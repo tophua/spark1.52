@@ -9,7 +9,7 @@
 *.pyo
 .idea/
 .idea_modules/
-build/*.jar
+*build/*.jar
 .settings
 .cache
 cache
@@ -36,7 +36,7 @@ reports/
 .project
 .classpath
 .scala_dependencies
-lib_managed/
+*lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/build.properties
