@@ -33,8 +33,8 @@ docs/_site
 docs/api
 target/
 reports/
-*.project
-*.classpath
+**.project
+**.classpath
 .scala_dependencies
 *lib_managed/
 src_managed/
