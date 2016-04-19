@@ -1,0 +1,9 @@
+P=genjavadoc\:out\=D\:\\eclipse44_64\\workspace\\spark1.5\\unsafe\\target\\java
+Xplugin=D\:\\eclipse44_64\\workspace\\spark1.5\\lib_managed\\jars\\genjavadoc-plugin_2.10.4-0.9-spark0.jar
+deprecation=true
+eclipse.preferences.version=1
+scala.compiler.additionalParams=-feature -Xsource\:2.10 -Ymacro-expand\:none
+scala.compiler.installation=-1796128305
+scala.compiler.sourceLevel=2.10
+scala.compiler.useProjectSettings=true
+unchecked=true
