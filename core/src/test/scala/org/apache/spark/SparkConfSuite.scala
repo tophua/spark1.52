@@ -60,6 +60,7 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   }
 
   test("named set methods") {
+    
     val conf = new SparkConf(false)
 
     conf.setMaster("local[3]")

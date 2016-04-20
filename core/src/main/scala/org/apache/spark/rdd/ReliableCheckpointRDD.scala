@@ -83,10 +83,11 @@ private[spark] class ReliableCheckpointRDD[T: ClassTag](
 
   /**
    * Read the content of the checkpoint file associated with the given partition.
+   * 
    */
   override def compute(split: Partition, context: TaskContext): Iterator[T] = {
     val file = new Path(checkpointPath, ReliableCheckpointRDD.checkpointFileName(split.index))
-    ReliableCheckpointRDD.readCheckpointFile(file, broadcastedConf, context)
+    ReliableCheckpointRDD.readCheckpointFile(file, broadcastedConf, context)//读取CheckpointRDD数据
   }
 
 }
@@ -108,6 +109,7 @@ private[spark] object ReliableCheckpointRDD extends Logging {
       broadcastedConf: Broadcast[SerializableConfiguration],
       blockSize: Int = -1)(ctx: TaskContext, iterator: Iterator[T]) {
     val env = SparkEnv.get
+    
     val outputDir = new Path(path)
     val fs = outputDir.getFileSystem(broadcastedConf.value.value)
 
@@ -115,7 +117,7 @@ private[spark] object ReliableCheckpointRDD extends Logging {
     val finalOutputPath = new Path(outputDir, finalOutputName)
     val tempOutputPath =
       new Path(outputDir, s".$finalOutputName-attempt-${ctx.attemptNumber()}")
-
+     //创建一个保存Checkpoint数据的目录
     if (fs.exists(tempOutputPath)) {
       throw new IOException(s"Checkpoint failed: temporary path $tempOutputPath already exists")
     }
@@ -151,12 +153,14 @@ private[spark] object ReliableCheckpointRDD extends Logging {
 
   /**
    * Read the content of the specified checkpoint file.
+   *
    */
   def readCheckpointFile[T](
       path: Path,
       broadcastedConf: Broadcast[SerializableConfiguration],
       context: TaskContext): Iterator[T] = {
     val env = SparkEnv.get
+    //序列化配置文件
     val fs = path.getFileSystem(broadcastedConf.value.value)
     val bufferSize = env.conf.getInt("spark.buffer.size", 65536)
     val fileInputStream = fs.open(path, bufferSize)
@@ -164,6 +168,7 @@ private[spark] object ReliableCheckpointRDD extends Logging {
     val deserializeStream = serializer.deserializeStream(fileInputStream)
 
     // Register an on-task-completion callback to close the input stream.
+    //异步增加一个任务完成监听器,
     context.addTaskCompletionListener(context => deserializeStream.close())
 
     deserializeStream.asIterator.asInstanceOf[Iterator[T]]

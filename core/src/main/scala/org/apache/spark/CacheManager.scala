@@ -51,7 +51,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
         existingMetrics.incBytesRead(blockResult.bytes)
 
         val iter = blockResult.data.asInstanceOf[Iterator[T]]
-        
+        //可中断迭代器
         new InterruptibleIterator[T](context, iter) {
           override def next(): T = {
             existingMetrics.incRecordsRead(1)
@@ -62,16 +62,21 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
         //缓存后封装为InterruptibleIterator并返回
         // Acquire a lock for loading this partition
         // If another thread already holds the lock, wait for it to finish return its results
+        //判断当前是否有线程在处理当前partition,如果有那么等待它结束后,直接从BlockManager中读取处理结果数据
+        //如果没有线程在计算,那么storedvalue就是none,否则就是计算结果
         val storedValues = acquireLockForPartition[T](key)
-        if (storedValues.isDefined) {//已经被其他线程处理了，直接返回
+        if (storedValues.isDefined) {//已经被其他线程处理了，直接返回计算结果
           return new InterruptibleIterator[T](context, storedValues.get)
         }
 
         // Otherwise, we have to load the partition ourselves
+        //需要计算
         try {
           logInfo(s"Partition $key not found, computing it")
+          //如果被Checkpoint过,那么读取Checkpoint的数据,否则调用RDD的compute开始计算
           val computedValues = rdd.computeOrReadCheckpoint(partition, context)
-          // Task是在Dr
+          // Task是在Drver端执行的话不需要缓存结果,这个主要是为了first()或者take()
+          //这种仅仅有一个执行的任务的快速执行,这类任务由于没有Shuflle阶段,直接运行Driver端可以可能更省时间
           // If the task is running locally, do not persist the result
           if (context.isRunningLocally) {
             return computedValues
@@ -98,7 +103,8 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
 
   /**
    * Acquire a loading lock for the partition identified by the given block ID.
-   *
+   *  判断当前是否有线程在处理当前partition,如果有那么等待它结束后,直接从BlockManager中读取处理结果数据
+                 如果没有线程在计算,那么storedvalue就是none,否则就是计算结果
    * If the lock is free, just acquire it and return None. Otherwise, another thread is already
    * loading the partition, so we wait for it to finish and return the values loaded by the thread.
    */

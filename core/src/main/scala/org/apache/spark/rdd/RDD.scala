@@ -303,11 +303,13 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Compute an RDD partition or read it from a checkpoint if the RDD is checkpointing.
-   * 首先检查isCheckpointed是否检查点
+   * 首先检查当前RDD是否被isCheckpointed过,如果有,读取Checkpointed的数据,否则开始计算
    */
   private[spark] def computeOrReadCheckpoint(split: Partition, context: TaskContext): Iterator[T] =
     {
+    
       if (isCheckpointedAndMaterialized) {
+            
         firstParent[T].iterator(split, context)
       } else {
         compute(split, context)
@@ -580,7 +582,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the intersection of this RDD and another one. The output will not contain any duplicate
    * elements, even if the input RDDs did.
-   *
+   * 数据交集,返回一个新的数据集,包含两个数据集的交集数据
    * Note that this method performs a shuffle internally.
    */
   def intersection(other: RDD[T]): RDD[T] = withScope {

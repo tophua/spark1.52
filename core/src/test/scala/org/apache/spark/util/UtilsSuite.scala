@@ -60,15 +60,15 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(Utils.timeStringAsSeconds("1h") === TimeUnit.HOURS.toSeconds(1))
     //1天
     assert(Utils.timeStringAsSeconds("1d") === TimeUnit.DAYS.toSeconds(1))
-  
-    assert(Utils.timeStringAsMs("1") === 1)
-    assert(Utils.timeStringAsMs("1ms") === 1)
-    assert(Utils.timeStringAsMs("1000us") === 1)
-    assert(Utils.timeStringAsMs("1s") === TimeUnit.SECONDS.toMillis(1))
-    assert(Utils.timeStringAsMs("1m") === TimeUnit.MINUTES.toMillis(1))
-    assert(Utils.timeStringAsMs("1min") === TimeUnit.MINUTES.toMillis(1))
-    assert(Utils.timeStringAsMs("1h") === TimeUnit.HOURS.toMillis(1))
-    assert(Utils.timeStringAsMs("1d") === TimeUnit.DAYS.toMillis(1))
+    //
+    assert(Utils.timeStringAsMs("1") === 1)//秒
+    assert(Utils.timeStringAsMs("1ms") === 1)//秒
+    assert(Utils.timeStringAsMs("1000us") === 1)//
+    assert(Utils.timeStringAsMs("1s") === TimeUnit.SECONDS.toMillis(1))//秒
+    assert(Utils.timeStringAsMs("1m") === TimeUnit.MINUTES.toMillis(1))//分
+    assert(Utils.timeStringAsMs("1min") === TimeUnit.MINUTES.toMillis(1))//分
+    assert(Utils.timeStringAsMs("1h") === TimeUnit.HOURS.toMillis(1))//小时
+    assert(Utils.timeStringAsMs("1d") === TimeUnit.DAYS.toMillis(1))//天
 
     // Test invalid strings
     intercept[NumberFormatException] {
@@ -95,11 +95,11 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   test("Test byteString conversion") {
     // Test zero
     assert(Utils.byteStringAsBytes("0") === 0)
-    //
-    assert(Utils.byteStringAsGb("1") === 1)
+    //byteString
+    assert(Utils.byteStringAsGb("1") === 1)//G
     assert(Utils.byteStringAsGb("1g") === 1)
-    assert(Utils.byteStringAsGb("1023m") === 0)
-    assert(Utils.byteStringAsGb("1024m") === 1)
+    assert(Utils.byteStringAsGb("1023m") === 0)//
+    assert(Utils.byteStringAsGb("1024m") === 1)//G
     assert(Utils.byteStringAsGb("1048575k") === 0)
     assert(Utils.byteStringAsGb("1048576k") === 1)
     assert(Utils.byteStringAsGb("1k") === 0)
@@ -187,7 +187,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   }
 
   test("bytesToString") {
-    //bytes转换字符串
+    //bytes转换字符串KB
     assert(Utils.bytesToString(10) === "10.0 B")
     assert(Utils.bytesToString(1500) === "1500.0 B")
     assert(Utils.bytesToString(2000000) === "1953.1 KB")
@@ -203,7 +203,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     Random.nextBytes(bytes)
 
     val os = new ByteArrayOutputStream()
-    //流复制
+    //ByteArray流复制,输入流复制到输出流
     Utils.copyStream(new ByteArrayInputStream(bytes), os)
 
     assert(os.toByteArray.toList.equals(bytes.toList))
@@ -230,7 +230,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   }
 
   test("splitCommandString") {
-    //字符串分隔
+    //字符串分隔成序列
     assert(Utils.splitCommandString("") === Seq())
     assert(Utils.splitCommandString("a") === Seq("a"))
     assert(Utils.splitCommandString("aaa") === Seq("aaa"))
@@ -260,7 +260,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     val minute = second * 60
     val hour = minute * 60
     def str: (Long) => String = Utils.msDurationToString(_)
-
+    //
     val sep = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator()
 
     assert(str(123) === "123 ms")
@@ -280,7 +280,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     f1.write("1\n2\n3\n4\n5\n6\n7\n8\n9\n".getBytes(UTF_8))
     f1.close()
 
-    // Read first few bytes,包括换行\n符
+    // Read first few bytes,包括换行\n符,offset位移
     assert(Utils.offsetBytes(f1Path, 0, 5) === "1\n2\n3")
 
     // Read some middle bytes
@@ -303,7 +303,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
 
   test("reading offset bytes across multiple files") {
     val tmpDir = Utils.createTempDir()
-    val files = (1 to 3).map(i => new File(tmpDir, i.toString))
+    val files = (1 to 3).map(i => new File(tmpDir, i.toString))//files:IndexedSeq
     Files.write("0123456789", files(0), UTF_8)
     Files.write("abcdefghij", files(1), UTF_8)
     Files.write("ABCDEFGHIJ", files(2), UTF_8)
@@ -496,7 +496,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
 
   // Test for using the util function to change our log levels.
   test("log4j log level change") {
-    //
+    //log4j日志等级变更
     val current = org.apache.log4j.Logger.getRootLogger().getLevel()
     try {
       Utils.setLogLevel(org.apache.log4j.Level.ALL)
@@ -536,6 +536,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   }
 
   test("loading properties from file") {
+    //加载配置文件
     val tmpDir = Utils.createTempDir()
     val outFile = File.createTempFile("test-load-spark-properties", "test", tmpDir)
     try {
@@ -622,7 +623,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     manager.add(3, () => output += 3)
     manager.add(2, () => output += 2)
     manager.add(4, () => output += 4)
-    manager.remove(hook1)
+    manager.remove(hook1)//删除1
 
     manager.runAll()
     assert(output.toList === List(4, 3, 2))

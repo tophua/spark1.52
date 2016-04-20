@@ -38,7 +38,9 @@ class ThreadUtilsSuite extends SparkFunSuite {
         threadName = Thread.currentThread().getName()
       }
     })
+    //shutdown不是一个阻塞方法,本身的执行很快，执行完后线程池可能仍处于运行中
     executor.shutdown()
+    //awaitTermination是一个阻塞方法。它必须等线程池退出后才会结束自身
     executor.awaitTermination(10, TimeUnit.SECONDS)
     assert(threadName === "this-is-a-thread-name")
   }

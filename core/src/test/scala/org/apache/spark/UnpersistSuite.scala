@@ -24,6 +24,7 @@ class UnpersistSuite extends SparkFunSuite with LocalSparkContext {
   test("unpersist RDD") {
     sc = new SparkContext("local", "test")
     val rdd = sc.makeRDD(Array(1, 2, 3, 4), 2).cache()
+    //激活后,系统持久化
     rdd.count
     assert(sc.persistentRdds.isEmpty === false)
     rdd.unpersist()

@@ -26,26 +26,26 @@ import org.apache.spark.partial.CountEvaluator
 import org.apache.spark.rdd.RDD
 
 class ClosureCleanerSuite extends SparkFunSuite {
-  test("closures inside an object") {
+  test("closures(闭包) inside an object") {
     assert(TestObject.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("closures inside a class") {
+  test("closures(闭包) inside a class") {
     val obj = new TestClass
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("closures inside a class with no default constructor") {
+  test("closures(闭包) inside a class with no default constructor") {
     val obj = new TestClassWithoutDefaultConstructor(5)
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("closures that don't use fields of the outer class") {
+  test("closures(闭包) that don't use fields of the outer class") {
     val obj = new TestClassWithoutFieldAccess
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("nested closures inside an object") {
+  test("nested(闭包) closures inside an object") {
     assert(TestObjectWithNesting.run() === 96) // 4 * (1+2+3+4) + 4 * (1+2+3+4) + 16 * 1
   }
 
