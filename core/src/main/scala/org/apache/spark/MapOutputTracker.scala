@@ -265,7 +265,7 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
   // For cleaning up TimeStampedHashMaps
   private val metadataCleaner =
     new MetadataCleaner(MetadataCleanerType.MAP_OUTPUT_TRACKER, this.cleanup, conf)
-
+//
   def registerShuffle(shuffleId: Int, numMaps: Int) {
     if (mapStatuses.put(shuffleId, new Array[MapStatus](numMaps)).isDefined) {
       throw new IllegalArgumentException("Shuffle ID " + shuffleId + " registered twice")

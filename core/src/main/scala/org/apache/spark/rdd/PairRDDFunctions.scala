@@ -887,6 +887,8 @@ preservesPartitioning = true)
   /**
    * Return the list of values in the RDD for key `key`. This operation is done efficiently if the
    * RDD has a known partitioner by only searching the partition that the key maps to.
+   * rdd实现的时候，然后分区是基于key的，那比较高效可以直接遍历对应分区，否则全部遍历。
+   * 全部遍历的实现为filter(_._1 == key).map(_._2).collect()
    */
   def lookup(key: K): Seq[V] = self.withScope {
     self.partitioner match {

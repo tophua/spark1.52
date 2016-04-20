@@ -55,9 +55,9 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     val rand = new scala.util.Random()
     val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }
     val pairs = sc.parallelize(pairArr, 2)
-    val sorted = pairs.sortByKey(true, 20)
+    val sorted = pairs.sortByKey(true, 20)// true升序
     assert(sorted.partitions.size === 20)
-    assert(sorted.collect() === pairArr.sortBy(_._1))
+    assert(sorted.collect() === pairArr.sortBy(_._1))//数组的排序pairArr.sortBy(_._1)
   }
 
   test("sort descending") {//倒序

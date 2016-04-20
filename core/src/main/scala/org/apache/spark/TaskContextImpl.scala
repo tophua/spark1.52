@@ -71,19 +71,19 @@ private[spark] class TaskContextImpl(
 
   /** Marks the task as completed and triggers the listeners. */
   private[spark] def markTaskCompleted(): Unit = {
-    completed = true
-    val errorMsgs = new ArrayBuffer[String](2)
+    completed = true//标记task完成
+    val errorMsgs = new ArrayBuffer[String](2)//记录错误信息
     // Process complete callbacks in the reverse order of registration
     onCompleteCallbacks.reverse.foreach { listener =>
       try {
-        listener.onTaskCompletion(this)
+        listener.onTaskCompletion(this)//执行回调函数
       } catch {
-        case e: Throwable =>
+        case e: Throwable =>//发生异常,记录错误信息
           errorMsgs += e.getMessage
           logError("Error in TaskCompletionListener", e)
       }
     }
-    if (errorMsgs.nonEmpty) {
+    if (errorMsgs.nonEmpty) {//如果错误信息不为空,那么抛出异常
       throw new TaskCompletionListenerException(errorMsgs)
     }
   }

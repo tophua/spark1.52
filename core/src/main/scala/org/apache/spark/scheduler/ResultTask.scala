@@ -27,7 +27,8 @@ import org.apache.spark.rdd.RDD
 
 /**
  * A task that sends back the output to the driver application.
- *
+ *对于最后一个Stage,会根据生成结果的Partition来生成与Partition数量相同的ResultTask
+ * 然后ResultTask会将计算的结果汇报到Driver端
  * See [[Task]] for more information.
  *
  * @param stageId id of the stage this task belongs to
@@ -56,14 +57,16 @@ private[spark] class ResultTask[T, U](
 
   override def runTask(context: TaskContext): U = {
     // Deserialize the RDD and the func using the broadcast variables.
+    //获取用于反序列化的实例
     val deserializeStartTime = System.currentTimeMillis()
     val ser = SparkEnv.get.closureSerializer.newInstance()
+    //获取RDD和作用RDD结果的函数
     val (rdd, func) = ser.deserialize[(RDD[T], (TaskContext, Iterator[T]) => U)](
       ByteBuffer.wrap(taskBinary.value), Thread.currentThread.getContextClassLoader)
     _executorDeserializeTime = System.currentTimeMillis() - deserializeStartTime
-
+    //Task的taskMetrics信息
     metrics = Some(context.taskMetrics)
-    //rdd.iterator完成计算结果
+    //调用rdd.iterator执行Rdd上的计算,完成计算结果
     func(context, rdd.iterator(partition, context))
   }
 

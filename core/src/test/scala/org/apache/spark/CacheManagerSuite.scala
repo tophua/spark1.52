@@ -69,6 +69,7 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
     val computeValue = cacheManager.getOrCompute(rdd, split, context, StorageLevel.MEMORY_ONLY)
     val getValue = blockManager.get(RDDBlockId(rdd.id, split.index))
     assert(computeValue.toList === List(1, 2, 3, 4))
+    //getValue BlockResult 
     assert(getValue.isDefined, "Block cached from getOrCompute is not found!")
     assert(getValue.get.data.toList === List(1, 2, 3, 4))
   }

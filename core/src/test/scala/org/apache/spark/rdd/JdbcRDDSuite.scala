@@ -84,7 +84,7 @@ class JdbcRDDSuite extends SparkFunSuite with BeforeAndAfter with LocalSparkCont
     assert(rdd.reduce(_ + _) === 10100)
   }
 
-  test("large id overflow") {
+  test("large id overflow") {//overflow 溢出
     sc = new SparkContext("local", "test")
     val rdd = new JdbcRDD(
       sc,

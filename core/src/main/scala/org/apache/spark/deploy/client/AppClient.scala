@@ -18,16 +18,16 @@
 package org.apache.spark.deploy.client
 
 import java.util.concurrent._
-import java.util.concurrent.{Future => JFuture, ScheduledFuture => JScheduledFuture}
+import java.util.concurrent.{ Future => JFuture, ScheduledFuture => JScheduledFuture }
 
 import scala.util.control.NonFatal
 
-import org.apache.spark.{Logging, SparkConf}
-import org.apache.spark.deploy.{ApplicationDescription, ExecutorState}
+import org.apache.spark.{ Logging, SparkConf }
+import org.apache.spark.deploy.{ ApplicationDescription, ExecutorState }
 import org.apache.spark.deploy.DeployMessages._
 import org.apache.spark.deploy.master.Master
 import org.apache.spark.rpc._
-import org.apache.spark.util.{RpcUtils, ThreadUtils, Utils}
+import org.apache.spark.util.{ RpcUtils, ThreadUtils, Utils }
 
 /**
  * Interface allowing applications to speak with a Spark deploy cluster. Takes a master URL,
@@ -58,12 +58,12 @@ import org.apache.spark.util.{RpcUtils, ThreadUtils, Utils}
  *    要求重新向Master注册
  */
 private[spark] class AppClient(
-    rpcEnv: RpcEnv,
-    masterUrls: Array[String],
-    appDescription: ApplicationDescription,
-    listener: AppClientListener,
-    conf: SparkConf)
-  extends Logging {
+  rpcEnv: RpcEnv,
+  masterUrls: Array[String],
+  appDescription: ApplicationDescription,
+  listener: AppClientListener,
+  conf: SparkConf)
+    extends Logging {
 
   private val masterRpcAddresses = masterUrls.map(RpcAddress.fromSparkURL(_))
 
@@ -73,11 +73,11 @@ private[spark] class AppClient(
   @volatile private var registered = false
   private var endpoint: RpcEndpointRef = null
   private var appId: String = null
-/**
- * RpcEnv)是一个RpcEndpoints用于处理消息的环境onStart方法,所以ClientActor在正试启动前触发其onStart方法
- */
+  /**
+   * RpcEnv)是一个RpcEndpoints用于处理消息的环境onStart方法,所以ClientActor在正试启动前触发其onStart方法
+   */
   private class ClientEndpoint(override val rpcEnv: RpcEnv) extends ThreadSafeRpcEndpoint
-    with Logging {
+      with Logging {
 
     private var master: Option[RpcEndpointRef] = None
     // To avoid calling listener.disconnected() multiple times
@@ -92,7 +92,7 @@ private[spark] class AppClient(
     private val registerMasterThreadPool = ThreadUtils.newDaemonCachedThreadPool(
       "appclient-register-master-threadpool",
       masterRpcAddresses.length // Make sure we can register with all masters at the same time
-    )
+      )
 
     // A scheduled executor for scheduling the registration actions
     private val registrationRetryThread =
@@ -124,11 +124,11 @@ private[spark] class AppClient(
             logInfo("Connecting to master " + masterAddress.toSparkURL + "...")
             val masterRef =
               rpcEnv.setupEndpointRef(Master.SYSTEM_NAME, masterAddress, Master.ENDPOINT_NAME)
-             //向Master发送RegisterApplication消息,注册Application
+            //向Master发送RegisterApplication消息,注册Application
             masterRef.send(RegisterApplication(appDescription, self))
           } catch {
             case ie: InterruptedException => // Cancelled
-            case NonFatal(e) => logWarning(s"Failed to connect to master $masterAddress", e)
+            case NonFatal(e)              => logWarning(s"Failed to connect to master $masterAddress", e)
           }
         })
       }
@@ -138,7 +138,7 @@ private[spark] class AppClient(
      * Register with all masters asynchronously. It will call `registerWithMaster` every
      * REGISTRATION_TIMEOUT_SECONDS seconds until exceeding REGISTRATION_RETRIES times.
      * Once we connect to a master successfully, all scheduling work and Futures will be cancelled.
-     *向所有的Master注册当前Application
+     * 向所有的Master注册当前Application
      * nthRetry means this is the nth attempt to register with master.
      */
     private def registerWithMaster(nthRetry: Int) {
@@ -149,7 +149,7 @@ private[spark] class AppClient(
             if (registered) {
               registerMasterFutures.foreach(_.cancel(true))
               registerMasterThreadPool.shutdownNow()
-              
+
             } else if (nthRetry >= REGISTRATION_RETRIES) {
               //注册失败超过3次,标记不存活
               markDead("All masters are unresponsive! Giving up.")
@@ -170,7 +170,7 @@ private[spark] class AppClient(
     private def sendToMaster(message: Any): Unit = {
       master match {
         case Some(masterRef) => masterRef.send(message)
-        case None => logWarning(s"Drop $message because has not yet connected to master")
+        case None            => logWarning(s"Drop $message because has not yet connected to master")
       }
     }
 
@@ -195,16 +195,18 @@ private[spark] class AppClient(
         // changing.
         appId = appId_
         registered = true
-        master = Some(masterRef)//
+        master = Some(masterRef) //
         listener.connected(appId)
-
+      /**
+       * 在Application无论成功完成或者失败的情况下,都会通过这个消息通知AppClient停止
+       */
       case ApplicationRemoved(message) =>
         markDead("Master removed our application: %s".format(message))
         stop()
-       /**
-        * 收到Master发送ExecutorAdded消息后,向Master发送ExecutorStateChanged消息
-        * Master收到ExecutorStateChanged消息后将DriverEndpoint发送ExecutorUpdated消息,用于更新Driver上有关Executor
-        */
+      /**
+       * 收到Master发送ExecutorAdded消息后,向Master发送ExecutorStateChanged消息
+       * Master收到ExecutorStateChanged消息后将DriverEndpoint发送ExecutorUpdated消息,用于更新Driver上有关Executor
+       */
       case ExecutorAdded(id: Int, workerId: String, hostPort: String, cores: Int, memory: Int) =>
         val fullId = appId + "/" + id
         logInfo("Executor added: %s on %s (%s) with %d cores".format(fullId, workerId, hostPort,
@@ -213,7 +215,9 @@ private[spark] class AppClient(
         // guaranteed), `ExecutorStateChanged` may be sent to a dead master.
         sendToMaster(ExecutorStateChanged(appId, id, ExecutorState.RUNNING, None, None))
         listener.executorAdded(fullId, workerId, hostPort, cores, memory)
-
+      /**
+       * 将Eexcutor的状态更新通知Appclient
+       */
       case ExecutorUpdated(id, state, message, exitStatus) =>
         val fullId = appId + "/" + id
         val messageText = message.map(s => " (" + s + ")").getOrElse("")
@@ -221,7 +225,9 @@ private[spark] class AppClient(
         if (ExecutorState.isFinished(state)) {
           listener.executorRemoved(fullId, message.getOrElse(""), exitStatus)
         }
-
+       /**
+        * 在Master故障恢复后,它会通过该消息通知AppClient和worker当前Master已经更改
+        */
       case MasterChanged(masterRef, masterWebUiUrl) =>
         logInfo("Master has changed, new master is at " + masterRef.address.toSparkURL)
         master = Some(masterRef)
@@ -293,11 +299,11 @@ private[spark] class AppClient(
     }
 
   }
-/**
- * AppClient主要代表Application和Master通信,AppClient在启动时,会向Driver的ActorSystem注册ClientEndpoint
- * 由于向ActorSystem注册Actor时,ActorSystem会首先调用Actor的perStart方法,所以ClientEndpoint在正式启动前会
- * 触发其Start方法
- */
+  /**
+   * AppClient主要代表Application和Master通信,AppClient在启动时,会向Driver的ActorSystem注册ClientEndpoint
+   * 由于向ActorSystem注册Actor时,ActorSystem会首先调用Actor的perStart方法,所以ClientEndpoint在正式启动前会
+   * 触发其Start方法
+   */
   def start() {
     // Just launch an rpcEndpoint; it will call back into the listener.
     //RpcEnv)是一个RpcEndpoints用于处理消息的环境onStart方法,所以ClientActor在正试启动前触发其onStart方法

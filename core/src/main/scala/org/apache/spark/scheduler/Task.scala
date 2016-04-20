@@ -81,13 +81,15 @@ private[spark] abstract class Task[T](
     TaskContext.setTaskContext(context)
     context.taskMetrics.setHostname(Utils.localHostName())
     context.taskMetrics.setAccumulatorsUpdater(context.collectInternalAccumulators)
+    //当前线程,在被打断的时候可以通过来停止该线程
     taskThread = Thread.currentThread()
-    if (_killed) {
+    if (_killed) {//如果当前Task被杀死,那么需要退出Task的执行
       kill(interruptThread = false)
     }
     try {
-      (runTask(context), context.collectAccumulators())
+      (runTask(context), context.collectAccumulators())//执行本次Task 
     } finally {
+      //任务结束,执行任务结束时的回调函数
       context.markTaskCompleted()
       try {
         Utils.tryLogNonFatalError {

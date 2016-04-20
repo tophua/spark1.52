@@ -59,11 +59,14 @@ private[spark] class JobWaiter[T](
     if (_jobFinished) {
       throw new UnsupportedOperationException("taskSucceeded() called on a finished JobWaiter")
     }
+    //调用用户逻辑处理结果
     resultHandler(index, result.asInstanceOf[T])
+    
     finishedTasks += 1
-    if (finishedTasks == totalTasks) {
+    if (finishedTasks == totalTasks) {//该Job结束
       _jobFinished = true
       jobResult = JobSucceeded
+      //会通知JobWaiter.awaitResult任务结束
       this.notifyAll()
     }
   }

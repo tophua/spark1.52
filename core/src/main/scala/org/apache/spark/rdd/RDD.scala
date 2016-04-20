@@ -376,7 +376,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a new RDD that has exactly(正确) numPartitions partitions.
-   *
+   *repartition用于增减rdd分区。coalesce特指减少分区，可以通过一次窄依赖的映射避免shuffle
    * Can increase(增加) or decrease(减少) the level of parallelism in this RDD. Internally, this uses
    * a shuffle to redistribute data.
    *
@@ -681,6 +681,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an RDD created by piping elements to a forked external process.
+   * 把RDD数据通过ProcessBuilder创建额外的进程输出走
    */
   def pipe(command: String): RDD[String] = withScope {
     new PipedRDD(this, command)
@@ -931,7 +932,8 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an iterator that contains all of the elements in this RDD.
-   *
+   *把所有数据以迭代器返回，rdd实现是调用sc.runJob()，每个分区迭代器转array，
+   *收集到driver端再flatMap一次打散成大迭代器。理解为一种比较特殊的driver端cache
    * The iterator will consume as much memory as the largest partition in this RDD.
    *
    * Note: this results in multiple Spark jobs, and if the input RDD is the result
@@ -1094,6 +1096,8 @@ abstract class RDD[T: ClassTag](
    * and one operation for merging two U's, as in scala.TraversableOnce. Both of these functions are
    * allowed to modify and return their first argument instead of creating a new U to avoid memory
    * allocation.
+   * 带初始值、reduce聚合、merge聚合三个完整条件的聚合方法。
+   * rdd的做法是把函数传入分区里去做计算，最后汇总各分区的结果再一次combOp计算
    */
   def aggregate[U: ClassTag](zeroValue: U)(seqOp: (U, T) => U, combOp: (U, U) => U): U = withScope {
     // Clone the zero value since we will also be serializing it as part of tasks

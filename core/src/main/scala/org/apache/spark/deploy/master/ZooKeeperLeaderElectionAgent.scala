@@ -37,8 +37,8 @@ private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderEle
     logInfo("Starting ZooKeeper LeaderElection agent")
     zk = SparkCuratorUtil.newClient(conf)
     leaderLatch = new LeaderLatch(zk, WORKING_DIR)
-    leaderLatch.addListener(this)
-    leaderLatch.start()
+    leaderLatch.addListener(this)//它实现LeanderLatchListener
+    leaderLatch.start()//启动Lead的竞争与选举
   }
 
   override def stop() {
@@ -49,11 +49,13 @@ private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderEle
   override def isLeader() {
     synchronized {
       // could have lost leadership by now.
+      //有可能状态已经再次改变,即Leader再次变化,因此需要再次确认
       if (!leaderLatch.hasLeadership) {
         return
       }
 
       logInfo("We have gained leadership")
+      //已经被选举Leader
       updateLeadershipStatus(true)
     }
   }
@@ -61,10 +63,11 @@ private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderEle
   override def notLeader() {
     synchronized {
       // could have gained leadership by now.
+     //有可能状态已经再次改变,即Leader再次变化,因此需要再次确认
       if (leaderLatch.hasLeadership) {
         return
       }
-
+      //被剥夺Leader
       logInfo("We have lost leadership")
       updateLeadershipStatus(false)
     }
@@ -73,10 +76,10 @@ private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderEle
   private def updateLeadershipStatus(isLeader: Boolean) {
     if (isLeader && status == LeadershipStatus.NOT_LEADER) {
       status = LeadershipStatus.LEADER
-      masterInstance.electedLeader()
+      masterInstance.electedLeader()//Master已经被选举为Leader
     } else if (!isLeader && status == LeadershipStatus.LEADER) {
       status = LeadershipStatus.NOT_LEADER
-      masterInstance.revokedLeadership()
+      masterInstance.revokedLeadership()//Master已经被剥夺Leader
     }
   }
 

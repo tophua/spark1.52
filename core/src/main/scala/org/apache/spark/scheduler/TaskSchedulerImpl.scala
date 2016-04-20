@@ -266,10 +266,10 @@ private[spark] class TaskSchedulerImpl(
       availableCpus: Array[Int],
       tasks: Seq[ArrayBuffer[TaskDescription]]) : Boolean = {
     var launchedTask = false
-    for (i <- 0 until shuffledOffers.size) {
-      val execId = shuffledOffers(i).executorId
-      val host = shuffledOffers(i).host
-      if (availableCpus(i) >= CPUS_PER_TASK) {
+    for (i <- 0 until shuffledOffers.size) {//顺序遍历当前存在的Executor
+      val execId = shuffledOffers(i).executorId//executor的ID
+      val host = shuffledOffers(i).host//executor的host
+      if (availableCpus(i) >= CPUS_PER_TASK) {//该executor可以被分配任务核心实现,通过调用TaskSetManager来为Executor分配
         try {
           //调用每个TaskSetManager的resourceOffer方法,根据execId,host找到需要执行的任务并进一步进行资源处理
           for (task <- taskSet.resourceOffer(execId, host, maxLocality)) {
@@ -317,7 +317,7 @@ private[spark] class TaskSchedulerImpl(
       executorIdToHost(o.executorId) = o.host
       //增加激活的executorId,
       activeExecutorIds += o.executorId
-      
+      //如果有新Executor加入
       if (!executorsByHost.contains(o.host)) {
         //按照host对executorId分组
         executorsByHost(o.host) = new HashSet[String]()
@@ -342,6 +342,7 @@ private[spark] class TaskSchedulerImpl(
     val sortedTaskSets = rootPool.getSortedTaskSetQueue
     for (taskSet <- sortedTaskSets) {
       logDebug("parentName: %s, name: %s, runningTasks: %s".format(
+          //重新计算该TaskSetManager的就近原则
         taskSet.parent.name, taskSet.name, taskSet.runningTasks))
       if (newExecAvail) {
         taskSet.executorAdded()
@@ -351,6 +352,7 @@ private[spark] class TaskSchedulerImpl(
     // Take each TaskSet in our scheduling order, and then offer it each node in increasing order
     // of locality levels so that it gets a chance to launch local tasks on all of them.
     // NOTE: the preferredLocality order: PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY
+    //为从rootPool里获取TaskSetManager列表分配资源,分配的原则是就近原则,优先分配顺序PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY
     var launchedTask = false
     for (taskSet <- sortedTaskSets; maxLocality <- taskSet.myLocalityLevels) {
       do {
@@ -372,7 +374,7 @@ private[spark] class TaskSchedulerImpl(
     synchronized {
       try {
         if (state == TaskState.LOST && taskIdToExecutorId.contains(tid)) {
-          // We lost this entire executor, so remember that it's gone
+          // We lost this entire executor, so remember that it's gone         
           val execId = taskIdToExecutorId(tid)
           if (activeExecutorIds.contains(execId)) {
             removeExecutor(execId)
@@ -387,9 +389,10 @@ private[spark] class TaskSchedulerImpl(
             }
             if (state == TaskState.FINISHED) {
               taskSet.removeRunningTask(tid)//删除任务
-              //处理执行成功的返回结果
+              //处理任务计算结果并返回结果
               taskResultGetter.enqueueSuccessfulTask(taskSet, tid, serializedData)
             } else if (Set(TaskState.FAILED, TaskState.KILLED, TaskState.LOST).contains(state)) {
+              //TaskSetManager标记任务已经结束,注意这里不一定是成功结束的
               taskSet.removeRunningTask(tid)
               //执行失败任务的返回结果
               taskResultGetter.enqueueFailedTask(taskSet, tid, state, serializedData)
@@ -451,6 +454,7 @@ private[spark] class TaskSchedulerImpl(
       tid: Long,
       taskState: TaskState,
       reason: TaskEndReason): Unit = synchronized {
+        //首先会调用taskSetManager来处理任务失败的情况,如果任务的失败数没有超过阈值,那么会重新提交任务
     taskSetManager.handleFailedTask(tid, taskState, reason)
     if (!taskSetManager.isZombie && taskState != TaskState.KILLED) {
       // Need to revive offers again now that the task set manager state has been updated to

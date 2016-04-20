@@ -62,8 +62,10 @@ private[spark] class SparkUI private (
     attachTab(stagesTab)
     attachTab(new StorageTab(this))
     attachTab(new EnvironmentTab(this))
-    attachTab(new ExecutorsTab(this))
-    attachHandler(createStaticHandler(SparkUI.STATIC_RESOURCE_DIR, "/static"))
+    attachTab(new ExecutorsTab(this))    
+    //attachHandler 注释掉,报销信息如下
+    //java.lang.Exception: Could not find resource path for Web UI: org/apache/spark/ui/static
+    //attachHandler(createStaticHandler(SparkUI.STATIC_RESOURCE_DIR, "/static"))
     attachHandler(createRedirectHandler("/", "/jobs", basePath = basePath))
     attachHandler(ApiRootResource.getServletHandler(this))
     // This should be POST only, but, the YARN AM proxy won't proxy POSTs

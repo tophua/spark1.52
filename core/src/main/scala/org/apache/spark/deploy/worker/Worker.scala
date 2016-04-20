@@ -20,46 +20,46 @@ package org.apache.spark.deploy.worker
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.{UUID, Date}
+import java.util.{ UUID, Date }
 import java.util.concurrent._
-import java.util.concurrent.{Future => JFuture, ScheduledFuture => JScheduledFuture}
+import java.util.concurrent.{ Future => JFuture, ScheduledFuture => JScheduledFuture }
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable.{HashMap, HashSet, LinkedHashMap}
+import scala.collection.mutable.{ HashMap, HashSet, LinkedHashMap }
 import scala.concurrent.ExecutionContext
 import scala.util.Random
 import scala.util.control.NonFatal
 
-import org.apache.spark.{Logging, SecurityManager, SparkConf}
-import org.apache.spark.deploy.{Command, ExecutorDescription, ExecutorState}
+import org.apache.spark.{ Logging, SecurityManager, SparkConf }
+import org.apache.spark.deploy.{ Command, ExecutorDescription, ExecutorState }
 import org.apache.spark.deploy.DeployMessages._
 import org.apache.spark.deploy.ExternalShuffleService
-import org.apache.spark.deploy.master.{DriverState, Master}
+import org.apache.spark.deploy.master.{ DriverState, Master }
 import org.apache.spark.deploy.worker.ui.WorkerWebUI
 import org.apache.spark.metrics.MetricsSystem
 import org.apache.spark.rpc._
-import org.apache.spark.util.{ThreadUtils, SignalLogger, Utils}
+import org.apache.spark.util.{ ThreadUtils, SignalLogger, Utils }
 
 private[deploy] class Worker(
-    override val rpcEnv: RpcEnv,
-    webUiPort: Int,
-    //worker 节点当前可用的core个数
-    cores: Int,
-    //worker节点当前可用的memory大小
-    memory: Int,
-    masterRpcAddresses: Array[RpcAddress],
-    systemName: String,
-    endpointName: String,
-    workDirPath: String = null,
-    val conf: SparkConf,
-    val securityMgr: SecurityManager)
-  extends ThreadSafeRpcEndpoint with Logging {
+  override val rpcEnv: RpcEnv,
+  webUiPort: Int,
+  //worker 节点当前可用的core个数
+  cores: Int,
+  //worker节点当前可用的memory大小
+  memory: Int,
+  masterRpcAddresses: Array[RpcAddress],
+  systemName: String,
+  endpointName: String,
+  workDirPath: String = null,
+  val conf: SparkConf,
+  val securityMgr: SecurityManager)
+    extends ThreadSafeRpcEndpoint with Logging {
 
   private val host = rpcEnv.address.host
   private val port = rpcEnv.address.port
 
   Utils.checkHost(host, "Expected hostname")
-  assert (port > 0)
+  assert(port > 0)
 
   // A scheduled executor used to send messages at the specified time.
   private val forwordMessageScheduler =
@@ -103,7 +103,7 @@ private[deploy] class Worker(
   private val testing: Boolean = sys.props.contains("spark.testing")
   private var master: Option[RpcEndpointRef] = None
   private var activeMasterUrl: String = ""
-  private[worker] var activeMasterWebUiUrl : String = ""
+  private[worker] var activeMasterWebUiUrl: String = ""
   private val workerUri = rpcEnv.uriOf(systemName, rpcEnv.address, endpointName)
   private var registered = false
   private var connected = false
@@ -152,7 +152,7 @@ private[deploy] class Worker(
   private val registerMasterThreadPool = ThreadUtils.newDaemonCachedThreadPool(
     "worker-register-master-threadpool",
     masterRpcAddresses.size // Make sure we can register with all masters at the same time
-  )
+    )
 
   var coresUsed = 0
   var memoryUsed = 0
@@ -166,11 +166,11 @@ private[deploy] class Worker(
       // This sporadically fails - not sure why ... !workDir.exists() && !workDir.mkdirs()
       // So attempting to create and then check if directory was created or not.
       workDir.mkdirs()
-      if ( !workDir.exists() || !workDir.isDirectory) {
+      if (!workDir.exists() || !workDir.isDirectory) {
         logError("Failed to create work directory " + workDir)
         System.exit(1)
       }
-      assert (workDir.isDirectory)
+      assert(workDir.isDirectory)
     } catch {
       case e: Exception =>
         logError("Failed to create work directory " + workDir, e)
@@ -191,7 +191,7 @@ private[deploy] class Worker(
     //启动WorkerWebUI
     webUi = new WorkerWebUI(this, workDir, webUiPort)
     webUi.bind()
-    
+
     //用于将Worker注册到Master
     registerWithMaster()
     //启动测量信息
@@ -200,9 +200,9 @@ private[deploy] class Worker(
     // Attach the worker metrics servlet handler to the web ui after the metrics system is started.
     metricsSystem.getServletHandlers.foreach(webUi.attachHandler)
   }
-/**
- * 调用changeMaster方法更新activeMasterUrl,activeMasterWebUIurl,master,masterAddress消息
- */
+  /**
+   * 调用changeMaster方法更新activeMasterUrl,activeMasterWebUIurl,master,masterAddress消息
+   */
   private def changeMaster(masterRef: RpcEndpointRef, uiUrl: String) {
     // activeMasterUrl it's a valid Spark url since we receive it from master.
     activeMasterUrl = masterRef.address.toSparkURL
@@ -212,9 +212,9 @@ private[deploy] class Worker(
     // Cancel any outstanding re-registration attempts because we found a new master
     cancelLastRegistrationRetry()
   }
-/**
- * Worker启动后会向所有Master发起注册,在注册消息中说明本WorkerNode含有的Core数目及可用的内存大小
- */
+  /**
+   * Worker启动后会向所有Master发起注册,在注册消息中说明本WorkerNode含有的Core数目及可用的内存大小
+   */
   private def tryRegisterAllMasters(): Array[JFuture[_]] = {
     masterRpcAddresses.map { masterAddress =>
       registerMasterThreadPool.submit(new Runnable {
@@ -222,13 +222,14 @@ private[deploy] class Worker(
           try {
             logInfo("Connecting to master " + masterAddress + "...")
             val masterEndpoint =
-              rpcEnv.setupEndpointRef(Master.SYSTEM_NAME, masterAddress, Master.ENDPOINT_NAME)  
-              //向Master发起注册Worker
+              rpcEnv.setupEndpointRef(Master.SYSTEM_NAME, masterAddress, Master.ENDPOINT_NAME)
+            //向Master发起注册Worker,Woker启动后,会向Master发送消息注册,Master注册完成会回复RegisteredWorker
+            //Worker完成注册后就可以接受来自Master的调度请求
             masterEndpoint.send(RegisterWorker(
               workerId, host, port, self, cores, memory, webUi.boundPort, publicAddress))
           } catch {
             case ie: InterruptedException => // Cancelled
-            case NonFatal(e) => logWarning(s"Failed to connect to master $masterAddress", e)
+            case NonFatal(e)              => logWarning(s"Failed to connect to master $masterAddress", e)
           }
         }
       })
@@ -246,6 +247,10 @@ private[deploy] class Worker(
       if (registered) {
         cancelLastRegistrationRetry()
       } else if (connectionAttemptCount <= TOTAL_REGISTRATION_RETRIES) {
+        //Worker在向Master注册的时候 有重试机制,即在指定时间如果收不到Master的响应
+        //那么Worker会重新发送注册请求,目前重试的次数至多为16次,为了避免所有的Worker
+        //都在同一个时刻向Master发送注册请求,每次重试的时间间隔是随机的,而且前6次的重试间隔在5-15秒
+        //而后10次的重试间隔在30-90秒
         logInfo(s"Retrying connection to master (attempt # $connectionAttemptCount)")
         /**
          * Re-register with the active master this worker has been communicating with. If there
@@ -286,7 +291,7 @@ private[deploy] class Worker(
                     workerId, host, port, self, cores, memory, webUi.boundPort, publicAddress))
                 } catch {
                   case ie: InterruptedException => // Cancelled
-                  case NonFatal(e) => logWarning(s"Failed to connect to master $masterAddress", e)
+                  case NonFatal(e)              => logWarning(s"Failed to connect to master $masterAddress", e)
                 }
               }
             }))
@@ -299,6 +304,7 @@ private[deploy] class Worker(
         }
         // We have exceeded the initial registration retry threshold
         // All retries from now on should use a higher interval
+        //前6次的重试间隔在5-15秒,
         if (connectionAttemptCount == INITIAL_REGISTRATION_RETRIES) {
           registrationRetryTimer.foreach(_.cancel(true))
           registrationRetryTimer = Some(
@@ -334,12 +340,12 @@ private[deploy] class Worker(
     // if there are outstanding registration attempts scheduled.
     registrationRetryTimer match {
       case None =>
-        registered = false
+        registered = false //标记未注册,为true代表注册成功
         //向所有Mastr发送RegisterWorker消息
-        registerMasterFutures = tryRegisterAllMasters()
-        connectionAttemptCount = 0
+        registerMasterFutures = tryRegisterAllMasters() //向所有的Master发送发出注册请求
+        connectionAttemptCount = 0//记录重试次数
         registrationRetryTimer = Some(forwordMessageScheduler.scheduleAtFixedRate(
-          new Runnable {
+          new Runnable {//开启定时器,超时时间在5--15秒
             override def run(): Unit = Utils.tryLogNonFatalError {
               self.send(ReregisterWithMaster)
             }
@@ -355,6 +361,8 @@ private[deploy] class Worker(
 
   override def receive: PartialFunction[Any, Unit] = {
     /**
+     * Woker启动后,会向Master发送消息RegisterWorker注册,Master注册完成会回复RegisteredWorker
+     * Worker完成注册后就可以接受来自Master的调度请求
      * Worker在收到Master确认注册成功的消息RegisteredWorker消息的处理逻辑
      * 1)标记注册成功
      * 2)调用changeMaster方法更新activeMasterUrl,activeMasterWebUIurl,master,masterAddress消息
@@ -398,7 +406,7 @@ private[deploy] class Worker(
           val appIdFromDir = dir.getName
           val isAppStillRunning = appIds.contains(appIdFromDir)
           dir.isDirectory && !isAppStillRunning &&
-          !Utils.doesDirectoryContainAnyNewFiles(dir, APP_DATA_RETENTION_SECONDS)
+            !Utils.doesDirectoryContainAnyNewFiles(dir, APP_DATA_RETENTION_SECONDS)
         }.foreach { dir =>
           logInfo(s"Removing directory: ${dir.getPath}")
           Utils.deleteRecursively(dir)
@@ -417,29 +425,31 @@ private[deploy] class Worker(
       val execs = executors.values.
         map(e => new ExecutorDescription(e.appId, e.execId, e.cores, e.state))
       masterRef.send(WorkerSchedulerStateResponse(workerId, execs.toList, drivers.keys.toSeq))
-
+    /**
+     * Worker注册失败的返回消息,Worker接到该消息后会直接退出
+     */
     case RegisterWorkerFailed(message) =>
       if (!registered) {
         logError("Worker registration failed: " + message)
         System.exit(1)
       }
-/**
- * Master收到Heartbeat消息后的实现步骤
- * 1)更新workerInfo.lastHeartbeat,即最后一次接收到心跳的时间戳
- * 2)如果worker的id与Worker的映射关系(idToWorker)中找不到匹配的Worker,但是Worker的缓存(workers)的缓存
- *   中却存在此Id,那么向Worker发送ReconnectWorker消息
- */
+    /**
+     * Master收到Heartbeat消息后的实现步骤
+     * 1)更新workerInfo.lastHeartbeat,即最后一次接收到心跳的时间戳
+     * 2)如果worker的id与Worker的映射关系(idToWorker)中找不到匹配的Worker,但是Worker的缓存(workers)的缓存
+     *   中却存在此Id,那么向Worker发送ReconnectWorker消息
+     */
     case ReconnectWorker(masterUrl) =>
       logInfo(s"Master with url $masterUrl requested this worker to reconnect.")
       registerWithMaster()
-/**
- * Worker接收Master发送LaunchExecutor消息后处理步骤如下:
- * 1)创建Executor的工作目录
- * 2)创建Application的本地目录,当Application完成时,此目录会被删除
- * 3)创建并启动ExecutorRunner
- * 4)向Master发送ExecutorStateChanged消息
- * 
- */
+    /**
+     * Worker接收Master发送LaunchExecutor消息后处理步骤如下:
+     * 1)创建Executor的工作目录
+     * 2)创建Application的本地目录,当Application完成时,此目录会被删除
+     * 3)创建并启动ExecutorRunner
+     * 4)向Master发送ExecutorStateChanged消息
+     *
+     */
     case LaunchExecutor(masterUrl, appId, execId, appDesc, cores_, memory_) =>
       if (masterUrl != activeMasterUrl) {
         logWarning("Invalid Master (" + masterUrl + ") attempted to launch executor.")
@@ -497,10 +507,16 @@ private[deploy] class Worker(
           }
         }
       }
-
+    /**
+     * 当Executor的状态有更新,向Master汇报,Worker接收LaunchExecutor的命令后,会向Master汇报其启动
+     * 其启动Executor状态,然后Executor在被杀死或者退出时,ExecutorRunner会向Worker汇报该情况而Worker
+     * 又会将这个状态汇报到Master
+     */
     case executorStateChanged @ ExecutorStateChanged(appId, execId, state, message, exitStatus) =>
       handleExecutorStateChanged(executorStateChanged)
-
+    /**
+     * 在Application完成的时候,Master会告知Worker删除指定的Executor
+     */
     case KillExecutor(masterUrl, appId, execId) =>
       if (masterUrl != activeMasterUrl) {
         logWarning("Invalid Master (" + masterUrl + ") attempted to launch executor " + execId)
@@ -532,6 +548,9 @@ private[deploy] class Worker(
       coresUsed += driverDesc.cores
       memoryUsed += driverDesc.mem
     }
+    /**
+     * 通知Driver所在的Worker的杀死该Driver
+     */
 
     case KillDriver(driverId) => {
       logInfo(s"Asked to kill driver $driverId")
@@ -542,11 +561,17 @@ private[deploy] class Worker(
           logError(s"Asked to kill unknown driver $driverId")
       }
     }
+    /**
+     * 在Dirver的状态变化时,DirverRunner会向Worker发送状态更新的消息,Worker会将这个消息转到Master
+     * 在Master接收停止Driver的消息后,也会自身发送Driver状态更新消息
+     */
 
     case driverStateChanged @ DriverStateChanged(driverId, state, exception) => {
       handleDriverStateChanged(driverStateChanged)
     }
-
+    /**
+     * 重新注册Master 
+     */
     case ReregisterWithMaster =>
       reregisterWithMaster()
 
@@ -664,8 +689,7 @@ private[deploy] class Worker(
     coresUsed -= driver.driverDesc.cores
   }
 
-  private[worker] def handleExecutorStateChanged(executorStateChanged: ExecutorStateChanged):
-    Unit = {
+  private[worker] def handleExecutorStateChanged(executorStateChanged: ExecutorStateChanged): Unit = {
     //向Master转发ExecutorStateChanged消息
     sendToMaster(executorStateChanged)
     val state = executorStateChanged.state
@@ -708,23 +732,23 @@ private[deploy] object Worker extends Logging {
       args.memory, args.masters, args.workDir)
     rpcEnv.awaitTermination()
   }
-/**
- * Rpc Environment(RpcEnv)是一个RpcEndpoints用于处理消息的环境，
+  /**
+   * Rpc Environment(RpcEnv)是一个RpcEndpoints用于处理消息的环境，
    * 它管理着整个RpcEndpoints的声明周期：(1)根据name或uri注册endpoints(2)管理各种消息的处理(3)停止endpoints。
    * RpcEnv必须通过工厂类RpcEnvFactory创建
- * 创建,启动Worker的ActorSystem,所有Worker的ActorSystem的Akka的访问地址以akka://sparkWorker加编号访问
- * 每个Worker的ActorSystem都需要注册自身的Worker,同时每个Worker的ActorSystem都需要注册到WorkerActorSystem缓存
- */
+   * 创建,启动Worker的ActorSystem,所有Worker的ActorSystem的Akka的访问地址以akka://sparkWorker加编号访问
+   * 每个Worker的ActorSystem都需要注册自身的Worker,同时每个Worker的ActorSystem都需要注册到WorkerActorSystem缓存
+   */
   def startRpcEnvAndEndpoint(
-      host: String,
-      port: Int,
-      webUiPort: Int,
-      cores: Int,
-      memory: Int,
-      masterUrls: Array[String],
-      workDir: String,
-      workerNumber: Option[Int] = None,
-      conf: SparkConf = new SparkConf): RpcEnv = {
+    host: String,
+    port: Int,
+    webUiPort: Int,
+    cores: Int,
+    memory: Int,
+    masterUrls: Array[String],
+    workDir: String,
+    workerNumber: Option[Int] = None,
+    conf: SparkConf = new SparkConf): RpcEnv = {
 
     // The LocalSparkCluster runs multiple local sparkWorkerX RPC Environments
     val systemName = SYSTEM_NAME + workerNumber.map(_.toString).getOrElse("")
@@ -749,9 +773,9 @@ private[deploy] object Worker extends Logging {
     val useNLC = "spark.ssl.useNodeLocalConf"
     if (isUseLocalNodeSSLConfig(cmd)) {
       val newJavaOpts = cmd.javaOpts
-          .filter(opt => !opt.startsWith(s"-D$prefix")) ++
-          conf.getAll.collect { case (key, value) if key.startsWith(prefix) => s"-D$key=$value" } :+
-          s"-D$useNLC=true"
+        .filter(opt => !opt.startsWith(s"-D$prefix")) ++
+        conf.getAll.collect { case (key, value) if key.startsWith(prefix) => s"-D$key=$value" } :+
+        s"-D$useNLC=true"
       cmd.copy(javaOpts = newJavaOpts)
     } else {
       cmd

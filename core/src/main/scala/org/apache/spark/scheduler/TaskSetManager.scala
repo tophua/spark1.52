@@ -662,6 +662,7 @@ private[spark] class TaskSetManager(
   /**
    * Marks the task as failed, re-adds it to the list of pending tasks, and notifies the
    * DAG Scheduler.
+   * 首先会调用taskSetManager来处理任务失败的情况,如果任务的失败数没有超过阈值,那么会重新提交任务
    */
   def handleFailedTask(tid: Long, state: TaskState, reason: TaskEndReason) {
     val info = taskInfos(tid)
@@ -734,15 +735,20 @@ private[spark] class TaskSetManager(
     // always add to failed executors
     failedExecutors.getOrElseUpdate(index, new HashMap[String, Long]()).
       put(info.executorId, clock.getTimeMillis())
+      //调用DAGScheduler级别的容错
     sched.dagScheduler.taskEnded(tasks(index), reason, null, null, info, taskMetrics)
+    //标记为等待调度
     addPendingTask(index)
     if (!isZombie && state != TaskState.KILLED && !reason.isInstanceOf[TaskCommitDenied]) {
+      
       // If a task failed because its attempt to commit was denied, do not count this failure
       // towards failing the stage. This is intended to prevent spurious stage failures in cases
       // where many speculative tasks are launched and denied to commit.
       assert (null != failureReason)
       numFailures(index) += 1
       if (numFailures(index) >= maxTaskFailures) {
+        //如果失败次数已经超过阈值,那么标记该TaskSetManager为失败
+        //阈值可以通过Spark.task.maxFailurse设置,默认值是4
         logError("Task %d in stage %s failed %d times; aborting job".format(
           index, taskSet.id, maxTaskFailures))
         abort("Task %d in stage %s failed %d times, most recent failure: %s\nDriver stacktrace:"
@@ -750,6 +756,7 @@ private[spark] class TaskSetManager(
         return
       }
     }
+    //设置TaskSet完成
     maybeFinishTaskSet()
   }
 

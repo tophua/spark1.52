@@ -196,10 +196,12 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val emptyMap = new StringMap {
       override def default(key: String): Int = 0
     }
+    //合并元素
     val mergeElement: (StringMap, (String, Int)) => StringMap = (map, pair) => {
       map(pair._1) += pair._2
       map
     }
+    //合并值
     val mergeMaps: (StringMap, StringMap) => StringMap = (map1, map2) => {
       for ((key, value) <- map2) {
         map1(key) += value
@@ -304,6 +306,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
     val repartitioned1 = data.repartition(2)
     assert(repartitioned1.partitions.size == 2)
+    //glom把每个分区的数据合并成一个Array
     val partitions1 = repartitioned1.glom().collect()
     // some noise in balancing is allowed due to randomization
     assert(math.abs(partitions1(0).length - 500) < initialPartitions)

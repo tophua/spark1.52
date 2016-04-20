@@ -221,9 +221,10 @@ private[deploy] class Master(
   }
 
   override def receive: PartialFunction[Any, Unit] = {
-    case ElectedLeader => {//收到ElectedLeader消息后会进行选举操作,由于local-cluster模式中只有一个Master
-      //所以persistenceEngine没有持久化的App,Driver,Worker的信息,所以当前Master即为激活(ALIVE)状态
+    case ElectedLeader => {//收到ElectedLeader消息后会进行选举操作,处理当前的Master被选举为Leader
+      //读取集群当前运行的Application,Driver,Client和Worker
       val (storedApps, storedDrivers, storedWorkers) = persistenceEngine.readPersistedData(rpcEnv)
+     //如果所有的元数据都是空的,那么就不需要恢复
       state = if (storedApps.isEmpty && storedDrivers.isEmpty && storedWorkers.isEmpty) {
         RecoveryState.ALIVE
       } else {
@@ -231,7 +232,9 @@ private[deploy] class Master(
       }
       logInfo("I have been elected leader! New state: " + state)
       if (state == RecoveryState.RECOVERING) {
+        //开始恢复集群之前状态,恢复实际上就是通知Application和Worker,Master已经更改
         beginRecovery(storedApps, storedDrivers, storedWorkers)
+        //在WORKER_TIMEOUT_MS毫秒后,尝试将恢复标记为完成
         recoveryCompletionTask = forwardMessageThread.schedule(new Runnable {
           override def run(): Unit = Utils.tryLogNonFatalError {
             self.send(CompleteRecovery)
@@ -239,7 +242,7 @@ private[deploy] class Master(
         }, WORKER_TIMEOUT_MS, TimeUnit.MILLISECONDS)
       }
     }
-
+    //恢复已经结束
     case CompleteRecovery => completeRecovery()
 
     case RevokedLeadership => {
@@ -590,25 +593,26 @@ private[deploy] class Master(
     // Ensure "only-once" recovery semantics using a short synchronization period.
     if (state != RecoveryState.RECOVERING) { return }
     state = RecoveryState.COMPLETING_RECOVERY
-
+    //将所有未响应的Worker和Application删除
     // Kill off any workers and apps that didn't respond to us.
     workers.filter(_.state == WorkerState.UNKNOWN).foreach(removeWorker)
     apps.filter(_.state == ApplicationState.UNKNOWN).foreach(finishApplication)
-
+    //对于未分配Woker的Driver client(有可能Worker已经死掉)
+    //确定是否需要重新启动
     // Reschedule drivers which were not claimed by any workers
     drivers.filter(_.worker.isEmpty).foreach { d =>
       logWarning(s"Driver ${d.id} was not found after master recovery")
-      if (d.desc.supervise) {
+      if (d.desc.supervise) {//需要重新启动Driver Client
         logWarning(s"Re-launching ${d.id}")
         relaunchDriver(d)
-      } else {
+      } else {//将没有设置重启的Driver Client删除
         removeDriver(d.id, DriverState.ERROR, None)
         logWarning(s"Did not re-launch ${d.id} because it was not supervised")
       }
     }
-
+    //设置Master的状态为ALIVE,此后Master开始正常工作
     state = RecoveryState.ALIVE
-    schedule()
+    schedule()//开始新一轮的资源调度
     logInfo("Recovery complete - resuming operations!")
   }
 
@@ -733,7 +737,7 @@ private[deploy] class Master(
         .filter(worker => worker.memoryFree >= app.desc.memoryPerExecutorMB &&
           worker.coresFree >= coresPerExecutor.getOrElse(1))
         .sortBy(_.coresFree).reverse
-      //可分配CPU核数
+      //usableWorkers对应的Worker上可以使用多少Core
       val assignedCores = scheduleExecutorsOnWorkers(app, usableWorkers, spreadOutApps)
 
       // Now that we've decided how many cores to allocate on each worker, let's allocate them
@@ -755,7 +759,6 @@ private[deploy] class Master(
    * @param coresPerExecutor number of cores per executor
    * @param worker the worker info
    * 
-   * 
    */
   private def allocateWorkerResourceToExecutors(
       app: ApplicationInfo,
@@ -770,9 +773,9 @@ private[deploy] class Master(
     for (i <- 1 to numExecutors) {
       //addExecutor逻辑分配CPU核数及内存大小,将ExecutorDesc添加到Application的executors缓存中,增加已经授权得到的内存数
       val exec = app.addExecutor(worker, coresToAssign)
-      //物理分配通过调用launchExecutor
+      //物理分配通过调用launchExecutor,在worker上启动Executor
       launchExecutor(worker, exec)
-      app.state = ApplicationState.RUNNING
+      app.state = ApplicationState.RUNNING 
     }
   }
 

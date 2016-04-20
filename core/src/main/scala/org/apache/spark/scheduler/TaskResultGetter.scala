@@ -48,11 +48,12 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
  */
   def enqueueSuccessfulTask(
     taskSetManager: TaskSetManager, tid: Long, serializedData: ByteBuffer) {
-    getTaskResultExecutor.execute(new Runnable {//另起线程
+    getTaskResultExecutor.execute(new Runnable {//另起线程,通过线程池来执行结果获取
       override def run(): Unit = Utils.logUncaughtExceptions {
         try {
           val (result, size) = serializer.get().deserialize[TaskResult[_]](serializedData) match {
-            case directResult: DirectTaskResult[_] =>
+            case directResult: DirectTaskResult[_] =>//结果是计算结果
+              //确定大小符合要
               if (!taskSetManager.canFetchMoreResults(serializedData.limit())) {
                 return
               }
@@ -62,27 +63,33 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
               directResult.value()
               (directResult, serializedData.limit())
               //Indirect 间结
-            case IndirectTaskResult(blockId, size) =>
+            case IndirectTaskResult(blockId, size) =>//需要向远程的Worker网络获取结果
+              //确定大小符合要求
               if (!taskSetManager.canFetchMoreResults(size)) {
                 // dropped by executor if size is larger than maxResultSize
+                //从远程的Worker删除结果
                 sparkEnv.blockManager.master.removeBlock(blockId)
                 return
               }
               logDebug("Fetching indirect task result for TID %s".format(tid))
               //
               scheduler.handleTaskGettingResult(taskSetManager, tid)
+              //从远程的BlockManager获取计算结果
               val serializedTaskResult = sparkEnv.blockManager.getRemoteBytes(blockId)
               if (!serializedTaskResult.isDefined) {
                 /* We won't be able to get the task result if the machine that ran the task failed
                  * between when the task ended and when we tried to fetch the result, or if the
                  * block manager had to flush the result. */
-                //对TaskSet中的任务信息进行失败状态标记
+                //如果在Executor的任务执行完成和Driver端取结果之间,Executor所在机器出现故障或其他错误
+                //会导致获取结果失败
                 scheduler.handleFailedTask(
                   taskSetManager, tid, TaskState.FINISHED, TaskResultLost)
                 return
               }
+              //反序列化结果
               val deserializedResult = serializer.get().deserialize[DirectTaskResult[_]](
                 serializedTaskResult.get)
+                //将远程的结果删除
               sparkEnv.blockManager.master.removeBlock(blockId)
               (deserializedResult, size)
           }
