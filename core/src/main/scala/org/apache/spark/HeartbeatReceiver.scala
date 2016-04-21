@@ -113,13 +113,14 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
       context.reply(true)
     case TaskSchedulerIsSet =>
       scheduler = sc.taskScheduler
+      //使用方法askWithRetry[Boolean]请求TaskSchedulerIsSet消息并要求返回Boolean值
       context.reply(true)
     case ExpireDeadHosts =>
       expireDeadHosts()
       context.reply(true)
 
     // Messages received from executors
-    //接收executors信息
+    //接收executors发送的Heartbeat信息,
     case heartbeat @ Heartbeat(executorId, taskMetrics, blockManagerId) =>
       if (scheduler != null) {
         if (executorLastSeen.contains(executorId)) {
@@ -130,7 +131,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
               val unknownExecutor = !scheduler.executorHeartbeatReceived(
                 executorId, taskMetrics, blockManagerId)
               val response = HeartbeatResponse(reregisterBlockManager = unknownExecutor)
-              //
+              //返回HeartbeatResponse
               context.reply(response)
             }
           })
@@ -197,6 +198,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
     val now = clock.getTimeMillis()
     for ((executorId, lastSeenMs) <- executorLastSeen) {
       if (now - lastSeenMs > executorTimeoutMs) {
+        //当前时间减去executor发送最新心跳时间大于超时时间,判断executor是不可用状态
         logWarning(s"Removing executor $executorId with no recent heartbeats: " +
           s"${now - lastSeenMs} ms exceeds timeout $executorTimeoutMs ms")
         scheduler.executorLost(executorId, SlaveLost("Executor heartbeat " +

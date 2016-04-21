@@ -94,7 +94,8 @@ class HeartbeatReceiverSuite
 
   test("task scheduler is set correctly") {
     assert(heartbeatReceiver.scheduler === null)
-    heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet)
+   val bll= heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) //返回值Boolean
+     println(bll)
     assert(heartbeatReceiver.scheduler !== null)
   }
 

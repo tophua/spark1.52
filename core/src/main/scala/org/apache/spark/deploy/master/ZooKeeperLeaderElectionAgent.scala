@@ -76,7 +76,7 @@ private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderEle
   private def updateLeadershipStatus(isLeader: Boolean) {
     if (isLeader && status == LeadershipStatus.NOT_LEADER) {
       status = LeadershipStatus.LEADER
-      masterInstance.electedLeader()//Master已经被选举为Leader
+      masterInstance.electedLeader()//Master已经被选举为Leader,
     } else if (!isLeader && status == LeadershipStatus.LEADER) {
       status = LeadershipStatus.NOT_LEADER
       masterInstance.revokedLeadership()//Master已经被剥夺Leader

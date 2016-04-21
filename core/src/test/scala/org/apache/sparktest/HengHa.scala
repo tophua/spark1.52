@@ -1,5 +1,5 @@
 package org.apache.sparktest
-
+import java.lang.management.ManagementFactory
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
@@ -31,6 +31,8 @@ object HengHa {
     val ha = system.actorOf(Props[Ha], name = "ha")
     val heng = system.actorOf(Props(new Heng(ha)), name = "heng")
 
-    heng ! "start"
+    //heng ! "start"    
+    
+    //ManagementFactory.getGarbageCollectorMXBeans.map(_.getCollectionTime).sum
   }
 }
