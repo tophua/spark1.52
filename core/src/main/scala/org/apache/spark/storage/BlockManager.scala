@@ -55,7 +55,7 @@ private[spark] class BlockResult(
 /**
  * Manager running on every node (driver and executors) which provides interfaces for putting and
  * retrieving blocks both locally and remotely into various stores (memory, disk, and off-heap).
- *
+ * 提供Storage模块与其他其他模块的交互接口
  * Note that #initialize() must be called before the BlockManager is usable.
  */
 private[spark] class BlockManager(
@@ -196,6 +196,7 @@ private[spark] class BlockManager(
     shuffleClient.init(appId)
     //blockManagerId创建
     blockManagerId = BlockManagerId(
+        //包括标识Slave的ExecutorId,HostName和Port及节点的最大可用内存数
       executorId, blockTransferService.hostName, blockTransferService.port)
     //shuffleServerId创建,当有外部externalShuffleServiceEnabled则初始化
     shuffleServerId = if (externalShuffleServiceEnabled) {

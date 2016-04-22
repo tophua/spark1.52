@@ -33,7 +33,7 @@ import org.apache.spark.util.Utils
  * This class does not support concurrent writes. Also, once the writer has been opened it cannot be
  * reopened again.
  * 
- * 被用于输出Spark任务的中间计算结果
+ * 被用于输出Spark任务的中间计算结果,支持直接写入一个文件到Diisk,并且支持文件追加
  */
 private[spark] class DiskBlockObjectWriter(
     val blockId: BlockId,

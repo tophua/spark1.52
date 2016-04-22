@@ -50,12 +50,14 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     val parCollection = sc.makeRDD(1 to 4)
     val flatMappedRDD = parCollection.flatMap(x => 1 to x)
     checkpoint(flatMappedRDD, reliableCheckpoint)
+    //窄依赖
     assert(flatMappedRDD.dependencies.head.rdd === parCollection)
     val result = flatMappedRDD.collect()
+    //执行动作后rdd不相等
     assert(flatMappedRDD.dependencies.head.rdd != parCollection)
     assert(flatMappedRDD.collect() === result)
   }
-
+/**
   runTest("RDDs with one-to-one dependencies") { reliableCheckpoint: Boolean =>
     testRDD(_.map(x => x.toString), reliableCheckpoint)
     testRDD(_.flatMap(x => 1 to x), reliableCheckpoint)
@@ -67,7 +69,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     testRDD(_.map(x => (x % 2, 1)).reduceByKey(_ + _).flatMapValues(x => 1 to x),
       reliableCheckpoint)
     testRDD(_.pipe(Seq("cat")), reliableCheckpoint)
-  }
+  }**/
 
   runTest("ParallelCollectionRDD") { reliableCheckpoint: Boolean =>
     val parCollection = sc.makeRDD(1 to 4, 2)

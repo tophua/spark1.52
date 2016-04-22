@@ -17,23 +17,23 @@
 
 package org.apache.spark.storage
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-import org.apache.spark.rpc.{RpcEnv, RpcCallContext, RpcEndpoint}
+import org.apache.spark.rpc.{ RpcEnv, RpcCallContext, RpcEndpoint }
 import org.apache.spark.util.ThreadUtils
-import org.apache.spark.{Logging, MapOutputTracker, SparkEnv}
+import org.apache.spark.{ Logging, MapOutputTracker, SparkEnv }
 import org.apache.spark.storage.BlockManagerMessages._
 
 /**
  * An RpcEndpoint to take commands from the master to execute options. For example,
  * this is used to remove blocks from the slave's BlockManager.
+ * 运行在所有节点 上,接收BlockManagerMasterEndpoint的命令,例如:删除某个RDD的数据,删除某个Block
  */
-private[storage]
-class BlockManagerSlaveEndpoint(
-    override val rpcEnv: RpcEnv,
-    blockManager: BlockManager,
-    mapOutputTracker: MapOutputTracker)
-  extends RpcEndpoint with Logging {
+private[storage] class BlockManagerSlaveEndpoint(
+  override val rpcEnv: RpcEnv,
+  blockManager: BlockManager,
+  mapOutputTracker: MapOutputTracker)
+    extends RpcEndpoint with Logging {
 
   private val asyncThreadPool =
     ThreadUtils.newDaemonCachedThreadPool("block-manager-slave-async-thread-pool")
@@ -41,17 +41,18 @@ class BlockManagerSlaveEndpoint(
 
   // Operations that involve removing blocks may be slow and should be done asynchronously
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
+    //根据BlockId删除该Executor上所有和该Shuffle相关的Block
     case RemoveBlock(blockId) =>
       doAsync[Boolean]("removing block " + blockId, context) {
         blockManager.removeBlock(blockId)
         true
       }
-
+    //根据RddId删除该Excutor上RDD所关联的所有Block
     case RemoveRdd(rddId) =>
       doAsync[Int]("removing RDD " + rddId, context) {
         blockManager.removeRdd(rddId)
       }
-
+    //根据shuffleId删除该Executor上所有和该Shuffle相关的Block
     case RemoveShuffle(shuffleId) =>
       doAsync[Boolean]("removing shuffle " + shuffleId, context) {
         if (mapOutputTracker != null) {
@@ -59,15 +60,15 @@ class BlockManagerSlaveEndpoint(
         }
         SparkEnv.get.shuffleManager.unregisterShuffle(shuffleId)
       }
-
+    //根据broadcastId删除该Executor上和该广播变量相关的所有Block
     case RemoveBroadcast(broadcastId, _) =>
       doAsync[Int]("removing broadcast " + broadcastId, context) {
         blockManager.removeBroadcast(broadcastId, tellMaster = true)
       }
-
+    //根据blockId和askSlaves向Master返回该Block的blockStatus
     case GetBlockStatus(blockId, _) =>
       context.reply(blockManager.getStatus(blockId))
-
+    //根据blockId和askSlaves向Master返回该Block的blockStatus
     case GetMatchingBlockIds(filter, _) =>
       context.reply(blockManager.getMatchingBlockIds(filter))
   }
@@ -77,14 +78,16 @@ class BlockManagerSlaveEndpoint(
       logDebug(actionMessage)
       body
     }
-    future.onSuccess { case response =>
-      logDebug("Done " + actionMessage + ", response is " + response)
-      context.reply(response)
-      logDebug("Sent response: " + response + " to " + context.sender)
+    future.onSuccess {
+      case response =>
+        logDebug("Done " + actionMessage + ", response is " + response)
+        context.reply(response)
+        logDebug("Sent response: " + response + " to " + context.sender)
     }
-    future.onFailure { case t: Throwable =>
-      logError("Error in " + actionMessage, t)
-      context.sendFailure(t)
+    future.onFailure {
+      case t: Throwable =>
+        logError("Error in " + actionMessage, t)
+        context.sendFailure(t)
     }
   }
 

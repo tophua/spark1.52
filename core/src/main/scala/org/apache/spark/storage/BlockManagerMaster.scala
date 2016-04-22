@@ -35,7 +35,10 @@ class BlockManagerMaster(
 
   val timeout = RpcUtils.askRpcTimeout(conf)
 
-  /** Remove a dead executor from the driver endpoint. This is only called on the driver side. */
+  /** 
+   *  Remove a dead executor from the driver endpoint. This is only called on the driver side. 
+   *  删除Master上保存的execId对应的Executor上的BlockManager的信息
+   */
   def removeExecutor(execId: String) {
     tell(RemoveExecutor(execId))
     logInfo("Removed " + execId + " successfully in removeExecutor")

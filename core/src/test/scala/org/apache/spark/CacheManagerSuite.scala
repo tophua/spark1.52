@@ -40,6 +40,7 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
   before {
     sc = new SparkContext("local", "test")
     blockManager = mock[BlockManager]
+    //引用BlockManager
     cacheManager = new CacheManager(blockManager)
     split = new Partition { override def index: Int = 0 }
     rdd = new RDD[Int](sc, Nil) {

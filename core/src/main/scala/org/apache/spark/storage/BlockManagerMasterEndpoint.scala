@@ -32,6 +32,7 @@ import org.apache.spark.storage.BlockManagerMessages._
 import org.apache.spark.util.{ThreadUtils, Utils}
 
 /**
+ * 在Master跟踪所有Slave节点的Block的信息
  * BlockManagerMasterEndpoint is an [[ThreadSafeRpcEndpoint]] on the master node to track statuses
  * of all slaves' block managers.
  */
@@ -42,13 +43,15 @@ class BlockManagerMasterEndpoint(
     conf: SparkConf,
     listenerBus: LiveListenerBus)
   extends ThreadSafeRpcEndpoint with Logging {
-
+  //保存BlockManagerId到BlockManagerInfo的映射,BlockManagerInfo保存了slave节点的内存使用情况
+  //slave上的Block状态,Master通过个BlockMasterSlaveActor的Reference可以向Slave发送命令查询请求
   // Mapping from block manager id to the block manager's information.
   private val blockManagerInfo = new mutable.HashMap[BlockManagerId, BlockManagerInfo]
-
+ //保存executor ID到BlockManagerInfo的映射,这样Master就可以通过executor ID查找到BlockManagerId
   // Mapping from executor ID to block manager ID.
   private val blockManagerIdByExecutor = new mutable.HashMap[String, BlockManagerId]
-
+  //保存Block是在那些BlockManager上的HashMap,由于Block可能在多个Slave上都有备份,因此注意Value是一个
+  //不可变HashSet,通过查询blockLocations就可以查询到某个Block所在的物理位置
   // Mapping from block id to the set of block managers that have the block.
   private val blockLocations = new JHashMap[BlockId, mutable.HashSet[BlockManagerId]]
 
@@ -56,53 +59,56 @@ class BlockManagerMasterEndpoint(
   private implicit val askExecutionContext = ExecutionContext.fromExecutorService(askThreadPool)
 
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
+    //当BlockManager在创建后,向BlockManagerActor发送消息RegisterBlockManager进行注册
+    //Master Actor保存该BlockManage所包含的Block等信息
     case RegisterBlockManager(blockManagerId, maxMemSize, slaveEndpoint) =>
       register(blockManagerId, maxMemSize, slaveEndpoint)
       context.reply(true)
-
+   //向Master汇报Block的信息,Master会记录这些信息并且提供Slave查询
     case _updateBlockInfo @ UpdateBlockInfo(
       blockManagerId, blockId, storageLevel, deserializedSize, size, externalBlockStoreSize) =>
       context.reply(updateBlockInfo(
         blockManagerId, blockId, storageLevel, deserializedSize, size, externalBlockStoreSize))
       listenerBus.post(SparkListenerBlockUpdated(BlockUpdatedInfo(_updateBlockInfo)))
-
+    //获得某个Block所在的位置信息,返回BlockManagerId组成的列表,Block可能在多个节点上都有备份
     case GetLocations(blockId) =>
       context.reply(getLocations(blockId))
-
+    //获得某个Block所在的位置信息,返回BlockManagerId组成的列表,Block可能在多个节点上都有备份
+    //一次获取多个Block的位置信息
     case GetLocationsMultipleBlockIds(blockIds) =>
       context.reply(getLocationsMultipleBlockIds(blockIds))
-
+   //获得其他BlockManager的id
     case GetPeers(blockManagerId) =>
       context.reply(getPeers(blockManagerId))
-
+    //根据executorId获取Executor的Thread Dump,获得了Executor的hostname和port后,会通过AkkA向Executor发送请求信息
     case GetRpcHostPortForExecutor(executorId) =>
       context.reply(getRpcHostPortForExecutor(executorId))
-
+    //获取所有Executor的内存使用的状态,包括使用的最大的内存大小,剩余的内存大小
     case GetMemoryStatus =>
       context.reply(memoryStatus)
-
+     //返回每个Executor的Storage的状态,包括每个Executor最大可用的内存数据和Block的信息
     case GetStorageStatus =>
       context.reply(storageStatus)
-
+    //根据blockId和askSlaves向Master返回该Block的blockStatus
     case GetBlockStatus(blockId, askSlaves) =>
       context.reply(blockStatus(blockId, askSlaves))
-
+    //根据BlockId获取Block的Status,如果askSlave为true,那么需要到所有的Slave上查询结果
     case GetMatchingBlockIds(filter, askSlaves) =>
       context.reply(getMatchingBlockIds(filter, askSlaves))
-
+     //根据RddId删除该Excutor上RDD所关联的所有Block
     case RemoveRdd(rddId) =>
       context.reply(removeRdd(rddId))
-
+    //根据shuffleId删除该Executor上所有和该Shuffle相关的Block
     case RemoveShuffle(shuffleId) =>
       context.reply(removeShuffle(shuffleId))
-
+    //根据broadcastId删除该Executor上和该广播变量相关的所有Block
     case RemoveBroadcast(broadcastId, removeFromDriver) =>
       context.reply(removeBroadcast(broadcastId, removeFromDriver))
-
+    //根据BlockId删除该Executor上所有和该Shuffle相关的Block
     case RemoveBlock(blockId) =>
       removeBlockFromWorkers(blockId)
       context.reply(true)
-
+  //删除Master上保存的execId对应的Executor上的BlockManager的信息
     case RemoveExecutor(execId) =>
       removeExecutor(execId)
       context.reply(true)
@@ -110,7 +116,7 @@ class BlockManagerMasterEndpoint(
     case StopBlockManagerMaster =>
       context.reply(true)
       stop()
-    //接收DAGScheduler.executorHeartbeatReceived消息
+    //接收DAGScheduler.executorHeartbeatReceived消息    
     case BlockManagerHeartbeat(blockManagerId) =>
       context.reply(heartbeatReceived(blockManagerId))
 
