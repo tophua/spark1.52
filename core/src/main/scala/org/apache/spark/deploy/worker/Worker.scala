@@ -417,7 +417,12 @@ private[deploy] class Worker(
         case e: Throwable =>
           logError("App dir cleanup failed: " + e.getMessage, e)
       }(cleanupThreadExecutor)
-
+/**
+ * 恢复Worker的步骤:
+ * 1)重新注册Worker（实际上是更新Master本地维护的数据结构），置状态为UNKNOWN
+ * 2)向Worker发送Master Changed的消息
+ * 3)Worker收到消息后，向Master回复WorkerSchedulerStateResponse消息，并通过该消息上报executor和driver的信息
+ */
     case MasterChanged(masterRef, masterWebUiUrl) =>
       logInfo("Master has changed, new master is at " + masterRef.address.toSparkURL)
       changeMaster(masterRef, masterWebUiUrl)

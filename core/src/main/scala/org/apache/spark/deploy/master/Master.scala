@@ -59,7 +59,7 @@ private[deploy] class Master(
   private val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
 
   private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") // For application IDs
-  //Wroker最大超时间
+  //Wroker节点最大超时时间60S
   private val WORKER_TIMEOUT_MS = conf.getLong("spark.worker.timeout", 60) * 1000
   private val RETAINED_APPLICATIONS = conf.getInt("spark.deploy.retainedApplications", 200)
   private val RETAINED_DRIVERS = conf.getInt("spark.deploy.retainedDrivers", 200)
@@ -399,19 +399,30 @@ private[deploy] class Master(
           }
       }
     }
-
+/**
+ * AppClient收到后改变其保存的Master的信息，包括URL和Master actor的信息，
+ * 回复MasterChangeAcknowledged(appId)
+ */
     case MasterChangeAcknowledged(appId) => {
       idToApp.get(appId) match {
         case Some(app) =>
           logInfo("Application has been re-registered: " + appId)
+          //Master收到后通过appId后将Application的状态置为WAITING
           app.state = ApplicationState.WAITING
         case None =>
           logWarning("Master change ack from unknown app: " + appId)
       }
-
+    //检查如果所有的worker和Application的状态都不是UNKNOWN，那么恢复结束，调用completeRecovery()
       if (canCompleteRecovery) { completeRecovery() }
     }
-
+/**
+ * 恢复Worker的步骤:
+ * 1)重新注册Worker（实际上是更新Master本地维护的数据结构），置状态为UNKNOWN
+ * 2)向Worker发送Master Changed的消息
+ * 3)Worker收到消息后，向Master回复WorkerSchedulerStateResponse消息，并通过该消息上报executor和driver的信息
+ * 4)Master收到WorkerSchedulerStateResponse消息后，会置该Worker的状态为ALIVE，并且会检查该Worker上报的信息是否与自己从ZK中获取的数据一致，包括executor和driver。
+ *         一致的executor和driver将被恢复。对于Driver，其状态被置为RUNNING。
+ */
     case WorkerSchedulerStateResponse(workerId, executors, driverIds) => {
       idToWorker.get(workerId) match {
         case Some(worker) =>
@@ -560,11 +571,13 @@ private[deploy] class Master(
 
   private def beginRecovery(storedApps: Seq[ApplicationInfo], storedDrivers: Seq[DriverInfo],
       storedWorkers: Seq[WorkerInfo]) {
-    for (app <- storedApps) {
+    for (app <- storedApps) {// 逐个恢复Application
       logInfo("Trying to recover app: " + app.id)
       try {
         registerApplication(app)
+        //ApplicationState.UNKNOWN置待恢复的Application的状态为UNKNOWN，向AppClient发送MasterChanged的消息
         app.state = ApplicationState.UNKNOWN
+        //向AppClient发送Master变化的消息，AppClient会回复MasterChangeAcknowledged
         app.driver.send(MasterChanged(self, masterWebUiUrl))
       } catch {
         case e: Exception => logInfo("App " + app.id + " had exception on reconnect")
@@ -574,33 +587,41 @@ private[deploy] class Master(
     for (driver <- storedDrivers) {
       // Here we just read in the list of drivers. Any drivers associated with now-lost workers
       // will be re-launched when we detect that the worker is missing.
+      //在Worker恢复后，Worker会主动上报运行其上的executors和drivers从而使得Master恢复executor和driver的信息。
       drivers += driver
     }
 
-    for (worker <- storedWorkers) {
+    for (worker <- storedWorkers) {//逐个恢复Worker
       logInfo("Trying to recover worker: " + worker.id)
       try {
-        registerWorker(worker)
+        registerWorker(worker)//重新注册Worker,置状态为UNKNOWN
         worker.state = WorkerState.UNKNOWN
+        //向Worker发送Master变化Changed的消息，Worker会回复WorkerSchedulerStateResponse
         worker.endpoint.send(MasterChanged(self, masterWebUiUrl))
       } catch {
         case e: Exception => logInfo("Worker " + worker.id + " had exception on reconnect")
       }
+   
     }
   }
-
+/**
+ * 调用时机
+ * 1. 在恢复开始后的60s会被强制调用
+ * 2. 在每次收到AppClient和Worker的消息回复后会检查如果Application和worker的状态都不为UNKNOWN，则调用
+ */
   private def completeRecovery() {
     // Ensure "only-once" recovery semantics using a short synchronization period.
     if (state != RecoveryState.RECOVERING) { return }
     state = RecoveryState.COMPLETING_RECOVERY
     //将所有未响应的Worker和Application删除
     // Kill off any workers and apps that didn't respond to us.
+    // 删除在60s内没有回应的app和worker
     workers.filter(_.state == WorkerState.UNKNOWN).foreach(removeWorker)
     apps.filter(_.state == ApplicationState.UNKNOWN).foreach(finishApplication)
     //对于未分配Woker的Driver client(有可能Worker已经死掉)
     //确定是否需要重新启动
     // Reschedule drivers which were not claimed by any workers
-    drivers.filter(_.worker.isEmpty).foreach { d =>
+    drivers.filter(_.worker.isEmpty).foreach { d =>//如果driver的worker为空，则relaunchDriver。
       logWarning(s"Driver ${d.id} was not found after master recovery")
       if (d.desc.supervise) {//需要重新启动Driver Client
         logWarning(s"Re-launching ${d.id}")
