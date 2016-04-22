@@ -161,7 +161,7 @@ private[spark] class CoarseGrainedExecutorBackend(
       logWarning(s"An unknown ($remoteAddress) driver disconnected.")
     }
   }
-
+    //通过AKKA向Driver汇报本次Task的已经完成
   override def statusUpdate(taskId: Long, state: TaskState, data: ByteBuffer) {
     val msg = StatusUpdate(executorId, taskId, state, data)
     driver match {

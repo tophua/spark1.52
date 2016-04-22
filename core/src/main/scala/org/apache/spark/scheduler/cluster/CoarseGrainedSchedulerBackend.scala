@@ -98,7 +98,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
         }
       }, 0, reviveIntervalMs, TimeUnit.MILLISECONDS)
     }
-
+   //收到CoarseGrainedExecutorBackend发送StatusUpdate消息,
     override def receive: PartialFunction[Any, Unit] = {
       case StatusUpdate(executorId, taskId, state, data) =>
         scheduler.statusUpdate(taskId, state, data.value)

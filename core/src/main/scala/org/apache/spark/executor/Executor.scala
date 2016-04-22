@@ -282,11 +282,15 @@ private[spark] class Executor(
         // directSend = sending directly back to the driver
         val serializedResult: ByteBuffer = {
           if (maxResultSize > 0 && resultSize > maxResultSize) {
+            // 如果结果的大小大于1GB，那么直接丢弃，
+            // 可以在spark.driver.maxResultSize设置
             logWarning(s"Finished $taskName (TID $taskId). Result is larger than maxResultSize " +
               s"(${Utils.bytesToString(resultSize)} > ${Utils.bytesToString(maxResultSize)}), " +
               s"dropping it.")
             ser.serialize(new IndirectTaskResult[Any](TaskResultBlockId(taskId), resultSize))
           } else if (resultSize >= akkaFrameSize - AkkaUtils.reservedSizeBytes) {
+            //如果不能通过AKKA的消息传递，那么放入BlockManager等待调用者以网络的形式来获取。
+            //AKKA的消息的默认大小可以通过 spark.akka.frameSize来设置，默认10MB。     
             val blockId = TaskResultBlockId(taskId)
             env.blockManager.putBytes(
               blockId, serializedDirectResult, StorageLevel.MEMORY_AND_DISK_SER)
@@ -294,11 +298,12 @@ private[spark] class Executor(
               s"Finished $taskName (TID $taskId). $resultSize bytes result sent via BlockManager)")
             ser.serialize(new IndirectTaskResult[Any](blockId, resultSize))
           } else {
+             //结果可以直接回传到Driver
             logInfo(s"Finished $taskName (TID $taskId). $resultSize bytes result sent to driver")
             serializedDirectResult
           }
         }
-
+        //通过AKKA向Driver汇报本次Task的已经完成
         execBackend.statusUpdate(taskId, TaskState.FINISHED, serializedResult)
 
       } catch {

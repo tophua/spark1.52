@@ -62,10 +62,10 @@ private[spark] class ShuffleMapTask(
  * 
  */
   override def runTask(context: TaskContext): MapStatus = {
-    // Deserialize the RDD using the broadcast variable.
+    // Deserialize the RDD using the broadcast variable.   
     val deserializeStartTime = System.currentTimeMillis()
-    val ser = SparkEnv.get.closureSerializer.newInstance()
-    //对任务的RDD和ShuffleDependency进行反序列化
+    val ser = SparkEnv.get.closureSerializer.newInstance()    
+    // 反序列化广播变量taskBinary得到RDD,ShuffleDependency
     val (rdd, dep) = ser.deserialize[(RDD[_], ShuffleDependency[_, _, _])](
       ByteBuffer.wrap(taskBinary.value), Thread.currentThread.getContextClassLoader)
     _executorDeserializeTime = System.currentTimeMillis() - deserializeStartTime
@@ -73,11 +73,13 @@ private[spark] class ShuffleMapTask(
     metrics = Some(context.taskMetrics)
     var writer: ShuffleWriter[Any, Any] = null
     try {
-      val manager = SparkEnv.get.shuffleManager
-      //getWriter方法获取partition指定分区的SortShuffleWriter
+      val manager = SparkEnv.get.shuffleManager //获得Shuffle Manager      
+      //获取partition指定分区的Shuffle的SortShuffleWriter
       writer = manager.getWriter[Any, Any](dep.shuffleHandle, partitionId, context)
-      //write将计算的中间结果写入文件,rdd.iterator方法触发任务计算
+      //首先调用rdd .iterator，如果该RDD已经cache了或者checkpoint了，那么直接读取结果，
+      //否则开始计算计算的结果将调用Shuffle Writer写入本地文件系统
       writer.write(rdd.iterator(partition, context).asInstanceOf[Iterator[_ <: Product2[Any, Any]]])
+     // 返回MapStatus数据的元数据信息，包括location和size
       writer.stop(success = true).get
     } catch {
       case e: Exception =>
