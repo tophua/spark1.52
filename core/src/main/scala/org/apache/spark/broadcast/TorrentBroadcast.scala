@@ -82,7 +82,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   private val broadcastId = BroadcastBlockId(id)
 
   /** Total number of blocks this broadcast variable contains. */
-  //将的写入操作,返回广播变更包含的块数
+  //块的写入操作,返回广播变更包含的块数
   private val numBlocks: Int = writeBlocks(obj)
 
   override protected def getValue() = {
@@ -100,13 +100,14 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   private def writeBlocks(value: T): Int = {
     // Store a copy of the broadcast variable in the driver so that tasks run on the driver
     // do not create a duplicate copy of the broadcast variable's value.
+    //1)将要写入的对象在本地的存储体系中备份一份,以便于Task也可以在本地的Driver上运行
     SparkEnv.get.blockManager.putSingle(broadcastId, value, StorageLevel.MEMORY_AND_DISK,
       tellMaster = false)
-      //blockifyObject方法用于将对象序列化写入ByteChunkOutputStream并用compressionCodec压缩,
-      //最终将ByteChunkOutputStream转换为Array[ByteBuffer]
+  //2)给ByteArrayChunkOutputStream指定压缩算法,并且将对象以序列化方式写入ByteChunkOutputStream后转换为Array
     val blocks =
       TorrentBroadcast.blockifyObject(value, blockSize, SparkEnv.get.serializer, compressionCodec)
     blocks.zipWithIndex.foreach { case (block, i) =>
+      //3)将每一个ByteBuffer作为一个Block,使用putByte方法写入存储体系.
       SparkEnv.get.blockManager.putBytes(
         BroadcastBlockId(id, "piece" + i),
         block,

@@ -47,8 +47,9 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     val bytes = _bytes.duplicate()
     logDebug(s"Attempting to put block $blockId")
     val startTime = System.currentTimeMillis
-    val file = diskManager.getFile(blockId)
+    val file = diskManager.getFile(blockId)//获取文件
     val channel = new FileOutputStream(file).getChannel
+    //然后使用NIO的Channel将ByteBuffer写入文件
     Utils.tryWithSafeFinally {
       while (bytes.remaining > 0) {
         channel.write(bytes)
@@ -87,7 +88,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
         //使用dataSerializeStream方法,将FileOutputStrem序列化并压缩
         blockManager.dataSerializeStream(blockId, outputStream, values)
       } {
-        // Close outputStream here because it should be closed before file is deleted.
+        // Close outputStream here because it should be closed before file is deleted.        
         outputStream.close()
       }
     } catch {
@@ -114,7 +115,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       PutResult(length, null)
     }
   }
-
+//获取文件,然后使用NIO将文件读取到ByteBuffer
   private def getBytes(file: File, offset: Long, length: Long): Option[ByteBuffer] = {
     val channel = new RandomAccessFile(file, "r").getChannel
     Utils.tryWithSafeFinally {

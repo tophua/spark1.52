@@ -38,7 +38,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   extends BlockStore(blockManager) {
 
   private val conf = blockManager.conf
-  //
+  //被很多MemoryEntry占据的内存currentMemory,这些是通过entries持有
   private val entries = new LinkedHashMap[BlockId, MemoryEntry](32, 0.75f, true)
  //当前Driver或者Executor已使用内存
   @volatile private var currentMemory = 0L
@@ -48,6 +48,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
   // A mapping from taskAttemptId to amount of memory used for unrolling a block (in bytes)
   // All accesses of this map are assumed to have manually synchronized on `accountingLock`
+  //通过占座方式占用的内存CurrentUnrollMemory,好比教室空着的座位,有人在座坐放上书本
   //当前Dirver或者Executor中所有线程展开的Block都存入此Map中,key为线程ID,value为线程展开的所有块的内存大小总和
   private val unrollMemoryMap = mutable.HashMap[Long, Long]()
   // Same as `unrollMemoryMap`, but for pending unroll memory as defined below.
@@ -70,7 +71,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   }
 
   // Initial memory to request before unrolling any block
-  //初始内存
+  //初始内存需要展开块的内存
   private val unrollMemoryThreshold: Long =
     conf.getLong("spark.storage.unrollMemoryThreshold", 1024 * 1024)
 
@@ -96,7 +97,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
  */
   override def putBytes(blockId: BlockId, _bytes: ByteBuffer, level: StorageLevel): PutResult = {
     // Work on a duplicate - since the original input might be used elsewhere.
-    val bytes = _bytes.duplicate()
+    val bytes = _bytes.duplicate()//创建共享此缓冲区的新的字节缓存区
     bytes.rewind()//重新分配缓存
     if (level.deserialized) {
       val values = blockManager.dataDeserialize(blockId, bytes)
@@ -137,14 +138,13 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
     if (level.deserialized) {
       //首先对对象大小进行估算
       val sizeEstimate = SizeEstimator.estimate(values.asInstanceOf[AnyRef])
-      //尝试写入内存
+      //尝试写入内存,如果unrollsafely返回的数据匹配Left,整个block是可以一次性放入内存的
       val putAttempt = tryToPut(blockId, values, sizeEstimate, deserialized = true)
-      //整个block是可以一次性放入内存的
       PutResult(sizeEstimate, Left(values.iterator), putAttempt.droppedBlocks)
     } else {
-      //
+      //不支持序列化
       val bytes = blockManager.dataSerialize(blockId, values.iterator)
-      //尝试写入内存
+      //尝试写入内存,如果unrollsafely返回的数据匹配Left,整个block是可以一次性放入内存的
       val putAttempt = tryToPut(blockId, bytes, bytes.limit, deserialized = false)
       PutResult(bytes.limit(), Right(bytes.duplicate()), putAttempt.droppedBlocks)
     }
@@ -180,22 +180,24 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       returnValues: Boolean,
       allowPersistToDisk: Boolean): PutResult = {
     val droppedBlocks = new ArrayBuffer[(BlockId, BlockStatus)]
-    //unrollSafely将块在内存中安全展开,如果返回数据的类型匹配Left则说明内存足够
+    //unrollSafely将块在内存中安全展开,如果返回数据的类型匹配Left则说明内存足够,调用putArray方法写入内存
+    //如果返回数据类型Right,则说明内存不足并写入硬盘或者放弃
     val unrolledValues = unrollSafely(blockId, values, droppedBlocks)
     unrolledValues match {
-      case Left(arrayValues) =>
+      case Left(arrayValues) =>//如果返回数据的类型匹配Left则说明内存足够,调用putArray方法写入内存
         // Values are fully unrolled in memory, so store them as an array
         val res = putArray(blockId, arrayValues, level, returnValues)
         droppedBlocks ++= res.droppedBlocks
         PutResult(res.size, res.data, droppedBlocks)
       case Right(iteratorValues) =>
         // Not enough space to unroll this block; drop to disk if applicable
-        //如果返回数据类型Right,则说明内存不足并写入硬盘或者放弃
+        //如果返回数据类型Right,则说明内存不足并写入硬盘
         if (level.useDisk && allowPersistToDisk) {
           logWarning(s"Persisting block $blockId to disk instead.")
           val res = blockManager.diskStore.putIterator(blockId, iteratorValues, level, returnValues)
           PutResult(res.size, res.data, droppedBlocks)
         } else {
+          //放弃
           PutResult(0, Left(iteratorValues), droppedBlocks)
         }
     }
@@ -210,8 +212,10 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
     if (entry == null) {
       None
     } else if (entry.deserialized) {
+      //用于entries中获取MemoryEntry,如果MemoryEntry支持反序列化,将MemoryEntry的value反序列化后返回
       Some(blockManager.dataSerialize(blockId, entry.value.asInstanceOf[Array[Any]].iterator))
     } else {
+      //不支持序列化,对MemoryEntny的value复制后返回
       Some(entry.value.asInstanceOf[ByteBuffer].duplicate()) // Doesn't actually copy the data
     }
   }
@@ -255,7 +259,9 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
   /**
    * Unroll the given block in memory safely.
-   *
+   *安全展开,为了防止写入内存的数据过大,导致内存溢出
+   * Spark采用了一种优化方案:在正式写入内存之前,先用逻辑方式申请内存,如果申请成功,再写入内存
+   * 这个过程称为安全展开
    * The safety of this operation refers to avoiding potential OOM exceptions caused by
    * unrolling the entirety of the block in memory at once. This is achieved by periodically
    * checking whether the memory restrictions for unrolling blocks are still satisfied,
@@ -500,7 +506,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
           val pair = iterator.next()
           val blockId = pair.getKey
           if (rddToAdd.isEmpty || rddToAdd != getRddId(blockId)) {
-            selectedBlocks += blockId
+            selectedBlocks += blockId//这个blockId将会被移出内存
             selectedMemory += pair.getValue.size
           }
         }
@@ -509,6 +515,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       if (actualFreeMemory + selectedMemory >= space) {
         logInfo(s"${selectedBlocks.size} blocks selected for dropping")
         for (blockId <- selectedBlocks) {
+         
           val entry = entries.synchronized { entries.get(blockId) }
           // This should never be null as only one task should be dropping
           // blocks and removing entries. However the check is still here for
@@ -519,6 +526,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
             } else {
               Right(entry.value.asInstanceOf[ByteBuffer].duplicate())
             }
+             //根据entries装入Data
             val droppedBlockStatus = blockManager.dropFromMemory(blockId, data)
             droppedBlockStatus.foreach { status => droppedBlocks += ((blockId, status)) }
           }

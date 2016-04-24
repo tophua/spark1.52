@@ -43,7 +43,7 @@ import org.apache.spark.util._
 
 /**
  * Spark executor, backed by a threadpool to run tasks.
- *
+ *执行计算任务线程,主要负责任务的执行以及Worker,Driver App信息同步
  * This can be used with Mesos, YARN, and the standalone scheduler.
  * An internal RPC interface (at the moment Akka) is used for communication with the driver,
  * except in the case of Mesos fine-grained mode.
@@ -86,13 +86,14 @@ private[spark] class Executor(
   private val threadPool = ThreadUtils.newDaemonCachedThreadPool("Executor task launch worker")
   //用于测量系统
   private val executorSource = new ExecutorSource(threadPool, executorId)
-
+//非本地模块,注册executorSource
   if (!isLocal) {
     env.metricsSystem.registerSource(executorSource)
     env.blockManager.initialize(conf.getAppId)
   }
 
   // Create an RpcEndpoint for receiving RPCs from the driver
+  //创建注册executorEndpoint负责接收driver消息
   private val executorEndpoint = env.rpcEnv.setupEndpoint(
     ExecutorEndpoint.EXECUTOR_ENDPOINT_NAME, new ExecutorEndpoint(env.rpcEnv, executorId))
 
@@ -114,12 +115,12 @@ private[spark] class Executor(
   //结果总大小的字节限制
   // Limit of bytes for total size of results (default is 1GB)
   private val maxResultSize = Utils.getMaxResultSize(conf)
-  //维持一个运行Task任务线程池
+  //创建Executor执行Task的线程池,此线程池用于执行任务
   // Maintains the list of running tasks.
   private val runningTasks = new ConcurrentHashMap[Long, TaskRunner]
   // Executor for the heartbeat task.
   private val heartbeater = ThreadUtils.newDaemonSingleThreadScheduledExecutor("driver-heartbeater")
-//启动executor心跳线程,此线程用于向Driver发送心跳
+  //启动executor心跳线程,此线程用于向Driver发送心跳
   startDriverHeartbeater()
 
   def launchTask(
@@ -478,9 +479,10 @@ private[spark] class Executor(
       }
     }
     //通知blockManagerMaster,此Executor上的blockManager依然活着,
-    //发送消息到HeartbeatReceiver.receiveAndReply
+    //发送HeartbeatResponse消息到HeartbeatReceiver.receiveAndReply
     val message = Heartbeat(executorId, tasksMetrics.toArray, env.blockManager.blockManagerId)
     try {
+      //
       val response = heartbeatReceiverRef.askWithRetry[HeartbeatResponse](message)
       if (response.reregisterBlockManager) {
         logInfo("Told to re-register on heartbeat")
@@ -495,9 +497,10 @@ private[spark] class Executor(
    * Schedules a task to report heartbeat and partial metrics for active tasks to driver.
    */
   private def startDriverHeartbeater(): Unit = {
-    //心跳线程的间隔默认10秒
+    //Executor和Driver之间心跳的间隔,心跳线程的间隔默认10秒,即BlockManager超时时间
+    //m毫秒,s秒
     val intervalMs = conf.getTimeAsMs("spark.executor.heartbeatInterval", "10s")
-    //心跳不能发送时的随机间隔,每次休眼时间10---20秒
+    //心跳不能发送时的随机间隔,每次随机时间10---20秒
     // Wait a random interval so the heartbeats don't end up in sync
     val initialDelay = intervalMs + (math.random * intervalMs).asInstanceOf[Int]
 
@@ -511,4 +514,14 @@ private[spark] class Executor(
     heartbeater.scheduleAtFixedRate(heartbeatTask, initialDelay, intervalMs, TimeUnit.MILLISECONDS)
   }
 
+ 
+}
+object TestRandom{
+   def main(args: Array[String]): Unit = {
+     val intervalMs = 10
+     val initialDelay = intervalMs + (math.random * intervalMs).asInstanceOf[Int]
+    println(initialDelay);
+     
+   }
+  
 }

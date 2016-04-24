@@ -128,9 +128,11 @@ private[spark] class LocalBackend(
     //LocalActor与ActorSystem进行消息通信
     //RpcEndpointRef与ActorSystem进行消息通信
     val rpcEnv = SparkEnv.get.rpcEnv
+    //LocalEndpoint 创建本地Exceutor
     val executorEndpoint = new LocalEndpoint(rpcEnv, userClassPath, scheduler, this, totalCores)
     
     localEndpoint = rpcEnv.setupEndpoint("LocalBackendEndpoint", executorEndpoint)
+    //向SparkListenerBus发送事件SparkListenerExecutorAdded
     listenerBus.post(SparkListenerExecutorAdded(
       System.currentTimeMillis,
       executorEndpoint.localExecutorId,

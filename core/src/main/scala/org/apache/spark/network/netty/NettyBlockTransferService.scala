@@ -35,6 +35,9 @@ import org.apache.spark.util.Utils
 /**
  * A BlockTransferService that uses Netty to fetch a set of blocks at at time.
  * 块传输服务,使用Netty可以异步事件驱动的网络应用框架,提供Web服务及客户端,获取远程节点上Block的集合
+ * 为什么提供Shuffle服务与客户端
+ * Spark是分布式部署的,每个task最终都运行在不同的机器节点上,map任务的输出结果直接存储到map任务所在机器的存储体系中
+ * reduce任务极有可能不在同一台机器上运行,所以需要远程下载map任务的中间输出
  */
 class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManager, numCores: Int)
     extends BlockTransferService {
@@ -48,7 +51,9 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
   private[this] var server: TransportServer = _
   private[this] var clientFactory: TransportClientFactory = _
   private[this] var appId: String = _
-
+/**
+ * BlockTransferService只有在其init方法被调用,即初始化后才提供服务
+ */
   override def init(blockDataManager: BlockDataManager): Unit = {
     //创建RpcServer
     val rpcHandler = new NettyBlockRpcServer(serializer, blockDataManager)
@@ -80,7 +85,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
     val portToTry = conf.getInt("spark.blockManager.port", 0)
     Utils.startServiceOnPort(portToTry, startService, conf, getClass.getName)._1
   }
-  //方法用于获取远程shuffle文件
+  //方法用于获取远程shuffle文件,实际是利用NettyBlockTransferService中创建服务
   override def fetchBlocks(
     host: String,
     port: Int,
@@ -114,10 +119,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
   override def hostName: String = Utils.localHostName()
 
   override def port: Int = server.getPort
-  //上传shuffle文件
-  /**
-   *
-   */
+  //上传shuffle文件到远程Executor,也是利用NettyBlockTransferService中创建服务
   override def uploadBlock(
     hostname: String,
     port: Int,
@@ -146,7 +148,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
       data
     }
     //将appId,execId,blockId,序列化的StorageLevel,转化为数组的Block封装为UploadBlock,
-    //并将UploadBlock序列化为数组
+    //并将UploadBlock序列化为数组,调用客户端sendRpc方法将字节数组上传
     client.sendRpc(new UploadBlock(appId, execId, blockId.toString, levelBytes, array).toByteArray,
     //最终调用Netty客户端的SendRpc方法将字节数组上传,回调函数RpcResponseCallback根据RPC的结果更改上传状态
       new RpcResponseCallback {

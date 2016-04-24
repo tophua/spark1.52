@@ -50,7 +50,8 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
   /* Cap the capacity of the event queue so we get an explicit error (rather than
    * an OOM exception) if it's perpetually being added to more quickly than it's being drained. */
   private val EVENT_QUEUE_CAPACITY = 10000
-  //事件阻塞队列,固定大小10000
+  //基于已链接节点的,范围任意的blocking queue实现,此队列按先进先出排序元素,
+  //线程阻塞,不接受null,固定大小10000,先进先出
   private val eventQueue = new LinkedBlockingQueue[E](EVENT_QUEUE_CAPACITY)
 
   // Indicate if `start()` is called
@@ -64,6 +65,8 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
   private var processingEvent = false
 
   // A counter that represents the number of events produced and consumed in the queue
+  //Semaphore负责协调各个线程以保证它们能够正确,合理的使用公共资源
+  //Semaphore(0)只能几个线程同时访问
   private val eventLock = new Semaphore(0)
 /**
  * 事件匹配监听器的线程:此Thread不断拉取LinkedBlockingQueue中的事件,遍历监听器,调用监听器的方法,任何事件都会在
@@ -74,12 +77,12 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
     setDaemon(true)
     override def run(): Unit = Utils.tryOrStopSparkContext(sparkContext) {
       while (true) {
-        eventLock.acquire()
+        eventLock.acquire()//获取许可
         self.synchronized {
           processingEvent = true
         }
         try {
-          val event = eventQueue.poll
+          val event = eventQueue.poll//检索并移除此队列的头,如果队列为空,则返回null
           if (event == null) {
             // Get out of the while loop and shutdown the daemon thread
             if (!stopped.get) {
@@ -122,9 +125,9 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
       logError(s"$name has already stopped! Dropping event $event")
       return
     }
-    val eventAdded = eventQueue.offer(event)
+    val eventAdded = eventQueue.offer(event)//在尾部插入一个元素,返回true表示插入成功
     if (eventAdded) {
-      eventLock.release()
+      eventLock.release()//释放资源
     } else {
       onDropEvent(event)
     }
@@ -175,7 +178,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
     if (stopped.compareAndSet(false, true)) {
       // Call eventLock.release() so that listenerThread will poll `null` from `eventQueue` and know
       // `stop` is called.
-      eventLock.release()
+      eventLock.release() //释放资源
       listenerThread.join()
     } else {
       // Keep quiet

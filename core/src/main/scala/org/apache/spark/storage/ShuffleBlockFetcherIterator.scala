@@ -75,6 +75,7 @@ final class ShuffleBlockFetcherIterator(
   private[this] val startTime = System.currentTimeMillis
 
   /** Local blocks to fetch, excluding zero-sized blocks. */
+  //存入将本地的Block列表
   private[this] val localBlocks = new ArrayBuffer[BlockId]()
 
   /** Remote blocks to fetch, excluding zero-sized blocks. */
@@ -186,7 +187,8 @@ final class ShuffleBlockFetcherIterator(
     //为什么每个请求不能过超五分之一呢?这样做是为了提高请求的并发度,允许5个请求分别从5个节点获取数据,最大限度
     //利用各节点的资源.
     //每个远程请求的最大尺寸
-    val targetRequestSize = math.max(maxBytesInFlight / 5, 1L)
+    val targetRequestSize = math.max(maxBytesInFlight / 5, 1L)//每次请求的数据大小不会超过maxBytesInFlight的五分之一
+        
     logDebug("maxBytesInFlight: " + maxBytesInFlight + ", targetRequestSize: " + targetRequestSize)
 
     // Split local and remote blocks. Remote blocks are further split into FetchRequests of size
@@ -202,10 +204,11 @@ final class ShuffleBlockFetcherIterator(
       //如果BlockInfo所在的Excutor与当前Executor相同,则将它的BlockId存入localBlocks
       if (address.executorId == blockManager.blockManagerId.executorId) {
         // Filter out zero-sized blocks
+        //Block在本地,需要过滤大小为0的Block
         localBlocks ++= blockInfos.filter(_._2 != 0).map(_._1)
         //一共要获取的Block数量
         numBlocksToFetch += localBlocks.size
-      } else {
+      } else {//需要远程获取的Block
         //否则将Blockinfo的BlockId和size累加到curBlocks,将blockId存入remoteBlocks,
         val iterator = blockInfos.iterator
         //当前累加到curBlocks中的所有Block的大小之和,用于保证每个远程请求的尺寸不超过targetRequestSize
@@ -217,6 +220,7 @@ final class ShuffleBlockFetcherIterator(
         while (iterator.hasNext) {
           val (blockId, size) = iterator.next()
           // Skip empty blocks
+          //跳过空的Block
           if (size > 0) {
             //将Blockinfo的BlockId和size累加到curBlocks
             curBlocks += ((blockId, size))
@@ -231,6 +235,7 @@ final class ShuffleBlockFetcherIterator(
           //并且为生成下一个FetchRequest做一些准备(curRequestSize设置为0)
           if (curRequestSize >= targetRequestSize) {
             // Add this FetchRequest
+            //当前总的size已经可以批量放入一次FetchRequest中
             remoteRequests += new FetchRequest(address, curBlocks)
             curBlocks = new ArrayBuffer[(BlockId, Long)]
             logDebug(s"Creating fetch request of $curRequestSize at $address")
@@ -238,6 +243,7 @@ final class ShuffleBlockFetcherIterator(
           }
         }
         // Add in the final request
+        //剩余的请求组成一次FetchRequest
         if (curBlocks.nonEmpty) {
           //如果curBlocks仍然有缓存,新建FetchRequest放入remoteRequests
           remoteRequests += new FetchRequest(address, curBlocks)
@@ -255,10 +261,12 @@ final class ShuffleBlockFetcherIterator(
    * 用于对本地中间计算结果的获取
    */
   private[this] def fetchLocalBlocks() {
+    //已经将本地的Block列表存入localBlocks
     val iter = localBlocks.iterator
     while (iter.hasNext) {
       val blockId = iter.next()
       try {
+        //
         val buf = blockManager.getBlockData(blockId)
         shuffleMetrics.incLocalBlocksFetched(1)
         shuffleMetrics.incLocalBytesRead(buf.size)

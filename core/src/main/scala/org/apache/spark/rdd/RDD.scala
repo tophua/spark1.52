@@ -226,6 +226,7 @@ abstract class RDD[T: ClassTag](
    * RDD给子类提供了getDependencies方法来制定如何依赖父类RDD
    * Get the list of dependencies of this RDD, taking into account whether the
    * RDD is checkpointed or not.
+   *Seq 有序重复数据
    */
   final def dependencies: Seq[Dependency[_]] = {
     checkpointRDD.map(r => List(new OneToOneDependency(r))).getOrElse {

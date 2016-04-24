@@ -177,16 +177,18 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
       val shuffleState = shuffleStates(blockId.shuffleId)
       val iter = shuffleState.allFileGroups.iterator
       while (iter.hasNext) {
+      //根据Map ID和Reduce ID获取File Segment的信息
         val segmentOpt = iter.next.getFileSegmentFor(blockId.mapId, blockId.reduceId)
         if (segmentOpt.isDefined) {
           val segment = segmentOpt.get
-          return new FileSegmentManagedBuffer(
+	  //根据File Segment的信息,从FileGroup中到相应的File和Block在文件中的offset和size
+	  return new FileSegmentManagedBuffer(
             transportConf, segment.file, segment.offset, segment.length)
         }
       }
       throw new IllegalStateException("Failed to find shuffle block: " + blockId)
     } else {
-      val file = blockManager.diskBlockManager.getFile(blockId)
+      val file = blockManager.diskBlockManager.getFile(blockId)//直接获取文件句柄
       new FileSegmentManagedBuffer(transportConf, file, 0, file.length)
     }
   }

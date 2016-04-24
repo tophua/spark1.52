@@ -37,8 +37,9 @@ import org.apache.spark.storage.{BlockId, StorageLevel}
  * Opened blocks are registered with the "one-for-one" strategy, meaning each Transport-layer Chunk
  * is equivalent to one Spark-level shuffle block.
  * 
- * 当map任务与Reduce任务处于不同节点时,Reduce任务需要从远端节点下载map任务的中间输出,因此NettyBlockRpcServer
- * 
+ * 当map任务与Reduce任务处于不同节点时,Reduce任务需要从远端节点下载map任务的中间输出,
+ * 因此NettyBlockRpcServer提供下载Block文件的功能,为了容错需要将block的数据备份到其他节点
+ * 提供上传Block文件的RPC服务
  */
 class NettyBlockRpcServer(
     serializer: Serializer,

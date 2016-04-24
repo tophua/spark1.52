@@ -82,14 +82,15 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
             return computedValues
           }
 
-          // Otherwise, cache the values and keep track of any updates in block statuses
-          //将结果写入到BlockManager
+          // Otherwise, cache the values and keep track of any updates in block statuses          
           val updatedBlocks = new ArrayBuffer[(BlockId, BlockStatus)]
+         //将数据结果写缓存到BlockManager
           val cachedValues = putInBlockManager(key, computedValues, storageLevel, updatedBlocks)
           //更新任务的统计信息
           val metrics = context.taskMetrics
           val lastUpdatedBlocks = metrics.updatedBlocks.getOrElse(Seq[(BlockId, BlockStatus)]())
           metrics.updatedBlocks = Some(lastUpdatedBlocks ++ updatedBlocks.toSeq)
+          //最后封装InterruptibleIterator返回
           new InterruptibleIterator(context, cachedValues)
 
         } finally {

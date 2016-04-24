@@ -33,7 +33,7 @@ private[spark] abstract class BlockStore(val blockManager: BlockManager) extends
   /**
    * Put in a block and, possibly, also return its content as either bytes or another Iterator.
    * This is used to efficiently write the values to multiple locations (e.g. for replication).
-   *
+   *将values写入系统,如果returnValue=true 需要将结果写入PutResult
    * @return a PutResult that contains the size of the data, as well as the values put if
    *         returnValues is true (if not, the result's data field can be null)
    */
@@ -42,7 +42,9 @@ private[spark] abstract class BlockStore(val blockManager: BlockManager) extends
     values: Iterator[Any],
     level: StorageLevel,
     returnValues: Boolean): PutResult
-
+/**
+ * 根据StorageLevel将BlockId标识Block的内容bytes写入系统
+ */
   def putArray(
     blockId: BlockId,
     values: Array[Any],
@@ -50,22 +52,32 @@ private[spark] abstract class BlockStore(val blockManager: BlockManager) extends
     returnValues: Boolean): PutResult
 
   /**
+   * 获得Block的大小
    * Return the size of a block in bytes.
    */
   def getSize(blockId: BlockId): Long
-
+/**
+ * 获得Block的数据,返回ByteBuffer
+ */
   def getBytes(blockId: BlockId): Option[ByteBuffer]
-
+/**
+ * 获得Block的数据,返回Iterator
+ */
   def getValues(blockId: BlockId): Option[Iterator[Any]]
 
   /**
+   * 删除Block,成功返回true,否则返回false
    * Remove a block, if it exists.
    * @param blockId the block to remove.
    * @return True if the block was found and removed, False otherwise.
    */
   def remove(blockId: BlockId): Boolean
-
+/**
+ * 查询是否包含某个Block
+ */
   def contains(blockId: BlockId): Boolean
-
+/**
+ * 退出时清理回收资源
+ */
   def clear() { }
 }

@@ -72,6 +72,8 @@ private[spark] class MapOutputTrackerMasterEndpoint(
  * Class that keeps track of the location of the map output of
  * a stage. This is abstract because different versions of MapOutputTracker
  * (driver and executor) use different HashMap to store its metadata.
+ * 主要存放Shuffle Map Stage的输出,因为主从节点的MapOutTracker实现机制不一样
+ * 主要维护和记录Map的状态,添加或移除Shuffle以及从节点上获取相应shuffle的状态
  */
 private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging {
 

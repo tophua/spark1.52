@@ -139,6 +139,7 @@ class BlockManagerMasterEndpoint(
 
     // Find all blocks for the given RDD, remove the block from both blockLocations and
     // the blockManagerInfo that is tracking the blocks.
+    //首先删除Master保存的RDD相关的元数据信息
     val blocks = blockLocations.keys.flatMap(_.asRDDId).filter(_.rddId == rddId)
     blocks.foreach { blockId =>
       val bms: mutable.HashSet[BlockManagerId] = blockLocations.get(blockId)
@@ -148,9 +149,11 @@ class BlockManagerMasterEndpoint(
 
     // Ask the slaves to remove the RDD, and put the result in a sequence of Futures.
     // The dispatcher is used as an implicit argument into the Future sequence construction.
+    //其次删除Slave上的RDD的信息
     val removeMsg = RemoveRdd(rddId)
     Future.sequence(
       blockManagerInfo.values.map { bm =>
+        //向BlockManagerSlaveEndpoint发送RemoveRdd信息
         bm.slaveEndpoint.ask[Int](removeMsg)
       }.toSeq
     )
@@ -218,6 +221,7 @@ class BlockManagerMasterEndpoint(
     if (!blockManagerInfo.contains(blockManagerId)) {
       blockManagerId.isDriver && !isLocal
     } else {
+      //最终更新BlockManagerMaster对BlockManager的最后可见时间(即更新Block-ManagerId对应的BlockManagerInfo的_lastSeenMS)
       blockManagerInfo(blockManagerId).updateLastSeenMs()
       true
     }
@@ -305,10 +309,14 @@ class BlockManagerMasterEndpoint(
       }
     ).map(_.flatten.toSeq)
   }
-
+/**
+ * 接到注册请求后,会将Slave的信息保存到Master端
+ */
   private def register(id: BlockManagerId, maxMemSize: Long, slaveEndpoint: RpcEndpointRef) {
     val time = System.currentTimeMillis()
+    //确保BlockManagerInfo持有消息中的blockManagerId及对应信息,
     if (!blockManagerInfo.contains(id)) {
+     //并且确保每个Executor最多只能有一个blockManagerId,旧的blockManagerId会移除
       blockManagerIdByExecutor.get(id.executorId) match {
         case Some(oldId) =>
           // A block manager of the same executor already exists, so remove it (assumed dead)
@@ -319,15 +327,18 @@ class BlockManagerMasterEndpoint(
       }
       logInfo("Registering block manager %s with %s RAM, %s".format(
         id.hostPort, Utils.bytesToString(maxMemSize), id))
-
+     
       blockManagerIdByExecutor(id.executorId) = id
 
       blockManagerInfo(id) = new BlockManagerInfo(
         id, System.currentTimeMillis(), maxMemSize, slaveEndpoint)
     }
+    //最后向listenerBus推送(post)SparkListenerBlockManagerAdded事件
     listenerBus.post(SparkListenerBlockManagerAdded(time, id, maxMemSize))
   }
-
+/**
+ * Master端信息更新
+ */
   private def updateBlockInfo(
       blockManagerId: BlockManagerId,
       blockId: BlockId,
@@ -335,7 +346,7 @@ class BlockManagerMasterEndpoint(
       memSize: Long,
       diskSize: Long,
       externalBlockStoreSize: Long): Boolean = {
-
+   
     if (!blockManagerInfo.contains(blockManagerId)) {
       if (blockManagerId.isDriver && !isLocal) {
         // We intentionally do not register the master (except in local mode),
@@ -350,25 +361,28 @@ class BlockManagerMasterEndpoint(
       blockManagerInfo(blockManagerId).updateLastSeenMs()
       return true
     }
-
+    //更新blockManagerInfo
     blockManagerInfo(blockManagerId).updateBlockInfo(
       blockId, storageLevel, memSize, diskSize, externalBlockStoreSize)
 
     var locations: mutable.HashSet[BlockManagerId] = null
     if (blockLocations.containsKey(blockId)) {
+      //该Block是有信息更新或者多个备份
       locations = blockLocations.get(blockId)
     } else {
+      //新加入的Block
       locations = new mutable.HashSet[BlockManagerId]
       blockLocations.put(blockId, locations)
     }
 
     if (storageLevel.isValid) {
-      locations.add(blockManagerId)
+      locations.add(blockManagerId)//为该Block加入新的位置
     } else {
-      locations.remove(blockManagerId)
+      locations.remove(blockManagerId)//删除无效的Block的位置
     }
 
     // Remove the block from master tracking if it has been removed on all slaves.
+    //删除在Slave上已经不存在的Block
     if (locations.size == 0) {
       blockLocations.remove(blockId)
     }

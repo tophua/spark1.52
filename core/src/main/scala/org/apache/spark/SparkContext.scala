@@ -477,7 +477,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     //构造JobProgressListener,作用是通过HashMap,ListBuffer等数据结构存储JobId及对应JobUIData信息,并按照激活
     //完成,失败等job状态统计,对于StageId,StageInfo等信息按照激活,完成,忽略,失败等Stage状态统计,并且存储StageID
     //与JobId的一对多关系.
-    _jobProgressListener = new JobProgressListener(_conf)
+    _jobProgressListener = new JobProgressListener(_conf)//更新任务进程
     //添加事件
     listenerBus.addListener(jobProgressListener)
 
@@ -518,14 +518,14 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     if (files != null) {
       files.foreach(addFile)
     }
-    //_executorMemory指定Executor占用的内存大小,也可以配置系统变量SPARK_EXECUTOR_MEMORY对其大小进行设置
+    //spark.executor.memory指定Executor占用的内存大小,也可以配置系统变量SPARK_EXECUTOR_MEMORY对其大小进行设置
 
     _executorMemory = _conf.getOption("spark.executor.memory")
       .orElse(Option(System.getenv("SPARK_EXECUTOR_MEMORY")))
       .orElse(Option(System.getenv("SPARK_MEM"))
       .map(warnSparkMem))
       .map(Utils.memoryStringToMb)
-      .getOrElse(1024)
+      .getOrElse(1024)//默认值 1024
 
     // Convert java options to env vars as a work around
     // since we can't set env vars directly in sbt.
@@ -541,7 +541,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     // TODO: Set this only in the Mesos scheduler.
     executorEnvs("SPARK_EXECUTOR_MEMORY") = executorMemory + "m"
     executorEnvs ++= _conf.getExecutorEnv
-    executorEnvs("SPARK_USER") = sparkUser
+    executorEnvs("SPARK_USER") = sparkUser //设置Spark_user 用户名
 
     // We need to register "HeartbeatReceiver" before "createTaskScheduler" because Executor will
     // retrieve "HeartbeatReceiver" in the constructor. (SPARK-6640)
@@ -558,6 +558,9 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     //包括创建Job,将DAG中的RDD划分到不同的Stage,提交Stage等
     
     _dagScheduler = new DAGScheduler(this)
+    // 主要目的 scheduler = sc.taskScheduler
+    //HeartbeatReceiver接收TaskSchedulerIsSet消息,设置scheduler = sc.taskScheduler
+    //启动Start方法,向自己发送ExpireDeadHosts,检测Executor心跳
     _heartbeatReceiver.ask[Boolean](TaskSchedulerIsSet)
 
     // start TaskScheduler after taskScheduler sets DAGScheduler reference in DAGScheduler's
@@ -1375,7 +1378,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     val bc = env.broadcastManager.newBroadcast[T](value, isLocal)
     val callSite = getCallSite
     logInfo("Created broadcast " + bc.id + " from " + callSite.shortForm)
-    //广播结束将广播对象注册到Context-Cleanner中,以便清理.
+    //广播结束将广播对象注册到ContextCleanner中,以便清理.
     cleaner.foreach(_.registerBroadcastForCleanup(bc))
     bc
   }

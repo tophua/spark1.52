@@ -55,6 +55,7 @@ private[spark] trait SparkListenerBus extends ListenerBus[SparkListener, SparkLi
       case metricsUpdate: SparkListenerExecutorMetricsUpdate =>
         listener.onExecutorMetricsUpdate(metricsUpdate)
       case executorAdded: SparkListenerExecutorAdded =>
+        //接收LocalBackend.start方法发送SparkListenerExecutorAdded事件
         listener.onExecutorAdded(executorAdded)
       case executorRemoved: SparkListenerExecutorRemoved =>
         listener.onExecutorRemoved(executorRemoved)

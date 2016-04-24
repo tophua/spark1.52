@@ -71,7 +71,9 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
   // The number of pending tasks which is locality required
   protected var localityAwareTasks = 0
-
+/**
+ * 客户端驱动程序,也可以理解客户端应用程序 ,用于将任务程序 转换为RDD和DAG,并与Cluster Manager进行通信与调度
+ */
   class DriverEndpoint(override val rpcEnv: RpcEnv, sparkProperties: Seq[(String, String)])
     extends ThreadSafeRpcEndpoint with Logging {
 

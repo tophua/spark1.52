@@ -33,7 +33,7 @@ import org.apache.spark.util.{ThreadUtils, Utils}
  */
 private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedulerImpl)
   extends Logging {
-
+//通过线程池(默认4个线程)对worker上的Exceutor发送的Task的执行结果进行处理
   private val THREADS = sparkEnv.conf.getInt("spark.resultGetter.threads", 4)
   private val getTaskResultExecutor = ThreadUtils.newDaemonFixedThreadPool(
     THREADS, "task-result-getter")

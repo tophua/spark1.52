@@ -113,7 +113,7 @@ class DAGScheduler(
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
    * and its values are arrays indexed by partition numbers. Each array value is the set of
    * locations where that RDD partition is cached.
-   *
+   *缓存的RDD的Partitions的位置信息
    * All accesses to this map should be guarded by synchronizing on it (see SPARK-4454).
    */
   private val cacheLocs = new HashMap[Int, IndexedSeq[Seq[TaskLocation]]]
@@ -137,7 +137,7 @@ class DAGScheduler(
 
   private val messageScheduler =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("dag-scheduler-message")
-
+   //创建DAGSchedulerEventProcessLoop事件
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
 
@@ -191,7 +191,8 @@ class DAGScheduler(
    * Update metrics for in-progress tasks and let the master know that the BlockManager is still
    * alive. Return true if the driver knows about the given block manager. Otherwise, return false,
    * indicating that the block manager should re-register.
-   * 
+   * 将execId,taskMetrics封装为SparkListenerExecutorMetricsUpdate事件中并post到listenerBus中
+   * 此事件用于更新Stage的各种测量数据.
    * 
    */
   def executorHeartbeatReceived(
@@ -200,8 +201,8 @@ class DAGScheduler(
       blockManagerId: BlockManagerId): Boolean = {
     //更新Stage的各中测量数据
     listenerBus.post(SparkListenerExecutorMetricsUpdate(execId, taskMetrics))
-    //blockManagerMaster持有blockManagerMasterActor发送BlockManagerActor发送BlockManagerHeartBeat消息
-    
+    //blockManagerMaster持有blockManagerMasterActor发送BlockManagerHeartBeat消息
+    //Executor启动的时候向Drive发送BlockManagerHeartbeat心跳
     blockManagerMaster.driverEndpoint.askWithRetry[Boolean](
       BlockManagerHeartbeat(blockManagerId), new RpcTimeout(600 seconds, "BlockManagerHeartbeat"))
   }

@@ -25,7 +25,11 @@ import org.apache.spark.rpc.RpcEndpointRef
 import org.apache.spark.{Logging, SparkConf, SparkException}
 import org.apache.spark.storage.BlockManagerMessages._
 import org.apache.spark.util.{ThreadUtils, RpcUtils}
-
+/**
+ * Driver上的BlockManagerMaster对存在于Executor上的BlockManager统一管理,比如Executor需要向Driver发送注册
+ * BlockManager,更新Executor上Block的最新信息,询问所需要Block目前所在位置以及当前Executor运行结束需要将此
+ * Executor移除等
+ */
 private[spark]
 class BlockManagerMaster(
     var driverEndpoint: RpcEndpointRef,
@@ -44,14 +48,20 @@ class BlockManagerMaster(
     logInfo("Removed " + execId + " successfully in removeExecutor")
   }
 
-  /** Register the BlockManager's id with the driver. */
+  /** 
+   *  Register the BlockManager's id with the driver. 
+   *  向BlockManagerMaster注册blockManagerId,注册信息包括blockManagerId,标识了Slave的ExecutorId,Hostname和port
+   *  节点的最大可用内存
+   * */
   def registerBlockManager(
       blockManagerId: BlockManagerId, maxMemSize: Long, slaveEndpoint: RpcEndpointRef): Unit = {
     logInfo("Trying to register BlockManager")
     tell(RegisterBlockManager(blockManagerId, maxMemSize, slaveEndpoint))
     logInfo("Registered BlockManager")
   }
-
+/**
+ * Master信息更新
+ */
   def updateBlockInfo(
       blockManagerId: BlockManagerId,
       blockId: BlockId,

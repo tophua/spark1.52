@@ -207,6 +207,7 @@ private[spark] object AkkaUtils extends Logging {
     val url = address(protocol(actorSystem), driverActorSystemName, driverHost, driverPort, name)
     val timeout = RpcUtils.lookupRpcTimeout(conf)
     logInfo(s"Connecting to $name: $url")
+    //同步阻塞的获取结果,如果超时抛出异常
     timeout.awaitResult(actorSystem.actorSelection(url).resolveOne(timeout.duration))
   }
 /**

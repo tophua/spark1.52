@@ -42,6 +42,7 @@ import org.apache.spark.network.util.TransportConf;
 
 /**
  * Server for the efficient, low-level streaming service.
+ * 提供Netty实现的服务器,用于提供RPC服务(比如上传,下载等)
  */
 public class TransportServer implements Closeable {
   private final Logger logger = LoggerFactory.getLogger(TransportServer.class);
@@ -80,7 +81,11 @@ public class TransportServer implements Closeable {
     }
     return port;
   }
-
+/**
+ * 用于对TransportServer初始化,通过使用Netty框架的EventLoopGroup,
+ * ServerBootstrap等API创建shuffle的I/O交互的服务器
+ * @param portToBind
+ */
   private void init(int portToBind) {
 
     IOMode ioMode = IOMode.valueOf(conf.ioMode());

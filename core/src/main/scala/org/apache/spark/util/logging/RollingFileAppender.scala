@@ -136,6 +136,13 @@ private[spark] class RollingFileAppender(
 private[spark] object RollingFileAppender {
   val STRATEGY_PROPERTY = "spark.executor.logs.rolling.strategy"
   val STRATEGY_DEFAULT = ""
+ /**设置Executor日志回滚的时间间隔
+  *  有效地设置包括:
+  *  daily:按天级回滚
+  *   hourly:按照小时级回滚
+  *   minutely:按照分钟级回滚
+  *  有效的数字:单位是少,按照设置的秒数进行回滚
+  **/
   val INTERVAL_PROPERTY = "spark.executor.logs.rolling.time.interval"
   val INTERVAL_DEFAULT = "daily"
   val SIZE_PROPERTY = "spark.executor.logs.rolling.maxSize"

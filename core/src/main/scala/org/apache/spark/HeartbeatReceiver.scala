@@ -72,16 +72,19 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   private val executorLastSeen = new mutable.HashMap[String, Long]
 
   // "spark.network.timeout" uses "seconds", while `spark.storage.blockManagerSlaveTimeoutMs` uses
-  // "milliseconds"
+  // "milliseconds"从节点超时120秒 
   private val slaveTimeoutMs =
     sc.conf.getTimeAsMs("spark.storage.blockManagerSlaveTimeoutMs", "120s")
+    //executor网络超进
   private val executorTimeoutMs =
     sc.conf.getTimeAsSeconds("spark.network.timeout", s"${slaveTimeoutMs}ms") * 1000
 
   // "spark.network.timeoutInterval" uses "seconds", while
   // "spark.storage.blockManagerTimeoutIntervalMs" uses "milliseconds"
+  //指定检查BlockManager超时时间间隔
   private val timeoutIntervalMs =
     sc.conf.getTimeAsMs("spark.storage.blockManagerTimeoutIntervalMs", "60s")
+    //Worker超时60秒
   private val checkTimeoutIntervalMs =
     sc.conf.getTimeAsSeconds("spark.network.timeoutInterval", s"${timeoutIntervalMs}ms") * 1000
 
@@ -97,6 +100,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   override def onStart(): Unit = {
     timeoutCheckingTask = eventLoopThread.scheduleAtFixedRate(new Runnable {
       override def run(): Unit = Utils.tryLogNonFatalError {
+        //删除心跳超时的Executor,默认超进
         Option(self).foreach(_.ask[Boolean](ExpireDeadHosts))
       }
     }, 0, checkTimeoutIntervalMs, TimeUnit.MILLISECONDS)
@@ -116,18 +120,22 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
       //使用方法askWithRetry[Boolean]请求TaskSchedulerIsSet消息并要求返回Boolean值
       context.reply(true)
     case ExpireDeadHosts =>
+      //删除心跳超时的executor
       expireDeadHosts()
       context.reply(true)
 
     // Messages received from executors
-    //接收executors发送的Heartbeat信息,
+    //发送HeartbeatResponse消息到HeartbeatReceiver.receiveAndReply
+     //接收executors发送的Heartbeat信息,
+     //通知blockManagerMaster,此Executor上的blockManager依然活着,    
     case heartbeat @ Heartbeat(executorId, taskMetrics, blockManagerId) =>
       if (scheduler != null) {
         if (executorLastSeen.contains(executorId)) {
           executorLastSeen(executorId) = clock.getTimeMillis()
           eventLoopThread.submit(new Runnable {
             override def run(): Unit = Utils.tryLogNonFatalError {
-              //
+              //用于更新Stage的各种测量数据.
+              //blockManagerMaster持有blockManagerMasterActor发送BlockManagerHeartBeat消息到 BlockManagerMasterEndpoint   
               val unknownExecutor = !scheduler.executorHeartbeatReceived(
                 executorId, taskMetrics, blockManagerId)
               val response = HeartbeatResponse(reregisterBlockManager = unknownExecutor)

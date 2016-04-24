@@ -58,10 +58,13 @@ object Partitioner {
    *   的partitions函数返回值的最大值作为分区数量
    */
   def defaultPartitioner(rdd: RDD[_], others: RDD[_]*): Partitioner = {
+  //1)将RDD转换为Seq,然后对Seq按照RDD的partitions的大小倒序排列
     val bySize = (Seq(rdd) ++ others).sortBy(_.partitions.size).reverse
     for (r <- bySize if r.partitioner.isDefined && r.partitioner.get.numPartitions > 0) {
       return r.partitioner.get
     }
+    // 2)创建HashPartitioner对象,如果配置parallelis属性,则使用属性值作为分区数量,否则使用Seq中所有RDD
+   //   的partitions函数返回值的最大值作为分区数量
     if (rdd.context.conf.contains("spark.default.parallelism")) {
       new HashPartitioner(rdd.context.defaultParallelism)
     } else {

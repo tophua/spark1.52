@@ -56,6 +56,8 @@ private[spark] class BlockResult(
  * Manager running on every node (driver and executors) which provides interfaces for putting and
  * retrieving blocks both locally and remotely into various stores (memory, disk, and off-heap).
  * 提供Storage模块与其他其他模块的交互接口
+ * BlockManager创建的时候会持有一个BlockManagerMaster,
+ * master BlockManagerMaster会把请求转发给BlockManagerMasterEndpoint来完成元数据的管理和维护.
  * Note that #initialize() must be called before the BlockManager is usable.
  */
 private[spark] class BlockManager(
@@ -90,7 +92,7 @@ private[spark] class BlockManager(
     externalBlockStoreInitialized = true
     new ExternalBlockStore(this, executorId)
   }
-
+  //是否有外部ShuffleService可用
   private[spark]
   val externalShuffleServiceEnabled = conf.getBoolean("spark.shuffle.service.enabled", false)
 
@@ -116,12 +118,14 @@ private[spark] class BlockManager(
 
   // Client to read other executors' shuffle files. This is either an external service, or just the
   // standard BlockTransferService to directly connect to other Executors.
-  //shuffleClient客户端
+  //shuffleClient客户端,是否有外ShuffleService可用
   private[spark] val shuffleClient = if (externalShuffleServiceEnabled) {
+    //创建新的ExternalShuffleClient
     val transConf = SparkTransportConf.fromSparkConf(conf, numUsableCores)
     new ExternalShuffleClient(transConf, securityManager, securityManager.isAuthenticationEnabled(),
       securityManager.isSaslEncryptionEnabled())
   } else {
+    //使用默认BlockTransferService
     blockTransferService
   }
 
@@ -134,7 +138,7 @@ private[spark] class BlockManager(
   private val compressRdds = conf.getBoolean("spark.rdd.compress", false)
   // Whether to compress shuffle output temporarily spilled to disk
   private val compressShuffleSpill = conf.getBoolean("spark.shuffle.spill.compress", true)
-//
+//向查找或注册BlockManagerSlaveEndpoint
   private val slaveEndpoint = rpcEnv.setupEndpoint(
     "BlockManagerEndpoint" + BlockManager.ID_GENERATOR.next,
     new BlockManagerSlaveEndpoint(rpcEnv, this, mapOutputTracker))
@@ -204,7 +208,11 @@ private[spark] class BlockManager(
     } else {
       blockManagerId
     }
-   //blockManagerMaster注册,BlockManagerMaster对存在于所有Executor上的BlockManager统一管理
+    /**
+     * 表示Executor的BlockManger与Driver的BlockManager进行消息通信,例 如:注册BlockManager,更新Block信息,
+     * 获取Block所在的BlockManager,删除Exceutor
+     */
+   //向blockManagerMaster注册blockManagerId,BlockManagerMaster对存在于所有Executor上的BlockManager统一管理
     master.registerBlockManager(blockManagerId, maxMemory, slaveEndpoint)
 
     // Register Executors' configuration with the local shuffle service, if one should exist.
@@ -305,11 +313,13 @@ private[spark] class BlockManager(
    * Interface to get local block data. Throws an exception if the block cannot be found or
    * cannot be read successfully.
    * 用于从本地获取Block数据
+   * 
    */
   override def getBlockData(blockId: BlockId): ManagedBuffer = {
     
     if (blockId.isShuffle) {
       //如果是ShuffleMapTask的输出,那么多个Partition的中间结果都写入同一个文件
+      //怎么读取不同partition的中间结果?IndexShuffleBlockManager的getBlockData方法解决这个问题
       shuffleManager.shuffleBlockResolver.getBlockData(blockId.asInstanceOf[ShuffleBlockId])
     } else {
       //如果是ResultTask的输出,则使用doGetLocal来获取本地中间结果数据
@@ -363,7 +373,12 @@ private[spark] class BlockManager(
    * it is still valid). This ensures that update in master will compensate for the increase in
    * memory on slave.
    * 
-   * reportBlockStatus 用于向BlockManagerMasterActor报告Block的状态并且重新注册BlockManager
+   * reportBlockStatus 用于向BlockManagerMasterActor报告Block的状态
+   * 什么时候Slave向Master汇报Block状态
+   * 1)dropFromMemory将某个Block从内存中移出
+   * 2)dropOldBlocks删除一个block时
+   * 3)doput写一个新的Block时
+   * 
    * 
    */
   private def reportBlockStatus(
@@ -447,6 +462,7 @@ private[spark] class BlockManager(
 
   /**
    * Get block from local block manager.
+   * 当reduce任务与map任务处于同一节点时,不需要远程拉取,只需调取doGetLocal
    */
   def getLocal(blockId: BlockId): Option[BlockResult] = {
     logDebug(s"Getting local block $blockId")
@@ -619,11 +635,12 @@ private[spark] class BlockManager(
     doGetRemote(blockId, asBlockResult = false).asInstanceOf[Option[ByteBuffer]]
   }
 /**
- * 用于从远端节点上获取Block数据
+ * 获取远程Block数据
  */
   private def doGetRemote(blockId: BlockId, asBlockResult: Boolean): Option[Any] = {
     require(blockId != null, "BlockId is null")
-    //master.getLocations(blockId)发送获取Block数据存储的BlockManager,如果Block数据复制份数大小1个,则会返回多个BlockManagerId
+    //向master.getLocations(blockId)发送消息获取Block数据存储的BlockManagerId,
+    //如果Block数据复制份数大小1个,则会返回多个BlockManagerId,
     //对这些BlockManager洗牌,避免总是从一个远程BlockManager获取Block数据
     val locations = Random.shuffle(master.getLocations(blockId))
     for (loc <- locations) {
@@ -735,7 +752,15 @@ private[spark] class BlockManager(
    * The effective storage level refers to the level according to which the block will actually be
    * handled. This allows the caller to specify an alternate behavior of doPut while preserving
    * the original level specified by the user.
-   * 
+   * 真正数据写入流程
+   * 1)获取putBlockInfo,如果BlockInfo中已经缓存了BlockInfo,则使用缓存的BlockInfo,否则使用新建的BlockInfo
+   * 2)获取块最终使用的存储级别PutLevel,根据putLevel判断块写入的BlockStore,优先使用MemoryStore,其他TechyonStone和DiskStore
+   *   依据Data的实际包装类型,分别调用BlockStore不同方法
+   * 3)写入完毕,将写入操作导致从内存drop掉的Block更新到updatedBlocks中,使用getCurrentBlockStatus获取写入Block的状态
+   *   将putBlockInfo设置为充许其他线程读取,调用reportBlockStatus将当前Block的信息更新到upatedBlocks中的Block的状态
+   *   由于都发生的变化,所以都需要向BlockManagerMasterActor发送updateBlockInfo消息
+   * 4)如果putLevel.replication大于1,即为了容错考虑,数据的备份数量大于1的时候,需要将Block的数据备份到其他节点上.
+   *   
    */
   private def doPut(
       blockId: BlockId,
@@ -758,8 +783,7 @@ private[spark] class BlockManager(
      * to be dropped right after it got put into memory. Note, however, that other threads will
      * not be able to get() this block until we call markReady on its BlockInfo. */
     /**
-     * 获取putBlockInfo,如果blockInfo中已经缓存了BlockInfo,则使用缓存的BlockInfo
-     * 否则使用新建BlockInfo
+ 			1)获取putBlockInfo,如果BlockInfo中已经缓存了BlockInfo,则使用缓存的BlockInfo,否则使用新建的BlockInfo
      */
     val putBlockInfo = {
       val tinfo = new BlockInfo(level, tellMaster)
@@ -794,8 +818,10 @@ private[spark] class BlockManager(
     var size = 0L
 
     // The level we actually use to put the block
+    
     /**
-     * 获取块最终使用的存储级别putLevel,根据putLevel判断块写入的BlockStore
+     2)获取块最终使用的存储级别PutLevel,根据putLevel判断块写入的BlockStore,
+     		优先使用MemoryStore,其他TechyonStone和DiskStore,依据Data的实际包装类型,分别调用BlockStore不同方法
      */
     val putLevel = effectiveStorageLevel.getOrElse(level)
 
@@ -803,16 +829,17 @@ private[spark] class BlockManager(
     // This is faster as data is already serialized and ready to send.
     val replicationFuture = data match {
       case b: ByteBufferValues if putLevel.replication > 1 =>
+        //如果putLevel.replication大于1,即为了容错考虑,数据的备份数量大于1的时候,需要将Block的数据备份到其他节点上
         // Duplicate doesn't copy the bytes, but just creates a wrapper
         val bufferView = b.buffer.duplicate()
         Future {
           // This is a blocking action and should run in futureExecutionContext which is a cached
           // thread pool
-          replicate(blockId, bufferView, putLevel)
+          replicate(blockId, bufferView, putLevel)//
         }(futureExecutionContext)
       case _ => null
     }
-
+   
     putBlockInfo.synchronized {
       logTrace("Put for block %s took %s to get into synchronized block"
         .format(blockId, Utils.getUsedTimeMs(startTimeMs)))
@@ -828,9 +855,11 @@ private[spark] class BlockManager(
             (true, memoryStore)
           } else if (putLevel.useOffHeap) {
             // Use external block store 
+            
             (false, externalBlockStore)
           } else if (putLevel.useDisk) {
             // Don't get back the bytes from put unless we replicate them
+            //最后使用diskStore
             (putLevel.replication > 1, diskStore)
           } else {
             assert(putLevel == StorageLevel.NONE)
@@ -840,7 +869,7 @@ private[spark] class BlockManager(
         }
 
         // Actually put the values
-        //根据result包装类型分别调用BlockStore不同的方法,如putIterator,putArray,putBytes
+        //根据result包装类型分别调用BlockStore不同的方法写入数据,如putIterator,putArray,putBytes
         val result = data match {
           case IteratorValues(iterator) =>
             blockStore.putIterator(blockId, iterator, putLevel, returnValues)
@@ -858,21 +887,21 @@ private[spark] class BlockManager(
         }
 
         // Keep track of which blocks are dropped from memory
-        //写入完毕,将写入操作导致从内存drop掉的Block更新到updatedBlocks
+        //写入完毕,将写入操作导致从内存移除掉Block,同时更新到updatedBlocks
         if (putLevel.useMemory) {
           result.droppedBlocks.foreach { updatedBlocks += _ }
         }
         //getCurrentBlockStatus获取写入BlockStatus状态
         val putBlockStatus = getCurrentBlockStatus(blockId, putBlockInfo)
-        //将putBlockStatus设置为允许其他线程读取
+        
         if (putBlockStatus.storageLevel != StorageLevel.NONE) {
           // Now that the block is in either the memory, externalBlockStore, or disk store,
           // let other threads read it, and tell the master about it.
           marked = true
+          //将putBlockStatus设置为允许其他线程读取
           putBlockInfo.markReady(size)
           if (tellMaster) {
-            //将当前Block的信息更新到BlockManagerMasterActor
-            
+            //是否上报Master,将当前Block的信息更新到BlockManagerMasterActor,            
             reportBlockStatus(blockId, putBlockInfo, putBlockStatus)
           }
           //将putBlockInfo添加到updatedBlocks中
@@ -1089,7 +1118,9 @@ private[spark] class BlockManager(
       tellMaster: Boolean = true): Seq[(BlockId, BlockStatus)] = {
     putIterator(blockId, Iterator(value), level, tellMaster)
   }
-
+/**
+ * 将某个blockId从内存中移出
+ */
   def dropFromMemory(
       blockId: BlockId,
       data: Either[Array[Any], ByteBuffer]): Option[BlockStatus] = {
@@ -1103,7 +1134,9 @@ private[spark] class BlockManager(
    * If `data` is not put on disk, it won't be created.
    *
    * Return the block status if the given block has been updated, else None.
-   * 当内存不足时,可能需要腾出部分内存空间
+   * 将某个blockId从内存中移出
+   * 当内存不足时,需要腾出部分内存空间
+   * 
    * 
    * 
    */
@@ -1240,10 +1273,12 @@ private[spark] class BlockManager(
     dropOldBlocks(cleanupTime, _.isBroadcast)
   }
 /**
- * 删除很久不使用的Block
+ * 删除很久不使用的Block从MemoryStore,DiskStore,TachyonStore清除
+ * 删除一个Block,并向BlockManagerMaster发送消息,同时删除其他Slave节点
  */
   private def dropOldBlocks(cleanupTime: Long, shouldDrop: (BlockId => Boolean)): Unit = {
     val iterator = blockInfo.getEntrySet.iterator
+    //遍历blockInfo
     while (iterator.hasNext) {
       val entry = iterator.next()
       val (id, info, time) = (entry.getKey, entry.getValue.value, entry.getValue.timestamp)
@@ -1313,6 +1348,8 @@ private[spark] class BlockManager(
   /**
    * Deserializes a ByteBuffer into an iterator of values and disposes of it when the end of
    * the iterator is reached.
+   * 数据序列化方法:
+   * 如果写入存储体系的数据本身是序列化,那么读取时应该对其反序列化
    */
   def dataDeserialize(
       blockId: BlockId,

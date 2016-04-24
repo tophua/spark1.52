@@ -31,7 +31,7 @@ private[spark] class MapPartitionsRDD[U: ClassTag, T: ClassTag](
   extends RDD[U](prev) {
 
   override val partitioner = if (preservesPartitioning) firstParent[T].partitioner else None
-//firstParent用于返回依赖的第一个父RDD,
+  //firstParent用于返回依赖的第一个父RDD,
   override def getPartitions: Array[Partition] = firstParent[T].partitions
 
   override def compute(split: Partition, context: TaskContext): Iterator[U] =

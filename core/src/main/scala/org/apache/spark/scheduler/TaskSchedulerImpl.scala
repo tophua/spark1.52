@@ -61,6 +61,7 @@ private[spark] class TaskSchedulerImpl(
     isLocal: Boolean = false)
   extends TaskScheduler with Logging
 {
+  //spark.task.maxFailures任务最大失败数4
   def this(sc: SparkContext) = this(sc, sc.conf.getInt("spark.task.maxFailures", 4))
 
   val conf = sc.conf
@@ -75,6 +76,7 @@ private[spark] class TaskSchedulerImpl(
   val STARVATION_TIMEOUT_MS = conf.getTimeAsMs("spark.starvation.timeout", "15s")
   
   // CPUs to request per task
+  //spark.task.cpus 每个任务分配的CPU数,默认1
   val CPUS_PER_TASK = conf.getInt("spark.task.cpus", 1)
 
   // TaskSetManagers are not thread safe, so any access to one should be synchronized
@@ -113,7 +115,7 @@ private[spark] class TaskSchedulerImpl(
   
   var rootPool: Pool = null
   // default scheduler is FIFO
-  //任务的最终调度实际都是落实到接SchedulerBackend的具体实现上.
+  //任务的最终调度模式,实际都是落实到接SchedulerBackend的具体实现上.
   private val schedulingModeConf = conf.get("spark.scheduler.mode", "FIFO")
   
   val schedulingMode: SchedulingMode = try {
@@ -425,14 +427,18 @@ private[spark] class TaskSchedulerImpl(
       execId: String,
       taskMetrics: Array[(Long, TaskMetrics)], // taskId -> TaskMetrics
       blockManagerId: BlockManagerId): Boolean = {
-
+     //通过遍历TaskMetrics,依据taskIdToTaskSetId和activeTaskSets找到TaskSetManager
     val metricsWithStageIds: Array[(Long, Int, Int, TaskMetrics)] = synchronized {
       taskMetrics.flatMap { case (id, metrics) =>
+        //找到TaskSetManager,然后将taskId,TaskSetManager.stageId,TaskSetManager.taskSet.attemptId,TaskMetrics
+        //封装到类型为Array的数组
         taskIdToTaskSetManager.get(id).map { taskSetMgr =>
           (id, taskSetMgr.stageId, taskSetMgr.taskSet.stageAttemptId, metrics)
         }
       }
     }
+    //用于更新Stage的各种测量数据.
+    //blockManagerMaster持有blockManagerMasterActor发送BlockManagerHeartBeat消息到 BlockManagerMasterEndpoint   
     dagScheduler.executorHeartbeatReceived(execId, metricsWithStageIds, blockManagerId)
   }
 

@@ -52,14 +52,18 @@ import org.apache.spark.network.util.TransportConf;
  * The TransportServer and TransportClientFactory both create a TransportChannelHandler for each
  * channel. As each TransportChannelHandler contains a TransportClient, this enables server
  * processes to send messages back to the client on an existing channel.
+ * 构造传输上下文TransportContext
+ * 即可以创建Netty服务,也可以创建Netty访问客户端
  */
 public class TransportContext {
   private final Logger logger = LoggerFactory.getLogger(TransportContext.class);
 
-  private final TransportConf conf;
-  private final RpcHandler rpcHandler;
-
+  private final TransportConf conf; //主要控制Netty框架提供的Shuffle的I/O交互的客户端线程数量
+  private final RpcHandler rpcHandler;//负责shuffle的I/O服务端在接收客户端的RPC请求后,提供打开Block
+  									  //或者上传Block的RPC处理,此处即NettyBlockRPCServer
+  //在Shuffle的I/O服务端在对客户端传来的ByteBuf进行解析,防止丢包和解析错误
   private final MessageEncoder encoder;
+  //在Shuffle的I/O客户端对消息内容进行编码,防止丢包和解析错误
   private final MessageDecoder decoder;
 
   public TransportContext(TransportConf conf, RpcHandler rpcHandler) {

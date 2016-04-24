@@ -84,28 +84,29 @@ private[spark] class HashShuffleReader[K, C](
     val interruptibleIter = new InterruptibleIterator[(Any, Any)](context, metricIter)
     //对InterruptibleIterator执行聚合
     val aggregatedIter: Iterator[Product2[K, C]] = if (dep.aggregator.isDefined) {
-      if (dep.mapSideCombine) {
+      if (dep.mapSideCombine) {//需要mapSide的聚合
         // We are reading values that are already combined
         val combinedKeyValuesIterator = interruptibleIter.asInstanceOf[Iterator[(K, C)]]
         dep.aggregator.get.combineCombinersByKey(combinedKeyValuesIterator, context)
-      } else {
+      } else {//只需要Reducer端的聚合
         // We don't know the value type, but also don't care -- the dependency *should*
         // have made sure its compatible w/ this aggregator, which will convert the value
         // type to the combined type C
         val keyValuesIterator = interruptibleIter.asInstanceOf[Iterator[(K, Nothing)]]
         dep.aggregator.get.combineValuesByKey(keyValuesIterator, context)
       }
-    } else {
+    } else {//无需聚合操作
       require(!dep.mapSideCombine, "Map-side combine without Aggregator specified!")
       interruptibleIter.asInstanceOf[Iterator[Product2[K, C]]]
     }
 
     // Sort the output if there is a sort ordering defined.
     //对InterruptibleIterator排序,使用insertAll
-    dep.keyOrdering match {
-      case Some(keyOrd: Ordering[K]) =>
+    dep.keyOrdering match {//判断是否需要排序
+      case Some(keyOrd: Ordering[K]) =>//对于需要排序的情况
         // Create an ExternalSorter to sort the data. Note that if spark.shuffle.spill is disabled,
         // the ExternalSorter won't spill to disk.
+        //使用ExternalSorter进行排序,注意如果Spark.Shuffle.spill是false那么数据是不会写入到硬盘的
         val sorter = new ExternalSorter[K, C, C](ordering = Some(keyOrd), serializer = Some(ser))
         sorter.insertAll(aggregatedIter)
         context.taskMetrics().incMemoryBytesSpilled(sorter.memoryBytesSpilled)
@@ -113,7 +114,7 @@ private[spark] class HashShuffleReader[K, C](
         context.internalMetricsToAccumulators(
           InternalAccumulator.PEAK_EXECUTION_MEMORY).add(sorter.peakMemoryUsedBytes)
         sorter.iterator
-      case None =>
+      case None =>//不需要排序
         aggregatedIter
     }
   }

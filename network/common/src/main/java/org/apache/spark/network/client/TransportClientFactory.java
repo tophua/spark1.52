@@ -56,6 +56,8 @@ import org.apache.spark.network.util.TransportConf;
  *
  * TransportClients will be reused whenever possible. Prior to completing the creation of a new
  * TransportClient, all given {@link TransportClientBootstrap}s will be run.
+ * RPC客户端工厂TransportClientFactory,用于向Netty服务端发送RPC请求,TransportContext的CreateClientFactory
+ * 方法用于创建TransportClientFactory
  */
 public class TransportClientFactory implements Closeable {
 
@@ -93,15 +95,20 @@ public class TransportClientFactory implements Closeable {
       List<TransportClientBootstrap> clientBootstraps) {
     this.context = Preconditions.checkNotNull(context);
     this.conf = context.getConf();
+    //用于缓存客户端列表
     this.clientBootstraps = Lists.newArrayList(Preconditions.checkNotNull(clientBootstraps));
+    //用于缓存客户端连接
     this.connectionPool = new ConcurrentHashMap<SocketAddress, ClientPool>();
+    //节点之间取数据的连接数,可以使用spark.shuffle.io.numConnectionsPerPeer来设置默认1
     this.numConnectionsPerPeer = conf.numConnectionsPerPeer();
     this.rand = new Random();
 
     IOMode ioMode = IOMode.valueOf(conf.ioMode());
     this.socketChannelClass = NettyUtils.getClientChannelClass(ioMode);
     // TODO: Make thread pool name configurable.
+    //根据Netty的规范,客户端只有work组,所以此处创建workerGroup
     this.workerGroup = NettyUtils.createEventLoop(ioMode, conf.clientThreads(), "shuffle-client");
+    //汇集ByteBuf,但对本地线程缓存禁用的分配器
     this.pooledAllocator = NettyUtils.createPooledByteBufAllocator(
       conf.preferDirectBufs(), false /* allowCache */, conf.clientThreads());
   }

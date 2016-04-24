@@ -29,6 +29,12 @@ import org.apache.spark.metrics.source.Source
 import org.apache.spark.util.{ThreadUtils, Clock, SystemClock, Utils}
 
 /**
+ * 用于对已分配的Executor进行管理,创建和启动ExecutorAllocationManager,默认情况下不会创建ExecutorAllocationManager
+ * 可以修改spark.dynamicAllocation.enabled为true来创建,
+ * spark.dynamicAllocation.minExecutors设置动态分配最小Executor数量
+ * spark.dynamicAllocation.maxExecutors设置动态分配最大Executor数量
+ * spark.dynamicAllocation.initialExecutors每个Executor可以运行的Task数量等配置信息
+ * 
  * An agent that dynamically allocates and removes executors based on the workload.
  *
  * The ExecutorAllocationManager maintains a moving target number of executors which is periodically

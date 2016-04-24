@@ -29,6 +29,7 @@ import org.apache.spark.util.Utils
 import org.apache.spark.{Logging, SparkConf, SparkEnv}
 
 /**
+ * 
  * Create and maintain the shuffle blocks' mapping between logic block and physical file location.
  * Data of shuffle blocks from the same map task are stored in a single consolidated data file.
  * The offsets of the data blocks in the data file are stored in a separate index file.
@@ -48,7 +49,7 @@ private[spark] class IndexShuffleBlockResolver(
   private lazy val blockManager = Option(_blockManager).getOrElse(SparkEnv.get.blockManager)
 
   private val transportConf = SparkTransportConf.fromSparkConf(conf)
-
+//获取Shuffle数据文件方法
   def getDataFile(shuffleId: Int, mapId: Int): File = {
     blockManager.diskBlockManager.getFile(ShuffleDataBlockId(shuffleId, mapId, NOOP_REDUCE_ID))
   }
@@ -126,7 +127,7 @@ private[spark] class IndexShuffleBlockResolver(
    * replace them with new ones.
    *
    * Note: the `lengths` will be updated to match the existing index file if use the existing ones.
-   *用于在Block索引文件中记录各个Partition的偏移量信息,便于下游Stage的任务有读取
+   *用于在Block索引文件中记录各个Partition的偏移量信息,便于下游Stage的任务读取
    *  */
   def writeIndexFileAndCommit(
       shuffleId: Int,
@@ -186,13 +187,14 @@ private[spark] class IndexShuffleBlockResolver(
   override def getBlockData(blockId: ShuffleBlockId): ManagedBuffer = {
     // The block is actually going to be a range of a single map output file for this map, so
     // find out the consolidated file, then the offset within that from our index
+    //根据shuffleId,mapId获取索引文件
     val indexFile = getIndexFile(blockId.shuffleId, blockId.mapId)
 
     val in = new DataInputStream(new FileInputStream(indexFile))
     try {
-      ByteStreams.skipFully(in, blockId.reduceId * 8)
-      val offset = in.readLong()
-      val nextOffset = in.readLong()
+      ByteStreams.skipFully(in, blockId.reduceId * 8)//跳到本次Block的数据区
+      val offset = in.readLong()//数据文件中的开始位置
+      val nextOffset = in.readLong()//数据文件中的结束位置
       new FileSegmentManagedBuffer(
         transportConf,
         getDataFile(blockId.shuffleId, blockId.mapId),

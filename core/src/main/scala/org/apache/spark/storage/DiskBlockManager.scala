@@ -43,6 +43,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   /* Create one local directory for each path mentioned in spark.local.dir; then, inside this
    * directory, create multiple subdirectories that we will hash files into, in order to avoid
    * having really large inodes at the top level. */
+  //创建本地文件目录,然后创建二级目录  
   private[spark] val localDirs: Array[File] = createLocalDirs(conf)
   if (localDirs.isEmpty) {
     logError("Failed to create any local dir.")
@@ -58,6 +59,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   // This method should be kept in sync with
   // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getFile().
   /**
+   * 获取磁盘文件
    * 目录结构如下所述
    * /tmp/spark-local-20140723092540-7f24
    * /tmp/spark-local-20140723092540-7f24/0d
@@ -92,7 +94,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
 
     new File(subDir, filename)
   }
-
+//获取硬盘上的文件,
   def getFile(blockId: BlockId): File = getFile(blockId.name)
 
   /** Check if disk block manager has a block. */

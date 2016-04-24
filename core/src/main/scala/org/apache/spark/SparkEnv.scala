@@ -255,9 +255,9 @@ object SparkEnv extends Logging {
     hostname: String,
     port: Int,
     isDriver: Boolean,
-    isLocal: Boolean,
+    isLocal: Boolean,//是否单机模式
     numUsableCores: Int,
-    listenerBus: LiveListenerBus = null,
+    listenerBus: LiveListenerBus = null,//采用监听器模式维护各类事件处理
     mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
 
     // Listener bus is only used on the driver
@@ -328,10 +328,10 @@ object SparkEnv extends Logging {
     //每个Map任务或者Reduce任务都会有其唯一标识,分别为mapId和reduceId,每个reduce任务的输入可能是多个Map任务的输出,
     //reduce会到各个Map任务的所在节点上拉取Block,这个过程叫做Shuffle,每批过程都有唯一ShuufleId
     val mapOutputTracker = if (isDriver) {
-      //如果当前应用程序是Driver,则创建MapOutputTrackerMaster,注册到ActorSystem
+      //如果当前应用程序是Driver,则创建MapOutputTrackerMasterActor,注册到ActorSystem
       new MapOutputTrackerMaster(conf)
     } else {
-      //如果当前是Exceutor,则创建MapOutputTrackerWorker,注册到ActorSystem
+      //如果当前是Exceutor,则创建MapOutputTrackerWorker,并从ActorSystem中找到MapOutputTrackerMasterActor
       new MapOutputTrackerWorker(conf)
     }
 
@@ -339,6 +339,7 @@ object SparkEnv extends Logging {
     // requires the MapOutputTracker itself
     //将MapOutputTracker注册ActorSystem,mapOutputTracker的属性trackerEndpoint持有MapOutputTrackerMasterEndpoint的引用
     /**
+     * 查找或者注册Actor 
      * Map任务的状态正是由Executor向持有的MapOutputTrackerMasterActor发送消息,将Map任务状态同步到MapOutPutTracker的MapStatus
      * 和cachedSerializedStatuses,
      * Executor如何找到MapOutputTrackerMasterActor?registerOrLookupEndpoint方法通过调用AkkaUtils.makeDriverRef找到MapOutputTrackerMasterActor
@@ -389,7 +390,8 @@ object SparkEnv extends Logging {
     val blockManager = new BlockManager(executorId, rpcEnv, blockManagerMaster,
       serializer, conf, mapOutputTracker, shuffleManager, blockTransferService, securityManager,
       numUsableCores)
-    //创建广播管理器BroadcastManager
+    //创建广播管理器BroadcastManager,用于将配置信息和序列化后的RDD,Job以及ShuffleDependency等信息在本地存储
+    //如果为了容灾,也会复制到其他节点上
     val broadcastManager = new BroadcastManager(isDriver, conf, securityManager)
     //创建缓存管理器CacheManager
     val cacheManager = new CacheManager(blockManager)

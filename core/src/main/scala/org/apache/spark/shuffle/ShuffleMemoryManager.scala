@@ -174,7 +174,9 @@ private[spark] object ShuffleMemoryManager {
    * 获取Shuffle所有线程占用的最大内存
    */
   private def getMaxMemory(conf: SparkConf): Long = {
+    //Shuffle最大内存占比
     val memoryFraction = conf.getDouble("spark.shuffle.memoryFraction", 0.2)
+    //shuffle的安全内存占比
     val safetyFraction = conf.getDouble("spark.shuffle.safetyFraction", 0.8)
     //java运行最大内存*Spark的Shuffle最大内存占比*Spark的安全内存占比
     (Runtime.getRuntime.maxMemory * memoryFraction * safetyFraction).toLong

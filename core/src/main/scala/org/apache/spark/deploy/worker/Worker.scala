@@ -39,7 +39,10 @@ import org.apache.spark.deploy.worker.ui.WorkerWebUI
 import org.apache.spark.metrics.MetricsSystem
 import org.apache.spark.rpc._
 import org.apache.spark.util.{ ThreadUtils, SignalLogger, Utils }
-
+/**
+ * Spark工作节点,对Spark应用程序来说,由集群管理器分配得到资源的worker节点主要负责
+ * 创建Executor,将资源和任务进一步分配给Executor,同步资源信息给Cluster Manager
+ */
 private[deploy] class Worker(
   override val rpcEnv: RpcEnv,
   webUiPort: Int,
