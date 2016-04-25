@@ -47,6 +47,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     buffer.flip
 
     val bufferMessage = Message.createBufferMessage(buffer.duplicate)
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     Await.result(manager.sendMessageReliably(manager.id, bufferMessage), 10 seconds)
 
     assert(receivedMessage == true)
@@ -121,6 +122,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     val bufferMessage = Message.createBufferMessage(buffer.duplicate)
     // Expect managerServer to close connection, which we'll report as an error:
     intercept[IOException] {
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
       Await.result(manager.sendMessageReliably(managerServer.id, bufferMessage), 10 seconds)
     }
 

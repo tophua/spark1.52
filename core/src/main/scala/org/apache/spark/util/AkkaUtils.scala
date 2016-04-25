@@ -62,9 +62,10 @@ private[spark] object AkkaUtils extends Logging {
       port: Int,
       conf: SparkConf,
       securityManager: SecurityManager): (ActorSystem, Int) = {
-
+   //用于通信的actor线程数量。如果驱动器有很多CPU核心，那么在大集群上可以增大这个值
     val akkaThreads = conf.getInt("spark.akka.threads", 4)
     val akkaBatchSize = conf.getInt("spark.akka.batchSize", 15)
+    //Spark节点之间通信的超时时间，以秒为单位
     val akkaTimeoutS = conf.getTimeAsSeconds("spark.akka.timeout",
       conf.get("spark.network.timeout", "120s"))
     val akkaFrameSize = maxFrameSizeBytes(conf)
@@ -129,6 +130,7 @@ private[spark] object AkkaUtils extends Logging {
 
   /** Returns the configured max frame size for Akka messages in bytes. */
   def maxFrameSizeBytes(conf: SparkConf): Int = {
+  //驱动器Driver发回大尺寸的结果
     val frameSizeInMB = conf.getInt("spark.akka.frameSize", 128)
     if (frameSizeInMB > AKKA_MAX_FRAME_SIZE_IN_MB) {
       throw new IllegalArgumentException(

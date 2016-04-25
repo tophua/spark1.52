@@ -1048,6 +1048,7 @@ private[spark] object ConnectionManager {
 
     (0 until count).map(i => {
       val bufferMessage = Message.createBufferMessage(buffer.duplicate)
+      //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
       Await.result(manager.sendMessageReliably(manager.id, bufferMessage), Duration.Inf)
     })
     println("--------------------------")

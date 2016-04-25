@@ -1398,6 +1398,7 @@ private[spark] object BlockManager extends Logging {
 
   /** Return the total amount of storage memory available. */
   private def getMaxMemory(conf: SparkConf): Long = {
+     //Spark用于缓存的内存大小所占用的Java堆的比率
     val memoryFraction = conf.getDouble("spark.storage.memoryFraction", 0.6)
     val safetyFraction = conf.getDouble("spark.storage.safetyFraction", 0.9)
     //execution内存最多仅占JVM heap的0.6*0.9=54%,对于无需cache数据的应用，大部分heap内存都被浪费了

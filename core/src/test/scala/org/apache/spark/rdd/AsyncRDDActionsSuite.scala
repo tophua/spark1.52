@@ -180,12 +180,14 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
   test("FutureAction result, infinite wait") {
     val f = sc.parallelize(1 to 100, 4)
               .countAsync()
+//Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     assert(Await.result(f, Duration.Inf) === 100)
   }
 
   test("FutureAction result, finite wait") {
     val f = sc.parallelize(1 to 100, 4)
               .countAsync()
+//Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     assert(Await.result(f, Duration(30, "seconds")) === 100)
   }
 
@@ -194,6 +196,7 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
               .mapPartitions(itr => { Thread.sleep(20); itr })
               .countAsync()
     intercept[TimeoutException] {
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
       Await.result(f, Duration(20, "milliseconds"))
     }
   }

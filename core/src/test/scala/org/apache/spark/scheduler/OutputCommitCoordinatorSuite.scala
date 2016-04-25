@@ -161,6 +161,7 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
     // It's an error if the job completes successfully even though no committer was authorized,
     // so throw an exception if the job was allowed to complete.
     intercept[TimeoutException] {
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
       Await.result(futureAction, 5 seconds)
     }
     assert(tempDir.list().size === 0)

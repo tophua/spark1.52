@@ -69,6 +69,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   @transient private var blockSize: Int = _
 //设置广播配置信息,配置属性确认是否对广播消息进行压缩,并且生成CompressionCode对象
   private def setConf(conf: SparkConf) {
+  //广播变量在发送之前是否先要被压缩，通常设置为true是个不错的选择
     compressionCodec = if (conf.getBoolean("spark.broadcast.compress", true)) {
       Some(CompressionCodec.createCodec(conf))
     } else {

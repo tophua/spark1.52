@@ -563,6 +563,7 @@ private[spark] object SparkConf extends Logging {
         // Translate old value to a duration, with 10s wait time per try.
         translation = s => s"${s.toLong * 10}s")),
     "spark.reducer.maxSizeInFlight" -> Seq(
+    //同时获取每一个分解任务的时候，映射输出文件的最大的尺寸（以兆为单位）
       AlternateConfig("spark.reducer.maxMbInFlight", "1.4")),
     "spark.kryoserializer.buffer" ->
         Seq(AlternateConfig("spark.kryoserializer.buffer.mb", "1.4",

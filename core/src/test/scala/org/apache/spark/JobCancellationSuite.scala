@@ -134,6 +134,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     sc.clearJobGroup()
     val jobB = sc.parallelize(1 to 100, 2).countAsync()
     sc.cancelJobGroup("jobA")
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     val e = intercept[SparkException] { Await.result(jobA, Duration.Inf) }
     assert(e.getMessage contains "cancel")
 
@@ -199,6 +200,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     sc.clearJobGroup()
     val jobB = sc.parallelize(1 to 100, 2).countAsync()
     sc.cancelJobGroup("jobA")
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     val e = intercept[SparkException] { Await.result(jobA, 5.seconds) }
     assert(e.getMessage contains "cancel")
 

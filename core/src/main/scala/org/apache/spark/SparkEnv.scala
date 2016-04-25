@@ -65,20 +65,21 @@ class SparkEnv(
     private[spark] val rpcEnv: RpcEnv,
     val serializer: Serializer,
     val closureSerializer: Serializer,
-    val cacheManager: CacheManager,
-    val mapOutputTracker: MapOutputTracker,
-    val shuffleManager: ShuffleManager,
-    val broadcastManager: BroadcastManager,
-    val blockTransferService: BlockTransferService,
-    val blockManager: BlockManager,
-    val securityManager: SecurityManager,
-    val httpFileServer: HttpFileServer,
-    val sparkFilesDir: String,
-    val metricsSystem: MetricsSystem,
+    val cacheManager: CacheManager,//用于存储中间计算结果
+    val mapOutputTracker: MapOutputTracker,//用来缓存MapStatus信息，并提供从MapOutputMaster获取信息的功能
+    val shuffleManager: ShuffleManager,// 路由维护表
+    val broadcastManager: BroadcastManager,//广播
+    val blockTransferService: BlockTransferService,//块传输管理
+    val blockManager: BlockManager,//块管理
+    val securityManager: SecurityManager,//安全管理
+    val httpFileServer: HttpFileServer,//文件存储服务器
+    val sparkFilesDir: String,//文件存储目录
+    val metricsSystem: MetricsSystem,//测量
     val shuffleMemoryManager: ShuffleMemoryManager,
     val executorMemoryManager: ExecutorMemoryManager,
     val outputCommitCoordinator: OutputCommitCoordinator,
-    val conf: SparkConf) extends Logging {
+    val conf: SparkConf //配置文件 
+    ) extends Logging {
 
   // TODO Remove actorSystem
   @deprecated("Actor system is no longer supported as of 1.4.0", "1.4.0")
@@ -195,7 +196,9 @@ object SparkEnv extends Logging {
     mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
     assert(conf.contains("spark.driver.host"), "spark.driver.host is not set on the driver!")
     assert(conf.contains("spark.driver.port"), "spark.driver.port is not set on the driver!")
+    //驱动器监听主机名或者IP地址.
     val hostname = conf.get("spark.driver.host")
+    //驱动器监听端口号
     val port = conf.get("spark.driver.port").toInt
     create(
       conf,

@@ -111,6 +111,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     val f = Future {
       Thread.currentThread().getName()
     }(ThreadUtils.sameThread)
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     val futureThreadName = Await.result(f, 10.seconds)
     assert(futureThreadName === callerThreadName)
   }

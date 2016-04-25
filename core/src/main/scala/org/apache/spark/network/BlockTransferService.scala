@@ -99,7 +99,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
           result.success(new NioManagedBuffer(ret))
         }
       })
-
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     Await.result(result.future, Duration.Inf)
   }
 
@@ -116,6 +116,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
       blockId: BlockId,
       blockData: ManagedBuffer,
       level: StorageLevel): Unit = {
+	//Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     Await.result(uploadBlock(hostname, port, execId, blockId, blockData, level), Duration.Inf)
   }
 }

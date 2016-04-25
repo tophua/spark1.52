@@ -58,8 +58,8 @@ private[deploy] class Master(
 
   private val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
 
-  private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") // For application IDs
-  //Wroker节点最大超时时间60S
+  private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") // For application IDs 
+  //如果超过这个时间，独立部署master还没有收到worker的心跳回复，那么就认为这个worker已经丢失了
   private val WORKER_TIMEOUT_MS = conf.getLong("spark.worker.timeout", 60) * 1000
   private val RETAINED_APPLICATIONS = conf.getInt("spark.deploy.retainedApplications", 200)
   private val RETAINED_DRIVERS = conf.getInt("spark.deploy.retainedDrivers", 200)

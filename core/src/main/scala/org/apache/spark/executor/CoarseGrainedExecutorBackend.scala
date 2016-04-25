@@ -82,6 +82,7 @@ private[spark] class CoarseGrainedExecutorBackend(
        */
       ref.ask[RegisteredExecutor.type](
         RegisterExecutor(executorId, self, hostPort, cores, extractLogUrls))
+	//onComplete,onSuccess,onFailure三个回调函数来异步执行Future任务
     }(ThreadUtils.sameThread).onComplete {
       // This is a very fast action so we can use "ThreadUtils.sameThread"
       case Success(msg) => Utils.tryLogNonFatalError {

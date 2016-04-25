@@ -85,7 +85,8 @@ trait FutureAction[T] extends Future[T] {
   override def value: Option[Try[T]]
 
   /**
-   * Blocks and returns the result of this job.
+   * Blocks and returns the result of this job.\
+   *Await.result会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
    */
   @throws(classOf[Exception])
   def get(): T = Await.result(this, Duration.Inf)

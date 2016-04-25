@@ -106,6 +106,7 @@ private class ClientEndpoint(
    */
   private def ayncSendToMasterAndForwardReply[T: ClassTag](message: Any): Unit = {
     for (masterEndpoint <- masterEndpoints) {
+    //onComplete,onSuccess,onFailure三个回调函数来异步执行Future任务
       masterEndpoint.ask[T](message).onComplete {
         case Success(v) => self.send(v)
         case Failure(e) =>

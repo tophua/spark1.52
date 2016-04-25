@@ -263,6 +263,7 @@ private object FaultToleranceTest extends App with Logging {
     }
 
     // Avoid waiting indefinitely (e.g., we could register but get no executors).
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     assertTrue(Await.result(f, 120 seconds))
   }
 
@@ -316,6 +317,7 @@ private object FaultToleranceTest extends App with Logging {
     }
 
     try {
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
       assertTrue(Await.result(f, 120 seconds))
     } catch {
       case e: TimeoutException =>

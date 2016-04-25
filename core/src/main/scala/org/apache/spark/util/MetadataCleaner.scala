@@ -85,6 +85,8 @@ private[spark] object MetadataCleanerType extends Enumeration {
 private[spark] object MetadataCleaner {
   def getDelaySeconds(conf: SparkConf): Int = {
     //设置清理时间  -1清理
+    //Spark记忆任何元数据(stages生成，任务生成等等)的时间(秒)。周期性清除保证在这个时间之前的元数据会被遗忘。
+    //当长时间几小时，几天的运行Spark的时候设置这个是很有用的。注意：任何内存中的RDD只要过了这个时间就会被清除掉。
     conf.getTimeAsSeconds("spark.cleaner.ttl", "-1").toInt
   }
 
@@ -108,6 +110,8 @@ private[spark] object MetadataCleaner {
    * @param resetAll whether to reset all to default
    */
   def setDelaySeconds(conf: SparkConf, delay: Int, resetAll: Boolean = true) {
+    //Spark记忆任何元数据(stages生成，任务生成等等)的时间(秒)。周期性清除保证在这个时间之前的元数据会被遗忘。
+    //当长时间几小时，几天的运行Spark的时候设置这个是很有用的。注意：任何内存中的RDD只要过了这个时间就会被清除掉。
     conf.set("spark.cleaner.ttl", delay.toString)
     if (resetAll) {
       for (cleanerType <- MetadataCleanerType.values) {

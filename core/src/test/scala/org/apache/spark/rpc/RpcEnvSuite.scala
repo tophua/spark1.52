@@ -486,6 +486,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     try {
       val f = rpcEndpointRef.ask[String]("hello")
       val e = intercept[SparkException] {
+      ////Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
         Await.result(f, 5 seconds)
       }
       assert("Oops" === e.getMessage)

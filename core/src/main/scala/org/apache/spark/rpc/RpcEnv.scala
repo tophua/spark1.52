@@ -287,6 +287,7 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
        * Await 它有两个方法，一个是Await.ready，当Future的状态为完成时返回，
        * 一种是Await.result，直接返回Future持有的结果。
        * Future还提供了一些map,filter,foreach等操作
+       * Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
        */
       Await.result(awaitable, duration)
     } catch addMessageIfTimeout
