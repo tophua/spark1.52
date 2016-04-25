@@ -320,10 +320,11 @@ object SparkEnv extends Logging {
     def registerOrLookupEndpoint(
       name: String, endpointCreator: => RpcEndpoint): RpcEndpointRef = {
       if (isDriver) {
+      //如果当前节点是Driver则创建这个Actor
         logInfo("Registering " + name)
         rpcEnv.setupEndpoint(name, endpointCreator)
       } else {
-        //
+        //否则建立到Driver的连接,取得BlockManagerMaster的Actor
         RpcUtils.makeDriverRef(name, conf, rpcEnv)
       }
     }

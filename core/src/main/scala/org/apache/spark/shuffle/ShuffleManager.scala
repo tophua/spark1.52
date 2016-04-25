@@ -23,25 +23,31 @@ import org.apache.spark.{TaskContext, ShuffleDependency}
  * Pluggable interface for shuffle systems. A ShuffleManager is created in SparkEnv on the driver
  * and on each executor, based on the spark.shuffle.manager setting. The driver registers shuffles
  * with it, and executors (or tasks running locally in the driver) can ask to read and write data.
- *
+ * Driver中的ShuffleManager负责注册Shuffle的元数据，比如Shuffle ID，map task的数量等。
+ * Executor中的ShuffleManager 则负责读和写Shuffle的数据
  * NOTE: this will be instantiated by SparkEnv so its constructor can take a SparkConf and
  * boolean isDriver as parameters.
  */
 private[spark] trait ShuffleManager {
   /**
    * Register a shuffle with the manager and obtain a handle for it to pass to tasks.
+   *  由Driver注册元数据信息
    */
   def registerShuffle[K, V, C](
       shuffleId: Int,
       numMaps: Int,
       dependency: ShuffleDependency[K, V, C]): ShuffleHandle
 
-  /** Get a writer for a given partition. Called on executors by map tasks. */
+  /** 
+   *  Get a writer for a given partition. Called on executors by map tasks. 
+   *  获得Shuffle Writer， 根据Shuffle Map Task的ID为其创建Shuffle Writer
+   *  */
   def getWriter[K, V](handle: ShuffleHandle, mapId: Int, context: TaskContext): ShuffleWriter[K, V]
 
   /**
    * Get a reader for a range of reduce partitions (startPartition to endPartition-1, inclusive).
    * Called on executors by reduce tasks.
+   * 获得Shuffle Reader，根据Shuffle ID和partition的ID为其创建ShuffleReader
    */
   def getReader[K, C](
       handle: ShuffleHandle,
@@ -50,6 +56,7 @@ private[spark] trait ShuffleManager {
       context: TaskContext): ShuffleReader[K, C]
 
   /**
+   * 删除本地的Shuffle的元数据
     * Remove a shuffle's metadata from the ShuffleManager.
     * @return true if the metadata removed successfully, otherwise false.
     */

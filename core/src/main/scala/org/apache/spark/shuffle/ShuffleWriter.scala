@@ -22,13 +22,21 @@ import java.io.IOException
 import org.apache.spark.scheduler.MapStatus
 
 /**
+ * Shuffle Map Task通过ShuffleWriter将Shuffle数据写入本地。
+ * 这个Writer主要通过ShuffleBlockManager来写入数据，因此它的功能是比较轻量级的
  * Obtained inside a map task to write out records to the shuffle system.
  */
 private[spark] abstract class ShuffleWriter[K, V] {
-  /** Write a sequence of records to this task's output */
+  /** 
+   *  Write a sequence of records to this task's output 
+   *  写入所有的数据
+   *  */
   @throws[IOException]
   def write(records: Iterator[Product2[K, V]]): Unit
 
-  /** Close this writer, passing along whether the map completed */
+  /** 
+   *  Close this writer, passing along whether the map completed 
+   *  写入完成后提交本次写入
+   *  */
   def stop(success: Boolean): Option[MapStatus]
 }

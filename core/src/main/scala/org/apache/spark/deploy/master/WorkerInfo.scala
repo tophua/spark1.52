@@ -67,7 +67,9 @@ private[spark] class WorkerInfo(
     assert (port > 0)
     host + ":" + port
   }
-
+/**
+ * 更新worker的信息，可用core数和memory数减去本次分配的executor占用
+ */
   def addExecutor(exec: ExecutorDesc) {
     executors(exec.fullId) = exec
     coresUsed += exec.cores

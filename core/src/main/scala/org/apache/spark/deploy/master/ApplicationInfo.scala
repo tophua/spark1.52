@@ -61,7 +61,7 @@ private[spark] class ApplicationInfo(
   private def init() {
     state = ApplicationState.WAITING
     executors = new mutable.HashMap[Int, ExecutorDesc]
-    coresGranted = 0
+    coresGranted = 0 //
     endTime = -1L
     appSource = new ApplicationSource(this)
     nextExecutorId = 0
@@ -103,9 +103,9 @@ private[spark] class ApplicationInfo(
       coresGranted -= exec.cores
     }
   }
-
+  //当前app申请的maxcpus
   private val requestedCores = desc.maxCores.getOrElse(defaultCores)
-
+//coresLeft表示的是该app还有cpu资源没申请到,coresGranted==允许的cpus
   private[master] def coresLeft: Int = requestedCores - coresGranted
 
   private var _retryCount = 0

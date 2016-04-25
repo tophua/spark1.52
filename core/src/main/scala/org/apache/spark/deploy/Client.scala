@@ -92,6 +92,7 @@ private class ClientEndpoint(
           driverArgs.cores,
           driverArgs.supervise,
           command)
+        //向Master发送RequestSubmitDriver消息,
         ayncSendToMasterAndForwardReply[SubmitDriverResponse](
           RequestSubmitDriver(driverDescription))
 
@@ -207,6 +208,7 @@ private class ClientEndpoint(
 
 /**
  * Executable utility for starting and terminating drivers inside of a standalone cluster.
+ * Client：负责提交作业到Master
  */
 object Client {
   def main(args: Array[String]) {
@@ -223,17 +225,18 @@ object Client {
     if (!driverArgs.logLevel.isGreaterOrEqual(Level.WARN)) {
       conf.set("spark.akka.logLifecycleEvents", "true")
     }
+    //
     conf.set("spark.rpc.askTimeout", "10")
     conf.set("akka.loglevel", driverArgs.logLevel.toString.replace("WARN", "WARNING"))
     Logger.getRootLogger.setLevel(driverArgs.logLevel)
-
+  // 使用ClientActor初始化actorSystem
     val rpcEnv =
       RpcEnv.create("driverClient", Utils.localHostName(), 0, conf, new SecurityManager(conf))
 
     val masterEndpoints = driverArgs.masters.map(RpcAddress.fromSparkURL).
       map(rpcEnv.setupEndpointRef(Master.SYSTEM_NAME, _, Master.ENDPOINT_NAME))
     rpcEnv.setupEndpoint("client", new ClientEndpoint(rpcEnv, driverArgs, masterEndpoints, conf))
-
+    //启动ClientEndpoint并等待actorSystem的结束
     rpcEnv.awaitTermination()
   }
 }

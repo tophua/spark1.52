@@ -32,8 +32,18 @@ import org.apache.spark.shuffle.ShuffleWriter
 * specified in the ShuffleDependency).
 *
 * ShuflleMap 会产生临时计算结果,这些数据会被ResulTask 作为输入而读取.
+* 
+* ShuffleMapTask的计算结果是如何被ResultTask取得的呢?
+* 1)ShuffleMapTask将计算的状态,包装为MapStatus返回给DAGScheduler
+* 2)DAGScheduler将MapStatus保存到MapOutputTrackerMaster中
+* 3)ResultTask在调用到ShuffleRDD时,会利用BlockStoreShuffleFetch的fetch方法去获取数据
+*   1)第一件事情就是咨询MapOutputTrackMaster所要取的数据的location
+*   2)根据返回的结果调用BlockManager.getMultiple获取真正的数据
+* 每个ShuffleMapTask都会用一个MapStatus来保存计算结果
+* MapStatus由BlockManagerId和byteSize构成,BlockManagerId表示这些计算的中间结果实际数据在那个BlockManager
 * See [[org.apache.spark.scheduler.Task]] for more information.
 *
+* 
  * @param stageId id of the stage this task belongs to
  * @param taskBinary broadcast version of the RDD and the ShuffleDependency. Once deserialized,
  *                   the type should be (RDD[_], ShuffleDependency[_, _, _]).

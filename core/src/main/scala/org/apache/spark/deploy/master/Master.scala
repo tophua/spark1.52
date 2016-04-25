@@ -118,6 +118,8 @@ private[deploy] class Master(
   // As a temporary workaround before better ways of configuring memory, we allow users to set
   // a flag that will perform round-robin scheduling across the nodes (spreading out each app
   // among all the nodes) instead of trying to consolidate each app onto a small # of nodes.
+  //Executor的分配方式有两种，一种是倾向于把任务分散在多个节点上，一种是在尽量少的节点上运行，
+  //由参数spark.deploy.spreadOut参数来决定的，默认是true，把任务分散到多个节点上
   private val spreadOutApps = conf.getBoolean("spark.deploy.spreadOut", true)
 
   // Default maxCores for applications that don't specify it (i.e. pass Int.MaxValue)
@@ -338,6 +340,7 @@ private[deploy] class Master(
           val appInfo = idToApp(appId)
           exec.state = state
           if (state == ExecutorState.RUNNING) { appInfo.resetRetryCount() }
+          //向Driver发送ExecutorUpdated消息
           exec.application.driver.send(ExecutorUpdated(execId, state, message, exitStatus))
           if (ExecutorState.isFinished(state)) {
             // Remove this executor from the worker and app
@@ -462,15 +465,21 @@ private[deploy] class Master(
   }
 
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
-    case RequestSubmitDriver(description) => {
+    //接收Client发送RequestSubmitDriver消息
+    case RequestSubmitDriver(description) => {      
       if (state != RecoveryState.ALIVE) {
+        //如果master不是active，返回错误
         val msg = s"${Utils.BACKUP_STANDALONE_MASTER_PREFIX}: $state. " +
           "Can only accept driver submissions in ALIVE state."
         context.reply(SubmitDriverResponse(self, false, None, msg))
       } else {
+        //否则创建driver，返回成功的消息
         logInfo("Driver submitted " + description.command.mainClass)
+        //创建Driver
         val driver = createDriver(description)
+        //持久化Driver
         persistenceEngine.addDriver(driver)
+        //等待启动Driver
         waitingDrivers += driver
         drivers.add(driver)
         schedule()
@@ -485,30 +494,36 @@ private[deploy] class Master(
 
     case RequestKillDriver(driverId) => {
       if (state != RecoveryState.ALIVE) {
+        //如果master不是active，返回错误
         val msg = s"${Utils.BACKUP_STANDALONE_MASTER_PREFIX}: $state. " +
           s"Can only kill drivers in ALIVE state."
         context.reply(KillDriverResponse(self, driverId, success = false, msg))
       } else {
+     
         logInfo("Asked to kill driver " + driverId)
         val driver = drivers.find(_.id == driverId)
         driver match {
           case Some(d) =>
             if (waitingDrivers.contains(d)) {
+              //如果driver仍然在等待队列，从等待队列删除并且更新driver状态为KILLED
               waitingDrivers -= d
               self.send(DriverStateChanged(driverId, DriverState.KILLED, None))
             } else {
               // We just notify the worker to kill the driver here. The final bookkeeping occurs
               // on the return path when the worker submits a state change back to the master
               // to notify it that the driver was successfully killed.
+              //通知worker kill driver id的driver。结果会由workder发消息给master ! DriverStateChanged
               d.worker.foreach { w =>
                 w.endpoint.send(KillDriver(driverId))
               }
             }
             // TODO: It would be nice for this to be a synchronous response
+            //注意，此时driver不一定被kill，master只是通知了worker去kill driver。
             val msg = s"Kill request for $driverId submitted"
             logInfo(msg)
             context.reply(KillDriverResponse(self, driverId, success = true, msg))
           case None =>
+            // driver已经被kill，直接返回结果
             val msg = s"Driver $driverId has already finished or does not exist"
             logWarning(msg)
             context.reply(KillDriverResponse(self, driverId, success = false, msg))
@@ -523,6 +538,7 @@ private[deploy] class Master(
         context.reply(
           DriverStatusResponse(found = false, None, None, None, Some(new Exception(msg))))
       } else {
+        // 查找请求的driver，如果找到则返回driver的状态
         (drivers ++ completedDrivers).find(_.id == driverId) match {
           case Some(driver) =>
             context.reply(DriverStatusResponse(found = true, Some(driver.state),
@@ -534,6 +550,7 @@ private[deploy] class Master(
     }
 
     case RequestMasterState => {
+       //向sender返回master的状态
       context.reply(MasterStateResponse(
         address.host, address.port, restServerBoundPort,
         workers.toArray, apps.toArray, completedApps.toArray,
@@ -744,6 +761,7 @@ private[deploy] class Master(
     // Right now this is a very simple FIFO scheduler. We keep trying to fit in the first app
     // in the queue, then the second app, etc.
     //app.coresLeft是Application需要的内核数coresLeft
+    // 遍历一下app
     for (app <- waitingApps if app.coresLeft > 0) {
       val coresPerExecutor: Option[Int] = app.desc.coresPerExecutor
       // Filter out workers that don't have enough resources to launch an executor
@@ -754,6 +772,7 @@ private[deploy] class Master(
      * 4)Worker可使用CPU核数大于或等于Application分配CPU核数
      * 5)过虑得到的Worker按照其空闲CUP内核数倒序排列
      */
+     //canUse里面判断了worker的内存是否够用，并且该worker是否已经包含了该app的Executor
       val usableWorkers = workers.toArray.filter(_.state == WorkerState.ALIVE)
         .filter(worker => worker.memoryFree >= app.desc.memoryPerExecutorMB &&
           worker.coresFree >= coresPerExecutor.getOrElse(1))
@@ -762,6 +781,7 @@ private[deploy] class Master(
       val assignedCores = scheduleExecutorsOnWorkers(app, usableWorkers, spreadOutApps)
 
       // Now that we've decided how many cores to allocate on each worker, let's allocate them
+
       for (pos <- 0 until usableWorkers.length if assignedCores(pos) > 0) {
         //计算资源物理分配,即计算资源物理分配是指给Application物理分配Worker的内存以及核数
         allocateWorkerResourceToExecutors(
@@ -804,16 +824,22 @@ private[deploy] class Master(
    * Schedule the currently available resources among waiting apps. This method will be called
    * every time a new app joins or resource availability changes.
    * 无论是注册Worker还是注册Application,最后都会调用schedule方法,对资源调度逻辑分配与物理分配
+   * 调度当前可用资源的调度方法，它管理还在排队等待的Apps资源的分配,随机的将Driver分配到空闲的Worker上去
+   * 每次在集群资源发生变动的时候都会调用，根据当前集群最新的资源来进行Apps的资源分配
    * 
    */
   private def schedule(): Unit = {
     if (state != RecoveryState.ALIVE) { return }
     // Drivers take strict precedence over executors
+    //把当前workers这个HashSet的顺序随机打乱
     val shuffledWorkers = Random.shuffle(workers) // Randomization helps balance drivers
-    for (worker <- shuffledWorkers if worker.state == WorkerState.ALIVE) {
-      for (driver <- waitingDrivers) {
+    for (worker <- shuffledWorkers if worker.state == WorkerState.ALIVE) {//遍历活着的workers
+      for (driver <- waitingDrivers) {//在等待队列中的Driver们会进行资源分配
+	 //当前的worker内存和cpu均大于当前driver请求的mem和cpu，则启动
         if (worker.memoryFree >= driver.desc.mem && worker.coresFree >= driver.desc.cores) {
+          //启动Driver 内部实现是发送启动Driver命令给指定Worker，Worker来启动Driver
           launchDriver(worker, driver)
+	  //把启动过的Driver从队列移除
           waitingDrivers -= driver
         }
       }
@@ -832,8 +858,10 @@ private[deploy] class Master(
   private def launchExecutor(worker: WorkerInfo, exec: ExecutorDesc): Unit = {
     logInfo("Launching executor " + exec.fullId + " on worker " + worker.id)
     worker.addExecutor(exec)
+    //2)向Worker发送LaunchExecutor消息,运行Executor
     worker.endpoint.send(LaunchExecutor(masterUrl,
       exec.application.id, exec.id, exec.application.desc, exec.cores, exec.memory))
+    //3)向AppClient发送ExecutorAdded消息,AppClient收到后,向Master发送ExecutorStateChanged消息
     exec.application.driver.send(ExecutorAdded(
       exec.id, worker.id, worker.hostPort, exec.cores, exec.memory))
   }
@@ -1181,7 +1209,9 @@ private[deploy] class Master(
     nextDriverNumber += 1
     appId
   }
-
+/**
+ * 创建DriverInfo
+ */
   private def createDriver(desc: DriverDescription): DriverInfo = {
     val now = System.currentTimeMillis()
     val date = new Date(now)
@@ -1192,6 +1222,7 @@ private[deploy] class Master(
     logInfo("Launching driver " + driver.id + " on worker " + worker.id)
     worker.addDriver(driver)
     driver.worker = Some(worker)
+    //Master向worker发送LaunchDriver消息
     worker.endpoint.send(LaunchDriver(driver.id, driver.desc))
     driver.state = DriverState.RUNNING
   }

@@ -62,7 +62,8 @@ private[spark] class HashShuffleWriter[K, V](
     
     val iter = if (dep.aggregator.isDefined) {
       if (dep.mapSideCombine) {//mapSideCombine是否执行map端的聚合
-        //执行数据合并操作
+        //汇聚工作,reducebyKey是一分为二的,一部在ShuffleMapTask中进行聚合
+        //另一部分在resultTask中聚合
         dep.aggregator.get.combineValuesByKey(records, context)
       } else {
         records
