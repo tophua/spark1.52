@@ -27,10 +27,10 @@ import org.apache.spark.util.CallSite
  * 
  */
 private[spark] class ActiveJob(
-    val jobId: Int,
-    val finalStage: ResultStage,
-    val func: (TaskContext, Iterator[_]) => _,
-    val partitions: Array[Int],
+    val jobId: Int,//每个作业都分配一个唯一的I
+    val finalStage: ResultStage,//最终的stage
+    val func: (TaskContext, Iterator[_]) => _,//作用于最后一个stage上的函数
+    val partitions: Array[Int],//分区列表,注意这里表示从多少个分区读入数据并进行处理
     val callSite: CallSite,
     val listener: JobListener,
     val properties: Properties) {

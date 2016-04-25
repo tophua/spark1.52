@@ -47,11 +47,11 @@ import org.apache.spark.util.CallSite
  *
  */
 private[spark] abstract class Stage(
-    val id: Int,
-    val rdd: RDD[_],
-    val numTasks: Int,
-    val parents: List[Stage],
-    val firstJobId: Int,
+    val id: Int,//stage序号,数值越大,越优先执行,如3,2,1,
+    val rdd: RDD[_],//归属于本stage的最后一个Rdd
+    val numTasks: Int,//创建的Task数目,等于父rdd的输出partition数目
+    val parents: List[Stage],//父stage列表
+    val firstJobId: Int,//作业Id
     val callSite: CallSite)
   extends Logging {
 
