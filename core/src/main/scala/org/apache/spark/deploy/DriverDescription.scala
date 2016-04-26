@@ -19,9 +19,9 @@ package org.apache.spark.deploy
 
 private[deploy] class DriverDescription(
     val jarUrl: String,
-    val mem: Int,
-    val cores: Int,
-    val supervise: Boolean,
+    val mem: Int,//对Worker的内存要求
+    val cores: Int,//对Worker的Cores的要求
+    val supervise: Boolean,//supervise，则drvier挂掉之后可以自动重启
     val command: Command)
   extends Serializable {
 

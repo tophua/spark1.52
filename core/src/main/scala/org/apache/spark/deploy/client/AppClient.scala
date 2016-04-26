@@ -142,24 +142,26 @@ private[spark] class AppClient(
      * nthRetry means this is the nth attempt to register with master.
      */
     private def registerWithMaster(nthRetry: Int) {
+      //向所有的Master注册当前Apllcation其中Master依然使用rpcEnv.setupEndpointRef方式获得
       registerMasterFutures = tryRegisterAllMasters()
+      //
       registrationRetryTimer = registrationRetryThread.scheduleAtFixedRate(new Runnable {
         override def run(): Unit = {
           Utils.tryOrExit {
-            if (registered) {
+            if (registered) { // 注册成功，那么取消所有的重试
               registerMasterFutures.foreach(_.cancel(true))
               registerMasterThreadPool.shutdownNow()
 
             } else if (nthRetry >= REGISTRATION_RETRIES) {
-              //注册失败超过3次,标记不存活
+              //重试超过指定次数（3次），则认为当前集群不可用，退出
               markDead("All masters are unresponsive! Giving up.")
             } else {
               registerMasterFutures.foreach(_.cancel(true))
-              //递归
+              //递归 进行新一轮的重试
               registerWithMaster(nthRetry + 1)
             }
           }
-        }
+        }//如果注册20s内未收到成功的消息，那么再次重复注册
       }, REGISTRATION_TIMEOUT_SECONDS, REGISTRATION_TIMEOUT_SECONDS, TimeUnit.SECONDS)
     }
 

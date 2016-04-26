@@ -23,7 +23,7 @@ private[spark] class ApplicationDescription(
     val name: String,//Apllication 名称,可以通过Spark.app.name设置
     //这个application最多需要的core个数,可以通过Spark.core.Max设置
     val maxCores: Option[Int],
-    //每一个Executor进程的memory大小,可以通过Spark.Executo.memory,SPARK_EXECUTOR_MEMORY设置
+    //获得每个Executor进程的memory大小,可以通过Spark.Executo.memory,SPARK_EXECUTOR_MEMORY设置
     //默认1024MB
     val memoryPerExecutorMB: Int,
     //worker Node拉起的ExecutorBanckEnd进程的Command,在Worker接收Master LaunchExecutor
@@ -36,7 +36,7 @@ private[spark] class ApplicationDescription(
     val eventLogDir: Option[URI] = None,
     // short name of compression codec used when writing event logs, if any (e.g. lzf)
     val eventLogCodec: Option[String] = None,
-    //每一个Executor进程的core个数
+    //获得每个Executor上分配多少个cores
     val coresPerExecutor: Option[Int] = None)
   extends Serializable {
 

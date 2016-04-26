@@ -305,6 +305,7 @@ private[deploy] class Master(
       // TODO Prevent repeated registrations from some driver
       if (state == RecoveryState.STANDBY) {
         // ignore, don't send response
+        //AppClient有超时机制（20s），超时会重试
       } else {
         logInfo("Registering app " + description.name)
         //创建Application,会调用Application.init方法
@@ -312,9 +313,11 @@ private[deploy] class Master(
         //注册Application的过程
         registerApplication(app)
         logInfo("Registered app " + description.name + " with ID " + app.id)
+        //持久化app的元数据信息，可以选择持久化到ZooKeeper，本地文件系统，或者不持久化
         persistenceEngine.addApplication(app)
         //向ClientEndpoint发送RegisteredAppliction消息
         driver.send(RegisteredApplication(app.id, self))
+        //为处于待分配资源的Application分配资源。在每次有新的Application加入或者新的资源加入时都会调用schedule进行调度
         schedule()
       }
     }
@@ -674,6 +677,7 @@ private[deploy] class Master(
    * User requests 3 executors (spark.cores.max = 48, spark.executor.cores = 16). If 1 core is
    * allocated at a time, 12 cores from each worker would be assigned to each executor.
    * Since 12 < 16, no executors would launch [SPARK-8881].
+   * 返回为每个Worker上分配的cores的数组
    */
   private def scheduleExecutorsOnWorkers(
       app: ApplicationInfo,
@@ -681,25 +685,31 @@ private[deploy] class Master(
       spreadOutApps: Boolean): Array[Int] = {
     //Application每一个Executor进程的core个数
     val coresPerExecutor = app.desc.coresPerExecutor
-    val minCoresPerExecutor = coresPerExecutor.getOrElse(1)
+    //默认最小为每个executor分配一个core
+    val minCoresPerExecutor = coresPerExecutor.getOrElse(1)    
     val oneExecutorPerWorker = coresPerExecutor.isEmpty
-    //Application每一个Executor进程的memory大小
+    //每个Executor需要的memory
     val memoryPerExecutor = app.desc.memoryPerExecutorMB
     val numUsable = usableWorkers.length
+    //已经给每个Worker上分配的cores
     val assignedCores = new Array[Int](numUsable) // Number of cores to give to each worker
     val assignedExecutors = new Array[Int](numUsable) // Number of new executors on each worker
-    //Application.coresLeft需要分配的内核数,过虑掉Worker空闲内核数的总和
-    var coresToAssign = math.min(app.coresLeft, usableWorkers.map(_.coresFree).sum)
-
-    /** Return whether the specified worker can launch an executor for this app. */
+    //求最小值,
+    //为啥要求最小值：因为可能我们的程序需要1000个cores，但是集群中只有100个cores。
+    //所以只能先分配100个cores，所以就要增加批次    
+    var coresToAssign = math.min(app.coresLeft, 
+        //app.coresLeft程序需要的cores,可用的Worker上面的free cores总和
+        usableWorkers.map(_.coresFree).sum)
+    /** Return whether the specified worker can launch an executor for this app.筛选条件 */
     def canLaunchExecutor(pos: Int): Boolean = {
-      val keepScheduling = coresToAssign >= minCoresPerExecutor
+      //必须要大于等于，因为如果默认一个cores都不能满足的话，无法启动了。
+      val keepScheduling = coresToAssign >= minCoresPerExecutor   
       val enoughCores = usableWorkers(pos).coresFree - assignedCores(pos) >= minCoresPerExecutor
-
       // If we allow multiple executors per worker, then we can always launch new executors.
       // Otherwise, if there is already an executor on this worker, just give it more cores.
       val launchingNewExecutor = !oneExecutorPerWorker || assignedExecutors(pos) == 0
       if (launchingNewExecutor) {
+        //具体executor上分配的内存
         val assignedMemory = assignedExecutors(pos) * memoryPerExecutor
         val enoughMemory = usableWorkers(pos).memoryFree - assignedMemory >= memoryPerExecutor
         val underLimit = assignedExecutors.sum + app.executors.size < app.executorLimit
@@ -707,20 +717,24 @@ private[deploy] class Master(
       } else {
         // We're adding cores to an existing executor, so no need
         // to check memory and executor limits
+        //如果Worker上的executor已经存在，可用直接往executor上增加cores
         keepScheduling && enoughCores
       }
     }
 
     // Keep launching executors until no more workers can accommodate any
     // more executors, or if we have reached this application's limits
+    //根据filter就过滤出来满足在Worker上launchExecutor的条件
     var freeWorkers = (0 until numUsable).filter(canLaunchExecutor)
-    while (freeWorkers.nonEmpty) {
+    while (freeWorkers.nonEmpty) {//可用的Worker不是空的话，就执行下面的循环。
+      //如果不是spreadOutApps的时候，每次都会给executor增加一个core，
+      //会一直循环当前程序的executor上的freeCores,所以会占用本机器上的尽可能多的cores
       freeWorkers.foreach { pos =>
-        var keepScheduling = true
+        var keepScheduling = true      
         while (keepScheduling && canLaunchExecutor(pos)) {
           coresToAssign -= minCoresPerExecutor
           assignedCores(pos) += minCoresPerExecutor
-
+          //如果是每个Worker下面只能够为当前的应用程序分配一个Executor的话，每次只分配一个Core
           // If we are launching one executor per worker, then every iteration assigns 1 core
           // to the executor. Otherwise, every iteration assigns cores to a new executor.
           if (oneExecutorPerWorker) {
@@ -728,11 +742,11 @@ private[deploy] class Master(
           } else {
             assignedExecutors(pos) += 1
           }
-
           // Spreading out an application means spreading out its executors across as
           // many workers as possible. If we are not spreading out, then we should keep
           // scheduling executors on this worker until we use all of its resources.
           // Otherwise, just move on to the next worker.
+          //如果不是spreadOutApps的话，会尽可能用当前的机器去处理程序的一切的cores需求，也就是executor会占用尽可能多的cores
           if (spreadOutApps) {
             keepScheduling = false
           }
@@ -762,28 +776,29 @@ private[deploy] class Master(
     // in the queue, then the second app, etc.
     //app.coresLeft是Application需要的内核数coresLeft
     // 遍历一下app
-    for (app <- waitingApps if app.coresLeft > 0) {
-      val coresPerExecutor: Option[Int] = app.desc.coresPerExecutor
+    for (app <- waitingApps if app.coresLeft > 0) {//使用FIFO(先进先出)的方式为等待的app分配资源,
+      //为应用程序具体分配Executor之前要判断应用程序是否还需要分配cores，如果不需要，则不会为应用程序分配Executor
+      val coresPerExecutor: Option[Int] = app.desc.coresPerExecutor //获得每个Executor上分配多少个cores
       // Filter out workers that don't have enough resources to launch an executor
     /**给Application分配CPU核数处理步骤如下
-     * 1)过虑出所有可用的Worker条件
-     * 2)处于激活状态(ALIVE)
-     * 3)空闲内存大于等于Apllication在每个Worker上需要的内存(memoryPerSlave)
-     * 4)Worker可使用CPU核数大于或等于Application分配CPU核数
-     * 5)过虑得到的Worker按照其空闲CUP内核数倒序排列
-     */
-     //canUse里面判断了worker的内存是否够用，并且该worker是否已经包含了该app的Executor
+     * 1)过虑出所有可用的Worker处于激活状态(ALIVE)
+     * 2)空闲内存大于等于Apllication在每个Worker上需要的内存(memoryPerSlave)
+     * 3)Worker可使用CPU核数大于或等于Application分配CPU核数过虑得到的Worker
+     * 4)按照其空闲CUP内核数倒序排列,优先选择可用core数多的.
+     */   
       val usableWorkers = workers.toArray.filter(_.state == WorkerState.ALIVE)
         .filter(worker => worker.memoryFree >= app.desc.memoryPerExecutorMB &&
-          worker.coresFree >= coresPerExecutor.getOrElse(1))
+          worker.coresFree >= coresPerExecutor.getOrElse(1))//至少大于一个
         .sortBy(_.coresFree).reverse
-      //usableWorkers对应的Worker上可以使用多少Core
+      
+      //scheduleExecutorsOnWorkers返回为每个Worker上分配的cores的数组
       val assignedCores = scheduleExecutorsOnWorkers(app, usableWorkers, spreadOutApps)
 
       // Now that we've decided how many cores to allocate on each worker, let's allocate them
-
-      for (pos <- 0 until usableWorkers.length if assignedCores(pos) > 0) {
-        //计算资源物理分配,即计算资源物理分配是指给Application物理分配Worker的内存以及核数
+   //计算资源物理分配,即计算资源物理分配是指给Application物理分配Worker的内存以及核数
+      for (pos <- 0 until usableWorkers.length if assignedCores(pos) > 0) {     
+        //然后就是分配了，准备好具体要为当前应用程序分配的Executor信息后，
+        //具体Master要通过远程通信发指令给Worker来具体启动ExecutorBackEnd进程
         allocateWorkerResourceToExecutors(
           app, assignedCores(pos), coresPerExecutor, usableWorkers(pos))
       }
@@ -811,35 +826,37 @@ private[deploy] class Master(
     // Otherwise, we launch a single executor that grabs all the assignedCores on this worker.
     val numExecutors = coresPerExecutor.map { assignedCores / _ }.getOrElse(1)
     val coresToAssign = coresPerExecutor.getOrElse(assignedCores)
-    for (i <- 1 to numExecutors) {
+    for (i <- 1 to numExecutors) {    
       //addExecutor逻辑分配CPU核数及内存大小,将ExecutorDesc添加到Application的executors缓存中,增加已经授权得到的内存数
+      //给Driver发送一个ExecutorAdded的信息
       val exec = app.addExecutor(worker, coresToAssign)
       //物理分配通过调用launchExecutor,在worker上启动Executor
       launchExecutor(worker, exec)
+      //分配executor之后，application就为RUNNING
       app.state = ApplicationState.RUNNING 
     }
   }
 
   /**
+   * 为处于待分配资源的Application分配资源,每次有新的应用程序或者集群资源状态发生改变的时候
+   * （包括Executor增加或者减少、Worker增加或者减少等）
    * Schedule the currently available resources among waiting apps. This method will be called
    * every time a new app joins or resource availability changes.
-   * 无论是注册Worker还是注册Application,最后都会调用schedule方法,对资源调度逻辑分配与物理分配
-   * 调度当前可用资源的调度方法，它管理还在排队等待的Apps资源的分配,随机的将Driver分配到空闲的Worker上去
-   * 每次在集群资源发生变动的时候都会调用，根据当前集群最新的资源来进行Apps的资源分配
    * 
    */
   private def schedule(): Unit = {
     if (state != RecoveryState.ALIVE) { return }
+    //Master必须是Alive的状态才能进行资源的调度，如果不是Alive的状态，会直接返回
     // Drivers take strict precedence over executors
     //把当前workers这个HashSet的顺序随机打乱
     val shuffledWorkers = Random.shuffle(workers) // Randomization helps balance drivers
     for (worker <- shuffledWorkers if worker.state == WorkerState.ALIVE) {//遍历活着的workers
-      for (driver <- waitingDrivers) {//在等待队列中的Driver们会进行资源分配
-	 //当前的worker内存和cpu均大于当前driver请求的mem和cpu，则启动
+      for (driver <- waitingDrivers) {//在等待队列中的Driver会进行资源分配
+	        //当前的worker内存和cpu均大于当前driver请求的mem和cpu，启动launchDriver
         if (worker.memoryFree >= driver.desc.mem && worker.coresFree >= driver.desc.cores) {
           //启动Driver 内部实现是发送启动Driver命令给指定Worker，Worker来启动Driver
           launchDriver(worker, driver)
-	  //把启动过的Driver从队列移除
+	        //把启动过的Driver从队列移除
           waitingDrivers -= driver
         }
       }
@@ -861,7 +878,7 @@ private[deploy] class Master(
     //2)向Worker发送LaunchExecutor消息,运行Executor
     worker.endpoint.send(LaunchExecutor(masterUrl,
       exec.application.id, exec.id, exec.application.desc, exec.cores, exec.memory))
-    //3)向AppClient发送ExecutorAdded消息,AppClient收到后,向Master发送ExecutorStateChanged消息
+    //3)向Driver发送ExecutorAdded消息,Driver收到后,向Master发送ExecutorStateChanged消息
     exec.application.driver.send(ExecutorAdded(
       exec.id, worker.id, worker.hostPort, exec.cores, exec.memory))
   }
@@ -963,6 +980,7 @@ private[deploy] class Master(
     }
 
     applicationMetricsSystem.registerSource(app.appSource)
+    //保存到master维护的成员变量中
     apps += app
     idToApp(app.id) = app
     endpointToApp(app.driver) = app
@@ -1217,13 +1235,16 @@ private[deploy] class Master(
     val date = new Date(now)
     new DriverInfo(now, newDriverId(date), desc, date)
   }
-
+/**
+ * 向Worker发送LaunchDriver消息
+ */
   private def launchDriver(worker: WorkerInfo, driver: DriverInfo) {
     logInfo("Launching driver " + driver.id + " on worker " + worker.id)
     worker.addDriver(driver)
     driver.worker = Some(worker)
-    //Master向worker发送LaunchDriver消息
+    //Master向worker发送LaunchDriver消息,Worker启动driver
     worker.endpoint.send(LaunchDriver(driver.id, driver.desc))
+    //driver的state就编程RUNNING
     driver.state = DriverState.RUNNING
   }
 
