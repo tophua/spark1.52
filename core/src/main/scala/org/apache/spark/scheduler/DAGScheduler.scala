@@ -835,7 +835,7 @@ class DAGScheduler(
     val jobId = activeJobForStage(stage)
     if (jobId.isDefined) {
       logDebug("submitStage(" + stage + ")")
-      //如果当前stage不再等待其parent Stage的返回,不是正在运行且没有提示失败,那么尝试提交
+      // 如果当前stage不在等待其parent stage的返回，并且 不在运行的状态， 并且 没有已经失败（失败会有重试机制，不会通过这里再次提交）
       if (!waitingStages(stage) && !runningStages(stage) && !failedStages(stage)) {
         val missing = getMissingParentStages(stage).sortBy(_.id)//用来找到Stage的所有不可用的祖先Stage
         logDebug("missing: " + missing)

@@ -459,6 +459,7 @@ private[deploy] class Worker(
      *
      */
     case LaunchExecutor(masterUrl, appId, execId, appDesc, cores_, memory_) =>
+      //验证该命令是否发自一个合法的Master
       if (masterUrl != activeMasterUrl) {
         logWarning("Invalid Master (" + masterUrl + ") attempted to launch executor.")
       } else {
@@ -498,13 +499,21 @@ private[deploy] class Worker(
             workerUri,
             conf,
             appLocalDirs, ExecutorState.LOADING)
+          //将新建的executor放到上面提到的Hash Map中
           executors(appId + "/" + execId) = manager
+          //启动这个Executor
           manager.start()
+          //将现在已经使用的core和memory进行的统计
           coresUsed += cores_
           memoryUsed += memory_
           //向Master发送ExecutorStateChanged消息
           sendToMaster(ExecutorStateChanged(appId, execId, manager.state, None, None))
         } catch {
+          /**
+           * 如果在这过程中有异常抛出，那么需要check是否是executor已经加到Hash Map中，
+           * 如果有则首先停止它，然后从Hash Map中删除它。并且向Master report Executor是FAILED的。
+           * Master会重新启动新的Executor
+           */
           case e: Exception => {
             logError(s"Failed to launch executor $appId/$execId for ${appDesc.name}.", e)
             if (executors.contains(appId + "/" + execId)) {
