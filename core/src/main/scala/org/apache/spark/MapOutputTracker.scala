@@ -281,7 +281,10 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
     }
   }
 
-  /** Register multiple map output information for the given shuffle */
+  /** 
+   *  Register multiple map output information for the given shuffle 
+   *  Shuffle ID为key将MapStatus的列表存入带有时间戳的HashMap
+   *  */
   def registerMapOutputs(shuffleId: Int, statuses: Array[MapStatus], changeEpoch: Boolean = false) {
     mapStatuses.put(shuffleId, Array[MapStatus]() ++ statuses)
     if (changeEpoch) {

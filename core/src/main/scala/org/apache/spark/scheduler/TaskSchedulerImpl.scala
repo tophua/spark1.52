@@ -163,7 +163,8 @@ private[spark] class TaskSchedulerImpl(
   override def start() {
     //向actorSystem注册了LocalActor
     backend.start()
-
+    //spark.speculation为true 对于非本地模式，那么对于指定时间未返回的task将会启动另外的task来执行
+    //其实对于一般的应用，这个的确可能会减少任务的执行时间，但是也浪费了集群的计算资源。因此对于离线应用来说，这个设置是不推荐的
     if (!isLocal && conf.getBoolean("spark.speculation", false)) {
       logInfo("Starting speculative execution thread")
       speculationScheduler.scheduleAtFixedRate(new Runnable {
@@ -375,6 +376,7 @@ private[spark] class TaskSchedulerImpl(
     var failedExecutor: Option[String] = None
     synchronized {
       try {
+        //Task丢失
         if (state == TaskState.LOST && taskIdToExecutorId.contains(tid)) {
           // We lost this entire executor, so remember that it's gone         
           val execId = taskIdToExecutorId(tid)

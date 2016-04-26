@@ -378,9 +378,9 @@ class DAGScheduler(
     // We are manually maintaining a stack here to prevent StackOverflowError
     // caused by recursively visiting
     //存储需要被处理的RDD,Stack中的RDD都需要被处理
-    val waitingForVisit = new Stack[RDD[_]]
+    val waitingForVisit = new Stack[RDD[_]]//堆,后进先出的原则存储数据
     def visit(r: RDD[_]) {//广度优先遍历Rdd生成的依赖树
-      if (!visited(r)) {
+      if (!visited(r)) {//如果不存在时
         visited += r
         // Kind of ugly: need to register RDDs with the cache here since
         // we can't do it in its constructor because # of partitions is unknown
@@ -398,7 +398,7 @@ class DAGScheduler(
       }
     }
     //以输入的RDD作为第一个需要处理的RDD,然后从该RDD开始,顺序处理其Parent Rdd
-    waitingForVisit.push(rdd)
+    waitingForVisit.push(rdd)//堆,后进先出的原则存储数据
     while (waitingForVisit.nonEmpty) {//只要Stack不为空,则一直处理
       //每次visit如果遇到了ShuffleDependency,那么就会形成一个Stage,否则这些RDD属于同个Stage      
       visit(waitingForVisit.pop())
@@ -828,7 +828,7 @@ class DAGScheduler(
   }
 
   /** Submits stage, but first recursively(递归) submits any missing parents. */
-  //如果存在没有提交的祖先Stage,则需要先提交所有没有提交的祖先Stage
+  // 提交Stage，如果有parent Stage没有提交，那么递归提交它。
   //每个Stage提交之前,如果存在没有提交的祖先Stage,都会先提交祖先Stage,并且将子Stage放入waitingStages中等待
   //如果不存在没有提交的祖先Stage,则提交所有的Task
   private def submitStage(stage: Stage) {
@@ -1586,40 +1586,44 @@ private[scheduler] class DAGSchedulerEventProcessLoop(dagScheduler: DAGScheduler
   }
 
   private def doOnReceive(event: DAGSchedulerEvent): Unit = event match {
+    //// 提交job，来自与RDD->SparkContext->DAGScheduler的消息。之所以在这需要在这里中转一下，是为了模块功能的一致性。
     case JobSubmitted(jobId, rdd, func, partitions, callSite, listener, properties) =>
       dagScheduler.handleJobSubmitted(jobId, rdd, func, partitions, callSite, listener, properties)
-
+    //消息源org.apache.spark.ui.jobs.JobProgressTab，在GUI上显示一个SparkContext的Job的执行状态。    
+    //用户可以cancel一个Stage，会通过SparkContext->DAGScheduler 传递到这里。      
     case StageCancelled(stageId) =>
       dagScheduler.handleStageCancellation(stageId)
-
+    //来自于org.apache.spark.scheduler.JobWaiter的消息。取消一个Job
     case JobCancelled(jobId) =>
       dagScheduler.handleJobCancellation(jobId)
 
-    case JobGroupCancelled(groupId) =>
+    case JobGroupCancelled(groupId) =>// 取消整个Job Group
       dagScheduler.handleJobGroupCancelled(groupId)
-
-    case AllJobsCancelled =>
+    case AllJobsCancelled =>//取消所有Job
       dagScheduler.doCancelAllJobs()
-
     case ExecutorAdded(execId, host) =>
+     // TaskScheduler得到一个Executor被添加的消息。具体来自org.apache.spark.scheduler.TaskSchedulerImpl.resourceOffers
       dagScheduler.handleExecutorAdded(execId, host)
-
-    case ExecutorLost(execId) =>
+  
+    case ExecutorLost(execId) =>//来自TaskScheduler
       dagScheduler.handleExecutorLost(execId, fetchFailed = false)
 
-    case BeginEvent(task, taskInfo) =>
+    case BeginEvent(task, taskInfo) => //来自TaskScheduler
       dagScheduler.handleBeginEvent(task, taskInfo)
 
-    case GettingResultEvent(taskInfo) =>
+    case GettingResultEvent(taskInfo) =>//处理获得TaskResult信息的消息
       dagScheduler.handleGetTaskResult(taskInfo)
 
     case completion @ CompletionEvent(task, reason, _, _, taskInfo, taskMetrics) =>
+      //来自TaskScheduler，报告task是完成或者失败
       dagScheduler.handleTaskCompletion(completion)
 
     case TaskSetFailed(taskSet, reason, exception) =>
+      //来自TaskScheduler，要么TaskSet失败次数超过阈值或者由于Job Cancel
       dagScheduler.handleTaskSetFailed(taskSet, reason, exception)
 
     case ResubmitFailedStages =>
+      //当一个Stage处理失败时，重试。来自org.apache.spark.scheduler.DAGScheduler.handleTaskCompletion
       dagScheduler.resubmitFailedStages()
   }
 

@@ -103,11 +103,13 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
    //收到CoarseGrainedExecutorBackend发送StatusUpdate消息,
     override def receive: PartialFunction[Any, Unit] = {
       case StatusUpdate(executorId, taskId, state, data) =>
+        //调用TaskSchedulerImpl.statusUpdate
         scheduler.statusUpdate(taskId, state, data.value)
         if (TaskState.isFinished(state)) {
           executorDataMap.get(executorId) match {
             case Some(executorInfo) =>
               executorInfo.freeCores += scheduler.CPUS_PER_TASK
+              //并且根据更新后的Executor重新调度
               makeOffers(executorId)
             case None =>
               // Ignoring the update since we don't know about the executor.
@@ -233,6 +235,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
     }
 
     // Make fake resource offers on just one executor
+    //根据executorId重新资源分配启动任务
     private def makeOffers(executorId: String) {
       // Filter out executors under killing
       if (!executorsPendingToRemove.contains(executorId)) {

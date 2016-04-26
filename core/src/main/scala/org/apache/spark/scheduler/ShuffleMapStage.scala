@@ -45,8 +45,8 @@ private[spark] class ShuffleMapStage(
 
   def addOutputLoc(partition: Int, status: MapStatus): Unit = {
     val prevList = outputLocs(partition)
-    outputLocs(partition) = status :: prevList
-    if (prevList == Nil) {
+    outputLocs(partition) = status :: prevList 
+    if (prevList == Nil) {//Nil表示空列表
       numAvailableOutputs += 1
     }
   }

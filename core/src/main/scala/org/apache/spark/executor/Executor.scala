@@ -195,7 +195,7 @@ private[spark] class Executor(
       Thread.currentThread.setContextClassLoader(replClassLoader)
       val ser = env.closureSerializer.newInstance()
       logInfo(s"Running $taskName (TID $taskId)")
-      //任务状态更新,
+      //通过AKKA向Driver汇报本次Task的状态
       execBackend.statusUpdate(taskId, TaskState.RUNNING, EMPTY_BYTE_BUFFER)
       var taskStart: Long = 0
       startGCTime = computeTotalGcTime()
