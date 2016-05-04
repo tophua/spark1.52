@@ -25,27 +25,32 @@ import scala.util.control.NonFatal
 import org.apache.spark.Logging
 
 /**
+ * EventLoop里面开辟了一个线程，这个线程不断的循环队列，post的时候其实就是将消息放入到这个队列里面，
+ * 由于线程不断循环，因此放到队列里面可以拿到，拿到后就会回调DAGSchedulerEventProcessLoop里面的onReceive，
+ * 处理的时候onReceive调用doOnReceive。
  * An event loop to receive events from the caller and process all events in the event thread. It
  * will start an exclusive event thread to process all events.
- *
  * Note: The event queue will grow indefinitely. So subclasses should make sure `onReceive` can
  * handle events in time to avoid the potential OOM.
  */
 private[spark] abstract class EventLoop[E](name: String) extends Logging {
-
+//一个由链表结构组成的有界阻塞队列,此队列按照先进先出的原则对元素进行排序
   private val eventQueue: BlockingQueue[E] = new LinkedBlockingDeque[E]()
 
   private val stopped = new AtomicBoolean(false)
 
   private val eventThread = new Thread(name) {
+    //setDaemon(true)是守护线程，为啥是守护线程呢？
+    //作为后台线程，在后台不断的循环，如果是前台线程的话，对垃圾的回收是有影响的
     setDaemon(true)
 
     override def run(): Unit = {
       try {
-        while (!stopped.get) {
-          val event = eventQueue.take()
+        while (!stopped.get) {//不断的循环队列
+          val event = eventQueue.take()//从eventQueue中获得消息队列
           try {
-            onReceive(event)
+            onReceive(event)//接收消息。在这里并没有直接实现OnReceive方法,
+                            //具体方法实现是在DAGScheduler#onReceive
           } catch {
             case NonFatal(e) => {
               try {

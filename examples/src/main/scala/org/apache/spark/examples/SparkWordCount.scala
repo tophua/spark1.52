@@ -19,8 +19,8 @@ object SparkWordCount {
 
     val conf = new SparkConf().setMaster("local").setAppName("Spark Exercise: Spark Version Word Count Program");
     val sc = new SparkContext(conf);
-    val textFile = sc.textFile("people.txt");
-
+    val textFile = sc.textFile("people.txt");//textFile：生成一个HadoopRDD.map,创建了一个MapPartitionsRDD
+    //flatMap：前面生成的MapPartitionsRDD[String]，调用flatMap函数，生成了MapPartitionsRDD[String] 
     val wordCounts = textFile.flatMap(line => line.split(" ")).map(
       word => (word, 1))
     /**
@@ -45,7 +45,7 @@ object SparkWordCount {
     });
     */
 
-    //wordCounts.saveAsTextFile(FILE_NAME + System.currentTimeMillis());
+   wordCounts.saveAsTextFile(FILE_NAME + System.currentTimeMillis());
     println("Word Count program running results are successfully saved.");
   }
 }

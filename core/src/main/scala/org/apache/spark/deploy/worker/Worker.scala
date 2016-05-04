@@ -76,6 +76,8 @@ private[deploy] class Worker(
   // For worker and executor IDs
   private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
   // Send a heartbeat every (heartbeat timeout) / 4 milliseconds
+  //HEARTBEAT_MILLIS （默认是15秒（15000毫秒）
+  //System.getProperty("spark.worker.timeout", "60").toLong * 1000 / 4）为时间间隔，定期向master发送心跳, 
   private val HEARTBEAT_MILLIS = conf.getLong("spark.worker.timeout", 60) * 1000 / 4
 
   // Model retries to connect to the master, after Hadoop's model.
@@ -378,7 +380,7 @@ private[deploy] class Worker(
       forwordMessageScheduler.scheduleAtFixedRate(new Runnable {
         override def run(): Unit = Utils.tryLogNonFatalError {
           self.send(SendHeartbeat) //启动定时调用给自己发送SendHeartbeat
-        }
+        }//默认是15秒,1 / 4分为时间间隔，定期向master发送心跳
       }, 0, HEARTBEAT_MILLIS, TimeUnit.MILLISECONDS)
       if (CLEANUP_ENABLED) {
         logInfo(s"Worker cleanup enabled; old application directories will be deleted in: $workDir")
@@ -501,7 +503,7 @@ private[deploy] class Worker(
             appLocalDirs, ExecutorState.LOADING)
           //将新建的executor放到上面提到的Hash Map中
           executors(appId + "/" + execId) = manager
-          //启动这个Executor
+          //启动这个Executor进程
           manager.start()
           //将现在已经使用的core和memory进行的统计
           coresUsed += cores_

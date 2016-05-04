@@ -272,7 +272,7 @@ private[spark] class TaskSchedulerImpl(
     for (i <- 0 until shuffledOffers.size) {//顺序遍历当前存在的Executor
       val execId = shuffledOffers(i).executorId//executor的ID
       val host = shuffledOffers(i).host//executor的host
-      if (availableCpus(i) >= CPUS_PER_TASK) {//该executor可以被分配任务核心实现,通过调用TaskSetManager来为Executor分配
+      if (availableCpus(i) >= CPUS_PER_TASK) {//每台机器可用的计算资源
         try {
           //调用每个TaskSetManager的resourceOffer方法,根据execId,host找到需要执行的任务并进一步进行资源处理
           for (task <- taskSet.resourceOffer(execId, host, maxLocality)) {

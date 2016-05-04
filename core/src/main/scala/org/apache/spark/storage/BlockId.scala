@@ -57,6 +57,7 @@ case class RDDBlockId(rddId: Int, splitIndex: Int) extends BlockId {
 // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getBlockData().
 @DeveloperApi
 case class ShuffleBlockId(shuffleId: Int, mapId: Int, reduceId: Int) extends BlockId {
+  //ShuffleBlockId的格式如下
   override def name: String = "shuffle_" + shuffleId + "_" + mapId + "_" + reduceId
 }
 

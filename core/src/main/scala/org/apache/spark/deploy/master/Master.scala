@@ -59,7 +59,7 @@ private[deploy] class Master(
   private val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
 
   private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") // For application IDs 
-  //如果超过这个时间，独立部署master还没有收到worker的心跳回复，那么就认为这个worker已经丢失了
+  //每隔WORKER_TIMEOUT（默认60秒（60000毫秒）检查一次超时
   private val WORKER_TIMEOUT_MS = conf.getLong("spark.worker.timeout", 60) * 1000
   private val RETAINED_APPLICATIONS = conf.getInt("spark.deploy.retainedApplications", 200)
   private val RETAINED_DRIVERS = conf.getInt("spark.deploy.retainedDrivers", 200)
@@ -69,10 +69,14 @@ private[deploy] class Master(
 
   val workers = new HashSet[WorkerInfo]
   val idToApp = new HashMap[String, ApplicationInfo]
+  //创建一个addApplication，然后把app加入到等待队列waitingApps,一个addApplication，
+  //然后把app加入到等待队列waitingApps中，之后再调用schedule函数进行调度  
+
   val waitingApps = new ArrayBuffer[ApplicationInfo]
   val apps = new HashSet[ApplicationInfo]
-
+  //注册Worker的id与WorkerInfo的映射关系
   private val idToWorker = new HashMap[String, WorkerInfo]
+  //注册Worker的addess与WorkerInfo的映射关系
   private val addressToWorker = new HashMap[RpcAddress, WorkerInfo]
 
   private val endpointToApp = new HashMap[RpcEndpointRef, ApplicationInfo]
@@ -148,7 +152,7 @@ private[deploy] class Master(
     checkForWorkerTimeOutTask = forwardMessageThread.scheduleAtFixedRate(new Runnable {
       override def run(): Unit = Utils.tryLogNonFatalError {
         self.send(CheckForWorkerTimeOut)
-      }
+      }//master 每隔60秒,检查一次超时
     }, 0, WORKER_TIMEOUT_MS, TimeUnit.MILLISECONDS)
 
     if (restServerEnabled) {
@@ -889,6 +893,7 @@ private[deploy] class Master(
   private def registerWorker(worker: WorkerInfo): Boolean = {
     // There may be one or more refs to dead workers on this same node (w/ different ID's),
     // remove them.
+    //如果当前Worker不活动,则删除,说则重新注册
     workers.filter { w =>
       (w.host == worker.host && w.port == worker.port) && (w.state == WorkerState.DEAD)
     }.foreach { w =>

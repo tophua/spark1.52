@@ -79,6 +79,7 @@ private[spark] class CoarseGrainedExecutorBackend(
        * 4)调用makeOffers方法执行任务  
        * 向DriverEndpoint发送RegisterExecutor消息,DriverEndpoint收到消息后,先向CoarseGrainedExecutorBackend发送
        * RegisteredExecutor消息,
+       * ref也就相当于Driver
        */
       ref.ask[RegisteredExecutor.type](
         RegisterExecutor(executorId, self, hostPort, cores, extractLogUrls))

@@ -97,13 +97,14 @@ class DAGScheduler(
   private[scheduler] val stageIdToStage = new HashMap[Int, Stage]
   private[scheduler] val shuffleToMapStage = new HashMap[Int, ShuffleMapStage]
   private[scheduler] val jobIdToActiveJob = new HashMap[Int, ActiveJob]
-
+ //等待运行的调度Stage列表,防止过早执行
   // Stages we need to run whose parents aren't done
   private[scheduler] val waitingStages = new HashSet[Stage]
 
   // Stages we are running right now
+  //正在运行的调度Stage列表,防止重复执行
   private[scheduler] val runningStages = new HashSet[Stage]
-
+//运行失败的调度Stage列表,需要重新执行，这里的设计是出于容错的考虑
   // Stages that must be resubmitted due to fetch failures
   private[scheduler] val failedStages = new HashSet[Stage]
 
@@ -124,6 +125,7 @@ class DAGScheduler(
   //
   // TODO: Garbage collect information about failure epochs when we know there are no more
   //       stray messages to detect.
+
   private val failedEpoch = new HashMap[String, Long]
 
   private [scheduler] val outputCommitCoordinator = env.outputCommitCoordinator
@@ -315,7 +317,7 @@ class DAGScheduler(
       numTasks: Int,
       jobId: Int,
       callSite: CallSite): ResultStage = {
-    //获取所有的父Stage列表,父Stage主要是宽依赖对应的Stage
+    //获取所有的父Stage列表,父Stage主要是宽依赖对应的Stage,id是StageID
     val (parentStages: List[Stage], id: Int) = getParentStagesAndId(rdd, jobId)
     //创建Stege
     val stage: ResultStage = new ResultStage(id, rdd, numTasks, parentStages, jobId, callSite)
@@ -347,7 +349,7 @@ class DAGScheduler(
         //计算结果复制到Stage
         stage.outputLocs(i) = Option(locs(i)).toList // locs(i) will be null if missing
       }
-      //保存Stage可用结果的数理,对于不可用的部分,会被重新计算
+      //保存Stage可用结果的数,对于不可用的部分,会被重新计算
       stage.numAvailableOutputs = locs.count(_ != null)
     } else {
       // Kind of ugly: need to register RDDs with the cache and map output tracker here
@@ -373,7 +375,7 @@ class DAGScheduler(
    * getParentStages用于获取或者创建给定RDD的所有父Stage,这些Stage将被分配给job对应的job
    */
   private def getParentStages(rdd: RDD[_], firstJobId: Int): List[Stage] = {
-    val parents = new HashSet[Stage] //存储parent stage
+    val parents = new HashSet[Stage] //存储parent stage,HashSet为了防止里面元素重复 
     val visited = new HashSet[RDD[_]] //存储已经被访问到的RDD
     // We are manually maintaining a stack here to prevent StackOverflowError
     // caused by recursively visiting
@@ -792,11 +794,11 @@ class DAGScheduler(
     try {
       // New stage creation may throw an exception if, for example, jobs are run on a
       // HadoopRDD whose underlying HDFS files have been deleted.
-      //创建finalStage及Stage的划分,创建Stage的过程可能发生异常,例如:运行HadoopRDD上的任务所依赖的底层
-      //HDFS文件被删除,当异常发生时需要主动调用JobWaiter的JobFailed方法
+      //创建finalStage及Stage的划分
       finalStage = newResultStage(finalRDD, partitions.length, jobId, callSite)
     } catch {
       case e: Exception =>
+        //在创建的时候可能会出现异常：HDFS文件被修改，或者被删除了
         logWarning("Creating new stage failed due to exception - job: " + jobId, e)
         listener.jobFailed(e)
         return
@@ -906,6 +908,7 @@ class DAGScheduler(
     val taskIdToLocations = try {
       stage match {
         case s: ShuffleMapStage =>
+          //getPreferredLocs获取任务的本地性
           partitionsToCompute.map { id => (id, getPreferredLocs(stage.rdd, id))}.toMap
         case s: ResultStage =>
           val job = s.resultOfJob.get
@@ -1497,7 +1500,8 @@ class DAGScheduler(
 
   /**
    * Recursive implementation for getPreferredLocs.
-   *
+   * 首先查询DAGScheduler的内存数据结构中是否存在当前Paritition的数据本地性的信息，如果有的话直接返回，
+   * 如果没有首先会调用rdd.getPreferedLocations
    * This method is thread-safe because it only accesses DAGScheduler state through thread-safe
    * methods (getCacheLocs()); please be careful when modifying this method, because any new
    * DAGScheduler state accessed by it may require additional synchronization.
@@ -1579,12 +1583,12 @@ private[scheduler] class DAGSchedulerEventProcessLoop(dagScheduler: DAGScheduler
   override def onReceive(event: DAGSchedulerEvent): Unit = {
     val timerContext = timer.time()
     try {
-      doOnReceive(event)
+      doOnReceive(event)// 调用doOnReceive
     } finally {
       timerContext.stop()
     }
   }
-
+  //模式匹配，是用过post的方式。
   private def doOnReceive(event: DAGSchedulerEvent): Unit = event match {
     //// 提交job，来自与RDD->SparkContext->DAGScheduler的消息。之所以在这需要在这里中转一下，是为了模块功能的一致性。
     case JobSubmitted(jobId, rdd, func, partitions, callSite, listener, properties) =>

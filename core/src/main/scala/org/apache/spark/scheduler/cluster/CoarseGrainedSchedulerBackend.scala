@@ -72,7 +72,9 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   // The number of pending tasks which is locality required
   protected var localityAwareTasks = 0
 /**
- * 客户端驱动程序,也可以理解客户端应用程序 ,用于将任务程序 转换为RDD和DAG,并与Cluster Manager进行通信与调度
+ * 
+ * 整个程序运行时候的驱动器,例如接收CoarseGrainedExecutorBackend的注册，是CoarseGrainedExecutorBackend的内部成员
+ * 并与Cluster Manager进行通信与调度
  */
   class DriverEndpoint(override val rpcEnv: RpcEnv, sparkProperties: Seq[(String, String)])
     extends ThreadSafeRpcEndpoint with Logging {
@@ -160,7 +162,8 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
           val data = new ExecutorData(executorRef, executorRef.address, host, cores, cores, logUrls)
           // This must be synchronized because variables mutated
           // in this block are read when requesting executors
-          CoarseGrainedSchedulerBackend.this.synchronized {
+          CoarseGrainedSchedulerBackend.this.synchronized {            
+            //在Driver中通过ExecutorData封装并注册ExecutorBackend的信息到Driver的内存数据结构executorMapData中
             executorDataMap.put(executorId, data)
             if (numPendingExecutors > 0) {
               numPendingExecutors -= 1

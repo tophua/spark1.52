@@ -76,13 +76,14 @@ import org.apache.spark.util.random.{
  * on RDD internals.
  */
 abstract class RDD[T: ClassTag](
+    //在所有有父子关系的RDD，共享的是同一个SparkContext
     @transient private var _sc: SparkContext,
+    //而子RDD的deps变量，也被赋值为一个List，里面包含一个OneToOneDependency实例，表明父RDD和子RDD之间的关系 
     @transient private var deps: Seq[Dependency[_]]) extends Serializable with Logging {
-
-  if (classOf[RDD[_]].isAssignableFrom(elementClassTag.runtimeClass)) {
-    // This is a warning instead of an exception in order to avoid breaking user programs that
-    // might have defined nested RDDs without running jobs with them.
-    logWarning("Spark does not support nested RDDs (see SPARK-5063)")
+      if (classOf[RDD[_]].isAssignableFrom(elementClassTag.runtimeClass)) {
+      // This is a warning instead of an exception in order to avoid breaking user programs that
+      // might have defined nested RDDs without running jobs with them.
+      logWarning("Spark does not support nested RDDs (see SPARK-5063)")
   }
 
   private def sc: SparkContext = {
@@ -96,7 +97,11 @@ abstract class RDD[T: ClassTag](
     _sc
   }
 
-  /** Construct an RDD with just a one-to-one dependency on one parent */
+  /** 
+   *  Construct an RDD with just a one-to-one dependency on one parent
+   *  this是把父RDD的SparkContext(oneParent.context)和一个列表List(new OneToOneDependency(oneParent)))，
+   *  传入了另一个RDD的构造函数
+   *   */
   def this(@transient oneParent: RDD[_]) =
     this(oneParent.context, List(new OneToOneDependency(oneParent)))
 
@@ -254,6 +259,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Get the preferred locations of a partition(取得每个partition的优先位置), taking into account whether the
    * RDD is checkpointed.
+   * 根据数据存放的位置，返回分区split在哪些节点访问更快
    */
   final def preferredLocations(split: Partition): Seq[String] = {
     checkpointRDD.map(_.getPreferredLocations(split)).getOrElse {
@@ -287,8 +293,11 @@ abstract class RDD[T: ClassTag](
     val ancestors = new mutable.HashSet[RDD[_]]
 
     def visit(rdd: RDD[_]) {
+      //根据当前RDD获取依赖,过虑窄依赖
       val narrowDependencies = rdd.dependencies.filter(_.isInstanceOf[NarrowDependency[_]])
+      //根据窄依赖关系获取RDD
       val narrowParents = narrowDependencies.map(_.rdd)
+      //当前窄依赖关系不包含已添加ancestors到RDD
       val narrowParentsNotVisited = narrowParents.filterNot(ancestors.contains)
       narrowParentsNotVisited.foreach { parent =>
         ancestors.add(parent)
@@ -298,7 +307,7 @@ abstract class RDD[T: ClassTag](
 
     visit(this)
 
-    // In case there is a cycle, do not include the root itself
+    // In case there is a cycle, do not include the root itself,不包括自己RDD
     ancestors.filterNot(_ == this).toSeq
   }
 
@@ -333,6 +342,8 @@ abstract class RDD[T: ClassTag](
    */
   def map[U: ClassTag](f: T => U): RDD[U] = withScope {
     val cleanF = sc.clean(f)
+    //这里this，就是之前生成的HadoopRDD，MapPartitionsRDD的构造函数，会调用父类的构造函数RDD[U](prev)， 
+    //这个this(例如也就是hadoopRdd),会被赋值给prev
     new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.map(cleanF))
   }
 
@@ -595,7 +606,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the intersection of this RDD and another one. The output will not contain any duplicate
    * elements, even if the input RDDs did.
-   *
+   *数据交集,返回一个新的数据集,包含两个数据集的交集数据
    * Note that this method performs a shuffle internally.
    *
    * @param partitioner Partitioner to use for the resulting RDD
@@ -621,7 +632,7 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
-   * Return an RDD created by coalescing all elements within each partition into an array.
+   * Return an RDD created by coalescing(聚合) all elements within each partition into an array.
    */
   def glom(): RDD[Array[T]] = withScope {
     new MapPartitionsRDD[Array[T], T](this, (context, pid, iter) => Iterator(iter.toArray))
@@ -736,6 +747,7 @@ abstract class RDD[T: ClassTag](
     f: Iterator[T] => Iterator[U],
     preservesPartitioning: Boolean = false): RDD[U] = withScope {
     val cleanedF = sc.clean(f)
+     //这个this(例如也就是hadoopRdd),会被赋值给prev,然后调用RDD.scala
     new MapPartitionsRDD(
       this,
       (context: TaskContext, index: Int, iter: Iterator[T]) => cleanedF(iter),
@@ -967,7 +979,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
-   *
+   * 相当于进行集合的差操作，RDD 1去除RDD 1和RDD 2交集中的所有元素
    * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
    * RDD will be &lt;= us.
    */
@@ -1454,6 +1466,7 @@ abstract class RDD[T: ClassTag](
     // same bytecodes for `saveAsTextFile`.
     val nullWritableClassTag = implicitly[ClassTag[NullWritable]]
     val textClassTag = implicitly[ClassTag[Text]]
+    //生成MapPartitionsRDD 
     val r = this.mapPartitions { iter =>
       val text = new Text()
       iter.map { x =>

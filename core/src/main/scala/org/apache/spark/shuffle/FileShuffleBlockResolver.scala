@@ -127,8 +127,9 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
         Array.tabulate[DiskBlockObjectWriter](numBuckets) { bucketId =>
           val blockId = ShuffleBlockId(shuffleId, mapId, bucketId)
           //
-          val blockFile = blockManager.diskBlockManager.getFile(blockId)
-          val tmp = Utils.tempFileWith(blockFile)
+          val blockFile = blockManager.diskBlockManager.getFile(blockId)           
+          val tmp = Utils.tempFileWith(blockFile)    
+          //tmp也就是blockFile如果已经存在则，在后面追加数据
           blockManager.getDiskWriter(blockId, tmp, serializerInstance, bufferSize, writeMetrics)
         }
       }

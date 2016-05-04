@@ -54,6 +54,7 @@ private[spark] class SortShuffleWriter[K, V, C](
   override def write(records: Iterator[Product2[K, V]]): Unit = {
     sorter = if (dep.mapSideCombine) {
       require(dep.aggregator.isDefined, "Map-side combine without Aggregator specified!")
+      //创建ExternalSorter实例。
       new ExternalSorter[K, V, C](
         dep.aggregator, Some(dep.partitioner), dep.keyOrdering, dep.serializer)
     } else if (SortShuffleWriter.shouldBypassMergeSort(
@@ -86,8 +87,9 @@ private[spark] class SortShuffleWriter[K, V, C](
     //获取当前任务要输出的文件路径
     val output = shuffleBlockResolver.getDataFile(dep.shuffleId, mapId)
     val tmp = Utils.tempFileWith(output)    
+    //创建BlockId
     val blockId = ShuffleBlockId(dep.shuffleId, mapId, IndexShuffleBlockResolver.NOOP_REDUCE_ID)
-    //将中间结果持久化
+    //调用ExternalSorter. writePartitionedFile将中间结果持久化
     val partitionLengths = sorter.writePartitionedFile(blockId, context, tmp)
     //创建索引文件
     shuffleBlockResolver.writeIndexFileAndCommit(dep.shuffleId, mapId, partitionLengths, tmp)

@@ -871,6 +871,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
       minPartitions: Int = defaultMinPartitions): RDD[String] = withScope {
     assertNotStopped()
     hadoopFile(path, classOf[TextInputFormat], classOf[LongWritable], classOf[Text],
+        //map来生成一个MappedRDD
       minPartitions).map(pair => pair._2.toString)
   }
 

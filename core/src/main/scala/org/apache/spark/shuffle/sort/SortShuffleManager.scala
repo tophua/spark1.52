@@ -22,7 +22,9 @@ import java.util.concurrent.ConcurrentHashMap
 import org.apache.spark.{SparkConf, TaskContext, ShuffleDependency}
 import org.apache.spark.shuffle._
 import org.apache.spark.shuffle.hash.HashShuffleReader
-
+/**
+ * sorted Shuffle就会极大的节省内存和磁盘的访问，所以更有利于更大规模的计算
+ */
 private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager {
 
   private val indexShuffleBlockResolver = new IndexShuffleBlockResolver(conf)
@@ -53,14 +55,17 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
       handle.asInstanceOf[BaseShuffleHandle[K, _, C]], startPartition, endPartition, context)
   }
 
-  /** Get a writer for a given partition. Called on executors by map tasks. */
+  /** 
+   *  Get a writer for a given partition. Called on executors by map tasks.
+   *  mapId 是partitionId
+   *   */
   override def getWriter[K, V](handle: ShuffleHandle, mapId: Int, context: TaskContext)
       : ShuffleWriter[K, V] = {
     val baseShuffleHandle = handle.asInstanceOf[BaseShuffleHandle[K, V, _]]
     //ConcurrentHashMap put和putIfAbsent的区别就是一个是直接放入并替换，另一个是有就不替换
     shuffleMapNumber.putIfAbsent(baseShuffleHandle.shuffleId, baseShuffleHandle.numMaps)
-    //负责计算中间结果的缓存处理及持久化,暂时理解是map任务的Stage的任务执行结果将通过SortShuffleManager持久
-    //化到存储体系
+    
+    //创建SortShuffleWriter对象,shuffleBlockResolver：index文件
     new SortShuffleWriter(
       shuffleBlockResolver, baseShuffleHandle, mapId, context)
   }

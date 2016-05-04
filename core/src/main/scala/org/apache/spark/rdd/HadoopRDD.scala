@@ -106,6 +106,7 @@ class HadoopRDD[K, V](
     keyClass: Class[K],
     valueClass: Class[V],
     minPartitions: Int)
+    //deps是一个空的Nil list，原因是它是从外部文件生成的，没有父rdd
   extends RDD[(K, V)](sc, Nil) with Logging {
 
   if (initLocalJobConfFuncOpt.isDefined) {

@@ -51,8 +51,8 @@ import org.apache.spark.util.{Clock, SystemClock, Utils}
  */
 private[spark] class TaskSetManager(
     sched: TaskSchedulerImpl,
-    val taskSet: TaskSet,
-    val maxTaskFailures: Int,
+    val taskSet: TaskSet,//接收提交的任务的集合
+    val maxTaskFailures: Int,//最大失败提交次数
     clock: Clock = new SystemClock())
   extends Schedulable with Logging {
 

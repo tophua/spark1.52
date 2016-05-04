@@ -24,7 +24,7 @@
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/xz-1.0.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/slf4j-api-1.7.10.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/hadoop-client-2.2.0.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/hadoop-common-2.2.0.jar"/>
+	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/hadoop-common-2.2.0.jar" sourcepath="C:/Users/liushuhua/.m2/repository/org/apache/hadoop/hadoop-common/2.2.0/hadoop-common-2.2.0-sources.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/hadoop-annotations-2.2.0.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/commons-math-2.1.jar"/>

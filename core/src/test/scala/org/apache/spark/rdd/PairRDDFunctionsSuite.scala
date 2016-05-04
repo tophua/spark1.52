@@ -442,6 +442,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
   }
 
   test("subtract") {
+    //去除两个RDD中相同的元素，不同的RDD将保留下来 
     val a = sc.parallelize(Array(1, 2, 3), 2)
     val b = sc.parallelize(Array(2, 3, 4), 4)
     //subtract 本RDD有、它RDD无的元素留下来

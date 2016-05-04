@@ -75,6 +75,7 @@ private[spark] class AppClient(
   private var appId: String = null
   /**
    * RpcEnv)是一个RpcEndpoints用于处理消息的环境onStart方法,所以ClientActor在正试启动前触发其onStart方法
+   * ClientEndpoint 主要负责向Master注册当前的程序,是AppClient的内部成员
    */
   private class ClientEndpoint(override val rpcEnv: RpcEnv) extends ThreadSafeRpcEndpoint
       with Logging {
@@ -161,7 +162,7 @@ private[spark] class AppClient(
               registerWithMaster(nthRetry + 1)
             }
           }
-        }//如果注册20s内未收到成功的消息，那么再次重复注册
+        }//如果注册20秒内未收到成功的消息，那么再次重复注册
       }, REGISTRATION_TIMEOUT_SECONDS, REGISTRATION_TIMEOUT_SECONDS, TimeUnit.SECONDS)
     }
 

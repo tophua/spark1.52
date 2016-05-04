@@ -47,12 +47,12 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
     stats().mean
   }
 
-  /** Compute the variance of this RDD's elements. */
+  /** Compute the variance(方差) of this RDD's elements. */
   def variance(): Double = self.withScope {
     stats().variance
   }
 
-  /** Compute the standard deviation of this RDD's elements. */
+  /** Compute the standard deviation(偏离) of this RDD's elements. */
   def stdev(): Double = self.withScope {
     stats().stdev
   }
@@ -100,7 +100,7 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
   }
 
   /**
-   * Compute a histogram of the data using bucketCount number of buckets evenly
+   * Compute a histogram(直方图) of the data using bucketCount number of buckets evenly
    *  spaced between the minimum and maximum of the RDD. For example if the min
    *  value is 0 and the max is 100 and there are two buckets the resulting
    *  buckets will be [0, 50) [50, 100]. bucketCount must be at least 1

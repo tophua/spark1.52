@@ -32,7 +32,7 @@ import org.apache.spark.util.{ThreadUtils, SparkExitCode, Utils}
 
 /**
  * Proxy that relays messages to the driver.
- *
+ * 主要负责向Master注册当前的程序,是AppClient的内部成员
  * We currently don't support retry if submission fails. In HA mode, client will submit request to
  * all masters and see which one could handle it.
  */
