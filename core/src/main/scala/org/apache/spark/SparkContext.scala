@@ -756,7 +756,9 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   // Methods for creating RDDs
 
   /** Distribute a local Scala collection to form an RDD.
-   *
+   *  从一个Seq集合创建RDD,
+   *  参数1：Seq集合，必须。
+                 参数2：分区数，默认为该Application分配到的资源的CPU核数
    * @note Parallelize acts lazily. If `seq` is a mutable collection and is altered after the call
    * to parallelize and before the first action on the RDD, the resultant RDD will reflect the
    * modified collection. Pass a copy of the argument to avoid this.
@@ -843,7 +845,9 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   }
 
   /** Distribute a local Scala collection to form an RDD.
-   *
+   *  从一个Seq集合创建RDD。
+      参数1：Seq集合，必须。
+     参数2：分区数，默认为该Application分配到的资源的CPU核数
    * This method is identical to `parallelize`.
    */
   def makeRDD[T: ClassTag](
@@ -864,6 +868,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   /**
    * Read a text file from HDFS, a local file system (available on all nodes), or any
    * Hadoop-supported file system URI, and return it as an RDD of Strings.
+   * 从hdf或者本地文件创建RDD
    * 
    */
   def textFile(

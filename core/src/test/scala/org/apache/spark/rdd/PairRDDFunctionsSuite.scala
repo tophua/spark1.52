@@ -30,8 +30,11 @@ OutputFormat => NewOutputFormat, RecordWriter => NewRecordWriter,
 TaskAttemptContext => NewTaskAttempContext}
 import org.apache.spark.{Partitioner, SharedSparkContext, SparkFunSuite}
 import org.apache.spark.util.Utils
-
+  /**
+   * PairRDDFunctions主要是Key/Value对操作
+   */
 class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
+
   test("aggregateByKey") {
      val pairs = sc.parallelize(Array((1, 1), (1, 1), (3, 2), (5, 1), (5, 3)), 2)
 

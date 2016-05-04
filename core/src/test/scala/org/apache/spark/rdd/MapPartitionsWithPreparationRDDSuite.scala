@@ -20,7 +20,9 @@ package org.apache.spark.rdd
 import scala.collection.mutable
 
 import org.apache.spark.{LocalSparkContext, SparkContext, SparkFunSuite, TaskContext}
-
+/**
+ * MapPartitions提供函数应用父RDD
+ */
 class MapPartitionsWithPreparationRDDSuite extends SparkFunSuite with LocalSparkContext {
 
   test("prepare called before parent partition is computed") {

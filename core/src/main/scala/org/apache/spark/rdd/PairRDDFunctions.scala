@@ -269,14 +269,18 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
   }
 
   /**
-   * 在一个（K，V)对的数据集上使用，返回一个（K，V）对的数据集，key相同的值，都被使用指定的reduce函数聚合到一起。
-   * 和groupbykey类似，任务的个数是可以通过第二个可选参数来配置的。
    * Merge the values for each key using an associative reduce function. This will also perform
    * the merging locally on each mapper before sending results to a reducer, similarly to a
    * "combiner" in MapReduce.
    * 
-   * 使用指定的reduce函数，将相同key的值聚合到一起，并执行函数
-   * 
+   * 该函数用于将RDD[K,V]中每个K对应的V值根据映射函数来运算，
+   * 参数numPartitions用于指定分区数；
+   * 参数partitioner用于指定分区函数；
+   * 例如:
+   * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
+   * scala> var rdd2 = rdd1.reduceByKey((x,y) => x + y)
+   * scala> rdd2.collect
+   * res85: Array[(String, Int)] = Array((A,2), (B,3), (C,1))
    */
   def reduceByKey(partitioner: Partitioner, func: (V, V) => V): RDD[(K, V)] = self.withScope {
     combineByKey[V]((v: V) => v, func, func, partitioner)
@@ -306,6 +310,11 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Merge the values for each key using an associative reduce function, but return the results
    * immediately to the master as a Map. This will also perform the merging locally on each mapper
    * before sending results to a reducer, similarly to a "combiner" in MapReduce.
+   * 该函数将RDD[K,V]中每个K对应的V值根据映射函数来运算，运算结果映射到一个Map[K,V]中，而不是RDD[K,V]。
+   * 例如:
+   * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
+   * scala> rdd1.reduceByKeyLocally((x,y) => x + y)
+   * res90: scala.collection.Map[String,Int] = Map(B -> 3, A -> 2, C -> 1)
    */
   def reduceByKeyLocally(func: (V, V) => V): Map[K, V] = self.withScope {
     val cleanedF = self.sparkContext.clean(func)
@@ -344,6 +353,11 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Count the number of elements for each key, collecting the results to a local Map.
    * 用于统计RDD[K,V]中每个K的数量
    * 返回一个(K，Int)对的Map，表示每一个key对应的元素个数
+   * 例如:
+   * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("B",3)))
+   * scala> rdd1.countByKey
+   * res5: scala.collection.Map[String,Long] = Map(A -> 2, B -> 3)
+   *
    * Note that this method should only be used if the resulting map is expected to be small, as
    * the whole thing is loaded into the driver's memory.
    * To handle very large results, consider using rdd.mapValues(_ => 1L).reduceByKey(_ + _), which
@@ -473,7 +487,13 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Note: As currently implemented, groupByKey must be able to hold all the key-value pairs for any
    * key in memory. If a key has too many values, it can result in an [[OutOfMemoryError]]
    * 
-   * 对相同key的数据进行group操作，在一个（K,V）对的数据集上调用，返回一个（K，Seq[V])对的数据集.
+   * 该函数用于将RDD[K,V]中每个K对应的V值，返回一个（K，Seq[V])对的数据集，
+   * 参数numPartitions用于指定分区数；
+   * 参数partitioner用于指定分区函数；
+   * 例如:
+   * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
+   * scala> rdd1.groupByKey().collect
+   * res81: Array[(String, Iterable[Int])] = Array((A,CompactBuffer(0, 2)), (B,CompactBuffer(2, 1)), (C,CompactBuffer(1)))
    */
   def groupByKey(partitioner: Partitioner): RDD[(K, Iterable[V])] = self.withScope {
     // groupByKey shouldn't use map side combine because map side combine does not
@@ -505,6 +525,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Return a copy of the RDD partitioned using the specified partitioner.
+   * 该函数根据partitioner函数生成新的ShuffleRDD，将原RDD重新分区
    */
   def partitionBy(partitioner: Partitioner): RDD[(K, V)] = self.withScope {
     if (keyClass.isArray && partitioner.isInstanceOf[HashPartitioner]) {
@@ -522,6 +543,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
    * (k, v2) is in `other`. Uses the given Partitioner to partition the output RDD.
    * 在类型为（K,V)和（K,W)类型的数据集上调用时，返回一个相同key对应的所有元素对在一起的(K, (V, W))数据集
+   * join相当于SQL中的内关联join，只返回两个RDD根据K可以关联上的结果，join只能用于两个RDD之间的关联，如果要多个RDD关联，多关联几次即可
    */
   def join[W](other: RDD[(K, W)], partitioner: Partitioner): RDD[(K, (V, W))] = self.withScope {
     this.cogroup(other, partitioner).flatMapValues( pair =>
@@ -534,6 +556,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in `other`, or the
    * pair (k, (v, None)) if no elements in `other` have key k. Uses the given Partitioner to
    * partition the output RDD.
+   * leftOuterJoin类似于SQL中的左外关联left outer join，返回结果以前面的RDD为主，关联不上的记录为空。
+   * 只能用于两个RDD之间的关联，如果要多个RDD关联，多关联几次即可。
    */
   def leftOuterJoin[W](
       other: RDD[(K, W)],
@@ -552,6 +576,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in `this`, or the
    * pair (k, (None, w)) if no elements in `this` have key k. Uses the given Partitioner to
    * partition the output RDD.
+   * rightOuterJoin类似于SQL中的有外关联right outer join，返回结果以参数中的RDD为主，关联不上的记录为空。
+   * 只能用于两个RDD之间的关联，如果要多个RDD关联，多关联几次即可
    */
   def rightOuterJoin[W](other: RDD[(K, W)], partitioner: Partitioner)
       : RDD[(K, (Option[V], W))] = self.withScope {
@@ -710,6 +736,11 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
   /**
    * Pass each value in the key-value pair RDD through a map function without changing the keys;
    * this also retains the original RDD's partitioning.
+   * 同基本转换操作中的map，只不过mapValues是针对[K,V]中的V值进行map操作
+   * 例如:
+   * scala> var rdd1 = sc.makeRDD(Array((1,"A"),(2,"B"),(3,"C"),(4,"D")),2)
+   * scala> rdd1.mapValues(x => x + "_").collect
+   * res26: Array[(Int, String)] = Array((1,A_), (2,B_), (3,C_), (4,D_))
    */
   def mapValues[U](f: V => U): RDD[(K, U)] = self.withScope {
     val cleanF = self.context.clean(f)
@@ -721,6 +752,11 @@ preservesPartitioning = true)
   /**
    * Pass each value in the key-value pair RDD through a flatMap function without changing the
    * keys; this also retains the original RDD's partitioning.
+   * 同基本转换操作中的flatMap，只不过flatMapValues是针对[K,V]中的V值进行flatMap操作
+   * 例如:
+   * scala> var rdd1 = sc.makeRDD(Array((1,"A"),(2,"B"),(3,"C"),(4,"D")),2)
+   * scala> rdd1.flatMapValues(x => x + "_").collect
+   * res26: Array[(Int, Char)] = Array((1,A), (1,_), (2,B), (2,_), (3,C), (3,_), (4,D), (4,_))
    */
   def flatMapValues[U](f: V => TraversableOnce[U]): RDD[(K, U)] = self.withScope {
     val cleanF = self.context.clean(f)
@@ -736,6 +772,8 @@ preservesPartitioning = true)
    * return a resulting RDD that contains a tuple with the list of values
    * for that key in `this`, `other1`, `other2` and `other3`.
    * 在类型为（K,V)和（K,W)的数据集上调用，返回一个 (K, Seq[V], Seq[W])元组的数据集
+   * cogroup相当于SQL中的全外关联full outer join，返回左右RDD中的记录，关联不上的为空。
+   * 参数partitioner用于指定分区函数
    */
   def cogroup[W1, W2, W3](other1: RDD[(K, W1)],
       other2: RDD[(K, W2)],
@@ -864,9 +902,15 @@ preservesPartitioning = true)
 
   /**
    * Return an RDD with the pairs from `this` whose keys are not in `other`.
-   *
+   * 返回在RDD中出现，并且不在other RDD中出现的元素(交集,相当于进行集合的差操作)，不去重,
+   * 只不过这里是针对K的，返回在主RDD中出现，并且不在otherRDD中出现的元素。
    * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
    * RDD will be <= us.
+   * 例如:
+   * var rdd1 = sc.makeRDD(Array(("A","1"),("B","2"),("C","3")),2)
+   * var rdd2 = sc.makeRDD(Array(("A","a"),("C","c"),("D","d")),2)
+   * scala> rdd1.subtractByKey(rdd2).collect
+   * res13: Array[(String, String)] = Array((B,2))
    */
   def subtractByKey[W: ClassTag](other: RDD[(K, W)]): RDD[(K, V)] = self.withScope {
     subtractByKey(other, self.partitioner.getOrElse(new HashPartitioner(self.partitions.length)))
@@ -887,8 +931,13 @@ preservesPartitioning = true)
   /**
    * Return the list of values in the RDD for key `key`. This operation is done efficiently if the
    * RDD has a known partitioner by only searching the partition that the key maps to.
-   * rdd实现的时候，然后分区是基于key的，那比较高效可以直接遍历对应分区，否则全部遍历。
-   * 全部遍历的实现为filter(_._1 == key).map(_._2).collect()
+   * lookup用于(K,V)类型的RDD,指定K值，返回RDD中该K对应的所有V值。
+   * 例如:
+   * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
+   * scala> rdd1.lookup("A")
+   * res0: Seq[Int] = WrappedArray(0, 2)
+   * scala> rdd1.lookup("B")
+   * res1: Seq[Int] = WrappedArray(1, 2)
    */
   def lookup(key: K): Seq[V] = self.withScope {
     self.partitioner match {
