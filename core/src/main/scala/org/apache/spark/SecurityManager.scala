@@ -197,6 +197,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   private val authOn = sparkConf.getBoolean(SecurityManager.SPARK_AUTH_CONF, false)
   // keep spark.ui.acls.enable for backwards compatibility with 1.0
+  //Spark webUI存取权限是否启用。如果启用，在用户浏览web界面的时候会检查用户是否有访问权限
   private var aclsOn =
     sparkConf.getBoolean("spark.acls.enable", sparkConf.getBoolean("spark.ui.acls.enable", false))
 
@@ -213,7 +214,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   // always add the current user and SPARK_USER to the viewAcls
   private val defaultAclUsers = Set[String](System.getProperty("user.name", ""),
     Utils.getCurrentUserName())
-
+//以逗号分隔Spark webUI访问用户的列表。默认情况下只有启动Spark job的用户才有访问权限
   setViewAcls(defaultAclUsers, sparkConf.get("spark.ui.view.acls", ""))
   setModifyAcls(defaultAclUsers, sparkConf.get("spark.modify.acls", ""))
 
@@ -457,8 +458,9 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 }
 
 private[spark] object SecurityManager {
-
+//是否启用内部身份验证
   val SPARK_AUTH_CONF: String = "spark.authenticate"
+  //设置组件之间进行身份验证的密钥
   val SPARK_AUTH_SECRET_CONF: String = "spark.authenticate.secret"
   // This is used to set auth secret to an executor's env variable. It should have the same
   // value as SPARK_AUTH_SECERET_CONF set in SparkConf

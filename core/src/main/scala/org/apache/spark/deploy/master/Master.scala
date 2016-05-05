@@ -59,12 +59,15 @@ private[deploy] class Master(
   private val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
 
   private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") // For application IDs 
-  //每隔WORKER_TIMEOUT（默认60秒（60000毫秒）检查一次超时
+  //如果master没有收到worker的心跳，那么将在这么多秒之后，master将丢弃该worker（默认60秒（60000毫秒）
   private val WORKER_TIMEOUT_MS = conf.getLong("spark.worker.timeout", 60) * 1000
+  //web UI上最多展示几个已结束应用。更早的应用的数将被删除
   private val RETAINED_APPLICATIONS = conf.getInt("spark.deploy.retainedApplications", 200)
+  //web UI上最多展示几个已结束的驱动器。更早的驱动器进程数据将被删除
   private val RETAINED_DRIVERS = conf.getInt("spark.deploy.retainedDrivers", 200)
   //worker判断死亡时间
   private val REAPER_ITERATIONS = conf.getInt("spark.dead.worker.persistence", 15)
+  //设置启用master备用恢复模式,默认为NONE
   private val RECOVERY_MODE = conf.get("spark.deploy.recoveryMode", "NONE")
 
   val workers = new HashSet[WorkerInfo]
@@ -102,6 +105,7 @@ private[deploy] class Master(
   private var webUi: MasterWebUI = null
 
   private val masterPublicAddress = {
+  //Spark master和workers使用的公共DNS（默认空）
     val envVar = conf.getenv("SPARK_PUBLIC_DNS")
     if (envVar != null) envVar else address.host
   }
@@ -127,6 +131,8 @@ private[deploy] class Master(
   private val spreadOutApps = conf.getBoolean("spark.deploy.spreadOut", true)
 
   // Default maxCores for applications that don't specify it (i.e. pass Int.MaxValue)
+  //如果没有设置spark.cores.max，该参数设置Standalone集群分配给应用程序的最大内核数，
+  //如果不设置，应用程序获取所有的有效内核。注意在一个共享的集群中，设置一个低值防止攫取了所有的内核，影响他人的使用
   private val defaultCores = conf.getInt("spark.deploy.defaultCores", Int.MaxValue)
   if (defaultCores < 1) {
     throw new SparkException("spark.deploy.defaultCores must be positive")

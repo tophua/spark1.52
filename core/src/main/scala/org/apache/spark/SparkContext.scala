@@ -274,9 +274,11 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   def jars: Seq[String] = _jars
   def files: Seq[String] = _files
+  //要连接的Spark集群Master的URL
   def master: String = _conf.get("spark.master")
+  //应用程序名称
   def appName: String = _conf.get("spark.app.name")
-
+ //是否记录Spark事件
   private[spark] def isEventLogEnabled: Boolean = _conf.getBoolean("spark.eventLog.enabled", false)
   private[spark] def eventLogDir: Option[URI] = _eventLogDir
   private[spark] def eventLogCodec: Option[String] = _eventLogCodec
@@ -435,13 +437,15 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
       throw new SparkException("Detected yarn-cluster mode, but isn't running on a cluster. " +
         "Deployment to YARN is not supported directly by SparkContext. Please use spark-submit.")
     }
-
+    //SparkContext 启动时是否记录有效 SparkConf信息
     if (_conf.getBoolean("spark.logConf", false)) {
       logInfo("Spark configuration:\n" + _conf.toDebugString)
     }
 
     // Set Spark driver host and port system properties
+    //运行driver的主机名或 IP 地址
     _conf.setIfMissing("spark.driver.host", Utils.localHostName())
+    //随机 driver侦听的端口
     _conf.setIfMissing("spark.driver.port", "0")
 
     _conf.set("spark.executor.id", SparkContext.DRIVER_IDENTIFIER)
@@ -449,7 +453,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     _jars = _conf.getOption("spark.jars").map(_.split(",")).map(_.filter(_.size != 0)).toSeq.flatten
     _files = _conf.getOption("spark.files").map(_.split(",")).map(_.filter(_.size != 0))
       .toSeq.flatten
-
+   //保存日志相关信息的路径，可以是hdfs://开头的HDFS路径，也可以是file://开头的本地路径，都需要提前创建
     _eventLogDir =
       if (isEventLogEnabled) {
         val unresolvedDir = conf.get("spark.eventLog.dir", EventLoggingListener.DEFAULT_LOG_DIR)
@@ -460,6 +464,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
       }
 
     _eventLogCodec = {
+    //是否压缩记录Spark事件，前提spark.eventLog.enabled为true
       val compress = _conf.getBoolean("spark.eventLog.compress", false)
       if (compress && isEventLogEnabled) {
         Some(CompressionCodec.getCodecName(_conf)).map(CompressionCodec.getShortName)

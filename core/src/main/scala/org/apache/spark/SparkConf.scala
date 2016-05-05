@@ -83,12 +83,13 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * The master URL to connect to, such as "local" to run locally with one thread, "local[4]" to
    * run locally with 4 cores, or "spark://master:7077" to run on a Spark standalone cluster.
+   * 要连接的Spark集群Master的URL
    */
   def setMaster(master: String): SparkConf = {
     set("spark.master", master)
   }
 
-  /** Set a name for your application. Shown in the Spark web UI. */
+  /** Set a name for your application. Shown in the Spark web UI. 应用程序名称*/
   def setAppName(name: String): SparkConf = {
     set("spark.app.name", name)
   }
@@ -393,9 +394,11 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
         "the cluster manager (via SPARK_LOCAL_DIRS in mesos/standalone and LOCAL_DIRS in YARN)."
       logWarning(msg)
     }
-
+  //传递给executor的额外JVM 选项，但是不能使用它来设置Spark属性或堆空间大小
     val executorOptsKey = "spark.executor.extraJavaOptions"
+    //追加到executor类路径中的附加类路径
     val executorClasspathKey = "spark.executor.extraClassPath"
+    
     val driverOptsKey = "spark.driver.extraJavaOptions"
     val driverClassPathKey = "spark.driver.extraClassPath"
     val driverLibraryPathKey = "spark.driver.extraLibraryPath"
@@ -429,7 +432,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
     // Validate memory fractions
     val memoryKeys = Seq(
-      "spark.storage.memoryFraction",
+      "spark.storage.memoryFraction",//Java堆用于cache的比例
       "spark.shuffle.memoryFraction",
       "spark.shuffle.safetyFraction",
       "spark.storage.unrollFraction",
@@ -489,6 +492,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     }
 
     if (!contains(sparkExecutorInstances)) {
+    //每个slave机器上启动的worker实例个数（默认：1）
       sys.env.get("SPARK_WORKER_INSTANCES").foreach { value =>
         val warning =
           s"""
@@ -548,6 +552,7 @@ private[spark] object SparkConf extends Logging {
    * present in the user's configuration, a warning is logged.
    */
   private val configsWithAlternatives = Map[String, Seq[AlternateConfig]](
+  //executor在加载类的时候是否优先使用用户自定义的JAR包，而不是Spark带有的JAR包，目前，该属性只是一项试验功能
     "spark.executor.userClassPathFirst" -> Seq(
       AlternateConfig("spark.files.userClassPathFirst", "1.3")),
     "spark.history.fs.update.interval" -> Seq(
@@ -562,8 +567,9 @@ private[spark] object SparkConf extends Logging {
       AlternateConfig("spark.yarn.applicationMaster.waitTries", "1.3",
         // Translate old value to a duration, with 10s wait time per try.
         translation = s => s"${s.toLong * 10}s")),
-    "spark.reducer.maxSizeInFlight" -> Seq(
-    //同时获取每一个分解任务的时候，映射输出文件的最大的尺寸（以兆为单位）
+    "spark.reducer.maxSizeInFlight" -> Seq(   
+    //每个reduce任务同时获取map输出的最大大小 （以兆字节为单位）。
+    //由于每个map输出都需要一个缓冲区来接收它，这代表着每个 reduce 任务有固定的内存开销，所以要设置小点，除非有很大内存
       AlternateConfig("spark.reducer.maxMbInFlight", "1.4")),
     "spark.kryoserializer.buffer" ->
         Seq(AlternateConfig("spark.kryoserializer.buffer.mb", "1.4",
@@ -571,6 +577,7 @@ private[spark] object SparkConf extends Logging {
     "spark.kryoserializer.buffer.max" -> Seq(
       AlternateConfig("spark.kryoserializer.buffer.max.mb", "1.4")),
     "spark.shuffle.file.buffer" -> Seq(
+    //每个shuffle的文件输出流内存缓冲区的大小，以KB为单位。这些缓冲区可以减少磁盘寻道的次数，也减少创建shuffle中间文件时的系统调用
       AlternateConfig("spark.shuffle.file.buffer.kb", "1.4")),
     "spark.executor.logs.rolling.maxSize" -> Seq(
       AlternateConfig("spark.executor.logs.rolling.size.maxBytes", "1.4")),

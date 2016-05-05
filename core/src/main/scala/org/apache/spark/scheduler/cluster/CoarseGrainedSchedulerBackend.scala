@@ -93,6 +93,8 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
     override def onStart() {
       // Periodically revive offers to allow delay scheduling to work
+      //复活重新获取资源的Task的最长时间间隔（毫秒），
+      //发生在Task因为本地资源不足而将资源分配给其他Task运行后进入等待时间，如果这个等待时间内重新获取足够的资源就继续计算
       val reviveIntervalMs = conf.getTimeAsMs("spark.scheduler.revive.interval", "1s")
 
       reviveThread.scheduleAtFixedRate(new Runnable {
@@ -364,7 +366,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   override def killTask(taskId: Long, executorId: String, interruptThread: Boolean) {
     driverEndpoint.send(KillTask(taskId, executorId, interruptThread))
   }
-
+///如果用户不设置，系统使用集群中运行shuffle操作的默认任务数
   override def defaultParallelism(): Int = {
     conf.getInt("spark.default.parallelism", math.max(totalCoreCount.get(), 2))
   }

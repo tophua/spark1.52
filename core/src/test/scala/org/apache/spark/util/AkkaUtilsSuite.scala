@@ -38,7 +38,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   test("remote fetch security bad password") {
     val conf = new SparkConf
     conf.set("spark.rpc", "akka")
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
 
     val securityManager = new SecurityManager(conf)
@@ -53,7 +55,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
 
     val badconf = new SparkConf
     badconf.set("spark.rpc", "akka")
+     //是否启用内部身份验证
     badconf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     badconf.set("spark.authenticate.secret", "bad")
     val securityManagerBad = new SecurityManager(badconf)
 
@@ -72,7 +76,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
 
   test("remote fetch security off") {
     val conf = new SparkConf
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "bad")
     val securityManager = new SecurityManager(conf)
 
@@ -87,7 +93,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
       new MapOutputTrackerMasterEndpoint(rpcEnv, masterTracker, conf))
 
     val badconf = new SparkConf
+     //是否启用内部身份验证
     badconf.set("spark.authenticate", "false")
+    //设置组件之间进行身份验证的密钥
     badconf.set("spark.authenticate.secret", "good")
     val securityManagerBad = new SecurityManager(badconf)
 
@@ -119,7 +127,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
 
   test("remote fetch security pass") {
     val conf = new SparkConf
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
     val securityManager = new SecurityManager(conf)
 
@@ -167,7 +177,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   test("remote fetch security off client") {
     val conf = new SparkConf
     conf.set("spark.rpc", "akka")
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
 
     val securityManager = new SecurityManager(conf)
@@ -184,7 +196,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
 
     val badconf = new SparkConf
     badconf.set("spark.rpc", "akka")
+     //是否启用内部身份验证
     badconf.set("spark.authenticate", "false")
+    //设置组件之间进行身份验证的密钥
     badconf.set("spark.authenticate.secret", "bad")
     val securityManagerBad = new SecurityManager(badconf)
 
@@ -246,7 +260,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
 
   test("remote fetch ssl on and security enabled") {
     val conf = sparkSSLConfig()
+    //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
     val securityManager = new SecurityManager(conf)
 
@@ -261,7 +277,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
       new MapOutputTrackerMasterEndpoint(rpcEnv, masterTracker, conf))
 
     val slaveConf = sparkSSLConfig()
+     //是否启用内部身份验证
     slaveConf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     slaveConf.set("spark.authenticate.secret", "good")
     val securityManagerBad = new SecurityManager(slaveConf)
 
@@ -293,7 +311,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   test("remote fetch ssl on and security enabled - bad credentials") {
     val conf = sparkSSLConfig()
     conf.set("spark.rpc", "akka")
+    //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
     val securityManager = new SecurityManager(conf)
 
@@ -309,7 +329,9 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
 
     val slaveConf = sparkSSLConfig()
     slaveConf.set("spark.rpc", "akka")
+    //是否启用内部身份验证
     slaveConf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     slaveConf.set("spark.authenticate.secret", "bad")
     val securityManagerBad = new SecurityManager(slaveConf)
 

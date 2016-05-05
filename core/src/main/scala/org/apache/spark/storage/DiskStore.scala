@@ -31,7 +31,8 @@ import org.apache.spark.util.Utils
  */
 private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBlockManager)
   extends BlockStore(blockManager) with Logging {
-
+//以字节为单位的块大小，用于磁盘读取一个块大小时进行内存映射。这可以防止Spark在内存映射时使用很小块，
+//一般情况下，对块进行内存映射的开销接近或低于操作系统的页大小
   val minMemoryMapBytes = blockManager.conf.getSizeAsBytes("spark.storage.memoryMapThreshold", "2m")
 
   override def getSize(blockId: BlockId): Long = {

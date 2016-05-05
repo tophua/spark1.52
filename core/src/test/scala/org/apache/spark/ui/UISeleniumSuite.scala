@@ -97,6 +97,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       .setAppName("test")
       .set("spark.ui.enabled", "true")
       .set("spark.ui.port", "0")
+      //允许在webUI将stage和相应的job杀死
       .set("spark.ui.killEnabled", killEnabled.toString)
     val sc = new SparkContext(conf)
     assert(sc.ui.isDefined)
@@ -182,7 +183,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       updatedStageJson should be (stageJson)
     }
   }
-
+//允许在webUI将stage和相应的job杀死
   test("spark.ui.killEnabled should properly control kill button display") {
     def hasKillLink: Boolean = find(className("kill-link")).isDefined
     def runSlowJob(sc: SparkContext) {

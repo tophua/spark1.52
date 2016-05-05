@@ -250,6 +250,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
       val myConf = conf.clone()
         .setAppName("test")
         .setMaster("local")
+	//是否压缩在shuffle期间溢出的数据，如果压缩将使用spark.io.compression.codec。
         .set("spark.shuffle.spill.compress", shuffleSpillCompress.toString)
         .set("spark.shuffle.compress", shuffleCompress.toString)
         .set("spark.shuffle.memoryFraction", "0.001")

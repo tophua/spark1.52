@@ -68,7 +68,9 @@ private[spark] class TaskSetManager(
     conf.getLong("spark.scheduler.executorTaskBlacklistTime", 0L)
 
   // Quantile of tasks at which to start speculation
+  //推测启动前，Stage必须要完成总Task的百分比
   val SPECULATION_QUANTILE = conf.getDouble("spark.speculation.quantile", 0.75)
+  //比已完成Task的运行速度中位数慢多少倍才启用推测
   val SPECULATION_MULTIPLIER = conf.getDouble("spark.speculation.multiplier", 1.5)
 
   // Limit of bytes for total size of results (default is 1GB)

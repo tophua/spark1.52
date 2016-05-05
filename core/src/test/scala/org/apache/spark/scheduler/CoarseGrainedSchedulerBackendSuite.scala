@@ -24,6 +24,7 @@ class CoarseGrainedSchedulerBackendSuite extends SparkFunSuite with LocalSparkCo
 
   test("serialized task larger than akka frame size") {
     val conf = new SparkConf
+    //以MB为单位的driver和executor之间通信信息的大小，设置值越大，driver可以接受更大的计算结果
     conf.set("spark.akka.frameSize", "1")
     conf.set("spark.default.parallelism", "1")
     sc = new SparkContext("local-cluster[2, 1, 1024]", "test", conf)

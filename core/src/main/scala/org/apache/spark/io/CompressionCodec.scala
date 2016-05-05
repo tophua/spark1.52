@@ -48,7 +48,7 @@ trait CompressionCodec {
  */
 
 private[spark] object CompressionCodec {
-
+//用于压缩内部数据如 RDD分区和shuffle输出的编码解码器
   private val configKey = "spark.io.compression.codec"
   private val shortCompressionCodecNames = Map(
     "lz4" -> classOf[LZ4CompressionCodec].getName,

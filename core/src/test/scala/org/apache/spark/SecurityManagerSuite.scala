@@ -25,9 +25,13 @@ class SecurityManagerSuite extends SparkFunSuite {
 
   test("set security with conf") {
     val conf = new SparkConf
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
+     //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
+     //Spark webUI存取权限是否启用。如果启用，在用户浏览web界面的时候会检查用户是否有访问权限
     conf.set("spark.ui.acls.enable", "true")
+    //以逗号分隔Spark webUI访问用户的列表。默认情况下只有启动Spark job的用户才有访问权限
     conf.set("spark.ui.view.acls", "user1,user2")
     val securityManager = new SecurityManager(conf);
     assert(securityManager.isAuthenticationEnabled() === true)
@@ -39,6 +43,7 @@ class SecurityManagerSuite extends SparkFunSuite {
 
   test("set security with api") {
     val conf = new SparkConf
+    //以逗号分隔Spark webUI访问用户的列表。默认情况下只有启动Spark job的用户才有访问权限
     conf.set("spark.ui.view.acls", "user1,user2")
     val securityManager = new SecurityManager(conf);
     securityManager.setAcls(true)
@@ -86,6 +91,7 @@ class SecurityManagerSuite extends SparkFunSuite {
 
   test("set security admin acls") {
     val conf = new SparkConf
+    //以逗号分隔Spark webUI访问用户的列表。默认情况下只有启动Spark job的用户才有访问权限
     conf.set("spark.admin.acls", "user1,user2")
     conf.set("spark.ui.view.acls", "user3")
     conf.set("spark.modify.acls", "user4")

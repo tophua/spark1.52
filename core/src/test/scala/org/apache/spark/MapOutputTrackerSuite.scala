@@ -161,6 +161,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
 
   test("remote fetch below akka frame size") {
     val newConf = new SparkConf
+  //以MB为单位的driver和executor之间通信信息的大小，设置值越大，driver可以接受更大的计算结果
     newConf.set("spark.akka.frameSize", "1")
     newConf.set("spark.rpc.askTimeout", "1") // Fail fast
 
@@ -187,6 +188,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
 
   test("remote fetch exceeds akka frame size") {
     val newConf = new SparkConf
+    //以MB为单位的driver和executor之间通信信息的大小，设置值越大，driver可以接受更大的计算结果
     newConf.set("spark.akka.frameSize", "1")
     newConf.set("spark.rpc.askTimeout", "1") // Fail fast
 

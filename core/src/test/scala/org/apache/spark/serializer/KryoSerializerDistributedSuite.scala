@@ -30,6 +30,7 @@ class KryoSerializerDistributedSuite extends SparkFunSuite {
     val conf = new SparkConf(false)
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", classOf[AppJarRegistrator].getName)
+      //Task的最大重试次数
       .set("spark.task.maxFailures", "1")
 
     val jar = TestUtils.createJarWithClasses(List(AppJarRegistrator.customClassName))

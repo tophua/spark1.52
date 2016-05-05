@@ -115,7 +115,7 @@ private[spark] class ExternalSorter[K, V, C](
   private val diskBlockManager = blockManager.diskBlockManager
   private val ser = Serializer.getSerializer(serializer)
   private val serInstance = ser.newInstance()
-
+ //如果为true，在shuffle期间通过溢出数据到磁盘来降低了内存使用总量，溢出阈值是由spark.shuffle.memoryFraction指定的
   private val spillingEnabled = conf.getBoolean("spark.shuffle.spill", true)
 
   // Use getSizeAsKb (not bytes) to maintain backwards compatibility if no units are provided

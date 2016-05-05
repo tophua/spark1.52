@@ -397,7 +397,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val conf = new SparkConf().
       set("spark.scheduler.executorTaskBlacklistTime", rescheduleDelay.toString).
       // dont wait to jump locality levels in this test
-      set("spark.locality.wait", "0")
+      set("spark.locality.wait", "0")//本参数是以毫秒为单位启动本地数据task的等待时间
 
     sc = new SparkContext("local", "test", conf)
     // two executors on same host, one on different.

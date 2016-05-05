@@ -92,7 +92,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
 
   // To limit the total memory usage of JobProgressListener, we only track information for a fixed
   // number of non-active jobs and stages (there is no limit for active jobs and stages):
-
+  //在GC之前保留的stage数量
   val retainedStages = conf.getInt("spark.ui.retainedStages", SparkUI.DEFAULT_RETAINED_STAGES)
   val retainedJobs = conf.getInt("spark.ui.retainedJobs", SparkUI.DEFAULT_RETAINED_JOBS)
 
@@ -514,7 +514,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     synchronized {
       schedulingMode = environmentUpdate
         .environmentDetails("Spark Properties").toMap
-        .get("spark.scheduler.mode")
+        .get("spark.scheduler.mode")//Spark的任务调度模式
         .map(SchedulingMode.withName)
     }
   }

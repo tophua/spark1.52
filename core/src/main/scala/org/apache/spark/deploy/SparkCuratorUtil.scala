@@ -34,6 +34,7 @@ private[spark] object SparkCuratorUtil extends Logging {
 
   def newClient(
       conf: SparkConf,
+      //zookeeper集群URL
       zkUrlConf: String = "spark.deploy.zookeeper.url"): CuratorFramework = {
     val ZK_URL = conf.get(zkUrlConf)
     val zk = CuratorFrameworkFactory.newClient(ZK_URL,

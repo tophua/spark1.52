@@ -50,6 +50,7 @@ private[deploy] class Worker(
   cores: Int,
   //worker节点当前可用的memory大小
   memory: Int,
+  //Master地址
   masterRpcAddresses: Array[RpcAddress],
   systemName: String,
   endpointName: String,
@@ -96,11 +97,13 @@ private[deploy] class Worker(
     REGISTRATION_RETRY_FUZZ_MULTIPLIER))
   private val PROLONGED_REGISTRATION_RETRY_INTERVAL_SECONDS = (math.round(60
     * REGISTRATION_RETRY_FUZZ_MULTIPLIER))
-
+  //是否定期清理worker的应用程序工作目录
   private val CLEANUP_ENABLED = conf.getBoolean("spark.worker.cleanup.enabled", false)
   // How often worker will clean up old app folders
+  //清理worker本地过期的应用程序工作目录的时间间隔（秒）
   private val CLEANUP_INTERVAL_MILLIS =
     conf.getLong("spark.worker.cleanup.interval", 60 * 30) * 1000
+    //worker保留应用程序工作目录的有效时间。
   // TTL for app folders/data;  after TTL expires it will be cleaned up
   private val APP_DATA_RETENTION_SECONDS =
     conf.getLong("spark.worker.cleanup.appDataTtl", 7 * 24 * 3600)
@@ -136,7 +139,7 @@ private[deploy] class Worker(
 
   // The shuffle service is not actually started unless configured.
   private val shuffleService = new ExternalShuffleService(conf, securityMgr)
-
+ //Spark master和workers使用的公共DNS（默认空）
   private val publicAddress = {
     val envVar = conf.getenv("SPARK_PUBLIC_DNS")
     if (envVar != null) envVar else host

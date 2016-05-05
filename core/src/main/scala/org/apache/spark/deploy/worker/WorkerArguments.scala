@@ -51,7 +51,7 @@ private[worker] class WorkerArguments(args: Array[String], conf: SparkConf) {
   if (System.getenv("SPARK_WORKER_WEBUI_PORT") != null) {//Worker WebUI监听端口
     webUiPort = System.getenv("SPARK_WORKER_WEBUI_PORT").toInt
   }
-  if (System.getenv("SPARK_WORKER_DIR") != null) {//Worker的工作目录
+  if (System.getenv("SPARK_WORKER_DIR") != null) {//Worker的工作目录,包括worker的日志以及临时存储空间
     workDir = System.getenv("SPARK_WORKER_DIR")
   }
 

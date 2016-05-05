@@ -48,7 +48,9 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
 
   test("security on same password") {
     val conf = new SparkConf()
+     //是否启用内部身份验证
       .set("spark.authenticate", "true")
+       //设置组件之间进行身份验证的密钥
       .set("spark.authenticate.secret", "good")
       .set("spark.app.id", "app-id")
     testConnection(conf, conf) match {
@@ -59,7 +61,9 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
 
   test("security on mismatch password") {
     val conf0 = new SparkConf()
+     //是否启用内部身份验证
       .set("spark.authenticate", "true")
+       //设置组件之间进行身份验证的密钥
       .set("spark.authenticate.secret", "good")
       .set("spark.app.id", "app-id")
     val conf1 = conf0.clone.set("spark.authenticate.secret", "bad")
@@ -71,7 +75,9 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
 
   test("security mismatch auth off on server") {
     val conf0 = new SparkConf()
+     //是否启用内部身份验证
       .set("spark.authenticate", "true")
+       //设置组件之间进行身份验证的密钥
       .set("spark.authenticate.secret", "good")
       .set("spark.app.id", "app-id")
     val conf1 = conf0.clone.set("spark.authenticate", "false")
@@ -83,7 +89,9 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
 
   test("security mismatch auth off on client") {
     val conf0 = new SparkConf()
+    //是否启用内部身份验证
       .set("spark.authenticate", "false")
+       //设置组件之间进行身份验证的密钥
       .set("spark.authenticate.secret", "good")
       .set("spark.app.id", "app-id")
     val conf1 = conf0.clone.set("spark.authenticate", "true")

@@ -51,6 +51,7 @@ class PersistenceEngineSuite extends SparkFunSuite {
     val zkTestServer = new TestingServer(findFreePort(conf))
     try {
       testPersistenceEngine(conf, serializer => {
+	//zookeeper集群URL
         conf.set("spark.deploy.zookeeper.url", zkTestServer.getConnectString)
         new ZooKeeperPersistenceEngine(conf, serializer)
       })

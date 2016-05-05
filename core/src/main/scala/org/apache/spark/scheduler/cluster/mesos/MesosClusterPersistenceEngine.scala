@@ -94,6 +94,7 @@ private[spark] class ZookeeperMesosClusterPersistenceEngine(
     conf: SparkConf)
   extends MesosClusterPersistenceEngine with Logging {
   private val WORKING_DIR =
+    //zooKeeper保存恢复状态的目录，缺省为/spark
     conf.get("spark.deploy.zookeeper.dir", "/spark_mesos_dispatcher") + "/" + baseDir
 
   SparkCuratorUtil.mkdir(zk, WORKING_DIR)

@@ -43,6 +43,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
   }
 
   test("local mode, FIFO scheduler") {
+  //Spark的任务调度模式
     val conf = new SparkConf().set("spark.scheduler.mode", "FIFO")
     sc = new SparkContext("local[2]", "test", conf)
     testCount()
@@ -51,7 +52,8 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
 
-  test("local mode, fair scheduler") {
+  test("local mode, fair scheduler")
+  //Spark的任务调度模式{
     val conf = new SparkConf().set("spark.scheduler.mode", "FAIR")
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()
     conf.set("spark.scheduler.allocation.file", xmlPath)
@@ -61,7 +63,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     // Make sure we can still launch tasks.
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
-
+//Spark的任务调度模式
   test("cluster mode, FIFO scheduler") {
     val conf = new SparkConf().set("spark.scheduler.mode", "FIFO")
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
@@ -70,7 +72,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     // Make sure we can still launch tasks.
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
-
+//Spark的任务调度模式
   test("cluster mode, fair scheduler") {
     val conf = new SparkConf().set("spark.scheduler.mode", "FAIR")//FAIR 公平
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()

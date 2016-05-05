@@ -49,6 +49,7 @@ private[spark] object UIWorkloadGenerator {
     val conf = new SparkConf().setMaster(args(0)).setAppName("Spark UI tester")
 
     val schedulingMode = SchedulingMode.withName(args(1))
+    //Spark的任务调度模式
     if (schedulingMode == SchedulingMode.FAIR) {
       conf.set("spark.scheduler.mode", "FAIR")
     }

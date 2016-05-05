@@ -57,7 +57,9 @@ class ConnectionManagerSuite extends SparkFunSuite {
 
   test("security on same password") {
     val conf = new SparkConf
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
     conf.set("spark.app.id", "app-id")
     val securityManager = new SecurityManager(conf)
@@ -94,8 +96,10 @@ class ConnectionManagerSuite extends SparkFunSuite {
 
   test("security mismatch password") {
     val conf = new SparkConf
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
     conf.set("spark.app.id", "app-id")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
     val securityManager = new SecurityManager(conf)
     val manager = new ConnectionManager(0, conf, securityManager)
@@ -105,7 +109,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
       numReceivedMessages += 1
       None
     })
-
+//设置组件之间进行身份验证的密钥
     val badconf = conf.clone.set("spark.authenticate.secret", "bad")
     val badsecurityManager = new SecurityManager(badconf)
     val managerServer = new ConnectionManager(0, badconf, badsecurityManager)
@@ -135,7 +139,9 @@ class ConnectionManagerSuite extends SparkFunSuite {
 
   test("security mismatch auth off") {
     val conf = new SparkConf
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
+    //设置组件之间进行身份验证的密钥
     conf.set("spark.authenticate.secret", "good")
     val securityManager = new SecurityManager(conf)
     val manager = new ConnectionManager(0, conf, securityManager)
@@ -147,7 +153,9 @@ class ConnectionManagerSuite extends SparkFunSuite {
     })
 
     val badconf = new SparkConf
+     //是否启用内部身份验证
     badconf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     badconf.set("spark.authenticate.secret", "good")
     val badsecurityManager = new SecurityManager(badconf)
     val managerServer = new ConnectionManager(0, badconf, badsecurityManager)
@@ -186,6 +194,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
 
   test("security auth off") {
     val conf = new SparkConf
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
     val securityManager = new SecurityManager(conf)
     val manager = new ConnectionManager(0, conf, securityManager)
@@ -232,6 +241,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
 
   test("Ack error message") {
     val conf = new SparkConf
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
     val securityManager = new SecurityManager(conf)
     val manager = new ConnectionManager(0, conf, securityManager)

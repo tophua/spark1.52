@@ -24,7 +24,7 @@ import org.apache.spark.deploy.SparkCuratorUtil
 
 private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderElectable,
     conf: SparkConf) extends LeaderLatchListener with LeaderElectionAgent with Logging  {
-
+//zooKeeper保存恢复状态的目录，缺省为/spark
   val WORKING_DIR = conf.get("spark.deploy.zookeeper.dir", "/spark") + "/leader_election"
 
   private var zk: CuratorFramework = _

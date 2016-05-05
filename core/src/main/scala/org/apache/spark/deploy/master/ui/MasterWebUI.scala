@@ -33,6 +33,7 @@ class MasterWebUI(val master: Master, requestedPort: Int)
   with UIRoot {
 
   val masterEndpointRef = master.self
+  //允许在webUI将stage和相应的job杀死
   val killEnabled = master.conf.getBoolean("spark.ui.killEnabled", true)
 
   val masterPage = new MasterPage(this)

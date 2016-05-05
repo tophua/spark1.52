@@ -50,7 +50,7 @@ abstract class StandaloneRecoveryModeFactory(conf: SparkConf, serializer: Serial
  */
 private[master] class FileSystemRecoveryModeFactory(conf: SparkConf, serializer: Serializer)
   extends StandaloneRecoveryModeFactory(conf, serializer) with Logging {
-
+//Spark保存恢复状态的目录
   val RECOVERY_DIR = conf.get("spark.deploy.recoveryDirectory", "")
 
   def createPersistenceEngine(): PersistenceEngine = {

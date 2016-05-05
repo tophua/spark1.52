@@ -133,10 +133,13 @@ private[spark] class BlockManager(
   //压缩算法
   private val compressBroadcast = conf.getBoolean("spark.broadcast.compress", true)
   // Whether to compress shuffle output that are stored
+  //是否压缩map输出文件，压缩将使用spark.io.compression.codec
   private val compressShuffle = conf.getBoolean("spark.shuffle.compress", true)
   // Whether to compress RDD partitions that are stored serialized
+  //是否压缩RDD分区
   private val compressRdds = conf.getBoolean("spark.rdd.compress", false)
   // Whether to compress shuffle output temporarily spilled to disk
+  //是否压缩在shuffle期间溢出的数据，如果压缩将使用spark.io.compression.codec。
   private val compressShuffleSpill = conf.getBoolean("spark.shuffle.spill.compress", true)
 //向查找或注册BlockManagerSlaveEndpoint
   private val slaveEndpoint = rpcEnv.setupEndpoint(

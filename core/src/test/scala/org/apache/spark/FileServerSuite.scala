@@ -34,7 +34,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
   @transient var tmpDir: File = _
   @transient var tmpFile: File = _
   @transient var tmpJarUrl: String = _
-
+ //是否启用内部身份验证
   def newConf: SparkConf = new SparkConf(loadDefaults = false).set("spark.authenticate", "false")
 
   override def beforeEach() {
@@ -95,7 +95,9 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
 
   test("Distributing files locally security On") {
     val sparkConf = new SparkConf(false)
+    //是否启用内部身份验证
     sparkConf.set("spark.authenticate", "true")
+    //设置组件之间进行身份验证的密钥
     sparkConf.set("spark.authenticate.secret", "good")
     sc = new SparkContext("local[4]", "test", sparkConf)
 
@@ -189,7 +191,9 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
 
   test ("HttpFileServer should work with SSL and good credentials") {
     val sparkConf = sparkSSLConfig()
+     //是否启用内部身份验证
     sparkConf.set("spark.authenticate", "true")
+     //设置组件之间进行身份验证的密钥
     sparkConf.set("spark.authenticate.secret", "good")
 
     val sm = new SecurityManager(sparkConf)
@@ -205,7 +209,9 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
 
   test ("HttpFileServer should not work with valid SSL and bad credentials") {
     val sparkConf = sparkSSLConfig()
+     //是否启用内部身份验证
     sparkConf.set("spark.authenticate", "true")
+     //设置组件之间进行身份验证的密钥
     sparkConf.set("spark.authenticate.secret", "bad")
 
     val sm = new SecurityManager(sparkConf)

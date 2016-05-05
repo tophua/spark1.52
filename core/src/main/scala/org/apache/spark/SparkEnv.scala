@@ -502,6 +502,7 @@ object SparkEnv extends Logging {
 
     // Spark properties
     // This includes the scheduling mode whether or not it is configured (used by SparkUI)
+    //Spark的任务调度模式
     val schedulerMode =
       if (!conf.contains("spark.scheduler.mode")) {
         Seq(("spark.scheduler.mode", schedulingMode))

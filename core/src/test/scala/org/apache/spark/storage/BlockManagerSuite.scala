@@ -49,6 +49,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
   var store2: BlockManager = null
   var rpcEnv: RpcEnv = null
   var master: BlockManagerMaster = null
+   //是否启用内部身份验证
   conf.set("spark.authenticate", "false")
   val securityMgr = new SecurityManager(conf)
   val mapOutputTracker = new MapOutputTrackerMaster(conf)
@@ -737,7 +738,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
         "shuffle_0_0_0 was compressed")
       store.stop()
       store = null
-
+     //是否在发送之前压缩广播变量
       conf.set("spark.broadcast.compress", "true")
       store = makeBlockManager(20000, "exec3")
       store.putSingle(BroadcastBlockId(0), new Array[Byte](10000), StorageLevel.MEMORY_ONLY_SER)
@@ -745,21 +746,21 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
         "broadcast_0 was not compressed")
       store.stop()
       store = null
-
+      //是否在发送之前压缩广播变量
       conf.set("spark.broadcast.compress", "false")
       store = makeBlockManager(20000, "exec4")
       store.putSingle(BroadcastBlockId(0), new Array[Byte](10000), StorageLevel.MEMORY_ONLY_SER)
       assert(store.memoryStore.getSize(BroadcastBlockId(0)) >= 10000, "broadcast_0 was compressed")
       store.stop()
       store = null
-
+ //是否压缩RDD分区
       conf.set("spark.rdd.compress", "true")
       store = makeBlockManager(20000, "exec5")
       store.putSingle(rdd(0, 0), new Array[Byte](10000), StorageLevel.MEMORY_ONLY_SER)
       assert(store.memoryStore.getSize(rdd(0, 0)) <= 1000, "rdd_0_0 was not compressed")
       store.stop()
       store = null
-
+ //是否压缩RDD分区
       conf.set("spark.rdd.compress", "false")
       store = makeBlockManager(20000, "exec6")
       store.putSingle(rdd(0, 0), new Array[Byte](10000), StorageLevel.MEMORY_ONLY_SER)
@@ -776,6 +777,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     } finally {
       System.clearProperty("spark.shuffle.compress")
       System.clearProperty("spark.broadcast.compress")
+       //是否压缩RDD分区
       System.clearProperty("spark.rdd.compress")
     }
   }
@@ -801,6 +803,8 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
   }
 
   test("reads of memory-mapped and non memory-mapped files are equivalent") {
+  //以字节为单位的块大小，用于磁盘读取一个块大小时进行内存映射。这可以防止Spark在内存映射时使用很小块，
+//一般情况下，对块进行内存映射的开销接近或低于操作系统的页大小
     val confKey = "spark.storage.memoryMapThreshold"
 
     // Create a non-trivial (not all zeros) byte array

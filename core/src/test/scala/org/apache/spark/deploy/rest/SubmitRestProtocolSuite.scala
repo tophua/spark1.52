@@ -100,6 +100,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     conf.set("spark.driver.extraLibraryPath", "pickle.jar")
     conf.set("spark.driver.supervise", "false")
     conf.set("spark.executor.memory", "256m")
+     //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
     conf.set("spark.cores.max", "10000")
     message.sparkProperties = conf.getAll.toMap
     message.appArgs = Array("two slices", "a hint of cinnamon")

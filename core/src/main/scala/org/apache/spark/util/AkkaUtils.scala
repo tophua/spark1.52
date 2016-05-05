@@ -78,8 +78,9 @@ private[spark] object AkkaUtils extends Logging {
     }
 
     val logAkkaConfig = if (conf.getBoolean("spark.akka.logAkkaConfig", false)) "on" else "off"
-
+    //本参数是设置可接受的心跳停顿时间
     val akkaHeartBeatPausesS = conf.getTimeAsSeconds("spark.akka.heartbeat.pauses", "6000s")
+    //心跳间隔时间
     val akkaHeartBeatIntervalS = conf.getTimeAsSeconds("spark.akka.heartbeat.interval", "1000s")
 
     val secretKey = securityManager.getSecretKey()
@@ -130,7 +131,7 @@ private[spark] object AkkaUtils extends Logging {
 
   /** Returns the configured max frame size for Akka messages in bytes. */
   def maxFrameSizeBytes(conf: SparkConf): Int = {
-  //驱动器Driver发回大尺寸的结果
+  //以MB为单位的driver和executor之间通信信息的大小，设置值越大，driver可以接受更大的计算结果
     val frameSizeInMB = conf.getInt("spark.akka.frameSize", 128)
     if (frameSizeInMB > AKKA_MAX_FRAME_SIZE_IN_MB) {
       throw new IllegalArgumentException(

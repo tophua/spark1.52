@@ -68,6 +68,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     val numSlaves = 4
     val conf = httpConf.clone
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+    //是否在发送之前压缩广播变量
     conf.set("spark.broadcast.compress", "true")
     sc = new SparkContext("local-cluster[%d, 1, 1024]".format(numSlaves), "test", conf)
     val list = List[Int](1, 2, 3, 4)
@@ -96,6 +97,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     val numSlaves = 4
     val conf = torrentConf.clone
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+    //是否在发送之前压缩广播变量
     conf.set("spark.broadcast.compress", "true")
     sc = new SparkContext("local-cluster[%d, 1, 1024]".format(numSlaves), "test", conf)
     val list = List[Int](1, 2, 3, 4)

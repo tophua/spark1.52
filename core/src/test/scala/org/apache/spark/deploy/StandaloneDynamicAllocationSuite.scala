@@ -182,6 +182,7 @@ class StandaloneDynamicAllocationSuite
   }
 
   test("dynamic allocation with max cores > cores per worker") {
+   //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
     sc = new SparkContext(appConf.set("spark.cores.max", "16"))
     val appId = sc.applicationId
     eventually(timeout(10.seconds), interval(10.millis)) {
@@ -287,6 +288,7 @@ class StandaloneDynamicAllocationSuite
   }
 
   test("dynamic allocation with cores per executor AND max cores") {
+   //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
     sc = new SparkContext(appConf
       .set("spark.executor.cores", "2")
       .set("spark.cores.max", "8"))

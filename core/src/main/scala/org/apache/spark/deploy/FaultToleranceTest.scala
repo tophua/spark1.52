@@ -59,6 +59,7 @@ import org.apache.spark.util.Utils
 private object FaultToleranceTest extends App with Logging {
 
   private val conf = new SparkConf()
+  //zooKeeper保存恢复状态的目录，缺省为/spark
   private val ZK_DIR = conf.get("spark.deploy.zookeeper.dir", "/spark")
 
   private val masters = ListBuffer[TestMasterInfo]()

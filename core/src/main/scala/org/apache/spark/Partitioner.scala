@@ -65,7 +65,7 @@ object Partitioner {
     }
     // 2)创建HashPartitioner对象,如果配置parallelis属性,则使用属性值作为分区数量,否则使用Seq中所有RDD
    //   的partitions函数返回值的最大值作为分区数量
-    if (rdd.context.conf.contains("spark.default.parallelism")) {
+    if (rdd.context.conf.contains("spark.default.parallelism")) {//本地模式：机器核数
       new HashPartitioner(rdd.context.defaultParallelism)
     } else {
       new HashPartitioner(bySize.head.partitions.size)

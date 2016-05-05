@@ -50,7 +50,7 @@ private[spark] class SparkUI private (
   extends WebUI(securityManager, SparkUI.getUIPort(conf), conf, basePath, "SparkUI")
   with Logging
   with UIRoot {
-
+//允许在webUI将stage和相应的job杀死
   val killEnabled = sc.map(_.conf.getBoolean("spark.ui.killEnabled", true)).getOrElse(false)
 
 

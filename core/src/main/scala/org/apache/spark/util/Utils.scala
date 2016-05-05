@@ -367,6 +367,7 @@ private[spark] object Utils extends Logging {
         url,
         cachedFile,
         targetFile,
+	//通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时，是否覆盖目标文件
         conf.getBoolean("spark.files.overwrite", false)
       )
     } else {
@@ -538,6 +539,7 @@ private[spark] object Utils extends Logging {
       hadoopConf: Configuration) {
     val targetFile = new File(targetDir, filename)
     val uri = new URI(url)
+    //通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时，是否覆盖目标文件
     val fileOverwrite = conf.getBoolean("spark.files.overwrite", defaultValue = false)
     Option(uri.getScheme).getOrElse("file") match {
       case "http" | "https" | "ftp" =>
@@ -552,7 +554,7 @@ private[spark] object Utils extends Logging {
           uc = new URL(url).openConnection()
         }
         Utils.setupSecureURLConnection(uc, securityMgr)
-
+	//在获取由driver通过SparkContext.addFile() 添加的文件时，是否使用通信时间超时
         val timeoutMs =
           conf.getTimeAsSeconds("spark.files.fetchTimeout", "60s").toInt * 1000
         uc.setConnectTimeout(timeoutMs)

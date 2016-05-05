@@ -61,12 +61,13 @@ private[spark] class TaskSchedulerImpl(
     isLocal: Boolean = false)
   extends TaskScheduler with Logging
 {
-  //spark.task.maxFailures任务最大失败数4
+  //spark.task.maxFailures任务Task的最大重试次数
   def this(sc: SparkContext) = this(sc, sc.conf.getInt("spark.task.maxFailures", 4))
 
   val conf = sc.conf
 
-  // How often(经常) to check for speculative(推测) tasks
+  // How often to check for speculative(推测) tasks
+  //Spark多长时间进行检查task运行状态用以推测，以毫秒为单位
   val SPECULATION_INTERVAL_MS = conf.getTimeAsMs("spark.speculation.interval", "100ms")
 
   private val speculationScheduler =

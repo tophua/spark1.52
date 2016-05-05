@@ -49,6 +49,7 @@ private[spark] class ApplicationEventListener extends SparkListener {
     synchronized {
       val environmentDetails = environmentUpdate.environmentDetails
       val allProperties = environmentDetails("Spark Properties").toMap
+      //以逗号分隔Spark webUI访问用户的列表。默认情况下只有启动Spark job的用户才有访问权限
       viewAcls = allProperties.get("spark.ui.view.acls")
       adminAcls = allProperties.get("spark.admin.acls")
     }
