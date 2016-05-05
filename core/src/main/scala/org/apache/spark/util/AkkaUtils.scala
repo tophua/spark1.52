@@ -64,6 +64,7 @@ private[spark] object AkkaUtils extends Logging {
       securityManager: SecurityManager): (ActorSystem, Int) = {
    //用于通信的actor线程数量。如果驱动器有很多CPU核心，那么在大集群上可以增大这个值
     val akkaThreads = conf.getInt("spark.akka.threads", 4)
+    //
     val akkaBatchSize = conf.getInt("spark.akka.batchSize", 15)
     //Spark节点之间通信的超时时间，以秒为单位
     val akkaTimeoutS = conf.getTimeAsSeconds("spark.akka.timeout",
@@ -120,9 +121,10 @@ private[spark] object AkkaUtils extends Logging {
       |akka.log-dead-letters = $lifecycleEvents
       |akka.log-dead-letters-during-shutdown = $lifecycleEvents
       """.stripMargin))
-
-    val actorSystem = ActorSystem(name, akkaConf)
+    //获取ActorSystem实例对象
+    val actorSystem = ActorSystem(name, akkaConf)    
     val provider = actorSystem.asInstanceOf[ExtendedActorSystem].provider
+    //获取端口
     val boundPort = provider.getDefaultAddress.port.get
     (actorSystem, boundPort)
   }
@@ -158,7 +160,7 @@ private[spark] object AkkaUtils extends Logging {
    * 使用ActorSystem向ActorRef发送任何消息,发送每条消息的最大尝试次数maxAttempts,每次间隔时间毫秒etryInterval,请求超时时间timeout秒
    * Send a message to the given actor and get its result within a default timeout, or
    * throw a SparkException if this fails even after the specified number of retries.
-   * maxAttempts 发送每条消息的最大尝试次数
+   * maxAttempts   发送每条消息的最大尝试次数
    * retryInterval 间隔为时间毫秒
    * timeout       请求超时时间
    * 
@@ -200,7 +202,7 @@ private[spark] object AkkaUtils extends Logging {
       s"Error sending message [message = $message]", lastException)
   }
 /**
- * 从远端ActionSystem中查找已经注册的某个Actor
+ * 从远端ActionSystem中查找已经注册Driver的Actor
  */
   def makeDriverRef(name: String, conf: SparkConf, actorSystem: ActorSystem): ActorRef = {
     val driverActorSystemName = SparkEnv.driverActorSystemName
@@ -214,7 +216,7 @@ private[spark] object AkkaUtils extends Logging {
     timeout.awaitResult(actorSystem.actorSelection(url).resolveOne(timeout.duration))
   }
 /**
- * 从远端ActionSystem中查找已经注册的某个Actor
+ * 从远端ActionSystem中查找已经注册Executor的Actor
  */
   def makeExecutorRef(
       name: String,

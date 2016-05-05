@@ -32,7 +32,7 @@ import org.apache.spark.scheduler.SparkListener
 private[spark] trait ListenerBus[L <: AnyRef, E] extends Logging {
 
   // Marked `private[spark]` for access in tests.
-  //CopyOnWriteArrayList线程安全,其中有可变操作(add,set)
+  //CopyOnWriteArrayList是ArrayList的一个线程安全的变体
   private[spark] val listeners = new CopyOnWriteArrayList[L]
 
   /**

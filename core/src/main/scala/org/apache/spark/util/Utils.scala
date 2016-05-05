@@ -178,7 +178,12 @@ private[spark] object Utils extends Logging {
    * Primitive often used when writing [[java.nio.ByteBuffer]] to [[java.io.DataOutput]]
    */
   def writeByteBuffer(bb: ByteBuffer, out: ObjectOutput): Unit = {
+    //来检查是否支持访问数组
     if (bb.hasArray) {
+      //arrayOffset 返回此缓冲区中的第一个元素在缓冲区的底层实现数组中的偏移量
+      //position 即缓冲区开始读或者写数据的位置
+      //remaining 返回剩余的可用长度,此长度为实际读取的数据长度
+      //array 返回的 array 长度
       out.write(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining())
     } else {
       val bbval = new Array[Byte](bb.remaining())
@@ -209,6 +214,7 @@ private[spark] object Utils extends Logging {
    */
   def createDirectory(root: String, namePrefix: String = "spark"): File = {
     var attempts = 0
+    //最大目录尝试次数
     val maxAttempts = MAX_DIR_CREATION_ATTEMPTS
     var dir: File = null
     while (dir == null) {
@@ -219,7 +225,7 @@ private[spark] object Utils extends Logging {
       }
       try {
         dir = new File(root, namePrefix + "-" + UUID.randomUUID.toString)
-        if (dir.exists() || !dir.mkdirs()) {
+        if (dir.exists() || !dir.mkdirs()) {//生成目录不成功
           dir = null
         }
       } catch { case e: SecurityException => dir = null; }
@@ -349,6 +355,7 @@ private[spark] object Utils extends Logging {
       val lockFileName = s"${url.hashCode}${timestamp}_lock"
       val localDir = new File(getLocalDir(conf))
       val lockFile = new File(localDir, lockFileName)
+      //RandomAccessFile 此类的实例支持对随机访问文件的读取和写入
       val lockFileChannel = new RandomAccessFile(lockFile, "rw").getChannel()
       // Only one executor entry.
       // The FileLock is only used to control synchronization for executors download file,
@@ -367,7 +374,7 @@ private[spark] object Utils extends Logging {
         url,
         cachedFile,
         targetFile,
-	//通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时，是否覆盖目标文件
+	    //通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时，是否覆盖目标文件
         conf.getBoolean("spark.files.overwrite", false)
       )
     } else {
@@ -377,9 +384,11 @@ private[spark] object Utils extends Logging {
     // Decompress the file if it's a .tar or .tar.gz
     if (fileName.endsWith(".tar.gz") || fileName.endsWith(".tgz")) {
       logInfo("Untarring " + fileName)
+      //解压.tar.gz文件
       executeAndGetOutput(Seq("tar", "-xzf", fileName), targetDir)
     } else if (fileName.endsWith(".tar")) {
       logInfo("Untarring " + fileName)
+       //解压.tar文件
       executeAndGetOutput(Seq("tar", "-xf", fileName), targetDir)
     }
     // Make the file executable - That's necessary for scripts

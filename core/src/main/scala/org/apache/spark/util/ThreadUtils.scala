@@ -39,6 +39,7 @@ private[spark] object ThreadUtils {
 
   /**
    * Create a thread factory that names threads with a prefix and also sets the threads to daemon.
+   * 创建线程序名称,并设置守护线程
    */
   def namedThreadFactory(prefix: String): ThreadFactory = {
     new ThreadFactoryBuilder().setDaemon(true).setNameFormat(prefix + "-%d").build()
@@ -47,7 +48,7 @@ private[spark] object ThreadUtils {
   /**
    * Wrapper over newCachedThreadPool. Thread names are formatted as prefix-ID, where ID is a
    * unique, sequentially assigned integer.
-   */
+   */ 
   def newDaemonCachedThreadPool(prefix: String): ThreadPoolExecutor = {
     val threadFactory = namedThreadFactory(prefix)
     Executors.newCachedThreadPool(threadFactory).asInstanceOf[ThreadPoolExecutor]
@@ -59,15 +60,16 @@ private[spark] object ThreadUtils {
    */
   def newDaemonCachedThreadPool(
       prefix: String, maxThreadNumber: Int, keepAliveSeconds: Int = 60): ThreadPoolExecutor = {
-    val threadFactory = namedThreadFactory(prefix)
+    val threadFactory = namedThreadFactory(prefix)    
     val threadPool = new ThreadPoolExecutor(
-      maxThreadNumber, // corePoolSize: the max number of threads to create before queuing the tasks
-      maxThreadNumber, // maximumPoolSize: because we use LinkedBlockingDeque, this one is not used
-      keepAliveSeconds,
-      TimeUnit.SECONDS,
-      new LinkedBlockingQueue[Runnable],
-      threadFactory)
-    threadPool.allowCoreThreadTimeOut(true)
+      maxThreadNumber, // corePoolSize: 核心线程数，会一直存活，即使没有任务，线程池也会维护线程的最少数量
+      maxThreadNumber, // maximumPoolSize:线程池维护线程的最大数量
+      keepAliveSeconds,//线程池维护线程所允许的空闲时间，当线程空闲时间达到keepAliveTime，该线程会退出，
+      //直到线程数量等于corePoolSize。如果allowCoreThreadTimeout设置为true，则所有线程均会退出直到线程数量为0
+      TimeUnit.SECONDS,//线程池维护线程所允许的空闲时间的单位
+      new LinkedBlockingQueue[Runnable],//线程池所使用的缓冲队列
+      threadFactory)//执行程序创建新线程时使用的工厂
+    threadPool.allowCoreThreadTimeOut(true)//允许超时自动关闭
     threadPool
   }
 

@@ -50,7 +50,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
   /* Cap the capacity of the event queue so we get an explicit error (rather than
    * an OOM exception) if it's perpetually being added to more quickly than it's being drained. */
   private val EVENT_QUEUE_CAPACITY = 10000
-  //基于已链接节点的,范围任意的blocking queue实现,此队列按先进先出排序元素,
+
   //线程阻塞,不接受null,固定大小10000,先进先出
   private val eventQueue = new LinkedBlockingQueue[E](EVENT_QUEUE_CAPACITY)
 
@@ -111,6 +111,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
    * @param sc Used to stop the SparkContext in case the listener thread dies.
    */
   def start(sc: SparkContext) {
+    //如果当前值与期望值(第一个参数)相等，则设置为新值(第二个参数)，设置成功返回true
     if (started.compareAndSet(false, true)) {
       sparkContext = sc
       listenerThread.start()

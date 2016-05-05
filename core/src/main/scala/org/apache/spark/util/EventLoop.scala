@@ -34,7 +34,7 @@ import org.apache.spark.Logging
  * handle events in time to avoid the potential OOM.
  */
 private[spark] abstract class EventLoop[E](name: String) extends Logging {
-//一个由链表结构组成的有界阻塞队列,此队列按照先进先出的原则对元素进行排序
+  //一个由链表结构组成的有界阻塞队列,此队列按照先进先出的原则对元素进行排序
   private val eventQueue: BlockingQueue[E] = new LinkedBlockingDeque[E]()
 
   private val stopped = new AtomicBoolean(false)
@@ -46,6 +46,7 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
 
     override def run(): Unit = {
       try {
+        //stopped.get没有停止
         while (!stopped.get) {//不断的循环队列
           val event = eventQueue.take()//从eventQueue中获得消息队列
           try {
@@ -79,6 +80,7 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
   }
 
   def stop(): Unit = {
+    //compareAndSet 如果当前值与期望值(第一个参数)相等，则设置为新值(第二个参数)，设置成功返回true
     if (stopped.compareAndSet(false, true)) {
       eventThread.interrupt()
       var onStopCalled = false

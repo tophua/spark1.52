@@ -17,7 +17,7 @@
 
 package org.apache.spark.util.collection
 
-import java.util.{Arrays, Comparator}
+import java.util.{ Arrays, Comparator }
 
 import com.google.common.hash.Hashing
 
@@ -33,14 +33,14 @@ import org.apache.spark.annotation.DeveloperApi
  * http://en.wikipedia.org/wiki/Quadratic_probing).
  *
  * The map can support up to `375809638 (0.7 * 2 ^ 29)` elements.
- * 
+ *
  * 缓存集合算法
  *
  * TODO: Cache the hash values of each key? java.util.HashMap does that.
  */
 @DeveloperApi
 class AppendOnlyMap[K, V](initialCapacity: Int = 64)
-  extends Iterable[(K, V)] with Serializable {
+    extends Iterable[(K, V)] with Serializable {
 
   import AppendOnlyMap._
 
@@ -51,7 +51,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   private val LOAD_FACTOR = 0.7 //负载因子,常量值等于0.7
 
   private var capacity = nextPowerOf2(initialCapacity) //容量,初始值等于64
-  private var mask = capacity - 1  //计算数据存放位置的掩码值
+  private var mask = capacity - 1 //计算数据存放位置的掩码值
   private var curSize = 0 //记当当前已经放入data的key与聚合的数量
   private var growThreshold = (LOAD_FACTOR * capacity).toInt //data数组容量增加的阈值
 
@@ -66,7 +66,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   private var nullValue: V = null.asInstanceOf[V]
 
   // Triggered by destructiveSortedIterator; the underlying data array may no longer be used
-  private var destroyed = false 
+  private var destroyed = false
   private val destructionMessage = "Map state is invalid from destructive sorting!"
 
   /** Get the value for a given key */
@@ -112,7 +112,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
       if (curKey.eq(null)) {
         data(2 * pos) = k
         data(2 * pos + 1) = value.asInstanceOf[AnyRef]
-        incrementSize()  // Since we added a new key
+        incrementSize() // Since we added a new key
         return
       } else if (k.eq(curKey) || k.equals(curKey)) {
         data(2 * pos + 1) = value.asInstanceOf[AnyRef]
@@ -155,7 +155,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
         data(2 * pos + 1) = newValue.asInstanceOf[AnyRef]
         return newValue
       } else if (curKey.eq(null)) {
-        val newValue = updateFunc(false, null.asInstanceOf[V])//key的聚合值
+        val newValue = updateFunc(false, null.asInstanceOf[V]) //key的聚合值
         data(2 * pos) = k
         data(2 * pos + 1) = newValue.asInstanceOf[AnyRef]
         incrementSize()
@@ -177,7 +177,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
 
       /** Get the next value we should return from next(), or null if we're finished iterating */
       def nextValue(): (K, V) = {
-        if (pos == -1) {    // Treat position -1 as looking at the null value
+        if (pos == -1) { // Treat position -1 as looking at the null value
           if (haveNullValue) {
             return (null.asInstanceOf[K], nullValue)
           }
@@ -273,7 +273,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
    * 1)将data数组向左整理排列
    * 2)利用Sort,KVArraySortDataFormat以及指定的比较器进行排序,这其中用到了TimeSort也是优化版的归并排序
    * 3)生成新的迭代器
-   * 
+   *
    */
   def destructiveSortedIterator(keyComparator: Comparator[K]): Iterator[(K, V)] = {
     destroyed = true
@@ -289,9 +289,9 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
       keyIndex += 1
     }
     assert(curSize == newIndex + (if (haveNullValue) 1 else 0))
-//2)利用Sort,KVArraySortDataFormat以及指定的比较器进行排序,这其中用到了TimeSort也是优化版的归并排序
+    //2)利用Sort,KVArraySortDataFormat以及指定的比较器进行排序,这其中用到了TimeSort也是优化版的归并排序
     new Sorter(new KVArraySortDataFormat[K, AnyRef]).sort(data, 0, newIndex, keyComparator)
-//3)生成新的迭代器
+    //3)生成新的迭代器
     new Iterator[(K, V)] {
       var i = 0
       var nullValueReady = haveNullValue
