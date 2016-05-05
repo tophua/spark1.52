@@ -52,7 +52,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
 
-  test("local mode, fair scheduler")
+  test("local mode, fair scheduler"){
   //Spark的任务调度模式{
     val conf = new SparkConf().set("spark.scheduler.mode", "FAIR")
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()
