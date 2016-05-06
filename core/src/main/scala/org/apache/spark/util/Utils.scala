@@ -1064,7 +1064,7 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * Convert a quantity in megabytes to a human-readable string such as "4.0 MB".
+   * Convert a quantity in megabytes(兆字节) to a human-readable string such as "4.0 MB".
    */
   def megabytesToString(megabytes: Long): String = {
     bytesToString(megabytes * 1024L * 1024L)

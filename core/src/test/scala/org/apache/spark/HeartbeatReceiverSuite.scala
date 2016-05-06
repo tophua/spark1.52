@@ -17,7 +17,7 @@
 
 package org.apache.spark
 
-import java.util.concurrent.{ExecutorService, TimeUnit}
+import java.util.concurrent.{ ExecutorService, TimeUnit }
 
 import scala.collection.Map
 import scala.collection.mutable
@@ -25,13 +25,13 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-import org.scalatest.{BeforeAndAfterEach, PrivateMethodTester}
-import org.mockito.Mockito.{mock, spy, verify, when}
+import org.scalatest.{ BeforeAndAfterEach, PrivateMethodTester }
+import org.mockito.Mockito.{ mock, spy, verify, when }
 import org.mockito.Matchers
 import org.mockito.Matchers._
 
 import org.apache.spark.executor.TaskMetrics
-import org.apache.spark.rpc.{RpcCallContext, RpcEndpoint, RpcEnv, RpcEndpointRef}
+import org.apache.spark.rpc.{ RpcCallContext, RpcEndpoint, RpcEnv, RpcEndpointRef }
 import org.apache.spark.scheduler._
 import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages._
 import org.apache.spark.scheduler.cluster.CoarseGrainedSchedulerBackend
@@ -40,22 +40,22 @@ import org.apache.spark.util.ManualClock
 
 /**
  * A test suite for the heartbeating behavior between the driver and the executors.
- * 测试一个心跳executors与driver
+ * executors和driver之间心跳测试
  */
 class HeartbeatReceiverSuite
-  extends SparkFunSuite
-  with BeforeAndAfterEach
-  with PrivateMethodTester
-  with LocalSparkContext {
+    extends SparkFunSuite
+    with BeforeAndAfterEach
+    with PrivateMethodTester
+    with LocalSparkContext {
 
   private val executorId1 = "executor-1"
   private val executorId2 = "executor-2"
 
   // Shared state that must be reset before and after each test
   private var scheduler: TaskSchedulerImpl = null
-  private var heartbeatReceiver: HeartbeatReceiver = null
-  private var heartbeatReceiverRef: RpcEndpointRef = null
-  private var heartbeatReceiverClock: ManualClock = null
+  private var heartbeatReceiver: HeartbeatReceiver = null //心跳接收
+  private var heartbeatReceiverRef: RpcEndpointRef = null //消息发送
+  private var heartbeatReceiverClock: ManualClock = null //通常频率
 
   // Helper private method accessors for HeartbeatReceiver
   private val _executorLastSeen = PrivateMethod[collection.Map[String, Long]]('executorLastSeen)
@@ -94,8 +94,8 @@ class HeartbeatReceiverSuite
 
   test("task scheduler is set correctly") {
     assert(heartbeatReceiver.scheduler === null)
-   val bll= heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) //返回值Boolean
-     println(bll)
+    //发送消息TaskSchedulerIsSet,HeartbeatReceiver类receiveAndReply方法接收消息设置TaskScheduler,并返回boolean类型    
+    val bll = heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) //返回值Boolean  
     assert(heartbeatReceiver.scheduler !== null)
   }
 
@@ -118,7 +118,7 @@ class HeartbeatReceiverSuite
   }
 
   test("reregister if heartbeat from unregistered executor") {
-    heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet)
+    heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) 
     // Received heartbeat from unknown executor, so we ask it to re-register
     triggerHeartbeat(executorId1, executorShouldReregister = true)
     assert(getTrackedExecutors.isEmpty)
@@ -140,7 +140,7 @@ class HeartbeatReceiverSuite
     assert(!trackedExecutors.contains(executorId2))
   }
 
-  test("expire dead hosts") {
+  test("expire dead hosts") {//过期主机,不活动 
     val executorTimeout = heartbeatReceiver.invokePrivate(_executorTimeoutMs())
     heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet)
     addExecutorAndVerify(executorId1)
@@ -153,6 +153,7 @@ class HeartbeatReceiverSuite
     heartbeatReceiverClock.advance(executorTimeout)
     heartbeatReceiverRef.askWithRetry[Boolean](ExpireDeadHosts)
     // Only the second executor should be expired as a dead host
+    //第二个executor设置过期,设置executorId2为不可用
     verify(scheduler).executorLost(Matchers.eq(executorId2), any())
     val trackedExecutors = getTrackedExecutors
     assert(trackedExecutors.size === 1)
@@ -209,12 +210,17 @@ class HeartbeatReceiverSuite
     assert(fakeClusterManager.getExecutorIdsToKill === Set(executorId1, executorId2))
   }
 
-  /** Manually send a heartbeat and return the response. */
+  /**
+   *  Manually send a heartbeat and return the response.
+   *  手动发送心跳并返回响应
+   */
   private def triggerHeartbeat(
-      executorId: String,
-      executorShouldReregister: Boolean): Unit = {
-    val metrics = new TaskMetrics
+    executorId: String,
+    executorShouldReregister: Boolean): Unit = {
+    val metrics = new TaskMetrics //任务测量
     val blockManagerId = BlockManagerId(executorId, "localhost", 12345)
+    //发送Heartbeat消息到HeartbeatReceiver.receiveAndReply,接收executors发送的Heartbeat信息,
+    //通知blockManagerMaster,此Executor上的blockManager依然活着,    
     val response = heartbeatReceiverRef.askWithRetry[HeartbeatResponse](
       Heartbeat(executorId, Array(1L -> metrics), blockManagerId))
     if (executorShouldReregister) {
@@ -231,21 +237,24 @@ class HeartbeatReceiverSuite
     assert(
       heartbeatReceiver.addExecutor(executorId).map { f =>
         Await.result(f, 10.seconds)
-      } === Some(true))
+      } === Some(true))//接收注册executor消息成功
   }
 
   private def removeExecutorAndVerify(executorId: String): Unit = {
     assert(
       heartbeatReceiver.removeExecutor(executorId).map { f =>
         Await.result(f, 10.seconds)
-      } === Some(true))
+      } === Some(true))//接收移除executor消息成功
   }
-
+  /**
+   * 跟踪Executor
+   */
   private def getTrackedExecutors: Map[String, Long] = {
     // We may receive undesired SparkListenerExecutorAdded from LocalBackend, so exclude it from
     // the map. See SPARK-10800.
+    //使用反射调用HeartbeatReceiver类executorLastSeen得到Executor
     heartbeatReceiver.invokePrivate(_executorLastSeen()).
-      filterKeys(_ != SparkContext.DRIVER_IDENTIFIER)
+      filterKeys(_ != SparkContext.DRIVER_IDENTIFIER)//过滤掉Driver
   }
 }
 
@@ -260,10 +269,10 @@ private class FakeExecutorEndpoint(override val rpcEnv: RpcEnv) extends RpcEndpo
  * Dummy scheduler backend to simulate executor allocation requests to the cluster manager.
  */
 private class FakeSchedulerBackend(
-    scheduler: TaskSchedulerImpl,
-    rpcEnv: RpcEnv,
-    clusterManagerEndpoint: RpcEndpointRef)
-  extends CoarseGrainedSchedulerBackend(scheduler, rpcEnv) {
+  scheduler: TaskSchedulerImpl,
+  rpcEnv: RpcEnv,
+  clusterManagerEndpoint: RpcEndpointRef)
+    extends CoarseGrainedSchedulerBackend(scheduler, rpcEnv) {
 
   protected override def doRequestTotalExecutors(requestedTotal: Int): Boolean = {
     clusterManagerEndpoint.askWithRetry[Boolean](

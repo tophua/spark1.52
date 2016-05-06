@@ -54,11 +54,11 @@ private[deploy] class Master(
   extends ThreadSafeRpcEndpoint with Logging with LeaderElectable {
 
   private val forwardMessageThread =
-    ThreadUtils.newDaemonSingleThreadScheduledExecutor("master-forward-message-thread")
+    ThreadUtils.newDaemonSingleThreadScheduledExecutor("master-forward-message-thread")////创建大小为1的固定线程池
 
   private val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
 
-  private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") // For application IDs 
+  private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") //精确到秒 For application IDs 
   //如果master没有收到worker的心跳，那么将在这么多秒之后，master将丢弃该worker（默认60秒（60000毫秒）
   private val WORKER_TIMEOUT_MS = conf.getLong("spark.worker.timeout", 60) * 1000
   //web UI上最多展示几个已结束应用。更早的应用的数将被删除
@@ -69,15 +69,15 @@ private[deploy] class Master(
   private val REAPER_ITERATIONS = conf.getInt("spark.dead.worker.persistence", 15)
   //设置启用master备用恢复模式,默认为NONE
   private val RECOVERY_MODE = conf.get("spark.deploy.recoveryMode", "NONE")
-
+  //一个HashSet用于保存WorkerInfo
   val workers = new HashSet[WorkerInfo]
+  //一个HashMap Appid-》 ApplicationInfo
   val idToApp = new HashMap[String, ApplicationInfo]
-  //创建一个addApplication，然后把app加入到等待队列waitingApps,一个addApplication，
-  //然后把app加入到等待队列waitingApps中，之后再调用schedule函数进行调度  
-
+  //等待schedule调度App  
   val waitingApps = new ArrayBuffer[ApplicationInfo]
+  //一个HashSet用于保存客户端（SparkSubmit）提交的任务
   val apps = new HashSet[ApplicationInfo]
-  //注册Worker的id与WorkerInfo的映射关系
+  //一个HashMap用保存workid -> WorkerInfo
   private val idToWorker = new HashMap[String, WorkerInfo]
   //注册Worker的addess与WorkerInfo的映射关系
   private val addressToWorker = new HashMap[RpcAddress, WorkerInfo]
@@ -87,7 +87,7 @@ private[deploy] class Master(
   private val completedApps = new ArrayBuffer[ApplicationInfo]
   private var nextAppNumber = 0
   private val appIdToUI = new HashMap[String, SparkUI]
-
+  //保存DriverInfo
   private val drivers = new HashSet[DriverInfo]
   private val completedDrivers = new ArrayBuffer[DriverInfo]
   // Drivers currently spooled for scheduling
@@ -132,19 +132,18 @@ private[deploy] class Master(
 
   // Default maxCores for applications that don't specify it (i.e. pass Int.MaxValue)
   //如果没有设置spark.cores.max，该参数设置Standalone集群分配给应用程序的最大内核数，
-  //如果不设置，应用程序获取所有的有效内核。注意在一个共享的集群中，设置一个低值防止攫取了所有的内核，影响他人的使用
+  //如果不设置，应用程序获取所有的有效内核。
   private val defaultCores = conf.getInt("spark.deploy.defaultCores", Int.MaxValue)
   if (defaultCores < 1) {
     throw new SparkException("spark.deploy.defaultCores must be positive")
   }
-
   // Alternative application submission gateway that is stable across Spark versions
   private val restServerEnabled = conf.getBoolean("spark.master.rest.enabled", true)
   private var restServer: Option[StandaloneRestServer] = None
   private var restServerBoundPort: Option[Int] = None
-/**
- * 向Master的ActorSystem注册Master,会先触发onStart方法
- */
+  /**
+   * 向Master的ActorSystem注册Master,会先触发onStart方法
+   */
   override def onStart(): Unit = {
     logInfo("Starting Spark master at " + masterUrl)
     logInfo(s"Running Spark version ${org.apache.spark.SPARK_VERSION}")
@@ -152,13 +151,14 @@ private[deploy] class Master(
     webUi = new MasterWebUI(this, webUiPort)
     webUi.bind()
     masterWebUiUrl = "http://" + masterPublicAddress + ":" + webUi.boundPort
-    //给ActorSystem增加定时调度,向自身发送checkForWorkerTimeOutTask消息
+    
     //Master接收到CheckForWorkTimerOut消息后,会匹配调用checkForWorkerTimeOutTask方法处理
     //启动检测Worker是否死亡的定时调度
     checkForWorkerTimeOutTask = forwardMessageThread.scheduleAtFixedRate(new Runnable {
       override def run(): Unit = Utils.tryLogNonFatalError {
-        self.send(CheckForWorkerTimeOut)
-      }//master 每隔60秒,检查一次超时
+        self.send(CheckForWorkerTimeOut)//向自身发送checkForWorkerTimeOutTask消息
+      }
+     //0毫秒为单位的延迟之前的任务执行,连续执行任务之间的毫秒的时间每隔(60秒),每次调度的任务checkForWorkerTimeOutTask
     }, 0, WORKER_TIMEOUT_MS, TimeUnit.MILLISECONDS)
 
     if (restServerEnabled) {
@@ -246,7 +246,7 @@ private[deploy] class Master(
       if (state == RecoveryState.RECOVERING) {
         //开始恢复集群之前状态,恢复实际上就是通知Application和Worker,Master已经更改
         beginRecovery(storedApps, storedDrivers, storedWorkers)
-        //在WORKER_TIMEOUT_MS毫秒后,尝试将恢复标记为完成
+        //在WORKER_TIMEOUT_MS(60)秒后,尝试将恢复标记为完成
         recoveryCompletionTask = forwardMessageThread.schedule(new Runnable {
           override def run(): Unit = Utils.tryLogNonFatalError {
             self.send(CompleteRecovery)
@@ -899,7 +899,7 @@ private[deploy] class Master(
   private def registerWorker(worker: WorkerInfo): Boolean = {
     // There may be one or more refs to dead workers on this same node (w/ different ID's),
     // remove them.
-    //如果当前Worker不活动,则删除,说则重新注册
+    //如果当前Worker不活动,从workers[HashSet]删除worker,则重新注册
     workers.filter { w =>
       (w.host == worker.host && w.port == worker.port) && (w.state == WorkerState.DEAD)
     }.foreach { w =>
@@ -907,6 +907,7 @@ private[deploy] class Master(
     }
 
     val workerAddress = worker.endpoint.address
+    //已注册WorkerHashMap[RpcAddress, WorkerInfo]是否包涵当前workerAddress
     if (addressToWorker.contains(workerAddress)) {
       val oldWorker = addressToWorker(workerAddress)
       if (oldWorker.state == WorkerState.UNKNOWN) {
@@ -918,7 +919,7 @@ private[deploy] class Master(
         return false
       }
     }
-
+    //增加向HashSet增加work信息 
     workers += worker
     idToWorker(worker.id) = worker
     addressToWorker(workerAddress) = worker
@@ -949,7 +950,7 @@ private[deploy] class Master(
     }
     //WorkerInfo最后使用removeDriver重新调度之前调度给此Worker的Driver
     for (driver <- worker.drivers.values) {
-      if (driver.desc.supervise) {
+      if (driver.desc.supervise) {//drvier挂掉之后可以自动重启
         logInfo(s"Re-launching ${driver.id}")
         //重新调度之前调度给此Worker的Driver
         relaunchDriver(driver)
@@ -985,6 +986,7 @@ private[deploy] class Master(
  */
   private def registerApplication(app: ApplicationInfo): Unit = {
     val appAddress = app.driver.address
+    //判断addressToApp是否包含 appAddress
     if (addressToApp.contains(appAddress)) {
       logInfo("Attempted to re-register application at same address: " + appAddress)
       return
@@ -995,6 +997,7 @@ private[deploy] class Master(
     apps += app
     idToApp(app.id) = app
     endpointToApp(app.driver) = app
+    //把appAddress添加到addressToApp[HashMap]中
     addressToApp(appAddress) = app
     waitingApps += app
   }
@@ -1032,6 +1035,7 @@ private[deploy] class Master(
         app.driver.send(ApplicationRemoved(state.toString))
       }
       persistenceEngine.removeApplication(app)
+      //重新执行调度
       schedule()
 
       // Tell all workers that the application has finished, so they can clean up any app state.
@@ -1076,7 +1080,7 @@ private[deploy] class Master(
     idToApp.get(appId) match {
       case Some(appInfo) =>
         logInfo(s"Application $appId requests to kill executors: " + executorIds.mkString(", "))
-        val (known, unknown) = executorIds.partition(appInfo.executors.contains)
+        val (known, unknown) = executorIds.partition(appInfo.executors.contains)//第一部分为满足条件p的元素，第二部分为不满足条件p的元素
         known.foreach { executorId =>
           val desc = appInfo.executors(executorId)
           appInfo.removeExecutor(desc)
@@ -1193,7 +1197,7 @@ private[deploy] class Master(
 
   /** Generate a new app ID given a app's submission date */
   private def newApplicationId(submitDate: Date): String = {
-    val appId = "app-%s-%04d".format(createDateFormat.format(submitDate), nextAppNumber)
+    val appId = "app-%s-%04d".format(createDateFormat.format(submitDate), nextAppNumber)//精确到秒 For application IDs 
     nextAppNumber += 1
     appId
   }
@@ -1204,7 +1208,7 @@ private[deploy] class Master(
    *否则认为该Worker因为没有发送心跳消息而挂.  
    * 
    * 处理步骤如下:
-   * 1)过滤出所有超进的Worker,即使用当前时间减去Worker最大超时时间仍然大于lastHeartbeat的Worker节点
+   * 1)过滤出所有超时的Worker,即使用当前时间减去Worker最大超时时间仍然大于lastHeartbeat的Worker节点
    * 2)如果WorkerInfo的状态是WorkerState.DEAD,则等待足够长的时间后将它从workers列表中移除
    *   足够长的时间的计算公式为:spark.dead.worker.persistence(15)+1乘以Wroker最大超时间conf.getLong("spark.worker.timeout", 60) * 1000
    *   如果worker.state不是WorkerState.DEAD,则调用removeWorker方法将WorkerInfo的状态设置DEAD,从idToWorker缓存中移除Worker的Id,
@@ -1215,6 +1219,7 @@ private[deploy] class Master(
   private def timeOutDeadWorkers() {
     // Copy the workers into an array so we don't modify the hashset while iterating through it
     val currentTime = System.currentTimeMillis()
+    //workers过滤出所有当前时间减去超时定时器间隔时间小于Worker最近一次的状态更新时间
     val toRemove = workers.filter(_.lastHeartbeat < currentTime - WORKER_TIMEOUT_MS).toArray
     for (worker <- toRemove) {
       if (worker.state != WorkerState.DEAD) {
@@ -1287,7 +1292,7 @@ private[deploy] class Master(
 private[deploy] object Master extends Logging {
   val SYSTEM_NAME = "sparkMaster"
   val ENDPOINT_NAME = "Master"
-
+   //master启动的入口
   def main(argStrings: Array[String]) {
     SignalLogger.register(log)
     val conf = new SparkConf
@@ -1295,6 +1300,7 @@ private[deploy] object Master extends Logging {
     val args = new MasterArguments(argStrings, conf)
     //创建Actor
     val (rpcEnv, _, _) = startRpcEnvAndEndpoint(args.host, args.port, args.webUiPort, conf)
+    //等待结束
     rpcEnv.awaitTermination()
   }
 
@@ -1321,4 +1327,6 @@ private[deploy] object Master extends Logging {
     val portsResponse = masterEndpoint.askWithRetry[BoundPortsResponse](BoundPortsRequest)
     (rpcEnv, portsResponse.webUIPort, portsResponse.restPort)
   }
+   
+  
 }

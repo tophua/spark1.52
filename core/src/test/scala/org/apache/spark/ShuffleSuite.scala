@@ -43,15 +43,15 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     sc = new SparkContext("local", "test", myConf)
     val pairs = sc.parallelize(Array((1, 1), (1, 2), (1, 3), (2, 1)), 4)
     //groups: Array[(Int, Iterable[Int])] = Array((1,CompactBuffer(1, 2, 3)), (2,CompactBuffer(1)))
-    val groups = pairs.groupByKey(4).collect() //元组的方式
+    val groups = pairs.groupByKey(4).collect() //以Key分组,元组的方式
     assert(groups.size === 2)
-    val valuesFor1 = groups.find(_._1 == 1).get._2 
-    assert(valuesFor1.toList.sorted === List(1, 2, 3))
+    val valuesFor1 = groups.find(_._1 == 1).get._2 //过滤元组key等于1,再取出元组第二个元素
+    assert(valuesFor1.toList.sorted === List(1, 2, 3))//取出元组CompactBuffer元素转换成数组,再进行排序
     val valuesFor2 = groups.find(_._1 == 2).get._2
     assert(valuesFor2.toList.sorted === List(1))
   }
 
-  test("shuffle non-zero block size") {
+  test("shuffle non-zeroO(非零) block size") {
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     val NUM_BLOCKS = 3
 
@@ -65,6 +65,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
       NonJavaSerializableClass,
       NonJavaSerializableClass](b, new HashPartitioner(NUM_BLOCKS))
     c.setSerializer(new KryoSerializer(conf))
+    //获取第一个父依赖shuffleId
     val shuffleId = c.dependencies.head.asInstanceOf[ShuffleDependency[_, _, _]].shuffleId
 
     assert(c.count === 10)
@@ -198,7 +199,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(results(3)(1).contains("3"))
   }
 
-  test("subtract mutable pairs") {
+  test("subtract mutable pairs") {//返回在RDD中出现，并且不在otherRDD中出现的元素，不去重
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     def p[T1, T2](_1: T1, _2: T2): MutablePair[T1, T2] = MutablePair(_1, _2)

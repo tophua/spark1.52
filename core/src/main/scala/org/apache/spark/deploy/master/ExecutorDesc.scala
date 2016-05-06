@@ -20,11 +20,11 @@ package org.apache.spark.deploy.master
 import org.apache.spark.deploy.{ExecutorDescription, ExecutorState}
 
 private[master] class ExecutorDesc(
-    val id: Int,
-    val application: ApplicationInfo,
+    val id: Int,//ID标识
+    val application: ApplicationInfo,//应用程序
     val worker: WorkerInfo,
-    val cores: Int,
-    val memory: Int) {
+    val cores: Int,//CPU内核
+    val memory: Int) {//申请内存
 
   var state = ExecutorState.LAUNCHING
 

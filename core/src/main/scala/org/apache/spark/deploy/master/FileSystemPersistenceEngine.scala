@@ -24,8 +24,6 @@ import scala.reflect.ClassTag
 import org.apache.spark.Logging
 import org.apache.spark.serializer.{DeserializationStream, SerializationStream, Serializer}
 import org.apache.spark.util.Utils
-
-
 /**
  * Stores data in a single on-disk directory with one file per application and worker.
  * Files are deleted when applications and workers are removed.

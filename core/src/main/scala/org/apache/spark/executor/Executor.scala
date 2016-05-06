@@ -43,7 +43,7 @@ import org.apache.spark.util._
 
 /**
  * Spark executor, backed by a threadpool to run tasks.
- *执行计算任务线程,主要负责任务的执行以及Worker,Driver App信息同步
+ * 执行计算任务线程,主要负责任务的执行以及Worker,Driver App信息同步
  * This can be used with Mesos, YARN, and the standalone scheduler.
  * An internal RPC interface (at the moment Akka) is used for communication with the driver,
  * except in the case of Mesos fine-grained mode.
@@ -86,7 +86,7 @@ private[spark] class Executor(
   private val threadPool = ThreadUtils.newDaemonCachedThreadPool("Executor task launch worker")
   //用于测量系统
   private val executorSource = new ExecutorSource(threadPool, executorId)
-//非本地模块,注册executorSource
+  //非本地模块,注册executorSource
   if (!isLocal) {
     env.metricsSystem.registerSource(executorSource)
     env.blockManager.initialize(conf.getAppId)

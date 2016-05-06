@@ -95,7 +95,7 @@ private[spark] object ThreadUtils {
    */
   def newDaemonSingleThreadScheduledExecutor(threadName: String): ScheduledExecutorService = {
     val threadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat(threadName).build()
-    Executors.newSingleThreadScheduledExecutor(threadFactory)
+    Executors.newSingleThreadScheduledExecutor(threadFactory)//创建大小为1的固定线程池
   }
 
   /**

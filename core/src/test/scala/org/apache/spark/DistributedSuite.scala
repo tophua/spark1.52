@@ -28,7 +28,7 @@ class NotSerializableExn(val notSer: NotSerializableClass) extends Throwable() {
 
 //分布式
 class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContext {
-                   //1 CPU核数，1024内存数
+  //1 CPU核数，1024内存数
   val clusterUrl = "local-cluster[2,1,1024]"
 
   test("task throws not serializable exception") {
@@ -151,7 +151,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
   }
 
-  test("caching in memory, replicated(重复)") {
+  test("caching in memory, replicated(复制)") {
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_ONLY_2)
     assert(data.count() === 1000)

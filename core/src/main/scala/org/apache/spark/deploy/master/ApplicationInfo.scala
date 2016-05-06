@@ -105,7 +105,7 @@ private[spark] class ApplicationInfo(
   }
   //当前app申请的maxcpus
   private val requestedCores = desc.maxCores.getOrElse(defaultCores)
-//coresLeft表示的是该app还有cpu资源没申请到,coresGranted==允许的cpus
+  //coresLeft表示的是该app还有cpu资源没申请到,coresGranted==允许的cpus
   private[master] def coresLeft: Int = requestedCores - coresGranted
 
   private var _retryCount = 0

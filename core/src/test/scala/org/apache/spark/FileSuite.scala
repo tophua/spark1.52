@@ -49,9 +49,9 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
 
   test("text files") {
     sc = new SparkContext("local", "test")
-    val outputDir = new File(tempDir, "output").getAbsolutePath
+    val outputDir = new File(tempDir, "output").getAbsolutePath//返回抽象路径名的绝对路径名字符串
     val nums = sc.makeRDD(1 to 4)
-    nums.saveAsTextFile(outputDir)
+    nums.saveAsTextFile(outputDir)//保存文件1,2,3,4
     // Read the plain text file and check it's OK
     val outputFile = new File(outputDir, "part-00000")
     val content = Source.fromFile(outputFile).mkString
@@ -513,7 +513,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     assert(new File(tempDir.getPath + "/outputDataset_new/part-r-00000").exists() === true)
   }
 
-  test("Get input files via old Hadoop API") {
+ /* test("Get input files via old Hadoop API") {
     sc = new SparkContext("local", "test")
     val outDir = new File(tempDir, "output").getAbsolutePath
     sc.makeRDD(1 to 4, 2).saveAsTextFile(outDir)
@@ -539,5 +539,5 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
           Iterator(split.asInstanceOf[NewFileSplit].getPath.toUri.getPath)
         }.collect()
     assert(inputPaths.toSet === Set(s"$outDir/part-00000", s"$outDir/part-00001"))
-  }
+  }*/
 }

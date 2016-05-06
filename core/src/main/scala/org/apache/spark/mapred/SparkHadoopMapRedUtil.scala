@@ -114,8 +114,8 @@ object SparkHadoopMapRedUtil extends Logging {
         val sparkConf = SparkEnv.get.conf
         // We only need to coordinate with the driver if there are multiple concurrent task
         // attempts, which should only occur if speculation is enabled
-	//此参数设定是否使用推测执行机制，如果设置为true则spark使用推测执行机制，
-	//对于Stage中拖后腿的Task在其他节点中重新启动，并将最先完成的Task的计算结果最为最终结果
+	      //此参数设定是否使用推测执行机制，如果设置为true则spark使用推测执行机制，
+	      //对于Stage中拖后腿的Task在其他节点中重新启动，并将最先完成的Task的计算结果最为最终结果
         val speculationEnabled = sparkConf.getBoolean("spark.speculation", defaultValue = false)
         // This (undocumented) setting is an escape-hatch in case the commit code introduces bugs
         sparkConf.getBoolean("spark.hadoop.outputCommitCoordination.enabled", speculationEnabled)

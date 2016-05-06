@@ -54,6 +54,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     val tracker = new MapOutputTrackerMaster(conf)
     tracker.trackerEndpoint = rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME,
       new MapOutputTrackerMasterEndpoint(rpcEnv, tracker, conf))
+      //shuffleId:10,2数组存储[MapStatus]
     tracker.registerShuffle(10, 2)
     assert(tracker.containsShuffle(10))
     val size1000 = MapStatus.decompressSize(MapStatus.compressSize(1000L))

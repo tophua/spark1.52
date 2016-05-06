@@ -30,7 +30,7 @@ import org.scalatest.Matchers
 import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskStart}
 
 /**
- * Test suite for cancelling(取消) running jobs. We run the cancellation tasks for single job action
+ * Test suite for cancelling(取消) running jobs. We run the cancellation(取消) tasks for single job action
  * (e.g. count) as well as multi-job action (e.g. take). We test the local and cluster schedulers
  * in both FIFO and fair scheduling modes.
  */
@@ -43,7 +43,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
   }
 
   test("local mode, FIFO scheduler") {
-  //Spark的任务调度模式
+  //Spark的任务调度模式,先进先出原则
     val conf = new SparkConf().set("spark.scheduler.mode", "FIFO")
     sc = new SparkContext("local[2]", "test", conf)
     testCount()
@@ -53,7 +53,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
   }
 
   test("local mode, fair scheduler"){
-  //Spark的任务调度模式{
+  //Spark的任务调度模式,公平调度
     val conf = new SparkConf().set("spark.scheduler.mode", "FAIR")
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()
     conf.set("spark.scheduler.allocation.file", xmlPath)
@@ -63,7 +63,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     // Make sure we can still launch tasks.
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
-//Spark的任务调度模式
+  //Spark的任务调度模式,先进先出原则
   test("cluster mode, FIFO scheduler") {
     val conf = new SparkConf().set("spark.scheduler.mode", "FIFO")
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
@@ -72,7 +72,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     // Make sure we can still launch tasks.
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
-//Spark的任务调度模式
+  //Spark的任务调度模式
   test("cluster mode, fair scheduler") {
     val conf = new SparkConf().set("spark.scheduler.mode", "FAIR")//FAIR 公平
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()

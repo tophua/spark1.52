@@ -167,6 +167,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
    *         indicate if this operation is successful.
    */
   def addExecutor(executorId: String): Option[Future[Boolean]] = {
+    //向自己发送ExecutorRegistered消息,receiveAndReply方法接收消息
     Option(self).map(_.ask[Boolean](ExecutorRegistered(executorId)))
   }
 

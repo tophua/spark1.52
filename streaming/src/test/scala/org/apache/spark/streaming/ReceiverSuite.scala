@@ -133,6 +133,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
     val blockGeneratorListener = new FakeBlockGeneratorListener
     val blockIntervalMs = 100
     val maxRate = 1001
+    //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
     val conf = new SparkConf().set("spark.streaming.blockInterval", s"${blockIntervalMs}ms").
       set("spark.streaming.receiver.maxRate", maxRate.toString)
     val blockGenerator = new BlockGenerator(blockGeneratorListener, 1, conf)

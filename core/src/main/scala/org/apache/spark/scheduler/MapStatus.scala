@@ -29,12 +29,16 @@ import org.apache.spark.util.Utils
  * task ran on as well as the sizes of outputs for each reducer, for passing on to the reduce tasks.
  */
 private[spark] sealed trait MapStatus {
-  /** Location where this task was run. */
+  /** 
+   *  Location where this task was run. 
+   *  任务运行的位置
+   **/
+ 
   def location: BlockManagerId
 
   /**
    * Estimated size for the reduce block, in bytes.
-   *
+   * 估计大小为减少块
    * If a block is non-empty, then this method MUST return a non-zero size.  This invariant is
    * necessary for correctness, since block fetchers are allowed to skip zero-size blocks.
    */

@@ -58,7 +58,7 @@ private[spark] class PipedRDD[T: ClassTag](
     this(prev, PipedRDD.tokenize(command), envVars, printPipeContext, printRDDElement,
       separateWorkingDir)
 
-    //getPartitions返回的就是第一个父类的partitions
+  //getPartitions返回的就是第一个父类的partitions
   override def getPartitions: Array[Partition] = firstParent[T].partitions
 
   /**

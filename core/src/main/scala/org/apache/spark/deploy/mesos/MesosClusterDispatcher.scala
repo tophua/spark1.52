@@ -48,7 +48,7 @@ private[mesos] class MesosClusterDispatcher(
     args: MesosClusterDispatcherArguments,
     conf: SparkConf)
   extends Logging {
- //Spark master和workers使用的公共DNS（默认空）
+  //Spark master和workers使用的公共DNS（默认空）
   private val publicAddress = Option(conf.getenv("SPARK_PUBLIC_DNS")).getOrElse(args.host)
   private val recoveryMode = conf.get("spark.mesos.deploy.recoveryMode", "NONE").toUpperCase()
   logInfo("Recovery mode in Mesos dispatcher set to: " + recoveryMode)

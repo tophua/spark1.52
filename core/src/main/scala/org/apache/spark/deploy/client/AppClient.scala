@@ -116,7 +116,7 @@ private[spark] class AppClient(
      *  向所有的Master注册当前Apllcation其中Master依然使用rpcEnv.setupEndpointRef方式获得
      */
     private def tryRegisterAllMasters(): Array[JFuture[_]] = {
-      for (masterAddress <- masterRpcAddresses) yield {
+      for (masterAddress <- masterRpcAddresses) yield {//yield 会把当前的元素记下来，保存在集合中，循环结束后将返回该集合
         registerMasterThreadPool.submit(new Runnable {
           override def run(): Unit = try {
             if (registered) {
@@ -144,8 +144,7 @@ private[spark] class AppClient(
      */
     private def registerWithMaster(nthRetry: Int) {
       //向所有的Master注册当前Apllcation其中Master依然使用rpcEnv.setupEndpointRef方式获得
-      registerMasterFutures = tryRegisterAllMasters()
-      //
+      registerMasterFutures = tryRegisterAllMasters()    
       registrationRetryTimer = registrationRetryThread.scheduleAtFixedRate(new Runnable {
         override def run(): Unit = {
           Utils.tryOrExit {

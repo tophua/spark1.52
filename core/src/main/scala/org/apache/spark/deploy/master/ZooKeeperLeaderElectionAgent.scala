@@ -17,14 +17,14 @@
 
 package org.apache.spark.deploy.master
 
-import org.apache.spark.{Logging, SparkConf}
+import org.apache.spark.{ Logging, SparkConf }
 import org.apache.curator.framework.CuratorFramework
-import org.apache.curator.framework.recipes.leader.{LeaderLatchListener, LeaderLatch}
+import org.apache.curator.framework.recipes.leader.{ LeaderLatchListener, LeaderLatch }
 import org.apache.spark.deploy.SparkCuratorUtil
 
 private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderElectable,
-    conf: SparkConf) extends LeaderLatchListener with LeaderElectionAgent with Logging  {
-//zooKeeper保存恢复状态的目录，缺省为/spark
+    conf: SparkConf) extends LeaderLatchListener with LeaderElectionAgent with Logging {
+  //zooKeeper保存恢复状态的目录，缺省为/spark
   val WORKING_DIR = conf.get("spark.deploy.zookeeper.dir", "/spark") + "/leader_election"
 
   private var zk: CuratorFramework = _
@@ -37,8 +37,8 @@ private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderEle
     logInfo("Starting ZooKeeper LeaderElection agent")
     zk = SparkCuratorUtil.newClient(conf)
     leaderLatch = new LeaderLatch(zk, WORKING_DIR)
-    leaderLatch.addListener(this)//它实现LeanderLatchListener
-    leaderLatch.start()//启动Lead的竞争与选举
+    leaderLatch.addListener(this) //它实现LeanderLatchListener
+    leaderLatch.start() //启动Lead的竞争与选举
   }
 
   override def stop() {
@@ -63,7 +63,7 @@ private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderEle
   override def notLeader() {
     synchronized {
       // could have gained leadership by now.
-     //有可能状态已经再次改变,即Leader再次变化,因此需要再次确认
+      //有可能状态已经再次改变,即Leader再次变化,因此需要再次确认
       if (leaderLatch.hasLeadership) {
         return
       }
@@ -76,10 +76,10 @@ private[master] class ZooKeeperLeaderElectionAgent(val masterInstance: LeaderEle
   private def updateLeadershipStatus(isLeader: Boolean) {
     if (isLeader && status == LeadershipStatus.NOT_LEADER) {
       status = LeadershipStatus.LEADER
-      masterInstance.electedLeader()//Master已经被选举为Leader,
+      masterInstance.electedLeader() //Master已经被选举为Leader,
     } else if (!isLeader && status == LeadershipStatus.LEADER) {
       status = LeadershipStatus.NOT_LEADER
-      masterInstance.revokedLeadership()//Master已经被剥夺Leader
+      masterInstance.revokedLeadership() //Master已经被剥夺Leader
     }
   }
 

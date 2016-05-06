@@ -97,7 +97,7 @@ private[streaming] class BlockGenerator(
     val Initialized, Active, StoppedAddingData, StoppedGeneratingBlocks, StoppedAll = Value
   }
   import GeneratorState._
-
+//Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
   private val blockIntervalMs = conf.getTimeAsMs("spark.streaming.blockInterval", "200ms")
   require(blockIntervalMs > 0, s"'spark.streaming.blockInterval' should be a positive value")
 

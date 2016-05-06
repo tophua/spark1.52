@@ -32,6 +32,7 @@ import org.apache.spark.{SparkException, SparkConf, SparkFunSuite}
 class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
 
   private val blockIntervalMs = 10
+  //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
   private val conf = new SparkConf().set("spark.streaming.blockInterval", s"${blockIntervalMs}ms")
   @volatile private var blockGenerator: BlockGenerator = null
 
