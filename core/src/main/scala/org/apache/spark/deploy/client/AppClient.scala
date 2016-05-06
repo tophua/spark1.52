@@ -66,10 +66,11 @@ private[spark] class AppClient(
     extends Logging {
 
   private val masterRpcAddresses = masterUrls.map(RpcAddress.fromSparkURL(_))
-
+  //注册超时20秒
   private val REGISTRATION_TIMEOUT_SECONDS = 20
+  //注册重试次数3 
   private val REGISTRATION_RETRIES = 3
-
+  //注册是否成功
   @volatile private var registered = false
   private var endpoint: RpcEndpointRef = null
   private var appId: String = null
@@ -116,7 +117,7 @@ private[spark] class AppClient(
      *  向所有的Master注册当前Apllcation其中Master依然使用rpcEnv.setupEndpointRef方式获得
      */
     private def tryRegisterAllMasters(): Array[JFuture[_]] = {
-      for (masterAddress <- masterRpcAddresses) yield {//yield 会把当前的元素记下来，保存在集合中，循环结束后将返回该集合
+      for (masterAddress <- masterRpcAddresses) yield { //yield 会把当前的元素记下来，保存在集合中，循环结束后将返回该集合
         registerMasterThreadPool.submit(new Runnable {
           override def run(): Unit = try {
             if (registered) {
@@ -144,7 +145,7 @@ private[spark] class AppClient(
      */
     private def registerWithMaster(nthRetry: Int) {
       //向所有的Master注册当前Apllcation其中Master依然使用rpcEnv.setupEndpointRef方式获得
-      registerMasterFutures = tryRegisterAllMasters()    
+      registerMasterFutures = tryRegisterAllMasters()
       registrationRetryTimer = registrationRetryThread.scheduleAtFixedRate(new Runnable {
         override def run(): Unit = {
           Utils.tryOrExit {
@@ -161,7 +162,7 @@ private[spark] class AppClient(
               registerWithMaster(nthRetry + 1)
             }
           }
-        }//如果注册20秒内未收到成功的消息，那么再次重复注册
+        } //如果注册20秒内未收到成功的消息，那么再次重复注册
       }, REGISTRATION_TIMEOUT_SECONDS, REGISTRATION_TIMEOUT_SECONDS, TimeUnit.SECONDS)
     }
 
@@ -227,9 +228,9 @@ private[spark] class AppClient(
         if (ExecutorState.isFinished(state)) {
           listener.executorRemoved(fullId, message.getOrElse(""), exitStatus)
         }
-       /**
-        * 在Master故障恢复后,它会通过该消息通知AppClient和worker当前Master已经更改
-        */
+      /**
+       * 在Master故障恢复后,它会通过该消息通知AppClient和worker当前Master已经更改
+       */
       case MasterChanged(masterRef, masterWebUiUrl) =>
         logInfo("Master has changed, new master is at " + masterRef.address.toSparkURL)
         master = Some(masterRef)

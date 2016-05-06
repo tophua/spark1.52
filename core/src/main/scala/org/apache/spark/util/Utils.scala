@@ -2088,7 +2088,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return a pair of host and port extracted from the `sparkUrl`.
-   *
+   * sparkUrl根据提取主机及端口
    * A spark url (`spark://host:port`) is a special URI that its scheme is `spark` and only contains
    * host and port.
    *

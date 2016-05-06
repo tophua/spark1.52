@@ -48,9 +48,11 @@ object CommandUtils extends Logging {
       substituteArguments: String => String,
       classPaths: Seq[String] = Seq[String](),
       env: Map[String, String] = sys.env): ProcessBuilder = {
+    //ProcessBuilder实例管理一个进程属性集
     val localCommand = buildLocalCommand(
       command, securityMgr, substituteArguments, classPaths, env)
     val commandSeq = buildCommandSeq(localCommand, memory, sparkHome)
+    //ProcessBuilder此类用于创建操作系统进程，它提供一种启动和管理进程（也就是应用程序）的方法
     val builder = new ProcessBuilder(commandSeq: _*)
     val environment = builder.environment()
     for ((key, value) <- localCommand.environment) {

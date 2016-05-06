@@ -228,7 +228,9 @@ private[spark] object RpcAddress {
   def fromURIString(uri: String): RpcAddress = {
     fromURI(new java.net.URI(uri))
   }
-
+/**
+ * 根据sparkUrl提取主机名称及端口
+ */
   def fromSparkURL(sparkUrl: String): RpcAddress = {
     val (host, port) = Utils.extractHostPortFromSparkUrl(sparkUrl)
     RpcAddress(host, port)

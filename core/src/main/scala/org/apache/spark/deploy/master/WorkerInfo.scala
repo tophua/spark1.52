@@ -23,7 +23,7 @@ import org.apache.spark.rpc.RpcEndpointRef
 import org.apache.spark.util.Utils
 
 private[spark] class WorkerInfo(
-    val id: String,
+    val id: String, //Id标识
     val host: String,
     val port: Int,
     val cores: Int,
