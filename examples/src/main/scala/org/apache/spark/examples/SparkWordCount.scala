@@ -19,8 +19,8 @@ object SparkWordCount {
 
     val conf = new SparkConf().setMaster("local").setAppName("Spark Exercise: Spark Version Word Count Program");
     val sc = new SparkContext(conf);
-    val textFile = sc.textFile("people.txt");//textFileï¼šç”Ÿæˆä¸€ä¸ªHadoopRDD.map,åˆ›å»ºäº†ä¸€ä¸ªMapPartitionsRDD
-    //flatMapï¼šå‰é¢ç”Ÿæˆçš„MapPartitionsRDD[String]ï¼Œè°ƒç”¨flatMapå‡½æ•°ï¼Œç”Ÿæˆäº†MapPartitionsRDD[String] 
+    val textFile = sc.textFile("people.txt");//textFile£ºÉú³ÉÒ»¸öHadoopRDD.map,´´½¨ÁËÒ»¸öMapPartitionsRDD
+    //flatMap£ºÇ°ÃæÉú³ÉµÄMapPartitionsRDD[String]£¬µ÷ÓÃflatMapº¯Êı£¬Éú³ÉÁËMapPartitionsRDD[String] 
     val wordCounts = textFile.flatMap(line => line.split(" ")).map(
       word => (word, 1))
     /**
@@ -31,11 +31,11 @@ object SparkWordCount {
      *
      *
      * val wordcount = textFile.flatMap(_.split(' ')).map((_,1)).reduceByKey(_+_)
-     * .map(x => (x._2, x._1))//K Vè°ƒæ¢ä½ç½®
-     * .sortByKey(false)//Kè¡¨ç¤ºå€’åºæ’åˆ—
-     * .map(x => (x._2, x._1))//K Vè°ƒæ¢ä½ç½®
+     * .map(x => (x._2, x._1))//K Vµ÷»»Î»ÖÃ
+     * .sortByKey(false)//K±íÊ¾µ¹ĞòÅÅÁĞ
+     * .map(x => (x._2, x._1))//K Vµ÷»»Î»ÖÃ
      */
-    val tsets = wordCounts.reduceByKey((a, b) => a + b) //reduceByKey(_+_)åŠŸèƒ½ä¸€æ · 
+    val tsets = wordCounts.reduceByKey((a, b) => a + b) //reduceByKey(_+_)¹¦ÄÜÒ»Ñù 
     //print the results,for debug use.
     //println("Word Count program running results:");
     /* 

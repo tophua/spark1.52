@@ -7,26 +7,26 @@ object SparkRDDAPIExamples {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setMaster("local").setAppName("Spark Exercise: Spark Version Word Count Program");
     val sc = new SparkContext(conf);
-    //æ£€æŸ¥ç‚¹ä¾‹å­
+    //¼ì²éµãÀý×Ó
     sc.setCheckpointDir("my_directory_name")
     val a = sc.parallelize(1 to 4)
-    a.checkpoint //ä¿å­˜æ£€æŸ¥ç‚¹,å­˜å‚¨ç›®å½•
+    a.checkpoint //±£´æ¼ì²éµã,´æ´¢Ä¿Â¼
     a.count
-   //CollectAsMapä¾‹å­
+   //CollectAsMapÀý×Ó
     val a1 = sc.parallelize(List(1, 2, 1, 3), 1)
-    //zipå‡½æ•°å°†ä¼ è¿›æ¥çš„å‚æ•°ä¸­ç›¸åº”ä½ç½®ä¸Šçš„å…ƒç´ ç»„æˆä¸€ä¸ªpairæ•°ç»„ã€‚
-    //å¦‚æžœå…¶ä¸­ä¸€ä¸ªå‚æ•°å…ƒç´ æ¯”è¾ƒé•¿ï¼Œé‚£ä¹ˆå¤šä½™çš„å‚æ•°ä¼šè¢«åˆ æŽ‰
+    //zipº¯Êý½«´«½øÀ´µÄ²ÎÊýÖÐÏàÓ¦Î»ÖÃÉÏµÄÔªËØ×é³ÉÒ»¸öpairÊý×é¡£
+    //Èç¹ûÆäÖÐÒ»¸ö²ÎÊýÔªËØ±È½Ï³¤£¬ÄÇÃ´¶àÓàµÄ²ÎÊý»á±»É¾µô
     val b = a1.zip(a1)
     b.collectAsMap //Map(2 -> 2, 1 -> 1, 3 -> 3)
     println(b.collectAsMap)
-    //sortBy ä¾‹å­
+    //sortBy Àý×Ó
     val data = List(3,1,90,3,5,12)
 
     val rdd = sc.parallelize(data)
     rdd.collect
-    //é»˜è®¤å‡åº,Array(1, 3, 3, 5, 12, 90)
+    //Ä¬ÈÏÉýÐò,Array(1, 3, 3, 5, 12, 90)
    rdd.sortBy(x => x).collect
-   //ä½¿ç”¨é™åº,Array(90, 12, 5, 3, 3, 1)
+   //Ê¹ÓÃ½µÐò,Array(90, 12, 5, 3, 3, 1)
    rdd.sortBy(x => x, false).collect.toString()
  //
 

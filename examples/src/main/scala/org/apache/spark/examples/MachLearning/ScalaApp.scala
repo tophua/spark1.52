@@ -22,21 +22,21 @@ object ScalaApp {
       .map(line => line.split(","))
       .map(purchaseRecord => (purchaseRecord(0), purchaseRecord(1), purchaseRecord(2)))
 
-    // let's count the number of purchases,æ±‚è´­ä¹°æ¬¡æ•°
+    // let's count the number of purchases,Çó¹ºÂò´ÎÊı
     val numPurchases = data.count()
 
-    // let's count how many unique users made purchases,æ±‚æœ‰å¤šå°‘ä¸ªä¸åŒå®¢æˆ·è´­ä¹°è¿‡å•†å“
+    // let's count how many unique users made purchases,ÇóÓĞ¶àÉÙ¸ö²»Í¬¿Í»§¹ºÂò¹ıÉÌÆ·
     val uniqueUsers = data.map { case (user, product, price) => user }.distinct().count()
 
-    // let's sum up our total revenue,æ±‚å’Œå¾—å‡ºæ€»æ”¶å…¥
+    // let's sum up our total revenue,ÇóºÍµÃ³ö×ÜÊÕÈë
     val totalRevenue = data.map { case (user, product, price) => price.toDouble }.sum()
 
-    // let's find our most popular product,æ±‚æœ€ç•…é”€çš„äº§å“æ˜¯ä»€ä¹ˆ
+    // let's find our most popular product,Çó×î³©ÏúµÄ²úÆ·ÊÇÊ²Ã´
     val productsByPopularity = data
       .map { case (user, product, price) => (product, 1) }
       .reduceByKey(_ + _)
       .collect()
-      .sortBy(-_._2)//æ ¹æ®Map valueæ’åºï¼Œ-é™åºï¼Œç¼ºçœå‡åºã€‚
+      .sortBy(-_._2)//¸ù¾İMap valueÅÅĞò£¬-½µĞò£¬È±Ê¡ÉıĞò¡£
     val mostPopular = productsByPopularity(0)
 
     // finally, print everything out

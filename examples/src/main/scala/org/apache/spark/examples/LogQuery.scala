@@ -44,7 +44,7 @@ object LogQuery {
 
   def main(args: Array[String]) {
 
-    val sparkConf = new SparkConf().setAppName("Log Query")
+    val sparkConf = new SparkConf().setAppName("Log Query").setMaster("local")
     val sc = new SparkContext(sparkConf)
 
     val dataSet =

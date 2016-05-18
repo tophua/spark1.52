@@ -50,8 +50,8 @@ object HdfsWordCount {
     val words = lines.flatMap(_.split(" "))
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)
     wordCounts.print()
-    ssc.start()// å¼€å§‹
-    ssc.awaitTermination() //è®¡ç®—å®Œæ¯•é€€å‡º
+    ssc.start()// ¿ªÊ¼
+    ssc.awaitTermination() //¼ÆËãÍê±ÏÍË³ö
   }
 }
 // scalastyle:on println

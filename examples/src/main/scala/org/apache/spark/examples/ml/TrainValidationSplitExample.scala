@@ -42,7 +42,9 @@ object TrainValidationSplitExample {
     import sqlContext.implicits._
 
     // Prepare training and test data.
+    // 加载数据
     val data = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt").toDF()
+   // 将数据随机分配为两份，一份用于训练，一份用于测试
     val Array(training, test) = data.randomSplit(Array(0.9, 0.1), seed = 12345)
 
     val lr = new LinearRegression()

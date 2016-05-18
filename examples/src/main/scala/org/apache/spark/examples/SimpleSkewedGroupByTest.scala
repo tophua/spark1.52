@@ -20,12 +20,12 @@ package org.apache.spark.examples
 
 import java.util.Random
 
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{ SparkConf, SparkContext }
 import org.apache.spark.SparkContext._
 
 /**
-  * Usage: SimpleSkewedGroupByTest [numMappers] [numKVPairs] [valSize] [numReducers] [ratio]
-  */
+ * Usage: SimpleSkewedGroupByTest [numMappers] [numKVPairs] [valSize] [numReducers] [ratio]
+ */
 object SimpleSkewedGroupByTest {
   def main(args: Array[String]) {
 
@@ -50,7 +50,7 @@ object SimpleSkewedGroupByTest {
           result(i) = (offset, byteArr)
         } else {
           // generate a key for one of the other reducers
-          val key = 1 + ranGen.nextInt(numReducers-1) + offset
+          val key = 1 + ranGen.nextInt(numReducers - 1) + offset
           result(i) = (key, byteArr)
         }
       }
