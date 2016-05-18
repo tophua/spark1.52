@@ -49,6 +49,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     val df = Seq((1, 1)).toDF("key", "value")
     df.registerTempTable("src")
     val queryCaseWhen = sql("select case when true then 1.0 else '1' end from src ")
+    //coalesce 依次参考表达式,遇到非null值即停止并返回值,如果遇到表达式为值,返回空值
     val queryCoalesce = sql("select coalesce(null, 1, '1') from src ")
 
     checkAnswer(queryCaseWhen, Row("1.0") :: Nil)
@@ -60,7 +61,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       FunctionRegistry.builtin.listFunction().sorted.map(Row(_)))
   }
 
-  test("describe functions") {
+  test("describe functions") { //描述函数
     checkExistence(sql("describe function extended upper"), true,
       "Function: upper",
       "Class: org.apache.spark.sql.catalyst.expressions.Upper",
@@ -89,7 +90,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     ).toDF("a", "b", "c").registerTempTable("cachedData")
 
     sqlContext.cacheTable("cachedData")
-    checkAnswer(
+    checkAnswer(//分组b列,
       sql("SELECT t1.b FROM cachedData, cachedData t1 GROUP BY t1.b"),
       Row(0) :: Row(81) :: Nil)
   }
@@ -137,7 +138,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SPARK-8668 expr function") {
     checkAnswer(Seq((1, "Bobby G."))
-      .toDF("id", "name")
+      .toDF("id", "name")//使用函数表达式
       .select(expr("length(name)"), expr("abs(id)")), Row(8, 1))
 
     checkAnswer(Seq((1, "building burrito tunnels"), (1, "major projects"))
@@ -636,7 +637,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("date row") {
-    checkAnswer(sql(
+    checkAnswer(sql(//cast数据类型转换
       """select cast("2015-01-28" as date) from testData limit 1"""),
       Row(java.sql.Date.valueOf("2015-01-28"))
     )

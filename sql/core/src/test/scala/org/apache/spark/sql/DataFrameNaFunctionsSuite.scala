@@ -33,7 +33,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
       ("Nina", 25, Double.NaN),
       ("Amy", null, null),
       (null, null, null)
-      ).toDF("name", "age", "height")
+      ).toDF("name", "age", "height")//标题
   }
 
   test("drop") {
