@@ -41,6 +41,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("fast squared distance") {
+    //pow 第一个参数的值提高到第二个参数的幂
     val a = (30 to 0 by -1).map(math.pow(2.0, _)).toArray
     val n = a.length
     val v1 = Vectors.dense(a)
@@ -54,6 +55,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
       val v3 = Vectors.sparse(n, indices, indices.map(i => a(i) + 0.5))
       val norm3 = Vectors.norm(v3, 2.0)
       val squaredDist = breezeSquaredDistance(v1.toBreeze, v2.toBreeze)
+      //是一种快速计算向量距离的方法,主要用于KMeans聚合算法中,先计算一个精度
       val fastSquaredDist1 = fastSquaredDistance(v1, norm1, v2, norm2, precision)
       assert((fastSquaredDist1 - squaredDist) <= precision * squaredDist, s"failed with m = $m")
       val fastSquaredDist2 =
@@ -76,18 +78,20 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("loadLibSVMFile") {
+    //使用三个引号来进行多行字符引用
     val lines =
       """
         |1 1:1.0 3:2.0 5:3.0
         |0
         |0 2:4.0 4:5.0 6:6.0
-      """.stripMargin
+      """.stripMargin//stripMargin默认是“|”作为出来连接符，在多行换行的行头前面加一个“|”符号即可
     val tempDir = Utils.createTempDir()
     val file = new File(tempDir.getPath, "part-00000")
     Files.write(lines, file, Charsets.US_ASCII)
     val path = tempDir.toURI.toString
-
+    //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量
     val pointsWithNumFeatures = loadLibSVMFile(sc, path, 6).collect()
+    //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量
     val pointsWithoutNumFeatures = loadLibSVMFile(sc, path).collect()
 
     for (points <- Seq(pointsWithNumFeatures, pointsWithoutNumFeatures)) {
@@ -99,8 +103,9 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(points(2).label === 0.0)
       assert(points(2).features === Vectors.sparse(6, Seq((1, 4.0), (3, 5.0), (5, 6.0))))
     }
-
+    //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量
     val multiclassPoints = loadLibSVMFile(sc, path).collect()
+    //字符串使用空格分隔，索引从0开始，以递增的训练排列。导入系统后，特征索引自动转为从0开始索引
     assert(multiclassPoints.length === 3)
     assert(multiclassPoints(0).label === 1.0)
     assert(multiclassPoints(1).label === 0.0)
@@ -121,6 +126,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     val path = tempDir.toURI.toString
 
     intercept[SparkException] {
+      //loadLibSVMFile加载指定LIBSVM格式文件方法
       loadLibSVMFile(sc, path).collect()
     }
     Utils.deleteRecursively(tempDir)
@@ -150,6 +156,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     ), 2)
     val tempDir = Utils.createTempDir()
     val outputDir = new File(tempDir, "output")
+    //将LIBSVM格式的数据保存到指定文件
     MLUtils.saveAsLibSVMFile(examples, outputDir.toURI.toString)
     val lines = outputDir.listFiles()
       .filter(_.getName.startsWith("part-"))
@@ -161,6 +168,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("appendBias") {
+    //对向量增加偏置项,用于回归和分类算法计算中
     val sv = Vectors.sparse(3, Seq((0, 1.0), (2, 3.0)))
     val sv1 = appendBias(sv).asInstanceOf[SparseVector]
     assert(sv1.size === 4)

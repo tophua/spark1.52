@@ -32,6 +32,7 @@ import org.apache.spark.rdd.RDD
 /**
  * :: Experimental ::
  * API for statistical functions in MLlib.
+ * 基础统计模块
  */
 @Since("1.1.0")
 @Experimental
@@ -39,7 +40,7 @@ object Statistics {
 
   /**
    * Computes column-wise summary statistics for the input RDD[Vector].
-   *
+   * 计算每列最大值,最小值,平均值,方差值,L1范数,L2范数
    * @param X an RDD[Vector] for which column-wise summary statistics are to be computed.
    * @return [[MultivariateStatisticalSummary]] object containing column-wise summary statistics.
    */
@@ -49,11 +50,11 @@ object Statistics {
   }
 
   /**
-   * Compute the Pearson correlation matrix for the input RDD of Vectors.
+   * Compute the Pearson correlation(皮尔森相关数) matrix for the input RDD of Vectors.
    * Columns with 0 covariance produce NaN entries in the correlation matrix.
-   *
+   * 相关系数用来表达两个变量的相关性, 取值为(0,1)表示相关,取值(0--1)表示负相关,0为不相关
    * @param X an RDD[Vector] for which the correlation matrix is to be computed.
-   * @return Pearson correlation matrix comparing columns in X.
+   * @return Pearson correlation(皮尔森相关数) matrix comparing columns in X.
    */
   @Since("1.1.0")
   def corr(X: RDD[Vector]): Matrix = Correlations.corrMatrix(X)
@@ -123,7 +124,9 @@ object Statistics {
   /**
    * Conduct Pearson's chi-squared goodness of fit test of the observed data against the
    * expected distribution.
-   *
+   *假设检验
+   * 当前支持用于判断拟合度或者独立性的person卡方检验,不同的输入类型决定了是做拟合度检验还是独立 
+   * 性检验,拟合度检验要求输入为Vector,独立性检验输入为Matrix
    * Note: the two input Vectors need to have the same size.
    *       `observed` cannot contain negative values.
    *       `expected` cannot contain nonpositive values.

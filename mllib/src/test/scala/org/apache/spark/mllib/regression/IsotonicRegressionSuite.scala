@@ -23,7 +23,9 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
-
+/**
+ * 保序回归
+ */
 class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers {
 
   private def round(d: Double) = {

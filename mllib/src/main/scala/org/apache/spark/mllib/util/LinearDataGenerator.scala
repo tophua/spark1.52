@@ -41,6 +41,7 @@ object LinearDataGenerator {
   /**
    * Return a Java List of synthetic data randomly generated according to a multi
    * collinear model.
+   * 用于生成线性回归的训练样本数据
    * @param intercept Data intercept
    * @param weights  Weights to be applied.
    * @param nPoints Number of points in sample.

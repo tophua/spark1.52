@@ -19,34 +19,47 @@ package org.apache.spark.mllib.stat
 
 import java.util.Random
 
-import org.apache.commons.math3.distribution.{ExponentialDistribution,
-  NormalDistribution, UniformRealDistribution}
+import org.apache.commons.math3.distribution.{
+  ExponentialDistribution,
+  NormalDistribution,
+  UniformRealDistribution
+}
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest
 
-import org.apache.spark.{SparkException, SparkFunSuite}
-import org.apache.spark.mllib.linalg.{DenseVector, Matrices, Vectors}
+import org.apache.spark.{ SparkException, SparkFunSuite }
+import org.apache.spark.mllib.linalg.{ DenseVector, Matrices, Vectors }
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.stat.test.ChiSqTest
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 假设检验
+ */
 class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
-
+  //皮尔森(goodness)适配度检测
+  /**
+   * 皮尔森适配度检测，Goodness of Fit test，验证一组观察值的次数分配是否异于理论上的分配。
+   * 目前Spark默认的是均匀分配.
+   */
   test("chi squared pearson goodness of fit") {
 
     val observed = new DenseVector(Array[Double](4, 6, 5))
+    //提供了进行Pearson(皮尔森)卡方检验的方法
     val pearson = Statistics.chiSqTest(observed)
 
     // Results validated against the R command `chisq.test(c(4, 6, 5), p=c(1/3, 1/3, 1/3))`
+    //计算卡方检定的统计值
     assert(pearson.statistic === 0.4)
+    //自由度为2
     assert(pearson.degreesOfFreedom === 2)
-    assert(pearson.pValue ~== 0.8187 relTol 1e-4)
+    assert(pearson.pValue ~== 0.8187 relTol 1e-4)//概率值
     assert(pearson.method === ChiSqTest.PEARSON.name)
     assert(pearson.nullHypothesis === ChiSqTest.NullHypothesis.goodnessOfFit.toString)
 
     // different expected and observed sum
     val observed1 = new DenseVector(Array[Double](21, 38, 43, 80))
     val expected1 = new DenseVector(Array[Double](3, 5, 7, 20))
+    //提供了进行Pearson卡方检验的方法
     val pearson1 = Statistics.chiSqTest(observed1, expected1)
 
     // Results validated against the R command
@@ -60,14 +73,17 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     // Vectors with different sizes
     val observed3 = new DenseVector(Array(1.0, 2.0, 3.0))
     val expected3 = new DenseVector(Array(1.0, 2.0, 3.0, 4.0))
+    //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(observed3, expected3))
 
     // negative counts in observed
     val negObs = new DenseVector(Array(1.0, 2.0, 3.0, -4.0))
+    //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(negObs, expected1))
 
     // count = 0.0 in expected but not observed
     val zeroExpected = new DenseVector(Array(1.0, 0.0, 3.0))
+    //提供了进行Pearson卡方检验的方法
     val inf = Statistics.chiSqTest(observed, zeroExpected)
     assert(inf.statistic === Double.PositiveInfinity)
     assert(inf.degreesOfFreedom === 2)
@@ -77,14 +93,20 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // 0.0 in expected and observed simultaneously
     val zeroObserved = new DenseVector(Array(2.0, 0.0, 1.0))
+    //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(zeroObserved, zeroExpected))
   }
-
+  /**皮尔森独立性(independence)检测**/
+  /**
+   * 独立性检测，independence test，验证从两个变量抽出的配对观察值组是否互相独立。
+   * 其虚无假设是：两个变量呈统计独立性。
+   */
   test("chi squared pearson matrix independence") {
     val data = Array(40.0, 24.0, 29.0, 56.0, 32.0, 42.0, 31.0, 10.0, 0.0, 30.0, 15.0, 12.0)
     // [[40.0, 56.0, 31.0, 30.0],
     //  [24.0, 32.0, 10.0, 15.0],
     //  [29.0, 42.0, 0.0,  12.0]]
+    //提供了进行Pearson卡方检验的方法
     val chi = Statistics.chiSqTest(Matrices.dense(3, 4, data))
     // Results validated against R command
     // `chisq.test(rbind(c(40, 56, 31, 30),c(24, 32, 10, 15), c(29, 42, 0, 12)))`
@@ -96,10 +118,12 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Negative counts
     val negCounts = Array(4.0, 5.0, 3.0, -3.0)
+    //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(Matrices.dense(2, 2, negCounts)))
 
     // Row sum = 0.0
     val rowZero = Array(0.0, 1.0, 0.0, 2.0)
+    //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(Matrices.dense(2, 2, rowZero)))
 
     // Column sum  = 0.0
@@ -120,6 +144,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(0.0, Vectors.dense(3.5, 40.0)),
       LabeledPoint(1.0, Vectors.dense(3.5, 40.0)))
     for (numParts <- List(2, 4, 6, 8)) {
+      //提供了进行Pearson卡方检验的方法
       val chi = Statistics.chiSqTest(sc.parallelize(data, numParts))
       val feature1 = chi(0)
       assert(feature1.statistic === 0.75)
@@ -140,6 +165,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val sparseData = Array(
       new LabeledPoint(0.0, Vectors.sparse(numCols, Seq((100, 2.0)))),
       new LabeledPoint(0.1, Vectors.sparse(numCols, Seq((200, 1.0)))))
+    //提供了进行Pearson卡方检验的方法
     val chi = Statistics.chiSqTest(sc.parallelize(sparseData))
     assert(chi.size === numCols)
     assert(chi(1000) != null) // SPARK-3087
@@ -149,11 +175,13 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val continuousLabel =
       Seq.fill(100000)(LabeledPoint(random.nextDouble(), Vectors.dense(random.nextInt(2))))
     intercept[SparkException] {
+      //提供了进行Pearson卡方检验的方法
       Statistics.chiSqTest(sc.parallelize(continuousLabel, 2))
     }
     val continuousFeature =
       Seq.fill(100000)(LabeledPoint(random.nextInt(2), Vectors.dense(random.nextDouble())))
     intercept[SparkException] {
+      //提供了进行Pearson卡方检验的方法
       Statistics.chiSqTest(sc.parallelize(continuousFeature, 2))
     }
   }
@@ -247,9 +275,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
         -0.446566766553219, 0.569606122374976, -2.88971761441412, -0.869018343326555,
         -0.461702683149641, -0.555540910137444, -0.0201353678515895, -0.150382224136063,
         -0.628126755843964, 1.32322085193283, -1.52135057001199, -0.437427868856691,
-        0.970577579543399, 0.0282226444247749, -0.0857821886527593, 0.389214404984942
-      )
-    )
+        0.970577579543399, 0.0282226444247749, -0.0857821886527593, 0.389214404984942))
     val rCompResult = Statistics.kolmogorovSmirnovTest(rData, "norm", 0, 1)
     assert(rCompResult.statistic ~== rKSStat relTol 1e-4)
     assert(rCompResult.pValue ~== rKSPVal relTol 1e-4)

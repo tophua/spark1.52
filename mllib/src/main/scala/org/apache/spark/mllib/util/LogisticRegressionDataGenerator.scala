@@ -36,7 +36,7 @@ object LogisticRegressionDataGenerator {
 
   /**
    * Generate an RDD containing test data for LogisticRegression.
-   *
+   * 用于生成逻辑回归的训练样本数据
    * @param sc SparkContext to use for creating the RDD.
    * @param nexamples Number of examples that will be contained in the RDD.
    * @param nfeatures Number of features to generate for each example.

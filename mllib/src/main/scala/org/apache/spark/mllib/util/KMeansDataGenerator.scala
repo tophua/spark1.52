@@ -35,7 +35,7 @@ object KMeansDataGenerator {
 
   /**
    * Generate an RDD containing test data for KMeans.
-   *
+   * 生成KMeans的训练样本数据
    * @param sc SparkContext to use for creating the RDD
    * @param numPoints Number of points that will be contained in the RDD
    * @param k Number of clusters

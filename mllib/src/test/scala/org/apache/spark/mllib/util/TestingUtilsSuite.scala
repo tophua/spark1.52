@@ -160,7 +160,7 @@ class TestingUtilsSuite extends SparkFunSuite {
     intercept[TestFailedException](Vectors.dense(Array(3.1, 3.5, 0.0)) ~==
       Vectors.dense(Array(3.1 + 1E-5, 3.5 + 2E-7, 1 + 1E-3)) absTol 1E-6)
 
-    // Comparisons of two sparse vectors
+    // Comparisons of two sparse vectors 创建稀疏向量
     assert(Vectors.sparse(3, Array(0, 2), Array(3.1, 2.4)) ~==
       Vectors.sparse(3, Array(0, 2), Array(3.1 + 1E-8, 2.4 + 1E-7)) absTol 1E-6)
 

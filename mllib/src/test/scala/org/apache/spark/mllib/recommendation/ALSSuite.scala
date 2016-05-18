@@ -26,9 +26,14 @@ import org.jblas.DoubleMatrix
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.storage.StorageLevel
-
+/**
+ * 协同过滤
+ */
 object ALSSuite {
-
+/**
+ * Llib中对每个解决最小二乘问题的正则化参数lambda做了扩展：
+ * 一个是在更新用户因素时用户产生的评分数量；另一个是在更新产品因素时产品被评分的数量。
+ */
   def generateRatingsAsJavaList(
       users: Int,
       products: Int,
@@ -128,8 +133,8 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("pseudorandomness") {
     val ratings = sc.parallelize(ALSSuite.generateRatings(10, 20, 5, 0.5, false, false)._1, 2)
-    val model11 = ALS.train(ratings, 5, 1, 1.0, 2, 1)
-    val model12 = ALS.train(ratings, 5, 1, 1.0, 2, 1)
+    val model11 = ALS.train(ratings, 5, 1, 1.0, 2, 1)//训练
+    val model12 = ALS.train(ratings, 5, 1, 1.0, 2, 1)//训练
     val u11 = model11.userFeatures.values.flatMap(_.toList).collect().toList
     val u12 = model12.userFeatures.values.flatMap(_.toList).collect().toList
     val model2 = ALS.train(ratings, 5, 1, 1.0, 2, 2)
@@ -153,8 +158,8 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.userFeatures.getStorageLevel == storageLevel);
     storageLevel = StorageLevel.DISK_ONLY
     model = new ALS()
-      .setRank(5)
-      .setIterations(1)
+      .setRank(5)//模型中潜在因素的数量
+      .setIterations(1)//迭代次数
       .setLambda(1.0)
       .setBlocks(2)
       .setSeed(1)
@@ -208,13 +213,13 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       users: Int,
       products: Int,
       features: Int,
-      iterations: Int,
+      iterations: Int,//迭代次数
       samplingRate: Double,
       matchThreshold: Double,
-      implicitPrefs: Boolean = false,
+      implicitPrefs: Boolean = false,//制定是否使用显示反馈ALS变体（或者说是对隐式反馈数据的一种适应）
       bulkPredict: Boolean = false,
       negativeWeights: Boolean = false,
-      numUserBlocks: Int = -1,
+      numUserBlocks: Int = -1,//并行计算的块数量,（默认值为-1，表示自动配置）
       numProductBlocks: Int = -1,
       negativeFactors: Boolean = true) {
     // scalastyle:on
@@ -225,9 +230,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = new ALS()
       .setUserBlocks(numUserBlocks)
       .setProductBlocks(numProductBlocks)
-      .setRank(features)
+      .setRank(features)//模型中潜在因素的数量
       .setIterations(iterations)
-      .setAlpha(1.0)
+      .setAlpha(1.0)//应用于隐式数据的ALS变体，它控制的是观察到偏好的基本置信度
       .setImplicitPrefs(implicitPrefs)
       .setLambda(0.01)
       .setSeed(0L)

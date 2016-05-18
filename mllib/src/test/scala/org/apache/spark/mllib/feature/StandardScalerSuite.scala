@@ -18,30 +18,30 @@
 package org.apache.spark.mllib.feature
 
 import org.apache.spark.SparkFunSuite
-import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vector, Vectors}
+import org.apache.spark.mllib.linalg.{ DenseVector, SparseVector, Vector, Vectors }
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
-import org.apache.spark.mllib.stat.{MultivariateStatisticalSummary, MultivariateOnlineSummarizer}
+import org.apache.spark.mllib.stat.{ MultivariateStatisticalSummary, MultivariateOnlineSummarizer }
 import org.apache.spark.rdd.RDD
 
 class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   // When the input data is all constant, the variance is zero. The standardization against
   // zero variance is not well-defined, but we decide to just set it into zero here.
+  //密集向量(dense vector)使用double数组表示元素值
   val constantData = Array(
     Vectors.dense(2.0),
     Vectors.dense(2.0),
-    Vectors.dense(2.0)
-  )
-
+    Vectors.dense(2.0))
+  //稀疏向量(sparse vector)通过两个并列的数组来表示：一个表示索引，一个表示数值
   val sparseData = Array(
+    //3表示此向量的长度，后面的比较直观，Seq里面每一对都是(索引，值）的形式。
     Vectors.sparse(3, Seq((0, -2.0), (1, 2.3))),
     Vectors.sparse(3, Seq((1, -1.0), (2, -3.0))),
     Vectors.sparse(3, Seq((1, -5.1))),
     Vectors.sparse(3, Seq((0, 3.8), (2, 1.9))),
     Vectors.sparse(3, Seq((0, 1.7), (1, -0.6))),
-    Vectors.sparse(3, Seq((1, 1.9)))
-  )
+    Vectors.sparse(3, Seq((1, 1.9))))
 
   val denseData = Array(
     Vectors.dense(-2.0, 2.3, 0),
@@ -49,8 +49,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     Vectors.dense(0.0, -5.1, 0.0),
     Vectors.dense(3.8, 0.0, 1.9),
     Vectors.dense(1.7, -0.6, 0.0),
-    Vectors.dense(0.0, 1.9, 0.0)
-  )
+    Vectors.dense(0.0, 1.9, 0.0))
 
   private def computeSummary(data: RDD[Vector]): MultivariateStatisticalSummary = {
     data.treeAggregate(new MultivariateOnlineSummarizer)(
@@ -61,11 +60,16 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Standardization with dense input when means and stds are provided") {
 
     val dataRDD = sc.parallelize(denseData, 3)
-
+    //标准化是指：对于训练集中的样本，基于列统计信息将数据除以方差或（且）者将数据减去其均值（结果是方差等于1，数据在0附近）
+    //标准化可以提升模型优化阶段的收敛速度，还可以避免方差很大的特征对模型训练产生过大的影响
+    /**
+     * withMean 默认值False. 在尺度变换（除方差）之前使用均值做居中处理（减去均值）。这会导致密集型输出，所以在稀疏数据上无效
+     * withStd 默认值True. 将数据缩放（尺度变换）到单位标准差
+     */
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
-
+    //fit 计算汇总统计信息，然后返回一个模型，该模型可以根据StandardScaler配置将输入数据转换为标准差为1，均值为0的特征
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -190,7 +194,6 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(data3(5) ~== Vectors.dense(-0.58333333, 2.316666666, 0.18333333333) absTol 1E-5)
   }
 
-
   test("Standardization with sparse input when means and stds are provided") {
 
     val dataRDD = sc.parallelize(sparseData, 3)
@@ -267,7 +270,6 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     val data2RDD = model2.transform(dataRDD)
-
 
     val summary = computeSummary(data2RDD)
 

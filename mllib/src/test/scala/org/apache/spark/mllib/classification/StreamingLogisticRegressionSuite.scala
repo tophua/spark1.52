@@ -40,7 +40,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     }
   }
 
-  // Test if we can accurately learn B for Y = logistic(BX) on streaming data
+  // Test if we can accurately(精确地) learn B for Y = logistic(BX) on streaming data
   test("parameter accuracy") {
 
     val nPoints = 100

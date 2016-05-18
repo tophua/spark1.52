@@ -20,14 +20,20 @@ package org.apache.spark.mllib.linalg.distributed
 import scala.util.Random
 
 import breeze.numerics.abs
-import breeze.linalg.{DenseVector => BDV, DenseMatrix => BDM, norm => brzNorm, svd => brzSvd}
+import breeze.linalg.{ DenseVector => BDV, DenseMatrix => BDM, norm => brzNorm, svd => brzSvd }
 
 import org.apache.spark.SparkFunSuite
-import org.apache.spark.mllib.linalg.{Matrices, Vectors, Vector}
-import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkContext}
-
+import org.apache.spark.mllib.linalg.{ Matrices, Vectors, Vector }
+import org.apache.spark.mllib.util.{ LocalClusterSparkContext, MLlibTestSparkContext }
+/**
+ * 分布式矩阵以long整型做索引，以double类型为值，以RDD的方式分布式存储
+ * 当存储非常大的分布式矩阵的时候，选择正确的存储方式非常重要
+ */
 class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
-
+  /**
+   * 行矩阵(RowMatrix)按行分布式存储，无行索引，底层支撑结构是多行数据组成的RDD，每行是一个局部向量。
+   * 正因为每行是局部向量，列数受限于整数的范围，不过在实践中已经够用了
+   */
   val m = 4
   val n = 3
   val arr = Array(0.0, 3.0, 6.0, 9.0, 1.0, 4.0, 7.0, 0.0, 2.0, 5.0, 8.0, 1.0)
@@ -35,25 +41,25 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     Vectors.dense(0.0, 1.0, 2.0),
     Vectors.dense(3.0, 4.0, 5.0),
     Vectors.dense(6.0, 7.0, 8.0),
-    Vectors.dense(9.0, 0.0, 1.0)
-  )
+    Vectors.dense(9.0, 0.0, 1.0))
   val sparseData = Seq(
     Vectors.sparse(3, Seq((1, 1.0), (2, 2.0))),
     Vectors.sparse(3, Seq((0, 3.0), (1, 4.0), (2, 5.0))),
     Vectors.sparse(3, Seq((0, 6.0), (1, 7.0), (2, 8.0))),
-    Vectors.sparse(3, Seq((0, 9.0), (2, 1.0)))
-  )
+    Vectors.sparse(3, Seq((0, 9.0), (2, 1.0))))
 
   val principalComponents = BDM(
     (0.0, 1.0, 0.0),
     (math.sqrt(2.0) / 2.0, 0.0, math.sqrt(2.0) / 2.0),
-    (math.sqrt(2.0) / 2.0, 0.0, - math.sqrt(2.0) / 2.0))
+    (math.sqrt(2.0) / 2.0, 0.0, -math.sqrt(2.0) / 2.0))
 
   var denseMat: RowMatrix = _
   var sparseMat: RowMatrix = _
 
   override def beforeAll() {
     super.beforeAll()
+    //行矩阵按行分布式存储，这个时候行号没有意义,
+    //特征向量集就可以表示为行矩阵，通过RDD来支撑矩阵的部分行，每行是一个局部向量
     denseMat = new RowMatrix(sc.parallelize(denseData, 2))
     sparseMat = new RowMatrix(sc.parallelize(sparseData, 2))
   }
@@ -217,8 +223,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
         Vectors.dense(5.0, 14.0),
         Vectors.dense(14.0, 50.0),
         Vectors.dense(23.0, 86.0),
-        Vectors.dense(2.0, 32.0)
-      ))
+        Vectors.dense(2.0, 32.0)))
     }
   }
 

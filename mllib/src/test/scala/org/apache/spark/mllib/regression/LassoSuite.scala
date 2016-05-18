@@ -30,7 +30,9 @@ private object LassoSuite {
   /** 3 features */
   val model = new LassoModel(weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5)
 }
-
+/**
+ * 岭回归
+ */
 class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   def validatePrediction(predictions: Seq[Double], input: Seq[LabeledPoint]) {

@@ -468,6 +468,7 @@ class Word2VecModel private[mllib] (
   def this(model: Map[String, Array[Float]]) = {
     this(Word2VecModel.buildWordIndex(model), Word2VecModel.buildWordVectors(model))
   }
+/**余弦相似度**/
 
   private def cosineSimilarity(v1: Array[Float], v2: Array[Float]): Double = {
     require(v1.length == v2.length, "Vectors should have the same length")

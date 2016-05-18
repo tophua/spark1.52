@@ -239,8 +239,9 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
         .filter(_ >= 0.0)
 
     // Run the partitions, including the consecutive empty ones, through StatCounter
+    //取出RDD数据值最大值,最小值,总数,中间值
     val stats: StatCounter = rdd.stats()
-    assert(abs(6.0 - stats.sum) < 0.01)
+    assert(abs(6.0 - stats.sum) < 0.01)//
     assert(abs(6.0/2 - rdd.mean) < 0.01)
     assert(abs(1.0 - rdd.variance) < 0.01)
     assert(abs(1.0 - rdd.stdev) < 0.01)

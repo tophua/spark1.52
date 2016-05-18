@@ -22,10 +22,10 @@ import scala.util.Random
 
 import org.jblas.DoubleMatrix
 
-import org.apache.spark.{SparkException, SparkFunSuite}
+import org.apache.spark.{ SparkException, SparkFunSuite }
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression._
-import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkContext}
+import org.apache.spark.mllib.util.{ LocalClusterSparkContext, MLlibTestSparkContext }
 import org.apache.spark.util.Utils
 
 object SVMSuite {
@@ -45,9 +45,9 @@ object SVMSuite {
     nPoints: Int,
     seed: Int): Seq[LabeledPoint] = {
     val rnd = new Random(seed)
-    val weightsMat = new DoubleMatrix(1, weights.length, weights : _*)
+    val weightsMat = new DoubleMatrix(1, weights.length, weights: _*)
     val x = Array.fill[Array[Double]](nPoints)(
-        Array.fill[Double](weights.length)(rnd.nextDouble() * 2.0 - 1.0))
+      Array.fill[Double](weights.length)(rnd.nextDouble() * 2.0 - 1.0))
     val y = x.map { xi =>
       val yD = new DoubleMatrix(1, xi.length, xi: _*).dot(weightsMat) +
         intercept + 0.01 * rnd.nextGaussian()
@@ -60,12 +60,15 @@ object SVMSuite {
   private val binaryModel = new SVMModel(weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5)
 
 }
-
+/**
+ * Llib提供两种线性方法用于分类：线性支持向量机(SVM)和逻辑回归。SVM只支持二分类，而逻辑回归既支持二分类又支持多分类
+ */
 class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   def validatePrediction(predictions: Seq[Double], input: Seq[LabeledPoint]) {
-    val numOffPredictions = predictions.zip(input).count { case (prediction, expected) =>
-      prediction != expected.label
+    val numOffPredictions = predictions.zip(input).count {
+      case (prediction, expected) =>
+        prediction != expected.label
     }
     // At least 80% of the predictions should be on.
     assert(numOffPredictions < input.length / 5)

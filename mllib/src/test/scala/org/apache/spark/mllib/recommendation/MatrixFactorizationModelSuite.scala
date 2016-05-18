@@ -22,7 +22,9 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.util.Utils
-
+/**
+ * 矩阵分解模型 MatrixFactorizationModel
+ */
 class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   val rank = 2
@@ -82,6 +84,8 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
   }
 
   test("batch predict API recommendUsersForProducts") {
+    
+    //userFeatures用户因子,prodFeatures商品因子,rank因子个数,因子个数一般越多越好,普通取值10到200
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
     val topK = 10
     val recommendations = model.recommendUsersForProducts(topK).collectAsMap()

@@ -32,7 +32,9 @@ import org.apache.spark.mllib.tree.model._
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.util.Utils
 
-
+/**
+ * 决策树
+ */
 class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   /////////////////////////////////////////////////////////////////////////////

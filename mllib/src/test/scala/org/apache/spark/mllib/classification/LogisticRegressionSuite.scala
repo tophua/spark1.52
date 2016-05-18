@@ -30,7 +30,7 @@ import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkCont
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 
-
+//逻辑回归广泛应用于二分类问题
 object LogisticRegressionSuite {
 
   def generateLogisticInputAsList(
@@ -180,7 +180,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     // At least 83% of the predictions should be on.
     ((input.length - numOffPredictions).toDouble / input.length) should be > expectedAcc
   }
-
+  //逻辑回归广泛应用于二分类问题
   // Test if we can correctly learn A, B where Y = logistic(A + B*X)
   test("logistic regression with SGD") {
     val nPoints = 10000

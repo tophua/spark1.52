@@ -54,7 +54,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     val y = sc.parallelize(yData)
     val expected = 0.6546537
     val default = Statistics.corr(x, y)
-    val p1 = Statistics.corr(x, y, "pearson")
+    val p1 = Statistics.corr(x, y, "pearson")//(皮尔森相关数)
     assert(approxEqual(expected, default))
     assert(approxEqual(expected, p1))
 
@@ -94,7 +94,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
   test("corr(X) default, pearson") {
     val X = sc.parallelize(data)
     val defaultMat = Statistics.corr(X)
-    val pearsonMat = Statistics.corr(X, "pearson")
+    val pearsonMat = Statistics.corr(X, "pearson")//(皮尔森相关数)
     // scalastyle:off
     val expected = BDM(
       (1.00000000, 0.05564149, Double.NaN, 0.4004714),
@@ -120,10 +120,10 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
   }
 
   test("method identification") {
-    val pearson = PearsonCorrelation
+    val pearson = PearsonCorrelation//(皮尔森相关数)
     val spearman = SpearmanCorrelation
 
-    assert(Correlations.getCorrelationFromName("pearson") === pearson)
+    assert(Correlations.getCorrelationFromName("pearson") === pearson)//(皮尔森相关数)
     assert(Correlations.getCorrelationFromName("spearman") === spearman)
 
     // Should throw IllegalArgumentException

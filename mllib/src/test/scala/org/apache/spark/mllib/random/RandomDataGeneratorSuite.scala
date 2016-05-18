@@ -24,7 +24,9 @@ import org.apache.spark.util.StatCounter
 
 // TODO update tests to use TestingUtils for floating point comparison after PR 1367 is merged
 class RandomDataGeneratorSuite extends SparkFunSuite {
-
+/**
+ * 随机数据生成在随机算法、原型开发、性能测试中比较有用
+ */
   def apiChecks(gen: RandomDataGenerator[Double]) {
     // resetting seed should generate the same sequence of random numbers
     gen.setSeed(42L)

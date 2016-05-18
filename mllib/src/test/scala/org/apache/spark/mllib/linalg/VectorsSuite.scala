@@ -23,27 +23,33 @@ import breeze.linalg.{DenseMatrix => BDM, squaredDistance => breezeSquaredDistan
 
 import org.apache.spark.{Logging, SparkException, SparkFunSuite}
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 向量
+ */
 class VectorsSuite extends SparkFunSuite with Logging {
 
   val arr = Array(0.1, 0.0, 0.3, 0.4)
   val n = 4
   val indices = Array(0, 2, 3)
   val values = Array(0.1, 0.3, 0.4)
-
+  //密集向量(dense vector)使用double数组表示元素值
   test("dense vector construction with varargs") {
+    //密集向量
     val vec = Vectors.dense(arr).asInstanceOf[DenseVector]
     assert(vec.size === arr.length)
     assert(vec.values.eq(arr))
   }
-
+  
   test("dense vector construction from a double array") {
+     //密集向量
    val vec = Vectors.dense(arr).asInstanceOf[DenseVector]
     assert(vec.size === arr.length)
     assert(vec.values.eq(arr))
   }
 
   test("sparse vector construction") {
+    //稀疏向量 第一参数3表示此向量的长度，第二个参数Array(0,2)表示的索引，第三个参数Array(1.0, 3.0)
+    //与前面的Array(0,2)是相互对应的，表示第0个位置的值为1.0，第2个位置的值为3
     val vec = Vectors.sparse(n, indices, values).asInstanceOf[SparseVector]
     assert(vec.size === n)
     assert(vec.indices.eq(indices))
@@ -79,13 +85,13 @@ class VectorsSuite extends SparkFunSuite with Logging {
 
   test("dense argmax") {
     val vec = Vectors.dense(Array.empty[Double]).asInstanceOf[DenseVector]
-    assert(vec.argmax === -1)
+    assert(vec.argmax === -1)//找出最大元素位置
 
     val vec2 = Vectors.dense(arr).asInstanceOf[DenseVector]
-    assert(vec2.argmax === 3)
+    assert(vec2.argmax === 3)//找出最大元素位置
 
     val vec3 = Vectors.dense(Array(-1.0, 0.0, -2.0, 1.0)).asInstanceOf[DenseVector]
-    assert(vec3.argmax === 3)
+    assert(vec3.argmax === 3)//找出最大元素位置
   }
 
   test("sparse to array") {
@@ -95,30 +101,30 @@ class VectorsSuite extends SparkFunSuite with Logging {
 
   test("sparse argmax") {
     val vec = Vectors.sparse(0, Array.empty[Int], Array.empty[Double]).asInstanceOf[SparseVector]
-    assert(vec.argmax === -1)
+    assert(vec.argmax === -1)//找出最大元素位置
 
     val vec2 = Vectors.sparse(n, indices, values).asInstanceOf[SparseVector]
-    assert(vec2.argmax === 3)
+    assert(vec2.argmax === 3)//找出最大元素位置
 
     val vec3 = Vectors.sparse(5, Array(2, 3, 4), Array(1.0, 0.0, -.7))
-    assert(vec3.argmax === 2)
+    assert(vec3.argmax === 2)//找出最大元素位置
 
     // check for case that sparse vector is created with
     // only negative values {0.0, 0.0,-1.0, -0.7, 0.0}
     val vec4 = Vectors.sparse(5, Array(2, 3), Array(-1.0, -.7))
-    assert(vec4.argmax === 0)
+    assert(vec4.argmax === 0)//找出最大元素位置
 
     val vec5 = Vectors.sparse(11, Array(0, 3, 10), Array(-1.0, -.7, 0.0))
-    assert(vec5.argmax === 1)
+    assert(vec5.argmax === 1)//找出最大元素位置
 
     val vec6 = Vectors.sparse(11, Array(0, 1, 2), Array(-1.0, -.7, 0.0))
-    assert(vec6.argmax === 2)
+    assert(vec6.argmax === 2)//找出最大元素位置
 
     val vec7 = Vectors.sparse(5, Array(0, 1, 3), Array(-1.0, 0.0, -.7))
-    assert(vec7.argmax === 1)
+    assert(vec7.argmax === 1)//找出最大元素位置
 
     val vec8 = Vectors.sparse(5, Array(1, 2), Array(0.0, -1.0))
-    assert(vec8.argmax === 0)
+    assert(vec8.argmax === 0)//找出最大元素位置
   }
 
   test("vector equals") {
@@ -167,11 +173,13 @@ class VectorsSuite extends SparkFunSuite with Logging {
   }
 
   test("indexing sparse vectors") {
+    //稀疏向量 第一参数7表示此向量的长度，第二个参数Array(0, 2, 4, 6)表示的索引，第三个参数Array(1.0, 2.0, 3.0, 4.0)
+    //与前面的Array(0, 2, 4, 6)是相互对应的，表示第0个位置的值为1.0，第2个位置的值为2,第4个位置的值为3,第6个位置的值为4
     val vec = Vectors.sparse(7, Array(0, 2, 4, 6), Array(1.0, 2.0, 3.0, 4.0))
     assert(vec(0) === 1.0)
-    assert(vec(1) === 0.0)
+    assert(vec(1) === 0.0)//第一个Array没有1值,数据为0
     assert(vec(2) === 2.0)
-    assert(vec(3) === 0.0)
+    assert(vec(3) === 0.0)//第一个Array没有3值,数据为0
     assert(vec(6) === 4.0)
     val vec2 = Vectors.sparse(8, Array(0, 2, 4, 6), Array(1.0, 2.0, 3.0, 4.0))
     assert(vec2(6) === 4.0)
@@ -279,6 +287,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
 
   test("foreachActive") {
     val dv = Vectors.dense(0.0, 1.2, 3.1, 0.0)
+    //4表示此向量的长度，后面的比较直观，Seq里面每一对都是(索引，值）的形式。
     val sv = Vectors.sparse(4, Seq((1, 1.2), (2, 3.1), (3, 0.0)))
 
     val dvMap = scala.collection.mutable.Map[Int, Double]()
@@ -290,7 +299,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
     assert(dvMap.get(1) === Some(1.2))
     assert(dvMap.get(2) === Some(3.1))
     assert(dvMap.get(3) === Some(0.0))
-
+    //4表示此向量的长度，后面的比较直观，Seq里面每一对都是(索引，值）的形式。
     val svMap = scala.collection.mutable.Map[Int, Double]()
     sv.foreachActive { (index, value) =>
       svMap.put(index, value)

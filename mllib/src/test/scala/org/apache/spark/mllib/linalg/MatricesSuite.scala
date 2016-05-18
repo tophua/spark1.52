@@ -25,12 +25,16 @@ import scala.collection.mutable.{Map => MutableMap}
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 本地矩阵也有密度矩阵（Dense Matrix）、稀疏矩阵（Sparse Matrix）两种存储方法
+ */
 class MatricesSuite extends SparkFunSuite {
+  /**局部矩阵使用整型行列索引和浮点(double)数值,存储在单机上**/
   test("dense matrix construction") {
     val m = 3
     val n = 2
     val values = Array(0.0, 1.0, 2.0, 3.0, 4.0, 5.0)
+    //会被存储为一维数组[1.0, 3.0, 5.0, 2.0, 4.0, 6.0] ,矩阵的大小是(3行, 2列)
     val mat = Matrices.dense(m, n, values).asInstanceOf[DenseMatrix]
     assert(mat.numRows === m)
     assert(mat.numCols === n)
@@ -44,11 +48,16 @@ class MatricesSuite extends SparkFunSuite {
   }
 
   test("sparse matrix construction") {
-    val m = 3
-    val n = 4
+    //稀疏矩阵(Sparse Matrix)
+    val m = 3 //行数
+    val n = 4 //列数
+    //实际存储值
     val values = Array(1.0, 2.0, 4.0, 5.0)
+    //列起始位置索引：colPointers=[0, 2, 2, 4, 4]
     val colPtrs = Array(0, 2, 2, 4, 4)
+     //矩阵元素对应的行索引
     val rowIndices = Array(1, 2, 1, 2)
+   
     val mat = Matrices.sparse(m, n, colPtrs, rowIndices, values).asInstanceOf[SparseMatrix]
     assert(mat.numRows === m)
     assert(mat.numCols === n)
@@ -111,8 +120,9 @@ class MatricesSuite extends SparkFunSuite {
   }
 
   test("matrix indexing and updating") {
-    val m = 3
-    val n = 2
+    val m = 3//行数
+    val n = 2//列数
+    
     val allValues = Array(0.0, 1.0, 2.0, 3.0, 4.0, 0.0)
 
     val denseMat = new DenseMatrix(m, n, allValues)
@@ -125,12 +135,14 @@ class MatricesSuite extends SparkFunSuite {
     denseMat.update(0, 0, 10.0)
     assert(denseMat(0, 0) === 10.0)
     assert(denseMat.values(0) === 10.0)
-
+    //实际存储值
     val sparseValues = Array(1.0, 2.0, 3.0, 4.0)
+    //列起始位置索引
     val colPtrs = Array(0, 2, 4)
+    //矩阵元素对应的行索引
     val rowIndices = Array(1, 2, 0, 1)
+    //稀疏矩阵(Sparse Matrix)
     val sparseMat = new SparseMatrix(m, n, colPtrs, rowIndices, sparseValues)
-
     assert(sparseMat(0, 1) === 3.0)
     assert(sparseMat(0, 1) === sparseMat.values(2))
     assert(sparseMat(0, 0) === 0.0)

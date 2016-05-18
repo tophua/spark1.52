@@ -32,7 +32,9 @@ private object RidgeRegressionSuite {
   /** 3 features */
   val model = new RidgeRegressionModel(weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5)
 }
-
+/**
+ * 逻辑回归
+ */
 class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   def predictionError(predictions: Seq[Double], input: Seq[LabeledPoint]): Double = {

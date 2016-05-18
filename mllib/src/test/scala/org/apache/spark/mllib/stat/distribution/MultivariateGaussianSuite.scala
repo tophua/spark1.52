@@ -40,10 +40,10 @@ class MultivariateGaussianSuite extends SparkFunSuite with MLlibTestSparkContext
   }
 
   test("multivariate") {
-    val x1 = Vectors.dense(0.0, 0.0)
-    val x2 = Vectors.dense(1.0, 1.0)
+    val x1 = Vectors.dense(0.0, 0.0)//创建密集向量
+    val x2 = Vectors.dense(1.0, 1.0)//创建密集向量
 
-    val mu = Vectors.dense(0.0, 0.0)
+    val mu = Vectors.dense(0.0, 0.0)//创建密集向量
     val sigma1 = Matrices.dense(2, 2, Array(1.0, 0.0, 0.0, 1.0))
     val dist1 = new MultivariateGaussian(mu, sigma1)
     assert(dist1.pdf(x1) ~== 0.15915 absTol 1E-5)

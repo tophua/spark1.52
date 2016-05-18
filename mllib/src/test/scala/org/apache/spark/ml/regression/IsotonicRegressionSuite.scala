@@ -23,7 +23,9 @@ import org.apache.spark.ml.util.MLTestingUtils
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.{DataFrame, Row}
-
+/**
+ * 保序回归
+ */
 class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   private def generateIsotonicInput(labels: Seq[Double]): DataFrame = {
     sqlContext.createDataFrame(

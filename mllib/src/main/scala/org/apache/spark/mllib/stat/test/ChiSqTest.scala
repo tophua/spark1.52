@@ -35,7 +35,7 @@ import scala.collection.mutable
  * label for an input `RDD[LabeledPoint]`, return an `Array[ChiSquaredTestResult]` of size =
  * number of features in the input RDD.
  *
- * Supported methods for goodness of fit: `pearson` (default)
+ * Supported methods for goodness of fit: `pearson` (default)(皮尔森相关数)
  * Supported methods for independence: `pearson` (default)
  *
  * More information on Chi-squared test: http://en.wikipedia.org/wiki/Chi-squared_test
@@ -48,7 +48,7 @@ private[stat] object ChiSqTest extends Logging {
    */
   case class Method(name: String, chiSqFunc: (Double, Double) => Double)
 
-  // Pearson's chi-squared test: http://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test
+  // (皮尔森相关数) Pearson's chi-squared test: http://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test
   val PEARSON = new Method("pearson", (observed: Double, expected: Double) => {
     val dev = observed - expected
     dev * dev / expected

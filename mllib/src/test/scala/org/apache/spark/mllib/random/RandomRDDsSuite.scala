@@ -124,18 +124,19 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     val exponentialMean = 1.0
 
     for (seed <- 0 until 5) {
+      //生成了一个RDD[double], 它服从标准正态分布，然后转成了N(1, 4)分布
       val uniform = RandomRDDs.uniformRDD(sc, size, numPartitions, seed)
       testGeneratedRDD(uniform, size, numPartitions, 0.5, 1 / math.sqrt(12))
-
+      //标准正态分布
       val normal = RandomRDDs.normalRDD(sc, size, numPartitions, seed)
       testGeneratedRDD(normal, size, numPartitions, 0.0, 1.0)
-
+ 
       val logNormal = RandomRDDs.logNormalRDD(sc, 0.0, 1.0, size, numPartitions, seed)
       testGeneratedRDD(logNormal, size, numPartitions, logNormalMean, logNormalStd, 0.1)
-
+      //泊松分布
       val poisson = RandomRDDs.poissonRDD(sc, poissonMean, size, numPartitions, seed)
       testGeneratedRDD(poisson, size, numPartitions, poissonMean, math.sqrt(poissonMean), 0.1)
-
+      //指数曲线
       val exponential = RandomRDDs.exponentialRDD(sc, exponentialMean, size, numPartitions, seed)
       testGeneratedRDD(exponential, size, numPartitions, exponentialMean, exponentialMean, 0.1)
 

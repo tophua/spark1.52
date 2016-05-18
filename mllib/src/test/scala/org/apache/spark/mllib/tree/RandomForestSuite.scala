@@ -32,6 +32,7 @@ import org.apache.spark.util.Utils
 
 
 /**
+ * RandomForest它们提供了随机森林具体的 trainClassifier
  * Test suite for [[RandomForest]].
  */
 class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {

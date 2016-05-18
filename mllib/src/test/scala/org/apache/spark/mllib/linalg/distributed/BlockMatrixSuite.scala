@@ -25,9 +25,15 @@ import org.apache.spark.{SparkException, SparkFunSuite}
 import org.apache.spark.mllib.linalg.{SparseMatrix, DenseMatrix, Matrices, Matrix}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵，RDD中的元素为MatrixBlock
+ */
 class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
-
+/**
+ * MatrixBlock是多个((Int, Int), Matrix)组成的元组，其中(Int, Int)是分块索引, Matriax是指定索引处的子矩阵, 
+ * 该矩阵的大小为rowsPerBlock x colsPerBlock。BlockMatrix支持跟其他BlockMatrix做add(加)和multiply(乘）操作。
+ * BlockMatrix还有一个辅助方法validate，这个方法可以检查BlockMatrix是否设置是否恰当
+ */
   val m = 5
   val n = 4
   val rowPerPart = 2

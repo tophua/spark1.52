@@ -24,7 +24,9 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.{LocalClusterSparkContext, LinearDataGenerator,
   MLlibTestSparkContext}
 import org.apache.spark.util.Utils
-
+/**
+ * 线性回归
+ */
 private object LinearRegressionSuite {
 
   /** 3 features */
