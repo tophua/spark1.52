@@ -98,11 +98,11 @@ object DecisionTreeRunner {
         .text(s"number of trees (1 = decision tree, 2+ = random forest)," +
           s" default: ${defaultParams.numTrees}")
         .action((x, c) => c.copy(numTrees = x))
-      opt[String]("featureSubsetStrategy")
+      /*opt[String]("featureSubsetStrategy")
         .text(s"feature subset sampling strategy" +
           s" (${RandomForest.supportedFeatureSubsetStrategies.mkString(", ")}), " +
           s"default: ${defaultParams.featureSubsetStrategy}")
-        .action((x, c) => c.copy(featureSubsetStrategy = x))
+        .action((x, c) => c.copy(featureSubsetStrategy = x))*/
       opt[Double]("fracTest")
         .text(s"fraction of data to hold out for testing.  If given option testInput, " +
           s"this option is ignored. default: ${defaultParams.fracTest}")
@@ -312,6 +312,7 @@ object DecisionTreeRunner {
       }
     } else {
       val randomSeed = Utils.random.nextInt()
+       /* 
       if (params.algo == Classification) {
         val startTime = System.nanoTime()
         val model = RandomForest.trainClassifier(training, strategy, params.numTrees,
@@ -331,7 +332,7 @@ object DecisionTreeRunner {
           new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
         println(s"Test accuracy = $testAccuracy")
       }
-      if (params.algo == Regression) {
+    if (params.algo == Regression) {
         val startTime = System.nanoTime()
         val model = RandomForest.trainRegressor(training, strategy, params.numTrees,
           params.featureSubsetStrategy, randomSeed)
@@ -346,7 +347,7 @@ object DecisionTreeRunner {
         println(s"Train mean squared error = $trainMSE")
         val testMSE = meanSquaredError(model, test)
         println(s"Test mean squared error = $testMSE")
-      }
+      }*/
     }
 
     sc.stop()
