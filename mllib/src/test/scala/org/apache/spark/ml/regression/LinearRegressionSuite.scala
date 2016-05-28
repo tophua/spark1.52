@@ -61,11 +61,13 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
     ParamsSuite.checkParams(new LinearRegression)
+    //线性模型
     val model = new LinearRegressionModel("linearReg", Vectors.dense(0.0), 0.0)
     ParamsSuite.checkParams(model)
   }
 
   test("linear regression: default params") {
+    //线性回归
     val lir = new LinearRegression
     assert(lir.getLabelCol === "label")
     assert(lir.getFeaturesCol === "features")

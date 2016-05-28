@@ -34,6 +34,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.util.Utils
 
 /**
+ * 决策树
  * An example runner for decision trees and random forests. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DecisionTreeRunner [options]
@@ -273,7 +274,11 @@ object DecisionTreeRunner {
     }
 
     params.checkpointDir.foreach(sc.setCheckpointDir)
-
+/**
+ * 最大树深度maxDepth
+	  最小信息增益minInfoGain
+        最小子节点实例数minInstancesPerNode
+ */
     val strategy
       = new Strategy(
           algo = params.algo,
@@ -296,10 +301,12 @@ object DecisionTreeRunner {
         println(model) // Print model summary.
       }
       if (params.algo == Classification) {
+       //评估指标-多分类
         val trainAccuracy =
           new MulticlassMetrics(training.map(lp => (model.predict(lp.features), lp.label)))
             .precision
         println(s"Train accuracy = $trainAccuracy")
+	 //评估指标-多分类
         val testAccuracy =
           new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
         println(s"Test accuracy = $testAccuracy")

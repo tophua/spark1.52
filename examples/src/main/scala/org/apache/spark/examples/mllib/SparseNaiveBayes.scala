@@ -26,6 +26,7 @@ import org.apache.spark.mllib.classification.NaiveBayes
 import org.apache.spark.mllib.util.MLUtils
 
 /**
+ * ∆”Àÿ±¥“∂Àπ
  * An example naive Bayes app. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.SparseNaiveBayes [options] <input>

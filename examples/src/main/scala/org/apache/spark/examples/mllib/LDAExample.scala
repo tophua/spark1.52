@@ -33,6 +33,7 @@ import org.apache.spark.rdd.RDD
 
 
 /**
+ * æ€¿‡ LDA
  * An example Latent Dirichlet Allocation (LDA) app. Run with
  * {{{
  * ./bin/run-example mllib.LDAExample [options] <input>

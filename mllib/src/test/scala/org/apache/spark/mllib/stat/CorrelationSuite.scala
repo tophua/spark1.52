@@ -17,14 +17,19 @@
 
 package org.apache.spark.mllib.stat
 
-import breeze.linalg.{DenseMatrix => BDM, Matrix => BM}
+import breeze.linalg.{ DenseMatrix => BDM, Matrix => BM }
 
-import org.apache.spark.{Logging, SparkFunSuite}
+import org.apache.spark.{ Logging, SparkFunSuite }
 import org.apache.spark.mllib.linalg.Vectors
-import org.apache.spark.mllib.stat.correlation.{Correlations, PearsonCorrelation,
-  SpearmanCorrelation}
+import org.apache.spark.mllib.stat.correlation.{
+  Correlations,
+  PearsonCorrelation,
+  SpearmanCorrelation
+}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+/**
+ * 相关性
+ */
 class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
   // test input data
@@ -35,10 +40,13 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     Vectors.dense(1.0, 0.0, 0.0, -2.0),
     Vectors.dense(4.0, 5.0, 0.0, 3.0),
     Vectors.dense(6.0, 7.0, 0.0, 8.0),
-    Vectors.dense(9.0, 0.0, 0.0, 1.0)
-  )
-
+    Vectors.dense(9.0, 0.0, 0.0, 1.0))
+  /**
+   * pearson皮尔森相关性
+   * spearman 斯皮漫相关性
+   */
   test("corr(x, y) pearson, 1 value in data") {
+    //一个数据值无法相关系数
     val x = sc.parallelize(Array(1.0))
     val y = sc.parallelize(Array(4.0))
     intercept[RuntimeException] {
@@ -52,9 +60,9 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
   test("corr(x, y) default, pearson") {
     val x = sc.parallelize(xData)
     val y = sc.parallelize(yData)
-    val expected = 0.6546537
-    val default = Statistics.corr(x, y)
-    val p1 = Statistics.corr(x, y, "pearson")//(皮尔森相关数)
+    val expected = 0.6546537 //期望值
+    val default = Statistics.corr(x, y) //默认皮尔森相关性,default值为 0.6546536707079771
+    val p1 = Statistics.corr(x, y, "pearson") //皮尔森相关性
     assert(approxEqual(expected, default))
     assert(approxEqual(expected, p1))
 
@@ -71,7 +79,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     assert(Statistics.corr(x, z).isNaN)
   }
 
-  test("corr(x, y) spearman") {
+  test("corr(x, y) spearman") { //斯皮漫相关性 
     val x = sc.parallelize(xData)
     val y = sc.parallelize(yData)
     val expected = 0.5
@@ -94,7 +102,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
   test("corr(X) default, pearson") {
     val X = sc.parallelize(data)
     val defaultMat = Statistics.corr(X)
-    val pearsonMat = Statistics.corr(X, "pearson")//(皮尔森相关数)
+    val pearsonMat = Statistics.corr(X, "pearson") //(皮尔森相关数)
     // scalastyle:off
     val expected = BDM(
       (1.00000000, 0.05564149, Double.NaN, 0.4004714),
@@ -107,23 +115,29 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
   }
 
   test("corr(X) spearman") {
+     /**
+     *Vectors.dense(1.0, 0.0, 0.0, -2.0),
+     *Vectors.dense(4.0, 5.0, 0.0, 3.0),
+     *Vectors.dense(6.0, 7.0, 0.0, 8.0),
+     *Vectors.dense(9.0, 0.0, 0.0, 1.0)
+     */
     val X = sc.parallelize(data)
     val spearmanMat = Statistics.corr(X, "spearman")
     // scalastyle:off
     val expected = BDM(
-      (1.0000000,  0.1054093,  Double.NaN, 0.4000000),
-      (0.1054093,  1.0000000,  Double.NaN, 0.9486833),
+      (1.0000000, 0.1054093, Double.NaN, 0.4000000),
+      (0.1054093, 1.0000000, Double.NaN, 0.9486833),
       (Double.NaN, Double.NaN, 1.00000000, Double.NaN),
-      (0.4000000,  0.9486833,  Double.NaN, 1.0000000))
+      (0.4000000, 0.9486833, Double.NaN, 1.0000000))
     // scalastyle:on
     assert(matrixApproxEqual(spearmanMat.toBreeze, expected))
   }
 
   test("method identification") {
-    val pearson = PearsonCorrelation//(皮尔森相关数)
+    val pearson = PearsonCorrelation //(皮尔森相关数)
     val spearman = SpearmanCorrelation
 
-    assert(Correlations.getCorrelationFromName("pearson") === pearson)//(皮尔森相关数)
+    assert(Correlations.getCorrelationFromName("pearson") === pearson) //(皮尔森相关数)
     assert(Correlations.getCorrelationFromName("spearman") === spearman)
 
     // Should throw IllegalArgumentException
@@ -139,14 +153,21 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     if (v1.isNaN) {
       v2.isNaN
     } else {
-      math.abs(v1 - v2) <= threshold
+      //求绝对值,threshold
+     // println("V1:" + v1 + "\t V2:" + v2 + "\t threshold:" + threshold)
+      //println("math.abs(v1 - v2):" + math.abs(v1 - v2))
+      val b = math.abs(v1 - v2) <= threshold
+
+      b
     }
   }
 
   def matrixApproxEqual(A: BM[Double], B: BM[Double], threshold: Double = 1e-6): Boolean = {
+
     for (i <- 0 until A.rows; j <- 0 until A.cols) {
       if (!approxEqual(A(i, j), B(i, j), threshold)) {
         logInfo("i, j = " + i + ", " + j + " actual: " + A(i, j) + " expected:" + B(i, j))
+        println("i, j = " + i + ", " + j + " actual: " + A(i, j) + " expected:" + B(i, j))
         return false
       }
     }

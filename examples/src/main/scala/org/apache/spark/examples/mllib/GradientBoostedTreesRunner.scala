@@ -28,6 +28,7 @@ import org.apache.spark.util.Utils
 
 
 /**
+ *梯度提升树
  * An example runner for Gradient Boosting using decision trees as weak learners. Run with
  * {{{
  * ./bin/run-example mllib.GradientBoostedTreesRunner [options]
@@ -120,10 +121,12 @@ object GradientBoostedTreesRunner {
       } else {
         println(model) // Print model summary.
       }
+       //评估指标-多分类
       val trainAccuracy =
         new MulticlassMetrics(training.map(lp => (model.predict(lp.features), lp.label)))
           .precision
       println(s"Train accuracy = $trainAccuracy")
+       //评估指标-多分类
       val testAccuracy =
         new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
       println(s"Test accuracy = $testAccuracy")

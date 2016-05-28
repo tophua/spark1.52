@@ -29,7 +29,9 @@ import org.apache.spark.mllib.regression._
 import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkContext}
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
-
+/**
+ * LogisticRegression:归结为二元分类问题。这个算法的优点是可以给出数据所在类别的概率
+ */
 //逻辑回归广泛应用于二分类问题
 object LogisticRegressionSuite {
 
@@ -223,6 +225,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
+    //逻辑回归广泛运用于二元因变量预测
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
 
     val model = lr.run(testRDD)

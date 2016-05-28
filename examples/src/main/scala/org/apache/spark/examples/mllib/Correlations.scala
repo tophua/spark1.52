@@ -26,6 +26,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 /**
+ * œ‡πÿ–‘
  * An example app for summarizing multivariate data from a file. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.Correlations

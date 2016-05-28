@@ -20,20 +20,27 @@ package org.apache.spark.mllib.evaluation
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+/**
+ * RankingMetrics类用来计算基于排名的评估指标
+ */
 class RankingMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Ranking metrics: map, ndcg") {
     val predictionAndLabels = sc.parallelize(
       Seq(
+          //一个键值对类型的RDD,其键为给定用户预测的物品的ID数组,而值则是实际的物品ID数组
         (Array[Int](1, 6, 2, 7, 8, 3, 9, 10, 4, 5), Array[Int](1, 2, 3, 4, 5)),
         (Array[Int](4, 1, 5, 6, 2, 7, 3, 8, 9, 10), Array[Int](1, 2, 3)),
         (Array[Int](1, 2, 3, 4, 5), Array[Int]())
       ), 2)
     val eps: Double = 1E-5
-
+   //需要向我们之前的平均准确率函数传入一个键值对类型的RDD,
+   //其键为给定用户预测的物品的ID数组,而值则是实际的物品ID数组
     val metrics = new RankingMetrics(predictionAndLabels)
+    //平均正确率值
     val map = metrics.meanAveragePrecision
-
+  
+    println("precisionAt:"+metrics.precisionAt(1)+" \t"+1.0/3)
+    //计算所有的查询的平均精度，截断在排名位置
     assert(metrics.precisionAt(1) ~== 1.0/3 absTol eps)
     assert(metrics.precisionAt(2) ~== 1.0/3 absTol eps)
     assert(metrics.precisionAt(3) ~== 1.0/3 absTol eps)

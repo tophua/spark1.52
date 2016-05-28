@@ -33,7 +33,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.util.Utils
 
 /**
- * 决策树
+ *决策树:分类与回归树(Classification and Regression Trees ,CART)算法常用于特征含有类别信息的分类或者回归问题
  */
 class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 

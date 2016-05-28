@@ -27,7 +27,10 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression._
 import org.apache.spark.mllib.util.{ LocalClusterSparkContext, MLlibTestSparkContext }
 import org.apache.spark.util.Utils
-
+/**
+ * 线性支持向量机(SVM):对于大规模的分类任务来说，线性支持向量机是标准方法.
+ * 
+ */
 object SVMSuite {
 
   def generateSVMInputAsList(

@@ -28,6 +28,7 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.optimization.{SquaredL2Updater, L1Updater}
 
 /**
+ * 二分类评估指标
  * An example app for binary classification. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.BinaryClassification

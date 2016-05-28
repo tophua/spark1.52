@@ -26,6 +26,7 @@ import org.apache.spark.ml.recommendation.ALS
 import org.apache.spark.sql.{Row, SQLContext}
 
 /**
+ * 协同过滤,交替最小二乘(ALS)显式反馈和隐式反馈
  * An example app for ALS on MovieLens data (http://grouplens.org/datasets/movielens/).
  * Run with
  * {{{

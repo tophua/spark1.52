@@ -25,7 +25,10 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{StreamingContext, TestSuiteBase}
-
+/**
+ * 用时间间隔的数据作为特征训练流式模型，这里的场景非常简单，只是为了说明问题。
+ * 实际的产品模型需要结合前面讨论的按天和周末的模型来提高预测的准确性
+ */
 class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase {
 
   // use longer wait time to ensure job completion
@@ -48,6 +51,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
 
     // create model
     val model = new StreamingLogisticRegressionWithSGD()
+    //初始化权重
       .setInitialWeights(Vectors.dense(0.0))
       .setStepSize(0.2)
       .setNumIterations(25)

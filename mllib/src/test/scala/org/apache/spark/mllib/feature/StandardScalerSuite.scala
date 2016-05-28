@@ -23,7 +23,11 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.stat.{ MultivariateStatisticalSummary, MultivariateOnlineSummarizer }
 import org.apache.spark.rdd.RDD
-
+/**
+ * StandardScaler标准化:将数据按期属性（按列进行）减去其均值，并处以其方差。
+ *       得到的结果是，对于每个属性/每列来说所有数据都聚集在0附近，方差为1
+ *数据标准化(Z-score)标准化方法:给予原始数据的均值（mean）和标准差（standard deviation）进行数据的标准化。经过处理的数据符合标准正态分布，即均值为0，标准差为1
+ */
 class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   // When the input data is all constant, the variance is zero. The standardization against
@@ -63,11 +67,13 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     //标准化是指：对于训练集中的样本，基于列统计信息将数据除以方差或（且）者将数据减去其均值（结果是方差等于1，数据在0附近）
     //标准化可以提升模型优化阶段的收敛速度，还可以避免方差很大的特征对模型训练产生过大的影响
     /**
-     * withMean 默认值False. 在尺度变换（除方差）之前使用均值做居中处理（减去均值）。这会导致密集型输出，所以在稀疏数据上无效
-     * withStd 默认值True. 将数据缩放（尺度变换）到单位标准差
+     * withMean 默认值False. 是否从数据中减均值
+     *          这会导致密集型输出，所以在稀疏数据上无效
+     * withStd 默认值True. 是否应用标准差
      */
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
+    //
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
     //fit 计算汇总统计信息，然后返回一个模型，该模型可以根据StandardScaler配置将输入数据转换为标准差为1，均值为0的特征
     val model1 = standardizer1.fit(dataRDD)
@@ -145,7 +151,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val data1 = denseData.map(model1.transform)
     val data2 = denseData.map(model2.transform)
     val data3 = denseData.map(model3.transform)
-
+    //使用该类的好处在于可以保存训练集中的参数（均值、方差）直接使用其对象转换测试集数据
     val data1RDD = model1.transform(dataRDD)
     val data2RDD = model2.transform(dataRDD)
     val data3RDD = model3.transform(dataRDD)
@@ -246,7 +252,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Standardization with sparse input") {
 
     val dataRDD = sc.parallelize(sparseData, 3)
-
+    //标准化
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)

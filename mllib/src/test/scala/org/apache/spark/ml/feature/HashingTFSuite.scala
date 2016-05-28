@@ -24,7 +24,7 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
-
+  //特征提取和转换 TF-IDF
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {

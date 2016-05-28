@@ -333,6 +333,7 @@ object DecisionTreeExample {
       case None => throw new RuntimeException(
         "Unknown failure when indexing labels for classification.")
     }
+    //评估指标-多分类
     val accuracy = new MulticlassMetrics(predictions.zip(labels)).precision
     println(s"  Accuracy ($numClasses classes): $accuracy")
   }
@@ -352,6 +353,7 @@ object DecisionTreeExample {
     val fullPredictions = model.transform(data).cache()
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
+    //回归模型评估
     val RMSE = new RegressionMetrics(predictions.zip(labels)).rootMeanSquaredError
     println(s"  Root mean squared error (RMSE): $RMSE")
   }

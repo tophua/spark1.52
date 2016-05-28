@@ -27,6 +27,7 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.optimization.{SimpleUpdater, SquaredL2Updater, L1Updater}
 
 /**
+ * ÏßÐÔ»Ø¹é
  * An example app for linear regression. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.LinearRegression

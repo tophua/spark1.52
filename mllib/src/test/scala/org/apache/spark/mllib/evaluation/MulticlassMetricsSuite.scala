@@ -20,7 +20,9 @@ package org.apache.spark.mllib.evaluation
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Matrices
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+/**
+ * 多元分类评估
+ */
 class MulticlassMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Multiclass evaluation metrics") {
     /*
@@ -34,6 +36,7 @@ class MulticlassMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     val predictionAndLabels = sc.parallelize(
       Seq((0.0, 0.0), (0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0),
         (1.0, 1.0), (1.0, 1.0), (2.0, 2.0), (2.0, 0.0)), 2)
+     //评估指标-多分类
     val metrics = new MulticlassMetrics(predictionAndLabels)
     val delta = 0.0000001
     val fpRate0 = 1.0 / (9 - 4)

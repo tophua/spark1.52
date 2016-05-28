@@ -26,6 +26,11 @@ import org.apache.spark.mllib.linalg.{Vector, VectorUDT}
 import org.apache.spark.sql.types.DataType
 
 /**
+ * 正则化:背后的思想是将各个数值特征进行转换,将它们的值域规范到一个标准区间内
+ * 正则化特征:
+ *   1)实际上是对数据集中的单个特征进行转换,比如:减去平均值或是进行标准的正则转换(使得该特征的平均值和标准差分别为0和1)
+ * 正则化特征向量:通常是对数据中的某一行的所有特征进行转换,以让转换后的特征向量的长度标准化
+ * 特征向量正则化
  * :: Experimental ::
  * Normalize a vector to have unit norm using the given p-norm.
  */

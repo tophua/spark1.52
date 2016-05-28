@@ -66,6 +66,7 @@ object CrossValidatorExample {
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
+      //特征提取和转换 TF-IDF
     val hashingTF = new HashingTF()
       .setInputCol(tokenizer.getOutputCol)
       .setOutputCol("features")

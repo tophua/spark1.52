@@ -24,6 +24,7 @@ import org.apache.spark.mllib.fpm.FPGrowth
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
+  Æµ·±Ä£Ê½ÍÚ¾ò-FP-growth
  * Example for mining frequent itemsets using FP-growth.
  * Example usage: ./bin/run-example mllib.FPGrowthExample \
  *   --minSupport 0.8 --numPartition 2 ./data/mllib/sample_fpgrowth.txt

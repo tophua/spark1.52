@@ -18,7 +18,7 @@ package org.apache.spark.mllib.fpm
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+//Æµ·±Ä£Ê½ÍÚ¾ò-FP-growth
 class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
 
 
@@ -167,7 +167,7 @@ class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setMinSupport(0.5)
       .setNumPartitions(2)
       .run(rdd)
-      .generateAssociationRules(0.9)
+      .generateAssociationRules(0.9)//Æµ·±Ä£Ê½ÍÚ¾ò-Association Rules
       .collect()
 
     assert(rules.size === 23)

@@ -23,6 +23,7 @@ import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.mllib.linalg.Vectors
 
 /**
+ * ΩµŒ¨ ∆Ê“Ï÷µ∑÷Ω‚
  * Compute the singular value decomposition (SVD) of a tall-and-skinny matrix.
  *
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries

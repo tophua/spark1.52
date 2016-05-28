@@ -154,9 +154,9 @@ class MatrixFactorizationModel @Since("0.8.0") (
 
   /**
    * Recommends products to a user.
-   *
-   * @param user the user to recommend products to
-   * @param num how many products to return. The number returned may be less than this.
+   * 对用户推荐物品
+   * @param user the user to recommend products to,用户ID
+   * @param num how many products to return. The number returned may be less than this.,返回推荐物品的数量
    * @return [[Rating]] objects, each of which contains the given user ID, a product ID, and a
    *  "score" in the rating field. Each represents one recommended product, and they are sorted
    *  by score, decreasing. The first returned is the one predicted to be most strongly
@@ -171,9 +171,9 @@ class MatrixFactorizationModel @Since("0.8.0") (
   /**
    * Recommends users to a product. That is, this returns users who are most likely to be
    * interested in a product.
-   *
-   * @param product the product to recommend users to
-   * @param num how many users to return. The number returned may be less than this.
+   *对物品推荐用户
+   * @param product the product to recommend users to,物品ID
+   * @param num how many users to return. The number returned may be less than this.返回推荐用户的数量
    * @return [[Rating]] objects, each of which contains a user ID, the given product ID, and a
    *  "score" in the rating field. Each represents one recommended user, and they are sorted
    *  by score, decreasing. The first returned is the one predicted to be most strongly
@@ -207,8 +207,8 @@ class MatrixFactorizationModel @Since("0.8.0") (
 
   /**
    * Recommends topK products for all users.
-   *
-   * @param num how many products to return for every user.
+   * 对所有用户推荐物品,物品数量取前K
+   * @param num how many products to return for every user.,用户推荐物品的数量
    * @return [(Int, Array[Rating])] objects, where every tuple contains a userID and an array of
    * rating objects which contains the same userId, recommended productID and a "score" in the
    * rating field. Semantics of score is same as recommendProducts API
@@ -225,7 +225,7 @@ class MatrixFactorizationModel @Since("0.8.0") (
 
   /**
    * Recommends topK users for all products.
-   *
+   * 对所有物品推荐用户,用户数量取前K个
    * @param num how many users to return for every product.
    * @return [(Int, Array[Rating])] objects, where every tuple contains a productID and an array
    * of rating objects which contains the recommended userId, same productID and a "score" in the
@@ -248,6 +248,7 @@ object MatrixFactorizationModel extends Loader[MatrixFactorizationModel] {
 
   /**
    * Makes recommendations for a single user (or product).
+   * 对一个用户或一个物品推荐
    */
   private def recommend(
       recommendToFeatures: Array[Double],
@@ -261,10 +262,11 @@ object MatrixFactorizationModel extends Loader[MatrixFactorizationModel] {
 
   /**
    * Makes recommendations for all users (or products).
+   * 对所有用户或者物品进行推荐
    * @param rank rank
    * @param srcFeatures src features to receive recommendations
    * @param dstFeatures dst features used to make recommendations
-   * @param num number of recommendations for each record
+   * @param num number of recommendations for each record  推荐数量
    * @return an RDD of (srcId: Int, recommendations), where recommendations are stored as an array
    *         of (dstId, rating) pairs.
    */
@@ -293,6 +295,7 @@ object MatrixFactorizationModel extends Loader[MatrixFactorizationModel] {
 
   /**
    * Blockifies features to use Level-3 BLAS.
+   * 计算Blockifies特征,其中采用BlAS库进行计算
    */
   private def blockify(
       rank: Int,
@@ -318,7 +321,7 @@ object MatrixFactorizationModel extends Loader[MatrixFactorizationModel] {
 
   /**
    * Load a model from the given path.
-   *
+   * 模型加载
    * The model should have been saved by [[Saveable.save]].
    *
    * @param sc  Spark context used for loading model files.

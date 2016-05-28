@@ -25,6 +25,7 @@ import org.apache.spark.sql.types.{StructField, StructType}
 
 
 /**
+ * 聚类,K均值
  * An example demonstrating a k-means clustering.
  * Run with
  * {{{
@@ -49,13 +50,14 @@ object KMeansExample {
     val conf = new SparkConf().setAppName(s"${this.getClass.getSimpleName}")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
-
+    //加载和解析数据文件
     // Loads data
     val rowRDD = sc.textFile(input).filter(_.nonEmpty)
+    //创建密集型矩阵,得到每行数据 
       .map(_.split(" ").map(_.toDouble)).map(Vectors.dense).map(Row(_))
     val schema = StructType(Array(StructField(FEATURES_COL, new VectorUDT, false)))
     val dataset = sqlContext.createDataFrame(rowRDD, schema)
-
+    //聚类模型
     // Trains a k-means model
     val kmeans = new KMeans()
       .setK(k)

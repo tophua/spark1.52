@@ -18,7 +18,7 @@ package org.apache.spark.mllib.fpm
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+//Æµ·±Ä£Ê½ÍÚ¾ò-Association Rules
 class AssociationRulesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("association rules using String type") {
@@ -33,7 +33,7 @@ class AssociationRulesSuite extends SparkFunSuite with MLlibTestSparkContext {
     ).map {
       case (items, freq) => new FPGrowth.FreqItemset(items.toArray, freq)
     })
-
+//Æµ·±Ä£Ê½ÍÚ¾ò-Association Rules
     val ar = new AssociationRules()
 
     val results1 = ar

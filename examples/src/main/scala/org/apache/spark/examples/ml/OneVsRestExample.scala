@@ -154,7 +154,7 @@ object OneVsRestExample {
     // evaluate the model
     val predictionsAndLabels = predictions.select("prediction", "label")
       .map(row => (row.getDouble(0), row.getDouble(1)))
-
+    //评估指标-多分类
     val metrics = new MulticlassMetrics(predictionsAndLabels)
 
     val confusionMatrix = metrics.confusionMatrix

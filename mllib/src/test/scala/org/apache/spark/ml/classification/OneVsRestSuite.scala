@@ -93,6 +93,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     // determine the #confusion matrix in each class.
     // bound how much error we allow compared to multinomial logistic regression.
     val expectedMetrics = new MulticlassMetrics(results)
+     //评估指标-多分类
     val ovaMetrics = new MulticlassMetrics(ovaResults)
     assert(expectedMetrics.confusionMatrix ~== ovaMetrics.confusionMatrix absTol 400)
   }

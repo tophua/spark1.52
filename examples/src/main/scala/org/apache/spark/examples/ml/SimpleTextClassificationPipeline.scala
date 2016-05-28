@@ -59,6 +59,7 @@ object SimpleTextClassificationPipeline {
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
+        //特征提取和转换 TF-IDF
     val hashingTF = new HashingTF()
       .setNumFeatures(1000)
       .setInputCol(tokenizer.getOutputCol)

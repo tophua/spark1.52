@@ -27,7 +27,7 @@ import org.apache.spark.util.Utils
  */
 class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  val rank = 2
+  val rank = 2 //相关特征因子
   var userFeatures: RDD[(Int, Array[Double])] = _
   var prodFeatures: RDD[(Int, Array[Double])] = _
 
@@ -39,6 +39,7 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
 
   test("constructor") {
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
+    //预测得分
     assert(model.predict(0, 2) ~== 17.0 relTol 1e-14)
 
     intercept[IllegalArgumentException] {

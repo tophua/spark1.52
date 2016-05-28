@@ -26,7 +26,7 @@ import org.apache.spark.mllib.linalg.distributed.{MatrixEntry, RowMatrix}
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
- * Compute the similar columns of a matrix, using cosine similarity.
+ * Compute the similar columns of a matrix, using cosine similarity(相似度度量).
  *
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries
  * separated by space. For example,

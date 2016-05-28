@@ -26,6 +26,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
+ 聚类 幂迭代聚类(PIC)
  * An example Power Iteration Clustering http://www.icml2010.org/papers/387.pdf app.
  * Takes an input of K concentric circles and the number of points in the innermost circle.
  * The output should be K clusters - each cluster containing precisely the points associated
@@ -98,6 +99,7 @@ object PowerIterationClusteringExample {
     Logger.getRootLogger.setLevel(Level.WARN)
 
     val circlesRdd = generateCirclesRdd(sc, params.k, params.numPoints, params.outerRadius)
+    //聚类 幂迭代聚类(PIC)
     val model = new PowerIterationClustering()
       .setK(params.k)
       .setMaxIterations(params.maxIterations)

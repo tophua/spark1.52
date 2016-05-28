@@ -24,7 +24,9 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.LinearDataGenerator
 import org.apache.spark.streaming.{StreamingContext, TestSuiteBase}
 import org.apache.spark.streaming.dstream.DStream
-
+/**
+ * LinearRegression线性回归 
+ */
 class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
 
   // use longer wait time to ensure job completion
@@ -42,6 +44,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   // Assert that two values are equal within tolerance epsilon
   def assertEqual(v1: Double, v2: Double, epsilon: Double) {
     def errorMessage = v1.toString + " did not equal " + v2.toString
+    //math.abs绝对值
     assert(math.abs(v1-v2) <= epsilon, errorMessage)
   }
 

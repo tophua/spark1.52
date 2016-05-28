@@ -84,6 +84,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val lrModel = lr.run(rdd)
     val lrPredictionAndLabels = lrModel.predict(rdd.map(_.features)).zip(rdd.map(_.label))
     // MLP's predictions should not differ a lot from LR's.
+     //评估指标-多分类
     val lrMetrics = new MulticlassMetrics(lrPredictionAndLabels)
     val mlpMetrics = new MulticlassMetrics(mlpPredictionAndLabels)
     assert(mlpMetrics.confusionMatrix ~== lrMetrics.confusionMatrix absTol 100)

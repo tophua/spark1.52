@@ -17,13 +17,15 @@
 
 package org.apache.spark.mllib.feature
 
-import breeze.linalg.{norm => brzNorm}
+import breeze.linalg.{ norm => brzNorm }
 
 import org.apache.spark.SparkFunSuite
-import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vectors}
+import org.apache.spark.mllib.linalg.{ DenseVector, SparseVector, Vectors }
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 数据标准化(min-max):也称为离差标准化，是对原始数据的线性变换，使结果值映射到[0 - 1]之间
+ */
 class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   val data = Array(
@@ -32,8 +34,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     Vectors.dense(0.6, -1.1, -3.0),
     Vectors.sparse(3, Seq((1, 0.91), (2, 3.2))),
     Vectors.sparse(3, Seq((0, 5.7), (1, 0.72), (2, 2.7))),
-    Vectors.sparse(3, Seq())
-  )
+    Vectors.sparse(3, Seq()))
 
   lazy val dataRDD = sc.parallelize(data, 3)
 

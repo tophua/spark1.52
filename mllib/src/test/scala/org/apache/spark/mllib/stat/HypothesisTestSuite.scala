@@ -45,7 +45,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val observed = new DenseVector(Array[Double](4, 6, 5))
     //提供了进行Pearson(皮尔森)卡方检验的方法
-    val pearson = Statistics.chiSqTest(observed)
+    val pearson = Statistics.chiSqTest(observed)//卡方检验
 
     // Results validated against the R command `chisq.test(c(4, 6, 5), p=c(1/3, 1/3, 1/3))`
     //计算卡方检定的统计值
@@ -53,7 +53,9 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     //自由度为2
     assert(pearson.degreesOfFreedom === 2)
     assert(pearson.pValue ~== 0.8187 relTol 1e-4)//概率值
+    //名称
     assert(pearson.method === ChiSqTest.PEARSON.name)
+    
     assert(pearson.nullHypothesis === ChiSqTest.NullHypothesis.goodnessOfFit.toString)
 
     // different expected and observed sum

@@ -25,6 +25,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
+ * 聚类 流式K均值
  * Estimate clusters on one stream of data and make predictions
  * on another stream, where the data streams arrive as text files
  * into two different directories.

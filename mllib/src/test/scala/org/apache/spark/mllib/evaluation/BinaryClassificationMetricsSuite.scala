@@ -20,7 +20,9 @@ package org.apache.spark.mllib.evaluation
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
-
+/*
+ * 二元分类评估
+ */
 class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   private def areWithinEpsilon(x: (Double, Double)): Boolean = x._1 ~= (x._2) absTol 1E-5

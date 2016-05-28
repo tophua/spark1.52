@@ -113,8 +113,9 @@ class LinearRegressionWithSGD private[mllib] (
 }
 
 /**
+ * 
  * Top-level methods for calling LinearRegression.
- *
+ * 算法建立一个简单的线性模型来预测标签的值
  */
 @Since("0.8.0")
 object LinearRegressionWithSGD {

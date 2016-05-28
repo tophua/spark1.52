@@ -8,7 +8,7 @@ import org.apache.spark.mllib.util.MLUtils
 /**
  * 随机森林算法算法使用 demo
  */
-object RandomForest {
+object RandomForestDemo {
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
@@ -33,7 +33,20 @@ object RandomForest {
     //特征最大装箱数
     val maxBins = 32
     //训练随机森林分类器，trainClassifier 返回的是 RandomForestModel 对象
-   
+    val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
+      numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
+    // 测试数据评价训练好的分类器并计算错误率
+    val labelAndPreds = testData.map { point =>
+      val prediction = model.predict(point.features)
+      (point.label, prediction)
+    }
+    val testErr = labelAndPreds.filter(r => r._1 != r._2).count.toDouble / testData.count()
+    println("Test Error = " + testErr)
+    println("Learned classification forest model:\n" + model.toDebugString)
+    // 将训练后的随机森林模型持久化
+    model.save(sc, "myModelPath")
+    //加载随机森林模型到内存
+    val sameModel = RandomForestModel.load(sc, "myModelPath")
 
   }
 }

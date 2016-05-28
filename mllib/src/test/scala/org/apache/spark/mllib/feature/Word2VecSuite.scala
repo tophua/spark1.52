@@ -63,6 +63,8 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
       ("taiwan", Array(0.60f, 0.50f, 0.50f, 0.50f)),
       ("korea", Array(0.45f, 0.60f, 0.60f, 0.60f))
     )
+    //word2vec是一个将单词转换成向量形式的工具。
+    //可以把对文本内容的处理简化为向量空间中的向量运算，计算出向量空间上的相似度，来表示文本语义上的相似度
     val model = new Word2VecModel(word2VecMap)
     val syms = model.findSynonyms("china", num)
     assert(syms.length == num)
@@ -78,6 +80,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
       ("taiwan", Array(0.60f, 0.50f, 0.50f, 0.50f)),
       ("korea", Array(0.45f, 0.60f, 0.60f, 0.60f))
     )
+    
     val model = new Word2VecModel(word2VecMap)
 
     val tempDir = Utils.createTempDir()

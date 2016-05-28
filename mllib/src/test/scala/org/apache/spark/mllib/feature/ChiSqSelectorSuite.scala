@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+//特征提取和转换 卡方选择(ChiSqSelector)
 class ChiSqSelectorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   /*
@@ -45,7 +45,7 @@ class ChiSqSelectorSuite extends SparkFunSuite with MLlibTestSparkContext {
    *
    *  Use chi-squared calculator from Internet
    */
-
+//特征提取和转换 卡方选择(ChiSqSelector)
   test("ChiSqSelector transform test (sparse & dense vector)") {
     val labeledDiscreteData = sc.parallelize(
       Seq(LabeledPoint(0.0, Vectors.sparse(3, Array((0, 8.0), (1, 7.0)))),

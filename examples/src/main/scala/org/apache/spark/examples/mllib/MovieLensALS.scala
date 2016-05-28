@@ -106,9 +106,9 @@ object MovieLensALS {
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)
-
+    //是否显性反馈
     val implicitPrefs = params.implicitPrefs
-
+    //数据集
     val ratings = sc.textFile(params.input).map { line =>
       val fields = line.split("::")
       if (implicitPrefs) {
@@ -137,7 +137,7 @@ object MovieLensALS {
     val numMovies = ratings.map(_.product).distinct().count()
 
     println(s"Got $numRatings ratings from $numUsers users on $numMovies movies.")
-
+   //拆分数据，80%为训练集，20%为测试集
     val splits = ratings.randomSplit(Array(0.8, 0.2))
     val training = splits(0).cache()
     val test = if (params.implicitPrefs) {

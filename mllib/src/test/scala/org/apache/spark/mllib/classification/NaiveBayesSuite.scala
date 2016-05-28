@@ -28,7 +28,9 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkContext}
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
-
+/**
+ * 朴素贝叶斯:该方法的任务是还原训练样本数据的分布密度，其在多类别分类中有很好的效果
+ */
 object NaiveBayesSuite {
 
   import NaiveBayes.{Multinomial, Bernoulli}
