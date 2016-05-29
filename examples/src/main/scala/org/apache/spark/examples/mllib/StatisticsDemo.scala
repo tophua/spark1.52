@@ -16,7 +16,7 @@ object StatisticsDemo {
     val rdd1 = sc.parallelize(
       Array(
         Array(1.0, 2.0, 3.0),
-        Array(2.0, 3.0, 4.0))).map(f => Vectors.dense(f))
+        Array(2.0, 3.0, 4.0))).map(f =>Vectors.dense(f))
     //比如1.2.3.4.5 这五个数的平均数是3
     val mss  = Statistics.colStats(rdd1)
     //方差是各个数据与平均数之差的平方相加再除以个数
