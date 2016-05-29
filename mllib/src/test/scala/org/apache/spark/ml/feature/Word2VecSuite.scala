@@ -25,7 +25,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.mllib.feature.{Word2VecModel => OldWord2VecModel}
-//ÌØÕ÷ÌáÈ¡ºÍ×ª»» Word2Vec
+//ç‰¹å¾æå–å’Œè½¬æ¢ Word2Vec
 class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
@@ -114,7 +114,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     val sentence = "a b " * 100 + "a c " * 10
     val doc = sc.parallelize(Seq(sentence, sentence)).map(line => line.split(" "))
     val docDF = doc.zip(doc).toDF("text", "alsotext")
-//ÌØÕ÷ÌáÈ¡ºÍ×ª»» Word2Vec
+//ç‰¹å¾æå–å’Œè½¬æ¢ Word2Vec
     val model = new Word2Vec()
       .setVectorSize(3)
       .setInputCol("text")

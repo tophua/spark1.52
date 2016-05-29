@@ -18,7 +18,7 @@ package org.apache.spark.mllib.fpm
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-//Ƶ��ģʽ�ھ�-FP-growth
+//频繁模式挖掘-FP-growth
 class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
 
 
@@ -167,7 +167,7 @@ class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setMinSupport(0.5)
       .setNumPartitions(2)
       .run(rdd)
-      .generateAssociationRules(0.9)//Ƶ��ģʽ�ھ�-Association Rules
+      .generateAssociationRules(0.9)//频繁模式挖掘-Association Rules
       .collect()
 
     assert(rules.size === 23)

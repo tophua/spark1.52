@@ -20,7 +20,7 @@ package org.apache.spark.mllib.feature
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-  //ÌØÕ÷ÌáÈ¡ºÍ×ª»» TF-IDF
+  //ç‰¹å¾æå–å’Œè½¬æ¢ TF-IDF
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("hashing tf on a single doc") {

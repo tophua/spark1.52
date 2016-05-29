@@ -50,16 +50,16 @@ class RegressionMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
        r2
        > [1] 0.9571734
      */
-    val predictionAndObservations = sc.parallelize(
-      Seq((2.25, 3.0), (-0.25, -0.5), (1.75, 2.0), (7.75, 7.0)), 2)
+    val predictionAndObservations = sc.parallelize(Seq((2.25, 3.0), (-0.25, -0.5), (1.75, 2.0), (7.75, 7.0)), 2)
     //实例化一个RegressionMetrics对象需要一个键值对类型的RDD,其每一条记录对应每个数据点上相应的预测值与实际值
     val metrics = new RegressionMetrics(predictionAndObservations)
+    //方差
     assert(metrics.explainedVariance ~== 8.79687 absTol 1E-5,
       "explained variance regression score mismatch")
       //这个指标用于评判预测值与实际值之间的差异度,
-      //绝对差值
+      //平均绝对误差
     assert(metrics.meanAbsoluteError ~== 0.5 absTol 1E-5, "mean absolute error mismatch")
-    //meanSquaredError 平方根误差
+    //meanSquaredError 均方差
     assert(metrics.meanSquaredError ~== 0.3125 absTol 1E-5, "mean squared error mismatch")
     //均方根误差
     assert(metrics.rootMeanSquaredError ~== 0.55901 absTol 1E-5,

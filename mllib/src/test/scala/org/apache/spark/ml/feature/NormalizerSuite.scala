@@ -23,7 +23,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 
-//ÌØÕ÷ÌáÈ¡ºÍ×ª»» ¹éÒ»»¯(Normalizer)
+//ç‰¹å¾æå–å’Œè½¬æ¢ å½’ä¸€åŒ–(Normalizer)
 class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   @transient var data: Array[Vector] = _

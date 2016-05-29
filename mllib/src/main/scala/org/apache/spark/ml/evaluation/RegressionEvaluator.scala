@@ -70,8 +70,7 @@ final class RegressionEvaluator(override val uid: String)
     val predictionAndLabels = dataset.select($(predictionCol), $(labelCol))
       .map { case Row(prediction: Double, label: Double) =>
         (prediction, label)
-      }
-      //»Ø¹éÄ£ÐÍÆÀ¹À
+      }     
     val metrics = new RegressionMetrics(predictionAndLabels)
     val metric = $(metricName) match {
       case "rmse" => metrics.rootMeanSquaredError

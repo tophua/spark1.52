@@ -25,7 +25,7 @@ import org.apache.spark.graphx.{Edge, Graph}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
-//¾ÛÀà Ãİµü´ú¾ÛÀà(PIC)
+//èšç±» å¹‚è¿­ä»£èšç±»(PIC)
 class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   import org.apache.spark.mllib.clustering.PowerIterationClustering._

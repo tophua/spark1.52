@@ -49,7 +49,7 @@ class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("two clusters") {
     val data = sc.parallelize(GaussianTestData.data)
-    //聚类 高斯混合
+    //鑱氱被 楂樻柉娣峰悎
     // we set an initial gaussian to induce expected results
     val initialGmm = new GaussianMixtureModel(
       Array(0.5, 0.5),

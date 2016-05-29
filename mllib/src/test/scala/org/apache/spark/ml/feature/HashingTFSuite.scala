@@ -24,7 +24,7 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
-  //ÌØÕ÷ÌáÈ¡ºÍ×ª»» TF-IDF
+  //ç‰¹å¾æå–å’Œè½¬æ¢ TF-IDF
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {

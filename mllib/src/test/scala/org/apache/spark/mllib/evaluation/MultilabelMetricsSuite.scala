@@ -20,7 +20,7 @@ package org.apache.spark.mllib.evaluation
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.rdd.RDD
-//·ÖÀàÄ£ÐÍÆÀ¹À¶à±êÇ©·ÖÀà
+//åˆ†ç±»æ¨¡åž‹è¯„ä¼°å¤šæ ‡ç­¾åˆ†ç±»
 class MultilabelMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Multilabel evaluation metrics") {
     /*
@@ -52,7 +52,7 @@ class MultilabelMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
         (Array(2.0, 0.0), Array(2.0, 0.0)),
         (Array(0.0, 1.0, 2.0), Array(0.0, 1.0)),
         (Array(1.0), Array(1.0, 2.0))), 2)
-//·ÖÀàÄ£ÐÍÆÀ¹À¶à±êÇ©·ÖÀà
+//åˆ†ç±»æ¨¡åž‹è¯„ä¼°å¤šæ ‡ç­¾åˆ†ç±»
     val metrics = new MultilabelMetrics(scoreAndLabels)
     val delta = 0.00001
     val precision0 = 4.0 / (4 + 0)
