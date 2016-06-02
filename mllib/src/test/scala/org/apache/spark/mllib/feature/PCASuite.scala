@@ -21,7 +21,9 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+/**
+ * PCA 算法也叫主成分分析（principal components analysis），主要是用于数据降维 
+ */
 class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
 
   private val data = Array(

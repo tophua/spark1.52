@@ -20,7 +20,11 @@ package org.apache.spark.mllib.linalg
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.linalg.BLAS._
-
+/**
+ *词向量模型 PLSA 潜在语义分析概率模型
+ * 
+ * 从概率学的角度重新审视了矩阵分解模型，并得到一个从统计，概率角度上推导出来的和LSA相当的词矢量模型
+ */
 class BLASSuite extends SparkFunSuite {
 
   test("copy") {
