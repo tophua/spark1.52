@@ -30,31 +30,31 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
 
     withClue("Getting numNonzeros from empty summarizer should throw exception.") {
       intercept[IllegalArgumentException] {
-        summarizer.numNonzeros
+        summarizer.numNonzeros //向量每列非零元素的个数
       }
     }
 
     withClue("Getting variance from empty summarizer should throw exception.") {
       intercept[IllegalArgumentException] {
-        summarizer.variance
+        summarizer.variance //样本方差 构成样本的单项数值与平均值之间的差的平方和除以n-1
       }
     }
 
     withClue("Getting mean from empty summarizer should throw exception.") {
       intercept[IllegalArgumentException] {
-        summarizer.mean
+        summarizer.mean //均值
       }
     }
 
     withClue("Getting max from empty summarizer should throw exception.") {
       intercept[IllegalArgumentException] {
-        summarizer.max
+        summarizer.max //最大值
       }
     }
 
     withClue("Getting min from empty summarizer should throw exception.") {
       intercept[IllegalArgumentException] {
-        summarizer.min
+        summarizer.min //最小值
       }
     }
 
@@ -62,7 +62,7 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
 
     withClue("Adding a new dense sample with different array size should throw exception.") {
       intercept[IllegalArgumentException] {
-        summarizer.add(Vectors.dense(3.0, 1.0))
+        summarizer.add(Vectors.dense(3.0, 1.0)) 
       }
     }
 
@@ -85,37 +85,39 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
     // the zeros; it's a case we need to test. For column 3, the minimum will be 0.0 which we
     // need to test as well.
     val summarizer = (new MultivariateOnlineSummarizer)
+      //密度矩阵，零值也存储
       .add(Vectors.dense(-1.0, 0.0, 6.0))
       .add(Vectors.dense(3.0, -3.0, 0.0))
-
+    //每列的均值
     assert(summarizer.mean ~== Vectors.dense(1.0, -1.5, 3.0) absTol 1E-5, "mean mismatch")
-
+    //向量最小值
     assert(summarizer.min ~== Vectors.dense(-1.0, -3, 0.0) absTol 1E-5, "min mismatch")
-
+    //向量最大值
     assert(summarizer.max ~== Vectors.dense(3.0, 0.0, 6.0) absTol 1E-5, "max mismatch")
-
+    //向量每列非零元素的个数
     assert(summarizer.numNonzeros ~== Vectors.dense(2, 1, 1) absTol 1E-5, "numNonzeros mismatch")
-
+    //样本方差 构成样本的单项数值与平均值之间的差的平方和除以n-1
     assert(summarizer.variance ~== Vectors.dense(8.0, 4.5, 18.0) absTol 1E-5, "variance mismatch")
-
+    //矩阵数
     assert(summarizer.count === 2)
   }
 
   test("sparse vector input") {
     val summarizer = (new MultivariateOnlineSummarizer)
+      //创建稀疏矩阵，指定元素的个数、索引及非零值，数组方式
       .add(Vectors.sparse(3, Seq((0, -1.0), (2, 6.0))))
       .add(Vectors.sparse(3, Seq((0, 3.0), (1, -3.0))))
-
+    //每列的均值
     assert(summarizer.mean ~== Vectors.dense(1.0, -1.5, 3.0) absTol 1E-5, "mean mismatch")
-
+    //向量最小值
     assert(summarizer.min ~== Vectors.dense(-1.0, -3, 0.0) absTol 1E-5, "min mismatch")
-
+    //向量最大值
     assert(summarizer.max ~== Vectors.dense(3.0, 0.0, 6.0) absTol 1E-5, "max mismatch")
-
+    //向量每列非零元素的个数
     assert(summarizer.numNonzeros ~== Vectors.dense(2, 1, 1) absTol 1E-5, "numNonzeros mismatch")
-
+    //样本方差 构成样本的单项数值与平均值之间的差的平方和除以n-1
     assert(summarizer.variance ~== Vectors.dense(8.0, 4.5, 18.0) absTol 1E-5, "variance mismatch")
-
+    //矩阵数
     assert(summarizer.count === 2)
   }
 
@@ -127,20 +129,20 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
       .add(Vectors.dense(3.8, 0.0, 1.9))
       .add(Vectors.dense(1.7, -0.6, 0.0))
       .add(Vectors.sparse(3, Seq((1, 1.9), (2, 0.0))))
-
+    //每列的均值
     assert(summarizer.mean ~==
       Vectors.dense(0.583333333333, -0.416666666666, -0.183333333333) absTol 1E-5, "mean mismatch")
-
+    //每列的最小值
     assert(summarizer.min ~== Vectors.dense(-2.0, -5.1, -3) absTol 1E-5, "min mismatch")
-
+    //每列的最大值
     assert(summarizer.max ~== Vectors.dense(3.8, 2.3, 1.9) absTol 1E-5, "max mismatch")
-
+    //向量每列非零元素的个数
     assert(summarizer.numNonzeros ~== Vectors.dense(3, 5, 2) absTol 1E-5, "numNonzeros mismatch")
-
+    //向量每列样本方差 构成样本的单项数值与平均值之间的差的平方和除以n-1
     assert(summarizer.variance ~==
       Vectors.dense(3.857666666666, 7.0456666666666, 2.48166666666666) absTol 1E-5,
       "variance mismatch")
-
+    //矩阵数
     assert(summarizer.count === 6)
   }
 
@@ -165,7 +167,7 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
     assert(summarizer.max ~== Vectors.dense(3.8, 2.3, 1.9) absTol 1E-5, "max mismatch")
 
     assert(summarizer.numNonzeros ~== Vectors.dense(3, 5, 2) absTol 1E-5, "numNonzeros mismatch")
-
+    //向量每列样本方差 构成样本的单项数值与平均值之间的差的平方和除以n-1
     assert(summarizer.variance ~==
       Vectors.dense(3.857666666666, 7.0456666666666, 2.48166666666666) absTol 1E-5,
       "variance mismatch")
@@ -202,7 +204,7 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
     assert(summarizer1.numNonzeros ~== Vectors.dense(0, 1, 1) absTol 1E-5, "numNonzeros mismatch")
 
     assert(summarizer2.numNonzeros ~== Vectors.dense(0, 1, 1) absTol 1E-5, "numNonzeros mismatch")
-
+     //向量每列样本方差 构成样本的单项数值与平均值之间的差的平方和除以n-1
     assert(summarizer1.variance ~== Vectors.dense(0, 0, 0) absTol 1E-5, "variance mismatch")
 
     assert(summarizer2.variance ~== Vectors.dense(0, 0, 0) absTol 1E-5, "variance mismatch")

@@ -23,7 +23,9 @@ import org.apache.spark.mllib.stat.distribution.MultivariateGaussian
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
-
+/**
+ * 高斯混合聚类
+ */
 class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("single cluster") {
     val data = sc.parallelize(Array(

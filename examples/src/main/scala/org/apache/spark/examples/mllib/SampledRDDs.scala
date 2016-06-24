@@ -82,7 +82,8 @@ object SampledRDDs {
     println(s"  RDD.takeSample(): sample has ${sampledArray.size} examples")
 
     println()
-
+     //spark对于分层抽样支持两个版本sampleByKey和sampleByKeyExact。
+     //它是一个根据RDD的Key-Value来抽样的功能，可以为每个key设置其被选中的概率
     // Example: RDD.sampleByKey() and RDD.sampleByKeyExact()
     val keyedRDD = examples.map { lp => (lp.label.toInt, lp.features) }
     println(s"  Keyed data using label (Int) as key ==> Orig")

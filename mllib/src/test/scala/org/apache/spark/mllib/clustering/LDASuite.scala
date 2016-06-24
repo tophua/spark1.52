@@ -28,6 +28,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 /**
+ * LDA是一个三层贝叶斯概率模型,包含词,主题和文档三层结构
  * LDA 文档生成模型
  * 按照文档生成的过程，使用贝叶斯估计统计学方法，将文档用多个主题来表示。LDA不只解决了同义词的问题，还解决了一次多义的问题。
  * 目前训练LDA模型的方法有原始论文中的基于EM和 差分贝叶斯方法以及后来出现的Gibbs Samplings 采样算法

@@ -52,7 +52,7 @@ class MultilabelMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
         (Array(2.0, 0.0), Array(2.0, 0.0)),
         (Array(0.0, 1.0, 2.0), Array(0.0, 1.0)),
         (Array(1.0), Array(1.0, 2.0))), 2)
-//分类模型评估多标签分类
+    //分类模型评估多标签分类
     val metrics = new MultilabelMetrics(scoreAndLabels)
     val delta = 0.00001
     val precision0 = 4.0 / (4 + 0)

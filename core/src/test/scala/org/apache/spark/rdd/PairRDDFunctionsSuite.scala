@@ -132,7 +132,8 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
 
   test("sampleByKeyExact") {
     val defaultSeed = 1L
-
+     //spark对于分层抽样支持两个版本sampleByKey和sampleByKeyExact。
+     //它是一个根据RDD的Key-Value来抽样的功能，可以为每个key设置其被选中的概率
     // vary RDD size
     for (n <- List(100, 1000, 1000000)) {
       val data = sc.parallelize(1 to n, 2)

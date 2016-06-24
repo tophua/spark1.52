@@ -58,7 +58,7 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
      * > r2 <- mmetric(label, predict(model, features), metric='R2')
      */
     val trainer = new LinearRegression
-    val model = trainer.fit(dataset)
+    val model = trainer.fit(dataset) //转换
     val predictions = model.transform(dataset)
 
     // default = rmse

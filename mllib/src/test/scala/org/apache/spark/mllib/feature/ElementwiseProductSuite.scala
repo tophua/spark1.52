@@ -21,7 +21,10 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 元素智能乘积 ,点乘，就是说每个矩阵元素对应相乘
+ * ElementwiseProduct 采用逐个相乘的方式,使用给定的权重与每个输入向量相乘
+ */
 class ElementwiseProductSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("elementwise (hadamard) product should properly apply vector to dense data set") {
@@ -30,6 +33,7 @@ class ElementwiseProductSuite extends SparkFunSuite with MLlibTestSparkContext {
     )
     val scalingVec = Vectors.dense(2.0, 0.5, 0.0, 0.25)
     val transformer = new ElementwiseProduct(scalingVec)
+    //批理变换和每个变换,得到相同的结果
     val transformedData = transformer.transform(sc.makeRDD(denseData))
     val transformedVecs = transformedData.collect()
     val transformedVec = transformedVecs(0)

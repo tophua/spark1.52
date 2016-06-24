@@ -28,7 +28,7 @@ import org.apache.spark.mllib.stat.correlation.{
 }
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 /**
- * 相关性
+ * 相关性操作
  */
 class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
@@ -78,6 +78,11 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     val z = sc.parallelize(zeros)
     assert(Statistics.corr(x, z).isNaN)
   }
+  /**
+   * spearman 由于利用的等级相关，因而spearman相关性分析也称为spearman等级相关分析或等级差数法，
+   * 但需要注意的是spearman相关性分析方法涉及到等级的排序问题，
+   * 在分布式环境下的排序可能会涉及到大量的网络IO操作，算法效率不是特别高
+   */
 
   test("corr(x, y) spearman") { //斯皮漫相关性 
     val x = sc.parallelize(xData)

@@ -30,6 +30,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Test suite for [[GradientBoostedTrees]].
+ * 梯度提升决策树
  */
 class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 

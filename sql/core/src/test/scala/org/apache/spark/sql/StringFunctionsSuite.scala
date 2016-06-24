@@ -82,6 +82,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
   test("string ascii function") {
     val df = Seq(("abc", "")).toDF("a", "b")
     checkAnswer(
+      //
       df.select(ascii($"a"), ascii($"b")),
       Row(97, 0))
 
@@ -105,6 +106,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
   test("string / binary substring function") {
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
+    //使用substring截取字符串
     val df = Seq(("1世3", Array[Byte](1, 2, 3, 4))).toDF("a", "b")
     checkAnswer(df.select(substring($"a", 1, 2)), Row("1世"))
     checkAnswer(df.select(substring($"b", 2, 2)), Row(Array[Byte](2,3)))
@@ -135,7 +137,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string trim functions") {
     val df = Seq(("  example  ", "")).toDF("a", "b")
-
+    //截取空格
     checkAnswer(
       df.select(ltrim($"a"), rtrim($"a"), trim($"a")),
       Row("example  ", "  example", "example"))
@@ -170,6 +172,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     val df = Seq(("aaads", "aa", "zz")).toDF("a", "b", "c")
 
     checkAnswer(
+        //返回要截取的字符串在源字符串中的位置
       df.select(instr($"a", "aa")),
       Row(1))
 
@@ -193,6 +196,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     val df = Seq(("aaads", "aa", "zz", 1)).toDF("a", "b", "c", "d")
 
     checkAnswer(
+      //locate 确定…的位置
       df.select(locate("aa", $"a"), locate("aa", $"a", 1)),
       Row(1, 2))
 

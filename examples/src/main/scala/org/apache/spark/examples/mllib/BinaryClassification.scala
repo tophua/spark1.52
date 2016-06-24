@@ -148,7 +148,7 @@ object BinaryClassification {
     val predictionAndLabel = prediction.zip(test.map(_.label))
 
     val metrics = new BinaryClassificationMetrics(predictionAndLabel)
-
+    
     println(s"Test areaUnderPR = ${metrics.areaUnderPR()}.")
     println(s"Test areaUnderROC = ${metrics.areaUnderROC()}.")
 

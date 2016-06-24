@@ -27,16 +27,17 @@ class RegressionMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("regression metrics for unbiased (includes intercept term) predictor") {
     /* Verify results in R:
-       preds = c(2.25, -0.25, 1.75, 7.75)
-       obs = c(3.0, -0.5, 2.0, 7.0)
+       preds = c(2.25, -0.25, 1.75, 7.75) //向量
+       obs = c(3.0, -0.5, 2.0, 7.0) //向量
 
        SStot = sum((obs - mean(obs))^2)
-       SSreg = sum((preds - mean(obs))^2)
+       SSreg = sum((preds - mean(obs))^2)//除以矩阵长度为4
        SSerr = sum((obs - preds)^2)
 
        explainedVariance = SSreg / length(obs)
-       explainedVariance
+       explainedVariance //总体方差
        > [1] 8.796875
+       //平均绝对误差
        meanAbsoluteError = mean(abs(preds - obs))
        meanAbsoluteError
        > [1] 0.5
@@ -53,17 +54,18 @@ class RegressionMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     val predictionAndObservations = sc.parallelize(Seq((2.25, 3.0), (-0.25, -0.5), (1.75, 2.0), (7.75, 7.0)), 2)
     //实例化一个RegressionMetrics对象需要一个键值对类型的RDD,其每一条记录对应每个数据点上相应的预测值与实际值
     val metrics = new RegressionMetrics(predictionAndObservations)
-    //方差
+    //总体方差
     assert(metrics.explainedVariance ~== 8.79687 absTol 1E-5,
       "explained variance regression score mismatch")
       //这个指标用于评判预测值与实际值之间的差异度,
       //平均绝对误差
     assert(metrics.meanAbsoluteError ~== 0.5 absTol 1E-5, "mean absolute error mismatch")
-    //meanSquaredError 均方差
+    //meanSquaredError 均方差,它的定义为预测值的评级与真实评级的差的平方的和与总数目的商
     assert(metrics.meanSquaredError ~== 0.3125 absTol 1E-5, "mean squared error mismatch")
-    //均方根误差
+    //均方根误差,均方差再开平方根
     assert(metrics.rootMeanSquaredError ~== 0.55901 absTol 1E-5,
       "root mean squared error mismatch")
+     //R2平方系统也称判定系数,用来评估模型拟合数据的好坏
     assert(metrics.r2 ~== 0.95717 absTol 1E-5, "r2 score mismatch")
   }
 
@@ -98,9 +100,11 @@ class RegressionMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(metrics.explainedVariance ~== 8.85937 absTol 1E-5,
       "explained variance regression score mismatch")
     assert(metrics.meanAbsoluteError ~== 0.5 absTol 1E-5, "mean absolute error mismatch")
+    //
     assert(metrics.meanSquaredError ~== 0.375 absTol 1E-5, "mean squared error mismatch")
-    assert(metrics.rootMeanSquaredError ~== 0.61237 absTol 1E-5,
+    assert(metrics.rootMeanSquaredError ~== 0.61237 absTol 1E-5,//均方根误差,均方差再开平方根
       "root mean squared error mismatch")
+      //R2平方系统也称判定系数,用来评估模型拟合数据的好坏
     assert(metrics.r2 ~== 0.94860 absTol 1E-5, "r2 score mismatch")
   }
 
@@ -109,12 +113,17 @@ class RegressionMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
       Seq((3.0, 3.0), (0.0, 0.0), (2.0, 2.0), (8.0, 8.0)), 2)
       //回归模型评估
     val metrics = new RegressionMetrics(predictionAndObservations)
+    //总体方差
     assert(metrics.explainedVariance ~== 8.6875 absTol 1E-5,
-      "explained variance regression score mismatch")
-    assert(metrics.meanAbsoluteError ~== 0.0 absTol 1E-5, "mean absolute error mismatch")
+      "explained variance regression score mismatch") 
+      //平均绝对误差
+    assert(metrics.meanAbsoluteError ~== 0.0 absTol 1E-5, "mean absolute error mismatch")//
+    //平均误差
     assert(metrics.meanSquaredError ~== 0.0 absTol 1E-5, "mean squared error mismatch")
+    //平均根误差
     assert(metrics.rootMeanSquaredError ~== 0.0 absTol 1E-5,
       "root mean squared error mismatch")
+     //R2平方系统也称判定系数,用来评估模型拟合数据的好坏
     assert(metrics.r2 ~== 1.0 absTol 1E-5, "r2 score mismatch")
   }
 }

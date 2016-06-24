@@ -23,7 +23,9 @@ import org.apache.spark.mllib.clustering.KMeansModel
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.{LassoModel, LinearRegressionModel, RidgeRegressionModel}
 import org.apache.spark.mllib.util.LinearDataGenerator
-
+/**
+ * 预言模型标记语言是一种基于xml语言,它能够定义和共享应用程序之间的预测模型
+ */
 class PMMLModelExportFactorySuite extends SparkFunSuite {
 
   test("PMMLModelExportFactory create KMeansPMMLModelExport when passing a KMeansModel") {
@@ -32,7 +34,7 @@ class PMMLModelExportFactorySuite extends SparkFunSuite {
       Vectors.dense(1.0, 3.0, 0.0),
       Vectors.dense(1.0, 4.0, 6.0))
     val kmeansModel = new KMeansModel(clusterCenters)
-
+  //
     val modelExport = PMMLModelExportFactory.createPMMLModelExport(kmeansModel)
 
     assert(modelExport.isInstanceOf[KMeansPMMLModelExport])

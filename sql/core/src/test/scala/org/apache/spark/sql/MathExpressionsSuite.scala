@@ -231,6 +231,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     testOneToOneMathFunction[Double](signum, math.signum)
 
     checkAnswer(
+        //sign
       sql("SELECT sign(10), signum(-11)"),
       Row(1, -1))
   }

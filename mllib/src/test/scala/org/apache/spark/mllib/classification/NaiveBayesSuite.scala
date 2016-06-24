@@ -134,6 +134,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("Naive Bayes Multinomial") {
     val nPoints = 1000
+    //math.log 对数
     val pi = Array(0.5, 0.1, 0.4).map(math.log)
     val theta = Array(
       Array(0.70, 0.10, 0.10, 0.10), // label 0

@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 /**
- * RankingMetrics类用来计算基于排名的评估指标
+ * RankingMetrics类用来计算基于排名的评估指标,K值平均准确率函数
  */
 class RankingMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Ranking metrics: map, ndcg") {
@@ -36,11 +36,13 @@ class RankingMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
    //需要向我们之前的平均准确率函数传入一个键值对类型的RDD,
    //其键为给定用户预测的物品的ID数组,而值则是实际的物品ID数组
     val metrics = new RankingMetrics(predictionAndLabels)
-    //平均正确率值
+    //平均精度均值(平均正确率值)
     val map = metrics.meanAveragePrecision
-  
+   //精度位置
     println("precisionAt:"+metrics.precisionAt(1)+" \t"+1.0/3)
     //计算所有的查询的平均精度，截断在排名位置
+    
+
     assert(metrics.precisionAt(1) ~== 1.0/3 absTol eps)
     assert(metrics.precisionAt(2) ~== 1.0/3 absTol eps)
     assert(metrics.precisionAt(3) ~== 1.0/3 absTol eps)
@@ -50,7 +52,20 @@ class RankingMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(metrics.precisionAt(15) ~== 8.0/45 absTol eps)
 
     assert(map ~== 0.355026 absTol eps)
-
+     /**
+     * 排名指标是MAP和NDCG
+     * NDCG表示归一化折损累积增益
+     * 平均精度均值（MAP）
+     * 
+     * 两者之间的主要区别是，
+     * MAP认为是二元相关性（一个项是感兴趣的或者不感兴趣的）
+     * 而NDCG允许以实数形式进行相关性打分
+     * 
+     * 一个推荐系统返回一些项并形成一个列表，我们想要计算这个列表有多好。
+     * 每一项都有一个相关的评分值，通常这些评分值是一个非负数。这就是gain（增益）
+     * 
+     */
+    //ndcg 归一化折损累积增益
     assert(metrics.ndcgAt(3) ~== 1.0/3 absTol eps)
     assert(metrics.ndcgAt(5) ~== 0.328788 absTol eps)
     assert(metrics.ndcgAt(10) ~== 0.487913 absTol eps)

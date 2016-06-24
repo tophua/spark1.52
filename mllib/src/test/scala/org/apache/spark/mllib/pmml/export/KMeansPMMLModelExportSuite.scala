@@ -22,7 +22,9 @@ import org.dmg.pmml.ClusteringModel
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.clustering.KMeansModel
 import org.apache.spark.mllib.linalg.Vectors
-
+/**
+ * 预言模型标记语言是一种基于xml语言,它能够定义和共享应用程序之间的预测模型
+ */
 class KMeansPMMLModelExportSuite extends SparkFunSuite {
 
   test("KMeansPMMLModelExport generate PMML format") {

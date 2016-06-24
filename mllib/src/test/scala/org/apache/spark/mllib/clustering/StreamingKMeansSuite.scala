@@ -23,7 +23,10 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.streaming.{StreamingContext, TestSuiteBase}
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.util.random.XORShiftRandom
-
+/**
+ * 流式k-means:当数据到达,我们可能想要动态地估算cluster,并更新他们,该算法采用了小批量的k-means更新规则,对每一次
+ * 数据,将所有的点分配到最近的cluster,并计算最新cluster中心,然后更新每个cluster
+ */
 class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
 
   override def maxWaitTimeMillis: Int = 30000
@@ -71,7 +74,7 @@ class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
     assert(model.latestModel().clusterCenters(0) ~== Vectors.dense(grandMean.toArray) absTol 1E-5)
   }
 
-  test("accuracy for two centers") {
+  test("accuracy for two centers") { //精确
     val numBatches = 10
     val numPoints = 5
     val k = 2

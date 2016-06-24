@@ -22,7 +22,9 @@ import org.dmg.pmml.RegressionModel
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.regression.{LassoModel, LinearRegressionModel, RidgeRegressionModel}
 import org.apache.spark.mllib.util.LinearDataGenerator
-
+/**
+ * 预言模型标记语言是一种基于xml语言,它能够定义和共享应用程序之间的预测模型
+ */
 class GeneralizedLinearPMMLModelExportSuite extends SparkFunSuite {
 
   test("linear regression PMML export") {

@@ -37,8 +37,8 @@ class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("StopWordsRemover default") {
     val remover = new StopWordsRemover()
-      .setInputCol("raw")
-      .setOutputCol("filtered")
+      .setInputCol("raw")//输入
+      .setOutputCol("filtered")//输出
     val dataSet = sqlContext.createDataFrame(Seq(
       (Seq("test", "test"), Seq("test", "test")),
       (Seq("a", "b", "c", "d"), Seq("b", "c", "d")),
@@ -46,7 +46,7 @@ class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
       (Seq("A", "The", "AN"), Seq()),
       (Seq(null), Seq(null)),
       (Seq(), Seq())
-    )).toDF("raw", "expected")
+    )).toDF("raw", "expected")//未加工值,期望值
 
     testStopWordsRemover(remover, dataSet)
   }

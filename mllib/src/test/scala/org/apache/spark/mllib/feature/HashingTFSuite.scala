@@ -24,14 +24,18 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("hashing tf on a single doc") {
+    
+    //
     val hashingTF = new HashingTF(1000)
     val doc = "a a b b c d".split(" ")
     val n = hashingTF.numFeatures
+    //词的频率
     val termFreqs = Seq(
       (hashingTF.indexOf("a"), 2.0),
       (hashingTF.indexOf("b"), 2.0),
       (hashingTF.indexOf("c"), 1.0),
       (hashingTF.indexOf("d"), 1.0))
+    //termFreqs: Seq[(Int, Double)] = List((97,2.0), (98,2.0), (99,1.0), (100,1.0))
     assert(termFreqs.map(_._1).forall(i => i >= 0 && i < n),
       "index must be in range [0, #features)")
     assert(termFreqs.map(_._1).toSet.size === 4, "expecting perfect hashing")

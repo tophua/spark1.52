@@ -42,22 +42,24 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
    * 目前Spark默认的是均匀分配.
    */
   test("chi squared pearson goodness of fit") {
-
+    //配度检测:验证一组观察值的次数分配是否异于理论上的分配
     val observed = new DenseVector(Array[Double](4, 6, 5))
     //提供了进行Pearson(皮尔森)卡方检验的方法
-    val pearson = Statistics.chiSqTest(observed)//卡方检验
-
-    // Results validated against the R command `chisq.test(c(4, 6, 5), p=c(1/3, 1/3, 1/3))`
-    //计算卡方检定的统计值
+    val pearson = Statistics.chiSqTest(observed)//卡方检验   
+    // Results validated against the R command `chisq.test(c(4, 6, 5), p=c(1/3, 1/3, 1/3))',P值一种概率
+    //计算卡方检验的统计值(适配度检测):把每一个观察值和理论值(适配度检测,平均值)的差做平方后、除以理论值、再加总
+    println("statistic:"+pearson.statistic+"\t degreesOfFreedom:"+pearson.degreesOfFreedom+"\t pValue:"+pearson.pValue)
+    //statistic:0.4	 degreesOfFreedom:2	 pValue:0.8187307530779818
     assert(pearson.statistic === 0.4)
     //自由度为2
     assert(pearson.degreesOfFreedom === 2)
-    assert(pearson.pValue ~== 0.8187 relTol 1e-4)//概率值
+    //P 值，一般以P < 0.05 为显著， P <0.01 为非常显著，其含义是样本间的差异由抽样误差所致的概率小于0.05 或0.01
+    assert(pearson.pValue ~== 0.8187 relTol 1e-4)//假定值、假设机率,由于总是介于0和1之间
     //名称
     assert(pearson.method === ChiSqTest.PEARSON.name)
     
     assert(pearson.nullHypothesis === ChiSqTest.NullHypothesis.goodnessOfFit.toString)
-
+    //独立性检测:验证从两个变量抽出的配对观察值组是否互相独立
     // different expected and observed sum
     val observed1 = new DenseVector(Array[Double](21, 38, 43, 80))
     val expected1 = new DenseVector(Array[Double](3, 5, 7, 20))
@@ -66,6 +68,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Results validated against the R command
     // `chisq.test(c(21, 38, 43, 80), p=c(3/35, 1/7, 1/5, 4/7))`
+    //
     assert(pearson1.statistic ~== 14.1429 relTol 1e-4)
     assert(pearson1.degreesOfFreedom === 3)
     assert(pearson1.pValue ~== 0.002717 relTol 1e-4)
@@ -110,11 +113,14 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     //  [29.0, 42.0, 0.0,  12.0]]
     //提供了进行Pearson卡方检验的方法
     val chi = Statistics.chiSqTest(Matrices.dense(3, 4, data))
+    //
     // Results validated against R command
     // `chisq.test(rbind(c(40, 56, 31, 30),c(24, 32, 10, 15), c(29, 42, 0, 12)))`
+    
     assert(chi.statistic ~== 21.9958 relTol 1e-4)
+    //自由度 df=(r−1)(c−1)=(3−1)∗(4−1)=6 //其中r为行数，c为列数
     assert(chi.degreesOfFreedom === 6)
-    assert(chi.pValue ~== 0.001213 relTol 1e-4)
+    assert(chi.pValue ~== 0.001213 relTol 1e-4)//概率值
     assert(chi.method === ChiSqTest.PEARSON.name)
     assert(chi.nullHypothesis === ChiSqTest.NullHypothesis.independence.toString)
 
@@ -149,6 +155,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
       //提供了进行Pearson卡方检验的方法
       val chi = Statistics.chiSqTest(sc.parallelize(data, numParts))
       val feature1 = chi(0)
+      //协方差
       assert(feature1.statistic === 0.75)
       assert(feature1.degreesOfFreedom === 2)
       assert(feature1.pValue ~== 0.6873 relTol 1e-4)

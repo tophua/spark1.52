@@ -26,7 +26,10 @@ import org.apache.spark.sql.catalyst.plans.logical.OneRowRelation
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.test.{ExamplePointUDT, ExamplePoint, SharedSQLContext}
-
+/**
+ * DataFrame是一个分布式的，按照命名列的形式组织的数据集合,与关系型数据库中的数据库表类似
+ * 
+ */
 class DataFrameSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

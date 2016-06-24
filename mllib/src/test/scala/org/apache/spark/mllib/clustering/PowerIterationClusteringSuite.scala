@@ -26,6 +26,9 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 //聚类 幂迭代聚类(PIC)
+/**
+ * 快速迭代聚类是一种简单可扩展的图聚类方法
+ */
 class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   import org.apache.spark.mllib.clustering.PowerIterationClustering._

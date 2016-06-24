@@ -289,7 +289,6 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(summary.mean !~== Vectors.dense(0.0, 0.0, 0.0) absTol 1E-5)
     assert(summary.variance ~== Vectors.dense(1.0, 1.0, 1.0) absTol 1E-5)
-
     assert(data2(4) ~== Vectors.sparse(3, Seq((0, 0.865538862), (1, -0.22604255))) absTol 1E-5)
     assert(data2(5) ~== Vectors.sparse(3, Seq((1, 0.71580142))) absTol 1E-5)
   }

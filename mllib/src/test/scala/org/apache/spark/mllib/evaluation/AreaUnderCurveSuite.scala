@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 /**
- * AUC是一种用来度量分类模型好坏的一个标准
+ * AUC是一种用来度量分类模型好坏的一个标准,简单来说就是曲线右下角部分占正方形格子的面积比例
  * AUC的值介于0.5到1.0之间，较大的AUC代表了较好
  */
 class AreaUnderCurveSuite extends SparkFunSuite with MLlibTestSparkContext {

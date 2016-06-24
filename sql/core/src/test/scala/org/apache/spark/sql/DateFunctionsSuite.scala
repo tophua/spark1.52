@@ -88,6 +88,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
     val df = Seq((d, sdf.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
+        //日期格式化
       df.select(date_format($"a", "y"), date_format($"b", "y"), date_format($"c", "y")),
       Row("2015", "2015", "2013"))
 
@@ -100,6 +101,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
+        //提取年
       df.select(year($"a"), year($"b"), year($"c")),
       Row(2015, 2015, 2013))
 
@@ -123,6 +125,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
   }
 
   test("month") {
+    //提取月
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -136,7 +139,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("dayofmonth") {
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
-
+     //提取日
     checkAnswer(
       df.select(dayofmonth($"a"), dayofmonth($"b"), dayofmonth($"c")),
       Row(8, 8, 8))
@@ -160,7 +163,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("hour") {
     val df = Seq((d, sdf.format(d), ts)).toDF("a", "b", "c")
-
+    //提取小时
     checkAnswer(
       df.select(hour($"a"), hour($"b"), hour($"c")),
       Row(0, 13, 13))
@@ -217,9 +220,11 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
     val d2 = Date.valueOf(s2)
     val df = Seq((t1, d1, s1, st1), (t2, d2, s2, st2)).toDF("t", "d", "s", "ss")
     checkAnswer(
+      //添加日
       df.select(date_add(col("d"), 1)),
       Seq(Row(Date.valueOf("2015-06-02")), Row(Date.valueOf("2015-06-03"))))
     checkAnswer(
+        //添加3天
       df.select(date_add(col("t"), 3)),
       Seq(Row(Date.valueOf("2015-06-04")), Row(Date.valueOf("2015-06-05"))))
     checkAnswer(

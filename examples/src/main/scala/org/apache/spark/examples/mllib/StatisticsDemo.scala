@@ -22,7 +22,7 @@ object StatisticsDemo {
     //方差是各个数据与平均数之差的平方相加再除以个数
     //方差越小越稳定,表示数据间差别小
     println("均值:" + mss.mean);
-    println("方差:" + mss.variance); //方差是各个数据与平均数之差的平方相加再除以(个数-1)
+    println("样本方差:" + mss.variance); //样本方差是各个数据与平均数之差的平方相加再除以(个数-1)
     println("非零统计量个数:" + mss.numNonzeros);
     println("总数:" + mss.count);
     println("最大值:" + mss.max);

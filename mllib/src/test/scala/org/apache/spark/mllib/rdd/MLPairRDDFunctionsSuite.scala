@@ -27,7 +27,7 @@ class MLPairRDDFunctionsSuite extends SparkFunSuite with MLlibTestSparkContext {
       1), (3, 5)), 2)
       //
       .topByKey(5)
-      
+      //以k转换map数组
       .collectAsMap()
 
     assert(topMap.size === 3)

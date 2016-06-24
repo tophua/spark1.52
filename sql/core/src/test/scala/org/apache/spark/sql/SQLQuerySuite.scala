@@ -39,6 +39,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   setupTestData()
 
   test("having clause") {
+    //HAVING 从句
     Seq(("one", 1), ("two", 2), ("three", 3), ("one", 5)).toDF("k", "v").registerTempTable("hav")
     checkAnswer(
       sql("SELECT k, sum(v) FROM hav GROUP BY k HAVING sum(v) > 2"),
@@ -46,8 +47,10 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("SPARK-8010: promote numeric to string") {
+    //促进数据转换字符
     val df = Seq((1, 1)).toDF("key", "value")
     df.registerTempTable("src")
+    // case when 使用
     val queryCaseWhen = sql("select case when true then 1.0 else '1' end from src ")
     //coalesce 依次参考表达式,遇到非null值即停止并返回值,如果遇到表达式为值,返回空值
     val queryCoalesce = sql("select coalesce(null, 1, '1') from src ")
@@ -88,7 +91,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       (26, 0, 79),
       (43, 81, 24)
     ).toDF("a", "b", "c").registerTempTable("cachedData")
-
+   //缓存列 
     sqlContext.cacheTable("cachedData")
     checkAnswer(//分组b列,
       sql("SELECT t1.b FROM cachedData, cachedData t1 GROUP BY t1.b"),
@@ -96,6 +99,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("self join with aliases") {
+    //自连接
     Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str").registerTempTable("df")
 
     checkAnswer(
@@ -143,6 +147,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
     checkAnswer(Seq((1, "building burrito tunnels"), (1, "major projects"))
       .toDF("id", "saying")
+      //表达式函数,以saying长度分组
       .groupBy(expr("length(saying)"))
       .count(), Row(24, 1) :: Row(14, 1) :: Nil)
   }
@@ -202,6 +207,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
      .registerTempTable("rows")
 
     checkAnswer(
+        //分组嵌套
       sql(
         """
           |select attribute, sum(cnt)
@@ -216,6 +222,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SPARK-6201 IN type conversion") {
     sqlContext.read.json(
+        //json类型转换
       sqlContext.sparkContext.parallelize(
         Seq("{\"a\": \"1\"}}", "{\"a\": \"2\"}}", "{\"a\": \"3\"}}")))
       .registerTempTable("d")
@@ -301,15 +308,17 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       testCodeGen(
         "SELECT count(distinct key) FROM testData3x",
         Row(100) :: Nil)
-      // SUM
+      // SUM 求和
       testCodeGen(
         "SELECT value, sum(key) FROM testData3x GROUP BY value",
         (1 to 100).map(i => Row(i.toString, 3 * i)))
       testCodeGen(
+          //CAST 强制转换 Double
         "SELECT sum(key), SUM(CAST(key as Double)) FROM testData3x",
         Row(5050 * 3, 5050 * 3.0) :: Nil)
       // AVERAGE
       testCodeGen(
+          //求平均值
         "SELECT value, avg(key) FROM testData3x GROUP BY value",
         (1 to 100).map(i => Row(i.toString, i)))
       testCodeGen(
@@ -317,12 +326,13 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         Row(50.5) :: Nil)
       // MAX
       testCodeGen(
+          //最大值
         "SELECT value, max(key) FROM testData3x GROUP BY value",
         (1 to 100).map(i => Row(i.toString, i)))
       testCodeGen(
         "SELECT max(key) FROM testData3x",
         Row(100) :: Nil)
-      // MIN
+      // MIN 最小值
       testCodeGen(
         "SELECT value, min(key) FROM testData3x GROUP BY value",
         (1 to 100).map(i => Row(i.toString, i)))
@@ -330,6 +340,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         "SELECT min(key) FROM testData3x",
         Row(1) :: Nil)
       // Some combinations.
+      //组合
       testCodeGen(
         """
           |SELECT
@@ -359,6 +370,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("Add Parser of SQL COALESCE()") {
     checkAnswer(
+        //依次参考各参数表达式，遇到非null值即停止并返回该值
       sql("""SELECT COALESCE(1, 2)"""),
       Row(1))
     checkAnswer(
@@ -371,6 +383,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SPARK-3176 Added Parser of SQL LAST()") {
     checkAnswer(
+       //末尾
       sql("SELECT LAST(n) FROM lowerCaseData"),
       Row(4))
   }
@@ -383,13 +396,14 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SQRT") {
     checkAnswer(
+      //平方根函数
       sql("SELECT SQRT(key) FROM testData"),
       (1 to 100).map(x => Row(math.sqrt(x.toDouble))).toSeq
     )
   }
 
   test("SQRT with automatic string casts") {
-    checkAnswer(
+    checkAnswer(//平方根函数
       sql("SELECT SQRT(CAST(key AS STRING)) FROM testData"),
       (1 to 100).map(x => Row(math.sqrt(x.toDouble))).toSeq
     )
@@ -397,6 +411,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SPARK-2407 Added Parser of SQL SUBSTR()") {
     checkAnswer(
+        //substr字符串中抽取从 start 下标开始的指定数目的字符
       sql("SELECT substr(tableName, 1, 2) FROM tableName"),
       Row("te"))
     checkAnswer(
@@ -411,6 +426,8 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("SPARK-3173 Timestamp support in the parser") {
+    //用数据集创建一个time对象的DataFrame,将DataFrame注册为一个表
+    //DataFrame 与关系型数据库中的数据库表类似
     (0 to 3).map(i => Tuple1(new Timestamp(i))).toDF("time").registerTempTable("timestamps")
 
     checkAnswer(sql(
@@ -430,10 +447,11 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00.001")))
 
     checkAnswer(sql(
+        //时间段查询
       """SELECT time FROM timestamps WHERE time<'1969-12-31 16:00:00.003'
           AND time>'1969-12-31 16:00:00.001'"""),
       Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00.002")))
-
+      // in操作
     checkAnswer(sql(
       """
         |SELECT time FROM timestamps
@@ -454,7 +472,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("left semi greater than predicate") {
-    checkAnswer(
+    checkAnswer(// IN/EXISTS 子查询的一种更高效的实现
       sql("SELECT * FROM testData2 x LEFT SEMI JOIN testData2 y ON x.a >= y.a + 2"),
       Seq(Row(3, 1), Row(3, 2))
     )
@@ -484,6 +502,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("agg") {
     checkAnswer(
+        //分组求和
       sql("SELECT a, SUM(b) FROM testData2 GROUP BY a"),
       Seq(Row(1, 3), Row(2, 3), Row(3, 3)))
   }
@@ -491,6 +510,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   test("literal in agg grouping expressions") {
     def literalInAggTest(): Unit = {
       checkAnswer(
+        //
         sql("SELECT a, count(1) FROM testData2 GROUP BY a, 1"),
         Seq(Row(1, 2), Row(2, 2), Row(3, 2)))
       checkAnswer(
@@ -516,6 +536,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("aggregates with nulls") {
     checkAnswer(
+        //最小,最大,平均,求和,计数
       sql("SELECT MIN(a), MAX(a), AVG(a), SUM(a), COUNT(a) FROM nullInts"),
       Row(1, 3, 2, 6, 3)
     )
@@ -602,7 +623,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("limit") {
-    checkAnswer(
+    checkAnswer(//前10行
       sql("SELECT * FROM testData LIMIT 10"),
       testData.take(10).toSeq)
 
@@ -637,7 +658,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("date row") {
-    checkAnswer(sql(//cast数据类型转换
+    checkAnswer(sql(//cast数据类型转换日期
       """select cast("2015-01-28" as date) from testData limit 1"""),
       Row(java.sql.Date.valueOf("2015-01-28"))
     )
@@ -669,6 +690,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("average") {
     checkAnswer(
+      //平均
       sql("SELECT AVG(a) FROM testData2"),
       Row(2.0))
   }
@@ -693,6 +715,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("approximate count distinct") {
     checkAnswer(
+        //相似计算
       sql("SELECT APPROXIMATE COUNT(DISTINCT a) FROM testData2"),
       Row(3))
   }
@@ -725,6 +748,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("inner join where, one match per row") {
     checkAnswer(
+        //大写小写匹配
       sql("SELECT * FROM upperCaseData JOIN lowerCaseData WHERE n = N"),
       Seq(
         Row(1, "A", 1, "a"),
@@ -1132,6 +1156,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   test("cast boolean to string") {
     // TODO Ensure true/false string letter casing is consistent with Hive in all cases.
     checkAnswer(
+        //布尔转换字符串
       sql("SELECT CAST(TRUE AS STRING), CAST(FALSE AS STRING) FROM testData LIMIT 1"),
       Row("true", "false"))
   }
@@ -1162,12 +1187,13 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("SPARK-3371 Renaming a function expression with group by gives error") {
+    //重命名
     sqlContext.udf.register("len", (s: String) => s.length)
     checkAnswer(
       sql("SELECT len(value) as temp FROM testData WHERE key = 1 group by len(value)"),
       Row(1))
   }
-
+  //CASE a WHEN
   test("SPARK-3813 CASE a WHEN b THEN c [WHEN d THEN e]* [ELSE f] END") {
     checkAnswer(
       sql("SELECT CASE key WHEN 1 THEN 1 ELSE 0 END FROM testData WHERE key = 1 group by key"),
@@ -1469,6 +1495,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SPARK-6583 order by aggregated function") {
     Seq("1" -> 3, "1" -> 4, "2" -> 7, "2" -> 8, "3" -> 5, "3" -> 6, "4" -> 1, "4" -> 2)
+    //DF(DataFrame)缩写,数据库表类似
       .toDF("a", "b").registerTempTable("orderByData")
 
     checkAnswer(
@@ -1477,14 +1504,15 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
           |SELECT a
           |FROM orderByData
           |GROUP BY a
-          |ORDER BY sum(b)
+          |ORDER BY sum(b)//以b和排序
         """.stripMargin),
+       
       Row("4") :: Row("1") :: Row("3") :: Row("2") :: Nil)
 
     checkAnswer(
       sql(
         """
-          |SELECT sum(b)
+          |SELECT sum(b)//和计B值
           |FROM orderByData
           |GROUP BY a
           |ORDER BY sum(b)
@@ -1497,7 +1525,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
           |SELECT a, sum(b)
           |FROM orderByData
           |GROUP BY a
-          |ORDER BY sum(b)
+          |ORDER BY sum(b)//按合计的升序排序
         """.stripMargin),
       Row("4", 3) :: Row("1", 7) :: Row("3", 11) :: Row("2", 15) :: Nil)
 
@@ -1639,6 +1667,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       df.selectExpr("b * a / b / b"),
       Seq(Row(d.toBigDecimal)))
     checkAnswer(
+        //数字表达式
       df.selectExpr("b * a + b"),
       Seq(Row(BigDecimal(2.12321))))
     checkAnswer(

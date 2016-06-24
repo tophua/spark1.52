@@ -24,7 +24,9 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.classification.LogisticRegressionModel
 import org.apache.spark.mllib.classification.SVMModel
 import org.apache.spark.mllib.util.LinearDataGenerator
-
+/**
+ * 预言模型标记语言是一种基于xml语言,它能够定义和共享应用程序之间的预测模型
+ */
 class BinaryClassificationPMMLModelExportSuite extends SparkFunSuite {
 
   test("logistic regression PMML export") {
