@@ -25,7 +25,9 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.mllib.feature.{Word2VecModel => OldWord2VecModel}
-//特征提取和转换 Word2Vec
+/**
+ * Word2Vec模型来根据词义比较两个字词相似性
+ */
 class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
@@ -114,14 +116,14 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     val sentence = "a b " * 100 + "a c " * 10
     val doc = sc.parallelize(Seq(sentence, sentence)).map(line => line.split(" "))
     val docDF = doc.zip(doc).toDF("text", "alsotext")
-//特征提取和转换 Word2Vec
+    //特征提取和转换 Word2Vec
     val model = new Word2Vec()
       .setVectorSize(3)
       .setInputCol("text")
       .setOutputCol("result")
       .setSeed(42L)
       .fit(docDF)
-
+    //比较两个字词相似性
     val expectedSimilarity = Array(0.2789285076917586, -0.6336972059851644)
     val (synonyms, similarity) = model.findSynonyms("a", 2).map {
       case Row(w: String, sim: Double) => (w, sim)

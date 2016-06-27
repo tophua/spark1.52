@@ -22,7 +22,9 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.Row
-
+/**
+ * 统计向量
+ */
 class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {

@@ -47,6 +47,8 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("labelIndex")
       .setOutputCol("labelVec")
       .setDropLast(false)
+//transform主要是用来把 一个 DataFrame 转换成另一个 DataFrame
+      
     val encoded = encoder.transform(transformed)
 
     val output = encoded.select("id", "labelVec").map { r =>

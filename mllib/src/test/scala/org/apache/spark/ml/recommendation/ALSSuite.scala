@@ -113,7 +113,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     assert(ne0.ata.forall(_ == 0.0))
     assert(ne0.atb.forall(_ == 0.0))
   }
-
+ //Cholesky 分解是把一个对称正定的矩阵表示成一个下三角矩阵L和其转置的乘积的分解
   test("CholeskySolver") {
     val k = 2
     val ne0 = new NormalEquation(k)
@@ -338,19 +338,24 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     val sqlContext = this.sqlContext
     import sqlContext.implicits._
     val als = new ALS()
-      .setRank(rank)
+      .setRank(rank)//是模型中隐语义因子的个数
       .setRegParam(regParam)
-      .setImplicitPrefs(implicitPrefs)
-      .setNumUserBlocks(numUserBlocks)
-      .setNumItemBlocks(numItemBlocks)
-      .setSeed(0)
-    val alpha = als.getAlpha
+      .setImplicitPrefs(implicitPrefs)//决定了是用显性反馈ALS的版本还是用适用隐性反馈数据集的版本
+      .setNumUserBlocks(numUserBlocks)//是用于并行化计算的分块个数,设置为-1,为自动配置
+      .setNumItemBlocks(numItemBlocks)//是用于并行化计算的分块个数 (设置为-1,为自动配置)
+      .setSeed(0) //随机种子
+    //可以调整这些参数，不断优化结果，使均方差变小。比如：iterations越多，lambda较小，均方差会较小，推荐结果较优。
+    val alpha = als.getAlpha //是一个针对于隐性反馈 ALS 版本的参数，这个参数决定了偏好行为强度的基准
     val model = als.fit(training.toDF())
     val predictions = model.transform(test.toDF())
       .select("rating", "prediction")
+      //实际评级,预测评级
       .map { case Row(rating: Float, prediction: Float) =>
         (rating.toDouble, prediction.toDouble)
       }
+    //rmse 均方根误差亦称标准误差,
+    //均方根误差常用下式表示：√[∑di^2/n]=Re，式中：n为测量次数；di为一组测量值与真值的偏差
+    //均方根值（RMS）、均方根误差（RMSE）
     val rmse =
       if (implicitPrefs) {
         // TODO: Use a better (rank-based?) evaluation metric for implicit feedback.
@@ -367,13 +372,15 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
         }
         math.sqrt(weightedSumSq / totalWeight)
       } else {
-        val mse = predictions.map { case (rating, prediction) =>
+          val mse = predictions.map { case (rating, prediction) =>
           val err = rating - prediction
-          err * err
-        }.mean()
-        math.sqrt(mse)
+          err * err //平方
+        }.mean()//平均数
+        math.sqrt(mse)//平方根
       }
     logInfo(s"Test RMSE is $rmse.")
+    //targetRMSE: Double = 0.05
+    //均方差越小，推荐结果较优
     assert(rmse < targetRMSE)
 
     // copied model must have the same parent.
@@ -386,14 +393,14 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     testALS(training, test, maxIter = 1, rank = 2, regParam = 1e-5, targetRMSE = 0.001)
   }
 
-  test("approximate rank-1 matrix") {
+  test("approximate rank-1 matrix") {//近似
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 1, noiseStd = 0.01)
     testALS(training, test, maxIter = 2, rank = 1, regParam = 0.01, targetRMSE = 0.02)
     testALS(training, test, maxIter = 2, rank = 2, regParam = 0.01, targetRMSE = 0.02)
   }
 
-  test("approximate rank-2 matrix") {
+  test("approximate rank-2 matrix") {//近似
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     testALS(training, test, maxIter = 4, rank = 2, regParam = 0.01, targetRMSE = 0.03)

@@ -23,6 +23,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 /**
+ * Word2Vec模型来根据词义比较两个字词相似性
  * Word2Vec将词语转换为向量,
  * 通过测量两个向量内积空间的夹角的余弦值来度量它们之间的相似性,
  * Word2Vec 计算单词的向量表示。这种表示的主要优点是相似的词在向量空间中离得近，

@@ -22,12 +22,15 @@ import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vectors, Vector
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 /**
+ * 短语加权
  * TF-IDF是一种用于信息检索与数据挖掘的常用加权技术
  * TF-IDF是一种统计方法，用以评估一字词对于一个文件集或一个语料库中的其中一份文件的重要程度.
  * 字词的重要性随着它在文件中出现的次数成正比增加，但同时会随着它在语料库中出现的频率成反比下降
  */
 class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
-
+/**
+ * IDF计算提供了忽略低频词的选项。被忽略的词IDF置零。该特性可以通过将参数minDocFreq传给IDF构造函数来使用。
+ */
   test("idf") {
     val n = 4
     val localTermFrequencies = Seq(
@@ -40,7 +43,7 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
     val idf = new IDF
     val model = idf.fit(termFrequencies)
     val expected = Vectors.dense(Array(0, 3, 1, 2).map { x =>
-      math.log((m + 1.0) / (x + 1.0))
+      math.log((m + 1.0) / (x + 1.0))//对数
     })
     assert(model.idf ~== expected absTol 1e-12)
 

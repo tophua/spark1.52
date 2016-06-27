@@ -24,7 +24,7 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
-  //特征提取和转换 TF-IDF
+  //TF就是词在一篇文章中的词频
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
@@ -36,6 +36,7 @@ class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
       (0, "a a b b c d".split(" ").toSeq)
     )).toDF("id", "words")
     val n = 100
+    //
     val hashingTF = new HashingTF()
       .setInputCol("words")
       .setOutputCol("features")

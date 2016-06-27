@@ -21,7 +21,9 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.ml.param.ParamsSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.{DataFrame, Row}
-
+/**
+ * 二元
+ */
 class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   @transient var data: Array[Double] = _

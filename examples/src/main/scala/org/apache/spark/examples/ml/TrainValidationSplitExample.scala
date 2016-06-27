@@ -61,8 +61,8 @@ object TrainValidationSplitExample {
     // In this case the estimator is simply the linear regression.
     // A TrainValidationSplit requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
     val trainValidationSplit = new TrainValidationSplit()
-      .setEstimator(lr)
-      .setEvaluator(new RegressionEvaluator)
+      .setEstimator(lr)//ÆÀ¹ÀÆ÷»òÊÊÅäÆ÷
+      .setEvaluator(new RegressionEvaluator)//ÆÀ¹ÀÆ÷»òÊÊÅäÆ÷
       .setEstimatorParamMaps(paramGrid)
 
     // 80% of the data will be used for training and the remaining 20% for validation.

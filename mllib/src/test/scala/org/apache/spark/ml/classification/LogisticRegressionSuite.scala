@@ -74,6 +74,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val lr = new LogisticRegression
     assert(lr.getLabelCol === "label")
     assert(lr.getFeaturesCol === "features")
+    //Prediction 预测
     assert(lr.getPredictionCol === "prediction")
     assert(lr.getRawPredictionCol === "rawPrediction")
     assert(lr.getProbabilityCol === "probability")
@@ -85,6 +86,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .collect()
     assert(model.getThreshold === 0.5)
     assert(model.getFeaturesCol === "features")
+    //Prediction 预测
     assert(model.getPredictionCol === "prediction")
     assert(model.getRawPredictionCol === "rawPrediction")
     assert(model.getProbabilityCol === "probability")

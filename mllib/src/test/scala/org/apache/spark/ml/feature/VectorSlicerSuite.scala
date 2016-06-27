@@ -24,7 +24,7 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
-
+//向量切分,单词向量它用1和0分别表示是否存在某个词
 class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
@@ -98,12 +98,16 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     vectorSlicer.setIndices(Array(1, 4)).setNames(Array.empty)
-    validateResults(vectorSlicer.transform(df))
+    validateResults(vectorSlicer.transform(df))//transform主要是用来把 一个 DataFrame 转换成另一个 DataFrame
 
     vectorSlicer.setIndices(Array(1)).setNames(Array("f4"))
+    //transform主要是用来把 一个 DataFrame 转换成另一个 DataFrame
+
     validateResults(vectorSlicer.transform(df))
 
     vectorSlicer.setIndices(Array.empty).setNames(Array("f1", "f4"))
+    //transform主要是用来把 一个 DataFrame 转换成另一个 DataFrame
+
     validateResults(vectorSlicer.transform(df))
   }
 }

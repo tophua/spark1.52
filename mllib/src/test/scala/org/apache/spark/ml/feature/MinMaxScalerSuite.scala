@@ -22,7 +22,9 @@ import org.apache.spark.ml.util.MLTestingUtils
 import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.{Row, SQLContext}
-
+/**
+ * 最大最小权值
+ */
 class MinMaxScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("MinMaxScaler fit basic case") {

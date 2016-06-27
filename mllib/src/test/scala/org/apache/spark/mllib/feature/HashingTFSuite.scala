@@ -20,7 +20,7 @@ package org.apache.spark.mllib.feature
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-  //特征提取和转换 TF-IDF
+  //把字符转换特征哈希值,返回词的频率
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("hashing tf on a single doc") {
@@ -40,6 +40,7 @@ class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
       "index must be in range [0, #features)")
     assert(termFreqs.map(_._1).toSet.size === 4, "expecting perfect hashing")
     val expected = Vectors.sparse(n, termFreqs)
+    //transform 把每个输入文档映射到一个Vector对象
     assert(hashingTF.transform(doc) === expected)
   }
 

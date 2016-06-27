@@ -24,7 +24,9 @@ import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vector, Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.col
-
+/**
+ * 向量化装配 单词向量它用1和0分别表示是否存在某个词
+ */
 class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {

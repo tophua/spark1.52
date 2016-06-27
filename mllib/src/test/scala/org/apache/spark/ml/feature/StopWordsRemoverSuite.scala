@@ -32,6 +32,9 @@ object StopWordsRemoverSuite extends SparkFunSuite {
   }
 }
 
+/**
+ * 删除停用词
+ */
 class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
   import StopWordsRemoverSuite._
 

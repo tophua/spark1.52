@@ -25,7 +25,10 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.Row
-
+/**
+ * 这是一个基于 前馈神经网络 的分类器，它是一种在输入层与输出层之间含有一层或多层隐含结点的具有正向传播机制的神经网络模型，
+ * 中间的节点使用sigmoid (logistic)函数，输出层的节点使用softmax函数
+ */
 class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("XOR function learning as binary classification problem with two outputs.") {

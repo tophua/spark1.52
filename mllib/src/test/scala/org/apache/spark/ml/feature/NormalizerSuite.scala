@@ -23,7 +23,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 
-//特征提取和转换 归一化(Normalizer)
+//特征提取和转换 归一化(Normalizer,默认使用范数二)
 class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   @transient var data: Array[Vector] = _

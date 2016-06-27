@@ -24,7 +24,10 @@ import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vector, Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.Row
-
+/**
+ * IDF就是单词逆向文档率
+ * 
+ */
 class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   def scaleDataWithIDF(dataSet: Array[Vector], model: Vector): Array[Vector] = {

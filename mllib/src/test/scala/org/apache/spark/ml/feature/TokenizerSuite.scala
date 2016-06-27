@@ -26,7 +26,9 @@ import org.apache.spark.sql.{DataFrame, Row}
 
 @BeanInfo
 case class TokenizerTestData(rawText: String, wantedTokens: Array[String])
-
+/**
+ * 分词
+ */
 class TokenizerSuite extends SparkFunSuite {
 
   test("params") {

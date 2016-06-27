@@ -46,6 +46,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 2)
+    //clusterCenters 聚类中心 
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 5)
@@ -251,7 +252,9 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       val model = KMeans.train(rdd, k = 2, maxIterations = 2, runs = 1, initMode)
 
       val predicts = model.predict(rdd).collect()
-
+      for(ps<-predicts){
+        println(ps)
+      }
       assert(predicts(0) === predicts(1))
       assert(predicts(0) === predicts(2))
       assert(predicts(3) === predicts(4))

@@ -86,7 +86,7 @@ class MatricesSuite extends SparkFunSuite {
   test("equals") {
     val dm1 = Matrices.dense(2, 2, Array(0.0, 1.0, 2.0, 3.0))
     assert(dm1 === dm1)
-    assert(dm1 !== dm1.transpose)
+    assert(dm1 !== dm1.transpose)//转置阵
 
     val dm2 = Matrices.dense(2, 2, Array(0.0, 2.0, 1.0, 3.0))
     assert(dm1 === dm2.transpose)
