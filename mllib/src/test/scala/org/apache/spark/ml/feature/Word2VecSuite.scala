@@ -59,9 +59,12 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     val docDF = doc.zip(expected).toDF("text", "expected")
 
     val model = new Word2Vec()
+      //目标数值向量的维度大小，默认是 100
       .setVectorSize(3)
+      //源数据 DataFrame 中存储文本词数组列的名称
       .setInputCol("text")
-      .setOutputCol("result")
+      //经过处理的数值型特征向量存储列名称
+      .setOutputCol("result")      
       .setSeed(42L)
       .fit(docDF)
 
@@ -94,7 +97,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = new Word2Vec()
       .setVectorSize(3)
       .setInputCol("text")
-      .setOutputCol("result")
+      .setOutputCol("result")  
       .setSeed(42L)
       .fit(docDF)
 

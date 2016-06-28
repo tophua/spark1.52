@@ -96,25 +96,25 @@ final class Word2Vec(override val uid: String) extends Estimator[Word2VecModel] 
 
   def this() = this(Identifiable.randomUID("w2v"))
 
-  /** @group setParam */
+  /** @group setParam  源数据 DataFrame 中存储文本词数组列的名称*/
   def setInputCol(value: String): this.type = set(inputCol, value)
 
-  /** @group setParam */
+  /** @group setParam 经过处理的数值型特征向量存储列名称*/
   def setOutputCol(value: String): this.type = set(outputCol, value)
 
-  /** @group setParam */
+  /** @group setParam 目标数值向量的维度大小*/
   def setVectorSize(value: Int): this.type = set(vectorSize, value)
 
-  /** @group setParam */
+  /** @group setParam 优化算法的每一次迭代的学习速率。默认值是 0.025*/
   def setStepSize(value: Double): this.type = set(stepSize, value)
 
-  /** @group setParam */
+  /** @group setParam 训练数据的分区数，默认是 1*/
   def setNumPartitions(value: Int): this.type = set(numPartitions, value)
 
-  /** @group setParam */
+  /** @group setParam 优化算法求解的最大迭代次数。默认值是 100*/
   def setMaxIter(value: Int): this.type = set(maxIter, value)
 
-  /** @group setParam */
+  /** @group setParam 只有当某个词出现的次数大于或者等于 minCount 时，才会被包含到词汇表里，否则会被忽略掉*/
   def setSeed(value: Long): this.type = set(seed, value)
 
   /** @group setParam */

@@ -33,6 +33,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.util.Utils
 
 /**
+ *决策树是一个预测模型
  *决策树:分类与回归树(Classification and Regression Trees ,CART)算法常用于特征含有类别信息的分类或者回归问题
  */
 class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
@@ -45,6 +46,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
+    //Gini基尼不纯度：将来自集合中的某种结果随机应用于集合中某一数据项的预期误差率。
     val strategy = new Strategy(Classification, Gini, 3, 2, 100)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
     assert(!metadata.isUnordered(featureIndex = 0))
@@ -57,6 +59,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("Binary classification with binary (ordered) categorical features:" +
     " split and bin calculation") {
+    //[(1.0,[0.0,1.0]), (0.0,[1.0, 0.0]), (1.0,[0.0,1.0]), (0.0,[1.0, 0.0])]
     val arr = DecisionTreeSuite.generateCategoricalDataPoints()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
@@ -358,6 +361,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(bins(0).length === 100)
 
     // Train a 1-node model
+    //熵：代表集合的无序程度
     val strategyOneNode = new Strategy(Classification, Entropy, maxDepth = 1,
       numClasses = 2, maxBins = 100)
     val modelOneNode = DecisionTree.train(rdd, strategyOneNode)

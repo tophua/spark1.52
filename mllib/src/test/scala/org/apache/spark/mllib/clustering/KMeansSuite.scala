@@ -36,7 +36,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       Vectors.dense(1.0, 2.0, 6.0),
       Vectors.dense(1.0, 3.0, 0.0),
       Vectors.dense(1.0, 4.0, 6.0)))
-
+    //聚类中心是坐标平均数
     val center = Vectors.dense(1.0, 3.0, 4.0)
 
     // No matter how many runs or iterations we use, we should get one cluster,
@@ -73,7 +73,8 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
         Vectors.dense(1.0, 2.0, 3.0),
         Vectors.dense(1.0, 2.0, 3.0)),
       2)
-    val center = Vectors.dense(1.0, 2.0, 3.0)
+      //聚类中心是坐标平均数,
+      val center = Vectors.dense(1.0, 2.0, 3.0)
 
     // Make sure code runs.
     var model = KMeans.train(data, k = 2, maxIterations = 1)
@@ -232,6 +233,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       .zip(points.sortBy(VectorWithCompare(_))).forall(x => x._1 ~== (x._2) absTol 1E-5))
 
     // Neither should more runs
+      
     model = KMeans.train(rdd, k = 5, maxIterations = 10, runs = 5)
     assert(model.clusterCenters.sortBy(VectorWithCompare(_))
       .zip(points.sortBy(VectorWithCompare(_))).forall(x => x._1 ~== (x._2) absTol 1E-5))
@@ -255,6 +257,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       for(ps<-predicts){
         println(ps)
       }
+      //预测分类
       assert(predicts(0) === predicts(1))
       assert(predicts(0) === predicts(2))
       assert(predicts(3) === predicts(4))

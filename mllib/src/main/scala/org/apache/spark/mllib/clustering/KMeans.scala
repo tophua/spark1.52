@@ -552,6 +552,7 @@ object KMeans {
   }
 
   /**
+   * 该方法就是找到点与所有聚类中心最近的一个中心
    * Returns the index of the closest center to the given point, as well as the squared distance.
    */
   private[mllib] def findClosest(
@@ -578,6 +579,7 @@ object KMeans {
   }
 
   /**
+   * 计算样本点与中心点之的间
    * Returns the K-means cost of a given point against the given cluster centers.
    */
   private[mllib] def pointCost(
@@ -586,6 +588,7 @@ object KMeans {
     findClosest(centers, point)._2
 
   /**
+   * 快速计算两点之间距离的方法
    * Returns the squared Euclidean distance between two vectors computed by
    * [[org.apache.spark.mllib.util.MLUtils#fastSquaredDistance]].
    */
