@@ -32,13 +32,33 @@ object ClassificationPipeline_IBM {
      * 0.32924,-4.4552,4.5718,-0.9888,0
      * ... ...
      */
+    
+    
+     /***=======spark-shell.cmd执行命令===========
+     val parsedRDD = sc.textFile("./ml-100k/data_banknote_authentication.txt").map(_.split(",")).map(eachRow => {
+      val a = eachRow.map(x => x.toDouble)
+      (a(0), a(1), a(2), a(3), a(4))
+    })
+ 		 val df = sqlCtx.createDataFrame(parsedRDD).toDF(
+      "f0", "f1", "f2", "f3", "label").cache()
+
+      df.registerTempTable("data")
+
+      sqlCtx.sql("select f0,f1,f2,f3,label from data ").show()
+      **/
+    
     val parsedRDD = sc.textFile("../data/mllib/data_banknote_authentication.txt").map(_.split(",")).map(eachRow => {
       val a = eachRow.map(x => x.toDouble)
       (a(0), a(1), a(2), a(3), a(4))
     })
     val df = sqlCtx.createDataFrame(parsedRDD).toDF(
+      //四列依次是小波变换图像的方差，小波变换图像的偏态，小波变换图像的峰度，图像熵，类别标签,最后一列是真假标识
       "f0", "f1", "f2", "f3", "label").cache()
-
+     df.registerTempTable("data")
+   val queryCaseWhen = sqlCtx.sql("select f0,f1,f2,f3,label from data ").show()
+   
+   
+  
     /**
      * *
      * Step 2
@@ -64,14 +84,14 @@ object ClassificationPipeline_IBM {
     /**
      * Step 4
      * 创建一个随机森林分类器 RandomForestClassifier 实例，并设定相关参数，
-     * 主要是告诉随机森林算法输入 DataFrame 数据里哪个列是特征向量，哪个是类别标识，并告诉随机森林分类器训练 5 棵独立的子树.
+     * 主要是告诉随机森林算法输入 DataFrame 数据里哪个列是特征向量，哪个是类别标识.
      */
     val rfClassifier = new RandomForestClassifier()
-      .setLabelCol("indexedLabel")
-      .setFeaturesCol("featureVector")//特征值
+      .setLabelCol("indexedLabel")//标签列的名称
+      .setFeaturesCol("featureVector")//训练数据集 DataFrame 中存储特征数据的列名
       .setProbabilityCol("probability")//类别预测结果的条件概率值存储列的名称, 默认值是”probability”
       .setPredictionCol("prediction")//算法预测结果的存储列的名称, 默认是”prediction”
-      .setNumTrees(5)
+      .setNumTrees(5)//并告诉随机森林分类器训练 5 棵独立的子树
 
     /**
      * Step 5
@@ -113,8 +133,32 @@ object ClassificationPipeline_IBM {
      * Step 9
      * Select features,label,and predicted label from the DataFrame to display.
      * We only show 20 rows, it is just for reference.
+      +--------+--------+--------+---------+-----+--------------+
+      |      f0|      f1|      f2|       f3|label|predictedLabel|
+      +--------+--------+--------+---------+-----+--------------+
+      |  4.3684|  9.6718| -3.9606|  -3.1625|  0.0|           0.0|
+      |  1.1432| -3.7413|  5.5777| -0.63578|  0.0|           0.0|
+      |-0.38214|  8.3909|  2.1624|  -3.7405|  0.0|           0.0|
+      |-0.96511|  9.4111|  1.7305|  -4.8629|  0.0|           0.0|
+      |  4.3239| -4.8835|  3.4356|  -0.5776|  0.0|           0.0|
+      |  4.8265| 0.80287|  1.6371|   1.1875|  0.0|           0.0|
+      |  2.5635|  6.7769|-0.61979|  0.38576|  0.0|           0.0|
+      |   5.807|  5.0097| -2.2384|  0.43878|  0.0|           0.0|
+      |  3.1377| -4.1096|  4.5701|  0.98963|  0.0|           0.0|
+      |  4.2586| 11.2962| -4.0943|  -4.3457|  0.0|           0.0|
+      |  1.7939| -1.1174|  1.5454| -0.26079|  0.0|           0.0|
+      |  2.5367|   2.599|  2.0938|  0.20085|  0.0|           0.0|
+      |  4.7181| 10.0153| -3.9486|  -3.8582|  0.0|           0.0|
+      |  4.1654| -3.4495|   3.643|   1.0879|  0.0|           0.0|
+      |  4.4069| 10.9072| -4.5775|  -4.4271|  0.0|           0.0|
+      |  1.8664|  7.7763|-0.23849|  -2.9634|  0.0|           0.0|
+      |  2.1616| -6.8804|  8.1517|-0.081048|  0.0|           0.0|
+      |  5.1129|-0.49871| 0.62863|   1.1189|  0.0|           0.0|
+      |  3.5438|  1.2395|   1.997|   2.1547|  0.0|           0.0|
+      |  3.2351|   9.647| -3.2074|  -2.5948|  0.0|           0.0|
+      +--------+--------+--------+---------+-----+--------------+
      */
-    predictionResultDF.select("f0", "f1", "f2", "f3", "label", "predictedLabel").show(20)
+    predictionResultDF.select("f0", "f1", "f2", "f3", "featureVector","label", "predictedLabel").show(20)
 
     /**
      * Step 10
@@ -125,7 +169,9 @@ object ClassificationPipeline_IBM {
       .setLabelCol("label")//标签列的名称
       .setPredictionCol("prediction")//算法预测结果的存储列的名称, 默认是”prediction”
       .setMetricName("precision")//测量名称
-    val predictionAccuracy = evaluator.evaluate(predictionResultDF)
+    //predictionAccuracy: Double = 0.9825783972125436
+    val predictionAccuracy = evaluator.evaluate(predictionResultDF)   
+    //Testing Error = 0.017421602787456414
     println("Testing Error = " + (1.0 - predictionAccuracy))
     /**
      * Step 11(Optional)
