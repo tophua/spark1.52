@@ -39,20 +39,21 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("StringIndexer") {
     val data = sc.parallelize(Seq((0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
-    val indexer = new StringIndexer()
-      .setInputCol("label")
-      .setOutputCol("labelIndex")
-      .fit(df)
+    //1)按照 Label 出现的频次对其进行序列编码,如0,1,2，… Array[String] = Array(a, c, b),a出次3次,c出现2次,b出现1次
+    //2)fit方法设计和实现上实际上是采用了模板方法的设计模式，具体会调用实现类的 train方法
+    val indexer = new StringIndexer()      .setInputCol("label")      .setOutputCol("labelIndex")      .fit(df)
 
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(indexer)
-
+    //主要是用来把 一个 StringIndexer 转换成另一个 DataFrame
     val transformed = indexer.transform(df)
     val attr = Attribute.fromStructField(transformed.schema("labelIndex"))
       .asInstanceOf[NominalAttribute]
     assert(attr.values.get === Array("a", "c", "b"))
-    val output = transformed.select("id", "labelIndex").map { r =>
-      (r.getInt(0), r.getDouble(1))
+    //
+    val output = transformed.select("id", "labelIndex","label").map { r =>
+      println(r(0)+">>>>"+r(1)+">>>>"+r)
+      (r.getInt(0), r.getDouble(1))//a,c,b转换double类型
     }.collect().toSet
     // a -> 0, b -> 2, c -> 1
     val expected = Set((0, 0.0), (1, 2.0), (2, 1.0), (3, 0.0), (4, 0.0), (5, 1.0))
@@ -62,15 +63,12 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("StringIndexer with a numeric input column") {
     val data = sc.parallelize(Seq((0, 100), (1, 200), (2, 300), (3, 100), (4, 100), (5, 300)), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
-    val indexer = new StringIndexer()
-      .setInputCol("label")
-      .setOutputCol("labelIndex")
-      .fit(df)
+    val indexer = new StringIndexer()      .setInputCol("label")      .setOutputCol("labelIndex")      .fit(df)
     val transformed = indexer.transform(df)
-    val attr = Attribute.fromStructField(transformed.schema("labelIndex"))
-      .asInstanceOf[NominalAttribute]
+    val attr = Attribute.fromStructField(transformed.schema("labelIndex"))      .asInstanceOf[NominalAttribute]
     assert(attr.values.get === Array("100", "300", "200"))
-    val output = transformed.select("id", "labelIndex").map { r =>
+    val output = transformed.select("id", "labelIndex","label").map { r =>
+      println(r)
       (r.getInt(0), r.getDouble(1))
     }.collect().toSet
     // 100 -> 0, 200 -> 2, 300 -> 1
@@ -100,7 +98,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val idxToStr0 = new IndexToString()
       .setInputCol("index")
       .setOutputCol("actual")
-      .setLabels(labels)
+      .setLabels(labels)//
     idxToStr0.transform(df0).select("actual", "expected").collect().foreach {
       case Row(actual, expected) =>
         assert(actual === expected)

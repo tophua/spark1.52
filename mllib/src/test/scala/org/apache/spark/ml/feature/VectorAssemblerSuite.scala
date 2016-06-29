@@ -17,15 +17,22 @@
 
 package org.apache.spark.ml.feature
 
-import org.apache.spark.{SparkException, SparkFunSuite}
-import org.apache.spark.ml.attribute.{AttributeGroup, NominalAttribute, NumericAttribute}
+import org.apache.spark.SparkException
+import org.apache.spark.SparkFunSuite
+import org.apache.spark.ml.attribute.AttributeGroup
+import org.apache.spark.ml.attribute.NominalAttribute
+import org.apache.spark.ml.attribute.NumericAttribute
 import org.apache.spark.ml.param.ParamsSuite
-import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vector, Vectors}
+import org.apache.spark.mllib.linalg.DenseVector
+import org.apache.spark.mllib.linalg.SparseVector
+import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.col
 /**
- * 向量化装配 单词向量它用1和0分别表示是否存在某个词
+ * 使用 VectorAssembler 从源数据中提取特征指标数据, 这是一个比较典型且通用的步骤,
+ * 因为我们的原始数据集里,因为我们的原始数据集里，经常会包含一些非指标数据，如 ID，Description 等
  */
 class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -33,7 +40,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
     ParamsSuite.checkParams(new VectorAssembler)
   }
 
-  test("assemble") {
+  test("assemble") {//集合
     import org.apache.spark.ml.feature.VectorAssembler.assemble
     assert(assemble(0.0) === Vectors.sparse(1, Array.empty, Array.empty))
     assert(assemble(0.0, 1.0) === Vectors.sparse(2, Array(1), Array(1.0)))
@@ -57,14 +64,31 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("VectorAssembler") {
+    //Seq:List((0,0.0,[1.0,2.0],a,(2,[1],[3.0]),10))
     val df = sqlContext.createDataFrame(Seq(
       (0, 0.0, Vectors.dense(1.0, 2.0), "a", Vectors.sparse(2, Array(1), Array(3.0)), 10L)
     )).toDF("id", "x", "y", "name", "z", "n")
+    df.registerTempTable("src")
+    /**
+     +---+---+---------+-------------+---+----+
+      | id|  x|        y|            z|  n|name|
+      +---+---+---------+-------------+---+----+
+      |  0|0.0|[1.0,2.0]|(2,[1],[3.0])| 10|   a|
+      +---+---+---------+-------------+---+----+
+     */
+      val queryCaseWhen = sqlContext.sql("select id,x,y,z,n,name from src ").show()
+    val a=Seq(
+      (0, 0.0, Vectors.dense(1.0, 2.0), "a", Vectors.sparse(2, Array(1), Array(3.0)), 10L)
+    )
+    println("Seq:"+a)
     val assembler = new VectorAssembler()
-      .setInputCols(Array("x", "y", "z", "n"))
-      .setOutputCol("features")
+      .setInputCols(Array("x", "y", "z", "n"))//源数据 DataFrame 中存储文本词数组列的名称
+      .setOutputCol("features")//经过处理的数值型特征向量存储列名称
+    //res8: Array[org.apache.spark.sql.Row] = Array([[0.0,1.0,2.0,0.0,3.0,10.0]])
     assembler.transform(df).select("features").collect().foreach {
       case Row(v: Vector) =>
+        println(">>>>>>>>>>>>"+v)
+        //[0.0,1.0,2.0,0.0,3.0,10.0]
         assert(v === Vectors.sparse(6, Array(1, 2, 4, 5), Array(1.0, 2.0, 3.0, 10.0)))
     }
   }

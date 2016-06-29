@@ -26,7 +26,11 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.mllib.feature.{Word2VecModel => OldWord2VecModel}
 /**
- * Word2Vec模型来根据词义比较两个字词相似性
+ Word2Vec模型来根据词义比较两个字词相似性
+ Word2Vec 是一个用来将词表示为数值型向量的工具，其基本思想是将文本中的词映射成一个 K 维数值向量 (K 通常作为算法的超参数)，
+ 这样文本中的所有词就组成一个 K 维向量空间， 这样我们可以通过计算向量间的欧氏距离或者余弦相似度得到文本语义的相似度。
+ Word2Vec 采用的是 Distributed representation 的词向量表示方式，这种表达方式不仅可以有效控制词向量的维度，
+ 避免维数灾难 (相对于 one-hot representation)，而且可以保证意思相近的词在向量空间中的距离较近。
  */
 class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
 

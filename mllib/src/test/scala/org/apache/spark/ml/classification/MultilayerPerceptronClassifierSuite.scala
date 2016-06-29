@@ -16,7 +16,11 @@
  */
 
 package org.apache.spark.ml.classification
-
+/**
+ * 参考资料
+ * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice6/
+ * 
+ */
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.classification.LogisticRegressionSuite._
 import org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
@@ -26,8 +30,9 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.Row
 /**
- * 这是一个基于 前馈神经网络 的分类器，它是一种在输入层与输出层之间含有一层或多层隐含结点的具有正向传播机制的神经网络模型，
- * 中间的节点使用sigmoid (logistic)函数，输出层的节点使用softmax函数
+ * 多层感知器分类器 (MultilayerPerceptronClassifer),
+ *  BP(反向传播，Back Propagation) 算法训练的多层感知器实现，BP 算法的学习目的是对网络的连接权值进行调整，
+ *  使得调整后的网络对任一输入都能得到所期望的输出
  */
 class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -39,11 +44,28 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
         (Vectors.dense(1.0, 1.0), 0.0))
     ).toDF("features", "label")
     val layers = Array[Int](2, 5, 2)
+    //多层感知器分类器 (MultilayerPerceptronClassifer)
     val trainer = new MultilayerPerceptronClassifier()
+    /**
+     * setLayers
+     * 这个参数是一个整型数组类型，第一个元素需要和特征向量的维度相等，最后一个元素需要训练数据的标签取值个数相等，
+     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层，元素的取值代表了该层的神经元的个数。
+     * 例如val layers = Array[Int](100,6,5,2)。
+     */
       .setLayers(layers)
-      .setBlockSize(1)
-      .setSeed(11L)
-      .setMaxIter(100)
+    /**
+     * setBlockSize
+     * 该参数被前馈网络训练器用来将训练样本数据的每个分区都按照 blockSize 大小分成不同组，
+     * 并且每个组内的每个样本都会被叠加成一个向量，以便于在各种优化算法间传递。
+     * 该参数的推荐值是 10-1000，默认值是 128
+     */
+      .setBlockSize(1)//
+      .setSeed(11L)//
+      .setMaxIter(100)//优化算法求解的最大迭代次数,默认值是 100
+      //predictionCol:预测结果的列名称。
+      //tol:优化算法迭代求解过程的收敛阀值。默认值是 1e-4。不能为负数
+      //labelCol：输入数据 DataFrame 中标签列的名称。
+      //featuresCol:输入数据 DataFrame 中指标特征列的名称。
     val model = trainer.fit(dataFrame)
     val result = model.transform(dataFrame)
     val predictionAndLabels = result.select("prediction", "label").collect()
@@ -71,9 +93,22 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val numIterations = 100
     val layers = Array[Int](4, 5, 4, numClasses)
     val trainer = new MultilayerPerceptronClassifier()
+     /**
+     * setLayers
+     * 这个参数是一个整型数组类型，第一个元素需要和特征向量的维度相等，最后一个元素需要训练数据的标签取值个数相等，
+     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层，元素的取值代表了该层的神经元的个数。
+     * 例如val layers = Array[Int](100,6,5,2)。
+     */
       .setLayers(layers)
-      .setBlockSize(1)
+         /**
+     * setBlockSize
+     * 该参数被前馈网络训练器用来将训练样本数据的每个分区都按照 blockSize 大小分成不同组，
+     * 并且每个组内的每个样本都会被叠加成一个向量，以便于在各种优化算法间传递。
+     * 该参数的推荐值是 10-1000，默认值是 128
+     */
+      .setBlockSize(1)      
       .setSeed(11L)
+      //优化算法求解的最大迭代次数。默认值是 100。
       .setMaxIter(numIterations)
     val model = trainer.fit(dataFrame)
     val mlpPredictionAndLabels = model.transform(dataFrame).select("prediction", "label")
