@@ -38,19 +38,27 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
       Vectors.dense(0.0, 1.0, 2.0, 3.0),
       Vectors.sparse(n, Array(1), Array(1.0))
     )
+   
     val m = localTermFrequencies.size
     val termFrequencies = sc.parallelize(localTermFrequencies, 2)
     val idf = new IDF
+    //termFrequencies List((4,[1,3],[1.0,2.0]), [0.0,1.0,2.0,3.0], (4,[1],[1.0]))
     val model = idf.fit(termFrequencies)
     val expected = Vectors.dense(Array(0, 3, 1, 2).map { x =>
       math.log((m + 1.0) / (x + 1.0))//对数
     })
+    println(expected)
+    //  0,                3,   1,                 2 重要程度 
+    //[1.3862943611198906,0.0,0.6931471805599453,0.28768207245178085]
     assert(model.idf ~== expected absTol 1e-12)
 
     val assertHelper = (tfidf: Array[Vector]) => {
       assert(tfidf.size === 3)
       val tfidf0 = tfidf(0).asInstanceOf[SparseVector]
-      assert(tfidf0.indices === Array(1, 3))
+      //indices 指数
+      assert(tfidf0.indices === Array(1, 3))      
+      //tfidf0.values [0.0,0.5753641449035617]
+      println("tfidf0.values>>>>>>:"+Vectors.dense(tfidf0.values))
       assert(Vectors.dense(tfidf0.values) ~==
           Vectors.dense(1.0 * expected(1), 2.0 * expected(3)) absTol 1e-12)
       val tfidf1 = tfidf(1).asInstanceOf[DenseVector]
@@ -58,13 +66,19 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
           Vectors.dense(0.0, 1.0 * expected(1), 2.0 * expected(2), 3.0 * expected(3)) absTol 1e-12)
       val tfidf2 = tfidf(2).asInstanceOf[SparseVector]
       assert(tfidf2.indices === Array(1))
+      //[0.0]
+        println("tfidf2.values>>>>>>:"+Vectors.dense(tfidf2.values))
       assert(tfidf2.values(0) ~== (1.0 * expected(1)) absTol 1e-12)
     }
     // Transforms a RDD
     val tfidf = model.transform(termFrequencies).collect()
+    //WrappedArray((4,[1,3],[0.0,0.5753641449035617]), [0.0,0.0,1.3862943611198906,0.8630462173553426], (4,[1],[0.0]))
+    println("Transforms:"+tfidf.toSeq)
     assertHelper(tfidf)
     // Transforms local vectors
+    //((4,[1,3],[0.0,0.5753641449035617]), [0.0,0.0,1.3862943611198906,0.8630462173553426], (4,[1],[0.0]))
     val localTfidf = localTermFrequencies.map(model.transform(_)).toArray
+     println("localTfidf:"+localTfidf.toSeq)
     assertHelper(localTfidf)
   }
 
@@ -86,6 +100,8 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
         0
       }
     })
+    println("expected:"+expected)
+    //[0.0,0.0,0.6931471805599453,0.28768207245178085]
     assert(model.idf ~== expected absTol 1e-12)
 
     val assertHelper = (tfidf: Array[Vector]) => {

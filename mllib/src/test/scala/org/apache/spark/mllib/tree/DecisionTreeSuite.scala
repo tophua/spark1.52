@@ -42,7 +42,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   // Tests examining individual elements of training
   /////////////////////////////////////////////////////////////////////////////
 
-  test("Binary classification with continuous features: split and bin calculation") {
+  test("Binary classification with continuous features(连续特征): split and bin calculation") {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
@@ -301,8 +301,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     // set impurity and predict for child nodes
     assert(topNode.leftNode.get.predict.predict === 0.0)
     assert(topNode.rightNode.get.predict.predict === 1.0)
-    assert(topNode.leftNode.get.impurity === 0.0)
-    assert(topNode.rightNode.get.impurity === 0.0)
+    assert(topNode.leftNode.get.impurity === 0.0)//不纯度
+    assert(topNode.rightNode.get.impurity === 0.0)//不纯度
   }
 
   test("Avoid aggregation if impurity is 0.0") {
@@ -649,6 +649,17 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(1.0, Vectors.sparse(2, Seq((1, 2.0)))))
 
     val rdd = sc.parallelize(arr)
+    /**
+    1.训练数据集 
+    2.目标类别个数，即结果有几种选择 
+    3.Map中的键值分别对应Vector下标和该下标对应类别特征的取值情况，
+               空表示所有特征都是数值型（为了方便，示例中直接取空，实际当中并不能这么使用） 
+    4.不纯性(impurity)度量：gini或者entropy，不纯度用来衡量一个规则的好坏，
+               好的规则可以将数据划分为等值的两部分，坏规则则相反 
+    5.决策树的最大深度，越深的决策树越有可能产生过度拟合的问题 
+    6.决策树的最大桶数，每层使用的决策规则的个数，越多就可能精确，花费的时候也就越多,
+                 最小的桶数应该不小于类别特征中最大的选择个数
+     */
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
       numClasses = 2)
 
@@ -799,6 +810,17 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(0.0, Vectors.dense(0.0, 0.0)))
 
     val rdd = sc.parallelize(arr)
+    /**
+      1.训练数据集 
+      2.目标类别个数，即结果有几种选择 
+      3.Map中的键值分别对应Vector下标和该下标对应类别特征的取值情况，
+                 空表示所有特征都是数值型（为了方便，示例中直接取空，实际当中并不能这么使用） 
+      4.不纯性(impurity)度量：gini或者entropy，不纯度用来衡量一个规则的好坏，
+                 好的规则可以将数据划分为等值的两部分，坏规则则相反 
+      5.决策树的最大深度，越深的决策树越有可能产生过度拟合的问题 
+      6.决策树的最大桶数，每层使用的决策规则的个数，越多就可能精确，花费的时候也就越多,
+                   最小的桶数应该不小于类别特征中最大的选择个数
+    **/
     val strategy = new Strategy(algo = Classification, impurity = Gini,
       maxBins = 2, maxDepth = 2, categoricalFeaturesInfo = Map(0 -> 2, 1-> 2),
       numClasses = 2, minInstancesPerNode = 2)

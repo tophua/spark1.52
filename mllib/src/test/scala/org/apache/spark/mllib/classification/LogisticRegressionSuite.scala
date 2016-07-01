@@ -193,6 +193,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
+    //逻辑回归随机梯度下降
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer
       .setStepSize(10.0)
@@ -225,7 +226,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-    //逻辑回归广泛运用于二元因变量预测
+    //逻辑回归梯度下降运用于二元因变量预测
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
 
     val model = lr.run(testRDD)
@@ -255,7 +256,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-
+    //逻辑回归梯度下降
     // Use half as many iterations as the previous test.
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer
@@ -290,7 +291,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-
+    //逻辑回归梯度下降
     // Use half as many iterations as the previous test.
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer.
@@ -378,7 +379,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD3.cache()
 
     val numIteration = 10
-
+   //逻辑回归梯度下降
     val lrA = new LogisticRegressionWithLBFGS().setIntercept(true)
     lrA.optimizer.setNumIterations(numIteration)
     val lrB = new LogisticRegressionWithLBFGS().setIntercept(true).setFeatureScaling(false)

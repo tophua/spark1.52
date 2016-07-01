@@ -28,6 +28,7 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.collection.OpenHashMap
 
 /**
+ * 随机森林树
  * Test suite for [[RandomForest]].
  */
 class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {

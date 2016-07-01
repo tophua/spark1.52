@@ -172,7 +172,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("vertex indexing") {
-    // Check vertex ID indexing and conversions.
+    // Check vertex 最高点ID indexing and conversions.
     val docIds = Array(0, 1, 2)
     val docVertexIds = docIds
     val termIds = Array(0, 1, 2)
