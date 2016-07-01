@@ -38,10 +38,7 @@ object SMSClassifierWord2Vec_IBM {
     .setSeed(1234L).setMaxIter(128).setFeaturesCol("features")
     .setLabelCol("indexedLabel").setPredictionCol("prediction")
     //使用 LabelConverter 将预测结果的数值标签转化成原始的文本标签
-    val labelConverter = new IndexToString()
-      .setInputCol("prediction")
-      .setOutputCol("predictedLabel")
-      .setLabels(labelIndexer.labels)
+    val labelConverter = new IndexToString().setInputCol("prediction").setOutputCol("predictedLabel").setLabels(labelIndexer.labels)
     //将原始文本数据按照 8:2 的比例分成训练和测试数据集
     val Array(trainingData, testData) = msgDF.randomSplit(Array(0.8, 0.2))
 
