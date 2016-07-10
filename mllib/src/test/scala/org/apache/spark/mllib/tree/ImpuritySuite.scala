@@ -22,6 +22,7 @@ import org.apache.spark.mllib.tree.impurity.{EntropyAggregator, GiniAggregator}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 
 /**
+ * 测试基尼和熵算法
  * Test suites for [[GiniAggregator]] and [[EntropyAggregator]].
  */
 class ImpuritySuite extends SparkFunSuite with MLlibTestSparkContext {

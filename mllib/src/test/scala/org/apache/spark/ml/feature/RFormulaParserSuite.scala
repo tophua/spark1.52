@@ -40,10 +40,8 @@ class RFormulaParserSuite extends SparkFunSuite {
 
   test("parse dot") {
     val schema = (new StructType)
-      .add("a", "int", true)
-      .add("b", "long", false)
-      .add("c", "string", true)
-    checkParse("a ~ .", "a", Seq("b", "c"), schema)
+      .add("a", "int", true).add("b", "long", false).add("c", "string", true)
+      checkParse("a ~ .", "a", Seq("b", "c"), schema)
   }
 
   test("parse deletion") {

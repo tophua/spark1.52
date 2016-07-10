@@ -61,6 +61,7 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
     val model = trainer.fit(dataset) //转换
     //Prediction 预测
     val predictions = model.transform(dataset)
+    predictions.collect()
 
     // default = rmse
     val evaluator = new RegressionEvaluator()

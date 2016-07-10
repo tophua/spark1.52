@@ -46,8 +46,8 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("default parameters") {
+    //KMeans默认参数
     val kmeans = new KMeans()
-
     assert(kmeans.getK === 2)
     assert(kmeans.getFeaturesCol === "features")
     //Prediction预测
@@ -93,15 +93,45 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("fit & transform") {
     val predictionColName = "kmeans_prediction"
+    //PredictionCol 测量输出的名称
     val kmeans = new KMeans().setK(k).setPredictionCol(predictionColName).setSeed(1)
-    val model = kmeans.fit(dataset)
-    assert(model.clusterCenters.length === k)
+    /**dataset:List([[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]],
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
+    [[0.0,0.0,0.0]])**/
 
-    val transformed = model.transform(dataset)
+    val model = kmeans.fit(dataset)//返回一个训练模型
+    //clusterCenters = Array([1.0,1.0,1.0], [4.0,4.0,4.0], [0.0,0.0,0.0], [3.0,3.0,3.0], [2.0,2.0,2.0])
+    assert(model.clusterCenters.length === k)
+    //println("dataset:"+dataset.collect().toSeq)
+    val transformed = model.transform(dataset)//转换成DataFrame
     val expectedColumns = Array("features", predictionColName)
     expectedColumns.foreach { column =>
+      //println("column>>>>"+column)
+      //features,kmeans_prediction
       assert(transformed.columns.contains(column))
     }
+    val coll=transformed.select("features","kmeans_prediction").collect()
+   /**
+    * res2: Array[org.apache.spark.sql.Row] = Array([[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4],
+    * [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0],
+			[[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], 
+			[[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], 
+			[[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], 
+			[[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], 
+			[[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0], 
+			[[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], 
+			[[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], 
+			[[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], 
+    */
+
     val clusters = transformed.select(predictionColName).map(_.getInt(0)).distinct().collect().toSet
     assert(clusters.size === k)
     assert(clusters === Set(0, 1, 2, 3, 4))

@@ -186,7 +186,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       useNodeIdCache = true)
     binaryClassificationTestWithContinuousFeaturesAndSubsampledFeatures(strategy)
   }
-
+  //交互 alternating
   test("alternating categorical and continuous features with multiclass labels to test indexing") {
     val arr = new Array[LabeledPoint](4)
     arr(0) = new LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0, 3.0, 1.0))
@@ -198,8 +198,27 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 5,
       numClasses = 3, categoricalFeaturesInfo = categoricalFeaturesInfo)
+    
+    /**
+     * Tree 0:
+        If (feature 3 <= 1.0)
+         Predict: 1.0
+        Else (feature 3 > 1.0)
+         Predict: 0.0
+  		Tree 1:
+       If (feature 0 in {2.0})
+         Predict: 0.0
+        Else (feature 0 not in {2.0})
+         If (feature 3 <= 1.0)
+          Predict: 1.0
+         Else (feature 3 > 1.0)
+          Predict: 2.0
+     */
     val model = RandomForest.trainClassifier(input, strategy, numTrees = 2,
       featureSubsetStrategy = "sqrt", seed = 12345)
+     // model.trees.foreach { x =>println(x.leftSide) }
+      println(">>>"+model.trees.toList)
+      println("toDebugString:"+model.toDebugString)
   }
 
   test("subsampling rate in RandomForest"){

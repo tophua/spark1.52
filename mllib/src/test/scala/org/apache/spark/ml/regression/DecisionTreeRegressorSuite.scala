@@ -27,6 +27,9 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 
+/**
+ * 决策树回归,方差
+ */
 
 class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -46,9 +49,9 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
 
   test("Regression stump with 3-ary (ordered) categorical features") {
     val dt = new DecisionTreeRegressor()
-      .setImpurity("variance")
-      .setMaxDepth(2)
-      .setMaxBins(100)
+      .setImpurity("variance")//设置纯度,方差
+      .setMaxDepth(2)//最大深度
+      .setMaxBins(100)//最大桶数
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }

@@ -45,10 +45,7 @@ class RegexTokenizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("RegexTokenizer") {
     val tokenizer0 = new RegexTokenizer()
-      .setGaps(false)
-      .setPattern("\\w+|\\p{Punct}")
-      .setInputCol("rawText")
-      .setOutputCol("tokens")
+      .setGaps(false).setPattern("\\w+|\\p{Punct}").setInputCol("rawText").setOutputCol("tokens")
     val dataset0 = sqlContext.createDataFrame(Seq(
       TokenizerTestData("Test for tokenization.", Array("Test", "for", "tokenization", ".")),
       TokenizerTestData("Te,st. punct", Array("Te", ",", "st", ".", "punct"))

@@ -195,23 +195,15 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
     //逻辑回归随机梯度下降
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
-    lr.optimizer
-      .setStepSize(10.0)
-      .setRegParam(0.0)
-      .setNumIterations(20)
-      .setConvergenceTol(0.0005)
-
+    lr.optimizer.setStepSize(10.0).setRegParam(0.0).setNumIterations(20).setConvergenceTol(0.0005)
     val model = lr.run(testRDD)
-
     // Test the weights
     assert(model.weights(0) ~== B relTol 0.02)
     assert(model.intercept ~== A relTol 0.02)
-
     val validationData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 17)
     val validationRDD = sc.parallelize(validationData, 2)
     // Test prediction on RDD.
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
-
     // Test prediction on Array.
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }

@@ -95,11 +95,11 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("naive bayes: default params") {
     val nb = new NaiveBayes
-    assert(nb.getLabelCol === "label")
-    assert(nb.getFeaturesCol === "features")
-    assert(nb.getPredictionCol === "prediction")
-    assert(nb.getSmoothing === 1.0)
-    assert(nb.getModelType === "multinomial")
+    assert(nb.getLabelCol === "label")//标签
+    assert(nb.getFeaturesCol === "features")//特征
+    assert(nb.getPredictionCol === "prediction")//预测
+    assert(nb.getSmoothing === 1.0)//光滑
+    assert(nb.getModelType === "multinomial")//多项式
   }
 
   test("Naive Bayes Multinomial") {
@@ -132,7 +132,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     validateProbabilities(featureAndProbabilities, model, "multinomial")
   }
 
-  test("Naive Bayes Bernoulli") {
+  test("Naive Bayes Bernoulli") {//伯努利方程是数学中的一种方程
     val nPoints = 10000
     val piArray = Array(0.5, 0.3, 0.2).map(math.log)
     val thetaArray = Array(

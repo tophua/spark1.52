@@ -44,7 +44,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   // Assert that two values are equal within tolerance epsilon
   def assertEqual(v1: Double, v2: Double, epsilon: Double) {
     def errorMessage = v1.toString + " did not equal " + v2.toString
-    //math.abs绝对值
+    //math.abs绝对值,epsilon一定无限大小
     assert(math.abs(v1-v2) <= epsilon, errorMessage)
   }
 
@@ -95,9 +95,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   test("parameter convergence") {
     // create model
     val model = new StreamingLinearRegressionWithSGD()
-      .setInitialWeights(Vectors.dense(0.0))
-      .setStepSize(0.2)
-      .setNumIterations(25)
+      .setInitialWeights(Vectors.dense(0.0)).setStepSize(0.2).setNumIterations(25)
 
     // generate sequence of simulated data
     val numBatches = 10

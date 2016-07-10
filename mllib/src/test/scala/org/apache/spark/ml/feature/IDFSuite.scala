@@ -51,27 +51,43 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("compute IDF with default parameter") {
     val numOfFeatures = 4
+    /**
+     * data= Array((4,[1,3],[1.0,2.0]),[0.0,1.0,2.0,3.0],(4,[1],[1.0]))
+     */    
     val data = Array(
       Vectors.sparse(numOfFeatures, Array(1, 3), Array(1.0, 2.0)),
       Vectors.dense(0.0, 1.0, 2.0, 3.0),
       Vectors.sparse(numOfFeatures, Array(1), Array(1.0))
     )
     val numOfData = data.size
+     /**
+     * idf= [1.3862943611198906,0.0,0.6931471805599453,0.28768207245178085]
+     */
     val idf = Vectors.dense(Array(0, 3, 1, 2).map { x =>
       math.log((numOfData + 1.0) / (x + 1.0))
-    })
+    })   
+    /**
+     expected = Array((4,[1,3],[0.0,0.5753641449035617]), 
+                      [0.0,0.0,1.3862943611198906,0.8630462173553426],
+                      (4,[1],[0.0])
+											)
+     * 
+     */
     val expected = scaleDataWithIDF(data, idf)
 
     val df = sqlContext.createDataFrame(data.zip(expected)).toDF("features", "expected")
-
-    val idfModel = new IDF()
-      .setInputCol("features")
-      .setOutputCol("idfValue")
-      .fit(df)
+    //计算逆词频 idf
+    val idfModel = new IDF().setInputCol("features").setOutputCol("idfValue").fit(df)
 
     idfModel.transform(df).select("idfValue", "expected").collect().foreach {
       case Row(x: Vector, y: Vector) =>
-        assert(x ~== y absTol 1e-5, "Transformed vector is different with expected vector.")
+        //println(x+"|||"+y)
+        /**
+        (4,[1,3],[0.0,0.5753641449035617])|||(4,[1,3],[0.0,0.5753641449035617])
+			  [0.0,0.0,1.3862943611198906,0.8630462173553426]|||[0.0,0.0,1.3862943611198906,0.8630462173553426]
+			  (4,[1],[0.0])|||(4,[1],[0.0])
+         */
+       assert(x ~== y absTol 1e-5, "Transformed vector is different with expected vector.")
     }
   }
 

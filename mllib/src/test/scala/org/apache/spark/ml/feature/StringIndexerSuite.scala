@@ -41,7 +41,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
     //1)按照 Label 出现的频次对其进行序列编码,如0,1,2，… Array[String] = Array(a, c, b),a出次3次,c出现2次,b出现1次
     //2)fit方法设计和实现上实际上是采用了模板方法的设计模式，具体会调用实现类的 train方法
-    val indexer = new StringIndexer()      .setInputCol("label")      .setOutputCol("labelIndex")      .fit(df)
+    val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
 
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(indexer)
@@ -52,7 +52,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(attr.values.get === Array("a", "c", "b"))
     //
     val output = transformed.select("id", "labelIndex","label").map { r =>
-      println(r(0)+">>>>"+r(1)+">>>>"+r)
+      //println(r(0)+">>>>"+r(1)+">>>>"+r)
       (r.getInt(0), r.getDouble(1))//a,c,b转换double类型
     }.collect().toSet
     // a -> 0, b -> 2, c -> 1
@@ -63,9 +63,9 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("StringIndexer with a numeric input column") {
     val data = sc.parallelize(Seq((0, 100), (1, 200), (2, 300), (3, 100), (4, 100), (5, 300)), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
-    val indexer = new StringIndexer()      .setInputCol("label")      .setOutputCol("labelIndex")      .fit(df)
+    val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
     val transformed = indexer.transform(df)
-    val attr = Attribute.fromStructField(transformed.schema("labelIndex"))      .asInstanceOf[NominalAttribute]
+    val attr = Attribute.fromStructField(transformed.schema("labelIndex")).asInstanceOf[NominalAttribute]
     assert(attr.values.get === Array("100", "300", "200"))
     val output = transformed.select("id", "labelIndex","label").map { r =>
       println(r)
@@ -96,8 +96,8 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     )).toDF("index", "expected")
 
     val idxToStr0 = new IndexToString()
-      .setInputCol("index")
-      .setOutputCol("actual")
+      .setInputCol("index")//输入列
+      .setOutputCol("actual")//输出列
       .setLabels(labels)//
     idxToStr0.transform(df0).select("actual", "expected").collect().foreach {
       case Row(actual, expected) =>
@@ -107,27 +107,23 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val attr = NominalAttribute.defaultAttr.withValues(labels)
     val df1 = df0.select(col("index").as("indexWithAttr", attr.toMetadata()), col("expected"))
 
-    val idxToStr1 = new IndexToString()
-      .setInputCol("indexWithAttr")
-      .setOutputCol("actual")
+    val idxToStr1 = new IndexToString().setInputCol("indexWithAttr").setOutputCol("actual")
     idxToStr1.transform(df1).select("actual", "expected").collect().foreach {
       case Row(actual, expected) =>
         assert(actual === expected)
     }
   }
 
-  test("StringIndexer, IndexToString are inverses") {
+  test("StringIndexer, IndexToString are inverses") {//转换
     val data = sc.parallelize(Seq((0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
-    val indexer = new StringIndexer()
-      .setInputCol("label")
-      .setOutputCol("labelIndex")
-      .fit(df)
+    //indexer.labels = Array(a, c, b)
+    val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
     val transformed = indexer.transform(df)
-    val idx2str = new IndexToString()
-      .setInputCol("labelIndex")
-      .setOutputCol("sameLabel")
-      .setLabels(indexer.labels)
+    //labelIndex = Array([0.0,a], [2.0,b], [1.0,c], [0.0,a], [0.0,a], [1.0,c])
+    val labelIndex=transformed.select("labelIndex", "label").collect()
+    //setLabels 设置标签列表indexer.labels = Array(a, c, b)
+    val idx2str = new IndexToString().setInputCol("labelIndex").setOutputCol("sameLabel").setLabels(indexer.labels)
     idx2str.transform(transformed).select("label", "sameLabel").collect().foreach {
       case Row(a: String, b: String) =>
         assert(a === b)

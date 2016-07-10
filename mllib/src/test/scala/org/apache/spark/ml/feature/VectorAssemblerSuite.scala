@@ -87,7 +87,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
     //res8: Array[org.apache.spark.sql.Row] = Array([[0.0,1.0,2.0,0.0,3.0,10.0]])
     assembler.transform(df).select("features").collect().foreach {
       case Row(v: Vector) =>
-        println(">>>>>>>>>>>>"+v)
+        //println(">>>>>>>>>>>>"+v)
         //[0.0,1.0,2.0,0.0,3.0,10.0]
         assert(v === Vectors.sparse(6, Array(1, 2, 4, 5), Array(1.0, 2.0, 3.0, 10.0)))
     }
@@ -97,26 +97,32 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val browser = NominalAttribute.defaultAttr.withValues("chrome", "firefox", "safari")
     val hour = NumericAttribute.defaultAttr.withMin(0.0).withMax(24.0)
     val user = new AttributeGroup("user", Array(
+      //性别
       NominalAttribute.defaultAttr.withName("gender").withValues("male", "female"),
-      NumericAttribute.defaultAttr.withName("salary")))
+      NumericAttribute.defaultAttr.withName("salary")))//薪水
+    
     val row = (1.0, 0.5, 1, Vectors.dense(1.0, 1000.0), Vectors.sparse(2, Array(1), Array(2.0)))
-    val df = sqlContext.createDataFrame(Seq(row)).toDF("browser", "hour", "count", "user", "ad")
-      .select(
+    val df = sqlContext.createDataFrame(Seq(row)).toDF("browser", "hour", "count", "user", "ad").select(
         col("browser").as("browser", browser.toMetadata()),
         col("hour").as("hour", hour.toMetadata()),
         col("count"), // "count" is an integer column without ML attribute
         col("user").as("user", user.toMetadata()),
         col("ad")) // "ad" is a vector column without ML attribute
     val assembler = new VectorAssembler()
+      //VectorAssembler 从源数据中提取特征指标数据
       .setInputCols(Array("browser", "hour", "count", "user", "ad"))
       .setOutputCol("features")
+    //output: org.apache.spark.sql.DataFrame=[browser,hour,count,user,ad,features]
     val output = assembler.transform(df)
     val schema = output.schema
     val features = AttributeGroup.fromStructField(schema("features"))
     assert(features.size === 7)
     val browserOut = features.getAttr(0)
+    //browserOut = {"vals":["chrome","firefox","safari"],"type":"nominal","idx":0,"name":"browser"}
     assert(browserOut === browser.withIndex(0).withName("browser"))
+    //res1: = {"name":"hour","min":0.0,"max":24.0,"idx":1,"type":"numeric"}
     val hourOut = features.getAttr(1)
+    //
     assert(hourOut === hour.withIndex(1).withName("hour"))
     val countOut = features.getAttr(2)
     assert(countOut === NumericAttribute.defaultAttr.withName("count").withIndex(2))

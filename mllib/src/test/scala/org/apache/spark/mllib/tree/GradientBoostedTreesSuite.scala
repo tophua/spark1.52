@@ -220,7 +220,9 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
   }
 
 }
-
+/**
+ * 梯度提高树
+ */
 private object GradientBoostedTreesSuite {
 
   // Combinations for estimators, learning rates and subsamplingRate

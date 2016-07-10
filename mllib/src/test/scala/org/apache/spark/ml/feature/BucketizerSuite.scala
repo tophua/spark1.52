@@ -26,7 +26,9 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.{DataFrame, Row}
-
+/**
+ * 特征离散化函数  
+ */
 class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
@@ -39,15 +41,20 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validData = Array(-0.5, -0.3, 0.0, 0.2)
     val expectedBuckets = Array(0.0, 0.0, 1.0, 1.0)
     val dataFrame: DataFrame =
-      sqlContext.createDataFrame(validData.zip(expectedBuckets)).toDF("feature", "expected")
-
-    val bucketizer: Bucketizer = new Bucketizer()
-      .setInputCol("feature")
-      .setOutputCol("result")
-      .setSplits(splits)
+      //res4= Array((-0.5,0.0), (-0.3,0.0), (0.0,1.0), (0.2,1.0))
+    sqlContext.createDataFrame(validData.zip(expectedBuckets)).toDF("feature", "expected")
+    val bucketizer: Bucketizer = new Bucketizer().setInputCol("feature")//输入字段
+      .setOutputCol("result")//输出字段
+      .setSplits(splits)//分隔
 
     bucketizer.transform(dataFrame).select("result", "expected").collect().foreach {
       case Row(x: Double, y: Double) =>
+        /**
+          0.0====0.0
+          0.0====0.0
+          1.0====1.0
+          1.0====1.0
+         **/
         assert(x === y,
           s"The feature value is not correct after bucketing.  Expected $y but found $x")
     }
@@ -76,10 +83,7 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val dataFrame: DataFrame =
       sqlContext.createDataFrame(validData.zip(expectedBuckets)).toDF("feature", "expected")
 
-    val bucketizer: Bucketizer = new Bucketizer()
-      .setInputCol("feature")
-      .setOutputCol("result")
-      .setSplits(splits)
+    val bucketizer: Bucketizer = new Bucketizer().setInputCol("feature").setOutputCol("result").setSplits(splits)
 
     bucketizer.transform(dataFrame).select("result", "expected").collect().foreach {
       case Row(x: Double, y: Double) =>

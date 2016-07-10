@@ -30,41 +30,42 @@ class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    data = Array(0.1, -0.5, 0.2, -0.3, 0.8, 0.7, -0.1, -0.4)
+   val data = Array(0.1, -0.5, 0.2, -0.3, 0.8, 0.7, -0.1, -0.4)
   }
 
   test("params") {
     ParamsSuite.checkParams(new Binarizer)
   }
-
+//默认参数
   test("Binarize continuous features with default parameter") {
+    //defaultBinarized=Array(1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0)
     val defaultBinarized: Array[Double] = data.map(x => if (x > 0.0) 1.0 else 0.0)
     val dataFrame: DataFrame = sqlContext.createDataFrame(
+      //res1= Array((0.1,1.0), (-0.5,0.0), (0.2,1.0),(-0.3,0.0), (0.8,1.0),(0.7,1.0),(-0.1,0.0),(-0.4,0.0))
       data.zip(defaultBinarized)).toDF("feature", "expected")
-
-    val binarizer: Binarizer = new Binarizer()
-      .setInputCol("feature")
-      .setOutputCol("binarized_feature")
-
+    //二元分类,输入字段feature,输出字段binarized_feature
+    val binarizer: Binarizer = new Binarizer().setInputCol("feature").setOutputCol("binarized_feature")
     binarizer.transform(dataFrame).select("binarized_feature", "expected").collect().foreach {
       case Row(x: Double, y: Double) =>
+        //println(x+"||||||"+y)
         assert(x === y, "The feature value is not correct after binarization.")
     }
   }
-
+   //设置阀值setThreshold
   test("Binarize continuous features with setter") {
+    //阀值
     val threshold: Double = 0.2
+    //thresholdBinarized: Array[Double] = Array(0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0)
     val thresholdBinarized: Array[Double] = data.map(x => if (x > threshold) 1.0 else 0.0)
     val dataFrame: DataFrame = sqlContext.createDataFrame(
+        //res2= Array((0.1,0.0),(-0.5,0.0),(0.2,0.0),(-0.3,0.0),(0.8,1.0),(0.7,1.0),(-0.1,0.0),(-0.4,0.0))
         data.zip(thresholdBinarized)).toDF("feature", "expected")
 
-    val binarizer: Binarizer = new Binarizer()
-      .setInputCol("feature")
-      .setOutputCol("binarized_feature")
-      .setThreshold(threshold)
+    val binarizer: Binarizer = new Binarizer().setInputCol("feature").setOutputCol("binarized_feature").setThreshold(threshold)
 
     binarizer.transform(dataFrame).select("binarized_feature", "expected").collect().foreach {
       case Row(x: Double, y: Double) =>
+        //println(x+"||||||"+y)
         assert(x === y, "The feature value is not correct after binarization.")
     }
   }

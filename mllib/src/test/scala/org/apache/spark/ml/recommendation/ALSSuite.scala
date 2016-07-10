@@ -68,10 +68,10 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
   }
 
   test("normal equation construction") {
+    //线性回归
     val k = 2
-    val ne0 = new NormalEquation(k)
-      .add(Array(1.0f, 2.0f), 3.0)
-      .add(Array(4.0f, 5.0f), 6.0, 2.0) // weighted
+    //NormalEquation 另一种线性回归方法
+    val ne0 = new NormalEquation(k).add(Array(1.0f, 2.0f), 3.0).add(Array(4.0f, 5.0f), 6.0, 2.0) // weighted
     assert(ne0.k === k)
     assert(ne0.triK === k * (k + 1) / 2)
     // NumPy code that computes the expected values:
@@ -153,9 +153,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
       .add(Rating(3, 4, 5.0f))
     assert(builder0.size === 2)
     val builder1 = new RatingBlockBuilder()
-      .add(Rating(6, 7, 8.0f))
+      .add(Rating(6, 7, 8.0f))//
       .merge(builder0.build())
-    assert(builder1.size === 3)
+    assert(builder1.size === 3)//合并
     val block = builder1.build()
     val ratings = Seq.tabulate(block.size) { i =>
       (block.srcIds(i), block.dstIds(i), block.ratings(i))
@@ -357,7 +357,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     //均方根误差常用下式表示：√[∑di^2/n]=Re，式中：n为测量次数；di为一组测量值与真值的偏差
     //均方根值（RMS）、均方根误差（RMSE）
     val rmse =
-      if (implicitPrefs) {
+      if (implicitPrefs) {//隐式
         // TODO: Use a better (rank-based?) evaluation metric for implicit feedback.
         // We limit the ratings and the predictions to interval [0, 1] and compute the weighted RMSE
         // with the confidence scores as weights.
@@ -371,7 +371,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
           (c0 + c1, e0 + e1)
         }
         math.sqrt(weightedSumSq / totalWeight)
-      } else {
+      } else {//明确
           val mse = predictions.map { case (rating, prediction) =>
           val err = rating - prediction
           err * err //平方
@@ -387,7 +387,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     MLTestingUtils.checkCopy(model)
   }
 
-  test("exact rank-1 matrix") {
+  test("exact rank-1 matrix") {//提取
     val (training, test) = genExplicitTestData(numUsers = 20, numItems = 40, rank = 1)
     testALS(training, test, maxIter = 1, rank = 1, regParam = 1e-5, targetRMSE = 0.001)
     testALS(training, test, maxIter = 1, rank = 2, regParam = 1e-5, targetRMSE = 0.001)
@@ -407,7 +407,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     testALS(training, test, maxIter = 4, rank = 3, regParam = 0.01, targetRMSE = 0.03)
   }
 
-  test("different block settings") {
+  test("different block settings") {//不同块设置
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     for ((numUserBlocks, numItemBlocks) <- Seq((1, 1), (1, 2), (2, 1), (2, 2))) {

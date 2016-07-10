@@ -111,8 +111,10 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     val numPartitions = 10
 
     //  mean of log normal = e^(mean + var / 2)
+    //自然指数函数 
     val logNormalMean = math.exp(0.5)
     // variance of log normal = (e^var - 1) * e^(2 * mean + var)
+    //
     val logNormalStd = math.sqrt((math.E - 1.0) * math.E)
     val gammaScale = 1.0
     val gammaShape = 2.0

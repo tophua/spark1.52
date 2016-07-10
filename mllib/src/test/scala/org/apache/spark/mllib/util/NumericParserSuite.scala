@@ -40,6 +40,7 @@ class NumericParserSuite extends SparkFunSuite {
 
   test("parser with whitespaces") {
     val s = "(0.0, [1.0, 2.0])"
+    //数字解析
     val parsed = NumericParser.parse(s).asInstanceOf[Seq[_]]
     assert(parsed(0).asInstanceOf[Double] === 0.0)
     assert(parsed(1).asInstanceOf[Array[Double]] === Array(1.0, 2.0))

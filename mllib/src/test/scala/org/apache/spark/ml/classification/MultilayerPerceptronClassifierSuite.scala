@@ -18,6 +18,8 @@
 package org.apache.spark.ml.classification
 /**
  * 参考资料
+ * Spark ML 在 1.5 版本后提供一个使用 BP(反向传播，Back Propagation) 算法训练的多层感知器实现，
+ * BP 算法的学习目的是对网络的连接权值进行调整，使得调整后的网络对任一输入都能得到所期望的输出。
  * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice6/
  * 
  */
@@ -60,7 +62,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
      * 该参数的推荐值是 10-1000，默认值是 128
      */
       .setBlockSize(1)//
-      .setSeed(11L)//
+      .setSeed(11L)//设置种子
       .setMaxIter(100)//优化算法求解的最大迭代次数,默认值是 100
       //predictionCol:预测结果的列名称。
       //tol:优化算法迭代求解过程的收敛阀值。默认值是 1e-4。不能为负数

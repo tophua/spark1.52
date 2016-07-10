@@ -18,27 +18,37 @@ package org.apache.spark.mllib.fpm
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-//频繁模式挖掘-FP-growth
+/**频繁增长模式挖掘-FP-growth
+ * 首长,将代表频繁项集的数据压缩到一棵频繁模式树,该树仍保留项集的关联信息,
+ * 然后,把这种压缩后的数据划分成一组条件数据,每个数据关联一个频繁项,并分别
+ * 挖掘每个条件数据库.
+ * 
+ */
+//一般使用购物车关联营销
 class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
 
 
   test("FP-Growth using String type") {
+    /**
+     * List(Array(r, z, h, k, p), 
+     * 			Array(z, y, x, w,v, u, t, s), 
+     * 			Array(s, x, o, n, r), 
+     * 			Array(x, z, y, m, t, s, q, e), 
+     * 			Array(z), 
+     * 			Array(x, z, y, r, q, t, p))
+     */
     val transactions = Seq(
       "r z h k p",
       "z y x w v u t s",
       "s x o n r",
       "x z y m t s q e",
       "z",
-      "x z y r q t p")
-      .map(_.split(" "))
+      "x z y r q t p").map(_.split(" "))
     val rdd = sc.parallelize(transactions, 2).cache()
 
     val fpg = new FPGrowth()
-
-    val model6 = fpg
-      .setMinSupport(0.9)
-      .setNumPartitions(1)
-      .run(rdd)
+    //最小支持度
+    val model6 = fpg.setMinSupport(0.9).setNumPartitions(1).run(rdd)
 
     /* Verify results using the `R` code:
        transactions = as(sapply(
@@ -57,10 +67,28 @@ class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
      */
     assert(model6.freqItemsets.count() === 0)
 
-    val model3 = fpg
-      .setMinSupport(0.5)
-      .setNumPartitions(2)
-      .run(rdd)
+    val model3 = fpg.setMinSupport(0.5).setNumPartitions(2).run(rdd)
+    /**
+     * List(Array(r, z, h, k, p), 
+     * 			Array(z, y, x, w,v, u, t, s), 
+     * 			Array(s, x, o, n, r), 
+     * 			Array(x, z, y, m, t, s, q, e), 
+     * 			Array(z), 
+     * 			Array(x, z, y, r, q, t, p))
+     */
+    
+    /**
+     * 分区等于2的时候
+     * (Set[String], Long)] = Array((Set(t),3), (Set(t, x),3), (Set(t, x, z),3), (Set(t, z),3), (Set(s),3), 
+     *       (Set(s, x),3),(Set(z),5), (Set(y),3), (Set(y, t),3), (Set(y, t, x),3), 
+     *       (Set(y, t, x, z),3),(Set(y, t, z),3), (Set(y, x),3), (Set(y, x, z),3), 
+     *       (Set(y, z),3), (Set(x),4),(Set(x, z),3), (Set(r),3))
+     * 分区等于5的时候
+     * freqItemsets3:= Array((Set(r),3),(Set(z),5),(Set(x),4),(Set(x, z),3),(Set(s),3),(Set(s, x),3), 
+     * 											(Set(t),3),(Set(t, x),3),(Set(t, x, z),3),(Set(t, z),3),(Set(y),3), 
+     * 											(Set(y, x),3),(Set(y, x, z),3),(Set(y, t),3),(Set(y, t, x),3), 
+     * 											(Set(y, t, x, z),3),(Set(y, t, z),3),(Set(y, z),3))
+     */
     val freqItemsets3 = model3.freqItemsets.collect().map { itemset =>
       (itemset.items.toSet, itemset.freq)
     }
@@ -245,7 +273,7 @@ class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(freqItemsets3.toSet === expected)
 
     val model2 = fpg
-      .setMinSupport(0.3)
+      .setMinSupport(0.3)//最小支持度
       .setNumPartitions(4)
       .run(rdd)
 

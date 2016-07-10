@@ -33,7 +33,7 @@ private object RidgeRegressionSuite {
   val model = new RidgeRegressionModel(weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5)
 }
 /**
- * 逻辑回归
+ * 岭回归数值计算方法的“稳定性”是指在计算过程中舍入误差是可以控制的
  */
 class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -65,9 +65,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // First run without regularization.
     val linearReg = new LinearRegressionWithSGD()
-    linearReg.optimizer.setNumIterations(200)
-                       .setStepSize(1.0)
-
+    linearReg.optimizer.setNumIterations(200).setStepSize(1.0)
     val linearModel = linearReg.run(testRDD)
     val linearErr = predictionError(
         linearModel.predict(validationRDD.map(_.features)).collect(), validationData)

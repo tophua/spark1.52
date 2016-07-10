@@ -20,7 +20,9 @@ package org.apache.spark.mllib.stat
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 多变更在线合计
+ */
 class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
 
   test("basic error handing") {

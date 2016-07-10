@@ -335,10 +335,11 @@ class VectorsSuite extends SparkFunSuite with Logging {
 
   test("Vector numActive and numNonzeros") {
     val dv = Vectors.dense(0.0, 2.0, 3.0, 0.0)
-    assert(dv.numActives === 4)
-    assert(dv.numNonzeros === 2)
-
+    assert(dv.numActives === 4)//
+    assert(dv.numNonzeros === 2)//非零值
+   //res4: org.apache.spark.mllib.linalg.DenseVector = [0.0,2.0,3.0,0.0]
     val sv = Vectors.sparse(4, Array(0, 1, 2), Array(0.0, 2.0, 3.0))
+    sv.toDense
     assert(sv.numActives === 3)
     assert(sv.numNonzeros === 2)
   }

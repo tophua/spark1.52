@@ -34,6 +34,13 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
   private def split(s: String): Seq[String] = s.split("\\s+")
 
   test("CountVectorizerModel common cases") {
+    /**
+     res9:= List((0,WrappedArray(a, b, c, d),(4,[0,1,2,3],[1.0,1.0,1.0,1.0])), 
+     						 (1,WrappedArray(a, b, b, c, d, a),(4,[0,1,2,3],[2.0,2.0,1.0,1.0])), 
+     						 (2,WrappedArray(a),(4,[0],[1.0])),
+     						 (3,WrappedArray(""),(4,[],[])), 
+     						 (4,WrappedArray(a, notInDict, d),(4,[0,3],[1.0,1.0])))
+     */
     val df = sqlContext.createDataFrame(Seq(
       (0, split("a b c d"),
         Vectors.sparse(4, Seq((0, 1.0), (1, 1.0), (2, 1.0), (3, 1.0)))),
@@ -44,36 +51,60 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       (4, split("a notInDict d"),
         Vectors.sparse(4, Seq((0, 1.0), (3, 1.0))))  // with words not in vocabulary
     )).toDF("id", "words", "expected")
-    val cv = new CountVectorizerModel(Array("a", "b", "c", "d"))
-      .setInputCol("words")
-      .setOutputCol("features")
+
+    val cv = new CountVectorizerModel(Array("a", "b", "c", "d")).setInputCol("words").setOutputCol("features")
+    /**
+      (4,[0,1,2,3],[1.0,1.0,1.0,1.0])~==(4,[0,1,2,3],[1.0,1.0,1.0,1.0])
+      (4,[0,1,2,3],[2.0,2.0,1.0,1.0])~==(4,[0,1,2,3],[2.0,2.0,1.0,1.0])
+      (4,[0],[1.0])~==(4,[0],[1.0])
+      (4,[],[])~==(4,[],[])
+      (4,[0,3],[1.0,1.0])~==(4,[0,3],[1.0,1.0])
+     */
     cv.transform(df).select("features", "expected").collect().foreach {
       case Row(features: Vector, expected: Vector) =>
-        assert(features ~== expected absTol 1e-14)
+        println(features+"~=="+expected)
+        //assert(features ~== expected absTol 1e-14)
     }
   }
 
   test("CountVectorizer common cases") {
+    /**
+  	res11:=List((0,WrappedArray(a, b, c, d, e),(5,[0,1,2,3,4],[1.0,1.0,1.0,1.0,1.0])), 
+    						(1,WrappedArray(a, a, a, a, a, a),(5,[0],[6.0])), 
+    						(2,WrappedArray(c),(5,[2],[1.0])), 
+    						(3,WrappedArray(b, b, b, b, b),(5,[1],[5.0])))
+     **/
     val df = sqlContext.createDataFrame(Seq(
-      (0, split("a b c d e"),
-        Vectors.sparse(5, Seq((0, 1.0), (1, 1.0), (2, 1.0), (3, 1.0), (4, 1.0)))),
+      (0, split("a b c d e"),Vectors.sparse(5, Seq((0, 1.0), (1, 1.0), (2, 1.0), (3, 1.0), (4, 1.0)))),
       (1, split("a a a a a a"), Vectors.sparse(5, Seq((0, 6.0)))),
       (2, split("c"), Vectors.sparse(5, Seq((2, 1.0)))),
       (3, split("b b b b b"), Vectors.sparse(5, Seq((1, 5.0)))))
     ).toDF("id", "words", "expected")
-    val cv = new CountVectorizer()
-      .setInputCol("words")
-      .setOutputCol("features")
-      .fit(df)
+   
+    val cv = new CountVectorizer().setInputCol("words").setOutputCol("features").fit(df)
+    //使用的词汇
     assert(cv.vocabulary === Array("a", "b", "c", "d", "e"))
 
     cv.transform(df).select("features", "expected").collect().foreach {
       case Row(features: Vector, expected: Vector) =>
-        assert(features ~== expected absTol 1e-14)
+        //println(features+"|||"+expected)        
+        /**
+         (5,[0,1,2,3,4],[1.0,1.0,1.0,1.0,1.0])|||(5,[0,1,2,3,4],[1.0,1.0,1.0,1.0,1.0])
+         (5,[0],[6.0])|||(5,[0],[6.0])
+         (5,[2],[1.0])|||(5,[2],[1.0])
+         (5,[1],[5.0])|||(5,[1],[5.0])
+         **/
+       assert(features ~== expected absTol 1e-14)
     }
   }
 
   test("CountVectorizer vocabSize and minDF") {
+    /**
+  	res11:=List((0,WrappedArray(a, b, c, d, e),(5,[0,1,2,3,4],[1.0,1.0,1.0,1.0,1.0])), 
+    						(1,WrappedArray(a, a, a, a, a, a),(5,[0],[6.0])), 
+    						(2,WrappedArray(c),(5,[2],[1.0])), 
+    						(3,WrappedArray(b, b, b, b, b),(5,[1],[5.0])))
+     **/
     val df = sqlContext.createDataFrame(Seq(
       (0, split("a b c d"), Vectors.sparse(3, Seq((0, 1.0), (1, 1.0)))),
       (1, split("a b c"), Vectors.sparse(3, Seq((0, 1.0), (1, 1.0)))),
@@ -83,8 +114,9 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val cvModel = new CountVectorizer()
       .setInputCol("words")
       .setOutputCol("features")
-      .setVocabSize(3)  // limit vocab size to 3
+      .setVocabSize(3)  // limit vocab size to 3 限制单词列表
       .fit(df)
+   //使用的词汇      
     assert(cvModel.vocabulary === Array("a", "b", "c"))
 
     // minDF: ignore terms with count less than 3
@@ -93,6 +125,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setOutputCol("features")
       .setMinDF(3)
       .fit(df)
+    //使用的词汇
     assert(cvModel2.vocabulary === Array("a", "b"))
 
     cvModel2.transform(df).select("features", "expected").collect().foreach {

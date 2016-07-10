@@ -28,37 +28,49 @@ case class NGramTestData(inputTokens: Array[String], wantedNGrams: Array[String]
 
 class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
   import org.apache.spark.ml.feature.NGramSuite._
-
+/**
+ * ngrams该模型基于这样一种假设，第n个词的出现只与前面N-1个词相关，而与其它任何词都不相关,
+ * 整句的概率就是各个词出现概率的乘积。
+ */
   test("default behavior yields bigram features") {
-    val nGram = new NGram()
-      .setInputCol("inputTokens")
-      .setOutputCol("nGrams")
+    val nGram = new NGram().setInputCol("inputTokens").setOutputCol("nGrams")
     val dataset = sqlContext.createDataFrame(Seq(
-      NGramTestData(
-        Array("Test", "for", "ngram", "."),
+      NGramTestData(//分词
+         Array("Test", "for", "ngram", "."),
+        //WrappedArray(中国 的, 的 人民, 人民 生活, 生活 .)
+        //Array("中国", "的", "人民","生活" ,"."),
+        //wantedNGrams
         Array("Test for", "for ngram", "ngram .")
     )))
-    testNGram(nGram, dataset)
+    nGram.transform(dataset).select("nGrams", "wantedNGrams").collect().foreach { 
+      
+      case Row(actualNGrams, wantedNGrams) =>{
+        //actualNGrams 实际,wantedNGrams期望值 
+        //WrappedArray(Test for, for ngram, ngram .)|||WrappedArray(Test for, for ngram, ngram .)
+       // println(actualNGrams+"|||"+wantedNGrams)
+        assert(actualNGrams === wantedNGrams)
+      }        
+     }
+    //testNGram(nGram, dataset)
   }
 
   test("NGramLength=4 yields length 4 n-grams") {
-    val nGram = new NGram()
-      .setInputCol("inputTokens")
-      .setOutputCol("nGrams")
-      .setN(4)
+    //设置长度为4
+    val nGram = new NGram().setInputCol("inputTokens").setOutputCol("nGrams").setN(4)
     val dataset = sqlContext.createDataFrame(Seq(
       NGramTestData(
+        //Array("中国", "的", "人民","生活" ,"."),
         Array("a", "b", "c", "d", "e"),
         Array("a b c d", "b c d e")
       )))
+      nGram.transform(dataset).select("nGrams", "wantedNGrams").collect().foreach {       
+          case Row(actualNGrams, wantedNGrams) =>  println(actualNGrams+"|||"+wantedNGrams)      
+      }
     testNGram(nGram, dataset)
   }
 
   test("empty input yields empty output") {
-    val nGram = new NGram()
-      .setInputCol("inputTokens")
-      .setOutputCol("nGrams")
-      .setN(4)
+    val nGram = new NGram().setInputCol("inputTokens").setOutputCol("nGrams").setN(4)
     val dataset = sqlContext.createDataFrame(Seq(
       NGramTestData(
         Array(),
@@ -88,6 +100,7 @@ object NGramSuite extends SparkFunSuite {
       .select("nGrams", "wantedNGrams")
       .collect()
       .foreach { case Row(actualNGrams, wantedNGrams) =>
+        
         assert(actualNGrams === wantedNGrams)
       }
   }

@@ -272,6 +272,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val df = TreeTests.setMetadata(data, Map(0 -> 1), 2)
     val dt = new DecisionTreeClassifier().setMaxDepth(3)
     val model = dt.fit(df)
+/*   println("rootNode:"+model.rootNode)
+   println(model.labelCol.name+"\t"+model.labelCol.doc)
+   println("getFeaturesCol:"+model.getFeaturesCol)*/
   }
 
   /////////////////////////////////////////////////////////////////////////////

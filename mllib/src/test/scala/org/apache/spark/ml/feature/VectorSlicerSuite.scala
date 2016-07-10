@@ -30,7 +30,9 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("params") {
     val slicer = new VectorSlicer
     ParamsSuite.checkParams(slicer)
+    //指数
     assert(slicer.getIndices.length === 0)
+    //名称
     assert(slicer.getNames.length === 0)
     withClue("VectorSlicer should not have any features selected by default") {
       intercept[IllegalArgumentException] {
@@ -45,7 +47,6 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(validIndices(Array.empty[Int]))
     assert(!validIndices(Array(-1)))
     assert(!validIndices(Array(1, 2, 1)))
-
     assert(validNames(Array("a", "b")))
     assert(validNames(Array.empty[String]))
     assert(!validNames(Array("", "b")))
@@ -64,6 +65,7 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
     )
 
     // Expected after selecting indices 1, 4
+    //
     val expected = Array(
       Vectors.sparse(2, Seq((0, 2.3))),
       Vectors.dense(2.3, 1.0),
@@ -80,8 +82,9 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val resultAttrGroup = new AttributeGroup("expected", resultAttrs.asInstanceOf[Array[Attribute]])
 
     val rdd = sc.parallelize(data.zip(expected)).map { case (a, b) => Row(a, b) }
+    
     val df = sqlContext.createDataFrame(rdd,
-      StructType(Array(attrGroup.toStructField(), resultAttrGroup.toStructField())))
+        StructType(Array(attrGroup.toStructField(), resultAttrGroup.toStructField())))
 
     val vectorSlicer = new VectorSlicer().setInputCol("features").setOutputCol("result")
 
@@ -102,7 +105,7 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     vectorSlicer.setIndices(Array(1)).setNames(Array("f4"))
     //transform主要是用来把 一个 DataFrame 转换成另一个 DataFrame
-
+    
     validateResults(vectorSlicer.transform(df))
 
     vectorSlicer.setIndices(Array.empty).setNames(Array("f1", "f4"))

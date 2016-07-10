@@ -131,7 +131,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     testALS(100, 200, 2, 15, 0.7, 0.4, numUserBlocks = 4, numProductBlocks = 2)
   }
 
-  test("pseudorandomness") {
+  test("pseudorandomness") {//伪随机性
     val ratings = sc.parallelize(ALSSuite.generateRatings(10, 20, 5, 0.5, false, false)._1, 2)
     val model11 = ALS.train(ratings, 5, 1, 1.0, 2, 1)//训练
     val model12 = ALS.train(ratings, 5, 1, 1.0, 2, 1)//训练

@@ -43,6 +43,17 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   /////////////////////////////////////////////////////////////////////////////
 
   test("Binary classification with continuous features(连续特征): split and bin calculation") {
+    /**
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
+     */
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
@@ -51,8 +62,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
     assert(!metadata.isUnordered(featureIndex = 0))
     val (splits, bins) = DecisionTree.findSplitsBins(rdd, metadata)
-    assert(splits.length === 2)
-    assert(bins.length === 2)
+    assert(splits.length === 2)//分裂
+    assert(bins.length === 2)//桶数
     assert(splits(0).length === 99)
     assert(bins(0).length === 100)
   }
@@ -93,6 +104,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       maxDepth = 2,
       numClasses = 2,
       maxBins = 100,
+      //用Map存储类别(离散)特征及每个类别对应值(类别)的数量
+      //例如 Map(n->k)表示特征n类别(离散)特征,特征值有K个,具体值为(0,1,...K-1)
+      //Map中元素的键是特征在输入向量Vector中的下标,Map中元素的值是类别特征的不同取值个数
+      //例如指定类别特征0取值3个数,指定类别1取值为3个数
       categoricalFeaturesInfo = Map(0 -> 3, 1 -> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -178,7 +193,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("Multiclass classification with unordered categorical features:" +
+  test("Multiclass classification with unordered(无序) categorical features:" +
       " split and bin calculations") {
     val arr = DecisionTreeSuite.generateCategoricalDataPoints()
     assert(arr.length === 1000)
@@ -192,8 +207,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
+    //特征无序
     assert(metadata.isUnordered(featureIndex = 0))
     assert(metadata.isUnordered(featureIndex = 1))
+    //不同的策略采用不同的预测方法
     val (splits, bins) = DecisionTree.findSplitsBins(rdd, metadata)
     assert(splits.length === 2)
     assert(bins.length === 2)
@@ -201,11 +218,27 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(bins(0).length === 0)
 
     // Expecting 2^2 - 1 = 3 bins/splits
+   /**
+    * splits(0)
+    * [
+    * 	Feature = 0, threshold = -1.7976931348623157E308, featureType = Categorical, categories = List(0.0), 
+    * 	Feature = 0, threshold = -1.7976931348623157E308, featureType = Categorical, categories = List(1.0), 
+    * 	Feature = 0, threshold = -1.7976931348623157E308, featureType = Categorical, categories = List(1.0, 0.0)
+    * ]
+    */
     assert(splits(0)(0).feature === 0)
     assert(splits(0)(0).threshold === Double.MinValue)
     assert(splits(0)(0).featureType === Categorical)
     assert(splits(0)(0).categories.length === 1)
     assert(splits(0)(0).categories.contains(0.0))
+   /**
+    * splits(1)
+    * [
+    *  Feature = 1, threshold = -1.7976931348623157E308, featureType = Categorical, categories = List(0.0),
+    *  Feature = 1, threshold = -1.7976931348623157E308, featureType = Categorical, categories = List(1.0), 
+    *  Feature = 1, threshold = -1.7976931348623157E308, featureType = Categorical, categories = List(1.0, 0.0)
+    * ]
+    */
     assert(splits(1)(0).feature === 1)
     assert(splits(1)(0).threshold === Double.MinValue)
     assert(splits(1)(0).featureType === Categorical)
@@ -262,7 +295,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(bins(0).length === 0)
   }
 
-  test("Avoid aggregation on the last level") {
+  test("Avoid(无效) aggregation on the last level") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 1.0, 1.0)),
@@ -271,6 +304,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val input = sc.parallelize(arr)
 
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 1,
+        //categoricalFeaturesInfo 所有的特征为连续型变量
+        //numClasses 分类数
       numClasses = 2, categoricalFeaturesInfo = Map(0 -> 3))
     val metadata = DecisionTreeMetadata.buildMetadata(input, strategy)
     val (splits, bins) = DecisionTree.findSplitsBins(input, metadata)
@@ -430,9 +465,9 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Classification,
       Gini,
-      numClasses = 2,
-      maxDepth = 2,
-      maxBins = 100,
+      numClasses = 2,//分类数
+      maxDepth = 2,//最大深度
+      maxBins = 100,//最大箱数
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -448,7 +483,9 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val rootNode = DecisionTree.train(rdd, strategy).topNode
 
     val split = rootNode.split.get
+    //分类
     assert(split.categories === List(1.0))
+    //特征类型
     assert(split.featureType === Categorical)
     assert(split.threshold === Double.MinValue)
 
@@ -610,6 +647,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlass()
     val rdd = sc.parallelize(arr)
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
+        //categoricalFeaturesInfo用Map存储类别(离散)特征及每个类别对应值(类别)的数量
+      //例如 Map(n->k)表示特征n类别(离散)特征,特征值有K个,具体值为(0,1,...K-1)
       numClasses = 3, categoricalFeaturesInfo = Map(0 -> 3, 1 -> 3))
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
     assert(strategy.isMulticlassClassification)
@@ -958,6 +997,7 @@ object DecisionTreeSuite extends SparkFunSuite {
         arr(i) = new LabeledPoint(0.0, Vectors.dense(1.0, 0.0))
       }
     }
+    //println(">>>>"+arr.toList)
     arr
   }
 

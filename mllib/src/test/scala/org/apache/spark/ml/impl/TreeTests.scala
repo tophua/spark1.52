@@ -96,10 +96,12 @@ private[ml] object TreeTests extends SparkFunSuite {
    *       make mistakes such as creating loops of Nodes.
    */
   private def checkEqual(a: Node, b: Node): Unit = {
+    println(a.prediction+"\t"+a.impurity+"\t"+a.leftSide)
     assert(a.prediction === b.prediction)
     assert(a.impurity === b.impurity)
     (a, b) match {
       case (aye: InternalNode, bee: InternalNode) =>
+        println("split:"+aye.split+" leftChild:"+ aye.leftChild+" rightChild:"+aye.rightChild)
         assert(aye.split === bee.split)
         checkEqual(aye.leftChild, bee.leftChild)
         checkEqual(aye.rightChild, bee.rightChild)
@@ -118,6 +120,7 @@ private[ml] object TreeTests extends SparkFunSuite {
       a.trees.zip(b.trees).foreach { case (treeA, treeB) =>
         TreeTests.checkEqual(treeA, treeB)
       }
+      //权重
       assert(a.treeWeights === b.treeWeights)
     } catch {
       case ex: Exception => throw new AssertionError(

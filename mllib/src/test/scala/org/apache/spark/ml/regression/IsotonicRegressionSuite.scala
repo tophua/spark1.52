@@ -57,7 +57,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.predictions === Vectors.dense(1, 2, 2, 6, 16.5, 16.5, 17.0, 18.0))
     assert(model.getIsotonic)
   }
-//预测（Prediction）
+   //预测（Prediction）
   test("antitonic regression predictions") {
     val dataset = generateIsotonicInput(Seq(7, 5, 3, 5, 1))
     val ir = new IsotonicRegression().setIsotonic(false)

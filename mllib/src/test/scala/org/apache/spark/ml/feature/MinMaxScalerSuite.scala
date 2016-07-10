@@ -29,13 +29,17 @@ class MinMaxScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("MinMaxScaler fit basic case") {
     val sqlContext = new SQLContext(sc)
-
+  /**
+   * data:= Array([1.0,0.0,-9.223372036854776E18], [2.0,0.0,0.0], (3,[0,2],[3.0,9.223372036854776E18]), (3,[0],[1.5]))
+   */
     val data = Array(
       Vectors.dense(1, 0, Long.MinValue),
       Vectors.dense(2, 0, 0),
       Vectors.sparse(3, Array(0, 2), Array(3, Long.MaxValue)),
       Vectors.sparse(3, Array(0), Array(1.5)))
-
+  /**
+   * expected= Array([-5.0,0.0,-5.0], [0.0,0.0,0.0], (3,[0,2],[5.0,5.0]), (3,[0],[-2.5]))
+   */
     val expected: Array[Vector] = Array(
       Vectors.dense(-5, 0, -5),
       Vectors.dense(0, 0, 0),
@@ -43,11 +47,7 @@ class MinMaxScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
       Vectors.sparse(3, Array(0), Array(-2.5)))
 
     val df = sqlContext.createDataFrame(data.zip(expected)).toDF("features", "expected")
-    val scaler = new MinMaxScaler()
-      .setInputCol("features")
-      .setOutputCol("scaled")
-      .setMin(-5)
-      .setMax(5)
+    val scaler = new MinMaxScaler().setInputCol("features").setOutputCol("scaled").setMin(-5).setMax(5)
 
     val model = scaler.fit(df)
     model.transform(df).select("expected", "scaled").collect()
