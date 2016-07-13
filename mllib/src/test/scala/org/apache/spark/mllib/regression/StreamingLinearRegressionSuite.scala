@@ -60,7 +60,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
 
   // Test if we can accurately learn Y = 10*X1 + 10*X2 on streaming data
   test("parameter accuracy") {
-    // create model
+    // create model,梯度下降法
     val model = new StreamingLinearRegressionWithSGD()
       .setInitialWeights(Vectors.dense(0.0, 0.0))
       .setStepSize(0.2)

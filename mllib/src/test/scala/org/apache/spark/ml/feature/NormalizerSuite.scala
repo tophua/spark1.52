@@ -43,7 +43,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       Vectors.sparse(3, Seq((0, 5.7), (1, 0.72), (2, 2.7))),
       Vectors.sparse(3, Seq())
     )
-    l1Normalized = Array(
+     l1Normalized = Array(
       Vectors.sparse(3, Seq((0, -0.465116279), (1, 0.53488372))),
       Vectors.dense(0.0, 0.0, 0.0),
       Vectors.dense(0.12765957, -0.23404255, -0.63829787),
@@ -62,9 +62,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val sqlContext = new SQLContext(sc)
     dataFrame = sqlContext.createDataFrame(sc.parallelize(data, 2).map(NormalizerSuite.FeatureData))
-    normalizer = new Normalizer()
-      .setInputCol("features")
-      .setOutputCol("normalized_features")
+    normalizer = new Normalizer().setInputCol("features").setOutputCol("normalized_features")
   }
 
   def collectResult(result: DataFrame): Array[Vector] = {

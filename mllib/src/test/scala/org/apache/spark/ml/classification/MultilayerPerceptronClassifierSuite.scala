@@ -45,6 +45,12 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
         (Vectors.dense(1.0, 0.0), 1.0),
         (Vectors.dense(1.0, 1.0), 0.0))
     ).toDF("features", "label")
+    /**
+     * setLayers
+     * 这个参数是一个整型数组类型，第一个元素需要和特征向量的维度相等，最后一个元素需要训练数据的标签取值个数相等，
+     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层，元素的取值代表了该层的神经元的个数。
+     * 例如val layers = Array[Int](2,5,2)。
+     */
     val layers = Array[Int](2, 5, 2)
     //多层感知器分类器 (MultilayerPerceptronClassifer)
     val trainer = new MultilayerPerceptronClassifier()
@@ -52,7 +58,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
      * setLayers
      * 这个参数是一个整型数组类型，第一个元素需要和特征向量的维度相等，最后一个元素需要训练数据的标签取值个数相等，
      * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层，元素的取值代表了该层的神经元的个数。
-     * 例如val layers = Array[Int](100,6,5,2)。
+     * 例如val layers = Array[Int](2,5,2)。
      */
       .setLayers(layers)
     /**
@@ -72,6 +78,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val result = model.transform(dataFrame)
     val predictionAndLabels = result.select("prediction", "label").collect()
     predictionAndLabels.foreach { case Row(p: Double, l: Double) =>
+      //p是预测值,l实际分类值
       assert(p == l)
     }
   }
@@ -85,15 +92,16 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val weights = Array(
       -0.57997, 0.912083, -0.371077, -0.819866, 2.688191,
       -0.16624, -0.84355, -0.048509, -0.301789, 4.170682)
-
-    val xMean = Array(5.843, 3.057, 3.758, 1.199)
-    val xVariance = Array(0.6856, 0.1899, 3.116, 0.581)
+   //平均值
+    val xMean = Array(5.843, 3.057, 3.758, 1.199)//数据维度4
+    //平方
+    val xVariance = Array(0.6856, 0.1899, 3.116, 0.581)//数据维度4
     val rdd = sc.parallelize(generateMultinomialLogisticInput(
       weights, xMean, xVariance, true, nPoints, 42), 2)
     val dataFrame = sqlContext.createDataFrame(rdd).toDF("label", "features")
-    val numClasses = 3
+    val numClasses = 3 //分类数
     val numIterations = 100
-    val layers = Array[Int](4, 5, 4, numClasses)
+    val layers = Array[Int](4, 5, 4, numClasses)//分为3类
     val trainer = new MultilayerPerceptronClassifier()
      /**
      * setLayers
@@ -102,7 +110,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
      * 例如val layers = Array[Int](100,6,5,2)。
      */
       .setLayers(layers)
-         /**
+     /**
      * setBlockSize
      * 该参数被前馈网络训练器用来将训练样本数据的每个分区都按照 blockSize 大小分成不同组，
      * 并且每个组内的每个样本都会被叠加成一个向量，以便于在各种优化算法间传递。
