@@ -33,60 +33,82 @@ case class LabeledDocument(id: Long, text: String, label: Double)
 @BeanInfo
 case class Document(id: Long, text: String)
 
-/**
- * A simple text classification pipeline that recognizes "spark" from input text. This is to show
- * how to create and configure an ML pipeline. Run with
- * {{{
- * bin/run-example ml.SimpleTextClassificationPipeline
- * }}}
- */
+  /**
+   * 简单分类分类示例
+   * A simple text classification pipeline that recognizes "spark" from input text. This is to show
+   * how to create and configure an ML pipeline. Run with
+   * {{{
+   * bin/run-example ml.SimpleTextClassificationPipeline
+   * }}}
+   */
 object SimpleTextClassificationPipeline {
 
   def main(args: Array[String]) {
-    val conf = new SparkConf().setAppName("SimpleTextClassificationPipeline")
+    val conf = new SparkConf().setAppName("SimpleTextClassificationPipeline").setMaster("local[2]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
     // Prepare training documents, which are labeled.
     val training = sc.parallelize(Seq(
+      //文档ID,内容,标号
       LabeledDocument(0L, "a b c d e spark", 1.0),
       LabeledDocument(1L, "b d", 0.0),
       LabeledDocument(2L, "spark f g h", 1.0),
       LabeledDocument(3L, "hadoop mapreduce", 0.0)))
 
     // Configure an ML pipeline, which consists of three stages: tokenizer, hashingTF, and lr.
+    //使用将文本拆分成单词
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
-        //特征提取和转换 TF-IDF
+    //特征提取和转换 TF-IDF
     val hashingTF = new HashingTF()
-      .setNumFeatures(1000)
+      .setNumFeatures(1000)//设置特征值
       .setInputCol(tokenizer.getOutputCol)
-      .setOutputCol("features")
+      .setOutputCol("features")//text=spark hadoop spark,features=(1000,[269,365],[1.0,2.0]) //2代表spark出现2次
+    //把词频作为输入特征创建逻辑回归分类器
     val lr = new LogisticRegression()
-      .setMaxIter(10)
+      .setMaxIter(10)//最大迭代次数
       .setRegParam(0.001)
+    //将这些操作合并到一个pipeline中,让pipeline实际执行从输入训练数据中构造模型的工作
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // Fit the pipeline to training documents.
+    //隐式转换为schemaRDD
     val model = pipeline.fit(training.toDF())
 
     // Prepare test documents, which are unlabeled.
+    //将模型用于新文档的分类,
+    /**
+      LabeledDocument(0L, "a b c d e spark", 1.0),
+      LabeledDocument(1L, "b d",0.0),
+      LabeledDocument(2L, "spark f g h", 1.0),
+      LabeledDocument(3L, "hadoop mapreduce", 0.0)))
+     */
     val test = sc.parallelize(Seq(
       Document(4L, "spark i j k"),
-      Document(5L, "l m n"),
+      Document(5L, "l m n  i k"),
       Document(6L, "spark hadoop spark"),
       Document(7L, "apache hadoop")))
 
     // Make predictions on test documents.
+     //注意Model实际上是一个包含所有转换逻辑的pipeline,而不是一个对分类的调用
     model.transform(test.toDF())
-      .select("id", "text", "probability", "prediction")
+      .select("id", "text","features", "probability", "prediction")
       .collect()
-      .foreach { case Row(id: Long, text: String, prob: Vector, prediction: Double) =>
-        println(s"($id, $text) --> prob=$prob, prediction=$prediction")
+      .foreach { case Row(id: Long, text: String,  features: Vector, prob: Vector, prediction: Double) =>
+        //文档ID,text文本,probability概率,prediction 预测分类
+        println(s"($id, $text) --> prob=$prob, prediction=$prediction,text=$text,features=$features")
       }
+   
+   /**
+    * (4, spark i j k) --> prob=[0.1596407738787411,0.8403592261212589], prediction=1.0
+    * (5, l m n) --> prob=[0.8378325685476612,0.16216743145233883], prediction=0.0
+    * (6, spark hadoop spark) --> prob=[0.0692663313297627,0.9307336686702373], prediction=1.0
+    * (7, apache hadoop) --> prob=[0.9821575333444208,0.01784246665557917], prediction=0.0
+    */
 
     sc.stop()
   }
