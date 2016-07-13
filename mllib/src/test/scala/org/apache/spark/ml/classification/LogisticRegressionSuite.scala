@@ -208,10 +208,6 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
  */
         println(s"label=$label,prediction=$prediction,features=$features,rawPrediction=$rawPrediction,probability=$probability")
       }
-      
-    
-    
-     
     assert(model.getThreshold === 0.5)
     assert(model.getFeaturesCol === "features")
     //Prediction 预测
