@@ -29,6 +29,8 @@ import org.apache.spark.streaming.util.WriteAheadLogUtils
 import org.apache.spark.streaming.{StreamingContext, Time}
 
 /**
+ * 会保存关于历次 batch 的源头数据条数、历次 batch 计算花费的时间等数值，用来实时计算准确的流量控制信息
+ * 这些都是记在 DStream 里的， 而 RDD a[1] 等则不会保存这些信息
  * Abstract class for defining any [[org.apache.spark.streaming.dstream.InputDStream]]
  * that has to start a receiver on worker nodes to receive external data.
  * Specific implementations of ReceiverInputDStream must

@@ -219,15 +219,15 @@ class BatchInfoCollector extends StreamingListener {
   val batchInfosCompleted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
   val batchInfosStarted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
   val batchInfosSubmitted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
-
+//已提交
   override def onBatchSubmitted(batchSubmitted: StreamingListenerBatchSubmitted) {
     batchInfosSubmitted += batchSubmitted.batchInfo
   }
-
+//
   override def onBatchStarted(batchStarted: StreamingListenerBatchStarted) {
     batchInfosStarted += batchStarted.batchInfo
   }
-
+//处理完成
   override def onBatchCompleted(batchCompleted: StreamingListenerBatchCompleted) {
     batchInfosCompleted += batchCompleted.batchInfo
   }
@@ -239,15 +239,15 @@ class ReceiverInfoCollector extends StreamingListener {
   val stoppedReceiverStreamIds = new ArrayBuffer[Int] with SynchronizedBuffer[Int]
   val receiverErrors =
     new ArrayBuffer[(Int, String, String)] with SynchronizedBuffer[(Int, String, String)]
-
+//接收开始
   override def onReceiverStarted(receiverStarted: StreamingListenerReceiverStarted) {
     startedReceiverStreamIds += receiverStarted.receiverInfo.streamId
   }
-
+//接收暂停
   override def onReceiverStopped(receiverStopped: StreamingListenerReceiverStopped) {
     stoppedReceiverStreamIds += receiverStopped.receiverInfo.streamId
   }
-
+//接收错误
   override def onReceiverError(receiverError: StreamingListenerReceiverError) {
     receiverErrors += ((receiverError.receiverInfo.streamId,
       receiverError.receiverInfo.lastErrorMessage, receiverError.receiverInfo.lastError))
@@ -256,6 +256,8 @@ class ReceiverInfoCollector extends StreamingListener {
 
 class StreamingListenerSuiteReceiver extends Receiver[Any](StorageLevel.MEMORY_ONLY) with Logging {
   def onStart() {
+    //Future 只能写一次： 当一个 future 完成后，它就不能再被改变了,
+    //Future 只提供了读取计算值的接口，写入计算值的任务交给了 Promise
     Future {
       logInfo("Started receiver and sleeping")
       Thread.sleep(10)

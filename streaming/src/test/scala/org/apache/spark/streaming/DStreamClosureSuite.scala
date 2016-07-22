@@ -28,6 +28,7 @@ import org.apache.spark.util.ReturnStatementInClosureException
 
 /**
  * Test that closures passed to DStream operations are actually cleaned.
+ * 试验通过对dstream操作关闭实际上清理
  */
 class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
   private var ssc: StreamingContext = null

@@ -27,7 +27,7 @@ import org.apache.spark.streaming.Seconds
 
 class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
 
-  test("the right estimator is created") {
+  test("the right estimator is created") {//评价者
     val conf = new SparkConf
     conf.set("spark.streaming.backpressure.rateEstimator", "pid")
     val pid = RateEstimator.create(conf, Seconds(1))

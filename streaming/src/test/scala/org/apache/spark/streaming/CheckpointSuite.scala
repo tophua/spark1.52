@@ -47,7 +47,7 @@ class CheckpointSuite extends TestSuiteBase {
 
   var ssc: StreamingContext = null
 
-  override def batchDuration: Duration = Milliseconds(500)
+  override def batchDuration: Duration = Milliseconds(500) //毫秒
 
   override def beforeFunction() {
     super.beforeFunction()
@@ -60,13 +60,13 @@ class CheckpointSuite extends TestSuiteBase {
     Utils.deleteRecursively(new File(checkpointDir))
   }
 
-  test("basic rdd checkpoints + dstream graph checkpoint recovery") {
+  test("basic rdd checkpoints + dstream graph checkpoint recovery") {//恢复
 
     assert(batchDuration === Milliseconds(500), "batchDuration for this test must be 1 second")
 
     conf.set("spark.streaming.clock", "org.apache.spark.util.ManualClock")
 
-    val stateStreamCheckpointInterval = Seconds(1)
+    val stateStreamCheckpointInterval = Seconds(1)//秒
     val fs = FileSystem.getLocal(new Configuration())
     // this ensure checkpointing occurs at least once
     val firstNumBatches = (stateStreamCheckpointInterval / batchDuration).toLong * 2

@@ -26,10 +26,11 @@ import org.apache.spark.streaming.ui.UIUtils
 
 /**
  * Tests whether scope information is passed from DStream operations to RDDs correctly.
+ * 测试范围的信息从dstream操作正确通过RDDS
  */
 class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAndAfterAll {
   private var ssc: StreamingContext = null
-  private val batchDuration: Duration = Seconds(1)
+  private val batchDuration: Duration = Seconds(1)//批量处理间隔1秒
 
   override def beforeAll(): Unit = {
     ssc = new StreamingContext(new SparkContext("local", "test"), batchDuration)
@@ -42,13 +43,14 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
   before { assertPropertiesNotSet() }
   after { assertPropertiesNotSet() }
 
-  test("dstream without scope") {
+  test("dstream without scope") {//没有范围
     val dummyStream = new DummyDStream(ssc)
     dummyStream.initialize(Time(0))
-
+    //没有初始化
     // This DStream is not instantiated in any scope, so all RDDs
     // created by this stream should similarly not have a scope
     assert(dummyStream.baseScope === None)
+    //获取父DStream的RDD
     assert(dummyStream.getOrCompute(Time(1000)).get.scope === None)
     assert(dummyStream.getOrCompute(Time(2000)).get.scope === None)
     assert(dummyStream.getOrCompute(Time(3000)).get.scope === None)
@@ -57,7 +59,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
   test("input dstream without scope") {
     val inputStream = new DummyInputDStream(ssc)
     inputStream.initialize(Time(0))
-
+   //没有输入流范围
     val baseScope = inputStream.baseScope.map(RDDOperationScope.fromJson)
     val scope1 = inputStream.getOrCompute(Time(1000)).get.scope
     val scope2 = inputStream.getOrCompute(Time(2000)).get.scope

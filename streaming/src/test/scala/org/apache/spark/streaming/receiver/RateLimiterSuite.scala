@@ -26,7 +26,7 @@ class RateLimiterSuite extends SparkFunSuite {
   test("rate limiter initializes even without a maxRate set") {
     val conf = new SparkConf()
     val rateLimiter = new RateLimiter(conf){}
-    rateLimiter.updateRate(105)
+    rateLimiter.updateRate(105)//速率限制
     assert(rateLimiter.getCurrentLimit == 105)
   }
 

@@ -43,7 +43,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   val master = "local[2]"
   val appName = this.getClass.getSimpleName
-  val batchDuration = Milliseconds(500)
+  val batchDuration = Milliseconds(500)//毫秒
   val sparkHome = "someDir"
   val envPair = "key" -> "value"
   val conf = new SparkConf().setMaster(master).setAppName(appName)
@@ -81,7 +81,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("from conf with settings") {
     val myConf = SparkContext.updatedConf(new SparkConf(false), master, appName)
-    myConf.set("spark.cleaner.ttl", "10s")
+    myConf.set("spark.cleaner.ttl", "10s")//
     ssc = new StreamingContext(myConf, batchDuration)
     assert(ssc.conf.getTimeAsSeconds("spark.cleaner.ttl", "-1") === 10)
   }
@@ -100,10 +100,14 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("from checkpoint") {
     val myConf = SparkContext.updatedConf(new SparkConf(false), master, appName)
+    //参数的原意是清除超过这个时间的所有RDD数据,以便腾出空间给后来的RDD使用。
+    //周期性清除保证在这个时间之前的元数据会被遗忘,
+    //对于那些运行了几小时或者几天的Spark作业（特别是Spark Streaming）设置这个是很有用的
     myConf.set("spark.cleaner.ttl", "10s")
     val ssc1 = new StreamingContext(myConf, batchDuration)
     addInputStream(ssc1).register()
     ssc1.start()
+    //
     val cp = new Checkpoint(ssc1, Time(1000))
     assert(
       Utils.timeStringAsSeconds(cp.sparkConfPairs
@@ -116,9 +120,10 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   }
 
   test("checkPoint from conf") {
+    //创建一个临时目录,获得绝对路径
     val checkpointDirectory = Utils.createTempDir().getAbsolutePath()
-
     val myConf = SparkContext.updatedConf(new SparkConf(false), master, appName)
+    //设置检查点路径
     myConf.set("spark.streaming.checkpoint.directory", checkpointDirectory)
     ssc = new StreamingContext(myConf, batchDuration)
     assert(ssc.checkpointDir != null)
@@ -126,18 +131,20 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("state matching") {
     import StreamingContextState._
-    assert(INITIALIZED === INITIALIZED)
-    assert(INITIALIZED != ACTIVE)
+    assert(INITIALIZED === INITIALIZED)//初始化
+    assert(INITIALIZED != ACTIVE)//活动状态
   }
 
   test("start and stop state check") {
     ssc = new StreamingContext(master, appName, batchDuration)
     addInputStream(ssc).register()
-
+    //初始化
     assert(ssc.getState() === StreamingContextState.INITIALIZED)
+    //活动
     ssc.start()
-    assert(ssc.getState() === StreamingContextState.ACTIVE)
+    assert(ssc.getState() === StreamingContextState.ACTIVE)    
     ssc.stop()
+    //暂停
     assert(ssc.getState() === StreamingContextState.STOPPED)
 
     // Make sure that the SparkContext is also stopped by default
@@ -149,6 +156,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("start with non-seriazable DStream checkpoints") {
     val checkpointDir = Utils.createTempDir()
     ssc = new StreamingContext(conf, batchDuration)
+    //检查点
     ssc.checkpoint(checkpointDir.getAbsolutePath)
     addInputStream(ssc).foreachRDD { rdd =>
       // Refer to this.appName from inside closure so that this closure refers to
@@ -171,6 +179,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     val updateFunc = (values: Seq[Int], state: Option[Int]) => {
       Some(values.sum + state.getOrElse(0))
     }
+    //没有设置检查点
     inputStream.map(x => (x, 1)).updateStateByKey[Int](updateFunc)
     // Require that the start fails because checkpoint directory was not set
     intercept[Exception] {
@@ -213,7 +222,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     assert(sc.getLocalProperty(SparkContext.SPARK_JOB_INTERRUPT_ON_CANCEL) === "true")
   }
 
-  test("start multiple times") {
+  test("start multiple times") {//运行多个实时处理
     ssc = new StreamingContext(master, appName, batchDuration)
     addInputStream(ssc).register()
     ssc.start()
@@ -222,7 +231,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     assert(ssc.getState() === StreamingContextState.ACTIVE)
   }
 
-  test("stop multiple times") {
+  test("stop multiple times") {//暂停多个实时处理
     ssc = new StreamingContext(master, appName, batchDuration)
     addInputStream(ssc).register()
     ssc.start()
@@ -232,7 +241,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     assert(ssc.getState() === StreamingContextState.STOPPED)
   }
 
-  test("stop before start") {
+  test("stop before start") {//运行之前停止不抛异常
     ssc = new StreamingContext(master, appName, batchDuration)
     addInputStream(ssc).register()
     ssc.stop()  // stop before start should not throw exception
@@ -253,17 +262,17 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("stop only streaming context") {
     val conf = new SparkConf().setMaster(master).setAppName(appName)
 
-    // Explicitly do not stop SparkContext
+    // Explicitly do not stop SparkContext,显示不能暂停
     ssc = new StreamingContext(conf, batchDuration)
     sc = ssc.sparkContext
     addInputStream(ssc).register()
     ssc.start()
-    ssc.stop(stopSparkContext = false)
+    ssc.stop(stopSparkContext = false)//只暂停实时流处理,不暂停Spark
     assert(ssc.getState() === StreamingContextState.STOPPED)
     assert(sc.makeRDD(1 to 100).collect().size === 100)
     sc.stop()
 
-    // Implicitly do not stop SparkContext
+    // Implicitly do not stop SparkContext,隐式,不暂停Spark上下文信息
     conf.set("spark.streaming.stopSparkContextByDefault", "false")
     ssc = new StreamingContext(conf, batchDuration)
     sc = ssc.sparkContext
@@ -277,7 +286,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("stop(stopSparkContext=true) after stop(stopSparkContext=false)") {
     ssc = new StreamingContext(master, appName, batchDuration)
     addInputStream(ssc).register()
-    ssc.stop(stopSparkContext = false)
+    ssc.stop(stopSparkContext = false)//
     assert(ssc.sc.makeRDD(1 to 100).collect().size === 100)
     ssc.stop(stopSparkContext = true)
     // Check that the SparkContext is actually stopped:
@@ -286,7 +295,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
   }
 
-  test("stop gracefully") {
+  test("stop gracefully") {//优雅地 gracefully
     val conf = new SparkConf().setMaster(master).setAppName(appName)
     conf.set("spark.cleaner.ttl", "3600s")
     sc = new SparkContext(conf)
@@ -302,9 +311,10 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
         logInfo("Count = " + count + ", Running count = " + runningCount)
       }
       ssc.start()
-    /*  eventually(timeout(10.seconds), interval(10.millis)) {
+      //最终 含有时间因素,表示目前还未发生,但终将发生
+      eventually(timeout(10.seconds), interval(10.millis)) {
         assert(runningCount > 0)
-      }*/
+      }
       ssc.stop(stopSparkContext = false, stopGracefully = true)
       logInfo("Running count = " + runningCount)
       logInfo("TestReceiver.counter = " + TestReceiver.counter.get())
@@ -332,7 +342,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
   }
 
-  test("stop slow receiver gracefully") {
+  test("stop slow receiver gracefully") {//
     val conf = new SparkConf().setMaster(master).setAppName(appName)
     conf.set("spark.streaming.gracefulStopTimeout", "20000s")
     sc = new SparkContext(conf)
@@ -377,7 +387,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     assert(!sourcesAfterStop.contains(streamingSourceAfterStop))
   }
 
-  test("awaitTermination") {
+  test("awaitTermination") {//用于等待子线程结束
     ssc = new StreamingContext(master, appName, batchDuration)
     val inputStream = addInputStream(ssc)
     inputStream.map(x => x).register()

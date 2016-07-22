@@ -31,7 +31,7 @@ import org.apache.spark.{SparkException, SparkConf, SparkFunSuite}
 
 class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
 
-  private val blockIntervalMs = 10
+  private val blockIntervalMs = 10 //间隔10毫秒
   //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
   private val conf = new SparkConf().set("spark.streaming.blockInterval", s"${blockIntervalMs}ms")
   @volatile private var blockGenerator: BlockGenerator = null
@@ -42,7 +42,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
   }
 
-  test("block generation and data callbacks") {
+  test("block generation and data callbacks") {//
     val listener = new TestBlockGeneratorListener
     val clock = new ManualClock()
 
@@ -77,6 +77,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
       assert(listener.onGenerateBlockCalled === false)
       assert(listener.onPushBlockCalled === false)
     }
+    //提前时钟产生块
     clock.advance(blockIntervalMs)  // advance clock to generate blocks
     withClue("blocks not generated or pushed") {
       eventually(timeout(1 second)) {
@@ -134,9 +135,9 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     blockGenerator.stop()   // Calling stop again should be fine
   }
 
-  test("stop ensures correct shutdown") {
+  test("stop ensures correct shutdown") {//确保正确的关闭
     val listener = new TestBlockGeneratorListener
-    val clock = new ManualClock()
+    val clock = new ManualClock()//手动时钟
     blockGenerator = new BlockGenerator(listener, 0, conf, clock)
     require(listener.onGenerateBlockCalled === false)
     blockGenerator.start()
@@ -194,9 +195,13 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     assert(listener.pushedData === data, "All data not pushed by stop()")
   }
 
-  test("block push errors are reported") {
+  test("block push errors are reported") {//块推送错误报告
     val listener = new TestBlockGeneratorListener {
-      @volatile var errorReported = false
+      /**
+       * Volatile修饰的成员变量在每次被线程访问时,都强迫从共享内存中重读该成员变量的值。
+       * 而且,当成员变量发生变化时,强迫线程将变化值回写到共享内存
+       */
+      @volatile var errorReported = false  //
       override def onPushBlock(
           blockId: StreamBlockId, arrayBuffer: mutable.ArrayBuffer[_]): Unit = {
         throw new SparkException("test")
@@ -237,15 +242,17 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     @volatile var onGenerateBlockCalled = false
     @volatile var onAddDataCalled = false
     @volatile var onPushBlockCalled = false
-
+    //取出数据块
     override def onPushBlock(blockId: StreamBlockId, arrayBuffer: mutable.ArrayBuffer[_]): Unit = {
       pushedData ++= arrayBuffer
       onPushBlockCalled = true
     }
     override def onError(message: String, throwable: Throwable): Unit = {}
+    //产生数据块
     override def onGenerateBlock(blockId: StreamBlockId): Unit = {
       onGenerateBlockCalled = true
     }
+    //增加数据
     override def onAddData(data: Any, metadata: Any): Unit = {
       addedData += data
       addedMetadata += metadata

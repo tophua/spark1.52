@@ -50,9 +50,12 @@ object MasterFailureTest extends Logging {
           "[<batch size in milliseconds>]")
       System.exit(1)
     }
+    //检查点
     val directory = args(0)
-    val numBatches = args(1).toInt
-    val batchDuration = if (args.size > 2) Milliseconds(args(2).toInt) else Seconds(1)
+    //批量时间
+    val numBatches = args(1).toInt//批量
+    //设置合理的批处理时间,一般500ms性能很不错了。Milliseconds 毫秒
+    val batchDuration = if (args.size > 2) Milliseconds(args(2).toInt) else Seconds(1)//1秒
 
     println("\n\n========================= MAP TEST =========================\n\n")
     testMap(directory, numBatches, batchDuration)
@@ -63,7 +66,7 @@ object MasterFailureTest extends Logging {
     println("\n\nSUCCESS\n\n")
     // scalastyle:on println
   }
-
+  //
   def testMap(directory: String, numBatches: Int, batchDuration: Duration) {
     // Input: time=1 ==> [ 1 ] , time=2 ==> [ 2 ] , time=3 ==> [ 3 ] , ...
     val input = (1 to numBatches).map(_.toString).toSeq

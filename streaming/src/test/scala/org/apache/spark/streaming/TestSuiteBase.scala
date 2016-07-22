@@ -66,8 +66,11 @@ class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], 
   def stop() {}
 
   def compute(validTime: Time): Option[RDD[T]] = {
+    //计算RDD时间
     logInfo("Computing RDD for time " + validTime)
+    //validTime 有效的时间,slide Duration持续时间
     val index = ((validTime - zeroTime) / slideDuration - 1).toInt
+    //
     val selectedInput = if (index < input.size) input(index) else Seq[T]()
 
     // lets us test cases where RDDs are not created
@@ -76,7 +79,9 @@ class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], 
     }
 
     // Report the input data's information to InputInfoTracker for testing
+    //
     val inputInfo = StreamInputInfo(id, selectedInput.length.toLong)
+    //Inputinfotracker里面是保存了元数据
     ssc.scheduler.inputInfoTracker.reportInfo(validTime, inputInfo)
 
     val rdd = ssc.sc.makeRDD(selectedInput, numPartitions)
@@ -216,6 +221,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   def batchDuration: Duration = Seconds(1)
 
   // Directory where the checkpoint data will be saved
+  //检查点数据保存目录
   lazy val checkpointDir: String = {
     val dir = Utils.createTempDir()
     logDebug(s"checkpointDir: $dir")
@@ -223,15 +229,19 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   }
 
   // Number of partitions of the input parallel collections created for testing
+  //分区数
   def numInputPartitions: Int = 2
 
   // Maximum time to wait before the test times out
+  //最大等待时间,即超时
   def maxWaitTimeMillis: Int = 10000
 
   // Whether to use manual clock or not
+  //是否使用手动时钟
   def useManualClock: Boolean = true
 
   // Whether to actually wait in real time before changing manual clock
+  //等待之前是否实时在改变人工时钟
   def actuallyWait: Boolean = false
 
   // A SparkConf to use in tests. Can be modified before calling setupStreams to configure things.
@@ -240,6 +250,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     .setAppName(framework)
 
   // Timeout for use in ScalaTest `eventually` blocks
+  //
   val eventuallyTimeout: PatienceConfiguration.Timeout = timeout(Span(10, ScalaTestSeconds))
 
   // Default before function for any streaming test suite. Override this
@@ -247,9 +258,11 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   def beforeFunction() {
     if (useManualClock) {
       logInfo("Using manual clock")
+      //手动时间
       conf.set("spark.streaming.clock", "org.apache.spark.util.ManualClock")
     } else {
       logInfo("Using real clock")
+      //系统时间
       conf.set("spark.streaming.clock", "org.apache.spark.util.SystemClock")
     }
   }
@@ -265,7 +278,9 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Run a block of code with the given StreamingContext and automatically
+   * 与给定的StreamingContext和自动运行的代码块
    * stop the context when the block completes or when an exception is thrown.
+   * 阻止块完成或引发异常时的上下文
    */
   def withStreamingContext[R](ssc: StreamingContext)(block: StreamingContext => R): R = {
     try {
@@ -306,13 +321,14 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       operation: DStream[U] => DStream[V],
       numPartitions: Int = numInputPartitions
     ): StreamingContext = {
-    // Create StreamingContext
+    // Create StreamingContext,创建实时上下文
     val ssc = new StreamingContext(conf, batchDuration)
     if (checkpointDir != null) {
-      ssc.checkpoint(checkpointDir)
+      ssc.checkpoint(checkpointDir)//设置检查点
     }
 
     // Setup the stream computation
+    //设置流计算
     val inputStream = new TestInputStream(ssc, input, numPartitions)
     val operatedStream = operation(inputStream)
     val outputStream = new TestOutputStreamWithPartitions(operatedStream,
@@ -425,6 +441,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Verify whether the output values after running a DStream operation
+   * 验证是否输出值运行一个dstream操作
    * is same as the expected output values, by comparing the output
    * collections either as lists (order matters) or sets (order does not matter)
    */
@@ -436,9 +453,11 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     logInfo("--------------------------------")
     logInfo("output.size = " + output.size)
     logInfo("output")
+    //
     output.foreach(x => logInfo("[" + x.mkString(",") + "]"))
     logInfo("expected output.size = " + expectedOutput.size)
     logInfo("expected output")
+    //期望值
     expectedOutput.foreach(x => logInfo("[" + x.mkString(",") + "]"))
     logInfo("--------------------------------")
 

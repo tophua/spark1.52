@@ -31,7 +31,7 @@ import org.apache.spark.streaming.receiver._
 
 /** Testsuite for receiver scheduling */
 class ReceiverTrackerSuite extends TestSuiteBase {
-
+//receiver 接收到的数据
   test("send rate update to receivers") {
     withStreamingContext(new StreamingContext(conf, Milliseconds(100))) { ssc =>
       ssc.scheduler.listenerBus.start(ssc.sc)

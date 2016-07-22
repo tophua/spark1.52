@@ -19,52 +19,52 @@ package org.apache.spark.streaming
 
 class TimeSuite extends TestSuiteBase {
 
-  test("less") {
+  test("less") {//小于
     assert(new Time(999) < new Time(1000))
     assert(new Time(0) < new Time(1))
     assert(!(new Time(1000) < new Time(999)))
     assert(!(new Time(1000) < new Time(1000)))
   }
 
-  test("lessEq") {
+  test("lessEq") {//小于等于
     assert(new Time(999) <= new Time(1000))
     assert(new Time(0) <= new Time(1))
     assert(!(new Time(1000) <= new Time(999)))
     assert(new Time(1000) <= new Time(1000))
   }
 
-  test("greater") {
+  test("greater") {//大于
     assert(!(new Time(999) > new Time(1000)))
     assert(!(new Time(0) > new Time(1)))
     assert(new Time(1000) > new Time(999))
     assert(!(new Time(1000) > new Time(1000)))
   }
 
-  test("greaterEq") {
+  test("greaterEq") {//大于等于
     assert(!(new Time(999) >= new Time(1000)))
     assert(!(new Time(0) >= new Time(1)))
     assert(new Time(1000) >= new Time(999))
     assert(new Time(1000) >= new Time(1000))
   }
 
-  test("plus") {
+  test("plus") {//加法
     assert((new Time(1000) + new Duration(100)) == new Time(1100))
     assert((new Time(1000) + new Duration(0)) == new Time(1000))
   }
 
-  test("minus Time") {
+  test("minus Time") {//减法
     assert((new Time(1000) - new Time(100)) == new Duration(900))
     assert((new Time(1000) - new Time(0)) == new Duration(1000))
     assert((new Time(1000) - new Time(1000)) == new Duration(0))
   }
 
-  test("minus Duration") {
+  test("minus Duration") {//
     assert((new Time(1000) - new Duration(100)) == new Time(900))
     assert((new Time(1000) - new Duration(0)) == new Time(1000))
     assert((new Time(1000) - new Duration(1000)) == new Time(0))
   }
 
-  test("floor") {
+  test("floor") {//向下取整计算,它返回的是小于或等于函数参数,并且与之最接近的整数
     assert(new Time(1350).floor(new Duration(200)) == new Time(1200))
     assert(new Time(1200).floor(new Duration(200)) == new Time(1200))
     assert(new Time(199).floor(new Duration(200)) == new Time(0))
@@ -74,20 +74,20 @@ class TimeSuite extends TestSuiteBase {
     assert(new Time(1350).floor(new Duration(200), new Time(200)) == new Time(1200))
   }
 
-  test("isMultipleOf") {
+  test("isMultipleOf") {//倍数
     assert(new Time(1000).isMultipleOf(new Duration(5)))
     assert(new Time(1000).isMultipleOf(new Duration(1000)))
     assert(new Time(1000).isMultipleOf(new Duration(1)))
     assert(!new Time(1000).isMultipleOf(new Duration(6)))
   }
 
-  test("min") {
+  test("min") {//最小
     assert(new Time(999).min(new Time(1000)) == new Time(999))
     assert(new Time(1000).min(new Time(999)) == new Time(999))
     assert(new Time(1000).min(new Time(1000)) == new Time(1000))
   }
 
-  test("max") {
+  test("max") {//最大
     assert(new Time(999).max(new Time(1000)) == new Time(1000))
     assert(new Time(1000).max(new Time(999)) == new Time(1000))
     assert(new Time(1000).max(new Time(1000)) == new Time(1000))

@@ -38,7 +38,7 @@ import org.apache.spark.util.Utils
 /** Testsuite for testing the network receiver behavior */
 class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 
-  test("receiver life cycle") {
+  test("receiver life cycle") {//生命周期
 
     val receiver = new FakeReceiver
     val executor = new FakeReceiverSupervisor(receiver)

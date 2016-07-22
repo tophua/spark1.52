@@ -40,8 +40,10 @@ class FailureSuite extends SparkFunSuite with BeforeAndAfter with Logging {
 
   after {
     if (directory != null) {
+     //删除临时目录
       Utils.deleteRecursively(directory)
     }
+    //停止所有活动实时流
     StreamingContext.getActive().foreach { _.stop() }
   }
 

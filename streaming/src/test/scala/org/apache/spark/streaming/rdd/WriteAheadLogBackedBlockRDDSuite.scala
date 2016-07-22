@@ -42,10 +42,12 @@ class WriteAheadLogBackedBlockRDDSuite
   var dir: File = null
 
   override def beforeEach(): Unit = {
+    //创建临时目录
     dir = Utils.createTempDir()
   }
 
   override def afterEach(): Unit = {
+    //递归删除目录
     Utils.deleteRecursively(dir)
   }
 

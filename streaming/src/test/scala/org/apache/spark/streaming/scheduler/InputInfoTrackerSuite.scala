@@ -21,7 +21,7 @@ import org.scalatest.BeforeAndAfter
 
 import org.apache.spark.{SparkConf, SparkFunSuite}
 import org.apache.spark.streaming.{Time, Duration, StreamingContext}
-
+//输入流信息跟踪器
 class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
 
   private var ssc: StreamingContext = _
@@ -29,7 +29,7 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
   before {
     val conf = new SparkConf().setMaster("local[2]").setAppName("DirectStreamTacker")
     if (ssc == null) {
-      ssc = new StreamingContext(conf, Duration(1000))
+      ssc = new StreamingContext(conf, Duration(1000))//设置批理处理时间,1000毫秒
     }
   }
 
@@ -50,7 +50,7 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
     val inputInfo2 = StreamInputInfo(streamId2, 300L)
     inputInfoTracker.reportInfo(time, inputInfo1)
     inputInfoTracker.reportInfo(time, inputInfo2)
-
+    //根据时间获得跟踪批处理信息
     val batchTimeToInputInfos = inputInfoTracker.getInfo(time)
     assert(batchTimeToInputInfos.size == 2)
     assert(batchTimeToInputInfos.keys === Set(streamId1, streamId2))
@@ -60,11 +60,13 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
   }
 
   test("test cleanup InputInfo from InputInfoTracker") {
+    //测试理清InputInfo
     val inputInfoTracker = new InputInfoTracker(ssc)
-
+    //
     val streamId1 = 0
     val inputInfo1 = StreamInputInfo(streamId1, 100L)
     val inputInfo2 = StreamInputInfo(streamId1, 300L)
+    //增加跟踪信息
     inputInfoTracker.reportInfo(Time(0), inputInfo1)
     inputInfoTracker.reportInfo(Time(1), inputInfo2)
 
@@ -73,6 +75,7 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
     assert(inputInfoTracker.getInfo(Time(1))(streamId1) === inputInfo2)
 
     inputInfoTracker.cleanup(Time(1))
+    ////清理之后再获得为None
     assert(inputInfoTracker.getInfo(Time(0)).get(streamId1) === None)
     assert(inputInfoTracker.getInfo(Time(1))(streamId1) === inputInfo2)
   }

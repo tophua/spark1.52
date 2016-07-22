@@ -19,91 +19,91 @@ package org.apache.spark.streaming
 
 class DurationSuite extends TestSuiteBase {
 
-  test("less") {
+  test("less") {//小于
     assert(new Duration(999) < new Duration(1000))
     assert(new Duration(0) < new Duration(1))
     assert(!(new Duration(1000) < new Duration(999)))
     assert(!(new Duration(1000) < new Duration(1000)))
   }
 
-  test("lessEq") {
+  test("lessEq") {//小于等于
     assert(new Duration(999) <= new Duration(1000))
     assert(new Duration(0) <= new Duration(1))
     assert(!(new Duration(1000) <= new Duration(999)))
     assert(new Duration(1000) <= new Duration(1000))
   }
 
-  test("greater") {
+  test("greater") {//大于
     assert(!(new Duration(999) > new Duration(1000)))
     assert(!(new Duration(0) > new Duration(1)))
     assert(new Duration(1000) > new Duration(999))
     assert(!(new Duration(1000) > new Duration(1000)))
   }
 
-  test("greaterEq") {
+  test("greaterEq") {//大于等于
     assert(!(new Duration(999) >= new Duration(1000)))
     assert(!(new Duration(0) >= new Duration(1)))
     assert(new Duration(1000) >= new Duration(999))
     assert(new Duration(1000) >= new Duration(1000))
   }
 
-  test("plus") {
+  test("plus") {//加
     assert((new Duration(1000) + new Duration(100)) == new Duration(1100))
     assert((new Duration(1000) + new Duration(0)) == new Duration(1000))
   }
 
-  test("minus") {
+  test("minus") {//减
     assert((new Duration(1000) - new Duration(100)) == new Duration(900))
     assert((new Duration(1000) - new Duration(0)) == new Duration(1000))
     assert((new Duration(1000) - new Duration(1000)) == new Duration(0))
   }
 
-  test("times") {
+  test("times") {//乘
     assert((new Duration(100) * 2) == new Duration(200))
     assert((new Duration(100) * 1) == new Duration(100))
     assert((new Duration(100) * 0) == new Duration(0))
   }
 
-  test("div") {
+  test("div") {//除
     assert((new Duration(1000) / new Duration(5)) == 200.0)
     assert((new Duration(1000) / new Duration(1)) == 1000.0)
     assert((new Duration(1000) / new Duration(1000)) == 1.0)
     assert((new Duration(1000) / new Duration(2000)) == 0.5)
   }
 
-  test("isMultipleOf") {
+  test("isMultipleOf") {//
     assert(new Duration(1000).isMultipleOf(new Duration(5)))
     assert(new Duration(1000).isMultipleOf(new Duration(1000)))
     assert(new Duration(1000).isMultipleOf(new Duration(1)))
     assert(!new Duration(1000).isMultipleOf(new Duration(6)))
   }
 
-  test("min") {
+  test("min") {//最小值
     assert(new Duration(999).min(new Duration(1000)) == new Duration(999))
     assert(new Duration(1000).min(new Duration(999)) == new Duration(999))
     assert(new Duration(1000).min(new Duration(1000)) == new Duration(1000))
   }
 
-  test("max") {
+  test("max") {//最大值
     assert(new Duration(999).max(new Duration(1000)) == new Duration(1000))
     assert(new Duration(1000).max(new Duration(999)) == new Duration(1000))
     assert(new Duration(1000).max(new Duration(1000)) == new Duration(1000))
   }
 
-  test("isZero") {
+  test("isZero") {//是否为0值
     assert(new Duration(0).isZero)
     assert(!(new Duration(1).isZero))
   }
 
-  test("Milliseconds") {
+  test("Milliseconds") {//毫秒
     assert(new Duration(100) == Milliseconds(100))
   }
 
-  test("Seconds") {
+  test("Seconds") {//秒
     assert(new Duration(30 * 1000) == Seconds(30))
   }
 
-  test("Minutes") {
+  test("Minutes") {//分
     assert(new Duration(2 * 60 * 1000) == Minutes(2))
   }
 

@@ -44,7 +44,7 @@ import org.apache.spark.streaming.receiver.Receiver
 
 class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
-  test("socket input stream") {
+  test("socket input stream") {//网络输入流
     withTestServer(new TestServer()) { testServer =>
       // Start the server
       testServer.start()
@@ -55,7 +55,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
         val input = Seq(1, 2, 3, 4, 5)
         // Use "batchCount" to make sure we check the result after all batches finish
-        val batchCounter = new BatchCounter(ssc)
+        val batchCounter = new BatchCounter(ssc)//
         val networkStream = ssc.socketTextStream(
           "localhost", testServer.port, StorageLevel.MEMORY_AND_DISK)
         val outputBuffer = new ArrayBuffer[Seq[String]] with SynchronizedBuffer[Seq[String]]
@@ -64,14 +64,17 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         ssc.start()
 
         // Feed data to the server to send to the network receiver
+        //将数据发送到服务器发送到网络接收器
         val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
         val expectedOutput = input.map(_.toString)
         for (i <- 0 until input.size) {
           testServer.send(input(i).toString + "\n")
-          Thread.sleep(500)
+          Thread.sleep(500)//500毫秒,0.5秒
+          //批量间隔为毫秒
           clock.advance(batchDuration.milliseconds)
         }
         // Make sure we finish all batches before "stop"
+        //等待直到批处理完成,3000毫秒超时
         if (!batchCounter.waitUntilBatchesCompleted(input.size, 30000)) {
           fail("Timeout: cannot finish all batches in 30 seconds")
         }
@@ -109,7 +112,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     }
   }
 
-  test("socket input stream - no block in a batch") {
+  test("socket input stream - no block in a batch") {//没有
     withTestServer(new TestServer()) { testServer =>
       testServer.start()
 
@@ -128,7 +131,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         clock.advance(batchDuration.milliseconds)
 
         // Make sure the first batch is finished
-        if (!batchCounter.waitUntilBatchesCompleted(1, 30000)) {
+        if (!batchCounter.waitUntilBatchesCompleted(1, 30000)) {//没有块处理
           fail("Timeout: cannot finish all batches in 30 seconds")
         }
 
@@ -139,22 +142,25 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     }
   }
 
-  test("binary records stream") {
+  test("binary records stream") {//二进制数据流
     val testDir: File = null
     try {
-      val batchDuration = Seconds(2)
-      val testDir = Utils.createTempDir()
+      val batchDuration = Seconds(2)//2秒
+      val testDir = Utils.createTempDir()//创建临时目录
       // Create a file that exists before the StreamingContext is created:
       val existingFile = new File(testDir, "0")
       Files.write("0\n", existingFile, Charset.forName("UTF-8"))
       assert(existingFile.setLastModified(10000) && existingFile.lastModified === 10000)
 
       // Set up the streaming context and input streams
+      //
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
         // This `setTime` call ensures that the clock is past the creation time of `existingFile`
+        //
         clock.setTime(existingFile.lastModified + batchDuration.milliseconds)
         val batchCounter = new BatchCounter(ssc)
+        //二进制记录流,长度为1
         val fileStream = ssc.binaryRecordsStream(testDir.toString, 1)
         val outputBuffer = new ArrayBuffer[Seq[Array[Byte]]]
           with SynchronizedBuffer[Seq[Array[Byte]]]
@@ -162,8 +168,8 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         outputStream.register()
         ssc.start()
 
-        // Advance the clock so that the files are created after StreamingContext starts, but
-        // not enough to trigger a batch
+        // Advance the clock so that the files are created after StreamingContext starts, 
+        // but not enough to trigger a batch,但不足以触发一个批处理
         clock.advance(batchDuration.milliseconds / 2)
 
         val input = Seq(1, 2, 3, 4, 5)
@@ -181,8 +187,9 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
             assert(batchCounter.getNumCompletedBatches === i)
           }
         }
-
+        //期望输出
         val expectedOutput = input.map(i => i.toByte)
+        //实际输出
         val obtainedOutput = outputBuffer.flatten.toList.map(i => i(0).toByte)
         assert(obtainedOutput === expectedOutput)
       }
@@ -201,17 +208,24 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
   test("multi-thread receiver") {
     // set up the test receiver
+    //多线程接收数据
     val numThreads = 10
+    //记录线程数
     val numRecordsPerThread = 1000
+    //
     val numTotalRecords = numThreads * numRecordsPerThread
+    //测试多线程接收数据
     val testReceiver = new MultiThreadTestReceiver(numThreads, numRecordsPerThread)
     MultiThreadTestReceiver.haveAllThreadsFinished = false
 
     // set up the network stream using the test receiver
     val ssc = new StreamingContext(conf, batchDuration)
+    //数据源输入
     val networkStream = ssc.receiverStream[Int](testReceiver)
     val countStream = networkStream.count
+    
     val outputBuffer = new ArrayBuffer[Seq[Long]] with SynchronizedBuffer[Seq[Long]]
+    
     val outputStream = new TestOutputStream(countStream, outputBuffer)
     def output: ArrayBuffer[Long] = outputBuffer.flatMap(x => x)
     outputStream.register()
@@ -238,12 +252,12 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     assert(output.sum === numTotalRecords)
   }
 
-  test("queue input stream - oneAtATime = true") {
+  test("queue input stream - oneAtATime = true") {//队列输入流,一次一个
     // Set up the streaming context and input streams
     val ssc = new StreamingContext(conf, batchDuration)
-    val queue = new SynchronizedQueue[RDD[String]]()
-    val queueStream = ssc.queueStream(queue, oneAtATime = true)
-    val outputBuffer = new ArrayBuffer[Seq[String]] with SynchronizedBuffer[Seq[String]]
+    val queue = new SynchronizedQueue[RDD[String]]()//
+    val queueStream = ssc.queueStream(queue, oneAtATime = true)//一次一个
+    val outputBuffer = new ArrayBuffer[Seq[String]] with SynchronizedBuffer[Seq[String]]//
     val outputStream = new TestOutputStream(queueStream, outputBuffer)
     def output: ArrayBuffer[Seq[String]] = outputBuffer.filter(_.size > 0)
     outputStream.register()
@@ -281,7 +295,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     }
   }
 
-  test("queue input stream - oneAtATime = false") {
+  test("queue input stream - oneAtATime = false") {//
     // Set up the streaming context and input streams
     val ssc = new StreamingContext(conf, batchDuration)
     val queue = new SynchronizedQueue[RDD[String]]()
@@ -327,7 +341,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     }
   }
 
-  test("test track the number of input stream") {
+  test("test track the number of input stream") {//跟踪输入流为数字
     withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
 
       class TestInputDStream extends InputDStream[String](ssc) {
@@ -350,6 +364,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         receiverInputStreams.length + inputStreams.length)
       assert(ssc.graph.getReceiverInputStreams().length == receiverInputStreams.length)
       assert(ssc.graph.getReceiverInputStreams() === receiverInputStreams)
+      //tabulate 返回包含一个给定的函数的值超过从0开始的范围内的整数值的数组
       assert(ssc.graph.getInputStreams().map(_.id) === Array.tabulate(5)(i => i))
       assert(receiverInputStreams.map(_.id) === Array(0, 1))
     }
@@ -358,11 +373,15 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
   def testFileStream(newFilesOnly: Boolean) {
     val testDir: File = null
     try {
-      val batchDuration = Seconds(2)
+      //批处理时间
+      val batchDuration = Seconds(2)//秒
+      //创建临时文件
       val testDir = Utils.createTempDir()
       // Create a file that exists before the StreamingContext is created:
       val existingFile = new File(testDir, "0")
+      //输出存在文件
       Files.write("0\n", existingFile, Charset.forName("UTF-8"))
+      //setLastModified 新的最后修改时间
       assert(existingFile.setLastModified(10000) && existingFile.lastModified === 10000)
 
       // Set up the streaming context and input streams
@@ -415,11 +434,14 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
 /** This is a server to test the network input stream */
 class TestServer(portToBind: Int = 0) extends Logging {
-
+ //是一个由数组支持的有界阻塞队列。此队列按 FIFO(先进先出)原则对元素进行排序。
+ //让容量满时往BlockingQueue中添加数据时会造成阻塞，当容量为空时取元素操作会阻塞
   val queue = new ArrayBlockingQueue[String](100)
-
+  //服务器端需要创建监听端口的 ServerSocket, ServerSocket 负责接收客户连接请求
   val serverSocket = new ServerSocket(portToBind)
-
+//CountDownLatch,在完成一组正在其他线程中执行的操作之前,它允许一个或多个线程一直等待.
+//是一个同步计数器,构造时传入int参数,该参数就是计数器的初始值，每调用一次countDown()方法，
+//计数器减1,计数器大于0 时，await()方法会阻塞程序继续执行
   private val startLatch = new CountDownLatch(1)
 
   val servingThread = new Thread() {
@@ -427,23 +449,28 @@ class TestServer(portToBind: Int = 0) extends Logging {
       try {
         while (true) {
           logInfo("Accepting connections on port " + port)
-          val clientSocket = serverSocket.accept()
+          val clientSocket = serverSocket.accept()//等待接收客户连接请求
           if (startLatch.getCount == 1) {
             // The first connection is a test connection to implement "waitForStart", so skip it
             // and send a signal
             if (!clientSocket.isClosed) {
-              clientSocket.close()
+              clientSocket.close()//关闭客户端连接
             }
+           //每调用一次countDown()方法，计数器减1,计数器大于0 时，await()方法会阻塞程序继续执行 
             startLatch.countDown()
           } else {
             // Real connections
             logInfo("New connection")
             try {
+              //客户端向服务器发送数据时，会根据数据包的大小决定是否立即发送
               clientSocket.setTcpNoDelay(true)
+              //创建一个使用默认大小输出缓冲区的缓冲字符输出流
               val outputStream = new BufferedWriter(
+                  //把字节流转化为字符流
                 new OutputStreamWriter(clientSocket.getOutputStream))
 
               while (clientSocket.isConnected) {
+                //相当于先get然后再remove掉,参数指定等待的毫秒数,无论I/O是否准备好,poll都会返回
                 val msg = queue.poll(100, TimeUnit.MILLISECONDS)
                 if (msg != null) {
                   outputStream.write(msg)
@@ -486,7 +513,8 @@ class TestServer(portToBind: Int = 0) extends Logging {
     // We will create a test connection to the server so that we can make sure it has started.
     val socket = new Socket("localhost", port)
     try {
-      startLatch.await(millis, TimeUnit.MILLISECONDS)
+      //使当前线程在锁存器倒计数至零之前一直等待，除非线程被中断或超出了指定的等待时间     
+      startLatch.await(millis, TimeUnit.MILLISECONDS)//timeout - 要等待的最长时间
     } finally {
       if (!socket.isClosed) {
         socket.close()
@@ -496,29 +524,34 @@ class TestServer(portToBind: Int = 0) extends Logging {
 
   def send(msg: String) { queue.put(msg) }
 
-  def stop() { servingThread.interrupt() }
+  def stop() { servingThread.interrupt() }//在等待时被中断
 
   def port: Int = serverSocket.getLocalPort
 }
 
-/** This is a receiver to test multiple threads inserting data using block generator */
+/** 
+ *  This is a receiver to test multiple threads inserting data using block generator 
+ *  这是一个测试多线程生成插入数据块接收器
+ *  */
 class MultiThreadTestReceiver(numThreads: Int, numRecordsPerThread: Int)
   extends Receiver[Int](StorageLevel.MEMORY_ONLY_SER) with Logging {
-  lazy val executorPool = Executors.newFixedThreadPool(numThreads)
-  lazy val finishCount = new AtomicInteger(0)
+  lazy val executorPool = Executors.newFixedThreadPool(numThreads)//线程池数
+  lazy val finishCount = new AtomicInteger(0)//AtomicInteger则通过一种线程安全的加减操作接口
 
   def onStart() {
     (1 to numThreads).map(threadId => {
       val runnable = new Runnable {
         def run() {
           (1 to numRecordsPerThread).foreach(i =>
+            //存储接收到的数据到Spark的内存中的单个项目
             store(threadId * numRecordsPerThread + i) )
-          if (finishCount.incrementAndGet == numThreads) {
+          if (finishCount.incrementAndGet == numThreads) {//
             MultiThreadTestReceiver.haveAllThreadsFinished = true
           }
           logInfo("Finished thread " + threadId)
         }
       }
+      //提交线程池
       executorPool.submit(runnable)
     })
   }

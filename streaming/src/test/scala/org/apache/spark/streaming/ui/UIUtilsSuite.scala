@@ -36,22 +36,22 @@ class UIUtilsSuite extends SparkFunSuite with Matchers{
     assert("days" === UIUtils.shortTimeUnitString(TimeUnit.DAYS))
   }
 
-  test("normalizeDuration") {
-    verifyNormalizedTime(900, TimeUnit.MILLISECONDS, 900)
-    verifyNormalizedTime(1.0, TimeUnit.SECONDS, 1000)
-    verifyNormalizedTime(1.0, TimeUnit.MINUTES, 60 * 1000)
-    verifyNormalizedTime(1.0, TimeUnit.HOURS, 60 * 60 * 1000)
-    verifyNormalizedTime(1.0, TimeUnit.DAYS, 24 * 60 * 60 * 1000)
+  test("normalizeDuration") {//验证正常时间
+    verifyNormalizedTime(900, TimeUnit.MILLISECONDS, 900)//毫秒
+    verifyNormalizedTime(1.0, TimeUnit.SECONDS, 1000)//秒
+    verifyNormalizedTime(1.0, TimeUnit.MINUTES, 60 * 1000)//分
+    verifyNormalizedTime(1.0, TimeUnit.HOURS, 60 * 60 * 1000)//小时
+    verifyNormalizedTime(1.0, TimeUnit.DAYS, 24 * 60 * 60 * 1000)//天
   }
 
   private def verifyNormalizedTime(
       expectedTime: Double, expectedUnit: TimeUnit, input: Long): Unit = {
-    val (time, unit) = UIUtils.normalizeDuration(input)
+    val (time, unit) = UIUtils.normalizeDuration(input)//正常时间
     time should be (expectedTime +- 1E-6)
     unit should be (expectedUnit)
   }
 
-  test("convertToTimeUnit") {
+  test("convertToTimeUnit") {//时间转换
     verifyConvertToTimeUnit(60.0 * 1000 * 1000 * 1000, 60 * 1000, TimeUnit.NANOSECONDS)
     verifyConvertToTimeUnit(60.0 * 1000 * 1000, 60 * 1000, TimeUnit.MICROSECONDS)
     verifyConvertToTimeUnit(60 * 1000, 60 * 1000, TimeUnit.MILLISECONDS)
@@ -68,6 +68,7 @@ class UIUtilsSuite extends SparkFunSuite with Matchers{
   }
 
   test("formatBatchTime") {
+    //获得默认时区
     val tzForTest = TimeZone.getTimeZone("America/Los_Angeles")
     val batchTime = 1431637480452L // Thu May 14 14:04:40 PDT 2015
     assert("2015/05/14 14:04:40" === UIUtils.formatBatchTime(batchTime, 1000, timezone = tzForTest))
