@@ -34,13 +34,13 @@ class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
 
   private lazy val dataRDD = sc.parallelize(data, 2)
 
-  test("Correct computing use a PCA wrapper") {
+  test("Correct computing use a PCA wrapper") {   
     val k = dataRDD.count().toInt
     val pca = new PCA(k).fit(dataRDD)
-
+   //转换分布式矩阵分
     val mat = new RowMatrix(dataRDD)
-    val pc = mat.computePrincipalComponents(k)
-
+    //计算主成分析,将维度降为K
+    val pc = mat.computePrincipalComponents(k)  
     val pca_transform = pca.transform(dataRDD).collect()
     val mat_multiply = mat.multiply(pc).rows.collect()
 

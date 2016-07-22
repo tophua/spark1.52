@@ -50,7 +50,7 @@ object NativeBayesSQL {
     //[1,WrappedArray(苹果, 梨, 香蕉),(100,[23,72,92],[1.0,1.0,1.0])]
     //结果中，“苹果”用23来表示，第一个文档中，词频为2，第二个文档中词频为1.
 
-    //计算TF-IDF值
+    //逆文档频率(IDF)，用来衡量一个词语特定文档的相关度
     var idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
     var idfModel = idf.fit(featurizedData)
     var rescaledData = idfModel.transform(featurizedData)

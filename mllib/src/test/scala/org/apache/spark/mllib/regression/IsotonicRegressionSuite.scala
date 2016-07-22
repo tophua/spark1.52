@@ -24,7 +24,9 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 /**
- * 保序回归
+ * 保序回归:从该序列的首元素往后观察，一旦出现乱序现象停止该轮观察，从该乱序元素开始逐个吸收元素组成一个序列，
+ * 					直到该序列所有元素的平均值小于或等于下一个待吸收的元素.
+ * http://blog.csdn.net/fsz521/article/details/7706250 具体规则
  */
 class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers {
 
@@ -47,6 +49,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
       weights: Seq[Double],
       isotonic: Boolean): IsotonicRegressionModel = {
     val trainRDD = sc.parallelize(generateIsotonicInput(labels, weights)).cache()
+    //isotonic，默认值是true，此参数指定保序回归是保序的（单调增加）还是不保序的（单调减少）
     new IsotonicRegression().setIsotonic(isotonic).run(trainRDD)
   }
 
@@ -69,11 +72,13 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
      array([  1. ,   2. ,   2. ,   2. ,   6. ,  16.5,  16.5,  17. ,  18. ])
      */
     val model = runIsotonicRegression(Seq(1, 2, 3, 1, 6, 17, 16, 17, 18), true)
-
+   //返回一个包含给定函数的值超过整数值从0开始范围的二维数组
     assert(Array.tabulate(9)(x => model.predict(x)) === Array(1, 2, 2, 2, 6, 16.5, 16.5, 17, 18))
-
+   //boundaries 边界数据
     assert(model.boundaries === Array(0, 1, 3, 4, 5, 6, 7, 8))
+    //predictions对应边界数据组的值
     assert(model.predictions === Array(1, 2, 2, 6, 16.5, 16.5, 17.0, 18.0))
+    //序列升序或者降序
     assert(model.isotonic)
   }
 
@@ -109,13 +114,13 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predictions === Array(1.0))
   }
 
-  test("isotonic regression strictly increasing sequence") {
+  test("isotonic regression strictly increasing sequence(递增)") {
     val model = runIsotonicRegression(Seq(1, 2, 3, 4, 5), true)
 
     assert(model.predictions === Array(1, 2, 3, 4, 5))
   }
 
-  test("isotonic regression strictly decreasing sequence") {
+  test("isotonic regression strictly decreasing sequence(渐减)") {
     val model = runIsotonicRegression(Seq(5, 4, 3, 2, 1), true)
 
     assert(model.boundaries === Array(0, 4))

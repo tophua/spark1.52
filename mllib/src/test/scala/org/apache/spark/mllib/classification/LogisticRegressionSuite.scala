@@ -289,7 +289,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     lr.optimizer.
       setStepSize(1.0).
       setNumIterations(10).
-      setRegParam(1.0)
+      setRegParam(1.0)//正则因子
 
     val model = lr.run(testRDD, initialWeights)
 

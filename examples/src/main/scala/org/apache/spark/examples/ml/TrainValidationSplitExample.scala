@@ -36,17 +36,17 @@ import org.apache.spark.{SparkConf, SparkContext}
 object TrainValidationSplitExample {
 
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf().setAppName("TrainValidationSplitExample")
+    val conf = new SparkConf().setAppName("TrainValidationSplitExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
     // Prepare training and test data.
     // 加载数据
-    val data = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt").toDF()
+    val data = MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt").toDF()
    // 将数据随机分配为两份，一份用于训练，一份用于测试
     val Array(training, test) = data.randomSplit(Array(0.9, 0.1), seed = 12345)
-
+   //线性回归
     val lr = new LinearRegression()
 
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
@@ -60,13 +60,13 @@ object TrainValidationSplitExample {
 
     // In this case the estimator is simply the linear regression.
     // A TrainValidationSplit requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
-    val trainValidationSplit = new TrainValidationSplit()
+    val trainValidationSplit = new TrainValidationSplit()//来做模型超参数优化
       .setEstimator(lr)//评估器或适配器
       .setEvaluator(new RegressionEvaluator)//评估器或适配器
       .setEstimatorParamMaps(paramGrid)
 
     // 80% of the data will be used for training and the remaining 20% for validation.
-    trainValidationSplit.setTrainRatio(0.8)
+    trainValidationSplit.setTrainRatio(0.8)//
 
     // Run train validation split, and choose the best set of parameters.
     val model = trainValidationSplit.fit(training)

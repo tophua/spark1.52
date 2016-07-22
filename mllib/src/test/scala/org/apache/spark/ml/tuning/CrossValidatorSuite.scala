@@ -37,30 +37,49 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
   override def beforeAll(): Unit = {
     super.beforeAll()
     val sqlContext = new SQLContext(sc)
+    val input=generateLogisticInput(1.0, 1.0, 100, 42)
+    println("input:"+input)
+    /**
+     * input:Vector((1.0,[1.1419053154730547]), (0.0,[0.9194079489827879]), (0.0,[-0.9498666368908959]), 
+     * (1.0,[-1.1069902863993377]), (0.0,[0.2809776380727795]), (1.0,[0.6846227956326554]), 
+     * (1.0,[-0.8172214073987268]), (0.0,[-1.3966434026780434]), (1.0,[-0.19094451307087512]),
+     * (1.0,[1.4862133923906502]), (1.0,[0.8023071496873626]), (0.0,[-0.12151292466549345]), 
+     * (1.0,[1.4105062239438624]), (0.0,[-0.6402327822135738]), (0.0,[-1.2096444592532913]), 
+     * (1.0,[0.35375769787202876]), (0.0,[-0.4903496491990076]), (0.0,[0.5507215382743629]), 
+     * (1.0,[-1.2035510019650835]), (1.0,[0.3210160806416416]), (1.0,[1.5511476388671834]), 
+     * (1.0,[0.43853028624710505]), (1.0,[0.4815980608245389]), (1.0,[1.5196310789680683]), 
+     * (0.0,[-0.2768317291873249]), (1.0,[-0.08393897849486337]), (1.0,[1.255833005788796]), 
+     * (0.0,[-0.3252727938665772]), (0.0,[-0.17329033306108363]), (0.0,[-1.8585851445864527]),
+     * (1.0,[1.4238069456328435]), (0.0,[-1.363726024075023]), (0.0,[-1.964666098753878]), 
+     * (1.0,[-0.9185948439341892]), (0.0,[-2.548887393384806]), (0.0,[-1.6309606578419305]), 
+     * (1.0,[-0.12200477461989162]), (1.0,[1.289159071801577]), (1.0,[-0.2691388556559934]), 
+     * (1.0,[0.2574914085090889]), (0.0,[-0.3199143760045327]), (0.0,[-1.7684998592513064]))
+     */
     dataset = sqlContext.createDataFrame(
       sc.parallelize(generateLogisticInput(1.0, 1.0, 100, 42), 2))
   }
 
   test("cross validation with logistic regression") {
-    val lr = new LogisticRegression
+    //交叉验证
+    val lr = new LogisticRegression//逻辑回归
     val lrParamMaps = new ParamGridBuilder()
       .addGrid(lr.regParam, Array(0.001, 1000.0))
       .addGrid(lr.maxIter, Array(0, 10))
       .build()
-    val eval = new BinaryClassificationEvaluator
+    val eval = new BinaryClassificationEvaluator //二分类评估
     val cv = new CrossValidator()
-      .setEstimator(lr)
-      .setEstimatorParamMaps(lrParamMaps)
-      .setEvaluator(eval)
-      .setNumFolds(3)
+      .setEstimator(lr)//被评估模型
+      .setEstimatorParamMaps(lrParamMaps)//评估参数
+      .setEvaluator(eval)//评估模型
+      .setNumFolds(3)//
     val cvModel = cv.fit(dataset)
 
     // copied model must have the same paren.
     MLTestingUtils.checkCopy(cvModel)
-
+    //最好的模型
     val parent = cvModel.bestModel.parent.asInstanceOf[LogisticRegression]
-    assert(parent.getRegParam === 0.001)
-    assert(parent.getMaxIter === 10)
+    assert(parent.getRegParam === 0.001)//正则化参数
+    assert(parent.getMaxIter === 10)//最大迭代次数
     assert(cvModel.avgMetrics.length === lrParamMaps.length)
   }
 
@@ -70,14 +89,14 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
         6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1), 2))
 
     val trainer = new LinearRegression
-    val lrParamMaps = new ParamGridBuilder()
+    val lrParamMaps = new ParamGridBuilder() //模型参数
       .addGrid(trainer.regParam, Array(1000.0, 0.001))
       .addGrid(trainer.maxIter, Array(0, 10))
       .build()
     val eval = new RegressionEvaluator()
     val cv = new CrossValidator()
       .setEstimator(trainer)
-      .setEstimatorParamMaps(lrParamMaps)
+      .setEstimatorParamMaps(lrParamMaps)//设置被评估模型的参数
       .setEvaluator(eval)
       .setNumFolds(3)
     val cvModel = cv.fit(dataset)

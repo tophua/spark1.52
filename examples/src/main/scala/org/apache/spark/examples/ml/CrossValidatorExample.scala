@@ -42,13 +42,15 @@ import org.apache.spark.sql.{Row, SQLContext}
 object CrossValidatorExample {
 
   def main(args: Array[String]) {
-    val conf = new SparkConf().setAppName("CrossValidatorExample")
+    val conf = new SparkConf().setAppName("CrossValidatorExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
     // Prepare training documents, which are labeled.
+    //准备训练数据
     val training = sc.parallelize(Seq(
+      //id,内容,分类标识
       LabeledDocument(0L, "a b c d e spark", 1.0),
       LabeledDocument(1L, "b d", 0.0),
       LabeledDocument(2L, "spark f g h", 1.0),
@@ -70,6 +72,7 @@ object CrossValidatorExample {
     val hashingTF = new HashingTF()
       .setInputCol(tokenizer.getOutputCol)
       .setOutputCol("features")
+    //逻辑回归
     val lr = new LogisticRegression()
       .setMaxIter(10)
     val pipeline = new Pipeline()
@@ -78,17 +81,18 @@ object CrossValidatorExample {
     // We now treat the Pipeline as an Estimator, wrapping it in a CrossValidator instance.
     // This will allow us to jointly choose parameters for all Pipeline stages.
     // A CrossValidator requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
-    val crossval = new CrossValidator()
-      .setEstimator(pipeline)
+    val crossval = new CrossValidator()//交叉
+      .setEstimator(pipeline)//表示从一个schemardd构建机器学习模式即Model的逻辑
+      //二分类评估
       .setEvaluator(new BinaryClassificationEvaluator)
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
     // With 3 values for hashingTF.numFeatures and 2 values for lr.regParam,
     // this grid will have 3 x 2 = 6 parameter settings for CrossValidator to choose from.
-    val paramGrid = new ParamGridBuilder()
+    val paramGrid = new ParamGridBuilder()//通过addGrid添加我们需要寻找的最佳参数  
       .addGrid(hashingTF.numFeatures, Array(10, 100, 1000))
-      .addGrid(lr.regParam, Array(0.1, 0.01))
+      .addGrid(lr.regParam, Array(0.1, 0.01))//正则化参数
       .build()
-    crossval.setEstimatorParamMaps(paramGrid)
+    crossval.setEstimatorParamMaps(paramGrid)//设置构建参数
     crossval.setNumFolds(2) // Use 3+ in practice
 
     // Run cross-validation, and choose the best set of parameters.

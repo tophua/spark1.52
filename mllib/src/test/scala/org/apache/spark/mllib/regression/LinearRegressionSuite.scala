@@ -153,12 +153,14 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
        *        (10.465315437042944,[0.1789490173139363,0.5584053824232391]), 
        *        (-5.245508439024772,[0.03495894704368174,-0.8505720014852347]))
        */
-    val linReg = new LinearRegressionWithSGD().setIntercept(true)
+    val linReg = new LinearRegressionWithSGD().setIntercept(true)//是否给数据加上一个干扰特征或者偏差特征--也就是一个值始终未1的特征
+    //迭代次数,步长
     linReg.optimizer.setNumIterations(1000).setStepSize(1.0)
 
     val model = linReg.run(testRDD)
+    //
     assert(model.intercept >= 2.5 && model.intercept <= 3.5)//3.062070032411828
-
+    //权重
     val weights = model.weights //[9.735526941802604,9.700906954001237]
     assert(weights.size === 2)
     assert(weights(0) >= 9.0 && weights(0) <= 11.0)

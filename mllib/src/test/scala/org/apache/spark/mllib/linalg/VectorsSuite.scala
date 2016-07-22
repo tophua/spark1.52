@@ -29,8 +29,11 @@ import org.apache.spark.mllib.util.TestingUtils._
 class VectorsSuite extends SparkFunSuite with Logging {
 
   val arr = Array(0.1, 0.0, 0.3, 0.4)
+  //长度
   val n = 4
+  //索引
   val indices = Array(0, 2, 3)
+  //值
   val values = Array(0.1, 0.3, 0.4)
   //密集向量(dense vector)使用double数组表示元素值
   test("dense vector construction with varargs") {
@@ -41,23 +44,24 @@ class VectorsSuite extends SparkFunSuite with Logging {
   }
   
   test("dense vector construction from a double array") {
-     //密集向量
+   //密集向量
    val vec = Vectors.dense(arr).asInstanceOf[DenseVector]
     assert(vec.size === arr.length)
     assert(vec.values.eq(arr))
   }
 
   test("sparse vector construction") {
-    //稀疏向量 第一参数3表示此向量的长度，第二个参数Array(0,2)表示的索引，第三个参数Array(1.0, 3.0)
-    //与前面的Array(0,2)是相互对应的，表示第0个位置的值为1.0，第2个位置的值为3
+    //稀疏向量 第一参数4表示此向量的长度，第二个参数Array(0,2,3)表示的索引，第三个参数表示值Array(0.1, 0.3, 0.4)
+    //与前面的Array(0, 2, 3)是相互对应的，表示第0个位置的值为1.0，第2个位置的值为3,即第2位置为0
     val vec = Vectors.sparse(n, indices, values).asInstanceOf[SparseVector]
-    assert(vec.size === n)
-    assert(vec.indices.eq(indices))
-    assert(vec.values.eq(values))
+    assert(vec.size === n)//稀疏矩阵长度 
+    assert(vec.indices.eq(indices))//稀疏矩阵索引
+    assert(vec.values.eq(values))//稀疏矩阵值
   }
 
   test("sparse vector construction with unordered elements") {
-    val vec = Vectors.sparse(n, indices.zip(values).reverse).asInstanceOf[SparseVector]
+    //构建一个没有索引的元素,reverse: Array[(Int, Double)] = Array((3,0.4), (2,0.3), (0,0.1))
+    val vec = Vectors.sparse(n, indices.zip(values).reverse).asInstanceOf[SparseVector] 
     assert(vec.size === n)
     assert(vec.indices === indices)
     assert(vec.values === values)
@@ -313,12 +317,23 @@ class VectorsSuite extends SparkFunSuite with Logging {
   test("vector p-norm") {
     val dv = Vectors.dense(0.0, -1.2, 3.1, 0.0, -4.5, 1.9)
     val sv = Vectors.sparse(6, Seq((1, -1.2), (2, 3.1), (3, 0.0), (4, -4.5), (5, 1.9)))
-
+    //矩阵范数 norm 10.700000000000001,即所有元素相加
     assert(Vectors.norm(dv, 1.0) ~== dv.toArray.foldLeft(0.0)((a, v) =>
-      a + math.abs(v)) relTol 1E-8)
+      {
+        /**
+         * 0.0     0.0
+         * 0.0     1.2
+         * 1.2     3.1
+         * 4.3     0.0
+         * 4.3     4.5
+         * 8.8     1.9
+         */
+      println(a+"\t"+ math.abs(v))
+      a + math.abs(v)
+      }) relTol 1E-8)
     assert(Vectors.norm(sv, 1.0) ~== sv.toArray.foldLeft(0.0)((a, v) =>
       a + math.abs(v)) relTol 1E-8)
-
+    //正平方根
     assert(Vectors.norm(dv, 2.0) ~== math.sqrt(dv.toArray.foldLeft(0.0)((a, v) =>
       a + v * v)) relTol 1E-8)
     assert(Vectors.norm(sv, 2.0) ~== math.sqrt(sv.toArray.foldLeft(0.0)((a, v) =>
@@ -335,7 +350,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
 
   test("Vector numActive and numNonzeros") {
     val dv = Vectors.dense(0.0, 2.0, 3.0, 0.0)
-    assert(dv.numActives === 4)//
+    assert(dv.numActives === 4)//最大数据
     assert(dv.numNonzeros === 2)//非零值
    //res4: org.apache.spark.mllib.linalg.DenseVector = [0.0,2.0,3.0,0.0]
     val sv = Vectors.sparse(4, Array(0, 1, 2), Array(0.0, 2.0, 3.0))

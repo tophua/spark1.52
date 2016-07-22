@@ -185,6 +185,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("Naive Bayes Bernoulli") {
     val nPoints = 10000
+    //pi: Array[Double] = Array(-0.6931471805599453, -1.2039728043259361, -1.6094379124341003)
     val pi = Array(0.5, 0.3, 0.2).map(math.log)
     val theta = Array(
       Array(0.50, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.40), // label 0

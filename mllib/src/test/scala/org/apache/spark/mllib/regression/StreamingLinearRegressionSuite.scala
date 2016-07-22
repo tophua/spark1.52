@@ -25,7 +25,7 @@ import org.apache.spark.mllib.util.LinearDataGenerator
 import org.apache.spark.streaming.{StreamingContext, TestSuiteBase}
 import org.apache.spark.streaming.dstream.DStream
 /**
- * LinearRegression线性回归 
+ * 实时机器学习
  */
 class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
 
@@ -168,7 +168,24 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     // train and predict
     ssc = setupStreams(testInput, (inputDStream: DStream[LabeledPoint]) => {
       model.trainOn(inputDStream)
-      model.predictOnValues(inputDStream.map(x => (x.label, x.features)))
+      model.predictOnValues(inputDStream.map(x => {
+        /**
+         *  5.117672680666696||||[-0.43560342773870375,0.9349906440170221]
+            8.214024772532593||||[0.4551273600657362,0.36644694351969087]
+            4.961775958770297||||[0.8090021580031235,-0.3121157071110545]
+            -3.5835907407691754||||[-0.9718883630945336,0.6191882496201251]
+            7.238079296773607||||[0.0429886073795116,0.670311110015402]
+            -8.415689635517044||||[-0.38256108933468047,-0.4458430198517267]
+            5.528566011825288||||[0.16692329718223786,0.37649213869502973]
+            11.375642473813445||||[0.33109790358914726,0.8067445293443565]
+         */
+         println(x.label+"||||"+x.features)
+        (x.label, x.features)
+       
+       
+      }
+      )
+          )
     })
 
     val output: Seq[Seq[(Double, Double)]] = runStreams(ssc, numBatches, numBatches)

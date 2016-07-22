@@ -35,7 +35,7 @@ import org.apache.spark.sql.{Row, SQLContext}
 object SimpleParamsExample {
 
   def main(args: Array[String]) {
-    val conf = new SparkConf().setAppName("SimpleParamsExample")
+    val conf = new SparkConf().setAppName("SimpleParamsExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._

@@ -25,6 +25,12 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
   //spark 的词频计算是用特征哈希（HashingTF）来计算的。特征哈希是一种处理高维数据的技术,
+/** 
+ * HashTF从一个文档中计算出给定大小的词频向量。为了将词和向量顺序对应起来，所以使用了哈希。
+ * HashingTF使用每个单词对所需向量的长度S取模得出的哈希值，把所有单词映射到一个0到S-1之间的数字上。
+ * 由此可以保证生成一个S维的向量。随后当构建好词频向量后，使用IDF来计算逆文档频率,然后将它们与词频相乘计算TF-IDF
+ */
+
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
@@ -39,6 +45,7 @@ class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
     //words:WrappedArray(a, a, b, b, c, d)
     val hashingTF = new HashingTF().setInputCol("words").setOutputCol("features").setNumFeatures(n)//将词转化为词频
     val output = hashingTF.transform(df)
+    //属性分组
     val attrGroup = AttributeGroup.fromStructField(output.schema("features"))
     //属性100
     require(attrGroup.numAttributes === Some(n))

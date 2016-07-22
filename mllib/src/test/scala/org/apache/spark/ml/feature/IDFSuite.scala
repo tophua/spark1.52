@@ -24,9 +24,10 @@ import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vector, Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.Row
-/**
- * IDF就是单词逆向文档率
- * 
+/** 
+ * HashTF从一个文档中计算出给定大小的词频向量。为了将词和向量顺序对应起来，所以使用了哈希。
+ * HashingTF使用每个单词对所需向量的长度S取模得出的哈希值，把所有单词映射到一个0到S-1之间的数字上。
+ * 由此可以保证生成一个S维的向量。随后当构建好词频向量后，使用IDF来计算逆文档频率,然后将它们与词频相乘计算TF-IDF
  */
 class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
 

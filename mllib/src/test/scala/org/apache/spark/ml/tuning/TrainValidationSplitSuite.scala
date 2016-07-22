@@ -40,7 +40,7 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
       .addGrid(lr.maxIter, Array(0, 10))
       .build()
     val eval = new BinaryClassificationEvaluator
-    val cv = new TrainValidationSplit()
+    val cv = new TrainValidationSplit()//训练分隔验证
       .setEstimator(lr)
       .setEstimatorParamMaps(lrParamMaps)
       .setEvaluator(eval)

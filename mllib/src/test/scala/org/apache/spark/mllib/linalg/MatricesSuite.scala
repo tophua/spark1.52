@@ -177,10 +177,10 @@ class MatricesSuite extends SparkFunSuite {
   test("map, update") {
     val m = 3
     val n = 2
-    val values = Array(1.0, 2.0, 4.0, 5.0)
-    val allValues = Array(1.0, 2.0, 0.0, 0.0, 4.0, 5.0)
-    val colPtrs = Array(0, 2, 4)
-    val rowIndices = Array(0, 1, 1, 2)
+    val values = Array(1.0, 2.0, 4.0, 5.0)//
+    val allValues = Array(1.0, 2.0, 0.0, 0.0, 4.0, 5.0)//
+    val colPtrs = Array(0, 2, 4)//
+    val rowIndices = Array(0, 1, 1, 2)//
 
     val spMat1 = new SparseMatrix(m, n, colPtrs, rowIndices, values)
     val deMat1 = new DenseMatrix(m, n, allValues)

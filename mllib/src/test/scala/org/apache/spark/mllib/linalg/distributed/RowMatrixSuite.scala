@@ -37,17 +37,19 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   val m = 4
   val n = 3
   val arr = Array(0.0, 3.0, 6.0, 9.0, 1.0, 4.0, 7.0, 0.0, 2.0, 5.0, 8.0, 1.0)
+  //稠密矩阵:非0元素数目占大多数
   val denseData = Seq(
     Vectors.dense(0.0, 1.0, 2.0),
     Vectors.dense(3.0, 4.0, 5.0),
     Vectors.dense(6.0, 7.0, 8.0),
     Vectors.dense(9.0, 0.0, 1.0))
+  //稀疏矩阵:数值为0的元素数目远远多于非0元素的数目时
   val sparseData = Seq(
     Vectors.sparse(3, Seq((1, 1.0), (2, 2.0))),
     Vectors.sparse(3, Seq((0, 3.0), (1, 4.0), (2, 5.0))),
     Vectors.sparse(3, Seq((0, 6.0), (1, 7.0), (2, 8.0))),
     Vectors.sparse(3, Seq((0, 9.0), (2, 1.0))))
-
+ //主成分分析
   val principalComponents = BDM(
     (0.0, 1.0, 0.0),
     (math.sqrt(2.0) / 2.0, 0.0, math.sqrt(2.0) / 2.0),
@@ -61,12 +63,13 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     //行矩阵按行分布式存储，这个时候行号没有意义,
     //特征向量集就可以表示为行矩阵，通过RDD来支撑矩阵的部分行，每行是一个局部向量
     denseMat = new RowMatrix(sc.parallelize(denseData, 2))
+    //
     sparseMat = new RowMatrix(sc.parallelize(sparseData, 2))
   }
 
   test("size") {
-    assert(denseMat.numRows() === m)
-    assert(denseMat.numCols() === n)
+    assert(denseMat.numRows() === m)//3行
+    assert(denseMat.numCols() === n)//4列
     assert(sparseMat.numRows() === m)
     assert(sparseMat.numCols() === n)
   }
@@ -140,7 +143,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     for (mat <- Seq(denseMat, sparseMat)) {
       for (mode <- Seq("auto", "local-svd", "local-eigs", "dist-eigs")) {
         val localMat = mat.toBreeze()
-        val brzSvd.SVD(localU, localSigma, localVt) = brzSvd(localMat)
+               val brzSvd.SVD(localU, localSigma, localVt) = brzSvd(localMat)
         val localV: BDM[Double] = localVt.t.toDenseMatrix
         for (k <- 1 to n) {
           val skip = (mode == "local-eigs" || mode == "dist-eigs") && k == n
@@ -169,6 +172,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     val rows = sc.parallelize(Array.fill(4)(Vectors.dense(1.0, 1.0, 1.0)), 2)
     val mat = new RowMatrix(rows, 4, 3)
     for (mode <- Seq("auto", "local-svd", "local-eigs", "dist-eigs")) {
+     //第一个参数3意味着取top 2个奇异值，第二个参数true意味着计算矩阵U，第三个参数意味小于1e-6d的奇异值将被抛弃
       val svd = mat.computeSVD(2, computeU = true, 1e-6, 300, 1e-10, mode)
       assert(svd.s.size === 1, s"should not return zero singular values but got ${svd.s}")
       assert(svd.U.numRows() === 4)
@@ -278,6 +282,7 @@ class RowMatrixClusterSuite extends SparkFunSuite with LocalClusterSparkContext 
   }
 
   test("task size should be small in svd") {
+    //第一个参数1意味着取top 1个奇异值，第二个参数true意味着计算矩阵U
     val svd = mat.computeSVD(1, computeU = true)
   }
 

@@ -26,7 +26,11 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.feature.{PCAModel => OldPCAModel}
 import org.apache.spark.sql.Row
-
+/**
+ * 主成分分析经常用于减少数据集的维数，同时保持数据集中的对方差贡献最大的特征。
+ * 其方法主要是通过对协方差矩阵进行特征分解，以得出数据的主成分（即特征向量）与它们的权值（即特征值）
+ * 
+ */
 class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
@@ -44,11 +48,26 @@ class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
     )
 
     val dataRDD = sc.parallelize(data, 2)
-
+   
     val mat = new RowMatrix(dataRDD)
-    val pc = mat.computePrincipalComponents(3)
-    val expected = mat.multiply(pc).rows
+     println("numRows:"+mat.numRows()+"\t numCols:"+mat.numCols())
+    val pc = mat.computePrincipalComponents(3)//将维度降为3
+    /**
+     * pc:-0.44859172075072673  -0.28423808214073987  0.07290753685535857   
+     *    0.13301985745398526   -0.05621155904253121  0.04139694704366137   
+     *    -0.1252315635978212   0.7636264774662965    -0.5812910463866972   
+     *    0.21650756651919933   -0.5652958773533948   -0.795459443083758    
+     *    -0.8476512931126826   -0.11560340501314653  -0.14938466335164732 
+     */
+    println("pc numRows:"+pc.numRows+"\t numCols:"+pc.numCols)
+    //multiply 矩阵相乘积操作
+    val expected = mat.multiply(pc).rows//multiply 矩阵相乘积操作
+    println("expected numRows:"+mat.multiply(pc).numRows()+"\t"+expected)
+    //zip:Set(((5,[1,3],[1.0,7.0]),[1.6485728230883807,-4.013282700516295,-5.526819154542645]), 
+    //([2.0,0.0,3.0,4.0,5.0],[-4.645104331781534,-1.1167972663619021,-5.526819154542643]), 
+    //([4.0,0.0,0.0,6.0,7.0],[-6.428880535676489,-5.337951427775354,-5.526819154542644]))
 
+    println("zip:"+dataRDD.zip(expected).collect().toSet)
     val df = sqlContext.createDataFrame(dataRDD.zip(expected)).toDF("features", "expected")
 
     val pca = new PCA()
@@ -59,10 +78,16 @@ class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(pca)
-
+/**
+ * x:[1.6485728230883807,-4.013282700516295,-5.526819154542645]	 y:[1.6485728230883807,-4.013282700516295,-5.526819154542645]
+ * x:[-4.645104331781534,-1.1167972663619021,-5.526819154542643] y:[-4.645104331781534,-1.1167972663619021,-5.526819154542643]
+ * x:[-6.428880535676489,-5.337951427775354,-5.526819154542644]	 y:[-6.428880535676489,-5.337951427775354,-5.526819154542644]
+ */
     pca.transform(df).select("pca_features", "expected").collect().foreach {
+    
       case Row(x: Vector, y: Vector) =>
-        assert(x ~== y absTol 1e-5, "Transformed vector is different with expected vector.")
+        println("x:"+x+"\t y:"+y)
+        //assert(x ~== y absTol 1e-5, "Transformed vector is different with expected vector.")
     }
   }
 }

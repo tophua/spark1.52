@@ -37,19 +37,19 @@ class ParamGridBuilderSuite extends SparkFunSuite {
       }
       assert(expected.isEmpty)
     }
-
+    //通过addGrid添加我们需要寻找的最佳参数
     val maps0 = new ParamGridBuilder()
       .baseOn(maxIter -> 10)
       .addGrid(inputCol, Array("input0", "input1"))
       .build()
+    //期望值
     val expected0 = mutable.Set(
       (10, "input0"),
       (10, "input1"))
     validateGrid(maps0, expected0)
-
     val maps1 = new ParamGridBuilder()
       .baseOn(ParamMap(maxIter -> 5, inputCol -> "input")) // will be overwritten
-      .addGrid(maxIter, Array(10, 20))
+      .addGrid(maxIter, Array(10, 20))//重载
       .addGrid(inputCol, Array("input0", "input1"))
       .build()
     val expected1 = mutable.Set(

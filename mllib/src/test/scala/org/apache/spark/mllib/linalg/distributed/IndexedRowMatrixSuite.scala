@@ -127,6 +127,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("svd") {
     val A = new IndexedRowMatrix(indexedRows)
+    //第一个参数3意味着取top 2个奇异值，第二个参数true意味着计算矩阵U
     val svd = A.computeSVD(n, computeU = true)
     assert(svd.U.isInstanceOf[IndexedRowMatrix])
     val localA = A.toBreeze()
