@@ -34,7 +34,7 @@ class MetricsConfigSuite extends SparkFunSuite with BeforeAndAfter {
     val sparkConf = new SparkConf(loadDefaults = false)
     sparkConf.set("spark.metrics.conf", "dummy-file")
     val conf = new MetricsConfig(sparkConf)
-    conf.initialize()
+    conf.initialize()//初始化
 
     assert(conf.properties.size() === 4)
     assert(conf.properties.getProperty("test-for-dummy") === null)

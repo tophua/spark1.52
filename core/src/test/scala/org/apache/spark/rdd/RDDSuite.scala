@@ -123,6 +123,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
   test("SparkContext.union") {
     val nums = sc.makeRDD(Array(1, 2, 3, 4), 2)
+    //执行集合合并操作,不去重
     assert(sc.union(nums).collect().toList === List(1, 2, 3, 4))
     assert(sc.union(nums, nums).collect().toList === List(1, 2, 3, 4, 1, 2, 3, 4))
     assert(sc.union(Seq(nums)).collect().toList === List(1, 2, 3, 4))
@@ -380,7 +381,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(coalesced6.partitions.size === 20)
     assert(coalesced6.collect().toSet === (1 to 10).toSet)
   }
-// coalesced 联合
+  //coalesced 联合
   test("coalesced RDDs with locality") {
     val data3 = sc.makeRDD(List((1, List("a", "c")), (2, List("a", "b", "c")), (3, List("b"))))
     val coal3 = data3.coalesce(3)
@@ -639,11 +640,12 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(sc.emptyRDD.isEmpty())
     assert(sc.parallelize(Seq[Int]()).isEmpty())
     assert(!sc.parallelize(Seq(1)).isEmpty())
+    //判断是否为空值
     assert(sc.parallelize(Seq(1, 2, 3), 3).filter(_ < 0).isEmpty())
     assert(!sc.parallelize(Seq(1, 2, 3), 3).filter(_ > 1).isEmpty())
   }
 
-  test("sample preserves partitioner") {
+  test("sample preserves partitioner") {//preserves保持
     val partitioner = new HashPartitioner(2)
     //partitionBy 为rdd设置新的分区结构
     val rdd = sc.parallelize(Seq((0, 1), (2, 3))).partitionBy(partitioner)
@@ -750,9 +752,9 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     //第一个参数是一个函数，该函数的也有一个带T泛型的参数，返回类型和RDD中元素的类型是一致的
     //第二个参数是ascending，从字面的意思大家应该可以猜到，是的，这参数决定排序后RDD中的元素是升序还是降序，
         //默认是true，也就是升序
-    assert(data.sortBy(_.split("\\|")(0)).collect() === col1)//升序，
-    assert(data.sortBy(_.split("\\|")(1)).collect() === col2)//降序
-    assert(data.sortBy(_.split("\\|")(2)).collect() === col3)//
+    assert(data.sortBy(_.split("\\|")(0)).collect() === col1)//按第一个值升序
+    assert(data.sortBy(_.split("\\|")(1)).collect() === col2)//按第二个值升序
+    assert(data.sortBy(_.split("\\|")(2)).collect() === col3)//按第三个值的升序
   }
 
   test("sortByKey ascending parameter") {
@@ -762,8 +764,8 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val asc = Array("4|60|C", "5|50|A", "6|40|B")
     val desc = Array("6|40|B", "5|50|A", "4|60|C")
     //默认是true，也就是升序
-    assert(data.sortBy(_.split("\\|")(0), true).collect() === asc)
-    assert(data.sortBy(_.split("\\|")(0), false).collect() === desc)
+    assert(data.sortBy(_.split("\\|")(0), true).collect() === asc)//按第一个值升序
+    assert(data.sortBy(_.split("\\|")(0), false).collect() === desc)//按第一个值降序
   }
 
   test("sortByKey with explicit ordering") {
@@ -789,7 +791,9 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     }
 
     import scala.reflect.classTag
+    //使用Person 年龄排序
     assert(data.sortBy(parse, true, 2)(AgeOrdering, classTag[Person]).collect() === ageOrdered)
+    //使用名称排序
     assert(data.sortBy(parse, true, 2)(NameOrdering, classTag[Person]).collect() === nameOrdered)
   }
 
@@ -822,7 +826,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val a = sc.parallelize(Seq(1, 2, 3, 3))
     val b = sc.parallelize(Seq(1, 1, 2, 3))
     val intersection = Array(1, 2, 3)
-
+    //两个集合取交集，并去重
     assert(a.intersection(b).collect().sorted === intersection)
     assert(b.intersection(a).collect().sorted === intersection)
   }
@@ -832,6 +836,9 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val n = 10
     val data = sc.parallelize(0 until n, 3)
     val ranked = data.zipWithIndex()
+    /**
+     * ranked = Array((0,0), (1,1), (2,2), (3,3), (4,4), (5,5), (6,6), (7,7), (8,8), (9,9))
+     */
     ranked.collect().foreach { x =>
       assert(x._1 === x._2)
     }
@@ -856,7 +863,9 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val n = 10
     val data = sc.parallelize(0 until n, 3)
     val ranked = data.zipWithUniqueId()
-    
+    /**
+     * ranked = Array((0,0), (1,3), (2,6), (3,1), (4,4), (5,7), (6,2),(7,5), (8,8), (9,11))
+     */
     val ids = ranked.map(_._1).distinct().collect()
     assert(ids.length === n)
   }
@@ -877,7 +886,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(rdd4.parent[Int](2) === rdd3)
   }
 
-  test("getNarrowAncestors") {
+  test("getNarrowAncestors") {//窄依赖
     val rdd1 = sc.parallelize(1 to 100, 4)
     val rdd2 = rdd1.filter(_ % 2 == 0).map(_ + 1)
     val rdd3 = rdd2.map(_ - 1).filter(_ < 50).map(i => (i, i))
@@ -906,7 +915,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(ancestors5.count(_.isInstanceOf[MapPartitionsRDD[_, _]]) === 2)
   }
 
-  test("getNarrowAncestors with multiple parents") {
+  test("getNarrowAncestors with multiple parents") {//窄依赖
     val rdd1 = sc.parallelize(1 to 100, 5)
     val rdd2 = sc.parallelize(1 to 200, 10).map(_ + 1)
     val rdd3 = sc.parallelize(1 to 300, 15).filter(_ > 50)

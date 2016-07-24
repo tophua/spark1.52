@@ -44,10 +44,10 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
 
   test("large array with one split") {
     val rand = new scala.util.Random()
-    val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }
+    val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }// Array[(Int, Int)]类型数组
     val pairs = sc.parallelize(pairArr, 2)
     //K升序
-    val sorted = pairs.sortByKey(true, 1)
+    val sorted = pairs.sortByKey(true, 1)//分区1
     assert(sorted.partitions.size === 1)
 
     assert(sorted.collect() === pairArr.sortBy(_._1))

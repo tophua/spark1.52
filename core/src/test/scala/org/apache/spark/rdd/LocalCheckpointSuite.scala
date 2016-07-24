@@ -33,6 +33,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   test("transform storage level") {
+    //转换检查点
     val transform = LocalRDDCheckpointData.transformStorageLevel _
     assert(transform(StorageLevel.NONE) === StorageLevel.DISK_ONLY)
     assert(transform(StorageLevel.MEMORY_ONLY) === StorageLevel.MEMORY_AND_DISK)
@@ -51,7 +52,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
 
-  test("basic lineage truncation") {
+  test("basic lineage truncation") {//基本线程截取
     val numPartitions = 4
     val parallelRdd = sc.parallelize(1 to 100, numPartitions)
     val mappedRdd = parallelRdd.map { i => i + 1 }
@@ -220,7 +221,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   /**
-   * Helper method to test indirect lineage truncation.
+   * Helper method to test indirect lineage truncation.间接
    *
    * Indirect lineage truncation here means the action is called on one of the
    * checkpointed RDD's descendants, but not on the checkpointed RDD itself.

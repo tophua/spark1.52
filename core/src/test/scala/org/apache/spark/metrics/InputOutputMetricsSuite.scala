@@ -42,7 +42,9 @@ import org.apache.spark.{SharedSparkContext, SparkFunSuite}
 import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskEnd}
 import org.apache.spark.util.Utils
-
+/**
+ * Metrics 度量
+ */
 class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
   with BeforeAndAfter {
 
@@ -74,7 +76,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     Utils.deleteRecursively(tmpDir)
   }
 
-  test("input metrics for old hadoop with coalesce") {
+  test("input metrics for old hadoop with coalesce") {//合并
     val bytesRead = runAndReturnBytesRead {
       sc.textFile(tmpFilePath, 4).count()
     }
@@ -88,7 +90,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
 
   test("input metrics with cache and coalesce") {
     // prime the cache manager
-    val rdd = sc.textFile(tmpFilePath, 4).cache()
+    val rdd = sc.textFile(tmpFilePath, 4).cache() //缓存
     rdd.collect()
 
     val bytesRead = runAndReturnBytesRead {

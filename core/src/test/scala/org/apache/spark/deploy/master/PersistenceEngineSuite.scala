@@ -66,6 +66,7 @@ class PersistenceEngineSuite extends SparkFunSuite {
     val persistenceEngine = persistenceEngineCreator(serializer)
     persistenceEngine.persist("test_1", "test_1_value")
     assert(Seq("test_1_value") === persistenceEngine.read[String]("test_"))
+    //持久化
     persistenceEngine.persist("test_2", "test_2_value")
     assert(Set("test_1_value", "test_2_value") === persistenceEngine.read[String]("test_").toSet)
     persistenceEngine.unpersist("test_1")

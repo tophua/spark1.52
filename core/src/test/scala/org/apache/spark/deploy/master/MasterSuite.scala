@@ -34,7 +34,7 @@ import org.apache.spark.deploy._
 import org.apache.spark.rpc.RpcEnv
 
 class MasterSuite extends SparkFunSuite with Matchers with Eventually with PrivateMethodTester {
-
+//自定义恢复模式
   test("can use a custom recovery mode factory") {
     val conf = new SparkConf(loadDefaults = false)
     conf.set("spark.deploy.recoveryMode", "CUSTOM")
@@ -43,58 +43,61 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     conf.set("spark.master.rest.enabled", "false")
 
     val instantiationAttempts = CustomRecoveryModeFactory.instantiationAttempts
-
+    
     val commandToPersist = new Command(
-      mainClass = "",
-      arguments = Nil,
+      mainClass = "", 
+      arguments = Nil, //参数
       environment = Map.empty,
       classPathEntries = Nil,
-      libraryPathEntries = Nil,
+      libraryPathEntries = Nil,//
       javaOpts = Nil
     )
 
     val appToPersist = new ApplicationInfo(
-      startTime = 0,
+      startTime = 0, //开始运行时间
       id = "test_app",
       desc = new ApplicationDescription(
         name = "",
-        maxCores = None,
-        memoryPerExecutorMB = 0,
+        maxCores = None,//最大CPU内核数
+        memoryPerExecutorMB = 0,//每个Executor内存数
         command = commandToPersist,
         appUiUrl = "",
         eventLogDir = None,
         eventLogCodec = None,
         coresPerExecutor = None),
-      submitDate = new Date(),
+      submitDate = new Date(),//提交时间
       driver = null,
-      defaultCores = 0
+      defaultCores = 0 //默认CPU内核数
     )
 
     val driverToPersist = new DriverInfo(
-      startTime = 0,
+      startTime = 0,//开始运行时间
       id = "test_driver",
       desc = new DriverDescription(
         jarUrl = "",
-        mem = 0,
-        cores = 0,
+        mem = 0,//内存数
+        cores = 0,//CPU内核数
+        //监督,管理
         supervise = false,
         command = commandToPersist
       ),
+      //提交时间
       submitDate = new Date()
     )
-
+   
     val workerToPersist = new WorkerInfo(
-      id = "test_worker",
-      host = "127.0.0.1",
-      port = 10000,
-      cores = 0,
-      memory = 0,
+      id = "test_worker",//
+      host = "127.0.0.1",//IP
+      port = 10000,//端口
+      cores = 0,//CPU内核数
+      memory = 0,//内存数
       endpoint = null,
       webUiPort = 0,
-      publicAddress = ""
+      publicAddress = ""//对外地址
     )
 
     val (rpcEnv, _, _) =
+      //运行RPC环境
       Master.startRpcEnvAndEndpoint("127.0.0.1", 0, 0, conf)
 
     try {
@@ -106,7 +109,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
       persistenceEngine.addApplication(appToPersist)
       persistenceEngine.addDriver(driverToPersist)
       persistenceEngine.addWorker(workerToPersist)
-
+      //读取持久化数据
       val (apps, drivers, workers) = persistenceEngine.readPersistedData(rpcEnv)
 
       apps.map(_.id) should contain(appToPersist.id)
@@ -144,7 +147,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     }
   }
 
-  test("basic scheduling - spread out") {
+  test("basic scheduling - spread out") {//展开
     basicScheduling(spreadOut = true)
   }
 
@@ -160,7 +163,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     basicSchedulingWithMoreMemory(spreadOut = false)
   }
 
-  test("scheduling with max cores - spread out") {
+  test("scheduling with max cores - spread out") {//最大内存
     schedulingWithMaxCores(spreadOut = true)
   }
 
@@ -236,7 +239,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     val appInfo2 = makeAppInfo(1024, maxCores = Some(16))
     val scheduledCores1 = scheduleExecutorsOnWorkers(master, appInfo1, workerInfos, spreadOut)
     val scheduledCores2 = scheduleExecutorsOnWorkers(master, appInfo2, workerInfos, spreadOut)
-    if (spreadOut) {
+    if (spreadOut) {//展开
       assert(scheduledCores1 === Array(3, 3, 2))
       assert(scheduledCores2 === Array(6, 5, 5))
     } else {
