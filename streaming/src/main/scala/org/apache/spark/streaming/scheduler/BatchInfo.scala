@@ -23,12 +23,15 @@ import org.apache.spark.streaming.Time
 /**
  * :: DeveloperApi ::
  * Class having information on completed batches.
- * @param batchTime   Time of the batch
+ * @param batchTime   Time of the batch,批处理间隔
  * @param streamIdToInputInfo A map of input stream id to its input info
  * @param submissionTime  Clock time of when jobs of this batch was submitted to
  *                        the streaming scheduler queue
+ *                        提交作业时间
  * @param processingStartTime Clock time of when the first job of this batch started processing
+ *                            开始运行作业时间
  * @param processingEndTime Clock time of when the last job of this batch finished processing
+ *                          作业结束时间
  */
 @DeveloperApi
 case class BatchInfo(

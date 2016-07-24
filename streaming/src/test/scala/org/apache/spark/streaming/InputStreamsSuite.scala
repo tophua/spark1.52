@@ -385,9 +385,11 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
       assert(existingFile.setLastModified(10000) && existingFile.lastModified === 10000)
 
       // Set up the streaming context and input streams
+      //
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
         // This `setTime` call ensures that the clock is past the creation time of `existingFile`
+        //设置
         clock.setTime(existingFile.lastModified + batchDuration.milliseconds)
         val batchCounter = new BatchCounter(ssc)
         val fileStream = ssc.fileStream[LongWritable, Text, TextInputFormat](
@@ -402,6 +404,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         clock.advance(batchDuration.milliseconds / 2)
 
         // Over time, create files in the directory
+        //
         val input = Seq(1, 2, 3, 4, 5)
         input.foreach { i =>
           val file = new File(testDir, i.toString)

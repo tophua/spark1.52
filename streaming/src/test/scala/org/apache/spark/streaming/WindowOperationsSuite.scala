@@ -19,7 +19,9 @@ package org.apache.spark.streaming
 
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.storage.StorageLevel
-
+/**
+ * 窗口操作
+ */
 class WindowOperationsSuite extends TestSuiteBase {
 
   override def maxWaitTimeMillis: Int = 20000  // large window tests can sometimes take longer
@@ -146,11 +148,14 @@ class WindowOperationsSuite extends TestSuiteBase {
 
   test("window - persistence level") {
     val input = Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5))
+    //批处理间隔
     val ssc = new StreamingContext(conf, batchDuration)
     val inputStream = new TestInputStream[Int](ssc, input, 1)
+    //窗口间隔
     val windowStream1 = inputStream.window(batchDuration * 2)
     assert(windowStream1.storageLevel === StorageLevel.NONE)
     assert(inputStream.storageLevel === StorageLevel.MEMORY_ONLY_SER)
+    //设置持久化
     windowStream1.persist(StorageLevel.MEMORY_ONLY)
     assert(windowStream1.storageLevel === StorageLevel.NONE)
     assert(inputStream.storageLevel === StorageLevel.MEMORY_ONLY)
@@ -279,6 +284,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     ) {
     test("window - " + name) {
       val numBatches = expectedOutput.size * (slideDuration / batchDuration).toInt
+      //slideDuration 滑动间隔,windowDuration批处理间隔时间
       val operation = (s: DStream[Int]) => s.window(windowDuration, slideDuration)
       testOperation(input, operation, expectedOutput, numBatches, true)
     }
@@ -295,6 +301,7 @@ class WindowOperationsSuite extends TestSuiteBase {
       logInfo("reduceByKeyAndWindow - " + name)
       val numBatches = expectedOutput.size * (slideDuration / batchDuration).toInt
       val operation = (s: DStream[(String, Int)]) => {
+        //基于窗口对原DStream中元素进行聚合得到新的DStream,与reduceByKey相似
         s.reduceByKeyAndWindow((x: Int, y: Int) => x + y, windowDuration, slideDuration)
       }
       testOperation(input, operation, expectedOutput, numBatches, true)

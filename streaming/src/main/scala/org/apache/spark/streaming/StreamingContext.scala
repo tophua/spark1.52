@@ -290,6 +290,7 @@ class StreamingContext private[streaming] (
   }
 
   /**
+
    * Create an input stream with any arbitrary user implemented receiver.
    * Find more details at: http://spark.apache.org/docs/latest/streaming-custom-receivers.html
    * @param receiver Custom implementation of Receiver
@@ -596,7 +597,7 @@ class StreamingContext private[streaming] (
 
   /**
    * Start the execution of the streams.
-   *
+   * 主要调用JobScheduler的方法Start方法
    * @throws IllegalStateException if the StreamingContext is already stopped.
    */
   def start(): Unit = synchronized {

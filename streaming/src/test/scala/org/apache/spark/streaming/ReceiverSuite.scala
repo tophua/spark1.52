@@ -35,7 +35,10 @@ import org.apache.spark.streaming.receiver._
 import org.apache.spark.streaming.receiver.WriteAheadLogBasedBlockHandler._
 import org.apache.spark.util.Utils
 
-/** Testsuite for testing the network receiver behavior */
+/** 
+ *  输入流接收器
+ *  Testsuite for testing the network receiver behavior 
+ *  */
 class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 
   test("receiver life cycle") {//生命周期
@@ -82,10 +85,10 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
     val byteBuffer = ByteBuffer.allocate(100)
     val arrayBuffer = new ArrayBuffer[Int]()
     val iterator = arrayBuffer.iterator
-    receiver.store(1)
-    receiver.store(byteBuffer)
-    receiver.store(arrayBuffer)
-    receiver.store(iterator)
+    receiver.store(1)//存储单条小数据
+    receiver.store(byteBuffer)//ByteBuffer形式的块数据
+    receiver.store(arrayBuffer)//数组块形式的块数据
+    receiver.store(iterator)//iterator形式的块数据
     assert(executor.singles.size === 1)
     assert(executor.singles.head === 1)
     assert(executor.byteBuffers.size === 1)

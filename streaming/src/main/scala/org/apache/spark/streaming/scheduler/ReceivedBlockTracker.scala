@@ -66,7 +66,7 @@ private[streaming] class ReceivedBlockTracker(
     recoverFromWriteAheadLog: Boolean,
     checkpointDirOption: Option[String])
   extends Logging {
-
+  //缓存从blockForPushing中取出一个Block
   private type ReceivedBlockQueue = mutable.Queue[ReceivedBlockInfo]
 
   private val streamIdToUnallocatedBlockQueues = new mutable.HashMap[Int, ReceivedBlockQueue]

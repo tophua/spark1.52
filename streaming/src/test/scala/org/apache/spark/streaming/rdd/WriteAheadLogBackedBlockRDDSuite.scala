@@ -52,6 +52,7 @@ class WriteAheadLogBackedBlockRDDSuite
   }
 
   override def beforeAll(): Unit = {
+    
     sparkContext = new SparkContext(conf)
     blockManager = sparkContext.env.blockManager
   }

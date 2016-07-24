@@ -33,7 +33,7 @@ import org.apache.spark.annotation.DeveloperApi
  * and `onStop()` should define the cleanup steps necessary to stop receiving data.
  * Exceptions while receiving can be handled either by restarting the receiver with `restart(...)`
  * or stopped completely by `stop(...)` or
- *
+ * Spark Streaming 内置的输入流接收器或者用户自定义的接收器,用户于从数据源接收源源不断的数据流
  * A custom receiver in Scala would look like this.
  *
  * {{{

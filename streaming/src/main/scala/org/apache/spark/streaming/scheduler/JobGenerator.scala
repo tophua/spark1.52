@@ -35,6 +35,7 @@ private[scheduler] case class ClearCheckpointData(time: Time) extends JobGenerat
 /**
  * This class generates jobs from DStreams as well as drives checkpointing and cleaning
  * up DStream metadata.
+ * Job生成器,用于给每一批Block生成一个Job
  */
 private[streaming]
 class JobGenerator(jobScheduler: JobScheduler) extends Logging {

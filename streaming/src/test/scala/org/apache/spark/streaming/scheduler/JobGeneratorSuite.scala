@@ -27,7 +27,9 @@ import org.scalatest.concurrent.Eventually._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
 import org.apache.spark.util.{ManualClock, Utils}
-
+/**
+ * 定时生成Spark JOB
+ */
 class JobGeneratorSuite extends TestSuiteBase {
 
   // SPARK-6222 is a tricky regression bug which causes received block metadata

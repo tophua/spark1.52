@@ -214,20 +214,25 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   }
 }
 
-/** Listener that collects information on processed batches */
+/** 
+ *  用户利用这个类中的方法可以获得作业当前处理的情况,获得作业内部信息,
+ *  当用户需要监控或者输出内部状态时
+ *  Listener that collects information on processed batches 
+ *  
+ *  */
 class BatchInfoCollector extends StreamingListener {
   val batchInfosCompleted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
   val batchInfosStarted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
   val batchInfosSubmitted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
-//已提交
+//提交作业时间
   override def onBatchSubmitted(batchSubmitted: StreamingListenerBatchSubmitted) {
     batchInfosSubmitted += batchSubmitted.batchInfo
   }
-//
+//批处理开始运行
   override def onBatchStarted(batchStarted: StreamingListenerBatchStarted) {
     batchInfosStarted += batchStarted.batchInfo
   }
-//处理完成
+//批处理完成
   override def onBatchCompleted(batchCompleted: StreamingListenerBatchCompleted) {
     batchInfosCompleted += batchCompleted.batchInfo
   }

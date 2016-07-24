@@ -265,7 +265,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     // Explicitly do not stop SparkContext,显示不能暂停
     ssc = new StreamingContext(conf, batchDuration)
     sc = ssc.sparkContext
-    addInputStream(ssc).register()
+    addInputStream(ssc).register()//将当前有Dstream注册到DstreamGrap的输出流中
     ssc.start()
     ssc.stop(stopSparkContext = false)//只暂停实时流处理,不暂停Spark
     assert(ssc.getState() === StreamingContextState.STOPPED)
@@ -276,7 +276,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     conf.set("spark.streaming.stopSparkContextByDefault", "false")
     ssc = new StreamingContext(conf, batchDuration)
     sc = ssc.sparkContext
-    addInputStream(ssc).register()
+    addInputStream(ssc).register()//将当前有Dstream注册到DstreamGrap的输出流中
     ssc.start()
     ssc.stop()
     assert(sc.makeRDD(1 to 100).collect().size === 100)
@@ -285,7 +285,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("stop(stopSparkContext=true) after stop(stopSparkContext=false)") {
     ssc = new StreamingContext(master, appName, batchDuration)
-    addInputStream(ssc).register()
+    addInputStream(ssc).register()//将当前有Dstream注册到DstreamGrap的输出流中
     ssc.stop(stopSparkContext = false)//
     assert(ssc.sc.makeRDD(1 to 100).collect().size === 100)
     ssc.stop(stopSparkContext = true)
@@ -353,6 +353,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     // Create test receiver that sleeps in onStop()
     val totalNumRecords = 15
     val recordsPerSecond = 1
+    //接收流
     val input = ssc.receiverStream(new SlowTestReceiver(totalNumRecords, recordsPerSecond))
     input.count().foreachRDD { rdd =>
       val count = rdd.first()
@@ -360,7 +361,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
       logInfo("Count = " + count + ", Running count = " + runningCount)
     }
     ssc.start()
-    ssc.awaitTerminationOrTimeout(500)
+    ssc.awaitTerminationOrTimeout(500)//
     ssc.stop(stopSparkContext = false, stopGracefully = true)
     logInfo("Running count = " + runningCount)
     assert(runningCount > 0)
