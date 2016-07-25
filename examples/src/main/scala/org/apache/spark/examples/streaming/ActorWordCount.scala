@@ -109,6 +109,7 @@ object FeederActor {
       System.err.println("Usage: FeederActor <hostname> <port>\n")
       System.exit(1)
     }
+    //
     val Seq(host, port) = args.toSeq
 
     val conf = new SparkConf

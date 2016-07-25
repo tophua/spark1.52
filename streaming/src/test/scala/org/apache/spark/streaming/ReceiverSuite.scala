@@ -281,6 +281,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
    * An implementation of NetworkReceiverExecutor used for testing a NetworkReceiver.
    * Instead of storing the data in the BlockManager, it stores all the data in a local buffer
    * that can used for verifying that the data has been forwarded correctly.
+   * ReceiverSupervisor 接收监听
    */
   class FakeReceiverSupervisor(receiver: FakeReceiver)
     extends ReceiverSupervisor(receiver, new SparkConf()) {

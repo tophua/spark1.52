@@ -255,7 +255,7 @@
 	<classpathentry kind="lib" path="lib/spark-network-common_2.10-1.5.3-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/spark-network-shuffle_2.10-1.5.3-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/spark-sql_2.10-1.5.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/spark-streaming_2.10-1.5.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/spark-streaming_2.10-1.5.3-SNAPSHOT.jar" sourcepath="/spark-streaming"/>
 	<classpathentry kind="lib" path="lib/spark-streaming-flume_2.10-1.5.3-20151212.002248-63.jar"/>
 	<classpathentry kind="lib" path="lib/spark-streaming-flume-sink_2.10-1.5.3-20151212.002228-63.jar"/>
 	<classpathentry kind="lib" path="lib/spark-streaming-kafka_2.10-1.5.3-20151212.002413-63.jar"/>
