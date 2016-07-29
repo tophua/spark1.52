@@ -35,8 +35,10 @@ import org.apache.spark.util.{Utils, ThreadUtils, SerializableConfiguration}
 
 /** Enumeration to identify current state of a Receiver */
 private[streaming] object ReceiverState extends Enumeration {
+  //定义三个字段，然后用Value调用将它们初始化，每次调用Value都返回内部类的新实例，
+  //该内部类也叫做Value，或者你也可以向Value方法传入ID/名称/两个参数都传
   type ReceiverState = Value
-  val INACTIVE, SCHEDULED, ACTIVE = Value
+  val INACTIVE, SCHEDULED, ACTIVE = Value //定义一个枚举类型
 }
 
 /**
@@ -97,6 +99,7 @@ private[streaming] case class UpdateReceiverRateLimit(streamUID: Int, newRate: L
  * @param skipReceiverLaunch Do not launch the receiver. This is useful for testing.
  */
 private[streaming]
+//JobScheduler 将源头输入数据的记录工作委托给 ReceiverTracker,将每个 batch 的 RDD DAG 具体生成工作委托给 JobGenerator
 class ReceiverTracker(ssc: StreamingContext, skipReceiverLaunch: Boolean = false) extends Logging {
 
   private val receiverInputStreams = ssc.graph.getReceiverInputStreams()
@@ -510,6 +513,7 @@ class ReceiverTracker(ssc: StreamingContext, skipReceiverLaunch: Boolean = false
 
     /**
      * Start a receiver along with its scheduled executors
+     *  ReceiverTracker 再将收到的块数据 meta 信息直接转给自己的成员 ReceivedBlockTracker，由ReceivedBlockTracker 专门管理收到的块数据 meta 信息
      */
     private def startReceiver(receiver: Receiver[_], scheduledExecutors: Seq[String]): Unit = {
       def shouldStartReceiver: Boolean = {

@@ -50,9 +50,11 @@ class BasicOperationsSuite extends TestSuiteBase {
   }
 
   test("filter") {
+    //input: Seq = List(Range(1, 2, 3, 4), Range(5, 6, 7, 8), Range(9, 10, 11, 12))
     val input = Seq(1 to 4, 5 to 8, 9 to 12)
     testOperation(
       input,
+      //DStream[Int] 泛型
       (r: DStream[Int]) => r.filter(x => (x % 2 == 0)),
       input.map(_.filter(x => (x % 2 == 0)))
     )

@@ -35,9 +35,12 @@ private[scheduler] case class ClearCheckpointData(time: Time) extends JobGenerat
 /**
  * This class generates jobs from DStreams as well as drives checkpointing and cleaning
  * up DStream metadata.
- * Job生成器,用于给每一批Block生成一个Job
+ * JobScheduler 将每个 batch 的 RDD DAG 具体生成工作委托给 JobGenerator，而将源头输入数据的记录工作委托给 ReceiverTracker
  */
 private[streaming]
+/**
+ * JobGenerator 维护了一个定时器，周期就是我们刚刚提到的 batchDuration，定时为每个 batch 生成 RDD DAG 的实例
+ */
 class JobGenerator(jobScheduler: JobScheduler) extends Logging {
 
   private val ssc = jobScheduler.ssc

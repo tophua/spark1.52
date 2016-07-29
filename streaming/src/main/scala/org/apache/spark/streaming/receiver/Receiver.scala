@@ -56,8 +56,8 @@ import org.apache.spark.annotation.DeveloperApi
  *  }
  * }}}
  *
- * A custom receiver in Java would look like this.
- *
+ * Receiver 的总指挥 ReceiverTracker 分发多个 job（每个 job 有 1 个 task, 到多个 executor 上分别启动ReceiverSupervisor 实例
+ * A custom receiver in Java would look like this. 
  * {{{
  * class MyReceiver extends Receiver<String> {
  *     public MyReceiver(StorageLevel storageLevel) {
@@ -98,6 +98,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * clear up all resources allocated (threads, buffers, etc.) during `onStart()`.
    * (iii) `restart(...)` can be called to restart the receiver. This will call `onStop()`
    * immediately, and then `onStart()` after a delay.
+   * 就将持续不断地接收外界数据，并持续交给 ReceiverSupervisor 进行数据转储
    */
   def onStart()
 

@@ -43,7 +43,8 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
     ssc = null
   }
 
-  test("user provided closures are actually cleaned") {
+  test("user provided closures(闭包) are actually cleaned") {
+    //Dummy虚拟
     val dstream = new DummyInputDStream(ssc)
     val pairDstream = dstream.map { i => (i, i) }
     // DStream

@@ -45,7 +45,7 @@ private[streaming] class DummyDStream(ssc: StreamingContext) extends DStream[Int
 }
 
 /**
- * A dummy input stream that does absolutely nothing.
+ * A dummy input stream that does absolutely完全 nothing.
  */
 private[streaming] class DummyInputDStream(ssc: StreamingContext) extends InputDStream[Int](ssc) {
   override def start(): Unit = { }
@@ -54,8 +54,8 @@ private[streaming] class DummyInputDStream(ssc: StreamingContext) extends InputD
 }
 
 /**
- * This is a input stream just for the testsuites. This is equivalent to a checkpointable,
- * replayable, reliable message queue like Kafka. It requires a sequence as input, and
+ * This is a input stream just for the testsuites. This is equivalent(相当的) to a checkpointable,
+ * replayable(重玩), reliable(可靠) message queue like Kafka. It requires a sequence as input, and
  * returns the i_th element at the i_th batch unde manual clock.
  */
 class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], numPartitions: Int)
@@ -79,7 +79,7 @@ class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], 
     }
 
     // Report the input data's information to InputInfoTracker for testing
-    //
+    //代表输入数据信息
     val inputInfo = StreamInputInfo(id, selectedInput.length.toLong)
     //Inputinfotracker里面是保存了元数据
     ssc.scheduler.inputInfoTracker.reportInfo(validTime, inputInfo)
@@ -298,6 +298,8 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   /**
    * Run a block of code with the given TestServer and automatically
    * stop the server when the block completes or when an exception is thrown.
+   * 柯里化(Currying)指的是将原来接受两个参数的函数变成新的接受一个参数的函数的过程。
+   * 新的函数返回一个以原有第二个参数为参数的函数
    */
   def withTestServer[R](testServer: TestServer)(block: TestServer => R): R = {
     try {
@@ -489,14 +491,15 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   def testOperation[U: ClassTag, V: ClassTag](
       input: Seq[Seq[U]],
       operation: DStream[U] => DStream[V],
-      expectedOutput: Seq[Seq[V]],
+      expectedOutput: Seq[Seq[V]],//期望输出
       useSet: Boolean = false
     ) {
     testOperation[U, V](input, operation, expectedOutput, -1, useSet)
   }
 
   /**
-   * Test unary DStream operation with a list of inputs
+   * Test unary(一元) DStream operation with a list of inputs
+   * [U: ClassTag, V: ClassTag]泛型方法 
    * @param input      Sequence of input collections
    * @param operation  Binary DStream operation to be applied to the 2 inputs
    * @param expectedOutput Sequence of expected output collections
@@ -511,6 +514,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       numBatches: Int,
       useSet: Boolean
     ) {
+    //批量操作
     val numBatches_ = if (numBatches > 0) numBatches else expectedOutput.size
     withStreamingContext(setupStreams[U, V](input, operation)) { ssc =>
       val output = runStreams[V](ssc, numBatches_, expectedOutput.size)
