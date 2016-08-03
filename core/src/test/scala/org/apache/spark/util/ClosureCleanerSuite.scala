@@ -24,7 +24,9 @@ import org.apache.spark.LocalSparkContext._
 import org.apache.spark.{SparkContext, SparkException, SparkFunSuite, TaskContext}
 import org.apache.spark.partial.CountEvaluator
 import org.apache.spark.rdd.RDD
-
+/**
+ * 
+ */
 class ClosureCleanerSuite extends SparkFunSuite {
   test("closures(闭包) inside an object") {
     assert(TestObject.run() === 30) // 6 + 7 + 8 + 9
@@ -35,7 +37,7 @@ class ClosureCleanerSuite extends SparkFunSuite {
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("closures(闭包) inside a class with no default constructor") {
+  test("closures(闭包) inside a class with no default constructor") {//定义一个构造器
     val obj = new TestClassWithoutDefaultConstructor(5)
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
@@ -142,9 +144,14 @@ object TestObject {
   def run(): Int = {
     var nonSer = new NonSerializable
     val x = 5
-    withSpark(new SparkContext("local", "test")) { sc =>
+    //柯里化(Currying)指的是将原来接受两个参数的函数变成新的接受一个参数的函数的过程,
+    //新的函数返回一个以原有第二个参数为参数的函数.
+    
+    withSpark(new SparkContext("local", "test")) { sc =>//匿名方法
+      //柯里化第二个匿名方法调用方式
       val nums = sc.parallelize(Array(1, 2, 3, 4))
-      nums.map(_ + x).reduce(_ + _)
+      //6+7+8+9=30
+      nums.map(_ + x).reduce(_ + _) //返回值 Int = 30
     }
   }
 }

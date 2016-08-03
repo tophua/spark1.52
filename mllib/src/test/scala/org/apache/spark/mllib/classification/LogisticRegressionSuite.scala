@@ -53,6 +53,7 @@ object LogisticRegressionSuite {
     val x1 = Array.fill[Double](nPoints)(rnd.nextGaussian())
 
     val y = (0 until nPoints).map { i =>
+      //math.exp 返回欧拉数e的一个double值的幂
       val p = 1.0 / (1.0 + math.exp(-(offset + scale * x1(i))))
       if (rnd.nextDouble() < p) 1.0 else 0.0
     }
@@ -100,7 +101,7 @@ object LogisticRegressionSuite {
     val x = Array.fill[Vector](nPoints)(Vectors.dense(Array.fill[Double](xDim)(rnd.nextGaussian())))
 
     x.foreach { vector =>
-      // This doesn't work if `vector` is a sparse vector.
+      // This doesn't work if `vector` is a sparse(稀疏) vector.
       val vectorArray = vector.toArray
       var i = 0
       val len = vectorArray.length

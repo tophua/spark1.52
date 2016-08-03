@@ -42,7 +42,9 @@ class MapOutputTrackerSuite extends SparkFunSuite {
 
   test("master start and stop") {
     val rpcEnv = createRpcEnv("test")
+    //保存Shuffle Map Task 输出的位置信息
     val tracker = new MapOutputTrackerMaster(conf)
+    //设置输出的位置信息
     tracker.trackerEndpoint = rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME,
       new MapOutputTrackerMasterEndpoint(rpcEnv, tracker, conf))
     tracker.stop()
@@ -57,6 +59,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
       //shuffleId:10,2数组存储[MapStatus]
     tracker.registerShuffle(10, 2)
     assert(tracker.containsShuffle(10))
+    //
     val size1000 = MapStatus.decompressSize(MapStatus.compressSize(1000L))
     val size10000 = MapStatus.decompressSize(MapStatus.compressSize(10000L))
     tracker.registerMapOutput(10, 0, MapStatus(BlockManagerId("a", "hostA", 1000),

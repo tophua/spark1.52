@@ -41,25 +41,27 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
   test("accessing SparkContext form a different thread") {
     sc = new SparkContext("local", "test")
     val nums = sc.parallelize(1 to 10, 2)
-    val sem = new Semaphore(0)
+    val sem = new Semaphore(0)//是负责协调各个线程, 以保证它们能够正确、合理的使用公共资源
+    //volatile注解标记变量非线程安全
     @volatile var answer1: Int = 0
     @volatile var answer2: Int = 0
     new Thread {
       override def run() {
         answer1 = nums.reduce(_ + _)
         answer2 = nums.first()    // This will run "locally" in the current thread
-        sem.release()
+        sem.release()//释放一个许可
       }
     }.start()
-    sem.acquire()
+    sem.acquire()//获取一个许可,如果没有就等待
     assert(answer1 === 55)
     assert(answer2 === 1)
   }
 
-  test("accessing SparkContext form multiple threads") {
+  test("accessing SparkContext form multiple threads") {//多线程访问
     sc = new SparkContext("local", "test")
     val nums = sc.parallelize(1 to 10, 2)
     val sem = new Semaphore(0)
+    //volatile注解标记变量非线程安全
     @volatile var ok = true
     for (i <- 0 until 10) {
       new Thread {
@@ -112,14 +114,14 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     }
   }
 
-  test("parallel job execution") {
+  test("parallel job execution") {//并行job执行
     // This test launches two jobs with two threads each on a 4-core local cluster. Each thread
     // waits until there are 4 threads running at once, to test that both jobs have been launched.
     sc = new SparkContext("local[4]", "test")
     val nums = sc.parallelize(1 to 2, 2)
     val sem = new Semaphore(0)
     ThreadingSuiteState.clear()
-    var throwable: Option[Throwable] = None
+    var throwable: Option[Throwable] = None //Option[T]是容器对于给定的类型的零个或一个元件
     for (i <- 0 until 2) {
       new Thread {
         override def run() {
@@ -139,7 +141,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
             assert(ans.toList === List(1, 2))
           } catch {
             case t: Throwable =>
-              throwable = Some(t)
+              throwable = Some(t) //存一个元素
           } finally {
             sem.release()
           }
@@ -158,7 +160,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
   test("set local properties in different thread") {
     sc = new SparkContext("local", "test")
     val sem = new Semaphore(0)
-    var throwable: Option[Throwable] = None
+    var throwable: Option[Throwable] = None//Option[T]是容器对于给定的类型的零个或一个元件
     val threads = (1 to 5).map { i =>
       new Thread() {
         override def run() {

@@ -39,7 +39,7 @@ private[spark] abstract class SparkFunSuite extends FunSuite with Logging {
     val shortSuiteName = suiteName.replaceAll("org.apache.spark", "o.a.s")
     try {
       logInfo(s"\n\n===== TEST OUTPUT FOR $shortSuiteName: '$testName' =====\n")
-      test()
+      test()//没有参数方法
     } finally {
       logInfo(s"\n\n===== FINISHED $shortSuiteName: '$testName' =====\n")
     }

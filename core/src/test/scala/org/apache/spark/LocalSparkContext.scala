@@ -24,7 +24,7 @@ import org.scalatest.Suite
 
 /** Manages a local `sc` {@link SparkContext} variable, correctly stopping it after each test. */
 trait LocalSparkContext extends BeforeAndAfterEach with BeforeAndAfterAll { self: Suite =>
-
+  //transient注解用于标记变量不被序列化
   @transient var sc: SparkContext = _
 
   override def beforeAll() {
@@ -53,7 +53,12 @@ object LocalSparkContext {
     System.clearProperty("spark.driver.port")
   }
 
-  /** Runs `f` by passing in `sc` and ensures that `sc` is stopped. */
+  /**
+   * Runs `f` by passing in `sc` and ensures(确保) that `sc` is stopped.
+   * 
+   * 柯里化（Currying）是把接受多个参数的函数变换成接受一个单一参数(最初函数的第一个参数)的函数，
+   * 并且返回接受余下的参数且返回结果
+   **/
   def withSpark[T](sc: SparkContext)(f: SparkContext => T): T = {
     try {
       f(sc)
