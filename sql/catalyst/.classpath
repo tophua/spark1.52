@@ -110,7 +110,7 @@
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/paranamer-2.6.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/scalap-2.10.0.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/scala-compiler-2.10.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/liushuhua/.sbt/boot/scala-2.10.4/lib/scala-reflect.jar"/>
+	<classpathentry kind="lib" path="D:/scala/scala-2.10.4/lib/scala-reflect.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/bundles/jackson-databind-2.4.4.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/bundles/jackson-core-2.4.4.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/bundles/jersey-core-1.9.jar"/>
