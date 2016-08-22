@@ -31,16 +31,20 @@ class StatusTrackerSuite extends SparkFunSuite with Matchers with LocalSparkCont
   test("basic status API usage") {
     sc = new SparkContext("local", "test", new SparkConf(false))
     val jobFuture = sc.parallelize(1 to 10000, 2).map(identity).groupBy(identity).collectAsync()
-    val jobId: Int = eventually(timeout(10 seconds)) {
-      val jobIds = jobFuture.jobIds
+    //eventually
+    // 柯里化（Currying）是把接受多个参数的函数变换成接受一个单一参数(最初函数的第一个参数)的函数，
+    // 并且返回接受余下的参数且返回结果
+    val jobId: Int = eventually(timeout(10 seconds)) {//简写匿名函数写法
+      val jobIds = jobFuture.jobIds//
       jobIds.size should be(1)
-      jobIds.head
+      jobIds.head//取出列表第一值
     }
-    val jobInfo = eventually(timeout(10 seconds)) {
+    
+    val jobInfo = eventually(timeout(10 seconds)) {//jobInfo:SparkJobInfo
       sc.statusTracker.getJobInfo(jobId).get
     }
     jobInfo.status() should not be FAILED
-    val stageIds = jobInfo.stageIds()
+    val stageIds = jobInfo.stageIds()//获得SageId
     stageIds.size should be(2)
 
     val firstStageInfo = eventually(timeout(10 seconds)) {
@@ -48,12 +52,12 @@ class StatusTrackerSuite extends SparkFunSuite with Matchers with LocalSparkCont
     }
     firstStageInfo.stageId() should be(stageIds(0))
     firstStageInfo.currentAttemptId() should be(0)
-    firstStageInfo.numTasks() should be(2)
+    firstStageInfo.numTasks() should be(2)//获得任务数
     eventually(timeout(10 seconds)) {
       val updatedFirstStageInfo = sc.statusTracker.getStageInfo(stageIds(0)).get
-      updatedFirstStageInfo.numCompletedTasks() should be(2)
-      updatedFirstStageInfo.numActiveTasks() should be(0)
-      updatedFirstStageInfo.numFailedTasks() should be(0)
+      updatedFirstStageInfo.numCompletedTasks() should be(2) //完成任务数
+      updatedFirstStageInfo.numActiveTasks() should be(0)//任务活动数
+      updatedFirstStageInfo.numFailedTasks() should be(0) //任务失败数
     }
   }
 
@@ -68,7 +72,7 @@ class StatusTrackerSuite extends SparkFunSuite with Matchers with LocalSparkCont
       sc.statusTracker.getJobIdsForGroup(null).toSet should be (Set(defaultJobGroupJobId))
     }
     // Test jobs submitted in job groups:
-    sc.setJobGroup("my-job-group", "description")
+    sc.setJobGroup("my-job-group", "description")//设置Job分组
     sc.statusTracker.getJobIdsForGroup("my-job-group") should be (Seq.empty)
     val firstJobFuture = sc.parallelize(1 to 1000).countAsync()
     val firstJobId = eventually(timeout(10 seconds)) {

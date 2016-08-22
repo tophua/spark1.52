@@ -158,7 +158,8 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Mark this RDD for persisting using the specified level.
-   *
+   * this.type表示当前对象（this)的类型。this指代当前的对象。
+   * this.type被用于变量，函数参数和函数返回值的类型声明
    * @param newLevel the target storage level
    * @param allowOverride whether to override any existing level with the new one
    */
@@ -316,10 +317,8 @@ abstract class RDD[T: ClassTag](
    * 首先检查当前RDD是否被isCheckpointed过,如果有,读取Checkpointed的数据,否则开始计算
    */
   private[spark] def computeOrReadCheckpoint(split: Partition, context: TaskContext): Iterator[T] =
-    {
-    
-      if (isCheckpointedAndMaterialized) {
-            
+    {    
+      if (isCheckpointedAndMaterialized) {            
         firstParent[T].iterator(split, context)
       } else {
         compute(split, context)
@@ -340,7 +339,7 @@ abstract class RDD[T: ClassTag](
    * Return a new RDD by applying a function to all elements of this RDD.
    * 返回一个新的分布式数据集，由每个原元素经过func函数转换后组成
    */
-  def map[U: ClassTag](f: T => U): RDD[U] = withScope {
+  def map[U: ClassTag](f: T => U): RDD[U] = withScope{
     val cleanF = sc.clean(f)
     //这里this，就是之前生成的HadoopRDD，MapPartitionsRDD的构造函数，会调用父类的构造函数RDD[U](prev)， 
     //这个this(例如也就是hadoopRdd),会被赋值给prev
@@ -402,7 +401,7 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
-   * Return a new RDD that is reduced into `numPartitions` partitions.
+   * Return a new RDD that is reduced into `numPartitions` partitions. 联合
    *该函数用于将RDD进行重分区，使用HashPartitioner。
           第一个参数为重分区的数目，第二个为是否进行shuffle，默认为false
    * This results in a narrow dependency, e.g. if you go from 1000 partitions
@@ -949,8 +948,6 @@ abstract class RDD[T: ClassTag](
    * Applies a function f to all elements of this RDD.
    * foreach用于遍历RDD,将函数f应用于每一个元素。
    * 但要注意，如果对RDD执行foreach，只会在Executor端有效，而并不是Driver端
-   *
-   * 
    */
   def foreach(f: T => Unit): Unit = withScope {
     val cleanF = sc.clean(f)
@@ -1068,7 +1065,8 @@ abstract class RDD[T: ClassTag](
    */
   def reduce(f: (T, T) => T): T = withScope {
     val cleanF = sc.clean(f)
-    val reducePartition: Iterator[T] => Option[T] = iter => {
+    //
+    val reducePartition: Iterator[T] => Option[T] = iter => {//不明白函数定义?
       if (iter.hasNext) {
         Some(iter.reduceLeft(cleanF))
       } else {
@@ -1076,6 +1074,7 @@ abstract class RDD[T: ClassTag](
       }
     }
     var jobResult: Option[T] = None
+    //匿名函数
     val mergeResult = (index: Int, taskResult: Option[T]) => {
       if (taskResult.isDefined) {
         jobResult = jobResult match {
@@ -1098,6 +1097,7 @@ abstract class RDD[T: ClassTag](
   def treeReduce(f: (T, T) => T, depth: Int = 2): T = withScope {
     require(depth >= 1, s"Depth must be greater than or equal to 1 but got $depth.")
     val cleanF = context.clean(f)
+    //
     val reducePartition: Iterator[T] => Option[T] = iter => {
       if (iter.hasNext) {
         Some(iter.reduceLeft(cleanF))
