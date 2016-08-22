@@ -147,9 +147,9 @@ private[spark] class Executor(
   def stop(): Unit = {
     env.metricsSystem.report()
     env.rpcEnv.stop(executorEndpoint)
-    heartbeater.shutdown()
-    heartbeater.awaitTermination(10, TimeUnit.SECONDS)
-    threadPool.shutdown()
+    heartbeater.shutdown()//线程池就会不再接受任务。
+    heartbeater.awaitTermination(10, TimeUnit.SECONDS)//等待关闭线程池，每次等待的超时时间为10秒
+    threadPool.shutdown()//线程池就会不再接受任务。
     if (!isLocal) {
       env.stop()
     }
