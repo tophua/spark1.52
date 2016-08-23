@@ -61,15 +61,14 @@ private[spark] trait Spillable[C] extends Logging {
   private[this] var _spillCount = 0
 
   /**
-   * Spills the current in-memory collection to disk if needed. Attempts to acquire more
+   * Spills(溢出) the current in-memory collection to disk if needed. Attempts to acquire(获得) more
    * memory before spilling.
    *
    * @param collection collection to spill to disk
    * @param currentMemory estimated size of the collection in bytes
    * @return true if `collection` was spilled to disk; false otherwise
    */
-  protected def maybeSpill(collection: C, currentMemory: Long): Boolean = {
-    //为
+  protected def maybeSpill(collection: C, currentMemory: Long): Boolean = {  
     if (elementsRead % 32 == 0 && currentMemory >= myMemoryThreshold) {
       // Claim up to double our current memory from the shuffle memory pool
       //为当前线程尝试获取amountToRequest大小的内存

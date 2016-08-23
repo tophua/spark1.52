@@ -97,7 +97,7 @@ private[spark] class Executor(
   private val executorEndpoint = env.rpcEnv.setupEndpoint(
     ExecutorEndpoint.EXECUTOR_ENDPOINT_NAME, new ExecutorEndpoint(env.rpcEnv, executorId))
 
-  // Whether to load classes in user jars before those in Spark jars
+  // Whether(可能的选择) to load classes in user jars before those in Spark jars
   private val userClassPathFirst = conf.getBoolean("spark.executor.userClassPathFirst", false)
 
   // Create our ClassLoader

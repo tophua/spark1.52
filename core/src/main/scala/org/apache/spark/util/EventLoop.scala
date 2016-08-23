@@ -82,7 +82,7 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
   def stop(): Unit = {
     //compareAndSet 如果当前值与期望值(第一个参数)相等，则设置为新值(第二个参数)，设置成功返回true
     if (stopped.compareAndSet(false, true)) {
-      eventThread.interrupt()
+      eventThread.interrupt()//
       var onStopCalled = false
       try {
         eventThread.join()
@@ -91,6 +91,7 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
         onStop()
       } catch {
         case ie: InterruptedException =>
+          //interrupt不会中断一个正在运行的线程。它的作用是，在线程受到阻塞时抛出一个中断信号，这样线程就得以退出阻塞的状态.
           Thread.currentThread().interrupt()
           if (!onStopCalled) {
             // ie is thrown from `eventThread.join()`. Otherwise, we should not call `onStop` since

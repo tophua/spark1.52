@@ -22,7 +22,9 @@ import org.scalatest.Suite
 
 /** Shares a local `SparkContext` between all tests in a suite and closes it at the end */
 trait SharedSparkContext extends BeforeAndAfterAll { self: Suite =>
-
+/**
+ * transient注解用于标记变量不被序列化
+ */
   @transient private var _sc: SparkContext = _
 
   def sc: SparkContext = _sc

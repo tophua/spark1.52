@@ -54,6 +54,7 @@ private[spark] object RpcEnv {
     val rpcEnvNames = Map("akka" -> "org.apache.spark.rpc.akka.AkkaRpcEnvFactory")
     val rpcEnvName = conf.get("spark.rpc", "akka")
     val rpcEnvFactoryClassName = rpcEnvNames.getOrElse(rpcEnvName.toLowerCase, rpcEnvName)
+    //默认AkkaRpcEnvFactory工厂类
     Utils.classForName(rpcEnvFactoryClassName).newInstance().asInstanceOf[RpcEnvFactory]
   }
 
@@ -91,6 +92,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
    * 根据RpcEndpoint返回RpcEndpointRef，具体实现在RpcEndpoint.self方法中，如果RpcEndpointRef不存在，将返回null
    * Return RpcEndpointRef of the registered [[RpcEndpoint]]. Will be used to implement
    * [[RpcEndpoint.self]]. Return `null` if the corresponding [[RpcEndpointRef]] does not exist.
+   * endpoint(服务端点)
    */
   private[rpc] def endpointRef(endpoint: RpcEndpoint): RpcEndpointRef
 
@@ -276,7 +278,7 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
 
   /**
    * 在规定时间内返回对象， Await是scala并发库中的一个对象，result在duration时间片内返回Awaitable的执行结果。
-   * 
+   * future类继承于Awaitable类，
    * Wait for the completed result and return it. If the result is not available within this
    * timeout, throw a [[RpcTimeoutException]] to indicate which configuration controls the timeout.
    * @param  awaitable  the `Awaitable` to be awaited
@@ -287,7 +289,7 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
     try {
       /**
        * Await 它有两个方法，一个是Await.ready，当Future的状态为完成时返回，
-       * 一种是Await.result，直接返回Future持有的结果。
+       *                    一种是Await.result，直接返回Future持有的结果
        * Future还提供了一些map,filter,foreach等操作
        * Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
        */

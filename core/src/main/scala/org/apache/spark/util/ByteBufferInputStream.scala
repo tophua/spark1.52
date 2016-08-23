@@ -48,6 +48,7 @@ class ByteBufferInputStream(private var buffer: ByteBuffer, dispose: Boolean = f
       cleanUp()
       -1
     } else {
+      //remaining 剩余的
       val amountToGet = math.min(buffer.remaining(), length)
       buffer.get(dest, offset, amountToGet)
       amountToGet
@@ -68,7 +69,7 @@ class ByteBufferInputStream(private var buffer: ByteBuffer, dispose: Boolean = f
   }
 
   /**
-   * Clean up the buffer, and potentially dispose of it using BlockManager.dispose().
+   * Clean up the buffer, and potentially dispose(潜在的处理) of it using BlockManager.dispose().
    */
   private def cleanUp() {
     if (buffer != null) {

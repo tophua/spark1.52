@@ -69,10 +69,10 @@ private[spark] class MetadataCleaner(
 }
 
 private[spark] object MetadataCleanerType extends Enumeration {
-
+//枚举类
   val MAP_OUTPUT_TRACKER, SPARK_CONTEXT, HTTP_BROADCAST, BLOCK_MANAGER,
   SHUFFLE_BLOCK_MANAGER, BROADCAST_VARS = Value
- //元数据清理类型
+ //枚举别名
   type MetadataCleanerType = Value
 
   def systemProperty(which: MetadataCleanerType.MetadataCleanerType): String = {

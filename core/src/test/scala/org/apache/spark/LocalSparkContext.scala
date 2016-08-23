@@ -23,7 +23,12 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Suite
 
 /** Manages a local `sc` {@link SparkContext} variable, correctly stopping it after each test. */
-trait LocalSparkContext extends BeforeAndAfterEach with BeforeAndAfterAll { self: Suite =>
+trait LocalSparkContext extends BeforeAndAfterEach with BeforeAndAfterAll { 
+  /**
+   * 特质可以要求混入它的类扩展自另一个类型，但是当使用自身类型（self type）的声明来定义特质时（this: ClassName =>），
+   * 这样的特质只能被混入给定类型的子类当中,
+   */     
+  self: Suite =>
   //transient注解用于标记变量不被序列化
   @transient var sc: SparkContext = _
 
@@ -55,7 +60,6 @@ object LocalSparkContext {
 
   /**
    * Runs `f` by passing in `sc` and ensures(确保) that `sc` is stopped.
-   * 
    * 柯里化（Currying）是把接受多个参数的函数变换成接受一个单一参数(最初函数的第一个参数)的函数，
    * 并且返回接受余下的参数且返回结果
    **/
