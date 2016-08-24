@@ -20,7 +20,7 @@ package org.apache.spark.util
 import org.apache.spark.Logging
 
 /**
- * The default uncaught exception handler for Executors terminates the whole process, to avoid
+ * The default uncaught(捕获) exception handler for Executors terminates the whole process, to avoid
  * getting into a bad state indefinitely. Since Executors are relatively lightweight, it's better
  * to fail fast when things go wrong.
  */

@@ -67,11 +67,11 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
   test("simple groupByKey") {
     sc = new SparkContext(clusterUrl, "test")
     val pairs = sc.parallelize(Array((1, 1), (1, 2), (1, 3), (2, 1)), 5)
-    //元组分组
+    //元组分组,参数分区数
     val groups = pairs.groupByKey(5).collect()
     assert(groups.size === 2)
     //元组
-    val valuesFor1 = groups.find(_._1 == 1).get._2 //取出数组第二个元素，
+    val valuesFor1 = groups.find(_._1 == 1).get._2 //取出数组分组为1的第二个元素列表
     assert(valuesFor1.toList.sorted === List(1, 2, 3))
     val valuesFor2 = groups.find(_._1 == 2).get._2
     assert(valuesFor2.toList.sorted === List(1))

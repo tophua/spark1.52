@@ -32,7 +32,7 @@ class StatusTrackerSuite extends SparkFunSuite with Matchers with LocalSparkCont
     sc = new SparkContext("local", "test", new SparkConf(false))
     //collectAsync 异步集合
     val jobFuture = sc.parallelize(1 to 10000, 2).map(identity).groupBy(identity).collectAsync()
-    //eventually
+    //eventually 
     // 柯里化(Currying)是把接受多个参数的函数变换成接受一个单一参数(最初函数的第一个参数)的函数，
     // 并且返回接受余下的参数且返回结果
     val jobId: Int = eventually(timeout(10 seconds)) {//简写匿名函数写法

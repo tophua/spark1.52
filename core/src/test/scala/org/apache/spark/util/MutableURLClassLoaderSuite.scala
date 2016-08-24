@@ -20,7 +20,9 @@ package org.apache.spark.util
 import java.net.URLClassLoader
 
 import org.apache.spark.{SparkContext, SparkException, SparkFunSuite, TestUtils}
-
+/**
+ * 可变类加载器
+ */
 class MutableURLClassLoaderSuite extends SparkFunSuite {
 
   val urls2 = List(TestUtils.createJarWithClasses(

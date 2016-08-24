@@ -62,6 +62,7 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
   // Run a map-reduce job in which a reduce task deterministically fails once.
   test("failure in a two-stage job") {
     sc = new SparkContext("local[1,2]", "test")
+    //groupByKey参数分组数
     val results = sc.makeRDD(1 to 3).map(x => (x, x)).groupByKey(3).map {
       case (k, v) =>
         FailureSuiteState.synchronized {
