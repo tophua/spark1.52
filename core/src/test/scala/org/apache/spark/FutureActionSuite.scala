@@ -37,7 +37,7 @@ class FutureActionSuite
     val rdd = sc.parallelize(1 to 10, 2)
     val job = rdd.countAsync()//异步
     //Await.result或者Await.ready会导致当前线程被同步(阻塞)，并等待actor通过它的应答来完成Future
-    val res = Await.result(job, Duration.Inf)
+    val res = Await.result(job, Duration.Inf)//Duration.Inf 无限等待
     res should be (10)
     job.jobIds.size should be (1)
   }

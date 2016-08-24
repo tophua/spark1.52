@@ -39,7 +39,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
     assert(anotherP4 === p4)
   }
 
-  test("RangePartitioner equality") {//
+  test("RangePartitioner equality") {//范围分区相等比较
     // Make an RDD where all the elements are the same so that the partition range bounds
     // are deterministically all the same.
     val rdd = sc.parallelize(Seq(1, 1, 1, 1)).map(x => (x, x))

@@ -42,7 +42,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     resetSparkContext()
   }
 
-  test("local mode, FIFO scheduler") {
+  test("local mode, FIFO scheduler") {//先进先出调度模式
   //Spark的任务调度模式,先进先出原则
     val conf = new SparkConf().set("spark.scheduler.mode", "FIFO")
     sc = new SparkContext("local[2]", "test", conf)
@@ -52,8 +52,8 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
 
-  test("local mode, fair scheduler"){
-  //Spark的任务调度模式,公平调度
+  test("local mode, fair scheduler"){//公平模式调试
+    //Spark的任务调度模式,公平调度
     val conf = new SparkConf().set("spark.scheduler.mode", "FAIR")
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()
     conf.set("spark.scheduler.allocation.file", xmlPath)
@@ -94,15 +94,15 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     // Run from 1 to 10, and then block and wait for the task to be killed.
     val rdd = sc.parallelize(1 to 1000, 2).map { x =>
       if (x > 10) {
-        taskStartedSemaphore.release()
-        taskCancelledSemaphore.acquire()
+        taskStartedSemaphore.release()//释放资源
+        taskCancelledSemaphore.acquire()//获取资源
       }
       x
     }.cache()
 
     val rdd1 = rdd.map(x => x)
 
-    future {
+    future {//Future 表示一个可能还没有实际完成的异步任务的结果
       taskStartedSemaphore.acquire()
       sc.cancelAllJobs()
       taskCancelledSemaphore.release(100000)
@@ -125,7 +125,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     })
 
     // jobA is the one to be cancelled.
-    val jobA = future {
+    val jobA = future {//Future 表示一个可能还没有实际完成的异步任务的结果,
       sc.setJobGroup("jobA", "this is a job to be cancelled")
       sc.parallelize(1 to 10000, 2).map { i => Thread.sleep(10); i }.count()
     }

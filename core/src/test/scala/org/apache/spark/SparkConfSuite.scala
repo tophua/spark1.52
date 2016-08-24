@@ -42,7 +42,7 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   test("Test timeString conversion") {
     val conf = new SparkConf()
     // Simply exercise the API, we don't need a complete conversion test since that's handled in
-    // UtilsSuite.scala
+    // UtilsSuite.scala,fake伪造,假装
     assert(conf.getTimeAsMs("fake", "1ms") === TimeUnit.MILLISECONDS.toMillis(1))
     assert(conf.getTimeAsSeconds("fake", "1000ms") === TimeUnit.MILLISECONDS.toSeconds(1000))
   }
@@ -60,7 +60,7 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   }
 
   test("named set methods") {
-    
+    //设置配置文件属性
     val conf = new SparkConf(false)
 
     conf.setMaster("local[3]")
@@ -79,7 +79,8 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(conf.get("spark.executorEnv.VAR3") === "value3")
 
     // Test the Java-friendly versions of these too
-    conf.setJars(Array("c.jar", "d.jar"))
+    conf.setJars(Array("c.jar", "d.jar"))//设置jar包
+    //设置执行环境
     conf.setExecutorEnv(Array(("VAR4", "value4"), ("VAR5", "value5")))
     assert(conf.get("spark.jars") === "c.jar,d.jar")
     assert(conf.get("spark.executorEnv.VAR4") === "value4")
@@ -120,7 +121,8 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   }
 
   test("creating SparkContext with both master and app name") {
-    val conf = new SparkConf(false).setMaster("local").setAppName("My app")
+    //设置应用程序名称
+    val conf = new SparkConf(false).setMaster("local").setAppName("My app")    
     sc = new SparkContext(conf)
     assert(sc.master === "local")
     assert(sc.appName === "My app")
@@ -148,9 +150,13 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(conf.get("spark.test.a.b.c") === "a.b.c")
   }
 
-  test("Thread safeness - SPARK-5425") {
+  test("Thread safeness - SPARK-5425") {//线程安全
     import scala.collection.JavaConversions._
     val executor = Executors.newSingleThreadScheduledExecutor()
+         /**
+          * scheduleAtFixedRate有两个时间参数，initialDelay和period，
+          * 对应该方法的两个主要功能，即延迟运行任务和周期性执行任务
+          */
     val sf = executor.scheduleAtFixedRate(new Runnable {
       override def run(): Unit =
         System.setProperty("spark.5425." + Random.nextInt(), Random.nextInt().toString)

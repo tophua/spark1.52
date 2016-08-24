@@ -22,7 +22,7 @@ import java.io.File
 object SSLSampleConfigs {
   val keyStorePath = new File(this.getClass.getResource("/keystore").toURI).getAbsolutePath
   val untrustedKeyStorePath = new File(
-    this.getClass.getResource("/untrusted-keystore").toURI).getAbsolutePath
+    this.getClass.getResource("/untrusted-keystore").toURI).getAbsolutePath //绝对路径
   val trustStorePath = new File(this.getClass.getResource("/truststore").toURI).getAbsolutePath
 
   val enabledAlgorithms =

@@ -127,6 +127,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.addFile(file1.getAbsolutePath)
       sc.addFile(relativePath)
       sc.parallelize(Array(1), 1).map(x => {
+        //SparkFiles获得Spark文件
         val gotten1 = new File(SparkFiles.get(file1.getName))
         val gotten2 = new File(SparkFiles.get(file2.getName))
         if (!gotten1.exists()) {
@@ -196,7 +197,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     try {
       sc = new SparkContext(new SparkConf().setAppName("test").setMaster("local"))
       intercept[SparkException] {
-        sc.addFile(dir.getAbsolutePath)
+        sc.addFile(dir.getAbsolutePath)//递归创建文件
       }
     } finally {
       sc.stop()
@@ -221,8 +222,8 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
   test("Comma separated paths for newAPIHadoopFile/wholeTextFiles/binaryFiles (SPARK-7155)") {
     // Regression test for SPARK-7155
     // dir1 and dir2 are used for wholeTextFiles and binaryFiles
-    val dir1 = Utils.createTempDir()
-    val dir2 = Utils.createTempDir()
+    val dir1 = Utils.createTempDir() //创建临时目录
+    val dir2 = Utils.createTempDir() //创建临时目录
 
     val dirpath1 = dir1.getAbsolutePath
     val dirpath2 = dir2.getAbsolutePath
@@ -246,6 +247,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
 
     try {
       // Create 5 text files.
+      //创建文件内容
       Files.write("someline1 in file1\nsomeline2 in file1\nsomeline3 in file1", file1, UTF_8)
       Files.write("someline1 in file2\nsomeline2 in file2", file2, UTF_8)
       Files.write("someline1 in file3", file3, UTF_8)
@@ -255,8 +257,8 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc = new SparkContext(new SparkConf().setAppName("test").setMaster("local"))
 
       // Test textFile, hadoopFile, and newAPIHadoopFile for file1 and file2
-      assert(sc.textFile(filepath1 + "," + filepath2).count() == 5L)
-      assert(sc.hadoopFile(filepath1 + "," + filepath2,
+      assert(sc.textFile(filepath1 + "," + filepath2).count() == 5L)//增加普通文件
+      assert(sc.hadoopFile(filepath1 + "," + filepath2,//Hadoop文件
         classOf[TextInputFormat], classOf[LongWritable], classOf[Text]).count() == 5L)
       assert(sc.newAPIHadoopFile(filepath1 + "," + filepath2,
         classOf[NewTextInputFormat], classOf[LongWritable], classOf[Text]).count() == 5L)

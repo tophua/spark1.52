@@ -50,7 +50,7 @@ class SparkContextSchedulerCreationSuite
 
   test("local") {
     val sched = createTaskScheduler("local")
-    sched.backend match {
+    sched.backend match {//match 偏函数
       // LocalBackend 响应Scheduler的receiveOffers请求，根据可用的CPU核的设定值local[N]直接生成
       //CPU资源返回给Scheduler，并通过executor类在线程池中依次启动和运行scheduler返回的任务列表
       case s: LocalBackend => assert(s.totalCores === 1)
