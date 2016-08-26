@@ -89,7 +89,7 @@ private[spark] object RDDOperationScope extends Logging {
    * Execute the given body such that all RDDs created in this body will have the same scope.
    * The name of the scope will be the first method name in the stack trace that is not the
    * same as this method's.
-   *
+   * 柯里化函数
    * Note: Return statements are NOT allowed in body.
    */
   private[spark] def withScope[T](
@@ -105,6 +105,7 @@ private[spark] object RDDOperationScope extends Logging {
         logWarning("No valid method name for this RDD operation scope!")
         "N/A"
       }
+    //调用柯里化withScope函数(下面)
     withScope[T](sc, callerMethodName, allowNesting, ignoreParent = false)(body)
   }
 

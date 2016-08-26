@@ -2143,10 +2143,14 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   private val nextShuffleId = new AtomicInteger(0)
 
   private[spark] def newShuffleId(): Int = nextShuffleId.getAndIncrement()
-
+  //AtomicInteger，一个提供原子操作的Integer的类,++i和i++操作并不是线程安全的，不可避免的会用到synchronized关键字。
+  //而AtomicInteger则通过一种线程安全的加减操作接口
   private val nextRddId = new AtomicInteger(0)
 
-  /** Register a new RDD, returning its RDD ID */
+  /** 
+   *  Register a new RDD, returning its RDD ID 
+   *  注册一个新的RDD,返回一个RDDID标识
+   *  */
   private[spark] def newRddId(): Int = nextRddId.getAndIncrement()
 
   /**
