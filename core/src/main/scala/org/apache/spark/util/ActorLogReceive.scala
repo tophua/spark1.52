@@ -37,7 +37,7 @@ import org.slf4j.Logger
  *
  */
 private[spark] trait ActorLogReceive {
-  self: Actor =>
+  self: Actor =>//自身类型，指定子类
 
   override def receive: Actor.Receive = new Actor.Receive {
 

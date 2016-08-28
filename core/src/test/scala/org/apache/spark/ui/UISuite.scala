@@ -46,6 +46,7 @@ class UISuite extends SparkFunSuite {
   }
 
   ignore("basic ui visibility") {
+    //柯里化方法
     withSpark(newSparkContext()) { sc =>
       // test if the ui is visible, and all the expected tabs are visible
       eventually(timeout(10 seconds), interval(50 milliseconds)) {

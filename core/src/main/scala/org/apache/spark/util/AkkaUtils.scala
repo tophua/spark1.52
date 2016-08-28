@@ -34,11 +34,11 @@ import org.apache.spark.rpc.RpcTimeout
 private[spark] object AkkaUtils extends Logging {
 
   /**
-    * 创建ActorSystem启动ActorSystem
-   * Creates an ActorSystem ready for remoting, with various Spark features. Returns both the
+   * 创建ActorSystem启动ActorSystem
+   * Creates an ActorSystem ready for remoting, with various(各种) Spark features. Returns both the
    * ActorSystem itself and its port (which is hard to get from Akka).
    *
-   * Note: the `name` parameter is important, as even if a client sends a message to right
+   * Note: the `name` parameter is important(重要), as even if a client sends a message to right
    * host + port, if the system name is incorrect, Akka will drop the message.
    *
    * If indestructible is set to true, the Actor System will continue running in the event
@@ -64,7 +64,7 @@ private[spark] object AkkaUtils extends Logging {
       securityManager: SecurityManager): (ActorSystem, Int) = {
    //用于通信的actor线程数量。如果驱动器有很多CPU核心，那么在大集群上可以增大这个值
     val akkaThreads = conf.getInt("spark.akka.threads", 4)
-    //
+    //设置批量处理大小
     val akkaBatchSize = conf.getInt("spark.akka.batchSize", 15)
     //Spark节点之间通信的超时时间，以秒为单位
     val akkaTimeoutS = conf.getTimeAsSeconds("spark.akka.timeout",
@@ -83,7 +83,7 @@ private[spark] object AkkaUtils extends Logging {
     val akkaHeartBeatPausesS = conf.getTimeAsSeconds("spark.akka.heartbeat.pauses", "6000s")
     //心跳间隔时间
     val akkaHeartBeatIntervalS = conf.getTimeAsSeconds("spark.akka.heartbeat.interval", "1000s")
-
+  
     val secretKey = securityManager.getSecretKey()
     val isAuthOn = securityManager.isAuthenticationEnabled()
     if (isAuthOn && secretKey == null) {
@@ -131,7 +131,10 @@ private[spark] object AkkaUtils extends Logging {
 
   private val AKKA_MAX_FRAME_SIZE_IN_MB = Int.MaxValue / 1024 / 1024
 
-  /** Returns the configured max frame size for Akka messages in bytes. */
+  /** 
+   *  Returns the configured max frame size for Akka messages in bytes. 
+   *  返回Akka消息最大值
+   *  */
   def maxFrameSizeBytes(conf: SparkConf): Int = {
   //以MB为单位的driver和executor之间通信信息的大小，设置值越大，driver可以接受更大的计算结果
     val frameSizeInMB = conf.getInt("spark.akka.frameSize", 128)
@@ -184,8 +187,10 @@ private[spark] object AkkaUtils extends Logging {
         val future = actor.ask(message)(timeout.duration)
         val result = timeout.awaitResult(future)
         if (result == null) {
+          //抛出异常退回
           throw new SparkException("Actor returned null")
         }
+        //方法返回退出
         return result.asInstanceOf[T]
       } catch {
         case ie: InterruptedException => throw ie

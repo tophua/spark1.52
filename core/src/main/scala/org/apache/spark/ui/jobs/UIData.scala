@@ -28,9 +28,9 @@ import scala.collection.mutable.HashMap
 private[spark] object UIData {
 
   class ExecutorSummary {
-    var taskTime : Long = 0
-    var failedTasks : Int = 0
-    var succeededTasks : Int = 0
+    var taskTime : Long = 0//任务时间
+    var failedTasks : Int = 0//失败任务数
+    var succeededTasks : Int = 0//完成任务数
     var inputBytes : Long = 0
     var inputRecords : Long = 0
     var outputBytes : Long = 0
@@ -45,8 +45,8 @@ private[spark] object UIData {
 
   class JobUIData(
     var jobId: Int = -1,
-    var submissionTime: Option[Long] = None,
-    var completionTime: Option[Long] = None,
+    var submissionTime: Option[Long] = None,//提交时间
+    var completionTime: Option[Long] = None,//完成时间
     var stageIds: Seq[Int] = Seq.empty,
     var jobGroup: Option[String] = None,
     var status: JobExecutionStatus = JobExecutionStatus.UNKNOWN,
@@ -70,12 +70,12 @@ private[spark] object UIData {
   )
 
   class StageUIData {
-    var numActiveTasks: Int = _
-    var numCompleteTasks: Int = _
-    var completedIndices = new OpenHashSet[Int]()
-    var numFailedTasks: Int = _
+    var numActiveTasks: Int = _//活动任务数
+    var numCompleteTasks: Int = _//完成任务数
+    var completedIndices = new OpenHashSet[Int]() //
+    var numFailedTasks: Int = _ //失败任务数
 
-    var executorRunTime: Long = _
+    var executorRunTime: Long = _ //运行执行时间
 
     var inputBytes: Long = _
     var inputRecords: Long = _

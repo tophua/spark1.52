@@ -82,9 +82,8 @@ private[spark] trait RpcEndpoint {
    */
   val rpcEnv: RpcEnv
 
-  /**
-   * 
-   * 
+  /** 
+   * 定义self无参方法,返回RpcEndpointRef类型,
    * The [[RpcEndpointRef]] of this [[RpcEndpoint]]. `self` will become valid when `onStart` is
    * called. And `self` will become `null` when `onStop` is called.
    *
@@ -106,7 +105,7 @@ private[spark] trait RpcEndpoint {
   }
 
   /**
-   * 处理RpcEndpointRef.ask方法，如果不匹配消息，将抛出SparkException
+   * 处理RpcEndpointRef.ask方法，默认如果不匹配消息，将抛出SparkException
    * Process messages from [[RpcEndpointRef.ask]]. If receiving a unmatched message,
    * [[SparkException]] will be thrown and sent to `onError`.
    */

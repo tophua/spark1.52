@@ -94,6 +94,7 @@ private[spark] object ThreadUtils {
    * Wrapper over ScheduledThreadPoolExecutor.
    */
   def newDaemonSingleThreadScheduledExecutor(threadName: String): ScheduledExecutorService = {
+    //setDaemon设置为守护线程（也称为后台线程）
     val threadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat(threadName).build()
     Executors.newSingleThreadScheduledExecutor(threadFactory)//创建大小为1的固定线程池
   }

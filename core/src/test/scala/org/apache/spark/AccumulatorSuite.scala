@@ -50,7 +50,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
   test ("basic accumulation(累加器)"){
     sc = new SparkContext("local", "test")
     val acc : Accumulator[Int] = sc.accumulator(0)
-
+   //
     val d = sc.parallelize(1 to 20)
     d.foreach{x => acc += x}
     acc.value should be (210)
@@ -85,7 +85,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
       resetSparkContext()
     }
   }
-
+  
   test ("value not readable in tasks") {
     val maxI = 1000
     for (nThreads <- List(1, 10)) { // test single & multi-threaded
@@ -190,6 +190,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
     // Register asserts in job completion callback to avoid flakiness
     listener.registerJobCompletionCallback { _ =>
+      
       val stageInfos = listener.getCompletedStageInfos
       val taskInfos = listener.getCompletedTaskInfos
       assert(stageInfos.size === 1)

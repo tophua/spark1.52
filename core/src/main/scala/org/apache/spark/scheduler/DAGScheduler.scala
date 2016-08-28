@@ -114,7 +114,7 @@ class DAGScheduler(
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
    * and its values are arrays indexed by partition numbers. Each array value is the set of
    * locations where that RDD partition is cached.
-   *缓存的RDD的Partitions的位置信息
+   * 缓存的RDD的Partitions的位置信息
    * All accesses to this map should be guarded by synchronizing on it (see SPARK-4454).
    */
   private val cacheLocs = new HashMap[Int, IndexedSeq[Seq[TaskLocation]]]

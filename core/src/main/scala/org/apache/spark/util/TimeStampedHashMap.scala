@@ -123,16 +123,18 @@ private[spark] class TimeStampedHashMap[A, B](updateTimeStampOnGet: Boolean = fa
     val it = getEntrySet.iterator
     while (it.hasNext) {
       val entry = it.next()
+      //判断timestamp小于threshTime
       if (entry.getValue.timestamp < threshTime) {
-        f(entry.getKey, entry.getValue.value)
+        f(entry.getKey, entry.getValue.value)//调用函数
         logDebug("Removing key " + entry.getKey)
-        it.remove()
+        it.remove()//删除Key
       }
     }
   }
 
-  /** Removes old key-value pairs that have timestamp earlier than `threshTime`. */
+  /** Removes old key-value pairs that have timestamp earlier(早期,初期) than `threshTime`. */
   def clearOldValues(threshTime: Long) {
+    //删除旧Key-value
     clearOldValues(threshTime, (_, _) => ())
   }
 

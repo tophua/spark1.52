@@ -77,6 +77,7 @@ class NewHadoopRDD[K, V](
   // private val serializableConf = new SerializableWritable(conf)
 
   private val jobTrackerId: String = {
+    //返回四位年二位月二位日两位小时二位分,例如:201608261652
     val formatter = new SimpleDateFormat("yyyyMMddHHmm")
     formatter.format(new Date())
   }

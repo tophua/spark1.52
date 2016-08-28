@@ -22,13 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 import org.apache.spark.util.AsynchronousListenerBus
 
 /**
- * Asynchronously passes SparkListenerEvents to registered SparkListeners.
- *
+ * Asynchronously(异步) passes SparkListenerEvents to registered(注册) SparkListeners.
  * Until start() is called, all posted events are only buffered. Only after this listener bus
  * has started will events be actually propagated to all attached listeners. This listener bus
  * is stopped when it receives a SparkListenerShutdown event, which is posted using stop().
  */
 private[spark] class LiveListenerBus
+  //事件阻塞队列
   extends AsynchronousListenerBus[SparkListener, SparkListenerEvent]("SparkListenerBus")
   with SparkListenerBus {
 

@@ -52,7 +52,7 @@ class HeartbeatReceiverSuite
   private val executorId2 = "executor-2"
 
   // Shared state that must be reset before and after each test
-  private var scheduler: TaskSchedulerImpl = null
+  private var scheduler: TaskSchedulerImpl = null //任务调度
   private var heartbeatReceiver: HeartbeatReceiver = null //心跳接收
   private var heartbeatReceiverRef: RpcEndpointRef = null //消息发送
   private var heartbeatReceiverClock: ManualClock = null //通常频率
@@ -99,7 +99,7 @@ class HeartbeatReceiverSuite
     assert(heartbeatReceiver.scheduler !== null)
   }
 
-  test("normal heartbeat") {
+  test("normal heartbeat") {///正常心跳
     heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet)
     addExecutorAndVerify(executorId1)
     addExecutorAndVerify(executorId2)
@@ -236,7 +236,7 @@ class HeartbeatReceiverSuite
   private def addExecutorAndVerify(executorId: String): Unit = {
     assert(
       heartbeatReceiver.addExecutor(executorId).map { f =>
-        Await.result(f, 10.seconds)
+        Await.result(f, 10.seconds)//等待返回結果
       } === Some(true))//接收注册executor消息成功
   }
 
@@ -286,6 +286,7 @@ private class FakeSchedulerBackend(
 
 /**
  * Dummy cluster manager to simulate responses to executor allocation requests.
+ * Fake假装,冒充
  */
 private class FakeClusterManager(override val rpcEnv: RpcEnv) extends RpcEndpoint {
   private var targetNumExecutors = 0
@@ -293,7 +294,7 @@ private class FakeClusterManager(override val rpcEnv: RpcEnv) extends RpcEndpoin
 
   def getTargetNumExecutors: Int = targetNumExecutors
   def getExecutorIdsToKill: Set[String] = executorIdsToKill.toSet
-
+  //处理RpcEndpointRef.ask方法，如果不匹配消息，将抛出异常
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case RequestExecutors(requestedTotal, _, _) =>
       targetNumExecutors = requestedTotal

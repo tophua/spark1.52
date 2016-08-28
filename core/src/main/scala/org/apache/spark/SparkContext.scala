@@ -336,6 +336,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] def executorMemory: Int = _executorMemory
 
   // Environment variables to pass to our executors.
+  //设置executors环境变量
   private[spark] val executorEnvs = HashMap[String, String]()
 
   // Set SPARK_USER for user who is running SparkContext.
@@ -416,7 +417,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 }
 Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 }
-
+//初始化代码块
   try {
     //对SparkCon进行复制,然后对各种配置信息进行检验.
     _conf = config.clone()
@@ -447,10 +448,10 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     _conf.setIfMissing("spark.driver.host", Utils.localHostName())
     //随机 driver侦听的端口
     _conf.setIfMissing("spark.driver.port", "0")
-
+    //设置executor.id为driver
     _conf.set("spark.executor.id", SparkContext.DRIVER_IDENTIFIER)
 
-    _jars = _conf.getOption("spark.jars").map(_.split(",")).map(_.filter(_.size != 0)).toSeq.flatten
+    _jars = _conf.getOption("spark.jars").map(_.split(",")).map(_.filter(_.size != 0)).toSeq.flatten//转换 
     _files = _conf.getOption("spark.files").map(_.split(",")).map(_.filter(_.size != 0))
       .toSeq.flatten
    //保存日志相关信息的路径，可以是hdfs://开头的HDFS路径，也可以是file://开头的本地路径，都需要提前创建
@@ -482,7 +483,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     //构造JobProgressListener,作用是通过HashMap,ListBuffer等数据结构存储JobId及对应JobUIData信息,并按照激活
     //完成,失败等job状态统计,对于StageId,StageInfo等信息按照激活,完成,忽略,失败等Stage状态统计,并且存储StageID
     //与JobId的一对多关系.
-    _jobProgressListener = new JobProgressListener(_conf)//更新任务进程
+    _jobProgressListener = new JobProgressListener(_conf)//通过监听listenerBus中的事件更新任务进度
     //添加事件
     listenerBus.addListener(jobProgressListener)
 
@@ -524,11 +525,11 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
       files.foreach(addFile)
     }
     //spark.executor.memory指定Executor占用的内存大小,也可以配置系统变量SPARK_EXECUTOR_MEMORY对其大小进行设置
-
+    //Master给Worker发送高度后,worker最终使用executorEnvs提供的信息启动Executor
     _executorMemory = _conf.getOption("spark.executor.memory")
       .orElse(Option(System.getenv("SPARK_EXECUTOR_MEMORY")))
       .orElse(Option(System.getenv("SPARK_MEM"))
-      .map(warnSparkMem))
+      .map(warnSparkMem))//获得Spark
       .map(Utils.memoryStringToMb)
       .getOrElse(1024)//默认值 1024
 
@@ -556,6 +557,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 
     // Create and start the scheduler
     //创建任务调度器:负责任务的提交,并且请求集群管理器对任务调度,TaskSchedule可以看做任务调度的客户端
+    //createTaskScheduler方法会根据master的配置匹配部署模式,创建TaskSchedulerImpl,并生成不同的SchedulerBanckend
     val (sched, ts) = SparkContext.createTaskScheduler(this, master)
     _schedulerBackend = sched
     _taskScheduler = ts
@@ -650,7 +652,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   }
 
   /**
-   * Called by the web UI to obtain executor thread dumps.  This method may be expensive.
+   * Called by the web UI to obtain executor thread dumps.  This method may be expensive(昂贵的).
    * Logs an error and returns None if we failed to obtain a thread dump, which could occur due
    * to an executor being dead or unresponsive or due to network issues while sending the thread
    * dump message back to the driver.
@@ -704,7 +706,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   def getLocalProperty(key: String): String =
     Option(localProperties.get).map(_.getProperty(key)).orNull
 
-  /** Set a human readable description of the current job. */
+  /** Set a human readable(人类可读描述) description of the current job. */
   def setJobDescription(value: String) {
     setLocalProperty(SparkContext.SPARK_JOB_DESCRIPTION, value)
   }
@@ -773,7 +775,8 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   def parallelize[T: ClassTag](
       seq: Seq[T],
       numSlices: Int = defaultParallelism): RDD[T] = withScope {
-    assertNotStopped()
+    assertNotStopped()//判断是否暂停
+    //并发集体RDD
     new ParallelCollectionRDD[T](this, seq, numSlices, Map[Int, Seq[String]]())
   }
 
@@ -874,7 +877,6 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
    * Read a text file from HDFS, a local file system (available on all nodes), or any
    * Hadoop-supported file system URI, and return it as an RDD of Strings.
    * 从hdf或者本地文件创建RDD
-   * 
    */
   def textFile(
       path: String,
@@ -2143,10 +2145,14 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   private val nextShuffleId = new AtomicInteger(0)
 
   private[spark] def newShuffleId(): Int = nextShuffleId.getAndIncrement()
-
+  //AtomicInteger，一个提供原子操作的Integer的类,++i和i++操作并不是线程安全的，不可避免的会用到synchronized关键字。
+  //而AtomicInteger则通过一种线程安全的加减操作接口
   private val nextRddId = new AtomicInteger(0)
 
-  /** Register a new RDD, returning its RDD ID */
+  /** 
+   *  Register a new RDD, returning its RDD ID 
+   *  注册一个新的RDD,返回一个RDDID标识
+   *  */
   private[spark] def newRddId(): Int = nextRddId.getAndIncrement()
 
   /**
@@ -2647,7 +2653,7 @@ object SparkContext extends Logging {
       case "local" =>
         val scheduler = new TaskSchedulerImpl(sc, MAX_LOCAL_TASK_FAILURES, isLocal = true)
         val backend = new LocalBackend(sc.getConf, scheduler, 1)
-        //初始化
+        //TaskSchedulerImpl初始化,调度默认FiFO模式
         scheduler.initialize(backend)
         (backend, scheduler)
 

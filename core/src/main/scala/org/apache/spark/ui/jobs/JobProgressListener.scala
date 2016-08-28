@@ -34,6 +34,8 @@ import org.apache.spark.ui.jobs.UIData._
 
 /**
  * :: DeveloperApi ::
+ * JobProgressListener 通过监听listenerBus中的事件更新任务进度,SparkStatusTracker和SparkUI实际上也是通过JobProgressListener
+ * 来实现任务状态跟踪
  * Tracks task-level information to be displayed in the UI.
  * 构造JobProgressListener,作用是通过HashMap,ListBuffer等数据结构存储JobId及对应JobUIData信息,
         并按照激活,完成,失败等job状态统计,对于StageId,StageInfo等信息按照激活,完成,忽略,失败等Stage状态统计,
@@ -59,18 +61,18 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
   @volatile var startTime = -1L
 
   // Jobs:
-  val activeJobs = new HashMap[JobId, JobUIData]
-  val completedJobs = ListBuffer[JobUIData]()
-  val failedJobs = ListBuffer[JobUIData]()
-  val jobIdToData = new HashMap[JobId, JobUIData]
+  val activeJobs = new HashMap[JobId, JobUIData]//活动Jobs
+  val completedJobs = ListBuffer[JobUIData]()//完成Jobs
+  val failedJobs = ListBuffer[JobUIData]()//失败Jobs
+  val jobIdToData = new HashMap[JobId, JobUIData]//JobId到Job数据
   val jobGroupToJobIds = new HashMap[JobGroupId, HashSet[JobId]]
 
   // Stages:
-  val pendingStages = new HashMap[StageId, StageInfo]
-  val activeStages = new HashMap[StageId, StageInfo]
-  val completedStages = ListBuffer[StageInfo]()
-  val skippedStages = ListBuffer[StageInfo]()
-  val failedStages = ListBuffer[StageInfo]()
+  val pendingStages = new HashMap[StageId, StageInfo]//未发现Stages
+  val activeStages = new HashMap[StageId, StageInfo]//活动Stage
+  val completedStages = ListBuffer[StageInfo]()//完成Stage
+  val skippedStages = ListBuffer[StageInfo]()//忽略Stage
+  val failedStages = ListBuffer[StageInfo]()//失败Stage
   val stageIdToData = new HashMap[(StageId, StageAttemptId), StageUIData]
   val stageIdToInfo = new HashMap[StageId, StageInfo]
   val stageIdToActiveJobIds = new HashMap[StageId, HashSet[JobId]]
@@ -151,7 +153,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     }
   }
 
-  /** If jobs is too large, remove and garbage collect old jobs */
+  /** If jobs is too large, remove and garbage(垃圾) collect old jobs */
   private def trimJobsIfNecessary(jobs: ListBuffer[JobUIData]) = synchronized {
     if (jobs.size > retainedJobs) {
       val toRemove = math.max(retainedJobs / 10, 1)

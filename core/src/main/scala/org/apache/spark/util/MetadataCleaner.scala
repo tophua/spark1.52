@@ -35,19 +35,17 @@ private[spark] class MetadataCleaner(
   val name = cleanerType.toString
  //表示数据多少秒过期
   private val delaySeconds = MetadataCleaner.getDelaySeconds(conf, cleanerType)
-  //清理周期,即periodSeconds的间隔周期性调用清理函数来判断是否过期
-  
+  //清理周期,即periodSeconds的间隔周期性调用清理函数来判断是否过期 
   private val periodSeconds = math.max(10, delaySeconds / 10)
-  
+  //
   private val timer = new Timer(name + " cleanup timer", true)
-
-  //清理任务,定时器实现,不断调用cleanupFunc函数参数,
+  //清理任务,定时器实现,不断调用cleanupFunc函数,
   private val task = new TimerTask {
     override def run() {
       try {
         //该函数实现逻辑是判断数据存储的时间戳是否小于传入的参数,若小于则表示过期,需要清理
         //否则没有过期
-        cleanupFunc(System.currentTimeMillis() - (delaySeconds * 1000))
+        cleanupFunc(System.currentTimeMillis() - (delaySeconds * 1000))//清理persistentRdds中的过期内容
         logInfo("Ran metadata cleaner for " + name)
       } catch {
         case e: Exception => logError("Error running cleanup task for " + name, e)
@@ -59,7 +57,7 @@ private[spark] class MetadataCleaner(
     logDebug(
       "Starting metadata cleaner for " + name + " with delay of " + delaySeconds + " seconds " +
       "and period of " + periodSeconds + " secs")
-      //delaySeconds 延迟秒数,periodSeconds间隔周期调用清理
+      //delaySeconds 延迟毫秒数,periodSeconds间隔周期调用清理毫秒,task调用执行任务
     timer.schedule(task, delaySeconds * 1000, periodSeconds * 1000)
   }
 
@@ -69,10 +67,10 @@ private[spark] class MetadataCleaner(
 }
 
 private[spark] object MetadataCleanerType extends Enumeration {
-
+//枚举类
   val MAP_OUTPUT_TRACKER, SPARK_CONTEXT, HTTP_BROADCAST, BLOCK_MANAGER,
   SHUFFLE_BLOCK_MANAGER, BROADCAST_VARS = Value
- //元数据清理类型
+ //枚举别名
   type MetadataCleanerType = Value
 
   def systemProperty(which: MetadataCleanerType.MetadataCleanerType): String = {

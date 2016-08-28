@@ -20,7 +20,7 @@ package org.apache.spark
 /**
  * Low-level status reporting APIs for monitoring job and stage progress.
  *
- * These APIs intentionally provide very weak consistency semantics; consumers of these APIs should
+ * These APIs intentionally provide very weak consistency semantics(一致性语义); consumers of these APIs should
  * be prepared to handle empty / missing information.  For example, a job's stage ids may be known
  * but the status API may not have any information about the details of those stages, so
  * `getStageInfo` could potentially return `None` for a valid stage id.

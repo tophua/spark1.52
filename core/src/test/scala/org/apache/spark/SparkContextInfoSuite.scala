@@ -62,8 +62,8 @@ class SparkContextInfoSuite extends SparkFunSuite with LocalSparkContext {
     assert(sc.getRDDStorageInfo.size === 0)
     rdd.collect()
     assert(sc.getRDDStorageInfo.size === 1)
-    assert(sc.getRDDStorageInfo.head.isCached)
-    assert(sc.getRDDStorageInfo.head.memSize > 0)
+    assert(sc.getRDDStorageInfo.head.isCached)//判断是否缓存
+    assert(sc.getRDDStorageInfo.head.memSize > 0)//内存大小
     assert(sc.getRDDStorageInfo.head.storageLevel === StorageLevel.MEMORY_ONLY)
   }
 

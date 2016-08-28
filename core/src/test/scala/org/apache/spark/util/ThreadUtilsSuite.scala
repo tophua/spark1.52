@@ -45,7 +45,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     assert(threadName === "this-is-a-thread-name")
   }
 
-  test("newDaemonSingleThreadScheduledExecutor") {
+  test("newDaemonSingleThreadScheduledExecutor") {//时间调度
     val executor = ThreadUtils.newDaemonSingleThreadScheduledExecutor("this-is-a-thread-name")
     try {
       val latch = new CountDownLatch(1)
@@ -70,7 +70,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     val cachedThreadPool = ThreadUtils.newDaemonCachedThreadPool(
       "ThreadUtilsSuite-newDaemonCachedThreadPool",
       maxThreadNumber,
-      keepAliveSeconds = 2)
+      keepAliveSeconds = 2)//keepAliveSeconds 线程池维护线程所允许的空闲时间
     try {
       for (_ <- 1 to maxThreadNumber) {
         cachedThreadPool.execute(new Runnable {
@@ -106,7 +106,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     }
   }
 
-  test("sameThread") {
+  test("sameThread") {//
     val callerThreadName = Thread.currentThread().getName()
     val f = Future {
       Thread.currentThread().getName()
@@ -119,7 +119,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
   test("runInNewThread") {
     import ThreadUtils._
     assert(runInNewThread("thread-name") { Thread.currentThread().getName } === "thread-name")
-    assert(runInNewThread("thread-name") { Thread.currentThread().isDaemon } === true)
+    assert(runInNewThread("thread-name") { Thread.currentThread().isDaemon } === true)//是否守护线程
     assert(
       runInNewThread("thread-name", isDaemon = false) { Thread.currentThread().isDaemon } === false
     )

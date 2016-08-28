@@ -81,7 +81,7 @@ class SizeEstimatorSuite
     assertResult(48)(SizeEstimator.estimate(new DummyClass4(new DummyClass3)))
   }
 
-  test("primitive wrapper objects") {
+  test("primitive wrapper objects") {//包装对象
     assertResult(16)(SizeEstimator.estimate(new java.lang.Boolean(true)))
     assertResult(16)(SizeEstimator.estimate(new java.lang.Byte("1")))
     assertResult(16)(SizeEstimator.estimate(new java.lang.Character('1')))
@@ -100,7 +100,7 @@ class SizeEstimatorSuite
   // NOTE: The String class definition varies across JDK versions (1.6 vs. 1.7) and vendors
   // (Sun vs IBM). Use a DummyString class to make tests deterministic.
   test("strings") {
-    assertResult(40)(SizeEstimator.estimate(DummyString("")))
+    assertResult(40)(SizeEstimator.estimate(DummyString("")))//评估
     assertResult(48)(SizeEstimator.estimate(DummyString("a")))
     assertResult(48)(SizeEstimator.estimate(DummyString("ab")))
     assertResult(56)(SizeEstimator.estimate(DummyString("abcdefgh")))

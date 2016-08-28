@@ -23,7 +23,7 @@ import org.apache.spark.SparkFunSuite
 
 class PagedDataSourceSuite extends SparkFunSuite {
 
-  test("basic") {
+  test("basic") {   
     val dataSource1 = new SeqPagedDataSource[Int](1 to 5, pageSize = 2)
     assert(dataSource1.pageData(1) === PageData(3, (1 to 2)))
 

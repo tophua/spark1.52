@@ -56,27 +56,26 @@ import org.apache.spark.util.{ RpcUtils, Utils }
  * SparkEnv是Spark的执行环境对象,其中包括众多与Executor执行相关的对象,由于在local模式下Driver模式下Driver会创建Executor
  * local-cluster部署模式或者Standalone部署模式下Worker另起的CoarseGrainedExecutorBackend进程中也会创建Executor,
  * 所以SparkEnv存在于Driver或CoarseGrainedExecutorBackend进程中,创建SparkEnv主要使用SparkEnv的CreateDriver
- * 
+ *
  */
 @DeveloperApi
 class SparkEnv(
-    //
     val executorId: String,
     private[spark] val rpcEnv: RpcEnv,
-    val serializer: Serializer,
-    val closureSerializer: Serializer,
-    val cacheManager: CacheManager,//用于存储中间计算结果
-    val mapOutputTracker: MapOutputTracker,//用来缓存MapStatus信息，并提供从MapOutputMaster获取信息的功能
-    val shuffleManager: ShuffleManager,// 路由维护表
-    val broadcastManager: BroadcastManager,//广播
-    val blockTransferService: BlockTransferService,//块传输管理
-    val blockManager: BlockManager,//块管理
-    val securityManager: SecurityManager,//安全管理
-    val httpFileServer: HttpFileServer,//文件存储服务器
-    val sparkFilesDir: String,//文件存储目录
-    val metricsSystem: MetricsSystem,//测量
-    val shuffleMemoryManager: ShuffleMemoryManager,
-    val executorMemoryManager: ExecutorMemoryManager,
+    val serializer: Serializer,//类序列化
+    val closureSerializer: Serializer, //闭包序列化
+    val cacheManager: CacheManager, //用于存储中间计算结果
+    val mapOutputTracker: MapOutputTracker, //用来缓存MapStatus信息，并提供从MapOutputMaster获取信息的功能
+    val shuffleManager: ShuffleManager, // 路由维护表
+    val broadcastManager: BroadcastManager, //广播
+    val blockTransferService: BlockTransferService, //块传输管理
+    val blockManager: BlockManager, //块管理
+    val securityManager: SecurityManager, //安全管理
+    val httpFileServer: HttpFileServer, //文件存储服务器
+    val sparkFilesDir: String, //文件存储目录
+    val metricsSystem: MetricsSystem, //测量
+    val shuffleMemoryManager: ShuffleMemoryManager, //负责管理Shuffle线程占有内存的分配与释放
+    val executorMemoryManager: ExecutorMemoryManager, //
     val outputCommitCoordinator: OutputCommitCoordinator,
     val conf: SparkConf //配置文件 
     ) extends Logging {
@@ -121,7 +120,7 @@ class SparkEnv(
       // We only need to delete the tmp dir create by driver, because sparkFilesDir is point to the
       // current working dir in executor which we do not need to delete.
       driverTmpDirToDelete match {
-        case Some(path) => {//如果有path值
+        case Some(path) => { //如果有path值
           try {
             Utils.deleteRecursively(new File(path))
           } catch {
@@ -255,12 +254,12 @@ object SparkEnv extends Logging {
   private def create(
     conf: SparkConf,
     executorId: String,
-    hostname: String,
-    port: Int,
+    hostname: String, //机器
+    port: Int, //端口
     isDriver: Boolean,
-    isLocal: Boolean,//是否单机模式
-    numUsableCores: Int,
-    listenerBus: LiveListenerBus = null,//采用监听器模式维护各类事件处理
+    isLocal: Boolean, //是否单机模式
+    numUsableCores: Int, //可使用内核数
+    listenerBus: LiveListenerBus = null, //采用监听器模式维护各类事件处理
     mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
 
     // Listener bus is only used on the driver
@@ -313,14 +312,14 @@ object SparkEnv extends Logging {
     val serializer = instantiateClassFromConf[Serializer](
       "spark.serializer", "org.apache.spark.serializer.JavaSerializer")
     logDebug(s"Using serializer: ${serializer.getClass}")
-
+    //闭包序列化类
     val closureSerializer = instantiateClassFromConf[Serializer](
       "spark.closure.serializer", "org.apache.spark.serializer.JavaSerializer")
     //用于查找或者注册Actor的实现
     def registerOrLookupEndpoint(
       name: String, endpointCreator: => RpcEndpoint): RpcEndpointRef = {
       if (isDriver) {
-      //如果当前节点是Driver则创建这个Actor
+        //如果当前节点是Driver则创建这个Actor
         logInfo("Registering " + name)
         rpcEnv.setupEndpoint(name, endpointCreator)
       } else {
@@ -343,7 +342,7 @@ object SparkEnv extends Logging {
     // requires the MapOutputTracker itself
     //将MapOutputTracker注册ActorSystem,mapOutputTracker的属性trackerEndpoint持有MapOutputTrackerMasterEndpoint的引用
     /**
-     * 查找或者注册Actor 
+     * 查找或者注册Actor
      * Map任务的状态正是由Executor向持有的MapOutputTrackerMasterActor发送消息,将Map任务状态同步到MapOutPutTracker的MapStatus
      * 和cachedSerializedStatuses,
      * Executor如何找到MapOutputTrackerMasterActor?registerOrLookupEndpoint方法通过调用AkkaUtils.makeDriverRef找到MapOutputTrackerMasterActor
@@ -361,23 +360,24 @@ object SparkEnv extends Logging {
     //默认使用SortShuffleManager实例,通过持有的IndexShuffleBlockManager间接操作BlockManager中的DiskBlockManager
     //将Map结果写入本地,并根据shuffleId,MapId写入索引文件,也能通过MapOutputTrackerMaster中维护的MapStatuses从本地
     //或者其他远程节点读取文件
-    val shuffleMgrName = conf.get("spark.shuffle.manager", "sort")//默认SortShuffleManager
+    val shuffleMgrName = conf.get("spark.shuffle.manager", "sort") //默认SortShuffleManager
     val shuffleMgrClass = shortShuffleMgrNames.getOrElse(shuffleMgrName.toLowerCase, shuffleMgrName)
     //实例ShuffleManager,通过反射方式生成实例
     val shuffleManager = instantiateClass[ShuffleManager](shuffleMgrClass)
-    //shuffleMemoryManager负责管理shuffle线程占有内存的分配与释放,并通过
+    //shuffleMemoryManager负责管理shuffle线程占有内存的分配与释放
     val shuffleMemoryManager = ShuffleMemoryManager.create(conf, numUsableCores)
-    //创建块传输服务,netty提供的异步事件驱动的网络应用框架,提供web服务及客户端,获取远程节点上Block的集合
+    //创建块传输服务
     val blockTransferService =
       conf.get("spark.shuffle.blockTransferService", "netty").toLowerCase match {
         case "netty" =>
+          //netty提供的异步事件驱动的网络应用框架,提供web服务及客户端,获取远程节点上Block的集合
           new NettyBlockTransferService(conf, securityManager, numUsableCores)
         case "nio" =>
           logWarning("NIO-based block transfer service is deprecated, " +
-            "and will be removed in Spark 1.6.0.")
+            "and will be removed in Spark 1.6.0.")//不赞成使用,1.6删除
           new NioBlockTransferService(conf, securityManager)
       }
-    //创建blockManagerMaster,负责对Block的管理和协调,具体操作于BlockManagerMasterActor
+    //创建blockManagerMaster负责对Block的管理和协调,具体操作于BlockManagerMasterActor
     /**
      * Driver和Executor处理BlockManagerMaster的方式不同
      * 1)如果当前应用程序是Driver,则创建BlockManagerMasterActor,并且注册到ActorSystem中
@@ -397,12 +397,12 @@ object SparkEnv extends Logging {
     //创建广播管理器BroadcastManager,用于将配置信息和序列化后的RDD,Job以及ShuffleDependency等信息在本地存储
     //如果为了容灾,也会复制到其他节点上
     val broadcastManager = new BroadcastManager(isDriver, conf, securityManager)
-    //创建缓存管理器CacheManager
+    //创建缓存管理器CacheManager,用于缓存RDD某个分区计算后的中间结果,缓存计算结果发生在迭代计算的时候
     val cacheManager = new CacheManager(blockManager)
     //创建HTTP文件服务器httpFileServer
     val httpFileServer =
       if (isDriver) {
-        //主要提供对jar及其他文件的http访问,这些jar包包括用户上传的jar包
+        //主要提供对jar及其他文件的http访问,这些jar包括用户上传的jar包
         //spark.fileserver.port,0默认表示随机生成
         val fileServerPort = conf.getInt("spark.fileserver.port", 0)
         val server = new HttpFileServer(conf, securityManager, fileServerPort)
@@ -443,7 +443,7 @@ object SparkEnv extends Logging {
     val outputCommitCoordinatorRef = registerOrLookupEndpoint("OutputCommitCoordinator",
       new OutputCommitCoordinatorEndpoint(rpcEnv, outputCommitCoordinator))
     outputCommitCoordinator.coordinatorRef = Some(outputCommitCoordinatorRef)
-
+  //
     val executorMemoryManager: ExecutorMemoryManager = {
       val allocator = if (conf.getBoolean("spark.unsafe.offHeap", false)) {
         MemoryAllocator.UNSAFE

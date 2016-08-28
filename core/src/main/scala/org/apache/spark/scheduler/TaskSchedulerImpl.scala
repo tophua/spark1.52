@@ -100,9 +100,9 @@ private[spark] class TaskSchedulerImpl(
   // The set of executors we have on each host; this is used to compute hostsAlive, which
   // in turn is used to decide when we can attain data locality on a given host
   protected val executorsByHost = new HashMap[String, HashSet[String]]
-
+  //同一机架
   protected val hostsByRack = new HashMap[String, HashSet[String]]
-
+ 
   protected val executorIdToHost = new HashMap[String, String]
 
   // Listener object to pass upcalls into
@@ -116,9 +116,9 @@ private[spark] class TaskSchedulerImpl(
   
   var rootPool: Pool = null
   // default scheduler is FIFO
-  //任务的最终调度模式,实际都是落实到接SchedulerBackend的具体实现上.
+  //任务的最终调度模式,实际都是落实到接SchedulerBackend的具体实现上.,默认先进先出
   private val schedulingModeConf = conf.get("spark.scheduler.mode", "FIFO")
-  
+  //调度模式,默认先进先出
   val schedulingMode: SchedulingMode = try {
     SchedulingMode.withName(schedulingModeConf.toUpperCase)
   } catch {

@@ -45,9 +45,9 @@ import org.apache.spark.{SparkException, Logging, SparkConf}
 private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   extends Serializable with Logging {
 
-  private[this] val maxRetries = RpcUtils.numRetries(conf)
-  private[this] val retryWaitMs = RpcUtils.retryWaitMs(conf)
-  private[this] val defaultAskTimeout = RpcUtils.askRpcTimeout(conf)
+  private[this] val maxRetries = RpcUtils.numRetries(conf)//最大重试次数
+  private[this] val retryWaitMs = RpcUtils.retryWaitMs(conf)//重试等待3秒
+  private[this] val defaultAskTimeout = RpcUtils.askRpcTimeout(conf)//返回默认RPC操作超时时间,默认120秒
 
   /**
    * return the address for the [[RpcEndpointRef]]
@@ -63,10 +63,10 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   def send(message: Any): Unit
 
   /**
-   * 发送一个消息给RpcEndpoint.receiveAndReply并返回一个Future在指定的时间内接受响应，本方法值请求一次
-   * Send a message to the corresponding [[RpcEndpoint.receiveAndReply)]] and return a [[Future]] to
+   * 发送一个消息给RpcEndpoint.receiveAndReply并返回一个Future在指定的时间内接受响应，
+   * Send a message to the corresponding(类似,相配) [[RpcEndpoint.receiveAndReply)]] and return a [[Future]] to
    * receive the reply within the specified timeout.
-   *
+   * 本方法值请求一次
    * This method only sends the message once and never retries.
    */
   def ask[T: ClassTag](message: Any, timeout: RpcTimeout): Future[T]
@@ -75,7 +75,7 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
    * Send a message to the corresponding [[RpcEndpoint.receiveAndReply)]] and return a [[Future]] to
    * receive the reply within a default timeout.
    *
-   * This method only sends the message once and never retries.
+   * This method only sends the message once and never(不再从试) retries.
    */
   def ask[T: ClassTag](message: Any): Future[T] = ask(message, defaultAskTimeout)
 
@@ -83,11 +83,11 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
    * 
    * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果，否则抛出SparkException，
    * 注意，本方法是一个阻塞操作可能消耗时间，所以不要早消息循环中调用它
-   * Send a message to the corresponding [[RpcEndpoint]] and get its result within a default
+   * Send a message to the corresponding(相当) [[RpcEndpoint]] and get its result within a default
    * timeout, or throw a SparkException if this fails even after the default number of retries.
    * The default `timeout` will be used in every trial of calling `sendWithReply`. Because this
    * method retries, the message handling in the receiver side should be idempotent.
-   *
+   *注意，本方法是一个阻塞操作可能消耗时间，所以不要在消息循环中调用它
    * Note: this is a blocking action which may cost a lot of time,  so don't call it in an message
    * loop of [[RpcEndpoint]].
    *
@@ -98,13 +98,13 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   def askWithRetry[T: ClassTag](message: Any): T = askWithRetry(message, defaultAskTimeout)
 
   /**
-   *  发送消息给RpcEndpoint.receive并在默认的超时内得到结果，否则抛出SparkException，
-   * 注意，本方法是一个阻塞操作可能消耗时间，所以不要在消息循环中调用它
+   * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果，否则抛出SparkException，
+   *
    * Send a message to the corresponding [[RpcEndpoint.receive]] and get its result within a
    * specified timeout, throw a SparkException if this fails even after the specified number of
    * retries. `timeout` will be used in every trial of calling `sendWithReply`. Because this method
    * retries, the message handling in the receiver side should be idempotent.
-   *
+   * 注意，本方法是一个阻塞操作可能消耗时间，所以不要在消息循环中调用它
    * Note: this is a blocking action which may cost a lot of time, so don't call it in an message
    * loop of [[RpcEndpoint]].
    *
@@ -115,8 +115,9 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
    */
   def askWithRetry[T: ClassTag](message: Any, timeout: RpcTimeout): T = {
     // TODO: Consider removing multiple attempts
-    var attempts = 0
+    var attempts = 0 //重试次数
     var lastException: Exception = null
+    //maxRetries最大重试次数
     while (attempts < maxRetries) {
       attempts += 1
       try {

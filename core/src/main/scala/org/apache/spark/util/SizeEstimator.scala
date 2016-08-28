@@ -89,7 +89,7 @@ object SizeEstimator extends Logging {
 
   initialize()
 
-  // Sets object size, pointer size based on architecture and CompressedOops settings
+  // Sets object size, pointer size based on architecture and CompressedOops(压缩普通对象指针) settings
   // from the JVM.
   private def initialize() {
     val arch = System.getProperty("os.arch")
@@ -163,10 +163,10 @@ object SizeEstimator extends Logging {
     }
 
     def isFinished(): Boolean = stack.isEmpty
-
+   //出列
     def dequeue(): AnyRef = {
       val elem = stack.last
-      stack.trimEnd(1)
+      stack.trimEnd(1)//数组移除最后的1个元素
       elem
     }
   }
@@ -179,6 +179,9 @@ object SizeEstimator extends Logging {
   private class ClassInfo(
     val shellSize: Long,
     val pointerFields: List[Field]) {}
+/**
+ * AnyRef可以对应是java的Object类
+ */
 
   private def estimate(obj: AnyRef, visited: IdentityHashMap[AnyRef, AnyRef]): Long = {
     val state = new SearchState(visited)

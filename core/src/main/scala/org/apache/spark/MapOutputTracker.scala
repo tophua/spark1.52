@@ -40,12 +40,15 @@ private[spark] case object StopMapOutputTracker extends MapOutputTrackerMessage
 private[spark] class MapOutputTrackerMasterEndpoint(
     override val rpcEnv: RpcEnv, tracker: MapOutputTrackerMaster, conf: SparkConf)
   extends RpcEndpoint with Logging {
-  val maxAkkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)
-
+  val maxAkkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)//返回Akka消息最大值
+ //定义偏函数是具有类型PartialFunction[-A,+B]的一种函数。A是其接受的函数类型，B是其返回的结果类型
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case GetMapOutputStatuses(shuffleId: Int) =>
+      //sender返回发送消息信息
       val hostPort = context.sender.address.hostPort
+      //发送map任务输出指定机器
       logInfo("Asked to send map output locations for shuffle " + shuffleId + " to " + hostPort)
+      
       val mapOutputStatuses = tracker.getSerializedMapOutputStatuses(shuffleId)
       val serializedSize = mapOutputStatuses.size
       if (serializedSize > maxAkkaFrameSize) {
@@ -72,8 +75,7 @@ private[spark] class MapOutputTrackerMasterEndpoint(
  * Class that keeps track of the location of the map output of
  * a stage. This is abstract because different versions of MapOutputTracker
  * (driver and executor) use different HashMap to store its metadata.
- * 主要存放Shuffle Map Stage的输出,因为主从节点的MapOutTracker实现机制不一样
- * 主要维护和记录Map的状态,添加或移除Shuffle以及从节点上获取相应shuffle的状态
+ * 主要用于跟踪Map阶段任务的输出状态,此状态便于Reduce阶段任务获取地址及中间输出结果
  */
 private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging {
 
@@ -83,11 +85,11 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
   /**
    * This HashMap has different behavior for the driver and the executors.
    *
-   * On the driver, it serves as the source of map outputs recorded from ShuffleMapTasks.
+   * On the driver, it serves(服务) as the source of map outputs recorded(记录) from ShuffleMapTasks.
    * On the executors, it simply serves as a cache, in which a miss triggers a fetch from the
    * driver's corresponding HashMap.
    *
-   * Note: because mapStatuses is accessed concurrently, subclasses should make sure it's a
+   * Note: because(因为) mapStatuses is accessed concurrently(并发), subclasses should make sure it's a
    * thread-safe map.
    */
   protected val mapStatuses: Map[Int, Array[MapStatus]]
@@ -95,9 +97,10 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
   /**
    * Incremented every time a fetch fails so that client nodes know to clear
    * their cache of map output locations if this happens.
+   * 
    */
   protected var epoch: Long = 0
-  protected val epochLock = new AnyRef
+  protected val epochLock = new AnyRef//对象引用
 
   /** Remembers which map output locations are currently being fetched on an executor. */
   private val fetching = new HashSet[Int]
@@ -105,7 +108,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
   /**
    * Send a message to the trackerEndpoint and get its result within a default timeout, or
    * throw a SparkException if this fails.
-   * 
+   * 发一个消息到trackerEndpoint并在规定时间内返回,否则抛出异常
    */
   protected def askTracker[T: ClassTag](message: Any): T = {
     try {
@@ -117,7 +120,10 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
     }
   }
 
-  /** Send a one-way message to the trackerEndpoint, to which we expect it to reply with true. */
+  /** 
+   *  Send a one-way message to the trackerEndpoint, to which we expect it to reply with true. 
+   *  发一个消息到trackerEndpoint并在规定时间内返回,否则抛出异常,返回true值
+   *  */
   protected def sendTracker(message: Any) {
     val response = askTracker[Boolean](message)
     if (response != true) {
@@ -212,7 +218,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
     }
   }
 
-  /** Called to get current epoch number. */
+  /** Called to get current epoch(时间上的一点) number. */
   def getEpoch: Long = {
     epochLock.synchronized {
       return epoch
@@ -267,16 +273,16 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
   // For cleaning up TimeStampedHashMaps
   private val metadataCleaner =
     new MetadataCleaner(MetadataCleanerType.MAP_OUTPUT_TRACKER, this.cleanup, conf)
-//
+   //
   def registerShuffle(shuffleId: Int, numMaps: Int) {
     if (mapStatuses.put(shuffleId, new Array[MapStatus](numMaps)).isDefined) {
       throw new IllegalArgumentException("Shuffle ID " + shuffleId + " registered twice")
     }
   }
-
+  //注册Map任务
   def registerMapOutput(shuffleId: Int, mapId: Int, status: MapStatus) {
     val array = mapStatuses(shuffleId)
-    array.synchronized {
+    array.synchronized {//同步并发
       array(mapId) = status
     }
   }
@@ -376,11 +382,12 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
   def getSerializedMapOutputStatuses(shuffleId: Int): Array[Byte] = {
     var statuses: Array[MapStatus] = null
     var epochGotten: Long = -1
-    epochLock.synchronized {
+    epochLock.synchronized {//对象引用同步
       if (epoch > cacheEpoch) {
         cachedSerializedStatuses.clear()
         cacheEpoch = epoch
       }
+      //维护序列化后的各个map任务输出状态,其中Key对应ShuffleId,Array存储各个序列化MapStatus生成的字节数组
       cachedSerializedStatuses.get(shuffleId) match {
         case Some(bytes) =>
           return bytes
@@ -432,11 +439,14 @@ private[spark] object MapOutputTracker extends Logging {
   // Serialize an array of map output locations into an efficient byte format so that we can send
   // it to reduce tasks. We do this by compressing the serialized bytes using GZIP. They will
   // generally be pretty compressible because many map outputs will be on the same hostname.
+  
   def serializeMapStatuses(statuses: Array[MapStatus]): Array[Byte] = {
     val out = new ByteArrayOutputStream
     val objOut = new ObjectOutputStream(new GZIPOutputStream(out))
+    //柯里化函数
     Utils.tryWithSafeFinally {
       // Since statuses can be modified in parallel, sync on it
+      //同步并发修改数据
       statuses.synchronized {
         objOut.writeObject(statuses)
       }

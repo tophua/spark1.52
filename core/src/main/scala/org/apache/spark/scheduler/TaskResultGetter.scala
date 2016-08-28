@@ -30,6 +30,7 @@ import org.apache.spark.util.{ThreadUtils, Utils}
 
 /**
  * Runs a thread pool that deserializes and remotely fetches (if necessary) task results.
+ * TaskResultGetter作用是通过线程池对Worker上的Executor发送的Task的执行结果进行处理
  */
 private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedulerImpl)
   extends Logging {

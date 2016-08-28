@@ -83,7 +83,7 @@ private[spark] class CoarseGrainedExecutorBackend(
        */
       ref.ask[RegisteredExecutor.type](
         RegisterExecutor(executorId, self, hostPort, cores, extractLogUrls))
-	//onComplete,onSuccess,onFailure三个回调函数来异步执行Future任务
+	  //onComplete,onSuccess,onFailure三个回调函数来异步执行Future任务
     }(ThreadUtils.sameThread).onComplete {
       // This is a very fast action so we can use "ThreadUtils.sameThread"
       case Success(msg) => Utils.tryLogNonFatalError {
@@ -101,7 +101,7 @@ private[spark] class CoarseGrainedExecutorBackend(
     sys.env.filterKeys(_.startsWith(prefix))
       .map(e => (e._1.substring(prefix.length).toLowerCase, e._2))
   }
-
+//定义偏函数是具有类型PartialFunction[-A,+B]的一种函数。A是其接受的函数类型，B是其返回的结果类型
   override def receive: PartialFunction[Any, Unit] = {
       /**
        * 主要向DriverAction发送RegisterExecutor消息,DriverActor接到RegisterExecutor消息后处理步骤:
@@ -172,7 +172,9 @@ private[spark] class CoarseGrainedExecutorBackend(
     }
   }
 }
-
+/**
+ * 粗颗粒
+ */
 private[spark] object CoarseGrainedExecutorBackend extends Logging {
   /**
    * 处理过程

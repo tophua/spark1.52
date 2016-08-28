@@ -27,7 +27,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Test suite for end-to-end checkpointing functionality.
- * This tests both reliable checkpoints and local checkpoints.
+ * This tests both reliable(可靠) checkpoints and local checkpoints.
  */
 class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging {
   private var checkpointDir: File = _
@@ -43,6 +43,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
 
   override def afterEach(): Unit = {
     super.afterEach()
+    //递归删除
     Utils.deleteRecursively(checkpointDir)
   }
 
@@ -57,7 +58,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     assert(flatMappedRDD.dependencies.head.rdd != parCollection)
     assert(flatMappedRDD.collect() === result)
   }
-/**
+
   runTest("RDDs with one-to-one dependencies") { reliableCheckpoint: Boolean =>
     testRDD(_.map(x => x.toString), reliableCheckpoint)
     testRDD(_.flatMap(x => 1 to x), reliableCheckpoint)
@@ -69,7 +70,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     testRDD(_.map(x => (x % 2, 1)).reduceByKey(_ + _).flatMapValues(x => 1 to x),
       reliableCheckpoint)
     testRDD(_.pipe(Seq("cat")), reliableCheckpoint)
-  }**/
+  }
 
   runTest("ParallelCollectionRDD") { reliableCheckpoint: Boolean =>
     val parCollection = sc.makeRDD(1 to 4, 2)
@@ -238,8 +239,10 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
       "PartitionerAwareUnionRDDPartition.parents not updated after parent RDD is checkpointed"
     )
   }
-
-  runTest("CheckpointRDD with zero partitions") { reliableCheckpoint: Boolean =>
+/**
+ * 自身类型:任何混入该特质的具体类必须确保它的类型符合特质的自身类型，自身类型最通常的应用是为了把大类分成若干特质
+ */
+  runTest("CheckpointRDD with zero partitions") { reliableCheckpoint: Boolean => //自身类型
     val rdd = new BlockRDD[Int](sc, Array[BlockId]())
     assert(rdd.partitions.size === 0)
     assert(rdd.isCheckpointed === false)
@@ -258,9 +261,9 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
   /** Checkpoint the RDD either locally or reliably. */
   private def checkpoint(rdd: RDD[_], reliableCheckpoint: Boolean): Unit = {
     if (reliableCheckpoint) {
-      rdd.checkpoint()
+      rdd.checkpoint()//检查点
     } else {
-      rdd.localCheckpoint()
+      rdd.localCheckpoint() //本地检查点
     }
   }
 
@@ -438,12 +441,12 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
    * it is sent to a slave along with a task)
    */
   private def serializeDeserialize[T](obj: T): T = {
-    val bytes = Utils.serialize(obj)
-    Utils.deserialize[T](bytes)
+    val bytes = Utils.serialize(obj)//序列化
+    Utils.deserialize[T](bytes)//反序列化
   }
 
   /**
-   * Recursively force the initialization of the all members of an RDD and it parents.
+   * Recursively(递归) force the initialization of the all members of an RDD and it parents.
    */
   private def initializeRdd(rdd: RDD[_]): Unit = {
     rdd.partitions // forces the

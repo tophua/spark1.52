@@ -40,7 +40,7 @@ import org.apache.spark.storage.ShuffleIndexBlockId
 /**
  * An abstract base class for context cleaner tests, which sets up a context with a config
  * suitable for cleaner tests and provides some utility functions. Subclasses can use different
- * config options, in particular, a different shuffle manager class
+ * config options, in particular(详细的), a different shuffle manager class
  */
 abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[HashShuffleManager])
   extends SparkFunSuite with BeforeAndAfter with LocalSparkContext
@@ -98,8 +98,9 @@ abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[Ha
     rdd
   }
 
-  /** Run GC and make sure it actually has run */
+  /** Run GC(垃圾回收) and make sure it actually has run */
   protected def runGC() {
+    //WeakReference 弱引用,在内存不足时,垃圾回收器会回收此对象,所以在每次使用此对象时,要检查其是否被回收
     val weakRef = new WeakReference(new Object())
     val startTime = System.currentTimeMillis
     System.gc() // Make a best effort to run the garbage collection. It *usually* runs GC.

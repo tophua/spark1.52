@@ -34,7 +34,7 @@ import org.apache.spark.util.{ThreadUtils, Clock, SystemClock, Utils}
  * spark.dynamicAllocation.minExecutors设置动态分配最小Executor数量
  * spark.dynamicAllocation.maxExecutors设置动态分配最大Executor数量
  * spark.dynamicAllocation.initialExecutors每个Executor可以运行的Task数量等配置信息
- * 
+ * 代理动态分配和删除executors
  * An agent that dynamically allocates and removes executors based on the workload.
  *
  * The ExecutorAllocationManager maintains a moving target number of executors which is periodically

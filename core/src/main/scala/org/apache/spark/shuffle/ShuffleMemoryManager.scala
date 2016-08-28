@@ -56,7 +56,7 @@ class ShuffleMemoryManager protected (
     val maxMemory: Long,
     val pageSizeBytes: Long)
   extends Logging {
- //缓存每个任务的内存字节数,
+ //缓存每个线程的内存字节数,
   private val taskMemory = new mutable.HashMap[Long, Long]()  // taskAttemptId -> memory bytes
 
   private def currentTaskAttemptId(): Long = {
@@ -75,7 +75,7 @@ class ShuffleMemoryManager protected (
    * 处理逻辑:假设当前有N个线程,必须保证每个线程在溢出之前至少获得1/2N的内存,并且每个线程获得1/N的内存,由于是动
    * 态变化的变量,所以要持续对这些线程跟踪,以便无论何时在这些线程发生变化时重新按照1/2N和1/N计算
    */
-  def tryToAcquire(numBytes: Long): Long = synchronized {
+  def tryToAcquire(numBytes: Long): Long = synchronized {//同步
     val taskAttemptId = currentTaskAttemptId()
     assert(numBytes > 0, "invalid number of bytes requested: " + numBytes)
 
@@ -122,9 +122,9 @@ class ShuffleMemoryManager protected (
   }
 
   /** Release numBytes bytes for the current task. */
-  def release(numBytes: Long): Unit = synchronized {
-    val taskAttemptId = currentTaskAttemptId()
-    val curMem = taskMemory.getOrElse(taskAttemptId, 0L)
+  def release(numBytes: Long): Unit = synchronized {//同步,释放当前任务
+    val taskAttemptId = currentTaskAttemptId()//获得当前任务ID
+    val curMem = taskMemory.getOrElse(taskAttemptId, 0L)//返回当前任务的内存
     if (curMem < numBytes) {
       throw new SparkException(
         s"Internal error: release called on ${numBytes} bytes but task only has ${curMem}")
@@ -133,15 +133,15 @@ class ShuffleMemoryManager protected (
     notifyAll()  // Notify waiters who locked "this" in tryToAcquire that memory has been freed
   }
 
-  /** Release all memory for the current task and mark it as inactive (e.g. when a task ends). */
+  /** Release all memory for the current task and mark it as inactive(不活动) (e.g. when a task ends). */
   def releaseMemoryForThisTask(): Unit = synchronized {
     val taskAttemptId = currentTaskAttemptId()
     taskMemory.remove(taskAttemptId)
     notifyAll()  // Notify waiters who locked "this" in tryToAcquire that memory has been freed
   }
 
-  /** Returns the memory consumption, in bytes, for the current task */
-  def getMemoryConsumptionForThisTask(): Long = synchronized {
+  /** Returns the memory consumption(内存消耗), in bytes, for the current task */
+  def getMemoryConsumptionForThisTask(): Long = synchronized {//返回当前任务的内存大小
     val taskAttemptId = currentTaskAttemptId()
     taskMemory.getOrElse(taskAttemptId, 0L)
   }
@@ -154,7 +154,7 @@ private[spark] object ShuffleMemoryManager {
 
   def create(conf: SparkConf, numCores: Int): ShuffleMemoryManager = {
     val maxMemory = ShuffleMemoryManager.getMaxMemory(conf)//获取shuffle所有线程占用的最大内存
-    val pageSize = ShuffleMemoryManager.getPageSize(conf, maxMemory, numCores)
+    val pageSize = ShuffleMemoryManager.getPageSize(conf, maxMemory, numCores)//
     new ShuffleMemoryManager(maxMemory, pageSize)
   }
 
@@ -168,7 +168,7 @@ private[spark] object ShuffleMemoryManager {
   }
 
   /**
-   * Figure out the shuffle memory limit from a SparkConf. We currently have both a fraction
+   * Figure out the shuffle memory limit from a SparkConf. We currently have both a fraction(部分)
    * of the memory pool and a safety factor since collections can sometimes grow bigger than
    * the size we target before we estimate their sizes again.
    * 获取Shuffle所有线程占用的最大内存
@@ -192,6 +192,7 @@ private[spark] object ShuffleMemoryManager {
   private def getPageSize(conf: SparkConf, maxMemory: Long, numCores: Int): Long = {
     val minPageSize = 1L * 1024 * 1024   // 1MB
     val maxPageSize = 64L * minPageSize  // 64MB
+    //获得当前可以cpu 核数
     val cores = if (numCores > 0) numCores else Runtime.getRuntime.availableProcessors()
     // Because of rounding to next power of 2, we may have safetyFactor as 8 in worst case
     val safetyFactor = 16

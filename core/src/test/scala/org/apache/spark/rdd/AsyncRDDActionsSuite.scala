@@ -28,7 +28,9 @@ import org.scalatest.concurrent.Timeouts
 import org.scalatest.time.SpanSugar._
 
 import org.apache.spark.{LocalSparkContext, SparkContext, SparkException, SparkFunSuite}
-
+/**
+ * 异步RDD
+ */
 class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Timeouts {
 
   @transient private var sc: SparkContext = _
@@ -111,7 +113,7 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
    * of a successful job execution.
    */
   test("async success handling") {
-    val f = sc.parallelize(1 to 10, 2).countAsync()
+    val f = sc.parallelize(1 to 10, 2).countAsync()//FutureAction[Long]
 
     // Use a semaphore to make sure onSuccess and onComplete's success path will be called.
     // If not, the test will hang.
@@ -177,11 +179,11 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
   /**
    * Awaiting FutureAction results
    */
-  test("FutureAction result, infinite wait") {
+  test("FutureAction result, infinite(无限) wait") {
     val f = sc.parallelize(1 to 100, 4)
               .countAsync()
   //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
-    assert(Await.result(f, Duration.Inf) === 100)
+    assert(Await.result(f, Duration.Inf) === 100)//Await.result等待返回结果
   }
 
   test("FutureAction result, finite wait") {

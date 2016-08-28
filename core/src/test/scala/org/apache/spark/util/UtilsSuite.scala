@@ -70,7 +70,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(Utils.timeStringAsMs("1h") === TimeUnit.HOURS.toMillis(1))//小时
     assert(Utils.timeStringAsMs("1d") === TimeUnit.DAYS.toMillis(1))//天
 
-    // Test invalid strings
+    // Test invalid strings,测试无效的字符串
     intercept[NumberFormatException] {
       Utils.timeStringAsMs("600l")
     }
@@ -209,7 +209,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(os.toByteArray.toList.equals(bytes.toList))
   }
 
-  test("memoryStringToMb") {
+  test("memoryStringToMb") {//内存字符串转换Mb
     assert(Utils.memoryStringToMb("1") === 0)
     assert(Utils.memoryStringToMb("1048575") === 0)
     assert(Utils.memoryStringToMb("3145728") === 3)
@@ -263,7 +263,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     //
     val sep = new DecimalFormatSymbols(Locale.getDefault()).getDecimalSeparator()
 
-    assert(str(123) === "123 ms")
+    assert(str(123) === "123 ms")//秒
     assert(str(second) === "1" + sep + "0 s")
     assert(str(second + 462) === "1" + sep + "5 s")
     assert(str(hour) === "1" + sep + "00 h")
@@ -274,13 +274,13 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   }
 
   test("reading offset bytes of a file") {
-    val tmpDir2 = Utils.createTempDir()
+    val tmpDir2 = Utils.createTempDir()//
     val f1Path = tmpDir2 + "/f1"
     val f1 = new FileOutputStream(f1Path)
     f1.write("1\n2\n3\n4\n5\n6\n7\n8\n9\n".getBytes(UTF_8))
     f1.close()
 
-    // Read first few bytes,包括换行\n符,offset位移
+    // Read first few bytes,包括换行\n符,offset位置
     assert(Utils.offsetBytes(f1Path, 0, 5) === "1\n2\n3")
 
     // Read some middle bytes
@@ -301,7 +301,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     Utils.deleteRecursively(tmpDir2)
   }
 
-  test("reading offset bytes across multiple files") {
+  test("reading offset bytes across multiple files") {//多文件读取
     val tmpDir = Utils.createTempDir()
     val files = (1 to 3).map(i => new File(tmpDir, i.toString))//files:IndexedSeq
     Files.write("0123456789", files(0), UTF_8)
@@ -328,7 +328,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
 
     // Read some nonexistent bytes on both ends
     assert(Utils.offsetBytes(files, -5, 35) === "0123456789abcdefghijABCDEFGHIJ")
-
+   //递归删除
     Utils.deleteRecursively(tmpDir)
   }
 
@@ -342,7 +342,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(Utils.deserializeLongValue(bbuf.array) === testval)
   }
 
-  test("get iterator size") {
+  test("get iterator size") {//获得迭代器大小
     val empty = Seq[Int]()
     assert(Utils.getIteratorSize(empty.toIterator) === 0L)
     val iterator = Iterator.range(0, 5)
@@ -374,7 +374,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(!Utils.doesDirectoryContainAnyNewFiles(parent, 5))
   }
 
-  test("resolveURI") {
+  test("resolveURI") {//解析URI
     def assertResolves(before: String, after: String): Unit = {
       // This should test only single paths
       assume(before.split(",").length === 1)
@@ -431,7 +431,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
 
   test("nonLocalPaths") {
     //非本地路径
-    assert(Utils.nonLocalPaths("spark.jar") === Array.empty)
+    assert(Utils.nonLocalPaths("spark.jar") === Array.empty)//非本地路径
     assert(Utils.nonLocalPaths("file:/spark.jar") === Array.empty)
     assert(Utils.nonLocalPaths("file:///spark.jar") === Array.empty)
     assert(Utils.nonLocalPaths("local:/spark.jar") === Array.empty)
@@ -497,7 +497,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   // Test for using the util function to change our log levels.
   test("log4j log level change") {
     //log4j日志等级变更
-    val current = org.apache.log4j.Logger.getRootLogger().getLevel()
+    val current = org.apache.log4j.Logger.getRootLogger().getLevel()//获得当前日志等级
     try {
       Utils.setLogLevel(org.apache.log4j.Level.ALL)
       assert(log.isInfoEnabled())
@@ -512,13 +512,17 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
 
   test("deleteRecursively") {
     //递归删除
-    val tempDir1 = Utils.createTempDir()
+    val tempDir1 = Utils.createTempDir()//创建临时目录
     assert(tempDir1.exists())
     Utils.deleteRecursively(tempDir1)
     assert(!tempDir1.exists())
 
     val tempDir2 = Utils.createTempDir()
     val sourceFile1 = new File(tempDir2, "foo.txt")
+    /**
+     * touch是用来修改指定的文件的访问和修改时间属性，如果指定的文件不存在，
+     * 将建立一个新的空文件，并以当前的时间来设置文件的访问和修改时间
+     */
     Files.touch(sourceFile1)
     assert(sourceFile1.exists())
     Utils.deleteRecursively(sourceFile1)
@@ -543,9 +547,10 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
       System.setProperty("spark.test.fileNameLoadB", "2")
       Files.write("spark.test.fileNameLoadA true\n" +
         "spark.test.fileNameLoadB 1\n", outFile, UTF_8)
+      //加一个properties文件
       val properties = Utils.getPropertiesFromFile(outFile.getAbsolutePath)
       properties
-        .filter { case (k, v) => k.startsWith("spark.")}
+        .filter { case (k, v) => k.startsWith("spark.")}//操作配制文件
         .foreach { case (k, v) => sys.props.getOrElseUpdate(k, v)}
       val sparkConf = new SparkConf
       assert(sparkConf.getBoolean("spark.test.fileNameLoadA", false) === true)
@@ -566,7 +571,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     require(time < 500, "preparation time should not count")
   }
 
-  test("fetch hcfs dir") {
+  test("fetch hcfs dir") {//
     val tempDir = Utils.createTempDir()
     val sourceDir = new File(tempDir, "source-dir")
     val innerSourceDir = Utils.createTempDir(root = sourceDir.getPath)
@@ -695,7 +700,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(!Utils.isInDirectory(nullFile, childFile3))
   }
 
-  test("circular buffer") {
+  test("circular buffer") {//循环
     val buffer = new CircularBuffer(25)
     val stream = new java.io.PrintStream(buffer, true, "UTF-8")
 
@@ -735,7 +740,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(Utils.nanSafeCompareFloats(Float.NegativeInfinity, Float.NaN) === -1)
   }
 
-  test("isDynamicAllocationEnabled") {
+  test("isDynamicAllocationEnabled") {//动态分配是否可用
     val conf = new SparkConf()
     assert(Utils.isDynamicAllocationEnabled(conf) === false)
     assert(Utils.isDynamicAllocationEnabled(

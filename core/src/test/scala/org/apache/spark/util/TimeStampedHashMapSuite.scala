@@ -39,7 +39,7 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
   testMapThreadSafety(new TimeStampedWeakValueHashMap[String, String]())
 
   test("TimeStampedHashMap - clearing by timestamp") {
-    // clearing by insertion time
+    // clearing by insertion time 清除插入时间
     val map = new TimeStampedHashMap[String, String](updateTimeStampOnGet = false)
     map("k1") = "v1"
     assert(map("k1") === "v1")
@@ -47,7 +47,7 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
     val threshTime = System.currentTimeMillis
     assert(map.getTimestamp("k1").isDefined)
     assert(map.getTimestamp("k1").get < threshTime)
-    map.clearOldValues(threshTime)
+    map.clearOldValues(threshTime)//清除旧的值
     assert(map.get("k1") === None)
 
     // clearing by modification time
@@ -148,7 +148,10 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
     assert(map.get("k2").get === "v2")
   }
 
-  /** Test basic operations of a Scala mutable Map. */
+  /** 
+   *  Test basic operations of a Scala mutable Map.
+   *  操作一个Scla 可变Map
+   *  */
   def testMap(hashMapConstructor: => mutable.Map[String, String]) {
     def newMap() = hashMapConstructor
     val testMap1 = newMap()
@@ -219,7 +222,10 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
     }
   }
 
-  /** Test thread safety of a Scala mutable map. */
+  /** 
+   *  Test thread safety of a Scala mutable map. 
+   *  测试线程安全可变Map
+   *  */
   def testMapThreadSafety(hashMapConstructor: => mutable.Map[String, String]) {
     def newMap() = hashMapConstructor
     val name = newMap().getClass.getSimpleName

@@ -104,7 +104,7 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
 
   def min: Double = minValue
 
-  /** Return the variance of the values. */
+  /** Return the variance(可变) of the values. */
   def variance: Double = {
     if (n == 0) {
       Double.NaN
@@ -126,7 +126,7 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
   }
 
   /** Return the standard deviation of the values. */
-  def stdev: Double = math.sqrt(variance)
+  def stdev: Double = math.sqrt(variance)//绝对值
 
   /**
    * Return the sample standard deviation of the values, which corrects for bias in estimating the

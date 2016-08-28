@@ -201,7 +201,9 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   override def onExecutorRemoved(executorRemoved: SparkListenerExecutorRemoved): Unit = {
     removeExecutor(executorRemoved.executorId)
   }
-
+  /**
+   * 过期不活动机器
+   */
   private def expireDeadHosts(): Unit = {
     logTrace("Checking for hosts with no recent heartbeats in HeartbeatReceiver.")
     val now = clock.getTimeMillis()

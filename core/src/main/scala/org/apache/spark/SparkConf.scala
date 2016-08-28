@@ -55,14 +55,13 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 /**
  * 主要是通过ConcurrentHashMap来维护各种Spark的配置属性
  */
-
   private val settings = new ConcurrentHashMap[String, String]()
 
   if (loadDefaults) {
     // Load any spark.* system properties
     //加载任何以spark.* 开头的系统属性
     for ((key, value) <- Utils.getSystemProperties if key.startsWith("spark.")) {
-      set(key, value)
+      set(key, value)//把Key和value值增加到ConcurrentHashMap中
     }
   }
 
@@ -460,7 +459,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
       logWarning(warning)
 
       for (key <- Seq(executorOptsKey, driverOptsKey)) {
-        if (getOption(key).isDefined) {
+        if (getOption(key).isDefined) {//查询Key已经被使用
           throw new SparkException(s"Found both $key and SPARK_JAVA_OPTS. Use only the former.")
         } else {
           logWarning(s"Setting '$key' to '$value' as a work-around.")
@@ -546,7 +545,7 @@ private[spark] object SparkConf extends Logging {
   }
 
   /**
-   * Maps a current config key to alternate keys that were used in previous version of Spark.
+   * Maps a current config key to alternate(交替,替换) keys that were used in previous version of Spark.
    *
    * The alternates are used in the order defined in this map. If deprecated configs are
    * present in the user's configuration, a warning is logged.
@@ -653,12 +652,13 @@ private[spark] object SparkConf extends Logging {
    * Logs a warning message if the given config key is deprecated.
    */
   def logDeprecationWarning(key: String): Unit = {
+    //不赞成配制属性
     deprecatedConfigs.get(key).foreach { cfg =>
       logWarning(
         s"The configuration key '$key' has been deprecated as of Spark ${cfg.version} and " +
         s"may be removed in the future. ${cfg.deprecationMessage}")
     }
-
+    //替代配制属性
     allAlternatives.get(key).foreach { case (newKey, cfg) =>
       logWarning(
         s"The configuration key '$key' has been deprecated as of Spark ${cfg.version} and " +
