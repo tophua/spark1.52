@@ -454,7 +454,7 @@ private[spark] class Executor(
   private def reportHeartBeat(): Unit = {
     // list of (task id, metrics) to send back to the driver
     val tasksMetrics = new ArrayBuffer[(Long, TaskMetrics)]()
-    val curGCTime = computeTotalGcTime()
+    val curGCTime = computeTotalGcTime()//
     
     for (taskRunner <- runningTasks.values()) {
       if (taskRunner.task != null) {
@@ -482,7 +482,7 @@ private[spark] class Executor(
     //发送HeartbeatResponse消息到HeartbeatReceiver.receiveAndReply
     val message = Heartbeat(executorId, tasksMetrics.toArray, env.blockManager.blockManagerId)
     try {
-      //
+      //发送消息给RpcEndpoint.receive并在默认的超时内得到结果
       val response = heartbeatReceiverRef.askWithRetry[HeartbeatResponse](message)
       if (response.reregisterBlockManager) {
         logInfo("Told to re-register on heartbeat")
@@ -495,6 +495,7 @@ private[spark] class Executor(
 
   /**
    * Schedules a task to report heartbeat and partial metrics for active tasks to driver.
+   * Executor心跳由startDriverHeartbeater启动
    */
   private def startDriverHeartbeater(): Unit = {
     //Executor和Driver之间心跳的间隔,心跳线程的间隔默认10秒,即BlockManager超时时间
@@ -508,20 +509,11 @@ private[spark] class Executor(
       override def run(): Unit = Utils.logUncaughtExceptions(reportHeartBeat())
     }
     /**
-     * 　schedule和scheduleAtFixedRate的区别在于：如果指定开始执行的时间在当前系统运行时间之前，
+     * schedule和scheduleAtFixedRate的区别在于：如果指定开始执行的时间在当前系统运行时间之前，
      * scheduleAtFixedRate会把已经过去的时间也作为周期执行，而schedule不会把过去的时间算上。
      */
     heartbeater.scheduleAtFixedRate(heartbeatTask, initialDelay, intervalMs, TimeUnit.MILLISECONDS)
   }
 
  
-}
-object TestRandom{
-   def main(args: Array[String]): Unit = {
-     val intervalMs = 10
-     val initialDelay = intervalMs + (math.random * intervalMs).asInstanceOf[Int]
-    println(initialDelay);
-     
-   }
-  
 }

@@ -56,7 +56,9 @@ private[spark] class LocalEndpoint(
   //创建本地Executor
   private val executor = new Executor(
     localExecutorId, localExecutorHostname, SparkEnv.get, userClassPath, isLocal = true)
-
+/**
+ * PartialFunction[Any, Unit]Any接收任务类型,Unit返回值
+ */
   override def receive: PartialFunction[Any, Unit] = {
     case ReviveOffers =>
       reviveOffers()

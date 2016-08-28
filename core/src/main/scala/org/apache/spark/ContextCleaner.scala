@@ -49,21 +49,21 @@ private class CleanupTaskWeakReference(
 
 /**
  * An asynchronous cleaner for RDD, shuffle, and broadcast state.
- *
+ * 异步清理那些超出应用范围的RDD,shuffle,broadcast对象
  * This maintains a weak reference for each RDD, ShuffleDependency, and Broadcast of interest,
  * to be processed when the associated object goes out of scope of the application. Actual
  * cleanup is performed in a separate daemon thread.
  */
 private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
-
+  //缓存AnyRef的虚引用
   private val referenceBuffer = new ArrayBuffer[CleanupTaskWeakReference]
     with SynchronizedBuffer[CleanupTaskWeakReference]
-
+ //缓存顶级的AnyRef的引用
   private val referenceQueue = new ReferenceQueue[AnyRef]
-
+ //缓存清理工作的监听器数组
   private val listeners = new ArrayBuffer[CleanerListener]
     with SynchronizedBuffer[CleanerListener]
-
+//用于具体的清理工作的线程
   private val cleaningThread = new Thread() { override def run() { keepCleaning() }}
 
   /**
@@ -118,6 +118,10 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
     synchronized {
       cleaningThread.interrupt()
     }
+   /**
+   * join将main线程切换到等待状态,直到变量cleaningThread中的新线程执行完毕为止,重点是处于等待状态的线程会交出处理器控制权,
+   * OS可以将处理器分配给其他等待可运行线程.
+   */
     cleaningThread.join()
   }
 

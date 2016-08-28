@@ -2244,6 +2244,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   // In order to prevent multiple SparkContexts from being active at the same time, mark this
   // context as having finished construction.
   // NOTE: this must be placed at the end of the SparkContext constructor.
+  //SparkContext初始化的最后将当前SparkContext的状态从contextBeingConstructed构建中更改为已激活
   SparkContext.setActiveContext(this, allowMultipleContexts)
 }
 
@@ -2367,6 +2368,7 @@ object SparkContext extends Logging {
   /**
    * Called at the end of the SparkContext constructor to ensure that no other SparkContext has
    * raced with this constructor and started.
+   * SparkContext初始化的最后将当前SparkContext的状态从contextBeingConstructed构建中更改为已激活
    */
   private[spark] def setActiveContext(
       sc: SparkContext,

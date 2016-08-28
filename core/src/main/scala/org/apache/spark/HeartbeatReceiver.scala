@@ -75,7 +75,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   // "milliseconds"从节点超时120秒 
   private val slaveTimeoutMs =
     sc.conf.getTimeAsMs("spark.storage.blockManagerSlaveTimeoutMs", "120s")
-    //executor网络超进
+    //executor网络超时
   private val executorTimeoutMs =
     sc.conf.getTimeAsSeconds("spark.network.timeout", s"${slaveTimeoutMs}ms") * 1000
 
