@@ -32,7 +32,7 @@ import org.apache.spark.util.Utils
 
 private[spark] sealed trait TaskResult[T]
 
-/** A reference to a DirectTaskResult that has been stored in the worker's BlockManager. */
+/** A reference to a DirectTaskResult that has been stored(存储) in the worker's BlockManager. */
 
 private[spark] case class IndirectTaskResult[T](blockId: BlockId, size: Int)
   extends TaskResult[T] with Serializable

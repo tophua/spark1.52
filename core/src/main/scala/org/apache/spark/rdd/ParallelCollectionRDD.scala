@@ -28,7 +28,9 @@ import scala.reflect.ClassTag
 import org.apache.spark._
 import org.apache.spark.serializer.JavaSerializer
 import org.apache.spark.util.Utils
-
+/**
+ * 并发集合分区
+ */
 private[spark] class ParallelCollectionPartition[T: ClassTag](
     var rddId: Long,
     var slice: Int,

@@ -44,7 +44,6 @@ private[spark] trait ThreadSafeRpcEndpoint extends RpcEndpoint
 
 
 /**
- * 
  * 凡是继承RpcEndpoint，都是一个消息通讯体，能接收消息
  * 当一个消息到来时，方法调用顺序为  onStart, receive, onStop
         它的生命周期为constructor -> onStart -> receive* -> onStop  .当然还有一些其他方法，都是间触发方法

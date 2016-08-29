@@ -69,7 +69,10 @@ private[spark] class TaskContextImpl(
     }
   }
 
-  /** Marks the task as completed and triggers the listeners. */
+  /** 
+   *  Marks the task as completed and triggers the listeners. 
+   *  标记task任务完成触发listeners
+   *  */
   private[spark] def markTaskCompleted(): Unit = {
     completed = true//标记task完成
     val errorMsgs = new ArrayBuffer[String](2)//记录错误信息

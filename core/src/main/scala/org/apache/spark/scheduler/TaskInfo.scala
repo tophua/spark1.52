@@ -23,21 +23,21 @@ import org.apache.spark.annotation.DeveloperApi
 
 /**
  * :: DeveloperApi ::
- * Information about a running task attempt inside a TaskSet.
+ * Information about a running task attempt inside(内部) a TaskSet.
  */
 @DeveloperApi
 class TaskInfo(
     val taskId: Long,
     val index: Int,
-    val attemptNumber: Int,
-    val launchTime: Long,
+    val attemptNumber: Int,//尝试数
+    val launchTime: Long,//开始时间
     val executorId: String,
     val host: String,
-    val taskLocality: TaskLocality.TaskLocality,
-    val speculative: Boolean) {
+    val taskLocality: TaskLocality.TaskLocality,//任务位置策略 
+    val speculative: Boolean) {//speculative是否使用推理
 
   /**
-   * The time when the task started remotely getting the result. Will not be set if the
+   * The time when the task started remotely getting the result.(任务远程正在获得结果) Will not be set if the
    * task result was sent immediately when the task finished (as opposed to sending an
    * IndirectTaskResult and later fetching the result from the block manager).
    */
@@ -53,6 +53,7 @@ class TaskInfo(
   /**
    * The time when the task has completed successfully (including the time to remotely fetch
    * results, if necessary).
+   * 任务完成时间
    */
   var finishTime: Long = 0
 

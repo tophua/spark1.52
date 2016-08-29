@@ -44,8 +44,6 @@ import org.apache.spark.util.{RpcUtils, Utils}
           或者将没有发送者，‘NotSerializableException’等记录到日志中。
           同时，
     RpcEnv也提供了根据name或uri获取RpcEndpointRef的方法。
-
-   * 
  */
 private[spark] object RpcEnv {
 
@@ -70,8 +68,6 @@ private[spark] object RpcEnv {
   }
 
 }
-
-
 /**
  * RpcEnv处理从RpcEndpointRef或远程节点发送过来的消息，然后把响应消息给RpcEndpoint
         对于Rpc捕获到的异常消息，RpcEnv将会用RpcCallContext.sendFailure将失败消息发送给发送者，
@@ -85,7 +81,7 @@ private[spark] object RpcEnv {
  * [[RpcEnv]] also provides some methods to retrieve [[RpcEndpointRef]]s given name or uri.
  */
 private[spark] abstract class RpcEnv(conf: SparkConf) {
-
+//返回默认RPC远程查找节点超时时间 ,默认120s秒
   private[spark] val defaultLookupTimeout = RpcUtils.lookupRpcTimeout(conf)
 
   /**
@@ -96,8 +92,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
    */
   private[rpc] def endpointRef(endpoint: RpcEndpoint): RpcEndpointRef
 
-  /**
-   * 
+  /**  
    * Return the address that [[RpcEnv]] is listening to.
    */
   def address: RpcAddress
@@ -109,7 +104,6 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
    * 3)停止endpoints
    * 
    * RpcEnv里面有setupEndpoint方法， RpcEndpoint和RpcEndpointRef向RpcEnv进行注册
-   * 
    * 
    * 根据name注册RpcEndpoint到RpcEnv中并返回它的一个引用RpcEndpointRef
    * Register a [[RpcEndpoint]] with a name and return its [[RpcEndpointRef]]. [[RpcEnv]] does not
@@ -125,8 +119,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
    */
   def asyncSetupEndpointRefByURI(uri: String): Future[RpcEndpointRef]
 
-  /**
-   
+  /**   
    * 根据url同步获取RpcEndpointRef，这是一个阻塞操作
    * Retrieve the [[RpcEndpointRef]] represented by `uri`. This is a blocking action.
    */
@@ -135,8 +128,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
   }
 
   /**
-   * 异步获取RpcEndpointRef
-   * 
+   * 异步获取RpcEndpointRef 
    * 根据systemName、address、endpointName获取RpcEndpointRef，其实是将三者拼接为uri，
    * 根据uri获取异步获取
    * Retrieve the [[RpcEndpointRef]] represented by `systemName`, `address` and `endpointName`
@@ -165,7 +157,6 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
   def stop(endpoint: RpcEndpointRef): Unit
 
   /**
-   * 
    * Shutdown this [[RpcEnv]] asynchronously. If need to make sure [[RpcEnv]] exits successfully,
    * call [[awaitTermination()]] straight after [[shutdown()]].
    */

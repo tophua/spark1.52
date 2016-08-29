@@ -110,7 +110,9 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
       }
     })
   }
-
+/**
+ * enqueue 任务队列失败
+ */
   def enqueueFailedTask(taskSetManager: TaskSetManager, tid: Long, taskState: TaskState,
     serializedData: ByteBuffer) {
     var reason : TaskEndReason = UnknownReason

@@ -28,7 +28,7 @@ private[spark] class MapPartitionsRDD[U: ClassTag, T: ClassTag](
     prev: RDD[T],
     f: (TaskContext, Int, Iterator[T]) => Iterator[U],  // (TaskContext, partition index, iterator)
     preservesPartitioning: Boolean = false)
-        //这里this，就是之前生成的HadoopRDD，MapPartitionsRDD的构造函数，会调用父类的构造函数RDD[U](prev)， 
+    //这里this，就是之前生成的HadoopRDD，MapPartitionsRDD的构造函数，会调用父类的构造函数RDD[U](prev)， 
     //这个this(例如也就是hadoopRdd),会被赋值给prev,然后调用RDD.scala
   extends RDD[U](prev) {
 

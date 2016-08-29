@@ -130,6 +130,7 @@ abstract class RDD[T: ClassTag](
   protected def getDependencies: Seq[Dependency[_]] = deps
 
   /**
+   * 指定的位置偏好
    * Optionally overridden by subclasses to specify placement preferences.
    */
   protected def getPreferredLocations(split: Partition): Seq[String] = Nil
@@ -149,7 +150,10 @@ abstract class RDD[T: ClassTag](
 
   /** A friendly name for this RDD */
   @transient var name: String = null
-
+/**
+ * this.type表示当前对象（this)的类型。this指代当前的对象。
+ * this.type被用于变量，函数参数和函数返回值的类型声明
+ */
   /** Assign a name to this RDD */
   def setName(_name: String): this.type = {
     name = _name

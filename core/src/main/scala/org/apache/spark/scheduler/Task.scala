@@ -87,6 +87,7 @@ private[spark] abstract class Task[T](
       kill(interruptThread = false)
     }
     try {
+      //返回值
       (runTask(context), context.collectAccumulators())//执行本次Task 
     } finally {
       //任务结束,执行任务结束时的回调函数
@@ -152,9 +153,11 @@ private[spark] abstract class Task[T](
   def kill(interruptThread: Boolean) {
     _killed = true
     if (context != null) {
+      //设置中断
       context.markInterrupted()
     }
     if (interruptThread && taskThread != null) {
+      //方法不会中断一个正在运行的线程。在线程受到阻塞时抛出一个中断信号，这样线程就得以退出阻塞的状态
       taskThread.interrupt()
     }
   }
