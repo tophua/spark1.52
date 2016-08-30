@@ -120,12 +120,15 @@ class BlockManagerMaster(
       case e: Exception =>
         logWarning(s"Failed to remove RDD $rddId - ${e.getMessage}", e)
     }(ThreadUtils.sameThread)
-    if (blocking) {
+    if (blocking) {//是否同步执行堵塞
       timeout.awaitResult(future)
     }
   }
 
-  /** Remove all blocks belonging to the given shuffle. */
+  /** 
+   *  Remove all blocks belonging to the given shuffle. 
+   *  删除属于给定洗牌的所有块
+   *  */
   def removeShuffle(shuffleId: Int, blocking: Boolean) {
     val future = driverEndpoint.askWithRetry[Future[Seq[Boolean]]](RemoveShuffle(shuffleId))
     future.onFailure {

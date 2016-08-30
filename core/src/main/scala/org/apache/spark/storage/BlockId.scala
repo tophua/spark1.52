@@ -36,7 +36,7 @@ sealed abstract class BlockId {
 
   // convenience methods
   def asRDDId: Option[RDDBlockId] = if (isRDD) Some(asInstanceOf[RDDBlockId]) else None
-  def isRDD: Boolean = isInstanceOf[RDDBlockId]
+  def isRDD: Boolean = isInstanceOf[RDDBlockId]//判断对象是否为RDDBlockId类型的实例
   def isShuffle: Boolean = isInstanceOf[ShuffleBlockId]
   def isBroadcast: Boolean = isInstanceOf[BroadcastBlockId]
 
@@ -103,7 +103,7 @@ private[spark] case class TestBlockId(id: String) extends BlockId {
 
 @DeveloperApi
 object BlockId {
-  val RDD = "rdd_([0-9]+)_([0-9]+)".r
+  val RDD = "rdd_([0-9]+)_([0-9]+)".r //返回正则表达式
   val SHUFFLE = "shuffle_([0-9]+)_([0-9]+)_([0-9]+)".r
   val SHUFFLE_DATA = "shuffle_([0-9]+)_([0-9]+)_([0-9]+).data".r
   val SHUFFLE_INDEX = "shuffle_([0-9]+)_([0-9]+)_([0-9]+).index".r

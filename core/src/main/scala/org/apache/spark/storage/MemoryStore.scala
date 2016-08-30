@@ -169,9 +169,6 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    * One scenario in which `allowPersistToDisk` is false is when the BlockManager reads a block
    * back from disk and attempts to cache it in memory. In this case, we should not persist the
    * block back on disk again, as it is already in disk store.
-   * 
-   * 
-   * 
    */
   private[storage] def putIterator(
       blockId: BlockId,
