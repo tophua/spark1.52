@@ -45,7 +45,8 @@ private[spark] object TestClient {
   }
 
   def main(args: Array[String]) {
-    val url = args(0)
+    val url = if(args.isEmpty) "172.0.0.1" else args(0)
+    
     val conf = new SparkConf
     val rpcEnv = RpcEnv.create("spark", Utils.localHostName(), 0, conf, new SecurityManager(conf))
     val executorClassname = TestExecutor.getClass.getCanonicalName.stripSuffix("$")

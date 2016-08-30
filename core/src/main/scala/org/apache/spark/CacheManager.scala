@@ -27,6 +27,8 @@ import org.apache.spark.storage._
  * Spark class responsible for passing RDDs partition contents to the BlockManager and making
  * sure a node doesn't load two copies of an RDD at once.
  * CacheManager 缓存管理用于缓存RDD某个分区计算后的中间结果,缓存计算结果发生在迭代计算的时候
+ * cacheManager负责调用BlockManager来管理RDD的缓存,如果当前RDD原来计算过并且把结果缓存起来.
+ * 接下来的运行都可以通过BlockManager来直接读取缓存后返回
   */
 private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
 
@@ -40,10 +42,10 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
       context: TaskContext,
       storageLevel: StorageLevel): Iterator[T] = {
 
-    val key = RDDBlockId(rdd.id, partition.index)//获取RDD的BlockID
+    val key = RDDBlockId(rdd.id, partition.index)//获取RDD的BlockID,RDDBlockId扩展BlockID类
     logDebug(s"Looking for partition $key")
     blockManager.get(key) match {//向BlockManager查询是否有缓存,如果有将它封装为InterruptibleIterator并返回
-      case Some(blockResult) =>
+      case Some(blockResult) =>//val blockResult: BlockResult
         //缓存命中，更新统计信息，将缓存作为结果返回
         // Partition is already materialized, so just return its values
         val existingMetrics = context.taskMetrics

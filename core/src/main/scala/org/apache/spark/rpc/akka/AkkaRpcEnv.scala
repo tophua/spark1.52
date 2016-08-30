@@ -90,6 +90,7 @@ private[spark] class AkkaRpcEnv private[akka] (
     // Use lazy because the Actor needs to use `endpointRef`.
     // So `actorRef` should be created after assigning `endpointRef`.
     //创建Actor
+    //Props 是一个配置类，它的作用是对创建角色确认选项
     lazy val actorRef = actorSystem.actorOf(Props(new Actor with ActorLogReceive with Logging {
 
       assert(endpointRef != null)

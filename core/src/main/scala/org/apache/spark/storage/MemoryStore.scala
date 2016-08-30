@@ -206,7 +206,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
  * 用于entries中获取MemoryEntry,如果MemoryEntry支持反序列化,则将MemoryEntry的value反序列化后返回
  */
   override def getBytes(blockId: BlockId): Option[ByteBuffer] = {
-    val entry = entries.synchronized {
+    val entry = entries.synchronized {//MemoryEntry
       entries.get(blockId)
     }
     if (entry == null) {

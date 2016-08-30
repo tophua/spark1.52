@@ -273,8 +273,8 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
-   *
-   * Internal method to this RDD; will read from cache if applicable, or otherwise compute it.
+   * Task的执行起点,计算由此开始
+   * Internal method to this RDD; will read from cache if applicable(可用), or otherwise(否则) compute it.
    * This should ''not'' be called by users directly, but is available for implementors of custom
    * subclasses of RDD.
    */
@@ -282,6 +282,9 @@ abstract class RDD[T: ClassTag](
     if (storageLevel != StorageLevel.NONE) {
       //如果存储级别不是NONE 那么先检查是否有缓存，没有缓存则要进行计算
       SparkEnv.get.cacheManager.getOrCompute(this, split, context, storageLevel)
+      //SparkEnv包含运行时节点所需要的环境信息
+      //cacheManager负责调用BlockManager来管理RDD的缓存,如果当前RDD原来计算过并且把结果缓存起来.
+      //接下来的运行都可以通过BlockManager来直接读取缓存后返回
     } else {
       //如果没有缓存,存在检查点时直接获取中间结果
       computeOrReadCheckpoint(split, context)

@@ -65,17 +65,26 @@ class SparkEnv(
     val serializer: Serializer,//类序列化
     val closureSerializer: Serializer, //闭包序列化
     val cacheManager: CacheManager, //用于存储中间计算结果
+    /**
+     * 保存Shuffle Map Task输出的位置信息,其中在Driver上的Tracer是MapOutputTrackerMaster
+     * 而在Executor上的Tracker是MapOutputTrackerWorker,它会从MapOutputTrackerMaster获取信息
+     */
     val mapOutputTracker: MapOutputTracker, //用来缓存MapStatus信息，并提供从MapOutputMaster获取信息的功能
-    val shuffleManager: ShuffleManager, // 路由维护表
-    val broadcastManager: BroadcastManager, //广播
-    val blockTransferService: BlockTransferService, //块传输管理
-    val blockManager: BlockManager, //块管理
-    val securityManager: SecurityManager, //安全管理
-    val httpFileServer: HttpFileServer, //文件存储服务器
+    /**
+     * Shuffle管理者,其中Driver端会注册Shuffle的信息,而Executor会上报和获取Shuffle信息
+     * 现阶段内部支持Hash base Shuffle和 Sort Based Shuffle
+     */
+    val shuffleManager: ShuffleManager,//Shuffle管理者 
+    val broadcastManager: BroadcastManager, //广播变量管理者
+    val blockTransferService: BlockTransferService, //Executor读取Shuffle数据的Client
+    val blockManager: BlockManager, //块管理,提供Storage模块与其他模块的交互接口,管理Storage模块
+    val securityManager: SecurityManager, //Spark对于认证授权的实现
+    val httpFileServer: HttpFileServer, //主要用于Executor端下载依赖
     val sparkFilesDir: String, //文件存储目录
-    val metricsSystem: MetricsSystem, //测量
+    val metricsSystem: MetricsSystem, //用于搜集统计信息
     val shuffleMemoryManager: ShuffleMemoryManager, //负责管理Shuffle线程占有内存的分配与释放
-    val executorMemoryManager: ExecutorMemoryManager, //
+    //负责管理Executor线程占有内存的分配与释放,当Task退出时这个内存也会被回收
+    val executorMemoryManager: ExecutorMemoryManager, 
     val outputCommitCoordinator: OutputCommitCoordinator,
     val conf: SparkConf //配置文件 
     ) extends Logging {
@@ -443,12 +452,13 @@ object SparkEnv extends Logging {
     val outputCommitCoordinatorRef = registerOrLookupEndpoint("OutputCommitCoordinator",
       new OutputCommitCoordinatorEndpoint(rpcEnv, outputCommitCoordinator))
     outputCommitCoordinator.coordinatorRef = Some(outputCommitCoordinatorRef)
-  //
+  //负责管理Executor线程占有内存的分配与释放,当Task退出时这个内存也会被回收
+  //Spark Tungsten project 引入的新的内存管理机制
     val executorMemoryManager: ExecutorMemoryManager = {
       val allocator = if (conf.getBoolean("spark.unsafe.offHeap", false)) {
-        MemoryAllocator.UNSAFE
+        MemoryAllocator.UNSAFE //org.apache.spark.unsafe.memory.UnsafeMemoryAllocator
       } else {
-        MemoryAllocator.HEAP
+        MemoryAllocator.HEAP//org.apache.spark.unsafe.memory.HeapMemoryAllocator
       }
       new ExecutorMemoryManager(allocator)
     }

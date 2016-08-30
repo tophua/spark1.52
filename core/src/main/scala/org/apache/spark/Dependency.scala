@@ -36,7 +36,8 @@ abstract class Dependency[T] extends Serializable {
 /**
  * :: DeveloperApi ::
  * Base class for dependencies where each partition of the child RDD depends on a small number
- * of partitions of the parent RDD. Narrow dependencies allow for pipelined execution.
+ * of partitions of the parent RDD. Narrow dependencies allow for pipelined execution(线性执行).
+ * 窄依赖
  */
 @DeveloperApi
 abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
@@ -45,7 +46,7 @@ abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
    * @param partitionId a partition of the child RDD
    * @return the partitions of the parent RDD that the child partition depends upon
    */
-  def getParents(partitionId: Int): Seq[Int]
+  def getParents(partitionId: Int): Seq[Int]//返回子rdd的partitionId依赖的所有父Rdd的partitions
 
   override def rdd: RDD[T] = _rdd
 }
@@ -55,7 +56,7 @@ abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
  * :: DeveloperApi ::
  * Represents a dependency on the output of a shuffle stage. Note that in the case of shuffle,
  * the RDD is transient since we don't need it on the executor side.
- *
+ * 宽依赖,子RDD依赖于parent RDD的所有partition,Spark根据宽依赖将DAG划分不同的Stage
  * @param _rdd the parent RDD
  * @param partitioner partitioner used to partition the shuffle output
  * @param serializer [[org.apache.spark.serializer.Serializer Serializer]] to use. If set to None,
@@ -76,9 +77,9 @@ class ShuffleDependency[K, V, C](
   extends Dependency[Product2[K, V]] {
 
   override def rdd: RDD[Product2[K, V]] = _rdd.asInstanceOf[RDD[Product2[K, V]]]
-
+//获取新的shuffleId
   val shuffleId: Int = _rdd.context.newShuffleId()
-
+//向shuffleManager注册shuffle的信息
   val shuffleHandle: ShuffleHandle = _rdd.context.env.shuffleManager.registerShuffle(
     shuffleId, _rdd.partitions.size, this)
 
@@ -92,22 +93,25 @@ class ShuffleDependency[K, V, C](
  */
 @DeveloperApi
 class OneToOneDependency[T](rdd: RDD[T]) extends NarrowDependency[T](rdd) {
+  //Rdd仅仅依赖于parent RDD相同ID的partition
   override def getParents(partitionId: Int): List[Int] = List(partitionId)
 }
 
 
 /**
  * :: DeveloperApi ::
+ * 范围的依赖,它仅仅被UnionRDD使用把多个RDD合成一个RDD,这些RDD是被拼接而成,即每个parent RDD的partitions
+ * 相对顺序不会变,只不过每个parent RDD在UnionRDD中的partitions的起始位置不同.
  * Represents a one-to-one dependency between ranges of partitions in the parent and child RDDs.
  * @param rdd the parent RDD
- * @param inStart the start of the range in the parent RDD
- * @param outStart the start of the range in the child RDD
- * @param length the length of the range
+ * @param inStart the start of the range in the parent RDD,inStart是parent RDD中partitions起始位置
+ * @param outStart the start of the range in the child RDD,outStart是在UnionRDD中的起始位置
+ * @param length the length of the range,length就是parent RDD中partitions的数量
  */
 @DeveloperApi
 class RangeDependency[T](rdd: RDD[T], inStart: Int, outStart: Int, length: Int)
   extends NarrowDependency[T](rdd) {
-
+//
   override def getParents(partitionId: Int): List[Int] = {
     if (partitionId >= outStart && partitionId < outStart + length) {
       List(partitionId - outStart + inStart)

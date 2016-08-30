@@ -24,26 +24,28 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
   @volatile var size: Long = BlockInfo.BLOCK_PENDING
   private def pending: Boolean = size == BlockInfo.BLOCK_PENDING
   private def failed: Boolean = size == BlockInfo.BLOCK_FAILED
-  private def initThread: Thread = BlockInfo.blockInfoInitThreads.get(this)
+  private def initThread: Thread = BlockInfo.blockInfoInitThreads.get(this)//根据当前对象获取当前线程对象
 
-  setInitThread()
+  setInitThread()//初始化对象
 
   private def setInitThread() {
     /* Set current thread as init thread - waitForReady will not block this thread
      * (in case there is non trivial initialization which ends up calling waitForReady
      * as part of initialization itself) */
-    BlockInfo.blockInfoInitThreads.put(this, Thread.currentThread())
+    BlockInfo.blockInfoInitThreads.put(this, Thread.currentThread())//
   }
 
   /**
+   * 等待block完成写入
    * Wait for this BlockInfo to be marked as ready (i.e. block is finished writing).
    * Return true if the block is available, false otherwise.
+   * true返回一个可用的block,否则false
    */
   def waitForReady(): Boolean = {
     if (pending && initThread != Thread.currentThread()) {
       synchronized {
         while (pending) {
-          this.wait()
+          this.wait()//线程等待
         }
       }
     }
@@ -57,7 +59,7 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
     size = sizeInBytes
     BlockInfo.blockInfoInitThreads.remove(this)
     synchronized {
-      this.notifyAll()
+      this.notifyAll()//用于通知处在等待该对象的线程的方法
     }
   }
 
@@ -67,7 +69,7 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
     size = BlockInfo.BLOCK_FAILED
     BlockInfo.blockInfoInitThreads.remove(this)
     synchronized {
-      this.notifyAll()
+      this.notifyAll()//用于通知处在等待该对象的线程的方法
     }
   }
 }
@@ -78,6 +80,6 @@ private object BlockInfo {
    * to minimize BlockInfo's memory footprint. */
   private val blockInfoInitThreads = new ConcurrentHashMap[BlockInfo, Thread]
 
-  private val BLOCK_PENDING: Long = -1L
-  private val BLOCK_FAILED: Long = -2L
+  private val BLOCK_PENDING: Long = -1L //在等待…期间
+  private val BLOCK_FAILED: Long = -2L//失败
 }

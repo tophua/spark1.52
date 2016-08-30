@@ -495,20 +495,21 @@ private[spark] class BlockManager(
    */
 
   private def doGetLocal(blockId: BlockId, asBlockResult: Boolean): Option[Any] = {
-    val info = blockInfo.get(blockId).orNull
+    val info = blockInfo.get(blockId).orNull//如果选项包含有值返回选项值，否则返回 null
     if (info != null) {
-      info.synchronized {
-        // Double check to make sure the block is still there. There is a small chance that the
+      info.synchronized {//BlockInfom线程同步
+        // Double check to make sure the block is still there. There is a small chance(小的机会) that the
         // block has been removed by removeBlock (which also synchronizes on the blockInfo object).
         // Note that this only checks metadata tracking. If user intentionally deleted the block
         // on disk or from off heap storage without using removeBlock, this conditional check will
         // still pass but eventually we will get an exception because we can't find the block.
-        if (blockInfo.get(blockId).isEmpty) {
+        if (blockInfo.get(blockId).isEmpty) {//再次检查
           logWarning(s"Block $blockId had been removed")
           return None
         }
 
         // If another thread is writing the block, wait for it to become ready.
+        //如果另一个线程写入block,true返回一个可用的block,否则false
         if (!info.waitForReady()) {
           // If we get here, the block write failed.
           logWarning(s"Block $blockId was marked as failure.")
@@ -522,9 +523,10 @@ private[spark] class BlockManager(
         //如果Block充许使用内存,则调用memoryStore.getValues或getBytes获取
         if (level.useMemory) {
           logDebug(s"Getting block $blockId from memory")
-          val result = if (asBlockResult) {
+          val result = if (asBlockResult) {//默认false
             memoryStore.getValues(blockId).map(new BlockResult(_, DataReadMethod.Memory, info.size))
           } else {
+            //MemoryStore内存存储获取数据
             memoryStore.getBytes(blockId)
           }
           result match {
@@ -556,7 +558,7 @@ private[spark] class BlockManager(
         }
 
         // Look for block on disk, potentially storing it back in memory if required
-        //如果Block充许使用DiskStore
+        //查找硬盘上块,如果需要的话，可能会在内存中存储它
         if (level.useDisk) {
           logDebug(s"Getting block $blockId from disk")
           val bytes: ByteBuffer = diskStore.getBytes(blockId) match {
@@ -565,10 +567,12 @@ private[spark] class BlockManager(
               throw new BlockException(
                 blockId, s"Block $blockId not found on disk, though it should be")
           }
+          //position 表示当前进行读写操作时的位置
           assert(0 == bytes.position())
 
           if (!level.useMemory) {
             // If the block shouldn't be stored in memory, we can just return it
+            //如果块不应该被存储在内存中，我们可以只返回它
             if (asBlockResult) {
               return Some(new BlockResult(dataDeserialize(blockId, bytes), DataReadMethod.Disk,
                 info.size))
@@ -577,6 +581,7 @@ private[spark] class BlockManager(
             }
           } else {
             // Otherwise, we also have to store something in the memory store
+            //否则,我们还必须在存储器存储中存储一些东西
             if (!level.deserialized || !asBlockResult) {
               /* We'll store the bytes in memory if the block's storage level includes
                * "memory serialized", or if it should be cached as objects in memory
@@ -586,11 +591,12 @@ private[spark] class BlockManager(
                 // If the file size is bigger than the free memory, OOM will happen. So if we cannot
                 // put it into MemoryStore, copyForMemory should not be created. That's why this
                 // action is put into a `() => ByteBuffer` and created lazily.
-                val copyForMemory = ByteBuffer.allocate(bytes.limit)
+                val copyForMemory = ByteBuffer.allocate(bytes.limit)//Buffer对象首先要进行分配
                 copyForMemory.put(bytes)
               })
+              //rewind将position设回0，所以你可以重读Buffer中的所有数据,limit保持不变      
               bytes.rewind()
-            }
+              }
             if (!asBlockResult) {
               return Some(bytes)
             } else {
@@ -670,15 +676,15 @@ private[spark] class BlockManager(
 
   /**
    * Get a block from the block manager (either local or remote).
-   * 通过BlockId获取Block先尝试从本获取,如果所要获取的内容不在本,则发远程获取
+   * 通过BlockId获取Block先尝试从本获取,如果没有所要获取的内容,则发远程获取
    */
   def get(blockId: BlockId): Option[BlockResult] = {
-    val local = getLocal(blockId)
-    if (local.isDefined) {
+    val local = getLocal(blockId)//BlockId.name= "rdd_" + rddId + "_" + splitIndex
+    if (local.isDefined) {//isDefined 方法来检查它是否有值
       logInfo(s"Found block $blockId locally")
       return local
     }
-    val remote = getRemote(blockId)
+    val remote = getRemote(blockId)//
     if (remote.isDefined) {
       logInfo(s"Found block $blockId remotely")
       return remote
