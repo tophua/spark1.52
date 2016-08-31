@@ -112,6 +112,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   // This is used only by YARN for now, but should be relevant to other cluster types (Mesos,
   // etc) too. This is typically generated from InputFormatInfo.computePreferredLocations. It
   // contains a map from hostname to a list of input format splits on the host.
+  //它包含主机名的列表
   private[spark] var preferredNodeLocationData: Map[String, Set[SplitInfo]] = Map()
 
   val startTime = System.currentTimeMillis()
@@ -133,7 +134,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * :: DeveloperApi ::
    * Alternative constructor for setting preferred locations where Spark will create executors.
-   *
+   * 选择构造函数首选使用Spark创建执行
    * @param config a [[org.apache.spark.SparkConf]] object specifying other Spark parameters
    * @param preferredNodeLocationData used in YARN mode to select nodes to launch containers on.
    * Can be generated using [[org.apache.spark.scheduler.InputFormatInfo.computePreferredLocations]]
@@ -149,7 +150,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   *
+   * 选择构造函数允许直接设置共用Spark属性
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI
    * @param conf a [[org.apache.spark.SparkConf]] object specifying other Spark parameters
@@ -159,7 +160,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   *  加载SparkConf,
+   * 选择构造函数允许直接设置共用Spark属性
     * 加载配置文件SparkConf初始化时，会将相关的配置參数传递给SparkContex，包含master、appName、sparkHome、jars、
     * environment等信息，这里的构造函数有多中表达形式，但最归初始化的结果都是殊途同归，
     * SparkContex获取了全部相关的本地配置和执行时配置信息
@@ -291,8 +292,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   //是否单机模式
   def isLocal: Boolean = (master == "local" || master.startsWith("local["))
 
-  // An asynchronous listener bus for Spark events
-  //listenerBus采用监听器模式维护各类事件的处理
+  // An asynchronous listener bus for Spark events,Spark异步监听模式事件
+  //listenerBus采用异步监听器模式维护各类事件的处理
   //LiveListenerBus实现了监听器模型,通过监听事件触发对各种监听状态信息的修改,达到UI界面的数据刷新效果
   private[spark] val listenerBus = new LiveListenerBus
 
@@ -309,6 +310,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] def env: SparkEnv = _env
 
   // Used to store a URL for each static file/jar together with the file's local timestamp
+  //用于存储URL为每个静态文件/jar 连同文件的时间戳
   private[spark] val addedFiles = HashMap[String, Long]()
   private[spark] val addedJars = HashMap[String, Long]()
 
@@ -327,7 +329,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * A default Hadoop Configuration for the Hadoop code (e.g. file systems) that we reuse.
-   *
+   * 重新使用默认Hadoop默认文件
    * '''Note:''' As it will be reused in all Hadoop RDDs, it's better not to modify it unless you
    * plan to set some global configurations for all Hadoop RDDs.
    */
@@ -336,10 +338,11 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] def executorMemory: Int = _executorMemory
 
   // Environment variables to pass to our executors.
-  //设置executors环境变量
+  //环境变量传递给executors
   private[spark] val executorEnvs = HashMap[String, String]()
 
   // Set SPARK_USER for user who is running SparkContext.
+  //设置谁在使用SparkContext
   val sparkUser = Utils.getCurrentUserName()
 
   private[spark] def schedulerBackend: SchedulerBackend = _schedulerBackend
@@ -1894,6 +1897,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 
   /**
    * Run a function on a given set of partitions in an RDD and return the results as an array.
+   * 运行一个函数对给定的一个RDD分区设置并返回结果为数组
    */
   def runJob[T, U: ClassTag](
       rdd: RDD[T],
@@ -1905,6 +1909,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   }
 
   /**
+   * 运行一个新Job给定的一个RDD分区,但采取类型迭代器的函数
    * Run a job on a given set of partitions of an RDD, but take a function of type
    * `Iterator[T] => U` instead of `(TaskContext, Iterator[T]) => U`.
    */

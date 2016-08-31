@@ -29,6 +29,7 @@ import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.util.{SerializableConfiguration, Utils}
 
 /**
+ * RDD，读取检查点文件来至之前写入的分布式存储
  * An RDD that reads from checkpoint files previously written to reliable storage.
  */
 private[spark] class ReliableCheckpointRDD[T: ClassTag](
@@ -46,12 +47,14 @@ private[spark] class ReliableCheckpointRDD[T: ClassTag](
 
   /**
    * Return the path of the checkpoint directory this RDD reads data from.
+   * 返回检查点路径目录从RDD中读取数据。
+   * 
    */
   override def getCheckpointFile: Option[String] = Some(checkpointPath)
 
   /**
    * Return partitions described by the files in the checkpoint directory.
-   *
+   * 返回描述分区文件所在检查点目录中  
    * Since the original RDD may belong to a prior application, there is no way to know a
    * priori the number of partitions to expect. This method assumes that the original set of
    * checkpoint files are fully preserved in a reliable storage across application lifespans.
@@ -73,6 +76,7 @@ private[spark] class ReliableCheckpointRDD[T: ClassTag](
 
   /**
    * Return the locations of the checkpoint file associated with the given partition.
+   * 返回与给定分区关联的检查点文件的位置
    */
   protected override def getPreferredLocations(split: Partition): Seq[String] = {
     val status = fs.getFileStatus(
@@ -83,7 +87,7 @@ private[spark] class ReliableCheckpointRDD[T: ClassTag](
 
   /**
    * Read the content of the checkpoint file associated with the given partition.
-   * 
+   * 读取与给定分区相关联的检查点文件的内容。
    */
   override def compute(split: Partition, context: TaskContext): Iterator[T] = {
     val file = new Path(checkpointPath, ReliableCheckpointRDD.checkpointFileName(split.index))
@@ -96,12 +100,14 @@ private[spark] object ReliableCheckpointRDD extends Logging {
 
   /**
    * Return the checkpoint file name for the given partition.
+   * 返回给定分区的检查点文件名。
    */
   private def checkpointFileName(partitionIndex: Int): String = {
     "part-%05d".format(partitionIndex)
   }
 
   /**
+   * 将此分区的值写入检查点文件。
    * Write this partition's values to a checkpoint file.
    */
   def writeCheckpointFile[T: ClassTag](
@@ -111,8 +117,8 @@ private[spark] object ReliableCheckpointRDD extends Logging {
     val env = SparkEnv.get
     
     val outputDir = new Path(path)
+    //此类封装了对文件的所有操作,包括删除、 修改 
     val fs = outputDir.getFileSystem(broadcastedConf.value.value)
-
     val finalOutputName = ReliableCheckpointRDD.checkpointFileName(ctx.partitionId())
     val finalOutputPath = new Path(outputDir, finalOutputName)
     val tempOutputPath =
@@ -121,20 +127,23 @@ private[spark] object ReliableCheckpointRDD extends Logging {
     if (fs.exists(tempOutputPath)) {
       throw new IOException(s"Checkpoint failed: temporary path $tempOutputPath already exists")
     }
+    //文件缓存大小
     val bufferSize = env.conf.getInt("spark.buffer.size", 65536)
 
     val fileOutputStream = if (blockSize < 0) {
+      //hdfs创建文件
       fs.create(tempOutputPath, false, bufferSize)
     } else {
       // This is mainly for testing purpose
       fs.create(tempOutputPath, false, bufferSize, fs.getDefaultReplication, blockSize)
     }
     val serializer = env.serializer.newInstance()
+    //序列化文件输出流
     val serializeStream = serializer.serializeStream(fileOutputStream)
     Utils.tryWithSafeFinally {
-      serializeStream.writeAll(iterator)
+      serializeStream.writeAll(iterator)//写入数据对象
     } {
-      serializeStream.close()
+      serializeStream.close()//关闭数据
     }
 
     if (!fs.rename(tempOutputPath, finalOutputPath)) {

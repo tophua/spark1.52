@@ -45,6 +45,7 @@ private[spark] class LocalRDDCheckpointData[T: ClassTag](@transient rdd: RDD[T])
 
     // Not all actions compute all partitions of the RDD (e.g. take). For correctness, we
     // must cache any missing partitions. TODO: avoid running another job here (SPARK-8582).
+    //缓存丢失分区
     val action = (tc: TaskContext, iterator: Iterator[T]) => Utils.getIteratorSize(iterator)
     val missingPartitionIndices = rdd.partitions.map(_.index).filter { i =>
       !SparkEnv.get.blockManager.master.contains(RDDBlockId(rdd.id, i))
@@ -64,7 +65,7 @@ private[spark] object LocalRDDCheckpointData {
 
   /**
    * Transform the specified storage level to one that uses disk.
-   *
+   * 将指定的存储级别转换为磁盘,这保证了RDD可以进行多次正确重新计算，只要执行者不失败
    * This guarantees that the RDD can be recomputed multiple times correctly as long as
    * executors do not fail. Otherwise, if the RDD is cached in memory only, for instance,
    * the checkpoint data will be lost if the relevant block is evicted from memory.

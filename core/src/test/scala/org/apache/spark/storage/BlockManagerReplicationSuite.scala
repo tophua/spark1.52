@@ -69,7 +69,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
 
   before {
     rpcEnv = RpcEnv.create("test", "localhost", 0, conf, securityMgr)
- //是否启用内部身份验证
+     //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
     conf.set("spark.driver.port", rpcEnv.address.port.toString)
     conf.set("spark.storage.unrollFraction", "0.4") 

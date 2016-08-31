@@ -118,19 +118,21 @@ abstract class RDD[T: ClassTag](
   def compute(split: Partition, context: TaskContext): Iterator[T]
 
   /**
+   * 返回RDD分区
    * Implemented by subclasses to return the set of partitions in this RDD. This method will only
    * be called once, so it is safe to implement a time-consuming computation in it.
    */
   protected def getPartitions: Array[Partition]
 
   /**
+   * 返回父RDD依赖
    * Implemented by subclasses to return how this RDD depends on parent RDDs. This method will only
    * be called once, so it is safe to implement a time-consuming computation in it.
    */
   protected def getDependencies: Seq[Dependency[_]] = deps
 
   /**
-   * 指定的位置偏好
+   * 指定RDD偏好的位置
    * Optionally overridden by subclasses to specify placement preferences.
    */
   protected def getPreferredLocations(split: Partition): Seq[String] = Nil
@@ -184,12 +186,14 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
+   * 设置RDD存储级别在操作之后完成,这里只能分配RDD尚未确认的新存储级别,检查点是一个例别
    * Set this RDD's storage level to persist its values across operations after the first time
    * it is computed. This can only be used to assign a new storage level if the RDD does not
    * have a storage level set yet. Local checkpointing is an exception.
    */
   def persist(newLevel: StorageLevel): this.type = {
     if (isLocallyCheckpointed) {
+      //之前已经调用过localCheckpoint(),这里应该标记RDD待久化,在这里我们应该重写旧的存储级别，一个是由用户显式请求
       // This means the user previously called localCheckpoint(), which should have already
       // marked this RDD for persisting. Here we should override the old storage level with
       // one that is explicitly requested by the user (after adapting it to use disk).
@@ -250,7 +254,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Get the array of partitions of this RDD, taking into account whether the
    * RDD is checkpointed or not.
-   * 
+   * 获得RDD的partitions数组
    */
   final def partitions: Array[Partition] = {
     checkpointRDD.map(_.partitions).getOrElse {
@@ -1745,18 +1749,21 @@ abstract class RDD[T: ClassTag](
   }
 
   // Avoid handling doCheckpoint multiple times to prevent excessive recursion
+  //避免多次处理检查点防止递归
   @transient private var doCheckpointCalled = false
 
   /**
+   * 首先保存这个检查点,然后启动一个新的Job来计算,将计算结果写入新创建的目录,所以RDD可能物化存储在内存中
    * Performs the checkpointing of this RDD by saving this. It is called after a job using this RDD
    * has completed (therefore the RDD has been materialized and potentially stored in memory).
+   * 递归调用父类doCheckpoint()
    * doCheckpoint() is called recursively on the parent RDDs.
    */
   private[spark] def doCheckpoint(): Unit = {
     RDDOperationScope.withScope(sc, "checkpoint", allowNesting = false, ignoreParent = true) {
       if (!doCheckpointCalled) {
         doCheckpointCalled = true
-        if (checkpointData.isDefined) {
+        if (checkpointData.isDefined) {//如果可选值是 Some 的实例返回 true，否则返回 false
           checkpointData.get.checkpoint()
         } else {
           dependencies.foreach(_.rdd.doCheckpoint())
@@ -1768,14 +1775,17 @@ abstract class RDD[T: ClassTag](
   /**
    * Changes the dependencies of this RDD from its original parents to a new RDD (`newRDD`)
    * created from the checkpoint file, and forget its old dependencies and partitions.
+   * 清除原始RDD和partitions的依赖
    */
   private[spark] def markCheckpointed(): Unit = {
     clearDependencies()
     partitions_ = null
+    //忘记依赖项的构造函数参数
     deps = null // Forget the constructor argument for dependencies too
   }
 
   /**
+   * 清除RDD依赖,垃圾回收集确保删除原始父RDD引用
    * Clears the dependencies of this RDD. This method must ensure that all references
    * to the original parent RDDs is removed to enable the parent RDDs to be garbage
    * collected. Subclasses of RDD may override this method for implementing their own cleaning
@@ -1795,6 +1805,7 @@ abstract class RDD[T: ClassTag](
       val storageInfo = rdd.context.getRDDStorageInfo.filter(_.id == rdd.id).map(info =>
         "    CachedPartitions: %d; MemorySize: %s; ExternalBlockStoreSize: %s; DiskSize: %s".format(
           info.numCachedPartitions, bytesToString(info.memSize),
+          //扩展块存储大小
           bytesToString(info.externalBlockStoreSize), bytesToString(info.diskSize)))
 
       s"$rdd [$persistence]" +: storageInfo

@@ -52,19 +52,19 @@ private[spark] class ReliableRDDCheckpointData[T: ClassTag](@transient rdd: RDD[
   }
 
   /**
+   * 实现RDD内容写一个可靠的DFS(分布式文件系统),检查点的数据写入
    * Materialize this RDD and write its content to a reliable DFS.
    * This is called immediately after the first action invoked on this RDD has completed.
    */
   protected override def doCheckpoint(): CheckpointRDD[T] = {
-
     // Create the output path for the checkpoint
     //创建一个保存checkpoint数据的目录
     val path = new Path(cpDir)
     val fs = path.getFileSystem(rdd.context.hadoopConfiguration)
-    if (!fs.mkdirs(path)) {
+    if (!fs.mkdirs(path)) {//
       throw new SparkException(s"Failed to create checkpoint path $cpDir")
     }
-    //创建广播判变量
+    //保存广播判变量,从重新加载RDD
     // Save to file, and reload it as an RDD
     val broadcastedConf = rdd.context.broadcast(
       new SerializableConfiguration(rdd.context.hadoopConfiguration))
@@ -104,7 +104,10 @@ private[spark] object ReliableRDDCheckpointData {
     sc.checkpointDir.map { dir => new Path(dir, s"rdd-$rddId") }
   }
 
-  /** Clean up the files associated with the checkpoint data for this RDD. */
+  /** 
+   *  Clean up the files associated with the checkpoint data for this RDD.   
+   *  删除RDD检查点数据相关的文件
+   *  */
   def cleanCheckpoint(sc: SparkContext, rddId: Int): Unit = {
     checkpointPath(sc, rddId).foreach { path =>
       val fs = path.getFileSystem(sc.hadoopConfiguration)
