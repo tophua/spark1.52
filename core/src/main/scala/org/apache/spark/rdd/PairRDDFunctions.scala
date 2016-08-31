@@ -50,6 +50,8 @@ import org.apache.spark.util.random.StratifiedSamplingUtils
 
 /**
  * Extra functions available on RDDs of (key, value) pairs through an implicit conversion.
+ * 该扩展类中的方法输入的数据单元是一个包含两个元素的tuple结构。
+ * Spark会把其中第一个元素当成key，第二个当成value
  */
 class PairRDDFunctions[K, V](self: RDD[(K, V)])
     (implicit kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K] = null)
@@ -736,7 +738,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
   /**
    * Pass each value in the key-value pair RDD through a map function without changing the keys;
    * this also retains the original RDD's partitioning.
-   * 同基本转换操作中的map，只不过mapValues是针对[K,V]中的V值进行map操作
+   * 将输入的二元tuple数据的value值逐一转换处理，并输出包含原有key和处理后value的二元tuple，最终输出处理后二元tuple的RDD
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array((1,"A"),(2,"B"),(3,"C"),(4,"D")),2)
    * scala> rdd1.mapValues(x => x + "_").collect
@@ -932,6 +934,7 @@ preservesPartitioning = true)
    * Return the list of values in the RDD for key `key`. This operation is done efficiently if the
    * RDD has a known partitioner by only searching the partition that the key maps to.
    * lookup用于(K,V)类型的RDD,指定K值，返回RDD中该K对应的所有V值。
+   * 遍历RDD中所有的key，找到符合输入key的value，并输出scala的seq数据
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
    * scala> rdd1.lookup("A")
@@ -1213,11 +1216,13 @@ preservesPartitioning = true)
 
   /**
    * Return an RDD with the keys of each tuple.
+   * 从RDD元组中抽取所有元素的key并生成新的RDD
    */
   def keys: RDD[K] = self.map(_._1)
 
   /**
    * Return an RDD with the values of each tuple.
+   * 从RDD元组中抽取所有元素的value并生成新的RD
    */
   def values: RDD[V] = self.map(_._2)
 

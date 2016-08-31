@@ -237,7 +237,7 @@ abstract class RDD[T: ClassTag](
   private def checkpointRDD: Option[CheckpointRDD[T]] = checkpointData.flatMap(_.checkpointRDD)
 
   /**
-   * RDD给子类提供了getDependencies方法来制定如何依赖父类RDD
+   * 返回当前RDD所依赖的RDD
    * Get the list of dependencies of this RDD, taking into account whether the
    * RDD is checkpointed or not.
    *Seq 有序重复数据
@@ -372,7 +372,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a new RDD containing only the elements that satisfy a predicate.
-   * 返回一个新的数据集，由经过func函数后返回值为true的原元素组成
+   * 对RDD中的数据单元进行过滤。如果过滤函数f返回true，则当前被验证的数据单元会被过滤。
    */
   def filter(f: T => Boolean): RDD[T] = withScope {
     val cleanF = sc.clean(f)
@@ -593,6 +593,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return this RDD sorted by the given key function.
+   * 这个方法将RDD的数据排序并存入新的RDD，第一个参数传入方法指定排序key，第二个参数指定是逆序还是顺序
    * sortBy根据给定的排序k函数将RDD中的元素进行排序
    * 该函数最多可以传三个参数：
 　 * 第一个参数是一个函数，该函数的也有一个带T泛型的参数，返回类型和RDD中元素的类型是一致的；
@@ -1137,6 +1138,7 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
+   * 聚合每个数据分片的数据。每个数据分片聚合之前可以设置一个初始值zeroValue
    * Aggregate the elements of each partition, and then the results for all the partitions, using a
    * given associative and commutative function and a neutral "zero value". The function
    * op(t1, t2) is allowed to modify t1 and return it as its result value to avoid object
@@ -1413,7 +1415,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return the first element in this RDD.
-   * 返回数据集的第一个元素,不排序。
+   * 返回RDD数据中第一个数据元素,不排序。
    */
   def first(): T = withScope {
     take(1) match {
@@ -1567,9 +1569,12 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Creates tuples of the elements in this RDD by applying `f`.
-   * 而且sortBy函数函数的实现依赖于sortByKey函数，关于sortByKey函数后面会进行说明。
-   * keyBy函数也是RDD类中进行实现的，它的主要作用就是将将传进来的每个元素作用于f(x)中，
-   * 并返回tuples类型的元素，也就变成了Key-Value类型的RDD了
+   * 为RDD中的每个数据单元增加一个key，即生成key-value对。输入的函数是key的构造函数
+   * 例如:
+   *  val a = sc.parallelize(List("dog", "salmon", "salmon", "rat", "elephant"), 3)
+	 *	val b = a.keyBy(_.length)
+	 *	b.collect
+	 *  res26: Array[(Int, String)] = Array((3,dog), (6,salmon), (6,salmon), (3,rat), (8,elephant))
    */
   def keyBy[K](f: T => K): RDD[(K, T)] = withScope {
     val cleanedF = sc.clean(f)
@@ -1662,7 +1667,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return whether this RDD is checkpointed and materialized, either reliably or locally.
-   * 判断RDD检查点是否已保存分布式或本地
+   * 返回这个RDD是否被checkpoint了。谨记只有当执行了action操作之后相应的数据才会被checkpoint
    */
   def isCheckpointed: Boolean = checkpointData.exists(_.isCheckpointed)
 

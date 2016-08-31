@@ -39,9 +39,10 @@ private[spark] class ReliableRDDCheckpointData[T: ClassTag](@transient rdd: RDD[
       //如果 Option 里有东西就拿出来，不然就给个默认值,抛出异常
       .getOrElse { throw new SparkException("Checkpoint dir must be specified.") }
 
-  /**
+  /**  
    * Return the directory to which this RDD was checkpointed.
    * If the RDD is not checkpointed yet, return None.
+   * 返回RDD检查点目录,
    */
   def getCheckpointDir: Option[String] = RDDCheckpointData.synchronized {
     if (isCheckpointed) {

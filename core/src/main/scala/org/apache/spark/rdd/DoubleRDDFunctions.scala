@@ -27,6 +27,7 @@ import org.apache.spark.util.StatCounter
 
 /**
  * Extra functions available on RDDs of Doubles through an implicit conversion.
+ * 这个扩展类包含了很多数值的聚合方法,如果RDD的数据单元能够隐式变换成Scala的double数据类型
  */
 class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
   /** Add up the elements in this RDD. */
@@ -42,7 +43,7 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
     self.mapPartitions(nums => Iterator(StatCounter(nums))).reduce((a, b) => a.merge(b))
   }
 
-  /** Compute the mean of this RDD's elements. */
+  /** Compute the mean(平均数) of this RDD's elements. */
   def mean(): Double = self.withScope {
     stats().mean
   }
@@ -52,13 +53,13 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
     stats().variance
   }
 
-  /** Compute the standard deviation(偏离) of this RDD's elements. */
+  /** Compute the standard deviation(标准差) of this RDD's elements. */
   def stdev(): Double = self.withScope {
     stats().stdev
   }
 
   /**
-   * Compute the sample standard deviation of this RDD's elements (which corrects for bias in
+   * Compute the sample standard deviation(样本标准差) of this RDD's elements (which corrects for bias in
    * estimating the standard deviation by dividing by N-1 instead of N).
    */
   def sampleStdev(): Double = self.withScope {
@@ -66,7 +67,7 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
   }
 
   /**
-   * Compute the sample variance of this RDD's elements (which corrects for bias in
+   * Compute the sample variance(样本方差) of this RDD's elements (which corrects for bias in
    * estimating the variance by dividing by N-1 instead of N).
    */
   def sampleVariance(): Double = self.withScope {
@@ -138,6 +139,14 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
   }
 
   /**
+   * 针对数据类型为Double的RDD统计直方图,
+   * 可以输入分桶数进行平均分桶，也可以输入自定义的分桶区间。
+   * 平均分桶情况下会输出两个数组，第一个是每个分桶边界值，第二个是每个分桶的统计数。
+   * 自定义分桶情况下只输出一个数组，即每个分桶的统计数
+   * val a = sc.parallelize(List(1.1, 1.2, 1.3, 2.0, 2.1, 7.4, 7.5, 7.6, 8.8, 9.0), 3)
+	 * a.histogram(5)
+	 * val a = sc.parallelize(List(1.1, 1.2, 1.3, 2.0, 2.1, 7.4, 7.5, 7.6, 8.8, 9.0), 3)
+   * a.histogram(Array(0.0, 3.0, 8.0))
    * Compute a histogram using the provided buckets. The buckets are all open
    * to the right except for the last which is closed
    *  e.g. for the array
