@@ -339,8 +339,10 @@ abstract class RDD[T: ClassTag](
   /**
    * Execute a block of code in a scope such that all new RDDs created in this body will
    * be part of the same scope. For more detail, see {{org.apache.spark.rdd.RDDOperationScope}}.
+   * 新的RDDS将相同的范围的一部分执行的代码块。
    *
    * Note: Return statements are NOT allowed in the given body.
+   * 在给定的名称替换函数不允许返回语句
    */
   private[spark] def withScope[U](body: => U): U = RDDOperationScope.withScope[U](sc)(body)
 
@@ -706,9 +708,10 @@ abstract class RDD[T: ClassTag](
    * mapping to that key. The ordering of elements within each group is not guaranteed, and
    * may even differ each time the resulting RDD is evaluated.
    *
-   * Note: This operation may be very expensive. If you are grouping in order to perform an
-   * aggregation (such as a sum or average) over each key, using [[PairRDDFunctions.aggregateByKey]]
-   * or [[PairRDDFunctions.reduceByKey]] will provide much better performance.
+   * Note: This operation may be very expensive(耗时). If you are grouping in order to perform an
+   * aggregation (such as a sum or average) over each key(如果你要分在每个键上执行聚合),
+   * using [[PairRDDFunctions.aggregateByKey]] or [[PairRDDFunctions.reduceByKey]] 
+   * will provide much better performance(将提供更好性能).
    */
   def groupBy[K](
     f: T => K,
@@ -1044,6 +1047,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
+   * 但返回在RDD中出现，并且不在otherRDD中出现的元素，不去重
    */
   def subtract(
     other: RDD[T],
@@ -1242,7 +1246,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return the count of each unique value in this RDD as a local map of (value, count) pairs.
-   *
+   * 返回 各元素在RDD中出现次数
    * Note that this method should only be used if the resulting map is expected to be small, as
    * the whole thing is loaded into the driver's memory.
    * To handle very large results, consider using rdd.map(x =&gt; (x, 1L)).reduceByKey(_ + _), which
@@ -1658,10 +1662,12 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return whether this RDD is checkpointed and materialized, either reliably or locally.
+   * 判断RDD检查点是否已保存分布式或本地
    */
   def isCheckpointed: Boolean = checkpointData.exists(_.isCheckpointed)
 
   /**
+   * 
    * Return whether this RDD is checkpointed and materialized, either reliably or locally.
    * This is introduced as an alias for `isCheckpointed` to clarify the semantics of the
    * return value. Exposed for testing.
@@ -1670,7 +1676,8 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return whether this RDD is marked for local checkpointing.
-   * Exposed for testing.
+   * 判断这个RDD是否本地检查点
+   * Exposed for testing.暴露测试
    */
   private[rdd] def isLocallyCheckpointed: Boolean = {
     checkpointData match {
@@ -1682,6 +1689,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Gets the name of the directory to which this RDD was checkpointed.
    * This is not defined if the RDD is checkpointed locally.
+   * 获取checkpoint文件，如果RDD没有被checkpoint则返回null
    */
   def getCheckpointFile: Option[String] = {
     checkpointData match {
@@ -1723,7 +1731,10 @@ abstract class RDD[T: ClassTag](
     dependencies.head.rdd.asInstanceOf[RDD[U]]
   }
 
-  /** Returns the jth parent RDD: e.g. rdd.parent[T](0) is equivalent to rdd.firstParent[T] */
+  /** 
+   *  Returns the jth parent RDD: e.g. rdd.parent[T](0) is equivalent to rdd.firstParent[T] 
+   *  返回两父RDD
+   *  */
   protected[spark] def parent[U: ClassTag](j: Int) = {
     dependencies(j).rdd.asInstanceOf[RDD[U]]
   }
