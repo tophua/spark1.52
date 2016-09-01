@@ -97,7 +97,7 @@ class DAGScheduler(
   private[scheduler] val stageIdToStage = new HashMap[Int, Stage]
   private[scheduler] val shuffleToMapStage = new HashMap[Int, ShuffleMapStage]
   private[scheduler] val jobIdToActiveJob = new HashMap[Int, ActiveJob]
- //等待运行的调度Stage列表,防止过早执行
+  //等待运行的调度Stage列表,防止过早执行
   // Stages we need to run whose parents aren't done
   private[scheduler] val waitingStages = new HashSet[Stage]
 
@@ -125,7 +125,7 @@ class DAGScheduler(
   //
   // TODO: Garbage collect information about failure epochs when we know there are no more
   //       stray messages to detect.
-
+//失败跟踪每个节点,
   private val failedEpoch = new HashMap[String, Long]
 
   private [scheduler] val outputCommitCoordinator = env.outputCommitCoordinator
@@ -136,10 +136,10 @@ class DAGScheduler(
 
   /** If enabled, FetchFailed will not cause stage retry, in order to surface the problem. */
   private val disallowStageRetryForTest = sc.getConf.getBoolean("spark.test.noStageRetry", false)
-
+    //线程池
   private val messageScheduler =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("dag-scheduler-message")
-   //创建DAGSchedulerEventProcessLoop事件
+   //主要职责处理DAGScheduler发各给它的各种消息
   private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
 
@@ -210,7 +210,7 @@ class DAGScheduler(
   }
 
   /**
-   * Called by TaskScheduler implementation when an executor fails.
+   * Called by TaskScheduler implementation when an executor fails.  
    */
   def executorLost(execId: String): Unit = {
     eventProcessLoop.post(ExecutorLost(execId))
@@ -272,7 +272,6 @@ class DAGScheduler(
         //生成当前RDD所在的Stage
         val stage = newOrUsedShuffleStage(shuffleDep, firstJobId)
         shuffleToMapStage(shuffleDep.shuffleId) = stage
-
         stage
     }
   }
@@ -572,7 +571,7 @@ class DAGScheduler(
   /**
    * Submit a job to the job scheduler and get a JobWaiter object back. The JobWaiter object
    * can be used to block until the the job finishes executing or can be used to cancel the job.
-   * 
+   * 将作业提交到作业调度器和得到一个jobwaiter对象,JobWaiter对象可以用来堵塞直到Job执行结束或可取消Job
    */
   def submitJob[T, U](
       rdd: RDD[T],
@@ -597,8 +596,9 @@ class DAGScheduler(
     }
 
     assert(partitions.size > 0)
-  
+    //强制类型转换匿名方法
     val func2 = func.asInstanceOf[(TaskContext, Iterator[_]) => _]
+    //生成JobWaiter实例用来监听Job执行情况
     val waiter = new JobWaiter(this, jobId, partitions.size, resultHandler)
     //eventProcessLoop发送jobSubmittied事件
     eventProcessLoop.post(JobSubmitted(
@@ -607,7 +607,7 @@ class DAGScheduler(
       //返回waiter
     waiter
   }
-
+//JOb的提交
   def runJob[T, U](
       rdd: RDD[T],
       func: (TaskContext, Iterator[T]) => U,
@@ -615,12 +615,12 @@ class DAGScheduler(
       callSite: CallSite,
       resultHandler: (Int, U) => Unit,
       properties: Properties): Unit = {
-    val start = System.nanoTime
+    val start = System.nanoTime //开始时间
     val waiter = submitJob(rdd, func, partitions, callSite, resultHandler, properties)
     //waiter.awaitResult()说明任务的运行是异步
     waiter.awaitResult() match {
       case JobSucceeded =>
-        logInfo("Job %d finished: %s, took %f s".format
+        logInfo("Job %d finished: %s, took %f s".format//1e9就为1*(10的九次方),也就是十亿
           (waiter.jobId, callSite.shortForm, (System.nanoTime - start) / 1e9))
       case JobFailed(exception: Exception) =>
         logInfo("Job %d failed: %s, took %f s".format
@@ -631,7 +631,7 @@ class DAGScheduler(
         throw exception
     }
   }
-
+//近似估计
   def runApproximateJob[T, U, R](
       rdd: RDD[T],
       func: (TaskContext, Iterator[T]) => U,
@@ -782,7 +782,9 @@ class DAGScheduler(
     listenerBus.post(SparkListenerTaskGettingResult(taskInfo))
     submitWaitingStages()
   }
-
+/**
+ * 处理提交的Job,调用划分Stage方法
+ */
   private[scheduler] def handleJobSubmitted(jobId: Int,
       finalRDD: RDD[_],
       func: (TaskContext, Iterator[_]) => _,
@@ -794,7 +796,7 @@ class DAGScheduler(
     try {
       // New stage creation may throw an exception if, for example, jobs are run on a
       // HadoopRDD whose underlying HDFS files have been deleted.
-      //创建finalStage及Stage的划分
+      //根据RDD创建finalStage,
       finalStage = newResultStage(finalRDD, partitions.length, jobId, callSite)
     } catch {
       case e: Exception =>
@@ -805,6 +807,7 @@ class DAGScheduler(
     }
     //创建ActiveJob,准备计算这个finalStage
     if (finalStage != null) {
+      //创建ActiveJob后提交计算任务
       val job = new ActiveJob(jobId, finalStage, func, partitions, callSite, listener, properties)
       clearCacheLocs()
       logInfo("Got job %s (%s) with %d output partitions".format(
@@ -829,7 +832,10 @@ class DAGScheduler(
     submitWaitingStages()
   }
 
-  /** Submits stage, but first recursively(递归) submits any missing parents. */
+  /** 
+   *  stage划分
+   *  Submits stage, but first recursively(递归) submits any missing parents. 
+   *  */
   // 提交Stage，如果有parent Stage没有提交，那么递归提交它。
   //每个Stage提交之前,如果存在没有提交的祖先Stage,都会先提交祖先Stage,并且将子Stage放入waitingStages中等待
   //如果不存在没有提交的祖先Stage,则提交所有的Task
@@ -1571,7 +1577,9 @@ class DAGScheduler(
   env.metricsSystem.registerSource(metricsSource)
   eventProcessLoop.start()
 }
-
+/**
+ * 主要职责是调用DAGScheduler相应的方法来处理DAGScheduler发送给它的各种消息
+ */
 private[scheduler] class DAGSchedulerEventProcessLoop(dagScheduler: DAGScheduler)
   extends EventLoop[DAGSchedulerEvent]("dag-scheduler-event-loop") with Logging {
 
@@ -1590,7 +1598,7 @@ private[scheduler] class DAGSchedulerEventProcessLoop(dagScheduler: DAGScheduler
   }
   //模式匹配，是用过post的方式。
   private def doOnReceive(event: DAGSchedulerEvent): Unit = event match {
-    //// 提交job，来自与RDD->SparkContext->DAGScheduler的消息。之所以在这需要在这里中转一下，是为了模块功能的一致性。
+    //接收提交job，来自与RDD->SparkContext->DAGScheduler.submit方法。需要在这里中转一下，是为了模块功能的一致性。
     case JobSubmitted(jobId, rdd, func, partitions, callSite, listener, properties) =>
       dagScheduler.handleJobSubmitted(jobId, rdd, func, partitions, callSite, listener, properties)
     //消息源org.apache.spark.ui.jobs.JobProgressTab，在GUI上显示一个SparkContext的Job的执行状态。    
@@ -1651,5 +1659,6 @@ private[spark] object DAGScheduler {
   // The time, in millis, to wait for fetch failure events to stop coming in after one is detected;
   // this is a simplistic way to avoid resubmitting tasks in the non-fetchable map stage one by one
   // as more failure events come in
+  //
   val RESUBMIT_TIMEOUT = 200
 }

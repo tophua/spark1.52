@@ -20,6 +20,8 @@ package org.apache.spark.scheduler
 /**
  * An object that waits for a DAGScheduler job to complete. As tasks finish, it passes their
  * results to the given handler function.
+ * 一个对象用来监听dagscheduler Job执行状态,Job是由多个task组织的tasks,
+ * 因此只有Job的所有Task都完成,Job才标记完成,任意一个Task失败都标记该Job失败 
  * 
  */
 private[spark] class JobWaiter[T](
@@ -32,6 +34,7 @@ private[spark] class JobWaiter[T](
   private var finishedTasks = 0
 
   // Is the job as a whole finished (succeeded or failed)?
+  // 一个任务全完成或失败
   @volatile
   private var _jobFinished = totalTasks == 0
 
@@ -61,7 +64,7 @@ private[spark] class JobWaiter[T](
     }
     //调用用户逻辑处理结果
     resultHandler(index, result.asInstanceOf[T])
-    
+    //只有Job的所有Task都完成,Job才标记完成,任意一个Task失败都标记该Job失败 
     finishedTasks += 1
     if (finishedTasks == totalTasks) {//该Job结束
       _jobFinished = true

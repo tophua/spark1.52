@@ -21,6 +21,7 @@ import org.apache.spark.executor.ExecutorExitCode
 
 /**
  * Represents an explanation for a executor or whole slave failing or exiting.
+ * 代表一个executor或整个slave失败或退出
  */
 private[spark]
 class ExecutorLossReason(val message: String) {
