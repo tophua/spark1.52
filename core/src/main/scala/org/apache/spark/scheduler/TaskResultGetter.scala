@@ -45,11 +45,11 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
     }
   }
 /**
- * enqueue 排队完成任务
+ * 处理任务成功执行的机制,Driver端对结果的处理了,处理成功完成Task如下
  */
   def enqueueSuccessfulTask(
     taskSetManager: TaskSetManager, tid: Long, serializedData: ByteBuffer) {
-    getTaskResultExecutor.execute(new Runnable {//另起线程,通过线程池来执行结果获取
+    getTaskResultExecutor.execute(new Runnable {//通过线程池来执行结果获取
       override def run(): Unit = Utils.logUncaughtExceptions {
         try {
           val (result, size) = serializer.get().deserialize[TaskResult[_]](serializedData) match {
@@ -111,7 +111,7 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
     })
   }
 /**
- * enqueue 任务队列失败
+ * enqueue 任务队列失败,处理每次结果都是由一个Daemon线程池负责,默认这个线程池由4个线程组成
  */
   def enqueueFailedTask(taskSetManager: TaskSetManager, tid: Long, taskState: TaskState,
     serializedData: ByteBuffer) {

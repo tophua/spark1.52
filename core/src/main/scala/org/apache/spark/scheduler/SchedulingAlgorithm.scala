@@ -25,13 +25,17 @@ package org.apache.spark.scheduler
 private[spark] trait SchedulingAlgorithm {
   def comparator(s1: Schedulable, s2: Schedulable): Boolean
 }
-
+/**
+ * FIFOSchedulingAlgorith首先保证Job Id较小的先被执行调度,如果是同一个Job,那么Stage ID小的先被调度
+ */
 private[spark] class FIFOSchedulingAlgorithm extends SchedulingAlgorithm {
   override def comparator(s1: Schedulable, s2: Schedulable): Boolean = {
-    val priority1 = s1.priority
+    val priority1 = s1.priority//实际上JobID
     val priority2 = s2.priority
-    var res = math.signum(priority1 - priority2)
+    //如果参数大于零返回1.0,如果参数小于零返回-1,如果参数为0，则返回signum函数的参数为零
+    var res = math.signum(priority1 - priority2)//首比较Job ID
     if (res == 0) {
+      //如果Job ID相同,那么比较Stage ID
       val stageId1 = s1.stageId
       val stageId2 = s2.stageId
       res = math.signum(stageId1 - stageId2)

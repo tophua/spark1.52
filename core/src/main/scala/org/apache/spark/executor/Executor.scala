@@ -290,6 +290,7 @@ private[spark] class Executor(
               s"dropping it.")
             ser.serialize(new IndirectTaskResult[Any](TaskResultBlockId(taskId), resultSize))
           } else if (resultSize >= akkaFrameSize - AkkaUtils.reservedSizeBytes) {
+          //Executor将结果回传到Driver时,大小首不能超过个机制设置的消息最大值
             //如果不能通过AKKA的消息传递，那么放入BlockManager等待调用者以网络的形式来获取。
             //AKKA的消息的默认大小可以通过 spark.akka.frameSize来设置，默认10MB。     
             val blockId = TaskResultBlockId(taskId)

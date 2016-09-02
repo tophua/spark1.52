@@ -22,6 +22,7 @@ import org.apache.spark.util.CallSite
 
 /**
  * The ResultStage represents the final stage in a job.
+ * 表示Job中的最后阶段(stage)
  */
 private[spark] class ResultStage(
     id: Int,
@@ -33,6 +34,7 @@ private[spark] class ResultStage(
   extends Stage(id, rdd, numTasks, parents, firstJobId, callSite) {
 
   // The active job for this result stage. Will be empty if the job has already finished
+  //这是一个活动Job对于这个结果阶段,如果Job已经完成则空,因为这个Job被取消了.
   // (e.g., because the job was cancelled).
   var resultOfJob: Option[ActiveJob] = None
 

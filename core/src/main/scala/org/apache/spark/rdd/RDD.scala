@@ -65,8 +65,8 @@ import org.apache.spark.util.random.{
  *  - A list of partitions
  *  - A function for computing each split
  *  - A list of dependencies on other RDDs
- *  - Optionally, a Partitioner for key-value RDDs (e.g. to say that the RDD is hash-partitioned)
- *  - Optionally, a list of preferred locations to compute each split on (e.g. block locations for
+ *  - Optionally, a Partitioner(分区策略) for key-value RDDs (e.g. to say that the RDD is hash-partitioned)
+ *  - Optionally, a list of preferred locations(最佳位置) to compute each split on (e.g. block locations for
  *    an HDFS file)
  *
  * All of the scheduling and execution in Spark is done based on these methods, allowing each RDD
@@ -132,7 +132,7 @@ abstract class RDD[T: ClassTag](
   protected def getDependencies: Seq[Dependency[_]] = deps
 
   /**
-   * 指定RDD偏好的位置
+   * 指定RDD最佳位置
    * Optionally overridden by subclasses to specify placement preferences.
    */
   protected def getPreferredLocations(split: Partition): Seq[String] = Nil
@@ -983,6 +983,8 @@ abstract class RDD[T: ClassTag](
    * 在Driver的程序中，collect用于将一个RDD转换成数组
    */
   def collect(): Array[T] = withScope {
+    //需要注意的是这里传入了一个函数，这个函数就是这个Job的要执行的任务,
+    //它将会被包装并序列化后发送到要执行它的executor上，并在要处理的RDD上的每个分区上被调用执行
     val results = sc.runJob(this, (iter: Iterator[T]) => iter.toArray)
     Array.concat(results: _*)
   }

@@ -94,7 +94,7 @@ private[spark] class Pool(
     }
     shouldRevive
   }
-
+  //对rootPool中的所有TaskSetManager按照调度算法排序
   override def getSortedTaskSetQueue: ArrayBuffer[TaskSetManager] = {
     var sortedTaskSetQueue = new ArrayBuffer[TaskSetManager]
     val sortedSchedulableQueue =

@@ -40,7 +40,8 @@ import org.apache.spark.util.{Clock, SystemClock, Utils}
  * handles locality-aware scheduling for this TaskSet via delay scheduling. The main interfaces
  * to it are resourceOffer, which asks the TaskSet whether it wants to run a task on one node,
  * and statusUpdate, which tells it that one of its tasks changed state (e.g. finished).
- *
+ * TaskSetManager 会根据数据的就近原则为Task分配计算资源,监控Task的执行状态并采取必要的措施,如:
+ * 失败重试,慢任务的推测性执行.
  * THREADING: This class is designed to only be called from code with a lock on the
  * TaskScheduler (e.g. its event handlers). It should not be called from other threads.
  *
@@ -74,6 +75,7 @@ private[spark] class TaskSetManager(
   val SPECULATION_MULTIPLIER = conf.getDouble("spark.speculation.multiplier", 1.5)
 
   // Limit of bytes for total size of results (default is 1GB)
+  //限制最大记录数
   val maxResultSize = Utils.getMaxResultSize(conf)
 
   // Serializer for closures and tasks.
@@ -613,6 +615,8 @@ private[spark] class TaskSetManager(
    * Check whether has enough quota to fetch the result with `size` bytes
    */
   def canFetchMoreResults(size: Long): Boolean = sched.synchronized {
+  // 如果结果的大小大于1GB，那么直接丢弃，
+   // 可以在spark.driver.maxResultSize设置
     totalResultSize += size
     calculatedTasks += 1
     if (maxResultSize > 0 && totalResultSize > maxResultSize) {

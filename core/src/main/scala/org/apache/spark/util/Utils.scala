@@ -2034,6 +2034,8 @@ private[spark] object Utils extends Logging {
   }
 
   // Limit of bytes for total size of results (default is 1GB)
+  //如果结果的大小大于1GB，那么直接丢弃，
+   // 可以在spark.driver.maxResultSize设置
   def getMaxResultSize(conf: SparkConf): Long = {
     memoryStringToMb(conf.get("spark.driver.maxResultSize", "1g")).toLong << 20
   }

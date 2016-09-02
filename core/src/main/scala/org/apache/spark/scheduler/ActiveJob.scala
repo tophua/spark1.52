@@ -24,7 +24,7 @@ import org.apache.spark.util.CallSite
 
 /**
  * Tracks information about an active job in the DAGScheduler.
- * 
+ * ActiveJob对象用来表示这个活跃的Job
  */
 private[spark] class ActiveJob(
     val jobId: Int,//每个作业都分配一个唯一的I

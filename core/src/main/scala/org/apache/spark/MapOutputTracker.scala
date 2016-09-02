@@ -52,6 +52,7 @@ private[spark] class MapOutputTrackerMasterEndpoint(
       val mapOutputStatuses = tracker.getSerializedMapOutputStatuses(shuffleId)
       val serializedSize = mapOutputStatuses.size
       if (serializedSize > maxAkkaFrameSize) {
+      //Executor将结果回传到Driver时,大小首不能超过个机制设置的消息最大值
         val msg = s"Map output statuses were $serializedSize bytes which " +
           s"exceeds spark.akka.frameSize ($maxAkkaFrameSize bytes)."
 
@@ -272,8 +273,9 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
 
   // For cleaning up TimeStampedHashMaps
   private val metadataCleaner =
-    new MetadataCleaner(MetadataCleanerType.MAP_OUTPUT_TRACKER, this.cleanup, conf)
-   //
+    new MetadataCleaner(MetadataCleanerType.MAP_OUTPUT_TRACKER, this.cleanup, conf)  
+   //registerMapOutPuts来保存计算结果,这个结果不是真实的数据,而是这些数据的位置,大小等元数据信息,
+   //这些下游的task就可以通过这些元数据信息获取其他需要处理的数据
   def registerShuffle(shuffleId: Int, numMaps: Int) {
     if (mapStatuses.put(shuffleId, new Array[MapStatus](numMaps)).isDefined) {
       throw new IllegalArgumentException("Shuffle ID " + shuffleId + " registered twice")

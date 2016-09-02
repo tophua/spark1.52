@@ -24,14 +24,15 @@ import org.apache.spark.util.SerializableBuffer
 /**
  * Description of a task that gets passed onto executors to be executed, usually created by
  * [[TaskSetManager.resourceOffer]].
+ * 
  */
 private[spark] class TaskDescription(
-    val taskId: Long,
-    val attemptNumber: Int,
+    val taskId: Long,//
+    val attemptNumber: Int,//失败尝试数
     val executorId: String,
     val name: String,
     val index: Int,    // Index within this task's TaskSet
-    _serializedTask: ByteBuffer)
+    _serializedTask: ByteBuffer)//task执行环境的依赖的信息
   extends Serializable {
 
   // Because ByteBuffers are not serializable, wrap the task in a SerializableBuffer

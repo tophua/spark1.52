@@ -43,6 +43,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   // Use an atomic variable to track total number of cores in the cluster for simplicity and speed
   var totalCoreCount = new AtomicInteger(0)
   // Total number of executors that are currently registered
+  //当前注册executors数
   var totalRegisteredExecutors = new AtomicInteger(0)
   val conf = scheduler.sc.conf
   private val akkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)
@@ -64,12 +65,15 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   private val listenerBus = scheduler.sc.listenerBus
 
   // Executors we have requested the cluster manager to kill that have not died yet
+  //请求集群管理Kill掉Executors
   private val executorsPendingToRemove = new HashSet[String]
 
   // A map to store hostname with its possible task number running on it
+  //存储主机可能的运行任务数
   protected var hostToLocalTaskCount: Map[String, Int] = Map.empty
 
   // The number of pending tasks which is locality required
+  //有待解决的任务数
   protected var localityAwareTasks = 0
 /**
  * 

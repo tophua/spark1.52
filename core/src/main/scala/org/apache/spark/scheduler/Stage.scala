@@ -85,7 +85,8 @@ private[spark] abstract class Stage(
   }
 
   /**
-   * Pointer to the [StageInfo] object for the most recent attempt. This needs to be initialized
+   * Pointer to the [StageInfo] object for the most recent attempt. 
+   * 指向最新StageInfo对象,这需要一个初始化,This needs to be initialized
    * here, before any attempts have actually been created, because the DAGScheduler uses this
    * StageInfo to tell SparkListeners when a job starts (which happens before any stage attempts
    * have been created).
@@ -102,7 +103,10 @@ private[spark] abstract class Stage(
     nextAttemptId += 1
   }
 
-  /** Returns the StageInfo for the most recent attempt for this stage. */
+  /** 
+   *  Returns the StageInfo for the most recent attempt for this stage.
+   *  返回StageInfo 尝试最新stage
+   *   */
   def latestInfo: StageInfo = _latestInfo
 
   override final def hashCode(): Int = id

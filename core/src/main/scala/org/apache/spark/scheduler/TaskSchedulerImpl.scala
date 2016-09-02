@@ -99,6 +99,7 @@ private[spark] class TaskSchedulerImpl(
 
   // The set of executors we have on each host; this is used to compute hostsAlive, which
   // in turn is used to decide when we can attain data locality on a given host
+  //执行设定每个主机还活着
   protected val executorsByHost = new HashMap[String, HashSet[String]]
   //同一机架
   protected val hostsByRack = new HashMap[String, HashSet[String]]
@@ -198,9 +199,11 @@ private[spark] class TaskSchedulerImpl(
         throw new IllegalStateException(s"more than one active taskSet for stage $stage:" +
           s" ${stageTaskSets.toSeq.map{_._2.taskSet.id}.mkString(",")}")
       }
+      //schedulableBuilder是Application级别的调度器,现支持两种调度策略,FiFo先进先出和FAIR公平调度
       schedulableBuilder.addTaskSetManager(manager, manager.taskSet.properties)
 
       if (!isLocal && !hasReceivedTask) {
+        //超时取消
         starvationTimer.scheduleAtFixedRate(new TimerTask() {
           override def run() {
             if (!hasLaunchedTask) {
@@ -220,6 +223,7 @@ private[spark] class TaskSchedulerImpl(
   }
 
   // Label as private[scheduler] to allow tests to swap in different task set managers if necessary
+  //
   private[scheduler] def createTaskSetManager(
       taskSet: TaskSet,
       maxTaskFailures: Int): TaskSetManager = {
@@ -309,13 +313,13 @@ private[spark] class TaskSchedulerImpl(
    */
 
   /***
-    * resourceOffers方法会将已经提交的tasks进行一次优先级排序，这个排序算法目前是两种：FIFO或FAIR。得到这一份待运行的tasks后，
-    * 接下里就是要把schedulerBackend交过来的worker资源信息合理分配给这些tasks
+    * resourceOffers方法会将已经提交的tasks进行一次优先级排序，这个排序算法目前是两种：FIFO或FAIR。
+    * 响应CoarseGrainedSchedulerBackend的资源调度请求,为每个Task具体分配资源
     */
   def resourceOffers(offers: Seq[WorkerOffer]): Seq[Seq[TaskDescription]] = synchronized {
     // Mark each slave as alive and remember its hostname
     // Also track if new executor is added
-    var newExecAvail = false
+    var newExecAvail = false 
     for (o <- offers) {
       //标记executorId与host关系
       executorIdToHost(o.executorId) = o.host
@@ -346,9 +350,10 @@ private[spark] class TaskSchedulerImpl(
     val sortedTaskSets = rootPool.getSortedTaskSetQueue
     for (taskSet <- sortedTaskSets) {
       logDebug("parentName: %s, name: %s, runningTasks: %s".format(
-          //重新计算该TaskSetManager的就近原则
+        
         taskSet.parent.name, taskSet.name, taskSet.runningTasks))
       if (newExecAvail) {
+        //重新计算该TaskSetManager的就近原则
         taskSet.executorAdded()
       }
     }
@@ -371,13 +376,14 @@ private[spark] class TaskSchedulerImpl(
     return tasks
   }
 /**
- * 
+ * Task在Executor执行完成时,会通过向Driver发送StatusUpdate的消息来通知Driver任务的状态更新为TaskState.FINISHED
+ * Driver首先会将任务的状态更新通知TaskScheduler,然后在这个Executor上重新分配新的计算任务
  */
   def statusUpdate(tid: Long, state: TaskState, serializedData: ByteBuffer) {
     var failedExecutor: Option[String] = None
     synchronized {
       try {
-        //Task丢失
+        //TaskState状态失去整个的执行者,所以记住它已经消失了
         if (state == TaskState.LOST && taskIdToExecutorId.contains(tid)) {
           // We lost this entire executor, so remember that it's gone         
           val execId = taskIdToExecutorId(tid)
@@ -388,6 +394,7 @@ private[spark] class TaskSchedulerImpl(
         }
         taskIdToTaskSetManager.get(tid) match {
           case Some(taskSet) =>
+            //如果Task的状态是任务成功完成
             if (TaskState.isFinished(state)) {
               taskIdToTaskSetManager.remove(tid)//删除任务
               taskIdToExecutorId.remove(tid)//删除任务
