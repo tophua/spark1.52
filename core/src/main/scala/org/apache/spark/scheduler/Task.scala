@@ -53,6 +53,7 @@ private[spark] abstract class Task[T](
   /**
    * The key of the Map is the accumulator id and the value of the Map is the latest accumulator
    * local value.
+   * 
    */
   type AccumulatorUpdates = Map[Long, Any]
 
@@ -114,10 +115,11 @@ private[spark] abstract class Task[T](
   }
 
   def runTask(context: TaskContext): T
-
+  //task最佳位置
   def preferredLocations: Seq[TaskLocation] = Nil
 
   // Map output tracker epoch. Will be set by TaskScheduler.
+  // map 输出跟踪值,将由任务调度器
   var epoch: Long = -1
 
   var metrics: Option[TaskMetrics] = None
@@ -136,11 +138,13 @@ private[spark] abstract class Task[T](
 
   /**
    * Whether the task has been killed.
+   * 是否任务已经被杀死了
    */
   def killed: Boolean = _killed
 
   /**
    * Returns the amount of time spent deserializing the RDD and function to be run.
+   * 返回返序列化运行时间
    */
   def executorDeserializeTime: Long = _executorDeserializeTime
 
@@ -173,6 +177,7 @@ private[spark] abstract class Task[T](
 private[spark] object Task {
   /**
    * Serialize a task and the current app dependencies (files and JARs added to the SparkContext)
+   * Task序列化依赖文件或jar
    */
   def serializeWithDependencies(
       task: Task[_],
@@ -185,10 +190,11 @@ private[spark] object Task {
     val dataOut = new DataOutputStream(out)
 
     // Write currentFiles
+    //写入文件大小
     dataOut.writeInt(currentFiles.size)
     for ((name, timestamp) <- currentFiles) {
-      dataOut.writeUTF(name)
-      dataOut.writeLong(timestamp)
+      dataOut.writeUTF(name)//输出名称
+      dataOut.writeLong(timestamp)//输出时间戳
     }
 
     // Write currentJars

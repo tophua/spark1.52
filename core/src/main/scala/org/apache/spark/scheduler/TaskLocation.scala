@@ -28,6 +28,7 @@ private[spark] sealed trait TaskLocation {
 
 /**
  * A location that includes both a host and an executor id on that host.
+ * 包括主机和executor主机上的位置
  */
 private [spark]
 case class ExecutorCacheTaskLocation(override val host: String, executorId: String)
@@ -35,6 +36,7 @@ case class ExecutorCacheTaskLocation(override val host: String, executorId: Stri
 
 /**
  * A location on a host.
+ * 包括一个主机上
  */
 private [spark] case class HostTaskLocation(override val host: String) extends TaskLocation {
   override def toString: String = host
@@ -42,6 +44,7 @@ private [spark] case class HostTaskLocation(override val host: String) extends T
 
 /**
  * A location on a host that is cached by HDFS.
+ * 一个主机位置缓存在HDFS
  */
 private [spark] case class HDFSCacheTaskLocation(override val host: String) extends TaskLocation {
   override def toString: String = TaskLocation.inMemoryLocationTag + host

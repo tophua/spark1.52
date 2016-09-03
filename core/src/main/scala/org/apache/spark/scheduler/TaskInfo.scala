@@ -53,10 +53,10 @@ class TaskInfo(
   /**
    * The time when the task has completed successfully (including the time to remotely fetch
    * results, if necessary).
-   * 任务完成时间
+   * 任务完成时间,包括完成时间失败时间
    */
   var finishTime: Long = 0
-
+  //任务失败
   var failed = false
 
   private[spark] def markGettingResult(time: Long = System.currentTimeMillis) {
@@ -100,7 +100,7 @@ class TaskInfo(
   def attempt: Int = attemptNumber
 
   def id: String = s"$index.$attemptNumber"
-
+  //任务执行的持续的时间
   def duration: Long = {
     if (!finished) {
       throw new UnsupportedOperationException("duration() called on unfinished task")

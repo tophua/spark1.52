@@ -95,13 +95,14 @@ private[spark] class TaskSchedulerImpl(
   val nextTaskId = new AtomicLong(0)
 
   // Which executor IDs we have executors on
+  //保存集群当前所有可用的 executor id
   val activeExecutorIds = new HashSet[String]
 
   // The set of executors we have on each host; this is used to compute hostsAlive, which
   // in turn is used to decide when we can attain data locality on a given host
-  //执行设定每个主机还活着
+  //执行设定每个主机还活着,key为 host,value 为该 host 上的 active executors
   protected val executorsByHost = new HashMap[String, HashSet[String]]
-  //同一机架
+  //hostsByRack保存key为rack，value为该 rack上所有作为 taskSetManager优先位置的 hosts
   protected val hostsByRack = new HashMap[String, HashSet[String]]
  
   protected val executorIdToHost = new HashMap[String, String]
@@ -254,6 +255,7 @@ private[spark] class TaskSchedulerImpl(
    * Called to indicate that all task attempts (including speculated tasks) associated with the
    * given TaskSetManager have completed, so state associated with the TaskSetManager should be
    * cleaned up.
+   * tasksetmanager已经完成间接调用所有任务的尝试（包括猜测任务）,清理相关TaskSetManager状态
    */
   def taskSetFinished(manager: TaskSetManager): Unit = synchronized {
     taskSetsByStageIdAndAttempt.get(manager.taskSet.stageId).foreach { taskSetsForStage =>
@@ -262,11 +264,12 @@ private[spark] class TaskSchedulerImpl(
         taskSetsByStageIdAndAttempt -= manager.taskSet.stageId
       }
     }
+    //
     manager.parent.removeSchedulable(manager)
     logInfo("Removed TaskSet %s, whose tasks have all completed, from pool %s"
       .format(manager.taskSet.id, manager.parent.name))
   }
-
+ //分配资源
   private def resourceOfferSingleTaskSet(
       taskSet: TaskSetManager,
       maxLocality: TaskLocality,
@@ -323,7 +326,7 @@ private[spark] class TaskSchedulerImpl(
     for (o <- offers) {
       //标记executorId与host关系
       executorIdToHost(o.executorId) = o.host
-      //增加激活的executorId,
+      //保存集群当前所有可用的 executor id
       activeExecutorIds += o.executorId
       //如果有新Executor加入
       if (!executorsByHost.contains(o.host)) {
@@ -406,7 +409,7 @@ private[spark] class TaskSchedulerImpl(
             } else if (Set(TaskState.FAILED, TaskState.KILLED, TaskState.LOST).contains(state)) {
               //TaskSetManager标记任务已经结束,注意这里不一定是成功结束的
               taskSet.removeRunningTask(tid)
-              //执行失败任务的返回结果
+              //执行失败任务的返回结果,
               taskResultGetter.enqueueFailedTask(taskSet, tid, state, serializedData)
             }
           case None =>
@@ -455,7 +458,9 @@ private[spark] class TaskSchedulerImpl(
   def handleTaskGettingResult(taskSetManager: TaskSetManager, tid: Long): Unit = synchronized {
     taskSetManager.handleTaskGettingResult(tid)
   }
-
+/**
+ * 负责处理获取到的计算结果
+ */
   def handleSuccessfulTask(
       taskSetManager: TaskSetManager,
       tid: Long,
@@ -552,7 +557,7 @@ private[spark] class TaskSchedulerImpl(
 
   /** Remove an executor from all our data structures and mark it as lost */
   private def removeExecutor(executorId: String) {
-    activeExecutorIds -= executorId
+    activeExecutorIds -= executorId//从存集群删除当前可用的 executor id
     val host = executorIdToHost(executorId)
     val execs = executorsByHost.getOrElse(host, new HashSet)
     execs -= executorId
@@ -565,6 +570,7 @@ private[spark] class TaskSchedulerImpl(
         }
       }
     }
+    
     executorIdToHost -= executorId
     rootPool.executorLost(executorId, host)
   }
@@ -576,15 +582,17 @@ private[spark] class TaskSchedulerImpl(
   def getExecutorsAliveOnHost(host: String): Option[Set[String]] = synchronized {
     executorsByHost.get(host).map(_.toSet)
   }
-
+//
   def hasExecutorsAliveOnHost(host: String): Boolean = synchronized {
     executorsByHost.contains(host)
   }
-
+//
   def hasHostAliveOnRack(rack: String): Boolean = synchronized {
     hostsByRack.contains(rack)
   }
-
+/**
+ * isExecutorAlive就是判断参数中的 executor id 当前是否活动
+ */
   def isExecutorAlive(execId: String): Boolean = synchronized {
     activeExecutorIds.contains(execId)
   }

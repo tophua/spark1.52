@@ -257,6 +257,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
     // Launch tasks returned by a set of resource offers
     /**
+     * Executor在接到消息后,就会开始执行Task,
      * launchTasks处理步骤
      * 1)序列化TaskDescription
      * 2)取出TaskDescription所描述任务分配的ExecutorData信息,并且将ExecutorData描述的空闲CPU核数减去

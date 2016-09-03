@@ -223,7 +223,7 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
     }
     iter
   }
-
+//返回对应 partition 关联的 block 所在的节点 host,
   override def getPreferredLocations(hsplit: SparkPartition): Seq[String] = {
     val split = hsplit.asInstanceOf[SqlNewHadoopPartition].serializableHadoopSplit.value
     val locs = HadoopRDD.SPLIT_INFO_REFLECTIONS match {

@@ -64,6 +64,8 @@ private[spark] class TaskSetManager(
    * does not realize right away leading to repeated task failures. If enabled,
    * this temporarily prevents a task from re-launching on an executor where
    * it just failed.
+   * worker节点出现了故障，task执行失败后会在该 executor上不断重试，达到最大重试次数后会导致整个application执行失败，
+   * 设置失败task在该节点运行失败后会换节点重试
    */
   private val EXECUTOR_TASK_BLACKLIST_TIMEOUT =
     conf.getLong("spark.scheduler.executorTaskBlacklistTime", 0L)
@@ -82,65 +84,72 @@ private[spark] class TaskSetManager(
   val env = SparkEnv.get
   val ser = env.closureSerializer.newInstance()
 
-  val tasks = taskSet.tasks
+  val tasks = taskSet.tasks //获得所有Task任务
   val numTasks = tasks.length
-  val copiesRunning = new Array[Int](numTasks)
-  val successful = new Array[Boolean](numTasks)
-  private val numFailures = new Array[Int](numTasks)
+  val copiesRunning = new Array[Int](numTasks)//运行任务ID
+  val successful = new Array[Boolean](numTasks)//全部成功完成
+  private val numFailures = new Array[Int](numTasks)//失败数
   // key is taskId, value is a Map of executor id to when it failed
+  //执行失败的executor
   private val failedExecutors = new HashMap[Int, HashMap[String, Long]]()
-
+  //任务重试数,即所有任务数
   val taskAttempts = Array.fill[List[TaskInfo]](numTasks)(Nil)
-  var tasksSuccessful = 0
+  var tasksSuccessful = 0 //全部成功
 
   var weight = 1
   var minShare = 0
-  var priority = taskSet.priority
+  var priority = taskSet.priority//优先级
   var stageId = taskSet.stageId
   var name = "TaskSet_" + taskSet.stageId.toString
   var parent: Pool = null
-  var totalResultSize = 0L
-  var calculatedTasks = 0
+  var totalResultSize = 0L//总记录数
+  var calculatedTasks = 0 //计算任务数
 
 
   val runningTasksSet = new HashSet[Long]
   override def runningTasks: Int = runningTasksSet.size
-
+  //True表示任务集管理器应启动一次任务,TaskSetManagers至少一次任务成功完成
   // True once no more tasks should be launched for this task set manager. TaskSetManagers enter
-  // the zombie state once at least one attempt of each task has completed successfully, or if the
+  // the zombie(僵尸状态) state once at least one attempt of each task has completed successfully, or if the
   // task set is aborted (for example, because it was killed).  TaskSetManagers remain in the zombie
   // state until all tasks have finished running; we keep TaskSetManagers that are in the zombie
   // state in order to continue to track and account for the running tasks.
   // TODO: We should kill any running task attempts when the task set manager becomes a zombie.
   var isZombie = false
 
-  // Set of pending tasks for each executor. These collections are actually
-  // treated as stacks, in which new tasks are added to the end of the
+  // Set of pending(待执行) tasks for each executor. These collections are actually
+  // treated(已处理过) as stacks, in which new tasks are added to the end of the
   // ArrayBuffer and removed from the end. This makes it faster to detect
-  // tasks that repeatedly fail because whenever a task failed, it is put
-  // back at the head of the stack. They are also only cleaned up lazily;
+  // tasks that repeatedly fail because whenever a task failed
+  //每当一个任务失败,使它更快地检测到重复失败的任务 
+  //it is put back at the head of the stack. They are also only cleaned up lazily;
   // when a task is launched, it remains in all the pending lists except
   // the one that it was launched from, but gets removed from them later.
+  //pendingTasksForExecutor保存着当前可用的 executor 对应优先位置在其上的 tasks 的映射关系
+  //key 为executoroId，value 为task index 数组
   private val pendingTasksForExecutor = new HashMap[String, ArrayBuffer[Int]]
 
-  // Set of pending tasks for each host. Similar to pendingTasksForExecutor,
+  // Set of pending(待执行) tasks for each host. Similar to pendingTasksForExecutor,
   // but at host level.
+  // key为 host,value为 host的tasks索引数组
   private val pendingTasksForHost = new HashMap[String, ArrayBuffer[Int]]
 
-  // Set of pending tasks for each rack -- similar to the above.
+  // Set of pending tasks for each rack(机架) -- similar to the above.
+  //key为 rack,value为优先位置所在的 host 属于该机架的 tasks
   private val pendingTasksForRack = new HashMap[String, ArrayBuffer[Int]]
 
-  // Set containing pending tasks with no locality preferences.
+  // Set containing pending tasks with no locality preferences(没有最佳位置).
   var pendingTasksWithNoPrefs = new ArrayBuffer[Int]
 
-  // Set containing all pending tasks (also used as a stack, as above).
+  // Set containing all pending tasks(待执行任务) (also used as a stack, as above).
   val allPendingTasks = new ArrayBuffer[Int]
 
-  // Tasks that can be speculated. Since these will be a small fraction of total
+  // Tasks that can be speculated(推测的任务). Since these will be a small fraction of total
   // tasks, we'll just hold them in a HashSet.
   val speculatableTasks = new HashSet[Int]
 
   // Task index, start and finish time for each task attempt (indexed by task ID)
+  //任务索引即Task Id，开始和完成每个任务的时间,
   val taskInfos = new HashMap[Long, TaskInfo]
 
   // How frequently to reprint duplicate exceptions in full, in milliseconds
@@ -153,6 +162,7 @@ private[spark] class TaskSetManager(
   val recentExceptions = HashMap[String, (Int, Long)]()
 
   // Figure out the current map output tracker epoch and set it on all tasks
+  //找出当前Map 输出跟踪，并将其设置在所有的任务
   val epoch = sched.mapOutputTracker.getEpoch
   logDebug("Epoch for " + taskSet + ": " + epoch)
   for (t <- tasks) {
@@ -161,12 +171,13 @@ private[spark] class TaskSetManager(
 
   // Add all our tasks to the pending lists. We do this in reverse order
   // of task index so that tasks with low indices get launched first.
+  //添加tasks到pendingTasksForExecutor保存着当前可用的 executor 对应优先位置在其上的 tasks 的映射关系
   for (i <- (0 until numTasks).reverse) {
     addPendingTask(i)
   }
 
   // Figure out which locality levels we have in our TaskSet, so we can do delay scheduling
-  //充许当前TaskSetManage使用的本地化级别
+  //在构造 TaskSetManager 对象时来确定locality levels
   var myLocalityLevels = computeValidLocalityLevels()
   //本地化级别等待时间
   var localityWaits = myLocalityLevels.map(getLocalityWait) // Time to wait at each level
@@ -186,8 +197,13 @@ private[spark] class TaskSetManager(
   var emittedTaskSizeWarning = false
 
   /**
-   * Add a task to all the pending-task lists that it should be on. If readding is set, we are
+   * Add a task to all the pending-task lists that it should be on.
+   * 添加一个任务到待执行任务列表 ,如果重新添加只包括它在每个列表中
+   * If readding is set, we are
    * re-adding the task so only include it in each list if it's not already there.
+   * addPendingTask 获取 task 的优先位置，即一组hosts；再获得这组 hosts 对应的 executors，
+   * 从来反过来获得了 executor 对应 tasks 的关系，即pendingTasksForExecutor
+   * 
    */
   private def addPendingTask(index: Int, readding: Boolean = false) {
     // Utility method that adds `index` to a list only if readding=false or it's not already there
@@ -197,15 +213,18 @@ private[spark] class TaskSetManager(
       }
     }
 
-    for (loc <- tasks(index).preferredLocations) {
+    for (loc <- tasks(index).preferredLocations) {//task最佳位置
       loc match {
         case e: ExecutorCacheTaskLocation =>
+          //如果HashMap中存在键k，则返回键k的值。否则向HashMap中新增映射关系k -> v并返回d
           addTo(pendingTasksForExecutor.getOrElseUpdate(e.executorId, new ArrayBuffer))
         case e: HDFSCacheTaskLocation => {
+          //根据主机获得活动的Executor
           val exe = sched.getExecutorsAliveOnHost(loc.host)
           exe match {
             case Some(set) => {
               for (e <- set) {
+                //如果HashMap中存在键k，则返回键k的值。否则向HashMap中新增映射关系k -> v并返回d
                 addTo(pendingTasksForExecutor.getOrElseUpdate(e, new ArrayBuffer))
               }
               logInfo(s"Pending task $index has a cached location at ${e.host} " +
@@ -235,12 +254,14 @@ private[spark] class TaskSetManager(
   /**
    * Return the pending tasks list for a given executor ID, or an empty list if
    * there is no map entry for that host
+   * 一个给定的executor ID 返回的待执行任务的任务列表
    */
   private def getPendingTasksForExecutor(executorId: String): ArrayBuffer[Int] = {
     pendingTasksForExecutor.getOrElse(executorId, ArrayBuffer())
   }
 
   /**
+   * 一个给定的主机返回的待执行任务的任务列表
    * Return the pending tasks list for a given host, or an empty list if
    * there is no map entry for that host
    */
@@ -285,12 +306,13 @@ private[spark] class TaskSetManager(
 
   /**
    * Is this re-execution of a failed task on an executor it already failed in before
+   * 这是在重新执行一个失败的任务，它已经之前失败过
    * EXECUTOR_TASK_BLACKLIST_TIMEOUT has elapsed ?
    */
   private def executorIsBlacklisted(execId: String, taskId: Int): Boolean = {
-    if (failedExecutors.contains(taskId)) {
+    if (failedExecutors.contains(taskId)) {//是否包含一个失败Task
       val failed = failedExecutors.get(taskId).get
-
+         //包含execId和系统当前时间-存入Map系统时间
       return failed.contains(execId) &&
         clock.getTimeMillis() - failed.get(execId).get < EXECUTOR_TASK_BLACKLIST_TIMEOUT
     }
@@ -299,7 +321,7 @@ private[spark] class TaskSetManager(
   }
 
   /**
-   * Return a speculative task for a given executor if any are available. The task should not have
+   * Return a speculative task for a given executor if any are available(). The task should not have
    * an attempt running on this host, in case the host is slow. In addition, the task should meet
    * the given locality constraint.
    */
@@ -509,10 +531,10 @@ private[spark] class TaskSetManager(
     }
     None
   }
-
+//标记Taskset已完成
   private def maybeFinishTaskSet() {
     if (isZombie && runningTasks == 0) {
-      sched.taskSetFinished(this)
+      sched.taskSetFinished(this)//如果所有Task都已经成功完成,那么从taskSetsByStageIdAndAttempt删除
     }
   }
 
@@ -613,6 +635,7 @@ private[spark] class TaskSetManager(
 
   /**
    * Check whether has enough quota to fetch the result with `size` bytes
+   * 检查是否有足够的配额来获取“大小”字节的结果
    */
   def canFetchMoreResults(size: Long): Boolean = sched.synchronized {
   // 如果结果的大小大于1GB，那么直接丢弃，
@@ -633,6 +656,7 @@ private[spark] class TaskSetManager(
 
   /**
    * Marks the task as successful and notifies the DAGScheduler that a task has ended.
+   * 标记任务全部成功完成
    */
   def handleSuccessfulTask(tid: Long, result: DirectTaskResult[_]): Unit = {
     val info = taskInfos(tid)
@@ -647,6 +671,7 @@ private[spark] class TaskSetManager(
     // here "result.value()" just returns the value and won't block other threads.
     //
     sched.dagScheduler.taskEnded(
+       //Success返回任务成功
       tasks(index), Success, result.value(), result.accumUpdates, info, result.metrics)
     if (!successful(index)) {
       tasksSuccessful += 1
@@ -654,7 +679,7 @@ private[spark] class TaskSetManager(
         info.id, taskSet.id, info.taskId, info.duration, info.host, tasksSuccessful, numTasks))
       // Mark successful and stop if all the tasks have succeeded.
       successful(index) = true
-      if (tasksSuccessful == numTasks) {
+      if (tasksSuccessful == numTasks) {//如果所有任务都成功完成
         isZombie = true
       }
     } else {
@@ -675,8 +700,8 @@ private[spark] class TaskSetManager(
     if (info.failed) {
       return
     }
-    removeRunningTask(tid)
-    info.markFailed()
+    removeRunningTask(tid)//移除给定tid
+    info.markFailed()//标记任务失败
     val index = info.index
     copiesRunning(index) -= 1
     var taskMetrics : TaskMetrics = null
@@ -738,7 +763,8 @@ private[spark] class TaskSetManager(
         logError("Unknown TaskEndReason: " + e)
         None
     }
-    // always add to failed executors
+    //always add to failed executors
+    //添加失败的执行者
     failedExecutors.getOrElseUpdate(index, new HashMap[String, Long]()).
       put(info.executorId, clock.getTimeMillis())
       //调用DAGScheduler级别的容错
@@ -773,8 +799,9 @@ private[spark] class TaskSetManager(
     maybeFinishTaskSet()
   }
 
-  /** If the given task ID is not in the set of running tasks, adds it.
-   *
+  /** 
+   *  If the given task ID is not in the set of running tasks, adds it.
+   *  如果给定的task ID不在运行任务的集合中，则添加它,用于跟踪运行任务的数量,执行调度策略
    * Used to keep track of the number of running tasks, for enforcing scheduling policies.
    */
   def addRunningTask(tid: Long) {
@@ -783,7 +810,10 @@ private[spark] class TaskSetManager(
     }
   }
 
-  /** If the given task ID is in the set of running tasks, removes it. */
+  /** 
+   *  If the given task ID is in the set of running tasks, removes it.
+   *  如果给定的task ID在运行任务的集合中，则删除它
+   *   */
   def removeRunningTask(tid: Long) {
     if (runningTasksSet.remove(tid) && parent != null) {
       parent.decreaseRunningTasks(1)
@@ -804,7 +834,10 @@ private[spark] class TaskSetManager(
     sortedTaskSetQueue
   }
 
-  /** Called by TaskScheduler when an executor is lost so we can re-enqueue our tasks */
+  /** 
+   *  Called by TaskScheduler when an executor is lost so we can re-enqueue our tasks
+   *  调用TaskScheduler重新排列的任务
+   *  */
   override def executorLost(execId: String, host: String) {
     logInfo("Re-queueing tasks for " + execId + " from TaskSet " + taskSet.id)
 
@@ -890,10 +923,10 @@ private[spark] class TaskSetManager(
    //在发布一个本地数据任务时候，放弃并发布到一个非本地数据的地方前，需要等待的时间
     val defaultWait = conf.get("spark.locality.wait", "3s")//本地化级别的默认等待时间3秒
     val localityWaitKey = level match {
-      case TaskLocality.PROCESS_LOCAL => "spark.locality.wait.process"//本地进程的等待时间
-      case TaskLocality.NODE_LOCAL => "spark.locality.wait.node"//本地节点的等待时间
-      case TaskLocality.RACK_LOCAL => "spark.locality.wait.rack"//本地机架的等待时间
-      case _ => null
+      case TaskLocality.PROCESS_LOCAL => "spark.locality.wait.process"//同一个进程的即内存等待时间
+      case TaskLocality.NODE_LOCAL => "spark.locality.wait.node"//同一个节点的等待时间
+      case TaskLocality.RACK_LOCAL => "spark.locality.wait.rack"//同一个机架的等待时间
+      case _ => null//
     }
 
     if (localityWaitKey != null) {
@@ -914,18 +947,33 @@ private[spark] class TaskSetManager(
   private def computeValidLocalityLevels(): Array[TaskLocality.TaskLocality] = {
     import TaskLocality.{PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY}
     val levels = new ArrayBuffer[TaskLocality.TaskLocality]
+    //locality levels是否包含 PROCESS_LOCAL
+    /**
+     * taskSetManager的所有tasks对应的所有 executor，是否有任一 active，若有则返回 true；否则返回 false
+     * 也就知道了如何去判断一个 taskSetManager对象的 locality levels是否包含 PROCESS_LOCAL
+     */
     if (!pendingTasksForExecutor.isEmpty && getLocalityWait(PROCESS_LOCAL) != 0 &&
+        //pendingTasksForExecutor存储 key 为executoroId，value 为task index 数组
+        //isExecutorAlive判断参数中的 executor id 当前是否 active        
         pendingTasksForExecutor.keySet.exists(sched.isExecutorAlive(_))) {
       levels += PROCESS_LOCAL
     }
-    if (!pendingTasksForHost.isEmpty && getLocalityWait(NODE_LOCAL) != 0 &&
+    if (!pendingTasksForHost.isEmpty && getLocalityWait(NODE_LOCAL) != 0 &&       
+       //taskSetManager的所有 tasks对应的所有 hosts,是否有任一是 tasks的优先位置 hosts,若有返回 true,否则返回 fals
         pendingTasksForHost.keySet.exists(sched.hasExecutorsAliveOnHost(_))) {
       levels += NODE_LOCAL
     }
+    //如果一个 RDD的某些 partitions没有优先位置,那么这个RDD action产生的taskSetManagers的locality levels就包含 NO_PREF
     if (!pendingTasksWithNoPrefs.isEmpty) {
       levels += NO_PREF
     }
     if (!pendingTasksForRack.isEmpty && getLocalityWait(RACK_LOCAL) != 0 &&
+        //pendingTasksForRack保存key为 rack，value 为优先位置所在的 host 属于该机架的 tasks
+        /**
+         * 判断 taskSetManager的locality levels是否包含RACK_LOCAL的规则为：
+         * taskSetManager的所有tasks的优先位置 host所在的所有racks与当前 active executors所在的机架是否有交集，
+         * 若有则返回 true，否则返回 false
+         */
         pendingTasksForRack.keySet.exists(sched.hasHostAliveOnRack(_))) {
       levels += RACK_LOCAL
     }

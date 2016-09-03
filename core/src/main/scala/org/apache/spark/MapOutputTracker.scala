@@ -85,7 +85,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
 
   /**
    * This HashMap has different behavior for the driver and the executors.
-   *
+   * driver端Executor 定义不同状态
    * On the driver, it serves(服务) as the source of map outputs recorded(记录) from ShuffleMapTasks.
    * On the executors, it simply serves as a cache, in which a miss triggers a fetch from the
    * driver's corresponding HashMap.
@@ -96,9 +96,9 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
   protected val mapStatuses: Map[Int, Array[MapStatus]]
 
   /**
-   * Incremented every time a fetch fails so that client nodes know to clear
+   * Incremented every time a fetch fails(每次获取失败未增加) so that client nodes know to clear
    * their cache of map output locations if this happens.
-   * 
+   * 如果发生每次获取失败未增加,使客户端节点知道要清除他们的Map 输出位置的缓存
    */
   protected var epoch: Long = 0
   protected val epochLock = new AnyRef//对象引用
@@ -228,6 +228,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
 
   /**
    * Called from executors to update the epoch number, potentially clearing old outputs
+   * 调用executors更新epoch数,可能获取失败清除旧outputs,每个执行任务调用在驱动程序创建时生成最新epoch
    * because of a fetch failure. Each executor task calls this with the latest epoch
    * number on the driver at the time it was created.
    */
@@ -322,7 +323,10 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
     cachedSerializedStatuses.remove(shuffleId)
   }
 
-  /** Check if the given shuffle is being tracked */
+  /**
+   *  Check if the given shuffle is being tracked 
+	 *  检查给定的shuffleId是否正在被跟踪
+   *  */
   def containsShuffle(shuffleId: Int): Boolean = {
     cachedSerializedStatuses.contains(shuffleId) || mapStatuses.contains(shuffleId)
   }
@@ -330,7 +334,7 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
   /**
    * Return a list of locations that each have fraction of map output greater than the specified
    * threshold.
-   *
+   * 返回一个位置列表，每个位置都有大于指定阈值的Map输出。
    * @param shuffleId id of the shuffle
    * @param reducerId id of the reduce task
    * @param numReducers total number of reducers in the shuffle

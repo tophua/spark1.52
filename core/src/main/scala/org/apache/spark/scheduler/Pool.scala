@@ -27,6 +27,7 @@ import org.apache.spark.scheduler.SchedulingMode.SchedulingMode
 
 /**
  * An Schedulable entity that represent collection of Pools or TaskSetManagers
+ * 代表一个可调度的实体集合池或tasksetmanagers
  */
 
 private[spark] class Pool(
@@ -41,8 +42,8 @@ private[spark] class Pool(
   val schedulableNameToSchedulable = new ConcurrentHashMap[String, Schedulable]
   var weight = initWeight
   var minShare = initMinShare
-  var runningTasks = 0
-  var priority = 0
+  var runningTasks = 0//运行Task数
+  var priority = 0//优先级
 
   // A pool's stage id is used to break the tie in scheduling.
   var stageId = -1
@@ -82,11 +83,11 @@ private[spark] class Pool(
     }
     null
   }
-
+//丢失executor
   override def executorLost(executorId: String, host: String) {
     schedulableQueue.foreach(_.executorLost(executorId, host))
   }
-
+//推测
   override def checkSpeculatableTasks(): Boolean = {
     var shouldRevive = false
     for (schedulable <- schedulableQueue) {
@@ -104,14 +105,14 @@ private[spark] class Pool(
     }
     sortedTaskSetQueue
   }
-
+//增加运行Task
   def increaseRunningTasks(taskNum: Int) {
     runningTasks += taskNum
     if (parent != null) {
       parent.increaseRunningTasks(taskNum)
     }
   }
-
+  //减少运行Task
   def decreaseRunningTasks(taskNum: Int) {
     runningTasks -= taskNum
     if (parent != null) {
