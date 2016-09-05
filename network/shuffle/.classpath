@@ -4,21 +4,21 @@
   <classpathentry kind="src" path="src\test\scala" output="target\scala-2.10\test-classes"/>
   <classpathentry kind="src" path="src\test\java" output="target\scala-2.10\test-classes"/>
   <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\netty-all-4.0.29.Final.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\bundles\guava-14.0.1.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\unused-1.0.0.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\slf4j-api-1.7.10.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\junit-4.10.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\hamcrest-core-1.1.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\junit-interface-0.10.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\junit-dep-4.10.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\test-interface-0.5.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\bundles\log4j-1.2.17.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\mockito-core-1.9.5.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\objenesis-1.0.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\jars\slf4j-log4j12-1.7.10.jar"/>
-  <classpathentry kind="lib" path="..\..\lib_managed\bundles\scalatest_2.10-2.2.1.jar"/>
-  <classpathentry kind="lib" path="C:\Users\liushuhua\.sbt\boot\scala-2.10.4\lib\scala-reflect.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\netty-all-4.0.29.Final.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\bundles\guava-14.0.1.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\unused-1.0.0.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\slf4j-api-1.7.10.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\junit-4.10.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\hamcrest-core-1.1.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\junit-interface-0.10.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\junit-dep-4.10.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\test-interface-0.5.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\bundles\log4j-1.2.17.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\mockito-core-1.9.5.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\objenesis-1.0.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\jars\slf4j-log4j12-1.7.10.jar"/>
+  <classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed\bundles\scalatest_2.10-2.2.1.jar"/>
+ <classpathentry kind="lib" path="D:/scala/scala-2.10.4/lib/scala-reflect.jar"/>
   <classpathentry kind="src" path="/spark-network-common" exported="true" combineaccessrules="false"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
   <classpathentry kind="output" path="bin"/>
