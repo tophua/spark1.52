@@ -38,9 +38,9 @@ private[deploy] object DeployMessages {
       id: String,
       host: String,
       port: Int,
-      worker: RpcEndpointRef,
-      cores: Int,
-      memory: Int,
+      worker: RpcEndpointRef,//RPC
+      cores: Int,//内核数
+      memory: Int,//内存数
       webUiPort: Int,
       publicAddress: String)
     extends DeployMessage {
@@ -77,13 +77,13 @@ private[deploy] object DeployMessages {
 
   case class KillExecutor(masterUrl: String, appId: String, execId: Int) extends DeployMessage
 
-  case class LaunchExecutor(
-      masterUrl: String,
+  case class LaunchExecutor(//启动Executor
+      masterUrl: String,//
       appId: String,
       execId: Int,
       appDesc: ApplicationDescription,
-      cores: Int,
-      memory: Int)
+      cores: Int,//内核
+      memory: Int)//内存
     extends DeployMessage
 
   case class LaunchDriver(driverId: String, driverDesc: DriverDescription) extends DeployMessage

@@ -1141,7 +1141,7 @@ class DAGScheduler(
                   // If the whole job has finished, remove it
                   //2)如果ActiveJob的所有任务都完成,则标记当前Stage完成并SparkListenerJobEnd发送事件
                   if (job.numFinished == job.numPartitions) {
-                    markStageAsFinished(resultStage)
+                    markStageAsFinished(resultStage)//标记stage完成
                     cleanupStateForJobAndIndependentStages(job)
                     listenerBus.post(
                       SparkListenerJobEnd(job.jobId, clock.getTimeMillis(), JobSucceeded))
@@ -1321,15 +1321,16 @@ class DAGScheduler(
   }
 
   /**
-   * Responds to an executor being lost. This is called inside the event loop, so it assumes it can
-   * modify the scheduler's internal state. Use executorLost() to post a loss event from outside.
-   *
+   * Responds to an executor being lost(响应Executor丢失). This is called inside the event loop(这是在事件循环中调用), so it assumes it can
+   * modify the scheduler's internal state(修改调度程序的内部状态). Use executorLost() to post a loss event from outside.
+   * 
    * We will also assume that we've lost all shuffle blocks associated with the executor if the
    * executor serves its own blocks (i.e., we're not using external shuffle) OR a FetchFailed
    * occurred, in which case we presume all shuffle data related to this executor to be lost.
-   *
+   *  假定所有shuff 数据相关的exeucto丢失
    * Optionally the epoch during which the failure was caught can be passed to avoid allowing
    * stray fetch failures from possibly retriggering the detection of a node as lost.
+   * 
    */
   private[scheduler] def handleExecutorLost(
       execId: String,

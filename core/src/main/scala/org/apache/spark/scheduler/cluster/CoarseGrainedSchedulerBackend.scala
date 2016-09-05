@@ -97,6 +97,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
     override def onStart() {
       // Periodically revive offers to allow delay scheduling to work
+      //周期性恢复提供允许延迟调度工作
       //复活重新获取资源的Task的最长时间间隔（毫秒），
       //发生在Task因为本地资源不足而将资源分配给其他Task运行后进入等待时间，如果这个等待时间内重新获取足够的资源就继续计算
       val reviveIntervalMs = conf.getTimeAsMs("spark.scheduler.revive.interval", "1s")
@@ -126,7 +127,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
           }
         }
 /**
- * CoarseGrainedSchedulerBackend的reviveOffers方法向DriverEndpoint发送ReviveOffers消息
+ * CoarseGrainedSchedulerBackend的start方法调用发送ReviveOffers消息,向DriverEndpoint发送ReviveOffers消息
  * DriverEndpoint接收到ReviveOffers消息后调用makeOffers
  */
       case ReviveOffers =>

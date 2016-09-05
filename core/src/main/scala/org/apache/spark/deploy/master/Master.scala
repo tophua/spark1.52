@@ -81,7 +81,7 @@ private[deploy] class Master(
   private val idToWorker = new HashMap[String, WorkerInfo]
   //注册Worker的addess与WorkerInfo的映射关系
   private val addressToWorker = new HashMap[RpcAddress, WorkerInfo]
-
+//HashMap用保存RpcEndpointRef -> ApplicationInfo 
   private val endpointToApp = new HashMap[RpcEndpointRef, ApplicationInfo]
   private val addressToApp = new HashMap[RpcAddress, ApplicationInfo]
   private val completedApps = new ArrayBuffer[ApplicationInfo]
@@ -89,8 +89,10 @@ private[deploy] class Master(
   private val appIdToUI = new HashMap[String, SparkUI]
   //保存DriverInfo
   private val drivers = new HashSet[DriverInfo]
+  //完成Driver
   private val completedDrivers = new ArrayBuffer[DriverInfo]
   // Drivers currently spooled for scheduling
+  //等待被高度的Application
   private val waitingDrivers = new ArrayBuffer[DriverInfo]
   private var nextDriverNumber = 0
 
@@ -112,7 +114,7 @@ private[deploy] class Master(
 
   private val masterUrl = address.toSparkURL
   private var masterWebUiUrl: String = _
-
+ //
   private var state = RecoveryState.STANDBY
 
   private var persistenceEngine: PersistenceEngine = _
@@ -304,13 +306,13 @@ private[deploy] class Master(
         }
       }
     }
-/**
- * Master接收到RegisterApplication消息后,处理步骤
- * 1)创建ApplicationInfo
- * 2)注册ApplicationInfo
- * 3)向ClientEndpoint发送RegisteredAppliction消息
- * 4)调用schedule()执行调度
- */
+  /**
+   * Master接收到RegisterApplication消息后,处理步骤
+   * 1)创建ApplicationInfo
+   * 2)注册ApplicationInfo
+   * 3)向ClientEndpoint发送RegisteredAppliction消息
+   * 4)调用schedule()执行调度
+   */
     case RegisterApplication(description, driver) => {
       // TODO Prevent repeated registrations from some driver
       if (state == RecoveryState.STANDBY) {
@@ -332,13 +334,13 @@ private[deploy] class Master(
       }
     }
     //Mater收到Worker上报来的消息,会将失联的executor通知给Application Driver
-/**
- * launchExecutor分配资源,启动Executor功能如下
- * 1)将ExecutorDesc添加到WorkerInfo的executors缓存中,并更新Worker已经使用的CPU核数和内存大小
- * 2)向Worker发送LaunchExecutor消息,运行Executor
- * 3)向AppClient发送ExecutorAdded消息,AppClient收到后,向Master发送ExecutorStateChanged消息
- * 4)Master收到ExecutorStateChanged消息后将DriverEndpoint发送ExecutorUpdated消息,用于更新Driver上有关Executor
- */
+  /**
+   * launchExecutor分配资源,启动Executor功能如下
+   * 1)将ExecutorDesc添加到WorkerInfo的executors缓存中,并更新Worker已经使用的CPU核数和内存大小
+   * 2)向Worker发送LaunchExecutor消息,运行Executor
+   * 3)向AppClient发送ExecutorAdded消息,AppClient收到后,向Master发送ExecutorStateChanged消息
+   * 4)Master收到ExecutorStateChanged消息后将DriverEndpoint发送ExecutorUpdated消息,用于更新Driver上有关Executor
+   */
     case ExecutorStateChanged(appId, execId, state, message, exitStatus) => {
       /**
        * 处理步骤如下:
@@ -805,7 +807,7 @@ private[deploy] class Master(
       val assignedCores = scheduleExecutorsOnWorkers(app, usableWorkers, spreadOutApps)
 
       // Now that we've decided how many cores to allocate on each worker, let's allocate them
-   //计算资源物理分配,即计算资源物理分配是指给Application物理分配Worker的内存以及核数
+      //计算资源物理分配,即计算资源物理分配是指给Application物理分配Worker的内存以及核数
       for (pos <- 0 until usableWorkers.length if assignedCores(pos) > 0) {     
         //然后就是分配了，准备好具体要为当前应用程序分配的Executor信息后，
         //具体Master要通过远程通信发指令给Worker来具体启动ExecutorBackEnd进程
@@ -941,10 +943,11 @@ private[deploy] class Master(
     //从addressToWorker的缓存中移除WorkerInfo
     addressToWorker -= worker.endpoint.address
     //最后向此WorkerInfo的所有Executor所有服务的Drver application发送ExecutorUpdated消息
-    //更新Executor的状态为Lost
+    //更新Executor的状态为Lost(丢失)
     for (exec <- worker.executors.values) {
       logInfo("Telling app of lost executor: " + exec.id)
       exec.application.driver.send(ExecutorUpdated(
+      //ExecutorState.LOST标记丢失,即Worker异常退出
         exec.id, ExecutorState.LOST, Some("worker lost"), None))
       exec.application.removeExecutor(exec)
     }
@@ -995,10 +998,13 @@ private[deploy] class Master(
     applicationMetricsSystem.registerSource(app.appSource)
     //保存到master维护的成员变量中
     apps += app
+    //一个HashMap Appid-》 ApplicationInfo
     idToApp(app.id) = app
+    //HashMap用保存RpcEndpointRef,driver引用 -> ApplicationInfo 
     endpointToApp(app.driver) = app
     //把appAddress添加到addressToApp[HashMap]中
     addressToApp(appAddress) = app
+    //等待被调度的Application
     waitingApps += app
   }
 

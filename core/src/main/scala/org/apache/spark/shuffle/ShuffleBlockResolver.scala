@@ -23,10 +23,12 @@ import org.apache.spark.storage.ShuffleBlockId
 
 private[spark]
 /**
+ * 如何从本地指定的block id的数据块中恢复Shuffle数据,Shuffle数据的封装格式为文件或者file segments 
  * Implementers of this trait understand how to retrieve block data for a logical shuffle block
  * identifier (i.e. map, reduce, and shuffle). Implementations may use files or file segments to
  * encapsulate shuffle data. This is used by the BlockStore to abstract over different shuffle
  * implementations when shuffle data is retrieved.
+ * Resolver(解析器)
  */
 trait ShuffleBlockResolver {
   type ShuffleId = Int
@@ -34,6 +36,7 @@ trait ShuffleBlockResolver {
   /**
    * Retrieve the data for the specified block. If the data for that block is not available,
    * throws an unspecified exception.
+   * 需要通过先读取Index索引文件获得每个partition的起始位置后，才能读取真正的数据文件
    */
   def getBlockData(blockId: ShuffleBlockId): ManagedBuffer
 

@@ -69,6 +69,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   private[spark] var scheduler: TaskScheduler = null
 
   // executor ID -> timestamp of when the last heartbeat from this executor was received
+  //Key值executor ID,value值最后一次心跳被接收时间
   private val executorLastSeen = new mutable.HashMap[String, Long]
 
   // "spark.network.timeout" uses "seconds", while `spark.storage.blockManagerSlaveTimeoutMs` uses
@@ -207,7 +208,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   private def expireDeadHosts(): Unit = {
     logTrace("Checking for hosts with no recent heartbeats in HeartbeatReceiver.")
     val now = clock.getTimeMillis()
-    for ((executorId, lastSeenMs) <- executorLastSeen) {
+    for ((executorId, lastSeenMs) <- executorLastSeen) {//executorLastSeen最后一次接收到信息
       if (now - lastSeenMs > executorTimeoutMs) {
         //当前时间减去executor发送最新心跳时间大于超时时间,判断executor是不可用状态
         logWarning(s"Removing executor $executorId with no recent heartbeats: " +

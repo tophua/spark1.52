@@ -51,7 +51,7 @@ private[deploy] class Worker(
   //worker节点当前可用的memory大小
   memory: Int,
   //Master地址
-  masterRpcAddresses: Array[RpcAddress],
+  masterRpcAddresses: Array[RpcAddress],//Master RPC地址
   systemName: String,
   endpointName: String,
   workDirPath: String = null,
@@ -246,7 +246,9 @@ private[deploy] class Worker(
 
   /**
    * Re-register with the master because a network failure or a master failure has occurred.
+   * 因为网络故障或者Master故障已发生需Worker重新注册Master
    * If the re-registration attempt threshold is exceeded, the worker exits with error.
+   * 如果重新注册超过重试次数,worker异常退出
    * Note that for thread-safety this should only be called from the rpcEndpoint.
    */
   private def reregisterWithMaster(): Unit = {
@@ -261,22 +263,23 @@ private[deploy] class Worker(
         //而后10次的重试间隔在30-90秒
         logInfo(s"Retrying connection to master (attempt # $connectionAttemptCount)")
         /**
-         * Re-register with the active master this worker has been communicating with. If there
-         * is none, then it means this worker is still bootstrapping and hasn't established a
-         * connection with a master yet, in which case we should re-register with all masters.
+         * Re-register with the active master this worker has been communicating with(重新注册活动Master与Worker一直在通信). If there
+         * is none(如果没有), then it means this worker is still bootstrapping and hasn't established a
+         * connection with a master yet(这意味着Worker自启动没有建立Master连接), in which case we should re-register with all masters.
+         * (在这种情况下,应该重新注册Master)
          *
-         * It is important to re-register only with the active master during failures. Otherwise,
-         * if the worker unconditionally attempts to re-register with all masters, the following
+         * It is important to re-register only with the active master during failures(重新注册活动的Master只有在Master故障期间). Otherwise,
+         * if the worker unconditionally(无条件) attempts to re-register with all masters, the following
          * race condition may arise and cause a "duplicate worker" error detailed in SPARK-4592:
          *
          *   (1) Master A fails and Worker attempts to reconnect to all masters
-         *   (2) Master B takes over and notifies Worker
-         *   (3) Worker responds by registering with Master B
-         *   (4) Meanwhile, Worker's previous reconnection attempt reaches Master B,
-         *       causing the same Worker to register with Master B twice
+         *   (2) Master B takes over(接管) and notifies Worker
+         *   (3) Worker responds(响应) by registering with Master B
+         *   (4) Meanwhile(同时), Worker's previous reconnection attempt reaches Master B,
+         *       causing the same Worker to register with Master B twice(导致Worker注册两次Master B)
          *
-         * Instead, if we only register with the known active master, we can assume that the
-         * old master must have died because another master has taken over. Note that this is
+         * Instead(相反), if we only register with the known active master(如果注册一个未知活动Master), we can assume that the
+         * old master must have died because another master has taken over(旧的Master必须已经死状态,因为别一个Master接管). Note that this is
          * still not safe if the old master recovers within this interval, but this is a much
          * less likely scenario.
          */
@@ -308,10 +311,13 @@ private[deploy] class Worker(
               registerMasterFutures.foreach(_.cancel(true))
             }
             // We are retrying the initial registration
+            //我们正在尝试的初始注册
             registerMasterFutures = tryRegisterAllMasters()
         }
-        // We have exceeded the initial registration retry threshold
+        // We have exceeded the initial registration retry threshold,
+        //我们已经超过了初始注册重试阈值
         // All retries from now on should use a higher interval
+        //所有重试从现在开始应该使用较高的间隔
         //前6次的重试间隔在5-15秒,
         if (connectionAttemptCount == INITIAL_REGISTRATION_RETRIES) {
           registrationRetryTimer.foreach(_.cancel(true))
@@ -333,6 +339,7 @@ private[deploy] class Worker(
 
   /**
    * Cancel last registeration retry, or do nothing if no retry
+   * 
    */
   private def cancelLastRegistrationRetry(): Unit = {
     if (registerMasterFutures != null) {
@@ -641,6 +648,7 @@ private[deploy] class Worker(
   /**
    * Send a message to the current master. If we have not yet registered successfully with any
    * master, the message will be dropped.
+   * 发送一个消息到当前Master,如果我们还没有成功注册任何的Master，该消息将被删除。
    */
   private def sendToMaster(message: Any): Unit = {
     master match {

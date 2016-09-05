@@ -84,7 +84,7 @@ private[spark] class ShuffleMapTask(
     var writer: ShuffleWriter[Any, Any] = null
     try {
       val manager = SparkEnv.get.shuffleManager //获得Shuffle Manager      
-      //根据partition指定分区的Shufflea获取Shuffle Writer
+      //根据partition指定分区的Shufflea获取Shuffle Writer,shuffleHandle是shuffle ID
       writer = manager.getWriter[Any, Any](dep.shuffleHandle, partitionId, context)
       //首先调用rdd .iterator，如果该RDD已经cache了或者checkpoint了，那么直接读取结果，
       //否则开始计算计算的结果将调用Shuffle Writer写入本地文件系统

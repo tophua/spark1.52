@@ -19,6 +19,6 @@ package org.apache.spark.deploy.master
 
 private[deploy] object RecoveryState extends Enumeration {
   type MasterState = Value
-
+//恢复状态:STANDBY 准备,ALIVE 活着,RECOVERING 恢复,COMPLETING_RECOVERY 完成恢复
   val STANDBY, ALIVE, RECOVERING, COMPLETING_RECOVERY = Value
 }

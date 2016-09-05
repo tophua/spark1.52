@@ -72,7 +72,7 @@ private[spark] class AppClient(
   private val REGISTRATION_RETRIES = 3
   //注册是否成功
   @volatile private var registered = false
-  private var endpoint: RpcEndpointRef = null
+  private var endpoint: RpcEndpointRef = null 
   private var appId: String = null
   /**
    * RpcEnv)是一个RpcEndpoints用于处理消息的环境onStart方法,所以ClientActor在正试启动前触发其onStart方法
@@ -83,7 +83,7 @@ private[spark] class AppClient(
 
     private var master: Option[RpcEndpointRef] = None
     // To avoid calling listener.disconnected() multiple times
-    private var alreadyDisconnected = false
+    private var alreadyDisconnected = false //已经断开连接
     @volatile private var alreadyDead = false // To avoid calling listener.dead() multiple times
     @volatile private var registerMasterFutures: Array[JFuture[_]] = null
     @volatile private var registrationRetryTimer: JScheduledFuture[_] = null
@@ -97,6 +97,7 @@ private[spark] class AppClient(
       )
 
     // A scheduled executor for scheduling the registration actions
+    //一个计划的执行用于调度注册动作
     private val registrationRetryThread =
       ThreadUtils.newDaemonSingleThreadScheduledExecutor("appclient-registration-retry-thread")
 
@@ -169,6 +170,7 @@ private[spark] class AppClient(
     /**
      * Send a message to the current master. If we have not yet registered successfully with any
      * master, the message will be dropped.
+     * 发送一个消息到当前Master,如果不注册成功Master,则把消息删除.
      */
     private def sendToMaster(message: Any): Unit = {
       master match {
@@ -277,6 +279,7 @@ private[spark] class AppClient(
 
     /**
      * Notify the listener that we disconnected, if we hadn't already done so before.
+     * 通知监听器断开连接,如果未断开连接.
      */
     def markDisconnected() {
       if (!alreadyDisconnected) {
@@ -328,6 +331,7 @@ private[spark] class AppClient(
 
   /**
    * Request executors from the Master by specifying the total number desired,
+   * 请求executors从Master通过指定期望的总数,
    * including existing pending and running executors.
    *
    * @return whether the request is acknowledged.

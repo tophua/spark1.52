@@ -117,9 +117,9 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
 
       val openStartTime = System.nanoTime
       val serializerInstance = serializer.newInstance()
-      //如果consolidateShuffleFiles开关没有打开,那么在一个Task中,有多少个输出的Partition就会有多少个中间文件
+      //如果consolidateShuffleFiles为true,那么在一个Task中,有多少个输出的Partition就会有多少个中间文件,默认为false
       val writers: Array[DiskBlockObjectWriter] = if (consolidateShuffleFiles) {
-        fileGroup = getUnusedFileGroup()
+        fileGroup = getUnusedFileGroup()//获取没有使用的FileGroup
         Array.tabulate[DiskBlockObjectWriter](numBuckets) { bucketId =>
           val blockId = ShuffleBlockId(shuffleId, mapId, bucketId)
           blockManager.getDiskWriter(blockId, fileGroup(bucketId), serializerInstance, bufferSize,
@@ -128,7 +128,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
       } else {
         Array.tabulate[DiskBlockObjectWriter](numBuckets) { bucketId =>
           val blockId = ShuffleBlockId(shuffleId, mapId, bucketId)
-          //
+          //如果blockFile已经存在,那么删除它并打印日志
           val blockFile = blockManager.diskBlockManager.getFile(blockId)           
           val tmp = Utils.tempFileWith(blockFile)    
           //tmp也就是blockFile如果已经存在则，在后面追加数据
@@ -173,7 +173,9 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
       }
     }
   }
-
+/**
+ * 核心的读取逻辑
+ */
   override def getBlockData(blockId: ShuffleBlockId): ManagedBuffer = {
     if (consolidateShuffleFiles) {
       // Search all file groups associated with this shuffle.
@@ -242,6 +244,8 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
 
 private[spark] object FileShuffleBlockResolver {
   /**
+   * 一组shuffle文件,这个文件组的每个文件都对应一个partition或者下游的task
+   * 因此一个Shuffle Map Task来说对应一个文件
    * A group of shuffle files, one per reducer.
    * A particular mapper will be assigned a single ShuffleFileGroup to write its output to.
    */

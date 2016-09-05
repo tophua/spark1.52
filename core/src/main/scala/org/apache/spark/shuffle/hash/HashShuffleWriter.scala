@@ -59,7 +59,7 @@ private[spark] class HashShuffleWriter[K, V](
      * 2)利用Partition函数来决定<k,val>写入哪一个文件中.
      */
   override def write(records: Iterator[Product2[K, V]]): Unit = {
-    //判断aggregator是否被定义
+    //判断aggregator是否被定义,需要做Map端聚合操作
     val iter = if (dep.aggregator.isDefined) {
       if (dep.mapSideCombine) {//判断是否需要聚合,如果需要，聚合records执行map端的聚合
         //汇聚工作,reducebyKey是一分为二的,一部在ShuffleMapTask中进行聚合
@@ -75,10 +75,8 @@ private[spark] class HashShuffleWriter[K, V](
      //利用getPartition函数来决定<k,val>写入哪一个文件中.
     for (elem <- iter) {
      //elem是类似于<k,val>的键值对,以K为参数用partitioner计算其对应的值,
-     //从而选取相应的writer来写入整个elem
-     //那么这里的partitioner是什么呢?默认HashPartitioner
-      val bucketId = dep.partitioner.getPartition(elem._1)
-      //
+      val bucketId = dep.partitioner.getPartition(elem._1)//获得该element需要写入的partitioner
+      //实际调用FileShuffleBlockManager.forMapTask进入数据写入
       shuffle.writers(bucketId).write(elem._1, elem._2)
     }
   }

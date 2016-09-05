@@ -530,7 +530,9 @@ private[spark] class TaskSchedulerImpl(
       backend.reviveOffers()
     }
   }
-
+/**
+ * Executor执行丢失,可能Worker异常退出
+ */
   override def executorLost(executorId: String, reason: ExecutorLossReason): Unit = {
     var failedExecutor: Option[String] = None
 
@@ -551,7 +553,7 @@ private[spark] class TaskSchedulerImpl(
     // Call dagScheduler.executorLost without holding the lock on this to prevent deadlock
     if (failedExecutor.isDefined) {
       dagScheduler.executorLost(failedExecutor.get)
-      backend.reviveOffers()
+      backend.reviveOffers()//重新资源分配
     }
   }
 

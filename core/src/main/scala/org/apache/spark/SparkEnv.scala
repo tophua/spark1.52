@@ -74,7 +74,7 @@ class SparkEnv(
      * Shuffle管理者,其中Driver端会注册Shuffle的信息,而Executor会上报和获取Shuffle信息
      * 现阶段内部支持Hash base Shuffle和 Sort Based Shuffle
      */
-    val shuffleManager: ShuffleManager,//Shuffle管理者 
+    val shuffleManager: ShuffleManager,//Shuffle元数据管理,例如:shuffleId,MapTask的数量
     val broadcastManager: BroadcastManager, //广播变量管理者
     val blockTransferService: BlockTransferService, //Executor读取Shuffle数据的Client
     val blockManager: BlockManager, //块管理,提供Storage模块与其他模块的交互接口,管理Storage模块

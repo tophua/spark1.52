@@ -29,7 +29,7 @@ import org.apache.spark.scheduler.MapStatus
 private[spark] abstract class ShuffleWriter[K, V] {
   /** 
    *  Write a sequence of records to this task's output 
-   *  写入所有的数据
+   *  写入所有的数据。需要注意的是如果需要在Map端做聚合。（aggregate），那么写入前需要将records做聚合。  
    *  */
   @throws[IOException]
   def write(records: Iterator[Product2[K, V]]): Unit

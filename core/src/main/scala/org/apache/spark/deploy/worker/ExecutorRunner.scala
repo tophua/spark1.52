@@ -33,8 +33,9 @@ import org.apache.spark.util.logging.FileAppender
 
 /**
  * Worker进程中ExcetorRuner具体负责executor的启动和停止,每一个executor进程对应于一个ExecutorRunner
- * ExecutorRunner担任监工角色
+ * ExecutorRunner担任监工角色,
  * 
+ * 管理一个执行的executor进程,这个目录只使用standalone 模式
  * Manages the execution of one executor process.
  * This is currently only used in standalone mode.
  */
@@ -44,7 +45,7 @@ private[deploy] class ExecutorRunner(
     val appDesc: ApplicationDescription,
     val cores: Int,
     val memory: Int,
-    val worker: RpcEndpointRef,
+    val worker: RpcEndpointRef,//Worker Actor的引用
     val workerId: String,
     val host: String,
     val webUiPort: Int,
@@ -126,6 +127,7 @@ private[deploy] class ExecutorRunner(
   }
 
   /** Replace variables such as {{EXECUTOR_ID}} and {{CORES}} in a command argument passed to us */
+  //通过Commmand启动时,需要将这些参数替换成真实分配的值
   private[worker] def substituteVariables(argument: String): String = argument match {
     case "{{WORKER_URL}}" => workerUrl
     case "{{EXECUTOR_ID}}" => execId.toString
@@ -181,6 +183,8 @@ private[deploy] class ExecutorRunner(
       val exitCode = process.waitFor()
       state = ExecutorState.EXITED
       val message = "Command exited with code " + exitCode
+      //向Worker发送ExecutorStateChanged消息,Worker会将这个消息转发到Master,由于Executor是异常退出,
+      //Master将会为该Apllcation分配新的Executor
       worker.send(ExecutorStateChanged(appId, execId, state, Some(message), Some(exitCode)))
     } catch {
       case interrupted: InterruptedException => {
