@@ -17,7 +17,7 @@
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/objenesis-1.0.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/slf4j-log4j12-1.7.10.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/bundles/scalatest_2.10-2.2.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/liushuhua/.sbt/boot/scala-2.10.4/lib/scala-reflect.jar"/>
+	<classpathentry kind="lib" path="D:/scala/scala-2.10.4/lib/scala-reflect.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
