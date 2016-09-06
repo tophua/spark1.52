@@ -38,15 +38,16 @@ private[spark] trait SchedulerBackend {
 
   /**
    * Get an application ID associated with the job.
-   *
+   * 获取与作业关联的应用程序标识
    * @return An application ID
    */
   def applicationId(): String = appId
 
   /**
+   * 获取此运行的尝试标识，如果群集管理器支持多个尝试
    * Get the attempt ID for this run, if the cluster manager supports multiple
    * attempts. Applications run in client mode will not have attempt IDs.
-   *
+   *如果可用的应用程序尝试Id
    * @return The application attempt id, if available.
    */
   def applicationAttemptId(): Option[String] = None
@@ -54,6 +55,7 @@ private[spark] trait SchedulerBackend {
   /**
    * Get the URLs for the driver logs. These URLs are used to display the links in the UI
    * Executors tab for the driver.
+   * 获取驱动程序日志的网址,这些URL是用来显示链接在UI执行标签驱动程序
    * @return Map containing the log names and their respective URLs
    */
   def getDriverLogUrls: Option[Map[String, String]] = None

@@ -168,19 +168,34 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
    */
   def numRddBlocksById(rddId: Int): Int = _rddBlocks.get(rddId).map(_.size).getOrElse(0)
 
-  /** Return the memory remaining in this block manager. */
+  /** 
+   *  Return the memory remaining in this block manager.
+   *  返回块管理器剩余内存 
+   *  */
   def memRemaining: Long = maxMem - memUsed
 
-  /** Return the memory used by this block manager. */
+  /** 
+   *  Return the memory used by this block manager.
+   *  返回已使用内存 
+   *  */
   def memUsed: Long = _nonRddStorageInfo._1 + _rddBlocks.keys.toSeq.map(memUsedByRdd).sum
 
-  /** Return the disk space used by this block manager. */
+  /** 
+   *  Return the disk space used by this block manager. 
+   *  返回硬盘空间使用大小
+   *  */
   def diskUsed: Long = _nonRddStorageInfo._2 + _rddBlocks.keys.toSeq.map(diskUsedByRdd).sum
 
-  /** Return the off-heap space used by this block manager. */
+  /** 
+   *  Return the off-heap space used by this block manager. 
+   *  返回此块管理器使用的堆内存空间
+   *  */
   def offHeapUsed: Long = _nonRddStorageInfo._3 + _rddBlocks.keys.toSeq.map(offHeapUsedByRdd).sum
 
-  /** Return the memory used by the given RDD in this block manager in O(1) time. */
+  /**
+   *  Return the memory used by the given RDD in this block manager in O(1) time.
+   *  返回给定的RDD块管理使用的内存
+   *   */
   def memUsedByRdd(rddId: Int): Long = _rddStorageInfo.get(rddId).map(_._1).getOrElse(0L)
 
   /** Return the disk space used by the given RDD in this block manager in O(1) time. */

@@ -95,6 +95,7 @@ class InputFormatInfo(val configuration: Configuration, val inputFormatClazz: Cl
 
 
   // This method does not expect failures, since validate has already passed ...
+  //此方法不期望失败，因为验证已经通过
   private def prefLocsFromMapreduceInputFormat(): Set[SplitInfo] = {
     val conf = new JobConf(configuration)
     SparkHadoopUtil.get.addCredentials(conf)

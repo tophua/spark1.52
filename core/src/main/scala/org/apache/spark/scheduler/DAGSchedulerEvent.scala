@@ -32,6 +32,8 @@ import org.apache.spark.util.CallSite
  * architecture where any thread can post an event (e.g. a task finishing or a new job being
  * submitted) but there is a single "logic" thread that reads these events and takes decisions.
  * This greatly simplifies synchronization.
+ * 这可以通过DAGScheduler处理事件的类型,dagscheduler使用事件队列架构在多线程发布一个事件,
+ * 有一个单一的“逻辑”线程读取这些事件,这大大简化了同步
  */
 private[scheduler] sealed trait DAGSchedulerEvent
 

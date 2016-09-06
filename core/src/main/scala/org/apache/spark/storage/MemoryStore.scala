@@ -160,7 +160,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
   /**
    * Attempt to put the given block in memory store.
-   *
+   * 尝试将给定的块放在内存中
    * There may not be enough space to fully unroll the iterator in memory, in which case we
    * optionally drop the values to disk if
    *   (1) the block's storage level specifies useDisk, and
@@ -622,11 +622,13 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
   /**
    * Return the number of tasks currently unrolling blocks.
+   * 返回任务目前展开的块的数量
    */
   def numTasksUnrolling: Int = accountingLock.synchronized { unrollMemoryMap.keys.size }
 
   /**
    * Log information about current memory usage.
+   * 关于当前内存使用的日志信息。
    */
   def logMemoryUsage(): Unit = {
     val blocksMemory = currentMemory
@@ -642,7 +644,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
   /**
    * Log a warning for failing to unroll a block.
-   *
+   * 
    * @param blockId ID of the block we are trying to unroll.
    * @param finalVectorSize Final size of the vector before unrolling failed.
    */

@@ -62,7 +62,10 @@ private[spark] abstract class Stage(
  //待运行任务
   var pendingTasks = new HashSet[Task[_]]
 
-  /** The ID to use for the next new attempt for this stage. */
+  /** 
+   *  The ID to use for the next new attempt for this stage.
+   *  用于此阶段的下一个新尝试的标识
+   *   */
   private var nextAttemptId: Int = 0
 
   val name = callSite.shortForm
@@ -70,12 +73,15 @@ private[spark] abstract class Stage(
 
   private var _internalAccumulators: Seq[Accumulator[Long]] = Seq.empty
 
-  /** Internal accumulators shared across all tasks in this stage. */
+  /** 
+   *  Internal accumulators shared across all tasks in this stage. 
+   *  Stage内部累加器共享在所有的任务
+   *  */
   def internalAccumulators: Seq[Accumulator[Long]] = _internalAccumulators
 
   /**
    * Re-initialize the internal accumulators associated with this stage.
-   *
+   * 重新初始化内部累加器
    * This is called every time the stage is submitted, *except* when a subset of tasks
    * belonging to this stage has already finished. Otherwise, reinitializing the internal
    * accumulators here again will override partial values from the finished tasks.

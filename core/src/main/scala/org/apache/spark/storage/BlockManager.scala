@@ -63,7 +63,7 @@ private[spark] class BlockResult(
 private[spark] class BlockManager(
     executorId: String,
     rpcEnv: RpcEnv,
-    val master: BlockManagerMaster,
+    val master: BlockManagerMaster,//BlockManagerMasterEndpoint
     defaultSerializer: Serializer,
     maxMemory: Long,
     val conf: SparkConf,

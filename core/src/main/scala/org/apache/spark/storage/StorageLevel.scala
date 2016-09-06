@@ -139,17 +139,27 @@ class StorageLevel private(
  * new storage levels.
  */
 object StorageLevel {
+  //不会保存任务数据
   val NONE = new StorageLevel(false, false, false, false)
+  //直接将RDD的partition保存在该节点的Disk上
   val DISK_ONLY = new StorageLevel(true, false, false, false)
+  //直接将RDD的partition保存在该节点的Disk上,在其他节点上保存一个相同的备份
   val DISK_ONLY_2 = new StorageLevel(true, false, false, false, 2)
+  //将RDD的partition对应的原生的Java Object保存在JVM中,如果RDD太大导致它的部分partition不能存储在内存中
+  //那么这些partition将不会缓存,并且需要的时候被重新计算,默认缓存的级别
   val MEMORY_ONLY = new StorageLevel(false, true, false, true)
-  val MEMORY_ONLY_2 = new StorageLevel(false, true, false, true, 2)
+  //将RDD的partition对应的原生的Java Object保存在JVM中,在其他节点上保存一个相同的备份
+  val MEMORY_ONLY_2 = new StorageLevel(false, true, false, true, 2)  
   val MEMORY_ONLY_SER = new StorageLevel(false, true, false, false)
   val MEMORY_ONLY_SER_2 = new StorageLevel(false, true, false, false, 2)
+  //将RDD的partition反序列化后的对象存储在JVM中,如果RDD太大导致它的部分partition不能存储在内存中
+  //超出的partition将被保存在Disk上,并且在需要时读取
   val MEMORY_AND_DISK = new StorageLevel(true, true, false, true)
+  //在其他节点上保存一个相同的备份
   val MEMORY_AND_DISK_2 = new StorageLevel(true, true, false, true, 2)
   val MEMORY_AND_DISK_SER = new StorageLevel(true, true, false, false)
   val MEMORY_AND_DISK_SER_2 = new StorageLevel(true, true, false, false, 2)
+  //将RDD的partition序列化后存储在Tachyon中
   val OFF_HEAP = new StorageLevel(false, false, true, false)
 
   /**

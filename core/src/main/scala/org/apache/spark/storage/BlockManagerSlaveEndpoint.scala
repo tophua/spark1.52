@@ -34,7 +34,7 @@ import org.apache.spark.storage.BlockManagerMessages._
  */
 private[storage] class BlockManagerSlaveEndpoint(
   override val rpcEnv: RpcEnv,
-  blockManager: BlockManager,
+  blockManager: BlockManager,//引用BlockManagerMaster与Mast消息通信
   mapOutputTracker: MapOutputTracker)
     extends RpcEndpoint with Logging {
 
