@@ -31,7 +31,10 @@ private[ui] class ApplicationPage(parent: MasterWebUI) extends WebUIPage("app") 
 
   private val master = parent.masterEndpointRef
 
-  /** Executor details for a particular application */
+  /** 
+   *  Executor details for a particular application 
+   *  执行详细特定应用程序
+   *  */
   def render(request: HttpServletRequest): Seq[Node] = {
     val appId = request.getParameter("appId")
     val state = master.askWithRetry[MasterStateResponse](RequestMasterState)

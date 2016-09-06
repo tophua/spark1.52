@@ -95,7 +95,7 @@ private[spark] class ApplicationInfo(
     coresGranted += cores
     exec
   }
-
+//删除Executor
   private[master] def removeExecutor(exec: ExecutorDesc) {
     if (executors.contains(exec.id)) {
       removedExecutors += executors(exec.id)
@@ -108,7 +108,7 @@ private[spark] class ApplicationInfo(
   //coresLeft表示的是该app还有cpu资源没申请到,coresGranted==允许的cpus
   private[master] def coresLeft: Int = requestedCores - coresGranted
 
-  private var _retryCount = 0
+  private var _retryCount = 0 //重试次数
 
   private[master] def retryCount = _retryCount
 
@@ -118,7 +118,7 @@ private[spark] class ApplicationInfo(
   }
 
   private[master] def resetRetryCount() = _retryCount = 0
-
+//
   private[master] def markFinished(endState: ApplicationState.Value) {
     state = endState
     endTime = System.currentTimeMillis()

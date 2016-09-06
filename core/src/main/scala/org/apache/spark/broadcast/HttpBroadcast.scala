@@ -71,13 +71,19 @@ private[spark] class HttpBroadcast[T: ClassTag](
     HttpBroadcast.unpersist(id, removeFromDriver = true, blocking)
   }
 
-  /** Used by the JVM when serializing this object. */
+  /** 
+   *  Used by the JVM when serializing this object. 
+   *  使用JVM序列化对象
+   *  */
   private def writeObject(out: ObjectOutputStream): Unit = Utils.tryOrIOException {
     assertValid()
     out.defaultWriteObject()
   }
 
-  /** Used by the JVM when deserializing this object. */
+  /** 
+   *  Used by the JVM when deserializing this object.
+   *  使用JVM序列化对象
+   *   */
   private def readObject(in: ObjectInputStream): Unit = Utils.tryOrIOException {
     in.defaultReadObject()
     HttpBroadcast.synchronized {
@@ -121,7 +127,7 @@ private[broadcast] object HttpBroadcast extends Logging {
     synchronized {
       if (!initialized) {
         bufferSize = conf.getInt("spark.buffer.size", 65536)
-	//广播变量在发送之前是否先要被压缩，通常设置为true是个不错的选择
+	    //广播变量在发送之前是否先要被压缩，通常设置为true是个不错的选择
         compress = conf.getBoolean("spark.broadcast.compress", true)
         securityManager = securityMgr
         if (isDriver) {
@@ -225,6 +231,7 @@ private[broadcast] object HttpBroadcast extends Logging {
 
   /**
    * Remove all persisted blocks associated with this HTTP broadcast on the executors.
+   * 在executor删除所有持久化块相关HTTP广播
    * If removeFromDriver is true, also remove these persisted blocks on the driver
    * and delete the associated broadcast file.
    */
@@ -238,8 +245,9 @@ private[broadcast] object HttpBroadcast extends Logging {
   }
 
   /**
-   * Periodically clean up old broadcasts by removing the associated map entries and
+   * Periodically(定期) clean up old broadcasts by removing the associated map entries and
    * deleting the associated files.
+   * 定期清理旧的广播，通过删除相关的Map条目和删除相关的文件
    */
   private def cleanup(cleanupTime: Long) {
     val iterator = files.internalMap.entrySet().iterator()

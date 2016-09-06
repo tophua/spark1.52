@@ -97,17 +97,25 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
 //获取硬盘上的文件,
   def getFile(blockId: BlockId): File = getFile(blockId.name)
 
-  /** Check if disk block manager has a block. */
+  /** 
+   *  Check if disk block manager has a block. 
+   *  检查是否包含指定的块
+   *  */
   def containsBlock(blockId: BlockId): Boolean = {
     getFile(blockId.name).exists()
   }
 
-  /** List all the files currently stored on disk by the disk manager. */
+  /** 
+   *  List all the files currently stored on disk by the disk manager. 
+   *  列出当前由磁盘管理器存储在磁盘上的所有文件。
+   *  */
   def getAllFiles(): Seq[File] = {
     // Get all the files inside the array of array of directories
+    //获取目录数组中的所有文件
     subDirs.flatMap { dir =>
       dir.synchronized {
         // Copy the content of dir because it may be modified in other threads
+        //复制数组目录的内容因为它可能在其他线程修改
         dir.clone()
       }
     }.filter(_ != null).flatMap { dir =>
@@ -116,14 +124,17 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
     }
   }
 
-  /** List all the blocks currently stored on disk by the disk manager. */
+  /** 
+   *  List all the blocks currently stored on disk by the disk manager. 
+   *  列出当前由磁盘管理器存储在磁盘上的所有块。
+   *  */
   def getAllBlocks(): Seq[BlockId] = {
     getAllFiles().map(f => BlockId(f.getName))
   }
 
   /** 
    *  Produces a unique block id and File suitable for storing local intermediate results. 
-   *  
+   *  产生一个唯一的块标识和文件，适用于存储本地中间结果。
    *  
    * */
   
@@ -179,8 +190,12 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
     }
   }
 
-  /** Cleanup local dirs and stop shuffle sender. */
+  /** 
+   *  Cleanup local dirs and stop shuffle sender. 
+   *  清理本地目录和发送停止shuffle信息。
+   *  */
   private[spark] def stop() {
+    //删除关闭钩子,如果使用它会导致内存泄漏
     // Remove the shutdown hook.  It causes memory leaks if we leave it around.
     try {
       ShutdownHookManager.removeShutdownHook(shutdownHook)

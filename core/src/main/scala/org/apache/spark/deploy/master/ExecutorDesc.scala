@@ -22,11 +22,11 @@ import org.apache.spark.deploy.{ExecutorDescription, ExecutorState}
 private[master] class ExecutorDesc(
     val id: Int,//ID标识
     val application: ApplicationInfo,//应用程序
-    val worker: WorkerInfo,
+    val worker: WorkerInfo,//WorerInfo信息
     val cores: Int,//CPU内核
     val memory: Int) {//申请内存
 
-  var state = ExecutorState.LAUNCHING
+  var state = ExecutorState.LAUNCHING //启动状态
 
   /** Copy all state (non-val) variables from the given on-the-wire ExecutorDescription. */
   def copyState(execDesc: ExecutorDescription) {

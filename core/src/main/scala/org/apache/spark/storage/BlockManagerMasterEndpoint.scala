@@ -47,7 +47,7 @@ class BlockManagerMasterEndpoint(
   //slave上的Block状态,Master通过个BlockMasterSlaveActor的Reference可以向Slave发送命令查询请求
   // Mapping from block manager id to the block manager's information.
   private val blockManagerInfo = new mutable.HashMap[BlockManagerId, BlockManagerInfo]
- //保存executor ID到BlockManagerInfo的映射,这样Master就可以通过executor ID查找到BlockManagerId
+ //保存executor ID到BlockManagerInfo的映射,Master通过executor ID查找到BlockManagerId
   // Mapping from executor ID to block manager ID.
   private val blockManagerIdByExecutor = new mutable.HashMap[String, BlockManagerId]
   //保存Block是在那些BlockManager上的HashMap,由于Block可能在多个Slave上都有备份,因此注意Value是一个

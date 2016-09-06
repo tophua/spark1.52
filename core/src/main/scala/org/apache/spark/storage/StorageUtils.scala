@@ -34,7 +34,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
 
   /**
    * Internal representation of the blocks stored in this block manager.
-   *
+   * 内部表示存储在块管理器中的块,存储RDD块充许快速检索RDD块
    * We store RDD blocks and non-RDD blocks separately to allow quick retrievals of RDD blocks.
    * These collections should only be mutated through the add/update/removeBlock methods.
    */
@@ -43,7 +43,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
 
   /**
    * Storage information of the blocks that entails memory, disk, and off-heap memory usage.
-   *
+   * 存储的块的存储信息，包括内存、磁盘和内存堆内存使用情况,
    * As with the block maps, we store the storage information separately for RDD blocks and
    * non-RDD blocks for the same reason. In particular, RDD storage information is stored
    * in a map indexed by the RDD ID to the following 4-tuple:
@@ -65,7 +65,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
 
   /**
    * Return the blocks stored in this block manager.
-   *
+   * 返回存储在块管理器中的块
    * Note that this is somewhat expensive, as it involves cloning the underlying maps and then
    * concatenating them together. Much faster alternatives exist for common operations such as
    * contains, get, and size.
@@ -252,6 +252,7 @@ private[spark] object StorageUtils {
 
   /**
    * Update the given list of RDDInfo with the given list of storage statuses.
+   * 存储状态给定的列表更新RDDInfo给出的列表
    * This method overwrites the old values stored in the RDDInfo's.
    */
   def updateRddInfo(rddInfos: Seq[RDDInfo], statuses: Seq[StorageStatus]): Unit = {

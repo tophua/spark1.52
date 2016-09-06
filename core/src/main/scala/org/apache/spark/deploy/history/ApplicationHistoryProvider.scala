@@ -39,14 +39,14 @@ private[history] abstract class ApplicationHistoryProvider {
 
   /**
    * Returns a list of applications available for the history server to show.
-   *
+   * 返回历史服务器可用的应用程序的列表
    * @return List of all know applications.
    */
   def getListing(): Iterable[ApplicationHistoryInfo]
 
   /**
    * Returns the Spark UI for a specific application.
-   *
+   * 返回特定应用程序的Spark用户界面。
    * @param appId The application ID.
    * @param attemptId The application attempt ID (or None if there is no attempt ID).
    * @return The application's UI, or None if application is not found.
@@ -60,7 +60,7 @@ private[history] abstract class ApplicationHistoryProvider {
 
   /**
    * Returns configuration data to be shown in the History Server home page.
-   *
+   * 返回在历史服务器主页上显示的配置数据
    * @return A map with the configuration data. Data is show in the order returned by the map.
    */
   def getConfig(): Map[String, String] = Map()

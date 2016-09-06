@@ -25,16 +25,16 @@ import org.apache.spark.util.Utils
 class RDDInfo(
     val id: Int,
     val name: String,
-    val numPartitions: Int,
-    var storageLevel: StorageLevel,
-    val parentIds: Seq[Int],
+    val numPartitions: Int,//分区数
+    var storageLevel: StorageLevel,//存储级别
+    val parentIds: Seq[Int],//父RDD列表
     val scope: Option[RDDOperationScope] = None)
   extends Ordered[RDDInfo] {
 
-  var numCachedPartitions = 0
-  var memSize = 0L
-  var diskSize = 0L
-  var externalBlockStoreSize = 0L
+  var numCachedPartitions = 0//缓存分区数
+  var memSize = 0L//内存大小
+  var diskSize = 0L//硬盘大小
+  var externalBlockStoreSize = 0L//扩展块存储大小
 
   def isCached: Boolean =
     (memSize + diskSize + externalBlockStoreSize > 0) && numCachedPartitions > 0

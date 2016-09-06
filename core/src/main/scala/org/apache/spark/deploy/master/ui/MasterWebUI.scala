@@ -40,7 +40,10 @@ class MasterWebUI(val master: Master, requestedPort: Int)
 
   initialize()
 
-  /** Initialize all components of the server. */
+  /** 
+   *  Initialize all components of the server. 
+   *  初始化Server所有组件
+   *  */
   def initialize() {
     val masterPage = new MasterPage(this)
     attachPage(new ApplicationPage(this))

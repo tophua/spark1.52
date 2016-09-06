@@ -20,8 +20,8 @@ package org.apache.spark.deploy.master
 private[master] object ApplicationState extends Enumeration {
 
   type ApplicationState = Value
-
+  //WAITING  等待,RUNNING 运行,FINISHED 完成,FAILED失败,KILLED杀死,UNKNOWN未知
   val WAITING, RUNNING, FINISHED, FAILED, KILLED, UNKNOWN = Value
-
+ //最大重试次数
   val MAX_NUM_RETRY = 10
 }

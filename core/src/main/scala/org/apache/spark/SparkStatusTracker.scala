@@ -38,7 +38,7 @@ class SparkStatusTracker private[spark] (sc: SparkContext) {
   /**
    * Return a list of all known jobs in a particular job group.  If `jobGroup` is `null`, then
    * returns all known jobs that are not associated with a job group.
-   *
+   * 返回一个特定工作组中所有已知的工作的列表,
    * The returned list may contain running, failed, and completed jobs, and may vary across
    * invocations of this method.  This method does not guarantee the order of the elements in
    * its result.
@@ -51,8 +51,9 @@ class SparkStatusTracker private[spark] (sc: SparkContext) {
 
   /**
    * Returns an array containing the ids of all active stages.
-   *
+   * 返回包含所有活动阶段的stageId的数组。
    * This method does not guarantee the order of the elements in its result.
+   * 这种方法不能保证其结果的元素的顺序
    */
   def getActiveStageIds(): Array[Int] = {
     jobProgressListener.synchronized {
@@ -62,7 +63,7 @@ class SparkStatusTracker private[spark] (sc: SparkContext) {
 
   /**
    * Returns an array containing the ids of all active jobs.
-   *
+   * 返回包含所有活动Job的JobId的数组。
    * This method does not guarantee the order of the elements in its result.
    */
   def getActiveJobIds(): Array[Int] = {
@@ -73,6 +74,7 @@ class SparkStatusTracker private[spark] (sc: SparkContext) {
 
   /**
    * Returns job information, or `None` if the job info could not be found or was garbage collected.
+   * 返回Job信息
    */
   def getJobInfo(jobId: Int): Option[SparkJobInfo] = {
     jobProgressListener.synchronized {
@@ -83,6 +85,7 @@ class SparkStatusTracker private[spark] (sc: SparkContext) {
   }
 
   /**
+   * 返回stage信息
    * Returns stage information, or `None` if the stage info could not be found or was
    * garbage collected.
    */
