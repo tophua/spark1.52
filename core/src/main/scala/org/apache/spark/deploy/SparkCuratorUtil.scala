@@ -55,7 +55,9 @@ private[spark] object SparkCuratorUtil extends Logging {
       }
     }
   }
-
+/**
+ * 递归删除
+ */
   def deleteRecursive(zk: CuratorFramework, path: String) {
     if (zk.checkExists().forPath(path) != null) {
       for (child <- zk.getChildren.forPath(path)) {

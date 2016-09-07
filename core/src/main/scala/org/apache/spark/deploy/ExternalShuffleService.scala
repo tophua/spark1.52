@@ -63,7 +63,10 @@ class ExternalShuffleService(sparkConf: SparkConf, securityManager: SecurityMana
     }
   }
 
-  /** Start the external shuffle service */
+  /** 
+   *  Start the external shuffle service
+   *  开始运行扩展Shuffle服务
+   *   */
   def start() {
     require(server == null, "Shuffle server already started")
     logInfo(s"Starting shuffle service on port $port with useSasl = $useSasl")
@@ -91,6 +94,7 @@ class ExternalShuffleService(sparkConf: SparkConf, securityManager: SecurityMana
 
 /**
  * A main class for running the external shuffle service.
+ * 用于运行外部shuffle服务的一个主要类。
  */
 object ExternalShuffleService extends Logging {
   @volatile

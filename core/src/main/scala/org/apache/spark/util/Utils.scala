@@ -60,6 +60,7 @@ private[spark] object CallSite {
 
 /**
  * Various utility methods used by Spark.
+ * Spark所用的各种实用方法
  */
 private[spark] object Utils extends Logging {
   val random = new Random()
@@ -168,7 +169,7 @@ private[spark] object Utils extends Logging {
   }
 
   // scalastyle:off classforname
-  /** Preferred alternative to Class.forName(className) */
+  /** Preferred alternative(优先选择) to Class.forName(className) */
   def classForName(className: String): Class[_] = {
     Class.forName(className, true, getContextOrSparkClassLoader)
     // scalastyle:on classforname
@@ -310,6 +311,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Construct a URI container information used for authentication.
+   * 构建一个用于身份验证的URI的集装箱信息,
    * This also sets the default authenticator to properly negotiation the
    * user/password based on the URI.
    *
@@ -439,7 +441,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Copy `sourceFile` to `destFile`.
-   *
+   * 复制源文件到目录文件
    * If `destFile` already exists:
    *   - no-op if its contents equal those of `sourceFile`,
    *   - throw an exception if `fileOverwrite` is false,
@@ -860,6 +862,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return the string to tell how long has passed in milliseconds.
+   * 返回字符串告诉过了多久时间
    */
   def getUsedTimeMs(startTimeMs: Long): String = {
     " " + (System.currentTimeMillis - startTimeMs) + " ms"
@@ -914,6 +917,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Delete a file or directory and its contents recursively.
+   * 递归删除一个文件或目录和它的内容。
    */
   def deleteRecursively(dir: TachyonFile, client: TachyonFS) {
     if (!client.delete(new TachyonURI(dir.getPath()), true)) {
@@ -923,6 +927,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Check to see if file is a symbolic link.
+   * 检查文件是否一个符号链接
    */
   def isSymlink(file: File): Boolean = {
     if (file == null) throw new NullPointerException("File must not be null")
@@ -938,10 +943,11 @@ private[spark] object Utils extends Logging {
 
   /**
    * Determines if a directory contains any files newer than cutoff seconds.
-   *
+   * 确定一个目录是否包含比截止秒更新的任何文件
    * @param dir must be the path to a directory, or IllegalArgumentException is thrown
-   * @param cutoff measured in seconds. Returns true if there are any files or directories in the
+   * @param cutoff measured in seconds(以秒测量的截止). Returns true if there are any files or directories in the
    *               given directory whose last modified time is later than this many seconds ago
+   * 如果在给定目录中的任何文件或目录的最后修改时间比此多秒前的最后一次修改时，则返回真
    */
   def doesDirectoryContainAnyNewFiles(dir: File, cutoff: Long): Boolean = {
     if (!dir.isDirectory) {
@@ -959,6 +965,7 @@ private[spark] object Utils extends Logging {
   /**
    * Convert a time parameter such as (50s, 100ms, or 250us) to microseconds for internal use. If
    * no suffix is provided, the passed number is assumed to be in ms.
+   * 将一个时间参数如（50s，100ms，或250us）以微秒,如果没有任务后缀默认为毫秒
    */
   def timeStringAsMs(str: String): Long = {
     JavaUtils.timeStringAsMs(str)
@@ -967,6 +974,7 @@ private[spark] object Utils extends Logging {
   /**
    * Convert a time parameter such as (50s, 100ms, or 250us) to microseconds for internal use. If
    * no suffix is provided, the passed number is assumed to be in seconds.
+   * 将一个时间参数如（50s，100ms，或250us）以微秒。如果没有提供后缀，默认为秒
    */
   def timeStringAsSeconds(str: String): Long = {
     JavaUtils.timeStringAsSec(str)
@@ -974,7 +982,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m) to bytes for internal use.
-   *
+   * 将通过字节字符串（例如50B，100K，或250m）字节,如没有提供后缀默认为byte
    * If no suffix is provided, the passed number is assumed to be in bytes.
    */
   def byteStringAsBytes(str: String): Long = {
@@ -1020,6 +1028,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Convert a quantity in bytes to a human-readable string such as "4.0 MB".
+   * 将一个字节转换可读的字符串
    */
   def bytesToString(size: Long): String = {
     val TB = 1L << 40
@@ -1045,6 +1054,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Returns a human-readable string representing a duration such as "35ms"
+   * 返回可读持续时间的字符串
    */
   def msDurationToString(ms: Long): String = {
     val second = 1000
@@ -1072,6 +1082,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Execute a command and return the process running the command.
+   * 执行命令和返回过程中运行命令
    */
   def executeCommand(
       command: Seq[String],
@@ -1117,6 +1128,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return and start a daemon thread that processes the content of the input stream line by line.
+   * 返回并开始守护线程的处理输入流行的内容
    */
   def processStreamByLine(
       threadName: String,
@@ -1137,8 +1149,9 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code that evaluates to Unit, forwarding any uncaught exceptions to the
    * default UncaughtExceptionHandler
-   *
+   * 执行一个代码块为单位,,转发任何未捕获的异常到默认UncaughtExceptionHandler
    * NOTE: This method is to be called by the spark-started JVM process.
+   * 这种方法被称为Spark开始JVM进程
    */
   def tryOrExit(block: => Unit) {
     try {
@@ -1152,7 +1165,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code that evaluates to Unit, stop SparkContext is there is any uncaught
    * exception
-   *
+   * 执行一个计算单元的代码块,停止sparkcontext未捕获的异常
    * NOTE: This method is to be called by the driver-side components to avoid stopping the
    * user-started JVM process completely; in contrast, tryOrExit is to be called in the
    * spark-started JVM process .
@@ -1180,6 +1193,7 @@ private[spark] object Utils extends Logging {
    * exceptions as IOException.  This is used when implementing Externalizable and Serializable's
    * read and write methods, since Java's serializer will not report non-IOExceptions properly;
    * see SPARK-4080 for more context.
+   * 执行一个计算单元的代码块,抛出任何非致命的未捕获的异常作为IOException
    */
   def tryOrIOException(block: => Unit) {
     try {
@@ -1328,7 +1342,10 @@ private[spark] object Utils extends Logging {
     CallSite(shortForm, longForm)
   }
 
-  /** Return a string containing part of a file from byte 'start' to 'end'. */
+  /** 
+   *  Return a string containing part of a file from byte 'start' to 'end'. 
+   *  返回一个字符串的字节开始到结束的部分文件
+   *  */
   def offsetBytes(path: String, start: Long, end: Long): String = {
     val file = new File(path)
     val length = file.length()
@@ -1536,6 +1553,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Method executed for repeating a task for side effects.
+   * 执行重复一个副作用的任务的方法
    * Unlike a for comprehension, it permits JVM JIT optimization
    */
   def times(numIters: Int)(f: => Unit): Unit = {
@@ -1548,6 +1566,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Timing method based on iterations that permit JVM JIT optimization.
+   * 基于迭代允许JVM的JIT优化配时方法
    * @param numIters number of iterations
    * @param f function to be executed. If prepare is not None, the running time of each call to f
    *          must be an order of magnitude longer than one millisecond for accurate timing.
@@ -1656,16 +1675,19 @@ private[spark] object Utils extends Logging {
 
   /**
    * Whether the underlying operating system is Windows.
+   * 底层的操作系统是否是Windows
    */
   val isWindows = SystemUtils.IS_OS_WINDOWS
 
   /**
    * Whether the underlying operating system is Mac OS X.
+   * 底层的操作系统是否是IOS
    */
   val isMac = SystemUtils.IS_OS_MAC_OSX
 
   /**
    * Pattern for matching a Windows drive, which contains only a single alphabet character.
+   * 
    */
   val windowsDrive = "([a-zA-Z])".r
 
@@ -1686,6 +1708,7 @@ private[spark] object Utils extends Logging {
   /**
    * Wait for a process to terminate for at most the specified duration.
    * Return whether the process actually terminated after the given timeout.
+   * 等待一个进程在指定的时间终止,返回给定超时后是否实际终止的过程
    */
   def waitForProcess(process: Process, timeoutMs: Long): Boolean = {
     var terminated = false
@@ -1709,6 +1732,7 @@ private[spark] object Utils extends Logging {
   /**
    * Return the stderr of a process after waiting for the process to terminate.
    * If the process does not terminate within the specified timeout, return None.
+   * 等待进程结束后返回一个进程的标准错误,如果进程在指定的超时时间内不终止，返回None。
    */
   def getStderr(process: Process, timeoutMs: Long): Option[String] = {
     val terminated = Utils.waitForProcess(process, timeoutMs)
@@ -1720,9 +1744,10 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * Execute the given block, logging and re-throwing any uncaught exception.
+   * Execute the given block, logging and re-throwing any uncaught exception. 
    * This is particularly useful for wrapping code that runs in a thread, to ensure
    * that exceptions are printed, and to avoid having to catch Throwable.
+   * 执行给定的块，重新抛出任何未捕获的异常,包装在一个线程中运行的代码,确保异常打印,并避免捕获Throwable
    */
   def logUncaughtExceptions[T](f: => T): T = {
     try {
@@ -1736,7 +1761,10 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Executes the given block in a Try, logging any uncaught exceptions. */
+  /** 
+   *  Executes the given block in a Try, logging any uncaught exceptions.
+   *  给定的块中尝试执行，记录任何未捕获的异常
+   *   */
   def tryLog[T](f: => T): Try[T] = {
     try {
       val res = f
@@ -1750,7 +1778,10 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Returns true if the given exception was fatal. See docs for scala.util.control.NonFatal. */
+  /** 
+   *  Returns true if the given exception was fatal. See docs for scala.util.control.NonFatal. 
+   *  如果给定的异常是致命的，则返回真
+   *  */
   def isFatalError(e: Throwable): Boolean = {
     e match {
       case NonFatal(_) | _: InterruptedException | _: NotImplementedError | _: ControlThrowable =>
@@ -1794,7 +1825,10 @@ private[spark] object Utils extends Logging {
     new File(path).getAbsoluteFile().toURI()
   }
 
-  /** Resolve a comma-separated list of paths. */
+  /** 
+   *  Resolve a comma-separated list of paths. 
+   *  解析一个逗号分隔的路径列表
+   *  */
   def resolveURIs(paths: String): String = {
     if (paths == null || paths.trim.isEmpty) {
       ""
@@ -1803,7 +1837,10 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Return all non-local paths from a comma-separated list of paths. */
+  /** 
+   *  Return all non-local paths from a comma-separated list of paths. 
+   *  返回从逗号分隔的路径列表中的所有非本地路径。
+   *  */
   def nonLocalPaths(paths: String, testWindows: Boolean = false): Array[String] = {
     val windows = isWindows || testWindows
     if (paths == null || paths.trim.isEmpty) {
@@ -1840,7 +1877,10 @@ private[spark] object Utils extends Logging {
     path
   }
 
-  /** Load properties present in the given file. */
+  /** 
+   *  Load properties present in the given file. 
+   *  在给定文件中的加载属性
+   *  */
   def getPropertiesFromFile(filename: String): Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"Properties file $file does not exist")
@@ -1859,7 +1899,10 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Return the path of the default Spark properties file. */
+  /** 
+   *  Return the path of the default Spark properties file.
+   *  返回默认的Spark属性文件的路径
+   *   */
   def getDefaultPropertiesFile(env: Map[String, String] = sys.env): String = {
     env.get("SPARK_CONF_DIR")
       .orElse(env.get("SPARK_HOME").map { t => s"$t${File.separator}conf" })
@@ -1872,6 +1915,7 @@ private[spark] object Utils extends Logging {
   /**
    * Return a nice string representation of the exception. It will call "printStackTrace" to
    * recursively generate the stack trace including the exception and its causes.
+   * 返回异常的的字符串形式
    */
   def exceptionString(e: Throwable): String = {
     if (e == null) {
@@ -1884,7 +1928,10 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Return a thread dump of all threads' stacktraces.  Used to capture dumps for the web UI */
+  /** 
+   *  Return a thread dump of all threads' stacktraces.  Used to capture dumps for the web UI
+   *  返回所有线程的堆栈跟踪线程,用于捕获Web用户界面
+   *   */
   def getThreadDump(): Array[ThreadStackTrace] = {
     // We need to filter out null values here because dumpAllThreads() may return null array
     // elements for threads that are dead / don't exist.
@@ -1898,6 +1945,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Convert all spark properties set in the given SparkConf to a sequence of java options.
+   * 将所有的Spark在给定的sparkconf属性设置为序列java选项
    */
   def sparkJavaOpts(conf: SparkConf, filterKey: (String => Boolean) = _ => true): Seq[String] = {
     conf.getAll
@@ -1907,6 +1955,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Maximum number of retries when binding to a port before giving up.
+   * 最大重试次数时，绑定到一个端口
    */
   def portMaxRetries(conf: SparkConf): Int = {
     val maxRetries = conf.getOption("spark.port.maxRetries").map(_.toInt)
@@ -1989,6 +2038,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * configure a new log4j level
+   * 设置一个新log4j级别
    */
   def setLogLevel(l: org.apache.log4j.Level) {
     org.apache.log4j.Logger.getRootLogger().setLevel(l)
@@ -2128,6 +2178,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Split the comma delimited string of master URLs into a list.
+   * 将Master目录以逗号分隔成一个字符串列表。
    * For instance, "spark://abc,def" becomes [spark://abc, spark://def].
    */
   def parseStandaloneMasterUrls(masterUrls: String): Array[String] = {
@@ -2162,6 +2213,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return whether the specified file is a parent directory of the child file.
+   * 返回指定的文件是否是子文件的父目录
    */
   def isInDirectory(parent: File, child: File): Boolean = {
     if (child == null || parent == null) {

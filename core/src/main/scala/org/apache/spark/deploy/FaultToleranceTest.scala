@@ -36,11 +36,12 @@ import org.apache.spark.deploy.master.RecoveryState
 import org.apache.spark.util.Utils
 
 /**
- * This suite tests the fault tolerance of the Spark standalone scheduler, mainly the Master.
+ * This suite tests the fault tolerance(容错) of the Spark standalone scheduler, mainly the Master.
  * In order to mimic a real distributed cluster more closely, Docker is used.
+ * 为了模拟一个真正的分布式集群,使用下列方式
  * Execute using
  * ./bin/spark-class org.apache.spark.deploy.FaultToleranceTest
- *
+ * 请确保环境包括以下属性
  * Make sure that that the environment includes the following properties in SPARK_DAEMON_JAVA_OPTS
  * *and* SPARK_JAVA_OPTS:
  *   - spark.deploy.recoveryMode=ZOOKEEPER
@@ -48,9 +49,10 @@ import org.apache.spark.util.Utils
  * Note that 172.17.42.1 is the default docker ip for the host and 2181 is the default ZK port.
  *
  * In case of failure, make sure to kill off prior docker containers before restarting:
+ * 在失败的情况下，一定要杀死前docker容器之前重新启动
  *   docker kill $(docker ps -q)
  *
- * Unfortunately, due to the Docker dependency this suite cannot be run automatically without a
+ * Unfortunately(不幸), due to the Docker dependency this suite cannot be run automatically without a
  * working installation of Docker. In addition to having Docker, the following are assumed:
  *   - Docker can run without sudo (see http://docs.docker.io/en/latest/use/basics/)
  *   - The docker images tagged spark-test-master and spark-test-worker are built from the
@@ -97,7 +99,7 @@ private object FaultToleranceTest extends App with Logging {
     createClient()
     assertValidClusterState()
   }
-
+  //sanity 心智健康
   test("sanity-many-masters") {
     addMasters(3)
     addWorkers(3)
@@ -248,7 +250,10 @@ private object FaultToleranceTest extends App with Logging {
     workers.clear()
   }
 
-  /** This includes Client retry logic, so it may take a while if the cluster is recovering. */
+  /** 
+   *  This includes Client retry logic, so it may take a while if the cluster is recovering. 
+   *  这包括客户端重试逻辑,如果集群正在恢复,它可能需要一段时间，
+   *  */
   private def assertUsable() = {
     val f = future {
       try {
@@ -271,6 +276,7 @@ private object FaultToleranceTest extends App with Logging {
   /**
    * Asserts that the cluster is usable and that the expected masters and workers
    * are all alive in a proper configuration (e.g., only one leader).
+   * 断言预期集群是Mast和Workers可用一个适当的配置
    */
   private def assertValidClusterState() = {
     logInfo(">>>>> ASSERT VALID CLUSTER STATE <<<<<")

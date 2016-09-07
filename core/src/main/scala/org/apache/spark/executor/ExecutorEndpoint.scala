@@ -22,6 +22,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Driver -> Executor message to trigger a thread dump.
+ * Driver->Executor 消息来触发一个线程转储
  */
 private[spark] case object TriggerThreadDump
 
