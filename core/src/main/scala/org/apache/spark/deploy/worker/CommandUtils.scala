@@ -113,7 +113,10 @@ object CommandUtils extends Logging {
       command.javaOpts.filterNot(_.startsWith("-D" + SecurityManager.SPARK_AUTH_SECRET_CONF)))
   }
 
-  /** Spawn a thread that will redirect a given stream to a file */
+  /** 
+   *  Spawn a thread that will redirect a given stream to a file 
+   *  生成一个线程，将一个给定的流重定向到一个文件
+   *  */
   def redirectStream(in: InputStream, file: File) {
     val out = new FileOutputStream(file, true)
     // TODO: It would be nice to add a shutdown hook here that explains why the output is

@@ -34,6 +34,7 @@ import org.apache.spark.rpc.RpcEndpointRef
 import org.apache.spark.util.{Utils, Clock, SystemClock}
 
 /**
+ * 管理一个驱动程序的执行,包括自动重新启动驱动程序的故障,目前只用于独立的集群部署模式
  * Manages the execution of one driver, including automatically restarting the driver on failure.
  * This is currently only used in standalone cluster deploy mode.
  */
@@ -70,7 +71,10 @@ private[deploy] class DriverRunner(
     def sleep(seconds: Int): Unit = (0 until seconds).takeWhile(f => {Thread.sleep(1000); !killed})
   }
 
-  /** Starts a thread to run and manage the driver. */
+  /** 
+   *  Starts a thread to run and manage the driver. 
+   *  启动一个线程来运行管理驱动程序。
+   *  */
   private[worker] def start() = {
     new Thread("DriverRunner for " + driverId) {
       override def run() {
@@ -85,7 +89,7 @@ private[deploy] class DriverRunner(
           }
 
           // TODO: If we add ability to submit multiple jars they should also be added here
-	  //提交多个jar也应该在这里添加
+	        //提交多个jar也应该在这里添加
           val builder = CommandUtils.buildProcessBuilder(driverDesc.command, securityManager,
             driverDesc.mem, sparkHome.getAbsolutePath, substituteVariables)
           launchDriver(builder, driverDir, driverDesc.supervise)
@@ -113,7 +117,10 @@ private[deploy] class DriverRunner(
     }.start()
   }
 
-  /** Terminate this driver (or prevent it from ever starting if not yet started) */
+  /** 
+   *  Terminate this driver (or prevent it from ever starting if not yet started)
+   *  终止此驱动程序
+   *  */
   private[worker] def kill() {
     synchronized {
       process.foreach(p => p.destroy())
@@ -122,6 +129,7 @@ private[deploy] class DriverRunner(
   }
 
   /**
+   * 创建Driver端Work目录
    * Creates the working directory for this driver.
    * Will throw an exception if there are errors preparing the directory.
    */
@@ -134,6 +142,7 @@ private[deploy] class DriverRunner(
   }
 
   /**
+   * 将用户jar下载到所提供的目录，并返回其本地路径,如果有错误，将抛出一个异常
    * Download the user jar into the supplied directory and return its local path.
    * Will throw an exception if there are errors downloading the jar.
    */

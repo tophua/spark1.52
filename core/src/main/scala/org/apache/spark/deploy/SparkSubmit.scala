@@ -56,7 +56,7 @@ private[deploy] object SparkSubmitAction extends Enumeration {
 
 /**
  * Main gateway of launching a Spark application.
- *
+ * Spark 应用的主要启动入口,这和个程序主要处理相关的类路径,提供不同的集群部署模式
  * This program handles setting up the classpath with relevant Spark dependencies and provides
  * a layer over the different cluster managers and deploy modes that Spark supports.
  */
@@ -67,18 +67,19 @@ object SparkSubmit {
   private val STANDALONE = 2
   private val MESOS = 4
   private val LOCAL = 8
-  private val ALL_CLUSTER_MGRS = YARN | STANDALONE | MESOS | LOCAL
+  private val ALL_CLUSTER_MGRS = YARN | STANDALONE | MESOS | LOCAL //ALL_CLUSTER_MGRS: Int = 15
 
   // Deploy modes
-  private val CLIENT = 1
-  private val CLUSTER = 2
+  private val CLIENT = 1 //客户端
+  private val CLUSTER = 2//集群
   private val ALL_DEPLOY_MODES = CLIENT | CLUSTER
 
   // A special jar name that indicates the class being run is inside of Spark itself, and therefore
   // no user jar is needed.
-  private val SPARK_INTERNAL = "spark-internal"
+  //特别是一类特别的名字是jar运行是在放电本身，因此是没有用户需要的JAR
+  private val SPARK_INTERNAL = "spark-internal"//
 
-  // Special primary resource names that represent shells rather than application jars.
+  // Special primary resource names that represent shells rather than application jars. 
   private val SPARK_SHELL = "spark-shell"
   private val PYSPARK_SHELL = "pyspark-shell"
   private val SPARKR_SHELL = "sparkr-shell"
@@ -87,8 +88,8 @@ object SparkSubmit {
 
   private val CLASS_NOT_FOUND_EXIT_STATUS = 101
 
-  // scalastyle:off println
-  // Exposed for testing
+  // scalastyle:off println,关闭打印
+  // Exposed for testing,暴露测试  
   private[spark] var exitFn: Int => Unit = (exitCode: Int) => System.exit(exitCode)
   private[spark] var printStream: PrintStream = System.err
   private[spark] def printWarning(str: String): Unit = printStream.println("Warning: " + str)
@@ -209,6 +210,7 @@ object SparkSubmit {
 
   /**
    * Prepare the environment for submitting an application.
+   * 准备提交应用程序的环境
    * This returns a 4-tuple:
    *   (1) the arguments for the child process,
    *   (2) a list of classpath entries for the child,

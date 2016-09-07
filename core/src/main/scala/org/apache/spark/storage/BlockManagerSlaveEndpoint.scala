@@ -75,7 +75,7 @@ private[storage] class BlockManagerSlaveEndpoint(
     case GetMatchingBlockIds(filter, _) =>
       context.reply(blockManager.getMatchingBlockIds(filter))
   }
-  //科里化函数,异步调用
+  //科里化函数,异步调用,方法回调
   private def doAsync[T](actionMessage: String, context: RpcCallContext)(body: => T) {
     val future = Future {
       logDebug(actionMessage)

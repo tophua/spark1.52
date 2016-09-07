@@ -19,6 +19,6 @@ package org.apache.spark.deploy.master
 
 private[master] object WorkerState extends Enumeration {
   type WorkerState = Value
-
+  //Worker状态,ALIVE活动, 状态DEAD不再存活,DECOMMISSIONED 正式停止使用,UNKNOWN 未知
   val ALIVE, DEAD, DECOMMISSIONED, UNKNOWN = Value
 }

@@ -194,6 +194,7 @@ private[spark] case class RpcEnvConfig(
 
 /**
  * Represents a host and port.
+ * 代表一个主机和端口
  */
 private[spark] case class RpcAddress(host: String, port: Int) {
   // TODO do we need to add the type of RpcEnv in the address?

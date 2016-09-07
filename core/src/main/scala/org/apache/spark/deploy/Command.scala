@@ -20,10 +20,10 @@ package org.apache.spark.deploy
 import scala.collection.Map
 
 private[spark] case class Command(
-    mainClass: String,
-    arguments: Seq[String],
-    environment: Map[String, String],
-    classPathEntries: Seq[String],
-    libraryPathEntries: Seq[String],
-    javaOpts: Seq[String]) {
+    mainClass: String,//main类
+    arguments: Seq[String],//参数
+    environment: Map[String, String],//环境变量
+    classPathEntries: Seq[String],//class路径
+    libraryPathEntries: Seq[String],//jar路径
+    javaOpts: Seq[String]) {//java 参数
 }

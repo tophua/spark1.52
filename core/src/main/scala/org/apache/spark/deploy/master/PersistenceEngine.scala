@@ -24,6 +24,7 @@ import scala.reflect.ClassTag
 
 /**
  * Allows Master to persist any state that is necessary in order to recover from a failure.
+ * 允许Master持久化的状态，以从失败中恢复
  * The following semantics are required:
  *   - addApplication and addWorker are called before completing registration of a new app/worker.
  *   - removeApplication and removeWorker are called at any time.

@@ -33,6 +33,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Parses and encapsulates arguments from the spark-submit script.
+ * 解析Spark-submit 脚本参数
  * The env argument is used for testing.
  */
 private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, String] = sys.env)
@@ -77,7 +78,10 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   var submissionToRequestStatusFor: String = null
   var useRest: Boolean = true // used internally
 
-  /** Default properties present in the currently defined defaults file. */
+  /** 
+   *  Default properties present in the currently defined defaults file.
+   *  定义的默认属性文件
+   *   */
   lazy val defaultSparkProperties: HashMap[String, String] = {
     val defaultProperties = new HashMap[String, String]()
     // scalastyle:off println
@@ -93,6 +97,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   }
 
   // Set parameters from command line arguments
+  //设置命令行参数
   try {
     parse(args.toList)
   } catch {
@@ -125,6 +130,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
 
   /**
    * Remove keys that don't start with "spark." from `sparkProperties`.
+   * 移除不是spark.开头
    */
   private def ignoreNonSparkProperties(): Unit = {
     sparkProperties.foreach { case (k, v) =>
@@ -137,6 +143,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
 
   /**
    * Load arguments from environment variables, Spark properties etc.
+   * 从环境变量中的加载参数,Spark属性文件等
    */
   private def loadEnvironmentArguments(): Unit = {
     master = Option(master)
@@ -175,10 +182,11 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     totalExecutorCores = Option(totalExecutorCores)
       .orElse(sparkProperties.get("spark.cores.max"))
       .orNull
-    name = Option(name).orElse(sparkProperties.get("spark.app.name")).orNull
-    jars = Option(jars).orElse(sparkProperties.get("spark.jars")).orNull
-    ivyRepoPath = sparkProperties.get("spark.jars.ivy").orNull
-    packages = Option(packages).orElse(sparkProperties.get("spark.jars.packages")).orNull
+      
+    name = Option(name).orElse(sparkProperties.get("spark.app.name")).orNull//如果它不为空返回该选项的值,如果它是空则返回null
+    jars = Option(jars).orElse(sparkProperties.get("spark.jars")).orNull//如果它不为空返回该选项的值,如果它是空则返回null
+    ivyRepoPath = sparkProperties.get("spark.jars.ivy").orNull//如果它不为空返回该选项的值,如果它是空则返回null
+    packages = Option(packages).orElse(sparkProperties.get("spark.jars.packages")).orNull//如果它不为空返回该选项的值,如果它是空则返回null
     packagesExclusions = Option(packagesExclusions)
       .orElse(sparkProperties.get("spark.jars.excludes")).orNull
     deployMode = Option(deployMode).orElse(env.get("DEPLOY_MODE")).orNull
@@ -227,7 +235,10 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     action = Option(action).getOrElse(SUBMIT)
   }
 
-  /** Ensure that required fields exists. Call this only once all defaults are loaded. */
+  /** 
+   *  Ensure that required fields exists. Call this only once all defaults are loaded. 
+   *  确保所需字段的存在,调用只有一次所有的默认加载
+   *  */
   private def validateArguments(): Unit = {
     action match {
       case SUBMIT => validateSubmitArguments()

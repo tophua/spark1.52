@@ -44,6 +44,7 @@ private class ClientEndpoint(
   extends ThreadSafeRpcEndpoint with Logging {
 
   // A scheduled executor used to send messages at the specified time.
+  //用于在指定时间发送消息的执行调度器
   private val forwardMessageThread =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("client-forward-message")
   // Used to provide the implicit parameter of `Future` methods.
@@ -104,6 +105,7 @@ private class ClientEndpoint(
 
   /**
    * Send the message to master and forward the reply to self asynchronously.
+   * 发送消息到Master并异步答复
    */
   private def ayncSendToMasterAndForwardReply[T: ClassTag](message: Any): Unit = {
     for (masterEndpoint <- masterEndpoints) {
@@ -116,7 +118,10 @@ private class ClientEndpoint(
     }
   }
 
-  /* Find out driver status then exit the JVM */
+  /* 
+   * Find out driver status then exit the JVM 
+   * 查找Driver状态然后退出JVM
+   * */
   def pollAndReportStatus(driverId: String) {
     // Since ClientEndpoint is the only RpcEndpoint in the process, blocking the event loop thread
     // is fine.

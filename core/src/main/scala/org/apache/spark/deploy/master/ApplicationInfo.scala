@@ -131,6 +131,7 @@ private[spark] class ApplicationInfo(
   /**
    * Return the limit on the number of executors this application can have.
    * For testing only.
+   * 返回限制应用程序executors数
    */
   private[deploy] def getExecutorLimit: Int = executorLimit
 
