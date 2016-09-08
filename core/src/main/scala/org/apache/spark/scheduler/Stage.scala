@@ -28,12 +28,15 @@ import org.apache.spark.util.CallSite
  * of a Spark job, where all the tasks have the same shuffle dependencies. Each DAG of tasks run
  * by the scheduler is split up into stages at the boundaries where shuffle occurs, and then the
  * DAGScheduler runs these stages in topological order.
- *
+ * 一个(stage)阶段是一组独立的任务，所有计算的相同的功能，需要运行作为一个Spark作业的一部分,
+ * 在所有的任务都有相同的Shuufle依赖关系,每个DAG任务运行的界限Shuffle,然后dagscheduler运行这些阶段的拓扑顺序
+ * 
  * Each Stage can either be a shuffle map stage, in which case its tasks' results are input for
  * another stage, or a result stage, in which case its tasks directly compute the action that
  * initiated a job (e.g. count(), save(), etc). For shuffle map stages, we also track the nodes
  * that each output partition is on.
- *
+ * 每个Stage都可以是一个Shuffle stage,在这种情况下，它的任务的结果是另一个Stage的输入，或结果阶段,
+ * 在这种情况下，它的任务直接计算发起了一个作业的动作,
  * Each Stage also has a firstJobId, identifying the job that first submitted the stage.  When FIFO
  * scheduling is used, this allows Stages from earlier jobs to be computed first or recovered
  * faster on failure.
@@ -44,6 +47,7 @@ import org.apache.spark.util.CallSite
  *
  * A single stage can consist of multiple attempts. In that case, the latestInfo field will
  * be updated for each attempt.
+ * Job分成的阶段,一个Job可能被划分为一到多个Stage
  *
  */
 private[spark] abstract class Stage(
@@ -58,6 +62,7 @@ private[spark] abstract class Stage(
   val numPartitions = rdd.partitions.size
 
   /** Set of jobs that this stage belongs to. */
+  //这个阶段(Stage)属于的工作组
   val jobIds = new HashSet[Int]
  //待运行任务
   var pendingTasks = new HashSet[Task[_]]
@@ -65,7 +70,7 @@ private[spark] abstract class Stage(
   /** 
    *  The ID to use for the next new attempt for this stage.
    *  用于此阶段的下一个新尝试的标识
-   *   */
+   *  */
   private var nextAttemptId: Int = 0
 
   val name = callSite.shortForm
@@ -96,11 +101,15 @@ private[spark] abstract class Stage(
    * here, before any attempts have actually been created, because the DAGScheduler uses this
    * StageInfo to tell SparkListeners when a job starts (which happens before any stage attempts
    * have been created).
+   * 因为dagscheduler使用本stageinfo告诉sparklisteners一个Job开始运行
    */
   
   private var _latestInfo: StageInfo = StageInfo.fromStage(this, nextAttemptId)
 
-  /** Creates a new attempt for this stage by creating a new StageInfo with a new attempt ID. */
+  /** 
+   *  Creates a new attempt for this stage by creating a new StageInfo with a new attempt ID.
+   *  创建新StageInfo,尝试创建一个新的ID
+   *  */
   def makeNewStageAttempt(
       numPartitionsToCompute: Int,
       taskLocalityPreferences: Seq[Seq[TaskLocation]] = Seq.empty): Unit = {

@@ -33,6 +33,7 @@ import org.apache.spark.deploy.SparkHadoopUtil
 /**
  * :: DeveloperApi ::
  * Parses and holds information about inputFormat (and files) specified as a parameter.
+ * 解析和信息保存关于InputFormat（和文件）指定为一个参数
  */
 @DeveloperApi
 class InputFormatInfo(val configuration: Configuration, val inputFormatClazz: Class[_],
@@ -116,6 +117,7 @@ class InputFormatInfo(val configuration: Configuration, val inputFormatClazz: Cl
   }
 
   // This method does not expect failures, since validate has already passed ...
+  //此方法不期望失败，因为验证已经通过
   private def prefLocsFromMapredInputFormat(): Set[SplitInfo] = {
     val jobConf = new JobConf(configuration)
     SparkHadoopUtil.get.addCredentials(jobConf)
@@ -151,11 +153,11 @@ class InputFormatInfo(val configuration: Configuration, val inputFormatClazz: Cl
 
 object InputFormatInfo {
   /**
-    Computes the preferred locations based on input(s) and returned a location to block map.
+    Computes the preferred locations based on input(s) and returned a location to block map.    
     Typical use of this method for allocation would follow some algo like this:
-
-    a) For each host, count number of splits hosted on that host.
-    b) Decrement the currently allocated containers on that host.
+	     计算基于输入（S）的首选位置，并返回一个块映射的位置。典型方法的使用将遵循下列规则:
+    a) For each host, count number of splits hosted on that host.,对于每个主机，计数分割每个主机上
+    b) Decrement the currently allocated containers on that host.将当前主机上的已分配的容器减量
     c) Compute rack info for each host and update rack -> count map based on (b).
     d) Allocate nodes based on (c)
     e) On the allocation result, ensure that we dont allocate "too many" jobs on a single node

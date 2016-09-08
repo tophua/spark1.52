@@ -25,6 +25,7 @@ import org.apache.spark.storage.RDDInfo
 /**
  * :: DeveloperApi ::
  * Stores information about a stage to pass from the scheduler to SparkListeners.
+ * 存储一个阶段的信息，从调度程序到SparkListeners
  */
 @DeveloperApi
 class StageInfo(
@@ -36,13 +37,25 @@ class StageInfo(
     val parentIds: Seq[Int],
     val details: String,
     private[spark] val taskLocalityPreferences: Seq[Seq[TaskLocation]] = Seq.empty) {
-  /** When this stage was submitted from the DAGScheduler to a TaskScheduler. */
+  /** 
+   *  When this stage was submitted from the DAGScheduler to a TaskScheduler. 
+   *  当阶段的所有任务提交的时间
+   *  */
   var submissionTime: Option[Long] = None
-  /** Time when all tasks in the stage completed or when the stage was cancelled. */
+  /** 
+   *  Time when all tasks in the stage completed or when the stage was cancelled.
+   *  当阶段的所有任务完成或取消阶段时的时间
+   *   */
   var completionTime: Option[Long] = None
-  /** If the stage failed, the reason why. */
+  /** 
+   *  If the stage failed, the reason why. 
+   *  如果阶段失败了，原因为什么
+   *  */
   var failureReason: Option[String] = None
-  /** Terminal values of accumulables updated during this stage. */
+  /** 
+   *  Terminal values of accumulables updated during this stage. 
+   *  在这一阶段的累积数据更新值。
+   *  */
   val accumulables = HashMap[Long, AccumulableInfo]()
 
   def stageFailed(reason: String) {

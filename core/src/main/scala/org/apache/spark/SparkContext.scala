@@ -286,6 +286,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   // Generate the random name for a temp folder in external block store.
   // Add a timestamp as the suffix here to make it more safe
+  //随机生成外部块存储临时文件夹名称,添加一个时间戳作为后缀来让它更安全
   val externalBlockStoreFolderName = "spark-" + randomUUID.toString()
   @deprecated("Use externalBlockStoreFolderName instead.", "1.4.0")
   val tachyonFolderName = externalBlockStoreFolderName
@@ -362,6 +363,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * A unique identifier for the Spark application.
+   * Spark应用程序唯一标示,它的格式取决于调度程序的实现
    * Its format depends on the scheduler implementation.
    * (i.e.
    *  in case of local spark app something like 'local-1433865536131'
@@ -383,6 +385,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] var checkpointDir: Option[String] = None
 
   // Thread Local variable that can be used by users to pass information down the stack
+  // 线程本地变量，用户传递堆栈中的信息
   protected[spark] val localProperties = new InheritableThreadLocal[Properties] {
     override protected def childValue(parent: Properties): Properties = {
       // Note: make a clone such that changes in the parent properties aren't reflected in
@@ -408,7 +411,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     value
   }
 
-  /** Control our logLevel. This overrides any user-defined log settings.
+  /** 
+   * Control our logLevel. This overrides any user-defined log settings.
+   * 控制日志级别,这将覆盖任何自定义日志设置
    * @param logLevel The desired log level as a string.
    * Valid log levels include: ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
    */
@@ -422,7 +427,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 }
 //初始化代码块
   try {
-    //对SparkCon进行复制,然后对各种配置信息进行检验.
+    //对SparkCon进行复制
     _conf = config.clone()
     //对Spark各种信息进行校验
     _conf.validateSettings()
@@ -455,8 +460,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     _conf.set("spark.executor.id", SparkContext.DRIVER_IDENTIFIER)
 
     _jars = _conf.getOption("spark.jars").map(_.split(",")).map(_.filter(_.size != 0)).toSeq.flatten//转换 
-    _files = _conf.getOption("spark.files").map(_.split(",")).map(_.filter(_.size != 0))
-      .toSeq.flatten
+    _files = _conf.getOption("spark.files").map(_.split(",")).map(_.filter(_.size != 0)).toSeq.flatten
    //保存日志相关信息的路径，可以是hdfs://开头的HDFS路径，也可以是file://开头的本地路径，都需要提前创建
     _eventLogDir =
       if (isEventLogEnabled) {
@@ -491,6 +495,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     listenerBus.addListener(jobProgressListener)
 
     // Create the Spark execution environment (cache, map output tracker, etc)
+    //创建Spark执行环境
     _env = createSparkEnv(_conf, isLocal, listenerBus)
     SparkEnv.set(_env)
     //清除过期的持久化RDD,构造MetadataCleaner时的参数是cleanup,用于清理persistentRdds
@@ -575,16 +580,16 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 
     // start TaskScheduler after taskScheduler sets DAGScheduler reference in DAGScheduler's
     // constructor
-    _taskScheduler.start()
+    _taskScheduler.start() //启动任务调度器
 
-    _applicationId = _taskScheduler.applicationId()
+    _applicationId = _taskScheduler.applicationId()//获得应用程序ID
     _applicationAttemptId = taskScheduler.applicationAttemptId()
     _conf.set("spark.app.id", _applicationId)
     _env.blockManager.initialize(_applicationId)
 
     // The metrics system for Driver need to be set spark.app.id to app ID.
     // So it should start after we get app ID from the task scheduler and set spark.app.id.
-    metricsSystem.start()
+    metricsSystem.start()//启动测量系统
     // Attach the driver metrics servlet handler to the web ui after the metrics system is started.
     metricsSystem.getServletHandlers.foreach(handler => ui.foreach(_.attachHandler(handler)))
 
@@ -2262,6 +2267,7 @@ object SparkContext extends Logging {
 
   /**
    * Lock that guards access to global variables that track SparkContext construction.
+   * 锁保护访问全局变量，跟踪sparkcontext构造
    */
   private val SPARK_CONTEXT_CONSTRUCTOR_LOCK = new Object()
 

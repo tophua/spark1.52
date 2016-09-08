@@ -22,6 +22,7 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * :: DeveloperApi ::
  * A result of a job in the DAGScheduler.
+ * Job正在提交的作业,一个Job可能由一个到多个Task组成
  */
 @DeveloperApi
 sealed trait JobResult

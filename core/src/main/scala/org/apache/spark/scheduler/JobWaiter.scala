@@ -22,6 +22,7 @@ package org.apache.spark.scheduler
  * results to the given handler function.
  * 一个对象用来监听dagscheduler Job执行状态,Job是由多个task组织的tasks,
  * 因此只有Job的所有Task都完成,Job才标记完成,任意一个Task失败都标记该Job失败 
+ * Job正在提交的作业,一个Job可能由一个到多个Task组成
  * 
  */
 private[spark] class JobWaiter[T](
