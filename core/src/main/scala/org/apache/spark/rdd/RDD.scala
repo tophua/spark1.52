@@ -138,6 +138,7 @@ abstract class RDD[T: ClassTag](
   protected def getPreferredLocations(split: Partition): Seq[String] = Nil
 
   /** Optionally overridden by subclasses to specify how they are partitioned. */
+  //键值对RDD（key-value pair RDD）中键的分区算法，有HashPartitioner，CustomPartitioner
   @transient val partitioner: Option[Partitioner] = None
 
   // =======================================================================
