@@ -33,22 +33,25 @@ private case class MemoryEntry(value: Any, size: Long, deserialized: Boolean)
  * Stores blocks in memory, either as Arrays of deserialized Java objects or as
  * serialized ByteBuffers.
  * 负责将没有序列化的Java对象数组或者序列化的ByteBuffer存储到内存中
+ * maxMemory 最大可用的内存大小
+ * 
  */
 private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   extends BlockStore(blockManager) {
 
   private val conf = blockManager.conf
-  //被很多MemoryEntry占据的内存currentMemory,这些是通过entries持有
+  //存储Block数据的Map,以BlockId为key,MemoryEntry为值,并能根据存储的先后顺序访问
   private val entries = new LinkedHashMap[BlockId, MemoryEntry](32, 0.75f, true)
- //当前Driver或者Executor已使用内存
+ //当前内存使用情况
   @volatile private var currentMemory = 0L
  
   // Ensure only one thread is putting, and if necessary, dropping blocks at any given time
+  //同步锁，保证只有一个线程在写和删除Block
   private val accountingLock = new Object
 
   // A mapping from taskAttemptId to amount of memory used for unrolling a block (in bytes)
   // All accesses of this map are assumed to have manually synchronized on `accountingLock`
-  //通过占座方式占用的内存CurrentUnrollMemory,好比教室空着的座位,有人在座坐放上书本
+  //记录各个线程展开Iterator时的内存使用情况，key为线程的Id，value为内存使用情况
   //当前Dirver或者Executor中所有线程展开的Block都存入此Map中,key为线程ID,value为线程展开的所有块的内存大小总和
   private val unrollMemoryMap = mutable.HashMap[Long, Long]()
   // Same as `unrollMemoryMap`, but for pending unroll memory as defined below.
@@ -61,7 +64,9 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   private val pendingUnrollMemoryMap = mutable.HashMap[Long, Long]()
 
   /**
-   * 当前Drver或者Executor最多展开的Block所占的内存,可以修改属性Spark.storage.unrollFraction改变大小
+   * 展开Iterator时需要保证的内存大小,值为maxMemory*conf.getDouble(“spark.storage.unrollFraction”, 0.2)
+   * 若展开时没有足够的内存, 并且展开Iterator使用的内存没有达到maxUnrollMemory,
+   * 需要将存储在内存中的可以存储到磁盘中的Block存储到磁盘,以释放内存
    * The amount of space ensured for unrolling values in memory, shared across all cores.
    * This space is not reserved in advance, but allocated dynamically by dropping existing blocks.
    */
@@ -71,10 +76,13 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   }
 
   // Initial memory to request before unrolling any block
-  //初始内存需要展开块的内存
+  /**
+   * 展开Iterator时每个线程初始分配的内存大小，当内存不够时会以1.5倍的大小申请内存，
+   * 若没有足够的内存并且没有达到maxUnrollMemory，将存储在内存中的可以存储到磁盘中的Block存储到磁盘，
+   * 以释放内存。值为conf.getLong(“spark.storage.unrollMemoryThreshold”, 1024 * 1024)
+   */
   private val unrollMemoryThreshold: Long =
     conf.getLong("spark.storage.unrollMemoryThreshold", 1024 * 1024)
-
   if (maxMemory < unrollMemoryThreshold) {
     logWarning(s"Max memory ${Utils.bytesToString(maxMemory)} is less than the initial memory " +
       s"threshold ${Utils.bytesToString(unrollMemoryThreshold)} needed to store a block in " +
@@ -111,7 +119,8 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   /**
    * Use `size` to test if there is enough space in MemoryStore. If so, create the ByteBuffer and
    * put it into MemoryStore. Otherwise, the ByteBuffer won't be created.
-   *
+   * 将字节缓存形式的Block存储到内存中，若level.deserialized为真，则需要将字节缓存反序列化，
+   * 以数组的形式（Array[Any]）存储；若为假则以字节缓存形式（ByteBuffer）存储
    * The caller should guarantee that `size` is correct.
    */
   def putBytes(blockId: BlockId, size: Long, _bytes: () => ByteBuffer): PutResult = {
@@ -232,7 +241,9 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       Some(blockManager.dataDeserialize(blockId, buffer))
     }
   }
-
+/**
+ * 将BlockId对应的Block从entries中移除，更新currentMemory
+ */
   override def remove(blockId: BlockId): Boolean = {
     entries.synchronized {
       val entry = entries.remove(blockId)
@@ -245,7 +256,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       }
     }
   }
-
+//清空entries，并令currentMemory为0
   override def clear() {
     entries.synchronized {
       entries.clear()
@@ -388,7 +399,9 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    * Try to put in a set of values, if we can free up enough space. The value should either be
    * an Array if deserialized is true or a ByteBuffer otherwise. Its (possibly estimated) size
    * must also be passed by the caller.
-   *
+   * 将value（数组，如果deserialized为真；或字节缓存，如果deserialized为假）存储到内存。
+   * 该方法会首先调用ensureFreeSpace来释放足够的内存，如果有足够的内存则将Block放到entries，
+   * 否则如果Block可以被放到磁盘（level.useDisk）则将Block存储到磁盘，否则返回失败的结果
    * `value` will be lazily created. If it cannot be put into MemoryStore or disk, `value` won't be
    * created to avoid OOM since it may be a big ByteBuffer.
    *

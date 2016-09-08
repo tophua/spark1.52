@@ -82,6 +82,7 @@ private[spark] class BlockManager(
     ThreadUtils.newDaemonCachedThreadPool("block-manager-future", 128))
 
   // Actual storage of where blocks are kept
+  //扩展存储块初始化
   private var externalBlockStoreInitialized = false
   //内存存储
   private[spark] val memoryStore = new MemoryStore(this, maxMemory)
@@ -114,6 +115,7 @@ private[spark] class BlockManager(
 
   // Address of the server that serves this executor's shuffle files. This is either an external
   // service, or just our own Executor's BlockManager.
+  //执行shuffle服务器的地址
   private[spark] var shuffleServerId: BlockManagerId = _
 
   // Client to read other executors' shuffle files. This is either an external service, or just the
@@ -148,6 +150,7 @@ private[spark] class BlockManager(
 
   // Pending re-registration action being executed asynchronously or null if none is pending.
   // Accesses should synchronize on asyncReregisterLock.
+  //异步执行申请重新注册的动作,如果没有等待
   private var asyncReregisterTask: Future[Unit] = null
   private val asyncReregisterLock = new Object
   //非广播清理器
@@ -191,7 +194,7 @@ private[spark] class BlockManager(
    * Initializes the BlockManager with the given appId. This is not performed in the constructor as
    * the appId may not be known at BlockManager instantiation time (in particular for the driver,
    * where it is only learned after registration with the TaskScheduler).
-   *
+   * 给定appId初始化BlockManager,
    * This method initializes the BlockTransferService and ShuffleClient, registers with the
    * BlockManagerMaster, starts the BlockManagerWorker endpoint, and registers with a local shuffle
    * service if configured.
@@ -253,11 +256,12 @@ private[spark] class BlockManager(
    * Report all blocks to the BlockManager again. This may be necessary if we are dropped
    * by the BlockManager and come back or if we become capable of recovering blocks on disk after
    * an executor crash.
-   *
-   * This function deliberately fails silently if the master returns false (indicating that
+   * 报告所有的块到blockmanager,
+   * This function deliberately(故意) fails silently if the master returns false (indicating that
    * the slave needs to re-register). The error condition will be detected again by the next
    * heart beat attempt or new block registration and another try to re-register all blocks
    * will be made then.
+   * 错误状态将尝试再次检测到下一个心跳或重新块注册
    */
   private def reportAllBlocks(): Unit = {
     logInfo(s"Reporting ${blockInfo.size} blocks to the master.")
@@ -273,7 +277,7 @@ private[spark] class BlockManager(
   /**
    * Re-register with the master and report all blocks to it. This will be called by the heart beat
    * thread if our heartbeat to the block manager indicates that we were not registered.
-   *
+   * 重新注册到Master，并报告所有块,这将没有注册调用心跳的线程
    * Note that this method must be called without any BlockInfo locks held.
    */
   def reregister(): Unit = {
@@ -285,7 +289,7 @@ private[spark] class BlockManager(
 
   /**
    * Re-register with the master sometime soon.
-   * Reregister,最后Reregister实际调用了BlockmanagerMaster的RegisterBlockManager方法
+   * 异步重新注册Master
    */
   private def asyncReregister(): Unit = {
     asyncReregisterLock.synchronized {
@@ -715,7 +719,7 @@ private[spark] class BlockManager(
       bufferSize: Int,
       writeMetrics: ShuffleWriteMetrics): DiskBlockObjectWriter = {
     val compressStream: OutputStream => OutputStream = wrapForCompression(blockId, _)
-    //sync同步,false默认异步
+    //是否同步写入
     val syncWrites = conf.getBoolean("spark.shuffle.sync", false)
     new DiskBlockObjectWriter(blockId, file, serializerInstance, bufferSize, compressStream,
       syncWrites, writeMetrics)

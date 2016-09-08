@@ -38,12 +38,13 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   extends Logging {
 
   private[spark]
+  //每个本地根目录生成子目录的个数，生成子目录是为了避免生成过多的索引节点
   val subDirsPerLocalDir = blockManager.conf.getInt("spark.diskStore.subDirectories", 64)
 
   /* Create one local directory for each path mentioned in spark.local.dir; then, inside this
    * directory, create multiple subdirectories that we will hash files into, in order to avoid
    * having really large inodes at the top level. */
-  //创建本地文件目录,然后创建二级目录  
+  //存放Block对应的File的本地根目录
   private[spark] val localDirs: Array[File] = createLocalDirs(conf)
   if (localDirs.isEmpty) {
     logError("Failed to create any local dir.")
@@ -51,6 +52,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   }
   // The content of subDirs is immutable but the content of subDirs(i) is mutable. And the content
   // of subDirs(i) is protected by the lock of subDirs(i)
+  //存放所有子目录的二维数组
   private val subDirs = Array.fill(localDirs.length)(new Array[File](subDirsPerLocalDir))
 
   private val shutdownHook = addShutdownHook()
@@ -59,7 +61,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   // This method should be kept in sync with
   // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getFile().
   /**
-   * 获取磁盘文件
+   * 根据文件名，取得文件,该方法先将filename哈希到相应的子目录，然后判断子目录是否存在，若不存在则生成
    * 目录结构如下所述
    * /tmp/spark-local-20140723092540-7f24
    * /tmp/spark-local-20140723092540-7f24/0d
@@ -94,12 +96,12 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
 
     new File(subDir, filename)
   }
-//获取硬盘上的文件,
+  //根据BlockId取得相应的File
   def getFile(blockId: BlockId): File = getFile(blockId.name)
 
   /** 
    *  Check if disk block manager has a block. 
-   *  检查是否包含指定的块
+   *  判断BlockId是否有存储在该本地磁盘
    *  */
   def containsBlock(blockId: BlockId): Boolean = {
     getFile(blockId.name).exists()
@@ -107,7 +109,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
 
   /** 
    *  List all the files currently stored on disk by the disk manager. 
-   *  列出当前由磁盘管理器存储在磁盘上的所有文件。
+   *  取得存储的所有的文件
    *  */
   def getAllFiles(): Seq[File] = {
     // Get all the files inside the array of array of directories
@@ -126,7 +128,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
 
   /** 
    *  List all the blocks currently stored on disk by the disk manager. 
-   *  列出当前由磁盘管理器存储在磁盘上的所有块。
+   *  取得存储的所有Block的BlockId。
    *  */
   def getAllBlocks(): Seq[BlockId] = {
     getAllFiles().map(f => BlockId(f.getName))
@@ -134,7 +136,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
 
   /** 
    *  Produces a unique block id and File suitable for storing local intermediate results. 
-   *  产生一个唯一的块标识和文件，适用于存储本地中间结果。
+   *  创建本地临时文件
    *  
    * */
   

@@ -583,11 +583,11 @@ class DAGScheduler(
    * 将作业提交到作业调度器和得到一个jobwaiter对象,JobWaiter对象可以用来堵塞直到Job执行结束或可取消Job
    */
   def submitJob[T, U](
-      rdd: RDD[T],
-      func: (TaskContext, Iterator[T]) => U,
-      partitions: Seq[Int],
-      callSite: CallSite,
-      resultHandler: (Int, U) => Unit,
+      rdd: RDD[T],//job运行的RDD
+      func: (TaskContext, Iterator[T]) => U,//作用于RDD上的函数
+      partitions: Seq[Int],//需要处理的分区索引
+      callSite: CallSite,//用户代码中调用spark接口的堆栈信息
+      resultHandler: (Int, U) => Unit,//结果处理函数
       properties: Properties): JobWaiter[U] = {
     // Check to make sure we are not launching a task on a partition that does not exist.
     //调用RDD.partitions函数获取 当前Job最大分区数,即maxPartitions
@@ -642,18 +642,19 @@ class DAGScheduler(
   }
 //近似估计
   def runApproximateJob[T, U, R](
-      rdd: RDD[T],
-      func: (TaskContext, Iterator[T]) => U,
-      evaluator: ApproximateEvaluator[U, R],
-      callSite: CallSite,
-      timeout: Long,
-      properties: Properties): PartialResult[R] = {
+      rdd: RDD[T],//job运行的RDD
+      func: (TaskContext, Iterator[T]) => U,//作用于RDD上的函数
+      evaluator: ApproximateEvaluator[U, R],//结果近似计算与评价的实现
+      callSite: CallSite,//用户代码中调用spark接口的堆栈信息
+      timeout: Long,//超时时间
+      properties: Properties): PartialResult[R] = {//PartialResult 返回值部分结果
     val listener = new ApproximateActionListener(rdd, func, evaluator, timeout)
     val func2 = func.asInstanceOf[(TaskContext, Iterator[_]) => _]
     val partitions = (0 until rdd.partitions.length).toArray
     val jobId = nextJobId.getAndIncrement()
     eventProcessLoop.post(JobSubmitted(
       jobId, rdd, func2, partitions, callSite, listener, SerializationUtils.clone(properties)))
+      //
     listener.awaitResult()    // Will throw an exception if the job fails
   }
 

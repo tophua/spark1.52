@@ -31,8 +31,7 @@ import org.apache.spark.util.Utils
  */
 private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBlockManager)
   extends BlockStore(blockManager) with Logging {
-//以字节为单位的块大小，用于磁盘读取一个块大小时进行内存映射。这可以防止Spark在内存映射时使用很小块，
-//一般情况下，对块进行内存映射的开销接近或低于操作系统的页大小
+//对文件进行内存映射的阈值，即当文件大于该值时getBytes方法对文件进行内存映射，而不是直接将该文件的内容读取到字节缓存区。
   val minMemoryMapBytes = blockManager.conf.getSizeAsBytes("spark.storage.memoryMapThreshold", "2m")
 
   override def getSize(blockId: BlockId): Long = {
@@ -40,7 +39,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
   }
 
   /**
-   * putBytes 方法的作用是通过diskManager.getFile方法获取文件,然后使用NIO的Channel将ByteBuffer写入文件
+   * 将BlockId对应的字节缓存存储到磁盘
    */
   override def putBytes(blockId: BlockId, _bytes: ByteBuffer, level: StorageLevel): PutResult = {
     // So that we do not modify the input offsets !
@@ -63,7 +62,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       file.getName, Utils.bytesToString(bytes.limit), finishTime - startTime))
     PutResult(bytes.limit(), Right(bytes.duplicate()))
   }
-
+//将BlockId对应的Array数据存储到磁盘，该方法先将Array序列化，然后存储到相应的文件。
   override def putArray(
       blockId: BlockId,
       values: Array[Any],
@@ -71,7 +70,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       returnValues: Boolean): PutResult = {
     putIterator(blockId, values.toIterator, level, returnValues)
   }
-
+//将BlockId对应的Iterator数据存储到磁盘，该方法先将Iterator序列化，然后存储到相应的文件。
   override def putIterator(
       blockId: BlockId,
       values: Iterator[Any],
@@ -116,7 +115,10 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       PutResult(length, null)
     }
   }
-//获取文件,然后使用NIO将文件读取到ByteBuffer
+   /**
+    * 读取文件中偏移为offset，长度为length的内容。
+    * 该方法会判断length是否大于minMemoryMapBytes，若大于，则做内存映射，否则直接读取到字节缓存中。
+    */
   private def getBytes(file: File, offset: Long, length: Long): Option[ByteBuffer] = {
     val channel = new RandomAccessFile(file, "r").getChannel
     Utils.tryWithSafeFinally {
@@ -145,18 +147,18 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       channel.close()
     }
   }
-/**
- * getBytes 方法通过diskManager.getFile方法获取文件,然后使用NIO将文件读取到ByteBuffer
- */
+  /**
+   *读取存储在磁盘中与BlockId对应的内容。
+   */
   override def getBytes(blockId: BlockId): Option[ByteBuffer] = {
     val file = diskManager.getFile(blockId.name)
     getBytes(file, 0, file.length)
   }
-
+  //根据FileSegment读取内容，其中 FileSegment存放文件和要读取数据的偏移和大小
   def getBytes(segment: FileSegment): Option[ByteBuffer] = {
     getBytes(segment.file, segment.offset, segment.length)
   }
-
+//读取BlockId对应的内容，并反序列化为Iterator
   override def getValues(blockId: BlockId): Option[Iterator[Any]] = {
     getBytes(blockId).map(buffer => blockManager.dataDeserialize(blockId, buffer))
   }
@@ -164,13 +166,14 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
   /**
    * A version of getValues that allows a custom serializer. This is used as part of the
    * shuffle short-circuit code.
+   * 读取BlockId对应的内容，并根据自定义的Serializer反序列化为Iterator。
    */
   def getValues(blockId: BlockId, serializer: Serializer): Option[Iterator[Any]] = {
     // TODO: Should bypass getBytes and use a stream based implementation, so that
     // we won't use a lot of memory during e.g. external sort merge.
     getBytes(blockId).map(bytes => blockManager.dataDeserialize(blockId, bytes, serializer))
   }
-
+  //删除存储的BlockId对应的Block。
   override def remove(blockId: BlockId): Boolean = {
     val file = diskManager.getFile(blockId.name)
     // If consolidation mode is used With HashShuffleMananger, the physical filename for the block
@@ -182,7 +185,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       false
     }
   }
-
+  //判断是否存储BlockId对应的Block。
   override def contains(blockId: BlockId): Boolean = {
     val file = diskManager.getFile(blockId.name)
     file.exists()

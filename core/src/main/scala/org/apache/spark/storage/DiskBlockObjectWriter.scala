@@ -51,10 +51,15 @@ private[spark] class DiskBlockObjectWriter(
   private var channel: FileChannel = null
   private var bs: OutputStream = null
   private var fos: FileOutputStream = null
+  //记录每条数据写入花费的时间
   private var ts: TimeTrackingOutputStream = null
+  //压缩算法流
   private var objOut: SerializationStream = null
+  //是否初始化
   private var initialized = false
+  //是否关闭
   private var hasBeenClosed = false
+  //
   private var commitAndCloseHasBeenCalled = false
 
   /**
@@ -72,8 +77,11 @@ private[spark] class DiskBlockObjectWriter(
    * -----: Current writes to the underlying file.
    * xxxxx: Existing contents of the file.
    */
-  private val initialPosition = file.length()
+  //Block在File中开始的位置，不变量，值为file.length()，即位File中已经被其他Block写入的数据量
+  private val initialPosition = file.length() 
+  //Block在File中结束的位置，初始值为-1，当调用commitAndClose方法时更新为当前File的大小，然后不可再改变。
   private var finalPosition: Long = -1
+  //当前数据写入的位置，初始值为initialPosition，每写入32条数据时更新为channel.position()
   private var reportedPosition = initialPosition
 
   /**
@@ -82,15 +90,18 @@ private[spark] class DiskBlockObjectWriter(
    */
   private var numRecordsWritten = 0
 /**
- * 打一个文件输出流,利用NIO,压缩,缓存,序列化方式打开一个文件输出流
+ * 初始化各个输出流, 打一个文件输出流,利用NIO,压缩,缓存,序列化方式打开一个文件输出流
+ * 
  */
   def open(): DiskBlockObjectWriter = {
     if (hasBeenClosed) {
       throw new IllegalStateException("Writer already closed. Cannot be reopened.")
     }
     fos = new FileOutputStream(file, true)
+    //记录每条数据写入花费的时间
     ts = new TimeTrackingOutputStream(writeMetrics, fos)
     channel = fos.getChannel()
+    //压缩算法流
     bs = compressStream(new BufferedOutputStream(ts, bufferSize))
     objOut = serializerInstance.serializeStream(bs)
     initialized = true
@@ -104,7 +115,7 @@ private[spark] class DiskBlockObjectWriter(
           // Force outstanding writes to disk and track how long it takes
           objOut.flush()
           val start = System.nanoTime()
-          fos.getFD.sync()
+          fos.getFD.sync()//
           writeMetrics.incShuffleWriteTime(System.nanoTime() - start)
         }
       } {
@@ -120,12 +131,13 @@ private[spark] class DiskBlockObjectWriter(
       hasBeenClosed = true
     }
   }
-
+  //判断文件是否已经打开
   def isOpen: Boolean = objOut != null
 
   /**
    * Flush the partial writes and commit them as a single atomic block.
-   * 将缓存数据写入磁盘并关闭缓存,然后更新测量数据
+   * 将缓存数据写入磁盘,并更新finalPosition,然后更新测量数据
+   * 
    */
   def commitAndClose(): Unit = {
     if (initialized) {
@@ -148,6 +160,7 @@ private[spark] class DiskBlockObjectWriter(
    * Reverts writes that haven't been flushed yet. Callers should invoke this function
    * when there are runtime exceptions. This method will not throw, though it may be
    * unsuccessful in truncating written data.
+   * 撤销所有的写入操作，将文件中的内容恢复到写入数据之前。
    */
   def revertPartialWritesAndClose() {
     // Discard current writes. We do this by flushing the outstanding writes and then
@@ -186,7 +199,7 @@ private[spark] class DiskBlockObjectWriter(
     objOut.writeValue(value)
     recordWritten()
   }
-
+   //写入一条数据
   override def write(b: Int): Unit = throw new UnsupportedOperationException()
 
   override def write(kvBytes: Array[Byte], offs: Int, len: Int): Unit = {
@@ -213,7 +226,8 @@ private[spark] class DiskBlockObjectWriter(
   /**
    * Returns the file segment of committed data that this Writer has written.
    * This is only valid after commitAndClose() has been called.
-   * 用于创建文件分片FileSegment(FileSegment记录分片的起始,结束偏移量)
+   * 返回FileSegment，该方法只有在commitAndClose方法调用之后才有效。
+   * FileSegment表示文件的一个连续的片段
    */
   def fileSegment(): FileSegment = {
     if (!commitAndCloseHasBeenCalled) {
