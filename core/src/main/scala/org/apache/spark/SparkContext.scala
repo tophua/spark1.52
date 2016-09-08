@@ -2282,18 +2282,19 @@ object SparkContext extends Logging {
   /**
    * Points to a partially-constructed SparkContext if some thread is in the SparkContext
    * constructor, or `None` if no SparkContext is being constructed.
-   *
+   * 指向一个部分构造SprakContext在一些线程SparkContext构造函数,或`None` 非None,sparkcontext正在建设
    * Access to this field is guarded by SPARK_CONTEXT_CONSTRUCTOR_LOCK
    */
   private var contextBeingConstructed: Option[SparkContext] = None
 
   /**
    * Called to ensure that no other SparkContext is running in this JVM.
-   *
+   * 为确保没有其他sparkcontext在JVM中运行
    * Throws an exception if a running context is detected and logs a warning if another thread is
    * constructing a SparkContext.  This warning is necessary because the current locking scheme
    * prevents us from reliably distinguishing between cases where another context is being
    * constructed and cases where another constructor threw an exception.
+   * 如果另一个线程正在构造则抛出异常,
    */
   private def assertNoOtherContextIsRunning(
       sc: SparkContext,
@@ -2333,7 +2334,9 @@ object SparkContext extends Logging {
    * singleton object. Because we can only have one active SparkContext per JVM,
    * this is useful when applications may wish to share a SparkContext.
    *
+   * 这个函数用来获取或实例化单个sparkcontext,每个JVM只有一个SparkContext激活的,使用的时候可能与应用程序共享SparkContext
    * Note: This function cannot be used to create multiple SparkContext instances
+   * 这个函数不能创建多个SparkContext实例,即使允许多个上下文.
    * even if multiple contexts are allowed.
    */
   def getOrCreate(config: SparkConf): SparkContext = {
@@ -2367,13 +2370,14 @@ object SparkContext extends Logging {
    * thread is constructing a SparkContext.  This warning is necessary because the current locking
    * scheme prevents us from reliably distinguishing between cases where another context is being
    * constructed and cases where another constructor threw an exception.
+   * 确保实例的唯一性,并将当前SparkContext标记为正在构建中.
    */
   private[spark] def markPartiallyConstructed(
       sc: SparkContext,
       allowMultipleContexts: Boolean): Unit = {
     SPARK_CONTEXT_CONSTRUCTOR_LOCK.synchronized {
       assertNoOtherContextIsRunning(sc, allowMultipleContexts)
-      contextBeingConstructed = Some(sc)
+      contextBeingConstructed = Some(sc)//标示SparkContext正在构建中
     }
   }
 
@@ -2604,6 +2608,7 @@ object SparkContext extends Logging {
    * Find the JAR that contains the class of a particular object, to make it easy for users
    * to pass their JARs to SparkContext. In most cases you can call jarOfObject(this) in
    * your driver program.
+   * 给定类加载查找Jar，让用户很容易把罐子sparkcontext。
    */
   def jarOfObject(obj: AnyRef): Option[String] = jarOfClass(obj.getClass)
 
@@ -2636,6 +2641,7 @@ object SparkContext extends Logging {
 
   /**
    * The number of driver cores to use for execution in local mode, 0 otherwise.
+   * 本地模式下执行的驱动程序内核的数量，否则为0
    */
   private[spark] def numDriverCores(master: String): Int = {
     def convertToInt(threads: String): Int = {
@@ -2808,19 +2814,24 @@ object SparkContext extends Logging {
 
 /**
  * A collection of regexes for extracting information from the master string.
+ * 使用正则表达式从Master字符串中提取集合信息
  */
 private object SparkMasterRegex {
   // Regular expression used for local[N] and local[*] master formats
-  val LOCAL_N_REGEX = """local\[([0-9]+|\*)\]""".r
+  //注意转换\转义|\符匹配
+  val LOCAL_N_REGEX = """local\[([0-9]+|\*)\]""".r//
   // Regular expression for local[N, maxRetries], used in tests with failing tasks
   val LOCAL_N_FAILURES_REGEX = """local\[([0-9]+|\*)\s*,\s*([0-9]+)\]""".r
   // Regular expression for simulating a Spark cluster of [N, cores, memory] locally
   val LOCAL_CLUSTER_REGEX = """local-cluster\[\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*]""".r
   // Regular expression for connecting to Spark deploy clusters
+  //用于连接到Spark部署集群的正则表达式
   val SPARK_REGEX = """spark://(.*)""".r
+  //正则表达式连接到目标群 by mesos:// or zk:// url
   // Regular expression for connection to Mesos cluster by mesos:// or zk:// url
   val MESOS_REGEX = """(mesos|zk)://.*""".r
   // Regular expression for connection to Simr cluster
+  // 用于连接到集群环境的正则表达式
   val SIMR_REGEX = """simr://(.*)""".r
 }
 

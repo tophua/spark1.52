@@ -24,7 +24,9 @@ import org.apache.spark.scheduler.{SchedulerBackend, TaskScheduler, TaskSchedule
 import org.apache.spark.scheduler.cluster.{SimrSchedulerBackend, SparkDeploySchedulerBackend}
 import org.apache.spark.scheduler.cluster.mesos.{CoarseMesosSchedulerBackend, MesosSchedulerBackend}
 import org.apache.spark.scheduler.local.LocalBackend
-
+/**
+ * 测试创建任务调度器TaskScheduler,同时SparkContext.SparkMasterRegex正测表达测试
+ */
 class SparkContextSchedulerCreationSuite
   extends SparkFunSuite with LocalSparkContext with PrivateMethodTester with Logging {
 
@@ -34,13 +36,16 @@ class SparkContextSchedulerCreationSuite
   def createTaskScheduler(master: String, conf: SparkConf): TaskSchedulerImpl = {
     // Create local SparkContext to setup a SparkEnv. We don't actually want to start() the
     // real schedulers, so we don't want to create a full SparkContext with the desired scheduler.
+    //创建本地sparkcontext设置sparkenv,我们不想实际调用 start()方法,
     sc = new SparkContext("local", "test", conf)
+    //Tuple2[SchedulerBackend, TaskScheduler]返回类型
     val createTaskSchedulerMethod =
       PrivateMethod[Tuple2[SchedulerBackend, TaskScheduler]]('createTaskScheduler)
+    //invokePrivate反射调用createTaskScheduler方法
     val (_, sched) = SparkContext invokePrivate createTaskSchedulerMethod(sc, master)
-    sched.asInstanceOf[TaskSchedulerImpl]
+    sched.asInstanceOf[TaskSchedulerImpl]//强制类型转换
   }
-
+  //val LOCAL_N_REGEX = """local\[([0-9]+|\*)\]""".r正则表达式
   test("bad-master") {
     val e = intercept[SparkException] {
       createTaskScheduler("localhost:1234")
@@ -75,7 +80,7 @@ class SparkContextSchedulerCreationSuite
       case _ => fail()
     }
   }
-
+//val LOCAL_N_FAILURES_REGEX = """local\[([0-9]+|\*)\s*,\s*([0-9]+)\]""".r正则表达式
   test("local-*-n-failures") {
     val sched = createTaskScheduler("local[* ,2]")
     assert(sched.maxTaskFailures === 2)
@@ -110,6 +115,7 @@ class SparkContextSchedulerCreationSuite
   }
 
   test("local-default-parallelism") {
+    //默认并行数
     val conf = new SparkConf().set("spark.default.parallelism", "16")
     val sched = createTaskScheduler("local", conf)
 
@@ -118,14 +124,14 @@ class SparkContextSchedulerCreationSuite
       case _ => fail()
     }
   }
-
+//val SIMR_REGEX = """simr://(.*)""".r
   test("simr") {
     createTaskScheduler("simr://uri").backend match {
       case s: SimrSchedulerBackend => // OK
       case _ => fail()
     }
   }
-
+//val LOCAL_CLUSTER_REGEX = """local-cluster\[\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*]""".r
   test("local-cluster") {
     createTaskScheduler("local-cluster[3, 14, 1024]").backend match {
       case s: SparkDeploySchedulerBackend => // OK
@@ -144,7 +150,7 @@ class SparkContextSchedulerCreationSuite
       case e: Throwable => fail(e)
     }
   }
-
+//
   test("yarn-cluster") {
     testYarn("yarn-cluster", "org.apache.spark.scheduler.cluster.YarnClusterScheduler")
   }
@@ -169,7 +175,7 @@ class SparkContextSchedulerCreationSuite
       case e: Throwable => fail(e)
     }
   }
-
+// MESOS_REGEX = """(mesos|zk)://.*""".r
   test("mesos fine-grained") {
     testMesos("mesos://localhost:1234", classOf[MesosSchedulerBackend], coarse = false)
   }
