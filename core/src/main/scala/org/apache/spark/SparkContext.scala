@@ -618,7 +618,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
         None
       }
     _executorAllocationManager.foreach(_.start())
-
+   //ContextCleaner用于清理超出应用范围的RDD、ShuffleDependency和Broadcast对象
     _cleaner =
       if (_conf.getBoolean("spark.cleaner.referenceTracking", true)) {
         Some(new ContextCleaner(this))
@@ -1613,6 +1613,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   /**
    * :: DeveloperApi ::
    * Return information about blocks stored in all of the slaves
+   * 返回存储在Slove中的所有块的信息
    */
   @DeveloperApi
   def getExecutorStorageStatus: Array[StorageStatus] = {
@@ -1623,6 +1624,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   /**
    * :: DeveloperApi ::
    * Return pools for fair scheduler
+   * 返回公平调度池
    */
   @DeveloperApi
   def getAllPools: Seq[Schedulable] = {
@@ -1634,6 +1636,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   /**
    * :: DeveloperApi ::
    * Return the pool associated with the given name, if one exists
+   * 返回存在给定名称关联调度器
    */
   @DeveloperApi
   def getPoolForName(pool: String): Option[Schedulable] = {
@@ -1643,6 +1646,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 
   /**
    * Return current scheduling mode
+   * 返回当前调度模式
    */
   def getSchedulingMode: SchedulingMode.SchedulingMode = {
     assertNotStopped()
@@ -1652,6 +1656,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   /**
    * Clear the job's list of files added by `addFile` so that they do not get downloaded to
    * any new nodes.
+   * 清除
    */
   @deprecated("adding files no longer creates local copies that need to be deleted", "1.0.0")
   def clearFiles() {
@@ -1670,6 +1675,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 
   /**
    * Register an RDD to be persisted in memory and/or disk storage
+   * 注册一个RDD被保存在内存或磁盘
    */
   private[spark] def persistRDD(rdd: RDD[_]) {
     persistentRdds(rdd.id) = rdd
@@ -1677,6 +1683,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 
   /**
    * Unpersist an RDD from memory and/or disk storage
+   * 在内存或磁盘删除一个RDD
    */
   private[spark] def unpersistRDD(rddId: Int, blocking: Boolean = true) {
     env.blockManager.master.removeRdd(rddId, blocking)
@@ -2046,6 +2053,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   /**
    * :: Experimental ::
    * Submit a job for execution and return a FutureJob holding the result.
+   * 提交一个作业执行并返回持有的结果。
    */
   @Experimental
   def submitJob[T, U, R](
@@ -2071,24 +2079,34 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   /**
    * Cancel active jobs for the specified group. See [[org.apache.spark.SparkContext.setJobGroup]]
    * for more information.
+   * 取消指定组的活动作业
    */
   def cancelJobGroup(groupId: String) {
     assertNotStopped()
     dagScheduler.cancelJobGroup(groupId)
   }
 
-  /** Cancel all jobs that have been scheduled or are running.  */
+  /** 
+  *Cancel all jobs that have been scheduled or are running.  
+  *取消已计划或正在运行的所有作业
+  */
   def cancelAllJobs() {
     assertNotStopped()
     dagScheduler.cancelAllJobs()
   }
 
-  /** Cancel a given job if it's scheduled or running */
+  /** 
+  * Cancel a given job if it's scheduled or running 
+  * 取消一个计划或运行作业
+  */
   private[spark] def cancelJob(jobId: Int) {
     dagScheduler.cancelJob(jobId)
   }
 
-  /** Cancel a given stage and all jobs associated with it */
+  /** 
+  * Cancel a given stage and all jobs associated with it 
+  * 给定一个StageID取消计划或运行作业
+  */
   private[spark] def cancelStage(stageId: Int) {
     dagScheduler.cancelStage(stageId)
   }
@@ -2114,6 +2132,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   /**
    * Set the directory under which RDDs are going to be checkpointed. The directory must
    * be a HDFS path if running on a cluster.
+   * 设置目录下的RDDS将检查点,该目录必须在集群上运行是一个HDFS路径。
    */
   def setCheckpointDir(directory: String) {
 
@@ -2136,7 +2155,10 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 
   def getCheckpointDir: Option[String] = checkpointDir
 
-  /** Default level of parallelism to use when not given by user (e.g. parallelize and makeRDD). */
+  /** 
+  * Default level of parallelism to use when not given by user (e.g. parallelize and makeRDD). 
+  * 默认并发数
+  */
   def defaultParallelism: Int = {
     assertNotStopped()
     taskScheduler.defaultParallelism
@@ -2170,6 +2192,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
    * Registers listeners specified in spark.extraListeners, then starts the listener bus.
    * This should be called after all internal listeners have been registered with the listener bus
    * (e.g. after the web UI and event logging listeners have been registered).
+   *
    */
   private def setupAndStartListenerBus(): Unit = {
     // Use reflection to instantiate listeners specified via `spark.extraListeners`
