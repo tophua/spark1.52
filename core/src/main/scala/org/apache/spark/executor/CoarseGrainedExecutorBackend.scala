@@ -131,11 +131,14 @@ private[spark] class CoarseGrainedExecutorBackend(
      */
     case LaunchTask(data) =>
       if (executor == null) {
+        //如果不存在Executor则会报错，退出系统  
         logError("Received LaunchTask command but executor was null")
         System.exit(1)
       } else {
+        //反序列化Task，得到TaskDescription信息  
         val taskDesc = ser.deserialize[TaskDescription](data.value)
         logInfo("Got assigned task " + taskDesc.taskId)
+        //调用executor#launchTask在executor上加载任务  
         executor.launchTask(this, taskId = taskDesc.taskId, attemptNumber = taskDesc.attemptNumber,
           taskDesc.name, taskDesc.serializedTask)
       }

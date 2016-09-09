@@ -59,7 +59,7 @@ private[spark] abstract class Task[T](
 
   /**
    * Called by [[Executor]] to run this task.
-   *
+   * 被Executor调用以执行Task,TaskRunner.run调用此方法
    * @param taskAttemptId an identifier for this task attempt that is unique within a SparkContext.
    * @param attemptNumber how many times this task has been attempted (0 for the first attempt)
    * @return the result of the task along with updates of Accumulators.
@@ -70,6 +70,7 @@ private[spark] abstract class Task[T](
     attemptNumber: Int,
     metricsSystem: MetricsSystem)
   : (T, AccumulatorUpdates) = {
+    //创建一个Task上下文实例：TaskContextImpl类型的context 
     context = new TaskContextImpl(
       stageId,
       partitionId,
@@ -79,30 +80,36 @@ private[spark] abstract class Task[T](
       metricsSystem,
       internalAccumulators,
       runningLocally = false)
+    //将context放入TaskContext的taskContext变量中  
+    //taskContext变量为ThreadLocal[TaskContext] 
     TaskContext.setTaskContext(context)
+    //设置主机名localHostName、内部累加器internalAccumulators等Metrics信息  
     context.taskMetrics.setHostname(Utils.localHostName())
     context.taskMetrics.setAccumulatorsUpdater(context.collectInternalAccumulators)
-    //当前线程,在被打断的时候可以通过来停止该线程
+    //task线程为当前线程 ,在被打断的时候可以通过来停止该线程
     taskThread = Thread.currentThread()
-    if (_killed) {//如果当前Task被杀死,那么需要退出Task的执行
+    if (_killed) {//如果需要杀死task,调用kill()方法，且调用的方式为不中断线程  
       kill(interruptThread = false)
     }
     try {
-      //返回值
-      (runTask(context), context.collectAccumulators())//执行本次Task 
+      //调用runTask()方法,传入Task上下文信息context,执行Task,并调用Task上下文的collectAccumulators()方法,收集累加器
+      (runTask(context), context.collectAccumulators())
     } finally {
       //任务结束,执行任务结束时的回调函数
       context.markTaskCompleted()
       try {
         Utils.tryLogNonFatalError {
-          // Release memory used by this thread for shuffles
+          // Release memory used by this thread for shuffles 
+          //为shuffles释放当前线程使用的内存  
           SparkEnv.get.shuffleMemoryManager.releaseMemoryForThisTask()
         }
         Utils.tryLogNonFatalError {
           // Release memory used by this thread for unrolling blocks
+          // 为unrolling块释放当前线程使用的内存  
           SparkEnv.get.blockManager.memoryStore.releaseUnrollMemoryForThisTask()
         }
       } finally {
+         // 释放TaskContext  
         TaskContext.unset()
       }
     }

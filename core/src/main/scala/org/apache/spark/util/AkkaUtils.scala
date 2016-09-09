@@ -145,7 +145,10 @@ private[spark] object AkkaUtils extends Logging {
     frameSizeInMB * 1024 * 1024
   }
 
-  /** Space reserved for extra data in an Akka message besides serialized task or task result. */
+  /** 
+   *  Space reserved for extra data in an Akka message besides serialized task or task result.   
+   *   Task返回结果大小大于设定20M的阀值
+   *  */
   val reservedSizeBytes = 200 * 1024
 
   /**

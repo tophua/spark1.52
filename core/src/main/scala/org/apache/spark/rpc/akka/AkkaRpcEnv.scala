@@ -39,7 +39,7 @@ import org.apache.spark.util.{ActorLogReceive, AkkaUtils, ThreadUtils}
  *
  * TODO Once we remove all usages of Akka in other place, we can move this file to a new project and
  * remove Akka from the dependencies.
- *
+ * actorSystem是Akka提供用于创建分布式消息通信系统的基础类
  * @param actorSystem
  * @param conf
  * @param boundPort

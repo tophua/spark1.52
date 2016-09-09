@@ -30,7 +30,8 @@ import org.apache.spark.shuffle.ShuffleWriter
  * 
 * A ShuffleMapTask divides the elements of an RDD into multiple buckets (based on a partitioner
 * specified in the ShuffleDependency).
-*
+* 将map处理的结果，传输到reduce上的过程叫Shuffle
+* 
 * ShuflleMap 会产生临时计算结果,这些数据会被ResulTask 作为输入而读取.
 * 
 * ShuffleMapTask的计算结果是如何被ResultTask取得的呢?

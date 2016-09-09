@@ -49,7 +49,7 @@ private[spark] class ApplicationInfo(
 
   @transient private var nextExecutorId: Int = _
 
-  init()
+  init()//初始化方法
 
   private def readObject(in: java.io.ObjectInputStream): Unit = Utils.tryOrIOException {
     in.defaultReadObject()
@@ -59,10 +59,10 @@ private[spark] class ApplicationInfo(
  * 创建ApplicationSource,声明了executors用于缓存分配Application的executor
  */
   private def init() {
-    state = ApplicationState.WAITING
+    state = ApplicationState.WAITING//等待
     executors = new mutable.HashMap[Int, ExecutorDesc]
     coresGranted = 0 //
-    endTime = -1L
+    endTime = -1L//结束时间
     appSource = new ApplicationSource(this)
     nextExecutorId = 0
     removedExecutors = new ArrayBuffer[ExecutorDesc]
@@ -111,14 +111,14 @@ private[spark] class ApplicationInfo(
   private var _retryCount = 0 //重试次数
 
   private[master] def retryCount = _retryCount
-
+//添加重试数
   private[master] def incrementRetryCount() = {
     _retryCount += 1
     _retryCount
   }
 
   private[master] def resetRetryCount() = _retryCount = 0
-//
+//标识应用程序已经完成
   private[master] def markFinished(endState: ApplicationState.Value) {
     state = endState
     endTime = System.currentTimeMillis()

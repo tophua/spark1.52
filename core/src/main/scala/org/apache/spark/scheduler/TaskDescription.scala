@@ -27,10 +27,11 @@ import org.apache.spark.util.SerializableBuffer
  * 
  */
 private[spark] class TaskDescription(
-    val taskId: Long,//
+    val taskId: Long,//任务ID
     val attemptNumber: Int,//失败尝试数
-    val executorId: String,
-    val name: String,
+    val executorId: String,//ExecutID
+    val name: String,//任务名称
+    //在TaskSet的任务索引
     val index: Int,    // Index within this task's TaskSet
     _serializedTask: ByteBuffer)//task执行环境的依赖的信息
   extends Serializable {

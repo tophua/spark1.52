@@ -44,7 +44,7 @@ import org.apache.spark.util.{ ThreadUtils, SignalLogger, Utils }
  * 创建Executor,将资源和任务进一步分配给Executor,同步资源信息给Cluster Manager
  */
 private[deploy] class Worker(
-  override val rpcEnv: RpcEnv,
+  override val rpcEnv: RpcEnv,//RpcEnv处理从RpcEndpointRef或远程节点发送过来的消息
   webUiPort: Int,
   //worker 节点当前可用的core个数
   cores: Int,
@@ -52,8 +52,8 @@ private[deploy] class Worker(
   memory: Int,
   //Master地址
   masterRpcAddresses: Array[RpcAddress],//Master RPC地址
-  systemName: String,
-  endpointName: String,
+  systemName: String,//系统名称
+  endpointName: String,//终端名称
   workDirPath: String = null,
   val conf: SparkConf,
   val securityMgr: SecurityManager)
@@ -125,6 +125,7 @@ private[deploy] class Worker(
     }
 
   var workDir: File = null
+  //完成运行Executor
   val finishedExecutors = new LinkedHashMap[String, ExecutorRunner]
   val drivers = new HashMap[String, DriverRunner]
   val executors = new HashMap[String, ExecutorRunner]

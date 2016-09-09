@@ -273,6 +273,7 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
   private val cachedSerializedStatuses = new TimeStampedHashMap[Int, Array[Byte]]()
 
   // For cleaning up TimeStampedHashMaps
+  //清除元数据
   private val metadataCleaner =
     new MetadataCleaner(MetadataCleanerType.MAP_OUTPUT_TRACKER, this.cleanup, conf)  
    //registerMapOutPuts来保存计算结果,这个结果不是真实的数据,而是这些数据的位置,大小等元数据信息,

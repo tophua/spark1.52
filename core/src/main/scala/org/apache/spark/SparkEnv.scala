@@ -90,6 +90,7 @@ class SparkEnv(
     ) extends Logging {
 
   // TODO Remove actorSystem
+  //actorSystem是Akka提供用于创建分布式消息通信系统的基础类
   @deprecated("Actor system is no longer supported as of 1.4.0", "1.4.0")
   val actorSystem: ActorSystem = rpcEnv.asInstanceOf[AkkaRpcEnv].actorSystem
 

@@ -75,7 +75,10 @@ private[spark] object Utils extends Logging {
   @volatile private var localRootDirs: Array[String] = null
 
 
-  /** Serialize an object using Java serialization */
+  /** 
+   *  Serialize an object using Java serialization
+   *  使用java序列化序列化一个对象
+   *  */
   def serialize[T](o: T): Array[Byte] = {
     val bos = new ByteArrayOutputStream()
     val oos = new ObjectOutputStream(bos)
@@ -84,7 +87,10 @@ private[spark] object Utils extends Logging {
     bos.toByteArray
   }
 
-  /** Deserialize an object using Java serialization */
+  /** 
+   *  Deserialize an object using Java serialization 
+   *  使用java序列化反序列化一个对象
+   *  */
   def deserialize[T](bytes: Array[Byte]): T = {
     val bis = new ByteArrayInputStream(bytes)
     val ois = new ObjectInputStream(bis)
@@ -177,6 +183,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Primitive often used when writing [[java.nio.ByteBuffer]] to [[java.io.DataOutput]]
+   * 使用原始写操作ByteBuffer到DataOutput
    */
   def writeByteBuffer(bb: ByteBuffer, out: ObjectOutput): Unit = {
     //来检查是否支持访问数组
@@ -248,9 +255,11 @@ private[spark] object Utils extends Logging {
     dir
   }
 
-  /** Copy all data from an InputStream to an OutputStream. NIO way of file stream to file stream
+  /** 
+   *  Copy all data from an InputStream to an OutputStream. NIO way of file stream to file stream
     * copying is disabled by default unless explicitly set transferToEnabled as true,
     * the parameter transferToEnabled should be configured by spark.file.transferTo = [true|false].
+    * 复制数据从InputStream输入流 到OutputStream输出流,
     */
   def copyStream(in: InputStream,
                  out: OutputStream,
@@ -1219,7 +1228,10 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Executes the given block. Log non-fatal errors if any, and only throw fatal errors */
+  /** 
+   *  Executes the given block. Log non-fatal errors if any, and only throw fatal errors 
+   *  执行给定的块,如果有任何错误，只抛出致命错误,日志非致命错误
+   *  */
   def tryLogNonFatalError(block: => Unit) {
     try {
       block
@@ -1232,7 +1244,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code, then a finally block, but if exceptions happen in
    * the finally block, do not suppress the original exception.
-   *
+   * 执行一个代码块，然后一个最后块，但如果在最后块中发生异常，抛出原始的异常
    * This is primarily an issue with `finally { out.close() }` blocks, where
    * close needs to be called to clean up `out`, but if an exception happened
    * in `out.write`, it's likely `out` may be corrupted and `out.close` will
@@ -1593,6 +1605,7 @@ private[spark] object Utils extends Logging {
   }
 
   /**
+   * 使用循环调用一个迭代器元素数量
    * Counts the number of elements of an iterator using a while loop rather than calling
    * [[scala.collection.Iterator#size]] because it uses a for loop, which is slightly slower
    * in the current version of Scala.
@@ -1666,6 +1679,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return the absolute path of a file in the given directory.
+   * 返回给定目录中的文件的绝对路径
    */
   def getFilePath(dir: File, fileName: String): Path = {
     assert(dir.isDirectory)
@@ -2022,6 +2036,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return whether the exception is caused by an address-port collision when binding.
+   * 返回是否绑定时的地址端口造成的异常
    */
   def isBindCollision(exception: Throwable): Boolean = {
     exception match {
@@ -2092,6 +2107,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return the current system LD_LIBRARY_PATH name
+   * 返回当前系统路径名
    */
   def libraryPathEnvName: String = {
     if (isWindows) {
@@ -2241,6 +2257,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Returns a path of temporary file which is in the same directory with `path`.
+   * 返回一个临时文件的路径，它位于同一个目录中的“路径”。
    */
   def tempFileWith(path: File): File = {
     new File(path.getAbsolutePath + "." + UUID.randomUUID())
@@ -2249,6 +2266,7 @@ private[spark] object Utils extends Logging {
 
 /**
  * A utility class to redirect the child process's stdout or stderr.
+ * 一个工具类重定向子进程的stdout和stderr。
  */
 private[spark] class RedirectThread(
     in: InputStream,

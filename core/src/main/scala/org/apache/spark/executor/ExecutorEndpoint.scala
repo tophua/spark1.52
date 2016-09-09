@@ -28,6 +28,7 @@ private[spark] case object TriggerThreadDump
 
 /**
  * [[RpcEndpoint]] that runs inside of executors to enable driver -> executor RPC.
+ *  运行在执行使驱动程序->执行RPC
  */
 private[spark]
 class ExecutorEndpoint(override val rpcEnv: RpcEnv, executorId: String) extends RpcEndpoint {
