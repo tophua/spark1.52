@@ -35,7 +35,9 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
   /** Keys of RDD partitions that are being computed/loaded. */
   private val loading = new mutable.HashSet[RDDBlockId]
 
-  /** Gets or computes an RDD partition. Used by RDD.iterator() when an RDD is cached. */
+  /** Gets or computes an RDD partition. Used by RDD.iterator() when an RDD is cached. 
+   *  获取或计算一个RDD的分区  
+   *  */
   def getOrCompute[T](
       rdd: RDD[T],
       partition: Partition,

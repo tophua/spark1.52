@@ -42,12 +42,15 @@ private[spark] class TaskContextImpl(
   override def attemptId(): Long = taskAttemptId
 
   // List of callback functions to execute when the task completes.
+  // 当任务完成时调用的回调函数列表。
   @transient private val onCompleteCallbacks = new ArrayBuffer[TaskCompletionListener]
 
   // Whether the corresponding task has been killed.
+  //是否对应的任务已被杀死。
   @volatile private var interrupted: Boolean = false
 
   // Whether the task has completed.
+  //是否任务已经完成。
   @volatile private var completed: Boolean = false
 
   override def addTaskCompletionListener(listener: TaskCompletionListener): this.type = {
@@ -91,7 +94,10 @@ private[spark] class TaskContextImpl(
     }
   }
 
-  /** Marks the task for interruption, i.e. cancellation. */
+  /** 
+   *  Marks the task for interruption, i.e. cancellation. 
+   *  标记任务中断
+   *  */
   private[spark] def markInterrupted(): Unit = {
     interrupted = true
   }

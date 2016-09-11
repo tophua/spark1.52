@@ -72,14 +72,14 @@ private[spark] abstract class Task[T](
   : (T, AccumulatorUpdates) = {
     //创建一个Task上下文实例：TaskContextImpl类型的context 
     context = new TaskContextImpl(
-      stageId,
-      partitionId,
-      taskAttemptId,
-      attemptNumber,
-      taskMemoryManager,
-      metricsSystem,
-      internalAccumulators,
-      runningLocally = false)
+      stageId,//Task所属Stage的stageId
+      partitionId,//Task对应数据分区的partitionId
+      taskAttemptId,//Task执行的taskAttemptId
+      attemptNumber,//Task执行的序号attemptNumber
+      taskMemoryManager,//Task内存管理器
+      metricsSystem,//指标度量系统
+      internalAccumulators,//内部累加器
+      runningLocally = false)//是否本地运行的标志位
     //将context放入TaskContext的taskContext变量中  
     //taskContext变量为ThreadLocal[TaskContext] 
     TaskContext.setTaskContext(context)

@@ -132,6 +132,7 @@ class SparkEnv(
       driverTmpDirToDelete match {
         case Some(path) => { //如果有path值
           try {
+            //递归删除文件
             Utils.deleteRecursively(new File(path))
           } catch {
             case e: Exception =>

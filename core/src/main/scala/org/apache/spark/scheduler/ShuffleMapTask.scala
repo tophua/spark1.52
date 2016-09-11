@@ -74,23 +74,27 @@ private[spark] class ShuffleMapTask(
  */
   override def runTask(context: TaskContext): MapStatus = {
     // Deserialize the RDD using the broadcast variable.   
+    //反序列化的起始时间  
     val deserializeStartTime = System.currentTimeMillis()
+     // 获得反序列化器closureSerializer  
     val ser = SparkEnv.get.closureSerializer.newInstance()    
-    // 反序列化广播变量taskBinary得到RDD,ShuffleDependency
+   // 调用反序列化器closureSerializer的deserialize()进行RDD和ShuffleDependency的反序列化，数据来源于taskBinary 
     val (rdd, dep) = ser.deserialize[(RDD[_], ShuffleDependency[_, _, _])](
       ByteBuffer.wrap(taskBinary.value), Thread.currentThread.getContextClassLoader)
+    //计算Executor进行反序列化的时间  
     _executorDeserializeTime = System.currentTimeMillis() - deserializeStartTime
 
     metrics = Some(context.taskMetrics)
     var writer: ShuffleWriter[Any, Any] = null
     try {
-      val manager = SparkEnv.get.shuffleManager //获得Shuffle Manager      
+      //获得shuffleManager
+      val manager = SparkEnv.get.shuffleManager
       //根据partition指定分区的Shufflea获取Shuffle Writer,shuffleHandle是shuffle ID
+      //partitionId表示的是当前RDD的某个partition,也就是说write操作作用于partition之上  
       writer = manager.getWriter[Any, Any](dep.shuffleHandle, partitionId, context)
-      //首先调用rdd .iterator，如果该RDD已经cache了或者checkpoint了，那么直接读取结果，
-      //否则开始计算计算的结果将调用Shuffle Writer写入本地文件系统
+      //针对RDD中的分区partition,调用rdd的iterator()方法后，再调用writer的write()方法，写数据  
       writer.write(rdd.iterator(partition, context).asInstanceOf[Iterator[_ <: Product2[Any, Any]]])
-     // 返回MapStatus数据的元数据信息，包括location和size
+      //停止writer，并返回标志位 
       writer.stop(success = true).get
     } catch {
       case e: Exception =>
