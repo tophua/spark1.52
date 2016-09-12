@@ -82,6 +82,7 @@ private[spark] class TaskSchedulerImpl(
 
   // TaskSetManagers are not thread safe, so any access to one should be synchronized
   // on this class.
+  //taskSetsByStageIdAndAttempt存储的是stageId->[taskSet.stageAttemptId->TaskSetManager]  
   private val taskSetsByStageIdAndAttempt = new HashMap[Int, HashMap[Int, TaskSetManager]]
 
   private[scheduler] val taskIdToTaskSetManager = new HashMap[Long, TaskSetManager]
@@ -183,16 +184,21 @@ private[spark] class TaskSchedulerImpl(
   }
 
   override def submitTasks(taskSet: TaskSet) {
+    //获取TaskSet中的tasks  
     val tasks = taskSet.tasks
     logInfo("Adding task set " + taskSet.id + " with " + tasks.length + " tasks")
-    this.synchronized {
+    this.synchronized { // 使用synchronized进行同步  
       //为tasks创建一个TaskSetManager，添加到任务队列里,即将TaskSchedule,TaskSet及最大失败次数
       //TaskSetManager跟踪每个task的执行状况，设置任务集调度策略
       val manager = createTaskSetManager(taskSet, maxTaskFailures)
+      //获取taskSet对应的stageId  
       val stage = taskSet.stageId
+       // taskSetsByStageIdAndAttempt存储的是stageId->[taskSet.stageAttemptId->TaskSetManager]  
+      // 更新taskSetsByStageIdAndAttempt，将上述对应关系存入  
       val stageTaskSets =
         taskSetsByStageIdAndAttempt.getOrElseUpdate(stage, new HashMap[Int, TaskSetManager])
       stageTaskSets(taskSet.stageAttemptId) = manager
+      //查看是否存在冲突的taskSet,如果存在，抛出IllegalStateException异常  
       val conflictingTaskSet = stageTaskSets.exists { case (_, ts) =>
         ts.taskSet != taskSet && !ts.isZombie
       }
@@ -201,8 +207,9 @@ private[spark] class TaskSchedulerImpl(
           s" ${stageTaskSets.toSeq.map{_._2.taskSet.id}.mkString(",")}")
       }
       //schedulableBuilder是Application级别的调度器,现支持两种调度策略,FiFo先进先出和FAIR公平调度
+      //将TaskSetManager添加到schedulableBuilder中  
       schedulableBuilder.addTaskSetManager(manager, manager.taskSet.properties)
-
+       //如果不是本地任务,且不再接受任务  
       if (!isLocal && !hasReceivedTask) {
         //超时取消
         starvationTimer.scheduleAtFixedRate(new TimerTask() {
@@ -217,6 +224,7 @@ private[spark] class TaskSchedulerImpl(
           }
         }, STARVATION_TIMEOUT_MS, STARVATION_TIMEOUT_MS)
       }
+      // 设置标志位hasReceivedTask为true  
       hasReceivedTask = true
     }
     //向localActor发送reviveOffers消息

@@ -126,10 +126,10 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
                 s"from unknown executor with ID $executorId")
           }
         }
-/**
- * CoarseGrainedSchedulerBackend的start方法调用发送ReviveOffers消息,向DriverEndpoint发送ReviveOffers消息
- * DriverEndpoint接收到ReviveOffers消息后调用makeOffers
- */
+    /**
+     * CoarseGrainedSchedulerBackend的start方法调用发送ReviveOffers消息,向DriverEndpoint发送ReviveOffers消息
+     * DriverEndpoint接收到ReviveOffers消息后调用makeOffers
+     */
       case ReviveOffers =>
         makeOffers()
 
@@ -231,11 +231,16 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
      * 
      */
     private def makeOffers() {
-      // Filter out executors under killing
+      //Filter out executors under killing
+      //过滤掉正在杀死的executors,得到activeExecutors
       val activeExecutors = executorDataMap.filterKeys(!executorsPendingToRemove.contains(_))
+      //获取workOffers即资源 
       val workOffers = activeExecutors.map { case (id, executorData) =>
+        //activeExecutors中executorData的executorHost、freeCores，获取workOffers，即资源
         new WorkerOffer(id, executorData.executorHost, executorData.freeCores)
       }.toSeq
+      //调用scheduler的resourceOffers()方法,分配资源  
+      //调用launchTasks()方法,启动tasks
       launchTasks(scheduler.resourceOffers(workOffers))
     }
 

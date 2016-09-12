@@ -64,6 +64,7 @@ private[spark] trait TaskScheduler {
    * Update metrics for in-progress tasks and let the master know that the BlockManager is still
    * alive. Return true if the driver knows about the given block manager. Otherwise, return false,
    * indicating that the block manager should re-register.
+   * 周期性的接收executor的心跳，更新运行中tasks的元信息，并让master知晓BlockManager仍然存活
    */
   def executorHeartbeatReceived(execId: String, taskMetrics: Array[(Long, TaskMetrics)],
     blockManagerId: BlockManagerId): Boolean

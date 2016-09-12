@@ -69,7 +69,7 @@ private[spark] abstract class Stage(
 
   /** 
    *  The ID to use for the next new attempt for this stage.
-   *  用于此阶段的下一个新尝试的标识
+   *  该stage下一次新尝试的id  
    *  */
   private var nextAttemptId: Int = 0
 
