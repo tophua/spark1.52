@@ -38,7 +38,9 @@ private[spark] class ShuffleMapStage(
   override def toString: String = "ShuffleMapStage " + id
 
   var numAvailableOutputs: Long = 0
-//它的已经输出计算结果的分区任务数量要和分区数一样,即所有分区上的子任务都要完成
+  //通过判断numAvailableOutputs和numPartitions是否相等来确定stage是否已被提交
+  //它的已经输出计算结果的分区任务数量要和分区数一样,即所有分区上的子任务都要完成
+  //如果map stage已就绪的话返回true，即所有分区均有shuffle输出。这个将会和outputLocs.contains保持一致。 
   def isAvailable: Boolean = numAvailableOutputs == numPartitions
 
   val outputLocs = Array.fill[List[MapStatus]](numPartitions)(Nil)

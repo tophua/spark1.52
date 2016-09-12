@@ -25,9 +25,9 @@ import org.apache.spark.util.CallSite
  * 表示Job中的最后阶段(stage)
  */
 private[spark] class ResultStage(
-    id: Int,
-    rdd: RDD[_],
-    numTasks: Int,
+    id: Int,//id为stage的id
+    rdd: RDD[_],//rdd为stage中最后一个rdd
+    numTasks: Int,  
     parents: List[Stage],
     firstJobId: Int,
     callSite: CallSite)

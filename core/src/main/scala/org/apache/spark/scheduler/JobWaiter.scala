@@ -27,8 +27,8 @@ package org.apache.spark.scheduler
  */
 private[spark] class JobWaiter[T](
     dagScheduler: DAGScheduler,
-    val jobId: Int,
-    totalTasks: Int,
+    val jobId: Int,//Job正在提交的作业
+    totalTasks: Int,//任务总数
     resultHandler: (Int, T) => Unit)
   extends JobListener {
 
@@ -58,6 +58,7 @@ private[spark] class JobWaiter[T](
  * 2)finishedTasks自增,当完成任务数finishedTasks等于全部任务数totalTasks时,标记Job完成,并且唤醒等待的线程
  *   即执行awaitResult方法线程,
  * 3)此方法被阻塞
+ * 任务运行完成  
  */
   override def taskSucceeded(index: Int, result: Any): Unit = synchronized {
     if (_jobFinished) {
@@ -67,21 +68,27 @@ private[spark] class JobWaiter[T](
     resultHandler(index, result.asInstanceOf[T])
     //只有Job的所有Task都完成,Job才标记完成,任意一个Task失败都标记该Job失败 
     finishedTasks += 1
+    // 已完成Task数目是否等于总Task数目  
     if (finishedTasks == totalTasks) {//该Job结束
+       //设置标志位_jobFinished为ture  
       _jobFinished = true
+       //作业运行结果为成功  
       jobResult = JobSucceeded
       //会通知JobWaiter.awaitResult任务结束
       this.notifyAll()
     }
   }
-
+// 作业失败  
   override def jobFailed(exception: Exception): Unit = synchronized {
+     // 设置标志位_jobFinished为ture 
     _jobFinished = true
+     //作业运行结果为失败  
     jobResult = JobFailed(exception)
     this.notifyAll()
   }
   //这个方法是一个阻塞方法，会在Job完成之前一直阻塞等待，直到Job执行完成之后返回所得的结果
   def awaitResult(): JobResult = synchronized {
+    //循环,如果标志位_jobFinished为false，则一直循环，否则退出，返回JobResult  
     while (!_jobFinished) {
       this.wait()
     }

@@ -30,15 +30,16 @@ import org.apache.spark.Logging
  * 处理的时候onReceive调用doOnReceive。
  * An event loop to receive events from the caller and process all events in the event thread. It
  * will start an exclusive event thread to process all events.
+ * EventLoop用来接收来自调用者的事件并在event thread中除了所有的事件。它将开启一个专门的事件处理线程处理所有的事件。 
  * Note: The event queue will grow indefinitely. So subclasses should make sure `onReceive` can
  * handle events in time to avoid the potential OOM.
  */
 private[spark] abstract class EventLoop[E](name: String) extends Logging {
   //一个由链表结构组成的有界阻塞队列,此队列按照先进先出的原则对元素进行排序
   private val eventQueue: BlockingQueue[E] = new LinkedBlockingDeque[E]()
-
+  //标志位  
   private val stopped = new AtomicBoolean(false)
-
+  //事件处理线程  
   private val eventThread = new Thread(name) {
     //setDaemon(true)是守护线程，为啥是守护线程呢？
     //作为后台线程，在后台不断的循环，如果是前台线程的话，对垃圾的回收是有影响的
@@ -46,10 +47,12 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
 
     override def run(): Unit = {
       try {
-        //stopped.get没有停止
-        while (!stopped.get) {//不断的循环队列
-          val event = eventQueue.take()//从eventQueue中获得消息队列
+        //果标志位stopped没有被设置为true，一直循环 
+        while (!stopped.get) {
+         //从eventQueue中获得消息队列
+          val event = eventQueue.take()
           try {
+             //调用onReceive()方法进行处理  
             onReceive(event)//接收消息。在这里并没有直接实现OnReceive方法,
                             //具体方法实现是在DAGScheduler#onReceive
           } catch {
@@ -106,8 +109,10 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
 
   /**
    * Put the event into the event queue. The event thread will process it later.
+   * 将事件加入到时间队列。事件线程过会会处理它。 
    */
   def post(event: E): Unit = {
+     //将事件加入到待处理队列  
     eventQueue.put(event)
   }
 

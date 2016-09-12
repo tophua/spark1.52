@@ -279,6 +279,8 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
    //registerMapOutPuts来保存计算结果,这个结果不是真实的数据,而是这些数据的位置,大小等元数据信息,
    //这些下游的task就可以通过这些元数据信息获取其他需要处理的数据
   def registerShuffle(shuffleId: Int, numMaps: Int) {
+    //将shuffleId、numMaps大小和MapStatus类型的Array数组的映射关系，放入mapStatuses中  
+    //mapStatuses为TimeStampedHashMap[Int, Array[MapStatus]]类型的数据结构  
     if (mapStatuses.put(shuffleId, new Array[MapStatus](numMaps)).isDefined) {
       throw new IllegalArgumentException("Shuffle ID " + shuffleId + " registered twice")
     }
