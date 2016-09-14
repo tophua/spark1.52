@@ -132,6 +132,7 @@ private[spark] class ExecutorAllocationManager(
     conf.getInt("spark.dynamicAllocation.initialExecutors", minNumExecutors)
 
   // Executors that have been requested to be removed but have not been killed yet
+  //已要求将其删除，但没有死亡的Executors
   private val executorsPendingToRemove = new mutable.HashSet[String]
 
   // All known executors

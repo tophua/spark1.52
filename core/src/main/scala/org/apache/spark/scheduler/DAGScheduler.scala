@@ -129,7 +129,7 @@ class DAGScheduler(
   //
   // TODO: Garbage collect information about failure epochs when we know there are no more
   //       stray messages to detect.
-//失败跟踪每个节点,
+ //failedEpoch存储的是系统探测到的失效节点的集合，存储的是execId->host的对应关系
   private val failedEpoch = new HashMap[String, Long]
 
   private [scheduler] val outputCommitCoordinator = env.outputCommitCoordinator
@@ -1433,6 +1433,7 @@ class DAGScheduler(
     // remove from failedEpoch(execId) ?
     if (failedEpoch.contains(execId)) {
       logInfo("Host added was in lost list earlier: " + host)
+      //host从failedEpoch中移除
       failedEpoch -= execId
     }
     //用于将跟踪失败的节点重新恢复正常和提交等待中的Stage

@@ -27,7 +27,10 @@ import org.apache.spark.executor.{Executor, ExecutorBackend}
 import org.apache.spark.rpc.{RpcCallContext, RpcEndpointRef, RpcEnv, ThreadSafeRpcEndpoint}
 import org.apache.spark.scheduler._
 import org.apache.spark.scheduler.cluster.ExecutorInfo
-
+/**
+ * ReviveOffers本身是一个空的case object对象,只是起到触发底层资源调度的作用，
+ * 在有Task提交或者计算资源变动的时候会发送ReviveOffers这个消息作为触发器
+ */
 private case class ReviveOffers()
 
 private case class StatusUpdate(taskId: Long, state: TaskState, serializedData: ByteBuffer)
@@ -40,6 +43,7 @@ private case class StopExecutor()
  * Calls to LocalBackend are all serialized through LocalEndpoint. Using an RpcEndpoint makes the
  * calls on LocalBackend asynchronous, which is necessary to prevent deadlock between LocalBackend
  * and the TaskSchedulerImpl.
+ * 
  */
 private[spark] class LocalEndpoint(
     override val rpcEnv: RpcEnv,
@@ -48,15 +52,15 @@ private[spark] class LocalEndpoint(
     executorBackend: LocalBackend,
     private val totalCores: Int)
   extends ThreadSafeRpcEndpoint with Logging {
-
+ //可用CPUS内核数
   private var freeCores = totalCores
-
   val localExecutorId = SparkContext.DRIVER_IDENTIFIER
   val localExecutorHostname = "localhost"
   //创建本地Executor
   private val executor = new Executor(
     localExecutorId, localExecutorHostname, SparkEnv.get, userClassPath, isLocal = true)
 /**
+ * 处理RpcEndpointRef.send或RpcCallContext.reply方法，如果收到不匹配的消息
  * PartialFunction[Any, Unit]Any接收任务类型,Unit返回值
  */
   override def receive: PartialFunction[Any, Unit] = {
@@ -73,15 +77,15 @@ private[spark] class LocalEndpoint(
     case KillTask(taskId, interruptThread) =>
       executor.killTask(taskId, interruptThread)
   }
-
+//处理RpcEndpointRef.ask方法，默认如果不匹配消息
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case StopExecutor =>
       executor.stop()
       context.reply(true)
   }
-/**
- * 申请资源
- */
+  /**
+   * 申请分配资源
+   */
   def reviveOffers() {
     //使用localExecutorId,localExecutorHostname,freeCores创建WorkerOffer
     val offers = Seq(new WorkerOffer(localExecutorId, localExecutorHostname, freeCores))
@@ -148,7 +152,7 @@ private[spark] class LocalBackend(
   override def reviveOffers() {
     localEndpoint.send(ReviveOffers)
   }
-
+  //控制Spark中的分布式shuffle过程默认使用的task数量,默认为8个
   override def defaultParallelism(): Int =
     scheduler.conf.getInt("spark.default.parallelism", totalCores)
 

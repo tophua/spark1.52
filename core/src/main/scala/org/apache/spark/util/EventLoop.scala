@@ -37,7 +37,7 @@ import org.apache.spark.Logging
 private[spark] abstract class EventLoop[E](name: String) extends Logging {
   //一个由链表结构组成的有界阻塞队列,此队列按照先进先出的原则对元素进行排序
   private val eventQueue: BlockingQueue[E] = new LinkedBlockingDeque[E]()
-  //标志位  
+  //是否停止标志位 
   private val stopped = new AtomicBoolean(false)
   //事件处理线程  
   private val eventThread = new Thread(name) {

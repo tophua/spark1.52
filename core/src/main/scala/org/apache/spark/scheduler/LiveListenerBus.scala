@@ -29,7 +29,7 @@ import org.apache.spark.util.AsynchronousListenerBus
  * 
  */
 private[spark] class LiveListenerBus
-  //事件阻塞队列
+  //事件阻塞队列,先进先出
   extends AsynchronousListenerBus[SparkListener, SparkListenerEvent]("SparkListenerBus")
   with SparkListenerBus {
 

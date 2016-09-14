@@ -62,6 +62,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
 
   // Indicate if we are processing some event
   // Guarded by `self`
+  //事件正在处理
   private var processingEvent = false
 
   // A counter that represents the number of events produced and consumed in the queue
@@ -74,7 +75,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
  * 到站就下车
  */
   private val listenerThread = new Thread(name) {
-    setDaemon(true)
+    setDaemon(true)//设置守护线程
     override def run(): Unit = Utils.tryOrStopSparkContext(sparkContext) {
       while (true) {
         eventLock.acquire()//获取许可
@@ -156,13 +157,14 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
 
   /**
    * For testing only. Return whether the listener daemon thread is still alive.
+   * 返回是否听者守护线程仍然活着 
    */
   @VisibleForTesting
   def listenerThreadIsAlive: Boolean = listenerThread.isAlive
 
   /**
    * Return whether the event queue is empty.
-   *
+   * 返回事件队列是否为空 
    * The use of synchronized here guarantees that all events that once belonged to this queue
    * have already been processed by all attached listeners, if this returns true.
    */
@@ -180,7 +182,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
       // Call eventLock.release() so that listenerThread will poll `null` from `eventQueue` and know
       // `stop` is called.
       eventLock.release() //释放资源
-      listenerThread.join()
+      listenerThread.join()//thread.join()应该是让当前线程block住，等thread执行完之后，再继续执行
     } else {
       // Keep quiet
     }

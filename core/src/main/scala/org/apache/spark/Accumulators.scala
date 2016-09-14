@@ -31,6 +31,7 @@ import org.apache.spark.util.Utils
 /**
  * A data type that can be accumulated, ie has an commutative and associative "add" operation,
  * but where the result type, `R`, may be different from the element type being added, `T`.
+ * 可以累加数据类型,有一个可交换的和关联“添加”操作结果类型,可能与添加的元素类型不同.
  *
  * You must define how to add data, and how to merge two of these together.  For some data types,
  * such as a counter, these might be the same operation. In that case, you can use the simpler

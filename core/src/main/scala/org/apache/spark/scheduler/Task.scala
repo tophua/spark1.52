@@ -33,6 +33,7 @@ import org.apache.spark.util.Utils
 
 /**
  * A unit of execution. We have two kinds of Task's in Spark:
+ * Spark执行单位,
  * - [[org.apache.spark.scheduler.ShuffleMapTask]]
  * - [[org.apache.spark.scheduler.ResultTask]]
  *
@@ -40,7 +41,8 @@ import org.apache.spark.util.Utils
  * ResultTasks, while earlier stages consist of ShuffleMapTasks. A ResultTask executes the task
  * and sends the task output back to the driver application. A ShuffleMapTask executes the task
  * and divides the task output to multiple buckets (based on the task's partitioner).
- *
+ * 一个Spark Job是由一个或多个Stage组成,一个resulttask执行任务,将任务发送输出到Driver端,
+ * 一个shufflemaptask执行任务,将任务的输出到多个任务的分配
  * @param stageId id of the stage this task belongs to
  * @param partitionId index of the number in the RDD
  */
@@ -132,13 +134,16 @@ private[spark] abstract class Task[T](
   var metrics: Option[TaskMetrics] = None
 
   // Task context, to be initialized in run().
+  // 任务的上下文,在run()被初始化
   @transient protected var context: TaskContextImpl = _
 
   // The actual Thread on which the task is running, if any. Initialized in run().
+  //任务正在运行的实际线程，如果有。在run()初始化。
   @volatile @transient private var taskThread: Thread = _
 
   // A flag to indicate whether the task is killed. This is used in case context is not yet
   // initialized when kill() is invoked.
+  // 指示任务是否被杀死的标志
   @volatile @transient private var _killed = false
 
   protected var _executorDeserializeTime: Long = 0
@@ -159,6 +164,7 @@ private[spark] abstract class Task[T](
    * Kills a task by setting the interrupted flag to true. This relies on the upper level Spark
    * code and user code to properly handle the flag. This function should be idempotent so it can
    * be called multiple times.
+   * 通过设置中断的标志来杀死一个任务
    * If interruptThread is true, we will also call Thread.interrupt() on the Task's executor thread.
    */
   def kill(interruptThread: Boolean) {
@@ -180,6 +186,7 @@ private[spark] abstract class Task[T](
  * worker nodes find out about it, but we can't make it part of the Task because the user's code in
  * the task might depend on one of the JARs. Thus we serialize each task as multiple objects, by
  * first writing out its dependencies.
+ * 处理任务和它们的依赖关系的传输,
  */
 private[spark] object Task {
   /**
@@ -212,6 +219,7 @@ private[spark] object Task {
     }
 
     // Write the task itself and finish
+    // 自身任务输出完成
     dataOut.flush()
     val taskBytes = serializer.serialize(task).array()
     out.write(taskBytes)
@@ -221,8 +229,7 @@ private[spark] object Task {
   /**
    * Deserialize the list of dependencies in a task serialized with serializeWithDependencies,
    * and return the task itself as a serialized ByteBuffer. The caller can then update its
-   * ClassLoaders and deserialize the task.
-   *
+   * ClassLoaders and deserialize the task.  
    * @return (taskFiles, taskJars, taskBytes)
    */
   def deserializeWithDependencies(serializedTask: ByteBuffer)

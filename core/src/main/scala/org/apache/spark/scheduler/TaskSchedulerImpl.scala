@@ -89,6 +89,7 @@ private[spark] class TaskSchedulerImpl(
   val taskIdToExecutorId = new HashMap[Long, String]
 
   @volatile private var hasReceivedTask = false
+  //标志位launchedTask初始化为false,用它来标记是否有task被成功分配或者launched
   @volatile private var hasLaunchedTask = false
   private val starvationTimer = new Timer(true)
 
@@ -284,25 +285,32 @@ private[spark] class TaskSchedulerImpl(
       shuffledOffers: Seq[WorkerOffer],
       availableCpus: Array[Int],
       tasks: Seq[ArrayBuffer[TaskDescription]]) : Boolean = {
-    var launchedTask = false
+   //标志位launchedTask初始化为false,用它来标记是否有task被成功分配或者launched
+   var launchedTask = false
+    //循环shuffledOffers，即每个可用executor  
     for (i <- 0 until shuffledOffers.size) {//顺序遍历当前存在的Executor
-      val execId = shuffledOffers(i).executorId//executor的ID
-      val host = shuffledOffers(i).host//executor的host
+      //获取其executorId和host  
+      val execId = shuffledOffers(i).executorId
+      val host = shuffledOffers(i).host
+      //如果executor上可利用cpu数目大于每个task需要的数目，则继续task分配  
+      //CPUS_PER_TASK为参数spark.task.cpus配置的值，未配置的话默认为1
       if (availableCpus(i) >= CPUS_PER_TASK) {//每台机器可用的计算资源
         try {
-          //调用每个TaskSetManager的resourceOffer方法,根据execId,host找到需要执行的任务并进一步进行资源处理
+          //调用每个TaskSetManager的resourceOffer方法,处理返回的每个TaskDescription,根据execId,host找到需要执行的任务并进一步进行资源处理
           for (task <- taskSet.resourceOffer(execId, host, maxLocality)) {
-            //任务分配到相应的host和Executor后,将taskId与TaskSetId的关系
-            //taskId与ExecutorId的关系
-            //executor与host的分组关系等更新并且将
+             // 分配task成功  
+            // 将task加入到tasks对应位置  
+            // 注意，tasks为一个空的，根据shuffledOffers和其可用cores生成的有一定结构的列表  
             tasks(i) += task
             val tid = task.taskId
-            taskIdToTaskSetManager(tid) = taskSet
-            taskIdToExecutorId(tid) = execId
-            executorsByHost(host) += execId
+            taskIdToTaskSetManager(tid) = taskSet// taskId与TaskSetManager的映射关系  
+            taskIdToExecutorId(tid) = execId// taskId与ExecutorId的映射关系  
+            executorsByHost(host) += execId//host上对应的executor的映射关系  
             //availableCpus数目减去每个任务分配的CPU核数
             availableCpus(i) -= CPUS_PER_TASK
+            //确保availableCpus(i)不小于0  
             assert(availableCpus(i) >= 0)
+            // 标志位launchedTask设置为true 
             launchedTask = true
           }
         } catch {
@@ -330,39 +338,50 @@ private[spark] class TaskSchedulerImpl(
   def resourceOffers(offers: Seq[WorkerOffer]): Seq[Seq[TaskDescription]] = synchronized {
     // Mark each slave as alive and remember its hostname
     // Also track if new executor is added
+    //newExecAvail为false,这个标志位是在新的slave被添加时被设置的一个标志true
     var newExecAvail = false 
+    //循环offers，WorkerOffer为包含executorId、host、cores的结构体，代表集群中的可用executor资源  
     for (o <- offers) {
-      //标记executorId与host关系
+      // 利用HashMap存储executorId->host映射的集合  
       executorIdToHost(o.executorId) = o.host
       //保存集群当前所有可用的 executor id
       activeExecutorIds += o.executorId
       //如果有新Executor加入
-      if (!executorsByHost.contains(o.host)) {
-        //按照host对executorId分组
+      // 每个host上executors的集合  
+      // 这个executorsByHost被用来计算host活跃性，反过来我们用它来决定在给定的主机上何时实现数据本地性  
+      if (!executorsByHost.contains(o.host)) {//如果executorsByHost中不存在对应的host
+         //executorsByHost中添加一条记录,key为host,value为new HashSet[String]()  
         executorsByHost(o.host) = new HashSet[String]()
         //并向DagSchedulerEventProcessActor发送ExecutorAdd事件
+        //调用DAGScheduler的executorAdded()方法处理  
         executorAdded(o.executorId, o.host)
+        //新的slave加入时,标志位newExecAvail设置为true  
         newExecAvail = true
       }
+      //更新hostsByRack 
       for (rack <- getRackForHost(o.host)) {
         hostsByRack.getOrElseUpdate(rack, new HashSet[String]()) += o.host
       }
     }
 
     // Randomly shuffle offers to avoid always placing tasks on the same set of workers.
-    //计算资源的分配与计算,对所有WorkOffer随机洗牌,避免将任务总是分配给同样的workOffer
+    // 随机shuffle offers以避免总是把任务放在同一组workers上执行  
     val shuffledOffers = Random.shuffle(offers)
     // Build a list of tasks to assign to each worker.
-    //根据每个WorkerOffer的可用的CPU核数创建同等尺寸的任务描述TaskDescription数组
+    //构造一个task列表,以分配到每个worker  
     val tasks = shuffledOffers.map(o => new ArrayBuffer[TaskDescription](o.cores))
-    //将每个WorkerOffer的可用的CPU核数统计到可用CPU数组中
+    //可以使用的cpu资源 
     val availableCpus = shuffledOffers.map(o => o.cores).toArray
-    //对rootPool中的所有TaskSetManager按照调度算法排序
+    //获得排序好的task集合  
+    //先调用Pool.getSortedTaskSetQueue()方法  
+    //还记得这个Pool吗，就是调度器中的调度池啊  
     val sortedTaskSets = rootPool.getSortedTaskSetQueue
+     //循环每个taskSet  
     for (taskSet <- sortedTaskSets) {
-      logDebug("parentName: %s, name: %s, runningTasks: %s".format(
-        
+       //记录日志 
+      logDebug("parentName: %s, name: %s, runningTasks: %s".format(        
         taskSet.parent.name, taskSet.name, taskSet.runningTasks))
+       //如果存在新的活跃的executor(新的slave节点被添加时)  
       if (newExecAvail) {
         //重新计算该TaskSetManager的就近原则
         taskSet.executorAdded()
@@ -372,15 +391,17 @@ private[spark] class TaskSchedulerImpl(
     // Take each TaskSet in our scheduling order, and then offer it each node in increasing order
     // of locality levels so that it gets a chance to launch local tasks on all of them.
     // NOTE: the preferredLocality order: PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY
-    //为从rootPool里获取TaskSetManager列表分配资源,分配的原则是就近原则,优先分配顺序PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY
-    var launchedTask = false
+      var launchedTask = false
+    //为从rootPool里获取TaskSetManager列表分配资源,按照位置本地性规则调度每个TaskSet,分配的原则是就近原则,  
+    //位置本地性规则的顺序是：PROCESS_LOCAL（同进程）、NODE_LOCAL（同节点）、NO_PREF、RACK_LOCAL（同机架）、ANY（任何）  
     for (taskSet <- sortedTaskSets; maxLocality <- taskSet.myLocalityLevels) {
       do {
+         //调用resourceOfferSingleTaskSet()方法进行任务集调度  
         launchedTask = resourceOfferSingleTaskSet(
             taskSet, maxLocality, shuffledOffers, availableCpus, tasks)
       } while (launchedTask)
     }
-
+    //设置标志位hasLaunchedTask  
     if (tasks.size > 0) {
       hasLaunchedTask = true
     }

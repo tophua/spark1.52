@@ -60,6 +60,7 @@ private[spark] class Executor(
 
   // Application dependencies (added through SparkContext) that we've fetched so far on this node.
   // Each map holds the master's timestamp for the version of that file or JAR we got.
+  // HashMap保存Master的文件或JAR,Key文件名,value=>文件修改的时间戳,记录每个文件版本
   private val currentFiles: HashMap[String, Long] = new HashMap[String, Long]()
   private val currentJars: HashMap[String, Long] = new HashMap[String, Long]()
 
@@ -83,6 +84,7 @@ private[spark] class Executor(
   }
 
   // Start worker thread pool
+  //创建Executor执行Task的线程池
   private val threadPool = ThreadUtils.newDaemonCachedThreadPool("Executor task launch worker")
   //用于测量系统
   private val executorSource = new ExecutorSource(threadPool, executorId)
@@ -102,6 +104,7 @@ private[spark] class Executor(
 
   // Create our ClassLoader
   // do this after SparkEnv creation so can access the SecurityManager
+  //创建一个classloader
   private val urlClassLoader = createClassLoader()
   private val replClassLoader = addReplClassLoaderIfNeeded(urlClassLoader)
   
@@ -112,13 +115,14 @@ private[spark] class Executor(
   // to send the result back.
   //Akka发送消息的帧大小
   private val akkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)
-  //结果总大小的字节限制
+  //限制结果总大小的字节
   // Limit of bytes for total size of results (default is 1GB)
   private val maxResultSize = Utils.getMaxResultSize(conf)
-  //创建Executor执行Task的线程池,此线程池用于执行任务
+  //运行Task列表
   // Maintains the list of running tasks.
   private val runningTasks = new ConcurrentHashMap[Long, TaskRunner]
   // Executor for the heartbeat task.
+  //ScheduledExecutorService定时周期执行指定的任务,基于时间的延迟,不会由于系统时间的改变发生执行变化
   private val heartbeater = ThreadUtils.newDaemonSingleThreadScheduledExecutor("driver-heartbeater")
   //启动executor心跳线程,此线程用于向Driver发送心跳
   startDriverHeartbeater()
@@ -156,7 +160,10 @@ private[spark] class Executor(
     }
   }
 
-  /** Returns the total amount of time this JVM process has spent in garbage collection. */
+  /** 
+   *  Returns the total amount of time this JVM process has spent in garbage collection. 
+   *  返回JVM垃圾收集花费总时间
+   *  */
   private def computeTotalGcTime(): Long = {
     ManagementFactory.getGarbageCollectorMXBeans.map(_.getCollectionTime).sum
   }
@@ -465,9 +472,13 @@ private[spark] class Executor(
   private val heartbeatReceiverRef =
     RpcUtils.makeDriverRef(HeartbeatReceiver.ENDPOINT_NAME, conf, env.rpcEnv)
 
-  /** Reports heartbeat and metrics for active tasks to the driver. */
+  /** 
+   *  Reports heartbeat and metrics for active tasks to the driver. 
+   *  报告心跳和测量活动任务到Driver。
+   **/
   private def reportHeartBeat(): Unit = {
     // list of (task id, metrics) to send back to the driver
+    //发送任务列表
     val tasksMetrics = new ArrayBuffer[(Long, TaskMetrics)]()
     val curGCTime = computeTotalGcTime()//
     

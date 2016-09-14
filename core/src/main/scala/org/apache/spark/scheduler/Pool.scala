@@ -27,7 +27,8 @@ import org.apache.spark.scheduler.SchedulingMode.SchedulingMode
 
 /**
  * An Schedulable entity that represent collection of Pools or TaskSetManagers
- * 代表一个可调度的实体集合池或tasksetmanagers
+ * 代表一个可调度的实体集合池或tasksetmanagers,
+ * 
  */
 
 private[spark] class Pool(
@@ -97,12 +98,17 @@ private[spark] class Pool(
   }
   //对rootPool中的所有TaskSetManager按照调度算法排序
   override def getSortedTaskSetQueue: ArrayBuffer[TaskSetManager] = {
-    var sortedTaskSetQueue = new ArrayBuffer[TaskSetManager]
+    //创建一个ArrayBuffer，存储TaskSetManager  
+    var sortedTaskSetQueue = new ArrayBuffer[TaskSetManager]  
+    // taskSetSchedulingAlgorithm为调度算法，包括FIFO和FAIR两种  
+    // 这里针对调度队列,按照调度算法对其排序,生成一个序列sortedSchedulableQueue  
     val sortedSchedulableQueue =
       schedulableQueue.toSeq.sortWith(taskSetSchedulingAlgorithm.comparator)
+    //循环sortedSchedulableQueue中所有的TaskSetManager，通过其getSortedTaskSetQueue来填充sortedTaskSetQueue  
     for (schedulable <- sortedSchedulableQueue) {
       sortedTaskSetQueue ++= schedulable.getSortedTaskSetQueue
     }
+    //返回sortedTaskSetQueue 
     sortedTaskSetQueue
   }
 //增加运行Task

@@ -29,7 +29,13 @@ private[spark] trait SchedulerBackend {
 
   def start(): Unit
   def stop(): Unit
+  /**
+   * 分配执行资源
+   */
   def reviveOffers(): Unit
+  /**
+   * 控制Spark中的分布式shuffle过程默认使用的task数量,默认为8个
+   */
   def defaultParallelism(): Int
 
   def killTask(taskId: Long, executorId: String, interruptThread: Boolean): Unit =

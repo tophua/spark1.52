@@ -29,6 +29,7 @@ private[spark] trait SchedulingAlgorithm {
  * FIFOSchedulingAlgorith首先保证Job Id较小的先被执行调度,如果是同一个Job,那么Stage ID小的先被调度
  */
 private[spark] class FIFOSchedulingAlgorithm extends SchedulingAlgorithm {
+  //比较函数  
   override def comparator(s1: Schedulable, s2: Schedulable): Boolean = {
     val priority1 = s1.priority//实际上JobID
     val priority2 = s2.priority
@@ -61,14 +62,19 @@ private[spark] class FairSchedulingAlgorithm extends SchedulingAlgorithm {
     val taskToWeightRatio1 = runningTasks1.toDouble / s1.weight.toDouble
     val taskToWeightRatio2 = runningTasks2.toDouble / s2.weight.toDouble
     var compare: Int = 0
-
+    // 前者的runningTasks<minShare而后者相反的的话,返回true;
+    // runningTasks为正在运行的tasks数目,minShare为最小共享cores数;
+    // 前面两个if判断的意思是两个TaskSetManager中,如果其中一个正在运行的tasks数目小于最小共享cores数,则优先调度该TaskSetManager
     if (s1Needy && !s2Needy) {
       return true
-    } else if (!s1Needy && s2Needy) {
+    } else if (!s1Needy && s2Needy) {//前者的runningTasks>=minShare而后者相反的的话，返回true  
       return false
     } else if (s1Needy && s2Needy) {
+       //如果两者的正在运行的tasks数目都比最小共享cores数小的话，再比较minShareRatio  
+       //minShareRatio为正在运行的tasks数目与最小共享cores数的比率  
       compare = minShareRatio1.compareTo(minShareRatio2)
     } else {
+      //最后比较taskToWeightRatio,即权重使用率,weight代表调度池对资源获取的权重,越大需要越多的资源 
       compare = taskToWeightRatio1.compareTo(taskToWeightRatio2)
     }
 

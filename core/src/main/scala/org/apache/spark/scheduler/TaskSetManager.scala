@@ -124,24 +124,25 @@ private[spark] class TaskSetManager(
   //每当一个任务失败,使它更快地检测到重复失败的任务 
   //it is put back at the head of the stack. They are also only cleaned up lazily;
   // when a task is launched, it remains in all the pending lists except
-  // the one that it was launched from, but gets removed from them later.
-  //pendingTasksForExecutor保存着当前可用的 executor 对应优先位置在其上的 tasks 的映射关系
-  //key 为executoroId，value 为task index 数组
+  // the one that it was launched from, but gets removed from them later. 
+  //每个executor上即将被执行的tasks的映射集合,key 为executoroId，value 为task index 数组
   private val pendingTasksForExecutor = new HashMap[String, ArrayBuffer[Int]]
 
   // Set of pending(待执行) tasks for each host. Similar to pendingTasksForExecutor,
   // but at host level.
-  // key为 host,value为 host的tasks索引数组
+  //每个host上即将被执行的tasks的映射集合 ,key为 host,value为 host的tasks索引数组
   private val pendingTasksForHost = new HashMap[String, ArrayBuffer[Int]]
 
   // Set of pending tasks for each rack(机架) -- similar to the above.
-  //key为 rack,value为优先位置所在的 host 属于该机架的 tasks
+  //每个rack上即将被执行的tasks的映射集合  key为 rack,value为优先位置所在的 host属于该机架的 tasks
   private val pendingTasksForRack = new HashMap[String, ArrayBuffer[Int]]
 
   // Set containing pending tasks with no locality preferences(没有最佳位置).
+  // 存储所有没有位置信息的即将运行tasks的index索引的集合  
   var pendingTasksWithNoPrefs = new ArrayBuffer[Int]
 
   // Set containing all pending tasks(待执行任务) (also used as a stack, as above).
+  // 存储所有即将运行tasks的index索引的集合  
   val allPendingTasks = new ArrayBuffer[Int]
 
   // Tasks that can be speculated(推测的任务). Since these will be a small fraction of total
@@ -171,7 +172,7 @@ private[spark] class TaskSetManager(
 
   // Add all our tasks to the pending lists. We do this in reverse order
   // of task index so that tasks with low indices get launched first.
-  //添加tasks到pendingTasksForExecutor保存着当前可用的 executor 对应优先位置在其上的 tasks 的映射关系
+  //将所有的tasks添加到pending列表。我们用倒序的任务索引一遍较低索引的任务可以被优先加载 
   for (i <- (0 until numTasks).reverse) {
     addPendingTask(i)
   }
@@ -207,22 +208,25 @@ private[spark] class TaskSetManager(
    */
   private def addPendingTask(index: Int, readding: Boolean = false) {
     // Utility method that adds `index` to a list only if readding=false or it's not already there
+    //定义了一个如果索引不存在添加索引至列表的工具方法  
     def addTo(list: ArrayBuffer[Int]) {
       if (!readding || !list.contains(index)) {
         list += index
       }
     }
-
+    //遍历task的优先位置  
     for (loc <- tasks(index).preferredLocations) {//task最佳位置
       loc match {
-        case e: ExecutorCacheTaskLocation =>
+        case e: ExecutorCacheTaskLocation =>//如果为ExecutorCacheTaskLocation  
           //如果HashMap中存在键k，则返回键k的值。否则向HashMap中新增映射关系k -> v并返回d
+          //添加任务索引index至pendingTasksForExecutor列表 
           addTo(pendingTasksForExecutor.getOrElseUpdate(e.executorId, new ArrayBuffer))
         case e: HDFSCacheTaskLocation => {
-          //根据主机获得活动的Executor
+          //调用sched（即TaskSchedulerImpl）的getExecutorsAliveOnHost()方法,获得指定Host上的Alive Executors  
           val exe = sched.getExecutorsAliveOnHost(loc.host)
           exe match {
             case Some(set) => {
+              //循环host上的每个Alive Executor，添加任务索引index至pendingTasksForExecutor列表  
               for (e <- set) {
                 //如果HashMap中存在键k，则返回键k的值。否则向HashMap中新增映射关系k -> v并返回d
                 addTo(pendingTasksForExecutor.getOrElseUpdate(e, new ArrayBuffer))
@@ -236,16 +240,19 @@ private[spark] class TaskSetManager(
         }
         case _ => Unit
       }
+      //添加任务索引index至pendingTasksForHost列表 
       addTo(pendingTasksForHost.getOrElseUpdate(loc.host, new ArrayBuffer))
+      //根据获得任务优先位置host获得机架rack，循环，添加任务索引index至pendingTasksForRack列表  
       for (rack <- sched.getRackForHost(loc.host)) {
         addTo(pendingTasksForRack.getOrElseUpdate(rack, new ArrayBuffer))
       }
     }
-
+    //如果task没有位置属性，则将任务的索引index添加到pendingTasksWithNoPrefs,
+    //pendingTasksWithNoPrefs为存储所有没有位置信息的即将运行tasks的index索引的集合
     if (tasks(index).preferredLocations == Nil) {
       addTo(pendingTasksWithNoPrefs)
     }
-
+    //将任务的索引index加入到allPendingTasks，allPendingTasks为存储所有即将运行tasks的index索引的集合 
     if (!readding) {
       allPendingTasks += index  // No point scanning this whole list to find the old task there
     }
@@ -544,15 +551,20 @@ private[spark] class TaskSetManager(
    */
   private def getAllowedLocalityLevel(curTime: Long): TaskLocality.TaskLocality = {
     // Remove the scheduled or finished tasks lazily
-    //
+    //判断task是否可以被调度  
     def tasksNeedToBeScheduledFrom(pendingTaskIds: ArrayBuffer[Int]): Boolean = {
       var indexOffset = pendingTaskIds.size
+       // 循环  
       while (indexOffset > 0) {
+         // 索引递减  
         indexOffset -= 1
+        // 获得task索引  
         val index = pendingTaskIds(indexOffset)
+         // 如果对应task不存在任何运行实例，且未执行成功，可以调度，返回true  
         if (copiesRunning(index) == 0 && !successful(index)) {
           return true
         } else {
+          // 从pendingTaskIds中移除  
           pendingTaskIds.remove(indexOffset)
         }
       }
@@ -561,10 +573,13 @@ private[spark] class TaskSetManager(
     // Walk through the list of tasks that can be scheduled at each location and returns true
     // if there are any tasks that still need to be scheduled. Lazily cleans up tasks that have
     // already been scheduled.
+    //
     def moreTasksToRunIn(pendingTasks: HashMap[String, ArrayBuffer[Int]]): Boolean = {
       val emptyKeys = new ArrayBuffer[String]
+       // 循环pendingTasks  
       val hasTasks = pendingTasks.exists {
         case (id: String, tasks: ArrayBuffer[Int]) =>
+          // 判断task是否可以被调度  
           if (tasksNeedToBeScheduledFrom(tasks)) {
             true
           } else {
@@ -573,34 +588,37 @@ private[spark] class TaskSetManager(
           }
       }
       // The key could be executorId, host or rackId
+       // 移除数据  
       emptyKeys.foreach(id => pendingTasks.remove(id))
       hasTasks
     }
-
+   //从当前索引currentLocalityIndex开始，循环myLocalityLevels  
     while (currentLocalityIndex < myLocalityLevels.length - 1) {
+      // 是否存在待调度task，根据不同的Locality Level，调用moreTasksToRunIn()方法从不同的数据结构中获取，  
+      // NO_PREF直接看pendingTasksWithNoPrefs是否为空  
       val moreTasks = myLocalityLevels(currentLocalityIndex) match {
         case TaskLocality.PROCESS_LOCAL => moreTasksToRunIn(pendingTasksForExecutor)
         case TaskLocality.NODE_LOCAL => moreTasksToRunIn(pendingTasksForHost)
         case TaskLocality.NO_PREF => pendingTasksWithNoPrefs.nonEmpty
         case TaskLocality.RACK_LOCAL => moreTasksToRunIn(pendingTasksForRack)
       }
-      if (!moreTasks) {
+      if (!moreTasks) {// 不存在可以被调度的task  
         // This is a performance optimization: if there are no more tasks that can
         // be scheduled at a particular locality level, there is no point in waiting
         // for the locality wait timeout (SPARK-4939).
+        // 记录lastLaunchTime  
          lastLaunchTime = curTime
         logDebug(s"No tasks for locality level ${myLocalityLevels(currentLocalityIndex)}, " +
           s"so moving to locality level ${myLocalityLevels(currentLocalityIndex + 1)}")
+         //位置策略索引加1 
         currentLocalityIndex += 1
       } else if (curTime - lastLaunchTime >= localityWaits(currentLocalityIndex)) {
         //如果当前时间与上次运行本地化时间之差大于等于上一步获得的时间
-       
-       
         // Jump to the next locality level, and reset lastLaunchTime so that the next locality
         // wait timer doesn't immediately expire
         //运行本地化时间增加获取本地化级别的等待时长
         lastLaunchTime += localityWaits(currentLocalityIndex)
-        //将currentLocalityIndex增加1
+        //将位置策略currentLocalityIndex索引加1
         currentLocalityIndex += 1
         logDebug(s"Moving to ${myLocalityLevels(currentLocalityIndex)} after waiting for " +
           s"${localityWaits(currentLocalityIndex)}ms")
@@ -916,9 +934,9 @@ private[spark] class TaskSetManager(
     }
     foundTasks
   }
-/**
- * 用于获取各个本地化级别的等待时间
- */
+  /**
+   *获取Locality级别对应TaskSetManager等待分配下一个任务的时间  
+   */
   private def getLocalityWait(level: TaskLocality.TaskLocality): Long = {
    //在发布一个本地数据任务时候，放弃并发布到一个非本地数据的地方前，需要等待的时间
     val defaultWait = conf.get("spark.locality.wait", "3s")//本地化级别的默认等待时间3秒
@@ -939,18 +957,21 @@ private[spark] class TaskSetManager(
   /**
    * Compute the locality levels used in this TaskSet. Assumes that all tasks have already been
    * added to queues using addPendingTask.
-   * 获取任务集充许使用的本地化级别,
+   * 计算该TaskSet使用的位置策略,假设所有的任务已经通过addPendingTask()被添加入队列 
    * PROCESS_LOCAL为例:如果存在Executor中有待执行的任务(pendingTasksForExecutor不为空)且PROCESS_LOCAL
    * 本地化的等待时间不为0(调用getLocalityWait方法获得)且存在Executor已经激活(pendingTasksForExecutor.isExecutorAlive)
    * 那么允许本地化级别里包含PROCESS_LOCAL
    */
   private def computeValidLocalityLevels(): Array[TaskLocality.TaskLocality] = {
+    // 引入任务位置策略  
     import TaskLocality.{PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY}
+     // 创建ArrayBuffer类型的levels，存储TaskLocality  
     val levels = new ArrayBuffer[TaskLocality.TaskLocality]
     //locality levels是否包含 PROCESS_LOCAL
     /**
-     * taskSetManager的所有tasks对应的所有 executor，是否有任一 active，若有则返回 true；否则返回 false
-     * 也就知道了如何去判断一个 taskSetManager对象的 locality levels是否包含 PROCESS_LOCAL
+     * 如果pendingTasksForExecutor不为空，且PROCESS_LOCAL级别中TaskSetManager等待分配下一个任务的时间不为零，且  
+     * 如果pendingTasksForExecutor中每个executorId在sched的executorIdToTaskCount中存在 
+     * executorIdToTaskCount为每个executor上运行的task的数目集合  
      */
     if (!pendingTasksForExecutor.isEmpty && getLocalityWait(PROCESS_LOCAL) != 0 &&
         //pendingTasksForExecutor存储 key 为executoroId，value 为task index 数组
@@ -958,15 +979,19 @@ private[spark] class TaskSetManager(
         pendingTasksForExecutor.keySet.exists(sched.isExecutorAlive(_))) {
       levels += PROCESS_LOCAL
     }
+    //如果pendingTasksForHost不为空，且NODE_LOCAL级别中TaskSetManager等待分配下一个任务的时间不为零，且  
+    //如果pendingTasksForHost中每个host在sched的executorsByHost中存在  
+    //executorsByHost为每个host上executors的集合  
     if (!pendingTasksForHost.isEmpty && getLocalityWait(NODE_LOCAL) != 0 &&       
        //taskSetManager的所有 tasks对应的所有 hosts,是否有任一是 tasks的优先位置 hosts,若有返回 true,否则返回 fals
         pendingTasksForHost.keySet.exists(sched.hasExecutorsAliveOnHost(_))) {
       levels += NODE_LOCAL
     }
-    //如果一个 RDD的某些 partitions没有优先位置,那么这个RDD action产生的taskSetManagers的locality levels就包含 NO_PREF
+    //如果存在没有位置信息的task，则添加NO_PREF级别
     if (!pendingTasksWithNoPrefs.isEmpty) {
       levels += NO_PREF
     }
+    //同样处理RACK_LOCAL级别
     if (!pendingTasksForRack.isEmpty && getLocalityWait(RACK_LOCAL) != 0 &&
         //pendingTasksForRack保存key为 rack，value 为优先位置所在的 host 属于该机架的 tasks
         /**
@@ -977,15 +1002,22 @@ private[spark] class TaskSetManager(
         pendingTasksForRack.keySet.exists(sched.hasHostAliveOnRack(_))) {
       levels += RACK_LOCAL
     }
+    //最后加上一个ANY级别  
     levels += ANY
     logDebug("Valid locality levels for " + taskSet + ": " + levels.mkString(", "))
+    //返回   
     levels.toArray
   }
-
+  //重新计算位置  
   def recomputeLocality() {
+    //它是有效位置策略级别中的索引,指示当前的位置信息。也就是我们上一个task被launched所使用的Locality Level
+    //currentLocalityIndex为有效位置策略级别中的索引，默认为0  
     val previousLocalityLevel = myLocalityLevels(currentLocalityIndex)
+     //确定在我们的任务集TaskSet中应该使用哪种位置Level,以便我们做延迟调度  
     myLocalityLevels = computeValidLocalityLevels()
+    //获得位置策略级别的等待时间  
     localityWaits = myLocalityLevels.map(getLocalityWait)
+    //设置当前使用的位置策略级别的索引 
     currentLocalityIndex = getLocalityIndex(previousLocalityLevel)
   }
 

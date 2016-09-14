@@ -30,12 +30,14 @@ object TaskContext {
   /**
    * Return the currently active TaskContext. This can be called inside of
    * user functions to access contextual information about running tasks.
+   * 返回当前运行任务的上下文信息
    */
   def get(): TaskContext = taskContext.get
 
   /**
    * Returns the partition id of currently active TaskContext. It will return 0
    * if there is no active TaskContext for cases like local execution.
+   * 返回当前活动的上下文信息的分区ID
    */
   def getPartitionId(): Int = {
     val tc = taskContext.get()
@@ -52,16 +54,19 @@ object TaskContext {
   // showing up in JavaDoc.
   /**
    * Set the thread local TaskContext. Internal to Spark.
+   * 设置线程局部任务的上下文信息
    */
   protected[spark] def setTaskContext(tc: TaskContext): Unit = taskContext.set(tc)
 
   /**
    * Unset the thread local TaskContext. Internal to Spark.
+   * 删除线程局部的任务上下文信息
    */
   protected[spark] def unset(): Unit = taskContext.remove()
 
   /**
    * An empty task context that does not represent an actual task.
+   * 一个不代表实际任务的空任务上下文
    */
   private[spark] def empty(): TaskContextImpl = {
     new TaskContextImpl(0, 0, 0, 0, null, null, Seq.empty)
@@ -73,6 +78,7 @@ object TaskContext {
 /**
  * Contextual information about a task which can be read or mutated during
  * execution. To access the TaskContext for a running task, use:
+ * 在执行过程中可以读取的任务的上下文信息,taskcontext访问正在运行的任务
  * {{{
  *   org.apache.spark.TaskContext.get()
  * }}}
@@ -87,11 +93,13 @@ abstract class TaskContext extends Serializable {
 
   /**
    * Returns true if the task has completed.
+   * 如果任务已完成，则返回真
    */
   def isCompleted(): Boolean
 
   /**
    * Returns true if the task has been killed.
+   * 如果任务已被杀死，返回真
    */
   def isInterrupted(): Boolean
 
@@ -100,6 +108,7 @@ abstract class TaskContext extends Serializable {
 
   /**
    * Returns true if the task is running locally in the driver program.
+   * 如果任务在驱动程序中运行本地运行，则返回真
    * @return
    */
   def isRunningLocally(): Boolean
@@ -108,10 +117,12 @@ abstract class TaskContext extends Serializable {
    * Adds a (Java friendly) listener to be executed on task completion.
    * This will be called in all situation - success, failure, or cancellation.
    * An example use is for HadoopRDD to register a callback to close the input stream.
+   * 添加一个完成任务的执行的侦听器,这记录任务的成功,失败,或者取消.
    */
   def addTaskCompletionListener(listener: TaskCompletionListener): TaskContext
 
   /**
+   * 添加一个完成任务的执行的侦听器,这记录任务的成功,失败,或者取消.
    * Adds a listener in the form of a Scala closure to be executed on task completion.
    * This will be called in all situations - success, failure, or cancellation.
    * An example use is for HadoopRDD to register a callback to close the input stream.
@@ -130,17 +141,20 @@ abstract class TaskContext extends Serializable {
 
   /**
    * The ID of the stage that this task belong to.
+   * 这个任务的Stage的标识
    */
   def stageId(): Int
 
   /**
    * The ID of the RDD partition that is computed by this task.
+   * 返回计算任务RDD分区的ID
    */
   def partitionId(): Int
 
   /**
    * How many times this task has been attempted.  The first task attempt will be assigned
    * attemptNumber = 0, and subsequent attempts will have increasing attempt numbers.
+   * 任务已被尝试次数,第一次被分配为0,随后的尝试将有越来越多的尝试
    */
   def attemptNumber(): Int
 
@@ -150,6 +164,7 @@ abstract class TaskContext extends Serializable {
   /**
    * An ID that is unique to this task attempt (within the same SparkContext, no two task attempts
    * will share the same attempt ID).  This is roughly equivalent to Hadoop's TaskAttemptID.
+   * 此任务尝试唯一的标识,没有两个任务共享相同的标识,
    */
   def taskAttemptId(): Long
 
@@ -167,18 +182,20 @@ abstract class TaskContext extends Serializable {
 
   /**
    * Returns the manager for this task's managed memory.
+   * 返回任务内存的管理器
    */
   private[spark] def taskMemoryManager(): TaskMemoryManager
 
   /**
    * Register an accumulator that belongs to this task. Accumulators must call this method when
    * deserializing in executors.
+   * 注册一个任务累加器,累加器执行方法执行反序列化
    */
   private[spark] def registerAccumulator(a: Accumulable[_, _]): Unit
 
   /**
    * Return the local values of internal accumulators that belong to this task. The key of the Map
-   * is the accumulator id and the value of the Map is the latest accumulator local value.
+   * is the accumulator id and the value of the Map is the latest accumulator local value.   
    */
   private[spark] def collectInternalAccumulators(): Map[Long, Any]
 

@@ -29,10 +29,10 @@ import org.apache.spark.rpc.{RpcEndpointRef, RpcAddress}
  * @param totalCores The total number of cores available to the executor
  */
 private[cluster] class ExecutorData(
-   val executorEndpoint: RpcEndpointRef,//代表一个executor
-   val executorAddress: RpcAddress, //此执行任务的网络地址
-   override val executorHost: String,//执行器运行的主机名
-   var freeCores: Int,//可用于执行器的内核的当前数量
-   override val totalCores: Int,//可用的执行器的内核总数
-   override val logUrlMap: Map[String, String]//
+   val executorEndpoint: RpcEndpointRef,//RPC终端的引用,用于数据通信
+   val executorAddress: RpcAddress, //RPC地址,用于数据通信,此执行任务的网络地址
+   override val executorHost: String,//executor的主机
+   var freeCores: Int,//可用处理器cores
+   override val totalCores: Int,//处理器cores总数
+   override val logUrlMap: Map[String, String]//日志url映射集合
 ) extends ExecutorInfo(executorHost, totalCores, logUrlMap)

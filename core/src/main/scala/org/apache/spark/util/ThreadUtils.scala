@@ -92,6 +92,8 @@ private[spark] object ThreadUtils {
 
   /**
    * Wrapper over ScheduledThreadPoolExecutor.
+   * ScheduledExecutorService定时周期执行指定的任务,基于时间的延迟，不会由于系统时间的改变发生执行变化
+   * Timer执行周期任务时依赖系统时间,如果当前系统时间发生变化会出现一些执行上的变化
    */
   def newDaemonSingleThreadScheduledExecutor(threadName: String): ScheduledExecutorService = {
     //setDaemon设置为守护线程（也称为后台线程）
