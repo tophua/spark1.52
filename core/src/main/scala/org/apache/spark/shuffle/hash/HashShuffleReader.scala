@@ -53,6 +53,7 @@ private[spark] class HashShuffleReader[K, C](
       blockManager,
       mapOutputTracker.getMapSizesByExecutorId(handle.shuffleId, startPartition),
       // Note: we use getSizeAsMb when no suffix is provided for backwards compatibility
+      //在Shuffle的时候,每个Reducer任务获取缓存数据指定大小(以兆字节为单位) 
       SparkEnv.get.conf.getSizeAsMb("spark.reducer.maxSizeInFlight", "48m") * 1024 * 1024)
 
     // Wrap the streams for compression based on configuration

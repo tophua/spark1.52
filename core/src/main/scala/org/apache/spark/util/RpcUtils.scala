@@ -46,6 +46,7 @@ object RpcUtils {
 
   /** 
    * Returns the configured number of milliseconds to wait on each retry(重试)  
+   * 获取rpc读取数据重试的时间间隔
    * */
   def retryWaitMs(conf: SparkConf): Long = {
     conf.getTimeAsMs("spark.rpc.retry.wait", "3s")//重试等待3秒

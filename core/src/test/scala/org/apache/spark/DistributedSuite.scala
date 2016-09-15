@@ -78,6 +78,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
   }
 
   test("groupByKey where map output sizes exceed maxMbInFlight") {
+     //在Shuffle的时候,每个Reducer任务获取缓存数据指定大小(以兆字节为单位) 
     val conf = new SparkConf().set("spark.reducer.maxSizeInFlight", "1m")
     sc = new SparkContext(clusterUrl, "test", conf)
     // This data should be around 20 MB, so even with 4 mappers and 2 reducers, each map output

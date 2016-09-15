@@ -568,7 +568,7 @@ private[spark] object SparkConf extends Logging {
         // Translate old value to a duration, with 10s wait time per try.
         translation = s => s"${s.toLong * 10}s")),
     "spark.reducer.maxSizeInFlight" -> Seq(   
-    //每个reduce任务同时获取map输出的最大大小(以兆字节为单位)
+    //在Shuffle的时候,每个Reducer任务获取缓存数据指定大小(以兆字节为单位)  
       AlternateConfig("spark.reducer.maxMbInFlight", "1.4")),
     "spark.kryoserializer.buffer" ->
         Seq(AlternateConfig("spark.kryoserializer.buffer.mb", "1.4",
@@ -576,7 +576,7 @@ private[spark] object SparkConf extends Logging {
     "spark.kryoserializer.buffer.max" -> Seq(
       AlternateConfig("spark.kryoserializer.buffer.max.mb", "1.4")),
     "spark.shuffle.file.buffer" -> Seq(
-    //每个shuffle的文件输出流内存缓冲区的大小，以KB为单位。这些缓冲区可以减少磁盘寻道的次数，也减少创建shuffle中间文件时的系统调用
+    //每个shuffle的文件输出流内存缓冲区的大小,以KB为单位.
       AlternateConfig("spark.shuffle.file.buffer.kb", "1.4")),
     "spark.executor.logs.rolling.maxSize" -> Seq(
       AlternateConfig("spark.executor.logs.rolling.size.maxBytes", "1.4")),
