@@ -32,7 +32,7 @@ import org.apache.spark.util.{ThreadUtils, RpcUtils}
  */
 private[spark]
 class BlockManagerMaster(
-    var driverEndpoint: RpcEndpointRef,//RpcEndpointRef该对象引用Worker,Driver的通信，
+    var driverEndpoint: RpcEndpointRef,//RpcEndpointRef该对象引用Worker,与Driver的通信，
     conf: SparkConf,
     isDriver: Boolean)
   extends Logging {

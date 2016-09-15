@@ -106,7 +106,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
           new OneForOneBlockFetcher(client, appId, execId, blockIds.toArray, listener).start()
         }
       }
-     //最大重试次数
+      //最大重试次数
       val maxRetries = transportConf.maxIORetries()
       if (maxRetries > 0) {
         // Note this Fetcher will correctly handle maxRetries == 0; we avoid it just in case there's
