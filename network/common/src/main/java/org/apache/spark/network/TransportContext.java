@@ -69,7 +69,9 @@ public class TransportContext {
   public TransportContext(TransportConf conf, RpcHandler rpcHandler) {
     this.conf = conf;
     this.rpcHandler = rpcHandler;
-    this.encoder = new MessageEncoder();
+    //在Shuffle的I/O客户端对消息内容进行编码,防止丢包和解析错误
+    this.encoder = new MessageEncoder();    
+    //在Shuffle的I/O服务端对客户端传来的ByteBuffer进行解析,防止丢包和解析错误
     this.decoder = new MessageDecoder();
   }
 

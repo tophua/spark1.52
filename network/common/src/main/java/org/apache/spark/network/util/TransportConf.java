@@ -21,6 +21,7 @@ import com.google.common.primitives.Ints;
 
 /**
  * A central location that tracks all the settings we expose to users.
+ * 主要控制Netty框架提供的shuffle的I/O交互的客户端和服务端线程的数量
  */
 public class TransportConf {
   private final ConfigProvider conf;
@@ -37,7 +38,10 @@ public class TransportConf {
     return conf.getBoolean("spark.shuffle.io.preferDirectBufs", true);
   }
 
-  /** Connect timeout in milliseconds. Default 120 secs. */
+  /** 
+   * Connect timeout in milliseconds. Default 120 secs. 
+   * 连接超时毫秒,默认120秒
+   * */
   public int connectionTimeoutMs() {
     long defaultNetworkTimeoutS = JavaUtils.timeStringAsSec(
       conf.get("spark.network.timeout", "120s"));
@@ -46,15 +50,24 @@ public class TransportConf {
     return (int) defaultTimeoutMs;
   }
 
-  /** Number of concurrent connections between two nodes for fetching data. */
+  /** 
+   * Number of concurrent connections between two nodes for fetching data. 
+   * 获取数据的两个节点之间的并发连接数,默认为1
+   * */
   public int numConnectionsPerPeer() {
     return conf.getInt("spark.shuffle.io.numConnectionsPerPeer", 1);
   }
 
-  /** Requested maximum length of the queue of incoming connections. Default -1 for no backlog. */
+  /** 
+   * Requested maximum length of the queue of incoming connections. Default -1 for no backlog.
+   * 请求的传入连接的队列的最大长度。默认- 1,没有限制
+   * */
   public int backLog() { return conf.getInt("spark.shuffle.io.backLog", -1); }
 
-  /** Number of threads used in the server thread pool. Default to 0, which is 2x#cores. */
+  /** 
+   * Number of threads used in the server thread pool. Default to 0, which is 2x#cores. 
+   * 服务器线程池中使用的线程数,默认0,使用CPU核数
+   * */
   public int serverThreads() { return conf.getInt("spark.shuffle.io.serverThreads", 0); }
 
   /** Number of threads used in the client thread pool. Default to 0, which is 2x#cores. */
@@ -62,17 +75,25 @@ public class TransportConf {
 
   /**
    * Receive buffer size (SO_RCVBUF).
+   * 接收缓冲区的大小,最佳的接收缓冲区和发送缓冲区的大小应网络延迟X网络带宽
    * Note: the optimal size for receive buffer and send buffer should be
    *  latency * network_bandwidth.
+   *  假设 网络延迟= 1ms毫秒  网络带宽=10G,缓存区大小应该1.25MB
    * Assuming latency = 1ms, network_bandwidth = 10Gbps
    *  buffer size should be ~ 1.25MB
    */
   public int receiveBuf() { return conf.getInt("spark.shuffle.io.receiveBuffer", -1); }
 
-  /** Send buffer size (SO_SNDBUF). */
+  /** 
+   * Send buffer size (SO_SNDBUF). 
+   * 发送缓冲区大小
+   * */
   public int sendBuf() { return conf.getInt("spark.shuffle.io.sendBuffer", -1); }
 
-  /** Timeout for a single round trip of SASL token exchange, in milliseconds. */
+  /** 
+   * Timeout for a single round trip of SASL token exchange, in milliseconds. 
+   * 对于单往返SASL令牌交换超时时间，以毫秒为单位。
+   * */
   public int saslRTTimeoutMs() {
     return (int) JavaUtils.timeStringAsSec(conf.get("spark.shuffle.sasl.timeout", "30s")) * 1000;
   }
@@ -80,12 +101,14 @@ public class TransportConf {
   /**
    * Max number of times we will try IO exceptions (such as connection timeouts) per request.
    * If set to 0, we will not do any retries.
+   * 请求连接最大尝试数,如果0,不做任何重试
    */
   public int maxIORetries() { return conf.getInt("spark.shuffle.io.maxRetries", 3); }
 
   /**
    * Time (in milliseconds) that we will wait in order to perform a retry after an IOException.
    * Only relevant if maxIORetries &gt; 0.
+   *等待进行再连接时间,时间(以毫秒为单位)
    */
   public int ioRetryWaitTimeMs() {
     return (int) JavaUtils.timeStringAsSec(conf.get("spark.shuffle.io.retryWait", "5s")) * 1000;
@@ -95,6 +118,8 @@ public class TransportConf {
    * Minimum size of a block that we should start using memory map rather than reading in through
    * normal IO operations. This prevents Spark from memory mapping very small blocks. In general,
    * memory mapping has high overhead for blocks close to or below the page size of the OS.
+   * 以字节为单位的块大小，用于磁盘读取一个块大小进行内存映射。这可以防止Spark在内存映射时使用很小块
+   * 一般情况下，对块进行内存映射的开销接近或低于操作系统的页大小。
    */
   public int memoryMapBytes() {
     return conf.getInt("spark.storage.memoryMapThreshold", 2 * 1024 * 1024);
@@ -110,6 +135,7 @@ public class TransportConf {
 
   /**
    * Maximum number of retries when binding to a port before giving up.
+   * 绑定到一个端口在放弃之前,最大重试次数时.
    */
   public int portMaxRetries() {
     return conf.getInt("spark.port.maxRetries", 16);

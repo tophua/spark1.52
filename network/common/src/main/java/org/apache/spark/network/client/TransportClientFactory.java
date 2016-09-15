@@ -61,7 +61,10 @@ import org.apache.spark.network.util.TransportConf;
  */
 public class TransportClientFactory implements Closeable {
 
-  /** A simple data structure to track the pool of clients between two peer nodes. */
+  /** 
+   * A simple data structure to track the pool of clients between two peer nodes.
+   * 一个简单的数据结构来跟踪两个对等节点之间的客户端 
+   * */
   private static class ClientPool {
     TransportClient[] clients;
     Object[] locks;
@@ -104,6 +107,7 @@ public class TransportClientFactory implements Closeable {
     this.rand = new Random();
 
     IOMode ioMode = IOMode.valueOf(conf.ioMode());
+    //客户端channel被创建时使用的类,可以使用属性spark.shuffle.io.mode来配置
     this.socketChannelClass = NettyUtils.getClientChannelClass(ioMode);
     // TODO: Make thread pool name configurable.
     //根据Netty的规范,客户端只有work组,所以此处创建workerGroup

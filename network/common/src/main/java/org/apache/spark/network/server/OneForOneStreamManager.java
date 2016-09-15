@@ -35,6 +35,7 @@ import com.google.common.base.Preconditions;
 /**
  * StreamManager which allows registration of an Iterator&lt;ManagedBuffer&gt;, which are individually
  * fetched as chunks by the client. Each registered buffer is one chunk.
+ * 流管理迭代注册,使客户端单独获取的块,每个注册的缓冲区是一个块
  */
 public class OneForOneStreamManager extends StreamManager {
   private final Logger logger = LoggerFactory.getLogger(OneForOneStreamManager.class);

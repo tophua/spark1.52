@@ -22,12 +22,13 @@ import org.apache.spark.network.client.TransportClient;
 
 /**
  * Handler for sendRPC() messages sent by {@link org.apache.spark.network.client.TransportClient}s.
+ * 负责shuffle的I/O服务端在接收客户端的RPC请求后,提供下载Block或者上传Block的RPC处理,此处即NettyBlockRPCServer
  */
 public abstract class RpcHandler {
   /**
    * Receive a single RPC message. Any exception thrown while in this method will be sent back to
    * the client in string form as a standard RPC failure.
-   *
+   * 接收RPC消息,同时该方法抛出的任何异常将被发送回客户端的字符串形式作为一个标准的RPC失败
    * This method will not be called in parallel for a single TransportClient (i.e., channel).
    *
    * @param client A channel client which enables the handler to make requests back to the sender

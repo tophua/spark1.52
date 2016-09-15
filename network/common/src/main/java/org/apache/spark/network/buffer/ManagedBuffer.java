@@ -24,8 +24,9 @@ import java.nio.ByteBuffer;
 /**
  * This interface provides an immutable view for data in the form of bytes. The implementation
  * should specify how the data is provided:
+ * 接口提供不可变以字节形式的数据
  *
- * - {@link FileSegmentManagedBuffer}: data backed by part of a file
+ * - {@link FileSegmentManagedBuffer}: data backed by part of a file,由文件的一部分支持的数据
  * - {@link NioManagedBuffer}: data backed by a NIO ByteBuffer
  * - {@link NettyManagedBuffer}: data backed by a Netty ByteBuf
  *
