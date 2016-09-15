@@ -40,6 +40,7 @@ private[spark] class BroadcastManager(
     synchronized {
       if (!initialized) {
         val broadcastFactoryClass =
+	//广播的实现类
           conf.get("spark.broadcast.factory", "org.apache.spark.broadcast.TorrentBroadcastFactory")
 
         broadcastFactory =

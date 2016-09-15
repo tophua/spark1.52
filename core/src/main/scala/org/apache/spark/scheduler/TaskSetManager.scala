@@ -938,7 +938,7 @@ private[spark] class TaskSetManager(
    *获取Locality级别对应TaskSetManager等待分配下一个任务的时间  
    */
   private def getLocalityWait(level: TaskLocality.TaskLocality): Long = {
-   //在发布一个本地数据任务时候，放弃并发布到一个非本地数据的地方前，需要等待的时间
+   //在执行一个本地数据任务时候,放弃并执行到一个非本地数据的地方前,需要等待的时间
     val defaultWait = conf.get("spark.locality.wait", "3s")//本地化级别的默认等待时间3秒
     val localityWaitKey = level match {
       case TaskLocality.PROCESS_LOCAL => "spark.locality.wait.process"//同一个进程的即内存等待时间

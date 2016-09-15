@@ -516,7 +516,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     synchronized {
       schedulingMode = environmentUpdate
         .environmentDetails("Spark Properties").toMap
-        .get("spark.scheduler.mode")//Spark的任务调度模式
+        .get("spark.scheduler.mode")//SparkContext对job进行调度所采用的模式
         .map(SchedulingMode.withName)
     }
   }

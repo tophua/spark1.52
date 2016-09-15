@@ -84,6 +84,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
 
   test("test LRU eviction of stages") {
     val conf = new SparkConf()
+    //在GC之前webUI保留的stage数量
     conf.set("spark.ui.retainedStages", 5.toString)
     val listener = new JobProgressListener(conf)
 
@@ -99,6 +100,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
 
   test("test clearing of stageIdToActiveJobs") {
     val conf = new SparkConf()
+    //在GC之前webUI保留的stage数量
     conf.set("spark.ui.retainedStages", 5.toString)
     val listener = new JobProgressListener(conf)
     val jobId = 0
@@ -138,6 +140,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
 
   test("test LRU eviction of jobs") {
     val conf = new SparkConf()
+    //在GC之前webUI保留的stage数量
     conf.set("spark.ui.retainedStages", 5.toString)
     conf.set("spark.ui.retainedJobs", 5.toString)
     val listener = new JobProgressListener(conf)

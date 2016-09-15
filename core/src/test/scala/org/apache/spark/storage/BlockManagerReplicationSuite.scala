@@ -71,6 +71,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
     rpcEnv = RpcEnv.create("test", "localhost", 0, conf, securityMgr)
      //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
+    //0随机 driver侦听的端口
     conf.set("spark.driver.port", rpcEnv.address.port.toString)
     conf.set("spark.storage.unrollFraction", "0.4") 
     conf.set("spark.storage.unrollMemoryThreshold", "512")//展开内存线程

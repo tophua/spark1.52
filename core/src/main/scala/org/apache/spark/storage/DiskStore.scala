@@ -31,7 +31,7 @@ import org.apache.spark.util.Utils
  */
 private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBlockManager)
   extends BlockStore(blockManager) with Logging {
-//对文件进行内存映射的阈值，即当文件大于该值时getBytes方法对文件进行内存映射，而不是直接将该文件的内容读取到字节缓存区。
+ //以字节为单位的块大小,用于磁盘读取一个块大小进行内存映射
   val minMemoryMapBytes = blockManager.conf.getSizeAsBytes("spark.storage.memoryMapThreshold", "2m")
 
   override def getSize(blockId: BlockId): Long = {

@@ -93,8 +93,9 @@ class CoarseMesosSchedulerBackendSuite extends SparkFunSuite
     when(driver.start()).thenReturn(Protos.Status.DRIVER_RUNNING)
     val taskScheduler = mock[TaskSchedulerImpl]
     when(taskScheduler.sc).thenReturn(sc)
-
+    //运行driver的主机名或 IP 地址
     sparkConf.set("spark.driver.host", "driverHost")
+    //0随机 driver侦听的端口
     sparkConf.set("spark.driver.port", "1234")
 
     val backend = createSchedulerBackend(taskScheduler, driver)

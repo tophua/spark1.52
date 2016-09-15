@@ -126,6 +126,7 @@ private[spark] class LocalBackend(
    * @param conf Spark configuration.
    */
   def getUserClasspath(conf: SparkConf): Seq[URL] = {
+    //追加到executor类路径中的附加类路径，主要为了兼容旧版本的Spark
     val userClassPathStr = conf.getOption("spark.executor.extraClassPath")
     userClassPathStr.map(_.split(File.pathSeparator)).toSeq.flatten.map(new File(_).toURI.toURL)
   }

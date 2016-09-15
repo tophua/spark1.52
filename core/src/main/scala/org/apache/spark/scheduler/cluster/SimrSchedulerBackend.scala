@@ -40,6 +40,7 @@ private[spark] class SimrSchedulerBackend(
     super.start()
 
     val driverUrl = rpcEnv.uriOf(SparkEnv.driverActorSystemName,
+    //运行driver的主机名或 IP 地址
       RpcAddress(sc.conf.get("spark.driver.host"), sc.conf.get("spark.driver.port").toInt),
       CoarseGrainedSchedulerBackend.ENDPOINT_NAME)
 

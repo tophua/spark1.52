@@ -76,7 +76,7 @@ private[spark] class TaskSchedulerImpl(
   val STARVATION_TIMEOUT_MS = conf.getTimeAsMs("spark.starvation.timeout", "15s")
 
   // CPUs to request per task
-  //spark.task.cpus 每个任务分配的CPU数,默认1
+  //spark.task.cpus 每个任务分配的CPU内核数,默认1
   val CPUS_PER_TASK = conf.getInt("spark.task.cpus", 1)
 
   // TaskSetManagers are not thread safe, so any access to one should be synchronized

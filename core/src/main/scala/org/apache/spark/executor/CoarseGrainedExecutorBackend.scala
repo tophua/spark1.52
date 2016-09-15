@@ -237,6 +237,7 @@ private[spark] object CoarseGrainedExecutorBackend extends Logging {
         driverConf, executorId, hostname, port, cores, isLocal = false)
 
       // SparkEnv sets spark.driver.port so it shouldn't be 0 anymore.
+      //0随机 driver侦听的端口
       val boundPort = env.conf.getInt("spark.executor.port", 0)
       assert(boundPort != 0)
 

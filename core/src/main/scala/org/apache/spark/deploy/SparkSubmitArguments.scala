@@ -168,7 +168,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     driverCores = Option(driverCores)
       .orElse(sparkProperties.get("spark.driver.cores"))
       .orNull
-      //每个Worker所占用的内存大小；
+      //分配给每个executor进程总内存
     executorMemory = Option(executorMemory)
       .orElse(sparkProperties.get("spark.executor.memory"))
       .orElse(env.get("SPARK_EXECUTOR_MEMORY"))

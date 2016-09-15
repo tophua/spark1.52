@@ -37,8 +37,8 @@ import org.apache.spark.storage.{BlockId, StorageLevel}
  * Opened blocks are registered with the "one-for-one" strategy, meaning each Transport-layer Chunk
  * is equivalent to one Spark-level shuffle block.
  * 
- * 当map任务与Reduce任务处于不同节点时,Reduce任务需要从远端节点下载map任务的中间输出,
- * 因此NettyBlockRpcServer提供下载Block文件的功能,为了容错需要将block的数据备份到其他节点
+ * 当map任务与Reduce任务处于不同节点时,reduce任务需要从远端节点下载map任务的中间结果输出,
+ * 因此NettyBlockRpcServer提供下载Block文件的功能,一般为了容错需要将block的数据备份到其他节点
  * 提供上传Block文件的RPC服务
  */
 class NettyBlockRpcServer(
@@ -52,23 +52,27 @@ class NettyBlockRpcServer(
       client: TransportClient,
       messageBytes: Array[Byte],
       responseContext: RpcResponseCallback): Unit = {
+    //消息解码
     val message = BlockTransferMessage.Decoder.fromByteArray(messageBytes)
     logTrace(s"Received request: $message")
 
     message match {
-      //提供打开,即下载Block文件的功能,
+      //提供下载Block文件的功能,
       case openBlocks: OpenBlocks =>
         val blocks: Seq[ManagedBuffer] =
-          openBlocks.blockIds.map(BlockId.apply).map(blockManager.getBlockData)
+          //数据blockIds,存放BlockId,获得块数据
+          openBlocks.blockIds.map(BlockId.apply).map(blockManager.getBlockData) 
         val streamId = streamManager.registerStream(blocks.iterator)
         logTrace(s"Registered streamId $streamId with ${blocks.size} buffers")
         responseContext.onSuccess(new StreamHandle(streamId, blocks.size).toByteArray)
         //提供上传Block文件的RPC服务
       case uploadBlock: UploadBlock =>
         // StorageLevel is serialized as bytes using our JavaSerializer.
+        //存储级别
         val level: StorageLevel =
-          serializer.newInstance().deserialize(ByteBuffer.wrap(uploadBlock.metadata))
+          serializer.newInstance().deserialize(ByteBuffer.wrap(uploadBlock.metadata)) 
         val data = new NioManagedBuffer(ByteBuffer.wrap(uploadBlock.blockData))
+        //存储局部块,使用给定的存储级别
         blockManager.putBlockData(BlockId(uploadBlock.blockId), data, level)
         responseContext.onSuccess(new Array[Byte](0))
     }

@@ -26,10 +26,12 @@ trait BlockDataManager {
   /**
    * Interface to get local block data. Throws an exception if the block cannot be found or
    * cannot be read successfully.
+   * 根据blockId获得本地块数据(ManagedBuffer)
    */
   def getBlockData(blockId: BlockId): ManagedBuffer
 
   /**
+   * 存储局部块,使用给定的存储级别
    * Put the block locally, using the given storage level.
    */
   def putBlockData(blockId: BlockId, data: ManagedBuffer, level: StorageLevel): Unit

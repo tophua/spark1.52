@@ -58,6 +58,7 @@ class LocalDirsSuite extends SparkFunSuite with BeforeAndAfter {
     }
     // spark.local.dir only contains invalid directories, but that's not a problem since
     // SPARK_LOCAL_DIRS will override it on both the driver and workers:
+    //用于暂存空间的目录,该目录用于保存map输出文件或者转储RDD
     val conf = new MySparkConf().set("spark.local.dir", "/NONEXISTENT_PATH")
     assert(new File(Utils.getLocalDir(conf)).exists())
   }

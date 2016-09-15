@@ -388,7 +388,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     * 对Spark各种信息进行校验
     * */
   private[spark] def validateSettings() {
-    if (contains("spark.local.dir")) {
+    if (contains("spark.local.dir")) {//用于暂存空间的目录,该目录用于保存map输出文件或者转储RDD
       val msg = "In Spark 1.0 and later spark.local.dir will be overridden by the value set by " +
         "the cluster manager (via SPARK_LOCAL_DIRS in mesos/standalone and LOCAL_DIRS in YARN)."
       logWarning(msg)
@@ -553,6 +553,7 @@ private[spark] object SparkConf extends Logging {
   private val configsWithAlternatives = Map[String, Seq[AlternateConfig]](
   //executor在加载类的时候是否优先使用用户自定义的JAR包，而不是Spark带有的JAR包，目前，该属性只是一项试验功能
     "spark.executor.userClassPathFirst" -> Seq(
+    //executor在加载类的时候是否优先使用用户自定义的JAR包，而不是Spark带有的JAR包
       AlternateConfig("spark.files.userClassPathFirst", "1.3")),
     "spark.history.fs.update.interval" -> Seq(
       AlternateConfig("spark.history.fs.update.interval.seconds", "1.4"),
@@ -567,8 +568,7 @@ private[spark] object SparkConf extends Logging {
         // Translate old value to a duration, with 10s wait time per try.
         translation = s => s"${s.toLong * 10}s")),
     "spark.reducer.maxSizeInFlight" -> Seq(   
-    //每个reduce任务同时获取map输出的最大大小 （以兆字节为单位）。
-    //由于每个map输出都需要一个缓冲区来接收它，这代表着每个 reduce 任务有固定的内存开销，所以要设置小点，除非有很大内存
+    //每个reduce任务同时获取map输出的最大大小(以兆字节为单位)
       AlternateConfig("spark.reducer.maxMbInFlight", "1.4")),
     "spark.kryoserializer.buffer" ->
         Seq(AlternateConfig("spark.kryoserializer.buffer.mb", "1.4",

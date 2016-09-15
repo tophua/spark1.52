@@ -78,7 +78,7 @@ private object FaultToleranceTest extends App with Logging {
 
   private val containerSparkHome = "/opt/spark"
   private val dockerMountDir = "%s:%s".format(sparkHome, containerSparkHome)
-
+//运行driver的主机名或 IP 地址
   System.setProperty("spark.driver.host", "172.17.42.1") // default docker host ip
 
   private def afterEach() {
@@ -218,6 +218,7 @@ private object FaultToleranceTest extends App with Logging {
     if (sc != null) { sc.stop() }
     // Counter-hack: Because of a hack in SparkEnv#create() that changes this
     // property, we need to reset it.
+    //0随机 driver侦听的端口
     System.setProperty("spark.driver.port", "0")
     sc = new SparkContext(getMasterUrls(masters), "fault-tolerance", containerSparkHome)
   }

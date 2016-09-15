@@ -268,7 +268,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
   }
 
   test("onTaskGettingResult() called when result fetched remotely") {
-  //以MB为单位的driver和executor之间通信信息的大小，设置值越大，driver可以接受更大的计算结果
+   //以MB为单位的driver和executor之间通信信息的大小,设置值越大,driver可以接受越大的计算结果
     val conf = new SparkConf().set("spark.akka.frameSize", "1")
     sc = new SparkContext("local", "SparkListenerSuite", conf)
     val listener = new SaveTaskEvents

@@ -29,6 +29,14 @@ import org.apache.spark.network.shuffle.{ShuffleClient, BlockFetchingListener}
 import org.apache.spark.storage.{BlockManagerId, BlockId, StorageLevel}
 
 private[spark]
+/**
+ * 为什么网络服务组织存储体系里面?
+ * Spark是分布式部署,每个Task最终都运行在不同的机器节点上,map任务的输出结果直接存储到map任务所在机器的存储体系中
+ * reduce任务极有可能不在同一机器上运行,需要BlockTransferService远程下载map任务的中间输出结果 ,
+ * BlockTransferServicer提供shuufle文件上传到其他Executor或者下载到本地的客户端,
+ * 也提供了可以被其他Executor访问的Shuufle服务
+ * 
+ */
 abstract class BlockTransferService extends ShuffleClient with Closeable with Logging {
 
   /**

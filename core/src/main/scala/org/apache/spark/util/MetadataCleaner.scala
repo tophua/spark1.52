@@ -90,7 +90,7 @@ private[spark] object MetadataCleanerType extends Enumeration {
 // initialization of StreamingContext. It's okay for users trying to configure stuff themselves.
 private[spark] object MetadataCleaner {
   def getDelaySeconds(conf: SparkConf): Int = {
-    //设置清理时间  -1清理
+    //spark记录任何元数据的持续时间,设置清理时间  -1清理
     //周期性清除保证在这个时间之前的元数据会被清理。
     //当程序长时间几小时，几天的运行Spark的时候设置这个是很有用的。注意：任何内存中的RDD只要过了这个时间就会被清除掉。
     conf.getTimeAsSeconds("spark.cleaner.ttl", "-1").toInt

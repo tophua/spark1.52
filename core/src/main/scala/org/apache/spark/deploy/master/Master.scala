@@ -59,7 +59,7 @@ private[deploy] class Master(
   private val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
 
   private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") //精确到秒 For application IDs 
-  //如果master没有收到worker的心跳，那么将在这么多秒之后，master将丢弃该worker（默认60秒（60000毫秒）
+  //如果master没有收到worker的心跳,那么将在这么多秒之后，master将丢弃该worker（默认60秒（60000毫秒）
   private val WORKER_TIMEOUT_MS = conf.getLong("spark.worker.timeout", 60) * 1000
   //web UI上最多展示几个已结束应用。更早的应用的数将被删除
   private val RETAINED_APPLICATIONS = conf.getInt("spark.deploy.retainedApplications", 200)

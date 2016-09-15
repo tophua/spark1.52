@@ -356,6 +356,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
   /** Helper method to create a SparkConf that uses the given broadcast factory. */
   private def broadcastConf(factoryName: String): SparkConf = {
     val conf = new SparkConf
+    //广播的实现类
     conf.set("spark.broadcast.factory", "org.apache.spark.broadcast.%s".format(factoryName))
     conf
   }

@@ -199,7 +199,7 @@ class SparkSubmitSuite
     classpath(2) should endWith ("two.jar")
     classpath(3) should endWith ("three.jar")
     sysProps("spark.app.name") should be ("trill")
-    sysProps("spark.executor.memory") should be ("5g")
+    sysProps("spark.executor.memory") should be ("5g")//分配给每个executor进程总内存
     sysProps("spark.executor.cores") should be ("5")
     sysProps("spark.yarn.queue") should be ("thequeue")
     sysProps("spark.executor.instances") should be ("6")

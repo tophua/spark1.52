@@ -72,7 +72,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     // Make sure we can still launch tasks.
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
-  //Spark的任务调度模式
+  //SparkContext对job进行调度所采用的模式
   test("cluster mode, fair scheduler") {
     val conf = new SparkConf().set("spark.scheduler.mode", "FAIR")//FAIR 公平
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()

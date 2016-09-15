@@ -127,7 +127,7 @@ private[broadcast] object HttpBroadcast extends Logging {
     synchronized {
       if (!initialized) {
         bufferSize = conf.getInt("spark.buffer.size", 65536)
-	    //广播变量在发送之前是否先要被压缩，通常设置为true是个不错的选择
+	//是否在发送之前压缩广播变量
         compress = conf.getBoolean("spark.broadcast.compress", true)
         securityManager = securityMgr
         if (isDriver) {

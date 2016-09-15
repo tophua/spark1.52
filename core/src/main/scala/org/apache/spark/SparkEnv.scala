@@ -204,11 +204,12 @@ object SparkEnv extends Logging {
     listenerBus: LiveListenerBus,
     numCores: Int,
     mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
+    //运行driver的主机名或 IP 地址
     assert(conf.contains("spark.driver.host"), "spark.driver.host is not set on the driver!")
     assert(conf.contains("spark.driver.port"), "spark.driver.port is not set on the driver!")
     //驱动器监听主机名或者IP地址.
     val hostname = conf.get("spark.driver.host")
-    //驱动器监听端口号
+   //0随机 driver侦听的端口
     val port = conf.get("spark.driver.port").toInt
     create(
       conf,
@@ -288,6 +289,7 @@ object SparkEnv extends Logging {
 
     // Figure out which port Akka actually bound to in case the original port is 0 or occupied.
     if (isDriver) {
+    //0随机 driver侦听的端口
       conf.set("spark.driver.port", rpcEnv.address.port.toString)
     } else {
       conf.set("spark.executor.port", rpcEnv.address.port.toString)
@@ -516,7 +518,7 @@ object SparkEnv extends Logging {
 
     // Spark properties
     // This includes the scheduling mode whether or not it is configured (used by SparkUI)
-    //Spark的任务调度模式
+    //SparkContext对job进行调度所采用的模式
     val schedulerMode =
       if (!conf.contains("spark.scheduler.mode")) {
         Seq(("spark.scheduler.mode", schedulingMode))

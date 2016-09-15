@@ -68,9 +68,10 @@ private[spark] object Utils extends Logging {
   /**
    * Define a default value for driver memory here since this value is referenced across the code
    * base and nearly all files already use Utils.scala
+   * 定义一个Driver程序内存的默认值
    */
   val DEFAULT_DRIVER_MEM_MB = JavaUtils.DEFAULT_DRIVER_MEM_MB.toInt
-
+  //最大目录创建次数
   private val MAX_DIR_CREATION_ATTEMPTS: Int = 10
   @volatile private var localRootDirs: Array[String] = null
 
@@ -110,7 +111,10 @@ private[spark] object Utils extends Logging {
     ois.readObject.asInstanceOf[T]
   }
 
-  /** Deserialize a Long value (used for [[org.apache.spark.api.python.PythonPartitioner]]) */
+  /** 
+   *  Deserialize a Long value (used for [[org.apache.spark.api.python.PythonPartitioner]]) 
+   *  反序列化
+   *  */
   def deserializeLongValue(bytes: Array[Byte]) : Long = {
     // Note: we assume that we are given a Long value encoded in network (big-endian) byte order
     var result = bytes(7) & 0xFFL
@@ -160,14 +164,17 @@ private[spark] object Utils extends Logging {
   /**
    * Get the Context ClassLoader on this thread or, if not present, the ClassLoader that
    * loaded Spark.
-   *用于获取线程上下文的classloader,没有设置时获取加载Spark的classLoader
+   * 用于获取线程上下文的classloader,没有设置时获取加载Spark的classLoader
    * This should be used whenever passing a ClassLoader to Class.ForName or finding the currently
    * active loader when setting up ClassLoader delegation chains.
    */
   def getContextOrSparkClassLoader: ClassLoader =
     Option(Thread.currentThread().getContextClassLoader).getOrElse(getSparkClassLoader)
 
-  /** Determines whether the provided class is loadable in the current thread. */
+  /** 
+   *  Determines whether the provided class is loadable in the current thread. 
+   *  是否类加载器在当前线程中
+   *  */
   def classIsLoadable(clazz: String): Boolean = {
     // scalastyle:off classforname
     Try { Class.forName(clazz, false, getContextOrSparkClassLoader) }.isSuccess
@@ -385,7 +392,7 @@ private[spark] object Utils extends Logging {
         url,
         cachedFile,
         targetFile,
-	    //通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时，是否覆盖目标文件
+	//通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时,是否覆盖目标文件
         conf.getBoolean("spark.files.overwrite", false)
       )
     } else {
@@ -414,7 +421,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Download `in` to `tempFile`, then move it to `destFile`.
-   *
+   * 下载`到` tempfile `,然后将它移到`destfile `
    * If `destFile` already exists:
    *   - no-op if its contents equal those of `sourceFile`,
    *   - throw an exception if `fileOverwrite` is false,
@@ -468,9 +475,9 @@ private[spark] object Utils extends Logging {
       url: String,
       sourceFile: File,
       destFile: File,
-      fileOverwrite: Boolean,
+      fileOverwrite: Boolean,//文件覆盖
+      //removeSourceFile 删除源文件
       removeSourceFile: Boolean = false): Unit = {
-
     if (destFile.exists) {
       if (!filesEqualRecursive(sourceFile, destFile)) {
         if (fileOverwrite) {
@@ -559,7 +566,7 @@ private[spark] object Utils extends Logging {
       hadoopConf: Configuration) {
     val targetFile = new File(targetDir, filename)
     val uri = new URI(url)
-    //通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时，是否覆盖目标文件
+    //通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时,是否覆盖目标文件
     val fileOverwrite = conf.getBoolean("spark.files.overwrite", defaultValue = false)
     Option(uri.getScheme).getOrElse("file") match {
       case "http" | "https" | "ftp" =>
@@ -574,7 +581,7 @@ private[spark] object Utils extends Logging {
           uc = new URL(url).openConnection()
         }
         Utils.setupSecureURLConnection(uc, securityMgr)
-	//在获取由driver通过SparkContext.addFile() 添加的文件时，是否使用通信时间超时
+	//在获取由driver通过SparkContext.addFile()添加的文件时,是否使用通信时间超时
         val timeoutMs =
           conf.getTimeAsSeconds("spark.files.fetchTimeout", "60s").toInt * 1000
         uc.setConnectTimeout(timeoutMs)

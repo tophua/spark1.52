@@ -80,6 +80,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     System.setProperty("os.arch", "amd64")
     conf.set("os.arch", "amd64")
     conf.set("spark.test.useCompressedOops", "true")
+    //0随机 driver侦听的端口
     conf.set("spark.driver.port", rpcEnv.address.port.toString)
     conf.set("spark.storage.unrollFraction", "0.4")
     conf.set("spark.storage.unrollMemoryThreshold", "512")
@@ -776,6 +777,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
       store = null
     } finally {
       System.clearProperty("spark.shuffle.compress")
+      //是否在发送之前压缩广播变量
       System.clearProperty("spark.broadcast.compress")
        //是否压缩RDD分区
       System.clearProperty("spark.rdd.compress")

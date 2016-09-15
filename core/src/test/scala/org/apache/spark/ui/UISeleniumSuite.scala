@@ -470,7 +470,9 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       .setMaster("local")
       .setAppName("test")
       .set("spark.ui.enabled", "true")
+      //应用程序webUI的端口
       .set("spark.ui.port", "0")
+      //在GC之前webUI保留的stage数量
       .set("spark.ui.retainedStages", "3")
       .set("spark.ui.retainedJobs", "2")
     val sc = new SparkContext(conf)

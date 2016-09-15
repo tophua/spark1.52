@@ -360,6 +360,7 @@ private[spark] class MesosClusterScheduler(
       .setValue(desc.jarUrl.stripPrefix("file:").stripPrefix("local:")).build()
     val builder = CommandInfo.newBuilder().addUris(appJar)
     val entries =
+     //启动executor JVM 时要用到的特殊库路径
       (conf.getOption("spark.executor.extraLibraryPath").toList ++
         desc.command.libraryPathEntries)
     val prefixEnv = if (!entries.isEmpty) {
@@ -416,6 +417,7 @@ private[spark] class MesosClusterScheduler(
       "--master", s"mesos://${conf.get("spark.master")}",
       "--driver-cores", desc.cores.toString,
       "--driver-memory", s"${desc.mem}M")
+      //分配给每个executor进程总内存
     desc.schedulerProperties.get("spark.executor.memory").map { v =>
       options ++= Seq("--executor-memory", v)
     }

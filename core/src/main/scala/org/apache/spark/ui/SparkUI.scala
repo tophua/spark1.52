@@ -129,6 +129,7 @@ private[spark] object SparkUI {
   val DEFAULT_RETAINED_JOBS = 1000
 
   def getUIPort(conf: SparkConf): Int = {
+   //应用程序webUI的端口
     conf.getInt("spark.ui.port", SparkUI.DEFAULT_PORT)
   }
 

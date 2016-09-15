@@ -32,12 +32,13 @@ import org.apache.spark.util.Utils
  * can be created only using the apply method in the companion object. This allows de-duplication
  * of ID objects. Also, constructor parameters are private to ensure that parameters cannot be
  * modified from outside this class.
+ * 包括标识Slave的ExecutorId,块管理器的主机名称和端口
  */
 @DeveloperApi
 class BlockManagerId private (
-    private var executorId_ : String,
-    private var host_ : String,
-    private var port_ : Int)
+    private var executorId_ : String,//executorId
+    private var host_ : String,//块管理器的主机名称
+    private var port_ : Int)//端口
   extends Externalizable {
 
   private def this() = this(null, null, 0)  // For deserialization only
@@ -97,7 +98,7 @@ private[spark] object BlockManagerId {
 
   /**
    * Returns a [[org.apache.spark.storage.BlockManagerId]] for the given configuration.
-   *
+   *  包括标识Slave的ExecutorId,块管理器的主机名称和端口及节点的最大可用内存数
    * @param execId ID of the executor.
    * @param host Host name of the block manager.
    * @param port Port of the block manager.
@@ -108,14 +109,14 @@ private[spark] object BlockManagerId {
 
   def apply(in: ObjectInput): BlockManagerId = {
     val obj = new BlockManagerId()
-    obj.readExternal(in)
-    getCachedBlockManagerId(obj)
+    obj.readExternal(in)//读取ObjectInput对象host和port_
+    getCachedBlockManagerId(obj)//获取BlockManagerId
   }
 
   val blockManagerIdCache = new ConcurrentHashMap[BlockManagerId, BlockManagerId]()
 
   def getCachedBlockManagerId(id: BlockManagerId): BlockManagerId = {
-    blockManagerIdCache.putIfAbsent(id, id)
-    blockManagerIdCache.get(id)
+    blockManagerIdCache.putIfAbsent(id, id)//put和putIfAbsent的区别就是一个是直接放入并替换,另一个是有就不替换
+    blockManagerIdCache.get(id)//返回BlockManagerId对象
   }
 }

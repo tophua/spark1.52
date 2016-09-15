@@ -454,7 +454,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     // Set Spark driver host and port system properties
     //运行driver的主机名或 IP 地址
     _conf.setIfMissing("spark.driver.host", Utils.localHostName())
-    //随机 driver侦听的端口
+    //0随机 driver侦听的端口
     _conf.setIfMissing("spark.driver.port", "0")
     //设置executor.id为driver
     _conf.set("spark.executor.id", SparkContext.DRIVER_IDENTIFIER)
@@ -532,9 +532,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     if (files != null) {
       files.foreach(addFile)
     }
-    //spark.executor.memory指定Executor占用的内存大小,也可以配置系统变量SPARK_EXECUTOR_MEMORY对其大小进行设置
+    //spark.executor.memory指定分配给每个executor进程总内存,也可以配置系统变量SPARK_EXECUTOR_MEMORY对其大小进行设置
     //Master给Worker发送高度后,worker最终使用executorEnvs提供的信息启动Executor
-    _executorMemory = _conf.getOption("spark.executor.memory")
+    _executorMemory = _conf.getOption("spark.executor.memory")//分配给每个executor进程总内存
       .orElse(Option(System.getenv("SPARK_EXECUTOR_MEMORY")))
       .orElse(Option(System.getenv("SPARK_MEM"))
       .map(warnSparkMem))//获得Spark

@@ -78,7 +78,7 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
     val conf = new SparkConf()
       .setMaster("local[4]")
       .setAppName(classOf[OutputCommitCoordinatorSuite].getSimpleName)
-      .set("spark.speculation", "true")
+      .set("spark.speculation", "true")//设定是否使用推测执行机制
     sc = new SparkContext(conf) {
       override private[spark] def createSparkEnv(
           conf: SparkConf,

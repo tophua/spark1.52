@@ -77,7 +77,7 @@ private[spark] class BlockManager(
   val diskBlockManager = new DiskBlockManager(this, conf)
  //BlockManager缓存BlockId及对应的BlockInfo
   private val blockInfo = new TimeStampedHashMap[BlockId, BlockInfo]
-
+  //Executor线程池
   private val futureExecutionContext = ExecutionContext.fromExecutorService(
     ThreadUtils.newDaemonCachedThreadPool("block-manager-future", 128))
 
@@ -99,11 +99,15 @@ private[spark] class BlockManager(
 
   // Port used by the external shuffle service. In Yarn mode, this may be already be
   // set through the Hadoop configuration as the server is launched in the Yarn NM.
+  //使用扩展Shuffle service端口
   private val externalShuffleServicePort =
     Utils.getSparkOrYarnConfig(conf, "spark.shuffle.service.port", "7337").toInt
 
   // Check that we're not using external shuffle service with consolidated shuffle files.
+  // 检查外部不使用合并文件的shuffle服务
   if (externalShuffleServiceEnabled
+    //如果为true，在shuffle时就合并中间文件，对于有大量Reduce任务的shuffle来说，合并文件可 以提高文件系统性能，
+  //如果使用的是ext4 或 xfs 文件系统，建议设置为true；对于ext3，由于文件系统的限制，设置为true反而会使内核>8的机器降低性能
       && conf.getBoolean("spark.shuffle.consolidateFiles", false)
       && shuffleManager.isInstanceOf[HashShuffleManager]) {
     throw new UnsupportedOperationException("Cannot use external shuffle service with consolidated"
@@ -121,6 +125,11 @@ private[spark] class BlockManager(
   // Client to read other executors' shuffle files. This is either an external service, or just the
   // standard BlockTransferService to directly connect to other Executors.
   //shuffleClient客户端,是否有外ShuffleService可用
+  /**
+   * 为什么网络服务组织存储体系里面?
+   * Spark是分布式部署,每个Task最终都运行在不同的机器节点上,map任务的输出结果直接存储到map任务所在机器的存储体系中
+   * reduce任务极有可能不在同一机器上运行,需要远程下载map任务的中间输出结果
+   */
   private[spark] val shuffleClient = if (externalShuffleServiceEnabled) {
     //创建新的ExternalShuffleClient
     val transConf = SparkTransportConf.fromSparkConf(conf, numUsableCores)
@@ -151,7 +160,7 @@ private[spark] class BlockManager(
   // Pending re-registration action being executed asynchronously or null if none is pending.
   // Accesses should synchronize on asyncReregisterLock.
   //异步执行申请重新注册的动作,如果没有等待
-  private var asyncReregisterTask: Future[Unit] = null
+    private var asyncReregisterTask: Future[Unit] = null
   private val asyncReregisterLock = new Object
   //非广播清理器
   private val metadataCleaner = new MetadataCleaner(
@@ -160,7 +169,7 @@ private[spark] class BlockManager(
   private val broadcastCleaner = new MetadataCleaner(
     MetadataCleanerType.BROADCAST_VARS, this.dropOldBroadcastBlocks, conf)
 
-  // Field related to peer block managers that are necessary for block replication
+  // Field related to peer block managers that are necessary for block replication  
   @volatile private var cachedPeers: Seq[BlockManagerId] = _
   private val peerFetchLock = new Object
   private var lastPeerFetchTime = 0L
@@ -174,6 +183,7 @@ private[spark] class BlockManager(
 
   /**
    * Construct a BlockManager with a memory limit set based on system properties.
+   * 构建blockmanager设置内存限制系统属性
    */
   def this(
       execId: String,
@@ -206,7 +216,7 @@ private[spark] class BlockManager(
     shuffleClient.init(appId)
     //blockManagerId创建
     blockManagerId = BlockManagerId(
-        //包括标识Slave的ExecutorId,HostName和Port及节点的最大可用内存数
+        //包括标识Slave的ExecutorId,HostName和Port
       executorId, blockTransferService.hostName, blockTransferService.port)
     //shuffleServerId创建,当有外部externalShuffleServiceEnabled则初始化
     shuffleServerId = if (externalShuffleServiceEnabled) {
@@ -222,11 +232,12 @@ private[spark] class BlockManager(
     master.registerBlockManager(blockManagerId, maxMemory, slaveEndpoint)
 
     // Register Executors' configuration with the local shuffle service, if one should exist.
+    //当有外部shuffle service时,还需要向blockManagerMaster注册shuffleId
     if (externalShuffleServiceEnabled && !blockManagerId.isDriver) {
       registerWithExternalShuffleServer()
     }
   }
-
+  //当有外部shuffle service时,还需要向blockManagerMaster注册shuffleId
   private def registerWithExternalShuffleServer() {
     logInfo("Registering executor with local external shuffle service.")
     val shuffleConfig = new ExecutorShuffleInfo(
@@ -308,6 +319,7 @@ private[spark] class BlockManager(
 
   /**
    * For testing. Wait for any pending asynchronous re-registration; otherwise, do nothing.
+   * 重新注册异步等待任何未运行的任务
    */
   def waitForAsyncReregister(): Unit = {
     val task = asyncReregisterTask

@@ -415,7 +415,7 @@ class StandaloneDynamicAllocationSuite
     new SparkConf()
       .setMaster(masterRpcEnv.address.toSparkURL)
       .setAppName("test")
-      .set("spark.executor.memory", "256m")
+      .set("spark.executor.memory", "256m")//分配给每个executor进程总内存
   }
 
   /** Make a master to which our application will send executor requests. */

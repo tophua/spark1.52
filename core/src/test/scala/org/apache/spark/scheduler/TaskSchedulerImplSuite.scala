@@ -70,7 +70,7 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
   test("Scheduler correctly accounts for multiple CPUs per task") {
     sc = new SparkContext("local", "TaskSchedulerImplSuite")
     val taskCpus = 2
-//为每个任务分配的内核数
+    //spark.task.cpus 每个任务分配的CPU内核数,默认1
     sc.conf.set("spark.task.cpus", taskCpus.toString)
     val taskScheduler = new TaskSchedulerImpl(sc)
     taskScheduler.initialize(new FakeSchedulerBackend)
@@ -111,7 +111,7 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
   test("Scheduler does not crash when tasks are not serializable") {
     sc = new SparkContext("local", "TaskSchedulerImplSuite")
     val taskCpus = 2
-//为每个任务分配的内核数
+    //为每个任务分配的内核数
     sc.conf.set("spark.task.cpus", taskCpus.toString)
     val taskScheduler = new TaskSchedulerImpl(sc)
     taskScheduler.initialize(new FakeSchedulerBackend)

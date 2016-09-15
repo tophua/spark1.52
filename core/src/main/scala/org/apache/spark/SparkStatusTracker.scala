@@ -74,7 +74,7 @@ class SparkStatusTracker private[spark] (sc: SparkContext) {
 
   /**
    * Returns job information, or `None` if the job info could not be found or was garbage collected.
-   * 返回Job信息
+   * 返回Job信息,如果返回None,找不到job信息或者垃圾回收了
    */
   def getJobInfo(jobId: Int): Option[SparkJobInfo] = {
     jobProgressListener.synchronized {
@@ -85,7 +85,7 @@ class SparkStatusTracker private[spark] (sc: SparkContext) {
   }
 
   /**
-   * 返回stage信息
+   * 返回stage信息,如果返回None,找不到Stage信息或者垃圾回收了
    * Returns stage information, or `None` if the stage info could not be found or was
    * garbage collected.
    */

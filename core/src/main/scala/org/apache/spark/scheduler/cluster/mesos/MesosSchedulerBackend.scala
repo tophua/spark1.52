@@ -87,12 +87,14 @@ private[spark] class MesosSchedulerBackend(
       throw new SparkException("Executor Spark home `spark.mesos.executor.home` is not set!")
     }
     val environment = Environment.newBuilder()
+      //追加到executor类路径中的附加类路径，主要为了兼容旧版本的Spark
     sc.conf.getOption("spark.executor.extraClassPath").foreach { cp =>
       environment.addVariables(
         Environment.Variable.newBuilder().setName("SPARK_CLASSPATH").setValue(cp).build())
     }
+     //要传递给executor的额外JVM 选项,注意不能使用它来设置Spark属性或堆大小设置
     val extraJavaOpts = sc.conf.getOption("spark.executor.extraJavaOptions").getOrElse("")
-
+     //启动executor JVM 时要用到的特殊库路径
     val prefixEnv = sc.conf.getOption("spark.executor.extraLibraryPath").map { p =>
       Utils.libraryPathEnvPrefix(Seq(p))
     }.getOrElse("")

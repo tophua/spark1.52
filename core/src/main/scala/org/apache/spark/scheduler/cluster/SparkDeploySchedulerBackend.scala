@@ -60,6 +60,7 @@ private[spark] class SparkDeploySchedulerBackend(
 
     // The endpoint for executors to talk to us
     val driverUrl = rpcEnv.uriOf(SparkEnv.driverActorSystemName,
+    //运行driver的主机名或 IP 地址
       RpcAddress(sc.conf.get("spark.driver.host"), sc.conf.get("spark.driver.port").toInt),
       CoarseGrainedSchedulerBackend.ENDPOINT_NAME)
     //现在executor还没有申请，因此关于executor的所有信息都是未知的。
@@ -71,10 +72,13 @@ private[spark] class SparkDeploySchedulerBackend(
       "--cores", "{{CORES}}",
       "--app-id", "{{APP_ID}}",
       "--worker-url", "{{WORKER_URL}}")
+      //要传递给executor的额外JVM 选项,注意不能使用它来设置Spark属性或堆大小设置
     val extraJavaOpts = sc.conf.getOption("spark.executor.extraJavaOptions")
       .map(Utils.splitCommandString).getOrElse(Seq.empty)
+      //追加到executor类路径中的附加类路径,兼容旧版本的Spark
     val classPathEntries = sc.conf.getOption("spark.executor.extraClassPath")
       .map(_.split(java.io.File.pathSeparator).toSeq).getOrElse(Nil)
+      //启动executor JVM 时要用到的特殊库路径
     val libraryPathEntries = sc.conf.getOption("spark.executor.extraLibraryPath")
       .map(_.split(java.io.File.pathSeparator).toSeq).getOrElse(Nil)
 

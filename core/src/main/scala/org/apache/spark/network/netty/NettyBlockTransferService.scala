@@ -37,7 +37,10 @@ import org.apache.spark.util.Utils
  * 块传输服务,使用Netty可以异步事件驱动的网络应用框架,提供Web服务及客户端,获取远程节点上Block的集合
  * 为什么提供Shuffle服务与客户端
  * Spark是分布式部署的,每个task最终都运行在不同的机器节点上,map任务的输出结果直接存储到map任务所在机器的存储体系中
- * reduce任务极有可能不在同一台机器上运行,所以需要远程下载map任务的中间输出
+ * reduce任务极有可能不在同一台机器上运行,所以需要远程下载map任务的中间结果输出
+ *
+ * BlockTransferServicer提供shuufle文件上传到其他Executor或者下载到本地的客户端,
+ * 也提供了可以被其他Executor访问的Shuufle服务
  */
 class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManager, numCores: Int)
     extends BlockTransferService {
@@ -51,9 +54,9 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
   private[this] var server: TransportServer = _
   private[this] var clientFactory: TransportClientFactory = _
   private[this] var appId: String = _
-/**
- * BlockTransferService只有在其init方法被调用,即初始化后才提供服务
- */
+  /**
+   * BlockTransferService只有在其init方法被调用,即初始化后才提供服务
+   */
   override def init(blockDataManager: BlockDataManager): Unit = {
     //创建RpcServer
     val rpcHandler = new NettyBlockRpcServer(serializer, blockDataManager)
@@ -75,7 +78,10 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
     logInfo("Server created on " + server.getPort)
   }
 
-  /** Creates and binds the TransportServer, possibly trying multiple ports. */
+  /**
+   *  Creates and binds the TransportServer, possibly trying multiple ports. 
+   *  创建和绑定transportserver，可能在多个端口
+   *  */
   private def createServer(bootstraps: List[TransportServerBootstrap]): TransportServer = {
     def startService(port: Int): (TransportServer, Int) = {
       val server = transportContext.createServer(port, bootstraps)
@@ -150,7 +156,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
     //将appId,execId,blockId,序列化的StorageLevel,转化为数组的Block封装为UploadBlock,
     //并将UploadBlock序列化为数组,调用客户端sendRpc方法将字节数组上传
     client.sendRpc(new UploadBlock(appId, execId, blockId.toString, levelBytes, array).toByteArray,
-    //最终调用Netty客户端的SendRpc方法将字节数组上传,回调函数RpcResponseCallback根据RPC的结果更改上传状态
+      //最终调用Netty客户端的SendRpc方法将字节数组上传,回调函数RpcResponseCallback根据RPC的结果更改上传状态
       new RpcResponseCallback {
         override def onSuccess(response: Array[Byte]): Unit = {
           logTrace(s"Successfully uploaded block $blockId")

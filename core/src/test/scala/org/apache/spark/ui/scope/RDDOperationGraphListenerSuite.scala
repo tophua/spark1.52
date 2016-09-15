@@ -33,6 +33,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
   private val maxRetainedStages = 10
   private val conf = new SparkConf()
     .set("spark.ui.retainedJobs", maxRetainedJobs.toString)
+    //在GC之前webUI保留的stage数量
     .set("spark.ui.retainedStages", maxRetainedStages.toString)
 
   test("run normal jobs") {

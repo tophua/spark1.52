@@ -62,7 +62,7 @@ private[spark] object AkkaUtils extends Logging {
       port: Int,
       conf: SparkConf,
       securityManager: SecurityManager): (ActorSystem, Int) = {
-   //用于通信的actor线程数量。如果驱动器有很多CPU核心，那么在大集群上可以增大这个值
+     //用于通信的actor线程数量
     val akkaThreads = conf.getInt("spark.akka.threads", 4)
     //设置批量处理大小
     val akkaBatchSize = conf.getInt("spark.akka.batchSize", 15)
@@ -79,9 +79,9 @@ private[spark] object AkkaUtils extends Logging {
     }
 
     val logAkkaConfig = if (conf.getBoolean("spark.akka.logAkkaConfig", false)) "on" else "off"
-    //本参数是设置可接受的心跳停顿时间
+    //本参数是设置可接受的心跳停顿时间,以秒为单位
     val akkaHeartBeatPausesS = conf.getTimeAsSeconds("spark.akka.heartbeat.pauses", "6000s")
-    //心跳间隔时间
+    //心跳间隔时间,以秒为单位
     val akkaHeartBeatIntervalS = conf.getTimeAsSeconds("spark.akka.heartbeat.interval", "1000s")
   
     val secretKey = securityManager.getSecretKey()
@@ -133,10 +133,10 @@ private[spark] object AkkaUtils extends Logging {
 
   /** 
    *  Returns the configured max frame size for Akka messages in bytes. 
-   *  返回Akka消息最大值
+   *  返回Akka消息driver和executor之间通信信息的最大值,设置值越大,driver可以接受越大的计算结果
    *  */
   def maxFrameSizeBytes(conf: SparkConf): Int = {
-  //以MB为单位的driver和executor之间通信信息的大小，设置值越大，driver可以接受更大的计算结果
+  //以MB为单位的driver和executor之间通信信息的大小,设置值越大,driver可以接受越大的计算结果
     val frameSizeInMB = conf.getInt("spark.akka.frameSize", 128)
     if (frameSizeInMB > AKKA_MAX_FRAME_SIZE_IN_MB) {
       throw new IllegalArgumentException(
@@ -214,7 +214,9 @@ private[spark] object AkkaUtils extends Logging {
  */
   def makeDriverRef(name: String, conf: SparkConf, actorSystem: ActorSystem): ActorRef = {
     val driverActorSystemName = SparkEnv.driverActorSystemName
+    //运行driver的主机名或 IP 地址
     val driverHost: String = conf.get("spark.driver.host", "localhost")
+    //0随机 driver侦听的端口
     val driverPort: Int = conf.getInt("spark.driver.port", 7077)
     Utils.checkHost(driverHost, "Expected hostname")
     val url = address(protocol(actorSystem), driverActorSystemName, driverHost, driverPort, name)
