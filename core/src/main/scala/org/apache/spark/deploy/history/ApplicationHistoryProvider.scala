@@ -55,6 +55,7 @@ private[history] abstract class ApplicationHistoryProvider {
 
   /**
    * Called when the server is shutting down.
+   * 调用服务器关闭
    */
   def stop(): Unit = { }
 
@@ -68,6 +69,7 @@ private[history] abstract class ApplicationHistoryProvider {
   /**
    * Writes out the event logs to the output stream provided. The logs will be compressed into a
    * single zip file and written out.
+   * 将事件日志写入提供的输出流中,日志将被压缩成一个单个的压缩文件
    * @throws SparkException if the logs for the app id cannot be found.
    */
   @throws(classOf[SparkException])

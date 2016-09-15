@@ -136,6 +136,7 @@ private[spark] class ExecutorAllocationManager(
   private val executorsPendingToRemove = new mutable.HashSet[String]
 
   // All known executors
+  //所有已知executors
   private val executorIds = new mutable.HashSet[String]
 
   // A timestamp of when an addition should be triggered, or NOT_SET if it is not set
@@ -144,18 +145,23 @@ private[spark] class ExecutorAllocationManager(
 
   // A timestamp for each executor of when the executor should be removed, indexed by the ID
   // This is set when an executor is no longer running a task, or when it first registers
+  //时间戳的每个executor的执行时应删除
   private val removeTimes = new mutable.HashMap[String, Long]
 
   // Polling loop interval (ms)
+  //循环间隔
   private val intervalMillis: Long = 100
 
   // Clock used to schedule when executors should be added and removed
+  // 时钟用于调度执行时应添加和删除
   private var clock: Clock = new SystemClock()
 
   // Listener for Spark events that impact the allocation policy
+  // 侦听Spark事件引发的侦听器
   private val listener = new ExecutorAllocationListener
 
   // Executor that handles the scheduling task.
+  // 处理调度任务的执行器线程池
   private val executor =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("spark-dynamic-executor-allocation")
 
@@ -167,17 +173,21 @@ private[spark] class ExecutorAllocationManager(
   // set to false when:
   //   (1) a stage is submitted, or
   //   (2) an executor idle timeout has elapsed.
+  //是否仍在等待执行被分配的初始设置,
   @volatile private var initializing: Boolean = true
 
   // Number of locality aware tasks, used for executor placement.
+  //用于执行最佳位置任务的数量
   private var localityAwareTasks = 0
 
   // Host to possible task running on it, used for executor placement.
+  //可能运行主机上的任务
   private var hostToLocalTaskCount: Map[String, Int] = Map.empty
 
   /**
    * Verify that the settings specified through the config are valid.
    * If not, throw an appropriate exception.
+   * 设置验证配置设置是否有效
    */
   private def validateSettings(): Unit = {
     if (minNumExecutors < 0 || maxNumExecutors < 0) {
@@ -221,10 +231,12 @@ private[spark] class ExecutorAllocationManager(
   /**
    * Register for scheduler callbacks to decide when to add and remove executors, and start
    * the scheduling task.
+   * 启动调度任务,注册调度回调方法来决定添加和删除的Executor
+   * 
    */
   def start(): Unit = {
+    //将ExecutorAllocationListener添加LiveListenerBus中    
     listenerBus.addListener(listener)
-
     val scheduleTask = new Runnable() {
       override def run(): Unit = {
         try {
@@ -237,6 +249,7 @@ private[spark] class ExecutorAllocationManager(
         }
       }
     }
+    //通过线程不断添加exector,遍历exector,将超进的Eexecutor杀掉并移除
     executor.scheduleAtFixedRate(scheduleTask, 0, intervalMillis, TimeUnit.MILLISECONDS)
   }
 
@@ -249,6 +262,7 @@ private[spark] class ExecutorAllocationManager(
   }
 
   /**
+   * 最大Executros数
    * The maximum number of executors we would need under the current load to satisfy all running
    * and pending tasks, rounded up.
    */
@@ -260,18 +274,20 @@ private[spark] class ExecutorAllocationManager(
   /**
    * This is called at a fixed interval to regulate the number of pending executor requests
    * and number of executors running.
-   *
+   * 这是在一个固定的时间间隔,调整未执行和运行executor数。
    * First, adjust our requested executors based on the add time and our current needs.
    * Then, if the remove time for an existing executor has expired, kill the executor.
    *
    * This is factored out into its own method for testing.
+   * 
    */
   private def schedule(): Unit = synchronized {
-    val now = clock.getTimeMillis
+    val now = clock.getTimeMillis //获得当前时间
 
     updateAndSyncNumExecutorsTarget(now)
-
+    //retain保留
     removeTimes.retain { case (executorId, expireTime) =>
+      //executorId,expireTime到期时间
       val expired = now >= expireTime
       if (expired) {
         initializing = false
@@ -283,7 +299,7 @@ private[spark] class ExecutorAllocationManager(
 
   /**
    * Updates our target number of executors and syncs the result with the cluster manager.
-   *
+   * 同步更新集群管理器执行目标数
    * Check to see whether our existing allocation and the requests we've made previously exceed our
    * current needs. If so, truncate our target and let the cluster manager know so that it can
    * cancel pending requests that are unneeded.
@@ -329,7 +345,7 @@ private[spark] class ExecutorAllocationManager(
    * Request a number of executors from the cluster manager.
    * If the cap on the number of executors is reached, give up and reset the
    * number of executors to add next round instead of continuing to double it.
-   *
+   * 从集群管理器请求的执行者,如果在执行者的数量达到上限,放弃执行数复位而不是继续添加下一轮双
    * @param maxNumExecutorsNeeded the maximum number of executors all currently running or pending
    *                              tasks could fill
    * @return the number of additional executors actually requested.
@@ -521,10 +537,11 @@ private[spark] class ExecutorAllocationManager(
 
   /**
    * A listener that notifies the given allocation manager of when to add and remove executors.
-   *
+   * 通过一个监听事件对动态添加,删除Executor.
    * This class is intentionally conservative in its assumptions about the relative ordering
    * and consistency of events returned by the listener. For simplicity, it does not account
    * for speculated tasks.
+   * 
    */
   private class ExecutorAllocationListener extends SparkListener {
 

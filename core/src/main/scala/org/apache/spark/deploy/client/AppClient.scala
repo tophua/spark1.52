@@ -347,6 +347,7 @@ private[spark] class AppClient(
 
   /**
    * Kill the given list of executors through the Master.
+   * 通过Master杀死给定executor Id列表
    * @return whether the kill request is acknowledged.
    */
   def killExecutors(executorIds: Seq[String]): Boolean = {

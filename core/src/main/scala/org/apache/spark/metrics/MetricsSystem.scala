@@ -24,11 +24,11 @@ import org.apache.spark.util.Utils
 
 import scala.collection.mutable
 
-import com.codahale.metrics.{Metric, MetricFilter, MetricRegistry}
+import com.codahale.metrics.{ Metric, MetricFilter, MetricRegistry }
 import org.eclipse.jetty.servlet.ServletContextHandler
 
-import org.apache.spark.{Logging, SecurityManager, SparkConf}
-import org.apache.spark.metrics.sink.{MetricsServlet, Sink}
+import org.apache.spark.{ Logging, SecurityManager, SparkConf }
+import org.apache.spark.metrics.sink.{ MetricsServlet, Sink }
 import org.apache.spark.metrics.source.Source
 
 /**
@@ -67,10 +67,10 @@ import org.apache.spark.metrics.source.Source
  * [options] is the specific property of this source or sink.
  */
 private[spark] class MetricsSystem private (
-    val instance: String,
-    conf: SparkConf,
-    securityMgr: SecurityManager)
-  extends Logging {
+  val instance: String, //指定了谁在使用测量系统
+  conf: SparkConf, //指定了从那里收集测量数据
+  securityMgr: SecurityManager) //指定了往哪里测量数据
+    extends Logging {
 
   private[this] val metricsConfig = new MetricsConfig(conf)
 
@@ -85,6 +85,7 @@ private[spark] class MetricsSystem private (
 
   /**
    * Get any UI handlers used by this metrics system; can only be called after start().
+   * 为了能够在SparkUI(页面)访问到测量数据,所以需要给Sinks增加Jetty的ServletHandlers
    */
   def getServletHandlers: Array[ServletContextHandler] = {
     require(running, "Can only call getServletHandlers on a running MetricsSystem")
@@ -92,7 +93,7 @@ private[spark] class MetricsSystem private (
   }
 
   metricsConfig.initialize()
-
+  //启动
   def start() {
     require(!running, "Attempting to start a MetricsSystem that is already running")
     running = true
@@ -162,31 +163,39 @@ private[spark] class MetricsSystem private (
       def matches(name: String, metric: Metric): Boolean = name.startsWith(regName)
     })
   }
-
+  //注册Souurces,告诉测量系统从哪里收集测量数据
   private def registerSources() {
+    //从instance获取properties,
     val instConfig = metricsConfig.getInstance(instance)
+    //使用正则匹配properties中以source.开头的属性
     val sourceConfigs = metricsConfig.subProperties(instConfig, MetricsSystem.SOURCE_REGEX)
 
     // Register all the sources related to instance
+
     sourceConfigs.foreach { kv =>
       val classPath = kv._2.getProperty("class")
       try {
         val source = Utils.classForName(classPath).newInstance()
+        //将每个source的实例注册到ArrayBuffer
         registerSource(source.asInstanceOf[Source])
       } catch {
         case e: Exception => logError("Source class " + classPath + " cannot be instantiated", e)
       }
     }
   }
-
+  //注册Sinks,即告诉测量系统MetricsSystem往哪里输出测量数据
   private def registerSinks() {
+    //从instance获取properties,
     val instConfig = metricsConfig.getInstance(instance)
+    //使用正则匹配properties中以sink.开头的属性
     val sinkConfigs = metricsConfig.subProperties(instConfig, MetricsSystem.SINK_REGEX)
 
     sinkConfigs.foreach { kv =>
       val classPath = kv._2.getProperty("class")
       if (null != classPath) {
         try {
+          //将子属性class对应的类metricsServleter反射得到MetricsServlet实例
+          //如果属性的Key是servlet,将其设置为MetricsServlet,如果是Sink,则加入ArrayBuffer
           val sink = Utils.classForName(classPath)
             .getConstructor(classOf[Properties], classOf[MetricRegistry], classOf[SecurityManager])
             .newInstance(kv._2, registry, securityMgr)
@@ -207,7 +216,9 @@ private[spark] class MetricsSystem private (
 }
 
 private[spark] object MetricsSystem {
+  //匹配以sink.开头
   val SINK_REGEX = "^sink\\.(.+)\\.(.+)".r
+  //匹配以source.开头
   val SOURCE_REGEX = "^source\\.(.+)\\.(.+)".r
 
   private[this] val MINIMAL_POLL_UNIT = TimeUnit.SECONDS
@@ -222,7 +233,7 @@ private[spark] object MetricsSystem {
   }
 
   def createMetricsSystem(
-      instance: String, conf: SparkConf, securityMgr: SecurityManager): MetricsSystem = {
+    instance: String, conf: SparkConf, securityMgr: SecurityManager): MetricsSystem = {
     new MetricsSystem(instance, conf, securityMgr)
   }
 }

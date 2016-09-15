@@ -33,12 +33,12 @@ import org.apache.spark.util.io.ByteArrayChunkOutputStream
 
 /**
  * A BitTorrent-like implementation of [[org.apache.spark.broadcast.Broadcast]].
- *
+ * 
  * The mechanism is as follows:
  *
  * The driver divides the serialized object into small chunks and
  * stores those chunks in the BlockManager of the driver.
- *
+ * 将Driver序列化的对象分为小块并存储在驱动器的blockmanager。
  * On each executor, the executor first attempts to fetch the object from its BlockManager. If
  * it does not exist, it then uses remote fetches to fetch the small chunks from the driver and/or
  * other executors if available. Once it gets the chunks, it puts the chunks in its own

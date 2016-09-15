@@ -37,6 +37,7 @@ import org.apache.spark.util.{Clock, SystemClock, ThreadUtils, Utils}
 
 /**
  * A class that provides application history from event logs stored in the file system.
+ * 一个从存储在文件系统中的事件日志提供应用程序历史的类
  * This provider checks for new finished applications in the background periodically and
  * renders the history application UI by parsing the associated event logs.
  */

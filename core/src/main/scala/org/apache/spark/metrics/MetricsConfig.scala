@@ -44,6 +44,7 @@ private[spark] class MetricsConfig(conf: SparkConf) extends Logging {
 
   def initialize() {
     // Add default properties in case there's no properties file
+    // 添加默认属性的情况下,没有任何属性文件
     setDefaultProperties(properties)
 
     loadPropertiesFromFile(conf.getOption("spark.metrics.conf"))
@@ -69,7 +70,7 @@ private[spark] class MetricsConfig(conf: SparkConf) extends Logging {
       }
     }
   }
-
+//使用正则匹配properties中以source.开头的属性,然后将属性中的source反映得到的实例加入HashMap
   def subProperties(prop: Properties, regex: Regex): mutable.HashMap[String, Properties] = {
     val subProperties = new mutable.HashMap[String, Properties]
     import scala.collection.JavaConversions._
@@ -92,6 +93,7 @@ private[spark] class MetricsConfig(conf: SparkConf) extends Logging {
   /**
    * Loads configuration from a config file. If no config file is provided, try to get file
    * in class path.
+   * 从配置文件中加载配置信息,未提供配置文件,尝试在类路径中获取文件
    */
   private[this] def loadPropertiesFromFile(path: Option[String]): Unit = {
     var is: InputStream = null

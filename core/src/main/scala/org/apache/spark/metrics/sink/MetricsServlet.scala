@@ -48,7 +48,8 @@ private[spark] class MetricsServlet(
 
   val mapper = new ObjectMapper().registerModule(
     new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, servletShowSample))
-
+  //最终生成处理/metrics/json请求的ServletContextHandler,而请求的真正处理由getMetricsSnapshot方法
+  //利用fastJson解析,生成
   def getHandlers: Array[ServletContextHandler] = {
     Array[ServletContextHandler](
       createServletHandler(servletPath,

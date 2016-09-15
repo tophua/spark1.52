@@ -114,11 +114,11 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   // contains a map from hostname to a list of input format splits on the host.
   //它包含主机名的列表
   private[spark] var preferredNodeLocationData: Map[String, Set[SplitInfo]] = Map()
-
+  //系统开始运行时间
   val startTime = System.currentTimeMillis()
-
+  //暂停标示
   private[spark] val stopped: AtomicBoolean = new AtomicBoolean(false)
-
+  //如果已经停止抛出异常
   private def assertNotStopped(): Unit = {
     if (stopped.get()) {
       throw new IllegalStateException("Cannot call methods on a stopped SparkContext")
@@ -312,7 +312,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   // Used to store a URL for each static file/jar together with the file's local timestamp
   //用于存储URL为每个静态文件/jar 连同文件的时间戳
-  private[spark] val addedFiles = HashMap[String, Long]()
+  private[spark] val addedFiles = HashMap[String, Long]() 
   private[spark] val addedJars = HashMap[String, Long]()
 
   // Keeps track of all persisted RDDs
@@ -343,7 +343,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] val executorEnvs = HashMap[String, String]()
 
   // Set SPARK_USER for user who is running SparkContext.
-  //设置谁在使用SparkContext
+  // 设置谁在使用SparkContext
   val sparkUser = Utils.getCurrentUserName()
 
   private[spark] def schedulerBackend: SchedulerBackend = _schedulerBackend
@@ -421,10 +421,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     val validLevels = Seq("ALL", "DEBUG", "ERROR", "FATAL", "INFO", "OFF", "TRACE", "WARN")
     if (!validLevels.contains(logLevel)) {
       throw new IllegalArgumentException(
-  s"Supplied level $logLevel did not match one of: ${validLevels.mkString(",")}")
-}
-Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
-}
+      s"Supplied level $logLevel did not match one of: ${validLevels.mkString(",")}")
+    }
+    Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
+  }
 //初始化代码块
   try {
     //对SparkCon进行复制
@@ -606,19 +606,23 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
       }
 
     // Optionally scale number of executors dynamically based on workload. Exposed for testing.
+    //动态分配最小Executor数量,动态分配最大Executor数量,每个Executor可以运行的Task的数量等配置信息
     val dynamicAllocationEnabled = Utils.isDynamicAllocationEnabled(_conf)
     if (!dynamicAllocationEnabled && _conf.getBoolean("spark.dynamicAllocation.enabled", false)) {
       logInfo("Dynamic Allocation and num executors both set, thus dynamic allocation disabled.")
     }
-
+    //对已分配的Executor进行管理,创建和启动ExecutorAllocationManager
     _executorAllocationManager =
       if (dynamicAllocationEnabled) {
+        //动态分配最小Executor数量,动态分配最大Executor数量,每个Executor可以运行的Task的数量等配置信息
         Some(new ExecutorAllocationManager(this, listenerBus, _conf))
       } else {
         None
       }
+    //启动动态分配
     _executorAllocationManager.foreach(_.start())
-   //ContextCleaner用于清理超出应用范围的RDD、ShuffleDependency和Broadcast对象
+    //ContextCleaner用于清理超出应用范围的RDD、ShuffleDependency和Broadcast对象
+    //默认为true
     _cleaner =
       if (_conf.getBoolean("spark.cleaner.referenceTracking", true)) {
         Some(new ContextCleaner(this))
@@ -628,11 +632,13 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     _cleaner.foreach(_.start())
 
     setupAndStartListenerBus()
+    //更新Spark环境
     postEnvironmentUpdate()
     postApplicationStart()
 
     // Post init
     _taskScheduler.postStartHook()
+    //注册测量信息
     _env.metricsSystem.registerSource(new BlockManagerSource(_env.blockManager))
     _executorAllocationManager.foreach { e =>
       _env.metricsSystem.registerSource(e.executorAllocationManagerSource)
@@ -664,6 +670,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
    * Logs an error and returns None if we failed to obtain a thread dump, which could occur due
    * to an executor being dead or unresponsive or due to network issues while sending the thread
    * dump message back to the driver.
+   * 由Web用户界面调用，获取执行线程的栈信息
    */
   private[spark] def getExecutorThreadDump(executorId: String): Option[Array[ThreadStackTrace]] = {
     try {
@@ -1416,6 +1423,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
 
   /**
    * Add a file to be downloaded with this Spark job on every node.
+   * 
    * The `path` passed can be either a local file, a file in HDFS (or other Hadoop-supported
    * filesystems), or an HTTP, HTTPS or FTP URI.  To access the file in Spark jobs,
    * use `SparkFiles.get(fileName)` to find its download location.
@@ -1453,6 +1461,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     } else {
       schemeCorrectedPath
     }
+
     val timestamp = System.currentTimeMillis
     addedFiles(key) = timestamp
 
@@ -2246,6 +2255,7 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   private def postApplicationStart() {
     // Note: this code assumes that the task scheduler has been initialized and has contacted
     // the cluster manager to get an application ID (in case the cluster manager provides one).
+    //向listenerBus发送SparkListenerApplicationStart事件
     listenerBus.post(SparkListenerApplicationStart(appName, Some(applicationId),
       startTime, sparkUser, applicationAttemptId, schedulerBackend.getDriverLogUrls))
   }
@@ -2255,7 +2265,10 @@ Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
     listenerBus.post(SparkListenerApplicationEnd(System.currentTimeMillis))
   }
 
-  /** Post the environment update event once the task scheduler is ready */
+  /** 
+   *  Post the environment update event once the task scheduler is ready 
+   *  一旦任务调度程序准备就绪后，发布环境更新事件
+   *  */
   private def postEnvironmentUpdate() {
     if (taskScheduler != null) {
       val schedulingMode = getSchedulingMode.toString
@@ -2296,8 +2309,10 @@ object SparkContext extends Logging {
 
   /**
    * The active, fully-constructed SparkContext.  If no SparkContext is active, then this is `null`.
-   *
+   * 这激活,全面构造一个SparkContext,如果没有sparkcontext活跃,那么这是null,
    * Access to this field is guarded by SPARK_CONTEXT_CONSTRUCTOR_LOCK.
+   * 访问这个字段是由SPARK_CONTEXT_CONSTRUCTOR_LOCK
+   * AtomicReference则对应普通的对象引用,它可以保证你在修改对象引用时的线程安全性.
    */
   private val activeContext: AtomicReference[SparkContext] =
     new AtomicReference[SparkContext](null)
@@ -2412,9 +2427,13 @@ object SparkContext extends Logging {
   private[spark] def setActiveContext(
       sc: SparkContext,
       allowMultipleContexts: Boolean): Unit = {
+    //锁保护访问全局变量,跟踪sparkcontext构造
     SPARK_CONTEXT_CONSTRUCTOR_LOCK.synchronized {
+      //为确保没有其他sparkcontext在JVM中运行
       assertNoOtherContextIsRunning(sc, allowMultipleContexts)
+      //非None,sparkcontext正在建设
       contextBeingConstructed = None
+      //
       activeContext.set(sc)
     }
   }
