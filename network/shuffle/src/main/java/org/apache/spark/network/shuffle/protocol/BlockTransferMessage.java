@@ -26,7 +26,7 @@ import org.apache.spark.network.shuffle.protocol.mesos.RegisterDriver;
 /**
  * Messages handled by the {@link org.apache.spark.network.shuffle.ExternalShuffleBlockHandler}, or
  * by Spark's NettyBlockTransferService.
- *
+ * 消息句柄
  * At a high level:
  *   - OpenBlock is handled by both services, but only services shuffle files for the external
  *     shuffle service. It returns a StreamHandle.
@@ -52,13 +52,16 @@ public abstract class BlockTransferMessage implements Encodable {
 
   // NB: Java does not support static methods in interfaces, so we must put this in a static class.
   public static class Decoder {
-    /** Deserializes the 'type' byte followed by the message itself. */
+    /** 
+     * Deserializes the 'type' byte followed by the message itself. 
+     * byte类型消息反序列化返回下列消息类型
+     * */
     public static BlockTransferMessage fromByteArray(byte[] msg) {
       ByteBuf buf = Unpooled.wrappedBuffer(msg);
       byte type = buf.readByte();
       switch (type) {
-        case 0: return OpenBlocks.decode(buf);
-        case 1: return UploadBlock.decode(buf);
+        case 0: return OpenBlocks.decode(buf);//下载
+        case 1: return UploadBlock.decode(buf);//上传
         case 2: return RegisterExecutor.decode(buf);
         case 3: return StreamHandle.decode(buf);
         case 4: return RegisterDriver.decode(buf);
