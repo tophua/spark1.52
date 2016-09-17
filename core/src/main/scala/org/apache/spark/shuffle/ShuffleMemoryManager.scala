@@ -39,7 +39,7 @@ import org.apache.spark.{Logging, SparkException, SparkConf, TaskContext}
  * wait() and notifyAll() to signal changes.
  *
  * Use `ShuffleMemoryManager.create()` factory method to create a new instance.
- *  负责管理Shuffle线程占有内存的分配与释放
+ *  负责管理Shuffle线程占有内存的分配与释放,
  * @param maxMemory total amount of memory available for execution, in bytes.
  * @param pageSizeBytes number of bytes for each page, by default.
  * 
@@ -76,7 +76,7 @@ class ShuffleMemoryManager protected (
    * 态变化的变量,所以要持续对这些线程跟踪,以便无论何时在这些线程发生变化时重新按照1/2N和1/N计算
    */
   def tryToAcquire(numBytes: Long): Long = synchronized {//同步
-    val taskAttemptId = currentTaskAttemptId()
+    val taskAttemptId = currentTaskAttemptId()//获得当前线程任务的Id
     assert(numBytes > 0, "invalid number of bytes requested: " + numBytes)
 
     // Add this task to the taskMemory map just so we can keep an accurate count of the number
@@ -92,7 +92,7 @@ class ShuffleMemoryManager protected (
     while (true) {
       val numActiveTasks = taskMemory.keys.size
       val curMem = taskMemory(taskAttemptId)
-      val freeMemory = maxMemory - taskMemory.values.sum
+      val freeMemory = maxMemory - taskMemory.values.sum//当前可以内存
 
       // How much we can grant this task; don't let it grow to more than 1 / numActiveTasks;
       // don't let it be negative
@@ -121,7 +121,10 @@ class ShuffleMemoryManager protected (
     0L  // Never reached
   }
 
-  /** Release numBytes bytes for the current task. */
+  /** 
+   *  Release numBytes bytes for the current task. 
+   *  释放当前任务numbytes字节
+   *  */
   def release(numBytes: Long): Unit = synchronized {//同步,释放当前任务
     val taskAttemptId = currentTaskAttemptId()//获得当前任务ID
     val curMem = taskMemory.getOrElse(taskAttemptId, 0L)//返回当前任务的内存
@@ -133,14 +136,20 @@ class ShuffleMemoryManager protected (
     notifyAll()  // Notify waiters who locked "this" in tryToAcquire that memory has been freed
   }
 
-  /** Release all memory for the current task and mark it as inactive(不活动) (e.g. when a task ends). */
+  /** 
+   *  Release all memory for the current task and mark it as inactive(不活动) (e.g. when a task ends). 
+   *  释放当前任务的所有内存，并将其标记为不活动
+   *  */
   def releaseMemoryForThisTask(): Unit = synchronized {
     val taskAttemptId = currentTaskAttemptId()
     taskMemory.remove(taskAttemptId)
     notifyAll()  // Notify waiters who locked "this" in tryToAcquire that memory has been freed
   }
 
-  /** Returns the memory consumption(内存消耗), in bytes, for the current task */
+  /**
+   *  Returns the memory consumption, in bytes, for the current task 
+   *  返回当前任务的占用的内存,
+   *  */
   def getMemoryConsumptionForThisTask(): Long = synchronized {//返回当前任务的内存大小
     val taskAttemptId = currentTaskAttemptId()
     taskMemory.getOrElse(taskAttemptId, 0L)

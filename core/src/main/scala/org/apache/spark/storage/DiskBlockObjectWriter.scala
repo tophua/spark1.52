@@ -136,7 +136,7 @@ private[spark] class DiskBlockObjectWriter(
 
   /**
    * Flush the partial writes and commit them as a single atomic block.
-   * 将缓存数据写入磁盘,并更新finalPosition,然后更新测量数据
+   * 将缓存数据写入磁盘并关闭缓存,并更新finalPosition,然后更新测量数据
    * 
    */
   def commitAndClose(): Unit = {

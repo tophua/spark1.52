@@ -32,7 +32,8 @@ import org.apache.spark.{Logging, SparkConf, SparkEnv}
  * Create and maintain the shuffle blocks' mapping between logic block and physical file location.
  * Data of shuffle blocks from the same map task are stored in a single consolidated data file.
  * The offsets of the data blocks in the data file are stored in a separate index file.
- *
+ * 创建和维护Shuffle块文件和物理文件之间映射,一个shuffle数据块映射到单个文件
+ * 块索引Shuffle管理器,通常用于获取Block索引文件,并根据索引文件读取Block文件,
  * We use the name of the shuffle data's shuffleBlockId with reduce ID set to 0 and add ".data"
  * as the filename postfix for data file, and ".index" as the filename postfix for index file.
  *
@@ -48,17 +49,18 @@ private[spark] class IndexShuffleBlockResolver(
   private lazy val blockManager = Option(_blockManager).getOrElse(SparkEnv.get.blockManager)
 
   private val transportConf = SparkTransportConf.fromSparkConf(conf)
-//获取Shuffle数据文件方法
+  /**获取Shuffle数据索引文件,根据shuffleId和mapId**/
   def getDataFile(shuffleId: Int, mapId: Int): File = {
     blockManager.diskBlockManager.getFile(ShuffleDataBlockId(shuffleId, mapId, NOOP_REDUCE_ID))
   }
-
+  /**获取Shuffle数据索引文件,根据shuffleId和mapId**/
   private def getIndexFile(shuffleId: Int, mapId: Int): File = {
     blockManager.diskBlockManager.getFile(ShuffleIndexBlockId(shuffleId, mapId, NOOP_REDUCE_ID))
   }
 
   /**
    * Remove data file and index file that contain the output data from one map.
+   * 从一个Map任务中删除,包含输出的数据文件和索引文件
    * */
   def removeDataByMap(shuffleId: Int, mapId: Int): Unit = {
     var file = getDataFile(shuffleId, mapId)
@@ -75,6 +77,7 @@ private[spark] class IndexShuffleBlockResolver(
   /**
    * Check whether the given index and data files match each other.
    * If so, return the partition lengths in the data file. Otherwise return null.
+   * 检查给定的索引文件和数据文件是否相互匹配,如果是的话,返回数据文件中的分区长度,否则返回空。
    */
   private def checkIndexAndDataFile(index: File, data: File, blocks: Int): Array[Long] = {
     // the index file should have `block + 1` longs as offset.
@@ -121,12 +124,12 @@ private[spark] class IndexShuffleBlockResolver(
    * Write an index file with the offsets of each block, plus a final offset at the end for the
    * end of the output file. This will be used by getBlockData to figure out where each block
    * begins and ends.
-   *
+   * 用于在Block索引文件中记录各个Partition的偏移量信息,便于下游Stage的任务读取
    * It will commit the data and index file as an atomic operation, use the existing ones, or
    * replace them with new ones.
    *
    * Note: the `lengths` will be updated to match the existing index file if use the existing ones.
-   *用于在Block索引文件中记录各个Partition的偏移量信息,便于下游Stage的任务读取
+   * 
    *  */
   def writeIndexFileAndCommit(
       shuffleId: Int,
@@ -179,10 +182,9 @@ private[spark] class IndexShuffleBlockResolver(
       }
     }
   }
-/**
- * 根据ShuffleId和mapId(即partitionId)读取索引文件,从索引文件中获得partition计算中间结果写入文件的偏移理
- * 和中间结果的大小,根据偏移量和大小读取文件中partition的中间计算结果
- */
+  /**
+   * 根据ShuffleBlockId读取索引文件
+   */
   override def getBlockData(blockId: ShuffleBlockId): ManagedBuffer = {
     // The block is actually going to be a range of a single map output file for this map, so
     // find out the consolidated file, then the offset within that from our index
@@ -194,11 +196,11 @@ private[spark] class IndexShuffleBlockResolver(
       ByteStreams.skipFully(in, blockId.reduceId * 8)//跳到本次Block的数据区
       val offset = in.readLong()//数据文件中的开始位置
       val nextOffset = in.readLong()//数据文件中的结束位置
-      new FileSegmentManagedBuffer(
+      new FileSegmentManagedBuffer(//
         transportConf,
         getDataFile(blockId.shuffleId, blockId.mapId),
-        offset,
-        nextOffset - offset)
+        offset,//数据文件中的开始位置
+        nextOffset - offset)//数据文件中的结束位置
     } finally {
       in.close()
     }
