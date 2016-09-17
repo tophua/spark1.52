@@ -64,7 +64,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
   /**
    * Fetch a sequence of blocks from a remote node asynchronously,
    * available only after [[init]] is invoked.
-   *
+   * 异步从一个远程节点获取一个数据块序列
    * Note that this API takes a sequence so the implementation can batch requests, and does not
    * return a future so the underlying implementation can invoke onBlockFetchSuccess as soon as
    * the data of a block is fetched, rather than waiting for all blocks to be fetched.
@@ -78,6 +78,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
 
   /**
    * Upload a single block to a remote node, available only after [[init]] is invoked.
+   * 上传一个数据块到一个远程节点
    */
   def uploadBlock(
       hostname: String,
@@ -89,7 +90,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
 
   /**
    * A special case of [[fetchBlocks]], as it fetches only one block and is blocking.
-   *
+   * 阻塞线程从一个远程节点获取一个数据块序列
    * It is also only available after [[init]] is invoked.
    */
   def fetchBlockSync(host: String, port: Int, execId: String, blockId: String): ManagedBuffer = {
@@ -113,7 +114,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
 
   /**
    * Upload a single block to a remote node, available only after [[init]] is invoked.
-   *
+   * 上传一个数据块到一个远程节点,这是一个阻塞线程直到上传完成
    * This method is similar to [[uploadBlock]], except this one blocks the thread
    * until the upload finishes.
    */

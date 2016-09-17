@@ -27,24 +27,14 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.shuffle.ShuffleWriter
 
 /**
- * 
-* A ShuffleMapTask divides the elements of an RDD into multiple buckets (based on a partitioner
-* specified in the ShuffleDependency).
-* 将map处理的结果，传输到reduce上的过程叫Shuffle
-* 
-* ShuflleMap 会产生临时计算结果,这些数据会被ResulTask 作为输入而读取.
-* 
-* ShuffleMapTask的计算结果是如何被ResultTask取得的呢?
-* 1)ShuffleMapTask将计算的状态,包装为MapStatus返回给DAGScheduler
-* 2)DAGScheduler将MapStatus保存到MapOutputTrackerMaster中
-* 3)ResultTask在调用到ShuffleRDD时,会利用BlockStoreShuffleFetch的fetch方法去获取数据
-*   1)第一件事情就是咨询MapOutputTrackMaster所要取的数据的location
-*   2)根据返回的结果调用BlockManager.getMultiple获取真正的数据
-* 每个ShuffleMapTask都会用一个MapStatus来保存计算结果
-* MapStatus由BlockManagerId和byteSize构成,BlockManagerId表示这些计算的中间结果实际数据在那个BlockManager
-* See [[org.apache.spark.scheduler.Task]] for more information.
-*
-* 
+ *
+ * A ShuffleMapTask divides the elements of an RDD into multiple buckets (based on a partitioner
+ * specified in the ShuffleDependency).
+ * Spark的ShuffleMapTask和ResultTask被划分到不同Stage,ShuffleMapTask执行完毕将中间结果输出到本地磁盘系统(如HDFS)
+ * 然后下一个Stage中的ResultTask通过ShuffleClient下载ShuffleMapTask的输出到本地磁盘
+ *
+ * 将map处理的结果，传输到reduce上的过程叫Shuffle
+ * See [[org.apache.spark.scheduler.Task]] for more information.
  * @param stageId id of the stage this task belongs to
  * @param taskBinary broadcast version of the RDD and the ShuffleDependency. Once deserialized,
  *                   the type should be (RDD[_], ShuffleDependency[_, _, _]).
@@ -52,14 +42,14 @@ import org.apache.spark.shuffle.ShuffleWriter
  * @param locs preferred task execution locations for locality scheduling
  */
 private[spark] class ShuffleMapTask(
-    stageId: Int,
-    stageAttemptId: Int,
-    taskBinary: Broadcast[Array[Byte]],
-    partition: Partition,
-    @transient private var locs: Seq[TaskLocation],
-    internalAccumulators: Seq[Accumulator[Long]])
-  extends Task[MapStatus](stageId, stageAttemptId, partition.index, internalAccumulators)
-  with Logging {
+  stageId: Int,
+  stageAttemptId: Int,
+  taskBinary: Broadcast[Array[Byte]],
+  partition: Partition,
+  @transient private var locs: Seq[TaskLocation],
+  internalAccumulators: Seq[Accumulator[Long]])
+    extends Task[MapStatus](stageId, stageAttemptId, partition.index, internalAccumulators)
+    with Logging {
 
   /** A constructor used only in test suites. This does not require passing in an RDD. */
   def this(partitionId: Int) {
@@ -69,16 +59,16 @@ private[spark] class ShuffleMapTask(
   @transient private val preferredLocs: Seq[TaskLocation] = {
     if (locs == null) Nil else locs.toSet.toSeq
   }
-/**
- * 
- */
+  /**
+   *
+   */
   override def runTask(context: TaskContext): MapStatus = {
     // Deserialize the RDD using the broadcast variable.   
     //反序列化的起始时间  
     val deserializeStartTime = System.currentTimeMillis()
-     // 获得反序列化器closureSerializer  
-    val ser = SparkEnv.get.closureSerializer.newInstance()    
-   // 调用反序列化器closureSerializer的deserialize()进行RDD和ShuffleDependency的反序列化，数据来源于taskBinary 
+    // 获得反序列化器closureSerializer  
+    val ser = SparkEnv.get.closureSerializer.newInstance()
+    // 调用反序列化器closureSerializer的deserialize()进行RDD和ShuffleDependency的反序列化，数据来源于taskBinary 
     val (rdd, dep) = ser.deserialize[(RDD[_], ShuffleDependency[_, _, _])](
       ByteBuffer.wrap(taskBinary.value), Thread.currentThread.getContextClassLoader)
     //计算Executor进行反序列化的时间  

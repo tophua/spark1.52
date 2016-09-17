@@ -64,6 +64,7 @@ private[spark] trait ShuffleManager {
 
   /**
    * Return a resolver capable of retrieving shuffle block data based on block coordinates.
+   * 返回一个基于Shuffle数据块位置的解析器
    */
   def shuffleBlockResolver: ShuffleBlockResolver
 

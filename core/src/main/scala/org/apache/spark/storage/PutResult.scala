@@ -20,6 +20,7 @@ package org.apache.spark.storage
 import java.nio.ByteBuffer
 
 /**
+ * 将块添加一个块存储(BlockStore)
  * Result of adding a block into a BlockStore. This case class contains a few things:
  *   (1) The estimated size of the put,
  *   (2) The values put if the caller asked for them to be returned (e.g. for chaining
@@ -27,6 +28,6 @@ import java.nio.ByteBuffer
  *   (3) A list of blocks dropped as a result of this put. This is always empty for DiskStore.
  */
 private[spark] case class PutResult(
-    size: Long,
-    data: Either[Iterator[_], ByteBuffer],
-    droppedBlocks: Seq[(BlockId, BlockStatus)] = Seq.empty)
+    size: Long,//估计的大小
+    data: Either[Iterator[_], ByteBuffer],//两者之中任何一个
+    droppedBlocks: Seq[(BlockId, BlockStatus)] = Seq.empty)//写入块的列表,如果硬盘存储总是空

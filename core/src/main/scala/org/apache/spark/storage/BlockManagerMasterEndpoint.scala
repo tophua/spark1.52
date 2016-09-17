@@ -402,12 +402,14 @@ private[spark] class BlockManagerMasterEndpoint(
     blockIds.map(blockId => getLocations(blockId))
   }
 
-  /** Get the list of the peers of the given block manager */
-  //getPeers 从BlockManagerInfo中过滤掉Driver的BlockManager和当前的Executor的BlockManager,
-  //将其余的BlockManagerId都返回
+  /** 
+   *  Get the list of the peers of the given block manager 
+   *  请求获得其他BlockManager的id
+   * */
   private def getPeers(blockManagerId: BlockManagerId): Seq[BlockManagerId] = {
     val blockManagerIds = blockManagerInfo.keySet
     if (blockManagerIds.contains(blockManagerId)) {
+      //过滤掉Driver的BlockManager和当前的Executor的BlockManager,将其余的BlockManagerId都返回
       blockManagerIds.filterNot { _.isDriver }.filterNot { _ == blockManagerId }.toSeq
     } else {
       Seq.empty

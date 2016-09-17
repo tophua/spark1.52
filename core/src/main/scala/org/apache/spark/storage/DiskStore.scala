@@ -31,11 +31,11 @@ import org.apache.spark.util.Utils
  */
 private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBlockManager)
   extends BlockStore(blockManager) with Logging {
- //以字节为单位的块大小,用于磁盘读取一个块大小进行内存映射
+ //用于磁盘读取一个块大小进行内存映射,以M兆为单位,
   val minMemoryMapBytes = blockManager.conf.getSizeAsBytes("spark.storage.memoryMapThreshold", "2m")
 
   override def getSize(blockId: BlockId): Long = {
-    diskManager.getFile(blockId.name).length
+    diskManager.getFile(blockId.name).length//获取文件长度
   }
 
   /**
@@ -44,10 +44,11 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
   override def putBytes(blockId: BlockId, _bytes: ByteBuffer, level: StorageLevel): PutResult = {
     // So that we do not modify the input offsets !
     // duplicate does not copy buffer, so inexpensive
-    val bytes = _bytes.duplicate()
+    val bytes = _bytes.duplicate()//复制一个可读可写的缓冲区
     logDebug(s"Attempting to put block $blockId")
-    val startTime = System.currentTimeMillis
-    val file = diskManager.getFile(blockId)//获取文件
+    val startTime = System.currentTimeMillis//文件写入开始时间
+    val file = diskManager.getFile(blockId)//获取文件,如果没有创建新的
+    //Channel是数据的源头或者数据的目的地,用于向buffer提供数据或者从buffer读取数据
     val channel = new FileOutputStream(file).getChannel
     //然后使用NIO的Channel将ByteBuffer写入文件
     Utils.tryWithSafeFinally {
@@ -57,10 +58,10 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     } {
       channel.close()
     }
-    val finishTime = System.currentTimeMillis
+    val finishTime = System.currentTimeMillis//文件写入完成时间
     logDebug("Block %s stored as %s file on disk in %d ms".format(
       file.getName, Utils.bytesToString(bytes.limit), finishTime - startTime))
-    PutResult(bytes.limit(), Right(bytes.duplicate()))
+    PutResult(bytes.limit(), Right(bytes.duplicate()))//复制一个可读可写的缓冲区
   }
 //将BlockId对应的Array数据存储到磁盘，该方法先将Array序列化，然后存储到相应的文件。
   override def putArray(
@@ -76,12 +77,11 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       values: Iterator[Any],
       level: StorageLevel,
       returnValues: Boolean): PutResult = {
-
     logDebug(s"Attempting to write values for block $blockId")
     val startTime = System.currentTimeMillis
-    //使用diskManager.getFile获取blockId对应的block文件,并封装为FileOutputStream
-
+    //使用diskManager.getFile获取blockId对应的block文件,
     val file = diskManager.getFile(blockId)
+    //将file封装为FileOutputStream
     val outputStream = new FileOutputStream(file)
     try {
       Utils.tryWithSafeFinally {
@@ -100,15 +100,15 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     }
 
     val length = file.length
-
+    //所用的时间
     val timeTaken = System.currentTimeMillis - startTime
     logDebug("Block %s stored as %s file on disk in %d ms".format(
       file.getName, Utils.bytesToString(length), timeTaken))
-    //如果需要返回写入的数据(即returnValue),则将写入的文件使用getBytes读取
-    //与文件的长度一并封装到PutResult中并返回
     if (returnValues) {
       // Return a byte buffer for the contents of the file
+      //将写入的文件使用getBytes读取为ByteBuffer
       val buffer = getBytes(blockId).get
+      // 返回文件内容的字节缓冲区
       PutResult(length, Right(buffer))
     } else {
       //只返回文件长度

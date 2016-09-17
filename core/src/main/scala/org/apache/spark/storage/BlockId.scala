@@ -94,7 +94,10 @@ private[spark] case class TempLocalBlockId(id: UUID) extends BlockId {
   override def name: String = "temp_local_" + id
 }
 
-/** Id associated with temporary shuffle data managed as blocks. Not serializable. */
+/** 
+ *  Id associated with temporary shuffle data managed as blocks. Not serializable. 
+ *  与临时shuffle数据管理的块相关
+ *  */
 private[spark] case class TempShuffleBlockId(id: UUID) extends BlockId {
   override def name: String = "temp_shuffle_" + id
 }

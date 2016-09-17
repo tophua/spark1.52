@@ -38,7 +38,7 @@ import org.apache.spark.util.Utils
 class StorageLevel private(
     private var _useDisk: Boolean,
     private var _useMemory: Boolean,
-    private var _useOffHeap: Boolean,
+    private var _useOffHeap: Boolean,//使用扩展存储
     private var _deserialized: Boolean,
     private var _replication: Int = 1)
   extends Externalizable {

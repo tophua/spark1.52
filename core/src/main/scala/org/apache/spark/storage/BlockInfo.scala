@@ -63,10 +63,14 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
     }
   }
 
-  /** Mark this BlockInfo as ready but failed */
+  /** 
+   *  Mark this BlockInfo as ready but failed 
+   *  标记BlockInfo数据失败
+   *  */
   def markFailure() {
     assert(pending)
     size = BlockInfo.BLOCK_FAILED
+    //移除BlockInfo
     BlockInfo.blockInfoInitThreads.remove(this)
     synchronized {
       this.notifyAll()//用于通知处在等待该对象的线程的方法

@@ -55,6 +55,7 @@ private[spark] object ShutdownHookManager extends Logging {
   private val shutdownDeleteTachyonPaths = new scala.collection.mutable.HashSet[String]()
 
   // Add a shutdown hook to delete the temp dirs when the JVM exits
+  //添加一个JVM退出关机钩子删除临时目录时,
   addShutdownHook(TEMP_DIR_SHUTDOWN_PRIORITY) { () =>
     logInfo("Shutdown hook called")
     // we need to materialize the paths to delete because deleteRecursively removes items from
@@ -87,6 +88,7 @@ private[spark] object ShutdownHookManager extends Logging {
   }
 
   // Remove the path to be deleted via shutdown hook
+  // 通过关闭钩子删除要删除的路径
   def removeShutdownDeleteDir(file: File) {
     val absolutePath = file.getAbsolutePath()
     shutdownDeletePaths.synchronized {

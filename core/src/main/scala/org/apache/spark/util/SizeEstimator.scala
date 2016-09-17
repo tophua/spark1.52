@@ -182,7 +182,6 @@ object SizeEstimator extends Logging {
 /**
  * AnyRef可以对应是java的Object类
  */
-
   private def estimate(obj: AnyRef, visited: IdentityHashMap[AnyRef, AnyRef]): Long = {
     val state = new SearchState(visited)
     state.enqueue(obj)

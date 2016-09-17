@@ -21,6 +21,7 @@ import scala.reflect.ClassTag
 
 /**
  * An append-only, non-threadsafe, array-backed vector that is optimized for primitive types.
+ * 一个追加,非线程安全的,阵列的支持向量，是原始vector类型的优化
  */
 private[spark]
 class PrimitiveVector[@specialized(Long, Int, Double) V: ClassTag](initialSize: Int = 64) {
@@ -69,7 +70,10 @@ class PrimitiveVector[@specialized(Long, Int, Double) V: ClassTag](initialSize: 
   /** Trims this vector so that the capacity is equal to the size. */
   def trim(): PrimitiveVector[V] = resize(size)
 
-  /** Resizes the array, dropping elements if the total length decreases. */
+  /** 
+   *  Resizes the array, dropping elements if the total length decreases. 
+   *  调整大小的数组,如果总长度减小,减少的元素
+   *  */
   def resize(newLength: Int): PrimitiveVector[V] = {
     _array = copyArrayWithLength(newLength)
     if (newLength < _numElements) {
@@ -78,7 +82,10 @@ class PrimitiveVector[@specialized(Long, Int, Double) V: ClassTag](initialSize: 
     this
   }
 
-  /** Return a trimmed version of the underlying array. */
+  /** 
+   *  Return a trimmed version of the underlying array. 
+   *  返回裁剪基本数组
+   *  */
   def toArray: Array[V] = {
     copyArrayWithLength(size)
   }
