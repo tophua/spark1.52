@@ -135,57 +135,68 @@ private[spark] case class SparkListenerLogStart(sparkVersion: String) extends Sp
  * Interface for listening to events from the Spark scheduler. Note that this is an internal
  * interface which might change in different Spark releases. Java clients should extend
  * {@link JavaSparkListener}
+ * Spark 调度程序的事件接口
  */
 @DeveloperApi
 trait SparkListener {
   /**
    * Called when a stage completes successfully or fails, with information on the completed stage.
+   * 当调用一个阶段完成成功或失败时
    */
   def onStageCompleted(stageCompleted: SparkListenerStageCompleted) { }
 
   /**
    * Called when a stage is submitted
+   * 当调用一个阶段提交时
    */
   def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted) { }
 
   /**
    * Called when a task starts
+   * 当调用一个任务运行时
    */
   def onTaskStart(taskStart: SparkListenerTaskStart) { }
 
   /**
    * Called when a task begins remotely fetching its result (will not be called for tasks that do
    * not need to fetch the result remotely).
+   * 当调用一个任务开始远程抓取结果时
    */
   def onTaskGettingResult(taskGettingResult: SparkListenerTaskGettingResult) { }
 
   /**
    * Called when a task ends
+   * 当调用任务结束时
    */
   def onTaskEnd(taskEnd: SparkListenerTaskEnd) { }
 
   /**
    * Called when a job starts
+   * 当调用Job开始运行时
    */
   def onJobStart(jobStart: SparkListenerJobStart) { }
 
   /**
    * Called when a job ends
+   * 当调用job结束时
    */
   def onJobEnd(jobEnd: SparkListenerJobEnd) { }
 
   /**
    * Called when environment properties have been updated
+   * 当环境属性已被更新时
    */
   def onEnvironmentUpdate(environmentUpdate: SparkListenerEnvironmentUpdate) { }
 
   /**
    * Called when a new block manager has joined
+   * 当一个新的块加入块管理器时调用
    */
   def onBlockManagerAdded(blockManagerAdded: SparkListenerBlockManagerAdded) { }
 
   /**
    * Called when an existing block manager has been removed
+   * 当一个现有的块管理器已被删除时调用
    */
   def onBlockManagerRemoved(blockManagerRemoved: SparkListenerBlockManagerRemoved) { }
 
@@ -196,31 +207,37 @@ trait SparkListener {
 
   /**
    * Called when the application starts
+   * 当应用程序启动时调用
    */
   def onApplicationStart(applicationStart: SparkListenerApplicationStart) { }
 
   /**
    * Called when the application ends
+   * 当应用程序终止时调用
    */
   def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) { }
 
   /**
    * Called when the driver receives task metrics from an executor in a heartbeat.
+   * 当驱动程序从执行器接收到一个心跳中的任务度量时调用
    */
   def onExecutorMetricsUpdate(executorMetricsUpdate: SparkListenerExecutorMetricsUpdate) { }
 
   /**
    * Called when the driver registers a new executor.
+   * 当驱动程序注册一个新的执行器时调用
    */
   def onExecutorAdded(executorAdded: SparkListenerExecutorAdded) { }
 
   /**
    * Called when the driver removes an executor.
+   * 当驱动程序删除执行程序时调用
    */
   def onExecutorRemoved(executorRemoved: SparkListenerExecutorRemoved) { }
 
   /**
    * Called when the driver receives a block update info.
+   * 当驱动程序接收到块更新信息时调用
    */
   def onBlockUpdated(blockUpdated: SparkListenerBlockUpdated) { }
 }
@@ -228,6 +245,7 @@ trait SparkListener {
 /**
  * :: DeveloperApi ::
  * Simple SparkListener that logs a few summary statistics when each stage completes
+ * 简单的spark侦听器记录每个Stage完成时统计结果
  */
 @DeveloperApi
 class StatsReportListener extends SparkListener with Logging {
@@ -262,6 +280,7 @@ class StatsReportListener extends SparkListener with Logging {
       (_, metric) => Some(metric.resultSize), taskInfoMetrics)
 
     // Runtime breakdown
+    //运行时故障
     val runtimePcts = taskInfoMetrics.map { case (info, metrics) =>
       RuntimePercentage(info.duration, metrics)
     }
@@ -358,6 +377,7 @@ private[spark] object StatsReportListener extends Logging {
 
   /**
    * Reformat a time interval in milliseconds to a prettier format for output
+   * 重新格式化以毫秒为单位的时间间隔的格式输出
    */
   def millisToString(ms: Long): String = {
     val (size, units) =

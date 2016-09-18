@@ -24,6 +24,7 @@ import org.apache.spark.util.CallSite
 
 /**
  * The ShuffleMapStage represents the intermediate(中间) stages in a job.
+ * 表示作业中间阶段(Stage),
  */
 private[spark] class ShuffleMapStage(
     id: Int,
@@ -66,6 +67,7 @@ private[spark] class ShuffleMapStage(
    * Removes all shuffle outputs associated with this executor. Note that this will also remove
    * outputs which are served by an external shuffle server (if one exists), as they are still
    * registered with this execId.
+   * 移除执行(executor)所有Shuffle输出
    */
   def removeOutputsOnExecutor(execId: String): Unit = {
     var becameUnavailable = false

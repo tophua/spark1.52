@@ -27,8 +27,8 @@ import org.apache.spark.util.CallSite
 private[spark] class ResultStage(
     id: Int,//id为stage的id
     rdd: RDD[_],//rdd为stage中最后一个rdd
-    numTasks: Int,  
-    parents: List[Stage],
+    numTasks: Int, //任务数
+    parents: List[Stage],//父Stage
     firstJobId: Int,
     callSite: CallSite)
   extends Stage(id, rdd, numTasks, parents, firstJobId, callSite) {
