@@ -62,7 +62,10 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   createLogDir()
 
-  /** Create a folder for log files, the folder's name is the creation time of jobLogger */
+  /** 
+   *  Create a folder for log files, the folder's name is the creation time of jobLogger 
+   *  创建日志文件的文件夹
+   *  */
   protected def createLogDir() {
     val dir = new File(logDir + "/" + logDirName + "/")
     if (dir.exists()) {
@@ -76,6 +79,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * Create a log file for one job
+   * 创建一个Job日志文件
    * @param jobId ID of the job
    * @throws FileNotFoundException Fail to create log file
    */
@@ -90,6 +94,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * Close log file, and clean the stage relationship in stageIdToJobId
+   * 关闭日志文件,清理stage关系,
    * @param jobId ID of the job
    */
   protected def closeLogWriter(jobId: Int) {
@@ -105,6 +110,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * Build up the maps that represent stage-job relationships
+   * 构建stage-job依赖关系
    * @param jobId ID of the job
    * @param stageIds IDs of the associated stages
    */
@@ -115,6 +121,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * Write info into log file
+   * 将信息写入日志文件
    * @param jobId ID of the job
    * @param info Info to be recorded
    * @param withTime Controls whether to record time stamp before the info, default is true
@@ -132,6 +139,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * Write info into log file
+   * 将信息写入日志文件
    * @param stageId ID of the stage
    * @param info Info to be recorded
    * @param withTime Controls whether to record time stamp before the info, default is true
@@ -142,6 +150,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * Record task metrics into job log files, including execution info and shuffle metrics
+   * 将任务度量记录到工作日志文件中,包括执行(execution)信息和shuffle度量
    * @param stageId Stage ID of the task
    * @param status Status info of the task
    * @param taskInfo Task description info
@@ -187,6 +196,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * When stage is submitted, record stage submit info
+   * 提交阶段(Stage)时,记录提交阶段(Stage)信息
    * @param stageSubmitted Stage submitted event
    */
   override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted) {
@@ -197,6 +207,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * When stage is completed, record stage completion status
+   * 当阶段(Stage)完成时，记录阶段(Stage)完成状态
    * @param stageCompleted Stage completed event
    */
   override def onStageCompleted(stageCompleted: SparkListenerStageCompleted) {
@@ -210,6 +221,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * When task ends, record task completion status and metrics
+   * 当任务结束时,记录任务完成状态和度量
    * @param taskEnd Task end event
    */
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd) {
@@ -234,6 +246,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * When job ends, recording job completion status and close log file
+   * 当作业结束时,记录作业完成状态和关闭日志文件
    * @param jobEnd Job end event
    */
   override def onJobEnd(jobEnd: SparkListenerJobEnd) {
@@ -252,6 +265,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * Record job properties into job log file
+   * 将作业属性保存到作业日志文件中
    * @param jobId ID of the job
    * @param properties Properties of the job
    */
@@ -264,6 +278,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * When job starts, record job property and stage graph
+   * 当作业开始,记录Job的属性和Stage
    * @param jobStart Job start event
    */
   override def onJobStart(jobStart: SparkListenerJobStart) {

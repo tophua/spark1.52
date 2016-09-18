@@ -24,16 +24,16 @@ import org.apache.spark.executor.ExecutorExitCode
  * 代表一个executor或整个slave失败或退出
  */
 private[spark]
-class ExecutorLossReason(val message: String) {
+class ExecutorLossReason(val message: String) {//Eexecutor丢失原因
   override def toString: String = message
 }
 
 private[spark]
-case class ExecutorExited(val exitCode: Int)
+case class ExecutorExited(val exitCode: Int)//Eexecutor退出原因
   extends ExecutorLossReason(ExecutorExitCode.explainExitCode(exitCode)) {
 }
 
 private[spark]
-case class SlaveLost(_message: String = "Slave lost")
+case class SlaveLost(_message: String = "Slave lost")//Slave丢失原因
   extends ExecutorLossReason(_message) {
 }

@@ -41,9 +41,9 @@ private[scheduler] case class JobSubmitted(
     jobId: Int,
     finalRDD: RDD[_],
     func: (TaskContext, Iterator[_]) => _,
-    partitions: Array[Int],
+    partitions: Array[Int],//Partition要进行计算
     callSite: CallSite,
-    listener: JobListener,
+    listener: JobListener,//joblistener作业监听等等  
     properties: Properties = null)
   extends DAGSchedulerEvent
 

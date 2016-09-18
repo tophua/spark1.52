@@ -17,7 +17,7 @@
 
 package org.apache.spark.scheduler
 
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedQueue}
+import java.util.concurrent.{ ConcurrentHashMap, ConcurrentLinkedQueue }
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -28,23 +28,23 @@ import org.apache.spark.scheduler.SchedulingMode.SchedulingMode
 /**
  * An Schedulable entity that represent collection of Pools or TaskSetManagers
  * 代表一个可调度的实体集合池或tasksetmanagers,
- * 
+ *
  */
 
 private[spark] class Pool(
-    val poolName: String,
-    val schedulingMode: SchedulingMode,
-    initMinShare: Int,
-    initWeight: Int)
-  extends Schedulable
-  with Logging {
+  val poolName: String,
+  val schedulingMode: SchedulingMode,
+  initMinShare: Int,
+  initWeight: Int)
+    extends Schedulable
+    with Logging {
 
   val schedulableQueue = new ConcurrentLinkedQueue[Schedulable]
   val schedulableNameToSchedulable = new ConcurrentHashMap[String, Schedulable]
   var weight = initWeight
   var minShare = initMinShare
-  var runningTasks = 0//运行Task数
-  var priority = 0//优先级
+  var runningTasks = 0 //运行Task数
+  var priority = 0 //优先级
 
   // A pool's stage id is used to break the tie in scheduling.
   var stageId = -1
@@ -84,11 +84,11 @@ private[spark] class Pool(
     }
     null
   }
-//丢失executor
+  //丢失executor
   override def executorLost(executorId: String, host: String) {
     schedulableQueue.foreach(_.executorLost(executorId, host))
   }
-//推测
+  //推测
   override def checkSpeculatableTasks(): Boolean = {
     var shouldRevive = false
     for (schedulable <- schedulableQueue) {
@@ -99,7 +99,7 @@ private[spark] class Pool(
   //对rootPool中的所有TaskSetManager按照调度算法排序
   override def getSortedTaskSetQueue: ArrayBuffer[TaskSetManager] = {
     //创建一个ArrayBuffer，存储TaskSetManager  
-    var sortedTaskSetQueue = new ArrayBuffer[TaskSetManager]  
+    var sortedTaskSetQueue = new ArrayBuffer[TaskSetManager]
     // taskSetSchedulingAlgorithm为调度算法，包括FIFO和FAIR两种  
     // 这里针对调度队列,按照调度算法对其排序,生成一个序列sortedSchedulableQueue  
     val sortedSchedulableQueue =
@@ -111,7 +111,7 @@ private[spark] class Pool(
     //返回sortedTaskSetQueue 
     sortedTaskSetQueue
   }
-//增加运行Task
+  //增加运行Task
   def increaseRunningTasks(taskNum: Int) {
     runningTasks += taskNum
     if (parent != null) {

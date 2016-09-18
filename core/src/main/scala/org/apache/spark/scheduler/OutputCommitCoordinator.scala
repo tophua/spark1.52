@@ -30,7 +30,7 @@ private case class AskPermissionToCommitOutput(stage: Int, partition: Int, attem
 /**
  * Authority that decides whether tasks can commit output to HDFS. Uses a "first committer wins"
  * policy.
- *
+ * 任务输出到HDFS
  * OutputCommitCoordinator is instantiated in both the drivers and executors. On executors, it is
  * configured with a reference to the driver's OutputCommitCoordinatorEndpoint, so requests to
  * commit output will be forwarded to the driver's OutputCommitCoordinator.

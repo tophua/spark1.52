@@ -37,7 +37,7 @@ import org.apache.spark.util.{JsonProtocol, Utils}
 
 /**
  * A SparkListener that logs events to persistent storage.
- *
+ * 一个Spark监听器事件将日志存储
  * Event logging is specified by the following configurable parameters:
  *   spark.eventLog.enabled - Whether event logging is enabled.
  *   spark.eventLog.compress - Whether to compress logged events
@@ -58,10 +58,12 @@ private[spark] class EventLoggingListener(
   def this(appId: String, appAttemptId : Option[String], logBaseDir: URI, sparkConf: SparkConf) =
     this(appId, appAttemptId, logBaseDir, sparkConf,
       SparkHadoopUtil.get.newConfiguration(sparkConf))
-//是否压缩记录Spark事件，前提spark.eventLog.enabled为true
+  //是否压缩记录Spark事件，前提spark.eventLog.enabled为true
   private val shouldCompress = sparkConf.getBoolean("spark.eventLog.compress", false)
+   //是否覆盖Spark事件日志文件，前提spark.eventLog.enabled为true
   private val shouldOverwrite = sparkConf.getBoolean("spark.eventLog.overwrite", false)
   private val testing = sparkConf.getBoolean("spark.eventLog.testing", false)
+  //Spark日志的输出大小
   private val outputBufferSize = sparkConf.getInt("spark.eventLog.buffer.kb", 100) * 1024
   private val fileSystem = Utils.getHadoopFileSystem(logBaseDir, hadoopConf)
   private val compressionCodec =
@@ -75,6 +77,7 @@ private[spark] class EventLoggingListener(
   }
 
   // Only defined if the file system scheme is not local
+  // 定义一个不是本地的文件系统
   private var hadoopDataStream: Option[FSDataOutputStream] = None
 
   // The Hadoop APIs have changed over time, so we use reflection to figure out
@@ -88,13 +91,16 @@ private[spark] class EventLoggingListener(
   private var writer: Option[PrintWriter] = None
 
   // For testing. Keep track of all JSON serialized events that have been logged.
+  //测试,跟踪所有的JSON序列化已记录的事件
   private[scheduler] val loggedEvents = new ArrayBuffer[JValue]
 
   // Visible for tests only.
+  //可见仅用于测试
   private[scheduler] val logPath = getLogPath(logBaseDir, appId, appAttemptId, compressionCodecName)
 
   /**
    * Creates the log file in the configured log directory.
+   * 在已配置的日志目录中创建日志文件
    */
   def start() {
     if (!fileSystem.getFileStatus(new Path(logBaseDir)).isDir) {
@@ -228,6 +234,7 @@ private[spark] class EventLoggingListener(
 
 private[spark] object EventLoggingListener extends Logging {
   // Suffix applied to the names of files still being written by applications.
+  //后缀的文件名称
   val IN_PROGRESS = ".inprogress"
   val DEFAULT_LOG_DIR = "/tmp/spark-events"
   val SPARK_VERSION_KEY = "SPARK_VERSION"
@@ -241,7 +248,7 @@ private[spark] object EventLoggingListener extends Logging {
   /**
    * Write metadata about an event log to the given stream.
    * The metadata is encoded in the first line of the event log as JSON.
-   *
+   * 将事件日志的元数据写入到输出中,元数据编码在事件日志中的第一行作为JSON
    * @param logStream Raw output stream to the event log file.
    */
   def initEventLog(logStream: OutputStream): Unit = {

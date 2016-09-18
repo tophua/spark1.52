@@ -23,7 +23,6 @@ package org.apache.spark.scheduler
  * 一个对象用来监听dagscheduler Job执行状态,Job是由多个task组织的tasks,
  * 因此只有Job的所有Task都完成,Job才标记完成,任意一个Task失败都标记该Job失败 
  * Job正在提交的作业,一个Job可能由一个到多个Task组成
- * 
  */
 private[spark] class JobWaiter[T](
     dagScheduler: DAGScheduler,
@@ -32,13 +31,13 @@ private[spark] class JobWaiter[T](
     resultHandler: (Int, T) => Unit)
   extends JobListener {
 
-  private var finishedTasks = 0
+  private var finishedTasks = 0 //任务完成数
 
   // Is the job as a whole finished (succeeded or failed)?
   // 一个任务全完成或失败
   @volatile
   private var _jobFinished = totalTasks == 0
-
+  //任务是否完成
   def jobFinished: Boolean = _jobFinished
 
   // If the job is finished, this will be its result. In the case of 0 task jobs (e.g. zero
