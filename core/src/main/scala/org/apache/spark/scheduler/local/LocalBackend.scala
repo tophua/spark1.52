@@ -122,7 +122,7 @@ private[spark] class LocalBackend(
 
   /**
    * Returns a list of URLs representing the user classpath.
-   *
+   * 返回一个列表,代表用户类路径的URL
    * @param conf Spark configuration.
    */
   def getUserClasspath(conf: SparkConf): Seq[URL] = {

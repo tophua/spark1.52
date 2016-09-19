@@ -26,5 +26,5 @@ package org.apache.spark.scheduler
 object SchedulingMode extends Enumeration {
 
   type SchedulingMode = Value
-  val FAIR, FIFO, NONE = Value //声明一个枚举类型
+  val FAIR, FIFO, NONE = Value //声明一个调试模式枚举类型
 }

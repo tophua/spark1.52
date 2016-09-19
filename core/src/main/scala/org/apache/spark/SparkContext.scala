@@ -128,6 +128,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Create a SparkContext that loads settings from system properties (for instance, when
    * launching with ./bin/spark-submit).
+   * 创建一个sparkcontext加载设置系统属性
    */
   def this() = this(new SparkConf())
 
@@ -195,7 +196,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   *
+  
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
    */
@@ -425,7 +426,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     }
     Utils.setLogLevel(org.apache.log4j.Level.toLevel(logLevel))
   }
-//初始化代码块
+  //初始化代码块
   try {
     //对SparkCon进行复制
     _conf = config.clone()
@@ -525,6 +526,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     _hadoopConfiguration = SparkHadoopUtil.get.newConfiguration(_conf)
 
     // Add each JAR given through the constructor
+    //通过构造函数添加每个jar
     if (jars != null) {
       jars.foreach(addJar)
     }
@@ -705,6 +707,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Set a local property that affects jobs submitted from this thread, such as the
    * Spark fair scheduler pool.
+   * 设置一个影响从该线程提交的作业的局部属性
    */
   def setLocalProperty(key: String, value: String) {
     if (value == null) {
