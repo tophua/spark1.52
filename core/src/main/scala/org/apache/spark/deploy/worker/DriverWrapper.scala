@@ -25,6 +25,7 @@ import org.apache.spark.util.{ChildFirstURLClassLoader, MutableURLClassLoader, U
 
 /**
  * Utility object for launching driver programs such that they share fate with the Worker process.
+ * 用于启动程序,使得它与Worker进程共享内存,这是使用独立的集群模式
  * This is used in standalone cluster mode only.
  */
 object DriverWrapper {

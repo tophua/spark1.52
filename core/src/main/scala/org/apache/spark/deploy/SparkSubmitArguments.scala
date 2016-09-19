@@ -116,6 +116,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   /**
    * Merge values from the default properties file with those specified through --conf.
    * When this is called, `sparkProperties` is already filled with configs from the latter.
+   * 合并值与那些通过指定文件的默认属性--配置文件,调用"sparkProperties"已经装满了从后者的配置
    */
   private def mergeDefaultSparkProperties(): Unit = {
     // Use common defaults file, if not specified by user
@@ -225,7 +226,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
       name = Option(name).orElse(env.get("SPARK_YARN_APP_NAME")).orNull
     }
 
-    // Set name from main class if not given
+    // Set name from main class if not given    
     name = Option(name).orElse(Option(mainClass)).orNull
     if (name == null && primaryResource != null) {
       name = Utils.stripDirectory(primaryResource)

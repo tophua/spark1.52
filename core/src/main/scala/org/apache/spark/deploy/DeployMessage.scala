@@ -29,19 +29,22 @@ import org.apache.spark.util.Utils
 
 private[deploy] sealed trait DeployMessage extends Serializable
 
-/** Contains messages sent between Scheduler endpoint nodes. */
+/** 
+ *  Contains messages sent between Scheduler endpoint nodes. 
+ *  包含调度节点消息发送
+ *  */
 private[deploy] object DeployMessages {
 
   // Worker to Master
-
+  // Work 注册到Master
   case class RegisterWorker(
       id: String,
-      host: String,
-      port: Int,
+      host: String,//主机
+      port: Int,//端口
       worker: RpcEndpointRef,//RPC
       cores: Int,//内核数
       memory: Int,//内存数
-      webUiPort: Int,
+      webUiPort: Int,//webUI端口
       publicAddress: String)
     extends DeployMessage {
     Utils.checkHost(host, "Required hostname")
@@ -68,7 +71,7 @@ private[deploy] object DeployMessages {
   case class Heartbeat(workerId: String, worker: RpcEndpointRef) extends DeployMessage
 
   // Master to Worker
-
+  // Master 到 Worker
   case class RegisteredWorker(master: RpcEndpointRef, masterWebUiUrl: String) extends DeployMessage
 
   case class RegisterWorkerFailed(message: String) extends DeployMessage
@@ -93,9 +96,9 @@ private[deploy] object DeployMessages {
   case class ApplicationFinished(id: String)
 
   // Worker internal
-
-  case object WorkDirCleanup // Sent to Worker endpoint periodically for cleaning up app folders
-
+  //定期发送到工作端清理应用程序文件夹
+  case object WorkDirCleanup // Sent to Worker endpoint periodically(定期地) for cleaning up app folders
+  //当一个Woker试图重新连接到一个Master
   case object ReregisterWithMaster // used when a worker attempts to reconnect to a master
 
   // AppClient to Master

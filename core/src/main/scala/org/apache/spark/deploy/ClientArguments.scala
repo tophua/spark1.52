@@ -34,6 +34,7 @@ private[deploy] class ClientArguments(args: Array[String]) {
   var logLevel = Level.WARN
 
   // launch parameters
+  // 启动参数
   var masters: Array[String] = null
   var jarUrl: String = ""
   var mainClass: String = ""
@@ -44,6 +45,7 @@ private[deploy] class ClientArguments(args: Array[String]) {
   def driverOptions: Seq[String] = _driverOptions.toSeq
 
   // kill parameters
+  // 杀死参数
   var driverId: String = ""
 
   parse(args.toList)
@@ -96,6 +98,7 @@ private[deploy] class ClientArguments(args: Array[String]) {
 
   /**
    * Print usage and exit JVM with the given exit code.
+   * 给退出代码打印使用退出JVM代码
    */
   private def printUsageAndExit(exitCode: Int) {
     // TODO: It wouldn't be too hard to allow users to submit their app and dependency jars

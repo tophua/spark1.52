@@ -927,6 +927,7 @@ private[spark] object SparkSubmitUtils {
 
   /**
    * Output a comma-delimited list of paths for the downloaded jars to be added to the classpath
+   * 输出一个逗号分隔的jar列表,下载添加到classpath路径
    * (will append to jars in SparkSubmit).
    * @param artifacts Sequence of dependencies that were resolved and retrieved
    * @param cacheDirectory directory where jars are cached

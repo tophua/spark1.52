@@ -30,13 +30,14 @@ import org.apache.spark.launcher.WorkerCommandBuilder
 import org.apache.spark.util.Utils
 
 /**
- ** Utilities for running commands with the spark classpath.
+ * Utilities for running commands with the spark classpath.
+ * 运行命令行工具在Spark路径
  */
 private[deploy]
 object CommandUtils extends Logging {
 
   /**
-    * 基于给定的参数创建ProcessBuilder
+   * 基于给定的参数创建ProcessBuilder
    * Build a ProcessBuilder based on the given parameters.
    * The `env` argument is exposed for testing.
    */
