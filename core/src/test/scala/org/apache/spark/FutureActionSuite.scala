@@ -42,7 +42,7 @@ class FutureActionSuite
     job.jobIds.size should be (1)
   }
 
-  test("complex async action") {
+  test("complex async action") {//异步
     val rdd = sc.parallelize(1 to 15, 3)
     val job = rdd.takeAsync(10)
     val res = Await.result(job, Duration.Inf)
