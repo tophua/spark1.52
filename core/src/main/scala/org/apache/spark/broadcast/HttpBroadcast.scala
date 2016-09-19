@@ -35,6 +35,8 @@ import org.apache.spark.util.{MetadataCleaner, MetadataCleanerType, TimeStampedH
  * task) is deserialized in the executor, the broadcasted data is fetched from the driver
  * (through a HTTP server running at the driver) and stored in the BlockManager of the
  * executor to speed up future accesses.
+ * 实现HTTP Server作为广播机制,第一次HTTP广播变量（发送一部分任务）反序列化执行,
+ * 从driver（在driver上执行的HTTP Server）抓取广播数据，然后存储到Block中，以便下次更快速度访问
  */
 private[spark] class HttpBroadcast[T: ClassTag](
     @transient var value_ : T, isLocal: Boolean, id: Long)
@@ -127,7 +129,7 @@ private[broadcast] object HttpBroadcast extends Logging {
     synchronized {
       if (!initialized) {
         bufferSize = conf.getInt("spark.buffer.size", 65536)
-	//是否在发送之前压缩广播变量
+	      //是否在发送之前压缩广播变量
         compress = conf.getBoolean("spark.broadcast.compress", true)
         securityManager = securityMgr
         if (isDriver) {
@@ -135,6 +137,7 @@ private[broadcast] object HttpBroadcast extends Logging {
           conf.set("spark.httpBroadcast.uri", serverUri)
         }
         serverUri = conf.get("spark.httpBroadcast.uri")
+        //创建MetadataCleaner对象,广播结果将广播对象注册到ContextClenner中,以便清理
         cleaner = new MetadataCleaner(MetadataCleanerType.HTTP_BROADCAST, cleanup, conf)
         compressionCodec = CompressionCodec.createCodec(conf)
         initialized = true
@@ -247,7 +250,7 @@ private[broadcast] object HttpBroadcast extends Logging {
   /**
    * Periodically(定期) clean up old broadcasts by removing the associated map entries and
    * deleting the associated files.
-   * 定期清理旧的广播，通过删除相关的Map条目和删除相关的文件
+   * 定期清理旧的广播,通过删除相关的Map条目和删除相关的文件
    */
   private def cleanup(cleanupTime: Long) {
     val iterator = files.internalMap.entrySet().iterator()
@@ -260,7 +263,7 @@ private[broadcast] object HttpBroadcast extends Logging {
       }
     }
   }
-
+  //删除本地的广播文件
   private def deleteBroadcastFile(file: File) {
     try {
       if (file.exists) {

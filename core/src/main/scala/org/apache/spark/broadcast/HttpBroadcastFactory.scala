@@ -28,6 +28,7 @@ import org.apache.spark.{SecurityManager, SparkConf}
  */
 class HttpBroadcastFactory extends BroadcastFactory {
   override def initialize(isDriver: Boolean, conf: SparkConf, securityMgr: SecurityManager) {
+    //调用HttpBroadcast初始化
     HttpBroadcast.initialize(isDriver, conf, securityMgr)
   }
 

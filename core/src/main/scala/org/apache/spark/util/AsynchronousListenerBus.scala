@@ -24,14 +24,8 @@ import com.google.common.annotations.VisibleForTesting
 import org.apache.spark.SparkContext
 
 /**
- * 事件处理都是异步,当前线程可以继续执行后续逻辑,线程池中的线程还可以被重用,这个整个系统的并发度会大在增加
- * 处理步骤:
- * 1)发送的事件会存入缓存,
- * 2)由定时调度器取出后,分配监听此事件的监听器对监控数据进行更新
- * 
- * 实现监听器模型,通过监听事件触发对各种监听器状态信息的修改,达到UI界面的数据刷新新效果
  * Asynchronously passes events to registered listeners.
- *
+ * 内部维护了一个queue,事件都会先放到这个queue,然后通过一个线程来让Listener处理Event
  * Until `start()` is called, all posted events are only buffered. Only after this listener bus
  * has started will events be actually propagated to all attached listeners. This listener bus
  * is stopped when `stop()` is called, and it will drop further events after stopping.
@@ -104,7 +98,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
 
   /**
    * Start sending events to attached listeners.
-   *
+   * 开始发送事件给连接的侦听器
    * This first sends out all buffered events posted before this listener bus has started, then
    * listens for any additional events asynchronously while the listener bus is still running.
    * This should only be called once.
@@ -139,6 +133,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
    * For testing only. Wait until there are no more events in the queue, or until the specified
    * time has elapsed. Throw `TimeoutException` if the specified time elapsed before the queue
    * emptied.
+   * 仅用于测试,等待直到没有的事件在队列中,或者或直到指定的时间超时,
    */
   @VisibleForTesting
   @throws(classOf[TimeoutException])
@@ -173,6 +168,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
   /**
    * Stop the listener bus. It will wait until the queued events have been processed, but drop the
    * new events after stopping.
+   * 暂停监听事件,将等待事件队列已经被处理,
    */
   def stop() {
     if (!started.get()) {
@@ -191,7 +187,8 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
   /**
    * If the event queue exceeds its capacity, the new events will be dropped. The subclasses will be
    * notified with the dropped events.
-   *
+   * 如果事件队列超过其容量,新的事件将被删除,子类将被通知丢弃事件
+   * 
    * Note: `onDropEvent` can be called in any thread.
    */
   def onDropEvent(event: E): Unit

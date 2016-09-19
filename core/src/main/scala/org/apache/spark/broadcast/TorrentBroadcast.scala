@@ -33,12 +33,14 @@ import org.apache.spark.util.io.ByteArrayChunkOutputStream
 
 /**
  * A BitTorrent-like implementation of [[org.apache.spark.broadcast.Broadcast]].
- * 
+ * 一个BT实现
  * The mechanism is as follows:
  *
  * The driver divides the serialized object into small chunks and
  * stores those chunks in the BlockManager of the driver.
- * 将Driver序列化的对象分为小块并存储在驱动器的blockmanager。
+ * driver将序列化对象划分一个个小块,交给BlockManager处理存储,每一个执行器executor将首先尝试从BlockManager获取的对象
+ * 如果没有找到，它然后使用远程从driver或者其他executor抓取数据块,一旦它得到的这个数据块，它会把块在自己的BlockManager,
+ * 准备其他executors从获取
  * On each executor, the executor first attempts to fetch the object from its BlockManager. If
  * it does not exist, it then uses remote fetches to fetch the small chunks from the driver and/or
  * other executors if available. Once it gets the chunks, it puts the chunks in its own
@@ -67,7 +69,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   @transient private var compressionCodec: Option[CompressionCodec] = _
   /** Size of each block. Default value is 4MB.  This value is only read by the broadcaster. */
   @transient private var blockSize: Int = _
-//设置广播配置信息,配置属性确认是否对广播消息进行压缩,并且生成CompressionCode对象
+  //设置广播配置信息,配置属性确认是否对广播消息进行压缩,并且生成CompressionCode对象
   private def setConf(conf: SparkConf) {
   //是否在发送之前压缩广播变量
     compressionCodec = if (conf.getBoolean("spark.broadcast.compress", true)) {
@@ -76,15 +78,16 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
       None
     }
     // Note: use getSizeAsKb (not bytes) to maintain compatiblity if no units are provided
-    //TorrentBroadcastFactory块大小
+    //根据配置属性设置块大小,默认4M
     blockSize = conf.getSizeAsKb("spark.broadcast.blockSize", "4m").toInt * 1024
   }
+  
   setConf(SparkEnv.get.conf)
-//生成BroadcastBlockId
+  //生成BroadcastBlockId
   private val broadcastId = BroadcastBlockId(id)
 
   /** Total number of blocks this broadcast variable contains. */
-  //块的写入操作,返回广播变更包含的块数
+  //块的写入操作,返回广播变更包含的块数,
   private val numBlocks: Int = writeBlocks(obj)
 
   override protected def getValue() = {
@@ -93,11 +96,9 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
 
   /**
    * Divide the object into multiple blocks and put those blocks in the block manager.
+   * 将该对象划分为多个块，并将这些块放在块管理器中
    * @param value the object to divide
    * @return number of blocks this broadcast variable is divided into
-   * 1)将要写入的对象在本地的存储体系中备份一份,以便于Task也可以在本地的Driver上运行
-   * 2)给ByteArrayChunkOutputStream指定压缩算法,并且将对象以序列化方式写入ByteChunkOutputStream后转换为Array
-   * 3)将每一个ByteBuffer作为一个Block,使用putByte方法写入存储体系.
    */
   private def writeBlocks(value: T): Int = {
     // Store a copy of the broadcast variable in the driver so that tasks run on the driver

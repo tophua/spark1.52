@@ -33,23 +33,22 @@ private[spark] class BroadcastManager(
   private var initialized = false
   private var broadcastFactory: BroadcastFactory = null
 
-  initialize()
+  initialize()//主要根据配置初始化broadcastFactory成员变量
 
   // Called by SparkContext or Executor before using Broadcast
+  //调用SparkContext或者Executor前使用广播
   private def initialize() {
     synchronized {
       if (!initialized) {
-        val broadcastFactoryClass =
-	//广播的实现类
-          conf.get("spark.broadcast.factory", "org.apache.spark.broadcast.TorrentBroadcastFactory")
-
+         //广播的实现类
+        val broadcastFactoryClass =	     
+        conf.get("spark.broadcast.factory", "org.apache.spark.broadcast.TorrentBroadcastFactory")
         broadcastFactory =
           Utils.classForName(broadcastFactoryClass).newInstance.asInstanceOf[BroadcastFactory]
-
         // Initialize appropriate BroadcastFactory and BroadcastObject
+        //调用初始化函数
         broadcastFactory.initialize(isDriver, conf, securityManager)
-
-        initialized = true
+        initialized = true //初始化完成
       }
     }
   }
@@ -57,7 +56,7 @@ private[spark] class BroadcastManager(
   def stop() {
     broadcastFactory.stop()
   }
-
+  //广播变更ID
   private val nextBroadcastId = new AtomicLong(0)
 
   def newBroadcast[T: ClassTag](value_ : T, isLocal: Boolean): Broadcast[T] = {

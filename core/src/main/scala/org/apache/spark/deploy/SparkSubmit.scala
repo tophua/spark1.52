@@ -48,9 +48,11 @@ import org.apache.spark.util.{ChildFirstURLClassLoader, MutableURLClassLoader, U
 /**
  * Whether to submit, kill, or request the status of an application.
  * The latter two operations are currently supported only for standalone cluster mode.
+ * 后两个模式支持独立模式及集群模式
  */
 private[deploy] object SparkSubmitAction extends Enumeration {
   type SparkSubmitAction = Value
+   //设置应用程序状态,SUBMIT提交,KILL杀死,及请求应用程序
   val SUBMIT, KILL, REQUEST_STATUS = Value
 }
 
@@ -127,6 +129,7 @@ object SparkSubmit {
 
   /**
    * Kill an existing submission using the REST protocol. Standalone and Mesos cluster mode only.
+   * 使用REST协议杀死存在的提交应用,支持独立模式及Mesos集群模式
    */
   private def kill(args: SparkSubmitArguments): Unit = {
     new RestSubmissionClient(args.master)
@@ -144,7 +147,7 @@ object SparkSubmit {
 
   /**
    * Submit the application using the provided parameters.
-   *
+   * 提交应用程序使用的参数,这是第二步,第一步指定环境变量,设置合适的路径及系统属性,
    * This runs in two steps. First, we prepare the launch environment by setting up
    * the appropriate classpath, system properties, and application arguments for
    * running the child main class based on the cluster manager and the deploy mode.
@@ -184,6 +187,7 @@ object SparkSubmit {
     }
 
      // In standalone cluster mode, there are two submission gateways:
+     // 在独立的集群模式中,有两个提交方式：
      //   (1) The traditional Akka gateway using o.a.s.deploy.Client as a wrapper
      //   (2) The new REST-based gateway introduced in Spark 1.3
      // The latter is the default behavior as of Spark 1.3, but Spark submit will fail over
@@ -202,7 +206,7 @@ object SparkSubmit {
           args.useRest = false
           submit(args)
       }
-    // In all other modes, just run the main class as prepared
+    // In all other modes, just run the main class as prepared  
     } else {
       doRunMain()
     }
@@ -227,6 +231,7 @@ object SparkSubmit {
     var childMainClass = ""
 
     // Set the cluster manager
+    // 设置集群管理器
     val clusterManager: Int = args.master match {
       case m if m.startsWith("yarn") => YARN
       case m if m.startsWith("spark") => STANDALONE
@@ -236,6 +241,7 @@ object SparkSubmit {
     }
 
     // Set the deploy mode; default is client mode
+    // 设置部署模式,默认客户端模式
     var deployMode: Int = args.deployMode match {
       case "client" | null => CLIENT
       case "cluster" => CLUSTER
@@ -321,6 +327,7 @@ object SparkSubmit {
     }
 
     // The following modes are not supported or applicable
+    // 下列模式不支持或适用
     (clusterManager, deployMode) match {
       case (MESOS, CLUSTER) if args.isPython =>
         printErrorAndExit("Cluster deploy mode is currently not supported for python " +
@@ -427,6 +434,7 @@ object SparkSubmit {
     }
 
     // Special flag to avoid deprecation warnings at the client
+    // 为了避免否决警告在客户端特定的标志
     sysProps("SPARK_SUBMIT") = "true"
 
     // A list of rules to map each argument to system properties or command-line options in
@@ -434,6 +442,7 @@ object SparkSubmit {
     val options = List[OptionAssigner](
 
       // All cluster managers
+      // 所有的集群管理 
       OptionAssigner(args.master, ALL_CLUSTER_MGRS, ALL_DEPLOY_MODES, sysProp = "spark.master"),
       OptionAssigner(args.deployMode, ALL_CLUSTER_MGRS, ALL_DEPLOY_MODES,
         sysProp = "spark.submit.deployMode"),
@@ -471,7 +480,7 @@ object SparkSubmit {
       OptionAssigner(args.principal, YARN, CLUSTER, clOption = "--principal"),
       OptionAssigner(args.keytab, YARN, CLUSTER, clOption = "--keytab"),
 
-      // Other options
+      // Other options,其他选项
       OptionAssigner(args.executorCores, STANDALONE | YARN, ALL_DEPLOY_MODES,
         sysProp = "spark.executor.cores"),
       OptionAssigner(args.executorMemory, STANDALONE | MESOS | YARN, ALL_DEPLOY_MODES,
@@ -493,6 +502,7 @@ object SparkSubmit {
 
     // In client mode, launch the application main class directly
     // In addition, add the main application jar and any added jars (if any) to the classpath
+    // 在客户端模式,直接启动应用程序主类,此外,添加的主要应用程序JAR和任何附加的jar（如果有的话）的路径
     if (deployMode == CLIENT) {
       childMainClass = args.mainClass
       if (isUserJar(args.primaryResource)) {
@@ -503,6 +513,7 @@ object SparkSubmit {
     }
 
     // Map all arguments to command-line options or system properties for our chosen mode
+    //将所有参数映射到命令行选项,或系统属性选择的模式
     for (opt <- options) {
       if (opt.value != null &&
           (deployMode & opt.deployMode) != 0 &&
@@ -525,6 +536,7 @@ object SparkSubmit {
 
     // In standalone cluster mode, use the REST client to submit the application (Spark 1.3+).
     // All Spark parameters are expected to be passed to the client through system properties.
+    // 在独立的集群模式,所有的Spark参数都将通过系统属性传递给客户端
     if (args.isStandaloneCluster) {
       if (args.useRest) {
         childMainClass = "org.apache.spark.deploy.rest.RestSubmissionClient"
@@ -599,16 +611,19 @@ object SparkSubmit {
     }
 
     // Load any properties specified through --conf and the default properties file
+    // 加载任何属性指定通过conf和默认的属性文件
     for ((k, v) <- args.sparkProperties) {
       sysProps.getOrElseUpdate(k, v)
     }
 
     // Ignore invalid spark.driver.host in cluster modes.
+    // 忽略无效的spark.driver.host集群模式
     if (deployMode == CLUSTER) {
       sysProps -= "spark.driver.host"
     }
 
     // Resolve paths in certain spark properties
+    // 解析Spark属性路径
     val pathConfigs = Seq(
       "spark.jars",
       "spark.files",
@@ -617,6 +632,7 @@ object SparkSubmit {
       "spark.yarn.dist.archives")
     pathConfigs.foreach { config =>
       // Replace old URIs with resolved URIs, if they exist
+      // 如果存在,解析URL替换旧URI
       sysProps.get(config).foreach { oldValue =>
         sysProps(config) = Utils.resolveURIs(oldValue)
       }
@@ -636,7 +652,8 @@ object SparkSubmit {
 
   /**
    * Run the main method of the child class using the provided launch environment.
-   *
+   * 使用提供的启动环境运行子类main方法
+   * 
    * Note that this main class will not be the one provided by the user if we're
    * running cluster deploy mode or python applications.
    */
@@ -740,6 +757,7 @@ object SparkSubmit {
 
   /**
    * Return whether the given primary resource represents a user jar.
+   * 返回给定的原始资源是否代表用户的jar
    */
   private[deploy] def isUserJar(res: String): Boolean = {
     !isShell(res) && !isPython(res) && !isInternal(res) && !isR(res)
@@ -760,7 +778,7 @@ object SparkSubmit {
   }
 
   /**
-   * Return whether the given main class represents a thrift server.
+   * Return whether the given main class represents a thrift server.   
    */
   private def isThriftServer(mainClass: String): Boolean = {
     mainClass == "org.apache.spark.sql.hive.thriftserver.HiveThriftServer2"
@@ -796,7 +814,10 @@ object SparkSubmit {
   }
 }
 
-/** Provides utility functions to be used inside SparkSubmit. */
+/** 
+ *  Provides utility functions to be used inside SparkSubmit.
+ *  提供内部SparkSubmit使用的公共的函数 
+ *  */
 private[spark] object SparkSubmitUtils {
 
   // Exposed for testing
@@ -845,6 +866,7 @@ private[spark] object SparkSubmitUtils {
 
   /**
    * Extracts maven coordinates from a comma-delimited string
+   * 用逗号分隔的字符串中提取Maven字符串
    * @param remoteRepos Comma-delimited string of remote repositories
    * @param ivySettings The Ivy settings for this session
    * @return A ChainResolver used by Ivy to search for and resolve dependencies.
@@ -936,7 +958,10 @@ private[spark] object SparkSubmitUtils {
     }
   }
 
-  /** Add exclusion rules for dependencies already included in the spark-assembly */
+  /** 
+   *  Add exclusion rules for dependencies already included in the spark-assembly 
+   *  添加已包含在已包含的依赖项的排除规则
+   *  */
   def addExclusionRules(
       ivySettings: IvySettings,
       ivyConfName: String,

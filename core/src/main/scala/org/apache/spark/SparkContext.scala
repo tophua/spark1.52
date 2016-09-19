@@ -897,6 +897,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       path: String,
       minPartitions: Int = defaultMinPartitions): RDD[String] = withScope {
     assertNotStopped()
+    //调用hadoopFile方法
     hadoopFile(path, classOf[TextInputFormat], classOf[LongWritable], classOf[Text],
         //map来生成一个MappedRDD
       minPartitions).map(pair => pair._2.toString)
@@ -1070,12 +1071,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     new HadoopRDD(this, conf, inputFormatClass, keyClass, valueClass, minPartitions)
   }
 
-  /** Get an RDD for a Hadoop file with an arbitrary InputFormat
-   *
-   * 主要是为了构建HadoopRDD,
-   * 1)将Hadoop的Configuration封装为SerializableWritable用于序列化读写操作,然后广播Hadoop的Configuration
-   * 2)定义偏函数,设置输入路径
-   * 3)构建HadoopRDD
+  /** Get an RDD for a Hadoop file with an arbitrary InputFormat  
    * '''Note:''' Because Hadoop's RecordReader class re-uses the same Writable object for each
    * record, directly caching the returned RDD or directly passing it to an aggregation or shuffle
    * operation will create many references to the same object.
@@ -1090,8 +1086,12 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       minPartitions: Int = defaultMinPartitions): RDD[(K, V)] = withScope {
     assertNotStopped()
     // A Hadoop configuration can be about 10 KB, which is pretty big, so broadcast it.
+    //Hadoop的配置约10 kb,这是相当大的,所以广播
+    //将Hadoop的Configuration封装为SerializableWritable用于序列化读写操作,然后广播Hadoop的Configuration
     val confBroadcast = broadcast(new SerializableConfiguration(hadoopConfiguration))
+    //定义偏函数,设置输入路径
     val setInputPathsFunc = (jobConf: JobConf) => FileInputFormat.setInputPaths(jobConf, path)
+    //构建HadoopRDD
     new HadoopRDD(
       this,
       confBroadcast,
@@ -1393,7 +1393,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * Broadcast a read-only variable to the cluster, returning a
    * [[org.apache.spark.broadcast.Broadcast]] object for reading it in distributed functions.
    * The variable will be sent to each cluster only once.
-   * 方法用于广播Hadoop的配置信息,
+   * 广播Hadoop的配置信息到群集,返回一个Broadcast对象用于在分布式函数中读取
+   * 将该变量被发送一次到每个群集
    */
   def broadcast[T: ClassTag](value: T): Broadcast[T] = {
     assertNotStopped()
