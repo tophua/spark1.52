@@ -27,13 +27,13 @@ import org.apache.spark.rpc.RpcEndpointRef
 import org.apache.spark.util.Utils
 
 private[spark] class ApplicationInfo(
-    val startTime: Long,
-    val id: String,
-    val desc: ApplicationDescription,
-    val submitDate: Date,
-    val driver: RpcEndpointRef,
-    defaultCores: Int)
-  extends Serializable {
+  val startTime: Long,
+  val id: String,
+  val desc: ApplicationDescription,
+  val submitDate: Date,
+  val driver: RpcEndpointRef,
+  defaultCores: Int)
+    extends Serializable {
 
   @transient var state: ApplicationState.Value = _
   @transient var executors: mutable.HashMap[Int, ExecutorDesc] = _
@@ -49,20 +49,20 @@ private[spark] class ApplicationInfo(
 
   @transient private var nextExecutorId: Int = _
 
-  init()//初始化方法
+  init() //初始化方法
 
   private def readObject(in: java.io.ObjectInputStream): Unit = Utils.tryOrIOException {
     in.defaultReadObject()
     init()
   }
-/**
- * 创建ApplicationSource,声明了executors用于缓存分配Application的executor
- */
+  /**
+   * 创建ApplicationSource,声明了executors用于缓存分配Application的executor
+   */
   private def init() {
-    state = ApplicationState.WAITING//等待
+    state = ApplicationState.WAITING //等待
     executors = new mutable.HashMap[Int, ExecutorDesc]
     coresGranted = 0 //
-    endTime = -1L//结束时间
+    endTime = -1L //结束时间
     appSource = new ApplicationSource(this)
     nextExecutorId = 0
     removedExecutors = new ArrayBuffer[ExecutorDesc]
@@ -80,22 +80,22 @@ private[spark] class ApplicationInfo(
         id
     }
   }
-/**
- * 物理分配的步骤如下:
- * 1)首先使用WorkerInfo,逻辑分配的CPU核数及内存大小创建ExecutorDesc
- * 2)将ExecutorDesc添加Application的executors缓存中
- * 3)增加已授权得到的内核数
- */
+  /**
+   * 物理分配的步骤如下:
+   * 1)首先使用WorkerInfo,逻辑分配的CPU核数及内存大小创建ExecutorDesc
+   * 2)将ExecutorDesc添加Application的executors缓存中
+   * 3)增加已授权得到的内核数
+   */
   private[master] def addExecutor(
-      worker: WorkerInfo,
-      cores: Int,
-      useID: Option[Int] = None): ExecutorDesc = {
+    worker: WorkerInfo,
+    cores: Int,
+    useID: Option[Int] = None): ExecutorDesc = {
     val exec = new ExecutorDesc(newExecutorId(useID), this, worker, cores, desc.memoryPerExecutorMB)
     executors(exec.id) = exec
     coresGranted += cores
     exec
   }
-//删除Executor
+  //删除Executor
   private[master] def removeExecutor(exec: ExecutorDesc) {
     if (executors.contains(exec.id)) {
       removedExecutors += executors(exec.id)
@@ -111,14 +111,14 @@ private[spark] class ApplicationInfo(
   private var _retryCount = 0 //重试次数
 
   private[master] def retryCount = _retryCount
-//添加重试数
+  //添加重试数
   private[master] def incrementRetryCount() = {
     _retryCount += 1
     _retryCount
   }
 
   private[master] def resetRetryCount() = _retryCount = 0
-//标识应用程序已经完成
+  //标识应用程序已经完成
   private[master] def markFinished(endState: ApplicationState.Value) {
     state = endState
     endTime = System.currentTimeMillis()

@@ -31,9 +31,15 @@ private[deploy] class DriverInfo(
   extends Serializable {
 
   @transient var state: DriverState.Value = DriverState.SUBMITTED
-  /* If we fail when launching the driver, the exception is stored here. */
+  /* 
+   * If we fail when launching the driver, the exception is stored here. 
+   * 如果在启动驱动程序时失败,则将异常存储
+   * */
   @transient var exception: Option[Exception] = None
-  /* Most recent worker assigned to this driver */
+  /* 
+   * Most recent worker assigned to this driver 
+   * 最近Woker被分配到Driver
+   * */
   @transient var worker: Option[WorkerInfo] = None
 
   init()

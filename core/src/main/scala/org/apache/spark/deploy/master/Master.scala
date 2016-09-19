@@ -223,9 +223,9 @@ private[deploy] class Master(
     persistenceEngine.close()
     leaderElectionAgent.stop()
   }
-/**
- * onStart 触发electedLeader方法,向Master发送ElectedLeader消息
- */
+  /**
+   * onStart 触发electedLeader方法,向Master发送ElectedLeader消息
+   */
   override def electedLeader() {
     self.send(ElectedLeader)
   }
@@ -263,14 +263,12 @@ private[deploy] class Master(
       logError("Leadership has been revoked -- master shutting down.")
       System.exit(0)
     }
-    //master收到RegisterWorker通知,做如下处理       
     /**
      * Master收到RegisterWorker消息后的处理步骤:
      * 1)创建WorkerInfo
      * 2)registerWorker注册WorkerInfo,其实就是将添加到workers[HashSet]中,并且更新worker Id与Worker以及worker addess与worker的映射关系
      * 3)向Worker发送RegisteredWorker消息,表示注册完成
-     * 4)调用schedule方法进行资源调度
-     * 
+     * 4)调用schedule方法进行资源调度   
      */
     case RegisterWorker(
         id, workerHost, workerPort, workerRef, cores, memory, workerUiPort, publicAddress) => {
@@ -306,18 +304,18 @@ private[deploy] class Master(
         }
       }
     }
-  /**
-   * Master接收到RegisterApplication消息后,处理步骤
-   * 1)创建ApplicationInfo
-   * 2)注册ApplicationInfo
-   * 3)向ClientEndpoint发送RegisteredAppliction消息
-   * 4)调用schedule()执行调度
-   */
+    /**
+     * Master接收到RegisterApplication消息后,处理步骤
+     * 1)创建ApplicationInfo
+     * 2)注册ApplicationInfo
+     * 3)向ClientEndpoint发送RegisteredAppliction消息
+     * 4)调用schedule()执行调度
+     */
     case RegisterApplication(description, driver) => {
       // TODO Prevent repeated registrations from some driver
       if (state == RecoveryState.STANDBY) {
         // ignore, don't send response
-        //AppClient有超时机制（20s），超时会重试
+        // 恢复状态,不发送任务信息       
       } else {
         logInfo("Registering app " + description.name)
         //创建Application,会调用Application.init方法
@@ -359,9 +357,12 @@ private[deploy] class Master(
           exec.application.driver.send(ExecutorUpdated(execId, state, message, exitStatus))
           if (ExecutorState.isFinished(state)) {
             // Remove this executor from the worker and app
+            //从Worker和app中删除这个executor
             logInfo(s"Removing executor ${exec.fullId} because it is $state")
             // If an application has already finished, preserve its
             // state to display its information properly on the UI
+            //如果一个应用程序已经完成,保存它,
+            //状态,正确显示其信息在用户界面上
             if (!appInfo.isFinished) {
               appInfo.removeExecutor(exec)
             }
@@ -369,6 +370,7 @@ private[deploy] class Master(
 
             val normalExit = exitStatus == Some(0)
             // Only retry certain number of times so we don't go into an infinite loop.
+            // 只有重试一定数量的时间,所以我们不进入一个无限循环
             if (!normalExit) {
               if (appInfo.incrementRetryCount() < ApplicationState.MAX_NUM_RETRY) {
                 schedule()
@@ -396,20 +398,21 @@ private[deploy] class Master(
           throw new Exception(s"Received unexpected state update for driver $driverId: $state")
       }
     }
-/**
- * Master收到Heartbeat消息后的实现步骤
- * 1)更新workerInfo.lastHeartbeat,即最后一次接收到心跳的时间戳
- * 2)如果worker的id与Worker的映射关系(idToWorker)中找不到匹配的Worker,但是Worker的缓存(workers)的缓存
- *   中却存在此Id,那么向Worker发送ReconnectWorker消息
- */
+    /**
+     * Master收到Heartbeat消息后的实现步骤
+     */
     case Heartbeat(workerId, worker) => {
       idToWorker.get(workerId) match {
         case Some(workerInfo) =>
+          //更新workerInfo.lastHeartbeat,即最后一次接收到心跳的时间戳
           workerInfo.lastHeartbeat = System.currentTimeMillis()
         case None =>
           if (workers.map(_.id).contains(workerId)) {
+            //如果worker的id与Worker的映射关系(idToWorker)中找不到匹配的Worker
+            //但是Worker的缓存(workers)的缓存中却存在此Id
             logWarning(s"Got heartbeat from unregistered worker $workerId." +
               " Asking it to re-register.")
+            //向Worker发送ReconnectWorker消息
             worker.send(ReconnectWorker(masterUrl))
           } else {
             logWarning(s"Got heartbeat from unregistered worker $workerId." +
@@ -571,9 +574,9 @@ private[deploy] class Master(
         workers.toArray, apps.toArray, completedApps.toArray,
         drivers.toArray, completedDrivers.toArray, state))
     }
-/**
- * 首先会启动
- */
+  /**
+   * 首先会启动
+   */
     case BoundPortsRequest => {
       context.reply(BoundPortsResponse(address.port, webUi.boundPort, restServerBoundPort))
     }
@@ -1053,11 +1056,11 @@ private[deploy] class Master(
 
   /**
    * Handle a request to set the target number of executors for this application.
-   *
+   * 处理一请求设置应用的executors数
    * If the executor limit is adjusted upwards, new executors will be launched provided
    * that there are workers with sufficient resources. If it is adjusted downwards, however,
    * we do not kill existing executors until we explicitly receive a kill request.
-   *
+   * 如果执行器限制向上调整
    * @return whether the application has previously registered with this Master.
    */
   private def handleRequestExecutors(appId: String, requestedTotal: Int): Boolean = {
@@ -1075,7 +1078,7 @@ private[deploy] class Master(
 
   /**
    * Handle a kill request from the given application.
-   *
+   * 向给定的应用程序杀死executor请求
    * This method assumes the executor limit has already been adjusted downwards through
    * a separate [[RequestExecutors]] message, such that we do not launch new executors
    * immediately after the old ones are removed.
@@ -1106,7 +1109,7 @@ private[deploy] class Master(
 
   /**
    * Cast the given executor IDs to integers and filter out the ones that fail.
-   *
+   * 将给定executor IDs转换Int列表,如果转换失败抛出异常,所有的执行者ID应该是整数
    * All executors IDs should be integers since we launched these executors. However,
    * the kill interface on the driver side accepts arbitrary strings, so we need to
    * handle non-integer executor IDs just to be safe.
@@ -1125,6 +1128,7 @@ private[deploy] class Master(
 
   /**
    * Ask the worker on which the specified executor is launched to kill the executor.
+   * 要求在指定的worker启动杀死executor
    */
   private def killExecutor(exec: ExecutorDesc): Unit = {
     exec.worker.removeExecutor(exec)
@@ -1135,6 +1139,7 @@ private[deploy] class Master(
   /**
    * Rebuild a new SparkUI from the given application's event logs.
    * Return the UI if successful, else None
+   * 从给定的应用程序的事件日志重新构建SparkUI
    */
   private[master] def rebuildSparkUI(app: ApplicationInfo): Option[SparkUI] = {
     val appName = app.desc.name
@@ -1201,14 +1206,19 @@ private[deploy] class Master(
     }
   }
 
-  /** Generate a new app ID given a app's submission date */
+  /** 
+   *  Generate a new app ID given a app's submission date
+   *  给一个提交日期 生成一个新的应用程序ID
+   *  */
   private def newApplicationId(submitDate: Date): String = {
-    val appId = "app-%s-%04d".format(createDateFormat.format(submitDate), nextAppNumber)//精确到秒 For application IDs 
-    nextAppNumber += 1
+    //精确到秒 For application IDs
+    val appId = "app-%s-%04d".format(createDateFormat.format(submitDate), nextAppNumber) 
+    nextAppNumber += 1//自增1
     appId
   }
 
-  /** Check for, and remove, any timed-out workers 
+  /** 
+   *  Check for, and remove, any timed-out workers 
    *  
    *如果当前时间减去Worker最近一次的状态更新时间小于定时器的话,就认为该Worker还处于Alive状态
    *否则认为该Worker因为没有发送心跳消息而挂.  
