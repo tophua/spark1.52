@@ -28,6 +28,7 @@ import org.apache.spark.scheduler.SparkListener
 
 /**
  * An event bus which posts events to its listeners.
+ * 一个事件总线,事件发送一个侦听器
  */
 private[spark] trait ListenerBus[L <: AnyRef, E] extends Logging {
 
@@ -37,6 +38,7 @@ private[spark] trait ListenerBus[L <: AnyRef, E] extends Logging {
 
   /**
    * Add a listener to listen events. This method is thread-safe and can be called in any thread.
+   * 添加一个监听事件,此方法是线程安全的，可以在任何线程中调用
    */
   final def addListener(listener: L) {
     listeners.add(listener)
@@ -66,6 +68,7 @@ private[spark] trait ListenerBus[L <: AnyRef, E] extends Logging {
   /**
    * Post an event to the specified listener. `onPostEvent` is guaranteed to be called in the same
    * thread.
+   * 将事件发送到指定的侦听器,onPostEvent保证是在同一个线程调用
    */
   def onPostEvent(listener: L, event: E): Unit
 

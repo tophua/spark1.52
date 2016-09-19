@@ -298,6 +298,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
     }
 
     // Remove a disconnected slave from the cluster
+    // 删除断开连接的群集的从节点
     def removeExecutor(executorId: String, reason: String): Unit = {
       executorDataMap.get(executorId) match {
         case Some(executorInfo) =>
@@ -410,11 +411,13 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
   /**
    * Return the number of executors currently registered with this backend.
+   * 返回当前注册本的executors数
    */
   def numExistingExecutors: Int = executorDataMap.size
 
   /**
    * Request an additional number of executors from the cluster manager.
+   *
    * @return whether the request is acknowledged.
    */
   final override def requestExecutors(numAdditionalExecutors: Int): Boolean = synchronized {
@@ -481,6 +484,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
   /**
    * Request that the cluster manager kill the specified executors.
+   * 请求的集群管理器杀死指定的executors
    * @return whether the kill request is acknowledged.
    */
   final override def killExecutors(executorIds: Seq[String]): Boolean = synchronized {
@@ -489,7 +493,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
   /**
    * Request that the cluster manager kill the specified executors.
-   *
+   * 请求的集群管理器杀死指定的executors
    * @param executorIds identifiers of executors to kill
    * @param replace whether to replace the killed executors with new ones
    * @return whether the kill request is acknowledged.

@@ -28,7 +28,6 @@ import org.apache.spark.scheduler.SchedulingMode.SchedulingMode
 /**
  * An Schedulable entity that represent collection of Pools or TaskSetManagers
  * 代表一个可调度的实体集合池或tasksetmanagers,
- *
  */
 
 private[spark] class Pool(

@@ -52,7 +52,10 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
     !failed
   }
 
-  /** Mark this BlockInfo as ready (i.e. block is finished writing) */
+  /** 
+   *  Mark this BlockInfo as ready (i.e. block is finished writing)
+   *  标记一个 BlockInfo准备,块完成正在写入中.
+   *  */
   def markReady(sizeInBytes: Long) {
     require(sizeInBytes >= 0, s"sizeInBytes was negative: $sizeInBytes")
     assert(pending)

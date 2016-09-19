@@ -296,7 +296,7 @@ private[spark] object EventLoggingListener extends Logging {
 
   /**
    * Opens an event log file and returns an input stream that contains the event data.
-   *
+   * 打开一个事件日志文件,并返回包含事件数据的输入流
    * @return input stream that holds one JSON record per line.
    */
   def openEventLog(log: Path, fs: FileSystem): InputStream = {

@@ -147,7 +147,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
   /**
    * Cache the values of a partition, keeping track of any updates in the storage statuses of
    * other blocks along the way.
-   *
+   * 缓存一个分区的值,保持跟踪在其他分区块存储状态更新
    * The effective storage level refers to the level that actually specifies BlockManager put
    * behavior, not the level originally specified by the user. This is mainly for forcing a
    * MEMORY_AND_DISK partition to disk if there is not enough room to unroll the partition,
