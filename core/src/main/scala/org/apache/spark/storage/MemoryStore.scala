@@ -687,7 +687,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
   /**
    * Log a warning for failing to unroll a block.
-   * 
+   * 日志警告展开块失败
    * @param blockId ID of the block we are trying to unroll.
    * @param finalVectorSize Final size of the vector before unrolling failed.
    */

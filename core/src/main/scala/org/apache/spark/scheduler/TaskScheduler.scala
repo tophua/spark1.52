@@ -46,12 +46,15 @@ private[spark] trait TaskScheduler {
   def postStartHook() { }
 
   // Disconnect from the cluster.
+  // 断开群集
   def stop(): Unit
 
   // Submit a sequence of tasks to run.
+  // 提交一系列任务到运行状态
   def submitTasks(taskSet: TaskSet): Unit
 
   // Cancel a stage.
+  // 取消一个Stage
   def cancelTasks(stageId: Int, interruptThread: Boolean)
 
   // Set the DAG scheduler for upcalls. This is guaranteed to be set before submitTasks is called.
@@ -71,19 +74,20 @@ private[spark] trait TaskScheduler {
 
   /**
    * Get an application ID associated with the job.
-   *
+   * 获取与Job关联的应用程序标识
    * @return An application ID
    */
   def applicationId(): String = appId
 
   /**
    * Process a lost executor
+   * 处理丢失的executor
    */
   def executorLost(executorId: String, reason: ExecutorLossReason): Unit
 
   /**
    * Get an application's attempt ID associated with the job.
-   *
+   * 获取与作业相关的应用程序尝试标识
    * @return An application's Attempt ID
    */
   def applicationAttemptId(): Option[String]

@@ -17,11 +17,11 @@
 
 package org.apache.spark.storage
 
-import java.io.{BufferedOutputStream, FileOutputStream, File, OutputStream}
+import java.io.{ BufferedOutputStream, FileOutputStream, File, OutputStream }
 import java.nio.channels.FileChannel
 
 import org.apache.spark.Logging
-import org.apache.spark.serializer.{SerializerInstance, SerializationStream}
+import org.apache.spark.serializer.{ SerializerInstance, SerializationStream }
 import org.apache.spark.executor.ShuffleWriteMetrics
 import org.apache.spark.util.Utils
 
@@ -35,17 +35,17 @@ import org.apache.spark.util.Utils
  * 用于Spark任务的中间计算结果输入文件,直接向一个文件写入数据,如果文件已经存在,那么会以追加的方式写入.
  */
 private[spark] class DiskBlockObjectWriter(
-    val blockId: BlockId,
-    val file: File,
-    serializerInstance: SerializerInstance,
-    bufferSize: Int,
-    compressStream: OutputStream => OutputStream,
-    syncWrites: Boolean,
-    // These write metrics concurrently shared with other active DiskBlockObjectWriters who
-    // are themselves performing writes. All updates must be relative.
-    writeMetrics: ShuffleWriteMetrics)
-  extends OutputStream
-  with Logging {
+  val blockId: BlockId,
+  val file: File,
+  serializerInstance: SerializerInstance,
+  bufferSize: Int,
+  compressStream: OutputStream => OutputStream,
+  syncWrites: Boolean,
+  // These write metrics concurrently shared with other active DiskBlockObjectWriters who
+  // are themselves performing writes. All updates must be relative.
+  writeMetrics: ShuffleWriteMetrics)
+    extends OutputStream
+    with Logging {
 
   /** The file channel, used for repositioning / truncating the file. */
   private var channel: FileChannel = null
@@ -78,7 +78,7 @@ private[spark] class DiskBlockObjectWriter(
    * xxxxx: Existing contents of the file.
    */
   //Block在File中开始的位置，不变量，值为file.length()，即位File中已经被其他Block写入的数据量
-  private val initialPosition = file.length() 
+  private val initialPosition = file.length()
   //Block在File中结束的位置，初始值为-1，当调用commitAndClose方法时更新为当前File的大小，然后不可再改变。
   private var finalPosition: Long = -1
   //当前数据写入的位置，初始值为initialPosition，每写入32条数据时更新为channel.position()
@@ -89,10 +89,9 @@ private[spark] class DiskBlockObjectWriter(
    * output bytes written since the latter is expensive to do for each record.
    */
   private var numRecordsWritten = 0
-/**
- * 初始化各个输出流, 打一个文件输出流,利用NIO,压缩,缓存,序列化方式打开一个文件输出流
- * 
- */
+  /**
+   * 初始化各个输出流, 打一个文件输出流,利用NIO,压缩,缓存,序列化方式打开一个文件输出流
+   */
   def open(): DiskBlockObjectWriter = {
     if (hasBeenClosed) {
       throw new IllegalStateException("Writer already closed. Cannot be reopened.")
@@ -107,7 +106,7 @@ private[spark] class DiskBlockObjectWriter(
     initialized = true
     this
   }
-//关闭文件输出流,并更新测量信息
+  //关闭文件输出流,并更新测量信息
   override def close() {
     if (initialized) {
       Utils.tryWithSafeFinally {
@@ -115,7 +114,7 @@ private[spark] class DiskBlockObjectWriter(
           // Force outstanding writes to disk and track how long it takes
           objOut.flush()
           val start = System.nanoTime()
-          fos.getFD.sync()//
+          fos.getFD.sync() //
           writeMetrics.incShuffleWriteTime(System.nanoTime() - start)
         }
       } {
@@ -137,7 +136,7 @@ private[spark] class DiskBlockObjectWriter(
   /**
    * Flush the partial writes and commit them as a single atomic block.
    * 将缓存数据写入磁盘并关闭缓存,并更新finalPosition,然后更新测量数据
-   * 
+   *
    */
   def commitAndClose(): Unit = {
     if (initialized) {
@@ -154,7 +153,6 @@ private[spark] class DiskBlockObjectWriter(
     }
     commitAndCloseHasBeenCalled = true
   }
-
 
   /**
    * Reverts writes that haven't been flushed yet. Callers should invoke this function
@@ -199,7 +197,7 @@ private[spark] class DiskBlockObjectWriter(
     objOut.writeValue(value)
     recordWritten()
   }
-   //写入一条数据
+  //写入一条数据
   override def write(b: Int): Unit = throw new UnsupportedOperationException()
 
   override def write(kvBytes: Array[Byte], offs: Int, len: Int): Unit = {
@@ -212,7 +210,8 @@ private[spark] class DiskBlockObjectWriter(
 
   /**
    * Notify the writer that a record worth of bytes has been written with OutputStream#write.
-   * 
+   * 通知写操作,记录字节的值已被写入
+   *
    */
   def recordWritten(): Unit = {
     numRecordsWritten += 1
@@ -240,7 +239,7 @@ private[spark] class DiskBlockObjectWriter(
   /**
    * Report the number of bytes written in this writer's shuffle write metrics.
    * Note that this is only valid before the underlying streams are closed.
-   * 更新测量信息 
+   * 更新测量信息
    */
   private def updateBytesWritten() {
     val pos = channel.position()

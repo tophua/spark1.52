@@ -224,6 +224,7 @@ class DAGScheduler(
 
   /**
    * Called by TaskScheduler implementation when a host is added.  
+   * 添加主机时调用任务调试器
    */
   def executorAdded(execId: String, host: String): Unit = {
     eventProcessLoop.post(ExecutorAdded(execId, host))
@@ -329,7 +330,7 @@ class DAGScheduler(
 
   /**
    * Create a ResultStage associated with the provided jobId.
-   * 提供一个jobid创建一个相关resultstage。
+   * 提供一个jobid创建一个相关resultstage
    */
   private def newResultStage(
       rdd: RDD[_],
@@ -714,6 +715,7 @@ class DAGScheduler(
 
   /**
    * Cancel a job that is running or waiting in the queue.
+   * 取消正在运行或在队列中等待的作业
    */
   def cancelJob(jobId: Int): Unit = {
     logInfo("Asked to cancel job " + jobId)
@@ -727,6 +729,7 @@ class DAGScheduler(
 
   /**
    * Cancel all jobs that are running or waiting in the queue.
+   * 取消正在队列中运行或等待的所有工作
    */
   def cancelAllJobs(): Unit = {
     eventProcessLoop.post(AllJobsCancelled)
@@ -734,15 +737,18 @@ class DAGScheduler(
 
   private[scheduler] def doCancelAllJobs() {
     // Cancel all running jobs.
+    // 取消所有运行作业
     runningStages.map(_.firstJobId).foreach(handleJobCancellation(_,
       reason = "as part of cancellation of all jobs"))
-    activeJobs.clear() // These should already be empty by this point,
+    // These should already be empty by this point,
+    activeJobs.clear() //清空正在运行的Job
     jobIdToActiveJob.clear() // but just in case we lost track of some jobs...
     submitWaitingStages()
   }
 
   /**
    * Cancel all jobs associated with a running or scheduled stage.
+   * 取消正在运行或调度阶段相关联的所有作业(Job)
    */
   def cancelStage(stageId: Int) {
     eventProcessLoop.post(StageCancelled(stageId))
@@ -751,6 +757,7 @@ class DAGScheduler(
   /**
    * Resubmit any failed stages. Ordinarily called after a small amount of time has passed since
    * the last fetch failure.
+   * 重新提交任何失败的阶段
    */
   private[scheduler] def resubmitFailedStages() {
     if (failedStages.size > 0) {
@@ -1116,7 +1123,10 @@ class DAGScheduler(
     }
   }
 
-  /** Merge updates from a task to our local accumulator values */
+  /** 
+   *  Merge updates from a task to our local accumulator values 
+   *  合并更新一个任务到本地的累加值
+   *  */
   private def updateAccumulators(event: CompletionEvent): Unit = {
     val task = event.task
     val stage = stageIdToStage(task.stageId)
@@ -1465,6 +1475,7 @@ class DAGScheduler(
 
   /**
    * Marks a stage as finished and removes it from the list of running stages.
+   * 标志一个阶段完成,并将其从运行阶段的列表中删除
    */
   private def markStageAsFinished(stage: Stage, errorMessage: Option[String] = None): Unit = {
     val serviceTime = stage.latestInfo.submissionTime match {
@@ -1506,7 +1517,10 @@ class DAGScheduler(
     }
   }
 
-  /** Fails a job and all stages that are only used by that job, and cleans up relevant state. */
+  /** 
+   *  Fails a job and all stages that are only used by that job,and cleans up relevant state. 
+   *  失败一个工作Job和所有阶段(stage)只使用的工作,并清理相关状态
+   *  */
   private def failJobAndIndependentStages(
       job: ActiveJob,
       failureReason: String,
@@ -1534,6 +1548,7 @@ class DAGScheduler(
           logError(s"Missing Stage for stage with id $stageId")
         } else {
           // This is the only job that uses this stage, so fail the stage if it is running.
+          //这是唯一一个使用这个阶段的工作,所以,如果它正在运行失败的阶段
           val stage = stageIdToStage(stageId)
           if (runningStages.contains(stage)) {
             try { // cancelTasks will fail if a SchedulerBackend does not implement killTask
@@ -1556,7 +1571,10 @@ class DAGScheduler(
     }
   }
 
-  /** Return true if one of stage's ancestors is target. */
+  /** 
+   *  Return true if one of stage's ancestors is target. 
+   *  如果一个Stage是目标父Stage,则返回true
+   *  */
   private def stageDependsOn(stage: Stage, target: Stage): Boolean = {
     if (stage == target) {
       return true
@@ -1735,7 +1753,7 @@ private[scheduler] class DAGSchedulerEventProcessLoop(dagScheduler: DAGScheduler
       dagScheduler.handleTaskSetFailed(taskSet, reason, exception)
 
     case ResubmitFailedStages =>
-      //当一个Stage处理失败时，重试。来自org.apache.spark.scheduler.DAGScheduler.handleTaskCompletion
+      //当一个Stage处理失败时,重试,来自org.apache.spark.scheduler.DAGScheduler.handleTaskCompletion
       dagScheduler.resubmitFailedStages()
   }
 

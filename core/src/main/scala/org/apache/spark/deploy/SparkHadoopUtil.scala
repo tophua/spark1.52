@@ -82,6 +82,7 @@ class SparkHadoopUtil extends Logging {
   /**
    * Return an appropriate (subclass) of Configuration. Creating config can initializes some Hadoop
    * subsystems.
+   * 返回一个适合的配置文件
    */
   def newConfiguration(conf: SparkConf): Configuration = {
     val hadoopConf = new Configuration()
@@ -136,6 +137,7 @@ class SparkHadoopUtil extends Logging {
    * return the bytes read on r since t.  Reflection is required because thread-level FileSystem
    * statistics are only available as of Hadoop 2.5 (see HADOOP-10688).
    * Returns None if the required method can't be found.
+   * 返回一个函数,查询Hadoop文件系统读取的字节数
    */
   private[spark] def getFSBytesReadOnThreadCallback(): Option[() => Long] = {
     try {

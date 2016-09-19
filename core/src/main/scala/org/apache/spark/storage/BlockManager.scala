@@ -1140,6 +1140,7 @@ private[spark] class BlockManager(
 
   /**
    * Read a block consisting of a single object.
+   * 读单个对象组成的块
    */
   def getSingle(blockId: BlockId): Option[Any] = {
     get(blockId).map(_.data.next())
@@ -1461,6 +1462,7 @@ private[spark] object BlockManager extends Logging {
    * might cause errors if one attempts to read from the unmapped buffer, but it's better than
    * waiting for the GC to find it because that could lead to huge numbers of open files. There's
    * unfortunately no standard API to do this.
+   * 试图清理ByteBuffer,可能试图从映射的缓冲区读取导致错误
    */
   def dispose(buffer: ByteBuffer): Unit = {
     if (buffer != null && buffer.isInstanceOf[MappedByteBuffer]) {
