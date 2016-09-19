@@ -706,8 +706,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Set a local property that affects jobs submitted from this thread, such as the
-   * Spark fair scheduler pool.
-   * 设置一个影响从该线程提交的作业的局部属性
+   * Spark fair scheduler pool.   
    */
   def setLocalProperty(key: String, value: String) {
     if (value == null) {
@@ -2255,7 +2254,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     _listenerBusStarted = true
   }
 
-  /** Post the application start event */
+  /** 
+   *  Post the application start event
+   *  提交应用程序启动事件
+   *   */
   private def postApplicationStart() {
     // Note: this code assumes that the task scheduler has been initialized and has contacted
     // the cluster manager to get an application ID (in case the cluster manager provides one).
