@@ -24,10 +24,10 @@ import org.apache.spark.util.Utils
 
 private[spark] class WorkerInfo(
     val id: String, //Id标识
-    val host: String,
-    val port: Int,
-    val cores: Int,
-    val memory: Int,
+    val host: String,//Worker的IP
+    val port: Int,//Worker的端口
+    val cores: Int,//Worker节点的CPU
+    val memory: Int,//Worker节点的内存
     val endpoint: RpcEndpointRef,
     val webUiPort: Int,
     val publicAddress: String)
@@ -44,10 +44,10 @@ private[spark] class WorkerInfo(
 
   @transient var lastHeartbeat: Long = _
 
-  init()
+  init()//初始化数据
 
-  def coresFree: Int = cores - coresUsed
-  def memoryFree: Int = memory - memoryUsed
+  def coresFree: Int = cores - coresUsed//
+  def memoryFree: Int = memory - memoryUsed//
 
   private def readObject(in: java.io.ObjectInputStream): Unit = Utils.tryOrIOException {
     in.defaultReadObject()
@@ -57,7 +57,7 @@ private[spark] class WorkerInfo(
   private def init() {
     executors = new mutable.HashMap
     drivers = new mutable.HashMap
-    state = WorkerState.ALIVE
+    state = WorkerState.ALIVE//活动状态
     coresUsed = 0
     memoryUsed = 0
     lastHeartbeat = System.currentTimeMillis()

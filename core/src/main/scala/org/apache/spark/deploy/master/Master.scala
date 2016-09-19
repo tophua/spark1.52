@@ -209,6 +209,7 @@ private[deploy] class Master(
     masterMetricsSystem.report()
     applicationMetricsSystem.report()
     // prevent the CompleteRecovery message sending to restarted master
+    //防止完成恢复发送重新启动Master
     if (recoveryCompletionTask != null) {
       recoveryCompletionTask.cancel(true)
     }

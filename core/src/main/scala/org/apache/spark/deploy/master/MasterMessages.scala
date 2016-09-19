@@ -19,17 +19,20 @@ package org.apache.spark.deploy.master
 
 sealed trait MasterMessages extends Serializable
 
-/** Contains messages seen only by the Master and its associated entities. */
+/** 
+ *  Contains messages seen only by the Master and its associated entities. 
+ *  包含Master及关联实体的消息
+ *  */
 private[master] object MasterMessages {
 
   // LeaderElectionAgent to Master
-
+  // 选举代理到Master
   case object ElectedLeader
 
   case object RevokedLeadership
 
   // Master to itself
-
+  // Master to 自己本身
   case object CheckForWorkerTimeOut
 
   case class BeginRecovery(storedApps: Seq[ApplicationInfo], storedWorkers: Seq[WorkerInfo])

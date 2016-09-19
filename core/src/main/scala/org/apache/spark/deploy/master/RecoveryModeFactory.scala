@@ -26,6 +26,7 @@ import org.apache.spark.serializer.Serializer
  *
  * Implementation of this class can be plugged in as recovery mode alternative for Spark's
  * Standalone mode.
+ * 这个类的实现作为Spark独立模式的恢复模式
  *
  */
 @DeveloperApi
@@ -34,12 +35,13 @@ abstract class StandaloneRecoveryModeFactory(conf: SparkConf, serializer: Serial
   /**
    * PersistenceEngine defines how the persistent data(Information about worker, driver etc..)
    * is handled for recovery.
-   *
+   * 持久化引擎定义恢复持久化数据的处理方式
    */
   def createPersistenceEngine(): PersistenceEngine
 
   /**
    * Create an instance of LeaderAgent that decides who gets elected as master.
+   * 创建一个选举代理方式,决定谁被选举Master节点
    */
   def createLeaderElectionAgent(master: LeaderElectable): LeaderElectionAgent
 }
