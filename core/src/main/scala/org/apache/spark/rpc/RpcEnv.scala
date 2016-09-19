@@ -94,6 +94,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
 
   /**  
    * Return the address that [[RpcEnv]] is listening to.
+   * 返回一个正在侦听的地址
    */
   def address: RpcAddress
 
@@ -158,6 +159,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
 
   /**
    * Shutdown this [[RpcEnv]] asynchronously. If need to make sure [[RpcEnv]] exits successfully,
+   * 异步关闭RPC环境,如果需要成功确定退出
    * call [[awaitTermination()]] straight after [[shutdown()]].
    */
   def shutdown(): Unit
@@ -172,6 +174,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
   /**
    * Create a URI used to create a [[RpcEndpointRef]]. Use this one to create the URI instead of
    * creating it manually because different [[RpcEnv]] may have different formats.
+   * 
    */
   def uriOf(systemName: String, address: RpcAddress, endpointName: String): String
 
@@ -211,6 +214,7 @@ private[spark] object RpcAddress {
 
   /**
    * Return the [[RpcAddress]] represented by `uri`.
+   * 返回一个RpcAddress代表uri
    */
   def fromURI(uri: URI): RpcAddress = {
     RpcAddress(uri.getHost, uri.getPort)
@@ -255,7 +259,7 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
 
   /**
    * PartialFunction to match a TimeoutException and add the timeout description to the message
-   *
+   * PartialFunction 匹配一个TimeoutException和添加超时的描述信息
    * @note This can be used in the recover callback of a Future to add to a TimeoutException
    * Example:
    *    val timeout = new RpcTimeout(5 millis, "short timeout")
@@ -296,6 +300,7 @@ private[spark] object RpcTimeout {
   /**
    * Lookup the timeout property in the configuration and create
    * a RpcTimeout with the property key in the description.
+   * 查找超时属性配置在配置文件中创建一个rpctimeout的描述
    * @param conf configuration properties containing the timeout
    * @param timeoutProp property key for the timeout in seconds
    * @throws NoSuchElementException if property is not set

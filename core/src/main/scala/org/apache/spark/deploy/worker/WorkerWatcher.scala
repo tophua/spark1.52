@@ -23,7 +23,7 @@ import org.apache.spark.rpc._
 /**
  * Actor which connects to a worker process and terminates the JVM if the connection is severed.
  * Provides fate sharing between a worker and its associated child processes.
- * 断开连接到一个工作进程并终止JVM,提供共享worker和其相关的子进程
+ * 断开连接到一个工作进程并终止JVM,提供共享worker和相关的子进程
  */
 private[spark] class WorkerWatcher(override val rpcEnv: RpcEnv, workerUrl: String)
   extends RpcEndpoint with Logging {
