@@ -52,6 +52,7 @@ private[spark] class MapPartitionsWithPreparationRDD[U: ClassTag, T: ClassTag, M
 
   /**
    * Prepare a partition before computing it from its parent.
+   * 准备一个分区计算的父分区
    */
   override def compute(partition: Partition, context: TaskContext): Iterator[U] = {
     val prepared =

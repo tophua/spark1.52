@@ -61,6 +61,7 @@ class BlockRDD[T: ClassTag](@transient sc: SparkContext, @transient val blockIds
    * Remove the data blocks that this BlockRDD is made from. NOTE: This is an
    * irreversible operation, as the data in the blocks cannot be recovered back
    * once removed. Use it with caution.
+   * 删除的数据块,这是一个不可逆的操作,由于块中的数据不能恢复,谨慎使用
    */
   private[spark] def removeBlocks() {
     blockIds.foreach { blockId =>
@@ -72,12 +73,16 @@ class BlockRDD[T: ClassTag](@transient sc: SparkContext, @transient val blockIds
   /**
    * Whether this BlockRDD is actually usable. This will be false if the data blocks have been
    * removed using `this.removeBlocks`.
+   * blockrdd实际上是否可用,如果数据块已经删除返回false
    */
   private[spark] def isValid: Boolean = {
     _isValid
   }
 
-  /** Check if this BlockRDD is valid. If not valid, exception is thrown. */
+  /** 
+   *  Check if this BlockRDD is valid. If not valid, exception is thrown.
+   *  检查BlockRDD是否有效,如果没有效,抛出异常 
+   *  */
   private[spark] def assertValid() {
     if (!isValid) {
       throw new SparkException(

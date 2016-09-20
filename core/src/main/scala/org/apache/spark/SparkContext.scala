@@ -707,6 +707,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Set a local property that affects jobs submitted from this thread, such as the
    * Spark fair scheduler pool.   
+   * 设置一个本地属影响线程的提交作业Job,这是Spark公平调度池
    */
   def setLocalProperty(key: String, value: String) {
     if (value == null) {
@@ -719,11 +720,15 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Get a local property set in this thread, or null if it is missing. See
    * [[org.apache.spark.SparkContext.setLocalProperty]].
+   * 获取此线程中的本地属性,如果null,则缺失
    */
   def getLocalProperty(key: String): String =
     Option(localProperties.get).map(_.getProperty(key)).orNull
 
-  /** Set a human readable(人类可读描述) description of the current job. */
+  /** 
+   *  Set a human readable description of the current job. 
+   *  设置对当前作业可读的描述
+   *  */
   def setJobDescription(value: String) {
     setLocalProperty(SparkContext.SPARK_JOB_DESCRIPTION, value)
   }
@@ -762,7 +767,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     setLocalProperty(SparkContext.SPARK_JOB_INTERRUPT_ON_CANCEL, interruptOnCancel.toString)
   }
 
-  /** Clear the current thread's job group ID and its description. */
+  /** 
+   *  Clear the current thread's job group ID and its description. 
+   *  清除当前线程的Job组标识的描述
+   *  */
   def clearJobGroup() {
     setLocalProperty(SparkContext.SPARK_JOB_DESCRIPTION, null)
     setLocalProperty(SparkContext.SPARK_JOB_GROUP_ID, null)
@@ -800,7 +808,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Creates a new RDD[Long] containing elements from `start` to `end`(exclusive), increased by
    * `step` every element.
-   *
+   * 创建一个新RDD,包含元素开始和结果,增加每个元素
    * @note if we need to cache this RDD, we should make sure each partition does not exceed limit.
    *
    * @param start the start value.
@@ -893,7 +901,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Read a text file from HDFS, a local file system (available on all nodes), or any
    * Hadoop-supported file system URI, and return it as an RDD of Strings.
-   * 从hdf或者本地文件创建RDD
+   * 从hdf或者本地读取文件
    */
   def textFile(
       path: String,
@@ -901,7 +909,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     assertNotStopped()
     //调用hadoopFile方法,生成MappedRDD对象
     hadoopFile(path, classOf[TextInputFormat], classOf[LongWritable], classOf[Text],
-        //map方法将MappedRDD封装为MapPartitionsRDD
+     //map方法将MappedRDD封装为MapPartitionsRDD
       minPartitions).map(pair => pair._2.toString)
   }
 
@@ -909,7 +917,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * Read a directory of text files from HDFS, a local file system (available on all nodes), or any
    * Hadoop-supported file system URI. Each file is read as a single record and returned in a
    * key-value pair, where the key is the path of each file, the value is the content of each file.
-   *
+   * 在HDFS中读一个目录下的文本文件,本地文件系统(可在所有节点上),Hadoop文件系统或任何支持URI,
+   * 每个文件被读取为一个记录，并返回一个关键值对,其中键是每个文件的路径,值是每个文件的内容
    * <p> For example, if you have the following files:
    * {{{
    *   hdfs://a-hdfs-path/part-00000
@@ -959,7 +968,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    *
    * Get an RDD for a Hadoop-readable dataset as PortableDataStream for each file
    * (useful for binary data)
-   *
+   * 在HDFS中读一个目录下的二进行文件,每个文件被读取为一个记录,
+   * 并返回一个关键值对,其中键是每个文件的路径,值是每个文件的内容
    * For example, if you have the following files:
    * {{{
    *   hdfs://a-hdfs-path/part-00000
@@ -1010,7 +1020,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * :: Experimental ::
    *
    * Load data from a flat binary file, assuming the length of each record is constant.
-   *
+   * 加载数据二进制文件,假设每个记录的长度是固定的,
    * '''Note:''' We ensure that the byte array for each record in the resulting RDD
    * has the provided record length.
    *
@@ -1216,7 +1226,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   }
 
   /** Get an RDD for a Hadoop SequenceFile with given key and value types.
-    *
+    * 得到一个RDD为Hadoop SequenceFile与给定的键和值的类型
     * '''Note:''' Because Hadoop's RecordReader class re-uses the same Writable object for each
     * record, directly caching the returned RDD or directly passing it to an aggregation or shuffle
     * operation will create many references to the same object.
@@ -1307,7 +1317,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     new ReliableCheckpointRDD[T](this, path)
   }
 
-  /** Build the union of a list of RDDs. */
+  /** 
+   *  Build the union of a list of RDDs. 
+   *  建立一个列表的RDDS合并
+   *  */
   def union[T: ClassTag](rdds: Seq[RDD[T]]): RDD[T] = withScope {
     val partitioners = rdds.flatMap(_.partitioner).toSet
     if (rdds.forall(_.partitioner.isDefined) && partitioners.size == 1) {
@@ -1317,12 +1330,18 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     }
   }
 
-  /** Build the union of a list of RDDs passed as variable-length arguments. */
+  /** 
+   *  Build the union of a list of RDDs passed as variable-length arguments.
+   *  建立一个合并列表是可变长度参数RDDS
+   *   */
   def union[T: ClassTag](first: RDD[T], rest: RDD[T]*): RDD[T] = withScope {
     union(Seq(first) ++ rest)
   }
 
-  /** Get an RDD that has no partitions or elements. */
+  /** 
+   *  Get an RDD that has no partitions or elements.
+   *  得到一个RDD没有分区或元素
+   *   */
   def emptyRDD[T: ClassTag]: EmptyRDD[T] = new EmptyRDD[T](this)
 
   // Methods for creating shared variables
@@ -1330,6 +1349,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Create an [[org.apache.spark.Accumulator]] variable of a given type, which tasks can "add"
    * values to using the `+=` method. Only the driver can access the accumulator's `value`.
+   * 创建一个自增变量类型,任务任务可以增加值,只有驱动程序可以访问自增变量的值
    */
   def accumulator[T](initialValue: T)(implicit param: AccumulatorParam[T]): Accumulator[T] =
   {
@@ -1416,6 +1436,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Add a file to be downloaded with this Spark job on every node.
+   * 添加一个要在每个节点上使用Spark Job下载的文件,它的路径可以本地文件或者HDF文件
    * The `path` passed can be either a local file, a file in HDFS (or other Hadoop-supported
    * filesystems), or an HTTP, HTTPS or FTP URI.  To access the file in Spark jobs,
    * use `SparkFiles.get(fileName)` to find its download location.
@@ -1426,13 +1447,14 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Add a file to be downloaded with this Spark job on every node.
-   * 
+   * 添加一个要在每个节点上使用Spark Job下载的文件,它的路径可以本地文件或者HDF文件
    * The `path` passed can be either a local file, a file in HDFS (or other Hadoop-supported
    * filesystems), or an HTTP, HTTPS or FTP URI.  To access the file in Spark jobs,
    * use `SparkFiles.get(fileName)` to find its download location.
    *
    * A directory can be given if the recursive option is set to true. Currently directories are only
    * supported for Hadoop-supported filesystems.
+   * 如果recursive选项设置为真,则可以给出一个目录,目前目录只支持Hadoop支持的文件系统
    */
   def addFile(path: String, recursive: Boolean): Unit = {
     val uri = new URI(path)
@@ -1479,6 +1501,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * :: DeveloperApi ::
    * Register a listener to receive up-calls from events that happen during execution.
+   * 注册一个侦听器,以接收在执行过程中发生的事件的调用
    */
   @DeveloperApi
   def addSparkListener(listener: SparkListener) {
@@ -1516,7 +1539,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * :: DeveloperApi ::
    * Request an additional number of executors from the cluster manager.
-   * @return whether the request is received.
+   * 从群集管理器请求执行一个额外的数
+   * @return whether the request is received.是否收到请求
    */
   @DeveloperApi
   override def requestExecutors(numAdditionalExecutors: Int): Boolean = {
@@ -1532,13 +1556,13 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * :: DeveloperApi ::
    * Request that the cluster manager kill the specified executors.
-   *
+   * 请求的集群管理器杀死指定executor列表
    * Note: This is an indication to the cluster manager that the application wishes to adjust
    * its resource usage downwards. If the application wishes to replace the executors it kills
    * through this method with new ones, it should follow up explicitly with a call to
    * {{SparkContext#requestExecutors}}.
    *
-   * @return whether the request is received.
+   * @return whether the request is received. 是否收到请求
    */
   @DeveloperApi
   override def killExecutors(executorIds: Seq[String]): Boolean = {
@@ -1554,7 +1578,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * :: DeveloperApi ::
    * Request that the cluster manager kill the specified executor.
-   *
+   * 请求的集群管理器杀死指定executor
    * Note: This is an indication to the cluster manager that the application wishes to adjust
    * its resource usage downwards. If the application wishes to replace the executor it kills
    * through this method with a new one, it should follow up explicitly with a call to
@@ -1568,7 +1592,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Request that the cluster manager kill the specified executor without adjusting the
    * application resource requirements.
-   *
+   * 请求群集管理器在不调整应用程序资源需求的条件下杀死指定的executor
    * The effect is that a new executor will be launched in place of the one killed by
    * this request. This assumes the cluster manager will automatically and eventually
    * fulfill all missing application resource requests.
@@ -1589,12 +1613,16 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     }
   }
 
-  /** The version of Spark on which this application is running. */
+  /** 
+   *  The version of Spark on which this application is running. 
+   *  应用程序正在运行Spark的版本
+   *  */
   def version: String = SPARK_VERSION
 
   /**
    * Return a map from the slave to the max memory available for caching and the remaining
    * memory available for caching.
+   * 返回一个从slave可用的最大内存
    */
   def getExecutorMemoryStatus: Map[String, (Long, Long)] = {
     assertNotStopped()
@@ -1607,6 +1635,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * :: DeveloperApi ::
    * Return information about what RDDs are cached, if they are in mem or on disk, how much space
    * they take, etc.
+   * 返回关于RDDs缓存的信息,如果在内存或磁盘上需要多少空间
    */
   @DeveloperApi
   def getRDDStorageInfo: Array[RDDInfo] = {
@@ -1618,6 +1647,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Returns an immutable map of RDDs that have marked themselves as persistent via cache() call.
+   * 
    * Note that this does not necessarily mean the caching or computation was successful.
    */
   def getPersistentRDDs: Map[Int, RDD[_]] = persistentRdds.toMap
@@ -1677,6 +1707,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Gets the locality information associated with the partition in a particular rdd
+   * 在一个特定的RDD获得位置信息与分区相关联
    * @param rdd of interest
    * @param partition to be looked up for locality
    * @return list of preferred locations for the partition
@@ -1705,6 +1736,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Adds a JAR dependency for all tasks to be executed on this SparkContext in the future.
+   * 增加所有任务要执行sparkcontext依赖JAR
    * The `path` passed can be either a local file, a file in HDFS (or other Hadoop-supported
    * filesystems), an HTTP, HTTPS or FTP URI, or local:/path for a file on every worker node.
    */
@@ -1898,7 +1930,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Run a function on a given set of partitions in an RDD and pass the results to the given
    * handler function. This is the main entry point for all actions in Spark.
-   * 
+   * 给定RDD分区运行一个函数,将结果传递给给定的处理函数(resultHandler),这是Spark中所有动作的主要入口点
    * 
    */
   def runJob[T, U: ClassTag](
@@ -2005,6 +2037,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Run a job on all partitions in an RDD and return the results in an array.
+   * 运行在一个job在RDD所有分区上,返回结果在一个数组中
    */
   def runJob[T, U: ClassTag](rdd: RDD[T], func: (TaskContext, Iterator[T]) => U): Array[U] = {
     runJob(rdd, func, 0 until rdd.partitions.length)
@@ -2012,6 +2045,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Run a job on all partitions in an RDD and return the results in an array.
+   * 运行在一个job在RDD所有分区上,返回结果在一个数组中
    */
   def runJob[T, U: ClassTag](rdd: RDD[T], func: Iterator[T] => U): Array[U] = {
     runJob(rdd, func, 0 until rdd.partitions.length)
@@ -2019,6 +2053,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Run a job on all partitions in an RDD and pass the results to a handler function.
+   * 运行在一个job在RDD所有分区上,结果传递到一个处理函数
    */
   def runJob[T, U: ClassTag](
     rdd: RDD[T],
@@ -2266,7 +2301,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       startTime, sparkUser, applicationAttemptId, schedulerBackend.getDriverLogUrls))
   }
 
-  /** Post the application end event */
+  /** 
+   *  Post the application end event 
+   *  提交应用程序结束事件
+   *  */
   private def postApplicationEnd() {
     listenerBus.post(SparkListenerApplicationEnd(System.currentTimeMillis))
   }

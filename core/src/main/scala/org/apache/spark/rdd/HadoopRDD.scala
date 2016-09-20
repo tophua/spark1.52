@@ -210,6 +210,7 @@ class HadoopRDD[K, V](
     if (inputFormat.isInstanceOf[Configurable]) {
       inputFormat.asInstanceOf[Configurable].setConf(jobConf)
     }
+    //决定 分区个数
     val inputSplits = inputFormat.getSplits(jobConf, minPartitions)
     val array = new Array[Partition](inputSplits.size)
     for (i <- 0 until inputSplits.size) {

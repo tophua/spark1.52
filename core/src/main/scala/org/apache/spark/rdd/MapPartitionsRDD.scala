@@ -23,6 +23,7 @@ import org.apache.spark.{Partition, TaskContext}
 
 /**
  * An RDD that applies the provided function to every partition of the parent RDD.
+ * RDD应用提供的功能对父RDD的每个分区
  */
 private[spark] class MapPartitionsRDD[U: ClassTag, T: ClassTag](
     prev: RDD[T],

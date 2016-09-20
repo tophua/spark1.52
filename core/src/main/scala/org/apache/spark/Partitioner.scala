@@ -68,6 +68,7 @@ object Partitioner {
     if (rdd.context.conf.contains("spark.default.parallelism")) {//本地模式：机器核数
       new HashPartitioner(rdd.context.defaultParallelism)
     } else {
+      //取第一个列表分区大小(倒序最大一个)
       new HashPartitioner(bySize.head.partitions.size)
     }
   }

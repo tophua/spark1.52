@@ -36,6 +36,7 @@ private[spark] class LocalRDDCheckpointData[T: ClassTag](@transient rdd: RDD[T])
 
   /**
    * Ensure the RDD is fully cached so the partitions can be recovered later.
+   * 确保RDD是缓存的分区恢复
    */
   protected override def doCheckpoint(): CheckpointRDD[T] = {
     val level = rdd.getStorageLevel

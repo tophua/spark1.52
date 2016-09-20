@@ -72,6 +72,7 @@ class OrderedRDDFunctions[K : Ordering : ClassTag,
   /**
    * Repartition the RDD according to the given partitioner and, within each resulting partition,
    * sort records by their keys.
+   * 再分配的RDD根据给定的分割,在每个分区内按键值排序
    *
    * This is more efficient than calling `repartition` and then sorting within each partition
    * because it can push the sorting down into the shuffle machinery.

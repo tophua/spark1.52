@@ -35,7 +35,7 @@ private[spark] class JdbcPartition(idx: Int, val lower: Long, val upper: Long) e
 /**
  * An RDD that executes an SQL query on a JDBC connection and reads results.
  * For usage example, see test case JdbcRDDSuite.
- *
+ * RDD执行JDBC连接SQL查询和读取结果,使用例子,查看JdbcRDDSuite
  * @param getConnection a function that returns an open Connection.
  *   The RDD takes care of closing the connection.
  * @param sql the text of the query.
@@ -63,6 +63,7 @@ class JdbcRDD[T: ClassTag](
 
   override def getPartitions: Array[Partition] = {
     // bounds are inclusive, hence the + 1 here and - 1 on end
+    //范围包括开始+1,结束-1
     val length = BigInt(1) + upperBound - lowerBound
     (0 until numPartitions).map(i => {
       val start = lowerBound + ((i * length) / numPartitions)

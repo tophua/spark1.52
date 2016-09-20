@@ -1733,7 +1733,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * The scope associated with the operation that created this RDD.
-   *
+   * 创建这个RDD操作相关的范围
    * This is more flexible than the call site and can be defined hierarchically. For more
    * detail, see the documentation of {{RDDOperationScope}}. This scope is not defined if the
    * user instantiates this RDD himself without using any Spark operations.

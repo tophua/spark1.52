@@ -29,11 +29,13 @@ import org.apache.spark.{ComplexFutureAction, FutureAction, Logging}
 
 /**
  * A set of asynchronous(异步) RDD actions available through an implicit conversion.
+ * 这是异步RDD的行动通过隐式转换* 
  */
 class AsyncRDDActions[T: ClassTag](self: RDD[T]) extends Serializable with Logging {
 
   /**
    * Returns a future for counting the number of elements in the RDD.
+   * 返回一个future用于计数RDD元素个数
    */
   def countAsync(): FutureAction[Long] = self.withScope {
     val totalCount = new AtomicLong
@@ -54,6 +56,7 @@ class AsyncRDDActions[T: ClassTag](self: RDD[T]) extends Serializable with Loggi
 
   /**
    * Returns a future for retrieving all elements of this RDD.
+   * 返回RDD的所有的元素
    */
   def collectAsync(): FutureAction[Seq[T]] = self.withScope {
     val results = new Array[Array[T]](self.partitions.length)
@@ -63,6 +66,7 @@ class AsyncRDDActions[T: ClassTag](self: RDD[T]) extends Serializable with Loggi
 
   /**
    * Returns a future for retrieving the first num elements of the RDD.
+   *  返回RDD的第一个元素
    */
   def takeAsync(num: Int): FutureAction[Seq[T]] = self.withScope {
     val f = new ComplexFutureAction[Seq[T]]
@@ -112,6 +116,7 @@ class AsyncRDDActions[T: ClassTag](self: RDD[T]) extends Serializable with Loggi
 
   /**
    * Applies a function f to all elements of this RDD.
+   * 函数f应用RDD的每个元素
    */
   def foreachAsync(f: T => Unit): FutureAction[Unit] = self.withScope {
     val cleanF = self.context.clean(f)
@@ -121,6 +126,7 @@ class AsyncRDDActions[T: ClassTag](self: RDD[T]) extends Serializable with Loggi
 
   /**
    * Applies a function f to each partition of this RDD.
+   * 函数f应用RDD的每个分区
    */
   def foreachPartitionAsync(f: Iterator[T] => Unit): FutureAction[Unit] = self.withScope {
     self.context.submitJob[T, Unit, Unit](self, f, Range(0, self.partitions.length),

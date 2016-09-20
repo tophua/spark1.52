@@ -23,11 +23,13 @@ import org.apache.spark.{Partition, SparkContext, TaskContext}
 
 /**
  * An RDD partition used to recover checkpointed data.
+ * RDD的分区用于恢复的检查点数据
  */
 private[spark] class CheckpointRDDPartition(val index: Int) extends Partition
 
 /**
  * An RDD that recovers checkpointed data from storage.
+ * RDD恢复检查点数据存储
  */
 private[spark] abstract class CheckpointRDD[T: ClassTag](@transient sc: SparkContext)
   extends RDD[T](sc, Nil) {

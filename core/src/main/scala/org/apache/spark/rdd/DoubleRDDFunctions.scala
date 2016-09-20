@@ -43,17 +43,26 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
     self.mapPartitions(nums => Iterator(StatCounter(nums))).reduce((a, b) => a.merge(b))
   }
 
-  /** Compute the mean(平均数) of this RDD's elements. */
+  /** 
+   *  Compute the mean(平均数) of this RDD's elements.
+   *  计算RDD元素平均数
+   *   */
   def mean(): Double = self.withScope {
     stats().mean
   }
 
-  /** Compute the variance(方差) of this RDD's elements. */
+  /** 
+   *  Compute the variance(方差) of this RDD's elements. 
+   *  计算RDD元素方差
+   *  */
   def variance(): Double = self.withScope {
     stats().variance
   }
 
-  /** Compute the standard deviation(标准差) of this RDD's elements. */
+  /** 
+   *  Compute the standard deviation(标准差) of this RDD's elements. 
+   *  计算RDD元素标准差
+   *  */
   def stdev(): Double = self.withScope {
     stats().stdev
   }
@@ -61,6 +70,7 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
   /**
    * Compute the sample standard deviation(样本标准差) of this RDD's elements (which corrects for bias in
    * estimating the standard deviation by dividing by N-1 instead of N).
+   * 计算RDD元素样本标准差
    */
   def sampleStdev(): Double = self.withScope {
     stats().sampleStdev
@@ -69,6 +79,7 @@ class DoubleRDDFunctions(self: RDD[Double]) extends Logging with Serializable {
   /**
    * Compute the sample variance(样本方差) of this RDD's elements (which corrects for bias in
    * estimating the variance by dividing by N-1 instead of N).
+   *  计算RDD元素样本方差
    */
   def sampleVariance(): Double = self.withScope {
     stats().sampleVariance

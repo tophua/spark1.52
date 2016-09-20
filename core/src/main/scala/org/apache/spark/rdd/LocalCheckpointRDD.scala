@@ -50,7 +50,7 @@ private[spark] class LocalCheckpointRDD[T: ClassTag](
 
   /**
    * Throw an exception indicating that the relevant block is not found.
-   *
+   * 抛出一个异常,指示未找到相关的块
    * This should only be called if the original RDD is explicitly unpersisted or if an
    * executor is lost. Under normal circumstances, however, the original RDD (our child)
    * is expected to be fully cached and so all partitions should already be computed and
