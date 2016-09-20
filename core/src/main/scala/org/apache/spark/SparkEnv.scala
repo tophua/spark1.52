@@ -99,6 +99,7 @@ class SparkEnv(
 
   // A general, soft-reference map for metadata needed during HadoopRDD split computation
   // (e.g., HadoopFileRDD uses this to cache JobConfs and InputFormats).
+  //对于hadooprdd分割计算过程中所需的元数据弱引用,
   private[spark] val hadoopJobMetadata = new MapMaker().softValues().makeMap[String, Any]()
 
   private var driverTmpDirToDelete: Option[String] = None
@@ -179,6 +180,7 @@ object SparkEnv extends Logging {
 
   /**
    * Returns the SparkEnv.
+   * 返回SparkEnv信息
    */
   def get: SparkEnv = {
     env
@@ -226,6 +228,8 @@ object SparkEnv extends Logging {
   /**
    * Create a SparkEnv for an executor.
    * In coarse-grained mode, the executor provides an actor system that is already instantiated.
+   * 创建一个(executor)执行的SparkEnv环境变量,这是粗粒度方式,executor提供已经实例
+   * ActorSystem是Akka提供的用于创建分布式消息通信系统的基础
    */
   private[spark] def createExecutorEnv(
     conf: SparkConf,
@@ -275,6 +279,7 @@ object SparkEnv extends Logging {
     mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
 
     // Listener bus is only used on the driver
+    //监听总线只用于driver端
     if (isDriver) {
       assert(listenerBus != null, "Attempted to create driver SparkEnv with null listener bus!")
     }
@@ -283,9 +288,10 @@ object SparkEnv extends Logging {
     //创建基本Akka的分布式消息系统ActorSystem
     //ActorSystem是Akka提供的用于创建分布式消息通信系统的基础
     // Create the ActorSystem for Akka and get the port it binds to.
+    //创建Akka的ActorSystem获得端口并绑定他
     val actorSystemName = if (isDriver) driverActorSystemName else executorActorSystemName
     val rpcEnv = RpcEnv.create(actorSystemName, hostname, port, conf, securityManager)
-    val actorSystem = rpcEnv.asInstanceOf[AkkaRpcEnv].actorSystem
+    val actorSystem = rpcEnv.asInstanceOf[AkkaRpcEnv].actorSystem //实例AkkaRpcEnv
 
     // Figure out which port Akka actually bound to in case the original port is 0 or occupied.
     if (isDriver) {
@@ -296,11 +302,12 @@ object SparkEnv extends Logging {
     }
 
     // Create an instance of the class with the given name, possibly initializing it with our conf
-
+    //给定名字创建class实例,可以我们需要初始它
     def instantiateClass[T](className: String): T = {
       val cls = Utils.classForName(className)
       // Look for a constructor taking a SparkConf and a boolean isDriver, then one taking just
       // SparkConf, then one taking no arguments
+      //查找一个sparkconf构造函数,是否isDriver
       try {
         cls.getConstructor(classOf[SparkConf], java.lang.Boolean.TYPE)
           .newInstance(conf, new java.lang.Boolean(isDriver))

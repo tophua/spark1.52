@@ -60,11 +60,13 @@ private[spark] class AkkaRpcEnv private[akka] (
   /**
    * A lookup table to search a [[RpcEndpointRef]] for a [[RpcEndpoint]]. We need it to make
    * [[RpcEndpoint.self]] work.
+   * 查找ConcurrentHashMap搜索RpcEndpointRef的RpcEndpoint,
    */
   private val endpointToRef = new ConcurrentHashMap[RpcEndpoint, RpcEndpointRef]()
 
   /**
    * Need this map to remove `RpcEndpoint` from `endpointToRef` via a `RpcEndpointRef`
+   * 从Map删除RpcEndpoint
    */
   private val refToEndpoint = new ConcurrentHashMap[RpcEndpointRef, RpcEndpoint]()
 
@@ -82,15 +84,16 @@ private[spark] class AkkaRpcEnv private[akka] (
 
   /**
    * Retrieve the [[RpcEndpointRef]] of `endpoint`.
+   * 根据RpcEndpoint从endpointToRef(ConcurrentHashMap)获得RpcEndpointRef
    */
   override def endpointRef(endpoint: RpcEndpoint): RpcEndpointRef = endpointToRef.get(endpoint)
 
   override def setupEndpoint(name: String, endpoint: RpcEndpoint): RpcEndpointRef = {
     @volatile var endpointRef: AkkaRpcEndpointRef = null
     // Use lazy because the Actor needs to use `endpointRef`.
-    // So `actorRef` should be created after assigning `endpointRef`.
-    //创建Actor
-    //Props 是一个配置类，它的作用是对创建角色确认选项
+    // So `actorRef` should be created after assigning `endpointRef`.   
+    //使用延迟加载Actor,需要使用endpointRef,所以actorre被创建后,分配endpointref,
+    //Props是一个配置类,它的作用是对创建角色确认选项
     lazy val actorRef = actorSystem.actorOf(Props(new Actor with ActorLogReceive with Logging {
 
       assert(endpointRef != null)
@@ -148,10 +151,13 @@ private[spark] class AkkaRpcEnv private[akka] (
       }
 
       }), name = name)
+      //创建AkkaRpcEndpointRef对象
     endpointRef = new AkkaRpcEndpointRef(defaultAddress, actorRef, conf, initInConstructor = false)
     registerEndpoint(endpoint, endpointRef)
     // Now actorRef can be created safely
+    // 现在创建安全actorref
     endpointRef.init()
+  
     endpointRef
   }
 
@@ -194,6 +200,8 @@ private[spark] class AkkaRpcEnv private[akka] (
   /**
    * Run `action` safely to avoid to crash the thread. If any non-fatal exception happens, it will
    * call `endpoint.onError`. If `endpoint.onError` throws any non-fatal exception, just log it.
+   * 运行"action"安全地避免崩溃的线程,如果任何非致命的异常.这将调用endpoint.onError方法
+   * 如果ndpoint.onError抛出非致命异常,仅仅记录它
    */
   private def safelyCall(endpoint: RpcEndpoint)(action: => Unit): Unit = {
     try {
@@ -264,10 +272,12 @@ private[spark] class AkkaRpcEnvFactory extends RpcEnvFactory {
 
 /**
  * Monitor errors reported by Akka and log them.
+ * 监测报告的Akka错误和日志
  */
 private[akka] class ErrorMonitor extends Actor with ActorLogReceive with Logging {
 
   override def preStart(): Unit = {
+    //订阅
     context.system.eventStream.subscribe(self, classOf[Error])
   }
 
@@ -294,13 +304,14 @@ private[akka] class AkkaRpcEndpointRef(
   override lazy val name: String = actorRef.path.name
 
   private[akka] def init(): Unit = {
-    // Initialize the lazy vals
+    //Initialize the lazy vals
+    //初始化延迟加载变量
     actorRef
     address
     name
   }
 
-  if (initInConstructor) {
+  if (initInConstructor) {//默认初始
     init()
   }
 
@@ -311,8 +322,9 @@ private[akka] class AkkaRpcEndpointRef(
   override def ask[T: ClassTag](message: Any, timeout: RpcTimeout): Future[T] = {
     actorRef.ask(AkkaMessage(message, true))(timeout.duration).flatMap {
       // The function will run in the calling thread, so it should be short and never block.
+      // 函数的调用线程中运行,所以它应该是短暂,线程永远不会堵塞
       case msg @ AkkaMessage(message, reply) =>
-        if (reply) {
+        if (reply) {//判断是否有回复消息,则失败
           logError(s"Receive $msg but the sender cannot reply")
           Future.failed(new SparkException(s"Receive $msg but the sender cannot reply"))
         } else {
@@ -336,12 +348,14 @@ private[akka] class AkkaRpcEndpointRef(
 
 /**
  * A wrapper to `message` so that the receiver knows if the sender expects a reply.
+ * "消息"的一个包装器,接收发送方答复已知消息
  * @param message
- * @param needReply if the sender expects a reply message
+ * @param needReply if the sender expects a reply message 否是接收发送回复的消息
  */
 private[akka] case class AkkaMessage(message: Any, needReply: Boolean)
 
 /**
  * A reply with the failure error from the receiver to the sender
+ * 一个故障错误的答复从接收者到发送者
  */
 private[akka] case class AkkaFailure(e: Throwable)

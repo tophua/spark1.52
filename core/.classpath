@@ -178,8 +178,8 @@
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/bundles/scalatest_2.10-2.2.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk17_64"/>
 	<classpathentry kind="lib" path="lib/spark-launcher_2.10-1.5.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/spark-network-common_2.10-1.5.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/spark-network-shuffle_2.10-1.5.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/spark-network-common_2.10-1.5.3-SNAPSHOT.jar" sourcepath="/spark-network-common"/>
+	<classpathentry kind="lib" path="lib/spark-network-shuffle_2.10-1.5.3-SNAPSHOT.jar" sourcepath="/spark-network-shuffle"/>
 	<classpathentry kind="lib" path="lib/spark-unsafe_2.10-1.5.3-SNAPSHOT.jar" sourcepath="/spark-unsafe"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

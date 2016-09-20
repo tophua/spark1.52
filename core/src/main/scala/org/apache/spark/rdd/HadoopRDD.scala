@@ -82,8 +82,9 @@ private[spark] class HadoopPartition(rddId: Int, idx: Int, @transient s: InputSp
  * :: DeveloperApi ::
  * An RDD that provides core functionality for reading data stored in Hadoop (e.g., files in HDFS,
  * sources in HBase, or S3), using the older MapReduce API (`org.apache.hadoop.mapred`).
- *
+ * 这个RDD提供读取存储到Hadoop数据,使用旧的MapReduce API
  * Note: Instantiating this class directly is not recommended, please use
+ * 注意:实例化这个类不推荐直接使用
  * [[org.apache.spark.SparkContext.hadoopRDD()]]
  *
  * @param sc The SparkContext to associate the RDD with.
@@ -92,7 +93,7 @@ private[spark] class HadoopPartition(rddId: Int, idx: Int, @transient s: InputSp
  *     Otherwise, a new JobConf will be created on each slave using the enclosed Configuration.
  * @param initLocalJobConfFuncOpt Optional closure used to initialize any JobConf that HadoopRDD
  *     creates.
- * @param inputFormatClass Storage format of the data to be read.
+ * @param inputFormatClass Storage format of the data to be read. * 
  * @param keyClass Class of the key associated with the inputFormatClass.
  * @param valueClass Class of the value associated with the inputFormatClass.
  * @param minPartitions Minimum number of HadoopRDD partitions (Hadoop Splits) to generate.
@@ -102,15 +103,15 @@ class HadoopRDD[K, V](
     @transient sc: SparkContext,
     broadcastedConf: Broadcast[SerializableConfiguration],
     initLocalJobConfFuncOpt: Option[JobConf => Unit],
-    inputFormatClass: Class[_ <: InputFormat[K, V]],
+    inputFormatClass: Class[_ <: InputFormat[K, V]],//读取的数据的存储格式
     keyClass: Class[K],
     valueClass: Class[V],
-    minPartitions: Int)
+    minPartitions: Int)//生成最小分区数
     //deps是一个空的Nil list，原因是它是从外部文件生成的，没有父rdd
   extends RDD[(K, V)](sc, Nil) with Logging {
 
   if (initLocalJobConfFuncOpt.isDefined) {
-    sc.clean(initLocalJobConfFuncOpt.get)
+    sc.clean(initLocalJobConfFuncOpt.get)//清理
   }
 
   def this(
@@ -136,11 +137,12 @@ class HadoopRDD[K, V](
   protected val inputFormatCacheKey = "rdd_%d_input_format".format(id)
 
   // used to build JobTracker ID
-  private val createTime = new Date()
+  private val createTime = new Date()//创建一个Job跟踪ID
 
   private val shouldCloneJobConf = sc.conf.getBoolean("spark.hadoop.cloneConf", false)
 
   // Returns a JobConf that will be used on slaves to obtain input splits for Hadoop reads.
+  //返回一个jobconf将用于从节点获得输入Hadoop读取
   protected def getJobConf(): JobConf = {
     val conf: Configuration = broadcastedConf.value.value
     if (shouldCloneJobConf) {
@@ -183,16 +185,18 @@ class HadoopRDD[K, V](
   }
 
   protected def getInputFormat(conf: JobConf): InputFormat[K, V] = {
-    if (HadoopRDD.containsCachedMetadata(inputFormatCacheKey)) {
+    if (HadoopRDD.containsCachedMetadata(inputFormatCacheKey)) {//是否缓存包含
       return HadoopRDD.getCachedMetadata(inputFormatCacheKey).asInstanceOf[InputFormat[K, V]]
     }
     // Once an InputFormat for this RDD is created, cache it so that only one reflection call is
     // done in each local process.
+    //通过调用反射创建InputFormat对象在本地进程中完成
     val newInputFormat = ReflectionUtils.newInstance(inputFormatClass.asInstanceOf[Class[_]], conf)
       .asInstanceOf[InputFormat[K, V]]
     if (newInputFormat.isInstanceOf[Configurable]) {
       newInputFormat.asInstanceOf[Configurable].setConf(conf)
     }
+    //缓存它
     HadoopRDD.putCachedMetadata(inputFormatCacheKey, newInputFormat)
     newInputFormat
   }
@@ -200,6 +204,7 @@ class HadoopRDD[K, V](
   override def getPartitions: Array[Partition] = {
     val jobConf = getJobConf()
     // add the credentials here as this can be called before SparkContext initialized
+    //调用SparkContext初始化之前在这里添加凭据(credentials)
     SparkHadoopUtil.get.addCredentials(jobConf)
     val inputFormat = getInputFormat(jobConf)
     if (inputFormat.isInstanceOf[Configurable]) {
@@ -345,15 +350,20 @@ private[spark] object HadoopRDD extends Logging {
   /**
    * Configuration's constructor is not threadsafe (see SPARK-1097 and HADOOP-10456).
    * Therefore, we synchronize on this lock before calling new JobConf() or new Configuration().
+   * 配置的构造函数不是线程安全的,因此,在调用new JobConf() or new Configuration()之前,我们在这个锁上进行同步
    */
   val CONFIGURATION_INSTANTIATION_LOCK = new Object()
 
-  /** Update the input bytes read metric each time this number of records has been read */
+  /** 
+   *  Update the input bytes read metric each time this number of records has been read 
+   *  更新输入字节读测量每一次读取记录数
+   *  */
   val RECORDS_BETWEEN_BYTES_READ_METRIC_UPDATES = 256
 
   /**
    * The three methods below are helpers for accessing the local map, a property of the SparkEnv of
    * the local process.
+   * 下面的三种方法是访问本地Map的助手,对本地进程的SparkEnv属性
    */
   def getCachedMetadata(key: String): Any = SparkEnv.get.hadoopJobMetadata.get(key)
 

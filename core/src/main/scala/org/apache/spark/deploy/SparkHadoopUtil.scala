@@ -45,6 +45,7 @@ import org.apache.spark.{Logging, SparkConf, SparkException}
 /**
  * :: DeveloperApi ::
  * Contains util methods to interact with Hadoop from Spark.
+ * 包含工具方法Hadoop与Spark相互调用
  */
 @DeveloperApi
 class SparkHadoopUtil extends Logging {
@@ -159,7 +160,7 @@ class SparkHadoopUtil extends Logging {
    * getFSBytesWrittenOnThreadCallback is called from thread r at time t, the returned callback will
    * return the bytes written on r since t.  Reflection is required because thread-level FileSystem
    * statistics are only available as of Hadoop 2.5 (see HADOOP-10688).
-   * Returns None if the required method can't be found.
+   * Returns None if the required method can't be found. 
    */
   private[spark] def getFSBytesWrittenOnThreadCallback(): Option[() => Long] = {
     try {
@@ -267,6 +268,7 @@ class SparkHadoopUtil extends Logging {
    * Lists all the files in a directory with the specified prefix, and does not end with the
    * given suffix. The returned {{FileStatus}} instances are sorted by the modification times of
    * the respective files.
+   * 指定的前缀文件名,列出目录中的所有文件,返回FileStatus实例按文件修改时间排序,
    */
   def listFilesSorted(
       remoteFs: FileSystem,
@@ -397,6 +399,7 @@ object SparkHadoopUtil {
 
   def get: SparkHadoopUtil = {
     // Check each time to support changing to/from YARN
+    // 检查每个时间支持改变YARN
     val yarnMode = java.lang.Boolean.valueOf(
         System.getProperty("SPARK_YARN_MODE", System.getenv("SPARK_YARN_MODE")))
     if (yarnMode) {

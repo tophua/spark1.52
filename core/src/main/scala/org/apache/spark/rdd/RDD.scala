@@ -74,6 +74,7 @@ import org.apache.spark.util.random.{
  * reading data from a new storage system) by overriding these functions. Please refer to the
  * [[http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf Spark paper]] for more details
  * on RDD internals.
+ * RDD主构造器
  */
 abstract class RDD[T: ClassTag](
     //在所有有父子关系的RDD，共享的是同一个SparkContext
@@ -99,6 +100,7 @@ abstract class RDD[T: ClassTag](
 
   /** 
    *  Construct an RDD with just a one-to-one dependency on one parent
+   *  RDD辅助构造器
    *  this是把父RDD的SparkContext(oneParent.context)和一个列表List(new OneToOneDependency(oneParent)))，
    *  传入了另一个RDD的构造函数
    *   */
@@ -125,7 +127,7 @@ abstract class RDD[T: ClassTag](
   protected def getPartitions: Array[Partition]
 
   /**
-   * 返回父RDD依赖
+   * 返回RDD依赖信息
    * Implemented by subclasses to return how this RDD depends on parent RDDs. This method will only
    * be called once, so it is safe to implement a time-consuming computation in it.
    */
@@ -148,10 +150,16 @@ abstract class RDD[T: ClassTag](
   /** The SparkContext that created this RDD. */
   def sparkContext: SparkContext = sc
 
-  /** A unique ID for this RDD (within its SparkContext). */
+  /** 
+   *  A unique ID for this RDD (within its SparkContext).
+   *  在Sparkcontext内RDD唯一ID
+   *  */
   val id: Int = sc.newRddId()
 
-  /** A friendly name for this RDD */
+  /** 
+   *  A friendly name for this RDD
+   *  RDD名称
+   *   */
   @transient var name: String = null
 /**
  * this.type表示当前对象（this)的类型。this指代当前的对象。
@@ -210,7 +218,10 @@ abstract class RDD[T: ClassTag](
    *  */
   def persist(): this.type = persist(StorageLevel.MEMORY_ONLY)
 
-  /** Persist this RDD with the default storage level (`MEMORY_ONLY`). */
+  /** 
+   *  Persist this RDD with the default storage level (`MEMORY_ONLY`). 
+   *  持久化RDD使用默认存储级别(内存存储)
+   *  */
   def cache(): this.type = persist()
 
   /**
@@ -226,7 +237,10 @@ abstract class RDD[T: ClassTag](
     this
   }
 
-  /** Get the RDD's current storage level, or StorageLevel.NONE if none is set. */
+  /** 
+   *  Get the RDD's current storage level, or StorageLevel.NONE if none is set.
+   *  获得RDD当前的存储级别 
+   *  */
   def getStorageLevel: StorageLevel = storageLevel
 
   // Our dependencies and partitions will be gotten by calling subclass's methods below, and will
@@ -255,7 +269,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Get the array of partitions of this RDD, taking into account whether the
    * RDD is checkpointed or not.
-   * 获得RDD的partitions数组
+   * 获得RDD的分区(partitions)数组
    */
   final def partitions: Array[Partition] = {
     checkpointRDD.map(_.partitions).getOrElse {
@@ -269,7 +283,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Get the preferred locations of a partition(取得每个partition的优先位置), taking into account whether the
    * RDD is checkpointed.
-   * 根据数据存放的位置，返回分区split在哪些节点访问更快
+   * 获取分区的首选位置,是否考虑到RDD是检查点
    */
   final def preferredLocations(split: Partition): Seq[String] = {
     checkpointRDD.map(_.getPreferredLocations(split)).getOrElse {
@@ -282,6 +296,7 @@ abstract class RDD[T: ClassTag](
    * Internal method to this RDD; will read from cache if applicable(可用), or otherwise(否则) compute it.
    * This should ''not'' be called by users directly, but is available for implementors of custom
    * subclasses of RDD.
+   * RDD内部方法,从缓存中读取可用,如果没有则计算它,
    */
   final def iterator(split: Partition, context: TaskContext): Iterator[T] = {
     if (storageLevel != StorageLevel.NONE) {
@@ -354,8 +369,9 @@ abstract class RDD[T: ClassTag](
    * 返回一个新的分布式数据集，由每个原元素经过func函数转换后组成
    */
   def map[U: ClassTag](f: T => U): RDD[U] = withScope{
+    //调用ClosureCleaner的clean清除闭包中的不能序列化的变更,防止RDD在网络传输过程中反序列化失败
     val cleanF = sc.clean(f)
-    //这里this，就是之前生成的HadoopRDD，MapPartitionsRDD的构造函数，会调用父类的构造函数RDD[U](prev)， 
+    //这里this,会调用父类的构造函数RDD[U](prev),就是之前生成的HadoopRDD，MapPartitionsRDD的构造函数，， 
     //这个this(例如也就是hadoopRdd),会被赋值给prev
     new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.map(cleanF))
   }

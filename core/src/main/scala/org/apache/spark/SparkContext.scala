@@ -899,9 +899,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       path: String,
       minPartitions: Int = defaultMinPartitions): RDD[String] = withScope {
     assertNotStopped()
-    //调用hadoopFile方法
+    //调用hadoopFile方法,生成MappedRDD对象
     hadoopFile(path, classOf[TextInputFormat], classOf[LongWritable], classOf[Text],
-        //map来生成一个MappedRDD
+        //map方法将MappedRDD封装为MapPartitionsRDD
       minPartitions).map(pair => pair._2.toString)
   }
 
@@ -1095,7 +1095,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     val setInputPathsFunc = (jobConf: JobConf) => FileInputFormat.setInputPaths(jobConf, path)
     //构建HadoopRDD
     new HadoopRDD(
-      this,
+      this,//this代表SparkContext
       confBroadcast,
       Some(setInputPathsFunc),
       inputFormatClass,
