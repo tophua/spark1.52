@@ -85,7 +85,7 @@ private[spark] class HashShuffleReader[K, C](
     val interruptibleIter = new InterruptibleIterator[(Any, Any)](context, metricIter)
     //对InterruptibleIterator执行聚合
     val aggregatedIter: Iterator[Product2[K, C]] = if (dep.aggregator.isDefined) {
-      if (dep.mapSideCombine) {//需要mapSide的聚合
+      if (dep.mapSideCombine) {//是否需要在worker端进行combine操作聚合
         // We are reading values that are already combined
         val combinedKeyValuesIterator = interruptibleIter.asInstanceOf[Iterator[(K, C)]]
         dep.aggregator.get.combineCombinersByKey(combinedKeyValuesIterator, context)

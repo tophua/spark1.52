@@ -29,12 +29,12 @@ import org.apache.spark.storage.RDDInfo
  */
 @DeveloperApi
 class StageInfo(
-    val stageId: Int,
-    val attemptId: Int,
-    val name: String,
-    val numTasks: Int,
-    val rddInfos: Seq[RDDInfo],
-    val parentIds: Seq[Int],
+    val stageId: Int,//ID
+    val attemptId: Int,//尝试数
+    val name: String,//名称
+    val numTasks: Int,//任务数
+    val rddInfos: Seq[RDDInfo],//RDD
+    val parentIds: Seq[Int],//父Stage列表
     val details: String,
     private[spark] val taskLocalityPreferences: Seq[Seq[TaskLocation]] = Seq.empty) {
   /** 
@@ -93,7 +93,9 @@ private[spark] object StageInfo {
       taskLocalityPreferences: Seq[Seq[TaskLocation]] = Seq.empty
     ): StageInfo = {
     //方法获取RDD的所有直接或间接的NarrowDependency的RDD
+    //RDDInfo.fromRdd创建RDDInfo信息,包括RDD父依赖关系
     val ancestorRddInfos = stage.rdd.getNarrowAncestors.map(RDDInfo.fromRdd)
+    //对当前stage的RDD也生成RDDInfo,然后所有生成的RDDInfo合并到rddInfos
     val rddInfos = Seq(RDDInfo.fromRdd(stage.rdd)) ++ ancestorRddInfos
     new StageInfo(
       stage.id,

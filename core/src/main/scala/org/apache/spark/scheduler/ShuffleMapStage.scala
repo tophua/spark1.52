@@ -37,20 +37,20 @@ private[spark] class ShuffleMapStage(
   extends Stage(id, rdd, numTasks, parents, firstJobId, callSite) {
 
   override def toString: String = "ShuffleMapStage " + id
-
+   //输出计算任务数
   var numAvailableOutputs: Long = 0
   //通过判断numAvailableOutputs和numPartitions是否相等来确定stage是否已被提交
-  //它的已经输出计算结果的分区任务数量要和分区数一样,即所有分区上的子任务都要完成
+  //判断输出计算任务数和分区数一样,即所有分区上的子任务都已完成
   //如果map stage已就绪的话返回true，即所有分区均有shuffle输出。这个将会和outputLocs.contains保持一致。 
   def isAvailable: Boolean = numAvailableOutputs == numPartitions
-
+   //输出的位置
   val outputLocs = Array.fill[List[MapStatus]](numPartitions)(Nil)
 
   def addOutputLoc(partition: Int, status: MapStatus): Unit = {
     val prevList = outputLocs(partition)
-    outputLocs(partition) = status :: prevList 
+    outputLocs(partition) = status :: prevList //元素合并进List用::
     if (prevList == Nil) {//Nil表示空列表
-      numAvailableOutputs += 1
+      numAvailableOutputs += 1//输出任务自增1
     }
   }
 
@@ -58,8 +58,8 @@ private[spark] class ShuffleMapStage(
     val prevList = outputLocs(partition)
     val newList = prevList.filterNot(_.location == bmAddress)
     outputLocs(partition) = newList
-    if (prevList != Nil && newList == Nil) {
-      numAvailableOutputs -= 1
+    if (prevList != Nil && newList == Nil) {//Nil表示空列表
+      numAvailableOutputs -= 1//输出任务自减1
     }
   }
 

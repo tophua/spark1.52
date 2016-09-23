@@ -31,21 +31,24 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
   //1 CPU核数，1024内存数
   val clusterUrl = "local-cluster[2,1,1024]"
 
-  test("task throws not serializable exception") {
+  test("task throws not serializable exception") {//task任务抛出不能序列化异常
     // Ensures that executors do not crash when an exn is not serializable. If executors crash,
     // this test will hang. Correct behavior is that executors don't crash but fail tasks
     // and the scheduler throws a SparkException.
-
+    //确保执行者(executors)不死机时,生成不可序列化,如果执行者(executors)死机,这个测试将挂起,
+    //正确的方法是执行者不崩溃,但失败的任务,并任务调度器抛出Spark异常
     // numSlaves must be less than numPartitions
-    val numSlaves = 3
-    val numPartitions = 10
+    //从节点数必须小于分区数
+    val numSlaves = 3 //从节点
+    val numPartitions = 10//分区数
 
     sc = new SparkContext("local-cluster[%s,1,1024]".format(numSlaves), "test")
     val data = sc.parallelize(1 to 100, numPartitions).
       map(x => throw new NotSerializableExn(new NotSerializableClass))
-    intercept[SparkException] {
+    intercept[SparkException] {//截获异常      
       data.count()
     }
+     println("task throws not :"+data.count())
     resetSparkContext()
   }
 
@@ -325,10 +328,12 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
 
 object DistributedSuite {
   // Indicates whether this JVM is marked for failure.
+  // 标示此JVM标记为失败
   var mark = false
 
   // Set by test to remember if we are in the driver program so we can assert
   // that we are not.
+
   var amMaster = false
 
   // Act like an identity function, but if the argument is true, set mark to true.
@@ -342,6 +347,7 @@ object DistributedSuite {
 
   // Act like an identity function, but if mark was set to true previously, fail,
   // crashing the entire JVM.
+  //但如果标记被设置为真,则失败,整个JVM崩溃
   def failOnMarkedIdentity(item: Boolean): Boolean = {
     if (mark) {
       System.exit(42)

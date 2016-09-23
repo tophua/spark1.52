@@ -35,7 +35,7 @@ class RDDInfo(
   var memSize = 0L//内存大小
   var diskSize = 0L//硬盘大小
   var externalBlockStoreSize = 0L//扩展块存储大小
-
+  //是否缓存,
   def isCached: Boolean =
     (memSize + diskSize + externalBlockStoreSize > 0) && numCachedPartitions > 0
 
@@ -55,7 +55,7 @@ class RDDInfo(
 private[spark] object RDDInfo {
   def fromRdd(rdd: RDD[_]): RDDInfo = {
     val rddName = Option(rdd.name).getOrElse(Utils.getFormattedClassName(rdd))
-    val parentIds = rdd.dependencies.map(_.rdd.id)
+    val parentIds = rdd.dependencies.map(_.rdd.id)//返回RDD依赖的父列表
     new RDDInfo(rdd.id, rddName, rdd.partitions.length, rdd.getStorageLevel, parentIds, rdd.scope)
   }
 }

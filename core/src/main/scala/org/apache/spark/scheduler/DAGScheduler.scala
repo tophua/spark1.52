@@ -295,7 +295,7 @@ class DAGScheduler(
    * Helper function to eliminate some code re-use when creating new stages.
    */
   private def getParentStagesAndId(rdd: RDD[_], firstJobId: Int): (List[Stage], Int) = {
-    //获取所有的父Stage的列表
+    //获取所有的父Stage的列表,父Stage主要是宽依赖对应的Stage
     val parentStages = getParentStages(rdd, firstJobId)
     //获取下一个stageId，为AtomicInteger类型，getAndIncrement()能保证原子操作  
     val id = nextStageId.getAndIncrement()
@@ -316,14 +316,14 @@ class DAGScheduler(
       shuffleDep: ShuffleDependency[_, _, _],
       firstJobId: Int,
       callSite: CallSite): ShuffleMapStage = {
-    // 获得parentStages和下一个stageId  
+    // 获得所有的父Stage和stage Id,父Stage主要是宽依赖对应的Stage
     val (parentStages: List[Stage], id: Int) = getParentStagesAndId(rdd, firstJobId)
      // 创建一个ShuffleMapStage  
     val stage: ShuffleMapStage = new ShuffleMapStage(id, rdd, numTasks, parentStages,
       firstJobId, callSite, shuffleDep)
-    //将stage和stage Id注册到stageIdToStage
+    //将stage和stage Id注册到stageIdToStage(HashMap)
     stageIdToStage(id) = stage
-    //
+    //更新Stage及祖先Stage与jobId对应关系
     updateJobIdStageIdMaps(firstJobId, stage)
     stage
   }
@@ -408,7 +408,7 @@ class DAGScheduler(
     val visited = new HashSet[RDD[_]] //用HashSet存储已经被访问过的RDD  
     // We are manually maintaining a stack here to prevent StackOverflowError
     // caused by recursively visiting
-    //存储需要被处理的RDD。Stack中得RDD都需要被处理
+    //存储需要被处理的RDD,Stack中得RDD都需要被处理
     val waitingForVisit = new Stack[RDD[_]]//堆,后进先出的原则存储数据
     // 定义一个visit函数，根据传入的RDD，如果之前没有处理过，标记为已处理，循环此RDD的依赖关系dependencies  
     // 如果是ShuffleDependency，获取其parents；如果不是，则说明为同一stage，并压入Stack：waitingForVisit顶部 
@@ -499,7 +499,7 @@ class DAGScheduler(
     parents
   }
 /**
- * Missing 用来查到Stage的所有不可用的祖先Stage
+ * 获取父阶段Stage,未完成任务列表
  */
   private def getMissingParentStages(stage: Stage): List[Stage] = {
     //存储尚未提交的parent stages,用于最后结果的返回  
@@ -520,7 +520,7 @@ class DAGScheduler(
               case shufDep: ShuffleDependency[_, _, _] =>
                  // 调用getShuffleMapStage，获取ShuffleMapStage  
                 val mapStage = getShuffleMapStage(shufDep, stage.firstJobId)
-                if (!mapStage.isAvailable) {
+                if (!mapStage.isAvailable) {//判断Stage是否可用
                   missing += mapStage
                 }
               case narrowDep: NarrowDependency[_] =>  // 窄依赖，直接将RDD压入waitingForVisit栈  
@@ -552,14 +552,15 @@ class DAGScheduler(
     def updateJobIdStageIdMapsList(stages: List[Stage]) {
       if (stages.nonEmpty) {
         // 获取列表头stages元素  
-        val s = stages.head//取出第一个stages
-        s.jobIds += jobId//把当前Job,添加到stages
+        val s = stages.head//取出第一个stages,列表里的头元素，即第一个元素
+        s.jobIds += jobId//把当前Job,添加到stages.jobIds(HashSet)
         //将job id和祖先Stag ID 更新到jobIdToStageids中
-        jobIdToStageIds.getOrElseUpdate(jobId, new HashSet[Int]()) += s.id        
+        jobIdToStageIds.getOrElseUpdate(jobId, new HashSet[Int]()) += s.id    
+        //获取所有的父Stage的列表,父Stage主要是宽依赖对应的Stage
         val parents: List[Stage] = getParentStages(s.rdd, jobId)
         //当前Stage不包含JobId
         val parentsWithoutThisJobId = parents.filter { ! _.jobIds.contains(jobId) }
-        updateJobIdStageIdMapsList(parentsWithoutThisJobId ++ stages.tail)
+        updateJobIdStageIdMapsList(parentsWithoutThisJobId ++ stages.tail)//tail返回除头元素外的剩余元素组成的列表
       }
     }
     //调用函数updateJobIdStageIdMapsList()
@@ -798,14 +799,16 @@ class DAGScheduler(
 
   /** 
    *  Finds the earliest-created active job that needs the stage 
-   *  查找Stage最早创建活动Job
+   *  查找Stage保存活动Job
    *  */
   // TODO: Probably should actually find among the active jobs that need this
   // stage the one with the highest priority (highest-priority pool, earliest created).
   // That should take care of at least part of the priority inversion problem with
   // cross-job dependencies.
   private def activeJobForStage(stage: Stage): Option[Int] = {
+    //查找Stage保存活动Job转换数组并按升级排序
     val jobsThatUseStage: Array[Int] = stage.jobIds.toArray.sorted
+    //jobIdToActiveJob包含(Job)任务
     jobsThatUseStage.find(jobIdToActiveJob.contains)
   }
 
@@ -922,29 +925,30 @@ class DAGScheduler(
   }
 
   /** 
-   *  提交Stage，如果有parent Stage没有提交，那么递归提交它。
+   *  在提交finalStage之前,如果存在没有提交父 Stage,则需要先提交没有提交提交父 Stage
    *  Submits stage, but first recursively(递归) submits any missing parents. 
    * */
-  //每个Stage提交之前,如果存在没有提交的祖先Stage,都会先提交祖先Stage,并且将子Stage放入waitingStages中等待
-  //如果不存在没有提交的祖先Stage,则提交所有的Task
   private def submitStage(stage: Stage) {
-    //查找最早创建的jobId
+    //查找stage创建的jobId
     val jobId = activeJobForStage(stage)
     if (jobId.isDefined) {
       logDebug("submitStage(" + stage + ")")
-      // 如果当前stage不在等待其parent stage的返回，并且 不在运行的状态， 并且 没有已经失败,就尝试提交它
+      //如果当前stage不在等待中,并且 不在运行的状态,并且没有已经失败,就尝试提交它
       if (!waitingStages(stage) && !runningStages(stage) && !failedStages(stage)) {
-        val missing = getMissingParentStages(stage).sortBy(_.id)//用来找到Stage的所有不可用的祖先Stage
+        //获取父阶段Stage
+        val missing = getMissingParentStages(stage).sortBy(_.id)
         logDebug("missing: " + missing)
-        if (missing.isEmpty) {
-          //如果所有的parent Stage都已经完成,那么提交该stage所包含的Task
+        if (missing.isEmpty) {          
           logInfo("Submitting " + stage + " (" + stage.rdd + "), which has no missing parents")
+          //如果所有的parent Stage都已经完成,那么提交该stage所包含的Task
           submitMissingTasks(stage, jobId.get)
         } else {
-          for (parent <- missing) {
+          //迭代该阶段所依赖的父调度阶段
+          for (parent <- missing) {//如果存在则先提交该父阶段的Stage
             //有parent Stage未完成,则递归 提交它
             submitStage(parent)
           }
+          //将子Stage放入waitingStages中等待
           waitingStages += stage
         }
       }
@@ -953,13 +957,15 @@ class DAGScheduler(
     }
   }
 
-  /** Called when stage's parents are available and we can now do its task. */
-  //用来找到Stage的所有不可用的祖先Stage
+  /** 
+   *  Called when stage's parents are available and we can now do its task. 
+   *  用于提交还未计算的任务
+   *  */
+  
   private def submitMissingTasks(stage: Stage, jobId: Int) {
     logDebug("submitMissingTasks(" + stage + ")")
     // Get our pending tasks and remember them in our pendingTasks entry
-    //pendingTasks存储待处理的Task,清空pendingTasks,由于当前Stage的任务刚开始提交,
-    //所以需要清空,便于记录需要计算任务
+    //pendingTasks存储待处理的Task,清空列表,由于当前Stage的任务刚开始提交,    
     stage.pendingTasks.clear()
     //MapStatus包括执行Task的BlockManager的地址和要传给Reduce任务的Blok的估算大小
     //outputLocs如果Stage是Map任务,则outputLocs记录每个Partition的MapStatus

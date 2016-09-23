@@ -50,8 +50,8 @@ import org.apache.spark.util.random.StratifiedSamplingUtils
 
 /**
  * Extra functions available on RDDs of (key, value) pairs through an implicit conversion.
- * 该扩展类中的方法输入的数据单元是一个包含两个元素的tuple结构。
- * Spark会把其中第一个元素当成key，第二个当成value
+ * 扩展类中的方法输入的数据单元是一个包含两个元素的tuple结构,其中第一个元素当成key,第二个当成value
+ * PairRDDFunctions主要是Key/Value对操作
  */
 class PairRDDFunctions[K, V](self: RDD[(K, V)])
     (implicit kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K] = null)
@@ -64,7 +64,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * functions. Turns an RDD[(K, V)] into a result of type RDD[(K, C)], for a "combined type" C
    * Note that V and C can be different -- for example, one might group an RDD of type
    * (Int, Int) into an RDD of type (Int, Seq[Int]). Users provide three functions:
-   *
+   * combineByKey属于Key-Value型算子,做的是聚集操作,这种变换不会触发作业的提交
    * - `createCombiner`, which turns a V into a C (e.g., creates a one-element list)
    * - `mergeValue`, to merge a V into a C (e.g., adds it to the end of a list)
    * - `mergeCombiners`, to combine two C's into a single one.
@@ -76,15 +76,15 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * 1)创建Aggregator(其中mergeValue)
    * 
    */
-  def combineByKey[C](createCombiner: V => C,
-      mergeValue: (C, V) => C,
-      mergeCombiners: (C, C) => C,
-      partitioner: Partitioner,
-      mapSideCombine: Boolean = true,
+  def combineByKey[C](createCombiner: V => C,//一个组合函数,用于将RDD[K,V]中的V转换成一个新的值C1
+      mergeValue: (C, V) => C,//合并值函数，将一个C1类型值和一个V类型值合并成一个C2类型，输入参数为(C1,V)，输出为新的C2
+      mergeCombiners: (C, C) => C,//该函数把2个元素集合C合并
+      partitioner: Partitioner,  
+      mapSideCombine: Boolean = true,//是否需要在worker端进行combine操作
       serializer: Serializer = null): RDD[(K, C)] = self.withScope {
     require(mergeCombiners != null, "mergeCombiners must be defined") // required as of Spark 0.9.0
-    if (keyClass.isArray) {
-      if (mapSideCombine) {
+    if (keyClass.isArray) {//key是数组时需要特殊的partitioner，默认的HashPartitioner不支持数组 
+      if (mapSideCombine) {//是否需要在worker端进行combine操作
         throw new SparkException("Cannot use map-side combining with array keys.")
       }
       if (partitioner.isInstanceOf[HashPartitioner]) {
@@ -102,11 +102,11 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
         new InterruptibleIterator(context, aggregator.combineValuesByKey(iter, context))
       }, preservesPartitioning = true)
     } else {
-      //ShuffledRDD依赖是ShuffleDepency
+      //进行shuffle过程对key进行分组 
       new ShuffledRDD[K, V, C](self, partitioner)
         .setSerializer(serializer)
         .setAggregator(aggregator)
-        .setMapSideCombine(mapSideCombine)
+        .setMapSideCombine(mapSideCombine)//是否需要在worker端进行combine操作
     }
   }
 
@@ -275,9 +275,9 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * the merging locally on each mapper before sending results to a reducer, similarly to a
    * "combiner" in MapReduce.
    * 
-   * 该函数用于将RDD[K,V]中每个K对应的V值根据映射函数来运算，
-   * 参数numPartitions用于指定分区数；
-   * 参数partitioner用于指定分区函数；
+   * 该函数用于将RDD[K,V]中每个K对应的V值根据映射函数来运算
+   * 参数numPartitions用于指定分区数
+   * 参数partitioner用于指定分区
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
    * scala> var rdd2 = rdd1.reduceByKey((x,y) => x + y)
@@ -293,6 +293,9 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Merge the values for each key using an associative reduce function. This will also perform
    * the merging locally on each mapper before sending results to a reducer, similarly to a
    * "combiner" in MapReduce. Output will be hash-partitioned with numPartitions partitions.
+   * 该函数用于将RDD[K,V]中每个K对应的V值根据映射函数来运算
+   * 参数numPartitions用于指定分区数
+   * 参数partitioner用于指定分区数
    */
   def reduceByKey(func: (V, V) => V, numPartitions: Int): RDD[(K, V)] = self.withScope {
     reduceByKey(new HashPartitioner(numPartitions), func)
@@ -312,7 +315,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Merge the values for each key using an associative reduce function, but return the results
    * immediately to the master as a Map. This will also perform the merging locally on each mapper
    * before sending results to a reducer, similarly to a "combiner" in MapReduce.
-   * 该函数将RDD[K,V]中每个K对应的V值根据映射函数来运算，运算结果映射到一个Map[K,V]中，而不是RDD[K,V]。
+   * 该函数将RDD[K,V]中每个K对应的V值根据映射函数来运算,运算结果映射到一个Map[K,V]中,而不是RDD[K,V]
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
    * scala> rdd1.reduceByKeyLocally((x,y) => x + y)
@@ -426,7 +429,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Return approximate number of distinct values for each key in this RDD.
-   *
+   * 
    * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
    * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
    * <a href="http://dx.doi.org/10.1145/2452376.2452456">here</a>.
@@ -489,9 +492,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Note: As currently implemented, groupByKey must be able to hold all the key-value pairs for any
    * key in memory. If a key has too many values, it can result in an [[OutOfMemoryError]]
    * 
-   * 该函数用于将RDD[K,V]中每个K对应的V值，返回一个（K，Seq[V])对的数据集，
-   * 参数numPartitions用于指定分区数；
-   * 参数partitioner用于指定分区函数；
+   * 该函数用于将RDD[K,V]中每个K对应的V值，返回一个（K,Seq[V])对的数据集
+   * 参数partitioner用于指定分区
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
    * scala> rdd1.groupByKey().collect
@@ -513,7 +515,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Group the values for each key in the RDD into a single sequence. Hash-partitions the
    * resulting RDD with into `numPartitions` partitions. The ordering of elements within
    * each group is not guaranteed, and may even differ each time the resulting RDD is evaluated.
-   *
+   * 该函数用于将RDD[K,V]中每个K对应的V值,返回一个（K,Seq[V])对的数据集
+   * 参数numPartitions用于指定分区数
    * Note: This operation may be very expensive. If you are grouping in order to perform an
    * aggregation (such as a sum or average) over each key, using [[PairRDDFunctions.aggregateByKey]]
    * or [[PairRDDFunctions.reduceByKey]] will provide much better performance.
@@ -527,7 +530,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Return a copy of the RDD partitioned using the specified partitioner.
-   * 该函数根据partitioner函数生成新的ShuffleRDD，将原RDD重新分区
+   * 该函数根据partitioner函数生成新的ShuffleRDD,将原RDD重新分区
    */
   def partitionBy(partitioner: Partitioner): RDD[(K, V)] = self.withScope {
     if (keyClass.isArray && partitioner.isInstanceOf[HashPartitioner]) {
@@ -723,14 +726,14 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Return the key-value pairs in this RDD to the master as a Map.
-   *
+   * 返回Master键-值对的Map
    * Warning: this doesn't return a multimap (so if you have multiple values to the same key, only
    *          one value per key is preserved in the map returned)
    */
   def collectAsMap(): Map[K, V] = self.withScope {
     val data = self.collect()
-    val map = new mutable.HashMap[K, V]
-    map.sizeHint(data.length)
+    val map = new mutable.HashMap[K, V]//可变HashMap
+    map.sizeHint(data.length)//设置大小
     data.foreach { pair => map.put(pair._1, pair._2) }
     map
   }
@@ -829,6 +832,7 @@ preservesPartitioning = true)
   /**
    * For each key k in `this` or `other1` or `other2` or `other3`,
    * return a resulting RDD that contains a tuple with the list of values
+   * 返回一个包含RDD值列表元组
    * for that key in `this`, `other1`, `other2` and `other3`.
    */
   def cogroup[W1, W2, W3](other1: RDD[(K, W1)], other2: RDD[(K, W2)], other3: RDD[(K, W3)])
@@ -918,14 +922,20 @@ preservesPartitioning = true)
     subtractByKey(other, self.partitioner.getOrElse(new HashPartitioner(self.partitions.length)))
   }
 
-  /** Return an RDD with the pairs from `this` whose keys are not in `other`. */
+  /** 
+   *  Return an RDD with the pairs from `this` whose keys are not in `other`. 
+   *  返回在RDD中出现，并且不在other RDD中出现的元素(交集,相当于进行集合的差操作)，不去重
+   *  */
   def subtractByKey[W: ClassTag](
       other: RDD[(K, W)],
       numPartitions: Int): RDD[(K, V)] = self.withScope {
     subtractByKey(other, new HashPartitioner(numPartitions))
   }
 
-  /** Return an RDD with the pairs from `this` whose keys are not in `other`. */
+  /** 
+   *  Return an RDD with the pairs from `this` whose keys are not in `other`. 
+   *  返回在RDD中出现，并且不在other RDD中出现的元素(交集,相当于进行集合的差操作)，不去重
+   *  */
   def subtractByKey[W: ClassTag](other: RDD[(K, W)], p: Partitioner): RDD[(K, V)] = self.withScope {
     new SubtractedRDD[K, V, W](self, other, p)
   }
@@ -1133,6 +1143,7 @@ preservesPartitioning = true)
    * that storage system. The JobConf should set an OutputFormat and any output paths required
    * (e.g. a table name to write to) in the same way as it would be configured for a Hadoop
    * MapReduce job.
+   * 输出RDD任何Hadoopf支持的存储系统,使用Hadoop JobConf对象存储系统.
    */
   def saveAsHadoopDataset(conf: JobConf): Unit = self.withScope {
     // Rename this as hadoopConf internally to avoid shadowing (see SPARK-2038).
@@ -1225,7 +1236,7 @@ preservesPartitioning = true)
    * 从RDD元组中抽取所有元素的value并生成新的RD
    */
   def values: RDD[V] = self.map(_._2)
-
+  //keyClass是数组时需要特殊的partitioner,默认的HashPartitioner不支持数组 
   private[spark] def keyClass: Class[_] = kt.runtimeClass
 
   private[spark] def valueClass: Class[_] = vt.runtimeClass

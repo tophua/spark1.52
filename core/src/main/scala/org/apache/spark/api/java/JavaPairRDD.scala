@@ -236,7 +236,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
       mergeValue: JFunction2[C, V, C],
       mergeCombiners: JFunction2[C, C, C],
       partitioner: Partitioner,
-      mapSideCombine: Boolean,
+      mapSideCombine: Boolean,//是否需要在worker端进行combine操作
       serializer: Serializer): JavaPairRDD[K, C] = {
       implicit val ctag: ClassTag[C] = fakeClassTag
     fromRDD(rdd.combineByKey(
@@ -244,7 +244,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
       mergeValue,
       mergeCombiners,
       partitioner,
-      mapSideCombine,
+      mapSideCombine,//是否需要在worker端进行combine操作
       serializer
     ))
   }

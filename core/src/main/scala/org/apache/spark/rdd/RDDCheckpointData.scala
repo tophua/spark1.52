@@ -23,7 +23,8 @@ import org.apache.spark.Partition
 
 /**
  * Enumeration to manage state transitions of an RDD through checkpointing
- * [ Initialized --> checkpointing in progress --> checkpointed ].
+ * 枚举通过检查点管理一个RDD状态转换
+ * [ Initialized --> checkpointing in progress(检查点进程) --> checkpointed ].
  */
 private[spark] object CheckpointState extends Enumeration {
   type CheckpointState = Value //type关键字，用来给类型或者是操作起别名，用起来很是方便 ,Value扩展枚举类型
@@ -42,7 +43,7 @@ private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD
 
   import CheckpointState._
 
-  // The checkpoint state of the associated RDD . RDD检查点相关的状态
+  // The checkpoint state of the associated RDD . RDD检查点初始状态
   protected var cpState = Initialized
 
   // The RDD that contains our checkpointed data,包含RDD检查点的数据
@@ -112,5 +113,6 @@ private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD
 
 /**
  * Global lock for synchronizing checkpoint operations.
+ * 全局检查点同步锁对象
  */
 private[spark] object RDDCheckpointData

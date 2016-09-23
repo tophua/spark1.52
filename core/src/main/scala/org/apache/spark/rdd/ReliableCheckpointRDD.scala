@@ -162,7 +162,7 @@ private[spark] object ReliableCheckpointRDD extends Logging {
 
   /**
    * Read the content of the specified checkpoint file.
-   *
+   * 读取指定检查点文件的内容
    */
   def readCheckpointFile[T](
       path: Path,

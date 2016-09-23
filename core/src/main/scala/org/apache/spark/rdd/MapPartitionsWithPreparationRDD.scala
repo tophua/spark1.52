@@ -30,7 +30,7 @@ private[spark] class MapPartitionsWithPreparationRDD[U: ClassTag, T: ClassTag, M
     prev: RDD[T],
     preparePartition: () => M,
     executePartition: (TaskContext, Int, M, Iterator[T]) => Iterator[U],
-    preservesPartitioning: Boolean = false)
+    preservesPartitioning: Boolean = false)//是否保存分区
   extends RDD[U](prev) {
 
   override val partitioner: Option[Partitioner] = {
@@ -45,6 +45,7 @@ private[spark] class MapPartitionsWithPreparationRDD[U: ClassTag, T: ClassTag, M
 
   /**
    * Prepare a partition for a single call to compute.
+   * 准备调用一个单独计算分区
    */
   def prepare(): Unit = {
     preparedArguments += preparePartition()

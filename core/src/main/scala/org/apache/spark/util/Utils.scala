@@ -1654,7 +1654,10 @@ private[spark] object Utils extends Logging {
   }
 
 
-  /** Return the class name of the given object, removing all dollar signs */
+  /** 
+   *  Return the class name of the given object, removing all dollar signs 
+   *  返回给定对象的类名称,删除所有$符号
+   *  */
   def getFormattedClassName(obj: AnyRef): String = {
     obj.getClass.getSimpleName.replace("$", "")
   }

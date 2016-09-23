@@ -245,10 +245,13 @@ abstract class RDD[T: ClassTag](
 
   // Our dependencies and partitions will be gotten by calling subclass's methods below, and will
   // be overwritten when we're checkpointed
+  //我们的依赖和分区将通过调用子类的方法得到,我们的检查点并将被覆盖
   private var dependencies_ : Seq[Dependency[_]] = null
   @transient private var partitions_ : Array[Partition] = null
 
-  /** An Option holding our checkpoint RDD, if we are checkpointed */
+  /** 
+   *  An Option holding our checkpoint RDD, if we are checkpointed 
+   *  */
   private def checkpointRDD: Option[CheckpointRDD[T]] = checkpointData.flatMap(_.checkpointRDD)
 
   /**
@@ -1925,7 +1928,7 @@ object RDD {
   // `import SparkContext._` to enable them. Now we move them here to make the compiler find
   // them automatically. However, we still keep the old functions in SparkContext for backward
   // compatibility and forward to the following functions directly.
-
+  //隐式转换,通过隐式转换使kv形式的RDD具有这个类中的方法,一定要是RDD[(K,V)]型的才可以被转换 
   implicit def rddToPairRDDFunctions[K, V](rdd: RDD[(K, V)])(implicit kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K] = null): PairRDDFunctions[K, V] = {
     new PairRDDFunctions(rdd)
   }

@@ -28,14 +28,14 @@ import org.apache.spark.{Logging, SparkContext}
 
 /**
  * A general, named code block representing an operation that instantiates RDDs.
- *
+ * 指定代码块代表操作实例化RDDS
  * All RDDs instantiated in the corresponding code block will store a pointer to this object.
  * Examples include, but will not be limited to, existing RDD operations, such as textFile,
  * reduceByKey, and treeAggregate.
- *
+ *所有的RDDS实例化对应的代码块将存储一个指向该对象,例如包括,不限于现有RDD操作,如文本文件,
  * An operation scope may be nested in other scopes. For instance, a SQL query may enclose
  * scopes associated with the public RDD APIs it uses under the hood.
- *
+ * 操作范围可以嵌套在其他作用域中,例如,SQL查询可以用公共RDD API使用的相关范围
  * There is no particular relationship between an operation scope and a stage or a job.
  * A scope may live inside one stage (e.g. map) or span across multiple jobs (e.g. take).
  */
@@ -82,7 +82,10 @@ private[spark] object RDDOperationScope extends Logging {
     jsonMapper.readValue(s, classOf[RDDOperationScope])
   }
 
-  /** Return a globally unique operation scope ID. */
+  /** 
+   *  Return a globally unique operation scope ID.
+   *  返回一个全局唯一ID的操作范围 
+   *  */
   def nextScopeId(): Int = scopeCounter.getAndIncrement
 
   /**
@@ -111,7 +114,7 @@ private[spark] object RDDOperationScope extends Logging {
 
   /**
    * Execute the given body such that all RDDs created in this body will have the same scope.
-   *
+   * 执行给定自身RDD的代码主休,创建自身相同的范围,如果允许嵌套
    * If nesting is allowed, any subsequent calls to this method in the given body will instantiate
    * child scopes that are nested within our scope. Otherwise, these calls will take no effect.
    *

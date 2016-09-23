@@ -63,13 +63,12 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
   test("groupByKey with duplicates") {
     val pairs = sc.parallelize(Array((1, 1), (1, 2), (1, 3), (1, 1), (2, 1)))
     val groups = pairs.groupByKey().collect()
-      /* 
+    /** 
 		结果 
     Array( 
     (1,ArrayBuffer(1, 2, 3)), 
     (2,ArrayBuffer(1)) 
-    ) 
-		*/
+    )**/
     assert(groups.size === 2)
     val valuesFor1 = groups.find(_._1 == 1).get._2
     assert(valuesFor1.toList.sorted === List(1, 1, 2, 3))//包括重复数据

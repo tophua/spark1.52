@@ -23,6 +23,7 @@ import org.apache.spark.{Partition, SparkContext, SparkFunSuite, TaskContext}
 
 /**
  * Tests whether scopes are passed from the RDD operation to the RDDs correctly.
+ * 测试范围从RDD RDDS正确操作
  */
 class RDDOperationScopeSuite extends SparkFunSuite with BeforeAndAfter {
   private var sc: SparkContext = null

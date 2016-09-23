@@ -29,17 +29,18 @@ private[spark] class ShuffledRDDPartition(val idx: Int) extends Partition {
 /**
  * :: DeveloperApi ::
  * The resulting RDD from a shuffle (e.g. repartitioning of data).
- * @param prev the parent RDD.
- * @param part the partitioner used to partition the RDD
+ * 
+ * @param prev the parent RDD.父RDD
+ * @param part the partitioner used to partition the RDD 使用那个分区
  * @tparam K the key class.
  * @tparam V the value class.
- * @tparam C the combiner class.
+ * @tparam C the combiner class. 合成
  */
 // TODO: Make this return RDD[Product2[K, C]] or have some way to configure mutable pairs
 @DeveloperApi
 class ShuffledRDD[K, V, C](
     @transient var prev: RDD[_ <: Product2[K, V]],
-    part: Partitioner)
+    part: Partitioner)//分区
   extends RDD[(K, C)](prev.context, Nil) {
 
   private var serializer: Option[Serializer] = None
@@ -47,40 +48,53 @@ class ShuffledRDD[K, V, C](
   private var keyOrdering: Option[Ordering[K]] = None
 
   private var aggregator: Option[Aggregator[K, V, C]] = None
-
+//是否需要在worker端进行combine操作
   private var mapSideCombine: Boolean = false
 
-  /** Set a serializer for this RDD's shuffle, or null to use the default (spark.serializer) */
+  /** 
+   *  Set a serializer for this RDD's shuffle, or null to use the default (spark.serializer)
+   *  设置RDD shuffle序列化,如果空使用默认序列 spark.serializer
+   *  */
   def setSerializer(serializer: Serializer): ShuffledRDD[K, V, C] = {
     this.serializer = Option(serializer)
     this
   }
 
-  /** Set key ordering for RDD's shuffle. */
+  /** 
+   *  Set key ordering for RDD's shuffle. 
+   *  RDD Shffle key值的排序
+   *  */
   def setKeyOrdering(keyOrdering: Ordering[K]): ShuffledRDD[K, V, C] = {
     this.keyOrdering = Option(keyOrdering)
     this
   }
 
-  /** Set aggregator for RDD's shuffle. */
+  /** 
+   *  Set aggregator for RDD's shuffle. 
+   *  RDD Shffle 聚合
+   *  */
   def setAggregator(aggregator: Aggregator[K, V, C]): ShuffledRDD[K, V, C] = {
     this.aggregator = Option(aggregator)
     this
   }
 
-  /** Set mapSideCombine flag for RDD's shuffle. */
+  /** 
+   *  Set mapSideCombine flag for RDD's shuffle. 
+   *  设置mapSideCombine标记
+   *  */
   def setMapSideCombine(mapSideCombine: Boolean): ShuffledRDD[K, V, C] = {
     this.mapSideCombine = mapSideCombine
     this
   }
-//ShuffledRDD 依赖于ShuffleDependency 
+  //ShuffledRDD 依赖于ShuffleDependency 
   override def getDependencies: Seq[Dependency[_]] = {
     List(new ShuffleDependency(prev, part, serializer, keyOrdering, aggregator, mapSideCombine))
   }
 
-  override val partitioner = Some(part)
-//
+  override val partitioner = Some(part) //设置分区
+
   override def getPartitions: Array[Partition] = {
+    //返回包含一个给定的函数的值超过从0开始的范围内的整数值的数组
     Array.tabulate[Partition](part.numPartitions)(i => new ShuffledRDDPartition(i))
   }
   /**

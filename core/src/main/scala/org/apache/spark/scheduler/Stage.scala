@@ -62,9 +62,9 @@ private[spark] abstract class Stage(
   val numPartitions = rdd.partitions.size
 
   /** Set of jobs that this stage belongs to. */
-  //这个阶段(Stage)属于的工作组
+  //阶段(Stage)的Job(作业)集合
   val jobIds = new HashSet[Int]
- //待运行任务
+ //存储等待处理的Task
   var pendingTasks = new HashSet[Task[_]]
 
   /** 

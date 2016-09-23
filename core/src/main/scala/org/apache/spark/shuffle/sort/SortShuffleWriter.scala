@@ -52,7 +52,7 @@ private[spark] class SortShuffleWriter[K, V, C](
   /** Write a bunch of records to this task's output */
   
   override def write(records: Iterator[Product2[K, V]]): Unit = {
-    sorter = if (dep.mapSideCombine) {
+    sorter = if (dep.mapSideCombine) {//是否需要在worker端进行combine操作聚合
       require(dep.aggregator.isDefined, "Map-side combine without Aggregator specified!")
       //创建ExternalSorter实例。
       new ExternalSorter[K, V, C](

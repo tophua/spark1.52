@@ -44,14 +44,14 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
       serializer: Option[Serializer],
       keyOrdering: Option[Ordering[Any]],
       aggregator: Option[Aggregator[Any, Any, Any]],
-      mapSideCombine: Boolean): ShuffleDependency[Any, Any, Any] = {
+      mapSideCombine: Boolean): ShuffleDependency[Any, Any, Any] = {//是否需要在worker端进行combine聚合操作
     val dep = mock(classOf[ShuffleDependency[Any, Any, Any]], new RuntimeExceptionAnswer())
     doReturn(0).when(dep).shuffleId
     doReturn(partitioner).when(dep).partitioner
     doReturn(serializer).when(dep).serializer
     doReturn(keyOrdering).when(dep).keyOrdering
     doReturn(aggregator).when(dep).aggregator
-    doReturn(mapSideCombine).when(dep).mapSideCombine
+    doReturn(mapSideCombine).when(dep).mapSideCombine//是否需要在worker端进行combine聚合操作
     dep
   }
 
@@ -63,7 +63,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
       serializer = kryo,
       keyOrdering = None,
       aggregator = None,
-      mapSideCombine = false
+      mapSideCombine = false//是否需要在worker端进行combine聚合操作
     )))
 
     val rangePartitioner = mock(classOf[RangePartitioner[Any, Any]])
@@ -73,7 +73,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
       serializer = kryo,
       keyOrdering = None,
       aggregator = None,
-      mapSideCombine = false
+      mapSideCombine = false//是否需要在worker端进行combine聚合操作
     )))
 
     // Shuffles with key orderings are supported as long as no aggregator is specified
@@ -81,7 +81,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
       partitioner = new HashPartitioner(2),
       serializer = kryo,
       keyOrdering = Some(mock(classOf[Ordering[Any]])),
-      aggregator = None,
+      aggregator = None,//是否需要在worker端进行combine聚合操作
       mapSideCombine = false
     )))
 
@@ -97,7 +97,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
       serializer = java,
       keyOrdering = None,
       aggregator = None,
-      mapSideCombine = false
+      mapSideCombine = false//是否需要在worker端进行combine聚合操作
     )))
 
     // We do not support shuffles with more than 16 million output partitions
@@ -106,7 +106,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
       serializer = kryo,
       keyOrdering = None,
       aggregator = None,
-      mapSideCombine = false
+      mapSideCombine = false//是否需要在worker端进行combine聚合操作
     )))
 
     // We do not support shuffles that perform aggregation
@@ -115,14 +115,14 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
       serializer = kryo,
       keyOrdering = None,
       aggregator = Some(mock(classOf[Aggregator[Any, Any, Any]])),
-      mapSideCombine = false
+      mapSideCombine = false//是否需要在worker端进行combine聚合操作
     )))
     assert(!canUseUnsafeShuffle(shuffleDep(
       partitioner = new HashPartitioner(2),
       serializer = kryo,
       keyOrdering = Some(mock(classOf[Ordering[Any]])),
       aggregator = Some(mock(classOf[Aggregator[Any, Any, Any]])),
-      mapSideCombine = true
+      mapSideCombine = true//是否需要在worker端进行combine聚合操作
     )))
   }
 
