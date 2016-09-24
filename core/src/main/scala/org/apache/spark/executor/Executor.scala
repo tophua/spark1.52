@@ -136,7 +136,7 @@ private[spark] class Executor(
     //实例化一个TaskRunner对象来执行Task  
     val tr = new TaskRunner(context, taskId = taskId, attemptNumber = attemptNumber, taskName,
       serializedTask)
-    //将Task加入到正在运行的Task队列  
+    //将TaskRunner加入到正在运行的Task队列,taskId-->TaskRunner
     runningTasks.put(taskId, tr)
     //TaskRunner实现了Runnable接口,最后使用线程池执行TaskRunner
     threadPool.execute(tr)
@@ -170,10 +170,10 @@ private[spark] class Executor(
 
   class TaskRunner(
       execBackend: ExecutorBackend,
-      val taskId: Long,
-      val attemptNumber: Int,
-      taskName: String,
-      serializedTask: ByteBuffer)
+      val taskId: Long,//taskId
+      val attemptNumber: Int,//重试次数
+      taskName: String,//task名称
+      serializedTask: ByteBuffer)//Task序列化
     extends Runnable {
 
     /** 
@@ -183,7 +183,8 @@ private[spark] class Executor(
     @volatile private var killed = false
 
     /** 
-     *  How much the JVM process has spent in GC when the task starts to run.    
+     *  How much the JVM process has spent in GC when the task starts to run. 
+     *  多少的JVM进程一直在GC当任务开始运行  
      *  */
     @volatile var startGCTime: Long = _
 
@@ -325,7 +326,7 @@ private[spark] class Executor(
             serializedDirectResult
           }
         }
-        //通过AKKA向Driver汇报本次Task的已经完成
+        //通过AKKA向Driver汇报本次Task的已经完成,更新状态
         execBackend.statusUpdate(taskId, TaskState.FINISHED, serializedResult)
 
       } catch {
@@ -440,12 +441,14 @@ private[spark] class Executor(
     lazy val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
     synchronized {
       // Fetch missing dependencies
+      //获取依赖是利用Utils.fetchFile方法实现
       for ((name, timestamp) <- newFiles if currentFiles.getOrElse(name, -1L) < timestamp) {
         logInfo("Fetching " + name + " with timestamp " + timestamp)
         // Fetch file with useCache mode, close cache for local mode.
+        //获取文件缓存模式,关闭本地缓存模式\\
         Utils.fetchFile(name, new File(SparkFiles.getRootDirectory()), conf,
           env.securityManager, hadoopConf, timestamp, useCache = !isLocal)
-        currentFiles(name) = timestamp
+        currentFiles(name) = timestamp//文件名,文件的最新修改时间
       }
       for ((name, timestamp) <- newJars) {
         val localName = name.split("/").last
@@ -462,6 +465,7 @@ private[spark] class Executor(
           val url = new File(SparkFiles.getRootDirectory(), localName).toURI.toURL
           if (!urlClassLoader.getURLs().contains(url)) {
             logInfo("Adding " + url + " to class loader")
+            //下载的jar文件还会添加到Executor自身加载器的URL中
             urlClassLoader.addURL(url)
           }
         }

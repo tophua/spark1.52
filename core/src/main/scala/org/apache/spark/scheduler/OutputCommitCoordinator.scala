@@ -50,7 +50,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
   /**
    * Map from active stages's id => partition id => task attempt with exclusive lock on committing
    * output for that partition.
-   *
+   * 
    * Entries are added to the top-level map when stages start and are removed they finish
    * (either successfully or unsuccessfully).
    *
@@ -97,6 +97,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
 
   // Called by DAGScheduler
   private[scheduler] def stageStart(stage: StageId): Unit = synchronized {
+    // stages's id => partition id => task
     authorizedCommittersByStage(stage) = mutable.HashMap[PartitionId, TaskAttemptNumber]()
   }
 

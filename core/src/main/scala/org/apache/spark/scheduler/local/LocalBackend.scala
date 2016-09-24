@@ -87,11 +87,10 @@ private[spark] class LocalEndpoint(
    * 申请分配资源
    */
   def reviveOffers() {
-    //使用localExecutorId,localExecutorHostname,freeCores创建WorkerOffer
+    //使用localExecutorId,localExecutorHostname,freeCores空闲CPU核数创建WorkerOffer
     val offers = Seq(new WorkerOffer(localExecutorId, localExecutorHostname, freeCores))
-    //调用TaskSchedulerImpl的resourceOffers方法分配资源
-    //TaskSchedulerImpl.resourceOffers 申请资源
-    for (task <- scheduler.resourceOffers(offers).flatten) {
+    //调用TaskSchedulerImpl的resourceOffers方法用于任务的资源分配
+    for (task <- scheduler.resourceOffers(offers).flatten) {//flatten把嵌套的结构(Seq)展开,成一个(Seq)      
       freeCores -= scheduler.CPUS_PER_TASK
       //调用launchTask方法运行任务
       executor.launchTask(executorBackend, taskId = task.taskId, attemptNumber = task.attemptNumber,

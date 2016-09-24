@@ -86,7 +86,7 @@ private[spark] class TaskSchedulerImpl(
 
   private[scheduler] val taskIdToTaskSetManager = new HashMap[Long, TaskSetManager]
   val taskIdToExecutorId = new HashMap[Long, String]
-
+  //是否接受任务  
   @volatile private var hasReceivedTask = false
   //标志位launchedTask初始化为false,用它来标记是否有task被成功分配或者launched
   @volatile private var hasLaunchedTask = false
@@ -189,13 +189,13 @@ private[spark] class TaskSchedulerImpl(
     val tasks = taskSet.tasks
     logInfo("Adding task set " + taskSet.id + " with " + tasks.length + " tasks")
     this.synchronized { // 使用synchronized进行同步  
-      //为tasks创建一个TaskSetManager，添加到任务队列里,即将TaskSchedule,TaskSet及最大失败次数
+      //为taskSet创建一个TaskSetManager任务集管理器,最大提交任务失败次数
       //TaskSetManager跟踪每个task的执行状况，设置任务集调度策略
       val manager = createTaskSetManager(taskSet, maxTaskFailures)
       //获取taskSet对应的stageId  
       val stage = taskSet.stageId
       // taskSetsByStageIdAndAttempt存储的是stageId->[taskSet.stageAttemptId->TaskSetManager]  
-      // 更新taskSetsByStageIdAndAttempt，将上述对应关系存入  
+      // 更新taskSetsByStageIdAndAttempt,将上述对应关系存入  
       val stageTaskSets =
         taskSetsByStageIdAndAttempt.getOrElseUpdate(stage, new HashMap[Int, TaskSetManager])
       stageTaskSets(taskSet.stageAttemptId) = manager
@@ -208,8 +208,7 @@ private[spark] class TaskSchedulerImpl(
         throw new IllegalStateException(s"more than one active taskSet for stage $stage:" +
           s" ${stageTaskSets.toSeq.map { _._2.taskSet.id }.mkString(",")}")
       }
-      //schedulableBuilder是Application级别的调度器,现支持两种调度策略,FiFo先进先出和FAIR公平调度
-      //将TaskSetManager添加到schedulableBuilder中  
+      //设置任务集调度策略,现支持两种调度策略,FiFo先进先出和FAIR公平调度
       schedulableBuilder.addTaskSetManager(manager, manager.taskSet.properties)
       //如果不是本地任务,且不再接受任务  
       if (!isLocal && !hasReceivedTask) {
@@ -226,7 +225,7 @@ private[spark] class TaskSchedulerImpl(
           }
         }, STARVATION_TIMEOUT_MS, STARVATION_TIMEOUT_MS)
       }
-      // 设置标志位hasReceivedTask为true  
+      // 设置标志位hasReceivedTask为true,接受任务  
       hasReceivedTask = true
     }
     //向localActor发送reviveOffers消息
@@ -234,10 +233,11 @@ private[spark] class TaskSchedulerImpl(
   }
 
   // Label as private[scheduler] to allow tests to swap in different task set managers if necessary
-  //
+  //创建任务集管理器
   private[scheduler] def createTaskSetManager(
     taskSet: TaskSet,
     maxTaskFailures: Int): TaskSetManager = {
+    //maxTaskFailures任务集最大失败数
     new TaskSetManager(this, taskSet, maxTaskFailures)
   }
 
@@ -289,20 +289,21 @@ private[spark] class TaskSchedulerImpl(
     tasks: Seq[ArrayBuffer[TaskDescription]]): Boolean = {
     //标志位launchedTask初始化为false,用它来标记是否有task被成功分配或者launched
     var launchedTask = false
-    //循环shuffledOffers，即每个可用executor  
+    //循环shuffledOffers,即每个可用executor  
     for (i <- 0 until shuffledOffers.size) { //顺序遍历当前存在的Executor
-      //获取其executorId和host  
+      //根据WorkerOffer的executorId和host找到需要执行的任务并进一步资源处理  
       val execId = shuffledOffers(i).executorId
       val host = shuffledOffers(i).host
       //如果executor上可利用cpu数目大于每个task需要的数目，则继续task分配  
       //CPUS_PER_TASK为参数spark.task.cpus配置的值，未配置的话默认为1
       if (availableCpus(i) >= CPUS_PER_TASK) { //每台机器可用的计算资源
         try {
-          //调用每个TaskSetManager的resourceOffer方法,处理返回的每个TaskDescription,根据execId,host找到需要执行的任务并进一步进行资源处理
+          //调用每个TaskSetManager的resourceOffer方法,根据execId,host找到需要执行的任务最佳位置
+          //处理返回的每个TaskDescription,
           for (task <- taskSet.resourceOffer(execId, host, maxLocality)) {
             // 分配task成功  
             // 将task加入到tasks对应位置  
-            // 注意，tasks为一个空的，根据shuffledOffers和其可用cores生成的有一定结构的列表  
+            // 注意,tasks为一个空的,根据shuffledOffers和其可用cores生成的有一定结构的列表  
             tasks(i) += task
             val tid = task.taskId
             taskIdToTaskSetManager(tid) = taskSet // taskId与TaskSetManager的映射关系  
@@ -310,7 +311,7 @@ private[spark] class TaskSchedulerImpl(
             executorsByHost(host) += execId //host上对应的executor的映射关系  
             //availableCpus数目减去每个任务分配的CPU核数
             availableCpus(i) -= CPUS_PER_TASK
-            //确保availableCpus(i)不小于0  
+            //确保availableCpus(i)不小于0
             assert(availableCpus(i) >= 0)
             // 标志位launchedTask设置为true 
             launchedTask = true
@@ -347,10 +348,9 @@ private[spark] class TaskSchedulerImpl(
     for (o <- offers) {
       // 利用HashMap存储executorId->host映射的集合  
       executorIdToHost(o.executorId) = o.host
-      //保存集群当前所有可用的 executor id
+      //保存集群当前所有可用的 executor id->HashSet
       activeExecutorIds += o.executorId
-      //如果有新Executor加入
-      // 每个host上executors的集合  
+      //如果有新Executor加入,executors的集合 
       // 这个executorsByHost被用来计算host活跃性，反过来我们用它来决定在给定的主机上何时实现数据本地性  
       if (!executorsByHost.contains(o.host)) { //如果executorsByHost中不存在对应的host
         //executorsByHost中添加一条记录,key为host,value为new HashSet[String]()  
@@ -366,20 +366,17 @@ private[spark] class TaskSchedulerImpl(
         hostsByRack.getOrElseUpdate(rack, new HashSet[String]()) += o.host
       }
     }
-
     // Randomly shuffle offers to avoid always placing tasks on the same set of workers.
-    // 随机shuffle offers以避免总是把任务放在同一组workers上执行  
+    // 随机洗牌shuffle offers以避免总将任务总是放在同一组workers上执行  
     val shuffledOffers = Random.shuffle(offers)
     // Build a list of tasks to assign to each worker.
-    //构造一个task列表,以分配到每个worker  
+    //根据每个WorkerOffer的可用的CPU核数创建同等尺寸的任务描述[TaskDescription]数组
     val tasks = shuffledOffers.map(o => new ArrayBuffer[TaskDescription](o.cores))
-    //可以使用的cpu资源 
+    //将每个WorkerOffer的可用的CPU核数统计到可用的CPU[availableCpus]数组中
     val availableCpus = shuffledOffers.map(o => o.cores).toArray
-    //获得排序好的task集合  
-    //先调用Pool.getSortedTaskSetQueue()方法  
-    //还记得这个Pool吗，就是调度器中的调度池啊  
+    //对rootPool中的所有TaskManager按照调度算法排序
     val sortedTaskSets = rootPool.getSortedTaskSetQueue
-    //循环每个taskSet  
+    //循环每个taskSet,
     for (taskSet <- sortedTaskSets) {
       //记录日志 
       logDebug("parentName: %s, name: %s, runningTasks: %s".format(
@@ -394,12 +391,13 @@ private[spark] class TaskSchedulerImpl(
     // Take each TaskSet in our scheduling order, and then offer it each node in increasing order
     // of locality levels so that it gets a chance to launch local tasks on all of them.
     // NOTE: the preferredLocality order: PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY
+    //标志位launchedTask初始化为false,用它来标记是否有task被成功分配或者launched
     var launchedTask = false
     //为从rootPool里获取TaskSetManager列表分配资源,按照位置本地性规则调度每个TaskSet,分配的原则是就近原则,  
     //位置本地性规则的顺序是：PROCESS_LOCAL（同进程）、NODE_LOCAL（同节点）、NO_PREF、RACK_LOCAL（同机架）、ANY（任何）  
     for (taskSet <- sortedTaskSets; maxLocality <- taskSet.myLocalityLevels) {
       do {
-        //调用resourceOfferSingleTaskSet()方法进行任务集调度  
+        //调用resourceOfferSingleTaskSet()方法任务集分配资源 
         launchedTask = resourceOfferSingleTaskSet(
           taskSet, maxLocality, shuffledOffers, availableCpus, tasks)
       } while (launchedTask)
@@ -619,7 +617,9 @@ private[spark] class TaskSchedulerImpl(
     //将任务标记为丢失
     rootPool.executorLost(executorId, host)
   }
-
+/**
+ * 发送ExecutorAdded添加事件
+ */
   def executorAdded(execId: String, host: String) {
     dagScheduler.executorAdded(execId, host)
   }

@@ -43,9 +43,9 @@ private[spark] class ShuffleMapStage(
   //判断输出计算任务数和分区数一样,即所有分区上的子任务都已完成
   //如果map stage已就绪的话返回true，即所有分区均有shuffle输出。这个将会和outputLocs.contains保持一致。 
   def isAvailable: Boolean = numAvailableOutputs == numPartitions
-   //输出的位置
+   //如果Map任务记录每个Parttion的MapStatus(包括执行的Task的BlankManager地址和要传给reduce任务的Block的估算大小)
   val outputLocs = Array.fill[List[MapStatus]](numPartitions)(Nil)
-
+  //MapStatus包括执行Task的BlockManager的地址和要传给reduce任务的Block的估算大小
   def addOutputLoc(partition: Int, status: MapStatus): Unit = {
     val prevList = outputLocs(partition)
     outputLocs(partition) = status :: prevList //元素合并进List用::

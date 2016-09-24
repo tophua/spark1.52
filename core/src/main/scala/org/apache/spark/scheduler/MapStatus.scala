@@ -33,14 +33,14 @@ import org.apache.spark.util.Utils
 private[spark] sealed trait MapStatus {
   /** 
    *  Location where this task was run. 
-   *  任务运行的位置
+   *  运行Task任务的BlockManager的地址
    **/
  
   def location: BlockManagerId
 
   /**
    * Estimated size for the reduce block, in bytes.
-   * 估计大小为减少块
+   * 传给Reduce任务的Blok的估算大小
    * If a block is non-empty, then this method MUST return a non-zero size.  This invariant is
    * necessary for correctness, since block fetchers are allowed to skip zero-size blocks.
    */

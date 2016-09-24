@@ -108,7 +108,7 @@ private[spark] abstract class Stage(
 
   /** 
    *  Creates a new attempt for this stage by creating a new StageInfo with a new attempt ID.
-   *  创建新StageInfo,尝试创建一个新的ID
+   *  创建新StageInfo,尝试ID自增1
    *  */
   def makeNewStageAttempt(
       numPartitionsToCompute: Int,

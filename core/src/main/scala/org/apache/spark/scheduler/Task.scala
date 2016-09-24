@@ -228,6 +228,7 @@ private[spark] object Task {
 
   /**
    * Deserialize the list of dependencies in a task serialized with serializeWithDependencies,
+   * 
    * and return the task itself as a serialized ByteBuffer. The caller can then update its
    * ClassLoaders and deserialize the task.  
    * @return (taskFiles, taskJars, taskBytes)

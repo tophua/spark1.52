@@ -42,12 +42,12 @@ import org.apache.spark.shuffle.ShuffleWriter
  * @param locs preferred task execution locations for locality scheduling
  */
 private[spark] class ShuffleMapTask(
-  stageId: Int,
-  stageAttemptId: Int,
-  taskBinary: Broadcast[Array[Byte]],
-  partition: Partition,
-  @transient private var locs: Seq[TaskLocation],
-  internalAccumulators: Seq[Accumulator[Long]])
+  stageId: Int,//stageId
+  stageAttemptId: Int,//失败重试次数
+  taskBinary: Broadcast[Array[Byte]],//task任务广播
+  partition: Partition,//未计算的分区
+  @transient private var locs: Seq[TaskLocation],//最佳调度执行的位置
+  internalAccumulators: Seq[Accumulator[Long]])//内部累加器
     extends Task[MapStatus](stageId, stageAttemptId, partition.index, internalAccumulators)
     with Logging {
 

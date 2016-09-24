@@ -967,21 +967,25 @@ class DAGScheduler(
     // Get our pending tasks and remember them in our pendingTasks entry
     //pendingTasks存储待处理的Task,清空列表,由于当前Stage的任务刚开始提交,    
     stage.pendingTasks.clear()
-    //MapStatus包括执行Task的BlockManager的地址和要传给Reduce任务的Blok的估算大小
-    //outputLocs如果Stage是Map任务,则outputLocs记录每个Partition的MapStatus
+    
+    
     // First figure out the indexes of partition ids to compute.
     //找出还未计算的partition
     val (allPartitions: Seq[Int], partitionsToCompute: Seq[Int]) = {
       stage match {
+         
         case stage: ShuffleMapStage =>
-          //如果Stage是Map任务,那么outputLocs中partition对应的List为isEmpty,说明此partition还未计算
-          val allPartitions = 0 until stage.numPartitions
+          //如果Stage是Map任务,
+          //把分区数转换成immutable.Range集合
+          val allPartitions = 0 until stage.numPartitions      
+           //outputLocs中partition对应的List为isEmpty,表示partition还未计算
           val filteredPartitions = allPartitions.filter { id => stage.outputLocs(id).isEmpty }
           (allPartitions, filteredPartitions)
         case stage: ResultStage =>
-          //如果stage不是map任务,那么需要获取Stage的finalJob,并调用finished方法判断每个Partition的任务是否完成
+          //如果stage不是map任务,获取Stage的finalJob(ActiveJob),
           val job = stage.resultOfJob.get
           val allPartitions = 0 until job.numPartitions
+          //并调用finished方法判断每个Partition的任务是否完成
           val filteredPartitions = allPartitions.filter { id => !job.finished(id) }
           (allPartitions, filteredPartitions)
       }
@@ -990,13 +994,14 @@ class DAGScheduler(
     // Create internal accumulators if the stage has no accumulators initialized.
     // Reset internal accumulators only if this stage is not partially submitted
     // Otherwise, we may override existing accumulator values from some tasks
-   
+    //如果stage累加器为空,分区总数与待计算分区数相等,则重置内部累加器
     if (stage.internalAccumulators.isEmpty || allPartitions == partitionsToCompute) {
       stage.resetInternalAccumulators()
     }
 
     // Use the scheduling pool, job group, description, etc. from an ActiveJob associated
     // with this Stage
+    //获得Job(ActiveJob)属性文件
     val properties = jobIdToActiveJob(jobId).properties
    //将当前Stage加入运行中的Stage集合
     runningStages += stage
@@ -1004,24 +1009,27 @@ class DAGScheduler(
     // serializable. If tasks are not serializable, a SparkListenerStageCompleted event
     // will be posted, which should always come after a corresponding SparkListenerStageSubmitted
     // event.
-    
+    //SparkListenerStageSubmitted 提交之前测试任务是否序列化,如果可以序列化,则提交,否则
     outputCommitCoordinator.stageStart(stage.id)
-    //getPreferredLocs返回的 partition 的优先位置，就是这个 partition 对应的 task 的优先位置
+    //task id任务和最佳位置列表
     val taskIdToLocations = try {
       stage match {
         case s: ShuffleMapStage =>
-          //getPreferredLocs获取任务的本地性
+          //返回未计算partition的优先位置,TaskLocation
           partitionsToCompute.map { id => (id, getPreferredLocs(stage.rdd, id))}.toMap
         case s: ResultStage =>
           val job = s.resultOfJob.get
           partitionsToCompute.map { id =>
             val p = job.partitions(id)
+            //返回的 未计算partition的优先位置,TaskLocation
             (id, getPreferredLocs(stage.rdd, p))
           }.toMap
       }
     } catch {
       case NonFatal(e) =>
+        //创建新StageInfo,尝试ID自增1
         stage.makeNewStageAttempt(partitionsToCompute.size)
+        //listenerBus发送SparkListenerStageSubmitted事件
         listenerBus.post(SparkListenerStageSubmitted(stage.latestInfo, properties))
         abortStage(stage, s"Task creation failed: $e\n${e.getStackTraceString}", Some(e))
         runningStages -= stage
@@ -1038,16 +1046,17 @@ class DAGScheduler(
     // task gets a different copy of the RDD. This provides stronger isolation between tasks that
     // might modify state of objects referenced in their closures. This is necessary in Hadoop
     // where the JobConf/Configuration object is not thread-safe.
-    // 对stage进行序列化，如果是ShuffleMapStage，序列化rdd和shuffleDep，如果是ResultStage，序列化rdd和func  
+    //广播Task任务二进制,用于调度任务的执行,请注意,广播出的RDD序列化反序列化任务
     var taskBinary: Broadcast[Array[Byte]] = null
     try {
       // For ShuffleMapTask, serialize and broadcast (rdd, shuffleDep).
-      // 对于ShuffleMapTask,序列化并广播，广播的是rdd和shuffleDep  
+      // 对于ShuffleMapTask,序列化并广播,广播的是rdd和shuffleDep  
       // For ResultTask, serialize and broadcast (rdd, func).
       // 对于ResultTask,序列化并广播，广播的是rdd和func  
       val taskBinaryBytes: Array[Byte] = stage match {
         //序列化ShuffleMapStage  
-        case stage: ShuffleMapStage =>//如果Stage是map任务,那么序列化Stage的RDD及ShuffleDependency
+        case stage: ShuffleMapStage =>
+          //如果Stage是map任务,那么序列化Stage的RDD及ShuffleDependency
           closureSerializer.serialize((stage.rdd, stage.shuffleDep): AnyRef).array()
         case stage: ResultStage =>
           //如果不是map任务,那么序列化Stege及resultOfJob的处理函数
@@ -1057,10 +1066,10 @@ class DAGScheduler(
       taskBinary = sc.broadcast(taskBinaryBytes)
     } catch {
       // In the case of a failure during serialization, abort the stage.
+      //如果序列化期间失败,则终止stage
       case e: NotSerializableException =>
         abortStage(stage, "Task not serializable: " + e.toString, Some(e))
         runningStages -= stage
-
         // Abort execution
         return
       case NonFatal(e) =>
@@ -1068,27 +1077,31 @@ class DAGScheduler(
         runningStages -= stage
         return
     }
-  // 针对stage的每个分区构造task，形成tasks:ShuffleMapStage生成ShuffleMapTasks，ResultStage生成ResultTasks
+  //针对stage的每个分区构造task，形成tasks:ShuffleMapStage生成ShuffleMapTasks，ResultStage生成ResultTasks
     val tasks: Seq[Task[_]] = try {
-      stage match {
-        // 如果是ShuffleMapStage  
-        case stage: ShuffleMapStage =>//如果Stage是Map任务,则创建ShuffleMapTask
+      stage match {       
+        case stage: ShuffleMapStage =>
+          //如果Stage是ShuffleMapStage任务,则创建ShuffleMapTask
           partitionsToCompute.map { id =>
-             // 位置信息  
-            val locs = taskIdToLocations(id)            
+             //partitionsToCompute未计算的分区,找出未计算分区的最佳位置  
+            val locs = taskIdToLocations(id)  
+            //part 未计算的分区
             val part = stage.rdd.partitions(id)
-            //创建ShuffleMapTask，其中包括位置信息  
+            //创建ShuffleMapTask，其中包括任务执行的最佳位置,重试次数,分区,累加器
             new ShuffleMapTask(stage.id, stage.latestInfo.attemptId,
               taskBinary, part, locs, stage.internalAccumulators)
           }
 
         case stage: ResultStage =>//创建ResultTask
+          //获取Stage的finalJob(ActiveJob),
           val job = stage.resultOfJob.get
+          //未计算的分区partitionsToCompute
           partitionsToCompute.map { id =>
             val p: Int = job.partitions(id)
             val part = stage.rdd.partitions(p)
+            //找出未计算任务的最佳位置  
             val locs = taskIdToLocations(id)
-             //使用上述获得的 task 对应的优先位置，即 locs 来构造ResultTask
+             //其中包括任务执行的最佳位置,重试次数,分区,累加器
             new ResultTask(stage.id, stage.latestInfo.attemptId,
               taskBinary, part, locs, id, stage.internalAccumulators)
           }
@@ -1099,16 +1112,16 @@ class DAGScheduler(
         runningStages -= stage
         return
     }
-   //如果存在tasks,则利用taskScheduler.submitTasks()提交task,否则标记stage已完成  
+    //如果存在tasks,则利用taskScheduler.submitTasks()提交task,否则标记stage已完成  
     if (tasks.size > 0) {
       logInfo("Submitting " + tasks.size + " missing tasks from " + stage + " (" + stage.rdd + ")")
-     //将创建的所有Task都添加到stage.pendingTasks中
+     //将创建的所有Task都添加到stage.pendingTasks中,存储等待处理的Task
       stage.pendingTasks ++= tasks
       logDebug("New pending tasks: " + stage.pendingTasks)     
       //利用taskScheduler.submitTasks()提交task  
       taskScheduler.submitTasks(new TaskSet(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
-      //记录提交时间  
+      //更新StageInfo的任务提交时间  
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
     } else {
       // Because we posted SparkListenerStageSubmitted earlier, we should mark
@@ -1618,8 +1631,8 @@ class DAGScheduler(
    * This method is thread-safe and is called from both DAGScheduler and SparkContext.
    *
    * @param rdd whose partitions are to be looked at
-   * @param partition to lookup locality information for
-   * @return list of machines that are preferred by the partition
+   * @param partition to lookup locality information for//分区查找本地信息
+   * @return list of machines that are preferred by the partition//由分区优选的机器列表
    */
   private[spark]
   def getPreferredLocs(rdd: RDD[_], partition: Int): Seq[TaskLocation] = {
