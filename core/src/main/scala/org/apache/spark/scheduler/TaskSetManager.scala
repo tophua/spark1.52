@@ -659,6 +659,7 @@ private[spark] class TaskSetManager(//任务集管理器
 
   /**
    * Marks the task as getting result and notifies the DAG Scheduler
+   * 对TaskSet中的任务信息进行成功标记
    */
   def handleTaskGettingResult(tid: Long): Unit = {
     val info = taskInfos(tid)
@@ -694,15 +695,15 @@ private[spark] class TaskSetManager(//任务集管理器
   def handleSuccessfulTask(tid: Long, result: DirectTaskResult[_]): Unit = {
     val info = taskInfos(tid)
     val index = info.index
-    info.markSuccessful()
-    removeRunningTask(tid)
+    info.markSuccessful()//标记Task完成时间
+    removeRunningTask(tid)//从正在运行集合中移除Task
     // This method is called by "TaskSchedulerImpl.handleSuccessfulTask" which holds the
     // "TaskSchedulerImpl" lock until exiting. To avoid the SPARK-7655 issue, we should not
     // "deserialize" the value when holding a lock to avoid blocking other threads. So we call
     // "result.value()" in "TaskResultGetter.enqueueSuccessfulTask" before reaching here.
     // Note: "result.value()" only deserializes the value when it's called at the first time, so
     // here "result.value()" just returns the value and won't block other threads.
-    //
+    //DAGSchedulerEventProcessLoop接收CompletionEvent消息,将处理交给CompletionEvent
     sched.dagScheduler.taskEnded(
        //Success返回任务成功
       tasks(index), Success, result.value(), result.accumUpdates, info, result.metrics)
@@ -719,7 +720,9 @@ private[spark] class TaskSetManager(//任务集管理器
       logInfo("Ignoring task-finished event for " + info.id + " in stage " + taskSet.id +
         " because task " + index + " has already completed successfully")
     }
+    //根据索引删除TaskInfo
     failedExecutors.remove(index)
+    //标记全部任务完成
     maybeFinishTaskSet()
   }
 

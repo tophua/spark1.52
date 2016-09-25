@@ -419,27 +419,27 @@ private[spark] class TaskSchedulerImpl(
         //TaskState状态失去整个的执行者,所以记住它已经消失了
         if (state == TaskState.LOST && taskIdToExecutorId.contains(tid)) {
           // We lost this entire executor, so remember that it's gone         
-          val execId = taskIdToExecutorId(tid)
+          val execId = taskIdToExecutorId(tid)//根据taskId获得execId
           if (activeExecutorIds.contains(execId)) {
-            removeExecutor(execId)
-            failedExecutor = Some(execId)
+            removeExecutor(execId)//删除Executor
+            failedExecutor = Some(execId)//标记失败execId
           }
         }
         taskIdToTaskSetManager.get(tid) match {
           case Some(taskSet) =>
             //如果Task的状态是任务成功完成
             if (TaskState.isFinished(state)) {
-              taskIdToTaskSetManager.remove(tid) //删除任务
-              taskIdToExecutorId.remove(tid) //删除任务
+              taskIdToTaskSetManager.remove(tid) //删除此任务
+              taskIdToExecutorId.remove(tid) //删除此任务
             }
             if (state == TaskState.FINISHED) {
-              taskSet.removeRunningTask(tid) //删除任务
-              //处理任务计算结果并返回结果
+              taskSet.removeRunningTask(tid) //删除此任务
+              //处理执行任务成功的返回结果
               taskResultGetter.enqueueSuccessfulTask(taskSet, tid, serializedData)
             } else if (Set(TaskState.FAILED, TaskState.KILLED, TaskState.LOST).contains(state)) {
               //TaskSetManager标记任务已经结束,注意这里不一定是成功结束的
               taskSet.removeRunningTask(tid)
-              //执行失败任务的返回结果,
+              //执行失败任务的返回结果
               taskResultGetter.enqueueFailedTask(taskSet, tid, state, serializedData)
             }
           case None =>
@@ -485,7 +485,9 @@ private[spark] class TaskSchedulerImpl(
     //blockManagerMaster持有blockManagerMasterActor发送BlockManagerHeartBeat消息到 BlockManagerMasterEndpoint   
     dagScheduler.executorHeartbeatReceived(execId, metricsWithStageIds, blockManagerId)
   }
-
+/**
+ * 对TaskSet中的任务信息进行成功标记
+ */
   def handleTaskGettingResult(taskSetManager: TaskSetManager, tid: Long): Unit = synchronized {
     taskSetManager.handleTaskGettingResult(tid)
   }

@@ -277,6 +277,7 @@ private[spark] class Executor(
         //否则序列化得到的Task执行的结果  
         val resultSer = env.serializer.newInstance()
         val beforeSerialization = System.currentTimeMillis()
+        //任务执行结果简单的序列化
         val valueBytes = resultSer.serialize(value)
         val afterSerialization = System.currentTimeMillis()
         //计量统计
@@ -292,12 +293,13 @@ private[spark] class Executor(
           //执行垃圾回收消耗的时间
           m.setJvmGCTime(computeTotalGcTime() - startGCTime)
           //执行结果序列化消耗的时间
-          m.setResultSerializationTime(afterSerialization - beforeSerialization)         
+          m.setResultSerializationTime(afterSerialization - beforeSerialization) 
+          //更新累加器值
           m.updateAccumulators()
         }
-        //创建直接返回给Driver的结果对象DirectTaskResult  
+        //创建直接返回给Driver的结果对象DirectTaskResult,封装序列化结果,累加器,任务测量对象
         val directResult = new DirectTaskResult(valueBytes, accumUpdates, task.metrics.orNull)
-        //简单序列化
+        //序列化directResult
         val serializedDirectResult = ser.serialize(directResult)
         val resultSize = serializedDirectResult.limit
 

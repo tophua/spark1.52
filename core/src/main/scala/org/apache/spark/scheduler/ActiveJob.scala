@@ -32,7 +32,7 @@ private[spark] class ActiveJob(
     val func: (TaskContext, Iterator[_]) => _,//作用于最后一个stage上的函数
     val partitions: Array[Int],//分区列表,注意这里表示从多少个分区读入数据并进行处理
     val callSite: CallSite,
-    val listener: JobListener,
+    val listener: JobListener,//Job监听器
     val properties: Properties) {
  //任务的分区数量
   val numPartitions = partitions.length

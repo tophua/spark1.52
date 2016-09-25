@@ -73,7 +73,7 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
                 return
               }
               logDebug("Fetching indirect task result for TID %s".format(tid))
-              //
+              //对TaskSet中的任务信息进行成功标记
               scheduler.handleTaskGettingResult(taskSetManager, tid)
               //从远程的BlockManager获取计算结果
               val serializedTaskResult = sparkEnv.blockManager.getRemoteBytes(blockId)

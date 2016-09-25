@@ -100,18 +100,19 @@ private[spark] abstract class Task[T](
       //任务结束,执行任务结束时的回调函数
       context.markTaskCompleted()
       try {
+        //内存清理工作
         Utils.tryLogNonFatalError {
           // Release memory used by this thread for shuffles 
-          //为shuffles释放当前线程使用的内存  
+          //释放当前线程使用的内存通过ShuffleMemoryManager获得的内存
           SparkEnv.get.shuffleMemoryManager.releaseMemoryForThisTask()
         }
         Utils.tryLogNonFatalError {
-          // Release memory used by this thread for unrolling blocks
-          // 为unrolling块释放当前线程使用的内存  
+          //Release memory used by this thread for unrolling blocks
+          //释放当前线程在MemoryStore的releaseUnrollMemoryForThisTask中展开占用的内存
           SparkEnv.get.blockManager.memoryStore.releaseUnrollMemoryForThisTask()
         }
       } finally {
-         // 释放TaskContext  
+         //释放当前线程用于聚合计算占用的内存 
         TaskContext.unset()
       }
     }
@@ -128,7 +129,7 @@ private[spark] abstract class Task[T](
   def preferredLocations: Seq[TaskLocation] = Nil
 
   // Map output tracker epoch. Will be set by TaskScheduler.
-  // map 输出跟踪值,将由任务调度器
+  // map 输出跟踪失败值,将由任务调度器
   var epoch: Long = -1
 
   var metrics: Option[TaskMetrics] = None

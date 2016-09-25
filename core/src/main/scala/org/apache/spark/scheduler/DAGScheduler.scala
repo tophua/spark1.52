@@ -129,7 +129,7 @@ class DAGScheduler(
   //
   // TODO: Garbage collect information about failure epochs when we know there are no more
   //       stray messages to detect.
- //failedEpoch存储的是系统探测到的失效节点的集合，存储的是execId->host的对应关系
+ //failedEpoch存储的是系统探测到的失效节点的集合，存储的是execId->失败次数对应关系
   private val failedEpoch = new HashMap[String, Long]
 
   private [scheduler] val outputCommitCoordinator = env.outputCommitCoordinator
@@ -181,6 +181,7 @@ class DAGScheduler(
 
   /**
    * Called by the TaskSetManager to report task completions or failures.
+   * 调用TaskSetManager报告Task完成或者失败
    */
   def taskEnded(
       task: Task[_],
@@ -189,7 +190,7 @@ class DAGScheduler(
       accumUpdates: Map[Long, Any],
       taskInfo: TaskInfo,
       taskMetrics: TaskMetrics): Unit = {
-    //DAGSchedulerEventProcessLoop接收CompletionEvent消息,将处理交给
+    //DAGSchedulerEventProcessLoop接收CompletionEvent消息,将处理交给CompletionEvent
     eventProcessLoop.post(
       CompletionEvent(task, reason, result, accumUpdates, taskInfo, taskMetrics))
   }
@@ -1118,7 +1119,7 @@ class DAGScheduler(
      //将创建的所有Task都添加到stage.pendingTasks中,存储等待处理的Task
       stage.pendingTasks ++= tasks
       logDebug("New pending tasks: " + stage.pendingTasks)     
-      //利用taskScheduler.submitTasks()提交task  
+      //利用taskScheduler.submitTasks()提交task,
       taskScheduler.submitTasks(new TaskSet(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
       //更新StageInfo的任务提交时间  
@@ -1194,7 +1195,7 @@ class DAGScheduler(
     outputCommitCoordinator.taskCompleted(
       stageId,
       task.partitionId,
-      event.taskInfo.attemptNumber, // this is a task attempt number
+      event.taskInfo.attemptNumber, // this is a task attempt number,Taks任务重试次数
       event.reason)
 
     // The success case is dealt with separately below, since we need to compute accumulator
@@ -1218,13 +1219,9 @@ class DAGScheduler(
         //向listenerBus发送SparkListenerTaskEnd
         listenerBus.post(SparkListenerTaskEnd(stageId, stage.latestInfo.attemptId, taskType,
           event.reason, event.taskInfo, event.taskMetrics))
-        stage.pendingTasks -= task //删除任务
+        stage.pendingTasks -= task //从存储等待处理的Task的列表删除此任务
         task match {
-          case rt: ResultTask[_, _] =>
-            //ResultTask 任务处理结果
-            //1)标识ActiveJob的finished里对应分区的任务完成状态,并且将已完成的任务数numFinished加1
-            //2)如果ActiveJob的所有任务都完成,则标记当前Stage完成并SparkListenerJobEnd发送事件
-            //3)调用JobWaiter的taskSucceeded方法,以便通知JobWaiter有任务成功
+          case rt: ResultTask[_, _] =>           
             // Cast to ResultStage here because it's part of the ResultTask
             // TODO Refactor this out to a function that accepts a ResultStage
             val resultStage = stage.asInstanceOf[ResultStage]
@@ -1233,13 +1230,14 @@ class DAGScheduler(
                 if (!job.finished(rt.outputId)) {
                   //1)标识ActiveJob的finished里对应分区的任务完成状态,并且将已完成的任务数numFinished加1
                   updateAccumulators(event)
-                  job.finished(rt.outputId) = true//标识任务完成,即分区ID
-                  job.numFinished += 1
+                  job.finished(rt.outputId) = true//标识对应分区的任务为完成状态
+                  job.numFinished += 1//将已完成的任务数加1
                   // If the whole job has finished, remove it
                   //2)如果ActiveJob的所有任务都完成,则标记当前Stage完成并SparkListenerJobEnd发送事件
                   if (job.numFinished == job.numPartitions) {
                     markStageAsFinished(resultStage)//标记stage完成
-                    cleanupStateForJobAndIndependentStages(job)
+                    cleanupStateForJobAndIndependentStages(job)   
+                    //SparkListenerJobEnd发送事件
                     listenerBus.post(
                       SparkListenerJobEnd(job.jobId, clock.getTimeMillis(), JobSucceeded))
                   }
@@ -1253,7 +1251,7 @@ class DAGScheduler(
                   } catch {
                     case e: Exception =>
                       // TODO: Perhaps we want to mark the resultStage as failed?
-                      //直接标示失败
+                      //调用JobWaiter的taskSucceeded方法,以便通知JobWaiter有任务失败
                       job.listener.jobFailed(new SparkDriverExecutionException(e))
                   }
                 }
@@ -1263,28 +1261,24 @@ class DAGScheduler(
             }
 
           case smt: ShuffleMapTask =>
-            /**
-             * 1)将Task的partitionId和MapStatus追加到Stage的outputLocs中
-             * 2)将当前Stage标记为完成,然后将前当Stage的ShuffleId和OutputLocs中的MapStatus注册到MapOutTracker
-             *   这里注册的Map任务状态将最终被Reduce任务作用
-             * 3)如果Stage的OutputLocs中某个分区的输出为Nil,那么说明有任务失败,这时候需要再次提交此Stage
-             * 4)如果不存在Stage的outputLocs中某个分区的输出为Nil,那么说明所有任务执行成功了,这时需要遍历WaitingStage
-             *   中的Stage并将它们放入runningStage,最后调用submitMissgTasks方法逐个提交这些准备运行的Stage任务
-             */
+            //将Stage强制转换ShuffleMapStage
             val shuffleStage = stage.asInstanceOf[ShuffleMapStage]
+            //更新累加器
             updateAccumulators(event)
-            //
+            //将CompletionEvent事件result强制转换MapStatus
             val status = event.result.asInstanceOf[MapStatus]
+            //获得executorId
             val execId = status.location.executorId
             logDebug("ShuffleMapTask finished on " + execId)
+            //判断是否有失败execId,并且ShuffleMapTask的epoch值小于等于HashMap存储execId的值
             if (failedEpoch.contains(execId) && smt.epoch <= failedEpoch(execId)) {
+              //忽略可能是来自executor伪造ShuffleMapTask完成
               logInfo(s"Ignoring possibly bogus $smt completion from executor $execId")
-            } else {
-              
+            } else {              
               //将Task的partitionId和MapStatus追加到Stage的outputLocs中
               shuffleStage.addOutputLoc(smt.partitionId, status)
             }
-            //如果该Stage的所有Task都结束,那么需要整体结果注册到MapOutputTrackerMaster
+            //判断运行stage列表包含当前shuffleStage,及shuffleStage待处理的任务列表为空
             if (runningStages.contains(shuffleStage) && shuffleStage.pendingTasks.isEmpty) {
               //将当前Stage标记为完成
               markStageAsFinished(shuffleStage)
@@ -1299,16 +1293,14 @@ class DAGScheduler(
               // epoch incremented to refetch them.
               // TODO: Only increment the epoch number if this is not the first time
               //       we registered these map outputs.         
-              //将前当Stage的ShuffleId和OutputLocs中的MapStatus注册到MapOutTracker,如果该Stage的所有Task都结束了,
-              //将整体结束注册到MapOutputTrackMaster
-              //这样下一个Stage的Task就可以通过它来获取Shuffle结果的元数据信息,进而从Shuffle数据所在的节点获取数据了
+              //将前当Stage的ShuffleId和OutputLocs中的MapStatus注册到MapOutTracker,这里注册的Map任务状态最终被
+              //reduce任务所用
               mapOutputTracker.registerMapOutputs(
-                shuffleStage.shuffleDep.shuffleId,
-                shuffleStage.outputLocs.map(list => if (list.isEmpty) null else list.head),
+                shuffleStage.shuffleDep.shuffleId,//将前当Stage的ShuffleId
+                shuffleStage.outputLocs.map(list => if (list.isEmpty) null else list.head),//OutputLocs中的MapStatus
                 changeEpoch = true)
-
               clearCacheLocs()
-              //如果Stage的OutputLocs中某个分区的输出为Nil,那么说明有任务失败,这时候需要再次提交此Stage
+              //如果Stage的OutputLocs中存储的分区包含Nil,说明有任务失败,需再次提交此Stage
               if (shuffleStage.outputLocs.contains(Nil)) {
                 // Some tasks had failed; let's resubmit this shuffleStage
                 // TODO: Lower-level scheduler should also deal with this
@@ -1318,15 +1310,14 @@ class DAGScheduler(
                       .map(_._2).mkString(", "))
                 submitStage(shuffleStage)//再次提交此Stage
               } else {
-                //如果不存在Stage的outputLocs中某个分区的输出为Nil,那么说明所有任务执行成功了,这时需要遍历WaitingStage
-                //中的Stage并将它们放入runningStage,最后调用submitMissgTasks方法逐个提交这些准备运行的Stage任务
+                //如果Stage的OutputLocs中存储的分区不包含Nil,说明所有任务执行成功执行
                 val newlyRunnable = new ArrayBuffer[Stage]
                 for (shuffleStage <- waitingStages) {//重新提交这个Stage,重新计算丢失部分
                   logInfo("Missing parents for " + shuffleStage + ": " +
                     //部分Stage失败重新提交
                     getMissingParentStages(shuffleStage))
                 }
-                //如果
+                //遍历WaitingStage中的Stage并将它们放入runningStage
                 for (shuffleStage <- waitingStages if getMissingParentStages(shuffleStage).isEmpty)
                 {
                   newlyRunnable += shuffleStage//可以提交Stage
@@ -1335,13 +1326,13 @@ class DAGScheduler(
                 waitingStages --= newlyRunnable
                 //增加正在运行Stage
                 runningStages ++= newlyRunnable
-                for {
+                for {                  
                   shuffleStage <- newlyRunnable.sortBy(_.id)
                   jobId <- activeJobForStage(shuffleStage)
                 } {
                   logInfo("Submitting " + shuffleStage + " (" +
                     shuffleStage.rdd + "), which is now runnable")
-                    //提交Stage的Task
+                    //逐个提交Stage运行Task任务
                   submitMissingTasks(shuffleStage, jobId)
                 }
               }
@@ -1498,18 +1489,22 @@ class DAGScheduler(
    */
   private def markStageAsFinished(stage: Stage, errorMessage: Option[String] = None): Unit = {
     val serviceTime = stage.latestInfo.submissionTime match {
-      case Some(t) => "%.03f".format((clock.getTimeMillis() - t) / 1000.0)
+      case Some(t) => "%.03f".format((clock.getTimeMillis() - t) / 1000.0)//设置最新提交时间格式化为秒
       case _ => "Unknown"
     }
     if (errorMessage.isEmpty) {
       logInfo("%s (%s) finished in %s s".format(stage, stage.name, serviceTime))
+      //设置StageInfo完成时间
       stage.latestInfo.completionTime = Some(clock.getTimeMillis())
     } else {
       stage.latestInfo.stageFailed(errorMessage.get)
       logInfo("%s (%s) failed in %s s".format(stage, stage.name, serviceTime))
     }
+    //stage完成,移除stage
     outputCommitCoordinator.stageEnd(stage.id)
+    //发送SparkListenerStageCompleted完成事件
     listenerBus.post(SparkListenerStageCompleted(stage.latestInfo))
+    //删除待运行Stage
     runningStages -= stage
   }
 

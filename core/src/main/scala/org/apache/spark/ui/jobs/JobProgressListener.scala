@@ -213,7 +213,9 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
       stageIdToData.getOrElseUpdate((stageInfo.stageId, stageInfo.attemptId), new StageUIData)
     }
   }
-
+/**
+* 作业Job完成
+**/
   override def onJobEnd(jobEnd: SparkListenerJobEnd): Unit = synchronized {
     val jobData = activeJobs.remove(jobEnd.jobId).getOrElse {
       logWarning(s"Job completed for unknown job ${jobEnd.jobId}")

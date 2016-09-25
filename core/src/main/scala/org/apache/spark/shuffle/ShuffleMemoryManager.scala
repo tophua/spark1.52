@@ -138,7 +138,7 @@ class ShuffleMemoryManager protected (
 
   /** 
    *  Release all memory for the current task and mark it as inactive(不活动) (e.g. when a task ends). 
-   *  释放当前任务的所有内存，并将其标记为不活动
+   *  释放当前线程使用的内存通过ShuffleMemoryManager获得的内存
    *  */
   def releaseMemoryForThisTask(): Unit = synchronized {
     val taskAttemptId = currentTaskAttemptId()

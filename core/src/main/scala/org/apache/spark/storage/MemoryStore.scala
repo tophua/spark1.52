@@ -605,7 +605,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   /**
    * Release memory used by this task for unrolling blocks.
    * If the amount is not specified, remove the current task's allocation altogether.
-   * 释放当前任务中展开的内存,如果未指定内存,则全部删除当前任务的分配的内存
+   * 释放当前任务中展开的内存,如果未指定内存,则全部删除当前任务的分配的内存  
    */
   def releaseUnrollMemoryForThisTask(memory: Long = -1L): Unit = {
     val taskAttemptId = currentTaskAttemptId()

@@ -31,13 +31,13 @@ private[spark] class JobWaiter[T](
     resultHandler: (Int, T) => Unit)
   extends JobListener {
 
-  private var finishedTasks = 0 //任务完成数
+  private var finishedTasks = 0 //完成任务数
 
   // Is the job as a whole finished (succeeded or failed)?
-  // 一个任务全完成或失败
+  // 一个Job全完成或失败
   @volatile
   private var _jobFinished = totalTasks == 0
-  //任务是否完成
+  //job是否完成
   def jobFinished: Boolean = _jobFinished
 
   // If the job is finished, this will be its result. In the case of 0 task jobs (e.g. zero
@@ -64,17 +64,17 @@ private[spark] class JobWaiter[T](
     if (_jobFinished) {
       throw new UnsupportedOperationException("taskSucceeded() called on a finished JobWaiter")
     }
-    //调用用户逻辑处理结果
+    //通过调用匿名函数,将当前任务的结果加入最终结果集
     resultHandler(index, result.asInstanceOf[T])
     //只有Job的所有Task都完成,Job才标记完成,任意一个Task失败都标记该Job失败 
-    finishedTasks += 1
-    // 已完成Task数目是否等于总Task数目  
+    finishedTasks += 1//自增1,
+    //当完成任务数finishedTasks等于全部任务数totalTasks时
     if (finishedTasks == totalTasks) {//该Job结束
-       //设置标志位_jobFinished为ture  
+       //标记job完成
       _jobFinished = true
        //作业运行结果为成功  
       jobResult = JobSucceeded
-      //会通知JobWaiter.awaitResult任务结束
+      //唤醒等待的线程JobWaiter.awaitResult任务结束
       this.notifyAll()
     }
   }
