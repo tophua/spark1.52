@@ -27,12 +27,16 @@ import org.apache.spark.annotation.DeveloperApi
  * :: DeveloperApi ::
  * A simple open hash table optimized for the append-only use case, where keys
  * are never removed, but the value for each key may be changed.
- *
+ * 当需要对Value进行聚合时,会使用AppendOnlyMap作为buffer,它是一个只支持追加的map,
+ * 可以修改某个key对应的value,但不能删除已存在的key.使用它是因为在shuffle的map端,删除key不是必须的
  * This implementation uses quadratic probing with a power-of-2 hash table
  * size, which is guaranteed to explore all spaces for each key (see
  * http://en.wikipedia.org/wiki/Quadratic_probing).
- *
+ * AppendOnlyMap也是一个hash map,但它不是像HashMap一样在Hash冲突时采用链接法,而是采用二次探测法
+ * 它就不需要采用entry这种对kv对的包装,而是把kv对写同一个object数组里,减少了entry的对象头带来的内存开销
+ * 但是二次探测法有个缺点,就是删除元素时比较复杂.
  * The map can support up to `375809638 (0.7 * 2 ^ 29)` elements.
+ * 该Mpa支持高达375809638(0.7 * 2 * 29)的元素。
  *
  * 缓存集合算法
  *
@@ -186,7 +190,10 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
     new Iterator[(K, V)] {
       var pos = -1
 
-      /** Get the next value we should return from next(), or null if we're finished iterating */
+      /** 
+       *  Get the next value we should return from next(), or null if we're finished iterating 
+       *  获取下一个值,如果为空完成迭代
+       *  */
       def nextValue(): (K, V) = {
         //处理位置- 1视为空值
         if (pos == -1) { // Treat position -1 as looking at the null value          
@@ -306,7 +313,8 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
       keyIndex += 1
     }
     assert(curSize == newIndex + (if (haveNullValue) 1 else 0))
-    //2)利用Sort,KVArraySortDataFormat以及指定的比较器进行排序,这其中用到了TimeSort也是优化版的归并排序
+    //2)利用Sort,KVArraySortDataFormat以及指定的比较器进行排序,
+    //由于所有元素都在一个数组里,所以在对这个map里的kv对进行排序时,数组排序的算法在数组内做,节省了内存,效率也比较高
     new Sorter(new KVArraySortDataFormat[K, AnyRef]).sort(data, 0, newIndex, keyComparator)
     //3)生成新的迭代器
     new Iterator[(K, V)] {

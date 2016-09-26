@@ -34,7 +34,7 @@ import org.apache.spark.util.collection.OpenHashSet
  * :: DeveloperApi ::
  * Estimates the sizes of Java objects (number of bytes of memory they occupy), for use in
  * memory-aware caches.
- *
+ * java对象的大小估计(内存占用的字节数),用于在内存中的缓存
  * Based on the following JavaWorld article:
  * http://www.javaworld.com/javaworld/javaqa/2003-12/02-qa-1226-sizeof.html
  */
@@ -45,7 +45,7 @@ object SizeEstimator extends Logging {
    * Estimate the number of bytes that the given object takes up on the JVM heap. The estimate
    * includes space taken up by objects referenced by the given object, their references, and so on
    * and so forth.
-   *
+   * 估计的字节数，给定的对象占用的JVM堆,该估计包括由给定对象引用的对象所占用的空间
    * This is useful for determining the amount of heap space a broadcast variable will occupy on
    * each executor or the amount of space each object will take when caching objects in
    * deserialized form. This is not the same as the serialized size of the object, which will
@@ -55,6 +55,7 @@ object SizeEstimator extends Logging {
   def estimate(obj: AnyRef): Long = estimate(obj, new IdentityHashMap[AnyRef, AnyRef])
 
   // Sizes of primitive types
+  // 原始类型的大小
   private val BYTE_SIZE = 1
   private val BOOLEAN_SIZE = 1
   private val CHAR_SIZE = 2
@@ -67,24 +68,31 @@ object SizeEstimator extends Logging {
   // Fields can be primitive types, sizes are: 1, 2, 4, 8. Or fields can be pointers. The size of
   // a pointer is 4 or 8 depending on the JVM (32-bit or 64-bit) and UseCompressedOops flag.
   // The sizes should be in descending order, as we will use that information for fields placement.
+  //字段可以是原始类型,尺寸大小1,2,4,8,或字段可以是指针,一个指针的大小是4或8取决于JVM(32位或64位)
+  //尺寸应以递减的顺序排列,正如我们使用该字段信息的位置
   private val fieldSizes = List(8, 4, 2, 1)
 
   // Alignment boundary for objects
   // TODO: Is this arch dependent ?
+  //对象的对齐边界
   private val ALIGN_SIZE = 8
 
   // A cache of ClassInfo objects for each class
+  //每个classinfo对象缓存
   private val classInfos = new ConcurrentHashMap[Class[_], ClassInfo]
 
   // Object and pointer sizes are arch dependent
+  //对象和指针的大小是依赖操作系统架构
   private var is64bit = false
 
   // Size of an object reference
+  //对象引用的大小
   // Based on https://wikis.oracle.com/display/HotSpotInternals/CompressedOops
   private var isCompressedOops = false
   private var pointerSize = 4
 
   // Minimum size of a java.lang.Object
+  //最小对象
   private var objectSize = 8
 
   initialize()
@@ -175,6 +183,9 @@ object SizeEstimator extends Logging {
    * Cached information about each class. We remember two things: the "shell size" of the class
    * (size of all non-static fields plus the java.lang.Object size), and any fields that are
    * pointers to objects.
+   * 每个类的缓存信息,
+   * shellSize:所有非静态字段的大小
+   * pointerFields:指向对象的指针的任何字段
    */
   private class ClassInfo(
     val shellSize: Long,
@@ -209,6 +220,7 @@ object SizeEstimator extends Logging {
   }
 
   // Estimate the size of arrays larger than ARRAY_SIZE_FOR_SAMPLING by sampling.
+  // 估计数组的大小比ARRAY_SIZE_FOR_SAMPLING
   private val ARRAY_SIZE_FOR_SAMPLING = 400
   private val ARRAY_SAMPLE_SIZE = 100 // should be lower than ARRAY_SIZE_FOR_SAMPLING
 
@@ -217,6 +229,7 @@ object SizeEstimator extends Logging {
     val elementClass = arrayClass.getComponentType()
 
     // Arrays have object header and length field which is an integer
+    //数组有对象头和长度字段,该字段是一个整数
     var arrSize: Long = alignSize(objectSize + INT_SIZE)
 
     if (elementClass.isPrimitive) {
@@ -236,6 +249,8 @@ object SizeEstimator extends Logging {
         // Estimate the size of a large array by sampling elements without replacement.
         // To exclude the shared objects that the array elements may link, sample twice
         // and use the min one to caculate array size.
+        //不需要更换的采样元件估计大数组的大小,排除数组元素可能链接的共享对象
+        //两次样使用分钟计算数组的大小
         val rand = new Random(42)
         val drawn = new OpenHashSet[Int](2 * ARRAY_SAMPLE_SIZE)
         val s1 = sampleArray(array, state, rand, drawn, length)
@@ -293,9 +308,11 @@ object SizeEstimator extends Logging {
 
   /**
    * Get or compute the ClassInfo for a given class.
+   * 获取或计算一个给定的类的classinfo
    */
   private def getClassInfo(cls: Class[_]): ClassInfo = {
     // Check whether we've already cached a ClassInfo for this class
+    //检查是否已经缓存的classinfo
     val info = classInfos.get(cls)
     if (info != null) {
       return info
@@ -307,6 +324,7 @@ object SizeEstimator extends Logging {
     val sizeCount = Array.fill(fieldSizes.max + 1)(0)
 
     // iterate through the fields of this class and gather information.
+    // 通过的迭代收集信息
     for (field <- cls.getDeclaredFields) {
       if (!Modifier.isStatic(field.getModifiers)) {
         val fieldClass = field.getType
@@ -347,9 +365,11 @@ object SizeEstimator extends Logging {
 
     // Should choose a larger size to be new shellSize and clearly alignedSize >= shellSize, and
     // round up the instance filed blocks
+    //应选择更大的尺寸,并建立了实例块
     shellSize = alignSizeUp(alignedSize, pointerSize)
 
     // Create and cache a new ClassInfo
+    // 创建新classinfo和缓存
     val newInfo = new ClassInfo(shellSize, pointerFields)
     classInfos.put(cls, newInfo)
     newInfo
@@ -363,6 +383,7 @@ object SizeEstimator extends Logging {
    * will only have n trailing 1s(0b00...001..1). ~(alignSize - 1) will be 0b11..110..0. Hence,
    * (size + alignSize - 1) & ~(alignSize - 1) will set the last n bits to zeros, which leads to
    * multiple of alignSize.
+   * 比较算法大小,这个算法大小必须是2^,否则结果将是错误的
    */
   private def alignSizeUp(size: Long, alignSize: Int): Long =
     (size + alignSize - 1) & ~(alignSize - 1)

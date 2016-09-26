@@ -24,15 +24,19 @@ import org.apache.spark.util.collection.{AppendOnlyMap, ExternalAppendOnlyMap}
  * :: DeveloperApi ::
  * A set of functions used to aggregate data.
  * 当数据集键值对形式组织的时候,聚合具有相同键的元素进行一些统计
+ * 
+ * shuffle中的aggregate操作实际是把一个KV对的集合,变成一个KC对的map,C是指combiner,是V聚合成的结果.
+ * Aggregator的三个类型参数K,V,C即代表Key的类型,Value的类型和Combiner的类型。
+ * 
  * @param createCombiner function to create the initial value of the aggregation.
  * @param mergeValue function to merge a new value into the aggregation result.
  * @param mergeCombiners function to merge outputs from multiple mergeValue function.
  */
 @DeveloperApi
 case class Aggregator[K, V, C] (
-    createCombiner: V => C,//是将原RDD中的K类型转换为Iterable[V]类型,实现为CompactBuffer
-    mergeValue: (C, V) => C,//实则就是将原RDD的元素追加到CompactBuffer中,即将追加操作(+=)视为合并操作
-    mergeCombiners: (C, C) => C) {//则负责针对每个key值所对应的Iterable[V],提供合并功能
+    createCombiner: V => C,//描述了对于原KV对里由一个Value生成Combiner,以作为聚合的起始点
+    mergeValue: (C, V) => C,//描述了如何把一个新的Value(类型为V)合并到之前聚合的结果(类型为C)里
+    mergeCombiners: (C, C) => C) {//描述了如何把两个分别聚合好了的Combiner再聚合
 
   // When spilling is enabled sorting will happen externally, but not necessarily with an
   // ExternalSorter.

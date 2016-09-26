@@ -23,7 +23,7 @@ import org.apache.spark.util.SizeEstimator
 
 /**
  * A general interface for collections to keep track of their estimated sizes in bytes.
- * 通用接口集合跟踪估计字节大小
+ * 集合跟踪估计字节大小
  * We sample with a slow exponential back-off using the SizeEstimator to amortize the time,
  * as each call to SizeEstimator is somewhat expensive (order of a few milliseconds).
  */

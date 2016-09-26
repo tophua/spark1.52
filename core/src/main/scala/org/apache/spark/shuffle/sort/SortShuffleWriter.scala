@@ -42,6 +42,7 @@ private[spark] class SortShuffleWriter[K, V, C](
   // Are we in the process of stopping? Because map tasks can call stop() with success = true
   // and then call stop() with success = false if they get an exception, we want to make sure
   // we don't try deleting files, etc twice.
+  //我们在停止的过程中,因为map任务调用停止成功能为true,
   private var stopping = false
 
   private var mapStatus: MapStatus = null
@@ -51,7 +52,7 @@ private[spark] class SortShuffleWriter[K, V, C](
 
   /** 
    *  Write a bunch of records to this task's output 
-   *  这个任务的输出写一堆记录
+   *  把RDD分区中的数据写入文件
    * */
   
   override def write(records: Iterator[Product2[K, V]]): Unit = {
@@ -75,6 +76,7 @@ private[spark] class SortShuffleWriter[K, V, C](
       new BypassMergeSortShuffleWriter[K, V](SparkEnv.get.conf, blockManager, dep.partitioner,
         writeMetrics, Serializer.getSerializer(dep.serializer))
     } else {
+      //在这种情况下,分类不聚合或也不排序,因为我们不在乎键是否在每个分区中进行排序,如果正在运行的操作sortbykey,这将在减少方面
       // In this case we pass neither an aggregator nor an ordering to the sorter, because we don't
       // care whether the keys get sorted in each partition; that will be done on the reduce side
       // if the operation being run is sortByKey.
@@ -87,9 +89,9 @@ private[spark] class SortShuffleWriter[K, V, C](
     // Don't bother including the time to open the merged output file in the shuffle write time,
     // because it just opens a single file, so is typically too fast to measure accurately
     // (see SPARK-3570).
-    //获取当前任务要输出的文件路径
+    //获取当前任务要输出数据文件的路径
     val output = shuffleBlockResolver.getDataFile(dep.shuffleId, mapId)
-    //获取或创建临时文件
+    //获取或创建临时数据文件
     val tmp = Utils.tempFileWith(output)    
     //创建BlockId
     val blockId = ShuffleBlockId(dep.shuffleId, mapId, IndexShuffleBlockResolver.NOOP_REDUCE_ID)

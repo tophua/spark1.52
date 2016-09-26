@@ -77,7 +77,7 @@ abstract class SortDataFormat[K, Buffer] {
 /**
  * Supports sorting an array of key-value pairs where the elements of the array alternate between
  * keys and values, as used in [[AppendOnlyMap]].
- *
+ * 把所有的kv对移动数组的前端,然后进行排序
  * @tparam K Type of the sort key of each element
  * @tparam T Type of the Array we're sorting. Typically this must extend AnyRef, to support cases
  *           when the keys and values are not the same type.
