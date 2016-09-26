@@ -144,6 +144,7 @@ class HadoopRDD[K, V](
   // Returns a JobConf that will be used on slaves to obtain input splits for Hadoop reads.
   //返回一个jobconf将用于从节点获得输入Hadoop读取
   protected def getJobConf(): JobConf = {
+    //从广播变量中获取jobconfig
     val conf: Configuration = broadcastedConf.value.value
     if (shouldCloneJobConf) {
       // Hadoop Configuration objects are not thread-safe, which may lead to various problems if
@@ -226,7 +227,7 @@ class HadoopRDD[K, V](
       logInfo("Input split: " + split.inputSplit)
       //从broadcast中获取JobConf,
       val jobConf = getJobConf()
-      //用于计算字节读取的测量信息
+      //创建taskMetrics用于计算字节读取的测量信息
       val inputMetrics = context.taskMetrics.getInputMetricsForReadMethod(DataReadMethod.Hadoop)
 
       // Find a function that will return the FileSystem bytes read by this thread. Do this before
@@ -239,6 +240,7 @@ class HadoopRDD[K, V](
           case _ => None
         }
       }
+      //从文件系统读取的字节数
       inputMetrics.setBytesReadCallback(bytesReadCallback)
       //RecordReader读取数据之前创建bytesReadCallback
       var reader: RecordReader[K, V] = null
@@ -247,17 +249,19 @@ class HadoopRDD[K, V](
       //使用addLocalConfiguration给jobconf添加hadoop任务相关配置
       HadoopRDD.addLocalConfiguration(new SimpleDateFormat("yyyyMMddHHmm").format(createTime),
         context.stageId, theSplit.index, context.attemptNumber, jobConf)
-        
+      //创建RecordReader,
       reader = inputFormat.getRecordReader(split.inputSplit.value, jobConf, Reporter.NULL)
 
       // Register an on-task-completion callback to close the input stream.
+      //注册一个完成任务完成的回调,关闭输入流
       context.addTaskCompletionListener{ context => closeIfNeeded() }
-      
+      //得到LongWriteable
       val key: K = reader.createKey()
+      //得到Text
       val value: V = reader.createValue()
-
+      //每读取一些记录后使用bytesReadCallback更新InputMetrics的byteRead字段
       override def getNext(): (K, V) = {
-        try {//每读取一些记录后使用
+        try {
           finished = !reader.next(key, value)
         } catch {
           case eof: EOFException =>
@@ -301,7 +305,7 @@ class HadoopRDD[K, V](
         }
       }
     }
-    //将NextIterator封装为InterruptibleIterator
+    //将NextIterator封装为InterruptibleIterator,InterruptibleIterator只是对NextIterator的代理
     new InterruptibleIterator[(K, V)](context, iter)
   }
 
@@ -373,7 +377,10 @@ private[spark] object HadoopRDD extends Logging {
   private def putCachedMetadata(key: String, value: Any): Unit =
     SparkEnv.get.hadoopJobMetadata.put(key, value)
 
-  /** Add Hadoop configuration specific to a single partition and attempt. */
+  /** 
+   *  Add Hadoop configuration specific to a single partition and attempt.
+   *  添加Hadoop配置特定于单个分区和尝试次数
+   *   */
   def addLocalConfiguration(jobTrackerId: String, jobId: Int, splitId: Int, attemptId: Int,
                             conf: JobConf) {
     val jobID = new JobID(jobTrackerId, jobId)

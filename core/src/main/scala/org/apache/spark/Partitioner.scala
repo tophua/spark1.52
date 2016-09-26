@@ -31,7 +31,9 @@ import org.apache.spark.util.random.{XORShiftRandom, SamplingUtils}
 
 /**
  * An object that defines how the elements in a key-value pair RDD are partitioned by key.
+ * 一个RDD对象中定义在一个键值对中查找分区元素
  * Maps each key to a partition ID, from 0 to `numPartitions - 1`.
+ * 将每个键映射到分区标识,从0开始
  */
 abstract class Partitioner extends Serializable {
   def numPartitions: Int
@@ -122,11 +124,13 @@ class RangePartitioner[K : Ordering : ClassTag, V](
   private var ordering = implicitly[Ordering[K]]
 
   // An array of upper bounds for the first (partitions - 1) partitions
+  //上限数组的第一个分区
   private var rangeBounds: Array[K] = {
     if (partitions <= 1) {
       Array.empty
     } else {
       // This is the sample size we need to have roughly balanced output partitions, capped at 1M.
+      // 样本的大小,我们需要有大致平衡的输出分区
       val sampleSize = math.min(20.0 * partitions, 1e6)
       // Assume the input partitions are roughly balanced and over-sample a little bit.
       val sampleSizePerPartition = math.ceil(3.0 * sampleSize / rdd.partitions.size).toInt
@@ -136,6 +140,7 @@ class RangePartitioner[K : Ordering : ClassTag, V](
       } else {
         // If a partition contains much more than the average number of items, we re-sample from it
         // to ensure that enough items are collected from that partition.
+        //它重新采样,以确保从该分区收集足够的项
         val fraction = math.min(sampleSize / math.max(numItems, 1L), 1.0)
         val candidates = ArrayBuffer.empty[(K, Float)]
         val imbalancedPartitions = mutable.Set.empty[Int]
@@ -172,13 +177,16 @@ class RangePartitioner[K : Ordering : ClassTag, V](
     var partition = 0
     if (rangeBounds.length <= 128) {
       // If we have less than 128 partitions naive search
+      //如果不到128个分区天真的搜索
       while (partition < rangeBounds.length && ordering.gt(k, rangeBounds(partition))) {
         partition += 1
       }
     } else {
       // Determine which binary search method to use only once.
-      partition = binarySearch(rangeBounds, k)
+      // 确定二进制搜索方法只使用一次
+      partition = binarySearch(rangeBounds, k)      
       // binarySearch either returns the match location or -[insertion point]-1
+      //二进制搜索返回匹配位置
       if (partition < 0) {
         partition = -partition-1
       }

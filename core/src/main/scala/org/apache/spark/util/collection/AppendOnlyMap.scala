@@ -44,7 +44,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
 
   import AppendOnlyMap._
 
-  require(initialCapacity <= MAXIMUM_CAPACITY,
+  require(initialCapacity <= MAXIMUM_CAPACITY,//536870912
     s"Can't make capacity bigger than ${MAXIMUM_CAPACITY} elements")
   require(initialCapacity >= 1, "Invalid initial capacity")
 
@@ -56,20 +56,25 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   private var growThreshold = (LOAD_FACTOR * capacity).toInt //data数组容量增加的阈值
 
   // Holds keys and values in the same array for memory locality; specifically, the order of
+  //保存在同一个内存位置数组中的键和值,具体而言,元素的顺序是
   // elements is key0, value0, key1, value1, key2, value2, etc.
   //数组,初始化大小为2*capacity,data数组的实际大小之所以是capacity的2倍是因为Key和聚合值各占一位
   private var data = new Array[AnyRef](2 * capacity)
 
   // Treat the null key differently so we can use nulls in "data" to represent empty items.
-  //
+  //数据是否有null值
   private var haveNullValue = false
   private var nullValue: V = null.asInstanceOf[V]
 
   // Triggered by destructiveSortedIterator; the underlying data array may no longer be used
+  // 引发destructiveSortedIterator,底层的数据数组可能不再使用
   private var destroyed = false
   private val destructionMessage = "Map state is invalid from destructive sorting!"
 
-  /** Get the value for a given key */
+  /** 
+   *  Get the value for a given key 
+   *  获取给定键的值
+   *  */
   def apply(key: K): V = {
     assert(!destroyed, destructionMessage)
     val k = key.asInstanceOf[AnyRef]
@@ -93,7 +98,10 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
     null.asInstanceOf[V]
   }
 
-  /** Set the value for a key */
+  /** 
+   *  Set the value for a key 
+   *  设置一个键的值
+   *  */
   def update(key: K, value: V): Unit = {
     assert(!destroyed, destructionMessage)
     val k = key.asInstanceOf[AnyRef]
@@ -142,6 +150,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
       if (!haveNullValue) {
         incrementSize() //容量增长
       }
+      //回调updateFunc函数进行聚合操作
       nullValue = updateFunc(haveNullValue, nullValue)
       haveNullValue = true
       return nullValue
@@ -151,10 +160,12 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
     while (true) {
       val curKey = data(2 * pos) //data(2 * pos)位置的当前Key
       if (k.eq(curKey) || k.equals(curKey)) {
+        //回调updateFunc函数进行聚合操作
         val newValue = updateFunc(true, data(2 * pos + 1).asInstanceOf[V]) //key的聚合值
         data(2 * pos + 1) = newValue.asInstanceOf[AnyRef]
         return newValue
       } else if (curKey.eq(null)) {
+        //回调updateFunc函数进行聚合操作
         val newValue = updateFunc(false, null.asInstanceOf[V]) //key的聚合值
         data(2 * pos) = k
         data(2 * pos + 1) = newValue.asInstanceOf[AnyRef]
@@ -177,7 +188,8 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
 
       /** Get the next value we should return from next(), or null if we're finished iterating */
       def nextValue(): (K, V) = {
-        if (pos == -1) { // Treat position -1 as looking at the null value
+        //处理位置- 1视为空值
+        if (pos == -1) { // Treat position -1 as looking at the null value          
           if (haveNullValue) {
             return (null.asInstanceOf[K], nullValue)
           }
@@ -207,9 +219,12 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
 
   override def size: Int = curSize
 
-  /** Increase table size by 1, rehashing if necessary */
+  /** 
+   *  Increase table size by 1, rehashing if necessary 
+   *  记录数组元素计算自增1
+   *  */
   private def incrementSize() {
-    curSize += 1
+    curSize += 1 //记录数组元素计算自增1
     //当curSize大于growThreshold,调用growTable方法将capacity容量扩大一倍,即capacity=capacity*2
     if (curSize > growThreshold) {
       growTable()
@@ -218,6 +233,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
 
   /**
    * Re-hash a value to deal better with hash functions that don't differ in the lower bits.
+   * 重新散列一个值
    */
   private def rehash(h: Int): Int = Hashing.murmur3_32().hashInt(h).asInt()
 
@@ -225,13 +241,14 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   //将capacity容量扩大2倍,先创建newCapacity的两倍大小的新数组,将第数组中的元素复制到新数组中,新数组索引位置采用新
   //的rehash(k.hashCode)&mask计算
   protected def growTable() {
-    // capacity < MAXIMUM_CAPACITY (2 ^ 29) so capacity * 2 won't overflow
-    val newCapacity = capacity * 2
+    // capacity < MAXIMUM_CAPACITY (2 ^ 29) so capacity * 2 won't overflow   不会溢出
+    val newCapacity = capacity * 2//64X2=128
     require(newCapacity <= MAXIMUM_CAPACITY, s"Can't contain more than ${growThreshold} elements")
     val newData = new Array[AnyRef](2 * newCapacity)
     val newMask = newCapacity - 1
     // Insert all our old values into the new array. Note that because our old keys are
     // unique, there's no need to check for equality here when we insert.
+    //将我们所有的旧值插入到新的数组中,注意因为旧Key值唯一值,当插入时没有必要检查元素相等
     var oldPos = 0
     while (oldPos < capacity) {
       if (!data(2 * oldPos).eq(null)) {
@@ -262,8 +279,8 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   }
 
   private def nextPowerOf2(n: Int): Int = {
-    val highBit = Integer.highestOneBit(n)
-    if (highBit == n) n else highBit << 1
+    val highBit = Integer.highestOneBit(n)//highestOneBit方法获取最高位的1位(最左边)的位置
+    if (highBit == n) n else highBit << 1 //例如:64左移1等于128
   }
 
   /**
@@ -311,10 +328,11 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
 
   /**
    * Return whether the next insert will cause the map to grow
+   * 返回插入下一元素是否会导致Map的增长
    */
   def atGrowThreshold: Boolean = curSize == growThreshold
 }
 
 private object AppendOnlyMap {
-  val MAXIMUM_CAPACITY = (1 << 29)
+  val MAXIMUM_CAPACITY = (1 << 29) //536870912
 }

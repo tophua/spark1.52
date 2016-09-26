@@ -33,9 +33,9 @@ private[spark] class SortShuffleWriter[K, V, C](
     context: TaskContext)
   extends ShuffleWriter[K, V] with Logging {
 
-  private val dep = handle.dependency
+  private val dep = handle.dependency //shuffle依赖
 
-  private val blockManager = SparkEnv.get.blockManager
+  private val blockManager = SparkEnv.get.blockManager//块管理器
 
   private var sorter: SortShuffleFileWriter[K, V] = null
 
@@ -49,20 +49,23 @@ private[spark] class SortShuffleWriter[K, V, C](
   private val writeMetrics = new ShuffleWriteMetrics()
   context.taskMetrics.shuffleWriteMetrics = Some(writeMetrics)
 
-  /** Write a bunch of records to this task's output */
+  /** 
+   *  Write a bunch of records to this task's output 
+   *  这个任务的输出写一堆记录
+   * */
   
   override def write(records: Iterator[Product2[K, V]]): Unit = {
     sorter = if (dep.mapSideCombine) {//是否需要在worker端进行combine操作聚合
       require(dep.aggregator.isDefined, "Map-side combine without Aggregator specified!")
-      //创建ExternalSorter实例。
+      //创建ExternalSorter实例,然后调用insertAll将计算结果写入缓存
       new ExternalSorter[K, V, C](
         dep.aggregator, Some(dep.partitioner), dep.keyOrdering, dep.serializer)
     } else if (SortShuffleWriter.shouldBypassMergeSort(
         SparkEnv.get.conf, dep.partitioner.numPartitions, aggregator = None, keyOrdering = None)) {
 	  //传递到Reduce端再做合并(merge)操作的阈值
-	 //如果numPartitions小于bypassMergeThreshold,则不需要在Executor执行聚合和排序操作
-	 //只需要将各个Partition直接写到Executor的存储文件,最后在reduce端再做串联
-	 //通过配置spark.shuffle.sort.bypassMergeThreshold可以修改bypassMergeThreshold的大小
+	  //如果numPartitions小于bypassMergeThreshold,则不需要在Executor执行聚合和排序操作
+	   //只需要将各个Partition直接写到Executor的存储文件,最后在reduce端再做串联
+	   //通过配置spark.shuffle.sort.bypassMergeThreshold可以修改bypassMergeThreshold的大小
 
       // If there are fewer than spark.shuffle.sort.bypassMergeThreshold partitions and we don't
       // need local aggregation and sorting, write numPartitions files directly and just concatenate
@@ -78,7 +81,7 @@ private[spark] class SortShuffleWriter[K, V, C](
       new ExternalSorter[K, V, V](
         aggregator = None, Some(dep.partitioner), ordering = None, dep.serializer)
     }
-    //创建ExternalSorter,然后调用insertAll将计算结果写入缓存
+    //将计算结果写入缓存
     sorter.insertAll(records)
 
     // Don't bother including the time to open the merged output file in the shuffle write time,
@@ -86,10 +89,11 @@ private[spark] class SortShuffleWriter[K, V, C](
     // (see SPARK-3570).
     //获取当前任务要输出的文件路径
     val output = shuffleBlockResolver.getDataFile(dep.shuffleId, mapId)
+    //获取或创建临时文件
     val tmp = Utils.tempFileWith(output)    
     //创建BlockId
     val blockId = ShuffleBlockId(dep.shuffleId, mapId, IndexShuffleBlockResolver.NOOP_REDUCE_ID)
-    //调用ExternalSorter. writePartitionedFile将中间结果持久化
+    //将中间结果持久化,返回中间结果存储的长度
     val partitionLengths = sorter.writePartitionedFile(blockId, context, tmp)
     //创建索引文件
     shuffleBlockResolver.writeIndexFileAndCommit(dep.shuffleId, mapId, partitionLengths, tmp)
@@ -97,7 +101,10 @@ private[spark] class SortShuffleWriter[K, V, C](
     mapStatus = MapStatus(blockManager.shuffleServerId, partitionLengths)
   }
 
-  /** Close this writer, passing along whether the map completed */
+  /** 
+   *  Close this writer, passing along whether the map completed 
+   *  关闭写操作,是否完成Map任务的传递
+   *  */
   override def stop(success: Boolean): Option[MapStatus] = {
     try {
       if (stopping) {
@@ -108,10 +115,12 @@ private[spark] class SortShuffleWriter[K, V, C](
         return Option(mapStatus)
       } else {
         // The map task failed, so delete our output data.
+        //map任务失败,删除输出文件
         shuffleBlockResolver.removeDataByMap(dep.shuffleId, mapId)
         return None
       }
     } finally {
+      //清理存储,包括生成中间文件
       // Clean up our sorter, which may have its own intermediate files
       if (sorter != null) {
         val startTime = System.nanoTime()
@@ -131,11 +140,11 @@ private[spark] object SortShuffleWriter {
       numPartitions: Int,
       aggregator: Option[Aggregator[_, _, _]],
       keyOrdering: Option[Ordering[_]]): Boolean = {
-      //传递到Reduce端再做合并(merge)操作的阈值
+      //用于设置在Reducer的partition数目少于多少的时候,Sort Based Shuffle内部不使用Merge Sort的方式处理数据,
+      //而是直接将每个partition写入单独的文件,这个配置的默认值是200
     val bypassMergeThreshold: Int = conf.getInt("spark.shuffle.sort.bypassMergeThreshold", 200)
-    //如果numPartitions小于bypassMergeThreshold,则不需要在Executor执行聚合和排序操作
+    //如果numPartitions小于bypassMergeThreshold,并且没有聚合和排序函数,则不需要在Executor执行聚合和排序操作
     //只需要将各个Partition直接写到Executor的存储文件,最后在reduce端再做串联
-    //通过配置spark.shuffle.sort.bypassMergeThreshold可以修改bypassMergeThreshold的大小
     numPartitions <= bypassMergeThreshold && aggregator.isEmpty && keyOrdering.isEmpty
   }
 }

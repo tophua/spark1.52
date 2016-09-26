@@ -36,8 +36,8 @@ import org.apache.spark.executor.ShuffleWriteMetrics
 /**
  * :: DeveloperApi ::
  * An append-only map that spills sorted content to disk when there is insufficient space for it
- * to grow.
- *
+ * to grow. * 
+ * 主要负责做聚合
  * This map takes two passes over the data:
  *
  *   (1) Values are merged into combiners, which are sorted and spilled to disk as necessary

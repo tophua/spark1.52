@@ -33,6 +33,7 @@ private[spark] class SizeTrackingAppendOnlyMap[K, V]
     val newValue = super.changeValue(key, updateFunc)
     //调用afterUpdate,增加对AppendOnlyMap大小的采样
     super.afterUpdate()
+    //返回计算结果
     newValue
   }
 

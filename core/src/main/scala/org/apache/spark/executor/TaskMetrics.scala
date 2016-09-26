@@ -30,7 +30,7 @@ import org.apache.spark.util.Utils
 /**
  * :: DeveloperApi ::
  * Metrics tracked during the execution of a task.
- *
+ * 在任务执行过程中跟踪的测量信息
  * This class is used to house metrics both for in-progress and completed tasks. In executors,
  * both the task thread and the heartbeat thread write to the TaskMetrics. The heartbeat thread
  * reads it to send in-progress metrics, and the task thread reads it to send metrics along with
@@ -42,6 +42,7 @@ import org.apache.spark.util.Utils
 @DeveloperApi
 class TaskMetrics extends Serializable {
   /**
+   * 任务运行的主机名称
    * Host's name the task runs on
    */
   private var _hostname: String = _
@@ -50,6 +51,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * Time taken on the executor to deserialize this task
+   * 执行任务反序列化的时间
    */
   private var _executorDeserializeTime: Long = _
   def executorDeserializeTime: Long = _executorDeserializeTime
@@ -58,6 +60,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * Time the executor spends actually running the task (including fetching shuffle data)
+   * 执行实际任务运行的时间(包括获取shuffle数据)
    */
   private var _executorRunTime: Long = _
   def executorRunTime: Long = _executorRunTime
@@ -65,6 +68,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * The number of bytes this task transmitted back to the driver as the TaskResult
+   * 任务结果回传给Driver字节数
    */
   private var _resultSize: Long = _
   def resultSize: Long = _resultSize
@@ -73,6 +77,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * Amount of time the JVM spent in garbage collection while executing this task
+   * 执行任务JVM的垃圾收集花费的时间
    */
   private var _jvmGCTime: Long = _
   def jvmGCTime: Long = _jvmGCTime
@@ -80,6 +85,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * Amount of time spent serializing the task result
+   * 序列化任务结果的时间
    */
   private var _resultSerializationTime: Long = _
   def resultSerializationTime: Long = _resultSerializationTime
@@ -87,6 +93,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * The number of in-memory bytes spilled by this task
+   * 任务溢出所需的内存字节数
    */
   private var _memoryBytesSpilled: Long = _
   def memoryBytesSpilled: Long = _memoryBytesSpilled
@@ -95,6 +102,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * The number of on-disk bytes spilled by this task
+   * 任务溢出所需的磁盘字节数
    */
   private var _diskBytesSpilled: Long = _
   def diskBytesSpilled: Long = _diskBytesSpilled
@@ -104,6 +112,7 @@ class TaskMetrics extends Serializable {
   /**
    * If this task reads from a HadoopRDD or from persisted data, metrics on how much data was read
    * are stored here.
+   * 如果这个任务读取一个hadooprdd或持久化数据,测量读取多少存储数据
    */
   private var _inputMetrics: Option[InputMetrics] = None
 
@@ -112,6 +121,7 @@ class TaskMetrics extends Serializable {
   /**
    * This should only be used when recreating TaskMetrics, not when updating input metrics in
    * executors
+   * 当更新输入测量的executors,重新创建taskmetrics(任务测量)
    */
   private[spark] def setInputMetrics(inputMetrics: Option[InputMetrics]) {
     _inputMetrics = inputMetrics
@@ -120,12 +130,14 @@ class TaskMetrics extends Serializable {
   /**
    * If this task writes data externally (e.g. to a distributed filesystem), metrics on how much
    * data was written are stored here.
+   * 如果任务外部写入数据(对于一个分布式的文件系统),测量读取多少存储数据
    */
   var outputMetrics: Option[OutputMetrics] = None
 
   /**
    * If this task reads from shuffle output, metrics on getting shuffle data will be collected here.
    * This includes read metrics aggregated over all the task's shuffle dependencies.
+   * 如果任务读取从洗牌输出,测量获取洗牌数据的在这里收集,包括读取所有任务的洗牌依赖关系的读取数据
    */
   private var _shuffleReadMetrics: Option[ShuffleReadMetrics] = None
 
@@ -134,6 +146,7 @@ class TaskMetrics extends Serializable {
   /**
    * This should only be used when recreating TaskMetrics, not when updating read metrics in
    * executors.
+   * 重新创造taskmetrics(任务测量),当更新读取executors测量信息
    */
   private[spark] def setShuffleReadMetrics(shuffleReadMetrics: Option[ShuffleReadMetrics]) {
     _shuffleReadMetrics = shuffleReadMetrics
@@ -141,6 +154,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * ShuffleReadMetrics per dependency for collecting independently while task is in progress.
+   * shufflereadmetrics依赖
    */
   @transient private lazy val depsShuffleReadMetrics: ArrayBuffer[ShuffleReadMetrics] =
     new ArrayBuffer[ShuffleReadMetrics]()
@@ -148,11 +162,13 @@ class TaskMetrics extends Serializable {
   /**
    * If this task writes to shuffle output, metrics on the written shuffle data will be collected
    * here
+   * 如果任务写入到随机输出,收集度量shuffl写数据
    */
   var shuffleWriteMetrics: Option[ShuffleWriteMetrics] = None
 
   /**
    * Storage statuses of any blocks that have been updated as a result of this task.
+   * 任务更新任何块存储的状态
    */
   var updatedBlocks: Option[Seq[(BlockId, BlockStatus)]] = None
 
@@ -195,6 +211,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * Aggregates shuffle read metrics for all registered dependencies into shuffleReadMetrics.
+   * 注册的依赖shufflereadmetrics,聚合读取所有的指标
    */
   private[spark] def updateShuffleReadMetrics(): Unit = synchronized {
     if (!depsShuffleReadMetrics.isEmpty) {
@@ -233,6 +250,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * Return the latest updates of accumulators in this task.
+   * 返回任务累加器的最新更新
    */
   def accumulatorUpdates(): Map[Long, Any] = _accumulatorUpdates
 
@@ -266,6 +284,7 @@ object DataReadMethod extends Enumeration with Serializable {
 /**
  * :: DeveloperApi ::
  * Method by which output data was written.
+ * 写入输出数据的方法
  */
 @DeveloperApi
 object DataWriteMethod extends Enumeration with Serializable {
@@ -276,17 +295,20 @@ object DataWriteMethod extends Enumeration with Serializable {
 /**
  * :: DeveloperApi ::
  * Metrics about reading input data.
+ * 读取测量输入数据
  */
 @DeveloperApi
 case class InputMetrics(readMethod: DataReadMethod.Value) {
 
   /**
    * This is volatile so that it is visible to the updater thread.
+   * 这是不稳定的,它是更新线程可见
    */
   @volatile @transient var bytesReadCallback: Option[() => Long] = None
 
   /**
    * Total bytes read.
+   * 读取总字节数
    */
   private var _bytesRead: Long = _
   def bytesRead: Long = _bytesRead
@@ -294,6 +316,7 @@ case class InputMetrics(readMethod: DataReadMethod.Value) {
 
   /**
    * Total records read.
+   * 读取总字节数
    */
   private var _recordsRead: Long = _
   def recordsRead: Long = _recordsRead
@@ -320,11 +343,13 @@ case class InputMetrics(readMethod: DataReadMethod.Value) {
 /**
  * :: DeveloperApi ::
  * Metrics about writing output data.
+ * 关于测量数据输出
  */
 @DeveloperApi
 case class OutputMetrics(writeMethod: DataWriteMethod.Value) {
   /**
    * Total bytes written
+   * 总字节写入
    */
   private var _bytesWritten: Long = _
   def bytesWritten: Long = _bytesWritten
@@ -332,6 +357,7 @@ case class OutputMetrics(writeMethod: DataWriteMethod.Value) {
 
   /**
    * Total records written
+   * 总字节写入
    */
   private var _recordsWritten: Long = 0L
   def recordsWritten: Long = _recordsWritten
@@ -341,11 +367,13 @@ case class OutputMetrics(writeMethod: DataWriteMethod.Value) {
 /**
  * :: DeveloperApi ::
  * Metrics pertaining to shuffle data read in a given task.
+ * 给定的任务中读取数据的度量
  */
 @DeveloperApi
 class ShuffleReadMetrics extends Serializable {
   /**
    * Number of remote blocks fetched in this shuffle by this task
+   * 在这个任务中获取的远程块的数量
    */
   private var _remoteBlocksFetched: Int = _
   def remoteBlocksFetched: Int = _remoteBlocksFetched
@@ -354,6 +382,7 @@ class ShuffleReadMetrics extends Serializable {
 
   /**
    * Number of local blocks fetched in this shuffle by this task
+   * 在这个任务中获取的本地块的数量
    */
   private var _localBlocksFetched: Int = _
   def localBlocksFetched: Int = _localBlocksFetched
@@ -364,6 +393,8 @@ class ShuffleReadMetrics extends Serializable {
    * Time the task spent waiting for remote shuffle blocks. This only includes the time
    * blocking on shuffle input data. For instance if block B is being fetched while the task is
    * still not finished processing block A, it is not considered to be blocking on block B.
+   * 等待远程shuffle块的任务花费的时间,包括在shuffle输入数据上的阻塞时间,
+   * 例如,如果B块被拿来,而任务还没有完成处理块A,它不被认为是阻塞B块
    */
   private var _fetchWaitTime: Long = _
   def fetchWaitTime: Long = _fetchWaitTime
@@ -372,6 +403,7 @@ class ShuffleReadMetrics extends Serializable {
 
   /**
    * Total number of remote bytes read from the shuffle by this task
+   * 读取的远程任务的shuffle总字节数
    */
   private var _remoteBytesRead: Long = _
   def remoteBytesRead: Long = _remoteBytesRead
@@ -380,6 +412,7 @@ class ShuffleReadMetrics extends Serializable {
 
   /**
    * Shuffle data that was read from the local disk (as opposed to from a remote executor).
+   * 从本地磁盘读取的数据,而不是从一个远程执行
    */
   private var _localBytesRead: Long = _
   def localBytesRead: Long = _localBytesRead
@@ -387,16 +420,19 @@ class ShuffleReadMetrics extends Serializable {
 
   /**
    * Total bytes fetched in the shuffle by this task (both remote and local).
+   * 这个任务在洗牌中获取的总字节数(本地和远程)
    */
   def totalBytesRead: Long = _remoteBytesRead + _localBytesRead
 
   /**
    * Number of blocks fetched in this shuffle by this task (remote or local)
+   * 此任务在这个洗牌中获取的块数(本地或远程)
    */
   def totalBlocksFetched: Int = _remoteBlocksFetched + _localBlocksFetched
 
   /**
    * Total number of records read from the shuffle by this task
+   * 由该任务的随机读取的记录的总数
    */
   private var _recordsRead: Long = _
   def recordsRead: Long = _recordsRead
@@ -407,11 +443,13 @@ class ShuffleReadMetrics extends Serializable {
 /**
  * :: DeveloperApi ::
  * Metrics pertaining to shuffle data written in a given task.
+ * 度量给定一个的任务中写入的洗牌数据
  */
 @DeveloperApi
 class ShuffleWriteMetrics extends Serializable {
   /**
    * Number of bytes written for the shuffle by this task
+   * 由此任务为随机洗牌写入的字节数
    */
   @volatile private var _shuffleBytesWritten: Long = _
   def shuffleBytesWritten: Long = _shuffleBytesWritten
@@ -420,6 +458,7 @@ class ShuffleWriteMetrics extends Serializable {
 
   /**
    * Time the task spent blocking on writes to disk or buffer cache, in nanoseconds
+   * 写入到磁盘或缓冲区任务的阻塞时间,纳秒
    */
   @volatile private var _shuffleWriteTime: Long = _
   def shuffleWriteTime: Long = _shuffleWriteTime
@@ -428,6 +467,7 @@ class ShuffleWriteMetrics extends Serializable {
 
   /**
    * Total number of records written to the shuffle by this task
+   * 由该任务写入的记录的总数
    */
   @volatile private var _shuffleRecordsWritten: Long = _
   def shuffleRecordsWritten: Long = _shuffleRecordsWritten
