@@ -197,6 +197,7 @@ private[spark] class ExternalSorter[K, V, C](
   // user. (A partial ordering means that equal keys have comparator.compare(k, k) = 0, but some
   // non-equal keys also have this, so we need to do a later pass to find truly equal keys).
   // Note that we ignore this if no aggregator and no ordering are given.
+  //按指定的Key进行
   private val keyComparator: Comparator[K] = ordering.getOrElse(new Comparator[K] {
     override def compare(a: K, b: K): Int = {
       val h1 = if (a == null) 0 else a.hashCode()
@@ -285,13 +286,13 @@ private[spark] class ExternalSorter[K, V, C](
     }
 
     var estimatedSize = 0L//元素大小
-    if (usingMap) {
+    if (usingMap) {//
       estimatedSize = map.estimateSize() //估计当前集合中对象占用内存的大小
       if (maybeSpill(map, estimatedSize)) { //maybeSpill判定集合是否溢出
         map = new PartitionedAppendOnlyMap[K, C]
       }
     } else {
-      estimatedSize = buffer.estimateSize()
+      estimatedSize = buffer.estimateSize()//估计当前集合中对象占用内存的大小
       if (maybeSpill(buffer, estimatedSize)) {
         buffer = newBuffer()
       }
@@ -314,7 +315,6 @@ private[spark] class ExternalSorter[K, V, C](
     // createTempShuffleBlock here; see SPARK-3426 for more context.
     //创建临时文件
     val (blockId, file) = diskBlockManager.createTempShuffleBlock()
-
     // These variables are reset after each flush
     //这些变量被重置后刷新
     var objectsWritten: Long = 0
@@ -355,6 +355,7 @@ private[spark] class ExternalSorter[K, V, C](
       //对集合元素排序
       val it = collection.destructiveSortedWritablePartitionedIterator(comparator)
       while (it.hasNext) {
+        //获得分区ID
         val partitionId = it.nextPartition()
         it.writeNext(writer) //将集合内容写入临时文件
 
@@ -719,6 +720,7 @@ private[spark] class ExternalSorter[K, V, C](
     if (spills.isEmpty) {
       // Special case: if we have only in-memory data, we don't need to merge streams, and perhaps
       // we don't even need to sort by anything other than partition ID
+      //特殊情况：如果我们只在内存中的数据,我们不需要合并流,不需要对分区标识以外的任何东西进行分类
       if (!ordering.isDefined) {
         // The user hasn't requested sorted keys, so only sort by partition ID, not key
         //按照partition Id进行比较排序,生成迭代器,
@@ -744,7 +746,7 @@ private[spark] class ExternalSorter[K, V, C](
   /**
    * Write all the data added into this ExternalSorter into a file in the disk store. This is
    * called by the SortShuffleWriter.
-   * 持久化计算结果
+   * 把externalsorter的中所有数据存储到磁盘文件中,调用SortShuffleWriter
    * @param blockId block ID to write to. The index file will be blockId.name + ".index".
    * @param context a TaskContext for a running Spark task, for us to update shuffle metrics.
    * @return array of lengths, in bytes, of each partition of the file (used by map output tracker)
@@ -755,33 +757,38 @@ private[spark] class ExternalSorter[K, V, C](
     outputFile: File): Array[Long] = {
 
     // Track location of each range in the output file
+    //跟踪输出文件中每个区域的位置
     val lengths = new Array[Long](numPartitions)
     //溢出到分区文件后合并 
     if (spills.isEmpty) {
       // Case where we only have in-memory data
+      //内存有的数据情况下
       val collection = if (aggregator.isDefined) map else buffer
-      //将内存中缓存的多个partition的计算结果分别写入多个临时Block文件
-      //然后将这些Block文件的内容全部写入正式的Block输出文件中
+      //
       val it = collection.destructiveSortedWritablePartitionedIterator(comparator)
       while (it.hasNext) {
+        //获得DiskBlockObjectWriter对象
         val writer = blockManager.getDiskWriter(blockId, outputFile, serInstance, fileBufferSize,
           context.taskMetrics.shuffleWriteMetrics.get)
         val partitionId = it.nextPartition()
         while (it.hasNext && it.nextPartition() == partitionId) {
-          it.writeNext(writer)
-        }
+          it.writeNext(writer)//将内存中缓存的多个partition的计算结果分别写入DiskBlockObjectWriter文件
+          }
         writer.commitAndClose()
         val segment = writer.fileSegment()
         lengths(partitionId) = segment.length
       }
     } else {
       // We must perform merge-sort; get an iterator by partition and write everything directly.
+      //必须执行合并排序,通过一个迭代器直接写东西
       //内存中排序合并:将缓存的中间计算结果按照partition分组写入Block输出文件
       for ((id, elements) <- this.partitionedIterator) {
         if (elements.hasNext) {
+          //获得DiskBlockObjectWriter
           val writer = blockManager.getDiskWriter(blockId, outputFile, serInstance, fileBufferSize,
             context.taskMetrics.shuffleWriteMetrics.get)
           for (elem <- elements) {
+            //写入数据
             writer.write(elem._1, elem._2)
           }
           writer.commitAndClose()
@@ -820,10 +827,10 @@ private[spark] class ExternalSorter[K, V, C](
    * An iterator that reads only the elements for a given partition ID from an underlying buffered
    * stream, assuming this partition is the next one to be read. Used to make it easier to return
    * partitioned iterators from our in-memory collection.
-   * IteratorForPartition如何区分partitionId呢?可见其hasNext会判断数据的partitionId
    */
   private[this] class IteratorForPartition(partitionId: Int, data: BufferedIterator[((Int, K), C)])
       extends Iterator[Product2[K, C]] {
+    //如何区分partitionId呢?可见其hasNext会判断数据的partitionId
     override def hasNext: Boolean = data.hasNext && data.head._1._1 == partitionId
 
     override def next(): Product2[K, C] = {

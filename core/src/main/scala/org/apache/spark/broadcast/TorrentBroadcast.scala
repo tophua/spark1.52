@@ -124,19 +124,22 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   private def readBlocks(): Array[ByteBuffer] = {
     // Fetch chunks of data. Note that all these chunks are stored in the BlockManager and reported
     // to the driver, so other executors can pull these chunks from this executor as well.
+    //获取到的block被存在本地的BlockManager中并且上报给driver,这样其它的executor就可以从这个executor获取这些block了
     val blocks = new Array[ByteBuffer](numBlocks)
     val bm = SparkEnv.get.blockManager
-
+    //需要shuffle,避免所有executor以同样的顺序下载block,使得driver依然是瓶颈
     for (pid <- Random.shuffle(Seq.range(0, numBlocks))) {
-      val pieceId = BroadcastBlockId(id, "piece" + pid)
+      val pieceId = BroadcastBlockId(id, "piece" + pid)//组装BroadcastBlockId
       logDebug(s"Reading piece $pieceId of $broadcastId")
       // First try getLocalBytes because there is a chance that previous attempts to fetch the
       // broadcast blocks have already fetched some of the blocks. In that case, some blocks
       // would be available locally (on this executor).
+      //先试着从本地获取,因为之前的尝试可能已经获取了一些block
       def getLocal: Option[ByteBuffer] = bm.getLocalBytes(pieceId)
       def getRemote: Option[ByteBuffer] = bm.getRemoteBytes(pieceId).map { block =>
         // If we found the block from remote executors/driver's BlockManager, put the block
         // in this executor's BlockManager.
+         //如果从remote获取了block,就把它存在本地的BlockManager
         SparkEnv.get.blockManager.putBytes(
           pieceId,
           block,
@@ -153,6 +156,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
 
   /**
    * Remove all persisted state associated with this Torrent broadcast on the executors.
+   * 删除广播变量所有在executors端的持续状态
    */
   override protected def doUnpersist(blocking: Boolean) {
     TorrentBroadcast.unpersist(id, removeFromDriver = false, blocking)
@@ -161,12 +165,16 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   /**
    * Remove all persisted state associated with this Torrent broadcast on the executors
    * and driver.
+   * 删除广播变量所有在executors和driver端的持续状态
    */
   override protected def doDestroy(blocking: Boolean) {
     TorrentBroadcast.unpersist(id, removeFromDriver = true, blocking)
   }
 
-  /** Used by the JVM when serializing this object. */
+  /** 
+   *  Used by the JVM when serializing this object.
+   *  使用 JVM序列化该对象
+   *  */
   private def writeObject(out: ObjectOutputStream): Unit = Utils.tryOrIOException {
     assertValid()
     out.defaultWriteObject()
@@ -175,21 +183,22 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   private def readBroadcastBlock(): T = Utils.tryOrIOException {
     TorrentBroadcast.synchronized {
       setConf(SparkEnv.get.conf)
+       //从本地的blockManager里读这个被broadcast的对象，根据broadcastId
       SparkEnv.get.blockManager.getLocal(broadcastId).map(_.data.next()) match {
-        case Some(x) =>
+        case Some(x) =>//本地有
           x.asInstanceOf[T]
 
-        case None =>
+        case None =>//本地无
           logInfo("Started reading broadcast variable " + id)
           val startTimeMs = System.currentTimeMillis()
-          val blocks = readBlocks()
+          val blocks = readBlocks()//如果本地没有broadcastId对应的broadcast的block，就读
           logInfo("Reading broadcast variable " + id + " took" + Utils.getUsedTimeMs(startTimeMs))
 
           val obj = TorrentBroadcast.unBlockifyObject[T](
             blocks, SparkEnv.get.serializer, compressionCodec)
           // Store the merged copy in BlockManager so other tasks on this executor don't
           // need to re-fetch it.
-          SparkEnv.get.blockManager.putSingle(
+          SparkEnv.get.blockManager.putSingle(//读了之后再放进BlockManager
             broadcastId, obj, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
           obj
       }

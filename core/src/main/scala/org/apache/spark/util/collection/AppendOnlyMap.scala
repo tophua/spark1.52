@@ -140,13 +140,8 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   /**
    * Set the value for key to updateFunc(hadValue, oldValue), where oldValue will be the old value
    * for key, if any, or null otherwise. Returns the newly updated value.
-   * 利用一种使用数据缓存的算法完成聚合
-   * 算法描述:
-   * 条件1:如果curKey等于null,那么newVaule等于1
-   * 条件2:如果curKey不等于null并且不等于k,那么从pos当前位置向后找,直到此位置的索引值与mask按位&运算后的新位置的Key符合条件
-   *       1或者条件3
-   * 条件3:如果curKey不等于null,并且等于K,那么newValue等于data(2*pos+1)与k对应的值按照mergeValue定义的函数运算(例如:reduceBykey(_+_))
-   */
+   * 返回新更新的值,
+    */
   def changeValue(key: K, updateFunc: (Boolean, V) => V): V = {
     assert(!destroyed, destructionMessage)
     val k = key.asInstanceOf[AnyRef] //要放入data的Key
@@ -173,7 +168,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
         val newValue = updateFunc(false, null.asInstanceOf[V]) //key的聚合值
         data(2 * pos) = k
         data(2 * pos + 1) = newValue.asInstanceOf[AnyRef]
-        incrementSize()
+        incrementSize()//递增
         return newValue
       } else {
         val delta = i
@@ -251,8 +246,8 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
     // capacity < MAXIMUM_CAPACITY (2 ^ 29) so capacity * 2 won't overflow   不会溢出
     val newCapacity = capacity * 2//64X2=128
     require(newCapacity <= MAXIMUM_CAPACITY, s"Can't contain more than ${growThreshold} elements")
-    val newData = new Array[AnyRef](2 * newCapacity)
-    val newMask = newCapacity - 1
+    val newData = new Array[AnyRef](2 * newCapacity)//256
+    val newMask = newCapacity - 1//127
     // Insert all our old values into the new array. Note that because our old keys are
     // unique, there's no need to check for equality here when we insert.
     //将我们所有的旧值插入到新的数组中,注意因为旧Key值唯一值,当插入时没有必要检查元素相等
@@ -267,8 +262,8 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
         while (keepGoing) {
           val curKey = newData(2 * newPos)
           if (curKey.eq(null)) {
-            newData(2 * newPos) = key
-            newData(2 * newPos + 1) = value
+            newData(2 * newPos) = key //新数组赋值
+            newData(2 * newPos + 1) = value//新数组赋值
             keepGoing = false
           } else {
             val delta = i
@@ -278,10 +273,11 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
         }
       }
       oldPos += 1
-    }
+    }    
     data = newData
     capacity = newCapacity
     mask = newMask
+    //growThreshold=0.7X128=89.6
     growThreshold = (LOAD_FACTOR * newCapacity).toInt
   }
 
@@ -297,7 +293,6 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
    * 1)将data数组向左整理排列
    * 2)利用Sort,KVArraySortDataFormat以及指定的比较器进行排序,这其中用到了TimeSort也是优化版的归并排序
    * 3)生成新的迭代器
-   *
    */
   def destructiveSortedIterator(keyComparator: Comparator[K]): Iterator[(K, V)] = {
     destroyed = true

@@ -53,21 +53,27 @@ import org.apache.spark.util.random.{
  * basic operations available on all RDDs, such as `map`, `filter`, and `persist`. In addition,
  * [[org.apache.spark.rdd.PairRDDFunctions]] contains operations available only on RDDs of key-value
  * pairs, such as `groupByKey` and `join`;
+ * RDD是一个分布式弹性数据集,RDD是Spark的基本抽象,代表了一个不可变的、分区的、可以用于并行计算的数据集
+ * 这个类包括了所有RDD共有的基本操作比如map, filter, persist。另外
+ * org.apache.spark.rdd.PairRDDFunctions包括了只能用于key-value对类型的RDD的操作,比如groupByKey和join
  * [[org.apache.spark.rdd.DoubleRDDFunctions]] contains operations available only on RDDs of
- * Doubles; and
+ * Doubles; 包括了只能用于Double类型RDD的操作 and 
  * [[org.apache.spark.rdd.SequenceFileRDDFunctions]] contains operations available on RDDs that
- * can be saved as SequenceFiles.
+ * can be saved as SequenceFiles.包括了能被保存为SequenceFile的RDD支持的操作。通过隐式转换,只要RDD的类型正确，
+ * 相关的操作就自动可用
  * All operations are automatically available on any RDD of the right type (e.g. RDD[(Int, Int)]
  * through implicit.
  *
  * Internally, each RDD is characterized by five main properties:
- *
- *  - A list of partitions
- *  - A function for computing each split
- *  - A list of dependencies on other RDDs
+ * 在内部,每个RDD都由五个主要属性来表征 * 
+ *  - A list of partitions 分区列表
+ *  - A function for computing each split 一个用于计算每个split的函数
+ *  - A list of dependencies on other RDDs 对其它RDD的依赖
  *  - Optionally, a Partitioner(分区策略) for key-value RDDs (e.g. to say that the RDD is hash-partitioned)
+ *  	可选:用于键值对类型的RDD使用的Partitioner
  *  - Optionally, a list of preferred locations(最佳位置) to compute each split on (e.g. block locations for
  *    an HDFS file)
+ *    可选:计算每个split时优先使用的location(数据本地化 preferred locations)(比如一个HDFS文件的block的位置)
  *
  * All of the scheduling and execution in Spark is done based on these methods, allowing each RDD
  * to implement its own way of computing itself. Indeed, users can implement custom RDDs (e.g. for
@@ -115,6 +121,7 @@ abstract class RDD[T: ClassTag](
   /**
    * :: DeveloperApi ::
    * Implemented by subclasses to compute a given partition.
+   * 计算每个partition
    */
   @DeveloperApi
   def compute(split: Partition, context: TaskContext): Iterator[T]

@@ -70,8 +70,8 @@ private[spark] trait SizeTracker {
    * This should be called after the collection undergoes a dramatic change in size.
    */
   protected def resetSamples(): Unit = {
-    numUpdates = 1
-    nextSampleNum = 1
+    numUpdates = 1 //采样编号
+    nextSampleNum = 1 //下一个样本的值
     samples.clear()
     takeSample()
   }
@@ -81,7 +81,7 @@ private[spark] trait SizeTracker {
    * 每次更新AppendOnlyMap的缓存后进行采样,采样前提是已经达到设定的采样间隔
    */
   protected def afterUpdate(): Unit = {
-    numUpdates += 1
+    numUpdates += 1 //当前编号
     if (nextSampleNum == numUpdates) {
       takeSample()
     }
@@ -103,6 +103,7 @@ private[spark] trait SizeTracker {
       case latest :: previous :: tail =>
         //计算每次更新增加的大小    
         //公式:本次采集大小-上次采样大小/本次采集编号-上次采样编号
+        //两个Sample里大小的差值除以它们update次数的差值
         (latest.size - previous.size).toDouble / (latest.numUpdates - previous.numUpdates)
       // If fewer than 2 samples, assume no change
       //如果样本数小于2,则0
@@ -110,6 +111,7 @@ private[spark] trait SizeTracker {
     }
 
     bytesPerUpdate = math.max(0, bytesDelta)
+    //
     nextSampleNum = math.ceil(numUpdates * SAMPLE_GROWTH_RATE).toLong //计算下次采样的间隔
   }
 
@@ -120,6 +122,8 @@ private[spark] trait SizeTracker {
    */
   def estimateSize(): Long = {
     assert(samples.nonEmpty) //不能为空
+    //bytePerUpdate作为最近平均每次更新,
+    //用当前的update次数减去最后一个Sample的update次数,然后乘以bytePerUpdate,结果加上最后一个Sample记录的大小
     val extrapolatedDelta = bytesPerUpdate * (numUpdates - samples.last.numUpdates)
     (samples.last.size + extrapolatedDelta).toLong
   }

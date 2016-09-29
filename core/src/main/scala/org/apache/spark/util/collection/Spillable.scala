@@ -80,19 +80,19 @@ private[spark] trait Spillable[C] extends Logging {
   protected def maybeSpill(collection: C, currentMemory: Long): Boolean = {  
     if (elementsRead % 32 == 0 && currentMemory >= myMemoryThreshold) {
       // Claim up to double our current memory from the shuffle memory pool
-      //为当前线程尝试获取amountToRequest大小的内存
+     // 要求从shuffle内存池增加一倍内存
       val amountToRequest = 2 * currentMemory - myMemoryThreshold
-      
-      val granted = shuffleMemoryManager.tryToAcquire(amountToRequest)
+      //为当前线程尝试获取amountToRequest大小的内存 
+      val granted = shuffleMemoryManager.tryToAcquire(amountToRequest)      
       myMemoryThreshold += granted
-      //如果获得的内存依然不足
+      //如果获得的内存依然不足,内存不足可能是申请到的内存为0或者已经申请得到的内存大小超过myMemoryThreshold
       if (myMemoryThreshold <= currentMemory) {
         // We were granted too little memory to grow further (either tryToAcquire returned 0,
         // or we already had more memory than myMemoryThreshold); spill the current collection
         //给予太少的内存,进一步增长,溢出当前内存
         _spillCount += 1
         logSpillage(currentMemory)
-        //spill执行溢出操作,内存不足可能是申请到的内存为0或者已经申请得到的内存大小超过myMemoryThreshold
+        //spill执行溢出操作,将内存中的数据溢出到分区文件
         spill(collection)
         
         _elementsRead = 0

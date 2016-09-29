@@ -24,7 +24,7 @@ import org.apache.spark.util.collection.WritablePartitionedPairCollection._
 /**
  * Append-only buffer of key-value pairs, each with a corresponding partition ID, that keeps track
  * of its estimated size in bytes.
- *
+ * 只添加键值对的缓冲区,每个都有一个相应的分区标识,保持其估计大小的字节数
  * The buffer can support up to `1073741823 (2 ^ 30 - 1)` elements.
  */
 private[spark] class PartitionedPairBuffer[K, V](initialCapacity: Int = 64)
@@ -32,7 +32,7 @@ private[spark] class PartitionedPairBuffer[K, V](initialCapacity: Int = 64)
 {
   import PartitionedPairBuffer._
 
-  require(initialCapacity <= MAXIMUM_CAPACITY,
+  require(initialCapacity <= MAXIMUM_CAPACITY,//Int.MaxValue / 2
     s"Can't make capacity bigger than ${MAXIMUM_CAPACITY} elements")
   require(initialCapacity >= 1, "Invalid initial capacity")
 
@@ -43,33 +43,36 @@ private[spark] class PartitionedPairBuffer[K, V](initialCapacity: Int = 64)
   private var data = new Array[AnyRef](2 * initialCapacity)
 
   /** Add an element into the buffer 
-   *  把计算结果简单地缓存到数组中
+   *  计算结果元素添加缓存到数组中
    *  */
   def insert(partition: Int, key: K, value: V): Unit = {
     if (curSize == capacity) {
-      growArray()
+      growArray() //扩充容量
     }
+    //计算结果元素添加缓存到数组中
     data(2 * curSize) = (partition, key.asInstanceOf[AnyRef])
     data(2 * curSize + 1) = value.asInstanceOf[AnyRef]
-    curSize += 1
+    curSize += 1//自增1
     afterUpdate()
   }
 
-  /** Double the size of the array because we've reached capacity */
-  //实现增长data数组容量的方法非常简单,只是新建2倍大小的新数组,然后简单复制
+  /** 
+   *  Double the size of the array because we've reached capacity
+   *  新建2倍大小的新数组,我们已经扩展容量 
+   * */  
   private def growArray(): Unit = {
-    if (capacity >= MAXIMUM_CAPACITY) {
+    if (capacity >= MAXIMUM_CAPACITY) {//1073741823
       throw new IllegalStateException(s"Can't insert more than ${MAXIMUM_CAPACITY} elements")
     }
     val newCapacity =
-      if (capacity * 2 < 0 || capacity * 2 > MAXIMUM_CAPACITY) { // Overflow
+      if (capacity * 2 < 0 || capacity * 2 > MAXIMUM_CAPACITY) { // Overflo溢出
         MAXIMUM_CAPACITY
       } else {
         capacity * 2
       }
-    val newArray = new Array[AnyRef](2 * newCapacity)
-    System.arraycopy(data, 0, newArray, 0, 2 * capacity)
-    data = newArray
+    val newArray = new Array[AnyRef](2 * newCapacity)//扩大2倍数组
+    System.arraycopy(data, 0, newArray, 0, 2 * capacity)//复制数组数据
+    data = newArray//赋值
     capacity = newCapacity
     resetSamples()
   }
@@ -99,5 +102,5 @@ private[spark] class PartitionedPairBuffer[K, V](initialCapacity: Int = 64)
 }
 
 private object PartitionedPairBuffer {
-  val MAXIMUM_CAPACITY = Int.MaxValue / 2 // 2 ^ 30 - 1
+  val MAXIMUM_CAPACITY = Int.MaxValue / 2 // 2 ^ 30 - 1即1073741823
 }
