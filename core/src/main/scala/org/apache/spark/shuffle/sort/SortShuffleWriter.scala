@@ -56,8 +56,10 @@ private[spark] class SortShuffleWriter[K, V, C](
    * */
   
   override def write(records: Iterator[Product2[K, V]]): Unit = {
-     /* 
+    /** 
     * aggregateByKey默认情况下它的ShuffleDependency 
+    * Map-side Join会将数据从不同的dataset中取出,连接起来并放到相应的某个Mapper中处理,
+    * 因此key相同的数据肯定会在同一个Mapper里面一起得到处理的
     * */  
     sorter = if (dep.mapSideCombine) {//是否需要在worker端进行combine操作聚合
       require(dep.aggregator.isDefined, "Map-side combine without Aggregator specified!")
@@ -66,10 +68,10 @@ private[spark] class SortShuffleWriter[K, V, C](
         dep.aggregator, Some(dep.partitioner), dep.keyOrdering, dep.serializer)
     } else if (SortShuffleWriter.shouldBypassMergeSort(
         SparkEnv.get.conf, dep.partitioner.numPartitions, aggregator = None, keyOrdering = None)) {
-	  //传递到Reduce端再做合并(merge)操作的阈值
-	  //如果numPartitions小于bypassMergeThreshold,则不需要在Executor执行聚合和排序操作
-	   //只需要将各个Partition直接写到Executor的存储文件,最后在reduce端再做串联
-	   //通过配置spark.shuffle.sort.bypassMergeThreshold可以修改bypassMergeThreshold的大小
+	    //传递到Reduce端再做合并(merge)操作的阈值
+	    //如果numPartitions小于bypassMergeThreshold,则不需要在Executor执行聚合和排序操作
+	    //只需要将各个Partition直接写到Executor的存储文件,最后在reduce端再做串联
+	    //通过配置spark.shuffle.sort.bypassMergeThreshold可以修改bypassMergeThreshold的大小
 
       // If there are fewer than spark.shuffle.sort.bypassMergeThreshold partitions and we don't
       // need local aggregation and sorting, write numPartitions files directly and just concatenate
