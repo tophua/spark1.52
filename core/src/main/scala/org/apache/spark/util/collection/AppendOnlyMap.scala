@@ -141,6 +141,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
    * Set the value for key to updateFunc(hadValue, oldValue), where oldValue will be the old value
    * for key, if any, or null otherwise. Returns the newly updated value.
    * 返回新更新的值,
+   * kv是record的每条记录
     */
   def changeValue(key: K, updateFunc: (Boolean, V) => V): V = {
     assert(!destroyed, destructionMessage)
@@ -154,23 +155,29 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
       haveNullValue = true
       return nullValue
     }
-    var pos = rehash(k.hashCode) & mask //k将要放入data的索引值,索引值等于k的哈希值再次计算哈希的结果与mask按位&运算值
+    //对于Key进行rehash,计算出这个key在SizeTrackingAppendOnlyMap这个数据结构中的位置
+    var pos = rehash(k.hashCode) & mask
     var i = 1
-    while (true) {
+    while (true) {     
+      //2*pos表示key,2*pos+1表示key对应的value
       val curKey = data(2 * pos) //data(2 * pos)位置的当前Key
+      //当前key已经存在于Map中,则需要做combine操作
       if (k.eq(curKey) || k.equals(curKey)) {
-        //回调updateFunc函数进行聚合操作
+        //对Map中缓存的Key的Value进行_ + _操作,updateFunc即是在ExternalSorter.insertAll方法中创建的update函数
         val newValue = updateFunc(true, data(2 * pos + 1).asInstanceOf[V]) //key的聚合值
+        //将新值回写到data(2*pos+1)处,不管data（2*pos + 1)处是否有值
         data(2 * pos + 1) = newValue.asInstanceOf[AnyRef]
         return newValue
-      } else if (curKey.eq(null)) {
-        //回调updateFunc函数进行聚合操作
+      } else if (curKey.eq(null)) {//如果当前Map中,data(2*pos)处是null对象
+        //调用_ + _操作获取kv的value值  
         val newValue = updateFunc(false, null.asInstanceOf[V]) //key的聚合值
-        data(2 * pos) = k
-        data(2 * pos + 1) = newValue.asInstanceOf[AnyRef]
+        data(2 * pos) = k //Key
+        data(2 * pos + 1) = newValue.asInstanceOf[AnyRef]//Value
+        //因为是Map中新增的K/V,做容量扩容检查
         incrementSize()//递增
         return newValue
       } else {
+        //如果当前Map中,data(2*pos)处是空
         val delta = i
         pos = (pos + delta) & mask
         i += 1
@@ -288,16 +295,14 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
 
   /**
    * Return an iterator of the map in sorted order. This provides a way to sort the map without
-   * using additional memory, at the expense of destroying the validity of the map.
-   * 处理步骤如下
-   * 1)将data数组向左整理排列
+   * using additional memory, at the expense of destroying the validity of the map.    
    * 2)利用Sort,KVArraySortDataFormat以及指定的比较器进行排序,这其中用到了TimeSort也是优化版的归并排序
    * 3)生成新的迭代器
    */
   def destructiveSortedIterator(keyComparator: Comparator[K]): Iterator[(K, V)] = {
     destroyed = true
     // Pack KV pairs into the front of the underlying array
-    //1)将data数组向左整理排列
+    //1)所有的kv对移动数组的前端
     var keyIndex, newIndex = 0
     while (keyIndex < capacity) {
       if (data(2 * keyIndex) != null) {

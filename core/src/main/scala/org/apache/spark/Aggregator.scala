@@ -101,7 +101,10 @@ case class Aggregator[K, V, C] (
     }
   }
 
-  /** Update task metrics after populating the external map. */
+  /** 
+   *  Update task metrics after populating the external map. 
+   *  更新任务指标后填充外部Map任务
+   *  */
   private def updateMetrics(context: TaskContext, map: ExternalAppendOnlyMap[_, _, _]): Unit = {
     Option(context).foreach { c =>
       c.taskMetrics().incMemoryBytesSpilled(map.memoryBytesSpilled)

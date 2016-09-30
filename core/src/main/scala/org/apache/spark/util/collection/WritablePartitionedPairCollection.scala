@@ -106,6 +106,9 @@ private[spark] object WritablePartitionedPairCollection {
  * 迭代器元素写到一个diskblockobjectwriter不是返回他们,每个元素都有一个关联的分区
  */
 private[spark] trait WritablePartitionedIterator {
+  /**
+   * 写入Key和Value,并不写入Partition ID
+   */
   def writeNext(writer: DiskBlockObjectWriter): Unit
 
   def hasNext(): Boolean

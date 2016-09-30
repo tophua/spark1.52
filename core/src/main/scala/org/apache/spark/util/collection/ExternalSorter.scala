@@ -126,10 +126,11 @@ private[spark] class ExternalSorter[K, V, C](
     with SortShuffleFileWriter[K, V] {
 
   private val conf = SparkEnv.get.conf
-
+  //从分区器中获取分区的个数 
   private val numPartitions = partitioner.map(_.numPartitions).getOrElse(1)
+  //Partition的个数大于1的时候,才做分区
   private val shouldPartition = numPartitions > 1
-  //获得分区索引
+  //根据Key获得Parttion,是否分区大于1
   private def getPartition(key: K): Int = {
     if (shouldPartition) partitioner.get.getPartition(key) else 0
   }
@@ -140,9 +141,11 @@ private[spark] class ExternalSorter[K, V, C](
     throw new IllegalArgumentException("ExternalSorter should not be used to handle "
       + " a sort that the BypassMergeSortShuffleWriter should handle")
   }
-
+  //从evn中获取blockManager
   private val blockManager = SparkEnv.get.blockManager
+  //从blockManager获取diskBlockManager
   private val diskBlockManager = blockManager.diskBlockManager
+  
   private val ser = Serializer.getSerializer(serializer)
   private val serInstance = ser.newInstance()
   //shuffle期间通过溢出数据到磁盘来降低了内存使用总量,如果为true
@@ -153,7 +156,7 @@ private[spark] class ExternalSorter[K, V, C](
   private val fileBufferSize = conf.getSizeAsKb("spark.shuffle.file.buffer", "32k").toInt * 1024
 
   // Size of object batches when reading/writing from serializers.
-  // 序列化对象批量读/写大小从
+  // 每次序列化流最多写入的元素个数
   // Objects are written in batches, with each batch using its own serialization stream. This
   // cuts down on the size of reference-tracking maps constructed when deserializing a stream.
   //
@@ -162,12 +165,19 @@ private[spark] class ExternalSorter[K, V, C](
   private val serializerBatchSize = conf.getLong("spark.shuffle.spill.batchSize", 10000)
 
   private val useSerializedPairBuffer =
-    ordering.isEmpty &&
-      conf.getBoolean("spark.shuffle.sort.serializeMapOutputs", true) &&
-      ser.supportsRelocationOfSerializedObjects
+    ordering.isEmpty && //没有提供Ordering,即不需要对partition内部的kv再排序
+      conf.getBoolean("spark.shuffle.sort.serializeMapOutputs", true) &&//它默认即为true
+      //即在序列化输出流写了两个对象以后，把这两个对象对应的字节块交换位置，序列化输出流仍然能读出这两个对象
+      ser.supportsRelocationOfSerializedObjects//支持relocate序列化以后的对象
   private val kvChunkSize = conf.getInt("spark.shuffle.sort.kvChunkSize", 1 << 22) // 4 MB
+  /**
+   * buffer充分利用内存,直接对内存中的对象进行操作可以提高效率,减少序列化、反序列化和IO的开销,
+   * 比如在内存中先对部分value进行聚合,会减少要序列化和写磁盘的数据量;在内存中对kv先按照partition组合在一起,
+   * 也有利于以后的merge,而且越大的buffer写到磁盘中的文件越大,这意味着要合并的文件就越少.
+   */
   private def newBuffer(): WritablePartitionedPairCollection[K, C] with SizeTracker = {
     if (useSerializedPairBuffer) {
+      //没有提供Ordering,即不需要对partition内部的kv再排序
       new PartitionedSerializedPairBuffer(metaInitialRecords = 256, kvChunkSize, serInstance)
     } else {
       new PartitionedPairBuffer[K, C]
@@ -245,22 +255,25 @@ private[spark] class ExternalSorter[K, V, C](
       val mergeValue = aggregator.get.mergeValue //聚合函数获取例如reduceByKey(_+_) 
       //创建组合
       val createCombiner = aggregator.get.createCombiner //通过一个Value元素生成组合元素，会被多次调用
-      //每条记录Product2,将每行字符串按照空格切分,并且给每个文本设置1,例如(Apache,1),(Spark,1)
+      //kv就是records每次遍历得到的中的(K V)值
       var kv: Product2[K, V] = null
-      //定义update函数,用于操作mergeValue和createCombiner,按照Key叠加Vaule
+      //定义update函数,它接受两个参数，1.是否在Map中包含了值hasValue2.旧值是多少，如果还不存在，那是null，
+      //在scala中，null也是一个对象     
       val update = (hadValue: Boolean, oldValue: C) => {
+         //如果已经存在,则进行merge,根据Key进行merge(所谓的merge,就是调用mergeValue方法),否则调用createCombiner获取值
+         //createCombiner方法是(v:V)=>v就是原样输出值
         if (hadValue) mergeValue(oldValue, kv._2) else createCombiner(kv._2)
       }
       //迭代之前创建Iterator,每读取一条Product2(真正执行代码FlatMapFunction,PairFunction),     
       while (records.hasNext) {
-        addElementsRead()//元素自增1
+        addElementsRead()//遍历计数,每遍历一次增1
         //每读取一条Product2,将每行字符串按照空格切分,并且给每个文本设置1,例如(Apache,1),(Spark,1)
-        kv = records.next()
-        //kv._1分区索引,SizeTrackingAppendOnlyMap.changeValue与update函数配合,按照Key叠加Vaule
+        kv = records.next()//读取当前record
+        //getPartition是根据Key获得Parttion,SizeTrackingAppendOnlyMap.changeValue与update函数配合,按照Key叠加Vaule
         map.changeValue((getPartition(kv._1), kv._1), update)
         //当SizeTrackingAppendOnlyMap的大小超过myMemoryThreshold时,将集合中的数据写入到磁盘并新建
         //SizeTrackingAppendOnlyMap,为了防止内存溢出
-        maybeSpillCollection(usingMap = true)
+        maybeSpillCollection(usingMap = true)//是否要spill到磁盘
       }
     } else {
       //如果没有定义aggregator,将值插入到缓冲区中
@@ -270,7 +283,7 @@ private[spark] class ExternalSorter[K, V, C](
         val kv = records.next()
         //把计算结果简单地缓存到数组
         buffer.insert(getPartition(kv._1), kv._1, kv._2.asInstanceOf[C])
-        maybeSpillCollection(usingMap = false)
+        maybeSpillCollection(usingMap = false)//是否要spill到磁盘
       }
     }
   }
@@ -278,20 +291,20 @@ private[spark] class ExternalSorter[K, V, C](
   /**
    * Spill the current in-memory collection to disk if needed.
    * 将集合中的数据保存到磁盘并,判定集合是否溢出
+   * 
    * @param usingMap whether we're using a map or buffer as our current in-memory collection
    */
   private def maybeSpillCollection(usingMap: Boolean): Unit = {
-    if (!spillingEnabled) {
+    if (!spillingEnabled) { //默认启用,如果不启用,则有OOM风险
       return
     }
-
     var estimatedSize = 0L//元素大小
-    if (usingMap) {//
+    if (usingMap) {//如果使用Map,则是使用PartitionedAppendOnlyMap
       estimatedSize = map.estimateSize() //估计当前集合中对象占用内存的大小
       if (maybeSpill(map, estimatedSize)) { //maybeSpill判定集合是否溢出
         map = new PartitionedAppendOnlyMap[K, C]
       }
-    } else {
+    } else {//否则使用buffer则是使用SizeTrackingPairBuffe
       estimatedSize = buffer.estimateSize()//估计当前集合中对象占用内存的大小
       if (maybeSpill(buffer, estimatedSize)) {
         buffer = newBuffer()
@@ -631,6 +644,7 @@ private[spark] class ExternalSorter[K, V, C](
      * If the current batch is drained, construct a stream for the next batch and read from it.
      * If no more pairs are left, return null.
      * 如果当前批处理被耗尽,读取构建下一个批次流,如果没有更多的对返回
+     * 
      */
     private def readNextItem(): (K, C) = {
       if (finished || deserializeStream == null) {
@@ -662,7 +676,7 @@ private[spark] class ExternalSorter[K, V, C](
     }
 
     var nextPartitionToRead = 0
-
+    //返回的迭代器可以迭代这个partition内的所有元素
     def readNextPartition(): Iterator[Product2[K, C]] = new Iterator[Product2[K, C]] {
       val myPartition = nextPartitionToRead
       nextPartitionToRead += 1

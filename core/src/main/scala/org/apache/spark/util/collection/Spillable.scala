@@ -34,7 +34,7 @@ private[spark] trait Spillable[C] extends Logging {
   protected def spill(collection: C): Unit
 
   // Number of elements read from input since last spill
-  //读取最新输入溢出的元素数
+  //已经读取过的元素个数
   protected def elementsRead: Long = _elementsRead
 
   // Called by subclasses every time a record is read
@@ -48,7 +48,7 @@ private[spark] trait Spillable[C] extends Logging {
 
   // Initial threshold for the size of a collection before we start tracking its memory usage
   // Exposed for testing
-  //开始跟踪的内存使用之前,初始化一个集合大小的值5M
+  //初始化一个集合大小的值5M
   private[this] val initialMemoryThreshold: Long =
     SparkEnv.get.conf.getLong("spark.shuffle.spill.initialMemoryThreshold", 5 * 1024 * 1024)
 
@@ -74,18 +74,22 @@ private[spark] trait Spillable[C] extends Logging {
    * memory before spilling.
    * 如果需要将当前内存集合溢出到磁盘上,获得更多的内存
    * @param collection collection to spill to disk,集合溢出到磁盘
-   * @param currentMemory estimated size of the collection in bytes 估计的集合的大小
+   * @param currentMemory estimated size of the collection in bytes 是一个预估值,表示当前占用的内存
    * @return true if `collection` was spilled to disk; false otherwise,如果true,集合溢出到磁盘,否则
    */
-  protected def maybeSpill(collection: C, currentMemory: Long): Boolean = {  
+  protected def maybeSpill(collection: C, currentMemory: Long): Boolean = { 
+    //如果我的内存阀值小于当前已使用的内存,则进行spill,否则不进行spill
+    //elementsRead表示已经读取过的元素个数,只有当前读过的elements为32的整数倍才有可能spill 
+    //currentMemory是一个预估值,表示当前占用的内存
     if (elementsRead % 32 == 0 && currentMemory >= myMemoryThreshold) {
       // Claim up to double our current memory from the shuffle memory pool
-     // 要求从shuffle内存池增加一倍内存
+     // 申请的容量是当前使用容量*2减去内存阀值
       val amountToRequest = 2 * currentMemory - myMemoryThreshold
       //为当前线程尝试获取amountToRequest大小的内存 
-      val granted = shuffleMemoryManager.tryToAcquire(amountToRequest)      
+      val granted = shuffleMemoryManager.tryToAcquire(amountToRequest)     
+      //将申请的内存添加到能接受的内存阀值之上,即增加可忍受的内存阀值
       myMemoryThreshold += granted
-      //如果获得的内存依然不足,内存不足可能是申请到的内存为0或者已经申请得到的内存大小超过myMemoryThreshold
+      //此时的内存阀值还是小于当前使用两，则必须进行spill
       if (myMemoryThreshold <= currentMemory) {
         // We were granted too little memory to grow further (either tryToAcquire returned 0,
         // or we already had more memory than myMemoryThreshold); spill the current collection
@@ -95,16 +99,16 @@ private[spark] trait Spillable[C] extends Logging {
         //spill执行溢出操作,将内存中的数据溢出到分区文件
         spill(collection)
         
-        _elementsRead = 0
+        _elementsRead = 0//已读数清0
         // Keep track of spills, and release memory 
-        //已溢出内存字节数_memoryBytesSpilled增加线程当前内存大小
+        //已经释放的内存总量
         _memoryBytesSpilled += currentMemory
-        //释放当前线程占用的内存
+        //spill到磁盘,释放已经占用的内存,将内存阀值恢复到最初值    
         releaseMemoryForThisThread()
         return true
       }
     }
-    false
+    false //条件不满足,则不需要spill
   }
 
   /**
@@ -115,11 +119,11 @@ private[spark] trait Spillable[C] extends Logging {
 
   /**
    * Release our memory back to the shuffle pool so that other threads can grab it.
-   * 释放内存回到洗牌池,让其他线程可以抢占它
+   * 回收内存
    */
   private def releaseMemoryForThisThread(): Unit = {
     // The amount we requested does not include the initial memory tracking threshold
-    //我们所请求的数量不包括初始内存跟踪值
+    //回收的内存总量,不能减去自身的大小
     shuffleMemoryManager.release(myMemoryThreshold - initialMemoryThreshold)
     myMemoryThreshold = initialMemoryThreshold
   }
