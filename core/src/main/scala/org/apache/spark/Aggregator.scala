@@ -47,27 +47,27 @@ case class Aggregator[K, V, C] (
   def combineValuesByKey(iter: Iterator[_ <: Product2[K, V]]): Iterator[(K, C)] =
     combineValuesByKey(iter, null)
 /**
- * combineByKey()的处理流程如下：
- * 1,如果是一个新的元素，此时使用createCombiner()来创建那个键对应的累加器的初始值。
- *   (注意:这个过程会在每个分区第一次出现各个键时发生，而不是在整个RDD中第一次出现一个键时发生)
- * 2,如果这是一个在处理当前分区中之前已经遇到键，此时combineByKey()使用mergeValue()将该键的累加器对应的当前值与这个新值进行合并。
- * 3,由于每个分区都是独立处理的，因此对于同一个键可以有多个累加器。如果有两个或者更多的分区都有对应同一个键的累加器，
- *   就需要使用用户提供的mergeCombiners()将各个分区的结果进行合并.
+ * reduce端在缓存中对中间计算结果执行聚合和排序
  **/
   def combineValuesByKey(iter: Iterator[_ <: Product2[K, V]],
                          context: TaskContext): Iterator[(K, C)] = {
-    if (!isSpillEnabled) {//是否保存磁盘
+    // 是否使用外部排序,是由参数spark.shuffle.spill,默认是true
+    if (!isSpillEnabled) {//如果为false
       val combiners = new AppendOnlyMap[K, C]
       var kv: Product2[K, V] = null
       val update = (hadValue: Boolean, oldValue: C) => {
         if (hadValue) mergeValue(oldValue, kv._2) else createCombiner(kv._2)
       }
+      //用map来去重,用update方法来更新值,如果没值的时候,返回值,如果有值的时候,通过mergeValue方法来合并
+      //mergeValue方法就是我们在reduceByKey里面写的那个匿名函数,在这里就是（_ + _）
       while (iter.hasNext) {
         kv = iter.next()
+        //再次调用AppendOnlyMap的changeValue方法
         combiners.changeValue(kv._1, update)
       }
       combiners.iterator
     } else {
+      //isSpillEnabled为true,会使用ExternalAppendOnlyMap完成聚合
       val combiners = new ExternalAppendOnlyMap[K, V, C](createCombiner, mergeValue, mergeCombiners)
       combiners.insertAll(iter)
       updateMetrics(context, combiners)

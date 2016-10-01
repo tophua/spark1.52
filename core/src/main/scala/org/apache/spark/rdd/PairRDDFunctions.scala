@@ -97,6 +97,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
       self.context.clean(mergeValue),
       self.context.clean(mergeCombiners))
     if (self.partitioner == Some(partitioner)) {
+    //一般的RDD的partitioner是None,这个条件不成立,即使成立只需要对这个数据做一次按key合并value的操作即可
       self.mapPartitions(iter => {
         val context = TaskContext.get()
         new InterruptibleIterator(context, aggregator.combineValuesByKey(iter, context))

@@ -134,20 +134,22 @@ abstract class RDD[T: ClassTag](
   protected def getPartitions: Array[Partition]
 
   /**
-   * 返回RDD依赖信息
+   * 只计算一次,计算RDD对父RDD的依赖
    * Implemented by subclasses to return how this RDD depends on parent RDDs. This method will only
    * be called once, so it is safe to implement a time-consuming computation in it.
    */
   protected def getDependencies: Seq[Dependency[_]] = deps
 
   /**
-   * 指定RDD最佳位置
+   * 指定优先位置,输入参数是split分片,输出结果是一组优先的节点位置
    * Optionally overridden by subclasses to specify placement preferences.
    */
   protected def getPreferredLocations(split: Partition): Seq[String] = Nil
 
-  /** Optionally overridden by subclasses to specify how they are partitioned. */
-  //键值对RDD（key-value pair RDD）中键的分区算法，有HashPartitioner，CustomPartitioner
+  /** 
+   *  Optionally overridden by subclasses to specify how they are partitioned. 
+   *  key-value型的RDD是根据哈希来分区的,控制key分到哪个reduce
+   *  */ 
   @transient val partitioner: Option[Partitioner] = None
 
   // =======================================================================
