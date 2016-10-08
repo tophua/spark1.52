@@ -22,6 +22,7 @@ import scala.util.Try
 
 /**
  * Class representing a Spark computation. It may contain multiple Spark jobs.
+ * 它可能包含多个Spark作业
  */
 private[streaming]
 class Job(val time: Time, func: () => _) {

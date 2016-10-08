@@ -59,6 +59,7 @@ case class BatchInfo(
   /**
    * Time taken for the all jobs of this batch to finish processing from the time they started
    * processing. Essentially, it is `processingEndTime` - `processingStartTime`.
+   *  从提交Job(作业)到该批处理的开始的时间.
    */
   def processingDelay: Option[Long] = processingEndTime.zip(processingStartTime)
     .map(x => x._1 - x._2).headOption
@@ -66,28 +67,42 @@ case class BatchInfo(
   /**
    * Time taken for all the jobs of this batch to finish processing from the time they
    * were submitted.  Essentially, it is `processingDelay` + `schedulingDelay`.
+   * 从提交Job(作业)到该批处理的完成的时间.
    */
   def totalDelay: Option[Long] = schedulingDelay.zip(processingDelay)
     .map(x => x._1 + x._2).headOption
 
   /**
    * The number of recorders received by the receivers in this batch.
+   * 批理接收数据数
    */
   def numRecords: Long = streamIdToInputInfo.values.map(_.numRecords).sum
 
-  /** Set the failure reasons corresponding to every output ops in the batch */
+  /** 
+   *  Set the failure reasons corresponding to every output ops in the batch 
+   *  设置对应于批处理中的每一个输出操作的失败原因
+   *  */
   private[streaming] def setFailureReason(reasons: Map[Int, String]): Unit = {
     _failureReasons = reasons
   }
 
-  /** Failure reasons corresponding to every output ops in the batch */
+  /** 
+   *  Failure reasons corresponding to every output ops in the batch 
+   *  批处理中的每一个输出操作失败的原因
+   *  */
   private[streaming] def failureReasons = _failureReasons
 
-  /** Set the number of output operations in this batch */
+  /** 
+   *  Set the number of output operations in this batch 
+   *  在该批处理中设置输出操作数
+   *  */
   private[streaming] def setNumOutputOp(numOutputOp: Int): Unit = {
     _numOutputOp = numOutputOp
   }
 
-  /** Return the number of output operations in this batch */
+  /** 
+   *  Return the number of output operations in this batch 
+   *  返回此批中的输出操作数
+   *  */
   private[streaming] def numOutputOp: Int = _numOutputOp
 }

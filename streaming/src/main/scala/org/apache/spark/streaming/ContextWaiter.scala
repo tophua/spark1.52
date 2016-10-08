@@ -26,9 +26,11 @@ private[streaming] class ContextWaiter {
   private val condition = lock.newCondition()
 
   // Guarded by "lock"
+  //由“锁”守护
   private var error: Throwable = null
 
   // Guarded by "lock"
+  //由“锁”守护
   private var stopped: Boolean = false
 
   def notifyError(e: Throwable): Unit = {
@@ -54,6 +56,7 @@ private[streaming] class ContextWaiter {
   /**
    * Return `true` if it's stopped; or throw the reported error if `notifyError` has been called; or
    * `false` if the waiting time detectably elapsed before return from the method.
+   * 如果返回true,则已暂停,抛出异常返回false,如果等待的时间检测到才从方法返回
    */
   def waitForStopOrError(timeout: Long = -1): Boolean = {
     lock.lock()
@@ -69,8 +72,10 @@ private[streaming] class ContextWaiter {
         }
       }
       // If already had error, then throw it
+      //如果已经有错误,则抛出它
       if (error != null) throw error
       // already stopped or timeout
+      //已经停止或暂停
       stopped
     } finally {
       lock.unlock()

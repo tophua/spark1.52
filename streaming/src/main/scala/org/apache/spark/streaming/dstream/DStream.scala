@@ -67,13 +67,22 @@ abstract class DStream[T: ClassTag] (
   // Methods that should be implemented by subclasses of DStream
   // =======================================================================
 
-  /** Time interval after which the DStream generates a RDD */
+  /** 
+   *  Time interval after which the DStream generates a RDD 
+   *  时间间隔后产生的dstream RDD
+   *  */
   def slideDuration: Duration
 
-  /** List of parent DStreams on which this DStream depends on */
+  /** 
+   *  List of parent DStreams on which this DStream depends on 
+   *  DStream依赖的父级DStream列表
+   *  */
   def dependencies: List[DStream[_]]
 
-  /** Method that generates a RDD for the given time */
+  /** 
+   *  Method that generates a RDD for the given time
+   *  给定的时间生成一个RDD
+   *  */
   def compute(validTime: Time): Option[RDD[T]]
 
   // =======================================================================
@@ -85,36 +94,48 @@ abstract class DStream[T: ClassTag] (
   private[streaming] var generatedRDDs = new HashMap[Time, RDD[T]] ()
 
   // Time zero for the DStream
+  //零时间的DStream
   private[streaming] var zeroTime: Time = null
 
   // Duration for which the DStream will remember each RDD created
+  // 持续时间的dstream记住每个RDD创建
   private[streaming] var rememberDuration: Duration = null
 
   // Storage level of the RDDs in the stream
+  //RDD存储级别
   private[streaming] var storageLevel: StorageLevel = StorageLevel.NONE
 
   // Checkpoint details
+  //详细的检查点
   private[streaming] val mustCheckpoint = false
   private[streaming] var checkpointDuration: Duration = null
   private[streaming] val checkpointData = new DStreamCheckpointData(this)
 
   // Reference to whole DStream graph
+  //引用全部的DStream graph
   private[streaming] var graph: DStreamGraph = null
-
+ //是否已经初始化
   private[streaming] def isInitialized = (zeroTime != null)
 
   // Duration for which the DStream requires its parent DStream to remember each RDD created
+  //持续时间dstream要求其父dstream记住每个RDD创建
   private[streaming] def parentRememberDuration = rememberDuration
 
-  /** Return the StreamingContext associated with this DStream */
+  /** 
+   *  Return the StreamingContext associated with this DStream
+   *  返回StreamingContext上下文相关的dstream流
+   *  */
   def context: StreamingContext = ssc
 
-  /* Set the creation call site */
+  /* 
+   * Set the creation call site 
+   * 设置创建调用站点
+   * */
   private[streaming] val creationSite = DStream.getCreationSite()
 
   /**
    * The base scope associated with the operation that created this DStream.
-   *
+   * 与创建这个dstream操作相关的基本范围
    * This is the medium through which we pass the DStream operation name (e.g. updatedStateByKey)
    * to the RDDs created by this DStream. Note that we never use this scope directly in RDDs.
    * Instead, we instantiate a new scope during each call to `compute` based on this one.
@@ -150,7 +171,10 @@ abstract class DStream[T: ClassTag] (
     }
   }
 
-  /** Persist the RDDs of this DStream with the given storage level */
+  /** 
+   *  Persist the RDDs of this DStream with the given storage level 
+   *  使用指定的存储级别持久化DStream的RDD
+   *  */
   def persist(level: StorageLevel): DStream[T] = {
     if (this.isInitialized) {
       throw new UnsupportedOperationException(
@@ -163,11 +187,15 @@ abstract class DStream[T: ClassTag] (
   /** Persist RDDs of this DStream with the default storage level (MEMORY_ONLY_SER) */
   def persist(): DStream[T] = persist(StorageLevel.MEMORY_ONLY_SER)
 
-  /** Persist RDDs of this DStream with the default storage level (MEMORY_ONLY_SER) */
+  /** 
+   *  Persist RDDs of this DStream with the default storage level (MEMORY_ONLY_SER) 
+   *  缓存到内存,调用persist方法
+   *  */
   def cache(): DStream[T] = persist()
 
   /**
    * Enable periodic checkpointing of RDDs of this DStream
+   * 在指定时间间隔interval周期后生成的RDD设置检查点
    * @param interval Time interval after which generated RDD will be checkpointed
    */
   def checkpoint(interval: Duration): DStream[T] = {
@@ -184,6 +212,7 @@ abstract class DStream[T: ClassTag] (
    * Initialize the DStream by setting the "zero" time, based on which
    * the validity of future times is calculated. This method also recursively initializes
    * its parent DStreams.
+   * 初始化dstream通过设置“零”时间,在此基础上验证时间的有效性,递归初始化父dstreams
    */
   private[streaming] def initialize(time: Time) {
     if (zeroTime != null && zeroTime != time) {
@@ -199,9 +228,11 @@ abstract class DStream[T: ClassTag] (
     }
 
     // Set the minimum value of the rememberDuration if not already set
+    //设置的rememberduration最小值,如果不存在则设置
     var minRememberDuration = slideDuration
     if (checkpointDuration != null && minRememberDuration <= checkpointDuration) {
       // times 2 just to be sure that the latest checkpoint is not forgotten (#paranoia)
+      // 时间2只是为了确保最新的检查点没有被遗忘
       minRememberDuration = checkpointDuration * 2
     }
     if (rememberDuration == null || rememberDuration < minRememberDuration) {
@@ -209,6 +240,7 @@ abstract class DStream[T: ClassTag] (
     }
 
     // Initialize the dependencies
+    //初始化依赖
     dependencies.foreach(_.initialize(zeroTime))
   }
 
@@ -315,7 +347,10 @@ abstract class DStream[T: ClassTag] (
     dependencies.foreach(_.remember(parentRememberDuration))
   }
 
-  /** Checks whether the 'time' is valid wrt slideDuration for generating RDD */
+  /** 
+   *  Checks whether the 'time' is valid wrt slideDuration for generating RDD 
+   *  检查是否是有效的"时间",滑动时间产生RDD
+   *  */
   private[streaming] def isTimeValid(time: Time): Boolean = {
     if (!isInitialized) {
       throw new SparkException (this + " has not been initialized")
@@ -332,14 +367,15 @@ abstract class DStream[T: ClassTag] (
   /**
    * Get the RDD corresponding to the given time; either retrieve it from cache
    * or compute-and-cache it.
+   * 从缓存generatedRDDs获取RDD,如果缓存中不存在,则生成RDD并持久化,设置检查点
    */
   private[streaming] final def getOrCompute(time: Time): Option[RDD[T]] = {
     // If RDD was already generated, then retrieve it from HashMap,
-    // or else compute the RDD
+    // or else compute the RDD    
     generatedRDDs.get(time).orElse {
       // Compute the RDD if time is valid (e.g. correct time in a sliding window)
       // of RDD generation, else generate nothing.
-      if (isTimeValid(time)) {
+      if (isTimeValid(time)) {//如果时间有效,则产生RDD
 
         val rddOption = createRDDWithLocalProperties(time) {
           // Disable checks for existing output directories in jobs launched by the streaming
@@ -352,15 +388,16 @@ abstract class DStream[T: ClassTag] (
         }
 
         rddOption.foreach { case newRDD =>
-          // Register the generated RDD for caching and checkpointing
+          // Register the generated RDD for caching and checkpointing        
           if (storageLevel != StorageLevel.NONE) {
-            newRDD.persist(storageLevel)
+            newRDD.persist(storageLevel)//设置检查点
             logDebug(s"Persisting RDD ${newRDD.id} for time $time to $storageLevel")
           }
           if (checkpointDuration != null && (time - zeroTime).isMultipleOf(checkpointDuration)) {
             newRDD.checkpoint()
             logInfo(s"Marking RDD ${newRDD.id} for time $time for checkpointing")
           }
+          //缓存RDD
           generatedRDDs.put(time, newRDD)
         }
         rddOption
@@ -373,6 +410,7 @@ abstract class DStream[T: ClassTag] (
   /**
    * Wrap a body of code such that the call site and operation scope
    * information are passed to the RDDs created in this body properly.
+   * 总结一个代码的主体,这样的调用站点和操作范围
    */
   protected def createRDDWithLocalProperties[U](time: Time)(body: => U): U = {
     val scopeKey = SparkContext.RDD_SCOPE_KEY
@@ -410,6 +448,7 @@ abstract class DStream[T: ClassTag] (
    * should not be called directly. This default implementation creates a job
    * that materializes the corresponding RDD. Subclasses of DStream may override this
    * to generate their own jobs.
+   * 给指定的时间对象生成Job,默认创建一个Job,
    */
   private[streaming] def generateJob(time: Time): Option[Job] = {
     getOrCompute(time) match {
@@ -526,7 +565,10 @@ abstract class DStream[T: ClassTag] (
   // DStream operations
   // =======================================================================
 
-  /** Return a new DStream by applying a function to all elements of this DStream. */
+  /** 
+   *  Return a new DStream by applying a function to all elements of this DStream. 
+   *  通过一个函数应用dstream所有元素,返回一个新的dstream
+   *  */
   def map[U: ClassTag](mapFunc: T => U): DStream[U] = ssc.withScope {
     new MappedDStream(this, context.sparkContext.clean(mapFunc))
   }

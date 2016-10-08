@@ -79,7 +79,10 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
   // last batch whose completion,checkpointing and metadata cleanup has been completed
   private var lastProcessedBatch: Time = null
 
-  /** Start generation of jobs */
+  /** 
+   *  Start generation of jobs
+   *  开始运行Job 
+   *  */
   def start(): Unit = synchronized {
     if (eventLoop != null) return // generator has already been started
 
@@ -107,6 +110,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
    * Stop generation of jobs. processReceivedData = true makes this wait until jobs
    * of current ongoing time interval has been generated, processed and corresponding
    * checkpoints written.
+   * 停止jobs,
    */
   def stop(processReceivedData: Boolean): Unit = synchronized {
     if (eventLoop == null) return // generator has already been stopped

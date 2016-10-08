@@ -29,17 +29,20 @@ public enum StreamingContextState {
   /**
    * The context has been created, but not been started yet.
    * Input DStreams, transformations and output operations can be created on the context.
+   * 创建应用上下文件,但尚未开始
    */
   INITIALIZED,
 
   /**
    * The context has been started, and been not stopped.
+   * 上下文已开始,并没有停止.
    * Input DStreams, transformations and output operations cannot be created on the context.
    */
   ACTIVE,
 
   /**
    * The context has been stopped and cannot be used any more.
+   * 上下文已被停止,不能再使用了
    */
   STOPPED
 }
