@@ -65,7 +65,9 @@ private[streaming] class ReceiverSupervisorImpl(
   }
 
 
-  /** Remote RpcEndpointRef for the ReceiverTracker */
+  /** 
+   *  Remote RpcEndpointRef for the ReceiverTracker 
+   *  */
   private val trackerEndpoint = RpcUtils.makeDriverRef("ReceiverTracker", env.conf, env.rpcEnv)
 
   /** RpcEndpointRef for receiving messages from the ReceiverTracker in the driver */
@@ -88,7 +90,10 @@ private[streaming] class ReceiverSupervisorImpl(
       }
     })
 
-  /** Unique block ids if one wants to add blocks directly */
+  /** 
+   *  Unique block ids if one wants to add blocks directly
+   *  一个要直接添加块的唯一块标识 
+   *  */
   private val newBlockId = new AtomicLong(System.currentTimeMillis())
 
   private val registeredBlockGenerators = new mutable.ArrayBuffer[BlockGenerator]
@@ -110,10 +115,16 @@ private[streaming] class ReceiverSupervisorImpl(
   }
   private val defaultBlockGenerator = createBlockGenerator(defaultBlockGeneratorListener)
 
-  /** Get the current rate limit of the default block generator */
+  /** 
+   *  Get the current rate limit of the default block generator
+   *  获取默认块生成器的当前速率限制 
+   *  */
   override private[streaming] def getCurrentRateLimit: Long = defaultBlockGenerator.getCurrentLimit
 
-  /** Push a single record of received data into block generator. */
+  /** 
+   *  Push a single record of received data into block generator. 
+   *  将接收到的数据的单个记录推到块生成器
+   *  */
   def pushSingle(data: Any) {
     defaultBlockGenerator.addData(data)
   }
@@ -145,7 +156,10 @@ private[streaming] class ReceiverSupervisorImpl(
     pushAndReportBlock(ByteBufferBlock(bytes), metadataOption, blockIdOption)
   }
 
-  /** Store block and report it to driver */
+  /** 
+   *  Store block and report it to driver
+   *  存储块并将其报告给驱动程序 
+   *  */
   def pushAndReportBlock(
       receivedBlock: ReceivedBlock,
       metadataOption: Option[Any],
@@ -161,7 +175,10 @@ private[streaming] class ReceiverSupervisorImpl(
     logDebug(s"Reported block $blockId")
   }
 
-  /** Report error to the receiver tracker */
+  /** 
+   *  Report error to the receiver tracker
+   *  向接收器跟踪器报告错误 
+   *  */
   def reportError(message: String, error: Throwable) {
     val errorString = Option(error).map(Throwables.getStackTraceAsString).getOrElse("")
     trackerEndpoint.send(ReportError(streamId, message, errorString))
@@ -193,6 +210,7 @@ private[streaming] class ReceiverSupervisorImpl(
   override def createBlockGenerator(
       blockGeneratorListener: BlockGeneratorListener): BlockGenerator = {
     // Cleanup BlockGenerators that have already been stopped
+    //清理blockgenerators已经停止
     registeredBlockGenerators --= registeredBlockGenerators.filter{ _.isStopped() }
 
     val newBlockGenerator = new BlockGenerator(blockGeneratorListener, streamId, env.conf)
@@ -200,7 +218,10 @@ private[streaming] class ReceiverSupervisorImpl(
     newBlockGenerator
   }
 
-  /** Generate new block ID */
+  /** 
+   *  Generate new block ID
+   *  生成新的块标识 
+   *  */
   private def nextBlockId = StreamBlockId(streamId, newBlockId.getAndIncrement)
 
   private def cleanupOldBlocks(cleanupThreshTime: Time): Unit = {

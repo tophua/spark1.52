@@ -22,14 +22,26 @@ import java.nio.ByteBuffer
 import scala.collection.mutable.ArrayBuffer
 import scala.language.existentials
 
-/** Trait representing a received block */
+/** 
+ *  Trait representing a received block
+ *  表示接收块 
+ *  */
 private[streaming] sealed trait ReceivedBlock
 
-/** class representing a block received as an ArrayBuffer */
+/** 
+ *  class representing a block received as an ArrayBuffer 
+ *  代表一个块收到ArrayBuffer
+ *  */
 private[streaming] case class ArrayBufferBlock(arrayBuffer: ArrayBuffer[_]) extends ReceivedBlock
 
-/** class representing a block received as an Iterator */
+/** 
+ *  class representing a block received as an Iterator 
+ *  代表迭代器接收的块
+ *  */
 private[streaming] case class IteratorBlock(iterator: Iterator[_]) extends ReceivedBlock
 
-/** class representing a block received as an ByteBuffer */
+/** 
+ *  class representing a block received as an ByteBuffer 
+ *  代表一个块收到ByteBuffer
+ *  */
 private[streaming] case class ByteBufferBlock(byteBuffer: ByteBuffer) extends ReceivedBlock

@@ -70,10 +70,14 @@ object ActorSupervisorStrategy {
  */
 @DeveloperApi
 trait ActorHelper extends Logging{
-
+  //为了确保这只能添加到Actor类
   self: Actor => // to ensure that this can be added to Actor classes only
+    
 
-  /** Store an iterator of received data as a data block into Spark's memory. */
+  /** 
+   *  Store an iterator of received data as a data block into Spark's memory.
+   *  将接收到的数据的迭代器作为数据块存储到Spark存储器中 
+   *  */
   def store[T](iter: Iterator[T]) {
     logDebug("Storing iterator")
     context.parent ! IteratorData(iter)
@@ -83,6 +87,7 @@ trait ActorHelper extends Logging{
    * Store the bytes of received data as a data block into Spark's memory. Note
    * that the data in the ByteBuffer must be serialized using the same serializer
    * that Spark is configured to use.
+   * 将接收到的数据的字节存储为Spark的内存中
    */
   def store(bytes: ByteBuffer) {
     logDebug("Storing Bytes")
@@ -93,6 +98,7 @@ trait ActorHelper extends Logging{
    * Store a single item of received data to Spark's memory.
    * These single items will be aggregated together into data blocks before
    * being pushed into Spark's memory.
+   * 将接收到的单个数据项存储到Spark的内存中
    */
   def store[T](item: T) {
     logDebug("Storing item")
@@ -105,6 +111,7 @@ trait ActorHelper extends Logging{
  * Statistics for querying the supervisor about state of workers. Used in
  * conjunction with `StreamingContext.actorStream` and
  * [[org.apache.spark.streaming.receiver.ActorHelper]].
+ * 对Worker状态查询的统计
  */
 @DeveloperApi
 case class Statistics(numberOfMsgs: Int,
@@ -112,7 +119,9 @@ case class Statistics(numberOfMsgs: Int,
   numberOfHiccups: Int,
   otherInfo: String)
 
-/** Case class to receive data sent by child actors */
+/** 
+ *  Case class to receive data sent by child actors 
+ *  */
 private[streaming] sealed trait ActorReceiverData
 private[streaming] case class SingleItemData[T](item: T) extends ActorReceiverData
 private[streaming] case class IteratorData[T](iterator: Iterator[T]) extends ActorReceiverData

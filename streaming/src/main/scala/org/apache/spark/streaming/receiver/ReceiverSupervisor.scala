@@ -31,7 +31,8 @@ import org.apache.spark.util.{Utils, ThreadUtils}
 /**
  * Abstract class that is responsible for supervising a Receiver in the worker.
  * It provides all the necessary interfaces for handling the data received by the receiver.
- * 主要负责对Receiver的控制,receiver收到数据后,交给ReceiverSupervisor存储数据
+ * 主要负责监督Worker对Receiver的控制,receiver收到数据后,交给ReceiverSupervisor存储数据
+ * 它提供了用于处理接收到的数据的所有必要的接口
  */
 private[streaming] abstract class ReceiverSupervisor(
     receiver: Receiver[_],

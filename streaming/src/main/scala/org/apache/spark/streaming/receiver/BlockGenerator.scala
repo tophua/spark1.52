@@ -87,6 +87,7 @@ private[streaming] class BlockGenerator(
 
   /**
    * The BlockGenerator can be in 5 possible states, in the order as follows.
+   * blockgenerator可以在5种可能的状态顺序如下
    * - Initialized: Nothing has been started
    * - Active: start() has been called, and it is generating blocks on added data.
    * - StoppedAddingData: stop() has been called, the adding of data has been stopped,
@@ -130,12 +131,14 @@ private[streaming] class BlockGenerator(
 
   /**
    * Stop everything in the right order such that all the data added is pushed out correctly.
-   * - First, stop adding data to the current buffer.
-   * - Second, stop generating blocks.
-   * - Finally, wait for queue of to-be-pushed blocks to be drained.
+   * 以正确的顺序停止一切,这样所有的数据添加被正确地推出来
+   * - First, stop adding data to the current buffer.不要将数据添加到当前缓冲区
+   * - Second, stop generating blocks.停止生成块
+   * - Finally, wait for queue of to-be-pushed blocks to be drained.等待被推块被耗尽的队列
    */
   def stop(): Unit = {
     // Set the state to stop adding data
+    //设置状态停止添加数据
     synchronized {
       if (state == Active) {
         state = StoppedAddingData
@@ -146,11 +149,13 @@ private[streaming] class BlockGenerator(
     }
 
     // Stop generating blocks and set the state for block pushing thread to start draining the queue
+    //停止生成块并设置块推进线程的状态开始排空队列
     logInfo("Stopping BlockGenerator")
     blockIntervalTimer.stop(interruptTimer = false)
     synchronized { state = StoppedGeneratingBlocks }
 
     // Wait for the queue to drain and mark generated as stopped
+    //等待队列来消耗和标记生成的停止
     logInfo("Waiting for block pushing thread to terminate")
     blockPushingThread.join()
     synchronized { state = StoppedAll }
@@ -159,6 +164,7 @@ private[streaming] class BlockGenerator(
 
   /**
    * Push a single data item into the buffer.
+   * 将单个数据项推到缓冲区中
    */
   def addData(data: Any): Unit = {
     if (state == Active) {
@@ -180,6 +186,7 @@ private[streaming] class BlockGenerator(
   /**
    * Push a single data item into the buffer. After buffering the data, the
    * `BlockGeneratorListener.onAddData` callback will be called.
+   * 将单个数据项推到缓冲区中
    */
   def addDataWithCallback(data: Any, metadata: Any): Unit = {
     if (state == Active) {
@@ -203,10 +210,12 @@ private[streaming] class BlockGenerator(
    * Push multiple data items into the buffer. After buffering the data, the
    * `BlockGeneratorListener.onAddData` callback will be called. Note that all the data items
    * are atomically added to the buffer, and are hence guaranteed to be present in a single block.
+   * 将多个数据项推到缓冲区中
    */
   def addMultipleDataWithCallback(dataIterator: Iterator[Any], metadata: Any): Unit = {
     if (state == Active) {
       // Unroll iterator into a temp buffer, and wait for pushing in the process
+      //将迭代器为临时缓冲，等待过程中的推送
       val tempBuffer = new ArrayBuffer[Any]
       dataIterator.foreach { data =>
         waitToPush()
@@ -231,7 +240,10 @@ private[streaming] class BlockGenerator(
 
   def isStopped(): Boolean = state == StoppedAll
 
-  /** Change the buffer to which single records are added to. */
+  /** 
+   *  Change the buffer to which single records are added to. 
+   *  更改单个记录被添加到的缓冲区。
+   *  */
   private def updateCurrentBuffer(time: Long): Unit = {
     try {
       var newBlock: Block = null
@@ -256,7 +268,9 @@ private[streaming] class BlockGenerator(
     }
   }
 
-  /** Keep pushing blocks to the BlockManager. */
+  /** 
+   *  Keep pushing blocks to the BlockManager.
+   *  */
   private def keepPushingBlocks() {
     logInfo("Started block pushing thread")
 
@@ -266,6 +280,7 @@ private[streaming] class BlockGenerator(
 
     try {
       // While blocks are being generated, keep polling for to-be-pushed blocks and push them.
+      //正在生成块,保持循环推送块
       while (areBlocksBeingGenerated) {
         Option(blocksForPushing.poll(10, TimeUnit.MILLISECONDS)) match {
           case Some(block) => pushBlock(block)

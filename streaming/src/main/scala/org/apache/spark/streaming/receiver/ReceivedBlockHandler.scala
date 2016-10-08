@@ -33,18 +33,26 @@ import org.apache.spark.{Logging, SparkConf, SparkException}
 /** Trait that represents the metadata related to storage of blocks */
 private[streaming] trait ReceivedBlockStoreResult {
   // Any implementation of this trait will store a block id
+  //任何实现将存储一个块标识
   def blockId: StreamBlockId
   // Any implementation of this trait will have to return the number of records
+  //此特性的任何实现将必须返回记录的数量
   def numRecords: Option[Long]
 }
 
 /** Trait that represents a class that handles the storage of blocks received by receiver */
 private[streaming] trait ReceivedBlockHandler {
 
-  /** Store a received block with the given block id and return related metadata */
+  /** 
+   *  Store a received block with the given block id and return related metadata 
+   *  将接收的块存储在给定的块标识和返回相关的元数据中
+   *  */
   def storeBlock(blockId: StreamBlockId, receivedBlock: ReceivedBlock): ReceivedBlockStoreResult
 
-  /** Cleanup old blocks older than the given threshold time */
+  /** 
+   *  Cleanup old blocks older than the given threshold time
+   *  清理旧块比给定的阈值时间 
+   *  */
   def cleanupOldBlocks(threshTime: Long)
 }
 
