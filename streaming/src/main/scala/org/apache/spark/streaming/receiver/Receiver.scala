@@ -83,6 +83,9 @@ import org.apache.spark.annotation.DeveloperApi
  * }}}
  */
 @DeveloperApi
+/**
+ * 用于从数据源接收源源不断的数据流,Receiver是一条一条接收数据
+ */
 abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable {
 
   /**
@@ -90,37 +93,50 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * must initialize all resources (threads, buffers, etc.) necessary for receiving data.
    * This function must be non-blocking, so receiving the data must occur on a different
    * thread. Received data can be stored with Spark by calling `store(data)`.
-   *
+   * 该方法被系统调用时,接收器启动,此功能必须初始化接收数据所需的所有资源(线程、缓冲区等)
+   * 这个函数必须是非阻塞的,所以接收的数据必须在一个不同的线程发生,接收的数据可以存储与Spark通过调用的存储(数据)。
+   * 如果在开始的线程中有错误,那么可以做以下选项
    * If there are errors in threads started here, then following options can be done
    * (i) `reportError(...)` can be called to report the error to the driver.
+   * 可以调用来向驱动程序报告错误
    * The receiving of data will continue uninterrupted.
+   * 接收的数据将继续不间断
    * (ii) `stop(...)` can be called to stop receiving data. This will call `onStop()` to
    * clear up all resources allocated (threads, buffers, etc.) during `onStart()`.
+   * 可以调用停止接收数据
    * (iii) `restart(...)` can be called to restart the receiver. This will call `onStop()`
    * immediately, and then `onStart()` after a delay.
    * 就将持续不断地接收外界数据，并持续交给 ReceiverSupervisor 进行数据转储
    */
   def onStart()
 
-  /**
+  /**   
    * This method is called by the system when the receiver is stopped. All resources
    * (threads, buffers, etc.) setup in `onStart()` must be cleaned up in this method.
+   * 该方法被系统调用时,接收器被停止,所有在onstart()设置的资源(线程、缓冲区等),必须这个方法设置清理。
    */
   def onStop()
 
-  /** Override this to specify a preferred location (hostname). */
+  /** 
+   *  Override this to specify a preferred location (hostname). 
+   *  重写此指定优先位置(主机名)
+   *  */
   def preferredLocation : Option[String] = None
 
   /**
    * Store a single item of received data to Spark's memory.
    * These single items will be aggregated together into data blocks before
    * being pushed into Spark's memory.
+   * 接收单个数据项存储到Spark的内存中,这些单个数据项将聚集在一起到数据块之前被推到Spark内存
    */
   def store(dataItem: T) {
     supervisor.pushSingle(dataItem)
   }
 
-  /** Store an ArrayBuffer of received data as a data block into Spark's memory. */
+  /** 
+   *  Store an ArrayBuffer of received data as a data block into Spark's memory. 
+   *  接收到的数据以ArrayBuffer为数据块存储到Spark内存
+   *  */
   def store(dataBuffer: ArrayBuffer[T]) {
     supervisor.pushArrayBuffer(dataBuffer, None, None)
   }
@@ -134,7 +150,10 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
     supervisor.pushArrayBuffer(dataBuffer, Some(metadata), None)
   }
 
-  /** Store an iterator of received data as a data block into Spark's memory. */
+  /** 
+   *  Store an iterator of received data as a data block into Spark's memory. 
+   *  将接收到的数据的迭代器作为数据块存储到Spark内存中。
+   *  */
   def store(dataIterator: Iterator[T]) {
     supervisor.pushIterator(dataIterator, None, None)
   }
@@ -180,7 +199,10 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
     supervisor.pushBytes(bytes, Some(metadata), None)
   }
 
-  /** Report exceptions in receiving data. */
+  /** 
+   *  Report exceptions in receiving data. 
+   *  接收数据中的报告异常
+   *  */
   def reportError(message: String, throwable: Throwable) {
     supervisor.reportError(message, throwable)
   }
@@ -192,6 +214,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * in a background thread. The delay between the stopping and the starting
    * is defined by the Spark configuration `spark.streaming.receiverRestartDelay`.
    * The `message` will be reported to the driver.
+   * 重新启动接收器,该方法调度重新启动和立即返回
    */
   def restart(message: String) {
     supervisor.restartReceiver(message)
@@ -219,17 +242,26 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
     supervisor.restartReceiver(message, Some(error), millisecond)
   }
 
-  /** Stop the receiver completely. */
+  /** 
+   *  Stop the receiver completely. 
+   *  停止接收
+   *  */
   def stop(message: String) {
     supervisor.stop(message, None)
   }
 
-  /** Stop the receiver completely due to an exception */
+  /** 
+   *  Stop the receiver completely due to an exception 
+   *  由于异常停止接收
+   *  */
   def stop(message: String, error: Throwable) {
     supervisor.stop(message, Some(error))
   }
 
-  /** Check if the receiver has started or not. */
+  /** 
+   *  Check if the receiver has started or not. 
+   *  检查接收器是否已启动或不启动
+   *  */
   def isStarted(): Boolean = {
     supervisor.isReceiverStarted()
   }
@@ -237,6 +269,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
   /**
    * Check if receiver has been marked for stopping. Use this to identify when
    * the receiving of data should be stopped.
+   * 检查如果接收器已被标记为停止,使用此来识别当接收数据停止.
    */
   def isStopped(): Boolean = {
     supervisor.isReceiverStopped()
@@ -245,6 +278,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
   /**
    * Get the unique identifier the receiver input stream that this
    * receiver is associated with.
+   * 获取此接收器与之关联的接收器输入流的唯一标识符
    */
   def streamId: Int = id
 
@@ -254,7 +288,10 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * =================
    */
 
-  /** Identifier of the stream this receiver is associated with. */
+  /** 
+   *  Identifier of the stream this receiver is associated with.
+   *  该接收器的流的标识符
+   *   */
   private var id: Int = -1
 
   /** Handler object that runs the receiver. This is instantiated lazily in the worker. */

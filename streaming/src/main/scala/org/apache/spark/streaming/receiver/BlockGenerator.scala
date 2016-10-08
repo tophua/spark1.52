@@ -26,7 +26,10 @@ import org.apache.spark.storage.StreamBlockId
 import org.apache.spark.streaming.util.RecurringTimer
 import org.apache.spark.util.{Clock, SystemClock}
 
-/** Listener object for BlockGenerator events */
+/** 
+ *  Listener object for BlockGenerator events 
+ *  对于blockgenerator事件监听器对象
+ *  */
 private[streaming] trait BlockGeneratorListener {
   /**
    * Called after a data item is added into the BlockGenerator. The data addition and this
@@ -69,7 +72,7 @@ private[streaming] trait BlockGeneratorListener {
  * named blocks at regular intervals. This class starts two threads,
  * one to periodically start a new batch and prepare the previous batch of as a block,
  * the other to push the blocks into the block manager.
- *
+ * 生成由接收机接收的对象的批处理,并定期将它们放入适当的块中
  * Note: Do not create BlockGenerator instances directly inside receivers. Use
  * `ReceiverSupervisor.createBlockGenerator` to create a BlockGenerator and use it.
  */
@@ -100,15 +103,15 @@ private[streaming] class BlockGenerator(
 //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
   private val blockIntervalMs = conf.getTimeAsMs("spark.streaming.blockInterval", "200ms")
   require(blockIntervalMs > 0, s"'spark.streaming.blockInterval' should be a positive value")
-//一个定时器,用于将CurrentBuffer中缓存的数据流封装为Block后放入blocksForPushing
+//以一个固定间隔生成block(默认200ms),用于将CurrentBuffer中缓存的数据流封装为Block后放入blocksForPushing
   private val blockIntervalTimer =
     new RecurringTimer(clock, blockIntervalMs, updateCurrentBuffer, "BlockGenerator")
   private val blockQueueSize = conf.getInt("spark.streaming.blockQueueSize", 10)
   //用于缓存将要使用的Block
   private val blocksForPushing = new ArrayBlockingQueue[Block](blockQueueSize)
-  //此线程每隔100毫秒从blocksForPushing中取出一个Block存入存储体系,并缓存到ReceivedBlockQueue
+  //此线程每隔10秒从blocksForPushing中获取一个Block数据存入存储体系,并缓存到ReceivedBlockQueue
   private val blockPushingThread = new Thread() { override def run() { keepPushingBlocks() } }
-//currentBuffer 用于缓存输入流接收器接收的数据流
+  //currentBuffer 用于缓存输入流接收器接收的数据流,接收一条一条数据放入currentBuffer中
   @volatile private var currentBuffer = new ArrayBuffer[Any]
   @volatile private var state = Initialized
 
