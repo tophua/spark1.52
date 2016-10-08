@@ -85,7 +85,10 @@ public class TransportClientFactory implements Closeable {
   private final List<TransportClientBootstrap> clientBootstraps;
   private final ConcurrentHashMap<SocketAddress, ClientPool> connectionPool;
 
-  /** Random number generator for picking connections between peers. */
+  /** 
+   * Random number generator for picking connections between peers. 
+   * 随机产生开始连接
+   * */
   private final Random rand;
   private final int numConnectionsPerPeer;
 
@@ -229,7 +232,10 @@ public class TransportClientFactory implements Closeable {
     return client;
   }
 
-  /** Close all connections in the connection pool, and shutdown the worker thread pool. */
+  /** 
+   * Close all connections in the connection pool, and shutdown the worker thread pool. 
+   * 关闭连接池中的所有连接,并关闭Woker线程池
+   * */
   @Override
   public void close() {
     // Go through all clients and close them if they are active.

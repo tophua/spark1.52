@@ -72,15 +72,22 @@ public class RetryingBlockFetcher {
   /** Parent listener which we delegate all successful or permanently failed block fetches to. */
   private final BlockFetchingListener listener;
 
-  /** Max number of times we are allowed to retry. */
+  /**
+   *  Max number of times we are allowed to retry.
+   *  最大允许重试 次数
+   * */
   private final int maxRetries;
 
-  /** Milliseconds to wait before each retry. */
+  /**
+   *  Milliseconds to wait before each retry.
+   *  每次重试之前等待的毫秒数 
+   * */
   private final int retryWaitTime;
 
   // NOTE:
   // All of our non-final fields are synchronized under 'this' and should only be accessed/mutated
   // while inside a synchronized block.
+  //目前为止尝试次数
   /** Number of times we've attempted to retry so far. */
   private int retryCount = 0;
 
@@ -174,7 +181,7 @@ public class RetryingBlockFetcher {
 
   /**
    * Returns true if we should retry due a block fetch failure. We will retry if and only if
-   * the exception was an IOException and we haven't retried 'maxRetries' times already.
+   * the exception was an IOException and we haven't retried 'maxRetries' times already.   
    */
   private synchronized boolean shouldRetry(Throwable e) {
     boolean isIOException = e instanceof IOException

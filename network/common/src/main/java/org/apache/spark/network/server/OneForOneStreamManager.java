@@ -43,7 +43,11 @@ public class OneForOneStreamManager extends StreamManager {
   private final AtomicLong nextStreamId;
   private final ConcurrentHashMap<Long, StreamState> streams;
 
-  /** State of a single stream. */
+  /** 
+   * State of a single stream.
+   * 单一流的状态 
+   * */
+  
   private static class StreamState {
     final Iterator<ManagedBuffer> buffers;
 
