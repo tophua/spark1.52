@@ -83,17 +83,26 @@ object Checkpoint extends Logging {
   val PREFIX = "checkpoint-"
   val REGEX = (PREFIX + """([\d]+)([\w\.]*)""").r
 
-  /** Get the checkpoint file for the given checkpoint time */
+  /** 
+   *  Get the checkpoint file for the given checkpoint time
+   *  获取给定检查点时间的检查点文件 
+   *  */
   def checkpointFile(checkpointDir: String, checkpointTime: Time): Path = {
     new Path(checkpointDir, PREFIX + checkpointTime.milliseconds)
   }
 
-  /** Get the checkpoint backup file for the given checkpoint time */
+  /** 
+   *  Get the checkpoint backup file for the given checkpoint time
+   *  获取给定检查点时间的检查点备份文件 
+   *  */
   def checkpointBackupFile(checkpointDir: String, checkpointTime: Time): Path = {
     new Path(checkpointDir, PREFIX + checkpointTime.milliseconds + ".bk")
   }
 
-  /** Get checkpoint files present in the give directory, ordered by oldest-first */
+  /** 
+   *  Get checkpoint files present in the give directory, ordered by oldest-first 
+   *  获取给目录中的检查点文件
+   *  */
   def getCheckpointFiles(checkpointDir: String, fsOption: Option[FileSystem] = None): Seq[Path] = {
 
     def sortFunc(path1: Path, path2: Path): Boolean = {
@@ -120,7 +129,10 @@ object Checkpoint extends Logging {
     }
   }
 
-  /** Serialize the checkpoint, or throw any exception that occurs */
+  /** 
+   *  Serialize the checkpoint, or throw any exception that occurs 
+   *  序列化的检查站，或将出现的任何异常
+   *  */
   def serialize(checkpoint: Checkpoint, conf: SparkConf): Array[Byte] = {
     val compressionCodec = CompressionCodec.createCodec(conf)
     val bos = new ByteArrayOutputStream()
@@ -134,7 +146,10 @@ object Checkpoint extends Logging {
     bos.toByteArray
   }
 
-  /** Deserialize a checkpoint from the input stream, or throw any exception that occurs */
+  /** 
+   *  Deserialize a checkpoint from the input stream, or throw any exception that occurs
+   *  反序列化一个检查站从输入流,或把所出现的任何异常
+   *   */
   def deserialize(inputStream: InputStream, conf: SparkConf): Checkpoint = {
     val compressionCodec = CompressionCodec.createCodec(conf)
     var ois: ObjectInputStreamWithLoader = null
@@ -162,6 +177,7 @@ object Checkpoint extends Logging {
 
 /**
  * Convenience class to handle the writing of graph checkpoint to file
+ * 检查点的写入文件
  */
 private[streaming]
 class CheckpointWriter(
@@ -208,8 +224,9 @@ class CheckpointWriter(
             + "'")
 
           // Write checkpoint to temp file
+          //写入临时文件的检查点
           if (fs.exists(tempFile)) {
-            fs.delete(tempFile, true)   // just in case it exists
+            fs.delete(tempFile, true)   // just in case it exists以防万一它存在
           }
           val fos = fs.create(tempFile)
           Utils.tryWithSafeFinally {
@@ -220,6 +237,7 @@ class CheckpointWriter(
 
           // If the checkpoint file exists, back it up
           // If the backup exists as well, just delete it, otherwise rename will fail
+          //如果检查点文件存在,则备份,如果备份也存在,只需删除它,否则重命名将失败
           if (fs.exists(checkpointFile)) {
             if (fs.exists(backupFile)){
               fs.delete(backupFile, true) // just in case it exists
@@ -230,11 +248,13 @@ class CheckpointWriter(
           }
 
           // Rename temp file to the final checkpoint file
+          //将临时文件重命名为最终的检查点文件
           if (!fs.rename(tempFile, checkpointFile)) {
             logWarning("Could not rename " + tempFile + " to " + checkpointFile)
           }
 
           // Delete old checkpoint files
+          //删除检查点文件
           val allCheckpointFiles = Checkpoint.getCheckpointFiles(checkpointDir, Some(fs))
           if (allCheckpointFiles.size > 10) {
             allCheckpointFiles.take(allCheckpointFiles.size - 10).foreach(file => {
@@ -243,7 +263,7 @@ class CheckpointWriter(
             })
           }
 
-          // All done, print success
+          // All done, print success打印成功
           val finishTime = System.currentTimeMillis()
           logInfo("Checkpoint for time " + checkpointTime + " saved to file '" + checkpointFile +
             "', took " + bytes.length + " bytes and " + (finishTime - startTime) + " ms")
@@ -306,6 +326,7 @@ object CheckpointReader extends Logging {
    * Read checkpoint files present in the given checkpoint directory. If there are no checkpoint
    * files, then return None, else try to return the latest valid checkpoint object. If no
    * checkpoint files could be read correctly, then return None.
+   * 读取给定检查点目录中的检查点文件,如果没有检查点文件,则返回无检查点文件
    */
   def read(checkpointDir: String): Option[Checkpoint] = {
     read(checkpointDir, new SparkConf(), SparkHadoopUtil.get.conf, ignoreReadError = true)
@@ -316,6 +337,8 @@ object CheckpointReader extends Logging {
    * files, then return None, else try to return the latest valid checkpoint object. If no
    * checkpoint files could be read correctly, then return None (if ignoreReadError = true),
    * or throw exception (if ignoreReadError = false).
+   * 读取给定检查点目录中的检查点文件,如果没有检查点文件，则返回无检查点文件,否则尝试返回最新的有效的检查点对象
+   * 如果没有检查点文件,可以正确读取
    */
   def read(
       checkpointDir: String,
@@ -328,12 +351,14 @@ object CheckpointReader extends Logging {
     def fs: FileSystem = checkpointPath.getFileSystem(hadoopConf)
 
     // Try to find the checkpoint files
+    //尝试找到检查点文件
     val checkpointFiles = Checkpoint.getCheckpointFiles(checkpointDir, Some(fs)).reverse
     if (checkpointFiles.isEmpty) {
       return None
     }
 
     // Try to read the checkpoint files in the order
+    //尝试读取命令中的检查点文件
     logInfo("Checkpoint files found: " + checkpointFiles.mkString(","))
     var readError: Exception = null
     checkpointFiles.foreach(file => {
@@ -352,6 +377,7 @@ object CheckpointReader extends Logging {
     })
 
     // If none of checkpoint files could be read, then throw exception
+    //如果没有一个检查点文件可以读取，则抛出异常
     if (!ignoreReadError) {
       throw new SparkException(
         s"Failed to read checkpoint from directory $checkpointPath", readError)
