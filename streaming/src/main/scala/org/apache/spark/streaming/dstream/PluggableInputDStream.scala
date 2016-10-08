@@ -22,11 +22,14 @@ import scala.reflect.ClassTag
 import org.apache.spark.streaming.receiver.Receiver
 
 private[streaming]
+/**
+ * 可以扩展任务输入流,
+ */
 class PluggableInputDStream[T: ClassTag](
   @transient ssc_ : StreamingContext,
   receiver: Receiver[T]) extends ReceiverInputDStream[T](ssc_) {
 
   def getReceiver(): Receiver[T] = {
-    receiver
+    receiver//返回的是参数传入Receiver
   }
 }

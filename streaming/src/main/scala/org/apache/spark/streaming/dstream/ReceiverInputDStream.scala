@@ -29,8 +29,7 @@ import org.apache.spark.streaming.util.WriteAheadLogUtils
 import org.apache.spark.streaming.{StreamingContext, Time}
 
 /**
- * 会保存关于历次 batch 的源头数据条数、历次 batch 计算花费的时间等数值，用来实时计算准确的流量控制信息
- * 这些都是记在 DStream 里的， 而 RDD a[1] 等则不会保存这些信息
+ * 抽象类用于定义要在工作节点上启动一个接收端接收外部数据的任何一个数据源输入流
  * Abstract class for defining any [[org.apache.spark.streaming.dstream.InputDStream]]
  * that has to start a receiver on worker nodes to receive external data.
  * Specific implementations of ReceiverInputDStream must
@@ -45,6 +44,7 @@ abstract class ReceiverInputDStream[T: ClassTag](@transient ssc_ : StreamingCont
 
   /**
    * Asynchronously maintains & sends new rate limits to the receiver through the receiver tracker.
+   * 异步维护和跟踪发送新的限制速率到接收器
    */
   override protected[streaming] val rateController: Option[RateController] = {
     if (RateController.isBackPressureEnabled(ssc.conf)) {
@@ -58,6 +58,7 @@ abstract class ReceiverInputDStream[T: ClassTag](@transient ssc_ : StreamingCont
    * Gets the receiver object that will be sent to the worker nodes
    * to receive data. This method needs to defined by any specific implementation
    * of a ReceiverInputDStream.
+   * 获取将要发送数据到工作节点接收的对象
    */
   def getReceiver(): Receiver[T]
 
@@ -67,7 +68,9 @@ abstract class ReceiverInputDStream[T: ClassTag](@transient ssc_ : StreamingCont
   def stop() {}
 
   /**
-   * Generates RDDs with blocks received by the receiver of this stream. */
+   * Generates RDDs with blocks received by the receiver of this stream.
+   * 通过产生RDDS接模
+   * */
   override def compute(validTime: Time): Option[RDD[T]] = {
     val blockRDD = {
 
