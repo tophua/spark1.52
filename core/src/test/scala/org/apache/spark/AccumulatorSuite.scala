@@ -61,7 +61,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     longAcc.value should be (210L + maxInt * 20)
   }
 
-  test ("value not assignable from tasks") {
+  test ("value not assignable from tasks") {//任务不能分配的值
     sc = new SparkContext("local", "test")
     val acc : Accumulator[Int] = sc.accumulator(0)
 
@@ -69,7 +69,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     an [Exception] should be thrownBy {d.foreach{x => acc.value = x}}
   }
 
-  test ("add value to collection accumulators") {
+  test ("add value to collection accumulators") {//累加器集合增加值
     val maxI = 1000
     for (nThreads <- List(1, 10)) { // test single & multi-threaded
       sc = new SparkContext("local[" + nThreads + "]", "test")
@@ -86,7 +86,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
   
-  test ("value not readable in tasks") {
+  test ("value not readable in tasks") {//任务中不可读的值
     val maxI = 1000
     for (nThreads <- List(1, 10)) { // test single & multi-threaded
       sc = new SparkContext("local[" + nThreads + "]", "test")
@@ -101,7 +101,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
 
-  test ("collection accumulators") {
+  test ("collection accumulators") {//集合累加器
     val maxI = 1000
     for (nThreads <- List(1, 10)) {
       // test single & multi-threaded
@@ -127,7 +127,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
 
-  test ("localValue readable in tasks") {
+  test ("localValue readable in tasks") {//任务中的本地值可读性
     val maxI = 1000
     for (nThreads <- List(1, 10)) { // test single & multi-threaded
       sc = new SparkContext("local[" + nThreads + "]", "test")
@@ -142,17 +142,20 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
 
-  test ("garbage collection") {
+  test ("garbage collection") {//垃圾回收
     // Create an accumulator and let it go out of scope to test that it's properly garbage collected
+    //创建一个累加器,超出的范围,以测试它的垃圾回收
     sc = new SparkContext("local", "test")
     var acc: Accumulable[mutable.Set[Any], Any] = sc.accumulable(new mutable.HashSet[Any]())
     val accId = acc.id
     val ref = WeakReference(acc)
 
     // Ensure the accumulator is present
+    //确保累加器的存在
     assert(ref.get.isDefined)
 
     // Remove the explicit reference to it and allow weak reference to get garbage collected
+    //删除明确的引用,并允许弱引用获取垃圾收集
     acc = null
     System.gc()
     assert(ref.get.isEmpty)
@@ -161,7 +164,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(!Accumulators.originals.get(accId).isDefined)
   }
 
-  test("internal accumulators in TaskContext") {
+  test("internal accumulators in TaskContext") {//在任务的上下文内的累加器
     sc = new SparkContext("local", "test")
     val accums = InternalAccumulator.create(sc)
     val taskContext = new TaskContextImpl(0, 0, 0, 0, null, null, accums)
@@ -178,12 +181,13 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(collectedAccums.contains(testAccum.id))
   }
 
-  test("internal accumulators in a stage") {
+  test("internal accumulators in a stage") {//在阶段内的累加器
     val listener = new SaveInfoListener
     val numPartitions = 10
     sc = new SparkContext("local", "test")
     sc.addSparkListener(listener)
     // Have each task add 1 to the internal accumulator
+    //有每个任务添加1到内部的累加器
     val rdd = sc.parallelize(1 to 100, numPartitions).mapPartitions { iter =>
       TaskContext.get().internalMetricsToAccumulators(TEST_ACCUMULATOR) += 1
       iter
@@ -196,9 +200,11 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
       assert(stageInfos.size === 1)
       assert(taskInfos.size === numPartitions)
       // The accumulator values should be merged in the stage
+      //累加器的值应在阶段合并
       val stageAccum = findAccumulableInfo(stageInfos.head.accumulables.values, TEST_ACCUMULATOR)
       assert(stageAccum.value.toLong === numPartitions)
       // The accumulator should be updated locally on each task
+      //在每个任务上,累加器应更新本地
       val taskAccumValues = taskInfos.map { taskInfo =>
         val taskAccum = findAccumulableInfo(taskInfo.accumulables, TEST_ACCUMULATOR)
         assert(taskAccum.update.isDefined)
@@ -206,12 +212,13 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
         taskAccum.value.toLong
       }
       // Each task should keep track of the partial value on the way, i.e. 1, 2, ... numPartitions
+      //每一项任务都应保持在的部分价值
       assert(taskAccumValues.sorted === (1L to numPartitions).toSeq)
     }
     rdd.count()
   }
 
-  test("internal accumulators in multiple stages") {
+  test("internal accumulators in multiple stages") {//在多个阶段内部累加器
     val listener = new SaveInfoListener
     val numPartitions = 10
     sc = new SparkContext("local", "test")
@@ -250,16 +257,17 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
     rdd.count()
   }
 
-  test("internal accumulators in fully resubmitted stages") {
-    testInternalAccumulatorsWithFailedTasks((i: Int) => true) // fail all tasks
+  test("internal accumulators in fully resubmitted stages") {//在完全提交阶段内部累加器
+    testInternalAccumulatorsWithFailedTasks((i: Int) => true) // fail all tasks 失败的所有任务
   }
 
-  test("internal accumulators in partially resubmitted stages") {
-    testInternalAccumulatorsWithFailedTasks((i: Int) => i % 2 == 0) // fail a subset
+  test("internal accumulators in partially resubmitted stages") {//在部分提交阶段内部累加器
+    testInternalAccumulatorsWithFailedTasks((i: Int) => i % 2 == 0) // fail a subset 失败的一个子集
   }
 
   /**
    * Return the accumulable info that matches the specified name.
+   * 返回与指定名称的积累信息。
    */
   private def findAccumulableInfo(
       accums: Iterable[AccumulableInfo],
@@ -271,6 +279,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
 
   /**
    * Test whether internal accumulators are merged properly if some tasks fail.
+   * 测试是否内部累加器合并正确如果任务失败
    */
   private def testInternalAccumulatorsWithFailedTasks(failCondition: (Int => Boolean)): Unit = {
     val listener = new SaveInfoListener
@@ -296,16 +305,19 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
       assert(taskInfos.size === numPartitions + numFailedPartitions)
       val stageAccum = findAccumulableInfo(stageInfos.head.accumulables.values, TEST_ACCUMULATOR)
       // We should not double count values in the merged accumulator
+      //不应该在合并后的累加器中的双计数值
       assert(stageAccum.value.toLong === numPartitions)
       val taskAccumValues = taskInfos.flatMap { taskInfo =>
         if (!taskInfo.failed) {
           // If a task succeeded, its update value should always be 1
+          //如果一个任务成功了,它的更新值应该始终是1
           val taskAccum = findAccumulableInfo(taskInfo.accumulables, TEST_ACCUMULATOR)
           assert(taskAccum.update.isDefined)
           assert(taskAccum.update.get.toLong === 1)
           Some(taskAccum.value.toLong)
         } else {
           // If a task failed, we should not get its accumulator values
+          //如果一个任务失败,我们不应该得到它的累加值
           assert(taskInfo.accumulables.isEmpty)
           None
         }
@@ -322,6 +334,7 @@ private[spark] object AccumulatorSuite {
   /**
    * Run one or more Spark jobs and verify that the peak execution memory accumulator
    * is updated afterwards.
+   * 行一个或多个Spark作业,并验证执行内存储器的事后更新
    */
   def verifyPeakExecutionMemorySet(
       sc: SparkContext,
@@ -329,9 +342,11 @@ private[spark] object AccumulatorSuite {
     val listener = new SaveInfoListener
     sc.addSparkListener(listener)
     // Register asserts in job completion callback to avoid flakiness
+    //注册job完成回调
     listener.registerJobCompletionCallback { jobId =>
       if (jobId == 0) {
         // The first job is a dummy one to verify that the accumulator does not already exist
+        //第一个作业是一个虚拟的,验证是否已经存在了
         val accums = listener.getCompletedStageInfos.flatMap(_.accumulables.values)
         assert(!accums.exists(_.name == InternalAccumulator.PEAK_EXECUTION_MEMORY))
       } else {
@@ -346,7 +361,7 @@ private[spark] object AccumulatorSuite {
         assert(accum.value.toLong > 0)
       }
     }
-    // Run the jobs
+    // Run the jobs 运行工作
     sc.parallelize(1 to 10).count()
     testBody
   }
@@ -354,6 +369,7 @@ private[spark] object AccumulatorSuite {
 
 /**
  * A simple listener that keeps track of the TaskInfos and StageInfos of all completed jobs.
+ * 一个简单的侦听器,跟踪的taskinfos和所有已完成的工作stageinfos
  */
 private class SaveInfoListener extends SparkListener {
   private val completedStageInfos: ArrayBuffer[StageInfo] = new ArrayBuffer[StageInfo]

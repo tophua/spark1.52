@@ -80,7 +80,7 @@ abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[Ha
     }
     val rdd = newShuffleRDD()
 
-    // Get all the shuffle dependencies
+    // Get all the shuffle dependencies 获取所有的shuffle依赖
     val shuffleDeps = getAllDependencies(rdd)
       .filter(_.isInstanceOf[ShuffleDependency[_, _, _]])
       .map(_.asInstanceOf[ShuffleDependency[_, _, _]])
@@ -137,28 +137,30 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     val collected = rdd.collect().toList
     val tester = new CleanerTester(sc, shuffleIds = shuffleDeps.map(_.shuffleId))
 
-    // Explicit cleanup
+    // Explicit cleanup 显式的清除
     shuffleDeps.foreach(s => cleaner.doCleanupShuffle(s.shuffleId, blocking = true))
     tester.assertCleanup()
 
     // Verify that shuffles can be re-executed after cleaning up
+    //验证重新清理后执行
     assert(rdd.collect().toList.equals(collected))
   }
 
-  test("cleanup broadcast") {
+  test("cleanup broadcast") {//清理广播
     val broadcast = newBroadcast()
     val tester = new CleanerTester(sc, broadcastIds = Seq(broadcast.id))
 
-    // Explicit cleanup
+    // Explicit cleanup  显式清除
     cleaner.doCleanupBroadcast(broadcast.id, blocking = true)
     tester.assertCleanup()
   }
 
-  test("automatically cleanup RDD") {
+  test("automatically cleanup RDD") {//自动清理RDD
     var rdd = newRDD().persist()
     rdd.count()
 
     // Test that GC does not cause RDD cleanup due to a strong reference
+    //试验GC 清理RDD不会引起强引用
     val preGCTester = new CleanerTester(sc, rddIds = Seq(rdd.id))
     runGC()
     intercept[Exception] {
@@ -166,6 +168,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     }
 
     // Test that GC causes RDD cleanup after dereferencing the RDD
+    //测试 GC引起RDD清理后废弃的RDD
     // Note rdd is used after previous GC to avoid early collection by the JVM
     val postGCTester = new CleanerTester(sc, rddIds = Seq(rdd.id))
     rdd = null // Make RDD out of scope
@@ -183,7 +186,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     intercept[Exception] {
       preGCTester.assertCleanup()(timeout(1000 millis))
     }
-    rdd.count()  // Defeat early collection by the JVM
+    rdd.count()  // Defeat early collection by the JVM 由JVM早期采集失败
 
     // Test that GC causes shuffle cleanup after dereferencing the RDD
     val postGCTester = new CleanerTester(sc, shuffleIds = Seq(0))

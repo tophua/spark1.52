@@ -22,7 +22,7 @@ import org.scalatest.BeforeAndAfterAll
 class HashShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
 
   // This test suite should run all tests in ShuffleSuite with hash-based shuffle.
-
+  //这个测试套件运行在基于哈希Shuffle所有测试
   override def beforeAll() {
     conf.set("spark.shuffle.manager", "hash")
   }

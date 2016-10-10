@@ -50,6 +50,7 @@ class ExternalShuffleServiceSuite extends ShuffleSuite with BeforeAndAfterAll {
   }
 
   // This test ensures that the external shuffle service is actually in use for the other tests.
+  //此测试确保外部shuffle服务,在其他测试中实际使用
   test("using external shuffle service") {
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     sc.env.blockManager.externalShuffleServiceEnabled should equal(true)
@@ -61,6 +62,8 @@ class ExternalShuffleServiceSuite extends ShuffleSuite with BeforeAndAfterAll {
     // local blocks from the local BlockManager and won't send requests to ExternalShuffleService.
     // In this case, we won't receive FetchFailed. And it will make this test fail.
     // Therefore, we should wait until all slaves are up
+    //在一个缓慢的机器中,一个从节点可能会在另一个机器前登记数百毫秒
+    //如果我们不等待所有的从节点,这是可能的,只有一个执行者运行所有的工作,然后所有的shuffle块将在这个执行者
     sc.jobProgressListener.waitUntilExecutorsUp(2, 10000)
 
     val rdd = sc.parallelize(0 until 1000, 10).map(i => (i, 1)).reduceByKey(_ + _)
@@ -70,6 +73,7 @@ class ExternalShuffleServiceSuite extends ShuffleSuite with BeforeAndAfterAll {
 
     // Invalidate the registered executors, disallowing access to their shuffle blocks (without
     // deleting the actual shuffle files, so we could access them without the shuffle service).
+    //无效的注册者,不允许访问他们的shuffle块
     rpcHandler.applicationRemoved(sc.conf.getAppId, false /* cleanupLocalDirs */)
 
     // Now Spark will receive FetchFailed, and not retry the stage due to "spark.test.noStageRetry"

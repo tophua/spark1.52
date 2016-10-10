@@ -24,6 +24,8 @@ import java.io.{IOException, NotSerializableException, ObjectInputStream}
 // Common state shared by FailureSuite-launched tasks. We use a global object
 // for this because any local variables used in the task closures will rightfully
 // be copied for each task, so there's no other way for them to share state.
+//故障测试套件发起的任务共享的公共状态,我们使用一个全局对象,
+//因为在任务中使用闭包的任何局部变量会被每个任务复制
 object FailureSuiteState {
   var tasksRun = 0
   var tasksFailed = 0
@@ -40,7 +42,9 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
 
   // Run a 3-task map job in which task 1 deterministically fails once, and check
   // whether the job completes successfully and we ran 4 tasks in total.
-  test("failure in a single-stage job") {
+  //工作是否成功完成，我们总共完成了4项任务
+  //运行一个3-task map的工作任务1确定一次失败
+  test("failure in a single-stage job") {//单个的阶段Worker失败
     sc = new SparkContext("local[1,2]", "test")
     val results = sc.makeRDD(1 to 3, 3).map { x =>
       FailureSuiteState.synchronized {
@@ -60,6 +64,7 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   // Run a map-reduce job in which a reduce task deterministically fails once.
+  //减少任务确定的一次失败
   test("failure in a two-stage job") {
     sc = new SparkContext("local[1,2]", "test")
     //groupByKey参数分组数
@@ -82,18 +87,19 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   // Run a map-reduce job in which the map stage always fails.
-  test("failure in a map stage") {
+  test("failure in a map stage") {//map阶段的失败
     sc = new SparkContext("local", "test")
     val data = sc.makeRDD(1 to 3).map(x => { throw new Exception; (x, x) }).groupByKey(3)
     intercept[SparkException] {
       data.collect()
     }
     // Make sure that running new jobs with the same map stage also fails
+    //确保运行同一个Map阶段的新工作也失败了
     intercept[SparkException] {
       data.collect()
     }
   }
-
+  //因为任务失败的结果是不可序列化的
   test("failure because task results are not serializable") {
     sc = new SparkContext("local[1,1]", "test")
     val results = sc.makeRDD(1 to 3).map(x => new NonSerializable)
@@ -108,12 +114,13 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
 
     FailureSuiteState.clear()
   }
-
+  //因为任务失败关闭不可序列化
   test("failure because task closure is not serializable") {
     sc = new SparkContext("local[1,1]", "test")
     val a = new NonSerializable
 
     // Non-serializable closure in the final result stage
+    //在最终阶段非序列化的关闭
     val thrown = intercept[SparkException] {
       sc.parallelize(1 to 10, 2).map(x => a).count()
     }
@@ -122,6 +129,7 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
       thrown.getCause.getClass === classOf[NotSerializableException])
 
     // Non-serializable closure in an earlier stage
+    //在较早的阶段非序列化的关闭
     val thrown1 = intercept[SparkException] {
       sc.parallelize(1 to 10, 2).map(x => (x, a)).partitionBy(new HashPartitioner(3)).count()
     }
@@ -130,6 +138,7 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
       thrown1.getCause.getClass === classOf[NotSerializableException])
 
     // Non-serializable closure in foreach function
+    //在每个函数的非序列化的关闭
     val thrown2 = intercept[SparkException] {
       // scalastyle:off println
       sc.parallelize(1 to 10, 2).foreach(x => println(a))
@@ -141,13 +150,14 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
 
     FailureSuiteState.clear()
   }
-
+  //托管内存泄漏错误不应该掩盖其他故障
   test("managed memory leak error should not mask other failures (SPARK-9266") {
     val conf = new SparkConf().set("spark.unsafe.exceptionOnMemoryLeak", "true")
     sc = new SparkContext("local[1,1]", "test", conf)
 
     // If a task leaks memory but fails due to some other cause, then make sure that the original
     // cause is preserved
+    //如果一个任务泄漏内存,但由于其他原因失败,然后确保原始的原因被保存
     val thrownDueToTaskFailure = intercept[SparkException] {
       sc.parallelize(Seq(0)).mapPartitions { iter =>
         TaskContext.get().taskMemoryManager().allocate(128)
@@ -158,6 +168,7 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
     assert(thrownDueToTaskFailure.getMessage.contains("intentional task failure"))
 
     // If the task succeeded but memory was leaked, then the task should fail due to that leak
+    //如果任务成功了,但内存被泄露了,由于泄漏的然后任务应该失败
     val thrownDueToMemoryLeak = intercept[SparkException] {
       sc.parallelize(Seq(0)).mapPartitions { iter =>
         TaskContext.get().taskMemoryManager().allocate(128)
@@ -169,7 +180,8 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
 
   // Run a 3-task map job in which task 1 always fails with a exception message that
   // depends on the failure number, and check that we get the last failure.
-  test("last failure cause is sent back to driver") {
+  //运行一个3任务的工作任务1总是失败与异常信息,取决于失败的次数,检查最后的失败
+  test("last failure cause is sent back to driver") {//最后的失败原因是被发送回驱动程序
     sc = new SparkContext("local[1,2]", "test")
     val data = sc.makeRDD(1 to 3, 3).map { x =>
       FailureSuiteState.synchronized {
@@ -195,7 +207,7 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
     assert(thrown.getCause.getCause.getMessage === "failed=2")
     FailureSuiteState.clear()
   }
-
+  //如果异常不可序列化,将故障原因堆栈送回Dirver
   test("failure cause stacktrace is sent back to driver if exception is not serializable") {
     sc = new SparkContext("local", "test")
     val thrown = intercept[SparkException] {
@@ -206,7 +218,7 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
     assert(thrown.getMessage.contains("NonSerializableUserException"))
     FailureSuiteState.clear()
   }
-
+  //如果异常不可序列化,将故障原因堆栈送回Dirver
   test("failure cause stacktrace is sent back to driver if exception is not deserializable") {
     sc = new SparkContext("local", "test")
     val thrown = intercept[SparkException] {

@@ -52,6 +52,7 @@ class HeartbeatReceiverSuite
   private val executorId2 = "executor-2"
 
   // Shared state that must be reset before and after each test
+  //每个测试之前和之后必须重新设置的共享状态
   private var scheduler: TaskSchedulerImpl = null //任务调度
   private var heartbeatReceiver: HeartbeatReceiver = null //心跳接收
   private var heartbeatReceiverRef: RpcEndpointRef = null //消息发送
@@ -65,6 +66,7 @@ class HeartbeatReceiverSuite
   /**
    * Before each test, set up the SparkContext and a custom [[HeartbeatReceiver]]
    * that uses a manual clock.
+   * 每次测试之前,设置sparkcontext和自定义HeartbeatReceiver,使用手动时钟
    */
   override def beforeEach(): Unit = {
     val conf = new SparkConf()
@@ -83,6 +85,7 @@ class HeartbeatReceiverSuite
 
   /**
    * After each test, clean up all state and stop the [[SparkContext]].
+   * 每次测试后，清理所有状态并停止SparkContext
    */
   override def afterEach(): Unit = {
     super.afterEach()
@@ -92,14 +95,14 @@ class HeartbeatReceiverSuite
     heartbeatReceiverClock = null
   }
 
-  test("task scheduler is set correctly") {
+  test("task scheduler is set correctly") {//设置任务调度程序正确
     assert(heartbeatReceiver.scheduler === null)
     //发送消息TaskSchedulerIsSet,HeartbeatReceiver类receiveAndReply方法接收消息设置TaskScheduler,并返回boolean类型    
     val bll = heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) //返回值Boolean  
     assert(heartbeatReceiver.scheduler !== null)
   }
 
-  test("normal heartbeat") {///正常心跳
+  test("normal heartbeat") {///正常的心跳
     heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet)
     addExecutorAndVerify(executorId1)
     addExecutorAndVerify(executorId2)
@@ -111,27 +114,32 @@ class HeartbeatReceiverSuite
     assert(trackedExecutors.contains(executorId2))
   }
 
-  test("reregister if scheduler is not ready yet") {
+  test("reregister if scheduler is not ready yet") {//注册如果调度器是还没有准备好
     addExecutorAndVerify(executorId1)
     // Task scheduler is not set yet in HeartbeatReceiver, so executors should reregister
+    //任务调度是不在HeartbeatReceiver，所以执行者应该重新注册
     triggerHeartbeat(executorId1, executorShouldReregister = true)
   }
-
+  //如果未注册的执行者的心跳
   test("reregister if heartbeat from unregistered executor") {
     heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) 
     // Received heartbeat from unknown executor, so we ask it to re-register
+    //从未知的执行器接收到的心跳,所以我们要求它重新注册
     triggerHeartbeat(executorId1, executorShouldReregister = true)
     assert(getTrackedExecutors.isEmpty)
   }
-
+//如果执行者删除心跳
   test("reregister if heartbeat from removed executor") {
     heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet)
     addExecutorAndVerify(executorId1)
     addExecutorAndVerify(executorId2)
     // Remove the second executor but not the first
+    //删除第二个执行者，但不是第一个
     removeExecutorAndVerify(executorId2)
     // Now trigger the heartbeats
+    //现在引发的心跳
     // A heartbeat from the second executor should require reregistering
+    //第二者心跳需要重新注册
     triggerHeartbeat(executorId1, executorShouldReregister = false)
     triggerHeartbeat(executorId2, executorShouldReregister = true)
     val trackedExecutors = getTrackedExecutors
@@ -148,21 +156,23 @@ class HeartbeatReceiverSuite
     triggerHeartbeat(executorId1, executorShouldReregister = false)
     triggerHeartbeat(executorId2, executorShouldReregister = false)
     // Advance the clock and only trigger a heartbeat for the first executor
+    //提前时钟,触发第一个执行者的心跳
     heartbeatReceiverClock.advance(executorTimeout / 2)
     triggerHeartbeat(executorId1, executorShouldReregister = false)
     heartbeatReceiverClock.advance(executorTimeout)
     heartbeatReceiverRef.askWithRetry[Boolean](ExpireDeadHosts)
-    // Only the second executor should be expired as a dead host
-    //第二个executor设置过期,设置executorId2为不可用
+    // Only the second executor should be expired as a dead host    
+    //只有第二个executor是过期,设置executorId2为不可用
     verify(scheduler).executorLost(Matchers.eq(executorId2), any())
     val trackedExecutors = getTrackedExecutors
     assert(trackedExecutors.size === 1)
     assert(trackedExecutors.contains(executorId1))
     assert(!trackedExecutors.contains(executorId2))
   }
-
+  //到期的主机应该更换杀者死
   test("expire dead hosts should kill executors with replacement (SPARK-8119)") {
     // Set up a fake backend and cluster manager to simulate killing executors
+    //建立一个假的后端和集群管理器来模拟杀死executors
     val rpcEnv = sc.env.rpcEnv
     val fakeClusterManager = new FakeClusterManager(rpcEnv)
     val fakeClusterManagerRef = rpcEnv.setupEndpoint("fake-cm", fakeClusterManager)
@@ -170,6 +180,7 @@ class HeartbeatReceiverSuite
     when(sc.schedulerBackend).thenReturn(fakeSchedulerBackend)
 
     // Register fake executors with our fake scheduler backend
+    //注册假执行者与我们的假调度后台
     // This is necessary because the backend refuses to kill executors it does not know about
     fakeSchedulerBackend.start()
     val dummyExecutorEndpoint1 = new FakeExecutorEndpoint(rpcEnv)
@@ -187,25 +198,30 @@ class HeartbeatReceiverSuite
     triggerHeartbeat(executorId2, executorShouldReregister = false)
 
     // Adjust the target number of executors on the cluster manager side
+    //对集群管理方执行目标数
     assert(fakeClusterManager.getTargetNumExecutors === 0)
     sc.requestTotalExecutors(2, 0, Map.empty)
     assert(fakeClusterManager.getTargetNumExecutors === 2)
     assert(fakeClusterManager.getExecutorIdsToKill.isEmpty)
 
     // Expire the executors. This should trigger our fake backend to kill the executors.
+    //到期的executors,这触发后台杀死executors
     // Since the kill request is sent to the cluster manager asynchronously, we need to block
     // on the kill thread to ensure that the cluster manager actually received our requests.
+    //由于“杀”请求被异步发送到群集管理器,我们需要阻止“杀死线程”,以确保群集管理器实际上收到了我们的请求
     // Here we use a timeout of O(seconds), but in practice this whole test takes O(10ms).
     val executorTimeout = heartbeatReceiver.invokePrivate(_executorTimeoutMs())
     heartbeatReceiverClock.advance(executorTimeout * 2)
     heartbeatReceiverRef.askWithRetry[Boolean](ExpireDeadHosts)
     val killThread = heartbeatReceiver.invokePrivate(_killExecutorThread())
-    killThread.shutdown() // needed for awaitTermination
+    killThread.shutdown() // needed for awaitTermination 等待终止
     killThread.awaitTermination(10L, TimeUnit.SECONDS)
 
     // The target number of executors should not change! Otherwise, having an expired
     // executor means we permanently adjust the target number downwards until we
+    //执行目标数不应改变,否则,有过期的执行意味着我们永久的调整目标数下直到我们
     // explicitly request new executors. For more detail, see SPARK-8119.
+    //明确要求新的执行者
     assert(fakeClusterManager.getTargetNumExecutors === 2)
     assert(fakeClusterManager.getExecutorIdsToKill === Set(executorId1, executorId2))
   }
@@ -262,11 +278,13 @@ class HeartbeatReceiverSuite
 
 /**
  * Dummy RPC endpoint to simulate executors.
+ * 模拟执行RPC终端点
  */
 private class FakeExecutorEndpoint(override val rpcEnv: RpcEnv) extends RpcEndpoint
 
 /**
  * Dummy scheduler backend to simulate executor allocation requests to the cluster manager.
+ * 虚拟调度后端来模拟执行器分配给群集管理器的请求
  */
 private class FakeSchedulerBackend(
   scheduler: TaskSchedulerImpl,
@@ -286,6 +304,7 @@ private class FakeSchedulerBackend(
 
 /**
  * Dummy cluster manager to simulate responses to executor allocation requests.
+ * 模拟集群管理器来模拟执行分配请求的响应
  * Fake假装,冒充
  */
 private class FakeClusterManager(override val rpcEnv: RpcEnv) extends RpcEndpoint {

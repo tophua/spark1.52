@@ -79,7 +79,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     Utils.deleteRecursively(tmpDir)
   }
 
-  test("Distributing files locally") {
+  test("Distributing files locally") {//分布式本地文件
     sc = new SparkContext("local[4]", "test", newConf)
     sc.addFile(tmpFile.toString)
     val testData = Array((1, 1), (1, 1), (2, 1), (3, 5), (2, 2), (3, 0))
@@ -93,7 +93,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     assert(result.toSet === Set((1, 200), (2, 300), (3, 500)))
   }
 
-  test("Distributing files locally security On") {
+  test("Distributing files locally security On") {//分布式本地安全文件
     val sparkConf = new SparkConf(false)
     //是否启用内部身份验证
     sparkConf.set("spark.authenticate", "true")
@@ -113,7 +113,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     }.collect()
     assert(result.toSet === Set((1, 200), (2, 300), (3, 500)))
   }
-
+  //分布式以网址作为输入本地文件
   test("Distributing files locally using URL as input") {
     // addFile("file:///....")
     sc = new SparkContext("local[4]", "test", newConf)
@@ -128,7 +128,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     }.collect()
     assert(result.toSet === Set((1, 200), (2, 300), (3, 500)))
   }
-
+  //动态添加本地Jar
   test ("Dynamically adding JARS locally") {
     sc = new SparkContext("local[4]", "test", newConf)
     sc.addJar(tmpJarUrl)
@@ -139,7 +139,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
   }
-
+  //一个独立的群集上分布式文件
   test("Distributing files on a standalone cluster") {
     sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
     sc.addFile(tmpFile.toString)
@@ -153,7 +153,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     }.collect()
     assert(result.toSet === Set((1, 200), (2, 300), (3, 500)))
   }
-
+  //独立的集群上动态添加jar
   test ("Dynamically adding JARS on a standalone cluster") {
     sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
     sc.addJar(tmpJarUrl)
@@ -164,7 +164,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
   }
-
+  //独立的集群中动态添加本地的jar和URL
   test ("Dynamically adding JARS on a standalone cluster using local: URL") {
     sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
     sc.addJar(tmpJarUrl.replace("file", "local"))
@@ -206,7 +206,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       server.stop()
     }
   }
-
+  //HttpFileServer服务不应与有效的SSL和坏的凭据
   test ("HttpFileServer should not work with valid SSL and bad credentials") {
     val sparkConf = sparkSSLConfig()
      //是否启用内部身份验证

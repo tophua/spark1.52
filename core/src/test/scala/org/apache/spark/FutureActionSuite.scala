@@ -33,7 +33,7 @@ class FutureActionSuite
     sc = new SparkContext("local", "FutureActionSuite")
   }
 
-  test("simple async action") {
+  test("simple async action") {//简单的异步操作
     val rdd = sc.parallelize(1 to 10, 2)
     val job = rdd.countAsync()//异步
     //Await.result或者Await.ready会导致当前线程被同步(阻塞)，并等待actor通过它的应答来完成Future
@@ -42,7 +42,7 @@ class FutureActionSuite
     job.jobIds.size should be (1)
   }
 
-  test("complex async action") {//异步
+  test("complex async action") {//复杂的异步操作
     val rdd = sc.parallelize(1 to 15, 3)
     val job = rdd.takeAsync(10)
     val res = Await.result(job, Duration.Inf)

@@ -61,9 +61,10 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
     }.cache()
   }
 
-  test("get uncached rdd") {
+  test("get uncached rdd") {//得到未缓存的RDD
     // Do not mock this test, because attempting to match Array[Any], which is not covariant,
     // in blockManager.put is a losing battle. You have been warned.
+    //不要模拟这个测试,因为试图匹配数组[任何]，这不是协变的,
     blockManager = sc.env.blockManager
     cacheManager = sc.env.cacheManager
     val context = TaskContext.empty()
@@ -75,7 +76,7 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
     assert(getValue.get.data.toList === List(1, 2, 3, 4))
   }
 
-  test("get cached rdd") {
+  test("get cached rdd") {//得到缓存的RDD
     val result = new BlockResult(Array(5, 6, 7).iterator, DataReadMethod.Memory, 12)
     when(blockManager.get(RDDBlockId(0, 0))).thenReturn(Some(result))
 
@@ -84,7 +85,7 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
     assert(value.toList === List(5, 6, 7))
   }
 
-  test("get uncached local rdd") {
+  test("get uncached local rdd") {//得到未被缓存的本地RDD
     // Local computation should not persist the resulting value, so don't expect a put().
     when(blockManager.get(RDDBlockId(0, 0))).thenReturn(None)
 
@@ -93,7 +94,7 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
     assert(value.toList === List(1, 2, 3, 4))
   }
 
-  test("verify task metrics updated correctly") {
+  test("verify task metrics updated correctly") {//验证任务度量的正确更新
     cacheManager = sc.env.cacheManager
     val context = TaskContext.empty()
     cacheManager.getOrCompute(rdd3, split, context, StorageLevel.MEMORY_ONLY)
