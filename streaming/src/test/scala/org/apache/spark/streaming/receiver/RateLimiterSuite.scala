@@ -20,9 +20,12 @@ package org.apache.spark.streaming.receiver
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkFunSuite
 
-/** Testsuite for testing the network receiver behavior */
+/** 
+ *  Testsuite for testing the network receiver behavior
+ *  测试网络接收行为
+ * */
 class RateLimiterSuite extends SparkFunSuite {
-
+//即使没有maxrate速率限制器初始化设置
   test("rate limiter initializes even without a maxRate set") {
     val conf = new SparkConf()
     val rateLimiter = new RateLimiter(conf){}
@@ -30,14 +33,14 @@ class RateLimiterSuite extends SparkFunSuite {
     assert(rateLimiter.getCurrentLimit == 105)
   }
 
-  test("rate limiter updates when below maxRate") {
+  test("rate limiter updates when below maxRate") {//速率限制器更新时低于maxrate
     val conf = new SparkConf().set("spark.streaming.receiver.maxRate", "110")
     val rateLimiter = new RateLimiter(conf){}
     rateLimiter.updateRate(105)
     assert(rateLimiter.getCurrentLimit == 105)
   }
 
-  test("rate limiter stays below maxRate despite large updates") {
+  test("rate limiter stays below maxRate despite large updates") {//速率限制器下maxrate尽最大更新
     val conf = new SparkConf().set("spark.streaming.receiver.maxRate", "100")
     val rateLimiter = new RateLimiter(conf){}
     rateLimiter.updateRate(105)

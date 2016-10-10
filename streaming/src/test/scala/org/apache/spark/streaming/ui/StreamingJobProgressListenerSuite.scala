@@ -213,13 +213,13 @@ class StreamingJobProgressListenerSuite extends TestSuiteBase with Matchers {
       listener.onJobStart(jobStart)
     }
 
-    // We should not leak memory
+    // We should not leak memory 我们不应该泄漏内存
     listener.batchTimeToOutputOpIdSparkJobIdPair.size() should be <=
       (listener.waitingBatches.size + listener.runningBatches.size +
         listener.retainedCompletedBatches.size + 10)
   }
 
-  test("detect memory leak") {
+  test("detect memory leak") {//检测内存泄漏
     ssc = setupStreams(input, operation)
     val listener = new StreamingJobProgressListener(ssc)
 

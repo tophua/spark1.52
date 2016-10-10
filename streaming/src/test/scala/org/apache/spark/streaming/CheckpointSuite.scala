@@ -59,8 +59,8 @@ class CheckpointSuite extends TestSuiteBase {
     if (ssc != null) ssc.stop()
     Utils.deleteRecursively(new File(checkpointDir))
   }
-
-  test("basic rdd checkpoints + dstream graph checkpoint recovery") {//恢复
+  //基本的RDD检查点dstream图检查点恢复
+  test("basic rdd checkpoints + dstream graph checkpoint recovery") {
 
     assert(batchDuration === Milliseconds(500), "batchDuration for this test must be 1 second")
 
@@ -69,10 +69,11 @@ class CheckpointSuite extends TestSuiteBase {
     val stateStreamCheckpointInterval = Seconds(1)//秒
     val fs = FileSystem.getLocal(new Configuration())
     // this ensure checkpointing occurs at least once
+    //这确保检查点至少发生一次
     val firstNumBatches = (stateStreamCheckpointInterval / batchDuration).toLong * 2
     val secondNumBatches = firstNumBatches
 
-    // Setup the streams
+    // Setup the streams 设置流    
     val input = (1 to 10).map(_ => Seq("a")).toSeq
     val operation = (st: DStream[String]) => {
       val updateFunc = (values: Seq[Int], state: Option[Int]) => {
@@ -88,6 +89,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Run till a time such that at least one RDD in the stream should have been checkpointed,
     // then check whether some RDD has been checkpointed or not
+    //运行到一个时间至少一个RDD在流应该已经建立,然后检查是否已建立或不见
     ssc.start()
     advanceTimeWithRealDelay(ssc, firstNumBatches)
     logInfo("Checkpoint data of state stream = \n" + stateStream.checkpointData)
@@ -102,6 +104,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Run till a further time such that previous checkpoint files in the stream would be deleted
     // and check whether the earlier checkpoint files are deleted
+    //运行到进一步的时间,这样流中的以前的检查点文件将被删除,删除之前的检查点
     val checkpointFiles = stateStream.checkpointData.currentCheckpointFiles.map(x => new File(x._2))
     advanceTimeWithRealDelay(ssc, secondNumBatches)
     checkpointFiles.foreach(file =>
@@ -133,6 +136,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Restart stream computation from the new checkpoint file to see whether that file has
     // correct checkpoint data
+    //从新的检查点文件中重新启动流式计算,查看该文件是否具有正确的检查点数据
     ssc = new StreamingContext(checkpointDir)
     stateStream = ssc.graph.getOutputStreams().head.dependencies.head.dependencies.head
     logInfo("Restored data of state stream = \n[" + stateStream.generatedRDDs.mkString("\n") + "]")
@@ -141,6 +145,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Adjust manual clock time as if it is being restarted after a delay; this is a hack because
     // we modify the conf object, but it works for this one property
+    //调整手动时钟的时间,延迟后重新启动,修改conf对象
     ssc.conf.set("spark.streaming.manualClock.jump", (batchDuration.milliseconds * 7).toString)
     ssc.start()
     advanceTimeWithRealDelay(ssc, 4)
@@ -149,8 +154,8 @@ class CheckpointSuite extends TestSuiteBase {
   }
 
   // This tests whether spark conf persists through checkpoints, and certain
-  // configs gets scrubbed
-  test("recovery of conf through checkpoints") {
+  // configs gets scrubbed 
+  test("recovery of conf through checkpoints") {//通过检查点的conf文件恢复
     val key = "spark.mykey"
     val value = "myvalue"
     System.setProperty(key, value)
@@ -165,9 +170,11 @@ class CheckpointSuite extends TestSuiteBase {
     ssc.stop()
 
     // Serialize/deserialize to simulate write to storage and reading it back
+    //序列化/反序列化进行存储和回读写
     val newCp = Utils.deserialize[Checkpoint](Utils.serialize(cp))
 
     // Verify new SparkConf has all the previous properties
+    //验证新的sparkconf之前的所有属性
     val newCpConf = newCp.createSparkConf()
     assert(newCpConf.get("spark.master") === originalConf.get("spark.master"))
     assert(newCpConf.get("spark.app.name") === originalConf.get("spark.app.name"))
@@ -176,12 +183,14 @@ class CheckpointSuite extends TestSuiteBase {
     assert(!newCpConf.contains("spark.driver.port"))
 
     // Check if all the parameters have been restored
+    //检查所有参数是否已恢复
     ssc = new StreamingContext(null, newCp, null)
     val restoredConf = ssc.conf
     assert(restoredConf.get(key) === value)
     ssc.stop()
 
     // Verify new SparkConf picks up new master url if it is set in the properties. See SPARK-6331.
+    //验证新的sparkconf,新主URL是否设置属性
     try {
       val newMaster = "local[100]"
       System.setProperty("spark.master", newMaster)
@@ -218,6 +227,7 @@ class CheckpointSuite extends TestSuiteBase {
     assert(newCpConf.get("spark.driver.port") === "9999")
 
     // Check if all the parameters have been restored
+    //检查所有参数是否已恢复
     ssc = new StreamingContext(null, newCp, null)
     val restoredConf = ssc.conf
     assert(restoredConf.get("spark.driver.host") === "localhost")
@@ -395,7 +405,7 @@ class CheckpointSuite extends TestSuiteBase {
     testCheckpointedOperation(input, operation, output, 7)
   }
 
-  test("recovery maintains rate controller") {
+  test("recovery maintains rate controller") {//恢复维护速率控制器
     ssc = new StreamingContext(conf, batchDuration)
     ssc.checkpoint(checkpointDir)
 
@@ -427,8 +437,9 @@ class CheckpointSuite extends TestSuiteBase {
   // the master failure and uses them again to process a large window operation.
   // It also tests whether batches, whose processing was incomplete due to the
   // failure, are re-processed or not.
-  test("recovery with file input stream") {
+  test("recovery with file input stream") {//用文件输入流恢复
     // Set up the streaming context and input streams
+    //设置流上下文和输入流
     val batchDuration = Seconds(2)  // Due to 1-second resolution of setLastModified() on some OS's.
     val testDir = Utils.createTempDir()
     val outputBuffer = new ArrayBuffer[Seq[Int]] with SynchronizedBuffer[Seq[Int]]
@@ -436,6 +447,7 @@ class CheckpointSuite extends TestSuiteBase {
     /**
      * Writes a file named `i` (which contains the number `i`) to the test directory and sets its
      * modification time to `clock`'s current time.
+     * 修改时间到时钟的当前时间
      */
     def writeFile(i: Int, clock: Clock): Unit = {
       val file = new File(testDir, i.toString)
@@ -443,11 +455,13 @@ class CheckpointSuite extends TestSuiteBase {
       assert(file.setLastModified(clock.getTimeMillis()))
       // Check that the file's modification date is actually the value we wrote, since rounding or
       // truncation will break the test:
+      //请检查文件的修改日期实际上是我们写的值,由于四舍五入或截断测试
       assert(file.lastModified() === clock.getTimeMillis())
     }
 
     /**
      * Returns ids that identify which files which have been recorded by the file input stream.
+     * 返回标识已通过文件输入流记录的文件的标识
      */
     def recordedFiles(ssc: StreamingContext): Seq[Int] = {
       val fileInputDStream =
@@ -458,6 +472,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     try {
       // This is a var because it's re-assigned when we restart from a checkpoint
+      //这是一个变量,因为它是重新分配的,当我们从一个检查点重新启动
       var clock: ManualClock = null
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         ssc.checkpoint(checkpointDir)
@@ -487,6 +502,7 @@ class CheckpointSuite extends TestSuiteBase {
         // Advance half a batch so that the first file is created after the StreamingContext starts
         clock.advance(batchDuration.milliseconds / 2)
         // Create files and advance manual clock to process them
+        //创建文件和推进手动时钟来处理它们
         for (i <- Seq(1, 2, 3)) {
           writeFile(i, clock)
           // Advance the clock after creating the file to avoid a race when
@@ -518,6 +534,7 @@ class CheckpointSuite extends TestSuiteBase {
       CheckpointSuite.batchThreeShouldBlockIndefinitely = false
 
       // Create files while the streaming driver is down
+      //创建文件,流驱动程序正在关闭
       for (i <- Seq(4, 5, 6)) {
         writeFile(i, clock)
         // Advance the clock after creating the file to avoid a race when

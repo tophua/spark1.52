@@ -30,7 +30,7 @@ class RateControllerSuite extends TestSuiteBase {
   override def useManualClock: Boolean = false
 
   override def batchDuration: Duration = Milliseconds(50)
-
+  //速率控制器发布批量完成后的更新
   test("RateController - rate controller publishes updates after batches complete") {
     val ssc = new StreamingContext(conf, batchDuration)
     withStreamingContext(ssc) { ssc =>
@@ -43,7 +43,7 @@ class RateControllerSuite extends TestSuiteBase {
       }
     }
   }
-
+//发布率达到接收器
   test("ReceiverRateController - published rates reach receivers") {
     val ssc = new StreamingContext(conf, batchDuration)
     withStreamingContext(ssc) { ssc =>
@@ -56,11 +56,13 @@ class RateControllerSuite extends TestSuiteBase {
       ssc.start()
 
       // Wait for receiver to start
+      //等待接收器启动
       eventually(timeout(5.seconds)) {
         RateTestReceiver.getActive().nonEmpty
       }
 
       // Update rate in the estimator and verify whether the rate was published to the receiver
+      //估计的更新率,并验证该速率是否被发布到接收器
       def updateRateAndVerify(rate: Long): Unit = {
         estimator.updateRate(rate)
         eventually(timeout(5.seconds)) {
@@ -69,6 +71,7 @@ class RateControllerSuite extends TestSuiteBase {
       }
 
       // Verify multiple rate update
+      //验证多速率更新
       Seq(100, 200, 300).foreach { rate =>
         updateRateAndVerify(rate)
       }

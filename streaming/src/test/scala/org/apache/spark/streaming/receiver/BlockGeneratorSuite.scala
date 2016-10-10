@@ -42,7 +42,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
   }
 
-  test("block generation and data callbacks") {//
+  test("block generation and data callbacks") {//块生成和数据回调
     val listener = new TestBlockGeneratorListener
     val clock = new ManualClock()
 
@@ -52,6 +52,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     require(listener.onPushBlockCalled === false)
 
     // Verify that creating the generator does not start it
+    //确认创建生成器不启动它
     blockGenerator = new BlockGenerator(listener, 0, conf, clock)
     assert(blockGenerator.isActive() === false, "block generator active before start()")
     assert(blockGenerator.isStopped() === false, "block generator stopped before start()")
@@ -60,6 +61,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     assert(listener.onPushBlockCalled === false)
 
     // Verify start marks the generator active, but does not call the callbacks
+    //验证的启动标志,但不会调用回调
     blockGenerator.start()
     assert(blockGenerator.isActive() === true, "block generator active after start()")
     assert(blockGenerator.isStopped() === false, "block generator stopped after start()")
@@ -70,6 +72,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
 
     // Verify whether addData() adds data that is present in generated blocks
+
     val data1 = 1 to 10
     data1.foreach { blockGenerator.addData _ }
     withClue("callbacks called on adding data without metadata and without block generation") {
@@ -112,6 +115,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
 
     // Stop the block generator by starting the stop on a different thread and
     // then advancing the manual clock for the stopping to proceed.
+    //通过在另一个线程上启动停止,停止块生成器然后推送手动时钟停止继续进行
     val thread = stopBlockGenerator(blockGenerator)
     eventually(timeout(1 second), interval(10 milliseconds)) {
       clock.advance(blockIntervalMs)
@@ -159,6 +163,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     assert(blockGenerator.isStopped() === false)
 
     // Verify that data cannot be added
+    //无法添加数据验证
     intercept[SparkException] {
       blockGenerator.addData(1)
     }
@@ -222,7 +227,9 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
 
   /**
    * Helper method to stop the block generator with manual clock in a different thread,
+   * 在另一个线程中停止使用手动时钟的块发生器
    * so that the main thread can advance the clock that allows the stopping to proceed.
+   * 主线程可以提前时钟,允许停止进行
    */
   private def stopBlockGenerator(blockGenerator: BlockGenerator): Thread = {
     val thread = new Thread() {

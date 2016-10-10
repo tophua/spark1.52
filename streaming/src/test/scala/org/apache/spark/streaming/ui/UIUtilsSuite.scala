@@ -67,7 +67,7 @@ class UIUtilsSuite extends SparkFunSuite with Matchers{
     convertedTime should be (expectedTime +- 1E-6)
   }
 
-  test("formatBatchTime") {
+  test("formatBatchTime") {//格式化时间
     //获得默认时区
     val tzForTest = TimeZone.getTimeZone("America/Los_Angeles")
     val batchTime = 1431637480452L // Thu May 14 14:04:40 PDT 2015

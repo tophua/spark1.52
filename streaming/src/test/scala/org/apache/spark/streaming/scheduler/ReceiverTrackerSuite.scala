@@ -29,9 +29,12 @@ import org.apache.spark.streaming._
 import org.apache.spark.streaming.dstream.ReceiverInputDStream
 import org.apache.spark.streaming.receiver._
 
-/** Testsuite for receiver scheduling */
+/** 
+ *  Testsuite for receiver scheduling
+ *  测试接收调度集 
+ *  */
 class ReceiverTrackerSuite extends TestSuiteBase {
-//receiver 接收到的数据
+  //发送速率更新到接收器
   test("send rate update to receivers") {
     withStreamingContext(new StreamingContext(conf, Milliseconds(100))) { ssc =>
       ssc.scheduler.listenerBus.start(ssc.sc)
@@ -42,13 +45,16 @@ class ReceiverTrackerSuite extends TestSuiteBase {
       tracker.start()
       try {
         // we wait until the Receiver has registered with the tracker,
+        //我们等待,直到接收器已注册的跟踪
         // otherwise our rate update is lost
+        //否则我们的速度更新丢失
         eventually(timeout(5 seconds)) {
           assert(RateTestReceiver.getActive().nonEmpty)
         }
 
 
         // Verify that the rate of the block generator in the receiver get updated
+        //确认接收器中的块生成器的速率得到更新
         val activeReceiver = RateTestReceiver.getActive().get
         tracker.sendRateUpdate(inputDStream.id, newRateLimit)
         eventually(timeout(5 seconds)) {
@@ -63,7 +69,7 @@ class ReceiverTrackerSuite extends TestSuiteBase {
     }
   }
 
-  test("should restart receiver after stopping it") {
+  test("should restart receiver after stopping it") {//停止后应重新启动接收器
     withStreamingContext(new StreamingContext(conf, Milliseconds(100))) { ssc =>
       @volatile var startTimes = 0
       ssc.addStreamingListener(new StreamingListener {
@@ -77,6 +83,7 @@ class ReceiverTrackerSuite extends TestSuiteBase {
       ssc.start()
       StoppableReceiver.shouldStop = true
       eventually(timeout(10 seconds), interval(10 millis)) {
+        //接收器被停止一次,所以如果它被重新启动,它应该开始两次。
         // The receiver is stopped once, so if it's restarted, it should be started twice.
         assert(startTimes === 2)
       }
@@ -106,7 +113,10 @@ class ReceiverTrackerSuite extends TestSuiteBase {
   }
 }
 
-/** An input DStream with for testing rate controlling */
+/** 
+ *  An input DStream with for testing rate controlling
+ *  输入dstream与测试速率控制 
+ *  */
 private[streaming] class RateTestInputDStream(@transient ssc_ : StreamingContext)
   extends ReceiverInputDStream[Int](ssc_) {
 
@@ -124,7 +134,10 @@ private[streaming] class RateTestInputDStream(@transient ssc_ : StreamingContext
   }
 }
 
-/** A receiver implementation for testing rate controlling */
+/** 
+ *  A receiver implementation for testing rate controlling 
+ *  一种用于测试速率控制的接收器
+ *  */
 private[streaming] class RateTestReceiver(receiverId: Int, host: Option[String] = None)
   extends Receiver[Int](StorageLevel.MEMORY_ONLY) {
 

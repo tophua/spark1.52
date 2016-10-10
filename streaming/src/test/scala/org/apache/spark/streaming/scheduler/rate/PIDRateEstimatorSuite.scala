@@ -27,14 +27,14 @@ import org.apache.spark.streaming.Seconds
 
 class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
 
-  test("the right estimator is created") {//评价者
+  test("the right estimator is created") {//创建正确的估计量
     val conf = new SparkConf
     conf.set("spark.streaming.backpressure.rateEstimator", "pid")
     val pid = RateEstimator.create(conf, Seconds(1))
     pid.getClass should equal(classOf[PIDRateEstimator])
   }
 
-  test("estimator checks ranges") {
+  test("estimator checks ranges") {//估计检查的范围
     intercept[IllegalArgumentException] {
       new PIDRateEstimator(batchIntervalMillis = 0, 1, 2, 3, 10)
     }
@@ -55,12 +55,12 @@ class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
     }
   }
 
-  test("first estimate is None") {
+  test("first estimate is None") {//第一估计是没有
     val p = createDefaultEstimator()
     p.compute(0, 10, 10, 0) should equal(None)
   }
 
-  test("second estimate is not None") {
+  test("second estimate is not None") {//第二个估计是不是没有
     val p = createDefaultEstimator()
     p.compute(0, 10, 10, 0)
     // 1000 elements / s
@@ -74,21 +74,21 @@ class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
     p.compute(time = 10, 10, 10, 0) should equal(None)
   }
 
-  test("no estimate when no records in previous batch") {
+  test("no estimate when no records in previous batch") {//没有估计时,没有记录在以前的批次
     val p = createDefaultEstimator()
     p.compute(0, 10, 10, 0)
     p.compute(10, numElements = 0, 10, 0) should equal(None)
     p.compute(20, numElements = -10, 10, 0) should equal(None)
   }
 
-  test("no estimate when there is no processing delay") {
+  test("no estimate when there is no processing delay") {//没有处理延迟时的估计
     val p = createDefaultEstimator()
     p.compute(0, 10, 10, 0)
     p.compute(10, 10, processingDelay = 0, 0) should equal(None)
     p.compute(20, 10, processingDelay = -10, 0) should equal(None)
   }
 
-  test("estimate is never less than min rate") {
+  test("estimate is never less than min rate") {//估计是决不低于最小率
     val minRate = 5D
     val p = new PIDRateEstimator(20, 1D, 1D, 0D, minRate)
     // prepare a series of batch updates, one every 20ms, 0 processed elements, 2ms of processing

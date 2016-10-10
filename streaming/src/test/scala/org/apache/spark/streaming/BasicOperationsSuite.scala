@@ -80,7 +80,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     testOperation(input, operation, output, true)
   }
 
-  test("repartition (more partitions)") {
+  test("repartition (more partitions)") {//重新分配
     val input = Seq(1 to 100, 101 to 200, 201 to 300)
     val operation = (r: DStream[Int]) => r.repartition(5)
     withStreamingContext(setupStreams(input, operation, 2)) { ssc =>
@@ -100,7 +100,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     }
   }
 
-  test("repartition (fewer partitions)") {
+  test("repartition (fewer partitions)") {//重新分配
     val input = Seq(1 to 100, 101 to 200, 201 to 300)
     val operation = (r: DStream[Int]) => r.repartition(2)
     withStreamingContext(setupStreams(input, operation, 5)) { ssc =>
@@ -517,7 +517,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     val windowedStream1 = windowedStream2.dependencies.head.asInstanceOf[WindowedDStream[_]]
     val mappedStream = windowedStream1.dependencies.head
 
-    // Checkpoint remember durations
+    // Checkpoint remember durations 记住时间点
     assert(windowedStream2.rememberDuration === rememberDuration)
     assert(windowedStream1.rememberDuration === rememberDuration + windowedStream2.windowDuration)
     assert(mappedStream.rememberDuration ===
@@ -557,7 +557,7 @@ class BasicOperationsSuite extends TestSuiteBase {
 
   test("rdd cleanup - input blocks and persisted RDDs") {
     // Actually receive data over through receiver to create BlockRDDs
-
+    //其实接收数据通过接收器创建blockrdds
     withTestServer(new TestServer()) { testServer =>
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         testServer.start()
@@ -565,6 +565,7 @@ class BasicOperationsSuite extends TestSuiteBase {
         val batchCounter = new BatchCounter(ssc)
 
         // Set up the streaming context and input streams
+        //设置流上下文和输入流
         val networkStream =
           ssc.socketTextStream("localhost", testServer.port, StorageLevel.MEMORY_AND_DISK)
         val mappedStream = networkStream.map(_ + ".").persist()
@@ -575,12 +576,13 @@ class BasicOperationsSuite extends TestSuiteBase {
         ssc.start()
 
         // Feed data to the server to send to the network receiver
+        //将数据发送到服务器发送到网络接收器
         val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
         val input = Seq(1, 2, 3, 4, 5, 6)
 
         val blockRdds = new mutable.HashMap[Time, BlockRDD[_]]
         val persistentRddIds = new mutable.HashMap[Time, Int]
-
+        //得到所有RDD信息进行核查的要求
         def collectRddInfo() { // get all RDD info required for verification
           networkStream.generatedRDDs.foreach { case (time, rdd) =>
             blockRdds(time) = rdd.asInstanceOf[BlockRDD[_]]
@@ -633,7 +635,10 @@ class BasicOperationsSuite extends TestSuiteBase {
     }
   }
 
-  /** Test cleanup of RDDs in DStream metadata */
+  /** 
+   *  Test cleanup of RDDs in DStream metadata
+   *  测试清理RDDS dstream元数据
+   *  */
   def runCleanupTest[T: ClassTag](
       conf2: SparkConf,
       operation: DStream[Int] => DStream[T],
@@ -642,6 +647,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     ): DStream[T] = {
 
     // Setup the stream computation
+    //设置流式计算
     assert(batchDuration === Seconds(1),
       "Batch duration has changed from 1 second, check cleanup tests")
     withStreamingContext(setupStreams(cleanupTestInput, operation)) { ssc =>

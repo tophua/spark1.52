@@ -56,7 +56,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     assert(dummyStream.getOrCompute(Time(3000)).get.scope === None)
   }
 
-  test("input dstream without scope") {
+  test("input dstream without scope") {//输入dstream没有范围
     val inputStream = new DummyInputDStream(ssc)
     inputStream.initialize(Time(0))
    //没有输入流范围
@@ -66,6 +66,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     val scope3 = inputStream.getOrCompute(Time(3000)).get.scope
 
     // This DStream is not instantiated in any scope, so all RDDs
+    //dstream不在任何范围的实例化
     assertDefined(baseScope, scope1, scope2, scope3)
     assert(baseScope.get.name.startsWith("dummy stream"))
     assertScopeCorrect(baseScope.get, scope1.get, 1000)
@@ -73,7 +74,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     assertScopeCorrect(baseScope.get, scope3.get, 3000)
   }
 
-  test("scoping simple operations") {
+  test("scoping simple operations") {//简单作用域操作
     val inputStream = new DummyInputDStream(ssc)
     val mappedStream = inputStream.map { i => i + 1 }
     val filteredStream = mappedStream.filter { i => i % 2 == 0 }
@@ -89,6 +90,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     val filteredScope3 = filteredStream.getOrCompute(Time(3000)).get.scope
 
     // These streams are defined in their respective scopes "map" and "filter", so all
+    //这些流被定义在它们各自的作用域中"map" and "filter",
     // RDDs created by these streams should inherit the IDs and names of their parent
     // DStream's base scopes
     assertDefined(mappedScopeBase, mappedScope1, mappedScope2, mappedScope3)
@@ -103,7 +105,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     assertScopeCorrect(filteredScopeBase.get, filteredScope3.get, 3000)
   }
 
-  test("scoping nested operations") {
+  test("scoping nested operations") {//作用域嵌套操作
     val inputStream = new DummyInputDStream(ssc)
     val countStream = inputStream.countByWindow(Seconds(10), Seconds(1))
     countStream.initialize(Time(0))
@@ -121,6 +123,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     assertScopeCorrect(countScopeBase.get, countScope3.get, 3000)
 
     // All streams except the input stream should share the same scopes as `countStream`
+    //除了输入流的所有数据流必须共享相同的范围"countstream"
     def testStream(stream: DStream[_]): Unit = {
       if (stream != inputStream) {
         val myScopeBase = stream.baseScope.map(RDDOperationScope.fromJson)
@@ -139,7 +142,10 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     testStream(countStream)
   }
 
-  /** Assert that the RDD operation scope properties are not set in our SparkContext. */
+  /** 
+   *  Assert that the RDD operation scope properties are not set in our SparkContext.
+   *  断言RDD操作范围属性没有设置sparkcontext 
+   *  */
   private def assertPropertiesNotSet(): Unit = {
     assert(ssc != null)
     assert(ssc.sc.getLocalProperty(SparkContext.RDD_SCOPE_KEY) == null)
@@ -166,7 +172,10 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     assert(rddScope.name.replaceAll("\\n", " ") === s"$baseScopeName @ $formattedBatchTime")
   }
 
-  /** Assert that all the specified options are defined. */
+  /** 
+   *  Assert that all the specified options are defined.
+   *  断言所有指定的选项都被定义 
+   *  */
   private def assertDefined[T](options: Option[T]*): Unit = {
     options.zipWithIndex.foreach { case (o, i) => assert(o.isDefined, s"Option $i was empty!") }
   }

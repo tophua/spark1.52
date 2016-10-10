@@ -58,7 +58,7 @@ class JobGeneratorSuite extends TestSuiteBase {
   // 4. allow subsequent batches to be generated (to allow premature deletion of 3rd batch metadata)
   // 5. verify whether 3rd batch's block metadata still exists
   //
-  test("SPARK-6222: Do not clear received block data too soon(立即,马上)") {
+  test("SPARK-6222: Do not clear received block data too soon(立即,马上)") {//不清除接收块数据太快
     import JobGeneratorSuite._
     val checkpointDir = Utils.createTempDir()
     val testConf = conf
@@ -68,7 +68,7 @@ class JobGeneratorSuite extends TestSuiteBase {
     withStreamingContext(new StreamingContext(testConf, batchDuration)) { ssc =>
       val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
       val numBatches = 10
-      val longBatchNumber = 3 // 3rd batch will take a long time
+      val longBatchNumber = 3 // 3rd batch will take a long time 第三批将需要很长的时间
       val longBatchTime = longBatchNumber * batchDuration.milliseconds
 
       val testTimeout = timeout(10 seconds)
@@ -87,15 +87,18 @@ class JobGeneratorSuite extends TestSuiteBase {
       ssc.start()
 
       // Make sure the only 1 batch of information is to be remembered
+      //确保只有1个批次的信息被记住
       assert(inputStream.rememberDuration === batchDuration)
       val receiverTracker = ssc.scheduler.receiverTracker
 
       // Get the blocks belonging to a batch
+      //获取属于一个批的块
       def getBlocksOfBatch(batchTime: Long): Seq[ReceivedBlockInfo] = {
         receiverTracker.getBlocksOfBatchAndStream(Time(batchTime), inputStream.id)
       }
 
       // Wait for new blocks to be received
+      //等待新的块被接收
       def waitForNewReceivedBlocks() {
         eventually(testTimeout) {
           assert(receiverTracker.hasUnallocatedBlocks)
@@ -103,6 +106,7 @@ class JobGeneratorSuite extends TestSuiteBase {
       }
 
       // Wait for received blocks to be allocated to a batch
+      //等待接收的块被分配给一个批处理
       def waitForBlocksToBeAllocatedToBatch(batchTime: Long) {
         eventually(testTimeout) {
           assert(getBlocksOfBatch(batchTime).nonEmpty)
@@ -110,6 +114,7 @@ class JobGeneratorSuite extends TestSuiteBase {
       }
 
       // Generate a large number of batches with blocks in them
+      //产生大量的批量块
       for (batchNum <- 1 to numBatches) {
         waitForNewReceivedBlocks()
         clock.advance(batchDuration.milliseconds)
@@ -117,11 +122,13 @@ class JobGeneratorSuite extends TestSuiteBase {
       }
 
       // Wait for 3rd batch to start
+      //等待第三批开始
       eventually(testTimeout) {
         ssc.scheduler.getPendingTimes().contains(Time(numBatches * batchDuration.milliseconds))
       }
 
       // Verify that the 3rd batch's block data is still present while the 3rd batch is incomplete
+      //验证第三批的块数据仍然存在,而第三批处理是不完整的
       assert(getBlocksOfBatch(longBatchTime).nonEmpty, "blocks of incomplete batch already deleted")
       assert(batchCounter.getNumCompletedBatches < longBatchNumber)
       waitLatch.countDown()

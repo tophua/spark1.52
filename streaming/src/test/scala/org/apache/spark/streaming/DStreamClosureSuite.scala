@@ -42,7 +42,7 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
     ssc.stop(stopSparkContext = true)
     ssc = null
   }
-
+  //用户提供的闭包清理
   test("user provided closures(闭包) are actually cleaned") {
     //Dummy虚拟
     val dstream = new DummyInputDStream(ssc)
@@ -71,7 +71,7 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
 
   /**
    * Verify that the expected exception is thrown.
-   *
+   * 验证所期望的异常被抛出
    * We use return statements as an indication that a closure is actually being cleaned.
    * We expect closure cleaner to find the return statements in the user provided closures.
    */

@@ -62,19 +62,19 @@ class WriteAheadLogBackedBlockRDDSuite
     sparkContext.stop()
     System.clearProperty("spark.driver.port")
   }
-
+ //在两个块管理器中读取数据并写日志
   test("Read data available in both block manager and write ahead log") {
     testRDD(numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 5)
   }
-
+ //读取数据只在块管理器,而不是在写提前日志
   test("Read data available only in block manager, not in write ahead log") {
     testRDD(numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 0)
   }
-
+ //在写前面的日志,而不是在块管理器读取数据
   test("Read data available only in write ahead log, not in block manager") {
     testRDD(numPartitions = 5, numPartitionsInBM = 0, numPartitionsInWAL = 5)
   }
-
+  //读取部分可用的块管理器的数据,并在前面的日志中休息
   test("Read data with partially available in block manager, and rest in write ahead log") {
     testRDD(numPartitions = 5, numPartitionsInBM = 3, numPartitionsInWAL = 2)
   }
@@ -83,7 +83,7 @@ class WriteAheadLogBackedBlockRDDSuite
     testRDD(
       numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 0, testIsBlockValid = true)
   }
-
+//测试是否删除有效的RDD数据块管理器
   test("Test whether RDD is valid after removing blocks from block manager") {
     testRDD(
       numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 5, testBlockRemove = true)
@@ -138,12 +138,14 @@ class WriteAheadLogBackedBlockRDDSuite
     val data = Seq.fill(numPartitions, 10)(scala.util.Random.nextString(50))
 
     // Put the necessary blocks in the block manager
+    //把必要的块放在块管理器中
     val blockIds = Array.fill(numPartitions)(StreamBlockId(Random.nextInt(), Random.nextInt()))
     data.zip(blockIds).take(numPartitionsInBM).foreach { case(block, blockId) =>
       blockManager.putIterator(blockId, block.iterator, StorageLevel.MEMORY_ONLY_SER)
     }
 
     // Generate write ahead log record handles
+    //生成写入前日志记录句柄
     val recordHandles = generateFakeRecordHandles(numPartitions - numPartitionsInWAL) ++
       generateWALRecordHandles(data.takeRight(numPartitionsInWAL),
         blockIds.takeRight(numPartitionsInWAL))
@@ -171,6 +173,7 @@ class WriteAheadLogBackedBlockRDDSuite
     )
 
     // Create the RDD and verify whether the returned data is correct
+    //创建RDD和验证是否返回的正确数据
     val rdd = new WriteAheadLogBackedBlockRDD[String](sparkContext, blockIds.toArray,
       recordHandles.toArray, storeInBlockManager = false)
     assert(rdd.collect() === data.flatten)
