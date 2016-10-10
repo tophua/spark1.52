@@ -50,13 +50,13 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   override def batchDuration: Duration = Milliseconds(100)
   override def actuallyWait: Boolean = true
 
-  test("batch info reporting") {
+  test("batch info reporting") {//批量信息报告
     ssc = setupStreams(input, operation)
     val collector = new BatchInfoCollector
     ssc.addStreamingListener(collector)
     runStreams(ssc, input.size, input.size)
 
-    // SPARK-6766: batch info should be submitted
+    // SPARK-6766: batch info should be submitted 批量信息提交
     val batchInfosSubmitted = collector.batchInfosSubmitted
     batchInfosSubmitted should have size 4
 
@@ -74,6 +74,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     isInIncreasingOrder(batchInfosSubmitted.map(_.submissionTime)) should be (true)
 
     // SPARK-6766: processingStartTime of batch info should not be None when starting
+    //启动批量信息的处理开始时间不应该是没有的
     val batchInfosStarted = collector.batchInfosStarted
     batchInfosStarted should have size 4
 
@@ -92,7 +93,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     isInIncreasingOrder(batchInfosStarted.map(_.submissionTime)) should be (true)
     isInIncreasingOrder(batchInfosStarted.map(_.processingStartTime.get)) should be (true)
 
-    // test onBatchCompleted
+    // test onBatchCompleted 测试批处理完成
     val batchInfosCompleted = collector.batchInfosCompleted
     batchInfosCompleted should have size 4
 
@@ -115,7 +116,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     isInIncreasingOrder(batchInfosCompleted.map(_.processingEndTime.get)) should be (true)
   }
 
-  test("receiver info reporting") {
+  test("receiver info reporting") {//接收信息报告
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
     inputStream.foreachRDD(_.count)
@@ -140,7 +141,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     }
   }
 
-  test("onBatchCompleted with successful batch") {
+  test("onBatchCompleted with successful batch") {//批处理完成与成功
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
     inputStream.foreachRDD(_.count)
@@ -150,7 +151,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
       "A successful batch should not set errorMessage")
   }
 
-  test("onBatchCompleted with failed batch and one failed job") {
+  test("onBatchCompleted with failed batch and one failed job") {//批处理失败和一个失败的Job
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
     inputStream.foreachRDD { _ =>
@@ -158,6 +159,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     }
 
     // Check if failureReasons contains the correct error message
+    // 检查是否包含正确的错误消息
     val failureReasons = startStreamingContextAndCollectFailureReasons(ssc, isFailed = true)
     assert(failureReasons != null)
     assert(failureReasons.size === 1)
@@ -176,6 +178,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     }
 
     // Check if failureReasons contains the correct error messages
+    //检查是否包含正确的错误消息
     val failureReasons =
       startStreamingContextAndCollectFailureReasons(ssc, isFailed = true)
     assert(failureReasons != null)
@@ -193,6 +196,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     val batchCounter = new BatchCounter(_ssc)
     _ssc.start()
     // Make sure running at least one batch
+    //确保运行至少一个批
     batchCounter.waitUntilBatchesCompleted(expectedNumCompletedBatches = 1, timeout = 10000)
     if (isFailed) {
       intercept[RuntimeException] {
@@ -203,7 +207,10 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     failureReasonsCollector.failureReasons
   }
 
-  /** Check if a sequence of numbers is in increasing order */
+  /** 
+   *  Check if a sequence of numbers is in increasing order
+   *  检查一个数字序列是否在递增顺序 
+   *  */
   def isInIncreasingOrder(seq: Seq[Long]): Boolean = {
     for (i <- 1 until seq.size) {
       if (seq(i - 1) > seq(i)) {

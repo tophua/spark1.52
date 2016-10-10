@@ -51,6 +51,7 @@ class UISeleniumSuite
 
   /**
    * Create a test SparkStreamingContext with the SparkUI enabled.
+   * 创建一个能测试使用的SparkStreamingContext SparkUI
    */
   private def newSparkStreamingContext(): StreamingContext = {
     val conf = new SparkConf()
@@ -79,7 +80,7 @@ class UISeleniumSuite
     }
   }
 
-  test("attaching and detaching a Streaming tab") {
+  test("attaching and detaching a Streaming tab") {//添加和删除的流标签
     withStreamingContext(newSparkStreamingContext()) { ssc =>
       setupStreams(ssc)
       ssc.start()
@@ -97,7 +98,7 @@ class UISeleniumSuite
         val h3Text = findAll(cssSelector("h3")).map(_.text).toSeq
         h3Text should contain("Streaming Statistics")
 
-        // Check stat table
+        // Check stat table 检查统计表
         val statTableHeaders = findAll(cssSelector("#stat-table th")).map(_.text).toSeq
         statTableHeaders.exists(
           _.matches("Timelines \\(Last \\d+ batches, \\d+ active, \\d+ completed\\)")
@@ -110,7 +111,7 @@ class UISeleniumSuite
         statTableCells.exists(_.contains("Processing Time")) should be (true)
         statTableCells.exists(_.contains("Total Delay")) should be (true)
 
-        // Check batch tables
+        // Check batch tables 检验批表
         val h4Text = findAll(cssSelector("h4")).map(_.text).toSeq
         h4Text.exists(_.matches("Active Batches \\(\\d+\\)")) should be (true)
         h4Text.exists(_.matches("Completed Batches \\(last \\d+ out of \\d+\\)")) should be (true)
@@ -128,7 +129,8 @@ class UISeleniumSuite
           findAll(cssSelector("""#completed-batches-table a""")).flatMap(_.attribute("href")).toSeq
         batchLinks.size should be >= 1
 
-        // Check a normal batch page
+        // Check a normal batch page 检查一个正常的批处理页面
+        //最后应该是第一批，所以它会有一些工作
         go to (batchLinks.last) // Last should be the first batch, so it will have some jobs
         val summaryText = findAll(cssSelector("li strong")).map(_.text).toSeq
         summaryText should contain ("Batch Duration:")
@@ -142,42 +144,43 @@ class UISeleniumSuite
             "Stages: Succeeded/Total", "Tasks (for all stages): Succeeded/Total", "Error")
         }
 
-        // Check we have 2 output op ids
+        // Check we have 2 output op ids 检查我们有2个输出
         val outputOpIds = findAll(cssSelector(".output-op-id-cell")).toSeq
         outputOpIds.map(_.attribute("rowspan")) should be (List(Some("2"), Some("2")))
         outputOpIds.map(_.text) should be (List("0", "1"))
 
-        // Check job ids
+        // Check job ids 检查作业ID
         val jobIdCells = findAll(cssSelector( """#batch-job-table a""")).toSeq
         jobIdCells.map(_.text) should be (List("0", "1", "2", "3"))
 
         val jobLinks = jobIdCells.flatMap(_.attribute("href"))
         jobLinks.size should be (4)
 
-        // Check stage progress
+        // Check stage progress 检查阶段的进展
         findAll(cssSelector(""".stage-progress-cell""")).map(_.text).toSeq should be
           (List("1/1", "1/1", "1/1", "0/1 (1 failed)"))
 
-        // Check job progress
+        // Check job progress 检查Job的进展
         findAll(cssSelector(""".progress-cell""")).map(_.text).toSeq should be
           (List("1/1", "1/1", "1/1", "0/1 (1 failed)"))
 
-        // Check stacktrace
+        // Check stacktrace 检查堆栈跟踪
         val errorCells = findAll(cssSelector(""".stacktrace-details""")).map(_.text).toSeq
         errorCells should have size 1
         errorCells(0) should include("java.lang.RuntimeException: Oops")
 
         // Check the job link in the batch page is right
+        // 检查批处理页面中的作业链接是否正确
         go to (jobLinks(0))
         val jobDetails = findAll(cssSelector("li strong")).map(_.text).toSeq
         jobDetails should contain("Status:")
         jobDetails should contain("Completed Stages:")
 
-        // Check a batch page without id
+        // Check a batch page without id 检查一个没有Id的批处理页面
         go to (sparkUI.appUIAddress.stripSuffix("/") + "/streaming/batch/")
         webDriver.getPageSource should include ("Missing id parameter")
 
-        // Check a non-exist batch
+        // Check a non-exist batch 检查有无存在批量
         go to (sparkUI.appUIAddress.stripSuffix("/") + "/streaming/batch/?id=12345")
         webDriver.getPageSource should include ("does not exist")
       }

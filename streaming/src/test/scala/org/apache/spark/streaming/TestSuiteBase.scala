@@ -37,6 +37,7 @@ import org.apache.spark.util.{ManualClock, Utils}
 
 /**
  * A dummy stream that does absolutely nothing.
+ * 一个没有任何的虚拟流
  */
 private[streaming] class DummyDStream(ssc: StreamingContext) extends DStream[Int](ssc) {
   override def dependencies: List[DStream[Int]] = List.empty
@@ -45,7 +46,8 @@ private[streaming] class DummyDStream(ssc: StreamingContext) extends DStream[Int
 }
 
 /**
- * A dummy input stream that does absolutely完全 nothing.
+ * A dummy input stream that does absolutely  nothing.
+ * 一个没有任何的虚拟流
  */
 private[streaming] class DummyInputDStream(ssc: StreamingContext) extends InputDStream[Int](ssc) {
   override def start(): Unit = { }
@@ -74,12 +76,13 @@ class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], 
     val selectedInput = if (index < input.size) input(index) else Seq[T]()
 
     // lets us test cases where RDDs are not created
+    // RDDs没有创建测试用例
     if (selectedInput == null) {
       return None
     }
 
     // Report the input data's information to InputInfoTracker for testing
-    //代表输入数据信息
+    //代表测试数据输入的信息
     val inputInfo = StreamInputInfo(id, selectedInput.length.toLong)
     //Inputinfotracker里面是保存了元数据
     ssc.scheduler.inputInfoTracker.reportInfo(validTime, inputInfo)
@@ -93,8 +96,9 @@ class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], 
 /**
  * This is a output stream just for the testsuites. All the output is collected into a
  * ArrayBuffer. This buffer is wiped clean on being restored from checkpoint.
- *
+ * 这只是一个输出流的测试包,所有输出都被集合到ArrayBuffer,这个缓冲区是清除干净的从检查点恢复
  * The buffer contains a sequence of RDD's, each containing a sequence of items
+ * 缓冲区包含一个序列的RDD,每个包含一系列的项目
  */
 class TestOutputStream[T: ClassTag](
     parent: DStream[T],
@@ -106,6 +110,7 @@ class TestOutputStream[T: ClassTag](
   }) {
 
   // This is to clear the output buffer every it is read from a checkpoint
+  // 这是为了清除输出缓冲区,每一个它是从一个检查点读取
   @throws(classOf[IOException])
   private def readObject(ois: ObjectInputStream): Unit = Utils.tryOrIOException {
     ois.defaultReadObject()
@@ -130,6 +135,7 @@ class TestOutputStreamWithPartitions[T: ClassTag](
   }) {
 
   // This is to clear the output buffer every it is read from a checkpoint
+  //这是为了清除输出缓冲区,每一个它是从一个检查点读取
   @throws(classOf[IOException])
   private def readObject(ois: ObjectInputStream): Unit = Utils.tryOrIOException {
     ois.defaultReadObject()
@@ -141,6 +147,8 @@ class TestOutputStreamWithPartitions[T: ClassTag](
  * An object that counts the number of started / completed batches. This is implemented using a
  * StreamingListener. Constructing a new instance automatically registers a StreamingListener on
  * the given StreamingContext.
+ * 一个开始/完成批次数量计数的对象,这是使用一个流侦听器来实现的,
+ * 构建一个新的实例会自动在给定的流上下文中注册一个流侦听器。
  */
 class BatchCounter(ssc: StreamingContext) {
 
@@ -208,20 +216,23 @@ class BatchCounter(ssc: StreamingContext) {
 /**
  * This is the base trait for Spark Streaming testsuites. This provides basic functionality
  * to run user-defined set of input on user-defined stream operations, and verify the output.
+ * 这是一个基本Spark Streaming测试套件,这提供输入流自定义的操作的基本功能并验证输出
  */
 trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   // Name of the framework for Spark context
+  //Spark上下文的框架名称
   def framework: String = this.getClass.getSimpleName
 
-  // Master for Spark context
+  // Master for Spark context  
   def master: String = "local[2]"
 
   // Batch duration
+  // 间隔时间
   def batchDuration: Duration = Seconds(1)
 
   // Directory where the checkpoint data will be saved
-  //检查点数据保存目录
+  //检查点数据被保存目录
   lazy val checkpointDir: String = {
     val dir = Utils.createTempDir()
     logDebug(s"checkpointDir: $dir")
@@ -229,11 +240,11 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   }
 
   // Number of partitions of the input parallel collections created for testing
-  //分区数
+  //用于测试的输入并行集合的分区数
   def numInputPartitions: Int = 2
 
   // Maximum time to wait before the test times out
-  //最大等待时间,即超时
+  //超时前等待的最大时间,即超时,
   def maxWaitTimeMillis: Int = 10000
 
   // Whether to use manual clock or not
@@ -245,16 +256,18 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   def actuallyWait: Boolean = false
 
   // A SparkConf to use in tests. Can be modified before calling setupStreams to configure things.
+  //一个sparkconf使用测试,可以修改调用setupstreams配置之前
   val conf = new SparkConf()
     .setMaster(master)
     .setAppName(framework)
 
   // Timeout for use in ScalaTest `eventually` blocks
-  //
+  //超时使用 
   val eventuallyTimeout: PatienceConfiguration.Timeout = timeout(Span(10, ScalaTestSeconds))
 
   // Default before function for any streaming test suite. Override this
   // if you want to add your stuff to "before" (i.e., don't call before { } )
+  //默认任何流测试套件的功能之前,重写此,如果你想添加你的东西
   def beforeFunction() {
     if (useManualClock) {
       logInfo("Using manual clock")
@@ -342,6 +355,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   /**
    * Set up required DStreams to test the binary operation using the sequence
    * of input collections.
+   * 设置所需的dstreams测试使用两个序列的输入集合操作
    */
   def setupStreams[U: ClassTag, V: ClassTag, W: ClassTag](
       input1: Seq[Seq[U]],
@@ -355,6 +369,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     }
 
     // Setup the stream computation
+    //设置流计算
     val inputStream1 = new TestInputStream(ssc, input1, numInputPartitions)
     val inputStream2 = new TestInputStream(ssc, input2, numInputPartitions)
     val operatedStream = operation(inputStream1, inputStream2)
@@ -368,8 +383,9 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
    * Runs the streams set up in `ssc` on manual clock for `numBatches` batches and
    * returns the collected output. It will wait until `numExpectedOutput` number of
    * output data has been collected or timeout (set by `maxWaitTimeMillis`) is reached.
-   *
+   * 运行设置` SSC `手动时钟` numbatches `分批返回收集输出流,
    * Returns a sequence of items for each RDD.
+   * 返回一个序列的每个RDD项目
    */
   def runStreams[V: ClassTag](
       ssc: StreamingContext,
@@ -377,6 +393,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       numExpectedOutput: Int
     ): Seq[Seq[V]] = {
     // Flatten each RDD into a single Seq
+    //把每个RDD生成单个的序列
     runStreamsWithPartitions(ssc, numBatches, numExpectedOutput).map(_.flatten.toSeq)
   }
 
@@ -398,6 +415,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     logInfo("numBatches = " + numBatches + ", numExpectedOutput = " + numExpectedOutput)
 
     // Get the output buffer
+    //获取输出缓冲区
     val outputStream = ssc.graph.getOutputStreams.
       filter(_.isInstanceOf[TestOutputStreamWithPartitions[_]]).
       head.asInstanceOf[TestOutputStreamWithPartitions[V]]
@@ -405,9 +423,10 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
     try {
       // Start computation
+      //开始计算
       ssc.start()
 
-      // Advance manual clock
+      // Advance manual clock 提前设置时钟
       val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
       logInfo("Manual clock before advancing = " + clock.getTimeMillis())
       if (actuallyWait) {
@@ -422,6 +441,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       logInfo("Manual clock after advancing = " + clock.getTimeMillis())
 
       // Wait until expected number of output items have been generated
+      //等待直到生成的输出期望值
       val startTime = System.currentTimeMillis()
       while (output.size < numExpectedOutput &&
         System.currentTimeMillis() - startTime < maxWaitTimeMillis) {
@@ -433,7 +453,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       output.foreach(x => logInfo("[" + x.mkString(",") + "]"))
       assert(timeTaken < maxWaitTimeMillis, "Operation timed out after " + timeTaken + " ms")
       assert(output.size === numExpectedOutput, "Unexpected number of outputs generated")
-
+      //给旧RDDS完成一些时间
       Thread.sleep(100) // Give some time for the forgetting old RDDs to complete
     } finally {
       ssc.stop(stopSparkContext = true)
@@ -464,6 +484,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     logInfo("--------------------------------")
 
     // Match the output with the expected output
+    //将输出与预期输出相匹配
     for (i <- 0 until output.size) {
       if (useSet) {
         assert(
