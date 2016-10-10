@@ -47,14 +47,17 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
   test("socket input stream") {//网络输入流
     withTestServer(new TestServer()) { testServer =>
       // Start the server
+      //开始运行服务
       testServer.start()
 
       // Set up the streaming context and input streams
+      //设置流上下文和输入流
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         ssc.addStreamingListener(ssc.progressListener)
 
         val input = Seq(1, 2, 3, 4, 5)
         // Use "batchCount" to make sure we check the result after all batches finish
+        //使用“batchcount”检查结果所有批次完成后
         val batchCounter = new BatchCounter(ssc)//
         val networkStream = ssc.socketTextStream(
           "localhost", testServer.port, StorageLevel.MEMORY_AND_DISK)
@@ -80,6 +83,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         }
 
         // Ensure progress listener has been notified of all events
+        //确保进度侦听器已通知所有事件
         ssc.scheduler.listenerBus.waitUntilEmpty(500)
 
         // Verify all "InputInfo"s have been reported
@@ -92,6 +96,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         ssc.stop()
 
         // Verify whether data received was as expected
+        //验证是否收到的数据是预期的
         logInfo("--------------------------------")
         logInfo("output.size = " + outputBuffer.size)
         logInfo("output")
@@ -102,7 +107,9 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         logInfo("--------------------------------")
 
         // Verify whether all the elements received are as expected
+        //验证是否所有的元素都将收到
         // (whether the elements were received one in each interval is not verified)
+        //是否收到一个在每个时间间隔中的元素没有被验证
         val output: ArrayBuffer[String] = outputBuffer.flatMap(x => x)
         assert(output.size === expectedOutput.size)
         for (i <- 0 until output.size) {
@@ -131,6 +138,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         clock.advance(batchDuration.milliseconds)
 
         // Make sure the first batch is finished
+        //确保第一批完成
         if (!batchCounter.waitUntilBatchesCompleted(1, 30000)) {//没有块处理
           fail("Timeout: cannot finish all batches in 30 seconds")
         }
@@ -148,16 +156,17 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
       val batchDuration = Seconds(2)//2秒
       val testDir = Utils.createTempDir()//创建临时目录
       // Create a file that exists before the StreamingContext is created:
+      //创建一个文件存在之前,创建StreamingContext
       val existingFile = new File(testDir, "0")
       Files.write("0\n", existingFile, Charset.forName("UTF-8"))
       assert(existingFile.setLastModified(10000) && existingFile.lastModified === 10000)
 
       // Set up the streaming context and input streams
-      //
+      //设置流上下文和输入流
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
         // This `setTime` call ensures that the clock is past the creation time of `existingFile`
-        //
+        //这"setTime"调用确保时钟过去的创作时间"existingfile"
         clock.setTime(existingFile.lastModified + batchDuration.milliseconds)
         val batchCounter = new BatchCounter(ssc)
         //二进制记录流,长度为1
@@ -181,7 +190,9 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
           assert(file.lastModified === clock.getTimeMillis())
           logInfo("Created file " + file)
           // Advance the clock after creating the file to avoid a race when
+          //推进时钟后创建该文件,以避免竞争时
           // setting its modification time
+          //设置修改时间
           clock.advance(batchDuration.milliseconds)
           eventually(eventuallyTimeout) {
             assert(batchCounter.getNumCompletedBatches === i)
@@ -219,6 +230,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     MultiThreadTestReceiver.haveAllThreadsFinished = false
 
     // set up the network stream using the test receiver
+    //使用测试接收器设置网络流
     val ssc = new StreamingContext(conf, batchDuration)
     //数据源输入
     val networkStream = ssc.receiverStream[Int](testReceiver)
@@ -232,6 +244,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     ssc.start()
 
     // Let the data from the receiver be received
+    //来自接收者的数据
     val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
     val startTime = System.currentTimeMillis()
     while((!MultiThreadTestReceiver.haveAllThreadsFinished || output.sum < numTotalRecords) &&
@@ -244,6 +257,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     ssc.stop()
 
     // Verify whether data received was as expected
+    //验证数据是否收到预期
     logInfo("--------------------------------")
     logInfo("output.size = " + outputBuffer.size)
     logInfo("output")
@@ -254,6 +268,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
   test("queue input stream - oneAtATime = true") {//队列输入流,一次一个
     // Set up the streaming context and input streams
+    //设置流上下文和输入流
     val ssc = new StreamingContext(conf, batchDuration)
     val queue = new SynchronizedQueue[RDD[String]]()//
     val queueStream = ssc.queueStream(queue, oneAtATime = true)//一次一个
@@ -264,6 +279,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     ssc.start()
 
     // Setup data queued into the stream
+    //设置队列到流中的数据
     val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
     val input = Seq("1", "2", "3", "4", "5")
     val expectedOutput = input.map(Seq(_))
@@ -271,6 +287,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     val inputIterator = input.toIterator
     for (i <- 0 until input.size) {
       // Enqueue more than 1 item per tick but they should dequeue one at a time
+      //将超过1项每滴答应出列一次
       inputIterator.take(2).foreach(i => queue += ssc.sparkContext.makeRDD(Seq(i)))
       clock.advance(batchDuration.milliseconds)
     }
@@ -279,6 +296,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     ssc.stop()
 
     // Verify whether data received was as expected
+    //验证数据是否收到预期
     logInfo("--------------------------------")
     logInfo("output.size = " + outputBuffer.size)
     logInfo("output")
@@ -289,14 +307,16 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     logInfo("--------------------------------")
 
     // Verify whether all the elements received are as expected
+    //检查所有接收到的元素是否预期
     assert(output.size === expectedOutput.size)
     for (i <- 0 until output.size) {
       assert(output(i) === expectedOutput(i))
     }
   }
 
-  test("queue input stream - oneAtATime = false") {//
+  test("queue input stream - oneAtATime = false") {//排队输入流
     // Set up the streaming context and input streams
+    //设置流上下文和输入流
     val ssc = new StreamingContext(conf, batchDuration)
     val queue = new SynchronizedQueue[RDD[String]]()
     val queueStream = ssc.queueStream(queue, oneAtATime = false)
@@ -307,11 +327,13 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     ssc.start()
 
     // Setup data queued into the stream
+    //设置队列到流中的数据
     val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
     val input = Seq("1", "2", "3", "4", "5")
     val expectedOutput = Seq(Seq("1", "2", "3"), Seq("4", "5"))
 
     // Enqueue the first 3 items (one by one), they should be merged in the next batch
+    //第一入列 3项(一对一)的,他们应该出现在下一批
     val inputIterator = input.toIterator
     inputIterator.take(3).foreach(i => queue += ssc.sparkContext.makeRDD(Seq(i)))
     clock.advance(batchDuration.milliseconds)
@@ -325,6 +347,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     ssc.stop()
 
     // Verify whether data received was as expected
+    //验证收到的数据是否预期
     logInfo("--------------------------------")
     logInfo("output.size = " + outputBuffer.size)
     logInfo("output")
@@ -335,6 +358,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     logInfo("--------------------------------")
 
     // Verify whether all the elements received are as expected
+    //检查所有接收到的元素是否预期
     assert(output.size === expectedOutput.size)
     for (i <- 0 until output.size) {
       assert(output(i) === expectedOutput(i))
@@ -357,6 +381,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
       }
 
       // Register input streams
+      //注册输入流
       val receiverInputStreams = Array(new TestReceiverInputDStream, new TestReceiverInputDStream)
       val inputStreams = Array(new TestInputDStream, new TestInputDStream, new TestInputDStream)
 
@@ -378,6 +403,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
       //创建临时文件
       val testDir = Utils.createTempDir()
       // Create a file that exists before the StreamingContext is created:
+      //创建一个文件存在之前,创建StreamingContext
       val existingFile = new File(testDir, "0")
       //输出存在文件
       Files.write("0\n", existingFile, Charset.forName("UTF-8"))
@@ -385,7 +411,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
       assert(existingFile.setLastModified(10000) && existingFile.lastModified === 10000)
 
       // Set up the streaming context and input streams
-      //
+      //设置流上下文和输入流
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
         // This `setTime` call ensures that the clock is past the creation time of `existingFile`
@@ -404,7 +430,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         clock.advance(batchDuration.milliseconds / 2)
 
         // Over time, create files in the directory
-        //
+        //随着时间的推移,在目录中创建文件
         val input = Seq(1, 2, 3, 4, 5)
         input.foreach { i =>
           val file = new File(testDir, i.toString)
@@ -413,7 +439,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
           assert(file.lastModified === clock.getTimeMillis())
           logInfo("Created file " + file)
           // Advance the clock after creating the file to avoid a race when
-          // setting its modification time
+          // setting its modification time 设置修改时间
           clock.advance(batchDuration.milliseconds)
           eventually(eventuallyTimeout) {
             assert(batchCounter.getNumCompletedBatches === i)
@@ -421,6 +447,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         }
 
         // Verify that all the files have been read
+        //验证所有的文件已被读取
         val expectedOutput = if (newFilesOnly) {
           input.map(_.toString).toSet
         } else {
@@ -435,7 +462,10 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 }
 
 
-/** This is a server to test the network input stream */
+/** 
+ *  This is a server to test the network input stream
+ *  这是一个测试网络输入流的服务器 
+ *  */
 class TestServer(portToBind: Int = 0) extends Logging {
  //是一个由数组支持的有界阻塞队列。此队列按 FIFO(先进先出)原则对元素进行排序。
  //让容量满时往BlockingQueue中添加数据时会造成阻塞，当容量为空时取元素操作会阻塞
@@ -456,6 +486,7 @@ class TestServer(portToBind: Int = 0) extends Logging {
           if (startLatch.getCount == 1) {
             // The first connection is a test connection to implement "waitForStart", so skip it
             // and send a signal
+            //第一连接是连接是测试连接“waitforstart”,所以跳过它发送一个信号
             if (!clientSocket.isClosed) {
               clientSocket.close()//关闭客户端连接
             }
@@ -511,9 +542,11 @@ class TestServer(portToBind: Int = 0) extends Logging {
   /**
    * Wait until the server starts. Return true if the server starts in "millis" milliseconds.
    * Otherwise, return false to indicate it's timeout.
+   * 等到服务器启动,如果服务器在“微”毫秒开始返回true,否则,返回错误指示它的超时时间
    */
   private def waitForStart(millis: Long): Boolean = {
     // We will create a test connection to the server so that we can make sure it has started.
+    //将创建一个测试连接到服务器,以便我们可以确保它已经开始
     val socket = new Socket("localhost", port)
     try {
       //使当前线程在锁存器倒计数至零之前一直等待，除非线程被中断或超出了指定的等待时间     

@@ -76,6 +76,7 @@ object MasterFailureTest extends Logging {
     val operation = (st: DStream[String]) => st.map(_.toInt)
 
     // Run streaming operation with multiple master failures
+    //具有多个主故障的运行流操作
     val output = testOperation(directory, batchDuration, input, operation, expectedOutput)
 
     logInfo("Expected output, size = " + expectedOutput.size)
@@ -85,6 +86,7 @@ object MasterFailureTest extends Logging {
 
     // Verify whether all the values of the expected output is present
     // in the output
+    //是否验证所期望输出的所有值是否存在于输出中
     assert(output.distinct.toSet == expectedOutput.toSet)
   }
 
@@ -106,24 +108,28 @@ object MasterFailureTest extends Logging {
     }
 
     // Run streaming operation with multiple master failures
+    //具有多个主故障的运行流操作
     val output = testOperation(directory, batchDuration, input, operation, expectedOutput)
 
     logInfo("Expected output, size = " + expectedOutput.size + "\n" + expectedOutput)
     logInfo("Output, size = " + output.size + "\n" + output)
 
     // Verify whether all the values in the output are among the expected output values
+    //是否验证输出中的所有值是否在预期的输出值中
     output.foreach(o =>
       assert(expectedOutput.contains(o), "Expected value " + o + " not found")
     )
 
     // Verify whether the last expected output value has been generated, there by
     // confirming that none of the inputs have been missed
+    //验证是否已生成最后一个期望输出值,确认没有输入已被丢失
     assert(output.last == expectedOutput.last)
   }
 
   /**
    * Tests stream operation with multiple master failures, and verifies whether the
    * final set of output values is as expected or not.
+   * 测试与多个主故障的流操作,并验证最后一组输出值是否为预期的或不
    */
   def testOperation[T: ClassTag](
     directory: String,
@@ -134,12 +140,15 @@ object MasterFailureTest extends Logging {
   ): Seq[T] = {
 
     // Just making sure that the expected output does not have duplicates
+    //只要确保预期的输出没有重复
     assert(expectedOutput.distinct.toSet == expectedOutput.toSet)
 
     // Reset all state
+    //重置所有状态
     reset()
 
     // Create the directories for this test
+    //为这个测试创建目录
     val uuid = UUID.randomUUID().toString
     val rootDir = new Path(directory, uuid)
     val fs = rootDir.getFileSystem(new Configuration())
@@ -149,20 +158,24 @@ object MasterFailureTest extends Logging {
     fs.mkdirs(testDir)
 
     // Setup the stream computation with the given operation
+    //用给定的操作设置流计算
     val ssc = StreamingContext.getOrCreate(checkpointDir.toString, () => {
       setupStreams(batchDuration, operation, checkpointDir, testDir)
     })
 
     // Check if setupStream was called to create StreamingContext
+    //检查setupstream调用创建StreamingContext,并不是从检查点文件创建的
     // (and not created from checkpoint file)
     assert(setupCalled, "Setup was not called in the first call to StreamingContext.getOrCreate")
 
     // Start generating files in the a different thread
+    // 在一个不同的线程中开始生成文件
     val fileGeneratingThread = new FileGeneratingThread(input, testDir, batchDuration.milliseconds)
     fileGeneratingThread.start()
 
     // Run the streams and repeatedly kill it until the last expected output
     // has been generated, or until it has run for twice the expected time
+    //运行流，并多次杀死它，直到最后一个预期的输出已产生,或者直到它运行了两倍的预期时间
     val lastExpectedOutput = expectedOutput.last
     val maxTimeToRun = expectedOutput.size * batchDuration.milliseconds * 2
     val mergedOutput = runStreams(ssc, lastExpectedOutput, maxTimeToRun)
@@ -178,6 +191,7 @@ object MasterFailureTest extends Logging {
    * Sets up the stream computation with the given operation, directory (local or HDFS),
    * and batch duration. Returns the streaming context and the directory to which
    * files should be written for testing.
+   * 用给定的操作设置流计算,目录(本地或HDFS)和间隔时间,返回流上下文和文件写入测试的目录,   
    */
   private def setupStreams[T: ClassTag](
       batchDuration: Duration,
@@ -186,9 +200,11 @@ object MasterFailureTest extends Logging {
       testDir: Path
     ): StreamingContext = {
     // Mark that setup was called
+    // 标记设置被调用
     setupCalled = true
 
     // Setup the streaming computation with the given operation
+    //设置给定的流式计算操作
     val ssc = new StreamingContext("local[4]", "MasterFailureTest", batchDuration, null, Nil,
       Map())
     ssc.checkpoint(checkpointDir.toString)
@@ -203,6 +219,7 @@ object MasterFailureTest extends Logging {
   /**
    * Repeatedly starts and kills the streaming context until timed out or
    * the last expected output is generated. Finally, return
+   * 重复启动和杀死流上下文,直到超时或生成最后的期望输出
    */
   private def runStreams[T: ClassTag](
       ssc_ : StreamingContext,
@@ -220,10 +237,12 @@ object MasterFailureTest extends Logging {
 
     while(!isLastOutputGenerated && !isTimedOut) {
       // Get the output buffer
+      //获取输出缓冲区
       val outputBuffer = ssc.graph.getOutputStreams().head.asInstanceOf[TestOutputStream[T]].output
       def output = outputBuffer.flatMap(x => x)
 
       // Start the thread to kill the streaming after some time
+      // 在一段时间后开始线程杀死流
       killed = false
       val killingThread = new KillingThread(ssc, batchDuration.milliseconds * 10)
       killingThread.start()
@@ -231,6 +250,7 @@ object MasterFailureTest extends Logging {
       var timeRan = 0L
       try {
         // Start the streaming computation and let it run while ...
+        //开始流式计算,并让它运行
         // (i) StreamingContext has not been shut down yet
         // (ii) The last expected output has not been generated yet
         // (iii) Its not timed out yet
@@ -261,7 +281,9 @@ object MasterFailureTest extends Logging {
       logInfo("Is timed out = " + isTimedOut)
 
       // Verify whether the output of each batch has only one element or no element
+      //检查每个批处理的输出是否只有一个元素或没有元素
       // and then merge the new output with all the earlier output
+      //然后合并新的输出与所有之前的输出
       mergedOutput ++= output
       totalTimeRan += timeRan
       logInfo("New output = " + output)
@@ -325,6 +347,7 @@ object MasterFailureTest extends Logging {
 
 /**
  * Thread to kill streaming context after a random period of time.
+ * 线程在一个随机的时间后杀死流
  */
 private[streaming]
 class KillingThread(ssc: StreamingContext, maxKillWaitTime: Long) extends Thread with Logging {
@@ -358,6 +381,7 @@ class KillingThread(ssc: StreamingContext, maxKillWaitTime: Long) extends Thread
 
 /**
  * Thread to generate input files periodically with the desired text.
+ * 线程来周期性地生成与所需的文本的输入文件。
  */
 private[streaming]
 class FileGeneratingThread(input: Seq[String], testDir: Path, interval: Long)

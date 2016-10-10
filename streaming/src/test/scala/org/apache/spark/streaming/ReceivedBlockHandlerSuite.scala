@@ -101,12 +101,14 @@ class ReceivedBlockHandlerSuite
     withBlockManagerBasedBlockHandler { handler =>
       testBlockStoring(handler) { case (data, blockIds, storeResults) =>
         // Verify the data in block manager is correct
+        //验证块管理器中的数据是否正确
         val storedData = blockIds.flatMap { blockId =>
           blockManager.getLocal(blockId).map(_.data.map(_.toString).toList).getOrElse(List.empty)
         }.toList
         storedData shouldEqual data
 
         // Verify that the store results are instances of BlockManagerBasedStoreResult
+        //验证存储结果的实例blockmanagerbasedstoreresult
         assert(
           storeResults.forall { _.isInstanceOf[BlockManagerBasedStoreResult] },
           "Unexpected store result type"
@@ -115,27 +117,30 @@ class ReceivedBlockHandlerSuite
     }
   }
 
-  test("BlockManagerBasedBlockHandler - handle errors in storing block") {
+  test("BlockManagerBasedBlockHandler - handle errors in storing block") {//存储块中的处理错误
     withBlockManagerBasedBlockHandler { handler =>
       testErrorHandling(handler)
     }
   }
 
-  test("WriteAheadLogBasedBlockHandler - store blocks") {
+  test("WriteAheadLogBasedBlockHandler - store blocks") {//存储块
     withWriteAheadLogBasedBlockHandler { handler =>
       testBlockStoring(handler) { case (data, blockIds, storeResults) =>
         // Verify the data in block manager is correct
+        //验证块管理器中的数据是否正确
         val storedData = blockIds.flatMap { blockId =>
           blockManager.getLocal(blockId).map(_.data.map(_.toString).toList).getOrElse(List.empty)
         }.toList
         storedData shouldEqual data
 
         // Verify that the store results are instances of WriteAheadLogBasedStoreResult
+        //验证存储结果的实例WriteAheadLogBasedStoreResult
         assert(
           storeResults.forall { _.isInstanceOf[WriteAheadLogBasedStoreResult] },
           "Unexpected store result type"
         )
         // Verify the data in write ahead log files is correct
+        //在写前面的日志文件中验证数据是正确的
         val walSegments = storeResults.map { result =>
           result.asInstanceOf[WriteAheadLogBasedStoreResult].walRecordHandle
         }
@@ -151,7 +156,7 @@ class ReceivedBlockHandlerSuite
     }
   }
 
-  test("WriteAheadLogBasedBlockHandler - handle errors in storing block") {
+  test("WriteAheadLogBasedBlockHandler - handle errors in storing block") {//存储块中的处理错误
     withWriteAheadLogBasedBlockHandler { handler =>
       testErrorHandling(handler)
     }
@@ -166,6 +171,7 @@ class ReceivedBlockHandlerSuite
       require(preCleanupLogFiles.size > 1)
 
       // this depends on the number of blocks inserted using generateAndStoreData()
+      //这取决于块的数量插入使用
       manualClock.getTimeMillis() shouldEqual 5000L
 
       val cleanupThreshTime = 3000L
@@ -178,6 +184,7 @@ class ReceivedBlockHandlerSuite
 
   test("Test Block - count messages") {
     // Test count with BlockManagedBasedBlockHandler
+    //测试计数BlockManagedBasedBlockHandler
     testCountWithBlockManagerBasedBlockHandler(true)
     // Test count with WriteAheadLogBasedBlockHandler
     testCountWithBlockManagerBasedBlockHandler(false)
@@ -189,15 +196,18 @@ class ReceivedBlockHandlerSuite
     // spark.storage.unrollFraction set to 0.4 for BlockManager
     sparkConf.set("spark.storage.unrollFraction", "0.4")
     // Block Manager with 12000 * 0.4 = 4800 bytes of free space for unroll
+    //块管理12000 * 0.4 = 4800字节的自由空间展开
     blockManager = createBlockManager(12000, sparkConf)
 
     // there is not enough space to store this block in MEMORY,
+    //没有足够的空间来存储这个块在内存中,
     // But BlockManager will be able to sereliaze this block to WAL
     // and hence count returns correct value.
      testRecordcount(false, StorageLevel.MEMORY_ONLY,
       IteratorBlock((List.fill(70)(new Array[Byte](100))).iterator), blockManager, Some(70))
 
     // there is not enough space to store this block in MEMORY,
+    //没有足够的空间来存储这个块在内存中
     // But BlockManager will be able to sereliaze this block to DISK
     // and hence count returns correct value.
     testRecordcount(true, StorageLevel.MEMORY_AND_DISK,
@@ -262,6 +272,7 @@ class ReceivedBlockHandlerSuite
   /**
    * Test storing of data using different types of Handler, StorageLevle and ReceivedBlocks
    * and verify the correct record count
+   * 使用不同类型的汉德勒的数据的测试存储,存储级别和ReceivedBlocks验证正确的记录数
    */
   private def testRecordcount(isBlockManagedBasedBlockHandler: Boolean,
       sLevel: StorageLevel,
@@ -296,6 +307,7 @@ class ReceivedBlockHandlerSuite
       }
     } finally {
      // Removing the Block Id to use same blockManager for next test
+     //删除块ID使用相同的blockmanager下一个测试
      blockManager.removeBlock(bId, true)
     }
   }
@@ -303,6 +315,7 @@ class ReceivedBlockHandlerSuite
   /**
    * Test storing of data using different forms of ReceivedBlocks and verify that they succeeded
    * using the given verification function
+   * 测试存储采用不同形式的receivedblocks数据验证,他们成功地使用了验证功能
    */
   private def testBlockStoring(receivedBlockHandler: ReceivedBlockHandler)
       (verifyFunc: (Seq[String], Seq[StreamBlockId], Seq[ReceivedBlockStoreResult]) => Unit) {
@@ -316,6 +329,7 @@ class ReceivedBlockHandlerSuite
         (storeResults.map { _.blockId }) shouldEqual blockIds
 
         // Call handler-specific verification function
+        //调用处理程序特定的验证功能
         verifyFunc(data, blockIds, storeResults)
       }
     }
@@ -329,15 +343,20 @@ class ReceivedBlockHandlerSuite
     storeAndVerify(blocks.map { b => ByteBufferBlock(dataToByteBuffer(b)) })
   }
 
-  /** Test error handling when blocks that cannot be stored */
+  /** 
+   *  Test error handling when blocks that cannot be stored
+   *  无法存储的块时的测试错误处理 
+   *  */
   private def testErrorHandling(receivedBlockHandler: ReceivedBlockHandler) {
     // Handle error in iterator (e.g. divide-by-zero error)
+    //迭代器中的句柄错误
     intercept[Exception] {
       val iterator = (10 to (-10, -1)).toIterator.map { _ / 0 }
       receivedBlockHandler.storeBlock(StreamBlockId(1, 1), IteratorBlock(iterator))
     }
 
     // Handler error in block manager storing (e.g. too big block)
+    //块管理器存储中的处理错误
     intercept[SparkException] {
       val byteBuffer = ByteBuffer.wrap(new Array[Byte](blockManagerSize + 1))
       receivedBlockHandler.storeBlock(StreamBlockId(1, 1), ByteBufferBlock(byteBuffer))
@@ -361,7 +380,10 @@ class ReceivedBlockHandlerSuite
     }
   }
 
-  /** Store blocks using a handler */
+  /** 
+   *  Store blocks using a handler
+   *  使用处理程序的存储块 
+   *  */
   private def storeBlocks(
       receivedBlockHandler: ReceivedBlockHandler,
       blocks: Seq[ReceivedBlock]
@@ -369,6 +391,7 @@ class ReceivedBlockHandlerSuite
     val blockIds = Seq.fill(blocks.size)(generateBlockId())
     val storeResults = blocks.zip(blockIds).map {
       case (block, id) =>
+        //通过sparkconf设置日志滚动间隔为1000毫秒
         manualClock.advance(500) // log rolling interval set to 1000 ms through SparkConf
         logDebug("Inserting block " + id)
         receivedBlockHandler.storeBlock(id, block)
@@ -377,7 +400,10 @@ class ReceivedBlockHandlerSuite
     (blockIds, storeResults)
   }
 
-  /** Store single block using a handler */
+  /** 
+   *  Store single block using a handler
+   *  使用处理程序存储单个块
+   *   */
   private def storeSingleBlock(
       handler: ReceivedBlockHandler,
       block: ReceivedBlock

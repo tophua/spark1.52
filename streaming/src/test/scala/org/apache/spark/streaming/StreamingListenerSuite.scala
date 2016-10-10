@@ -17,7 +17,7 @@
 
 package org.apache.spark.streaming
 
-import scala.collection.mutable.{ArrayBuffer, SynchronizedBuffer}
+import scala.collection.mutable.{ ArrayBuffer, SynchronizedBuffer }
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -50,7 +50,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   override def batchDuration: Duration = Milliseconds(100)
   override def actuallyWait: Boolean = true
 
-  test("batch info reporting") {//批量信息报告
+  test("batch info reporting") { //批量信息报告
     ssc = setupStreams(input, operation)
     val collector = new BatchInfoCollector
     ssc.addStreamingListener(collector)
@@ -61,17 +61,17 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     batchInfosSubmitted should have size 4
 
     batchInfosSubmitted.foreach(info => {
-      info.schedulingDelay should be (None)
-      info.processingDelay should be (None)
-      info.totalDelay should be (None)
+      info.schedulingDelay should be(None)
+      info.processingDelay should be(None)
+      info.totalDelay should be(None)
     })
 
     batchInfosSubmitted.foreach { info =>
-      info.numRecords should be (1L)
-      info.streamIdToInputInfo should be (Map(0 -> StreamInputInfo(0, 1L)))
+      info.numRecords should be(1L)
+      info.streamIdToInputInfo should be(Map(0 -> StreamInputInfo(0, 1L)))
     }
 
-    isInIncreasingOrder(batchInfosSubmitted.map(_.submissionTime)) should be (true)
+    isInIncreasingOrder(batchInfosSubmitted.map(_.submissionTime)) should be(true)
 
     // SPARK-6766: processingStartTime of batch info should not be None when starting
     //启动批量信息的处理开始时间不应该是没有的
@@ -81,17 +81,17 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     batchInfosStarted.foreach(info => {
       info.schedulingDelay should not be None
       info.schedulingDelay.get should be >= 0L
-      info.processingDelay should be (None)
-      info.totalDelay should be (None)
+      info.processingDelay should be(None)
+      info.totalDelay should be(None)
     })
 
     batchInfosStarted.foreach { info =>
-      info.numRecords should be (1L)
-      info.streamIdToInputInfo should be (Map(0 -> StreamInputInfo(0, 1L)))
+      info.numRecords should be(1L)
+      info.streamIdToInputInfo should be(Map(0 -> StreamInputInfo(0, 1L)))
     }
 
-    isInIncreasingOrder(batchInfosStarted.map(_.submissionTime)) should be (true)
-    isInIncreasingOrder(batchInfosStarted.map(_.processingStartTime.get)) should be (true)
+    isInIncreasingOrder(batchInfosStarted.map(_.submissionTime)) should be(true)
+    isInIncreasingOrder(batchInfosStarted.map(_.processingStartTime.get)) should be(true)
 
     // test onBatchCompleted 测试批处理完成
     val batchInfosCompleted = collector.batchInfosCompleted
@@ -107,16 +107,16 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     })
 
     batchInfosCompleted.foreach { info =>
-      info.numRecords should be (1L)
-      info.streamIdToInputInfo should be (Map(0 -> StreamInputInfo(0, 1L)))
+      info.numRecords should be(1L)
+      info.streamIdToInputInfo should be(Map(0 -> StreamInputInfo(0, 1L)))
     }
 
-    isInIncreasingOrder(batchInfosCompleted.map(_.submissionTime)) should be (true)
-    isInIncreasingOrder(batchInfosCompleted.map(_.processingStartTime.get)) should be (true)
-    isInIncreasingOrder(batchInfosCompleted.map(_.processingEndTime.get)) should be (true)
+    isInIncreasingOrder(batchInfosCompleted.map(_.submissionTime)) should be(true)
+    isInIncreasingOrder(batchInfosCompleted.map(_.processingStartTime.get)) should be(true)
+    isInIncreasingOrder(batchInfosCompleted.map(_.processingEndTime.get)) should be(true)
   }
 
-  test("receiver info reporting") {//接收信息报告
+  test("receiver info reporting") { //接收信息报告
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
     inputStream.foreachRDD(_.count)
@@ -127,21 +127,21 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     ssc.start()
     try {
       eventually(timeout(30 seconds), interval(20 millis)) {
-        collector.startedReceiverStreamIds.size should equal (1)
-        collector.startedReceiverStreamIds(0) should equal (0)
+        collector.startedReceiverStreamIds.size should equal(1)
+        collector.startedReceiverStreamIds(0) should equal(0)
         collector.stoppedReceiverStreamIds should have size 1
-        collector.stoppedReceiverStreamIds(0) should equal (0)
+        collector.stoppedReceiverStreamIds(0) should equal(0)
         collector.receiverErrors should have size 1
-        collector.receiverErrors(0)._1 should equal (0)
-        collector.receiverErrors(0)._2 should include ("report error")
-        collector.receiverErrors(0)._3 should include ("report exception")
+        collector.receiverErrors(0)._1 should equal(0)
+        collector.receiverErrors(0)._2 should include("report error")
+        collector.receiverErrors(0)._3 should include("report exception")
       }
     } finally {
       ssc.stop()
     }
   }
 
-  test("onBatchCompleted with successful batch") {//批处理完成与成功
+  test("onBatchCompleted with successful batch") { //批处理完成与成功
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
     inputStream.foreachRDD(_.count)
@@ -151,7 +151,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
       "A successful batch should not set errorMessage")
   }
 
-  test("onBatchCompleted with failed batch and one failed job") {//批处理失败和一个失败的Job
+  test("onBatchCompleted with failed batch and one failed job") { //批处理失败和一个失败的Job
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
     inputStream.foreachRDD { _ =>
@@ -190,7 +190,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   }
 
   private def startStreamingContextAndCollectFailureReasons(
-      _ssc: StreamingContext, isFailed: Boolean = false): Map[Int, String] = {
+    _ssc: StreamingContext, isFailed: Boolean = false): Map[Int, String] = {
     val failureReasonsCollector = new FailureReasonsCollector()
     _ssc.addStreamingListener(failureReasonsCollector)
     val batchCounter = new BatchCounter(_ssc)
@@ -207,10 +207,10 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     failureReasonsCollector.failureReasons
   }
 
-  /** 
+  /**
    *  Check if a sequence of numbers is in increasing order
-   *  检查一个数字序列是否在递增顺序 
-   *  */
+   *  检查一个数字序列是否在递增顺序
+   */
   def isInIncreasingOrder(seq: Seq[Long]): Boolean = {
     for (i <- 1 until seq.size) {
       if (seq(i - 1) > seq(i)) {
@@ -221,45 +221,48 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   }
 }
 
-/** 
+/**
  *  用户利用这个类中的方法可以获得作业当前处理的情况,获得作业内部信息,
  *  当用户需要监控或者输出内部状态时
- *  Listener that collects information on processed batches 
- *  
- *  */
+ *  Listener that collects information on processed batches
+ *
+ */
 class BatchInfoCollector extends StreamingListener {
   val batchInfosCompleted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
   val batchInfosStarted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
   val batchInfosSubmitted = new ArrayBuffer[BatchInfo] with SynchronizedBuffer[BatchInfo]
-//提交作业时间
+  //提交作业时间
   override def onBatchSubmitted(batchSubmitted: StreamingListenerBatchSubmitted) {
     batchInfosSubmitted += batchSubmitted.batchInfo
   }
-//批处理开始运行
+  //批处理开始运行
   override def onBatchStarted(batchStarted: StreamingListenerBatchStarted) {
     batchInfosStarted += batchStarted.batchInfo
   }
-//批处理完成
+  //批处理完成
   override def onBatchCompleted(batchCompleted: StreamingListenerBatchCompleted) {
     batchInfosCompleted += batchCompleted.batchInfo
   }
 }
 
-/** Listener that collects information on processed batches */
+/** 
+ *  Listener that collects information on processed batches
+ *  侦听器,收集处理的批次的信息 
+ *  */
 class ReceiverInfoCollector extends StreamingListener {
   val startedReceiverStreamIds = new ArrayBuffer[Int] with SynchronizedBuffer[Int]
   val stoppedReceiverStreamIds = new ArrayBuffer[Int] with SynchronizedBuffer[Int]
   val receiverErrors =
     new ArrayBuffer[(Int, String, String)] with SynchronizedBuffer[(Int, String, String)]
-//接收开始
+  //接收开始
   override def onReceiverStarted(receiverStarted: StreamingListenerReceiverStarted) {
     startedReceiverStreamIds += receiverStarted.receiverInfo.streamId
   }
-//接收暂停
+  //接收暂停
   override def onReceiverStopped(receiverStopped: StreamingListenerReceiverStopped) {
     stoppedReceiverStreamIds += receiverStopped.receiverInfo.streamId
   }
-//接收错误
+  //接收错误
   override def onReceiverError(receiverError: StreamingListenerReceiverError) {
     receiverErrors += ((receiverError.receiverInfo.streamId,
       receiverError.receiverInfo.lastErrorMessage, receiverError.receiverInfo.lastError))
@@ -280,7 +283,7 @@ class StreamingListenerSuiteReceiver extends Receiver[Any](StorageLevel.MEMORY_O
       stop("test stop error")
     }
   }
-  def onStop() { }
+  def onStop() {}
 }
 
 /**
