@@ -54,57 +54,72 @@ class JobScheduler(val ssc: StreamingContext) extends Logging {
   val listenerBus = new StreamingListenerBus()
 
   // These two are created only when scheduler starts.
+  //只有当调度程序启动时才创建InputInfoTracker,ReceiverTracker
   // eventLoop not being null means the scheduler has been started and not stopped
+  //eventloop不空意味着调度程序已经开始运行
   //JobScheduler将源头输入数据的记录工作委托给 ReceiverTracker
   var receiverTracker: ReceiverTracker = null
   // A tracker to track all the input stream information as well as processed record number
+  //跟踪所有输入流信息及处理记录数
   var inputInfoTracker: InputInfoTracker = null
 
   private var eventLoop: EventLoop[JobSchedulerEvent] = null
 
   def start(): Unit = synchronized {
+    //如果调度程序已经运行,则返回
     if (eventLoop != null) return // scheduler has already been started
 
     logDebug("Starting JobScheduler")
+    //创建EventLoop主要用于处理各类JobScheduler事件
     eventLoop = new EventLoop[JobSchedulerEvent]("JobScheduler") {
       override protected def onReceive(event: JobSchedulerEvent): Unit = processEvent(event)
 
       override protected def onError(e: Throwable): Unit = reportError("Error in job scheduler", e)
     }
+    //启动事件
     eventLoop.start()
 
     // attach rate controllers of input streams to receive batch completion updates
-    
+    //将输入流的速率控制器连接到接收批处理完成更新
     for {
       inputDStream <- ssc.graph.getInputStreams
       rateController <- inputDStream.rateController
     } ssc.addStreamingListener(rateController)
-
+    //主要用于更新SparkUI中StreamTab的内容
     listenerBus.start(ssc.sparkContext)
+    //创建并启动ReceiverTracker,用于处理数据接收,数据缓存,Block生成等工作
     receiverTracker = new ReceiverTracker(ssc)
+    //创建并启动InputInfoTracker,用于处理数据输入
     inputInfoTracker = new InputInfoTracker(ssc)
     receiverTracker.start()
+    //启动JobGenerator负责对DstreamGraph的初始化,Dstream与RDD的转换,生成Job,提交执行等工作
     jobGenerator.start()
     logInfo("Started JobScheduler")
   }
 
   def stop(processAllReceivedData: Boolean): Unit = synchronized {
+    //如果调度程序已经暂停,则返回
     if (eventLoop == null) return // scheduler has already been stopped
     logDebug("Stopping JobScheduler")
 
     // First, stop receiving
+    // 第一,停止接收
     receiverTracker.stop(processAllReceivedData)
 
     // Second, stop generating jobs. If it has to process all received data,
     // then this will wait for all the processing through JobScheduler to be over.
+    //第二,停止产生作业,处理所有接收到的数据.
     jobGenerator.stop(processAllReceivedData)
 
     // Stop the executor for receiving new jobs
+    //停止接收执行新的Job
     logDebug("Stopping job executor")
     jobExecutor.shutdown()
 
     // Wait for the queued jobs to complete if indicated
+    //等待队列的工作完成,如果true
     val terminated = if (processAllReceivedData) {
+      //只是一个非常大的时间
       jobExecutor.awaitTermination(1, TimeUnit.HOURS)  // just a very large period of time
     } else {
       jobExecutor.awaitTermination(2, TimeUnit.SECONDS)
@@ -115,6 +130,7 @@ class JobScheduler(val ssc: StreamingContext) extends Logging {
     logDebug("Stopped job executor")
 
     // Stop everything else
+    //停止一切
     listenerBus.stop()
     eventLoop.stop()
     eventLoop = null

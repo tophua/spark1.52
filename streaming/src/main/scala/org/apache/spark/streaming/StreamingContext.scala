@@ -279,7 +279,7 @@ class StreamingContext private[streaming] (
 
   /**
    * Create an input stream with any arbitrary user implemented receiver.
-   * Find more details at: http://spark.apache.org/docs/latest/streaming-custom-receivers.html
+   * Find more details at: http://spark.apache.org/docs/latest/streaming-custom-receivers.html   * 
    * @param receiver Custom implementation of Receiver
    *
    * @deprecated As of 1.0.0", replaced by `receiverStream`.
@@ -292,9 +292,9 @@ class StreamingContext private[streaming] (
   }
 
   /**
-
    * Create an input stream with any arbitrary user implemented receiver.
-   * Find more details at: http://spark.apache.org/docs/latest/streaming-custom-receivers.html
+   * 创建自定义实现接收器的输入流
+   * Find more details at: http://spark.apache.org/docs/latest/streaming-custom-receivers.html   * 
    * @param receiver Custom implementation of Receiver
    */
   def receiverStream[T: ClassTag](receiver: Receiver[T]): ReceiverInputDStream[T] = {

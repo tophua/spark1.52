@@ -71,7 +71,7 @@ private[deploy] class Master(
   private val RECOVERY_MODE = conf.get("spark.deploy.recoveryMode", "NONE")
   //一个HashSet用于保存WorkerInfo
   val workers = new HashSet[WorkerInfo]
-  //一个HashMap Appid-》 ApplicationInfo
+  //一个HashMap Appid-> ApplicationInfo
   val idToApp = new HashMap[String, ApplicationInfo]
   //等待schedule调度App  
   val waitingApps = new ArrayBuffer[ApplicationInfo]
@@ -449,7 +449,7 @@ private[deploy] class Master(
       idToWorker.get(workerId) match {
         case Some(worker) =>
           logInfo("Worker has been re-registered: " + workerId)
-          worker.state = WorkerState.ALIVE
+          worker.state = WorkerState.ALIVE //激活状态
 
           val validExecutors = executors.filter(exec => idToApp.get(exec.appId).isDefined)
           for (exec <- validExecutors) {

@@ -184,7 +184,10 @@ abstract class DStream[T: ClassTag] (
     this
   }
 
-  /** Persist RDDs of this DStream with the default storage level (MEMORY_ONLY_SER) */
+  /** 
+   *  Persist RDDs of this DStream with the default storage level (MEMORY_ONLY_SER) 
+   *  持久化DStream的RDD,使用默认的MEMORY_ONLY_SER存储级别
+   *  */
   def persist(): DStream[T] = persist(StorageLevel.MEMORY_ONLY_SER)
 
   /** 
@@ -977,7 +980,7 @@ object DStream {
   // `import StreamingContext._` to enable it. Now we move it here to make the compiler find
   // it automatically. However, we still keep the old function in StreamingContext for backward
   // compatibility and forward to the following function directly.
-
+  //隐式转换Key,value
   implicit def toPairDStreamFunctions[K, V](stream: DStream[(K, V)])
       (implicit kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K] = null):
     PairDStreamFunctions[K, V] = {

@@ -59,7 +59,7 @@ private[streaming] class ReceiverSupervisorImpl(
       }
       new WriteAheadLogBasedBlockHandler(env.blockManager, receiver.streamId,
         receiver.storageLevel, env.conf, hadoopConf, checkpointDirOption.get)
-    } else {
+    } else {//默认情况下
       new BlockManagerBasedBlockHandler(env.blockManager, receiver.storageLevel)
     }
   }
@@ -167,10 +167,13 @@ private[streaming] class ReceiverSupervisorImpl(
     ) {
     val blockId = blockIdOption.getOrElse(nextBlockId)
     val time = System.currentTimeMillis
+    //调用receivedBlockHandler的storeBlock将Block存储到Spark的存储体系中,默认使用BlockManager
     val blockStoreResult = receivedBlockHandler.storeBlock(blockId, receivedBlock)
     logDebug(s"Pushed block $blockId in ${(System.currentTimeMillis - time)} ms")
     val numRecords = blockStoreResult.numRecords
+    //将blockStoreResult封装为ReceivedBlockInfo实例
     val blockInfo = ReceivedBlockInfo(streamId, numRecords, metadataOption, blockStoreResult)
+    //向ReceiverTracker.ReceiverTrackerEndpoint发送AddBlock消息,
     trackerEndpoint.askWithRetry[Boolean](AddBlock(blockInfo))
     logDebug(s"Reported block $blockId")
   }

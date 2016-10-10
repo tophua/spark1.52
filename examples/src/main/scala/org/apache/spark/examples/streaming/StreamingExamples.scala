@@ -24,7 +24,10 @@ import org.apache.log4j.{Level, Logger}
 /** Utility functions for Spark Streaming examples. */
 object StreamingExamples extends Logging {
 
-  /** Set reasonable logging levels for streaming if the user has not configured log4j. */
+  /** 
+   *  Set reasonable logging levels for streaming if the user has not configured log4j. 
+   *  如果用户没有设置合理配置log4j日志级别
+   *  */
   def setStreamingLogLevels() {
     val log4jInitialized = Logger.getRootLogger.getAllAppenders.hasMoreElements
     if (!log4jInitialized) {

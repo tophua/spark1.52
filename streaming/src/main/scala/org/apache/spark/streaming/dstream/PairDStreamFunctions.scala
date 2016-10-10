@@ -32,6 +32,7 @@ import org.apache.spark.util.{SerializableConfiguration, SerializableJobConf}
 
 /**
  * Extra functions available on DStream of (key, value) pairs through an implicit conversion.
+ * 通过提取dstream可用的(Key,value)键值对进行隐式转换
  */
 class PairDStreamFunctions[K, V](self: DStream[(K, V)])
     (implicit kt: ClassTag[K], vt: ClassTag[V], ord: Ordering[K])
@@ -40,7 +41,7 @@ class PairDStreamFunctions[K, V](self: DStream[(K, V)])
   private[streaming] def ssc = self.ssc
 
   private[streaming] def sparkContext = self.context.sparkContext
-
+  //获取默认Partitioner,Spark的默认并发任务数
   private[streaming] def defaultPartitioner(numPartitions: Int = self.ssc.sc.defaultParallelism) = {
     new HashPartitioner(numPartitions)
   }

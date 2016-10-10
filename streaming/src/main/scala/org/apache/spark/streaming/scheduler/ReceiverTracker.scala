@@ -311,7 +311,10 @@ class ReceiverTracker(ssc: StreamingContext, skipReceiverLaunch: Boolean = false
     }
   }
 
-  /** Add new blocks for the given stream */
+  /** 
+   *  Add new blocks for the given stream
+   *  为给定的流添加新块 
+   *  */
   private def addBlock(receivedBlockInfo: ReceivedBlockInfo): Boolean = {
     receivedBlockTracker.addBlock(receivedBlockInfo)
   }

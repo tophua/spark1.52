@@ -80,7 +80,10 @@ private[streaming] class ReceivedBlockTracker(
     recoverPastEvents()
   }
 
-  /** Add received block. This event will get written to the write ahead log (if enabled). */
+  /** 
+   *  Add received block. This event will get written to the write ahead log (if enabled).
+   *  添加接收块,此事件将被写入到写入前日志(如果启用)
+   *   */
   def addBlock(receivedBlockInfo: ReceivedBlockInfo): Boolean = synchronized {
     try {
       writeToLog(BlockAdditionEvent(receivedBlockInfo))

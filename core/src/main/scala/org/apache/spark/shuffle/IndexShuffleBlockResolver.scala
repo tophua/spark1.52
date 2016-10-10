@@ -86,6 +86,7 @@ private[spark] class IndexShuffleBlockResolver(
     }
     val lengths = new Array[Long](blocks)
     // Read the lengths of blocks
+    // 读取块的长度
     val in = try {
       new DataInputStream(new BufferedInputStream(new FileInputStream(index)))
     } catch {
@@ -94,6 +95,7 @@ private[spark] class IndexShuffleBlockResolver(
     }
     try {
       // Convert the offsets into lengths of each block
+      // 将偏移量转换成每一个块的长度
       var offset = in.readLong()
       if (offset != 0L) {
         return null
@@ -113,6 +115,7 @@ private[spark] class IndexShuffleBlockResolver(
     }
 
     // the size of data file should match with index file
+    //数据文件的大小应与索引文件相匹配
     if (data.length() == lengths.sum) {
       lengths
     } else {
@@ -167,6 +170,7 @@ private[spark] class IndexShuffleBlockResolver(
       } else {
         // This is the first successful attempt in writing the map outputs for this task,
         // so override any existing index and data files with the ones we wrote.
+        //这是第一次成功尝试编写此任务的Map输出
         if (indexFile.exists()) {
           indexFile.delete()
         }

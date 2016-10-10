@@ -152,7 +152,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
 
   /** 
    *  Store an iterator of received data as a data block into Spark's memory. 
-   *  将接收到的数据的迭代器作为数据块存储到Spark内存中。
+   *  将接收到的迭代器数据作为数据块存储到Spark内存中
    *  */
   def store(dataIterator: Iterator[T]) {
     supervisor.pushIterator(dataIterator, None, None)
@@ -160,14 +160,19 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
 
   /**
    * Store an iterator of received data as a data block into Spark's memory.
+   * 将接收到的迭代器数据作为数据块存储到Spark内存中
    * The metadata will be associated with this block of data
+   * 元数据将与此块相关联的数据
    * for being used in the corresponding InputDStream.
    */
   def store(dataIterator: java.util.Iterator[T], metadata: Any) {
     supervisor.pushIterator(dataIterator, Some(metadata), None)
   }
 
-  /** Store an iterator of received data as a data block into Spark's memory. */
+  /** 
+   *  Store an iterator of received data as a data block into Spark's memory.
+   *  将接收到的迭代器数据作为数据块存储到Spark内存中
+   *   */
   def store(dataIterator: java.util.Iterator[T]) {
     supervisor.pushIterator(dataIterator, None, None)
   }
@@ -297,7 +302,10 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
   /** Handler object that runs the receiver. This is instantiated lazily in the worker. */
   @transient private var _supervisor : ReceiverSupervisor = null
 
-  /** Set the ID of the DStream that this receiver is associated with. */
+  /** 
+   *  Set the ID of the DStream that this receiver is associated with.
+   *  设置的dstream接收器的ID 
+   *  */
   private[streaming] def setReceiverId(id_ : Int) {
     id = id_
   }

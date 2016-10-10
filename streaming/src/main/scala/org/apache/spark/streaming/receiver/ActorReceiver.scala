@@ -34,6 +34,7 @@ import org.apache.spark.storage.StorageLevel
 /**
  * :: DeveloperApi ::
  * A helper with set of defaults for supervisor strategy
+ * 默认设置监督策略
  */
 @DeveloperApi
 object ActorSupervisorStrategy {
@@ -49,7 +50,8 @@ object ActorSupervisorStrategy {
  * :: DeveloperApi ::
  * A receiver trait to be mixed in with your Actor to gain access to
  * the API for pushing received data into Spark Streaming for being processed.
- *
+ * 混合Action的接收器以获得访问接收到的数据
+ * 
  * Find more details at: http://spark.apache.org/docs/latest/streaming-custom-receivers.html
  *
  * @example {{{
@@ -129,17 +131,17 @@ private[streaming] case class ByteBufferData(bytes: ByteBuffer) extends ActorRec
 
 /**
  * Provides Actors as receivers for receiving stream.
- *
+ * 提供Actor作为接收流的接收器
  * As Actors can also be used to receive data from almost any stream source.
  * A nice set of abstraction(s) for actors as receivers is already provided for
  * a few general cases. It is thus exposed as an API where user may come with
  * their own Actor to run as receiver for Spark Streaming input source.
- *
+ * 作为Actors可以被用来接收来自几乎任何流的数据源
  * This starts a supervisor actor which starts workers and also provides
  * [http://doc.akka.io/docs/akka/snapshot/scala/fault-tolerance.html fault-tolerance].
  *
  * Here's a way to start more supervisor/workers as its children.
- *
+ * 
  * @example {{{
  *  context.parent ! Props(new Supervisor)
  * }}} OR {{{

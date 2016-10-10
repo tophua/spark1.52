@@ -17,19 +17,19 @@
 
 package org.apache.spark.streaming.receiver
 
-import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
+import java.util.concurrent.{ ArrayBlockingQueue, TimeUnit }
 
 import scala.collection.mutable.ArrayBuffer
 
-import org.apache.spark.{SparkException, Logging, SparkConf}
+import org.apache.spark.{ SparkException, Logging, SparkConf }
 import org.apache.spark.storage.StreamBlockId
 import org.apache.spark.streaming.util.RecurringTimer
-import org.apache.spark.util.{Clock, SystemClock}
+import org.apache.spark.util.{ Clock, SystemClock }
 
-/** 
- *  Listener object for BlockGenerator events 
+/**
+ *  Listener object for BlockGenerator events
  *  对于blockgenerator事件监听器对象
- *  */
+ */
 private[streaming] trait BlockGeneratorListener {
   /**
    * Called after a data item is added into the BlockGenerator. The data addition and this
@@ -80,8 +80,7 @@ private[streaming] class BlockGenerator(
     listener: BlockGeneratorListener,
     receiverId: Int,
     conf: SparkConf,
-    clock: Clock = new SystemClock()
-  ) extends RateLimiter(conf) with Logging {
+    clock: Clock = new SystemClock()) extends RateLimiter(conf) with Logging {
 
   private case class Block(id: StreamBlockId, buffer: ArrayBuffer[Any])
 
@@ -101,10 +100,10 @@ private[streaming] class BlockGenerator(
     val Initialized, Active, StoppedAddingData, StoppedGeneratingBlocks, StoppedAll = Value
   }
   import GeneratorState._
-//Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
+  //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
   private val blockIntervalMs = conf.getTimeAsMs("spark.streaming.blockInterval", "200ms")
   require(blockIntervalMs > 0, s"'spark.streaming.blockInterval' should be a positive value")
-//以一个固定间隔生成block(默认200ms),用于将CurrentBuffer中缓存的数据流封装为Block后放入blocksForPushing
+  //以一个固定间隔生成block(默认200ms),用于将CurrentBuffer中缓存的数据流封装为Block后放入blocksForPushing
   private val blockIntervalTimer =
     new RecurringTimer(clock, blockIntervalMs, updateCurrentBuffer, "BlockGenerator")
   private val blockQueueSize = conf.getInt("spark.streaming.blockQueueSize", 10)
@@ -116,7 +115,10 @@ private[streaming] class BlockGenerator(
   @volatile private var currentBuffer = new ArrayBuffer[Any]
   @volatile private var state = Initialized
 
-  /** Start block generating and pushing threads. */
+  /**
+   *  Start block generating and pushing threads.
+   *  启动生成块和推送线程
+   */
   def start(): Unit = synchronized {
     if (state == Initialized) {
       state = Active
@@ -240,10 +242,10 @@ private[streaming] class BlockGenerator(
 
   def isStopped(): Boolean = state == StoppedAll
 
-  /** 
-   *  Change the buffer to which single records are added to. 
+  /**
+   *  Change the buffer to which single records are added to.
    *  更改单个记录被添加到的缓冲区。
-   *  */
+   */
   private def updateCurrentBuffer(time: Long): Unit = {
     try {
       var newBlock: Block = null
@@ -251,14 +253,21 @@ private[streaming] class BlockGenerator(
         if (currentBuffer.nonEmpty) {
           val newBlockBuffer = currentBuffer
           currentBuffer = new ArrayBuffer[Any]
+          /**
+           * 生成新的StreamBlockId,生成规则"Input-"+StreamId+"-"+(调用时间-blockIntervalMs)
+           * blockIntervalMs为生成block的间隔时长
+           */
           val blockId = StreamBlockId(receiverId, time - blockIntervalMs)
+          //调用onGenerateBlock方法
           listener.onGenerateBlock(blockId)
+          //将当前currentBuffer与blockId封装为Block
           newBlock = new Block(blockId, newBlockBuffer)
         }
       }
 
       if (newBlock != null) {
-        blocksForPushing.put(newBlock)  // put is blocking when queue is full
+        //将新建的Block放入blocksForPushing中
+        blocksForPushing.put(newBlock) // put is blocking when queue is full
       }
     } catch {
       case ie: InterruptedException =>
@@ -268,31 +277,33 @@ private[streaming] class BlockGenerator(
     }
   }
 
-  /** 
+  /**
    *  Keep pushing blocks to the BlockManager.
-   *  */
+   *  继续推送块到块管理器
+   */
   private def keepPushingBlocks() {
     logInfo("Started block pushing thread")
 
     def areBlocksBeingGenerated: Boolean = synchronized {
-      state != StoppedGeneratingBlocks
+      state != StoppedGeneratingBlocks //没有停止
     }
 
     try {
       // While blocks are being generated, keep polling for to-be-pushed blocks and push them.
-      //正在生成块,保持循环推送块
+      //当BlockGenerator没有停止时,每隔100毫秒从blocksForPushing中取出一个Block,然后调用pushBlock
       while (areBlocksBeingGenerated) {
         Option(blocksForPushing.poll(10, TimeUnit.MILLISECONDS)) match {
-          case Some(block) => pushBlock(block)
-          case None =>
+          case Some(block) => pushBlock(block)//然后调用pushBlock
+          case None        =>
         }
       }
 
       // At this point, state is StoppedGeneratingBlock. So drain the queue of to-be-pushed blocks.
       logInfo("Pushing out the last " + blocksForPushing.size() + " blocks")
-      while (!blocksForPushing.isEmpty) {
+      while (!blocksForPushing.isEmpty) {//一旦BlockGenerator停止了,将blocksForPushing中所有的Block取出
         val block = blocksForPushing.take()
         logDebug(s"Pushing block $block")
+        
         pushBlock(block)
         logInfo("Blocks left to push " + blocksForPushing.size())
       }
