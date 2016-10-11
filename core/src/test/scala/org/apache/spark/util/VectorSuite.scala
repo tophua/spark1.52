@@ -33,12 +33,12 @@ class VectorSuite extends SparkFunSuite {
     assert(vector.elements.max < 1.0)
   }
 
-  test("random with default random number generator") {
+  test("random with default random number generator") {//默认随机数产生器
     val vector100 = Vector.random(100)
     verifyVector(vector100, 100)
   }
 
-  test("random with given random number generator") {
+  test("random with given random number generator") {//随机给定值随机产生器
     val vector100 = Vector.random(100, new Random(100))
     verifyVector(vector100, 100)
   }

@@ -25,6 +25,7 @@ import org.apache.spark.scheduler._
 
 /**
  * Holds state shared across task threads in some ThreadingSuite tests.
+ * 持有共享任务线程的状态
  */
 object ThreadingSuiteState {
   val runningThreads = new AtomicInteger
@@ -38,7 +39,7 @@ object ThreadingSuiteState {
 
 class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
 
-  test("accessing SparkContext form a different thread") {
+  test("accessing SparkContext form a different thread") {//不同线程访问sparkcontext
     sc = new SparkContext("local", "test")
     val nums = sc.parallelize(1 to 10, 2)
     val sem = new Semaphore(0)//是负责协调各个线程, 以保证它们能够正确、合理的使用公共资源
@@ -58,7 +59,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     assert(answer2 === 1)
   }
 
-  test("accessing SparkContext form multiple threads") {//多线程访问
+  test("accessing SparkContext form multiple threads") {//多线程访问SparkContext
     sc = new SparkContext("local", "test")
     val nums = sc.parallelize(1 to 10, 2)
     val sem = new Semaphore(0)
@@ -88,7 +89,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     }
   }
 
-  test("accessing multi-threaded SparkContext form multiple threads") {
+  test("accessing multi-threaded SparkContext form multiple threads") {//多线程嵌套多线访问SparkContext
     sc = new SparkContext("local[4]", "test")
     val nums = sc.parallelize(1 to 10, 2)
     val sem = new Semaphore(0)
@@ -159,7 +160,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     }
   }
 
-  test("set local properties in different thread") {
+  test("set local properties in different thread") {//在不同的线程中设置本地属性
     sc = new SparkContext("local", "test")
     val sem = new Semaphore(0)
     var throwable: Option[Throwable] = None//Option[T]是容器对于给定的类型的零个或一个元件
@@ -186,7 +187,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     assert(sc.getLocalProperty("test") === null)
   }
 
-  test("set and get local properties in parent-children thread") {
+  test("set and get local properties in parent-children thread") {//在父线程中设置和获取本地属性
     sc = new SparkContext("local", "test")
     sc.setLocalProperty("test", "parent")
     val sem = new Semaphore(0)
@@ -215,7 +216,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     assert(sc.getLocalProperty("test") === "parent")
     assert(sc.getLocalProperty("Foo") === null)
   }
-
+    //父本地属性的突变不影响子
   test("mutation in parent local property does not affect child (SPARK-10563)") {
     sc = new SparkContext("local", "test")
     sc.conf.set("spark.localProperties.clone", "true")

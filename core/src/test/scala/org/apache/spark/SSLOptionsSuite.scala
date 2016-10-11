@@ -26,7 +26,7 @@ import org.scalatest.BeforeAndAfterAll
 
 class SSLOptionsSuite extends SparkFunSuite with BeforeAndAfterAll {
 
-  test("test resolving property file as spark conf ") {
+  test("test resolving property file as spark conf ") {//测试解析Spark文件中的属性
     val keyStorePath = new File(this.getClass.getResource("/keystore").toURI).getAbsolutePath
     val trustStorePath = new File(this.getClass.getResource("/truststore").toURI).getAbsolutePath
 
@@ -65,7 +65,7 @@ class SSLOptionsSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(opts.enabledAlgorithms === algorithms)
   }
 
-  test("test resolving property with defaults specified ") {
+  test("test resolving property with defaults specified ") {//具有指定的默认值的测试解析属性
     val keyStorePath = new File(this.getClass.getResource("/keystore").toURI).getAbsolutePath
     val trustStorePath = new File(this.getClass.getResource("/truststore").toURI).getAbsolutePath
 
@@ -98,7 +98,7 @@ class SSLOptionsSuite extends SparkFunSuite with BeforeAndAfterAll {
       Set("TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA"))
   }
 
-  test("test whether defaults can be overridden ") {
+  test("test whether defaults can be overridden ") {//测试是否默认重写
     val keyStorePath = new File(this.getClass.getResource("/keystore").toURI).getAbsolutePath
     val trustStorePath = new File(this.getClass.getResource("/truststore").toURI).getAbsolutePath
 
