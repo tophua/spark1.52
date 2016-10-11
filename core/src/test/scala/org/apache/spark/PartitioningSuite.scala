@@ -67,7 +67,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
   test("RangePartitioner getPartition") {
     val rdd = sc.parallelize(1.to(2000)).map(x => (x, x))
     // We have different behaviour of getPartition for partitions with less than 1000 and more than
-    // 1000 partitions.
+    // 1000 partitions.    
     val partitionSizes = List(1, 2, 10, 100, 500, 1000, 1500)
     val partitioners = partitionSizes.map(p => (p, new RangePartitioner(p, rdd)))
     val decoratedRangeBounds = PrivateMethod[Array[Int]]('rangeBounds)
@@ -88,9 +88,10 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
       }}
     }
   }
-
+  //对于不可比较的键,但与排序
   test("RangePartitioner for keys that are not Comparable (but with Ordering)") {
     // Row does not extend Comparable, but has an implicit Ordering defined.
+    //行不扩展可比性,但有一个隐含的排序定义
     implicit object RowOrdering extends Ordering[Item] {
       override def compare(x: Item, y: Item): Int = x.value - y.value
     }
@@ -121,7 +122,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
       (0.7, 2.0f), (0.1, 1.0f), (0.4, 1.0f), (0.3, 1.0f), (0.2, 1.0f), (0.5, 1.0f), (1.0, 3.0f))
     assert(RangePartitioner.determineBounds(candidates, 3) === Array(0.4, 0.7))
   }
-
+  //如果数据基本平衡,只有一个运行Job
   test("RangePartitioner should run only one job if data is roughly balanced") {
     val rdd = sc.makeRDD(0 until 20, 20).flatMap { i =>
       val random = new java.util.Random(i)
@@ -135,7 +136,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
     }
   }
 
-  test("RangePartitioner should work well on unbalanced data") {
+  test("RangePartitioner should work well on unbalanced data") {//在不平衡数据上工作
     val rdd = sc.makeRDD(0 until 20, 20).flatMap { i =>
       val random = new java.util.Random(i)
       Iterator.fill(20 * i * i * i)((random.nextDouble() + i, i))
@@ -147,7 +148,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
       assert(counts.max < 3.0 * counts.min)
     }
   }
-
+  //应返回空RDDS单个分区
   test("RangePartitioner should return a single partition for empty RDDs") {
     val empty1 = sc.emptyRDD[(Int, Double)]
     val partitioner1 = new RangePartitioner(0, empty1)
@@ -167,7 +168,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
     assert(rangeP2 != hashP2)
   }
 
-  test("partitioner preservation") {
+  test("partitioner preservation") {//保存分区
     val rdd = sc.parallelize(1 to 10, 4).map(x => (x, x))
 
     val grouped2 = rdd.groupByKey(2)
@@ -232,8 +233,9 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
     verify(arrPairs.reduceByKey(_ + _))
   }
 
-  test("zero-length partitions should be correctly handled") {
+  test("zero-length partitions should be correctly handled") {//零长度分区应正确处理
     // Create RDD with some consecutive empty partitions (including the "first" one)
+    //一些连续的空分区创建RDD
     val rdd: RDD[Double] = sc
         .parallelize(Array(-1.0, -1.0, -1.0, -1.0, 2.0, 4.0, -1.0, -1.0), 8)
         .filter(_ >= 0.0)
@@ -249,6 +251,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
     assert(stats.min === 2.0)
 
     // Add other tests here for classes that should be able to handle empty partitions correctly
+    //在这里添加其他类型的测试,以正确处理空分区
   }
 }
 

@@ -22,6 +22,7 @@ import org.scalatest.BeforeAndAfterAll
 class ShuffleNettySuite extends ShuffleSuite with BeforeAndAfterAll {
 
   // This test suite should run all tests in ShuffleSuite with Netty shuffle mode.
+  //这个测试套件运行在Shuffle模式所有测试
 
   override def beforeAll() {
     conf.set("spark.shuffle.blockTransferService", "netty")

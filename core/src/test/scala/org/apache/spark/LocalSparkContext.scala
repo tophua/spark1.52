@@ -22,7 +22,10 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Suite
 
-/** Manages a local `sc` {@link SparkContext} variable, correctly stopping it after each test. */
+/** 
+ *  Manages a local `sc` {@link SparkContext} variable, correctly stopping it after each test. 
+ *  管理一个本地"SC"变量,测试后停止。
+ *  */
 trait LocalSparkContext extends BeforeAndAfterEach with BeforeAndAfterAll { 
   /**
    * 特质可以要求混入它的类扩展自另一个类型，但是当使用自身类型（self type）的声明来定义特质时（this: ClassName =>），
@@ -55,6 +58,7 @@ object LocalSparkContext {
       sc.stop()
     }
     // To avoid Akka rebinding to the same port, since it doesn't unbind immediately on shutdown
+    //为了避免Akka重新绑定到相同的端口,不绑定立即关机
     System.clearProperty("spark.driver.port")
   }
 

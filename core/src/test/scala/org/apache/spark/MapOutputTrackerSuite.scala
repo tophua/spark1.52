@@ -40,7 +40,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     RpcEnv.create(name, host, port, conf, securityManager)
   }
 
-  test("master start and stop") {
+  test("master start and stop") {//主节点开始和停止
     val rpcEnv = createRpcEnv("test")
     //保存Shuffle Map Task 输出的位置信息
     val tracker = new MapOutputTrackerMaster(conf)
@@ -51,7 +51,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     rpcEnv.shutdown()
   }
 
-  test("master register shuffle and fetch") {
+  test("master register shuffle and fetch") {//主节点注册shuffle和获取
     val rpcEnv = createRpcEnv("test")
     val tracker = new MapOutputTrackerMaster(conf)
     tracker.trackerEndpoint = rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME,
@@ -75,7 +75,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     rpcEnv.shutdown()
   }
 
-  test("master register and unregister shuffle") {
+  test("master register and unregister shuffle") {//主节点注册shuffle和注销shuffle
     val rpcEnv = createRpcEnv("test")
     val tracker = new MapOutputTrackerMaster(conf)
     tracker.trackerEndpoint = rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME,
@@ -95,7 +95,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     tracker.stop()
     rpcEnv.shutdown()
   }
-
+  //注册和注销Shuffle Map输出和获取
   test("master register shuffle and unregister map output and fetch") {
     val rpcEnv = createRpcEnv("test")
     val tracker = new MapOutputTrackerMaster(conf)
@@ -110,10 +110,11 @@ class MapOutputTrackerSuite extends SparkFunSuite {
         Array(compressedSize10000, compressedSize1000, compressedSize1000)))
 
     // As if we had two simultaneous fetch failures
+    //我们有两个同时获取失败
     tracker.unregisterMapOutput(10, 0, BlockManagerId("a", "hostA", 1000))
     tracker.unregisterMapOutput(10, 0, BlockManagerId("a", "hostA", 1000))
 
-    // The remaining reduce task might try to grab the output despite the shuffle failure;
+    // The remaining reduce task might try to grab the output despite the shuffle failure;    
     // this should cause it to fail, and the scheduler will ignore the failure due to the
     // stage already being aborted.
     intercept[FetchFailedException] { tracker.getMapSizesByExecutorId(10, 1) }
@@ -122,7 +123,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     rpcEnv.shutdown()
   }
 
-  test("remote fetch") {
+  test("remote fetch") {//远程读取
     val hostname = "localhost"
     val rpcEnv = createRpcEnv("spark", hostname, 0, new SecurityManager(conf))
 
@@ -154,6 +155,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     intercept[FetchFailedException] { slaveTracker.getMapSizesByExecutorId(10, 0) }
 
     // failure should be cached
+    //失败的缓存
     intercept[FetchFailedException] { slaveTracker.getMapSizesByExecutorId(10, 0) }
 
     masterTracker.stop()
@@ -162,7 +164,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     slaveRpcEnv.shutdown()
   }
 
-  test("remote fetch below akka frame size") {
+  test("remote fetch below akka frame size") {//远程读取akka帧大小低于
     val newConf = new SparkConf
     //以MB为单位的driver和executor之间通信信息的大小,设置值越大,driver可以接受越大的计算结果
     newConf.set("spark.akka.frameSize", "1")
@@ -185,15 +187,15 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     verify(rpcCallContext).reply(any())
     verify(rpcCallContext, never()).sendFailure(any())
 
-//    masterTracker.stop() // this throws an exception
+//    masterTracker.stop() // this throws an exception 抛出一个异常
     rpcEnv.shutdown()
   }
 
-  test("remote fetch exceeds akka frame size") {
+  test("remote fetch exceeds akka frame size") {//远程读取超过Akka框架大小
     val newConf = new SparkConf
     //以MB为单位的driver和executor之间通信信息的大小，设置值越大，driver可以接受更大的计算结果
     newConf.set("spark.akka.frameSize", "1")
-    newConf.set("spark.rpc.askTimeout", "1") // Fail fast
+    newConf.set("spark.rpc.askTimeout", "1") // Fail fast 快速失败
 
     val masterTracker = new MapOutputTrackerMaster(conf)
     val rpcEnv = createRpcEnv("test")
@@ -201,6 +203,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME, masterEndpoint)
 
     // Frame size should be ~1.1MB, and MapOutputTrackerMasterEndpoint should throw exception.
+    //帧大小应该是 ~1.1MB,应该抛出异常
     // Note that the size is hand-selected here because map output statuses are compressed before
     // being sent.
     masterTracker.registerShuffle(20, 100)
@@ -216,16 +219,16 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     verify(rpcCallContext, never()).reply(any())
     verify(rpcCallContext).sendFailure(isA(classOf[SparkException]))
 
-//    masterTracker.stop() // this throws an exception
+//    masterTracker.stop() // this throws an exception 抛出一个异常
     rpcEnv.shutdown()
   }
-
+  //在同一台机器上的多个输出
   test("getLocationsWithLargestOutputs with multiple outputs in same machine") {
     val rpcEnv = createRpcEnv("test")
     val tracker = new MapOutputTrackerMaster(conf)
     tracker.trackerEndpoint = rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME,
       new MapOutputTrackerMasterEndpoint(rpcEnv, tracker, conf))
-    // Setup 3 map tasks
+    // Setup 3 map tasks 设置3个Map任务
     // on hostA with output size 2
     // on hostA with output size 2
     // on hostB with output size 3
@@ -238,6 +241,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
         Array(3L)))
 
     // When the threshold is 50%, only host A should be returned as a preferred location
+    //当阈值为50%时,只有主机A应该作为一个首选的位置返回,因为它有7个4字节的输出。
     // as it has 4 out of 7 bytes of output.
     val topLocs50 = tracker.getLocationsWithLargestOutputs(10, 0, 1, 0.5)
     assert(topLocs50.nonEmpty)
@@ -245,6 +249,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     assert(topLocs50.get.head === BlockManagerId("a", "hostA", 1000))
 
     // When the threshold is 20%, both hosts should be returned as preferred locations.
+    //当阈值为20%时,两台主机应作为首选位置返回
     val topLocs20 = tracker.getLocationsWithLargestOutputs(10, 0, 1, 0.2)
     assert(topLocs20.nonEmpty)
     assert(topLocs20.get.size === 2)

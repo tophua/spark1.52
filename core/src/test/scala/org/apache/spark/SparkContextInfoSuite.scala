@@ -21,6 +21,7 @@ import org.scalatest.Assertions
 import org.apache.spark.storage.StorageLevel
 
 class SparkContextInfoSuite extends SparkFunSuite with LocalSparkContext {
+  //只返回RDDS被标记为缓存
   test("getPersistentRDDs only returns RDDs that are marked（表示） as cached") {
     sc = new SparkContext("local", "test")
     assert(sc.getPersistentRDDs.isEmpty === true)
@@ -33,7 +34,7 @@ class SparkContextInfoSuite extends SparkFunSuite with LocalSparkContext {
     assert(sc.getPersistentRDDs.size === 1)
     assert(sc.getPersistentRDDs.values.head === rdd)
   }
-
+  //返回一个不可变的Map
   test("getPersistentRDDs returns an immutable(不可变) map") {
     sc = new SparkContext("local", "test")
     val rdd1 = sc.makeRDD(Array(1, 2, 3, 4), 2).cache()
@@ -55,7 +56,7 @@ class SparkContextInfoSuite extends SparkFunSuite with LocalSparkContext {
     assert(myRdds(0) === rdd1)
     assert(myRdds(0).getStorageLevel === StorageLevel.MEMORY_ONLY)
   }
-
+  //在实际数据报告持久化RDDS
   test("getRDDStorageInfo only reports on RDDs that actually(实际) persist data") {
     sc = new SparkContext("local", "test")
     val rdd = sc.makeRDD(Array(1, 2, 3, 4), 2).cache()
@@ -67,7 +68,7 @@ class SparkContextInfoSuite extends SparkFunSuite with LocalSparkContext {
     assert(sc.getRDDStorageInfo.head.storageLevel === StorageLevel.MEMORY_ONLY)
   }
 
-  test("call sites report correct locations") {
+  test("call sites report correct locations") {//报告正确的位置
     sc = new SparkContext("local", "test")
     testPackage.runCallSiteTest(sc)
   }

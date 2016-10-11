@@ -33,13 +33,14 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     val conf = new SparkConf()
     // Simply exercise the API, we don't need a complete conversion test since that's handled in
     // UtilsSuite.scala
+    //简单提取API,我们不需要一个完整的转换测试
     assert(conf.getSizeAsBytes("fake", "1k") === ByteUnit.KiB.toBytes(1))
     assert(conf.getSizeAsKb("fake", "1k") === ByteUnit.KiB.toKiB(1))
     assert(conf.getSizeAsMb("fake", "1k") === ByteUnit.KiB.toMiB(1))
     assert(conf.getSizeAsGb("fake", "1k") === ByteUnit.KiB.toGiB(1))
   }
 
-  test("Test timeString conversion") {
+  test("Test timeString conversion") {//测试时间字符串转换
     val conf = new SparkConf()
     // Simply exercise the API, we don't need a complete conversion test since that's handled in
     // UtilsSuite.scala,fake伪造,假装
@@ -47,19 +48,19 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(conf.getTimeAsSeconds("fake", "1000ms") === TimeUnit.MILLISECONDS.toSeconds(1000))
   }
 
-  test("loading from system properties") {
+  test("loading from system properties") {//从系统属性加载
     System.setProperty("spark.test.testProperty", "2")
     val conf = new SparkConf()
     assert(conf.get("spark.test.testProperty") === "2")
   }
 
-  test("initializing without loading defaults") {
+  test("initializing without loading defaults") {//不加载默认值初始化
     System.setProperty("spark.test.testProperty", "2")
     val conf = new SparkConf(false)
     assert(!conf.contains("spark.test.testProperty"))
   }
 
-  test("named set methods") {
+  test("named set methods") {//
     //设置配置文件属性
     val conf = new SparkConf(false)
 
@@ -87,7 +88,7 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(conf.get("spark.executorEnv.VAR5") === "value5")
   }
 
-  test("basic get and set") {
+  test("basic get and set") {//基本获取和设置
     val conf = new SparkConf(false)
     assert(conf.getAll.toSet === Set())
     conf.set("k1", "v1")
@@ -105,22 +106,22 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(conf.getOption("k4") === None)
   }
 
-  test("creating SparkContext without master and app name") {
+  test("creating SparkContext without master and app name") {//创建sparkcontext应用程序名称
     val conf = new SparkConf(false)
     intercept[SparkException] { sc = new SparkContext(conf) }
   }
 
-  test("creating SparkContext without master") {
+  test("creating SparkContext without master") {//创建sparkcontext无Master节点
     val conf = new SparkConf(false).setAppName("My app")
     intercept[SparkException] { sc = new SparkContext(conf) }
   }
 
-  test("creating SparkContext without app name") {
+  test("creating SparkContext without app name") {//创建sparkcontext没有应用程序名称
     val conf = new SparkConf(false).setMaster("local")
     intercept[SparkException] { sc = new SparkContext(conf) }
   }
 
-  test("creating SparkContext with both master and app name") {
+  test("creating SparkContext with both master and app name") {//创建sparkcontext与主应用程序名称
     //设置应用程序名称
     val conf = new SparkConf(false).setMaster("local").setAppName("My app")    
     sc = new SparkContext(conf)
@@ -128,15 +129,16 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(sc.appName === "My app")
   }
 
-  test("SparkContext property overriding") {
+  test("SparkContext property overriding") {//sparkcontext属性重写
     val conf = new SparkConf(false).setMaster("local").setAppName("My app")
     sc = new SparkContext("local[2]", "My other app", conf)
     assert(sc.master === "local[2]")
     assert(sc.appName === "My other app")
   }
 
-  test("nested property names") {
+  test("nested property names") {//套式的性质的名称
     // This wasn't supported by some external conf parsing libraries
+    //这不是一些外部配置解析库支持
     System.setProperty("spark.test.a", "a")
     System.setProperty("spark.test.a.b", "a.b")
     System.setProperty("spark.test.a.b.c", "a.b.c")
@@ -224,7 +226,7 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     serializer.newInstance().serialize(new StringBuffer())
   }
 
-  test("deprecated configs") {
+  test("deprecated configs") {//推荐配置
     val conf = new SparkConf()
     val newName = "spark.history.fs.update.interval"
 
@@ -252,7 +254,7 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(conf.getSizeAsKb("spark.kryoserializer.buffer") === 1100)
   }
 
-  test("akka deprecated configs") {
+  test("akka deprecated configs") {//akka推荐配置
     val conf = new SparkConf()
 
     assert(!conf.contains("spark.rpc.numRetries"))

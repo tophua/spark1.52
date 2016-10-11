@@ -34,7 +34,7 @@ import org.scalatest.Matchers._
 
 class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
 
-  test("Only one SparkContext may be active at a time") {
+  test("Only one SparkContext may be active at a time") {//只有一个sparkcontext是激活一次
     // Regression test for SPARK-4180
     val conf = new SparkConf().setAppName("test").setMaster("local")
     //allowMultipleContexts是否允许存在多个SparkContext实例的标识
@@ -46,17 +46,19 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     resetSparkContext()
     sc = new SparkContext(conf)
   }
-
+  //仍然失败后,构建一个新的sparkcontext
   test("Can still construct a new SparkContext after failing to construct a previous one") {
     val conf = new SparkConf().set("spark.driver.allowMultipleContexts", "false")
     // This is an invalid configuration (no app name or master URL)
+    //这是一个无效的配置,没有App名称或者主节点URL
     intercept[SparkException] {
       new SparkContext(conf)
     }
     // Even though those earlier calls failed, we should still be able to create a new context
+    //即使早期的调用失败了,我们仍然应该能够创建一个新的上下文
     sc = new SparkContext(conf.setMaster("local").setAppName("test"))
   }
-
+  //检查多个sparkcontexts可以禁用通过非法调试选项
   test("Check for multiple SparkContexts can be disabled via undocumented debug option") {
     //undocumented 正式文件
     var secondSparkContext: SparkContext = null
@@ -84,12 +86,13 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     assert(sc eq sc2)
 
     // Try creating second context to confirm that it's still possible, if desired
+    //尝试创建第二个上下文,以确认它仍然是可能的,如果需要的话
     sc2 = new SparkContext(new SparkConf().setAppName("test3").setMaster("local")
         .set("spark.driver.allowMultipleContexts", "true"))
 
     sc2.stop()
   }
-
+  //BytesWritable正确的隐式转换
   test("BytesWritable implicit(隐式转换) conversion is correct") {
     // Regression test for SPARK-3121
     val bytesWritable = new BytesWritable()
@@ -105,7 +108,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     val byteArray2 = converter.convert(bytesWritable)
     assert(byteArray2.length === 0)
   }
-
+  //添加文件工作
   test("addFile works") {
     val dir = Utils.createTempDir()
 
@@ -160,7 +163,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.stop()
     }
   }
-
+  //增加文件递归works
   test("addFile recursive works") {
     val pluto = Utils.createTempDir()
     val neptune = Utils.createTempDir(pluto.getAbsolutePath)
@@ -190,7 +193,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.stop()
     }
   }
-
+  //增加文件递归不能默认添加目录
   test("addFile recursive can't add directories by default") {
     val dir = Utils.createTempDir()
 
@@ -203,7 +206,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.stop()
     }
   }
-
+  //取消工作组应该不会造成sparkcontext关机
   test("Cancelling job group should not cause SparkContext to shutdown (SPARK-6414)") {
     try {
       sc = new SparkContext(new SparkConf().setAppName("test").setMaster("local"))
@@ -218,7 +221,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.stop()
     }
   }
-
+  //逗号分隔的路径
   test("Comma separated paths for newAPIHadoopFile/wholeTextFiles/binaryFiles (SPARK-7155)") {
     // Regression test for SPARK-7155
     // dir1 and dir2 are used for wholeTextFiles and binaryFiles
@@ -278,7 +281,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.stop()
     }
   }
-
+  //调用多个sc.stop()不抛出任何异常
   test("calling multiple sc.stop() must not throw any exception") {
     noException should be thrownBy {
       sc = new SparkContext(new SparkConf().setAppName("test").setMaster("local"))
@@ -286,6 +289,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.cancelAllJobs()
       sc.stop()
       // call stop second time
+      //第二次调用停止
       sc.stop()
     }
   }

@@ -23,7 +23,7 @@ import org.apache.spark.util.Utils
 
 class SecurityManagerSuite extends SparkFunSuite {
 
-  test("set security with conf") {
+  test("set security with conf") {//设置安全配置
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
@@ -41,7 +41,7 @@ class SecurityManagerSuite extends SparkFunSuite {
     assert(securityManager.checkUIViewPermissions("user3") === false)
   }
 
-  test("set security with api") {
+  test("set security with api") {//设置安全性API
     val conf = new SparkConf
     //以逗号分隔Spark webUI访问用户的列表。默认情况下只有启动Spark job的用户才有访问权限
     conf.set("spark.ui.view.acls", "user1,user2")
@@ -65,7 +65,7 @@ class SecurityManagerSuite extends SparkFunSuite {
     assert(securityManager.checkUIViewPermissions(null) === true)
   }
 
-  test("set security modify acls") {
+  test("set security modify acls") {//设置安全修改ACL
     val conf = new SparkConf
     conf.set("spark.modify.acls", "user1,user2")
 
@@ -76,6 +76,7 @@ class SecurityManagerSuite extends SparkFunSuite {
     assert(securityManager.aclsEnabled() === false)
 
     // acls are off so doesn't matter what view acls set to
+    //ACL是不管怎样查看ACL设置
     assert(securityManager.checkModifyPermissions("user4") === true)
 
     securityManager.setAcls(true)
@@ -89,7 +90,7 @@ class SecurityManagerSuite extends SparkFunSuite {
     assert(securityManager.checkModifyPermissions(null) === true)
   }
 
-  test("set security admin acls") {
+  test("set security admin acls") {//设置安全管理系统
     val conf = new SparkConf
     //以逗号分隔Spark webUI访问用户的列表。默认情况下只有启动Spark job的用户才有访问权限
     conf.set("spark.admin.acls", "user1,user2")

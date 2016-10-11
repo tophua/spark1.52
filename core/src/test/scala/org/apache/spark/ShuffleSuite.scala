@@ -36,6 +36,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
 
   // Ensure that the DAGScheduler doesn't retry stages whose fetches fail, so that we accurately
   // test that the shuffle works (rather than retrying until all blocks are local to one Executor).
+  //确保DAGScheduler不重试阶段其获取失败,准确地测试Shuffle的Worker
   conf.set("spark.test.noStageRetry", "true")//Retry 再试
 
   test("groupByKey without compression") { //没有压缩 
@@ -51,7 +52,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(valuesFor2.toList.sorted === List(1))
   }
 
-  test("shuffle non-zeroO(非零) block size") {
+  test("shuffle non-zero block size") {//非零块的大小
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     val NUM_BLOCKS = 3
 
@@ -61,6 +62,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     }
     // If the Kryo serializer is not used correctly, the shuffle would fail because the
     // default Java serializer cannot handle the non serializable class.
+    //如果不能正确使用kryo序列化,Shuffle会失败,因为默认的java序列化程序不能处理非可序列化的类
     val c = new ShuffledRDD[Int,
       NonJavaSerializableClass,
       NonJavaSerializableClass](b, new HashPartitioner(NUM_BLOCKS))
@@ -71,14 +73,16 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(c.count === 10)
 
     // All blocks must have non-zero size
+    //所有块必须有非零大小
     (0 until NUM_BLOCKS).foreach { id =>
       val statuses = SparkEnv.get.mapOutputTracker.getMapSizesByExecutorId(shuffleId, id)
       assert(statuses.forall(_._2.forall(blockIdSizePair => blockIdSizePair._2 > 0)))
     }
   }
 
-  test("shuffle serializer") {
+  test("shuffle serializer") {//shuffle 序列化
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
+    //使用本地群集2个进程,以确保有两个本地和远程块
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     val a = sc.parallelize(1 to 10, 2)
     val b = a.map { x =>
@@ -93,17 +97,20 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(c.count === 10)
   }
 
-  test("zero sized blocks") {
+  test("zero sized blocks") {//零大小的块
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
+    //使用本地群集2个进程,以确保有两个本地和远程块
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
 
     // 201 partitions (greater than "spark.shuffle.sort.bypassMergeThreshold") from 4 keys
+    //201个分区4个键
     val NUM_BLOCKS = 201
     val a = sc.parallelize(1 to 4, NUM_BLOCKS)
     val b = a.map(x => (x, x*2))
 
     // NOTE: The default Java serializer doesn't create zero-sized blocks.
     //       So, use Kryo
+    //默认的java序列化程序不创建零大小的块
     val c = new ShuffledRDD[Int, Int, Int](b, new HashPartitioner(NUM_BLOCKS))
       .setSerializer(new KryoSerializer(conf))
 
@@ -117,10 +124,12 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     val nonEmptyBlocks = blockSizes.filter(x => x > 0)
 
     // We should have at most 4 non-zero sized partitions
+    //至少有4个非零大小的分区
     assert(nonEmptyBlocks.size <= 4)
   }
 
-  test("zero sized blocks without kryo") {
+  test("zero sized blocks without kryo") {//没有低零大小的块
+    //使用本地群集与2个进程，以确保有两个本地和远程块
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
 
@@ -145,8 +154,9 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(nonEmptyBlocks.size <= 4)
   }
 
-  test("shuffle on mutable pairs") {
+  test("shuffle on mutable pairs") {//可变shuffle对
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
+    //使用本地群集与2个进程，以确保有两个本地和远程块
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     def p[T1, T2](_1: T1, _2: T2): MutablePair[T1, T2] = MutablePair(_1, _2)
     val data = Array(p(1, 1), p(1, 2), p(1, 3), p(2, 1))
@@ -157,9 +167,11 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     data.foreach { pair => results should contain ((pair._1, pair._2)) }
   }
 
-  test("sorting on mutable pairs") {
+  test("sorting on mutable pairs") {//在可变对排序
     // This is not in SortingSuite because of the local cluster setup.
+    //这不是在排序套件,因为本地群集设置
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
+    //使用本地群集与2个进程,以确保有两个本地和远程块
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     def p[T1, T2](_1: T1, _2: T2): MutablePair[T1, T2] = MutablePair(_1, _2)
     val data = Array(p(1, 11), p(3, 33), p(100, 100), p(2, 22))
@@ -172,8 +184,9 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     results(3) should be ((100, 100))
   }
 
-  test("cogroup using mutable pairs") {
+  test("cogroup using mutable pairs") {//使用可变的双
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
+    //本地集群有2个进程,以确保有两个本地和远程块
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     def p[T1, T2](_1: T1, _2: T2): MutablePair[T1, T2] = MutablePair(_1, _2)
     val data1 = Seq(p(1, 1), p(1, 2), p(1, 3), p(2, 1))
@@ -210,11 +223,13 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     val results = new SubtractedRDD(pairs1, pairs2, new HashPartitioner(2)).collect()
     results should have length (1)
     // substracted rdd return results as Tuple2
+    //减去RDD返回结果作为tuple2
     results(0) should be ((3, 33))
   }
 
-  test("sort with Java non serializable class - Kryo") {
+  test("sort with Java non serializable class - Kryo") {//用java非序列化类排序
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
+    //使用本地群集与2个进程,以确保有两个本地和远程块
     val myConf = conf.clone().set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     sc = new SparkContext("local-cluster[2,1,1024]", "test", myConf)
     val a = sc.parallelize(1 to 10, 2)
@@ -227,14 +242,16 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(c.collect() === Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
   }
 
-  test("sort with Java non serializable class - Java") {
+  test("sort with Java non serializable class - Java") {//用java非序列化类排序
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
+    //使用本地群集与2个进程,以确保有两个本地和远程块
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     val a = sc.parallelize(1 to 10, 2)
     val b = a.map { x =>
       (new NonJavaSerializableClass(x), x)
     }
     // default Java serializer cannot handle the non serializable class.
+    //默认的java序列化程序不能处理非可序列化的类
     val thrown = intercept[SparkException] {
       b.sortByKey().collect()
     }
@@ -243,7 +260,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(thrown.getMessage.toLowerCase.contains("serializable"))
   }
 
-  test("shuffle with different compression settings (SPARK-3426)") {
+  test("shuffle with different compression settings (SPARK-3426)") {//设置不同shuffle的压缩
     for (
       shuffleSpillCompress <- Set(true, false);
       shuffleCompress <- Set(true, false)
@@ -267,7 +284,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
       }
     }
   }
-
+  //重新运行Map阶段,如果降低阶段不能找到本地文件
   test("[SPARK-4085] rerun map stage if reduce stage cannot find its local shuffle file") {
     val myConf = conf.clone().set("spark.test.noStageRetry", "false")
     sc = new SparkContext("local", "test", myConf)
@@ -275,6 +292,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     rdd.count()
 
     // Delete one of the local shuffle blocks.
+    //删除本地的Shuffle块
     val hashFile = sc.env.blockManager.diskBlockManager.getFile(new ShuffleBlockId(0, 0, 0))
     val sortFile = sc.env.blockManager.diskBlockManager.getFile(new ShuffleDataBlockId(0, 0, 0))
     assert(hashFile.exists() || sortFile.exists())
@@ -287,10 +305,11 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     }
 
     // This count should retry the execution of the previous stage and rerun shuffle.
+    //应该重新执行前一阶段和重新洗牌
     rdd.count()
   }
 
-  test("metrics for shuffle without aggregation") {
+  test("metrics for shuffle without aggregation") {//没有聚合的Shuffle的度量
     sc = new SparkContext("local", "test", conf.clone())
     val numRecords = 10000
 
@@ -307,7 +326,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(metrics.bytesWritten > 0)
   }
 
-  test("metrics for shuffle with aggregation") {
+  test("metrics for shuffle with aggregation") {//聚合的洗牌的度量
     sc = new SparkContext("local", "test", conf.clone())
     val numRecords = 10000
 
@@ -323,7 +342,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(metrics.bytesWritten > 0)
   }
 
-  test("multiple simultaneous attempts for one task (SPARK-8029)") {
+  test("multiple simultaneous attempts for one task (SPARK-8029)") {//同时尝试一个或者多个任务
     sc = new SparkContext("local", "test", conf)
     val mapTrackerMaster = sc.env.mapOutputTracker.asInstanceOf[MapOutputTrackerMaster]
     val manager = sc.env.shuffleManager
@@ -335,12 +354,14 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     val shuffleHandle = manager.registerShuffle(0, 1, shuffleDep)
 
     // first attempt -- its successful
+    //第一次尝试--成功的
     val writer1 = manager.getWriter[Int, Int](shuffleHandle, 0,
       new TaskContextImpl(0, 0, 0L, 0, taskMemoryManager, metricsSystem,
         InternalAccumulator.create(sc)))
     val data1 = (1 to 10).map { x => x -> x}
 
     // second attempt -- also successful.  We'll write out different data,
+    //第二次尝试--也成功,我们会写出不同的数据
     // just to simulate the fact that the records may get written differently
     // depending on what gets spilled, what gets combined, etc.
     val writer2 = manager.getWriter[Int, Int](shuffleHandle, 0,
@@ -362,12 +383,14 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     val (mapOutput1, mapOutput2) = interleaver.run()
 
     // check that we can read the map output and it has the right data
+    //检查我们可以读取Map输出,并且它有正确的数据
     assert(mapOutput1.isDefined)
     assert(mapOutput2.isDefined)
     assert(mapOutput1.get.location === mapOutput2.get.location)
     assert(mapOutput1.get.getSizeForBlock(0) === mapOutput1.get.getSizeForBlock(0))
 
     // register one of the map outputs -- doesn't matter which one
+    //注册一个Map输出
     mapOutput1.foreach { case mapStatus =>
       mapTrackerMaster.registerMapOutputs(0, Array(mapStatus))
     }
@@ -387,6 +410,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
  * in different threads.  This makes sure that in your test, you don't completely process data1 with
  * f1 before processing data2 with f2 (or vice versa).  It adds a barrier so that the functions only
  * process one element, before pausing to wait for the other function to "catch up".
+ * 实用工具来帮助测试,确保我们同时在不同的线程的两个不同的迭代器,这确保在你的测试中
  */
 class InterleaveIterators[T, R](
   data1: Seq[T],
