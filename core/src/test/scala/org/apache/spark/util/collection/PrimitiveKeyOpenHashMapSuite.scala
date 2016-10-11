@@ -26,17 +26,18 @@ import org.apache.spark.util.SizeEstimator
 
 class PrimitiveKeyOpenHashMapSuite extends SparkFunSuite with Matchers {
 
-  test("size for specialized, primitive key, value (int, int)") {
+  test("size for specialized, primitive key, value (int, int)") {//专业大小,原始键,值
     val capacity = 1024
     val map = new PrimitiveKeyOpenHashMap[Int, Int](capacity)
     val actualSize = SizeEstimator.estimate(map)
     // 32 bit for keys, 32 bit for values, and 1 bit for the bitset.
     val expectedSize = capacity * (32 + 32 + 1) / 8
     // Make sure we are not allocating a significant amount of memory beyond our expected.
+    //确保分配的内存量没有超出的预期。
     actualSize should be <= (expectedSize * 1.1).toLong
   }
 
-  test("initialization") {
+  test("initialization") {//初始化
     val goodMap1 = new PrimitiveKeyOpenHashMap[Int, Int](1)
     assert(goodMap1.size === 0)
     val goodMap2 = new PrimitiveKeyOpenHashMap[Int, Int](255)
@@ -54,7 +55,7 @@ class PrimitiveKeyOpenHashMapSuite extends SparkFunSuite with Matchers {
     }
   }
 
-  test("basic operations") {
+  test("basic operations") {//基本操作
     val longBase = 1000000L
     val map = new PrimitiveKeyOpenHashMap[Long, Int]
 
@@ -77,7 +78,7 @@ class PrimitiveKeyOpenHashMapSuite extends SparkFunSuite with Matchers {
     assert(set === (1 to 1000).map(x => (x + longBase, x)).toSet)
   }
 
-  test("null values") {
+  test("null values") {//空值
     val map = new PrimitiveKeyOpenHashMap[Long, String]()
     for (i <- 1 to 100) {
       map(i.toLong) = null
@@ -86,7 +87,7 @@ class PrimitiveKeyOpenHashMapSuite extends SparkFunSuite with Matchers {
     assert(map(1.toLong) === null)
   }
 
-  test("changeValue") {
+  test("changeValue") {//该变值
     val map = new PrimitiveKeyOpenHashMap[Long, String]()
     for (i <- 1 to 100) {
       map(i.toLong) = i.toString
@@ -101,6 +102,7 @@ class PrimitiveKeyOpenHashMapSuite extends SparkFunSuite with Matchers {
     }
     // Iterate from 101 to 400 to make sure the map grows a couple of times, because we had a
     // bug where changeValue would return the wrong result when the map grew on that insert
+    //从101到400进行迭代以确保Map增长几次,
     for (i <- 101 to 400) {
       val res = map.changeValue(i.toLong, { i + "!" }, v => { assert(false); v })
       assert(res === i + "!")
@@ -108,7 +110,7 @@ class PrimitiveKeyOpenHashMapSuite extends SparkFunSuite with Matchers {
     assert(map.size === 400)
   }
 
-  test("inserting in capacity-1 map") {
+  test("inserting in capacity-1 map") {//插入容量-1
     val map = new PrimitiveKeyOpenHashMap[Long, String](1)
     for (i <- 1 to 100) {
       map(i.toLong) = i.toString

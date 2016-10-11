@@ -42,7 +42,7 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     cleanup()
   }
 
-  test("basic file appender") {
+  test("basic file appender") {//基本文件追加
     val testString = (1 to 1000).mkString(", ")
     val inputStream = new ByteArrayInputStream(testString.getBytes(UTF_8))
     val appender = new FileAppender(inputStream, testFile)
@@ -51,8 +51,9 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     assert(Files.toString(testFile, UTF_8) === testString)
   }
 
-  test("rolling file appender - time-based rolling") {
+  test("rolling file appender - time-based rolling") {//滚动文件追加-时间滚动
     // setup input stream and appender
+    //设置输入流和追加
     val testOutputStream = new PipedOutputStream()
     val testInputStream = new PipedInputStream(testOutputStream, 100 * 1000)
     val rolloverIntervalMillis = 100
@@ -67,7 +68,7 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     testRolling(appender, testOutputStream, textToAppend, rolloverIntervalMillis)
   }
 
-  test("rolling file appender - size-based rolling") {
+  test("rolling file appender - size-based rolling") {//文件大小的滚动和追加
     // setup input stream and appender
     val testOutputStream = new PipedOutputStream()
     val testInputStream = new PipedInputStream(testOutputStream, 100 * 1000)
@@ -84,15 +85,17 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     }
   }
 
-  test("rolling file appender - cleaning") {
+  test("rolling file appender - cleaning") {//滚动文件附加清理
     // setup input stream and appender
+    //设置输入流和附加
     val testOutputStream = new PipedOutputStream()
     val testInputStream = new PipedInputStream(testOutputStream, 100 * 1000)
     val conf = new SparkConf().set(RollingFileAppender.RETAINED_FILES_PROPERTY, "10")
     val appender = new RollingFileAppender(testInputStream, testFile,
       new SizeBasedRollingPolicy(1000, false), conf, 10)
 
-    // send data to appender through the input stream, and wait for the data to be written
+    //send data to appender through the input stream, and wait for the data to be written
+    //通过输入流数据发送到appender,并等待数据写入
     val allGeneratedFiles = new HashSet[String]()
     val items = (1 to 10).map { _.toString * 10000 }
     for (i <- 0 until items.size) {
@@ -108,6 +111,7 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     logInfo("Appender closed")
 
     // verify whether the earliest file has been deleted
+    //检查最早的文件是否已被删除
     val rolledOverFiles = allGeneratedFiles.filter { _ != testFile.toString }.toArray.sorted
     logInfo(s"All rolled over files generated:${rolledOverFiles.size}\n" +
       rolledOverFiles.mkString("\n"))
@@ -119,7 +123,7 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     assert(!existingRolledOverFiles.toSet.contains(earliestRolledOverFile))
   }
 
-  test("file appender selection") {
+  test("file appender selection") {//文件附加选择
     // Test whether FileAppender.apply() returns the right type of the FileAppender based
     // on SparkConf settings.
 
@@ -127,12 +131,14 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
         properties: Seq[(String, String)], expectedRollingPolicyParam: Long = -1): Unit = {
 
       // Set spark conf properties
+      //设置Spark 配置属性
       val conf = new SparkConf
       properties.foreach { p =>
         conf.set(p._1, p._2)
       }
 
       // Create and test file appender
+      //创建和测试文件附加
       val testOutputStream = new PipedOutputStream()
       val testInputStream = new PipedInputStream(testOutputStream)
       val appender = FileAppender(testInputStream, testFile, conf)
@@ -165,9 +171,11 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     val msInMinute = 60 * 1000L
 
     // test no strategy -> no rolling
+    //测试没有策略- >没有滚动
     testAppenderSelection[FileAppender, Any](Seq.empty)
 
     // test time based rolling strategy
+    //基于测试时间的滚动策略
     testAppenderSelection[RollingFileAppender, Any](rollingStrategy("time"), msInDay)
     testAppenderSelection[RollingFileAppender, TimeBasedRollingPolicy](
       rollingStrategy("time") ++ rollingInterval("daily"), msInDay)
@@ -181,17 +189,20 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
       rollingStrategy("time") ++ rollingInterval("xyz"))
 
     // test size based rolling strategy
+    //测试基本大小的滚动策略
     testAppenderSelection[RollingFileAppender, SizeBasedRollingPolicy](
       rollingStrategy("size") ++ rollingSize("123456789"), 123456789)
     testAppenderSelection[FileAppender, Any](rollingSize("xyz"))
 
     // test illegal strategy
+    //试验非法策略
     testAppenderSelection[FileAppender, Any](rollingStrategy("xyz"))
   }
 
   /**
    * Run the rolling file appender with data and see whether all the data was written correctly
    * across rolled over files.
+   * 运行滚动文件appender数据,查看所有的数据是否正确地写入滚动的文件
    */
   def testRolling(
       appender: FileAppender,
@@ -200,6 +211,7 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
       sleepTimeBetweenTexts: Long
     ): Seq[File] = {
     // send data to appender through the input stream, and wait for the data to be written
+    //通过输入流数据发送到appender,等待写入的数据
     val expectedText = textToAppend.mkString("")
     for (i <- 0 until textToAppend.size) {
       outputStream.write(textToAppend(i).getBytes(UTF_8))
@@ -212,6 +224,7 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     logInfo("Appender closed")
 
     // verify whether all the data written to rolled over files is same as expected
+    //验证是否所有的数据写入到滚动的文件
     val generatedFiles = RollingFileAppender.getSortedRolledOverFiles(
       testFile.getParentFile.toString, testFile.getName)
     logInfo("Filtered files: \n" + generatedFiles.mkString("\n"))
@@ -223,7 +236,10 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     generatedFiles
   }
 
-  /** Delete all the generated rolledover files */
+  /** 
+   *  Delete all the generated rolledover files 
+   *  删除所有生成的rolledover文件
+   *  */
   def cleanup() {
     testFile.getParentFile.listFiles.filter { file =>
       file.getName.startsWith(testFile.getName)

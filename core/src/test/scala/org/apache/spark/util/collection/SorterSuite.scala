@@ -25,7 +25,7 @@ import org.apache.spark.util.random.XORShiftRandom
 
 class SorterSuite extends SparkFunSuite with Logging {
 
-  test("equivalent to Arrays.sort") {
+  test("equivalent to Arrays.sort") {//数组相等排序
     val rand = new XORShiftRandom(123)
     val data0 = Array.tabulate[Int](10000) { i => rand.nextInt() }
     val data1 = data0.clone()
@@ -42,7 +42,7 @@ class SorterSuite extends SparkFunSuite with Logging {
 
   test("KVArraySorter") {
     val rand = new XORShiftRandom(456)
-
+    //构建一个键数组（java类）和一个数组中的键和值的交替
     // Construct an array of keys (to Java sort) and an array where the keys and values
     // alternate. Keys are random doubles, values are ordinals from 0 to length.
     val keys = Array.tabulate[Double](5000) { i => rand.nextDouble() }
@@ -51,6 +51,7 @@ class SorterSuite extends SparkFunSuite with Logging {
     }
 
     // Map from generated keys to values, to verify correctness later
+    //从生成的键映射到值,以验证以后的正确性
     val kvMap =
       keyValueArray.grouped(2).map { case Array(k, v) => k.doubleValue() -> v.intValue() }.toMap
 
@@ -104,7 +105,7 @@ class SorterSuite extends SparkFunSuite with Logging {
    * real Java solution is to make Tuple2s to store the keys and values and sort an array of
    * those, while the Sorter approach can work directly on the input data format.
    */
-  ignore("Sorter benchmark for key-value pairs") {
+  ignore("Sorter benchmark for key-value pairs") {//分类的基准键-值对
     val numElements = 25000000 // 25 mil
     val rand = new XORShiftRandom(123)
 

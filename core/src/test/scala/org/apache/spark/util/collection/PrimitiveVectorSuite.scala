@@ -22,7 +22,7 @@ import org.apache.spark.util.SizeEstimator
 
 class PrimitiveVectorSuite extends SparkFunSuite {
 
-  test("primitive value") {
+  test("primitive value") {//原始值
     val vector = new PrimitiveVector[Int]
 
     for (i <- 0 until 1000) {
@@ -41,7 +41,7 @@ class PrimitiveVectorSuite extends SparkFunSuite {
     }
   }
 
-  test("non-primitive value") {
+  test("non-primitive value") {//非原始值
     val vector = new PrimitiveVector[String]
 
     for (i <- 0 until 1000) {
@@ -60,7 +60,7 @@ class PrimitiveVectorSuite extends SparkFunSuite {
     }
   }
 
-  test("ideal growth") {
+  test("ideal growth") {//理想的增长
     val vector = new PrimitiveVector[Long](initialSize = 1)
     vector += 1
     for (i <- 1 until 1024) {
@@ -73,7 +73,7 @@ class PrimitiveVectorSuite extends SparkFunSuite {
     assert(vector.capacity === 2048)
   }
 
-  test("ideal size") {
+  test("ideal size") {//理想的大小
     val vector = new PrimitiveVector[Long](8192)
     for (i <- 0 until 8192) {
       vector += i
@@ -83,11 +83,12 @@ class PrimitiveVectorSuite extends SparkFunSuite {
     val actualSize = SizeEstimator.estimate(vector)
     val expectedSize = 8192 * 8
     // Make sure we are not allocating a significant amount of memory beyond our expected.
+    //确保我们分配的内存量没有超出的预期
     // Due to specialization wonkiness, we need to ensure we don't have 2 copies of the array.
     assert(actualSize < expectedSize * 1.1)
   }
 
-  test("resizing") {
+  test("resizing") {//调整大小
     val vector = new PrimitiveVector[Long]
     for (i <- 0 until 4097) {
       vector += i

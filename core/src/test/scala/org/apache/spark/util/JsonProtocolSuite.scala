@@ -108,7 +108,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     testEvent(executorMetricsUpdate, executorMetricsUpdateJsonString)
   }
 
-  test("Dependent Classes") {
+  test("Dependent Classes") {//依赖类
     val logUrlMap = Map("stderr" -> "mystderr", "stdout" -> "mystdout").toMap
     testRDDInfo(makeRddInfo(2, 3, 4, 5L, 6L))
     testStageInfo(makeStageInfo(10, 20, 30, 40L, 50L))
@@ -118,7 +118,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     testBlockManagerId(BlockManagerId("Hong", "Kong", 500))
     testExecutorInfo(new ExecutorInfo("host", 43, logUrlMap))
 
-    // StorageLevel
+    // StorageLevel 存储级别
     testStorageLevel(StorageLevel.NONE)
     testStorageLevel(StorageLevel.DISK_ONLY)
     testStorageLevel(StorageLevel.DISK_ONLY_2)
@@ -131,14 +131,14 @@ class JsonProtocolSuite extends SparkFunSuite {
     testStorageLevel(StorageLevel.MEMORY_AND_DISK_SER)
     testStorageLevel(StorageLevel.MEMORY_AND_DISK_SER_2)
 
-    // JobResult
+    // JobResult 工作的结果
     val exception = new Exception("Out of Memory! Please restock film.")
     exception.setStackTrace(stackTrace)
     val jobFailed = JobFailed(exception)
     testJobResult(JobSucceeded)
     testJobResult(jobFailed)
 
-    // TaskEndReason
+    // TaskEndReason 任务结束的原因
     val fetchFailed = FetchFailed(BlockManagerId("With or", "without you", 15), 17, 18, 19,
       "Some exception")
     val fetchMetadataFailed = new MetadataFetchFailedException(17,
@@ -163,7 +163,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     testBlockId(StreamBlockId(1, 2L))
   }
 
-  test("ExceptionFailure backward compatibility") {
+  test("ExceptionFailure backward compatibility") {//异常故障向后兼容性
     val exceptionFailure = ExceptionFailure("To be", "or not to be", stackTrace, null,
       None, None)
     val oldEvent = JsonProtocol.taskEndReasonToJson(exceptionFailure)
@@ -171,7 +171,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assertEquals(exceptionFailure, JsonProtocol.taskEndReasonFromJson(oldEvent))
   }
 
-  test("StageInfo backward compatibility (details, accumulables)") {
+  test("StageInfo backward compatibility (details, accumulables)") {//stageinfo向后兼容性
     val info = makeStageInfo(1, 2, 3, 4L, 5L)
     val newJson = JsonProtocol.stageInfoToJson(info)
 
@@ -189,7 +189,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assert(0 === newInfo.accumulables.size)
   }
 
-  test("InputMetrics backward compatibility") {
+  test("InputMetrics backward compatibility") {//测量输入向后兼容
     // InputMetrics were added after 1.0.1.
     val metrics = makeTaskMetrics(1L, 2L, 3L, 4L, 5, 6, hasHadoopInput = true, hasOutput = false)
     assert(metrics.inputMetrics.nonEmpty)
@@ -199,7 +199,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assert(newMetrics.inputMetrics.isEmpty)
   }
 
-  test("Input/Output records backwards compatibility") {
+  test("Input/Output records backwards compatibility") {//输入/输出记录向后兼容性
     // records read were added after 1.2
     val metrics = makeTaskMetrics(1L, 2L, 3L, 4L, 5, 6,
       hasHadoopInput = true, hasOutput = true, hasRecords = false)
@@ -213,7 +213,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assert(newMetrics.outputMetrics.get.recordsWritten == 0)
   }
 
-  test("Shuffle Read/Write records backwards compatibility") {
+  test("Shuffle Read/Write records backwards compatibility") {//Shuffle读/写记录向后兼容性
     // records read were added after 1.2
     val metrics = makeTaskMetrics(1L, 2L, 3L, 4L, 5, 6,
       hasHadoopInput = false, hasOutput = false, hasRecords = false)
@@ -227,7 +227,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assert(newMetrics.shuffleWriteMetrics.get.shuffleRecordsWritten == 0)
   }
 
-  test("OutputMetrics backward compatibility") {
+  test("OutputMetrics backward compatibility") {//outputmetrics向后兼容性
     // OutputMetrics were added after 1.1
     val metrics = makeTaskMetrics(1L, 2L, 3L, 4L, 5, 6, hasHadoopInput = false, hasOutput = true)
     assert(metrics.outputMetrics.nonEmpty)
@@ -237,7 +237,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assert(newMetrics.outputMetrics.isEmpty)
   }
 
-  test("BlockManager events backward compatibility") {
+  test("BlockManager events backward compatibility") {//blockmanager事件向后兼容性
     // SparkListenerBlockManagerAdded/Removed in Spark 1.0.0 do not have a "time" property.
     val blockManagerAdded = SparkListenerBlockManagerAdded(1L,
       BlockManagerId("Stars", "In your multitude...", 300), 500)
@@ -259,7 +259,7 @@ class JsonProtocolSuite extends SparkFunSuite {
       deserializedBmRemoved)
   }
 
-  test("FetchFailed backwards compatibility") {
+  test("FetchFailed backwards compatibility") {//fetchfailed向后兼容性
     // FetchFailed in Spark 1.1.0 does not have an "Message" property.
     val fetchFailed = FetchFailed(BlockManagerId("With or", "without you", 15), 17, 18, 19,
       "ignored")
@@ -269,7 +269,7 @@ class JsonProtocolSuite extends SparkFunSuite {
       "Unknown reason")
     assert(expectedFetchFailed === JsonProtocol.taskEndReasonFromJson(oldEvent))
   }
-
+  //本地字节读取和时间向后兼容性
   test("ShuffleReadMetrics: Local bytes read and time taken backwards compatibility") {
     // Metrics about local shuffle bytes read and local read time were added in 1.3.1.
     val metrics = makeTaskMetrics(1L, 2L, 3L, 4L, 5, 6,
@@ -294,7 +294,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assert(applicationStart === JsonProtocol.applicationStartFromJson(oldEvent))
   }
 
-  test("ExecutorLostFailure backward compatibility") {
+  test("ExecutorLostFailure backward compatibility") {//执行器失败后向后兼容性
     // ExecutorLostFailure in Spark 1.1.0 does not have an "Executor ID" property.
     val executorLostFailure = ExecutorLostFailure("100")
     val oldEvent = JsonProtocol.taskEndReasonToJson(executorLostFailure)
@@ -334,7 +334,7 @@ class JsonProtocolSuite extends SparkFunSuite {
     assertEquals(expectedJobEnd, JsonProtocol.jobEndFromJson(oldEndEvent))
   }
 
-  test("RDDInfo backward compatibility (scope, parent IDs)") {
+  test("RDDInfo backward compatibility (scope, parent IDs)") {//rddinfo向后兼容性
     // Prior to Spark 1.4.0, RDDInfo did not have the "Scope" and "Parent IDs" properties
     val rddInfo = new RDDInfo(
       1, "one", 100, StorageLevel.NONE, Seq(1, 6, 8), Some(new RDDOperationScope("fable")))

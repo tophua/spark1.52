@@ -29,13 +29,13 @@ class SizeTrackerSuite extends SparkFunSuite {
 
   import SizeTrackerSuite._
 
-  test("vector fixed size insertions") {
+  test("vector fixed size insertions") {//向量固定大小插入
     testVector[Long](10000, i => i.toLong)
     testVector[(Long, Long)](10000, i => (i.toLong, i.toLong))
     testVector[LargeDummyClass](10000, i => new LargeDummyClass)
   }
 
-  test("vector variable size insertions") {
+  test("vector variable size insertions") {//向量变量大小插入
     val rand = new Random(123456789)
     def randString(minLen: Int, maxLen: Int): String = {
       "a" * (rand.nextInt(maxLen - minLen) + minLen)
@@ -45,13 +45,13 @@ class SizeTrackerSuite extends SparkFunSuite {
     testVector[String](10000, i => randString(90, 100))
   }
 
-  test("map fixed size insertions") {
+  test("map fixed size insertions") {//映射固定大小插入
     testMap[Int, Long](10000, i => (i, i.toLong))
     testMap[Int, (Long, Long)](10000, i => (i, (i.toLong, i.toLong)))
     testMap[Int, LargeDummyClass](10000, i => (i, new LargeDummyClass))
   }
 
-  test("map variable size insertions") {
+  test("map variable size insertions") {//Map可变大小插入
     val rand = new Random(123456789)
     def randString(minLen: Int, maxLen: Int): String = {
       "a" * (rand.nextInt(maxLen - minLen) + minLen)
@@ -61,7 +61,7 @@ class SizeTrackerSuite extends SparkFunSuite {
     testMap[Int, String](10000, i => (i, randString(90, 100)))
   }
 
-  test("map updates") {
+  test("map updates") {//map 更新
     val rand = new Random(123456789)
     def randString(minLen: Int, maxLen: Int): String = {
       "a" * (rand.nextInt(maxLen - minLen) + minLen)
@@ -100,6 +100,7 @@ private object SizeTrackerSuite {
 
   /**
    * Run speed tests for size tracking collections.
+   * 运行速度测试跟踪集合的大小
    */
   def main(args: Array[String]): Unit = {
     if (args.size < 1) {
@@ -117,9 +118,10 @@ private object SizeTrackerSuite {
    * Speed test for SizeTrackingVector.
    *
    * Results for 100000 elements (possibly non-deterministic):
-   *   PrimitiveVector  15 ms
-   *   SizeTracker      51 ms
-   *   SizeEstimator    2000 ms
+   * 结果100000个元素(possibly non-deterministic)可能的非确定性
+   *   PrimitiveVector  15 ms 原始矢量
+   *   SizeTracker      51 ms 大小的跟踪器
+   *   SizeEstimator    2000 ms 大小估计
    */
   def vectorSpeedTest(numElements: Int): Unit = {
     val baseTimes = for (i <- 0 until 10) yield time {
@@ -149,6 +151,7 @@ private object SizeTrackerSuite {
    * Speed test for SizeTrackingAppendOnlyMap.
    *
    * Results for 100000 elements (possibly non-deterministic):
+   * 结果100000个元素(possibly non-deterministic)可能的非确定性
    *   AppendOnlyMap  30 ms
    *   SizeTracker    41 ms
    *   SizeEstimator  1666 ms

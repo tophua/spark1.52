@@ -34,7 +34,7 @@ class MutableURLClassLoaderSuite extends SparkFunSuite {
       toStringValue = "1",
       classpathUrls = urls2)).toArray
 
-  test("child first") {
+  test("child first") {//第一个子类
     val parentLoader = new URLClassLoader(urls2, null)
     val classLoader = new ChildFirstURLClassLoader(urls, parentLoader)
     val fakeClass = classLoader.loadClass("FakeClass2").newInstance()
@@ -44,7 +44,7 @@ class MutableURLClassLoaderSuite extends SparkFunSuite {
     assert(fakeClass.getClass === fakeClass2.getClass)
   }
 
-  test("parent first") {
+  test("parent first") {//第一个父类
     val parentLoader = new URLClassLoader(urls2, null)
     val classLoader = new MutableURLClassLoader(urls, parentLoader)
     val fakeClass = classLoader.loadClass("FakeClass1").newInstance()
@@ -54,7 +54,7 @@ class MutableURLClassLoaderSuite extends SparkFunSuite {
     assert(fakeClass.getClass === fakeClass2.getClass)
   }
 
-  test("child first can fall back") {
+  test("child first can fall back") {//
     val parentLoader = new URLClassLoader(urls2, null)
     val classLoader = new ChildFirstURLClassLoader(urls, parentLoader)
     val fakeClass = classLoader.loadClass("FakeClass3").newInstance()
@@ -69,7 +69,7 @@ class MutableURLClassLoaderSuite extends SparkFunSuite {
       classLoader.loadClass("FakeClassDoesNotExist").newInstance()
     }
   }
-
+  //驱动程序在本地模式下设置上下文类加载程序
   test("driver sets context class loader in local mode") {
     // Test the case where the driver program sets a context classloader and then runs a job
     // in local mode. This is what happens when ./spark-submit is called with "local" as the

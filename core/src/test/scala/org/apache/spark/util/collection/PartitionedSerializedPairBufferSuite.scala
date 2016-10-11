@@ -33,7 +33,7 @@ import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.storage.DiskBlockObjectWriter
 
 class PartitionedSerializedPairBufferSuite extends SparkFunSuite {
-  test("OrderedInputStream single record") {
+  test("OrderedInputStream single record") {//单记录
     val serializerInstance = new KryoSerializer(new SparkConf()).newInstance
 
     val buffer = new PartitionedSerializedPairBuffer[Int, SomeStruct](4, 32, serializerInstance)
@@ -51,7 +51,7 @@ class PartitionedSerializedPairBufferSuite extends SparkFunSuite {
     baos.toByteArray should be (bytes)
   }
 
-  test("insert single record") {
+  test("insert single record") {//插入一个新记录
     val serializerInstance = new KryoSerializer(new SparkConf()).newInstance
     val buffer = new PartitionedSerializedPairBuffer[Int, SomeStruct](4, 32, serializerInstance)
     val struct = SomeStruct("something", 5)
@@ -61,7 +61,7 @@ class PartitionedSerializedPairBufferSuite extends SparkFunSuite {
     elements.head should be (((4, 10), struct))
   }
 
-  test("insert multiple records") {
+  test("insert multiple records") {//插入多个新记录
     val serializerInstance = new KryoSerializer(new SparkConf()).newInstance
     val buffer = new PartitionedSerializedPairBuffer[Int, SomeStruct](4, 32, serializerInstance)
     val struct1 = SomeStruct("something1", 8)
@@ -78,7 +78,7 @@ class PartitionedSerializedPairBufferSuite extends SparkFunSuite {
     elements(2) should be (((6, 1), struct1))
   }
 
-  test("write single record") {
+  test("write single record") {//写单记录
     val serializerInstance = new KryoSerializer(new SparkConf()).newInstance
     val buffer = new PartitionedSerializedPairBuffer[Int, SomeStruct](4, 32, serializerInstance)
     val struct = SomeStruct("something", 5)
@@ -95,7 +95,7 @@ class PartitionedSerializedPairBufferSuite extends SparkFunSuite {
     stream.readObject[AnyRef]() should be (struct)
   }
 
-  test("write multiple records") {
+  test("write multiple records") {//写多个记录
     val serializerInstance = new KryoSerializer(new SparkConf()).newInstance
     val buffer = new PartitionedSerializedPairBuffer[Int, SomeStruct](4, 32, serializerInstance)
     val struct1 = SomeStruct("something1", 8)

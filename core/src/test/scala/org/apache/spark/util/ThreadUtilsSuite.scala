@@ -86,6 +86,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
 
       // Submit a new task and it should be put into the queue since the thread number reaches the
       // limitation
+      //提交一个新的任务,它应该被放在队列中,因为线程数达到了限制
       cachedThreadPool.execute(new Runnable {
         override def run(): Unit = {
           latch.await(10, TimeUnit.SECONDS)
@@ -98,6 +99,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
       latch.countDown()
       eventually(timeout(10.seconds)) {
         // All threads should be stopped after keepAliveSeconds
+        //所有的线程应该停止后
         assert(cachedThreadPool.getActiveCount === 0)
         assert(cachedThreadPool.getPoolSize === 0)
       }
@@ -106,7 +108,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     }
   }
 
-  test("sameThread") {//
+  test("sameThread") {//同一个线程
     val callerThreadName = Thread.currentThread().getName()
     val f = Future {
       Thread.currentThread().getName()
@@ -116,7 +118,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     assert(futureThreadName === callerThreadName)
   }
 
-  test("runInNewThread") {
+  test("runInNewThread") {//运行新的线程
     import ThreadUtils._
     assert(runInNewThread("thread-name") { Thread.currentThread().getName } === "thread-name")
     assert(runInNewThread("thread-name") { Thread.currentThread().isDaemon } === true)//是否守护线程

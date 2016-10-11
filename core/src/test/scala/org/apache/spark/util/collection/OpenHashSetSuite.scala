@@ -24,7 +24,7 @@ import org.apache.spark.util.SizeEstimator
 
 class OpenHashSetSuite extends SparkFunSuite with Matchers {
 
-  test("size for specialized, primitive int") {
+  test("size for specialized, primitive int") {//原始类型Int
     val loadFactor = 0.7
     val set = new OpenHashSet[Int](64, loadFactor)
     for (i <- 0 until 1024) {
@@ -34,12 +34,13 @@ class OpenHashSetSuite extends SparkFunSuite with Matchers {
     assert(set.capacity > 1024)
     val actualSize = SizeEstimator.estimate(set)
     // 32 bits for the ints + 1 bit for the bitset
+    //对于int型+ 1位32位的位
     val expectedSize = set.capacity * (32 + 1) / 8
     // Make sure we are not allocating a significant amount of memory beyond our expected.
     actualSize should be <= (expectedSize * 1.1).toLong
   }
 
-  test("primitive int") {
+  test("primitive int") {//原型Int类型
     val set = new OpenHashSet[Int]
     assert(set.size === 0)
     assert(!set.contains(10))
@@ -75,7 +76,7 @@ class OpenHashSetSuite extends SparkFunSuite with Matchers {
     assert(!set.contains(10000))
   }
 
-  test("primitive long") {
+  test("primitive long") {//原型long类型
     val set = new OpenHashSet[Long]
     assert(set.size === 0)
     assert(!set.contains(10L))
@@ -112,7 +113,7 @@ class OpenHashSetSuite extends SparkFunSuite with Matchers {
     assert(!set.contains(10000L))
   }
 
-  test("non-primitive") {
+  test("non-primitive") {//非原型类型
     val set = new OpenHashSet[String]
     assert(set.size === 0)
     assert(!set.contains(10.toString))
@@ -149,7 +150,7 @@ class OpenHashSetSuite extends SparkFunSuite with Matchers {
     assert(!set.contains(10000.toString))
   }
 
-  test("non-primitive set growth") {
+  test("non-primitive set growth") {//非原始集增长
     val set = new OpenHashSet[String]
     for (i <- 1 to 1000) {
       set.add(i.toString)
@@ -163,7 +164,7 @@ class OpenHashSetSuite extends SparkFunSuite with Matchers {
     assert(set.capacity > 1000)
   }
 
-  test("primitive set growth") {
+  test("primitive set growth") {//设定原始的增长
     val set = new OpenHashSet[Long]
     for (i <- 1 to 1000) {
       set.add(i.toLong)

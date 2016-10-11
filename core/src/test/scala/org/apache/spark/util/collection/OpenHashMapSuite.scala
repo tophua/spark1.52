@@ -166,7 +166,7 @@ class OpenHashMapSuite extends SparkFunSuite with Matchers {
     assert(map.size === 401)
   }
 
-  test("inserting in capacity-1 map") {
+  test("inserting in capacity-1 map") {//插入容量capacity-1Map任务
     val map = new OpenHashMap[String, String](1)
     for (i <- 1 to 100) {
       map(i.toString) = i.toString
@@ -177,7 +177,7 @@ class OpenHashMapSuite extends SparkFunSuite with Matchers {
     }
   }
 
-  test("contains") {
+  test("contains") {//包含
     val map = new OpenHashMap[String, Int](2)
     map("a") = 1
     assert(map.contains("a"))
@@ -187,7 +187,7 @@ class OpenHashMapSuite extends SparkFunSuite with Matchers {
     assert(map.contains(null))
   }
 
-  test("support for more than 12M items") {
+  test("support for more than 12M items") {//支持超过12m项目
     val cnt = 12000000 // 12M
     val map = new OpenHashMap[Int, Int](cnt)
     for (i <- 0 until cnt) {

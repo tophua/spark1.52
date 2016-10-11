@@ -39,6 +39,7 @@ class DummyClass4(val d: DummyClass3) {
 }
 
 // dummy class to show class field blocks alignment.
+//虚拟类显示类字段块对齐
 class DummyClass5 extends DummyClass1 {
   val x: Boolean = true
 }
@@ -73,7 +74,7 @@ class SizeEstimatorSuite
     System.setProperty("spark.test.useCompressedOops", "true")
   }
 
-  test("simple classes") {
+  test("simple classes") {//简单的类
     assertResult(16)(SizeEstimator.estimate(new DummyClass1))
     assertResult(16)(SizeEstimator.estimate(new DummyClass2))
     assertResult(24)(SizeEstimator.estimate(new DummyClass3))
@@ -81,7 +82,7 @@ class SizeEstimatorSuite
     assertResult(48)(SizeEstimator.estimate(new DummyClass4(new DummyClass3)))
   }
 
-  test("primitive wrapper objects") {//包装对象
+  test("primitive wrapper objects") {//原始的包装对象
     assertResult(16)(SizeEstimator.estimate(new java.lang.Boolean(true)))
     assertResult(16)(SizeEstimator.estimate(new java.lang.Byte("1")))
     assertResult(16)(SizeEstimator.estimate(new java.lang.Character('1')))
@@ -92,13 +93,14 @@ class SizeEstimatorSuite
     assertResult(24)(SizeEstimator.estimate(new java.lang.Double(1.0d)))
   }
 
-  test("class field blocks rounding") {
+  test("class field blocks rounding") {//字段块四舍五入
     assertResult(16)(SizeEstimator.estimate(new DummyClass5))
     assertResult(24)(SizeEstimator.estimate(new DummyClass6))
   }
 
   // NOTE: The String class definition varies across JDK versions (1.6 vs. 1.7) and vendors
   // (Sun vs IBM). Use a DummyString class to make tests deterministic.
+  //使用虚拟类做试验确定
   test("strings") {
     assertResult(40)(SizeEstimator.estimate(DummyString("")))//评估
     assertResult(48)(SizeEstimator.estimate(DummyString("a")))
@@ -106,7 +108,7 @@ class SizeEstimatorSuite
     assertResult(56)(SizeEstimator.estimate(DummyString("abcdefgh")))
   }
 
-  test("primitive arrays") {
+  test("primitive arrays") {//原始数组
     assertResult(32)(SizeEstimator.estimate(new Array[Byte](10)))
     assertResult(40)(SizeEstimator.estimate(new Array[Char](10)))
     assertResult(40)(SizeEstimator.estimate(new Array[Short](10)))
@@ -118,10 +120,12 @@ class SizeEstimatorSuite
     assertResult(8016)(SizeEstimator.estimate(new Array[Long](1000)))
   }
 
-  test("object arrays") {
+  test("object arrays") {//对象数组
     // Arrays containing nulls should just have one pointer per element
+    //数组包含空值应该有一个指针一个每元素
     assertResult(56)(SizeEstimator.estimate(new Array[String](10)))
     assertResult(56)(SizeEstimator.estimate(new Array[AnyRef](10)))
+    //对象的数组与非零元素
     // For object arrays with non-null elements, each object should take one pointer plus
     // however many bytes that class takes. (Note that Array.fill calls the code in its
     // second parameter separately for each object, so we get distinct objects.)
@@ -131,6 +135,7 @@ class SizeEstimatorSuite
     assertResult(56)(SizeEstimator.estimate(Array(new DummyClass1, new DummyClass2)))
 
     // Past size 100, our samples 100 elements, but we should still get the right size.
+    //过去大小100,我们的样本100个元素，但我们仍然应该得到正确的大小
     assertResult(28016)(SizeEstimator.estimate(Array.fill(1000)(new DummyClass3)))
 
 
@@ -166,7 +171,7 @@ class SizeEstimatorSuite
     assert(estimatedSize <= 4200, "Estimated size " + estimatedSize + " should be less than 4200")
   }
 
-  test("32-bit arch") {
+  test("32-bit arch") {//32位架构
     System.setProperty("os.arch", "x86")
 
     val initialize = PrivateMethod[Unit]('initialize)
@@ -191,7 +196,7 @@ class SizeEstimatorSuite
     assertResult(64)(SizeEstimator.estimate(DummyString("ab")))
     assertResult(72)(SizeEstimator.estimate(DummyString("abcdefgh")))
 
-    // primitive wrapper classes
+    // primitive wrapper classes 原始包装类
     assertResult(24)(SizeEstimator.estimate(new java.lang.Boolean(true)))
     assertResult(24)(SizeEstimator.estimate(new java.lang.Byte("1")))
     assertResult(24)(SizeEstimator.estimate(new java.lang.Character('1')))

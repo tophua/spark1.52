@@ -48,7 +48,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     eventLoop.stop()
   }
 
-  test("EventLoop: start and stop") {
+  test("EventLoop: start and stop") {//启动和停止
     val eventLoop = new EventLoop[Int]("test") {
 
       override def onReceive(event: Int): Unit = {}
@@ -62,7 +62,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     assert(false === eventLoop.isActive)
   }
 
-  test("EventLoop: onError") {
+  test("EventLoop: onError") {//错误
     val e = new RuntimeException("Oops")
     @volatile var receivedError: Throwable = null
     val eventLoop = new EventLoop[Int]("test") {
@@ -82,7 +82,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     }
     eventLoop.stop()
   }
-
+  //错误不应该冲突事件的线程
   test("EventLoop: error thrown from onError should not crash the event thread") {
     val e = new RuntimeException("Oops")
     @volatile var receivedError: Throwable = null
@@ -105,7 +105,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     }
     eventLoop.stop()
   }
-
+  //呼吁停止多次应该只调用onStop一旦
   test("EventLoop: calling stop multiple times should only call onStop once") {
     var onStopTimes = 0
     val eventLoop = new EventLoop[Int]("test") {
@@ -130,7 +130,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     assert(1 === onStopTimes)
   }
 
-  test("EventLoop: post event in multiple threads") {
+  test("EventLoop: post event in multiple threads") {//多线程中的事件
     @volatile var receivedEventsCount = 0
     val eventLoop = new EventLoop[Int]("test") {
 
@@ -187,7 +187,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     assert(false === eventLoop.isActive)
   }
 
-  test("EventLoop: stop in eventThread") {
+  test("EventLoop: stop in eventThread") {//事件线程中暂停
     val eventLoop = new EventLoop[Int]("test") {
 
       override def onReceive(event: Int): Unit = {

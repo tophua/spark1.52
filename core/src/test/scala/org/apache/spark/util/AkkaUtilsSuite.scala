@@ -32,10 +32,11 @@ import org.apache.spark.SSLSampleConfigs._
 
 /**
   * Test the AkkaUtils with various(各种) security settings.
+  * 测试akkautils各种安全设置
   */
 class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSystemProperties {
 
-  test("remote fetch security bad password") {
+  test("remote fetch security bad password") {//远程取安全坏密码
     val conf = new SparkConf
     conf.set("spark.rpc", "akka")
      //是否启用内部身份验证
@@ -74,7 +75,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     slaveRpcEnv.shutdown()
   }
 
-  test("remote fetch security off") {
+  test("remote fetch security off") {//远程提取安全关闭
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
@@ -117,6 +118,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     slaveTracker.updateEpoch(masterTracker.getEpoch)
 
     // this should succeed since security off
+    //这应该成功，因为安全关闭
     assert(slaveTracker.getMapSizesByExecutorId(10, 0).toSeq ===
            Seq((BlockManagerId("a", "hostA", 1000),
              ArrayBuffer((ShuffleBlockId(10, 0, 0), size1000)))))
@@ -125,7 +127,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     slaveRpcEnv.shutdown()
   }
 
-  test("remote fetch security pass") {
+  test("remote fetch security pass") {//远程获取安全通行证
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
@@ -166,6 +168,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     slaveTracker.updateEpoch(masterTracker.getEpoch)
 
     // this should succeed since security on and passwords match
+    //这应该成功，因为安全性和密码匹配
     assert(slaveTracker.getMapSizesByExecutorId(10, 0) ===
            Seq((BlockManagerId("a", "hostA", 1000),
              ArrayBuffer((ShuffleBlockId(10, 0, 0), size1000)))))
@@ -174,7 +177,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     slaveRpcEnv.shutdown()
   }
 
-  test("remote fetch security off client") {
+  test("remote fetch security off client") {//远程获取安全关闭客户端
     val conf = new SparkConf
     conf.set("spark.rpc", "akka")
      //是否启用内部身份验证
@@ -215,7 +218,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     slaveRpcEnv.shutdown()
   }
 
-  test("remote fetch ssl on") {
+  test("remote fetch ssl on") {//远程读取SSL上
     val conf = sparkSSLConfig()
     val securityManager = new SecurityManager(conf)
 
@@ -258,7 +261,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   }
 
 
-  test("remote fetch ssl on and security enabled") {
+  test("remote fetch ssl on and security enabled") {//远程读取和安全启用SSL
     val conf = sparkSSLConfig()
     //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
@@ -308,7 +311,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   }
 
 
-  test("remote fetch ssl on and security enabled - bad credentials") {
+  test("remote fetch ssl on and security enabled - bad credentials") {//远程读取SSL和启用安全的坏的凭据
     val conf = sparkSSLConfig()
     conf.set("spark.rpc", "akka")
     //是否启用内部身份验证
@@ -347,7 +350,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
   }
 
 
-  test("remote fetch ssl on - untrusted server") {
+  test("remote fetch ssl on - untrusted server") {//在不受信任的服务器的SSL远程读取
     val conf = sparkSSLConfigUntrusted()
     val securityManager = new SecurityManager(conf)
 

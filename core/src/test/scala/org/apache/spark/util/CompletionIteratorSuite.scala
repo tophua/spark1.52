@@ -18,9 +18,9 @@
 package org.apache.spark.util
 
 import org.apache.spark.SparkFunSuite
-
+//完成迭代器测试套件
 class CompletionIteratorSuite extends SparkFunSuite {
-  test("basic test") {
+  test("basic test") {//基本测试
     var numTimesCompleted = 0
     val iter = List(1, 2, 3).iterator
     val completionIter = CompletionIterator[Int, Iterator[Int]](iter, { numTimesCompleted += 1 })

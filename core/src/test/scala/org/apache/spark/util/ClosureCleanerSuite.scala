@@ -28,34 +28,34 @@ import org.apache.spark.rdd.RDD
  * 
  */
 class ClosureCleanerSuite extends SparkFunSuite {
-  test("closures(闭包) inside an object") {
+  test("closures  inside an object") {//对象中的闭包
     assert(TestObject.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("closures(闭包) inside a class") {
+  test("closures  inside a class") {//类中的闭包
     val obj = new TestClass
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("closures(闭包) inside a class with no default constructor") {//定义一个构造器
+  test("closures inside a class with no default constructor") {//一个没有默认构造函数的类中的闭包
     val obj = new TestClassWithoutDefaultConstructor(5)
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("closures(闭包) that don't use fields of the outer class") {
+  test("closures  that don't use fields of the outer class") {//不使用外部类闭包的字段
     val obj = new TestClassWithoutFieldAccess
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("nested(闭包) closures inside an object") {
+  test("nested closures inside an object") {//对象内的嵌套闭包
     assert(TestObjectWithNesting.run() === 96) // 4 * (1+2+3+4) + 4 * (1+2+3+4) + 16 * 1
   }
 
-  test("nested closures inside a class") {
+  test("nested closures inside a class") {//一个类中嵌套闭包
     val obj = new TestClassWithNesting(1)
     assert(obj.run() === 96) // 4 * (1+2+3+4) + 4 * (1+2+3+4) + 16 * 1
   }
-
+   //顶层返回语句关闭时确定清理时间
   test("toplevel return statements in closures are identified at cleaning time") {
     intercept[ReturnStatementInClosureException] {
       TestObjectWithBogusReturns.run()
@@ -67,7 +67,7 @@ class ClosureCleanerSuite extends SparkFunSuite {
     assert(result === 1)
   }
 
-  test("user provided closures are actually cleaned") {
+  test("user provided closures are actually cleaned") {//用户提供的闭包实际上是清理
 
     // We use return statements as an indication that a closure is actually being cleaned
     // We expect closure cleaner to find the return statements in the user provided closures
@@ -202,6 +202,7 @@ object TestObjectWithBogusReturns {
     withSpark(new SparkContext("local", "test")) { sc =>
       val nums = sc.parallelize(Array(1, 2, 3, 4))
       // this return is invalid since it will transfer control outside the closure
+      //此返回是无效的,因为它将在闭包的外部传输控制
       nums.map {x => return 1 ; x * 2}
       1
     }
@@ -313,6 +314,7 @@ private object TestUserClosuresActuallyCleaned {
   }
 
   // Test pair RDD functions
+  //测试RDD对功能
   def testCombineByKey(rdd: RDD[(Int, Int)]): Unit = {
     rdd.combineByKey(
       { _ => return; 1 }: Int => Int,

@@ -26,7 +26,7 @@ import org.scalatest.Matchers
 import org.apache.spark.SparkFunSuite
 
 class NextIteratorSuite extends SparkFunSuite with Matchers {
-  test("one iteration") {
+  test("one iteration") {//一个迭代器
     val i = new StubIterator(Buffer(1))
     i.hasNext should be (true)
     i.next should be (1)
@@ -34,7 +34,7 @@ class NextIteratorSuite extends SparkFunSuite with Matchers {
     intercept[NoSuchElementException] { i.next() }
   }
 
-  test("two iterations") {
+  test("two iterations") {//两个迭代器
     val i = new StubIterator(Buffer(1, 2))
     i.hasNext should be (true)
     i.next should be (1)
@@ -44,13 +44,13 @@ class NextIteratorSuite extends SparkFunSuite with Matchers {
     intercept[NoSuchElementException] { i.next() }
   }
 
-  test("empty iteration") {
+  test("empty iteration") {//空的迭代器
     val i = new StubIterator(Buffer())
     i.hasNext should be (false)
     intercept[NoSuchElementException] { i.next() }
   }
 
-  test("close is called once for empty iterations") {
+  test("close is called once for empty iterations") {//关闭为一次为空的迭代器
     val i = new StubIterator(Buffer())
     i.hasNext should be (false)
     i.hasNext should be (false)
@@ -62,6 +62,7 @@ class NextIteratorSuite extends SparkFunSuite with Matchers {
     i.next should be (1)
     i.next should be (2)
     // close isn't called until we check for the next element
+    //关闭不调用,直到检查有下一个元素
     i.closeCalled should be (0)
     i.hasNext should be (false)
     i.closeCalled should be (1)
