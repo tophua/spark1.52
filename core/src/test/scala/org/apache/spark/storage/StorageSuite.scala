@@ -26,6 +26,7 @@ class StorageSuite extends SparkFunSuite {
   private val memAndDisk = StorageLevel.MEMORY_AND_DISK
 
   // For testing add, update, and remove (for non-RDD blocks)
+  //用于测试添加,更新和删除
   private def storageStatus1: StorageStatus = {
     val status = new StorageStatus(BlockManagerId("big", "dog", 1), 1000L)
     assert(status.blocks.isEmpty)
@@ -40,7 +41,7 @@ class StorageSuite extends SparkFunSuite {
     status
   }
 
-  test("storage status add non-RDD blocks") {
+  test("storage status add non-RDD blocks") {//添加非RDD块存储状态
     val status = storageStatus1
     assert(status.blocks.size === 3)
     assert(status.blocks.contains(TestBlockId("foo")))
@@ -53,7 +54,7 @@ class StorageSuite extends SparkFunSuite {
     assert(status.offHeapUsed === 3L)
   }
 
-  test("storage status update non-RDD blocks") {
+  test("storage status update non-RDD blocks") {//存储状态更新非RDD块
     val status = storageStatus1
     status.updateBlock(TestBlockId("foo"), BlockStatus(memAndDisk, 50L, 100L, 1L))
     status.updateBlock(TestBlockId("fee"), BlockStatus(memAndDisk, 100L, 20L, 0L))
@@ -64,7 +65,7 @@ class StorageSuite extends SparkFunSuite {
     assert(status.offHeapUsed === 2L)
   }
 
-  test("storage status remove non-RDD blocks") {
+  test("storage status remove non-RDD blocks") {//删除非RDD块存储状态
     val status = storageStatus1
     status.removeBlock(TestBlockId("foo"))
     status.removeBlock(TestBlockId("faa"))
@@ -90,7 +91,7 @@ class StorageSuite extends SparkFunSuite {
     status
   }
 
-  test("storage status add RDD blocks") {
+  test("storage status add RDD blocks") {//存储状态添加RDD块
     val status = storageStatus2
     assert(status.blocks.size === 7)
     assert(status.rddBlocks.size === 5)
@@ -121,6 +122,7 @@ class StorageSuite extends SparkFunSuite {
     assert(status.rddStorageLevel(2) === Some(memAndDisk))
 
     // Verify default values for RDDs that don't exist
+    //验证默认值不存RDD
     assert(status.rddBlocksById(10).isEmpty)
     assert(status.memUsedByRdd(10) === 0L)
     assert(status.diskUsedByRdd(10) === 0L)
@@ -128,7 +130,7 @@ class StorageSuite extends SparkFunSuite {
     assert(status.rddStorageLevel(10) === None)
   }
 
-  test("storage status update RDD blocks") {
+  test("storage status update RDD blocks") {//存储状态更新RDD块
     val status = storageStatus2
     status.updateBlock(TestBlockId("dan"), BlockStatus(memAndDisk, 5000L, 0L, 0L))
     status.updateBlock(RDDBlockId(0, 0), BlockStatus(memAndDisk, 0L, 0L, 0L))
@@ -149,7 +151,7 @@ class StorageSuite extends SparkFunSuite {
     assert(status.offHeapUsedByRdd(2) === 0L)
   }
 
-  test("storage status remove RDD blocks") {
+  test("storage status remove RDD blocks") {//删除RDD块存储状态
     val status = storageStatus2
     status.removeBlock(TestBlockId("man"))
     status.removeBlock(RDDBlockId(1, 1))
@@ -178,6 +180,7 @@ class StorageSuite extends SparkFunSuite {
   test("storage status containsBlock") {
     val status = storageStatus2
     // blocks that actually exist
+    //实际上存在的块
     assert(status.blocks.contains(TestBlockId("dan")) === status.containsBlock(TestBlockId("dan")))
     assert(status.blocks.contains(TestBlockId("man")) === status.containsBlock(TestBlockId("man")))
     assert(status.blocks.contains(RDDBlockId(0, 0)) === status.containsBlock(RDDBlockId(0, 0)))
@@ -186,13 +189,15 @@ class StorageSuite extends SparkFunSuite {
     assert(status.blocks.contains(RDDBlockId(2, 3)) === status.containsBlock(RDDBlockId(2, 3)))
     assert(status.blocks.contains(RDDBlockId(2, 4)) === status.containsBlock(RDDBlockId(2, 4)))
     // blocks that don't exist
+    //不存在的块
     assert(status.blocks.contains(TestBlockId("fan")) === status.containsBlock(TestBlockId("fan")))
     assert(status.blocks.contains(RDDBlockId(100, 0)) === status.containsBlock(RDDBlockId(100, 0)))
   }
 
-  test("storage status getBlock") {
+  test("storage status getBlock") {//存储状态getblock
     val status = storageStatus2
     // blocks that actually exist
+    //实际上存在的块
     assert(status.blocks.get(TestBlockId("dan")) === status.getBlock(TestBlockId("dan")))
     assert(status.blocks.get(TestBlockId("man")) === status.getBlock(TestBlockId("man")))
     assert(status.blocks.get(RDDBlockId(0, 0)) === status.getBlock(RDDBlockId(0, 0)))
@@ -201,11 +206,12 @@ class StorageSuite extends SparkFunSuite {
     assert(status.blocks.get(RDDBlockId(2, 3)) === status.getBlock(RDDBlockId(2, 3)))
     assert(status.blocks.get(RDDBlockId(2, 4)) === status.getBlock(RDDBlockId(2, 4)))
     // blocks that don't exist
+    //不存在的块
     assert(status.blocks.get(TestBlockId("fan")) === status.getBlock(TestBlockId("fan")))
     assert(status.blocks.get(RDDBlockId(100, 0)) === status.getBlock(RDDBlockId(100, 0)))
   }
 
-  test("storage status num[Rdd]Blocks") {
+  test("storage status num[Rdd]Blocks") {//
     val status = storageStatus2
     assert(status.blocks.size === status.numBlocks)
     assert(status.rddBlocks.size === status.numRddBlocks)
@@ -232,6 +238,7 @@ class StorageSuite extends SparkFunSuite {
     assert(status.rddBlocksById(4).size === status.numRddBlocksById(4))
     assert(status.rddBlocksById(10).size === status.numRddBlocksById(10))
     // remove a block that doesn't exist
+    //删除不存在的块
     status.removeBlock(RDDBlockId(1000, 999))
     assert(status.blocks.size === status.numBlocks)
     assert(status.rddBlocks.size === status.numRddBlocks)

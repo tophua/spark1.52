@@ -24,7 +24,7 @@ import org.apache.spark.SparkFunSuite
 class UIUtilsSuite extends SparkFunSuite {
   import UIUtils._
 
-  test("makeDescription") {
+  test("makeDescription") {//标记描述
     verify(
       """test <a href="/link"> text </a>""",
       <span class="description-input">test <a href="/link"> text </a></span>,

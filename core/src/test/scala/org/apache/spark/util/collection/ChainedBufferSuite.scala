@@ -24,98 +24,110 @@ import org.scalatest.Matchers._
 import org.apache.spark.SparkFunSuite
 
 class ChainedBufferSuite extends SparkFunSuite {
-  test("write and read at start") {
+  test("write and read at start") {//开始写和读
     // write from start of source array
+    //从数组开始写
     val buffer = new ChainedBuffer(8)
     buffer.capacity should be (0)
     verifyWriteAndRead(buffer, 0, 0, 0, 4)
     buffer.capacity should be (8)
 
     // write from middle of source array
+    //从源数组中间写
     verifyWriteAndRead(buffer, 0, 5, 0, 4)
     buffer.capacity should be (8)
 
     // read to middle of target array
+    //读取目标数组中间值
     verifyWriteAndRead(buffer, 0, 0, 5, 4)
     buffer.capacity should be (8)
 
-    // write up to border
+    // write up to border 写边界
     verifyWriteAndRead(buffer, 0, 0, 0, 8)
     buffer.capacity should be (8)
 
     // expand into second buffer
+    //扩展到第二个缓冲区
     verifyWriteAndRead(buffer, 0, 0, 0, 12)
     buffer.capacity should be (16)
 
     // expand into multiple buffers
+    //扩展到多个缓冲区
     verifyWriteAndRead(buffer, 0, 0, 0, 28)
     buffer.capacity should be (32)
   }
 
-  test("write and read at middle") {
+  test("write and read at middle") {//在中间写和读
     val buffer = new ChainedBuffer(8)
 
-    // fill to a middle point
+    // fill to a middle point 填充中间点
     verifyWriteAndRead(buffer, 0, 0, 0, 3)
 
     // write from start of source array
+    //从数组开始写
     verifyWriteAndRead(buffer, 3, 0, 0, 4)
     buffer.capacity should be (8)
 
     // write from middle of source array
+    //从源数组中间写
     verifyWriteAndRead(buffer, 3, 5, 0, 4)
     buffer.capacity should be (8)
 
     // read to middle of target array
+    //读到目标数组的中间
     verifyWriteAndRead(buffer, 3, 0, 5, 4)
     buffer.capacity should be (8)
 
-    // write up to border
+    // write up to border 写边界
     verifyWriteAndRead(buffer, 3, 0, 0, 5)
     buffer.capacity should be (8)
 
-    // expand into second buffer
+    // expand into second buffer 扩展到第二个缓冲区
     verifyWriteAndRead(buffer, 3, 0, 0, 12)
     buffer.capacity should be (16)
 
-    // expand into multiple buffers
+    // expand into multiple buffers 扩展到多个缓冲区
     verifyWriteAndRead(buffer, 3, 0, 0, 28)
     buffer.capacity should be (32)
   }
 
-  test("write and read at later buffer") {
+  test("write and read at later buffer") {//在缓冲区中写入和读取
     val buffer = new ChainedBuffer(8)
 
-    // fill to a middle point
+    // fill to a middle point 填充中间点
     verifyWriteAndRead(buffer, 0, 0, 0, 11)
 
     // write from start of source array
+    //从数组开始写
     verifyWriteAndRead(buffer, 11, 0, 0, 4)
     buffer.capacity should be (16)
 
     // write from middle of source array
+    //从源数组中间写
     verifyWriteAndRead(buffer, 11, 5, 0, 4)
     buffer.capacity should be (16)
 
     // read to middle of target array
+    //读到目标数组的中间
     verifyWriteAndRead(buffer, 11, 0, 5, 4)
     buffer.capacity should be (16)
 
-    // write up to border
+    // write up to border 写边界
     verifyWriteAndRead(buffer, 11, 0, 0, 5)
     buffer.capacity should be (16)
 
-    // expand into second buffer
+    // expand into second buffer 扩展到第二个缓冲区
     verifyWriteAndRead(buffer, 11, 0, 0, 12)
     buffer.capacity should be (24)
 
-    // expand into multiple buffers
+    // expand into multiple buffers 扩展到多个缓冲区
     verifyWriteAndRead(buffer, 11, 0, 0, 28)
     buffer.capacity should be (40)
   }
 
 
   // Used to make sure we're writing different bytes each time
+  //用来每一次确保我们写不同的字节
   var rangeStart = 0
 
   /**

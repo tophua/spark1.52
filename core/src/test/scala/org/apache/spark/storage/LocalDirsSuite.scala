@@ -33,7 +33,7 @@ class LocalDirsSuite extends SparkFunSuite with BeforeAndAfter {
   before {
     Utils.clearLocalRootDirs()
   }
-
+//返回一个有效的目录,即使一些地方目录丢失
   test("Utils.getLocalDir() returns a valid directory, even if some local dirs are missing") {
     // Regression test for SPARK-2974
     assert(!new File("/NONEXISTENT_DIR").exists())
@@ -42,7 +42,7 @@ class LocalDirsSuite extends SparkFunSuite with BeforeAndAfter {
     assert(new File(Utils.getLocalDir(conf)).exists())
   }
 
-  test("SPARK_LOCAL_DIRS override also affects driver") {
+  test("SPARK_LOCAL_DIRS override also affects driver") {//重写也会影响驱动程序
     // Regression test for SPARK-2975
     assert(!new File("/NONEXISTENT_DIR").exists())
     // SPARK_LOCAL_DIRS is a valid directory:

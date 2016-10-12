@@ -24,7 +24,7 @@ import scala.collection.mutable.HashSet
 import org.apache.spark.SparkFunSuite
 
 class AppendOnlyMapSuite extends SparkFunSuite {
-  test("initialization") {
+  test("initialization") {//初始化
     val goodMap1 = new AppendOnlyMap[Int, Int](1)
     assert(goodMap1.size === 0)
     val goodMap2 = new AppendOnlyMap[Int, Int](255)
@@ -42,7 +42,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     }
   }
 
-  test("object keys and values") {
+  test("object keys and values") {//对象键和值
     val map = new AppendOnlyMap[String, String]()
     for (i <- 1 to 100) {
       map("" + i) = "" + i
@@ -61,7 +61,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     assert(set === (1 to 100).map(_.toString).map(x => (x, x)).toSet)
   }
 
-  test("primitive keys and values") {
+  test("primitive keys and values") {//原始键和值
     val map = new AppendOnlyMap[Int, Int]()
     for (i <- 1 to 100) {
       map(i) = i
@@ -79,7 +79,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     assert(set === (1 to 100).map(x => (x, x)).toSet)
   }
 
-  test("null keys") {
+  test("null keys") {//空键
     val map = new AppendOnlyMap[String, String]()
     for (i <- 1 to 100) {
       map("" + i) = "" + i
@@ -91,7 +91,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     assert(map(null) === "hello")
   }
 
-  test("null values") {
+  test("null values") {//空值
     val map = new AppendOnlyMap[String, String]()
     for (i <- 1 to 100) {
       map("" + i) = null
@@ -121,6 +121,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     }
     // Iterate from 101 to 400 to make sure the map grows a couple of times, because we had a
     // bug where changeValue would return the wrong result when the map grew on that insert
+    //从101到400进行迭代以确保Map增长
     for (i <- 101 to 400) {
       val res = map.changeValue("" + i, (hadValue, oldValue) => {
         assert(hadValue === false)
@@ -143,7 +144,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     assert(map.size === 401)
   }
 
-  test("inserting in capacity-1 map") {
+  test("inserting in capacity-1 map") {//插入容量-1的Map任务
     val map = new AppendOnlyMap[String, String](1)
     for (i <- 1 to 100) {
       map("" + i) = "" + i
@@ -154,7 +155,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     }
   }
 
-  test("destructive sort") {
+  test("destructive sort") {//破坏性排序
     val map = new AppendOnlyMap[String, String]()
     for (i <- 1 to 100) {
       map("" + i) = "" + i
@@ -179,6 +180,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     })
 
     // Should be sorted by key
+    //应按键分类
     assert(it.hasNext)
     var previous = it.next()
     assert(previous == (null, "happy new year!"))
@@ -191,6 +193,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     }
 
     // All subsequent calls to apply, update, changeValue and iterator should throw exception
+    //所有后续的调用申请,更新,changevalue和迭代器应该抛出异常
     intercept[AssertionError] { map.apply("1") }
     intercept[AssertionError] { map.update("1", "2013") }
     intercept[AssertionError] { map.changeValue("1", (hadValue, oldValue) => "2014") }

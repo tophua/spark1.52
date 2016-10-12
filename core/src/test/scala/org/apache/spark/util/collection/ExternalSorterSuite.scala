@@ -41,11 +41,11 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     conf
   }
 
-  test("empty data stream with kryo ser") {
+  test("empty data stream with kryo ser") {//空数据流使用kryo序列化
     emptyDataStream(createSparkConf(false, true))
   }
 
-  test("empty data stream with java ser") {
+  test("empty data stream with java ser") {//空数据流使用java序列化
     emptyDataStream(createSparkConf(false, false))
   }
 
@@ -57,36 +57,36 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     val agg = new Aggregator[Int, Int, Int](i => i, (i, j) => i + j, (i, j) => i + j)
     val ord = implicitly[Ordering[Int]]
 
-    // Both aggregator and ordering
+    // Both aggregator and ordering 两者的聚合和排序
     val sorter = new ExternalSorter[Int, Int, Int](
       Some(agg), Some(new HashPartitioner(3)), Some(ord), None)
     assert(sorter.iterator.toSeq === Seq())
     sorter.stop()
 
-    // Only aggregator
+    // Only aggregator 只有聚合
     val sorter2 = new ExternalSorter[Int, Int, Int](
       Some(agg), Some(new HashPartitioner(3)), None, None)
     assert(sorter2.iterator.toSeq === Seq())
     sorter2.stop()
 
-    // Only ordering
+    // Only ordering 只有排序
     val sorter3 = new ExternalSorter[Int, Int, Int](
       None, Some(new HashPartitioner(3)), Some(ord), None)
     assert(sorter3.iterator.toSeq === Seq())
     sorter3.stop()
 
-    // Neither aggregator nor ordering
+    // Neither aggregator nor ordering 无论是聚合和排序
     val sorter4 = new ExternalSorter[Int, Int, Int](
       None, Some(new HashPartitioner(3)), None, None)
     assert(sorter4.iterator.toSeq === Seq())
     sorter4.stop()
   }
 
-  test("few elements per partition with kryo ser") {
+  test("few elements per partition with kryo ser") {//几个元素的每个分区使用kryo序列化
     fewElementsPerPartition(createSparkConf(false, true))
   }
 
-  test("few elements per partition with java ser") {
+  test("few elements per partition with java ser") {//几个元素的每个分区使用java序列化
     fewElementsPerPartition(createSparkConf(false, false))
   }
 
@@ -103,27 +103,28 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
       (5, Set((5, 5))), (6, Set()))
 
     // Both aggregator and ordering
+    //两者的聚合和排序
     val sorter = new ExternalSorter[Int, Int, Int](
       Some(agg), Some(new HashPartitioner(7)), Some(ord), None)
     sorter.insertAll(elements.iterator)
     assert(sorter.partitionedIterator.map(p => (p._1, p._2.toSet)).toSet === expected)
     sorter.stop()
 
-    // Only aggregator
+    // Only aggregator 只有聚合
     val sorter2 = new ExternalSorter[Int, Int, Int](
       Some(agg), Some(new HashPartitioner(7)), None, None)
     sorter2.insertAll(elements.iterator)
     assert(sorter2.partitionedIterator.map(p => (p._1, p._2.toSet)).toSet === expected)
     sorter2.stop()
 
-    // Only ordering
+    // Only ordering 只有排序
     val sorter3 = new ExternalSorter[Int, Int, Int](
       None, Some(new HashPartitioner(7)), Some(ord), None)
     sorter3.insertAll(elements.iterator)
     assert(sorter3.partitionedIterator.map(p => (p._1, p._2.toSet)).toSet === expected)
     sorter3.stop()
 
-    // Neither aggregator nor ordering
+    // Neither aggregator nor ordering 无论是聚合和排序
     val sorter4 = new ExternalSorter[Int, Int, Int](
       None, Some(new HashPartitioner(7)), None, None)
     sorter4.insertAll(elements.iterator)
@@ -131,11 +132,11 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     sorter4.stop()
   }
 
-  test("empty partitions with spilling with kryo ser") {
+  test("empty partitions with spilling with kryo ser") {//空的分区与溢出kryo序列化
     emptyPartitionsWithSpilling(createSparkConf(false, true))
   }
 
-  test("empty partitions with spilling with java ser") {
+  test("empty partitions with spilling with java ser") {//空的分区与溢出java序列化
     emptyPartitionsWithSpilling(createSparkConf(false, false))
   }
 
@@ -165,11 +166,13 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
   test("spilling in local cluster with kryo ser") {
     // Load defaults, otherwise SPARK_HOME is not found
+    //加载默认值,否则spark_home没有找到
     testSpillingInLocalCluster(createSparkConf(true, true))
   }
 
   test("spilling in local cluster with java ser") {
     // Load defaults, otherwise SPARK_HOME is not found
+    //加载默认值,否则spark_home没有找到
     testSpillingInLocalCluster(createSparkConf(true, false))
   }
 
@@ -242,11 +245,11 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     val resultE = rddE.sortByKey().collect().toSeq
     assert(resultE === (0 until 100000).map(i => (i/4, i)).toSeq)
   }
-
+  //溢出减少本地集群任务kryo序列化
   test("spilling in local cluster with many reduce tasks with kryo ser") {
     spillingInLocalClusterWithManyReduceTasks(createSparkConf(true, true))
   }
-
+  //溢出减少本地集群任务java序列化
   test("spilling in local cluster with many reduce tasks with java ser") {
     spillingInLocalClusterWithManyReduceTasks(createSparkConf(true, false))
   }
@@ -256,7 +259,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
 
-    // reduceByKey - should spill ~4 times per executor
+    // reduceByKey - should spill ~4 times per executor 每执行者应溢出4次
     val rddA = sc.parallelize(0 until 100000).map(i => (i/2, i))
     val resultA = rddA.reduceByKey(math.max _, 100).collect()
     assert(resultA.length == 50000)
@@ -266,7 +269,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
 
-    // groupByKey - should spill ~8 times per executor
+    // groupByKey - should spill ~8 times per executor 每执行者应溢出8次
     val rddB = sc.parallelize(0 until 100000).map(i => (i/4, i))
     val resultB = rddB.groupByKey(100).collect()
     assert(resultB.length == 25000)
@@ -277,7 +280,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
 
-    // cogroup - should spill ~4 times per executor
+    // cogroup - should spill ~4 times per executor 每执行者应溢出8次
     val rddC1 = sc.parallelize(0 until 10000).map(i => (i, i))
     val rddC2 = sc.parallelize(0 until 10000).map(i => (i%1000, i))
     val resultC = rddC1.cogroup(rddC2, 100).collect()
@@ -345,7 +348,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     sorter2.stop()
     assert(diskBlockManager.getAllBlocks().length === 0)
   }
-
+  //如果有错误,在分类的中间文件清理
   test("cleanup of intermediate files in sorter if there are errors") {
     val conf = createSparkConf(true, false)  // Load defaults, otherwise SPARK_HOME is not found
     conf.set("spark.shuffle.memoryFraction", "0.001")
@@ -369,7 +372,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     sorter.stop()
     assert(diskBlockManager.getAllBlocks().length === 0)
   }
-
+  //在shuffle中清除中间文件
   test("cleanup of intermediate files in shuffle") {
     val conf = createSparkConf(false, false)
     conf.set("spark.shuffle.memoryFraction", "0.001")
@@ -381,11 +384,12 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     assert(data.reduceByKey(_ + _).count() === 100000)
 
     // After the shuffle, there should be only 4 files on disk: our two map output files and
+    //在磁盘上应该只有4个文件,两个Map输出文件和它们的索引文件,所有其他中间文件都应该被删除
     // their index files. All other intermediate files should've been deleted.
     assert(diskBlockManager.getAllFiles().length === 4)
   }
 
-  test("cleanup of intermediate files in shuffle with errors") {
+  test("cleanup of intermediate files in shuffle with errors") {//在shuffle中清除中间文件的错误
     val conf = createSparkConf(false, false)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
@@ -404,10 +408,11 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
     // After the shuffle, there should be only 2 files on disk: the output of task 1 and its index.
     // All other files (map 2's output and intermediate merge files) should've been deleted.
+    //在磁盘上应该只有2个文件,1个Map输出文件和1索引文件,有其他的文件(2个Map的输出和中间合并文件)应该已经被删除
     assert(diskBlockManager.getAllFiles().length === 2)
   }
 
-  test("no partial aggregation or sorting with kryo ser") {
+  test("no partial aggregation or sorting with kryo ser") {//
     noPartialAggregationOrSorting(createSparkConf(false, true))
   }
 
@@ -428,11 +433,11 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }).toSet
     assert(results === expected)
   }
-
+  //部分聚集无溢出
   test("partial aggregation without spill with kryo ser") {
     partialAggregationWithoutSpill(createSparkConf(false, true))
   }
-
+  //部分聚集无溢出
   test("partial aggregation without spill with java ser") {
     partialAggregationWithoutSpill(createSparkConf(false, false))
   }
@@ -451,11 +456,11 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }).toSet
     assert(results === expected)
   }
-
+  //部分聚集溢出,没有排序
   test("partial aggregation with spill, no ordering with kryo ser") {
     partialAggregationWIthSpillNoOrdering(createSparkConf(false, true))
   }
-
+  //部分聚集溢出,没有排序
   test("partial aggregation with spill, no ordering with java ser") {
     partialAggregationWIthSpillNoOrdering(createSparkConf(false, false))
   }
@@ -493,7 +498,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     val ord = implicitly[Ordering[Int]]
     val sorter = new ExternalSorter(Some(agg), Some(new HashPartitioner(3)), Some(ord), None)
 
-    // avoid combine before spill
+    // avoid combine before spill 避免溢出前的结合
     sorter.insertAll((0 until 50000).iterator.map(i => (i , 2 * i)))
     sorter.insertAll((0 until 50000).iterator.map(i => (i, 2 * i + 1)))
     val results = sorter.partitionedIterator.map{case (p, vs) => (p, vs.toSet)}.toSet
@@ -526,11 +531,11 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }).toSeq
     assert(results === expected)
   }
-
+  //没有分类聚集,
   test("sorting without aggregation, with spill with kryo ser") {
     sortingWithoutAggregationWithSpill(createSparkConf(false, true))
   }
-
+ //没有分类聚集,
   test("sorting without aggregation, with spill with java ser") {
     sortingWithoutAggregationWithSpill(createSparkConf(false, false))
   }
@@ -550,7 +555,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }).toSeq
     assert(results === expected)
   }
-
+  //溢出哈希冲突
   test("spilling with hash collisions") {
     val conf = createSparkConf(true, false)
     conf.set("spark.shuffle.memoryFraction", "0.001")
@@ -607,7 +612,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }
     assert(count === 100000 + collisionPairs.size * 2)
   }
-
+  //多散列碰撞溢出
   test("spilling with many hash collisions") {
     val conf = createSparkConf(true, false)
     conf.set("spark.shuffle.memoryFraction", "0.0001")
@@ -630,7 +635,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }
     assert(count === 10000)
   }
-
+  //使用哈希冲突溢出
   test("spilling with hash collisions using the Int.MaxValue key") {
     val conf = createSparkConf(true, false)
     conf.set("spark.shuffle.memoryFraction", "0.001")
@@ -687,7 +692,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   test("sort without breaking sorting contracts with kryo ser") {
     sortWithoutBreakingSortingContracts(createSparkConf(true, true))
   }
-
+ 
   test("sort without breaking sorting contracts with java ser") {
     sortWithoutBreakingSortingContracts(createSparkConf(true, false))
   }
@@ -735,6 +740,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     sorter2.insertAll(testData.iterator.map(i => (i, i)))
 
     // To validate the hash ordering of key
+    //验证哈希Key排序
     var minKey = Int.MinValue
     sorter2.iterator.foreach { case (k, v) =>
       val h = k.hashCode()
@@ -745,11 +751,12 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     sorter2.stop()
   }
 
-  test("sorting updates peak execution memory") {
+  test("sorting updates peak execution memory") {//分类更新执行内存
     val conf = createSparkConf(loadDefaults = false, kryo = false)
       .set("spark.shuffle.manager", "sort")
     sc = new SparkContext("local", "test", conf)
     // Avoid aggregating here to make sure we're not also using ExternalAppendOnlyMap
+    //避免在这里聚合,当然我们使用ExternalAppendOnlyMap
     AccumulatorSuite.verifyPeakExecutionMemorySet(sc, "external sorter") {
       sc.parallelize(1 to 1000, 2).repartition(100).count()
     }

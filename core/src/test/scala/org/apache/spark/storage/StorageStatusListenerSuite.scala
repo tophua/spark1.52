@@ -30,10 +30,11 @@ class StorageStatusListenerSuite extends SparkFunSuite {
   private val taskInfo1 = new TaskInfo(0, 0, 0, 0, "big", "dog", TaskLocality.ANY, false)
   private val taskInfo2 = new TaskInfo(0, 0, 0, 0, "fat", "duck", TaskLocality.ANY, false)
 
-  test("block manager added/removed") {
+  test("block manager added/removed") {//块管理器添加/删除
     val listener = new StorageStatusListener
 
     // Block manager add
+    //模块管理器添加
     assert(listener.executorIdToStorageStatus.size === 0)
     listener.onBlockManagerAdded(SparkListenerBlockManagerAdded(1L, bm1, 1000L))
     assert(listener.executorIdToStorageStatus.size === 1)
@@ -49,6 +50,7 @@ class StorageStatusListenerSuite extends SparkFunSuite {
     assert(listener.executorIdToStorageStatus("fat").numBlocks === 0)
 
     // Block manager remove
+    //模块管理器删除
     listener.onBlockManagerRemoved(SparkListenerBlockManagerRemoved(1L, bm1))
     assert(listener.executorIdToStorageStatus.size === 1)
     assert(!listener.executorIdToStorageStatus.get("big").isDefined)
@@ -59,13 +61,14 @@ class StorageStatusListenerSuite extends SparkFunSuite {
     assert(!listener.executorIdToStorageStatus.get("fat").isDefined)
   }
 
-  test("task end without updated blocks") {
+  test("task end without updated blocks") {//任务结束没有更新块
     val listener = new StorageStatusListener
     listener.onBlockManagerAdded(SparkListenerBlockManagerAdded(1L, bm1, 1000L))
     listener.onBlockManagerAdded(SparkListenerBlockManagerAdded(1L, bm2, 2000L))
     val taskMetrics = new TaskMetrics
 
     // Task end with no updated blocks
+    //没有更新的块的任务结束
     assert(listener.executorIdToStorageStatus("big").numBlocks === 0)
     assert(listener.executorIdToStorageStatus("fat").numBlocks === 0)
     listener.onTaskEnd(SparkListenerTaskEnd(1, 0, "obliteration", Success, taskInfo1, taskMetrics))
@@ -76,7 +79,7 @@ class StorageStatusListenerSuite extends SparkFunSuite {
     assert(listener.executorIdToStorageStatus("fat").numBlocks === 0)
   }
 
-  test("task end with updated blocks") {
+  test("task end with updated blocks") {//任务结束更新块
     val listener = new StorageStatusListener
     listener.onBlockManagerAdded(SparkListenerBlockManagerAdded(1L, bm1, 1000L))
     listener.onBlockManagerAdded(SparkListenerBlockManagerAdded(1L, bm2, 2000L))
@@ -88,7 +91,7 @@ class StorageStatusListenerSuite extends SparkFunSuite {
     taskMetrics1.updatedBlocks = Some(Seq(block1, block2))
     taskMetrics2.updatedBlocks = Some(Seq(block3))
 
-    // Task end with new blocks
+    // Task end with new blocks 任务结束与新块
     assert(listener.executorIdToStorageStatus("big").numBlocks === 0)
     assert(listener.executorIdToStorageStatus("fat").numBlocks === 0)
     listener.onTaskEnd(SparkListenerTaskEnd(1, 0, "obliteration", Success, taskInfo1, taskMetrics1))
@@ -104,7 +107,7 @@ class StorageStatusListenerSuite extends SparkFunSuite {
     assert(listener.executorIdToStorageStatus("big").containsBlock(RDDBlockId(1, 2)))
     assert(listener.executorIdToStorageStatus("fat").containsBlock(RDDBlockId(4, 0)))
 
-    // Task end with dropped blocks
+    // Task end with dropped blocks 任务结束与删除块
     val droppedBlock1 = (RDDBlockId(1, 1), BlockStatus(StorageLevel.NONE, 0L, 0L, 0L))
     val droppedBlock2 = (RDDBlockId(1, 2), BlockStatus(StorageLevel.NONE, 0L, 0L, 0L))
     val droppedBlock3 = (RDDBlockId(4, 0), BlockStatus(StorageLevel.NONE, 0L, 0L, 0L))
@@ -125,7 +128,7 @@ class StorageStatusListenerSuite extends SparkFunSuite {
     assert(listener.executorIdToStorageStatus("fat").numBlocks === 0)
   }
 
-  test("unpersist RDD") {
+  test("unpersist RDD") {//未持久化RDD
     val listener = new StorageStatusListener
     listener.onBlockManagerAdded(SparkListenerBlockManagerAdded(1L, bm1, 1000L))
     val taskMetrics1 = new TaskMetrics
@@ -139,7 +142,7 @@ class StorageStatusListenerSuite extends SparkFunSuite {
     listener.onTaskEnd(SparkListenerTaskEnd(1, 0, "obliteration", Success, taskInfo1, taskMetrics2))
     assert(listener.executorIdToStorageStatus("big").numBlocks === 3)
 
-    // Unpersist RDD
+    // Unpersist RDD 未持久化RDD
     listener.onUnpersistRDD(SparkListenerUnpersistRDD(9090))
     assert(listener.executorIdToStorageStatus("big").numBlocks === 3)
     listener.onUnpersistRDD(SparkListenerUnpersistRDD(4))

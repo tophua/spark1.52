@@ -25,6 +25,7 @@ import org.apache.spark.scheduler.SparkListenerJobStart
 
 /**
  * Tests that this listener populates and cleans up its data structures properly.
+ * 这是一个测试监听和正确清理数据结构
  */
 class RDDOperationGraphListenerSuite extends SparkFunSuite {
   private var jobIdCounter = 0
@@ -36,7 +37,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     //在GC之前webUI保留的stage数量
     .set("spark.ui.retainedStages", maxRetainedStages.toString)
 
-  test("run normal jobs") {
+  test("run normal jobs") {//运行正常的工作
     val startingJobId = jobIdCounter
     val startingStageId = stageIdCounter
     val listener = new RDDOperationGraphListener(conf)
@@ -49,9 +50,10 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.stageIds.isEmpty)
 
     // Run a few jobs, but not enough for clean up yet
-    (1 to 3).foreach { numStages => startJob(numStages, listener) } // start 3 jobs and 6 stages
-    (0 to 5).foreach { i => endStage(startingStageId + i, listener) } // finish all 6 stages
-    (0 to 2).foreach { i => endJob(startingJobId + i, listener) } // finish all 3 jobs
+    //跑了几个工作,但还没有清理
+    (1 to 3).foreach { numStages => startJob(numStages, listener) } // start 3 jobs and 6 stages 开始3个工作和6个阶段
+    (0 to 5).foreach { i => endStage(startingStageId + i, listener) } // finish all 6 stages 完成所有6个阶段
+    (0 to 2).foreach { i => endJob(startingJobId + i, listener) } // finish all 3 jobs 完成所有3个工作
 
     assert(listener.jobIdToStageIds.size === 3)
     assert(listener.jobIdToStageIds(startingJobId).size === 1)
@@ -72,16 +74,18 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.stageIds.size === 6)
   }
 
-  test("run jobs with skipped stages") {
+  test("run jobs with skipped stages") {//跳过阶段的运行作业
     val startingJobId = jobIdCounter
     val startingStageId = stageIdCounter
     val listener = new RDDOperationGraphListener(conf)
 
     // Run a few jobs, but not enough for clean up yet
+    //运行几个工作,但还不清理
     // Leave some stages unfinished so that they are marked as skipped
-    (1 to 3).foreach { numStages => startJob(numStages, listener) } // start 3 jobs and 6 stages
-    (4 to 5).foreach { i => endStage(startingStageId + i, listener) } // finish only last 2 stages
-    (0 to 2).foreach { i => endJob(startingJobId + i, listener) } // finish all 3 jobs
+    // 留下一些未完成的阶段,使它们被标记为跳过
+    (1 to 3).foreach { numStages => startJob(numStages, listener) } // start 3 jobs and 6 stages 开始3个工作和6个阶段
+    (4 to 5).foreach { i => endStage(startingStageId + i, listener) } // finish only last 2 stages 完成最后的2个阶段
+    (0 to 2).foreach { i => endJob(startingJobId + i, listener) } // finish all 3 jobs 完成所有3个工作
 
     assert(listener.jobIdToSkippedStageIds.size === 3)
     assert(listener.jobIdToSkippedStageIds(startingJobId).size === 1)
@@ -90,6 +94,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.completedStageIds.size === 2)
 
     // The rest should be the same as before
+    //剩余应该和以前一样
     assert(listener.jobIdToStageIds.size === 3)
     assert(listener.jobIdToStageIds(startingJobId).size === 1)
     assert(listener.jobIdToStageIds(startingJobId + 1).size === 2)
@@ -106,12 +111,13 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.stageIds.size === 6)
   }
 
-  test("clean up metadata") {
+  test("clean up metadata") {//清理元数据
     val startingJobId = jobIdCounter
     val startingStageId = stageIdCounter
     val listener = new RDDOperationGraphListener(conf)
 
     // Run many jobs and stages to trigger clean up
+    //运行许多工作和阶段来触发清理
     (1 to 10000).foreach { i =>
       // Note: this must be less than `maxRetainedStages`
       val numStages = i % (maxRetainedStages - 2) + 1
@@ -127,6 +133,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     }
 
     // Ensure we never exceed the max retained thresholds
+    //确保我们永远不会超过最大保留阈值
     assert(listener.jobIdToStageIds.size <= maxRetainedJobs)
     assert(listener.jobIdToSkippedStageIds.size <= maxRetainedJobs)
     assert(listener.stageIdToJobId.size <= maxRetainedStages)
@@ -146,6 +153,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.stageIds.nonEmpty)
 
     // Ensure we clean up old jobs and stages, not arbitrary ones
+    //确保我们清理旧的工作和阶段,而不是任意的
     assert(!listener.jobIdToStageIds.contains(startingJobId))
     assert(!listener.jobIdToSkippedStageIds.contains(startingJobId))
     assert(!listener.stageIdToJobId.contains(startingStageId))
@@ -155,12 +163,13 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(!listener.jobIds.contains(startingJobId))
   }
 
-  test("fate sharing between jobs and stages") {
+  test("fate sharing between jobs and stages") {//工作和阶段之间的共享死亡
     val startingJobId = jobIdCounter
     val startingStageId = stageIdCounter
     val listener = new RDDOperationGraphListener(conf)
 
     // Run 3 jobs and 8 stages, finishing all 3 jobs but only 2 stages
+    //运行3个工作和8个阶段,完成所有3个工作，但只有2个阶段
     startJob(5, listener)
     startJob(1, listener)
     startJob(2, listener)
@@ -169,7 +178,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     endStage(startingStageId + 4, listener)
     (0 until 3).foreach { i => endJob(i + startingJobId, listener) }
 
-    // First, assert the old stuff
+    // First, assert the old stuff 首先,维护旧的东西
     assert(listener.jobIdToStageIds.size === 3)
     assert(listener.jobIdToSkippedStageIds.size === 3)
     assert(listener.stageIdToJobId.size === 8)
@@ -177,6 +186,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.completedStageIds.size === 2)
 
     // Cleaning the third job should clean all of its stages
+    //清洗第三个工作应该清洁所有的阶段
     listener.cleanJob(startingJobId + 2)
     assert(listener.jobIdToStageIds.size === 2)
     assert(listener.jobIdToSkippedStageIds.size === 2)
@@ -185,6 +195,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.completedStageIds.size === 2)
 
     // Cleaning one of the stages in the first job should clean that job and all of its stages
+    //清洁第一个工作阶段的一个阶段应该是清洁的工作和它的所有阶段
     // Note that we still keep around the last stage because it belongs to a different job
     listener.cleanStage(startingStageId)
     assert(listener.jobIdToStageIds.size === 1)
@@ -194,7 +205,10 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.completedStageIds.size === 0)
   }
 
-  /** Start a job with the specified number of stages. */
+  /** 
+   *  Start a job with the specified number of stages.
+   *  开始一个工作用指定数量的阶段
+   *   */
   private def startJob(numStages: Int, listener: RDDOperationGraphListener): Int = {
     assert(numStages > 0, "I will not run a job with 0 stages for you.")
     val stageInfos = (0 until numStages).map { _ =>
@@ -210,19 +224,28 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     jobId
   }
 
-  /** Start the stage specified by the given ID. */
+  /** 
+   *  Start the stage specified by the given ID. 
+   *  给定阶段的标识启动
+   *  */
   private def startStage(stageId: Int, listener: RDDOperationGraphListener): Unit = {
     val stageInfo = new StageInfo(stageId, 0, "s", 0, Seq.empty, Seq.empty, "d")
     listener.onStageSubmitted(new SparkListenerStageSubmitted(stageInfo))
   }
 
-  /** Finish the stage specified by the given ID. */
+  /** 
+   *  Finish the stage specified by the given ID.
+   *  完成指定标识的阶段 
+   *  */
   private def endStage(stageId: Int, listener: RDDOperationGraphListener): Unit = {
     val stageInfo = new StageInfo(stageId, 0, "s", 0, Seq.empty, Seq.empty, "d")
     listener.onStageCompleted(new SparkListenerStageCompleted(stageInfo))
   }
 
-  /** Finish the job specified by the given ID. */
+  /** 
+   *  Finish the job specified by the given ID.
+   *  完成指定标识的作业
+   *  */
   private def endJob(jobId: Int, listener: RDDOperationGraphListener): Unit = {
     listener.onJobEnd(new SparkListenerJobEnd(jobId, 0, JobSucceeded))
   }

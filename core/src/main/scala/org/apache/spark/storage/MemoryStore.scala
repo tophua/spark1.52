@@ -610,7 +610,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   def releaseUnrollMemoryForThisTask(memory: Long = -1L): Unit = {
     val taskAttemptId = currentTaskAttemptId()
     accountingLock.synchronized {
-      if (memory < 0) {
+      if (memory < 0) { 
         unrollMemoryMap.remove(taskAttemptId)
       } else {        
         unrollMemoryMap(taskAttemptId) = unrollMemoryMap.getOrElse(taskAttemptId, memory) - memory

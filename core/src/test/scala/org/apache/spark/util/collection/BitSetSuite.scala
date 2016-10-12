@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 
 class BitSetSuite extends SparkFunSuite {
 
-  test("basic set and get") {
+  test("basic set and get") {//基本集和得到
     val setBits = Seq(0, 9, 1, 10, 90, 96)
     val bitset = new BitSet(100)
 
@@ -41,7 +41,7 @@ class BitSetSuite extends SparkFunSuite {
     assert(bitset.cardinality() === setBits.size)
   }
 
-  test("100% full bit set") {
+  test("100% full bit set") {//100%全位集
     val bitset = new BitSet(10000)
     for (i <- 0 until 10000) {
       assert(!bitset.get(i))

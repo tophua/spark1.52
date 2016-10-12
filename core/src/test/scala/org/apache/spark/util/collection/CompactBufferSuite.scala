@@ -20,7 +20,7 @@ package org.apache.spark.util.collection
 import org.apache.spark.SparkFunSuite
 
 class CompactBufferSuite extends SparkFunSuite {
-  test("empty buffer") {
+  test("empty buffer") {//空缓存
     val b = new CompactBuffer[Int]
     assert(b.size === 0)
     assert(b.iterator.toList === Nil)
@@ -32,7 +32,7 @@ class CompactBufferSuite extends SparkFunSuite {
     intercept[IndexOutOfBoundsException] { b(-1) }
   }
 
-  test("basic inserts") {
+  test("basic inserts") {//基本的插入
     val b = new CompactBuffer[Int]
     assert(b.size === 0)
     assert(b.iterator.toList === Nil)
@@ -46,12 +46,13 @@ class CompactBufferSuite extends SparkFunSuite {
     assert(b.size === 1000)
   }
 
-  test("adding sequences") {
+  test("adding sequences") {//添加序列
     val b = new CompactBuffer[Int]
     assert(b.size === 0)
     assert(b.iterator.toList === Nil)
 
     // Add some simple lists and iterators
+    //添加一些简单的列表和迭代器
     b ++= List(0)
     assert(b.size === 1)
     assert(b.iterator.toList === List(0))
@@ -90,7 +91,7 @@ class CompactBufferSuite extends SparkFunSuite {
     assert(b.iterator.toList === (1 to 4).flatMap(i => 0 until 10).toList ++ List(0, 0, 1, 0, 1, 2))
   }
 
-  test("adding the same buffer to itself") {
+  test("adding the same buffer to itself") {//添加相同的缓冲区本身
     val b = new CompactBuffer[Int]
     assert(b.size === 0)
     assert(b.iterator.toList === Nil)

@@ -31,7 +31,7 @@ class FlatmapIteratorSuite extends SparkFunSuite with LocalSparkContext {
    * data, however that stops GC of those objects. By calling 'reset' you flush that
    * info from the serializer, and allow old objects to be GC'd
    */
-  test("Flatmap Iterator to Disk") {
+  test("Flatmap Iterator to Disk") {//迭到硬盘
     val sconf = new SparkConf().setMaster("local").setAppName("iterator_to_disk_test")
     sc = new SparkContext(sconf)
     val expand_size = 100
@@ -42,7 +42,7 @@ class FlatmapIteratorSuite extends SparkFunSuite with LocalSparkContext {
     assert(persisted.filter(_==1).count()===5)
   }
 
-  test("Flatmap Iterator to Memory") {
+  test("Flatmap Iterator to Memory") {//迭代到内存
     val sconf = new SparkConf().setMaster("local").setAppName("iterator_to_disk_test")
     sc = new SparkContext(sconf)
     val expand_size = 100
@@ -53,7 +53,7 @@ class FlatmapIteratorSuite extends SparkFunSuite with LocalSparkContext {
     assert(persisted.filter(_==1).count()===5)
   }
 
-  test("Serializer Reset") {
+  test("Serializer Reset") {//重置序列化
     val sconf = new SparkConf().setMaster("local").setAppName("serializer_reset_test")
       .set("spark.serializer.objectStreamReset", "10")
     sc = new SparkContext(sconf)

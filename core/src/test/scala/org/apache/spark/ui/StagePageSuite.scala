@@ -30,7 +30,7 @@ import org.apache.spark.ui.jobs.{JobProgressListener, StagePage, StagesTab}
 import org.apache.spark.ui.scope.RDDOperationGraphListener
 
 class StagePageSuite extends SparkFunSuite with LocalSparkContext {
-
+  //仅在启用不安全时才显示执行内存值
   test("peak execution memory only displayed if unsafe is enabled") {
     val unsafeConf = "spark.sql.unsafe.enabled"
     val conf = new SparkConf(false).set(unsafeConf, "true")
@@ -38,10 +38,12 @@ class StagePageSuite extends SparkFunSuite with LocalSparkContext {
     val targetString = "peak execution memory"
     assert(html.contains(targetString))
     // Disable unsafe and make sure it's not there
+    //禁用不安全的，并确保它不在那里
     val conf2 = new SparkConf(false).set(unsafeConf, "false")
     val html2 = renderStagePage(conf2).toString().toLowerCase
     assert(!html2.contains(targetString))
     // Avoid setting anything; it should be displayed by default
+    //避免设置任何东西，它应该默认显示
     val conf3 = new SparkConf(false)
     val html3 = renderStagePage(conf3).toString().toLowerCase
     assert(html3.contains(targetString))
@@ -74,6 +76,7 @@ class StagePageSuite extends SparkFunSuite with LocalSparkContext {
     val page = new StagePage(tab)
 
     // Simulate a stage in job progress listener
+    //在工作进度侦听器中模拟一个阶段
     val stageInfo = new StageInfo(0, 0, "dummy", 1, Seq.empty, Seq.empty, "details")
     // Simulate two tasks to test PEAK_EXECUTION_MEMORY correctness
     (1 to 2).foreach {

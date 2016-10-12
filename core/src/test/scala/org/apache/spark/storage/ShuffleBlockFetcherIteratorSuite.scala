@@ -61,18 +61,20 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
   }
 
   // Create a mock managed buffer for testing
+  //创建一个用于测试的模拟管理缓冲区
   def createMockManagedBuffer(): ManagedBuffer = {
     val mockManagedBuffer = mock(classOf[ManagedBuffer])
     when(mockManagedBuffer.createInputStream()).thenReturn(mock(classOf[InputStream]))
     mockManagedBuffer
   }
 
-  test("successful 3 local reads + 2 remote reads") {
+  test("successful 3 local reads + 2 remote reads") {//成功的3本地读取+ 2远程读取
     val blockManager = mock(classOf[BlockManager])
     val localBmId = BlockManagerId("test-client", "test-client", 1)
     doReturn(localBmId).when(blockManager).blockManagerId
 
     // Make sure blockManager.getBlockData would return the blocks
+    //确保blockmanager.getblockdata恢复块
     val localBlocks = Map[BlockId, ManagedBuffer](
       ShuffleBlockId(0, 0, 0) -> createMockManagedBuffer(),
       ShuffleBlockId(0, 1, 0) -> createMockManagedBuffer(),
@@ -82,6 +84,7 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
     }
 
     // Make sure remote blocks would return
+    //确保远程块将返回
     val remoteBmId = BlockManagerId("test-client-1", "test-client-1", 2)
     val remoteBlocks = Map[BlockId, ManagedBuffer](
       ShuffleBlockId(0, 3, 0) -> createMockManagedBuffer(),
@@ -102,6 +105,7 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
       48 * 1024 * 1024)
 
     // 3 local blocks fetched in initialization
+    //在初始化中获取的3个本地块
     verify(blockManager, times(3)).getBlockData(any())
 
     for (i <- 0 until 5) {
@@ -109,6 +113,7 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
       val (blockId, inputStream) = iterator.next()
 
       // Make sure we release buffers when a wrapped input stream is closed.
+      //确保当一个包装的输入流被关闭时,我们释放缓冲区。
       val mockBuf = localBlocks.getOrElse(blockId, remoteBlocks(blockId))
       // Note: ShuffleBlockFetcherIterator wraps input streams in a BufferReleasingInputStream
       val wrappedInputStream = inputStream.asInstanceOf[BufferReleasingInputStream]
@@ -124,12 +129,12 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
       verify(wrappedInputStream.invokePrivate(delegateAccess()), times(1)).close()
     }
 
-    // 3 local blocks, and 2 remote blocks
+    // 3 local blocks, and 2 remote blocks 3个本地块和2个远程块
     // (but from the same block manager so one call to fetchBlocks)
     verify(blockManager, times(3)).getBlockData(any())
     verify(transfer, times(1)).fetchBlocks(any(), any(), any(), any(), any())
   }
-
+  //任务完成释放未用的缓冲区
   test("release current unexhausted buffer in case the task completes early") {
     val blockManager = mock(classOf[BlockManager])
     val localBmId = BlockManagerId("test-client", "test-client", 1)
@@ -143,6 +148,7 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
       ShuffleBlockId(0, 2, 0) -> createMockManagedBuffer())
 
     // Semaphore to coordinate event sequence in two different threads.
+      //在两个不同的线程协调事件序列
     val sem = new Semaphore(0)
 
     val transfer = mock(classOf[BlockTransferService])
@@ -151,6 +157,7 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
         val listener = invocation.getArguments()(4).asInstanceOf[BlockFetchingListener]
         future {
           // Return the first two blocks, and wait till task completion before returning the 3rd one
+          //返回前两个块,并等到任务完成后,返回第三个
           listener.onBlockFetchSuccess(
             ShuffleBlockId(0, 0, 0).toString, blocks(ShuffleBlockId(0, 0, 0)))
           listener.onBlockFetchSuccess(
@@ -174,29 +181,32 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
       48 * 1024 * 1024)
 
     verify(blocks(ShuffleBlockId(0, 0, 0)), times(0)).release()
-    iterator.next()._2.close() // close() first block's input stream
+    iterator.next()._2.close() // close() first block's input stream 第一块输入流
     verify(blocks(ShuffleBlockId(0, 0, 0)), times(1)).release()
 
     // Get the 2nd block but do not exhaust the iterator
+    //获取第二个块，但不要耗尽迭代器
     val subIter = iterator.next()._2
 
     // Complete the task; then the 2nd block buffer should be exhausted
+    //完成任务,然后将第二块缓冲区耗尽
     verify(blocks(ShuffleBlockId(0, 1, 0)), times(0)).release()
     taskContext.markTaskCompleted()
     verify(blocks(ShuffleBlockId(0, 1, 0)), times(1)).release()
 
     // The 3rd block should not be retained because the iterator is already in zombie state
+    //第三块不应该被保留,因为迭代器已经处于僵尸状态
     sem.release()
     verify(blocks(ShuffleBlockId(0, 2, 0)), times(0)).retain()
     verify(blocks(ShuffleBlockId(0, 2, 0)), times(0)).release()
   }
-
+  //如果任何远程请求失败,所有的块都失败了
   test("fail all blocks if any of the remote request fails") {
     val blockManager = mock(classOf[BlockManager])
     val localBmId = BlockManagerId("test-client", "test-client", 1)
     doReturn(localBmId).when(blockManager).blockManagerId
 
-    // Make sure remote blocks would return
+    // Make sure remote blocks would return 确保远程块将返回
     val remoteBmId = BlockManagerId("test-client-1", "test-client-1", 2)
     val blocks = Map[BlockId, ManagedBuffer](
       ShuffleBlockId(0, 0, 0) -> mock(classOf[ManagedBuffer]),
@@ -213,6 +223,7 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
         val listener = invocation.getArguments()(4).asInstanceOf[BlockFetchingListener]
         future {
           // Return the first block, and then fail.
+          //返回第一个块,然后失败
           listener.onBlockFetchSuccess(
             ShuffleBlockId(0, 0, 0).toString, blocks(ShuffleBlockId(0, 0, 0)))
           listener.onBlockFetchFailure(
@@ -239,7 +250,8 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
     sem.acquire()
 
     // The first block should be returned without an exception, and the last two should throw
-    // FetchFailedExceptions (due to failure)
+    // FetchFailedExceptions (due to failure) 由于故障
+    //第一个块应该抛出异常返回
     iterator.next()
     intercept[FetchFailedException] { iterator.next() }
     intercept[FetchFailedException] { iterator.next() }

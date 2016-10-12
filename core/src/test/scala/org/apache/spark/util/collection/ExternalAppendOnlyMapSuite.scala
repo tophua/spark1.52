@@ -47,12 +47,13 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     conf
   }
 
-  test("simple insert") {
+  test("simple insert") {//简单的插入
     val conf = createSparkConf(loadDefaults = false)
     sc = new SparkContext("local", "test", conf)
     val map = createExternalMap[Int]
 
     // Single insert
+    //单个插入
     map.insert(1, 10)
     var it = map.iterator
     assert(it.hasNext)
@@ -61,6 +62,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     assert(!it.hasNext)
 
     // Multiple insert
+    //多个插入
     map.insert(2, 20)
     map.insert(3, 30)
     it = map.iterator
@@ -72,7 +74,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     sc.stop()
   }
 
-  test("insert with collision") {
+  test("insert with collision") {//插入冲突
     val conf = createSparkConf(loadDefaults = false)
     sc = new SparkContext("local", "test", conf)
     val map = createExternalMap[Int]
@@ -94,7 +96,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     sc.stop()
   }
 
-  test("ordering") {
+  test("ordering") {//排序
     val conf = createSparkConf(loadDefaults = false)
     sc = new SparkContext("local", "test", conf)
 
@@ -137,7 +139,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     sc.stop()
   }
 
-  test("null keys and values") {
+  test("null keys and values") {//空键和值
     val conf = createSparkConf(loadDefaults = false)
     sc = new SparkContext("local", "test", conf)
 
@@ -153,6 +155,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     ))
 
     // Null keys
+    //空键
     val nullInt = null.asInstanceOf[Int]
     map.insert(nullInt, 8)
     assert(map.size === 4)
@@ -164,6 +167,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     ))
 
     // Null values
+    //空值
     map.insert(4, nullInt)
     map.insert(nullInt, nullInt)
     assert(map.size === 5)
@@ -178,7 +182,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     sc.stop()
   }
 
-  test("simple aggregator") {
+  test("simple aggregator") {//简单的聚合
     val conf = createSparkConf(loadDefaults = false)
     sc = new SparkContext("local", "test", conf)
 
@@ -194,7 +198,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     sc.stop()
   }
 
-  test("simple cogroup") {
+  test("simple cogroup") {//简单群
     val conf = createSparkConf(loadDefaults = false)
     sc = new SparkContext("local", "test", conf)
     val rdd1 = sc.parallelize(1 to 4).map(i => (i, i))
@@ -213,12 +217,13 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     sc.stop()
   }
 
-  test("spilling") {
+  test("spilling") {//溢出
     testSimpleSpilling()
   }
 
-  test("spilling with compression") {
+  test("spilling with compression") {//举出压缩
     // Keep track of which compression codec we're using to report in test failure messages
+    //跟踪我们正在使用的压缩编解码器在测试失败消息报告
     var lastCompressionCodec: Option[String] = None
     try {
       allCompressionCodecs.foreach { c =>
@@ -381,7 +386,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     sc.stop()
   }
 
-  test("spilling with null keys and values") {
+  test("spilling with null keys and values") {//溢出空键和值
     val conf = createSparkConf(loadDefaults = true)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
@@ -400,16 +405,16 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     sc.stop()
   }
 
-  test("external aggregation updates peak execution memory") {
+  test("external aggregation updates peak execution memory") {//外部聚合更新执行内存值
     val conf = createSparkConf(loadDefaults = false)
       .set("spark.shuffle.memoryFraction", "0.001")
       .set("spark.shuffle.manager", "hash") // make sure we're not also using ExternalSorter
     sc = new SparkContext("local", "test", conf)
-    // No spilling
+    // No spilling,没有溢出
     AccumulatorSuite.verifyPeakExecutionMemorySet(sc, "external map without spilling") {
       sc.parallelize(1 to 10, 2).map { i => (i, i) }.reduceByKey(_ + _).count()
     }
-    // With spilling
+    // With spilling 溢出
     AccumulatorSuite.verifyPeakExecutionMemorySet(sc, "external map with spilling") {
       sc.parallelize(1 to 1000 * 1000, 2).map { i => (i, i) }.reduceByKey(_ + _).count()
     }

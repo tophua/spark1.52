@@ -45,7 +45,7 @@ class UISuite extends SparkFunSuite {
     sc
   }
 
-  ignore("basic ui visibility") {
+  ignore("basic ui visibility") {//基本可见
     //柯里化方法
     withSpark(newSparkContext()) { sc =>
       // test if the ui is visible, and all the expected tabs are visible

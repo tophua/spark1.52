@@ -38,7 +38,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     Utils.deleteRecursively(tempDir)
   }
 
-  test("verify write metrics") {
+  test("verify write metrics") {//验证写度量
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
     val writer = new DiskBlockObjectWriter(new TestBlockId("0"), file,
@@ -46,10 +46,13 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
 
     writer.write(Long.box(20), Long.box(30))
     // Record metrics update on every write
+    //记录每一个写的度量更新
     assert(writeMetrics.shuffleRecordsWritten === 1)
     // Metrics don't update on every write
+    //度量不更新在每一个写
     assert(writeMetrics.shuffleBytesWritten == 0)
     // After 32 writes, metrics should update
+    //32写后，指标应该更新
     for (i <- 0 until 32) {
       writer.flush()
       writer.write(Long.box(i), Long.box(i))
@@ -60,7 +63,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(file.length() == writeMetrics.shuffleBytesWritten)
   }
 
-  test("verify write metrics on revert") {
+  test("verify write metrics on revert") {//在还原上验证写度量
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
     val writer = new DiskBlockObjectWriter(new TestBlockId("0"), file,
@@ -68,6 +71,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
 
     writer.write(Long.box(20), Long.box(30))
     // Record metrics update on every write
+    //记录每一个写的度量更新
     assert(writeMetrics.shuffleRecordsWritten === 1)
     // Metrics don't update on every write
     assert(writeMetrics.shuffleBytesWritten == 0)
@@ -83,7 +87,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(writeMetrics.shuffleRecordsWritten == 0)
   }
 
-  test("Reopening a closed block writer") {
+  test("Reopening a closed block writer") {//重开一个关闭的写的块
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
     val writer = new DiskBlockObjectWriter(new TestBlockId("0"), file,
@@ -95,7 +99,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
       writer.open()
     }
   }
-
+  //一个封闭的块写器应该没有效果
   test("calling revertPartialWritesAndClose() on a closed block writer should have no effect") {
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
@@ -162,7 +166,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     writer.close()
   }
 
-  test("commitAndClose() without ever opening or writing") {
+  test("commitAndClose() without ever opening or writing") {//没有开或写
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
     val writer = new DiskBlockObjectWriter(new TestBlockId("0"), file,

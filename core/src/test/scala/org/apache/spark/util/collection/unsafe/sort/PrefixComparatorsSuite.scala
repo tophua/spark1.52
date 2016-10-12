@@ -24,7 +24,7 @@ import org.apache.spark.unsafe.types.UTF8String
 
 class PrefixComparatorsSuite extends SparkFunSuite with PropertyChecks {
 
-  test("String prefix comparator") {
+  test("String prefix comparator") {//字符串的前缀比较器
 
     def testPrefixComparison(s1: String, s2: String): Unit = {
       val utf8string1 = UTF8String.fromString(s1)
@@ -55,7 +55,7 @@ class PrefixComparatorsSuite extends SparkFunSuite with PropertyChecks {
     forAll { (s1: String, s2: String) => testPrefixComparison(s1, s2) }
   }
 
-  test("Binary prefix comparator") {
+  test("Binary prefix comparator") {//二进制前缀比较器
 
      def compareBinary(x: Array[Byte], y: Array[Byte]): Int = {
       for (i <- 0 until x.length; if i < y.length) {

@@ -60,7 +60,7 @@ class DiskBlockManagerSuite extends SparkFunSuite with BeforeAndAfterEach with B
     diskBlockManager.stop()
   }
 
-  test("basic block creation") {
+  test("basic block creation") {//基本块的创建
     val blockId = new TestBlockId("test")
     val newFile = diskBlockManager.getFile(blockId)
     writeToFile(newFile, 10)
@@ -69,7 +69,7 @@ class DiskBlockManagerSuite extends SparkFunSuite with BeforeAndAfterEach with B
     assert(!diskBlockManager.containsBlock(blockId))
   }
 
-  test("enumerating blocks") {
+  test("enumerating blocks") {//枚举块
     val ids = (1 to 100).map(i => TestBlockId("test_" + i))
     val files = ids.map(id => diskBlockManager.getFile(id))
     files.foreach(file => writeToFile(file, 10))

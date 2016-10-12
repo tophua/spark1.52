@@ -150,7 +150,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
     }
   }
 
-  test("failed stages should not appear to be active") {
+  test("failed stages should not appear to be active") {//失败的阶段不应该出现是活跃的
     withSpark(newSparkContext()) { sc =>
       // Regression test for SPARK-3021
       intercept[SparkException] {
@@ -183,7 +183,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       updatedStageJson should be (stageJson)
     }
   }
-//允许在webUI将stage和相应的job杀死
+  //允许在webUI将stage和相应的job杀死
   test("spark.ui.killEnabled should properly control kill button display") {
     def hasKillLink: Boolean = find(className("kill-link")).isDefined
     def runSlowJob(sc: SparkContext) {
@@ -206,7 +206,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       }
     }
   }
-
+  
   test("jobs page should not display job group name unless some job was submitted in a job group") {
     withSpark(newSparkContext()) { sc =>
       // If no job has been run in a job group, then "(Job Group)" should not appear in the header
@@ -239,12 +239,13 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
     }
   }
 
-  test("job progress bars should handle stage / task failures") {
+  test("job progress bars should handle stage / task failures") {//工作进度条应处理阶段/任务失败
     withSpark(newSparkContext()) { sc =>
       val data = sc.parallelize(Seq(1, 2, 3), 1).map(identity).groupBy(identity)
       val shuffleHandle =
         data.dependencies.head.asInstanceOf[ShuffleDependency[_, _, _]].shuffleHandle
       // Simulate fetch failures:
+      //模拟提取故障：
       val mappedData = data.map { x =>
         val taskContext = TaskContext.get
         if (taskContext.taskAttemptId() == 1) {

@@ -36,7 +36,7 @@ class OpenHashMapSuite extends SparkFunSuite with Matchers {
     actualSize should be <= (expectedSize * 1.1).toLong
   }
 
-  test("initialization") {
+  test("initialization") {//初始化
     val goodMap1 = new OpenHashMap[String, Int](1)
     assert(goodMap1.size === 0)
     val goodMap2 = new OpenHashMap[String, Int](255)
@@ -54,7 +54,7 @@ class OpenHashMapSuite extends SparkFunSuite with Matchers {
     }
   }
 
-  test("primitive value") {
+  test("primitive value") {//原始值
     val map = new OpenHashMap[String, Int]
 
     for (i <- 1 to 1000) {
@@ -82,7 +82,7 @@ class OpenHashMapSuite extends SparkFunSuite with Matchers {
     assert(set === expected.toSet)
   }
 
-  test("non-primitive value") {
+  test("non-primitive value") {//非原始值
     val map = new OpenHashMap[String, String]
 
     for (i <- 1 to 1000) {
@@ -110,7 +110,7 @@ class OpenHashMapSuite extends SparkFunSuite with Matchers {
     assert(set === expected.toSet)
   }
 
-  test("null keys") {
+  test("null keys") {//空键值
     val map = new OpenHashMap[String, String]()
     for (i <- 1 to 100) {
       map(i.toString) = i.toString
@@ -122,7 +122,7 @@ class OpenHashMapSuite extends SparkFunSuite with Matchers {
     assert(map(null) === "hello")
   }
 
-  test("null values") {
+  test("null values") {//空值
     val map = new OpenHashMap[String, String]()
     for (i <- 1 to 100) {
       map(i.toString) = null

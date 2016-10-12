@@ -107,11 +107,13 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     master = null
   }
 
-  test("StorageLevel object caching") {
+  test("StorageLevel object caching") {//存储级对象缓存
     val level1 = StorageLevel(false, false, false, false, 3)
     // this should return the same object as level1
+    //这应该返回相同一级的对象
     val level2 = StorageLevel(false, false, false, false, 3)
     // this should return a different object
+    //这应该返回一个不同的对象
     val level3 = StorageLevel(false, false, false, false, 2)
     assert(level2 === level1, "level2 is not same as level1")
     assert(level2.eq(level1), "level2 is not the same object as level1")
@@ -126,9 +128,11 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(level2_.eq(level1), "Deserialized level2 not the same object as original level1")
   }
 
-  test("BlockManagerId object caching") {
+  test("BlockManagerId object caching") {//块管理器标识对象缓存
     val id1 = BlockManagerId("e1", "XXX", 1)
+    //这应该是1返回相同的对象
     val id2 = BlockManagerId("e1", "XXX", 1) // this should return the same object as id1
+    //这应该返回一个不同的对象
     val id3 = BlockManagerId("e1", "XXX", 2) // this should return a different object
     assert(id2 === id1, "id2 is not same as id1")
     assert(id2.eq(id1), "id2 is not the same object as id1")
@@ -149,28 +153,32 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(!BlockManagerId("notADriverIdentifier", "XXX", 1).isDriver)
   }
 
-  test("master + 1 manager interaction") {
+  test("master + 1 manager interaction") {//主节点+ 1管理合作
     store = makeBlockManager(20000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
     val a3 = new Array[Byte](4000)
 
     // Putting a1, a2  and a3 in memory and telling master only about a1 and a2
+    //把A1，A2和A3在内存中告诉主节点只有A1和A2
     store.putSingle("a1", a1, StorageLevel.MEMORY_ONLY)
     store.putSingle("a2", a2, StorageLevel.MEMORY_ONLY)
     store.putSingle("a3", a3, StorageLevel.MEMORY_ONLY, tellMaster = false)
 
     // Checking whether blocks are in memory
+    //检查块是否在内存中
     assert(store.getSingle("a1").isDefined, "a1 was not in store")
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
     assert(store.getSingle("a3").isDefined, "a3 was not in store")
 
     // Checking whether master knows about the blocks or not
+    //检查是否主节点知道
     assert(master.getLocations("a1").size > 0, "master was not told about a1")
     assert(master.getLocations("a2").size > 0, "master was not told about a2")
     assert(master.getLocations("a3").size === 0, "master was told about a3")
 
     // Drop a1 and a2 from memory; this should be reported back to the master
+    //内存中删除A1和A2的,这应该报告给主节点
     store.dropFromMemory("a1", null: Either[Array[Any], ByteBuffer])
     store.dropFromMemory("a2", null: Either[Array[Any], ByteBuffer])
     assert(store.getSingle("a1") === None, "a1 not removed from store")
@@ -179,7 +187,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(master.getLocations("a2").size === 0, "master did not remove a2")
   }
 
-  test("master + 2 managers interaction") {
+  test("master + 2 managers interaction") {//主节点+ 2管理合作
     store = makeBlockManager(2000, "exec1")
     store2 = makeBlockManager(2000, "exec2")
 
@@ -195,18 +203,20 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(master.getLocations("a2").size === 2, "master did not report 2 locations for a2")
   }
 
-  test("removing block") {
+  test("removing block") {//删除块
     store = makeBlockManager(20000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
     val a3 = new Array[Byte](4000)
 
     // Putting a1, a2 and a3 in memory and telling master only about a1 and a2
+    //把A1,A2和A3存储内存中,只有A1和A2告诉master
     store.putSingle("a1-to-remove", a1, StorageLevel.MEMORY_ONLY)
     store.putSingle("a2-to-remove", a2, StorageLevel.MEMORY_ONLY)
     store.putSingle("a3-to-remove", a3, StorageLevel.MEMORY_ONLY, tellMaster = false)
 
     // Checking whether blocks are in memory and memory size
+    //检查块是否在内存大小
     val memStatus = master.getMemoryStatus.head._2
     assert(memStatus._1 == 20000L, "total memory " + memStatus._1 + " should equal 20000")
     assert(memStatus._2 <= 12000L, "remaining memory " + memStatus._2 + " should <= 12000")
@@ -220,6 +230,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(master.getLocations("a3-to-remove").size === 0, "master was told about a3")
 
     // Remove a1 and a2 and a3. Should be no-op for a3.
+    //删除a1,a2和 a3,应该没有A3
     master.removeBlock("a1-to-remove")
     master.removeBlock("a2-to-remove")
     master.removeBlock("a3-to-remove")
@@ -243,12 +254,13 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
   }
 
-  test("removing rdd") {
+  test("removing rdd") {//删除RDD
     store = makeBlockManager(20000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
     val a3 = new Array[Byte](4000)
     // Putting a1, a2 and a3 in memory.
+    //存储a1,a2,a3到内存中
     store.putSingle(rdd(0, 0), a1, StorageLevel.MEMORY_ONLY)
     store.putSingle(rdd(0, 1), a2, StorageLevel.MEMORY_ONLY)
     store.putSingle("nonrddblock", a3, StorageLevel.MEMORY_ONLY)
@@ -276,7 +288,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     master.getLocations(rdd(0, 1)) should have size 0
   }
 
-  test("removing broadcast") {
+  test("removing broadcast") {//删除广播变更
     store = makeBlockManager(2000)
     val driverStore = store
     val executorStore = makeBlockManager(2000, "executor")
@@ -291,6 +303,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val broadcast2BlockId2 = BroadcastBlockId(2, "_")
 
     // insert broadcast blocks in both the stores
+    //在两个存储中插入广播块
     Seq(driverStore, executorStore).foreach { case s =>
       s.putSingle(broadcast0BlockId, a1, StorageLevel.DISK_ONLY)
       s.putSingle(broadcast1BlockId, a2, StorageLevel.DISK_ONLY)
@@ -299,6 +312,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
 
     // verify whether the blocks exist in both the stores
+    //验证块是否存在于两个存储中
     Seq(driverStore, executorStore).foreach { case s =>
       s.getLocal(broadcast0BlockId) should not be (None)
       s.getLocal(broadcast1BlockId) should not be (None)
@@ -307,24 +321,29 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
 
     // remove broadcast 0 block only from executors
+    //从执行器删除0块广播
     master.removeBroadcast(0, removeFromMaster = false, blocking = true)
 
     // only broadcast 0 block should be removed from the executor store
+    //只有广播0块应该从执行器存储区中删除
     executorStore.getLocal(broadcast0BlockId) should be (None)
     executorStore.getLocal(broadcast1BlockId) should not be (None)
     executorStore.getLocal(broadcast2BlockId) should not be (None)
 
     // nothing should be removed from the driver store
+    //应该从驱动程序存储中删除任何东西
     driverStore.getLocal(broadcast0BlockId) should not be (None)
     driverStore.getLocal(broadcast1BlockId) should not be (None)
     driverStore.getLocal(broadcast2BlockId) should not be (None)
 
     // remove broadcast 0 block from the driver as well
+    //从驱动程序中删除广播0块
     master.removeBroadcast(0, removeFromMaster = true, blocking = true)
     driverStore.getLocal(broadcast0BlockId) should be (None)
     driverStore.getLocal(broadcast1BlockId) should not be (None)
 
     // remove broadcast 1 block from both the stores asynchronously
+    //从异步存储的两个存储区中删除广播1块,并验证所有广播的1个块已被删除
     // and verify all broadcast 1 blocks have been removed
     master.removeBroadcast(1, removeFromMaster = true, blocking = false)
     eventually(timeout(1000 milliseconds), interval(10 milliseconds)) {
@@ -333,6 +352,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
 
     // remove broadcast 2 from both the stores asynchronously
+    //从异步存储的2个广播中删除,并验证所有广播的2个块已被删除
     // and verify all broadcast 2 blocks have been removed
     master.removeBroadcast(2, removeFromMaster = true, blocking = false)
     eventually(timeout(1000 milliseconds), interval(10 milliseconds)) {
@@ -346,7 +366,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     store = null
   }
 
-  test("reregistration on heart beat") {
+  test("reregistration on heart beat") {//重新注册第一个的心跳
     store = makeBlockManager(2000)
     val a1 = new Array[Byte](400)
 
@@ -363,7 +383,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(reregister == true)
   }
 
-  test("reregistration on block update") {
+  test("reregistration on block update") {//重新注册更新块
     store = makeBlockManager(2000)
     val a1 = new Array[Byte](400)
     val a2 = new Array[Byte](400)
@@ -381,12 +401,13 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(master.getLocations("a2").size > 0, "master was not told about a2")
   }
 
-  test("reregistration doesn't dead lock") {
+  test("reregistration doesn't dead lock") {//注册不锁死
     store = makeBlockManager(2000)
     val a1 = new Array[Byte](400)
     val a2 = List(new Array[Byte](400))
 
     // try many times to trigger any deadlocks
+    //尝试了很多次触发死锁
     for (i <- 1 to 100) {
       master.removeExecutor(store.blockManagerId.executorId)
       val t1 = new Thread {
@@ -445,7 +466,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(list2DiskGet.get.readMethod === DataReadMethod.Disk)
   }
 
-  test("in-memory LRU storage") {
+  test("in-memory LRU storage") {//在内存中存储的(LRU)近期最少使用算法
     store = makeBlockManager(12000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
@@ -464,7 +485,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a3") === None, "a3 was in store")
   }
 
-  test("in-memory LRU storage with serialization") {
+  test("in-memory LRU storage with serialization") {//在内存中存储序列化的(LRU)近期最少使用算法
     store = makeBlockManager(12000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
@@ -483,7 +504,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a3") === None, "a3 was in store")
   }
 
-  test("in-memory LRU for partitions of same RDD") {
+  test("in-memory LRU for partitions of same RDD") {//对于相同RDD分区内存LRU
     store = makeBlockManager(12000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
@@ -502,7 +523,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle(rdd(0, 3)) === None, "rdd_0_3 was in store")
   }
 
-  test("in-memory LRU for partitions of multiple RDDs") {
+  test("in-memory LRU for partitions of multiple RDDs") {//对于多分区内存LRU RDDS
     store = makeBlockManager(12000)
     store.putSingle(rdd(0, 1), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     store.putSingle(rdd(0, 2), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
@@ -525,7 +546,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.memoryStore.contains(rdd(0, 3)), "rdd_0_3 was not in store")
   }
 
-  test("tachyon storage") {
+  test("tachyon storage") {//
     // TODO Make the spark.test.tachyon.enable true after using tachyon 0.5.0 testing jar.
     val tachyonUnitTestEnabled = conf.getBoolean("spark.test.tachyon.enable", false)
     conf.set(ExternalBlockStore.BLOCK_MANAGER_NAME, ExternalBlockStore.DEFAULT_BLOCK_MANAGER_NAME)
@@ -545,7 +566,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
   }
 
-  test("on-disk storage") {
+  test("on-disk storage") {//在磁盘上存储
     store = makeBlockManager(1200)
     val a1 = new Array[Byte](400)
     val a2 = new Array[Byte](400)
@@ -558,7 +579,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a1").isDefined, "a1 was in store")
   }
 
-  test("disk and memory storage") {
+  test("disk and memory storage") {//在内存上存储
     store = makeBlockManager(12000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
@@ -573,7 +594,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.memoryStore.getValues("a1").isDefined, "a1 was not in memory store")
   }
 
-  test("disk and memory storage with getLocalBytes") {
+  test("disk and memory storage with getLocalBytes") {//在磁盘和内存存储获本地二进制
     store = makeBlockManager(12000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
@@ -588,7 +609,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.memoryStore.getValues("a1").isDefined, "a1 was not in memory store")
   }
 
-  test("disk and memory storage with serialization") {
+  test("disk and memory storage with serialization") {//磁盘和存储器存储序列化
     store = makeBlockManager(12000)
     val a1 = new Array[Byte](4000)
     val a2 = new Array[Byte](4000)
@@ -602,7 +623,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a1").isDefined, "a1 was not in store")
     assert(store.memoryStore.getValues("a1").isDefined, "a1 was not in memory store")
   }
-
+//磁盘和存储器存储序列化获得本地或者远程数据
   test("disk and memory storage with serialization and getLocalBytes") {
     store = makeBlockManager(12000)
     val a1 = new Array[Byte](4000)
@@ -625,14 +646,17 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val a3 = new Array[Byte](4000)
     val a4 = new Array[Byte](4000)
     // First store a1 and a2, both in memory, and a3, on disk only
+    //第一个存储a1和a2在内存中,a2在磁盘
     store.putSingle("a1", a1, StorageLevel.MEMORY_ONLY_SER)
     store.putSingle("a2", a2, StorageLevel.MEMORY_ONLY_SER)
     store.putSingle("a3", a3, StorageLevel.DISK_ONLY)
     // At this point LRU should not kick in because a3 is only on disk
+    //在这一点上不应该因为LRU踢A3只有在磁盘
     assert(store.getSingle("a1").isDefined, "a1 was not in store")
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
     assert(store.getSingle("a3").isDefined, "a3 was not in store")
     // Now let's add in a4, which uses both disk and memory; a1 should drop out
+    //现在让我们添加在A4,使用磁盘和内存;A1应该退出
     store.putSingle("a4", a4, StorageLevel.MEMORY_AND_DISK_SER)
     assert(store.getSingle("a1") == None, "a1 was in store")
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
@@ -640,7 +664,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a4").isDefined, "a4 was not in store")
   }
 
-  test("in-memory LRU with streams") {
+  test("in-memory LRU with streams") {//在内存LRU流
     store = makeBlockManager(12000)
     val list1 = List(new Array[Byte](2000), new Array[Byte](2000))
     val list2 = List(new Array[Byte](2000), new Array[Byte](2000))
@@ -713,7 +737,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(stream.read(temp, 0, temp.length) === -1, "end of stream not signalled")
   }
 
-  test("overly large block") {
+  test("overly large block") {//过大的块
     store = makeBlockManager(5000)
     store.putSingle("a1", new Array[Byte](10000), StorageLevel.MEMORY_ONLY)
     assert(store.getSingle("a1") === None, "a1 was in store")
@@ -722,7 +746,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
   }
 
-  test("block compression") {
+  test("block compression") {//块压缩
     try {
       conf.set("spark.shuffle.compress", "true")
       store = makeBlockManager(20000, "exec1")
@@ -770,6 +794,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
       store = null
 
       // Check that any other block types are also kept uncompressed
+      //检查任何其他块类型也未压缩
       store = makeBlockManager(20000, "exec7")
       store.putSingle("other_block", new Array[Byte](10000), StorageLevel.MEMORY_ONLY)
       assert(store.memoryStore.getSize("other_block") >= 10000, "other_block was compressed")
@@ -784,14 +809,16 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
   }
 
-  test("block store put failure") {
+  test("block store put failure") {//块存储故障
     // Use Java serializer so we can create an unserializable error.
+    //使用java序列化程序,所以我们可以创建一个未序列化的错差
     val transfer = new NioBlockTransferService(conf, securityMgr)
     store = new BlockManager(SparkContext.DRIVER_IDENTIFIER, rpcEnv, master,
       new JavaSerializer(conf), 1200, conf, mapOutputTracker, shuffleManager, transfer, securityMgr,
       0)
 
     // The put should fail since a1 is not serializable.
+    //一个未序列化的存储失败
     class UnserializableClass
     val a1 = new UnserializableClass
     intercept[java.io.NotSerializableException] {
@@ -799,17 +826,19 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
 
     // Make sure get a1 doesn't hang and returns None.
+    //确保获得A1暂停，返回None,
     failAfter(1 second) {
       assert(store.getSingle("a1") == None, "a1 should not be in store")
     }
   }
-
+  //内存映射和非内存映射文件的读取是等效的
   test("reads of memory-mapped and non memory-mapped files are equivalent") {
   //以字节为单位的块大小，用于磁盘读取一个块大小时进行内存映射。这可以防止Spark在内存映射时使用很小块，
 //一般情况下，对块进行内存映射的开销接近或低于操作系统的页大小
     val confKey = "spark.storage.memoryMapThreshold"
 
     // Create a non-trivial (not all zeros) byte array
+    //创建一个不重要（不是所有的零）字节数组
     var counter = 0.toByte
     def incr: Byte = {counter = (counter + 1).toByte; counter;}
     val bytes = Array.fill[Byte](1000)(incr)
@@ -902,6 +931,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(updatedBlocks5.size === 0)
 
     // memory store contains only list3 and list4
+    //存储器存储只包含list3和list4
     assert(!store.memoryStore.contains("list1"), "list1 was in memory store")
     assert(!store.memoryStore.contains("list2"), "list2 was in memory store")
     assert(store.memoryStore.contains("list3"), "list3 was not in memory store")
@@ -909,6 +939,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(!store.memoryStore.contains("list5"), "list5 was in memory store")
 
     // disk store contains only list2
+    //磁盘存储只包含list2
     assert(!store.diskStore.contains("list1"), "list1 was in disk store")
     assert(store.diskStore.contains("list2"), "list2 was not in disk store")
     assert(!store.diskStore.contains("list3"), "list3 was in disk store")
@@ -916,11 +947,12 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(!store.diskStore.contains("list5"), "list5 was in disk store")
   }
 
-  test("query block statuses") {
+  test("query block statuses") {//查询块的状态
     store = makeBlockManager(12000)
     val list = List.fill(2)(new Array[Byte](2000))
 
     // Tell master. By LRU, only list2 and list3 remains.
+    //告诉主人,通过LRU,只有清单和目录3仍然。
     store.putIterator("list1", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     store.putIterator("list2", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     store.putIterator("list3", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
@@ -955,27 +987,31 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.master.getBlockStatus("list6", askSlaves = true).size === 1)
   }
 
-  test("get matching blocks") {
+  test("get matching blocks") {//获得匹配的块
     store = makeBlockManager(12000)
     val list = List.fill(2)(new Array[Byte](100))
 
     // insert some blocks
+    //插入块
     store.putIterator("list1", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     store.putIterator("list2", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     store.putIterator("list3", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
 
     // getLocations and getBlockStatus should yield the same locations
+    //getLocations和getBlockStatus应该产生相同的位置
     assert(store.master.getMatchingBlockIds(_.toString.contains("list"), askSlaves = false).size
       === 3)
     assert(store.master.getMatchingBlockIds(_.toString.contains("list1"), askSlaves = false).size
       === 1)
 
     // insert some more blocks
+      //插入一些块
     store.putIterator("newlist1", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     store.putIterator("newlist2", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
     store.putIterator("newlist3", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
 
     // getLocations and getBlockStatus should yield the same locations
+    //getlocations和getblockstatus应该产生相同的位置
     assert(store.master.getMatchingBlockIds(_.toString.contains("newlist"), askSlaves = false).size
       === 1)
     assert(store.master.getMatchingBlockIds(_.toString.contains("newlist"), askSlaves = true).size
@@ -991,28 +1027,31 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }, askSlaves = true)
     assert(matchedBlockIds.toSet === Set(RDDBlockId(1, 0), RDDBlockId(1, 1)))
   }
-
+  //修正了缓存替换相同的RDD规则
   test("SPARK-1194 regression: fix the same-RDD rule for cache replacement") {
     store = makeBlockManager(12000)
     store.putSingle(rdd(0, 0), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     store.putSingle(rdd(1, 0), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     // Access rdd_1_0 to ensure it's not least recently used.
+    //为了确保这不是最近最少使用的访问rdd_1_0。
     assert(store.getSingle(rdd(1, 0)).isDefined, "rdd_1_0 was not in store")
     // According to the same-RDD rule, rdd_1_0 should be replaced here.
+    //根据同一法规则,rdd_1_0应更换这里。
     store.putSingle(rdd(0, 1), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     // rdd_1_0 should have been replaced, even it's not least recently used.
+    //rdd_1_0应该被取代，即使它不是最近最少使用。
     assert(store.memoryStore.contains(rdd(0, 0)), "rdd_0_0 was not in store")
     assert(store.memoryStore.contains(rdd(0, 1)), "rdd_0_1 was not in store")
     assert(!store.memoryStore.contains(rdd(1, 0)), "rdd_1_0 was in store")
   }
 
-  test("reserve/release unroll memory") {
+  test("reserve/release unroll memory") {//储备/释放展开内存
     store = makeBlockManager(12000)
     val memoryStore = store.memoryStore
     assert(memoryStore.currentUnrollMemory === 0)
     assert(memoryStore.currentUnrollMemoryForThisTask === 0)
 
-    // Reserve
+    // Reserve 储备
     memoryStore.reserveUnrollMemoryForThisTask(100)
     assert(memoryStore.currentUnrollMemoryForThisTask === 100)
     memoryStore.reserveUnrollMemoryForThisTask(200)
@@ -1021,17 +1060,17 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(memoryStore.currentUnrollMemoryForThisTask === 800)
     memoryStore.reserveUnrollMemoryForThisTask(1000000)
     assert(memoryStore.currentUnrollMemoryForThisTask === 800) // not granted
-    // Release
+    // Release 释放
     memoryStore.releaseUnrollMemoryForThisTask(100)
     assert(memoryStore.currentUnrollMemoryForThisTask === 700)
     memoryStore.releaseUnrollMemoryForThisTask(100)
     assert(memoryStore.currentUnrollMemoryForThisTask === 600)
-    // Reserve again
+    // Reserve again 再次储备
     memoryStore.reserveUnrollMemoryForThisTask(4400)
     assert(memoryStore.currentUnrollMemoryForThisTask === 5000)
     memoryStore.reserveUnrollMemoryForThisTask(20000)
     assert(memoryStore.currentUnrollMemoryForThisTask === 5000) // not granted
-    // Release again
+    // Release again  再次释放
     memoryStore.releaseUnrollMemoryForThisTask(1000)
     assert(memoryStore.currentUnrollMemoryForThisTask === 4000)
     memoryStore.releaseUnrollMemoryForThisTask() // release all
@@ -1040,6 +1079,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
 
   /**
    * Verify the result of MemoryStore#unrollSafely is as expected.
+   * 验证的结果是内存中# unrollsafely预期
    */
   private def verifyUnroll(
       expected: Iterator[Any],
@@ -1060,7 +1100,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
   }
 
-  test("safely unroll blocks") {
+  test("safely unroll blocks") {//安全展开块
     store = makeBlockManager(12000)
     val smallList = List.fill(40)(new Array[Byte](100))
     val bigList = List.fill(40)(new Array[Byte](1000))
@@ -1069,12 +1109,14 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(memoryStore.currentUnrollMemoryForThisTask === 0)
 
     // Unroll with all the space in the world. This should succeed and return an array.
+    //将展开所有空间,这应该成功并返回一个数组
     var unrollResult = memoryStore.unrollSafely("unroll", smallList.iterator, droppedBlocks)
     verifyUnroll(smallList.iterator, unrollResult, shouldBeArray = true)
     assert(memoryStore.currentUnrollMemoryForThisTask === 0)
     memoryStore.releasePendingUnrollMemoryForThisTask()
 
     // Unroll with not enough space. This should succeed after kicking out someBlock1.
+    //将没有足够的空间,这应该被踢出后someblock1成功
     store.putIterator("someBlock1", smallList.iterator, StorageLevel.MEMORY_ONLY)
     store.putIterator("someBlock2", smallList.iterator, StorageLevel.MEMORY_ONLY)
     unrollResult = memoryStore.unrollSafely("unroll", smallList.iterator, droppedBlocks)
@@ -1087,6 +1129,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
 
     // Unroll huge block with not enough space. Even after ensuring free space of 12000 * 0.4 =
     // 4800 bytes, there is still not enough room to unroll this block. This returns an iterator.
+    //打开巨大的块没有足够的空间,即使在保证了自由空间
     // In the mean time, however, we kicked out someBlock2 before giving up.
     store.putIterator("someBlock3", smallList.iterator, StorageLevel.MEMORY_ONLY)
     unrollResult = memoryStore.unrollSafely("unroll", bigList.iterator, droppedBlocks)
@@ -1097,7 +1140,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     droppedBlocks.clear()
   }
 
-  test("safely unroll blocks through putIterator") {
+  test("safely unroll blocks through putIterator") {//安全地展开通过putiterator块
     store = makeBlockManager(12000)
     val memOnly = StorageLevel.MEMORY_ONLY
     val memoryStore = store.memoryStore
@@ -1108,13 +1151,14 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(memoryStore.currentUnrollMemoryForThisTask === 0)
 
     // Unroll with plenty of space. This should succeed and cache both blocks.
+    //将有很多的空间,这应该成功并缓存两个块。
     val result1 = memoryStore.putIterator("b1", smallIterator, memOnly, returnValues = true)
     val result2 = memoryStore.putIterator("b2", smallIterator, memOnly, returnValues = true)
     assert(memoryStore.contains("b1"))
     assert(memoryStore.contains("b2"))
-    assert(result1.size > 0) // unroll was successful
+    assert(result1.size > 0) // unroll was successful展开成功
     assert(result2.size > 0)
-    assert(result1.data.isLeft) // unroll did not drop this block to disk
+    assert(result1.data.isLeft) // unroll did not drop this block to disk 展开不放弃这一块磁盘
     assert(result2.data.isLeft)
     assert(memoryStore.currentUnrollMemoryForThisTask === 0)
 
@@ -1124,7 +1168,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     memoryStore.remove("b2")
     store.putIterator("b1", smallIterator, memOnly)
     store.putIterator("b2", smallIterator, memOnly)
-
+    //将没有足够的空间,这应该是成功的但踢出B1的过程中
     // Unroll with not enough space. This should succeed but kick out b1 in the process.
     val result3 = memoryStore.putIterator("b3", smallIterator, memOnly, returnValues = true)
     assert(result3.size > 0)
@@ -1137,6 +1181,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     store.putIterator("b3", smallIterator, memOnly)
 
     // Unroll huge block with not enough space. This should fail and kick out b2 in the process.
+    //打开巨大的块没有足够的空间,
     val result4 = memoryStore.putIterator("b4", bigIterator, memOnly, returnValues = true)
     assert(result4.size === 0) // unroll was unsuccessful
     assert(result4.data.isLeft)
@@ -1144,13 +1189,15 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(!memoryStore.contains("b2"))
     assert(memoryStore.contains("b3"))
     assert(!memoryStore.contains("b4"))
+    //我们返回了一个迭代器
     assert(memoryStore.currentUnrollMemoryForThisTask > 0) // we returned an iterator
   }
 
   /**
    * This test is essentially identical to the preceding one, except that it uses MEMORY_AND_DISK.
+   * 测试基本上是相同的前一个
    */
-  test("safely unroll blocks through putIterator (disk)") {
+  test("safely unroll blocks through putIterator (disk)") {//安全地展开,通过putiterator块
     store = makeBlockManager(12000)
     val memAndDisk = StorageLevel.MEMORY_AND_DISK
     val memoryStore = store.memoryStore
@@ -1165,6 +1212,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     store.putIterator("b2", smallIterator, memAndDisk)
 
     // Unroll with not enough space. This should succeed but kick out b1 in the process.
+    //将没有足够的空间
     // Memory store should contain b2 and b3, while disk store should contain only b1
     val result3 = memoryStore.putIterator("b3", smallIterator, memAndDisk, returnValues = true)
     assert(result3.size > 0)
@@ -1195,7 +1243,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(memoryStore.currentUnrollMemoryForThisTask > 0) // we returned an iterator
   }
 
-  test("multiple unrolls by the same thread") {
+  test("multiple unrolls by the same thread") {//同一个线程多展开
     store = makeBlockManager(12000)
     val memOnly = StorageLevel.MEMORY_ONLY
     val memoryStore = store.memoryStore
@@ -1204,6 +1252,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(memoryStore.currentUnrollMemoryForThisTask === 0)
 
     // All unroll memory used is released because unrollSafely returned an array
+    //所有使用的内存被释放因为unrollsafely将返回一个数组
     memoryStore.putIterator("b1", smallIterator, memOnly, returnValues = true)
     assert(memoryStore.currentUnrollMemoryForThisTask === 0)
     memoryStore.putIterator("b2", smallIterator, memOnly, returnValues = true)
@@ -1211,6 +1260,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
 
     // Unroll memory is not released because unrollSafely returned an iterator
     // that still depends on the underlying vector used in the process
+    //打开内存不释放unrollsafely返回一个迭代器,因为仍然依赖于底层的载体在使用过程中
     memoryStore.putIterator("b3", smallIterator, memOnly, returnValues = true)
     val unrollMemoryAfterB3 = memoryStore.currentUnrollMemoryForThisTask
     assert(unrollMemoryAfterB3 > 0)
@@ -1231,7 +1281,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(unrollMemoryAfterB6 === unrollMemoryAfterB4)
     assert(unrollMemoryAfterB7 === unrollMemoryAfterB4)
   }
-
+  //延迟创造大字节缓冲区，避免内存溢出,如果它不能被放在内存中
   test("lazily create a big ByteBuffer to avoid OOM if it cannot be put into MemoryStore") {
     store = makeBlockManager(12000)
     val memoryStore = store.memoryStore
@@ -1244,7 +1294,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(result.droppedBlocks === Nil)
   }
 
-  test("put a small ByteBuffer to MemoryStore") {
+  test("put a small ByteBuffer to MemoryStore") {//把一个小ByteBuffer到内存中
     store = makeBlockManager(12000)
     val memoryStore = store.memoryStore
     val blockId = BlockId("rdd_3_10")
