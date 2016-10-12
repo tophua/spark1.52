@@ -38,7 +38,7 @@ class HashShuffleManagerSuite extends SparkFunSuite with LocalSparkContext {
     assert(expected.offset === segment.getOffset)
     assert(expected.length === segment.getLength)
   }
-
+  //合并Shuffle,写Shuffle分组现有的偏移/长度
   test("consolidated shuffle can write to shuffle group without messing existing offsets/lengths") {
 
     val conf = new SparkConf(false)
@@ -99,6 +99,7 @@ class HashShuffleManagerSuite extends SparkFunSuite with LocalSparkContext {
       writer.commitAndClose()
     }
     // check before we register.
+    //注册之前检查
     checkSegments(shuffle2Segment, shuffleBlockResolver.getBlockData(ShuffleBlockId(1, 2, 0)))
     shuffle3.releaseWriters(success = true)
     checkSegments(shuffle2Segment, shuffleBlockResolver.getBlockData(ShuffleBlockId(1, 2, 0)))

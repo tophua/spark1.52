@@ -30,15 +30,17 @@ class SortShuffleWriterSuite extends SparkFunSuite {
     val agg = mock(classOf[Aggregator[_, _, _]], RETURNS_SMART_NULLS)
     val ord = implicitly[Ordering[Int]]
 
-    // Numbers of partitions that are above and below the default bypassMergeThreshold
+    // Numbers of partitions that are above and below the default bypassMergeThreshold    /
     val FEW_PARTITIONS = 50
     val MANY_PARTITIONS = 10000
 
     // Shuffles with no ordering or aggregator: should bypass unless # of partitions is high
+    //没有排序或聚合Shuffle
     assert(shouldBypassMergeSort(conf, FEW_PARTITIONS, None, None))
     assert(!shouldBypassMergeSort(conf, MANY_PARTITIONS, None, None))
 
     // Shuffles with an ordering or aggregator: should not bypass even if they have few partitions
+    //Shuffle的排序或聚合,
     assert(!shouldBypassMergeSort(conf, FEW_PARTITIONS, None, Some(ord)))
     assert(!shouldBypassMergeSort(conf, FEW_PARTITIONS, Some(agg), None))
   }

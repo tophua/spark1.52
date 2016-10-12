@@ -55,7 +55,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
     dep
   }
 
-  test("supported shuffle dependencies") {
+  test("supported shuffle dependencies") {//支持Shuffle依赖
     val kryo = Some(new KryoSerializer(new SparkConf()))
 
     assert(canUseUnsafeShuffle(shuffleDep(
@@ -77,6 +77,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
     )))
 
     // Shuffles with key orderings are supported as long as no aggregator is specified
+    //Shuffles键的排序支持,只要没有指定聚合
     assert(canUseUnsafeShuffle(shuffleDep(
       partitioner = new HashPartitioner(2),
       serializer = kryo,
@@ -87,11 +88,12 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
 
   }
 
-  test("unsupported shuffle dependencies") {
+  test("unsupported shuffle dependencies") {//不支持Shuffle依赖
     val kryo = Some(new KryoSerializer(new SparkConf()))
     val java = Some(new JavaSerializer(new SparkConf()))
 
     // We only support serializers that support object relocation
+    //我们只支持序列化支持对象重定位
     assert(!canUseUnsafeShuffle(shuffleDep(
       partitioner = new HashPartitioner(2),
       serializer = java,
@@ -101,6 +103,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
     )))
 
     // We do not support shuffles with more than 16 million output partitions
+    //我们不支持将有超过1600万的输出分区
     assert(!canUseUnsafeShuffle(shuffleDep(
       partitioner = new HashPartitioner(UnsafeShuffleManager.MAX_SHUFFLE_OUTPUT_PARTITIONS + 1),
       serializer = kryo,
@@ -110,6 +113,7 @@ class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
     )))
 
     // We do not support shuffles that perform aggregation
+    //我们不支持将执行聚合
     assert(!canUseUnsafeShuffle(shuffleDep(
       partitioner = new HashPartitioner(2),
       serializer = kryo,

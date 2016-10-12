@@ -25,7 +25,7 @@ import org.apache.spark._
 import org.apache.spark.serializer.KryoDistributedTest._
 
 class KryoSerializerDistributedSuite extends SparkFunSuite {
-
+  //kryo对象在不同的过程
   test("kryo objects are serialised consistently in different processes") {
     val conf = new SparkConf(false)
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")

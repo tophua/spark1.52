@@ -126,7 +126,7 @@ class BypassMergeSortShuffleWriterSuite extends SparkFunSuite with BeforeAndAfte
     assert(taskMetrics.memoryBytesSpilled === 0)
   }
 
-  test("write with some empty partitions") {
+  test("write with some empty partitions") {//用一些写空分区
     def records: Iterator[(Int, Int)] =
       Iterator((1, 1), (5, 5)) ++ (0 until 100000).iterator.map(x => (2, 2))
     val writer = new BypassMergeSortShuffleWriter[Int, Int](
@@ -146,8 +146,7 @@ class BypassMergeSortShuffleWriterSuite extends SparkFunSuite with BeforeAndAfte
     assert(taskMetrics.diskBytesSpilled === 0)
     assert(taskMetrics.memoryBytesSpilled === 0)
   }
-
-  test("cleanup of intermediate files after errors") {
+  test("cleanup of intermediate files after errors") {//出现错误后清理中间文件
     val writer = new BypassMergeSortShuffleWriter[Int, Int](
       new SparkConf(loadDefaults = false),
       blockManager,

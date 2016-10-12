@@ -20,7 +20,7 @@ package org.apache.spark.serializer
 import org.apache.spark.{SparkConf, SparkFunSuite}
 
 class JavaSerializerSuite extends SparkFunSuite {
-  test("JavaSerializer instances are serializable") {
+  test("JavaSerializer instances are serializable") {//JavaSerializer实例被序列化
     val serializer = new JavaSerializer(new SparkConf())
     val instance = serializer.newInstance()
     instance.deserialize[JavaSerializer](instance.serialize(serializer))

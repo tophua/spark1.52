@@ -57,6 +57,7 @@ class FakeDAGScheduler(sc: SparkContext, taskScheduler: FakeTaskScheduler)
 }
 
 // Get the rack for a given host
+//给定一个主机获得机架
 object FakeRackUtil {
   private val hostToRack = new mutable.HashMap[String, String]()
 

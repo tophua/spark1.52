@@ -60,7 +60,7 @@ class UISuite extends SparkFunSuite {
     }
   }
 
-  ignore("visibility at localhost:4040") {
+  ignore("visibility at localhost:4040") {//可见性
     withSpark(newSparkContext()) { sc =>
       // test if visible from http://localhost:4040
       eventually(timeout(10 seconds), interval(50 milliseconds)) {

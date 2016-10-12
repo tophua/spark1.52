@@ -183,7 +183,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     listener.failedJobs.map(_.jobId).toSet should be (Set(100, 99, 98, 97, 96))
   }
 
-  test("test executor id to summary") {
+  test("test executor id to summary") {//测试执行器编号汇总
     val conf = new SparkConf()
     val listener = new JobProgressListener(conf)
     val taskMetrics = new TaskMetrics()
@@ -221,6 +221,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
       .executorSummary.getOrElse("exe-1", fail()).shuffleRead === 2000)
 
     // finish this task, should get updated duration
+    //完成这项任务,应得到更新的持续时间
     taskInfo = new TaskInfo(1236L, 0, 2, 0L, "exe-2", "host1", TaskLocality.NODE_LOCAL, false)
     taskInfo.finishTime = 1
     task = new ShuffleMapTask(0)

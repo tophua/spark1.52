@@ -30,7 +30,10 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
 
   val nextTaskAttemptId = new AtomicInteger()
 
-  /** Launch a thread with the given body block and return it. */
+  /** 
+   *  Launch a thread with the given body block and return it. \
+   *  用一个给定块启动一个线程并返回
+   *  */
   private def startThread(name: String)(body: => Unit): Thread = {
     val thread = new Thread("ShuffleMemorySuite " + name) {
       override def run() {
@@ -49,7 +52,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
     thread
   }
 
-  test("single task requesting memory") {
+  test("single task requesting memory") {//单任务请求存储器
     val manager = ShuffleMemoryManager.createForTesting(maxMemory = 1000L)
 
     assert(manager.tryToAcquire(100L) === 100L)
@@ -68,10 +71,10 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
     assert(manager.tryToAcquire(100L) === 0L)
   }
 
-  test("two threads requesting full memory") {
+  test("two threads requesting full memory") {//两个线程请求全部内存
     // Two threads request 500 bytes first, wait for each other to get it, and then request
     // 500 more; we should immediately return 0 as both are now at 1 / N
-
+    //两个线程请求500个字节,等待对方得到它,然后再请求500个,我们应该立即返回0，因为现在都是
     val manager = ShuffleMemoryManager.createForTesting(maxMemory = 1000L)
 
     class State {
@@ -120,7 +123,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
   }
 
 
-  test("tasks cannot grow past 1 / N") {
+  test("tasks cannot grow past 1 / N") {//任务不能增长过去的1 / N
     // Two tasks request 250 bytes first, wait for each other to get it, and then request
     // 500 more; we should only grant 250 bytes to each of them on this second request
 
@@ -171,7 +174,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
     assert(state.t2Result2 === 250L)
   }
 
-  test("tasks can block to get at least 1 / 2N memory") {
+  test("tasks can block to get at least 1 / 2N memory") {//任务可以得到至少1／2N的内存
     // t1 grabs 1000 bytes and then waits until t2 is ready to make a request. It sleeps
     // for a bit and releases 250 bytes, which should then be granted to t2. Further requests
     // by t2 will return false right away because it now has 1 / 2N of the memory.

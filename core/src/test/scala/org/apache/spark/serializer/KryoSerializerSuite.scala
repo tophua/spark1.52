@@ -33,7 +33,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
   conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
   conf.set("spark.kryo.registrator", classOf[MyRegistrator].getName)
 
-  test("SPARK-7392 configuration limits") {
+  test("SPARK-7392 configuration limits") {//配置限制
     val kryoBufferProperty = "spark.kryoserializer.buffer"
     val kryoBufferMaxProperty = "spark.kryoserializer.buffer.max"
 
@@ -48,16 +48,21 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     }
 
     // test default values
+    //测试的默认值
     newKryoInstance(conf, "64k", "64m")
     // 2048m = 2097152k
     // should not throw exception when kryoBufferMaxProperty < kryoBufferProperty
+    //应该抛出异常
     newKryoInstance(conf, "2097151k", "64m")
     // test maximum size with unit of KiB
+    // 测试最大限度大小直到KiB
     newKryoInstance(conf, "2097151k", "2097151k")
     // should throw exception with bufferSize out of bound
+    //应该抛出异常与缓存的绑定
     val thrown1 = intercept[IllegalArgumentException](newKryoInstance(conf, "2048m"))
     assert(thrown1.getMessage.contains(kryoBufferProperty))
     // should throw exception with maxBufferSize out of bound
+    //应该抛出异常与maxbuffersize冲出绑定
     val thrown2 = intercept[IllegalArgumentException](
         newKryoInstance(conf, maxBufferSize = "2048m"))
     assert(thrown2.getMessage.contains(kryoBufferMaxProperty))
@@ -67,10 +72,11 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     assert(thrown3.getMessage.contains(kryoBufferProperty))
     assert(!thrown3.getMessage.contains(kryoBufferMaxProperty))
     // test configuration with mb is supported properly
+    //测试配置支持MB属性
     newKryoInstance(conf, "8m", "9m")
   }
 
-  test("basic types") {
+  test("basic types") {//基本类型
     val ser = new KryoSerializer(conf).newInstance()
     def check[T: ClassTag](t: T) {
       assert(ser.deserialize[T](ser.serialize(t)) === t)
@@ -100,7 +106,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     check(Array(Array("1", "2"), Array("1", "2", "3", "4")))
   }
 
-  test("pairs") {
+  test("pairs") {//键值对
     val ser = new KryoSerializer(conf).newInstance()
     def check[T: ClassTag](t: T) {
       assert(ser.deserialize[T](ser.serialize(t)) === t)
@@ -124,7 +130,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     check(("x", "x"))
   }
 
-  test("Scala data structures") {
+  test("Scala data structures") {//数据结构
     val ser = new KryoSerializer(conf).newInstance()
     def check[T: ClassTag](t: T) {
       assert(ser.deserialize[T](ser.serialize(t)) === t)
@@ -149,7 +155,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
       mutable.HashMap(1->"one", 2->"two", 3->"three")))
   }
 
-  test("ranges") {
+  test("ranges") {//范围
     val ser = new KryoSerializer(conf).newInstance()
     def check[T: ClassTag](t: T) {
       assert(ser.deserialize[T](ser.serialize(t)) === t)
@@ -170,14 +176,16 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     check(1.0 until 1000000.0 by 2.0)
   }
 
-  test("asJavaIterable") {
+  test("asJavaIterable") {//作为java迭代器
     // Serialize a collection wrapped by asJavaIterable
+    //序列一个集合包装asJavaIterable
     val ser = new KryoSerializer(conf).newInstance()
     val a = ser.serialize(scala.collection.convert.WrapAsJava.asJavaIterable(Seq(12345)))
     val b = ser.deserialize[java.lang.Iterable[Int]](a)
     assert(b.iterator().next() === 12345)
 
     // Serialize a normal Java collection
+    //序列化一个正常的java集合
     val col = new java.util.ArrayList[Int]
     col.add(54321)
     val c = ser.serialize(col)
@@ -185,7 +193,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     assert(b.iterator().next() === 12345)
   }
 
-  test("custom registrator") {
+  test("custom registrator") {//自定义注册器
     val ser = new KryoSerializer(conf).newInstance()
     def check[T: ClassTag](t: T) {
       assert(ser.deserialize[T](ser.serialize(t)) === t)
@@ -207,7 +215,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     System.clearProperty("spark.kryo.registrator")
   }
 
-  test("kryo with collect") {
+  test("kryo with collect") {//kryo的集合
     val control = 1 :: 2 :: Nil
     val result = sc.parallelize(control, 2)
       .map(new ClassWithoutNoArgConstructor(_))
@@ -216,21 +224,21 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     assert(control === result.toSeq)
   }
 
-  test("kryo with parallelize") {
+  test("kryo with parallelize") {//kryo的并行化
     val control = 1 :: 2 :: Nil
     val result = sc.parallelize(control.map(new ClassWithoutNoArgConstructor(_))).map(_.x).collect()
     assert (control === result.toSeq)
   }
 
-  test("kryo with parallelize for specialized tuples") {
+  test("kryo with parallelize for specialized tuples") {//kryo的并行化指定元组
     assert (sc.parallelize( Array((1, 11), (2, 22), (3, 33)) ).count === 3)
   }
 
-  test("kryo with parallelize for primitive arrays") {
+  test("kryo with parallelize for primitive arrays") {//kryo的并行化指定数组
     assert (sc.parallelize( Array(1, 2, 3) ).count === 3)
   }
 
-  test("kryo with collect for specialized tuples") {
+  test("kryo with collect for specialized tuples") {//kryo的集合指定元组
     assert (sc.parallelize( Array((1, 11), (2, 22), (3, 33)) ).collect().head === (1, 11))
   }
 
@@ -245,7 +253,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     assert(control.sum === result)
   }
 
-  test("kryo with fold") {
+  test("kryo with fold") {//kryo的折叠
     val control = 1 :: 2 :: Nil
     // zeroValue must not be a ClassWithoutNoArgConstructor instance because it will be
     // serialized by spark.closure.serializer but spark.closure.serializer only supports
@@ -257,7 +265,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     }).x
     assert(control.sum === result)
   }
-
+  //kryo不存在自定义注册器失败
   test("kryo with nonexistent custom registrator should fail") {
     import org.apache.spark.SparkException
 
@@ -267,18 +275,21 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     val thrown = intercept[SparkException](new KryoSerializer(conf).newInstance())
     assert(thrown.getMessage.contains("Failed to register classes with Kryo"))
   }
-
+  //默认类加载程序可以由一个不同的线程设置
   test("default class loader can be set by a different thread") {
     val ser = new KryoSerializer(new SparkConf)
 
     // First serialize the object
+    //首先将对象
     val serInstance = ser.newInstance()
     val bytes = serInstance.serialize(new ClassLoaderTestingObject)
 
     // Deserialize the object to make sure normal deserialization works
+    //反序列化对象的反序列化以确保正常工作
     serInstance.deserialize[ClassLoaderTestingObject](bytes)
 
     // Set a special, broken ClassLoader and make sure we get an exception on deserialization
+    //设置一个特殊类装载器,确保我们能在反序列化一个例外
     ser.setDefaultClassLoader(new ClassLoader() {
       override def loadClass(name: String): Class[_] = throw new UnsupportedOperationException
     })
@@ -304,7 +315,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
       ser.serialize(HighlyCompressedMapStatus(BlockManagerId("exec-1", "host", 1234), blockSizes))
     }
   }
-
+  //序列化缓冲区溢出报告
   test("serialization buffer overflow reporting") {
     import org.apache.spark.SparkException
     val kryoBufferMaxProperty = "spark.kryoserializer.buffer.max"

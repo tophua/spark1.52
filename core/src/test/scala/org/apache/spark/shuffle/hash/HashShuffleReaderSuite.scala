@@ -33,7 +33,7 @@ import org.apache.spark.storage.{BlockManager, BlockManagerId, ShuffleBlockId}
 
 /**
  * Wrapper for a managed buffer that keeps track of how many times retain and release are called.
- *
+ * 包装管理的缓冲区,保持跟踪多少次保留和释放被调用
  * We need to define this class ourselves instead of using a spy because the NioManagedBuffer class
  * is final (final classes cannot be spied on).
  */
@@ -61,11 +61,13 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
   /**
    * This test makes sure that, when data is read from a HashShuffleReader, the underlying
    * ManagedBuffers that contain the data are eventually released.
+   * 确保这个可以测试,当数据从一个HashShuffleReader,潜在的managedbuffers包含数据的最终发布
    */
-  test("read() releases resources on completion") {
+  test("read() releases resources on completion") {//读取释放完成的资源
     val testConf = new SparkConf(false)
     // Create a SparkContext as a convenient way of setting SparkEnv (needed because some of the
     // shuffle code calls SparkEnv.get()).
+    //创建一个sparkcontext作为一种实用设定sparkenv,
     sc = new SparkContext("local", "test", testConf)
 
     val reduceId = 15
@@ -95,10 +97,12 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
     }
 
     // Setup the mocked BlockManager to return RecordingManagedBuffers.
+    //设置模拟BlockManager返回RecordingManagedBuffers
     val localBlockManagerId = BlockManagerId("test-client", "test-client", 1)
     when(blockManager.blockManagerId).thenReturn(localBlockManagerId)
     val buffers = (0 until numMaps).map { mapId =>
       // Create a ManagedBuffer with the shuffle data.
+      //创建一个managedbuffer的shuffle 数据
       val nioBuffer = new NioManagedBuffer(ByteBuffer.wrap(byteOutputStream.toByteArray))
       val managedBuffer = new RecordingManagedBuffer(nioBuffer)
 

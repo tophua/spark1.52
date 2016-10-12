@@ -34,7 +34,7 @@ import org.apache.spark.serializer.KryoTest.RegistratorWithoutAutoReset
 class SerializerPropertiesSuite extends SparkFunSuite {
 
   import SerializerPropertiesSuite._
-
+  //Java序列化不支持再定位
   test("JavaSerializer does not support relocation") {
     // Per a comment on the SPARK-4550 JIRA ticket, Java serialization appears to write out the
     // full class name the first time an object is written to an output stream, but subsequent
@@ -42,13 +42,13 @@ class SerializerPropertiesSuite extends SparkFunSuite {
     val ser = new JavaSerializer(new SparkConf())
     testSupportsRelocationOfSerializedObjects(ser, generateRandomItem)
   }
-
+ //Kryo序列化支持搬迁再定位,自动重置可用
   test("KryoSerializer supports relocation when auto-reset is enabled") {
     val ser = new KryoSerializer(new SparkConf)
     assert(ser.newInstance().asInstanceOf[KryoSerializerInstance].getAutoReset())
     testSupportsRelocationOfSerializedObjects(ser, generateRandomItem)
   }
-
+//Kryo序列化不支持搬迁再定位,自动重置不可用
   test("KryoSerializer does not support relocation when auto-reset is disabled") {
     val conf = new SparkConf().set("spark.kryo.registrator",
       classOf[RegistratorWithoutAutoReset].getName)

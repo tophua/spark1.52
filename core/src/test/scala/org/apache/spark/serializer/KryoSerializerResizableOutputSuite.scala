@@ -26,8 +26,9 @@ import org.apache.spark.SparkException
 class KryoSerializerResizableOutputSuite extends SparkFunSuite {
 
   // trial and error showed this will not serialize with 1mb buffer
+  //试验和错误不会序列化使用1MB的缓冲
   val x = (1 to 400000).toArray
-
+  //kryo不可调整大小的输出缓冲区,应该在大数组失败
   test("kryo without resizable output buffer should fail on large array") {
     val conf = new SparkConf(false)
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
@@ -37,7 +38,7 @@ class KryoSerializerResizableOutputSuite extends SparkFunSuite {
     intercept[SparkException](sc.parallelize(x).collect())
     LocalSparkContext.stop(sc)
   }
-
+ //kryo不可调整大小的输出缓冲区,应该在大数组成功
   test("kryo with resizable output buffer should succeed on large array") {
     val conf = new SparkConf(false)
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")

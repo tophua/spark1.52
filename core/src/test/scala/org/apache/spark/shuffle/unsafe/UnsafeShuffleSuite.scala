@@ -38,9 +38,10 @@ class UnsafeShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
     conf.set("spark.shuffle.manager", "tungsten-sort")
     // UnsafeShuffleManager requires at least 128 MB of memory per task in order to be able to sort
     // shuffle records.
+    //需要至少128 MB内存每任务能够排序shuffle记录
     conf.set("spark.shuffle.memoryFraction", "0.5")
-  }
-
+  } 
+  //正确清理将使用新的shuffle路径文件
   test("UnsafeShuffleManager properly cleans up files for shuffles that use the new shuffle path") {
     val tmpDir = Utils.createTempDir()
     try {
@@ -57,12 +58,15 @@ class UnsafeShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
         FileUtils.listFiles(tmpDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE).asScala.toSet
       val filesBeforeShuffle = getAllFiles
       // Force the shuffle to be performed
+      //强制要执行的Shuffle
       shuffledRdd.count()
       // Ensure that the shuffle actually created files that will need to be cleaned up
+      //确保Shuffle实际上创建的文件,将需要清理
       val filesCreatedByShuffle = getAllFiles -- filesBeforeShuffle
       filesCreatedByShuffle.map(_.getName) should be
         Set("shuffle_0_0_0.data", "shuffle_0_0_0.index")
       // Check that the cleanup actually removes the files
+      //检查清理实际上删除文件
       sc.env.blockManager.master.removeShuffle(0, blocking = true)
       for (file <- filesCreatedByShuffle) {
         assert (!file.exists(), s"Shuffle file $file was not cleaned up")
@@ -79,6 +83,7 @@ class UnsafeShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
         .set("spark.local.dir", tmpDir.getAbsolutePath)
       sc = new SparkContext("local", "test", myConf)
       // Create a shuffled RDD and verify that it will actually use the old SortShuffle path
+      //创建一个shuffled RDD与确认它会使用旧的sortshuffle路径
       val rdd = sc.parallelize(1 to 10, 1).map(x => (x, x))
       val shuffledRdd = new ShuffledRDD[Int, Int, Int](rdd, new HashPartitioner(4))
         .setSerializer(new JavaSerializer(myConf))
@@ -88,12 +93,15 @@ class UnsafeShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
         FileUtils.listFiles(tmpDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE).asScala.toSet
       val filesBeforeShuffle = getAllFiles
       // Force the shuffle to be performed
+      //强制要执行的Shuffle
       shuffledRdd.count()
       // Ensure that the shuffle actually created files that will need to be cleaned up
+      //确保Shuffle实际上创建的文件,将需要清理
       val filesCreatedByShuffle = getAllFiles -- filesBeforeShuffle
       filesCreatedByShuffle.map(_.getName) should be
         Set("shuffle_0_0_0.data", "shuffle_0_0_0.index")
       // Check that the cleanup actually removes the files
+      //检查清理实际移除的文件
       sc.env.blockManager.master.removeShuffle(0, blocking = true)
       for (file <- filesCreatedByShuffle) {
         assert (!file.exists(), s"Shuffle file $file was not cleaned up")

@@ -36,12 +36,12 @@ class GenericAvroSerializerSuite extends SparkFunSuite with SharedSparkContext {
   val record = new Record(schema)
   record.put("data", "test data")
 
-  test("schema compression and decompression") {
+  test("schema compression and decompression") {//模式压缩与解压缩
     val genericSer = new GenericAvroSerializer(conf.getAvroSchema)
     assert(schema === genericSer.decompress(ByteBuffer.wrap(genericSer.compress(schema))))
   }
 
-  test("record serialization and deserialization") {
+  test("record serialization and deserialization") {//记录序列化和反序列化
     val genericSer = new GenericAvroSerializer(conf.getAvroSchema)
 
     val outputStream = new ByteArrayOutputStream()
@@ -53,7 +53,7 @@ class GenericAvroSerializerSuite extends SparkFunSuite with SharedSparkContext {
     val input = new Input(new ByteArrayInputStream(outputStream.toByteArray))
     assert(genericSer.deserializeDatum(input) === record)
   }
-
+  //使用模式指纹以减少信息大小
   test("uses schema fingerprint to decrease message size") {
     val genericSerFull = new GenericAvroSerializer(conf.getAvroSchema)
 
@@ -73,7 +73,7 @@ class GenericAvroSerializerSuite extends SparkFunSuite with SharedSparkContext {
     assert(fingerprintLength < normalLength)
   }
 
-  test("caches previously seen schemas") {
+  test("caches previously seen schemas") {//缓存之前模式
     val genericSer = new GenericAvroSerializer(conf.getAvroSchema)
     val compressedSchema = genericSer.compress(schema)
     val decompressedScheam = genericSer.decompress(ByteBuffer.wrap(compressedSchema))

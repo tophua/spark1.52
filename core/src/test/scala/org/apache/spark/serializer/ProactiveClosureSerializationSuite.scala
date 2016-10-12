@@ -32,7 +32,7 @@ class ProactiveClosureSerializationSuite extends SparkFunSuite with SharedSparkC
   def fixture: (RDD[String], UnserializableClass) = {
     (sc.parallelize(0 until 1000).map(_.toString), new UnserializableClass)
   }
-
+//在一个活动的序列化异常,抛出预期的序列化异常
   test("throws expected serialization exceptions on actions") {
     val (data, uc) = fixture
     val ex = intercept[SparkException] {
@@ -44,7 +44,7 @@ class ProactiveClosureSerializationSuite extends SparkFunSuite with SharedSparkC
   // There is probably a cleaner way to eliminate boilerplate here, but we're
   // iterating over a map from transformation names to functions that perform that
   // transformation on a given RDD, creating one test case for each
-
+  //有可能是一个更清洁的方式来消除样板,
   for (transformation <-
       Map("map" -> xmap _,
           "flatMap" -> xflatMap _,
