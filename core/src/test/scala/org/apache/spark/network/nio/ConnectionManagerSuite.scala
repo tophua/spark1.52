@@ -29,10 +29,11 @@ import org.apache.spark.util.Utils
 
 /**
   * Test the ConnectionManager with various security settings.
+  * 测试各种安全设置的连接管理器
   */
 class ConnectionManagerSuite extends SparkFunSuite {
 
-  test("security default off") {
+  test("security default off") {//安全默认关闭
     val conf = new SparkConf
     val securityManager = new SecurityManager(conf)
     val manager = new ConnectionManager(0, conf, securityManager)
@@ -55,7 +56,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     manager.stop()
   }
 
-  test("security on same password") {
+  test("security on same password") {//同一密码的安全性
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
@@ -94,7 +95,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     managerServer.stop()
   }
 
-  test("security mismatch password") {
+  test("security mismatch password") {//不匹配的安全密码
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
@@ -137,7 +138,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     managerServer.stop()
   }
 
-  test("security mismatch auth off") {
+  test("security mismatch auth off") {//不匹配的安全认证了
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
@@ -192,7 +193,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     managerServer.stop()
   }
 
-  test("security auth off") {
+  test("security auth off") {//安全认证
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
@@ -239,7 +240,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     managerServer.stop()
   }
 
-  test("Ack error message") {
+  test("Ack error message") {//ACK错误消息
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "false")
@@ -267,7 +268,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
 
   }
 
-  test("sendMessageReliably timeout") {
+  test("sendMessageReliably timeout") {//sendMessageReliably超时
     val clientConf = new SparkConf
     clientConf.set("spark.authenticate", "false")
     val ackTimeoutS = 30

@@ -42,24 +42,25 @@ class NettyBlockTransferServiceSuite
     }
   }
 
-  test("can bind to a random port") {
+  test("can bind to a random port") {//可以绑定到一个随机端口
     service0 = createService(port = 0)
     service0.port should not be 0
   }
 
-  test("can bind to two random ports") {
+  test("can bind to two random ports") {//可以绑定到两个随机端口
     service0 = createService(port = 0)
     service1 = createService(port = 0)
     service0.port should not be service1.port
   }
 
-  test("can bind to a specific port") {
+  test("can bind to a specific port") {//可以绑定到一个特定的端口
     val port = 17634
     service0 = createService(port)
     service0.port should be >= port
+    //在同时测试的情况下避免测试平等
     service0.port should be <= (port + 10) // avoid testing equality in case of simultaneous tests
   }
-
+  //可以绑定到一个特定的端口两次和第二个增量
   test("can bind to a specific port twice and the second increments") {
     val port = 17634
     service0 = createService(port)

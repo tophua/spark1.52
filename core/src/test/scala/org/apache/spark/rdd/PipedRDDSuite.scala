@@ -33,7 +33,7 @@ import org.apache.spark.util.Utils
 
 class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
 
-  test("basic pipe") {
+  test("basic pipe") {//基本的管道
     if (testCommandAvailable("cat")) {
       val nums = sc.makeRDD(Array(1, 2, 3, 4), 2)
 
@@ -50,7 +50,7 @@ class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
     }
   }
 
-  test("advanced pipe") {
+  test("advanced pipe") {//高级的管道
     if (testCommandAvailable("cat")) {
       val nums = sc.makeRDD(Array(1, 2, 3, 4), 2)
       val bl = sc.broadcast(List("0"))
@@ -100,7 +100,7 @@ class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
     }
   }
 
-  test("pipe with env variable") {
+  test("pipe with env variable") {//管道环境变量
     if (testCommandAvailable("printenv")) {
       val nums = sc.makeRDD(Array(1, 2, 3, 4), 2)
       val piped = nums.pipe(Seq("printenv", "MY_TEST_ENV"), Map("MY_TEST_ENV" -> "LALALA"))
@@ -113,7 +113,7 @@ class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
     }
   }
 
-  test("pipe with non-zero exit status") {
+  test("pipe with non-zero exit status") {//具有非零退出状态的管道
     if (testCommandAvailable("cat")) {
       val nums = sc.makeRDD(Array(1, 2, 3, 4), 2)
       val piped = nums.pipe(Seq("cat nonexistent_file", "2>", "/dev/null"))
@@ -124,7 +124,7 @@ class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
       assert(true)
     }
   }
-
+  //基本的管道具有独立工作目录
   test("basic pipe with separate working directory") {
     if (testCommandAvailable("cat")) {
       val nums = sc.makeRDD(Array(1, 2, 3, 4), 2)
@@ -140,8 +140,10 @@ class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
       assert(collectPwd(0).contains("tasks/"))
       val pipedLs = nums.pipe(Seq("ls"), separateWorkingDir = true).collect()
       // make sure symlinks were created
+      //确保链接的创建
       assert(pipedLs.length > 0)
       // clean up top level tasks directory
+      //清理顶层任务目录
       Utils.deleteRecursively(new File("tasks"))
     } else {
       assert(true)
@@ -180,6 +182,7 @@ class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
       val arr = rddIter.toArray
       assert(arr(0) == "/some/path")
     } else {
+      //命令不可用,所以只是通过测试
       // printenv isn't available so just pass the test
     }
   }

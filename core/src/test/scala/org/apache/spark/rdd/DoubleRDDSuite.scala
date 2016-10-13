@@ -20,7 +20,7 @@ package org.apache.spark.rdd
 import org.apache.spark._
 
 class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
-  test("sum") {
+  test("sum") {//总和
     assert(sc.parallelize(Seq.empty[Double]).sum() === 0.0)
     assert(sc.parallelize(Seq(1.0)).sum() === 1.0)
     assert(sc.parallelize(Seq(1.0, 2.0)).sum() === 3.0) //求和
@@ -32,6 +32,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
 
   // Verify tests on the histogram functionality. We test with both evenly
   // and non-evenly spaced buckets as the bucket lookup function changes.
+  //关于直方图功能的验证测试,我们测试的均匀和非均匀分布的桶桶查找功能的变化
   test("WorksOnEmpty") {
     // Make sure that it works on an empty input
     val rdd: RDD[Double] = sc.parallelize(Seq())

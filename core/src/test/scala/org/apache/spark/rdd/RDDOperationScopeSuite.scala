@@ -39,13 +39,13 @@ class RDDOperationScopeSuite extends SparkFunSuite with BeforeAndAfter {
     sc.stop()
   }
 
-  test("getAllScopes") {
+  test("getAllScopes") {//得到所有范围
     assert(scope1.getAllScopes === Seq(scope1))
     assert(scope2.getAllScopes === Seq(scope1, scope2))
     assert(scope3.getAllScopes === Seq(scope1, scope2, scope3))
   }
 
-  test("json de/serialization") {
+  test("json de/serialization") {//json序列化返序列化
     val scope1Json = scope1.toJson
     val scope2Json = scope2.toJson
     val scope3Json = scope3.toJson
@@ -57,7 +57,7 @@ class RDDOperationScopeSuite extends SparkFunSuite with BeforeAndAfter {
     assert(RDDOperationScope.fromJson(scope3Json) === scope3)
   }
 
-  test("withScope") {
+  test("withScope") {//范围
     val rdd0: MyCoolRDD = new MyCoolRDD(sc)
     var rdd1: MyCoolRDD = null
     var rdd2: MyCoolRDD = null
@@ -80,7 +80,7 @@ class RDDOperationScopeSuite extends SparkFunSuite with BeforeAndAfter {
     assert(rdd3.scope.get.getAllScopes.map(_.name) === Seq("scope1"))
   }
 
-  test("withScope with partial nesting") {
+  test("withScope with partial nesting") {//部分嵌套范围
     val rdd0: MyCoolRDD = new MyCoolRDD(sc)
     var rdd1: MyCoolRDD = null
     var rdd2: MyCoolRDD = null
@@ -105,7 +105,7 @@ class RDDOperationScopeSuite extends SparkFunSuite with BeforeAndAfter {
     assert(rdd3.scope.get.getAllScopes.map(_.name) === Seq("scope1", "scope2"))
   }
 
-  test("withScope with multiple layers of nesting") {
+  test("withScope with multiple layers of nesting") {//具有多层嵌套范围
     val rdd0: MyCoolRDD = new MyCoolRDD(sc)
     var rdd1: MyCoolRDD = null
     var rdd2: MyCoolRDD = null

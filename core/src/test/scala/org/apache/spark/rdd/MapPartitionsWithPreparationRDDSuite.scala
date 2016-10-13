@@ -25,7 +25,7 @@ import org.apache.spark.{LocalSparkContext, SparkContext, SparkFunSuite, TaskCon
  */
 class MapPartitionsWithPreparationRDDSuite extends SparkFunSuite with LocalSparkContext {
 
-  test("prepare called before parent partition is computed") {
+  test("prepare called before parent partition is computed") {//准备调用父分区之前计算
     sc = new SparkContext("local", "test")
 
     // Have the parent partition push a number to the list
@@ -36,9 +36,11 @@ class MapPartitionsWithPreparationRDDSuite extends SparkFunSuite with LocalSpark
     }
 
     // Push a different number during the prepare phase
+    //在准备阶段中推送一个不同的数字
     val preparePartition = () => { TestObject.things.append(10) }
 
     // Push yet another number during the execution phase
+    //在执行阶段中推另一个数字
     val executePartition = (
         taskContext: TaskContext,
         partitionIndex: Int,
@@ -49,6 +51,7 @@ class MapPartitionsWithPreparationRDDSuite extends SparkFunSuite with LocalSpark
     }
 
     // Verify that the numbers are pushed in the order expected
+        //确认数字被推到预期的顺序
     val rdd = new MapPartitionsWithPreparationRDD[Int, Int, Unit](
       parent, preparePartition, executePartition)
     val result = rdd.collect()

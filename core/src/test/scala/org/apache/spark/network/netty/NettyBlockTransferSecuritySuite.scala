@@ -37,7 +37,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.ShouldMatchers
 
 class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar with ShouldMatchers {
-  test("security default off") {
+  test("security default off") {//安全默认关闭
     val conf = new SparkConf()
       .set("spark.app.id", "app-id")
     testConnection(conf, conf) match {
@@ -46,7 +46,7 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     }
   }
 
-  test("security on same password") {
+  test("security on same password") {//同一密码的安全性
     val conf = new SparkConf()
      //是否启用内部身份验证
       .set("spark.authenticate", "true")
@@ -59,7 +59,7 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     }
   }
 
-  test("security on mismatch password") {
+  test("security on mismatch password") {//不匹配密码的安全性
     val conf0 = new SparkConf()
      //是否启用内部身份验证
       .set("spark.authenticate", "true")
@@ -73,7 +73,7 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     }
   }
 
-  test("security mismatch auth off on server") {
+  test("security mismatch auth off on server") {//不匹配的安全认证关闭服务器
     val conf0 = new SparkConf()
      //是否启用内部身份验证
       .set("spark.authenticate", "true")
@@ -87,7 +87,7 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     }
   }
 
-  test("security mismatch auth off on client") {
+  test("security mismatch auth off on client") {//不匹配的安全认证过的客户
     val conf0 = new SparkConf()
     //是否启用内部身份验证
       .set("spark.authenticate", "false")
@@ -136,7 +136,10 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     result
   }
 
-  /** Synchronously fetches a single block, acting as the given executor fetching from another. */
+  /** 
+   *  Synchronously fetches a single block, acting as the given executor fetching from another.
+   *  同步获取一个块,作为给定的执行者
+   *   */
   private def fetchBlock(
       self: BlockTransferService,
       from: BlockTransferService,

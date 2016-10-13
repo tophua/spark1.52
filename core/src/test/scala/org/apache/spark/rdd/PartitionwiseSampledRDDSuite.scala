@@ -20,7 +20,10 @@ package org.apache.spark.rdd
 import org.apache.spark.{SharedSparkContext, SparkFunSuite}
 import org.apache.spark.util.random.{BernoulliSampler, PoissonSampler, RandomSampler}
 
-/** a sampler that outputs its seed */
+/** 
+ *  a sampler that outputs its seed
+ *  一个简单输出种子 
+ *  */
 class MockSampler extends RandomSampler[Long, Long] {
 
   private var s: Long = _
@@ -38,16 +41,18 @@ class MockSampler extends RandomSampler[Long, Long] {
 
 class PartitionwiseSampledRDDSuite extends SparkFunSuite with SharedSparkContext {
 
-  test("seed distribution") {
+  test("seed distribution") {//分布式种子
     val rdd = sc.makeRDD(Array(1L, 2L, 3L, 4L), 2)
     val sampler = new MockSampler
     val sample = new PartitionwiseSampledRDD[Long, Long](rdd, sampler, false, 0L)
     assert(sample.distinct().count == 2, "Seeds must be different.")
   }
 
-  test("concurrency") {
+  test("concurrency") {//并发
     // SPARK-2251: zip with self computes each partition twice.
+    //用自己计算每个分区的两倍
     // We want to make sure there are no concurrency issues.
+    //我们要确保没有并发问题
     val rdd = sc.parallelize(0 until 111, 10)
     for (sampler <- Seq(new BernoulliSampler[Int](0.5), new PoissonSampler[Int](0.5))) {
       val sampled = new PartitionwiseSampledRDD[Int, Int](rdd, sampler, true)

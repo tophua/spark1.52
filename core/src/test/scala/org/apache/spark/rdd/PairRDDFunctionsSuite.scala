@@ -35,7 +35,7 @@ import org.apache.spark.util.Utils
    */
 class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
 
-  test("aggregateByKey") {
+  test("aggregateByKey") {//根据Key聚合操作
      val pairs = sc.parallelize(Array((1, 1), (1, 1), (3, 2), (5, 1), (5, 3)), 2)
 
     val sets = pairs.aggregateByKey(new HashSet[Int]())(_ += _, _ ++= _).collect()//tuple元组
@@ -60,7 +60,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(valuesFor2.toList.sorted === List(1))
   }
 
-  test("groupByKey with duplicates") {
+  test("groupByKey with duplicates") {//重复
     val pairs = sc.parallelize(Array((1, 1), (1, 2), (1, 3), (1, 1), (2, 1)))
     val groups = pairs.groupByKey().collect()
     /** 
@@ -114,7 +114,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
 
     val defaultSeed = 1L
 
-    // vary RDD size
+    // vary RDD size RDD大小不同
     for (n <- List(100, 1000, 1000000)) {
       val data = sc.parallelize(1 to n, 2)
       val fractionPositive = 0.3
@@ -133,6 +133,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     }
 
     // Use the same data for the rest of the tests
+    //使用相同的数据用于测试的其余部分
     val fractionPositive = 0.3
     val n = 100
     val data = sc.parallelize(1 to n, 2)
@@ -145,6 +146,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     }
 
     // vary sampling rate
+    //不同的采样率
     for (samplingRate <- List(0.01, 0.05, 0.1, 0.5)) {
       StratifiedAuxiliary.testSample(stratifiedData, samplingRate, defaultSeed, n)
     }
@@ -363,14 +365,14 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     ))
   }
 
-  test("join with no matches") {
+  test("join with no matches") {//加入没有匹配
     val rdd1 = sc.parallelize(Array((1, 1), (1, 2), (2, 1), (3, 1)))
     val rdd2 = sc.parallelize(Array((4, 'x'), (5, 'y'), (5, 'z'), (6, 'w')))
     val joined = rdd1.join(rdd2).collect()
     assert(joined.size === 0)
   }
 
-  test("join with many output partitions") {
+  test("join with many output partitions") {//加入多个输出分区
     val rdd1 = sc.parallelize(Array((1, 1), (1, 2), (2, 1), (3, 1)))
     val rdd2 = sc.parallelize(Array((1, 'x'), (2, 'y'), (2, 'z'), (4, 'w')))
     val joined = rdd1.join(rdd2, 10).collect()
@@ -463,7 +465,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     //返回一个仅包含值的RDD
     assert(rdd.values.collect().toList === List("a", "b"))
   }
-
+  //使用默认的分区的大小
   test("default partitioner uses partition size") {
     // specify 2000 partitions
     val a = sc.makeRDD(Array(1, 2, 3, 4), 2000)
@@ -473,7 +475,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val c = b.groupByKey()
     assert(c.partitions.size === 2000)
   }
-
+  //默认的分区,使用的最大分区
   test("default partitioner uses largest partitioner") {
     val a = sc.makeRDD(Array((1, "a"), (2, "b")), 2)
     val b = sc.makeRDD(Array((1, "a"), (2, "b")), 2000)
@@ -482,7 +484,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(c.partitions.size === 2000)
   }
 
-  test("subtract") {
+  test("subtract") {//减去
     //去除两个RDD中相同的元素，不同的RDD将保留下来 
     val a = sc.parallelize(Array(1, 2, 3), 2)
     val b = sc.parallelize(Array(2, 3, 4), 4)
@@ -491,14 +493,15 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(c.collect().toSet === Set(1))
     assert(c.partitions.size === a.partitions.size)
   }
-
+//去除两个RDD中相同的元素，不同的RDD将保留下来 窄依赖
   test("subtract with narrow dependency") {
     // use a deterministic partitioner
+    //使用一个确定性的分割
     val p = new Partitioner() {
       def numPartitions = 5
       def getPartition(key: Any) = key.asInstanceOf[Int]
     }
-    // partitionBy so we have a narrow dependency
+    // partitionBy so we have a narrow dependency 有一个狭窄的依赖
     val a = sc.parallelize(Array((1, "a"), (2, "b"), (3, "c"))).partitionBy(p)
     // more partitions/no partitioner so a shuffle dependency
     val b = sc.parallelize(Array((2, "b"), (3, "cc"), (4, "d")), 4)
@@ -517,8 +520,8 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(c.partitions.size === a.partitions.size)
   }
 
-  test("subtractByKey with narrow dependency") {
-    // use a deterministic partitioner
+  test("subtractByKey with narrow dependency") {//subtractByKey 窄依赖
+    // use a deterministic partitioner 使用一个确定性的分割
     val p = new Partitioner() {
       def numPartitions = 5
       def getPartition(key: Any) = key.asInstanceOf[Int]
@@ -591,7 +594,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
 
   }
 
-  test("lookup with partitioner") {
+  test("lookup with partitioner") {//查找与分区
     val pairs = sc.parallelize(Array((1, 2), (3, 4), (5, 6), (5, 7)))
 
     val p = new Partitioner {
@@ -607,7 +610,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(shuffled.lookup(-1) === Seq())
   }
 
-  test("lookup with bad partitioner") {
+  test("lookup with bad partitioner") {//查找坏的分区
     val pairs = sc.parallelize(Array((1, 2), (3, 4), (5, 6), (5, 7)))
 
     val p = new Partitioner {
@@ -678,7 +681,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
       takeSample.foreach { x => assert(1 <= x._2 && x._2 <= n, s"elements not in [1, $n]") }
     }
 
-    // With replacement validation
+    // With replacement validation 替换的验证
     def testPoisson(stratifiedData: RDD[(String, Int)],
         exact: Boolean,
         samplingRate: Double,

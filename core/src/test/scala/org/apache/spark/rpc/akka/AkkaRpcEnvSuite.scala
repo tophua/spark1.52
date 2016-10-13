@@ -48,7 +48,7 @@ class AkkaRpcEnvSuite extends RpcEnvSuite {
     }
   }
 
-  test("uriOf") {
+  test("uriOf") {//
     val uri = env.uriOf("local", RpcAddress("1.2.3.4", 12345), "test_endpoint")
     assert("akka.tcp://local@1.2.3.4:12345/user/test_endpoint" === uri)
   }

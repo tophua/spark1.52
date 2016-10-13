@@ -32,7 +32,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     sc = new SparkContext("local[2]", "test")
   }
 
-  test("transform storage level") {
+  test("transform storage level") {//转换存储级别
     //转换检查点
     val transform = LocalRDDCheckpointData.transformStorageLevel _
     assert(transform(StorageLevel.NONE) === StorageLevel.DISK_ONLY)
@@ -52,7 +52,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
 
-  test("basic lineage truncation") {//基本线程截取
+  test("basic lineage truncation") {//基本血缘截取
     val numPartitions = 4
     val parallelRdd = sc.parallelize(1 to 100, numPartitions)
     val mappedRdd = parallelRdd.map { i => i + 1 }
@@ -68,6 +68,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     assert(parallelRdd.dependencies.size === 0)
 
     // Mark the RDD for local checkpointing
+    //标记RDD本地检查点
     filteredRdd.localCheckpoint()
     assert(filteredRdd.checkpointData.isDefined)
     assert(!filteredRdd.checkpointData.get.isCheckpointed)
@@ -75,6 +76,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     assert(filteredRdd.getStorageLevel === LocalRDDCheckpointData.DEFAULT_STORAGE_LEVEL)
 
     // After an action, the lineage is truncated
+    //一个动作后，血缘被截断
     val result = filteredRdd.collect()
     assert(filteredRdd.checkpointData.get.isCheckpointed)
     assert(filteredRdd.checkpointData.get.checkpointRDD.isDefined)
@@ -85,40 +87,41 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     assert(checkpointRdd.partitions.map(_.index) === expectedPartitionIndices)
 
     // Recomputation should yield the same result
+    //重新计算应产生相同的结果
     assert(filteredRdd.collect() === result)
     assert(filteredRdd.collect() === result)
   }
-
+  //基本血缘截断-缓存之前检查点
   test("basic lineage truncation - caching before checkpointing") {
     testBasicLineageTruncationWithCaching(
       newRdd.persist(StorageLevel.MEMORY_ONLY).localCheckpoint(),
       StorageLevel.MEMORY_AND_DISK)
   }
-
+ //基本血缘截断-缓存之后检查点
   test("basic lineage truncation - caching after checkpointing") {
     testBasicLineageTruncationWithCaching(
       newRdd.localCheckpoint().persist(StorageLevel.MEMORY_ONLY),
       StorageLevel.MEMORY_AND_DISK)
   }
-
+//间接的血统截断
   test("indirect lineage truncation") {
     testIndirectLineageTruncation(
       newRdd.localCheckpoint(),
       LocalRDDCheckpointData.DEFAULT_STORAGE_LEVEL)
   }
-
+//间接的血统截断,缓存之前检查点
   test("indirect lineage truncation - caching before checkpointing") {
     testIndirectLineageTruncation(
       newRdd.persist(StorageLevel.MEMORY_ONLY).localCheckpoint(),
       StorageLevel.MEMORY_AND_DISK)
   }
-
+//间接的血统截断,缓存之后检查点
   test("indirect lineage truncation - caching after checkpointing") {
     testIndirectLineageTruncation(
       newRdd.localCheckpoint().persist(StorageLevel.MEMORY_ONLY),
       StorageLevel.MEMORY_AND_DISK)
   }
-
+  //没有迭代器的检查点
   test("checkpoint without draining iterator") {
     testWithoutDrainingIterator(
       newSortedRdd.localCheckpoint(),
@@ -139,25 +142,25 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
       StorageLevel.MEMORY_AND_DISK,
       50)
   }
-
+  //块存在检查点
   test("checkpoint blocks exist") {
     testCheckpointBlocksExist(
       newRdd.localCheckpoint(),
       LocalRDDCheckpointData.DEFAULT_STORAGE_LEVEL)
   }
-
+//块存在检查点-缓存之前检查点
   test("checkpoint blocks exist - caching before checkpointing") {
     testCheckpointBlocksExist(
       newRdd.persist(StorageLevel.MEMORY_ONLY).localCheckpoint(),
       StorageLevel.MEMORY_AND_DISK)
   }
-
+//块存在检查点-缓存之后检查点
   test("checkpoint blocks exist - caching after checkpointing") {
     testCheckpointBlocksExist(
       newRdd.localCheckpoint().persist(StorageLevel.MEMORY_ONLY),
       StorageLevel.MEMORY_AND_DISK)
   }
-
+//丢失的检查点块失败与信息的消息
   test("missing checkpoint block fails with informative message") {
     val rdd = newRdd.localCheckpoint()
     val numPartitions = rdd.partitions.size
@@ -165,13 +168,16 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     val bmm = sc.env.blockManager.master
 
     // After an action, the blocks should be found somewhere in the cache
+    //一个动作后，块应该在缓存中找到
     rdd.collect()
     partitionIndices.foreach { i =>
       assert(bmm.contains(RDDBlockId(rdd.id, i)))
     }
 
     // Remove one of the blocks to simulate executor failure
+    //删除一个块来模拟执行器故障
     // Collecting the RDD should now fail with an informative exception
+    //收集RDD现在应该失败的异常信息
     val blockId = RDDBlockId(rdd.id, numPartitions - 1)
     bmm.removeBlock(blockId)
     try {
@@ -187,6 +193,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * Helper method to create a simple RDD.
+   * 辅助方法来创建一个简单的RDD
    */
   private def newRdd: RDD[Int] = {
     sc.parallelize(1 to 100, 4)
@@ -196,6 +203,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * Helper method to create a simple sorted RDD.
+   * 辅助方法来创建一个简单的排序法。
    */
   private def newSortedRdd: RDD[Int] = newRdd.sortBy(identity)
 
@@ -248,12 +256,14 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     assert(rdd3Dependencies.head.rdd === rdd2)
 
     // Only the locally checkpointed RDD should have special storage level
+    //只有局部检查点RDD应具有特殊的存储级别
     assert(rdd.getStorageLevel === targetStorageLevel)
     assert(rdd1.getStorageLevel === StorageLevel.NONE)
     assert(rdd2.getStorageLevel === StorageLevel.NONE)
     assert(rdd3.getStorageLevel === StorageLevel.NONE)
 
     // After an action, only the dependencies of the checkpointed RDD changes
+    //后一个动作，只有检查RDD变化的相关性
     val result = rdd3.collect()
     assert(rdd.dependencies !== rddDependencies)
     assert(rdd1.dependencies === rdd1Dependencies)
@@ -265,7 +275,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * Helper method to test checkpointing without fully draining the iterator.
-   *
+   * 辅助方法来测试检查点没有充分引流的迭代器。
    * Not all RDD actions fully consume the iterator. As a result, a subset of the partitions
    * may not be cached. However, since we want to truncate the lineage safely, we explicitly
    * ensure that *all* partitions are fully cached. This method asserts this behavior.
@@ -281,6 +291,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     require(rdd.isLocallyCheckpointed)
 
     // This does not drain the iterator, but checkpointing should still work
+    //这不漏的迭代器，但检查点仍然可以正常工作
     val first = rdd.first()
     assert(rdd.count() === targetCount)
     assert(rdd.count() === targetCount)
@@ -288,6 +299,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     assert(rdd.first() === first)
 
     // Test the same thing by calling actions on a descendant instead
+    //通过调用一个后代而不是相同的动作来测试同样的事情
     val rdd1 = rdd.repartition(10)
     val rdd2 = rdd1.repartition(100)
     val rdd3 = rdd2.repartition(1000)
@@ -314,11 +326,13 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     val partitionIndices = rdd.partitions.map(_.index)
 
     // The blocks should not exist before the action
+    //块不应该在动作之前存在
     partitionIndices.foreach { i =>
       assert(!bmm.contains(RDDBlockId(rdd.id, i)))
     }
 
     // After an action, the blocks should be found in the cache with the expected level
+    //一个动作后,块应该被发现在缓存中与预期的水平
     rdd.collect()
     partitionIndices.foreach { i =>
       val blockId = RDDBlockId(rdd.id, i)

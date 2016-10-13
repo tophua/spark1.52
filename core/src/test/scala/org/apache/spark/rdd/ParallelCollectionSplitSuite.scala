@@ -27,7 +27,7 @@ import org.scalatest.prop.Checkers
 import org.apache.spark.SparkFunSuite
 
 class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
-  test("one element per slice(分片)") {
+  test("one element per slice(分片)") {//每片一个元素
     val data = Array(1, 2, 3)
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -36,14 +36,14 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices(2).mkString(",") === "3")
   }
 
-  test("one slice") {
+  test("one slice") {//一个分片
     val data = Array(1, 2, 3)
     val slices = ParallelCollectionRDD.slice(data, 1)
     assert(slices.size === 1)
     assert(slices(0).mkString(",") === "1,2,3")
   }
 
-  test("equal(相等) slices") {
+  test("equal(相等) slices") {//相等分片
     val data = Array(1, 2, 3, 4, 5, 6, 7, 8, 9)
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -52,7 +52,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices(2).mkString(",") === "7,8,9")
   }
 
-  test("non-equal(不等) slices") {
+  test("non-equal(不等) slices") {//不相等分片
     val data = Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -61,7 +61,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices(2).mkString(",") === "7,8,9,10")
   }
 
-  test("splitting exclusive(不包含) range") {
+  test("splitting exclusive(不包含) range") {//分片的不包括范围
     val data = 0 until 100
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -70,7 +70,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices(2).mkString(",") === (66 to 99).mkString(","))
   }
 
-  test("splitting inclusive range") {
+  test("splitting inclusive range") {//分片的包括范围
     val data = 0 to 100
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -80,24 +80,24 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices(2).isInstanceOf[Range.Inclusive])
   }
 
-  test("empty data") {
+  test("empty data") {//空数据
     val data = new Array[Int](0)
     val slices = ParallelCollectionRDD.slice(data, 5)
     assert(slices.size === 5)
     for (slice <- slices) assert(slice.size === 0)
   }
 
-  test("zero slices") {
+  test("zero slices") {//0分片
     val data = Array(1, 2, 3)
     intercept[IllegalArgumentException] { ParallelCollectionRDD.slice(data, 0) }
   }
 
-  test("negative number of slices") {
+  test("negative number of slices") {//负数分片
     val data = Array(1, 2, 3)
     intercept[IllegalArgumentException] { ParallelCollectionRDD.slice(data, -5) }
   }
 
-  test("exclusive ranges sliced into ranges") {
+  test("exclusive ranges sliced into ranges") {//排除范围分片
     val data = 1 until 100
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -105,7 +105,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices.forall(_.isInstanceOf[Range]))
   }
 
-  test("inclusive ranges sliced into ranges") {
+  test("inclusive ranges sliced into ranges") {//包括范围的分片
     val data = 1 to 100
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -131,7 +131,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     }
   }
 
-  test("large ranges don't overflow") {
+  test("large ranges don't overflow") {//大范围不溢出
     val N = 100 * 1000 * 1000
     val data = 0 until N
     val slices = ParallelCollectionRDD.slice(data, 40)
@@ -145,7 +145,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     }
   }
 
-  test("random array tests") {
+  test("random array tests") {//随机数组测试
     val gen = for {
       d <- arbitrary[List[Int]]
       n <- Gen.choose(1, 100)
@@ -162,7 +162,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     check(prop)
   }
 
-  test("random exclusive range tests") {
+  test("random exclusive range tests") {//随机不包括范围测试
     val gen = for {
       a <- Gen.choose(-100, 100)
       b <- Gen.choose(-100, 100)
@@ -180,7 +180,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     check(prop)
   }
 
-  test("random inclusive range tests") {
+  test("random inclusive range tests") {//随机包括范围测试
     val gen = for {
       a <- Gen.choose(-100, 100)
       b <- Gen.choose(-100, 100)
@@ -198,7 +198,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     check(prop)
   }
 
-  test("exclusive ranges of longs") {
+  test("exclusive ranges of longs") {//long类型不包括范围
     val data = 1L until 100L
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -206,7 +206,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices.forall(_.isInstanceOf[NumericRange[_]]))
   }
 
-  test("inclusive ranges of longs") {
+  test("inclusive ranges of longs") {//long类型的包括范围
     val data = 1L to 100L
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -214,7 +214,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices.forall(_.isInstanceOf[NumericRange[_]]))
   }
 
-  test("exclusive ranges of doubles") {
+  test("exclusive ranges of doubles") {//
     val data = 1.0 until 100.0 by 1.0
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)

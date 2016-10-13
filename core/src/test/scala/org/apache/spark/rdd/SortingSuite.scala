@@ -31,7 +31,7 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     assert(pairs.sortByKey().collect() === Array((0, 0), (1, 0), (2, 0), (3, 0)))
   }
 
-  test("large array") {
+  test("large array") {//大数组
     val rand = new scala.util.Random()
     val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }
     val pairs = sc.parallelize(pairArr, 2)
@@ -42,7 +42,7 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     assert(sorted.collect() === pairArr.sortBy(_._1))//pairArr.sortBy(_._1) 数据组排序K升序
   }
 
-  test("large array with one split") {
+  test("large array with one split") {//大数组一个分区
     val rand = new scala.util.Random()
     val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }// Array[(Int, Int)]类型数组
     val pairs = sc.parallelize(pairArr, 2)
@@ -53,7 +53,7 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     assert(sorted.collect() === pairArr.sortBy(_._1))
   }
 
-  test("large array with many partitions") {
+  test("large array with many partitions") {//大数组多个分区
     val rand = new scala.util.Random()
     val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }
     val pairs = sc.parallelize(pairArr, 2)
@@ -70,34 +70,34 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     assert(pairs.sortByKey(false).collect() === pairArr.sortWith((x, y) => x._1 > y._1))
   }
 
-  test("sort descending with one split") {
+  test("sort descending with one split") {//一个分区的倒序
     val rand = new scala.util.Random()
     val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }
     val pairs = sc.parallelize(pairArr, 1)
     assert(pairs.sortByKey(false, 1).collect() === pairArr.sortWith((x, y) => x._1 > y._1))
   }
 
-  test("sort descending with many partitions") {
+  test("sort descending with many partitions") {//多个分区的倒序
     val rand = new scala.util.Random()
     val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }
     val pairs = sc.parallelize(pairArr, 2)
     assert(pairs.sortByKey(false, 20).collect() === pairArr.sortWith((x, y) => x._1 > y._1))
   }
 
-  test("more partitions than elements") {
+  test("more partitions than elements") {//更多的分区比元素
     val rand = new scala.util.Random()
     val pairArr = Array.fill(10) { (rand.nextInt(), rand.nextInt()) }
     val pairs = sc.parallelize(pairArr, 30)
     assert(pairs.sortByKey().collect() === pairArr.sortBy(_._1))
   }
 
-  test("empty RDD") {
+  test("empty RDD") {//空RDD
     val pairArr = new Array[(Int, Int)](0)
     val pairs = sc.parallelize(pairArr, 2)
     assert(pairs.sortByKey().collect() === pairArr.sortBy(_._1))
   }
 
-  test("partition balancing") {
+  test("partition balancing") {//分区平衡
     val pairArr = (1 to 1000).map(x => (x, x)).toArray
     val sorted = sc.parallelize(pairArr, 4).sortByKey()
     assert(sorted.collect() === pairArr.sortBy(_._1))
@@ -112,7 +112,7 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     partitions(2).last should be < partitions(3).head
   }
 
-  test("partition balancing for descending sort") {
+  test("partition balancing for descending sort") {//倒序的分区平衡
     val pairArr = (1 to 1000).map(x => (x, x)).toArray
     val sorted = sc.parallelize(pairArr, 4).sortByKey(false)//倒序
     assert(sorted.collect() === pairArr.sortBy(_._1).reverse)//pairArr.sortBy(_._1).reverse 数组的倒序
@@ -126,7 +126,7 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     partitions(1).last should be > partitions(2).head
     partitions(2).last should be > partitions(3).head
   }
-
+  //在排序法指的是在一个分区得到的元素范围
   test("get a range of elements in a sorted RDD that is on one partition") {
     val pairArr = (1 to 1000).map(x => (x, x)).toArray
     val sorted = sc.parallelize(pairArr, 10).sortByKey()
