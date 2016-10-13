@@ -23,6 +23,7 @@ import org.apache.spark.TaskContext
 
 /**
  * A Task implementation that fails to serialize.
+ * 一个任务失败实现序列化
  */
 private[spark] class NotSerializableFakeTask(myId: Int, stageId: Int)
   extends Task[Array[Byte]](stageId, 0, 0, Seq.empty) {

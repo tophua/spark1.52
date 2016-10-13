@@ -24,6 +24,7 @@ import org.apache.spark.{LocalSparkContext, SparkConf, SparkContext, SparkFunSui
 /**
  * Tests that pools and the associated(关联) scheduling algorithms for FIFO and fair scheduling work
  * correctly.
+ * 测试相关的调度算法池FIFO和公平调度工作
  */
 class PoolSuite extends SparkFunSuite with LocalSparkContext {
 
@@ -44,7 +45,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     assert(nextTaskSetToSchedule.get.stageId === expectedStageId)
   }
 
-  test("FIFO Scheduler Test") {
+  test("FIFO Scheduler Test") {//先进先出调度测试
     sc = new SparkContext("local", "TaskSchedulerImplSuite")
     val taskScheduler = new TaskSchedulerImpl(sc)
 
@@ -72,7 +73,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
    * two scheduling pools. The test verifies that as tasks are scheduled, the fair scheduling
    * algorithm properly orders the two scheduling pools.
    */
-  test("Fair Scheduler Test") {
+  test("Fair Scheduler Test") {//公平调度测试
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()
     val conf = new SparkConf().set("spark.scheduler.allocation.file", xmlPath)
     sc = new SparkContext("local", "TaskSchedulerImplSuite", conf)
@@ -83,6 +84,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     schedulableBuilder.buildPools()
 
     // Ensure that the XML file was read in correctly.
+    //确保正确读取XML文件
     assert(rootPool.getSchedulableByName("default") != null)
     assert(rootPool.getSchedulableByName("1") != null)
     assert(rootPool.getSchedulableByName("2") != null)
@@ -112,6 +114,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     schedulableBuilder.addTaskSetManager(taskSetManager24, properties2)
 
     // Pool 1 share ratio: 0. Pool 2 share ratio: 0. 1 gets scheduled based on ordering of names.
+    //基于排序的名称调度
     scheduleTaskAndVerifyId(0, rootPool, 0)
     // Pool 1 share ratio: 1/2. Pool 2 share ratio: 0. 2 gets scheduled because ratio is lower.
     scheduleTaskAndVerifyId(1, rootPool, 3)
@@ -133,7 +136,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     scheduleTaskAndVerifyId(7, rootPool, 4)
   }
 
-  test("Nested Pool Test") {
+  test("Nested Pool Test") {//测试嵌套的调度算法池
     sc = new SparkContext("local", "TaskSchedulerImplSuite")
     val taskScheduler = new TaskSchedulerImpl(sc)
 

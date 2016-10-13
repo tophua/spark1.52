@@ -31,7 +31,7 @@ class MesosClusterSchedulerSuite extends SparkFunSuite with LocalSparkContext wi
 
   private val command = new Command("mainClass", Seq("arg"), null, null, null, null)
 
-  test("can queue drivers") {
+  test("can queue drivers") {//可以排队的Drive
     val conf = new SparkConf()
     conf.setMaster("mesos://localhost:5050")
     conf.setAppName("spark mesos")
@@ -54,7 +54,7 @@ class MesosClusterSchedulerSuite extends SparkFunSuite with LocalSparkContext wi
     assert(queuedDrivers(1).submissionId == response2.submissionId)
   }
 
-  test("can kill queued drivers") {
+  test("can kill queued drivers") {//可以杀死排队的驱动程序
     val conf = new SparkConf()
     conf.setMaster("mesos://localhost:5050")
     conf.setAppName("spark mesos")

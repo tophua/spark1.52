@@ -26,18 +26,22 @@ import org.apache.spark.scheduler.cluster.ExecutorInfo
 
 /**
  * Unit tests for SparkListener that require a local cluster.
+ * 对于sparklistener需要本地集群单元测试
  */
 class SparkListenerWithClusterSuite extends SparkFunSuite with LocalSparkContext
   with BeforeAndAfter with BeforeAndAfterAll {
 
-  /** Length of time to wait while draining listener events. */
+  /** 
+   *  Length of time to wait while draining listener events.
+   *  等待侦听事件的时间长度
+   *   */
   val WAIT_TIMEOUT_MILLIS = 10000
 
   before {
     sc = new SparkContext("local-cluster[2,1,1024]", "SparkListenerSuite")
   }
 
-  test("SparkListener sends executor added message") {
+  test("SparkListener sends executor added message") {//发送执行者添加消息
     val listener = new SaveExecutorInfo
     sc.addSparkListener(listener)
 

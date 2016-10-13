@@ -38,12 +38,12 @@ import scala.language.postfixOps
 
 /**
  * Unit tests for the output commit coordination functionality.
- *
+ * 输出提交协调功能的单元测试
  * The unit test makes both the original task and the speculated task
  * attempt to commit, where committing is emulated by creating a
  * directory. If both tasks create directories then the end result is
  * a failure.
- *
+ * 单元测试使原来的任务和推测的任务试图提交,通过创建一个目录进行被模拟的地方
  * Note that there are some aspects of this test that are less than ideal.
  * In particular, the test mocks the speculation-dequeuing logic to always
  * dequeue a task and consider it as speculated. Immediately after initially

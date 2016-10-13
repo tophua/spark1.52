@@ -87,7 +87,7 @@ class CoarseMesosSchedulerBackendSuite extends SparkFunSuite
 
     sc = new SparkContext(sparkConf)
   }
-
+  //mesos支持杀死和限制的执行者
   test("mesos supports killing and limiting executors") {
     val driver = mock[SchedulerDriver]
     when(driver.start()).thenReturn(Protos.Status.DRIVER_RUNNING)
@@ -114,6 +114,7 @@ class CoarseMesosSchedulerBackendSuite extends SparkFunSuite
       any[Filters])
 
     // simulate the allocation manager down-scaling executors
+    //模拟配置管理者缩小的执行者
     backend.doRequestTotalExecutors(0)
     assert(backend.doKillExecutors(Seq("s1/0")))
     verify(driver, times(1)).killTask(taskID0)
@@ -126,6 +127,7 @@ class CoarseMesosSchedulerBackendSuite extends SparkFunSuite
       .declineOffer(OfferID.newBuilder().setValue("o2").build())
 
     // Verify we didn't launch any new executor
+    //核实我们没有推出任何新的executor
     assert(backend.slaveIdsWithExecutors.size === 1)
 
     backend.doRequestTotalExecutors(2)

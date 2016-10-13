@@ -30,7 +30,7 @@ import org.apache.spark.metrics.source.JvmSource
 
 class TaskContextSuite extends SparkFunSuite with BeforeAndAfter with LocalSparkContext {
 
-  test("provide metrics sources") {
+  test("provide metrics sources") {//提供数据来源
     val filePath = getClass.getClassLoader.getResource("test_metrics_config.properties").getFile
     val conf = new SparkConf(loadDefaults = false)
       .set("spark.metrics.conf", filePath)
@@ -45,7 +45,7 @@ class TaskContextSuite extends SparkFunSuite with BeforeAndAfter with LocalSpark
     assert(result > 0)
   }
 
-  test("calls TaskCompletionListener after failure") {
+  test("calls TaskCompletionListener after failure") {//调用taskcompletionlistener失败后
     TaskContextSuite.completed = false
     sc = new SparkContext("local", "test")
     val rdd = new RDD[String](sc, List()) {
@@ -65,7 +65,7 @@ class TaskContextSuite extends SparkFunSuite with BeforeAndAfter with LocalSpark
     }
     assert(TaskContextSuite.completed === true)
   }
-
+  //应该被称为即使一些失败
   test("all TaskCompletionListeners should be called even if some fail") {
     val context = TaskContext.empty()
     val listener = mock(classOf[TaskCompletionListener])
@@ -89,6 +89,7 @@ class TaskContextSuite extends SparkFunSuite with BeforeAndAfter with LocalSpark
     assert(attemptIds.toSet === Set(0))
 
     // Test a job with failed tasks
+    //测试一个任务失败的任务
     val attemptIdsWithFailedTask = sc.parallelize(Seq(1, 2), 2).mapPartitions { iter =>
       val attemptId = TaskContext.get().attemptNumber
       if (iter.next() == 1 && attemptId == 0) {
@@ -98,7 +99,7 @@ class TaskContextSuite extends SparkFunSuite with BeforeAndAfter with LocalSpark
     }.collect()
     assert(attemptIdsWithFailedTask.toSet === Set(0, 1))
   }
-
+  //返回taskattemptid向后兼容性
   test("TaskContext.attemptId returns taskAttemptId for backwards-compatibility (SPARK-4014)") {
     sc = new SparkContext("local", "test")
     val attemptIds = sc.parallelize(Seq(1, 2, 3, 4), 4).mapPartitions { iter =>

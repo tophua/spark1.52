@@ -38,12 +38,12 @@ class MesosSchedulerUtilsSuite extends SparkFunSuite with Matchers with MockitoS
   val utils = new MesosSchedulerUtils { }
   // scalastyle:on structural.type
 
-  test("use at-least minimum overhead") {
+  test("use at-least minimum overhead") {//至少使用最小开销
     val f = fixture
     when(f.sc.executorMemory).thenReturn(512)
     utils.calculateTotalMemory(f.sc) shouldBe 896
   }
-
+  //使用开销,如果它大于最小值
   test("use overhead if it is greater than minimum value") {
     val f = fixture
     when(f.sc.executorMemory).thenReturn(4096)
@@ -64,16 +64,16 @@ class MesosSchedulerUtilsSuite extends SparkFunSuite with Matchers with MockitoS
     )
     utils.parseConstraintString("tachyon:true;zone:us-east-1a,us-east-1b") should be (expectedMap)
   }
-
+  //正确解析一个空约束字符串
   test("parse an empty constraint string correctly") {
     utils.parseConstraintString("") shouldBe Map()
   }
-
+  //输入当畸形抛出一个异常
   test("throw an exception when the input is malformed") {
     an[IllegalArgumentException] should be thrownBy
       utils.parseConstraintString("tachyon;zone:us-east")
   }
-
+  //属性约束的空值与所有值相匹配
   test("empty values for attributes' constraints matches all values") {
     val constraintsStr = "tachyon:"
     val parsedConstraints = utils.parseConstraintString(constraintsStr)
@@ -89,7 +89,7 @@ class MesosSchedulerUtilsSuite extends SparkFunSuite with Matchers with MockitoS
     utils.matchesAttributeRequirements(parsedConstraints, tachyonTrueOffer) shouldBe true
     utils.matchesAttributeRequirements(parsedConstraints, tachyonFalseOffer) shouldBe true
   }
-
+  //集合属性的子集匹配
   test("subset match is performed for set attributes") {
     val supersetConstraint = Map(
       "tachyon" -> Value.Text.newBuilder().setValue("true").build(),
@@ -116,7 +116,7 @@ class MesosSchedulerUtilsSuite extends SparkFunSuite with Matchers with MockitoS
     utils.matchesAttributeRequirements(eqConstraint, offerAttribs) shouldBe true
     utils.matchesAttributeRequirements(gtConstraint, offerAttribs) shouldBe false
   }
-
+  //包含用于范围属性的匹配
   test("contains match is performed for range attributes") {
     val offerAttribs = Map("ports" -> Value.Range.newBuilder().setBegin(7000).setEnd(8000).build())
     val ltConstraint = utils.parseConstraintString("ports:6000")
@@ -129,7 +129,7 @@ class MesosSchedulerUtilsSuite extends SparkFunSuite with Matchers with MockitoS
     utils.matchesAttributeRequirements(gtConstraint, offerAttribs) shouldBe false
     utils.matchesAttributeRequirements(multiConstraint, offerAttribs) shouldBe true
   }
-
+  //文本属性的相等的匹配
   test("equality match is performed for text attributes") {
     val offerAttribs = Map("tachyon" -> Value.Text.newBuilder().setValue("true").build())
 

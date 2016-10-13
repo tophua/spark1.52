@@ -26,7 +26,7 @@ import scala.util.Random
 
 class MapStatusSuite extends SparkFunSuite {
 
-  test("compressSize") {//compress 压缩
+  test("compressSize") {//compress 压缩大小
     assert(MapStatus.compressSize(0L) === 0)
     assert(MapStatus.compressSize(1L) === 1)
     assert(MapStatus.compressSize(2L) === 8)
@@ -34,10 +34,11 @@ class MapStatusSuite extends SparkFunSuite {
     assert((MapStatus.compressSize(1000000L) & 0xFF) === 145)
     assert((MapStatus.compressSize(1000000000L) & 0xFF) === 218)
     // This last size is bigger than we can encode in a byte, so check that we just return 255
+    //这最后一个大小字节编码,所以检查返回255
     assert((MapStatus.compressSize(1000000000000000000L) & 0xFF) === 255)
   }
 
-  test("decompressSize") {
+  test("decompressSize") {//解压缩的大小
     assert(MapStatus.decompressSize(0) === 0)
     for (size <- Seq(2L, 10L, 100L, 50000L, 1000000L, 1000000000L)) {
       val size2 = MapStatus.decompressSize(MapStatus.compressSize(size))
@@ -45,7 +46,7 @@ class MapStatusSuite extends SparkFunSuite {
         "size " + size + " decompressed to " + size2 + ", which is out of range")
     }
   }
-
+  //MapStatus 不应该报告非空块的大小为0
   test("MapStatus should never report non-empty blocks' sizes as 0") {
     import Math._
     for (
@@ -65,7 +66,7 @@ class MapStatusSuite extends SparkFunSuite {
       }
     }
   }
-
+//大型任务应该使用
   test("large tasks should use " + classOf[HighlyCompressedMapStatus].getName) {
     val sizes = Array.fill[Long](2001)(150L)
     val status = MapStatus(null, sizes)

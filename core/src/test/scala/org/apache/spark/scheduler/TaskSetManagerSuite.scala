@@ -139,6 +139,7 @@ class FakeTaskScheduler(sc: SparkContext, liveExecutors: (String, String)* /* ex
 
 /**
  * A Task implementation that results in a large serialized task.
+ * 一个任务的执行，结果在一个大的系列任务
  */
 class LargeTask(stageId: Int) extends Task[Array[Byte]](stageId, 0, 0, Seq.empty) {
   val randomBuffer = new Array[Byte](TaskSetManager.TASK_SIZE_TO_WARN_KB * 1024)
@@ -162,7 +163,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     FakeRackUtil.cleanUp()
   }
 
-  test("TaskSet with no preferences") {
+  test("TaskSet with no preferences") {//taskset没有最佳位置
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"))
     val taskSet = FakeTask.createTaskSet(1)
@@ -170,17 +171,20 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
 
     // Offer a host with NO_PREF as the constraint,
+    //提供一系列no_pref为约束
     // we should get a nopref task immediately since that's what we only have
+    //我们应该立即得到nopref任务,因为这是我们唯一的
     var taskOption = manager.resourceOffer("exec1", "host1", NO_PREF)
     assert(taskOption.isDefined)
 
     // Tell it the task has finished
+    // 告诉任务已经完成了
     manager.handleSuccessfulTask(0, createTaskResult(0))
     assert(sched.endedTasks(0) === Success)
     assert(sched.finishedManagers.contains(manager))
   }
 
-  test("multiple offers with no preferences") {
+  test("multiple offers with no preferences") {//没有提供多个最佳位置
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"))
     val taskSet = FakeTask.createTaskSet(3)
@@ -189,6 +193,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES)
 
     // First three offers should all find tasks
+    //前三个提供的任务应该都能找到
     for (i <- 0 until 3) {
       var taskOption = manager.resourceOffer("exec1", "host1", NO_PREF)
       assert(taskOption.isDefined)
@@ -198,9 +203,11 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     assert(sched.startedTasks.toSet === Set(0, 1, 2))
 
     // Re-offer the host -- now we should get no more tasks
+    //重新提供主机-现在我们不应该得到更多的任务
     assert(manager.resourceOffer("exec1", "host1", NO_PREF) === None)
 
     // Finish the first two tasks
+    //完成前两个任务
     manager.handleSuccessfulTask(0, createTaskResult(0))
     manager.handleSuccessfulTask(1, createTaskResult(1))
     assert(sched.endedTasks(0) === Success)
@@ -208,12 +215,13 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     assert(!sched.finishedManagers.contains(manager))
 
     // Finish the last task
+    //完成最后一项任务
     manager.handleSuccessfulTask(2, createTaskResult(2))
     assert(sched.endedTasks(2) === Success)
     assert(sched.finishedManagers.contains(manager))
   }
 
-  test("skip unsatisfiable locality levels") {
+  test("skip unsatisfiable locality levels") {//跳过不可满足的本地级别
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("execA", "host1"), ("execC", "host2"))
     val taskSet = FakeTask.createTaskSet(1, Seq(TaskLocation("host1", "execB")))
@@ -221,35 +229,41 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
 
     // An executor that is not NODE_LOCAL should be rejected.
+    //一个执行人,不应该拒绝node_local
     assert(manager.resourceOffer("execC", "host2", ANY) === None)
 
     // Because there are no alive PROCESS_LOCAL executors, the base locality level should be
     // NODE_LOCAL. So, we should schedule the task on this offered NODE_LOCAL executor before
     // any of the locality wait timers expire.
+    //因为没有活着process_local执行者,
     assert(manager.resourceOffer("execA", "host1", ANY).get.index === 0)
   }
 
-  test("basic delay scheduling") {
+  test("basic delay scheduling") {//基本延迟调度
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"), ("exec2", "host2"))
     val taskSet = FakeTask.createTaskSet(4,
       Seq(TaskLocation("host1", "exec1")),
       Seq(TaskLocation("host2", "exec2")),
       Seq(TaskLocation("host1"), TaskLocation("host2", "exec2")),
+      //最后一个任务没有位置参数
       Seq()   // Last task has no locality prefs
     )
     val clock = new ManualClock
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
     // First offer host1, exec1: first task should be chosen
+    //提供第一个主机,exec1:应选择第一个任务
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 0)
     assert(manager.resourceOffer("exec1", "host1", PROCESS_LOCAL) == None)
 
     clock.advance(LOCALITY_WAIT_MS)
     // Offer host1, exec1 again, at NODE_LOCAL level: the node local (task 2) should
     // get chosen before the noPref task
+    //提供主机1,本地节点级别,节点局部(任务2)应该选择在nopref任务
     assert(manager.resourceOffer("exec1", "host1", NODE_LOCAL).get.index == 2)
 
     // Offer host2, exec3 again, at NODE_LOCAL level: we should choose task 2
+    //提供主机2,再一次exec3,
     assert(manager.resourceOffer("exec2", "host2", NODE_LOCAL).get.index == 1)
 
     // Offer host2, exec3 again, at NODE_LOCAL level: we should get noPref task
@@ -258,7 +272,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     clock.advance(LOCALITY_WAIT_MS)
     assert(manager.resourceOffer("exec2", "host2", NO_PREF).get.index == 3)
   }
-
+  //我们只有nopref任务队列中,我们不需要延迟调度
   test("we do not need to delay scheduling when we only have noPref tasks in the queue") {
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"), ("exec3", "host2"))
@@ -269,14 +283,14 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     )
     val clock = new ManualClock
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
-    // First offer host1, exec1: first task should be chosen
+    // First offer host1, exec1: first task should be chosen 应选择第一个任务
     assert(manager.resourceOffer("exec1", "host1", PROCESS_LOCAL).get.index === 0)
     assert(manager.resourceOffer("exec3", "host2", PROCESS_LOCAL).get.index === 1)
     assert(manager.resourceOffer("exec3", "host2", NODE_LOCAL) == None)
     assert(manager.resourceOffer("exec3", "host2", NO_PREF).get.index === 2)
   }
 
-  test("delay scheduling with fallback") {
+  test("delay scheduling with fallback") {//延迟调度与回退
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc,
       ("exec1", "host1"), ("exec2", "host2"), ("exec3", "host3"))
@@ -290,33 +304,35 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val clock = new ManualClock
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
 
-    // First offer host1: first task should be chosen
+    // First offer host1: first task should be chosen 应选择第一个任务
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 0)
 
-    // Offer host1 again: nothing should get chosen
+    // Offer host1 again: nothing should get chosen 什么都不应该被选择
     assert(manager.resourceOffer("exec1", "host1", ANY) === None)
 
     clock.advance(LOCALITY_WAIT_MS)
 
-    // Offer host1 again: second task (on host2) should get chosen
+    // Offer host1 again: second task (on host2) should get chosen 第二任务(在第二个主机)应该选择
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 1)
 
-    // Offer host1 again: third task (on host2) should get chosen
+    // Offer host1 again: third task (on host2) should get chosen  第三任务(在第二个主机)应该选择
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 2)
 
     // Offer host2: fifth task (also on host2) should get chosen
     assert(manager.resourceOffer("exec2", "host2", ANY).get.index === 4)
 
     // Now that we've launched a local task, we should no longer launch the task for host3
+    //现在我们启动一个本地任务,我们不应该在主机3再启动任务
     assert(manager.resourceOffer("exec2", "host2", ANY) === None)
 
     clock.advance(LOCALITY_WAIT_MS)
 
     // After another delay, we can go ahead and launch that task non-locally
+    //在另一个延迟后,我们可以继续前进，并启动非本地任务
     assert(manager.resourceOffer("exec2", "host2", ANY).get.index === 3)
   }
 
-  test("delay scheduling with failed hosts") {
+  test("delay scheduling with failed hosts") {//延迟调度失败的主机
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"), ("exec2", "host2"),
       ("exec3", "host3"))
@@ -329,31 +345,37 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
 
     // First offer host1: first task should be chosen
+    //提供一个主机1,应选择第一个任务
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 0)
 
     // After this, nothing should get chosen, because we have separated tasks with unavailable
     // preference from the noPrefPendingTasks
+    //在这之后,没有什么应该选择,因为我们无法选择从noprefpendingtasks分离任务
     assert(manager.resourceOffer("exec1", "host1", ANY) === None)
 
     // Now mark host2 as dead
+    //现在标识主体2已死
     sched.removeExecutor("exec2")
     manager.executorLost("exec2", "host2")
 
     // nothing should be chosen
+    // 什么都不应该选择
     assert(manager.resourceOffer("exec1", "host1", ANY) === None)
 
     clock.advance(LOCALITY_WAIT_MS * 2)
 
     // task 1 and 2 would be scheduled as nonLocal task
+    //任务1和2将被定为非本地任务
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 1)
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 2)
 
     // all finished
+    //所有都完成
     assert(manager.resourceOffer("exec1", "host1", ANY) === None)
     assert(manager.resourceOffer("exec2", "host2", ANY) === None)
   }
 
-  test("task result lost") {
+  test("task result lost") {//任务结果丢失
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"))
     val taskSet = FakeTask.createTaskSet(1)
@@ -363,13 +385,15 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 0)
 
     // Tell it the task has finished but the result was lost.
+    //告诉它任务已经完成,但结果丢失
     manager.handleFailedTask(0, TaskState.FINISHED, TaskResultLost)
     assert(sched.endedTasks(0) === TaskResultLost)
 
     // Re-offer the host -- now we should get task 0 again.
+    //重新提供主机-现在我们应该得到0的任务。
     assert(manager.resourceOffer("exec1", "host1", ANY).get.index === 0)
   }
-
+  //重复的失败导致任务集终止
   test("repeated failures lead to task set abortion") {
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"))
@@ -379,6 +403,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
 
     // Fail the task MAX_TASK_FAILURES times, and check that the task set is aborted
     // after the last failure.
+    //任务失败max_task_failures数,检查任务集在最后一次失败后终止
     (1 to manager.maxTaskFailures).foreach { index =>
       val offerResult = manager.resourceOffer("exec1", "host1", ANY)
       assert(offerResult.isDefined,
@@ -392,19 +417,22 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
       }
     }
   }
-
+  //executors将任务失败的列入黑名单后,最佳的优先位置
   test("executors should be blacklisted after task failure, in spite of locality preferences") {
     val rescheduleDelay = 300L
     val conf = new SparkConf().
       set("spark.scheduler.executorTaskBlacklistTime", rescheduleDelay.toString).
       // dont wait to jump locality levels in this test
+      //测试不要等待跳转本地性
       set("spark.locality.wait", "0")//本参数是以毫秒为单位启动本地数据task的等待时间
 
     sc = new SparkContext("local", "test", conf)
     // two executors on same host, one on different.
+    //在同一台主机上不同的两个执行者
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"),
       ("exec1.1", "host1"), ("exec2", "host2"))
     // affinity to exec1 on host1 - which we will fail.
+    //关联性 exec1 on host1,我们会失败
     val taskSet = FakeTask.createTaskSet(1, Seq(TaskLocation("host1", "exec1")))
     val clock = new ManualClock
     val manager = new TaskSetManager(sched, taskSet, 4, clock)
@@ -417,10 +445,12 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
       assert(offerResult.get.executorId === "exec1")
 
       // Cause exec1 to fail : failure 1
+      //exec1失败原因:故障1
       manager.handleFailedTask(offerResult.get.taskId, TaskState.FINISHED, TaskResultLost)
       assert(!sched.taskSetsFailed.contains(taskSet.id))
 
       // Ensure scheduling on exec1 fails after failure 1 due to blacklist
+      //确保调度exec1 失败1到黑名单
       assert(manager.resourceOffer("exec1", "host1", PROCESS_LOCAL).isEmpty)
       assert(manager.resourceOffer("exec1", "host1", NODE_LOCAL).isEmpty)
       assert(manager.resourceOffer("exec1", "host1", RACK_LOCAL).isEmpty)
@@ -428,6 +458,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     }
 
     // Run the task on exec1.1 - should work, and then fail it on exec1.1
+    //运行在exec1.1的任务工作，然后失败了exec1.1
     {
       val offerResult = manager.resourceOffer("exec1.1", "host1", NODE_LOCAL)
       assert(offerResult.isDefined,
@@ -437,6 +468,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
       assert(offerResult.get.executorId === "exec1.1")
 
       // Cause exec1.1 to fail : failure 2
+      //因为exec1.1失败：失败2
       manager.handleFailedTask(offerResult.get.taskId, TaskState.FINISHED, TaskResultLost)
       assert(!sched.taskSetsFailed.contains(taskSet.id))
 
@@ -445,6 +477,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     }
 
     // Run the task on exec2 - should work, and then fail it on exec2
+    //运行在exec2的任务工作，然后失败了exec2
     {
       val offerResult = manager.resourceOffer("exec2", "host2", ANY)
       assert(offerResult.isDefined, "Expect resource offer to return a task")
@@ -461,6 +494,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     }
 
     // After reschedule delay, scheduling on exec1 should be possible.
+    //延迟后重新调度,调度exec1应该是可能的
     clock.advance(rescheduleDelay)
 
     {
@@ -473,15 +507,17 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
       assert(manager.resourceOffer("exec1", "host1", PROCESS_LOCAL).isEmpty)
 
       // Cause exec1 to fail : failure 4
+      //因为exec1失败：失败4
       manager.handleFailedTask(offerResult.get.taskId, TaskState.FINISHED, TaskResultLost)
     }
 
     // we have failed the same task 4 times now : task id should now be in taskSetsFailed
+    //我们已经失败了4次相同的任务了,现在应该在tasksetsfailed任务ID
     assert(sched.taskSetsFailed.contains(taskSet.id))
   }
 
-  test("new executors get added and lost") {
-    // Assign host2 to rack2
+  test("new executors get added and lost") {//新执行得到添加和丢失
+    // Assign host2 to rack2 分配到主机2到机架2
     FakeRackUtil.assignHostToRack("host2", "rack2")
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc)
@@ -493,19 +529,25 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val clock = new ManualClock
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
     // Only ANY is valid
+    //只有任何是有效的
     assert(manager.myLocalityLevels.sameElements(Array(NO_PREF, ANY)))
     // Add a new executor
+    //添加一个新的执行者
     sched.addExecutor("execD", "host1")
     manager.executorAdded()
     // Valid locality should contain NODE_LOCAL and ANY
+    //有效的本地应包含node_local和任何
     assert(manager.myLocalityLevels.sameElements(Array(NODE_LOCAL, NO_PREF, ANY)))
     // Add another executor
+    //添加另一个执行者
     sched.addExecutor("execC", "host2")
     manager.executorAdded()
     // Valid locality should contain PROCESS_LOCAL, NODE_LOCAL, RACK_LOCAL and ANY
+    //有效的地方应包含process_local，node_local，rack_local和任何
     assert(manager.myLocalityLevels.sameElements(
       Array(PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY)))
     // test if the valid locality is recomputed when the executor is lost
+    //测试如果本地则重新计算执行丢失
     sched.removeExecutor("execC")
     manager.executorLost("execC", "host2")
     assert(manager.myLocalityLevels.sameElements(Array(NODE_LOCAL, NO_PREF, ANY)))
@@ -514,12 +556,15 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     assert(manager.myLocalityLevels.sameElements(Array(NO_PREF, ANY)))
   }
 
-  test("test RACK_LOCAL tasks") {
+  test("test RACK_LOCAL tasks") {//测试任务本地机架
     // Assign host1 to rack1
+    //分配到主机1到机架1
     FakeRackUtil.assignHostToRack("host1", "rack1")
     // Assign host2 to rack1
+    // 分配到主机2到机架1
     FakeRackUtil.assignHostToRack("host2", "rack1")
     // Assign host3 to rack2
+    //分配到主机3到机架2
     FakeRackUtil.assignHostToRack("host3", "rack2")
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc,
@@ -532,18 +577,19 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
 
     assert(manager.myLocalityLevels.sameElements(Array(PROCESS_LOCAL, NODE_LOCAL, RACK_LOCAL, ANY)))
     // Set allowed locality to ANY
+    //设置允许的本地和任务
     clock.advance(LOCALITY_WAIT_MS * 3)
-    // Offer host3
+    // Offer host3 提供主机3
     // No task is scheduled if we restrict locality to RACK_LOCAL
     assert(manager.resourceOffer("execC", "host3", RACK_LOCAL) === None)
-    // Task 0 can be scheduled with ANY
+    // Task 0 can be scheduled with ANY 任务0可以与任何计划
     assert(manager.resourceOffer("execC", "host3", ANY).get.index === 0)
     // Offer host2
     // Task 1 can be scheduled with RACK_LOCAL
     assert(manager.resourceOffer("execB", "host2", RACK_LOCAL).get.index === 1)
   }
 
-  test("do not emit warning when serialized task is small") {
+  test("do not emit warning when serialized task is small") {//序列化小任务不发出警告
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"))
     val taskSet = FakeTask.createTaskSet(1)
@@ -556,7 +602,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     assert(!manager.emittedTaskSizeWarning)
   }
 
-  test("emit warning when serialized task is large") {
+  test("emit warning when serialized task is large") {//序列化任务大时发出警告
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"))
 
@@ -569,7 +615,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
 
     assert(manager.emittedTaskSizeWarning)
   }
-
+  //如果任务不能序列化,抛出无法序列化异常
   test("Not serializable exception thrown if the task cannot be serialized") {
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"))
@@ -584,7 +630,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     assert(manager.isZombie)
   }
 
-  test("abort the job if total size of results is too large") {
+  test("abort the job if total size of results is too large") {//如果结果的总太大,中止作业
     val conf = new SparkConf().set("spark.driver.maxResultSize", "2m")
     sc = new SparkContext("local", "test", conf)
 
@@ -595,20 +641,23 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     }
 
     // multiple 1k result
+    //多1k结果
     val r = sc.makeRDD(0 until 10, 10).map(genBytes(1024)).collect()
     assert(10 === r.size )
 
     // single 10M result
+    //单10M结果
     val thrown = intercept[SparkException] {sc.makeRDD(genBytes(10 << 20)(0), 1).collect()}
     assert(thrown.getMessage().contains("bigger than spark.driver.maxResultSize"))
 
     // multiple 1M results
+    //多1M结果
     val thrown2 = intercept[SparkException] {
       sc.makeRDD(0 until 10, 10).map(genBytes(1 << 20)).collect()
     }
     assert(thrown2.getMessage().contains("bigger than spark.driver.maxResultSize"))
   }
-
+  //推理nopref任务应在本地节点调度
   test("speculative and noPref task should be scheduled after node-local") {
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(
@@ -628,14 +677,17 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     manager.speculatableTasks += 1
     clock.advance(LOCALITY_WAIT_MS)
     // schedule the nonPref task
+    //nonpref任务调度
     assert(manager.resourceOffer("execA", "host1", NO_PREF).get.index === 2)
     // schedule the speculative task
+    //调度推理任务
     assert(manager.resourceOffer("execB", "host2", NO_PREF).get.index === 1)
     clock.advance(LOCALITY_WAIT_MS * 3)
     // schedule non-local tasks
+    //安排非本地任务
     assert(manager.resourceOffer("execB", "host2", ANY).get.index === 3)
   }
-
+  //节点本地任务应立即安排,当只有节点局部和无偏好任务时
   test("node-local tasks should be scheduled right away " +
     "when there are only node-local and no-preference tasks") {
     sc = new SparkContext("local", "test")
@@ -650,15 +702,17 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
 
     // node-local tasks are scheduled without delay
+    //节点本地任务无延迟
     assert(manager.resourceOffer("execA", "host1", NODE_LOCAL).get.index === 0)
     assert(manager.resourceOffer("execA", "host2", NODE_LOCAL).get.index === 1)
     assert(manager.resourceOffer("execA", "host3", NODE_LOCAL).get.index === 3)
     assert(manager.resourceOffer("execA", "host3", NODE_LOCAL) === None)
 
     // schedule no-preference after node local ones
+    // 调度没有最佳位置本地节点
     assert(manager.resourceOffer("execA", "host3", NO_PREF).get.index === 2)
   }
-
+  //本地任务节点,进程本地任务完成后,
   test("SPARK-4939: node-local tasks should be scheduled right after process-local tasks finished")
   {
     sc = new SparkContext("local", "test")
@@ -672,15 +726,17 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
 
     // process-local tasks are scheduled first
+    //进程本地任务首先被调度
     assert(manager.resourceOffer("execA", "host1", NODE_LOCAL).get.index === 2)
     assert(manager.resourceOffer("execB", "host2", NODE_LOCAL).get.index === 3)
     // node-local tasks are scheduled without delay
+    //节点本地任务无延迟
     assert(manager.resourceOffer("execA", "host1", NODE_LOCAL).get.index === 0)
     assert(manager.resourceOffer("execB", "host2", NODE_LOCAL).get.index === 1)
     assert(manager.resourceOffer("execA", "host1", NODE_LOCAL) == None)
     assert(manager.resourceOffer("execB", "host2", NODE_LOCAL) == None)
   }
-
+   //没有优先任务应该调度本地进程完成任务
   test("SPARK-4939: no-pref tasks should be scheduled after process-local tasks finished") {
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("execA", "host1"), ("execB", "host2"))
@@ -692,17 +748,20 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
 
     // process-local tasks are scheduled first
+    //进程本地任务首先被调度
     assert(manager.resourceOffer("execA", "host1", PROCESS_LOCAL).get.index === 1)
     assert(manager.resourceOffer("execB", "host2", PROCESS_LOCAL).get.index === 2)
     // no-pref tasks are scheduled without delay
+    //没有优先任务无延迟调度
     assert(manager.resourceOffer("execA", "host1", PROCESS_LOCAL) == None)
     assert(manager.resourceOffer("execA", "host1", NODE_LOCAL) == None)
     assert(manager.resourceOffer("execA", "host1", NO_PREF).get.index === 0)
     assert(manager.resourceOffer("execA", "host1", ANY) == None)
   }
 
-  test("Ensure TaskSetManager is usable after addition of levels") {
+  test("Ensure TaskSetManager is usable after addition of levels") {//确保tasksetmanager添加水平后可使用
     // Regression test for SPARK-2931
+    // 回归测试
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc)
     val taskSet = FakeTask.createTaskSet(2,
@@ -711,13 +770,14 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val clock = new ManualClock
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
     // Only ANY is valid
+    //只有任何是有效的
     assert(manager.myLocalityLevels.sameElements(Array(ANY)))
-    // Add a new executor
+    // Add a new executor 添加一个新的执行者
     sched.addExecutor("execA", "host1")
     sched.addExecutor("execB.2", "host2")
     manager.executorAdded()
     assert(manager.pendingTasksWithNoPrefs.size === 0)
-    // Valid locality should contain PROCESS_LOCAL, NODE_LOCAL and ANY
+    // Valid locality should contain PROCESS_LOCAL, NODE_LOCAL and ANY 有效的地方应包含
     assert(manager.myLocalityLevels.sameElements(Array(PROCESS_LOCAL, NODE_LOCAL, ANY)))
     assert(manager.resourceOffer("execA", "host1", ANY) !== None)
     clock.advance(LOCALITY_WAIT_MS * 4)
@@ -735,6 +795,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
 
   test("Test that locations with HDFSCacheTaskLocation are treated as PROCESS_LOCAL.") {
     // Regression test for SPARK-2931
+    //回归测试
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc,
         ("execA", "host1"), ("execB", "host2"), ("execC", "host3"))

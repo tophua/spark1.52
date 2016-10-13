@@ -35,7 +35,7 @@ import org.apache.spark.util.{MutableURLClassLoader, Utils}
 
 /**
  * Removes the TaskResult from the BlockManager before delegating to a normal TaskResultGetter.
- *
+ * 从BlockManager删除TaskResult,删除之前给一个正常的taskresultgetter
  * Used to test the case where a BlockManager evicts the task result (or dies) before the
  * TaskResult is retrieved.
  */
@@ -50,6 +50,7 @@ class ResultDeletingTaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedule
     if (!removedResult) {
       // Only remove the result once, since we'd like to test the case where the task eventually
       // succeeds.
+      //只删除一次结果,既然我们想测试的情况下,任务最终成功。
       serializer.get().deserialize[TaskResult[_]](serializedData) match {
         case IndirectTaskResult(blockId, size) =>
           sparkEnv.blockManager.master.removeBlock(blockId)
@@ -74,6 +75,7 @@ class ResultDeletingTaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedule
 
 /**
  * Tests related to handling task results (both direct and indirect).
+ * 测试有关处理任务结果(直接和间接)
  */
 class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with LocalSparkContext {
 
@@ -81,13 +83,13 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
   // as we can make it) so the tests don't take too long.
    //以MB为单位的driver和executor之间通信信息的大小,设置值越大,driver可以接受越大的计算结果
   def conf: SparkConf = new SparkConf().set("spark.akka.frameSize", "1")
-  test("handling results smaller than Akka frame size") {
+  test("handling results smaller than Akka frame size") {//处理结果小于Akka框架大小
     sc = new SparkContext("local", "test", conf)
     val result = sc.parallelize(Seq(1), 1).map(x => 2 * x).reduce((x, y) => x)
     assert(result === 2)
   }
 
-  test("handling results larger than Akka frame size") {
+  test("handling results larger than Akka frame size") {//处理结果大于Akka框架大小
     sc = new SparkContext("local", "test", conf)
     val akkaFrameSize =
       sc.env.actorSystem.settings.config.getBytes("akka.remote.netty.tcp.maximum-frame-size").toInt
@@ -99,12 +101,14 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
       "Expect result to be removed from the block manager.")
   }
 
-  test("task retried if result missing from block manager") {
-    // Set the maximum number of task failures to > 0, so that the task set isn't aborted
-    // after the result is missing.
+  test("task retried if result missing from block manager") {//任务重试,如果块管理器丢失结果
+      // Set the maximum number of task failures to > 0, so that the task set isn't aborted
+      // after the result is missing.
+    //设置最大任务失败数,因此任务集不会在结果丢失后中止。
     sc = new SparkContext("local[1,2]", "test", conf)
     // If this test hangs, it's probably because no resource offers were made after the task
     // failed.
+    //如果这个测试挂起,这可能是因为任务失败后没有提供资源
     val scheduler: TaskSchedulerImpl = sc.taskScheduler match {
       case taskScheduler: TaskSchedulerImpl =>
         taskScheduler
@@ -121,22 +125,26 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
     assert(result === 1.to(akkaFrameSize).toArray)
 
     // Make sure two tasks were run (one failed one, and a second retried one).
+    //确保两个任务运行(一个失败,第二重试一)
     assert(scheduler.nextTaskId.get() === 2)
   }
 
   /**
    * Make sure we are using the context classloader when deserializing failed TaskResults instead
    * of the Spark classloader.
-
+   * 确保我们使用上下文类加载器在反序列化TaskResults而失败Spark类加载器
+   *
    * This test compiles a jar containing an exception and tests that when it is thrown on the
    * executor, enqueueFailedTask can correctly deserialize the failure and identify the thrown
    * exception as the cause.
-
+	 * 这个测试编译包含一个异常和测试，当它执行器被抛出异常
    * Before this fix, enqueueFailedTask would throw a ClassNotFoundException when deserializing
-   * the exception, resulting in an UnknownReason for the TaskEndResult.
+   * the exception, resulting in an UnknownReason for the TaskEndResult.   
    */
+  //反序列化的类加载器正确失败任务
   test("failed task deserialized with the correct classloader (SPARK-11195)") {
     // compile a small jar containing an exception that will be thrown on an executor.
+    //编译一个jar包含一个执行器异常
     val tempDir = Utils.createTempDir()
     val srcDir = new File(tempDir, "repro/")
     srcDir.mkdirs()
@@ -151,9 +159,11 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
     TestUtils.createJar(Seq(excFile), jarFile, directoryPrefix = Some("repro"))
 
     // ensure we reset the classloader after the test completes
+    //确保我们的类加载器测试完成后复位
     val originalClassLoader = Thread.currentThread.getContextClassLoader
     try {
       // load the exception from the jar
+      //加载jar抛出异常
       val loader = new MutableURLClassLoader(new Array[URL](0), originalClassLoader)
       loader.addURL(jarFile.toURI.toURL)
       Thread.currentThread().setContextClassLoader(loader)
@@ -161,6 +171,7 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
 
       // NOTE: we must run the cluster with "local" so that the executor can load the compiled
       // jar.
+      //我们必须以"本地"使执行器可以加载编译jar运行群集
       sc = new SparkContext("local", "test", conf)
       val rdd = sc.parallelize(Seq(1), 1).map { _ =>
         val exc = excClass.newInstance().asInstanceOf[Exception]

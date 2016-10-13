@@ -156,7 +156,7 @@ class MesosSchedulerBackendSuite extends SparkFunSuite with LocalSparkContext wi
     assert(volumes.get(4).getMode.equals(Volume.Mode.RO))
   }
 
-  test("mesos resource offers result in launching tasks") {
+  test("mesos resource offers result in launching tasks") {//资源提供启动任务的结果
     def createOffer(id: Int, mem: Int, cpu: Int): Offer = {
       val builder = Offer.newBuilder()
       builder.addResourcesBuilder()

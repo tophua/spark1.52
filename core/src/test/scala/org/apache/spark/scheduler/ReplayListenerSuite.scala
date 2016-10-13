@@ -45,7 +45,7 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
     Utils.deleteRecursively(testDir)
   }
 
-  test("Simple replay") {
+  test("Simple replay") {//简单的重试
     val logFilePath = Utils.getFilePath(testDir, "events.txt")
     val fstream = fileSystem.create(logFilePath)
     val writer = new PrintWriter(fstream)
@@ -74,12 +74,12 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
   }
 
   // This assumes the correctness of EventLoggingListener
-  test("End-to-end replay") {
+  test("End-to-end replay") {//端到端重试
     testApplicationReplay()
   }
 
   // This assumes the correctness of EventLoggingListener
-  test("End-to-end replay with compression") {
+  test("End-to-end replay with compression") {//端到端与压缩的重试
     CompressionCodec.ALL_COMPRESSION_CODECS.foreach { codec =>
       testApplicationReplay(Some(codec))
     }
@@ -105,6 +105,7 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
     val sc = new SparkContext("local-cluster[2,1,1024]", "Test replay", conf)
 
     // Run a few jobs
+    //运行几个工作
     sc.parallelize(1 to 100, 1).count()
     sc.parallelize(1 to 100, 2).map(i => (i, i)).count()
     sc.parallelize(1 to 100, 3).map(i => (i, i)).groupByKey().count()
@@ -112,12 +113,14 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
     sc.stop()
 
     // Prepare information needed for replay
+    //准备重试所需的信息
     val applications = fileSystem.listStatus(logDirPath)
     assert(applications != null && applications.size > 0)
     val eventLog = applications.sortBy(_.getModificationTime).last
     assert(!eventLog.isDir)
 
     // Replay events
+    //重试事件
     val logData = EventLoggingListener.openEventLog(eventLog.getPath(), fileSystem)
     val eventMonster = new EventMonster(conf)
     try {
@@ -129,6 +132,7 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
     }
 
     // Verify the same events are replayed in the same order
+    //验证同一事件重试顺序相同
     assert(sc.eventLogger.isDefined)
     val originalEvents = sc.eventLogger.get.loggedEvents
     val replayedEvents = eventMonster.loggedEvents
@@ -137,7 +141,7 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
 
   /**
    * A simple listener that buffers all the events it receives.
-   *
+   * 一个简单的侦听器,它缓冲它接收到的所有事件。
    * The event buffering functionality must be implemented within EventLoggingListener itself.
    * This is because of the following race condition: the event may be mutated between being
    * processed by one listener and being processed by another. Thus, in order to establish

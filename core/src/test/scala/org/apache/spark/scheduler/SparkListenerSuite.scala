@@ -31,7 +31,10 @@ import org.apache.spark.{LocalSparkContext, SparkConf, SparkContext, SparkFunSui
 class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Matchers
   with ResetSystemProperties {
 
-  /** Length of time to wait while draining listener events. */
+  /** 
+   *  Length of time to wait while draining listener events.
+   *  等待在侦听侦听事件事件时等待的时间
+   *   */
   val WAIT_TIMEOUT_MILLIS = 10000
 
   val jobCompletionTime = 1421191296660L
@@ -42,20 +45,24 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     bus.addListener(counter)
 
     // Listener bus hasn't started yet, so posting events should not increment counter
+    //侦听器总线尚未启动,因此不应将事件增量计数器
     (1 to 5).foreach { _ => bus.post(SparkListenerJobEnd(0, jobCompletionTime, JobSucceeded)) }
     assert(counter.count === 0)
 
     // Starting listener bus should flush all buffered events
+    //启动侦听器总线应刷新所有缓冲事件
     bus.start(sc)
     bus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(counter.count === 5)
 
     // After listener bus has stopped, posting events should not increment counter
+    //侦听器总线停止后,发布事件不应增量计数器
     bus.stop()
     (1 to 5).foreach { _ => bus.post(SparkListenerJobEnd(0, jobCompletionTime, JobSucceeded)) }
     assert(counter.count === 5)
 
     // Listener bus must not be started twice
+    //侦听器总线不能启动两次
     intercept[IllegalStateException] {
       val bus = new LiveListenerBus
       bus.start(sc)
@@ -63,25 +70,30 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     }
 
     // ... or stopped before starting
+    //或停止之前开始
     intercept[IllegalStateException] {
       val bus = new LiveListenerBus
       bus.stop()
     }
   }
-
+  //等待事件队列完全耗尽
   test("bus.stop() waits for the event queue to completely drain") {
     @volatile var drained = false
 
     // When Listener has started
+    //当监听器已经开始
     val listenerStarted = new Semaphore(0)
 
     // Tells the listener to stop blocking
+    //告诉监听器停止阻塞
     val listenerWait = new Semaphore(0)
 
     // When stopper has started
+    //当阻塞已经开始
     val stopperStarted = new Semaphore(0)
 
     // When stopper has returned
+    //阻塞返回
     val stopperReturned = new Semaphore(0)
 
     class BlockingListener extends SparkListener {
@@ -101,6 +113,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
     listenerStarted.acquire()
     // Listener should be blocked after start
+    //监听开始后阻塞
     assert(!drained)
 
     new Thread("ListenerBusStopper") {
@@ -122,7 +135,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     assert(drained)
   }
 
-  test("basic creation of StageInfo") {
+  test("basic creation of StageInfo") {//创建基本StageInfo
     sc = new SparkContext("local", "SparkListenerSuite")
     val listener = new SaveStageAndTaskInfo
     sc.addSparkListener(listener)
@@ -144,7 +157,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     taskInfoMetrics.length should be {4}
   }
 
-  test("basic creation of StageInfo with shuffle") {
+  test("basic creation of StageInfo with shuffle") {//创建基本StageInfo具有shuffle
     sc = new SparkContext("local", "SparkListenerSuite")
     val listener = new SaveStageAndTaskInfo
     sc.addSparkListener(listener)
@@ -182,7 +195,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     stageInfo3.rddInfos.exists(_.name == "Trois") should be {true}
   }
 
-  test("StageInfo with fewer tasks than partitions") {
+  test("StageInfo with fewer tasks than partitions") {//StageInfo较少的任务分区
     sc = new SparkContext("local", "SparkListenerSuite")
     val listener = new SaveStageAndTaskInfo
     sc.addSparkListener(listener)
@@ -199,12 +212,12 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     stageInfo.rddInfos.forall(_.numPartitions == 4) should be {true}
   }
 
-  test("local metrics") {
+  test("local metrics") {//本地测量
     sc = new SparkContext("local", "SparkListenerSuite")
     val listener = new SaveStageAndTaskInfo
     sc.addSparkListener(listener)
     sc.addSparkListener(new StatsReportListener)
-    // just to make sure some of the tasks take a noticeable amount of time
+    // just to make sure some of the tasks take a noticeable amount of time    
     val w = { i: Int =>
       if (i == 0) {
         Thread.sleep(100)
@@ -266,7 +279,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
       }
     }
   }
-
+  //onTaskGettingResult调用获取远程结果
   test("onTaskGettingResult() called when result fetched remotely") {
    //以MB为单位的driver和executor之间通信信息的大小,设置值越大,driver可以接受越大的计算结果
     val conf = new SparkConf().set("spark.akka.frameSize", "1")
@@ -275,6 +288,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     sc.addSparkListener(listener)
 
     // Make a task whose result is larger than the akka frame size
+    //做一个任务的结果大于Akka框架大小
     val akkaFrameSize =
       sc.env.actorSystem.settings.config.getBytes("akka.remote.netty.tcp.maximum-frame-size").toInt
     assert(akkaFrameSize === 1024 * 1024)
@@ -289,13 +303,14 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     assert(listener.startedGettingResultTasks.contains(TASK_INDEX))
     assert(listener.endedTasks.contains(TASK_INDEX))
   }
-
+  //onTaskGettingResult()不调用,结果直接发送
   test("onTaskGettingResult() not called when result sent directly") {
     sc = new SparkContext("local", "SparkListenerSuite")
     val listener = new SaveTaskEvents
     sc.addSparkListener(listener)
 
     // Make a task whose result is larger than the akka frame size
+    //做一个任务的结果大于Akka框架大小
     val result = sc.parallelize(Seq(1), 1).map(2 * _).reduce { case (x, y) => x }
     assert(result === 2)
 
@@ -305,7 +320,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     assert(listener.startedGettingResultTasks.isEmpty)
     assert(listener.endedTasks.contains(TASK_INDEX))
   }
-
+   //应该所有开始的任务,事件后工作被杀死了
   test("onTaskEnd() should be called for all started tasks, even after job has been killed") {
     sc = new SparkContext("local", "SparkListenerSuite")
     val WAIT_TIMEOUT_MILLIS = 10000
@@ -329,6 +344,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     f.cancel()
 
     // Ensure that onTaskEnd is called for all started tasks.
+    //确保ontaskend被称为所有启动任务
     finishTime = System.currentTimeMillis + WAIT_TIMEOUT_MILLIS
     listener.synchronized {
       var remainingWait = finishTime - System.currentTimeMillis
@@ -339,7 +355,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
       assert(listener.endedTasks.size === listener.startedTasks.size)
     }
   }
-
+  //sparklistener删除,如果监听抛出一个异常
   test("SparkListener moves on if a listener throws an exception") {
     val badListener = new BadListener
     val jobCounter1 = new BasicJobCounter
@@ -347,22 +363,25 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     val bus = new LiveListenerBus
 
     // Propagate events to bad listener first
+    //传播事件第一个坏的监听事件
     bus.addListener(badListener)
     bus.addListener(jobCounter1)
     bus.addListener(jobCounter2)
     bus.start(sc)
 
     // Post events to all listeners, and wait until the queue is drained
+    //提交事件全部监听,等待队列耗尽
     (1 to 5).foreach { _ => bus.post(SparkListenerJobEnd(0, jobCompletionTime, JobSucceeded)) }
     bus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
 
     // The exception should be caught, and the event should be propagated to other listeners
+    //事件应该传播给其他监听
     assert(bus.listenerThreadIsAlive)
     assert(jobCounter1.count === 5)
     assert(jobCounter2.count === 5)
   }
 
-  test("registering listeners via spark.extraListeners") {
+  test("registering listeners via spark.extraListeners") {//通过spark.extraListeners注册监听器
     val conf = new SparkConf().setMaster("local").setAppName("test")
       .set("spark.extraListeners", classOf[ListenerThatAcceptsSparkConf].getName + "," +
         classOf[BasicJobCounter].getName)
@@ -375,6 +394,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
   /**
    * Assert that the given list of numbers has an average that is greater than zero.
+   * 断言给定的数字列表的平均值大于零。
    */
   private def checkNonZeroAvg(m: Traversable[Long], msg: String) {
     assert(m.sum / m.size.toDouble > 0.0, msg)
@@ -382,6 +402,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
   /**
    * A simple listener that saves all task infos and task metrics.
+   * 一个简单的侦听器,保存所有的任务信息和任务指标
    */
   private class SaveStageAndTaskInfo extends SparkListener {
     val stageInfos = mutable.Map[StageInfo, Seq[(TaskInfo, TaskMetrics)]]()
@@ -403,6 +424,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
   /**
    * A simple listener that saves the task indices for all task events.
+   * 一个简单的侦听器，可以保存所有任务事件的任务索引
    */
   private class SaveTaskEvents extends SparkListener {
     val startedTasks = new mutable.HashSet[Int]()
@@ -426,6 +448,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
   /**
    * A simple listener that throws an exception on job end.
+   * 一个简单的侦听器,工作结束将异常一个抛出
    */
   private class BadListener extends SparkListener {
     override def onJobEnd(jobEnd: SparkListenerJobEnd): Unit = { throw new Exception }
@@ -438,6 +461,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
 /**
  * A simple listener that counts the number of jobs observed.
+ * 一个简单的侦听器,计数观察到的工作的数量
  */
 private class BasicJobCounter extends SparkListener {
   var count = 0

@@ -44,7 +44,7 @@ class OutputCommitCoordinatorIntegrationSuite
     sc = new SparkContext("local[2, 4]", "test", conf)
   }
 
-  test("exception thrown in OutputCommitter.commitTask()") {
+  test("exception thrown in OutputCommitter.commitTask()") {//异常抛出
     // Regression test for SPARK-10381
     failAfter(Span(60, Seconds)) {
       val tempDir = Utils.createTempDir()
