@@ -38,6 +38,7 @@ class CustomRecoveryModeFactory(
   /**
    * PersistenceEngine defines how the persistent data(Information about worker, driver etc..)
    * is handled for recovery.
+   * 持久性引擎定义了如何处理恢复持久数据
    *
    */
   override def createPersistenceEngine(): PersistenceEngine =
@@ -45,6 +46,7 @@ class CustomRecoveryModeFactory(
 
   /**
    * Create an instance of LeaderAgent that decides who gets elected as master.
+   * 创建代理的领导者决定谁当选的主人
    */
   override def createLeaderElectionAgent(master: LeaderElectable): LeaderElectionAgent =
     new CustomLeaderElectionAgent(master)
@@ -62,6 +64,7 @@ class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine 
   /**
    * Defines how the object is serialized and persisted. Implementation will
    * depend on the store used.
+   * 定义对象序列化持久化,实施将取决于所使用的存储
    */
   override def persist(name: String, obj: Object): Unit = {
     CustomPersistenceEngine.persistAttempts += 1
@@ -73,6 +76,7 @@ class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine 
 
   /**
    * Defines how the object referred by its name is removed from the store.
+   * 定义由它的名称所引用的对象如何从存储中删除
    */
   override def unpersist(name: String): Unit = {
     CustomPersistenceEngine.unpersistAttempts += 1
@@ -82,6 +86,7 @@ class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine 
   /**
    * Gives all objects, matching a prefix. This defines how objects are
    * read/deserialized back.
+   * 给所有对象,匹配前缀,这一定义对象怎样读/反序列化回来
    */
   override def read[T: ClassTag](prefix: String): Seq[T] = {
     CustomPersistenceEngine.readAttempts += 1

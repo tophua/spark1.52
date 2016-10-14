@@ -48,14 +48,14 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
   private val httpConf = broadcastConf("HttpBroadcastFactory")
   private val torrentConf = broadcastConf("TorrentBroadcastFactory")
 
-  test("Using HttpBroadcast locally") {
+  test("Using HttpBroadcast locally") {//使用HTTP本地广播
     sc = new SparkContext("local", "test", httpConf)
     val list = List[Int](1, 2, 3, 4)
     val broadcast = sc.broadcast(list)
     val results = sc.parallelize(1 to 2).map(x => (x, broadcast.value.sum))
     assert(results.collect().toSet === Set((1, 10), (2, 10)))
   }
-
+  //从多个线程访问HTTP广播变量
   test("Accessing HttpBroadcast variables from multiple threads") {
     sc = new SparkContext("local[10]", "test", httpConf)
     val list = List[Int](1, 2, 3, 4)
@@ -63,7 +63,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     val results = sc.parallelize(1 to 10).map(x => (x, broadcast.value.sum))
     assert(results.collect().toSet === (1 to 10).map(x => (x, 10)).toSet)
   }
-
+  //在一个地方集群访问HTTP广播变量
   test("Accessing HttpBroadcast variables in a local cluster") {
     val numSlaves = 4
     val conf = httpConf.clone
@@ -76,7 +76,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     val results = sc.parallelize(1 to numSlaves).map(x => (x, broadcast.value.sum))
     assert(results.collect().toSet === (1 to numSlaves).map(x => (x, 10)).toSet)
   }
-
+//使用TorrentBroadcast本地广播
   test("Using TorrentBroadcast locally") {
     sc = new SparkContext("local", "test", torrentConf)
     val list = List[Int](1, 2, 3, 4)
@@ -134,7 +134,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
 
     assert(results.toSet === (1 to numSlaves).map(x => (x, false)).toSet)
   }
-
+  //在执行未持久化HTTP广播变量在本地模式
   test("Unpersisting HttpBroadcast on executors only in local mode") {
     testUnpersistHttpBroadcast(distributed = false, removeFromDriver = false)
   }
@@ -166,7 +166,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
   test("Unpersisting TorrentBroadcast on executors and driver in distributed mode") {
     testUnpersistTorrentBroadcast(distributed = true, removeFromDriver = true)
   }
-
+  //使用广播后直接打印破坏点
   test("Using broadcast after destroy prints callsite") {
     sc = new SparkContext("local", "test")
     testPackage.runCallSiteTest(sc)

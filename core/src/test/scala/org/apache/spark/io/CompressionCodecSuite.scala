@@ -36,6 +36,7 @@ class CompressionCodecSuite extends SparkFunSuite {
     out.close()
 
     // Read the 1000 integers back.
+    //读1000个整数
     val inputStream = new ByteArrayInputStream(outputStream.toByteArray)
     val in = codec.compressedInputStream(inputStream)
     for (i <- 1 until 1000) {
@@ -44,19 +45,19 @@ class CompressionCodecSuite extends SparkFunSuite {
     in.close()
   }
 
-  test("default compression codec") {
+  test("default compression codec") {//默认的压缩编解码器
     val codec = CompressionCodec.createCodec(conf)
     assert(codec.getClass === classOf[SnappyCompressionCodec])
     testCodec(codec)
   }
 
-  test("lz4 compression codec") {
+  test("lz4 compression codec") {//lz4压缩编解码器
     val codec = CompressionCodec.createCodec(conf, classOf[LZ4CompressionCodec].getName)
     assert(codec.getClass === classOf[LZ4CompressionCodec])
     testCodec(codec)
   }
 
-  test("lz4 compression codec short form") {
+  test("lz4 compression codec short form") {//lz4编解码压缩短形式
     val codec = CompressionCodec.createCodec(conf, "lz4")
     assert(codec.getClass === classOf[LZ4CompressionCodec])
     testCodec(codec)
@@ -70,7 +71,7 @@ class CompressionCodecSuite extends SparkFunSuite {
     }
   }
 
-  test("lzf compression codec") {
+  test("lzf compression codec") {//lzf压缩编解码器
     val codec = CompressionCodec.createCodec(conf, classOf[LZFCompressionCodec].getName)
     assert(codec.getClass === classOf[LZFCompressionCodec])
     testCodec(codec)

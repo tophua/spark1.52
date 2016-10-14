@@ -26,32 +26,36 @@ import org.apache.spark.util.Utils
 
 /**
  * Tests for the REST application submission protocol.
+ * 其余应用程序提交协议的测试
  */
 class SubmitRestProtocolSuite extends SparkFunSuite {
 
-  test("validate") {
+  test("validate") {//验证
     val request = new DummyRequest
+    //丢失的一切
     intercept[SubmitRestProtocolException] { request.validate() } // missing everything
     request.clientSparkVersion = "1.2.3"
-    intercept[SubmitRestProtocolException] { request.validate() } // missing name and age
+    intercept[SubmitRestProtocolException] { request.validate() } // missing name and age 失踪的姓名和年龄
     request.name = "something"
-    intercept[SubmitRestProtocolException] { request.validate() } // missing only age
+    intercept[SubmitRestProtocolException] { request.validate() } // missing only age 缺的只是年龄
     request.age = 2
-    intercept[SubmitRestProtocolException] { request.validate() } // age too low
+    intercept[SubmitRestProtocolException] { request.validate() } // age too low 年龄太低
     request.age = 10
-    request.validate() // everything is set properly
+    request.validate() // everything is set properly 一切都设置正确
     request.clientSparkVersion = null
+    //丢失Spark版本
     intercept[SubmitRestProtocolException] { request.validate() } // missing only Spark version
     request.clientSparkVersion = "1.2.3"
     request.name = null
+    //缺失名称
     intercept[SubmitRestProtocolException] { request.validate() } // missing only name
     request.message = "not-setting-name"
     intercept[SubmitRestProtocolException] { request.validate() } // still missing name
   }
 
-  test("request to and from JSON") {
+  test("request to and from JSON") {//从JSON请求
     val request = new DummyRequest
-    intercept[SubmitRestProtocolException] { request.toJson } // implicit validation
+    intercept[SubmitRestProtocolException] { request.toJson } // implicit validation 隐式验证
     request.clientSparkVersion = "1.2.3"
     request.active = true
     request.age = 25
@@ -67,7 +71,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newRequest.message === null)
   }
 
-  test("response to and from JSON") {
+  test("response to and from JSON") {//从JSON响应
     val response = new DummyResponse
     response.serverSparkVersion = "3.3.4"
     response.success = true
@@ -80,7 +84,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newResponse.message === null)
   }
 
-  test("CreateSubmissionRequest") {
+  test("CreateSubmissionRequest") {//创建提交请求
     val message = new CreateSubmissionRequest
     intercept[SubmitRestProtocolException] { message.validate() }
     message.clientSparkVersion = "1.2.3"
@@ -90,7 +94,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     conf.set("spark.app.name", "SparkPie")
     message.sparkProperties = conf.getAll.toMap
     message.validate()
-    // optional fields
+    // optional fields 可选字段
     conf.set("spark.jars", "mayonnaise.jar,ketchup.jar")
     conf.set("spark.files", "fireball.png")
     conf.set("spark.driver.memory", s"${Utils.DEFAULT_DRIVER_MEM_MB}m")
@@ -106,7 +110,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     message.appArgs = Array("two slices", "a hint of cinnamon")
     message.environmentVariables = Map("PATH" -> "/dev/null")
     message.validate()
-    // bad fields
+    // bad fields 坏字段
     var badConf = conf.clone().set("spark.driver.cores", "one hundred feet")
     message.sparkProperties = badConf.getAll.toMap
     intercept[SubmitRestProtocolException] { message.validate() }
@@ -141,7 +145,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newMessage.environmentVariables === message.environmentVariables)
   }
 
-  test("CreateSubmissionResponse") {
+  test("CreateSubmissionResponse") {//创建提交响应
     val message = new CreateSubmissionResponse
     intercept[SubmitRestProtocolException] { message.validate() }
     message.serverSparkVersion = "1.2.3"
@@ -157,7 +161,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newMessage.success)
   }
 
-  test("KillSubmissionResponse") {
+  test("KillSubmissionResponse") {//杀死提交响应
     val message = new KillSubmissionResponse
     intercept[SubmitRestProtocolException] { message.validate() }
     message.serverSparkVersion = "1.2.3"
@@ -173,7 +177,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newMessage.success)
   }
 
-  test("SubmissionStatusResponse") {
+  test("SubmissionStatusResponse") {//提交状态响应
     val message = new SubmissionStatusResponse
     intercept[SubmitRestProtocolException] { message.validate() }
     message.serverSparkVersion = "1.2.3"
@@ -196,7 +200,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newMessage.workerHostPort === "1.2.3.4:7780")
   }
 
-  test("ErrorResponse") {
+  test("ErrorResponse") {//错误响应
     val message = new ErrorResponse
     intercept[SubmitRestProtocolException] { message.validate() }
     message.serverSparkVersion = "1.2.3"

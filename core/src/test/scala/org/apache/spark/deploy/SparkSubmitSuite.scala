@@ -49,7 +49,10 @@ class SparkSubmitSuite
     def write(b: Int) = {}
   }
 
-  /** Simple PrintStream that reads data into a buffer */
+  /** 
+   *  Simple PrintStream that reads data into a buffer
+   *  将数据读入缓冲区的简单打印流 
+   *  */
   private class BufferPrintStream extends PrintStream(noOpOutputStream) {
     var lineBuffer = ArrayBuffer[String]()
     // scalastyle:off println
@@ -59,7 +62,10 @@ class SparkSubmitSuite
     // scalastyle:on println
   }
 
-  /** Returns true if the script exits and the given search string is printed. */
+  /** 
+   *  Returns true if the script exits and the given search string is printed.
+   *  如果脚本退出,并打印给定的搜索字符串,则返回真
+   *   */
   private def testPrematureExit(input: Array[String], searchString: String) = {
     val printStream = new BufferPrintStream()
     SparkSubmit.printStream = printStream
@@ -72,7 +78,9 @@ class SparkSubmitSuite
         SparkSubmit.main(input)
       } catch {
         // If exceptions occur after the "exit" has happened, fine to ignore them.
+        //如果在“退出”发生后发生异常,罚款忽视他们
         // These represent code paths not reachable during normal execution.
+        //这些表示在正常执行过程中无法到达的代码路径
         case e: Exception => if (!exitedCleanly) throw e
       }
     }
@@ -85,24 +93,24 @@ class SparkSubmitSuite
   }
 
   // scalastyle:off println
-  test("prints usage on empty input") {
+  test("prints usage on empty input") {//打印空白输入的用法
     testPrematureExit(Array[String](), "Usage: spark-submit")
   }
 
-  test("prints usage with only --help") {
+  test("prints usage with only --help") {//只使用打印-帮助
     testPrematureExit(Array("--help"), "Usage: spark-submit")
   }
 
-  test("prints error with unrecognized options") {
+  test("prints error with unrecognized options") {//打印错误与无法识别的选项
     testPrematureExit(Array("--blarg"), "Unrecognized option '--blarg'")
     testPrematureExit(Array("-bleg"), "Unrecognized option '-bleg'")
   }
 
-  test("handle binary specified but not class") {
+  test("handle binary specified but not class") {//处理指定二进制,但不是类
     testPrematureExit(Array("foo.jar"), "No main class")
   }
 
-  test("handles arguments with --key=val") {
+  test("handles arguments with --key=val") {//handles arguments with
     val clArgs = Seq(
       "--jars=one.jar,two.jar,three.jar",
       "--name=myApp")
@@ -111,7 +119,7 @@ class SparkSubmitSuite
     appArgs.name should be ("myApp")
   }
 
-  test("handles arguments to user program") {
+  test("handles arguments to user program") {//处理用户程序的参数
     val clArgs = Seq(
       "--name", "myApp",
       "--class", "Foo",
@@ -121,7 +129,7 @@ class SparkSubmitSuite
     val appArgs = new SparkSubmitArguments(clArgs)
     appArgs.childArgs should be (Seq("some", "--weird", "args"))
   }
-
+  //用名称冲突处理用户程序的参数
   test("handles arguments to user program with name collision") {
     val clArgs = Seq(
       "--name", "myApp",
@@ -133,7 +141,7 @@ class SparkSubmitSuite
     val appArgs = new SparkSubmitArguments(clArgs)
     appArgs.childArgs should be (Seq("--master", "local", "some", "--weird", "args"))
   }
-
+  //处理YARN集群模式
   test("handles YARN cluster mode") {
     val clArgs = Seq(
       "--deploy-mode", "cluster",
@@ -171,7 +179,7 @@ class SparkSubmitSuite
     sysProps("SPARK_SUBMIT") should be ("true")
     sysProps.keys should not contain ("spark.jars")
   }
-
+  //处理YARN客户机模式
   test("handles YARN client mode") {
     val clArgs = Seq(
       "--deploy-mode", "client",
@@ -209,17 +217,18 @@ class SparkSubmitSuite
     sysProps("SPARK_SUBMIT") should be ("true")
     sysProps("spark.shuffle.spill") should be ("false")
   }
-
+  //处理独立的集群模式
   test("handles standalone cluster mode") {
     testStandaloneCluster(useRest = true)
   }
-
+  //处理传统的独立的集群模式
   test("handles legacy standalone cluster mode") {
     testStandaloneCluster(useRest = false)
   }
 
   /**
    * Test whether the launch environment is correctly set up in standalone cluster mode.
+   * 测试在独立的集群模式中是否正确设置启动环境
    * @param useRest whether to use the REST submission gateway introduced in Spark 1.3
    */
   private def testStandaloneCluster(useRest: Boolean): Unit = {
@@ -258,7 +267,7 @@ class SparkSubmitSuite
     sysProps.keys should contain ("spark.submit.deployMode")
     sysProps("spark.shuffle.spill") should be ("false")
   }
-
+  //处理独立客户端模式
   test("handles standalone client mode") {
     val clArgs = Seq(
       "--deploy-mode", "client",
@@ -280,7 +289,7 @@ class SparkSubmitSuite
     sysProps("spark.cores.max") should be ("5")
     sysProps("spark.shuffle.spill") should be ("false")
   }
-
+  //处理mesos客户端模式
   test("handles mesos client mode") {
     val clArgs = Seq(
       "--deploy-mode", "client",
@@ -302,7 +311,7 @@ class SparkSubmitSuite
     sysProps("spark.cores.max") should be ("5")
     sysProps("spark.shuffle.spill") should be ("false")
   }
-
+  //处理confs标记相等
   test("handles confs with flag equivalents") {
     val clArgs = Seq(
       "--deploy-mode", "cluster",
@@ -318,7 +327,7 @@ class SparkSubmitSuite
     sysProps("spark.master") should be ("yarn-cluster")
     mainClass should be ("org.apache.spark.deploy.yarn.Client")
   }
-
+  //启动简单的应用程序与Spark提交
   test("launch simple application with spark-submit") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
@@ -330,7 +339,7 @@ class SparkSubmitSuite
       unusedJar.toString)
     runSparkSubmit(args)
   }
-
+  //通过包括Jar
   test("includes jars passed in through --jars") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val jar1 = TestUtils.createJarWithClasses(Seq("SparkSubmitClassA"))
@@ -388,7 +397,7 @@ class SparkSubmitSuite
       runSparkSubmit(args)
     }
   }
-
+  //正确解析命令行参数路径
   test("resolves command line argument paths correctly") {
     val jars = "/jar1,/jar2"                 // --jars
     val files = "hdfs:/file1,file2"          // --files
@@ -396,6 +405,7 @@ class SparkSubmitSuite
     val pyFiles = "py-file1,py-file2"        // --py-files
 
     // Test jars and files
+    //测试jars和文件
     val clArgs = Seq(
       "--master", "local",
       "--class", "org.SomeClass",
@@ -410,6 +420,7 @@ class SparkSubmitSuite
     sysProps("spark.files") should be (Utils.resolveURIs(files))
 
     // Test files and archives (Yarn)
+    //测试文件和档案
     val clArgs2 = Seq(
       "--master", "yarn-client",
       "--class", "org.SomeClass",
@@ -436,7 +447,7 @@ class SparkSubmitSuite
     sysProps3("spark.submit.pyFiles") should be (
       PythonRunner.formatPaths(Utils.resolveURIs(pyFiles)).mkString(","))
   }
-
+  //正确解析配置路径
   test("resolves config paths correctly") {
     val jars = "/jar1,/jar2" // spark.jars
     val files = "hdfs:/file1,file2" // spark.files / spark.yarn.dist.files
@@ -494,7 +505,7 @@ class SparkSubmitSuite
     sysProps3("spark.submit.pyFiles") should be(
       PythonRunner.formatPaths(Utils.resolveURIs(pyFiles)).mkString(","))
   }
-
+  //用户类路径的第一驱动
   test("user classpath first in driver") {
     val systemJar = TestUtils.createJarWithFiles(Map("test.resource" -> "SYSTEM"))
     val userJar = TestUtils.createJarWithFiles(Map("test.resource" -> "USER"))

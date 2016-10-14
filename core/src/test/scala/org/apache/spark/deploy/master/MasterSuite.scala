@@ -34,7 +34,7 @@ import org.apache.spark.deploy._
 import org.apache.spark.rpc.RpcEnv
 
 class MasterSuite extends SparkFunSuite with Matchers with Eventually with PrivateMethodTester {
-//自定义恢复模式
+  //可以使用自定义的恢复模式工厂
   test("can use a custom recovery mode factory") {
     val conf = new SparkConf(loadDefaults = false)
     conf.set("spark.deploy.recoveryMode", "CUSTOM")
@@ -123,7 +123,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
 
     CustomRecoveryModeFactory.instantiationAttempts should be > instantiationAttempts
   }
-
+  //主节点/工作节点网站界面可用
   test("master/worker web ui available") {
     implicit val formats = org.json4s.DefaultFormats
     val conf = new SparkConf()
@@ -147,74 +147,74 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     }
   }
 
-  test("basic scheduling - spread out") {//展开
+  test("basic scheduling - spread out") {//基本调度-扩展
     basicScheduling(spreadOut = true)
   }
 
-  test("basic scheduling - no spread out") {
+  test("basic scheduling - no spread out") {//基本调度-不扩展
     basicScheduling(spreadOut = false)
   }
 
-  test("basic scheduling with more memory - spread out") {
+  test("basic scheduling with more memory - spread out") {//基本调度与更多内存-扩展
     basicSchedulingWithMoreMemory(spreadOut = true)
   }
 
-  test("basic scheduling with more memory - no spread out") {
+  test("basic scheduling with more memory - no spread out") {//基本调度与更多内存-不扩展
     basicSchedulingWithMoreMemory(spreadOut = false)
   }
 
-  test("scheduling with max cores - spread out") {//最大内存
+  test("scheduling with max cores - spread out") {//最大内核的调度
     schedulingWithMaxCores(spreadOut = true)
   }
 
-  test("scheduling with max cores - no spread out") {
+  test("scheduling with max cores - no spread out") {//最大内核的调度-没有扩展
     schedulingWithMaxCores(spreadOut = false)
   }
 
-  test("scheduling with cores per executor - spread out") {
+  test("scheduling with cores per executor - spread out") {//每执行器核心的调度
     schedulingWithCoresPerExecutor(spreadOut = true)
   }
 
-  test("scheduling with cores per executor - no spread out") {
+  test("scheduling with cores per executor - no spread out") {//每执行器核心的调度-没有扩展
     schedulingWithCoresPerExecutor(spreadOut = false)
   }
 
-  test("scheduling with cores per executor AND max cores - spread out") {
+  test("scheduling with cores per executor AND max cores - spread out") {//每执行器内核和最大内核的调度
     schedulingWithCoresPerExecutorAndMaxCores(spreadOut = true)
   }
 
-  test("scheduling with cores per executor AND max cores - no spread out") {
+  test("scheduling with cores per executor AND max cores - no spread out") {//每执行器内核和最大内核的调度-没有扩展
     schedulingWithCoresPerExecutorAndMaxCores(spreadOut = false)
   }
 
-  test("scheduling with executor limit - spread out") {
+  test("scheduling with executor limit - spread out") {//执行者限制的调度-扩展
     schedulingWithExecutorLimit(spreadOut = true)
   }
 
-  test("scheduling with executor limit - no spread out") {
+  test("scheduling with executor limit - no spread out") {//执行者限制的调度-没有扩展
     schedulingWithExecutorLimit(spreadOut = false)
   }
 
-  test("scheduling with executor limit AND max cores - spread out") {
+  test("scheduling with executor limit AND max cores - spread out") {//执行限制和最大内核的调度-扩展
     schedulingWithExecutorLimitAndMaxCores(spreadOut = true)
   }
 
-  test("scheduling with executor limit AND max cores - no spread out") {
+  test("scheduling with executor limit AND max cores - no spread out") {//执行限制和最大内核的调度-没有扩展
     schedulingWithExecutorLimitAndMaxCores(spreadOut = false)
   }
 
-  test("scheduling with executor limit AND cores per executor - spread out") {
+  test("scheduling with executor limit AND cores per executor - spread out") {//执行者限制的调度和执行者的核心-扩展
     schedulingWithExecutorLimitAndCoresPerExecutor(spreadOut = true)
   }
 
-  test("scheduling with executor limit AND cores per executor - no spread out") {
+  test("scheduling with executor limit AND cores per executor - no spread out") {//调度与执行者限制和核心每执行人-没有蔓延
     schedulingWithExecutorLimitAndCoresPerExecutor(spreadOut = false)
   }
-
+  //调度与执行者限制和核心每执行人和最大内核-扩展
   test("scheduling with executor limit AND cores per executor AND max cores - spread out") {
     schedulingWithEverything(spreadOut = true)
   }
-
+  //调度与执行者限制和核心每执行人和最大内核-没有扩展
   test("scheduling with executor limit AND cores per executor AND max cores - no spread out") {
     schedulingWithEverything(spreadOut = false)
   }

@@ -44,7 +44,7 @@ class DriverRunnerTest extends SparkFunSuite {
     when(processBuilder.start()).thenReturn(process)
     (processBuilder, process)
   }
-
+  //进程的成功瞬间
   test("Process succeeds instantly") {
     val runner = createDriverRunner()
 
@@ -53,13 +53,14 @@ class DriverRunnerTest extends SparkFunSuite {
 
     val (processBuilder, process) = createProcessBuilderAndProcess()
     // One failure then a successful run
+    //一个失败,那么一个成功的运行
     when(process.waitFor()).thenReturn(0)
     runner.runCommandWithRetry(processBuilder, p => (), supervise = true)
 
     verify(process, times(1)).waitFor()
     verify(sleeper, times(0)).sleep(anyInt())
   }
-
+  //进程失败几次,然后成功
   test("Process failing several times and then succeeding") {
     val runner = createDriverRunner()
 
@@ -67,7 +68,7 @@ class DriverRunnerTest extends SparkFunSuite {
     runner.setSleeper(sleeper)
 
     val (processBuilder, process) = createProcessBuilderAndProcess()
-    // fail, fail, fail, success
+    // fail, fail, fail, success 失败,失败,失败,成功
     when(process.waitFor()).thenReturn(-1).thenReturn(-1).thenReturn(-1).thenReturn(0)
     runner.runCommandWithRetry(processBuilder, p => (), supervise = true)
 
@@ -77,7 +78,7 @@ class DriverRunnerTest extends SparkFunSuite {
     verify(sleeper, times(1)).sleep(2)
     verify(sleeper, times(1)).sleep(4)
   }
-
+  //进程不重新启动,如果没有监督
   test("Process doesn't restart if not supervised") {
     val runner = createDriverRunner()
 
@@ -92,7 +93,7 @@ class DriverRunnerTest extends SparkFunSuite {
     verify(process, times(1)).waitFor()
     verify(sleeper, times(0)).sleep(anyInt())
   }
-
+  //进程不重新启动,如果杀死
   test("Process doesn't restart if killed") {
     val runner = createDriverRunner()
 
@@ -112,7 +113,7 @@ class DriverRunnerTest extends SparkFunSuite {
     verify(process, times(1)).waitFor()
     verify(sleeper, times(0)).sleep(anyInt())
   }
-
+  //复位计数器
   test("Reset of backoff counter") {
     val runner = createDriverRunner()
 
@@ -141,6 +142,7 @@ class DriverRunnerTest extends SparkFunSuite {
 
     verify(sleeper, times(4)).sleep(anyInt())
     // Expected sequence of sleeps is 1,2,1,2
+    //睡眠是1,2,1,2预期序列
     verify(sleeper, times(2)).sleep(1)
     verify(sleeper, times(2)).sleep(2)
   }

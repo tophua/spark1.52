@@ -22,7 +22,7 @@ import org.apache.spark.SecurityManager
 import org.apache.spark.rpc.{RpcAddress, RpcEnv}
 
 class WorkerWatcherSuite extends SparkFunSuite {
-  test("WorkerWatcher shuts down on valid disassociation") {
+  test("WorkerWatcher shuts down on valid disassociation") {//工作节点关闭有效分离
     val conf = new SparkConf()
     val rpcEnv = RpcEnv.create("test", "localhost", 12345, conf, new SecurityManager(conf))
     val targetWorkerUrl = rpcEnv.uriOf("test", RpcAddress("1.2.3.4", 1234), "Worker")

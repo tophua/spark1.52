@@ -68,7 +68,7 @@ class WorkerArgumentsTest extends SparkFunSuite {
     val workerArgs = new WorkerArguments(args, conf)
     assert(workerArgs.memory === 5120)
   }
-
+  //设置正确内存参数
   test("Memory correctly set from args with M appended to memory value") {
     val conf = new SparkConf
     val args = Array("-m", "10000M", "spark://localhost:0000  ")

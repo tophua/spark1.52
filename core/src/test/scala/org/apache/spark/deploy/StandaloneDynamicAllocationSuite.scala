@@ -34,6 +34,7 @@ import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages.RegisterE
 
 /**
  * End-to-end tests for dynamic allocation in standalone mode.
+ * 测试独立模式下端到端的动态分配
  */
 class StandaloneDynamicAllocationSuite
   extends SparkFunSuite
@@ -51,7 +52,9 @@ class StandaloneDynamicAllocationSuite
 
   /**
    * Start the local cluster.
+   * 启动本地群集
    * Note: local-cluster mode is insufficient because we want a reference to the Master.
+   * 注意:本地群集模式是不够的,因为我们引用主节点
    */
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -62,6 +65,7 @@ class StandaloneDynamicAllocationSuite
     master = makeMaster()
     workers = makeWorkers(10, 2048)
     // Wait until all workers register with master successfully
+    //等到所有的Woker都成功注册到主节点
     eventually(timeout(60.seconds), interval(10.millis)) {
       assert(getMasterState.workers.size === numWorkers)
     }
@@ -79,7 +83,7 @@ class StandaloneDynamicAllocationSuite
     super.afterAll()
   }
 
-  test("dynamic allocation default behavior") {
+  test("dynamic allocation default behavior") {//默认动态分配行为
     sc = new SparkContext(appConf)
     val appId = sc.applicationId
     eventually(timeout(10.seconds), interval(10.millis)) {
@@ -90,42 +94,49 @@ class StandaloneDynamicAllocationSuite
       assert(apps.head.getExecutorLimit === Int.MaxValue)
     }
     // kill all executors
+    //杀死所有的执行者
     assert(killAllExecutors(sc))
     var apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
     // request 1
+    // 请求1
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
     assert(apps.head.getExecutorLimit === 1)
     // request 1 more
+    // 请求1个以上
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
     assert(apps.head.getExecutorLimit === 2)
     // request 1 more; this one won't go through
+    //请求1个以上,这一个不会去通过
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
     assert(apps.head.getExecutorLimit === 3)
     // kill all existing executors; we should end up with 3 - 2 = 1 executor
+    //杀了所有现有的执行者,我们应该结束了3 - 2 = 1执行
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
     assert(apps.head.getExecutorLimit === 1)
     // kill all executors again; this time we'll have 1 - 1 = 0 executors left
+    //杀死所有的执行者了,这个时候我们会有1 - 1 = 0者离开
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
     // request many more; this increases the limit well beyond the cluster capacity
+    //要求更多,这增加了限制,远远超出了集群容量
     assert(sc.requestExecutors(1000))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
     assert(apps.head.getExecutorLimit === 1000)
   }
-
+  //动态分配最大内核小于等于每个Worker 内存数
   test("dynamic allocation with max cores <= cores per worker") {
     sc = new SparkContext(appConf.set("spark.cores.max", "8"))
     val appId = sc.applicationId
@@ -138,11 +149,13 @@ class StandaloneDynamicAllocationSuite
       assert(apps.head.getExecutorLimit === Int.MaxValue)
     }
     // kill all executors
+    //杀死所有执行者
     assert(killAllExecutors(sc))
     var apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
     // request 1
+    //请求1
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
@@ -152,35 +165,41 @@ class StandaloneDynamicAllocationSuite
     // This highlights a limitation of using dynamic allocation with max cores WITHOUT
     // setting cores per executor: once an application scales down and then scales back
     // up, its executors may not be spread out anymore!
+    //要求1以上,这一个不会去通过，因为我们已经在最大的核心
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
     assert(apps.head.getExecutorLimit === 2)
     // request 1 more; this one also won't go through for the same reason
+    //请求1个；这一个也不会去通过同样的原因
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
     assert(apps.head.getExecutorLimit === 3)
     // kill all existing executors; we should end up with 3 - 1 = 2 executor
+    //杀死所有现有的执行者,我们应该以3 - 1 = 2执行者
     // Note: we scheduled these executors together, so their cores should be evenly distributed
+    //注：我们将这些执行者在一起，所以他们的核心应该是均匀分布的
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
     assert(apps.head.executors.values.map(_.cores).toArray === Array(4, 4))
     assert(apps.head.getExecutorLimit === 2)
     // kill all executors again; this time we'll have 1 - 1 = 0 executors left
+    //杀死所有的执行者了;这个时候我们会有1 - 1 = 0者离开
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
     // request many more; this increases the limit well beyond the cluster capacity
+    //要求更多,这增加了限制,远远超出了集群容量
     assert(sc.requestExecutors(1000))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
     assert(apps.head.executors.values.map(_.cores).toArray === Array(4, 4))
     assert(apps.head.getExecutorLimit === 1000)
   }
-
+  //动态分配最大内核大于等于每个Worker 内存数
   test("dynamic allocation with max cores > cores per worker") {
    //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
     sc = new SparkContext(appConf.set("spark.cores.max", "16"))
@@ -194,17 +213,18 @@ class StandaloneDynamicAllocationSuite
       assert(apps.head.getExecutorLimit === Int.MaxValue)
     }
     // kill all executors
+    //杀死所有执行者
     assert(killAllExecutors(sc))
     var apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
-    // request 1
+    // request 1 请求1
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
     assert(apps.head.executors.values.head.cores === 10)
     assert(apps.head.getExecutorLimit === 1)
-    // request 1 more
+    // request 1 more 请求1个以上
     // Note: the cores are not evenly distributed because we scheduled these executors 1 by 1
     assert(sc.requestExecutors(1))
     apps = getApplications()
@@ -212,22 +232,26 @@ class StandaloneDynamicAllocationSuite
     assert(apps.head.executors.values.map(_.cores).toSet === Set(10, 6))
     assert(apps.head.getExecutorLimit === 2)
     // request 1 more; this one won't go through
+    //请求1个以上,这一个不会去通过
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
     assert(apps.head.getExecutorLimit === 3)
     // kill all existing executors; we should end up with 3 - 2 = 1 executor
+    //杀了所有现有的执行者,我们应该结束了3 - 2 = 1执行
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
     assert(apps.head.executors.values.head.cores === 10)
     assert(apps.head.getExecutorLimit === 1)
     // kill all executors again; this time we'll have 1 - 1 = 0 executors left
+    //杀死所有的执行者了,这个时候我们会有1 - 1 = 0者离开
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
     // request many more; this increases the limit well beyond the cluster capacity
+    //要求更多,这增加了限制,远远超出了集群容量
     assert(sc.requestExecutors(1000))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
@@ -235,58 +259,63 @@ class StandaloneDynamicAllocationSuite
     assert(apps.head.getExecutorLimit === 1000)
   }
 
-  test("dynamic allocation with cores per executor") {
+  test("dynamic allocation with cores per executor") {//动态分配执行者的每个内核
     sc = new SparkContext(appConf.set("spark.executor.cores", "2"))
     val appId = sc.applicationId
     eventually(timeout(10.seconds), interval(10.millis)) {
       val apps = getApplications()
       assert(apps.size === 1)
       assert(apps.head.id === appId)
+      //总20内核
       assert(apps.head.executors.size === 10) // 20 cores total
       assert(apps.head.getExecutorLimit === Int.MaxValue)
     }
-    // kill all executors
+    // kill all executors 杀死所有执行者
     assert(killAllExecutors(sc))
     var apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
-    // request 1
+    // request 1 一个请求者
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
     assert(apps.head.getExecutorLimit === 1)
-    // request 3 more
+    // request 3 more 要求3以上
     assert(sc.requestExecutors(3))
     apps = getApplications()
     assert(apps.head.executors.size === 4)
     assert(apps.head.getExecutorLimit === 4)
-    // request 10 more; only 6 will go through
+    // request 10 more; only 6 will go through 再要求10个,只有6个会通过
     assert(sc.requestExecutors(10))
     apps = getApplications()
     assert(apps.head.executors.size === 10)
     assert(apps.head.getExecutorLimit === 14)
     // kill 2 executors; we should get 2 back immediately
+    //杀死2的执行者,我们应该立即回2
     assert(killNExecutors(sc, 2))
     apps = getApplications()
     assert(apps.head.executors.size === 10)
     assert(apps.head.getExecutorLimit === 12)
     // kill 4 executors; we should end up with 12 - 4 = 8 executors
+    //杀死4的执行者,我们应该结束了12 - 4 = 8执行者
     assert(killNExecutors(sc, 4))
     apps = getApplications()
     assert(apps.head.executors.size === 8)
     assert(apps.head.getExecutorLimit === 8)
     // kill all executors; this time we'll have 8 - 8 = 0 executors left
+    //杀死所有的执行者,这一次我们会有8 - 8 = 0者离开
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
     // request many more; this increases the limit well beyond the cluster capacity
+    //要求更多,这增加了限制，远远超出了集群容量
     assert(sc.requestExecutors(1000))
     apps = getApplications()
     assert(apps.head.executors.size === 10)
     assert(apps.head.getExecutorLimit === 1000)
   }
-
+  //动态分配每个执行器最大内核
   test("dynamic allocation with cores per executor AND max cores") {
    //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
     sc = new SparkContext(appConf
@@ -297,30 +326,34 @@ class StandaloneDynamicAllocationSuite
       val apps = getApplications()
       assert(apps.size === 1)
       assert(apps.head.id === appId)
-      assert(apps.head.executors.size === 4) // 8 cores total
+      assert(apps.head.executors.size === 4) // 8 cores total 共有8个内核
       assert(apps.head.getExecutorLimit === Int.MaxValue)
     }
     // kill all executors
+    //杀死所有的执行者
     assert(killAllExecutors(sc))
     var apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
-    // request 1
+    // request 1 请求1
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
     assert(apps.head.getExecutorLimit === 1)
     // request 3 more
+    //请求3以上
     assert(sc.requestExecutors(3))
     apps = getApplications()
     assert(apps.head.executors.size === 4)
     assert(apps.head.getExecutorLimit === 4)
     // request 10 more; none will go through
+    //再要求10个,没有人会通过
     assert(sc.requestExecutors(10))
     apps = getApplications()
     assert(apps.head.executors.size === 4)
     assert(apps.head.getExecutorLimit === 14)
     // kill all executors; 4 executors will be launched immediately
+    //杀死所有的执行者,4执行者将立即启动
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 4)
@@ -331,23 +364,26 @@ class StandaloneDynamicAllocationSuite
     assert(apps.head.executors.size === 4)
     assert(apps.head.getExecutorLimit === 6)
     // ... and again; now we end up with 6 - 4 = 2 executors left
+    //现在我们结束了6 - 4 = 2者离开
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
     assert(apps.head.getExecutorLimit === 2)
     // ... and again; this time we have 2 - 2 = 0 executors left
+    //一次又一次；这段时间我们有2 - 2 = 0者离开
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
     // request many more; this increases the limit well beyond the cluster capacity
+    //请求更多,这增加了限制,远远超出了集群容量
     assert(sc.requestExecutors(1000))
     apps = getApplications()
     assert(apps.head.executors.size === 4)
     assert(apps.head.getExecutorLimit === 1000)
   }
 
-  test("kill the same executor twice (SPARK-9795)") {
+  test("kill the same executor twice (SPARK-9795)") {//杀死同一执行者两次
     sc = new SparkContext(appConf)
     val appId = sc.applicationId
     eventually(timeout(10.seconds), interval(10.millis)) {
@@ -361,6 +397,7 @@ class StandaloneDynamicAllocationSuite
     // the driver refuses to kill executors it does not know about
     syncExecutors(sc)
     // kill the same executor twice
+    //杀死同一执行者两次
     val executors = getExecutorIds(sc)
     assert(executors.size === 2)
     assert(sc.killExecutor(executors.head))
@@ -368,9 +405,10 @@ class StandaloneDynamicAllocationSuite
     val apps = getApplications()
     assert(apps.head.executors.size === 1)
     // The limit should not be lowered twice
+    //限制不应降低两倍
     assert(apps.head.getExecutorLimit === 1)
   }
-
+  //待替换执行者不应该失去
   test("the pending replacement executors should not be lost (SPARK-10515)") {
     sc = new SparkContext(appConf)
     val appId = sc.applicationId
@@ -387,6 +425,7 @@ class StandaloneDynamicAllocationSuite
     val executors = getExecutorIds(sc)
     assert(executors.size === 2)
     // kill executor 1, and replace it
+    //杀死执行者1，并取代它
     assert(sc.killAndReplaceExecutor(executors.head))
     eventually(timeout(10.seconds), interval(10.millis)) {
       val apps = getApplications()
@@ -395,11 +434,13 @@ class StandaloneDynamicAllocationSuite
 
     var apps = getApplications()
     // kill executor 1
+    //杀死执行者1
     assert(sc.killExecutor(executors.head))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
     assert(apps.head.getExecutorLimit === 2)
     // kill executor 2
+    //杀死执行者2
     assert(sc.killExecutor(executors(1)))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
@@ -407,10 +448,14 @@ class StandaloneDynamicAllocationSuite
   }
 
   // ===============================
-  // | Utility methods for testing |
+  // | Utility methods for testing |用于测试的实用方法
   // ===============================
 
-  /** Return a SparkConf for applications that want to talk to our Master. */
+  /** 
+   *  Return a SparkConf for applications that want to talk to our Master.
+   *  返回一个应用程序sparkconf 
+   *  */
+  
   private def appConf: SparkConf = {
     new SparkConf()
       .setMaster(masterRpcEnv.address.toSparkURL)
@@ -418,14 +463,20 @@ class StandaloneDynamicAllocationSuite
       .set("spark.executor.memory", "256m")//分配给每个executor进程总内存
   }
 
-  /** Make a master to which our application will send executor requests. */
+  /** 
+   *  Make a master to which our application will send executor requests. 
+   *  标记一个主节点应用程序发送执行请求
+   *  */
   private def makeMaster(): Master = {
     val master = new Master(masterRpcEnv, masterRpcEnv.address, 0, securityManager, conf)
     masterRpcEnv.setupEndpoint(Master.ENDPOINT_NAME, master)
     master
   }
 
-  /** Make a few workers that talk to our master. */
+  /** 
+   *  Make a few workers that talk to our master. 
+   *  标记一个新worker和我们的主节点交互
+   *  */
   private def makeWorkers(cores: Int, memory: Int): Seq[Worker] = {
     (0 until numWorkers).map { i =>
       val rpcEnv = workerRpcEnvs(i)
@@ -436,22 +487,35 @@ class StandaloneDynamicAllocationSuite
     }
   }
 
-  /** Get the Master state */
+  /** 
+   *  Get the Master state
+   *  获得主节点状态
+   *   */
   private def getMasterState: MasterStateResponse = {
     master.self.askWithRetry[MasterStateResponse](RequestMasterState)
   }
 
-  /** Get the applictions that are active from Master */
+  /** 
+   *  Get the applictions that are active from Master 
+   *  得到的是活动的从主应用程序
+   *  */
   private def getApplications(): Seq[ApplicationInfo] = {
     getMasterState.activeApps
   }
 
-  /** Kill all executors belonging to this application. */
+  /** 
+   *  Kill all executors belonging to this application. *
+   *  杀死应用程序所属的执行者
+   */
+
   private def killAllExecutors(sc: SparkContext): Boolean = {
     killNExecutors(sc, Int.MaxValue)
   }
 
-  /** Kill N executors belonging to this application. */
+  /** 
+   *  Kill N executors belonging to this application. 
+   *  杀死N的执行者属于这个应用程序
+   *  */
   private def killNExecutors(sc: SparkContext, n: Int): Boolean = {
     syncExecutors(sc)
     sc.killExecutors(getExecutorIds(sc).take(n))
@@ -459,22 +523,24 @@ class StandaloneDynamicAllocationSuite
 
   /**
    * Return a list of executor IDs belonging to this application.
-   *
+   * 返回属于此应用程序的执行者ID列表
    * Note that we must use the executor IDs according to the Master, which has the most
    * updated view. We cannot rely on the executor IDs according to the driver because we
    * don't wait for executors to register. Otherwise the tests will take much longer to run.
+   * 其中有最新的视图,我们重试执行者到Driver,我们不要等到注册执行者,否则测试将需要更长的时间来运行,
    */
   private def getExecutorIds(sc: SparkContext): Seq[String] = {
     val app = getApplications().find(_.id == sc.applicationId)
     assert(app.isDefined)
     // Although executors is transient, master is in the same process so the message won't be
+    //虽然执行者短暂,主要节点相同进程信息不会序列化,这里很安全
     // serialized and it's safe here.
     app.get.executors.keys.map(_.toString).toSeq
   }
 
   /**
    * Sync executor IDs between the driver and the Master.
-   *
+   * 同步执行器列表主节点和Driver
    * This allows us to avoid waiting for new executors to register with the driver before
    * we submit a request to kill them. This must be called before each kill request.
    */
@@ -486,6 +552,7 @@ class StandaloneDynamicAllocationSuite
     val missingExecutors = masterExecutors.toSet.diff(driverExecutors.toSet).toSeq.sorted
     missingExecutors.foreach { id =>
       // Fake an executor registration so the driver knows about us
+      //登记假执行者，让Driver知道我们
       val port = System.currentTimeMillis % 65536
       val endpointRef = mock(classOf[RpcEndpointRef])
       val mockAddress = mock(classOf[RpcAddress])

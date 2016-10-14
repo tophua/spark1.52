@@ -51,7 +51,10 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     Utils.deleteRecursively(testDir)
   }
 
-  /** Create a fake log file using the new log format used in Spark 1.3+ */
+  /**
+   *  Create a fake log file using the new log format used in Spark 1.3+
+   *  使用新的日志格式创建一个假日志文件
+   *   */
   private def newLogFile(
       appId: String,
       appAttemptId: Option[String],
@@ -63,10 +66,10 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     new File(logPath)
   }
 
-  test("Parse new and old application logs") {
+  test("Parse new and old application logs") {//解析新的和旧的应用程序日志
     val provider = new FsHistoryProvider(createTestConf())
 
-    // Write a new-style application log.
+    // Write a new-style application log. 编写一个新型的应用程序日志
     val newAppComplete = newLogFile("new1", None, inProgress = false)
     writeFile(newAppComplete, true, None,
       SparkListenerApplicationStart(newAppComplete.getName(), Some("new-app-complete"), 1L, "test",
@@ -74,7 +77,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
       SparkListenerApplicationEnd(5L)
       )
 
-    // Write a new-style application log.
+    // Write a new-style application log. 编写一个新型的应用程序日志
     val newAppCompressedComplete = newLogFile("new1compressed", None, inProgress = false,
       Some("lzf"))
     writeFile(newAppCompressedComplete, true, None,
@@ -82,14 +85,14 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
         1L, "test", None),
       SparkListenerApplicationEnd(4L))
 
-    // Write an unfinished app, new-style.
+    // Write an unfinished app, new-style.写一个未完成的应用程序，新型
     val newAppIncomplete = newLogFile("new2", None, inProgress = true)
     writeFile(newAppIncomplete, true, None,
       SparkListenerApplicationStart(newAppIncomplete.getName(), Some("new-incomplete"), 1L, "test",
         None)
       )
 
-    // Write an old-style application log.
+    // Write an old-style application log.写一个旧式的应用程序日志
     val oldAppComplete = writeOldLog("old1", "1.0", None, true,
       SparkListenerApplicationStart("old1", Some("old-app-complete"), 2L, "test", None),
       SparkListenerApplicationEnd(3L)
@@ -97,15 +100,17 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
 
     // Check for logs so that we force the older unfinished app to be loaded, to make
     // sure unfinished apps are also sorted correctly.
+    //检查日志，使我们迫使旧的未完成的应用程序将被加载,为了确保未完成的应用程序也正确分类。
     provider.checkForLogs()
 
-    // Write an unfinished app, old-style.
+    // Write an unfinished app, old-style. 写一个未完成的应用程序,旧的风格
     val oldAppIncomplete = writeOldLog("old2", "1.0", None, false,
       SparkListenerApplicationStart("old2", None, 2L, "test", None)
       )
 
     // Force a reload of data from the log directory, and check that both logs are loaded.
     // Take the opportunity to check that the offset checks work as expected.
+    //强制从日志目录重新加载数据,检查两个日志是否加载,检查偏移检查工作如预期。
     updateAndCheck(provider) { list =>
       list.size should be (5)
       list.count(_.attempts.head.completed) should be (3)
@@ -134,6 +139,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
         newAppIncomplete.lastModified(), "test", false))
 
       // Make sure the UI can be rendered.
+      //确保用户界面可以被渲染
       list.foreach { case info =>
         val appUi = provider.getAppUI(info.id, None)
         appUi should not be null
@@ -141,7 +147,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
       }
     }
   }
-
+  //用压缩编解码器设置解析传统日志
   test("Parse legacy logs with compression codec set") {
     val provider = new FsHistoryProvider(createTestConf())
     val testCodecs = List((classOf[LZFCompressionCodec].getName(), true),
@@ -173,7 +179,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
       }
     }
   }
-
+  //忽略不能读取的目录
   test("SPARK-3697: ignore directories that cannot be read.") {
     val logFile1 = newLogFile("new1", None, inProgress = false)
     writeFile(logFile1, true, None,
@@ -192,7 +198,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
       list.size should be (1)
     }
   }
-
+  //历史文件改名为进度完成
   test("history file is renamed from inprogress to completed") {
     val provider = new FsHistoryProvider(createTestConf())
 
@@ -214,7 +220,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
         endWith(EventLoggingListener.IN_PROGRESS)
     }
   }
-
+  //解析应用程序未启动的日志
   test("Parse logs that application is not started") {
     val provider = new FsHistoryProvider((createTestConf()))
 
@@ -226,8 +232,8 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
       list.size should be (0)
     }
   }
-
-  test("SPARK-5582: empty log directory") {
+  
+  test("SPARK-5582: empty log directory") {//空的日志目录
     val provider = new FsHistoryProvider(createTestConf())
 
     val logFile1 = newLogFile("app1", None, inProgress = true)
@@ -243,7 +249,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     appListAfterRename.size should be (1)
   }
 
-  test("apps with multiple attempts with order") {
+  test("apps with multiple attempts with order") {//具有多个尝试的应用程序排序
     val provider = new FsHistoryProvider(createTestConf())
 
     val attempt1 = newLogFile("app1", Some("attempt1"), inProgress = true)
@@ -302,7 +308,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     }
   }
 
-  test("log cleaner") {
+  test("log cleaner") {//日志清理
     val maxAge = TimeUnit.SECONDS.toMillis(10)
     val clock = new ManualClock(maxAge / 2)
     val provider = new FsHistoryProvider(
@@ -328,6 +334,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     }
 
     // Move the clock forward so log1 exceeds the max age.
+    //将时钟拨快所以LOG1超过最大年龄。
     clock.advance(maxAge)
 
     updateAndCheck(provider) { list =>
@@ -338,6 +345,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     assert(!log1.exists())
 
     // Do the same for the other log.
+    //为其他日志做同样
     clock.advance(maxAge)
 
     updateAndCheck(provider) { list =>
@@ -346,7 +354,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     assert(!log2.exists())
   }
 
-  test("Event log copy") {
+  test("Event log copy") {//复制事件日志
     val provider = new FsHistoryProvider(createTestConf())
     val logs = (1 to 2).map { i =>
       val log = newLogFile("downloadApp1", Some(s"attempt$i"), inProgress = false)
@@ -380,16 +388,18 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     }
   }
 
-  test("SPARK-8372: new logs with no app ID are ignored") {
+  test("SPARK-8372: new logs with no app ID are ignored") {//没有应用程序标识的新日志被忽略
     val provider = new FsHistoryProvider(createTestConf())
 
     // Write a new log file without an app id, to make sure it's ignored.
+    //写一个新的日志文件，没有一个应用程序的ID,以确保它被忽略。
     val logFile1 = newLogFile("app1", None, inProgress = true)
     writeFile(logFile1, true, None,
       SparkListenerLogStart("1.4")
     )
 
     // Write a 1.2 log file with no start event (= no app id), it should be ignored.
+    //写一个1.2日志文件，没有启动事件（=没有应用程序的身份证），它应该被忽略。
     writeOldLog("v12Log", "1.2", None, false)
 
     // Write 1.0 and 1.1 logs, which don't have app ids.
@@ -409,7 +419,9 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
 
   /**
    * Asks the provider to check for logs and calls a function to perform checks on the updated
-   * app list. Example:
+   * app list.
+   * 请提供程序检查日志，并调用一个函数来执行更新的应用程序列表的检查 
+   * Example:
    *
    *     updateAndCheck(provider) { list =>
    *       // asserts

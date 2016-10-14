@@ -38,7 +38,10 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
     def write(b: Int) = {}
   }
 
-  /** Simple PrintStream that reads data into a buffer */
+  /** 
+   *  Simple PrintStream that reads data into a buffer
+   *  简单的可读取数据到缓冲区 
+   *  */
   private class BufferPrintStream extends PrintStream(noOpOutputStream) {
     var lineBuffer = ArrayBuffer[String]()
     // scalastyle:off println
@@ -51,10 +54,11 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
   override def beforeAll() {
     super.beforeAll()
     // We don't want to write logs during testing
+    //在测试过程中，我们不想写日志
     SparkSubmitUtils.printStream = new BufferPrintStream
     tempIvyPath = Utils.createTempDir(namePrefix = "ivy").getAbsolutePath()
   }
-
+  //不正确的Maven坐标抛出错误
   test("incorrect maven coordinate throws error") {
     val coordinates = Seq("a:b: ", " :a:b", "a: :b", "a:b:", ":a:b", "a::b", "::", "a:b", "a")
     for (coordinate <- coordinates) {
@@ -63,7 +67,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
       }
     }
   }
-
+  //创建解析器
   test("create repo resolvers") {
     val settings = new IvySettings
     val res1 = SparkSubmitUtils.createRepoResolvers(None, settings)
@@ -85,7 +89,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
       }
     }
   }
-
+  //添加正确依赖works
   test("add dependencies works correctly") {
     val md = SparkSubmitUtils.getModuleDescriptor
     val artifacts = SparkSubmitUtils.extractMavenCoordinates("com.databricks:spark-csv_2.10:0.1," +
@@ -94,7 +98,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
     SparkSubmitUtils.addDependenciesToIvy(md, artifacts, "default")
     assert(md.getDependencies.length === 2)
   }
-
+  //不包括正常工作
   test("excludes works correctly") {
     val md = SparkSubmitUtils.getModuleDescriptor
     val excludes = Seq("a:b", "c:d")
@@ -113,7 +117,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
       SparkSubmitUtils.createExclusion("e:f:g:h", new IvySettings, "default")
     }
   }
-
+  //ivy路径正确工作
   test("ivy path works correctly") {
     val md = SparkSubmitUtils.getModuleDescriptor
     val artifacts = for (i <- 0 until 3) yield new MDArtifact(md, s"jar-$i", "jar", "jar")
@@ -130,8 +134,8 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
         Option(tempIvyPath), isTest = true)
       assert(jarPath.indexOf(tempIvyPath) >= 0, "should use non-default ivy path")
     }
-  }
-
+  }  
+  //本地库中搜索
   test("search for artifact at local repositories") {
     val main = new MavenCoordinate("my.great.lib", "mylib", "0.1")
     val dep = "my.great.dep:mydep:0.5"
@@ -163,13 +167,13 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
       assert(jarPath.indexOf("mydep") >= 0, "should find dependency")
     }
   }
-
+  //依赖没有发现抛出RuntimeException
   test("dependency not found throws RuntimeException") {
     intercept[RuntimeException] {
       SparkSubmitUtils.resolveMavenCoordinates("a:b:c", None, None, isTest = true)
     }
   }
-
+  //忽略火Spark和Spark的依赖关系
   test("neglects Spark and Spark's dependencies") {
     val components = Seq("bagel_", "catalyst_", "core_", "graphx_", "hive_", "mllib_", "repl_",
       "sql_", "streaming_", "yarn_", "network-common_", "network-shuffle_", "network-yarn_")
@@ -187,7 +191,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
       assert(files.indexOf(main.artifactId) >= 0, "Did not return artifact")
     }
   }
-
+  //排除依赖关系端到端
   test("exclude dependencies end to end") {
     val main = new MavenCoordinate("my.great.lib", "mylib", "0.1")
     val dep = "my.great.dep:mydep:0.5"

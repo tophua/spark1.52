@@ -150,25 +150,26 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
     }
   }
 
-  test("download all logs for app with multiple attempts") {
+  test("download all logs for app with multiple attempts") {//下载所有的日志为应用程序与多个尝试
     doDownloadTest("local-1430917381535", None)
   }
 
-  test("download one log for app with multiple attempts") {
+  test("download one log for app with multiple attempts") {//下载一个日志的应用程序与多个尝试
     (1 to 2).foreach { attemptId => doDownloadTest("local-1430917381535", Some(attemptId)) }
   }
 
-  test("download legacy logs - all attempts") {
+  test("download legacy logs - all attempts") {//下载旧的日志-所有的尝试
     doDownloadTest("local-1426533911241", None, legacy = true)
   }
 
-  test("download legacy logs - single  attempts") {
+  test("download legacy logs - single  attempts") {//下载旧的日志-单一的尝试
     (1 to 2). foreach {
       attemptId => doDownloadTest("local-1426533911241", Some(attemptId), legacy = true)
     }
   }
 
   // Test that the files are downloaded correctly, and validate them.
+  //测试文件是否正确下载，并验证它们的正确性。
   def doDownloadTest(appId: String, attemptId: Option[Int], legacy: Boolean = false): Unit = {
 
     val url = attemptId match {
@@ -214,7 +215,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
     filesCompared should be (totalFiles)
   }
 
-  test("response codes on bad paths") {
+  test("response codes on bad paths") {//坏路径上的响应代码
     val badAppId = getContentAndCode("applications/foobar")
     badAppId._1 should be (HttpServletResponse.SC_NOT_FOUND)
     badAppId._3 should be (Some("unknown app: foobar"))
@@ -240,7 +241,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
     getContentAndCode("foobar")._1 should be (HttpServletResponse.SC_NOT_FOUND)
   }
 
-  test("generate history page with relative links") {
+  test("generate history page with relative links") {//生成具有相对链接的历史页
     val historyServer = mock[HistoryServer]
     val request = mock[HttpServletRequest]
     val ui = mock[SparkUI]

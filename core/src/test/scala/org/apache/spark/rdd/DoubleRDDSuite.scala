@@ -56,6 +56,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
 
   test("WorksWithOutOfRangeWithOneBucket") {
     // Verify that if all of the elements are out of range the counts are zero
+    //确认如果所有的元素都是不在范围内的计数是
     val rdd = sc.parallelize(Seq(10.01, -0.01))
     val buckets = Array(0.0, 10.0) //只有一个范围
     //Array[Long] = Array(0)
@@ -68,6 +69,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
 
   test("WorksInRangeWithOneBucket") {
     // Verify the basic case of one bucket and all elements in that bucket works
+    //验证一个桶和该桶中的所有元素的基本情况
     val rdd = sc.parallelize(Seq(1, 2, 3, 4))
     val buckets = Array(0.0, 10.0) //每个分桶边界值
     val histogramResults = rdd.histogram(buckets) //直方图
@@ -79,6 +81,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
 
   test("WorksInRangeWithOneBucketExactMatch") {
     // Verify the basic case of one bucket and all elements in that bucket works
+    //验证一个桶和该桶中的所有元素的基本情况
     val rdd = sc.parallelize(Seq(1, 2, 3, 4))
     val buckets = Array(1.0, 4.0) //匹配
     val histogramResults = rdd.histogram(buckets) //直方图
@@ -90,6 +93,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
 
   test("WorksWithOutOfRangeWithTwoBuckets") {
     // Verify that out of range works with two buckets
+    //用两个桶检查出范围内的工作
     val rdd = sc.parallelize(Seq(10.01, -0.01))
     val buckets = Array(0.0, 5.0, 10.0) //第一个是每个分桶边界值，第二个是每个分桶的统计数
     val histogramResults = rdd.histogram(buckets)

@@ -34,7 +34,7 @@ class WorkerSuite extends SparkFunSuite with Matchers {
   }
   def conf(opts: (String, String)*): SparkConf = new SparkConf(loadDefaults = false).setAll(opts)
 
-  test("test isUseLocalNodeSSLConfig") {
+  test("test isUseLocalNodeSSLConfig") {//试验isUseLocalNodeSSLConfig
     Worker.isUseLocalNodeSSLConfig(cmd("-Dasdf=dfgh")) shouldBe false
     Worker.isUseLocalNodeSSLConfig(cmd("-Dspark.ssl.useNodeLocalConf=true")) shouldBe true
     Worker.isUseLocalNodeSSLConfig(cmd("-Dspark.ssl.useNodeLocalConf=false")) shouldBe false
@@ -61,7 +61,7 @@ class WorkerSuite extends SparkFunSuite with Matchers {
           "-Dspark.ssl.useNodeLocalConf=true", "-Dspark.ssl.opt1=y", "-Dspark.ssl.opt2=z")
 
   }
-
+  //测试执行完成清理(执行者少数量)
   test("test clearing of finishedExecutors (small number of executors)") {
     val conf = new SparkConf()
     conf.set("spark.worker.ui.retainedExecutors", 2.toString)
@@ -69,10 +69,11 @@ class WorkerSuite extends SparkFunSuite with Matchers {
     val worker = new Worker(rpcEnv, 50000, 20, 1234 * 5, Array.fill(1)(RpcAddress("1.2.3.4", 1234)),
       "sparkWorker1", "Worker", "/tmp", conf, new SecurityManager(conf))
     // initialize workers
+    //初始化工作节点
     for (i <- 0 until 5) {
       worker.executors += s"app1/$i" -> createExecutorRunner(i)
     }
-    // initialize ExecutorStateChanged Message
+    // initialize ExecutorStateChanged Message 消息初始化
     worker.handleExecutorStateChanged(
       ExecutorStateChanged("app1", 0, ExecutorState.EXITED, None, None))
     assert(worker.finishedExecutors.size === 1)
@@ -87,18 +88,18 @@ class WorkerSuite extends SparkFunSuite with Matchers {
       assert(worker.executors.size === 4 - i)
     }
   }
-
+  //测试执行完成清理(更多的执行者)
   test("test clearing of finishedExecutors (more executors)") {
     val conf = new SparkConf()
     conf.set("spark.worker.ui.retainedExecutors", 30.toString)
     val rpcEnv = RpcEnv.create("test", "localhost", 12345, conf, new SecurityManager(conf))
     val worker = new Worker(rpcEnv, 50000, 20, 1234 * 5, Array.fill(1)(RpcAddress("1.2.3.4", 1234)),
       "sparkWorker1", "Worker", "/tmp", conf, new SecurityManager(conf))
-    // initialize workers
+    // initialize workers 初始化工作节点
     for (i <- 0 until 50) {
       worker.executors += s"app1/$i" -> createExecutorRunner(i)
     }
-    // initialize ExecutorStateChanged Message
+    // initialize ExecutorStateChanged Message 初始化信息
     worker.handleExecutorStateChanged(
       ExecutorStateChanged("app1", 0, ExecutorState.EXITED, None, None))
     assert(worker.finishedExecutors.size === 1)
@@ -122,7 +123,7 @@ class WorkerSuite extends SparkFunSuite with Matchers {
       assert(worker.finishedExecutors.size === expectedValue)
     }
   }
-
+  //测试Driver完成清理(更量的Driver)
   test("test clearing of finishedDrivers (small number of drivers)") {
     val conf = new SparkConf()
     conf.set("spark.worker.ui.retainedDrivers", 2.toString)
@@ -134,7 +135,7 @@ class WorkerSuite extends SparkFunSuite with Matchers {
       val driverId = s"driverId-$i"
       worker.drivers += driverId -> createDriverRunner(driverId)
     }
-    // initialize DriverStateChanged Message
+    // initialize DriverStateChanged Message 初始化消息
     worker.handleDriverStateChanged(DriverStateChanged("driverId-0", DriverState.FINISHED, None))
     assert(worker.drivers.size === 4)
     assert(worker.finishedDrivers.size === 1)
@@ -148,14 +149,14 @@ class WorkerSuite extends SparkFunSuite with Matchers {
       assert(worker.finishedDrivers.size === 2)
     }
   }
-
+//测试Driver完成清理(少量的执行者)
   test("test clearing of finishedDrivers (more drivers)") {
     val conf = new SparkConf()
     conf.set("spark.worker.ui.retainedDrivers", 30.toString)
     val rpcEnv = RpcEnv.create("test", "localhost", 12345, conf, new SecurityManager(conf))
     val worker = new Worker(rpcEnv, 50000, 20, 1234 * 5, Array.fill(1)(RpcAddress("1.2.3.4", 1234)),
       "sparkWorker1", "Worker", "/tmp", conf, new SecurityManager(conf))
-    // initialize workers
+    // initialize workers 初始化工作节点
     for (i <- 0 until 50) {
       val driverId = s"driverId-$i"
       worker.drivers += driverId -> createDriverRunner(driverId)

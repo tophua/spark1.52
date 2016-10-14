@@ -30,7 +30,7 @@ import org.apache.spark.util.Utils
 
 class PersistenceEngineSuite extends SparkFunSuite {
 
-  test("FileSystemPersistenceEngine") {
+  test("FileSystemPersistenceEngine") {//文件系统的持久性引擎
     val dir = Utils.createTempDir()
     try {
       val conf = new SparkConf()
@@ -42,7 +42,7 @@ class PersistenceEngineSuite extends SparkFunSuite {
     }
   }
 
-  test("ZooKeeperPersistenceEngine") {
+  test("ZooKeeperPersistenceEngine") {//ZooKeeper持久引擎
     val conf = new SparkConf()
     // TestingServer logs the port conflict exception rather than throwing an exception.
     // So we have to find a free port by ourselves. This approach cannot guarantee always starting
@@ -51,7 +51,7 @@ class PersistenceEngineSuite extends SparkFunSuite {
     val zkTestServer = new TestingServer(findFreePort(conf))
     try {
       testPersistenceEngine(conf, serializer => {
-	//zookeeper集群URL
+	    //zookeeper集群URL
         conf.set("spark.deploy.zookeeper.url", zkTestServer.getConnectString)
         new ZooKeeperPersistenceEngine(conf, serializer)
       })
@@ -75,9 +75,11 @@ class PersistenceEngineSuite extends SparkFunSuite {
     assert(persistenceEngine.read[String]("test_").isEmpty)
 
     // Test deserializing objects that contain RpcEndpointRef
+    //测试反序列化对象包含rpcendpointref
     val testRpcEnv = RpcEnv.create("test", "localhost", 12345, conf, new SecurityManager(conf))
     try {
       // Create a real endpoint so that we can test RpcEndpointRef deserialization
+      //创造一个真正的终点，我们可以测试RpcEndpointRef反序列化
       val workerEndpoint = testRpcEnv.setupEndpoint("worker", new RpcEndpoint {
         override val rpcEnv: RpcEnv = testRpcEnv
       })
@@ -102,6 +104,7 @@ class PersistenceEngineSuite extends SparkFunSuite {
       assert(storedDrivers.isEmpty)
 
       // Check deserializing WorkerInfo
+      //检查workerinfo序列化
       assert(storedWorkers.size == 1)
       val recoveryWorkerInfo = storedWorkers.head
       assert(workerToPersist.id === recoveryWorkerInfo.id)

@@ -19,7 +19,7 @@ package org.apache.spark.rdd
 
 import java.util.concurrent.Semaphore
 
-import scala.concurrent.{Await, TimeoutException}
+import scala.concurrent.{ Await, TimeoutException }
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -27,7 +27,7 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.Timeouts
 import org.scalatest.time.SpanSugar._
 
-import org.apache.spark.{LocalSparkContext, SparkContext, SparkException, SparkFunSuite}
+import org.apache.spark.{ LocalSparkContext, SparkContext, SparkException, SparkFunSuite }
 /**
  * 异步RDD
  */
@@ -46,19 +46,19 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
 
   lazy val zeroPartRdd = new EmptyRDD[Int](sc)
 
-  test("countAsync") {//计数异步
+  test("countAsync") { //计数异步
     assert(zeroPartRdd.countAsync().get() === 0)
     assert(sc.parallelize(1 to 10000, 5).countAsync().get() === 10000)
   }
 
-  test("collectAsync") {//收集异步
+  test("collectAsync") { //收集异步
     assert(zeroPartRdd.collectAsync().get() === Seq.empty)
 
     val collected = sc.parallelize(1 to 1000, 3).collectAsync().get()
     assert(collected === (1 to 1000))
   }
 
-  test("foreachAsync") {//迭代异步
+  test("foreachAsync") { //迭代异步
     zeroPartRdd.foreachAsync(i => Unit).get()
 
     val accum = sc.accumulator(0)
@@ -68,7 +68,7 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
     assert(accum.value === 1000)
   }
 
-  test("foreachPartitionAsync") {//异步迭代分区
+  test("foreachPartitionAsync") { //异步迭代分区
     zeroPartRdd.foreachPartitionAsync(iter => Unit).get()
 
     val accum = sc.accumulator(0)
@@ -78,7 +78,7 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
     assert(accum.value === 9)
   }
 
-  test("takeAsync") {//
+  test("takeAsync") { //
     def testTake(rdd: RDD[Int], input: Seq[Int], num: Int) {
       val expected = input.take(num)
       val saw = rdd.takeAsync(num).get()
@@ -113,8 +113,8 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
    * of a successful job execution.
    * 确保完成,成功,失败调用成功执行的案例
    */
-  test("async success handling") {//异步成功处理
-    val f = sc.parallelize(1 to 10, 2).countAsync()//FutureAction[Long]
+  test("async success handling") { //异步成功处理
+    val f = sc.parallelize(1 to 10, 2).countAsync() //FutureAction[Long]
 
     // Use a semaphore to make sure onSuccess and onComplete's success path will be called.
     // If not, the test will hang.
@@ -127,12 +127,14 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
         info("Should not have reached this code path (onComplete matching Failure)")
         throw new Exception("Task should succeed")
     }
-    f.onSuccess { case a: Any =>
-      sem.release()
+    f.onSuccess {
+      case a: Any =>
+        sem.release()
     }
-    f.onFailure { case t =>
-      info("Should not have reached this code path (onFailure)")
-      throw new Exception("Task should succeed")
+    f.onFailure {
+      case t =>
+        info("Should not have reached this code path (onFailure)")
+        throw new Exception("Task should succeed")
     }
     assert(f.get() === 10)
 
@@ -145,7 +147,7 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
    * Make sure onComplete, onSuccess, and onFailure are invoked correctly in the case
    * of a failed job execution.
    */
-  test("async failure handling") {//异步故障处理
+  test("async failure handling") { //异步故障处理
     val f = sc.parallelize(1 to 10, 2).map { i =>
       throw new Exception("intentional"); i
     }.countAsync()
@@ -161,12 +163,14 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
       case scala.util.Failure(e) =>
         sem.release()
     }
-    f.onSuccess { case a: Any =>
-      info("Should not have reached this code path (onSuccess)")
-      throw new Exception("Task should fail")
+    f.onSuccess {
+      case a: Any =>
+        info("Should not have reached this code path (onSuccess)")
+        throw new Exception("Task should fail")
     }
-    f.onFailure { case t =>
-      sem.release()
+    f.onFailure {
+      case t =>
+        sem.release()
     }
     intercept[SparkException] {
       f.get()
@@ -180,28 +184,28 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
   /**
    * Awaiting FutureAction results
    * 等待futureaction结果
-   * 
+   *
    */
   test("FutureAction result, infinite(无限) wait") {
     val f = sc.parallelize(1 to 100, 4)
-              .countAsync()
-  //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
-    assert(Await.result(f, Duration.Inf) === 100)//Await.result等待返回结果
+      .countAsync()
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+    assert(Await.result(f, Duration.Inf) === 100) //Await.result等待返回结果
   }
   //FutureAction结果,有限等待
   test("FutureAction result, finite wait") {
     val f = sc.parallelize(1 to 100, 4)
-              .countAsync()
-  //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+      .countAsync()
+    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
     assert(Await.result(f, Duration(30, "seconds")) === 100)
   }
-//FutureAction结果超时
+  //FutureAction结果超时
   test("FutureAction result, timeout") {
     val f = sc.parallelize(1 to 100, 4)
-              .mapPartitions(itr => { Thread.sleep(20); itr })
-              .countAsync()
+      .mapPartitions(itr => { Thread.sleep(20); itr })
+      .countAsync()
     intercept[TimeoutException] {
-    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+      //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
       Await.result(f, Duration(20, "milliseconds"))
     }
   }

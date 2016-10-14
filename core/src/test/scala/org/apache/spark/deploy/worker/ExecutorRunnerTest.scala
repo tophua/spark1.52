@@ -25,7 +25,7 @@ import org.apache.spark.deploy.{ApplicationDescription, Command, ExecutorState}
 import org.apache.spark.{SecurityManager, SparkConf, SparkFunSuite}
 
 class ExecutorRunnerTest extends SparkFunSuite {
-  test("command includes appId") {
+  test("command includes appId") {//命令包括AppID
     val appId = "12345-worker321-9876"
     val conf = new SparkConf
     val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))

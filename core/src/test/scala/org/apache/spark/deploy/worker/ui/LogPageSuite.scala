@@ -26,7 +26,7 @@ import org.apache.spark.SparkFunSuite
 
 class LogPageSuite extends SparkFunSuite with PrivateMethodTester {
 
-  test("get logs simple") {
+  test("get logs simple") {//获得简单日志
     val webui = mock(classOf[WorkerWebUI])
     val tmpDir = new File(sys.props("java.io.tmpdir"))
     val workDir = new File(tmpDir, "work-dir")
@@ -35,10 +35,12 @@ class LogPageSuite extends SparkFunSuite with PrivateMethodTester {
     val logPage = new LogPage(webui)
 
     // Prepare some fake log files to read later
+    //准备一些假日志文件来读取
     val out = "some stdout here"
     val err = "some stderr here"
     val tmpOut = new File(workDir, "stdout")
     val tmpErr = new File(workDir, "stderr")
+    //在工作目录外
     val tmpErrBad = new File(tmpDir, "stderr") // outside the working directory
     val tmpOutBad = new File(tmpDir, "stdout")
     val tmpRand = new File(workDir, "random")
@@ -49,6 +51,7 @@ class LogPageSuite extends SparkFunSuite with PrivateMethodTester {
     write(tmpRand, "1 6 4 5 2 7 8")
 
     // Get the logs. All log types other than "stderr" or "stdout" will be rejected
+    //获取日志,所有的日志类型以外的“标准”或“标准”将被拒绝
     val getLog = PrivateMethod[(String, Long, Long, Long)]('getLog)
     val (stdout, _, _, _) =
       logPage invokePrivate getLog(workDir.getAbsolutePath, "stdout", None, 100)
@@ -59,6 +62,7 @@ class LogPageSuite extends SparkFunSuite with PrivateMethodTester {
     val (error2, _, _, _) =
       logPage invokePrivate getLog(workDir.getAbsolutePath, "does-not-exist.txt", None, 100)
     // These files exist, but live outside the working directory
+    //这些文件存在,但活动在工作目录之外
     val (error3, _, _, _) =
       logPage invokePrivate getLog(tmpDir.getAbsolutePath, "stderr", None, 100)
     val (error4, _, _, _) =
@@ -71,7 +75,10 @@ class LogPageSuite extends SparkFunSuite with PrivateMethodTester {
     assert(error4.startsWith("Error: invalid log directory"))
   }
 
-  /** Write the specified string to the file. */
+  /** 
+   *  Write the specified string to the file.
+   *  将指定的字符串写入文件 
+   *  */
   private def write(f: File, s: String): Unit = {
     val writer = new FileWriter(f)
     try {

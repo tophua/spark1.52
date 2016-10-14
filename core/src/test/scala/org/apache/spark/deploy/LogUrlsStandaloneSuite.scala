@@ -29,7 +29,10 @@ import org.apache.spark.{LocalSparkContext, SparkConf, SparkContext, SparkFunSui
 
 class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
 
-  /** Length of time to wait while draining listener events. */
+  /** 
+   *  Length of time to wait while draining listener events.
+   *  侦听事件等待时间长度
+   *  */
   private val WAIT_TIMEOUT_MILLIS = 10000
 
   test("verify that correct log urls get propagated from workers") {
@@ -39,12 +42,14 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
     sc.addSparkListener(listener)
 
     // Trigger a job so that executors get added
+    //触发工作,添加执行者
     sc.parallelize(1 to 100, 4).map(_.toString).count()
 
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     listener.addedExecutorInfos.values.foreach { info =>
       assert(info.logUrlMap.nonEmpty)
       // Browse to each URL to check that it's valid
+      //浏览到每个网址，以检查它的有效性
       info.logUrlMap.foreach { case (logType, logUrl) =>
         val html = Source.fromURL(logUrl).mkString
         assert(html.contains(s"$logType log page"))
@@ -69,6 +74,7 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
 
     // Trigger a job so that executors get added
+    ///添加执行者触发工作
     sc.parallelize(1 to 100, 4).map(_.toString).count()
 
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)

@@ -32,37 +32,37 @@ class JsonProtocolSuite extends SparkFunSuite with JsonTestUtils {
 
   import org.apache.spark.deploy.DeployTestUtils._
 
-  test("writeApplicationInfo") {
+  test("writeApplicationInfo") {//写应用程序信息
     val output = JsonProtocol.writeApplicationInfo(createAppInfo())
     assertValidJson(output)
     assertValidDataInJson(output, JsonMethods.parse(JsonConstants.appInfoJsonStr))
   }
 
-  test("writeWorkerInfo") {
+  test("writeWorkerInfo") {//写Worker信息
     val output = JsonProtocol.writeWorkerInfo(createWorkerInfo())
     assertValidJson(output)
     assertValidDataInJson(output, JsonMethods.parse(JsonConstants.workerInfoJsonStr))
   }
 
-  test("writeApplicationDescription") {
+  test("writeApplicationDescription") {//写应用程序的描述
     val output = JsonProtocol.writeApplicationDescription(createAppDesc())
     assertValidJson(output)
     assertValidDataInJson(output, JsonMethods.parse(JsonConstants.appDescJsonStr))
   }
 
-  test("writeExecutorRunner") {
+  test("writeExecutorRunner") {//写运行的执行者
     val output = JsonProtocol.writeExecutorRunner(createExecutorRunner(123))
     assertValidJson(output)
     assertValidDataInJson(output, JsonMethods.parse(JsonConstants.executorRunnerJsonStr))
   }
 
-  test("writeDriverInfo") {
+  test("writeDriverInfo") {//写驱动程序信息
     val output = JsonProtocol.writeDriverInfo(createDriverInfo())
     assertValidJson(output)
     assertValidDataInJson(output, JsonMethods.parse(JsonConstants.driverInfoJsonStr))
   }
 
-  test("writeMasterState") {
+  test("writeMasterState") {//写主节点状态
     val workers = Array(createWorkerInfo(), createWorkerInfo())
     val activeApps = Array(createAppInfo())
     val completedApps = Array[ApplicationInfo]()
@@ -76,7 +76,7 @@ class JsonProtocolSuite extends SparkFunSuite with JsonTestUtils {
     assertValidDataInJson(output, JsonMethods.parse(JsonConstants.masterStateJsonStr))
   }
 
-  test("writeWorkerState") {
+  test("writeWorkerState") {//写工作节点状态
     val executors = List[ExecutorRunner]()
     val finishedExecutors = List[ExecutorRunner](createExecutorRunner(123),
       createExecutorRunner(123))

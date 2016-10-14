@@ -47,7 +47,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     server.foreach(_.stop())//暂停
   }
 
-  test("construct submit request") {
+  test("construct submit request") {//构造提交请求
     val appArgs = Array("one", "two", "three")
     val sparkProperties = Map("spark.app.name" -> "pi")
     //环境变量
@@ -64,7 +64,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(request.environmentVariables === environmentVariables)
   }
 
-  test("create submission") {
+  test("create submission") {//创建提交
     val submittedDriverId = "my-driver-id"
     val submitMessage = "your driver is submitted"
     val masterUrl = startDummyServer(submitId = submittedDriverId, submitMessage = submitMessage)
@@ -82,7 +82,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(submitResponse.success)
   }
 
-  test("create submission from main method") {
+  test("create submission from main method") {//从main方法创建提交
     val submittedDriverId = "your-driver-id"
     val submitMessage = "my driver is submitted"
     val masterUrl = startDummyServer(submitId = submittedDriverId, submitMessage = submitMessage)
@@ -91,6 +91,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     conf.set("spark.app.name", "dreamer")
     val appArgs = Array("one", "two", "six")
     // main method calls this
+    //main方法调用此
     val response = RestSubmissionClient.run("app-resource", "main-class", appArgs, conf)
     val submitResponse = getSubmitResponse(response)
     assert(submitResponse.action === Utils.getFormattedClassName(submitResponse))
@@ -100,7 +101,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(submitResponse.success)
   }
 
-  test("kill submission") {
+  test("kill submission") {//杀死提交
     val submissionId = "my-lyft-driver"
     val killMessage = "your driver is killed"
     val masterUrl = startDummyServer(killMessage = killMessage)
@@ -113,7 +114,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(killResponse.success)
   }
 
-  test("request submission status") {
+  test("request submission status") {//请求提交状态
     val submissionId = "my-uber-driver"
     val submissionState = KILLED
     val submissionException = new Exception("there was an irresponsible mix of alcohol and cars")
@@ -128,7 +129,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(statusResponse.success)
   }
 
-  test("create then kill") {
+  test("create then kill") {//创建然后杀死
     val masterUrl = startSmartServer()
     val request = constructSubmitRequest(masterUrl)
     val client = new RestSubmissionClient(masterUrl)
@@ -137,6 +138,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(submitResponse.success)
     assert(submitResponse.submissionId != null)
     // kill submission that was just created
+    //刚刚创建的杀死提交
     val submissionId = submitResponse.submissionId
     val response2 = client.killSubmission(submissionId)
     val killResponse = getKillResponse(response2)
@@ -144,7 +146,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(killResponse.submissionId === submissionId)
   }
 
-  test("create then request status") {
+  test("create then request status") {//创建然后请求状态
     val masterUrl = startSmartServer()
     val request = constructSubmitRequest(masterUrl)
     val client = new RestSubmissionClient(masterUrl)
@@ -153,6 +155,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(submitResponse.success)
     assert(submitResponse.submissionId != null)
     // request status of submission that was just created
+    //请求刚刚创建的提交的请求状态
     val submissionId = submitResponse.submissionId
     val response2 = client.requestSubmissionStatus(submissionId)
     val statusResponse = getStatusResponse(response2)
@@ -161,7 +164,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(statusResponse.driverState === RUNNING.toString)
   }
 
-  test("create then kill then request status") {
+  test("create then kill then request status") {//创建然后杀死然后请求状态
     val masterUrl = startSmartServer()
     val request = constructSubmitRequest(masterUrl)
     val client = new RestSubmissionClient(masterUrl)
@@ -176,11 +179,13 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val submissionId1 = submitResponse1.submissionId
     val submissionId2 = submitResponse2.submissionId
     // kill only submission 1, but not submission 2
+    //只杀死提交1，但不提交2
     val response3 = client.killSubmission(submissionId1)
     val killResponse = getKillResponse(response3)
     assert(killResponse.success)
     assert(killResponse.submissionId === submissionId1)
     // request status for both submissions: 1 should be KILLED but 2 should be RUNNING still
+    //提交意见书的请求状态：1应该被杀死，但2应该运行
     val response4 = client.requestSubmissionStatus(submissionId1)
     val response5 = client.requestSubmissionStatus(submissionId2)
     val statusResponse1 = getStatusResponse(response4)
@@ -191,16 +196,18 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(statusResponse2.driverState === RUNNING.toString)
   }
 
-  test("kill or request status before create") {
+  test("kill or request status before create") {//创建前杀死或请求状态
     val masterUrl = startSmartServer()
     val doesNotExist = "does-not-exist"
     val client = new RestSubmissionClient(masterUrl)
     // kill a non-existent submission
+    //杀死一个不存在的提交
     val response1 = client.killSubmission(doesNotExist)
     val killResponse = getKillResponse(response1)
     assert(!killResponse.success)
     assert(killResponse.submissionId === doesNotExist)
     // request status for a non-existent submission
+    //请求不存在提交的状态
     val response2 = client.requestSubmissionStatus(doesNotExist)
     val statusResponse = getStatusResponse(response2)
     assert(!statusResponse.success)
@@ -208,10 +215,10 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
   }
 
   /* ---------------------------------------- *
-   |     Aberrant client / server behavior    |
+   |     Aberrant client / server behavior    | 异常的客户机/服务器行为
    * ---------------------------------------- */
 
-  test("good request paths") {
+  test("good request paths") {//好的请求路径
     val masterUrl = startSmartServer()
     val httpUrl = masterUrl.replace("spark://", "http://")
     val v = RestSubmissionServer.PROTOCOL_VERSION
@@ -225,6 +232,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val (response4, code4) = sendHttpRequestWithResponse(s"$statusRequestPath/anything", "GET")
     val (response5, code5) = sendHttpRequestWithResponse(s"$statusRequestPath/any/thing", "GET")
     // these should all succeed and the responses should be of the correct types
+    //这些都应该是成功的,应该是正确的类型
     getSubmitResponse(response1)
     val killResponse1 = getKillResponse(response2)
     val killResponse2 = getKillResponse(response3)
@@ -241,7 +249,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(code5 === HttpServletResponse.SC_OK)
   }
 
-  test("good request paths, bad requests") {
+  test("good request paths, bad requests") {//好的请求路径,坏的请求
     val masterUrl = startSmartServer()
     val httpUrl = masterUrl.replace("spark://", "http://")
     val v = RestSubmissionServer.PROTOCOL_VERSION
@@ -261,6 +269,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val (response7, code7) = sendHttpRequestWithResponse(s"$statusRequestPath/", "GET")
     val (response8, code8) = sendHttpRequestWithResponse(submitRequestPath, "POST", notJson)
     // these should all fail as error responses
+    //这些都应该作为错误响应失败
     getErrorResponse(response1)
     getErrorResponse(response2)
     getErrorResponse(response3)
@@ -279,7 +288,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(code8 === HttpServletResponse.SC_BAD_REQUEST)
   }
 
-  test("bad request paths") {
+  test("bad request paths") {//错误的请求路径
     val masterUrl = startSmartServer()
     val httpUrl = masterUrl.replace("spark://", "http://")
     val v = RestSubmissionServer.PROTOCOL_VERSION
@@ -300,6 +309,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(code7 === HttpServletResponse.SC_BAD_REQUEST)
     assert(code8 === RestSubmissionServer.SC_UNKNOWN_PROTOCOL_VERSION)
     // all responses should be error responses
+    //所有的响应都应该是错误的
     val errorResponse1 = getErrorResponse(response1)
     val errorResponse2 = getErrorResponse(response2)
     val errorResponse3 = getErrorResponse(response3)
@@ -309,6 +319,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val errorResponse7 = getErrorResponse(response7)
     val errorResponse8 = getErrorResponse(response8)
     // only the incompatible version response should have server protocol version set
+    //只有不兼容的版本响应应该有服务器协议版本集
     assert(errorResponse1.highestProtocolVersion === null)
     assert(errorResponse2.highestProtocolVersion === null)
     assert(errorResponse3.highestProtocolVersion === null)
@@ -319,7 +330,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(errorResponse8.highestProtocolVersion === RestSubmissionServer.PROTOCOL_VERSION)
   }
 
-  test("server returns unknown fields") {
+  test("server returns unknown fields") {//服务器返回未知字段
     val masterUrl = startSmartServer()
     val httpUrl = masterUrl.replace("spark://", "http://")
     val v = RestSubmissionServer.PROTOCOL_VERSION
@@ -332,6 +343,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     )
     val newJson = pretty(render(JObject(newFields)))
     // send two requests, one with the unknown fields and the other without
+    //发送两个请求,一个与未知字段和另一个没有
     val (response1, code1) = sendHttpRequestWithResponse(submitRequestPath, "POST", oldJson)
     val (response2, code2) = sendHttpRequestWithResponse(submitRequestPath, "POST", newJson)
     val submitResponse1 = getSubmitResponse(response1)
@@ -339,11 +351,12 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(code1 === HttpServletResponse.SC_OK)
     assert(code2 === HttpServletResponse.SC_OK)
     // only the response to the modified request should have unknown fields set
+    //只有对修改后的请求的响应应该具有未知字段集
     assert(submitResponse1.unknownFields === null)
     assert(submitResponse2.unknownFields === Array("tomato", "potato"))
   }
 
-  test("client handles faulty server") {
+  test("client handles faulty server") {//客户端处理故障服务器
     val masterUrl = startFaultyServer()
     val client = new RestSubmissionClient(masterUrl)
     val httpUrl = masterUrl.replace("spark://", "http://")
@@ -352,18 +365,22 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val killRequestPath = s"$httpUrl/$v/submissions/kill/anything"
     val statusRequestPath = s"$httpUrl/$v/submissions/status/anything"
     val json = constructSubmitRequest(masterUrl).toJson
-    // server returns malformed response unwittingly
+    // server returns malformed response unwittingly 服务器返回的响应中的畸形
     // client should throw an appropriate exception to indicate server failure
+    //客户端应该抛出一个适当的异常来指示服务器故障
     val conn1 = sendHttpRequest(submitRequestPath, "POST", json)
     intercept[SubmitRestProtocolException] { client.readResponse(conn1) }
     // server attempts to send invalid response, but fails internally on validation
+    //服务器试图发送无效的响应，但在内部验证失败
     // client should receive an error response as server is able to recover
+    //客户端应该接收到一个错误响应，因为服务器能够恢复
     val conn2 = sendHttpRequest(killRequestPath, "POST")
     val response2 = client.readResponse(conn2)
     getErrorResponse(response2)
     assert(conn2.getResponseCode === HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
-    // server explodes internally beyond recovery
+    // server explodes internally beyond recovery 服务器内部超越恢复
     // client should throw an appropriate exception to indicate server failure
+    //客户端应该抛出一个适当的异常来指示服务器故障
     val conn3 = sendHttpRequest(statusRequestPath, "GET")
     intercept[SubmitRestProtocolException] { client.readResponse(conn3) } // empty response
     assert(conn3.getResponseCode === HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
@@ -373,7 +390,10 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
    |     Helper methods    |
    * --------------------- */
 
-  /** Start a dummy server that responds to requests using the specified parameters. */
+  /** 
+   *  Start a dummy server that responds to requests using the specified parameters. 
+   *  使用指定的参数启动一个响应请求的虚拟服务器
+   *  */
   private def startDummyServer(
       submitId: String = "fake-driver-id",
       submitMessage: String = "driver is submitted",
@@ -383,20 +403,28 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     startServer(new DummyMaster(_, submitId, submitMessage, killMessage, state, exception))
   }
 
-  /** Start a smarter dummy server that keeps track of submitted driver states. */
+  /** 
+   *  Start a smarter dummy server that keeps track of submitted driver states. 
+   *  启动一个更聪明的虚拟服务器，跟踪提交的驱动程序状态
+   *  */
   private def startSmartServer(): String = {
     startServer(new SmarterMaster(_))
   }
 
-  /** Start a dummy server that is faulty in many ways... */
+  /** 
+   *  Start a dummy server that is faulty in many ways... 
+   *  在许多方面启动一个错误的虚拟服务器…
+   *  */
   private def startFaultyServer(): String = {
     startServer(new DummyMaster(_), faulty = true)
   }
 
   /**
    * Start a [[StandaloneRestServer]] that communicates with the given endpoint.
+   * 启动一个与给定的端点通信的
    * If `faulty` is true, start an [[FaultyStandaloneRestServer]] instead.
    * Return the master URL that corresponds to the address of this server.
+   * 返回对应于该服务器的地址的主地址。
    */
   private def startServer(
       makeFakeMaster: RpcEnv => RpcEndpoint, faulty: Boolean = false): String = {
@@ -414,12 +442,16 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
       }
     val port = _server.start()
     // set these to clean them up after every test
+    //设置这些清理后，每一个测试
     rpcEnv = Some(_rpcEnv)
     server = Some(_server)
     s"spark://$localhost:$port"
   }
 
-  /** Create a submit request with real parameters using Spark submit. */
+  /** 
+   *  Create a submit request with real parameters using Spark submit.
+   *  创建一个提交请求与实际参数使用Spark提交
+   *   */
   private def constructSubmitRequest(
       masterUrl: String,
       appArgs: Array[String] = Array.empty): CreateSubmissionRequest = {
@@ -437,7 +469,10 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
       mainJar, mainClass, appArgs, sparkProperties.toMap, Map.empty)
   }
 
-  /** Return the response as a submit response, or fail with error otherwise. */
+  /** 
+   *  Return the response as a submit response, or fail with error otherwise. 
+   *  返回响应作为提交响应，否则会失败，否则会出错。
+   *  */
   private def getSubmitResponse(response: SubmitRestProtocolResponse): CreateSubmissionResponse = {
     response match {
       case s: CreateSubmissionResponse => s
@@ -446,7 +481,10 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     }
   }
 
-  /** Return the response as a kill response, or fail with error otherwise. */
+  /** 
+   *  Return the response as a kill response, or fail with error otherwise. 
+   *  返回响应作为一个杀死响应,否则失败与错误,否则
+   *  */
   private def getKillResponse(response: SubmitRestProtocolResponse): KillSubmissionResponse = {
     response match {
       case k: KillSubmissionResponse => k
@@ -455,7 +493,10 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     }
   }
 
-  /** Return the response as a status response, or fail with error otherwise. */
+  /** 
+   *  Return the response as a status response, or fail with error otherwise. 
+   *  将响应作为状态响应返回,否则会错误地失败。
+   *  */
   private def getStatusResponse(response: SubmitRestProtocolResponse): SubmissionStatusResponse = {
     response match {
       case s: SubmissionStatusResponse => s
@@ -464,7 +505,10 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     }
   }
 
-  /** Return the response as an error response, or fail if the response was not an error. */
+  /** 
+   *  Return the response as an error response, or fail if the response was not an error. 
+   *  返回响应作为错误响应,或失败,如果响应不是一个错误
+   *  */
   private def getErrorResponse(response: SubmitRestProtocolResponse): ErrorResponse = {
     response match {
       case e: ErrorResponse => e
@@ -474,7 +518,9 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   /**
    * Send an HTTP request to the given URL using the method and the body specified.
+   * 发送HTTP请求到指定的URL的使用方法和机构规定。
    * Return the connection object.
+   * 返回连接对象
    */
   private def sendHttpRequest(
       url: String,
@@ -493,7 +539,9 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   /**
    * Send an HTTP request to the given URL using the method and the body specified.
+   * 发送HTTP请求到指定的URL的使用方法和机构规定
    * Return a 2-tuple of the response message from the server and the response code.
+   * 返回一个元组从服务器响应代码响应消息。
    */
   private def sendHttpRequestWithResponse(
       url: String,
@@ -506,7 +554,9 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
 /**
  * A mock standalone Master that responds with dummy messages.
+ * 用虚拟消息响应的模拟独立主,
  * In all responses, the success parameter is always true.
+ * 在所有的反应中,成功的参数始终是真实的
  */
 private class DummyMaster(
     override val rpcEnv: RpcEnv,

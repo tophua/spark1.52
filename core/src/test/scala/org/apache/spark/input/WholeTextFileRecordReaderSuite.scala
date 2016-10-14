@@ -80,6 +80,7 @@ class WholeTextFileRecordReaderSuite extends SparkFunSuite with BeforeAndAfterAl
 
   /**
    * This code will test the behaviors of WholeTextFileRecordReader based on local disk. There are
+   * 码将测试基于本地磁盘的整个文本文件记录阅读器的行为
    * three aspects(方面) to check:
    *   1) Whether all files are read;//是否全部文件读取
    *   2) Whether paths are read correctly; //是否正确路径
@@ -165,6 +166,7 @@ class WholeTextFileRecordReaderSuite extends SparkFunSuite with BeforeAndAfterAl
 
 /**
  * Files to be tested are defined here.
+ * 要测试的文件在这里定义
  */
 object WholeTextFileRecordReaderSuite {
   //testWords: IndexedSeq[Byte] = Vector(83, 112, 97, 114, 107, 32, 105, 115, 32, 101, 
