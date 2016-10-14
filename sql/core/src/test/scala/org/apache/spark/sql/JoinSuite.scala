@@ -27,7 +27,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
 
   setupTestData()
 
-  test("equi-join is hash-join") {
+  test("equi-join is hash-join") {//等值连接是哈希连接
     val x = testData2.as("x")
     val y = testData2.as("y")
     val join = x.join(y, $"x.a" === $"y.a", "inner").queryExecution.optimizedPlan
@@ -58,7 +58,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("join operator selection") {
+  test("join operator selection") {//连接操作选择
     ctx.cacheManager.clearCache()
 
     Seq(
@@ -137,7 +137,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
     sql("UNCACHE TABLE testData")
   }
 
-  test("broadcasted hash outer join operator selection") {
+  test("broadcasted hash outer join operator selection") {//广播的哈希外连接操作的选择
     ctx.cacheManager.clearCache()
     sql("CACHE TABLE testData")
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "true") {
@@ -171,7 +171,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
     assert(planned.size === 1)
   }
 
-  test("inner join where, one match per row") {
+  test("inner join where, one match per row") {//内部连接,每行一个匹配
     checkAnswer(
       upperCaseData.join(lowerCaseData).where('n === 'N),
       Seq(
@@ -182,7 +182,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
       ))
   }
 
-  test("inner join ON, one match per row") {
+  test("inner join ON, one match per row") {//内部连接,每行一个匹配
     checkAnswer(
       upperCaseData.join(lowerCaseData, $"n" === $"N"),
       Seq(
@@ -193,7 +193,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
       ))
   }
 
-  test("inner join, where, multiple matches") {
+  test("inner join, where, multiple matches") {//内部连接,where,多个匹配
     val x = testData2.where($"a" === 1).as("x")
     val y = testData2.where($"a" === 1).as("y")
     checkAnswer(
@@ -205,7 +205,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("inner join, no matches") {
+  test("inner join, no matches") {//内部连接,没有匹配
     val x = testData2.where($"a" === 1).as("x")
     val y = testData2.where($"a" === 2).as("y")
     checkAnswer(
@@ -213,7 +213,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
       Nil)
   }
 
-  test("big inner join, 4 matches per row") {
+  test("big inner join, 4 matches per row") {//大的内部连接,每行4次
     val bigData = testData.unionAll(testData).unionAll(testData).unionAll(testData)
     val bigDataX = bigData.as("x")
     val bigDataY = bigData.as("y")
@@ -223,7 +223,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
       testData.rdd.flatMap(row => Seq.fill(16)(Row.merge(row, row))).collect().toSeq)
   }
 
-  test("cartisian product join") {
+  test("cartisian product join") {//直角产品加入
     checkAnswer(
       testData3.join(testData3),
       Row(1, null, 1, null) ::
@@ -232,7 +232,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
         Row(2, 2, 2, 2) :: Nil)
   }
 
-  test("left outer join") {
+  test("left outer join") {//左外连接
     checkAnswer(
       upperCaseData.join(lowerCaseData, $"n" === $"N", "left"),
       Row(1, "A", 1, "a") ::
@@ -295,7 +295,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
       Row(null, 6) :: Nil)
   }
 
-  test("right outer join") {
+  test("right outer join") {//右外部联接
     checkAnswer(
       lowerCaseData.join(upperCaseData, $"n" === $"N", "right"),
       Row(1, "a", 1, "A") ::
@@ -355,7 +355,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
         Row(6, 1) :: Nil)
   }
 
-  test("full outer join") {
+  test("full outer join") {//全外连接
     upperCaseData.where('N <= 4).registerTempTable("left")
     upperCaseData.where('N >= 3).registerTempTable("right")
 
@@ -465,7 +465,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
     sql("UNCACHE TABLE testData")
   }
 
-  test("left semi join") {
+  test("left semi join") {//左半连接
     val df = sql("SELECT * FROM testData2 LEFT SEMI JOIN testData ON key = a")
     checkAnswer(df,
       Row(1, 1) ::

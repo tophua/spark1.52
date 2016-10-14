@@ -35,7 +35,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfter with SharedSQLContex
     ctx.catalog.unregisterTable(Seq("ListTablesSuiteTable"))
   }
 
-  test("get all tables") {
+  test("get all tables") {//获得所有的表
     checkAnswer(
       ctx.tables().filter("tableName = 'ListTablesSuiteTable'"),
       Row("ListTablesSuiteTable", true))
@@ -47,7 +47,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfter with SharedSQLContex
     ctx.catalog.unregisterTable(Seq("ListTablesSuiteTable"))
     assert(ctx.tables().filter("tableName = 'ListTablesSuiteTable'").count() === 0)
   }
-
+  //使用数据库名称获取所有表对返回的表名不会有任何影响
   test("getting all Tables with a database name has no impact on returned table names") {
     checkAnswer(
       ctx.tables("DB").filter("tableName = 'ListTablesSuiteTable'"),
@@ -61,7 +61,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfter with SharedSQLContex
     assert(ctx.tables().filter("tableName = 'ListTablesSuiteTable'").count() === 0)
   }
 
-  test("query the returned DataFrame of tables") {
+  test("query the returned DataFrame of tables") {//查询返回的数据框的表
     val expectedSchema = StructType(
       StructField("tableName", StringType, false) ::
       StructField("isTemporary", BooleanType, false) :: Nil)

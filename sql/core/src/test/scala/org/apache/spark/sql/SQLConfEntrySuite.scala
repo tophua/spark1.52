@@ -24,7 +24,7 @@ class SQLConfEntrySuite extends SparkFunSuite {
 
   val conf = new SQLConf
 
-  test("intConf") {
+  test("intConf") {//Int类型配制文件
     val key = "spark.sql.SQLConfEntrySuite.int"
     val confEntry = SQLConfEntry.intConf(key)
     assert(conf.getConf(confEntry, 5) === 5)
@@ -43,7 +43,7 @@ class SQLConfEntrySuite extends SparkFunSuite {
     assert(e.getMessage === s"$key should be int, but was abc")
   }
 
-  test("longConf") {
+  test("longConf") {//Long类型配制文件
     val key = "spark.sql.SQLConfEntrySuite.long"
     val confEntry = SQLConfEntry.longConf(key)
     assert(conf.getConf(confEntry, 5L) === 5L)
@@ -62,7 +62,7 @@ class SQLConfEntrySuite extends SparkFunSuite {
     assert(e.getMessage === s"$key should be long, but was abc")
   }
 
-  test("booleanConf") {
+  test("booleanConf") {//boolean类型配制文件
     val key = "spark.sql.SQLConfEntrySuite.boolean"
     val confEntry = SQLConfEntry.booleanConf(key)
     assert(conf.getConf(confEntry, false) === false)
@@ -81,7 +81,7 @@ class SQLConfEntrySuite extends SparkFunSuite {
     assert(e.getMessage === s"$key should be boolean, but was abc")
   }
 
-  test("doubleConf") {
+  test("doubleConf") {//double类型配制文件
     val key = "spark.sql.SQLConfEntrySuite.double"
     val confEntry = SQLConfEntry.doubleConf(key)
     assert(conf.getConf(confEntry, 5.0) === 5.0)
@@ -100,7 +100,7 @@ class SQLConfEntrySuite extends SparkFunSuite {
     assert(e.getMessage === s"$key should be double, but was abc")
   }
 
-  test("stringConf") {
+  test("stringConf") {//string类型配制文件
     val key = "spark.sql.SQLConfEntrySuite.string"
     val confEntry = SQLConfEntry.stringConf(key)
     assert(conf.getConf(confEntry, "abc") === "abc")
@@ -114,7 +114,7 @@ class SQLConfEntrySuite extends SparkFunSuite {
     assert(conf.getConf(confEntry, "abc") === "abcde")
   }
 
-  test("enumConf") {
+  test("enumConf") {//枚举类型配制文件
     val key = "spark.sql.SQLConfEntrySuite.enum"
     val confEntry = SQLConfEntry.enumConf(key, v => v, Set("a", "b", "c"), defaultValue = Some("a"))
     assert(conf.getConf(confEntry) === "a")
@@ -133,7 +133,7 @@ class SQLConfEntrySuite extends SparkFunSuite {
     assert(e.getMessage === s"The value of $key should be one of a, b, c, but was d")
   }
 
-  test("stringSeqConf") {
+  test("stringSeqConf") {//字符串序列类型配制文件
     val key = "spark.sql.SQLConfEntrySuite.stringSeq"
     val confEntry = SQLConfEntry.stringSeqConf("spark.sql.SQLConfEntrySuite.stringSeq",
       defaultValue = Some(Nil))

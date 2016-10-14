@@ -27,7 +27,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
 
   private def toLetter(i: Int): String = (i + 97).toChar.toString
 
-  test("sample with replacement") {
+  test("sample with replacement") {//样品与替换
     val n = 100
     val data = ctx.sparkContext.parallelize(1 to n, 2).toDF("id")
     checkAnswer(
@@ -36,7 +36,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("sample without replacement") {
+  test("sample without replacement") {//样品不替换
     val n = 100
     val data = ctx.sparkContext.parallelize(1 to n, 2).toDF("id")
     checkAnswer(
@@ -45,7 +45,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("randomSplit") {
+  test("randomSplit") {//随机分隔
     val n = 600
     val data = ctx.sparkContext.parallelize(1 to n, 2).toDF("id")
     for (seed <- 1 to 5) {
@@ -62,7 +62,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("pearson correlation") {
+  test("pearson correlation") {//皮尔逊相关系数
     val df = Seq.tabulate(10)(i => (i, 2 * i, i * -1.0)).toDF("a", "b", "c")
     val corr1 = df.stat.corr("a", "b", "pearson")
     assert(math.abs(corr1 - 1.0) < 1e-12)
@@ -85,7 +85,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     assert(math.abs(corr3 - 0.95723391394758572) < 1e-12)
   }
 
-  test("covariance") {
+  test("covariance") {//协方差
     val df = Seq.tabulate(10)(i => (i, 2.0 * i, toLetter(i))).toDF("singles", "doubles", "letters")
 
     val results = df.stat.cov("singles", "doubles")
@@ -98,7 +98,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     assert(math.abs(decimalRes) < 1e-12)
   }
 
-  test("crosstab") {
+  test("crosstab") {//交叉表
     val rng = new Random()
     val data = Seq.tabulate(25)(i => (rng.nextInt(5), rng.nextInt(10)))
     val df = data.toDF("a", "b")
@@ -117,7 +117,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("special crosstab elements (., '', null, ``)") {
+  test("special crosstab elements (., '', null, ``)") {//特殊的crosstab元素
     val data = Seq(
       ("a", Double.NaN, "ho"),
       (null, 2.0, "ho"),
@@ -128,6 +128,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     val df = data.toDF("1", "2", "3")
     val ct1 = df.stat.crosstab("1", "2")
     // column fields should be 1 + distinct elements of second column
+    //列字段应该是1 +不同元素的第二列
     assert(ct1.schema.fields.length === 6)
     assert(ct1.collect().length === 4)
     val ct2 = df.stat.crosstab("1", "3")
@@ -147,7 +148,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     assert(ct4.collect().length === 4)
   }
 
-  test("Frequent Items") {
+  test("Frequent Items") {//频繁项
     val rows = Seq.tabulate(1000) { i =>
       if (i % 3 == 0) (1, toLetter(1), -1.0) else (i, toLetter(i), i * -1.0)
     }
@@ -163,7 +164,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     assert(items2.getSeq[Double](0).contains(-1.0))
   }
 
-  test("Frequent Items 2") {
+  test("Frequent Items 2") {//频繁项
     val rows = ctx.sparkContext.parallelize(Seq.empty[Int], 4)
     // this is a regression test, where when merging partitions, we omitted values with higher
     // counts than those that existed in the map when the map was full. This test should also fail
@@ -181,7 +182,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     assert(items.length === 1)
   }
 
-  test("sampleBy") {
+  test("sampleBy") {//
     val df = ctx.range(0, 100).select((col("id") % 3).as("key"))
     val sampled = df.stat.sampleBy("key", Map(0 -> 0.1, 1 -> 0.2), 0L)
     checkAnswer(

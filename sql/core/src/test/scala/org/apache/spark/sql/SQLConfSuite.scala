@@ -24,7 +24,7 @@ class SQLConfSuite extends QueryTest with SharedSQLContext {
   private val testKey = "test.key.0"
   private val testVal = "test.val.0"
 
-  test("propagate from spark conf") {
+  test("propagate from spark conf") {//传播Spark配置文件
     // We create a new context here to avoid order dependence with other tests that might call
     // clear().
     val newContext = new SQLContext(ctx.sparkContext)
@@ -49,7 +49,7 @@ class SQLConfSuite extends QueryTest with SharedSQLContext {
     ctx.conf.clear()
   }
 
-  test("parse SQL set commands") {
+  test("parse SQL set commands") {//解析SQL命令集
     ctx.conf.clear()
     sql(s"set $testKey=$testVal")
     assert(ctx.getConf(testKey, testVal + "_") === testVal)
@@ -71,13 +71,13 @@ class SQLConfSuite extends QueryTest with SharedSQLContext {
     ctx.conf.clear()
   }
 
-  test("deprecated property") {
+  test("deprecated property") {//不赞成的属性
     ctx.conf.clear()
     sql(s"set ${SQLConf.Deprecated.MAPRED_REDUCE_TASKS}=10")
     assert(ctx.conf.numShufflePartitions === 10)
   }
 
-  test("invalid conf value") {
+  test("invalid conf value") {//无效配置值
     ctx.conf.clear()
     val e = intercept[IllegalArgumentException] {
       sql(s"set ${SQLConf.CASE_SENSITIVE.key}=10")

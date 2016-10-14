@@ -39,7 +39,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   setupTestData()
 
   test("having clause") {
-    //HAVING 从句
+    //HAVING 子句
     Seq(("one", 1), ("two", 2), ("three", 3), ("one", 5)).toDF("k", "v").registerTempTable("hav")
     checkAnswer(
       sql("SELECT k, sum(v) FROM hav GROUP BY k HAVING sum(v) > 2"),
@@ -47,7 +47,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("SPARK-8010: promote numeric to string") {
-    //促进数据转换字符
+    //数字转换字符
     val df = Seq((1, 1)).toDF("key", "value")
     df.registerTempTable("src")
     // case when 使用
@@ -59,7 +59,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(queryCoalesce, Row("1") :: Nil)
   }
 
-  test("show functions") {
+  test("show functions") {//显示函数
     checkAnswer(sql("SHOW functions"),
       FunctionRegistry.builtin.listFunction().sorted.map(Row(_)))
   }
@@ -85,7 +85,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       "Function: abcadf is not found.")
   }
 
-  test("SPARK-6743: no columns from cache") {
+  test("SPARK-6743: no columns from cache") {//没有缓存的列
     Seq(
       (83, 0, 38),
       (26, 0, 79),
@@ -99,7 +99,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("self join with aliases") {
-    //自连接
+    //自连接别名
     Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str").registerTempTable("df")
 
     checkAnswer(
@@ -112,7 +112,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row("1", 1) :: Row("2", 1) :: Row("3", 1) :: Nil)
   }
 
-  test("support table.star") {
+  test("support table.star") {//支持表星号
     checkAnswer(
       sql(
         """
@@ -122,12 +122,12 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(1, 1) :: Row(1, 2) :: Row(2, 1) :: Row(2, 2) :: Row(3, 1) :: Row(3, 2) :: Nil)
   }
 
-  test("self join with alias in agg") {
+  test("self join with alias in agg") {//自加入别名的
       Seq(1, 2, 3)
         .map(i => (i, i.toString))
         .toDF("int", "str")
-        .groupBy("str")
-        .agg($"str", count("str").as("strCount"))
+        .groupBy("str")//df.agg() 求聚合用的相关函数
+        .agg($"str", count("str").as("strCount"))//DataFrame中的内置函数操作的结果是返回一个Column对象
         .registerTempTable("df")
 
     checkAnswer(
@@ -152,30 +152,31 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       .count(), Row(24, 1) :: Row(14, 1) :: Nil)
   }
 
-  test("SQL Dialect Switching to a new SQL parser") {
+  test("SQL Dialect Switching to a new SQL parser") {//SQL方言切换到一个新的SQL解析器
     val newContext = new SQLContext(sqlContext.sparkContext)
     newContext.setConf("spark.sql.dialect", classOf[MyDialect].getCanonicalName())
     assert(newContext.getSQLDialect().getClass === classOf[MyDialect])
     assert(newContext.sql("SELECT 1").collect() === Array(Row(1)))
   }
 
-  test("SQL Dialect Switch to an invalid parser with alias") {
+  test("SQL Dialect Switch to an invalid parser with alias") {//SQL方言开关无效的解析器的别名
     val newContext = new SQLContext(sqlContext.sparkContext)
     newContext.sql("SET spark.sql.dialect=MyTestClass")
     intercept[DialectException] {
       newContext.sql("SELECT 1")
     }
     // test if the dialect set back to DefaultSQLDialect
+    //测试如果方言重新设置为默认的SQL方言
     assert(newContext.getSQLDialect().getClass === classOf[DefaultParserDialect])
   }
 
-  test("SPARK-4625 support SORT BY in SimpleSQLParser & DSL") {
+  test("SPARK-4625 support SORT BY in SimpleSQLParser & DSL") {//通过简单的SQL解析器支持排序
     checkAnswer(
       sql("SELECT a FROM testData2 SORT BY a"),
       Seq(1, 1, 2, 2, 3, 3).map(Row(_))
     )
   }
-
+//收集并返回不同的结果
   test("SPARK-7158 collect and take return different results") {
     import java.util.UUID
 
@@ -185,8 +186,10 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
     val dfWithId = df.withColumn("id", idUDF())
     // Make a new DataFrame (actually the same reference to the old one)
+    //标记一个新DataFrame,(实际上是相同的旧参考)
     val cached = dfWithId.cache()
     // Trigger the cache
+    //触发缓存
     val d0 = dfWithId.collect()
     val d1 = cached.collect()
     val d2 = cached.collect()
@@ -201,7 +204,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     assert(d1.map(_(1)) === d2.map(_(1)))
   }
 
-  test("grouping on nested fields") {
+  test("grouping on nested fields") {//嵌套字段上的分组
     sqlContext.read.json(sqlContext.sparkContext.parallelize(
       """{"nested": {"attribute": 1}, "value": 2}""" :: Nil))
      .registerTempTable("rows")
@@ -220,7 +223,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(1, 1) :: Nil)
   }
 
-  test("SPARK-6201 IN type conversion") {
+  test("SPARK-6201 IN type conversion") {//类型转换
     sqlContext.read.json(
         //json类型转换
       sqlContext.sparkContext.parallelize(
@@ -232,7 +235,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Seq(Row("1"), Row("2")))
   }
 
-  test("SPARK-8828 sum should return null if all input values are null") {
+  test("SPARK-8828 sum should return null if all input values are null") {//如果所有的输入值为空，则应返回零
     withSQLConf(SQLConf.USE_SQL_AGGREGATE2.key -> "true") {
       withSQLConf(SQLConf.CODEGEN_ENABLED.key -> "true") {
         checkAnswer(
@@ -266,6 +269,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   private def testCodeGen(sqlText: String, expectedResults: Seq[Row]): Unit = {
     val df = sql(sqlText)
     // First, check if we have GeneratedAggregate.
+    //首先,检查是否生成聚合
     val hasGeneratedAgg = df.queryExecution.executedPlan
       .collect { case _: aggregate.TungstenAggregate => true }
       .nonEmpty
@@ -277,10 +281,11 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
          """.stripMargin)
     }
     // Then, check results.
+    //然后检查结果
     checkAnswer(df, expectedResults)
   }
 
-  test("aggregation with codegen") {
+  test("aggregation with codegen") {//
     val originalValue = sqlContext.conf.codegenEnabled
     sqlContext.setConf(SQLConf.CODEGEN_ENABLED, true)
     // Prepare a table that we can group some rows.
@@ -500,7 +505,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
          d.nestedData(0)(0) + d.nestedData(0)(1))).collect().toSeq)
   }
 
-  test("agg") {
+  test("agg") {//df.agg() 求聚合用的相关函数
     checkAnswer(
         //分组求和
       sql("SELECT a, SUM(b) FROM testData2 GROUP BY a"),

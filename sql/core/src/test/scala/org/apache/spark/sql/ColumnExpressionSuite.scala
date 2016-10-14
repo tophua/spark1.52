@@ -37,7 +37,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       StructType(Seq(StructField("a", BooleanType), StructField("b", BooleanType))))
   }
 
-  test("column names with space") {
+  test("column names with space") {//空格的列名称
     val df = Seq((1, "a")).toDF("name with space", "name.with.dot")
 
     checkAnswer(
@@ -61,7 +61,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(1) :: Nil)
   }
 
-  test("column names with dot") {
+  test("column names with dot") {//列名的点号
     val df = Seq((1, "a")).toDF("name with space", "name.with.dot").as("a")
 
     checkAnswer(
@@ -105,13 +105,13 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row("a") :: Nil)
   }
 
-  test("alias") {
+  test("alias") {//别名
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
     assert(df.select(df("a").as("b")).columns.head === "b")
     assert(df.select(df("a").alias("b")).columns.head === "b")
   }
 
-  test("as propagates metadata") {
+  test("as propagates metadata") {//作为传播元数据
     val metadata = new MetadataBuilder
     metadata.putString("key", "value")
     val origCol = $"a".as("b", metadata.build())
@@ -119,14 +119,14 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     assert(newCol.expr.asInstanceOf[NamedExpression].metadata.getString("key") === "value")
   }
 
-  test("single explode") {
+  test("single explode") {//函数把字符串分割为数组
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
     checkAnswer(
       df.select(explode('intList)),
       Row(1) :: Row(2) :: Row(3) :: Nil)
   }
 
-  test("explode and other columns") {
+  test("explode and other columns") {//其他列函数把字符串分割为数组
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
 
     checkAnswer(
@@ -142,7 +142,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(1, Seq(1, 2, 3), 3) :: Nil)
   }
 
-  test("aliased explode") {
+  test("aliased explode") {//别名函数把字符串分割为数组
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
 
     checkAnswer(
@@ -154,7 +154,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(6) :: Nil)
   }
 
-  test("explode on map") {
+  test("explode on map") {//Map函数把字符串分割为数组
     val df = Seq((1, Map("a" -> "b"))).toDF("a", "map")
 
     checkAnswer(
@@ -162,7 +162,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row("a", "b"))
   }
 
-  test("explode on map with aliases") {
+  test("explode on map with aliases") {//在Map上的别名函数把字符串分割为数组
     val df = Seq((1, Map("a" -> "b"))).toDF("a", "map")
 
     checkAnswer(
@@ -170,26 +170,26 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row("a", "b"))
   }
 
-  test("self join explode") {
+  test("self join explode") {//自加入函数把字符串分割为数组
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
     val exploded = df.select(explode('intList).as('i))
 
-    checkAnswer(
+    checkAnswer(//df.agg() 求聚合用的相关函数
       exploded.join(exploded, exploded("i") === exploded("i")).agg(count("*")),
       Row(3) :: Nil)
   }
 
-  test("collect on column produced by a binary operator") {
+  test("collect on column produced by a binary operator") {//按二元运算符生成的列
     val df = Seq((1, 2, 3)).toDF("a", "b", "c")
     checkAnswer(df.select(df("a") + df("b")), Seq(Row(3)))
     checkAnswer(df.select(df("a") + df("b").as("c")), Seq(Row(3)))
   }
 
-  test("star") {
+  test("star") {//星号
     checkAnswer(testData.select($"*"), testData.collect().toSeq)
   }
 
-  test("star qualified by data frame object") {
+  test("star qualified by data frame object") {//星号等于来自数据对象
     val df = testData.toDF
     val goldAnswer = df.collect().toSeq
     checkAnswer(df.select(df("*")), goldAnswer)
@@ -198,7 +198,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     checkAnswer(df1.select(df("*")), goldAnswer)
   }
 
-  test("star qualified by table name") {
+  test("star qualified by table name") {//星号等于表的名称
     checkAnswer(testData.as("testData").select($"testData.*"), testData.collect().toSeq)
   }
 
@@ -253,7 +253,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       testData2.collect().toSeq.map(r => Row(r.getInt(0) % r.getInt(1))))
   }
 
-  test("unary -") {
+  test("unary -") {//二元-号
     checkAnswer(
       testData2.select(-$"a"),
       testData2.collect().toSeq.map(r => Row(-r.getInt(0))))
@@ -265,7 +265,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       complexData.collect().toSeq.map(r => Row(!r.getBoolean(3))))
   }
 
-  test("isNull") {
+  test("isNull") {//是否null
     checkAnswer(
       nullStrings.toDF.where($"s".isNull),
       nullStrings.collect().toSeq.filter(r => r.getString(1) eq null))
@@ -275,7 +275,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(true, false))
   }
 
-  test("isNotNull") {
+  test("isNotNull") {//参数不为Null时返回true
     checkAnswer(
       nullStrings.toDF.where($"s".isNotNull),
       nullStrings.collect().toSeq.filter(r => r.getString(1) ne null))
@@ -285,7 +285,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(false, true))
   }
 
-  test("isNaN") {
+  test("isNaN") {//指明提供的值是否是保留值 NaN(不是数字)
     val testData = ctx.createDataFrame(ctx.sparkContext.parallelize(
       Row(Double.NaN, Float.NaN) ::
       Row(math.log(-1), math.log(-3).toFloat) ::
@@ -306,7 +306,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(false, false))
   }
 
-  test("nanvl") {
+  test("nanvl") {//如果n2为NaN(不是数值),返回n1,否则返回n2.
     val testData = ctx.createDataFrame(ctx.sparkContext.parallelize(
       Row(null, 3.0, Double.NaN, Double.PositiveInfinity, 1.0f, 4) :: Nil),
       StructType(Seq(StructField("a", DoubleType), StructField("b", DoubleType),
@@ -474,7 +474,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(false, true) :: Row(true, false) :: Row(true, true) :: Nil)
   }
 
-  test("SPARK-7321 when conditional statements") {
+  test("SPARK-7321 when conditional statements") {//当条件声明
     val testData = (1 to 3).map(i => (i, i.toString)).toDF("key", "value")
 
     checkAnswer(
@@ -490,12 +490,13 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     )
 
     // Test error handling for invalid expressions.
+    //测试无效表达式的错误处理
     intercept[IllegalArgumentException] { $"key".when($"key" === 1, -1) }
     intercept[IllegalArgumentException] { $"key".otherwise(-1) }
     intercept[IllegalArgumentException] { when($"key" === 1, -1).otherwise(-1).otherwise(-1) }
   }
 
-  test("sqrt") {
+  test("sqrt") {//返回n的平方根
     checkAnswer(
       testData.select(sqrt('key)).orderBy('key.asc),
       (1 to 100).map(n => Row(math.sqrt(n)))
@@ -512,7 +513,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("upper") {
+  test("upper") {//将char中字符串转化为大写字母
     checkAnswer(
       lowerCaseData.select(upper('l)),
       ('a' to 'd').map(c => Row(c.toString.toUpperCase))
@@ -533,7 +534,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row("AB", "CDE"))
   }
 
-  test("lower") {
+  test("lower") {//将char中字符串转化为小写字母
     checkAnswer(
       upperCaseData.select(lower('L)),
       ('A' to 'F').map(c => Row(c.toString.toLowerCase))
@@ -556,6 +557,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
 
   test("monotonicallyIncreasingId") {
     // Make sure we have 2 partitions, each with 2 records.
+    //确保我们有2个分区,每个分区有2个记录,
     val df = ctx.sparkContext.parallelize(Seq[Int](), 2).mapPartitions { _ =>
       Iterator(Tuple1(1), Tuple1(2))
     }.toDF("a")
@@ -567,6 +569,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
 
   test("sparkPartitionId") {
     // Make sure we have 2 partitions, each with 2 records.
+    //确保我们有2个分区,每个分区有2个记录。
     val df = ctx.sparkContext.parallelize(Seq[Int](), 2).mapPartitions { _ =>
       Iterator(Tuple1(1), Tuple1(2))
     }.toDF("a")
@@ -587,19 +590,19 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       checkAnswer(data.select(inputFileName()).limit(1), Row(""))
     }
   }
-
+  //cast将一种内置的数据类型或集合类型转化成另一种内置的数据类型或集合类型
   test("lift alias out of cast") {
     compareExpressions(
       col("1234").as("name").cast("int").expr,
       col("1234").cast("int").as("name").expr)
   }
 
-  test("columns can be compared") {
+  test("columns can be compared") {//可以比较列
     assert('key.desc == 'key.desc)
     assert('key.desc != 'key.asc)
   }
 
-  test("alias with metadata") {
+  test("alias with metadata") {//别名元数据
     val metadata = new MetadataBuilder()
       .putString("originName", "value")
       .build()
@@ -610,7 +613,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     assert(schema("abc").metadata === metadata)
   }
 
-  test("rand") {
+  test("rand") {//rand函数功能为获取一个伪随机数
     val randCol = testData.select($"key", rand(5L).as("rand"))
     randCol.columns.length should be (2)
     val rows = randCol.collect()
@@ -628,6 +631,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     }
 
     // We first create a plan with two Projects.
+    //我们首先创建一个有两个项目的计划。
     // Project [rand + 1 AS rand1, rand - 1 AS rand2]
     //   Project [key, (Rand 5 + 1) AS rand]
     //     LogicalRDD [key, value]
@@ -659,7 +663,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("randn") {
+  test("randn") {//randn函数功能为获取一个随机数
     val randCol = testData.select('key, randn(5L).as("rand"))
     randCol.columns.length should be (2)
     val rows = randCol.collect()

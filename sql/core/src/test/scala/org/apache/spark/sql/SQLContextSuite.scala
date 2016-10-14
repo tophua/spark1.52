@@ -30,7 +30,7 @@ class SQLContextSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("getOrCreate instantiates SQLContext") {
+  test("getOrCreate instantiates SQLContext") {//获取或创建实例化SQL上下文
     SQLContext.clearLastInstantiatedContext()
     val sqlContext = SQLContext.getOrCreate(ctx.sparkContext)
     assert(sqlContext != null, "SQLContext.getOrCreate returned null")
@@ -38,7 +38,7 @@ class SQLContextSuite extends SparkFunSuite with SharedSQLContext {
       "SQLContext created by SQLContext.getOrCreate not returned by SQLContext.getOrCreate")
   }
 
-  test("getOrCreate gets last explicitly instantiated SQLContext") {
+  test("getOrCreate gets last explicitly instantiated SQLContext") {//获得或创造获取最后的显式实例化SQL上下文
     SQLContext.clearLastInstantiatedContext()
     val sqlContext = new SQLContext(ctx.sparkContext)
     assert(SQLContext.getOrCreate(ctx.sparkContext) != null,

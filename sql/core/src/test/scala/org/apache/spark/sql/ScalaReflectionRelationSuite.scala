@@ -75,7 +75,7 @@ case class ComplexReflectData(
 class ScalaReflectionRelationSuite extends SparkFunSuite with SharedSQLContext {
   import testImplicits._
 
-  test("query case class RDD") {
+  test("query case class RDD") {//查询实例类RDD
     val data = ReflectData("a", 1, 1L, 1.toFloat, 1.toDouble, 1.toShort, 1.toByte, true,
       new java.math.BigDecimal(1), Date.valueOf("1970-01-01"), new Timestamp(12345), Seq(1, 2, 3))
     Seq(data).toDF().registerTempTable("reflectData")
@@ -86,7 +86,7 @@ class ScalaReflectionRelationSuite extends SparkFunSuite with SharedSQLContext {
         new Timestamp(12345), Seq(1, 2, 3)))
   }
 
-  test("query case class RDD with nulls") {
+  test("query case class RDD with nulls") {//查询实例类RDD为空
     val data = NullReflectData(null, null, null, null, null, null, null)
     Seq(data).toDF().registerTempTable("reflectNullData")
 
@@ -94,7 +94,7 @@ class ScalaReflectionRelationSuite extends SparkFunSuite with SharedSQLContext {
       Row.fromSeq(Seq.fill(7)(null)))
   }
 
-  test("query case class RDD with Nones") {
+  test("query case class RDD with Nones") {//查询实例类RDD
     val data = OptionalReflectData(None, None, None, None, None, None, None)
     Seq(data).toDF().registerTempTable("reflectOptionalData")
 
@@ -103,7 +103,7 @@ class ScalaReflectionRelationSuite extends SparkFunSuite with SharedSQLContext {
   }
 
   // Equality is broken for Arrays, so we test that separately.
-  test("query binary data") {
+  test("query binary data") {//查询二进制数据
     Seq(ReflectBinary(Array[Byte](1))).toDF().registerTempTable("reflectBinary")
 
     val result = sql("SELECT data FROM reflectBinary")
@@ -111,7 +111,7 @@ class ScalaReflectionRelationSuite extends SparkFunSuite with SharedSQLContext {
     assert(result.toSeq === Seq[Byte](1))
   }
 
-  test("query complex data") {
+  test("query complex data") {//查询复杂数据
     val data = ComplexReflectData(
       Seq(1, 2, 3),
       Seq(Some(1), Some(2), None),

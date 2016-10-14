@@ -24,7 +24,7 @@ import org.apache.spark.sql.test.SharedSQLContext
 class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("join - join using") {
+  test("join - join using") {//使用连接
     val df = Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str")
     val df2 = Seq(1, 2, 3).map(i => (i, (i + 1).toString)).toDF("int", "str")
 
@@ -86,8 +86,8 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
       df.join(df, df("key") === df("key") && df("value") === 1),
       Row(1, "1", 1, "1") :: Nil)
 
-    val left = df.groupBy("key").agg(count("*"))
-    val right = df.groupBy("key").agg(sum("key"))
+    val left = df.groupBy("key").agg(count("*"))//df.agg() 求聚合用的相关函数
+    val right = df.groupBy("key").agg(sum("key"))//df.agg() 求聚合用的相关函数
     checkAnswer(
       left.join(right, left("key") === right("key")),
       Row(1, 1, 1, 1) :: Row(2, 1, 2, 2) :: Nil)

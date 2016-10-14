@@ -22,7 +22,7 @@ import org.apache.spark.sql.test.SharedSQLContext
 class JsonFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("function get_json_object") {
+  test("function get_json_object") {//功得到JSON对象函数
     val df: DataFrame = Seq(("""{"name": "alice", "age": 5}""", "")).toDF("a", "b")
     checkAnswer(
       df.selectExpr("get_json_object(a, '$.name')", "get_json_object(a, '$.age')"),

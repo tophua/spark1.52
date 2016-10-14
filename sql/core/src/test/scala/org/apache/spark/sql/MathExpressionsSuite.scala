@@ -25,7 +25,7 @@ private object MathExpressionsTestData {
   case class DoubleData(a: java.lang.Double, b: java.lang.Double)
   case class NullDoubles(a: java.lang.Double)
 }
-
+//数学表达式的测试套件
 class MathExpressionsSuite extends QueryTest with SharedSQLContext {
   import MathExpressionsTestData._
   import testImplicits._
@@ -108,43 +108,43 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("sin") {
+  test("sin") {//正弦函数
     testOneToOneMathFunction(sin, math.sin)
   }
 
-  test("asin") {
+  test("asin") {//反正弦函数
     testOneToOneMathFunction(asin, math.asin)
   }
 
-  test("sinh") {
+  test("sinh") {//双曲正弦函数
     testOneToOneMathFunction(sinh, math.sinh)
   }
 
-  test("cos") {
+  test("cos") {//余弦值函数
     testOneToOneMathFunction(cos, math.cos)
   }
 
-  test("acos") {
+  test("acos") {//反余弦函数
     testOneToOneMathFunction(acos, math.acos)
   }
 
-  test("cosh") {
+  test("cosh") {//双曲余弦值
     testOneToOneMathFunction(cosh, math.cosh)
   }
 
-  test("tan") {
+  test("tan") {//正切函数
     testOneToOneMathFunction(tan, math.tan)
   }
 
-  test("atan") {
+  test("atan") {//反正切值
     testOneToOneMathFunction(atan, math.atan)
   }
 
-  test("tanh") {
+  test("tanh") {//双曲线正切函数
     testOneToOneMathFunction(tanh, math.tanh)
   }
 
-  test("toDegrees") {
+  test("toDegrees") {//传回将angrad径度转换成角度
     testOneToOneMathFunction(toDegrees, math.toDegrees)
     checkAnswer(
       sql("SELECT degrees(0), degrees(1), degrees(1.5)"),
@@ -152,7 +152,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("toRadians") {
+  test("toRadians") {//double类型的度数参数转换成弧度
     testOneToOneMathFunction(toRadians, math.toRadians)
     checkAnswer(
       sql("SELECT radians(0), radians(1), radians(1.5)"),
@@ -160,18 +160,18 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("cbrt") {
+  test("cbrt") {//返回 x 的立方根值
     testOneToOneMathFunction(cbrt, math.cbrt)
   }
 
-  test("ceil and ceiling") {
+  test("ceil and ceiling") {//ceiling将参数Number向上舍入
     testOneToOneMathFunction(ceil, math.ceil)
     checkAnswer(
       sql("SELECT ceiling(0), ceiling(1), ceiling(1.5)"),
       Row(0.0, 1.0, 2.0))
   }
 
-  test("conv") {
+  test("conv") {//用于计算向量的卷积和多项式乘法
     val df = Seq(("333", 10, 2)).toDF("num", "fromBase", "toBase")
     checkAnswer(df.select(conv('num, 10, 16)), Row("14D"))
     checkAnswer(df.select(conv(lit(100), 2, 16)), Row("4"))
@@ -183,11 +183,11 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       df.selectExpr("""conv("9223372036854775807", 36, -16)"""), Row("-1")) // for overflow
   }
 
-  test("floor") {
+  test("floor") {//其功能是“向下取整”，或者说“向下舍入”
     testOneToOneMathFunction(floor, math.floor)
   }
 
-  test("factorial") {
+  test("factorial") {//阶乘函数
     val df = (0 to 5).map(i => (i, i)).toDF("a", "b")
     checkAnswer(
       df.select(factorial('a)),
@@ -199,11 +199,11 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("rint") {
+  test("rint") {//返回最接近参数的整数,如果有2个数同样接近,则返回偶数的那个
     testOneToOneMathFunction(rint, math.rint)
   }
 
-  test("round") {
+  test("round") {//作用按指定的位数对数值进行四舍五入
     val df = Seq(5, 55, 555).map(Tuple1(_)).toDF("a")
     checkAnswer(
       df.select(round('a), round('a, -1), round('a, -2)),
@@ -219,7 +219,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("exp") {
+  test("exp") {//返回e的n次方,e是一个常数为2.71828
     testOneToOneMathFunction(exp, math.exp)
   }
 
@@ -227,7 +227,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     testOneToOneMathFunction(expm1, math.expm1)
   }
 
-  test("signum / sign") {
+  test("signum / sign") {//函数返回一个整型变量，指出参数的正负号
     testOneToOneMathFunction[Double](signum, math.signum)
 
     checkAnswer(
@@ -236,7 +236,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       Row(1, -1))
   }
 
-  test("pow / power") {
+  test("pow / power") {//返回某数的乘幂
     testTwoToOneMathFunction(pow, pow, math.pow)
 
     checkAnswer(
@@ -245,7 +245,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("hex") {
+  test("hex") {//可以通过在数字前面添加前缀 &H 来表示十六进制数
     val data = Seq((28, -28, 100800200404L, "hello")).toDF("a", "b", "c", "d")
     checkAnswer(data.select(hex('a)), Seq(Row("1C")))
     checkAnswer(data.select(hex('b)), Seq(Row("FFFFFFFFFFFFFFE4")))
@@ -258,7 +258,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     checkAnswer(data.selectExpr("hex(cast(d as binary))"), Seq(Row("68656C6C6F")))
   }
 
-  test("unhex") {
+  test("unhex") {//
     val data = Seq(("1C", "737472696E67")).toDF("a", "b")
     checkAnswer(data.select(unhex('a)), Row(Array[Byte](28.toByte)))
     checkAnswer(data.select(unhex('b)), Row("string".getBytes))
@@ -268,7 +268,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     checkAnswer(data.selectExpr("""unhex("G123")"""), Row(null))
   }
 
-  test("hypot") {
+  test("hypot") {//对于给定的直角三角形的两个直角边,求其斜边的长度
     testTwoToOneMathFunction(hypot, hypot, math.hypot)
   }
 
@@ -276,7 +276,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     testTwoToOneMathFunction(atan2, atan2, math.atan2)
   }
 
-  test("log / ln") {
+  test("log / ln") {//log对数函数
     testOneToOneNonNegativeMathFunction(org.apache.spark.sql.functions.log, math.log)
     checkAnswer(
       sql("SELECT ln(0), ln(1), ln(1.5)"),
@@ -292,7 +292,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     testOneToOneNonNegativeMathFunction(log1p, math.log1p)
   }
 
-  test("shift left") {
+  test("shift left") {//左移
     val df = Seq[(Long, Integer, Short, Byte, Integer, Integer)]((21, 21, 21, 21, 21, null))
       .toDF("a", "b", "c", "d", "e", "f")
 
@@ -309,7 +309,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       Row(42.toLong, 42, 42.toShort, 42.toByte, null))
   }
 
-  test("shift right") {
+  test("shift right") {//右移
     val df = Seq[(Long, Integer, Short, Byte, Integer, Integer)]((42, 42, 42, 42, 42, null))
       .toDF("a", "b", "c", "d", "e", "f")
 
@@ -343,7 +343,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       Row(9223372036854775787L, 21, 21.toShort, 21.toByte, null))
   }
 
-  test("binary log") {
+  test("binary log") {//二元对数
     val df = Seq[(Integer, Integer)]((123, null)).toDF("a", "b")
     checkAnswer(
       df.select(org.apache.spark.sql.functions.log("a"),
@@ -356,7 +356,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       Row(math.log(123), math.log(123) / math.log(2), null))
   }
 
-  test("abs") {
+  test("abs") {//求绝对值的函数
     val input =
       Seq[(java.lang.Double, java.lang.Double)]((null, null), (0.0, 0.0), (1.5, 1.5), (-2.5, 2.5))
     checkAnswer(
@@ -368,7 +368,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       input.map(pair => Row(pair._2)))
   }
 
-  test("log2") {
+  test("log2") {//对数2
     val df = Seq((1, 2)).toDF("a", "b")
     checkAnswer(
       df.select(log2("b") + log2("a")),
@@ -377,7 +377,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     checkAnswer(sql("SELECT LOG2(8), LOG2(null)"), Row(3, null))
   }
 
-  test("sqrt") {
+  test("sqrt") {//求绝对值的函数
     val df = Seq((1, 4)).toDF("a", "b")
     checkAnswer(
       df.select(sqrt("a"), sqrt("b")),
@@ -387,13 +387,13 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     checkAnswer(df.selectExpr("sqrt(a)", "sqrt(b)", "sqrt(null)"), Row(1.0, 2.0, null))
   }
 
-  test("negative") {
-    checkAnswer(
+  test("negative") {//负数
+    checkAnswer(//
       sql("SELECT negative(1), negative(0), negative(-1)"),
       Row(-1, 0, 1))
   }
 
-  test("positive") {
+  test("positive") {//正数
     val df = Seq((1, -1, "abc")).toDF("a", "b", "c")
     checkAnswer(df.selectExpr("positive(a)"), Row(1))
     checkAnswer(df.selectExpr("positive(b)"), Row(-1))

@@ -28,7 +28,7 @@ import org.apache.spark.unsafe.types.CalendarInterval
 class DateFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("function current_date") {
+  test("function current_date") {//当前日期函数
     val df1 = Seq((1, 2), (3, 1)).toDF("a", "b")
     val d0 = DateTimeUtils.millisToDays(System.currentTimeMillis())
     val d1 = DateTimeUtils.fromJavaDate(df1.select(current_date()).collect().head.getDate(0))
@@ -39,10 +39,12 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
   }
 
   // This is a bad test. SPARK-9196 will fix it and re-enable it.
-  ignore("function current_timestamp") {
+  //这是一个坏的测试,将修复它并重新启用它
+  ignore("function current_timestamp") {//当前时间戳函数
     val df1 = Seq((1, 2), (3, 1)).toDF("a", "b")
     checkAnswer(df1.select(countDistinct(current_timestamp())), Row(1))
     // Execution in one query should return the same value
+    //在一个查询中的执行应该返回相同的值
     checkAnswer(sql("""SELECT CURRENT_TIMESTAMP() = CURRENT_TIMESTAMP()"""),
       Row(true))
     assert(math.abs(sql("""SELECT CURRENT_TIMESTAMP()""").collect().head.getTimestamp(
@@ -54,7 +56,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
   val d = new Date(sdf.parse("2015-04-08 13:10:15").getTime)
   val ts = new Timestamp(sdf.parse("2013-04-08 13:10:15").getTime)
 
-  test("timestamp comparison with date strings") {
+  test("timestamp comparison with date strings") {//日期时间戳比较字符串
     val df = Seq(
       (1, Timestamp.valueOf("2015-01-01 00:00:00")),
       (2, Timestamp.valueOf("2014-01-01 00:00:00"))).toDF("i", "t")
@@ -69,7 +71,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(Timestamp.valueOf("2015-01-01 00:00:00")) :: Nil)
   }
 
-  test("date comparison with date strings") {
+  test("date comparison with date strings") {//日期字符串的日期比较
     val df = Seq(
       (1, Date.valueOf("2015-01-01")),
       (2, Date.valueOf("2014-01-01"))).toDF("i", "t")
@@ -84,7 +86,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(Date.valueOf("2015-01-01")) :: Nil)
   }
 
-  test("date format") {
+  test("date format") {//日期格式化
     val df = Seq((d, sdf.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -97,7 +99,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("2015", "2015", "2013"))
   }
 
-  test("year") {
+  test("year") {//年
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -110,7 +112,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(2015, 2015, 2013))
   }
 
-  test("quarter") {
+  test("quarter") {//季度
     val ts = new Timestamp(sdf.parse("2013-11-08 13:10:15").getTime)
 
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
@@ -124,7 +126,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(2, 2, 4))
   }
 
-  test("month") {
+  test("month") {//月
     //提取月
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
 
@@ -137,7 +139,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(4, 4, 4))
   }
 
-  test("dayofmonth") {
+  test("dayofmonth") {//这个月的第几天
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
      //提取日
     checkAnswer(
@@ -149,7 +151,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(8, 8, 8))
   }
 
-  test("dayofyear") {
+  test("dayofyear") {//这个年的第几天
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -161,7 +163,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(98, 98, 98))
   }
 
-  test("hour") {
+  test("hour") {//小时
     val df = Seq((d, sdf.format(d), ts)).toDF("a", "b", "c")
     //提取小时
     checkAnswer(
@@ -173,7 +175,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(0, 13, 13))
   }
 
-  test("minute") {
+  test("minute") {//分钟
     val df = Seq((d, sdf.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -185,7 +187,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(0, 10, 10))
   }
 
-  test("second") {
+  test("second") {//秒
     val df = Seq((d, sdf.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -197,7 +199,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(0, 15, 15))
   }
 
-  test("weekofyear") {
+  test("weekofyear") {//这年的第几周
     val df = Seq((d, sdfDate.format(d), ts)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -209,7 +211,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(15, 15, 15))
   }
 
-  test("function date_add") {
+  test("function date_add") {//日期增加函数
     val st1 = "2015-06-01 12:34:56"
     val st2 = "2015-06-02 12:34:56"
     val t1 = Timestamp.valueOf(st1)
@@ -240,7 +242,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-06-02")), Row(Date.valueOf("2015-06-03"))))
   }
 
-  test("function date_sub") {
+  test("function date_sub") {//日期减去指定的时间间隔
     val st1 = "2015-06-01 12:34:56"
     val st2 = "2015-06-02 12:34:56"
     val t1 = Timestamp.valueOf(st1)
@@ -271,7 +273,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-05-31")), Row(Date.valueOf("2015-06-01"))))
   }
 
-  test("time_add") {
+  test("time_add") {//时间添加
     val t1 = Timestamp.valueOf("2015-07-31 23:59:59")
     val t2 = Timestamp.valueOf("2015-12-31 00:00:00")
     val d1 = Date.valueOf("2015-07-31")
@@ -287,7 +289,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
         Row(Timestamp.valueOf("2016-02-29 00:00:02"))))
   }
 
-  test("time_sub") {
+  test("time_sub") {//时间减去指定的时间间隔
     val t1 = Timestamp.valueOf("2015-10-01 00:00:01")
     val t2 = Timestamp.valueOf("2016-02-29 00:00:02")
     val d1 = Date.valueOf("2015-09-30")
@@ -303,7 +305,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
         Row(Timestamp.valueOf("2015-12-31 00:00:00"))))
   }
 
-  test("function add_months") {
+  test("function add_months") {//将一个日期上加上一指定的月份数
     val d1 = Date.valueOf("2015-08-31")
     val d2 = Date.valueOf("2015-02-28")
     val df = Seq((1, d1), (2, d2)).toDF("n", "d")
@@ -315,7 +317,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-07-31")), Row(Date.valueOf("2015-01-31"))))
   }
 
-  test("function months_between") {
+  test("function months_between") {//返回两个日期之间的月份数
     val d1 = Date.valueOf("2015-07-31")
     val d2 = Date.valueOf("2015-02-16")
     val t1 = Timestamp.valueOf("2014-09-30 23:30:00")
@@ -327,7 +329,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
     checkAnswer(df.selectExpr("months_between(t, s)"), Seq(Row(0.5), Row(-0.5)))
   }
 
-  test("function last_day") {
+  test("function last_day") {//返回指定日期对应月份的最后一天
     val df1 = Seq((1, "2015-07-23"), (2, "2015-07-24")).toDF("i", "d")
     val df2 = Seq((1, "2015-07-23 00:11:22"), (2, "2015-07-24 11:22:33")).toDF("i", "t")
     checkAnswer(
@@ -338,7 +340,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-07-31")), Row(Date.valueOf("2015-07-31"))))
   }
 
-  test("function next_day") {
+  test("function next_day") {//返回输入日期开始
     val df1 = Seq(("mon", "2015-07-23"), ("tuesday", "2015-07-20")).toDF("dow", "d")
     val df2 = Seq(("th", "2015-07-23 00:11:22"), ("xx", "2015-07-24 11:22:33")).toDF("dow", "t")
     checkAnswer(
@@ -349,7 +351,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-07-30")), Row(Date.valueOf("2015-07-30"))))
   }
 
-  test("function to_date") {
+  test("function to_date") {//转换日期
     val d1 = Date.valueOf("2015-07-22")
     val d2 = Date.valueOf("2015-07-01")
     val t1 = Timestamp.valueOf("2015-07-22 10:00:00")
@@ -379,7 +381,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-07-22")), Row(Date.valueOf("2014-12-31"))))
   }
 
-  test("function trunc") {
+  test("function trunc") {//截取日期
     val df = Seq(
       (1, Timestamp.valueOf("2015-07-22 10:00:00")),
       (2, Timestamp.valueOf("2014-12-31 00:00:00"))).toDF("i", "t")
@@ -393,7 +395,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-07-01")), Row(Date.valueOf("2014-12-01"))))
   }
 
-  test("from_unixtime") {
+  test("from_unixtime") {//以"YYYY-MM-DD"格式来显示的字符
     val sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     val fmt2 = "yyyy-MM-dd HH:mm:ss.SSS"
     val sdf2 = new SimpleDateFormat(fmt2)
@@ -449,7 +451,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(ts1.getTime / 1000L), Row(ts2.getTime / 1000L)))
   }
 
-  test("datediff") {
+  test("datediff") {//表示两个指定日期间的时间间隔数目
     val df = Seq(
       (Date.valueOf("2015-07-24"), Timestamp.valueOf("2015-07-24 01:00:00"),
         "2015-07-23", "2015-07-23 03:00:00"),

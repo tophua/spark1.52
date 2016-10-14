@@ -23,11 +23,12 @@ import org.apache.spark.sql.types._
 
 /**
  * Test suite for functions in [[org.apache.spark.sql.functions]].
+ * 函数的测试套件
  */
 class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("array with column name") {
+  test("array with column name") {//数组列名
     val df = Seq((0, 1)).toDF("a", "b")
     val row = df.select(array("a", "b")).first()
 
@@ -36,7 +37,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(row.getAs[Seq[Int]](0) === Seq(0, 1))
   }
 
-  test("array with column expression") {
+  test("array with column expression") {//数组列名表达式
     val df = Seq((0, 1)).toDF("a", "b")
     val row = df.select(array(col("a"), col("b") + col("b"))).first()
 
@@ -46,6 +47,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
   }
 
   // Turn this on once we add a rule to the analyzer to throw a friendly exception
+  //如果将不同类型的列放入数组中,抛出异常
   ignore("array: throw exception if putting columns of different types into an array") {
     val df = Seq((0, "str")).toDF("a", "b")
     intercept[AnalysisException] {
@@ -53,7 +55,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("struct with column name") {
+  test("struct with column name") {//构造列名称
     val df = Seq((1, "str")).toDF("a", "b")
     val row = df.select(struct("a", "b")).first()
 
@@ -65,7 +67,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(row.getAs[Row](0) === Row(1, "str"))
   }
 
-  test("struct with column expression") {
+  test("struct with column expression") {//构造列名称表达式
     val df = Seq((1, "str")).toDF("a", "b")
     val row = df.select(struct((col("a") * 2).as("c"), col("b"))).first()
 
@@ -76,7 +78,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(row.schema(0).dataType === expectedType)
     assert(row.getAs[Row](0) === Row(2, "str"))
   }
-
+   //列表达结构被自动命名
   test("struct with column expression to be automatically named") {
     val df = Seq((1, "str")).toDF("a", "b")
     val result = df.select(struct((col("a") * 2), col("b")))
@@ -88,7 +90,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(result.first.schema(0).dataType === expectedType)
     checkAnswer(result, Row(Row(2, "str")))
   }
-
+  //文字列结构
   test("struct with literal columns") {
     val df = Seq((1, "str1"), (2, "str2")).toDF("a", "b")
     val result = df.select(struct((col("a") * 2), lit(5.0)))
@@ -101,7 +103,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(result.first.schema(0).dataType === expectedType)
     checkAnswer(result, Seq(Row(Row(2, 5.0)), Row(Row(4, 5.0))))
   }
-
+  //所有的文字列结构
   test("struct with all literal columns") {
     val df = Seq((1, "str1"), (2, "str2")).toDF("a", "b")
     val result = df.select(struct(lit("v"), lit(5.0)))
@@ -114,7 +116,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(result.first.schema(0).dataType === expectedType)
     checkAnswer(result, Seq(Row(Row("v", 5.0)), Row(Row("v", 5.0))))
   }
-
+  //常数函数
   test("constant functions") {
     checkAnswer(
       sql("SELECT E()"),
@@ -132,7 +134,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       testData2.collect().toSeq.map(r => Row(~r.getInt(0))))
   }
 
-  test("bin") {
+  test("bin") {//二进制
     val df = Seq[(Integer, Integer)]((12, null)).toDF("a", "b")
     checkAnswer(
       df.select(bin("a"), bin("b")),
@@ -142,20 +144,20 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("1100", null))
   }
 
-  test("if function") {
+  test("if function") {//IF函数
     val df = Seq((1, 2)).toDF("a", "b")
     checkAnswer(
       df.selectExpr("if(a = 1, 'one', 'not_one')", "if(b = 1, 'one', 'not_one')"),
       Row("one", "not_one"))
   }
 
-  test("nvl function") {
+  test("nvl function") {//如果E1为NULL，则函数返回E2，否则返回E1本身函数
     checkAnswer(
       sql("SELECT nvl(null, 'x'), nvl('y', 'x'), nvl(null, null)"),
       Row("x", "y", null))
   }
 
-  test("misc md5 function") {
+  test("misc md5 function") {//杂项MD5函数
     val df = Seq(("ABC", Array[Byte](1, 2, 3, 4, 5, 6))).toDF("a", "b")
     checkAnswer(
       df.select(md5($"a"), md5($"b")),
@@ -166,7 +168,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("902fbdd2b1df0c4f70b4a5d23525e932", "6ac1e56bc78f031059be7be854522c4c"))
   }
 
-  test("misc sha1 function") {
+  test("misc sha1 function") {//杂项sha1函数
     val df = Seq(("ABC", "ABC".getBytes)).toDF("a", "b")
     checkAnswer(
       df.select(sha1($"a"), sha1($"b")),
@@ -178,7 +180,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("da39a3ee5e6b4b0d3255bfef95601890afd80709", "da39a3ee5e6b4b0d3255bfef95601890afd80709"))
   }
 
-  test("misc sha2 function") {
+  test("misc sha2 function") {//杂项sha2函数
     val df = Seq(("ABC", Array[Byte](1, 2, 3, 4, 5, 6))).toDF("a", "b")
     checkAnswer(
       df.select(sha2($"a", 256), sha2($"b", 256)),
@@ -195,7 +197,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("misc crc32 function") {
+  test("misc crc32 function") {//crc32函数
     val df = Seq(("ABC", Array[Byte](1, 2, 3, 4, 5, 6))).toDF("a", "b")
     checkAnswer(
       df.select(crc32($"a"), crc32($"b")),
@@ -206,7 +208,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(2743272264L, 2180413220L))
   }
 
-  test("string function find_in_set") {
+  test("string function find_in_set") {//查找字符串在功能上
     val df = Seq(("abc,b,ab,c,def", "abc,b,ab,c,def")).toDF("a", "b")
 
     checkAnswer(
@@ -214,7 +216,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(3, 0))
   }
 
-  test("conditional function: least") {
+  test("conditional function: least") {//条件函数最少的
     checkAnswer(
       testData2.select(least(lit(-1), lit(0), col("a"), col("b"))).limit(1),
       Row(-1)
@@ -225,7 +227,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("conditional function: greatest") {
+  test("conditional function: greatest") {//条件函数最大的
     checkAnswer(
       testData2.select(greatest(lit(2), lit(3), col("a"), col("b"))).limit(1),
       Row(3)
@@ -236,7 +238,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("pmod") {
+  test("pmod") {//是一个求余函数
     val intData = Seq((7, 3), (-7, 3)).toDF("a", "b")
     checkAnswer(
       intData.select(pmod('a, 'b)),
@@ -273,7 +275,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("sort_array function") {
+  test("sort_array function") {//数组排序函数
     val df = Seq(
       (Array[Int](2, 1, 3), Array("b", "c", "a")),
       (Array[Int](), Array[String]()),
@@ -319,7 +321,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     }.getMessage().contains("only supports array input"))
   }
 
-  test("array size function") {
+  test("array size function") {//数组大小函数
     val df = Seq(
       (Seq[Int](1, 2), "x"),
       (Seq[Int](), "y"),
@@ -335,7 +337,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("map size function") {
+  test("map size function") {//Map大小函数
     val df = Seq(
       (Map[Int, Int](1 -> 1, 2 -> 2), "x"),
       (Map[Int, Int](), "y"),
@@ -351,13 +353,14 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("array contains function") {
+  test("array contains function") {//数组包含功能
     val df = Seq(
       (Seq[Int](1, 2), "x"),
       (Seq[Int](), "x")
     ).toDF("a", "b")
 
     // Simple test cases
+    //简单的测试用例
     checkAnswer(
       df.select(array_contains(df("a"), 1)),
       Seq(Row(true), Row(false))

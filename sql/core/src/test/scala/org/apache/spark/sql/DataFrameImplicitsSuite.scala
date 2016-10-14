@@ -22,13 +22,13 @@ import org.apache.spark.sql.test.SharedSQLContext
 class DataFrameImplicitsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("RDD of tuples") {
+  test("RDD of tuples") {//RDD元组
     checkAnswer(
       ctx.sparkContext.parallelize(1 to 10).map(i => (i, i.toString)).toDF("intCol", "strCol"),
       (1 to 10).map(i => Row(i, i.toString)))
   }
 
-  test("Seq of tuples") {
+  test("Seq of tuples") {//序列元组
     checkAnswer(
       (1 to 10).map(i => (i, i.toString)).toDF("intCol", "strCol"),
       (1 to 10).map(i => Row(i, i.toString)))

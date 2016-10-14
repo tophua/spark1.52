@@ -27,7 +27,7 @@ import org.apache.spark.unsafe.types.UTF8String
 class RowSuite extends SparkFunSuite with SharedSQLContext {
   import testImplicits._
 
-  test("create row") {
+  test("create row") {//创建行
     val expected = new GenericMutableRow(4)
     expected.setInt(0, 2147483647)
     expected.update(1, UTF8String.fromString("this is a string"))
@@ -49,13 +49,13 @@ class RowSuite extends SparkFunSuite with SharedSQLContext {
     assert(expected.isNullAt(3) === actual2.isNullAt(3))
   }
 
-  test("SpecificMutableRow.update with null") {
+  test("SpecificMutableRow.update with null") {//行的更新null
     val row = new SpecificMutableRow(Seq(IntegerType))
     row(0) = null
     assert(row.isNullAt(0))
   }
 
-  test("serialize w/ kryo") {
+  test("serialize w/ kryo") {//序列化
     val row = Seq((1, Seq(1), Map(1 -> 1), BigDecimal(1))).toDF().first()
     val serializer = new SparkSqlSerializer(ctx.sparkContext.getConf)
     val instance = serializer.newInstance()
@@ -64,7 +64,7 @@ class RowSuite extends SparkFunSuite with SharedSQLContext {
     assert(de === row)
   }
 
-  test("get values by field name on Row created via .toDF") {
+  test("get values by field name on Row created via .toDF") {//
     val row = Seq((1, Seq(1))).toDF("a", "b").first()
     assert(row.getAs[Int]("a") === 1)
     assert(row.getAs[Seq[Int]]("b") === Seq(1))
@@ -86,7 +86,7 @@ class RowSuite extends SparkFunSuite with SharedSQLContext {
     assert(r1 === r2)
   }
 
-  test("equals and hashCode") {
+  test("equals and hashCode") {//等于和哈希代码
     val r1 = Row("Hello")
     val r2 = Row("Hello")
     assert(r1 === r2)

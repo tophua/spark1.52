@@ -23,7 +23,7 @@ import org.apache.spark.sql.test.SharedSQLContext
 
 class SerializationSuite extends SparkFunSuite with SharedSQLContext {
 
-  test("[SPARK-5235] SQLContext should be serializable") {
+  test("[SPARK-5235] SQLContext should be serializable") {//SQLContext应该序列化
     val _sqlContext = new SQLContext(sqlContext.sparkContext)
     new JavaSerializer(new SparkConf()).newInstance().serialize(_sqlContext)
   }

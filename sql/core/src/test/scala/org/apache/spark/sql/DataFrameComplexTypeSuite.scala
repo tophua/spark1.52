@@ -22,11 +22,12 @@ import org.apache.spark.sql.test.SharedSQLContext
 
 /**
  * A test suite to test DataFrame/SQL functionalities with complex types (i.e. array, struct, map).
+ * 一个测试套件的测试数据框架/ SQL类型复杂的功能
  */
 class DataFrameComplexTypeSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("UDF on struct") {
+  test("UDF on struct") {//自定义函数构造
     val f = udf((a: String) => a)
     val df = sqlContext.sparkContext.parallelize(Seq((1, 1))).toDF("a", "b")
     df.select(struct($"a").as("s")).select(f($"s.a")).collect()
@@ -38,13 +39,13 @@ class DataFrameComplexTypeSuite extends QueryTest with SharedSQLContext {
     df.selectExpr("named_struct('a', a) s").select(f($"s.a")).collect()
   }
 
-  test("UDF on array") {
+  test("UDF on array") {//数组
     val f = udf((a: String) => a)
     val df = sqlContext.sparkContext.parallelize(Seq((1, 1))).toDF("a", "b")
     df.select(array($"a").as("s")).select(f(expr("s[0]"))).collect()
   }
 
-  test("SPARK-12477 accessing null element in array field") {
+  test("SPARK-12477 accessing null element in array field") {//数组字段中的空元素
     val df = sqlContext.sparkContext.parallelize(Seq((Seq("val1", null, "val2"),
       Seq(Some(1), None, Some(2))))).toDF("s", "i")
     val nullStringRow = df.selectExpr("s[1]").collect()(0)

@@ -48,7 +48,7 @@ object TestStrategy extends Strategy {
 class ExtraStrategiesSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("insert an extraStrategy") {
+  test("insert an extraStrategy") {//插入一个额外的策略
     try {
       sqlContext.experimental.extraStrategies = TestStrategy :: Nil
 

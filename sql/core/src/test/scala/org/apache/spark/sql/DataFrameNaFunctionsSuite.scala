@@ -36,7 +36,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
       ).toDF("name", "age", "height")//标题
   }
 
-  test("drop") {
+  test("drop") {//放弃
     val input = createDF()
     val rows = input.collect()
 
@@ -64,7 +64,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(input.na.drop().columns.toSeq === input.columns.toSeq)
   }
 
-  test("drop with how") {
+  test("drop with how") {//如何放弃
     val input = createDF()
     val rows = input.collect()
 
@@ -98,6 +98,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
       rows(0))
 
     // Make sure the columns are properly named.
+      //确保列正确命名
     assert(input.na.drop(2, Seq("age", "height")).columns.toSeq === input.columns.toSeq)
   }
 
@@ -115,6 +116,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
         Row(null, 50, 50.6) :: Nil)
 
     // Make sure the columns are properly named.
+    //确保列正确命名
     assert(fillNumeric.columns.toSeq === input.columns.toSeq)
 
     // string
@@ -140,7 +142,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("test", null))
   }
 
-  test("fill with map") {
+  test("fill with map") {//填充Map
     val df = Seq[(String, String, java.lang.Long, java.lang.Double)](
       (null, null, null, null)).toDF("a", "b", "c", "d")
     checkAnswer(
@@ -161,10 +163,11 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("test", null, 1, 2.2))
   }
 
-  test("replace") {
+  test("replace") {//替换
     val input = createDF()
 
     // Replace two numeric columns: age and height
+    //更换两个数字列：年龄和身高
     val out = input.na.replace(Seq("age", "height"), Map(
       16 -> 61,
       60 -> 6,
@@ -179,6 +182,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(out(5) === Row(null, null, null))
 
     // Replace only the age column
+    //替换年龄列
     val out1 = input.na.replace("age", Map(
       16 -> 61,
       60 -> 6,
