@@ -32,16 +32,16 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
 
   import VectorIndexerSuite.FeatureData
 
-  // identical, of length 3
+  // identical, of length 3 相同的长度为3
   @transient var densePoints1: DataFrame = _
   @transient var sparsePoints1: DataFrame = _
   @transient var point1maxes: Array[Double] = _
 
-  // identical, of length 2
+  // identical, of length 2 相同的长度为2
   @transient var densePoints2: DataFrame = _
   @transient var sparsePoints2: DataFrame = _
 
-  // different lengths
+  // different lengths 不同的长度
   @transient var badPoints: DataFrame = _
 
   override def beforeAll(): Unit = {
@@ -73,6 +73,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
       Vectors.sparse(3, Array(2), Array(-1.0)))
 
     // Sanity checks for assumptions made in tests
+    //健全检查在测试中所作的假设
     assert(densePoints1Seq.head.size == sparsePoints1Seq.head.size)
     assert(densePoints2Seq.head.size == sparsePoints2Seq.head.size)
     assert(densePoints1Seq.head.size != densePoints2Seq.head.size)
@@ -93,25 +94,26 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
   private def getIndexer: VectorIndexer =
     new VectorIndexer().setInputCol("features").setOutputCol("indexed")
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new VectorIndexer)
     val model = new VectorIndexerModel("indexer", 1, Map.empty)
     ParamsSuite.checkParams(model)
   }
 
-  test("Cannot fit an empty DataFrame") {
+  test("Cannot fit an empty DataFrame") {//不适合一个空帧
     val rdd = sqlContext.createDataFrame(sc.parallelize(Array.empty[Vector], 2).map(FeatureData))
     val vectorIndexer = getIndexer
     intercept[IllegalArgumentException] {
       vectorIndexer.fit(rdd)
     }
   }
-
+  //当给定不同RDDS大小的向量抛出异常
   test("Throws error when given RDDs with different size vectors") {
     val vectorIndexer = getIndexer
-    val model = vectorIndexer.fit(densePoints1) // vectors of length 3
-
+    val model = vectorIndexer.fit(densePoints1) // vectors of length 3 长度为3的向量
+    
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
 
     model.transform(densePoints1) // should work
@@ -126,7 +128,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     }
   }
 
-  test("Same result with dense and sparse vectors") {
+  test("Same result with dense and sparse vectors") {//密集和稀疏向量的相同的结果
     def testDenseSparse(densePoints: DataFrame, sparsePoints: DataFrame): Unit = {
       val denseVectorIndexer = getIndexer.setMaxCategories(2)
       val sparseVectorIndexer = getIndexer.setMaxCategories(2)
@@ -142,7 +144,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     testDenseSparse(densePoints1, sparsePoints1)
     testDenseSparse(densePoints2, sparsePoints2)
   }
-
+  //建立有效的分类特征值指数,正确转换，检查元数据
   test("Builds valid categorical feature value index, transform correctly, check metadata") {
     def checkCategoryMaps(
         data: DataFrame,
@@ -156,6 +158,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
         val model = vectorIndexer.fit(data)
         val categoryMaps = model.categoryMaps
         // Chose correct categorical features
+        //选择正确的分类特征
         assert(categoryMaps.keys.toSet === categoricalFeatures)
         val transformed = model.transform(data).select("indexed")
         val indexedRDD: RDD[Vector] = transformed.map(_.getAs[Vector](0))
@@ -166,14 +169,16 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
           val origValueSet = collectedData.map(_(feature)).toSet
           val targetValueIndexSet = Range(0, origValueSet.size).toSet
           val catMap = categoryMaps(feature)
-          assert(catMap.keys.toSet === origValueSet) // Correct categories
-          assert(catMap.values.toSet === targetValueIndexSet) // Correct category indices
+          assert(catMap.keys.toSet === origValueSet) // Correct categories 正确的分类
+          assert(catMap.values.toSet === targetValueIndexSet) // Correct category indices 正确的分类指标
           if (origValueSet.contains(0.0)) {
-            assert(catMap(0.0) === 0) // value 0 gets index 0
+            assert(catMap(0.0) === 0) // value 0 gets index 0 值0获取索引0
           }
           // Check transformed data
+          //检查转换数据
           assert(indexedRDD.map(_(feature)).collect().toSet === targetValueIndexSet)
           // Check metadata
+          //检查元数据
           val featureAttr = featureAttrs(feature)
           assert(featureAttr.index.get === feature)
           featureAttr match {
@@ -188,6 +193,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
           }
         }
         // Check numerical feature metadata.
+        //检查数值特征元数据
         Range(0, model.numFeatures).filter(feature => !categoricalFeatures.contains(feature))
           .foreach { feature: Int =>
           val featureAttr = featureAttrs(feature)
@@ -210,7 +216,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     checkCategoryMaps(densePoints2, maxCategories = 2, categoricalFeatures = Set(1, 3))
   }
 
-  test("Maintain sparsity for sparse vectors") {
+  test("Maintain sparsity for sparse vectors") {//保持稀疏向量的稀疏性
     def checkSparsity(data: DataFrame, maxCategories: Int): Unit = {
       val points = data.collect().map(_.getAs[Vector](0))
       val vectorIndexer = getIndexer.setMaxCategories(maxCategories)
@@ -226,8 +232,9 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     checkSparsity(sparsePoints2, maxCategories = 2)
   }
 
-  test("Preserve metadata") {
+  test("Preserve metadata") {//保存元数据
     // For continuous features, preserve name and stats.
+    //对于连续的功能,保存名称和统计
     val featureAttributes: Array[Attribute] = point1maxes.zipWithIndex.map { case (maxVal, i) =>
       NumericAttribute.defaultAttr.withName(i.toString).withMax(maxVal)
     }
@@ -237,6 +244,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     val vectorIndexer = getIndexer.setMaxCategories(2)
     val model = vectorIndexer.fit(densePoints1WithMeta)
     // Check that ML metadata are preserved.
+    //检查是否保留了元数据的元数据。
     val indexedPoints = model.transform(densePoints1WithMeta)
     val transAttributes: Array[Attribute] =
       AttributeGroup.fromStructField(indexedPoints.schema("indexed")).attributes.get

@@ -27,7 +27,7 @@ import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 //向量切分,单词向量它用1和0分别表示是否存在某个词
 class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("params") {
+  test("params") {//参数
     val slicer = new VectorSlicer
     ParamsSuite.checkParams(slicer)
     //指数
@@ -41,7 +41,7 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("feature validity checks") {
+  test("feature validity checks") {//特征有效性检查
     import VectorSlicer._
     assert(validIndices(Array(0, 1, 8, 2)))
     assert(validIndices(Array.empty[Int]))
@@ -53,7 +53,7 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(!validNames(Array("a", "b", "a")))
   }
 
-  test("Test vector slicer") {
+  test("Test vector slicer") {//测试向量机
     val sqlContext = new SQLContext(sc)
 
     val data = Array(
@@ -65,7 +65,7 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
     )
 
     // Expected after selecting indices 1, 4
-    //
+    //预计在选择指数1,4
     val expected = Array(
       Vectors.sparse(2, Seq((0, 2.3))),
       Vectors.dense(2.3, 1.0),

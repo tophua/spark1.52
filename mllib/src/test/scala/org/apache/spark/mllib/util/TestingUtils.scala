@@ -27,8 +27,11 @@ object TestingUtils {
 
   /**
    * Private helper function for comparing two values using relative tolerance.
+   * 用于比较两个值的相对公差的辅助函数
    * Note that if x or y is extremely close to zero, i.e., smaller than Double.MinPositiveValue,
+   * 请注意,如果X或Y是非常接近于零
    * the relative tolerance is meaningless, so the exception will be raised to warn users.
+   * 相对宽容是没有意义的,所以会提出警告用户的例外
    */
   private def RelativeErrorComparison(x: Double, y: Double, eps: Double): Boolean = {
     val absX = math.abs(x)
@@ -46,6 +49,7 @@ object TestingUtils {
 
   /**
    * Private helper function for comparing two values using absolute tolerance.
+   * 用于比较两个值的绝对公差的辅助函数
    */
   private def AbsoluteErrorComparison(x: Double, y: Double, eps: Double): Boolean = {
     math.abs(x - y) < eps
@@ -56,6 +60,7 @@ object TestingUtils {
 
   /**
    * Implicit class for comparing two double values using relative tolerance or absolute tolerance.
+   * 用于比较两个使用相对公差或绝对公差的两个值的隐式类
    */
   implicit class DoubleWithAlmostEquals(val x: Double) {
 
@@ -94,12 +99,14 @@ object TestingUtils {
 
     /**
      * Comparison using absolute tolerance.
+     * 使用绝对公差的比较
      */
     def absTol(eps: Double): CompareDoubleRightSide =
       CompareDoubleRightSide(AbsoluteErrorComparison, x, eps, ABS_TOL_MSG)
 
     /**
      * Comparison using relative tolerance.
+     * 使用相对公差的比较
      */
     def relTol(eps: Double): CompareDoubleRightSide =
       CompareDoubleRightSide(RelativeErrorComparison, x, eps, REL_TOL_MSG)
@@ -150,6 +157,7 @@ object TestingUtils {
 
     /**
      * Comparison using absolute tolerance.
+     * 使用绝对公差的比较
      */
     def absTol(eps: Double): CompareVectorRightSide = CompareVectorRightSide(
       (x: Vector, y: Vector, eps: Double) => {
@@ -213,6 +221,7 @@ object TestingUtils {
 
     /**
      * Comparison using absolute tolerance.
+     * 使用绝对公差的比较
      */
     def absTol(eps: Double): CompareMatrixRightSide = CompareMatrixRightSide(
       (x: Matrix, y: Matrix, eps: Double) => {

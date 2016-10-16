@@ -45,6 +45,7 @@ object NaiveBayesSuite {
   }
 
   // Generate input of the form Y = (theta * x).argmax()
+  //生成窗体的输入
   def generateNaiveBayesInput(
     pi: Array[Double],            // 1XC
     theta: Array[Array[Double]],  // CXD
@@ -72,6 +73,7 @@ object NaiveBayesSuite {
           counts.toArray.sortBy(_._1).map(_._2)
         case _ =>
           // This should never happen.
+          //这永远不会发生
           throw new UnknownError(s"Invalid modelType: $modelType.")
       }
 
@@ -79,11 +81,17 @@ object NaiveBayesSuite {
     }
   }
 
-  /** Bernoulli NaiveBayes with binary labels, 3 features */
+  /** 
+   *  Bernoulli NaiveBayes with binary labels, 3 features
+   *  伯努利 朴素贝叶斯二元标签,三个特征
+   *  */
   private val binaryBernoulliModel = new NaiveBayesModel(labels = Array(0.0, 1.0),
     pi = Array(0.2, 0.8), theta = Array(Array(0.1, 0.3, 0.6), Array(0.2, 0.4, 0.4)), Bernoulli)
 
-  /** Multinomial NaiveBayes with binary labels, 3 features */
+  /** 
+   *  Multinomial NaiveBayes with binary labels, 3 features 
+   *  多项式朴素贝叶斯二元标签,三个特征
+   *  */
   private val binaryMultinomialModel = new NaiveBayesModel(labels = Array(0.0, 1.0),
     pi = Array(0.2, 0.8), theta = Array(Array(0.1, 0.3, 0.6), Array(0.2, 0.4, 0.4)), Multinomial)
 }
@@ -98,6 +106,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
         prediction != expected.label
     }
     // At least 80% of the predictions should be on.
+    //至少有80%的预测
     assert(numOfPredictions < input.length / 5)
   }
 
@@ -119,12 +128,12 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("model types") {
+  test("model types") {//模型类型
     assert(Multinomial === "multinomial")
     assert(Bernoulli === "bernoulli")
   }
 
-  test("get, set params") {
+  test("get, set params") {//得到的,设置参数
     val nb = new NaiveBayes()
     nb.setLambda(2.0)
     assert(nb.getLambda === 2.0)
@@ -132,7 +141,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(nb.getLambda === 3.0)
   }
 
-  test("Naive Bayes Multinomial") {
+  test("Naive Bayes Multinomial") {//朴素贝叶斯分类
     val nPoints = 1000
     //math.log 对数
     val pi = Array(0.5, 0.1, 0.4).map(math.log)
@@ -153,13 +162,13 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
       pi, theta, nPoints, 17, Multinomial)
     val validationRDD = sc.parallelize(validationData, 2)
 
-    // Test prediction on RDD.
+    // Test prediction on RDD.测试在RDD预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
-    // Test prediction on Array.
+    // Test prediction on Array.测试数组预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
 
-    // Test posteriors
+    // Test posteriors 测试后
     validationData.map(_.features).foreach { features =>
       val predicted = model.predictProbabilities(features).toArray
       assert(predicted.sum ~== 1.0 relTol 1.0e-10)
@@ -183,7 +192,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     classProbs.map(_ / classProbsSum)
   }
 
-  test("Naive Bayes Bernoulli") {
+  test("Naive Bayes Bernoulli") {//朴素贝叶斯伯努利
     val nPoints = 10000
     //pi: Array[Double] = Array(-0.6931471805599453, -1.2039728043259361, -1.6094379124341003)
     val pi = Array(0.5, 0.3, 0.2).map(math.log)
@@ -239,7 +248,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     classProbs.map(_ / classProbsSum)
   }
 
-  test("detect negative values") {
+  test("detect negative values") {//检测负价值
     val dense = Seq(
       LabeledPoint(1.0, Vectors.dense(1.0)),
       LabeledPoint(0.0, Vectors.dense(-1.0)),
@@ -266,7 +275,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("detect non zero or one values in Bernoulli") {
+  test("detect non zero or one values in Bernoulli") {//检测伯努利中的非零或一个值
     val badTrain = Seq(
       LabeledPoint(1.0, Vectors.dense(1.0)),
       LabeledPoint(0.0, Vectors.dense(2.0)),
@@ -299,13 +308,14 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("model save/load: 2.0 to 2.0") {
+  test("model save/load: 2.0 to 2.0") {//模型保存/负载
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
 
     Seq(NaiveBayesSuite.binaryBernoulliModel, NaiveBayesSuite.binaryMultinomialModel).map {
       model =>
         // Save model, load it back, and compare.
+        //保存模型,加载它回来,并比较
         try {
           model.save(sc, path)
           val sameModel = NaiveBayesModel.load(sc, path)
@@ -326,6 +336,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     val path = tempDir.toURI.toString
 
     // Save model as version 1.0, load it back, and compare.
+    //保存模型为版本1,加载它回来,并比较
     try {
       val data = NaiveBayesModel.SaveLoadV1_0.Data(model.labels, model.pi, model.theta)
       NaiveBayesModel.SaveLoadV1_0.save(sc, path, data)
@@ -341,7 +352,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 class NaiveBayesClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-
+  //在训练和预测中,任务的大小应该是小的
   test("task size should be small in both training and prediction") {
     val m = 10
     val n = 200000
@@ -352,7 +363,10 @@ class NaiveBayesClusterSuite extends SparkFunSuite with LocalClusterSparkContext
       }
     }
     // If we serialize data directly in the task closure, the size of the serialized task
+    //如果我们将数据直接在任务结束,如果我们将数据直接在任务结束
     // would be greater than 1MB and hence Spark would throw an error.
+    //该系列任务的大小
+    
     val model = NaiveBayes.train(examples)
     val predictions = model.predict(examples.map(_.features))
   }

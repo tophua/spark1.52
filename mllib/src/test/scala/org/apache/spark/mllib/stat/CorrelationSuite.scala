@@ -32,7 +32,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
  */
 class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
-  // test input data
+  // test input data 测试输入数据
   val xData = Array(1.0, 0.0, -2.0)
   val yData = Array(4.0, 5.0, 3.0)
   val zeros = new Array[Double](3)
@@ -45,7 +45,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
    * pearson皮尔森相关性
    * spearman 斯皮漫相关性
    */
-  test("corr(x, y) pearson, 1 value in data") {
+  test("corr(x, y) pearson, 1 value in data") {//corr函数是求两个矩阵皮尔森相似度,在1值数据
     //一个数据值无法相关系数
     val x = sc.parallelize(Array(1.0))
     val y = sc.parallelize(Array(4.0))
@@ -56,7 +56,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
       Statistics.corr(x, y, "spearman")
     }
   }
-
+//corr函数是求两个矩阵皮尔森相似度,默认皮尔森相似度
   test("corr(x, y) default, pearson") {
     val x = sc.parallelize(xData)
     val y = sc.parallelize(yData)
@@ -75,6 +75,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     }
 
     // RDD of zero variance
+    //RDD零方差
     val z = sc.parallelize(zeros)
     assert(Statistics.corr(x, z).isNaN)
   }
@@ -100,11 +101,12 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     }
 
     // RDD of zero variance => zero variance in ranks
+    //RDD零方差=>零方差的行列
     val z = sc.parallelize(zeros)
     assert(Statistics.corr(x, z, "spearman").isNaN)
   }
 
-  test("corr(X) default, pearson") {
+  test("corr(X) default, pearson") {//corr函数是求两个矩阵皮尔森相似度,默认皮尔森相似度
     val X = sc.parallelize(data)
     val defaultMat = Statistics.corr(X)
     val pearsonMat = Statistics.corr(X, "pearson") //(皮尔森相关数)
@@ -119,7 +121,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     assert(matrixApproxEqual(pearsonMat.toBreeze, expected))
   }
 
-  test("corr(X) spearman") {
+  test("corr(X) spearman") {//corr函数是求两个矩阵皮尔森相似度,默认斯皮尔曼相似度
      /**
      *Vectors.dense(1.0, 0.0, 0.0, -2.0),
      *Vectors.dense(4.0, 5.0, 0.0, 3.0),
@@ -127,7 +129,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
      *Vectors.dense(9.0, 0.0, 0.0, 1.0)
      */
     val X = sc.parallelize(data)
-    val spearmanMat = Statistics.corr(X, "spearman")
+    val spearmanMat = Statistics.corr(X, "spearman")//默认斯皮尔曼相似度
     // scalastyle:off
     val expected = BDM(
       (1.0000000, 0.1054093, Double.NaN, 0.4000000),
@@ -138,14 +140,15 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     assert(matrixApproxEqual(spearmanMat.toBreeze, expected))
   }
 
-  test("method identification") {
+  test("method identification") {//方法识别
     val pearson = PearsonCorrelation //(皮尔森相关数)
     val spearman = SpearmanCorrelation
 
     assert(Correlations.getCorrelationFromName("pearson") === pearson) //(皮尔森相关数)
-    assert(Correlations.getCorrelationFromName("spearman") === spearman)
+    assert(Correlations.getCorrelationFromName("spearman") === spearman)//斯皮尔曼相似度
 
     // Should throw IllegalArgumentException
+    //应该抛出非法参数异常
     try {
       Correlations.getCorrelationFromName("kendall")
       assert(false)
@@ -153,7 +156,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
       case ie: IllegalArgumentException =>
     }
   }
-
+  //约等于
   def approxEqual(v1: Double, v2: Double, threshold: Double = 1e-6): Boolean = {
     if (v1.isNaN) {
       v2.isNaN
@@ -166,7 +169,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
       b
     }
   }
-
+  //矩阵近似相等
   def matrixApproxEqual(A: BM[Double], B: BM[Double], threshold: Double = 1e-6): Boolean = {
 
     for (i <- 0 until A.rows; j <- 0 until A.cols) {

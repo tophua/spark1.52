@@ -40,8 +40,9 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   /////////////////////////////////////////////////////////////////////////////
   // Tests examining individual elements of training
+  // 测试训练各个元素
   /////////////////////////////////////////////////////////////////////////////
-
+  //具有连续特征的二元分类:分裂和计算
   test("Binary classification with continuous features(连续特征): split and bin calculation") {
     /**
      * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
@@ -67,7 +68,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(splits(0).length === 99)
     assert(bins(0).length === 100)
   }
-
+  //具有二元（有序）分类特征的二元分类:分裂和计算
   test("Binary classification with binary (ordered) categorical features:" +
     " split and bin calculation") {
     //[(1.0,[0.0,1.0]), (0.0,[1.0, 0.0]), (1.0,[0.0,1.0]), (0.0,[1.0, 0.0])]
@@ -89,10 +90,11 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(splits.length === 2)
     assert(bins.length === 2)
     // no bins or splits pre-computed for ordered categorical features
+    //没有垃圾箱或分割预先计算的有序分类功能
     assert(splits(0).length === 0)
     assert(bins(0).length === 0)
   }
-
+  //采用三元二分类(有序)的分类特征:没有一个类别的样本
   test("Binary classification with 3-ary (ordered) categorical features," +
     " with no samples for one category") {
     val arr = DecisionTreeSuite.generateCategoricalDataPoints()
@@ -117,16 +119,17 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(splits.length === 2)
     assert(bins.length === 2)
     // no bins or splits pre-computed for ordered categorical features
+    //没有垃圾箱或分割预先计算的有序分类功能
     assert(splits(0).length === 0)
     assert(bins(0).length === 0)
   }
-
+  //从多类分类号提取类
   test("extract categories from a number for multiclass classification") {
     val l = DecisionTree.extractMultiClassCategories(13, 10)
     assert(l.length === 3)
     assert(List(3.0, 2.0, 0.0).toSeq === l.toSeq)
   }
-
+  //查找拆分连续特征
   test("find splits for a continuous feature") {
     // find splits for normal case
     {
@@ -141,11 +144,14 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(fakeMetadata.numSplits(0) === 5)
       assert(fakeMetadata.numBins(0) === 6)
       // check returned splits are distinct
+      //检查返回的拆分是不同的
       assert(splits.distinct.length === splits.length)
     }
 
     // find splits should not return identical splits
+    //查找拆分不应该返回相同的拆分
     // when there are not enough split candidates, reduce the number of splits in metadata
+    //当没有足够的分割候选时，减少元数据中的分裂次数
     {
       val fakeMetadata = new DecisionTreeMetadata(1, 0, 0, 0,
         Map(), Set(),
@@ -158,10 +164,12 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(fakeMetadata.numSplits(0) === 3)
       assert(fakeMetadata.numBins(0) === 4)
       // check returned splits are distinct
+      //检查返回不同拆分
       assert(splits.distinct.length === splits.length)
     }
 
     // find splits when most samples close to the minimum
+    //当大多数样本接近最小值时,发现分裂
     {
       val fakeMetadata = new DecisionTreeMetadata(1, 0, 0, 0,
         Map(), Set(),
@@ -178,6 +186,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // find splits when most samples close to the maximum
+    //当大多数样本接近最大值时发现分裂
     {
       val fakeMetadata = new DecisionTreeMetadata(1, 0, 0, 0,
         Map(), Set(),
@@ -192,7 +201,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(splits(0) === 1.0)
     }
   }
-
+  //无序多分类的分类特征:分裂和计算
   test("Multiclass classification with unordered(无序) categorical features:" +
       " split and bin calculations") {
     val arr = DecisionTreeSuite.generateCategoricalDataPoints()
@@ -270,7 +279,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(splits(1)(2).categories.contains(1.0))
 
   }
-
+  //有序分类特征的多类分类:分仓计算
   test("Multiclass classification with ordered categorical features: split and bin calculations") {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures()
     assert(arr.length === 3000)
@@ -282,6 +291,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       numClasses = 100,
       maxBins = 100,
       categoricalFeaturesInfo = Map(0 -> 10, 1-> 10))
+    //因此,分类的功能将被排序
     // 2^(10-1) - 1 > 100, so categorical features will be ordered
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -291,11 +301,12 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(splits.length === 2)
     assert(bins.length === 2)
     // no bins or splits pre-computed for ordered categorical features
+    //没有垃圾箱或分割预先计算的有序分类功能
     assert(splits(0).length === 0)
     assert(bins(0).length === 0)
   }
-
-  test("Avoid(无效) aggregation on the last level") {
+  //避免在最后一级聚集
+  test("Avoid aggregation on the last level") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 1.0, 1.0)),
@@ -327,9 +338,11 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       nodesForGroup, treeToNodeToIndexInfo, splits, bins, nodeQueue)
 
     // don't enqueue leaf nodes into node queue
+    //不要将叶子节点到节点的队列
     assert(nodeQueue.isEmpty)
 
     // set impurity and predict for topNode
+    //设置不纯度和预测topnode
     assert(topNode.predict.predict !== Double.MinValue)
     assert(topNode.impurity !== -1.0)
 
@@ -339,7 +352,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(topNode.leftNode.get.impurity === 0.0)//不纯度
     assert(topNode.rightNode.get.impurity === 0.0)//不纯度
   }
-
+  //避免聚合,如果不纯度是0
   test("Avoid aggregation if impurity is 0.0") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0)),
@@ -370,19 +383,22 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       nodesForGroup, treeToNodeToIndexInfo, splits, bins, nodeQueue)
 
     // don't enqueue a node into node queue if its impurity is 0.0
+    //不要将一个节点到节点的队列，如果不纯度0
     assert(nodeQueue.isEmpty)
 
     // set impurity and predict for topNode
+    //设置不纯度和预测顶节点
     assert(topNode.predict.predict !== Double.MinValue)
     assert(topNode.impurity !== -1.0)
 
     // set impurity and predict for child nodes
+    //设置不纯度和预测子节点
     assert(topNode.leftNode.get.predict.predict === 0.0)
     assert(topNode.rightNode.get.predict.predict === 1.0)
     assert(topNode.leftNode.get.impurity === 0.0)
     assert(topNode.rightNode.get.impurity === 0.0)
   }
-
+  //第二级节点构建与无组
   test("Second level node building with vs. without groups") {
     val arr = DecisionTreeSuite.generateOrderedLabeledPoints()
     assert(arr.length === 1000)
@@ -396,6 +412,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(bins(0).length === 100)
 
     // Train a 1-node model
+    //训练一个一级节点
     //熵：代表集合的无序程度
     val strategyOneNode = new Strategy(Classification, Entropy, maxDepth = 1,
       numClasses = 2, maxBins = 100)
@@ -409,6 +426,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val baggedInput = BaggedPoint.convertToBaggedRDD(treeInput, 1.0, 1, false)
 
     // Single group second level tree construction.
+    //单分组二级树结构
     val nodesForGroup = Map((0, Array(rootNode1.leftNode.get, rootNode1.rightNode.get)))
     val treeToNodeToIndexInfo = Map((0, Map(
       (rootNode1.leftNode.get.id, new RandomForest.NodeIndexInfo(0, None)),
@@ -421,6 +439,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     children1(1) = rootNode1.rightNode.get
 
     // Train one second-level node at a time.
+    //一次训练一个二级节点
     val nodesForGroupA = Map((0, Array(rootNode2.leftNode.get)))
     val treeToNodeToIndexInfoA = Map((0, Map(
       (rootNode2.leftNode.get.id, new RandomForest.NodeIndexInfo(0, None)))))
@@ -439,6 +458,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Verify whether the splits obtained using single group and multiple group level
     // construction strategies are the same.
+    //验证是否相同是否使用单个组和多组级别的构建策略
     for (i <- 0 until 2) {
       assert(children1(i).stats.nonEmpty && children1(i).stats.get.gain > 0)
       assert(children2(i).stats.nonEmpty && children2(i).stats.get.gain > 0)
@@ -455,9 +475,9 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  // Tests calling train()
+  // Tests calling train() 测试调用训练
   /////////////////////////////////////////////////////////////////////////////
-
+  //具有有序分类特征的二元分类方法
   test("Binary classification stump with ordered categorical features") {
     val arr = DecisionTreeSuite.generateCategoricalDataPoints()
     assert(arr.length === 1000)
@@ -477,6 +497,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(splits.length === 2)
     assert(bins.length === 2)
     // no bins or splits pre-computed for ordered categorical features
+    //没有垃圾箱或分割预先计算的有序分类功能
     assert(splits(0).length === 0)
     assert(bins(0).length === 0)
 
@@ -493,8 +514,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(stats.gain > 0)
     assert(rootNode.predict.predict === 1)
     assert(stats.impurity > 0.2)
-  }
-
+  }  
+  //三元回归树桩(有序)的类别特征
   test("Regression stump with 3-ary (ordered) categorical features") {
     val arr = DecisionTreeSuite.generateCategoricalDataPoints()
     assert(arr.length === 1000)
@@ -523,7 +544,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(rootNode.predict.predict === 0.6)
     assert(stats.impurity > 0.2)
   }
-
+  //具有二元(有序)分类特征的回归分析
   test("Regression stump with binary (ordered) categorical features") {
     val arr = DecisionTreeSuite.generateCategoricalDataPoints()
     assert(arr.length === 1000)
@@ -543,7 +564,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.numNodes === 3)
     assert(model.depth === 1)
   }
-
+  //Gini的固定标签0的二元分类
   test("Binary classification stump with fixed label 0 for Gini") {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel0()
     assert(arr.length === 1000)
@@ -567,7 +588,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(stats.leftImpurity === 0)
     assert(stats.rightImpurity === 0)
   }
-
+  //Gini的固定标签1的二元分类
   test("Binary classification stump with fixed label 1 for Gini") {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
     assert(arr.length === 1000)
@@ -592,7 +613,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(stats.rightImpurity === 0)
     assert(rootNode.predict.predict === 1)
   }
-
+  //具有固定标签0的熵的二元分类
   test("Binary classification stump with fixed label 0 for Entropy") {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel0()
     assert(arr.length === 1000)
@@ -617,7 +638,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(stats.rightImpurity === 0)
     assert(rootNode.predict.predict === 0)
   }
-
+  //具有固定标签1的熵的二元分类
   test("Binary classification stump with fixed label 1 for Entropy") {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
     assert(arr.length === 1000)
@@ -642,7 +663,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(stats.rightImpurity === 0)
     assert(rootNode.predict.predict === 1)
   }
-
+  //多类分类的树和三元(无序)的分类特征
   test("Multiclass classification stump with 3-ary (unordered) categorical features") {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlass()
     val rdd = sc.parallelize(arr)
@@ -663,7 +684,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(split.categories.contains(1))
     assert(split.featureType === Categorical)
   }
-
+  //有1个连续的特征分类,检查off-by-1误差
   test("Binary classification stump with 1 continuous feature, to check off-by-1 error") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.dense(0.0)),
@@ -679,7 +700,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.numNodes === 3)
     assert(model.depth === 1)
   }
-
+  //具有2个连续特征的二叉分类
   test("Binary classification stump with 2 continuous features") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
@@ -708,9 +729,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.depth === 1)
     assert(model.topNode.split.get.feature === 1)
   }
-
+  //多类分类的树桩和无序的分类特征
   test("Multiclass classification stump with unordered categorical features," +
     " with just enough bins") {
+    //足够的垃圾箱允许无序的特征
     val maxBins = 2 * (math.pow(2, 3 - 1).toInt - 1) // just enough bins to allow unordered features
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlass()
     val rdd = sc.parallelize(arr)
@@ -738,8 +760,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val gain = rootNode.stats.get
     assert(gain.leftImpurity === 0)
     assert(gain.rightImpurity === 0)
-  }
-
+  }  
+  //多类分类的连续性的特征
   test("Multiclass classification stump with continuous features") {
     val arr = DecisionTreeSuite.generateContinuousDataPointsForMulticlass()
     val rdd = sc.parallelize(arr)
@@ -760,7 +782,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(split.threshold < 2020)
 
   }
-
+  //多类分类连续+无序分类特征
   test("Multiclass classification stump with continuous + unordered categorical features") {
     val arr = DecisionTreeSuite.generateContinuousDataPointsForMulticlass()
     val rdd = sc.parallelize(arr)
@@ -781,7 +803,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(split.threshold > 1980)
     assert(split.threshold < 2020)
   }
-
+  //多类分类和10进制(有序)的分类特征
   test("Multiclass classification stump with 10-ary (ordered) categorical features") {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures()
     val rdd = sc.parallelize(arr)
@@ -800,8 +822,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(split.categories.length === 1)
     assert(split.categories.contains(1.0))
     assert(split.featureType === Categorical)
-  }
-
+  }  
+  //多类分类树与10(有序)的分类特征:只要有足够的垃圾箱
   test("Multiclass classification tree with 10-ary (ordered) categorical features," +
       " with just enough bins") {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures()
@@ -814,7 +836,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = DecisionTree.train(rdd, strategy)
     DecisionTreeSuite.validateClassifier(model, arr, 0.6)
   }
-
+  //分裂必须满足每个节点要求的最小实例
   test("split must satisfy min instances per node requirements") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
@@ -833,15 +855,18 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // test when no valid split can be found
+    //测试时,没有有效的分裂可以被发现
     val rootNode = model.topNode
 
     val gain = rootNode.stats.get
     assert(gain == InformationGainStats.invalidInformationGainStats)
   }
-
+  //不要选择不满足每个节点要求的最小实例的分割
   test("do not choose split that does not satisfy min instance per node requirements") {
     // if a split does not satisfy min instances per node requirements,
+    //如果一个分裂不满足每个节点的要求的最小实例
     // this split is invalid, even though the information gain of split is large.
+    //这种分裂是无效的,即使分裂的信息增益是大的
     val arr = Array(
       LabeledPoint(0.0, Vectors.dense(0.0, 1.0)),
       LabeledPoint(1.0, Vectors.dense(1.0, 1.0)),
@@ -871,7 +896,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(split.feature == 1)
     assert(gain != InformationGainStats.invalidInformationGainStats)
   }
-
+  //分隔必须满足最小信息增益的要求
   test("split must satisfy min info gain requirements") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
@@ -891,6 +916,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // test when no valid split can be found
+    //测试时,没有有效的分裂可以被发现
     val rootNode = model.topNode
 
     val gain = rootNode.stats.get
@@ -898,16 +924,16 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  // Tests of model save/load
+  // Tests of model save/load 模型保存/加载测试
   /////////////////////////////////////////////////////////////////////////////
 
-  test("Node.subtreeIterator") {
+  test("Node.subtreeIterator") {//子树迭代器
     val model = DecisionTreeSuite.createModel(Classification)
     val nodeIds = model.topNode.subtreeIterator.map(_.id).toArray.sorted
     assert(nodeIds === DecisionTreeSuite.createdModelNodeIds)
   }
 
-  test("model save/load") {
+  test("model save/load") {//模型保存/加载
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
 
@@ -1046,14 +1072,18 @@ object DecisionTreeSuite extends SparkFunSuite {
     arr
   }
 
-  /** Create a leaf node with the given node ID */
+  /** 
+   *  Create a leaf node with the given node ID 
+   *  用给定的节点标识创建一个叶节点
+   *  */
   private def createLeafNode(id: Int): Node = {
     Node(nodeIndex = id, new Predict(0.0, 1.0), impurity = 0.5, isLeaf = true)
   }
 
   /**
    * Create an internal node with the given node ID and feature type.
-   * Note: This does NOT set the child nodes.
+   * 创建一个给定节点标识和特征类型的内部节点
+   * Note: This does NOT set the child nodes.这不设置子节点
    */
   private def createInternalNode(id: Int, featureType: FeatureType): Node = {
     val node = Node(nodeIndex = id, new Predict(0.0, 1.0), impurity = 0.5, isLeaf = false)
@@ -1066,13 +1096,16 @@ object DecisionTreeSuite extends SparkFunSuite {
           categories = List(0.0, 1.0)))
     }
     // TODO: The information gain stats should be consistent with info in children: SPARK-7131
+    //信息增益统计应与子类的信息相一致
     node.stats = Some(new InformationGainStats(gain = 0.1, impurity = 0.2,
       leftImpurity = 0.3, rightImpurity = 0.4, new Predict(1.0, 0.4), new Predict(0.0, 0.6)))
     node
   }
 
   /**
-   * Create a tree model.  This is deterministic and contains a variety of node and feature types.
+   * Create a tree model.  创建树模型
+   * This is deterministic and contains a variety of node and feature types.
+   * 这是确定性的,包含了各种节点和特征类型
    * TODO: Update to be a correct tree (with matching probabilities, impurities, etc.): SPARK-7131
    */
   private[spark] def createModel(algo: Algo): DecisionTreeModel = {
@@ -1086,14 +1119,19 @@ object DecisionTreeSuite extends SparkFunSuite {
     new DecisionTreeModel(topNode, algo)
   }
 
-  /** Sorted Node IDs matching the model returned by [[createModel()]] */
+  /** 
+   *  Sorted Node IDs matching the model returned by [[createModel()]]
+   *  排序的节点标识匹配的模型返回 
+   *  */
   private val createdModelNodeIds = Array(1, 2, 3, 6, 7)
 
   /**
    * Check if the two trees are exactly the same.
+   * 检查两棵树是否完全相同
    * Note: I hesitate to override Node.equals since it could cause problems if users
    *       make mistakes such as creating loops of Nodes.
    * If the trees are not equal, this prints the two trees and throws an exception.
+   * 如果树不相等,则打印两个树并抛出一个异常
    */
   private[mllib] def checkEqual(a: DecisionTreeModel, b: DecisionTreeModel): Unit = {
     try {
@@ -1109,6 +1147,7 @@ object DecisionTreeSuite extends SparkFunSuite {
 
   /**
    * Return true iff the two nodes and their descendents are exactly the same.
+   * 返回true,当两节点和他们的后代是完全相同的
    * Note: I hesitate to override Node.equals since it could cause problems if users
    *       make mistakes such as creating loops of Nodes.
    */
@@ -1120,6 +1159,7 @@ object DecisionTreeSuite extends SparkFunSuite {
     assert(a.split === b.split)
     (a.stats, b.stats) match {
       // TODO: Check other fields besides the infomation gain.
+      //检查除了信息增益等领域
       case (Some(aStats), Some(bStats)) => assert(aStats.gain === bStats.gain)
       case (None, None) =>
       case _ => throw new AssertionError(

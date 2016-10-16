@@ -44,6 +44,7 @@ object LogisticRegressionSuite {
   }
 
   // Generate input of the form Y = logistic(offset + scale*X)
+  //来自产生输入
   def generateLogisticInput(
       offset: Double,
       scale: Double,
@@ -121,10 +122,12 @@ object LogisticRegressionSuite {
         if (addIntercept) margins(i + 1) += weights((i + 1) * xWithInterceptsDim - 1)
       }
       // Preventing the overflow when we compute the probability
+      //当我们计算概率时,防止溢出
       val maxMargin = margins.max
       if (maxMargin > 0) for (i <- 0 until nClasses) margins(i) -= maxMargin
 
       // Computing the probabilities for each class from the margins.
+      //从利润率计算每个类的概率
       val norm = {
         var temp = 0.0
         for (i <- 0 until nClasses) {
@@ -154,11 +157,17 @@ object LogisticRegressionSuite {
     testData
   }
 
-  /** Binary labels, 3 features */
+  /** 
+   *  Binary labels, 3 features
+   *  二进制标签，3个特征 
+   *  */
   private val binaryModel = new LogisticRegressionModel(
     weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5, numFeatures = 3, numClasses = 2)
 
-  /** 3 classes, 2 features */
+  /** 
+   *  3 classes, 2 features
+   *  3分类，2个特征 
+   *  */
   private val multiclassModel = new LogisticRegressionModel(
     weights = Vectors.dense(0.1, 0.2, 0.3, 0.4), intercept = 1.0, numFeatures = 2, numClasses = 3)
 
@@ -199,18 +208,22 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     lr.optimizer.setStepSize(10.0).setRegParam(0.0).setNumIterations(20).setConvergenceTol(0.0005)
     val model = lr.run(testRDD)
     // Test the weights
+    //测试的权重
     assert(model.weights(0) ~== B relTol 0.02)
     assert(model.intercept ~== A relTol 0.02)
     val validationData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 17)
     val validationRDD = sc.parallelize(validationData, 2)
     // Test prediction on RDD.
+    //测试RDD预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
     // Test prediction on Array.
+    //测试数组预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
 
   // Test if we can correctly learn A, B where Y = logistic(A + B*X)
-  test("logistic regression with LBFGS") {
+  //测试如果我们能正确学习A，B
+  test("logistic regression with LBFGS") {//逻辑回归
     val nPoints = 10000
     val A = 2.0
     val B = -1.5
@@ -225,18 +238,21 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val model = lr.run(testRDD)
 
     // Test the weights
+    //测试权重
     assert(model.weights(0) ~== B relTol 0.02)
     assert(model.intercept ~== A relTol 0.02)
 
     val validationData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 17)
     val validationRDD = sc.parallelize(validationData, 2)
     // Test prediction on RDD.
+    //测试RDD预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Test prediction on Array.
+    //测试数组预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
-
+   //Logistic回归梯度下降初始化权重
   test("logistic regression with initial weights with SGD") {
     val nPoints = 10000
     val A = 2.0
@@ -251,6 +267,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
     //逻辑回归梯度下降
     // Use half as many iterations as the previous test.
+    //使用一半的多次迭代作为以前的测试
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer
       .setStepSize(10.0)
@@ -260,6 +277,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val model = lr.run(testRDD, initialWeights)
 
     // Test the weights
+    //测试权重
     assert(model.weights(0) ~== B relTol 0.02)
     assert(model.intercept ~== A relTol 0.02)
 

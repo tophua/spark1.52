@@ -37,16 +37,18 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
 
   import LDASuite._
 
-  test("LocalLDAModel") {
+  test("LocalLDAModel") {//当地的LDA模型
     val model = new LocalLDAModel(tinyTopics,
       Vectors.dense(Array.fill(tinyTopics.numRows)(1.0 / tinyTopics.numRows)), 1D, 100D)
 
     // Check: basic parameters
+    //检查:基本参数
     assert(model.k === tinyK)
     assert(model.vocabSize === tinyVocabSize)
     assert(model.topicsMatrix === tinyTopics)
 
     // Check: describeTopics() with all terms
+    //检查:所有项describetopics()
     val fullTopicSummary = model.describeTopics()
     assert(fullTopicSummary.length === tinyK)
     fullTopicSummary.zip(tinyTopicDescription).foreach {
@@ -55,7 +57,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(algTermWeights === termWeights)
     }
 
-    // Check: describeTopics() with some terms
+    // Check: describeTopics() with some terms 一些术语
     val smallNumTerms = 3
     val smallTopicSummary = model.describeTopics(maxTermsPerTopic = smallNumTerms)
     smallTopicSummary.zip(tinyTopicDescription).foreach {
@@ -64,13 +66,13 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(algTermWeights === termWeights.slice(0, smallNumTerms))
     }
   }
-
+  //运行的默认优化分布式LDA模型
   test("running and DistributedLDAModel with default Optimizer (EM)") {
     val k = 3
     val topicSmoothing = 1.2
     val termSmoothing = 1.2
 
-    // Train a model
+    // Train a model 训练模型
     val lda = new LDA()
     lda.setK(k)
       .setOptimizer(new EMLDAOptimizer)
@@ -82,7 +84,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val model: DistributedLDAModel = lda.run(corpus).asInstanceOf[DistributedLDAModel]
 
-    // Check: basic parameters
+    // Check: basic parameters 基本参数
     val localModel = model.toLocal
     assert(model.k === k)
     assert(localModel.k === k)
@@ -90,7 +92,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(localModel.vocabSize === tinyVocabSize)
     assert(model.topicsMatrix === localModel.topicsMatrix)
 
-    // Check: topic summaries
+    // Check: topic summaries 主题摘要
     val topicSummary = model.describeTopics().map { case (terms, termWeights) =>
       Vectors.sparse(tinyVocabSize, terms, termWeights)
     }.sortBy(_.toString)
@@ -101,16 +103,19 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(topics ~== topicsLocal absTol 0.01)
     }
 
-    // Check: per-doc topic distributions
+    // Check: per-doc topic distributions 每个文档主题分布
     val topicDistributions = model.topicDistributions.collect()
 
-    //  Ensure all documents are covered.
+    //  Ensure all documents are covered. 确保所有的文件都被覆盖
     // SPARK-5562. since the topicDistribution returns the distribution of the non empty docs
+    //由于主题分布返回非空文档分布主题,
     // over topics. Compare it against nonEmptyTinyCorpus instead of tinyCorpus
+    //
     val nonEmptyTinyCorpus = getNonEmptyDoc(tinyCorpus)
     assert(topicDistributions.length === nonEmptyTinyCorpus.length)
     assert(nonEmptyTinyCorpus.map(_._1).toSet === topicDistributions.map(_._1).toSet)
     //  Ensure we have proper distributions
+    //确保我们有适当的分布
     topicDistributions.foreach { case (docId, topicDistribution) =>
       assert(topicDistribution.size === tinyK)
       assert(topicDistribution.toArray.sum ~== 1.0 absTol 1e-5)
@@ -127,12 +132,13 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(bdvTopicDist(top2Indices).toArray === weights)
     }
 
-    // Check: log probabilities
+    // Check: log probabilities 检查:对数概率
     assert(model.logLikelihood < 0.0)
     assert(model.logPrior < 0.0)
 
-    // Check: topDocumentsPerTopic
+    // Check: topDocumentsPerTopic 检查:每个主题的顶级文件
     // Compare it with top documents per topic derived from topicDistributions
+    //与来自主题分布的每个主题的顶级文档进行比较
     val topDocsByTopicDistributions = { n: Int =>
       Range(0, k).map { topic =>
         val (doc, docWeights) = topicDistributions.sortBy(-_._2(topic)).take(n).unzip
@@ -140,21 +146,22 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
       }.toArray
     }
 
-    // Top 3 documents per topic
+    // Top 3 documents per topic 每个主题的前3个文件
     model.topDocumentsPerTopic(3).zip(topDocsByTopicDistributions(3)).foreach { case (t1, t2) =>
       assert(t1._1 === t2._1)
       assert(t1._2 === t2._2)
     }
 
-    // All documents per topic
+    // All documents per topic 每个主题的所有文档
     val q = tinyCorpus.length
     model.topDocumentsPerTopic(q).zip(topDocsByTopicDistributions(q)).foreach { case (t1, t2) =>
       assert(t1._1 === t2._1)
       assert(t1._2 === t2._2)
     }
 
-    // Check: topTopicAssignments
+    // Check: topTopicAssignments 检查:顶级主题分配
     // Make sure it assigns a topic to each term appearing in each doc.
+    //确保它分配一个主题,每一个术语出现在每一个文件。
     val topTopicAssignments: Map[Long, (Array[Int], Array[Int])] =
       model.topicAssignments.collect().map(x => x._1 -> (x._2, x._3)).toMap
     assert(topTopicAssignments.keys.max < tinyCorpus.length)
@@ -162,8 +169,8 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
       if (topTopicAssignments.contains(docID)) {
         val (inds, vals) = topTopicAssignments(docID)
         assert(inds.length === doc.numNonzeros)
-        // For "term" in actual doc,
-        // check that it has a topic assigned.
+        // For "term" in actual doc, 在实际文档中的“术语”，
+        // check that it has a topic assigned. 检查它是否有一个指定的主题。
         doc.foreachActive((term, wcnt) => assert(wcnt === 0 || inds.contains(term)))
       } else {
         assert(doc.numNonzeros === 0)
@@ -171,7 +178,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("vertex indexing") {
+  test("vertex indexing") {//顶点索引
     // Check vertex 最高点ID indexing and conversions.
     val docIds = Array(0, 1, 2)
     val docVertexIds = docIds
@@ -183,14 +190,14 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(termVertexIds.forall(i => LDA.isTermVertex((i.toLong, 0))))
   }
 
-  test("setter alias") {
+  test("setter alias") {//设置别名
     val lda = new LDA().setAlpha(2.0).setBeta(3.0)
     assert(lda.getAsymmetricAlpha.toArray.forall(_ === 2.0))
     assert(lda.getAsymmetricDocConcentration.toArray.forall(_ === 2.0))
     assert(lda.getBeta === 3.0)
     assert(lda.getTopicConcentration === 3.0)
   }
-
+  //初始化与α长度！= K或1失
   test("initializing with alpha length != k or 1 fails") {
     intercept[IllegalArgumentException] {
       val lda = new LDA().setK(2).setAlpha(Vectors.dense(1, 2, 3, 4))
@@ -198,7 +205,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
       lda.run(corpus)
     }
   }
-
+  //在α＜0元素初始化失败
   test("initializing with elements in alpha < 0 fails") {
     intercept[IllegalArgumentException] {
       val lda = new LDA().setK(4).setAlpha(Vectors.dense(-1, 2, 3, 4))
@@ -207,7 +214,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("OnlineLDAOptimizer initialization") {
+  test("OnlineLDAOptimizer initialization") {//在线LDA算法的初始化
     val lda = new LDA().setK(2)
     val corpus = sc.parallelize(tinyCorpus, 2)
     val op = new OnlineLDAOptimizer().initialize(corpus, lda)
@@ -219,34 +226,40 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(op.getTau0 === 567)
   }
 
-  test("OnlineLDAOptimizer one iteration") {
+  test("OnlineLDAOptimizer one iteration") {//在线LDA算法的迭代
     // run OnlineLDAOptimizer for 1 iteration to verify it's consistency with Blei-lab,
+    //运行1迭代验证它的一致性和Blei lab在线LDA算法
     // [[https://github.com/Blei-Lab/onlineldavb]]
     val k = 2
     val vocabSize = 6
 
     def docs: Array[(Long, Vector)] = Array(
+      //苹果，橘子，香蕉 
       Vectors.sparse(vocabSize, Array(0, 1, 2), Array(1, 1, 1)), // apple, orange, banana
-      Vectors.sparse(vocabSize, Array(3, 4, 5), Array(1, 1, 1)) // tiger, cat, dog
+      Vectors.sparse(vocabSize, Array(3, 4, 5), Array(1, 1, 1)) // tiger, cat, dog 老虎，猫，狗
     ).zipWithIndex.map { case (wordCounts, docId) => (docId.toLong, wordCounts) }
     val corpus = sc.parallelize(docs, 2)
 
     // Set GammaShape large to avoid the stochastic impact.
+    //设置伽玛形状大，以避免随机影响。
     val op = new OnlineLDAOptimizer().setTau0(1024).setKappa(0.51).setGammaShape(1e40)
       .setMiniBatchFraction(1)
     val lda = new LDA().setK(k).setMaxIterations(1).setOptimizer(op).setSeed(12345)
 
     val state = op.initialize(corpus, lda)
     // override lambda to simulate an intermediate state
+    //重写λ来模拟一个中间状
     //    [[ 1.1  1.2  1.3  0.9  0.8  0.7]
     //     [ 0.9  0.8  0.7  1.1  1.2  1.3]]
     op.setLambda(new BDM[Double](k, vocabSize,
       Array(1.1, 0.9, 1.2, 0.8, 1.3, 0.7, 0.9, 1.1, 0.8, 1.2, 0.7, 1.3)))
 
     // run for one iteration
+      //运行一次迭代
     state.submitMiniBatch(corpus)
 
     // verify the result, Note this generate the identical result as
+    //验证结果，请注意，这将产生相同的结果
     // [[https://github.com/Blei-Lab/onlineldavb]]
     val topic1: Vector = Vectors.fromBreeze(op.getLambda(0, ::).t)
     val topic2: Vector = Vectors.fromBreeze(op.getLambda(1, ::).t)
@@ -256,7 +269,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(topic2 ~== expectedTopic2 absTol 0.01)
   }
 
-  test("OnlineLDAOptimizer with toy data") {
+  test("OnlineLDAOptimizer with toy data") {//数据在线LDA算法
     val docs = sc.parallelize(toyData)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(1e10)
@@ -274,13 +287,14 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // check distribution for each topic, typical distribution is (0.3, 0.3, 0.3, 0.02, 0.02, 0.02)
+    //检查每个主题的分布,典型的分布
     topics.foreach { topic =>
       val smalls = topic.filter(t => t._2 < 0.1).map(_._2)
       assert(smalls.length == 3 && smalls.sum < 0.2)
     }
   }
 
-  test("LocalLDAModel logLikelihood") {
+  test("LocalLDAModel logLikelihood") {//对于本地的LDA模型
     val ldaModel: LocalLDAModel = toyModel
 
     val docsSingleWord = sc.parallelize(Array(Vectors.sparse(6, Array(0), Array(1)))
@@ -291,6 +305,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
       .map { case (wordCounts, docId) => (docId.toLong, wordCounts) })
 
     /* Verify results using gensim:
+     * 验证结果使用Gensim：
        import numpy as np
        from gensim import models
        corpus = [
@@ -316,7 +331,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(ldaModel.logLikelihood(docsRepeatedWord) ~== -31.441  relTol 1E-3D)
   }
 
-  test("LocalLDAModel logPerplexity") {
+  test("LocalLDAModel logPerplexity") {//当地的LDA模型的日志的困惑
     val docs = sc.parallelize(toyData)
     val ldaModel: LocalLDAModel = toyModel
 
@@ -342,7 +357,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(ldaModel.logPerplexity(docs) ~== 3.690D relTol 1E-3D)
   }
 
-  test("LocalLDAModel predict") {
+  test("LocalLDAModel predict") {//预测 LocalLDAModel
     val docs = sc.parallelize(toyData)
     val ldaModel: LocalLDAModel = toyModel
 
@@ -366,13 +381,14 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
        > [(1, 0.99504950495049516)], [(1, 0.99504950495049516)]]
      */
 
-    val expectedPredictions = List(
+    val expectedPredictions = List(//预期的预测
       (0, 0.99504), (0, 0.99504),
       (0, 0.99504), (1, 0.99504),
       (1, 0.99504), (1, 0.99504))
 
     val actualPredictions = ldaModel.topicDistributions(docs).map { case (id, topics) =>
         // convert results to expectedPredictions format, which only has highest probability topic
+      //转换的结果expectedpredictions格式,只有概率最高的话题
         val topicsBz = topics.toBreeze.toDenseVector
         (id, (argmax(topicsBz), max(topicsBz)))
       }.sortByKey()
@@ -384,7 +400,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("OnlineLDAOptimizer with asymmetric prior") {
+  test("OnlineLDAOptimizer with asymmetric prior") {//不对称前在线LDA算法
     val docs = sc.parallelize(toyData)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(1e10)
@@ -425,7 +441,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("OnlineLDAOptimizer alpha hyperparameter optimization") {
+  test("OnlineLDAOptimizer alpha hyperparameter optimization") {//在线LDA算法α超参数优
     val k = 2
     val docs = sc.parallelize(toyData)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
@@ -459,7 +475,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(ldaModel.docConcentration ~== Vectors.dense(0.42582646, 0.43511073) absTol 0.05)
   }
 
-  test("model save/load") {
+  test("model save/load") {//模型保存/加载
     // Test for LocalLDAModel.
     val localModel = new LocalLDAModel(tinyTopics,
       Vectors.dense(Array.fill(tinyTopics.numRows)(0.01)), 0.5D, 10D)
@@ -518,7 +534,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("EMLDAOptimizer with empty docs") {
+  test("EMLDAOptimizer with empty docs") {//EM LDA优化空文档
     val vocabSize = 6
     val emptyDocsArray = Array.fill(6)(Vectors.sparse(vocabSize, Array.empty, Array.empty))
     val emptyDocs = emptyDocsArray
@@ -538,7 +554,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.vocabSize === vocabSize)
   }
 
-  test("OnlineLDAOptimizer with empty docs") {
+  test("OnlineLDAOptimizer with empty docs") {//
     val vocabSize = 6
     val emptyDocsArray = Array.fill(6)(Vectors.sparse(vocabSize, Array.empty, Array.empty))
     val emptyDocs = emptyDocsArray
@@ -600,7 +616,10 @@ private[clustering] object LDASuite {
     Vectors.sparse(6, Array(4, 5), Array(1, 1))
   ).zipWithIndex.map { case (wordCounts, docId) => (docId.toLong, wordCounts) }
 
-  /** Used in the Java Test Suite */
+  /** 
+   *  Used in the Java Test Suite
+   *  用于java测试套件 
+   *  */
   def javaToyData: JArrayList[(java.lang.Long, Vector)] = {
     val javaData = new JArrayList[(java.lang.Long, Vector)]
     var i = 0

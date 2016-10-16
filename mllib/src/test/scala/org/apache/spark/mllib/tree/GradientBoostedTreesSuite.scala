@@ -34,7 +34,7 @@ import org.apache.spark.util.Utils
  */
 class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
-  test("Regression with continuous features: SquaredError") {
+  test("Regression with continuous features: SquaredError") {//连续特征的回归:平方误差
     GradientBoostedTreesSuite.testCombinations.foreach {
       case (numIterations, learningRate, subsamplingRate) =>
         val rdd = sc.parallelize(GradientBoostedTreesSuite.data, 2)
@@ -59,11 +59,11 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
         val remappedInput = rdd.map(x => new LabeledPoint((x.label * 2) - 1, x.features))
         val dt = DecisionTree.train(remappedInput, treeStrategy)
 
-        // Make sure trees are the same.
+        // Make sure trees are the same.确保树是一样的
         assert(gbt.trees.head.toString == dt.toString)
     }
   }
-
+  //具有连续特征的回归:绝对误差
   test("Regression with continuous features: Absolute Error") {
     GradientBoostedTreesSuite.testCombinations.foreach {
       case (numIterations, learningRate, subsamplingRate) =>
@@ -89,11 +89,11 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
         val remappedInput = rdd.map(x => new LabeledPoint((x.label * 2) - 1, x.features))
         val dt = DecisionTree.train(remappedInput, treeStrategy)
 
-        // Make sure trees are the same.
+        // Make sure trees are the same.确保树是一样的
         assert(gbt.trees.head.toString == dt.toString)
     }
   }
-
+  //具有连续特征的二元分类:日志丢失
   test("Binary classification with continuous features: Log Loss") {
     GradientBoostedTreesSuite.testCombinations.foreach {
       case (numIterations, learningRate, subsamplingRate) =>
@@ -127,14 +127,14 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
         assert(gbt.trees.head.toString == dt.toString)
     }
   }
-
+  //提升策略的默认参数应识别分类
   test("SPARK-5496: BoostingStrategy.defaultParams should recognize Classification") {
     for (algo <- Seq("classification", "Classification", "regression", "Regression")) {
       BoostingStrategy.defaultParams(algo)
     }
   }
 
-  test("model save/load") {
+  test("model save/load") {//模型保存/加载
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
 
@@ -145,6 +145,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
       val model = new GradientBoostedTreesModel(algo, trees, treeWeights)
 
       // Save model, load it back, and compare.
+      //保存模型,加载它回来,并比较
       try {
         model.save(sc, path)
         val sameModel = GradientBoostedTreesModel.load(sc, path)
@@ -161,6 +162,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
 
   test("runWithValidation stops early and performs better on a validation dataset") {
     // Set numIterations large enough so that it stops early.
+    //集数足够大时,提前停止迭代
     val numIterations = 20
     val trainRdd = sc.parallelize(GradientBoostedTreesSuite.trainData, 2)
     val validateRdd = sc.parallelize(GradientBoostedTreesSuite.validateData, 2)
@@ -178,6 +180,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
       assert(numTrees !== numIterations)
 
       // Test that it performs better on the validation dataset.
+      //测试,它在验证数据集上表现得更好
       val gbt = new GradientBoostedTrees(boostingStrategy).run(trainRdd)
       val (errorWithoutValidation, errorWithValidation) = {
         if (algo == Classification) {
@@ -190,6 +193,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
       assert(errorWithValidation <= errorWithoutValidation)
 
       // Test that results from evaluateEachIteration comply with runWithValidation.
+      //测试结果评估每个迭代符合运行的验证
       // Note that convergenceTol is set to 0.0
       val evaluationArray = gbt.evaluateEachIteration(validateRdd, loss)
       assert(evaluationArray.length === numIterations)
@@ -202,7 +206,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     }
   }
 
-  test("Checkpointing") {
+  test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     sc.setCheckpointDir(path)
@@ -226,6 +230,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
 private object GradientBoostedTreesSuite {
 
   // Combinations for estimators, learning rates and subsamplingRate
+  //组合估计,利率和subsamplingrate学习
   val testCombinations = Array((10, 1.0, 1.0), (10, 0.1, 1.0), (10, 0.5, 0.75), (10, 0.1, 0.75))
 
   val data = EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 10, 100)

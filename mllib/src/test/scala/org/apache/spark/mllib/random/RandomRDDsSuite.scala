@@ -105,7 +105,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
       new RandomRDD(sc, Int.MaxValue.toLong * 100L, 99, new UniformGenerator, 0L)
     }
   }
-
+   //不同的分布randomrdd
   test("randomRDD for different distributions") {
     val size = 100000L
     val numPartitions = 10

@@ -57,6 +57,7 @@ object ALSSuite {
     val rand = new Random(42)
 
     // Create a random matrix with uniform values from -1 to 1
+    //创建一个具有均匀值的随机矩阵，从-1到1
     def randomMatrix(m: Int, n: Int) = {
       if (negativeFactors) {
         new DoubleMatrix(m, n, Array.fill(m * n)(rand.nextDouble() * 2 - 1): _*)
@@ -70,6 +71,7 @@ object ALSSuite {
     val (trueRatings, truePrefs) = implicitPrefs match {
       case true =>
         // Generate raw values from [0,9], or if negativeWeights, from [-2,7]
+        //从[0，]生成原始值，或者如果negativeweights，从[ 2,7 ]
         val raw = new DoubleMatrix(users, products,
           Array.fill(users * products)(
             (if (negativeWeights) -2 else 0) + rand.nextInt(10).toDouble): _*)
@@ -91,19 +93,19 @@ object ALSSuite {
 
 class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("rank-1 matrices") {
+  test("rank-1 matrices") {//秩1矩阵
     testALS(50, 100, 1, 15, 0.7, 0.3)
   }
 
-  test("rank-1 matrices bulk") {
+  test("rank-1 matrices bulk") {//秩1矩阵体积
     testALS(50, 100, 1, 15, 0.7, 0.3, false, true)
   }
 
-  test("rank-2 matrices") {
+  test("rank-2 matrices") {//矩阵的秩
     testALS(100, 200, 2, 15, 0.7, 0.3)
   }
 
-  test("rank-2 matrices bulk") {
+  test("rank-2 matrices bulk") {//秩矩阵体积
     testALS(100, 200, 2, 15, 0.7, 0.3, false, true)
   }
 
@@ -143,7 +145,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(u11 != u2)
   }
 
-  test("Storage Level for RDDs in model") {
+  test("Storage Level for RDDs in model") {//存储级别RDD模型
     val ratings = sc.parallelize(ALSSuite.generateRatings(10, 20, 5, 0.5, false, false)._1, 2)
     var storageLevel = StorageLevel.MEMORY_ONLY
     var model = new ALS()
@@ -169,7 +171,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.userFeatures.getStorageLevel == storageLevel);
   }
 
-  test("negative ids") {
+  test("negative ids") {//负ID
     val data = ALSSuite.generateRatings(50, 50, 2, 0.7, false, false)
     val ratings = sc.parallelize(data._1.map { case Rating(u, p, r) =>
       Rating(u - 25, p - 25, r)
@@ -194,7 +196,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   /**
    * Test if we can correctly factorize R = U * P where U and P are of known rank.
-   *
+   * 如果我们能正确地分解试验
    * @param users number of users
    * @param products number of products
    * @param features number of features (rank of problem)

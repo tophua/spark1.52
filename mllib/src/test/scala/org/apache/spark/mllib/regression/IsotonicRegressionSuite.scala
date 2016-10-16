@@ -59,10 +59,10 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     runIsotonicRegression(labels, Array.fill(labels.size)(1d), isotonic)
   }
 
-  test("increasing isotonic regression") {
+  test("increasing isotonic regression") {//增加保序回归
     /*
      The following result could be re-produced with sklearn.
-
+		下面的结果可以重新产生sklearn
      > from sklearn.isotonic import IsotonicRegression
      > x = range(9)
      > y = [1, 2, 3, 1, 6, 17, 16, 17, 18]
@@ -82,7 +82,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.isotonic)
   }
 
-  test("model save/load") {
+  test("model save/load") {//模型保存/加载
     val boundaries = Array(0.0, 1.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
     val predictions = Array(1, 2, 2, 6, 16.5, 16.5, 17.0, 18.0)
     val model = new IsotonicRegressionModel(boundaries, predictions, true)
@@ -91,6 +91,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val path = tempDir.toURI.toString
 
     // Save model, load it back, and compare.
+    //保存模型,加载它回来,并比较
     try {
       model.save(sc, path)
       val sameModel = IsotonicRegressionModel.load(sc, path)
@@ -102,45 +103,45 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     }
   }
 
-  test("isotonic regression with size 0") {
+  test("isotonic regression with size 0") {//保序回归与尺寸0
     val model = runIsotonicRegression(Seq(), true)
 
     assert(model.predictions === Array())
   }
 
-  test("isotonic regression with size 1") {
+  test("isotonic regression with size 1") {//保序回归与尺寸1
     val model = runIsotonicRegression(Seq(1), true)
 
     assert(model.predictions === Array(1.0))
   }
-
+  //保序回归严格递增序列
   test("isotonic regression strictly increasing sequence(递增)") {
     val model = runIsotonicRegression(Seq(1, 2, 3, 4, 5), true)
 
     assert(model.predictions === Array(1, 2, 3, 4, 5))
   }
-
+  //保序回归严格渐减序列
   test("isotonic regression strictly decreasing sequence(渐减)") {
     val model = runIsotonicRegression(Seq(5, 4, 3, 2, 1), true)
 
     assert(model.boundaries === Array(0, 4))
     assert(model.predictions === Array(3, 3))
   }
-
+  //保序回归一元违反单调性
   test("isotonic regression with last element violating monotonicity") {
     val model = runIsotonicRegression(Seq(1, 2, 3, 4, 2), true)
 
     assert(model.boundaries === Array(0, 1, 2, 4))
     assert(model.predictions === Array(1, 2, 3, 3))
   }
-
+  //保序回归一元违反单调性
   test("isotonic regression with first element violating monotonicity") {
     val model = runIsotonicRegression(Seq(4, 2, 3, 4, 5), true)
 
     assert(model.boundaries === Array(0, 2, 3, 4))
     assert(model.predictions === Array(3, 3, 4, 5))
-  }
-
+  }  
+  //保序回归与负标签
   test("isotonic regression with negative labels") {
     val model = runIsotonicRegression(Seq(-1, -2, 0, 1, -1), true)
 
@@ -148,41 +149,41 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predictions === Array(-1.5, -1.5, 0, 0))
   }
 
-  test("isotonic regression with unordered input") {
+  test("isotonic regression with unordered input") {//保序回归无序输入
     val trainRDD = sc.parallelize(generateIsotonicInput(Seq(1, 2, 3, 4, 5)).reverse, 2).cache()
 
     val model = new IsotonicRegression().run(trainRDD)
     assert(model.predictions === Array(1, 2, 3, 4, 5))
   }
 
-  test("weighted isotonic regression") {
+  test("weighted isotonic regression") {//加权保序回归
     val model = runIsotonicRegression(Seq(1, 2, 3, 4, 2), Seq(1, 1, 1, 1, 2), true)
 
     assert(model.boundaries === Array(0, 1, 2, 4))
     assert(model.predictions === Array(1, 2, 2.75, 2.75))
   }
-
+  //重量低于1加权序回归
   test("weighted isotonic regression with weights lower than 1") {
     val model = runIsotonicRegression(Seq(1, 2, 3, 2, 1), Seq(1, 1, 1, 0.1, 0.1), true)
 
     assert(model.boundaries === Array(0, 1, 2, 4))
     assert(model.predictions.map(round) === Array(1, 2, 3.3/1.2, 3.3/1.2))
   }
-
+  //负权值的加权序回归
   test("weighted isotonic regression with negative weights") {
     val model = runIsotonicRegression(Seq(1, 2, 3, 2, 1), Seq(-1, 1, -3, 1, -5), true)
 
     assert(model.boundaries === Array(0.0, 1.0, 4.0))
     assert(model.predictions === Array(1.0, 10.0/6, 10.0/6))
   }
-
+  //零权重加权序回归
   test("weighted isotonic regression with zero weights") {
     val model = runIsotonicRegression(Seq[Double](1, 2, 3, 2, 1), Seq[Double](0, 0, 0, 1, 0), true)
 
     assert(model.boundaries === Array(0.0, 1.0, 4.0))
     assert(model.predictions === Array(1, 2, 2))
   }
-
+  //保序回归预测
   test("isotonic regression prediction") {
     val model = runIsotonicRegression(Seq(1, 2, 7, 1, 2), true)
 
@@ -193,8 +194,8 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predict(1) === 2)
     assert(model.predict(2) === 10d/3)
     assert(model.predict(9) === 10d/3)
-  }
-
+  }  
+  //重复功能的保序回归预测
   test("isotonic regression prediction with duplicate features") {
     val trainRDD = sc.parallelize(
       Seq[(Double, Double, Double)](
@@ -206,7 +207,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predict(2.5) === 4.5)
     assert(model.predict(4) === 6)
   }
-
+  //重复特征逆序回归预测
   test("antitonic regression prediction with duplicate features") {
     val trainRDD = sc.parallelize(
       Seq[(Double, Double, Double)](
@@ -218,7 +219,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predict(2.5) === 2)
     assert(model.predict(4) === 1)
   }
-
+  //保序回归法预测
   test("isotonic regression RDD prediction") {
     val model = runIsotonicRegression(Seq(1, 2, 7, 1, 2), true)
 
@@ -226,7 +227,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val predictions = testRDD.map(x => (x, model.predict(x))).collect().sortBy(_._1).map(_._2)
     assert(predictions === Array(1, 1, 1.5, 1.75, 2, 10.0/3, 10.0/3))
   }
-
+  //逆序回归预测
   test("antitonic regression prediction") {
     val model = runIsotonicRegression(Seq(7, 5, 3, 5, 1), false)
 
@@ -238,7 +239,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predict(2) === 4)
     assert(model.predict(9) === 1)
   }
-
+//模型构建
   test("model construction") {
     val model = new IsotonicRegressionModel(Array(0.0, 1.0), Array(1.0, 2.0), isotonic = true)
     assert(model.predict(-0.5) === 1.0)
@@ -248,22 +249,22 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predict(1.5) === 2.0)
 
     intercept[IllegalArgumentException] {
-      // different array sizes.
+      // different array sizes.不同数组大小
       new IsotonicRegressionModel(Array(0.0, 1.0), Array(1.0), isotonic = true)
     }
 
     intercept[IllegalArgumentException] {
-      // unordered boundaries
+      // unordered boundaries 无序的界限
       new IsotonicRegressionModel(Array(1.0, 0.0), Array(1.0, 2.0), isotonic = true)
     }
 
     intercept[IllegalArgumentException] {
-      // unordered predictions (isotonic)
+      // unordered predictions (isotonic)无序的预测(保序)
       new IsotonicRegressionModel(Array(0.0, 1.0), Array(2.0, 1.0), isotonic = true)
     }
 
     intercept[IllegalArgumentException] {
-      // unordered predictions (antitonic)
+      // unordered predictions (antitonic)无序的预测(反序)
       new IsotonicRegressionModel(Array(0.0, 1.0), Array(1.0, 2.0), isotonic = false)
     }
   }

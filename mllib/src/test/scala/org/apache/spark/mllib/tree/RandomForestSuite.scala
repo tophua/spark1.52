@@ -55,9 +55,10 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     DecisionTreeSuite.validateClassifier(dt, arr, 0.9)
 
     // Make sure trees are the same.
+    //确保树是相同的
     assert(rfTree.toString == dt.toString)
   }
-
+  //具有连续特征的二元分类,相比决策树,随机森林(numTrees = 1)
   test("Binary classification with continuous features:" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
@@ -65,7 +66,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       numClasses = 2, categoricalFeaturesInfo = categoricalFeaturesInfo)
     binaryClassificationTestWithContinuousFeatures(strategy)
   }
-
+  //具有连续特征和节点标识缓存的二元分类,相比决策树,随机森林(numTrees = 1)
   test("Binary classification with continuous features and node Id cache :" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
@@ -91,9 +92,10 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     DecisionTreeSuite.validateRegressor(dt, arr, 0.01)
 
     // Make sure trees are the same.
+    //确保树是相同的
     assert(rfTree.toString == dt.toString)
   }
-
+  //具有连续特征的回归,决策树,随机森林(numTrees = 1)
   test("Regression with continuous features:" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
@@ -102,7 +104,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       categoricalFeaturesInfo = categoricalFeaturesInfo)
     regressionTestWithContinuousFeatures(strategy)
   }
-
+  //连续特征和节点ID缓存的回归,决策树,随机森林(numTrees = 1)
   test("Regression with continuous features and node Id cache :" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
@@ -119,6 +121,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val rdd = sc.parallelize(arr)
 
     // Select feature subset for top nodes.  Return true if OK.
+    //选择顶部节点的特征子集,如果确定返回真
     def checkFeatureSubsetStrategy(
         numTrees: Int,
         featureSubsetStrategy: String,
@@ -143,14 +146,17 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
           RandomForest.selectNodesToSplit(nodeQueue, maxMemoryUsage, metadata, rng)
 
         assert(nodesForGroup.size === numTrees, failString)
+        //每棵树的1个节点
         assert(nodesForGroup.values.forall(_.size == 1), failString) // 1 node per tree
 
         if (numFeaturesPerNode == numFeatures) {
           // featureSubset values should all be None
+          //特征子集值应该都是没有
           assert(treeToNodeToIndexInfo.values.forall(_.values.forall(_.featureSubset.isEmpty)),
             failString)
         } else {
           // Check number of features.
+          //检查特征数
           assert(treeToNodeToIndexInfo.values.forall(_.values.forall(
             _.featureSubset.get.size === numFeaturesPerNode)), failString)
         }
@@ -171,14 +177,14 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       (math.log(numFeatures) / math.log(2)).ceil.toInt)
     checkFeatureSubsetStrategy(numTrees = 2, "onethird", (numFeatures / 3.0).ceil.toInt)
   }
-
+  //具有连续特征的二元分类:抽样的特点
   test("Binary classification with continuous features: subsampling features") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
       numClasses = 2, categoricalFeaturesInfo = categoricalFeaturesInfo)
     binaryClassificationTestWithContinuousFeaturesAndSubsampledFeatures(strategy)
   }
-
+  //具有连续特征和节点标识缓存的二元分类:抽样的特点
   test("Binary classification with continuous features and node Id cache: subsampling features") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
@@ -186,7 +192,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       useNodeIdCache = true)
     binaryClassificationTestWithContinuousFeaturesAndSubsampledFeatures(strategy)
   }
-  //交互 alternating
+  //交替的分类和连续特征与多标签测试索引
   test("alternating categorical and continuous features with multiclass labels to test indexing") {
     val arr = new Array[LabeledPoint](4)
     arr(0) = new LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0, 3.0, 1.0))
@@ -220,7 +226,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       println(">>>"+model.trees.toList)
       println("toDebugString:"+model.toDebugString)
   }
-
+  //随机森林在采样率
   test("subsampling rate in RandomForest"){
     val arr = EnsembleTestHelper.generateOrderedLabeledPoints(5, 20)
     val rdd = sc.parallelize(arr)
@@ -247,7 +253,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(rf1.toDebugString != rf2.toDebugString)
   }
 
-  test("model save/load") {
+  test("model save/load") {//模型保存/加载
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
 
@@ -256,6 +262,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       val model = new RandomForestModel(algo, trees)
 
       // Save model, load it back, and compare.
+      //保存模型,加载它回来,并比较
       try {
         model.save(sc, path)
         val sameModel = RandomForestModel.load(sc, path)

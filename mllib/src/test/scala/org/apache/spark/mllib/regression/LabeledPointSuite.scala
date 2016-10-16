@@ -26,7 +26,7 @@ class LabeledPointSuite extends SparkFunSuite {
    MLlib的标记点用于有监督学习算法
       使用double来存储标签值，这样标记点既可以用于回归又可以用于分类。
       在二分类中，标签要么是0要么是1;在多分类中，标签是0, 1, 2, **/
-  test("parse labeled points") {
+  test("parse labeled points") {//解析标记点
     val points = Seq(
       LabeledPoint(1.0, Vectors.dense(1.0, 0.0)),
       LabeledPoint(0.0, Vectors.sparse(2, Array(1), Array(-1.0))))
@@ -35,13 +35,13 @@ class LabeledPointSuite extends SparkFunSuite {
     }
   }
 
-  test("parse labeled points with whitespaces") {
+  test("parse labeled points with whitespaces") {//解析标记点的空格
     //标记点字符串的解析
     val point = LabeledPoint.parse("(0.0, [1.0, 2.0])")
     assert(point === LabeledPoint(0.0, Vectors.dense(1.0, 2.0)))
   }
 
-  test("parse labeled points with v0.9 format") {
+  test("parse labeled points with v0.9 format") {//解析标记点的V0.9格式
     //默认密集向量,未指定标记默认1 
     val point = LabeledPoint.parse("1.0,1.0 0.0 -2.0")
     assert(point === LabeledPoint(1.0, Vectors.dense(1.0, 0.0, -2.0)))

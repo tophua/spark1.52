@@ -28,6 +28,7 @@ trait LocalClusterSparkContext extends BeforeAndAfterAll { self: Suite =>
     val conf = new SparkConf()
       .setMaster("local-cluster[2, 1, 1024]")
       .setAppName("test-cluster")
+      //设置为1MB检测数据直接序列化
       .set("spark.akka.frameSize", "1") // set to 1MB to detect direct serialization of data
     sc = new SparkContext(conf)
     super.beforeAll()

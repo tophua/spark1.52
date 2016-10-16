@@ -21,7 +21,7 @@ import org.apache.spark.{SparkException, SparkFunSuite}
 
 class NumericParserSuite extends SparkFunSuite {
 
-  test("parser") {
+  test("parser") {//解析
     val s = "((1.0,2e3),-4,[5e-6,7.0E8],+9)"
     val parsed = NumericParser.parse(s).asInstanceOf[Seq[_]]
     assert(parsed(0).asInstanceOf[Seq[_]] === Seq(1.0, 2.0e3))
@@ -38,7 +38,7 @@ class NumericParserSuite extends SparkFunSuite {
     }
   }
 
-  test("parser with whitespaces") {
+  test("parser with whitespaces") {//解析器的空格
     val s = "(0.0, [1.0, 2.0])"
     //数字解析
     val parsed = NumericParser.parse(s).asInstanceOf[Seq[_]]

@@ -38,7 +38,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   lazy val dataRDD = sc.parallelize(data, 3)
 
-  test("Normalization using L1 distance") {
+  test("Normalization using L1 distance") {//
     val l1Normalizer = new Normalizer(1)
 
     val data1 = data.map(l1Normalizer.transform)

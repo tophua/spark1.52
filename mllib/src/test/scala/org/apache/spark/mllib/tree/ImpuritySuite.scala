@@ -26,14 +26,14 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
  * Test suites for [[GiniAggregator]] and [[EntropyAggregator]].
  */
 class ImpuritySuite extends SparkFunSuite with MLlibTestSparkContext {
-  test("Gini impurity does not support negative labels") {
+  test("Gini impurity does not support negative labels") {//基尼杂质不支持负标签
     val gini = new GiniAggregator(2)
     intercept[IllegalArgumentException] {
       gini.update(Array(0.0, 1.0, 2.0), 0, -1, 0.0)
     }
   }
 
-  test("Entropy does not support negative labels") {
+  test("Entropy does not support negative labels") {//熵不支持负标签
     val entropy = new EntropyAggregator(2)
     intercept[IllegalArgumentException] {
       entropy.update(Array(0.0, 1.0, 2.0), 0, -1, 0.0)

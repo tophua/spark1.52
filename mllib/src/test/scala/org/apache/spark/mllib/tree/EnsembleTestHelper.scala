@@ -29,6 +29,7 @@ object EnsembleTestHelper {
   /**
    * Aggregates all values in data, and tests whether the empirical mean and stddev are within
    * epsilon of the expected values.
+   * 聚合数据中的所有值,和测试均值和标准差期望值
    * @param data  Every element of the data should be an i.i.d. sample from some distribution.
    */
   def testRandomArrays(
@@ -62,6 +63,7 @@ object EnsembleTestHelper {
 
   /**
    * Validates a tree ensemble model for regression.
+   * 验证回归的树集合模型
    */
   def validateRegressor(
       model: TreeEnsembleModel,

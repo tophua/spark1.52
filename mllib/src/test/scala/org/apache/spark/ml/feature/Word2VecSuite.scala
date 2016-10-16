@@ -34,7 +34,7 @@ import org.apache.spark.mllib.feature.{Word2VecModel => OldWord2VecModel}
  */
 class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new Word2Vec)
     val model = new Word2VecModel("w2v", new OldWord2VecModel(Map("a" -> Array(0.0f))))
     ParamsSuite.checkParams(model)
@@ -102,7 +102,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("getVectors") {
+  test("getVectors") {//获得向量
 
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
@@ -136,7 +136,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("findSynonyms") {
+  test("findSynonyms") {//查找同义词
 
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._

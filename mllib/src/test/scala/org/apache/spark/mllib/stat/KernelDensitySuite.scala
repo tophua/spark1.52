@@ -23,7 +23,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 
 class KernelDensitySuite extends SparkFunSuite with MLlibTestSparkContext {
-  test("kernel density single sample") {
+  test("kernel density single sample") {//核密度单样本
     val rdd = sc.parallelize(Array(5.0))
     val evaluationPoints = Array(5.0, 6.0)
     val densities = new KernelDensity().setSample(rdd).setBandwidth(3.0).estimate(evaluationPoints)
@@ -33,7 +33,7 @@ class KernelDensitySuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(math.abs(densities(1) - normal.density(6.0)) < acceptableErr)
   }
 
-  test("kernel density multiple samples") {
+  test("kernel density multiple samples") {//核密度多样本
     val rdd = sc.parallelize(Array(5.0, 10.0))
     val evaluationPoints = Array(5.0, 6.0)
     val densities = new KernelDensity().setSample(rdd).setBandwidth(3.0).estimate(evaluationPoints)

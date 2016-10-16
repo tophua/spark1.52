@@ -67,6 +67,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val pearson1 = Statistics.chiSqTest(observed1, expected1)
 
     // Results validated against the R command
+    //对R命令进行验证的结果
     // `chisq.test(c(21, 38, 43, 80), p=c(3/35, 1/7, 1/5, 4/7))`
     //
     assert(pearson1.statistic ~== 14.1429 relTol 1e-4)
@@ -76,17 +77,19 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(pearson1.nullHypothesis === ChiSqTest.NullHypothesis.goodnessOfFit.toString)
 
     // Vectors with different sizes
+    //大小不同的向量
     val observed3 = new DenseVector(Array(1.0, 2.0, 3.0))
     val expected3 = new DenseVector(Array(1.0, 2.0, 3.0, 4.0))
     //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(observed3, expected3))
 
-    // negative counts in observed
+    // negative counts in observed 观察中的负计数
     val negObs = new DenseVector(Array(1.0, 2.0, 3.0, -4.0))
     //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(negObs, expected1))
 
-    // count = 0.0 in expected but not observed
+    // count = 0.0 in expected but not observed 
+    //计数= 0,在预期,但没有观察到
     val zeroExpected = new DenseVector(Array(1.0, 0.0, 3.0))
     //提供了进行Pearson卡方检验的方法
     val inf = Statistics.chiSqTest(observed, zeroExpected)
@@ -97,6 +100,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(inf.nullHypothesis === ChiSqTest.NullHypothesis.goodnessOfFit.toString)
 
     // 0.0 in expected and observed simultaneously
+    //0在预期和观察同时
     val zeroObserved = new DenseVector(Array(2.0, 0.0, 1.0))
     //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(zeroObserved, zeroExpected))
@@ -106,7 +110,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
    * 独立性检测，independence test，验证从两个变量抽出的配对观察值组是否互相独立。
    * 其虚无假设是：两个变量呈统计独立性。
    */
-  test("chi squared pearson matrix independence") {
+  test("chi squared pearson matrix independence") {//卡方皮尔森矩阵独立性
     val data = Array(40.0, 24.0, 29.0, 56.0, 32.0, 42.0, 31.0, 10.0, 0.0, 30.0, 15.0, 12.0)
     // [[40.0, 56.0, 31.0, 30.0],
     //  [24.0, 32.0, 10.0, 15.0],
@@ -124,22 +128,22 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(chi.method === ChiSqTest.PEARSON.name)
     assert(chi.nullHypothesis === ChiSqTest.NullHypothesis.independence.toString)
 
-    // Negative counts
+    // Negative counts 负计数
     val negCounts = Array(4.0, 5.0, 3.0, -3.0)
     //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(Matrices.dense(2, 2, negCounts)))
 
-    // Row sum = 0.0
+    // Row sum = 0.0 行和
     val rowZero = Array(0.0, 1.0, 0.0, 2.0)
     //提供了进行Pearson卡方检验的方法
     intercept[IllegalArgumentException](Statistics.chiSqTest(Matrices.dense(2, 2, rowZero)))
 
-    // Column sum  = 0.0
+    // Column sum  = 0.0 列和
     val colZero = Array(0.0, 0.0, 2.0, 2.0)
     // IllegalArgumentException thrown here since it's thrown on driver, not inside a task
     intercept[IllegalArgumentException](Statistics.chiSqTest(Matrices.dense(2, 2, colZero)))
   }
-
+  //卡方卡方皮尔森 RDD标记点
   test("chi squared pearson RDD[LabeledPoint]") {
     // labels: 1.0 (2 / 6), 0.0 (4 / 6)
     // feature1: 0.5 (1 / 6), 1.5 (2 / 6), 3.5 (3 / 6)
@@ -170,6 +174,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // Test that the right number of results is returned
+    //返回测试结果的正确数量
     val numCols = 1001
     val sparseData = Array(
       new LabeledPoint(0.0, Vectors.sparse(numCols, Seq((100, 2.0)))),
@@ -180,6 +185,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(chi(1000) != null) // SPARK-3087
 
     // Detect continous features or labels
+    //检测连续特征或标记
     val random = new Random(11L)
     val continuousLabel =
       Seq.fill(100000)(LabeledPoint(random.nextDouble(), Vectors.dense(random.nextInt(2))))
@@ -196,7 +202,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("1 sample Kolmogorov-Smirnov test: apache commons math3 implementation equivalence") {
-    // Create theoretical distributions
+    // Create theoretical distributions 创建理论分布
     val stdNormalDist = new NormalDistribution(0, 1)
     val expDist = new ExponentialDistribution(0.6)
     val unifDist = new UniformRealDistribution()
@@ -208,6 +214,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     unifDist.reseedRandomGenerator(seed)
 
     // Sample data from the distributions and parallelize it
+    //从样本数据的分布和并行
     val n = 100000
     val sampledNorm = sc.parallelize(stdNormalDist.sample(n), 10)
     val sampledExp = sc.parallelize(expDist.sample(n), 10)
@@ -218,30 +225,38 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val pThreshold = 0.05
 
     // Comparing a standard normal sample to a standard normal distribution
+    //将标准的正态样本与标准正态分布的比较
     val result1 = Statistics.kolmogorovSmirnovTest(sampledNorm, "norm", 0, 1)
     val referenceStat1 = ksTest.kolmogorovSmirnovStatistic(stdNormalDist, sampledNorm.collect())
     val referencePVal1 = 1 - ksTest.cdf(referenceStat1, n)
     // Verify vs apache math commons ks test
+    //验证与Apache Commons KS检验数学
     assert(result1.statistic ~== referenceStat1 relTol 1e-4)
     assert(result1.pValue ~== referencePVal1 relTol 1e-4)
     // Cannot reject null hypothesis
     assert(result1.pValue > pThreshold)
 
     // Comparing an exponential sample to a standard normal distribution
+    //指数样本与标准正态分布的比较
     val result2 = Statistics.kolmogorovSmirnovTest(sampledExp, "norm", 0, 1)
     val referenceStat2 = ksTest.kolmogorovSmirnovStatistic(stdNormalDist, sampledExp.collect())
     val referencePVal2 = 1 - ksTest.cdf(referenceStat2, n)
     // verify vs apache math commons ks test
+    //验证与Apache Commons KS检验数学
     assert(result2.statistic ~== referenceStat2 relTol 1e-4)
     assert(result2.pValue ~== referencePVal2 relTol 1e-4)
     // reject null hypothesis
+    //拒绝零假设
     assert(result2.pValue < pThreshold)
 
     // Testing the use of a user provided CDF function
+    //测试一个用户提供的CDF函数的使用
     // Distribution is not serializable, so will have to create in the lambda
+    //分布是不可序列化的，所以要在lambda创建
     val expCDF = (x: Double) => new ExponentialDistribution(0.2).cumulativeProbability(x)
 
     // Comparing an exponential sample with mean X to an exponential distribution with mean Y
+    //指数样本与平均指数x的指数分布的比较
     // Where X != Y
     val result3 = Statistics.kolmogorovSmirnovTest(sampledExp, expCDF)
     val referenceStat3 = ksTest.kolmogorovSmirnovStatistic(new ExponentialDistribution(0.2),

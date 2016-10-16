@@ -27,7 +27,7 @@ import org.apache.spark.util.Utils
 
 private object LassoSuite {
 
-  /** 3 features */
+  /** 3 features 三个特征 */
   val model = new LassoModel(weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5)
 }
 /**
@@ -38,12 +38,14 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
   def validatePrediction(predictions: Seq[Double], input: Seq[LabeledPoint]) {
     val numOffPredictions = predictions.zip(input).count { case (prediction, expected) =>
       // A prediction is off if the prediction is more than 0.5 away from expected value.
+      //预测是关闭的,如果预测是超过0.5,从预期值
       math.abs(prediction - expected.label) > 0.5
     }
     // At least 80% of the predictions should be on.
+    //至少有80%的预测应该
     assert(numOffPredictions < input.length / 5)
   }
-
+//本地岭回归随机梯度
   test("Lasso local random SGD") {
     val nPoints = 1000
 
@@ -76,12 +78,14 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationRDD = sc.parallelize(validationData, 2)
 
     // Test prediction on RDD.
+    //测试在RDD上预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Test prediction on Array.
+    //测试在数组上预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
-
+  //岭回归局部随机SGD与初始权值
   test("Lasso local random SGD with initial weights") {
     val nPoints = 1000
 
@@ -119,20 +123,21 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
     val validationRDD = sc.parallelize(validationData, 2)
 
-    // Test prediction on RDD.
+    // Test prediction on RDD,测试在RDD预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
-    // Test prediction on Array.
+    // Test prediction on Array.测试数组的RDD预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
 
-  test("model save/load") {
+  test("model save/load") {//模型保存/加载
     val model = LassoSuite.model
 
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
 
     // Save model, load it back, and compare.
+    //保存模型,加载它回来,并比较
     try {
       model.save(sc, path)
       val sameModel = LassoModel.load(sc, path)
@@ -145,7 +150,7 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 class LassoClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-
+  //在训练和预测中,任务的大小应该是小的
   test("task size should be small in both training and prediction") {
     val m = 4
     val n = 200000
@@ -154,6 +159,7 @@ class LassoClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
       iter.map(i => LabeledPoint(1.0, Vectors.dense(Array.fill(n)(random.nextDouble()))))
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be
+    //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB,因此Spark会抛出一个错误
     // greater than 1MB and hence Spark would throw an error.
     val model = LassoWithSGD.train(points, 2)
     val predictions = model.predict(points.map(_.features))

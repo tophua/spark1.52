@@ -35,12 +35,12 @@ import org.apache.spark.util.Utils
 
 class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("epsilon computation") {
+  test("epsilon computation") {//epsilon表示大于零的最小正Double值计算
     assert(1.0 + EPSILON > 1.0, s"EPSILON is too small: $EPSILON.")
     assert(1.0 + EPSILON / 2.0 === 1.0, s"EPSILON is too big: $EPSILON.")
   }
 
-  test("fast squared distance") {
+  test("fast squared distance") {//快速平方距离
     //pow 第一个参数的值提高到第二个参数的幂
     val a = (30 to 0 by -1).map(math.pow(2.0, _)).toArray
     val n = a.length
@@ -77,7 +77,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("loadLibSVMFile") {
+  test("loadLibSVMFile") {//加载库支持向量机文件
     //使用三个引号来进行多行字符引用
     val lines =
       """
@@ -113,7 +113,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     Utils.deleteRecursively(tempDir)
   }
-
+  //加载库支持向量机文件,在索引为零的情况时抛出非法参数异常
   test("loadLibSVMFile throws IllegalArgumentException when indices is zero-based") {
     val lines =
       """
@@ -131,7 +131,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
     Utils.deleteRecursively(tempDir)
   }
-
+ //加载库支持向量机文件,在索引没有升序排序情况时,抛出非法参数异常
   test("loadLibSVMFile throws IllegalArgumentException when indices is not in ascending order") {
     val lines =
       """
@@ -149,7 +149,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     Utils.deleteRecursively(tempDir)
   }
 
-  test("saveAsLibSVMFile") {
+  test("saveAsLibSVMFile") {//保存为支持向量机文件
     val examples = sc.parallelize(Seq(
       LabeledPoint(1.1, Vectors.sparse(3, Seq((0, 1.23), (2, 4.56)))),
       LabeledPoint(0.0, Vectors.dense(1.01, 2.02, 3.03))
@@ -167,7 +167,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     Utils.deleteRecursively(tempDir)
   }
 
-  test("appendBias") {
+  test("appendBias") {//追加偏置
     //对向量增加偏置项,用于回归和分类算法计算中
     val sv = Vectors.sparse(3, Seq((0, 1.0), (2, 3.0)))
     val sv1 = appendBias(sv).asInstanceOf[SparseVector]
@@ -181,7 +181,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(dv1.values === Array(1.0, 0.0, 3.0, 1.0))
   }
 
-  test("kFold") {
+  test("kFold") {//K-折(倍)
     val data = sc.parallelize(1 to 100, 2)
     val collectedData = data.collect().sorted
     val twoFoldedRdd = kFold(data, 2, 1)
@@ -197,6 +197,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
           assert(validationSize > 0, "empty validation data")
           val p = 1 / folds.toFloat
           // Within 3 standard deviations of the mean
+          //在平均值的3个标准偏差内
           val range = 3 * math.sqrt(100 * p * (1 - p))
           val expected = 100 * p
           val lowerBound = expected - range
@@ -210,13 +211,14 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
             "Each training+validation set combined should contain all of the data.")
         }
         // K fold cross validation should only have each element in the validation set exactly once
+        //K倍交叉验证应该只在验证中的每一个元素都有一次
         assert(foldedRdds.map(_._2).reduce((x, y) => x.union(y)).collect().sorted ===
           data.collect().sorted)
       }
     }
   }
 
-  test("loadVectors") {
+  test("loadVectors") {//加载向量
     val vectors = sc.parallelize(Seq(
       Vectors.dense(1.0, 2.0),
       Vectors.sparse(2, Array(1), Array(-1.0)),
@@ -231,7 +233,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     Utils.deleteRecursively(tempDir)
   }
 
-  test("loadLabeledPoints") {
+  test("loadLabeledPoints") {//加载标记点
     val points = sc.parallelize(Seq(
       LabeledPoint(1.0, Vectors.dense(1.0, 2.0)),
       LabeledPoint(0.0, Vectors.sparse(2, Array(1), Array(-1.0))),
@@ -246,7 +248,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     Utils.deleteRecursively(tempDir)
   }
 
-  test("log1pExp") {
+  test("log1pExp") {//
     assert(log1pExp(76.3) ~== math.log1p(math.exp(76.3)) relTol 1E-10)
     assert(log1pExp(87296763.234) ~== 87296763.234 relTol 1E-10)
 

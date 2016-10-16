@@ -33,7 +33,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
 
   import org.apache.spark.mllib.clustering.PowerIterationClustering._
 
-  test("power iteration clustering") {
+  test("power iteration clustering") {//幂迭代聚类
     /*
      We use the following graph to test PIC. All edges are assigned similarity 1.0 except 0.1 for
      edge (3, 4).
@@ -71,7 +71,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
     assert(predictions2.toSet == Set((0 to 3).toSet, (4 to 15).toSet))
   }
 
-  test("power iteration clustering on graph") {
+  test("power iteration clustering on graph") {//图形上的幂迭代聚类
     /*
      We use the following graph to test PIC. All edges are assigned similarity 1.0 except 0.1 for
      edge (3, 4).
@@ -119,7 +119,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
     assert(predictions2.toSet == Set((0 to 3).toSet, (4 to 15).toSet))
   }
 
-  test("normalize and powerIter") {
+  test("normalize and powerIter") {//规范和poweriter
     /*
      Test normalize() with the following graph:
 
@@ -165,7 +165,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
     }
   }
 
-  test("model save/load") {
+  test("model save/load") {//模型保存/加载
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     val model = PowerIterationClusteringSuite.createModel(sc, 3, 10)
