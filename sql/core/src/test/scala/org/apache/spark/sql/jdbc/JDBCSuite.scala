@@ -28,7 +28,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
 import org.apache.spark.util.Utils
-
+//JDBC套件
 class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext {
   import testImplicits._
 
@@ -49,6 +49,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     Utils.classForName("org.h2.Driver")
     // Extra properties that will be specified for our database. We need these to test
     // usage of parameters from OPTIONS clause in queries.
+    //将为我们的数据库指定额外的属性,我们需要这些来测试查询选项子句中的参数的用法
     val properties = new Properties()
     properties.setProperty("user", "testUser")
     properties.setProperty("password", "testPass")
@@ -188,7 +189,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(sql("select * from foobar").where('NAME === "joe 'foo' \"bar\"").collect().size === 1)
   }
 
-  test("SELECT first field") {
+  test("SELECT first field") {//选择第一个字段
     //升序
     val names = sql("SELECT NAME FROM foobar").collect().map(x => x.getString(0)).sortWith(_ < _)
     assert(names.size === 3)
@@ -197,7 +198,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(names(2).equals("mary"))
   }
 
-  test("SELECT first field when fetchSize is two") {
+  test("SELECT first field when fetchSize is two") {//
     val names = sql("SELECT NAME FROM fetchtwo").collect().map(x => x.getString(0)).sortWith(_ < _)
     assert(names.size === 3)
     assert(names(0).equals("fred"))
@@ -205,7 +206,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(names(2).equals("mary"))
   }
 
-  test("SELECT second field") {
+  test("SELECT second field") {//选择第二个字段
     val ids = sql("SELECT THEID FROM foobar").collect().map(x => x.getInt(0)).sortWith(_ < _)
     assert(ids.size === 3)
     assert(ids(0) === 1)
@@ -221,7 +222,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(ids(2) === 3)
   }
 
-  test("SELECT * partitioned") {
+  test("SELECT * partitioned") {//
     assert(sql("SELECT * FROM parts").collect().size == 3)
   }
 
@@ -239,7 +240,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(ids(2) === 3)
   }
 
-  test("Register JDBC query with renamed fields") {
+  test("Register JDBC query with renamed fields") {//注册JDBC查询重命名字段
     // Regression test for bug SPARK-7345
     sql(
       s"""
@@ -255,31 +256,31 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(df.schema.fields(1).name == "NAME2")
   }
 
-  test("Basic API") {
+  test("Basic API") {//基本API
     assert(ctx.read.jdbc(
       urlWithUserAndPass, "TEST.PEOPLE", new Properties).collect().length === 3)
   }
 
-  test("Basic API with FetchSize") {
+  test("Basic API with FetchSize") {//基础API获取大小
     val properties = new Properties
     properties.setProperty("fetchSize", "2")
     assert(ctx.read.jdbc(
       urlWithUserAndPass, "TEST.PEOPLE", properties).collect().length === 3)
   }
 
-  test("Partitioning via JDBCPartitioningInfo API") {
+  test("Partitioning via JDBCPartitioningInfo API") {//通过划分
     assert(
       ctx.read.jdbc(urlWithUserAndPass, "TEST.PEOPLE", "THEID", 0, 4, 3, new Properties)
       .collect().length === 3)
   }
 
-  test("Partitioning via list-of-where-clauses API") {
+  test("Partitioning via list-of-where-clauses API") {//
     val parts = Array[String]("THEID < 2", "THEID >= 2")
     assert(ctx.read.jdbc(urlWithUserAndPass, "TEST.PEOPLE", parts, new Properties)
       .collect().length === 3)
   }
 
-  test("H2 integral types") {
+  test("H2 integral types") {//H2的整数类型
     val rows = sql("SELECT * FROM inttypes WHERE A IS NOT NULL").collect()
     assert(rows.length === 1)
     assert(rows(0).getInt(0) === 1)
@@ -289,7 +290,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(rows(0).getLong(4) === 1234567890123L)
   }
 
-  test("H2 null entries") {
+  test("H2 null entries") {//H2空项
     val rows = sql("SELECT * FROM inttypes WHERE A IS NULL").collect()
     assert(rows.length === 1)
     assert(rows(0).isNullAt(0))
@@ -299,7 +300,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(rows(0).isNullAt(4))
   }
 
-  test("H2 string types") {
+  test("H2 string types") {//H2字符串类型
     val rows = sql("SELECT * FROM strtypes").collect()
     assert(rows(0).getAs[Array[Byte]](0).sameElements(testBytes))
     assert(rows(0).getString(1).equals("Sensitive"))
@@ -309,7 +310,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(rows(0).getString(5).equals("I am a clob!"))
   }
 
-  test("H2 time types") {
+  test("H2 time types") {//H2时间类型
     val rows = sql("SELECT * FROM timetypes").collect()
     val cal = new GregorianCalendar(java.util.Locale.ROOT)
     cal.setTime(rows(0).getAs[java.sql.Timestamp](0))
@@ -330,7 +331,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(rows(0).getAs[java.sql.Timestamp](2).getNanos === 543543000)
   }
 
-  test("test DATE types") {
+  test("test DATE types") {//H2日期类型
     val rows = ctx.read.jdbc(
       urlWithUserAndPass, "TEST.TIMETYPES", new Properties).collect()
     val cachedRows = ctx.read.jdbc(urlWithUserAndPass, "TEST.TIMETYPES", new Properties)
@@ -340,7 +341,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(cachedRows(0).getAs[java.sql.Date](1) === java.sql.Date.valueOf("1996-01-01"))
   }
 
-  test("test DATE types in cache") {
+  test("test DATE types in cache") {//缓存中的测试日期类型
     val rows = ctx.read.jdbc(urlWithUserAndPass, "TEST.TIMETYPES", new Properties).collect()
     ctx.read.jdbc(urlWithUserAndPass, "TEST.TIMETYPES", new Properties)
       .cache().registerTempTable("mycached_date")
@@ -349,13 +350,13 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(cachedRows(0).getAs[java.sql.Date](1) === java.sql.Date.valueOf("1996-01-01"))
   }
 
-  test("test types for null value") {
+  test("test types for null value") {//空值的测试类型
     val rows = ctx.read.jdbc(
       urlWithUserAndPass, "TEST.NULLTYPES", new Properties).collect()
     assert((0 to 14).forall(i => rows(0).isNullAt(i)))
   }
 
-  test("H2 floating-point types") {
+  test("H2 floating-point types") {//H2的浮点类型
     val rows = sql("SELECT * FROM flttypes").collect()
     assert(rows(0).getDouble(0) === 1.00000000000000022)
     assert(rows(0).getDouble(1) === 1.00000011920928955)
@@ -367,7 +368,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       new BigDecimal("123456789012345.543215432154321000"))
   }
 
-  test("SQL query as table name") {
+  test("SQL query as table name") {//SQL查询的表名
     sql(
       s"""
         |CREATE TEMPORARY TABLE hack
@@ -378,10 +379,11 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     val rows = sql("SELECT * FROM hack").collect()
     assert(rows(0).getDouble(0) === 1.00000011920928955) // Yes, I meant ==.
     // For some reason, H2 computes this square incorrectly...
+    //因为某种原因,H2计算这方不正确
     assert(math.abs(rows(0).getDouble(1) - 1.00000023841859331) < 1e-12)
   }
 
-  test("Pass extra properties via OPTIONS") {
+  test("Pass extra properties via OPTIONS") {//通过选项传递额外的属性
     // We set rowId to false during setup, which means that _ROWID_ column should be absent from
     // all tables. If rowId is true (default), the query below doesn't throw an exception.
     intercept[JdbcSQLException] {
@@ -395,7 +397,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     }
   }
 
-  test("Remap types via JdbcDialects") {
+  test("Remap types via JdbcDialects") {//通过jdbcdialects映射类型
     JdbcDialects.registerDialect(testH2Dialect)
     val df = ctx.read.jdbc(urlWithUserAndPass, "TEST.PEOPLE", new Properties)
     assert(df.schema.filter(_.dataType != org.apache.spark.sql.types.StringType).isEmpty)
@@ -405,13 +407,13 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     JdbcDialects.unregisterDialect(testH2Dialect)
   }
 
-  test("Default jdbc dialect registration") {
+  test("Default jdbc dialect registration") {//默认注册JDBC方言
     assert(JdbcDialects.get("jdbc:mysql://127.0.0.1/db") == MySQLDialect)
     assert(JdbcDialects.get("jdbc:postgresql://127.0.0.1/db") == PostgresDialect)
     assert(JdbcDialects.get("test.invalid") == NoopDialect)
   }
 
-  test("quote column names by jdbc dialect") {
+  test("quote column names by jdbc dialect") {//引用列名JDBC方言
     val MySQL = JdbcDialects.get("jdbc:mysql://127.0.0.1/db")
     val Postgres = JdbcDialects.get("jdbc:postgresql://127.0.0.1/db")
 
@@ -422,13 +424,13 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(PostgresColumns === Seq(""""abc"""", """"key""""))
   }
 
-  test("Dialect unregister") {
+  test("Dialect unregister") {//方言注销
     JdbcDialects.registerDialect(testH2Dialect)
     JdbcDialects.unregisterDialect(testH2Dialect)
     assert(JdbcDialects.get(urlWithUserAndPass) == NoopDialect)
   }
 
-  test("Aggregated dialects") {
+  test("Aggregated dialects") {//聚合的方言
     val agg = new AggregatedDialect(List(new JdbcDialect {
       override def canHandle(url: String) : Boolean = url.startsWith("jdbc:h2:")
       override def getCatalystType(
@@ -445,7 +447,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(agg.getCatalystType(1, "", 1, null) === Some(StringType))
   }
 
-  test("Test DataFrame.where for Date and Timestamp") {
+  test("Test DataFrame.where for Date and Timestamp") {//测试日期和时间戳
     // Regression test for bug SPARK-11788
     val timestamp = java.sql.Timestamp.valueOf("2001-02-20 11:22:33.543543");
     val date = java.sql.Date.valueOf("1995-01-01")

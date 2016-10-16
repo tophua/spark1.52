@@ -30,15 +30,16 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
 
   setupTestData()
 
-  test("simple columnar query") {
+  test("simple columnar query") {//简单列查询
     val plan = ctx.executePlan(testData.logicalPlan).executedPlan
     val scan = InMemoryRelation(useCompression = true, 5, MEMORY_ONLY, plan, None)
 
     checkAnswer(scan, testData.collect().toSeq)
   }
 
-  test("default size avoids broadcast") {
+  test("default size avoids broadcast") {//默认大小避免广播
     // TODO: Improve this test when we have better statistics
+    //当我们有更好的统计数据时，改进这个测试
     ctx.sparkContext.parallelize(1 to 10).map(i => TestData(i, i.toString))
       .toDF().registerTempTable("sizeTst")
     ctx.cacheTable("sizeTst")
@@ -47,7 +48,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
         ctx.conf.autoBroadcastJoinThreshold)
   }
 
-  test("projection") {
+  test("projection") {//投影
     val plan = ctx.executePlan(testData.select('value, 'key).logicalPlan).executedPlan
     val scan = InMemoryRelation(useCompression = true, 5, MEMORY_ONLY, plan, None)
 
@@ -55,7 +56,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
       case Row(key: Int, value: String) => value -> key
     }.map(Row.fromTuple))
   }
-
+  //在内存列必须能够访问多个时间
   test("SPARK-1436 regression: in-memory columns must be able to be accessed multiple times") {
     val plan = ctx.executePlan(testData.logicalPlan).executedPlan
     val scan = InMemoryRelation(useCompression = true, 5, MEMORY_ONLY, plan, None)
@@ -63,7 +64,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(scan, testData.collect().toSeq)
     checkAnswer(scan, testData.collect().toSeq)
   }
-
+  //压缩不能丢失重复的值
   test("SPARK-1678 regression: compression must not lose repeated values") {
     checkAnswer(
       sql("SELECT * FROM repeatedData"),
@@ -76,7 +77,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
       repeatedData.collect().toSeq.map(Row.fromTuple))
   }
 
-  test("with null values") {
+  test("with null values") {//空值
     checkAnswer(
       sql("SELECT * FROM nullableRepeatedData"),
       nullableRepeatedData.collect().toSeq.map(Row.fromTuple))
@@ -88,7 +89,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
       nullableRepeatedData.collect().toSeq.map(Row.fromTuple))
   }
 
-  test("SPARK-2729 regression: timestamp data type") {
+  test("SPARK-2729 regression: timestamp data type") {//时间戳类型
     val timestamps = (0 to 3).map(i => Tuple1(new Timestamp(i))).toDF("time")
     timestamps.registerTempTable("timestamps")
 
@@ -102,7 +103,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT time FROM timestamps"),
       timestamps.collect().toSeq)
   }
-
+//批理的列缓冲区构建应与空分区
   test("SPARK-3320 regression: batched column buffer building should work with empty partitions") {
     checkAnswer(
       sql("SELECT * FROM withEmptyParts"),
@@ -122,7 +123,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
     complexData.unpersist()
   }
 
-  test("decimal type") {
+  test("decimal type") {//十进制类型
     // Casting is required here because ScalaReflection can't capture decimal precision information.
     val df = (1 to 10)
       .map(i => Tuple1(Decimal(i, 15, 10)))
@@ -137,7 +138,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
       (1 to 10).map(i => Row(Decimal(i, 15, 10).toJavaBigDecimal)))
   }
 
-  test("test different data types") {
+  test("test different data types") {//测试不同日期类型
     // Create the schema.
     val struct =
       StructType(
@@ -156,6 +157,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
     val schema = StructType(fields)
 
     // Create a RDD for the schema
+    //创建一个RDD模式
     val rdd =
       ctx.sparkContext.parallelize((1 to 100), 10).map { i =>
         Row(
@@ -179,30 +181,36 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
       }
     ctx.createDataFrame(rdd, schema).registerTempTable("InMemoryCache_different_data_types")
     // Cache the table.
+    //缓存表
     sql("cache table InMemoryCache_different_data_types")
     // Make sure the table is indeed cached.
+    //确保表确实缓存
     val tableScan = ctx.table("InMemoryCache_different_data_types").queryExecution.executedPlan
     assert(
       ctx.isCached("InMemoryCache_different_data_types"),
       "InMemoryCache_different_data_types should be cached.")
     // Issue a query and check the results.
+    //确认一个查询并检查结果
     checkAnswer(
       sql(s"SELECT DISTINCT ${allColumns} FROM InMemoryCache_different_data_types"),
       ctx.table("InMemoryCache_different_data_types").collect())
     ctx.dropTempTable("InMemoryCache_different_data_types")
   }
-
+  //字符串列在内存中缓存需要重写克隆方法
   test("SPARK-10422: String column in InMemoryColumnarCache needs to override clone method") {
     val df =
       ctx.range(1, 100).selectExpr("id % 10 as id").rdd.map(id => Tuple1(s"str_$id")).toDF("i")
     val cached = df.cache()
     // count triggers the caching action. It should not throw.
+    //计数触发缓存操作,它不应该扔
     cached.count()
 
     // Make sure, the DataFrame is indeed cached.
+    //确认,数据框架索引是缓存
     assert(sqlContext.cacheManager.lookupCachedData(cached).nonEmpty)
 
     // Check result.
+    //检查结果
     checkAnswer(
       cached,
       ctx.range(1, 100).selectExpr("id % 10 as id").rdd.map(id => Tuple1(s"str_$id")).toDF("i")

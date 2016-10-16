@@ -58,13 +58,14 @@ class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
 
   test("toUnsafeRow() test helper method") {
     // This currently doesnt work because the generic getter throws an exception.
+    //目前不工作因为一般人抛出一个异常
     val row = Row("Hello", 123)
     val unsafeRow = toUnsafeRow(row, Array(StringType, IntegerType))
     assert(row.getString(0) === unsafeRow.getUTF8String(0).toString)
     assert(row.getInt(1) === unsafeRow.getInt(1))
   }
 
-  test("basic row serialization") {
+  test("basic row serialization") {//基本行序列化
     val rows = Seq(Row("Hello", 1), Row("World", 2))
     val unsafeRows = rows.map(row => toUnsafeRow(row, Array(StringType, IntegerType)))
     val serializer = new UnsafeRowSerializer(numFields = 2).newInstance()
@@ -87,14 +88,14 @@ class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
     assert(input.closed)
   }
 
-  test("close empty input stream") {
+  test("close empty input stream") {//关闭空输入流
     val input = new ClosableByteArrayInputStream(Array.empty)
     val serializer = new UnsafeRowSerializer(numFields = 2).newInstance()
     val deserializerIter = serializer.deserializeStream(input).asKeyValueIterator
     assert(!deserializerIter.hasNext)
     assert(input.closed)
   }
-
+//外部排序溢出行序列化程序不安全
   test("SPARK-10466: external sorter spilling with unsafe row serializer") {
     var sc: SparkContext = null
     var outputFile: File = null
@@ -107,7 +108,7 @@ class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
 
       sc = new SparkContext("local", "test", conf)
       outputFile = File.createTempFile("test-unsafe-row-serializer-spill", "")
-      // prepare data
+      // prepare data 准备数据
       val converter = unsafeRowConverter(Array(IntegerType))
       val data = (1 to 1000).iterator.map { i =>
         (i, converter(Row(i)))
@@ -117,22 +118,25 @@ class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
         serializer = Some(new UnsafeRowSerializer(numFields = 1)))
 
       // Ensure we spilled something and have to merge them later
+      //确保我们溢出的东西,并将其合并后
       assert(sorter.numSpills === 0)
       sorter.insertAll(data)
       assert(sorter.numSpills > 0)
 
       // Merging spilled files should not throw assertion error
+      //合并溢出的文件不应该抛出断言错误
       val taskContext =
         new TaskContextImpl(0, 0, 0, 0, null, null, InternalAccumulator.create(sc))
       taskContext.taskMetrics.shuffleWriteMetrics = Some(new ShuffleWriteMetrics)
       sorter.writePartitionedFile(ShuffleBlockId(0, 0, 0), taskContext, outputFile)
     } {
-      // Clean up
+      // Clean up 清理
       if (sc != null) {
         sc.stop()
       }
 
       // restore the spark env
+      //恢复Spark环境
       SparkEnv.set(oldEnv)
 
       if (outputFile != null) {
@@ -140,7 +144,7 @@ class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
   }
-
+  //安全与不安全的Shuffle行序列化
   test("SPARK-10403: unsafe row serializer with UnsafeShuffleManager") {
     val conf = new SparkConf()
       .set("spark.shuffle.manager", "tungsten-sort")

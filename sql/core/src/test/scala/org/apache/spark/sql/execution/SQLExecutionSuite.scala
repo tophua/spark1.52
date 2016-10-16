@@ -25,7 +25,7 @@ import org.apache.spark.{SparkConf, SparkContext, SparkFunSuite}
 import org.apache.spark.sql.SQLContext
 
 class SQLExecutionSuite extends SparkFunSuite {
-
+  //并发查询执行
   test("concurrent query execution (SPARK-10548)") {
     // Try to reproduce the issue with the old SparkContext
     val conf = new SparkConf()
@@ -43,6 +43,7 @@ class SQLExecutionSuite extends SparkFunSuite {
     }
 
     // Verify that the issue is fixed with the latest SparkContext
+    //验证问题是固定的最新sparkcontext
     val goodSparkContext = new SparkContext(conf)
     try {
       testConcurrentQueryExecution(goodSparkContext)
@@ -53,17 +54,22 @@ class SQLExecutionSuite extends SparkFunSuite {
 
   /**
    * Trigger SPARK-10548 by mocking a parent and its child thread executing queries concurrently.
+   * 模拟父和它的子线程同时执行查询
    */
   private def testConcurrentQueryExecution(sc: SparkContext): Unit = {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
     // Initialize local properties. This is necessary for the test to pass.
+    //初始化本地属性,这是必要的测试通过
     sc.getLocalProperties
 
     // Set up a thread that runs executes a simple SQL query.
+    //建立运行一个线程执行一个简单的SQL查询
     // Before starting the thread, mutate the execution ID in the parent.
+    //在启动线程之前,父在可变执行ID
     // The child thread should not see the effect of this change.
+    //子线程不应该看到这个更改的效果
     var throwable: Option[Throwable] = None
     val child = new Thread {
       override def run(): Unit = {
@@ -81,6 +87,7 @@ class SQLExecutionSuite extends SparkFunSuite {
     child.join()
 
     // The throwable is thrown from the child thread so it doesn't have a helpful stack trace
+    //错误是子线程抛出它并不具有一种有益的堆栈跟踪
     throwable.foreach { t =>
       t.setStackTrace(t.getStackTrace ++ Thread.currentThread.getStackTrace)
       throw t

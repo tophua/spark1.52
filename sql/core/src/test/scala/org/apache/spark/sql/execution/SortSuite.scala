@@ -24,8 +24,9 @@ import org.apache.spark.sql.test.SharedSQLContext
 class SortSuite extends SparkPlanTest with SharedSQLContext {
 
   // This test was originally added as an example of how to use [[SparkPlanTest]];
+  //这个测试最初是作为一个如何使用的一个例子添加的
   // it's not designed to be a comprehensive test of ExternalSort.
-  test("basic sorting using ExternalSort") {
+  test("basic sorting using ExternalSort") {//使用外部排序的基本排序
 
     val input = Seq(
       ("Hello", 4, 2.0),

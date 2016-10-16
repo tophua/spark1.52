@@ -111,14 +111,14 @@ class UnsafeFixedWidthAggregationMapSuite
       groupKeySchema,
       taskMemoryManager,
       shuffleMemoryManager,
-      1024, // initial capacity,
+      1024, // initial capacity,初始化容量
       PAGE_SIZE_BYTES,
-      false // disable perf metrics
+      false // disable perf metrics 禁用的性能指标
     )
     assert(!map.iterator().next())
     map.free()
   }
-
+  //更新一个键的值
   testWithMemoryLeakDetection("updating values for a single key") {
     val map = new UnsafeFixedWidthAggregationMap(
       emptyAggregationBuffer,
@@ -126,13 +126,14 @@ class UnsafeFixedWidthAggregationMapSuite
       groupKeySchema,
       taskMemoryManager,
       shuffleMemoryManager,
-      1024, // initial capacity
+      1024, // initial capacity 初始化容量
       PAGE_SIZE_BYTES,
-      false // disable perf metrics
+      false // disable perf metrics 禁用的性能指标
     )
     val groupKey = InternalRow(UTF8String.fromString("cats"))
 
     // Looking up a key stores a zero-entry in the map (like Python Counters or DefaultDicts)
+    //在Map上查找一个键存储一零个条目
     assert(map.getAggregationBuffer(groupKey) != null)
     val iter = map.iterator()
     assert(iter.next())
@@ -141,13 +142,14 @@ class UnsafeFixedWidthAggregationMapSuite
     assert(!iter.next())
 
     // Modifications to rows retrieved from the map should update the values in the map
+    //从Map任务中检索的行的修改应更新地图中的值
     iter.getValue.setInt(0, 42)
     map.getAggregationBuffer(groupKey).getInt(0) should be (42)
 
     map.free()
   }
 
-  testWithMemoryLeakDetection("inserting large random keys") {
+  testWithMemoryLeakDetection("inserting large random keys") {//插入大随机键
     val map = new UnsafeFixedWidthAggregationMap(
       emptyAggregationBuffer,
       aggBufferSchema,
@@ -174,8 +176,9 @@ class UnsafeFixedWidthAggregationMapSuite
     map.free()
   }
 
-  testWithMemoryLeakDetection("test external sorting") {
+  testWithMemoryLeakDetection("test external sorting") {//测试外部排序
     // Memory consumption in the beginning of the task.
+    //任务开始时的内存消耗
     val initialMemoryConsumption = shuffleMemoryManager.getMemoryConsumptionForThisTask()
 
     val map = new UnsafeFixedWidthAggregationMap(
@@ -197,6 +200,7 @@ class UnsafeFixedWidthAggregationMapSuite
     }
 
     // Convert the map into a sorter
+    //转换Map分类
     val sorter = map.destructAndCreateExternalSorter()
 
     withClue(s"destructAndCreateExternalSorter should release memory used by the map") {
@@ -204,6 +208,7 @@ class UnsafeFixedWidthAggregationMapSuite
     }
 
     // Add more keys to the sorter and make sure the results come out sorted.
+    //添加更多的键的排序和确定出来的结果排序
     val additionalKeys = randomStrings(1024)
     val keyConverter = UnsafeProjection.create(groupKeySchema)
     val valueConverter = UnsafeProjection.create(aggBufferSchema)
@@ -230,7 +235,7 @@ class UnsafeFixedWidthAggregationMapSuite
 
     map.free()
   }
-
+  //用空映射进行外部排序的测试
   testWithMemoryLeakDetection("test external sorting with an empty map") {
 
     val map = new UnsafeFixedWidthAggregationMap(
@@ -277,10 +282,11 @@ class UnsafeFixedWidthAggregationMapSuite
 
     map.free()
   }
-
+  //用空记录进行外部排序的测试
   testWithMemoryLeakDetection("test external sorting with empty records") {
 
     // Memory consumption in the beginning of the task.
+    //任务开始时的内存消耗
     val initialMemoryConsumption = shuffleMemoryManager.getMemoryConsumptionForThisTask()
 
     val map = new UnsafeFixedWidthAggregationMap(
@@ -320,17 +326,19 @@ class UnsafeFixedWidthAggregationMapSuite
     val iter = sorter.sortedIterator()
     while (iter.next()) {
       // At here, we also test if copy is correct.
+      //在这里,我们也测试,如果正确复制
       iter.getKey.copy()
       iter.getValue.copy()
       count += 1
     }
 
     // 1 record was from the map and 4096 records were explicitly inserted.
+    //1记录是从Map和4096个记录显式插入
     assert(count === 4097)
 
     map.free()
   }
-
+  //在内存压力下在外部排序
   testWithMemoryLeakDetection("convert to external sorter under memory pressure (SPARK-10474)") {
     val smm = ShuffleMemoryManager.createForTesting(65536)
     val pageSize = 4096
@@ -346,6 +354,7 @@ class UnsafeFixedWidthAggregationMapSuite
     )
 
     // Insert into the map until we've run out of space
+    //插入到Map上,直到我们用完了空间
     val rand = new Random(42)
     var hasSpace = true
     while (hasSpace) {
@@ -359,6 +368,7 @@ class UnsafeFixedWidthAggregationMapSuite
     }
 
     // Ensure we're actually maxed out by asserting that we can't acquire even just 1 byte
+    //确保我们实际上透支的说,我们无法获得哪怕只有1字节
     assert(smm.tryToAcquire(1) === 0)
 
     // Convert the map into a sorter. This used to fail before the fix for SPARK-10474

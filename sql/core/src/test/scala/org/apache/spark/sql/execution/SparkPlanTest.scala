@@ -35,6 +35,7 @@ private[sql] abstract class SparkPlanTest extends SparkFunSuite {
 
   /**
    * Creates a DataFrame from a local Seq of Product.
+   * 从创建产品局部序列的一个数据框。
    */
   implicit def localSeqToDataFrameHolder[A <: Product : TypeTag](data: Seq[A]): DataFrameHolder = {
     _sqlContext.implicits.localSeqToDataFrameHolder(data)

@@ -25,7 +25,7 @@ import org.apache.spark.sql.{AnalysisException, SaveMode, SQLConf, DataFrame}
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
 import org.apache.spark.util.Utils
-
+//保存加载套件
 class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndAfter {
   protected override lazy val sql = caseInsensitiveContext.sql _
   private lazy val sparkContext = caseInsensitiveContext.sparkContext
@@ -74,14 +74,14 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
       sql(s"SELECT b FROM $tbl").collect())
   }
 
-  test("save with path and load") {
+  test("save with path and load") {//保存路径和加载
     caseInsensitiveContext.conf.setConf(
       SQLConf.DEFAULT_DATA_SOURCE_NAME, "org.apache.spark.sql.json")
     df.write.save(path.toString)
     checkLoad()
   }
 
-  test("save with string mode and path, and load") {
+  test("save with string mode and path, and load") {//保存字符串模式和路径,并加载
     caseInsensitiveContext.conf.setConf(
       SQLConf.DEFAULT_DATA_SOURCE_NAME, "org.apache.spark.sql.json")
     path.createNewFile()
@@ -89,19 +89,19 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
     checkLoad()
   }
 
-  test("save with path and datasource, and load") {
+  test("save with path and datasource, and load") {//路径和数据源保存和加载
     caseInsensitiveContext.conf.setConf(SQLConf.DEFAULT_DATA_SOURCE_NAME, "not a source name")
     df.write.json(path.toString)
     checkLoad()
   }
 
-  test("save with data source and options, and load") {
+  test("save with data source and options, and load") {//保存与数据源和选项,并加载
     caseInsensitiveContext.conf.setConf(SQLConf.DEFAULT_DATA_SOURCE_NAME, "not a source name")
     df.write.mode(SaveMode.ErrorIfExists).json(path.toString)
     checkLoad()
   }
 
-  test("save and save again") {
+  test("save and save again") {//再次保存和保存
     df.write.json(path.toString)
 
     val message = intercept[AnalysisException] {

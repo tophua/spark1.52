@@ -27,6 +27,7 @@ import org.apache.spark.sql.types._
 
 /**
  * A test suite that generates randomized data to test the [[TungstenSort]] operator.
+ * 一个测试用例生成随机数据测试tungstensort ] [ [ ]算子
  */
 class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
 
@@ -43,7 +44,7 @@ class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
     }
   }
 
-  test("sort followed by limit") {
+  test("sort followed by limit") {//排序下列限制
     checkThatPlansAgree(
       (1 to 100).map(v => Tuple1(v)).toDF("a"),
       (child: SparkPlan) => Limit(10, TungstenSort('a.asc :: Nil, true, child)),
@@ -52,7 +53,7 @@ class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
     )
   }
 
-  test("sorting does not crash for large inputs") {
+  test("sorting does not crash for large inputs") {//大输入的排序不崩溃
     val sortOrder = 'a.asc :: Nil
     val stringLength = 1024 * 1024 * 2
     checkThatPlansAgree(
@@ -63,7 +64,7 @@ class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
     )
   }
 
-  test("sorting updates peak execution memory") {
+  test("sorting updates peak execution memory") {//排序更新执行内存值
     val sc = ctx.sparkContext
     AccumulatorSuite.verifyPeakExecutionMemorySet(sc, "unsafe external sort") {
       checkThatPlansAgree(
@@ -75,6 +76,7 @@ class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
   }
 
   // Test sorting on different data types
+  //不同数据类型的测试排序
   for (
     dataType <- DataTypeTestUtils.atomicTypes ++ Set(NullType);
     nullable <- Seq(true, false);

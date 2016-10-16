@@ -53,7 +53,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
     }
   }
 
-  test("Simple INSERT OVERWRITE a JSONRelation") {
+  test("Simple INSERT OVERWRITE a JSONRelation") {//简单的插入覆盖一个JSON的关系
     sql(
       s"""
         |INSERT OVERWRITE TABLE jsonTable SELECT a, b FROM jt
@@ -65,7 +65,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
     )
   }
 
-  test("PreInsert casting and renaming") {
+  test("PreInsert casting and renaming") {//预插入强另类型转换和重命名
     sql(
       s"""
         |INSERT OVERWRITE TABLE jsonTable SELECT a * 2, a * 4 FROM jt
@@ -179,13 +179,14 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
       "INSERT OVERWRITE to a table while querying it should not be allowed.")
   }
 
-  test("Caching")  {
+  test("Caching")  {//缓存
     // write something to the jsonTable
+    //写点东西给jsontable
     sql(
       s"""
          |INSERT OVERWRITE TABLE jsonTable SELECT a, b FROM jt
       """.stripMargin)
-    // Cached Query Execution
+    // Cached Query Execution 缓存查询执行
     caseInsensitiveContext.cacheTable("jsonTable")
     assertCached(sql("SELECT * FROM jsonTable"))
     checkAnswer(
@@ -214,6 +215,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
       (2 to 10).map(i => Row(i, i - 1)).toSeq)
 
     // Insert overwrite and keep the same schema.
+      //插入覆盖并保持相同的模式
     sql(
       s"""
         |INSERT OVERWRITE TABLE jsonTable SELECT a * 2, b FROM jt

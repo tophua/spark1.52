@@ -31,6 +31,7 @@ class TestShuffleMemoryManager extends ShuffleMemoryManager(Long.MaxValue, 4 * 1
       0
     } else {
       // Uncomment the following to trace memory allocations.
+      //取消下列跟踪内存分配
       // println(s"tryToAcquire $numBytes in " +
       //   Thread.currentThread().getStackTrace.mkString("", "\n  -", ""))
       val acquired = super.tryToAcquire(numBytes)
@@ -40,6 +41,7 @@ class TestShuffleMemoryManager extends ShuffleMemoryManager(Long.MaxValue, 4 * 1
 
   override def release(numBytes: Long): Unit = {
     // Uncomment the following to trace memory releases.
+    //取消下列跟踪内存分配
     // println(s"release $numBytes in " +
     //   Thread.currentThread().getStackTrace.mkString("", "\n  -", ""))
     super.release(numBytes)

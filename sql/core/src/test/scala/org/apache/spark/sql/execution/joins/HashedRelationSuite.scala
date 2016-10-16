@@ -31,11 +31,12 @@ import org.apache.spark.util.collection.CompactBuffer
 class HashedRelationSuite extends SparkFunSuite with SharedSQLContext {
 
   // Key is simply the record itself
+  //键简单地记录自己
   private val keyProjection = new Projection {
     override def apply(row: InternalRow): InternalRow = row
   }
 
-  test("GeneralHashedRelation") {
+  test("GeneralHashedRelation") {//通用散列关系
     val data = Array(InternalRow(0), InternalRow(1), InternalRow(2), InternalRow(2))
     val numDataRows = SQLMetrics.createLongMetric(ctx.sparkContext, "data")
     val hashed = HashedRelation(data.iterator, numDataRows, keyProjection)
@@ -51,7 +52,7 @@ class HashedRelationSuite extends SparkFunSuite with SharedSQLContext {
     assert(numDataRows.value.value === data.length)
   }
 
-  test("UniqueKeyHashedRelation") {
+  test("UniqueKeyHashedRelation") {//唯一键哈希关系
     val data = Array(InternalRow(0), InternalRow(1), InternalRow(2))
     val numDataRows = SQLMetrics.createLongMetric(ctx.sparkContext, "data")
     val hashed = HashedRelation(data.iterator, numDataRows, keyProjection)
@@ -70,7 +71,7 @@ class HashedRelationSuite extends SparkFunSuite with SharedSQLContext {
     assert(numDataRows.value.value === data.length)
   }
 
-  test("UnsafeHashedRelation") {
+  test("UnsafeHashedRelation") {//不安全散列关系
     val schema = StructType(StructField("a", IntegerType, true) :: Nil)
     val data = Array(InternalRow(0), InternalRow(1), InternalRow(2), InternalRow(2))
     val numDataRows = SQLMetrics.createLongMetric(ctx.sparkContext, "data")
@@ -112,7 +113,7 @@ class HashedRelationSuite extends SparkFunSuite with SharedSQLContext {
     assert(java.util.Arrays.equals(os2.toByteArray, os.toByteArray))
   }
 
-  test("test serialization empty hash map") {
+  test("test serialization empty hash map") {//测试序列化的空哈希映射
     val os = new ByteArrayOutputStream()
     val out = new ObjectOutputStream(os)
     val hashed = new UnsafeHashedRelation(

@@ -90,7 +90,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
       StructField("id", IntegerType) ::
       StructField("seq", IntegerType) :: Nil)
 
-  test("Basic CREATE") {
+  test("Basic CREATE") {//基本创建
     val df = ctx.createDataFrame(sc.parallelize(arr2x2), schema2)
 
     df.write.jdbc(url, "TEST.BASICCREATETEST", new Properties)
@@ -98,7 +98,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     assert(2 === ctx.read.jdbc(url, "TEST.BASICCREATETEST", new Properties).collect()(0).length)
   }
 
-  test("CREATE with overwrite") {
+  test("CREATE with overwrite") {//创建覆盖
     val df = ctx.createDataFrame(sc.parallelize(arr2x3), schema3)
     val df2 = ctx.createDataFrame(sc.parallelize(arr1x2), schema2)
 
@@ -111,7 +111,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     assert(2 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).collect()(0).length)
   }
 
-  test("CREATE then INSERT to append") {
+  test("CREATE then INSERT to append") {//创建然后插入到追加
     val df = ctx.createDataFrame(sc.parallelize(arr2x2), schema2)
     val df2 = ctx.createDataFrame(sc.parallelize(arr1x2), schema2)
 
@@ -121,7 +121,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     assert(2 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).collect()(0).length)
   }
 
-  test("CREATE then INSERT to truncate") {
+  test("CREATE then INSERT to truncate") {//创建并插入截断
     val df = ctx.createDataFrame(sc.parallelize(arr2x2), schema2)
     val df2 = ctx.createDataFrame(sc.parallelize(arr1x2), schema2)
 
@@ -131,7 +131,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     assert(2 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).collect()(0).length)
   }
 
-  test("Incompatible INSERT to append") {
+  test("Incompatible INSERT to append") {//创建并插入追加
     val df = ctx.createDataFrame(sc.parallelize(arr2x2), schema2)
     val df2 = ctx.createDataFrame(sc.parallelize(arr2x3), schema3)
 
@@ -141,13 +141,13 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     }
   }
 
-  test("INSERT to JDBC Datasource") {
+  test("INSERT to JDBC Datasource") {//插入JDBC数据源
     sql("INSERT INTO TABLE PEOPLE1 SELECT * FROM PEOPLE")
     assert(2 === ctx.read.jdbc(url1, "TEST.PEOPLE1", properties).count)
     assert(2 === ctx.read.jdbc(url1, "TEST.PEOPLE1", properties).collect()(0).length)
   }
 
-  test("INSERT to JDBC Datasource with overwrite") {
+  test("INSERT to JDBC Datasource with overwrite") {//插入与改写JDBC数据源
     sql("INSERT INTO TABLE PEOPLE1 SELECT * FROM PEOPLE")
     sql("INSERT OVERWRITE TABLE PEOPLE1 SELECT * FROM PEOPLE")
     assert(2 === ctx.read.jdbc(url1, "TEST.PEOPLE1", properties).count)

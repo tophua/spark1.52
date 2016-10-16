@@ -32,6 +32,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
     ctx.sparkContext.parallelize(Seq(
       Row(1, 2.0),
       Row(2, 100.0),
+      //这行是重复的，以确保我们将有多个缓冲匹配
       Row(2, 1.0), // This row is duplicated to ensure that we will have multiple buffered matches
       Row(2, 1.0),
       Row(3, 3.0),
@@ -43,6 +44,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
   private lazy val right = ctx.createDataFrame(
     ctx.sparkContext.parallelize(Seq(
       Row(0, 0.0),
+      //这行是重复的，以确保我们将有多个缓冲匹配
       Row(2, 3.0), // This row is duplicated to ensure that we will have multiple buffered matches
       Row(2, -1.0),
       Row(2, -1.0),
@@ -74,7 +76,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
       ExtractEquiJoinKeys.unapply(join)
     }
 
-    test(s"$testName using ShuffledHashOuterJoin") {
+    test(s"$testName using ShuffledHashOuterJoin") {//利用Shuffle哈希外连接
       extractJoinParts().foreach { case (_, leftKeys, rightKeys, boundCondition, _, _) =>
           withSQLConf(SQLConf.SHUFFLE_PARTITIONS.key -> "1") {
             checkAnswer2(leftRows, rightRows, (left: SparkPlan, right: SparkPlan) =>
@@ -115,7 +117,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
   // --- Basic outer joins ------------------------------------------------------------------------
 
   testOuterJoin(
-    "basic left outer join",
+    "basic left outer join",//基本左外连接
     left,
     right,
     LeftOuter,
@@ -135,7 +137,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
   )
 
   testOuterJoin(
-    "basic right outer join",
+    "basic right outer join",//基本右外连接
     left,
     right,
     RightOuter,
@@ -157,7 +159,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
   )
 
   testOuterJoin(
-    "basic full outer join",
+    "basic full outer join",//基本全外连接
     left,
     right,
     FullOuter,
@@ -185,7 +187,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
 
   // --- Both inputs empty ------------------------------------------------------------------------
 
-  testOuterJoin(
+  testOuterJoin(//左外连接与两个输入空
     "left outer join with both inputs empty",
     left.filter("false"),
     right.filter("false"),
@@ -194,7 +196,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
     Seq.empty
   )
 
-  testOuterJoin(
+  testOuterJoin(//右外连接与两个输入空
     "right outer join with both inputs empty",
     left.filter("false"),
     right.filter("false"),
@@ -203,7 +205,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
     Seq.empty
   )
 
-  testOuterJoin(
+  testOuterJoin(//全外连接与两个输入空
     "full outer join with both inputs empty",
     left.filter("false"),
     right.filter("false"),

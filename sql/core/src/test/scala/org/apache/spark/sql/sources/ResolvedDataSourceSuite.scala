@@ -19,7 +19,7 @@ package org.apache.spark.sql.sources
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.execution.datasources.ResolvedDataSource
-
+  //解决数据源套件
 class ResolvedDataSourceSuite extends SparkFunSuite {
 
   test("jdbc") {

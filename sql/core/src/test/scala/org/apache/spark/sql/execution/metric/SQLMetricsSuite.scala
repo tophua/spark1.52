@@ -48,7 +48,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("Normal accumulator should do boxing") {
+  test("Normal accumulator should do boxing") {//普通累加器装箱
     // We need this test to make sure BoxingFinder works.
     val l = ctx.sparkContext.accumulator(0L)
     val f = () => { l += 1L }
@@ -102,12 +102,12 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("Project metrics") {
+  test("Project metrics") {///项目指标
     withSQLConf(
       SQLConf.UNSAFE_ENABLED.key -> "false",
       SQLConf.CODEGEN_ENABLED.key -> "false",
       SQLConf.TUNGSTEN_ENABLED.key -> "false") {
-      // Assume the execution plan is
+      // Assume the execution plan is 假设执行计划是
       // PhysicalRDD(nodeId = 1) -> Project(nodeId = 0)
       val df = person.select('name)
       testSparkPlanMetrics(df, 1, Map(
@@ -117,7 +117,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("TungstenProject metrics") {
+  test("TungstenProject metrics") {//钨丝项目指标
     withSQLConf(
       SQLConf.UNSAFE_ENABLED.key -> "true",
       SQLConf.CODEGEN_ENABLED.key -> "true",
@@ -132,7 +132,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("Filter metrics") {
+  test("Filter metrics") {//过滤器的指标
     // Assume the execution plan is
     // PhysicalRDD(nodeId = 1) -> Filter(nodeId = 0)
     val df = person.filter('age < 25)
@@ -143,7 +143,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     )
   }
 
-  test("Aggregate metrics") {
+  test("Aggregate metrics") {//聚合指标
     withSQLConf(
       SQLConf.UNSAFE_ENABLED.key -> "false",
       SQLConf.CODEGEN_ENABLED.key -> "false",
@@ -161,6 +161,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
       )
 
       // 2 partitions and each partition contains 2 keys
+      //2个分区和每个分区包含2个键
       val df2 = testData2.groupBy('a).count()
       testSparkPlanMetrics(df2, 1, Map(
         2L -> ("Aggregate", Map(
@@ -173,14 +174,16 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("SortBasedAggregate metrics") {
+  test("SortBasedAggregate metrics") {//基于排序的集合指标
     // Because SortBasedAggregate may skip different rows if the number of partitions is different,
+    //因为基于排序的聚合可以跳过不同的行,如果分区的数量是不同的
     // this test should use the deterministic number of partitions.
+    //这个测试应该使用确定的分区数
     withSQLConf(
       SQLConf.UNSAFE_ENABLED.key -> "false",
       SQLConf.CODEGEN_ENABLED.key -> "true",
       SQLConf.TUNGSTEN_ENABLED.key -> "true") {
-      // Assume the execution plan is
+      // Assume the execution plan is 假设执行计划是
       // ... -> SortBasedAggregate(nodeId = 2) -> TungstenExchange(nodeId = 1) ->
       // SortBasedAggregate(nodeId = 0)
       val df = testData2.groupBy().count() // 2 partitions
@@ -209,7 +212,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("TungstenAggregate metrics") {
+  test("TungstenAggregate metrics") {//钨丝聚合指标
     withSQLConf(
       SQLConf.UNSAFE_ENABLED.key -> "true",
       SQLConf.CODEGEN_ENABLED.key -> "true",
@@ -228,6 +231,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
       )
 
       // 2 partitions and each partition contains 2 keys
+      //2个分区和每个分区包含2个键
       val df2 = testData2.groupBy('a).count()
       testSparkPlanMetrics(df2, 1, Map(
         2L -> ("TungstenAggregate", Map(
@@ -240,7 +244,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("SortMergeJoin metrics") {
+  test("SortMergeJoin metrics") {//排序合并连接度量
     // Because SortMergeJoin may skip different rows if the number of partitions is different, this
     // test should use the deterministic number of partitions.
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "true") {
@@ -254,6 +258,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
         testSparkPlanMetrics(df, 1, Map(
           1L -> ("SortMergeJoin", Map(
             // It's 4 because we only read 3 rows in the first partition and 1 row in the second one
+            //这是4，因为我们只在第一个分区中读取3行和第二个分区中的1行
             "number of left rows" -> 4L,
             "number of right rows" -> 2L,
             "number of output rows" -> 4L)))
@@ -262,9 +267,11 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("SortMergeOuterJoin metrics") {
+  test("SortMergeOuterJoin metrics") {//排序合并外部连接度量
     // Because SortMergeOuterJoin may skip different rows if the number of partitions is different,
+    //如果排序合并外部连接可能跳过不同的行,如果分区的数目是不同的
     // this test should use the deterministic number of partitions.
+    //这个测试应该使用确定的分区数
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "true") {
       val testDataForJoin = testData2.filter('a < 2) // TestData2(1, 1) :: TestData2(1, 2)
       testDataForJoin.registerTempTable("testDataForJoin")
@@ -276,6 +283,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
         testSparkPlanMetrics(df, 1, Map(
           1L -> ("SortMergeOuterJoin", Map(
             // It's 4 because we only read 3 rows in the first partition and 1 row in the second one
+            //这是4,因为我们只在第一个分区中读取3行和第二个分区中的1行
             "number of left rows" -> 6L,
             "number of right rows" -> 2L,
             "number of output rows" -> 8L)))
@@ -294,7 +302,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("BroadcastHashJoin metrics") {
+  test("BroadcastHashJoin metrics") {//广播的哈希连接度量
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "false") {
       val df1 = Seq((1, "1"), (2, "2")).toDF("key", "value")
       val df2 = Seq((1, "1"), (2, "2"), (3, "3"), (4, "4")).toDF("key", "value")
@@ -310,7 +318,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("ShuffledHashJoin metrics") {
+  test("ShuffledHashJoin metrics") {//Shuffle的哈希连接度量
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "false") {
       val testDataForJoin = testData2.filter('a < 2) // TestData2(1, 1) :: TestData2(1, 2)
       testDataForJoin.registerTempTable("testDataForJoin")
@@ -329,7 +337,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("ShuffledHashOuterJoin metrics") {
+  test("ShuffledHashOuterJoin metrics") {//Shuffle哈希外连接度量
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "false",
       SQLConf.AUTO_BROADCASTJOIN_THRESHOLD.key -> "0") {
       val df1 = Seq((1, "a"), (1, "b"), (4, "c")).toDF("key", "value")
@@ -362,7 +370,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("BroadcastHashOuterJoin metrics") {
+  test("BroadcastHashOuterJoin metrics") {//广播散列外连接度量
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "false") {
       val df1 = Seq((1, "a"), (1, "b"), (4, "c")).toDF("key", "value")
       val df2 = Seq((1, "a"), (1, "b"), (2, "c"), (3, "d")).toDF("key2", "value")
@@ -386,7 +394,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("BroadcastNestedLoopJoin metrics") {
+  test("BroadcastNestedLoopJoin metrics") {//广播嵌套循环连接度量
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "true") {
       val testDataForJoin = testData2.filter('a < 2) // TestData2(1, 1) :: TestData2(1, 2)
       testDataForJoin.registerTempTable("testDataForJoin")
@@ -398,6 +406,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
             "testData2.a * testDataForJoin.a != testData2.a + testDataForJoin.a")
         testSparkPlanMetrics(df, 3, Map(
           1L -> ("BroadcastNestedLoopJoin", Map(
+              //左需要扫描两次
             "number of left rows" -> 12L, // left needs to be scanned twice
             "number of right rows" -> 2L,
             "number of output rows" -> 12L)))
@@ -406,7 +415,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("BroadcastLeftSemiJoinHash metrics") {
+  test("BroadcastLeftSemiJoinHash metrics") {//广播左半连接哈希度量
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "false") {
       val df1 = Seq((1, "1"), (2, "2")).toDF("key", "value")
       val df2 = Seq((1, "1"), (2, "2"), (3, "3"), (4, "4")).toDF("key2", "value")
@@ -422,7 +431,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("LeftSemiJoinHash metrics") {
+  test("LeftSemiJoinHash metrics") {//左半连接哈希度量
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "true",
       SQLConf.AUTO_BROADCASTJOIN_THRESHOLD.key -> "0") {
       val df1 = Seq((1, "1"), (2, "2")).toDF("key", "value")
@@ -439,7 +448,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("LeftSemiJoinBNL metrics") {
+  test("LeftSemiJoinBNL metrics") {//
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "false") {
       val df1 = Seq((1, "1"), (2, "2")).toDF("key", "value")
       val df2 = Seq((1, "1"), (2, "2"), (3, "3"), (4, "4")).toDF("key2", "value")
@@ -455,7 +464,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  test("CartesianProduct metrics") {
+  test("CartesianProduct metrics") {//笛卡尔积度量
     val testDataForJoin = testData2.filter('a < 2) // TestData2(1, 1) :: TestData2(1, 2)
     testDataForJoin.registerTempTable("testDataForJoin")
     withTempTable("testDataForJoin") {
@@ -465,14 +474,14 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
         "SELECT * FROM testData2 JOIN testDataForJoin")
       testSparkPlanMetrics(df, 1, Map(
         1L -> ("CartesianProduct", Map(
-          "number of left rows" -> 12L, // left needs to be scanned twice
-          "number of right rows" -> 12L, // right is read 6 times
+          "number of left rows" -> 12L, // left needs to be scanned twice 左需要扫描两次
+          "number of right rows" -> 12L, // right is read 6 times 右侧阅读6次
           "number of output rows" -> 12L)))
       )
     }
   }
 
-  test("save metrics") {
+  test("save metrics") {//保存度量
     withTempPath { file =>
       val previousExecutionIds = ctx.listener.executionIdToData.keySet
       // Assume the execution plan is
@@ -524,6 +533,7 @@ private class BoxingFinder(
     MethodVisitor = {
     if (method != null && (method.name != name || method.desc != desc)) {
       // If method is specified, skip other methods.
+      //如果指定了方法,则跳过其他方法。
       return new MethodVisitor(ASM4) {}
     }
 
@@ -542,6 +552,7 @@ private class BoxingFinder(
           val m = MethodIdentifier(classOfMethodOwner, name, desc)
           if (!visitedMethods.contains(m)) {
             // Keep track of visited methods to avoid potential infinite cycles
+            //跟踪访问的方法，以避免潜在的无限周期
             visitedMethods += m
             BoxingFinder.getClassReader(classOfMethodOwner).foreach { cl =>
               visitedMethods += m

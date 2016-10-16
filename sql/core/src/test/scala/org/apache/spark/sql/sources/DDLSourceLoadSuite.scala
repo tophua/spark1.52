@@ -25,23 +25,23 @@ import org.apache.spark.sql.types.{StringType, StructField, StructType}
 // please note that the META-INF/services had to be modified for the test directory for this to work
 class DDLSourceLoadSuite extends DataSourceTest with SharedSQLContext {
 
-  test("data sources with the same name") {
+  test("data sources with the same name") {//同名的数据源
     intercept[RuntimeException] {
       caseInsensitiveContext.read.format("Fluet da Bomb").load()
     }
   }
 
-  test("load data source from format alias") {
+  test("load data source from format alias") {//从格式别名加载数据源
     caseInsensitiveContext.read.format("gathering quorum").load().schema ==
       StructType(Seq(StructField("stringType", StringType, nullable = false)))
   }
 
-  test("specify full classname with duplicate formats") {
+  test("specify full classname with duplicate formats") {//重复的格式指定完整的类名
     caseInsensitiveContext.read.format("org.apache.spark.sql.sources.FakeSourceOne")
       .load().schema == StructType(Seq(StructField("stringType", StringType, nullable = false)))
   }
 
-  test("should fail to load ORC without HiveContext") {
+  test("should fail to load ORC without HiveContext") {//
     intercept[ClassNotFoundException] {
       caseInsensitiveContext.read.format("orc").load()
     }

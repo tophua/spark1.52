@@ -27,6 +27,7 @@ import org.apache.spark.sql.QueryTest
 
 /**
  * Helper class for testing Parquet compatibility.
+ * 测试Parquet的兼容性助手类
  */
 private[sql] abstract class ParquetCompatibilityTest extends QueryTest with ParquetTest {
   protected def readParquetSchema(path: String): MessageType = {

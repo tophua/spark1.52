@@ -31,6 +31,7 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     // Make a table with 5 partitions, 2 batches per partition, 10 elements per batch
+    //标记一个有5个分区的表,每分区的2个批次,每批10个元素
     ctx.setConf(SQLConf.COLUMN_BATCH_SIZE, 10)
 
     val pruningData = ctx.sparkContext.makeRDD((1 to 100).map { key =>
@@ -40,8 +41,10 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
     pruningData.registerTempTable("pruningData")
 
     // Enable in-memory partition pruning
+    //启用内存分区修剪
     ctx.setConf(SQLConf.IN_MEMORY_PARTITION_PRUNING, true)
     // Enable in-memory table scan accumulators
+    //使内存中的表扫描累加器
     ctx.setConf("spark.sql.inMemoryTableScanStatistics.enable", "true")
     ctx.cacheTable("pruningData")
   }
@@ -57,6 +60,7 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
   }
 
   // Comparisons
+  //比较
   checkBatchPruning("SELECT key FROM pruningData WHERE key = 1", 1, 1)(Seq(1))
   checkBatchPruning("SELECT key FROM pruningData WHERE 1 = key", 1, 1)(Seq(1))
   checkBatchPruning("SELECT key FROM pruningData WHERE key < 12", 1, 2)(1 to 11)
@@ -68,7 +72,7 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
   checkBatchPruning("SELECT key FROM pruningData WHERE 88 < key", 1, 2)(89 to 100)
   checkBatchPruning("SELECT key FROM pruningData WHERE 89 <= key", 1, 2)(89 to 100)
 
-  // IS NULL
+  // IS NULL 是否null
   checkBatchPruning("SELECT key FROM pruningData WHERE value IS NULL", 5, 5) {
     (1 to 10) ++ (21 to 30) ++ (41 to 50) ++ (61 to 70) ++ (81 to 90)
   }
@@ -78,7 +82,7 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
     (11 to 20) ++ (31 to 40) ++ (51 to 60) ++ (71 to 80) ++ (91 to 100)
   }
 
-  // Conjunction and disjunction
+  // Conjunction and disjunction 结合和分离
   checkBatchPruning("SELECT key FROM pruningData WHERE key > 8 AND key <= 21", 2, 3)(9 to 21)
   checkBatchPruning("SELECT key FROM pruningData WHERE key < 2 OR key > 99", 2, 2)(Seq(1, 100))
   checkBatchPruning("SELECT key FROM pruningData WHERE key < 12 AND key IS NOT NULL", 1, 2)(1 to 11)
@@ -91,7 +95,7 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
     88 to 100
   }
 
-  // With unsupported predicate
+  // With unsupported predicate 与不支持的谓词
   {
     val seq = (1 to 30).mkString(", ")
     checkBatchPruning(s"SELECT key FROM pruningData WHERE NOT (key IN ($seq))", 5, 10)(31 to 100)

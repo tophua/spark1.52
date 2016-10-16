@@ -25,7 +25,7 @@ import org.apache.spark.sql.types.Decimal
 class StringFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("string concat") {
+  test("string concat") {//字符串连接
     val df = Seq[(String, String, String)](("a", "b", null)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -37,7 +37,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("ab", null))
   }
 
-  test("string concat_ws") {
+  test("string concat_ws") {//字符串连接
     val df = Seq[(String, String, String)](("a", "b", null)).toDF("a", "b", "c")
 
     checkAnswer(
@@ -49,13 +49,13 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("a||b"))
   }
 
-  test("string Levenshtein distance") {
+  test("string Levenshtein distance") {//字符串编辑距离
     val df = Seq(("kitten", "sitting"), ("frog", "fog")).toDF("l", "r")
     checkAnswer(df.select(levenshtein($"l", $"r")), Seq(Row(3), Row(1)))
     checkAnswer(df.selectExpr("levenshtein(l, r)"), Seq(Row(3), Row(1)))
   }
 
-  test("string regex_replace / regex_extract") {
+  test("string regex_replace / regex_extract") {//字符串正则表达式替换/提取
     val df = Seq(
       ("100-200", "(\\d+)-(\\d+)", "300"),
       ("100-200", "(\\d+)-(\\d+)", "400"),
@@ -68,9 +68,11 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("num-num", "100") :: Row("num-num", "100") :: Row("num-num", "100") :: Nil)
 
     // for testing the mutable state of the expression in code gen.
+    //测试代码中表达式的可变状态
     // This is a hack way to enable the codegen, thus the codegen is enable by default,
+    //这是一个黑客的方式使代码生成,代码生成是默认启用
     // it will still use the interpretProjection if projection followed by a LocalRelation,
-    // hence we add a filter operator.
+    // hence we add a filter operator.因此,我们添加了一个过滤器操作符
     // See the optimizer rule `ConvertToLocalRelation`
     checkAnswer(
       df.filter("isnotnull(a)").selectExpr(
@@ -79,7 +81,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("300", "100") :: Row("400", "100") :: Row("400-400", "100") :: Nil)
   }
 
-  test("string ascii function") {
+  test("string ascii function") {//字符串ASCII码的功能
     val df = Seq(("abc", "")).toDF("a", "b")
     checkAnswer(
       //
@@ -91,7 +93,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(97, 0))
   }
 
-  test("string base64/unbase64 function") {
+  test("string base64/unbase64 function") {//字符串Base64 / unbase64功能
     val bytes = Array[Byte](1, 2, 3, 4)
     val df = Seq((bytes, "AQIDBA==")).toDF("a", "b")
     checkAnswer(
@@ -103,9 +105,10 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("AQIDBA==", bytes))
   }
 
-  test("string / binary substring function") {
+  test("string / binary substring function") {//字符串/二进制字符串函数
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
+    //非ASCII字符的代码不允许,所以我们禁用scalastyle这里
     //使用substring截取字符串
     val df = Seq(("1世3", Array[Byte](1, 2, 3, 4))).toDF("a", "b")
     checkAnswer(df.select(substring($"a", 1, 2)), Row("1世"))
@@ -114,10 +117,11 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     // scalastyle:on
   }
 
-  test("string encode/decode function") {
+  test("string encode/decode function") {//字符串编码/解码功能
     val bytes = Array[Byte](-27, -92, -89, -27, -115, -125, -28, -72, -106, -25, -107, -116)
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
+    //非ASCII字符的代码不允许,所以我们禁用scalastyle这里
     val df = Seq(("大千世界", "utf-8", bytes)).toDF("a", "b", "c")
     checkAnswer(
       df.select(encode($"a", "utf-8"), decode($"c", "utf-8")),
@@ -129,13 +133,13 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     // scalastyle:on
   }
 
-  test("string translate") {
+  test("string translate") {//字符串转换
     val df = Seq(("translate", "")).toDF("a", "b")
     checkAnswer(df.select(translate($"a", "rnlt", "123")), Row("1a2s3ae"))
     checkAnswer(df.selectExpr("""translate(a, "rnlt", "")"""), Row("asae"))
   }
 
-  test("string trim functions") {
+  test("string trim functions") {//字符串截取函数
     val df = Seq(("  example  ", "")).toDF("a", "b")
     //截取空格
     checkAnswer(
@@ -147,7 +151,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("example  ", "  example", "example"))
   }
 
-  test("string formatString function") {
+  test("string formatString function") {//字符串格式化函数
     val df = Seq(("aa%d%s", 123, "cc")).toDF("a", "b", "c")
 
     checkAnswer(
@@ -159,7 +163,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("aa123cc"))
   }
 
-  test("soundex function") {
+  test("soundex function") {//Soundex算法函数
     val df = Seq(("MARY", "SU")).toDF("l", "r")
     checkAnswer(
       df.select(soundex($"l"), soundex($"r")), Row("M600", "S000"))
@@ -168,7 +172,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       df.selectExpr("SoundEx(l)", "SoundEx(r)"), Row("M600", "S000"))
   }
 
-  test("string instr function") {
+  test("string instr function") {//返回要截取的字符串在源字符串中的位置
     val df = Seq(("aaads", "aa", "zz")).toDF("a", "b", "c")
 
     checkAnswer(
@@ -181,7 +185,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(1))
   }
 
-  test("string substring_index function") {
+  test("string substring_index function") {//子字符串索引函数
     val df = Seq(("www.apache.org", ".", "zz")).toDF("a", "b", "c")
     checkAnswer(
       df.select(substring_index($"a", ".", 2)),
@@ -192,7 +196,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("string locate function") {
+  test("string locate function") {//字符串定位函数
     val df = Seq(("aaads", "aa", "zz", 1)).toDF("a", "b", "c", "d")
 
     checkAnswer(
@@ -205,7 +209,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(1, 2))
   }
 
-  test("string padding functions") {
+  test("string padding functions") {//字符串填充函数
     val df = Seq(("hi", 5, "??")).toDF("a", "b", "c")
 
     checkAnswer(
@@ -217,7 +221,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("???hi", "hi???", "h", "h"))
   }
 
-  test("string repeat function") {
+  test("string repeat function") {//字符串重复函数
     val df = Seq(("hi", 2)).toDF("a", "b")
 
     checkAnswer(
@@ -229,7 +233,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("hihi", "hihi"))
   }
 
-  test("string reverse function") {
+  test("string reverse function") {//字符串反转函数
     val df = Seq(("hi", "hhhi")).toDF("a", "b")
 
     checkAnswer(
@@ -241,7 +245,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("ihhh"))
   }
 
-  test("string space function") {
+  test("string space function") {//字符串空格函数
     val df = Seq((2, 3)).toDF("a", "b")
 
     checkAnswer(
@@ -249,7 +253,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("   "))
   }
 
-  test("string split function") {
+  test("string split function") {//字符串分隔函数
     val df = Seq(("aa2bb3cc", "[1-9]+")).toDF("a", "b")
 
     checkAnswer(
@@ -261,7 +265,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(Seq("aa", "bb", "cc")))
   }
 
-  test("string / binary length function") {
+  test("string / binary length function") {//字符串/二进制长度函数
     val df = Seq(("123", Array[Byte](1, 2, 3, 4), 123)).toDF("a", "b", "c")
     checkAnswer(
       df.select(length($"a"), length($"b")),
@@ -272,13 +276,13 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(3, 4))
 
     intercept[AnalysisException] {
-      checkAnswer(
+      checkAnswer(//int类型的参数是不可接受的
         df.selectExpr("length(c)"), // int type of the argument is unacceptable
         Row("5.0000"))
     }
   }
 
-  test("initcap function") {
+  test("initcap function") {//首字母大写函数
     val df = Seq(("ab", "a B")).toDF("l", "r")
     checkAnswer(
       df.select(initcap($"l"), initcap($"r")), Row("Ab", "A B"))
@@ -287,7 +291,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       df.selectExpr("InitCap(l)", "InitCap(r)"), Row("Ab", "A B"))
   }
 
-  test("number format function") {
+  test("number format function") {//数字格式化函数
     val tuple =
       ("aa", 1.asInstanceOf[Byte], 2.asInstanceOf[Short],
         3.13223f, 4, 5L, 6.48173d, Decimal(7.128381))
@@ -308,30 +312,31 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("5.0000"))
 
     checkAnswer(
+        //将第一个参数转换为整数
       df.selectExpr("format_number(b, e)"), // convert the 1st argument to integer
       Row("1.0000"))
 
-    checkAnswer(
+    checkAnswer(//将第一个参数转换为整数
       df.selectExpr("format_number(c, e)"), // convert the 1st argument to integer
       Row("2.0000"))
 
-    checkAnswer(
+    checkAnswer(//将第一个参数转换为double类型
       df.selectExpr("format_number(d, e)"), // convert the 1st argument to double
       Row("3.1322"))
 
-    checkAnswer(
+    checkAnswer(//不转换任何东西
       df.selectExpr("format_number(e, e)"), // not convert anything
       Row("4.0000"))
 
-    checkAnswer(
+    checkAnswer(//不转换任何东西
       df.selectExpr("format_number(f, e)"), // not convert anything
       Row("5.0000"))
 
-    checkAnswer(
+    checkAnswer(//不转换任何东西
       df.selectExpr("format_number(g, e)"), // not convert anything
       Row("6.4817"))
 
-    checkAnswer(
+    checkAnswer(//不转换任何东西
       df.selectExpr("format_number(h, e)"), // not convert anything
       Row("7.1284"))
 
@@ -342,12 +347,13 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     }
 
     intercept[AnalysisException] {
-      checkAnswer(
+      checkAnswer(//字符串类型的第一个参数是不可接受的
         df.selectExpr("format_number(e, g)"), // decimal type of the 2nd argument is unacceptable
         Row("5.0000"))
     }
 
     // for testing the mutable state of the expression in code gen.
+    //测试代码中生成可变状态表达式
     // This is a hack way to enable the codegen, thus the codegen is enable by default,
     // it will still use the interpretProjection if projection follows by a LocalRelation,
     // hence we add a filter operator.

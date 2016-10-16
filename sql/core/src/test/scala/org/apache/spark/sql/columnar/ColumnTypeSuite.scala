@@ -35,7 +35,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
   private val DEFAULT_BUFFER_SIZE = 512
   private val MAP_GENERIC = GENERIC(MapType(IntegerType, StringType))
 
-  test("defaultSize") {
+  test("defaultSize") {//默认大小
     val checks = Map(
       BOOLEAN -> 1, BYTE -> 1, SHORT -> 2, INT -> 4, DATE -> 4,
       LONG -> 8, TIMESTAMP -> 8, FLOAT -> 4, DOUBLE -> 8,
@@ -49,7 +49,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
     }
   }
 
-  test("actualSize") {
+  test("actualSize") {//实际大小
     def checkActualSize[JvmType](
         columnType: ColumnType[JvmType],
         value: JvmType,

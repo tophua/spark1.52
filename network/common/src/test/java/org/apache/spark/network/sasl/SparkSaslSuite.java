@@ -93,6 +93,7 @@ public class SparkSaslSuite {
     assertTrue(server.isComplete());
 
     // Disposal should invalidate
+    //处理应无效
     server.dispose();
     assertFalse(server.isComplete());
     client.dispose();
@@ -170,6 +171,7 @@ public class SparkSaslSuite {
       // Create a channel with a really small buffer compared to the data. This means that on each
       // call, the outbound data will not be fully written, so the write() method should return a
       // dummy count to keep the channel alive when possible.
+      //创建一个通道与一个真正的小缓冲区相比的数据,这意味着每一个在调用,出站数据将无法完全写入
       ByteArrayWritableChannel channel = new ByteArrayWritableChannel(32);
 
       SaslEncryption.EncryptedMessage emsg =
@@ -179,14 +181,17 @@ public class SparkSaslSuite {
       assertTrue(count > 0);
 
       // Here, the output buffer is full so nothing should be transferred.
+      //在这里,输出缓冲区是满的，所以没有什么应该被转移
       assertEquals(0, emsg.transferTo(channel, emsg.transfered()));
 
       // Now there's room in the buffer, but not enough to transfer all the remaining data,
       // so the dummy count should be returned.
+      //现在有在缓冲区的房间,但不足以传送所有剩余的数据,因此，应该返回虚拟计数
       channel.reset();
       assertEquals(1, emsg.transferTo(channel, emsg.transfered()));
 
       // Eventually, the whole message should be transferred.
+      //最终,整个信息应该被传递
       for (int i = 0; i < data.length / 32 - 2; i++) {
         channel.reset();
         assertEquals(1, emsg.transferTo(channel, emsg.transfered()));
@@ -213,6 +218,7 @@ public class SparkSaslSuite {
 
       SaslEncryptionBackend backend = mock(SaslEncryptionBackend.class);
       // It doesn't really matter what we return here, as long as it's not null.
+      //我们在这里还什么真的不重要,只要它不是空的
       when(backend.wrap(any(byte[].class), anyInt(), anyInt())).thenReturn(data);
 
       FileSegmentManagedBuffer msg = new FileSegmentManagedBuffer(conf, file, 0, file.length());

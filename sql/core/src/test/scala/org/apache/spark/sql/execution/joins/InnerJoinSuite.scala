@@ -170,7 +170,7 @@ class InnerJoinSuite extends SparkPlanTest with SharedSQLContext {
   }
 
   testInnerJoin(
-    "inner join, one match per row",
+    "inner join, one match per row",//内部连接,匹配每行
     myUpperCaseData,
     myLowerCaseData,
     () => (myUpperCaseData.col("N") === myLowerCaseData.col("n")).expr,

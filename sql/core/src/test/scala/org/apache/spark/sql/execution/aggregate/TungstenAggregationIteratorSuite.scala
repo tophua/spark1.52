@@ -26,12 +26,13 @@ import org.apache.spark.unsafe.memory.TaskMemoryManager
 
 class TungstenAggregationIteratorSuite extends SparkFunSuite with SharedSQLContext {
 
-  test("memory acquired on construction") {
+  test("memory acquired on construction") {//建造上获得内存
     val taskMemoryManager = new TaskMemoryManager(SparkEnv.get.executorMemoryManager)
     val taskContext = new TaskContextImpl(0, 0, 0, 0, taskMemoryManager, null, Seq.empty)
     TaskContext.setTaskContext(taskContext)
 
     // Assert that a page is allocated before processing starts
+    //断言在处理开始前分配一个页面
     var iter: TungstenAggregationIterator = null
     try {
       val newMutableProjection = (expr: Seq[Expression], schema: Seq[Attribute]) => {
@@ -43,7 +44,7 @@ class TungstenAggregationIteratorSuite extends SparkFunSuite with SharedSQLConte
       val numPages = iter.getHashMap.getNumDataPages
       assert(numPages === 1)
     } finally {
-      // Clean up
+      // Clean up 清理
       if (iter != null) {
         iter.free()
       }

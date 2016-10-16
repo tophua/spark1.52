@@ -25,28 +25,28 @@ private case class FunctionResult(f1: String, f2: String)
 class UDFSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("built-in fixed arity expressions") {
+  test("built-in fixed arity expressions") {//内置固定数量的表达
     val df = ctx.emptyDataFrame
     df.selectExpr("rand()", "randn()", "rand(5)", "randn(50)")
   }
 
-  test("built-in vararg expressions") {
+  test("built-in vararg expressions") {//内置可变参数的表达式
     val df = Seq((1, 2)).toDF("a", "b")
     df.selectExpr("array(a, b)")
     df.selectExpr("struct(a, b)")
   }
-
+  //内置表达式的多个构造函数
   test("built-in expressions with multiple constructors") {
     val df = Seq(("abcd", 2)).toDF("a", "b")
     df.selectExpr("substr(a, 2)", "substr(a, 2, 3)").collect()
   }
 
-  test("count") {
+  test("count") {//计数
     val df = Seq(("abcd", 2)).toDF("a", "b")
     df.selectExpr("count(a)")
   }
 
-  test("count distinct") {
+  test("count distinct") {//重复计数
     val df = Seq(("abcd", 2)).toDF("a", "b")
     df.selectExpr("count(distinct a)")
   }
@@ -58,7 +58,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     ctx.dropTempTable("tmp_table")
   }
 
-  test("SPARK-8005 input_file_name") {
+  test("SPARK-8005 input_file_name") {//输入文件名
     withTempPath { dir =>
       val data = ctx.sparkContext.parallelize(0 to 10, 2).toDF("id")
       data.write.parquet(dir.getCanonicalPath)
@@ -70,7 +70,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("error reporting for incorrect number of arguments") {
+  test("error reporting for incorrect number of arguments") {//错误报告参数不正确数字
     val df = ctx.emptyDataFrame
     val e = intercept[AnalysisException] {
       df.selectExpr("substr('abcd', 2, 3, 4)")
@@ -78,7 +78,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(e.getMessage.contains("arguments"))
   }
 
-  test("error reporting for undefined functions") {
+  test("error reporting for undefined functions") {//错误报告未定义的函数
     val df = ctx.emptyDataFrame
     val e = intercept[AnalysisException] {
       df.selectExpr("a_function_that_does_not_exist()")
@@ -86,17 +86,17 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(e.getMessage.contains("undefined function"))
   }
 
-  test("Simple UDF") {
+  test("Simple UDF") {//简单的自定义函数
     ctx.udf.register("strLenScala", (_: String).length)
     assert(sql("SELECT strLenScala('test')").head().getInt(0) === 4)
   }
 
-  test("ZeroArgument UDF") {
+  test("ZeroArgument UDF") {//没有参数的自定义函数
     ctx.udf.register("random0", () => { Math.random()})
     assert(sql("SELECT random0()").head().getDouble(0) >= 0.0)
   }
 
-  test("TwoArgument UDF") {
+  test("TwoArgument UDF") {//两个参数的自定义函数
     ctx.udf.register("strLenScala", (_: String).length + (_: Int))
     assert(sql("SELECT strLenScala('test', 1)").head().getInt(0) === 5)
   }
@@ -113,7 +113,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(result.count() === 20)
   }
 
-  test("UDF in a HAVING") {
+  test("UDF in a HAVING") {//
     ctx.udf.register("havingFilter", (n: Long) => { n > 5 })
 
     val df = Seq(("red", 1), ("red", 2), ("blue", 10),
@@ -186,7 +186,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(sql("SELECT makeStruct(1 + 1, 2)").first().getAs[Row](0) === Row(2, 2))
   }
 
-  test("type coercion for udf inputs") {
+  test("type coercion for udf inputs") {//UDF程序输入类型强制
     ctx.udf.register("intExpected", (x: Int) => x)
     // pass a decimal to intExpected.
     assert(sql("SELECT intExpected(1.0)").head().getInt(0) === 1)

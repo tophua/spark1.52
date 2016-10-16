@@ -30,7 +30,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
 
-
+//规划套件
 class PlannerSuite extends SparkFunSuite with SharedSQLContext {
   import testImplicits._
 
@@ -47,12 +47,13 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
 
     // For the new aggregation code path, there will be three aggregate operator for
     // distinct aggregations.
+    //对于新的聚合代码路径,将有不同的聚合操作
     assert(
       aggregations.size == 2 || aggregations.size == 3,
       s"The plan of query $query does not have partial aggregations.")
   }
 
-  test("unions are collapsed") {
+  test("unions are collapsed") {//联合折叠
     val _ctx = ctx
     import _ctx.planner._
     val query = testData.unionAll(testData).unionAll(testData).logicalPlan
@@ -64,22 +65,22 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
     assert(physicalUnions.size === 1)
   }
 
-  test("count is partially aggregated") {
+  test("count is partially aggregated") {//计数是部分聚合
     val query = testData.groupBy('value).agg(count('key)).queryExecution.analyzed
     testPartialAggregationPlan(query)
   }
 
-  test("count distinct is partially aggregated") {
+  test("count distinct is partially aggregated") {//计数不同的是部分聚合
     val query = testData.groupBy('value).agg(countDistinct('key)).queryExecution.analyzed
     testPartialAggregationPlan(query)
   }
 
-  test("mixed aggregates are partially aggregated") {
+  test("mixed aggregates are partially aggregated") {//混合聚合部分聚合
     val query =
       testData.groupBy('value).agg(count('value), countDistinct('key)).queryExecution.analyzed
     testPartialAggregationPlan(query)
   }
-
+  //在字节估计连接广播哈希限制优化
   test("sizeInBytes estimation of limit operator for broadcast hash join optimization") {
     def checkPlan(fieldTypes: Seq[DataType], newThreshold: Int): Unit = {
       ctx.setConf(SQLConf.AUTO_BROADCASTJOIN_THRESHOLD, newThreshold)
@@ -140,7 +141,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
 
     ctx.setConf(SQLConf.AUTO_BROADCASTJOIN_THRESHOLD, origThreshold)
   }
-
+  //内存统计传播关系
   test("InMemoryRelation statistics propagation") {
     val origThreshold = ctx.conf.autoBroadcastJoinThreshold
     ctx.setConf(SQLConf.AUTO_BROADCASTJOIN_THRESHOLD, 81920)
@@ -160,7 +161,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
 
     ctx.setConf(SQLConf.AUTO_BROADCASTJOIN_THRESHOLD, origThreshold)
   }
-
+  //有效的限制>项目>排序
   test("efficient limit -> project -> sort") {
     {
       val query =
@@ -180,7 +181,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
       assert(planned.head.output === testData.select('value, 'key).logicalPlan.output)
     }
   }
-
+  //分区集合
   test("PartitioningCollection") {
     withTempTable("normal", "small", "tiny") {
       testData.registerTempTable("normal")
@@ -188,6 +189,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
       testData.limit(3).registerTempTable("tiny")
 
       // Disable broadcast join
+      //禁用广播连接
       withSQLConf(SQLConf.AUTO_BROADCASTJOIN_THRESHOLD.key -> "-1") {
         {
           val numExchanges = sql(
@@ -205,6 +207,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
 
         {
           // This second query joins on different keys:
+          //这个第二个查询连接在不同的键上：
           val numExchanges = sql(
             """
               |SELECT *

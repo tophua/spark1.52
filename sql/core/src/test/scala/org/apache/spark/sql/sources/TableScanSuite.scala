@@ -50,6 +50,7 @@ class AllDataTypesScanSource extends SchemaRelationProvider {
       parameters: Map[String, String],
       schema: StructType): BaseRelation = {
     // Check that weird parameters are passed correctly.
+    //检查奇怪的参数是否正确传递
     parameters("option_with_underscores")
     parameters("option.with.dots")
 
@@ -191,7 +192,7 @@ class TableScanSuite extends DataSourceTest with SharedSQLContext {
     "SELECT a.i, b.i FROM oneToTen a JOIN oneToTen b ON a.i = b.i + 1",
     (2 to 10).map(i => Row(i, i - 1)).toSeq)
 
-  test("Schema and all fields") {
+  test("Schema and all fields") {//模式所有字段
     val expectedSchema = StructType(
       StructField("string$%Field", StringType, true) ::
       StructField("binaryField", BinaryType, true) ::
@@ -283,7 +284,7 @@ class TableScanSuite extends DataSourceTest with SharedSQLContext {
     (1 to 10).map(i => Row(Seq(Date.valueOf(s"1970-01-${i + 1}")))).toSeq)
 
   test("Caching")  {
-    // Cached Query Execution
+    // Cached Query Execution 执行缓存查询
     caseInsensitiveContext.cacheTable("oneToTen")
     assertCached(sql("SELECT * FROM oneToTen"))
     checkAnswer(
@@ -311,12 +312,12 @@ class TableScanSuite extends DataSourceTest with SharedSQLContext {
       "SELECT a.i, b.i FROM oneToTen a JOIN oneToTen b ON a.i = b.i + 1"),
       (2 to 10).map(i => Row(i, i - 1)).toSeq)
 
-    // Verify uncaching
+    // Verify uncaching 验证未缓存
     caseInsensitiveContext.uncacheTable("oneToTen")
     assertCached(sql("SELECT * FROM oneToTen"), 0)
   }
 
-  test("defaultSource") {
+  test("defaultSource") {//默认数据源
     sql(
       """
         |CREATE TEMPORARY TABLE oneToTenDef
@@ -332,7 +333,7 @@ class TableScanSuite extends DataSourceTest with SharedSQLContext {
       (1 to 10).map(Row(_)).toSeq)
   }
 
-  test("exceptions") {
+  test("exceptions") {//异常
     // Make sure we do throw correct exception when users use a relation provider that
     // only implements the RelationProvier or the SchemaRelationProvider.
     val schemaNotAllowed = intercept[Exception] {
@@ -362,7 +363,7 @@ class TableScanSuite extends DataSourceTest with SharedSQLContext {
     assert(schemaNeeded.getMessage.contains("A schema needs to be specified when using"))
   }
 
-  test("SPARK-5196 schema field with comment") {
+  test("SPARK-5196 schema field with comment") {//模式字段与注释
     sql(
       """
        |CREATE TEMPORARY TABLE student(name string comment "SN", age int comment "SA", grade int)

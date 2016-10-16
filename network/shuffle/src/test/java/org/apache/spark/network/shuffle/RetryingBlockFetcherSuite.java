@@ -71,6 +71,7 @@ public class RetryingBlockFetcherSuite {
 
     List<? extends Map<String, Object>> interactions = Arrays.asList(
       // Immediately return both blocks successfully.
+      //立即返回两个块成功
       ImmutableMap.<String, Object>builder()
         .put("b0", block0)
         .put("b1", block1)

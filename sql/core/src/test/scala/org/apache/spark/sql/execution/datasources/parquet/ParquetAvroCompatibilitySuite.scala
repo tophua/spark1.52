@@ -46,7 +46,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
     try f(writer) finally writer.close()
   }
 
-  test("required primitives") {
+  test("required primitives") {//所需的原始
     withTempPath { dir =>
       val path = dir.getCanonicalPath
 
@@ -80,7 +80,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
     }
   }
 
-  test("optional primitives") {
+  test("optional primitives") {//可选的原始类型
     withTempPath { dir =>
       val path = dir.getCanonicalPath
 
@@ -131,7 +131,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
     }
   }
 
-  test("non-nullable arrays") {
+  test("non-nullable arrays") {//非空数组
     withTempPath { dir =>
       val path = dir.getCanonicalPath
 
@@ -162,12 +162,12 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
       })
     }
   }
-
+  //空数组
   ignore("nullable arrays (parquet-avro 1.7.0 does not properly support this)") {
     // TODO Complete this test case after upgrading to parquet-mr 1.8+
   }
 
-  test("SPARK-10136 array of primitive array") {
+  test("SPARK-10136 array of primitive array") {//原始数组数组
     withTempPath { dir =>
       val path = dir.getCanonicalPath
 
@@ -188,7 +188,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
     }
   }
 
-  test("map of primitive array") {
+  test("map of primitive array") {//原始数组映射
     withTempPath { dir =>
       val path = dir.getCanonicalPath
 
@@ -211,7 +211,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
     }
   }
 
-  test("various complex types") {
+  test("various complex types") {//各种复杂类型
     withTempPath { dir =>
       val path = dir.getCanonicalPath
 

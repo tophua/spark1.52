@@ -51,7 +51,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
     Utils.deleteRecursively(path)
   }
 
-  test("CREATE TEMPORARY TABLE AS SELECT") {
+  test("CREATE TEMPORARY TABLE AS SELECT") {//创建临时表作为选择
     sql(
       s"""
         |CREATE TEMPORARY TABLE jsonTable
@@ -68,7 +68,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
 
     caseInsensitiveContext.dropTempTable("jsonTable")
   }
-
+  //创建临时表,作为未写权限的文件的基础上的选择
   test("CREATE TEMPORARY TABLE AS SELECT based on the file without write permission") {
     val childPath = new File(path.toString, "child")
     path.mkdir()
@@ -91,7 +91,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
 
     path.setWritable(true)
   }
-
+  //创建一个表,并创建一个具有相同名称的另一个表
   test("create a table, drop it and create another one with the same name") {
     sql(
       s"""
@@ -156,7 +156,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
 
     caseInsensitiveContext.dropTempTable("jsonTable")
   }
-
+  //创建临时表作为选择,如果不存在的话是不允许的
   test("CREATE TEMPORARY TABLE AS SELECT with IF NOT EXISTS is not allowed") {
     val message = intercept[DDLException]{
       sql(
@@ -173,7 +173,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
       message.contains("a CREATE TEMPORARY TABLE statement does not allow IF NOT EXISTS clause."),
       "CREATE TEMPORARY TABLE IF NOT EXISTS should not be allowed.")
   }
-
+  //一个列定义CTAS语句是不允许的
   test("a CTAS statement with column definitions is not allowed") {
     intercept[DDLException]{
       sql(
@@ -187,7 +187,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
       """.stripMargin)
     }
   }
-
+  //在查询时,不允许在表上写入
   test("it is not allowed to write to a table while querying it.") {
     sql(
       s"""

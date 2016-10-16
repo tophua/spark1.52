@@ -285,10 +285,11 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(df, expectedResults)
   }
 
-  test("aggregation with codegen") {//
+  test("aggregation with codegen") {//聚集与代码生成
     val originalValue = sqlContext.conf.codegenEnabled
     sqlContext.setConf(SQLConf.CODEGEN_ENABLED, true)
     // Prepare a table that we can group some rows.
+    //准备一个表,我们可以组一些行
     sqlContext.table("testData")
       .unionAll(sqlContext.table("testData"))
       .unionAll(sqlContext.table("testData"))
@@ -299,7 +300,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       testCodeGen(
         "SELECT key FROM testData3x GROUP BY key",
         (1 to 100).map(Row(_)))
-      // COUNT
+      // COUNT 计数
       testCodeGen(
         "SELECT key, count(value) FROM testData3x GROUP BY key",
         (1 to 100).map(i => Row(i, 3)))
@@ -307,6 +308,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         "SELECT count(key) FROM testData3x",
         Row(300) :: Nil)
       // COUNT DISTINCT ON int
+        //计数不同的int
       testCodeGen(
         "SELECT value, count(distinct key) FROM testData3x GROUP BY value",
         (1 to 100).map(i => Row(i.toString, 1)))
@@ -364,6 +366,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         "SELECT max(key), min(key), avg(key), count(key), count(distinct key) FROM testData3x",
         Row(100, 1, 50.5, 300, 100) :: Nil)
       // Aggregate with Code generation handling all null values
+      //用代码生成处理所有空值的集合
       testCodeGen(
         "SELECT  sum('a'), avg('a'), count(null) FROM testData",
         Row(null, null, 0) :: Nil)
@@ -373,12 +376,12 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("Add Parser of SQL COALESCE()") {
+  test("Add Parser of SQL COALESCE()") {//添加解析SQL合并
     checkAnswer(
         //依次参考各参数表达式，遇到非null值即停止并返回该值
       sql("""SELECT COALESCE(1, 2)"""),
       Row(1))
-    checkAnswer(
+    checkAnswer(//此表达式的功能为返回第一个不为空的表达式,如果都为空则返回空值
       sql("SELECT COALESCE(null, 1, 1.5)"),
       Row(BigDecimal(1)))
     checkAnswer(
@@ -386,9 +389,9 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(null))
   }
 
-  test("SPARK-3176 Added Parser of SQL LAST()") {
+  test("SPARK-3176 Added Parser of SQL LAST()") {//添加解析SQL LAST函数
     checkAnswer(
-       //末尾
+       //返回指定的列中最后一个记录的值
       sql("SELECT LAST(n) FROM lowerCaseData"),
       Row(4))
   }
@@ -408,7 +411,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("SQRT with automatic string casts") {
-    checkAnswer(//平方根函数
+    checkAnswer(//平方根函数 cast强转换字符类型
       sql("SELECT SQRT(CAST(key AS STRING)) FROM testData"),
       (1 to 100).map(x => Row(math.sqrt(x.toDouble))).toSeq
     )
@@ -430,7 +433,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row("st"))
   }
 
-  test("SPARK-3173 Timestamp support in the parser") {
+  test("SPARK-3173 Timestamp support in the parser") {//支持解析Timestamp类型
     //用数据集创建一个time对象的DataFrame,将DataFrame注册为一个表
     //DataFrame 与关系型数据库中的数据库表类似
     (0 to 3).map(i => Tuple1(new Timestamp(i))).toDF("time").registerTempTable("timestamps")
@@ -439,7 +442,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       "SELECT time FROM timestamps WHERE time='1969-12-31 16:00:00.0'"),
       Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00")))
 
-    checkAnswer(sql(
+    checkAnswer(sql(//cast强转换TIMESTAMP类型
       "SELECT time FROM timestamps WHERE time=CAST('1969-12-31 16:00:00.001' AS TIMESTAMP)"),
       Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00.001")))
 
@@ -452,7 +455,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00.001")))
 
     checkAnswer(sql(
-        //时间段查询
+        //时间戳段查询
       """SELECT time FROM timestamps WHERE time<'1969-12-31 16:00:00.003'
           AND time>'1969-12-31 16:00:00.001'"""),
       Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00.002")))
@@ -461,7 +464,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       """
         |SELECT time FROM timestamps
         |WHERE time IN ('1969-12-31 16:00:00.001','1969-12-31 16:00:00.002')
-      """.stripMargin),
+      """.stripMargin),//时间戳段查询
       Seq(Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00.001")),
         Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00.002"))))
 
@@ -470,13 +473,13 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Nil)
   }
 
-  test("index into array") {
+  test("index into array") {//数组的索引
     checkAnswer(
       sql("SELECT data, data[0], data[0] + data[1], data[0 + 1] FROM arrayData"),
       arrayData.map(d => Row(d.data, d.data(0), d.data(0) + d.data(1), d.data(1))).collect())
   }
 
-  test("left semi greater than predicate") {
+  test("left semi greater than predicate") {//左半
     checkAnswer(// IN/EXISTS 子查询的一种更高效的实现
       sql("SELECT * FROM testData2 x LEFT SEMI JOIN testData2 y ON x.a >= y.a + 2"),
       Seq(Row(3, 1), Row(3, 2))
@@ -495,7 +498,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("index into array of arrays") {
+  test("index into array of arrays") {//数组数组的索引
     checkAnswer(
       sql(
         "SELECT nestedData, nestedData[0][0], nestedData[0][0] + nestedData[0][1] FROM arrayData"),
@@ -512,7 +515,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Seq(Row(1, 3), Row(2, 3), Row(3, 3)))
   }
 
-  test("literal in agg grouping expressions") {
+  test("literal in agg grouping expressions") {//分组表达式
     def literalInAggTest(): Unit = {
       checkAnswer(
         //
@@ -547,19 +550,19 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("select *") {
+  test("select *") {//星号
     checkAnswer(
       sql("SELECT * FROM testData"),
       testData.collect().toSeq)
   }
 
-  test("simple select") {
+  test("simple select") {//简单的选择字段
     checkAnswer(
       sql("SELECT value FROM testData WHERE key = 1"),
       Row("1"))
   }
 
-  def sortTest(): Unit = {
+  def sortTest(): Unit = {//排序
     checkAnswer(
       sql("SELECT * FROM testData2 ORDER BY a ASC, b ASC"),
       Seq(Row(1, 1), Row(1, 2), Row(2, 1), Row(2, 2), Row(3, 1), Row(3, 2)))
@@ -601,43 +604,43 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       mapData.collect().sortBy(_.data(1)).reverse.map(Row.fromTuple).toSeq)
   }
 
-  test("sorting") {
+  test("sorting") {//外部排序方式
     withSQLConf(SQLConf.EXTERNAL_SORT.key -> "false") {
       sortTest()
     }
   }
 
-  test("external sorting") {
+  test("external sorting") {//扩展外部排序
     withSQLConf(SQLConf.EXTERNAL_SORT.key -> "true") {
       sortTest()
     }
   }
 
-  test("SPARK-6927 sorting with codegen on") {
+  test("SPARK-6927 sorting with codegen on") {//排序与代码生成
     withSQLConf(SQLConf.EXTERNAL_SORT.key -> "false",
       SQLConf.CODEGEN_ENABLED.key -> "true") {
       sortTest()
     }
   }
 
-  test("SPARK-6927 external sorting with codegen on") {
+  test("SPARK-6927 external sorting with codegen on") {//外部排序与代码生成
     withSQLConf(SQLConf.EXTERNAL_SORT.key -> "true",
       SQLConf.CODEGEN_ENABLED.key -> "true") {
       sortTest()
     }
   }
 
-  test("limit") {
+  test("limit") {//限制
     checkAnswer(//前10行
       sql("SELECT * FROM testData LIMIT 10"),
       testData.take(10).toSeq)
 
     checkAnswer(
-      sql("SELECT * FROM arrayData LIMIT 1"),
+      sql("SELECT * FROM arrayData LIMIT 1"),//前1行
       arrayData.collect().take(1).map(Row.fromTuple).toSeq)
 
     checkAnswer(
-      sql("SELECT * FROM mapData LIMIT 1"),
+      sql("SELECT * FROM mapData LIMIT 1"),//前1行
       mapData.collect().take(1).map(Row.fromTuple).toSeq)
   }
 
@@ -655,21 +658,21 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   }
 
-  test("Allow only a single WITH clause per query") {
+  test("Allow only a single WITH clause per query") {//只允许一个查询子句
     intercept[RuntimeException] {
       sql(
         "with q1 as (select * from testData) with q2 as (select * from q1) select * from q2")
     }
   }
 
-  test("date row") {
-    checkAnswer(sql(//cast数据类型转换日期
+  test("date row") {//日期行
+    checkAnswer(sql(//cast强制转换日期类型
       """select cast("2015-01-28" as date) from testData limit 1"""),
       Row(java.sql.Date.valueOf("2015-01-28"))
     )
   }
 
-  test("from follow multiple brackets") {
+  test("from follow multiple brackets") {//跟随多个括号
     checkAnswer(sql(
       """
         |select key from ((select * from testData limit 1)
@@ -693,45 +696,45 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("average") {
+  test("average") {//平均数
     checkAnswer(
       //平均
       sql("SELECT AVG(a) FROM testData2"),
       Row(2.0))
   }
 
-  test("average overflow") {
+  test("average overflow") {//平均数溢出
     checkAnswer(
       sql("SELECT AVG(a),b FROM largeAndSmallInts group by b"),
       Seq(Row(2147483645.0, 1), Row(2.0, 2)))
   }
 
-  test("count") {
+  test("count") {//计数
     checkAnswer(
       sql("SELECT COUNT(*) FROM testData2"),
       Row(testData2.count()))
   }
 
-  test("count distinct") {
+  test("count distinct") {//重复计数
     checkAnswer(
       sql("SELECT COUNT(DISTINCT b) FROM testData2"),
       Row(2))
   }
 
-  test("approximate count distinct") {
+  test("approximate count distinct") {//相似计数
     checkAnswer(
         //相似计算
       sql("SELECT APPROXIMATE COUNT(DISTINCT a) FROM testData2"),
       Row(3))
   }
-
-  test("approximate count distinct with user provided standard deviation") {
+  //用户提供的标准偏差的近似计数
+  test("approximate count distinct with user provided standard deviation") {//
     checkAnswer(
       sql("SELECT APPROXIMATE(0.04) COUNT(DISTINCT a) FROM testData2"),
       Row(3))
   }
 
-  test("null count") {
+  test("null count") {//空的计数
     checkAnswer(
       sql("SELECT a, COUNT(b) FROM testData3 GROUP BY a"),
       Seq(Row(1, 0), Row(2, 1)))
@@ -742,7 +745,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(2, 1, 2, 2, 1))
   }
 
-  test("count of empty table") {
+  test("count of empty table") {//空表计数
     withTempTable("t") {
       Seq.empty[(Int, Int)].toDF("a", "b").registerTempTable("t")
       checkAnswer(
@@ -751,7 +754,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("inner join where, one match per row") {
+  test("inner join where, one match per row") {//内部连接,每行一个匹配
     checkAnswer(
         //大写小写匹配
       sql("SELECT * FROM upperCaseData JOIN lowerCaseData WHERE n = N"),
@@ -762,7 +765,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         Row(4, "D", 4, "d")))
   }
 
-  test("inner join ON, one match per row") {
+  test("inner join ON, one match per row") {//内部连接,每行一个匹配
     checkAnswer(
       sql("SELECT * FROM upperCaseData JOIN lowerCaseData ON n = N"),
       Seq(
@@ -772,7 +775,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         Row(4, "D", 4, "d")))
   }
 
-  test("inner join, where, multiple matches") {
+  test("inner join, where, multiple matches") {//内部连接,多个匹配
     checkAnswer(
       sql("""
         |SELECT * FROM
@@ -785,7 +788,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(1, 2, 1, 2) :: Nil)
   }
 
-  test("inner join, no matches") {
+  test("inner join, no matches") {//内部连接,不匹配
     checkAnswer(
       sql(
         """
@@ -796,7 +799,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Nil)
   }
 
-  test("big inner join, 4 matches per row") {
+  test("big inner join, 4 matches per row") {//大内部连接,4个匹配行
     checkAnswer(
       sql(
         """
@@ -814,7 +817,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         row => Seq.fill(16)(Row.merge(row, row))).collect().toSeq)
   }
 
-  test("cartesian product join") {
+  test("cartesian product join") {//笛卡尔积连接
     checkAnswer(
       testData3.join(testData3),
       Row(1, null, 1, null) ::
@@ -823,7 +826,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(2, 2, 2, 2) :: Nil)
   }
 
-  test("left outer join") {
+  test("left outer join") {//左外连接
     checkAnswer(
       sql("SELECT * FROM upperCaseData LEFT OUTER JOIN lowerCaseData ON n = N"),
       Row(1, "A", 1, "a") ::
@@ -834,7 +837,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(6, "F", null, null) :: Nil)
   }
 
-  test("right outer join") {
+  test("right outer join") {//右外连接
     checkAnswer(
       sql("SELECT * FROM lowerCaseData RIGHT OUTER JOIN upperCaseData ON n = N"),
       Row(1, "a", 1, "A") ::
@@ -845,7 +848,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(null, null, 6, "F") :: Nil)
   }
 
-  test("full outer join") {
+  test("full outer join") {//全外连接
     checkAnswer(
       sql(
         """
@@ -862,7 +865,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(null, null, 6, "F") :: Nil)
   }
 
-  test("SPARK-3349 partitioning after limit") {
+  test("SPARK-3349 partitioning after limit") {//分割后的限制
     sql("SELECT DISTINCT n FROM lowerCaseData ORDER BY n DESC")
       .limit(2)
       .registerTempTable("subset1")
@@ -879,7 +882,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(2, "b", 2) :: Nil)
   }
 
-  test("mixed-case keywords") {
+  test("mixed-case keywords") {//混合的情况下关键词
     checkAnswer(
       sql(
         """
@@ -896,13 +899,13 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(null, null, 6, "F") :: Nil)
   }
 
-  test("select with table name as qualifier") {
+  test("select with table name as qualifier") {//选择与表名称作为限定符
     checkAnswer(
       sql("SELECT testData.value FROM testData WHERE testData.key = 1"),
       Row("1"))
   }
 
-  test("inner join ON with table name as qualifier") {
+  test("inner join ON with table name as qualifier") {//内部连接与表名作为限定符
     checkAnswer(
       sql("SELECT * FROM upperCaseData JOIN lowerCaseData ON lowerCaseData.n = upperCaseData.N"),
       Seq(
@@ -911,7 +914,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         Row(3, "C", 3, "c"),
         Row(4, "D", 4, "d")))
   }
-
+  //具有内部连接的合格选择与表名作为限定符
   test("qualified select with inner join ON with table name as qualifier") {
     checkAnswer(
       sql("SELECT upperCaseData.N, upperCaseData.L FROM upperCaseData JOIN lowerCaseData " +
@@ -923,7 +926,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         Row(4, "D")))
   }
 
-  test("system function upper()") {
+  test("system function upper()") {//系统函数upper
     checkAnswer(
       sql("SELECT n,UPPER(l) FROM lowerCaseData"),
       Seq(
@@ -940,7 +943,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         Row(3, null)))
   }
 
-  test("system function lower()") {
+  test("system function lower()") {//系统函数lower
     checkAnswer(
       sql("SELECT N,LOWER(L) FROM upperCaseData"),
       Seq(
@@ -959,7 +962,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         Row(3, null)))
   }
 
-  test("UNION") {
+  test("UNION") {//联合
     checkAnswer(
       sql("SELECT * FROM lowerCaseData UNION SELECT * FROM upperCaseData"),
       Row(1, "A") :: Row(1, "a") :: Row(2, "B") :: Row(2, "b") :: Row(3, "C") :: Row(3, "c") ::
@@ -973,24 +976,27 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(4, "d") :: Row(4, "d") :: Nil)
   }
 
-  test("UNION with column mismatches") {
+  test("UNION with column mismatches") {//与列不匹配的联合
     // Column name mismatches are allowed.
+    //允许列名称不匹配
     checkAnswer(
       sql("SELECT n,l FROM lowerCaseData UNION SELECT N as x1, L as x2 FROM upperCaseData"),
       Row(1, "A") :: Row(1, "a") :: Row(2, "B") :: Row(2, "b") :: Row(3, "C") :: Row(3, "c") ::
       Row(4, "D") :: Row(4, "d") :: Row(5, "E") :: Row(6, "F") :: Nil)
     // Column type mismatches are not allowed, forcing a type coercion.
+    //不允许列类型不匹配,强制类型强制
     checkAnswer(
       sql("SELECT n FROM lowerCaseData UNION SELECT L FROM upperCaseData"),
       ("1" :: "2" :: "3" :: "4" :: "A" :: "B" :: "C" :: "D" :: "E" :: "F" :: Nil).map(Row(_)))
     // Column type mismatches where a coercion is not possible, in this case between integer
     // and array types, trigger a TreeNodeException.
+    //列类型不匹配的强制是不可能,在整数数组类型之间的这种情况下,引发treenodeexception。
     intercept[AnalysisException] {
       sql("SELECT data FROM arrayData UNION SELECT 1 FROM arrayData").collect()
     }
   }
 
-  test("EXCEPT") {
+  test("EXCEPT") {//除了
     checkAnswer(
       sql("SELECT * FROM lowerCaseData EXCEPT SELECT * FROM upperCaseData"),
       Row(1, "a") ::
@@ -1003,7 +1009,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT * FROM upperCaseData EXCEPT SELECT * FROM upperCaseData"), Nil)
   }
 
-  test("INTERSECT") {
+  test("INTERSECT") {//相交
     checkAnswer(
       sql("SELECT * FROM lowerCaseData INTERSECT SELECT * FROM lowerCaseData"),
       Row(1, "a") ::
@@ -1014,7 +1020,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT * FROM lowerCaseData INTERSECT SELECT * FROM upperCaseData"), Nil)
   }
 
-  test("SET commands semantics using sql()") {
+  test("SET commands semantics using sql()") {//使用SQL命令集语义
     sqlContext.conf.clear()
     val testKey = "test.key.0"
     val testVal = "test.val.0"
@@ -1050,7 +1056,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     sqlContext.conf.clear()
   }
 
-  test("SET commands with illegal or inappropriate argument") {
+  test("SET commands with illegal or inappropriate argument") {//用非法或不适当的参数设置命令
     sqlContext.conf.clear()
     // Set negative mapred.reduce.tasks for automatically determing
     // the number of reducers is not supported
@@ -1060,7 +1066,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     sqlContext.conf.clear()
   }
 
-  test("apply schema") {
+  test("apply schema") {//应用模式
     val schema1 = StructType(
       StructField("f1", IntegerType, false) ::
       StructField("f2", StringType, false) ::
@@ -1141,7 +1147,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(4, 2147483644) :: Nil)
   }
 
-  test("SPARK-3423 BETWEEN") {
+  test("SPARK-3423 BETWEEN") {//在…之间
     checkAnswer(
       sql("SELECT key, value FROM testData WHERE key BETWEEN 5 and 7"),
       Seq(Row(5, "5"), Row(6, "6"), Row(7, "7"))
@@ -1158,10 +1164,10 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("cast boolean to string") {
+  test("cast boolean to string") {//强制布尔值转换字符串
     // TODO Ensure true/false string letter casing is consistent with Hive in all cases.
     checkAnswer(
-        //布尔转换字符串
+        //强制转换布字符串类型,
       sql("SELECT CAST(TRUE AS STRING), CAST(FALSE AS STRING) FROM testData LIMIT 1"),
       Row("true", "false"))
   }
@@ -1190,7 +1196,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     validateMetadata(sql(
       "SELECT name, salary FROM personWithMeta JOIN salary ON id = personId"))
   }
-
+  //重命名功能表达与组给出错误
   test("SPARK-3371 Renaming a function expression with group by gives error") {
     //重命名
     sqlContext.udf.register("len", (s: String) => s.length)
@@ -1198,7 +1204,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT len(value) as temp FROM testData WHERE key = 1 group by len(value)"),
       Row(1))
   }
-  //CASE a WHEN
+  //case when语句,用于计算条件列表并返回多个可能结果表达式之
   test("SPARK-3813 CASE a WHEN b THEN c [WHEN d THEN e]* [ELSE f] END") {
     checkAnswer(
       sql("SELECT CASE key WHEN 1 THEN 1 ELSE 0 END FROM testData WHERE key = 1 group by key"),
@@ -1210,7 +1216,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT CASE WHEN key = 1 THEN 1 ELSE 2 END FROM testData WHERE key = 1 group by key"),
       Row(1))
   }
-
+  //聚合属性的非聚合属性的抛出错误
   test("throw errors for non-aggregate attributes with aggregation") {
     def checkAggregation(query: String, isInvalidQuery: Boolean = true) {
       if (isInvalidQuery) {
@@ -1218,6 +1224,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         assert(e.getMessage contains "group by")
       } else {
         // Should not throw
+        //不应该抛出异常
         sql(query).queryExecution.analyzed
       }
     }
@@ -1231,7 +1238,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAggregation("SELECT key + 2, COUNT(*) FROM testData GROUP BY key + 1")
     checkAggregation("SELECT key + 1 + 1, COUNT(*) FROM testData GROUP BY key + 1", false)
   }
-
+  //测试可以使用Long.MinValue最大值
   test("Test to check we can use Long.MinValue") {
     checkAnswer(
       sql(s"SELECT ${Long.MinValue} FROM testData ORDER BY key LIMIT 1"), Row(Long.MinValue)
@@ -1242,7 +1249,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       (1 to 100).map(Row(_)).toSeq
     )
   }
-
+  //浮点数格式
   test("Floating point number format") {
     checkAnswer(
       sql("SELECT 0.3"), Row(BigDecimal(0.3).underlying())
@@ -1260,7 +1267,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT -.18"), Row(BigDecimal(-0.18))
     )
   }
-
+  //自动整数类型
   test("Auto cast integer type") {
     checkAnswer(
       sql(s"SELECT ${Int.MaxValue + 1L}"), Row(Int.MaxValue + 1L)
@@ -1278,7 +1285,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT -9223372036854775809"), Row(new java.math.BigDecimal("-9223372036854775809"))
     )
   }
-
+  //测试检查我们可以应用符号表达式
   test("Test to check we can apply sign to expression") {
 
     checkAnswer(
@@ -1361,7 +1368,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT + - key FROM testData WHERE key = 33"), Row(-33)
     )
   }
-
+  //多个连接
   test("Multiple join") {
     checkAnswer(
       sql(
@@ -1372,22 +1379,22 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         """.stripMargin),
       (1 to 100).map(i => Row(i, i, i)))
   }
-
+  //在列名上特殊字符
   test("SPARK-3483 Special chars in column names") {
     val data = sqlContext.sparkContext.parallelize(
       Seq("""{"key?number1": "value1", "key.number2": "value2"}"""))
     sqlContext.read.json(data).registerTempTable("records")
     sql("SELECT `key?number1`, `key.number2` FROM records")
   }
-
+  //支持按位与运算符
   test("SPARK-3814 Support Bitwise & operator") {
     checkAnswer(sql("SELECT key&1 FROM testData WHERE key = 1 "), Row(1))
   }
-
+  //支持按位或运算符
   test("SPARK-3814 Support Bitwise | operator") {
     checkAnswer(sql("SELECT key|0 FROM testData WHERE key = 1 "), Row(1))
   }
-
+  //
   test("SPARK-3814 Support Bitwise ^ operator") {
     checkAnswer(sql("SELECT key^0 FROM testData WHERE key = 1 "), Row(1))
   }
@@ -1395,7 +1402,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   test("SPARK-3814 Support Bitwise ~ operator") {
     checkAnswer(sql("SELECT ~key FROM testData WHERE key = 1 "), Row(-2))
   }
-
+  //多表连接不工作sparksql
   test("SPARK-4120 Join of multiple tables does not work in SparkSQL") {
     checkAnswer(
       sql(
@@ -1405,7 +1412,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         """.stripMargin),
       (1 to 100).map(i => Row(i, i, i)))
   }
-
+  //查询是否已经不在work,如果它不是在SQL和HQL之间的Spark
   test("SPARK-4154 Query does not work if it has 'not between' in Spark SQL and HQL") {
     checkAnswer(sql("SELECT key FROM testData WHERE key not between 0 and 10 order by key"),
         (11 to 100).map(i => Row(i)))
@@ -1415,7 +1422,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(sql("SELECT key FROM testData WHERE value not like '100%' order by key"),
         (1 to 99).map(i => Row(i)))
   }
-
+  //随着结构字段作为分组字段的子表达式
   test("SPARK-4322 Grouping field with struct field as sub expression") {
     sqlContext.read.json(sqlContext.sparkContext.makeRDD("""{"a": {"b": [{"c": 1}]}}""" :: Nil))
       .registerTempTable("data")
@@ -1427,14 +1434,14 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(sql("SELECT a.b + 1 FROM data GROUP BY a.b + 1"), Row(2))
     sqlContext.dropTempTable("data")
   }
-
+  //固定属性引用解析错误时使用顺序
   test("SPARK-4432 Fix attribute reference resolution error when using ORDER BY") {
     checkAnswer(
       sql("SELECT a + b FROM testData2 ORDER BY a"),
       Seq(2, 3, 3, 4, 4, 5).map(Row(_))
     )
   }
-
+  //排序ASC默认时,不指定升序和降序
   test("oder by asc by default when not specify ascending and descending") {
     checkAnswer(
       sql("SELECT a, b FROM testData2 ORDER BY a desc, b"),
@@ -1442,7 +1449,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("Supporting relational operator '<=>' in Spark SQL") {
+  test("Supporting relational operator '<=>' in Spark SQL") {//支持关系运算符
     val nullCheckData1 = TestData(1, "1") :: TestData(2, null) :: Nil
     val rdd1 = sqlContext.sparkContext.parallelize((0 to 1).map(i => nullCheckData1(i)))
     rdd1.toDF().registerTempTable("nulldata1")
@@ -1454,14 +1461,14 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         (1 to 2).map(i => Row(i)))
   }
 
-  test("Multi-column COUNT(DISTINCT ...)") {
+  test("Multi-column COUNT(DISTINCT ...)") {//多列计数
     val data = TestData(1, "val_1") :: TestData(2, "val_2") :: Nil
     val rdd = sqlContext.sparkContext.parallelize((0 to 1).map(i => data(i)))
     rdd.toDF().registerTempTable("distinctData")
     checkAnswer(sql("SELECT COUNT(DISTINCT key,value) FROM distinctData"), Row(2))
   }
 
-  test("SPARK-4699 case sensitivity SQL query") {
+  test("SPARK-4699 case sensitivity SQL query") {//敏感的SQL查询
     sqlContext.setConf(SQLConf.CASE_SENSITIVE, false)
     val data = TestData(1, "val_1") :: TestData(2, "val_2") :: Nil
     val rdd = sqlContext.sparkContext.parallelize((0 to 1).map(i => data(i)))
@@ -1470,7 +1477,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     sqlContext.setConf(SQLConf.CASE_SENSITIVE, true)
   }
 
-  test("SPARK-6145: ORDER BY test for nested fields") {
+  test("SPARK-6145: ORDER BY test for nested fields") {//测试排序嵌套字段
     sqlContext.read.json(sqlContext.sparkContext.makeRDD(
         """{"a": {"b": 1, "a": {"a": 1}}, "c": [{"d": 1}]}""" :: Nil))
       .registerTempTable("nestedOrder")
@@ -1483,13 +1490,13 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(sql("SELECT c[0].d FROM nestedOrder ORDER BY c[0].d"), Row(1))
   }
 
-  test("SPARK-6145: special cases") {
+  test("SPARK-6145: special cases") {//特殊情况
     sqlContext.read.json(sqlContext.sparkContext.makeRDD(
       """{"a": {"b": [1]}, "b": [{"a": 1}], "_c0": {"a": 1}}""" :: Nil)).registerTempTable("t")
     checkAnswer(sql("SELECT a.b[0] FROM t ORDER BY _c0.a"), Row(1))
     checkAnswer(sql("SELECT b[0].a FROM t ORDER BY _c0.a"), Row(1))
   }
-
+  //在列名称的特殊字符的完整支持
   test("SPARK-6898: complete support for special chars in column names") {
     sqlContext.read.json(sqlContext.sparkContext.makeRDD(
       """{"a": {"c.b": 1}, "b.$q": [{"a@!.q": 1}], "q.w": {"w.i&": [1]}}""" :: Nil))
@@ -1497,7 +1504,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
     checkAnswer(sql("SELECT a.`c.b`, `b.$q`[0].`a@!.q`, `q.w`.`w.i&`[0] FROM t"), Row(1, 1, 1))
   }
-
+  //排序的聚合函数
   test("SPARK-6583 order by aggregated function") {
     Seq("1" -> 3, "1" -> 4, "2" -> 7, "2" -> 8, "3" -> 5, "3" -> 6, "4" -> 1, "4" -> 2)
     //DF(DataFrame)缩写,数据库表类似
@@ -1544,7 +1551,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
           """.stripMargin),
       Row("4", 3) :: Row("1", 7) :: Row("3", 11) :: Row("2", 15) :: Nil)
   }
-
+  //检查固定相等布尔值和数字类型之间
   test("SPARK-7952: fix the equality check between boolean and numeric types") {
     withTempTable("t") {
       // numeric field i, boolean field j, result of i = j, result of i <=> j
@@ -1564,7 +1571,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       checkAnswer(sql("select i <=> b from t"), sql("select r2 from t"))
     }
   }
-
+  //排序通过对复杂提取链
   test("SPARK-7067: order by queries for complex ExtractValue chain") {
     withTempTable("t") {
       sqlContext.read.json(sqlContext.sparkContext.makeRDD(
@@ -1573,14 +1580,14 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("SPARK-8782: ORDER BY NULL") {
+  test("SPARK-8782: ORDER BY NULL") {//空值的排序
     withTempTable("t") {
       Seq((1, 2), (1, 2)).toDF("a", "b").registerTempTable("t")
       checkAnswer(sql("SELECT * FROM t ORDER BY NULL"), Seq(Row(1, 2), Row(1, 2)))
     }
   }
 
-  test("SPARK-8837: use keyword in column name") {
+  test("SPARK-8837: use keyword in column name") {//在列名称中使用关键字
     withTempTable("t") {
       val df = Seq(1 -> "a").toDF("count", "sort")
       checkAnswer(df.filter("count > 0"), Row(1, "a"))
@@ -1589,13 +1596,14 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("SPARK-8753: add interval type") {
+  test("SPARK-8753: add interval type") {//添加间隔类型
     import org.apache.spark.unsafe.types.CalendarInterval
 
     val df = sql("select interval 3 years -3 month 7 week 123 microseconds")
     checkAnswer(df, Row(new CalendarInterval(12 * 3 - 3, 7L * 1000 * 1000 * 3600 * 24 * 7 + 123 )))
     withTempPath(f => {
       // Currently we don't yet support saving out values of interval data type.
+      //目前,我们还不支持保存区间数据类型的值
       val e = intercept[AnalysisException] {
         df.write.json(f.getCanonicalPath)
       }
@@ -1611,9 +1619,10 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
     checkIntervalParseError("select interval")
     // Currently we don't yet support nanosecond
+    //目前,我们还没有支持纳秒
     checkIntervalParseError("select interval 23 nanosecond")
   }
-
+  //加法和减法表达式区间型
   test("SPARK-8945: add and subtract expressions for interval type") {
     import org.apache.spark.unsafe.types.CalendarInterval
     import org.apache.spark.unsafe.types.CalendarInterval.MICROS_PER_WEEK
@@ -1631,7 +1640,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(df.select(-df("i")),
       Row(new CalendarInterval(-(12 * 3 - 3), -(7L * MICROS_PER_WEEK + 123))))
   }
-
+    //用代码生成更新执行内存聚合
   test("aggregation with codegen updates peak execution memory") {
     withSQLConf((SQLConf.CODEGEN_ENABLED.key, "true")) {
       val sc = sqlContext.sparkContext
@@ -1642,7 +1651,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       }
     }
   }
-
+  //十进制小数乘法/除法.
   test("decimal precision with multiply/division") {
     checkAnswer(sql("select 10.3 * 3.0"), Row(BigDecimal("30.90")))
     checkAnswer(sql("select 10.3000 * 3.0"), Row(BigDecimal("30.90000")))
@@ -1660,7 +1669,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(sql("select 10.3000000000000000000 / 3.00000000000000000"),
       Row(BigDecimal("3.4333333333333333333333333333", new MathContext(38))))
   }
-
+  //DIV的小数返回null
   test("SPARK-10215 Div of Decimal returns null") {
     val d = Decimal(1.12321)
     val df = Seq((d, 1)).toDF("a", "b")
@@ -1682,7 +1691,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       df.selectExpr("b * a * b"),
       Seq(Row(d.toBigDecimal)))
   }
-
+  //大规模高精度
   test("precision smaller than scale") {
     checkAnswer(sql("select 10.00"), Row(BigDecimal("10.00")))
     checkAnswer(sql("select 1.00"), Row(BigDecimal("1.00")))
@@ -1691,8 +1700,8 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     checkAnswer(sql("select 0.001"), Row(BigDecimal("0.001")))
     checkAnswer(sql("select -0.01"), Row(BigDecimal("-0.01")))
     checkAnswer(sql("select -0.001"), Row(BigDecimal("-0.001")))
-  }
-
+  } 
+  //外部排序更新执行内存值
   test("external sorting updates peak execution memory") {
     withSQLConf((SQLConf.EXTERNAL_SORT.key, "true")) {
       val sc = sqlContext.sparkContext
@@ -1701,7 +1710,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       }
     }
   }
-
+  //从数字表开始的错误
   test("SPARK-9511: error with table starting with number") {
     withTempTable("1one") {
       sqlContext.sparkContext.parallelize(1 to 10).map(i => (i, i.toString))
@@ -1710,7 +1719,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       checkAnswer(sql("select count(num) from 1one"), Row(10))
     }
   }
-
+ //不允许指定临时表的数据库名称
   test("specifying database name for a temporary table is not allowed") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -1745,14 +1754,14 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       checkAnswer(sqlContext.table("`db.t`"), df)
     }
   }
-
+  //类型强制转换为,如果应该子类先解决
   test("SPARK-10130 type coercion for IF should have children resolved first") {
     val df = Seq((1, 1), (-1, 1)).toDF("key", "value")
     df.registerTempTable("src")
     checkAnswer(
       sql("SELECT IF(a > 0, a, 0) FROM (SELECT key a FROM src) temp"), Seq(Row(1), Row(0)))
   }
-
+  //当使用unsaferows返回错误的结果
   test("SortMergeJoin returns wrong results when using UnsafeRows") {
     // This test is for the fix of https://issues.apache.org/jira/browse/SPARK-10737.
     // This bug will be triggered when Tungsten is enabled and there are multiple
@@ -1780,7 +1789,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         df1.withColumn("diff", lit(0)))
     }
   }
-
+  //顺序非属性分组表达式的聚合
   test("SPARK-10389: order by non-attribute grouping expression on Aggregate") {
     withTempTable("src") {
       Seq((1, 1), (-1, 1)).toDF("key", "value").registerTempTable("src")
@@ -1790,7 +1799,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         Seq(Row(1), Row(1)))
     }
   }
-
+  //过滤器不应被推送到样品
   test("SPARK-11303: filter should not be pushed down into sample") {
     val df = sqlContext.range(100)
     List(true, false).foreach { withReplacement =>
@@ -1800,7 +1809,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       assert(sampled.count() == sampledOdd.count() + sampledEven.count())
     }
   }
-
+  //有正确的解析
   test("SPARK-11032: resolve having correctly") {
     withTempTable("src") {
       Seq(1 -> "a").toDF("i", "j").registerTempTable("src")

@@ -47,6 +47,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     stageId = stageId,
     attemptId = attemptId,
     // The following fields are not used in tests
+    //下列字段不在测试中使用
     name = "",
     numTasks = 0,
     rddInfos = Nil,
@@ -58,6 +59,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     taskId = taskId,
     attemptNumber = attemptNumber,
     // The following fields are not used in tests
+    //下列字段不在测试中使用
     index = 0,
     launchTime = 0,
     executorId = "",
@@ -73,13 +75,14 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     metrics
   }
 
-  test("basic") {
+  test("basic") {//基础
     val listener = new SQLListener(ctx)
     val executionId = 0
     val df = createTestDataFrame
     val accumulatorIds =
       SparkPlanGraph(df.queryExecution.executedPlan).nodes.flatMap(_.metrics.map(_.accumulatorId))
     // Assume all accumulators are long
+      //假定所有的累加器为长整形
     var accumulatorValue = 0L
     val accumulatorUpdates = accumulatorIds.map { id =>
       accumulatorValue += 1L
@@ -124,7 +127,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
 
     assert(listener.getExecutionMetrics(0) === accumulatorUpdates.mapValues(_ * 3))
 
-    // Retrying a stage should reset the metrics
+    // Retrying a stage should reset the metrics 再试阶段应该重新度量
     listener.onStageSubmitted(SparkListenerStageSubmitted(createStageInfo(0, 1)))
 
     listener.onExecutorMetricsUpdate(SparkListenerExecutorMetricsUpdate("", Seq(
@@ -135,7 +138,8 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
 
     assert(listener.getExecutionMetrics(0) === accumulatorUpdates.mapValues(_ * 2))
 
-    // Ignore the task end for the first attempt
+    // Ignore the task end for the first attempt 
+    //忽略第一次尝试的任务结束
     listener.onTaskEnd(SparkListenerTaskEnd(
       stageId = 0,
       stageAttemptId = 0,
@@ -147,6 +151,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     assert(listener.getExecutionMetrics(0) === accumulatorUpdates.mapValues(_ * 2))
 
     // Finish two tasks
+    //两个任务完成
     listener.onTaskEnd(SparkListenerTaskEnd(
       stageId = 0,
       stageAttemptId = 1,
@@ -165,6 +170,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     assert(listener.getExecutionMetrics(0) === accumulatorUpdates.mapValues(_ * 5))
 
     // Summit a new stage
+    //提交一个新Stage
     listener.onStageSubmitted(SparkListenerStageSubmitted(createStageInfo(1, 0)))
 
     listener.onExecutorMetricsUpdate(SparkListenerExecutorMetricsUpdate("", Seq(
@@ -176,6 +182,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     assert(listener.getExecutionMetrics(0) === accumulatorUpdates.mapValues(_ * 7))
 
     // Finish two tasks
+    //完成两个任务
     listener.onTaskEnd(SparkListenerTaskEnd(
       stageId = 1,
       stageAttemptId = 0,
@@ -319,6 +326,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     sqlContext.sparkContext.parallelize(1 to 10).toDF().foreach(i => ())
     sqlContext.sparkContext.listenerBus.waitUntilEmpty(10000)
     // listener should save the SQL stage
+    //监听应该保存SQL阶段
     assert(sqlContext.listener.stageIdToStageMetrics.size == previousStageNumber + 1)
   }
 
@@ -326,18 +334,22 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
 
 class SQLListenerMemoryLeakSuite extends SparkFunSuite {
 
-  test("no memory leak") {
+  test("no memory leak") {//没有内存泄漏
     val conf = new SparkConf()
       .setMaster("local")
       .setAppName("test")
+      //不要重试任务快速运行此测试
       .set("spark.task.maxFailures", "1") // Don't retry the tasks to run this test quickly
+      //将它设置为50快速运行此测试
       .set("spark.sql.ui.retainedExecutions", "50") // Set it to 50 to run this test quickly
     val sc = new SparkContext(conf)
     try {
       val sqlContext = new SQLContext(sc)
       import sqlContext.implicits._
       // Run 100 successful executions and 100 failed executions.
+      //运行100个成功的执行和100个失败的执行。
       // Each execution only has one job and one stage.
+      //每一个执行只有一个工作和一个阶段
       for (i <- 0 until 100) {
         val df = Seq(
           (1, 1),
@@ -347,6 +359,7 @@ class SQLListenerMemoryLeakSuite extends SparkFunSuite {
         try {
           df.foreach(_ => throw new RuntimeException("Oops"))
         } catch {
+          //这是一个失败的工作
           case e: SparkException => // This is expected for a failed job
         }
       }
@@ -354,6 +367,7 @@ class SQLListenerMemoryLeakSuite extends SparkFunSuite {
       assert(sqlContext.listener.getCompletedExecutions.size <= 50)
       assert(sqlContext.listener.getFailedExecutions.size <= 50)
       // 50 for successful executions and 50 for failed executions
+      //50成功的处决和50的失败的处决
       assert(sqlContext.listener.executionIdToData.size <= 100)
       assert(sqlContext.listener.jobIdToExecutionId.size <= 100)
       assert(sqlContext.listener.stageIdToStageMetrics.size <= 100)

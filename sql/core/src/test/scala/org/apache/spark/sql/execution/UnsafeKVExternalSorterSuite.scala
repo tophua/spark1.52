@@ -48,7 +48,7 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
 
   /**
    * Create a test case using randomly generated data for the given key and value schema.
-   *
+   * 使用给定的键和值模式随机生成的数据创建一个测试用例
    * The approach works as follows:
    *
    * - Create input by randomly generating data based on the given schema
@@ -91,7 +91,7 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
 
   /**
    * Create a test case using the given input data for the given key and value schema.
-   *
+   * 使用给定的键和值模式的给定输入数据创建一个测试用例
    * The approach works as follows:
    *
    * - Create input by randomly generating data based on the given schema

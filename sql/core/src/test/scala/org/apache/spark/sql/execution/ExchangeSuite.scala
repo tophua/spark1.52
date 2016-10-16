@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.plans.physical.SinglePartition
 import org.apache.spark.sql.test.SharedSQLContext
 
 class ExchangeSuite extends SparkPlanTest with SharedSQLContext {
-  test("shuffling UnsafeRows in exchange") {
+  test("shuffling UnsafeRows in exchange") {//在Shuffle交换中的不安全行
     val input = (1 to 1000).map(Tuple1.apply)
     checkAnswer(
       input.toDF(),

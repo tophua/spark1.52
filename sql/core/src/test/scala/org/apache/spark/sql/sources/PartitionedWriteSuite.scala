@@ -25,7 +25,7 @@ import org.apache.spark.util.Utils
 class PartitionedWriteSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("write many partitions") {
+  test("write many partitions") {//写入更多分区
     val path = Utils.createTempDir()
     path.delete()
 
@@ -39,7 +39,7 @@ class PartitionedWriteSuite extends QueryTest with SharedSQLContext {
     Utils.deleteRecursively(path)
   }
 
-  test("write many partitions with repeats") {
+  test("write many partitions with repeats") {//用重复写多个分区
     val path = Utils.createTempDir()
     path.delete()
 

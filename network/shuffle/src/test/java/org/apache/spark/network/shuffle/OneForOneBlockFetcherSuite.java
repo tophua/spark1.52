@@ -84,6 +84,7 @@ public class OneForOneBlockFetcherSuite {
     BlockFetchingListener listener = fetchBlocks(blocks);
 
     // Each failure will cause a failure to be invoked in all remaining block fetches.
+    //每一次的失败将导致故障是所有剩余的块调用获取
     verify(listener, times(1)).onBlockFetchSuccess("b0", blocks.get("b0"));
     verify(listener, times(1)).onBlockFetchFailure(eq("b1"), (Throwable) any());
     verify(listener, times(2)).onBlockFetchFailure(eq("b2"), (Throwable) any());
@@ -99,6 +100,7 @@ public class OneForOneBlockFetcherSuite {
     BlockFetchingListener listener = fetchBlocks(blocks);
 
     // We may call both success and failure for the same block.
+    //我们可以调用同一个块的成功和失败。
     verify(listener, times(1)).onBlockFetchSuccess("b0", blocks.get("b0"));
     verify(listener, times(1)).onBlockFetchFailure(eq("b1"), (Throwable) any());
     verify(listener, times(1)).onBlockFetchSuccess("b2", blocks.get("b2"));
@@ -144,6 +146,7 @@ public class OneForOneBlockFetcherSuite {
     }).when(client).sendRpc((byte[]) any(), (RpcResponseCallback) any());
 
     // Respond to each chunk request with a single buffer from our blocks array.
+    //用我们的块数组中的一个缓冲区响应每一个块请求
     final AtomicInteger expectedChunkIndex = new AtomicInteger(0);
     final Iterator<ManagedBuffer> blockIterator = blocks.values().iterator();
     doAnswer(new Answer<Void>() {

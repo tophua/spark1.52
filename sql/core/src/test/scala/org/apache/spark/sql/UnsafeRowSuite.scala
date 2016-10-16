@@ -30,7 +30,7 @@ import org.apache.spark.unsafe.types.UTF8String
 
 class UnsafeRowSuite extends SparkFunSuite {
 
-  test("UnsafeRow Java serialization") {
+  test("UnsafeRow Java serialization") {//java序列不安全的行
     // serializing an UnsafeRow pointing to a large buffer should only serialize the relevant data
     val data = new Array[Byte](1024)
     val row = new UnsafeRow
@@ -56,7 +56,7 @@ class UnsafeRowSuite extends SparkFunSuite {
     assert(row1.getBaseObject().asInstanceOf[Array[Byte]].length == 16)
   }
 
-  test("bitset width calculation") {
+  test("bitset width calculation") {//bit集合宽度计算
     assert(UnsafeRow.calculateBitSetWidthInBytes(0) === 0)
     assert(UnsafeRow.calculateBitSetWidthInBytes(1) === 8)
     assert(UnsafeRow.calculateBitSetWidthInBytes(32) === 8)
@@ -65,7 +65,7 @@ class UnsafeRowSuite extends SparkFunSuite {
     assert(UnsafeRow.calculateBitSetWidthInBytes(128) === 16)
   }
 
-  test("writeToStream") {
+  test("writeToStream") {//写入流
     val row = InternalRow.apply(UTF8String.fromString("hello"), UTF8String.fromString("world"), 123)
     val arrayBackedUnsafeRow: UnsafeRow =
       UnsafeProjection.create(Array[DataType](StringType, StringType, IntegerType)).apply(row)

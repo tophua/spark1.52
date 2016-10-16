@@ -56,6 +56,7 @@ case class SimpleFilteredScan(from: Int, to: Int)(@transient val sqlContext: SQL
     FiltersPushed.list = filters
 
     // Predicate test on integer column
+    //测试整数列
     def translateFilterOnA(filter: Filter): Int => Boolean = filter match {
       case EqualTo("a", v) => (a: Int) => a == v
       case EqualNullSafe("a", v) => (a: Int) => a == v

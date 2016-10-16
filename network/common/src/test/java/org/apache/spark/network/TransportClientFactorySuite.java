@@ -65,9 +65,11 @@ public class TransportClientFactorySuite {
 
   /**
    * Request a bunch of clients to a single server to test
+   * 向一个客户端请求一个单一的服务器来测试
    * we create up to maxConnections of clients.
-   *
+   * 我们创建最大连接客户端
    * If concurrent is true, create multiple threads to create clients in parallel.
+   * 如果并发是真的，创建多个线程来创建并行的客户端
    */
   private void testClientReuse(final int maxConnections, boolean concurrent)
     throws IOException, InterruptedException {
@@ -86,6 +88,7 @@ public class TransportClientFactorySuite {
     Thread[] attempts = new Thread[maxConnections * 10];
 
     // Launch a bunch of threads to create new clients.
+    //推出一堆线程来创建新的客户
     for (int i = 0; i < attempts.length; i++) {
       attempts[i] = new Thread() {
         @Override
@@ -109,6 +112,7 @@ public class TransportClientFactorySuite {
     }
 
     // Wait until all the threads complete.
+    //等到所有的线程完成
     for (int i = 0; i < attempts.length; i++) {
       attempts[i].join();
     }
