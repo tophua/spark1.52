@@ -41,12 +41,14 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
  * An example runner for decision trees. Run with
+ * 决策树的一个例子
  * {{{
  * ./bin/run-example ml.DecisionTreeExample [options]
  * }}}
  * Note that Decision Trees can take a large amount of memory.  If the run-example command above
+ * 请注意,决策树可以采取大量的内存,如果上面的运行示例命令失败,试运行通过Spark提交指定的内存量为至少1G
  * fails, try running via spark-submit and specifying the amount of memory as at least 1g.
- * For local mode, run
+ * For local mode, run 本地模式
  * {{{
  * ./bin/spark-submit --class org.apache.spark.examples.ml.DecisionTreeExample --driver-memory 1g
  *   [examples JAR path] [options]
@@ -136,7 +138,10 @@ object DecisionTreeExample {
     }
   }
 
-  /** Load a dataset from the given path, using the given format */
+  /** 
+   *  Load a dataset from the given path, using the given format
+   *  从给定的路径加载数据集,使用给定的格式
+   *   */
   private[ml] def loadData(
       sc: SparkContext,
       path: String,
@@ -154,11 +159,13 @@ object DecisionTreeExample {
 
   /**
    * Load training and test data from files.
-   * @param input  Path to input dataset.
+   * 从文件中加载训练和测试数据
+   * @param input  Path to input dataset. 输入数据集的路径
    * @param dataFormat  "libsvm" or "dense"
-   * @param testInput  Path to test dataset.
-   * @param algo  Classification or Regression
+   * @param testInput  Path to test dataset. 测试数据集的路径
+   * @param algo  Classification or Regression 分类或回归
    * @param fracTest  Fraction of input data to hold out for testing.  Ignored if testInput given.
+   * 				用于测试的输入数据的分数,如果testinput给忽略了
    * @return  (training dataset, test dataset)
    */
   private[ml] def loadDatasets(
@@ -171,10 +178,10 @@ object DecisionTreeExample {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
-    // Load training data
+    // Load training data 加载 训练数据
     val origExamples: RDD[LabeledPoint] = loadData(sc, input, dataFormat)
 
-    // Load or create test set
+    // Load or create test set 加载或创建测试集
     val splits: Array[RDD[LabeledPoint]] = if (testInput != "") {
       // Load testInput.
       val numFeatures = origExamples.take(1)(0).features.size
@@ -182,12 +189,13 @@ object DecisionTreeExample {
         loadData(sc, testInput, dataFormat, Some(numFeatures))
       Array(origExamples, origTestExamples)
     } else {
-      // Split input into training, test.
+      // Split input into training, test. 将输入拆分为训练,测试
       origExamples.randomSplit(Array(1.0 - fracTest, fracTest), seed = 12345)
     }
 
-    // For classification, convert labels to Strings since we will index them later with
+    // For classification, convert labels to Strings since we will index them later with    
     // StringIndexer.
+    //进行分类,将标签转换为字符串，因为我们将索引他们以后
     def labelsToStrings(data: DataFrame): DataFrame = {
       algo.toLowerCase match {
         case "classification" =>
@@ -220,13 +228,13 @@ object DecisionTreeExample {
 
     println(s"DecisionTreeExample with parameters:\n$params")
 
-    // Load training and test data and cache it.
+    // Load training and test data and cache it. 加载训练和测试数据并将其缓存
     val (training: DataFrame, test: DataFrame) =
       loadDatasets(sc, params.input, params.dataFormat, params.testInput, algo, params.fracTest)
 
-    // Set up Pipeline
+    // Set up Pipeline 建立管道
     val stages = new mutable.ArrayBuffer[PipelineStage]()
-    // (1) For classification, re-index classes.
+    // (1) For classification, re-index classes. 对于分类,重新索引类
     val labelColName = if (algo == "classification") "indexedLabel" else "label"
     if (algo == "classification") {
       val labelIndexer = new StringIndexer()
@@ -235,13 +243,15 @@ object DecisionTreeExample {
       stages += labelIndexer
     }
     // (2) Identify categorical features using VectorIndexer.
+    //     确定使用vectorindexer分类特征
     //     Features with more than maxCategories values will be treated as continuous.
+    //    超过maxcategories值将被视为连续的特点
     val featuresIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
       .setMaxCategories(10)
     stages += featuresIndexer
-    // (3) Learn Decision Tree
+    // (3) Learn Decision Tree 学习决策树
     val dt = algo match {
       case "classification" =>
         new DecisionTreeClassifier()
@@ -268,20 +278,21 @@ object DecisionTreeExample {
     stages += dt
     val pipeline = new Pipeline().setStages(stages.toArray)
 
-    // Fit the Pipeline
+    // Fit the Pipeline 安装管道
     val startTime = System.nanoTime()
     val pipelineModel = pipeline.fit(training)
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained Decision Tree from the fitted PipelineModel
+    //从拟合的管道模型中得到训练有素的决策树
     algo match {
       case "classification" =>
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeClassificationModel]
         if (treeModel.numNodes < 20) {
-          println(treeModel.toDebugString) // Print full model.
+          println(treeModel.toDebugString) // Print full model. 打印完整的模型
         } else {
-          println(treeModel) // Print model summary.
+          println(treeModel) // Print model summary. 打印模型综述
         }
       case "regression" =>
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeRegressionModel]
@@ -293,7 +304,7 @@ object DecisionTreeExample {
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
 
-    // Evaluate model on training, test data
+    // Evaluate model on training, test data 训练评估模型，测试数据
     algo match {
       case "classification" =>
         println("Training data results:")
@@ -314,9 +325,10 @@ object DecisionTreeExample {
 
   /**
    * Evaluate the given ClassificationModel on data.  Print the results.
-   * @param model  Must fit ClassificationModel abstraction
-   * @param data  DataFrame with "prediction" and labelColName columns
-   * @param labelColName  Name of the labelCol parameter for the model
+   * 评估给定的数据分类模型,打印结果
+   * @param model  Must fit ClassificationModel abstraction 必须适合分类模型抽象
+   * @param data  DataFrame with "prediction" and labelColName columns “预测”和labelcolname列数据框
+   * @param labelColName  Name of the labelCol parameter for the model 该模型的labelcol参数名称
    *
    * TODO: Change model type to ClassificationModel once that API is public. SPARK-5995
    */
@@ -328,6 +340,7 @@ object DecisionTreeExample {
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
     // Print number of classes for reference
+    
     val numClasses = MetadataUtils.getNumClasses(fullPredictions.schema(labelColName)) match {
       case Some(n) => n
       case None => throw new RuntimeException(
@@ -340,9 +353,10 @@ object DecisionTreeExample {
 
   /**
    * Evaluate the given RegressionModel on data.  Print the results.
-   * @param model  Must fit RegressionModel abstraction
+   * 评估给定的数据回归模型,打印结果
+   * @param model  Must fit RegressionModel abstraction 必须回归模型的抽象
    * @param data  DataFrame with "prediction" and labelColName columns
-   * @param labelColName  Name of the labelCol parameter for the model
+   * @param labelColName  Name of the labelCol parameter for the model 该模型的labelcol参数名称
    *
    * TODO: Change model type to RegressionModel once that API is public. SPARK-5995
    */

@@ -27,6 +27,7 @@ import org.apache.spark.sql.types.{StructField, StructType}
 /**
  * 聚类,K均值
  * An example demonstrating a k-means clustering.
+ * 一个展示k-均值聚类的例子
  * Run with
  * {{{
  * bin/run-example ml.KMeansExample <file> <k>
@@ -47,6 +48,7 @@ object KMeansExample {
     val k = args(1).toInt
 
     // Creates a Spark context and a SQL context
+    //创建一个Spark上下文和SQL上下文
     val conf = new SparkConf().setAppName(s"${this.getClass.getSimpleName}")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
@@ -57,14 +59,14 @@ object KMeansExample {
       .map(_.split(" ").map(_.toDouble)).map(Vectors.dense).map(Row(_))
     val schema = StructType(Array(StructField(FEATURES_COL, new VectorUDT, false)))
     val dataset = sqlContext.createDataFrame(rowRDD, schema)
-    //聚类模型
+    //训练一个k-均值模型
     // Trains a k-means model
     val kmeans = new KMeans()
       .setK(k)
       .setFeaturesCol(FEATURES_COL)
     val model = kmeans.fit(dataset)
 
-    // Shows the result
+    // Shows the result 显示结果
     // scalastyle:off println
     println("Final Centers: ")
     model.clusterCenters.foreach(println)

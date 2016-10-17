@@ -29,8 +29,9 @@ import org.apache.spark.sql.{Row, SQLContext}
 
 /**
  * A simple example demonstrating model selection using CrossValidator.
+ * 演示模型选择使用交叉验证一个简单的例子
  * This example also demonstrates how Pipelines are Estimators.
- *
+ * 这个例子还演示了如何管道估计
  * This example uses the [[LabeledDocument]] and [[Document]] case classes from
  * [[SimpleTextClassificationPipeline]].
  *
@@ -65,6 +66,7 @@ object CrossValidatorExample {
       LabeledDocument(11L, "hadoop software", 0.0)))
 
     // Configure an ML pipeline, which consists of three stages: tokenizer, hashingTF, and lr.
+      //配置一个ML的管道,其中包括三个阶段, tokenizer, hashingTF, and lr
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
@@ -79,33 +81,42 @@ object CrossValidatorExample {
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // We now treat the Pipeline as an Estimator, wrapping it in a CrossValidator instance.
+     //我们现在把管道作为一个估计,包装在一个交叉验证实例
     // This will allow us to jointly choose parameters for all Pipeline stages.
+      //他将允许我们共同选择所有管道阶段的参数
     // A CrossValidator requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
+      //交叉验证需要估计,一套估计参数的Map,和一个计算器
     val crossval = new CrossValidator()//交叉
       .setEstimator(pipeline)//表示从一个schemardd构建机器学习模式即Model的逻辑
       //二分类评估
       .setEvaluator(new BinaryClassificationEvaluator)
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
+    //我们用一个参数网格生成器构建网格参数搜索
     // With 3 values for hashingTF.numFeatures and 2 values for lr.regParam,
+    //
     // this grid will have 3 x 2 = 6 parameter settings for CrossValidator to choose from.
+     //该网格将有3 x 2 = 6参数设置选择交叉验证
     val paramGrid = new ParamGridBuilder()//通过addGrid添加我们需要寻找的最佳参数  
       .addGrid(hashingTF.numFeatures, Array(10, 100, 1000))
       .addGrid(lr.regParam, Array(0.1, 0.01))//正则化参数
       .build()
     crossval.setEstimatorParamMaps(paramGrid)//设置构建参数
-    crossval.setNumFolds(2) // Use 3+ in practice
+    crossval.setNumFolds(2) // Use 3+ in practice 在实践中使用3 +
 
     // Run cross-validation, and choose the best set of parameters.
+    //运行交叉验证,并选择最佳的参数集
     val cvModel = crossval.fit(training.toDF())
 
     // Prepare test documents, which are unlabeled.
+    //准备测试文档,这些文件是未标记的
     val test = sc.parallelize(Seq(
       Document(4L, "spark i j k"),
       Document(5L, "l m n"),
       Document(6L, "mapreduce spark"),
       Document(7L, "apache hadoop")))
 
-    // Make predictions on test documents. cvModel uses the best model found (lrModel).
+    // Make predictions on test documents.对测试文档进行预测 
+    //cvModel uses the best model found (lrModel).C-V模型采用最好的模型
     cvModel.transform(test.toDF())
       .select("id", "text", "probability", "prediction")
       .collect()
