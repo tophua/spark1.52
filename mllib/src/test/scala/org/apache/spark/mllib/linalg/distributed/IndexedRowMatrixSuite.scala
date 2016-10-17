@@ -53,7 +53,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(mat2.numCols() === n)
   }
 
-  test("empty rows") {
+  test("empty rows") {//空行
     val rows = sc.parallelize(Seq[IndexedRow](), 1)
     val mat = new IndexedRowMatrix(rows)
     intercept[RuntimeException] {
@@ -64,7 +64,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("toBreeze") {
+  test("toBreeze") {//
     val mat = new IndexedRowMatrix(indexedRows)
     val expected = BDM(
       (0.0, 1.0, 2.0),
@@ -74,7 +74,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(mat.toBreeze() === expected)
   }
 
-  test("toRowMatrix") {
+  test("toRowMatrix") {//行矩阵
     val idxRowMat = new IndexedRowMatrix(indexedRows)
     val rowMat = idxRowMat.toRowMatrix()
     assert(rowMat.numCols() === n)
@@ -82,7 +82,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(rowMat.rows.collect().toSeq === data.map(_.vector).toSeq)
   }
 
-  test("toCoordinateMatrix") {
+  test("toCoordinateMatrix") {//协调矩阵
     val idxRowMat = new IndexedRowMatrix(indexedRows)
     val coordMat = idxRowMat.toCoordinateMatrix()
     assert(coordMat.numRows() === m)
@@ -90,7 +90,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(coordMat.toBreeze() === idxRowMat.toBreeze())
   }
 
-  test("toBlockMatrix") {
+  test("toBlockMatrix") {//块矩阵
     val idxRowMat = new IndexedRowMatrix(indexedRows)
     val blockMat = idxRowMat.toBlockMatrix(2, 2)
     assert(blockMat.numRows() === m)
@@ -105,7 +105,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("multiply a local matrix") {
+  test("multiply a local matrix") {//乘一个局部矩阵
     val A = new IndexedRowMatrix(indexedRows)
     val B = Matrices.dense(3, 2, Array(0.0, 1.0, 2.0, 3.0, 4.0, 5.0))
     val C = A.multiply(B)
@@ -115,7 +115,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(localC === expected)
   }
 
-  test("gram") {
+  test("gram") {//克
     val A = new IndexedRowMatrix(indexedRows)
     val G = A.computeGramianMatrix()
     val expected = BDM(
@@ -125,7 +125,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(G.toBreeze === expected)
   }
 
-  test("svd") {
+  test("svd") {//奇异值分解
     val A = new IndexedRowMatrix(indexedRows)
     //第一个参数3意味着取top 2个奇异值，第二个参数true意味着计算矩阵U
     val svd = A.computeSVD(n, computeU = true)
@@ -139,7 +139,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(closeToZero(U * brzDiag(s) * V.t - localA))
   }
 
-  test("validate matrix sizes of svd") {
+  test("validate matrix sizes of svd") {//验证SVD矩阵大小
     val k = 2
     val A = new IndexedRowMatrix(indexedRows)
     val svd = A.computeSVD(k, computeU = true)
@@ -150,7 +150,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(svd.V.numCols === k)
   }
 
-  test("validate k in svd") {
+  test("validate k in svd") {//验证K 奇异值
     val A = new IndexedRowMatrix(indexedRows)
     intercept[IllegalArgumentException] {
       A.computeSVD(-1)

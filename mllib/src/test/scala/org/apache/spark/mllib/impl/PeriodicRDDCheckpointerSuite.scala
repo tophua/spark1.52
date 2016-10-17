@@ -30,7 +30,7 @@ class PeriodicRDDCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCont
 
   import PeriodicRDDCheckpointerSuite._
 
-  test("Persisting") {
+  test("Persisting") {//持久化
     var rddsToCheck = Seq.empty[RDDToCheck]
 
     val rdd1 = createRDD(sc)
@@ -49,7 +49,7 @@ class PeriodicRDDCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCont
     }
   }
 
-  test("Checkpointing") {
+  test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     val checkpointInterval = 2
@@ -154,7 +154,7 @@ private object PeriodicRDDCheckpointerSuite {
           confirmCheckpointRemoved(rdd)
         }
       } else {
-        // RDD should never be checkpointed
+        // RDD should never be checkpointed RDD绝不应检查点
         assert(!rdd.isCheckpointed, "RDD should never have been checkpointed")
         assert(rdd.getCheckpointFile.isEmpty, "RDD should not have any checkpoint files")
       }

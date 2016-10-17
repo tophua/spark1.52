@@ -34,7 +34,7 @@ class StopwatchSuite extends SparkFunSuite with MLlibTestSparkContext {
       sw.stop()
     }
     val duration = checkStopwatch(sw)
-    val elapsed = sw.elapsed()
+    val elapsed = sw.elapsed()//消逝
     assert(elapsed === duration)
     val duration2 = checkStopwatch(sw)
     val elapsed2 = sw.elapsed()
@@ -47,17 +47,17 @@ class StopwatchSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("LocalStopwatch") {
+  test("LocalStopwatch") {//当地的秒表
     val sw = new LocalStopwatch("sw")
     testStopwatchOnDriver(sw)
   }
 
-  test("DistributedStopwatch on driver") {
+  test("DistributedStopwatch on driver") {//分布式驱动程序
     val sw = new DistributedStopwatch(sc, "sw")
     testStopwatchOnDriver(sw)
   }
 
-  test("DistributedStopwatch on executors") {
+  test("DistributedStopwatch on executors") {//分布式执行者
     val sw = new DistributedStopwatch(sc, "sw")
     val rdd = sc.parallelize(0 until 4, 4)
     val acc = sc.accumulator(0L)
@@ -69,7 +69,7 @@ class StopwatchSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(elapsed === acc.value)
   }
 
-  test("MultiStopwatch") {
+  test("MultiStopwatch") {//多秒表
     val sw = new MultiStopwatch(sc)
       .addLocal("local")
       .addDistributed("spark")
@@ -106,7 +106,9 @@ private object StopwatchSuite extends SparkFunSuite {
 
   /**
    * Checks the input stopwatch on a task that takes a random time (<10ms) to finish. Validates and
+   * 检查需要一个随机时间输入秒表(小于10ms)完成
    * returns the duration reported by the stopwatch.
+   * 验证并返回由计时表报告的持续时间
    */
   def checkStopwatch(sw: Stopwatch): Long = {
     val ubStart = now
@@ -120,6 +122,9 @@ private object StopwatchSuite extends SparkFunSuite {
     duration
   }
 
-  /** The current time in milliseconds. */
+  /** 
+   *  The current time in milliseconds. 
+   *  当前时间以毫秒为单位
+   *  */
   private def now: Long = System.currentTimeMillis()
 }

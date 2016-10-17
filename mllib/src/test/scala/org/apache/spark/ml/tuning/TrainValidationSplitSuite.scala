@@ -30,7 +30,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.StructType
 
 class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext {
-  test("train validation with logistic regression") {
+  test("train validation with logistic regression") {//训练验证逻辑回归
     val dataset = sqlContext.createDataFrame(
       sc.parallelize(generateLogisticInput(1.0, 1.0, 100, 42), 2))
 
@@ -53,7 +53,7 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
     assert(cvModel.validationMetrics.length === lrParamMaps.length)
   }
 
-  test("train validation with linear regression") {
+  test("train validation with linear regression") {//训练验证线性回归
     val dataset = sqlContext.createDataFrame(
         sc.parallelize(LinearDataGenerator.generateLinearInput(
             6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1), 2))
@@ -83,7 +83,7 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
     assert(cvModel2.validationMetrics.length === lrParamMaps.length)
   }
 
-  test("validateParams should check estimatorParamMaps") {
+  test("validateParams should check estimatorParamMaps") {//验证参数应检查估计参数Map
     import TrainValidationSplitSuite._
 
     val est = new MyEstimator("est")

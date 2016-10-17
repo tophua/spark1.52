@@ -49,6 +49,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
   }
 
   // assume test RDDs are small
+  //假设测试RDDS小
   def testGeneratedVectorRDD(rdd: RDD[Vector],
       expectedRows: Long,
       expectedColumns: Int,
@@ -68,7 +69,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     assert(math.abs(stats.stdev - expectedStddev) < epsilon)
   }
 
-  test("RandomRDD sizes") {
+  test("RandomRDD sizes") {//随机RDD大小
 
     // some cases where size % numParts != 0 to test getPartitions behaves correctly
     for ((size, numPartitions) <- List((10000, 6), (12345, 1), (1000, 101))) {
@@ -77,6 +78,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
       assert(rdd.partitions.size === numPartitions)
 
       // check that partition sizes are balanced
+      //检查分区大小是否平衡
       val partSizes = rdd.partitions.map(p =>
         p.asInstanceOf[RandomRDDPartition[Double]].size.toDouble)
 
@@ -95,12 +97,15 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     assert(count === size)
 
     // size needs to be positive
+    //尺寸需要是正数
     intercept[IllegalArgumentException] { new RandomRDD(sc, 0, 10, new UniformGenerator, 0L) }
 
     // numPartitions needs to be positive
+    //分区数需要一个正数    
     intercept[IllegalArgumentException] { new RandomRDD(sc, 100, 0, new UniformGenerator, 0L) }
 
     // partition size needs to be <= Int.MaxValue
+    //分区大小需要< = int.maxvalue
     intercept[IllegalArgumentException] {
       new RandomRDD(sc, Int.MaxValue.toLong * 100L, 99, new UniformGenerator, 0L)
     }
@@ -148,11 +153,12 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     }
 
     // mock distribution to check that partitions have unique seeds
+    //模拟分布以检查分区有唯一的种子
     val random = RandomRDDs.randomRDD(sc, new MockDistro(), 1000L, 1000, 0L)
     assert(random.collect.size === random.collect.distinct.size)
   }
 
-  test("randomVectorRDD for different distributions") {
+  test("randomVectorRDD for different distributions") {//不同分布的随机向量法
     val rows = 1000L
     val cols = 100
     val parts = 10
@@ -198,6 +204,7 @@ private[random] class MockDistro extends RandomDataGenerator[Double] {
   var seed = 0L
 
   // This allows us to check that each partition has a different seed
+  //这使我们能够检查每个分区都有一个不同的种子
   override def nextValue(): Double = seed.toDouble
 
   override def setSeed(seed: Long): Unit = this.seed = seed

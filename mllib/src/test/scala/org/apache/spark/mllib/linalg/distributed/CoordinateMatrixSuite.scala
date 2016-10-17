@@ -55,7 +55,7 @@ class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(mat.numCols() === n)
   }
 
-  test("empty entries") {
+  test("empty entries") {//空项
     val entries = sc.parallelize(Seq[MatrixEntry](), 1)
     val emptyMat = new CoordinateMatrix(entries)
     intercept[RuntimeException] {
@@ -76,7 +76,7 @@ class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(mat.toBreeze() === expected)
   }
 
-  test("transpose") {
+  test("transpose") {//转置矩阵
     val transposed = mat.transpose()
     assert(mat.toBreeze().t === transposed.toBreeze())
   }
@@ -92,7 +92,7 @@ class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(indexedRowMatrix.toBreeze() === expected)
   }
 
-  test("toRowMatrix") {
+  test("toRowMatrix") {//行矩阵
     val rowMatrix = mat.toRowMatrix()
     val rows = rowMatrix.rows.collect().toSet
     val expected = Set(
@@ -104,7 +104,7 @@ class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(rows === expected)
   }
 
-  test("toBlockMatrix") {
+  test("toBlockMatrix") {//分块矩阵
     val blockMat = mat.toBlockMatrix(2, 2)
     assert(blockMat.numRows() === m)
     assert(blockMat.numCols() === n)

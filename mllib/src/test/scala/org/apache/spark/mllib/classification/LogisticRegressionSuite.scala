@@ -103,6 +103,7 @@ object LogisticRegressionSuite {
 
     x.foreach { vector =>
       // This doesn't work if `vector` is a sparse(稀疏) vector.
+      //如果向量是一个稀疏向量,这不工作
       val vectorArray = vector.toArray
       var i = 0
       val len = vectorArray.length

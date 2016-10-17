@@ -29,9 +29,8 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
  */
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("hashing tf on a single doc") {
-    
-    //
+  test("hashing tf on a single doc") {//散列在一个单一的文件
+      
     val hashingTF = new HashingTF(1000)
     val doc = "a a b b c d".split(" ")
     val n = hashingTF.numFeatures
@@ -43,14 +42,14 @@ class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
       (hashingTF.indexOf("d"), 1.0))
     //termFreqs: Seq[(Int, Double)] = List((97,2.0), (98,2.0), (99,1.0), (100,1.0))
     assert(termFreqs.map(_._1).forall(i => i >= 0 && i < n),
-      "index must be in range [0, #features)")
-    assert(termFreqs.map(_._1).toSet.size === 4, "expecting perfect hashing")
+      "index must be in range [0, #features)")//索引必须在范围内
+    assert(termFreqs.map(_._1).toSet.size === 4, "expecting perfect hashing")//期待完美的哈希
     val expected = Vectors.sparse(n, termFreqs)
     //transform 把每个输入文档映射到一个Vector对象
     assert(hashingTF.transform(doc) === expected)
   }
 
-  test("hashing tf on an RDD") {
+  test("hashing tf on an RDD") {//散列TF在RDD
     val hashingTF = new HashingTF
     val localDocs: Seq[Seq[String]] = Seq(
       "a a b b b c d".split(" "),

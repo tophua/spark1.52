@@ -25,18 +25,19 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 class ChiSqSelectorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   /*
-   *  Contingency tables
-   *  feature0 = {8.0, 0.0}
+   *  Contingency tables 列联表数
+   *  
+   *  feature0 = {8.0, 0.0} 特征0
    *  class  0 1 2
    *    8.0||1|0|1|
    *    0.0||0|2|0|
    *
-   *  feature1 = {7.0, 9.0}
+   *  feature1 = {7.0, 9.0} 特征1
    *  class  0 1 2
    *    7.0||1|0|0|
    *    9.0||0|2|1|
    *
-   *  feature2 = {0.0, 6.0, 8.0, 5.0}
+   *  feature2 = {0.0, 6.0, 8.0, 5.0} 特征2
    *  class  0 1 2
    *    0.0||1|0|0|
    *    6.0||0|1|0|
@@ -44,15 +45,16 @@ class ChiSqSelectorSuite extends SparkFunSuite with MLlibTestSparkContext {
    *    5.0||0|0|1|
    *
    *  Use chi-squared calculator from Internet
+   *  从互联网上使用卡方计算器
    */
-  //特征提取和转换 卡方选择(ChiSqSelector)
+  //特征提取和转换 卡方选择(ChiSqSelector)稀疏和稠密向量
   test("ChiSqSelector transform test (sparse & dense vector)") {
-    val labeledDiscreteData = sc.parallelize(
+    val labeledDiscreteData = sc.parallelize(//标记的离散数据
       Seq(LabeledPoint(0.0, Vectors.sparse(3, Array((0, 8.0), (1, 7.0)))),
         LabeledPoint(1.0, Vectors.sparse(3, Array((1, 9.0), (2, 6.0)))),
         LabeledPoint(1.0, Vectors.dense(Array(0.0, 9.0, 8.0))),
         LabeledPoint(2.0, Vectors.dense(Array(8.0, 9.0, 5.0)))), 2)
-    val preFilteredData =
+    val preFilteredData =//预过滤数据
       Set(LabeledPoint(0.0, Vectors.dense(Array(0.0))),
         LabeledPoint(1.0, Vectors.dense(Array(6.0))),
         LabeledPoint(1.0, Vectors.dense(Array(8.0))),

@@ -43,7 +43,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     }.reduceLeft(_ + _) / predictions.size
   }
 
-  test("ridge regression can help avoid overfitting") {
+  test("ridge regression can help avoid overfitting") {//岭回归分析可以帮助避免过拟合
 
     // For small number of examples and large variance of error distribution,
     // ridge regression should give smaller generalization error that linear regression.

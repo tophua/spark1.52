@@ -37,7 +37,7 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
     prodFeatures = sc.parallelize(Seq((2, Array(5.0, 6.0))))
   }
 
-  test("constructor") {
+  test("constructor") {//构造函数
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
     //预测得分
     assert(model.predict(0, 2) ~== 17.0 relTol 1e-14)
@@ -57,7 +57,7 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
     }
   }
 
-  test("save/load") {
+  test("save/load") {//保存/加载
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
@@ -75,7 +75,7 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
     }
   }
 
-  test("batch predict API recommendProductsForUsers") {
+  test("batch predict API recommendProductsForUsers") {//批量预测API recommendproductsforusers
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
     val topK = 10
     val recommendations = model.recommendProductsForUsers(topK).collectAsMap()

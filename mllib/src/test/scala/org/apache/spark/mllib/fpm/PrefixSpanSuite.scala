@@ -20,7 +20,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 
 class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
-
+  //前缀跨度内(整数序列,0 delim)运行,单集
   test("PrefixSpan internal (integer seq, 0 delim) run, singleton itemsets") {
 
     /*
@@ -197,7 +197,7 @@ class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
         52   <{1},{2,3},{1}>    0.50
         53     <{1},{2},{1}>    0.50
      */
-    val expectedValue = Array(
+    val expectedValue = Array(//期望值
       (Array(0, 1, 0), 4L),
       (Array(0, 2, 0), 4L),
       (Array(0, 3, 0), 4L),

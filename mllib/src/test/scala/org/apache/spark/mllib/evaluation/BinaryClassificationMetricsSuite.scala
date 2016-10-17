@@ -70,17 +70,18 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
       assertTupleSequencesMatch(metrics.recallByThreshold().collect(),
       expectedThresholds.zip(expectedRecalls))
   }
-  //二元分类评估
+  //二元分类评估指标
   test("binary evaluation metrics") {
-    val scoreAndLabels = sc.parallelize(
+    val scoreAndLabels = sc.parallelize(//评分和标签
       Seq((0.1, 0.0), (0.1, 1.0), (0.4, 0.0), (0.6, 0.0), (0.6, 1.0), (0.6, 1.0), (0.8, 1.0)), 2)
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
     //阀值
     val thresholds = Seq(0.8, 0.6, 0.4, 0.1)
     val numTruePositives = Seq(1, 3, 3, 4)
     val numFalsePositives = Seq(0, 1, 2, 3)
-    val numPositives = 4
-    val numNegatives = 3
+    val numPositives = 4//阳性
+    val numNegatives = 3//阴性
+    //精度
     val precisions = numTruePositives.zip(numFalsePositives).map { case (t, f) =>
       t.toDouble / (t + f)
     }
@@ -88,13 +89,13 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
     val fpr = numFalsePositives.map(f => f.toDouble / numNegatives)
     val rocCurve = Seq((0.0, 0.0)) ++ fpr.zip(recalls) ++ Seq((1.0, 1.0))
     val pr = recalls.zip(precisions)
-    val prCurve = Seq((0.0, 1.0)) ++ pr
+    val prCurve = Seq((0.0, 1.0)) ++ pr//PR曲线
     val f1 = pr.map { case (r, p) => 2.0 * (p * r) / (p + r)}
     val f2 = pr.map { case (r, p) => 5.0 * (p * r) / (4.0 * p + r)}
 
     validateMetrics(metrics, thresholds, rocCurve, prCurve, f1, f2, precisions, recalls)
   }
-
+  //RDD在所有的例子都正的标签二进制的评价指标
   test("binary evaluation metrics for RDD where all examples have positive label") {
     val scoreAndLabels = sc.parallelize(Seq((0.5, 1.0), (0.5, 1.0)), 2)
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
@@ -111,7 +112,7 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
 
     validateMetrics(metrics, thresholds, rocCurve, prCurve, f1, f2, precisions, recalls)
   }
-
+  //RDD所有例子的负的标签二进制的评价指标
   test("binary evaluation metrics for RDD where all examples have negative label") {
     val scoreAndLabels = sc.parallelize(Seq((0.5, 0.0), (0.5, 0.0)), 2)
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
@@ -134,9 +135,9 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
 
     validateMetrics(metrics, thresholds, rocCurve, prCurve, f1, f2, precisions, recalls)
   }
-
+  //下采样的二元评价指标
   test("binary evaluation metrics with downsampling") {//downsampling 降采样
-    val scoreAndLabels = Seq(
+    val scoreAndLabels = Seq(//评分和标签
       (0.1, 0.0), (0.2, 0.0), (0.3, 1.0), (0.4, 0.0), (0.5, 0.0),
       (0.6, 1.0), (0.7, 1.0), (0.8, 0.0), (0.9, 1.0))
 

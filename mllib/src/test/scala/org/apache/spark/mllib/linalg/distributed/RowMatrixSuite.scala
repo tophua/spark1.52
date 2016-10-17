@@ -74,7 +74,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(sparseMat.numCols() === n)
   }
 
-  test("empty rows") {
+  test("empty rows") {//空行
     val rows = sc.parallelize(Seq[Vector](), 1)
     val emptyMat = new RowMatrix(rows)
     intercept[RuntimeException] {
@@ -96,7 +96,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("gram") {
+  test("gram") {//
     val expected =
       Matrices.dense(n, n, Array(126.0, 54.0, 72.0, 54.0, 66.0, 78.0, 72.0, 78.0, 94.0))
     for (mat <- Seq(denseMat, sparseMat)) {
@@ -105,7 +105,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("similar columns") {
+  test("similar columns") {//相似的列
     val colMags = Vectors.dense(math.sqrt(126), math.sqrt(66), math.sqrt(94))
     val expected = BDM(
       (0.0, 54.0, 72.0),
@@ -139,7 +139,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("svd of a full-rank matrix") {
+  test("svd of a full-rank matrix") {//一个满秩矩阵的奇异值分解
     for (mat <- Seq(denseMat, sparseMat)) {
       for (mode <- Seq("auto", "local-svd", "local-eigs", "dist-eigs")) {
         val localMat = mat.toBreeze()
@@ -168,7 +168,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("svd of a low-rank matrix") {
+  test("svd of a low-rank matrix") {//低秩矩阵的SVD
     val rows = sc.parallelize(Array.fill(4)(Vectors.dense(1.0, 1.0, 1.0)), 2)
     val mat = new RowMatrix(rows, 4, 3)
     for (mode <- Seq("auto", "local-svd", "local-eigs", "dist-eigs")) {
@@ -208,7 +208,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("pca") {
+  test("pca") {//主成分析
     for (mat <- Seq(denseMat, sparseMat); k <- 1 to n) {
       val pc = denseMat.computePrincipalComponents(k)
       assert(pc.numRows === n)
@@ -217,7 +217,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("multiply a local matrix") {
+  test("multiply a local matrix") {//乘一个局部矩阵
     val B = Matrices.dense(n, 2, Array(0.0, 1.0, 2.0, 3.0, 4.0, 5.0))
     for (mat <- Seq(denseMat, sparseMat)) {
       val AB = mat.multiply(B)
@@ -231,10 +231,11 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("compute column summary statistics") {
+  test("compute column summary statistics") {//计算列汇总统计
     for (mat <- Seq(denseMat, sparseMat)) {
       val summary = mat.computeColumnSummaryStatistics()
       // Run twice to make sure no internal states are changed.
+      //运行两次,以确保没有内部状态被更改
       for (k <- 0 to 1) {
         assert(summary.mean === Vectors.dense(4.5, 3.0, 4.0), "mean mismatch")
         assert(summary.variance === Vectors.dense(15.0, 10.0, 10.0), "variance mismatch")
@@ -249,7 +250,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("QR Decomposition") {
+  test("QR Decomposition") {//QR分解
     for (mat <- Seq(denseMat, sparseMat)) {
       val result = mat.tallSkinnyQR(true)
       val expected = breeze.linalg.qr.reduced(mat.toBreeze())
@@ -258,7 +259,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(closeToZero(abs(expected.q) - abs(calcQ.toBreeze())))
       assert(closeToZero(abs(expected.r) - abs(calcR.toBreeze.asInstanceOf[BDM[Double]])))
       assert(closeToZero(calcQ.multiply(calcR).toBreeze - mat.toBreeze()))
-      // Decomposition without computing Q
+      // Decomposition without computing Q 没有计算的分解
       val rOnly = mat.tallSkinnyQR(computeQ = false)
       assert(rOnly.Q == null)
       assert(closeToZero(abs(expected.r) - abs(rOnly.R.toBreeze.asInstanceOf[BDM[Double]])))
@@ -281,12 +282,12 @@ class RowMatrixClusterSuite extends SparkFunSuite with LocalClusterSparkContext 
     mat = new RowMatrix(rows)
   }
 
-  test("task size should be small in svd") {
+  test("task size should be small in svd") {//任务应该是小规模的奇异值分解
     //第一个参数1意味着取top 1个奇异值，第二个参数true意味着计算矩阵U
     val svd = mat.computeSVD(1, computeU = true)
   }
 
-  test("task size should be small in summarize") {
+  test("task size should be small in summarize") {//任务的大小应该是小的总结
     val summary = mat.computeColumnSummaryStatistics()
   }
 }

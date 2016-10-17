@@ -22,7 +22,7 @@ import breeze.linalg.{DenseMatrix => BDM, CSCMatrix => BSM}
 import org.apache.spark.SparkFunSuite
 
 class BreezeMatrixConversionSuite extends SparkFunSuite {
-  test("dense matrix to breeze") {
+  test("dense matrix to breeze") {//稠密矩阵转换breeze矩阵
     val mat = Matrices.dense(3, 2, Array(0.0, 1.0, 2.0, 3.0, 4.0, 5.0))
     val breeze = mat.toBreeze.asInstanceOf[BDM[Double]]
     assert(breeze.rows === mat.numRows)
@@ -30,20 +30,20 @@ class BreezeMatrixConversionSuite extends SparkFunSuite {
     assert(breeze.data.eq(mat.asInstanceOf[DenseMatrix].values), "should not copy data")
   }
 
-  test("dense breeze matrix to matrix") {
+  test("dense breeze matrix to matrix") {//稠密breeze矩阵转换矩阵
     val breeze = new BDM[Double](3, 2, Array(0.0, 1.0, 2.0, 3.0, 4.0, 5.0))
     val mat = Matrices.fromBreeze(breeze).asInstanceOf[DenseMatrix]
     assert(mat.numRows === breeze.rows)
     assert(mat.numCols === breeze.cols)
     assert(mat.values.eq(breeze.data), "should not copy data")
-    // transposed matrix
+    // transposed matrix 转置矩阵
     val matTransposed = Matrices.fromBreeze(breeze.t).asInstanceOf[DenseMatrix]
     assert(matTransposed.numRows === breeze.cols)
     assert(matTransposed.numCols === breeze.rows)
     assert(matTransposed.values.eq(breeze.data), "should not copy data")
   }
 
-  test("sparse matrix to breeze") {
+  test("sparse matrix to breeze") {//稀疏矩阵转换breeze矩阵
     val values = Array(1.0, 2.0, 4.0, 5.0)
     val colPtrs = Array(0, 2, 4)
     val rowIndices = Array(1, 2, 1, 2)
@@ -54,7 +54,7 @@ class BreezeMatrixConversionSuite extends SparkFunSuite {
     assert(breeze.data.eq(mat.asInstanceOf[SparseMatrix].values), "should not copy data")
   }
 
-  test("sparse breeze matrix to sparse matrix") {
+  test("sparse breeze matrix to sparse matrix") {//稀疏breeze矩阵转换稀疏矩阵
     val values = Array(1.0, 2.0, 4.0, 5.0)
     val colPtrs = Array(0, 2, 4)
     val rowIndices = Array(1, 2, 1, 2)

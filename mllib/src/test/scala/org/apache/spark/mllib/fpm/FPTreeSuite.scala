@@ -24,7 +24,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 
 class FPTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("add transaction") {
+  test("add transaction") {//增加转换
     val tree = new FPTree[String]
       .add(Seq("a", "b", "c"))
       .add(Seq("a", "b", "y"))
@@ -52,7 +52,7 @@ class FPTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(child.children("y").count == 1)
   }
 
-  test("merge tree") {
+  test("merge tree") {//合并树
     val tree1 = new FPTree[String]
       .add(Seq("a", "b", "c"))
       .add(Seq("a", "b", "y"))
@@ -93,7 +93,7 @@ class FPTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(child5.children("m").count == 1)
   }
 
-  test("extract freq itemsets") {
+  test("extract freq itemsets") {//频繁项集的提取物
     val tree = new FPTree[String]
       .add(Seq("a", "b", "c"))
       .add(Seq("a", "b", "y"))

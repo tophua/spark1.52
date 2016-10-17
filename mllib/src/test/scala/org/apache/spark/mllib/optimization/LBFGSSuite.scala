@@ -44,13 +44,14 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
   val squaredL2Updater = new SquaredL2Updater()
 
   // Add an extra variable consisting of all 1.0's for the intercept.
+  //添加一个额外的变量组成的所有1个的拦截
   val testData = GradientDescentSuite.generateGDInput(A, B, nPoints, 42)
   val data = testData.map { case LabeledPoint(label, features) =>
     label -> Vectors.dense(1.0 +: features.toArray)
   }
 
   lazy val dataRDD = sc.parallelize(data, 2).cache()
-
+  //损失应该减少比赛LBFGS梯度下降的结果
   test("LBFGS loss should be decreasing and match the result of Gradient Descent.") {
     val regParam = 0
 
@@ -98,6 +99,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
     val regParam = 0.2
 
     // Prepare another non-zero weights to compare the loss in the first iteration.
+    //准备另一个非零的权重，以比较第一次迭代中的损失
     val initialWeightsWithIntercept = Vectors.dense(0.3, 0.12)
     val convergenceTol = 1e-12
     val numIterations = 10
@@ -137,7 +139,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
       "The weight differences between LBFGS and GD should be within 2%.")
   }
 
-  test("The convergence criteria should work as we expect.") {
+  test("The convergence criteria should work as we expect.") {//收敛准则应该像我们期望的那样工作
     val regParam = 0.0
 
     /**

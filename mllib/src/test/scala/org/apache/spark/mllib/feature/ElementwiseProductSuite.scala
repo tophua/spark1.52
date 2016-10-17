@@ -26,7 +26,7 @@ import org.apache.spark.mllib.util.TestingUtils._
  * ElementwiseProduct 采用逐个相乘的方式,使用给定的权重与每个输入向量相乘
  */
 class ElementwiseProductSuite extends SparkFunSuite with MLlibTestSparkContext {
-
+  //产品应适用于数据集在一个密集的矢量
   test("elementwise (hadamard) product should properly apply vector to dense data set") {
     val denseData = Array(
       Vectors.dense(1.0, 4.0, 1.9, -9.0)

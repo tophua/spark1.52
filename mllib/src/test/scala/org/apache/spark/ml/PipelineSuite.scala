@@ -33,7 +33,7 @@ class PipelineSuite extends SparkFunSuite {
 
   abstract class MyModel extends Model[MyModel]
 
-  test("pipeline") {
+  test("pipeline") {//管道
     val estimator0 = mock[Estimator[MyModel]]
     val model0 = mock[MyModel]
     val transformer1 = mock[Transformer]
@@ -78,7 +78,7 @@ class PipelineSuite extends SparkFunSuite {
     assert(output.eq(dataset4))
   }
 
-  test("pipeline with duplicate stages") {
+  test("pipeline with duplicate stages") {//重复阶段管道
     val estimator = mock[Estimator[MyModel]]
     val pipeline = new Pipeline()
       .setStages(Array(estimator, estimator))
@@ -88,7 +88,7 @@ class PipelineSuite extends SparkFunSuite {
     }
   }
 
-  test("PipelineModel.copy") {
+  test("PipelineModel.copy") {//管道模型复制
     val hashingTF = new HashingTF()
       .setNumFeatures(100)
     val model = new PipelineModel("pipeline", Array[Transformer](hashingTF))
@@ -97,7 +97,7 @@ class PipelineSuite extends SparkFunSuite {
       "copy should handle extra stage params")
   }
 
-  test("pipeline model constructors") {
+  test("pipeline model constructors") {//管道模型构造器
     val transform0 = mock[Transformer]
     val model1 = mock[MyModel]
 

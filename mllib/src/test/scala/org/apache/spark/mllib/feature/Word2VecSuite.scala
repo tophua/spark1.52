@@ -61,12 +61,13 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Test that model built using Word2Vec, i.e wordVectors and wordIndec
     // and a Word2VecMap give the same values.
+    //测试模型使用Word2vec,wordvectors和wordindec和word2vecmap给相同的价值
     val word2VecMap = model.getVectors
     val newModel = new Word2VecModel(word2VecMap)
     assert(newModel.getVectors.mapValues(_.toSeq) === word2VecMap.mapValues(_.toSeq))
   }
 
-  test("Word2Vec throws exception when vocabulary is empty") {
+  test("Word2Vec throws exception when vocabulary is empty") {//Word2vec词汇为空时抛出异常
     intercept[IllegalArgumentException] {
       val sentence = "a b c"
       val localDoc = Seq(sentence, sentence)
@@ -76,7 +77,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("Word2VecModel") {
+  test("Word2VecModel") {//word2vec模型
     val num = 2
     val word2VecMap = Map(
         //每个单词都关联两个向量，分别表示词向量和上下文向量
@@ -96,7 +97,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(syms(1)._1 == "japan")
   }
 
-  test("model load / save") {
+  test("model load / save") {//模型加载/保存
 
     val word2VecMap = Map(
       ("china", Array(0.50f, 0.50f, 0.50f, 0.50f)),

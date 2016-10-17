@@ -47,7 +47,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     Vectors.sparse(3, Seq((0, 1.7), (1, -0.6))),
     Vectors.sparse(3, Seq((1, 1.9))))
 
-  val denseData = Array(
+  val denseData = Array(//密集的数据
     Vectors.dense(-2.0, 2.3, 0),
     Vectors.dense(0.0, -1.0, -3.0),
     Vectors.dense(0.0, -5.1, 0.0),
@@ -60,7 +60,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
       (aggregator, data) => aggregator.add(data),
       (aggregator1, aggregator2) => aggregator1.merge(aggregator2))
   }
-
+  //标准化与密集的输入时,提供了标准
   test("Standardization with dense input when means and stds are provided") {
 
     val dataRDD = sc.parallelize(denseData, 3)
@@ -100,7 +100,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert((denseData, data1, data1RDD.collect()).zipped.forall {
       case (v1: DenseVector, v2: DenseVector, v3: DenseVector) => true
       case (v1: SparseVector, v2: SparseVector, v3: SparseVector) => true
-      case _ => false
+      case _ => false //标准化后应保留向量类型
     }, "The vector type should be preserved after standardization.")
 
     assert((denseData, data2, data2RDD.collect()).zipped.forall {
@@ -137,7 +137,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(data3(5) ~== Vectors.dense(-0.58333333, 2.316666666, 0.18333333333) absTol 1E-5)
   }
 
-  test("Standardization with dense input") {
+  test("Standardization with dense input") {//标准化的密集输入
 
     val dataRDD = sc.parallelize(denseData, 3)
 
@@ -199,8 +199,8 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(data2(5) ~== Vectors.dense(0.0, 0.71580142, 0.0) absTol 1E-5)
     assert(data3(1) ~== Vectors.dense(-0.58333333, -0.58333333, -2.8166666666) absTol 1E-5)
     assert(data3(5) ~== Vectors.dense(-0.58333333, 2.316666666, 0.18333333333) absTol 1E-5)
-  }
-
+  }  
+  //标准化稀疏输入
   test("Standardization with sparse input when means and stds are provided") {
 
     val dataRDD = sc.parallelize(sparseData, 3)
@@ -249,7 +249,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(data2(4) ~== Vectors.sparse(3, Seq((0, 0.865538862), (1, -0.22604255))) absTol 1E-5)
     assert(data2(5) ~== Vectors.sparse(3, Seq((1, 0.71580142))) absTol 1E-5)
   }
-
+  //稀疏输入的标准化
   test("Standardization with sparse input") {
 
     val dataRDD = sc.parallelize(sparseData, 3)
@@ -314,14 +314,14 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val data2 = constantData.map(equivalentModel2.transform)
     val data3 = constantData.map(equivalentModel3.transform)
 
-    assert(data1.forall(_.toArray.forall(_ == 0.0)),
+    assert(data1.forall(_.toArray.forall(_ == 0.0)),//方差为零,因此变换后的结果为0
       "The variance is zero, so the transformed result should be 0.0")
     assert(data2.forall(_.toArray.forall(_ == 0.0)),
       "The variance is zero, so the transformed result should be 0.0")
     assert(data3.forall(_.toArray.forall(_ == 0.0)),
       "The variance is zero, so the transformed result should be 0.0")
   }
-
+  //常量输入标准化
   test("Standardization with constant input") {
 
     val dataRDD = sc.parallelize(constantData, 2)
@@ -345,26 +345,27 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(data3.forall(_.toArray.forall(_ == 0.0)),
       "The variance is zero, so the transformed result should be 0.0")
   }
-
+  //标准模型的参数为空的妥善处理定标器
   test("StandardScalerModel argument nulls are properly handled") {
 
-    withClue("model needs at least one of std or mean vectors") {
+    withClue("model needs at least one of std or mean vectors") {//模型需要至少一个标准或平均向量
       intercept[IllegalArgumentException] {
         val model = new StandardScalerModel(null, null)
       }
     }
-    withClue("model needs std to set withStd to true") {
+    withClue("model needs std to set withStd to true") {//模型需要两个标准
       intercept[IllegalArgumentException] {
         val model = new StandardScalerModel(null, Vectors.dense(0.0))
         model.setWithStd(true)
       }
     }
-    withClue("model needs mean to set withMean to true") {
+    withClue("model needs mean to set withMean to true") {//模型需要建立真正的平均值
       intercept[IllegalArgumentException] {
         val model = new StandardScalerModel(Vectors.dense(0.0), null)
         model.setWithMean(true)
       }
     }
+    //模型需要的标准和平均向量是相同的大小,当两个都提供
     withClue("model needs std and mean vectors to be equal size when both are provided") {
       intercept[IllegalArgumentException] {
         val model = new StandardScalerModel(Vectors.dense(0.0), Vectors.dense(0.0, 1.0))

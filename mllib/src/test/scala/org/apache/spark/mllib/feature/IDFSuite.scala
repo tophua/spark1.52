@@ -72,19 +72,19 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
         println("tfidf2.values>>>>>>:"+Vectors.dense(tfidf2.values))
       assert(tfidf2.values(0) ~== (1.0 * expected(1)) absTol 1e-12)
     }
-    // Transforms a RDD
+    // Transforms a RDD 转换一个RDD
     val tfidf = model.transform(termFrequencies).collect()
     //WrappedArray((4,[1,3],[0.0,0.5753641449035617]), [0.0,0.0,1.3862943611198906,0.8630462173553426], (4,[1],[0.0]))
     println("Transforms:"+tfidf.toSeq)
     assertHelper(tfidf)
-    // Transforms local vectors
+    // Transforms local vectors 转换本地向量
     //((4,[1,3],[0.0,0.5753641449035617]), [0.0,0.0,1.3862943611198906,0.8630462173553426], (4,[1],[0.0]))
     val localTfidf = localTermFrequencies.map(model.transform(_)).toArray
      println("localTfidf:"+localTfidf.toSeq)
     assertHelper(localTfidf)
   }
 
-  test("idf minimum document frequency filtering") {
+  test("idf minimum document frequency filtering") {//IDF最小文档频率过虑
     val n = 4
     val localTermFrequencies = Seq(
       Vectors.sparse(n, Array(1, 3), Array(1.0, 2.0)),

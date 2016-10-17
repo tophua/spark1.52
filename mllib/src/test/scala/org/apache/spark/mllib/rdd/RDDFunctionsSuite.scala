@@ -23,7 +23,7 @@ import org.apache.spark.mllib.rdd.RDDFunctions._
 
 class RDDFunctionsSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("sliding") {
+  test("sliding") {//滑动
     val data = 0 until 6
     for (numPartitions <- 1 to 8) {
       val rdd = sc.parallelize(data, numPartitions)
@@ -37,7 +37,7 @@ class RDDFunctionsSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("sliding with empty partitions") {
+  test("sliding with empty partitions") {//带空分区的滑动
     val data = Seq(Seq(1, 2, 3), Seq.empty[Int], Seq(4), Seq.empty[Int], Seq(5, 6, 7))
     // Array(1, 2, 3, 4, 5, 6, 7)
     val rdd = sc.parallelize(data, data.length).flatMap(s => s)

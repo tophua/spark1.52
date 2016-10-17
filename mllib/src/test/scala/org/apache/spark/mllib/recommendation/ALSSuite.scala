@@ -71,7 +71,7 @@ object ALSSuite {
     val (trueRatings, truePrefs) = implicitPrefs match {
       case true =>
         // Generate raw values from [0,9], or if negativeWeights, from [-2,7]
-        //从[0，]生成原始值，或者如果negativeweights，从[ 2,7 ]
+        //从[0，]生成原始值,或者如果negativeweights，从[ 2,7 ]
         val raw = new DoubleMatrix(users, products,
           Array.fill(users * products)(
             (if (negativeWeights) -2 else 0) + rand.nextInt(10).toDouble): _*)
@@ -109,23 +109,23 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     testALS(100, 200, 2, 15, 0.7, 0.3, false, true)
   }
 
-  test("rank-1 matrices implicit") {
+  test("rank-1 matrices implicit") {//秩1隐式矩阵
     testALS(80, 160, 1, 15, 0.7, 0.4, true)
   }
 
-  test("rank-1 matrices implicit bulk") {
+  test("rank-1 matrices implicit bulk") {//秩1隐式大块
     testALS(80, 160, 1, 15, 0.7, 0.4, true, true)
   }
 
-  test("rank-2 matrices implicit") {
+  test("rank-2 matrices implicit") {//秩2隐式矩阵
     testALS(100, 200, 2, 15, 0.7, 0.4, true)
   }
 
-  test("rank-2 matrices implicit bulk") {
+  test("rank-2 matrices implicit bulk") {//秩2隐式矩阵大块
     testALS(100, 200, 2, 15, 0.7, 0.4, true, true)
   }
 
-  test("rank-2 matrices implicit negative") {
+  test("rank-2 matrices implicit negative") {//秩2隐式矩阵负数
     testALS(100, 200, 2, 15, 0.7, 0.4, true, false, true)
   }
 

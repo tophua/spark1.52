@@ -30,7 +30,7 @@ class PeriodicGraphCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCo
 
   import PeriodicGraphCheckpointerSuite._
 
-  test("Persisting") {
+  test("Persisting") {//持久化
     var graphsToCheck = Seq.empty[GraphToCheck]
 
     val graph1 = createGraph(sc)
@@ -50,7 +50,7 @@ class PeriodicGraphCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCo
     }
   }
 
-  test("Checkpointing") {
+  test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     val checkpointInterval = 2

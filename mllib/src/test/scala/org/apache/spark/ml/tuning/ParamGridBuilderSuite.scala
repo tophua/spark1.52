@@ -27,7 +27,7 @@ class ParamGridBuilderSuite extends SparkFunSuite {
   val solver = new TestParams()
   import solver.{inputCol, maxIter}
 
-  test("param grid builder") {
+  test("param grid builder") {//参数表格生成器
     def validateGrid(maps: Array[ParamMap], expected: mutable.Set[(Int, String)]): Unit = {
       assert(maps.size === expected.size)
       maps.foreach { m =>
@@ -48,7 +48,7 @@ class ParamGridBuilderSuite extends SparkFunSuite {
       (10, "input1"))
     validateGrid(maps0, expected0)
     val maps1 = new ParamGridBuilder()
-      .baseOn(ParamMap(maxIter -> 5, inputCol -> "input")) // will be overwritten
+      .baseOn(ParamMap(maxIter -> 5, inputCol -> "input")) // will be overwritten 将被覆盖
       .addGrid(maxIter, Array(10, 20))//重载
       .addGrid(inputCol, Array("input0", "input1"))
       .build()

@@ -64,7 +64,7 @@ object GradientDescentSuite {
 
 class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers {
 
-  test("Assert the loss is decreasing.") {
+  test("Assert the loss is decreasing.") {//断言损失减少
     val nPoints = 10000
     val A = 2.0
     val B = -1.5
@@ -80,6 +80,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     val miniBatchFrac = 1.0
 
     // Add a extra variable consisting of all 1.0's for the intercept.
+    //添加一个额外的变量组成的所有1个的拦截
     val testData = GradientDescentSuite.generateGDInput(A, B, nPoints, 42)
     val data = testData.map { case LabeledPoint(label, features) =>
       label -> MLUtils.appendBias(features)
@@ -103,7 +104,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     val lossDiff = loss.init.zip(loss.tail).map { case (lhs, rhs) => lhs - rhs }
     assert(lossDiff.count(_ > 0).toDouble / lossDiff.size > 0.8)
   }
-
+  //用正则化方法检验第一次迭代的损失和梯度
   test("Test the loss and gradient of first iteration with regularization.") {
 
     val gradient = new LogisticGradient()
@@ -118,6 +119,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     val dataRDD = sc.parallelize(data, 2).cache()
 
     // Prepare non-zero weights
+    //准备非零权重
     val initialWeightsWithIntercept = Vectors.dense(1.0, 0.5)
 
     val regParam0 = 0
@@ -140,7 +142,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
         "should be initialWeightsWithIntercept.")
   }
 
-  test("iteration should end with convergence tolerance") {
+  test("iteration should end with convergence tolerance") {//迭代应以收敛公差结束
     val nPoints = 10000
     val A = 2.0
     val B = -1.5
@@ -182,7 +184,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
 
 class GradientDescentClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
 
-  test("task size should be small") {
+  test("task size should be small") {//任务大小应该是小的
     val m = 4
     val n = 200000
     val points = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>

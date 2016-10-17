@@ -29,6 +29,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
  */
   def apiChecks(gen: RandomDataGenerator[Double]) {
     // resetting seed should generate the same sequence of random numbers
+    //重置种子应产生同一序列的随机数
     gen.setSeed(42L)
     val array1 = (0 until 1000).map(_ => gen.nextValue())
     gen.setSeed(42L)
@@ -45,9 +46,11 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
     val array4 = (0 until 1000).map(_ => gen2.nextValue())
     // Compare arrays instead of elements since individual elements can coincide by chance but the
     // sequences should differ given two different seeds.
+    //比较数组,而不是元素,因为单个元素可以在偶然的机会,但序列应该不同给定的两个不同的种子。
     assert(!array3.equals(array4))
 
     // test that setting the same seed in the copied instance produces the same sequence of numbers
+    //测试在复制的实例中设置相同的种子产生相同的数字序列
     gen.setSeed(0L)
     val array5 = (0 until 1000).map(_ => gen.nextValue())
     gen2.setSeed(0L)
@@ -68,20 +71,20 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
     }
   }
 
-  test("UniformGenerator") {
+  test("UniformGenerator") {//均匀分布随机数生成器
     val uniform = new UniformGenerator()
     apiChecks(uniform)
     // Stddev of uniform distribution = (ub - lb) / math.sqrt(12)
     distributionChecks(uniform, 0.5, 1 / math.sqrt(12))
   }
 
-  test("StandardNormalGenerator") {
+  test("StandardNormalGenerator") {//标准正态生成器
     val normal = new StandardNormalGenerator()
     apiChecks(normal)
     distributionChecks(normal, 0.0, 1.0)
   }
 
-  test("LogNormalGenerator") {
+  test("LogNormalGenerator") {//对数正态生成器
     List((0.0, 1.0), (0.0, 2.0), (2.0, 1.0), (2.0, 2.0)).map {
       case (mean: Double, vari: Double) =>
         val normal = new LogNormalGenerator(mean, math.sqrt(vari))
@@ -101,7 +104,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
     }
   }
 
-  test("PoissonGenerator") {
+  test("PoissonGenerator") {//泊松生成器
     // mean = 0.0 will not pass the API checks since 0.0 is always deterministically produced.
     for (mean <- List(1.0, 5.0, 100.0)) {
       val poisson = new PoissonGenerator(mean)
@@ -110,7 +113,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
     }
   }
 
-  test("ExponentialGenerator") {
+  test("ExponentialGenerator") {//指数函数生成器
     // mean = 0.0 will not pass the API checks since 0.0 is always deterministically produced.
     for (mean <- List(2.0, 5.0, 10.0, 50.0, 100.0)) {
       val exponential = new ExponentialGenerator(mean)
@@ -125,7 +128,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
     }
   }
 
-  test("GammaGenerator") {
+  test("GammaGenerator") {//伽玛生成器
     // mean = 0.0 will not pass the API checks since 0.0 is always deterministically produced.
     List((1.0, 2.0), (2.0, 2.0), (3.0, 2.0), (5.0, 1.0), (9.0, 0.5)).map {
       case (shape: Double, scale: Double) =>

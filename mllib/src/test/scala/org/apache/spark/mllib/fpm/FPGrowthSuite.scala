@@ -28,7 +28,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
 
 
-  test("FP-Growth using String type") {
+  test("FP-Growth using String type") {//使用字符串型FP增长
     /**
      * List(Array(r, z, h, k, p), 
      * 			Array(z, y, x, w,v, u, t, s), 
@@ -160,7 +160,7 @@ class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model1.freqItemsets.count() === 625)
   }
 
-  test("FP-Growth String type association rule generation") {
+  test("FP-Growth String type association rule generation") {//FP-growth关联规则生成的字符串类型
     val transactions = Seq(
       "r z h k p",
       "z y x w v u t s",
@@ -202,7 +202,7 @@ class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(rules.count(rule => math.abs(rule.confidence - 1.0D) < 1e-6) == 23)
   }
 
-  test("FP-Growth using Int type") {
+  test("FP-Growth using Int type") {//使用int型FP增长
     val transactions = Seq(
       "1 2 3",
       "1 2 3 4",

@@ -27,7 +27,7 @@ import org.apache.spark.mllib.linalg.BLAS._
  */
 class BLASSuite extends SparkFunSuite {
 
-  test("copy") {
+  test("copy") {//复制
     val sx = Vectors.sparse(4, Array(0, 2), Array(1.0, -2.0))
     val dx = Vectors.dense(1.0, 0.0, -2.0, 0.0)
     val sy = Vectors.sparse(4, Array(0, 1, 3), Array(2.0, 1.0, 1.0))
@@ -49,14 +49,14 @@ class BLASSuite extends SparkFunSuite {
       copy(dx, sy)
     }
 
-    withClue("vector sizes must match") {
+    withClue("vector sizes must match") {//矢量大小必须匹配
       intercept[Exception] {
         copy(sx, Vectors.dense(0.0, 1.0, 2.0))
       }
     }
   }
 
-  test("scal") {
+  test("scal") {//规模
     val a = 0.1
     val sx = Vectors.sparse(3, Array(0, 2), Array(1.0, -2.0))
     val dx = Vectors.dense(1.0, 0.0, -2.0)
@@ -68,7 +68,7 @@ class BLASSuite extends SparkFunSuite {
     assert(dx ~== Vectors.dense(0.1, 0.0, -0.2) absTol 1e-15)
   }
 
-  test("axpy") {
+  test("axpy") {//函数返回值为向量
     val alpha = 0.1
     val sx = Vectors.sparse(3, Array(0, 2), Array(1.0, -2.0))
     val dx = Vectors.dense(1.0, 0.0, -2.0)
@@ -100,7 +100,7 @@ class BLASSuite extends SparkFunSuite {
     }
   }
 
-  test("dot") {
+  test("dot") {//dot为内积函数
     val sx = Vectors.sparse(3, Array(0, 2), Array(1.0, -2.0))
     val dx = Vectors.dense(1.0, 0.0, -2.0)
     val sy = Vectors.sparse(3, Array(0, 1), Array(2.0, 1.0))
@@ -123,14 +123,14 @@ class BLASSuite extends SparkFunSuite {
     assert(dot(sx1, sx2) ~== 20.0 absTol 1e-15)
     assert(dot(sx2, sx1) ~== 20.0 absTol 1e-15)
 
-    withClue("vector sizes must match") {
+    withClue("vector sizes must match") {//矢量大小必须匹配
       intercept[Exception] {
         dot(sx, Vectors.dense(2.0, 1.0))
       }
     }
   }
 
-  test("syr") {
+  test("syr") {//
     val dA = new DenseMatrix(4, 4,
       Array(0.0, 1.2, 2.2, 3.1, 1.2, 3.2, 5.3, 4.6, 2.2, 5.3, 1.8, 3.0, 3.1, 4.6, 3.0, 0.8))
     val x = new DenseVector(Array(0.0, 2.7, 3.5, 2.1))
@@ -227,7 +227,7 @@ class BLASSuite extends SparkFunSuite {
     gemm(1.0, sA, B, 0.0, C17)
     assert(C17 ~== expected absTol 1e-15)
 
-    withClue("columns of A don't match the rows of B") {
+    withClue("columns of A don't match the rows of B") {//一个不匹配的行的列
       intercept[Exception] {
         gemm(1.0, dA.transpose, B, 2.0, C1)
       }

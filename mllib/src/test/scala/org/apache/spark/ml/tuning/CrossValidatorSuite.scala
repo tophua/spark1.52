@@ -59,7 +59,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
       sc.parallelize(generateLogisticInput(1.0, 1.0, 100, 42), 2))
   }
 
-  test("cross validation with logistic regression") {
+  test("cross validation with logistic regression") {//用逻辑回归的交叉验证
     //交叉验证
     val lr = new LogisticRegression//逻辑回归
     val lrParamMaps = new ParamGridBuilder()
@@ -75,6 +75,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val cvModel = cv.fit(dataset)
 
     // copied model must have the same paren.
+    //复制模型必须具有相同的实质
     MLTestingUtils.checkCopy(cvModel)
     //最好的模型
     val parent = cvModel.bestModel.parent.asInstanceOf[LogisticRegression]
@@ -83,7 +84,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(cvModel.avgMetrics.length === lrParamMaps.length)
   }
 
-  test("cross validation with linear regression") {
+  test("cross validation with linear regression") {//用线性回归的交叉验证
     val dataset = sqlContext.createDataFrame(
       sc.parallelize(LinearDataGenerator.generateLinearInput(
         6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1), 2))
@@ -112,7 +113,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(parent2.getMaxIter === 10)
     assert(cvModel2.avgMetrics.length === lrParamMaps.length)
   }
-
+  //验证参数应检查估计parammaps
   test("validateParams should check estimatorParamMaps") {
     import CrossValidatorSuite._
 
@@ -126,7 +127,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setEstimator(est)
       .setEstimatorParamMaps(paramMaps)
       .setEvaluator(eval)
-
+    //这应该通过
     cv.validateParams() // This should pass.
 
     val invalidParamMaps = paramMaps :+ ParamMap(est.inputCol -> "")

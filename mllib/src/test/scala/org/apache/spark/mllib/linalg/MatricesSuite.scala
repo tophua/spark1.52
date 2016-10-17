@@ -30,7 +30,7 @@ import org.apache.spark.mllib.util.TestingUtils._
  */
 class MatricesSuite extends SparkFunSuite {
   /**局部矩阵使用整型行列索引和浮点(double)数值,存储在单机上**/
-  test("dense matrix construction") {
+  test("dense matrix construction") {//构建密集矩阵
     val m = 3
     val n = 2
     val values = Array(0.0, 1.0, 2.0, 3.0, 4.0, 5.0)
@@ -41,13 +41,13 @@ class MatricesSuite extends SparkFunSuite {
     assert(mat.values.eq(values), "should not copy data")
   }
 
-  test("dense matrix construction with wrong dimension") {
+  test("dense matrix construction with wrong dimension") {//构建错误维数的稠密矩阵
     intercept[RuntimeException] {
       Matrices.dense(3, 2, Array(0.0, 1.0, 2.0))
     }
   }
 
-  test("sparse matrix construction") {
+  test("sparse matrix construction") {//构造稀疏矩阵
     //稀疏矩阵(Sparse Matrix)
     val m = 3 //行数
     val n = 4 //列数
@@ -61,7 +61,7 @@ class MatricesSuite extends SparkFunSuite {
     val mat = Matrices.sparse(m, n, colPtrs, rowIndices, values).asInstanceOf[SparseMatrix]
     assert(mat.numRows === m)
     assert(mat.numCols === n)
-    assert(mat.values.eq(values), "should not copy data")
+    assert(mat.values.eq(values), "should not copy data")//不应该复制数据
     assert(mat.colPtrs.eq(colPtrs), "should not copy data")
     assert(mat.rowIndices.eq(rowIndices), "should not copy data")
 
@@ -72,7 +72,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(mat.toBreeze === mat2.toBreeze)
     assert(mat2.values.length == 4)
   }
-
+  //构造用错误数元素的稀疏矩阵
   test("sparse matrix construction with wrong number of elements") {
     intercept[IllegalArgumentException] {
       Matrices.sparse(3, 2, Array(0, 1), Array(1, 2, 1), Array(0.0, 1.0, 2.0))
@@ -83,7 +83,7 @@ class MatricesSuite extends SparkFunSuite {
     }
   }
 
-  test("equals") {
+  test("equals") {//相等
     val dm1 = Matrices.dense(2, 2, Array(0.0, 1.0, 2.0, 3.0))
     assert(dm1 === dm1)
     assert(dm1 !== dm1.transpose)//转置阵
@@ -101,7 +101,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(sm1 === dm2.transpose)
   }
 
-  test("matrix copies are deep copies") {
+  test("matrix copies are deep copies") {//矩阵复制是深刻复制
     val m = 3
     val n = 2
 
@@ -119,7 +119,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(!sparseMat.toArray.eq(sparseCopy.toArray))
   }
 
-  test("matrix indexing and updating") {
+  test("matrix indexing and updating") {//矩阵索引和更新
     val m = 3//行数
     val n = 2//列数
     
@@ -156,7 +156,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(sparseMat.values(2) === 10.0)
   }
 
-  test("toSparse, toDense") {
+  test("toSparse, toDense") {//转换稀疏,转换密集
     val m = 3
     val n = 2
     val values = Array(1.0, 2.0, 4.0, 5.0)
@@ -174,13 +174,13 @@ class MatricesSuite extends SparkFunSuite {
     assert(deMat1.toBreeze === deMat2.toBreeze)
   }
 
-  test("map, update") {
+  test("map, update") {//Mpa,更新
     val m = 3
     val n = 2
-    val values = Array(1.0, 2.0, 4.0, 5.0)//
-    val allValues = Array(1.0, 2.0, 0.0, 0.0, 4.0, 5.0)//
-    val colPtrs = Array(0, 2, 4)//
-    val rowIndices = Array(0, 1, 1, 2)//
+    val values = Array(1.0, 2.0, 4.0, 5.0)//值
+    val allValues = Array(1.0, 2.0, 0.0, 0.0, 4.0, 5.0)//所有值
+    val colPtrs = Array(0, 2, 4)//按列从小到大顺序对target_vertex进行排序后生成的序列数组
+    val rowIndices = Array(0, 1, 1, 2)//行索引
 
     val spMat1 = new SparseMatrix(m, n, colPtrs, rowIndices, values)
     val deMat1 = new DenseMatrix(m, n, allValues)
@@ -193,7 +193,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(deMat1.toArray === deMat2.toArray)
   }
 
-  test("transpose") {
+  test("transpose") {//转置
     val dA =
       new DenseMatrix(4, 3, Array(0.0, 1.0, 0.0, 0.0, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 3.0))
     val sA = new SparseMatrix(4, 3, Array(0, 1, 3, 4), Array(1, 0, 2, 3), Array(1.0, 2.0, 1.0, 3.0))
@@ -219,7 +219,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(sAT.toDense.toBreeze === dATexpected.toBreeze)
   }
 
-  test("foreachActive") {
+  test("foreachActive") {//每一个活动
     val m = 3
     val n = 2
     val values = Array(1.0, 2.0, 4.0, 5.0)
@@ -260,7 +260,7 @@ class MatricesSuite extends SparkFunSuite {
     val allValues = Array(1.0, 2.0, 0.0, 0.0, 4.0, 5.0)
     val colPtrs = Array(0, 2, 4)
     val rowIndices = Array(0, 1, 1, 2)
-    // transposed versions
+    // transposed versions 转换的版本
     val allValuesT = Array(1.0, 0.0, 2.0, 4.0, 0.0, 5.0)
     val colPtrsT = Array(0, 1, 3, 4)
     val rowIndicesT = Array(0, 0, 1, 1)
@@ -271,6 +271,7 @@ class MatricesSuite extends SparkFunSuite {
     val deMat1T = new DenseMatrix(n, m, allValuesT)
 
     // should equal spMat1 & deMat1 respectively
+    //应该等于spmat1和demat1分别
     val spMat1TT = spMat1T.transpose
     val deMat1TT = deMat1T.transpose
 
@@ -315,6 +316,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(deHorz1(1, 4) === 0.0)
 
     // containing transposed matrices
+    //包含转置矩阵
     val spHorzT = Matrices.horzcat(Array(spMat1TT, spMat2))
     val spHorz2T = Matrices.horzcat(Array(spMat1TT, deMat2))
     val spHorz3T = Matrices.horzcat(Array(deMat1TT, spMat2))
@@ -384,28 +386,28 @@ class MatricesSuite extends SparkFunSuite {
     }
   }
 
-  test("zeros") {
+  test("zeros") {//是生成一个零矩阵,可以相当于一个空矩阵
     val mat = Matrices.zeros(2, 3).asInstanceOf[DenseMatrix]
     assert(mat.numRows === 2)
     assert(mat.numCols === 3)
     assert(mat.values.forall(_ == 0.0))
   }
 
-  test("ones") {
+  test("ones") {//是生成一个单位矩阵
     val mat = Matrices.ones(2, 3).asInstanceOf[DenseMatrix]
     assert(mat.numRows === 2)
     assert(mat.numCols === 3)
     assert(mat.values.forall(_ == 1.0))
   }
 
-  test("eye") {
+  test("eye") {//是生成一个对角矩阵
     val mat = Matrices.eye(2).asInstanceOf[DenseMatrix]
     assert(mat.numCols === 2)
     assert(mat.numCols === 2)
     assert(mat.values.toSeq === Seq(1.0, 0.0, 0.0, 1.0))
   }
 
-  test("rand") {
+  test("rand") {//函数产生由在(0, 1)之间均匀分布的随机数组成的数组
     val rng = mock[Random]
     when(rng.nextDouble()).thenReturn(1.0, 2.0, 3.0, 4.0)
     val mat = Matrices.rand(2, 2, rng).asInstanceOf[DenseMatrix]
@@ -414,7 +416,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(mat.values.toSeq === Seq(1.0, 2.0, 3.0, 4.0))
   }
 
-  test("randn") {
+  test("randn") {//产生正态分布的随机数或矩阵的函数
     val rng = mock[Random]
     when(rng.nextGaussian()).thenReturn(1.0, 2.0, 3.0, 4.0)
     val mat = Matrices.randn(2, 2, rng).asInstanceOf[DenseMatrix]
@@ -423,14 +425,14 @@ class MatricesSuite extends SparkFunSuite {
     assert(mat.values.toSeq === Seq(1.0, 2.0, 3.0, 4.0))
   }
 
-  test("diag") {
+  test("diag") {//以向量v的元素作为矩阵X的第k条对角线元素
     val mat = Matrices.diag(Vectors.dense(1.0, 2.0)).asInstanceOf[DenseMatrix]
     assert(mat.numRows === 2)
     assert(mat.numCols === 2)
     assert(mat.values.toSeq === Seq(1.0, 0.0, 0.0, 2.0))
   }
 
-  test("sprand") {
+  test("sprand") {//生成与S具有相同稀疏结构的均匀分布随机矩阵
     val rng = mock[Random]
     when(rng.nextInt(4)).thenReturn(0, 1, 1, 3, 2, 2, 0, 1, 3, 0)
     when(rng.nextDouble()).thenReturn(1.0, 2.0, 3.0, 4.0, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
@@ -444,7 +446,7 @@ class MatricesSuite extends SparkFunSuite {
     assert(mat2.colPtrs.toSeq === Seq(0, 2, 4, 6))
   }
 
-  test("sprandn") {
+  test("sprandn") {//成与S具有相同稀疏结构的正态分布随机矩阵
     val rng = mock[Random]
     when(rng.nextInt(4)).thenReturn(0, 1, 1, 3, 2, 2, 0, 1, 3, 0)
     when(rng.nextGaussian()).thenReturn(1.0, 2.0, 3.0, 4.0)

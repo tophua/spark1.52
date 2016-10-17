@@ -25,7 +25,7 @@ import org.apache.spark.mllib.util.TestingUtils._
  * AUC的值介于0.5到1.0之间，较大的AUC代表了较好
  */
 class AreaUnderCurveSuite extends SparkFunSuite with MLlibTestSparkContext {
-  test("auc computation") {
+  test("auc computation") {//AUC计算
     val curve = Seq((0.0, 0.0), (1.0, 1.0), (2.0, 3.0), (3.0, 0.0))
     val auc = 4.0
     assert(AreaUnderCurve.of(curve) ~== auc absTol 1E-5) //1e-5的意思就是1乘以10的负5次幂.就是0.000001
@@ -33,14 +33,14 @@ class AreaUnderCurveSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(AreaUnderCurve.of(rddCurve) ~== auc absTol 1E-5)
   }
 
-  test("auc of an empty curve") {
+  test("auc of an empty curve") {//AUC空曲线
     val curve = Seq.empty[(Double, Double)]
     assert(AreaUnderCurve.of(curve) ~== 0.0 absTol 1E-5)
     val rddCurve = sc.parallelize(curve, 2)
     assert(AreaUnderCurve.of(rddCurve) ~== 0.0 absTol 1E-5)
   }
 
-  test("auc of a curve with a single point") {
+  test("auc of a curve with a single point") {//单点与曲线的AUC
     val curve = Seq((1.0, 1.0))
     assert(AreaUnderCurve.of(curve) ~== 0.0 absTol 1E-5)
     val rddCurve = sc.parallelize(curve, 2)

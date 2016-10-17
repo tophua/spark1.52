@@ -156,7 +156,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val linReg = new LinearRegressionWithSGD().setIntercept(true)//是否给数据加上一个干扰特征或者偏差特征--也就是一个值始终未1的特征
     //迭代次数,步长
     linReg.optimizer.setNumIterations(1000).setStepSize(1.0)
-
+    //运行模型
     val model = linReg.run(testRDD)
     //
     assert(model.intercept >= 2.5 && model.intercept <= 3.5)//3.062070032411828
@@ -169,14 +169,14 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationData = LinearDataGenerator.generateLinearInput(
       3.0, Array(10.0, 10.0), 100, 17)  
     val validationRDD = sc.parallelize(validationData, 2).cache()
-    // Test prediction on RDD.
+    // Test prediction on RDD. 测试在RDD预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
-    // Test prediction on Array.
+    // Test prediction on Array.测试在数据上预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
 
   // Test if we can correctly learn Y = 10*X1 + 10*X2
-  test("linear regression without intercept") {
+  test("linear regression without intercept") {//无拦截的线性回归
     val testRDD = sc.parallelize(LinearDataGenerator.generateLinearInput(
       0.0, Array(10.0, 10.0), 100, 42), 2).cache()
     val linReg = new LinearRegressionWithSGD().setIntercept(false)
@@ -203,7 +203,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   // Test if we can correctly learn Y = 10*X1 + 10*X10000
-  test("sparse linear regression without intercept") {
+  test("sparse linear regression without intercept") {//无拦截的稀疏线性回归
     val denseRDD = sc.parallelize(
       LinearDataGenerator.generateLinearInput(0.0, Array(10.0, 10.0), 100, 42), 2)
     val sparseRDD = denseRDD.map { case LabeledPoint(label, v) =>
@@ -238,7 +238,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       sparseValidationData.map(row => model.predict(row.features)), sparseValidationData)
   }
 
-  test("model save/load") {
+  test("model save/load") {//模型保存/加载
     val model = LinearRegressionSuite.model
 
     val tempDir = Utils.createTempDir()
@@ -257,7 +257,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 class LinearRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-
+//在训练和预测中，任务的大小应该是小的
   test("task size should be small in both training and prediction") {
     val m = 4
     val n = 200000

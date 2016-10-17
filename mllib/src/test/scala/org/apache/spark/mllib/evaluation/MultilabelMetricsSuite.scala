@@ -22,9 +22,10 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.rdd.RDD
 //分类模型评估多标签分类
 class MultilabelMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
-  test("Multilabel evaluation metrics") {
+  test("Multilabel evaluation metrics") {//分类模型的评价指标
     /*
     * Documents true labels (5x class0, 3x class1, 4x class2):
+    * 文件的真实标签
     * doc 0 - predict 0, 1 - class 0, 2
     * doc 1 - predict 0, 2 - class 0, 1
     * doc 2 - predict none - class 0
@@ -33,18 +34,18 @@ class MultilabelMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     * doc 5 - predict 0, 1, 2 - class 0, 1
     * doc 6 - predict 1 - class 1, 2
     *
-    * predicted classes
+    * predicted classes 预测类
     * class 0 - doc 0, 1, 4, 5 (total 4)
     * class 1 - doc 0, 5, 6 (total 3)
     * class 2 - doc 1, 3, 4, 5 (total 4)
     *
-    * true classes
+    * true classes 真正的类
     * class 0 - doc 0, 1, 2, 4, 5 (total 5)
     * class 1 - doc 1, 5, 6 (total 3)
     * class 2 - doc 0, 3, 4, 6 (total 4)
     *
     */
-    val scoreAndLabels: RDD[(Array[Double], Array[Double])] = sc.parallelize(
+    val scoreAndLabels: RDD[(Array[Double], Array[Double])] = sc.parallelize(//评分和标签
       Seq((Array(0.0, 1.0), Array(0.0, 2.0)),
         (Array(0.0, 2.0), Array(0.0, 1.0)),
         (Array(), Array(0.0)),

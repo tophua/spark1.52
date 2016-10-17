@@ -24,16 +24,17 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
  * 多元分类评估
  */
 class MulticlassMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
-  test("Multiclass evaluation metrics") {
+  test("Multiclass evaluation metrics") {//多分类指标评估
     /*
      * Confusion matrix for 3-class classification with total 9 instances:
+     * 总三级分类混淆矩阵的9个实例：
      * |2|1|1| true class0 (4 instances)
      * |1|3|0| true class1 (4 instances)
      * |0|0|1| true class2 (1 instance)
      */
     val confusionMatrix = Matrices.dense(3, 3, Array(2, 1, 0, 1, 3, 0, 1, 0, 1))
     val labels = Array(0.0, 1.0, 2.0)
-    val predictionAndLabels = sc.parallelize(
+    val predictionAndLabels = sc.parallelize(//预测和标签
       Seq((0.0, 0.0), (0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0),
         (1.0, 1.0), (1.0, 1.0), (2.0, 2.0), (2.0, 0.0)), 2)
      //评估指标-多分类

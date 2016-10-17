@@ -21,8 +21,8 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 //频繁模式挖掘-Association Rules
 class AssociationRulesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("association rules using String type") {
-    val freqItemsets = sc.parallelize(Seq(
+  test("association rules using String type") {//使用字符串类型的关联规则
+    val freqItemsets = sc.parallelize(Seq(//频繁项集
       (Set("s"), 3L), (Set("z"), 5L), (Set("x"), 4L), (Set("t"), 3L), (Set("y"), 3L),
       (Set("r"), 3L),
       (Set("x", "z"), 3L), (Set("t", "y"), 3L), (Set("t", "x"), 3L), (Set("s", "x"), 3L),
@@ -33,7 +33,7 @@ class AssociationRulesSuite extends SparkFunSuite with MLlibTestSparkContext {
     ).map {
       case (items, freq) => new FPGrowth.FreqItemset(items.toArray, freq)
     })
-//频繁模式挖掘-Association Rules
+  //频繁模式挖掘-Association Rules
     val ar = new AssociationRules()
 
     val results1 = ar
@@ -42,6 +42,7 @@ class AssociationRulesSuite extends SparkFunSuite with MLlibTestSparkContext {
       .collect()
 
     /* Verify results using the `R` code:
+     * 使用“R”代码的验证结果:
        transactions = as(sapply(
          list("r z h k p",
               "z y x w v u t s",

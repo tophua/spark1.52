@@ -30,6 +30,7 @@ import org.apache.spark.streaming.dstream.DStream
 class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
 
   // use longer wait time to ensure job completion
+  //使用更长的等待时间,以确保工作完成
   override def maxWaitTimeMillis: Int = 20000
 
   var ssc: StreamingContext = _
@@ -42,6 +43,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   }
 
   // Assert that two values are equal within tolerance epsilon
+  //断言两值在公差允许的范围内,ε是平等
   def assertEqual(v1: Double, v2: Double, epsilon: Double) {
     def errorMessage = v1.toString + " did not equal " + v2.toString
     //math.abs绝对值,epsilon一定无限大小
@@ -49,17 +51,20 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   }
 
   // Assert that model predictions are correct
+  //断言模型预测是正确的
   def validatePrediction(predictions: Seq[Double], input: Seq[LabeledPoint]) {
     val numOffPredictions = predictions.zip(input).count { case (prediction, expected) =>
       // A prediction is off if the prediction is more than 0.5 away from expected value.
+      //预测是关闭的,如果预测是超过0.5,从预期值
       math.abs(prediction - expected.label) > 0.5
     }
     // At least 80% of the predictions should be on.
+    //应该至少有80%的预测
     assert(numOffPredictions < input.length / 5)
   }
 
   // Test if we can accurately learn Y = 10*X1 + 10*X2 on streaming data
-  test("parameter accuracy") {
+  test("parameter accuracy") {//参数的精度
     // create model,梯度下降法
     val model = new StreamingLinearRegressionWithSGD()
       .setInitialWeights(Vectors.dense(0.0, 0.0))
@@ -68,12 +73,14 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
       .setConvergenceTol(0.0001)
 
     // generate sequence of simulated data
+      //生成模拟数据序列
     val numBatches = 10
     val input = (0 until numBatches).map { i =>
       LinearDataGenerator.generateLinearInput(0.0, Array(10.0, 10.0), 100, 42 * (i + 1))
     }
 
     // apply model training to input stream
+    //将模型训练应用于输入流
     ssc = setupStreams(input, (inputDStream: DStream[LabeledPoint]) => {
       model.trainOn(inputDStream)
       inputDStream.count()
@@ -81,32 +88,38 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     runStreams(ssc, numBatches, numBatches)
 
     // check accuracy of final parameter estimates
+    //检查最终参数估计的准确性
     assertEqual(model.latestModel().intercept, 0.0, 0.1)
     assertEqual(model.latestModel().weights(0), 10.0, 0.1)
     assertEqual(model.latestModel().weights(1), 10.0, 0.1)
 
     // check accuracy of predictions
+    //检查预测的准确性
     val validationData = LinearDataGenerator.generateLinearInput(0.0, Array(10.0, 10.0), 100, 17)
     validatePrediction(validationData.map(row => model.latestModel().predict(row.features)),
       validationData)
   }
 
   // Test that parameter estimates improve when learning Y = 10*X1 on streaming data
-  test("parameter convergence") {
+  //测试参数估计提高学习y = 10×x1数据流的时
+  test("parameter convergence") {//参数收敛
     // create model
     val model = new StreamingLinearRegressionWithSGD()
       .setInitialWeights(Vectors.dense(0.0)).setStepSize(0.2).setNumIterations(25)
 
     // generate sequence of simulated data
+    //生成模拟数据序列
     val numBatches = 10
     val input = (0 until numBatches).map { i =>
       LinearDataGenerator.generateLinearInput(0.0, Array(10.0), 100, 42 * (i + 1))
     }
 
     // create buffer to store intermediate fits
+    //创建缓冲区以存储中间安装
     val history = new ArrayBuffer[Double](numBatches)
 
     // apply model training to input stream, storing the intermediate results
+    //将模型训练应用到输入流中,存储中间结果
     // (we add a count to ensure the result is a DStream)
     ssc = setupStreams(input, (inputDStream: DStream[LabeledPoint]) => {
       model.trainOn(inputDStream)
@@ -116,22 +129,27 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     runStreams(ssc, numBatches, numBatches)
 
     // compute change in error
+    //计算误差的变化
     val deltas = history.drop(1).zip(history.dropRight(1))
     // check error stability (it always either shrinks, or increases with small tol)
+    //检查错误的稳定性(它总是要么收缩，或增加小公差)
     assert(deltas.forall(x => (x._1 - x._2) <= 0.1))
     // check that error shrunk on at least 2 batches
+    //检查至少2个批次的错误缩水
     assert(deltas.map(x => if ((x._1 - x._2) < 0) 1 else 0).sum > 1)
   }
 
-  // Test predictions on a stream
-  test("predictions") {
+  // Test predictions on a stream 在流上测试预测
+  test("predictions") {//预测
     // create model initialized with true weights
+    //创建真正的权重初始化模型
     val model = new StreamingLinearRegressionWithSGD()
       .setInitialWeights(Vectors.dense(10.0, 10.0))
       .setStepSize(0.2)
       .setNumIterations(25)
 
     // generate sequence of simulated data for testing
+    //生成测试的模拟数据序列
     val numBatches = 10
     val nPoints = 100
     val testInput = (0 until numBatches).map { i =>
@@ -139,33 +157,38 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     }
 
     // apply model predictions to test stream
+    //将模型预测应用到测试流
     ssc = setupStreams(testInput, (inputDStream: DStream[LabeledPoint]) => {
       model.predictOnValues(inputDStream.map(x => (x.label, x.features)))
     })
     // collect the output as (true, estimated) tuples
+    //收集输出(真的,估计)的元组
     val output: Seq[Seq[(Double, Double)]] = runStreams(ssc, numBatches, numBatches)
 
     // compute the mean absolute error and check that it's always less than 0.1
+    //计算平均绝对误差,并检查它总是小于0.1
     val errors = output.map(batch => batch.map(p => math.abs(p._1 - p._2)).sum / nPoints)
     assert(errors.forall(x => x <= 0.1))
   }
 
-  // Test training combined with prediction
+  // Test training combined with prediction 测试训练结合预测
   test("training and prediction") {
     // create model initialized with zero weights
+    //创建具有零权重的初始化模型
     val model = new StreamingLinearRegressionWithSGD()
       .setInitialWeights(Vectors.dense(0.0, 0.0))
       .setStepSize(0.2)
       .setNumIterations(25)
 
     // generate sequence of simulated data for testing
+    //生成测试的模拟数据序列
     val numBatches = 10
     val nPoints = 100
     val testInput = (0 until numBatches).map { i =>
       LinearDataGenerator.generateLinearInput(0.0, Array(10.0, 10.0), nPoints, 42 * (i + 1))
     }
 
-    // train and predict
+    // train and predict 训练和预测
     ssc = setupStreams(testInput, (inputDStream: DStream[LabeledPoint]) => {
       model.trainOn(inputDStream)
       model.predictOnValues(inputDStream.map(x => {
@@ -191,11 +214,12 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     val output: Seq[Seq[(Double, Double)]] = runStreams(ssc, numBatches, numBatches)
 
     // assert that prediction error improves, ensuring that the updated model is being used
+    //断言预测错误提高,确保正在使用的更新模型
     val error = output.map(batch => batch.map(p => math.abs(p._1 - p._2)).sum / nPoints).toList
     assert((error.head - error.last) > 2)
   }
 
-  // Test empty RDDs in a stream
+  // Test empty RDDs in a stream 测试空RDDS在流
   test("handling empty RDDs in a stream") {
     val model = new StreamingLinearRegressionWithSGD()
       .setInitialWeights(Vectors.dense(0.0, 0.0))

@@ -53,14 +53,15 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     gridBasedMat = new BlockMatrix(sc.parallelize(blocks, numPartitions), rowPerPart, colPerPart)
   }
 
-  test("size") {
+  test("size") {//大小
     assert(gridBasedMat.numRows() === m)
     assert(gridBasedMat.numCols() === n)
   }
 
-  test("grid partitioner") {
+  test("grid partitioner") {//网格分割
     val random = new ju.Random()
     // This should generate a 4x4 grid of 1x2 blocks.
+    //这应该产生一个4x4网络 1x2块
     val part0 = GridPartitioner(4, 7, suggestedNumPartitions = 12)
     // scalastyle:off
     val expected0 = Array(
@@ -128,22 +129,22 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("toCoordinateMatrix") {
+  test("toCoordinateMatrix") {//协调矩阵
     val coordMat = gridBasedMat.toCoordinateMatrix()
     assert(coordMat.numRows() === m)
     assert(coordMat.numCols() === n)
     assert(coordMat.toBreeze() === gridBasedMat.toBreeze())
   }
 
-  test("toIndexedRowMatrix") {
+  test("toIndexedRowMatrix") {//索引行矩阵
     val rowMat = gridBasedMat.toIndexedRowMatrix()
     assert(rowMat.numRows() === m)
     assert(rowMat.numCols() === n)
     assert(rowMat.toBreeze() === gridBasedMat.toBreeze())
   }
 
-  test("toBreeze and toLocalMatrix") {
-    val expected = BDM(
+  test("toBreeze and toLocalMatrix") {//和本地矩阵
+    val expected = BDM(//期望
       (1.0, 0.0, 0.0, 0.0),
       (0.0, 2.0, 1.0, 0.0),
       (3.0, 1.0, 1.0, 0.0),
@@ -155,7 +156,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(gridBasedMat.toBreeze() === expected)
   }
 
-  test("add") {
+  test("add") {//添加
     val blocks: Seq[((Int, Int), Matrix)] = Seq(
       ((0, 0), new DenseMatrix(2, 2, Array(1.0, 0.0, 0.0, 2.0))),
       ((0, 1), new DenseMatrix(2, 2, Array(0.0, 1.0, 0.0, 0.0))),
@@ -198,8 +199,8 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(sparseBM.add(sparseBM).toBreeze() === sparseBM.add(denseBM).toBreeze())
   }
 
-  test("multiply") {
-    // identity matrix
+  test("multiply") {//相乘
+    // identity matrix 单位矩阵
     val blocks: Seq[((Int, Int), Matrix)] = Seq(
       ((0, 0), new DenseMatrix(2, 2, Array(1.0, 0.0, 0.0, 1.0))),
       ((1, 1), new DenseMatrix(2, 2, Array(1.0, 0.0, 0.0, 1.0))))
@@ -223,7 +224,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     val largerBlocks = Seq(((0, 0), DenseMatrix.eye(4)))
     val C2 = new BlockMatrix(sc.parallelize(largerBlocks, numPartitions), 4, 4)
     intercept[SparkException] {
-      // partitioning doesn't match
+      // partitioning doesn't match 分区不匹配
       gridBasedMat.multiply(C2)
     }
     val rand = new ju.Random(42)
@@ -231,6 +232,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     val largerBblocks = for (i <- 0 until 16) yield ((i % 4, i / 4), DenseMatrix.rand(4, 4, rand))
 
     // Try it with increased number of partitions
+    //尝试它与增加的分区数
     val largeA = new BlockMatrix(sc.parallelize(largerAblocks, 10), 6, 4)
     val largeB = new BlockMatrix(sc.parallelize(largerBblocks, 8), 4, 4)
     val largeC = largeA.multiply(largeB)
@@ -241,10 +243,10 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(localC ~== result absTol 1e-8)
   }
 
-  test("validate") {
-    // No error
+  test("validate") {//验证
+    // No error 没有错误
     gridBasedMat.validate()
-    // Wrong MatrixBlock dimensions
+    // Wrong MatrixBlock dimensions 错误的矩阵块尺寸
     val blocks: Seq[((Int, Int), Matrix)] = Seq(
       ((0, 0), new DenseMatrix(2, 2, Array(1.0, 0.0, 0.0, 2.0))),
       ((0, 1), new DenseMatrix(2, 2, Array(0.0, 1.0, 0.0, 0.0))),
@@ -260,7 +262,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     intercept[SparkException] {
       wrongColPerParts.validate()
     }
-    // Wrong BlockMatrix dimensions
+    // Wrong BlockMatrix dimensions 错误的分块矩阵的维度
     val wrongRowSize = new BlockMatrix(rdd, rowPerPart, colPerPart, 4, 4)
     intercept[AssertionError] {
       wrongRowSize.validate()
@@ -269,7 +271,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     intercept[AssertionError] {
       wrongColSize.validate()
     }
-    // Duplicate indices
+    // Duplicate indices 复制指标
     val duplicateBlocks: Seq[((Int, Int), Matrix)] = Seq(
       ((0, 0), new DenseMatrix(2, 2, Array(1.0, 0.0, 0.0, 2.0))),
       ((0, 0), new DenseMatrix(2, 2, Array(0.0, 1.0, 0.0, 0.0))),
@@ -282,7 +284,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("transpose") {
+  test("transpose") {//转置
     val expected = BDM(
       (1.0, 0.0, 3.0, 0.0, 0.0),
       (0.0, 2.0, 1.0, 1.0, 0.0),
@@ -295,6 +297,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(AT.toBreeze() === expected)
 
     // make sure it works when matrices are cached as well
+    //确保它的工作时,矩阵缓存以及
     gridBasedMat.cache()
     val AT2 = gridBasedMat.transpose
     AT2.cache()
