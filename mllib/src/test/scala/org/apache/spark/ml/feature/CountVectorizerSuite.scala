@@ -27,13 +27,13 @@ import org.apache.spark.sql.Row
  */
 class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new CountVectorizerModel(Array("empty")))
   }
 
   private def split(s: String): Seq[String] = s.split("\\s+")
 
-  test("CountVectorizerModel common cases") {
+  test("CountVectorizerModel common cases") {//计数矢量模型常见的情况
     /**
      res9:= List((0,WrappedArray(a, b, c, d),(4,[0,1,2,3],[1.0,1.0,1.0,1.0])), 
      						 (1,WrappedArray(a, b, b, c, d, a),(4,[0,1,2,3],[2.0,2.0,1.0,1.0])), 
@@ -67,7 +67,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("CountVectorizer common cases") {
+  test("CountVectorizer common cases") {//一般情况下计数矢量
     /**
   	res11:=List((0,WrappedArray(a, b, c, d, e),(5,[0,1,2,3,4],[1.0,1.0,1.0,1.0,1.0])), 
     						(1,WrappedArray(a, a, a, a, a, a),(5,[0],[6.0])), 
@@ -97,7 +97,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
        assert(features ~== expected absTol 1e-14)
     }
   }
-
+  //计数矢量大小和mindf词汇
   test("CountVectorizer vocabSize and minDF") {
     /**
   	res11:=List((0,WrappedArray(a, b, c, d, e),(5,[0,1,2,3,4],[1.0,1.0,1.0,1.0,1.0])), 
@@ -146,7 +146,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(features ~== expected absTol 1e-14)
     }
   }
-
+  //计数矢量抛出异常词汇为空时
   test("CountVectorizer throws exception when vocab is empty") {
     intercept[IllegalArgumentException] {
       val df = sqlContext.createDataFrame(Seq(
@@ -156,13 +156,13 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       val cvModel = new CountVectorizer()
         .setInputCol("words")
         .setOutputCol("features")
-        .setVocabSize(3) // limit vocab size to 3
+        .setVocabSize(3) // limit vocab size to 3 限字的大小为3
         .setMinDF(3)
         .fit(df)
     }
   }
 
-  test("CountVectorizerModel with minTF count") {
+  test("CountVectorizerModel with minTF count") {//计数矢量模型与mintf计数
     val df = sqlContext.createDataFrame(Seq(
       (0, split("a a a b b c c c d "), Vectors.sparse(4, Seq((0, 3.0), (2, 3.0)))),
       (1, split("c c c c c c"), Vectors.sparse(4, Seq((2, 6.0)))),
@@ -180,7 +180,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(features ~== expected absTol 1e-14)
     }
   }
-
+  //计数矢量模型与mintf频率
   test("CountVectorizerModel with minTF freq") {
     val df = sqlContext.createDataFrame(Seq(
       (0, split("a a a b b c c c d "), Vectors.sparse(4, Seq((0, 3.0), (2, 3.0)))),

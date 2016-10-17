@@ -51,7 +51,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     super.afterAll()
   }
 
-  test("LocalIndexEncoder") {
+  test("LocalIndexEncoder") {//本地索引编码
     val random = new Random
     for (numBlocks <- Seq(1, 2, 5, 10, 20, 50, 100)) {
       val encoder = new LocalIndexEncoder(numBlocks)
@@ -67,7 +67,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     }
   }
 
-  test("normal equation construction") {
+  test("normal equation construction") {//构建标准相等
     //线性回归
     val k = 2
     //NormalEquation 另一种线性回归方法
@@ -140,7 +140,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     assert(Vectors.dense(x1) ~== Vectors.dense(-0.1155556, 3.28) relTol 1e-6)
   }
 
-  test("RatingBlockBuilder") {
+  test("RatingBlockBuilder") {//评级模块生成器
     val emptyBuilder = new RatingBlockBuilder[Int]()
     assert(emptyBuilder.size === 0)
     val emptyBlock = emptyBuilder.build()
@@ -163,7 +163,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     assert(ratings === Set((0, 1, 2.0f), (3, 4, 5.0f), (6, 7, 8.0f)))
   }
 
-  test("UncompressedInBlock") {
+  test("UncompressedInBlock") {//未压缩的块
     val encoder = new LocalIndexEncoder(10)
     val uncompressed = new UncompressedInBlockBuilder[Int](encoder)
       .add(0, Array(1, 0, 2), Array(0, 1, 4), Array(1.0f, 2.0f, 3.0f))
@@ -202,11 +202,13 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
   /**
    * Generates an explicit feedback dataset for testing ALS.
-   * @param numUsers number of users
-   * @param numItems number of items
-   * @param rank rank
+   * 生成用于测试的ALS一个明确的反馈数据
+   * @param numUsers number of users 用户数
+   * @param numItems number of items 项目数
+   * @param rank rank 等级
    * @param noiseStd the standard deviation of additive Gaussian noise on training data
-   * @param seed random seed
+   * 				训练数据中加性高斯噪声的标准偏差
+   * @param seed random seed 随机种子
    * @return (training, test)
    */
   def genExplicitTestData(
@@ -242,9 +244,10 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
   /**
    * Generates an implicit feedback dataset for testing ALS.
-   * @param numUsers number of users
-   * @param numItems number of items
-   * @param rank rank
+   * 生成用于测试的ALS的隐式反馈数据
+   * @param numUsers number of users 用户数
+   * @param numItems number of items 项目数
+   * @param rank rank 等级
    * @param noiseStd the standard deviation of additive Gaussian noise on training data
    * @param seed random seed
    * @return (training, test)
@@ -257,10 +260,11 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
       seed: Long = 11L): (RDD[Rating[Int]], RDD[Rating[Int]]) = {
     // The assumption of the implicit feedback model is that unobserved ratings are more likely to
     // be negatives.
-    val positiveFraction = 0.8
-    val negativeFraction = 1.0 - positiveFraction
-    val trainingFraction = 0.6
-    val testFraction = 0.3
+    //隐式反馈模型的假设是不可观测的评级更可能是消极的
+    val positiveFraction = 0.8 //正分数
+    val negativeFraction = 1.0 - positiveFraction //负分数
+    val trainingFraction = 0.6//训练部分
+    val testFraction = 0.3 //测试分数
     val totalFraction = trainingFraction + testFraction
     val random = new Random(seed)
     val userFactors = genFactors(numUsers, rank, random)
@@ -290,6 +294,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
   /**
    * Generates random user/item factors, with i.i.d. values drawn from U(a, b).
+   * 产生随机的用户/项目因素
    * @param size number of users/items
    * @param rank number of features
    * @param random random number generator
@@ -384,23 +389,24 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     assert(rmse < targetRMSE)
 
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
   }
 
-  test("exact rank-1 matrix") {//提取
+  test("exact rank-1 matrix") {//准确的秩1矩阵
     val (training, test) = genExplicitTestData(numUsers = 20, numItems = 40, rank = 1)
     testALS(training, test, maxIter = 1, rank = 1, regParam = 1e-5, targetRMSE = 0.001)
     testALS(training, test, maxIter = 1, rank = 2, regParam = 1e-5, targetRMSE = 0.001)
   }
 
-  test("approximate rank-1 matrix") {//近似
+  test("approximate rank-1 matrix") {//近似秩1矩阵
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 1, noiseStd = 0.01)
     testALS(training, test, maxIter = 2, rank = 1, regParam = 0.01, targetRMSE = 0.02)
     testALS(training, test, maxIter = 2, rank = 2, regParam = 0.01, targetRMSE = 0.02)
   }
 
-  test("approximate rank-2 matrix") {//近似
+  test("approximate rank-2 matrix") {//近似似秩2矩阵
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     testALS(training, test, maxIter = 4, rank = 2, regParam = 0.01, targetRMSE = 0.03)
@@ -416,21 +422,21 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     }
   }
 
-  test("more blocks than ratings") {
+  test("more blocks than ratings") {//多块比评级
     val (training, test) =
       genExplicitTestData(numUsers = 4, numItems = 4, rank = 1)
     testALS(training, test, maxIter = 2, rank = 1, regParam = 1e-4, targetRMSE = 0.002,
      numItemBlocks = 5, numUserBlocks = 5)
   }
 
-  test("implicit feedback") {
+  test("implicit feedback") {//隐式反馈
     val (training, test) =
       genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     testALS(training, test, maxIter = 4, rank = 2, regParam = 0.01, implicitPrefs = true,
       targetRMSE = 0.3)
   }
 
-  test("using generic ID types") {
+  test("using generic ID types") {//使用通用的身份标识类型
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
 
     val longRatings = ratings.map(r => Rating(r.user.toLong, r.item.toLong, r.rating))
@@ -442,7 +448,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     assert(strUserFactors.first()._1.getClass === classOf[String])
   }
 
-  test("nonnegative constraint") {
+  test("nonnegative constraint") {//非负约束
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     val (userFactors, itemFactors) =
       ALS.train(ratings, rank = 2, maxIter = 4, nonnegative = true, seed = 0)
@@ -454,7 +460,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     // TODO: Validate the solution.
   }
 
-  test("als partitioner is a projection") {
+  test("als partitioner is a projection") {//als分区是一个投影
     for (p <- Seq(1, 10, 100, 1000)) {
       val part = new ALSPartitioner(p)
       var k = 0
@@ -466,7 +472,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     }
   }
 
-  test("partitioner in returned factors") {
+  test("partitioner in returned factors") {//在返回的因素划分
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     val (userFactors, itemFactors) = ALS.train(
       ratings, rank = 2, maxIter = 4, numUserBlocks = 3, numItemBlocks = 4, seed = 0)
@@ -484,7 +490,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     }
   }
 
-  test("als with large number of iterations") {
+  test("als with large number of iterations") {//als具有大量的迭代
     val (ratings, _) = genExplicitTestData(numUsers = 4, numItems = 4, rank = 1)
     ALS.train(ratings, rank = 1, maxIter = 50, numUserBlocks = 2, numItemBlocks = 2, seed = 0)
     ALS.train(ratings, rank = 1, maxIter = 50, numUserBlocks = 2, numItemBlocks = 2,

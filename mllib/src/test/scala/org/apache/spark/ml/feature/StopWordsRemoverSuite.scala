@@ -38,7 +38,7 @@ object StopWordsRemoverSuite extends SparkFunSuite {
 class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
   import StopWordsRemoverSuite._
 
-  test("StopWordsRemover default") {
+  test("StopWordsRemover default") {//默认删除停用词
     val remover = new StopWordsRemover()
       .setInputCol("raw")//输入
       .setOutputCol("filtered")//输出
@@ -54,7 +54,7 @@ class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
     testStopWordsRemover(remover, dataSet)
   }
 
-  test("StopWordsRemover case sensitive") {
+  test("StopWordsRemover case sensitive") {//删除停用词区分大小写
     val remover = new StopWordsRemover()
       .setInputCol("raw")
       .setOutputCol("filtered")
@@ -67,7 +67,7 @@ class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
     testStopWordsRemover(remover, dataSet)
   }
 
-  test("StopWordsRemover with additional words") {
+  test("StopWordsRemover with additional words") {//删除停用词 附加词
     val stopWords = StopWords.EnglishStopWords ++ Array("python", "scala")
     val remover = new StopWordsRemover()
       .setInputCol("raw")

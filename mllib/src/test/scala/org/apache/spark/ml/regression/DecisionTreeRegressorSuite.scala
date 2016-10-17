@@ -46,7 +46,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
   /////////////////////////////////////////////////////////////////////////////
   // Tests calling train()
   /////////////////////////////////////////////////////////////////////////////
-
+  //三元回归树(有序)的类别特征
   test("Regression stump with 3-ary (ordered) categorical features") {
     val dt = new DecisionTreeRegressor()
       .setImpurity("variance")//设置纯度,方差
@@ -55,7 +55,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }
-
+  //具有二元(有序)分类特征的回归分析
   test("Regression stump with binary (ordered) categorical features") {
     val dt = new DecisionTreeRegressor()
       .setImpurity("variance")
@@ -65,7 +65,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }
 
-  test("copied model must have the same parent") {
+  test("copied model must have the same parent") {//复制的模型必须有相同的父
     val categoricalFeatures = Map(0 -> 2, 1-> 2)
     val df = TreeTests.setMetadata(categoricalDataPointsRDD, categoricalFeatures, numClasses = 0)
     val model = new DecisionTreeRegressor()
@@ -76,7 +76,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  // Tests of model save/load
+  // Tests of model save/load 测试模型保存/加载
   /////////////////////////////////////////////////////////////////////////////
 
   // TODO: test("model save/load")   SPARK-6725
@@ -86,7 +86,9 @@ private[ml] object DecisionTreeRegressorSuite extends SparkFunSuite {
 
   /**
    * Train 2 decision trees on the given dataset, one using the old API and one using the new API.
+   * 在给定的数据集上训练2个决策树,一个使用旧的和一个使用新的应用
    * Convert the old tree to the new format, compare them, and fail if they are not exactly equal.
+   * 将旧的树转换为新的格式,比较他们,如果他们不完全平等的话,就失败了
    */
   def compareAPIs(
       data: RDD[LabeledPoint],

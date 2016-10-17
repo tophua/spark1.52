@@ -33,14 +33,14 @@ import org.apache.spark.sql.Row
  */
 class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new PCA)
     val mat = Matrices.dense(2, 2, Array(0.0, 1.0, 2.0, 3.0)).asInstanceOf[DenseMatrix]
     val model = new PCAModel("pca", new OldPCAModel(2, mat))
     ParamsSuite.checkParams(model)
   }
 
-  test("pca") {
+  test("pca") {//主成分分析
     val data = Array(
       Vectors.sparse(5, Seq((1, 1.0), (3, 7.0))),
       Vectors.dense(2.0, 0.0, 3.0, 4.0, 5.0),

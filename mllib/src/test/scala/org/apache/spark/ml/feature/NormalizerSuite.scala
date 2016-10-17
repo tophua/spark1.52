@@ -85,7 +85,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }, "The vector value is not correct after normalization.")
   }
 
-  test("Normalization with default parameter") {
+  test("Normalization with default parameter") {//默认参数的正常化
     val result = collectResult(normalizer.transform(dataFrame))
 
     assertTypeOfVector(data, result)
@@ -93,7 +93,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assertValues(result, l2Normalized)
   }
 
-  test("Normalization with setter") {
+  test("Normalization with setter") {//规范化设置
     normalizer.setP(1)
 
     val result = collectResult(normalizer.transform(dataFrame))

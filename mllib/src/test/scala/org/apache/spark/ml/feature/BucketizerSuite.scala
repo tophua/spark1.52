@@ -34,9 +34,10 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("params") {
     ParamsSuite.checkParams(new Bucketizer)
   }
-
+  //离散连续特征
   test("Bucket continuous features, without -inf,inf") {
     // Check a set of valid feature values.
+    //检查一组有效的特征值
     val splits = Array(-0.5, 0.0, 0.5)
     val validData = Array(-0.5, -0.3, 0.0, 0.2)
     val expectedBuckets = Array(0.0, 0.0, 1.0, 1.0)
@@ -60,6 +61,7 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // Check for exceptions when using a set of invalid feature values.
+    //使用一组无效的特征值时检查异常
     val invalidData1: Array[Double] = Array(-0.9) ++ validData
     val invalidData2 = Array(0.51) ++ validData
     val badDF1 = sqlContext.createDataFrame(invalidData1.zipWithIndex).toDF("feature", "idx")
@@ -75,7 +77,7 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     }
   }
-
+ //离散连续特征
   test("Bucket continuous features, with -inf,inf") {
     val splits = Array(Double.NegativeInfinity, -0.5, 0.0, 0.5, Double.PositiveInfinity)
     val validData = Array(-0.9, -0.5, -0.3, 0.0, 0.2, 0.5, 0.9)
@@ -91,7 +93,7 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
           s"The feature value is not correct after bucketing.  Expected $y but found $x")
     }
   }
-
+  //手动选择的例子的二进制搜索正确性
   test("Binary search correctness on hand-picked examples") {
     import BucketizerSuite.checkBinarySearch
     // length 3, with -inf
@@ -107,7 +109,7 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     // length 4, with -inf and inf
     checkBinarySearch(Array(Double.NegativeInfinity, 0.0, 1.0, Double.PositiveInfinity))
   }
-
+ //与线性搜索相反的二进制搜索的正确性，对随机数据
   test("Binary search correctness in contrast with linear search, on random data") {
     val data = Array.fill(100)(Random.nextDouble())
     val splits: Array[Double] = Double.NegativeInfinity +:
@@ -119,7 +121,10 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 private object BucketizerSuite extends SparkFunSuite {
-  /** Brute force search for buckets.  Bucket i is defined by the range [split(i), split(i+1)). */
+  /** 
+   *  Brute force search for buckets.
+   *  斗蛮力搜索  
+   *  Bucket i is defined by the range [split(i), split(i+1)). */
   def linearSearchForBuckets(splits: Array[Double], feature: Double): Double = {
     require(feature >= splits.head)
     var i = 0
@@ -132,7 +137,10 @@ private object BucketizerSuite extends SparkFunSuite {
       s"linearSearchForBuckets failed to find bucket for feature value $feature")
   }
 
-  /** Check all values in splits, plus values between all splits. */
+  /** 
+   *  Check all values in splits, plus values between all splits.
+   *  所有分割中的所有值,以及所有分割之间的值 
+   *  */
   def checkBinarySearch(splits: Array[Double]): Unit = {
     def testFeature(feature: Double, expectedBucket: Double): Unit = {
       assert(Bucketizer.binarySearchForBuckets(splits, feature) === expectedBucket,

@@ -66,7 +66,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   /////////////////////////////////////////////////////////////////////////////
   // Tests calling train()
   /////////////////////////////////////////////////////////////////////////////
-
+  //具有有序分类特征的二元分类方法
   test("Binary classification stump with ordered categorical features") {
     val dt = new DecisionTreeClassifier()
       .setImpurity("gini")
@@ -75,8 +75,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     val numClasses = 2
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures, numClasses)
-  }
-
+  }  
+  //固定标签0.1熵的二进制分类的树,Gini
   test("Binary classification stump with fixed labels 0,1 for Entropy,Gini") {
     val dt = new DecisionTreeClassifier()
       .setMaxDepth(3)
@@ -89,7 +89,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       }
     }
   }
-
+  //多类分类的树和三元（无序）的分类特征
   test("Multiclass classification stump with 3-ary (unordered) categorical features") {
     val rdd = categoricalDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
@@ -99,7 +99,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
-
+  //有1个连续的特征分类,检查off-by-1误差
   test("Binary classification stump with 1 continuous feature, to check off-by-1 error") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.dense(0.0)),
@@ -113,7 +113,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
-
+  //具有2个连续特征的二叉分类
   test("Binary classification stump with 2 continuous features") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
@@ -127,7 +127,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
-
+  //多类分类的树和无序的分类特征,只要有足够的垃圾箱
   test("Multiclass classification stump with unordered categorical features," +
     " with just enough bins") {
     val maxBins = 2 * (math.pow(2, 3 - 1).toInt - 1) // just enough bins to allow unordered features
@@ -140,7 +140,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
-
+  //多类分类的树和连续性的特点
   test("Multiclass classification stump with continuous features") {
     val rdd = continuousDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
@@ -150,7 +150,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
-
+  //多类分类的树和连续+无序分类特征
   test("Multiclass classification stump with continuous + unordered categorical features") {
     val rdd = continuousDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
@@ -161,7 +161,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
-
+  //多类分类的树和10进制(有序)的分类特征
   test("Multiclass classification stump with 10-ary (ordered) categorical features") {
     val rdd = categoricalDataPointsForMulticlassForOrderedFeaturesRDD
     val dt = new DecisionTreeClassifier()
@@ -172,7 +172,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
-
+  //多类分类树与10叉(有序)的分类特征,只要有足够的垃圾箱
   test("Multiclass classification tree with 10-ary (ordered) categorical features," +
       " with just enough bins") {
     val rdd = categoricalDataPointsForMulticlassForOrderedFeaturesRDD
@@ -184,7 +184,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
-
+  //分裂必须满足每个节点要求的最小实例
   test("split must satisfy min instances per node requirements") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
@@ -197,11 +197,13 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMinInstancesPerNode(2)
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
-  }
-
+  }  
+  //不要选择不满足每个节点要求的最小实例的分割
   test("do not choose split that does not satisfy min instance per node requirements") {
     // if a split does not satisfy min instances per node requirements,
+    //如果一个分裂不满足每个节点的要求的最小实例
     // this split is invalid, even though the information gain of split is large.
+    //这种分裂是无效的，即使分裂的信息增益是大的
     val arr = Array(
       LabeledPoint(0.0, Vectors.dense(0.0, 1.0)),
       LabeledPoint(1.0, Vectors.dense(1.0, 1.0)),
@@ -217,7 +219,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
-
+  //分裂必须满足最小信息增益的要求
   test("split must satisfy min info gain requirements") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),

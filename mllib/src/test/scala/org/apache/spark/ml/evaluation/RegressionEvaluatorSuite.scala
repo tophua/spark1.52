@@ -29,7 +29,7 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
     ParamsSuite.checkParams(new RegressionEvaluator)
   }
 
-  test("Regression Evaluator: default params") {
+  test("Regression Evaluator: default params") {//评估回归:默认参数
     /**
      * Here is the instruction describing how to export the test data into CSV format
      * so we can validate the metrics compared with R's mmetric package.
@@ -46,7 +46,7 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
 
     /**
      * Using the following R code to load the data, train the model and evaluate metrics.
-     *
+     * 使用下面的R代码加载数据，训练模型和评估指标
      * > library("glmnet")
      * > library("rminer")
      * > data <- read.csv("path", header=FALSE, stringsAsFactors=FALSE)

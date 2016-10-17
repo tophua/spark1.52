@@ -50,7 +50,7 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
     ParamsSuite.checkParams(model)
   }
 
-  test("compute IDF with default parameter") {
+  test("compute IDF with default parameter") {//默认参数计算IDF
     val numOfFeatures = 4
     /**
      * data= Array((4,[1,3],[1.0,2.0]),[0.0,1.0,2.0,3.0],(4,[1],[1.0]))
@@ -92,7 +92,7 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("compute IDF with setter") {
+  test("compute IDF with setter") {//设置IDF计算
     val numOfFeatures = 4
     val data = Array(
       Vectors.sparse(numOfFeatures, Array(1, 3), Array(1.0, 2.0)),

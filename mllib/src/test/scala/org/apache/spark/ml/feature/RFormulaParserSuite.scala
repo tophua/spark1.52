@@ -31,20 +31,20 @@ class RFormulaParserSuite extends SparkFunSuite {
     assert(resolved.terms == terms)
   }
 
-  test("parse simple formulas") {
+  test("parse simple formulas") {//解析简单的公式
     checkParse("y ~ x", "y", Seq("x"))
     checkParse("y ~ x + x", "y", Seq("x"))
     checkParse("y ~   ._foo  ", "y", Seq("._foo"))
     checkParse("resp ~ A_VAR + B + c123", "resp", Seq("A_VAR", "B", "c123"))
   }
 
-  test("parse dot") {
+  test("parse dot") {//解析点
     val schema = (new StructType)
       .add("a", "int", true).add("b", "long", false).add("c", "string", true)
       checkParse("a ~ .", "a", Seq("b", "c"), schema)
   }
 
-  test("parse deletion") {
+  test("parse deletion") {//语法缺失
     val schema = (new StructType)
       .add("a", "int", true)
       .add("b", "long", false)
@@ -52,7 +52,7 @@ class RFormulaParserSuite extends SparkFunSuite {
     checkParse("a ~ c - b", "a", Seq("c"), schema)
   }
 
-  test("parse additions and deletions in order") {
+  test("parse additions and deletions in order") {//顺序分析的添加和删除
     val schema = (new StructType)
       .add("a", "int", true)
       .add("b", "long", false)
@@ -60,7 +60,7 @@ class RFormulaParserSuite extends SparkFunSuite {
     checkParse("a ~ . - b + . - c", "a", Seq("b"), schema)
   }
 
-  test("dot ignores complex column types") {
+  test("dot ignores complex column types") {//点忽略了复杂的列类型
     val schema = (new StructType)
       .add("a", "int", true)
       .add("b", "tinyint", false)
@@ -68,7 +68,7 @@ class RFormulaParserSuite extends SparkFunSuite {
     checkParse("a ~ .", "a", Seq("b"), schema)
   }
 
-  test("parse intercept") {
+  test("parse intercept") {//解析拦截
     assert(RFormulaParser.parse("a ~ b").hasIntercept)
     assert(RFormulaParser.parse("a ~ b + 1").hasIntercept)
     assert(RFormulaParser.parse("a ~ b - 0").hasIntercept)

@@ -40,6 +40,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
   import GBTClassifierSuite.compareAPIs
 
   // Combinations for estimators, learning rates and subsamplingRate
+  //组合估计
   private val testCombinations =
     Array((10, 1.0, 1.0), (10, 0.1, 1.0), (10, 0.5, 0.75), (10, 0.1, 0.75))
 

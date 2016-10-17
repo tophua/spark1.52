@@ -35,8 +35,9 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   import RandomForestSuite.mapToVec
 
-  test("computeFeatureImportance, featureImportances") {
+  test("computeFeatureImportance, featureImportances") {//计算功能的重要性,功能的重要性
     /* Build tree for testing, with this structure:
+     * 用于测试的生成树,有了这个结构:
           grandParent
       left2       parent
                 left  right
@@ -57,6 +58,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val grandImp = grandParent.impurityStats
 
     // Test feature importance computed at different subtrees.
+    //计算测试特征的重要性在不同的子树
     def testNode(node: Node, expected: Map[Int, Double]): Unit = {
       val map = new OpenHashMap[Int, Double]()
       RandomForest.computeFeatureImportance(node, map)
@@ -64,19 +66,23 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // Leaf node
+    //叶节点
     testNode(left, Map.empty[Int, Double])
 
     // Internal node with 2 leaf children
+    //具有2个叶的儿童的内部节点
     val feature0importance = parentImp.calculate() * parentImp.count -
       (leftImp.calculate() * leftImp.count + rightImp.calculate() * rightImp.count)
     testNode(parent, Map(0 -> feature0importance))
 
     // Full tree
+    //满树
     val feature1importance = grandImp.calculate() * grandImp.count -
       (left2Imp.calculate() * left2Imp.count + parentImp.calculate() * parentImp.count)
     testNode(grandParent, Map(0 -> feature0importance, 1 -> feature1importance))
 
     // Forest consisting of (full tree) + (internal node with 2 leafs)
+    //林组成(全树)+(2内部节点的叶子)
     val trees = Array(parent, grandParent).map { root =>
       new DecisionTreeClassificationModel(root, numClasses = 3).asInstanceOf[DecisionTreeModel]
     }
@@ -87,7 +93,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(importances ~== expected relTol 0.01)
   }
 
-  test("normalizeMapValues") {
+  test("normalizeMapValues") {//规范Map的值
     val map = new OpenHashMap[Int, Double]()
     map(0) = 1.0
     map(2) = 2.0

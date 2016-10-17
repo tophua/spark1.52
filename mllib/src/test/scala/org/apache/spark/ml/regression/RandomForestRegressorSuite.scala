@@ -58,20 +58,20 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
       .setSeed(123)
     compareAPIs(orderedLabeledPoints50_1000, newRF, categoricalFeaturesInfo)
   }
-
+  //具有连续特征的回归,决策树随机森林的比较
   test("Regression with continuous features:" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val rf = new RandomForestRegressor()
     regressionTestWithContinuousFeatures(rf)
   }
-
+ //具有连续特征和节点标识缓存的回归,决策树随机森林的比较
   test("Regression with continuous features and node Id cache :" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val rf = new RandomForestRegressor()
       .setCacheNodeIds(true)
     regressionTestWithContinuousFeatures(rf)
   }
-
+  //特征重要的数据
   test("Feature importance with toy data") {
     val rf = new RandomForestRegressor()
       .setImpurity("variance")
@@ -82,6 +82,7 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
       .setSeed(123)
 
     // In this data, feature 1 is very important.
+     //在这个数据中,特征1是非常重要的
     val data: RDD[LabeledPoint] = sc.parallelize(Seq(
       new LabeledPoint(0, Vectors.dense(1, 0, 0, 0, 1)),
       new LabeledPoint(1, Vectors.dense(1, 1, 0, 1, 0)),

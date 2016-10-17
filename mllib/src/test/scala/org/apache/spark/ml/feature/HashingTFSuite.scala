@@ -33,7 +33,7 @@ import org.apache.spark.util.Utils
 
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new HashingTF)
   }
   test("hashingTF") {

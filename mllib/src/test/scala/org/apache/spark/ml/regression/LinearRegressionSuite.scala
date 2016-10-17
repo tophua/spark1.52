@@ -59,13 +59,13 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   }
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new LinearRegression)
     //线性模型
     val model = new LinearRegressionModel("linearReg", Vectors.dense(0.0), 0.0)
     ParamsSuite.checkParams(model)
   }
-
+  //线性回归:默认参数
   test("linear regression: default params") {
     //线性回归
     val lir = new LinearRegression
@@ -79,6 +79,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = lir.fit(dataset)
 
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
 
     model.transform(dataset)
@@ -89,10 +90,11 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.intercept !== 0.0)
     assert(model.hasParent)
   }
-
+  //拦截不正则化的线性回归
   test("linear regression with intercept without regularization") {
     val trainer1 = new LinearRegression
     // The result should be the same regardless of standardization without regularization
+    //结果应该是相同的,无论标准化,没有正规化
     val trainer2 = (new LinearRegression).setStandardization(false)
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
@@ -128,7 +130,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(prediction1 ~== prediction2 relTol 1E-5)
     }
   }
-
+  //线性回归没有拦截没有正规化
   test("linear regression without intercept without regularization") {
     val trainer1 = (new LinearRegression).setFitIntercept(false)
     // Without regularization the results should be the same
@@ -158,6 +160,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     /*
        Then again with the data with no intercept:
+       然后再与数据没有拦截
        > weightsWithoutIntercept
        3 x 1 sparse Matrix of class "dgCMatrix"
                                  s0
@@ -172,7 +175,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(modelWithoutIntercept2.intercept ~== 0 absTol 1E-3)
     assert(modelWithoutIntercept2.weights ~= weightsWithoutInterceptR relTol 1E-3)
   }
-
+  //与L1正则化的线性回归的截距
   test("linear regression with intercept with L1 regularization") {
     val trainer1 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
     val trainer2 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
@@ -219,7 +222,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(prediction1 ~== prediction2 relTol 1E-5)
     }
   }
-
+  //线性回归不与L1正则化拦截
   test("linear regression without intercept with L1 regularization") {
     val trainer1 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
       .setFitIntercept(false)
@@ -268,7 +271,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(prediction1 ~== prediction2 relTol 1E-5)
     }
   }
-
+  //具有二语正则化的拦截的线性回归
   test("linear regression with intercept with L2 regularization") {
     val trainer1 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
     val trainer2 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
@@ -314,7 +317,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(prediction1 ~== prediction2 relTol 1E-5)
     }
   }
-
+  //线性回归不与L2正则化的拦截
   test("linear regression without intercept with L2 regularization") {
     val trainer1 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
       .setFitIntercept(false)
@@ -362,7 +365,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(prediction1 ~== prediction2 relTol 1E-5)
     }
   }
-
+  //带弹性网正则化的拦截的线性回归
   test("linear regression with intercept with ElasticNet regularization") {
     val trainer1 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
     val trainer2 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
@@ -408,7 +411,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(prediction1 ~== prediction2 relTol 1E-5)
     }
   }
-
+  //带弹性网正则化的不带截取的线性回归
   test("linear regression without intercept with ElasticNet regularization") {
     val trainer1 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
       .setFitIntercept(false)
@@ -456,12 +459,13 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(prediction1 ~== prediction2 relTol 1E-5)
     }
   }
-
+  //线性回归模型训练综述
   test("linear regression model training summary") {
     val trainer = new LinearRegression
     val model = trainer.fit(dataset)
 
     // Training results for the model should be available
+    //该模型的训练结果应该是可用的
     assert(model.hasSummary)
 
     // Residuals in [[LinearRegressionResults]] should equal those manually computed
@@ -495,18 +499,20 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.summary.r2 ~== 0.9998749 relTol 1E-5)
 
     // Objective function should be monotonically decreasing for linear regression
+    //目标函数应单调递减的线性回归
     assert(
       model.summary
         .objectiveHistory
         .sliding(2)
         .forall(x => x(0) >= x(1)))
   }
-
+  //线性回归模型的测试评价总结
   test("linear regression model testset evaluation summary") {
     val trainer = new LinearRegression
     val model = trainer.fit(dataset)
 
     // Evaluating on training dataset should yield results summary equal to training summary
+    //训练数据集的评价应得到结果汇总,等于培训总结
     val testSummary = model.evaluate(dataset)
     assert(model.summary.meanSquaredError ~== testSummary.meanSquaredError relTol 1E-5)
     assert(model.summary.r2 ~== testSummary.r2 relTol 1E-5)

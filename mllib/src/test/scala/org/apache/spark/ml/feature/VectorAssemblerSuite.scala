@@ -36,7 +36,7 @@ import org.apache.spark.sql.functions.col
  */
 class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new VectorAssembler)
   }
 
@@ -55,7 +55,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("assemble should compress vectors") {
+  test("assemble should compress vectors") {//装配应压缩向量
     import org.apache.spark.ml.feature.VectorAssembler.assemble
     val v1 = assemble(0.0, 0.0, 0.0, Vectors.dense(4.0))
     assert(v1.isInstanceOf[SparseVector])
@@ -63,7 +63,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(v2.isInstanceOf[DenseVector])
   }
 
-  test("VectorAssembler") {
+  test("VectorAssembler") {//向量汇编
     //Seq:List((0,0.0,[1.0,2.0],a,(2,[1],[3.0]),10))
     val df = sqlContext.createDataFrame(Seq(
       (0, 0.0, Vectors.dense(1.0, 2.0), "a", Vectors.sparse(2, Array(1), Array(3.0)), 10L)
@@ -93,7 +93,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("ML attributes") {
+  test("ML attributes") {//ML属性
     val browser = NominalAttribute.defaultAttr.withValues("chrome", "firefox", "safari")
     val hour = NumericAttribute.defaultAttr.withMin(0.0).withMax(24.0)
     val user = new AttributeGroup("user", Array(

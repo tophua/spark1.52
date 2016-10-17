@@ -32,7 +32,7 @@ class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
  * ngrams该模型基于这样一种假设，第n个词的出现只与前面N-1个词相关，而与其它任何词都不相关,
  * 整句的概率就是各个词出现概率的乘积。
  */
-  test("default behavior yields bigram features") {
+  test("default behavior yields bigram features") {//默认方法产生二元特征
     val nGram = new NGram().setInputCol("inputTokens").setOutputCol("nGrams")
     val dataset = sqlContext.createDataFrame(Seq(
       NGramTestData(//分词
@@ -79,7 +79,7 @@ class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
     testNGram(nGram, dataset)
   }
 
-  test("input array < n yields empty output") {
+  test("input array < n yields empty output") {//输入数组< n产量空输出
     val nGram = new NGram()
       .setInputCol("inputTokens")
       .setOutputCol("nGrams")

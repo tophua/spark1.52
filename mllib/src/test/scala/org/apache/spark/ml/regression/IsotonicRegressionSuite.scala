@@ -38,7 +38,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .toDF("features")
   }
 
-  test("isotonic regression predictions") {
+  test("isotonic regression predictions") {//保序回归预测
     val dataset = generateIsotonicInput(Seq(1, 2, 3, 1, 6, 17, 16, 17, 18))
     val ir = new IsotonicRegression().setIsotonic(true)
 
@@ -58,7 +58,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.getIsotonic)
   }
    //预测（Prediction）
-  test("antitonic regression predictions") {
+  test("antitonic regression predictions") {//逆序回归预测
     val dataset = generateIsotonicInput(Seq(7, 5, 3, 5, 1))
     val ir = new IsotonicRegression().setIsotonic(false)
 
@@ -74,7 +74,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(predictions === Array(7, 7, 6, 5.5, 5, 4, 1))
   }
 
-  test("params validation") {
+  test("params validation") {//参数验证
     val dataset = generateIsotonicInput(Seq(1, 2, 3))
     val ir = new IsotonicRegression
     ParamsSuite.checkParams(ir)
@@ -82,7 +82,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     ParamsSuite.checkParams(model)
   }
 
-  test("default params") {
+  test("default params") {//默认参数
     val dataset = generateIsotonicInput(Seq(1, 2, 3))
     val ir = new IsotonicRegression()
     assert(ir.getLabelCol === "label")
@@ -95,6 +95,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = ir.fit(dataset)
 
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
 
     model.transform(dataset)
@@ -110,7 +111,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.hasParent)
   }
 
-  test("set parameters") {
+  test("set parameters") {//设置参数
     val isotonicRegression = new IsotonicRegression()
       .setIsotonic(false)
       .setWeightCol("w")
@@ -125,7 +126,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(isotonicRegression.getPredictionCol === "p")
   }
 
-  test("missing column") {
+  test("missing column") {//缺少列
     val dataset = generateIsotonicInput(Seq(1, 2, 3))
 
     intercept[IllegalArgumentException] {
@@ -145,7 +146,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("vector features column with feature index") {
+  test("vector features column with feature index") {//具有特征索引的向量特征列
     val dataset = sqlContext.createDataFrame(Seq(
       (4.0, Vectors.dense(0.0, 1.0)),
       (3.0, Vectors.dense(0.0, 2.0)),

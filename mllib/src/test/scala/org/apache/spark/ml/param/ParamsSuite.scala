@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 
 class ParamsSuite extends SparkFunSuite {
 
-  test("param") {
+  test("param") {//参数
     val solver = new TestParams()
     val uid = solver.uid
     import solver.{maxIter, inputCol}
@@ -45,7 +45,7 @@ class ParamsSuite extends SparkFunSuite {
     }
   }
 
-  test("param pair") {
+  test("param pair") {//参数部分
     val solver = new TestParams()
     import solver.maxIter
 
@@ -61,7 +61,7 @@ class ParamsSuite extends SparkFunSuite {
     }
   }
 
-  test("param map") {
+  test("param map") {//参数Map
     val solver = new TestParams()
     import solver.{maxIter, inputCol}
 
@@ -100,7 +100,7 @@ class ParamsSuite extends SparkFunSuite {
     }
   }
 
-  test("params") {
+  test("params") {//参数
     val solver = new TestParams()
     import solver.{maxIter, inputCol}
 
@@ -157,7 +157,7 @@ class ParamsSuite extends SparkFunSuite {
     assert(copied.getMaxIter === 50)
   }
 
-  test("ParamValidate") {
+  test("ParamValidate") {//参数校验
     val alwaysTrue = ParamValidators.alwaysTrue[Int]
     assert(alwaysTrue(1))
 
@@ -204,7 +204,7 @@ class ParamsSuite extends SparkFunSuite {
     assert(arrayLengthGt(Array(0, 1, 2)) && !arrayLengthGt(Array(0, 1)))
   }
 
-  test("Params.copyValues") {
+  test("Params.copyValues") {//参数值复制
     val t = new TestParams()
     val t2 = t.copy(ParamMap.empty)
     assert(!t2.isSet(t2.maxIter))

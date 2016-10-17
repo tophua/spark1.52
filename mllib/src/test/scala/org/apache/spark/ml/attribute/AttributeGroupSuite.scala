@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 
 class AttributeGroupSuite extends SparkFunSuite {
 
-  test("attribute group") {
+  test("attribute group") {//属性分组
     val attrs = Array(
       NumericAttribute.defaultAttr,
       NominalAttribute.defaultAttr,
@@ -47,7 +47,7 @@ class AttributeGroupSuite extends SparkFunSuite {
     assert(group === AttributeGroup.fromStructField(group.toStructField()))
   }
 
-  test("attribute group without attributes") {
+  test("attribute group without attributes") {//没有属性的属性组
     val group0 = new AttributeGroup("user", 10)
     assert(group0.name === "user")
     assert(group0.numAttributes === Some(10))

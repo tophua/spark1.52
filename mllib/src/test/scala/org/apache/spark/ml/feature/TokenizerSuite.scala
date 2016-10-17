@@ -31,7 +31,7 @@ case class TokenizerTestData(rawText: String, wantedTokens: Array[String])
  */
 class TokenizerSuite extends SparkFunSuite {
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new Tokenizer)
   }
 }
@@ -43,7 +43,7 @@ class RegexTokenizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     ParamsSuite.checkParams(new RegexTokenizer)
   }
 
-  test("RegexTokenizer") {
+  test("RegexTokenizer") {//正则表达式分解器
     val tokenizer0 = new RegexTokenizer()
       .setGaps(false).setPattern("\\w+|\\p{Punct}").setInputCol("rawText").setOutputCol("tokens")
     val dataset0 = sqlContext.createDataFrame(Seq(

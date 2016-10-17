@@ -50,7 +50,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     val kmeans = new KMeans()
     assert(kmeans.getK === 2)
     assert(kmeans.getFeaturesCol === "features")
-    //Prediction预测
+    //Prediction预测列
     assert(kmeans.getPredictionCol === "prediction")
     assert(kmeans.getMaxIter === 20)
     assert(kmeans.getInitMode === MLlibKMeans.K_MEANS_PARALLEL)
@@ -58,7 +58,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(kmeans.getTol === 1e-4)
   }
 
-  test("set parameters") {
+  test("set parameters") {//设置参数
     val kmeans = new KMeans()
       .setK(9)
       .setFeaturesCol("test_feature")
@@ -79,7 +79,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(kmeans.getTol === 1e-3)
   }
 
-  test("parameters validation") {
+  test("parameters validation") {//参数验证
     intercept[IllegalArgumentException] {
       new KMeans().setK(1)
     }
@@ -91,7 +91,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("fit & transform") {
+  test("fit & transform") {//适合&转换
     val predictionColName = "kmeans_prediction"
     //PredictionCol 测量输出的名称
     val kmeans = new KMeans().setK(k).setPredictionCol(predictionColName).setSeed(1)
@@ -112,6 +112,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.clusterCenters.length === k)
     //println("dataset:"+dataset.collect().toSeq)
     val transformed = model.transform(dataset)//转换成DataFrame
+    //期望值列
     val expectedColumns = Array("features", predictionColName)
     expectedColumns.foreach { column =>
       //println("column>>>>"+column)

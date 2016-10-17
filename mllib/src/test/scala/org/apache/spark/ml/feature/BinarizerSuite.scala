@@ -33,11 +33,11 @@ class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
    val data = Array(0.1, -0.5, 0.2, -0.3, 0.8, 0.7, -0.1, -0.4)
   }
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new Binarizer)
   }
 //默认参数
-  test("Binarize continuous features with default parameter") {
+  test("Binarize continuous features with default parameter") {//默认参数进行连续的特征
     //defaultBinarized=Array(1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0)
     val defaultBinarized: Array[Double] = data.map(x => if (x > 0.0) 1.0 else 0.0)
     val dataFrame: DataFrame = sqlContext.createDataFrame(
@@ -51,7 +51,7 @@ class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(x === y, "The feature value is not correct after binarization.")
     }
   }
-   //设置阀值setThreshold
+   //设置阀值setThreshold,设置二元连续特征
   test("Binarize continuous features with setter") {
     //阀值
     val threshold: Double = 0.2

@@ -28,11 +28,11 @@ import org.apache.spark.sql.Row
 
 class PolynomialExpansionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new PolynomialExpansion)
   }
 
-  test("Polynomial expansion with default parameter") {
+  test("Polynomial expansion with default parameter") {//带有默认参数的多项式展开
     val data = Array(
       Vectors.sparse(3, Seq((0, -2.0), (1, 2.3))),
       Vectors.dense(-2.0, 2.3),
@@ -63,7 +63,7 @@ class PolynomialExpansionSuite extends SparkFunSuite with MLlibTestSparkContext 
         throw new TestFailedException("Unmatched data types after polynomial expansion", 0)
     }
   }
-
+  //多项式展开设置
   test("Polynomial expansion with setter") {
     val data = Array(
       Vectors.sparse(3, Seq((0, -2.0), (1, 2.3))),

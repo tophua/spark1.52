@@ -38,6 +38,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
   import GBTRegressorSuite.compareAPIs
 
   // Combinations for estimators, learning rates and subsamplingRate
+  //组合估计,利率和subsamplingrate学习
   private val testCombinations =
     Array((10, 1.0, 1.0), (10, 0.1, 1.0), (10, 0.5, 0.75), (10, 0.1, 0.75))
 
@@ -53,7 +54,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     validationData =
       sc.parallelize(EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 20, 80), 2)
   }
-
+  //具有连续特征的回归:平方误差
   test("Regression with continuous features: SquaredError") {
     val categoricalFeatures = Map.empty[Int, Int]
     GBTRegressor.supportedLossTypes.foreach { loss =>
@@ -69,7 +70,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     }
   }
-
+  //GBTRegressor 数据合理的行为
   test("GBTRegressor behaves reasonably on toy data") {
     val df = sqlContext.createDataFrame(Seq(
       LabeledPoint(10, Vectors.dense(1, 2, 3, 4)),
@@ -85,6 +86,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = gbt.fit(df)
 
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
     val preds = model.transform(df)
     val predictions = preds.select("prediction").map(_.getDouble(0))
@@ -93,7 +95,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(predictions.min() < -1)
   }
 
-  test("Checkpointing") {
+  test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     sc.setCheckpointDir(path)
@@ -160,7 +162,9 @@ private object GBTRegressorSuite {
 
   /**
    * Train 2 models on the given dataset, one using the old API and one using the new API.
+   * 在给定的数据集上训练2个模型,一个使用旧的和一个使用新的
    * Convert the old model to the new format, compare them, and fail if they are not exactly equal.
+   * 将旧的模型转换为新的格式，比较它们，如果它们不是完全相等的话，则失败了
    */
   def compareAPIs(
       data: RDD[LabeledPoint],

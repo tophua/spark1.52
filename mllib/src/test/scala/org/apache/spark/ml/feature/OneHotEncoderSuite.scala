@@ -45,11 +45,11 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
     indexer.transform(df)
   }
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new OneHotEncoder)
   }
 
-  test("OneHotEncoder dropLast = false") {
+  test("OneHotEncoder dropLast = false") {//
     val transformed = stringIndexed()
     // OneHotEncoder称为一位有效编码，在机器学习任务中，对于这样的特征，通常我们需要对其进行特征数字化
     val encoder = new OneHotEncoder().setInputCol("labelIndex").setOutputCol("labelVec").setDropLast(false)
@@ -91,7 +91,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(output === expected)
   }
 
-  test("input column with ML attribute") {
+  test("input column with ML attribute") {//具有输入列ML属性
     //
     val attr = NominalAttribute.defaultAttr.withValues("small", "medium", "large")
     val df = sqlContext.createDataFrame(Seq(0.0, 1.0, 2.0, 1.0).map(Tuple1.apply)).toDF("size")
@@ -104,7 +104,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(group.getAttr(1) === BinaryAttribute.defaultAttr.withName("medium").withIndex(1))
   }
 
-  test("input column without ML attribute") {
+  test("input column without ML attribute") {//具输入列没有ML属性
     val df = sqlContext.createDataFrame(Seq(0.0, 1.0, 2.0, 1.0).map(Tuple1.apply)).toDF("index")
     val encoder = new OneHotEncoder().setInputCol("index").setOutputCol("encoded")
     val output = encoder.transform(df)

@@ -47,7 +47,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
   override def beforeAll(): Unit = {
     super.beforeAll()
 
-    val densePoints1Seq = Seq(
+    val densePoints1Seq = Seq(//密集点1序列
       Vectors.dense(1.0, 2.0, 0.0),
       Vectors.dense(0.0, 1.0, 2.0),
       Vectors.dense(0.0, 0.0, -1.0),

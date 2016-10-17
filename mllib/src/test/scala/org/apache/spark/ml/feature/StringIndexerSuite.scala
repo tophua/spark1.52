@@ -28,7 +28,7 @@ import org.apache.spark.sql.functions.col
 
 class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new StringIndexer)
     val model = new StringIndexerModel("indexer", Array("a", "b"))
     val modelWithoutUid = new StringIndexerModel(Array("a", "b"))
@@ -36,7 +36,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     ParamsSuite.checkParams(modelWithoutUid)
   }
 
-  test("StringIndexer") {
+  test("StringIndexer") {//字符串索引
     val data = sc.parallelize(Seq((0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
     //1)按照 Label 出现的频次对其进行序列编码,如0,1,2，… Array[String] = Array(a, c, b),a出次3次,c出现2次,b出现1次
@@ -44,6 +44,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
 
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(indexer)
     //主要是用来把 一个 StringIndexer 转换成另一个 DataFrame
     val transformed = indexer.transform(df)
@@ -60,7 +61,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(output === expected)
   }
 
-  test("StringIndexer with a numeric input column") {
+  test("StringIndexer with a numeric input column") {//一个数字输入列字符串索引
     val data = sc.parallelize(Seq((0, 100), (1, 200), (2, 300), (3, 100), (4, 100), (5, 300)), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
     val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
@@ -75,7 +76,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val expected = Set((0, 0.0), (1, 2.0), (2, 1.0), (3, 0.0), (4, 0.0), (5, 1.0))
     assert(output === expected)
   }
-
+  //字符串索引模型应该保持沉默,如果输入列不存在
   test("StringIndexerModel should keep silent if the input column does not exist.") {
     val indexerModel = new StringIndexerModel("indexer", Array("a", "b", "c"))
       .setInputCol("label")
@@ -84,12 +85,12 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(indexerModel.transform(df).eq(df))
   }
 
-  test("IndexToString params") {
+  test("IndexToString params") {//IndexToString参数
     val idxToStr = new IndexToString()
     ParamsSuite.checkParams(idxToStr)
   }
 
-  test("IndexToString.transform") {
+  test("IndexToString.transform") {//IndexToString转换
     val labels = Array("a", "b", "c")
     val df0 = sqlContext.createDataFrame(Seq(
       (0, "a"), (1, "b"), (2, "c"), (0, "a")

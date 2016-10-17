@@ -32,6 +32,7 @@ private[ml] object TreeTests extends SparkFunSuite {
 
   /**
    * Convert the given data to a DataFrame, and set the features and label metadata.
+   * 把给出的数据到一个数据帧，并设置和标签的元数据的特点
    * @param data  Dataset.  Categorical features and labels must already have 0-based indices.
    *              This must be non-empty.
    * @param categoricalFeatures  Map: categorical feature index -> number of distinct values
@@ -75,6 +76,7 @@ private[ml] object TreeTests extends SparkFunSuite {
 
   /**
    * Check if the two trees are exactly the same.
+   * 检查两棵树是否完全相同
    * Note: I hesitate to override Node.equals since it could cause problems if users
    *       make mistakes such as creating loops of Nodes.
    * If the trees are not equal, this prints the two trees and throws an exception.
@@ -92,6 +94,7 @@ private[ml] object TreeTests extends SparkFunSuite {
 
   /**
    * Return true iff the two nodes and their descendants are exactly the same.
+   * 返回真,当且仅当两节点和他们的后代是完全相同的
    * Note: I hesitate to override Node.equals since it could cause problems if users
    *       make mistakes such as creating loops of Nodes.
    */
@@ -113,7 +116,9 @@ private[ml] object TreeTests extends SparkFunSuite {
 
   /**
    * Check if the two models are exactly the same.
+   * 检查两个模型是否完全相同
    * If the models are not equal, this throws an exception.
+   * 如果模型不相等，则抛出一个异常
    */
   def checkEqual(a: TreeEnsembleModel, b: TreeEnsembleModel): Unit = {
     try {
@@ -130,6 +135,7 @@ private[ml] object TreeTests extends SparkFunSuite {
 
   /**
    * Helper method for constructing a tree for testing.
+   * 用于构造测试树的辅助方法
    * Given left, right children, construct a parent node.
    * @param split  Split for parent node
    * @return  Parent node with children attached

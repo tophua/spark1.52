@@ -27,7 +27,7 @@ import org.apache.spark.sql.{Row, SQLContext}
  */
 class MinMaxScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("MinMaxScaler fit basic case") {
+  test("MinMaxScaler fit basic case") {//基本最大最小权值
     val sqlContext = new SQLContext(sc)
   /**
    * data:= Array([1.0,0.0,-9.223372036854776E18], [2.0,0.0,0.0], (3,[0,2],[3.0,9.223372036854776E18]), (3,[0],[1.5]))
@@ -58,7 +58,7 @@ class MinMaxScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(model)
   }
-
+  //MinMaxScaler参数最大值必须大于最小值
   test("MinMaxScaler arguments max must be larger than min") {
     withClue("arguments max must be larger than min") {
       intercept[IllegalArgumentException] {
