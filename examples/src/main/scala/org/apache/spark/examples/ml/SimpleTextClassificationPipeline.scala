@@ -36,7 +36,9 @@ case class Document(id: Long, text: String)
   /**
    * 简单分类分类示例
    * A simple text classification pipeline that recognizes "spark" from input text. This is to show
+   * 一个简单的文本分类管道，从“Spark”输入文本中识别
    * how to create and configure an ML pipeline. Run with
+   * 这是显示如何创建和配置一个ML的管道
    * {{{
    * bin/run-example ml.SimpleTextClassificationPipeline
    * }}}
@@ -50,6 +52,7 @@ object SimpleTextClassificationPipeline {
     import sqlContext.implicits._
 
     // Prepare training documents, which are labeled.
+    //准备训练文档,这些文件都是有标签
     val training = sc.parallelize(Seq(
       //文档ID,内容,标号
       LabeledDocument(0L, "a b c d e spark", 1.0),
@@ -58,6 +61,7 @@ object SimpleTextClassificationPipeline {
       LabeledDocument(3L, "hadoop mapreduce", 0.0)))
 
     // Configure an ML pipeline, which consists of three stages: tokenizer, hashingTF, and lr.
+    //配置ML管理,其中包括三个阶段
     //使用将文本拆分成单词
     val tokenizer = new Tokenizer()
       .setInputCol("text")
@@ -76,10 +80,12 @@ object SimpleTextClassificationPipeline {
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // Fit the pipeline to training documents.
+    //将管道安装到训练文档
     //隐式转换为schemaRDD
     val model = pipeline.fit(training.toDF())
 
     // Prepare test documents, which are unlabeled.
+    //准备测试文档,这些文件是未标记的
     //将模型用于新文档的分类,
     /**
       LabeledDocument(0L, "a b c d e spark", 1.0),

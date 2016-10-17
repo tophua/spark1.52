@@ -32,6 +32,7 @@ import org.apache.spark.sql.DataFrame
 
 /**
  * An example runner for logistic regression with elastic-net (mixing L1/L2) regularization.
+ * 运行逻辑回归的例子,弹性网络（混合L1或L2）正则化
  * Run with
  * {{{
  * bin/run-example ml.LogisticRegressionExample [options]
@@ -118,10 +119,12 @@ object LogisticRegressionExample {
     println(s"LogisticRegressionExample with parameters:\n$params")
 
     // Load training and test data and cache it.
+    //加载训练和测试数据并将其缓存
     val (training: DataFrame, test: DataFrame) = DecisionTreeExample.loadDatasets(sc, params.input,
       params.dataFormat, params.testInput, "classification", params.fracTest)
 
     // Set up Pipeline
+    //建立管道
     val stages = new mutable.ArrayBuffer[PipelineStage]()
 
     val labelIndexer = new StringIndexer()
@@ -141,7 +144,7 @@ object LogisticRegressionExample {
     stages += lor
     val pipeline = new Pipeline().setStages(stages.toArray)
 
-    // Fit the Pipeline
+    // Fit the Pipeline 安装管道
     val startTime = System.nanoTime()
     val pipelineModel = pipeline.fit(training)
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
@@ -149,6 +152,7 @@ object LogisticRegressionExample {
 
     val lorModel = pipelineModel.stages.last.asInstanceOf[LogisticRegressionModel]
     // Print the weights and intercept for logistic regression.
+    //打印逻辑回归的权重和截取
     println(s"Weights: ${lorModel.weights} Intercept: ${lorModel.intercept}")
 
     println("Training data results:")

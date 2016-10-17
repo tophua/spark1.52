@@ -34,6 +34,7 @@ import org.apache.spark.sql.DataFrame
 
 /**
  * An example runner for decision trees. Run with
+ * 决策树的一个例子
  * {{{
  * ./bin/run-example ml.RandomForestExample [options]
  * }}}
@@ -149,13 +150,13 @@ object RandomForestExample {
 
     println(s"RandomForestExample with parameters:\n$params")
 
-    // Load training and test data and cache it.
+    // Load training and test data and cache it.加载训练和测试数据并将其缓存
     val (training: DataFrame, test: DataFrame) = DecisionTreeExample.loadDatasets(sc, params.input,
       params.dataFormat, params.testInput, algo, params.fracTest)
 
-    // Set up Pipeline
+    // Set up Pipeline 建立管道
     val stages = new mutable.ArrayBuffer[PipelineStage]()
-    // (1) For classification, re-index classes.
+    // (1) For classification, re-index classes.对于分类,重新索引类
     val labelColName = if (algo == "classification") "indexedLabel" else "label"
     if (algo == "classification") {
       val labelIndexer = new StringIndexer()
@@ -163,14 +164,15 @@ object RandomForestExample {
         .setOutputCol(labelColName)
       stages += labelIndexer
     }
-    // (2) Identify categorical features using VectorIndexer.
+    // (2) Identify categorical features using VectorIndexer.确定使用vectorindexer分类特征
     //     Features with more than maxCategories values will be treated as continuous.
+    //超过maxcategories值将被视为连续的特点
     val featuresIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
       .setMaxCategories(10)
-    stages += featuresIndexer
-    // (3) Learn Random Forest
+    stages += featuresIndexer 
+    // (3) Learn Random Forest 学习随机森林
     val dt = algo match {
       case "classification" =>
         new RandomForestClassifier()
@@ -201,13 +203,14 @@ object RandomForestExample {
     stages += dt
     val pipeline = new Pipeline().setStages(stages.toArray)
 
-    // Fit the Pipeline
+    // Fit the Pipeline 安装管道
     val startTime = System.nanoTime()
     val pipelineModel = pipeline.fit(training)
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained Random Forest from the fitted PipelineModel
+    //从安装管道模型，得到训练随机森林
     algo match {
       case "classification" =>
         val rfModel = pipelineModel.stages.last.asInstanceOf[RandomForestClassificationModel]
@@ -227,6 +230,7 @@ object RandomForestExample {
     }
 
     // Evaluate model on training, test data
+    //训练评估模型,测试数据
     algo match {
       case "classification" =>
         println("Training data results:")

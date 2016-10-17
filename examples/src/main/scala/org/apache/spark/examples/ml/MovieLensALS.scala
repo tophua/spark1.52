@@ -28,6 +28,7 @@ import org.apache.spark.sql.{Row, SQLContext}
 /**
  * 协同过滤,交替最小二乘(ALS)显式反馈和隐式反馈
  * An example app for ALS on MovieLens data (http://grouplens.org/datasets/movielens/).
+ * ALS的MovieLens数据上的一个示例应用程序
  * Run with
  * {{{
  * bin/run-example ml.MovieLensALS
@@ -143,8 +144,8 @@ object MovieLensALS {
 
     val predictions = model.transform(test.toDF()).cache()
 
-    // Evaluate the model.
-    // TODO: Create an evaluator to compute RMSE.
+    // Evaluate the model. 评估模型
+    // TODO: Create an evaluator to compute RMSE. 创建一个计算器来计算均方根误差
     val mse = predictions.select("rating", "prediction").rdd
       .flatMap { case Row(rating: Float, prediction: Float) =>
         val err = rating.toDouble - prediction
@@ -158,8 +159,8 @@ object MovieLensALS {
     val rmse = math.sqrt(mse)
     println(s"Test RMSE = $rmse.")
 
-    // Inspect false positives.
-    // Note: We reference columns in 2 ways:
+    // Inspect false positives. 检查假阳性
+    // Note: We reference columns in 2 ways: 我们参考列2种方式
     //  (1) predictions("movieId") lets us specify the movieId column in the predictions
     //      DataFrame, rather than the movieId column in the movies DataFrame.
     //  (2) $"userId" specifies the userId column in the predictions DataFrame.

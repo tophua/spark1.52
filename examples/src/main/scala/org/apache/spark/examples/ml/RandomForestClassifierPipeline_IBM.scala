@@ -105,6 +105,7 @@ object ClassificationPipeline_IBM {
 
     //Step 6
     //Randomly split the input data by 8:2, while 80% is for training, the rest is for testing.
+     //随机将输入数据按8:2，而80%是用于训练，其余的用于测试
     val Array(trainingData, testData) = df.randomSplit(Array(0.8, 0.2))
 
     /**
@@ -132,7 +133,9 @@ object ClassificationPipeline_IBM {
     /**
      * Step 9
      * Select features,label,and predicted label from the DataFrame to display.
+     * 特征选择,标签,和预测的帧显示标签
      * We only show 20 rows, it is just for reference.
+     * 我们只显示20行,它只是供参考
       +--------+--------+--------+---------+-----+--------------+
       |      f0|      f1|      f2|       f3|label|predictedLabel|
       +--------+--------+--------+---------+-----+--------------+
@@ -163,7 +166,9 @@ object ClassificationPipeline_IBM {
     /**
      * Step 10
      * The evaluator code is used to compute the prediction accuracy, this is
+     * 计算代码是用来计算预测精度,
      * usually a valuable feature to estimate prediction accuracy the trained model.
+     * 这通常是一个有价值的特征来估计预测的准确性训练模型
      */
     val evaluator = new MulticlassClassificationEvaluator()
       .setLabelCol("label")//标签列的名称
@@ -176,6 +181,7 @@ object ClassificationPipeline_IBM {
     /**
      * Step 11(Optional)
      * You can choose to print or save the the model structure.
+     * 您可以选择打印或保存模型结构
      */
     val randomForestModel = model.stages(2).asInstanceOf[RandomForestClassificationModel]
     println("Trained Random Forest Model is:\n" + randomForestModel.toDebugString)

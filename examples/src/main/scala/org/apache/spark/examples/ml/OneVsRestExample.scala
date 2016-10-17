@@ -35,7 +35,9 @@ import org.apache.spark.sql.SQLContext
 /**
  * An example runner for Multiclass to Binary Reduction with One Vs Rest.
  * The example uses Logistic Regression as the base classifier. All parameters that
+ * 这个例子使用逻辑回归为基础的分类,
  * can be specified on the base classifier can be passed in to the runner options.
+ * 所有的参数都可以在指定的基分类器,可以通过运行选项
  * Run with
  * {{{
  * ./bin/run-example ml.OneVsRestExample [options]
@@ -116,9 +118,11 @@ object OneVsRestExample {
     import sqlContext.implicits._
 
     // compute the train/test split: if testInput is not provided use part of input.
+    //计算训练/测试分离,如果testinput不提供使用部分输入
     val data = params.testInput match {
       case Some(t) => {
         // compute the number of features in the training set.
+        //在训练集中计算功能的数量
         val numFeatures = inputData.first().features.size
         val testData = MLUtils.loadLibSVMFile(sc, t, numFeatures)
         Array[RDD[LabeledPoint]](inputData, testData)
@@ -131,27 +135,31 @@ object OneVsRestExample {
     val Array(train, test) = data.map(_.toDF().cache())
 
     // instantiate the base classifier
+    //实例化的基分类器
     val classifier = new LogisticRegression()
       .setMaxIter(params.maxIter)
       .setTol(params.tol)
       .setFitIntercept(params.fitIntercept)
 
     // Set regParam, elasticNetParam if specified in params
+    //设置参数,弹性网参数如果指定参数
     params.regParam.foreach(classifier.setRegParam)
     params.elasticNetParam.foreach(classifier.setElasticNetParam)
 
     // instantiate the One Vs Rest Classifier.
-
+    //实例化的一对多分类器
     val ovr = new OneVsRest()
     ovr.setClassifier(classifier)
 
     // train the multiclass model.
+    //训练多类模型
     val (trainingDuration, ovrModel) = time(ovr.fit(train))
 
     // score the model on test data.
+    //评分测试数据模型
     val (predictionDuration, predictions) = time(ovrModel.transform(test))
 
-    // evaluate the model
+    // evaluate the model 评估模型
     val predictionsAndLabels = predictions.select("prediction", "label")
       .map(row => (row.getDouble(0), row.getDouble(1)))
     //评估指标-多分类
@@ -159,7 +167,7 @@ object OneVsRestExample {
 
     val confusionMatrix = metrics.confusionMatrix
 
-    // compute the false positive rate per label
+    // compute the false positive rate per label 计算每个标签的假阳性率
     val predictionColSchema = predictions.schema("prediction")
     val numClasses = MetadataUtils.getNumClasses(predictionColSchema).get
     val fprs = Range(0, numClasses).map(p => (p, metrics.falsePositiveRate(p.toDouble)))
