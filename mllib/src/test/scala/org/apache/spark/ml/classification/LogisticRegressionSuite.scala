@@ -882,8 +882,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model1.weights ~== weightsR absTol 1E-6)
   }
 
-  test("evaluate on test set") {
+  test("evaluate on test set") {//测试集的评估
     // Evaluate on test set should be same as that of the transformed training data.
+    //测试集的评估应与转化的训练数据的评估相同
     val lr = new LogisticRegression()
       .setMaxIter(10)
       .setRegParam(1.0)
@@ -902,8 +903,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       summary.precisionByThreshold.collect() === sameSummary.precisionByThreshold.collect())
   }
 
-  test("statistics on training data") {
+  test("statistics on training data") {//训练数据统计
     // Test that loss is monotonically decreasing.
+    //测试，损失是单调递减
     val lr = new LogisticRegression()
       .setMaxIter(10)
       .setRegParam(1.0)

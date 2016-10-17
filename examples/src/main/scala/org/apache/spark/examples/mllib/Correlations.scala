@@ -26,13 +26,14 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 /**
- * 多个相关性
+ * 一个用于汇总文件中的多元数据的示例应用程序
  * An example app for summarizing multivariate data from a file. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.Correlations
  * }}}
  * By default, this loads a synthetic dataset from `data/mllib/sample_linear_regression_data.txt`.
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
+ * 如果你使用它作为一个模板来创建自己的应用程序
  */
 object Correlations {
 
@@ -75,6 +76,7 @@ object Correlations {
     println(s"${examples.count()} data points")
 
     // Calculate label -- feature correlations
+    //计算标签-特征相关性
     val labelRDD = examples.map(_.label)
     val numFeatures = examples.take(1)(0).features.size
     val corrType = "pearson"

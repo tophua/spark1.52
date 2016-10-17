@@ -27,8 +27,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * Compute the similar columns of a matrix, using cosine similarity(相似度度量).
- *
+ * 计算一个矩阵的相似列，使用余弦相似性
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries
+ * 输入矩阵必须以行为导向的密集格式存储,每行一行，其条目由空格隔开
  * separated by space. For example,
  * {{{
  * 0.5 1.0
@@ -36,6 +37,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  * 4.0 5.0
  * }}}
  * represents a 3-by-2 matrix, whose first row is (0.5, 1.0).
+ * 代表3-by-2矩阵的第一行是(0.5,1)
  *
  * Example invocation:
  *
@@ -81,6 +83,7 @@ object CosineSimilarity {
     val sc = new SparkContext(conf)
 
     // Load and parse the data file.
+    //加载和解析数据文件
     val rows = sc.textFile(params.inputFile).map { line =>
       val values = line.split(' ').map(_.toDouble)
       Vectors.dense(values)
@@ -88,9 +91,11 @@ object CosineSimilarity {
     val mat = new RowMatrix(rows)
 
     // Compute similar columns perfectly, with brute force.
+    //完美地计算类似的列,使用强力
     val exact = mat.columnSimilarities()
 
     // Compute similar columns with estimation using DIMSUM
+    //估计用点心计算类似的列
     val approx = mat.columnSimilarities(params.threshold)
 
     val exactEntries = exact.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }

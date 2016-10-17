@@ -28,7 +28,7 @@ import org.apache.spark.util.Utils
 
 
 /**
- *梯度提升树
+ *梯度提升树,以决策树为弱学习者的梯度提升的一个例子
  * An example runner for Gradient Boosting using decision trees as weak learners. Run with
  * {{{
  * ./bin/run-example mllib.GradientBoostedTreesRunner [options]
@@ -102,6 +102,7 @@ object GradientBoostedTreesRunner {
     println(s"GradientBoostedTreesRunner with parameters:\n$params")
 
     // Load training and test data and cache it.
+    //加载训练和测试数据并将其缓存
     val (training, test, numClasses) = DecisionTreeRunner.loadDatasets(sc, params.input,
       params.dataFormat, params.testInput, Algo.withName(params.algo), params.fracTest)
 

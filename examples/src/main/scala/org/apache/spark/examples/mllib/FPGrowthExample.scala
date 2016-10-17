@@ -72,7 +72,7 @@ object FPGrowthExample {
       .setMinSupport(params.minSupport)
       .setNumPartitions(params.numPartition)
       .run(transactions)
-
+     //Æµ·±Ïî¼¯Êý
     println(s"Number of frequent itemsets: ${model.freqItemsets.count()}")
 
     model.freqItemsets.collect().foreach { itemset =>

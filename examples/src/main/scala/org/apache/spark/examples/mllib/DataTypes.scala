@@ -81,26 +81,29 @@ object DataTypes {
     val qrResult = mat.tallSkinnyQR(true)
     /**索引行分布式矩阵**/
     //包涵行索引数据集信息
-    val rowsIndex: RDD[IndexedRow] = null // an RDD of indexed rows
+    val rowsIndex: RDD[IndexedRow] = null // an RDD of indexed rows 索引行的RDD
     // Create an IndexedRowMatrix from an RDD[IndexedRow].
     val matIndex: IndexedRowMatrix = new IndexedRowMatrix(rowsIndex)
 
-    // Get its size.
+    // Get its size. 得到它的大小
     val mIndex = matIndex.numRows()
     val nIndex = matIndex.numCols()
 
-    // Drop its row indices.
+    // Drop its row indices. 下降行索引
     val rowMat: RowMatrix = matIndex.toRowMatrix()
     /***三元组矩阵*/
-    val entries: RDD[MatrixEntry] = null // an RDD of matrix entries
+    val entries: RDD[MatrixEntry] = null // an RDD of matrix entries 矩阵元素的RDD
     // Create a CoordinateMatrix from an RDD[MatrixEntry].
+    //创建一个坐标矩阵为RDD
     val matCoordinate: CoordinateMatrix = new CoordinateMatrix(entries)
 
     // Get its size.
+    //得到它的大小
     val mCoordinate = mat.numRows()
     val nCoordinate = mat.numCols()
 
     // Convert it to an IndexRowMatrix whose rows are sparse vectors.
+    //将其转换为一个行是稀疏向量的索引行矩阵
     val indexedRowMatrix = matCoordinate.toIndexedRowMatrix()
     /**BlockMatrix块矩阵**/
 
@@ -109,7 +112,8 @@ object DataTypes {
     val matA: BlockMatrix = coordMat.toBlockMatrix().cache()
 
     // Validate whether the BlockMatrix is set up properly. Throws an Exception when it is not valid.
-    // Nothing happens if it is valid.
+    //验证是否正确设置属性,当它无效时抛出一个异常
+    // Nothing happens if it is valid.如果它是有效的,什么都不会发生
     matA.validate()
 
     // Calculate A^T A.

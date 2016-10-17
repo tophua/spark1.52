@@ -35,6 +35,7 @@ import org.apache.spark.rdd.RDD
 /**
  * 聚类 LDA
  * An example Latent Dirichlet Allocation (LDA) app. Run with
+ * 例隐含狄利克雷分配（LDA）的应用
  * {{{
  * ./bin/run-example mllib.LDAExample [options] <input>
  * }}}
@@ -117,6 +118,7 @@ object LDAExample {
     Logger.getRootLogger.setLevel(Level.WARN)
 
     // Load documents, and prepare them for LDA.
+    //加载文件,并准备将LDA
     val preprocessStart = System.nanoTime()
     val (corpus, vocabArray, actualNumTokens) =
       preprocess(sc, params.input, params.vocabSize, params.stopwordFile)

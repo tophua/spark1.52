@@ -34,7 +34,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.util.Utils
 
 /**
- * 决策树
+ * 决策树和随机森林运行的一个例子
  * An example runner for decision trees and random forests. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DecisionTreeRunner [options]
@@ -42,7 +42,9 @@ import org.apache.spark.util.Utils
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
  *
  * Note: This script treats all features as real-valued (not categorical).
+ * 			 这个脚本将所有的功能都视为真正的值(没有分类)
  *       To include categorical features, modify categoricalFeaturesInfo.
+ *       包括分类特征,修改分类特征信息
  */
 object DecisionTreeRunner {
 
@@ -159,6 +161,7 @@ object DecisionTreeRunner {
 
   /**
    * Load training and test data from files.
+   * 从文件中加载训练和测试数据
    * @param input  Path to input dataset.
    * @param dataFormat  "libsvm" or "dense"
    * @param testInput  Path to test dataset.
@@ -175,11 +178,13 @@ object DecisionTreeRunner {
       algo: Algo,
       fracTest: Double): (RDD[LabeledPoint], RDD[LabeledPoint], Int) = {
     // Load training data and cache it.
+    //加载训练数据并将其缓存
     val origExamples = dataFormat match {
       case "dense" => MLUtils.loadLabeledPoints(sc, input).cache()
       case "libsvm" => MLUtils.loadLibSVMFile(sc, input).cache()
     }
     // For classification, re-index classes if needed.
+    //对于分类,如果需要的话,重新索引类
     val (examples, classIndexMap, numClasses) = algo match {
       case Classification => {
         // classCounts: class --> # examples in class
@@ -218,8 +223,9 @@ object DecisionTreeRunner {
     }
 
     // Create training, test sets.
+    //创建训练,测试集
     val splits = if (testInput != "") {
-      // Load testInput.
+      // Load testInput. 加载测试输入
       val numFeatures = examples.take(1)(0).features.size
       val origTestExamples = dataFormat match {
         case "dense" => MLUtils.loadLabeledPoints(sc, testInput)
@@ -242,6 +248,7 @@ object DecisionTreeRunner {
       }
     } else {
       // Split input into training, test.
+      //将输入拆分为训练,测试
       examples.randomSplit(Array(1.0 - fracTest, fracTest))
     }
     val training = splits(0).cache()
@@ -264,6 +271,7 @@ object DecisionTreeRunner {
     println(s"DecisionTreeRunner with parameters:\n$params")
 
     // Load training and test data and cache it.
+    //加载训练和测试数据并将其缓存
     val (training, test, numClasses) = loadDatasets(sc, params.input, params.dataFormat,
       params.testInput, params.algo, params.fracTest)
 
@@ -362,7 +370,7 @@ object DecisionTreeRunner {
 
   /**
    * Calculates the mean squared error for regression.
-   *
+   *计算回归的平均平方误差
    * This is just for demo purpose. In general, don't copy this code because it is NOT efficient
    * due to the use of structural types, which leads to one reflection call per record.
    */
