@@ -84,7 +84,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
   }
 
   // TODO: implement a more rigorous test
-  test("3 class classification with 2 hidden layers") {
+  test("3 class classification with 2 hidden layers") {//3类分类有2个隐藏层
     val nPoints = 1000
 
     // The following weights are taken from OneVsRestSuite.scala
@@ -124,6 +124,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val mlpPredictionAndLabels = model.transform(dataFrame).select("prediction", "label")
       .map { case Row(p: Double, l: Double) => (p, l) }
     // train multinomial logistic regression
+    //训练多项逻辑回归
     val lr = new LogisticRegressionWithLBFGS()
       .setIntercept(true)
       .setNumClasses(numClasses)

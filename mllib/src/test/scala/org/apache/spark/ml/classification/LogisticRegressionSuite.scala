@@ -75,13 +75,13 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new LogisticRegression)
     val model = new LogisticRegressionModel("logReg", Vectors.dense(0.0), 0.0)
     ParamsSuite.checkParams(model)
   }
 
-  test("logistic regression: default params") {
+  test("logistic regression: default params") {//逻辑回归:默认参数
     val lr = new LogisticRegression
     //标识
     assert(lr.getLabelCol === "label")
@@ -209,16 +209,16 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         println(s"label=$label,prediction=$prediction,features=$features,rawPrediction=$rawPrediction,probability=$probability")
       }
     assert(model.getThreshold === 0.5)
-    assert(model.getFeaturesCol === "features")
+    assert(model.getFeaturesCol === "features")//特征
     //Prediction 预测
     assert(model.getPredictionCol === "prediction")
-    assert(model.getRawPredictionCol === "rawPrediction")
-    assert(model.getProbabilityCol === "probability")
-    assert(model.intercept !== 0.0)
+    assert(model.getRawPredictionCol === "rawPrediction")//原预测
+    assert(model.getProbabilityCol === "probability")//可能性
+    assert(model.intercept !== 0.0)//拦截
     assert(model.hasParent)
   }
 
-  test("setThreshold, getThreshold") {
+  test("setThreshold, getThreshold") {//设置,获得门槛
     val lr = new LogisticRegression
     // default
     assert(lr.getThreshold === 0.5, "LogisticRegression.threshold should default to 0.5")
@@ -236,11 +236,13 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     lr.setThreshold(0.5)
     assert(lr.getThresholds === Array(0.5, 0.5))
     // Set via thresholds
+    //通过设置阈值
     val lr2 = new LogisticRegression
     lr2.setThresholds(Array(0.3, 0.7))
     val expectedThreshold = 1.0 / (1.0 + 0.3 / 0.7)
     assert(lr2.getThreshold ~== expectedThreshold relTol 1E-7)
     // thresholds and threshold must be consistent
+    //阈值和阈值必须是一致的
     lr2.setThresholds(Array(0.1, 0.2, 0.3))
     withClue("getThreshold should throw error if thresholds has length != 2.") {
       intercept[IllegalArgumentException] {
@@ -248,6 +250,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     }
     // thresholds and threshold must be consistent: values
+    //阈值和阈值必须是一致的：值
     withClue("fit with ParamMap should throw error if threshold, thresholds do not match.") {
       intercept[IllegalArgumentException] {
         val lr2model = lr2.fit(dataset,
@@ -256,7 +259,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     }
   }
-
+  //逻辑回归模型不适合拦截时,fitintercept关闭
   test("logistic regression doesn't fit intercept when fitIntercept is off") {
     val lr = new LogisticRegression
     lr.setFitIntercept(false)
@@ -267,8 +270,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     MLTestingUtils.checkCopy(model)
   }
 
-  test("logistic regression with setters") {
+  test("logistic regression with setters") {//逻辑回归设置
     // Set params, train, and check as many params as we can.
+    //设置参数,训练并检查许多参数
     val lr = new LogisticRegression()
       .setMaxIter(10)
       .setRegParam(1.0)
@@ -282,6 +286,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.getThreshold === 0.6)
 
     // Modify model params, and check that the params worked.
+    //修改模型参数,并检查工作的参数
     model.setThreshold(1.0)
     val predAllZero = model.transform(dataset)
       .select("prediction", "myProbability")
@@ -291,6 +296,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       s"With threshold=1.0, expected predictions to be all 0, but only" +
       s" ${predAllZero.count(_ === 0)} of ${dataset.count()} were 0.")
     // Call transform with params, and check that the params worked.
+      //调用变换参数,并检查工作的参数
     val predNotAllZero =
       model.transform(dataset, model.threshold -> 0.0,
         model.probabilityCol -> "myProb")
@@ -311,7 +317,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model2.getProbabilityCol === "theProb")
   }
 
-  test("logistic regression: Predictor, Classifier methods") {
+  test("logistic regression: Predictor, Classifier methods") {//逻辑回归:预测,分类方法
     val sqlContext = this.sqlContext
     val lr = new LogisticRegression
 
@@ -322,6 +328,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val results = model.transform(dataset)
 
     // Compare rawPrediction with probability
+    //用概率比较原始预测
     results.select("rawPrediction", "probability").collect().foreach {
       case Row(raw: Vector, prob: Vector) =>
         assert(raw.size === 2)
@@ -332,6 +339,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // Compare prediction with probability
+    //用概率比较预测
     results.select("prediction", "probability").collect().foreach {
       case Row(pred: Double, prob: Vector) =>
         val predFromProb = prob.toArray.zipWithIndex.maxBy(_._1)._2
@@ -339,7 +347,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("MultiClassSummarizer") {
+  test("MultiClassSummarizer") {//多类总结
     val summarizer1 = (new MultiClassSummarizer)
       .add(0.0).add(3.0).add(4.0).add(3.0).add(6.0)
     assert(summarizer1.histogram.zip(Array[Long](1, 0, 0, 2, 1, 0, 1)).forall(x => x._1 === x._2))
@@ -365,6 +373,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(summarizer4.numClasses === 4)
 
     // small map merges large one
+    //小Map合并大Map
     val summarizerA = summarizer1.merge(summarizer2)
     assert(summarizerA.hashCode() === summarizer2.hashCode())
     assert(summarizerA.histogram.zip(Array[Long](2, 2, 0, 3, 2, 1, 1)).forall(x => x._1 === x._2))
@@ -378,7 +387,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(summarizerB.countInvalid === 5)
     assert(summarizerB.numClasses === 5)
   }
-
+  //不规则截取的二元逻辑回归
   test("binary logistic regression with intercept without regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(true).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true).setStandardization(false)
@@ -414,7 +423,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model2.intercept ~== interceptR relTol 1E-3)
     assert(model2.weights ~= weightsR relTol 1E-3)
   }
-
+  //不规则正则化的二元逻辑回归
   test("binary logistic regression without intercept without regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(false).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(false).setStandardization(false)

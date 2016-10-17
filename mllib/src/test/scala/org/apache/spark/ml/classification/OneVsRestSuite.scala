@@ -56,14 +56,14 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     dataset = sqlContext.createDataFrame(rdd)
   }
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new OneVsRest)
     val lrModel = new LogisticRegressionModel("lr", Vectors.dense(0.0), 0.0)
     val model = new OneVsRestModel("ovr", Metadata.empty, Array(lrModel))
     ParamsSuite.checkParams(model)
   }
 
-  test("one-vs-rest: default params") {
+  test("one-vs-rest: default params") {//默认参数
     val numClasses = 3
     val ova = new OneVsRest()
       .setClassifier(new LogisticRegression)
@@ -97,7 +97,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val ovaMetrics = new MulticlassMetrics(ovaResults)
     assert(expectedMetrics.confusionMatrix ~== ovaMetrics.confusionMatrix absTol 400)
   }
-
+   //在训练运行过程中正确地传递标签元数据
   test("one-vs-rest: pass label metadata correctly during train") {
     val numClasses = 3
     val ova = new OneVsRest()
@@ -109,7 +109,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val datasetWithLabelMetadata = dataset.select(labelWithMetadata, features)
     ova.fit(datasetWithLabelMetadata)
   }
-
+  //确保标签的功能和预测列配置
   test("SPARK-8092: ensure label features and prediction cols are configurable") {
     val labelIndexer = new StringIndexer()
       .setInputCol("label")
@@ -133,7 +133,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(outputFields.contains("p"))
   }
 
-  test("SPARK-8049: OneVsRest shouldn't output temp columns") {
+  test("SPARK-8049: OneVsRest shouldn't output temp columns") {//不应该输出临时列
     val logReg = new LogisticRegression()
       .setMaxIter(1)
     val ovr = new OneVsRest()

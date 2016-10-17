@@ -86,14 +86,14 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new NaiveBayes)
     val model = new NaiveBayesModel("nb", pi = Vectors.dense(Array(0.2, 0.8)),
       theta = new DenseMatrix(2, 3, Array(0.1, 0.2, 0.3, 0.4, 0.6, 0.4)))
     ParamsSuite.checkParams(model)
   }
 
-  test("naive bayes: default params") {
+  test("naive bayes: default params") {//朴素贝叶斯分类:默认参数
     val nb = new NaiveBayes
     assert(nb.getLabelCol === "label")//标签
     assert(nb.getFeaturesCol === "features")//特征
@@ -102,7 +102,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(nb.getModelType === "multinomial")//多项式
   }
 
-  test("Naive Bayes Multinomial") {
+  test("Naive Bayes Multinomial") {//朴素贝叶斯分类
     val nPoints = 1000
     val piArray = Array(0.5, 0.1, 0.4).map(math.log)
     val thetaArray = Array(

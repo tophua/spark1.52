@@ -71,20 +71,20 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       Array(new DecisionTreeClassificationModel("dtc", new LeafNode(0.0, 0.0, null), 2)), 2, 2)
     ParamsSuite.checkParams(model)
   }
-
+  //具有连续特征的二元分类
   test("Binary classification with continuous features:" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val rf = new RandomForestClassifier()
     binaryClassificationTestWithContinuousFeatures(rf)
   }
-
+  //具有连续特征和节点标识缓存的二元分类
   test("Binary classification with continuous features and node Id cache:" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val rf = new RandomForestClassifier()
       .setCacheNodeIds(true)
     binaryClassificationTestWithContinuousFeatures(rf)
   }
-
+  //交替的分类和连续特征与多标签测试索引
   test("alternating categorical and continuous features with multiclass labels to test indexing") {
     val arr = Array(
       LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0, 3.0, 1.0)),
@@ -167,6 +167,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setSeed(123)
 
     // In this data, feature 1 is very important.
+    //在这个数据中，特征1是非常重要
     val data: RDD[LabeledPoint] = sc.parallelize(Seq(
       new LabeledPoint(0, Vectors.dense(1, 0, 0, 0, 1)),
       new LabeledPoint(1, Vectors.dense(1, 1, 0, 1, 0)),

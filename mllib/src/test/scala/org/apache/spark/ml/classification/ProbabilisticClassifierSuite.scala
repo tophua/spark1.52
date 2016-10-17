@@ -43,14 +43,14 @@ final class TestProbabilisticClassificationModel(
 
 class ProbabilisticClassifierSuite extends SparkFunSuite {
 
-  test("test thresholding") {
+  test("test thresholding") {//测试阈值
     val thresholds = Array(0.5, 0.2)
     val testModel = new TestProbabilisticClassificationModel("myuid", 2).setThresholds(thresholds)
     assert(testModel.friendlyPredict(Vectors.dense(Array(1.0, 1.0))) === 1.0)
     assert(testModel.friendlyPredict(Vectors.dense(Array(1.0, 0.2))) === 0.0)
   }
 
-  test("test thresholding not required") {
+  test("test thresholding not required") {//测试阈值不需要
     val testModel = new TestProbabilisticClassificationModel("myuid", 2)
     assert(testModel.friendlyPredict(Vectors.dense(Array(1.0, 2.0))) === 1.0)
   }
