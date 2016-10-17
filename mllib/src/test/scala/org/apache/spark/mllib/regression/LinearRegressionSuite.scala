@@ -257,7 +257,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 class LinearRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-//在训练和预测中，任务的大小应该是小的
+  //在训练和预测中，任务的大小应该是小的
   test("task size should be small in both training and prediction") {
     val m = 4
     val n = 200000
