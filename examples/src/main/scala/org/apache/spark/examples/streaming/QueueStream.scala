@@ -29,14 +29,16 @@ object QueueStream {
 
     StreamingExamples.setStreamingLogLevels()
     val sparkConf = new SparkConf().setAppName("QueueStream")
-    // Create the context
+    // Create the context 创建上下文
     val ssc = new StreamingContext(sparkConf, Seconds(1))
 
     // Create the queue through which RDDs can be pushed to
     // a QueueInputDStream
+    //创建队列,通过它可以推到一个queueinputdstream RDDS
     val rddQueue = new SynchronizedQueue[RDD[Int]]()
 
     // Create the QueueInputDStream and use it do some processing
+    //创建queueinputdstream用它做一些处理
     val inputStream = ssc.queueStream(rddQueue)
     val mappedStream = inputStream.map(x => (x % 10, 1))
     val reducedStream = mappedStream.reduceByKey(_ + _)
@@ -44,6 +46,7 @@ object QueueStream {
     ssc.start()
 
     // Create and push some RDDs into
+    //创造和推动一些RDD
     for (i <- 1 to 30) {  
       rddQueue += ssc.sparkContext.makeRDD(1 to 1000, 10)
       Thread.sleep(1000)

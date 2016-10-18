@@ -27,7 +27,7 @@ import java.net.InetSocketAddress
 
 /**
  *  Produces a count of events received from Flume.
- *
+ *	产生从Flume收到的事件计数
  *  This should be used in conjunction with the Spark Sink running in a Flume agent. See
  *  the Spark Streaming programming guide for more details.
  *
@@ -53,6 +53,7 @@ object FlumePollingEventCount {
     val batchInterval = Milliseconds(2000)
 
     // Create the context and set the batch size
+    //创建上下文并设置批量大小
     val sparkConf = new SparkConf().setAppName("FlumePollingEventCount")
     val ssc = new StreamingContext(sparkConf, batchInterval)
 
@@ -60,6 +61,7 @@ object FlumePollingEventCount {
     val stream = FlumeUtils.createPollingStream(ssc, host, port)
 
     // Print out the count of events received from this server in each batch
+    //打印在每个批次中从这个服务器接收到的事件的计数
     stream.count().map(cnt => "Received " + cnt + " flume events." ).print()
 
     ssc.start()

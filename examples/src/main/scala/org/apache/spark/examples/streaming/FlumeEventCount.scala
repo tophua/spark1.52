@@ -26,7 +26,7 @@ import org.apache.spark.util.IntParam
 
 /**
  *  Produces a count of events received from Flume.
- *
+ *  产生从Flume收到的事件计数
  *  This should be used in conjunction with an AvroSink in Flume. It will start
  *  an Avro server on at the request host:port address and listen for requests.
  *  Your Flume AvroSink should be pointed to this address.
@@ -54,13 +54,15 @@ object FlumeEventCount {
     val batchInterval = Milliseconds(2000)
 
     // Create the context and set the batch size
+    //创建上下文并设置批量大小
     val sparkConf = new SparkConf().setAppName("FlumeEventCount")
     val ssc = new StreamingContext(sparkConf, batchInterval)
 
-    // Create a flume stream
+    // Create a flume stream 创建一个flume流
     val stream = FlumeUtils.createStream(ssc, host, port, StorageLevel.MEMORY_ONLY_SER_2)
 
     // Print out the count of events received from this server in each batch
+    //打印在每个批次中从这个服务器接收到的事件的计数
     stream.count().map(cnt => "Received " + cnt + " flume events." ).print()
 
     ssc.start()

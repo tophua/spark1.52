@@ -49,6 +49,7 @@ object MultiBroadcastTest {
       (barr1.value.size, barr2.value.size)
     }
     // Collect the small RDD so we can print the observed sizes locally.
+    //收集小RDD可以打印尺寸的局部观察
     observedSizes.collect().foreach(i => println(i))
 
     sc.stop()

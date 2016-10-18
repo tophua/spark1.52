@@ -31,8 +31,9 @@ import org.apache.spark.scheduler.InputFormatInfo
 
 /**
  * Logistic regression based classification.
- *
+ * 基于逻辑回归的分类
  * This is an example implementation for learning how to use Spark. For more conventional use,
+ * 这是一个学习如何使用Spark的例子实现,为更传统的使用
  * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD or
  * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS based on your needs.
  */

@@ -47,6 +47,7 @@ object GroupByTest {
       arr1
     }.cache()
     // Enforce that everything has been calculated and in cache
+    //执行所有的计算和缓存
     pairs1.count()
 
     println(pairs1.groupByKey(numReducers).count())

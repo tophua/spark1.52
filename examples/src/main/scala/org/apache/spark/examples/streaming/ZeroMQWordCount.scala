@@ -32,6 +32,7 @@ import org.apache.spark.SparkConf
 
 /**
  * A simple publisher for demonstration purposes, repeatedly publishes random Messages
+ * 一个简单的发行演示的目的,每一秒重复发布随机消息
  * every one second.
  */
 object SimpleZeroMQPublisher {
@@ -59,7 +60,7 @@ object SimpleZeroMQPublisher {
 // scalastyle:off
 /**
  * A sample wordcount with ZeroMQStream stream
- *
+ * 一个简单的单词计算zeromqstream流
  * To work with zeroMQ, some native libraries have to be installed.
  * Install zeroMQ (release 2.1) core libraries. [ZeroMQ Install guide]
  * (http://www.zeromq.org/intro:get-the-software)

@@ -24,18 +24,19 @@ import org.apache.spark._
 
 /**
  * Alternating least squares matrix factorization.
- *
+ * 交替最小二乘矩阵分解
  * This is an example implementation for learning how to use Spark. For more conventional use,
  * please refer to org.apache.spark.mllib.recommendation.ALS
  */
 object SparkALS {
 
   // Parameters set through command line arguments
-  var M = 0 // Number of movies
-  var U = 0 // Number of users
-  var F = 0 // Number of features
+  //通过命令行参数设置的参数
+  var M = 0 // Number of movies  电影数
+  var U = 0 // Number of users   用户数
+  var F = 0 // Number of features 特征数
   var ITERATIONS = 0
-  val LAMBDA = 0.01 // Regularization coefficient
+  val LAMBDA = 0.01 // Regularization coefficient 正则化系数
 
   def generateR(): RealMatrix = {
     val mh = randomMatrix(M, F)
@@ -63,6 +64,7 @@ object SparkALS {
     var XtX: RealMatrix = new Array2DRowRealMatrix(F, F)
     var Xty: RealVector = new ArrayRealVector(F)
     // For each user that rated the movie
+    //为每一个用户评价的电影
     for (j <- 0 until U) {
       val u = us(j)
       // Add u * u^t to XtX
@@ -71,6 +73,7 @@ object SparkALS {
       Xty = Xty.add(u.mapMultiply(R.getEntry(i, j)))
     }
     // Add regularization coefs to diagonal terms
+    //添加正则coefs对角项
     for (d <- 0 until F) {
       XtX.addToEntry(d, d, LAMBDA * U)
     }
@@ -114,10 +117,12 @@ object SparkALS {
     val R = generateR()
 
     // Initialize m and u randomly
+    //随机初始化M和U
     var ms = Array.fill(M)(randomVector(F))
     var us = Array.fill(U)(randomVector(F))
 
     // Iteratively update movies then users
+    //迭代更新电影然用户
     val Rc = sc.broadcast(R)
     var msb = sc.broadcast(ms)
     var usb = sc.broadcast(us)

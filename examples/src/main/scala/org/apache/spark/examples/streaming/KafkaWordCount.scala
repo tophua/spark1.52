@@ -28,6 +28,7 @@ import org.apache.spark.SparkConf
 
 /**
  * Consumes messages from one or more topics in Kafka and does wordcount.
+ * 从卡夫卡中的一个或多个主题中消耗消息,并对单词计数
  * Usage: KafkaWordCount <zkQuorum> <group> <topics> <numThreads>
  *   <zkQuorum> is a list of one or more zookeeper servers that make quorum
  *   <group> is the name of kafka consumer group
@@ -66,6 +67,7 @@ object KafkaWordCount {
 }
 
 // Produces some random words between 1 and 100.
+//在100到1之间产生一些随机的单词
 object KafkaWordCountProducer {
 
   def main(args: Array[String]) {
@@ -77,7 +79,7 @@ object KafkaWordCountProducer {
 
     val Array(brokers, topic, messagesPerSec, wordsPerMessage) = args
 
-    // Zookeeper connection properties
+    // Zookeeper connection properties 连接属性
     val props = new HashMap[String, Object]()
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
@@ -87,7 +89,7 @@ object KafkaWordCountProducer {
 
     val producer = new KafkaProducer[String, String](props)
 
-    // Send some messages
+    // Send some messages 发送一些信息
     while(true) {
       (1 to messagesPerSec.toInt).foreach { messageNum =>
         val str = (1 to wordsPerMessage.toInt).map(x => scala.util.Random.nextInt(10).toString)

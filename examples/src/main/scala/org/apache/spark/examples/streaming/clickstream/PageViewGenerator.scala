@@ -22,7 +22,10 @@ import java.net.ServerSocket
 import java.io.PrintWriter
 import util.Random
 
-/** Represents a page view on a website with associated dimension data. */
+/** 
+ *  Represents a page view on a website with associated dimension data.
+ *  表示与关联的维度数据的网站的页面视图 
+ *  */
 class PageView(val url : String, val status : Int, val zipCode : Int, val userID : Int)
     extends Serializable {
   override def toString() : String = {
@@ -39,7 +42,7 @@ object PageView extends Serializable {
 
 // scalastyle:off
 /** Generates streaming events to simulate page views on a website.
-  *
+  * 成流事件来模拟网站上的页面视图
   * This should be used in tandem with PageViewStream.scala. Example:
   *
   * To run the generator

@@ -22,6 +22,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Usage: BroadcastTest [slices] [numElem] [broadcastAlgo] [blockSize]
+  * 使用:广播测试  [分片] [元素数] [广播算法] [块的大小]
   */
 object BroadcastTest {
   def main(args: Array[String]) {
@@ -46,6 +47,7 @@ object BroadcastTest {
       val barr1 = sc.broadcast(arr1)
       val observedSizes = sc.parallelize(1 to 10, slices).map(_ => barr1.value.size)
       // Collect the small RDD so we can print the observed sizes locally.
+      //收集小RDD可以打印尺寸的本地观察
       observedSizes.collect().foreach(i => println(i))
       println("Iteration %d took %.0f milliseconds".format(i, (System.nanoTime - startTime) / 1E6))
     }

@@ -23,14 +23,17 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
  * Counts words in new text files created in the given directory
+ * 在给定目录中创建的新文本文件中的单词数
  * Usage: HdfsWordCount <directory>
  *   <directory> is the directory that Spark Streaming will use to find and read new text files.
- *
+ *	是Spark流将用于查找和读取新的文本文件的目录
  * To run this on your local machine on directory `localdir`, run this example
+ * 运行在本地机器上的目录'localdir',运行此示例
  *    $ bin/run-example \
  *       org.apache.spark.examples.streaming.HdfsWordCount localdir
  *
  * Then create a text file in `localdir` and the words in the file will get counted.
+ * 然后创建一个文本文件中的` localdir `和文件的话会计算
  */
 object HdfsWordCount {
   def main(args: Array[String]) {
@@ -41,11 +44,12 @@ object HdfsWordCount {
 
     StreamingExamples.setStreamingLogLevels()
     val sparkConf = new SparkConf().setAppName("HdfsWordCount")
-    // Create the context
+    // Create the context创建上下文
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     // Create the FileInputDStream on the directory and use the
     // stream to count words in new files created
+    //创建目录的fileinputdstream和使用流计数单词创建新文件
     val lines = ssc.textFileStream(args(0))
     val words = lines.flatMap(_.split(" "))
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)

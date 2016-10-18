@@ -22,7 +22,10 @@ import scala.math.random
 
 import org.apache.spark._
 
-/** Computes an approximation to pi */
+/** 
+ *  Computes an approximation to pi
+ *  计算一个近似的 
+ *  */
 object SparkPi {
   def main(args: Array[String]) {
     val conf = new SparkConf().setAppName("Spark Pi")

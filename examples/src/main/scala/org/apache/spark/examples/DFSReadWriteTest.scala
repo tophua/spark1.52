@@ -27,14 +27,15 @@ import org.apache.spark.SparkContext._
 
 /**
   * Simple test for reading and writing to a distributed
+  * 分布式文件系统读写的简单测试,这个例子做了以下
   * file system.  This example does the following:
   *
-  *   1. Reads local file
-  *   2. Computes word count on local file
-  *   3. Writes local file to a DFS
-  *   4. Reads the file back from the DFS
-  *   5. Computes word count on the file using Spark
-  *   6. Compares the word count results
+  *   1. Reads local file 读取本地文件
+  *   2. Computes word count on local file 计算本地文件上的字计数
+  *   3. Writes local file to a DFS 写本地文件到DFS
+  *   4. Reads the file back from the DFS 将文件从DFS读回来
+  *   5. Computes word count on the file using Spark 用Spark计算文件上的字计数
+  *   6. Compares the word count results 比较字计数结果
   */
 object DFSReadWriteTest {
 
@@ -98,21 +99,21 @@ object DFSReadWriteTest {
   def main(args: Array[String]): Unit = {
     parseArgs(args)
 
-    println("Performing local word count")
+    println("Performing local word count")//执行本地字计数
     val fileContents = readFile(localFilePath.toString())
     val localWordCount = runLocalWordCount(fileContents)
 
-    println("Creating SparkConf")
+    println("Creating SparkConf")//创建Spark配置文件
     val conf = new SparkConf().setAppName("DFS Read Write Test")
 
-    println("Creating SparkContext")
+    println("Creating SparkContext")//创建Spark上下文
     val sc = new SparkContext(conf)
 
-    println("Writing local file to DFS")
+    println("Writing local file to DFS")//写本地文件到DFS
     val dfsFilename = dfsDirPath + "/dfs_read_write_test"
     val fileRDD = sc.parallelize(fileContents)
     fileRDD.saveAsTextFile(dfsFilename)
-
+    //从DFS阅读文件和运行字数
     println("Reading file from DFS and running Word Count")
     val readFileRDD = sc.textFile(dfsFilename)
 

@@ -29,8 +29,9 @@ import org.apache.spark.SparkContext._
 
 /**
  * K-means clustering.
- *
+ * k-均值聚类
  * This is an example implementation for learning how to use Spark. For more conventional use,
+ * 这是一个学习如何使用Spark的例子实现,更传统的使用
  * please refer to org.apache.spark.mllib.clustering.KMeans
  */
 object LocalKMeans {
