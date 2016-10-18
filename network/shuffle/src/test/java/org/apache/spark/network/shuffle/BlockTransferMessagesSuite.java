@@ -23,7 +23,10 @@ import static org.junit.Assert.*;
 
 import org.apache.spark.network.shuffle.protocol.*;
 
-/** Verifies that all BlockTransferMessages can be serialized correctly. */
+/**
+ *  Verifies that all BlockTransferMessages can be serialized correctly.
+ *  验证所有的块传输的信息是可序列化的正确
+ *  */
 public class BlockTransferMessagesSuite {
   @Test
   public void serializeOpenShuffleBlocks() {

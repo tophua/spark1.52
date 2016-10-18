@@ -46,6 +46,7 @@ import static org.apache.spark.network.shuffle.RetryingBlockFetcher.BlockFetchSt
 /**
  * Tests retry logic by throwing IOExceptions and ensuring that subsequent attempts are made to
  * fetch the lost blocks.
+ * 测试通过投掷ioexceptions重试逻辑,确保后续尝试获取丢失的块
  */
 public class RetryingBlockFetcherSuite {
 
@@ -91,6 +92,7 @@ public class RetryingBlockFetcherSuite {
 
     List<? extends Map<String, Object>> interactions = Arrays.asList(
       // b0 throws a non-IOException error, so it will be failed without retry.
+      //B0抛出一个非IOException错误,就没有重试
       ImmutableMap.<String, Object>builder()
         .put("b0", new RuntimeException("Ouch!"))
         .put("b1", block1)
@@ -110,6 +112,7 @@ public class RetryingBlockFetcherSuite {
 
     List<? extends Map<String, Object>> interactions = Arrays.asList(
       // IOException will cause a retry. Since b0 fails, we will retry both.
+      //IOException会重试,由于b0失败,我们都将重试
       ImmutableMap.<String, Object>builder()
         .put("b0", new IOException("Connection failed or something"))
         .put("b1", block1)
@@ -133,6 +136,7 @@ public class RetryingBlockFetcherSuite {
 
     List<? extends Map<String, Object>> interactions = Arrays.asList(
       // IOException will cause a retry. Since b1 fails, we will not retry b0.
+      //IOException会重试,由于B1失败,我们不会重试B0
       ImmutableMap.<String, Object>builder()
         .put("b0", block0)
         .put("b1", new IOException("Connection failed or something"))
@@ -155,16 +159,19 @@ public class RetryingBlockFetcherSuite {
 
     List<? extends Map<String, Object>> interactions = Arrays.asList(
       // b0's IOException will trigger retry, b1's will be ignored.
+      //B0的IOException将触发重试,B1的将被忽略
       ImmutableMap.<String, Object>builder()
         .put("b0", new IOException())
         .put("b1", new IOException())
         .build(),
       // Next, b0 is successful and b1 errors again, so we just request that one.
+      //接下来,B0和B1的错误又是成功的,所以我们只是要求一个。
       ImmutableMap.<String, Object>builder()
         .put("b0", block0)
         .put("b1", new IOException())
         .build(),
       // b1 returns successfully within 2 retries.
+      //B1成功返回,在2次重试
       ImmutableMap.<String, Object>builder()
         .put("b1", block1)
         .build()
@@ -183,20 +190,24 @@ public class RetryingBlockFetcherSuite {
 
     List<? extends Map<String, Object>> interactions = Arrays.asList(
       // b0's IOException will trigger retry, b1's will be ignored.
+      //B0的IOException将触发重试,B1的将被忽略
       ImmutableMap.<String, Object>builder()
         .put("b0", new IOException())
         .put("b1", new IOException())
         .build(),
       // Next, b0 is successful and b1 errors again, so we just request that one.
+      //接下来,B0和B1的错误又是成功的,所以我们只是要求一个
       ImmutableMap.<String, Object>builder()
         .put("b0", block0)
         .put("b1", new IOException())
         .build(),
       // b1 errors again, but this was the last retry
+      //B1的错误了,但这是最后的重试
       ImmutableMap.<String, Object>builder()
         .put("b1", new IOException())
         .build(),
       // This is not reached -- b1 has failed.
+      //这是不是达到B1失败
       ImmutableMap.<String, Object>builder()
         .put("b1", block1)
         .build()
@@ -215,18 +226,21 @@ public class RetryingBlockFetcherSuite {
 
     List<? extends Map<String, Object>> interactions = Arrays.asList(
       // b0's IOException will trigger retry, subsequent messages will be ignored.
+      //b0的IOException将触发重试,后续消息将被忽略
       ImmutableMap.<String, Object>builder()
         .put("b0", new IOException())
         .put("b1", new RuntimeException())
         .put("b2", block2)
         .build(),
       // Next, b0 is successful, b1 errors unrecoverably, and b2 triggers a retry.
+      //接下来,B0是成功的,B1和B2触发错误并无法恢复,重试
       ImmutableMap.<String, Object>builder()
         .put("b0", block0)
         .put("b1", new RuntimeException())
         .put("b2", new IOException())
         .build(),
       // b2 succeeds in its last retry.
+      //B2成功地在其上重试
       ImmutableMap.<String, Object>builder()
         .put("b2", block2)
         .build()
@@ -242,7 +256,9 @@ public class RetryingBlockFetcherSuite {
 
   /**
    * Performs a set of interactions in response to block requests from a RetryingBlockFetcher.
+   * 执行响应块从retryingblockfetcher要求一组相互作用
    * Each interaction is a Map from BlockId to either ManagedBuffer or Exception. This interaction
+   * 每一次的互动是从BlockId到ManagedBuffer或异常图
    * means "respond to the next block fetch request with these Successful buffers and these Failure
    * exceptions". We verify that the expected block ids are exactly the ones requested.
    *
@@ -261,6 +277,7 @@ public class RetryingBlockFetcherSuite {
     Stubber stub = null;
 
     // Contains all blockIds that are referenced across all interactions.
+    //包含所有blockids进行引用,所有的相互作用
     final LinkedHashSet<String> blockIds = Sets.newLinkedHashSet();
 
     for (final Map<String, Object> interaction : interactions) {
@@ -271,11 +288,13 @@ public class RetryingBlockFetcherSuite {
         public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
           try {
             // Verify that the RetryingBlockFetcher requested the expected blocks.
+        	//验证retryingblockfetcher要求预期的块
             String[] requestedBlockIds = (String[]) invocationOnMock.getArguments()[0];
             String[] desiredBlockIds = interaction.keySet().toArray(new String[interaction.size()]);
             assertArrayEquals(desiredBlockIds, requestedBlockIds);
 
             // Now actually invoke the success/failure callbacks on each block.
+            //现在实际上调用成功/失败回调的每一块
             BlockFetchingListener retryListener =
               (BlockFetchingListener) invocationOnMock.getArguments()[1];
             for (Map.Entry<String, Object> block : interaction.entrySet()) {
@@ -299,6 +318,7 @@ public class RetryingBlockFetcherSuite {
       };
 
       // This is either the first stub, or should be chained behind the prior ones.
+      //这是第一个存根,或应该被链接在前面的
       if (stub == null) {
         stub = doAnswer(answer);
       } else {

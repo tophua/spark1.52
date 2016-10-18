@@ -47,6 +47,7 @@ public class ExternalShuffleBlockResolverSuite {
 
     dataContext.create();
     // Write some sort and hash data.
+    //写一些排序和哈希数据
     dataContext.insertSortShuffleData(0, 0,
       new byte[][] { sortBlock0.getBytes(), sortBlock1.getBytes() } );
     dataContext.insertHashShuffleData(1, 0,
@@ -61,7 +62,7 @@ public class ExternalShuffleBlockResolverSuite {
   @Test
   public void testBadRequests() {
     ExternalShuffleBlockResolver resolver = new ExternalShuffleBlockResolver(conf);
-    // Unregistered executor
+    // Unregistered executor 未登记的执行者
     try {
       resolver.getBlockData("app0", "exec1", "shuffle_1_1_0");
       fail("Should have failed");
@@ -69,7 +70,7 @@ public class ExternalShuffleBlockResolverSuite {
       assertTrue("Bad error message: " + e, e.getMessage().contains("not registered"));
     }
 
-    // Invalid shuffle manager
+    // Invalid shuffle manager 无效的shuffle管理
     resolver.registerExecutor("app0", "exec2", dataContext.createExecutorInfo("foobar"));
     try {
       resolver.getBlockData("app0", "exec2", "shuffle_1_1_0");
@@ -78,7 +79,7 @@ public class ExternalShuffleBlockResolverSuite {
       // pass
     }
 
-    // Nonexistent shuffle block
+    // Nonexistent shuffle block 不存在Shuffle块
     resolver.registerExecutor("app0", "exec3",
       dataContext.createExecutorInfo("org.apache.spark.shuffle.sort.SortShuffleManager"));
     try {

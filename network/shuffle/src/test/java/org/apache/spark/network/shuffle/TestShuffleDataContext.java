@@ -29,6 +29,7 @@ import org.apache.spark.network.shuffle.protocol.ExecutorShuffleInfo;
 
 /**
  * Manages some sort- and hash-based shuffle data, including the creation
+ * 管理一些排序和基于散列的Shuffle数据,包括可以读取的目录的创建和清除
  * and cleanup of directories that can be read by the {@link ExternalShuffleBlockResolver}.
  */
 public class TestShuffleDataContext {
@@ -56,7 +57,10 @@ public class TestShuffleDataContext {
     }
   }
 
-  /** Creates reducer blocks in a sort-based data format within our local dirs. */
+  /**
+   *  Creates reducer blocks in a sort-based data format within our local dirs.
+   *  创建一个基于排序的数据格式在本地目录减速块
+   *  */
   public void insertSortShuffleData(int shuffleId, int mapId, byte[][] blocks) throws IOException {
     String blockId = "shuffle_" + shuffleId + "_" + mapId + "_0";
 
@@ -77,7 +81,10 @@ public class TestShuffleDataContext {
     indexStream.close();
   }
 
-  /** Creates reducer blocks in a hash-based data format within our local dirs. */
+  /**
+   *  Creates reducer blocks in a hash-based data format within our local dirs.
+   *  创建一个基于散列的数据格式在本地目录减速块
+   *  */
   public void insertHashShuffleData(int shuffleId, int mapId, byte[][] blocks) throws IOException {
     for (int i = 0; i < blocks.length; i ++) {
       String blockId = "shuffle_" + shuffleId + "_" + mapId + "_" + i;
@@ -89,6 +96,7 @@ public class TestShuffleDataContext {
   /**
    * Creates an ExecutorShuffleInfo object based on the given shuffle manager which targets this
    * context's directories.
+   * 创建一个基于给定的Shuffle管理这方面的executorshuffleinfo目标目录对象。
    */
   public ExecutorShuffleInfo createExecutorInfo(String shuffleManager) {
     return new ExecutorShuffleInfo(localDirs, subDirsPerLocalDir, shuffleManager);

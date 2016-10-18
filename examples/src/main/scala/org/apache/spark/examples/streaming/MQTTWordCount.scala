@@ -28,6 +28,7 @@ import org.apache.spark.SparkConf
 
 /**
  * A simple Mqtt publisher for demonstration purposes, repeatedly publishes
+ * 出于演示的目的，一个简单的MQTT发布程序,
  * Space separated String Message "hello mqtt demo for spark streaming"
  */
 object MQTTPublisher {

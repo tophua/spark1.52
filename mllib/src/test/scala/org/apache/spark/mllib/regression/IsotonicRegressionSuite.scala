@@ -239,7 +239,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predict(2) === 4)
     assert(model.predict(9) === 1)
   }
-//模型构建
+  //模型构建
   test("model construction") {
     val model = new IsotonicRegressionModel(Array(0.0, 1.0), Array(1.0, 2.0), isotonic = true)
     assert(model.predict(-0.5) === 1.0)
@@ -248,7 +248,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.predict(1.0) === 2.0)
     assert(model.predict(1.5) === 2.0)
 
-    intercept[IllegalArgumentException] {
+    intercept[IllegalArgumentException] {  
       // different array sizes.不同数组大小
       new IsotonicRegressionModel(Array(0.0, 1.0), Array(1.0), isotonic = true)
     }

@@ -34,6 +34,7 @@ import org.apache.spark.network.util.TransportConf;
 public class ExternalShuffleCleanupSuite {
 
   // Same-thread Executor used to ensure cleanup happens synchronously in test thread.
+  //使用相同的线程执行器,以确保在测试线程中同步发生
   Executor sameThreadExecutor = MoreExecutors.sameThreadExecutor();
   TransportConf conf = new TransportConf(new SystemPropertyConfigProvider());
 
@@ -61,6 +62,7 @@ public class ExternalShuffleCleanupSuite {
     final AtomicBoolean cleanupCalled = new AtomicBoolean(false);
 
     // Executor which does nothing to ensure we're actually using it.
+    //执行并不能确保我们真正使用它
     Executor noThreadExecutor = new Executor() {
       @Override public void execute(Runnable runnable) { cleanupCalled.set(true); }
     };

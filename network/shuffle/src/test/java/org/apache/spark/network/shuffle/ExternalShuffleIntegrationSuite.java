@@ -52,9 +52,9 @@ public class ExternalShuffleIntegrationSuite {
   static String SORT_MANAGER = "org.apache.spark.shuffle.sort.SortShuffleManager";
   static String HASH_MANAGER = "org.apache.spark.shuffle.hash.HashShuffleManager";
 
-  // Executor 0 is sort-based
+  // Executor 0 is sort-based 执行器0是基于排序的
   static TestShuffleDataContext dataContext0;
-  // Executor 1 is hash-based
+  // Executor 1 is hash-based 执行器1是基于散列的
   static TestShuffleDataContext dataContext1;
 
   static ExternalShuffleBlockHandler handler;
@@ -122,12 +122,14 @@ public class ExternalShuffleIntegrationSuite {
   }
 
   // Fetch a set of blocks from a pre-registered executor.
+  //从预注册的执行器中提取一组块
   private FetchResult fetchBlocks(String execId, String[] blockIds) throws Exception {
     return fetchBlocks(execId, blockIds, server.getPort());
   }
 
   // Fetch a set of blocks from a pre-registered executor. Connects to the server on the given port,
   // to allow connecting to invalid servers.
+  //从预注册的执行器中提取一组块,连接到给定端口上的服务器,允许连接到无效的服务器
   private FetchResult fetchBlocks(String execId, String[] blockIds, int port) throws Exception {
     final FetchResult res = new FetchResult();
     res.successBlocks = Collections.synchronizedSet(new HashSet<String>());
