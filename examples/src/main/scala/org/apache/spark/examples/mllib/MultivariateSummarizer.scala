@@ -28,10 +28,12 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * An example app for summarizing multivariate data from a file. Run with
+ * 一个用于汇总文件中的多元数据的示例应用程序
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.MultivariateSummarizer
  * }}}
  * By default, this loads a synthetic dataset from `data/mllib/sample_linear_regression_data.txt`.
+ * 默认,这个加载一个合成数据集来自`data/mllib/sample_linear_regression_data.txt`
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
  */
 object MultivariateSummarizer {
@@ -75,11 +77,13 @@ object MultivariateSummarizer {
     println(s"${examples.count()} data points")
 
     // Summarize labels
+    //总结标签
     val labelSummary = examples.aggregate(new MultivariateOnlineSummarizer())(
       (summary, lp) => summary.add(Vectors.dense(lp.label)),
       (sum1, sum2) => sum1.merge(sum2))
 
     // Summarize features
+    //总结特点
     val featureSummary = examples.aggregate(new MultivariateOnlineSummarizer())(
       (summary, lp) => summary.add(lp.features),
       (sum1, sum2) => sum1.merge(sum2))

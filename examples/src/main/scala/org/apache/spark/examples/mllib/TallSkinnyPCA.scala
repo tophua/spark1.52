@@ -25,8 +25,9 @@ import org.apache.spark.mllib.linalg.Vectors
 /**
  * 降维 主成分分析(PCA)
  * Compute the principal components of a tall-and-skinny matrix, whose rows are observations.
- *
+ * 计算一个高和瘦矩阵的主要组成部分,谁的行是观察者
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries
+ * 输入矩阵必须以行为导向的密集格式存储,每行一行,条目由空格隔开
  * separated by space. For example,
  * {{{
  * 0.5 1.0
@@ -34,6 +35,7 @@ import org.apache.spark.mllib.linalg.Vectors
  * 4.0 5.0
  * }}}
  * represents a 3-by-2 matrix, whose first row is (0.5, 1.0).
+ * 代表3行2列矩阵,第一行是(0.5,1)
  */
 object TallSkinnyPCA {
   def main(args: Array[String]) {
@@ -46,6 +48,7 @@ object TallSkinnyPCA {
     val sc = new SparkContext(conf)
 
     // Load and parse the data file.
+    //加载和解析数据文件
     val rows = sc.textFile(args(0)).map { line =>
       val values = line.split(' ').map(_.toDouble)
       Vectors.dense(values)
@@ -53,6 +56,7 @@ object TallSkinnyPCA {
     val mat = new RowMatrix(rows)
 
     // Compute principal components.
+    //计算主成分
     val pc = mat.computePrincipalComponents(mat.numCols().toInt)
 
     println("Principal components are:\n" + pc)

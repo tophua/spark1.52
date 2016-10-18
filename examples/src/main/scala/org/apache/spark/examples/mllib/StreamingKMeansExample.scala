@@ -27,22 +27,29 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 /**
  * 聚类 流式K均值
  * Estimate clusters on one stream of data and make predictions
+ * 在一个数据流上估计集群，并在另一个流上进行预测,
  * on another stream, where the data streams arrive as text files
  * into two different directories.
+ * 当数据流到达文本文件到两个不同的目录时
  *
  * The rows of the training text files must be vector data in the form
+ * 训练文本文件的行必须是窗体中的矢量数据,其中n是维数的数目
  * `[x1,x2,x3,...,xn]`
  * Where n is the number of dimensions.
  *
  * The rows of the test text files must be labeled data in the form
+ * 测试文本文件的行必须在窗体中标记数据
  * `(y,[x1,x2,x3,...,xn])`
  * Where y is some identifier. n must be the same for train and test.
+ * 在哪里Y是一些标识符,训练和测试必须是相同的
  *
  * Usage:
  *   StreamingKMeansExample <trainingDir> <testDir> <batchDuration> <numClusters> <numDimensions>
  *
  * To run on your local machine using the two directories `trainingDir` and `testDir`,
+ * 使用两个目录在本地机器上运行`trainingDir` 和 `testDir`,
  * with updates every 5 seconds, 2 dimensions per data point, and 3 clusters, call:
+ * 每5秒更新一次,每一个数据点的2个维度,和3个族
  *    $ bin/run-example mllib.StreamingKMeansExample trainingDir testDir 5 3 2
  *
  * As you add text files to `trainingDir` the clusters will continuously update.

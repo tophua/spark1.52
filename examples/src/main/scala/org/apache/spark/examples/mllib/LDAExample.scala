@@ -158,7 +158,7 @@ object LDAExample {
     val startTime = System.nanoTime()
     val ldaModel = lda.run(corpus)
     val elapsed = (System.nanoTime() - startTime) / 1e9
-
+    //完成训练LDA模型,总结
     println(s"Finished training LDA model.  Summary:")
     println(s"\t Training time: $elapsed sec")
 
@@ -170,6 +170,7 @@ object LDAExample {
     }
 
     // Print the topics, showing the top-weighted terms for each topic.
+    //打印主题,显示每个主题的顶部加权项
     val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = 10)
     val topics = topicIndices.map { case (terms, termWeights) =>
       terms.zip(termWeights).map { case (term, weight) => (vocabArray(term.toInt), weight) }
@@ -187,6 +188,7 @@ object LDAExample {
 
   /**
    * Load documents, tokenize them, create vocabulary, and prepare documents as term count vectors.
+   * 加载文件,标记他们,创造词汇,并准备文件作为长期计数矢量
    * @return (corpus, vocabulary as array, total token count in corpus)
    */
   private def preprocess(
@@ -196,12 +198,17 @@ object LDAExample {
       stopwordFile: String): (RDD[(Long, Vector)], Array[String], Long) = {
 
     // Get dataset of document texts
+    //获取文档文本数据集
     // One document per line in each text file. If the input consists of many small files,
+    //每个文本文件中的每行一个文档,如果输入由许多小的文件
     // this can result in a large number of small partitions, which can degrade performance.
+    //这可能会导致大量的小分区,它可以降低性能
     // In this case, consider using coalesce() to create fewer, larger partitions.
+    //在这种情况下,可以考虑使用coalesce()创造更少,更大的分区
     val textRDD: RDD[String] = sc.textFile(paths.mkString(","))
 
     // Split text into words
+    //将文本分割成单词
     val tokenizer = new SimpleTokenizer(sc, stopwordFile)
     val tokenized: RDD[(Long, IndexedSeq[String])] = textRDD.zipWithIndex().map { case (text, id) =>
       id -> tokenizer.getWords(text)
@@ -209,19 +216,23 @@ object LDAExample {
     tokenized.cache()
 
     // Counts words: RDD[(word, wordCount)]
+    //数量 字
     val wordCounts: RDD[(String, Long)] = tokenized
       .flatMap { case (_, tokens) => tokens.map(_ -> 1L) }
       .reduceByKey(_ + _)
     wordCounts.cache()
     val fullVocabSize = wordCounts.count()
     // Select vocab
+    //选择词汇
     //  (vocab: Map[word -> id], total tokens after selecting vocab)
     val (vocab: Map[String, Int], selectedTokenCount: Long) = {
       val tmpSortedWC: Array[(String, Long)] = if (vocabSize == -1 || fullVocabSize <= vocabSize) {
         // Use all terms
+        //使用的所有项目
         wordCounts.collect().sortBy(-_._2)
       } else {
         // Sort terms to select vocab
+        //排序选择词汇
         wordCounts.sortBy(_._2, ascending = false).take(vocabSize)
       }
       (tmpSortedWC.map(_._1).zipWithIndex.toMap, tmpSortedWC.map(_._2).sum)
@@ -229,6 +240,7 @@ object LDAExample {
 
     val documents = tokenized.map { case (id, tokens) =>
       // Filter tokens by vocabulary, and create word count vector representation of document.
+      //通过词汇表过滤标记,并创建单词计数向量表示文档
       val wc = new mutable.HashMap[Int, Int]()
       tokens.foreach { term =>
         if (vocab.contains(term)) {
@@ -252,8 +264,9 @@ object LDAExample {
 
 /**
  * Simple Tokenizer.
- *
+ *简单的分解器
  * TODO: Formalize the interface, and make this a public class in mllib.feature
+ * 正式的接口，使mllib.feature公共类
  */
 private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Serializable {
 
@@ -265,9 +278,11 @@ private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Se
   }
 
   // Matches sequences of Unicode letters
+  //匹配Unicode字母序列
   private val allWordRegex = "^(\\p{L}*)$".r
 
   // Ignore words shorter than this length.
+  //忽略单词短的长度
   private val minWordLength = 3
 
   def getWords(text: String): IndexedSeq[String] = {
@@ -275,16 +290,19 @@ private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Se
     val words = new mutable.ArrayBuffer[String]()
 
     // Use Java BreakIterator to tokenize text into words.
+    //使用java迭代器切分文本和单词
     val wb = BreakIterator.getWordInstance
     wb.setText(text)
 
     // current,end index start,end of each word
+    //当前,结束索引开始,每个单词的结尾
     var current = wb.first()
     var end = wb.next()
     while (end != BreakIterator.DONE) {
-      // Convert to lowercase
+      // Convert to lowercase 转换小写
       val word: String = text.substring(current, end).toLowerCase
       // Remove short words and strings that aren't only letters
+      //删除短的单词和字符串，不仅是字母
       word match {
         case allWordRegex(w) if w.length >= minWordLength && !stopwords.contains(w) =>
           words += w
@@ -296,9 +314,11 @@ private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Se
         end = wb.next()
       } catch {
         case e: Exception =>
-          // Ignore remaining text in line.
+          // Ignore remaining text in line.忽略行中的剩余文本
           // This is a known bug in BreakIterator (for some Java versions),
+          //这是打破迭代器一个已知的bug(一些java版本)
           // which fails when it sees certain characters.
+          //当它看到某些字符时,它失败了
           end = BreakIterator.DONE
       }
     }

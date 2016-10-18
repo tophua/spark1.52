@@ -23,6 +23,7 @@ object SVMWithSGDDemo {
     // 加载LIBSVM格式数据    
     // Load and parse the data file
     // Load training data in LIBSVM format.
+    //加载训练libsvm格式的数据
     val data = MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
     // Split data into training (60%) and test (40%).
     //将数据切分训练数据(60%)和测试数据(40%)

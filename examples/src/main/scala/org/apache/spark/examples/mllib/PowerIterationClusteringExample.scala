@@ -26,9 +26,11 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
- 聚类 幂迭代聚类(PIC)
+ * 聚类 幂迭代聚类(PIC)
+ * 一个实例幂迭代聚类
  * An example Power Iteration Clustering http://www.icml2010.org/papers/387.pdf app.
  * Takes an input of K concentric circles and the number of points in the innermost circle.
+ * 需要一个k个同心圆的输入和最里面的点的个数
  * The output should be K clusters - each cluster containing precisely the points associated
  * with each of the input circles.
  *
@@ -36,16 +38,17 @@ import org.apache.spark.{SparkConf, SparkContext}
  * {{{
  * ./bin/run-example mllib.PowerIterationClusteringExample [options]
  *
- * Where options include:
- *   k:  Number of circles/clusters
+ * Where options include:其中选项包括
+ *   k:  Number of circles/clusters 循环次数/簇
  *   n:  Number of sampled points on innermost circle.. There are proportionally more points
+ *   		内圆上采样点的个数,这里有在外/大圆圈的比例更多点
  *      within the outer/larger circles
- *   maxIterations:   Number of Power Iterations
+ *   maxIterations:   Number of Power Iterations 幂次迭代次数
  *   outerRadius:  radius of the outermost of the concentric circles
  * }}}
  *
  * Here is a sample run and output:
- *
+ * 这里是一个示例运行和输出
  * ./bin/run-example mllib.PowerIterationClusteringExample -k 3 --n 30 --maxIterations 15
  *
  * Cluster assignments: 1 -> [0,1,2,3,4],2 -> [5,6,7,8,9,10,11,12,13,14],

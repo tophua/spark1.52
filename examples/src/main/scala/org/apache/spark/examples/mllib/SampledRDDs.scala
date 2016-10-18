@@ -26,6 +26,7 @@ import org.apache.spark.SparkContext._
 
 /**
  * An example app for randomly generated and sampled RDDs. Run with
+ * 随机生成和采样RDDS一个示例应用程序
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.SampledRDDs
  * }}}
@@ -64,7 +65,7 @@ object SampledRDDs {
     val conf = new SparkConf().setAppName(s"SampledRDDs with $params")
     val sc = new SparkContext(conf)
 
-    val fraction = 0.1 // fraction of data to sample
+    val fraction = 0.1 // fraction of data to sample 样本数据的分数
 
     val examples = MLUtils.loadLibSVMFile(sc, params.input)
     val numExamples = examples.count()
@@ -91,6 +92,7 @@ object SampledRDDs {
     val keyCounts = keyedRDD.countByKey()
 
     //  Subsample, and count examples per label in sampled data. (approximate)
+    //样本,并在采样数据的每个标签计数的例子,(近似的)
     val fractions = keyCounts.keys.map((_, fraction)).toMap
     val sampledByKeyRDD = keyedRDD.sampleByKey(withReplacement = true, fractions = fractions)
     val keyCountsB = sampledByKeyRDD.countByKey()
@@ -99,6 +101,7 @@ object SampledRDDs {
       " ==> Approx Sample")
 
     //  Subsample, and count examples per label in sampled data. (approximate)
+    //样本,并在采样数据的每个标签计数的例子(近似的)
     val sampledByKeyRDDExact =
       keyedRDD.sampleByKeyExact(withReplacement = true, fractions = fractions)
     val keyCountsBExact = sampledByKeyRDDExact.countByKey()
@@ -106,7 +109,7 @@ object SampledRDDs {
     println(s"  Sampled $sizeBExact examples using exact stratified sampling (by label)." +
       " ==> Exact Sample")
 
-    //  Compare samples
+    //  Compare samples比较样品
     println(s"   \tFractions of examples with key")
     println(s"Key\tOrig\tApprox Sample\tExact Sample")
     keyCounts.keys.toSeq.sorted.foreach { key =>

@@ -62,7 +62,7 @@ object TrainValidationSplitExample {
       .build()
 
     // In this case the estimator is simply the linear regression.
-    //在这种情况下,估计是简单的线性回归。
+    //在这种情况下,估计是简单的线性回归
     // A TrainValidationSplit requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
     //一个trainvalidationsplit需要估计,一套估计parammaps,和评估
     val trainValidationSplit = new TrainValidationSplit()//来做模型超参数优化
@@ -75,7 +75,7 @@ object TrainValidationSplitExample {
     trainValidationSplit.setTrainRatio(0.8)//
 
     // Run train validation split, and choose the best set of parameters.
-    //运行训练验证拆分,并选择最佳的参数集。
+    //运行训练验证拆分,并选择最佳的参数集
     val model = trainValidationSplit.fit(training)
 
     // Make predictions on test data. model is the model with combination of parameters

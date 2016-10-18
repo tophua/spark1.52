@@ -30,6 +30,7 @@ import org.apache.spark.rdd.RDD
 
 /**
  * An example app for ALS on MovieLens data (http://grouplens.org/datasets/movielens/).
+ * ALS的MovieLens数据上的一个示例应用程序
  * Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.MovieLensALS
@@ -175,7 +176,10 @@ object MovieLensALS {
     sc.stop()
   }
 
-  /** Compute RMSE (Root Mean Squared Error). */
+  /** 
+   *  Compute RMSE (Root Mean Squared Error).
+   *  计算均方根误差(均方根误差) 
+   *  */
   def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], implicitPrefs: Boolean)
     : Double = {
 

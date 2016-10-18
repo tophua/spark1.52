@@ -26,22 +26,30 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
  * Train a logistic regression model on one stream of data and make predictions
+ * 在一个数据流上训练一个逻辑回归模型,并在另一个数据流上进行预测
  * on another stream, where the data streams arrive as text files
  * into two different directories.
- *
+ * 当数据流到达文本文件到两个不同的目录时
+ * 
  * The rows of the text files must be labeled data points in the form
+ * 文本文件的行必须在窗体中标记数据点
  * `(y,[x1,x2,x3,...,xn])`
- * Where n is the number of features, y is a binary label, and
- * n must be the same for train and test.
+ * Where n is the number of features, y is a binary label,
+ * 其中n是特征的个数，Y是一个二进制标签,和n必须是相同的训练和测试
+ * and n must be the same for train and test.
  *
  * Usage: StreamingLogisticRegression <trainingDir> <testDir> <batchDuration> <numFeatures>
  *
  * To run on your local machine using the two directories `trainingDir` and `testDir`,
+ * 运行在本地机器上使用两个目录` trainingdir `和` testdir `
  * with updates every 5 seconds, and 2 features per data point, call:
+ * 每5秒更新一次,每个数据点的2个特征
  *    $ bin/run-example mllib.StreamingLogisticRegression trainingDir testDir 5 2
  *
  * As you add text files to `trainingDir` the model will continuously update.
+ * 当你添加文本文件` trainingdir `模型将不断更新
  * Anytime you add text files to `testDir`, you'll see predictions from the current model.
+ * 任何时候你添加文本文件` testdir `,你将从目前看到的预测模型
  *
  */
 object StreamingLogisticRegression {

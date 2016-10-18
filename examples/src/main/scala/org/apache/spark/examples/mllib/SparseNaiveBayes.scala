@@ -26,7 +26,7 @@ import org.apache.spark.mllib.classification.NaiveBayes
 import org.apache.spark.mllib.util.MLUtils
 
 /**
- * 朴素贝叶斯
+ * 一个朴素贝叶斯应用实例
  * An example naive Bayes app. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.SparseNaiveBayes [options] <input>
@@ -80,6 +80,7 @@ object SparseNaiveBayes {
     val examples =
       MLUtils.loadLibSVMFile(sc, params.input, params.numFeatures, minPartitions)
     // Cache examples because it will be used in both training and evaluation.
+    //缓存的例子,因为它将被用于在训练和评估。
     examples.cache()
 
     val splits = examples.randomSplit(Array(0.8, 0.2))

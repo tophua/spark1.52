@@ -25,6 +25,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * An example app for randomly generated RDDs. Run with
+ * 对于随机生成的RDDS一个示例应用程序
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.RandomRDDGeneration
  * }}}
@@ -37,17 +38,17 @@ object RandomRDDGeneration {
     val conf = new SparkConf().setAppName(s"RandomRDDGeneration")
     val sc = new SparkContext(conf)
 
-    val numExamples = 10000 // number of examples to generate
-    val fraction = 0.1 // fraction of data to sample
+    val numExamples = 10000 // number of examples to generate 生成的实例数
+    val fraction = 0.1 // fraction of data to sample 样本数据的分数
 
-    // Example: RandomRDDs.normalRDD
+    // Example: RandomRDDs.normalRDD 正常的RDD
     val normalRDD: RDD[Double] = RandomRDDs.normalRDD(sc, numExamples)
     println(s"Generated RDD of ${normalRDD.count()}" +
       " examples sampled from the standard normal distribution")
     println("  First 5 samples:")
     normalRDD.take(5).foreach( x => println(s"    $x") )
 
-    // Example: RandomRDDs.normalVectorRDD
+    // Example: RandomRDDs.normalVectorRDD 正常向量RDD
     val normalVectorRDD = RandomRDDs.normalVectorRDD(sc, numRows = numExamples, numCols = 2)
     println(s"Generated RDD of ${normalVectorRDD.count()} examples of length-2 vectors.")
     println("  First 5 samples:")
