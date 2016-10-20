@@ -25,10 +25,11 @@ import org.apache.spark.SparkContext._
 
 /**
   * Usage: GroupByTest [numMappers] [numKVPairs] [KeySize] [numReducers]
+  * 用法:
   */
 object GroupByTest {
   def main(args: Array[String]) {
-    val sparkConf = new SparkConf().setAppName("GroupBy Test")
+    val sparkConf = new SparkConf().setAppName("GroupBy Test").setMaster("local")
     var numMappers = if (args.length > 0) args(0).toInt else 2
     var numKVPairs = if (args.length > 1) args(1).toInt else 1000
     var valSize = if (args.length > 2) args(2).toInt else 1000
@@ -41,7 +42,8 @@ object GroupByTest {
       var arr1 = new Array[(Int, Array[Byte])](numKVPairs)
       for (i <- 0 until numKVPairs) {
         val byteArr = new Array[Byte](valSize)
-        ranGen.nextBytes(byteArr)
+        ranGen.nextBytes(byteArr)//用于生成随机字节并将其置于用户提供的字节数组
+        //nextInt用于获取一个伪随机,在0(包括)和指定值(不包括),从此随机数生成器的序列中取出均匀分布的int值
         arr1(i) = (ranGen.nextInt(Int.MaxValue), byteArr)
       }
       arr1
@@ -49,7 +51,7 @@ object GroupByTest {
     // Enforce that everything has been calculated and in cache
     //执行所有的计算和缓存
     pairs1.count()
-
+    //在一个由(K,V)对组成的数据集上调用,返回一个(K,Seq[V])对的数据集
     println(pairs1.groupByKey(numReducers).count())
 
     sc.stop()

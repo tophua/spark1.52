@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/spark-network-common_2.10-1.5.3-SNAPSHOT.jar" sourcepath="/spark-network-common"/>
 	<classpathentry kind="lib" path="D:/scala/scala-2.10.4/lib/scala-reflect.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="D:/eclipse44_64/workspace/spark1.5/lib_managed/jars/spark-network-common_2.10-1.5.3-20160621.072342-97-tests.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

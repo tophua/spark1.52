@@ -57,12 +57,15 @@ object SimpleSkewedGroupByTest {
       result
     }.cache
     // Enforce that everything has been calculated and in cache
+    //执行所有的计算和缓存
     pairs1.count
 
     println("RESULT: " + pairs1.groupByKey(numReducers).count)
     // Print how many keys each reducer got (for debugging)
+    //打印每个reducer有多少键(用于调试)
     // println("RESULT: " + pairs1.groupByKey(numReducers)
     //                           .map{case (k,v) => (k, v.size)}
+    //collectAsMap对(K,V)型的RDD数据返回一个单机HashMap,对于重复K的RDD元素，后面的元素覆盖前面的元素
     //                           .collectAsMap)
 
     sc.stop()

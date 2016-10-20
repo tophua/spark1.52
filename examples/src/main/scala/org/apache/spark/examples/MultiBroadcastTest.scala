@@ -43,8 +43,9 @@ object MultiBroadcastTest {
       arr2(i) = i
     }
 
-    val barr1 = sc.broadcast(arr1)
-    val barr2 = sc.broadcast(arr2)
+    val barr1 = sc.broadcast(arr1)//广播变量
+    val barr2 = sc.broadcast(arr2)//广播变量
+    //观察到的大小
     val observedSizes: RDD[(Int, Int)] = sc.parallelize(1 to 10, slices).map { _ =>
       (barr1.value.size, barr2.value.size)
     }

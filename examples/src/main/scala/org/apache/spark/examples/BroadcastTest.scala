@@ -28,9 +28,9 @@ object BroadcastTest {
   def main(args: Array[String]) {
 
     val bcName = if (args.length > 2) args(2) else "Http"
-    val blockSize = if (args.length > 3) args(3) else "4096"
+    val blockSize = if (args.length > 3) args(3) else "4096" //4兆字节
 
-    val sparkConf = new SparkConf().setAppName("Broadcast Test")
+    val sparkConf = new SparkConf().setAppName("Broadcast Test").setMaster("local")
       .set("spark.broadcast.factory", s"org.apache.spark.broadcast.${bcName}BroadcastFactory")
       .set("spark.broadcast.blockSize", blockSize)
     val sc = new SparkContext(sparkConf)
@@ -43,13 +43,14 @@ object BroadcastTest {
     for (i <- 0 until 3) {
       println("Iteration " + i)
       println("===========")
-      val startTime = System.nanoTime
+      val startTime = System.nanoTime  //系统计时器的当前值,以毫微秒为单位
       val barr1 = sc.broadcast(arr1)
       val observedSizes = sc.parallelize(1 to 10, slices).map(_ => barr1.value.size)
       // Collect the small RDD so we can print the observed sizes locally.
       //收集小RDD可以打印尺寸的本地观察
-      observedSizes.collect().foreach(i => println(i))
-      println("Iteration %d took %.0f milliseconds".format(i, (System.nanoTime - startTime) / 1E6))
+      observedSizes.collect().foreach(i => println(i))  
+      //1E6==1000000.0
+      println("Iteration %d took %.0f milliseconds(毫秒)".format(i, (System.nanoTime - startTime) / 1E6))
     }
 
     sc.stop()

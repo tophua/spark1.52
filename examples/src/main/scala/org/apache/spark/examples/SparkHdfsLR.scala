@@ -38,7 +38,7 @@ import org.apache.spark.scheduler.InputFormatInfo
  * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS based on your needs.
  */
 object SparkHdfsLR {
-  val D = 10   // Numer of dimensions
+  val D = 5   // Numer of dimensions 维度
   val rand = new Random(42)
 
   case class DataPoint(x: Vector[Double], y: Double)
@@ -65,31 +65,33 @@ object SparkHdfsLR {
 
   def main(args: Array[String]) {
 
-    if (args.length < 2) {
+  /*  if (args.length < 2) {
       System.err.println("Usage: SparkHdfsLR <file> <iters>")
       System.exit(1)
     }
-
+*/
     showWarning()
 
-    val sparkConf = new SparkConf().setAppName("SparkHdfsLR")
-    val inputPath = args(0)
+    val sparkConf = new SparkConf().setAppName("SparkHdfsLR").setMaster("local[2]")
+    val inputPath = "D:\\spark\\spark-1.5.0-hadoop2.6\\data\\mllib\\lr_data.txt"//args(0)
     val conf = new Configuration()
     val sc = new SparkContext(sparkConf,
       InputFormatInfo.computePreferredLocations(
         Seq(new InputFormatInfo(conf, classOf[org.apache.hadoop.mapred.TextInputFormat], inputPath))
       ))
     val lines = sc.textFile(inputPath)
-    val points = lines.map(parsePoint _).cache()
-    val ITERATIONS = args(1).toInt
+    val points = lines.map(parsePoint _).cache()//缓存
+    val ITERATIONS = 6 //args(1).toInt 迭代次数
 
     // Initialize w to a random value
+    //初始化W到一个随机值
     var w = DenseVector.fill(D){2 * rand.nextDouble - 1}
     println("Initial w: " + w)
 
     for (i <- 1 to ITERATIONS) {
       println("On iteration " + i)
       val gradient = points.map { p =>
+        //p代表DataPoint Vector 
         p.x * (1 / (1 + exp(-p.y * (w.dot(p.x)))) - 1) * p.y
       }.reduce(_ + _)
       w -= gradient

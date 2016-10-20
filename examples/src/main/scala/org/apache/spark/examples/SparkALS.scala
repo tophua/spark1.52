@@ -97,11 +97,11 @@ object SparkALS {
 
     options.toArray match {
       case Array(m, u, f, iters, slices_) =>
-        M = m.getOrElse("100").toInt
-        U = u.getOrElse("500").toInt
-        F = f.getOrElse("10").toInt
-        ITERATIONS = iters.getOrElse("5").toInt
-        slices = slices_.getOrElse("2").toInt
+        M = m.getOrElse("10").toInt //
+        U = u.getOrElse("50").toInt //
+        F = f.getOrElse("5").toInt //
+        ITERATIONS = iters.getOrElse("5").toInt//迭代次数5
+        slices = slices_.getOrElse("2").toInt//分片数2
       case _ =>
         System.err.println("Usage: SparkALS [M] [U] [F] [iters] [slices]")
         System.exit(1)
@@ -111,7 +111,7 @@ object SparkALS {
 
     println(s"Running with M=$M, U=$U, F=$F, iters=$ITERATIONS")
 
-    val sparkConf = new SparkConf().setAppName("SparkALS")
+    val sparkConf = new SparkConf().setAppName("SparkALS").setMaster("local")
     val sc = new SparkContext(sparkConf)
 
     val R = generateR()
@@ -136,7 +136,8 @@ object SparkALS {
                 .map(i => update(i, usb.value(i), msb.value, Rc.value.transpose()))
                 .collect()
       usb = sc.broadcast(us) // Re-broadcast us because it was updated
-      println("RMSE = " + rmse(R, ms, us))
+      //
+      println("RMSE(均方根误差) = " + rmse(R, ms, us))
       println()
     }
 

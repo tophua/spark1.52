@@ -43,13 +43,17 @@ object DFSReadWriteTest {
   private var dfsDirPath: String = ""
 
   private val NPARAMS = 2
-
+  /**
+   * 读取文件
+   */
   private def readFile(filename: String): List[String] = {
     val lineIter: Iterator[String] = fromFile(filename).getLines()
-    val lineList: List[String] = lineIter.toList
+    val lineList: List[String] = lineIter.toList //Iterator转换List
     lineList
   }
-
+ /**
+  * 打印使用
+  */
   private def printUsage(): Unit = {
     val usage: String = "DFS Read-Write Test\n" +
     "\n" +
@@ -60,59 +64,65 @@ object DFSReadWriteTest {
 
     println(usage)
   }
-
+  /**
+   * 解析参数判断是否文件
+   */
   private def parseArgs(args: Array[String]): Unit = {
-    if (args.length != NPARAMS) {
+    if (args.length != NPARAMS) {//如果参数不相于2则退出
       printUsage()
       System.exit(1)
     }
 
     var i = 0
 
-    localFilePath = new File(args(i))
-    if (!localFilePath.exists) {
+    localFilePath = new File(args(i))//取出第一个参数文件
+    if (!localFilePath.exists) {//如果文件不存在,则给定的路径文件不存在
       System.err.println("Given path (" + args(i) + ") does not exist.\n")
       printUsage()
       System.exit(1)
     }
 
-    if (!localFilePath.isFile) {
+    if (!localFilePath.isFile) {//如果文件不是文件,则给定的路径不是文件
       System.err.println("Given path (" + args(i) + ") is not a file.\n")
       printUsage()
       System.exit(1)
     }
 
     i += 1
-    dfsDirPath = args(i)
+    dfsDirPath = args(i)//存放文件位置的目录
   }
-
+/**
+ * 运行本地单词计数
+ */
   def runLocalWordCount(fileContents: List[String]): Int = {
-    fileContents.flatMap(_.split(" "))
-      .flatMap(_.split("\t"))
-      .filter(_.size > 0)
-      .groupBy(w => w)
-      .mapValues(_.size)
-      .values
-      .sum
+    fileContents.flatMap(_.split(" "))//以空格分隔
+      .flatMap(_.split("\t"))//水平制表(HT)(跳到下一个TAB位置)
+      .filter(_.size > 0)//过滤掉长度大小于0
+      .groupBy(w => w)//分组
+      .mapValues(_.size)//大小
+      .values//转换值
+      .sum//求和
   }
 
-  def main(args: Array[String]): Unit = {
-    parseArgs(args)
+  def main(args: Array[String]): Unit = {//第一参数读取文件,第二参数是存文件目录
+    val args1=Array("D:\\spark\\spark-1.5.0-hadoop2.6\\README.md","D:\\spark\\spark-1.5.0-hadoop2.6\\")
+    //parseArgs(args)
+    parseArgs(args1)
 
     println("Performing local word count")//执行本地字计数
-    val fileContents = readFile(localFilePath.toString())
+    val fileContents = readFile(localFilePath.toString())//读取文件
     val localWordCount = runLocalWordCount(fileContents)
 
     println("Creating SparkConf")//创建Spark配置文件
-    val conf = new SparkConf().setAppName("DFS Read Write Test")
+    val conf = new SparkConf().setAppName("DFS Read Write Test").setMaster("local")
 
     println("Creating SparkContext")//创建Spark上下文
     val sc = new SparkContext(conf)
 
     println("Writing local file to DFS")//写本地文件到DFS
-    val dfsFilename = dfsDirPath + "/dfs_read_write_test"
-    val fileRDD = sc.parallelize(fileContents)
-    fileRDD.saveAsTextFile(dfsFilename)
+    val dfsFilename = dfsDirPath + "/dfs_read_write_test"//存放读取文件的位置
+    val fileRDD = sc.parallelize(fileContents)//转换RDD文件
+    fileRDD.saveAsTextFile(dfsFilename)//保存文件
     //从DFS阅读文件和运行字数
     println("Reading file from DFS and running Word Count")
     val readFileRDD = sc.textFile(dfsFilename)
@@ -128,7 +138,7 @@ object DFSReadWriteTest {
 
     sc.stop()
 
-    if (localWordCount == dfsWordCount) {
+    if (localWordCount == dfsWordCount) {//如果本地单词统计数和dfs单词统计数相同,则表示数据读取成功
       println(s"Success! Local Word Count ($localWordCount) " +
         s"and DFS Word Count ($dfsWordCount) agree.")
     } else {

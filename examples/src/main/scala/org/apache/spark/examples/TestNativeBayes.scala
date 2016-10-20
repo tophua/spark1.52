@@ -54,7 +54,7 @@ object TestNativeBayes {
     //output2：（计算每个词在文档中的词频）
     println("output2：")
     featurizedData.select($"category", $"words", $"rawFeatures").take(1)
-    println(">>>>>>>>>>>>>>>."+featurizedData.toString())
+    //println(">>>>>>>>>>>>>>>."+featurizedData.toString())
     //计算每个词的TF-IDF
     var idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
     var idfModel = idf.fit(featurizedData)

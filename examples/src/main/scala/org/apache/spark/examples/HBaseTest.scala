@@ -43,6 +43,7 @@ object HBaseTest {
     }
 
     // Other options for configuring scan behavior are available. More information available at
+    //配置扫描行为的其他选项可用
     // http://hbase.apache.org/apidocs/org/apache/hadoop/hbase/mapreduce/TableInputFormat.html
     conf.set(TableInputFormat.INPUT_TABLE, args(0))
 

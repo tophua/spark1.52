@@ -9,7 +9,7 @@ object ALSExample {
   def main(args: Array[String]) {
     /**
      * 协同过滤ALS算法推荐过程如下：
-     * 加载数据到 ratings RDD，每行记录包括：user, product, rate
+     * 加载数据到 ratings RDD,每行记录包括：user, product, rate
      * 从 ratings 得到用户商品的数据集：(user, product)
      * 使用ALS对 ratings 进行训练
      * 通过 model 对用户商品进行预测评分：((user, product), rate)
@@ -22,11 +22,12 @@ object ALSExample {
     val data = sc.textFile("../data/mllib/als/test.data")
     val ratings = data.map(_.split(',') match {
       case Array(user, product, rate) =>
+        //用户ID,产品ID,(评级,等级)
         Rating(user.toInt, product.toInt, rate.toDouble)
     })
     //使用ALS训练数据建立推荐模型
-    val rank = 10
-    val numIterations = 20
+    val rank = 10 //模型中隐语义因子的个数(隐分类模型),ALS中因子的个数，通常来说越大越好，但是对内存占用率有直接影响，通常rank在10到200之间
+    val numIterations = 20 //迭代数
     val model = ALS.train(ratings, rank, numIterations, 0.01)
     //从 ratings 中获得只包含用户和商品的数据集 
     val usersProducts = ratings.map {
