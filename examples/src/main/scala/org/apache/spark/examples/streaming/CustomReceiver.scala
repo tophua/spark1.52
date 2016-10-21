@@ -20,11 +20,12 @@ package org.apache.spark.examples.streaming
 
 import java.io.{InputStreamReader, BufferedReader, InputStream}
 import java.net.Socket
-
 import org.apache.spark.{SparkConf, Logging}
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.receiver.Receiver
+import java.io.File
+import java.io.FileInputStream
 
 /**
  * Custom Receiver that receives data over a socket. Received bytes is interpreted as
@@ -60,7 +61,7 @@ object CustomReceiver {
     //自定义接收器,receiverStream创建PluggableInputDStream
     val lines = ssc.receiverStream(new CustomReceiver(local, port.toInt))
     //
-    val words = lines.flatMap(_.split(" "))
+    val words = lines.flatMap(_.split(","))
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)
     wordCounts.print()
     ssc.start()
@@ -97,17 +98,24 @@ class CustomReceiver(host: String, port: Int)
    var userInput: String = null
    try {
      logInfo("Connecting to " + host + ":" + port)
-     socket = new Socket(host, port) //连接机器
+     //socket = new Socket(host, port) //连接机器
      logInfo("Connected to " + host + ":" + port)
      //获取网络连接输入流
-     val reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"))
+     
+     //val socketInput=socket.getInputStream()
+     //
+     val inputFile=new File("../data/mllib/als/testCustomReceiver.data")
+     val  in = new FileInputStream(inputFile)
+     
+     val reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))
      userInput = reader.readLine()
      while(!isStopped && userInput != null) {
        store(userInput)//存储数据
        userInput = reader.readLine()//读取数据
+       println("userInput:"+userInput)
      }
      reader.close()//关闭流
-     socket.close()//关闭连接
+     //socket.close()//关闭连接
      logInfo("Stopped receiving")
      restart("Trying to connect again")
    } catch {

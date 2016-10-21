@@ -67,7 +67,7 @@ object RDDRelation {
 
     // Write out an RDD as a parquet file.
     //RDD写一个parquet文件,Parquet是面向分析型业务的列式存储格式
-    df.write.parquet("pair.parquet")
+    //df.write.parquet("pair.parquet")
 
     // Read in parquet file.  Parquet files are self-describing so the schmema is preserved.
     //读取parquet file,Parquet files是自描述的schmema保存

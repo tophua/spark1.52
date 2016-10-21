@@ -33,6 +33,13 @@ object ALSSuite {
 /**
  * Llib中对每个解决最小二乘问题的正则化参数lambda做了扩展：
  * 一个是在更新用户因素时用户产生的评分数量；另一个是在更新产品因素时产品被评分的数量。
+ * numBlocks 是用于并行化计算的分块个数 (设置为-1，为自动配置)
+ * rank ALS中因子的个数,通常来说越大越好,但是对内存占用率有直接影响,通常rank在10到200之间
+ * iterations 迭代次数，每次迭代都会减少ALS的重构误差。在几次迭代之后,ALS模型都会收敛得到一个不错的结果,所以大多情况下不需要太多的迭代（通常是10次）
+ * lambda 模型的正则化参数,控制着避免过度拟合,值越大,越正则化
+ * implicitPrefs 决定了是用显性反馈ALS的版本还是用适用隐性反馈数据集的版本
+ * alpha 是一个针对于隐性反馈 ALS 版本的参数,这个参数决定了偏好行为强度的基准
+ * 调整这些参数,不断优化结果,使均方差变小.比如：iterations越多,lambda较小,均方差会较小,推荐结果较优
  */
   def generateRatingsAsJavaList(
       users: Int,
@@ -45,7 +52,9 @@ object ALSSuite {
       generateRatings(users, products, features, samplingRate, implicitPrefs)
     (seqAsJavaList(sampledRatings), trueRatings, truePrefs)
   }
-
+/**
+ * 产生等级
+ */
   def generateRatings(
       users: Int,
       products: Int,
@@ -59,19 +68,19 @@ object ALSSuite {
     // Create a random matrix with uniform values from -1 to 1
     //创建一个具有均匀值的随机矩阵，从-1到1
     def randomMatrix(m: Int, n: Int) = {
-      if (negativeFactors) {
+      if (negativeFactors) {//负面因素
         new DoubleMatrix(m, n, Array.fill(m * n)(rand.nextDouble() * 2 - 1): _*)
       } else {
         new DoubleMatrix(m, n, Array.fill(m * n)(rand.nextDouble()): _*)
       }
     }
 
-    val userMatrix = randomMatrix(users, features)
-    val productMatrix = randomMatrix(features, products)
+    val userMatrix = randomMatrix(users, features)//用户
+    val productMatrix = randomMatrix(features, products)//产品
     val (trueRatings, truePrefs) = implicitPrefs match {
       case true =>
         // Generate raw values from [0,9], or if negativeWeights, from [-2,7]
-        //从[0，]生成原始值,或者如果negativeweights，从[ 2,7 ]
+        //从[0]生成原始值,或者如果negativeweights，从[ 2,7 ]
         val raw = new DoubleMatrix(users, products,
           Array.fill(users * products)(
             (if (negativeWeights) -2 else 0) + rand.nextInt(10).toDouble): _*)
@@ -162,7 +171,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     model = new ALS()
       .setRank(5)//模型中潜在因素的数量
       .setIterations(1)//迭代次数
-      .setLambda(1.0)
+      .setLambda(1.0)//
       .setBlocks(2)
       .setSeed(1)
       .setFinalRDDStorageLevel(storageLevel)
@@ -196,7 +205,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   /**
    * Test if we can correctly factorize R = U * P where U and P are of known rank.
-   * 如果我们能正确地分解试验
+   * 如果我们能正确地分解测试
    * @param users number of users
    * @param products number of products
    * @param features number of features (rank of problem)
@@ -214,7 +223,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
   def testALS(
       users: Int,
       products: Int,
-      features: Int,
+      features: Int,//特征数
       iterations: Int,//迭代次数
       samplingRate: Double,
       matchThreshold: Double,
@@ -231,13 +240,13 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val model = new ALS()
       .setUserBlocks(numUserBlocks)
-      .setProductBlocks(numProductBlocks)
+      .setProductBlocks(numProductBlocks)//
       .setRank(features)//模型中潜在因素的数量
-      .setIterations(iterations)
+      .setIterations(iterations)//迭代次数
       .setAlpha(1.0)//应用于隐式数据的ALS变体，它控制的是观察到偏好的基本置信度
-      .setImplicitPrefs(implicitPrefs)
-      .setLambda(0.01)
-      .setSeed(0L)
+      .setImplicitPrefs(implicitPrefs)//决定了是用显性反馈ALS的版本还是用适用隐性反馈数据集的版本
+      .setLambda(0.01)//ALS的正则化参数
+      .setSeed(0L)//
       .setNonnegative(!negativeFactors)
       .run(sc.parallelize(sampledRatings))
 

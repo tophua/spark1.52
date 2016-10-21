@@ -72,7 +72,7 @@ object SqlNetworkWordCount {
       import sqlContext.implicits._
 
       // Convert RDD[String] to RDD[case class] to DataFrame
-      //将RDD[字符串]转换  RDD [实列类]到DataFrame
+      //将RDD[字符串]转换  RDD [实列类]到DataFrame,强制类型转换DataFrame
       val wordsDataFrame = rdd.map(w => Record(w)).toDF()
 
       // Register as table 注册表

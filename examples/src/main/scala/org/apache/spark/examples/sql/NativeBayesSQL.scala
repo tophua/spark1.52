@@ -19,14 +19,15 @@ case class RawDataRecord(category: String, text: String)
 
 object NativeBayesSQL {
   def main(args: Array[String]) {
-    val conf = new SparkConf().setMaster("NativeBayesSQL")
+    val conf = new SparkConf().setAppName("HdfsWordCount").setMaster("local")
     val sc = new SparkContext(conf)
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
     //将原始数据映射到DataFrame中，字段category为分类编号，字段text为分好的词，以空格分隔
-    var srcDF = sc.textFile("/tmp/lxw1234/1.txt").map {
+    var srcDF = sc.textFile("..//data/mllib/1.txt").map {
       x =>
         var data = x.split(",")
+        //取出两个字段
         RawDataRecord(data(0), data(1))
     }.toDF()
     srcDF.select("category", "text").take(2).foreach(println)

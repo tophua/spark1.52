@@ -15,7 +15,7 @@ object SparkSqlExample {
   def main(args: Array[String]) {
     val conf = sys.env.get("SPARK_AUDIT_MASTER") match {
       case Some(master) => new SparkConf().setAppName("Simple Sql App").setMaster(master)
-      case None         => new SparkConf().setAppName("Simple Sql App")
+      case None         => new SparkConf().setAppName("Simple Sql App").setMaster("local")
     }
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
@@ -25,7 +25,9 @@ object SparkSqlExample {
     //生成RDD,转换成对象
     val people = sc.makeRDD(1 to 100, 10).map(x => Person(s"Name$x", x)).toDF()
     people.registerTempTable("people")//注册对象 
+    //返回DataFrame
     val teenagers = sql("SELECT name,age FROM people WHERE age >= 13 AND age <= 19")
+    //返回 teenagerNames: Array[String]
     val teenagerNames = teenagers.map(t => "Name: " + t(0)+ " age:"+t(1)).collect()
     teenagerNames.foreach(println)
 
@@ -35,7 +37,7 @@ object SparkSqlExample {
         System.exit(-1)
       }
     }
-
+    //意外数量的选定元素
     test(teenagerNames.size == 7, "Unexpected number of selected elements: " + teenagerNames)
     println("Test succeeded")
     sc.stop()

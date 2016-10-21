@@ -273,7 +273,8 @@ private[spark] object TaskMetrics {
 /**
  * :: DeveloperApi ::
  * Method by which input data was read.  Network means that the data was read over the network
- * from a remote block manager (which may have stored the data on-disk or in-memory).
+ * 读取输入数据的方法,网络意味着从远程块管理器上读取网络的数据(这可能已经存储在磁盘上或内存中的数据)
+ * from a remote block manager (which may have stored the data on-disk or in-memory). 
  */
 @DeveloperApi
 object DataReadMethod extends Enumeration with Serializable {

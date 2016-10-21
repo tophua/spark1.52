@@ -22,13 +22,13 @@ import scala.collection.mutable.SynchronizedQueue
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-
+//队列流
 object QueueStream {
 
   def main(args: Array[String]) {
 
     StreamingExamples.setStreamingLogLevels()
-    val sparkConf = new SparkConf().setAppName("QueueStream")
+    val sparkConf = new SparkConf().setAppName("QueueStream").setMaster("local[2]")
     // Create the context 创建上下文
     val ssc = new StreamingContext(sparkConf, Seconds(1))
 
@@ -47,7 +47,7 @@ object QueueStream {
 
     // Create and push some RDDs into
     //创造和推动一些RDD
-    for (i <- 1 to 30) {  
+    for (i <- 1 to 9) {  
       rddQueue += ssc.sparkContext.makeRDD(1 to 1000, 10)
       Thread.sleep(1000)
     }

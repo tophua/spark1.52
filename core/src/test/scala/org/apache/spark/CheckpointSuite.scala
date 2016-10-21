@@ -27,7 +27,9 @@ import org.apache.spark.util.Utils
 
 /**
  * Test suite for end-to-end checkpointing functionality.
+ * 端到端的检查点功能测试套件
  * This tests both reliable(可靠) checkpoints and local checkpoints.
+ * 这两个测试都可靠的检查点和本地检查点
  */
 class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging {
   private var checkpointDir: File = _
@@ -35,15 +37,16 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    //创建检查点目录包括删除文件
     checkpointDir = File.createTempFile("temp", "", Utils.createTempDir())
-    checkpointDir.delete()
+    checkpointDir.delete()//删除临时文件,目录不删除
     sc = new SparkContext("local", "test")
     sc.setCheckpointDir(checkpointDir.toString)
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
-    //递归删除
+    //递归删除检查点文件
     Utils.deleteRecursively(checkpointDir)
   }
   //基本的检查点
@@ -272,7 +275,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
 
   /** 
    *  Run a test twice, once for local checkpointing and once for reliable checkpointing. 
-   *  运行测试两次,一次一次可靠的本地检查点和检查点
+   *  运行测试两次,一次本地检查点和一次可靠性检查点
    *  */
   private def runTest(name: String)(body: Boolean => Unit): Unit = {
     test(name + " [reliable checkpoint]")(body(true))
@@ -412,7 +415,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
 
   /**
    * Generate an RDD such that both the RDD and its partitions have large size.
-   * 生成一个RDD,RDD的分区的大小。
+   * 生成一个RDD,有分区大小
    */
   private def generateFatRDD(): RDD[Int] = {
     new FatRDD(sc.makeRDD(1 to 100, 4)).map(x => x)
@@ -420,6 +423,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
 
   /**
    * Generate an pair RDD (with partitioner) such that both the RDD and its partitions
+   * 产生一个对RDD(和分区),有分区大小
    * have large size.
    */
   private def generateFatPairRDD(): RDD[(Int, Int)] = {
@@ -428,6 +432,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
 
   /**
    * Get serialized sizes of the RDD and its partitions, in order to test whether the size shrinks
+   * 得到序列化大小的RDD分区,为了测试是否大小在检查点,忽略检查点数据字段,可能当我们成长的检查点
    * upon checkpointing. Ignores the checkpointData field, which may grow when we checkpoint.
    */
   private def getSerializedSizes(rdd: RDD[_]): (Int, Int) = {

@@ -37,25 +37,33 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
  */
 object HdfsWordCount {
   def main(args: Array[String]) {
-    if (args.length < 1) {
+ /*   if (args.length < 1) {
       System.err.println("Usage: HdfsWordCount <directory>")
       System.exit(1)
-    }
+    }*/
 
     StreamingExamples.setStreamingLogLevels()
-    val sparkConf = new SparkConf().setAppName("HdfsWordCount")
+     //创建SparkConf对象
+    val sparkConf = new SparkConf().setAppName("HdfsWordCount").setMaster("local[2]")
     // Create the context创建上下文
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     // Create the FileInputDStream on the directory and use the
     // stream to count words in new files created
     //创建目录的fileinputdstream和使用流计数单词创建新文件
-    val lines = ssc.textFileStream(args(0))
-    val words = lines.flatMap(_.split(" "))
+    //val lines = ssc.textFileStream(args(0))
+     //如果目录中有新创建的文件,则读取
+    val lines = ssc.textFileStream("D:\\tmp\\")
+   //分割为单词
+    val words = lines.flatMap(_.split(" ")) 
+    //统计单词出现次数
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)
+    //打印结果
     wordCounts.print()
-    ssc.start()// 开始
-    ssc.awaitTermination() //计算完毕退出
+    //启动Spark Streaming
+    ssc.start()
+    //一直运行,除非人为干预再停止
+    ssc.awaitTermination()
   }
 }
 // scalastyle:on println

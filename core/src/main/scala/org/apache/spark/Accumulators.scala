@@ -178,16 +178,17 @@ trait AccumulableParam[R, T] extends Serializable {
   /**
    * Add additional data to the accumulator value. Is allowed to modify and return `r`
    * for efficiency (to avoid allocating objects).
-   *
-   * @param r the current value of the accumulator
-   * @param t the data to be added to the accumulator
-   * @return the new value of the accumulator
+   * 向累加器添加数据,允许修改和返回R的效率(以避免分配对象)
+   * @param r the current value of the accumulator 累加器的当前值
+   * @param t the data to be added to the accumulator 向累加器添加数据
+   * @return the new value of the accumulator  返回累加器新值
    */
   def addAccumulator(r: R, t: T): R
 
   /**
    * Merge two accumulated values together. Is allowed to modify and return the first value
    * for efficiency (to avoid allocating objects).
+   * 将两个累计值合并在一起,允许修改和回报效率第一值（避免配置对象）
    *
    * @param r1 one set of accumulated data
    * @param r2 another set of accumulated data
@@ -197,7 +198,9 @@ trait AccumulableParam[R, T] extends Serializable {
 
   /**
    * Return the "zero" (identity) value for an accumulator type, given its initial value. For
+   * 返回一个累加器类型的"零"(标识)值,给定它的初始值
    * example, if R was a vector of N dimensions, this would return a vector of N zeroes.
+   * 如果R是一个N维向量，这将返回一个N个零向量
    */
   def zero(initialValue: R): R
 }
