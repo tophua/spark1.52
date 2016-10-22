@@ -50,10 +50,10 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     Utils.deleteRecursively(checkpointDir)
   }
   //基本的检查点
-  runTest("basic checkpointing") { reliableCheckpoint: Boolean =>
+  runTest("basic checkpointing") { reliableCheckpoint: Boolean =>//科里化函数
     val parCollection = sc.makeRDD(1 to 4)
     val flatMappedRDD = parCollection.flatMap(x => 1 to x)
-    checkpoint(flatMappedRDD, reliableCheckpoint)
+    checkpoint(flatMappedRDD, reliableCheckpoint)//设置检查点
     //窄依赖
     assert(flatMappedRDD.dependencies.head.rdd === parCollection)
     val result = flatMappedRDD.collect()
@@ -77,14 +77,19 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
   //RDD的平行处理
   runTest("ParallelCollectionRDD") { reliableCheckpoint: Boolean =>
     val parCollection = sc.makeRDD(1 to 4, 2)
-    val numPartitions = parCollection.partitions.size
+    val numPartitions = parCollection.partitions.size//分区大小
     checkpoint(parCollection, reliableCheckpoint)
-    assert(parCollection.dependencies === Nil)
+    assert(parCollection.dependencies === Nil)//依赖为空
     val result = parCollection.collect()
-    if (reliableCheckpoint) {
-      assert(sc.checkpointFile[Int](parCollection.getCheckpointFile.get).collect() === result)
+    if (reliableCheckpoint) {//分布式检查点
+      //file:/C:/Users/liushuhua/AppData/Local/Temp/spark-8af57557-baeb-40cd-a56d-aceb21ff04c0/temp2755421388348795500/787781ef-805e-4869-adfa-0fe4eea1473a/rdd-0
+      val chFile=parCollection.getCheckpointFile.get
+      //ReliableCheckpointRDD
+      val checkpoint=sc.checkpointFile[Int](chFile)
+      assert(checkpoint.collect() === result)
     }
-    assert(parCollection.dependencies != Nil)
+
+    assert(parCollection.dependencies != Nil)//Nil代表空列表
     assert(parCollection.partitions.length === numPartitions)
     assert(parCollection.partitions.toList ===
       parCollection.checkpointData.get.getPartitions.toList)
@@ -225,6 +230,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     }, reliableCheckpoint)
 
     // Test that the PartitionerAwareUnionRDD updates parent partitions
+    //测试partitionerawareunionrdd更新父分区
     // (PartitionerAwareUnionRDD.parents) after the parent RDD has been checkpointed and parent
     // partitions have been changed. Note that this test is very specific to the current
     // implementation of PartitionerAwareUnionRDD.
@@ -267,7 +273,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
    *  */
   private def checkpoint(rdd: RDD[_], reliableCheckpoint: Boolean): Unit = {
     if (reliableCheckpoint) {
-      rdd.checkpoint()//检查点
+      rdd.checkpoint()//分布式检查点
     } else {
       rdd.localCheckpoint() //本地检查点
     }
@@ -277,7 +283,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
    *  Run a test twice, once for local checkpointing and once for reliable checkpointing. 
    *  运行测试两次,一次本地检查点和一次可靠性检查点
    *  */
-  private def runTest(name: String)(body: Boolean => Unit): Unit = {
+  private def runTest(name: String)(body: Boolean => Unit): Unit = {//科里化函数
     test(name + " [reliable checkpoint]")(body(true))
     test(name + " [local checkpoint]")(body(false))
   }

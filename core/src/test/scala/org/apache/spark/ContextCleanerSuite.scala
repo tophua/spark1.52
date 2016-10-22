@@ -39,7 +39,9 @@ import org.apache.spark.storage.ShuffleIndexBlockId
 
 /**
  * An abstract base class for context cleaner tests, which sets up a context with a config
+ * 上下文清理测试的抽象基类,设置一个适合于清理测试的配置,并提供了一些实用功能
  * suitable for cleaner tests and provides some utility functions. Subclasses can use different
+ * 子类可以使用不同的配置选项,一个不同的Shuffle管理器类
  * config options, in particular(详细的), a different shuffle manager class
  */
 abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[HashShuffleManager])
@@ -74,6 +76,7 @@ abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[Ha
 
   protected def newRDDWithShuffleDependencies(): (RDD[_], Seq[ShuffleDependency[_, _, _]]) = {
     def getAllDependencies(rdd: RDD[_]): Seq[Dependency[_]] = {
+      println("dependencies:"+rdd.dependencies)
       rdd.dependencies ++ rdd.dependencies.flatMap { dep =>
         getAllDependencies(dep.rdd)
       }
@@ -88,26 +91,31 @@ abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[Ha
   }
 
   protected def randomRdd() = {
-    val rdd: RDD[_] = Random.nextInt(3) match {
+    val rdd: RDD[_] = Random.nextInt(3) match {//不包含3的随机数
       case 0 => newRDD()
       case 1 => newShuffleRDD()
       case 2 => newPairRDD.join(newPairRDD())
     }
+    //nextBoolean方法调用返回下一个伪均匀分布的boolean值
     if (Random.nextBoolean()) rdd.persist()
     rdd.count()
     rdd
   }
 
-  /** Run GC(垃圾回收) and make sure it actually has run */
+  /** 
+   *  Run GC(垃圾回收) and make sure it actually has run
+   *  垃圾回收确保它实际上已经运行
+   *   */
   protected def runGC() {
     //WeakReference 弱引用,在内存不足时,垃圾回收器会回收此对象,所以在每次使用此对象时,要检查其是否被回收
     val weakRef = new WeakReference(new Object())
-    val startTime = System.currentTimeMillis
-    System.gc() // Make a best effort to run the garbage collection. It *usually* runs GC.
+    val startTime = System.currentTimeMillis//(毫秒时间)
+    System.gc() // 尽最大努力运行垃圾收集  Make a best effort to run the garbage collection. It *usually* runs GC.
     // Wait until a weak reference object has been GCed
+    //等到一个弱引用对象已垃圾回收,10000毫秒==10秒
     while (System.currentTimeMillis - startTime < 10000 && weakRef.get != null) {
       System.gc()
-      Thread.sleep(200)
+      Thread.sleep(200)//毫秒
     }
   }
 
@@ -117,6 +125,7 @@ abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[Ha
 
 /**
  * Basic ContextCleanerSuite, which uses sort-based shuffle
+ * 基础上下文件清理套件,它使用基于排序的Shuffle
  */
 class ContextCleanerSuite extends ContextCleanerSuiteBase {
   test("cleanup RDD") {
@@ -124,15 +133,16 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     val collected = rdd.collect().toList
     val tester = new CleanerTester(sc, rddIds = Seq(rdd.id))
 
-    // Explicit cleanup
+    // Explicit cleanup 显示清理
     cleaner.doCleanupRDD(rdd.id, blocking = true)
     tester.assertCleanup()
 
     // Verify that RDDs can be re-executed after cleaning up
+    // 验证RDDS可以重新清理后执行
     assert(rdd.collect().toList === collected)
   }
 
-  test("cleanup shuffle") {
+  test("cleanup shuffle") {//清理shuffle
     val (rdd, shuffleDeps) = newRDDWithShuffleDependencies()
     val collected = rdd.collect().toList
     val tester = new CleanerTester(sc, shuffleIds = shuffleDeps.map(_.shuffleId))
@@ -176,11 +186,12 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     postGCTester.assertCleanup()
   }
 
-  test("automatically cleanup shuffle") {
+  test("automatically cleanup shuffle") {//自动清理Shuffle
     var rdd = newShuffleRDD()
     rdd.count()
 
     // Test that GC does not cause shuffle cleanup due to a strong reference
+    //测试垃圾回收,不会因为强引用而导致Shuffle清理
     val preGCTester = new CleanerTester(sc, shuffleIds = Seq(0))
     runGC()
     intercept[Exception] {
@@ -189,16 +200,19 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     rdd.count()  // Defeat early collection by the JVM 由JVM早期采集失败
 
     // Test that GC causes shuffle cleanup after dereferencing the RDD
+    //测试垃圾回收,原因Shuffle清理后引用的RDD
     val postGCTester = new CleanerTester(sc, shuffleIds = Seq(0))
+    //使RDD超出范围,相应的Shuffle超出范围
     rdd = null  // Make RDD out of scope, so that corresponding shuffle goes out of scope
     runGC()
     postGCTester.assertCleanup()
   }
 
-  test("automatically cleanup broadcast") {
+  test("automatically cleanup broadcast") {//自动清理广播
     var broadcast = newBroadcast()
 
     // Test that GC does not cause broadcast cleanup due to a strong reference
+    //测试垃圾,不会造成广播清理强引用
     val preGCTester = new CleanerTester(sc, broadcastIds = Seq(broadcast.id))
     runGC()
     intercept[Exception] {
@@ -206,14 +220,16 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     }
 
     // Test that GC causes broadcast cleanup after dereferencing the broadcast variable
+    //测试垃圾回收,广播清理后的引用广播变量,
     // Note broadcast is used after previous GC to avoid early collection by the JVM
+    //注意广播后用以前的GC在JVM避免早期回收
     val postGCTester = new CleanerTester(sc, broadcastIds = Seq(broadcast.id))
-    broadcast = null  // Make broadcast variable out of scope
+    broadcast = null  // Make broadcast variable out of scope 使广播变量的范围
     runGC()
     postGCTester.assertCleanup()
   }
 
-  test("automatically cleanup normal checkpoint") {
+  test("automatically cleanup normal checkpoint") {//自动清理正常检查点
     val checkpointDir = java.io.File.createTempFile("temp", "")
     checkpointDir.deleteOnExit()
     checkpointDir.delete()
@@ -225,19 +241,23 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     var rddId = rdd.id
 
     // Confirm the checkpoint directory exists
+    //确认检查点目录存在
     assert(ReliableRDDCheckpointData.checkpointPath(sc, rddId).isDefined)
     val path = ReliableRDDCheckpointData.checkpointPath(sc, rddId).get
     val fs = path.getFileSystem(sc.hadoopConfiguration)
     assert(fs.exists(path))
 
     // the checkpoint is not cleaned by default (without the configuration set)
+    //默认情况下不清理检查点(没有配置集)
     var postGCTester = new CleanerTester(sc, Seq(rddId), Nil, Nil, Seq(rddId))
+    //使RDD超出范围,好吧,如果提前收集
     rdd = null // Make RDD out of scope, ok if collected earlier
     runGC()
     postGCTester.assertCleanup()
     assert(!fs.exists(ReliableRDDCheckpointData.checkpointPath(sc, rddId).get))
 
     // Verify that checkpoints are NOT cleaned up if the config is not enabled
+    //如果没有启用配置,则验证检查点未被清理
     sc.stop()
     val conf = new SparkConf()
       .setMaster("local[2]")
@@ -252,22 +272,27 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     rddId = rdd.id
 
     // Confirm the checkpoint directory exists
+    //确认检查点目录存在
     assert(fs.exists(ReliableRDDCheckpointData.checkpointPath(sc, rddId).get))
 
     // Reference rdd to defeat any early collection by the JVM
+    //引用作废RDD,JVM早期垃圾收回
     rdd.count()
 
     // Test that GC causes checkpoint data cleanup after dereferencing the RDD
+    //测试GC(垃圾收回)检查站数据清理后引用RDD
     postGCTester = new CleanerTester(sc, Seq(rddId))
-    rdd = null // Make RDD out of scope
+    rdd = null // Make RDD out of scope 使RDD超出范围
     runGC()
     postGCTester.assertCleanup()
     assert(fs.exists(ReliableRDDCheckpointData.checkpointPath(sc, rddId).get))
   }
 
-  test("automatically clean up local checkpoint") {
+  test("automatically clean up local checkpoint") {//自动清理本地检查点
     // Note that this test is similar to the RDD cleanup
+    //请注意,这个测试是类似于RDD清理
     // test because the same underlying mechanism is used!
+    //测试,因为使用相同的基本机制
     var rdd = newPairRDD().localCheckpoint()
     assert(rdd.checkpointData.isDefined)
     assert(rdd.checkpointData.get.checkpointRDD.isEmpty)
@@ -275,6 +300,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     assert(rdd.checkpointData.get.checkpointRDD.isDefined)
 
     // Test that GC does not cause checkpoint cleanup due to a strong reference
+    //测试垃圾收回,不会因为强引用而导致检查点清理
     val preGCTester = new CleanerTester(sc, rddIds = Seq(rdd.id))
     runGC()
     intercept[Exception] {
@@ -282,15 +308,16 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     }
 
     // Test that RDD going out of scope does cause the checkpoint blocks to be cleaned up
+    //测试,RDD超出范围导致检查点块被清理
     val postGCTester = new CleanerTester(sc, rddIds = Seq(rdd.id))
     rdd = null
     runGC()
     postGCTester.assertCleanup()
   }
-
+  //自动清理RDD +Shuffle+广播
   test("automatically cleanup RDD + shuffle + broadcast") {
     val numRdds = 100
-    val numBroadcasts = 4 // Broadcasts are more costly
+    val numBroadcasts = 4 // Broadcasts are more costly 广播是更昂贵
     val rddBuffer = (1 to numRdds).map(i => randomRdd()).toBuffer
     val broadcastBuffer = (1 to numBroadcasts).map(i => newBroadcast()).toBuffer
     val rddIds = sc.persistentRdds.keys.toSeq
@@ -304,6 +331,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     }
 
     // Test that GC triggers the cleanup of all variables after the dereferencing them
+    //试验表明,GC触发清理引用后的所有变量
     val postGCTester = new CleanerTester(sc, rddIds, shuffleIds, broadcastIds)
     broadcastBuffer.clear()
     rddBuffer.clear()
@@ -311,13 +339,14 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     postGCTester.assertCleanup()
 
     // Make sure the broadcasted task closure no longer exists after GC.
+    //确保广播任务关闭后GC不再存在
     val taskClosureBroadcastId = broadcastIds.max + 1
     assert(sc.env.blockManager.master.getMatchingBlockIds({
       case BroadcastBlockId(`taskClosureBroadcastId`, _) => true
       case _ => false
     }, askSlaves = true).isEmpty)
   }
-
+  //自动清理RDD+Shuffle+分布式模式广播
   test("automatically cleanup RDD + shuffle + broadcast in distributed mode") {
     sc.stop()
 
@@ -351,6 +380,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     postGCTester.assertCleanup()
 
     // Make sure the broadcasted task closure no longer exists after GC.
+    // 确保广播任务关闭后GC不再存在
     val taskClosureBroadcastId = broadcastIds.max + 1
     assert(sc.env.blockManager.master.getMatchingBlockIds({
       case BroadcastBlockId(`taskClosureBroadcastId`, _) => true
@@ -362,6 +392,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
 
 /**
  * A copy of the shuffle tests for sort-based shuffle
+ * 复制Shuffle测试排序为基础的Shuffle
  */
 class SortShuffleContextCleanerSuite extends ContextCleanerSuiteBase(classOf[SortShuffleManager]) {
   test("cleanup shuffle") {
@@ -370,32 +401,37 @@ class SortShuffleContextCleanerSuite extends ContextCleanerSuiteBase(classOf[Sor
     val tester = new CleanerTester(sc, shuffleIds = shuffleDeps.map(_.shuffleId))
 
     // Explicit cleanup
+    //显示清理
     shuffleDeps.foreach(s => cleaner.doCleanupShuffle(s.shuffleId, blocking = true))
     tester.assertCleanup()
 
     // Verify that shuffles can be re-executed after cleaning up
+    //验证将可以重新清理后执行
     assert(rdd.collect().toList.equals(collected))
   }
 
-  test("automatically cleanup shuffle") {
+  test("automatically cleanup shuffle") {//自动清理Shuffle
     var rdd = newShuffleRDD()
     rdd.count()
 
     // Test that GC does not cause shuffle cleanup due to a strong reference
+    //测试GC,不会因为强引用而导致shuffle清理
     val preGCTester = new CleanerTester(sc, shuffleIds = Seq(0))
     runGC()
     intercept[Exception] {
       preGCTester.assertCleanup()(timeout(1000 millis))
     }
-    rdd.count()  // Defeat early collection by the JVM
+    rdd.count()  // Defeat early collection by the JVM 由JVM早期采集失败
 
     // Test that GC causes shuffle cleanup after dereferencing the RDD
+    //测试GC,Shuffle清理后废弃的RDD
     val postGCTester = new CleanerTester(sc, shuffleIds = Seq(0))
+    //标记RDD超出范围,因此,相应的Shuffle会超出范围
     rdd = null  // Make RDD out of scope, so that corresponding shuffle goes out of scope
     runGC()
     postGCTester.assertCleanup()
   }
-
+  //自动清理RDD +Shuffle+广播在分布式模式
   test("automatically cleanup RDD + shuffle + broadcast in distributed mode") {
     sc.stop()
 
@@ -408,7 +444,7 @@ class SortShuffleContextCleanerSuite extends ContextCleanerSuiteBase(classOf[Sor
     sc = new SparkContext(conf2)
 
     val numRdds = 10
-    val numBroadcasts = 4 // Broadcasts are more costly
+    val numBroadcasts = 4 // Broadcasts are more costly 广播是更昂贵
     val rddBuffer = (1 to numRdds).map(i => randomRdd).toBuffer
     val broadcastBuffer = (1 to numBroadcasts).map(i => newBroadcast).toBuffer
     val rddIds = sc.persistentRdds.keys.toSeq
@@ -440,7 +476,9 @@ class SortShuffleContextCleanerSuite extends ContextCleanerSuiteBase(classOf[Sor
 
 /**
  * Class to test whether RDDs, shuffles, etc. have been successfully cleaned.
+ * 已成功清洗
  * The checkpoint here refers only to normal (reliable) checkpoints, not local checkpoints.
+ * 这里的检查点只指正常(可靠)的检查点,没有本地检查点
  */
 class CleanerTester(
     sc: SparkContext,
@@ -489,7 +527,10 @@ class CleanerTester(
   preCleanupValidate()
   sc.cleaner.get.attachListener(cleanerListener)
 
-  /** Assert that all the stuff has been cleaned up */
+  /** 
+   *  Assert that all the stuff has been cleaned up 
+   *  断言所有的东西都被清理过了
+   *  */
   def assertCleanup()(implicit waitTimeout: PatienceConfiguration.Timeout) {
     try {
       eventually(waitTimeout, interval(100 millis)) {
@@ -501,12 +542,16 @@ class CleanerTester(
     }
   }
 
-  /** Verify that RDDs, shuffles, etc. occupy resources */
+  /**
+   *  Verify that RDDs, shuffles, etc. occupy resources 
+   *  验证RDDS,Shuffle,占用资源等
+   *  */
   private def preCleanupValidate() {
     assert(rddIds.nonEmpty || shuffleIds.nonEmpty || broadcastIds.nonEmpty ||
       checkpointIds.nonEmpty, "Nothing to cleanup")
 
     // Verify the RDDs have been persisted and blocks are present
+    //验证RDDS已存在持久化块
     rddIds.foreach { rddId =>
       assert(
         sc.persistentRdds.contains(rddId),
@@ -521,6 +566,7 @@ class CleanerTester(
     }
 
     // Verify the shuffle ids are registered and blocks are present
+    //验证注册Shuffle的ids存在的块
     shuffleIds.foreach { shuffleId =>
       assert(
         mapOutputTrackerMaster.containsShuffle(shuffleId),
@@ -535,6 +581,7 @@ class CleanerTester(
     }
 
     // Verify that the broadcast blocks are present
+    //确认广播块的存在
     broadcastIds.foreach { broadcastId =>
       assert(
         !getBroadcastBlocks(broadcastId).isEmpty,
@@ -546,10 +593,12 @@ class CleanerTester(
 
   /**
    * Verify that RDDs, shuffles, etc. do not occupy resources. Tests multiple times as there is
+   * 验证RDDS,Shuffle,不占用资源等,测试多次,没有保证多长时间,它会采取清理的资源
    * as there is not guarantee on how long it will take clean up the resources.
    */
   private def postCleanupValidate() {
     // Verify the RDDs have been persisted and blocks are present
+    //验证RDDS持久化块存在
     rddIds.foreach { rddId =>
       assert(
         !sc.persistentRdds.contains(rddId),
@@ -563,6 +612,7 @@ class CleanerTester(
     }
 
     // Verify the shuffle ids are registered and blocks are present
+    //验证Shuffle注册ids存在的块
     shuffleIds.foreach { shuffleId =>
       assert(
         !mapOutputTrackerMaster.containsShuffle(shuffleId),
@@ -576,6 +626,7 @@ class CleanerTester(
     }
 
     // Verify that the broadcast blocks are present
+    //检查广播块的存在
     broadcastIds.foreach { broadcastId =>
       assert(
         getBroadcastBlocks(broadcastId).isEmpty,

@@ -36,16 +36,20 @@ import org.apache.spark.util.Utils
 @DeveloperApi
 trait Logging {
   // Make the log field transient so that objects with Logging can
+  //使用日志字段进行日志字段的临时,以便用日志记录可被序列化并用另一台机器上
   // be serialized and used on another machine
   @transient private var log_ : Logger = null
 
   // Method to get the logger name for this object
+  //获得日志对象名称的方法
   protected def logName = {
     // Ignore trailing $'s in the class names for Scala objects
+    //忽略后面的$在Scala对象类的名称
     this.getClass.getName.stripSuffix("$")
   }
 
   // Method to get or create the logger for this object
+  //获取或创建日志对象的方法
   protected def log: Logger = {
     if (log_ == null) {
       initializeIfNecessary()
@@ -55,6 +59,7 @@ trait Logging {
   }
 
   // Log methods that take only a String
+  //只需要一个字符串的日志方法
   protected def logInfo(msg: => String) {
     if (log.isInfoEnabled) log.info(msg)
   }
@@ -76,6 +81,7 @@ trait Logging {
   }
 
   // Log methods that take Throwables (Exceptions/Errors) too
+  //日志的方法,以Throwables(异常/错误)
   protected def logInfo(msg: => String, throwable: Throwable) {
     if (log.isInfoEnabled) log.info(msg, throwable)
   }
@@ -112,9 +118,12 @@ trait Logging {
 
   private def initializeLogging() {
     // Don't use a logger in here, as this is itself occurring during initialization of a logger
+    //不要在这里使用日志,这本身是一个初始化期间产生的日志
     // If Log4j 1.2 is being used, but is not initialized, load a default properties file
+    //如果正在使用log4j 1.2,但未初始化,加载一个默认属性文件
     val binderClass = StaticLoggerBinder.getSingleton.getLoggerFactoryClassStr
     // This distinguishes the log4j 1.2 binding, currently
+    //目前这是区分1.2结合log4j
     // org.slf4j.impl.Log4jLoggerFactory, from the log4j 2.0 binding, currently
     // org.apache.logging.slf4j.Log4jLoggerFactory
     val usingLog4j12 = "org.slf4j.impl.Log4jLoggerFactory".equals(binderClass)
