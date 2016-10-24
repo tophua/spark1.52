@@ -41,8 +41,10 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       .set("spark.driver.allowMultipleContexts", "false")
     sc = new SparkContext(conf)
     // A SparkContext is already running, so we shouldn't be able to create a second one
+    //一个sparkcontext已经运行,因此,我们不应该能够创建第二个
     intercept[SparkException] { new SparkContext(conf) }
     // After stopping the running context, we should be able to create a new one
+    //停止运行上下文后,我们应该能够创造一个新的
     resetSparkContext()
     sc = new SparkContext(conf)
   }
@@ -74,7 +76,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
 
   test("Test getOrCreate") {
     var sc2: SparkContext = null
-    SparkContext.clearActiveContext()
+    SparkContext.clearActiveContext()//清除激活
     val conf = new SparkConf().setAppName("test").setMaster("local")
 
     sc = SparkContext.getOrCreate(conf)
@@ -117,7 +119,9 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     val absolutePath1 = file1.getAbsolutePath
 
     val file2 = File.createTempFile("someprefix2", "somesuffix2", dir)
+    //相对路径
     val relativePath = file2.getParent + "/../" + file2.getParentFile.getName + "/" + file2.getName
+    //绝对路径
     val absolutePath2 = file2.getAbsolutePath
 
     try {
@@ -131,7 +135,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.addFile(relativePath)
       sc.parallelize(Array(1), 1).map(x => {
         //SparkFiles获得Spark文件
-        val gotten1 = new File(SparkFiles.get(file1.getName))
+        val gotten1 = new File(SparkFiles.get(file1.getName))//得到1
         val gotten2 = new File(SparkFiles.get(file2.getName))
         if (!gotten1.exists()) {
           throw new SparkException("file doesn't exist : " + absolutePath1)
@@ -166,16 +170,20 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
   //增加文件递归works
   test("addFile recursive works") {
     val pluto = Utils.createTempDir()
+    //海王星
     val neptune = Utils.createTempDir(pluto.getAbsolutePath)
+    //土星
     val saturn = Utils.createTempDir(neptune.getAbsolutePath)
+    //外星人
     val alien1 = File.createTempFile("alien", "1", neptune)
     val alien2 = File.createTempFile("alien", "2", saturn)
 
     try {
       sc = new SparkContext(new SparkConf().setAppName("test").setMaster("local"))
-      sc.addFile(neptune.getAbsolutePath, true)
+      //海王星
+      sc.addFile(neptune.getAbsolutePath, true)//递归添加子文件
       sc.parallelize(Array(1), 1).map(x => {
-        val sep = File.separator
+        val sep = File.separator//代表系统目录中的间隔符,说白了就是斜线
         if (!new File(SparkFiles.get(neptune.getName + sep + alien1.getName)).exists()) {
           throw new SparkException("can't access file under root added directory")
         }
@@ -193,7 +201,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
       sc.stop()
     }
   }
-  //增加文件递归不能默认添加目录
+  //增加递归文件,不能添加默认目录
   test("addFile recursive can't add directories by default") {
     val dir = Utils.createTempDir()
 
@@ -216,6 +224,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
 
       // In SPARK-6414, sc.cancelJobGroup will cause NullPointerException and cause
       // SparkContext to shutdown, so the following assertion will fail.
+      //sparkcontext关闭,因此下面的断言将失败
       assert(sc.parallelize(1 to 10).count() == 10L)
     } finally {
       sc.stop()
@@ -227,13 +236,15 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     // dir1 and dir2 are used for wholeTextFiles and binaryFiles
     val dir1 = Utils.createTempDir() //创建临时目录
     val dir2 = Utils.createTempDir() //创建临时目录
-
+  //C:\\Users\\liushuhua\\AppData\\Local\\Temp\\spark-dc06d21b-efce-42a8-8b2a-94262cb30b4e
     val dirpath1 = dir1.getAbsolutePath
     val dirpath2 = dir2.getAbsolutePath
 
     // file1 and file2 are placed inside dir1, they are also used for
+    // file1和file2在 dir1目录,也用于文本文件,hadoop文件
     // textFile, hadoopFile, and newAPIHadoopFile
     // file3, file4 and file5 are placed inside dir2, they are used for
+    //file3,file4和file5在 dir2目录,也用于文本文件,hadoop文件
     // textFile, hadoopFile, and newAPIHadoopFile as well
     val file1 = new File(dir1, "part-00000")
     val file2 = new File(dir1, "part-00001")

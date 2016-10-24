@@ -42,7 +42,7 @@ class ExternalShuffleServiceSuite extends ShuffleSuite with BeforeAndAfterAll {
 
     conf.set("spark.shuffle.manager", "sort")
     conf.set("spark.shuffle.service.enabled", "true")
-    conf.set("spark.shuffle.service.port", server.getPort.toString)
+    conf.set("spark.shuffle.service.port", server.getPort.toString)//端口随机
   }
 
   override def afterAll() {

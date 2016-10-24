@@ -55,6 +55,7 @@ class ExecutorAllocationManagerSuite
       .set("spark.dynamicAllocation.testing", "true")
     val sc0 = new SparkContext(conf)
     contexts += sc0
+    //动态分配是否已定义
     assert(sc0.executorAllocationManager.isDefined)
     sc0.stop()
 
@@ -71,11 +72,13 @@ class ExecutorAllocationManagerSuite
     intercept[SparkException] { createSparkContext(2, 1) }
 
     // Both min and max, and min == max
+    //最小值==最大值
     val sc1 = createSparkContext(1, 1)
     assert(sc1.executorAllocationManager.isDefined)
     sc1.stop()
 
     // Both min and max, and min < max
+    //最小值小于最大值
     val sc2 = createSparkContext(1, 2)
     assert(sc2.executorAllocationManager.isDefined)
     sc2.stop()
@@ -92,27 +95,28 @@ class ExecutorAllocationManagerSuite
   }
 
   test("add executors") {//添加执行
-    sc = createSparkContext(1, 10, 1)
+    sc = createSparkContext(1, 10, 1)//最小1,最大10,初始化1
     val manager = sc.executorAllocationManager.get
+    //
     sc.listenerBus.postToAll(SparkListenerStageSubmitted(createStageInfo(0, 1000)))
 
     // Keep adding until the limit is reached
     //继续添加,直到达到极限为止
     assert(numExecutorsTarget(manager) === 1)
     assert(numExecutorsToAdd(manager) === 1)
-    assert(addExecutors(manager) === 1)
+    assert(addExecutors(manager) === 1)//添加执行者数
     assert(numExecutorsTarget(manager) === 2)
     assert(numExecutorsToAdd(manager) === 2)
-    assert(addExecutors(manager) === 2)
+    assert(addExecutors(manager) === 2)//添加执行者数
     assert(numExecutorsTarget(manager) === 4)
     assert(numExecutorsToAdd(manager) === 4)
-    assert(addExecutors(manager) === 4)
+    assert(addExecutors(manager) === 4)//添加执行者数
     assert(numExecutorsTarget(manager) === 8)
     assert(numExecutorsToAdd(manager) === 8)
     assert(addExecutors(manager) === 2) // reached the limit of 10 达到了10的极限
     assert(numExecutorsTarget(manager) === 10)
     assert(numExecutorsToAdd(manager) === 1)
-    assert(addExecutors(manager) === 0)
+    assert(addExecutors(manager) === 0)//
     assert(numExecutorsTarget(manager) === 10)
     assert(numExecutorsToAdd(manager) === 1)
 
@@ -129,8 +133,9 @@ class ExecutorAllocationManagerSuite
     onExecutorAdded(manager, "second")
     assert(numExecutorsTarget(manager) === 10)
 
-    // Try adding again
+    // Try adding again 试着再添加
     // This should still fail because the number pending + running is still at the limit
+    //这应该仍然失败,因为挂起的+运行的数量仍然在限制
     assert(addExecutors(manager) === 0)
     assert(numExecutorsTarget(manager) === 10)
     assert(numExecutorsToAdd(manager) === 1)
@@ -138,9 +143,9 @@ class ExecutorAllocationManagerSuite
     assert(numExecutorsTarget(manager) === 10)
     assert(numExecutorsToAdd(manager) === 1)
   }
-  //加上限由Num待定任务执行者
+  //添加上限待定任务执行者
   test("add executors capped by num pending tasks") {
-    sc = createSparkContext(0, 10, 0)
+    sc = createSparkContext(0, 10, 0)//最小0,最大10,初始化0
     val manager = sc.executorAllocationManager.get
     sc.listenerBus.postToAll(SparkListenerStageSubmitted(createStageInfo(0, 5)))
 
@@ -158,7 +163,7 @@ class ExecutorAllocationManagerSuite
     assert(numExecutorsTarget(manager) === 5)
     assert(numExecutorsToAdd(manager) === 1)
 
-    // Verify that running a task doesn't affect the target
+    //Verify that running a task doesn't affect the target
     //验证正在运行的任务不会影响目标
     sc.listenerBus.postToAll(SparkListenerStageSubmitted(createStageInfo(1, 3)))
     sc.listenerBus.postToAll(SparkListenerExecutorAdded(
@@ -895,6 +900,7 @@ private object ExecutorAllocationManagerSuite extends PrivateMethodTester {
 
   /* ------------------------------------------------------- *
    | Helper methods for accessing private methods and fields |
+   | 辅助方法用于访问私有方法和字段                    										 |
    * ------------------------------------------------------- */
 
   private val _numExecutorsToAdd = PrivateMethod[Int]('numExecutorsToAdd)

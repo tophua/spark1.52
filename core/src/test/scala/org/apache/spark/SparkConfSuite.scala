@@ -226,7 +226,7 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     serializer.newInstance().serialize(new StringBuffer())
   }
 
-  test("deprecated configs") {//推荐配置
+  test("deprecated configs") {//不赞成配置
     val conf = new SparkConf()
     val newName = "spark.history.fs.update.interval"
 
@@ -254,7 +254,7 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(conf.getSizeAsKb("spark.kryoserializer.buffer") === 1100)
   }
 
-  test("akka deprecated configs") {//akka推荐配置
+  test("akka deprecated configs") {//akka不赞成配置
     val conf = new SparkConf()
 
     assert(!conf.contains("spark.rpc.numRetries"))

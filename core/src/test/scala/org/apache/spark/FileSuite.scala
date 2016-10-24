@@ -54,7 +54,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     nums.saveAsTextFile(outputDir)//保存文件1,2,3,4
     // Read the plain text file and check it's OK
     //读简单的文本文件,并检查它的正确
-    val outputFile = new File(outputDir, "part-00000")
+    val outputFile = new File(outputDir, "part-00000")//父目录,子目录
     val content = Source.fromFile(outputFile).mkString
     assert(content === "1\n2\n3\n4\n")
     // Also try reading it in as a text file RDD

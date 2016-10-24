@@ -32,8 +32,10 @@ private[spark] object ThreadUtils {
 
   /**
    * An `ExecutionContextExecutor` that runs each task in the thread that invokes `execute/submit`.
+   * `ExecutionContextExecutor`在调用调用的线程中运行每个任务`execute/submit`
    * The caller should make sure the tasks running in this `ExecutionContextExecutor` are short and
    * never block.
+   * 调用应该确保任务在这` executioncontextexecutor `运行短而不会堵塞
    */
   def sameThread: ExecutionContextExecutor = sameThreadExecutionContext
 

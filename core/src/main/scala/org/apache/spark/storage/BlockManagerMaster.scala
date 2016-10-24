@@ -124,7 +124,8 @@ private[spark] class BlockManagerMaster(
 
   /**
    *  Remove all blocks belonging to the given RDD.
-   *  根据RddId删除该Executor上RDD相关联的所有Block
+   *  根据RddId删除该Executor上RDD相关联的所有块
+   *  参数blocking同步执行即堵塞
    */
   def removeRdd(rddId: Int, blocking: Boolean) {
     val future = driverEndpoint.askWithRetry[Future[Seq[Int]]](RemoveRdd(rddId))

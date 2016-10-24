@@ -41,7 +41,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     //从节点数必须小于分区数
     val numSlaves = 3 //从节点
     val numPartitions = 10//分区数
-
+   val conf = new SparkConf
     sc = new SparkContext("local-cluster[%s,1,1024]".format(numSlaves), "test")
     val data = sc.parallelize(1 to 100, numPartitions).
       map(x => throw new NotSerializableExn(new NotSerializableClass))
@@ -67,7 +67,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     resetSparkContext()
   }
 
-  test("simple groupByKey") {
+  test("simple groupByKey") {//简单的以Key分组
     sc = new SparkContext(clusterUrl, "test")
     val pairs = sc.parallelize(Array((1, 1), (1, 2), (1, 3), (2, 1)), 5)
     //元组分组,参数分区数
@@ -76,7 +76,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     //元组
     val valuesFor1 = groups.find(_._1 == 1).get._2 //取出数组分组为1的第二个元素列表
     assert(valuesFor1.toList.sorted === List(1, 2, 3))
-    val valuesFor2 = groups.find(_._1 == 2).get._2
+    val valuesFor2 = groups.find(_._1 == 2).get._2//取出数组分组为2的第二个元素列表
     assert(valuesFor2.toList.sorted === List(1))
   }
 

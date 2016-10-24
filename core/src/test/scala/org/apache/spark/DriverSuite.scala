@@ -38,6 +38,7 @@ class DriverSuite extends SparkFunSuite with Timeouts {
         Map("SPARK_TESTING" -> "1", "SPARK_HOME" -> sparkHome))
       failAfter(60 seconds) { process.waitFor() }
       // Ensure we still kill the process in case it timed out
+      //它超时,确保我们仍然杀死过程
       process.destroy()
     }
   }
@@ -51,7 +52,8 @@ object DriverWithoutCleanup {
   def main(args: Array[String]) {
     Utils.configTestLog4j("INFO")
     val conf = new SparkConf
-    val sc = new SparkContext(args(0), "DriverWithoutCleanup", conf)
+    //val sc = new SparkContext(args(0), "DriverWithoutCleanup", conf)
+    val sc = new SparkContext("local", "DriverWithoutCleanup", conf)
     sc.parallelize(1 to 100, 4).count()
   }
 }

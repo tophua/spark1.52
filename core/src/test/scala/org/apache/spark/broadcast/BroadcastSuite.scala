@@ -28,6 +28,7 @@ import org.apache.spark.serializer.JavaSerializer
 import org.apache.spark.storage._
 
 // Dummy(虚拟的) class that creates a broadcast variable but doesn't use it
+//虚拟类创建一个广播变量,但不使用它
 class DummyBroadcastClass(rdd: RDD[Int]) extends Serializable {
   @transient val list = List(1, 2, 3, 4)
   val broadcast = rdd.context.broadcast(list)
@@ -37,6 +38,7 @@ class DummyBroadcastClass(rdd: RDD[Int]) extends Serializable {
     rdd.map { x =>
       val bm = SparkEnv.get.blockManager
       // Check if broadcast block was fetched
+      //检查广播块是否被取出
       val isFound = bm.getLocal(BroadcastBlockId(bid)).isDefined
       (x, isFound)
     }.collect().toSet

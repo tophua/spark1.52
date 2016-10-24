@@ -34,19 +34,19 @@ class SparkContextSchedulerCreationSuite
     createTaskScheduler(master, new SparkConf())
 
   def createTaskScheduler(master: String, conf: SparkConf): TaskSchedulerImpl = {
-    // Create local SparkContext to setup a SparkEnv. We don't actually want to start() the
+    // Create local SparkContext to setup a SparkEnv. We don't actually want to start() the    
     // real schedulers, so we don't want to create a full SparkContext with the desired scheduler.
     //创建本地sparkcontext设置sparkenv,我们不想实际调用 start()方法,
     sc = new SparkContext("local", "test", conf)
     //Tuple2[SchedulerBackend, TaskScheduler]返回类型
     val createTaskSchedulerMethod =
       PrivateMethod[Tuple2[SchedulerBackend, TaskScheduler]]('createTaskScheduler)
-    //invokePrivate反射调用createTaskScheduler方法
+    //invokePrivate反射调用SparkContext.createTaskScheduler方法
     val (_, sched) = SparkContext invokePrivate createTaskSchedulerMethod(sc, master)
     sched.asInstanceOf[TaskSchedulerImpl]//强制类型转换
   }
   //val LOCAL_N_REGEX = """local\[([0-9]+|\*)\]""".r正则表达式
-  test("bad-master") {
+  test("bad-master") {//坏的Master
     val e = intercept[SparkException] {
       createTaskScheduler("localhost:1234")
     }
@@ -65,6 +65,7 @@ class SparkContextSchedulerCreationSuite
 
   test("local-*") {
     val sched = createTaskScheduler("local[*]")
+    //返回TaskSchedulerImpl
     sched.backend match {
       //availableProcessors 返回到Java虚拟机的可用的处理器数量
       case s: LocalBackend => assert(s.totalCores === Runtime.getRuntime.availableProcessors())
@@ -90,7 +91,7 @@ class SparkContextSchedulerCreationSuite
       case _ => fail()
     }
   }
-
+//本地最大失败数
   test("local-n-failures") {
     val sched = createTaskScheduler("local[4, 2]")
     assert(sched.maxTaskFailures === 2)
@@ -99,7 +100,7 @@ class SparkContextSchedulerCreationSuite
       case _ => fail()
     }
   }
-
+//坏的本地
   test("bad-local-n") {
     val e = intercept[SparkException] {
       createTaskScheduler("local[2*]")
@@ -115,7 +116,7 @@ class SparkContextSchedulerCreationSuite
   }
 
   test("local-default-parallelism") {
-    //默认并行数
+    //设置默认并发数
     val conf = new SparkConf().set("spark.default.parallelism", "16")
     val sched = createTaskScheduler("local", conf)
 

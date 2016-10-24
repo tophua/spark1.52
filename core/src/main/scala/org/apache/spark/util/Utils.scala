@@ -255,7 +255,7 @@ private[spark] object Utils extends Logging {
    * automatically deleted when the VM shuts down.
    */
   def createTempDir(
-      root: String = System.getProperty("java.io.tmpdir"),
+      root: String = System.getProperty("java.io.tmpdir"),//根据目录目录默认tmpdir
       namePrefix: String = "spark"): File = {
     val dir = createDirectory(root, namePrefix)
     ShutdownHookManager.registerShutdownDeleteDir(dir)

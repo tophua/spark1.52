@@ -38,8 +38,9 @@ private case class CleanCheckpoint(rddId: Int) extends CleanupTask
 
 /**
  * A WeakReference associated with a CleanupTask.
- *
+ * 一个弱引用相关的清理类
  * When the referent object becomes only weakly reachable, the corresponding
+ * 当引用对象成为只有弱引用,相应的CleanupTaskWeakReference是自动添加到给定的引用队列
  * CleanupTaskWeakReference is automatically added to the given reference queue.
  */
 private class CleanupTaskWeakReference(
@@ -52,25 +53,27 @@ private class CleanupTaskWeakReference(
  * An asynchronous cleaner for RDD, shuffle, and broadcast state.
  * 异步清理超出应用范围的RDD、ShuffleDependency和Broadcast对象
  * This maintains a weak reference for each RDD, ShuffleDependency, and Broadcast of interest,
+ * 这保持每个RDD弱引用,Shuffle依赖,和引起的广播
  * to be processed when the associated object goes out of scope of the application. Actual
+ * 当关联的对象超出应用程序的范围时,将被处理,实际的清理是在一个单独的守护线程执行
  * cleanup is performed in a separate daemon thread.
  */
 private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
   //缓存AnyRef的虚引用
   private val referenceBuffer = new ArrayBuffer[CleanupTaskWeakReference]
     with SynchronizedBuffer[CleanupTaskWeakReference]
- //缓存顶级的AnyRef的引用
+   //缓存顶级的AnyRef的引用
   private val referenceQueue = new ReferenceQueue[AnyRef]
- //缓存清理工作的监听器数组
+   //缓存清理工作的监听器数组
   private val listeners = new ArrayBuffer[CleanerListener]
     with SynchronizedBuffer[CleanerListener]
-//用于具体的清理工作的线程
+  //用于具体的清理工作的线程
   private val cleaningThread = new Thread() { override def run() { keepCleaning() }}
 
   /**
    * Whether the cleaning thread will block on cleanup tasks (other than shuffle, which
    * is controlled by the `spark.cleaner.referenceTracking.blocking.shuffle` parameter).
-   * 清理线程是否会阻塞清理任务
+   * 清理线程是否会阻塞清理任务,默认为同步阻塞,这是因为问题只是暂时的解决办法,
    * Due to SPARK-3015, this is set to true by default. This is intended to be only a temporary
    * workaround for the issue, which is ultimately caused by the way the BlockManager actors
    * issue inter-dependent blocking Akka messages to each other at high frequencies. This happens,
@@ -227,8 +230,8 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
   def doCleanupShuffle(shuffleId: Int, blocking: Boolean): Unit = {
     try {
       logDebug("Cleaning shuffle " + shuffleId)
-      mapOutputTrackerMaster.unregisterShuffle(shuffleId)
-      blockManagerMaster.removeShuffle(shuffleId, blocking)
+      mapOutputTrackerMaster.unregisterShuffle(shuffleId)//清理
+      blockManagerMaster.removeShuffle(shuffleId, blocking)//Master删除Shuffle
       listeners.foreach(_.shuffleCleaned(shuffleId))
       logInfo("Cleaned shuffle " + shuffleId)
     } catch {
@@ -270,6 +273,7 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
    * Clean up checkpoint files written to a reliable storage.
    * 清理检查点文件写到一个可靠的存储
    * Locally checkpointed files are cleaned up separately through RDD cleanups.
+   * 本地检查点文件分别通过RDD清理
    */
   def doCleanCheckpoint(rddId: Int): Unit = {
     try {
@@ -294,6 +298,7 @@ private object ContextCleaner {
 
 /**
  * Listener class used for testing when any item has been cleaned by the Cleaner class.
+ * 用于测试任何项已清理时的侦听清理类
  */
 private[spark] trait CleanerListener {
   def rddCleaned(rddId: Int)

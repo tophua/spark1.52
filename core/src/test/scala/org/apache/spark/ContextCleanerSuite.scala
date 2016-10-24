@@ -231,6 +231,11 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
 
   test("automatically cleanup normal checkpoint") {//自动清理正常检查点
     val checkpointDir = java.io.File.createTempFile("temp", "")
+    /**
+     * delete为直接删除
+     * deleteOnExit文档解释为:在虚拟机终止时,请求删除此抽象路径名表示的文件或目录。
+     * 程序运行deleteOnExit成功后,File并没有直接删除，而是在虚拟机正常运行结束后才会删除
+     */
     checkpointDir.deleteOnExit()
     checkpointDir.delete()
     var rdd = newPairRDD()
@@ -242,8 +247,8 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
 
     // Confirm the checkpoint directory exists
     //确认检查点目录存在
-    assert(ReliableRDDCheckpointData.checkpointPath(sc, rddId).isDefined)
-    val path = ReliableRDDCheckpointData.checkpointPath(sc, rddId).get
+    assert(ReliableRDDCheckpointData.checkpointPath(sc, rddId).isDefined)//分布式检查点是否定义
+    val path = ReliableRDDCheckpointData.checkpointPath(sc, rddId).get//
     val fs = path.getFileSystem(sc.hadoopConfiguration)
     assert(fs.exists(path))
 
@@ -285,7 +290,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     rdd = null // Make RDD out of scope 使RDD超出范围
     runGC()
     postGCTester.assertCleanup()
-    assert(fs.exists(ReliableRDDCheckpointData.checkpointPath(sc, rddId).get))
+    assert(fs.exists(ReliableRDDCheckpointData.checkpointPath(sc, rddId).get))//检查点未被清理
   }
 
   test("automatically clean up local checkpoint") {//自动清理本地检查点
@@ -538,6 +543,7 @@ class CleanerTester(
       }
       postCleanupValidate()
     } finally {
+      //清理留下的资源
       logInfo("Resources left from cleaning up:\n" + uncleanedResourcesToString)
     }
   }
@@ -598,7 +604,7 @@ class CleanerTester(
    */
   private def postCleanupValidate() {
     // Verify the RDDs have been persisted and blocks are present
-    //验证RDDS持久化块存在
+    //验证RDDS持久化存在的块
     rddIds.foreach { rddId =>
       assert(
         !sc.persistentRdds.contains(rddId),
@@ -672,5 +678,5 @@ class CleanerTester(
   }
 
   private def blockManager = sc.env.blockManager
-  private def mapOutputTrackerMaster = sc.env.mapOutputTracker.asInstanceOf[MapOutputTrackerMaster]
+ private def mapOutputTrackerMaster = sc.env.mapOutputTracker.asInstanceOf[MapOutputTrackerMaster]
 }

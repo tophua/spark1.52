@@ -1726,12 +1726,12 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Unpersist an RDD from memory and/or disk storage
-   * 在内存或磁盘删除一个RDD
+   * 在内存或磁盘删除一个RDD,参数blocking是否堵塞
    */
   private[spark] def unpersistRDD(rddId: Int, blocking: Boolean = true) {
     env.blockManager.master.removeRdd(rddId, blocking)
-    persistentRdds.remove(rddId)
-    listenerBus.post(SparkListenerUnpersistRDD(rddId))
+    persistentRdds.remove(rddId)//根据RDDID从HashMap删除RDD
+    listenerBus.post(SparkListenerUnpersistRDD(rddId))//通知监听器
   }
 
   /**
@@ -1739,6 +1739,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * 增加所有任务要执行sparkcontext依赖JAR
    * The `path` passed can be either a local file, a file in HDFS (or other Hadoop-supported
    * filesystems), an HTTP, HTTPS or FTP URI, or local:/path for a file on every worker node.
+   * 通过的“路径”可以是本地文件,在HDFS中文件, an HTTP, HTTPS or FTP URI,或本地:在每一个工作节点上的文件路径
    */
   def addJar(path: String) {
     if (path == null) {
@@ -1747,13 +1748,16 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       var key = ""
       if (path.contains("\\")) {
         // For local paths with backslashes on Windows, URI throws an exception
+        //用反斜线Windows本地路径,URI抛出一个异常
         key = env.httpFileServer.addJar(new File(path))
       } else {
         val uri = new URI(path)
         key = uri.getScheme match {
           // A JAR file which exists only on the driver node
+          //只有在驱动节点存在的jar文件
           case null | "file" =>
             // yarn-standalone is deprecated, but still supported
+            //yarn-独立已过时,但仍然支持
             if (SparkHadoopUtil.get.isYarnMode() &&
                 (master == "yarn-standalone" || master == "yarn-cluster")) {
               // In order for this to work in yarn-cluster mode the user must specify the
@@ -1786,6 +1790,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
               }
             }
           // A JAR file which exists locally on every worker node
+          //在每个工作节点存在一个jar文件
           case "local" =>
             "file:" + uri.getPath
           case _ =>
@@ -1901,6 +1906,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Set the thread-local property for overriding the call sites
    * of actions and RDDs.
+   * 设置本地线程属性,覆盖RDD调用位置
    */
   private[spark] def setCallSite(callSite: CallSite) {
     setLocalProperty(CallSite.SHORT_FORM, callSite.shortForm)

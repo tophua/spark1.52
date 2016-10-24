@@ -54,10 +54,11 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     // scalastyle:off println
     pw.println("100")
     // scalastyle:on println
-    pw.close()
+    pw.close()//存储FileServerSuite文件
 
     val jarFile = new File(testTempDir, "test.jar")
     val jarStream = new FileOutputStream(jarFile)
+    //jar文件输出流
     val jar = new JarOutputStream(jarStream, new java.util.jar.Manifest())
 
     val jarEntry = new JarEntry(textFile.getName)
@@ -84,9 +85,9 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     sc.addFile(tmpFile.toString)
     val testData = Array((1, 1), (1, 1), (2, 1), (3, 5), (2, 2), (3, 0))
     val result = sc.parallelize(testData).reduceByKey {
-      val path = SparkFiles.get("FileServerSuite.txt")
+      val path = SparkFiles.get("FileServerSuite.txt") //读取文件路径
       val in = new BufferedReader(new FileReader(path))
-      val fileVal = in.readLine().toInt
+      val fileVal = in.readLine().toInt //读取数据100
       in.close()
       _ * fileVal + _ * fileVal
     }.collect()

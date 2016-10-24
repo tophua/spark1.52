@@ -31,6 +31,7 @@ import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskStart}
 
 /**
  * Test suite for cancelling(取消) running jobs. We run the cancellation(取消) tasks for single job action
+ * 取消运行作业,我们执行单作业操作的取消任务,以及多工作行动,我们测试的本地和集群调度程序FIFO和公平调度模式
  * (e.g. count) as well as multi-job action (e.g. take). We test the local and cluster schedulers
  * in both FIFO and fair scheduling modes.
  */
@@ -280,6 +281,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     //取消一些任务后已经启动
     {
       // Add a listener to release the semaphore once any tasks are launched.
+      //添加一个监听器来释放信号量一旦启动任务
       val sem = new Semaphore(0)
       sc.addSparkListener(new SparkListener {
         override def onTaskStart(taskStart: SparkListenerTaskStart) {

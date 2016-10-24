@@ -24,7 +24,7 @@ import java.io.{IOException, NotSerializableException, ObjectInputStream}
 // Common state shared by FailureSuite-launched tasks. We use a global object
 // for this because any local variables used in the task closures will rightfully
 // be copied for each task, so there's no other way for them to share state.
-//故障测试套件发起的任务共享的公共状态,我们使用一个全局对象,
+//通用状态启动任务失败测试套件,我们使用一个全局对象,
 //因为在任务中使用闭包的任何局部变量会被每个任务复制
 object FailureSuiteState {
   var tasksRun = 0
@@ -87,7 +87,8 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   // Run a map-reduce job in which the map stage always fails.
-  test("failure in a map stage") {//map阶段的失败
+  //
+  test("failure in a map stage") {//在一个map阶段的失败
     sc = new SparkContext("local", "test")
     val data = sc.makeRDD(1 to 3).map(x => { throw new Exception; (x, x) }).groupByKey(3)
     intercept[SparkException] {

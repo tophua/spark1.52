@@ -130,6 +130,7 @@ class ClosureCleanerSuite extends SparkFunSuite {
 }
 
 // A non-serializable class we create in closures to make sure that we aren't
+//一个不可序列化的类,我们创建在关闭，以确保保持不必要的变量引用
 // keeping references to unneeded variables from our outer closures.
 class NonSerializable(val id: Int = -1) {
   override def equals(other: Any): Boolean = {

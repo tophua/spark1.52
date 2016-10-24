@@ -31,6 +31,7 @@ class SSLOptionsSuite extends SparkFunSuite with BeforeAndAfterAll {
     val trustStorePath = new File(this.getClass.getResource("/truststore").toURI).getAbsolutePath
 
     // Pick two cipher suites that the provider knows about
+    //选择两个提供程序知道的密码
     val sslContext = SSLContext.getInstance("TLSv1.2")
     sslContext.init(null, null, null)
     val algorithms = sslContext

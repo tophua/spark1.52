@@ -42,7 +42,7 @@ import org.apache.spark.util.ManualClock
  * A test suite for the heartbeating behavior between the driver and the executors.
  * executors和driver之间心跳测试
  */
-class HeartbeatReceiverSuite
+class HeartbeatReceiverSuite//接收心跳测试
     extends SparkFunSuite
     with BeforeAndAfterEach
     with PrivateMethodTester
@@ -59,14 +59,15 @@ class HeartbeatReceiverSuite
   private var heartbeatReceiverClock: ManualClock = null //通常频率
 
   // Helper private method accessors for HeartbeatReceiver
-  private val _executorLastSeen = PrivateMethod[collection.Map[String, Long]]('executorLastSeen)
-  private val _executorTimeoutMs = PrivateMethod[Long]('executorTimeoutMs)
-  private val _killExecutorThread = PrivateMethod[ExecutorService]('killExecutorThread)
+  // 辅助私有方法访问心跳接收器
+  private val _executorLastSeen = PrivateMethod[collection.Map[String, Long]]('executorLastSeen)//最后一次看到
+  private val _executorTimeoutMs = PrivateMethod[Long]('executorTimeoutMs)//执行超时毫秒
+  private val _killExecutorThread = PrivateMethod[ExecutorService]('killExecutorThread)//杀死执行线程
 
   /**
    * Before each test, set up the SparkContext and a custom [[HeartbeatReceiver]]
    * that uses a manual clock.
-   * 每次测试之前,设置sparkcontext和自定义HeartbeatReceiver,使用手动时钟
+   * 每次测试之前,设置sparkcontext和自定义HeartbeatReceiver使用手动时钟
    */
   override def beforeEach(): Unit = {
     val conf = new SparkConf()
@@ -74,10 +75,10 @@ class HeartbeatReceiverSuite
       .setAppName("test")
       .set("spark.dynamicAllocation.testing", "true")
     sc = spy(new SparkContext(conf))
-    scheduler = mock(classOf[TaskSchedulerImpl])
+    scheduler = mock(classOf[TaskSchedulerImpl])//模拟TaskSchedulerImpl
     when(sc.taskScheduler).thenReturn(scheduler)
     when(scheduler.sc).thenReturn(sc)
-    heartbeatReceiverClock = new ManualClock
+    heartbeatReceiverClock = new ManualClock//创建一个手动时钟
     heartbeatReceiver = new HeartbeatReceiver(sc, heartbeatReceiverClock)
     heartbeatReceiverRef = sc.env.rpcEnv.setupEndpoint("heartbeat", heartbeatReceiver)
     when(scheduler.executorHeartbeatReceived(any(), any(), any())).thenReturn(true)
@@ -108,7 +109,7 @@ class HeartbeatReceiverSuite
     addExecutorAndVerify(executorId2)
     triggerHeartbeat(executorId1, executorShouldReregister = false)
     triggerHeartbeat(executorId2, executorShouldReregister = false)
-    val trackedExecutors = getTrackedExecutors
+    val trackedExecutors = getTrackedExecutors//获得跟踪执行者
     assert(trackedExecutors.size === 2)
     assert(trackedExecutors.contains(executorId1))
     assert(trackedExecutors.contains(executorId2))
@@ -244,6 +245,7 @@ class HeartbeatReceiverSuite
     } else {
       assert(!response.reregisterBlockManager)
       // Additionally verify that the scheduler callback is called with the correct parameters
+      //此外,验证调度程序回调调用的正确参数
       verify(scheduler).executorHeartbeatReceived(
         Matchers.eq(executorId), Matchers.eq(Array(1L -> metrics)), Matchers.eq(blockManagerId))
     }
