@@ -59,7 +59,7 @@ object CustomRecoveryModeFactory {
 class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine {
   val data = mutable.HashMap[String, Array[Byte]]()
 
-  CustomPersistenceEngine.lastInstance = Some(this)
+  CustomPersistenceEngine.lastInstance = Some(this)//最后的实例
 
   /**
    * Defines how the object is serialized and persisted. Implementation will
@@ -69,7 +69,7 @@ class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine 
   override def persist(name: String, obj: Object): Unit = {
     CustomPersistenceEngine.persistAttempts += 1
     val serialized = serializer.newInstance().serialize(obj)
-    val bytes = new Array[Byte](serialized.remaining())
+    val bytes = new Array[Byte](serialized.remaining())//返回剩余的可用长度
     serialized.get(bytes)
     data += name -> bytes
   }
@@ -101,7 +101,7 @@ object CustomPersistenceEngine {
   @volatile var unpersistAttempts = 0
   @volatile var readAttempts = 0
 
-  @volatile var lastInstance: Option[CustomPersistenceEngine] = None
+  @volatile var lastInstance: Option[CustomPersistenceEngine] = None //最后的实例
 }
 
 class CustomLeaderElectionAgent(val masterInstance: LeaderElectable) extends LeaderElectionAgent {

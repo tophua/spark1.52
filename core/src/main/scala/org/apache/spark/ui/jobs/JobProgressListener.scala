@@ -547,8 +547,8 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
    * `TimeoutException` if the waiting time elapsed before `numExecutors` executors up.
    * Exposed for testing.
    *
-   * @param numExecutors the number of executors to wait at least
-   * @param timeout time to wait in milliseconds
+   * @param numExecutors the number of executors to wait at least 至少等待执行的数量
+   * @param timeout time to wait in milliseconds 等待时间以毫秒为单位
    */
   private[spark] def waitUntilExecutorsUp(numExecutors: Int, timeout: Long): Unit = {
     val finishTime = System.currentTimeMillis() + timeout
@@ -558,6 +558,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
       }
       if (numBlockManagers >= numExecutors + 1) {
         // Need to count the block manager in driver
+        //需要在驱动程序中计算块管理器
         return
       }
       // Sleep rather than using wait/notify, because this is used only for testing and wait/notify

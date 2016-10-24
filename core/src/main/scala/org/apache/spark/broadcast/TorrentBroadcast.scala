@@ -215,10 +215,10 @@ private object TorrentBroadcast extends Logging {
  */
   def blockifyObject[T: ClassTag](
       obj: T,
-      blockSize: Int,
+      blockSize: Int,//块的大小
       serializer: Serializer,
       compressionCodec: Option[CompressionCodec]): Array[ByteBuffer] = {
-    val bos = new ByteArrayChunkOutputStream(blockSize)
+    val bos = new ByteArrayChunkOutputStream(blockSize)//分块大小
     val out: OutputStream = compressionCodec.map(c => c.compressedOutputStream(bos)).getOrElse(bos)
     val ser = serializer.newInstance()
     val serOut = ser.serializeStream(out)

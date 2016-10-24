@@ -86,6 +86,7 @@ abstract class PersistenceEngine {
   /**
    * Returns the persisted data sorted by their respective ids (which implies that they're
    * sorted by time of creation).  
+   * 返回由它们各自的标识进行排序的持久化数据,(这意味着他们被创造的时间排序)
    */
   final def readPersistedData(
       rpcEnv: RpcEnv): (Seq[ApplicationInfo], Seq[DriverInfo], Seq[WorkerInfo]) = {

@@ -44,24 +44,26 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
   private var testDir: File = null
 
   before {
-    testDir = Utils.createTempDir()
+    testDir = Utils.createTempDir() //创建临时目录
   }
 
   after {
-    Utils.deleteRecursively(testDir)
+    Utils.deleteRecursively(testDir)//递归删除临时目录
   }
 
   /**
    *  Create a fake log file using the new log format used in Spark 1.3+
    *  使用新的日志格式创建一个假日志文件
-   *   */
+   **/
   private def newLogFile(
       appId: String,
       appAttemptId: Option[String],
-      inProgress: Boolean,
+      inProgress: Boolean,//进程中
       codec: Option[String] = None): File = {
-    val ip = if (inProgress) EventLoggingListener.IN_PROGRESS else ""
+    val ip = if (inProgress) EventLoggingListener.IN_PROGRESS else "" //
+    //file:/C:/Users/liushuhua/AppData/Local/Temp/spark-70339850-a7c7-4622-b5da-6042400cac01/new1
     val logUri = EventLoggingListener.getLogPath(testDir.toURI, appId, appAttemptId)
+    ///C:/Users/liushuhua/AppData/Local/Temp/spark-70339850-a7c7-4622-b5da-6042400cac01/new1
     val logPath = new URI(logUri).getPath + ip
     new File(logPath)
   }
@@ -69,7 +71,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
   test("Parse new and old application logs") {//解析新的和旧的应用程序日志
     val provider = new FsHistoryProvider(createTestConf())
 
-    // Write a new-style application log. 编写一个新型的应用程序日志
+    // Write a new-style application log. 写一个新型的应用程序日志
     val newAppComplete = newLogFile("new1", None, inProgress = false)
     writeFile(newAppComplete, true, None,
       SparkListenerApplicationStart(newAppComplete.getName(), Some("new-app-complete"), 1L, "test",
@@ -77,7 +79,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
       SparkListenerApplicationEnd(5L)
       )
 
-    // Write a new-style application log. 编写一个新型的应用程序日志
+    // Write a new-style application log. 写一个新型的应用程序日志
     val newAppCompressedComplete = newLogFile("new1compressed", None, inProgress = false,
       Some("lzf"))
     writeFile(newAppCompressedComplete, true, None,
@@ -436,12 +438,14 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
 
   private def writeFile(file: File, isNewFormat: Boolean, codec: Option[CompressionCodec],
     events: SparkListenerEvent*) = {
-    val fstream = new FileOutputStream(file)
+    val fstream = new FileOutputStream(file)//文件输出
+    //压缩编码输出文件,获得输出流
     val cstream = codec.map(_.compressedOutputStream(fstream)).getOrElse(fstream)
-    val bstream = new BufferedOutputStream(cstream)
+    val bstream = new BufferedOutputStream(cstream)//转换缓存输出流
     if (isNewFormat) {
       EventLoggingListener.initEventLog(new FileOutputStream(file))
     }
+    //输出流
     val writer = new OutputStreamWriter(bstream, "UTF-8")
     Utils.tryWithSafeFinally {
       events.foreach(e => writer.write(compact(render(JsonProtocol.sparkEventToJson(e))) + "\n"))
@@ -450,8 +454,8 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     }
   }
 
-  private def createEmptyFile(file: File) = {
-    new FileOutputStream(file).close()
+  private def createEmptyFile(file: File) = {//创建空的文件
+    new FileOutputStream(file).close()//创建输出文件并关闭
   }
 
   private def createTestConf(): SparkConf = {

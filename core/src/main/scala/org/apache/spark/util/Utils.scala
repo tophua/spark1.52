@@ -1251,7 +1251,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code, then a finally block, but if exceptions happen in
    * the finally block, do not suppress the original exception.
-   * 执行一个代码块，然后一个最后块，但如果在最后块中发生异常，抛出原始的异常
+   * 执行一个代码块,然后一个最后块,但如果在最后块中发生异常，抛出原始的异常
    * This is primarily an issue with `finally { out.close() }` blocks, where
    * close needs to be called to clean up `out`, but if an exception happened
    * in `out.write`, it's likely `out` may be corrupted and `out.close` will
@@ -1260,13 +1260,16 @@ private[spark] object Utils extends Logging {
    */
   def tryWithSafeFinally[T](block: => T)(finallyBlock: => Unit): T = {
     // It would be nice to find a method on Try that did this
+    //这将是很好的找到一种方法,尝试这样做
     var originalThrowable: Throwable = null
     try {
       block
     } catch {
       case t: Throwable =>
         // Purposefully not using NonFatal, because even fatal exceptions
+        //故意不使用非致命性的，因为即使是致命的例外
         // we don't want to have our finallyBlock suppress
+        //我们不想抑制finallyBlock
         originalThrowable = t
         throw originalThrowable
     } finally {

@@ -37,19 +37,19 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
   //可以使用自定义的恢复模式工厂
   test("can use a custom recovery mode factory") {
     val conf = new SparkConf(loadDefaults = false)
-    conf.set("spark.deploy.recoveryMode", "CUSTOM")
+    conf.set("spark.deploy.recoveryMode", "CUSTOM")//恢复模式为自定义
     conf.set("spark.deploy.recoveryMode.factory",
-      classOf[CustomRecoveryModeFactory].getCanonicalName)
+      classOf[CustomRecoveryModeFactory].getCanonicalName)//使用恢复工厂
     conf.set("spark.master.rest.enabled", "false")
-
+    //实例化的尝试
     val instantiationAttempts = CustomRecoveryModeFactory.instantiationAttempts
-    
+    //命令到持久化
     val commandToPersist = new Command(
       mainClass = "", 
       arguments = Nil, //参数
-      environment = Map.empty,
-      classPathEntries = Nil,
-      libraryPathEntries = Nil,//
+      environment = Map.empty,//环境
+      classPathEntries = Nil,//类路径条目
+      libraryPathEntries = Nil,//库路径条目
       javaOpts = Nil
     )
 
@@ -62,9 +62,9 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
         memoryPerExecutorMB = 0,//每个Executor内存数
         command = commandToPersist,
         appUiUrl = "",
-        eventLogDir = None,
-        eventLogCodec = None,
-        coresPerExecutor = None),
+        eventLogDir = None,//事件日志目录
+        eventLogCodec = None,//事件日志的编解码器
+        coresPerExecutor = None),//每个执行者的内核
       submitDate = new Date(),//提交时间
       driver = null,
       defaultCores = 0 //默认CPU内核数
@@ -101,6 +101,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
       Master.startRpcEnvAndEndpoint("127.0.0.1", 0, 0, conf)
 
     try {
+      //根据url同步获取RpcEndpointRef
       rpcEnv.setupEndpointRef(Master.SYSTEM_NAME, rpcEnv.address, Master.ENDPOINT_NAME)
 
       CustomPersistenceEngine.lastInstance.isDefined shouldBe true
@@ -148,55 +149,55 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
   }
 
   test("basic scheduling - spread out") {//基本调度-扩展
-    basicScheduling(spreadOut = true)
+    basicScheduling(spreadOut = true)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("basic scheduling - no spread out") {//基本调度-不扩展
-    basicScheduling(spreadOut = false)
+    basicScheduling(spreadOut = false)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("basic scheduling with more memory - spread out") {//基本调度与更多内存-扩展
-    basicSchedulingWithMoreMemory(spreadOut = true)
+    basicSchedulingWithMoreMemory(spreadOut = true)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("basic scheduling with more memory - no spread out") {//基本调度与更多内存-不扩展
-    basicSchedulingWithMoreMemory(spreadOut = false)
+    basicSchedulingWithMoreMemory(spreadOut = false)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with max cores - spread out") {//最大内核的调度
-    schedulingWithMaxCores(spreadOut = true)
+    schedulingWithMaxCores(spreadOut = true)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with max cores - no spread out") {//最大内核的调度-没有扩展
-    schedulingWithMaxCores(spreadOut = false)
+    schedulingWithMaxCores(spreadOut = false)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with cores per executor - spread out") {//每执行器核心的调度
-    schedulingWithCoresPerExecutor(spreadOut = true)
+    schedulingWithCoresPerExecutor(spreadOut = true)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with cores per executor - no spread out") {//每执行器核心的调度-没有扩展
-    schedulingWithCoresPerExecutor(spreadOut = false)
+    schedulingWithCoresPerExecutor(spreadOut = false)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with cores per executor AND max cores - spread out") {//每执行器内核和最大内核的调度
-    schedulingWithCoresPerExecutorAndMaxCores(spreadOut = true)
+    schedulingWithCoresPerExecutorAndMaxCores(spreadOut = true)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with cores per executor AND max cores - no spread out") {//每执行器内核和最大内核的调度-没有扩展
-    schedulingWithCoresPerExecutorAndMaxCores(spreadOut = false)
+    schedulingWithCoresPerExecutorAndMaxCores(spreadOut = false)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with executor limit - spread out") {//执行者限制的调度-扩展
-    schedulingWithExecutorLimit(spreadOut = true)
+    schedulingWithExecutorLimit(spreadOut = true)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with executor limit - no spread out") {//执行者限制的调度-没有扩展
-    schedulingWithExecutorLimit(spreadOut = false)
+    schedulingWithExecutorLimit(spreadOut = false)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with executor limit AND max cores - spread out") {//执行限制和最大内核的调度-扩展
-    schedulingWithExecutorLimitAndMaxCores(spreadOut = true)
+    schedulingWithExecutorLimitAndMaxCores(spreadOut = true)//如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点。
   }
 
   test("scheduling with executor limit AND max cores - no spread out") {//执行限制和最大内核的调度-没有扩展
@@ -218,28 +219,29 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
   test("scheduling with executor limit AND cores per executor AND max cores - no spread out") {
     schedulingWithEverything(spreadOut = false)
   }
-
+  //基本调度,是否展开
   private def basicScheduling(spreadOut: Boolean): Unit = {
     val master = makeMaster()
     val appInfo = makeAppInfo(1024)
     val scheduledCores = scheduleExecutorsOnWorkers(master, appInfo, workerInfos, spreadOut)
     assert(scheduledCores === Array(10, 10, 10))
   }
-
+ //基本调度具有更多的内存
   private def basicSchedulingWithMoreMemory(spreadOut: Boolean): Unit = {
     val master = makeMaster()
     val appInfo = makeAppInfo(3072)
     val scheduledCores = scheduleExecutorsOnWorkers(master, appInfo, workerInfos, spreadOut)
     assert(scheduledCores === Array(10, 10, 10))
   }
-
+  //调度最大内核数,参数
   private def schedulingWithMaxCores(spreadOut: Boolean): Unit = {
     val master = makeMaster()
     val appInfo1 = makeAppInfo(1024, maxCores = Some(8))
     val appInfo2 = makeAppInfo(1024, maxCores = Some(16))
     val scheduledCores1 = scheduleExecutorsOnWorkers(master, appInfo1, workerInfos, spreadOut)
     val scheduledCores2 = scheduleExecutorsOnWorkers(master, appInfo2, workerInfos, spreadOut)
-    if (spreadOut) {//展开
+    //如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点
+    if (spreadOut) {
       assert(scheduledCores1 === Array(3, 3, 2))
       assert(scheduledCores2 === Array(6, 5, 5))
     } else {
@@ -247,7 +249,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
       assert(scheduledCores2 === Array(10, 6, 0))
     }
   }
-
+  //每执行器内核调度
   private def schedulingWithCoresPerExecutor(spreadOut: Boolean): Unit = {
     val master = makeMaster()
     val appInfo1 = makeAppInfo(1024, coresPerExecutor = Some(2))
@@ -256,12 +258,13 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     val scheduledCores1 = scheduleExecutorsOnWorkers(master, appInfo1, workerInfos, spreadOut)
     val scheduledCores2 = scheduleExecutorsOnWorkers(master, appInfo2, workerInfos, spreadOut)
     val scheduledCores3 = scheduleExecutorsOnWorkers(master, appInfo3, workerInfos, spreadOut)
-    assert(scheduledCores1 === Array(8, 8, 8)) // 4 * 2 because of memory limits
+    assert(scheduledCores1 === Array(8, 8, 8)) // 4 * 2 because of memory limits 由于内存限制
     assert(scheduledCores2 === Array(10, 10, 10)) // 5 * 2
     assert(scheduledCores3 === Array(9, 9, 9)) // 3 * 3
   }
 
   // Sorry for the long method name!
+  //每执行器内核调度和最 大内核调度
   private def schedulingWithCoresPerExecutorAndMaxCores(spreadOut: Boolean): Unit = {
     val master = makeMaster()
     val appInfo1 = makeAppInfo(256, coresPerExecutor = Some(2), maxCores = Some(4))
@@ -270,6 +273,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     val scheduledCores1 = scheduleExecutorsOnWorkers(master, appInfo1, workerInfos, spreadOut)
     val scheduledCores2 = scheduleExecutorsOnWorkers(master, appInfo2, workerInfos, spreadOut)
     val scheduledCores3 = scheduleExecutorsOnWorkers(master, appInfo3, workerInfos, spreadOut)
+    //如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点
     if (spreadOut) {
       assert(scheduledCores1 === Array(2, 2, 0))
       assert(scheduledCores2 === Array(8, 6, 6))
@@ -280,7 +284,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
       assert(scheduledCores3 === Array(9, 9, 0))
     }
   }
-
+  //执行限制的调度
   private def schedulingWithExecutorLimit(spreadOut: Boolean): Unit = {
     val master = makeMaster()
     val appInfo = makeAppInfo(256)
@@ -305,6 +309,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     appInfo.executorLimit = 5
     val scheduledCores3 = scheduleExecutorsOnWorkers(master, appInfo, workerInfos, spreadOut)
     assert(scheduledCores1 === Array(0, 0, 0))
+    //如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点
     if (spreadOut) {
       assert(scheduledCores2 === Array(8, 8, 0))
       assert(scheduledCores3 === Array(6, 5, 5))
@@ -313,7 +318,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
       assert(scheduledCores3 === Array(10, 6, 0))
     }
   }
-
+  //执行限制最大内核调度
   private def schedulingWithExecutorLimitAndCoresPerExecutor(spreadOut: Boolean): Unit = {
     val master = makeMaster()
     val appInfo = makeAppInfo(256, coresPerExecutor = Some(4))
@@ -324,7 +329,8 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     appInfo.executorLimit = 5
     val scheduledCores3 = scheduleExecutorsOnWorkers(master, appInfo, workerInfos, spreadOut)
     assert(scheduledCores1 === Array(0, 0, 0))
-    if (spreadOut) {
+    //如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点
+    if (spreadOut) { 
       assert(scheduledCores2 === Array(4, 4, 0))
     } else {
       assert(scheduledCores2 === Array(8, 0, 0))
@@ -333,6 +339,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
   }
 
   // Everything being: executor limit + cores per executor + max cores
+  //任务开始:执行者限制+每执行者内核数+最大内核
   private def schedulingWithEverything(spreadOut: Boolean): Unit = {
     val master = makeMaster()
     val appInfo = makeAppInfo(256, coresPerExecutor = Some(4), maxCores = Some(18))
@@ -343,6 +350,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     appInfo.executorLimit = 5
     val scheduledCores3 = scheduleExecutorsOnWorkers(master, appInfo, workerInfos, spreadOut)
     assert(scheduledCores1 === Array(0, 0, 0))
+    //如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点
     if (spreadOut) {
       assert(scheduledCores2 === Array(4, 4, 0))
       assert(scheduledCores3 === Array(8, 4, 4))
@@ -354,39 +362,41 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
 
   // ==========================================
   // | Utility methods and fields for testing |
+  // | 用于测试的实用方法和字段                                            |
   // ==========================================
 
   private val _scheduleExecutorsOnWorkers = PrivateMethod[Array[Int]]('scheduleExecutorsOnWorkers)
   private val workerInfo = makeWorkerInfo(4096, 10)
   private val workerInfos = Array(workerInfo, workerInfo, workerInfo)
-
+  //构造Master
   private def makeMaster(conf: SparkConf = new SparkConf): Master = {
     val securityMgr = new SecurityManager(conf)
     val rpcEnv = RpcEnv.create(Master.SYSTEM_NAME, "localhost", 0, conf, securityMgr)
     val master = new Master(rpcEnv, rpcEnv.address, 0, securityMgr, conf)
     master
   }
-
+  //构造ApplicationInfo
   private def makeAppInfo(
-      memoryPerExecutorMb: Int,
-      coresPerExecutor: Option[Int] = None,
-      maxCores: Option[Int] = None): ApplicationInfo = {
+      memoryPerExecutorMb: Int,//每执行者的内存(Mb)
+      coresPerExecutor: Option[Int] = None,//每个执行者的内核
+      maxCores: Option[Int] = None): ApplicationInfo = {//最大内核
     val desc = new ApplicationDescription(
       "test", maxCores, memoryPerExecutorMb, null, "", None, None, coresPerExecutor)
     val appId = System.currentTimeMillis.toString
     new ApplicationInfo(0, appId, desc, new Date, null, Int.MaxValue)
   }
-
+  //构造WorkerInfo
   private def makeWorkerInfo(memoryMb: Int, cores: Int): WorkerInfo = {
     val workerId = System.currentTimeMillis.toString
     new WorkerInfo(workerId, "host", 100, cores, memoryMb, null, 101, "address")
   }
-
+ //在工作节点调用执行者
   private def scheduleExecutorsOnWorkers(
       master: Master,
       appInfo: ApplicationInfo,
       workerInfos: Array[WorkerInfo],
       spreadOut: Boolean): Array[Int] = {
+    //如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源,否则,就转移到下一个工作节点
     master.invokePrivate(_scheduleExecutorsOnWorkers(appInfo, workerInfos, spreadOut))
   }
 

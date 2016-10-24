@@ -758,11 +758,12 @@ private[deploy] class Master(
           } else {
             assignedExecutors(pos) += 1
           }
-          // Spreading out an application means spreading out its executors across as
+          // Spreading out an application means spreading out its executors across as	
           // many workers as possible. If we are not spreading out, then we should keep
           // scheduling executors on this worker until we use all of its resources.
-          // Otherwise, just move on to the next worker.
-          //如果不是spreadOutApps的话，会尽可能用当前的机器去处理程序的一切的cores需求，也就是executor会占用尽可能多的cores
+	  //如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源
+          // Otherwise, just move on to the next worker.否则,就转移到下一个工作节点。
+          //如果spreadOutApps为false，会尽可能用当前的机器去处理程序的一切的cores需求，也就是executor会占用尽可能多的cores	 
           if (spreadOutApps) {
             keepScheduling = false
           }

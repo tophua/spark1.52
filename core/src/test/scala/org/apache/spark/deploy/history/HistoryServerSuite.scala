@@ -33,12 +33,14 @@ import org.apache.spark.ui.SparkUI
 
 /**
  * A collection of tests against the historyserver, including comparing responses from the json
+ * 对历史服务器的测试的集合,如果添加了新的端点/参数,应添加到这个测试套件
  * metrics api to a set of known "golden files".  If new endpoints / parameters are added,
  * cases should be added to this test suite.  The expected outcomes can be genered by running
  * the HistoryServerSuite.main.  Note that this will blindly generate new expectation files matching
  * the current behavior -- the developer must verify that behavior is correct.
  *
  * Similarly, if the behavior is changed, HistoryServerSuite.main can be run to update the
+ * 同样地，如果行为发生了改变,可以运行historyserversuite.main更新的期望值,然而,在一般来说,这应该是极端谨慎
  * expectations.  However, in general this should be done with extreme caution, as the metrics
  * are considered part of Spark's public api.
  */
@@ -131,6 +133,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
   )
 
   // run a bunch of characterization tests -- just verify the behavior is the same as what is saved
+  //运行一堆特性测试--只要验证的行为是相同的,因为什么是保存在测试资源文件夹
   // in the test resource folder
   cases.foreach { case (name, path) =>
     test(name) {
@@ -142,6 +145,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
       val exp = IOUtils.toString(new FileInputStream(
         new File(expRoot, HistoryServerSuite.sanitizePath(name) + "_expectation.json")))
       // compare the ASTs so formatting differences don't cause failures
+      //比较成本差异不会导致失败等格式
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
       val jsonAst = parse(json)
@@ -180,8 +184,8 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
     }
 
     val (code, inputStream, error) = HistoryServerSuite.connectAndGetInputStream(url)
-    code should be (HttpServletResponse.SC_OK)
-    inputStream should not be None
+    code should be (HttpServletResponse.SC_OK)// HTTP 状态码 200：OK
+    inputStream should not be None //输入不等于空
     error should be (None)
 
     val zipStream = new ZipInputStream(inputStream.get)
@@ -216,27 +220,27 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
   }
 
   test("response codes on bad paths") {//坏路径上的响应代码
-    val badAppId = getContentAndCode("applications/foobar")
-    badAppId._1 should be (HttpServletResponse.SC_NOT_FOUND)
-    badAppId._3 should be (Some("unknown app: foobar"))
+    val badAppId = getContentAndCode("applications/foobar")//坏的路径
+    badAppId._1 should be (HttpServletResponse.SC_NOT_FOUND)//HTTP 状态码 404:Not Found
+    badAppId._3 should be (Some("unknown app: foobar"))//抛出异常
 
     val badStageId = getContentAndCode("applications/local-1422981780767/stages/12345")
-    badStageId._1 should be (HttpServletResponse.SC_NOT_FOUND)
-    badStageId._3 should be (Some("unknown stage: 12345"))
+    badStageId._1 should be (HttpServletResponse.SC_NOT_FOUND)//HTTP 状态码 404:Not Found
+    badStageId._3 should be (Some("unknown stage: 12345"))//抛出异常
 
     val badStageAttemptId = getContentAndCode("applications/local-1422981780767/stages/1/1")
-    badStageAttemptId._1 should be (HttpServletResponse.SC_NOT_FOUND)
-    badStageAttemptId._3 should be (Some("unknown attempt for stage 1.  Found attempts: [0]"))
+    badStageAttemptId._1 should be (HttpServletResponse.SC_NOT_FOUND)//HTTP 状态码 404:Not Found
+    badStageAttemptId._3 should be (Some("unknown attempt for stage 1.  Found attempts: [0]"))//抛出异常
 
     val badStageId2 = getContentAndCode("applications/local-1422981780767/stages/flimflam")
-    badStageId2._1 should be (HttpServletResponse.SC_NOT_FOUND)
+    badStageId2._1 should be (HttpServletResponse.SC_NOT_FOUND)//HTTP 状态码 404:Not Found
     // will take some mucking w/ jersey to get a better error msg in this case
 
     val badQuantiles = getContentAndCode(
       "applications/local-1430917381534/stages/0/0/taskSummary?quantiles=foo,0.1")
-    badQuantiles._1 should be (HttpServletResponse.SC_BAD_REQUEST)
+    badQuantiles._1 should be (HttpServletResponse.SC_BAD_REQUEST)//HTTP 状态码 400：Bad Request
     badQuantiles._3 should be (Some("Bad value for parameter \"quantiles\".  Expected a double, " +
-      "got \"foo\""))
+      "got \"foo\""))//抛出异常
 
     getContentAndCode("foobar")._1 should be (HttpServletResponse.SC_NOT_FOUND)
   }
@@ -289,11 +293,12 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
 object HistoryServerSuite {
   def main(args: Array[String]): Unit = {
     // generate the "expected" results for the characterization tests.  Just blindly assume the
+    //测试生成描述的“预期”结果,
     // current behavior is correct, and write out the returned json to the test/resource files
 
     val suite = new HistoryServerSuite
-    FileUtils.deleteDirectory(suite.expRoot)
-    suite.expRoot.mkdirs()
+    FileUtils.deleteDirectory(suite.expRoot)//递归删除日志文件
+    suite.expRoot.mkdirs()//创建一个日志目录
     try {
       suite.init()
       suite.cases.foreach { case (name, path) =>
@@ -311,17 +316,17 @@ object HistoryServerSuite {
   }
 
   def connectAndGetInputStream(url: URL): (Int, Option[InputStream], Option[String]) = {
-    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-    connection.setRequestMethod("GET")
-    connection.connect()
-    val code = connection.getResponseCode()
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]//获得HttpURL连接
+    connection.setRequestMethod("GET")//get方式请求
+    connection.connect()//连接
+    val code = connection.getResponseCode()//获取URL响应状态码
     val inStream = try {
-      Option(connection.getInputStream())
+      Option(connection.getInputStream())//获取正文的数据
     } catch {
       case io: IOException => None
     }
     val errString = try {
-      val err = Option(connection.getErrorStream())
+      val err = Option(connection.getErrorStream())//如果连接失败但服务器仍然发送了有用数据,则返回错误流
       err.map(IOUtils.toString)
     } catch {
       case io: IOException => None
