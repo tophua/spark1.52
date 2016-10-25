@@ -31,7 +31,7 @@ import org.apache.spark.util.Utils
 class PersistenceEngineSuite extends SparkFunSuite {
 
   test("FileSystemPersistenceEngine") {//文件系统的持久性引擎
-    val dir = Utils.createTempDir()
+    val dir = Utils.createTempDir()//创建临时目录
     try {
       val conf = new SparkConf()
       testPersistenceEngine(conf, serializer =>
@@ -62,9 +62,9 @@ class PersistenceEngineSuite extends SparkFunSuite {
 
   private def testPersistenceEngine(
       conf: SparkConf, persistenceEngineCreator: Serializer => PersistenceEngine): Unit = {
-    val serializer = new JavaSerializer(conf)
+    val serializer = new JavaSerializer(conf)//序列
     val persistenceEngine = persistenceEngineCreator(serializer)
-    persistenceEngine.persist("test_1", "test_1_value")
+    persistenceEngine.persist("test_1", "test_1_value")//序列化
     assert(Seq("test_1_value") === persistenceEngine.read[String]("test_"))
     //持久化
     persistenceEngine.persist("test_2", "test_2_value")

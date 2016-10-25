@@ -37,6 +37,7 @@ import org.apache.spark.deploy.master.DriverState._
 
 /**
  * Tests for the REST application submission protocol used in standalone cluster mode.
+ * 测试独立集群模式中使用的剩余应用提交协议
  */
 class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
   private var rpcEnv: Option[RpcEnv] = None

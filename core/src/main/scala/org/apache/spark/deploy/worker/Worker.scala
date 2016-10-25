@@ -71,6 +71,7 @@ private[deploy] class Worker(
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("worker-forward-message-scheduler")
 
   // A separated thread to clean up the workDir. Used to provide the implicit parameter of `Future`
+  //一个分离的线程清理workDir目录,用于提供“Future”方法的隐式参数
   // methods.
   private val cleanupThreadExecutor = ExecutionContext.fromExecutorService(
     ThreadUtils.newDaemonSingleThreadExecutor("worker-cleanup-thread"))
@@ -83,10 +84,14 @@ private[deploy] class Worker(
   private val HEARTBEAT_MILLIS = conf.getLong("spark.worker.timeout", 60) * 1000 / 4
 
   // Model retries to connect to the master, after Hadoop's model.
+  //模型重新尝试连接到主节点,Hadoop的模型后
   // The first six attempts to reconnect are in shorter intervals (between 5 and 15 seconds)
+  //前六次尝试重新连接的时间间隔较短（在5到15秒之间）
   // Afterwards, the next 10 attempts are between 30 and 90 seconds.
+  //之后,下一个10次尝试是在30到90秒之间
   // A bit of randomness is introduced so that not all of the workers attempt to reconnect at
   // the same time.
+  //引入了一点随机性,以便不是所有的工作节占都尝试在同一时间重新连接
   private val INITIAL_REGISTRATION_RETRIES = 6
   private val TOTAL_REGISTRATION_RETRIES = INITIAL_REGISTRATION_RETRIES + 10
   private val FUZZ_MULTIPLIER_INTERVAL_LOWER_BOUND = 0.500
@@ -140,6 +145,7 @@ private[deploy] class Worker(
     WorkerWebUI.DEFAULT_RETAINED_DRIVERS)
 
   // The shuffle service is not actually started unless configured.
+    //Shuffle服务并没有真正开始,除非配置
   private val shuffleService = new ExternalShuffleService(conf, securityMgr)
  //Spark master和workers使用的公共DNS（默认空）
   private val publicAddress = {

@@ -34,7 +34,9 @@ object DriverWrapper {
       /*
        * IMPORTANT: Spark 1.3 provides a stable application submission gateway that is both
        * backward and forward compatible across future Spark versions. Because this gateway
+       * 提供一个稳定的应用程序提交网关,这两个网关都是向后和向前兼容整个未来的Spark版本
        * uses this class to launch the driver, the ordering and semantics of the arguments
+       * 因为这个网关使用这个类来启动驱动程序,这里的参数的顺序和语义也必须保持版本一致
        * here must also remain consistent across versions.
        */
       case workerUrl :: userJar :: mainClass :: extraArgs =>

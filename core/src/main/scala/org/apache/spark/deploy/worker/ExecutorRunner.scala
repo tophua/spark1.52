@@ -33,7 +33,7 @@ import org.apache.spark.util.logging.FileAppender
 
 /**
  * Worker进程中ExcetorRuner具体负责executor的启动和停止,每一个executor进程对应于一个ExecutorRunner
- * ExecutorRunner担任监工角色,
+ * ExecutorRunner担任监工角色
  * 
  * Manages the execution of one executor process.
  * This is currently only used in standalone mode.
@@ -64,7 +64,7 @@ private[deploy] class ExecutorRunner(
   private var stdoutAppender: FileAppender = null
   private var stderrAppender: FileAppender = null
 
-  // NOTE: This is now redundant with the automated shut-down enforced by the Executor. It might
+  // NOTE: This is now redundant with the automated shut-down enforced by the Executor. It might 
   // make sense to remove this in the future.
   private var shutdownHook: AnyRef = null
   /**
