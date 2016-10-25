@@ -676,22 +676,33 @@ private[deploy] class Master(
   /**
    * 
    * Schedule executors to be launched on the workers.
+   * 在Worker启动调用执行器,
    * Returns an array containing number of cores assigned to each worker.
-   *
+   * 返回一个包含分配给每个Worker的内核数的数组
    * There are two modes of launching executors. The first attempts to spread out an application's
+   * 有两种启动执行模式,第一种我们应该保持对这个工作节点调度执行直到使用它的所有资源,而第二个则相反
    * executors on as many workers as possible, while the second does the opposite (i.e. launch them
    * on as few workers as possible). The former is usually better for data locality purposes and is
+   * 前者是数据局部性(内存中数据)的目的通常是更好是默认
    * the default.
    *
    * The number of cores assigned to each executor is configurable. When this is explicitly set,
+   * 分配给每个执行者的内核的数量是可配置的,当这是明确的设置
    * multiple executors from the same application may be launched on the same worker if the worker
+   * 自同一个应用程序相同的Woker可能启动多个执行者,如果Worker有足够的内核和内存
    * has enough cores and memory. Otherwise, each executor grabs all the cores available on the
+   * 否则,默认Worker每个执行者都获取的所有可用的内核,
    * worker by default, in which case only one executor may be launched on each worker.
+   * 在这种情况下,每个Worker只有一个执行者可能会启动
    *
    * It is important to allocate coresPerExecutor on each worker at a time (instead of 1 core
+   * 这是对每个Woker分配coresperexecutor重要的一次(而不是一次1个内核)
    * at a time). Consider the following example: cluster has 4 workers with 16 cores each.
+   * 考虑下面的例子:集群有4节点,每个节点16个内核,用户请求3执行者(Spark最大内核48,执行者内核16)
    * User requests 3 executors (spark.cores.max = 48, spark.executor.cores = 16). If 1 core is
+   * 如果一个内核分配一次,每个Worker的12个内核将被分配给每一个执行者
    * allocated at a time, 12 cores from each worker would be assigned to each executor.
+   *Since 12 < 16,没有执行者将启动
    * Since 12 < 16, no executors would launch [SPARK-8881].
    * 返回为每个Worker上分配的cores的数组
    */
@@ -707,8 +718,9 @@ private[deploy] class Master(
     //每个Executor需要的memory
     val memoryPerExecutor = app.desc.memoryPerExecutorMB
     val numUsable = usableWorkers.length
-    //已经给每个Worker上分配的cores
+    //已经给每个Worker上分配的core
     val assignedCores = new Array[Int](numUsable) // Number of cores to give to each worker
+    //每个Worker的分配新的执行者
     val assignedExecutors = new Array[Int](numUsable) // Number of new executors on each worker
     //求最小值,
     //为啥要求最小值：因为可能我们的程序需要1000个cores，但是集群中只有100个cores。
@@ -722,7 +734,9 @@ private[deploy] class Master(
       val keepScheduling = coresToAssign >= minCoresPerExecutor   
       val enoughCores = usableWorkers(pos).coresFree - assignedCores(pos) >= minCoresPerExecutor
       // If we allow multiple executors per worker, then we can always launch new executors.
+      //如果我们允许每个Worker多个执行器,然后我们可以启动新的执行者
       // Otherwise, if there is already an executor on this worker, just give it more cores.
+      //否则,如果这个Woker已经有一个执行者,只是给它更多的内核
       val launchingNewExecutor = !oneExecutorPerWorker || assignedExecutors(pos) == 0
       if (launchingNewExecutor) {
         //具体executor上分配的内存
@@ -732,6 +746,7 @@ private[deploy] class Master(
         keepScheduling && enoughCores && enoughMemory && underLimit
       } else {
         // We're adding cores to an existing executor, so no need
+	//我们正在向一个存在的执行者添加内核,所以不需要检查内存和执行器限制
         // to check memory and executor limits
         //如果Worker上的executor已经存在，可用直接往executor上增加cores
         keepScheduling && enoughCores
@@ -739,7 +754,9 @@ private[deploy] class Master(
     }
 
     // Keep launching executors until no more workers can accommodate any
+    //保持启动执行者直到没有更多Worker可以容纳更多的执行者
     // more executors, or if we have reached this application's limits
+    //或者如果我们已经达到了这个应用程序的限制
     //根据filter就过滤出来满足在Worker上launchExecutor的条件
     var freeWorkers = (0 until numUsable).filter(canLaunchExecutor)
     while (freeWorkers.nonEmpty) {//可用的Worker不是空的话，就执行下面的循环。
@@ -750,9 +767,10 @@ private[deploy] class Master(
         while (keepScheduling && canLaunchExecutor(pos)) {
           coresToAssign -= minCoresPerExecutor
           assignedCores(pos) += minCoresPerExecutor
-          //如果是每个Worker下面只能够为当前的应用程序分配一个Executor的话，每次只分配一个Core
-          // If we are launching one executor per worker, then every iteration assigns 1 core
+           // If we are launching one executor per worker, then every iteration assigns 1 core
+	  //如果是每个Worker下面只能够为当前的应用程序分配一个Executor的话，每次迭代执行者只分配一个内核
           // to the executor. Otherwise, every iteration assigns cores to a new executor.
+	  //否则,每一次迭代将内核分配给一个新的执行者
           if (oneExecutorPerWorker) {
             assignedExecutors(pos) = 1
           } else {
@@ -761,8 +779,8 @@ private[deploy] class Master(
           // Spreading out an application means spreading out its executors across as	
           // many workers as possible. If we are not spreading out, then we should keep
           // scheduling executors on this worker until we use all of its resources.
-	  //如果没有散开(false),我们应该保持对这个工作节点调度执行直到使用它的所有资源
-          // Otherwise, just move on to the next worker.否则,就转移到下一个工作节点。
+	        //如果spreadOut为false,worker节点调度直到使用它的所有的内核资源
+          // Otherwise, just move on to the next worker.否则,就转移到下一个worker节点均匀分配内核
           //如果spreadOutApps为false，会尽可能用当前的机器去处理程序的一切的cores需求，也就是executor会占用尽可能多的cores	 
           if (spreadOutApps) {
             keepScheduling = false

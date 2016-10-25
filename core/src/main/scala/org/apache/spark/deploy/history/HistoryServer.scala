@@ -34,13 +34,18 @@ import org.apache.spark.util.{ShutdownHookManager, SignalLogger, Utils}
 
 /**
  * A web server that renders SparkUIs of completed applications.
- *
+ *一个Web服务器,提供完整的申请sparkuis
+ * 
  * For the standalone mode, MasterWebUI already achieves this functionality. Thus, the
+ * 在独立模式下,masterwebui已经实现此功能,该historyserver主要使用的情况在其他部署模式
  * main use case of the HistoryServer is in other deploy modes (e.g. Yarn or Mesos).
  *
  * The logging directory structure is as follows: Within the given base directory, each
+ * 日志记录目录结构如下:在给定的基本目录中,
  * application's event logs are maintained in the application's own sub-directory. This
+ * 每个应用程序的事件日志都保存在应用程序自己的子目录中,
  * is the same structure as maintained in the event log write code path in
+ * 这是相同的结构,保持在事件日志中写入的代码路径eventlogginglistener
  * EventLoggingListener.
  */
 class HistoryServer(
@@ -50,7 +55,7 @@ class HistoryServer(
     port: Int)
   extends WebUI(securityManager, port, conf) with Logging with UIRoot {
 
-  // How many applications to retain
+  // How many applications to retain 保留有多少个应用程序
   private val retainedApplications = conf.getInt("spark.history.retainedApplications", 50)
 
   private val appLoader = new CacheLoader[String, SparkUI] {
@@ -120,8 +125,9 @@ class HistoryServer(
 
   /**
    * Initialize the history server.
-   *
+   * 初始化历史服务器
    * This starts a background thread that periodically synchronizes information displayed on
+   * 这开始的日志中提供的根目录的后台线程定期同步显示在UI事件信息
    * this UI with the event logs in the provided base directory.
    */
   def initialize() {
@@ -137,25 +143,37 @@ class HistoryServer(
     attachHandler(contextHandler)
   }
 
-  /** Bind to the HTTP server behind this web interface. */
+  /** 
+   *  Bind to the HTTP server behind this web interface.
+   *  在这个网页界面绑定到HTTP服务器
+   *   */
   override def bind() {
     super.bind()
   }
 
-  /** Stop the server and close the file system. */
+  /** 
+   *  Stop the server and close the file system. 
+   *  停止服务器并关闭文件系统
+   *  */
   override def stop() {
     super.stop()
     provider.stop()
   }
 
-  /** Attach a reconstructed UI to this server. Only valid after bind(). */
+  /** 
+   *  Attach a reconstructed UI to this server. Only valid after bind().
+   *  将重构的用户界面附加到该服务器上,只有绑定后有效
+   *   */
   private def attachSparkUI(ui: SparkUI) {
     assert(serverInfo.isDefined, "HistoryServer must be bound before attaching SparkUIs")
     ui.getHandlers.foreach(attachHandler)
     addFilters(ui.getHandlers, conf)
   }
 
-  /** Detach a reconstructed UI from this server. Only valid after bind(). */
+  /** 
+   *  Detach a reconstructed UI from this server. Only valid after bind(). 
+   *  从该服务器上分离重构的用户界面,只有绑定后有效
+   *  */
   private def detachSparkUI(ui: SparkUI) {
     assert(serverInfo.isDefined, "HistoryServer must be bound before detaching SparkUIs")
     ui.getHandlers.foreach(detachHandler)
@@ -163,7 +181,7 @@ class HistoryServer(
 
   /**
    * Returns a list of available applications, in descending order according to their end time.
-   *
+   * 返回可用的应用程序的列表,按照他们的结束时间倒序排序
    * @return List of all known applications.
    */
   def getApplicationList(): Iterable[ApplicationHistoryInfo] = {
@@ -183,6 +201,7 @@ class HistoryServer(
 
   /**
    * Returns the provider configuration to show in the listing page.
+   * 返回在列表页中显示的提供程序配置
    *
    * @return A map with the provider's configuration.
    */
@@ -206,14 +225,18 @@ class HistoryServer(
 
 /**
  * The recommended way of starting and stopping a HistoryServer is through the scripts
+ * 启动和停止historyserver推荐的方式是通过脚本start-history-server.sh and stop-history-server.sh
  * start-history-server.sh and stop-history-server.sh. The path to a base log directory,
+ * 一个基本日志目录的路径,
  * as well as any other relevant history server configuration, should be specified via
- * the $SPARK_HISTORY_OPTS environment variable. For example:
+ * 以及任何其他相关的历史服务器配置,应通过 $SPARK_HISTORY_OPTS 指定环境变量
+ * the $SPARK_HISTORY_OPTS environment variable. For example: 例如
  *
  *   export SPARK_HISTORY_OPTS="-Dspark.history.fs.logDirectory=/tmp/spark-events"
  *   ./sbin/start-history-server.sh
  *
  * This launches the HistoryServer as a Spark daemon.
+ * 这将启动historyserver作为Spark守护线程
  */
 object HistoryServer extends Logging {
   private val conf = new SparkConf
@@ -241,11 +264,13 @@ object HistoryServer extends Logging {
     ShutdownHookManager.addShutdownHook { () => server.stop() }
 
     // Wait until the end of the world... or if the HistoryServer process is manually stopped
+    //到世界的尽头…如果historyserver过程是手动停止
     while(true) { Thread.sleep(Int.MaxValue) }
   }
 
   def initSecurity() {
     // If we are accessing HDFS and it has security enabled (Kerberos), we have to login
+    //如果我们访问HDFS和已启用安全的(Kerberos),我们必须登录从keytab文件以便我们能够获得超越Kerberos票证过期HDFS
     // from a keytab file so that we can access HDFS beyond the kerberos ticket expiration.
     // As long as it is using Hadoop rpc (hdfs://), a relogin will automatically
     // occur from the keytab.

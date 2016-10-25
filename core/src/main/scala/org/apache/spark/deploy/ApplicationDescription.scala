@@ -36,7 +36,7 @@ private[spark] class ApplicationDescription(
     val eventLogDir: Option[URI] = None,
     // short name of compression codec used when writing event logs, if any (e.g. lzf)
     val eventLogCodec: Option[String] = None,
-    //获得每个Executor上分配多少个cores
+    //获得每个Executor上分配多少个内核数,默认为1
     val coresPerExecutor: Option[Int] = None)
   extends Serializable {
 

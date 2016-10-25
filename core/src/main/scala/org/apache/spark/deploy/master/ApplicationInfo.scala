@@ -43,6 +43,7 @@ private[spark] class ApplicationInfo(
   @transient var appSource: ApplicationSource = _
 
   // A cap on the number of executors this application can have at any given time.
+  //执行者的数量这个应用程序可以在任何给定的时间
   // By default, this is infinite. Only after the first allocation request is issued by the
   // application will this be set to a finite value. This is used for dynamic allocation.
   @transient private[master] var executorLimit: Int = _

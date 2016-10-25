@@ -49,6 +49,7 @@ abstract class StandaloneRecoveryModeFactory(conf: SparkConf, serializer: Serial
 /**
  * LeaderAgent in this case is a no-op. Since leader is forever leader as the actual
  * recovery is made by restoring from filesystem.
+ * 由于领导者是永远的领导者,实际的恢复是通过从文件系统恢复
  */
 private[master] class FileSystemRecoveryModeFactory(conf: SparkConf, serializer: Serializer)
   extends StandaloneRecoveryModeFactory(conf, serializer) with Logging {

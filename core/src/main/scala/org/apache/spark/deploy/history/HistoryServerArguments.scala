@@ -22,6 +22,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Command-line parser for the master.
+ * 主节点命令行的解析器
  */
 private[history] class HistoryServerArguments(conf: SparkConf, args: Array[String])
   extends Logging {
@@ -53,6 +54,7 @@ private[history] class HistoryServerArguments(conf: SparkConf, args: Array[Strin
   }
 
    // This mutates the SparkConf, so all accesses to it must be made after this line
+  //可变SparkConf,因此,所有访问它必须在这行之后
    Utils.loadDefaultSparkProperties(conf, propertiesFile)
 
   private def printUsageAndExit(exitCode: Int) {

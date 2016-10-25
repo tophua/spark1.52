@@ -28,7 +28,10 @@ private[master] class ExecutorDesc(
 
   var state = ExecutorState.LAUNCHING //启动状态
 
-  /** Copy all state (non-val) variables from the given on-the-wire ExecutorDescription. */
+  /** 
+   *  Copy all state (non-val) variables from the given on-the-wire ExecutorDescription.
+   *  复制所有的状态(非Val)变量,从给定的执行器描述
+   *   */
   def copyState(execDesc: ExecutorDescription) {
     state = execDesc.state
   }

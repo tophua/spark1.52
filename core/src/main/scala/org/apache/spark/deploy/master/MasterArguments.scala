@@ -30,6 +30,7 @@ private[master] class MasterArguments(args: Array[String], conf: SparkConf) {
   var propertiesFile: String = null
 
   // Check for settings in environment variables
+  //检查环境变量中的设置
   if (System.getenv("SPARK_MASTER_HOST") != null) {
     host = System.getenv("SPARK_MASTER_HOST")//Master监听地址
   }
@@ -84,6 +85,7 @@ private[master] class MasterArguments(args: Array[String], conf: SparkConf) {
 
   /**
    * Print usage and exit JVM with the given exit code.
+   * 给定的退出代码打印、使用和退出JVM
    */
   private def printUsageAndExit(exitCode: Int) {
     // scalastyle:off println
