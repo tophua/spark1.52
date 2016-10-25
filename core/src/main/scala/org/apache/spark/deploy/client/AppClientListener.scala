@@ -19,7 +19,9 @@ package org.apache.spark.deploy.client
 
 /**
  * Callbacks invoked by deploy client when various events happen. There are currently four events:
+ * 部署客户端各种事件的发生发时调用的回调函数,目前有四个事件:
  * connecting to the cluster, disconnecting, being given an executor, and having an executor
+ * 连接到群集,断开连接,添加一个Executor,删除一个Executor(由于失败或由于撤销)
  * removed (either due to failure or due to revocation).
  * 主要为了SchedulerBackend和AppClient之间的函数回调
  * Users of this API should *not* block inside the callback methods.

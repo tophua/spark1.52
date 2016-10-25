@@ -31,10 +31,13 @@ import org.apache.spark.util.{ RpcUtils, ThreadUtils, Utils }
 
 /**
  * Interface allowing applications to speak with a Spark deploy cluster. Takes a master URL,
+ * 允许应用程序与Spark部署集群会话的接口,需要一个主URL
  * an app description, and a listener for cluster events, and calls back the listener when various
+ * 一个应用程序描述,和一个集群事件的侦听器,当各种各样的事件发生时,回调监听器
  * events occur.
  * 启动与调度
- * @param masterUrls Each url should look like spark://host:port.
+ * @param masterUrls Each url should look like spark://host:port. 
+ * 每个URL都应该看起来像Spark:/主机:端口
  */
 
 /**
@@ -83,16 +86,22 @@ private[spark] class AppClient(
 
     private var master: Option[RpcEndpointRef] = None
     // To avoid calling listener.disconnected() multiple times
+    //为了避免多次调用disconnected()
     private var alreadyDisconnected = false //已经断开连接
+    //为了避免多次调用listener.dead()
     @volatile private var alreadyDead = false // To avoid calling listener.dead() multiple times
     @volatile private var registerMasterFutures: Array[JFuture[_]] = null
     @volatile private var registrationRetryTimer: JScheduledFuture[_] = null
 
     // A thread pool for registering with masters. Because registering with a master is a blocking
+    //一个用于注册主节点的线程池,因为注册一个主节点是一个阻塞动作
     // action, this thread pool must be able to create "masterRpcAddresses.size" threads at the same
+    //这个线程池必须能够创建“masterrpcaddresses.size的线程,
     // time so that we can register with all masters.
+    //在同一时间,以便我们可以注册所有的主节点
     private val registerMasterThreadPool = ThreadUtils.newDaemonCachedThreadPool(
       "appclient-register-master-threadpool",
+      //确保我们可以同时在同一时间注册所有的Master
       masterRpcAddresses.length // Make sure we can register with all masters at the same time
       )
 
@@ -139,10 +148,13 @@ private[spark] class AppClient(
 
     /**
      * Register with all masters asynchronously. It will call `registerWithMaster` every
+     * 异步注册与所有的主节点,它将调用registerWithMaster,每REGISTRATION_TIMEOUT_SECONDS秒,直到超过REGISTRATION_RETRIES次
      * REGISTRATION_TIMEOUT_SECONDS seconds until exceeding REGISTRATION_RETRIES times.
      * Once we connect to a master successfully, all scheduling work and Futures will be cancelled.
+     * 一旦我们成功地连接到一个主节点,所有的调度工作,未来将被取消.
      * 向所有的Master注册当前Application
      * nthRetry means this is the nth attempt to register with master.
+     * 意味着尝试注册主节点次数
      */
     private def registerWithMaster(nthRetry: Int) {
       //向所有的Master注册当前Apllcation其中Master依然使用rpcEnv.setupEndpointRef方式获得
@@ -193,7 +205,7 @@ private[spark] class AppClient(
        *   更新appId,并且调用notifyContext方法标示Application注册完成
        */
       case RegisteredApplication(appId_, masterRef) =>
-        // FIXME How to handle the following cases?
+        // FIXME How to handle the following cases? 如何处理以下情况？
         // 1. A master receives multiple registrations and sends back multiple
         // RegisteredApplications due to an unstable network.
         // 2. Receive multiple RegisteredApplication from different masters because the master is
@@ -331,10 +343,10 @@ private[spark] class AppClient(
 
   /**
    * Request executors from the Master by specifying the total number desired,
-   * 请求executors从Master通过指定期望的总数,
+   * 请求executors从Master通过指定期望的总数,包括现有的正在运行的执行者
    * including existing pending and running executors.
    *
-   * @return whether the request is acknowledged.
+   * @return whether the request is acknowledged. 是否被承认的请求
    */
   def requestTotalExecutors(requestedTotal: Int): Boolean = {
     if (endpoint != null && appId != null) {
