@@ -32,24 +32,35 @@ import org.apache.spark.util.Utils
 
 /**
  * A client that submits applications to a [[RestSubmissionServer]].
- *
+ * 客户提交应用程序到一个restsubmissionserver
  * In protocol version v1, the REST URL takes the form http://[host:port]/v1/submissions/[action],
+ * 在协议版本V1,REST的URL以http://[host:port]/v1/submissions/[action]的形式
  * where [action] can be one of create, kill, or status. Each type of request is represented in
- * an HTTP message sent to the following prefixes:
+ * 这[action]可以一个创建,杀死,或者状态,每种类型的请求的HTTP消息发送到下列前缀代表
+ * an HTTP message sent to the following prefixes: 	
  *   (1) submit - POST to /submissions/create
+ *       提交---POST到/提交/创建
  *   (2) kill - POST /submissions/kill/[submissionId]
+ *   		 杀死--POST/提交/杀死/
  *   (3) status - GET /submissions/status/[submissionId]
+ *       状态--GET/提交/杀死/
  *
  * In the case of (1), parameters are posted in the HTTP body in the form of JSON fields.
+ * 情况1,在HTTP以JSON字段的形式参数提交,否则,客户端以网址形式指定参数
  * Otherwise, the URL fully specifies the intended action of the client.
  *
  * Since the protocol is expected to be stable across Spark versions, existing fields cannot be
+ * 由于该协议预计将稳定在Spark版本,无法添加或删除现有字段,
  * added or removed, though new optional fields can be added. In the rare event that forward or
+ * 虽然可以添加新的可选字段,在向前或向后兼容性被打破,Spark必须引入一个新的协议版本
  * backward compatibility is broken, Spark must introduce a new protocol version (e.g. v2).
  *
  * The client and the server must communicate using the same version of the protocol. If there
+ * 客户端和服务器必须使用相同版本的协议进行通信,
  * is a mismatch, the server will respond with the highest protocol version it supports. A future
+ * 如果有一个不匹配,它支持服务器将响应最高的协议版本,
  * implementation of this client can use that information to retry using the version specified
+ * 该客户端的未来实现可以使用该信息来重试使用服务器指定的版本
  * by the server.
  */
 private[spark] class RestSubmissionClient(master: String) extends Logging {
@@ -64,14 +75,17 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
   }
 
   // Set of masters that lost contact with us, used to keep track of
+  //失去了与我们的联系的主人,用于跟踪通讯主节点是否还活着
   // whether there are masters still alive for us to communicate with
   private val lostMasters = new mutable.HashSet[String]
 
   /**
    * Submit an application specified by the parameters in the provided request.
-   *
+   * 提交所提供的请求中的参数指定的应用程序
    * If the submission was successful, poll the status of the submission and report
+   * 如果提交成功,轮询提交的状态并将其报告给用户
    * it to the user. Otherwise, report the error message provided by the server.
+   * 否则,报告服务器提供的错误信息
    */
   def createSubmission(request: CreateSubmissionRequest): SubmitRestProtocolResponse = {
     logInfo(s"Submitting a request to launch an application in $master.")
@@ -102,7 +116,10 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     response
   }
 
-  /** Request that the server kill the specified submission. */
+  /** 
+   *  Request that the server kill the specified submission.
+   *  请求服务器杀死指定的提交 
+   *  */
   def killSubmission(submissionId: String): SubmitRestProtocolResponse = {
     logInfo(s"Submitting a request to kill submission $submissionId in $master.")
     var handled: Boolean = false
@@ -131,7 +148,10 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     response
   }
 
-  /** Request the status of a submission from the server. */
+  /** 
+   *  Request the status of a submission from the server. 
+   *  请求从服务器提交的状态
+   *  */
   def requestSubmissionStatus(
       submissionId: String,
       quiet: Boolean = false): SubmitRestProtocolResponse = {
@@ -163,7 +183,10 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     response
   }
 
-  /** Construct a message that captures the specified parameters for submitting an application. */
+  /** 
+   *  Construct a message that captures the specified parameters for submitting an application. 
+   *  构建一个用于捕获提交应用程序的指定参数的消息
+   *  */
   def constructSubmitRequest(
       appResource: String,
       mainClass: String,
@@ -181,7 +204,10 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     message
   }
 
-  /** Send a GET request to the specified URL. */
+  /** 
+   *  Send a GET request to the specified URL. 
+   *  发送一个get请求到指定的地址
+   *  */
   private def get(url: URL): SubmitRestProtocolResponse = {
     logDebug(s"Sending GET request to server at $url.")
     val conn = url.openConnection().asInstanceOf[HttpURLConnection]
@@ -189,7 +215,10 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     readResponse(conn)
   }
 
-  /** Send a POST request to the specified URL. */
+  /** 
+   *  Send a POST request to the specified URL. 
+   *  发送一个POST请求到指定的地址
+   *  */
   private def post(url: URL): SubmitRestProtocolResponse = {
     logDebug(s"Sending POST request to server at $url.")
     val conn = url.openConnection().asInstanceOf[HttpURLConnection]
@@ -197,7 +226,10 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     readResponse(conn)
   }
 
-  /** Send a POST request with the given JSON as the body to the specified URL. */
+  /** 
+   *  Send a POST request with the given JSON as the body to the specified URL. 
+   *  发送一个JSON格式POSt请求到指定的地址
+   *  */
   private def postJson(url: URL, json: String): SubmitRestProtocolResponse = {
     logDebug(s"Sending POST request to server at $url:\n$json")
     val conn = url.openConnection().asInstanceOf[HttpURLConnection]
@@ -221,7 +253,9 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
 
   /**
    * Read the response from the server and return it as a validated [[SubmitRestProtocolResponse]].
+   * 读取服务器的响应,并将其作为验证返回
    * If the response represents an error, report the embedded message to the user.
+   * 如果响应表示错误,将嵌入的消息报告给用户
    * Exposed for testing.
    */
   private[rest] def readResponse(connection: HttpURLConnection): SubmitRestProtocolResponse = {
@@ -233,6 +267,7 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
           connection.getErrorStream
         }
       // If the server threw an exception while writing a response, it will not have a body
+      //如果服务器在写响应时抛出异常,
       if (dataStream == null) {
         throw new SubmitRestProtocolException("Server returned empty body")
       }
@@ -242,10 +277,12 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
       response.validate()
       response match {
         // If the response is an error, log the message
+        //如果响应是一个错误,日志消息
         case error: ErrorResponse =>
           logError(s"Server responded with error:\n${error.message}")
           error
         // Otherwise, simply return the response
+        //否则,简单地返回响应
         case response: SubmitRestProtocolResponse => response
         case unexpected =>
           throw new SubmitRestProtocolException(
@@ -259,25 +296,37 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     }
   }
 
-  /** Return the REST URL for creating a new submission. */
+  /** 
+   *  Return the REST URL for creating a new submission. 
+   *  返回创建新提交的网址(URL)
+   *  */
   private def getSubmitUrl(master: String): URL = {
     val baseUrl = getBaseUrl(master)
     new URL(s"$baseUrl/create")
   }
 
-  /** Return the REST URL for killing an existing submission. */
+  /** 
+   *  Return the REST URL for killing an existing submission. 
+   *  返回杀死现有提交的地址
+   *  */
   private def getKillUrl(master: String, submissionId: String): URL = {
     val baseUrl = getBaseUrl(master)
     new URL(s"$baseUrl/kill/$submissionId")
   }
 
-  /** Return the REST URL for requesting the status of an existing submission. */
+  /** 
+   *  Return the REST URL for requesting the status of an existing submission. 
+   *  返回请求存在提交的状态的网址(URL)
+   *  */
   private def getStatusUrl(master: String, submissionId: String): URL = {
     val baseUrl = getBaseUrl(master)
     new URL(s"$baseUrl/status/$submissionId")
   }
 
-  /** Return the base URL for communicating with the server, including the protocol version. */
+  /** 
+   *  Return the base URL for communicating with the server, including the protocol version. 
+   *  返回与服务器通信的基本网址(RUL),包括协议版本
+   *  */
   private def getBaseUrl(master: String): String = {
     var masterUrl = master
     supportedMasterPrefixes.foreach { prefix =>
@@ -289,7 +338,10 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     s"http://$masterUrl/$PROTOCOL_VERSION/submissions"
   }
 
-  /** Throw an exception if this is not standalone mode. */
+  /** 
+   *  Throw an exception if this is not standalone mode.
+   *  抛出一个异常,如果这不是独立的模式
+   *   */
   private def validateMaster(master: String): Unit = {
     val valid = supportedMasterPrefixes.exists { prefix => master.startsWith(prefix) }
     if (!valid) {
@@ -299,7 +351,10 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     }
   }
 
-  /** Report the status of a newly created submission. */
+  /** 
+   *  Report the status of a newly created submission. 
+   *  报告一个新创建的提交的状态
+   *  */
   private def reportSubmissionStatus(
       submitResponse: CreateSubmissionResponse): Unit = {
     if (submitResponse.success) {
@@ -308,7 +363,7 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
         logInfo(s"Submission successfully created as $submissionId. Polling submission state...")
         pollSubmissionStatus(submissionId)
       } else {
-        // should never happen
+        // should never happen 不应该发生
         logError("Application successfully submitted, but submission ID was not provided!")
       }
     } else {
@@ -319,13 +374,16 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
 
   /**
    * Poll the status of the specified submission and log it.
+   * 轮询指定的提交的状态并将其记录,
    * This retries up to a fixed number of times before giving up.
+   * 在放弃之前重试到固定次数
    */
   private def pollSubmissionStatus(submissionId: String): Unit = {
     (1 to REPORT_DRIVER_STATUS_MAX_TRIES).foreach { _ =>
       val response = requestSubmissionStatus(submissionId, quiet = true)
       val statusResponse = response match {
         case s: SubmissionStatusResponse => s
+        //意想不到的类型,让上游的调用方处理它
         case _ => return // unexpected type, let upstream caller handle it
       }
       if (statusResponse.success) {
@@ -333,17 +391,18 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
         val workerId = Option(statusResponse.workerId)
         val workerHostPort = Option(statusResponse.workerHostPort)
         val exception = Option(statusResponse.message)
-        // Log driver state, if present
+        // Log driver state, if present 日志驱动状态,如果存在
         driverState match {
           case Some(state) => logInfo(s"State of driver $submissionId is now $state.")
           case _ => logError(s"State of driver $submissionId was not found!")
         }
-        // Log worker node, if present
+        // Log worker node, if present 日志工作节点,如果存在
         (workerId, workerHostPort) match {
           case (Some(id), Some(hp)) => logInfo(s"Driver is running on worker $id at $hp.")
           case _ =>
         }
         // Log exception stack trace, if present
+        //日志异常堆栈跟踪,如果存在
         exception.foreach { e => logError(e) }
         return
       }
@@ -352,18 +411,25 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
     logError(s"Error: Master did not recognize driver $submissionId.")
   }
 
-  /** Log the response sent by the server in the REST application submission protocol. */
+  /** 
+   *  Log the response sent by the server in the REST application submission protocol. 
+   *  日志服务器在其他应用程序提交协议中发送的响应
+   *  */
   private def handleRestResponse(response: SubmitRestProtocolResponse): Unit = {
     logInfo(s"Server responded with ${response.messageType}:\n${response.toJson}")
   }
 
-  /** Log an appropriate error if the response sent by the server is not of the expected type. */
+  /** 
+   *  Log an appropriate error if the response sent by the server is not of the expected type. 
+   *  如果服务器发送的响应不是预期的类型,则记录一个适当的错误
+   *  */
   private def handleUnexpectedRestResponse(unexpected: SubmitRestProtocolResponse): Unit = {
     logError(s"Error: Server responded with message of unexpected type ${unexpected.messageType}.")
   }
 
   /**
    * When a connection exception is caught, return true if all masters are lost.
+   * 当捕获连接异常,如果所有的主节点都丢失,返回真
    * Note that the heuristic used here does not take into account that masters
    * can recover during the lifetime of this client. This assumption should be
    * harmless because this client currently does not support retrying submission
@@ -385,6 +451,7 @@ private[spark] object RestSubmissionClient {
 
   /**
    * Submit an application, assuming Spark parameters are specified through the given config.
+   * 提交申请,假设Spark参数通过指定的配置,测试目的抽象到自己的方法
    * This is abstracted to its own method for testing purposes.
    */
   def run(

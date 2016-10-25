@@ -21,6 +21,7 @@ import java.lang.Boolean
 
 /**
  * An abstract response sent from the server in the REST application submission protocol.
+ * 在REST应用程序提交协议中从服务器发送的一个抽象响应
  */
 private[rest] abstract class SubmitRestProtocolResponse extends SubmitRestProtocolMessage {
   var serverSparkVersion: String = null
@@ -45,6 +46,7 @@ private[spark] class CreateSubmissionResponse extends SubmitRestProtocolResponse
 
 /**
  * A response to a kill request in the REST application submission protocol.
+ * 在REST应用程序提交协议中对一个杀死请求的响应
  */
 private[spark] class KillSubmissionResponse extends SubmitRestProtocolResponse {
   var submissionId: String = null
@@ -57,6 +59,7 @@ private[spark] class KillSubmissionResponse extends SubmitRestProtocolResponse {
 
 /**
  * A response to a status request in the REST application submission protocol.
+ * 针对REST应用程序提交协议中的状态请求的响应
  */
 private[spark] class SubmissionStatusResponse extends SubmitRestProtocolResponse {
   var submissionId: String = null
@@ -73,6 +76,7 @@ private[spark] class SubmissionStatusResponse extends SubmitRestProtocolResponse
 
 /**
  * An error response message used in the REST application submission protocol.
+ * 一个用于REST应用程序提交协议的错误响应消息
  */
 private[rest] class ErrorResponse extends SubmitRestProtocolResponse {
   // The highest protocol version that the server knows about

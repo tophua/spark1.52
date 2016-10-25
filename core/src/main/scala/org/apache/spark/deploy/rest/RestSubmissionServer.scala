@@ -33,17 +33,26 @@ import org.apache.spark.util.Utils
 
 /**
  * A server that responds to requests submitted by the [[RestSubmissionClient]].
- *
+ * 响应由所提交的RestSubmissionClient请求的服务器
  * This server responds with different HTTP codes depending on the situation:
+ * 该服务器具有不同的HTTP代码根据情况作出反应
  *   200 OK - Request was processed successfully
+ *   200 OK - 请求成功处理
  *   400 BAD REQUEST - Request was malformed, not successfully validated, or of unexpected type
+ *   400 BAD REQUEST - 请求格式错误,没有成功验证,或异常类型
  *   468 UNKNOWN PROTOCOL VERSION - Request specified a protocol this server does not understand
+ *   468 未知协议版本 -请求指定此服务器不理解的协议
  *   500 INTERNAL SERVER ERROR - Server throws an exception internally while processing the request
+ *   500 内部服务器错误--服务器在处理请求时发生异常
  *
  * The server always includes a JSON representation of the relevant [[SubmitRestProtocolResponse]]
+ * 服务器总是包含一个JSON表示有关的submitrestprotocolresponse,并在HTTP文档体中传递.
  * in the HTTP body. If an error occurs, however, the server will include an [[ErrorResponse]]
+ * 如果发生错误,但是服务器将包括一个ErrorResponse
  * instead of the one expected by the client. If the construction of this error response itself
+ * 而不是客户期望的,如果此错误响应本身的构造失败
  * fails, the response will consist of an empty body with a response code that indicates internal
+ * 响应将包括一个空,一个响应代码，表示内部服务器错误
  * server error.
  */
 private[spark] abstract class RestSubmissionServer(
@@ -57,6 +66,7 @@ private[spark] abstract class RestSubmissionServer(
   private var _server: Option[Server] = None
 
   // A mapping from URL prefixes to servlets that serve them. Exposed for testing.
+  //一个URL前缀servlet,为他们服务的映射,暴露测试
   protected val baseContext = s"/${RestSubmissionServer.PROTOCOL_VERSION}/submissions"
   protected lazy val contextToServlet = Map[String, RestServlet](
     s"$baseContext/create/*" -> submitRequestServlet,
@@ -65,7 +75,10 @@ private[spark] abstract class RestSubmissionServer(
     "/*" -> new ErrorServlet // default handler
   )
 
-  /** Start the server and return the bound port. */
+  /** 
+   *  Start the server and return the bound port.
+   *  启动服务器并返回绑定端口 
+   *  */
   def start(): Int = {
     val (server, boundPort) = Utils.startServiceOnPort[Server](requestedPort, doStart, masterConf)
     _server = Some(server)
@@ -75,7 +88,9 @@ private[spark] abstract class RestSubmissionServer(
 
   /**
    * Map the servlets to their corresponding contexts and attach them to a server.
+   * 映射servlet对应的上下文和附加到服务器
    * Return a 2-tuple of the started server and the bound port.
+   * 返回 一个元组已启动的服务器和绑定端口
    */
   private def doStart(startPort: Int): (Server, Int) = {
     val server = new Server(new InetSocketAddress(host, startPort))
@@ -105,12 +120,15 @@ private[rest] object RestSubmissionServer {
 
 /**
  * An abstract servlet for handling requests passed to the [[RestSubmissionServer]].
+ * 抽象Servlet处理请求传递到RestSubmissionServer
  */
 private[rest] abstract class RestServlet extends HttpServlet with Logging {
 
   /**
    * Serialize the given response message to JSON and send it through the response servlet.
+   * 序列化的JSON响应消息发送给它通过响应Servlet
    * This validates the response before sending it to ensure it is properly constructed.
+   * 这验证了在发送它之前,以确保它是正确构建的响应
    */
   protected def sendResponse(
       responseMessage: SubmitRestProtocolResponse,
@@ -123,9 +141,12 @@ private[rest] abstract class RestServlet extends HttpServlet with Logging {
 
   /**
    * Return any fields in the client request message that the server does not know about.
+   * 返回服务器不知道的客户端请求消息中的任何字段
    *
    * The mechanism for this is to reconstruct the JSON on the server side and compare the
+   * 这个机制是重建在服务器端的JSON和比较JSON和一个在客户端生成之间的差异
    * diff between this JSON and the one generated on the client side. Any fields that are
+   * 任何字段,只有在客户端的JSON作为意外。
    * only in the client JSON are treated as unexpected.
    */
   protected def findUnknownFields(
@@ -140,13 +161,19 @@ private[rest] abstract class RestServlet extends HttpServlet with Logging {
     }
   }
 
-  /** Return a human readable String representation of the exception. */
+  /** 
+   *  Return a human readable String representation of the exception.
+   *  返回异常的人类可读的字符串表示形式 
+   *  */
   protected def formatException(e: Throwable): String = {
     val stackTraceString = e.getStackTrace.map { "\t" + _ }.mkString("\n")
     s"$e\n$stackTraceString"
   }
 
-  /** Construct an error message to signal the fact that an exception has been thrown. */
+  /** 
+   *  Construct an error message to signal the fact that an exception has been thrown. 
+   *  构造一个错误消息来表示一个异常被抛出的事实
+   *  */
   protected def handleError(message: String): ErrorResponse = {
     val e = new ErrorResponse
     e.serverSparkVersion = sparkVersion
@@ -156,8 +183,11 @@ private[rest] abstract class RestServlet extends HttpServlet with Logging {
 
   /**
    * Parse a submission ID from the relative path, assuming it is the first part of the path.
+   * 从相对路径解析提交标识,假设它是路径的第一部分
    * For instance, we expect the path to take the form /[submission ID]/maybe/something/else.
+   * 例如,我们期望的路径采取的形式 /[submission ID]/maybe/something/else
    * The returned submission ID cannot be empty. If the path is unexpected, return None.
+   * 返回的提交ID不能为空,如果路径是异常,返回None
    */
   protected def parseSubmissionId(path: String): Option[String] = {
     if (path == null || path.isEmpty) {
@@ -169,9 +199,12 @@ private[rest] abstract class RestServlet extends HttpServlet with Logging {
 
   /**
    * Validate the response to ensure that it is correctly constructed.
+   * 确认响应,以确保它正确地构建
    *
    * If it is, simply return the message as is. Otherwise, return an error response instead
+   * 如果是,简单地返回的消息是,否则,返回一个错误响应
    * to propagate the exception back to the client and set the appropriate error code.
+   * 将异常传递到客户端并设置相应的错误代码
    */
   private def validateResponse(
       responseMessage: SubmitRestProtocolResponse,
@@ -189,12 +222,15 @@ private[rest] abstract class RestServlet extends HttpServlet with Logging {
 
 /**
  * A servlet for handling kill requests passed to the [[RestSubmissionServer]].
+ * 一个servlet处理杀死请求传递到[ restsubmissionserver ] 
  */
 private[rest] abstract class KillRequestServlet extends RestServlet {
 
   /**
    * If a submission ID is specified in the URL, have the Master kill the corresponding
+   * 如果在网址中指定提交的ID,让主节点杀死了相应驱动程序,并返回一个适当的响应客户端
    * driver and return an appropriate response to the client. Otherwise, return error.
+   * 否则,返回错误
    */
   protected override def doPost(
       request: HttpServletRequest,
@@ -212,6 +248,7 @@ private[rest] abstract class KillRequestServlet extends RestServlet {
 
 /**
  * A servlet for handling status requests passed to the [[RestSubmissionServer]].
+ * 一种处理状态请求传递给restsubmissionserver的servlet
  */
 private[rest] abstract class StatusRequestServlet extends RestServlet {
 
@@ -273,11 +310,15 @@ private[rest] abstract class SubmitRequestServlet extends RestServlet {
 
 /**
  * A default servlet that handles error cases that are not captured by other servlets.
+ * 默认servlet处理错误的情况下,不被其他servlet捕获。
  */
 private class ErrorServlet extends RestServlet {
   private val serverVersion = RestSubmissionServer.PROTOCOL_VERSION
 
-  /** Service a faulty request by returning an appropriate error message to the client. */
+  /** 
+   *  Service a faulty request by returning an appropriate error message to the client.
+   *  返回一个适当的错误消息到客户端,服务一个错误的请求
+   *   */
   protected override def service(
       request: HttpServletRequest,
       response: HttpServletResponse): Unit = {
@@ -306,6 +347,7 @@ private class ErrorServlet extends RestServlet {
     msg += s" Please submit requests through http://[host]:[port]/$serverVersion/submissions/..."
     val error = handleError(msg)
     // If there is a version mismatch, include the highest protocol version that
+    //如果有版本不匹配,包括最高的协议版本,此服务器支持的情况下,客户端要重试与我们的版本一致
     // this server supports in case the client wants to retry with our version
     if (versionMismatch) {
       error.highestProtocolVersion = serverVersion
