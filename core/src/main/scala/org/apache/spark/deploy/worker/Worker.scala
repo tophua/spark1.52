@@ -66,6 +66,7 @@ private[deploy] class Worker(
   assert(port > 0)
 
   // A scheduled executor used to send messages at the specified time.
+  //用于在指定时间发送消息的调度的执行器
   private val forwordMessageScheduler =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("worker-forward-message-scheduler")
 

@@ -53,11 +53,13 @@ private[deploy] class DriverRunner(
   @volatile private var killed = false
 
   // Populated once finished
+  //一次完成
   private[worker] var finalState: Option[DriverState] = None
   private[worker] var finalException: Option[Exception] = None
   private var finalExitCode: Option[Int] = None
 
   // Decoupled for testing
+  //解耦测试
   def setClock(_clock: Clock): Unit = {
     clock = _clock
   }
@@ -132,6 +134,7 @@ private[deploy] class DriverRunner(
    * 创建Driver端Work目录
    * Creates the working directory for this driver.
    * Will throw an exception if there are errors preparing the directory.
+   * 如果准备目录有错误,将抛出一个异常
    */
   private def createWorkingDirectory(): File = {
     val driverDir = new File(workDir, driverId)
@@ -142,7 +145,7 @@ private[deploy] class DriverRunner(
   }
 
   /**
-   * 将用户jar下载到所提供的目录，并返回其本地路径,如果有错误，将抛出一个异常
+   * 将用户jar下载到所提供的目录,并返回其本地路径,如果有错误,将抛出一个异常
    * Download the user jar into the supplied directory and return its local path.
    * Will throw an exception if there are errors downloading the jar.
    */
@@ -154,7 +157,7 @@ private[deploy] class DriverRunner(
     val jarFileName = jarPath.getName
     val localJarFile = new File(driverDir, jarFileName)
     val localJarFilename = localJarFile.getAbsolutePath
-
+    //如果在一个节点上运行多个工作节点可能已经存在
     if (!localJarFile.exists()) { // May already exist if running multiple workers on one node
       logInfo(s"Copying user jar $jarPath to $destPath")
       Utils.fetchFile(
@@ -166,7 +169,7 @@ private[deploy] class DriverRunner(
         System.currentTimeMillis(),
         useCache = false)
     }
-
+    //验证复制成功
     if (!localJarFile.exists()) { // Verify copy succeeded
       throw new Exception(s"Did not see expected jar $jarFileName in $driverDir")
     }
@@ -178,6 +181,7 @@ private[deploy] class DriverRunner(
     builder.directory(baseDir)
     def initialize(process: Process): Unit = {
       // Redirect stdout and stderr to files
+      //stdout和stderr重定向到文件
       val stdout = new File(baseDir, "stdout")
       CommandUtils.redirectStream(process.getInputStream, stdout)
 
@@ -193,8 +197,9 @@ private[deploy] class DriverRunner(
   def runCommandWithRetry(
       command: ProcessBuilderLike, initialize: Process => Unit, supervise: Boolean): Unit = {
     // Time to wait between submission retries.
+    //时间在提交重试等待
     var waitSeconds = 1
-    // A run of this many seconds resets the exponential back-off.
+    // A run of this many seconds resets the exponential back-off.    
     val successfulRunDuration = 5
 
     var keepTrying = !killed

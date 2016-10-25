@@ -29,6 +29,7 @@ import org.apache.spark.util.RpcUtils
 
 /**
  * Web UI server for the standalone worker.
+ * 用于独立工作的Web用户界面服务器
  */
 private[worker]
 class WorkerWebUI(
@@ -42,7 +43,10 @@ class WorkerWebUI(
 
   initialize()
 
-  /** Initialize all components of the server. */
+  /** 
+   *  Initialize all components of the server.
+   *  初始化服务器的所有组件 
+   *  */
   def initialize() {
     val logPage = new LogPage(this)
     attachPage(logPage)

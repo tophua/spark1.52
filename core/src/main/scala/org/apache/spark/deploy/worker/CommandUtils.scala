@@ -72,6 +72,7 @@ object CommandUtils extends Logging {
   private def buildCommandSeq(command: Command, memory: Int, sparkHome: String): Seq[String] = {
     // SPARK-698: do not call the run.cmd script, as process.destroy()
     // fails to kill a process tree on Windows
+    //无法在Windows上杀死进程树
     val cmd = new WorkerCommandBuilder(sparkHome, memory, command).buildCommand()
     cmd.toSeq ++ Seq(command.mainClass) ++ command.arguments
   }
@@ -100,6 +101,7 @@ object CommandUtils extends Logging {
     }
 
     // set auth secret to env variable if needed
+    //设置环境变量如果需要认证的密码
     if (securityMgr.isAuthenticationEnabled) {
       newEnvironment += (SecurityManager.ENV_AUTH_SECRET -> securityMgr.getSecretKey)
     }
@@ -109,8 +111,10 @@ object CommandUtils extends Logging {
       command.arguments.map(substituteArguments),
       newEnvironment,
       command.classPathEntries ++ classPath,
+      //已捕获环境变量中的库路径
       Seq[String](), // library path already captured in environment variable
       // filter out auth secret from java options
+      //过虑器从java认证的加密选项
       command.javaOpts.filterNot(_.startsWith("-D" + SecurityManager.SPARK_AUTH_SECRET_CONF)))
   }
 

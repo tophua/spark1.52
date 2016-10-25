@@ -150,7 +150,9 @@ private[deploy] class ExecutorRunner(
       builder.directory(executorDir)
       builder.environment.put("SPARK_EXECUTOR_DIRS", appLocalDirs.mkString(File.pathSeparator))
       // In case we are running this from within the Spark Shell, avoid creating a "scala"
+      //如果我们正在运行从Spark Shell
       // parent process for the executor command
+      //执行命令的父进程
       builder.environment.put("SPARK_LAUNCH_WITH_SCALA", "0")
 
       // Add webUI log urls
