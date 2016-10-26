@@ -64,7 +64,7 @@ class SparkSubmitSuite
 
   /** 
    *  Returns true if the script exits and the given search string is printed.
-   *  如果脚本退出,并打印给定的搜索字符串,则返回真
+   *  如果脚本退出,并打印给定的搜索字符串,则返回true
    *   */
   private def testPrematureExit(input: Array[String], searchString: String) = {
     val printStream = new BufferPrintStream()
@@ -93,7 +93,7 @@ class SparkSubmitSuite
   }
 
   // scalastyle:off println
-  test("prints usage on empty input") {//打印空白输入的用法
+  test("prints usage on empty input") {//打印用法空白输入
     testPrematureExit(Array[String](), "Usage: spark-submit")
   }
 

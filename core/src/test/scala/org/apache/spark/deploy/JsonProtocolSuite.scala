@@ -27,7 +27,7 @@ import org.apache.spark.deploy.DeployMessages.{MasterStateResponse, WorkerStateR
 import org.apache.spark.deploy.master.{ApplicationInfo, RecoveryState}
 import org.apache.spark.deploy.worker.ExecutorRunner
 import org.apache.spark.{JsonTestUtils, SparkFunSuite}
-
+//JSON协议套件
 class JsonProtocolSuite extends SparkFunSuite with JsonTestUtils {
 
   import org.apache.spark.deploy.DeployTestUtils._

@@ -497,7 +497,7 @@ class StandaloneDynamicAllocationSuite
 
   /** 
    *  Get the applictions that are active from Master 
-   *  得到的是活动的从主应用程序
+   *  得到的是活动主节点的应用程序
    *  */
   private def getApplications(): Seq[ApplicationInfo] = {
     getMasterState.activeApps
@@ -505,7 +505,7 @@ class StandaloneDynamicAllocationSuite
 
   /** 
    *  Kill all executors belonging to this application. *
-   *  杀死应用程序所属的执行者
+   *  杀死应用程序所属的执行器
    */
 
   private def killAllExecutors(sc: SparkContext): Boolean = {
@@ -523,40 +523,49 @@ class StandaloneDynamicAllocationSuite
 
   /**
    * Return a list of executor IDs belonging to this application.
-   * 返回属于此应用程序的执行者ID列表
+   * 返回应用程序所属的列表的执行器的ID
    * Note that we must use the executor IDs according to the Master, which has the most
+   * 注意:我们必须根据主节点相符的执行器的ID,
    * updated view. We cannot rely on the executor IDs according to the driver because we
+   * 其中有最新的视图,我们重试执行器到Driver,
    * don't wait for executors to register. Otherwise the tests will take much longer to run.
-   * 其中有最新的视图,我们重试执行者到Driver,我们不要等到注册执行者,否则测试将需要更长的时间来运行,
+   * 我们不要等到注册执行者,否则测试将需要更长的时间来运行,
    */
   private def getExecutorIds(sc: SparkContext): Seq[String] = {
+    //获得相等的ApplicationInfo
     val app = getApplications().find(_.id == sc.applicationId)
     assert(app.isDefined)
     // Although executors is transient, master is in the same process so the message won't be
-    //虽然执行者短暂,主要节点相同进程信息不会序列化,这里很安全
+    //虽然执行者是短暂,主节点相同进程信息不会序列化,这里很安全
     // serialized and it's safe here.
+    //keys获得HashMap的keys值,把Int转换字符串
     app.get.executors.keys.map(_.toString).toSeq
   }
 
   /**
    * Sync executor IDs between the driver and the Master.
-   * 同步执行器列表主节点和Driver
+   * 同步执行器IDs列表主节点和Driver
    * This allows us to avoid waiting for new executors to register with the driver before
+   * 这使用我们避免等待一个新执行器注册Driver之前,我们提交一个请求杀了他们
    * we submit a request to kill them. This must be called before each kill request.
+   * 这必须被调用之前杀死每个请求
    */
   private def syncExecutors(sc: SparkContext): Unit = {
+    //getExecutorStorageStatus 返回存储在从节点中的所有块的信息
     val driverExecutors = sc.getExecutorStorageStatus
       .map(_.blockManagerId.executorId)
-      .filter { _ != SparkContext.DRIVER_IDENTIFIER}
+      .filter { _ != SparkContext.DRIVER_IDENTIFIER}//驱动程序的执行者
     val masterExecutors = getExecutorIds(sc)
+    //丢失执行器ID,以masterExecutors为参考比较driverExecutors集合的差集(diff),intersect 两个集合相交(相同的元素), union 合并集合(两个集合相加,去掉重复元素)   
     val missingExecutors = masterExecutors.toSet.diff(driverExecutors.toSet).toSeq.sorted
     missingExecutors.foreach { id =>
       // Fake an executor registration so the driver knows about us
-      //登记假执行者，让Driver知道我们
+      //注册假的执行器到到Driver,让知道我们
       val port = System.currentTimeMillis % 65536
       val endpointRef = mock(classOf[RpcEndpointRef])
       val mockAddress = mock(classOf[RpcAddress])
       when(endpointRef.address).thenReturn(mockAddress)
+      //注册假的执行器到到Driver
       val message = RegisterExecutor(id, endpointRef, s"localhost:$port", 10, Map.empty)
       val backend = sc.schedulerBackend.asInstanceOf[CoarseGrainedSchedulerBackend]
       backend.driverEndpoint.askWithRetry[CoarseGrainedClusterMessage](message)

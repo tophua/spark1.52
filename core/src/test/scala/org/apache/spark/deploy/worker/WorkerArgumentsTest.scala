@@ -22,7 +22,7 @@ import org.apache.spark.{SparkConf, SparkFunSuite}
 
 
 class WorkerArgumentsTest extends SparkFunSuite {
-
+//内存不能被设置为0时,命令行参数离开M或G
   test("Memory can't be set to 0 when cmd line args leave off M or G") {
     val conf = new SparkConf
     val args = Array("-m", "10000", "spark://localhost:0000  ")
@@ -31,7 +31,7 @@ class WorkerArgumentsTest extends SparkFunSuite {
     }
   }
 
-
+  //内存不能被设置为0时,spark_worker_memory env参数离开M或G
   test("Memory can't be set to 0 when SPARK_WORKER_MEMORY env property leaves off M or G") {
     val args = Array("spark://localhost:0000  ")
 

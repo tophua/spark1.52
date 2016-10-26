@@ -34,7 +34,7 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
    *  侦听事件等待时间长度
    *  */
   private val WAIT_TIMEOUT_MILLIS = 10000
-
+  //验证正确的日志网址从工作节点传递
   test("verify that correct log urls get propagated from workers") {
     sc = new SparkContext("local-cluster[2,1,1024]", "test")
 
@@ -49,7 +49,7 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
     listener.addedExecutorInfos.values.foreach { info =>
       assert(info.logUrlMap.nonEmpty)
       // Browse to each URL to check that it's valid
-      //浏览到每个网址，以检查它的有效性
+      //浏览到每个网址,以检查它的有效性
       info.logUrlMap.foreach { case (logType, logUrl) =>
         val html = Source.fromURL(logUrl).mkString
         assert(html.contains(s"$logType log page"))

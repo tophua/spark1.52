@@ -1655,7 +1655,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * :: DeveloperApi ::
    * Return information about blocks stored in all of the slaves
-   * 返回存储在Slove中的所有块的信息
+   * 返回存储在从节点中的所有块的信息
    */
   @DeveloperApi
   def getExecutorStorageStatus: Array[StorageStatus] = {

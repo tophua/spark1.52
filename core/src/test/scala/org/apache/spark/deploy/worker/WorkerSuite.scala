@@ -64,6 +64,7 @@ class WorkerSuite extends SparkFunSuite with Matchers {
   //测试执行完成清理(执行者少数量)
   test("test clearing of finishedExecutors (small number of executors)") {
     val conf = new SparkConf()
+    //保留执行器
     conf.set("spark.worker.ui.retainedExecutors", 2.toString)
     val rpcEnv = RpcEnv.create("test", "localhost", 12345, conf, new SecurityManager(conf))
     val worker = new Worker(rpcEnv, 50000, 20, 1234 * 5, Array.fill(1)(RpcAddress("1.2.3.4", 1234)),

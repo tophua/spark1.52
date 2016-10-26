@@ -22,7 +22,7 @@ import org.scalatest.Matchers
 import org.apache.spark.SparkFunSuite
 
 class ClientSuite extends SparkFunSuite with Matchers {
-  test("correctly validates driver jar URL's") {//正确地验证驱动程序
+  test("correctly validates driver jar URL's") {//正确地验证驱动器
     ClientArguments.isValidJarUrl("http://someHost:8080/foo.jar") should be (true)
     ClientArguments.isValidJarUrl("https://someHost:8080/foo.jar") should be (true)
 
@@ -33,7 +33,7 @@ class ClientSuite extends SparkFunSuite with Matchers {
     // file scheme without path is not valid.
     //无效文件路径
     // In this case, jarFile.jar is recognized as authority.
-    //在这种情况下,jarfile.jar是公认的权威。
+    //在这种情况下,jarfile.jar是公认的权威
     ClientArguments.isValidJarUrl("file://jarFile.jar") should be (false)
 
     // file scheme without authority but with triple slash is valid.
@@ -46,6 +46,7 @@ class ClientSuite extends SparkFunSuite with Matchers {
     ClientArguments.isValidJarUrl("not-even-a-path.jar") should be (false)
 
     // This URI doesn't have authority and path.
+    //这个URI没有权威和路径
     ClientArguments.isValidJarUrl("hdfs:someHost:1234/jarfile.jar") should be (false)
 
     // Invalid syntax.

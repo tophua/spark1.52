@@ -34,7 +34,7 @@ class WorkerWatcherSuite extends SparkFunSuite {
     rpcEnv.shutdown()
   }
 
-  test("WorkerWatcher stays alive on invalid disassociation") {
+  test("WorkerWatcher stays alive on invalid disassociation") {//无效断开连接
     val conf = new SparkConf()
     val rpcEnv = RpcEnv.create("test", "localhost", 12345, conf, new SecurityManager(conf))
     val targetWorkerUrl = rpcEnv.uriOf("test", RpcAddress("1.2.3.4", 1234), "Worker")

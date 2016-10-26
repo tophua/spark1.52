@@ -24,19 +24,24 @@ import org.scalatest.{Matchers, PrivateMethodTester}
 
 class CommandUtilsSuite extends SparkFunSuite with Matchers with PrivateMethodTester {
 
-  test("set libraryPath correctly") {
+  test("set libraryPath correctly") {//正确设置库路径
     val appId = "12345-worker321-9876"
+    //返回当前系统路径名,windows默认PATH
+    val libraryPath = Utils.libraryPathEnvName   
+    //System.setProperty("spark.testing.home", "true")
     val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
+   //  val sparkHome = sys.props.getOrElse("spark.test.home", "test.home")
+    //Command
     val cmd = new Command("mainClass", Seq(), Map(), Seq(), Seq("libraryPathToB"), Seq())
+    //构建ProcessBuilder
     val builder = CommandUtils.buildProcessBuilder(
       cmd, new SecurityManager(new SparkConf), 512, sparkHome, t => t)
-    val libraryPath = Utils.libraryPathEnvName
-    val env = builder.environment
+   val env = builder.environment
     env.keySet should contain(libraryPath)
     assert(env.get(libraryPath).startsWith("libraryPathToB"))
   }
 
-  test("auth secret shouldn't appear in java opts") {
+  test("auth secret shouldn't appear in java opts") {//认证密码不应该出现在java选择
     val buildLocalCommand = PrivateMethod[Command]('buildLocalCommand)
     val conf = new SparkConf
     val secret = "This is the secret sauce"
