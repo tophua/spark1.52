@@ -33,6 +33,7 @@ import org.apache.spark.deploy.SparkHadoopUtil
 /**
  * A general format for reading whole files in as streams, byte arrays,
  * or other functions to be added
+ * 读取整个文件一种的通用格式,如数据流、字节数组或其他要添加的函数
  */
 private[spark] abstract class StreamFileInputFormat[T]
   extends CombineFileInputFormat[String, T]
@@ -59,7 +60,7 @@ private[spark] abstract class StreamFileInputFormat[T]
 
 /**
  * An abstract class of [[org.apache.hadoop.mapreduce.RecordReader RecordReader]]
- * to reading files out as streams
+ * to reading files out as streams 读取文件作为流
  */
 private[spark] abstract class StreamBasedRecordReader[T](
     split: CombineFileSplit,
@@ -68,6 +69,7 @@ private[spark] abstract class StreamBasedRecordReader[T](
   extends RecordReader[String, T] {
 
   // True means the current file has been processed, then skip it.
+  //true的意思是当前文件已被处理,然后跳过它
   private var processed = false
 
   private var key = ""
@@ -86,6 +88,7 @@ private[spark] abstract class StreamBasedRecordReader[T](
     if (!processed) {
       val fileIn = new PortableDataStream(split, context, index)
       value = parseStream(fileIn)
+      //如果它还没有打开,关闭什么都没有
       fileIn.close() // if it has not been open yet, close does nothing
       key = fileIn.getPath
       processed = true
@@ -97,14 +100,16 @@ private[spark] abstract class StreamBasedRecordReader[T](
 
   /**
    * Parse the stream (and close it afterwards) and return the value as in type T
-   * @param inStream the stream to be read in
-   * @return the data formatted as
+   * 解析流(并关闭它)并返回在类型T中的值
+   * @param inStream the stream to be read in 流被读取
+   * @return the data formatted as 数据格式为
    */
   def parseStream(inStream: PortableDataStream): T
 }
 
 /**
  * Reads the record in directly as a stream for other objects to manipulate and handle
+ * 直接读取记录作为流,其他操作和处理的对象
  */
 private[spark] class StreamRecordReader(
     split: CombineFileSplit,
@@ -117,6 +122,7 @@ private[spark] class StreamRecordReader(
 
 /**
  * The format for the PortableDataStream files
+ * 对于便携式数据文件格式
  */
 private[spark] class StreamInputFormat extends StreamFileInputFormat[PortableDataStream] {
   override def createRecordReader(split: InputSplit, taContext: TaskAttemptContext)
@@ -128,6 +134,7 @@ private[spark] class StreamInputFormat extends StreamFileInputFormat[PortableDat
 
 /**
  * A class that allows DataStreams to be serialized and moved around by not creating them
+ * 一个类可以被序列化的数据流,我们不能移动直到阅读完成
  * until they need to be read
  * @note TaskAttemptContext is not serializable resulting in the confBytes construct
  * @note CombineFileSplit is not serializable resulting in the splitBytes construct
@@ -140,7 +147,9 @@ class PortableDataStream(
   extends Serializable {
 
   // transient forces file to be reopened after being serialization
+  //正在序列化后重新打开的临时强制文件
   // it is also used for non-serializable classes
+  //它也可以用于非序列化的类
 
   @transient private var fileIn: DataInputStream = null
   @transient private var isOpen = false
@@ -173,6 +182,7 @@ class PortableDataStream(
   }
   /**
    * Calculate the path name independently of opening the file
+   * 独立计算文件打开的路径
    */
   @transient private lazy val path = {
     val pathp = split.getPath(index)
@@ -181,6 +191,7 @@ class PortableDataStream(
 
   /**
    * Create a new DataInputStream from the split and context
+   * 从分隔上下文创建一个新的输入流
    */
   def open(): DataInputStream = {
     if (!isOpen) {
@@ -194,6 +205,7 @@ class PortableDataStream(
 
   /**
    * Read the file as a byte array
+   * 读取文件作为一个字节数组
    */
   def toArray(): Array[Byte] = {
     open()
@@ -204,6 +216,7 @@ class PortableDataStream(
 
   /**
    * Close the file (if it is currently open)
+   * 关闭该文件(如果它是当前打开的)
    */
   def close(): Unit = {
     if (isOpen) {

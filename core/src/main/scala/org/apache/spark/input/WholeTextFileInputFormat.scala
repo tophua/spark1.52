@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext
 /**
  * A [[org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat CombineFileInputFormat]] for
  * reading whole text files. Each file is read as key-value pair, where the key is the file path and
+ *读取整个文本文件,每个文件都被读取为键值对,其中键是文件路径和值是整个文件的内容
  * the value is the entire content of file.
  */
 

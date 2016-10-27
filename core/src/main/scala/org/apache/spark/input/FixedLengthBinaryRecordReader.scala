@@ -71,33 +71,38 @@ private[spark] class FixedLengthBinaryRecordReader
   }
 
   override def initialize(inputSplit: InputSplit, context: TaskAttemptContext) {
-    // the file input
+    // the file input 文件输入
     val fileSplit = inputSplit.asInstanceOf[FileSplit]
 
     // the byte position this fileSplit starts at
+    //这个文件分割开始的字节位置
     splitStart = fileSplit.getStart
 
     // splitEnd byte marker that the fileSplit ends at
+    //分裂结束字节标记,文件拆分的结束位置
     splitEnd = splitStart + fileSplit.getLength
 
     // the actual file we will be reading from
+    //我们将从中读取的实际文件
     val file = fileSplit.getPath
-    // job configuration
+    // job configuration 作业配置
     val job = SparkHadoopUtil.get.getConfigurationFromJobContext(context)
-    // check compression
+    // check compression 检查配置
     val codec = new CompressionCodecFactory(job).getCodec(file)
     if (codec != null) {
       throw new IOException("FixedLengthRecordReader does not support reading compressed files")
     }
-    // get the record length
+    // get the record length 获取记录长度
     recordLength = FixedLengthBinaryInputFormat.getRecordLength(context)
-    // get the filesystem
+    // get the filesystem 获得系统文件
     val fs = file.getFileSystem(job)
-    // open the File
+    // open the File 打开文件
     fileInputStream = fs.open(file)
     // seek to the splitStart position
+    //寻找分裂的起始位置
     fileInputStream.seek(splitStart)
     // set our current position
+    //设置我们当前的位置
     currentPosition = splitStart
   }
 
@@ -106,18 +111,23 @@ private[spark] class FixedLengthBinaryRecordReader
       recordKey = new LongWritable()
     }
     // the key is a linear index of the record, given by the
+    //键是记录的一个线性索引,由位置给定的记录开始除以记录长度
     // position the record starts divided by the record length
     recordKey.set(currentPosition / recordLength)
     // the recordValue to place the bytes into
+    //将字节放置到的记录值
     if (recordValue == null) {
       recordValue = new BytesWritable(new Array[Byte](recordLength))
     }
     // read a record if the currentPosition is less than the split end
+    //读取记录,如果当前位置小于分分裂结束
     if (currentPosition < splitEnd) {
       // setup a buffer to store the record
+      //设置一个缓冲区来存储记录
       val buffer = recordValue.getBytes
       fileInputStream.readFully(buffer)
       // update our current position
+      //更新我们目前的位置
       currentPosition = currentPosition + recordLength
       // return true
       return true
