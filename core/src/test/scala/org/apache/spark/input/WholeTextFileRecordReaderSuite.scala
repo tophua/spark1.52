@@ -35,6 +35,7 @@ import org.apache.hadoop.io.compress.{DefaultCodec, CompressionCodecFactory, Gzi
  * Tests the correctness of
  * [[org.apache.spark.input.WholeTextFileRecordReader WholeTextFileRecordReader]]. A temporary
  * directory is created as fake input. Temporal storage would be deleted in the end.
+ * 创建一个临时目录作为假的输入,临时的存储最后将被删除
  */
 class WholeTextFileRecordReaderSuite extends SparkFunSuite with BeforeAndAfterAll with Logging {
   private var sc: SparkContext = _
@@ -42,16 +43,18 @@ class WholeTextFileRecordReaderSuite extends SparkFunSuite with BeforeAndAfterAl
 
   override def beforeAll() {
     // Hadoop's FileSystem caching does not use the Configuration as part of its cache key, which
+    //Hadoop的文件系统缓存配置为不使用的缓存的关键部分,
     // can cause Filesystem.get(Configuration) to return a cached instance created with a different
     // configuration than the one passed to get() (see HADOOP-8490 for more details). This caused
     // hard-to-reproduce test failures, since any suites that were run after this one would inherit
     // the new value of "fs.local.block.size" (see SPARK-5227 and SPARK-5679). To work around this,
-    // we disable FileSystem caching in this suite.
+    // we disable FileSystem caching in this suite. 我们在这个套件中禁用文件系统缓存
     val conf = new SparkConf().set("spark.hadoop.fs.file.impl.disable.cache", "true")
 
     sc = new SparkContext("local", "test", conf)
 
     // Set the block size of local file system to test whether files are split right or not.
+    // 设置本地文件系统的块大小,测试文件是否拆分对正确
     sc.hadoopConfiguration.setLong("fs.local.block.size", 32)
     sc.hadoopConfiguration.set("io.compression.codecs",
       "org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec")
@@ -80,14 +83,14 @@ class WholeTextFileRecordReaderSuite extends SparkFunSuite with BeforeAndAfterAl
 
   /**
    * This code will test the behaviors of WholeTextFileRecordReader based on local disk. There are
-   * 码将测试基于本地磁盘的整个文本文件记录阅读器的行为
-   * three aspects(方面) to check:
+   * 代码将测试基于本地磁盘的整个文本文件记录读取的行为
+   * three aspects to check: 有三个方面来检查
    *   1) Whether all files are read;//是否全部文件读取
    *   2) Whether paths are read correctly; //是否正确路径
    *   3) Does the contents be the same.//内容是一样的吗?
    */
   test("Correctness of WholeTextFileRecordReader.") {
-    val dir = Utils.createTempDir()
+    val dir = Utils.createTempDir()//创建本地临时文件
     logInfo(s"Local disk address is ${dir.toString}.")
 
     WholeTextFileRecordReaderSuite.files.foreach { case (filename, contents) =>
@@ -118,7 +121,7 @@ class WholeTextFileRecordReaderSuite extends SparkFunSuite with BeforeAndAfterAl
       assert(contents === new Text(WholeTextFileRecordReaderSuite.files(shortName)).toString,
         s"file $filename contents can not match.")
     }
- //递归删除
+   //递归删除
     Utils.deleteRecursively(dir)
   }
 
@@ -148,7 +151,7 @@ class WholeTextFileRecordReaderSuite extends SparkFunSuite with BeforeAndAfterAl
     val res = sc.wholeTextFiles(dir.toString, 3).collect()
 
     assert(res.size === WholeTextFileRecordReaderSuite.fileNames.size,
-      "Number of files read out does not fit with the actual value.")
+      "Number of files read out does not fit with the actual value.")//读取的文件数不符合实际值
 
     for ((filename, contents) <- res) {
       //part-00000.gz 取出part-00000文件名
