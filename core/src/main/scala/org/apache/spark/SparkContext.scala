@@ -68,9 +68,11 @@ import org.apache.spark.util._
 
 /**
  * Main entry point for Spark functionality. A SparkContext represents the connection to a Spark
+ * Spark功能的主要入口点,一个SparkContext代表连接Spark集群
  * cluster, and can be used to create RDDs, accumulators and broadcast variables on that cluster.
- *
+ * 可以用来创建RDDS,在集群可以累加器和广播变量
  * Only one SparkContext may be active per JVM.  You must `stop()` the active SparkContext before
+ * 每个JVM只有一个sparkcontext可能激活,创建一个新的SparkContext之前必须'stop()'.这种限制最终可能会被删除
  * creating a new one.  This limitation may eventually be removed; see SPARK-2243 for more details.
  *
  * SparkContext的初始化步骤如下:
@@ -99,19 +101,24 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private val creationSite: CallSite = Utils.getCallSite()
 
   // If true, log warnings instead of throwing exceptions when multiple SparkContexts are active
+  // 如果为true,多个激活sparkcontexts日志警告,而不是抛出异常
   //SparkContext默认只有一个实例
   private val allowMultipleContexts: Boolean =
     config.getBoolean("spark.driver.allowMultipleContexts", false)
 
-  // In order to prevent multiple SparkContexts from being active at the same time, mark this
+  // In order to prevent multiple SparkContexts from being active at the same time, mark this 
   // context as having started construction.
+  //为了防止同时激活多个sparkcontexts,标记当前上下文正在构建中
   // NOTE: this must be placed at the beginning of the SparkContext constructor.
+  //注意:这必须放在sparkcontext构造函数的开始
   //用来确保实例的唯一性,并将当前Spark标记为正在构建中
   SparkContext.markPartiallyConstructed(this, allowMultipleContexts)
 
-  // This is used only by YARN for now, but should be relevant to other cluster types (Mesos,
-  // etc) too. This is typically generated from InputFormatInfo.computePreferredLocations. It
-  // contains a map from hostname to a list of input format splits on the host.
+  // This is used only by YARN for now, but should be relevant to other cluster types (Mesos,  
+  // etc) too. This is typically generated from InputFormatInfo.computePreferredLocations.
+  //现在只用于的YARN,但也可以是其他相关的类型集群,这通常来自computePreferredLocations(计算的首选地点)
+  // It contains a map from hostname to a list of input format splits on the host.
+  //Map的Key主机的输入格式,value
   //它包含主机名的列表
   private[spark] var preferredNodeLocationData: Map[String, Set[SplitInfo]] = Map()
   //系统开始运行时间
@@ -126,20 +133,22 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   }
 
   /**
-   * Create a SparkContext that loads settings from system properties (for instance, when
+   * Create a SparkContext that loads settings from system properties (for instance, when  
    * launching with ./bin/spark-submit).
-   * 创建一个sparkcontext加载设置系统属性
+   * 创建一个sparkcontext加载设置系统属性(例如,当启动./bin/spark-submit)
    */
   def this() = this(new SparkConf())
 
   /**
    * :: DeveloperApi ::
    * Alternative constructor for setting preferred locations where Spark will create executors.
-   * 选择构造函数首选使用Spark创建执行
+   * 使用构造函数设置首选地点,创建Spark执行器
    * @param config a [[org.apache.spark.SparkConf]] object specifying other Spark parameters
+   * 					指定其他Spark参数的对象
    * @param preferredNodeLocationData used in YARN mode to select nodes to launch containers on.
+   * 																	用于在YARN模式选择节点来启动容器	
    * Can be generated using [[org.apache.spark.scheduler.InputFormatInfo.computePreferredLocations]]
-   * from a list of input files or InputFormats for the application.
+   * from a list of input files or InputFormats for the application.从输入文件的列表或输入格式的应用程序
    */
   @deprecated("Passing in preferred locations has no effect at all, see SPARK-8949", "1.5.0")
   @DeveloperApi
@@ -151,27 +160,31 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   * 选择构造函数允许直接设置共用Spark属性
+   * 使用构造函数允许直接设置公用Spark属性
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI
+   * 							你的应用程序的名称,在群集Web用户界面上显示
    * @param conf a [[org.apache.spark.SparkConf]] object specifying other Spark parameters
+   * 				指定其他Spark参数的对象
    */
   def this(master: String, appName: String, conf: SparkConf) =
     this(SparkContext.updatedConf(conf, master, appName))
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   * 选择构造函数允许直接设置共用Spark属性
-    * 加载配置文件SparkConf初始化时，会将相关的配置參数传递给SparkContex，包含master、appName、sparkHome、jars、
-    * environment等信息，这里的构造函数有多中表达形式，但最归初始化的结果都是殊途同归，
-    * SparkContex获取了全部相关的本地配置和执行时配置信息
+   * 选择构造函数允许直接设置公用Spark属性   
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
+   * 				你的应用程序的名称,在群集Web用户界面上显示
    * @param sparkHome Location where Spark is installed on cluster nodes.
-   * @param jars Collection of JARs to send to the cluster. These can be paths on the local file
+   * 				安装在群集节点上的位置
+   * @param jars Collection of JARs to send to the cluster. These can be paths on the local file 			
    *             system or HDFS, HTTP, HTTPS, or FTP URLs.
+   *         jar的集合发送到集群,这些路径可以在本地文件系统或HDFS,HTTP,HTTPS,或FTP URL
    * @param environment Environment variables to set on worker nodes.
+   * 				设置在工作节点上的环境变量
    * @param preferredNodeLocationData used in YARN mode to select nodes to launch containers on.
+   * 				用于在YARN模式选择节点来启动容器
    * Can be generated using [[org.apache.spark.scheduler.InputFormatInfo.computePreferredLocations]]
    * from a list of input files or InputFormats for the application.
    */
@@ -191,12 +204,13 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   }
 
   // NOTE: The below constructors could be consolidated using default arguments. Due to
+  //下面的构造函数可以使用默认参数合并
   // Scala bug SI-8479, however, this causes the compile step to fail when generating docs.
   // Until we have a good workaround for that bug the constructors remain broken out.
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-  
+ 	 * 选择构造函数允许直接设置公用Spark属性   
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
    */
@@ -205,17 +219,17 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   *
+   * 选择构造函数允许直接设置公用Spark属性   
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
-   * @param sparkHome Location where Spark is installed on cluster nodes.
+   * @param sparkHome Location where Spark is installed on cluster nodes.安装在群集节点上的位置
    */
   private[spark] def this(master: String, appName: String, sparkHome: String) =
     this(master, appName, sparkHome, Nil, Map(), Map())
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   *
+   * 选择构造函数允许直接设置公用Spark属性   
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
    * @param sparkHome Location where Spark is installed on cluster nodes.
@@ -226,12 +240,15 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     this(master, appName, sparkHome, jars, Map(), Map())
 
   // log out Spark Version in Spark driver log
+  // 在Spark驱动程序日志中记录Spark版本
   logInfo(s"Running Spark version $SPARK_VERSION")
 
   /* ------------------------------------------------------------------------------------- *
    | Private variables. These variables keep the internal state of the context, and are    |
+   | 私有变量.这些变量保持上下文的内部状态,并不可访问的外部
    | not accessible by the outside world. They're mutable since we want to initialize all  |
    | of them to some neutral value ahead of time, so that calling "stop()" while the       |
+   | 他们可变的的需要提前初始化中性值,所以调用“stop()”当构造函数运行是安全的。
    | constructor is still running is safe.                                                 |
    * ------------------------------------------------------------------------------------- */
 
@@ -263,6 +280,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /* ------------------------------------------------------------------------------------- *
    | Accessors and public fields. These provide access to the internal state of the        |
    | context.                                                                              |
+   | 访问公有的字段,这些提供访问上下文的内部状态
    * ------------------------------------------------------------------------------------- */
 
   private[spark] def conf: SparkConf = _conf
@@ -270,7 +288,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Return a copy of this SparkContext's configuration. The configuration ''cannot'' be
    * changed at runtime.
-   * 对SparkConf进行复制,然后对各种配制信息进行校验.
+   * 对SparkConf的配置文件进行复制,这个配置文件属性运行时不可改变.
    */
   def getConf: SparkConf = conf.clone()
 
@@ -287,19 +305,20 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   // Generate the random name for a temp folder in external block store.
   // Add a timestamp as the suffix here to make it more safe
-  //随机生成外部块存储临时文件夹名称,添加一个时间戳作为后缀来让它更安全
+  //随机生成外部块存储临时文件夹名称,添加一个时间戳作为后缀,在儿使它更安全
   val externalBlockStoreFolderName = "spark-" + randomUUID.toString()
   @deprecated("Use externalBlockStoreFolderName instead.", "1.4.0")
   val tachyonFolderName = externalBlockStoreFolderName
   //是否单机模式
   def isLocal: Boolean = (master == "local" || master.startsWith("local["))
 
-  // An asynchronous listener bus for Spark events,Spark异步监听模式事件
+  // An asynchronous listener bus for Spark events,Spark事件异步监听总线
   //listenerBus采用异步监听器模式维护各类事件的处理
   //LiveListenerBus实现了监听器模型,通过监听事件触发对各种监听状态信息的修改,达到UI界面的数据刷新效果
   private[spark] val listenerBus = new LiveListenerBus
 
   // This function allows components created by SparkEnv to be mocked in unit tests:
+  //这个功能允许创建的sparkenv,在单元测试中被模拟
   //SparkEnv是一个很重要的变量，其内包括了很多Spark执行时的重要组件（变量），包括 MapOutputTracker、ShuffleFetcher、BlockManager等，
   // 这里是通过SparkEnv类的伴生对象SparkEnv Object内的Create方法实现的
   private[spark] def createSparkEnv(
@@ -312,7 +331,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] def env: SparkEnv = _env
 
   // Used to store a URL for each static file/jar together with the file's local timestamp
-  //用于存储URL为每个静态文件/jar 连同文件的时间戳
+  //用于存储一个URL的每个静态文件/jar和文件的时间戳
   private[spark] val addedFiles = HashMap[String, Long]() 
   private[spark] val addedJars = HashMap[String, Long]()
 
@@ -333,6 +352,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * A default Hadoop Configuration for the Hadoop code (e.g. file systems) that we reuse.
    * 重新使用默认Hadoop默认文件
    * '''Note:''' As it will be reused in all Hadoop RDDs, it's better not to modify it unless you
+   * 它将在所有的Hadoop RDDS重用,最好不要修改它
    * plan to set some global configurations for all Hadoop RDDs.
    */
   def hadoopConfiguration: Configuration = _hadoopConfiguration
@@ -344,7 +364,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] val executorEnvs = HashMap[String, String]()
 
   // Set SPARK_USER for user who is running SparkContext.
-  // 设置谁在使用SparkContext
+  // 设置SPARK_USER,用户谁在运行SparkContext
   val sparkUser = Utils.getCurrentUserName()
 
   private[spark] def schedulerBackend: SchedulerBackend = _schedulerBackend
@@ -364,11 +384,13 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * A unique identifier for the Spark application.
-   * Spark应用程序唯一标示,它的格式取决于调度程序的实现
    * Its format depends on the scheduler implementation.
+   * Spark应用程序唯一标示,它的格式取决于调度程序的实现
    * (i.e.
    *  in case of local spark app something like 'local-1433865536131'
+   *  在Spark应用的本地模式情况下,类似的东西'local-1433865536131'
    *  in case of YARN something like 'application_1433865536131_34483'
+   *  在Spark应用的YARN模式情况下,类似的东西'application_1433865536131_34483'
    * )
    */
   def applicationId: String = _applicationId
@@ -386,7 +408,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] var checkpointDir: Option[String] = None
 
   // Thread Local variable that can be used by users to pass information down the stack
-  // 线程本地变量，用户传递堆栈中的信息
+  // 线程本地变量,这可以通过用户传递信息到堆栈
   protected[spark] val localProperties = new InheritableThreadLocal[Properties] {
     override protected def childValue(parent: Properties): Properties = {
       // Note: make a clone such that changes in the parent properties aren't reflected in
@@ -403,7 +425,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /* ------------------------------------------------------------------------------------- *
    | Initialization. This code initializes the context in a manner that is exception-safe. |
    | All internal fields holding state are initialized here, and any error prompts the     |
-   | stop() method to be called.                                                           |
+   | 初始化,此代码初始化上下文中的方式是异常安全,所有保持状态的内部字段都在这里初始化,
+   | stop() method to be called.任务错误提示将被调用stop方法                                                           |
    * ------------------------------------------------------------------------------------- */
 
   private def warnSparkMem(value: String): String = {
@@ -415,8 +438,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /** 
    * Control our logLevel. This overrides any user-defined log settings.
    * 控制日志级别,这将覆盖任何自定义日志设置
-   * @param logLevel The desired log level as a string.
+   * @param logLevel The desired log level as a string. 所需的日志级别作为一个字符串
    * Valid log levels include: ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
+   * 有效日志级别包括:ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
    */
   def setLogLevel(logLevel: String) {
     val validLevels = Seq("ALL", "DEBUG", "ERROR", "FATAL", "INFO", "OFF", "TRACE", "WARN")
@@ -442,6 +466,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
     // System property spark.yarn.app.id must be set if user code ran by AM on a YARN cluster
     // yarn-standalone is deprecated, but still supported
+    // 系统属性spark.yarn.app.id必须设置,如果用户代码跑的是YARN独立集群,已经过时,但一直支持
     if ((master == "yarn-cluster" || master == "yarn-standalone") &&
         !_conf.contains("spark.yarn.app.id")) {
       throw new SparkException("Detected yarn-cluster mode, but isn't running on a cluster. " +
@@ -453,7 +478,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     }
 
     // Set Spark driver host and port system properties
-    //运行driver的主机名或 IP 地址
+    //设置Sparkr的driver主机名或 IP地址和端口属性
     _conf.setIfMissing("spark.driver.host", Utils.localHostName())
     //0随机 driver侦听的端口
     _conf.setIfMissing("spark.driver.port", "0")
@@ -487,7 +512,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     if (master == "yarn-client") System.setProperty("SPARK_YARN_MODE", "true")
 
     // "_jobProgressListener" should be set up before creating SparkEnv because when creating
+    //"_jobProgressListener"应用在创建SparkEnv之前,需要创建JobProgressListener
     // "SparkEnv", some messages will be posted to "listenerBus" and we should not miss them.
+    //"SparkEnv",一些消息将被提交到"listenerBus"我们不应该错过他们
     //构造JobProgressListener,作用是通过HashMap,ListBuffer等数据结构存储JobId及对应JobUIData信息,并按照激活
     //完成,失败等job状态统计,对于StageId,StageInfo等信息按照激活,完成,忽略,失败等Stage状态统计,并且存储StageID
     //与JobId的一对多关系.
@@ -496,7 +523,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     listenerBus.addListener(jobProgressListener)
 
     // Create the Spark execution environment (cache, map output tracker, etc)
-    //创建Spark执行环境
+    //创建Spark执行环境(缓存, 任务输出跟踪,等等)
     _env = createSparkEnv(_conf, isLocal, listenerBus)
     SparkEnv.set(_env)
     //清除过期的持久化RDD,构造MetadataCleaner时的参数是cleanup,用于清理persistentRdds
@@ -516,11 +543,13 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
         Some(SparkUI.createLiveUI(this, _conf, listenerBus, _jobProgressListener,
           _env.securityManager, appName, startTime = startTime))
       } else {
-        // For tests, do not enable the UI
+        // For tests, do not enable the UI对于测试,不要启用用户界面
         None
       }
     // Bind the UI before starting the task scheduler to communicate
+    //在启动任务计划程序之前绑定该用户界面
     // the bound port to the cluster manager properly
+    //绑定端口到群集管理器
     _ui.foreach(_.bind())
    //默认情况下:Spark使用HDFS作为分布式文件系统,所以需要获取Hadoop相关配置信息
     _hadoopConfiguration = SparkHadoopUtil.get.newConfiguration(_conf)
@@ -544,7 +573,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       .getOrElse(1024)//默认值 1024
 
     // Convert java options to env vars as a work around
+    //转换java选项到evn变量作为一个工作节点
     // since we can't set env vars directly in sbt.
+    //既然我们不能设置环境变量直接在SBT
      //Executor环境变量executorEnvs
     for { (envKey, propKey) <- Seq(("SPARK_TESTING", "spark.testing"))
       value <- Option(System.getenv(envKey)).orElse(Option(System.getProperty(propKey)))} {
@@ -554,12 +585,14 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       executorEnvs("SPARK_PREPEND_CLASSES") = v
     }
     // The Mesos scheduler backend relies on this environment variable to set executor memory.
+    //使用Mesos调度器的后端,此环境变量设置执行器的内存
     // TODO: Set this only in the Mesos scheduler.
     executorEnvs("SPARK_EXECUTOR_MEMORY") = executorMemory + "m"
     executorEnvs ++= _conf.getExecutorEnv
     executorEnvs("SPARK_USER") = sparkUser //设置Spark_user 用户名
 
     // We need to register "HeartbeatReceiver" before "createTaskScheduler" because Executor will
+    //在"createTaskScheduler"之前,我们需要注册"HeartbeatReceiver", 因为执行器将接收“heartbeatreceiver”的构造函数
     // retrieve "HeartbeatReceiver" in the constructor. (SPARK-6640)
     //注册一个HeartbeatReceiver消息
     _heartbeatReceiver = env.rpcEnv.setupEndpoint(
@@ -590,9 +623,11 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     _env.blockManager.initialize(_applicationId)
 
     // The metrics system for Driver need to be set spark.app.id to app ID.
-    // So it should start after we get app ID from the task scheduler and set spark.app.id.
+    // 驱动器测量系统需要设置spark.app.id
+    // So it should start after we get app ID from the task scheduler and set spark.app.id.    
     metricsSystem.start()//启动测量系统
     // Attach the driver metrics servlet handler to the web ui after the metrics system is started.
+    //Web UI的度量系统启动后,驱动测量servlet处理
     metricsSystem.getServletHandlers.foreach(handler => ui.foreach(_.attachHandler(handler)))
 
     _eventLogger =
@@ -647,8 +682,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     }
 
     // Make sure the context is stopped if the user forgets about it. This avoids leaving
+    //确保上下文被停止,如果用户忘记它,这样可以避免留下未完成的事件日志在JVM退出后清理
     // unfinished event logs around after the JVM exits cleanly. It doesn't help if the JVM
     // is killed, though.
+    // 如果JVM被杀死,它不帮助
     _shutdownHookRef = ShutdownHookManager.addShutdownHook(
       ShutdownHookManager.SPARK_CONTEXT_SHUTDOWN_PRIORITY) { () =>
       logInfo("Invoking stop() from shutdown hook")
@@ -668,11 +705,13 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   }
 
   /**
-   * Called by the web UI to obtain executor thread dumps.  This method may be expensive(昂贵的).
+   * Called by the web UI to obtain executor thread dumps.  This method may be expensive.
+   * 由Web用户界面调用,获取执行线程转储,这种方法可能是耗时的
    * Logs an error and returns None if we failed to obtain a thread dump, which could occur due
+   * 记录一个错误,并返回没有,如果我们没有获得一个线程转储,
    * to an executor being dead or unresponsive or due to network issues while sending the thread
-   * dump message back to the driver.
-   * 由Web用户界面调用，获取执行线程的栈信息
+   * 这可能会发生一个执行器已经死了或没有响应或由于网络问题,同时发送线程转储消息返回到驱动程序
+   * dump message back to the driver.  
    */
   private[spark] def getExecutorThreadDump(executorId: String): Option[Array[ThreadStackTrace]] = {
     try {
@@ -707,7 +746,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Set a local property that affects jobs submitted from this thread, such as the
    * Spark fair scheduler pool.   
-   * 设置一个本地属影响线程的提交作业Job,这是Spark公平调度池
+   * 设置一个本地属性影响提交作业Job的线程,这是Spark公平调度池
    */
   def setLocalProperty(key: String, value: String) {
     if (value == null) {
@@ -727,7 +766,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /** 
    *  Set a human readable description of the current job. 
-   *  设置对当前作业可读的描述
+   *  设置当前作业可读的描述
    *  */
   def setJobDescription(value: String) {
     setLocalProperty(SparkContext.SPARK_JOB_DESCRIPTION, value)
@@ -736,24 +775,29 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Assigns a group ID to all the jobs started by this thread until the group ID is set to a
    * different value or cleared.
-   *
+   * 将一组标识分配给该线程所启动的所有作业,直到将该组标识设置为不同的值或清除
+   * 
    * Often, a unit of execution in an application consists of multiple Spark actions or jobs.
+   * 通常,在应用程序中的一个执行器单元由多个Spark动作或作业组成
    * Application programmers can use this method to group all those jobs together and give a
    * group description. Once set, the Spark web UI will associate such jobs with this group.
-   *
+   * 应用程序程序可以使用这种方法将所有工作组在一起并给出一组描述,一旦设置,Spark用户界面将把这类工作与这组
+   * 
    * The application can also use [[org.apache.spark.SparkContext.cancelJobGroup]] to cancel all
-   * running jobs in this group. For example,
+   * running jobs in this group. For example,取消本组所有的作业,例子
    * {{{
-   * // In the main thread:
+   * // In the main thread: 在主线程中：
    * sc.setJobGroup("some_job_to_cancel", "some job description")
    * sc.parallelize(1 to 10000, 2).map { i => Thread.sleep(10); i }.count()
    *
-   * // In a separate thread:
+   * // In a separate thread: 在一个单独的线程中
    * sc.cancelJobGroup("some_job_to_cancel")
    * }}}
    *
    * If interruptOnCancel is set to true for the job group, then job cancellation will result
+   * 如果interruptoncancel设置为true的工作组,在一个线程Thread.interrupt()取消作业的结果
    * in Thread.interrupt() being called on the job's executor threads. This is useful to help ensure
+   * 被调用该作业的执行线程,这是有用的,确保任务实际上是及时停止的
    * that the tasks are actually stopped in a timely manner, but is off by default due to HDFS-1208,
    * where HDFS may respond to Thread.interrupt() by marking nodes as dead.
    */
@@ -780,19 +824,22 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Execute a block of code in a scope such that all new RDDs created in this body will
    * be part of the same scope. For more detail, see {{org.apache.spark.rdd.RDDOperationScope}}.
-   *
+   * 在范围内执行一个代码块,创建所有新的RDDS将相同的范围
+   * 
    * Note: Return statements are NOT allowed in the given body.
+   * 注:在给定的代码体的所有内容中不允许返回语句
    */
   private[spark] def withScope[U](body: => U): U = RDDOperationScope.withScope[U](this)(body)
 
   // Methods for creating RDDs
 
-  /** Distribute a local Scala collection to form an RDD.
-   *  从一个Seq集合创建RDD,
-   *  参数1：Seq集合，必须。
-                 参数2：分区数，默认为该Application分配到的资源的CPU核数
+  /** 
+   *  Distribute a local Scala collection to form an RDD.
+   *  分配一个本地Seq的集合创建一个RDD
    * @note Parallelize acts lazily. If `seq` is a mutable collection and is altered after the call
+   * 延迟并发执行,如果'SEQ'是一个可变的集合和改变后调用并行化,
    * to parallelize and before the first action on the RDD, the resultant RDD will reflect the
+   * 在RDD第一个执行之前,所得的RDD将反回修改后集合,通过一个参数的副本,以避免此
    * modified collection. Pass a copy of the argument to avoid this.
    * @note avoid using `parallelize(Seq())` to create an empty `RDD`. Consider `emptyRDD` for an
    * RDD with no partitions, or `parallelize(Seq[T]())` for an RDD of `T` with empty partitions.
@@ -808,13 +855,14 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Creates a new RDD[Long] containing elements from `start` to `end`(exclusive), increased by
    * `step` every element.
-   * 创建一个新RDD,包含元素开始和结果,增加每个元素
+   * 创建一个新RDD,包含元素开始和结束,每个元素的增量
    * @note if we need to cache this RDD, we should make sure each partition does not exceed limit.
+   * 如果我们需要缓存该RDD,我们应该确保每个分区不超过限制
    *
-   * @param start the start value.
-   * @param end the end value.
-   * @param step the incremental step
-   * @param numSlices the partition number of the new RDD.
+   * @param start the start value.开始值
+   * @param end the end value. 结束值
+   * @param step the incremental step 每个元素的增量步骤
+   * @param numSlices the partition number of the new RDD.新RDD的分区数
    * @return
    */
   def range(
@@ -824,6 +872,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       numSlices: Int = defaultParallelism): RDD[Long] = withScope {
     assertNotStopped()
     // when step is 0, range will run infinitely
+    //当步骤为0时,范围将无限运行
     require(step != 0, "step cannot be 0")
     val numElements: BigInt = {
       val safeStart = BigInt(start)
@@ -832,6 +881,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
         (safeEnd - safeStart) / step
       } else {
         // the remainder has the same sign with range, could add 1 more
+        //其余的有相同的符号与范围,可以添加1个以上
         (safeEnd - safeStart) / step + 1
       }
     }
@@ -878,10 +928,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   }
 
   /** Distribute a local Scala collection to form an RDD.
-   *  从一个Seq集合创建RDD。
-      参数1：Seq集合，必须。
-     参数2：分区数，默认为该Application分配到的资源的CPU核数
+   * 分配一个本地Seq的集合创建一个RDD  
    * This method is identical to `parallelize`.
+   * 这种方法是`并行`相同
    */
   def makeRDD[T: ClassTag](
       seq: Seq[T],
@@ -889,9 +938,14 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     parallelize(seq, numSlices)
   }
 
-  /** Distribute a local Scala collection to form an RDD, with one or more
+  /** 
+   *  Distribute a local Scala collection to form an RDD, with one or more
+   *  分配一个本地Seq的集合创建一个RDD,
     * location preferences (hostnames of Spark nodes) for each object.
-    * Create a new partition for each collection item. */
+    * 每个一个或者是多个位置偏好对象(Spark节点主机名)
+    * Create a new partition for each collection item.
+    * 为每个集合项目创建一个新分区
+    *  */
   def makeRDD[T: ClassTag](seq: Seq[(T, Seq[String])]): RDD[T] = withScope {
     assertNotStopped()
     val indexToPrefs = seq.zipWithIndex.map(t => (t._2, t._1._2)).toMap
@@ -901,7 +955,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Read a text file from HDFS, a local file system (available on all nodes), or any
    * Hadoop-supported file system URI, and return it as an RDD of Strings.
-   * 从hdf或者本地读取文件
+   * 从HDFS读取文本文件,本地文件系统(可在所有节点上),或者Hadoop支持的URI文件系统
+   * 返回一个RDD的字符串
    */
   def textFile(
       path: String,
@@ -938,12 +993,16 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * }}}
    *
    * @note Small files are preferred, large file is also allowable, but may cause bad performance.
+   * 			 小文件优先考虑,大文件也是允许的,但可能会造成不好的表现
    * @note On some filesystems, `.../path/&#42;` can be a more efficient way to read all files
+   * 			 可以是一个更有效的方式来读取目录中的所有文件
    *       in a directory rather than `.../path/` or `.../path`
    *
    * @param path Directory to the input data files, the path can be comma separated paths as the
+   * 				输入数据的目录文件,可以是以逗号分隔的输入列表的路径
    *             list of inputs.
    * @param minPartitions A suggestion value of the minimal splitting number for input data.
+   * 				最小分区数,输入数据的最小拆分数建议值
    */
   def wholeTextFiles(
       path: String,
@@ -1020,16 +1079,19 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * :: Experimental ::
    *
    * Load data from a flat binary file, assuming the length of each record is constant.
-   * 加载数据二进制文件,假设每个记录的长度是固定的,
+   * 加载二进制数据文件,假设每个记录的长度是不变的
    * '''Note:''' We ensure that the byte array for each record in the resulting RDD
+   * 我们确保在产生的RDD每条记录的字节数组,具有提供的记录长度
    * has the provided record length.
    *
-   * @param path Directory to the input data files, the path can be comma separated paths as the
+   * @param path Directory to the input data files, the path can be comma separated paths as the   
    *             list of inputs.
-   * @param recordLength The length at which to split the records
-   * @param conf Configuration for setting up the dataset.
+   *     		输入数据文件的路径目录,路径可以是以逗号分隔的输入列表
+   * @param recordLength The length at which to split the records 拆分记录的长度
+   * @param conf Configuration for setting up the dataset. 设置数据集的配置
    *
    * @return An RDD of data with values, represented as byte arrays
+   * 				数据值的RDD,表示为字节数组
    */
   @Experimental
   def binaryRecords(

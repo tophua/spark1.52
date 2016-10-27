@@ -22,7 +22,9 @@ import collection.mutable.ArrayBuffer
 import org.apache.spark.annotation.DeveloperApi
 
 // information about a specific split instance : handles both split instances.
+// 关于一个特定的分割实例的信息:处理两个分裂实例
 // So that we do not need to worry about the differences.
+//因此,我们不需要担心的差异
 @DeveloperApi
 class SplitInfo(
     val inputFormatClazz: Class[_],
@@ -46,6 +48,7 @@ class SplitInfo(
   }
 
   // This is practically useless since most of the Split impl's dont seem to implement equals :-(
+  //这几乎是无用的,因为大多数的分裂实现的似乎不实现平等
   // So unless there is identity equality between underlyingSplits, it will always fail even if it
   // is pointing to same block.
   override def equals(other: Any): Boolean = other match {
