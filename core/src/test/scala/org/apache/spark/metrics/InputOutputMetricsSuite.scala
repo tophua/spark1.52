@@ -88,7 +88,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     assert(bytesRead2 >= tmpFile.length())
   }
 
-  test("input metrics with cache and coalesce") {
+  test("input metrics with cache and coalesce") {//输入数据缓存和合并
     // prime the cache manager
     val rdd = sc.textFile(tmpFilePath, 4).cache() //缓存
     rdd.collect()
@@ -108,14 +108,16 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
   /**
    * This checks the situation where we have interleaved reads from
    * different sources. Currently, we only accumulate fron the first
+   * 这检查的情况下,我们有交叉读取不同来源
    * read method we find in the task. This test uses cartesian to create
    * the interleaved reads.
    *
    * Once https://issues.apache.org/jira/browse/SPARK-5225 is fixed
    * this test should break.
    */
-  test("input metrics with mixed read method") {
+  test("input metrics with mixed read method") {//输入度量混合读取方法
     // prime the cache manager
+    //主要缓存管理器
     val numPartitions = 2
     val rdd = sc.parallelize(1 to 100, numPartitions).cache()
     rdd.collect()
@@ -136,10 +138,11 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     assert(cartRead != 0)
     assert(bytesRead != 0)
     // We read from the first rdd of the cartesian once per partition.
+    //我们读了从笛卡尔第一RDD每分区
     assert(cartRead == bytesRead * numPartitions)
   }
 
-  test("input metrics for new Hadoop API with coalesce") {
+  test("input metrics for new Hadoop API with coalesce") {//新的Hadoop的输入指标API与合并
     val bytesRead = runAndReturnBytesRead {
       sc.newAPIHadoopFile(tmpFilePath, classOf[NewTextInputFormat], classOf[LongWritable],
         classOf[Text]).count()
@@ -153,21 +156,21 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     assert(bytesRead >= tmpFile.length())
   }
 
-  test("input metrics when reading text file") {
+  test("input metrics when reading text file") {//读取文本文件时的输入度量
     val bytesRead = runAndReturnBytesRead {
       sc.textFile(tmpFilePath, 2).count()
     }
     assert(bytesRead >= tmpFile.length())
   }
 
-  test("input metrics on records read - simple") {
+  test("input metrics on records read - simple") {//记录读取的输入度量-简单
     val records = runAndReturnRecordsRead {
       sc.textFile(tmpFilePath, 4).count()
     }
     assert(records == numRecords)
   }
 
-  test("input metrics on records read - more stages") {
+  test("input metrics on records read - more stages") {//记录读取的输入度量-多个阶段
     val records = runAndReturnRecordsRead {
       sc.textFile(tmpFilePath, 4)
         .map(key => (key.length, 1))
@@ -177,7 +180,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     assert(records == numRecords)
   }
 
-  test("input metrics on records - New Hadoop API") {
+  test("input metrics on records - New Hadoop API") {//记录的输入度量-新的Hadoop API
     val records = runAndReturnRecordsRead {
       sc.newAPIHadoopFile(tmpFilePath, classOf[NewTextInputFormat], classOf[LongWritable],
         classOf[Text]).count()
@@ -185,7 +188,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     assert(records == numRecords)
   }
 
-  test("input metrics on recordsd read with cache") {
+  test("input metrics on recordsd read with cache") {//在记录读取缓存的输入指标
     // prime the cache manager
     val rdd = sc.textFile(tmpFilePath, 4).cache()
     rdd.collect()
@@ -199,10 +202,13 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
 
   /**
    * Tests the metrics from end to end.
-   * 1) reading a hadoop file
+   * 测试从端到端的度量
+   * 1) reading a hadoop file 读取一个hadoop文件
    * 2) shuffle and writing to a hadoop file.
-   * 3) writing to hadoop file.
+   * 		shuffle和写到一个hadoop文件
+   * 3) writing to hadoop file. 写Hadoop文件
    */
+  //输入读/写和shuffle读/写度量所有排队
   test("input read/write and shuffle read/write metrics all line up") {
     var inputRead = 0L
     var outputWritten = 0L
@@ -228,20 +234,21 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     sc.listenerBus.waitUntilEmpty(500)
     assert(inputRead == numRecords)
 
-    // Only supported on newer Hadoop
+    // Only supported on newer Hadoop 只有在新的Hadoop的支持
     if (SparkHadoopUtil.get.getFSBytesWrittenOnThreadCallback().isDefined) {
       assert(outputWritten == numBuckets)
     }
     assert(shuffleRead == shuffleWritten)
   }
 
-  test("input metrics with interleaved reads") {
+  test("input metrics with interleaved reads") {//交叉读取输入度量
     val numPartitions = 2
     val cartVector = 0 to 9
     val cartFile = new File(tmpDir, getClass.getSimpleName + "_cart.txt")
     val cartFilePath = "file://" + cartFile.getAbsolutePath
 
     // write files to disk so we can read them later.
+    //将文件写入磁盘,以便稍后读它们
     sc.parallelize(cartVector).saveAsTextFile(cartFilePath)
     val aRdd = sc.textFile(cartFilePath, numPartitions)
 
@@ -259,14 +266,16 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     }
 
     // Computing the amount of bytes read for a cartesian operation is a little involved.
+    //计算一个笛卡尔运算所读取的字节数
     // Cartesian interleaves reads between two partitions eg. p1 and p2.
     // Here are the steps:
-    //  1) First it creates an iterator for p1
-    //  2) Creates an iterator for p2
+    //  1) First it creates an iterator for p1 首先创建一个迭代器P1
+    //  2) Creates an iterator for p2 创建一个迭代器为P2
     //  3) Reads the first element of p1 and then all the elements of p2
-    //  4) proceeds to the next element of p1
-    //  5) Creates a new iterator for p2
-    //  6) rinse and repeat.
+    //    读取P1的第一个元素的所有元素，然后P2
+    //  4) proceeds to the next element of p1 从P1的下一个元素
+    //  5) Creates a new iterator for p2 创建一个新的迭代器P2
+    //  6) rinse and repeat. 冲洗和重复
     // As a result we read from the second partition n times where n is the number of keys in
     // p1. Thus the math below for the test.
     assert(cartesianBytes != 0)
@@ -304,8 +313,8 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     taskMetrics.sum
   }
 
-  test("output metrics on records written") {
-    // Only supported on newer Hadoop
+  test("output metrics on records written") {//写入记录的输出度量
+    // Only supported on newer Hadoop 只支持新Hadoop
     if (SparkHadoopUtil.get.getFSBytesWrittenOnThreadCallback().isDefined) {
       val file = new File(tmpDir, getClass.getSimpleName)
       val filePath = "file://" + file.getAbsolutePath
@@ -316,7 +325,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
       assert(records == numRecords)
     }
   }
-
+  //写入记录的输出度量-新Hadoop API
   test("output metrics on records written - new Hadoop API") {
     // Only supported on newer Hadoop
     if (SparkHadoopUtil.get.getFSBytesWrittenOnThreadCallback().isDefined) {
@@ -330,7 +339,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
       assert(records == numRecords)
     }
   }
-
+  //写入文本文件时的输出度量
   test("output metrics when writing text file") {
     val fs = FileSystem.getLocal(new Configuration())
     val outPath = new Path(fs.getWorkingDirectory, "outdir")
@@ -358,7 +367,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
       }
     }
   }
-
+  //输入度量old CombineFileInputFormat
   test("input metrics with old CombineFileInputFormat") {
     val bytesRead = runAndReturnBytesRead {
       sc.hadoopFile(tmpFilePath, classOf[OldCombineTextInputFormat], classOf[LongWritable],
@@ -366,7 +375,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     }
     assert(bytesRead >= tmpFile.length())
   }
-
+  //输入度量新CombineFileInputFormat
   test("input metrics with new CombineFileInputFormat") {
     val bytesRead = runAndReturnBytesRead {
       sc.newAPIHadoopFile(tmpFilePath, classOf[NewCombineTextInputFormat], classOf[LongWritable],

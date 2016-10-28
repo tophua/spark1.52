@@ -30,7 +30,7 @@ class MetricsConfigSuite extends SparkFunSuite with BeforeAndAfter {
     filePath = getClass.getClassLoader.getResource("test_metrics_config.properties").getFile()
   }
 
-  test("MetricsConfig with default properties") {
+  test("MetricsConfig with default properties") {//默认属性的度量配置
     val sparkConf = new SparkConf(loadDefaults = false)
     sparkConf.set("spark.metrics.conf", "dummy-file")
     val conf = new MetricsConfig(sparkConf)
@@ -46,7 +46,7 @@ class MetricsConfigSuite extends SparkFunSuite with BeforeAndAfter {
     assert(property.getProperty("sink.servlet.path") === "/metrics/json")
   }
 
-  test("MetricsConfig with properties set from a file") {
+  test("MetricsConfig with properties set from a file") {//从文件设置的属性的度量配置
     val sparkConf = new SparkConf(loadDefaults = false)
     sparkConf.set("spark.metrics.conf", filePath)
     val conf = new MetricsConfig(sparkConf)
@@ -73,7 +73,7 @@ class MetricsConfigSuite extends SparkFunSuite with BeforeAndAfter {
     assert(workerProp.getProperty("sink.servlet.path") === "/metrics/json")
   }
 
-  test("MetricsConfig with properties set from a Spark configuration") {
+  test("MetricsConfig with properties set from a Spark configuration") {//从Spark配置设置的属性
     val sparkConf = new SparkConf(loadDefaults = false)
     setMetricsProperty(sparkConf, "*.sink.console.period", "10")
     setMetricsProperty(sparkConf, "*.sink.console.unit", "seconds")
@@ -103,7 +103,7 @@ class MetricsConfigSuite extends SparkFunSuite with BeforeAndAfter {
       "org.apache.spark.metrics.sink.MetricsServlet")
     assert(workerProp.getProperty("sink.servlet.path") === "/metrics/json")
   }
-
+  //从文件和Spark配置设置的属性
   test("MetricsConfig with properties set from a file and a Spark configuration") {
     val sparkConf = new SparkConf(loadDefaults = false)
     setMetricsProperty(sparkConf, "*.sink.console.period", "10")
@@ -133,7 +133,7 @@ class MetricsConfigSuite extends SparkFunSuite with BeforeAndAfter {
       "org.apache.spark.metrics.sink.MetricsServlet")
     assert(workerProp.getProperty("sink.servlet.path") === "/metrics/json")
   }
-
+  //MetricsConfig 子属性
   test("MetricsConfig with subProperties") {
     val sparkConf = new SparkConf(loadDefaults = false)
     sparkConf.set("spark.metrics.conf", filePath)
