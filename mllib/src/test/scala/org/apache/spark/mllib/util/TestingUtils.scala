@@ -66,16 +66,19 @@ object TestingUtils {
 
     /**
      * When the difference of two values are within eps, returns true; otherwise, returns false.
+     * 当两个值的差值在eps,返回true,否则返回false
      */
     def ~=(r: CompareDoubleRightSide): Boolean = r.fun(x, r.y, r.eps)
 
     /**
      * When the difference of two values are within eps, returns false; otherwise, returns true.
+     * 当两个值的差值在eps,返回false,否则返回true
      */
     def !~=(r: CompareDoubleRightSide): Boolean = !r.fun(x, r.y, r.eps)
 
     /**
      * Throws exception when the difference of two values are NOT within eps;
+     * 抛出异常时,两个值的差异不在eps;否则返回true
      * otherwise, returns true.
      */
     def ~==(r: CompareDoubleRightSide): Boolean = {
@@ -88,6 +91,7 @@ object TestingUtils {
 
     /**
      * Throws exception when the difference of two values are within eps; otherwise, returns true.
+     *  抛出异常时,两个值的差异不在eps;否则返回true
      */
     def !~==(r: CompareDoubleRightSide): Boolean = {
       if (r.fun(x, r.y, r.eps)) {
@@ -119,6 +123,7 @@ object TestingUtils {
 
   /**
    * Implicit class for comparing two vectors using relative tolerance or absolute tolerance.
+   * 比较两个向量的相对公差或绝对公差的隐式类
    */
   implicit class VectorWithAlmostEquals(val x: Vector) {
 
@@ -157,7 +162,7 @@ object TestingUtils {
 
     /**
      * Comparison using absolute tolerance.
-     * 使用绝对公差的比较
+     * 使用绝对误差比较
      */
     def absTol(eps: Double): CompareVectorRightSide = CompareVectorRightSide(
       (x: Vector, y: Vector, eps: Double) => {
