@@ -175,7 +175,7 @@ private[spark] class BlockManagerMaster(
    * the block manager's id to two long values. The first value is the maximum
    * amount of memory allocated for the block manager, while the second is the
    * amount of remaining memory.
-   * 获得所有Executor的内存使用状态，第一个值是使用的最大内存, 第二个是剩余的内存大小.
+   * 获得所有Executor的内存使用状态,第一个值是使用的最大内存,第二个是剩余的内存大小.
    */
   def getMemoryStatus: Map[BlockManagerId, (Long, Long)] = {
     driverEndpoint.askWithRetry[Map[BlockManagerId, (Long, Long)]](GetMemoryStatus)

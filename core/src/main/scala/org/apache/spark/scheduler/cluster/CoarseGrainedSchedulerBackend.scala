@@ -473,7 +473,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
    * 													 有一个最佳位置的所有活动阶段的任务数,这包括运行,挂起和完成任务
    *                           preferences. This includes running, pending, and completed tasks.
    * @param hostToLocalTaskCount A map of hosts to the number of tasks from all active stages
-   * 														 	一个Map的Key主机,value所有活动阶段的任务数量,就喜欢在那个主机上运行
+   * 														 一个Map的Key主机,value所有活动阶段的任务数量,就喜欢在那个主机上运行
    *                             that would like to like to run on that host.
    *                             This includes running, pending, and completed tasks.
    *                             包括运行、挂起和完成任务
@@ -516,7 +516,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
 
   /**
    * Request that the cluster manager kill the specified executors.
-   * 请求的集群管理器杀死指定的executors
+   * 请求集群管理器杀死执行器的列表
    * @return whether the kill request is acknowledged.杀死请求确认
    */
   final override def killExecutors(executorIds: Seq[String]): Boolean = synchronized {
