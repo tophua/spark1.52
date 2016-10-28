@@ -63,7 +63,7 @@ class PageRankSuite extends SparkFunSuite with LocalSparkContext {
       .map { case (id, error) => error }.sum()
   }
 
-  test("Star PageRank") {
+  test("Star PageRank") {//明星的网页排名
     withSpark { sc =>
       val nVertices = 100
       val starGraph = GraphGenerators.starGraph(sc, nVertices).cache()
@@ -74,6 +74,7 @@ class PageRankSuite extends SparkFunSuite with LocalSparkContext {
       val staticRanks2 = starGraph.staticPageRank(numIter = 2, resetProb).vertices.cache()
 
       // Static PageRank should only take 2 iterations to converge
+      //静态页面排名应该只需要2次迭代才能收敛
       val notMatching = staticRanks1.innerZipJoin(staticRanks2) { (vid, pr1, pr2) =>
         if (pr1 != pr2) 1 else 0
       }.map { case (vid, test) => test }.sum()
@@ -91,7 +92,7 @@ class PageRankSuite extends SparkFunSuite with LocalSparkContext {
     }
   } // end of test Star PageRank
 
-  test("Star PersonalPageRank") {
+  test("Star PersonalPageRank") {//明星 个人页面排名
     withSpark { sc =>
       val nVertices = 100
       val starGraph = GraphGenerators.starGraph(sc, nVertices).cache()
@@ -103,6 +104,7 @@ class PageRankSuite extends SparkFunSuite with LocalSparkContext {
         .vertices.cache()
 
       // Static PageRank should only take 2 iterations to converge
+      //静态页面排名应该只需要2次迭代才能收敛
       val notMatching = staticRanks1.innerZipJoin(staticRanks2) { (vid, pr1, pr2) =>
         if (pr1 != pr2) 1 else 0
       }.map { case (vid, test) => test }.sum
@@ -121,7 +123,7 @@ class PageRankSuite extends SparkFunSuite with LocalSparkContext {
     }
   } // end of test Star PageRank
 
-  test("Grid PageRank") {
+  test("Grid PageRank") {//网格的网页排名
     withSpark { sc =>
       val rows = 10
       val cols = 10
@@ -141,7 +143,7 @@ class PageRankSuite extends SparkFunSuite with LocalSparkContext {
     }
   } // end of Grid PageRank
 
-  test("Chain PageRank") {
+  test("Chain PageRank") {//链的网页排名
     withSpark { sc =>
       val chain1 = (0 until 9).map(x => (x, x + 1))
       val rawEdges = sc.parallelize(chain1, 1).map { case (s, d) => (s.toLong, d.toLong) }
@@ -158,7 +160,7 @@ class PageRankSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
 
-  test("Chain PersonalizedPageRank") {
+  test("Chain PersonalizedPageRank") {//链个性化页面排名
     withSpark { sc =>
       val chain1 = (0 until 9).map(x => (x, x + 1) )
       val rawEdges = sc.parallelize(chain1, 1).map { case (s, d) => (s.toLong, d.toLong) }

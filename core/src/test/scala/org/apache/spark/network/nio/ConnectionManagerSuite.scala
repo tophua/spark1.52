@@ -56,7 +56,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     manager.stop()
   }
 
-  test("security on same password") {//同一密码的安全性
+  test("security on same password") {//安全相同密码
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
@@ -95,7 +95,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     managerServer.stop()
   }
 
-  test("security mismatch password") {//不匹配的安全密码
+  test("security mismatch password") {//不匹配的密码
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "true")
@@ -110,7 +110,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
       numReceivedMessages += 1
       None
     })
-//设置组件之间进行身份验证的密钥
+  //设置组件之间进行身份验证的密钥
     val badconf = conf.clone.set("spark.authenticate.secret", "bad")
     val badsecurityManager = new SecurityManager(badconf)
     val managerServer = new ConnectionManager(0, badconf, badsecurityManager)
@@ -138,7 +138,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     managerServer.stop()
   }
 
-  test("security mismatch auth off") {//不匹配的安全认证了
+  test("security mismatch auth off") {//不匹配的安全认证
     val conf = new SparkConf
      //是否启用内部身份验证
     conf.set("spark.authenticate", "false")

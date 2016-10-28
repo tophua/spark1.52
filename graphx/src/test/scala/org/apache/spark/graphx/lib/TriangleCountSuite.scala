@@ -24,7 +24,7 @@ import org.apache.spark.graphx.PartitionStrategy.RandomVertexCut
 
 class TriangleCountSuite extends SparkFunSuite with LocalSparkContext {
 
-  test("Count a single triangle") {
+  test("Count a single triangle") {//计算一个三角形
     withSpark { sc =>
       val rawEdges = sc.parallelize(Array( 0L->1L, 1L->2L, 2L->0L ), 2)
       val graph = Graph.fromEdgeTuples(rawEdges, true).cache()
@@ -34,7 +34,7 @@ class TriangleCountSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
 
-  test("Count two triangles") {
+  test("Count two triangles") {//计算两个三角形
     withSpark { sc =>
       val triangles = Array(0L -> 1L, 1L -> 2L, 2L -> 0L) ++
         Array(0L -> -1L, -1L -> -2L, -2L -> 0L)

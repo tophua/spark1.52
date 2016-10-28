@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.graphx._
 
 class LabelPropagationSuite extends SparkFunSuite with LocalSparkContext {
-  test("Label Propagation") {
+  test("Label Propagation") {//标签传递
     withSpark { sc =>
       // Construct a graph with two cliques connected by a single edge
       val n = 5

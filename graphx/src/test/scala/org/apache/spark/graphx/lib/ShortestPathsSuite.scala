@@ -26,7 +26,7 @@ import org.apache.spark.rdd._
 
 class ShortestPathsSuite extends SparkFunSuite with LocalSparkContext {
 
-  test("Shortest Path Computations") {
+  test("Shortest Path Computations") {//最短路径的计算
     withSpark { sc =>
       val shortestPaths = Set(
         (1, Map(1 -> 0, 4 -> 2)), (2, Map(1 -> 1, 4 -> 2)), (3, Map(1 -> 2, 4 -> 1)),

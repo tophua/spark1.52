@@ -26,7 +26,7 @@ import org.apache.spark.rdd._
 
 class StronglyConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
 
-  test("Island Strongly Connected Components") {
+  test("Island Strongly Connected Components") {//岛强连接组件
     withSpark { sc =>
       val vertices = sc.parallelize((1L to 5L).map(x => (x, -1)))
       val edges = sc.parallelize(Seq.empty[Edge[Int]])
@@ -38,7 +38,7 @@ class StronglyConnectedComponentsSuite extends SparkFunSuite with LocalSparkCont
     }
   }
 
-  test("Cycle Strongly Connected Components") {
+  test("Cycle Strongly Connected Components") {//循环强连接组件
     withSpark { sc =>
       val rawEdges = sc.parallelize((0L to 6L).map(x => (x, (x + 1) % 7)))
       val graph = Graph.fromEdgeTuples(rawEdges, -1)
@@ -49,7 +49,7 @@ class StronglyConnectedComponentsSuite extends SparkFunSuite with LocalSparkCont
     }
   }
 
-  test("2 Cycle Strongly Connected Components") {
+  test("2 Cycle Strongly Connected Components") {//2循环强连接组件
     withSpark { sc =>
       val edges =
         Array(0L -> 1L, 1L -> 2L, 2L -> 0L) ++

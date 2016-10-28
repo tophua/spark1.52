@@ -46,7 +46,7 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     }
   }
 
-  test("security on same password") {//同一密码的安全性
+  test("security on same password") {//安全相同的密码
     val conf = new SparkConf()
      //是否启用内部身份验证
       .set("spark.authenticate", "true")
@@ -59,7 +59,7 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     }
   }
 
-  test("security on mismatch password") {//不匹配密码的安全性
+  test("security on mismatch password") {//安全不匹配密码
     val conf0 = new SparkConf()
      //是否启用内部身份验证
       .set("spark.authenticate", "true")
@@ -83,11 +83,12 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     val conf1 = conf0.clone.set("spark.authenticate", "false")
     testConnection(conf0, conf1) match {
       case Success(_) => fail("Should have failed")
+      //任何有趣的错误可能发生,服务器将SASL令牌作为RPC
       case Failure(t) => // any funny error may occur, sever will interpret SASL token as RPC
     }
   }
 
-  test("security mismatch auth off on client") {//不匹配的安全认证过的客户
+  test("security mismatch auth off on client") {//不匹配安全认证的客户端
     val conf0 = new SparkConf()
     //是否启用内部身份验证
       .set("spark.authenticate", "false")
@@ -103,7 +104,9 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
 
   /**
    * Creates two servers with different configurations and sees if they can talk.
+   * 创建两个不同配置的服务器,看他们是否可以聊天通信
    * Returns Success() if they can transfer a block, and Failure() if the block transfer was failed
+   * 返回success()如果能转移一个块,和failure()如果块传输失败,我们将抛出一个异常,如果不是这样的话
    * properly. We will throw an out-of-band exception if something other than that goes wrong.
    */
   private def testConnection(conf0: SparkConf, conf1: SparkConf): Try[Unit] = {

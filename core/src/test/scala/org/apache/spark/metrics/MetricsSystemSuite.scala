@@ -38,7 +38,7 @@ class MetricsSystemSuite extends SparkFunSuite with BeforeAndAfter with PrivateM
     securityMgr = new SecurityManager(conf)
   }
 
-  test("MetricsSystem with default config") {
+  test("MetricsSystem with default config") {//MetricsSystem默认配置
     val metricsSystem = MetricsSystem.createMetricsSystem("default", conf, securityMgr)
     metricsSystem.start()
     val sources = PrivateMethod[ArrayBuffer[Source]]('sources)
@@ -49,7 +49,7 @@ class MetricsSystemSuite extends SparkFunSuite with BeforeAndAfter with PrivateM
     assert(metricsSystem.getServletHandlers.nonEmpty)
   }
 
-  test("MetricsSystem with sources add") {
+  test("MetricsSystem with sources add") {//MetricsSystem添加来源
     val metricsSystem = MetricsSystem.createMetricsSystem("test", conf, securityMgr)
     metricsSystem.start()
     val sources = PrivateMethod[ArrayBuffer[Source]]('sources)
@@ -64,7 +64,7 @@ class MetricsSystemSuite extends SparkFunSuite with BeforeAndAfter with PrivateM
     assert(metricsSystem.invokePrivate(sources()).length === 1)
   }
 
-  test("MetricsSystem with Driver instance") {
+  test("MetricsSystem with Driver instance") {//MetricsSystem驱动器实例
     val source = new Source {
       override val sourceName = "dummySource"
       override val metricRegistry = new MetricRegistry()
@@ -81,7 +81,7 @@ class MetricsSystemSuite extends SparkFunSuite with BeforeAndAfter with PrivateM
     val metricName = driverMetricsSystem.buildRegistryName(source)
     assert(metricName === s"$appId.$executorId.${source.sourceName}")
   }
-
+  //没有设置驱动程序实例spark.app.id
   test("MetricsSystem with Driver instance and spark.app.id is not set") {
     val source = new Source {
       override val sourceName = "dummySource"
@@ -114,7 +114,7 @@ class MetricsSystemSuite extends SparkFunSuite with BeforeAndAfter with PrivateM
     assert(metricName === source.sourceName)
   }
 
-  test("MetricsSystem with Executor instance") {
+  test("MetricsSystem with Executor instance") {//MetricsSystem执行器实例
     val source = new Source {
       override val sourceName = "dummySource"
       override val metricRegistry = new MetricRegistry()
@@ -163,7 +163,7 @@ class MetricsSystemSuite extends SparkFunSuite with BeforeAndAfter with PrivateM
     val metricName = driverMetricsSystem.buildRegistryName(source)
     assert(metricName === source.sourceName)
   }
-
+  //既不是驱动程序,也不是执行者的实例
   test("MetricsSystem with instance which is neither Driver nor Executor") {
     val source = new Source {
       override val sourceName = "dummySource"

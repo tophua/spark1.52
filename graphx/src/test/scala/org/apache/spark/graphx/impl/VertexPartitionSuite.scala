@@ -44,12 +44,14 @@ class VertexPartitionSuite extends SparkFunSuite {
     val vp3a = vp.map { (vid, attr) => 2 }
     val vp3b = VertexPartition(vp3a.iterator)
     // diff with same index
+    //同一指标的差异
     val diff1 = vp2.diff(vp3a)
     assert(diff1(0) === 2)
     assert(diff1(1) === 2)
     assert(diff1(2) === 2)
     assert(!diff1.isDefined(2))
     // diff with different indexes
+    //不同指标的差异
     val diff2 = vp2.diff(vp3b)
     assert(diff2(0) === 2)
     assert(diff2(1) === 2)

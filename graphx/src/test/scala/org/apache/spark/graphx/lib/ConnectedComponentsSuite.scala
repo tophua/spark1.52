@@ -26,7 +26,7 @@ import org.apache.spark.rdd._
 
 class ConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
 
-  test("Grid Connected Components") {
+  test("Grid Connected Components") {//网络连接的组件
     withSpark { sc =>
       val gridGraph = GraphGenerators.gridGraph(sc, 10, 10)
       val ccGraph = gridGraph.connectedComponents()
@@ -36,7 +36,7 @@ class ConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
   } // end of Grid connected components
 
 
-  test("Reverse Grid Connected Components") {
+  test("Reverse Grid Connected Components") {//反向网格连接组件
     withSpark { sc =>
       val gridGraph = GraphGenerators.gridGraph(sc, 10, 10).reverse
       val ccGraph = gridGraph.connectedComponents()
@@ -46,7 +46,7 @@ class ConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
   } // end of Grid connected components
 
 
-  test("Chain Connected Components") {
+  test("Chain Connected Components") {//链连接的组件
     withSpark { sc =>
       val chain1 = (0 until 9).map(x => (x, x + 1))
       val chain2 = (10 until 20).map(x => (x, x + 1))
@@ -72,7 +72,7 @@ class ConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
     }
   } // end of chain connected components
 
-  test("Reverse Chain Connected Components") {
+  test("Reverse Chain Connected Components") {//反向链连接的组件
     withSpark { sc =>
       val chain1 = (0 until 9).map(x => (x, x + 1))
       val chain2 = (10 until 20).map(x => (x, x + 1))
@@ -98,7 +98,7 @@ class ConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
     }
   } // end of reverse chain connected components
 
-  test("Connected Components on a Toy Connected Graph") {
+  test("Connected Components on a Toy Connected Graph") {//玩具连通图上的连通部件
     withSpark { sc =>
       // Create an RDD for the vertices
       val users: RDD[(VertexId, (String, String))] =

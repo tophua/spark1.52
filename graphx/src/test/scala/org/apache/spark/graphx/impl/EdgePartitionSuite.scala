@@ -34,7 +34,7 @@ class EdgePartitionSuite extends SparkFunSuite {
     builder.toEdgePartition
   }
 
-  test("reverse") {
+  test("reverse") {//反向
     val edges = List(Edge(0, 1, 0), Edge(1, 2, 0), Edge(2, 0, 0))
     val reversedEdges = List(Edge(0, 2, 0), Edge(1, 0, 0), Edge(2, 1, 0))
     val builder = new EdgePartitionBuilder[Int, Nothing]
