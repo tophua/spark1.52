@@ -31,13 +31,13 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     assert(pairs.sortByKey().collect() === Array((0, 0), (1, 0), (2, 0), (3, 0)))
   }
 
-  test("large array") {//大数组
+  test("large array") {//大数组2个分区
     val rand = new scala.util.Random()
     val pairArr = Array.fill(1000) { (rand.nextInt(), rand.nextInt()) }
     val pairs = sc.parallelize(pairArr, 2)
-    val sorted = pairs.sortByKey() //分区排序升序
+    val sorted = pairs.sortByKey() //排序升序
     val sort=sorted.collect()
-    assert(sorted.partitions.size === 2)
+    assert(sorted.partitions.size === 2)//分区数
     
     assert(sorted.collect() === pairArr.sortBy(_._1))//pairArr.sortBy(_._1) 数据组排序K升序
   }
@@ -84,7 +84,7 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     assert(pairs.sortByKey(false, 20).collect() === pairArr.sortWith((x, y) => x._1 > y._1))
   }
 
-  test("more partitions than elements") {//更多的分区比元素
+  test("more partitions than elements") {//更多的分区的元素
     val rand = new scala.util.Random()
     val pairArr = Array.fill(10) { (rand.nextInt(), rand.nextInt()) }
     val pairs = sc.parallelize(pairArr, 30)

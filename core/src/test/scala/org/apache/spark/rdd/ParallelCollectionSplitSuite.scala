@@ -27,10 +27,13 @@ import org.scalatest.prop.Checkers
 import org.apache.spark.SparkFunSuite
 
 class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
-  test("one element per slice(分片)") {//每片一个元素
+  test("one element per slice(分片)") {//每个分片一个元素
     val data = Array(1, 2, 3)
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
+    val slinces0=slices(0)
+    println("slinces0:"+slinces0+"\t"+slinces0.mkString(",")+"\t "+slinces0(0)+"\t mkString:"+slices(0).mkString(","))
+    //生成用逗号隔开的字符串
     assert(slices(0).mkString(",") === "1")
     assert(slices(1).mkString(",") === "2")
     assert(slices(2).mkString(",") === "3")
@@ -43,7 +46,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices(0).mkString(",") === "1,2,3")
   }
 
-  test("equal(相等) slices") {//相等分片
+  test("equal slices") {//相等分片
     val data = Array(1, 2, 3, 4, 5, 6, 7, 8, 9)
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -52,7 +55,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices(2).mkString(",") === "7,8,9")
   }
 
-  test("non-equal(不等) slices") {//不相等分片
+  test("non-equal slices") {//不相等分片
     val data = Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -61,7 +64,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices(2).mkString(",") === "7,8,9,10")
   }
 
-  test("splitting exclusive(不包含) range") {//分片的不包括范围
+  test("splitting exclusive range") {//分片的不包括范围
     val data = 0 until 100
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -214,7 +217,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices.forall(_.isInstanceOf[NumericRange[_]]))
   }
 
-  test("exclusive ranges of doubles") {//
+  test("exclusive ranges of doubles") {//double类型的包括范围
     val data = 1.0 until 100.0 by 1.0
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)
@@ -222,7 +225,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices.forall(_.isInstanceOf[NumericRange[_]]))
   }
 
-  test("inclusive ranges of doubles") {
+  test("inclusive ranges of doubles") {//double类型的不包括范围
     val data = 1.0 to 100.0 by 1.0
     val slices = ParallelCollectionRDD.slice(data, 3)
     assert(slices.size === 3)

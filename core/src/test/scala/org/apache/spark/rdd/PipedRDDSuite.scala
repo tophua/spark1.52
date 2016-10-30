@@ -150,7 +150,7 @@ class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
     }
   }
 
-  test("test pipe exports map_input_file") {
+  test("test pipe exports map_input_file") {//测试管道导出map_input_file文件
     testExportInputFile("map_input_file")
   }
 
@@ -187,7 +187,7 @@ class PipedRDDSuite extends SparkFunSuite with SharedSparkContext {
     }
   }
 
-  def generateFakeHadoopPartition(): HadoopPartition = {
+  def generateFakeHadoopPartition(): HadoopPartition = {//产生假Hadoop分区
     val split = new FileSplit(new Path("/some/path"), 0, 1,
       Array[String]("loc1", "loc2", "loc3", "loc4", "loc5"))
     new HadoopPartition(sc.newRddId(), 1, split)

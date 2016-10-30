@@ -50,7 +50,6 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     //最常用的一个函数是加法
    //合并RDD中的元素
     assert(nums.reduce(_ + _) === 10)
-    //
     //fold操作用于对RDD中的元素进行迭代操作，并且利用了一个变量保存迭代过程中的中间结果
     //与reduce 相似，在每个分区的初始化调用的时候多了个"0"值
     assert(nums.fold(0)(_ + _) === 10)
@@ -74,9 +73,9 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     //mapPartitions 是把 function 作用到每个 partition，针对的是 partition 内部的 iterator
     //mapPartitions 如果在映射的过程中需要频繁创建额外的对象，map就显得不高效了
     //map的输入函数是应用于RDD中每个元素，而mapPartitions的输入函数是应用于每个分区，
-    // 也就是把每个分区中的内容作为整体来处理的
+    // 也就是把每个分区中的内容作为整体来处理
     val partitionSums = nums.mapPartitions(iter => Iterator(iter.reduceLeft(_ + _)))
-    //第一个分区是和3，第二个分区是和 7
+    //第一个分区是和3,第二个分区是和 7
     assert(partitionSums.collect().toList === List(3, 7))
     //mapPartitions函数会对每个分区依次调用分区函数处理，然后将处理的结果(若干个Iterator)生成新的RDDs
     val partitionSumsWithSplit = nums.mapPartitionsWithIndex {
@@ -190,20 +189,20 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
   }
 
   test("aggregate") {//聚合
-    //与fold相似需要提供两个函数，返回不类似
-    //第一个数据：RDD中元素累加，每个节点只累加本地的结果
+    //与fold相似需要提供两个函数,返回不类似
+    //第一个数据：RDD中元素累加,每个节点只累加本地的结果
     //第二个数据：合并累加器
     val pairs = sc.makeRDD(Array(("a", 1), ("b", 2), ("a", 2), ("c", 5), ("a", 3)))
     type StringMap = HashMap[String, Int]
     val emptyMap = new StringMap {
       override def default(key: String): Int = 0
     }
-    //合并元素
+    //合并元素,匿名函数箭头左边是参数列表,右边是函数体
     val mergeElement: (StringMap, (String, Int)) => StringMap = (map, pair) => {
       map(pair._1) += pair._2
       map
     }
-    //合并值
+    //合并值,匿名函数箭头左边是参数列表,右边是函数体
     val mergeMaps: (StringMap, StringMap) => StringMap = (map1, map2) => {
       for ((key, value) <- map2) {
         map1(key) += value
@@ -246,7 +245,8 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
       override def getPartitions: Array[Partition] = Array(onlySplit)
       override val getDependencies = List[Dependency[_]]()
       override def compute(split: Partition, context: TaskContext): Iterator[Int] = {
-        throw new Exception("injected failure")
+        //RDD计算失败,抛出异常,则缓存失败
+        throw new Exception("injected failure")//注射失败
       }
     }.cache()
     val thrown = intercept[Exception]{
@@ -280,7 +280,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     
     val data = sc.parallelize(1 to 1000, 10)
     //repartition 该函数用于将RDD进行重分区 该函数其实就是coalesce函数第二个参数为true的实现
-    // Coalesce partitions
+    // Coalesce partitions 合并分区
     val repartitioned1 = data.repartition(2)
      
     assert(repartitioned1.partitions.size == 2)
@@ -300,9 +300,10 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(repartitioned2.collect().toSet === (1 to 1000).toSet)
   }
 
-  //重新分区负载均衡
+  //重新分区执行负载均衡
   test("repartitioned RDDs perform load balancing") {
     // Coalesce partitions
+    //合并分区
     val input = Array.fill(1000)(1)
     val initialPartitions = 10
     val data = sc.parallelize(input, initialPartitions)
@@ -414,7 +415,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(sortedList === (1 to 9).
       map{x => List(x)}.toList, "Tried coalescing 9 partitions to 20 but didn't get 9 back")
   }
-
+  //合并本地的RDD,大数据
   test("coalesced RDDs with locality, large scale (10K partitions)") {
     // large scale experiment
     //大规模试验
@@ -476,7 +477,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
   test("zipped RDDs") {//拉链RDDS
     val nums = sc.makeRDD(Array(1, 2, 3, 4), 2)
-    //两个RDD分区数目一致，且每个分区数据条数一致,该函数将RDD中的元素和这个元素在RDD中的组合成键/值对。
+    //两个RDD分区数目一致,且每个分区数据条数一致,该函数将RDD中的元素和这个元素在RDD中的组合成键/值对。
     val zipped = nums.zip(nums.map(_ + 1.0))
     assert(zipped.glom().map(_.toList).collect().toList ===
       List(List((1, 2.0), (2, 3.0)), List((3, 4.0), (4, 5.0))))
@@ -493,7 +494,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
   test("partition pruning") {//分区裁剪
     val data = sc.parallelize(1 to 10, 10)
     // Note that split number starts from 0, so > 8 means only 10th partition left.
-    //请注意，分裂数从0开始,所以> 8只剩下第十个分区
+    //请注意,分裂数从0开始,所以> 8只剩下第十个分区
     val prunedRdd = new PartitionPruningRDD(data, splitNum => splitNum > 8)
     assert(prunedRdd.partitions.size === 1)
     val prunedData = prunedRdd.collect()
@@ -568,7 +569,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
   test("take") {//取出
     var nums = sc.makeRDD(Range(1, 1000), 1)
-    assert(nums.take(0).size === 0)
+    assert(nums.take(0).size === 0)//take取出数据从1开始
     assert(nums.take(1) === Array(1)) //返回前几个元素
     assert(nums.take(3) === Array(1, 2, 3))
     assert(nums.take(500) === (1 to 500).toArray)
@@ -610,13 +611,13 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val ints = sc.makeRDD(scala.util.Random.shuffle(nums), 2)
     val topK = ints.top(5)
     assert(topK.size === 5)
-    assert(topK === nums.reverse.take(5))
+    assert(topK === nums.reverse.take(5))//反向
   }
 
   test("top with custom ordering") {//顶部自定义排序
     val words = Vector("a", "b", "c", "d")
     //自定义排序
-    implicit val ord = implicitly[Ordering[String]].reverse //字符串倒序
+    implicit val ord = implicitly[Ordering[String]].reverse //字符串倒序方式
     val rdd = sc.makeRDD(words, 2)
     val topK = rdd.top(2)
     assert(topK.size === 2)
@@ -638,7 +639,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(sortedLowerK.size === 0)
   }
 
-  test("takeOrdered with custom ordering") {
+  test("takeOrdered with custom ordering") {//取出自定义顺序
     val nums = Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     implicit val ord = implicitly[Ordering[Int]].reverse //倒序
     val rdd = sc.makeRDD(nums, 2)
@@ -742,7 +743,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     }
   }
 
-  test("runJob on an invalid partition") {//在一个无效的分区运行Job
+  test("runJob on an invalid partition") {//在运行一个无效分区的Job
     intercept[IllegalArgumentException] {
       sc.runJob(sc.parallelize(1 to 10, 2), {iter: Iterator[Int] => iter.size}, Seq(0, 1, 2))
     }
@@ -761,21 +762,21 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val col2 = Array("6|40|B", "5|50|A", "4|60|C")
     val col3 = Array("5|50|A", "6|40|B", "4|60|C")
      //0 升序，1  降序,2 中间排序
-    //第一个参数是一个函数，该函数的也有一个带T泛型的参数，返回类型和RDD中元素的类型是一致的
-    //第二个参数是ascending，从字面的意思大家应该可以猜到，是的，这参数决定排序后RDD中的元素是升序还是降序，
-        //默认是true，也就是升序
-    assert(data.sortBy(_.split("\\|")(0)).collect() === col1)//按第一个值升序
-    assert(data.sortBy(_.split("\\|")(1)).collect() === col2)//按第二个值升序
-    assert(data.sortBy(_.split("\\|")(2)).collect() === col3)//按第三个值的升序
+    //第一个参数是一个函数,该函数的也有一个带T泛型的参数,返回类型和RDD中元素的类型是一致的
+    //第二个参数是ascending,从字面的意思大家应该可以猜到,这参数决定排序后RDD中的元素是升序还是降序
+    //默认是true,也就是升序
+    assert(data.sortBy(_.split("\\|")(0)).collect() === col1)//按分隔的第一个值升序
+    assert(data.sortBy(_.split("\\|")(1)).collect() === col2)//按分隔的第二个值升序
+    assert(data.sortBy(_.split("\\|")(2)).collect() === col3)//按分隔的第三个值的升序
   }
 
-  test("sortByKey ascending parameter") {//sortByKey升序参数
-    //sortByKey函数是对PairRDD进行排序，也就是有Key和Value的RDD
+  test("sortByKey ascending parameter") {//sortByKey指定排序参数
+    //sortByKey函数是对PairRDD进行排序,也就是有Key和Value的RDD
     val data = sc.parallelize(Seq("5|50|A", "4|60|C", "6|40|B"))
 
     val asc = Array("4|60|C", "5|50|A", "6|40|B")
     val desc = Array("6|40|B", "5|50|A", "4|60|C")
-    //默认是true，也就是升序
+    //默认是true,也就是升序
     assert(data.sortBy(_.split("\\|")(0), true).collect() === asc)//按第一个值升序
     assert(data.sortBy(_.split("\\|")(0), false).collect() === desc)//按第一个值降序
   }
@@ -792,11 +793,12 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
                            "Karen|Williams|60")
 
     // last name, then first name
+    //最后的名称,第一名称
     val nameOrdered = Array("Bob|Smith|50",
                             "Jane|Smith|40",
                             "Karen|Williams|60",
                             "Thomas|Williams|30")
-
+  //匿名函数箭头左边是参数列表，右边是函数体
     val parse = (s: String) => {
       val split = s.split("\\|")
       Person(split(0), split(1), split(2).toInt)
@@ -823,31 +825,33 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(partitions(1) === Seq((1, 3), (3, 8), (3, 8)))
   }
 
-  test("intersection") {//交叉
-    //两个集合取交集，并去重
+  test("intersection") {//相交的集合
+    //两个集合取相交的集合,并去重
     val all = sc.parallelize(1 to 10)
     val evens = sc.parallelize(2 to 10 by 2)
+    //相交的集合
     val intersection = Array(2, 4, 6, 8, 10)
 
     // intersection is commutative
-    //交叉是交换
+    //两个集合取相交的集合,并去重
     assert(all.intersection(evens).collect().sorted === intersection)
     assert(evens.intersection(all).collect().sorted === intersection)
   }
 
-  test("intersection strips duplicates in an input") {//输入中的交叉条重复
+  test("intersection strips duplicates in an input") {//输入重复相交的集合
     val a = sc.parallelize(Seq(1, 2, 3, 3))
     val b = sc.parallelize(Seq(1, 1, 2, 3))
+    //相交的集合
     val intersection = Array(1, 2, 3)
-    //两个集合取交集，并去重
+     //两个集合取相交的集合,并去重
     assert(a.intersection(b).collect().sorted === intersection)
     assert(b.intersection(a).collect().sorted === intersection)
   }
 
-  test("zipWithIndex") {
-    //该函数将RDD中的元素和这个元素在RDD中的ID（索引号）组合成键/值对
+  test("zipWithIndex") {    
     val n = 10
     val data = sc.parallelize(0 until n, 3)
+    //该函数将RDD中的元素和这个元素在RDD中的ID(索引号)组合成键/值对
     val ranked = data.zipWithIndex()
     /**
      * ranked = Array((0,0), (1,1), (2,2), (3,3), (4,4), (5,5), (6,6), (7,7), (8,8), (9,9))
@@ -883,7 +887,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(ids.length === n)
   }
 
-  test("retag with implicit ClassTag") {//
+  test("retag with implicit ClassTag") {//隐式ClassTag
     val jsc: JavaSparkContext = new JavaSparkContext(sc)
     val jrdd: JavaRDD[String] = jsc.parallelize(Seq("A", "B", "C").asJava)
     jrdd.rdd.retag.collect()
@@ -899,17 +903,17 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(rdd4.parent[Int](2) === rdd3)
   }
 
-  test("getNarrowAncestors") {//窄依赖
+  test("getNarrowAncestors") {//获得窄依赖
     val rdd1 = sc.parallelize(1 to 100, 4)
     val rdd2 = rdd1.filter(_ % 2 == 0).map(_ + 1)
     val rdd3 = rdd2.map(_ - 1).filter(_ < 50).map(i => (i, i))
     val rdd4 = rdd3.reduceByKey(_ + _)
     val rdd5 = rdd4.mapValues(_ + 1).mapValues(_ + 2).mapValues(_ + 3)
-    val ancestors1 = rdd1.getNarrowAncestors
-    val ancestors2 = rdd2.getNarrowAncestors
-    val ancestors3 = rdd3.getNarrowAncestors
-    val ancestors4 = rdd4.getNarrowAncestors
-    val ancestors5 = rdd5.getNarrowAncestors
+    val ancestors1 = rdd1.getNarrowAncestors//获得窄依赖
+    val ancestors2 = rdd2.getNarrowAncestors//获得窄依赖
+    val ancestors3 = rdd3.getNarrowAncestors//获得窄依赖
+    val ancestors4 = rdd4.getNarrowAncestors//获得窄依赖
+    val ancestors5 = rdd5.getNarrowAncestors//获得窄依赖
 
     // Simple dependency tree with a single branch
     //简单依赖树的一个分支
@@ -999,7 +1003,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(ancestors2.count(_ == rdd2) === 0)
 
     // Cycle involving a longer chain
-    //周期较长的链
+    //循环较长的链
     rdd3.addDependency(new OneToOneDependency[Int](rdd4))
     val ancestors3 = rdd3.getNarrowAncestors
     val ancestors4 = rdd4.getNarrowAncestors
