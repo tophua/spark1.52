@@ -36,7 +36,7 @@ class RpcAddressSuite extends SparkFunSuite {
 
   test("fromSparkURL: a typo url") {//来自一个错误Spark URL
     val e = intercept[SparkException] {
-      RpcAddress.fromSparkURL("spark://1.2. 3.4:1234")
+      RpcAddress.fromSparkURL("spark://1.2. 3.4:1234")//中间有空格
     }
     assert("Invalid master URL: spark://1.2. 3.4:1234" === e.getMessage)
   }
@@ -48,7 +48,7 @@ class RpcAddressSuite extends SparkFunSuite {
     assert("Invalid master URL: invalid://1.2.3.4:1234" === e.getMessage)
   }
 
-  test("toSparkURL") {
+  test("toSparkURL") {//转换SparkURL格式
     val address = RpcAddress("1.2.3.4", 1234)
     assert(address.toSparkURL == "spark://1.2.3.4:1234")
   }

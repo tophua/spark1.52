@@ -31,6 +31,7 @@ import org.apache.spark.{SparkConf, SparkException, SparkFunSuite}
 
 /**
  * Common tests for an RpcEnv implementation.
+ * 一个rpcenv实现常见的测试
  */
 abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
