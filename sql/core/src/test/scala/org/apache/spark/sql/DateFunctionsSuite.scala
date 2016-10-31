@@ -351,7 +351,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-07-30")), Row(Date.valueOf("2015-07-30"))))
   }
 
-  test("function to_date") {//转换日期
+  test("function to_date") {//转换日期函数
     val d1 = Date.valueOf("2015-07-22")
     val d2 = Date.valueOf("2015-07-01")
     val t1 = Timestamp.valueOf("2015-07-22 10:00:00")
@@ -381,7 +381,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(Date.valueOf("2015-07-22")), Row(Date.valueOf("2014-12-31"))))
   }
 
-  test("function trunc") {//截取日期
+  test("function trunc") {//截取日期函数
     val df = Seq(
       (1, Timestamp.valueOf("2015-07-22 10:00:00")),
       (2, Timestamp.valueOf("2014-12-31 00:00:00"))).toDF("i", "t")
@@ -422,7 +422,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       Seq(Row(sdf3.format(new Timestamp(1000000))), Row(sdf3.format(new Timestamp(-1000000)))))
   }
 
-  test("unix_timestamp") {
+  test("unix_timestamp") {//unix时间戳
     val date1 = Date.valueOf("2015-07-24")
     val date2 = Date.valueOf("2015-07-25")
     val ts1 = Timestamp.valueOf("2015-07-24 10:00:00.3")
@@ -464,7 +464,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
     checkAnswer(df.selectExpr("datediff(a, d)"), Seq(Row(1), Row(1)))
   }
 
-  test("from_utc_timestamp") {
+  test("from_utc_timestamp") {//来自UTC时间戳
     val df = Seq(
       (Timestamp.valueOf("2015-07-24 00:00:00"), "2015-07-24 00:00:00"),
       (Timestamp.valueOf("2015-07-25 00:00:00"), "2015-07-25 00:00:00")
@@ -481,7 +481,7 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
         Row(Timestamp.valueOf("2015-07-24 17:00:00"))))
   }
 
-  test("to_utc_timestamp") {
+  test("to_utc_timestamp") {//转换UTC时间戳
     val df = Seq(
       (Timestamp.valueOf("2015-07-24 00:00:00"), "2015-07-24 00:00:00"),
       (Timestamp.valueOf("2015-07-25 00:00:00"), "2015-07-25 00:00:00")

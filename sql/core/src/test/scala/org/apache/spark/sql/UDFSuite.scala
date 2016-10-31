@@ -21,7 +21,9 @@ import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.test.SQLTestData._
 
 private case class FunctionResult(f1: String, f2: String)
-
+/**
+ * 自定义函数测试
+ */
 class UDFSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
@@ -101,7 +103,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(sql("SELECT strLenScala('test', 1)").head().getInt(0) === 5)
   }
 
-  test("UDF in a WHERE") {
+  test("UDF in a WHERE") {//自定义函数在一个WHERE
     ctx.udf.register("oneArgFilter", (n: Int) => { n > 80 })
 
     val df = ctx.sparkContext.parallelize(
@@ -113,7 +115,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(result.count() === 20)
   }
 
-  test("UDF in a HAVING") {//
+  test("UDF in a HAVING") {//自定义函数在一个HAVING
     ctx.udf.register("havingFilter", (n: Long) => { n > 5 })
 
     val df = Seq(("red", 1), ("red", 2), ("blue", 10),
@@ -132,7 +134,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(result.count() === 2)
   }
 
-  test("UDF in a GROUP BY") {
+  test("UDF in a GROUP BY") {//自定义函数在一个GROUP BY
     ctx.udf.register("groupFunction", (n: Int) => { n > 10 })
 
     val df = Seq(("red", 1), ("red", 2), ("blue", 10),
@@ -149,7 +151,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(result.count() === 2)
   }
 
-  test("UDFs everywhere") {
+  test("UDFs everywhere") {//任何使用定义函数
     ctx.udf.register("groupFunction", (n: Int) => { n > 10 })
     ctx.udf.register("havingFilter", (n: Long) => { n > 2000 })
     ctx.udf.register("whereFilter", (n: Int) => { n < 150 })
@@ -171,7 +173,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(result.count() === 1)
   }
 
-  test("struct UDF") {
+  test("struct UDF") {//结构定义函数
     ctx.udf.register("returnStruct", (f1: String, f2: String) => FunctionResult(f1, f2))
 
     val result =
@@ -180,9 +182,10 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     assert(result === "test")
   }
 
-  test("udf that is transformed") {
+  test("udf that is transformed") {//转换自义函数
     ctx.udf.register("makeStruct", (x: Int, y: Int) => (x, y))
     // 1 + 1 is constant folded causing a transformation.
+    //常数折叠引起变换
     assert(sql("SELECT makeStruct(1 + 1, 2)").first().getAs[Row](0) === Row(2, 2))
   }
 

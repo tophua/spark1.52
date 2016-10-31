@@ -35,10 +35,12 @@ class QueryTest extends PlanTest {
   /**
    * Runs the plan and makes sure the answer contains all of the keywords, or the
    * none of keywords are listed in the answer
+   * 运行该计划,并确保答案包含所有的关键字
    * @param df the [[DataFrame]] to be executed
    * @param exists true for make sure the keywords are listed in the output, otherwise
+   * 				确实为确保关键字在输出中列出,否则,确保关键字没有在输出中列出
    *               to make sure none of the keyword are not listed in the output
-   * @param keywords keyword in string array
+   * @param keywords keyword in string array 字符串数组中的关键字
    */
   def checkExistence(df: DataFrame, exists: Boolean, keywords: String*) {
     val outputs = df.collect().map(_.mkString).mkString
@@ -53,6 +55,7 @@ class QueryTest extends PlanTest {
 
   /**
    * Runs the plan and makes sure the answer matches the expected result.
+   * 运行该计划并确保答案与预期结果相匹配
    * @param df the [[DataFrame]] to be executed
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
    */

@@ -284,7 +284,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("log10") {
+  test("log10") {//log10对数函数
     testOneToOneNonNegativeMathFunction(log10, math.log10)
   }
 

@@ -25,7 +25,7 @@ import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.{Row, Strategy, QueryTest}
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.unsafe.types.UTF8String
-
+//快速操作
 case class FastOperator(output: Seq[Attribute]) extends SparkPlan {
 
   override protected def doExecute(): RDD[InternalRow] = {
@@ -36,7 +36,7 @@ case class FastOperator(output: Seq[Attribute]) extends SparkPlan {
 
   override def children: Seq[SparkPlan] = Nil
 }
-
+//测试策略
 object TestStrategy extends Strategy {
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case Project(Seq(attr), _) if attr.name == "a" =>
@@ -44,7 +44,7 @@ object TestStrategy extends Strategy {
     case _ => Nil
   }
 }
-
+//额外的策略集
 class ExtraStrategiesSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

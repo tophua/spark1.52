@@ -31,7 +31,7 @@ class SQLConfSuite extends QueryTest with SharedSQLContext {
     assert(newContext.getConf("spark.sql.testkey", "false") === "true")
   }
 
-  test("programmatic ways of basic setting and getting") {
+  test("programmatic ways of basic setting and getting") {//编程方式的基本设置和获取
     ctx.conf.clear()
     assert(ctx.getAllConfs.size === 0)
 

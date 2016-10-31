@@ -117,7 +117,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("special crosstab elements (., '', null, ``)") {//特殊的crosstab元素
+  test("special crosstab elements (., '', null, ``)") {//特殊的交叉表元素
     val data = Seq(
       ("a", Double.NaN, "ho"),
       (null, 2.0, "ho"),

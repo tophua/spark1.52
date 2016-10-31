@@ -74,7 +74,7 @@ class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
   private lazy val pointsRDD = Seq(
     MyLabeledPoint(1.0, new MyDenseVector(Array(0.1, 1.0))),
     MyLabeledPoint(0.0, new MyDenseVector(Array(0.2, 2.0)))).toDF()
-
+  //注册用户类型
   test("register user type: MyDenseVector for MyLabeledPoint") {
     val labels: RDD[Double] = pointsRDD.select('label).rdd.map { case Row(v: Double) => v }
     val labelsArrays: Array[Double] = labels.collect()
@@ -89,7 +89,7 @@ class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
     assert(featuresArrays.contains(new MyDenseVector(Array(0.1, 1.0))))
     assert(featuresArrays.contains(new MyDenseVector(Array(0.2, 2.0))))
   }
-
+  //注册用户类型和自定义函数
   test("UDTs and UDFs") {
     ctx.udf.register("testType", (d: MyDenseVector) => d.isInstanceOf[MyDenseVector])
     pointsRDD.registerTempTable("points")
@@ -98,7 +98,7 @@ class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
       Seq(Row(true), Row(true)))
   }
 
-
+ //注册用户类型的Parquet
   test("UDTs with Parquet") {
     val tempDir = Utils.createTempDir()
     tempDir.delete()
@@ -112,6 +112,7 @@ class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
   }
 
   // Tests to make sure that all operators correctly convert types on the way out.
+  //测试,以确保所有操作正确的转换类型
   test("Local UDTs") {
     val df = Seq((1, new MyDenseVector(Array(0.1, 1.0)))).toDF("int", "vec")
     df.collect()(0).getAs[MyDenseVector](1)
@@ -130,7 +131,7 @@ class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
     assert(java.util.Arrays.equals(actual.getBytes, hyperLogLog.getBytes))
   }
 
-  test("OpenHashSetUDT") {
+  test("OpenHashSetUDT") {//
     val openHashSetUDT = new OpenHashSetUDT(IntegerType)
     val set = new OpenHashSet[Int]
     (1 to 10).foreach(i => set.add(i))
@@ -139,7 +140,7 @@ class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
     assert(actual.iterator.toSet === set.iterator.toSet)
   }
 
-  test("UDTs with JSON") {
+  test("UDTs with JSON") {//JSON自定义类型
     val data = Seq(
       "{\"id\":1,\"vec\":[1.1,2.2,3.3,4.4]}",
       "{\"id\":2,\"vec\":[2.25,4.5,8.75]}"

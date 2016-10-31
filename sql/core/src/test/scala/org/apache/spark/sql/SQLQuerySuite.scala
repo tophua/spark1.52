@@ -30,7 +30,10 @@ import org.apache.spark.sql.test.SQLTestData._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
 
-/** A SQL Dialect for testing purpose, and it can not be nested type */
+/** 
+ *  A SQL Dialect for testing purpose, and it can not be nested type
+ *  用于测试目的的SQL方言,它不能嵌套类型
+ *  */
 class MyDialect extends DefaultParserDialect
 
 class SQLQuerySuite extends QueryTest with SharedSQLContext {
@@ -38,16 +41,14 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   setupTestData()
 
-  test("having clause") {
-    //HAVING 子句
+  test("having clause") {//HAVING子句   
     Seq(("one", 1), ("two", 2), ("three", 3), ("one", 5)).toDF("k", "v").registerTempTable("hav")
     checkAnswer(
       sql("SELECT k, sum(v) FROM hav GROUP BY k HAVING sum(v) > 2"),
       Row("one", 6) :: Row("three", 3) :: Nil)
   }
 
-  test("SPARK-8010: promote numeric to string") {
-    //数字转换字符
+  test("SPARK-8010: promote numeric to string") {//数字转换字符
     val df = Seq((1, 1)).toDF("key", "value")
     df.registerTempTable("src")
     // case when 使用
@@ -98,8 +99,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(0) :: Row(81) :: Nil)
   }
 
-  test("self join with aliases") {
-    //自连接别名
+  test("self join with aliases") {//自连接列的别名    
     Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str").registerTempTable("df")
 
     checkAnswer(
@@ -122,7 +122,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(1, 1) :: Row(1, 2) :: Row(2, 1) :: Row(2, 2) :: Row(3, 1) :: Row(3, 2) :: Nil)
   }
 
-  test("self join with alias in agg") {//自加入别名的
+  test("self join with alias in agg") {//自加入别名聚合函数
       Seq(1, 2, 3)
         .map(i => (i, i.toString))
         .toDF("int", "str")
@@ -140,7 +140,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row("1", 1) :: Row("2", 1) :: Row("3", 1) :: Nil)
   }
 
-  test("SPARK-8668 expr function") {
+  test("SPARK-8668 expr function") {//表达式函数
     checkAnswer(Seq((1, "Bobby G."))
       .toDF("id", "name")//使用函数表达式
       .select(expr("length(name)"), expr("abs(id)")), Row(8, 1))
@@ -176,12 +176,13 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Seq(1, 1, 2, 2, 3, 3).map(Row(_))
     )
   }
-//收集并返回不同的结果
+  //返回不同结果的集合
   test("SPARK-7158 collect and take return different results") {
     import java.util.UUID
 
     val df = Seq(Tuple1(1), Tuple1(2), Tuple1(3)).toDF("index")
     // we except the id is materialized once
+    //我们除了ID被物化了一次
     val idUDF = org.apache.spark.sql.functions.udf(() => UUID.randomUUID().toString)
 
     val dfWithId = df.withColumn("id", idUDF())
@@ -396,28 +397,27 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(4))
   }
 
-  test("SPARK-2041 column name equals tablename") {
+  test("SPARK-2041 column name equals tablename") {//表的列名称等于
     checkAnswer(
       sql("SELECT tableName FROM tableName"),
       Row("test"))
   }
 
-  test("SQRT") {
-    checkAnswer(
-      //平方根函数
+  test("SQRT") {//平方根函数
+    checkAnswer(      
       sql("SELECT SQRT(key) FROM testData"),
       (1 to 100).map(x => Row(math.sqrt(x.toDouble))).toSeq
     )
   }
 
-  test("SQRT with automatic string casts") {
-    checkAnswer(//平方根函数 cast强转换字符类型
+  test("SQRT with automatic string casts") {//平方根函数 cast强转换字符类型
+    checkAnswer(
       sql("SELECT SQRT(CAST(key AS STRING)) FROM testData"),
       (1 to 100).map(x => Row(math.sqrt(x.toDouble))).toSeq
     )
   }
 
-  test("SPARK-2407 Added Parser of SQL SUBSTR()") {
+  test("SPARK-2407 Added Parser of SQL SUBSTR()") {//substr()添加SQL解析器
     checkAnswer(
         //substr字符串中抽取从 start 下标开始的指定数目的字符
       sql("SELECT substr(tableName, 1, 2) FROM tableName"),
@@ -485,7 +485,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Seq(Row(3, 1), Row(3, 2))
     )
   }
-
+  //左半大于和相等操作
   test("left semi greater than predicate and equal operator") {
     checkAnswer(
       sql("SELECT * FROM testData2 x LEFT SEMI JOIN testData2 y ON x.b = y.b and x.a >= y.a + 2"),
@@ -1128,6 +1128,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(4, 2147483644) :: Nil)
 
     // The value of a MapType column can be a mutable map.
+    //一个map类型列中的值可以是一个可变的Map
     val rowRDD3 = unparsedStrings.map { r =>
       val values = r.split(",").map(_.trim)
       val v4 = try values(3).toInt catch {
@@ -1172,7 +1173,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row("true", "false"))
   }
 
-  test("metadata is propagated correctly") {
+  test("metadata is propagated correctly") {//元数据正确传递
     val person: DataFrame = sql("SELECT * FROM person")
     val schema = person.schema
     val docKey = "doc"

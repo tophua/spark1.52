@@ -127,6 +127,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(input.na.fill("unknown").columns.toSeq === input.columns.toSeq)
 
     // fill double with subset columns
+    //填充双子集列
     checkAnswer(
       input.na.fill(50.6, "age" :: Nil).select("name", "age"),
       Row("Bob", 16) ::

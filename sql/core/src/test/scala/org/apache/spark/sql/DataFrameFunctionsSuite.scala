@@ -116,7 +116,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(result.first.schema(0).dataType === expectedType)
     checkAnswer(result, Seq(Row(Row("v", 5.0)), Row(Row("v", 5.0))))
   }
-  //常数函数
+  //常量函数
   test("constant functions") {
     checkAnswer(
       sql("SELECT E()"),
@@ -128,7 +128,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("bitwiseNOT") {
+  test("bitwiseNOT") {//位not
     checkAnswer(
       testData2.select(bitwiseNOT($"a")),
       testData2.collect().toSeq.map(r => Row(~r.getInt(0))))

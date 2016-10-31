@@ -321,7 +321,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("deprecated callUdf in SQLContext") {//
+  test("deprecated callUdf in SQLContext") {//不赞成使用callUdf
     val df = Seq(("id1", 1), ("id2", 4), ("id3", 5)).toDF("id", "value")
     val sqlctx = df.sqlContext
     sqlctx.udf.register("simpleUdf", (v: Int) => v * v)
@@ -330,7 +330,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       Row("id1", 1) :: Row("id2", 16) :: Row("id3", 25) :: Nil)
   }
 
-  test("callUDF in SQLContext") {
+  test("callUDF in SQLContext") {//
     val df = Seq(("id1", 1), ("id2", 4), ("id3", 5)).toDF("id", "value")
     val sqlctx = df.sqlContext
     sqlctx.udf.register("simpleUDF", (v: Int) => v * v)
@@ -339,7 +339,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       Row("id1", 1) :: Row("id2", 16) :: Row("id3", 25) :: Nil)
   }
 
-  test("withColumn") {//列
+  test("withColumn") {//使用列
     val df = testData.toDF().withColumn("newCol", col("key") + 1)
     checkAnswer(
       df,
@@ -349,7 +349,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     assert(df.schema.map(_.name) === Seq("key", "value", "newCol"))
   }
 
-  test("replace column using withColumn") {//替换列
+  test("replace column using withColumn") {//替换使用的列
     val df2 = sqlContext.sparkContext.parallelize(Array(1, 2, 3)).toDF("x")
     val df3 = df2.withColumn("x", df2("x") + 1)
     checkAnswer(
@@ -357,7 +357,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       Row(2) :: Row(3) :: Row(4) :: Nil)
   }
 
-  test("drop column using drop") {//使用列的删除
+  test("drop column using drop") {//删除使用列
     val df = testData.drop("key")
     checkAnswer(
       df,
@@ -365,14 +365,14 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     assert(df.schema.map(_.name) === Seq("value"))
   }
 
-  test("drop unknown column (no-op)") {
+  test("drop unknown column (no-op)") {//删除未知的列
     val df = testData.drop("random")
     checkAnswer(
       df,
       testData.collect().toSeq)
     assert(df.schema.map(_.name) === Seq("key", "value"))
   }
-
+  //删除列使用列的引用
   test("drop column using drop with column reference") {
     val col = testData("key")
     val df = testData.drop(col)
@@ -381,7 +381,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       testData.collect().map(x => Row(x.getString(1))).toSeq)
     assert(df.schema.map(_.name) === Seq("value"))
   }
-
+   //删除列使用列的引用
   test("drop unknown column (no-op) with column reference") {
     val col = Column("random")
     val df = testData.drop(col)
@@ -404,9 +404,11 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     val newSalary = salary.withColumnRenamed("personId", "id")
     val col = newSalary("id")
     // this join will result in duplicate "id" columns
+    //此连接将导致重复的“ID”列
     val joinedDf = person.join(newSalary,
       person("id") === newSalary("id"), "inner")
     // remove only the "id" column that was associated with newSalary
+      //只删除“ID”列，与薪酬
     val df = joinedDf.drop(col)
     checkAnswer(
       df,
@@ -418,7 +420,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     assert(df("id") == person("id"))
   }
 
-  test("withColumnRenamed") {//列的改名
+  test("withColumnRenamed") {//列的重命名
     val df = testData.toDF().withColumn("newCol", col("key") + 1)
       .withColumnRenamed("value", "valueRenamed")
     checkAnswer(
@@ -592,7 +594,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   //  assert(testData.select($"*").showString(1) === expectedAnswer)
   }
 
-  test("SPARK-7327 show with empty dataFrame") {//空帧显示
+  test("SPARK-7327 show with empty dataFrame") {//显示空的dataFrame
     val expectedAnswer = """+---+-----+
                            ||key|value|
                            |+---+-----+
@@ -706,11 +708,13 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     assert(res4.agg(sum("id")).as("sumid").collect() === Seq(Row(0)))
 
     // start, end, step are negative
+    //开始,结束,一步都是否定的
     val res5 = sqlContext.range(-3, -8, -2, 1).select("id")
     assert(res5.count == 3)
     assert(res5.agg(sum("id")).as("sumid").collect() === Seq(Row(-15)))
 
     // start, end are negative, step is positive
+    //开始,结束是负的,步骤是正的
     val res6 = sqlContext.range(-8, -4, 2, 1).select("id")
     assert(res6.count == 2)
     assert(res6.agg(sum("id")).as("sumid").collect() === Seq(Row(-14)))
@@ -727,6 +731,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     assert(res9.agg(sum("id")).as("sumid").collect() === Seq(Row(Long.MaxValue - 1)))
 
     // only end provided as argument
+    // 只提供作为参数的结束
     val res10 = sqlContext.range(10).select("id")
     assert(res10.count == 10)//df.agg() 求聚合用的相关函数
     assert(res10.agg(sum("id")).as("sumid").collect() === Seq(Row(45)))
@@ -763,7 +768,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       .map(Tuple1.apply).toDF("a").selectExpr("max(a)").first()
     assert(java.lang.Float.isNaN(maxFloat.getFloat(0)))
   }
-
+  //重复列的更好的异常
   test("SPARK-8072: Better Exception for Duplicate Columns") {
     // only one duplicate column present 只有一个重复的列
     val e = intercept[org.apache.spark.sql.AnalysisException] {
@@ -818,6 +823,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       assert(e1.getMessage.contains("Inserting into an RDD-based table is not allowed."))
 
       // error case: insert into a logical plan that is not a LeafNode
+      //错误案例:插入一个合乎逻辑的计划,不是叶结点
       val indirectDS = pdf.select("_1").filter($"_1" > 5)
       indirectDS.registerTempTable("indirect_ds")
       val e2 = intercept[AnalysisException] {
@@ -850,9 +856,10 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     val df = (1 to 10).map(Tuple1.apply).toDF().select(rand(33))
     assert(df.showString(5) == df.showString(5))
   }
-
+  //本地数据框任意列排序后应该返回相同的值
   test("SPARK-8609: local DataFrame with random columns should return same value after sort") {
     // Make sure we can pass this test for both codegen mode and interpreted mode.
+    //确保我们可以通过代码生成模式和解释模式,这两个测试
     withSQLConf(SQLConf.CODEGEN_ENABLED.key -> "true") {
       checkAnswer(testData.sort(rand(33)), testData.sort(rand(33)))
     }
@@ -862,10 +869,11 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     }
 
     // We will reuse the same Expression object for LocalRelation.
+    //我们将使用相同的表达对象的地方
     val df = (1 to 10).map(Tuple1.apply).toDF()
     checkAnswer(df.sort(rand(33)), df.sort(rand(33)))
   }
-
+  //具有非确定性表达式的排序
   test("SPARK-9083: sort with non-deterministic expressions") {
     import org.apache.spark.util.random.XORShiftRandom
 
@@ -876,18 +884,18 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     val actual = df.sort(rand(seed)).collect().map(_.getInt(0))
     assert(expected === actual)
   }
-
+  //DataFrame.orderBy应该支持嵌套列名称
   test("SPARK-9323: DataFrame.orderBy should support nested column name") {
     val df = sqlContext.read.json(sqlContext.sparkContext.makeRDD(
       """{"a": {"b": 1}}""" :: Nil))
     checkAnswer(df.orderBy("a.b"), Row(Row(1)))
   }
-
+  //正确分析分组/聚集在结构领域
   test("SPARK-9950: correctly analyze grouping/aggregating on struct fields") {
     val df = Seq(("x", (1, 1)), ("y", (2, 2))).toDF("a", "b")//df.agg() 求聚合用的相关函数
     checkAnswer(df.groupBy("b._1").agg(sum("b._2")), Row(1, 1) :: Row(2, 2) :: Nil)
   }
-
+  //避免转换的执行器
   test("SPARK-10093: Avoid transformations on executors") {
     val df = Seq((1, 1)).toDF("a", "b")
     df.where($"a" === 1)
@@ -896,7 +904,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       .select(struct($"b"))
       .collect()
   }
-
+  //项目不应被推倒通过交叉或除
   test("SPARK-10539: Project should not be pushed down through Intersect or Except") {
     val df1 = (1 to 100).map(Tuple1.apply).toDF("i")
     val df2 = (1 to 30).map(Tuple1.apply).toDF("i")
@@ -905,12 +913,13 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     assert(intersect.count() === 30)
     assert(except.count() === 70)
   }
-
+  //正确处理非确定性表达式集合运算
   test("SPARK-10740: handle nondeterministic expressions correctly for set operations") {
     val df1 = (1 to 20).map(Tuple1.apply).toDF("i")
     val df2 = (1 to 10).map(Tuple1.apply).toDF("i")
 
     // When generating expected results at here, we need to follow the implementation of
+    //当在这里产生预期的结果,我们需要遵循兰德的表达
     // Rand expression.
     def expected(df: DataFrame): Seq[Row] = {
       df.rdd.collectPartitions().zipWithIndex.flatMap {
@@ -946,7 +955,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       expected(except)
     )
   }
-
+  //在分区的列固定大小敏感的筛选器
   test("SPARK-11301: fix case sensitivity for filter on partitioned columns") {
     withSQLConf(SQLConf.CASE_SENSITIVE.key -> "false") {
       withTempPath { path =>

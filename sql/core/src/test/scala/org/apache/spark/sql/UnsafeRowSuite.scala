@@ -27,11 +27,14 @@ import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.Platform
 import org.apache.spark.unsafe.memory.MemoryAllocator
 import org.apache.spark.unsafe.types.UTF8String
-
+/**
+ * 不安全行测试
+ */
 class UnsafeRowSuite extends SparkFunSuite {
 
   test("UnsafeRow Java serialization") {//java序列不安全的行
     // serializing an UnsafeRow pointing to a large buffer should only serialize the relevant data
+    //序列化一个不安全行,一个大缓冲应该只将序列化相关的数据
     val data = new Array[Byte](1024)
     val row = new UnsafeRow
     row.pointTo(data, 1, 16)
@@ -43,8 +46,9 @@ class UnsafeRowSuite extends SparkFunSuite {
     assert(row1.getBaseObject().asInstanceOf[Array[Byte]].length == 16)
   }
 
-  test("UnsafeRow Kryo serialization") {
+  test("UnsafeRow Kryo serialization") {//Kryo序列不安全的行
     // serializing an UnsafeRow pointing to a large buffer should only serialize the relevant data
+     //序列化一个不安全行,一个大缓冲应该只将序列化相关的数据
     val data = new Array[Byte](1024)
     val row = new UnsafeRow
     row.pointTo(data, 1, 16)
@@ -133,9 +137,11 @@ class UnsafeRowSuite extends SparkFunSuite {
     assert(emptyRow.getInt(0) === unsafeRow.getInt(0))
     assert(emptyRow.getUTF8String(1) === unsafeRow.getUTF8String(1))
     // make sure we reuse the buffer.
+    //确保我们重用缓冲区
     assert(emptyRow.getBaseObject === buffer)
 
     // make sure we really copied the input row.
+    //确保我们真的复制输入行
     unsafeRow.setInt(0, 2)
     assert(emptyRow.getInt(0) === 1)
 
@@ -144,24 +150,28 @@ class UnsafeRowSuite extends SparkFunSuite {
     val unsafeRow2 = converter.apply(row2)
 
     // make sure we can resize.
+    //确保我们可以调整大小
     emptyRow.copyFrom(unsafeRow2)
     assert(emptyRow.getSizeInBytes() === unsafeRow2.getSizeInBytes)
     assert(emptyRow.getInt(0) === 3)
     assert(emptyRow.getUTF8String(1) === longString)
     // make sure we really resized.
+    //确保我们真的调整
     assert(emptyRow.getBaseObject != buffer)
 
     // make sure we can still handle small rows after resize.
+    //确保我们仍然可以处理小行后调整大小
     emptyRow.copyFrom(unsafeRow)
     assert(emptyRow.getSizeInBytes() === unsafeRow.getSizeInBytes)
     assert(emptyRow.getInt(0) === unsafeRow.getInt(0))
     assert(emptyRow.getUTF8String(1) === unsafeRow.getUTF8String(1))
   }
-
+  //通过调用getarray返回不安全数组hashCode
   test("calling hashCode on unsafe array returned by getArray(ordinal)") {
     val row = InternalRow.apply(new GenericArrayData(Array(1L)))
     val unsafeRow = UnsafeProjection.create(Array[DataType](ArrayType(LongType))).apply(row)
     // Makes sure hashCode on unsafe array won't crash
+    //确保hashCode不安全的阵列不会崩溃
     unsafeRow.getArray(0).hashCode()
   }
 }

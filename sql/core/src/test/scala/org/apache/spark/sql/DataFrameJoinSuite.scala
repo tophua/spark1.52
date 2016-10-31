@@ -33,7 +33,7 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
       Row(1, "1", "2") :: Row(2, "2", "3") :: Row(3, "3", "4") :: Nil)
   }
 
-  test("join - join using multiple columns") {
+  test("join - join using multiple columns") {//加入使用多个列
     val df = Seq(1, 2, 3).map(i => (i, i + 1, i.toString)).toDF("int", "int2", "str")
     val df2 = Seq(1, 2, 3).map(i => (i, i + 1, (i + 1).toString)).toDF("int", "int2", "str")
 
@@ -42,7 +42,7 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
       Row(1, 2, "1", "2") :: Row(2, 3, "2", "3") :: Row(3, 4, "3", "4") :: Nil)
   }
 
-  test("join - join using self join") {
+  test("join - join using self join") {//加入使用自连接
     val df = Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str")
 
     // self join
@@ -51,7 +51,7 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
       Row(1, "1", "1") :: Row(2, "2", "2") :: Row(3, "3", "3") :: Nil)
   }
 
-  test("join - self join") {
+  test("join - self join") {//自连接
     val df1 = testData.select(testData("key")).as('df1)
     val df2 = testData.select(testData("key")).as('df2)
 
@@ -61,7 +61,7 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
         .collect().toSeq)
   }
 
-  test("join - using aliases after self join") {
+  test("join - using aliases after self join") {//自连接后使用别名
     val df = Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str")
     checkAnswer(
       df.as('x).join(df.as('y), $"x.str" === $"y.str").groupBy("x.str").count(),
@@ -72,7 +72,7 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
       Row("1", 1) :: Row("2", 1) :: Row("3", 1) :: Nil)
   }
 
-  test("[SPARK-6231] join - self join auto resolve ambiguity") {
+  test("[SPARK-6231] join - self join auto resolve ambiguity") {//自连接自动解决歧义
     val df = Seq((1, "1"), (2, "2")).toDF("key", "value")
     checkAnswer(
       df.join(df, df("key") === df("key")),
@@ -93,15 +93,17 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
       Row(1, 1, 1, 1) :: Row(2, 1, 2, 2) :: Nil)
   }
 
-  test("broadcast join hint") {
+  test("broadcast join hint") {//广播连接提示
     val df1 = Seq((1, "1"), (2, "2")).toDF("key", "value")
     val df2 = Seq((1, "1"), (2, "2")).toDF("key", "value")
 
     // equijoin - should be converted into broadcast join
+    //equijoin-应转换成广播连接
     val plan1 = df1.join(broadcast(df2), "key").queryExecution.executedPlan
     assert(plan1.collect { case p: BroadcastHashJoin => p }.size === 1)
 
     // no join key -- should not be a broadcast join
+    //没有加入键-不应该是一个广播连接
     val plan2 = df1.join(broadcast(df2)).queryExecution.executedPlan
     assert(plan2.collect { case p: BroadcastHashJoin => p }.size === 0)
 
