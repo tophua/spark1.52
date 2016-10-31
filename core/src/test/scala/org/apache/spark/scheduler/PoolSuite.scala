@@ -70,7 +70,9 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * This test creates three scheduling pools, and creates task set managers in the first
+   * 这个测试创建了三个调度池,创建前两个调度池中的任务集管理者
    * two scheduling pools. The test verifies that as tasks are scheduled, the fair scheduling
+   * 测试验证任务的计划,公平调度算法两个调度池正确的顺序
    * algorithm properly orders the two scheduling pools.
    */
   test("Fair Scheduler Test") {//公平调度测试
@@ -114,25 +116,33 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     schedulableBuilder.addTaskSetManager(taskSetManager24, properties2)
 
     // Pool 1 share ratio: 0. Pool 2 share ratio: 0. 1 gets scheduled based on ordering of names.
-    //基于排序的名称调度
+    //池1占有率:0.池2占有率:0. 1 根据排序的名称获得调度
     scheduleTaskAndVerifyId(0, rootPool, 0)
     // Pool 1 share ratio: 1/2. Pool 2 share ratio: 0. 2 gets scheduled because ratio is lower.
+     //池1占有率:1/2.池2占有率:0. 2 因为比例较低而被调度
     scheduleTaskAndVerifyId(1, rootPool, 3)
     // Pool 1 share ratio: 1/2. Pool 2 share ratio: 1/3. 2 gets scheduled because ratio is lower.
+    //池1占有率:1/2.池2占有率:1/3. 2因为比例较低而被调度
     scheduleTaskAndVerifyId(2, rootPool, 3)
     // Pool 1 share ratio: 1/2. Pool 2 share ratio: 2/3. 1 gets scheduled because ratio is lower.
+    //池1占有率:1/2.池2占有率:1/2. 池2占有率:2/3 1因为比例较低而被调度
     scheduleTaskAndVerifyId(3, rootPool, 1)
     // Pool 1 share ratio: 1. Pool 2 share ratio: 2/3. 2 gets scheduled because ratio is lower.
+    //池1占有率:1.池2占有率:2/3. 2因为比例较低而被调度
     scheduleTaskAndVerifyId(4, rootPool, 4)
     // Neither pool is needy so ordering is based on number of running tasks.
+    //无论是池是有需要的,所以排序基于运行任务的数量
     // Pool 1 running tasks: 2, Pool 2 running tasks: 3. 1 gets scheduled because fewer running
     // tasks.
+     //池1运行任务:2.池2运行任务:3. 1被调度,因为更少的运行任务
     scheduleTaskAndVerifyId(5, rootPool, 2)
     // Pool 1 running tasks: 3, Pool 2 running tasks: 3. 1 gets scheduled because of naming
     // ordering.
+     //池1运行任务:3.池2运行任务:1. 1被调度,由于命名排序
     scheduleTaskAndVerifyId(6, rootPool, 2)
     // Pool 1 running tasks: 4, Pool 2 running tasks: 3. 2 gets scheduled because fewer running
     // tasks.
+    //池1运行任务:4.池2运行任务:3 ,2被调度因为较少的运行任务
     scheduleTaskAndVerifyId(7, rootPool, 4)
   }
 

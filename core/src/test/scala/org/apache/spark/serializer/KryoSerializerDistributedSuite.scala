@@ -25,7 +25,7 @@ import org.apache.spark._
 import org.apache.spark.serializer.KryoDistributedTest._
 
 class KryoSerializerDistributedSuite extends SparkFunSuite {
-  //kryo对象在不同的过程
+  //kryo对象序列在不同的进程中
   test("kryo objects are serialised consistently in different processes") {
     val conf = new SparkConf(false)
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
@@ -48,6 +48,7 @@ class KryoSerializerDistributedSuite extends SparkFunSuite {
     val shuffledRDD = cachedRDD.map { case (i, o) => (i * i * i - 10 * i * i, o)}
 
     // Join the two RDDs, and force evaluation
+    //加入两RDDS,影响力分析
     assert(shuffledRDD.join(cachedRDD).collect().size == 1)
 
     LocalSparkContext.stop(sc)

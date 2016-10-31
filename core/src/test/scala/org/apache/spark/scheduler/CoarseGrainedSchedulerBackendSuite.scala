@@ -21,7 +21,7 @@ import org.apache.spark.{LocalSparkContext, SparkConf, SparkContext, SparkExcept
 import org.apache.spark.util.{SerializableBuffer, AkkaUtils}
 
 class CoarseGrainedSchedulerBackendSuite extends SparkFunSuite with LocalSparkContext {
-
+  //序列化任务大于Akka框架大小
   test("serialized task larger than akka frame size") {
     val conf = new SparkConf
     //以MB为单位的driver和executor之间通信信息的大小,设置值越大,driver可以接受越大的计算结果
@@ -34,6 +34,7 @@ class CoarseGrainedSchedulerBackendSuite extends SparkFunSuite with LocalSparkCo
     val thrown = intercept[SparkException] {
       larger.collect()
     }
+    //使用广播变量的大值
     assert(thrown.getMessage.contains("using broadcast variables for large values"))
     val smaller = sc.parallelize(1 to 4).collect()
     assert(smaller.size === 4)

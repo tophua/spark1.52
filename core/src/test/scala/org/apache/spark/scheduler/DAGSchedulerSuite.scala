@@ -108,7 +108,10 @@ class DAGSchedulerSuite
     override def applicationAttemptId(): Option[String] = None
   }
 
-  /** Length of time to wait while draining listener events. */
+  /** 
+   *  Length of time to wait while draining listener events.
+   *  等待在侦听侦听事件事件时等待的时间 
+   *  */
   val WAIT_TIMEOUT_MILLIS = 10000
   val sparkListener = new SparkListener() {
     val submittedStageInfos = new HashSet[StageInfo]
@@ -137,7 +140,9 @@ class DAGSchedulerSuite
 
   /**
    * Set of cache locations to return from our mock BlockManagerMaster.
+   * 设置缓存的位置,返回我们模拟blockmanagermaster
    * Keys are (rdd ID, partition ID). Anything not present will return an empty
+   * 键(RDD ID,分区ID),任何不存在的东西都返回一个缓存位置的空列表
    * list of cache locations silently.
    */
   val cacheLocations = new HashMap[(Int, Int), Seq[BlockManagerId]]
@@ -151,10 +156,14 @@ class DAGSchedulerSuite
       }
       override def removeExecutor(execId: String) {
         // don't need to propagate to the driver, which we don't have
+        //不需要传播到驱动程序,我们没有
       }
     }
 
-  /** The list of results that DAGScheduler has collected. */
+  /** 
+   *  The list of results that DAGScheduler has collected.
+   *  结果DAGScheduler已集合的列表 
+   *  */
   val results = new HashMap[Int, Any]()
   var failure: Exception = _
   val jobListener = new JobListener() {
@@ -194,16 +203,20 @@ class DAGSchedulerSuite
 
   /**
    * Type of RDD we use for testing. Note that we should never call the real RDD compute methods.
+   * 我们用于测试RDD类型,注意:我们不应该调用真正的RDD的计算方法
    * This is a pair RDD type so it can always be used in ShuffleDependencies.
+   * 这是一个RDD类型对,所以它总是可以在ShuffleDependencies使用
    */
   type PairOfIntsRDD = RDD[(Int, Int)]
 
   /**
    * Process the supplied event as if it were the top of the DAGScheduler event queue, expecting
    * the scheduler not to exit.
+   * 处理所提供的事件,如果是的dagscheduler事件队列的顶部,期望调度程序不退出
    *
-   * After processing the event, submit waiting stages as is done on most iterations of the
+   * After processing the event, submit waiting stages as is done on most iterations of the   
    * DAGScheduler event loop.
+   * 处理事件后,提交等待阶段对dagscheduler事件循环迭代完成
    */
   private def runEvent(event: DAGSchedulerEvent) {
     dagEventProcessLoopTester.post(event)
@@ -211,13 +224,18 @@ class DAGSchedulerSuite
 
   /**
    * When we submit dummy Jobs, this is the compute function we supply. Except in a local test
+   * 当我们提交虚拟工作,这是我们提供的计算功能,除了在下面的一个局部测试
    * below, we do not expect this function to ever be executed; instead, we will return results
+   * 我们不希望这个函数被执行,相反,我们将返回的结果直接通过completionevents
    * directly through CompletionEvents.
    */
   private val jobComputeFunc = (context: TaskContext, it: Iterator[(_)]) =>
      it.next.asInstanceOf[Tuple2[_, _]]._1
 
-  /** Send the given CompletionEvent messages for the tasks in the TaskSet. */
+  /** 
+   *  Send the given CompletionEvent messages for the tasks in the TaskSet. 
+   *  在taskset的任务发送消息给completionevent
+   *  */
   private def complete(taskSet: TaskSet, results: Seq[(TaskEndReason, Any)]) {
     assert(taskSet.tasks.size >= results.size)
     for ((result, i) <- results.zipWithIndex) {
@@ -239,7 +257,10 @@ class DAGSchedulerSuite
     }
   }
 
-  /** Sends the rdd to the scheduler for scheduling and returns the job id. */
+  /** 
+   *  Sends the rdd to the scheduler for scheduling and returns the job id. 
+   *  发送RDD调度的调度器和返回工作的ID
+   *  */
   private def submit(
       rdd: RDD[_],
       partitions: Array[Int],
@@ -251,16 +272,22 @@ class DAGSchedulerSuite
     jobId
   }
 
-  /** Sends TaskSetFailed to the scheduler. */
+  /** 
+   *  Sends TaskSetFailed to the scheduler. 
+   *  发送tasksetfailed的调度
+   *  */
   private def failed(taskSet: TaskSet, message: String) {
     runEvent(TaskSetFailed(taskSet, message, None))
   }
 
-  /** Sends JobCancelled to the DAG scheduler. */
+  /** 
+   *  Sends JobCancelled to the DAG scheduler. 
+   *  发送jobcancelled的DAG调度
+   *  */
   private def cancel(jobId: Int) {
     runEvent(JobCancelled(jobId))
   }
-
+  //父阶段应该有较低的阶段标识
   test("[SPARK-3353] parent stage should have lower stage id") {
     sparkListener.stageByOrderOfExecution.clear()
     sc.parallelize(1 to 10).map(x => (x, x)).reduceByKey(_ + _, 4).count()
@@ -269,7 +296,7 @@ class DAGSchedulerSuite
     assert(sparkListener.stageByOrderOfExecution(0) < sparkListener.stageByOrderOfExecution(1))
   }
 
-  test("zero split job") {
+  test("zero split job") {//零分隔的工作
     var numResults = 0
     val fakeListener = new JobListener() {
       override def taskSucceeded(partition: Int, value: Any) = numResults += 1
@@ -280,14 +307,14 @@ class DAGSchedulerSuite
     cancel(jobId)
   }
 
-  test("run trivial job") {
+  test("run trivial job") {//运行无价值的工作
     submit(new MyRDD(sc, 1, Nil), Array(0))
     complete(taskSets(0), List((Success, 42)))
     assert(results === Map(0 -> 42))
     assertDataStructuresEmpty()
   }
 
-  test("run trivial job w/ dependency") {
+  test("run trivial job w/ dependency") {//运行无价值的Job依赖
     val baseRdd = new MyRDD(sc, 1, Nil)
     val finalRdd = new MyRDD(sc, 1, List(new OneToOneDependency(baseRdd)))
     submit(finalRdd, Array(0))
@@ -296,7 +323,7 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("cache location preferences w/ dependency") {
+  test("cache location preferences w/ dependency") {//缓存位置偏好依赖
     val baseRdd = new MyRDD(sc, 1, Nil).cache()
     val finalRdd = new MyRDD(sc, 1, List(new OneToOneDependency(baseRdd)))
     cacheLocations(baseRdd.id -> 0) =
@@ -309,7 +336,7 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("regression test for getCacheLocs") {
+  test("regression test for getCacheLocs") {//对于getcachelocs回归测试
     val rdd = new MyRDD(sc, 3, Nil).cache()
     cacheLocations(rdd.id -> 0) =
       Seq(makeBlockManagerId("hostA"), makeBlockManagerId("hostB"))
@@ -322,8 +349,9 @@ class DAGSchedulerSuite
   }
 
   /**
-   * This test ensures that if a particular RDD is cached, RDDs earlier in the dependency chain
+   * This test ensures that if a particular RDD is cached, RDDs earlier in the dependency chain   
    * are not computed. It constructs the following chain of dependencies:
+   * 这个测试以确保如果某RDD缓存,较早的RDD在依赖链中没有计算,它构建了下面的依赖链：
    * +---+ shuffle +---+    +---+    +---+
    * | A |<--------| B |<---| C |<---| D |
    * +---+         +---+    +---+    +---+
@@ -334,6 +362,7 @@ class DAGSchedulerSuite
    * doesn't perform a shuffle, and instead computes the result using a single ResultStage
    * that reads C's cached data.
    */
+  //应该考虑所有父RDDS”缓存状态
   test("getMissingParentStages should consider all ancestor RDDs' cache statuses") {
     val rddA = new MyRDD(sc, 1, Nil)
     val rddB = new MyRDD(sc, 1, List(new ShuffleDependency(rddA, null)))
@@ -344,25 +373,30 @@ class DAGSchedulerSuite
     submit(rddD, Array(0))
     assert(scheduler.runningStages.size === 1)
     // Make sure that the scheduler is running the final result stage.
+    //确保调度程序运行的是最终结果阶段
     // Because C is cached, the shuffle map stage to compute A does not need to be run.
+    //因为C是缓存,Shuffle的Map任务阶段来计算A不需要运行
     assert(scheduler.runningStages.head.isInstanceOf[ResultStage])
   }
-
+  //避免指数爆破时优先位置列表
   test("avoid exponential blowup when getting preferred locs list") {
     // Build up a complex dependency graph with repeated zip operations, without preferred locations
+    //建立一个重复的压缩操作的复杂的依赖关系图,不喜欢的位置
     var rdd: RDD[_] = new MyRDD(sc, 1, Nil)
     (1 to 30).foreach(_ => rdd = rdd.zip(rdd))
     // getPreferredLocs runs quickly, indicating that exponential graph traversal is avoided.
+    //getPreferredLocs运行快速,避免了索引遍历
     failAfter(10 seconds) {
       //返回每一个数据数据块所在的机器名或者IP地址，
       //如果每一块数据是多份存储的，那么就会返回多个机器地址
       val preferredLocs = scheduler.getPreferredLocs(rdd, 0) 
       // No preferred locations are returned.
+      //返回没有首选的位置
       assert(preferredLocs.length === 0)
     }
   }
 
-  test("unserializable task") {
+  test("unserializable task") {//未序列任务
     val unserializableRdd = new MyRDD(sc, 1, Nil) {
       class UnserializableClass
       val unserializable = new UnserializableClass
@@ -376,9 +410,10 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("trivial job failure") {
+  test("trivial job failure") {//无价值的Job失败
     submit(new MyRDD(sc, 1, Nil), Array(0))
     failed(taskSets(0), "some failure")
+    //由于阶段故障而中止作业:一些失败
     assert(failure.getMessage === "Job aborted due to stage failure: some failure")
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(sparkListener.failedStages.contains(0))
@@ -386,7 +421,7 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("trivial job cancellation") {
+  test("trivial job cancellation") {//无价值的工作取消
     val rdd = new MyRDD(sc, 1, Nil)
     val jobId = submit(rdd, Array(0))
     cancel(jobId)
@@ -397,8 +432,9 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("job cancellation no-kill backend") {
+  test("job cancellation no-kill backend") {//作业取消不杀死后端
     // make sure that the DAGScheduler doesn't crash when the TaskScheduler
+    //确保DAGScheduler不崩溃时，任务调度器不执行killtask()
     // doesn't implement killTask()
     val noKillTaskScheduler = new TaskScheduler() {
       override def rootPool: Pool = null
@@ -431,9 +467,11 @@ class DAGSchedulerSuite
     val jobId = submit(new MyRDD(sc, 1, Nil), Array(0))
     cancel(jobId)
     // Because the job wasn't actually cancelled, we shouldn't have received a failure message.
+    //因为job并没有被取消,我们不应该收到一个失败的消息
     assert(failure === null)
 
     // When the task set completes normally, state should be correctly updated.
+    //当任务集合正常完成时,状态应该正确更新
     complete(taskSets(0), Seq((Success, 42)))
     assert(results === Map(0 -> 42))
     assertDataStructuresEmpty()
@@ -443,7 +481,7 @@ class DAGSchedulerSuite
     assert(sparkListener.successfulStages.contains(0))
   }
 
-  test("run trivial shuffle") {
+  test("run trivial shuffle") {//运行无价值的shuffle
     val shuffleMapRdd = new MyRDD(sc, 2, Nil)
     val shuffleDep = new ShuffleDependency(shuffleMapRdd, null)
     val shuffleId = shuffleDep.shuffleId
@@ -458,7 +496,7 @@ class DAGSchedulerSuite
     assert(results === Map(0 -> 42))
     assertDataStructuresEmpty()
   }
-
+  //运行无价值的Shuffle与获取失败
   test("run trivial shuffle with fetch failure") {
     val shuffleMapRdd = new MyRDD(sc, 2, Nil)
     val shuffleDep = new ShuffleDependency(shuffleMapRdd, null)
@@ -469,23 +507,25 @@ class DAGSchedulerSuite
         (Success, makeMapStatus("hostA", reduceRdd.partitions.size)),
         (Success, makeMapStatus("hostB", reduceRdd.partitions.size))))
     // the 2nd ResultTask failed
+    //第二个resulttask失败
     complete(taskSets(1), Seq(
         (Success, 42),
         (FetchFailed(makeBlockManagerId("hostA"), shuffleId, 0, 0, "ignored"), null)))
-    // this will get called
+    // this will get called 这将被称为
     // blockManagerMaster.removeExecutor("exec-hostA")
-    // ask the scheduler to try it again
+    // ask the scheduler to try it again 请调度程序再试一次
     scheduler.resubmitFailedStages()
-    // have the 2nd attempt pass
+    // have the 2nd attempt pass 有第二次尝试通过
     complete(taskSets(2), Seq((Success, makeMapStatus("hostA", reduceRdd.partitions.size))))
     // we can see both result blocks now
+    //我们现在可以看到两个结果块
     assert(mapOutputTracker.getMapSizesByExecutorId(shuffleId, 0).map(_._1.host).toSet ===
       HashSet("hostA", "hostB"))
     complete(taskSets(3), Seq((Success, 43)))
     assert(results === Map(0 -> 42, 1 -> 43))
     assertDataStructuresEmpty()
   }
-
+  //多个获取失败的无价值的Shuffle
   test("trivial shuffle with multiple fetch failures") {
     val shuffleMapRdd = new MyRDD(sc, 2, Nil)
     val shuffleDep = new ShuffleDependency(shuffleMapRdd, null)
@@ -496,10 +536,12 @@ class DAGSchedulerSuite
       (Success, makeMapStatus("hostA", reduceRdd.partitions.size)),
       (Success, makeMapStatus("hostB", reduceRdd.partitions.size))))
     // The MapOutputTracker should know about both map output locations.
+    //MapOutputTracker应该知道Map任务的输出位置
     assert(mapOutputTracker.getMapSizesByExecutorId(shuffleId, 0).map(_._1.host).toSet ===
       HashSet("hostA", "hostB"))
 
     // The first result task fails, with a fetch failure for the output from the first mapper.
+      //第一个结果任务失败,获取一个输出第一个Map的输出故障
     runEvent(CompletionEvent(
       taskSets(1).tasks(0),
       FetchFailed(makeBlockManagerId("hostA"), shuffleId, 0, 0, "ignored"),
@@ -511,6 +553,7 @@ class DAGSchedulerSuite
     assert(sparkListener.failedStages.contains(1))
 
     // The second ResultTask fails, with a fetch failure for the output from the second mapper.
+    //第二resulttask失败,获取一个输出第二个Map的输出故障
     runEvent(CompletionEvent(
       taskSets(1).tasks(0),
       FetchFailed(makeBlockManagerId("hostA"), shuffleId, 1, 1, "ignored"),
@@ -519,6 +562,7 @@ class DAGSchedulerSuite
       createFakeTaskInfo(),
       null))
     // The SparkListener should not receive redundant failure events.
+    // SparkListener不应该得到冗余故障事件
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(sparkListener.failedStages.size == 1)
   }
@@ -526,7 +570,9 @@ class DAGSchedulerSuite
   /**
    * This tests the case where another FetchFailed comes in while the map stage is getting
    * re-run.
+   * 这个测试的情况下,另一个fetchfailed进来而Map任务阶段开始重新运行  
    */
+  //后期获取失败不会导致同一个映射阶段的多个并发尝试
   test("late fetch failures don't cause multiple concurrent attempts for the same map stage") {
     val shuffleMapRdd = new MyRDD(sc, 2, Nil)
     val shuffleDep = new ShuffleDependency(shuffleMapRdd, null)
@@ -540,6 +586,7 @@ class DAGSchedulerSuite
     }
 
     // The map stage should have been submitted.
+    //Map阶段应该已经提交
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(countSubmittedMapStageAttempts() === 1)
 
@@ -547,12 +594,14 @@ class DAGSchedulerSuite
       (Success, makeMapStatus("hostA", 2)),
       (Success, makeMapStatus("hostB", 2))))
     // The MapOutputTracker should know about both map output locations.
+    //MapOutputTracker应该知道Map输出位置
     assert(mapOutputTracker.getMapSizesByExecutorId(shuffleId, 0).map(_._1.host).toSet ===
       HashSet("hostA", "hostB"))
     assert(mapOutputTracker.getMapSizesByExecutorId(shuffleId, 1).map(_._1.host).toSet ===
       HashSet("hostA", "hostB"))
 
     // The first result task fails, with a fetch failure for the output from the first mapper.
+    //第一个结果任务失败,获取第一个从Map输出故障。
     runEvent(CompletionEvent(
       taskSets(1).tasks(0),
       FetchFailed(makeBlockManagerId("hostA"), shuffleId, 0, 0, "ignored"),
@@ -564,13 +613,16 @@ class DAGSchedulerSuite
     assert(sparkListener.failedStages.contains(1))
 
     // Trigger resubmission of the failed map stage.
+    //触发失败的Map阶段提交
     runEvent(ResubmitFailedStages)
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
 
     // Another attempt for the map stage should have been submitted, resulting in 2 total attempts.
+    //Map阶段的另一个尝试应该已经提交,尝试2次结果
     assert(countSubmittedMapStageAttempts() === 2)
 
     // The second ResultTask fails, with a fetch failure for the output from the second mapper.
+    //第二次resulttask失败,一个获取失败在第二个Map任务的输出故障
     runEvent(CompletionEvent(
       taskSets(1).tasks(1),
       FetchFailed(makeBlockManagerId("hostB"), shuffleId, 1, 1, "ignored"),
@@ -581,6 +633,8 @@ class DAGSchedulerSuite
 
     // Another ResubmitFailedStages event should not result in another attempt for the map
     // stage being run concurrently.
+    //另一个resubmitfailedstages事件不应导致对地图的另一个尝试
+    //兼运行阶段
     // NOTE: the actual ResubmitFailedStages may get called at any time during this, but it
     // shouldn't effect anything -- our calling it just makes *SURE* it gets called between the
     // desired event and our check.
@@ -593,6 +647,7 @@ class DAGSchedulerSuite
   /**
     * This tests the case where a late FetchFailed comes in after the map stage has finished getting
     * retried and a new reduce stage starts running.
+    * 这个测试的情况下,后期fetchfailed进来之后的Map阶段完成复审和一个新的阶段开始减少
     */
   test("extremely late fetch failures don't cause multiple concurrent attempts for " +
       "the same stage") {
@@ -610,19 +665,23 @@ class DAGSchedulerSuite
     }
 
     // The map stage should have been submitted.
+    //Map阶段应该已经提交
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(countSubmittedMapStageAttempts() === 1)
 
     // Complete the map stage.
+    //完成Map阶段
     complete(taskSets(0), Seq(
       (Success, makeMapStatus("hostA", 2)),
       (Success, makeMapStatus("hostB", 2))))
 
     // The reduce stage should have been submitted.
+    //reduce阶段应提交
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(countSubmittedReduceStageAttempts() === 1)
 
     // The first result task fails, with a fetch failure for the output from the first mapper.
+    //第一个结果任务失败,一个获取失败Map任务输出故障
     runEvent(CompletionEvent(
       taskSets(1).tasks(0),
       FetchFailed(makeBlockManagerId("hostA"), shuffleId, 0, 0, "ignored"),
@@ -632,16 +691,20 @@ class DAGSchedulerSuite
       null))
 
     // Trigger resubmission of the failed map stage and finish the re-started map task.
+    //触发失败的Map阶段提交和完成重新启动Map任务
     runEvent(ResubmitFailedStages)
     complete(taskSets(2), Seq((Success, makeMapStatus("hostA", 1))))
 
     // Because the map stage finished, another attempt for the reduce stage should have been
+    //因为Map阶段结束了,reduce阶段的另一次尝试应该被提交
     // submitted, resulting in 2 total attempts for each the map and the reduce stage.
+    //造成2次总尝试的每一个Map和reduce阶段
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(countSubmittedMapStageAttempts() === 2)
     assert(countSubmittedReduceStageAttempts() === 2)
 
     // A late FetchFailed arrives from the second task in the original reduce stage.
+    //最后一个fetchfailed到达第二任务原来在reduce阶段
     runEvent(CompletionEvent(
       taskSets(1).tasks(1),
       FetchFailed(makeBlockManagerId("hostB"), shuffleId, 1, 1, "ignored"),
@@ -650,14 +713,16 @@ class DAGSchedulerSuite
       createFakeTaskInfo(),
       null))
 
-    // Running ResubmitFailedStages shouldn't result in any more attempts for the map stage, because
+    // Running ResubmitFailedStages shouldn't result in any more attempts for the map stage, because   
     // the FetchFailed should have been ignored
+    //运行resubmitfailedstages不应该再为Map阶段带来更多的尝试,因为fetchfailed应该被忽略
     runEvent(ResubmitFailedStages)
 
     // The FetchFailed from the original reduce stage should be ignored.
+    //从原始的fetchfailed减少阶段应该被忽略
     assert(countSubmittedMapStageAttempts() === 2)
   }
-
+  //忽视最后的Map任务完成
   test("ignore late map task completions") {
     val shuffleMapRdd = new MyRDD(sc, 2, Nil)
     val shuffleDep = new ShuffleDependency(shuffleMapRdd, null)
@@ -665,21 +730,26 @@ class DAGSchedulerSuite
     val reduceRdd = new MyRDD(sc, 2, List(shuffleDep))
     submit(reduceRdd, Array(0, 1))
     // pretend we were told hostA went away
+    //假装我们是告诉hostA走了
     val oldEpoch = mapOutputTracker.getEpoch
     runEvent(ExecutorLost("exec-hostA"))
     val newEpoch = mapOutputTracker.getEpoch
     assert(newEpoch > oldEpoch)
     val taskSet = taskSets(0)
     // should be ignored for being too old
+    //应该被忽视因为太老
     runEvent(CompletionEvent(taskSet.tasks(0), Success, makeMapStatus("hostA",
       reduceRdd.partitions.size), null, createFakeTaskInfo(), null))
     // should work because it's a non-failed host
+    //应该工作,因为它是一个非失败的主机
     runEvent(CompletionEvent(taskSet.tasks(0), Success, makeMapStatus("hostB",
       reduceRdd.partitions.size), null, createFakeTaskInfo(), null))
     // should be ignored for being too old
+    //应该被忽视因为太老
     runEvent(CompletionEvent(taskSet.tasks(0), Success, makeMapStatus("hostA",
       reduceRdd.partitions.size), null, createFakeTaskInfo(), null))
     // should work because it's a new epoch
+    //应该工作,因为它是一个新的时代
     taskSet.tasks(1).epoch = newEpoch
     runEvent(CompletionEvent(taskSet.tasks(1), Success, makeMapStatus("hostA",
       reduceRdd.partitions.size), null, createFakeTaskInfo(), null))
@@ -689,7 +759,7 @@ class DAGSchedulerSuite
     assert(results === Map(0 -> 42, 1 -> 43))
     assertDataStructuresEmpty()
   }
-
+  //运行Shuffle具有Map阶段故障
   test("run shuffle with map stage failure") {
     val shuffleMapRdd = new MyRDD(sc, 2, Nil)
     val shuffleDep = new ShuffleDependency(shuffleMapRdd, null)
@@ -697,11 +767,13 @@ class DAGSchedulerSuite
     submit(reduceRdd, Array(0, 1))
 
     // Fail the map stage.  This should cause the entire job to fail.
+    //失败的Map阶段,这应该会导致整个Job失败
     val stageFailureMessage = "Exception failure in map stage"
     failed(taskSets(0), stageFailureMessage)
     assert(failure.getMessage === s"Job aborted due to stage failure: $stageFailureMessage")
 
     // Listener bus should get told about the map stage failing, but not the reduce stage
+    //监听总线应该被告知Map阶段的失败,但不是减少阶段(因为减少阶段还没有开始)
     // (since the reduce stage hasn't been started yet).
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(sparkListener.failedStages.toSet === Set(0))
@@ -711,9 +783,10 @@ class DAGSchedulerSuite
 
   /**
    * Makes sure that failures of stage used by multiple jobs are correctly handled.
+   * 确保多个作业所使用的阶段失败是否正确处理
    *
    * This test creates the following dependency graph:
-   *
+   * 测试创建以下依赖关系图：
    * shuffleMapRdd1     shuffleMapRDD2
    *        |     \        |
    *        |      \       |
@@ -722,11 +795,14 @@ class DAGSchedulerSuite
    *   reduceRdd1    reduceRdd2
    *
    * We start both shuffleMapRdds and then fail shuffleMapRdd1.  As a result, the job listeners for
+   * 我们开始shufflemaprdds然后失败shufflemaprdd1,
    * reduceRdd1 and reduceRdd2 should both be informed that the job failed.  shuffleMapRDD2 should
+   * 因此一个结果,对于reducerdd1和reducerdd2工作作业失败都应告知的监听,shufflemaprdd2也应取消
    * also be cancelled, because it is only used by reduceRdd2 and reduceRdd2 cannot complete
+   * 因为只有reducerdd2和reducerdd2不能完成没有shufflemaprdd1
    * without shuffleMapRdd1.
    */
-  test("failure of stage used by two jobs") {
+  test("failure of stage used by two jobs") {//两个工作阶段的失败
     val shuffleMapRdd1 = new MyRDD(sc, 2, Nil)
     val shuffleDep1 = new ShuffleDependency(shuffleMapRdd1, null)
     val shuffleMapRdd2 = new MyRDD(sc, 2, Nil)
@@ -736,7 +812,9 @@ class DAGSchedulerSuite
     val reduceRdd2 = new MyRDD(sc, 2, List(shuffleDep1, shuffleDep2))
 
     // We need to make our own listeners for this test, since by default submit uses the same
+    //我们需要监听做测试,由于默认情况下,提交使用相同的侦听器进行所有作业
     // listener for all jobs, and here we want to capture the failure for each job separately.
+    //在这里我们要捕捉每一个工作的失败
     class FailureRecordingJobListener() extends JobListener {
       var failureMessage: String = _
       override def taskSucceeded(index: Int, result: Any) {}
@@ -754,6 +832,7 @@ class DAGSchedulerSuite
     assert(cancelledStages.toSet === Set(0, 2))
 
     // Make sure the listeners got told about both failed stages.
+    //确保两个失败的阶段告知这监听
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(sparkListener.successfulStages.isEmpty)
     assert(sparkListener.failedStages.toSet === Set(0, 2))
@@ -782,7 +861,9 @@ class DAGSchedulerSuite
     job2Properties.setProperty("testProperty", "job2")
 
     // Run jobs 1 & 2, both referencing the same stage, then cancel job1.
+    //运行作业1和2,都引用同一个阶段,然后取消job1
     // Note that we have to submit job2 before we cancel job1 to have them actually share
+    //注意,我们必须在我们那儿有他们真正共离取消提交的作业1
     // *Stages*, and not just shuffle dependencies, due to skipped stages (at least until
     // we address SPARK-10193.)
     val jobId1 = submit(finalRdd1, Array(0), properties = job1Properties)
@@ -791,9 +872,11 @@ class DAGSchedulerSuite
     val testProperty1 = scheduler.jobIdToActiveJob(jobId1).properties.getProperty("testProperty")
 
     // remove job1 as an ActiveJob
+    //移除Job1在活动Job(ActiveJob)
     cancel(jobId1)
 
     // job2 should still be running
+    //job2应该仍在运行
     assert(scheduler.activeJobs.nonEmpty)
     val testProperty2 = scheduler.jobIdToActiveJob(jobId2).properties.getProperty("testProperty")
     assert(testProperty1 != testProperty2)
@@ -802,6 +885,7 @@ class DAGSchedulerSuite
     // even though we have cancelled that job and are now running it because of job2, we haven't
     // updated the TaskSet's properties.  Changing the properties to "job2" is likely the more
     // correct behavior.
+    //taskset优先运行阶段,以“job1”为activejob
     val job1Id = 0  // TaskSet priority for Stages run with "job1" as the ActiveJob
     checkJobPropertiesAndPriority(taskSets(0), "job1", job1Id)
     complete(taskSets(0), Seq((Success, makeMapStatus("hostA", 1))))
@@ -812,7 +896,9 @@ class DAGSchedulerSuite
   /**
    * Makes sure that tasks for a stage used by multiple jobs are submitted with the properties of a
    * later, active job if they were previously run under a job that is no longer active
+   * 确保多个作业所使用的阶段的任务被提交给一个以后的属性,激活的工作,如果他们以前是在一个Job不再活跃
    */
+  //阶段所使用的两个工作,第一个不再活跃
   test("stage used by two jobs, the first no longer active (SPARK-6880)") {
     launchJobsThatShareStageAndCancelFirst()
 
@@ -835,23 +921,28 @@ class DAGSchedulerSuite
    * later, active job if they were previously run under a job that is no longer active, even when
    * there are fetch failures
    */
+  //两个工作阶段使用的阶段，一些获取失败,第一个Job不再活跃
   test("stage used by two jobs, some fetch failures, and the first job no longer active " +
     "(SPARK-6880)") {
     val shuffleDep1 = launchJobsThatShareStageAndCancelFirst()
+    //askset优先运行阶段，以"job2"为activejob
     val job2Id = 1  // TaskSet priority for Stages run with "job2" as the ActiveJob
 
-    // lets say there is a fetch failure in this task set, which makes us go back and
+    // lets say there is a fetch failure in this task set, which makes us go back and   
     // run stage 0, attempt 1
+    //可以说在这个任务集里有一个获取失败的,这使我们回到和运行阶段0，尝试1
     complete(taskSets(1), Seq(
       (FetchFailed(makeBlockManagerId("hostA"), shuffleDep1.shuffleId, 0, 0, "ignored"), null)))
     scheduler.resubmitFailedStages()
 
     // stage 0, attempt 1 should have the properties of job2
+    //0阶段，尝试1应具有的job2特性
     assert(taskSets(2).stageId === 0)
     assert(taskSets(2).stageAttemptId === 1)
     checkJobPropertiesAndPriority(taskSets(2), "job2", job2Id)
 
     // run the rest of the stages normally, checking that they have the correct properties
+    //正常运行阶段的其余部分,检查它们有正确的属性
     complete(taskSets(2), Seq((Success, makeMapStatus("hostA", 1))))
     checkJobPropertiesAndPriority(taskSets(3), "job2", job2Id)
     complete(taskSets(3), Seq((Success, makeMapStatus("hostA", 1))))
@@ -862,7 +953,7 @@ class DAGSchedulerSuite
 
     assertDataStructuresEmpty()
   }
-
+  //超出范围失败和重试的无价值的Shuffle
   test("run trivial shuffle with out-of-band failure and retry") {
     val shuffleMapRdd = new MyRDD(sc, 2, Nil)
     val shuffleDep = new ShuffleDependency(shuffleMapRdd, null)
@@ -871,6 +962,7 @@ class DAGSchedulerSuite
     submit(reduceRdd, Array(0))
     // blockManagerMaster.removeExecutor("exec-hostA")
     // pretend we were told hostA went away
+    //假装我们是告诉hostA走了
     runEvent(ExecutorLost("exec-hostA"))
     // DAGScheduler will immediately resubmit the stage after it appears to have no pending tasks
     // rather than marking it is as failed and waiting.
@@ -878,6 +970,7 @@ class DAGSchedulerSuite
         (Success, makeMapStatus("hostA", 1)),
        (Success, makeMapStatus("hostB", 1))))
     // have hostC complete the resubmitted task
+    //有hostc完成提交任务
     complete(taskSets(1), Seq((Success, makeMapStatus("hostC", 1))))
     assert(mapOutputTracker.getMapSizesByExecutorId(shuffleId, 0).map(_._1).toSet ===
            HashSet(makeBlockManagerId("hostC"), makeBlockManagerId("hostB")))
@@ -886,7 +979,7 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("recursive shuffle failures") {
+  test("recursive shuffle failures") {//递归Shuffle失败
     val shuffleOneRdd = new MyRDD(sc, 2, Nil)
     val shuffleDepOne = new ShuffleDependency(shuffleOneRdd, null)
     val shuffleTwoRdd = new MyRDD(sc, 2, List(shuffleDepOne))
@@ -894,19 +987,23 @@ class DAGSchedulerSuite
     val finalRdd = new MyRDD(sc, 1, List(shuffleDepTwo))
     submit(finalRdd, Array(0))
     // have the first stage complete normally
+    //有第一个阶段完成正常
     complete(taskSets(0), Seq(
         (Success, makeMapStatus("hostA", 2)),
         (Success, makeMapStatus("hostB", 2))))
     // have the second stage complete normally
+    // 有第二个阶段完成正常
     complete(taskSets(1), Seq(
         (Success, makeMapStatus("hostA", 1)),
         (Success, makeMapStatus("hostC", 1))))
     // fail the third stage because hostA went down
+    //失败的第三阶段因为hostA宕机了
     complete(taskSets(2), Seq(
         (FetchFailed(makeBlockManagerId("hostA"), shuffleDepTwo.shuffleId, 0, 0, "ignored"), null)))
     // TODO assert this:
     // blockManagerMaster.removeExecutor("exec-hostA")
     // have DAGScheduler try again
+    //有dagscheduler再试一次
     scheduler.resubmitFailedStages()
     complete(taskSets(3), Seq((Success, makeMapStatus("hostA", 2))))
     complete(taskSets(4), Seq((Success, makeMapStatus("hostA", 1))))
@@ -915,7 +1012,7 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("cached post-shuffle") {
+  test("cached post-shuffle") {//缓存提交shuffle
     val shuffleOneRdd = new MyRDD(sc, 2, Nil).cache()
     val shuffleDepOne = new ShuffleDependency(shuffleOneRdd, null)
     val shuffleTwoRdd = new MyRDD(sc, 2, List(shuffleDepOne)).cache()
@@ -925,22 +1022,27 @@ class DAGSchedulerSuite
     cacheLocations(shuffleTwoRdd.id -> 0) = Seq(makeBlockManagerId("hostD"))
     cacheLocations(shuffleTwoRdd.id -> 1) = Seq(makeBlockManagerId("hostC"))
     // complete stage 2
+    //完成阶段2
     complete(taskSets(0), Seq(
         (Success, makeMapStatus("hostA", 2)),
         (Success, makeMapStatus("hostB", 2))))
     // complete stage 1
+    //完成阶段1
     complete(taskSets(1), Seq(
         (Success, makeMapStatus("hostA", 1)),
         (Success, makeMapStatus("hostB", 1))))
     // pretend stage 0 failed because hostA went down
+    //假装阶段0失败 ,因为hostA宕机了
     complete(taskSets(2), Seq(
         (FetchFailed(makeBlockManagerId("hostA"), shuffleDepTwo.shuffleId, 0, 0, "ignored"), null)))
     // TODO assert this:
     // blockManagerMaster.removeExecutor("exec-hostA")
     // DAGScheduler should notice the cached copy of the second shuffle and try to get it rerun.
+    //DAGScheduler应该注意的缓存副本,第二个洗牌试着重新洗牌
     scheduler.resubmitFailedStages()
     assertLocations(taskSets(3), Seq(Seq("hostD")))
     // allow hostD to recover
+    //允许hostD恢复
     complete(taskSets(3), Seq((Success, makeMapStatus("hostD", 1))))
     complete(taskSets(4), Seq((Success, 42)))
     assert(results === Map(0 -> 42))
@@ -957,36 +1059,45 @@ class DAGSchedulerSuite
     })
 
     // Run this on executors
+    //运行在执行器
     sc.parallelize(1 to 10, 2).foreach { item => acc.add(1) }
 
     // Make sure we can still run commands
+    //确保我们仍然可以运行命令
     assert(sc.parallelize(1 to 10, 2).count() === 10)
   }
 
   /**
    * The job will be failed on first task throwing a DAGSchedulerSuiteDummyException.
+   * 这项工作将在第一个任务扔dagschedulersuitedummyexception失败
    *  Any subsequent task WILL throw a legitimate java.lang.UnsupportedOperationException.
+   *  任何后续任务都将抛出一个合法的UnsupportedOperationException
    *  If multiple tasks, there exists a race condition between the SparkDriverExecutionExceptions
+   *  如果多个任务,存在一个竞争条件SparkDriverExecutionExceptions和他们的不同的原因，这将代表工作的结果…
    *  and their differing causes as to which will represent result for job...
    */
   test("misbehaved resultHandler should not crash DAGScheduler and SparkContext") {
     val e = intercept[SparkDriverExecutionException] {
       // Number of parallelized partitions implies number of tasks of job
+      //并行分区数目意味着任务的工作数量
       val rdd = sc.parallelize(1 to 10, 2)
       sc.runJob[Int, Int](
         rdd,
         (context: TaskContext, iter: Iterator[Int]) => iter.size,
         // For a robust test assertion, limit number of job tasks to 1; that is,
+        //对于一个健壮的测试断言,将任务任务的数量限制为1,这是
         // if multiple RDD partitions, use id of any one partition, say, first partition id=0
+        //如果多个RDD的分区,使用ID的任何一个分区,第一个分区ID =0
         Seq(0),
         (part: Int, result: Int) => throw new DAGSchedulerSuiteDummyException)
     }
     assert(e.getCause.isInstanceOf[DAGSchedulerSuiteDummyException])
 
     // Make sure we can still run commands on our SparkContext
+    //确保我们仍然可以运行在我们的sparkcontext命令
     assert(sc.parallelize(1 to 10, 2).count() === 10)
   }
-
+  //异常不应该碰撞dagscheduler和sparkcontext
   test("getPartitions exceptions should not crash DAGScheduler and SparkContext (SPARK-8606)") {
     val e1 = intercept[DAGSchedulerSuiteDummyException] {
       val rdd = new MyRDD(sc, 2, Nil) {
@@ -997,10 +1108,11 @@ class DAGSchedulerSuite
       rdd.reduceByKey(_ + _, 1).count()
     }
 
-    // Make sure we can still run commands
+    // Make sure we can still run commands    
+    //确保我们仍然可以运行命令
     assert(sc.parallelize(1 to 10, 2).count() === 10)
   }
-
+  //错误不应该碰撞dagscheduler和sparkcontext
   test("getPreferredLocations errors should not crash DAGScheduler and SparkContext (SPARK-8606)") {
     val e1 = intercept[SparkException] {
       val rdd = new MyRDD(sc, 2, Nil) {
@@ -1013,9 +1125,10 @@ class DAGSchedulerSuite
     assert(e1.getMessage.contains(classOf[DAGSchedulerSuiteDummyException].getName))
 
     // Make sure we can still run commands
+    //确保我们仍然可以运行命令
     assert(sc.parallelize(1 to 10, 2).count() === 10)
   }
-
+  //累加器不计算提交结果阶段
   test("accumulator not calculated for resubmitted result stage") {
     // just for register
     val accum = new Accumulator[Int](0, AccumulatorParam.IntAccumulatorParam)
@@ -1031,7 +1144,7 @@ class DAGSchedulerSuite
 
     assertDataStructuresEmpty()
   }
-
+  //reduce任务应放在本地与Map输出
   ignore("reduce tasks should be placed locally with map output") {
     // Create an shuffleMapRdd with 1 partition
     val shuffleMapRdd = new MyRDD(sc, 1, Nil)
@@ -1045,13 +1158,14 @@ class DAGSchedulerSuite
            HashSet(makeBlockManagerId("hostA")))
 
     // Reducer should run on the same host that map task ran
+    //Reducer应在同一台主机上运行,Map任务
     val reduceTaskSet = taskSets(1)
     assertLocations(reduceTaskSet, Seq(Seq("hostA")))
     complete(reduceTaskSet, Seq((Success, 42)))
     assert(results === Map(0 -> 42))
     assertDataStructuresEmpty()
   }
-
+  //reduce任务局部性的喜好,只应包括机器与最大的map输出
   ignore("reduce task locality preferences should only include machines with largest map outputs") {
     val numMapTasks = 4
     // Create an shuffleMapRdd with more partitions
@@ -1067,6 +1181,7 @@ class DAGSchedulerSuite
     complete(taskSets(0), statuses)
 
     // Reducer should prefer the last 3 hosts as they have 20%, 30% and 40% of data
+    //Reducer应该更喜欢最后的3台主机,因为他们有20%,30%和40%的数据
     val hosts = (1 to numMapTasks).map(i => "host" + i).reverse.take(numMapTasks - 1)
 
     val reduceTaskSet = taskSets(1)
@@ -1075,9 +1190,10 @@ class DAGSchedulerSuite
     assert(results === Map(0 -> 42))
     assertDataStructuresEmpty()
   }
-
+  //窄和Shuffle的依赖关系的阶段使用窄的地方
   test("stages with both narrow and shuffle dependencies use narrow ones for locality") {
     // Create an RDD that has both a shuffle dependency and a narrow dependency (e.g. for a join)
+    //创建一个RDD具有Shuffle窄依赖
     val rdd1 = new MyRDD(sc, 1, Nil)
     val rdd2 = new MyRDD(sc, 1, Nil, locations = Seq(Seq("hostB")))
     val shuffleDep = new ShuffleDependency(rdd1, null)
@@ -1097,25 +1213,30 @@ class DAGSchedulerSuite
     assert(results === Map(0 -> 42))
     assertDataStructuresEmpty()
   }
-
+  //Spark异常应包括堆栈跟踪中的调用站点
   test("Spark exceptions should include call site in stack trace") {
     val e = intercept[SparkException] {
       sc.parallelize(1 to 10, 2).map { _ => throw new RuntimeException("uh-oh!") }.count()
     }
 
     // Does not include message, ONLY stack trace.
+    //不包括消息,只有堆栈跟踪
     val stackTraceString = e.getStackTraceString
 
     // should actually include the RDD operation that invoked the method:
+    //实际上应该包括RDD操作调用的方法
     assert(stackTraceString.contains("org.apache.spark.rdd.RDD.count"))
 
     // should include the FunSuite setup:
+    //应包括funsuite设置
     assert(stackTraceString.contains("org.scalatest.FunSuite"))
   }
 
   /**
    * Assert that the supplied TaskSet has exactly the given hosts as its preferred locations.
+   * 断言提供完全给予taskset主机作为其首选地点
    * Note that this checks only the host and not the executor ID.
+   * 注意这只检查主机而不是执行人的身份
    */
   private def assertLocations(taskSet: TaskSet, hosts: Seq[Seq[String]]) {
     assert(hosts.size === taskSet.tasks.size)

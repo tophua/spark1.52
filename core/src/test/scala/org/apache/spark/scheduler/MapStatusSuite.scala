@@ -76,7 +76,7 @@ class MapStatusSuite extends SparkFunSuite {
     assert(status.getSizeForBlock(99) === 150L)
     assert(status.getSizeForBlock(2000) === 150L)
   }
-
+  //高度压缩的Map状态:估计的大小应该是平均非空块大小
   test("HighlyCompressedMapStatus: estimated size should be the average non-empty block size") {
     val sizes = Array.tabulate[Long](3000) { i => i.toLong }
     val avg = sizes.sum / sizes.filter(_ != 0).length

@@ -236,27 +236,33 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
     val attempt1 = FakeTask.createTaskSet(10)
 
     // submit attempt 1, offer some resources, some tasks get scheduled
+    //提交尝试1,提供一些资源,一些任务被调度
     taskScheduler.submitTasks(attempt1)
     val taskDescriptions = taskScheduler.resourceOffers(workerOffers).flatten
     assert(10 === taskDescriptions.length)
 
     // now mark attempt 1 as a zombie
+    //现在标记尝试1作为一个僵尸
     val mgr1 = taskScheduler.taskSetManagerForAttempt(attempt1.stageId, attempt1.stageAttemptId).get
     mgr1.isZombie = true
 
     // don't schedule anything on another resource offer
+    //不要安排任何资源上的另一个资源
     val taskDescriptions2 = taskScheduler.resourceOffers(workerOffers).flatten
     assert(0 === taskDescriptions2.length)
 
     // submit attempt 2
+    //提交尝试2
     val attempt2 = FakeTask.createTaskSet(10, 1)
     taskScheduler.submitTasks(attempt2)
 
     // attempt 1 finished (this can happen even if it was marked zombie earlier -- all tasks were
     // already submitted, and then they finish)
+    //尝试完成1,（这可能发生，即使它被标记为僵尸早期-所有的任务都是已经提交,然后他们完成)
     taskScheduler.taskSetFinished(mgr1)
 
     // now with another resource offer, we should still schedule all the tasks in attempt2
+    //现在与另一个资源提供,我们还是应该安排在attempt2所有任务
     val taskDescriptions3 = taskScheduler.resourceOffers(workerOffers).flatten
     assert(10 === taskDescriptions3.length)
 

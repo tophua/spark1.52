@@ -81,8 +81,10 @@ class TaskContextSuite extends SparkFunSuite with BeforeAndAfter with LocalSpark
   }
 
   test("TaskContext.attemptNumber should return attempt number, not task id (SPARK-4014)") {
+    //使用maxretries = 2因为我们测试失败的任务
     sc = new SparkContext("local[1,2]", "test")  // use maxRetries = 2 because we test failed tasks
     // Check that attemptIds are 0 for all tasks' initial attempts
+    //检查最初尝试attemptids 0所有的任务
     val attemptIds = sc.parallelize(Seq(1, 2), 2).mapPartitions { iter =>
       Seq(TaskContext.get().attemptNumber).iterator
     }.collect()

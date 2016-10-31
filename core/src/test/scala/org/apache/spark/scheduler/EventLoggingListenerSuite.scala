@@ -34,9 +34,12 @@ import org.apache.spark.util.{JsonProtocol, Utils}
 
 /**
  * Test whether EventLoggingListener logs events properly.
+ * 测试是否eventlogginglistener日志事件属性
  *
  * This tests whether EventLoggingListener actually log files with expected name patterns while
+ * 是否实际eventlogginglistener日志名称与期望的日志事件名称模式相匹配
  * logging events, whether the parsing of the file names is correct, and whether the logged events
+ * 解析文件名是否正确
  * can be read and deserialized into actual SparkListenerEvents.
  */
 class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext with BeforeAndAfter
@@ -58,8 +61,9 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
     Utils.deleteRecursively(testDir)
   }
 
-  test("Verify log file exist") {
+  test("Verify log file exist") {//验证日志文件存在
     // Verify logging directory exists
+    //检查日志记录目录是否存在
     val conf = getLoggingConf(testDirPath)
     val eventLogger = new EventLoggingListener("test", None, testDirPath.toUri(), conf)
     eventLogger.start()
@@ -70,53 +74,58 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
     assert(!logStatus.isDir)
 
     // Verify log is renamed after stop()
+    //验证日志重命名后stop()
     eventLogger.stop()
     assert(!fileSystem.getFileStatus(new Path(eventLogger.logPath)).isDir)
   }
 
-  test("Basic event logging") {
+  test("Basic event logging") {//基本事件日志
     testEventLogging()
   }
 
-  test("Basic event logging with compression") {
+  test("Basic event logging with compression") {//压缩基本事件日志记录
     CompressionCodec.ALL_COMPRESSION_CODECS.foreach { codec =>
       testEventLogging(compressionCodec = Some(CompressionCodec.getShortName(codec)))
     }
   }
 
-  test("End-to-end event logging") {
+  test("End-to-end event logging") {//端到端事件日志记录
     testApplicationEventLogging()
   }
 
-  test("End-to-end event logging with compression") {
+  test("End-to-end event logging with compression") {//端到端的压缩事件日志记录
     CompressionCodec.ALL_COMPRESSION_CODECS.foreach { codec =>
       testApplicationEventLogging(compressionCodec = Some(CompressionCodec.getShortName(codec)))
     }
   }
 
-  test("Log overwriting") {
+  test("Log overwriting") {//日志覆盖
     val logUri = EventLoggingListener.getLogPath(testDir.toURI, "test", None)
     val logPath = new URI(logUri).getPath
     // Create file before writing the event log
+    // 在写入事件日志之前创建文件
     new FileOutputStream(new File(logPath)).close()
     // Expected IOException, since we haven't enabled log overwrite.
+    // 异常IOException,由于我们还没有启用日志覆盖
     intercept[IOException] { testEventLogging() }
     // Try again, but enable overwriting.
+    //再试一次,但使覆盖
     testEventLogging(extraConf = Map("spark.eventLog.overwrite" -> "true"))
   }
 
-  test("Event log name") {
-    // without compression
+  test("Event log name") {//事件日志名称
+    // without compression 无压缩
     assert(s"file:/base-dir/app1" === EventLoggingListener.getLogPath(
       Utils.resolveURI("/base-dir"), "app1", None))
-    // with compression
+    // with compression 压缩
     assert(s"file:/base-dir/app1.lzf" ===
       EventLoggingListener.getLogPath(Utils.resolveURI("/base-dir"), "app1", None, Some("lzf")))
-    // illegal characters in app ID
+    // illegal characters in app ID 应用程序中的非法字符
     assert(s"file:/base-dir/a-fine-mind_dollar_bills__1" ===
       EventLoggingListener.getLogPath(Utils.resolveURI("/base-dir"),
         "a fine:mind$dollar{bills}.1", None))
     // illegal characters in app ID with compression
+    //具有压缩的应用程序中的非法字符
     assert(s"file:/base-dir/a-fine-mind_dollar_bills__1.lz4" ===
       EventLoggingListener.getLogPath(Utils.resolveURI("/base-dir"),
         "a fine:mind$dollar{bills}.1", None, Some("lz4")))
@@ -130,8 +139,9 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
 
   /**
    * Test basic event logging functionality.
-   *
+   * 测试基本事件日志记录功能
    * This creates two simple events, posts them to the EventLoggingListener, and verifies that
+   * 这创造了两个简单的事件,提交到EventLoggingListener,并验证这两个事件是否在预期的文件中记录
    * exactly these two events are logged in the expected file.
    */
   private def testEventLogging(
@@ -147,6 +157,7 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
     val applicationEnd = SparkListenerApplicationEnd(1000L)
 
     // A comprehensive test on JSON de/serialization of all events is in JsonProtocolSuite
+    //一个综合测试JSON序列化/反列化,所有的事件是jsonprotocolsuite
     eventLogger.start()
     listenerBus.start(sc)
     listenerBus.addListener(eventLogger)
@@ -155,6 +166,7 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
     eventLogger.stop()
 
     // Verify file contains exactly the two events logged
+    //验证文件中包含的正是两个事件记录的
     val logData = EventLoggingListener.openEventLog(new Path(eventLogger.logPath), fileSystem)
     try {
       val lines = readLines(logData)
@@ -173,6 +185,7 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
 
   /**
    * Test end-to-end event logging functionality in an application.
+   * 在应用程序中测试端到端的事件日志记录功能
    * This runs a simple Spark job and asserts that the expected events are logged when expected.
    */
   private def testApplicationEventLogging(compressionCodec: Option[String] = None) {
@@ -189,17 +202,21 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
       expectedLogDir, sc.applicationId, None, compressionCodec.map(CompressionCodec.getShortName)))
 
     // Begin listening for events that trigger asserts
+    //开始监听触发断言的事件
     val eventExistenceListener = new EventExistenceListener(eventLogger)
     sc.addSparkListener(eventExistenceListener)
 
     // Trigger asserts for whether the expected events are actually logged
+    //触发器断言是否实际记录的预期事件
     sc.parallelize(1 to 10000).count()
     sc.stop()
 
     // Ensure all asserts have actually been triggered
+    //确保所有的断言实际上已经被触发
     eventExistenceListener.assertAllCallbacksInvoked()
 
     // Make sure expected events exist in the log file.
+    //确保日志文件中存在预期的事件
     val logData = EventLoggingListener.openEventLog(new Path(eventLogger.logPath), fileSystem)
     val logStart = SparkListenerLogStart(SPARK_VERSION)
     val lines = readLines(logData)
@@ -267,7 +284,10 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
 
 object EventLoggingListenerSuite {
 
-  /** Get a SparkConf with event logging enabled. */
+  /** 
+   *  Get a SparkConf with event logging enabled.
+   *  得到一个sparkconf事件启用日志记录
+   *   */
   def getLoggingConf(logDir: Path, compressionCodec: Option[String] = None): SparkConf = {
     val conf = new SparkConf
     //是否记录Spark事件，用于应用程序在完成后重构webUI

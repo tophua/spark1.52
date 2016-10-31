@@ -38,7 +38,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
   val WAIT_TIMEOUT_MILLIS = 10000
 
   val jobCompletionTime = 1421191296660L
-
+   //基本的创建和关闭livelistenerbus
   test("basic creation and shutdown of LiveListenerBus") {
     val counter = new BasicJobCounter
     val bus = new LiveListenerBus
@@ -120,6 +120,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
       override def run() {
         stopperStarted.release()
         // stop() will block until notify() is called below
+        //stop()将阻塞直到notify()被调用
         bus.stop()
         stopperReturned.release()
       }
@@ -127,9 +128,11 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
     stopperStarted.acquire()
     // Listener should remain blocked after stopper started
+    //监听器应保持锁定后,开始堵塞
     assert(!drained)
 
     // unblock Listener to let queue drain
+    //解锁监听器让排列排队
     listenerWait.release()
     stopperReturned.acquire()
     assert(drained)

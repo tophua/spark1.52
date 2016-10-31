@@ -180,6 +180,7 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
 
       // the driver should not have any problems resolving the exception class and determining
       // why the task failed.
+      //该驱动程序不应该有任何解决异常的问题,并确定任务失败的原因
       val exceptionMessage = intercept[SparkException] {
         rdd.collect()
       }.getMessage

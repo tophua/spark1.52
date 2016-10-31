@@ -31,6 +31,7 @@ import org.apache.spark.util.{JsonProtocol, Utils}
 
 /**
  * Test whether ReplayListenerBus replays events from logs correctly.
+ * 测试是否正确replaylistenerbus回放事件日志
  */
 class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
   private val fileSystem = Utils.getHadoopFileSystem("/",
@@ -92,10 +93,13 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
 
   /**
    * Test end-to-end replaying of events.
+   * 测试端到端的回放事件
    *
    * This test runs a few simple jobs with event logging enabled, and compares each emitted
+   * 此测试运行几个简单的作业,使用事件日志记录功能,比较每个发出事件对应的回放事件日志
    * event to the corresponding event replayed from the event logs. This test makes the
    * assumption that the event logging behavior is correct (tested in a separate suite).
+   * 该测试使事件日志记录行为是正确
    */
   private def testApplicationReplay(codecName: Option[String] = None) {
     val logDirPath = Utils.getFilePath(testDir, "test-replay")
@@ -141,8 +145,9 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
 
   /**
    * A simple listener that buffers all the events it receives.
-   * 一个简单的侦听器,它缓冲它接收到的所有事件。
+   * 一个简单的侦听器,它缓冲它接收到的所有事件
    * The event buffering functionality must be implemented within EventLoggingListener itself.
+   * 事件缓冲功能的实施必须在eventlogginglistener本身
    * This is because of the following race condition: the event may be mutated between being
    * processed by one listener and being processed by another. Thus, in order to establish
    * a fair comparison between the original events and the replayed events, both functionalities
@@ -150,6 +155,7 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
    *
    * This child listener inherits only the event buffering functionality, but does not actually
    * log the events.
+   * 此子侦听器只继承事件缓冲功能,但实际上并没有记录事件
    */
   private class EventMonster(conf: SparkConf)
     extends EventLoggingListener("test", None, new URI("testdir"), conf) {
