@@ -29,7 +29,10 @@ import org.apache.spark.util.Utils
 
 private object RidgeRegressionSuite {
 
-  /** 3 features */
+  /** 
+   *  3 features 
+   *  3特点
+   *  */
   val model = new RidgeRegressionModel(weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5)
 }
 /**
@@ -46,16 +49,20 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("ridge regression can help avoid overfitting") {//岭回归分析可以帮助避免过拟合
 
     // For small number of examples and large variance of error distribution,
+    //少量的例子和大方差的误差分布
     // ridge regression should give smaller generalization error that linear regression.
+    //岭回归应该给出较小的泛化误差,线性回归
 
     val numExamples = 50
     val numFeatures = 20
 
     org.jblas.util.Random.seed(42)
     // Pick weights as random values distributed uniformly in [-0.5, 0.5]
+    //选择权重为随机值分布的均匀分布在[ 0.5，0.5 ]
     val w = DoubleMatrix.rand(numFeatures, 1).subi(0.5)
 
     // Use half of data for training and other half for validation
+    //使用一半的数据进行培训和其他一半的验证
     val data = LinearDataGenerator.generateLinearInput(3.0, w.toArray, 2 * numExamples, 42, 10.0)
     val testData = data.take(numExamples)
     val validationData = data.takeRight(numExamples)
@@ -64,6 +71,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationRDD = sc.parallelize(validationData, 2).cache()
 
     // First run without regularization.
+    //无正则化第一次运行
     val linearReg = new LinearRegressionWithSGD()
     linearReg.optimizer.setNumIterations(200).setStepSize(1.0)
     val linearModel = linearReg.run(testRDD)
@@ -79,6 +87,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         ridgeModel.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Ridge validation error should be lower than linear regression.
+    //岭验证误差应低于线性回归
     assert(ridgeErr < linearErr,
       "ridgeError (" + ridgeErr + ") was not less than linearError(" + linearErr + ")")
   }
@@ -90,6 +99,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val path = tempDir.toURI.toString
 
     // Save model, load it back, and compare.
+    //保存模型,加载它回来,并比较
     try {
       model.save(sc, path)
       val sameModel = RidgeRegressionModel.load(sc, path)
@@ -102,7 +112,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 class RidgeRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-
+   //在训练和预测中,任务的大小应该是小
   test("task size should be small in both training and prediction") {
     val m = 4
     val n = 200000
@@ -112,6 +122,7 @@ class RidgeRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkCo
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be
     // greater than 1MB and hence Spark would throw an error.
+    //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB,因此Spark会抛出一个错误
     val model = RidgeRegressionWithSGD.train(points, 2)
     val predictions = model.predict(points.map(_.features))
   }

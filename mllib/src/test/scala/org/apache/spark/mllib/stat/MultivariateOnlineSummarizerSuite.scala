@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.TestingUtils._
 /**
- * 多变更在线合计
+ * 多元网络概述
  */
 class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
 

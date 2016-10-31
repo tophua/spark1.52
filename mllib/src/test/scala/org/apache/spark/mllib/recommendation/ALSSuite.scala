@@ -206,18 +206,24 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
   /**
    * Test if we can correctly factorize R = U * P where U and P are of known rank.
    * 如果我们能正确地分解测试
-   * @param users number of users
-   * @param products number of products
-   * @param features number of features (rank of problem)
-   * @param iterations number of iterations to run
+   * @param users number of users 用户数
+   * @param products number of products 产品数量
+   * @param features number of features (rank of problem)特征数
+   * @param iterations number of iterations to run 运行的迭代次数
    * @param samplingRate what fraction of the user-product pairs are known
+   * 				用户产品对的哪些部分是已知
    * @param matchThreshold max difference allowed to consider a predicted rating correct
-   * @param implicitPrefs flag to test implicit feedback
-   * @param bulkPredict flag to test bulk predicition
+   * 				最大允许差异考虑预测评级正确
+   * @param implicitPrefs flag to test implicit feedback 测试隐式反馈的标志
+   * @param bulkPredict flag to test bulk predicition 检验批量预测标志
    * @param negativeWeights whether the generated data can contain negative values
+   * 				生成的数据是否可以包含负值
    * @param numUserBlocks number of user blocks to partition users into
+   * 				分区用户的用户块数
    * @param numProductBlocks number of product blocks to partition products into
+   * 				产品块的数量划分成
    * @param negativeFactors whether the generated user/product factors can have negative entries
+   * 				是否生成的用户/产品因素可以有负面的条目
    */
   // scalastyle:off
   def testALS(

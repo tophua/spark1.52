@@ -257,7 +257,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
     assert(udt.simpleString == "vector")
   }
 
-  test("fromBreeze") {//
+  test("fromBreeze") {//来自Breeze
     val x = BDM.zeros[Double](10, 10)
     val v = Vectors.fromBreeze(x(::, 0))
     assert(v.size === x.rows)

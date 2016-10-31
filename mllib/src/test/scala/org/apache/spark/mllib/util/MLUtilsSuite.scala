@@ -248,7 +248,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     Utils.deleteRecursively(tempDir)
   }
 
-  test("log1pExp") {//
+  test("log1pExp") {// log1p方法返回参数与1之和的自然对数
     assert(log1pExp(76.3) ~== math.log1p(math.exp(76.3)) relTol 1E-10)
     assert(log1pExp(87296763.234) ~== 87296763.234 relTol 1E-10)
 

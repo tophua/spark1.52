@@ -133,6 +133,7 @@ class TestingUtilsSuite extends SparkFunSuite {
       Vectors.dense(Array(3.1, 0.01)) ~== Vectors.sparse(2, Array(0), Array(3.13)) relTol 0.01)
 
     // Comparisons of two sparse vectors
+    //两个稀疏向量的比较
     assert(Vectors.dense(Array(3.1, 3.5)) ~==
       Vectors.sparse(2, Array(0, 1), Array(3.130, 3.534)) relTol 0.01)
 

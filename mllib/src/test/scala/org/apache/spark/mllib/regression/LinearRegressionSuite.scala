@@ -40,13 +40,16 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   def validatePrediction(predictions: Seq[Double], input: Seq[LabeledPoint]) {
     val numOffPredictions = predictions.zip(input).count { case (prediction, expected) =>
       // A prediction is off if the prediction is more than 0.5 away from expected value.
+      //预测是关闭的,如果预测是超过0.5,从预期值
       math.abs(prediction - expected.label) > 0.5
     }
     // At least 80% of the predictions should be on.
+    //应该至少有80%的预测
     assert(numOffPredictions < input.length / 5)
   }
 
   // Test if we can correctly learn Y = 3 + 10*X1 + 10*X2
+  //测试 如果我们能正确学习  y = 3 + 10 + 10 * * X1 X2
   test("linear regression") {
     val testRDD = sc.parallelize(LinearDataGenerator.generateLinearInput(
       3.0, Array(10.0, 10.0), 100, 42), 2).cache()
@@ -196,13 +199,16 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationRDD = sc.parallelize(validationData, 2).cache()
 
     // Test prediction on RDD.
+    //测试预测在RDD上
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Test prediction on Array.
+     //测试预测在数组上
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
 
   // Test if we can correctly learn Y = 10*X1 + 10*X10000
+  //测试 如果我们能正确学习  y = Y = 10*X1 + 10*X10000
   test("sparse linear regression without intercept") {//无拦截的稀疏线性回归
     val denseRDD = sc.parallelize(
       LinearDataGenerator.generateLinearInput(0.0, Array(10.0, 10.0), 100, 42), 2)
@@ -230,10 +236,12 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val sparseValidationRDD = sc.parallelize(sparseValidationData, 2)
 
       // Test prediction on RDD.
+    //测试预测在RDD上
     validatePrediction(
       model.predict(sparseValidationRDD.map(_.features)).collect(), sparseValidationData)
 
     // Test prediction on Array.
+    //测试预测在数组上
     validatePrediction(
       sparseValidationData.map(row => model.predict(row.features)), sparseValidationData)
   }
@@ -245,6 +253,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val path = tempDir.toURI.toString
 
     // Save model, load it back, and compare.
+    //保存模型,加载它回来,并比较
     try {
       model.save(sc, path)
       val sameModel = LinearRegressionModel.load(sc, path)
@@ -266,6 +275,7 @@ class LinearRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkC
       iter.map(i => LabeledPoint(1.0, Vectors.dense(Array.fill(n)(random.nextDouble()))))
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be
+    //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB,因此Spark会抛出一个错误
     // greater than 1MB and hence Spark would throw an error.
     val model = LinearRegressionWithSGD.train(points, 2)
     val predictions = model.predict(points.map(_.features))

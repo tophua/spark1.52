@@ -23,7 +23,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 
 class MultivariateGaussianSuite extends SparkFunSuite with MLlibTestSparkContext {
-  test("univariate") {//单变量的
+  test("univariate") {//单变量
     val x1 = Vectors.dense(0.0)
     val x2 = Vectors.dense(1.5)
 
@@ -39,7 +39,7 @@ class MultivariateGaussianSuite extends SparkFunSuite with MLlibTestSparkContext
     assert(dist2.pdf(x2) ~== 0.15057 absTol 1E-5)
   }
 
-  test("multivariate") {//多变量的
+  test("multivariate") {//多变量
     val x1 = Vectors.dense(0.0, 0.0)//创建密集向量
     val x2 = Vectors.dense(1.0, 1.0)//创建密集向量
 

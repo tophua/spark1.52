@@ -147,7 +147,7 @@ class BLASSuite extends SparkFunSuite {
     val dB =
       new DenseMatrix(3, 4, Array(0.0, 1.2, 2.2, 3.1, 1.2, 3.2, 5.3, 4.6, 2.2, 5.3, 1.8, 3.0))
 
-    withClue("Matrix A must be a symmetric Matrix") {
+    withClue("Matrix A must be a symmetric Matrix") {//矩阵A必须是一个对称矩阵
       intercept[Exception] {
         syr(alpha, x, dB)
       }
@@ -156,7 +156,7 @@ class BLASSuite extends SparkFunSuite {
     val dC =
       new DenseMatrix(3, 3, Array(0.0, 1.2, 2.2, 1.2, 3.2, 5.3, 2.2, 5.3, 1.8))
 
-    withClue("Size of vector must match the rank of matrix") {
+    withClue("Size of vector must match the rank of matrix") {//向量的大小必须与矩阵的秩相匹配
       intercept[Exception] {
         syr(alpha, x, dC)
       }
@@ -164,7 +164,7 @@ class BLASSuite extends SparkFunSuite {
 
     val y = new DenseVector(Array(0.0, 2.7, 3.5, 2.1, 1.5))
 
-    withClue("Size of vector must match the rank of matrix") {
+    withClue("Size of vector must match the rank of matrix") {//向量的大小必须与矩阵的秩相匹配
       intercept[Exception] {
         syr(alpha, y, dA)
       }

@@ -36,7 +36,10 @@ class NNLSSuite extends SparkFunSuite {
     (ata, atb)
   }
 
-  /** Compute the objective value */
+  /** 
+   *  Compute the objective value
+   *  计算目标值 
+   *  */
   def computeObjectiveValue(ata: DoubleMatrix, atb: DoubleMatrix, x: DoubleMatrix): Double = {
     val res = (x.transpose().mmul(ata).mmul(x)).mul(0.5).sub(atb.dot(x))
     res.get(0)
