@@ -22,6 +22,7 @@ import org.json4s.JsonDSL._
 
 /**
  * A field inside a StructType.
+ * 代表一个字段
  * @param name The name of this field.
  * @param dataType The data type of this field.
  * @param nullable Indicates if values of this field can be `null` values.

@@ -89,6 +89,9 @@ import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference,
  * }}}
  */
 @DeveloperApi
+/**
+ * StructType代表一张表
+ */
 case class StructType(fields: Array[StructField]) extends DataType with Seq[StructField] {
 
   /** No-arg constructor for kryo. */
