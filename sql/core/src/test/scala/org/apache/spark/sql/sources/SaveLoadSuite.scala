@@ -67,7 +67,7 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
     checkAnswer(caseInsensitiveContext.read.format("json").load(path.toString),
       expectedDF.collect())
     checkAnswer(caseInsensitiveContext.read.format("json").load(path.toString),
-      expectedDF.collect())
+      expectedDF.collect())//StructType代表一张表,StructField代表一个字段
     val schema = StructType(StructField("b", StringType, true) :: Nil)
     checkAnswer(
       caseInsensitiveContext.read.format("json").schema(schema).load(path.toString),

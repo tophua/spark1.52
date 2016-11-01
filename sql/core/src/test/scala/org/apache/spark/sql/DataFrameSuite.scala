@@ -602,9 +602,10 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
                            |""".stripMargin
   //  assert(testData.select($"*").filter($"key" < 0).showString(1) === expectedAnswer)
   }
-
+//StructType代表一张表,StructField代表一个字段
   test("createDataFrame(RDD[Row], StructType) should convert UDTs (SPARK-6672)") {
     val rowRDD = sqlContext.sparkContext.parallelize(Seq(Row(new ExamplePoint(1.0, 2.0))))
+    //StructType代表一张表,StructField代表一个字段
     val schema = StructType(Array(StructField("point", new ExamplePointUDT(), false)))
     val df = sqlContext.createDataFrame(rowRDD, schema)
     df.rdd.collect()

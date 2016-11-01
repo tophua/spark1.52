@@ -34,6 +34,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(false, true) ::
       Row(true, false) ::
       Row(true, true) :: Nil),
+      //StructType代表一张表,StructField代表一个字段
       StructType(Seq(StructField("a", BooleanType), StructField("b", BooleanType))))
   }
 
@@ -291,6 +292,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(math.log(-1), math.log(-3).toFloat) ::
       Row(null, null) ::
       Row(Double.MaxValue, Float.MinValue):: Nil),
+      //StructType代表一张表,StructField代表一个字段
       StructType(Seq(StructField("a", DoubleType), StructField("b", FloatType))))
 
     checkAnswer(
@@ -309,6 +311,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
   test("nanvl") {//如果n2为NaN(不是数值),返回n1,否则返回n2.
     val testData = ctx.createDataFrame(ctx.sparkContext.parallelize(
       Row(null, 3.0, Double.NaN, Double.PositiveInfinity, 1.0f, 4) :: Nil),
+      //StructType代表一张表,StructField代表一个字段
       StructType(Seq(StructField("a", DoubleType), StructField("b", DoubleType),
         StructField("c", DoubleType), StructField("d", DoubleType),
         StructField("e", FloatType), StructField("f", IntegerType))))
@@ -355,6 +358,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(1, 2) ::
       Row(1, null) ::
       Row(null, null) :: Nil),
+      //StructType代表一张表,StructField代表一个字段
       StructType(Seq(StructField("a", IntegerType), StructField("b", IntegerType))))
 
     checkAnswer(

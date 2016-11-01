@@ -80,12 +80,12 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
 
   private lazy val arr2x2 = Array[Row](Row.apply("dave", 42), Row.apply("mary", 222))
   private lazy val arr1x2 = Array[Row](Row.apply("fred", 3))
-  private lazy val schema2 = StructType(
+  private lazy val schema2 = StructType(//StructType代表一张表,StructField代表一个字段
       StructField("name", StringType) ::
       StructField("id", IntegerType) :: Nil)
 
   private lazy val arr2x3 = Array[Row](Row.apply("dave", 42, 1), Row.apply("mary", 222, 2))
-  private lazy val schema3 = StructType(
+  private lazy val schema3 = StructType(//StructType代表一张表,StructField代表一个字段
       StructField("name", StringType) ::
       StructField("id", IntegerType) ::
       StructField("seq", IntegerType) :: Nil)

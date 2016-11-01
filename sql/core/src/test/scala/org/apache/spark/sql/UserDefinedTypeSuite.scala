@@ -145,6 +145,7 @@ class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
       "{\"id\":1,\"vec\":[1.1,2.2,3.3,4.4]}",
       "{\"id\":2,\"vec\":[2.25,4.5,8.75]}"
     )
+    //StructType代表一张表,StructField代表一个字段
     val schema = StructType(Seq(
       StructField("id", IntegerType, false),
       StructField("vec", new MyDenseVectorUDT, false)

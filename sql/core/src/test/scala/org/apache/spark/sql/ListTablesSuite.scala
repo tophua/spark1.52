@@ -62,6 +62,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfter with SharedSQLContex
   }
 
   test("query the returned DataFrame of tables") {//查询返回的数据框的表
+  //StructType代表一张表,StructField代表一个字段
     val expectedSchema = StructType(
       StructField("tableName", StringType, false) ::
       StructField("isTemporary", BooleanType, false) :: Nil)

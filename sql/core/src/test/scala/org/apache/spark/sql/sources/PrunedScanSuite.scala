@@ -37,7 +37,7 @@ case class SimplePrunedScan(from: Int, to: Int)(@transient val sqlContext: SQLCo
   with PrunedScan {
 
   override def schema: StructType =
-    StructType(
+    StructType(//StructType代表一张表,StructField代表一个字段
       StructField("a", IntegerType, nullable = false) ::
       StructField("b", IntegerType, nullable = false) :: Nil)
 

@@ -33,6 +33,7 @@ class DDLSourceLoadSuite extends DataSourceTest with SharedSQLContext {
 
   test("load data source from format alias") {//从格式别名加载数据源
     caseInsensitiveContext.read.format("gathering quorum").load().schema ==
+    //StructType代表一张表,StructField代表一个字段
       StructType(Seq(StructField("stringType", StringType, nullable = false)))
   }
 

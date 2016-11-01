@@ -33,7 +33,7 @@ import org.apache.spark.unsafe.memory.{ExecutorMemoryManager, MemoryAllocator, T
 class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
   private val keyTypes = Seq(IntegerType, FloatType, DoubleType, StringType)
   private val valueTypes = Seq(IntegerType, FloatType, DoubleType, StringType)
-
+//StructType代表一张表,StructField代表一个字段
   testKVSorter(new StructType, new StructType, spill = true)
   testKVSorter(new StructType().add("c1", IntegerType), new StructType, spill = true)
   testKVSorter(new StructType, new StructType().add("c1", IntegerType), spill = true)
@@ -181,7 +181,7 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
 
   test("kv sorting with records that exceed page size") {
     val pageSize = 128
-
+  //StructType代表一张表,StructField代表一个字段
     val schema = StructType(StructField("b", BinaryType) :: Nil)
     val externalConverter = CatalystTypeConverters.createToCatalystConverter(schema)
     val converter = UnsafeProjection.create(schema)

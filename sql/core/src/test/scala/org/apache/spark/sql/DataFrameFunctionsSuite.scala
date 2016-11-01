@@ -58,7 +58,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
   test("struct with column name") {//构造列名称
     val df = Seq((1, "str")).toDF("a", "b")
     val row = df.select(struct("a", "b")).first()
-
+    //StructType代表一张表,StructField代表一个字段
     val expectedType = StructType(Seq(
       StructField("a", IntegerType, nullable = false),
       StructField("b", StringType)
@@ -70,7 +70,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
   test("struct with column expression") {//构造列名称表达式
     val df = Seq((1, "str")).toDF("a", "b")
     val row = df.select(struct((col("a") * 2).as("c"), col("b"))).first()
-
+//StructType代表一张表,StructField代表一个字段
     val expectedType = StructType(Seq(
       StructField("c", IntegerType, nullable = false),
       StructField("b", StringType)
@@ -82,7 +82,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
   test("struct with column expression to be automatically named") {
     val df = Seq((1, "str")).toDF("a", "b")
     val result = df.select(struct((col("a") * 2), col("b")))
-
+//StructType代表一张表,StructField代表一个字段
     val expectedType = StructType(Seq(
       StructField("col1", IntegerType, nullable = false),
       StructField("b", StringType)
@@ -94,7 +94,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
   test("struct with literal columns") {
     val df = Seq((1, "str1"), (2, "str2")).toDF("a", "b")
     val result = df.select(struct((col("a") * 2), lit(5.0)))
-
+    //StructType代表一张表,StructField代表一个字段
     val expectedType = StructType(Seq(
       StructField("col1", IntegerType, nullable = false),
       StructField("col2", DoubleType, nullable = false)
@@ -107,7 +107,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
   test("struct with all literal columns") {
     val df = Seq((1, "str1"), (2, "str2")).toDF("a", "b")
     val result = df.select(struct(lit("v"), lit(5.0)))
-
+   //StructType代表一张表,StructField代表一个字段
     val expectedType = StructType(Seq(
       StructField("col1", StringType, nullable = false),
       StructField("col2", DoubleType, nullable = false)

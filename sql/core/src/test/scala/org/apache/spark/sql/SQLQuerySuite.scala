@@ -1067,6 +1067,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("apply schema") {//应用模式
+  //StructType代表一张表,StructField代表一个字段
     val schema1 = StructType(
       StructField("f1", IntegerType, false) ::
       StructField("f2", StringType, false) ::
@@ -1096,7 +1097,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Row(2, null) ::
       Row(3, null) ::
       Row(4, 2147483644) :: Nil)
-
+//StructType代表一张表,StructField代表一个字段
     val schema2 = StructType(
       StructField("f1", StructType(
         StructField("f11", IntegerType, false) ::

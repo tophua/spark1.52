@@ -87,7 +87,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
       val fields = fieldTypes.zipWithIndex.map {
         case (dataType, index) => StructField(s"c${index}", dataType, true)
       } :+ StructField("key", IntegerType, true)
-      val schema = StructType(fields)
+      val schema = StructType(fields)//StructType代表一张表,StructField代表一个字段
       val row = Row.fromSeq(Seq.fill(fields.size)(null))
       val rowRDD = ctx.sparkContext.parallelize(row :: Nil)
       ctx.createDataFrame(rowRDD, schema).registerTempTable("testLimit")

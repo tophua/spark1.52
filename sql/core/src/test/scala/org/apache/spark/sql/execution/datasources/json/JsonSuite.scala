@@ -36,6 +36,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
   import testImplicits._
 
   test("Type promotion") {//类型提升
+    //期望类型,实际类型
     def checkTypePromotion(expected: Any, actual: Any) {
       assert(expected.getClass == actual.getClass,
         s"Failed to promote ${actual.getClass} to ${expected.getClass}.")
@@ -45,18 +46,21 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     }
 
     val factory = new JsonFactory()
+    //执行正确的类型
     def enforceCorrectType(value: Any, dataType: DataType): Any = {
       val writer = new StringWriter()
-      val generator = factory.createGenerator(writer)
-      generator.writeObject(value)
-      generator.flush()
+      val generator = factory.createGenerator(writer)//注册一个类型
+      generator.writeObject(value)//设置值
+      generator.flush()//输出
 
-      val parser = factory.createParser(writer.toString)
+      val parser = factory.createParser(writer.toString)//创建Json解析
       parser.nextToken()
+      //字段类型转换
       JacksonParser.convertField(factory, parser, dataType)
     }
 
     val intNumber: Int = 2147483647
+    //Int转换类型
     checkTypePromotion(intNumber, enforceCorrectType(intNumber, IntegerType))
     checkTypePromotion(intNumber.toLong, enforceCorrectType(intNumber, LongType))
     checkTypePromotion(intNumber.toDouble, enforceCorrectType(intNumber, DoubleType))
@@ -64,12 +68,14 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       Decimal(intNumber), enforceCorrectType(intNumber, DecimalType.SYSTEM_DEFAULT))
 
     val longNumber: Long = 9223372036854775807L
+    //Long转换类型
     checkTypePromotion(longNumber, enforceCorrectType(longNumber, LongType))
     checkTypePromotion(longNumber.toDouble, enforceCorrectType(longNumber, DoubleType))
     checkTypePromotion(
       Decimal(longNumber), enforceCorrectType(longNumber, DecimalType.SYSTEM_DEFAULT))
 
     val doubleNumber: Double = 1.7976931348623157E308d
+    //Double转换类型
     checkTypePromotion(doubleNumber.toDouble, enforceCorrectType(doubleNumber, DoubleType))
 
     checkTypePromotion(DateTimeUtils.fromJavaTimestamp(new Timestamp(intNumber)),
@@ -77,10 +83,12 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkTypePromotion(DateTimeUtils.fromJavaTimestamp(new Timestamp(intNumber.toLong)),
         enforceCorrectType(intNumber.toLong, TimestampType))
     val strTime = "2014-09-30 12:34:56"
+    //字符转换时间类型
     checkTypePromotion(DateTimeUtils.fromJavaTimestamp(Timestamp.valueOf(strTime)),
         enforceCorrectType(strTime, TimestampType))
 
     val strDate = "2014-10-15"
+     //字符转换日期类型
     checkTypePromotion(
       DateTimeUtils.fromJavaDate(Date.valueOf(strDate)), enforceCorrectType(strDate, DateType))
 
@@ -114,6 +122,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkDataType(NullType, DecimalType.SYSTEM_DEFAULT, DecimalType.SYSTEM_DEFAULT)
     checkDataType(NullType, StringType, StringType)
     checkDataType(NullType, ArrayType(IntegerType), ArrayType(IntegerType))
+    //StructType代表一张表,StructField代表一个字段
     checkDataType(NullType, StructType(Nil), StructType(Nil))
     checkDataType(NullType, NullType, NullType)
 
@@ -124,6 +133,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkDataType(BooleanType, DoubleType, StringType)
     checkDataType(BooleanType, DecimalType.SYSTEM_DEFAULT, StringType)
     checkDataType(BooleanType, StringType, StringType)
+    //StructType代表一张表,StructField代表一个字段
     checkDataType(BooleanType, ArrayType(IntegerType), StringType)
     checkDataType(BooleanType, StructType(Nil), StringType)
 
@@ -132,6 +142,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkDataType(IntegerType, LongType, LongType)
     checkDataType(IntegerType, DoubleType, DoubleType)
     checkDataType(IntegerType, DecimalType.SYSTEM_DEFAULT, DecimalType.SYSTEM_DEFAULT)
+    //StructType代表一张表,StructField代表一个字段
     checkDataType(IntegerType, StringType, StringType)
     checkDataType(IntegerType, ArrayType(IntegerType), StringType)
     checkDataType(IntegerType, StructType(Nil), StringType)
@@ -182,6 +193,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       ArrayType(IntegerType, false), ArrayType(IntegerType, true), ArrayType(IntegerType, true))
 
     // StructType
+    //StructType代表一张表,StructField代表一个字段
     checkDataType(StructType(Nil), StructType(Nil), StructType(Nil))
     checkDataType(
       StructType(StructField("f1", IntegerType, true) :: Nil),
@@ -216,7 +228,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
   //采样中的复数字段和类型推断
   test("Complex field and type inferring with null in sampling") {
     val jsonDF = ctx.read.json(jsonNullStruct)
-    val expectedSchema = StructType(
+    val expectedSchema = StructType(//代表一张表
       StructField("headers", StructType(
         StructField("Charset", StringType, true) ::
           StructField("Host", StringType, true) :: Nil)

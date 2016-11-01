@@ -38,7 +38,7 @@ class SimpleScanSource extends RelationProvider {
 case class SimpleScan(from: Int, to: Int)(@transient val sqlContext: SQLContext)
   extends BaseRelation with TableScan {
 
-  override def schema: StructType =
+  override def schema: StructType =//StructType代表一张表,StructField代表一个字段
     StructType(StructField("i", IntegerType, nullable = false) :: Nil)
 
   override def buildScan(): RDD[Row] = sqlContext.sparkContext.parallelize(from to to).map(Row(_))
@@ -210,7 +210,7 @@ class TableScanSuite extends DataSourceTest with SharedSQLContext {
       StructField("varcharField", StringType, true) ::
       StructField("arrayFieldSimple", ArrayType(IntegerType), true) ::
       StructField("arrayFieldComplex",
-        ArrayType(
+        ArrayType(//StructType代表一张表,StructField代表一个字段
           MapType(StringType, StructType(StructField("key", LongType, true) :: Nil))), true) ::
       StructField("mapFieldSimple", MapType(IntegerType, StringType), true) ::
       StructField("mapFieldComplex",

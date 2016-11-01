@@ -43,7 +43,7 @@ class UnsafeFixedWidthAggregationMapSuite
   with SharedSQLContext {
 
   import UnsafeFixedWidthAggregationMap._
-
+//StructType代表一张表,StructField代表一个字段
   private val groupKeySchema = StructType(StructField("product", StringType) :: Nil)
   private val aggBufferSchema = StructType(StructField("salePrice", IntegerType) :: Nil)
   private def emptyAggregationBuffer: InternalRow = InternalRow(0)
@@ -95,6 +95,7 @@ class UnsafeFixedWidthAggregationMapSuite
   }
 
   testWithMemoryLeakDetection("supported schemas") {
+  //StructType代表一张表,StructField代表一个字段
     assert(supportsAggregationBufferSchema(
       StructType(StructField("x", DecimalType.USER_DEFAULT) :: Nil)))
     assert(supportsAggregationBufferSchema(

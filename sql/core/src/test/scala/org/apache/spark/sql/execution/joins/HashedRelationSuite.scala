@@ -72,6 +72,7 @@ class HashedRelationSuite extends SparkFunSuite with SharedSQLContext {
   }
 
   test("UnsafeHashedRelation") {//不安全散列关系
+  //StructType代表一张表,StructField代表一个字段
     val schema = StructType(StructField("a", IntegerType, true) :: Nil)
     val data = Array(InternalRow(0), InternalRow(1), InternalRow(2), InternalRow(2))
     val numDataRows = SQLMetrics.createLongMetric(ctx.sparkContext, "data")

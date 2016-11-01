@@ -121,7 +121,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       "hdfs://host:9000/path/a=10/b=20",
       "hdfs://host:9000/path/a=10.5/b=hello"),
       PartitionSpec(
-        StructType(Seq(
+        StructType(Seq(//StructType代表一张表,StructField代表一个字段
           StructField("a", DoubleType),
           StructField("b", StringType))),
         Seq(
@@ -155,7 +155,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       s"hdfs://host:9000/path/a=10/b=20",
       s"hdfs://host:9000/path/a=$defaultPartitionName/b=hello"),
       PartitionSpec(
-        StructType(Seq(
+        StructType(Seq(//StructType代表一张表,StructField代表一个字段
           StructField("a", IntegerType),
           StructField("b", StringType))),
         Seq(

@@ -141,6 +141,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
   test("test different data types") {//测试不同日期类型
     // Create the schema.
     val struct =
+    //StructType代表一张表,StructField代表一个字段
       StructType(
         StructField("f1", FloatType, true) ::
         StructField("f2", ArrayType(BooleanType), true) :: Nil)

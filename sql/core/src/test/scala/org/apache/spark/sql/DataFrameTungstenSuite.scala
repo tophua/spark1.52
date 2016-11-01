@@ -45,7 +45,7 @@ class DataFrameTungstenSuite extends QueryTest with SharedSQLContext {
     withSQLConf(SQLConf.UNSAFE_ENABLED.key -> "true") {
       val struct = Row(1, 2L, 3.0F, 3.0)
       val data = sqlContext.sparkContext.parallelize(Seq(Row(1, struct)))
-
+//StructType代表一张表,StructField代表一个字段
       val schema = new StructType()
         .add("a", IntegerType)
         .add("b",
@@ -65,7 +65,7 @@ class DataFrameTungstenSuite extends QueryTest with SharedSQLContext {
       val innerStruct = Row(1, "abcd")
       val outerStruct = Row(1, 2L, 3.0F, 3.0, innerStruct, "efg")
       val data = sqlContext.sparkContext.parallelize(Seq(Row(1, outerStruct)))
-
+//StructType代表一张表,StructField代表一个字段
       val schema = new StructType()
         .add("a", IntegerType)
         .add("b",

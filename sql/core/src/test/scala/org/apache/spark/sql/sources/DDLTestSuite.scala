@@ -36,7 +36,7 @@ case class SimpleDDLScan(from: Int, to: Int, table: String)(@transient val sqlCo
   extends BaseRelation with TableScan {
 
   override def schema: StructType =
-    StructType(Seq(
+    StructType(Seq(//StructType代表一张表,StructField代表一个字段
       StructField("intType", IntegerType, nullable = false,
         new MetadataBuilder().putString("comment", s"test comment $table").build()),
       StructField("stringType", StringType, nullable = false),
@@ -53,7 +53,7 @@ case class SimpleDDLScan(from: Int, to: Int, table: String)(@transient val sqlCo
       StructField("floatType", FloatType, nullable = false),
       StructField("mapType", MapType(StringType, StringType)),
       StructField("arrayType", ArrayType(StringType)),
-      StructField("structType",
+      StructField("structType",//StructType代表一张表,StructField代表一个字段
         StructType(StructField("f1", StringType) :: StructField("f2", IntegerType) :: Nil
         )
       )
