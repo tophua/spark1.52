@@ -83,7 +83,7 @@ private[spark] class ParallelCollectionPartition[T: ClassTag](
     }
   }
 }
-
+//并行集合RDD
 private[spark] class ParallelCollectionRDD[T: ClassTag](
     @transient sc: SparkContext,
     @transient data: Seq[T],

@@ -33,7 +33,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
   /** 
    *  Length of time to wait while draining listener events.
-   *  等待在侦听侦听事件事件时等待的时间
+   *  等待侦听事件超时时间
    *   */
   val WAIT_TIMEOUT_MILLIS = 10000
 
@@ -50,19 +50,19 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     assert(counter.count === 0)
 
     // Starting listener bus should flush all buffered events
-    //启动侦听器总线应刷新所有缓冲事件
+    //启动监听器总线应刷新所有缓冲事件
     bus.start(sc)
     bus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(counter.count === 5)
 
     // After listener bus has stopped, posting events should not increment counter
-    //侦听器总线停止后,发布事件不应增量计数器
+    //监听器总线停止后,发布事件不应增量计数器
     bus.stop()
     (1 to 5).foreach { _ => bus.post(SparkListenerJobEnd(0, jobCompletionTime, JobSucceeded)) }
     assert(counter.count === 5)
 
     // Listener bus must not be started twice
-    //侦听器总线不能启动两次
+    //监听器总线不能启动两次
     intercept[IllegalStateException] {
       val bus = new LiveListenerBus
       bus.start(sc)
@@ -70,7 +70,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     }
 
     // ... or stopped before starting
-    //或停止之前开始
+    //或停止之前开始启动
     intercept[IllegalStateException] {
       val bus = new LiveListenerBus
       bus.stop()
@@ -78,7 +78,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
   }
   //等待事件队列完全耗尽
   test("bus.stop() waits for the event queue to completely drain") {
-    @volatile var drained = false
+    @volatile var drained = false //是否耗尽
 
     // When Listener has started
     //当监听器已经开始
@@ -175,7 +175,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     listener.stageInfos.size should be {1}
     val stageInfo1 = listener.stageInfos.keys.find(_.stageId == 0).get
-    stageInfo1.rddInfos.size should be {1} // ParallelCollectionRDD
+    stageInfo1.rddInfos.size should be {1} // ParallelCollectionRDD 并行集合RDD
     stageInfo1.rddInfos.forall(_.numPartitions == 4) should be {true}
     stageInfo1.rddInfos.exists(_.name == "Un") should be {true}
     listener.stageInfos.clear()
@@ -184,8 +184,8 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     listener.stageInfos.size should be {1}
     val stageInfo2 = listener.stageInfos.keys.find(_.stageId == 1).get
-    stageInfo2.rddInfos.size should be {3} // ParallelCollectionRDD, FilteredRDD, MappedRDD
-    stageInfo2.rddInfos.forall(_.numPartitions == 4) should be {true}
+    stageInfo2.rddInfos.size should be {3} // ParallelCollectionRDD并行集合RDD, FilteredRDD, MappedRDD 
+    stageInfo2.rddInfos.forall(_.numPartitions == 4) should be {true}//并发数
     stageInfo2.rddInfos.exists(_.name == "Deux") should be {true}
     listener.stageInfos.clear()
 
@@ -210,8 +210,8 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
     listener.stageInfos.size should be {1}
     val (stageInfo, _) = listener.stageInfos.head
-    stageInfo.numTasks should be {2}
-    stageInfo.rddInfos.size should be {2}
+    stageInfo.numTasks should be {2} //任务数
+    stageInfo.rddInfos.size should be {2}//ParallelCollectionRDD并行集合RDD,MappedRDD
     stageInfo.rddInfos.forall(_.numPartitions == 4) should be {true}
   }
 
@@ -291,7 +291,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     sc.addSparkListener(listener)
 
     // Make a task whose result is larger than the akka frame size
-    //做一个任务的结果大于Akka框架大小
+    //一个任务的结果大于Akka框架大小
     val akkaFrameSize =
       sc.env.actorSystem.settings.config.getBytes("akka.remote.netty.tcp.maximum-frame-size").toInt
     assert(akkaFrameSize === 1024 * 1024)
@@ -378,7 +378,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     bus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
 
     // The exception should be caught, and the event should be propagated to other listeners
-    //事件应该传播给其他监听
+    //异常监听应该通过,其他监听事件应该传播
     assert(bus.listenerThreadIsAlive)
     assert(jobCounter1.count === 5)
     assert(jobCounter2.count === 5)

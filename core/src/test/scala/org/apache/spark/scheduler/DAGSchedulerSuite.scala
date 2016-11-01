@@ -40,6 +40,7 @@ class DAGSchedulerEventProcessLoopTester(dagScheduler: DAGScheduler)
   override def post(event: DAGSchedulerEvent): Unit = {
     try {
       // Forward event to `onReceive` directly to avoid processing event asynchronously.
+      //直接跳转onReceive事件,避免异步进程事件
       onReceive(event)
     } catch {
       case NonFatal(e) => onError(e)
@@ -49,13 +50,15 @@ class DAGSchedulerEventProcessLoopTester(dagScheduler: DAGScheduler)
 
 /**
  * An RDD for passing to DAGScheduler. These RDDs will use the dependencies and
+ * RDD通过DAGScheduler,这些RDDS将使用依赖性和preferredlocations(如果有)传递给他们
  * preferredLocations (if any) that are passed to them. They are deliberately not executable
  * so we can test that DAGScheduler does not try to execute RDDs locally.
+ * 他们是故意不可执行,所以我们可以测试DAGScheduler不想执行本地的RDDS
  */
 class MyRDD(
     sc: SparkContext,
     numPartitions: Int,
-    dependencies: List[Dependency[_]],//依赖udt
+    dependencies: List[Dependency[_]],//依赖
     locations: Seq[Seq[String]] = Nil) extends RDD[(Int, Int)](sc, dependencies) with Serializable {
   override def compute(split: Partition, context: TaskContext): Iterator[(Int, Int)] =
     throw new RuntimeException("should not be reached")
@@ -81,10 +84,15 @@ class DAGSchedulerSuite
   extends SparkFunSuite with BeforeAndAfter with LocalSparkContext with Timeouts {
 
   val conf = new SparkConf
-  /** Set of TaskSets the DAGScheduler has requested executed. */
+  /** 
+   *  Set of TaskSets the DAGScheduler has requested executed.
+   *  请求执行器设置DAGScheduler的TaskSets
+   *   
+   *  */
   val taskSets = scala.collection.mutable.Buffer[TaskSet]()
 
   /** Stages for which the DAGScheduler has called TaskScheduler.cancelTasks(). */
+  //调用TaskScheduler.cancelTasks()任务
   val cancelledStages = new HashSet[Int]()
 
   val taskScheduler = new TaskScheduler() {
@@ -96,23 +104,25 @@ class DAGSchedulerSuite
       blockManagerId: BlockManagerId): Boolean = true
     override def submitTasks(taskSet: TaskSet) = {
       // normally done by TaskSetManager
+      // TaskSetManager正常完成
       taskSet.tasks.foreach(_.epoch = mapOutputTracker.getEpoch)
       taskSets += taskSet
     }
+    //取消任务
     override def cancelTasks(stageId: Int, interruptThread: Boolean) {
       cancelledStages += stageId
     }
     override def setDAGScheduler(dagScheduler: DAGScheduler) = {}
-    override def defaultParallelism() = 2
+    override def defaultParallelism() = 2 //默认并发数
     override def executorLost(executorId: String, reason: ExecutorLossReason): Unit = {}
     override def applicationAttemptId(): Option[String] = None
   }
 
   /** 
    *  Length of time to wait while draining listener events.
-   *  等待在侦听侦听事件事件时等待的时间 
+   *  侦听事件等待的超时时间
    *  */
-  val WAIT_TIMEOUT_MILLIS = 10000
+  val WAIT_TIMEOUT_MILLIS = 10000//毫秒
   val sparkListener = new SparkListener() {
     val submittedStageInfos = new HashSet[StageInfo]
     val successfulStages = new HashSet[Int]
@@ -124,11 +134,15 @@ class DAGSchedulerSuite
     }
 
     override def onStageCompleted(stageCompleted: SparkListenerStageCompleted) {
+      //StageInfo
       val stageInfo = stageCompleted.stageInfo
+      //阶段排序的执行器
       stageByOrderOfExecution += stageInfo.stageId
       if (stageInfo.failureReason.isEmpty) {
+        //完成的Stage
         successfulStages += stageInfo.stageId
       } else {
+        //失败的Stage
         failedStages += stageInfo.stageId
       }
     }
@@ -147,10 +161,14 @@ class DAGSchedulerSuite
    */
   val cacheLocations = new HashMap[(Int, Int), Seq[BlockManagerId]]
   // stub out BlockManagerMaster.getLocations to use our cacheLocations
+  //我们使用cacheLocations获得位置
   val blockManagerMaster = new BlockManagerMaster(null, conf, true) {
       override def getLocations(blockIds: Array[BlockId]): IndexedSeq[Seq[BlockManagerId]] = {
+      var test=null
         blockIds.map {
-          _.asRDDId.map(id => (id.rddId -> id.splitIndex)).flatMap(key => cacheLocations.get(key)).
+          _.asRDDId.map(id =>
+            (id.rddId -> id.splitIndex)          
+            ).flatMap(key => cacheLocations.get(key)).
             getOrElse(Seq())
         }.toIndexedSeq
       }
@@ -162,7 +180,7 @@ class DAGSchedulerSuite
 
   /** 
    *  The list of results that DAGScheduler has collected.
-   *  结果DAGScheduler已集合的列表 
+   *  DAGScheduler集合结果的列表 
    *  */
   val results = new HashMap[Int, Any]()
   var failure: Exception = _
@@ -205,14 +223,14 @@ class DAGSchedulerSuite
    * Type of RDD we use for testing. Note that we should never call the real RDD compute methods.
    * 我们用于测试RDD类型,注意:我们不应该调用真正的RDD的计算方法
    * This is a pair RDD type so it can always be used in ShuffleDependencies.
-   * 这是一个RDD类型对,所以它总是可以在ShuffleDependencies使用
+   * 这是一个RDD类型对,所以它总是在ShuffleDependencies调用
    */
   type PairOfIntsRDD = RDD[(Int, Int)]
 
   /**
    * Process the supplied event as if it were the top of the DAGScheduler event queue, expecting
    * the scheduler not to exit.
-   * 处理所提供的事件,如果是的dagscheduler事件队列的顶部,期望调度程序不退出
+   * 处理所支持的事件,如果是dagscheduler顶部队列事件,期望调度不退出
    *
    * After processing the event, submit waiting stages as is done on most iterations of the   
    * DAGScheduler event loop.
@@ -224,7 +242,7 @@ class DAGSchedulerSuite
 
   /**
    * When we submit dummy Jobs, this is the compute function we supply. Except in a local test
-   * 当我们提交虚拟工作,这是我们提供的计算功能,除了在下面的一个局部测试
+   * 当我们提交虚拟Job,这是我们提供的计算功能,除了在下面的一个本地测试
    * below, we do not expect this function to ever be executed; instead, we will return results
    * 我们不希望这个函数被执行,相反,我们将返回的结果直接通过completionevents
    * directly through CompletionEvents.
@@ -240,7 +258,7 @@ class DAGSchedulerSuite
     assert(taskSet.tasks.size >= results.size)
     for ((result, i) <- results.zipWithIndex) {
       if (i < taskSet.tasks.size) {
-        runEvent(CompletionEvent(
+        runEvent(CompletionEvent(//result._1返馈,._2结果
           taskSet.tasks(i), result._1, result._2, null, createFakeTaskInfo(), null))
       }
     }
@@ -296,9 +314,9 @@ class DAGSchedulerSuite
     assert(sparkListener.stageByOrderOfExecution(0) < sparkListener.stageByOrderOfExecution(1))
   }
 
-  test("zero split job") {//零分隔的工作
+  test("zero split job") {//RDD零分隔的Job
     var numResults = 0
-    val fakeListener = new JobListener() {
+    val fakeListener = new JobListener() {//Job监听
       override def taskSucceeded(partition: Int, value: Any) = numResults += 1
       override def jobFailed(exception: Exception) = throw exception
     }
@@ -310,7 +328,9 @@ class DAGSchedulerSuite
   test("run trivial job") {//运行无价值的工作
     submit(new MyRDD(sc, 1, Nil), Array(0))
     complete(taskSets(0), List((Success, 42)))
+    //JobListener监听完成
     assert(results === Map(0 -> 42))
+    //清空数据结构
     assertDataStructuresEmpty()
   }
 
@@ -320,13 +340,14 @@ class DAGSchedulerSuite
     submit(finalRdd, Array(0))
     complete(taskSets(0), Seq((Success, 42)))
     assert(results === Map(0 -> 42))
+    //清空数据结构
     assertDataStructuresEmpty()
   }
 
   test("cache location preferences w/ dependency") {//缓存位置偏好依赖
     val baseRdd = new MyRDD(sc, 1, Nil).cache()
     val finalRdd = new MyRDD(sc, 1, List(new OneToOneDependency(baseRdd)))
-    cacheLocations(baseRdd.id -> 0) =
+    cacheLocations(baseRdd.id -> 0) =//数组的赋值
       Seq(makeBlockManagerId("hostA"), makeBlockManagerId("hostB"))
     submit(finalRdd, Array(0))
     val taskSet = taskSets(0)
@@ -337,13 +358,14 @@ class DAGSchedulerSuite
   }
 
   test("regression test for getCacheLocs") {//对于getcachelocs回归测试
-    val rdd = new MyRDD(sc, 3, Nil).cache()
-    cacheLocations(rdd.id -> 0) =
+    val rdd = new MyRDD(sc, 3, Nil).cache()//三个分区
+    cacheLocations(rdd.id -> 0) =//赋值
       Seq(makeBlockManagerId("hostA"), makeBlockManagerId("hostB"))
     cacheLocations(rdd.id -> 1) =
       Seq(makeBlockManagerId("hostB"), makeBlockManagerId("hostC"))
     cacheLocations(rdd.id -> 2) =
       Seq(makeBlockManagerId("hostC"), makeBlockManagerId("hostD"))
+      //获得缓存的位置
     val locs = scheduler.getCacheLocs(rdd).map(_.map(_.host))
     assert(locs === Seq(Seq("hostA", "hostB"), Seq("hostB", "hostC"), Seq("hostC", "hostD")))
   }
@@ -355,7 +377,7 @@ class DAGSchedulerSuite
    * +---+ shuffle +---+    +---+    +---+
    * | A |<--------| B |<---| C |<---| D |
    * +---+         +---+    +---+    +---+
-   * Here, B is derived from A by performing a shuffle, C has a one-to-one dependency on B,
+   * Here, B is derived from A by performing a shuffle, C has a one-to-one dependency on B,   
    * and D similarly has a one-to-one dependency on C. If none of the RDDs were cached, this
    * set of RDDs would result in a two stage job: one ShuffleMapStage, and a ResultStage that
    * reads the shuffled data from RDD A. This test ensures that if C is cached, the scheduler
@@ -385,7 +407,7 @@ class DAGSchedulerSuite
     var rdd: RDD[_] = new MyRDD(sc, 1, Nil)
     (1 to 30).foreach(_ => rdd = rdd.zip(rdd))
     // getPreferredLocs runs quickly, indicating that exponential graph traversal is avoided.
-    //getPreferredLocs运行快速,避免了索引遍历
+    //getPreferredLocs运行快速,避免索引遍历
     failAfter(10 seconds) {
       //返回每一个数据数据块所在的机器名或者IP地址，
       //如果每一块数据是多份存储的，那么就会返回多个机器地址
@@ -402,7 +424,7 @@ class DAGSchedulerSuite
       val unserializable = new UnserializableClass
     }
     submit(unserializableRdd, Array(0))
-    assert(failure.getMessage.startsWith(
+    assert(failure.getMessage.startsWith(//工作阶段失败而终止
       "Job aborted due to stage failure: Task not serializable:"))
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(sparkListener.failedStages.contains(0))
@@ -413,7 +435,7 @@ class DAGSchedulerSuite
   test("trivial job failure") {//无价值的Job失败
     submit(new MyRDD(sc, 1, Nil), Array(0))
     failed(taskSets(0), "some failure")
-    //由于阶段故障而中止作业:一些失败
+    //工作阶段失败而终止:一些失败
     assert(failure.getMessage === "Job aborted due to stage failure: some failure")
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(sparkListener.failedStages.contains(0))
@@ -448,7 +470,7 @@ class DAGSchedulerSuite
         throw new UnsupportedOperationException
       }
       override def setDAGScheduler(dagScheduler: DAGScheduler): Unit = {}
-      override def defaultParallelism(): Int = 2
+      override def defaultParallelism(): Int = 2 //默认并发数
       override def executorHeartbeatReceived(
           execId: String,
           taskMetrics: Array[(Long, TaskMetrics)],
@@ -506,16 +528,16 @@ class DAGSchedulerSuite
     complete(taskSets(0), Seq(
         (Success, makeMapStatus("hostA", reduceRdd.partitions.size)),
         (Success, makeMapStatus("hostB", reduceRdd.partitions.size))))
-    // the 2nd ResultTask failed
+    //the 2nd ResultTask failed
     //第二个resulttask失败
     complete(taskSets(1), Seq(
         (Success, 42),
         (FetchFailed(makeBlockManagerId("hostA"), shuffleId, 0, 0, "ignored"), null)))
     // this will get called 这将被称为
     // blockManagerMaster.removeExecutor("exec-hostA")
-    // ask the scheduler to try it again 请调度程序再试一次
+    // ask the scheduler to try it again 请求一次调度
     scheduler.resubmitFailedStages()
-    // have the 2nd attempt pass 有第二次尝试通过
+    // have the 2nd attempt pass 第二次尝试通过
     complete(taskSets(2), Seq((Success, makeMapStatus("hostA", reduceRdd.partitions.size))))
     // we can see both result blocks now
     //我们现在可以看到两个结果块
@@ -541,7 +563,7 @@ class DAGSchedulerSuite
       HashSet("hostA", "hostB"))
 
     // The first result task fails, with a fetch failure for the output from the first mapper.
-      //第一个结果任务失败,获取一个输出第一个Map的输出故障
+    // 第一个结果任务失败,获取一个输出第一个Map的输出故障
     runEvent(CompletionEvent(
       taskSets(1).tasks(0),
       FetchFailed(makeBlockManagerId("hostA"), shuffleId, 0, 0, "ignored"),
@@ -553,7 +575,7 @@ class DAGSchedulerSuite
     assert(sparkListener.failedStages.contains(1))
 
     // The second ResultTask fails, with a fetch failure for the output from the second mapper.
-    //第二resulttask失败,获取一个输出第二个Map的输出故障
+    //第二次resulttask失败,获取失败第二个Map的输出故障
     runEvent(CompletionEvent(
       taskSets(1).tasks(0),
       FetchFailed(makeBlockManagerId("hostA"), shuffleId, 1, 1, "ignored"),
@@ -732,7 +754,7 @@ class DAGSchedulerSuite
     // pretend we were told hostA went away
     //假装我们是告诉hostA走了
     val oldEpoch = mapOutputTracker.getEpoch
-    runEvent(ExecutorLost("exec-hostA"))
+    runEvent(ExecutorLost("exec-hostA"))//丢失
     val newEpoch = mapOutputTracker.getEpoch
     assert(newEpoch > oldEpoch)
     val taskSet = taskSets(0)
@@ -1241,7 +1263,14 @@ class DAGSchedulerSuite
   private def assertLocations(taskSet: TaskSet, hosts: Seq[Seq[String]]) {
     assert(hosts.size === taskSet.tasks.size)
     // preferredLocations对于data partition的位置偏好
+    val exp=taskSet.tasks.map(_.preferredLocations).zip(hosts)
     for ((taskLocs, expectedLocs) <- taskSet.tasks.map(_.preferredLocations).zip(hosts)) {
+      /**
+       * taskLocs:Set(hostA, hostB)
+			 * expectedLocs:Set(hostA, hostB)
+       */
+      println("taskLocs:"+taskLocs.map(_.host).toSet)
+       println("expectedLocs:"+expectedLocs.toSet)
       assert(taskLocs.map(_.host).toSet === expectedLocs.toSet)
     }
   }
@@ -1251,7 +1280,9 @@ class DAGSchedulerSuite
 
   private def makeBlockManagerId(host: String): BlockManagerId =
     BlockManagerId("exec-" + host, host, 12345)
-
+/**
+ * 清空数据结构
+ */
   private def assertDataStructuresEmpty(): Unit = {
     assert(scheduler.activeJobs.isEmpty)
     assert(scheduler.failedStages.isEmpty)

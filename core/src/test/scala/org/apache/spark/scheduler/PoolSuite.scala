@@ -35,10 +35,13 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     }
     new TaskSetManager(taskScheduler, new TaskSet(tasks, stageId, 0, 0, null), 0)
   }
-
+  /**
+   * 验证调度任务Id
+   */
   def scheduleTaskAndVerifyId(taskId: Int, rootPool: Pool, expectedStageId: Int) {
+    //对rootPool中的所有TaskSetManager按照调度算法排序
     val taskSetQueue = rootPool.getSortedTaskSetQueue
-    val nextTaskSetToSchedule =
+    val nextTaskSetToSchedule = 
       taskSetQueue.find(t => (t.runningTasks + t.tasksSuccessful) < t.numTasks)
     assert(nextTaskSetToSchedule.isDefined)
     nextTaskSetToSchedule.get.addRunningTask(taskId)

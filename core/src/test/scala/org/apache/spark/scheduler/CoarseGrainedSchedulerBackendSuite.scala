@@ -28,13 +28,15 @@ class CoarseGrainedSchedulerBackendSuite extends SparkFunSuite with LocalSparkCo
     conf.set("spark.akka.frameSize", "1")
     conf.set("spark.default.parallelism", "1")
     sc = new SparkContext("local-cluster[2, 1, 1024]", "test", conf)
+    //获得Akka传递值大小
     val frameSize = AkkaUtils.maxFrameSizeBytes(sc.conf)
+    //创建一个序列化缓存
     val buffer = new SerializableBuffer(java.nio.ByteBuffer.allocate(2 * frameSize))
     val larger = sc.parallelize(Seq(buffer))
     val thrown = intercept[SparkException] {
       larger.collect()
     }
-    //使用广播变量的大值
+    //抛出异常:使用大的值广播变量
     assert(thrown.getMessage.contains("using broadcast variables for large values"))
     val smaller = sc.parallelize(1 to 4).collect()
     assert(smaller.size === 4)

@@ -19,7 +19,7 @@ package org.apache.spark.scheduler
 
 import org.apache.spark._
 
-//SchedulerBackend 实现是与底层资源调度系统交互，配合TaskScheduler实现具体任务执行所需的资源分配
+//SchedulerBackend 实现是与底层资源调度系统交互,配合TaskScheduler实现具体任务执行所需的资源分配
 class FakeSchedulerBackend extends SchedulerBackend {
   def start() {}
   def stop() {}
@@ -28,9 +28,8 @@ class FakeSchedulerBackend extends SchedulerBackend {
 }
 
 /**
- * TaskScheduler 主要用于与DAGScheduler交互，负责任务的具体调度与运行,其核实接口是submitTasks和cancelTasks
- *
- * TaskSchedulerImpl 实现了TaskScheduler接口，提供了大数本地和分布式运行调度模式的任务调度接口
+ * TaskScheduler 主要用于与DAGScheduler交互,负责任务的具体调度与运行,其核实接口是submitTasks和cancelTasks
+ * TaskSchedulerImpl 实现了TaskScheduler接口,提供了本地和分布式运行调度模式的任务调度接口
  * */
 
 class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with Logging {
@@ -54,8 +53,8 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
     // because the task randomly gets placed on the first executor all 1000 times, the
     // probability of that happening is 2^-1000 (so sufficiently small to be considered
     // negligible).
-    //多次尝试一个任务调试task,确保不会总是被安排在同一个执行器,虽然有一个机会，这个测试将失败
-    //因为任务随机放置在第一个执行者1000次
+    //多次尝试一个任务调试task,确保不会总是被安排在同一个执行器,虽然有一个机会,这个测试将失败
+    //因为任务随机放置在第一个执行器1000次
     val numTrials = 1000
     val selectedExecutorIds = 1.to(numTrials).map { _ =>
       val taskSet = FakeTask.createTaskSet(1)

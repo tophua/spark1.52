@@ -108,6 +108,7 @@ private[spark] class TaskSetManager(//任务集管理器
 
 
   val runningTasksSet = new HashSet[Long]
+  //正在运行的任务数
   override def runningTasks: Int = runningTasksSet.size
   //True表示任务集管理器应启动一次任务,TaskSetManagers至少一次任务成功完成
   // True once no more tasks should be launched for this task set manager. TaskSetManagers enter

@@ -33,7 +33,7 @@ class SparkListenerWithClusterSuite extends SparkFunSuite with LocalSparkContext
 
   /** 
    *  Length of time to wait while draining listener events.
-   *  等待侦听事件的时间长度
+   *  等待监听事件的时间长度
    *   */
   val WAIT_TIMEOUT_MILLIS = 10000
 

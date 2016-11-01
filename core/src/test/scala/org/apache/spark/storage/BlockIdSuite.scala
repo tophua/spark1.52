@@ -32,7 +32,7 @@ class BlockIdSuite extends SparkFunSuite {
     assert(id1 != id2)
   }
 
-  test("test-bad-deserialization") {//测试坏反序列化
+  test("test-bad-deserialization") {//测试坏的反序列化
     try {
       // Try to deserialize an invalid block id.
       //尝试反序列化无效块的ID
@@ -46,8 +46,8 @@ class BlockIdSuite extends SparkFunSuite {
 
   test("rdd") {
     val id = RDDBlockId(1, 2)
-    assertSame(id, RDDBlockId(1, 2))
-    assertDifferent(id, RDDBlockId(1, 1))
+    assertSame(id, RDDBlockId(1, 2))//相同
+    assertDifferent(id, RDDBlockId(1, 1))//不同
     assert(id.name === "rdd_1_2")
     assert(id.asRDDId.get.rddId === 1)
     assert(id.asRDDId.get.splitIndex === 2)
@@ -55,10 +55,10 @@ class BlockIdSuite extends SparkFunSuite {
     assertSame(id, BlockId(id.toString))
   }
 
-  test("shuffle") {
+  test("shuffle") {//shuffleBlock
     val id = ShuffleBlockId(1, 2, 3)
-    assertSame(id, ShuffleBlockId(1, 2, 3))
-    assertDifferent(id, ShuffleBlockId(3, 2, 3))
+    assertSame(id, ShuffleBlockId(1, 2, 3))//相同
+    assertDifferent(id, ShuffleBlockId(3, 2, 3))//不同
     assert(id.name === "shuffle_1_2_3")
     assert(id.asRDDId === None)
     assert(id.shuffleId === 1)

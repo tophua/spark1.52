@@ -50,7 +50,7 @@ class ResultDeletingTaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedule
     if (!removedResult) {
       // Only remove the result once, since we'd like to test the case where the task eventually
       // succeeds.
-      //只删除一次结果,既然我们想测试的情况下,任务最终成功。
+      //只删除一次结果,既然我们想测试的情况下,任务最终成功
       serializer.get().deserialize[TaskResult[_]](serializedData) match {
         case IndirectTaskResult(blockId, size) =>
           sparkEnv.blockManager.master.removeBlock(blockId)

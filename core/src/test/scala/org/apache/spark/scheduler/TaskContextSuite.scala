@@ -30,7 +30,7 @@ import org.apache.spark.metrics.source.JvmSource
 
 class TaskContextSuite extends SparkFunSuite with BeforeAndAfter with LocalSparkContext {
 
-  test("provide metrics sources") {//提供数据来源
+  test("provide metrics sources") {//提供测量数源
     val filePath = getClass.getClassLoader.getResource("test_metrics_config.properties").getFile
     val conf = new SparkConf(loadDefaults = false)
       .set("spark.metrics.conf", filePath)
