@@ -30,44 +30,55 @@ import org.apache.spark.util.Utils
 
 class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext {
 
-  val url = "jdbc:h2:mem:testdb2"
+  //val url = "jdbc:h2:mem:testdb2"
+  val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
+  //val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
   var conn: java.sql.Connection = null
-  val url1 = "jdbc:h2:mem:testdb3"
+  //val url1 = "jdbc:h2:mem:testdb3"
+  val url1 = "jdbc:postgresql://192.168.10.198:3306/postgres"
+  
   var conn1: java.sql.Connection = null
   val properties = new Properties()
-  properties.setProperty("user", "testUser")
-  properties.setProperty("password", "testPass")
-  properties.setProperty("rowId", "false")
+ // properties.setProperty("user", "testUser")
+ // properties.setProperty("password", "testPass")
+    properties.setProperty("user", "postgres")
+   properties.setProperty("password", "admin")
+  //properties.setProperty("rowId", "false")
 
   before {
-    Utils.classForName("org.h2.Driver")
+    //Utils.classForName("org.h2.Driver")
+    
+    Utils.classForName("org.postgresql.Driver")
+    
     conn = DriverManager.getConnection(url)
-    conn.prepareStatement("create schema test").executeUpdate()
+   // conn.prepareStatement("drop schema test").executeUpdate()
+   // conn.prepareStatement("create schema test").executeUpdate()
 
     conn1 = DriverManager.getConnection(url1, properties)
-    conn1.prepareStatement("create schema test").executeUpdate()
+   // conn1.prepareStatement("create schema test").executeUpdate()
     conn1.prepareStatement("drop table if exists test.people").executeUpdate()
     conn1.prepareStatement(
-      "create table test.people (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
+      "create table test.people (name TEXT NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
     conn1.prepareStatement("insert into test.people values ('fred', 1)").executeUpdate()
     conn1.prepareStatement("insert into test.people values ('mary', 2)").executeUpdate()
-    conn1.prepareStatement("drop table if exists test.people1").executeUpdate()
-    conn1.prepareStatement(
-      "create table test.people1 (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
-    conn1.commit()
+   // conn1.prepareStatement("TRUNCATE TABLE test.people1 CASCADE").executeUpdate()
+   // conn1.prepareStatement("drop table if exists test.people1").executeUpdate()
+    //conn1.prepareStatement(
+    //  "create table test.people1 (name TEXT NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
+    //conn1.commit()
 
     sql(
       s"""
         |CREATE TEMPORARY TABLE PEOPLE
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass')
+        |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE', user 'postgres', password 'admin')
       """.stripMargin.replaceAll("\n", " "))
 
     sql(
       s"""
         |CREATE TEMPORARY TABLE PEOPLE1
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE1', user 'testUser', password 'testPass')
+        |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE1', user 'postgres', password 'admin')
       """.stripMargin.replaceAll("\n", " "))
   }
 
@@ -80,21 +91,29 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
 
   private lazy val arr2x2 = Array[Row](Row.apply("dave", 42), Row.apply("mary", 222))
   private lazy val arr1x2 = Array[Row](Row.apply("fred", 3))
-  private lazy val schema2 = StructType(//StructType代表一张表,StructField代表一个字段
+  //StructType代表一张表,StructField代表一个字段
+  private lazy val schema2 = StructType(
       StructField("name", StringType) ::
       StructField("id", IntegerType) :: Nil)
 
   private lazy val arr2x3 = Array[Row](Row.apply("dave", 42, 1), Row.apply("mary", 222, 2))
-  private lazy val schema3 = StructType(//StructType代表一张表,StructField代表一个字段
+  //StructType代表一张表,StructField代表一个字段
+  private lazy val schema3 = StructType(
       StructField("name", StringType) ::
       StructField("id", IntegerType) ::
       StructField("seq", IntegerType) :: Nil)
 
   test("Basic CREATE") {//基本创建
     val df = ctx.createDataFrame(sc.parallelize(arr2x2), schema2)
-
+    //创建表插入二行数据,根据schema2数据类型自动创建表构造
+    /**
+     * "dave", 42
+     * "mary", 222
+     */
     df.write.jdbc(url, "TEST.BASICCREATETEST", new Properties)
+    //读取数据库的数据
     assert(2 === ctx.read.jdbc(url, "TEST.BASICCREATETEST", new Properties).count)
+    //取出第一行数据,leng代表几列数据
     assert(2 === ctx.read.jdbc(url, "TEST.BASICCREATETEST", new Properties).collect()(0).length)
   }
 
@@ -103,20 +122,26 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     val df2 = ctx.createDataFrame(sc.parallelize(arr1x2), schema2)
 
     df.write.jdbc(url1, "TEST.DROPTEST", properties)
+    //总数据
     assert(2 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).count)
+    //获得第1行,3列
     assert(3 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).collect()(0).length)
-
+    //覆盖数据模式,即原来的数据删除
     df2.write.mode(SaveMode.Overwrite).jdbc(url1, "TEST.DROPTEST", properties)
     assert(1 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).count)
+    //表构造2列
     assert(2 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).collect()(0).length)
   }
 
   test("CREATE then INSERT to append") {//创建然后插入到追加
     val df = ctx.createDataFrame(sc.parallelize(arr2x2), schema2)
     val df2 = ctx.createDataFrame(sc.parallelize(arr1x2), schema2)
-
+    //插入2行2列数据,
     df.write.jdbc(url, "TEST.APPENDTEST", new Properties)
+     assert(2 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).count)
+    //追加数据模式
     df2.write.mode(SaveMode.Append).jdbc(url, "TEST.APPENDTEST", new Properties)
+    //插入1行2列数据,
     assert(3 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).count)
     assert(2 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).collect()(0).length)
   }
@@ -126,17 +151,23 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     val df2 = ctx.createDataFrame(sc.parallelize(arr1x2), schema2)
 
     df.write.jdbc(url1, "TEST.TRUNCATETEST", properties)
+    //2行数据
+    assert(2 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).count)
+    //覆盖数据
     df2.write.mode(SaveMode.Overwrite).jdbc(url1, "TEST.TRUNCATETEST", properties)
+    //1行数据
     assert(1 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).count)
     assert(2 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).collect()(0).length)
   }
 
-  test("Incompatible INSERT to append") {//创建并插入追加
+  test("Incompatible INSERT to append") {//不匹配插入与追加
+    //二列数据
     val df = ctx.createDataFrame(sc.parallelize(arr2x2), schema2)
+    //三列数据
     val df2 = ctx.createDataFrame(sc.parallelize(arr2x3), schema3)
 
     df.write.jdbc(url, "TEST.INCOMPATIBLETEST", new Properties)
-    intercept[org.apache.spark.SparkException] {
+    intercept[org.apache.spark.SparkException] {//追加三列数据报告
       df2.write.mode(SaveMode.Append).jdbc(url, "TEST.INCOMPATIBLETEST", new Properties)
     }
   }
