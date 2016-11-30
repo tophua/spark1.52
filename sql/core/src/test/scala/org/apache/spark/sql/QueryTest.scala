@@ -107,6 +107,7 @@ object QueryTest {
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
    */
   def checkAnswer(df: DataFrame, expectedAnswer: Seq[Row]): Option[String] = {
+    //nonEmpty测试容器是否包含元素
     val isSorted = df.logicalPlan.collect { case s: logical.Sort => s }.nonEmpty
 
     // We need to call prepareRow recursively to handle schemas with struct types.
@@ -122,7 +123,7 @@ object QueryTest {
         case o => o
       })
     }
-
+    //准备回答
     def prepareAnswer(answer: Seq[Row]): Seq[Row] = {
       // Converts data to types that we can do equality comparison using Scala collections.
       //转换数据,我们可以使用Scala集合类型的相等比较的大数字类型
@@ -132,9 +133,12 @@ object QueryTest {
       // For binary arrays, we convert it to Seq to avoid of calling java.util.Arrays.equals for
       // equality test.
       val converted: Seq[Row] = answer.map(prepareRow)
+      //
       if (!isSorted) converted.sortBy(_.toString()) else converted
     }
+    //答案s
     val sparkAnswer = try df.collect().toSeq catch {
+      //如果异常返回
       case e: Exception =>
         val errorMessage =
           s"""
@@ -146,7 +150,7 @@ object QueryTest {
           """.stripMargin
         return Some(errorMessage)
     }
-
+    
     if (prepareAnswer(expectedAnswer) != prepareAnswer(sparkAnswer)) {
       val errorMessage =
         s"""

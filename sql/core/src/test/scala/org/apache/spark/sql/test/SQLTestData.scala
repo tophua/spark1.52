@@ -207,6 +207,7 @@ private[sql] trait SQLTestData { self =>
   }
 
   // An RDD with 4 elements and 8 partitions
+  //一个RDD4元素和8分区
   protected lazy val withEmptyParts: RDD[IntField] = {
     val rdd = _sqlContext.sparkContext.parallelize((1 to 4).map(IntField), 8)
     rdd.toDF().registerTempTable("withEmptyParts")
@@ -216,9 +217,10 @@ private[sql] trait SQLTestData { self =>
   protected lazy val person: DataFrame = {
     val df = _sqlContext.sparkContext.parallelize(
       Person(0, "mike", 30) ::
-      Person(1, "jim", 20) :: Nil).toDF()
-    df.registerTempTable("person")
-    df
+      Person(1, "jim", 20) :: Nil)
+      val dft=df.toDF()
+    dft.registerTempTable("person")
+    dft
   }
 
   protected lazy val salary: DataFrame = {
@@ -240,6 +242,7 @@ private[sql] trait SQLTestData { self =>
 
   /**
    * Initialize all test data such that all temp tables are properly registered.
+   * 初始化所有的测试数据,所有临时表都已正确注册
    */
   def loadTestData(): Unit = {
     assert(_sqlContext != null, "attempted to initialize test data before SQLContext.")
@@ -270,6 +273,7 @@ private[sql] trait SQLTestData { self =>
 
 /**
  * Case classes used in test data.
+ * 测试数据中使用的案例类,单独封闭对象中
  */
 private[sql] object SQLTestData {
   case class TestData(key: Int, value: String)
