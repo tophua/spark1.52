@@ -27,6 +27,7 @@ class SQLConfSuite extends QueryTest with SharedSQLContext {
   test("propagate from spark conf") {//传播Spark配置文件
     // We create a new context here to avoid order dependence with other tests that might call
     // clear().
+    //我们在这里创建一个新的上下文,以避免与其他可能调用的测试顺序依赖关系
     val newContext = new SQLContext(ctx.sparkContext)
     assert(newContext.getConf("spark.sql.testkey", "false") === "true")
   }
@@ -42,6 +43,7 @@ class SQLConfSuite extends QueryTest with SharedSQLContext {
 
     // Tests SQLConf as accessed from a SQLContext is mutable after
     // the latter is initialized, unlike SparkConf inside a SparkContext.
+    //测试sqlconf作为访问一个sqlcontext改变后被初始化
     assert(ctx.getConf(testKey) == testVal)
     assert(ctx.getConf(testKey, testVal + "_") === testVal)
     assert(ctx.getAllConfs.contains(testKey))

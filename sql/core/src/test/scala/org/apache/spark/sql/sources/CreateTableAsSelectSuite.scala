@@ -36,6 +36,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
     super.beforeAll()
     path = Utils.createTempDir()
     val rdd = sparkContext.parallelize((1 to 10).map(i => s"""{"a":$i, "b":"str${i}"}"""))
+    //读取RDD[String]类型
     caseInsensitiveContext.read.json(rdd).registerTempTable("jt")
   }
 

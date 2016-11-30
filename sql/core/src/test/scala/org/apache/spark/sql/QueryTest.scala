@@ -45,7 +45,8 @@ class QueryTest extends PlanTest {
   def checkExistence(df: DataFrame, exists: Boolean, keywords: String*) {
     val outputs = df.collect().map(_.mkString).mkString
     for (key <- keywords) {
-      if (exists) {
+      if (exists) {//是否包含关键字
+        //doesn't exist in result 结果不存在
         assert(outputs.contains(key), s"Failed for $df ($key doesn't exist in result)")
       } else {
         assert(!outputs.contains(key), s"Failed for $df ($key existed in the result)")
@@ -56,8 +57,9 @@ class QueryTest extends PlanTest {
   /**
    * Runs the plan and makes sure the answer matches the expected result.
    * 运行该计划并确保答案与预期结果相匹配
-   * @param df the [[DataFrame]] to be executed
+   * @param df the [[DataFrame]] to be executed 被执行DataFrame
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
+   * 											 预期的结果在一序列的行
    */
   protected def checkAnswer(df: DataFrame, expectedAnswer: Seq[Row]): Unit = {
     QueryTest.checkAnswer(df, expectedAnswer) match {
@@ -76,8 +78,11 @@ class QueryTest extends PlanTest {
 
   /**
    * Asserts that a given [[DataFrame]] will be executed using the given number of cached results.
+   * 断言一个给定的DataFrame, 将使用给定数量的缓存结果执行
+   * 
    */
   def assertCached(query: DataFrame, numCachedTables: Int = 1): Unit = {
+    //缓存结果数据
     val planWithCaching = query.queryExecution.withCachedData
     val cachedData = planWithCaching collect {
       case cached: InMemoryRelation => cached
@@ -93,7 +98,9 @@ class QueryTest extends PlanTest {
 object QueryTest {
   /**
    * Runs the plan and makes sure the answer matches the expected result.
+   * 运行该计划,并确保答案与预期结果相匹配
    * If there was exception during the execution or the contents of the DataFrame does not
+   * 如果DataFrame执行或内容中有异常,不符合预期的结果,将返回一个错误消息,否则,一个[没有]将被返回。
    * match the expected result, an error message will be returned. Otherwise, a [[None]] will
    * be returned.
    * @param df the [[DataFrame]] to be executed
@@ -103,11 +110,13 @@ object QueryTest {
     val isSorted = df.logicalPlan.collect { case s: logical.Sort => s }.nonEmpty
 
     // We need to call prepareRow recursively to handle schemas with struct types.
+    //我们需要调用preparerow递归处理模式与结构类型
     def prepareRow(row: Row): Row = {
       Row.fromSeq(row.toSeq.map {
         case null => null
         case d: java.math.BigDecimal => BigDecimal(d)
         // Convert array to Seq for easy equality check.
+        //转换数组到序列,简单的等式检查
         case b: Array[_] => b.toSeq
         case r: Row => prepareRow(r)
         case o => o
@@ -116,8 +125,10 @@ object QueryTest {
 
     def prepareAnswer(answer: Seq[Row]): Seq[Row] = {
       // Converts data to types that we can do equality comparison using Scala collections.
+      //转换数据,我们可以使用Scala集合类型的相等比较的大数字类型
       // For BigDecimal type, the Scala type has a better definition of equality test (similar to
       // Java's java.math.BigDecimal.compareTo).
+      //Scala类型具有平等性测试更好的定义
       // For binary arrays, we convert it to Seq to avoid of calling java.util.Arrays.equals for
       // equality test.
       val converted: Seq[Row] = answer.map(prepareRow)

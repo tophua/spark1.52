@@ -203,5 +203,6 @@
 	<classpathentry kind="lib" path="lib/spark-streaming_2.10-1.5.3-SNAPSHOT-tests.jar"/>
 	<classpathentry kind="lib" path="lib/spark-streaming_2.10-1.5.3-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/spark-unsafe_2.10-1.5.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/postgresql-9.4.1212.jar"/>
 	<classpathentry kind="output" path="target/scala-2.10/classes"/>
 </classpath>

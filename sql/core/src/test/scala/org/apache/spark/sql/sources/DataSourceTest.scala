@@ -24,13 +24,15 @@ private[sql] abstract class DataSourceTest extends QueryTest {
   protected def _sqlContext: SQLContext
 
   // We want to test some edge cases.
-  //我们想测试一些边缘案件
+  //我们想测试一些边缘案件,大小写不敏感的Insensitive
   protected lazy val caseInsensitiveContext: SQLContext = {
     val ctx = new SQLContext(_sqlContext.sparkContext)
-    ctx.setConf(SQLConf.CASE_SENSITIVE, false)
+    ctx.setConf(SQLConf.CASE_SENSITIVE, false) //大小写敏感
     ctx
   }
-
+  /**
+   * expectedAnswer 预期的答案 
+   */
   protected def sqlTest(sqlString: String, expectedAnswer: Seq[Row]) {
     test(sqlString) {
       checkAnswer(caseInsensitiveContext.sql(sqlString), expectedAnswer)
