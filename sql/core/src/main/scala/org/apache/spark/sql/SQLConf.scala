@@ -38,7 +38,7 @@ private[spark] object SQLConf {
 
   /**
    * An entry contains all meta information for a configuration.
-   *
+   * 一个条目包含一个配置的所有元数据
    * @param key the key for the configuration
    * @param defaultValue the default value for the configuration
    * @param valueConverter how to convert a string to the value. It should throw an exception if the
@@ -188,12 +188,14 @@ private[spark] object SQLConf {
 
   val COMPRESS_CACHED = booleanConf("spark.sql.inMemoryColumnarStorage.compressed",
     defaultValue = Some(true),
+    //Spark SQL会自动选择一个基于数据统计每列压缩编解码
     doc = "When set to true Spark SQL will automatically select a compression codec for each " +
       "column based on statistics of the data.",
     isPublic = false)
-
+    
   val COLUMN_BATCH_SIZE = intConf("spark.sql.inMemoryColumnarStorage.batchSize",
     defaultValue = Some(10000),
+    //控制批量列的状缓存的大小,较大的批量,可以提高内存的利用率和压缩,但风险当缓存数据Ooms(内存益出)
     doc = "Controls the size of batches for columnar caching.  Larger batch sizes can improve " +
       "memory utilization and compression, but risk OOMs when caching data.",
     isPublic = false)
@@ -201,6 +203,7 @@ private[spark] object SQLConf {
   val IN_MEMORY_PARTITION_PRUNING =
     booleanConf("spark.sql.inMemoryColumnarStorage.partitionPruning",
       defaultValue = Some(true),
+       //允许在内存中的列表分区修剪
       doc = "When true, enable partition pruning for in-memory columnar tables.",
       isPublic = false)
 
@@ -210,46 +213,51 @@ private[spark] object SQLConf {
       "nodes when performing a join.  By setting this value to -1 broadcasting can be disabled. " +
       "Note that currently statistics are only supported for Hive Metastore tables where the " +
       "command<code>ANALYZE TABLE &lt;tableName&gt; COMPUTE STATISTICS noscan</code> has been run.")
-
+      //
   val DEFAULT_SIZE_IN_BYTES = longConf(
     "spark.sql.defaultSizeInBytes",
+    //查询计划中使用的默认表大小,默认情况下,它被设置为一个比autoBroadcastJoinThreshold的值更大
     doc = "The default table size used in query planning. By default, it is set to a larger " +
       "value than `spark.sql.autoBroadcastJoinThreshold` to be more conservative. That is to say " +
       "by default the optimizer will not choose to broadcast a table unless it knows for sure its" +
       "size is small enough.",
     isPublic = false)
-
+    //默认的分区数,使用洗牌的数据或连接聚合时
   val SHUFFLE_PARTITIONS = intConf("spark.sql.shuffle.partitions",
     defaultValue = Some(200),
     doc = "The default number of partitions to use when shuffling data for joins or aggregations.")
-
+    //使用钨丝
   val TUNGSTEN_ENABLED = booleanConf("spark.sql.tungsten.enabled",
     defaultValue = Some(true),
+     //当为true时,用优化钨物理执行后端明确管理内存和动态生成表达式求值的代码
     doc = "When true, use the optimized Tungsten physical execution backend which explicitly " +
           "manages memory and dynamically generates bytecode for expression evaluation.")
-
+  //代码动态生成
   val CODEGEN_ENABLED = booleanConf("spark.sql.codegen",
     defaultValue = Some(true),  // use TUNGSTEN_ENABLED as default
+    //当为true,代码将在运行时动态生成,用于在一个特定的查询中的表达式评估
     doc = "When true, code will be dynamically generated at runtime for expression evaluation in" +
       " a specific query.",
     isPublic = false)
-
+   //当true,使用新的钨丝优化后端执行
   val UNSAFE_ENABLED = booleanConf("spark.sql.unsafe.enabled",
     defaultValue = Some(true),  // use TUNGSTEN_ENABLED as default
     doc = "When true, use the new optimized Tungsten physical execution backend.",
     isPublic = false)
-
+  //默认的SQL方言的使用
   val DIALECT = stringConf(
     "spark.sql.dialect",
     defaultValue = Some("sql"),
     doc = "The default SQL dialect to use.")
-
+  //查询分析器默认区分大小写
   val CASE_SENSITIVE = booleanConf("spark.sql.caseSensitive",
     defaultValue = Some(true),
+    //查询分析器是否应该是区分大小写
     doc = "Whether the query analyzer should be case sensitive or not.")
-
+  //
   val PARQUET_SCHEMA_MERGING_ENABLED = booleanConf("spark.sql.parquet.mergeSchema",
     defaultValue = Some(false),
+    //Parquet数据源合并所有数据文件收集的模式
     doc = "When true, the Parquet data source merges schemas collected from all data files, " +
           "otherwise the schema is picked from the summary file or a random data file " +
           "if no summary file is available.")
@@ -326,58 +334,74 @@ private[spark] object SQLConf {
 
   val BROADCAST_TIMEOUT = intConf("spark.sql.broadcastTimeout",
     defaultValue = Some(5 * 60),
+    //广播中等待超时的时间
     doc = "Timeout in seconds for the broadcast wait time in broadcast joins.")
 
   // Options that control which operators can be chosen by the query planner.  These should be
   // considered hints and may be ignored by future versions of Spark SQL.
+  //选项,可以通过查询规划器选择控件的控件,这些应该是暗示,可以通过SQL的未来版本忽视的Spark
   val EXTERNAL_SORT = booleanConf("spark.sql.planner.externalSort",
     defaultValue = Some(true),
+    //当true,按需要对磁盘进行排序,否则将对内存中的每个分区进行排序
     doc = "When true, performs sorts spilling to disk as needed otherwise sort each partition in" +
       " memory.")
 
   val SORTMERGE_JOIN = booleanConf("spark.sql.planner.sortMergeJoin",
     defaultValue = Some(true),
+    //当true,使用排序合并连接(而不是哈希联接)默认为大连接
     doc = "When true, use sort merge join (as opposed to hash join) by default for large joins.")
 
   // This is only used for the thriftserver
+  // 这是只用于thriftserver
   val THRIFTSERVER_POOL = stringConf("spark.sql.thriftserver.scheduler.pool",
+    //设置一个JDBC客户端会话的公平调度器池
     doc = "Set a Fair Scheduler pool for a JDBC client session")
-
+   //SQL语句保存在JDBC/ODBC Web UI历史数
   val THRIFTSERVER_UI_STATEMENT_LIMIT = intConf("spark.sql.thriftserver.ui.retainedStatements",
     defaultValue = Some(200),
+    //SQL语句保存在JDBC/ODBC Web UI历史数
     doc = "The number of SQL statements kept in the JDBC/ODBC web UI history.")
-
+   //SQL客户端会话数保持在JDBC/ODBC Web UI的历史
   val THRIFTSERVER_UI_SESSION_LIMIT = intConf("spark.sql.thriftserver.ui.retainedSessions",
     defaultValue = Some(200),
+    //SQL客户端会话数保持在JDBC/ODBC Web UI的历史
     doc = "The number of SQL client sessions kept in the JDBC/ODBC web UI history.")
 
   // This is used to set the default data source
+  //这是用来设置默认的数据源
   val DEFAULT_DATA_SOURCE_NAME = stringConf("spark.sql.sources.default",
     defaultValue = Some("org.apache.spark.sql.parquet"),
+    //在输入/输出中使用的默认数据源
     doc = "The default data source to use in input/output.")
 
   // This is used to control the when we will split a schema's JSON string to multiple pieces
   // in order to fit the JSON string in metastore's table property (by default, the value has
   // a length restriction of 4000 characters). We will split the JSON string of a schema
   // to its length exceeds the threshold.
+  //这是用来控制当我们将分裂模式的JSON字符串以多件适合的表属性元数据的JSON字符串(默认情况下,该值具有4000个字符的长度限制)
+  //我们将一个架构,其长度超过阈值的JSON字符串
   val SCHEMA_STRING_LENGTH_THRESHOLD = intConf("spark.sql.sources.schemaStringLengthThreshold",
     defaultValue = Some(4000),
+    //(默认情况下,该值具有4000个字符的长度限制)
     doc = "The maximum length allowed in a single cell when " +
       "storing additional schema information in Hive's metastore.",
     isPublic = false)
 
   val PARTITION_DISCOVERY_ENABLED = booleanConf("spark.sql.sources.partitionDiscovery.enabled",
     defaultValue = Some(true),
+    //当为true时,自动发现数据分区
     doc = "When true, automtically discover data partitions.")
 
   val PARTITION_COLUMN_TYPE_INFERENCE =
     booleanConf("spark.sql.sources.partitionColumnTypeInference.enabled",
       defaultValue = Some(true),
+      //当为true,自动推断分区列的数据类型
       doc = "When true, automatically infer the data types for partitioned columns.")
 
   val PARTITION_MAX_FILES =
     intConf("spark.sql.sources.maxConcurrentWrites",
       defaultValue = Some(5),
+      //最大数量的并行文件打开前重新排序,在使用动态分区写文件时
       doc = "The maximum number of concurent files to open before falling back on sorting when " +
             "writing out files using dynamic partitioning.")
 
@@ -427,7 +451,7 @@ private[spark] object SQLConf {
 
 /**
  * A class that enables the setting and getting of mutable config parameters/hints.
- *
+ * 一个类设置和获得配置参数,在一个sqlcontext存在
  * In the presence of a SQLContext, these can be set and queried by passing SET commands
  * into Spark SQL's query functions (i.e. sql()). Otherwise, users of this class can
  * modify the hints by programmatically calling the setters and getters of this class.
@@ -448,13 +472,14 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
    * The SQL dialect that is used when parsing queries.  This defaults to 'sql' which uses
    * a simple SQL parser provided by Spark SQL.  This is currently the only option for users of
    * SQLContext.
-   *
+   * SQL方言,用来解析查询,默认为"SQL"采用Spark SQL提供简单的SQL解析器,这是目前用户对sqlcontext唯一的选择
    * When using a HiveContext, this value defaults to 'hiveql', which uses the Hive 0.12.0 HiveQL
    * parser.  Users can change this to 'sql' if they want to run queries that aren't supported by
    * HiveQL (e.g., SELECT 1).
    *
    * Note that the choice of dialect does not affect things like what tables are available or
    * how query execution is performed.
+   * 请注意 方言的选择不会影响诸如可用表或执行查询执行之类的事情
    */
   private[spark] def dialect: String = getConf(DIALECT)
 
@@ -529,12 +554,18 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
 
   /** ********************** SQLConf functionality methods ************ */
 
-  /** Set Spark SQL configuration properties. */
+  /** 
+   *  Set Spark SQL configuration properties.
+   *  设置Spark SQL 配置属性 
+   *  */
   def setConf(props: Properties): Unit = settings.synchronized {
     props.foreach { case (k, v) => setConfString(k, v) }
   }
 
-  /** Set the given Spark SQL configuration property using a `string` value. */
+  /** 
+   *  Set the given Spark SQL configuration property using a `string` value. 
+   *  设置特定的Spark SQL配置属性使用一个 字符串和值  
+   *  */
   def setConfString(key: String, value: String): Unit = {
     require(key != null, "key cannot be null")
     require(value != null, s"value cannot be null for key: $key")
@@ -546,7 +577,10 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
     settings.put(key, value)
   }
 
-  /** Set the given Spark SQL configuration property. */
+  /** 
+   *  Set the given Spark SQL configuration property. 
+   *  设置指定的Spark SQL配置属性
+   *  */
   def setConf[T](entry: SQLConfEntry[T], value: T): Unit = {
     require(entry != null, "entry cannot be null")
     require(value != null, s"value cannot be null for key: ${entry.key}")
@@ -554,11 +588,15 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
     settings.put(entry.key, entry.stringConverter(value))
   }
 
-  /** Return the value of Spark SQL configuration property for the given key. */
+  /** 
+   *  Return the value of Spark SQL configuration property for the given key. 
+   *  返回 Spark SQL配置属性给定的关键字值
+   *  */
   def getConfString(key: String): String = {
     Option(settings.get(key)).
       orElse {
         // Try to use the default value
+        //尝试使用默认值
         Option(sqlConfEntries.get(key)).map(_.defaultValueString)
       }.
       getOrElse(throw new NoSuchElementException(key))
@@ -566,8 +604,10 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
 
   /**
    * Return the value of Spark SQL configuration property for the given key. If the key is not set
+   * 返回Spark SQL配置属性的给定的关键字值,如果没有设置,返回默认值,
    * yet, return `defaultValue`. This is useful when `defaultValue` in SQLConfEntry is not the
    * desired one.
+   * 这是有用的当`默认值`在sqlconfentry是不期望的一个
    */
   def getConf[T](entry: SQLConfEntry[T], defaultValue: T): T = {
     require(sqlConfEntries.get(entry.key) == entry, s"$entry is not registered")
@@ -577,6 +617,7 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
   /**
    * Return the value of Spark SQL configuration property for the given key. If the key is not set
    * yet, return `defaultValue` in [[SQLConfEntry]].
+   * 返回Spark SQL配置属性的给定的关键字值,如果没有设置,返回默认值
    */
   def getConf[T](entry: SQLConfEntry[T]): T = {
     require(sqlConfEntries.get(entry.key) == entry, s"$entry is not registered")
@@ -587,6 +628,7 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
   /**
    * Return the `string` value of Spark SQL configuration property for the given key. If the key is
    * not set yet, return `defaultValue`.
+   * 返回Spark SQL配置属性的给定的关键字值,如果没有设置,返回默认值,
    */
   def getConfString(key: String, defaultValue: String): String = {
     val entry = sqlConfEntries.get(key)
@@ -599,6 +641,7 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
 
   /**
    * Return all the configuration properties that have been set (i.e. not the default).
+   * 返回已设置的所有配置属性(即不是默认),这将创建一个映射的配置属性的新副本
    * This creates a new copy of the config properties in the form of a Map.
    */
   def getAllConfs: immutable.Map[String, String] = settings.synchronized { settings.toMap }
@@ -606,6 +649,7 @@ private[sql] class SQLConf extends Serializable with CatalystConf {
   /**
    * Return all the configuration definitions that have been defined in [[SQLConf]]. Each
    * definition contains key, defaultValue and doc.
+   * 返回所有配置定义已定义的sqlconf,每个定义包含键,默认值和DOC
    */
   def getAllDefinedConfs: Seq[(String, String, String)] = sqlConfEntries.synchronized {
     sqlConfEntries.values.filter(_.isPublic).map { entry =>
