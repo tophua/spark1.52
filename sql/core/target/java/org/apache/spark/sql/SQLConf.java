@@ -1,7 +1,7 @@
 package org.apache.spark.sql;
 /**
  * A class that enables the setting and getting of mutable config parameters/hints.
- * <p>
+ * &#x4e00;&#x4e2a;&#x7c7b;&#x8bbe;&#x7f6e;&#x548c;&#x83b7;&#x5f97;&#x914d;&#x7f6e;&#x53c2;&#x6570;,&#x5728;&#x4e00;&#x4e2a;sqlcontext&#x5b58;&#x5728;
  * In the presence of a SQLContext, these can be set and queried by passing SET commands
  * into Spark SQL's query functions (i.e. sql()). Otherwise, users of this class can
  * modify the hints by programmatically calling the setters and getters of this class.
@@ -11,7 +11,7 @@ package org.apache.spark.sql;
   class SQLConf implements scala.Serializable, org.apache.spark.sql.catalyst.CatalystConf {
   /**
    * An entry contains all meta information for a configuration.
-   * <p>
+   * &#x4e00;&#x4e2a;&#x6761;&#x76ee;&#x5305;&#x542b;&#x4e00;&#x4e2a;&#x914d;&#x7f6e;&#x7684;&#x6240;&#x6709;&#x5143;&#x6570;&#x636e;
    * param:  key the key for the configuration
    * param:  defaultValue the default value for the configuration
    * param:  valueConverter how to convert a string to the value. It should throw an exception if the
@@ -112,13 +112,14 @@ package org.apache.spark.sql;
    * The SQL dialect that is used when parsing queries.  This defaults to 'sql' which uses
    * a simple SQL parser provided by Spark SQL.  This is currently the only option for users of
    * SQLContext.
-   * <p>
+   * SQL&#x65b9;&#x8a00;,&#x7528;&#x6765;&#x89e3;&#x6790;&#x67e5;&#x8be2;,&#x9ed8;&#x8ba4;&#x4e3a;"SQL"&#x91c7;&#x7528;Spark SQL&#x63d0;&#x4f9b;&#x7b80;&#x5355;&#x7684;SQL&#x89e3;&#x6790;&#x5668;,&#x8fd9;&#x662f;&#x76ee;&#x524d;&#x7528;&#x6237;&#x5bf9;sqlcontext&#x552f;&#x4e00;&#x7684;&#x9009;&#x62e9;
    * When using a HiveContext, this value defaults to 'hiveql', which uses the Hive 0.12.0 HiveQL
    * parser.  Users can change this to 'sql' if they want to run queries that aren't supported by
    * HiveQL (e.g., SELECT 1).
    * <p>
    * Note that the choice of dialect does not affect things like what tables are available or
    * how query execution is performed.
+   * &#x8bf7;&#x6ce8;&#x610f; &#x65b9;&#x8a00;&#x7684;&#x9009;&#x62e9;&#x4e0d;&#x4f1a;&#x5f71;&#x54cd;&#x8bf8;&#x5982;&#x53ef;&#x7528;&#x8868;&#x6216;&#x6267;&#x884c;&#x67e5;&#x8be2;&#x6267;&#x884c;&#x4e4b;&#x7c7b;&#x7684;&#x4e8b;&#x60c5;
    * @return (undocumented)
    */
     java.lang.String dialect () { throw new RuntimeException(); }
@@ -153,18 +154,39 @@ package org.apache.spark.sql;
     boolean dataFrameEagerAnalysis () { throw new RuntimeException(); }
     boolean dataFrameSelfJoinAutoResolveAmbiguity () { throw new RuntimeException(); }
     boolean dataFrameRetainGroupColumns () { throw new RuntimeException(); }
-  /** Set Spark SQL configuration properties. */
+  /** 
+   *  Set Spark SQL configuration properties.
+   *  &#x8bbe;&#x7f6e;Spark SQL &#x914d;&#x7f6e;&#x5c5e;&#x6027; 
+   * @param props (undocumented)
+   *  */
   public  void setConf (java.util.Properties props) { throw new RuntimeException(); }
-  /** Set the given Spark SQL configuration property using a `string` value. */
+  /** 
+   *  Set the given Spark SQL configuration property using a <code>string</code> value. 
+   *  &#x8bbe;&#x7f6e;&#x7279;&#x5b9a;&#x7684;Spark SQL&#x914d;&#x7f6e;&#x5c5e;&#x6027;&#x4f7f;&#x7528;&#x4e00;&#x4e2a; &#x5b57;&#x7b26;&#x4e32;&#x548c;&#x503c;  
+   * @param key (undocumented)
+   * @param value (undocumented)
+   *  */
   public  void setConfString (java.lang.String key, java.lang.String value) { throw new RuntimeException(); }
-  /** Set the given Spark SQL configuration property. */
+  /** 
+   *  Set the given Spark SQL configuration property. 
+   *  &#x8bbe;&#x7f6e;&#x6307;&#x5b9a;&#x7684;Spark SQL&#x914d;&#x7f6e;&#x5c5e;&#x6027;
+   * @param entry (undocumented)
+   * @param value (undocumented)
+   *  */
   public <T extends java.lang.Object> void setConf (org.apache.spark.sql.SQLConf.SQLConfEntry<T> entry, T value) { throw new RuntimeException(); }
-  /** Return the value of Spark SQL configuration property for the given key. */
+  /** 
+   *  Return the value of Spark SQL configuration property for the given key. 
+   *  &#x8fd4;&#x56de; Spark SQL&#x914d;&#x7f6e;&#x5c5e;&#x6027;&#x7ed9;&#x5b9a;&#x7684;&#x5173;&#x952e;&#x5b57;&#x503c;
+   * @param key (undocumented)
+   * @return (undocumented)
+   *  */
   public  java.lang.String getConfString (java.lang.String key) { throw new RuntimeException(); }
   /**
    * Return the value of Spark SQL configuration property for the given key. If the key is not set
+   * &#x8fd4;&#x56de;Spark SQL&#x914d;&#x7f6e;&#x5c5e;&#x6027;&#x7684;&#x7ed9;&#x5b9a;&#x7684;&#x5173;&#x952e;&#x5b57;&#x503c;,&#x5982;&#x679c;&#x6ca1;&#x6709;&#x8bbe;&#x7f6e;,&#x8fd4;&#x56de;&#x9ed8;&#x8ba4;&#x503c;,
    * yet, return <code>defaultValue</code>. This is useful when <code>defaultValue</code> in SQLConfEntry is not the
    * desired one.
+   * &#x8fd9;&#x662f;&#x6709;&#x7528;&#x7684;&#x5f53;<code>&#x9ed8;&#x8ba4;&#x503c;</code>&#x5728;sqlconfentry&#x662f;&#x4e0d;&#x671f;&#x671b;&#x7684;&#x4e00;&#x4e2a;
    * @param entry (undocumented)
    * @param defaultValue (undocumented)
    * @return (undocumented)
@@ -173,6 +195,7 @@ package org.apache.spark.sql;
   /**
    * Return the value of Spark SQL configuration property for the given key. If the key is not set
    * yet, return <code>defaultValue</code> in {@link SQLConfEntry}.
+   * &#x8fd4;&#x56de;Spark SQL&#x914d;&#x7f6e;&#x5c5e;&#x6027;&#x7684;&#x7ed9;&#x5b9a;&#x7684;&#x5173;&#x952e;&#x5b57;&#x503c;,&#x5982;&#x679c;&#x6ca1;&#x6709;&#x8bbe;&#x7f6e;,&#x8fd4;&#x56de;&#x9ed8;&#x8ba4;&#x503c;
    * @param entry (undocumented)
    * @return (undocumented)
    */
@@ -180,6 +203,7 @@ package org.apache.spark.sql;
   /**
    * Return the <code>string</code> value of Spark SQL configuration property for the given key. If the key is
    * not set yet, return <code>defaultValue</code>.
+   * &#x8fd4;&#x56de;Spark SQL&#x914d;&#x7f6e;&#x5c5e;&#x6027;&#x7684;&#x7ed9;&#x5b9a;&#x7684;&#x5173;&#x952e;&#x5b57;&#x503c;,&#x5982;&#x679c;&#x6ca1;&#x6709;&#x8bbe;&#x7f6e;,&#x8fd4;&#x56de;&#x9ed8;&#x8ba4;&#x503c;,
    * @param key (undocumented)
    * @param defaultValue (undocumented)
    * @return (undocumented)
@@ -187,6 +211,7 @@ package org.apache.spark.sql;
   public  java.lang.String getConfString (java.lang.String key, java.lang.String defaultValue) { throw new RuntimeException(); }
   /**
    * Return all the configuration properties that have been set (i.e. not the default).
+   * &#x8fd4;&#x56de;&#x5df2;&#x8bbe;&#x7f6e;&#x7684;&#x6240;&#x6709;&#x914d;&#x7f6e;&#x5c5e;&#x6027;(&#x5373;&#x4e0d;&#x662f;&#x9ed8;&#x8ba4;),&#x8fd9;&#x5c06;&#x521b;&#x5efa;&#x4e00;&#x4e2a;&#x6620;&#x5c04;&#x7684;&#x914d;&#x7f6e;&#x5c5e;&#x6027;&#x7684;&#x65b0;&#x526f;&#x672c;
    * This creates a new copy of the config properties in the form of a Map.
    * @return (undocumented)
    */
@@ -194,6 +219,7 @@ package org.apache.spark.sql;
   /**
    * Return all the configuration definitions that have been defined in {@link SQLConf}. Each
    * definition contains key, defaultValue and doc.
+   * &#x8fd4;&#x56de;&#x6240;&#x6709;&#x914d;&#x7f6e;&#x5b9a;&#x4e49;&#x5df2;&#x5b9a;&#x4e49;&#x7684;sqlconf,&#x6bcf;&#x4e2a;&#x5b9a;&#x4e49;&#x5305;&#x542b;&#x952e;,&#x9ed8;&#x8ba4;&#x503c;&#x548c;DOC
    * @return (undocumented)
    */
   public  scala.collection.Seq<scala.Tuple3<java.lang.String, java.lang.String, java.lang.String>> getAllDefinedConfs () { throw new RuntimeException(); }

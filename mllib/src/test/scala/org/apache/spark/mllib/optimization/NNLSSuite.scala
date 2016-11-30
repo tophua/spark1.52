@@ -25,7 +25,10 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.TestingUtils._
 
 class NNLSSuite extends SparkFunSuite {
-  /** Generate an NNLS problem whose optimal solution is the all-ones vector. */
+  /** 
+   *  Generate an NNLS problem whose optimal solution is the all-ones vector.
+   *  生成法问题的最优解是所有的向量
+   *   */
   def genOnesData(n: Int, rand: Random): (DoubleMatrix, DoubleMatrix) = {
     val A = new DoubleMatrix(n, n, Array.fill(n*n)(rand.nextDouble()): _*)
     val b = A.mmul(DoubleMatrix.ones(n, 1))

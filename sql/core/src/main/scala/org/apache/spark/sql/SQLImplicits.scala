@@ -29,18 +29,23 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * A collection of implicit methods for converting common Scala objects into [[DataFrame]]s.
+ * 一个集合隐式转换的方法常见的Scala对象转换DataFrame
+ * 
  */
 private[sql] abstract class SQLImplicits {
   protected def _sqlContext: SQLContext
 
   /**
    * An implicit conversion that turns a Scala `Symbol` into a [[Column]].
+   * 隐式转换,变成一个Scala `符号`为[列]
+   * 
    * @since 1.3.0
    */
   implicit def symbolToColumn(s: Symbol): ColumnName = new ColumnName(s.name)
 
   /**
    * Creates a DataFrame from an RDD of Product (e.g. case classes, tuples).
+   * 创建一个DataFrame来自RDD 结果例如(如类、元组)
    * @since 1.3.0
    */
   implicit def rddToDataFrameHolder[A <: Product : TypeTag](rdd: RDD[A]): DataFrameHolder = {
@@ -49,6 +54,7 @@ private[sql] abstract class SQLImplicits {
 
   /**
    * Creates a DataFrame from a local Seq of Product.
+   * 创建一个DataFrame来自一个本地序列结果
    * @since 1.3.0
    */
   implicit def localSeqToDataFrameHolder[A <: Product : TypeTag](data: Seq[A]): DataFrameHolder =
@@ -62,6 +68,7 @@ private[sql] abstract class SQLImplicits {
 
   /**
    * Creates a single column DataFrame from an RDD[Int].
+   * 从RDD[Int]创建一列的DataFrame
    * @since 1.3.0
    */
   implicit def intRddToDataFrameHolder(data: RDD[Int]): DataFrameHolder = {
@@ -79,6 +86,7 @@ private[sql] abstract class SQLImplicits {
 
   /**
    * Creates a single column DataFrame from an RDD[Long].
+   * 从RDD[Long]创建一列的DataFrame
    * @since 1.3.0
    */
   implicit def longRddToDataFrameHolder(data: RDD[Long]): DataFrameHolder = {
@@ -96,6 +104,7 @@ private[sql] abstract class SQLImplicits {
 
   /**
    * Creates a single column DataFrame from an RDD[String].
+   * 从RDD[String]创建一列的DataFrame
    * @since 1.3.0
    */
   implicit def stringRddToDataFrameHolder(data: RDD[String]): DataFrameHolder = {

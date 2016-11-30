@@ -27,6 +27,7 @@ object TestNativeBayes {
     val sc = new SparkContext(conf)
 
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+    //隐式导入,自动转换toDF
     import sqlContext.implicits._
     var srcRDD = sc.textFile("../data/mllib/sougou/C000007/10.txt").filter(!_.isEmpty).map {
       x =>

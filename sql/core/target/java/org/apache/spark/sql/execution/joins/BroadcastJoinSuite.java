@@ -17,6 +17,7 @@ public  class BroadcastJoinSuite extends org.apache.spark.sql.QueryTest implemen
   public  void afterAll () { throw new RuntimeException(); }
   /**
    * Test whether the specified broadcast join updates the peak execution memory accumulator.
+   * &#x6d4b;&#x8bd5;&#x6307;&#x5b9a;&#x7684;&#x5e7f;&#x64ad;&#x8fde;&#x63a5;&#x662f;&#x5426;&#x66f4;&#x65b0;&#x5cf0;&#x503c;&#x6267;&#x884c;&#x5185;&#x5b58;&#x84c4;&#x80fd;&#x5668;
    * @param name (undocumented)
    * @param joinType (undocumented)
    * @param evidence$1 (undocumented)

@@ -35,7 +35,10 @@ import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.shuffle.hash.HashShuffleManager
 import org.apache.spark.storage.StorageLevel._
 
-/** Testsuite that tests block replication in BlockManager */
+/** 
+ *  Testsuite that tests block replication in BlockManager 
+ *  测试套件,在blockmanager试验块复制
+ *  */
 class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with BeforeAndAfter {
 
   private val conf = new SparkConf(false)
@@ -374,7 +377,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
 
     storageLevels.foreach { storageLevel =>
       // Put the block into one of the stores
-      //把块放进一个存储
+      // 把块放进一个存储
       val blockId = new TestBlockId(
         "block-with-" + storageLevel.description.replace(" ", "-").toLowerCase)
       stores(0).putSingle(blockId, new Array[Byte](blockSize), storageLevel)
@@ -398,7 +401,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
         val blockStatus = master.getBlockStatus(blockId)(testStore.blockManagerId)
 
         // Assert that block status in the master for this store has expected storage level
-        //断言该存储在主节点中的块状态已预期存储级别
+        //断言该存储在主节点中的块状态预期存储级别
         assert(
           blockStatus.storageLevel.useDisk === storageLevel.useDisk &&
             blockStatus.storageLevel.useMemory === storageLevel.useMemory &&
@@ -407,6 +410,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
           s"master does not know correct storage level for ${blockId.name} in $testStoreName")
 
         // Assert that the block status in the master for this store has correct memory usage info
+        // 断言此存储的主中的块状态有正确的内存使用信息
         assert(!blockStatus.storageLevel.useMemory || blockStatus.memSize >= blockSize,
           s"master does not know size of ${blockId.name} stored in memory of $testStoreName")
 

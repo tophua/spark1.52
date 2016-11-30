@@ -10,6 +10,7 @@ package org.apache.spark.sql.execution;
   protected abstract  org.apache.spark.sql.SQLContext _sqlContext () ;
   /**
    * Creates a DataFrame from a local Seq of Product.
+   * &#x4ece;&#x521b;&#x5efa;&#x4ea7;&#x54c1;&#x5c40;&#x90e8;&#x5e8f;&#x5217;&#x7684;&#x4e00;&#x4e2a;&#x6570;&#x636e;&#x6846;&#x3002;
    * @param data (undocumented)
    * @param evidence$1 (undocumented)
    * @return (undocumented)

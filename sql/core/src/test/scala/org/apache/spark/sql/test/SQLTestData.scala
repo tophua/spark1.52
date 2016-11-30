@@ -22,11 +22,13 @@ import org.apache.spark.sql.{DataFrame, SQLContext, SQLImplicits}
 
 /**
  * A collection of sample data used in SQL tests.
+ * 一个集合样本数据用于SQL测试
  */
 private[sql] trait SQLTestData { self =>
   protected def _sqlContext: SQLContext
 
   // Helper object to import SQL implicits without a concrete SQLContext
+  //帮助对象隐式导入SQL没有具体的sqlcontext
   private object internalImplicits extends SQLImplicits {
     protected override def _sqlContext: SQLContext = self._sqlContext
   }
@@ -35,10 +37,11 @@ private[sql] trait SQLTestData { self =>
   import SQLTestData._
 
   // Note: all test data should be lazy because the SQLContext is not set up yet.
+  //注意:所有的测试数据应该延迟加载因为sqlcontext尚未建立
 
   protected lazy val testData: DataFrame = {
     val df = _sqlContext.sparkContext.parallelize(
-      (1 to 100).map(i => TestData(i, i.toString))).toDF()
+      (1 to 100).map(i => TestData(i, i.toString))).toDF()//系统自动换,隐式导入
     df.registerTempTable("testData")
     df
   }
@@ -50,7 +53,7 @@ private[sql] trait SQLTestData { self =>
       TestData2(2, 1) ::
       TestData2(2, 2) ::
       TestData2(3, 1) ::
-      TestData2(3, 2) :: Nil, 2).toDF()
+      TestData2(3, 2) :: Nil, 2).toDF()//隐式导入
     df.registerTempTable("testData2")
     df
   }

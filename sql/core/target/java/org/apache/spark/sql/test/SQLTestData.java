@@ -1,6 +1,7 @@
 package org.apache.spark.sql.test;
 /**
  * A collection of sample data used in SQL tests.
+ * &#x4e00;&#x4e2a;&#x96c6;&#x5408;&#x6837;&#x672c;&#x6570;&#x636e;&#x7528;&#x4e8e;SQL&#x6d4b;&#x8bd5;
  */
   interface SQLTestData {
   // no position

@@ -20,13 +20,13 @@ package org.apache.spark.storage
 import org.apache.spark.SparkFunSuite
 
 class BlockIdSuite extends SparkFunSuite {
-  def assertSame(id1: BlockId, id2: BlockId) {
+  def assertSame(id1: BlockId, id2: BlockId) {//相同断点的BlockId
     assert(id1.name === id2.name)
     assert(id1.hashCode === id2.hashCode)
     assert(id1 === id2)
   }
 
-  def assertDifferent(id1: BlockId, id2: BlockId) {
+  def assertDifferent(id1: BlockId, id2: BlockId) {//不同断点的BlockId
     assert(id1.name != id2.name)
     assert(id1.hashCode != id2.hashCode)
     assert(id1 != id2)

@@ -67,8 +67,11 @@ private[sql] class MyDenseVectorUDT extends UserDefinedType[MyDenseVector] {
 
   private[spark] override def asNullable: MyDenseVectorUDT = this
 }
-
+/***
+ * 用户定义类型套件
+ */
 class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
+  //导入隐式转换
   import testImplicits._
 
   private lazy val pointsRDD = Seq(

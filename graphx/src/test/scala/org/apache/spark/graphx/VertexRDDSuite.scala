@@ -176,11 +176,13 @@ class VertexRDDSuite extends SparkFunSuite with LocalSparkContext {
 
   test("mergeFunc") {
     // test to see if the mergeFunc is working correctly
+    //测试看看mergefunc工作正常
     withSpark { sc =>
       val verts = sc.parallelize(List((0L, 0), (1L, 1), (1L, 2), (2L, 3), (2L, 3), (2L, 3)))
       val edges = EdgeRDD.fromEdges(sc.parallelize(List.empty[Edge[Int]]))
       val rdd = VertexRDD(verts, edges, 0, (a: Int, b: Int) => a + b)
       // test merge function
+      //测试合并函数
       assert(rdd.collect().toSet == Set((0L, 0), (1L, 3), (2L, 9)))
     }
   }

@@ -60,6 +60,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
   val serializer = new KryoSerializer(conf)
 
   // Implicitly convert strings to BlockIds for test clarity.
+  // 隐式转换为字符串测试清晰的blockids
   implicit def StringToBlockId(value: String): BlockId = new TestBlockId(value)
   def rdd(rddId: Int, splitId: Int): RDDBlockId = RDDBlockId(rddId, splitId)
 
@@ -438,7 +439,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
       store.waitForAsyncReregister()
     }
   }
-
+  //正确的blockresult返回调用get()
   test("correct BlockResult returned from get() calls") {
     store = makeBlockManager(12000)
     val list1 = List(new Array[Byte](2000), new Array[Byte](2000))
@@ -462,6 +463,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(list2DiskGet.isDefined, "list2memory expected to be in store")
     assert(list2DiskGet.get.data.size === 3)
     // We don't know the exact size of the data on disk, but it should certainly be > 0.
+    //我们不知道磁盘上的数据的确切大小,但它肯定是> 0
     assert(list2DiskGet.get.bytes > 0)
     assert(list2DiskGet.get.readMethod === DataReadMethod.Disk)
   }
@@ -479,6 +481,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a1") === None, "a1 was in store")
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
     // At this point a2 was gotten last, so LRU will getSingle rid of a3
+    //在这一点上是得到A2,所以LRU将getsingle摆脱A3
     store.putSingle("a1", a1, StorageLevel.MEMORY_ONLY)
     assert(store.getSingle("a1").isDefined, "a1 was not in store")
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
@@ -513,11 +516,13 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     store.putSingle(rdd(0, 2), a2, StorageLevel.MEMORY_ONLY)
     store.putSingle(rdd(0, 3), a3, StorageLevel.MEMORY_ONLY)
     // Even though we accessed rdd_0_3 last, it should not have replaced partitions 1 and 2
+    //即使我们最后访问rdd_0_3,它不应该取代分区1和2从相同的RDD
     // from the same RDD
     assert(store.getSingle(rdd(0, 3)) === None, "rdd_0_3 was in store")
     assert(store.getSingle(rdd(0, 2)).isDefined, "rdd_0_2 was not in store")
     assert(store.getSingle(rdd(0, 1)).isDefined, "rdd_0_1 was not in store")
     // Check that rdd_0_3 doesn't replace them even after further accesses
+    //检查rdd_0_3不能代替他们还要经过进一步的访问
     assert(store.getSingle(rdd(0, 3)) === None, "rdd_0_3 was in store")
     assert(store.getSingle(rdd(0, 3)) === None, "rdd_0_3 was in store")
     assert(store.getSingle(rdd(0, 3)) === None, "rdd_0_3 was in store")
@@ -695,6 +700,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val list3 = List(new Array[Byte](2000), new Array[Byte](2000))
     val list4 = List(new Array[Byte](2000), new Array[Byte](2000))
     // First store list1 and list2, both in memory, and list3, on disk only
+    //第一个存储列表1和列表2,都在内存中,list3只在磁盘上
     store.putIterator("list1", list1.iterator, StorageLevel.MEMORY_ONLY_SER, tellMaster = true)
     store.putIterator("list2", list2.iterator, StorageLevel.MEMORY_ONLY_SER, tellMaster = true)
     store.putIterator("list3", list3.iterator, StorageLevel.DISK_ONLY, tellMaster = true)
@@ -702,6 +708,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     listForSizeEstimate ++= list1.iterator
     val listSize = SizeEstimator.estimate(listForSizeEstimate)
     // At this point LRU should not kick in because list3 is only on disk
+    //在这一点上不应该踢在LRU因为list3只有在磁盘
     assert(store.get("list1").isDefined, "list1 was not in store")
     assert(store.get("list1").get.data.size === 2)
     assert(store.get("list2").isDefined, "list2 was not in store")
@@ -715,6 +722,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.get("list3").isDefined, "list3 was not in store")
     assert(store.get("list3").get.data.size === 2)
     // Now let's add in list4, which uses both disk and memory; list1 should drop out
+    //现在让我们添加在list4,它使用磁盘和内存,list1应该退出
     store.putIterator("list4", list4.iterator, StorageLevel.MEMORY_AND_DISK_SER, tellMaster = true)
     assert(store.get("list1") === None, "list1 was in store")
     assert(store.get("list2").isDefined, "list2 was not in store")
@@ -879,12 +887,13 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(Arrays.equals(notMappedAsArray, bytes))
   }
 
-  test("updated block statuses") {
+  test("updated block statuses") {//更新块的状态
     store = makeBlockManager(12000)
     val list = List.fill(2)(new Array[Byte](2000))
     val bigList = List.fill(8)(new Array[Byte](2000))
 
     // 1 updated block (i.e. list1)
+    //1 更新块(i.e. list1)
     val updatedBlocks1 =
       store.putIterator("list1", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(updatedBlocks1.size === 1)
@@ -892,6 +901,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(updatedBlocks1.head._2.storageLevel === StorageLevel.MEMORY_ONLY)
 
     // 1 updated block (i.e. list2)
+    //1 更新块(i.e. list2)
     val updatedBlocks2 =
       store.putIterator("list2", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     assert(updatedBlocks2.size === 1)
@@ -899,6 +909,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(updatedBlocks2.head._2.storageLevel === StorageLevel.MEMORY_ONLY)
 
     // 2 updated blocks - list1 is kicked out of memory while list3 is added
+    //2 更新块- list1踢出内存而list3添加
     val updatedBlocks3 =
       store.putIterator("list3", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(updatedBlocks3.size === 2)
@@ -912,6 +923,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.memoryStore.contains("list3"), "list3 was not in memory store")
 
     // 2 updated blocks - list2 is kicked out of memory (but put on disk) while list4 is added
+    //2 更新块-ist2踢出内存(但放在磁盘上)而list4添加
     val updatedBlocks4 =
       store.putIterator("list4", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(updatedBlocks4.size === 2)
@@ -926,6 +938,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.memoryStore.contains("list4"), "list4 was not in memory store")
 
     // No updated blocks - list5 is too big to fit in store and nothing is kicked out
+    //没有更新的块-列表5太大,适合在存储并没有踢出
     val updatedBlocks5 =
       store.putIterator("list5", bigList.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(updatedBlocks5.size === 0)
@@ -958,6 +971,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     store.putIterator("list3", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
 
     // getLocations and getBlockStatus should yield the same locations
+    //getLocations 和 getBlockStatus应产生相同的位置
     assert(store.master.getLocations("list1").size === 0)
     assert(store.master.getLocations("list2").size === 1)
     assert(store.master.getLocations("list3").size === 1)
@@ -969,13 +983,16 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.master.getBlockStatus("list3", askSlaves = true).size === 1)
 
     // This time don't tell master and see what happens. By LRU, only list5 and list6 remains.
+    //这一次不要调用主节点,看看会发生什么,通过LRU,只有列表6和list6仍然保留
     store.putIterator("list4", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = false)
     store.putIterator("list5", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
     store.putIterator("list6", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = false)
 
     // getLocations should return nothing because the master is not informed
-    // getBlockStatus without asking slaves should have the same result
+    // getLocations应该返回无因为主节点是没有通知
+    // getBlockStatus without asking slaves should have the same result 不要求子节点有相同的结果
     // getBlockStatus with asking slaves, however, should return the actual block statuses
+    //getBlockStatus 然而,应该返回实际的块状态
     assert(store.master.getLocations("list4").size === 0)
     assert(store.master.getLocations("list5").size === 0)
     assert(store.master.getLocations("list6").size === 0)
@@ -1227,10 +1244,14 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(memoryStore.currentUnrollMemoryForThisTask === 0)
 
     // Unroll huge block with not enough space. This should fail and drop the new block to disk
+    //展开巨大的块没有足够的空间,这应该失败,并将新块放在磁盘上
     // directly in addition to kicking out b2 in the process. Memory store should contain only
+    //除了直接踢出B2的过程中,
     // b3, while disk store should contain b1, b2 and b4.
+    //内存存储应该只包含B,而磁盘存储应含有B1、B2和B4
     val result4 = memoryStore.putIterator("b4", bigIterator, memAndDisk, returnValues = true)
     assert(result4.size > 0)
+    //展开从磁盘返回字节
     assert(result4.data.isRight) // unroll returned bytes from disk
     assert(!memoryStore.contains("b1"))
     assert(!memoryStore.contains("b2"))
@@ -1240,7 +1261,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(diskStore.contains("b2"))
     assert(!diskStore.contains("b3"))
     assert(diskStore.contains("b4"))
-    assert(memoryStore.currentUnrollMemoryForThisTask > 0) // we returned an iterator
+    assert(memoryStore.currentUnrollMemoryForThisTask > 0) // we returned an iterator 我们返回了一个迭代器
   }
 
   test("multiple unrolls by the same thread") {//同一个线程多展开

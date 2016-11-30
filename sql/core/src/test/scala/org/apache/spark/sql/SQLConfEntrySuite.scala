@@ -26,9 +26,11 @@ class SQLConfEntrySuite extends SparkFunSuite {
 
   test("intConf") {//Int类型配制文件
     val key = "spark.sql.SQLConfEntrySuite.int"
+    //设置Spark 自定义属性值
     val confEntry = SQLConfEntry.intConf(key)
+    //获得key值,设置默认值 ,
     assert(conf.getConf(confEntry, 5) === 5)
-
+    //设置值Key
     conf.setConf(confEntry, 10)
     assert(conf.getConf(confEntry, 5) === 10)
 

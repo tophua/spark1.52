@@ -43,8 +43,11 @@ object HdfsWordCount {
     }*/
 
     StreamingExamples.setStreamingLogLevels()
+    
+    val mast="spark://dept3:8088"
+    val hdfs="hdfs://xcsq:8089/cookbook/input/"
      //创建SparkConf对象
-    val sparkConf = new SparkConf().setAppName("HdfsWordCount").setMaster("local[2]")
+    val sparkConf = new SparkConf().setAppName("HdfsWordCount").setMaster(mast)
     // Create the context创建上下文
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
@@ -53,7 +56,7 @@ object HdfsWordCount {
     //创建目录的fileinputdstream和使用流计数单词创建新文件
     //val lines = ssc.textFileStream(args(0))
      //如果目录中有新创建的文件,则读取
-    val lines = ssc.textFileStream("D:\\tmp\\")
+    val lines = ssc.textFileStream(hdfs)
    //分割为单词
     val words = lines.flatMap(_.split(" ")) 
     //统计单词出现次数
