@@ -32,7 +32,7 @@ import org.apache.spark.util.Utils
 /**
  * :: Experimental ::
  * Functions available for [[DataFrame]].
- *
+ * 函数可用于DataFrame
  * @groupname udf_funcs UDF functions
  * @groupname agg_funcs Aggregate functions
  * @groupname datetime_funcs Date time functions
@@ -55,7 +55,7 @@ object functions {
 
   /**
    * Returns a [[Column]] based on the given column name.
-   *
+   * 基于给定的列名称返回[列]。
    * @group normal_funcs
    * @since 1.3.0
    */
@@ -63,7 +63,7 @@ object functions {
 
   /**
    * Returns a [[Column]] based on the given column name. Alias of [[col]].
-   *
+   * 基于给定的列名称返回[列]
    * @group normal_funcs
    * @since 1.3.0
    */
@@ -71,9 +71,11 @@ object functions {
 
   /**
    * Creates a [[Column]] of literal value.
-   *
+   * 创建一个文本值[列]
    * The passed in object is returned directly if it is already a [[Column]].
+   * 在对象中传递直接返回,如果它已经存在是[列]
    * If the object is a Scala Symbol, it is converted into a [[Column]] also.
+   * 如果对象是一个Scala符号,它被转换成[列],否则,创建一个新的[列]来表示文字值
    * Otherwise, a new [[Column]] is created to represent the literal value.
    *
    * @group normal_funcs
@@ -91,13 +93,15 @@ object functions {
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // Sort functions
+  // Sort functions 排序函数
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Returns a sort expression based on ascending order of the column.
+   * 返回基于列上的升顺序的排序表达式,默认序列
    * {{{
    *   // Sort by dept in ascending order, and then age in descending order.
+   *   //按dept升序排序,按age降序排序
    *   df.sort(asc("dept"), desc("age"))
    * }}}
    *
@@ -108,8 +112,10 @@ object functions {
 
   /**
    * Returns a sort expression based on the descending order of the column.
+   * 返回基于列上的升顺序的排序表达式,默认降顺
    * {{{
    *   // Sort by dept in ascending order, and then age in descending order.
+   *   //按dept升序排序,按age降序排序
    *   df.sort(asc("dept"), desc("age"))
    * }}}
    *
@@ -119,11 +125,12 @@ object functions {
   def desc(columnName: String): Column = Column(columnName).desc
 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // Aggregate functions
+  // Aggregate functions 聚合函数
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Aggregate function: returns the approximate number of distinct items in a group.
+   * 聚合函数：返回一组中不同项目的近似数量
    *
    * @group agg_funcs
    * @since 1.3.0
@@ -132,6 +139,7 @@ object functions {
 
   /**
    * Aggregate function: returns the approximate number of distinct items in a group.
+   * 聚合函数：返回一组中不同项目的近似数量
    *
    * @group agg_funcs
    * @since 1.3.0
@@ -140,7 +148,7 @@ object functions {
 
   /**
    * Aggregate function: returns the approximate number of distinct items in a group.
-   *
+   * 聚合函数:返回一组中不同项目的近似数量
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -148,7 +156,7 @@ object functions {
 
   /**
    * Aggregate function: returns the approximate number of distinct items in a group.
-   *
+   * 聚合函数：返回一组中不同项目的近似数量
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -158,7 +166,7 @@ object functions {
 
   /**
    * Aggregate function: returns the average of the values in a group.
-   *
+   * 聚合函数:返回一组中的值的平均值
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -166,7 +174,7 @@ object functions {
 
   /**
    * Aggregate function: returns the average of the values in a group.
-   *
+   * 聚合函数:返回一组中的值的平均值
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -174,7 +182,7 @@ object functions {
 
   /**
    * Aggregate function: returns the number of items in a group.
-   *
+   * 聚合函数:返回一组中的项目的数量
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -186,7 +194,7 @@ object functions {
 
   /**
    * Aggregate function: returns the number of items in a group.
-   *
+   * 聚合函数:返回一组中的项目的数量
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -194,7 +202,7 @@ object functions {
 
   /**
    * Aggregate function: returns the number of distinct items in a group.
-   *
+   * 聚合函数:返回一组中不同的项目的数量
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -204,7 +212,7 @@ object functions {
 
   /**
    * Aggregate function: returns the number of distinct items in a group.
-   *
+   * 聚合函数:返回一组中不同的项目的数量。
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -214,7 +222,7 @@ object functions {
 
   /**
    * Aggregate function: returns the first value in a group.
-   *
+   * 聚合函数:返回一组中的第一个值。
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -222,7 +230,7 @@ object functions {
 
   /**
    * Aggregate function: returns the first value of a column in a group.
-   *
+   * 聚合函数:返回一组列的第一个值
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -230,7 +238,7 @@ object functions {
 
   /**
    * Aggregate function: returns the last value in a group.
-   *
+   * 聚合函数:返回一组中的最后一个值。
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -238,7 +246,7 @@ object functions {
 
   /**
    * Aggregate function: returns the last value of the column in a group.
-   *
+   * 聚合函数:返回一组列的最后一个值
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -246,7 +254,7 @@ object functions {
 
   /**
    * Aggregate function: returns the maximum value of the expression in a group.
-   *
+   * 聚合函数:返回一组中表达式的最大值
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -254,7 +262,7 @@ object functions {
 
   /**
    * Aggregate function: returns the maximum value of the column in a group.
-   *
+   * 聚合函数:返回一组列的最大值。
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -262,7 +270,8 @@ object functions {
 
   /**
    * Aggregate function: returns the average of the values in a group.
-   * Alias for avg.
+   * 聚合函数:返回一组中的值的平均值
+   * Alias for avg. 别名为平均
    *
    * @group agg_funcs
    * @since 1.4.0
@@ -271,6 +280,7 @@ object functions {
 
   /**
    * Aggregate function: returns the average of the values in a group.
+   * 聚合函数:返回一组中的值的平均值
    * Alias for avg.
    *
    * @group agg_funcs
@@ -280,7 +290,7 @@ object functions {
 
   /**
    * Aggregate function: returns the minimum value of the expression in a group.
-   *
+   * 聚合函数:返回一组表达式的最小值
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -288,7 +298,7 @@ object functions {
 
   /**
    * Aggregate function: returns the minimum value of the column in a group.
-   *
+   * 聚合函数:返回一组列的最小值
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -296,7 +306,7 @@ object functions {
 
   /**
    * Aggregate function: returns the sum of all values in the expression.
-   *
+   * 聚合函数:返回表达式中所有值的总和
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -304,7 +314,7 @@ object functions {
 
   /**
    * Aggregate function: returns the sum of all values in the given column.
-   *
+   * 聚合函数:返回给定列中所有值的总和
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -312,7 +322,7 @@ object functions {
 
   /**
    * Aggregate function: returns the sum of distinct values in the expression.
-   *
+   * 聚合函数:返回表达式中不同值的总和
    * @group agg_funcs
    * @since 1.3.0
    */
@@ -320,18 +330,19 @@ object functions {
 
   /**
    * Aggregate function: returns the sum of distinct values in the expression.
-   *
+   * 聚合函数:返回表达式中不同值的总和
    * @group agg_funcs
    * @since 1.3.0
    */
   def sumDistinct(columnName: String): Column = sumDistinct(Column(columnName))
 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // Window functions
+  // Window functions 窗口函数
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Window function: returns the cumulative distribution of values within a window partition,
+   * 窗口函数:返回累计分布窗口分区中的值
    * i.e. the fraction of rows that are below the current row.
    *
    * {{{
@@ -341,7 +352,8 @@ object functions {
    *
    *
    * This is equivalent to the CUME_DIST function in SQL.
-   *
+   * 这是在SQL的cume_dist函数相等,
+   * cume_dist 理解就是把一个数值排序,从头端到最尾部 ,把它看成1,然后看各占成员在属于哪个点上
    * @group window_funcs
    * @since 1.4.0
    */
@@ -351,14 +363,14 @@ object functions {
 
   /**
    * Window function: returns the rank of rows within a window partition, without any gaps.
-   *
+   * 返回窗口分区中的行的秩
    * The difference between rank and denseRank is that denseRank leaves no gaps in ranking
    * sequence when there are ties. That is, if you were ranking a competition using denseRank
    * and had three people tie for second place, you would say that all three were in second
    * place and that the next person came in third.
-   *
+   * dense_rank函数返回一个唯一的值,除非当碰到相同数据时,此时所有相同数据的排名都是一样
    * This is equivalent to the DENSE_RANK function in SQL.
-   *
+   * 这是在SQL的DENSE_RANK函数相等,
    * @group window_funcs
    * @since 1.4.0
    */
@@ -370,9 +382,9 @@ object functions {
    * Window function: returns the value that is `offset` rows before the current row, and
    * `null` if there is less than `offset` rows before the current row. For example,
    * an `offset` of one will return the previous row at any given point in the window partition.
-   *
+   *	LAG统计函数可以在一次查询中取出同一字段的前N行的数据和后N行的值
    * This is equivalent to the LAG function in SQL.
-   *
+   *这是在SQL的LAG函数相等,
    * @group window_funcs
    * @since 1.4.0
    */
@@ -384,9 +396,9 @@ object functions {
    * Window function: returns the value that is `offset` rows before the current row, and
    * `null` if there is less than `offset` rows before the current row. For example,
    * an `offset` of one will return the previous row at any given point in the window partition.
-   *
+   *LAG统计函数可以在一次查询中取出同一字段的前N行的数据和后N行的值
    * This is equivalent to the LAG function in SQL.
-   *
+   *这是在SQL的LAG函数相等,
    * @group window_funcs
    * @since 1.4.0
    */
@@ -398,9 +410,9 @@ object functions {
    * Window function: returns the value that is `offset` rows before the current row, and
    * `defaultValue` if there is less than `offset` rows before the current row. For example,
    * an `offset` of one will return the previous row at any given point in the window partition.
-   *
+   * LAG统计函数可以在一次查询中取出同一字段的前N行的数据和后N行的值
    * This is equivalent to the LAG function in SQL.
-   *
+   * 这是在SQL的LAG函数相等,
    * @group window_funcs
    * @since 1.4.0
    */
@@ -412,9 +424,9 @@ object functions {
    * Window function: returns the value that is `offset` rows before the current row, and
    * `defaultValue` if there is less than `offset` rows before the current row. For example,
    * an `offset` of one will return the previous row at any given point in the window partition.
-   *
+   * LAG统计函数可以在一次查询中取出同一字段的前N行的数据和后N行的值
    * This is equivalent to the LAG function in SQL.
-   *
+   * 这是在SQL的LAG函数相等,
    * @group window_funcs
    * @since 1.4.0
    */
@@ -426,9 +438,9 @@ object functions {
    * Window function: returns the value that is `offset` rows after the current row, and
    * `null` if there is less than `offset` rows after the current row. For example,
    * an `offset` of one will return the next row at any given point in the window partition.
-   *
+   * Lag和Lead分析函数可以在同一次查询中取出同一字段的前N行的数据(Lag)和后N行的数据(Lead)作为独立的列
    * This is equivalent to the LEAD function in SQL.
-   *
+   * 这是在SQL的Lead函数相等
    * @group window_funcs
    * @since 1.4.0
    */
@@ -440,9 +452,9 @@ object functions {
    * Window function: returns the value that is `offset` rows after the current row, and
    * `null` if there is less than `offset` rows after the current row. For example,
    * an `offset` of one will return the next row at any given point in the window partition.
-   *
+   * Lag和Lead分析函数可以在同一次查询中取出同一字段的前N行的数据(Lag)和后N行的数据(Lead)作为独立的列
    * This is equivalent to the LEAD function in SQL.
-   *
+   * 这是在SQL的Lead函数相等
    * @group window_funcs
    * @since 1.4.0
    */
@@ -454,9 +466,9 @@ object functions {
    * Window function: returns the value that is `offset` rows after the current row, and
    * `defaultValue` if there is less than `offset` rows after the current row. For example,
    * an `offset` of one will return the next row at any given point in the window partition.
-   *
+   * Lag和Lead分析函数可以在同一次查询中取出同一字段的前N行的数据(Lag)和后N行的数据(Lead)作为独立的列
    * This is equivalent to the LEAD function in SQL.
-   *
+   * 这是在SQL的Lead函数相等
    * @group window_funcs
    * @since 1.4.0
    */
@@ -470,7 +482,7 @@ object functions {
    * an `offset` of one will return the next row at any given point in the window partition.
    *
    * This is equivalent to the LEAD function in SQL.
-   *
+   * 这是在SQL的Lead函数相等
    * @group window_funcs
    * @since 1.4.0
    */
@@ -482,7 +494,7 @@ object functions {
    * Window function: returns the ntile group id (from 1 to `n` inclusive) in an ordered window
    * partition. Fow example, if `n` is 4, the first quarter of the rows will get value 1, the second
    * quarter will get 2, the third quarter will get 3, and the last quarter will get 4.
-   *
+   * NTILE函数对一个数据分区中的有序结果集进行划分，将其分组为各个桶，并为每个小组分配一个唯一的组编号
    * This is equivalent to the NTILE function in SQL.
    *
    * @group window_funcs
@@ -499,7 +511,7 @@ object functions {
    * {{{
    *   (rank of row in its partition - 1) / (number of rows in the partition - 1)
    * }}}
-   *
+   * 返回某个值相对于一组值的百分比排名
    * This is equivalent to the PERCENT_RANK function in SQL.
    *
    * @group window_funcs
@@ -516,7 +528,7 @@ object functions {
    * sequence when there are ties. That is, if you were ranking a competition using denseRank
    * and had three people tie for second place, you would say that all three were in second
    * place and that the next person came in third.
-   *
+   * RANK 返回数据项在分组中的排名，排名相等会在名次中留下空位
    * This is equivalent to the RANK function in SQL.
    *
    * @group window_funcs
@@ -528,7 +540,7 @@ object functions {
 
   /**
    * Window function: returns a sequential number starting at 1 within a window partition.
-   *
+   * ROW_NUMBER 为每条记录返回一个数字
    * This is equivalent to the ROW_NUMBER function in SQL.
    *
    * @group window_funcs
@@ -539,12 +551,12 @@ object functions {
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // Non-aggregate functions
+  // Non-aggregate functions 非聚合函数
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Computes the absolute value.
-   *
+   * 计算绝对值
    * @group normal_funcs
    * @since 1.3.0
    */
@@ -552,7 +564,7 @@ object functions {
 
   /**
    * Creates a new array column. The input columns must all have the same data type.
-   *
+   * 创建一个新的数组列,输入列必须都具有相同的数据类型
    * @group normal_funcs
    * @since 1.4.0
    */
@@ -561,7 +573,7 @@ object functions {
 
   /**
    * Creates a new array column. The input columns must all have the same data type.
-   *
+   * 创建一个新的数组列,输入列必须都具有相同的数据类型
    * @group normal_funcs
    * @since 1.4.0
    */
@@ -571,7 +583,7 @@ object functions {
 
   /**
    * Marks a DataFrame as small enough for use in broadcast joins.
-   *
+   * 标记一个DataFrame足够小,用于广播连接
    * The following example marks the right DataFrame for broadcast hash join using `joinKey`.
    * {{{
    *   // left and right are DataFrames
@@ -587,7 +599,7 @@ object functions {
 
   /**
    * Returns the first column that is not null, or null if all inputs are null.
-   *
+   * 返回不为空的第一列或如果所有的输入都为空,则为空
    * For example, `coalesce(a, b, c)` will return a if a is not null,
    * or b if a is null and b is not null, or c if both a and b are null but c is not null.
    *
@@ -599,14 +611,14 @@ object functions {
 
   /**
    * Creates a string column for the file name of the current Spark task.
-   *
+   * 为当前的任务的文件名创建一个字符串列
    * @group normal_funcs
    */
   def inputFileName(): Column = InputFileName()
 
   /**
    * Return true iff the column is NaN.
-   *
+   * 返回true,且仅当列为NaN
    * @group normal_funcs
    * @since 1.5.0
    */
@@ -614,7 +626,7 @@ object functions {
 
   /**
    * A column expression that generates monotonically increasing 64-bit integers.
-   *
+   * 生成单调递增的64位整数的列表达式
    * The generated ID is guaranteed to be monotonically increasing and unique, but not consecutive.
    * The current implementation puts the partition ID in the upper 31 bits, and the record number
    * within each partition in the lower 33 bits. The assumption is that the data frame has
@@ -631,9 +643,11 @@ object functions {
 
   /**
    * Returns col1 if it is not NaN, or col2 if col1 is NaN.
-   *
+   * 如果输入值col1是NaN返回一个替代值col2,如果col2不是NaN,Oracle将返回col2
+   * NANVL(x,value)用法总结
+   * 如果x是数字,则返回x,如果x不是数字,则返回value
    * Both inputs should be floating point columns (DoubleType or FloatType).
-   *
+   * 函数只能对浮点数类型DoubleType或FloatType
    * @group normal_funcs
    * @since 1.5.0
    */
@@ -643,6 +657,7 @@ object functions {
    * Unary minus, i.e. negate the expression.
    * {{{
    *   // Select the amount column and negates all values.
+   *   //选择列负数
    *   // Scala:
    *   df.select( -df("amount") )
    *
@@ -657,8 +672,10 @@ object functions {
 
   /**
    * Inversion of boolean expression, i.e. NOT.
+   * 取反布尔表达式
    * {{{
    *   // Scala: select rows that are not active (isActive === false)
+   *   //选择不活动的行
    *   df.filter( !df("isActive") )
    *
    *   // Java:
@@ -672,7 +689,7 @@ object functions {
 
   /**
    * Generate a random column with i.i.d. samples from U[0.0, 1.0].
-   *
+   * 产生一个随机列,样本[0,1.0]
    * @group normal_funcs
    * @since 1.4.0
    */
@@ -680,7 +697,7 @@ object functions {
 
   /**
    * Generate a random column with i.i.d. samples from U[0.0, 1.0].
-   *
+   * 产生一个随机列,样本[0,1.0]
    * @group normal_funcs
    * @since 1.4.0
    */
@@ -688,7 +705,7 @@ object functions {
 
   /**
    * Generate a column with i.i.d. samples from the standard normal distribution.
-   *
+   * 产生一个随机列,样本标准正态分布
    * @group normal_funcs
    * @since 1.4.0
    */
@@ -696,7 +713,7 @@ object functions {
 
   /**
    * Generate a column with i.i.d. samples from the standard normal distribution.
-   *
+   * 产生一个随机列,样本标准正态分布
    * @group normal_funcs
    * @since 1.4.0
    */
@@ -704,8 +721,9 @@ object functions {
 
   /**
    * Partition ID of the Spark task.
-   *
+   * Spark 任务的分区标识ID
    * Note that this is indeterministic because it depends on data partitioning and task scheduling.
+   * 请注意,这是不确定它取决于数据划分和任务调度
    *
    * @group normal_funcs
    * @since 1.4.0
@@ -714,7 +732,7 @@ object functions {
 
   /**
    * Computes the square root of the specified float value.
-   *
+   * 计算指定浮点值的平方根
    * @group math_funcs
    * @since 1.3.0
    */
@@ -722,7 +740,7 @@ object functions {
 
   /**
    * Computes the square root of the specified float value.
-   *
+   * 计算指定浮点值的平方根
    * @group math_funcs
    * @since 1.5.0
    */
@@ -730,6 +748,7 @@ object functions {
 
   /**
    * Creates a new struct column.
+   * 创建一个新的结构列
    * If the input column is a column in a [[DataFrame]], or a derived column expression
    * that is named (i.e. aliased), its name would be remained as the StructField's name,
    * otherwise, the newly generated StructField's name would be auto generated as col${index + 1},
@@ -755,11 +774,12 @@ object functions {
 
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
+   * 评估一个条件的列表，并返回多个可能的结果之一
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
-   *
+   * 如果没有其他定义,则结束,返回无法匹配的条件
    * {{{
    *   // Example: encoding gender string column into integer.
-   *
+   *	// 例子:将性别字符串列编码为整数
    *   // Scala:
    *   people.select(when(people("gender") === "male", 0)
    *     .when(people("gender") === "female", 1)
@@ -770,7 +790,7 @@ object functions {
    *     .when(col("gender").equalTo("female"), 1)
    *     .otherwise(2))
    * }}}
-   *
+   * when表达式,使用表达式确定返回值
    * @group normal_funcs
    * @since 1.4.0
    */
@@ -780,7 +800,7 @@ object functions {
 
   /**
    * Computes bitwise NOT.
-   *
+   * 计算位Not
    * @group normal_funcs
    * @since 1.4.0
    */
@@ -788,9 +808,11 @@ object functions {
 
   /**
    * Parses the expression string into the column that it represents, similar to
+   * 解析表达式字符串的列，它代表类似dataframe.selectexpr
    * DataFrame.selectExpr
    * {{{
    *   // get the number of words of each length
+   *   //获取每一长度的单词数
    *   df.groupBy(expr("length(word)")).count()
    * }}}
    *
@@ -804,6 +826,7 @@ object functions {
 
   /**
    * Computes the cosine inverse of the given value; the returned angle is in the range
+   * 计算给定值的余弦值,返回的角度是在0的范围内
    * 0.0 through pi.
    *
    * @group math_funcs
@@ -814,7 +837,7 @@ object functions {
   /**
    * Computes the cosine inverse of the given column; the returned angle is in the range
    * 0.0 through pi.
-   *
+   * 计算给定值的余弦值,返回的角度是在0的范围内
    * @group math_funcs
    * @since 1.4.0
    */
@@ -823,7 +846,7 @@ object functions {
   /**
    * Computes the sine inverse of the given value; the returned angle is in the range
    * -pi/2 through pi/2.
-   *
+   * 计算给定值的正弦值,返回的角度是在范围-pi/2 通过pi/2
    * @group math_funcs
    * @since 1.4.0
    */
@@ -832,7 +855,7 @@ object functions {
   /**
    * Computes the sine inverse of the given column; the returned angle is in the range
    * -pi/2 through pi/2.
-   *
+   * 计算给定值的正弦值,返回的角度是在范围-pi/2 通过pi/2
    * @group math_funcs
    * @since 1.4.0
    */
@@ -840,7 +863,8 @@ object functions {
 
   /**
    * Computes the tangent inverse of the given value.
-   *
+   * 计算给定值的切线
+   * 奇函数，关于原点对称
    * @group math_funcs
    * @since 1.4.0
    */
@@ -848,7 +872,7 @@ object functions {
 
   /**
    * Computes the tangent inverse of the given column.
-   *
+   * 计算给定列的切线逆
    * @group math_funcs
    * @since 1.4.0
    */
@@ -857,7 +881,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   *
+   * atan2是偶函数，关于y轴对称
    * @group math_funcs
    * @since 1.4.0
    */
@@ -866,7 +890,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   *
+   * 计算给定横坐标和纵坐标点的反正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -875,7 +899,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   *
+   * 计算给定横坐标和纵坐标点的反正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -884,7 +908,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   *
+   * 计算给定横坐标和纵坐标点的反正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -894,7 +918,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   *
+   * 计算给定横坐标和纵坐标点的反正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -903,7 +927,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   *
+   * 计算给定横坐标和纵坐标点的反正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -912,7 +936,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   *
+   * 计算给定横坐标和纵坐标点的反正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -921,7 +945,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   *
+   * 计算给定横坐标和纵坐标点的反正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -930,7 +954,7 @@ object functions {
   /**
    * An expression that returns the string representation of the binary value of the given long
    * column. For example, bin("12") returns "1100".
-   *
+   * 	返回N(其中N是一个BIGINT数)的二进制值的字符串表示形式
    * @group math_funcs
    * @since 1.5.0
    */
@@ -939,7 +963,7 @@ object functions {
   /**
    * An expression that returns the string representation of the binary value of the given long
    * column. For example, bin("12") returns "1100".
-   *
+   * 	返回N(其中N是一个BIGINT数)的二进制值的字符串表示形式
    * @group math_funcs
    * @since 1.5.0
    */
@@ -947,7 +971,7 @@ object functions {
 
   /**
    * Computes the cube-root of the given value.
-   *
+   * 返回 x 的立方根值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -955,7 +979,7 @@ object functions {
 
   /**
    * Computes the cube-root of the given column.
-   *
+   * 计算给定的列的立方根
    * @group math_funcs
    * @since 1.4.0
    */
@@ -963,7 +987,7 @@ object functions {
 
   /**
    * Computes the ceiling of the given value.
-   *
+   * 根据输入值返回一个数值,输入参数可以是非整数,但返回结果则是大于等于输入参数的最小整数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -971,7 +995,7 @@ object functions {
 
   /**
    * Computes the ceiling of the given column.
-   *
+   * 根据输入值返回一个数值,输入参数可以是非整数,但返回结果则是大于等于输入参数的最小整数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -979,7 +1003,7 @@ object functions {
 
   /**
    * Convert a number in a string column from one base to another.
-   *
+   * convert()函数的转换是用于将字符串从一个字符集转化为另一个字符集
    * @group math_funcs
    * @since 1.5.0
    */
@@ -988,7 +1012,7 @@ object functions {
 
   /**
    * Computes the cosine of the given value.
-   *
+   * 返回角度的余弦值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -996,7 +1020,7 @@ object functions {
 
   /**
    * Computes the cosine of the given column.
-   *
+   * 返回角度的余弦值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1004,7 +1028,7 @@ object functions {
 
   /**
    * Computes the hyperbolic cosine of the given value.
-   *
+   * 返回输入值的反余弦值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1012,7 +1036,7 @@ object functions {
 
   /**
    * Computes the hyperbolic cosine of the given column.
-   *
+   * 返回输入值的反余弦值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1020,7 +1044,7 @@ object functions {
 
   /**
    * Computes the exponential of the given value.
-   *
+   * 使用EXP(x)函数计算e的乘方,计算e的x次方，即ex
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1028,7 +1052,7 @@ object functions {
 
   /**
    * Computes the exponential of the given column.
-   *
+   * exp 返回e的m次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1036,7 +1060,7 @@ object functions {
 
   /**
    * Computes the exponential of the given value minus one.
-   *
+   * exp 返回e的1次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1044,7 +1068,7 @@ object functions {
 
   /**
    * Computes the exponential of the given column.
-   *
+   * exp 返回e的1次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1052,7 +1076,7 @@ object functions {
 
   /**
    * Computes the factorial of the given value.
-   *
+   * 阶乘的函数
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1060,7 +1084,7 @@ object functions {
 
   /**
    * Computes the floor of the given value.
-   *
+   * 取小于等于数值n的最大整数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1068,7 +1092,7 @@ object functions {
 
   /**
    * Computes the floor of the given column.
-   *
+   * 取小于等于数值n的最大整数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1077,7 +1101,8 @@ object functions {
   /**
    * Returns the greatest value of the list of values, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   *
+   * GREATEST()的函数返回输入参数的集合（N1，N2，N3，第二等）的最大值
+   * GREATEST()函数返回从一组数值的最大数
    * @group normal_funcs
    * @since 1.5.0
    */
@@ -1090,7 +1115,8 @@ object functions {
   /**
    * Returns the greatest value of the list of column names, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   *
+   * GREATEST()的函数返回输入参数的集合（N1，N2，N3，第二等）的最大值
+   * GREATEST()函数返回从一组数值的最大数
    * @group normal_funcs
    * @since 1.5.0
    */
@@ -1101,7 +1127,7 @@ object functions {
 
   /**
    * Computes hex value of the given column.
-   *
+   * 返回十六进制值的字符串表示形式
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1110,7 +1136,7 @@ object functions {
   /**
    * Inverse of hex. Interprets each pair of characters as a hexadecimal number
    * and converts to the byte representation of number.
-   *
+   * 它解释每对中的参数为一个数字的十六进制数字,并且将它转换为的数量表示的字符
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1118,7 +1144,7 @@ object functions {
 
   /**
    * Computes `sqrt(a^2^ + b^2^)` without intermediate overflow or underflow.
-   *
+   * 对于给定的直角三角形的两个直角边,求其斜边的长度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1126,7 +1152,7 @@ object functions {
 
   /**
    * Computes `sqrt(a^2^ + b^2^)` without intermediate overflow or underflow.
-   *
+   * 对于给定的直角三角形的两个直角边,求其斜边的长度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1134,7 +1160,7 @@ object functions {
 
   /**
    * Computes `sqrt(a^2^ + b^2^)` without intermediate overflow or underflow.
-   *
+   * 对于给定的直角三角形的两个直角边,求其斜边的长度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1142,7 +1168,7 @@ object functions {
 
   /**
    * Computes `sqrt(a^2^ + b^2^)` without intermediate overflow or underflow.
-   *
+   * 对于给定的直角三角形的两个直角边,求其斜边的长度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1151,7 +1177,7 @@ object functions {
 
   /**
    * Computes `sqrt(a^2^ + b^2^)` without intermediate overflow or underflow.
-   *
+   * 对于给定的直角三角形的两个直角边,求其斜边的长度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1159,7 +1185,7 @@ object functions {
 
   /**
    * Computes `sqrt(a^2^ + b^2^)` without intermediate overflow or underflow.
-   *
+   * 对于给定的直角三角形的两个直角边,求其斜边的长度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1167,7 +1193,7 @@ object functions {
 
   /**
    * Computes `sqrt(a^2^ + b^2^)` without intermediate overflow or underflow.
-   *
+   * 对于给定的直角三角形的两个直角边,求其斜边的长度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1175,7 +1201,7 @@ object functions {
 
   /**
    * Computes `sqrt(a^2^ + b^2^)` without intermediate overflow or underflow.
-   *
+   * 对于给定的直角三角形的两个直角边,求其斜边的长度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1184,7 +1210,7 @@ object functions {
   /**
    * Returns the least value of the list of values, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   *
+   * 返回从值列表（N1,N2,N3,和等)的项最少值
    * @group normal_funcs
    * @since 1.5.0
    */
@@ -1197,7 +1223,7 @@ object functions {
   /**
    * Returns the least value of the list of column names, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   *
+   * 返回从值列表（N1,N2,N3,和等)的项最少值
    * @group normal_funcs
    * @since 1.5.0
    */
@@ -1208,7 +1234,7 @@ object functions {
 
   /**
    * Computes the natural logarithm of the given value.
-   *
+   * 返回x的自然对数,x相对于基数e的对数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1216,7 +1242,7 @@ object functions {
 
   /**
    * Computes the natural logarithm of the given column.
-   *
+   * 返回x的自然对数,x相对于基数e的对数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1224,7 +1250,7 @@ object functions {
 
   /**
    * Returns the first argument-base logarithm of the second argument.
-   *
+   *  返回第二个参数自然对数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1232,7 +1258,7 @@ object functions {
 
   /**
    * Returns the first argument-base logarithm of the second argument.
-   *
+   * 返回第二个参数自然对数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1240,7 +1266,7 @@ object functions {
 
   /**
    * Computes the logarithm of the given value in base 10.
-   *
+   * 函数计算以10为底的对数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1248,7 +1274,7 @@ object functions {
 
   /**
    * Computes the logarithm of the given value in base 10.
-   *
+   * 函数计算以10为底的对数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1256,7 +1282,7 @@ object functions {
 
   /**
    * Computes the natural logarithm of the given value plus one.
-   *
+   * log1p() 函数返回 log(1+number),甚至当 number 的值接近零也能计算出准确结果
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1264,7 +1290,7 @@ object functions {
 
   /**
    * Computes the natural logarithm of the given column plus one.
-   *
+   * log1p() 函数返回 log(1+number),甚至当 number 的值接近零也能计算出准确结果
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1272,7 +1298,7 @@ object functions {
 
   /**
    * Computes the logarithm of the given column in base 2.
-   *
+   * 以2位基底的对数
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1280,7 +1306,7 @@ object functions {
 
   /**
    * Computes the logarithm of the given value in base 2.
-   *
+   * 以2位基底的对数
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1288,7 +1314,7 @@ object functions {
 
   /**
    * Returns the value of the first argument raised to the power of the second argument.
-   *
+   * 计算x的y次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1296,7 +1322,7 @@ object functions {
 
   /**
    * Returns the value of the first argument raised to the power of the second argument.
-   *
+   * 计算x的y次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1304,7 +1330,7 @@ object functions {
 
   /**
    * Returns the value of the first argument raised to the power of the second argument.
-   *
+   * 计算x的y次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1312,7 +1338,7 @@ object functions {
 
   /**
    * Returns the value of the first argument raised to the power of the second argument.
-   *
+   * 计算x的y次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1320,7 +1346,7 @@ object functions {
 
   /**
    * Returns the value of the first argument raised to the power of the second argument.
-   *
+   * 计算x的y次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1328,7 +1354,7 @@ object functions {
 
   /**
    * Returns the value of the first argument raised to the power of the second argument.
-   *
+   * 计算x的y次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1336,7 +1362,7 @@ object functions {
 
   /**
    * Returns the value of the first argument raised to the power of the second argument.
-   *
+   * 计算x的y次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1344,7 +1370,7 @@ object functions {
 
   /**
    * Returns the value of the first argument raised to the power of the second argument.
-   *
+   * 计算x的y次幂
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1352,7 +1378,7 @@ object functions {
 
   /**
    * Returns the positive value of dividend mod divisor.
-   *
+   * 返回除法操作的正余数 
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1361,7 +1387,7 @@ object functions {
   /**
    * Returns the double value that is closest in value to the argument and
    * is equal to a mathematical integer.
-   *
+   * rint方法返回最接近参数的整数值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1370,7 +1396,7 @@ object functions {
   /**
    * Returns the double value that is closest in value to the argument and
    * is equal to a mathematical integer.
-   *
+   * rint方法返回最接近参数的整数值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1378,7 +1404,7 @@ object functions {
 
   /**
    * Returns the value of the column `e` rounded to 0 decimal places.
-   *
+   * 传回一个数值,该数值是按照指定的小数位元数进行四舍五入运算的结果
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1387,7 +1413,7 @@ object functions {
   /**
    * Round the value of `e` to `scale` decimal places if `scale` >= 0
    * or at integral part when `scale` < 0.
-   *
+   * 传回一个数值,该数值是按照指定的小数位元数进行四舍五入运算的结果
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1396,7 +1422,7 @@ object functions {
   /**
    * Shift the the given value numBits left. If the given value is a long value, this function
    * will return a long value else it will return an integer value.
-   *
+   * 如果给定的值是一个long的值,此函数将返回一个long的值，否则将返回一个整数值
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1405,7 +1431,7 @@ object functions {
   /**
    * Shift the the given value numBits right. If the given value is a long value, it will return
    * a long value else it will return an integer value.
-   *
+   * 如果给定的值是一个long的值,此函数将返回一个long的值,否则将返回一个整数值
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1414,7 +1440,7 @@ object functions {
   /**
    * Unsigned shift the the given value numBits right. If the given value is a long value,
    * it will return a long value else it will return an integer value.
-   *
+   * 如果给定的值是一个long的值,此函数将返回一个long的值,否则将返回一个整数值
    * @group math_funcs
    * @since 1.5.0
    */
@@ -1423,7 +1449,7 @@ object functions {
 
   /**
    * Computes the signum of the given value.
-   *
+   * 计算给定值的正负号函数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1431,7 +1457,7 @@ object functions {
 
   /**
    * Computes the signum of the given column.
-   *
+   * 计算给定值的正负号函数
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1439,7 +1465,7 @@ object functions {
 
   /**
    * Computes the sine of the given value.
-   *
+   * 计算给定值的正弦值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1447,7 +1473,7 @@ object functions {
 
   /**
    * Computes the sine of the given column.
-   *
+   * 计算给定值的正弦值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1455,7 +1481,7 @@ object functions {
 
   /**
    * Computes the hyperbolic sine of the given value.
-   *
+   * 计算给定值的双曲正弦值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1463,7 +1489,7 @@ object functions {
 
   /**
    * Computes the hyperbolic sine of the given column.
-   *
+   * 计算给定列的双曲正弦
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1471,7 +1497,7 @@ object functions {
 
   /**
    * Computes the tangent of the given value.
-   *
+   * 计算给定值的正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1479,7 +1505,7 @@ object functions {
 
   /**
    * Computes the tangent of the given column.
-   *
+   * 计算给定值的正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1487,7 +1513,7 @@ object functions {
 
   /**
    * Computes the hyperbolic tangent of the given value.
-   *
+   * 计算给定值的双曲正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1495,7 +1521,7 @@ object functions {
 
   /**
    * Computes the hyperbolic tangent of the given column.
-   *
+   * 计算给定列的双曲正切值
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1503,7 +1529,7 @@ object functions {
 
   /**
    * Converts an angle measured in radians to an approximately equivalent angle measured in degrees.
-   *
+   * 将弧度转换为角度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1511,7 +1537,7 @@ object functions {
 
   /**
    * Converts an angle measured in radians to an approximately equivalent angle measured in degrees.
-   *
+   * 将弧度转换为角度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1519,7 +1545,7 @@ object functions {
 
   /**
    * Converts an angle measured in degrees to an approximately equivalent angle measured in radians.
-   *
+   * 将角度转换为弧度
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1527,20 +1553,20 @@ object functions {
 
   /**
    * Converts an angle measured in degrees to an approximately equivalent angle measured in radians.
-   *
+   * 将角度转换为弧度
    * @group math_funcs
    * @since 1.4.0
    */
   def toRadians(columnName: String): Column = toRadians(Column(columnName))
 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // Misc functions
+  // Misc functions 其他功能
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Calculates the MD5 digest of a binary column and returns the value
    * as a 32 character hex string.
-   *
+   * 计算一个二进制列的MD5摘要返回一个32个字符的值
    * @group misc_funcs
    * @since 1.5.0
    */
@@ -1549,7 +1575,7 @@ object functions {
   /**
    * Calculates the SHA-1 digest of a binary column and returns the value
    * as a 40 character hex string.
-   *
+   * 计算一个二进制列SHA-1摘要,返回值作为一个40字符的十六进制字符串
    * @group misc_funcs
    * @since 1.5.0
    */
@@ -1558,7 +1584,7 @@ object functions {
   /**
    * Calculates the SHA-2 family of hash functions of a binary column and
    * returns the value as a hex string.
-   *
+   * 计算一个二进制列的哈希函数SHA-2系列,返回一个十六进制字符串的值
    * @param e column to compute SHA-2 on.
    * @param numBits one of 224, 256, 384, or 512.
    *
@@ -1574,20 +1600,21 @@ object functions {
   /**
    * Calculates the cyclic redundancy check value  (CRC32) of a binary column and
    * returns the value as a bigint.
-   *
+   * 计算循环冗余校验值(CRC32)一个二进制列,返回值为bigint
    * @group misc_funcs
    * @since 1.5.0
    */
   def crc32(e: Column): Column = Crc32(e.expr)
 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // String functions
+  // String functions 字符串函数
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Computes the numeric value of the first character of the string column, and returns the
+   * 计算字符串列的第一个字符的数字值,返回一个结果的int列
    * result as a int column.
-   *
+   * 将字符串转换为ascii字符串
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1596,7 +1623,7 @@ object functions {
   /**
    * Computes the BASE64 encoding of a binary column and returns it as a string column.
    * This is the reverse of unbase64.
-   *
+   * 用来进行Base64编码
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1604,7 +1631,7 @@ object functions {
 
   /**
    * Concatenates multiple input string columns together into a single string column.
-   *
+   * 将多个输入字符串列成一个字符串列
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1614,7 +1641,7 @@ object functions {
   /**
    * Concatenates multiple input string columns together into a single string column,
    * using the given separator.
-   *
+   * 将多个输入字符串列成一个字符串列,使用给定的分隔符
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1626,8 +1653,9 @@ object functions {
   /**
    * Computes the first argument into a string from a binary using the provided character set
    * (one of 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16').
+   * 计算第一个参数为使用提供的字符集的二进制字符串,
    * If either argument is null, the result will also be null.
-   *
+   * 如果两参数是空的,结果也将是空的
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1637,7 +1665,7 @@ object functions {
    * Computes the first argument into a binary from a string using the provided character set
    * (one of 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16').
    * If either argument is null, the result will also be null.
-   *
+   * 如果两参数是空的,结果也将是空的
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1646,10 +1674,12 @@ object functions {
   /**
    * Formats numeric column x to a format like '#,###,###.##', rounded to d decimal places,
    * and returns the result as a string column.
-   *
+   * 格式数值列x一个格式的'## # #,# # #',四舍五入,返回字符串列的结果
    * If d is 0, the result has no decimal point or fractional part.
    * If d < 0, the result will be null.
-   *
+   * 如果d为0,则结果没有小数点或小数部分,如果d < 0,结果将为null
+   * 
+   * 用于对字段的显示进行格式化
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1657,7 +1687,7 @@ object functions {
 
   /**
    * Formats the arguments in printf-style and returns the result as a string column.
-   *
+   * 在printf格式的参数并返回结果字符串列
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1669,7 +1699,7 @@ object functions {
   /**
    * Returns a new string column by converting the first letter of each word to uppercase.
    * Words are delimited by whitespace.
-   *
+   * 返回字符串并将字符串的第一个字母变为大写
    * For example, "hello world" will become "Hello World".
    *
    * @group string_funcs
@@ -1680,10 +1710,11 @@ object functions {
   /**
    * Locate the position of the first occurrence of substr column in the given string.
    * Returns null if either of the arguments are null.
-   *
+   * 返回要截取的字符串在源字符串中的位置
+   * 
    * NOTE: The position is not zero based, but 1 based index, returns 0 if substr
    * could not be found in str.
-   *
+   * 注意:该位置不是零为基础的,但基于1的索引数,如果无法找到返回0
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1691,7 +1722,7 @@ object functions {
 
   /**
    * Computes the length of a given string or binary column.
-   *
+   * 计算一个给定字符串或二进制列的长度
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1699,7 +1730,7 @@ object functions {
 
   /**
    * Converts a string column to lower case.
-   *
+   * 将字符串列转换为小写
    * @group string_funcs
    * @since 1.3.0
    */
@@ -1707,6 +1738,9 @@ object functions {
 
   /**
    * Computes the Levenshtein distance of the two given string columns.
+   * 计算两个给定的字符串列的Levenshtein距离(编辑距离),
+   * 编辑距离:指的是两个字符串之间,由一个转换成另一个所需的最少编辑操作次数
+   * 许可的编辑操作包括将一个字符替换成另一个字符,插入一个字符,删除一个字符
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1716,7 +1750,7 @@ object functions {
    * Locate the position of the first occurrence of substr.
    * NOTE: The position is not zero based, but 1 based index, returns 0 if substr
    * could not be found in str.
-   *
+   * 返回一个字符串在另一个字符串中的位置
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1726,7 +1760,7 @@ object functions {
 
   /**
    * Locate the position of the first occurrence of substr in a string column, after position pos.
-   *
+   * 返回一个字符串在另一个字符串中的位置,在位置pos之后
    * NOTE: The position is not zero based, but 1 based index. returns 0 if substr
    * could not be found in str.
    *
@@ -1739,7 +1773,7 @@ object functions {
 
   /**
    * Left-pad the string column with
-   *
+   * 左垫字符串列
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1749,7 +1783,7 @@ object functions {
 
   /**
    * Trim the spaces from left end for the specified string value.
-   *
+   * 从指定的字符串值调整从左结束的空格
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1757,7 +1791,12 @@ object functions {
 
   /**
    * Extract a specific(idx) group identified by a java regex, from the specified string column.
-   *
+   * 字符串subject按照pattern正则表达式的规则拆分,返回index指定的字符
+   * 第一参数：处理的字段
+		   第二参数:需要匹配的正则表达式
+		   第三个参数: 0是显示与之匹配的整个字符串
+							  1 是显示第一个括号里面的
+								2 是显示第二个括号里面的字段...
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1767,7 +1806,7 @@ object functions {
 
   /**
    * Replace all substrings of the specified string value that match regexp with rep.
-   *
+   * 更换所有的指定的字符串值,表示的匹配正则表达式
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1778,7 +1817,7 @@ object functions {
   /**
    * Decodes a BASE64 encoded string column and returns it as a binary column.
    * This is the reverse of base64.
-   *
+   * Base64解码
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1786,7 +1825,7 @@ object functions {
 
   /**
    * Right-padded with pad to a length of len.
-   *
+   * 从右边对字符串使用指定的字符进行填充 
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1796,7 +1835,7 @@ object functions {
 
   /**
    * Repeats a string column n times, and returns it as a new string column.
-   *
+   * 返回一个字符串组成的字符串STR重复的次数
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1806,7 +1845,7 @@ object functions {
 
   /**
    * Reverses the string column and returns it as a new string column.
-   *
+   * 返回字符串str的字符颠倒顺序
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1816,7 +1855,7 @@ object functions {
 
   /**
    * Trim the spaces from right end for the specified string value.
-   *
+   * 返回字符串str与尾部的空格字符去掉
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1824,7 +1863,7 @@ object functions {
 
   /**
    * * Return the soundex code for the specified expression.
-   *
+   * 返回字符串参数的语音表示形式
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1833,7 +1872,7 @@ object functions {
   /**
    * Splits str around pattern (pattern is a regular expression).
    * NOTE: pattern is a string represent the regular expression.
-   *
+   * 就是将一字符串以特定的字符分割成数组
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1845,7 +1884,7 @@ object functions {
    * Substring starts at `pos` and is of length `len` when str is String type or
    * returns the slice of byte array that starts at `pos` in byte and is of length `len`
    * when str is Binary type
-   *
+   * 取子串函数,返回第一个参数中从第二个参数指定的位置开始、第三个参数指定的长度的子字符串
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1857,7 +1896,7 @@ object functions {
    * If count is positive, everything the left of the final delimiter (counting from left) is
    * returned. If count is negative, every to the right of the final delimiter (counting from the
    * right) is returned. substring_index performs a case-sensitive match when searching for delim.
-   *
+   * 取子串函数,返回第一个参数中从第二个参数指定的位置开始、第三个参数指定的长度的子字符串
    * @group string_funcs
    */
   def substring_index(str: Column, delim: String, count: Int): Column =
@@ -1868,7 +1907,7 @@ object functions {
    * The characters in replaceString is corresponding to the characters in matchingString.
    * The translate will happen when any character in the string matching with the character
    * in the matchingString.
-   *
+   * 返回将出现在from中的每个字符替换为to中的相应字符以后的字符串
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1877,7 +1916,7 @@ object functions {
 
   /**
    * Trim the spaces from both ends for the specified string column.
-   *
+   * 删除字符串首尾的空白
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1885,19 +1924,19 @@ object functions {
 
   /**
    * Converts a string column to upper case.
-   *
+   * 将字符串列转换为大写
    * @group string_funcs
    * @since 1.3.0
    */
   def upper(e: Column): Column = Upper(e.expr)
 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // DateTime functions
+  // DateTime functions 日期函数
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Returns the date that is numMonths after startDate.
-   *
+   * 将一个日期上加上一指定的月份数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1906,7 +1945,7 @@ object functions {
 
   /**
    * Returns the current date as a date column.
-   *
+   * 返回当前日期
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1914,7 +1953,7 @@ object functions {
 
   /**
    * Returns the current timestamp as a timestamp column.
-   *
+   * 返回是取得当前系统时间戳的函数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1923,7 +1962,7 @@ object functions {
   /**
    * Converts a date/timestamp/string to a value of string in the format specified by the date
    * format given by the second argument.
-   *
+   * 根据format字符串格式化日期或日期和时间值date,返回结果串
    * A pattern could be for instance `dd.MM.yyyy` and could return a string like '18.03.1993'. All
    * pattern letters of [[java.text.SimpleDateFormat]] can be used.
    *
@@ -1938,6 +1977,7 @@ object functions {
 
   /**
    * Returns the date that is `days` days after `start`
+   * 向日期添加指定的时间间隔
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1945,6 +1985,7 @@ object functions {
 
   /**
    * Returns the date that is `days` days before `start`
+   * 从日期减去指定的时间间隔
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1952,6 +1993,7 @@ object functions {
 
   /**
    * Returns the number of days from `start` to `end`.
+   * 用于判断在两个日期之间存在的指定时间间隔的数目
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1959,6 +2001,7 @@ object functions {
 
   /**
    * Extracts the year as an integer from a given date/timestamp/string.
+   * 从一个给定的日期/时间戳/字符串提取年,返回整数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1966,6 +2009,7 @@ object functions {
 
   /**
    * Extracts the quarter as an integer from a given date/timestamp/string.
+   * 从一个给定的日期/时间戳/字符串提取第几季度,返回整数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1973,6 +2017,7 @@ object functions {
 
   /**
    * Extracts the month as an integer from a given date/timestamp/string.
+   * 从一个给定的日期/时间戳/字符串提取第几月,返回整数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1980,6 +2025,7 @@ object functions {
 
   /**
    * Extracts the day of the month as an integer from a given date/timestamp/string.
+   * 从一个给定的日期/时间戳/字符串,返回一个月中的第几天
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1987,6 +2033,7 @@ object functions {
 
   /**
    * Extracts the day of the year as an integer from a given date/timestamp/string.
+   * 从一个给定的日期/时间戳/字符串,返回一个年中的第几天
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -1994,6 +2041,7 @@ object functions {
 
   /**
    * Extracts the hours as an integer from a given date/timestamp/string.
+   * 从一个给定的日期/时间戳/字符串,返回时间值中的小时数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2003,7 +2051,8 @@ object functions {
    * Given a date column, returns the last day of the month which the given date belongs to.
    * For example, input "2015-07-27" returns "2015-07-31" since July 31 is the last day of the
    * month in July 2015.
-   *
+   * 返回指定日期对应月份的最后一天
+   * 
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2011,6 +2060,7 @@ object functions {
 
   /**
    * Extracts the minutes as an integer from a given date/timestamp/string.
+   *  从一个给定的日期/时间戳/字符串,返回时间值中的分钟数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2018,6 +2068,7 @@ object functions {
 
   /*
    * Returns number of months between dates `date1` and `date2`.
+   * 返回两个日期之间的月份数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2026,13 +2077,14 @@ object functions {
   /**
    * Given a date column, returns the first date which is later than the value of the date column
    * that is on the specified day of the week.
-   *
+   * 
    * For example, `next_day('2015-07-27', "Sunday")` returns 2015-08-02 because that is the first
    * Sunday after 2015-07-27.
-   *
+   * 指定时间的下一个星期几所在的日期
    * Day of the week parameter is case insensitive, and accepts:
+   * 周参数的一天是不区分大小写的,并接受:
    * "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun".
-   *
+   * 
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2040,6 +2092,7 @@ object functions {
 
   /**
    * Extracts the seconds as an integer from a given date/timestamp/string.
+   *  从一个给定的日期/时间戳/字符串,返回时间值中的秒数
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2047,6 +2100,7 @@ object functions {
 
   /**
    * Extracts the week number as an integer from a given date/timestamp/string.
+   * 从一个给定的日期/时间戳/字符串,返回指定日期是一年中的第几周
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2056,6 +2110,7 @@ object functions {
    * Converts the number of seconds from unix epoch (1970-01-01 00:00:00 UTC) to a string
    * representing the timestamp of that moment in the current system time zone in the given
    * format.
+   * 把数据库里的时间字段,格式化成想要的格式
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2065,6 +2120,7 @@ object functions {
    * Converts the number of seconds from unix epoch (1970-01-01 00:00:00 UTC) to a string
    * representing the timestamp of that moment in the current system time zone in the given
    * format.
+   * 把数据库里的时间字段,格式化成想要的格式
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2072,6 +2128,7 @@ object functions {
 
   /**
    * Gets current Unix timestamp in seconds.
+   * 把数据库里的时间字段,格式化成想要的格式
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2080,6 +2137,7 @@ object functions {
   /**
    * Converts time string in format yyyy-MM-dd HH:mm:ss to Unix timestamp (in seconds),
    * using the default timezone and the default locale, return null if fail.
+   * 把数据库里的时间字段,格式化成想要的格式
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2087,8 +2145,10 @@ object functions {
 
   /**
    * Convert time string with given pattern
+   * 带给定模式的转换时间字符串
    * (see [http://docs.oracle.com/javase/tutorial/i18n/format/simpleDateFormat.html])
    * to Unix time stamp (in seconds), return null if fail.
+   * 把数据库里的时间字段,格式化成想要的格式
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2096,7 +2156,7 @@ object functions {
 
   /**
    * Converts the column into DateType.
-   *
+   * 将列换成日期类型
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2104,7 +2164,7 @@ object functions {
 
   /**
    * Returns date truncated to the unit specified by the format.
-   *
+   * TRUNC函数用于对值进行截断
    * @param format: 'year', 'yyyy', 'yy' for truncate by year,
    *               or 'month', 'mon', 'mm' for truncate by month
    *
@@ -2115,6 +2175,7 @@ object functions {
 
   /**
    * Assumes given timestamp is UTC and converts to given timezone.
+   * 假设给定的时间是UTC和转换为给定的时区
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2123,13 +2184,14 @@ object functions {
 
   /**
    * Assumes given timestamp is in given timezone and converts to UTC.
+   * 假设给定的时间戳在特定的时区转换为UTC
    * @group datetime_funcs
    * @since 1.5.0
    */
   def to_utc_timestamp(ts: Column, tz: String): Column = ToUTCTimestamp(ts.expr, Literal(tz).expr)
 
   //////////////////////////////////////////////////////////////////////////////////////////////
-  // Collection functions
+  // Collection functions 集合函数
   //////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
@@ -2142,7 +2204,8 @@ object functions {
 
   /**
    * Creates a new row for each element in the given array or map column.
-   *
+   * 列表中的每个元素生成一行,
+   * map中每个key-value对,生成一行,key为一列,value为一列
    * @group collection_funcs
    * @since 1.3.0
    */
@@ -2150,7 +2213,7 @@ object functions {
 
   /**
    * Returns length of array or map.
-   *
+   * 返回数组或map长度
    * @group collection_funcs
    * @since 1.5.0
    */
@@ -2158,8 +2221,8 @@ object functions {
 
   /**
    * Sorts the input array for the given column in ascending order,
+   * 对给定列的输入数组进行排序,根据数组元素的自然顺序
    * according to the natural ordering of the array elements.
-   *
    * @group collection_funcs
    * @since 1.5.0
    */
@@ -2168,7 +2231,7 @@ object functions {
   /**
    * Sorts the input array for the given column in ascending / descending order,
    * according to the natural ordering of the array elements.
-   *
+   * 对给定列的输入数组进行排序,根据数组元素的自然顺序
    * @group collection_funcs
    * @since 1.5.0
    */
