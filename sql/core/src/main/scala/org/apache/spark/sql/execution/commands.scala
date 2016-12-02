@@ -167,9 +167,9 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
 
 /**
  * An explain command for users to see how a command will be executed.
- * ½âÊÍÃüÁîÓÃ»§²é¿´ÃüÁî½«ÈçºÎÖ´ĞĞµÄÃüÁî
+ * è§£é‡Šå‘½ä»¤ç”¨æˆ·æŸ¥çœ‹å‘½ä»¤å°†å¦‚ä½•æ‰§è¡Œçš„å‘½ä»¤
  * Note that this command takes in a logical plan, runs the optimizer on the logical plan
- * Çë×¢Òâ,Õâ¸öÃüÁîĞèÒªÒ»¸öÂß¼­¼Æ»®,ÔËĞĞÂß¼­¼Æ»®µÄÓÅ»¯³ÌĞò
+ * è¯·æ³¨æ„,è¿™ä¸ªå‘½ä»¤éœ€è¦ä¸€ä¸ªé€»è¾‘è®¡åˆ’,è¿è¡Œé€»è¾‘è®¡åˆ’çš„ä¼˜åŒ–ç¨‹åº
  * (but do NOT actually execute it).
  *
  * :: DeveloperApi ::
@@ -239,7 +239,7 @@ case class UncacheTableCommand(tableName: String) extends RunnableCommand {
 /**
  * :: DeveloperApi ::
  * Clear all cached data from the in-memory cache.
- * Çå³ıÄÚ´æ»º´æÖĞµÄËùÓĞ»º´æÊı¾İ
+ * æ¸…é™¤å†…å­˜ç¼“å­˜ä¸­çš„æ‰€æœ‰ç¼“å­˜æ•°æ®
  */
 @DeveloperApi
 case object ClearCacheCommand extends RunnableCommand {
@@ -273,9 +273,9 @@ case class DescribeCommand(
 
 /**
  * A command for users to get tables in the given database.
- * Ò»¸öÓÃ»§ÔÚ¸ø¶¨Êı¾İ¿âÖĞ»ñÈ¡±íµÄÃüÁî
+ * ä¸€ä¸ªç”¨æˆ·åœ¨ç»™å®šæ•°æ®åº“ä¸­è·å–è¡¨çš„å‘½ä»¤
  * If a databaseName is not given, the current database will be used.
- * Èç¹ûÃ»ÓĞ¸ø³öÒ»¸öÊı¾İ¿â,½«Ê¹ÓÃµ±Ç°Êı¾İ¿â,
+ * å¦‚æœæ²¡æœ‰ç»™å‡ºä¸€ä¸ªæ•°æ®åº“,å°†ä½¿ç”¨å½“å‰æ•°æ®åº“,
  * The syntax of using this command in SQL is:
  * {{{
  *    SHOW TABLES [IN databaseName]
@@ -307,7 +307,7 @@ case class ShowTablesCommand(databaseName: Option[String]) extends RunnableComma
 
 /**
  * A command for users to list all of the registered functions.
- * ÃüÁîÎªÓÃ»§ÁĞ³öËùÓĞµÄ×¢²áº¯Êı
+ * å‘½ä»¤ä¸ºç”¨æˆ·åˆ—å‡ºæ‰€æœ‰çš„æ³¨å†Œå‡½æ•°
  * The syntax of using this command in SQL is:
  * {{{
  *    SHOW FUNCTIONS
@@ -338,7 +338,7 @@ case class ShowFunctions(db: Option[String], pattern: Option[String]) extends Ru
 
 /**
  * A command for users to get the usage of a registered function.
- * ÃüÁîÓÃ»§»ñÈ¡×¢²áº¯ÊıµÄÓÃ·¨
+ * å‘½ä»¤ç”¨æˆ·è·å–æ³¨å†Œå‡½æ•°çš„ç”¨æ³•
  * The syntax of using this command in SQL is
  * {{{
  *   DESCRIBE FUNCTION [EXTENDED] upper;
