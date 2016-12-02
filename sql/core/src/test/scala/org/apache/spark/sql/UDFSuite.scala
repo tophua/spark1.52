@@ -25,37 +25,76 @@ private case class FunctionResult(f1: String, f2: String)
  * 自定义函数测试
  */
 class UDFSuite extends QueryTest with SharedSQLContext {
+  //导入隐式转换  
   import testImplicits._
 
   test("built-in fixed arity expressions") {//内置固定数量的表达
-    val df = ctx.emptyDataFrame
-    df.selectExpr("rand()", "randn()", "rand(5)", "randn(50)")
+    val df = ctx.emptyDataFrame    
+    //val df = ctx.    
+    df.selectExpr("rand()", "randn()", "rand(5)", "randn(50)").show()
   }
 
   test("built-in vararg expressions") {//内置可变参数的表达式
-    val df = Seq((1, 2)).toDF("a", "b")
-    df.selectExpr("array(a, b)")
-    df.selectExpr("struct(a, b)")
+    val df = Seq((1, 2)).toDF("a", "b")  
+    df.selectExpr("array(a, b)").show()
+      /**
+     * +-----------+
+        |'array(a,b)|
+        +-----------+
+        |     [1, 2]|
+        +-----------+
+     */   
+    df.selectExpr("struct(a, b)").show()
+     /**
+     * +------------+
+       |'struct(a,b)|
+       +------------+
+       |       [1,2]|
+       +------------+
+     */
   }
   //内置表达式的多个构造函数
   test("built-in expressions with multiple constructors") {
     val df = Seq(("abcd", 2)).toDF("a", "b")
-    df.selectExpr("substr(a, 2)", "substr(a, 2, 3)").collect()
+    //[abcd,2]
+    df.collect().foreach(println)
+    //substr(a, 2)截取字段a,从第二位开始[bcd]
+    //substr(a, 2, 3)[bcd]截取字段a,从第二位开始,截取长度3
+    df.selectExpr("substr(a, 2)", "substr(a, 2, 3)").collect().foreach {println}
   }
 
   test("count") {//计数
     val df = Seq(("abcd", 2)).toDF("a", "b")
-    df.selectExpr("count(a)")
+    df.selectExpr("count(a)").show()
+    /** +---------+
+        |'count(a)|
+        +---------+
+        |        1|
+        +---------+**/
   }
 
   test("count distinct") {//重复计数
     val df = Seq(("abcd", 2)).toDF("a", "b")
-    df.selectExpr("count(distinct a)")
+    df.selectExpr("count(distinct a)").show()
+    /**
+     * +-----------------+
+       |COUNT(DISTINCT a)|
+       +-----------------+
+       |                1|
+       +-----------------+
+     */
   }
 
   test("SPARK-8003 spark_partition_id") {
     val df = Seq((1, "Tearing down the walls that divide us")).toDF("id", "saying")
+    //注册一个临时表
     df.registerTempTable("tmp_table")
+    sql("select spark_partition_id() from tmp_table").toDF().show()
+   /** 	+---+
+        |_c0|
+        +---+
+        |  0|
+        +---+**/
     checkAnswer(sql("select spark_partition_id() from tmp_table").toDF(), Row(0))
     ctx.dropTempTable("tmp_table")
   }
@@ -66,7 +105,10 @@ class UDFSuite extends QueryTest with SharedSQLContext {
       data.write.parquet(dir.getCanonicalPath)
       ctx.read.parquet(dir.getCanonicalPath).registerTempTable("test_table")
       val answer = sql("select input_file_name() from test_table").head().getString(0)
+      println(answer)
       assert(answer.contains(dir.getCanonicalPath))
+      sql("select input_file_name() from test_table").show()
+      
       assert(sql("select input_file_name() from test_table").distinct().collect().length >= 2)
       ctx.dropTempTable("test_table")
     }

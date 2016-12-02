@@ -289,6 +289,7 @@ package org.apache.spark.sql.test;
   public  org.apache.spark.sql.DataFrame complexData () ;
   /**
    * Initialize all test data such that all temp tables are properly registered.
+   * &#x521d;&#x59cb;&#x5316;&#x6240;&#x6709;&#x7684;&#x6d4b;&#x8bd5;&#x6570;&#x636e;,&#x6240;&#x6709;&#x4e34;&#x65f6;&#x8868;&#x90fd;&#x5df2;&#x6b63;&#x786e;&#x6ce8;&#x518c;
    */
   public  void loadTestData () ;
 }

@@ -37,6 +37,7 @@ class UnsafeRowSuite extends SparkFunSuite {
     //序列化一个不安全行,一个大缓冲应该只将序列化相关的数据
     val data = new Array[Byte](1024)
     val row = new UnsafeRow
+    //
     row.pointTo(data, 1, 16)
     row.setLong(0, 19285)
 
@@ -53,7 +54,7 @@ class UnsafeRowSuite extends SparkFunSuite {
     val row = new UnsafeRow
     row.pointTo(data, 1, 16)
     row.setLong(0, 19285)
-
+    //使用KryoSerializer序列化,反序列化
     val ser = new KryoSerializer(new SparkConf).newInstance()
     val row1 = ser.deserialize[UnsafeRow](ser.serialize(row))
     assert(row1.getLong(0) == 19285)
@@ -70,15 +71,20 @@ class UnsafeRowSuite extends SparkFunSuite {
   }
 
   test("writeToStream") {//写入流
-    val row = InternalRow.apply(UTF8String.fromString("hello"), UTF8String.fromString("world"), 123)
+    //把字符串转换UTF8
+    val hello=UTF8String.fromString("hello")
+    val row = InternalRow.apply(hello, UTF8String.fromString("world"), 123)
     val arrayBackedUnsafeRow: UnsafeRow =
       UnsafeProjection.create(Array[DataType](StringType, StringType, IntegerType)).apply(row)
     assert(arrayBackedUnsafeRow.getBaseObject.isInstanceOf[Array[Byte]])
+    //
     val bytesFromArrayBackedRow: Array[Byte] = {
-      val baos = new ByteArrayOutputStream()
+      //字节数组输出流在内存中创建一个字节数组缓冲区,所有发送到输出流的数据保存在该字节数组缓冲区中
+      val baos = new ByteArrayOutputStream()      
       arrayBackedUnsafeRow.writeToStream(baos, null)
       baos.toByteArray
     }
+    
     val bytesFromOffheapRow: Array[Byte] = {
       val offheapRowPage = MemoryAllocator.UNSAFE.allocate(arrayBackedUnsafeRow.getSizeInBytes)
       try {
@@ -144,9 +150,10 @@ class UnsafeRowSuite extends SparkFunSuite {
     //确保我们真的复制输入行
     unsafeRow.setInt(0, 2)
     assert(emptyRow.getInt(0) === 1)
-
+    //longString=abcabcabcabcabcabcabcabcabcabcabcab
     val longString = UTF8String.fromString((1 to 100).map(_ => "abc").reduce(_ + _))
     val row2 = InternalRow(3, longString)
+    //[0,3,180000012c,6261636261636261,6163626163626163,6362616362616362]
     val unsafeRow2 = converter.apply(row2)
 
     // make sure we can resize.

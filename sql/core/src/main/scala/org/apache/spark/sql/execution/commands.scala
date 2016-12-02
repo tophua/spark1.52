@@ -167,8 +167,9 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
 
 /**
  * An explain command for users to see how a command will be executed.
- *
+ * 解释命令用户查看命令将如何执行的命令
  * Note that this command takes in a logical plan, runs the optimizer on the logical plan
+ * 请注意,这个命令需要一个逻辑计划,运行逻辑计划的优化程序
  * (but do NOT actually execute it).
  *
  * :: DeveloperApi ::
@@ -238,6 +239,7 @@ case class UncacheTableCommand(tableName: String) extends RunnableCommand {
 /**
  * :: DeveloperApi ::
  * Clear all cached data from the in-memory cache.
+ * 清除内存缓存中的所有缓存数据
  */
 @DeveloperApi
 case object ClearCacheCommand extends RunnableCommand {
@@ -271,7 +273,9 @@ case class DescribeCommand(
 
 /**
  * A command for users to get tables in the given database.
+ * 一个用户在给定数据库中获取表的命令
  * If a databaseName is not given, the current database will be used.
+ * 如果没有给出一个数据库,将使用当前数据库,
  * The syntax of using this command in SQL is:
  * {{{
  *    SHOW TABLES [IN databaseName]
@@ -303,6 +307,7 @@ case class ShowTablesCommand(databaseName: Option[String]) extends RunnableComma
 
 /**
  * A command for users to list all of the registered functions.
+ * 命令为用户列出所有的注册函数
  * The syntax of using this command in SQL is:
  * {{{
  *    SHOW FUNCTIONS
@@ -333,6 +338,7 @@ case class ShowFunctions(db: Option[String], pattern: Option[String]) extends Ru
 
 /**
  * A command for users to get the usage of a registered function.
+ * 命令用户获取注册函数的用法
  * The syntax of using this command in SQL is
  * {{{
  *   DESCRIBE FUNCTION [EXTENDED] upper;

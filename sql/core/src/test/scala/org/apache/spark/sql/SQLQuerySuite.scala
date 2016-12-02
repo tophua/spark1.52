@@ -43,6 +43,17 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("having clause") {//HAVING子句   
     Seq(("one", 1), ("two", 2), ("three", 3), ("one", 5)).toDF("k", "v").registerTempTable("hav")
+    /**
+     *  +-----+---+
+        |    k|  v|
+        +-----+---+
+        |  one|  1|
+        |  two|  2|
+        |three|  3|
+        |  one|  5|
+        +-----+---+
+     */
+    sql("SELECT * FROM hav ").show()
     checkAnswer(
       sql("SELECT k, sum(v) FROM hav GROUP BY k HAVING sum(v) > 2"),
       Row("one", 6) :: Row("three", 3) :: Nil)
@@ -52,15 +63,31 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     val df = Seq((1, 1)).toDF("key", "value")
     df.registerTempTable("src")
     // case when 使用
+    /**
+     * +---+
+     * |_c0|
+     * +---+
+     * |1.0|
+     * +---+
+     */
+    sql("select case when true then 1.0 else '1' end from src ").show()
     val queryCaseWhen = sql("select case when true then 1.0 else '1' end from src ")
-    //coalesce 依次参考表达式,遇到非null值即停止并返回值,如果遇到表达式为值,返回空值
+    //coalesce函数可以接受一系列的值,如果第一个为null,使用第二个值,如果第二个值为null,使用第三个值,以此类推
     val queryCoalesce = sql("select coalesce(null, 1, '1') from src ")
-
+    /**
+     +---+---+---+
+     |_c0|_c1|_c2|
+     +---+---+---+
+     |  1|  2|  3|
+     +---+---+---+
+     */
+    val queryCoalescec = sql("select coalesce(key, 2, '3'),coalesce(null, 2, '3'),coalesce(null, null, '3') from src ").show()
     checkAnswer(queryCaseWhen, Row("1.0") :: Nil)
     checkAnswer(queryCoalesce, Row("1") :: Nil)
   }
 
-  test("show functions") {//显示函数
+  test("show functions") {//显示内置函数
+    sql("SHOW functions").show()
     checkAnswer(sql("SHOW functions"),
       FunctionRegistry.builtin.listFunction().sorted.map(Row(_)))
   }
@@ -94,6 +121,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     ).toDF("a", "b", "c").registerTempTable("cachedData")
    //缓存列 
     sqlContext.cacheTable("cachedData")
+    sql("SELECT * FROM cachedData")
     checkAnswer(//分组b列,
       sql("SELECT t1.b FROM cachedData, cachedData t1 GROUP BY t1.b"),
       Row(0) :: Row(81) :: Nil)

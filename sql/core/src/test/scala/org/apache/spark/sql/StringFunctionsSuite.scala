@@ -27,12 +27,21 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string concat") {//字符串连接
     val df = Seq[(String, String, String)](("a", "b", null)).toDF("a", "b", "c")
-
+    /***
+     *+---+---+----+
+      |  a|  b|   c|
+      +---+---+----+
+      |  a|  b|null|
+      +---+---+----+
+     */
+    df.show()
     checkAnswer(
       df.select(concat($"a", $"b"), concat($"a", $"b", $"c")),
+      //注意如果有一个字段为null,连接为null
       Row("ab", null))
 
     checkAnswer(
+        //表达式的形式字符串连接
       df.selectExpr("concat(a, b)", "concat(a, b, c)"),
       Row("ab", null))
   }
@@ -40,17 +49,19 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
   test("string concat_ws") {//字符串连接
     val df = Seq[(String, String, String)](("a", "b", null)).toDF("a", "b", "c")
 
-    checkAnswer(
+    checkAnswer(//将多个输入字符串列成一个字符串列,使用给定的分隔符,如果字段null,则可以连接
       df.select(concat_ws("||", $"a", $"b", $"c")),
       Row("a||b"))
 
     checkAnswer(
+        //表达式方式
       df.selectExpr("concat_ws('||', a, b, c)"),
       Row("a||b"))
   }
 
   test("string Levenshtein distance") {//字符串编辑距离
     val df = Seq(("kitten", "sitting"), ("frog", "fog")).toDF("l", "r")
+    
     checkAnswer(df.select(levenshtein($"l", $"r")), Seq(Row(3), Row(1)))
     checkAnswer(df.selectExpr("levenshtein(l, r)"), Seq(Row(3), Row(1)))
   }
@@ -60,10 +71,33 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       ("100-200", "(\\d+)-(\\d+)", "300"),
       ("100-200", "(\\d+)-(\\d+)", "400"),
       ("100-200", "(\\d+)", "400")).toDF("a", "b", "c")
-
+    df.show()
+    /**
+     * +-------+-----------+---+
+       |      a|          b|  c|
+       +-------+-----------+---+
+       |100-200|(\d+)-(\d+)|300|
+       |100-200|(\d+)-(\d+)|400|
+       |100-200|      (\d+)|400|
+       +-------+-----------+---+
+     */
+    df.select(
+          //正则表达式替换
+        regexp_replace($"a", "(\\d+)", "num"),
+        //正则表达式提取,1 提取正则表达式第一个匹配项
+        regexp_extract($"a", "(\\d+)-(\\d+)", 1)).show()
+     /**+---------------------------+-------------------------------+
+        |regexp_replace(a,(\d+),num)|regexp_extract(a,(\d+)-(\d+),1)|
+        +---------------------------+-------------------------------+
+        |                    num-num|                            100|
+        |                    num-num|                            100|
+        |                    num-num|                            100|
+        +---------------------------+-------------------------------+ **/
     checkAnswer(
       df.select(
+          //正则表达式替换
         regexp_replace($"a", "(\\d+)", "num"),
+        //正则表达式提取,1 提取第一个匹配项
         regexp_extract($"a", "(\\d+)-(\\d+)", 1)),
       Row("num-num", "100") :: Row("num-num", "100") :: Row("num-num", "100") :: Nil)
 
@@ -74,6 +108,29 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     // it will still use the interpretProjection if projection followed by a LocalRelation,
     // hence we add a filter operator.因此,我们添加了一个过滤器操作符
     // See the optimizer rule `ConvertToLocalRelation`
+      /**
+       * isnotnull过虑掉a列数据行不为null
+       * +-------+-----------+---+
+         |      a|          b|  c|
+         +-------+-----------+---+
+         |100-200|(\d+)-(\d+)|300|
+         |100-200|(\d+)-(\d+)|400|
+         |100-200|      (\d+)|400|
+         +-------+-----------+---+
+       */
+      df.filter("isnotnull(a)").show()
+   /**+----------------------+----------------------+
+      |'regexp_replace(a,b,c)|'regexp_extract(a,b,1)|
+      +----------------------+----------------------+
+      |                   300|                   100|
+      |                   400|                   100|
+      |               400-400|                   100|
+      +----------------------+----------------------+**/
+      df.filter("isnotnull(a)").selectExpr(
+        //regexp_replaces该函数用一个指定的 替换匹配的模式,从而允许复杂的"搜索并替换"操作
+        "regexp_replace(a, b, c)",
+        //regexp_extract 将字符串subject按照pattern正则表达式的规则拆分,1匹配第一个开始,返回提取匹配项
+        "regexp_extract(a, b, 1)").show()
     checkAnswer(
       df.filter("isnotnull(a)").selectExpr(
         "regexp_replace(a, b, c)",
@@ -81,10 +138,10 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("300", "100") :: Row("400", "100") :: Row("400-400", "100") :: Nil)
   }
 
-  test("string ascii function") {//字符串ASCII码的功能
+  test("string ascii function") {//字符串ASCII码
     val df = Seq(("abc", "")).toDF("a", "b")
     checkAnswer(
-      //
+      //字符串ASCII码
       df.select(ascii($"a"), ascii($"b")),
       Row(97, 0))
 
@@ -105,12 +162,13 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("AQIDBA==", bytes))
   }
 
-  test("string / binary substring function") {//字符串/二进制字符串函数
+  test("string / binary substring function") {//字符串/二进制截取函数
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
     //非ASCII字符的代码不允许,所以我们禁用scalastyle这里
     //使用substring截取字符串
     val df = Seq(("1世3", Array[Byte](1, 2, 3, 4))).toDF("a", "b")
+    //substring列名,从第几个开始,截取几位
     checkAnswer(df.select(substring($"a", 1, 2)), Row("1世"))
     checkAnswer(df.select(substring($"b", 2, 2)), Row(Array[Byte](2,3)))
     checkAnswer(df.selectExpr("substring(a, 1, 2)"), Row("1世"))
@@ -123,6 +181,14 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
     //非ASCII字符的代码不允许,所以我们禁用scalastyle这里
     val df = Seq(("大千世界", "utf-8", bytes)).toDF("a", "b", "c")
+    /**
+    +--------------------+---------------+
+    |     encode(a,utf-8)|decode(c,utf-8)|
+    +--------------------+---------------+
+    |[-27, -92, -89, -...|        大千世界|
+    +--------------------+---------------+
+    **/
+    df.select(encode($"a", "utf-8"), decode($"c", "utf-8")).show()
     checkAnswer(
       df.select(encode($"a", "utf-8"), decode($"c", "utf-8")),
       Row(bytes, "大千世界"))
@@ -133,13 +199,14 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     // scalastyle:on
   }
 
-  test("string translate") {//字符串转换
+  test("string translate") {//字符替换函数
     val df = Seq(("translate", "")).toDF("a", "b")
+    
     checkAnswer(df.select(translate($"a", "rnlt", "123")), Row("1a2s3ae"))
     checkAnswer(df.selectExpr("""translate(a, "rnlt", "")"""), Row("asae"))
   }
 
-  test("string trim functions") {//字符串截取函数
+  test("string trim functions") {//字符串空格截取函数
     val df = Seq(("  example  ", "")).toDF("a", "b")
     //截取空格
     checkAnswer(
@@ -155,6 +222,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     val df = Seq(("aa%d%s", 123, "cc")).toDF("a", "b", "c")
 
     checkAnswer(
+        //%d表示数字,%s表示字符串
       df.select(format_string("aa%d%s", $"b", $"c")),
       Row("aa123cc"))
 
@@ -176,7 +244,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     val df = Seq(("aaads", "aa", "zz")).toDF("a", "b", "c")
 
     checkAnswer(
-        //返回要截取的字符串在源字符串中的位置
+        //返回要截取的字符串在源字符串中开始的位置
       df.select(instr($"a", "aa")),
       Row(1))
 
@@ -185,9 +253,11 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(1))
   }
 
-  test("string substring_index function") {//子字符串索引函数
+  test("string substring_index function") {//截取子字符串索引函数
     val df = Seq(("www.apache.org", ".", "zz")).toDF("a", "b", "c")
+  
     checkAnswer(
+        //截取子字符串索引函数,2匹配索引截取的位置
       df.select(substring_index($"a", ".", 2)),
       Row("www.apache"))
     checkAnswer(
@@ -196,7 +266,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("string locate function") {//字符串定位函数
+  test("string locate function") {//字符串查找匹配定位函数
     val df = Seq(("aaads", "aa", "zz", 1)).toDF("a", "b", "c", "d")
 
     checkAnswer(
@@ -253,9 +323,9 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("   "))
   }
 
-  test("string split function") {//字符串分隔函数
+  test("string split function") {//字符串分隔函数,返回数组
     val df = Seq(("aa2bb3cc", "[1-9]+")).toDF("a", "b")
-
+    
     checkAnswer(
       df.select(split($"a", "[1-9]+")),
       Row(Seq("aa", "bb", "cc")))
@@ -287,7 +357,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     checkAnswer(
       df.select(initcap($"l"), initcap($"r")), Row("Ab", "A B"))
 
-    checkAnswer(
+    checkAnswer(//全部转换大写字母函数
       df.selectExpr("InitCap(l)", "InitCap(r)"), Row("Ab", "A B"))
   }
 
@@ -308,6 +378,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
           "h") // decimal 7.128381
 
     checkAnswer(
+       //数字格式4个零
       df.select(format_number($"f", 4)),
       Row("5.0000"))
 

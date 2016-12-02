@@ -599,7 +599,7 @@ object functions {
 
   /**
    * Returns the first column that is not null, or null if all inputs are null.
-   * 返回不为空的第一列或如果所有的输入都为空,则为空
+   *  coalesce函数可以接受一系列的值,如果第一个为null,使用第二个值,如果第二个值为null,使用第三个值,以此类推
    * For example, `coalesce(a, b, c)` will return a if a is not null,
    * or b if a is null and b is not null, or c if both a and b are null but c is not null.
    *
@@ -1665,7 +1665,7 @@ object functions {
    * Computes the first argument into a binary from a string using the provided character set
    * (one of 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16').
    * If either argument is null, the result will also be null.
-   * 如果两参数是空的,结果也将是空的
+   * 字符串编码格式参数'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16'
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1710,7 +1710,7 @@ object functions {
   /**
    * Locate the position of the first occurrence of substr column in the given string.
    * Returns null if either of the arguments are null.
-   * 返回要截取的字符串在源字符串中的位置
+   * 返回要截取的字符串在源字符串中开始的位置
    * 
    * NOTE: The position is not zero based, but 1 based index, returns 0 if substr
    * could not be found in str.
@@ -1763,7 +1763,8 @@ object functions {
    * 返回一个字符串在另一个字符串中的位置,在位置pos之后
    * NOTE: The position is not zero based, but 1 based index. returns 0 if substr
    * could not be found in str.
-   *
+   * 例如:
+   * 	locate("aa", "aaads", 1) 返回值 2  
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1773,7 +1774,7 @@ object functions {
 
   /**
    * Left-pad the string column with
-   * 左垫字符串列
+   * 左垫字符串列,参数len字符串总长度,pad填充的字符串
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1836,6 +1837,7 @@ object functions {
   /**
    * Repeats a string column n times, and returns it as a new string column.
    * 返回一个字符串组成的字符串STR重复的次数
+   * 参数n重复次数
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1863,7 +1865,7 @@ object functions {
 
   /**
    * * Return the soundex code for the specified expression.
-   * 返回字符串参数的语音表示形式
+   * 以评估两个字符串的相似性
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1872,7 +1874,8 @@ object functions {
   /**
    * Splits str around pattern (pattern is a regular expression).
    * NOTE: pattern is a string represent the regular expression.
-   * 就是将一字符串以特定的字符分割成数组
+   * 字符串以特定的字符分割成数组,支持正则表达式
+   * split("aa2bb3cc", "[1-9]+") Seq("aa", "bb", "cc")
    * @group string_funcs
    * @since 1.5.0
    */
@@ -1895,8 +1898,10 @@ object functions {
    * Returns the substring from string str before count occurrences of the delimiter delim.
    * If count is positive, everything the left of the final delimiter (counting from left) is
    * returned. If count is negative, every to the right of the final delimiter (counting from the
-   * right) is returned. substring_index performs a case-sensitive match when searching for delim.
-   * 取子串函数,返回第一个参数中从第二个参数指定的位置开始、第三个参数指定的长度的子字符串
+   * right) is returned. substring_index performs a case-sensitive match when searching for delim. 
+   * 截取子字符串索引函数,2匹配索引截取的位置
+   * substring_index("www.apache.org", ".", 2)
+   * www.apache
    * @group string_funcs
    */
   def substring_index(str: Column, delim: String, count: Int): Column =
@@ -1907,7 +1912,9 @@ object functions {
    * The characters in replaceString is corresponding to the characters in matchingString.
    * The translate will happen when any character in the string matching with the character
    * in the matchingString.
-   * 返回将出现在from中的每个字符替换为to中的相应字符以后的字符串
+   * 返回将出现在matchingString中的每个字符替换为replaceString中的相应字符以后的字符串
+   * 例如:translate("translate", "rnlt", "123")
+   *      Row("1a2s3ae")
    * @group string_funcs
    * @since 1.5.0
    */
