@@ -1,6 +1,7 @@
 package org.apache.spark.sql.execution;
 /**
  * A command for users to list all of the registered functions.
+ * &#x547d;&#x4ee4;&#x4e3a;&#x7528;&#x6237;&#x5217;&#x51fa;&#x6240;&#x6709;&#x7684;&#x6ce8;&#x518c;&#x51fd;&#x6570;
  * The syntax of using this command in SQL is:
  * <pre><code>
  *    SHOW FUNCTIONS

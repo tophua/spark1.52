@@ -71,6 +71,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Extracts a value or values from a complex type.
+   * 从一个复杂类型中提取一个值或者多个值
    * The following types of extraction are supported:
    * - Given an Array, an integer ordinal can be used to retrieve a single value.
    * - Given a Map, a key of the correct type can be used to retrieve an individual value.
@@ -85,6 +86,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Unary minus, i.e. negate the expression.
+   * 一元减号
    * {{{
    *   // Scala: select the amount column and negates all values.
    *   df.select( -df("amount") )
@@ -101,6 +103,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Inversion of boolean expression, i.e. NOT.
+   * 布尔表达式的非值
    * {{{
    *   // Scala: select rows that are not active (isActive === false)
    *   df.filter( !df("isActive") )
@@ -117,6 +120,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Equality test.
+   * 相等测试
    * {{{
    *   // Scala:
    *   df.filter( df("colA") === df("colB") )
@@ -191,6 +195,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Greater than.
+   * 大于
    * {{{
    *   // Scala: The following selects people older than 21.
    *   people.select( people("age") > 21 )
@@ -223,6 +228,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Less than.
+   * 小于
    * {{{
    *   // Scala: The following selects people younger than 21.
    *   people.select( people("age") < 21 )
@@ -253,6 +259,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Less than or equal to.
+   * 小于等于
    * {{{
    *   // Scala: The following selects people age 21 or younger than 21.
    *   people.select( people("age") <= 21 )
@@ -268,6 +275,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Less than or equal to.
+   * 小于等于
    * {{{
    *   // Scala: The following selects people age 21 or younger than 21.
    *   people.select( people("age") <= 21 )
@@ -283,6 +291,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Greater than or equal to an expression.
+   * 大于等于
    * {{{
    *   // Scala: The following selects people age 21 or older than 21.
    *   people.select( people("age") >= 21 )
@@ -298,6 +307,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Greater than or equal to an expression.
+   * 大于等于
    * {{{
    *   // Scala: The following selects people age 21 or older than 21.
    *   people.select( people("age") >= 21 )
@@ -313,7 +323,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Equality test that is safe for null values.
-   *
+   * 对空值的安全性的相等性测试
    * @group expr_ops
    * @since 1.3.0
    */
@@ -321,7 +331,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Equality test that is safe for null values.
-   *
+   * 对空值的安全性的相等性测试
    * @group java_expr_ops
    * @since 1.3.0
    */
@@ -330,7 +340,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
-   *
+   * 评估一个条件列表,并返回多个可能结果表达式的一个,如果没有其他定义，则返回无法匹配的条件
    * {{{
    *   // Example: encoding gender string column into integer.
    *
@@ -359,7 +369,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
-   *
+   * 评估一个条件列表,并返回多个可能结果表达式的一个,如果没有其他定义，则返回无法匹配的条件
    * {{{
    *   // Example: encoding gender string column into integer.
    *
@@ -392,7 +402,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * True if the current column is between the lower bound and upper bound, inclusive.
-   *
+   * 包含当前列在下限和上限之间
    * @group java_expr_ops
    * @since 1.4.0
    */
@@ -402,7 +412,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * True if the current expression is NaN.
-   *
+   * 如果true当前表达式为NaN
    * @group expr_ops
    * @since 1.5.0
    */
@@ -410,7 +420,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * True if the current expression is null.
-   *
+   * 如果True当前表达式为null
    * @group expr_ops
    * @since 1.3.0
    */
@@ -418,7 +428,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * True if the current expression is NOT null.
-   *
+   * 如果True当前表达式为NOT null
    * @group expr_ops
    * @since 1.3.0
    */
@@ -426,6 +436,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Boolean OR.
+   * 布尔或
    * {{{
    *   // Scala: The following selects people that are in school or employed.
    *   people.filter( people("inSchool") || people("isEmployed") )
@@ -441,6 +452,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Boolean OR.
+   * 布尔或
    * {{{
    *   // Scala: The following selects people that are in school or employed.
    *   people.filter( people("inSchool") || people("isEmployed") )
@@ -456,6 +468,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Boolean AND.
+   * 布尔与
    * {{{
    *   // Scala: The following selects people that are in school and employed at the same time.
    *   people.select( people("inSchool") && people("isEmployed") )
@@ -471,6 +484,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Boolean AND.
+   * 布尔与
    * {{{
    *   // Scala: The following selects people that are in school and employed at the same time.
    *   people.select( people("inSchool") && people("isEmployed") )
@@ -486,6 +500,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Sum of this expression and another expression.
+   * 此表达式和另一个表达式求和相加
    * {{{
    *   // Scala: The following selects the sum of a person's height and weight.
    *   people.select( people("height") + people("weight") )
@@ -501,6 +516,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Sum of this expression and another expression.
+   * 此表达式和另一个表达式求和相加
    * {{{
    *   // Scala: The following selects the sum of a person's height and weight.
    *   people.select( people("height") + people("weight") )
@@ -516,6 +532,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Subtraction. Subtract the other expression from this expression.
+   * 此表达式和另一个表达式相减
    * {{{
    *   // Scala: The following selects the difference between people's height and their weight.
    *   people.select( people("height") - people("weight") )
@@ -531,6 +548,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Subtraction. Subtract the other expression from this expression.
+   * 此表达式和另一个表达式相减
    * {{{
    *   // Scala: The following selects the difference between people's height and their weight.
    *   people.select( people("height") - people("weight") )
@@ -546,6 +564,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Multiplication of this expression and another expression.
+   * 此表达式和另一个表达式相乘
    * {{{
    *   // Scala: The following multiplies a person's height by their weight.
    *   people.select( people("height") * people("weight") )
@@ -561,6 +580,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Multiplication of this expression and another expression.
+   * 此表达式和另一个表达式相乘
    * {{{
    *   // Scala: The following multiplies a person's height by their weight.
    *   people.select( people("height") * people("weight") )
@@ -575,7 +595,8 @@ class Column(protected[sql] val expr: Expression) extends Logging {
   def multiply(other: Any): Column = this * other
 
   /**
-   * Division this expression by another expression.
+   * Division this expression by another expression.\
+   * 本表达式和另一个表达式相除
    * {{{
    *   // Scala: The following divides a person's height by their weight.
    *   people.select( people("height") / people("weight") )
@@ -591,6 +612,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Division this expression by another expression.
+   * 本表达式和另一个表达式相除
    * {{{
    *   // Scala: The following divides a person's height by their weight.
    *   people.select( people("height") / people("weight") )
@@ -606,7 +628,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Modulo (a.k.a. remainder) expression.
-   *
+   * 取余运算
    * @group expr_ops
    * @since 1.3.0
    */
@@ -614,7 +636,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Modulo (a.k.a. remainder) expression.
-   *
+   * 取余运算
    * @group java_expr_ops
    * @since 1.3.0
    */
@@ -634,7 +656,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
   /**
    * A boolean expression that is evaluated to true if the value of this expression is contained
    * by the evaluated values of the arguments.
-   *
+   * 评价为真的布尔表达式,如果这个表达式的值包含在参数的评价值
    * @group expr_ops
    * @since 1.5.0
    */
@@ -651,7 +673,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * SQL RLIKE expression (LIKE with Regex).
-   *
+   * SQL Rilke正则表达式
    * @group expr_ops
    * @since 1.3.0
    */
@@ -659,6 +681,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * An expression that gets an item at position `ordinal` out of an array,
+   * 获取一个在数组位置上的一个项目的表达式
    * or gets a value by key `key` in a [[MapType]].
    *
    * @group expr_ops
@@ -676,6 +699,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * An expression that returns a substring.
+   * 返回一个字符串表达式
    * @param startPos expression for the starting position.
    * @param len expression for the length of the substring.
    *
@@ -686,6 +710,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * An expression that returns a substring.
+   * 返回一个字符串表达式
    * @param startPos starting position.
    * @param len length of the substring.
    *
@@ -696,7 +721,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Contains the other element.
-   *
+   * 包含其他元素
    * @group expr_ops
    * @since 1.3.0
    */
@@ -704,7 +729,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * String starts with.
-   *
+   * 字符串的开始
    * @group expr_ops
    * @since 1.3.0
    */
@@ -712,7 +737,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * String starts with another string literal.
-   *
+   * 在另一个字符串的字符串的开始
    * @group expr_ops
    * @since 1.3.0
    */
@@ -720,7 +745,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * String ends with.
-   *
+   *  在另一个字符串的字符串的结束
    * @group expr_ops
    * @since 1.3.0
    */
@@ -736,6 +761,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Gives the column an alias. Same as `as`.
+   * 给列命名别名
    * {{{
    *   // Renames colA to colB in select output.
    *   df.select($"colA".alias("colB"))
@@ -748,6 +774,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Gives the column an alias.
+   * 给列命名别名
    * {{{
    *   // Renames colA to colB in select output.
    *   df.select($"colA".as("colB"))
@@ -766,8 +793,10 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * (Scala-specific) Assigns the given aliases to the results of a table generating function.
+   * 指定给定的别名表的生成函数的结果
    * {{{
    *   // Renames colA to colB in select output.
+   *   //选择输出重命名colA 到 colB
    *   df.select(explode($"myMap").as("key" :: "value" :: Nil))
    * }}}
    *
@@ -790,6 +819,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Gives the column an alias.
+   * 给列一个别名
    * {{{
    *   // Renames colA to colB in select output.
    *   df.select($"colA".as('colB))
@@ -808,6 +838,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Gives the column an alias with metadata.
+   * 给列一个元数据的别名
    * {{{
    *   val metadata: Metadata = ...
    *   df.select($"colA".as("colB", metadata))
@@ -822,6 +853,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Casts the column to a different data type.
+   * 将列转换为不同的数据类型
    * {{{
    *   // Casts colA to IntegerType.
    *   import org.apache.spark.sql.types.IntegerType
@@ -844,8 +876,10 @@ class Column(protected[sql] val expr: Expression) extends Logging {
    * Casts the column to a different data type, using the canonical string representation
    * of the type. The supported types are: `string`, `boolean`, `byte`, `short`, `int`, `long`,
    * `float`, `double`, `decimal`, `date`, `timestamp`.
+   * 将列转换为不同的数据类型,使用类型的规范字符串表示形式
    * {{{
    *   // Casts colA to integer.
+   *   //强制colA转换int类型
    *   df.select(df("colA").cast("int"))
    * }}}
    *
@@ -856,6 +890,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Returns an ordering used in sorting.
+   * 返回排序中降序
    * {{{
    *   // Scala: sort a DataFrame by age column in descending order.
    *   df.sort(df("age").desc)
@@ -871,6 +906,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Returns an ordering used in sorting.
+   * 返回排序中升序
    * {{{
    *   // Scala: sort a DataFrame by age column in ascending order.
    *   df.sort(df("age").asc)
@@ -886,7 +922,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Prints the expression to the console for debugging purpose.
-   *
+   * 将表达式打印到控制台以进行调试的目的
    * @group df_ops
    * @since 1.3.0
    */
@@ -902,6 +938,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Compute bitwise OR of this expression with another expression.
+   * 计算这个表达式与另一位或表达
    * {{{
    *   df.select($"colA".bitwiseOR($"colB"))
    * }}}

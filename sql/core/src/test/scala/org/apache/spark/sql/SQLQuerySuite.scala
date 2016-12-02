@@ -115,21 +115,50 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SPARK-6743: no columns from cache") {//没有缓存的列
     Seq(
-      (83, 0, 38),
-      (26, 0, 79),
-      (43, 81, 24)
+      (83, 0, 38),//第一行数据
+      (26, 0, 79),//第二行数据
+      (43, 81, 24)//第三行数据
     ).toDF("a", "b", "c").registerTempTable("cachedData")
-   //缓存列 
+ 
+   //缓存列     
     sqlContext.cacheTable("cachedData")
-    sql("SELECT * FROM cachedData")
+      
+    /**
+     * +---+---+---+
+       |  a|  b|  c|
+       +---+---+---+
+       | 83|  0| 38|
+       | 26|  0| 79|
+       | 43| 81| 24|
+       +---+---+---+
+     */
+     sql("SELECT * FROM cachedData").show()
+   
+     /**
+      * +---+
+      *  |  b|
+      *  +---+
+      *  | 81|
+      *  |  0|
+      *  +---+
+      */
     checkAnswer(//分组b列,
-      sql("SELECT t1.b FROM cachedData, cachedData t1 GROUP BY t1.b"),
+      sql("SELECT t1.b FROM  cachedData t1 GROUP BY t1.b"),
       Row(0) :: Row(81) :: Nil)
   }
 
   test("self join with aliases") {//自连接列的别名    
     Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str").registerTempTable("df")
-
+    //sql("SELECT * from df").show()
+    /**
+     *+---+---+
+      |int|str|
+      +---+---+
+      |  1|  1|
+      |  2|  2|
+      |  3|  3|
+      +---+---+
+     */
     checkAnswer(
       sql(
         """
@@ -141,6 +170,36 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("support table.star") {//支持表星号
+    /**
+     *+---+-----+
+      |key|value|
+      +---+-----+
+      |  1|    1|
+      |  2|    2|
+      |  3|    3|
+      |  4|    4|
+      |  5|    5|
+      |  6|    6|
+      |  7|    7|
+      |  8|    8|
+      |  9|    9|
+      | 10|   10|
+      +---+-----+
+     */
+    sql("select * from testData").show()
+    /**
+     *+---+---+
+      |  a|  b|
+      +---+---+
+      |  1|  1|
+      |  1|  2|
+      |  2|  1|
+      |  2|  2|
+      |  3|  1|
+      |  3|  2|
+      +---+---+
+     */
+    sql("select * from testData2").show()
     checkAnswer(
       sql(
         """
@@ -157,7 +216,21 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         .groupBy("str")//df.agg() 求聚合用的相关函数
         .agg($"str", count("str").as("strCount"))//DataFrame中的内置函数操作的结果是返回一个Column对象
         .registerTempTable("df")
-
+        
+        
+         Seq(1, 2, 3)
+        .map(i => (i, i.toString))
+        .toDF("int", "str").registerTempTable("df1")
+        /**
+         *+---+---+--------+
+          |str|str|strCount|
+          +---+---+--------+
+          |  2|  2|       1|
+          |  3|  3|       1|
+          |  1|  1|       1|
+          +---+---+--------+
+         */
+    sql("select a.* from df1 a").show()
     checkAnswer(
       sql(
         """
@@ -171,6 +244,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   test("SPARK-8668 expr function") {//表达式函数
     checkAnswer(Seq((1, "Bobby G."))
       .toDF("id", "name")//使用函数表达式
+      //length返回字符串长度,abs求绝对值
       .select(expr("length(name)"), expr("abs(id)")), Row(8, 1))
 
     checkAnswer(Seq((1, "building burrito tunnels"), (1, "major projects"))
@@ -182,6 +256,8 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SQL Dialect Switching to a new SQL parser") {//SQL方言切换到一个新的SQL解析器
     val newContext = new SQLContext(sqlContext.sparkContext)
+    //getCanonicalName返回更容易理解的类名org.apache.spark.sql.MyDialect
+    //println(classOf[MyDialect].getCanonicalName())
     newContext.setConf("spark.sql.dialect", classOf[MyDialect].getCanonicalName())
     assert(newContext.getSQLDialect().getClass === classOf[MyDialect])
     assert(newContext.sql("SELECT 1").collect() === Array(Row(1)))
@@ -200,6 +276,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SPARK-4625 support SORT BY in SimpleSQLParser & DSL") {//通过简单的SQL解析器支持排序
     checkAnswer(
+      //TestData2(a: Int, b: Int)
       sql("SELECT a FROM testData2 SORT BY a"),
       Seq(1, 1, 2, 2, 3, 3).map(Row(_))
     )
@@ -212,7 +289,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     // we except the id is materialized once
     //我们除了ID被物化了一次
     val idUDF = org.apache.spark.sql.functions.udf(() => UUID.randomUUID().toString)
-
+    //注意自定义方法
     val dfWithId = df.withColumn("id", idUDF())
     // Make a new DataFrame (actually the same reference to the old one)
     //标记一个新DataFrame,(实际上是相同的旧参考)
@@ -234,10 +311,29 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("grouping on nested fields") {//嵌套字段上的分组
+    //读取Json
     sqlContext.read.json(sqlContext.sparkContext.parallelize(
       """{"nested": {"attribute": 1}, "value": 2}""" :: Nil))
      .registerTempTable("rows")
-
+     /**
+      * +------+-----+
+        |nested|value|
+        +------+-----+
+        |   [1]|    2|
+        +------+-----+
+      */
+     //stripMargin默认是"|"作为出来连接符,在多行换行的行头前面加一个"|"符号即可
+     /**
+      * +---------+---+
+        |attribute|cnt|
+        +---------+---+
+        |        1|  1|
+        +---------+---+
+      */
+     sql( """
+          | select nested.attribute, count(*) as cnt
+          |  from rows
+          |  group by nested.attribute""".stripMargin).show()
     checkAnswer(
         //分组嵌套
       sql(
@@ -254,17 +350,17 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("SPARK-6201 IN type conversion") {//类型转换
     sqlContext.read.json(
-        //json类型转换
+        //json类型转换,共一列a,三行数据
       sqlContext.sparkContext.parallelize(
         Seq("{\"a\": \"1\"}}", "{\"a\": \"2\"}}", "{\"a\": \"3\"}}")))
       .registerTempTable("d")
-
+      
     checkAnswer(
       sql("select * from d where d.a in (1,2)"),
       Seq(Row("1"), Row("2")))
   }
 
-  test("SPARK-8828 sum should return null if all input values are null") {//如果所有的输入值为空，则应返回零
+  test("SPARK-8828 sum should return null if all input values are null") {//如果所有的输入值为空，则应返回null
     withSQLConf(SQLConf.USE_SQL_AGGREGATE2.key -> "true") {
       withSQLConf(SQLConf.CODEGEN_ENABLED.key -> "true") {
         checkAnswer(
@@ -400,7 +496,9 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         "SELECT  sum('a'), avg('a'), count(null) FROM testData",
         Row(null, null, 0) :: Nil)
     } finally {
+      //删除临时表testData3x
       sqlContext.dropTempTable("testData3x")
+      //恢复配置设置
       sqlContext.setConf(SQLConf.CODEGEN_ENABLED, originalValue)
     }
   }
@@ -410,7 +508,8 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
         //依次参考各参数表达式，遇到非null值即停止并返回该值
       sql("""SELECT COALESCE(1, 2)"""),
       Row(1))
-    checkAnswer(//此表达式的功能为返回第一个不为空的表达式,如果都为空则返回空值
+    checkAnswer(
+        //coalesce函数可以接受一系列的值,如果第一个为null,使用第二个值,如果第二个值为null,使用第三个值,以此类推
       sql("SELECT COALESCE(null, 1, 1.5)"),
       Row(BigDecimal(1)))
     checkAnswer(
@@ -419,6 +518,17 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("SPARK-3176 Added Parser of SQL LAST()") {//添加解析SQL LAST函数
+    /**
+     *+---+
+      |  n|
+      +---+
+      |  1|
+      |  2|
+      |  3|
+      |  4|
+      +---+
+     */
+    sql("SELECT n FROM lowerCaseData").show()
     checkAnswer(
        //返回指定的列中最后一个记录的值
       sql("SELECT LAST(n) FROM lowerCaseData"),
@@ -432,6 +542,21 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("SQRT") {//平方根函数
+    /**
+     *+------------------+---+
+      |              SQRT|key|
+      +------------------+---+
+      |               1.0|  1|
+      |1.4142135623730951|  2|
+      |1.7320508075688772|  3|
+      |               2.0|  4|
+      |  2.23606797749979|  5|
+      | 2.449489742783178|  6|
+      |2.6457513110645907|  7|
+      |2.8284271247461903|  8|
+      |               3.0|  9|
+     */
+    sql("SELECT SQRT(key) as SQRT ,key FROM testData").show()
     checkAnswer(      
       sql("SELECT SQRT(key) FROM testData"),
       (1 to 100).map(x => Row(math.sqrt(x.toDouble))).toSeq

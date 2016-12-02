@@ -91,7 +91,7 @@ private[sql] class SparkSQLParser(fallback: String => LogicalPlan) extends Abstr
     }
 
   // It can be the following patterns:
-  // SHOW FUNCTIONS; ÏÔÊ¾º¯Êý
+  // SHOW FUNCTIONS;æ˜¾ç¤ºå‡½æ•°
   // SHOW FUNCTIONS mydb.func1;
   // SHOW FUNCTIONS func1;
   // SHOW FUNCTIONS `mydb.a`.`func1.aa`;

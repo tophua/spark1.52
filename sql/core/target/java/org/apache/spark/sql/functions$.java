@@ -335,7 +335,7 @@ public  class functions$ {
   public  org.apache.spark.sql.Column first (java.lang.String columnName) { throw new RuntimeException(); }
   /**
    * Aggregate function: returns the last value in a group.
-   * &#x805a;&#x5408;&#x51fd;&#x6570;:&#x8fd4;&#x56de;&#x4e00;&#x7ec4;&#x4e2d;&#x7684;&#x6700;&#x540e;&#x4e00;&#x4e2a;&#x503c;&#x3002;
+   * &#x805a;&#x5408;&#x51fd;&#x6570;:&#x8fd4;&#x56de;&#x4e00;&#x5217;&#x4e2d;&#x7684;&#x6700;&#x540e;&#x4e00;&#x4e2a;&#x503c;
    * @group agg_funcs
    * @since 1.3.0
    * @param e (undocumented)

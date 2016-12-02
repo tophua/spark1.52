@@ -238,7 +238,7 @@ object functions {
 
   /**
    * Aggregate function: returns the last value in a group.
-   * 聚合函数:返回一组中的最后一个值。
+   * 聚合函数:返回一列中的最后一个值
    * @group agg_funcs
    * @since 1.3.0
    */
