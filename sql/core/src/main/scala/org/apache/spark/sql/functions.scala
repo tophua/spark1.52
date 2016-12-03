@@ -2000,7 +2000,7 @@ object functions {
 
   /**
    * Returns the number of days from `start` to `end`.
-   * 用于判断在两个日期之间存在的指定时间间隔的数目
+   * 用于判断在两个日期之间存在的指定时间间隔的数,不包括时间戳
    * @group datetime_funcs
    * @since 1.5.0
    */
@@ -2172,8 +2172,8 @@ object functions {
   /**
    * Returns date truncated to the unit specified by the format.
    * TRUNC函数用于对值进行截断
-   * @param format: 'year', 'yyyy', 'yy' for truncate by year,
-   *               or 'month', 'mon', 'mm' for truncate by month
+   * @param format: 'year', 'yyyy', 'yy' for truncate by year,年
+   *               or 'month', 'mon', 'mm' for truncate by month 月
    *
    * @group datetime_funcs
    * @since 1.5.0

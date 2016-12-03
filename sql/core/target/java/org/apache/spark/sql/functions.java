@@ -2218,7 +2218,7 @@ public  class functions {
   static public  org.apache.spark.sql.Column date_sub (org.apache.spark.sql.Column start, int days) { throw new RuntimeException(); }
   /**
    * Returns the number of days from <code>start</code> to <code>end</code>.
-   * &#x7528;&#x4e8e;&#x5224;&#x65ad;&#x5728;&#x4e24;&#x4e2a;&#x65e5;&#x671f;&#x4e4b;&#x95f4;&#x5b58;&#x5728;&#x7684;&#x6307;&#x5b9a;&#x65f6;&#x95f4;&#x95f4;&#x9694;&#x7684;&#x6570;&#x76ee;
+   * &#x7528;&#x4e8e;&#x5224;&#x65ad;&#x5728;&#x4e24;&#x4e2a;&#x65e5;&#x671f;&#x4e4b;&#x95f4;&#x5b58;&#x5728;&#x7684;&#x6307;&#x5b9a;&#x65f6;&#x95f4;&#x95f4;&#x9694;&#x7684;&#x6570;,&#x4e0d;&#x5305;&#x62ec;&#x65f6;&#x95f4;&#x6233;
    * @group datetime_funcs
    * @since 1.5.0
    * @param end (undocumented)
@@ -2404,8 +2404,8 @@ public  class functions {
   /**
    * Returns date truncated to the unit specified by the format.
    * TRUNC&#x51fd;&#x6570;&#x7528;&#x4e8e;&#x5bf9;&#x503c;&#x8fdb;&#x884c;&#x622a;&#x65ad;
-   * @param format: 'year', 'yyyy', 'yy' for truncate by year,
-   *               or 'month', 'mon', 'mm' for truncate by month
+   * @param format: 'year', 'yyyy', 'yy' for truncate by year,&#x5e74;
+   *               or 'month', 'mon', 'mm' for truncate by month &#x6708;
    * <p>
    * @group datetime_funcs
    * @since 1.5.0

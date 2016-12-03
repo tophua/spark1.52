@@ -1075,7 +1075,7 @@ public  class DataFrame implements scala.Serializable {
    * (Scala-specific) Returns a new {@link DataFrame} where a single column has been expanded to zero
    * or more rows by the provided function.  This is similar to a <code>LATERAL VIEW</code> in HiveQL. All
    * columns of the input row are implicitly joined with each value that is output by the function.
-   * <p>
+   *	&#x7b80;&#x5355;&#x7684;&#x628a;&#x5b57;&#x7b26;&#x4e32;&#x5206;&#x5272;&#x4e3a;&#x6570;&#x7ec4;,&#x540c;&#x65f6;&#x547d;&#x65b0;&#x547d;&#x540d;&#x5b57;&#x7684;&#x5b57;&#x6bb5;
    * <pre><code>
    *   df.explode("words", "word"){words: String =&gt; words.split(" ")}
    * </code></pre>

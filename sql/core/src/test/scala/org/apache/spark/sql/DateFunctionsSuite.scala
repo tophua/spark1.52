@@ -423,16 +423,18 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
     val df2 = Seq((1, "2015-07-23 00:11:22"), (2, "2015-07-24 11:22:33")).toDF("i", "t")
     checkAnswer(
       df1.select(last_day(col("d"))),
+      //返回指定日期对应月份的最后一天
       Seq(Row(Date.valueOf("2015-07-31")), Row(Date.valueOf("2015-07-31"))))
     checkAnswer(
       df2.select(last_day(col("t"))),
       Seq(Row(Date.valueOf("2015-07-31")), Row(Date.valueOf("2015-07-31"))))
   }
 
-  test("function next_day") {//返回输入日期开始
+  test("function next_day") {//指定时间的下一个星期几所在的日期
     val df1 = Seq(("mon", "2015-07-23"), ("tuesday", "2015-07-20")).toDF("dow", "d")
     val df2 = Seq(("th", "2015-07-23 00:11:22"), ("xx", "2015-07-24 11:22:33")).toDF("dow", "t")
     checkAnswer(
+       //指定时间的下一个星期几所在的日期
       df1.select(next_day(col("d"), "MONDAY")),
       Seq(Row(Date.valueOf("2015-07-27")), Row(Date.valueOf("2015-07-27"))))
     checkAnswer(
@@ -448,24 +450,37 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
     val s1 = "2015-07-22 10:00:00"
     val s2 = "2014-12-31"
     val df = Seq((d1, t1, s1), (d2, t2, s2)).toDF("d", "t", "s")
-
+    /**
+     *+----------+--------------------+-------------------+
+      |         d|                   t|                  s|
+      +----------+--------------------+-------------------+
+      |2015-07-22|2015-07-22 10:00:...|2015-07-22 10:00:00|
+      |2015-07-01|2014-12-31 23:59:...|         2014-12-31|
+      +----------+--------------------+-------------------+
+     */
+    df.show()
     checkAnswer(
+        //将Timestamp转换日期
       df.select(to_date(col("t"))),
       Seq(Row(Date.valueOf("2015-07-22")), Row(Date.valueOf("2014-12-31"))))
     checkAnswer(
+        //将Date转换日期
       df.select(to_date(col("d"))),
       Seq(Row(Date.valueOf("2015-07-22")), Row(Date.valueOf("2015-07-01"))))
     checkAnswer(
+       //将字符串转换日期
       df.select(to_date(col("s"))),
       Seq(Row(Date.valueOf("2015-07-22")), Row(Date.valueOf("2014-12-31"))))
 
     checkAnswer(
+      //使用函数方式
       df.selectExpr("to_date(t)"),
       Seq(Row(Date.valueOf("2015-07-22")), Row(Date.valueOf("2014-12-31"))))
     checkAnswer(
       df.selectExpr("to_date(d)"),
       Seq(Row(Date.valueOf("2015-07-22")), Row(Date.valueOf("2015-07-01"))))
     checkAnswer(
+       //将字符串转换日期
       df.selectExpr("to_date(s)"),
       Seq(Row(Date.valueOf("2015-07-22")), Row(Date.valueOf("2014-12-31"))))
   }
@@ -476,11 +491,14 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       (2, Timestamp.valueOf("2014-12-31 00:00:00"))).toDF("i", "t")
 
     checkAnswer(
+        //截取日期函数,YY代表年,年的开始1月1日
+        //'year', 'yyyy', 'yy' for truncate by year,
+        //  or 'month', 'mon', 'mm' for truncate by month
       df.select(trunc(col("t"), "YY")),
       Seq(Row(Date.valueOf("2015-01-01")), Row(Date.valueOf("2014-01-01"))))
 
     checkAnswer(
-      df.selectExpr("trunc(t, 'Month')"),
+      df.selectExpr("trunc(t, 'Month')"),//月的截取1号开始
       Seq(Row(Date.valueOf("2015-07-01")), Row(Date.valueOf("2014-12-01"))))
   }
 
@@ -547,6 +565,16 @@ class DateFunctionsSuite extends QueryTest with SharedSQLContext {
       (Date.valueOf("2015-07-25"), Timestamp.valueOf("2015-07-25 02:00:00"),
         "2015-07-24", "2015-07-24 04:00:00")
     ).toDF("a", "b", "c", "d")
+    /**
+     *+----------+--------------------+----------+-------------------+
+      |         a|                   b|         c|                  d|
+      +----------+--------------------+----------+-------------------+
+      |2015-07-24|2015-07-24 01:00:...|2015-07-23|2015-07-23 03:00:00|
+      |2015-07-25|2015-07-25 02:00:...|2015-07-24|2015-07-24 04:00:00|
+      +----------+--------------------+----------+-------------------+
+     */
+    df.show()
+    //表示两个指定日期间的时间间隔数,
     checkAnswer(df.select(datediff(col("a"), col("b"))), Seq(Row(0), Row(0)))
     checkAnswer(df.select(datediff(col("a"), col("c"))), Seq(Row(1), Row(1)))
     checkAnswer(df.select(datediff(col("d"), col("b"))), Seq(Row(-1), Row(-1)))

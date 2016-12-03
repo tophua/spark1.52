@@ -33,7 +33,7 @@ import org.apache.spark.sql.test.{ExamplePointUDT, ExamplePoint, SharedSQLContex
 class DataFrameSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("analysis error should be eagerly reported") {//应急切地报告分析误差
+  test("analysis error should be eagerly reported") {//分析错误应急切的报告
     // Eager analysis.
     withSQLConf(SQLConf.DATAFRAME_EAGER_ANALYSIS.key -> "true") {
       intercept[Exception] { testData.select('nonExistentName) }
@@ -55,16 +55,25 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("dataframe toString") {//转换化字符串
+  test("dataframe toString") {//dataframe转换字符串
     assert(testData.toString === "[key: int, value: string]")
+    //列名获取方式
     assert(testData("key").toString === "key")
     assert($"test".toString === "test")
   }
 
   test("rename nested groupby") {//重命名嵌套查询
     val df = Seq((1, (1, 1))).toDF()
-
+    /**
+     *+---+-----+
+      | _1|   _2|
+      +---+-----+
+      |  1|[1,1]|
+      +---+-----+
+     */
+    df.show()
     checkAnswer(
+        //第一列分组,合计第二列,第一个值
       df.groupBy("_1").agg(sum("_2._1")).toDF("key", "total"),
       Row(1, 1) :: Nil)
   }
@@ -86,32 +95,55 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   }
 
   test("access complex data") {//访问复杂的数据
+    /**
+     *+-----------+-----+---------+-----+
+      |          m|    s|        a|    b|
+      +-----------+-----+---------+-----+
+      |Map(1 -> 1)|[1,1]|[1, 1, 1]| true|
+      |Map(2 -> 2)|[2,2]|[2, 2, 2]|false|
+      +-----------+-----+---------+-----+
+     */
+    complexData.show()
+    //过虑a列,getItem(0)数组第一个值
     assert(complexData.filter(complexData("a").getItem(0) === 2).count() == 1)
+     //过虑m列,getItem(1)数组第二个值
     assert(complexData.filter(complexData("m").getItem("1") === 1).count() == 1)
+     //过虑s列,取字段Key的值,
     assert(complexData.filter(complexData("s").getField("key") === 1).count() == 1)
   }
 
   test("table scan") {//表扫描
+    //默认数据集testData,
     checkAnswer(
       testData,
       testData.collect().toSeq)
   }
 
-  test("empty data frame") {//空数据帧
+  test("empty data frame") {//空数据集
     assert(sqlContext.emptyDataFrame.columns.toSeq === Seq.empty[String])
     assert(sqlContext.emptyDataFrame.count() === 0)
   }
 
-  test("head and take") {//头和带
+  test("head and take") {//头和take取值相等
     assert(testData.take(2) === testData.collect().take(2))
     assert(testData.head(2) === testData.collect().take(2))
     assert(testData.head(2).head.schema === testData.schema)
   }
 
   test("simple explode") {//简单的把字符串分割为数组
+    //元组形式
     val df = Seq(Tuple1("a b c"), Tuple1("d e")).toDF("words")
-
+    /**
+     *+-----+
+      |words|
+      +-----+
+      |a b c|
+      |  d e|
+      +-----+
+     */
+    df.show()
     checkAnswer(
+       //简单的把字符串分割为数组
       df.explode("words", "word") { word: String => word.split(" ").toSeq }.select('word),
       Row("a") :: Row("b") :: Row("c") :: Row("d") ::Row("e") :: Nil
     )
@@ -121,18 +153,39 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     val df = Seq((1, "a b c"), (2, "a b"), (3, "a")).toDF("number", "letters")
     val df2 =
       df.explode('letters) {
+        //使用case Row形式分隔,注意Tuple1元组形式
         case Row(letters: String) => letters.split(" ").map(Tuple1(_)).toSeq
       }
-
+   /**
+    * +------+-------+---+
+      |number|letters| _1|
+      +------+-------+---+
+      |     1|  a b c|  a|
+      |     1|  a b c|  b|
+      |     1|  a b c|  c|
+      |     2|    a b|  a|
+      |     2|    a b|  b|
+      |     3|      a|  a|
+      +------+-------+---+
+    */
+     df2.select('_1 as 'letter, 'number).groupBy('letter).agg(countDistinct('number)).show()
+  /** +------+----------------------+
+      |letter|COUNT(DISTINCT number)|
+      +------+----------------------+
+      |     a|                     3|
+      |     b|                     2|
+      |     c|                     1|
+      +------+----------------------+**/
     checkAnswer(
       df2
         .select('_1 as 'letter, 'number)
         .groupBy('letter)
+        //countDistinct去重统计
         .agg(countDistinct('number)),//df.agg() 求聚合用的相关函数
       Row("a", 3) :: Row("b", 2) :: Row("c", 1) :: Nil
     )
   }
-//explode函数把字符串分割为数组
+   //explode函数把字符串分割为数组
   test("SPARK-8930: explode should fail with a meaningful message if it takes a star") {
     val df = Seq(("1", "1,2"), ("2", "4"), ("3", "7,8,9")).toDF("prefix", "csv")
     val e = intercept[AnalysisException] {

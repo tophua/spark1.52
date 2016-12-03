@@ -1104,7 +1104,7 @@ class DataFrame private[sql](
    * (Scala-specific) Returns a new [[DataFrame]] where a single column has been expanded to zero
    * or more rows by the provided function.  This is similar to a `LATERAL VIEW` in HiveQL. All
    * columns of the input row are implicitly joined with each value that is output by the function.
-   *
+   *	简单的把字符串分割为数组,同时命新命名字的字段
    * {{{
    *   df.explode("words", "word"){words: String => words.split(" ")}
    * }}}
