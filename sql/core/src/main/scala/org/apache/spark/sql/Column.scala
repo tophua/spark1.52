@@ -699,7 +699,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * An expression that returns a substring.
-   * 返回一个字符串表达式
+   * substr从字符串中截取 start下标开始的指定数目的字符
    * @param startPos expression for the starting position.
    * @param len expression for the length of the substring.
    *
@@ -710,7 +710,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * An expression that returns a substring.
-   * 返回一个字符串表达式
+   * substr从字符串中截取 start下标开始的指定数目的字符
    * @param startPos starting position.
    * @param len length of the substring.
    *

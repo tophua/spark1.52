@@ -30,10 +30,10 @@ class RowSuite extends SparkFunSuite with SharedSQLContext {
   test("create row") {//创建行
     //创建可变的行
     val expected = new GenericMutableRow(4)
-    expected.setInt(0, 2147483647)
+    expected.setInt(0, 2147483647)//设置第一列的数据
     expected.update(1, UTF8String.fromString("this is a string"))
     expected.setBoolean(2, false)
-    expected.setNullAt(3)
+    expected.setNullAt(3)//设置第四列数据为null
 
     val actual1 = Row(2147483647, "this is a string", false, null)
     //字段数相等
@@ -61,14 +61,17 @@ class RowSuite extends SparkFunSuite with SharedSQLContext {
     val row = Seq((1, Seq(1), Map(1 -> 1), BigDecimal(1))).toDF().first()
     val serializer = new SparkSqlSerializer(ctx.sparkContext.getConf)
     val instance = serializer.newInstance()
-    val ser = instance.serialize(row)
+    val ser = instance.serialize(row)//sql序列化
+    //sql反序列化
     val de = instance.deserialize(ser).asInstanceOf[Row]
     assert(de === row)
   }
 
-  test("get values by field name on Row created via .toDF") {//
+  test("get values by field name on Row created via .toDF") {//使用toDF创建行,根据字段获得值
     val row = Seq((1, Seq(1))).toDF("a", "b").first()
+    //根据行的字段获得值
     assert(row.getAs[Int]("a") === 1)
+    //getAs[]强制转换类型
     assert(row.getAs[Seq[Int]]("b") === Seq(1))
 
     intercept[IllegalArgumentException]{

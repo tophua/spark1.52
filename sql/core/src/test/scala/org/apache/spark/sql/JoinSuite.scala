@@ -116,7 +116,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
       ).foreach { case (query, joinClass) => assertJoin(query, joinClass) }
     }
   }
-
+  //广播的哈希连接操作的选择
   test("broadcasted hash join operator selection") {
     ctx.cacheManager.clearCache()
     sql("CACHE TABLE testData")

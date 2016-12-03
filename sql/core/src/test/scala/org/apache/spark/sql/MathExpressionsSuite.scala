@@ -152,7 +152,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("toRadians") {//double类型的度数参数转换成弧度
+  test("toRadians") {//double类型的角度参数转换成弧度
     testOneToOneMathFunction(toRadians, math.toRadians)
     checkAnswer(
       sql("SELECT radians(0), radians(1), radians(1.5)"),
@@ -183,14 +183,29 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       df.selectExpr("""conv("9223372036854775807", 36, -16)"""), Row("-1")) // for overflow
   }
 
-  test("floor") {//其功能是“向下取整”，或者说“向下舍入”
+  test("floor") {//其功能是"向下取整",或者说"向下舍入"
     testOneToOneMathFunction(floor, math.floor)
   }
 
   test("factorial") {//阶乘函数
     val df = (0 to 5).map(i => (i, i)).toDF("a", "b")
+    /**
+     *+---+---+
+      |  a|  b|
+      +---+---+
+      |  0|  0|
+      |  1|  1|
+      |  2|  2|
+      |  3|  3|
+      |  4|  4|
+      |  5|  5|
+      +---+---+
+     */
+    df.select('a, 'b).show()
+     df.select(factorial('a)).show()
     checkAnswer(
-      df.select(factorial('a)),
+      df.select(factorial('a)),//注意引用列名使用的单引号
+      //注意0的阶乘是1
       Seq(Row(1), Row(1), Row(2), Row(6), Row(24), Row(120))
     )
     checkAnswer(
@@ -204,8 +219,18 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
   }
 
   test("round") {//作用按指定的位数对数值进行四舍五入
+    //序列转使用元组Tuple1转换RDD
     val df = Seq(5, 55, 555).map(Tuple1(_)).toDF("a")
+ /**+---+
+    |  a|
+    +---+
+    |  5|
+    | 55|
+    |555|
+    +---+*/
+    df.select('a).show()
     checkAnswer(
+      //ROUND(21.5, -1)将 21.5左侧一位四舍五入即20
       df.select(round('a), round('a, -1), round('a, -2)),
       Seq(Row(5, 10, 0), Row(55, 60, 100), Row(555, 560, 600))
     )
@@ -258,7 +283,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     checkAnswer(data.selectExpr("hex(cast(d as binary))"), Seq(Row("68656C6C6F")))
   }
 
-  test("unhex") {//
+  test("unhex") {//解码十六进制数
     val data = Seq(("1C", "737472696E67")).toDF("a", "b")
     checkAnswer(data.select(unhex('a)), Row(Array[Byte](28.toByte)))
     checkAnswer(data.select(unhex('b)), Row("string".getBytes))

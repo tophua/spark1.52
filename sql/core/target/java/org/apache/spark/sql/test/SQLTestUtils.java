@@ -78,6 +78,7 @@ package org.apache.spark.sql.test;
   /**
    * Drops temporary table <code>tableName</code> after calling <code>f</code>.
    * &#x8c03;&#x7528;&#x540e;'f',&#x5220;&#x9664;&#x4e34;&#x65f6;&#x8868;'tableName'
+   * &#x6ce8;&#x610f;:f&#x662f;&#x5b9a;&#x4e49;&#x7684;&#x65b9;&#x6cd5;
    * @param tableNames (undocumented)
    * @param f (undocumented)
    */

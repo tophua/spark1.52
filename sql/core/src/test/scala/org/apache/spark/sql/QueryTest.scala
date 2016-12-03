@@ -136,7 +136,7 @@ object QueryTest {
       //
       if (!isSorted) converted.sortBy(_.toString()) else converted
     }
-    //答案s
+    //答案
     val sparkAnswer = try df.collect().toSeq catch {
       //如果异常返回
       case e: Exception =>

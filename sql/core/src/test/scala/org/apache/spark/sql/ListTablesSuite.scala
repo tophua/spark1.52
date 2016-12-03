@@ -36,7 +36,17 @@ class ListTablesSuite extends QueryTest with BeforeAndAfter with SharedSQLContex
   }
 
   test("get all tables") {//获得所有的表
+      
+      /**
+       *+--------------------+-----------+
+        |           tableName|isTemporary|
+        +--------------------+-----------+
+        |ListTablesSuiteTable|       true|
+        +--------------------+-----------+
+       */
+    ctx.tables().show()
     checkAnswer(
+       //获得所有的表,过虑掉tableName==ListTablesSuiteTable
       ctx.tables().filter("tableName = 'ListTablesSuiteTable'"),
       Row("ListTablesSuiteTable", true))
 
@@ -49,11 +59,20 @@ class ListTablesSuite extends QueryTest with BeforeAndAfter with SharedSQLContex
   }
   //使用数据库名称获取所有表对返回的表名不会有任何影响
   test("getting all Tables with a database name has no impact on returned table names") {
+  /** +--------------------+-----------+
+      |           tableName|isTemporary|
+      +--------------------+-----------+
+      |ListTablesSuiteTable|       true|
+      +--------------------+-----------+**/
+    ctx.tables("DB").show()
+    
     checkAnswer(
+      //使用数据库,查找表名
       ctx.tables("DB").filter("tableName = 'ListTablesSuiteTable'"),
       Row("ListTablesSuiteTable", true))
 
     checkAnswer(
+      //使用命令查询表名
       sql("show TABLES in DB").filter("tableName = 'ListTablesSuiteTable'"),
       Row("ListTablesSuiteTable", true))
 
@@ -61,7 +80,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfter with SharedSQLContex
     assert(ctx.tables().filter("tableName = 'ListTablesSuiteTable'").count() === 0)
   }
 
-  test("query the returned DataFrame of tables") {//查询返回的数据框的表
+  test("query the returned DataFrame of tables") {//查询返回的数据集的表名
   //StructType代表一张表,StructField代表一个字段
     val expectedSchema = StructType(
       StructField("tableName", StringType, false) ::

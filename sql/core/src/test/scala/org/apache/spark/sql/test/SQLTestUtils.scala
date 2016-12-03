@@ -160,6 +160,7 @@ private[sql] trait SQLTestUtils
   /**
    * Drops temporary table `tableName` after calling `f`.
    * 调用后'f',删除临时表'tableName'
+   * 注意:f是定义的方法
    */
   protected def withTempTable(tableNames: String*)(f: => Unit): Unit = {
     try f finally tableNames.foreach(_sqlContext.dropTempTable)

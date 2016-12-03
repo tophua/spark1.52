@@ -423,7 +423,7 @@ public  class Column implements org.apache.spark.Logging {
   public  org.apache.spark.sql.Column getField (java.lang.String fieldName) { throw new RuntimeException(); }
   /**
    * An expression that returns a substring.
-   * &#x8fd4;&#x56de;&#x4e00;&#x4e2a;&#x5b57;&#x7b26;&#x4e32;&#x8868;&#x8fbe;&#x5f0f;
+   * substr&#x4ece;&#x5b57;&#x7b26;&#x4e32;&#x4e2d;&#x622a;&#x53d6; start&#x4e0b;&#x6807;&#x5f00;&#x59cb;&#x7684;&#x6307;&#x5b9a;&#x6570;&#x76ee;&#x7684;&#x5b57;&#x7b26;
    * @param startPos expression for the starting position.
    * @param len expression for the length of the substring.
    * <p>
@@ -434,7 +434,7 @@ public  class Column implements org.apache.spark.Logging {
   public  org.apache.spark.sql.Column substr (org.apache.spark.sql.Column startPos, org.apache.spark.sql.Column len) { throw new RuntimeException(); }
   /**
    * An expression that returns a substring.
-   * &#x8fd4;&#x56de;&#x4e00;&#x4e2a;&#x5b57;&#x7b26;&#x4e32;&#x8868;&#x8fbe;&#x5f0f;
+   * substr&#x4ece;&#x5b57;&#x7b26;&#x4e32;&#x4e2d;&#x622a;&#x53d6; start&#x4e0b;&#x6807;&#x5f00;&#x59cb;&#x7684;&#x6307;&#x5b9a;&#x6570;&#x76ee;&#x7684;&#x5b57;&#x7b26;
    * @param startPos starting position.
    * @param len length of the substring.
    * <p>

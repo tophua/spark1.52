@@ -78,6 +78,7 @@ class ScalaReflectionRelationSuite extends SparkFunSuite with SharedSQLContext {
   test("query case class RDD") {//查询实例类RDD
     val data = ReflectData("a", 1, 1L, 1.toFloat, 1.toDouble, 1.toShort, 1.toByte, true,
       new java.math.BigDecimal(1), Date.valueOf("1970-01-01"), new Timestamp(12345), Seq(1, 2, 3))
+      //case class 创建RDD方式
     Seq(data).toDF().registerTempTable("reflectData")
 
     assert(sql("SELECT * FROM reflectData").collect().head ===
