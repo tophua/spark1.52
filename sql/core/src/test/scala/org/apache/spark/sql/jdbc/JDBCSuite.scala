@@ -33,8 +33,10 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
   import testImplicits._
 
   val url = "jdbc:h2:mem:TEST0"
+  //val url = "jdbc:h2:tcp://localhost/~/TEST0"
   ///  val url = "jdbc:testUserql://192.168.10.198:3306/testUser"
-  val urlWithUserAndPass = "jdbc:h2:mem:TEST0;user=testUser;password=testPass"
+   val urlWithUserAndPass = "jdbc:h2:mem:TEST0;user=testUser;password=testPass"
+  //val urlWithUserAndPass = "jdbc:h2:tcp://localhost/~/TEST0;user=testUser;password=testPass"
   // val urlWithUserAndPass = "jdbc:testUserql://192.168.10.198:3306/testUser?user=testUser&password=testPass"
   var conn: java.sql.Connection = null
 
