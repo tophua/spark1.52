@@ -32,60 +32,60 @@ import org.apache.spark.util.Utils
 class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext {
   import testImplicits._
 
- // val url = "jdbc:h2:mem:testdb0"
-    val url = "jdbc:postgresql://192.168.10.198:3306/postgres"
- // val urlWithUserAndPass = "jdbc:h2:mem:testdb0;user=testUser;password=testPass"
-   val urlWithUserAndPass = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
+  val url = "jdbc:h2:mem:TEST0"
+  ///  val url = "jdbc:testUserql://192.168.10.198:3306/testUser"
+  val urlWithUserAndPass = "jdbc:h2:mem:TEST0;user=testUser;password=testPass"
+  // val urlWithUserAndPass = "jdbc:testUserql://192.168.10.198:3306/testUser?user=testUser&password=testPass"
   var conn: java.sql.Connection = null
 
   val testBytes = Array[Byte](99.toByte, 134.toByte, 135.toByte, 200.toByte, 205.toByte)
 
   val testH2Dialect = new JdbcDialect {
-    //override def canHandle(url: String) : Boolean = url.startsWith("jdbc:h2")
-    override def canHandle(url: String) : Boolean = url.startsWith("jdbc:postgresql")
+    override def canHandle(url: String) : Boolean = url.startsWith("jdbc:h2")
+   // override def canHandle(url: String) : Boolean = url.startsWith("jdbc:testUserql")
     override def getCatalystType(
         sqlType: Int, typeName: String, size: Int, md: MetadataBuilder): Option[DataType] =
       Some(StringType)
   }
 
   before {
-    //Utils.classForName("org.h2.Driver")
-     Utils.classForName("org.postgresql.Driver")
+    Utils.classForName("org.h2.Driver")
+     //Utils.classForName("org.testUserql.Driver")
     // Extra properties that will be specified for our database. We need these to test
     // usage of parameters from OPTIONS clause in queries.
     //将为我们的数据库指定额外的属性,我们需要这些来测试查询选项子句中的参数的用法
     val properties = new Properties()
-   // properties.setProperty("user", "testUser")
-  //  properties.setProperty("password", "testPass")
-   // properties.setProperty("rowId", "false")
-    properties.setProperty("user", "postgres")
-    properties.setProperty("password", "admin")
+    properties.setProperty("user", "testUser")
+    properties.setProperty("password", "testPass")
+    properties.setProperty("rowId", "false")
+    //properties.setProperty("user", "testUser")
+    //properties.setProperty("password", "testPass")
 
     conn = DriverManager.getConnection(url, properties)
     //级别删除
-     conn.prepareStatement("drop schema  if exists testdb CASCADE").executeUpdate()
-    conn.prepareStatement("create schema testdb").executeUpdate()
+      conn.prepareStatement("create schema test").executeUpdate()
     conn.prepareStatement(
-      "create table testdb.people (name TEXT NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
-    conn.prepareStatement("insert into testdb.people values ('fred', 1)").executeUpdate()
-    conn.prepareStatement("insert into testdb.people values ('mary', 2)").executeUpdate()
+      "create table test.people (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
+    conn.prepareStatement("insert into test.people values ('fred', 1)").executeUpdate()
+    conn.prepareStatement("insert into test.people values ('mary', 2)").executeUpdate()
     conn.prepareStatement(
-      "insert into testdb.people values ('joe ''foo'' \"bar\"', 3)").executeUpdate()
-//    conn.commit()
+      "insert into test.people values ('joe ''foo'' \"bar\"', 3)").executeUpdate()
+    conn.commit()
+ 
 
     sql(
-      //testdb.PEOPLE表名,对应的foobar临时表
+      //TEST.PEOPLE表名,对应的foobar临时表
       s"""
         |CREATE TEMPORARY TABLE foobar
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable 'testdb.PEOPLE', user 'postgres', password 'admin')
+        |OPTIONS (url '$url', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
      //fetchSize 2参数
     sql(
       s"""
         |CREATE TEMPORARY TABLE fetchtwo
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable 'testdb.PEOPLE', user 'postgres', password 'admin',
+        |OPTIONS (url '$url', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass',
         |         fetchSize '2')
       """.stripMargin.replaceAll("\n", " "))
 
@@ -93,28 +93,28 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       s"""
         |CREATE TEMPORARY TABLE parts
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable 'testdb.PEOPLE', user 'postgres', password 'admin',
-        |         partitionColumn 'theid', lowerBound '1', upperBound '4', numPartitions '3')
+        |OPTIONS (url '$url', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass',
+        |         partitionColumn 'THEID', lowerBound '1', upperBound '4', numPartitions '3')
       """.stripMargin.replaceAll("\n", " "))
 
-    conn.prepareStatement("create table testdb.inttypes (a INT, b BOOLEAN, c INT, "
+    conn.prepareStatement("create table test.inttypes (a INT, b BOOLEAN, c TINYINT, "
       + "d SMALLINT, e BIGINT)").executeUpdate()
-    conn.prepareStatement("insert into testdb.inttypes values (1, false, 3, 4, 1234567890123)"
+    conn.prepareStatement("insert into test.inttypes values (1, false, 3, 4, 1234567890123)"
         ).executeUpdate()
     //插入一条null数据
-    conn.prepareStatement("insert into testdb.inttypes values (null, null, null, null, null)"
+    conn.prepareStatement("insert into test.inttypes values (null, null, null, null, null)"
         ).executeUpdate()
-   // conn.commit()
+    conn.commit()
     sql(
       s"""
         |CREATE TEMPORARY TABLE inttypes
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable 'testdb.INTTYPES', user 'postgres', password 'admin')
+        |OPTIONS (url '$url', dbtable 'TEST.INTTYPES', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
 
-    conn.prepareStatement("create table testdb.strtypes (a bytea, b VARCHAR(20), "
-      + "c VARCHAR(20), d CHAR(20), e bytea, f VARCHAR)").executeUpdate()
-    val stmt = conn.prepareStatement("insert into testdb.strtypes values (?, ?, ?, ?, ?, ?)")
+    conn.prepareStatement("create table test.strtypes (a BINARY(20), b VARCHAR(20), "
+      + "c VARCHAR_IGNORECASE(20), d CHAR(20), e BLOB, f CLOB)").executeUpdate()
+    val stmt = conn.prepareStatement("insert into test.strtypes values (?, ?, ?, ?, ?, ?)")
     stmt.setBytes(1, testBytes)
     stmt.setString(2, "Sensitive")
     stmt.setString(3, "Insensitive")
@@ -126,27 +126,27 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       s"""
         |CREATE TEMPORARY TABLE strtypes
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable 'testdb.STRTYPES', user 'postgres', password 'admin')
+        |OPTIONS (url '$url', dbtable 'TEST.STRTYPES', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
 
-    conn.prepareStatement("create table testdb.timetypes (a TIME, b DATE, c TIMESTAMP)"
+    conn.prepareStatement("create table test.timetypes (a TIME, b DATE, c TIMESTAMP)"
         ).executeUpdate()
-    conn.prepareStatement("insert into testdb.timetypes values ('12:34:56', "
+    conn.prepareStatement("insert into test.timetypes values ('12:34:56', "
       + "'1996-01-01', '2002-02-20 11:22:33.543543543')").executeUpdate()
-    conn.prepareStatement("insert into testdb.timetypes values ('12:34:56', "
+    conn.prepareStatement("insert into test.timetypes values ('12:34:56', "
       + "null, '2002-02-20 11:22:33.543543543')").executeUpdate()
     //conn.commit()
     sql(
       s"""
         |CREATE TEMPORARY TABLE timetypes
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable 'testdb.TIMETYPES', user 'postgres', password 'admin')
+        |OPTIONS (url '$url', dbtable 'TEST.TIMETYPES', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
 
 
-    conn.prepareStatement("create table testdb.flttypes (a numeric, b REAL, c DECIMAL(38, 18))"
+    conn.prepareStatement("create table test.flttypes (a DOUBLE, b REAL, c DECIMAL(38, 18))"
         ).executeUpdate()
-    conn.prepareStatement("insert into testdb.flttypes values ("
+    conn.prepareStatement("insert into test.flttypes values ("
       + "1.0000000000000002220446049250313080847263336181640625, "
       + "1.00000011920928955078125, "
       + "123456789012345.543215432154321)").executeUpdate()
@@ -155,24 +155,24 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       s"""
         |CREATE TEMPORARY TABLE flttypes
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable 'testdb.FLTTYPES', user 'postgres', password 'admin')
+        |OPTIONS (url '$url', dbtable 'TEST.FLTTYPES', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
 
     conn.prepareStatement(
       s"""
-        |create table testdb.nulltypes (a INT, b BOOLEAN, c INT, d bytea, e VARCHAR(20),
-        |f VARCHAR(20), g CHAR(20), h bytea, i text, j TIME, k DATE, l TIMESTAMP,
-        |m numeric, n REAL, o DECIMAL(38, 18))
+        |create table test.nulltypes (a INT, b BOOLEAN, c TINYINT, d BINARY(20), e VARCHAR(20),
+        |f VARCHAR_IGNORECASE(20), g CHAR(20), h BLOB, i CLOB, j TIME, k DATE, l TIMESTAMP,
+        |m DOUBLE, n REAL, o DECIMAL(38, 18))
       """.stripMargin.replaceAll("\n", " ")).executeUpdate()
-    conn.prepareStatement("insert into testdb.nulltypes values ("
+    conn.prepareStatement("insert into test.nulltypes values ("
       + "null, null, null, null, null, null, null, null, null, "
       + "null, null, null, null, null, null)").executeUpdate()
-   // conn.commit()
+    conn.commit()
     sql(
       s"""
          |CREATE TEMPORARY TABLE nulltypes
          |USING org.apache.spark.sql.jdbc
-         |OPTIONS (url '$url', dbtable 'testdb.NULLTYPES', user 'postgres', password 'admin')
+         |OPTIONS (url '$url', dbtable 'TEST.NULLTYPES', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
 
     // Untested: IDENTITY, OTHER, UUID, ARRAY, and GEOMETRY types.
@@ -189,25 +189,25 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
 
   test("SELECT * WHERE (simple predicates)") {
     //没有数据记录
-    assert(sql("SELECT * FROM foobar WHERE theid < 1").collect().size === 0)
+    assert(sql("SELECT * FROM foobar WHERE THEID != 2").collect().size === 2)
     //二条记录
-    assert(sql("SELECT * FROM foobar WHERE theid != 2").collect().size === 2)
+    assert(sql("SELECT * FROM foobar WHERE NAME = 'fred'").collect().size === 1)
     //一条记录
-    assert(sql("SELECT * FROM foobar WHERE theid = 1").collect().size === 1)
+    assert(sql("SELECT * FROM foobar WHERE NAME != 'fred'").collect().size === 2)
     //字符串比较    
-    assert(sql("SELECT * FROM foobar WHERE name = 'fred'").collect().size === 1)
-    assert(sql("SELECT * FROM foobar WHERE name > 'fred'").collect().size === 2)
-    assert(sql("SELECT * FROM foobar WHERE name != 'fred'").collect().size === 2)
+    assert(sql("SELECT * FROM foobar WHERE NAME = 'fred'").collect().size === 1)
+    assert(sql("SELECT * FROM foobar WHERE NAME > 'fred'").collect().size === 2)
+    assert(sql("SELECT * FROM foobar WHERE NAME != 'fred'").collect().size === 2)
   }
 
   test("SELECT * WHERE (quoted strings)") {//引用字符串
     
-    assert(sql("select * from foobar").where('name === "joe 'foo' \"bar\"").collect().size === 1)
+    assert(sql("select * from foobar").where('NAME === "joe 'foo' \"bar\"").collect().size === 1)
   }
 
   test("SELECT first field") {//选择第一个字段
     //升序
-    val names = sql("SELECT name FROM foobar").collect().map(x => x.getString(0)).sortWith(_ < _)
+    val names = sql("SELECT NAME FROM foobar").collect().map(x => x.getString(0)).sortWith(_ < _)
     assert(names.size === 3)
     assert(names(0).equals("fred"))
     assert(names(1).equals("joe 'foo' \"bar\""))
@@ -215,7 +215,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
   }
 
   test("SELECT first field when fetchSize is two") {//
-    val names = sql("SELECT name FROM fetchtwo").collect().map(x => x.getString(0)).sortWith(_ < _)
+    val names = sql("SELECT NAME FROM fetchtwo").collect().map(x => x.getString(0)).sortWith(_ < _)
     assert(names.size === 3)
     assert(names(0).equals("fred"))
     assert(names(1).equals("joe 'foo' \"bar\""))
@@ -223,7 +223,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
   }
 
   test("SELECT second field") {//选择第二个字段
-    val ids = sql("SELECT theid FROM foobar").collect().map(x => x.getInt(0)).sortWith(_ < _)
+    val ids = sql("SELECT THEID FROM foobar").collect().map(x => x.getInt(0)).sortWith(_ < _)
     assert(ids.size === 3)
     assert(ids(0) === 1)
     assert(ids(1) === 2)
@@ -231,7 +231,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
   }
 
   test("SELECT second field when fetchSize is two") {
-    val ids = sql("SELECT theid FROM fetchtwo").collect().map(x => x.getInt(0)).sortWith(_ < _)
+    val ids = sql("SELECT THEID FROM fetchtwo").collect().map(x => x.getInt(0)).sortWith(_ < _)
     assert(ids.size === 3)
     assert(ids(0) === 1)
     assert(ids(1) === 2)
@@ -243,13 +243,13 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
   }
 
   test("SELECT WHERE (simple predicates) partitioned") {//简单的计算分区
-    assert(sql("SELECT * FROM parts WHERE theid < 1").collect().size === 0)
-    assert(sql("SELECT * FROM parts WHERE theid != 2").collect().size === 2)
-    assert(sql("SELECT theid FROM parts WHERE theid = 1").collect().size === 1)
+    assert(sql("SELECT * FROM parts WHERE THEID < 1").collect().size === 0)
+    assert(sql("SELECT * FROM parts WHERE THEID != 2").collect().size === 2)
+    assert(sql("SELECT THEID FROM parts WHERE THEID = 1").collect().size === 1)
   }
 
   test("SELECT second field partitioned") {
-    val ids = sql("SELECT theid FROM parts").collect().map(x => x.getInt(0)).sortWith(_ < _)
+    val ids = sql("SELECT THEID FROM parts").collect().map(x => x.getInt(0)).sortWith(_ < _)
     assert(ids.size === 3)
     assert(ids(0) === 1)
     assert(ids(1) === 2)
@@ -262,27 +262,27 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       s"""
         |CREATE TEMPORARY TABLE renamed
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable '(select name as NAME1, name as NAME2 from testdb.PEOPLE) as PEOPLE',
-        |user 'postgres', password 'admin')
+        |OPTIONS (url '$url', dbtable '(select NAME as NAME1, NAME as NAME2 from TEST.PEOPLE)',
+        |user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
 
     val df = sql("SELECT * FROM renamed")
     val fields=df.schema.fields
     assert(df.schema.fields.size == 2)
-    assert(df.schema.fields(0).name == "name1")
-    assert(df.schema.fields(1).name == "name2")
+    assert(df.schema.fields(0).name == "NAME1")
+    assert(df.schema.fields(1).name == "NAME2")
   }
 
   test("Basic API") {//JDBC基本API读取方式
     assert(ctx.read.jdbc(
-      urlWithUserAndPass, "TESTdb.PEOPLE", new Properties).collect().length === 3)
+      urlWithUserAndPass, "TEST.PEOPLE", new Properties).collect().length === 3)
   }
 
   test("Basic API with FetchSize") {//基础API设置属性获取大小
     val properties = new Properties
     properties.setProperty("fetchSize", "2")
     assert(ctx.read.jdbc(
-      urlWithUserAndPass, "testdb.PEOPLE", properties).collect().length === 3)
+      urlWithUserAndPass, "TEST.PEOPLE", properties).collect().length === 3)
   }
 
   test("Partitioning via JDBCPartitioningInfo API") {//通过划分分区
@@ -293,18 +293,18 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
          *     4分区的上界
          *     3分区的个数
          */
-      ctx.read.jdbc(urlWithUserAndPass, "testdb.PEOPLE", "theid", 0, 4, 3, new Properties)
+      ctx.read.jdbc(urlWithUserAndPass, "TEST.PEOPLE", "theid", 0, 4, 3, new Properties)
       .collect().length === 3)
   }
 
   test("Partitioning via list-of-where-clauses API") {//
-    val parts = Array[String]("theid < 2", "theid >= 2")
-    assert(ctx.read.jdbc(urlWithUserAndPass, "testdb.PEOPLE", parts, new Properties)
+    val parts = Array[String]("THEID < 2", "THEID >= 2")
+    assert(ctx.read.jdbc(urlWithUserAndPass, "TEST.PEOPLE", parts, new Properties)
       .collect().length === 3)
   }
 
   test("H2 integral types") {//H2的整数类型
-    val rows = sql("SELECT * FROM inttypes WHERE a IS NOT NULL").collect()
+    val rows = sql("SELECT * FROM inttypes WHERE A IS NOT NULL").collect()
     assert(rows.length === 1)
     assert(rows(0).getInt(0) === 1)
     assert(rows(0).getBoolean(1) === false)
@@ -315,7 +315,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
 
   test("H2 null entries") {//H2空项
     //查找字段a为null
-    val rows = sql("SELECT * FROM inttypes WHERE a IS NULL").collect()
+    val rows = sql("SELECT * FROM inttypes WHERE A IS NULL").collect()
     assert(rows.length === 1)
     //按序数读取列的值判断是否为空 isNullAt
     assert(rows(0).isNullAt(0))
@@ -370,25 +370,27 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     //秒 
     assert(cal.get(Calendar.SECOND) === 33)
     //毫微秒nanos
-    assert(rows(0).getAs[java.sql.Timestamp](2).getNanos === 543544000)
+    assert(rows(0).getAs[java.sql.Timestamp](2).getNanos === 543543000)
   }
-
   test("test DATE types") {//H2日期类型
-    val rows = ctx.read.jdbc(urlWithUserAndPass, "testdb.TIMETYPES", new Properties).collect()
-     //缓存数据
-    val cachedRows = ctx.read.jdbc(urlWithUserAndPass, "testdb.TIMETYPES", new Properties).cache().collect()
-    //第一行第二列数据1996-01-01
+    val rows = ctx.read.jdbc(
+      urlWithUserAndPass, "TEST.TIMETYPES", new Properties).collect()
+       //缓存数据行
+    val cachedRows = ctx.read.jdbc(urlWithUserAndPass, "TEST.TIMETYPES", new Properties)
+      .cache().collect()
+       //第一行第二列数据1996-01-01
     assert(rows(0).getAs[java.sql.Date](1) === java.sql.Date.valueOf("1996-01-01"))
-    //第二行第二列数据null
+      //第二行第二列数据null
     assert(rows(1).getAs[java.sql.Date](1) === null)
-    //带缓存的数据
+     //带缓存的数据
     assert(cachedRows(0).getAs[java.sql.Date](1) === java.sql.Date.valueOf("1996-01-01"))
   }
 
+
   test("test DATE types in cache") {//缓存中的测试日期类型
-    val rows = ctx.read.jdbc(urlWithUserAndPass, "testdb.TIMETYPES", new Properties).collect()
+    val rows = ctx.read.jdbc(urlWithUserAndPass, "TEST.TIMETYPES", new Properties).collect()
     //注册临时表
-    ctx.read.jdbc(urlWithUserAndPass, "testdb.TIMETYPES", new Properties).cache().registerTempTable("mycached_date")
+    ctx.read.jdbc(urlWithUserAndPass, "TEST.TIMETYPES", new Properties).cache().registerTempTable("mycached_date")
     //使用注意的注意临时表
     val cachedRows = sql("select * from mycached_date").collect()
     //第一行第二列数据1996-01-01
@@ -399,21 +401,22 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
 
   test("test types for null value") {//空值的测试类型
     val rows = ctx.read.jdbc(
-      urlWithUserAndPass, "testdb.NULLTYPES", new Properties).collect()
+      urlWithUserAndPass, "TEST.NULLTYPES", new Properties).collect()
     assert((0 to 14).forall(i => rows(0).isNullAt(i)))
   }
 
   test("H2 floating-point types") {//H2的浮点类型
     val rows = sql("SELECT * FROM flttypes").collect()
-    //println(rows(0).getDecimal(0))
-    //assert(rows(0).getAs[BigDecimal](0) === 1.0000000000000002)
-    //assert(rows(0).getAs[BigDecimal](1) === 1.00000011920928955)
+    assert(rows(0).getDouble(0) === 1.00000000000000022)
+    assert(rows(0).getDouble(1) === 1.00000011920928955)
+     assert(rows(0).getAs[BigDecimal](2) ===
+      new BigDecimal("123456789012345.543215432154321000"))
     assert(rows(0).getAs[BigDecimal](2) ===//强制转大数据类型
       new BigDecimal("123456789012345.543215432154321000"))
       //获取字段类型及长度
     assert(rows(0).schema.fields(2).dataType === DecimalType(38, 18))
     
-    val result = sql("SELECT c FROM flttypes where c > c - 1").collect()
+    val result = sql("SELECT C FROM flttypes where C > C - 1").collect()
     assert(result(0).getAs[BigDecimal](0) ===
       new BigDecimal("123456789012345.543215432154321000"))
   }
@@ -423,11 +426,11 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       s"""
         |CREATE TEMPORARY TABLE hack
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url', dbtable '(SELECT b, b*b FROM testdb.FLTTYPES) as FLTTYPES',
-        |         user 'postgres', password 'admin')
+        |OPTIONS (url '$url', dbtable '(SELECT B, B*B FROM TEST.FLTTYPES)',
+        |         user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
     val rows = sql("SELECT * FROM hack").collect()
-   // assert(rows(0).getDouble(0) === 1.00000011920928955) // Yes, I meant ==.
+    assert(rows(0).getDouble(0) === 1.00000011920928955) // Yes, I meant ==.
     // For some reason, H2 computes this square incorrectly...
     //因为某种原因,H2计算这方不正确
     //assert(math.abs(rows(0).getDouble(1) - 1.00000023841859331) < 1e-12)
@@ -441,15 +444,15 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
         s"""
           |CREATE TEMPORARY TABLE abc
           |USING org.apache.spark.sql.jdbc
-          |OPTIONS (url '$url', dbtable '(SELECT _ROWID_ FROM testdb.people)',
-          |        user 'postgres', password 'admin')
+          |OPTIONS (url '$url', dbtable '(SELECT _ROWID_ FROM test.people)',
+          |         user 'testUser', password 'testPass')
         """.stripMargin.replaceAll("\n", " "))
     }
   }
 
   test("Remap types via JdbcDialects") {//通过jdbcdialects映射类型
     JdbcDialects.registerDialect(testH2Dialect)//注意方言
-    val df = ctx.read.jdbc(urlWithUserAndPass, "testdb.PEOPLE", new Properties)
+    val df = ctx.read.jdbc(urlWithUserAndPass, "TEST.PEOPLE", new Properties)
     assert(df.schema.filter(_.dataType != org.apache.spark.sql.types.StringType).isEmpty)
     val rows = df.collect()
     assert(rows(0).get(0).isInstanceOf[String])
@@ -460,7 +463,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
   test("Default jdbc dialect registration") {//默认注册JDBC方言
     assert(JdbcDialects.get("jdbc:mysql://127.0.0.1/db") == MySQLDialect)
     assert(JdbcDialects.get("jdbc:postgresql://127.0.0.1/db") == PostgresDialect)
-    assert(JdbcDialects.get("testdb.invalid") == NoopDialect)
+    assert(JdbcDialects.get("test.invalid") == NoopDialect)
   }
 
   test("quote column names by jdbc dialect") {//引用列名JDBC方言
@@ -502,8 +505,8 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     //回归测试
     val timestamp = java.sql.Timestamp.valueOf("2001-02-20 11:22:33.543543");
     val date = java.sql.Date.valueOf("1995-01-01")
-    val jdbcDf = sqlContext.read.jdbc(urlWithUserAndPass, "testdb.TIMETYPES", new Properties)
-    val rows = jdbcDf.where($"b" > date && $"c" > timestamp).collect()//where条件测试
+    val jdbcDf = sqlContext.read.jdbc(urlWithUserAndPass, "TEST.TIMETYPES", new Properties)
+    val rows = jdbcDf.where($"B" > date && $"C" > timestamp).collect()
     assert(rows(0).getAs[java.sql.Date](1) === java.sql.Date.valueOf("1996-01-01"))
     assert(rows(0).getAs[java.sql.Timestamp](2)
       === java.sql.Timestamp.valueOf("2002-02-20 11:22:33.543543"))

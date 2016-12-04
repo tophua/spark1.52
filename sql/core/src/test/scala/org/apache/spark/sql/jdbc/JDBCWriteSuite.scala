@@ -30,55 +30,53 @@ import org.apache.spark.util.Utils
 
 class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext {
 
-  //val url = "jdbc:h2:mem:testdb2"
-  val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
+  val url = "jdbc:h2:mem:testdb2"
+  //val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
   //val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
   var conn: java.sql.Connection = null
-  //val url1 = "jdbc:h2:mem:testdb3"
-  val url1 = "jdbc:postgresql://192.168.10.198:3306/postgres"
+  val url1 = "jdbc:h2:mem:testdb3"
+  //val url1 = "jdbc:postgresql://192.168.10.198:3306/postgres"
   
   var conn1: java.sql.Connection = null
   val properties = new Properties()
- // properties.setProperty("user", "testUser")
- // properties.setProperty("password", "testPass")
-    properties.setProperty("user", "postgres")
-   properties.setProperty("password", "admin")
-  //properties.setProperty("rowId", "false")
+   properties.setProperty("user", "testUser")
+   properties.setProperty("password", "testPass")
+   //properties.setProperty("user", "postgres")
+   //properties.setProperty("password", "admin")
+   properties.setProperty("rowId", "false")
 
   before {
-    //Utils.classForName("org.h2.Driver")
+    Utils.classForName("org.h2.Driver")
     
-    Utils.classForName("org.postgresql.Driver")
+    //Utils.classForName("org.postgresql.Driver")
     
-    conn = DriverManager.getConnection(url)
-   // conn.prepareStatement("drop schema test").executeUpdate()
-   // conn.prepareStatement("create schema test").executeUpdate()
-
+    conn = DriverManager.getConnection(url)    
+    conn.prepareStatement("create schema test").executeUpdate()
     conn1 = DriverManager.getConnection(url1, properties)
-   // conn1.prepareStatement("create schema test").executeUpdate()
+    conn1.prepareStatement("create schema test").executeUpdate()
     conn1.prepareStatement("drop table if exists test.people").executeUpdate()
     conn1.prepareStatement(
-      "create table test.people (name TEXT NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
+      "create table test.people (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
     conn1.prepareStatement("insert into test.people values ('fred', 1)").executeUpdate()
     conn1.prepareStatement("insert into test.people values ('mary', 2)").executeUpdate()
-   // conn1.prepareStatement("TRUNCATE TABLE test.people1 CASCADE").executeUpdate()
-   // conn1.prepareStatement("drop table if exists test.people1").executeUpdate()
-    //conn1.prepareStatement(
-    //  "create table test.people1 (name TEXT NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
+    conn1.prepareStatement("drop table if exists test.people1").executeUpdate()
+    conn1.prepareStatement(
+      "create table test.people1 (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
+    conn1.commit()
     //conn1.commit()
 
     sql(
       s"""
         |CREATE TEMPORARY TABLE PEOPLE
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE', user 'postgres', password 'admin')
+        |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
 
     sql(
       s"""
         |CREATE TEMPORARY TABLE PEOPLE1
         |USING org.apache.spark.sql.jdbc
-        |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE1', user 'postgres', password 'admin')
+        |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE1', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
   }
 
