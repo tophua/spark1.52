@@ -18,35 +18,35 @@
 package org.apache.spark.sql
 
 import org.apache.spark.sql.test.SharedSQLContext
-
+//DataFrame隐式转换测试
 class DataFrameImplicitsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
-  test("RDD of tuples") {//RDD元组
+  test("RDD of tuples") {//RDD元组转换DF
     checkAnswer(
       ctx.sparkContext.parallelize(1 to 10).map(i => (i, i.toString)).toDF("intCol", "strCol"),
       (1 to 10).map(i => Row(i, i.toString)))
   }
 
-  test("Seq of tuples") {//序列元组
+  test("Seq of tuples") {//序列元组转换DF
     checkAnswer(
       (1 to 10).map(i => (i, i.toString)).toDF("intCol", "strCol"),
       (1 to 10).map(i => Row(i, i.toString)))
   }
 
-  test("RDD[Int]") {
+  test("RDD[Int]") {//RDD[Int]转换DF
     checkAnswer(
       ctx.sparkContext.parallelize(1 to 10).toDF("intCol"),
       (1 to 10).map(i => Row(i)))
   }
 
-  test("RDD[Long]") {
+  test("RDD[Long]") {//RDD[Long]转换DF
     checkAnswer(
       ctx.sparkContext.parallelize(1L to 10L).toDF("longCol"),
       (1L to 10L).map(i => Row(i)))
   }
 
-  test("RDD[String]") {
+  test("RDD[String]") {//RDD[String]转换DF
     checkAnswer(
       ctx.sparkContext.parallelize(1 to 10).map(_.toString).toDF("stringCol"),
       (1 to 10).map(i => Row(i.toString)))

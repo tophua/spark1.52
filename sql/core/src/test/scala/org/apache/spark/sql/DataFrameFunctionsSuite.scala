@@ -39,10 +39,19 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("array with column expression") {//数组列名表达式
     val df = Seq((0, 1)).toDF("a", "b")
+    /**
+     *+----------------+
+      |array(a,(b + b))|
+      +----------------+
+      |          [0, 2]|
+      +----------------+*/
+    df.select(array(col("a"), col("b") + col("b"))).show()
+    //取出第一行数据
     val row = df.select(array(col("a"), col("b") + col("b"))).first()
-
     val expectedType = ArrayType(IntegerType, containsNull = false)
+    //判断数据类型
     assert(row.schema(0).dataType === expectedType)
+    //从行数据1列提取数据,转换序列
     assert(row.getAs[Seq[Int]](0) === Seq(0, 2))
   }
 
@@ -208,26 +217,31 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(2743272264L, 2180413220L))
   }
 
-  test("string function find_in_set") {//查找字符串在功能上
+  test("string function find_in_set") {//在集中查找字符串功能,返回查找到的字符串所在位置
     val df = Seq(("abc,b,ab,c,def", "abc,b,ab,c,def")).toDF("a", "b")
-
+   // df.show()
+    //注意字符串以逗号分隔
+    df.selectExpr("find_in_set('ab', a)", "find_in_set('c', b)").show()
     checkAnswer(
       df.selectExpr("find_in_set('ab', a)", "find_in_set('x', b)"),
       Row(3, 0))
   }
 
-  test("conditional function: least") {//条件函数最少的
+  test("conditional function: least") {//条件函数最少的值 
     checkAnswer(
       testData2.select(least(lit(-1), lit(0), col("a"), col("b"))).limit(1),
       Row(-1)
     )
+    sql("SELECT least(a, 2) as l from testData2 order by l").show()
+    //least返回从值列表（N1，N2，N3，和等）的项最少值
     checkAnswer(
       sql("SELECT least(a, 2) as l from testData2 order by l"),
       Seq(Row(1), Row(1), Row(2), Row(2), Row(2), Row(2))
     )
   }
 
-  test("conditional function: greatest") {//条件函数最大的
+  test("conditional function: greatest") {//条件函数最大的值
+     //greatest返回从值列表（N1，N2，N3，和等）的项最大值
     checkAnswer(
       testData2.select(greatest(lit(2), lit(3), col("a"), col("b"))).limit(1),
       Row(3)
@@ -240,6 +254,15 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("pmod") {//是一个求余函数
     val intData = Seq((7, 3), (-7, 3)).toDF("a", "b")
+    /**
+     *+---+---+
+      |  a|  b|
+      +---+---+
+      |  7|  3|
+      | -7|  3|
+      +---+---+
+     */
+    intData.show()
     checkAnswer(
       intData.select(pmod('a, 'b)),
       Seq(Row(1), Row(2))
@@ -282,6 +305,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       (null, null)
     ).toDF("a", "b")
     checkAnswer(
+        //数组升序排序
       df.select(sort_array($"a"), sort_array($"b")),
       Seq(
         Row(Seq(1, 2, 3), Seq("a", "b", "c")),
@@ -289,6 +313,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
         Row(null, null))
     )
     checkAnswer(
+      //数组降序排序
       df.select(sort_array($"a", false), sort_array($"b", false)),
       Seq(
         Row(Seq(3, 2, 1), Seq("c", "b", "a")),
@@ -328,6 +353,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       (Seq[Int](1, 2, 3), "z")
     ).toDF("a", "b")
     checkAnswer(
+        //返回数组的长度
       df.select(size($"a")),
       Seq(Row(2), Row(0), Row(3))
     )
@@ -362,6 +388,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
     // Simple test cases
     //简单的测试用例
     checkAnswer(
+        //测试数组是否包含指定值
       df.select(array_contains(df("a"), 1)),
       Seq(Row(true), Row(false))
     )

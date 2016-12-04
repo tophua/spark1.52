@@ -27,8 +27,9 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
   test("join - join using") {//使用连接
     val df = Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str")
     val df2 = Seq(1, 2, 3).map(i => (i, (i + 1).toString)).toDF("int", "str")
-
+    
     checkAnswer(
+      //使用内连接
       df.join(df2, "int"),
       Row(1, "1", "2") :: Row(2, "2", "3") :: Row(3, "3", "4") :: Nil)
   }
@@ -37,7 +38,7 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
     val df = Seq(1, 2, 3).map(i => (i, i + 1, i.toString)).toDF("int", "int2", "str")
     val df2 = Seq(1, 2, 3).map(i => (i, i + 1, (i + 1).toString)).toDF("int", "int2", "str")
 
-    checkAnswer(
+    checkAnswer(//使用多列内连接
       df.join(df2, Seq("int", "int2")),
       Row(1, 2, "1", "2") :: Row(2, 3, "2", "3") :: Row(3, 4, "3", "4") :: Nil)
   }
@@ -46,7 +47,7 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
     val df = Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str")
 
     // self join
-    checkAnswer(
+    checkAnswer(//自连接
       df.join(df, "int"),
       Row(1, "1", "1") :: Row(2, "2", "2") :: Row(3, "3", "3") :: Nil)
   }

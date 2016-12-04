@@ -210,13 +210,41 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   }
 
   test("selectExpr") {//选择表达式
+    testData.show()
+    /**
+     *+---+-----+
+      |  1|    1|
+      |  2|    2|
+      |  3|    3|
+      |  4|    4|
+      |  5|    5|
+      | 16|   16|
+      | 17|   17|
+      | 18|   18|
+      | 19|   19|
+      | 20|   20|
+      +---+-----+ */
+    //
+     testData.selectExpr("abs(key)", "value").show()
     checkAnswer(
+        
       testData.selectExpr("abs(key)", "value"),
       testData.collect().map(row => Row(math.abs(row.getInt(0)), row.getString(1))).toSeq)
   }
 
   test("selectExpr with alias") {//选择表达式的别名
+    /**
+     *+---+
+      |  k|
+      +---+
+      |  1|
+      |  2|
+      |  3|
+      +---+*/
+    testData.selectExpr("key as k").select("k").show()
+    
     checkAnswer(
+        //表达式使用别名
       testData.selectExpr("key as k").select("k"),
       testData.select("key").collect().toSeq)
   }
@@ -224,22 +252,23 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   test("filterExpr") {//过滤操作
     checkAnswer(
       testData.filter("key > 90"),
+      //使用集合过虑
       testData.collect().filter(_.getInt(0) > 90).toSeq)
   }
 
-  test("filterExpr using where") {//过滤操作使用的地方
+  test("filterExpr using where") {//使用where过滤操作
     checkAnswer(
       testData.where("key > 50"),
       testData.collect().filter(_.getInt(0) > 50).toSeq)
   }
 
-  test("repartition") {//再分配
+  test("repartition") {//重新分配分区
     checkAnswer(
       testData.select('key).repartition(10).select('key),
       testData.select('key).collect().toSeq)
   }
 
-  test("coalesce") {//合并
+  test("coalesce") {//合并分区,引用字段使用'
     assert(testData.select('key).coalesce(1).rdd.partitions.size === 1)
 
     checkAnswer(
@@ -293,10 +322,11 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
 
   test("global sorting") {//全局排序
     checkAnswer(
+        //使用字段排序
       testData2.orderBy('a.asc, 'b.asc),
       Seq(Row(1, 1), Row(1, 2), Row(2, 1), Row(2, 2), Row(3, 1), Row(3, 2)))
 
-    checkAnswer(
+    checkAnswer(//使用函数排序
       testData2.orderBy(asc("a"), desc("b")),
       Seq(Row(1, 2), Row(1, 1), Row(2, 2), Row(2, 1), Row(3, 2), Row(3, 1)))
 
@@ -312,11 +342,23 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       testData2.orderBy('a.desc, 'b.asc),
       Seq(Row(3, 1), Row(3, 2), Row(2, 1), Row(2, 2), Row(1, 1), Row(1, 2)))
 
+    /**
+     *+---------+--------------------+
+      |     data|          nestedData|
+      +---------+--------------------+
+      |[1, 2, 3]|[WrappedArray(1, ...|
+      |[2, 3, 4]|[WrappedArray(2, ...|
+      +---------+--------------------+
+     */
+    arrayData.toDF().show()      
+    arrayData.toDF().orderBy('data.getItem(0).desc).show()
     checkAnswer(
+      //使用data数组字段第一个值排序(即1)
       arrayData.toDF().orderBy('data.getItem(0).asc),
       arrayData.toDF().collect().sortBy(_.getAs[Seq[Int]](0)(0)).toSeq)
 
     checkAnswer(
+          //使用data数组字段第一个值排序(即1),降序
       arrayData.toDF().orderBy('data.getItem(0).desc),
       arrayData.toDF().collect().sortBy(_.getAs[Seq[Int]](0)(0)).reverse.toSeq)
 
@@ -330,6 +372,8 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   }
 
   test("limit") {//限制
+    //取10条数据
+    testData.limit(10).show()
     checkAnswer(
       testData.limit(10),
       testData.take(10).toSeq)
@@ -343,7 +387,8 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       mapData.take(1).map(r => Row.fromSeq(r.productIterator.toSeq)))
   }
 
-  test("except") {//异常
+  test("except") {//返回两个结果集的差(即从左查询中返回右查询没有找到的所有非重复值)
+    lowerCaseData.except(upperCaseData).show()
     checkAnswer(
       lowerCaseData.except(upperCaseData),
       Row(1, "a") ::
@@ -354,7 +399,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     checkAnswer(upperCaseData.except(upperCaseData), Nil)
   }
 
-  test("intersect") {//交叉
+  test("intersect") {//返回 两个结果集的交集(即两个查询都返回的所有非重复值)
     checkAnswer(
       lowerCaseData.intersect(lowerCaseData),
       Row(1, "a") ::
@@ -393,7 +438,9 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   }
 
   test("withColumn") {//使用列
+    //使用新列
     val df = testData.toDF().withColumn("newCol", col("key") + 1)
+    df.show()
     checkAnswer(
       df,
       testData.collect().map { case Row(key: Int, value: String) =>
@@ -419,6 +466,16 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   }
 
   test("drop unknown column (no-op)") {//删除未知的列
+    /**
+     *+---+-----+
+      |key|value|
+      +---+-----+
+      |  1|    1|
+      |  2|    2|
+      +---+-----+
+     */
+    testData.show()
+    //删除未知的列
     val df = testData.drop("random")
     checkAnswer(
       df,
@@ -428,13 +485,15 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   //删除列使用列的引用
   test("drop column using drop with column reference") {
     val col = testData("key")
+    //删除引用的列
     val df = testData.drop(col)
+    df.show()
     checkAnswer(
       df,
       testData.collect().map(x => Row(x.getString(1))).toSeq)
     assert(df.schema.map(_.name) === Seq("value"))
   }
-   //删除列使用列的引用
+   //删除未知列使用的列
   test("drop unknown column (no-op) with column reference") {
     val col = Column("random")
     val df = testData.drop(col)
@@ -445,16 +504,35 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   }
 
   test("drop unknown column with same name (no-op) with column reference") {
-    val col = Column("key")
+    val col = Column("key")//删除未知的列,但列没有引用
     val df = testData.drop(col)
     checkAnswer(
       df,
       testData.collect().toSeq)
+    //查找列名的方法
     assert(df.schema.map(_.name) === Seq("key", "value"))
   }
 
   test("drop column after join with duplicate columns using column reference") {
+    /**
+     *+--------+------+
+      |personId|salary|
+      +--------+------+
+      |       0|2000.0|
+      |       1|1000.0|
+      +--------+------+
+     */
+    salary.show()//重命名列
     val newSalary = salary.withColumnRenamed("personId", "id")
+    /**
+     *+---+------+
+      | id|salary|
+      +---+------+
+      |  0|2000.0|
+      |  1|1000.0|
+      +---+------+
+     */
+    newSalary.show()
     val col = newSalary("id")
     // this join will result in duplicate "id" columns
     //此连接将导致重复的“ID”列
@@ -469,6 +547,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
         case Row(id: Int, name: String, age: Int, idToDrop: Int, salary: Double) =>
           Row(id, name, age, salary)
       }.toSeq)
+     //查找列名的方法
     assert(df.schema.map(_.name) === Seq("id", "name", "age", "salary"))
     assert(df("id") == person("id"))
   }
@@ -504,10 +583,11 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       Row("stddev", null, null),
       Row("min", null, null),
       Row("max", null, null))
-
+     //定义一个方法,获得列名字的序列,参数DataFrame
     def getSchemaAsSeq(df: DataFrame): Seq[String] = df.schema.map(_.name)
-
+    //获得两列的描述DataFrame
     val describeTwoCols = describeTestData.describe("age", "height")
+    //getSchemaAsSeq(describeTwoCols).foreach {println }
     assert(getSchemaAsSeq(describeTwoCols) === Seq("summary", "age", "height"))
     checkAnswer(describeTwoCols, describeResult)
     // All aggregate value should have been cast to string
@@ -517,6 +597,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     }
 
     val describeAllCols = describeTestData.describe()
+    //为什么多一列summary
     assert(getSchemaAsSeq(describeAllCols) === Seq("summary", "age", "height"))
     checkAnswer(describeAllCols, describeResult)
 
@@ -541,15 +622,26 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   test("inputFiles") {//输入文件
     withTempDir { dir =>
       val df = Seq((1, 22)).toDF("a", "b")
-
+      //parquet目录
       val parquetDir = new File(dir, "parquet").getCanonicalPath
+      println(parquetDir)
+      //保存parquet格式文件
+      //df.write.json(parquetDir)
       df.write.parquet(parquetDir)
+      //读取数据自动转换DataFrame
       val parquetDF = sqlContext.read.parquet(parquetDir)
+      //判断输入文件不为空nonEmpty,nonEmpty测试可遍历迭代器是不是为空
+      //读取数据成功
+      println(parquetDF.inputFiles.nonEmpty)
       assert(parquetDF.inputFiles.nonEmpty)
 
       val jsonDir = new File(dir, "json").getCanonicalPath
+      println(jsonDir)
+      //写Json文件
       df.write.json(jsonDir)
+      //读取保存的json文件
       val jsonDF = sqlContext.read.json(jsonDir)
+      //判断读取json文件是否成功
       assert(parquetDF.inputFiles.nonEmpty)
 
       val unioned = jsonDF.unionAll(parquetDF).inputFiles.sorted
@@ -561,13 +653,16 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   ignore("show") {
     // This test case is intended ignored, but to make sure it compiles correctly
     //这个测试用例的目的是忽略,但要确保它正确编译
+    //默认显示20行数据
     testData.select($"*").show()
+    //show显示数据行数
     testData.select($"*").show(1000)
   }
 
   test("showString: truncate = [true, false]") {//截断
-    val longString = Array.fill(21)("1").mkString
+    val longString = Array.fill(21)("1").mkString    
     val df = sqlContext.sparkContext.parallelize(Seq("1", longString)).toDF()
+    df.show()
     val expectedAnswerForFalse = """+---------------------+
                                    ||_1                   |
                                    |+---------------------+
@@ -633,7 +728,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
                            ||  2|  2|
                            |+---+---+
                            |""".stripMargin
-  //  assert(df.showString(10) === expectedAnswer)
+   //assert(df.showString(10) === expectedAnswer)
   }
 
   test("SPARK-7319 showString") {
@@ -660,6 +755,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     val rowRDD = sqlContext.sparkContext.parallelize(Seq(Row(new ExamplePoint(1.0, 2.0))))
     //StructType代表一张表,StructField代表一个字段
     val schema = StructType(Array(StructField("point", new ExamplePointUDT(), false)))
+    //schema方式创建RDD
     val df = sqlContext.createDataFrame(rowRDD, schema)
     df.rdd.collect()
   }
@@ -679,7 +775,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     assert(complexData.filter(complexData("m")(complexData("s")("value")) === 1).count() == 1)
     assert(complexData.filter(complexData("a")(complexData("s")("key")) === 1).count() == 1)
   }
-
+  //支持引号属性
   test("SPARK-7551: support backticks for DataFrame attribute resolution") {
     val df = sqlContext.read.json(sqlContext.sparkContext.makeRDD(
       """{"a.b": {"c": {"d..e": {"f": 1}}}}""" :: Nil))
@@ -714,7 +810,38 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       (2, 2, 2) :: (2, 2, 1) ::
       (2, 1, 1) :: (1, 1, 2) ::
       (1, 2, 2) :: (1, 2, 1) :: Nil).toDF("key", "value1", "value2")
-
+      /**
+       *+---+------+------+
+        |key|value1|value2|
+        +---+------+------+
+        |  2|     1|     2|
+        |  1|     1|     1|
+        |  1|     2|     1|
+        |  2|     1|     2|
+        |  2|     2|     2|
+        |  2|     2|     1|
+        |  2|     1|     1|
+        |  1|     1|     2|
+        |  1|     2|     2|
+        |  1|     2|     1|
+        +---+------+------+ */
+   testData.show()
+   /**
+    * +---+------+------+
+      |key|value1|value2|
+      +---+------+------+
+      |  1|     2|     1|
+      |  2|     2|     2|
+      |  1|     2|     2|
+      |  2|     1|     1|
+      |  2|     1|     2|
+      |  1|     1|     1|
+      |  2|     2|     1|
+      |  1|     1|     2|
+      +---+------+------+
+    */
+   //删除重复的记录
+   testData.dropDuplicates().show()
     checkAnswer(
       testData.dropDuplicates(),
       Seq(Row(2, 1, 2), Row(1, 1, 1), Row(1, 2, 1),
@@ -722,6 +849,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
         Row(1, 1, 2), Row(1, 2, 2)))
 
     checkAnswer(
+        //删除重复的指定列
       testData.dropDuplicates(Seq("key", "value1")),
       Seq(Row(2, 1, 2), Row(1, 2, 1), Row(1, 1, 1), Row(2, 2, 2)))
 
@@ -803,11 +931,30 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   }
 
   test("SPARK-8797: sort by float column containing NaN should not crash") {
-    val inputData = Seq.fill(10)(Tuple1(Float.NaN)) ++ (1 to 1000).map(x => Tuple1(x.toFloat))
+    //排序float列包含NaN,不应该崩溃
+    val inputData = Seq.fill(10)(Tuple1(Float.NaN)) ++ (1 to 20).map(x => Tuple1(x.toFloat))
+    inputData.foreach(println)
     val df = Random.shuffle(inputData).toDF("a")
-    df.orderBy("a").collect()
+    /**
+    +----+
+    |   a|
+    +----+
+    | 2.0|
+    |14.0|
+    | 7.0|
+    | 1.0|
+    | NaN|
+    | NaN|
+    |10.0|
+    |11.0|
+    | NaN|
+    |15.0|
+    +----+*/
+    df.show(10)
+    //排序包括NaN,没有值,即不能排序操作
+    df.orderBy("a").collect().foreach { x => println _}
   }
-
+  //排序double列包含NaN,不应该崩溃
   test("SPARK-8797: sort by double column containing NaN should not crash") {
     val inputData = Seq.fill(10)(Tuple1(Double.NaN)) ++ (1 to 1000).map(x => Tuple1(x.toDouble))
     val df = Random.shuffle(inputData).toDF("a")
@@ -863,6 +1010,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       insertion.write.insertInto("parquet_base")
 
       // pass case: json table (InsertableRelation)
+      //
       df.write.mode(SaveMode.Overwrite).json(tempJsonFile.getCanonicalPath)
       val jdf = sqlContext.read.json(tempJsonFile.getCanonicalPath)
       jdf.registerTempTable("json_base")

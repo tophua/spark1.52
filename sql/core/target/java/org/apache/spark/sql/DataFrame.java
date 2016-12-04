@@ -989,6 +989,7 @@ public  class DataFrame implements scala.Serializable {
   /**
    * Returns a new {@link DataFrame} containing rows in this frame but not in another frame.
    * This is equivalent to <code>EXCEPT</code> in SQL.
+   * EXCEPT &#x8fd4;&#x56de;&#x4e24;&#x4e2a;&#x7ed3;&#x679c;&#x96c6;&#x7684;&#x5dee;,(&#x5373;&#x4ece;&#x5de6;&#x67e5;&#x8be2;&#x4e2d;&#x8fd4;&#x56de;&#x53f3;&#x67e5;&#x8be2;&#x6ca1;&#x6709;&#x627e;&#x5230;&#x7684;&#x6240;&#x6709;&#x975e;&#x91cd;&#x590d;&#x503c;)
    * @group dfops
    * @since 1.3.0
    * @param other (undocumented)

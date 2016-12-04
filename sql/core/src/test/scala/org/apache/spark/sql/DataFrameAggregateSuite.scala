@@ -26,6 +26,16 @@ class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
   test("groupBy") {//分组
+    /**
+     *+---+------+
+      |  a|sum(b)|
+      +---+------+
+      |  1|     3|
+      |  2|     3|
+      |  3|     3|
+      +---+------+
+     */
+    testData2.groupBy("a").agg(sum($"b")).show()
     checkAnswer(
       testData2.groupBy("a").agg(sum($"b")),//df.agg() 求聚合用的相关函数
       Seq(Row(1, 3), Row(2, 3), Row(3, 3))

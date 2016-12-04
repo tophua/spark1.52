@@ -41,6 +41,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
     val rows = input.collect()
 
     checkAnswer(
+        //删除包含null值的行
       input.na.drop("name" :: Nil).select("name"),
       Row("Bob") :: Row("Alice") :: Row("David") :: Row("Nina") :: Row("Amy") :: Nil)
 
@@ -64,7 +65,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
     assert(input.na.drop().columns.toSeq === input.columns.toSeq)
   }
 
-  test("drop with how") {//如何放弃
+  test("drop with how") {//如何删除
     val input = createDF()
     val rows = input.collect()
 

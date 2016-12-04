@@ -21,7 +21,7 @@ import java.util.Random
 
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.test.SharedSQLContext
-
+//DataFrame统计测试
 class DataFrameStatSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
@@ -64,9 +64,29 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
 
   test("pearson correlation") {//皮尔逊相关系数
     val df = Seq.tabulate(10)(i => (i, 2 * i, i * -1.0)).toDF("a", "b", "c")
+    /**
+     *+---+---+----+
+      |  a|  b|   c|
+      +---+---+----+
+      |  0|  0|-0.0|
+      |  1|  2|-1.0|
+      |  2|  4|-2.0|
+      |  3|  6|-3.0|
+      |  4|  8|-4.0|
+      |  5| 10|-5.0|
+      |  6| 12|-6.0|
+      |  7| 14|-7.0|
+      |  8| 16|-8.0|
+      |  9| 18|-9.0|
+      +---+---+----+**/
+    df.show()
+    //1.0
     val corr1 = df.stat.corr("a", "b", "pearson")
+    println(1e-12)
     assert(math.abs(corr1 - 1.0) < 1e-12)
+    //-1.0
     val corr2 = df.stat.corr("a", "c", "pearson")
+     println(corr2)
     assert(math.abs(corr2 + 1.0) < 1e-12)
     // non-trivial example. To reproduce in python, use:
     // >>> from scipy.stats import pearsonr
@@ -80,15 +100,61 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     // > b <- mapply(function(x) x * x - 2 * x + 3.5, a)
     // > cor(a, b)
     // [1] 0.957233913947585835
+    /**
+     *+---+-----+
+      |  a|    b|
+      +---+-----+
+      |  0|  3.5|
+      |  1|  2.5|
+      |  2|  3.5|
+      |  3|  6.5|
+      |  4| 11.5|
+      |  5| 18.5|
+      |  6| 27.5|
+      |  7| 38.5|
+      |  8| 51.5|
+      |  9| 66.5|
+      | 10| 83.5|
+      | 11|102.5|
+      | 12|123.5|
+      | 13|146.5|
+      | 14|171.5|
+      | 15|198.5|
+      | 16|227.5|
+      | 17|258.5|
+      | 18|291.5|
+      | 19|326.5|
+      +---+-----+*/
+   
     val df2 = Seq.tabulate(20)(x => (x, x * x - 2 * x + 3.5)).toDF("a", "b")
+     df2.show()
+    //0.9572339139475857
     val corr3 = df2.stat.corr("a", "b", "pearson")
+    println(corr3)
     assert(math.abs(corr3 - 0.95723391394758572) < 1e-12)
   }
 
   test("covariance") {//协方差
     val df = Seq.tabulate(10)(i => (i, 2.0 * i, toLetter(i))).toDF("singles", "doubles", "letters")
-
+    /**
+     *+-------+-------+-------+
+      |singles|doubles|letters|
+      +-------+-------+-------+
+      |      0|    0.0|      a|
+      |      1|    2.0|      b|
+      |      2|    4.0|      c|
+      |      3|    6.0|      d|
+      |      4|    8.0|      e|
+      |      5|   10.0|      f|
+      |      6|   12.0|      g|
+      |      7|   14.0|      h|
+      |      8|   16.0|      i|
+      |      9|   18.0|      j|
+      +-------+-------+-------+*/
+    df.show()
     val results = df.stat.cov("singles", "doubles")
+    //18.333333333333332
+    println(results)
     assert(math.abs(results - 55.0 / 3) < 1e-12)
     intercept[IllegalArgumentException] {
       df.stat.cov("singles", "letters") // doesn't accept non-numerical dataTypes
@@ -149,12 +215,19 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
   }
 
   test("Frequent Items") {//频繁项
-    val rows = Seq.tabulate(1000) { i =>
+    val rows = Seq.tabulate(100) { i =>
       if (i % 3 == 0) (1, toLetter(1), -1.0) else (i, toLetter(i), i * -1.0)
     }
     val df = rows.toDF("numbers", "letters", "negDoubles")
-
+    df.show()
+    /**
+     *+--------------------+------------------+
+      |   numbers_freqItems| letters_freqItems|
+      +--------------------+------------------+
+      |[95, 98, 47, 49, ...|[?, ?, b, ?, ?, ?]|
+      +--------------------+------------------+ */
     val results = df.stat.freqItems(Array("numbers", "letters"), 0.1)
+     results.show()
     val items = results.collect().head
     assert(items.getSeq[Int](0).contains(1))
     assert(items.getSeq[String](1).contains(toLetter(1)))

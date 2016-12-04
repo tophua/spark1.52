@@ -995,6 +995,7 @@ class DataFrame private[sql](
   /**
    * Returns a new [[DataFrame]] containing rows in this frame but not in another frame.
    * This is equivalent to `EXCEPT` in SQL.
+   * EXCEPT 返回两个结果集的差,(即从左查询中返回右查询没有找到的所有非重复值)
    * @group dfops
    * @since 1.3.0
    */
