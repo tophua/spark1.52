@@ -122,14 +122,37 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
 
   test("single explode") {//函数把字符串分割为数组
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
+    /**
+     *+---+---------+
+      |  a|  intList|
+      +---+---------+
+      |  1|[1, 2, 3]|
+      +---+---------+*/
+    df.show()
     checkAnswer(
+      //默认使用逗号分割另一个字符串,并返回由字符串组成的数组
       df.select(explode('intList)),
       Row(1) :: Row(2) :: Row(3) :: Nil)
   }
 
   test("explode and other columns") {//其他列函数把字符串分割为数组
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
-
+    /**
+     *+---+---------+
+      |  a|  intList|
+      +---+---------+
+      |  1|[1, 2, 3]|
+      +---+---------+ */
+    df.show()
+    /**
+     *+---+---+
+      |  a|_c0|
+      +---+---+
+      |  1|  1|
+      |  1|  2|
+      |  1|  3|
+      +---+---+*/
+    df.select($"a", explode('intList)).show()
     checkAnswer(
       df.select($"a", explode('intList)),
       Row(1, 1) ::
@@ -137,6 +160,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       Row(1, 3) :: Nil)
 
     checkAnswer(
+      //*分隔之后行
       df.select($"*", explode('intList)),
       Row(1, Seq(1, 2, 3), 1) ::
       Row(1, Seq(1, 2, 3), 2) ::
@@ -146,18 +170,18 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
   test("aliased explode") {//别名函数把字符串分割为数组
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
 
-    checkAnswer(
+    checkAnswer(//分隔后使用别名,查询
       df.select(explode('intList).as('int)).select('int),
       Row(1) :: Row(2) :: Row(3) :: Nil)
 
-    checkAnswer(
+    checkAnswer(//分隔后使用别名,查询合计
       df.select(explode('intList).as('int)).select(sum('int)),
       Row(6) :: Nil)
   }
 
   test("explode on map") {//Map函数把字符串分割为数组
     val df = Seq((1, Map("a" -> "b"))).toDF("a", "map")
-
+    //map形式分隔
     checkAnswer(
       df.select(explode('map)),
       Row("a", "b"))
@@ -167,6 +191,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     val df = Seq((1, Map("a" -> "b"))).toDF("a", "map")
 
     checkAnswer(
+        //在Map上的别名函数把字符串分割为数组
       df.select(explode('map).as("key1" :: "value1" :: Nil)).select("key1", "value1"),
       Row("a", "b"))
   }
@@ -203,7 +228,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     checkAnswer(testData.as("testData").select($"testData.*"), testData.collect().toSeq)
   }
 
-  test("+") {
+  test("+") {//加号操作
     checkAnswer(
       testData2.select($"a" + 1),
       testData2.collect().toSeq.map(r => Row(r.getInt(0) + 1)))
@@ -213,7 +238,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       testData2.collect().toSeq.map(r => Row(r.getInt(0) + r.getInt(1) + 2)))
   }
 
-  test("-") {
+  test("-") {//减号操作
     checkAnswer(
       testData2.select($"a" - 1),
       testData2.collect().toSeq.map(r => Row(r.getInt(0) - 1)))
@@ -223,7 +248,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       testData2.collect().toSeq.map(r => Row(r.getInt(0) - r.getInt(1) - 2)))
   }
 
-  test("*") {
+  test("*") {//乘法操作
     checkAnswer(
       testData2.select($"a" * 10),
       testData2.collect().toSeq.map(r => Row(r.getInt(0) * 10)))
@@ -234,7 +259,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
   }
 
   test("/") {
-    checkAnswer(
+    checkAnswer(//取余操作
       testData2.select($"a" / 2),
       testData2.collect().toSeq.map(r => Row(r.getInt(0).toDouble / 2)))
 
@@ -256,18 +281,18 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
 
   test("unary -") {//二元-号
     checkAnswer(
-      testData2.select(-$"a"),
+      testData2.select(-$"a"),//负数
       testData2.collect().toSeq.map(r => Row(-r.getInt(0))))
   }
 
   test("unary !") {
-    checkAnswer(
+    checkAnswer(//非操作
       complexData.select(!$"b"),
       complexData.collect().toSeq.map(r => Row(!r.getBoolean(3))))
   }
 
   test("isNull") {//是否null
-    checkAnswer(
+    checkAnswer(//判断是否为null
       nullStrings.toDF.where($"s".isNull),
       nullStrings.collect().toSeq.filter(r => r.getString(1) eq null))
 
@@ -318,6 +343,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
 
     checkAnswer(
       testData.select(
+          //判断是否为数字类型
         nanvl($"a", lit(5)), nanvl($"b", lit(10)), nanvl(lit(10), $"b"),
         nanvl($"c", lit(null).cast(DoubleType)), nanvl($"d", lit(10)),
         nanvl($"b", $"e"), nanvl($"e", $"f")),
@@ -577,6 +603,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
     val df = ctx.sparkContext.parallelize(Seq[Int](), 2).mapPartitions { _ =>
       Iterator(Tuple1(1), Tuple1(2))
     }.toDF("a")
+     df.select(sparkPartitionId()).show()
     checkAnswer(
       df.select(sparkPartitionId()),
       Row(0) :: Row(0) :: Row(1) :: Row(1) :: Nil
