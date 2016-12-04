@@ -47,7 +47,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     ctx.sparkContext.env.blockManager.get(RDDBlockId(rddId, 0)).nonEmpty
   }
 
-  test("withColumn doesn't invalidate cached dataframe") {//列不被缓存的数据框架
+  test("withColumn doesn't invalidate cached dataframe") {//列不被缓存的数据集
     var evalCount = 0
     val myUDF = udf((x: String) => { evalCount += 1; "result" })
     val df = Seq(("test", 1)).toDF("s", "i").select(myUDF($"s"))
@@ -63,14 +63,26 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     df2.collect()
 
     // We should not reevaluate the cached dataframe
-    //我们不应该对缓存的数据框架
+    //我们不应该对缓存的数据集
     assert(evalCount === 1)
   }
 
   test("cache temp table") {//缓存临时表
     testData.select('key).registerTempTable("tempTable")
+    testData.show()
+    //testData.show()
+    /**
+     *+---+
+      |_c0|
+      +---+
+      |100|
+      +---+*/
+    sql("SELECT COUNT(*) FROM tempTable").show()
+    //判断是否被缓存,数据表被缓存,0表示没有缓存表
     assertCached(sql("SELECT COUNT(*) FROM tempTable"), 0)
+    //数组缓存
     ctx.cacheTable("tempTable")
+    //默认有一条数据表被缓存
     assertCached(sql("SELECT COUNT(*) FROM tempTable"))
     ctx.uncacheTable("tempTable")
   }
@@ -90,6 +102,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
   }
   //缓存表的选择字段
   test("cache table as select") {
+    //使用CACHE TABLE命令缓存
     sql("CACHE TABLE tempTable AS SELECT key FROM testData")
     assertCached(sql("SELECT COUNT(*) FROM tempTable"))
     ctx.uncacheTable("tempTable")
@@ -116,6 +129,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     val data = "*" * 1000
     ctx.sparkContext.parallelize(1 to 200000, 1).map(_ => BigData(data)).toDF()
       .registerTempTable("bigData")
+      //持久化内存和磁盘
     ctx.table("bigData").persist(StorageLevel.MEMORY_AND_DISK)
     assert(ctx.table("bigData").count() === 200000L)
     ctx.table("bigData").unpersist(blocking = true)
@@ -126,11 +140,12 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     assertCached(ctx.table("testData"))
     ctx.table("testData").unpersist(blocking = true)
   }
-//调用unpersist在内存中删除列的缓存
+  //调用unpersist在内存中删除列的缓存
   test("calling .unpersist() should drop in-memory columnar cache") {
     ctx.table("testData").cache()
     ctx.table("testData").count()
     ctx.table("testData").unpersist(blocking = true)
+    //判断是否有缓存的表
     assertCached(ctx.table("testData"), 0)
   }
 
@@ -144,7 +159,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     })
 
     ctx.uncacheTable("testData")
-    assert(!ctx.isCached("testData"))
+    assert(!ctx.isCached("testData"))//是否被缓存
     assert(ctx.table("testData").queryExecution.withCachedData match {
       case _: InMemoryRelation => false
       case _ => true
@@ -190,6 +205,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
   }
   //缓存表
   test("SELECT star from cached table") {
+     
     sql("SELECT * FROM testData").registerTempTable("selectStar")
     ctx.cacheTable("selectStar")
     checkAnswer(
@@ -198,7 +214,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     ctx.uncacheTable("selectStar")
   }
 
-  test("Self-join cached") {//自加入缓存
+  test("Self-join cached") {//自连接加入缓存
     val unCachedAnswer =
       sql("SELECT * FROM testData a JOIN testData b ON a.key = b.key").collect()
     ctx.cacheTable("testData")

@@ -85,6 +85,7 @@ class QueryTest extends PlanTest {
     //缓存结果数据
     val planWithCaching = query.queryExecution.withCachedData
     val cachedData = planWithCaching collect {
+      //匹配内存关系
       case cached: InMemoryRelation => cached
     }
 
