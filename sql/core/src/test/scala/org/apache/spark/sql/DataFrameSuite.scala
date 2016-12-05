@@ -1004,16 +1004,18 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       val insertion = Seq(Tuple1(2)).toDF("col")
 
       // pass case: parquet table (HadoopFsRelation)
+      //当数据输出的位置已存在时,重写
       df.write.mode(SaveMode.Overwrite).parquet(tempParquetFile.getCanonicalPath)
       val pdf = sqlContext.read.parquet(tempParquetFile.getCanonicalPath)
       pdf.registerTempTable("parquet_base")
       insertion.write.insertInto("parquet_base")
 
       // pass case: json table (InsertableRelation)
-      //
+      //当数据输出的位置已存在时,重写
       df.write.mode(SaveMode.Overwrite).json(tempJsonFile.getCanonicalPath)
       val jdf = sqlContext.read.json(tempJsonFile.getCanonicalPath)
       jdf.registerTempTable("json_base")
+       //当数据输出的位置已存在时,重写
       insertion.write.mode(SaveMode.Overwrite).insertInto("json_base")
 
       // error cases: insert into an RDD

@@ -70,14 +70,14 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
       "create table test.people1 (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
     conn1.commit()
     conn.commit()
-
+//dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE PEOPLE
         |USING org.apache.spark.sql.jdbc
         |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
-
+//dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE PEOPLE1
@@ -131,6 +131,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     //获得第1行,3列
     assert(3 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).collect()(0).length)
     //覆盖数据模式,即原来的数据删除
+    //当数据输出的位置已存在时,重写
     df2.write.mode(SaveMode.Overwrite).jdbc(url1, "TEST.DROPTEST", properties)
     assert(1 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).count)
     //表构造2列
@@ -143,7 +144,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     //插入2行2列数据,
     df.write.jdbc(url, "TEST.APPENDTEST", new Properties)
      assert(2 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).count)
-    //追加数据模式
+    //当数据输出的位置已存在时,在文件后面追加
     df2.write.mode(SaveMode.Append).jdbc(url, "TEST.APPENDTEST", new Properties)
     //插入1行2列数据,
     assert(3 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).count)
@@ -157,7 +158,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     df.write.jdbc(url1, "TEST.TRUNCATETEST", properties)
     //2行数据
     assert(2 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).count)
-    //覆盖数据
+    //当数据输出的位置已存在时,重写
     df2.write.mode(SaveMode.Overwrite).jdbc(url1, "TEST.TRUNCATETEST", properties)
     //1行数据
     assert(1 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).count)
@@ -172,6 +173,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
 
     df.write.jdbc(url, "TEST.INCOMPATIBLETEST", new Properties)
     intercept[org.apache.spark.SparkException] {//追加三列数据报告
+    //当数据输出的位置已存在时，在文件后面追加
       df2.write.mode(SaveMode.Append).jdbc(url, "TEST.INCOMPATIBLETEST", new Properties)
     }
   }

@@ -99,6 +99,7 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
 
   test("save with data source and options, and load") {//保存与数据源和选项,并加载
     caseInsensitiveContext.conf.setConf(SQLConf.DEFAULT_DATA_SOURCE_NAME, "not a source name")
+    //当数据输出的位置已存在时,抛出此异常
     df.write.mode(SaveMode.ErrorIfExists).json(path.toString)
     checkLoad()
   }
@@ -118,12 +119,12 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
 
     df.write.json(path.toString)
     checkLoad()
-    //覆盖模式
+    //当数据输出的位置已存在时,重写
     df.write.mode(SaveMode.Overwrite).json(path.toString)
     checkLoad()
 
     // verify the append mode
-    //追加模式
+    //当数据输出的位置已存在时,在文件后面追加
     df.write.mode(SaveMode.Append).json(path.toString)
     val df2 = df.unionAll(df)
     df2.registerTempTable("jsonTable2")
