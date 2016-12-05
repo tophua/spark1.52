@@ -28,8 +28,10 @@ import org.apache.spark.sql.columnar.InMemoryRelation
 class QueryTest extends PlanTest {
 
   // Timezone is fixed to America/Los_Angeles for those timezone sensitive tests (timestamp_*)
+  //美国/洛杉矶,对于时区敏感重新设置时区
   TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
   // Add Locale setting
+  //添加本地设置
   Locale.setDefault(Locale.US)
 
   /**
