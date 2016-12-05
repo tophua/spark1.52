@@ -34,7 +34,7 @@ class SimpleScanSource extends RelationProvider {
     SimpleScan(parameters("from").toInt, parameters("TO").toInt)(sqlContext)
   }
 }
-
+//全表扫描 TableScan,@transient说明一个属性是临时的,不会被序列化
 case class SimpleScan(from: Int, to: Int)(@transient val sqlContext: SQLContext)
   extends BaseRelation with TableScan {
 

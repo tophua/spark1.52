@@ -30,11 +30,13 @@ import org.apache.spark.util.Utils
 
 class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext {
 
-  val url = "jdbc:h2:mem:testdb2"
+  //val url1 = "jdbc:h2:mem:testdb2"
+  val url1 = "jdbc:h2:tcp://localhost/~/testdb2"
   //val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
   //val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
   var conn: java.sql.Connection = null
-  val url1 = "jdbc:h2:mem:testdb3"
+   val url = "jdbc:h2:mem:testdb3"
+  //  val url = "jdbc:h2:tcp://localhost/~/testdb3?user=testUser&password=testPass"
   //val url1 = "jdbc:postgresql://192.168.10.198:3306/postgres"
   
   var conn1: java.sql.Connection = null
@@ -51,10 +53,14 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     //Utils.classForName("org.postgresql.Driver")
     
     conn = DriverManager.getConnection(url)    
-    conn.prepareStatement("create schema test").executeUpdate()
+     conn.prepareStatement("create schema test").executeUpdate()
+
     conn1 = DriverManager.getConnection(url1, properties)
-    conn1.prepareStatement("create schema test").executeUpdate()
-    conn1.prepareStatement("drop table if exists test.people").executeUpdate()
+    conn1.prepareStatement("create schema IF NOT EXISTS TEST").executeUpdate()
+    conn1.prepareStatement("drop table if exists TEST.people").executeUpdate()
+    conn1.prepareStatement("drop table if exists TEST.DROPTEST").executeUpdate()
+    conn1.prepareStatement("drop table if exists TEST.TRUNCATETEST").executeUpdate()
+    
     conn1.prepareStatement(
       "create table test.people (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
     conn1.prepareStatement("insert into test.people values ('fred', 1)").executeUpdate()
@@ -63,7 +69,7 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     conn1.prepareStatement(
       "create table test.people1 (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
     conn1.commit()
-    //conn1.commit()
+    conn.commit()
 
     sql(
       s"""

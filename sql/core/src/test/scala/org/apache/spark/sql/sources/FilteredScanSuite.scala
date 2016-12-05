@@ -25,7 +25,7 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
 
-
+//FilteredScan 指定列,并且还可以加一些过滤条件,只返回满足条件的数据
 class FilteredScanSource extends RelationProvider {
   override def createRelation(
       sqlContext: SQLContext,

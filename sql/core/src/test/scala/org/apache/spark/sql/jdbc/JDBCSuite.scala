@@ -32,11 +32,11 @@ import org.apache.spark.util.Utils
 class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext {
   import testImplicits._
 
-  val url = "jdbc:h2:mem:TEST0"
-  //val url = "jdbc:h2:tcp://localhost/~/TEST0"
+  //val url = "jdbc:h2:mem:TEST0"
+  val url = "jdbc:h2:tcp://localhost/~/TEST0"
   ///  val url = "jdbc:testUserql://192.168.10.198:3306/testUser"
-   val urlWithUserAndPass = "jdbc:h2:mem:TEST0;user=testUser;password=testPass"
-  //val urlWithUserAndPass = "jdbc:h2:tcp://localhost/~/TEST0;user=testUser;password=testPass"
+   //val urlWithUserAndPass = "jdbc:h2:mem:TEST0;user=testUser;password=testPass"
+  val urlWithUserAndPass = "jdbc:h2:tcp://localhost/~/TEST0;user=testUser;password=testPass"
   // val urlWithUserAndPass = "jdbc:testUserql://192.168.10.198:3306/testUser?user=testUser&password=testPass"
   var conn: java.sql.Connection = null
 
@@ -64,8 +64,15 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     //properties.setProperty("password", "testPass")
 
     conn = DriverManager.getConnection(url, properties)
-    //级别删除
-      conn.prepareStatement("create schema test").executeUpdate()
+    //级别删除       
+    conn.prepareStatement("create schema IF NOT EXISTS test").executeUpdate()
+    conn.prepareStatement("DROP TABLE  IF EXISTS TEST.PEOPLE").executeUpdate()
+    conn.prepareStatement("DROP TABLE  IF EXISTS TEST.FLTTYPES").executeUpdate()
+    conn.prepareStatement("DROP TABLE  IF EXISTS TEST.INTTYPES").executeUpdate()
+    conn.prepareStatement("DROP TABLE  IF EXISTS TEST.NULLTYPES").executeUpdate()
+    conn.prepareStatement("DROP TABLE  IF EXISTS TEST.PEOPLE").executeUpdate()
+    conn.prepareStatement("DROP TABLE  IF EXISTS TEST.STRTYPES").executeUpdate()
+    conn.prepareStatement("DROP TABLE  IF EXISTS TEST.TIMETYPES").executeUpdate()
     conn.prepareStatement(
       "create table test.people (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
     conn.prepareStatement("insert into test.people values ('fred', 1)").executeUpdate()
@@ -77,6 +84,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
 
     sql(
       //TEST.PEOPLE表名,对应的foobar临时表
+        //注意使用jdbc方式
       s"""
         |CREATE TEMPORARY TABLE foobar
         |USING org.apache.spark.sql.jdbc
@@ -137,7 +145,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       + "'1996-01-01', '2002-02-20 11:22:33.543543543')").executeUpdate()
     conn.prepareStatement("insert into test.timetypes values ('12:34:56', "
       + "null, '2002-02-20 11:22:33.543543543')").executeUpdate()
-    //conn.commit()
+    conn.commit()
     sql(
       s"""
         |CREATE TEMPORARY TABLE timetypes
@@ -152,7 +160,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       + "1.0000000000000002220446049250313080847263336181640625, "
       + "1.00000011920928955078125, "
       + "123456789012345.543215432154321)").executeUpdate()
-    //conn.commit()
+    conn.commit()
     sql(
       s"""
         |CREATE TEMPORARY TABLE flttypes
@@ -290,7 +298,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
   test("Partitioning via JDBCPartitioningInfo API") {//通过划分分区
     assert(
         /**
-         * 参数theid分区的字段
+         * 参数theid分区的字段,将用于分区的整数类型的列的名称
          * 参数0分区的下界
          *     4分区的上界
          *     3分区的个数
@@ -441,6 +449,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
   test("Pass extra properties via OPTIONS") {//通过选项传递额外的属性
     // We set rowId to false during setup, which means that _ROWID_ column should be absent from
     // all tables. If rowId is true (default), the query below doesn't throw an exception.
+    //如果rowId为true,查询条件不会抛出异常
     intercept[JdbcSQLException] {
       sql(
         s"""

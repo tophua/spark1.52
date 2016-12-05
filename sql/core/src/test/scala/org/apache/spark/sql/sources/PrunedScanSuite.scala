@@ -23,7 +23,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
-//Pruned 修剪
+//PrunedScan 可以指定列，其他的列数据源可以不用返回
 class PrunedScanSource extends RelationProvider {
   override def createRelation(
       sqlContext: SQLContext,
