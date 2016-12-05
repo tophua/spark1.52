@@ -42,6 +42,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
 
   override def afterAll(): Unit = {
     try {
+      //删除临时表
       caseInsensitiveContext.dropTempTable("jt")
     } finally {
       super.afterAll()
@@ -49,11 +50,13 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
   }
 
   after {
+    //递归删除目录文件
     Utils.deleteRecursively(path)
   }
 
-  test("CREATE TEMPORARY TABLE AS SELECT") {//创建临时表作为选择
+  test("CREATE TEMPORARY TABLE AS SELECT") {//创建临时表作为选择的字段
     sql(
+        //注意USING json格式
       s"""
         |CREATE TEMPORARY TABLE jsonTable
         |USING json
@@ -74,8 +77,9 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
     val childPath = new File(path.toString, "child")
     path.mkdir()
     childPath.createNewFile()
+    //设置只读权限
     path.setWritable(false)
-
+    //如果文件夹不能写,报错
     val e = intercept[IOException] {
       sql(
         s"""
@@ -109,6 +113,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
       sql("SELECT a, b FROM jt").collect())
 
     val message = intercept[DDLException]{
+      //IF NOT EXISTS 不充许覆盖临时表
       sql(
         s"""
         |CREATE TEMPORARY TABLE IF NOT EXISTS jsonTable
@@ -124,6 +129,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
       "CREATE TEMPORARY TABLE IF NOT EXISTS should not be allowed.")
 
     // Overwrite the temporary table.
+    //覆盖临时表
     sql(
       s"""
         |CREATE TEMPORARY TABLE jsonTable
@@ -139,6 +145,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
 
     caseInsensitiveContext.dropTempTable("jsonTable")
     // Explicitly delete the data.
+    //显式删除数据
     if (path.exists()) Utils.deleteRecursively(path)
 
     sql(
@@ -149,8 +156,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
         |  path '${path.toString}'
         |) AS
         |SELECT b FROM jt
-      """.stripMargin)
-
+      """.stripMargin)     
     checkAnswer(
       sql("SELECT * FROM jsonTable"),
       sql("SELECT b FROM jt").collect())
@@ -161,6 +167,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
   test("CREATE TEMPORARY TABLE AS SELECT with IF NOT EXISTS is not allowed") {
     val message = intercept[DDLException]{
       sql(
+          // IF NOT EXISTS 如果不存在
         s"""
         |CREATE TEMPORARY TABLE IF NOT EXISTS jsonTable
         |USING json
@@ -190,6 +197,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
   }
   //在查询时,不允许在表上写入
   test("it is not allowed to write to a table while querying it.") {
+    //path注意path使用单引号,引入路径
     sql(
       s"""
         |CREATE TEMPORARY TABLE jsonTable

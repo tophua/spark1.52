@@ -23,15 +23,17 @@ import org.apache.spark.sql.types.{StringType, StructField, StructType}
 
 
 // please note that the META-INF/services had to be modified for the test directory for this to work
+//请注意,这个服务必须改进这项工作的测试目录
+//数据库定义语言数据源加载
 class DDLSourceLoadSuite extends DataSourceTest with SharedSQLContext {
 
-  test("data sources with the same name") {//同名的数据源
+  test("data sources with the same name") {//相同的名字的数据源
     intercept[RuntimeException] {
       caseInsensitiveContext.read.format("Fluet da Bomb").load()
     }
   }
 
-  test("load data source from format alias") {//从格式别名加载数据源
+  test("load data source from format alias") {//从格式化别名加载数据源
     caseInsensitiveContext.read.format("gathering quorum").load().schema ==
     //StructType代表一张表,StructField代表一个字段
       StructType(Seq(StructField("stringType", StringType, nullable = false)))

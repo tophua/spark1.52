@@ -19,12 +19,14 @@ package org.apache.spark.sql.sources
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.execution.datasources.ResolvedDataSource
-  //解决数据源套件
+  //解析数据源套件
 class ResolvedDataSourceSuite extends SparkFunSuite {
 
   test("jdbc") {
     assert(
+        //解析JDBC数据源
       ResolvedDataSource.lookupDataSource("jdbc") ===
+        //默认使用jdbc.DefaultSource类型
       classOf[org.apache.spark.sql.execution.datasources.jdbc.DefaultSource])
     assert(
       ResolvedDataSource.lookupDataSource("org.apache.spark.sql.execution.datasources.jdbc") ===
@@ -36,7 +38,9 @@ class ResolvedDataSourceSuite extends SparkFunSuite {
 
   test("json") {
     assert(
+        //解析json数据源
       ResolvedDataSource.lookupDataSource("json") ===
+         //默认使用json.DefaultSource类型
       classOf[org.apache.spark.sql.execution.datasources.json.DefaultSource])
     assert(
       ResolvedDataSource.lookupDataSource("org.apache.spark.sql.execution.datasources.json") ===
@@ -48,7 +52,9 @@ class ResolvedDataSourceSuite extends SparkFunSuite {
 
   test("parquet") {
     assert(
+        //解析parquet数据源
       ResolvedDataSource.lookupDataSource("parquet") ===
+        //默认使用parquet.DefaultSource类型
       classOf[org.apache.spark.sql.execution.datasources.parquet.DefaultSource])
     assert(
       ResolvedDataSource.lookupDataSource("org.apache.spark.sql.execution.datasources.parquet") ===

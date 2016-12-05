@@ -57,6 +57,8 @@ case class SimpleFilteredScan(from: Int, to: Int)(@transient val sqlContext: SQL
 
     // Predicate test on integer column
     //测试整数列
+    //Int => Boolean表示一个函数的输入参数类型是Int,返回值类型是Boolean
+    //=方法实现
     def translateFilterOnA(filter: Filter): Int => Boolean = filter match {
       case EqualTo("a", v) => (a: Int) => a == v
       case EqualNullSafe("a", v) => (a: Int) => a == v
@@ -76,6 +78,7 @@ case class SimpleFilteredScan(from: Int, to: Int)(@transient val sqlContext: SQL
     }
 
     // Predicate test on string column
+    //字符串列的断言测试
     def translateFilterOnC(filter: Filter): String => Boolean = filter match {
       case StringStartsWith("c", v) => _.startsWith(v)
       case StringEndsWith("c", v) => _.endsWith(v)

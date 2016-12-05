@@ -35,9 +35,11 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
 
   override def beforeAll(): Unit = {
     super.beforeAll()
+    //创建一个不区分大小写的数据源,获得默认数据源名称
     originalDefaultSource = caseInsensitiveContext.conf.defaultDataSourceName
-
+    //创建Json数据源
     path = Utils.createTempDir()
+    //删除临时文件
     path.delete()
 
     val rdd = sparkContext.parallelize((1 to 10).map(i => s"""{"a":$i, "b":"str${i}"}"""))
@@ -56,7 +58,7 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
   after {
     Utils.deleteRecursively(path)
   }
-
+  //检查加载数据表
   def checkLoad(expectedDF: DataFrame = df, tbl: String = "jsonTable"): Unit = {
     caseInsensitiveContext.conf.setConf(
       SQLConf.DEFAULT_DATA_SOURCE_NAME, "org.apache.spark.sql.json")
@@ -116,11 +118,12 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
 
     df.write.json(path.toString)
     checkLoad()
-
+    //覆盖模式
     df.write.mode(SaveMode.Overwrite).json(path.toString)
     checkLoad()
 
     // verify the append mode
+    //追加模式
     df.write.mode(SaveMode.Append).json(path.toString)
     val df2 = df.unionAll(df)
     df2.registerTempTable("jsonTable2")

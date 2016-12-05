@@ -21,7 +21,7 @@ import org.apache.spark.sql.{Row, QueryTest}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.util.Utils
-
+//分区写测试
 class PartitionedWriteSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

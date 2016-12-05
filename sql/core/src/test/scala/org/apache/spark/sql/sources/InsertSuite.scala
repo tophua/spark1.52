@@ -30,13 +30,16 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
+    //创建json保存路径
     path = Utils.createTempDir()
     val rdd = sparkContext.parallelize((1 to 10).map(i => s"""{"a":$i, "b":"str$i"}"""))
+    //json参数rdd: RDD[String]类型
     caseInsensitiveContext.read.json(rdd).registerTempTable("jt")
     sql(
+     //USING使用org.apache.spark.sql.json.DefaultSource或者json都可以
       s"""
         |CREATE TEMPORARY TABLE jsonTable (a int, b string)
-        |USING org.apache.spark.sql.json.DefaultSource
+        |USING json
         |OPTIONS (
         |  path '${path.toString}'
         |)
@@ -45,8 +48,11 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
 
   override def afterAll(): Unit = {
     try {
+      
+      //删除临时表
       caseInsensitiveContext.dropTempTable("jsonTable")
       caseInsensitiveContext.dropTempTable("jt")
+      //递归删除json数据保存路径
       Utils.deleteRecursively(path)
     } finally {
       super.afterAll()
@@ -54,6 +60,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
   }
 
   test("Simple INSERT OVERWRITE a JSONRelation") {//简单的插入覆盖一个JSON的关系
+    //使用INSERT OVERWRITE TABLE插入数据
     sql(
       s"""
         |INSERT OVERWRITE TABLE jsonTable SELECT a, b FROM jt
@@ -65,17 +72,32 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
     )
   }
 
-  test("PreInsert casting and renaming") {//预插入强另类型转换和重命名
+  test("PreInsert casting and renaming") {//插入强类型转换和重命名
     sql(
       s"""
         |INSERT OVERWRITE TABLE jsonTable SELECT a * 2, a * 4 FROM jt
       """.stripMargin)
-
+      /**
+       *+---+---+
+        |  a|  b|
+        +---+---+
+        |  2|  4|
+        |  4|  8|
+        |  6| 12|
+        |  8| 16|
+        | 10| 20|
+        | 12| 24|
+        | 14| 28|
+        | 16| 32|
+        | 18| 36|
+        | 20| 40|
+        +---+---+*/
+  sql("SELECT a, b FROM jsonTable").show(1)
     checkAnswer(
       sql("SELECT a, b FROM jsonTable"),
       (1 to 10).map(i => Row(i * 2, s"${i * 4}"))
     )
-
+    //重命名字段
     sql(
       s"""
         |INSERT OVERWRITE TABLE jsonTable SELECT a * 4 AS A, a * 6 as c FROM jt
@@ -86,7 +108,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
       (1 to 10).map(i => Row(i * 4, s"${i * 6}"))
     )
   }
-
+  //产生相同的列,是不充许的.
   test("SELECT clause generating a different number of columns is not allowed.") {
     val message = intercept[RuntimeException] {
       sql(
@@ -111,8 +133,10 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
     )
 
     // Writing the table to less part files.
+    //写到表较少的部分文件
     val rdd1 = sparkContext.parallelize((1 to 10).map(i => s"""{"a":$i, "b":"str$i"}"""), 5)
     caseInsensitiveContext.read.json(rdd1).registerTempTable("jt1")
+    //使用RDD方式直接插入表数据
     sql(
       s"""
          |INSERT OVERWRITE TABLE jsonTable SELECT a, b FROM jt1
@@ -123,7 +147,9 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
     )
 
     // Writing the table to more part files.
+    //写到表更多的部分文件
     val rdd2 = sparkContext.parallelize((1 to 10).map(i => s"""{"a":$i, "b":"str$i"}"""), 10)
+    //读取RDD[String]数据
     caseInsensitiveContext.read.json(rdd2).registerTempTable("jt2")
     sql(
       s"""
@@ -148,6 +174,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
   }
 
   test("INSERT INTO JSONRelation for now") {
+    //插入覆盖表数据
     sql(
       s"""
       |INSERT OVERWRITE TABLE jsonTable SELECT a, b FROM jt
@@ -156,7 +183,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
       sql("SELECT a, b FROM jsonTable"),
       sql("SELECT a, b FROM jt").collect()
     )
-
+   //插入表数据,注意没有OVERWRITE
     sql(
       s"""
          |INSERT INTO TABLE jsonTable SELECT a, b FROM jt
@@ -166,7 +193,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
       sql("SELECT a, b FROM jt UNION ALL SELECT a, b FROM jt").collect()
     )
   }
-
+  //在查询时,不允许在表上写入
   test("it is not allowed to write to a table while querying it.") {
     val message = intercept[AnalysisException] {
       sql(
@@ -188,6 +215,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
       """.stripMargin)
     // Cached Query Execution 缓存查询执行
     caseInsensitiveContext.cacheTable("jsonTable")
+    //判断是否存在缓存表数据
     assertCached(sql("SELECT * FROM jsonTable"))
     checkAnswer(
       sql("SELECT * FROM jsonTable"),

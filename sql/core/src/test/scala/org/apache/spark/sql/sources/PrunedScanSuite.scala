@@ -23,7 +23,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
-
+//Pruned 修剪
 class PrunedScanSource extends RelationProvider {
   override def createRelation(
       sqlContext: SQLContext,
@@ -44,9 +44,12 @@ case class SimplePrunedScan(from: Int, to: Int)(@transient val sqlContext: SQLCo
   override def buildScan(requiredColumns: Array[String]): RDD[Row] = {
     val rowBuilders = requiredColumns.map {
       case "a" => (i: Int) => Seq(i)
-      case "b" => (i: Int) => Seq(i * 2)
+      case "b" => (i: Int) => {
+        //println(">>>>>>>"+i * 2)
+        Seq(i * 2)
+      }
     }
-
+    //分区数
     sqlContext.sparkContext.parallelize(from to to).map(i =>
       Row.fromSeq(rowBuilders.map(_(i)).reduceOption(_ ++ _).getOrElse(Seq.empty)))
   }
@@ -66,12 +69,28 @@ class PrunedScanSuite extends DataSourceTest with SharedSQLContext {
         |  to '10'
         |)
       """.stripMargin)
+     
   }
-
+/**
+ * +---+---+
+    |  a|  b|
+    +---+---+
+    |  1|  2|
+    |  2|  4|
+    |  3|  6|
+    |  4|  8|
+    |  5| 10|
+    |  6| 12|
+    |  7| 14|
+    |  8| 16|
+    |  9| 18|
+    | 10| 20|
+    +---+---+
+ **/
   sqlTest(
     "SELECT * FROM oneToTenPruned",
     (1 to 10).map(i => Row(i, i * 2)).toSeq)
-
+  //sql("SELECT * FROM oneToTenPruned").show()
   sqlTest(
     "SELECT a, b FROM oneToTenPruned",
     (1 to 10).map(i => Row(i, i * 2)).toSeq)
