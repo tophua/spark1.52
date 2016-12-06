@@ -167,6 +167,7 @@ private[sql] object InferSchema {
 
   /**
    * Returns the most general data type for two given data types.
+   * 返回两个给定的数据类型最常用的数据类型
    */
   private[json] def compatibleType(t1: DataType, t2: DataType): DataType = {
     HiveTypeCoercion.findTightestCommonTypeOfTwo(t1, t2).getOrElse {

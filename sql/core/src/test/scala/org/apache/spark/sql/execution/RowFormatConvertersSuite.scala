@@ -24,14 +24,18 @@ import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Attribute,
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types.{GenericArrayData, ArrayType, StringType}
 import org.apache.spark.unsafe.types.UTF8String
-
+/**
+ * 行格式化转换测试
+ */
 class RowFormatConvertersSuite extends SparkPlanTest with SharedSQLContext {
 
   private def getConverters(plan: SparkPlan): Seq[SparkPlan] = plan.collect {
+    //转换不安全
     case c: ConvertToUnsafe => c
+    //转换安全
     case c: ConvertToSafe => c
   }
-
+ 
   private val outputsSafe = ExternalSort(Nil, false, PhysicalRDD(Seq.empty, null, "name"))
   assert(!outputsSafe.outputsUnsafeRows)
   private val outputsUnsafe = TungstenSort(Nil, false, PhysicalRDD(Seq.empty, null, "name"))

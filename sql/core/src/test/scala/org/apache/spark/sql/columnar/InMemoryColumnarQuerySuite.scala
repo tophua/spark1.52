@@ -92,7 +92,16 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
   test("SPARK-2729 regression: timestamp data type") {//时间戳类型
     val timestamps = (0 to 3).map(i => Tuple1(new Timestamp(i))).toDF("time")
     timestamps.registerTempTable("timestamps")
-
+    /**
+     *+--------------------+
+      |                time|
+      +--------------------+
+      |1969-12-31 16:00:...|
+      |1969-12-31 16:00:...|
+      |1969-12-31 16:00:...|
+      |1969-12-31 16:00:...|
+      +--------------------+*/
+    sql("SELECT time FROM timestamps").show()
     checkAnswer(
       sql("SELECT time FROM timestamps"),
       timestamps.collect().toSeq)
@@ -105,6 +114,16 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
   }
 //批理的列缓冲区构建应与空分区
   test("SPARK-3320 regression: batched column buffer building should work with empty partitions") {
+    /**
+     *+---+
+      |  i|
+      +---+
+      |  1|
+      |  2|
+      |  3|
+      |  4|
+      +---+*/
+     sql("SELECT * FROM withEmptyParts").show()
     checkAnswer(
       sql("SELECT * FROM withEmptyParts"),
       withEmptyParts.collect().toSeq.map(Row.fromTuple))

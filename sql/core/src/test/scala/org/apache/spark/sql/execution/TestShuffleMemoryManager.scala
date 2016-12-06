@@ -21,8 +21,10 @@ import org.apache.spark.shuffle.ShuffleMemoryManager
 
 /**
  * A [[ShuffleMemoryManager]] that can be controlled to run out of memory.
+ * 可以控制运行时的内存
  */
 class TestShuffleMemoryManager extends ShuffleMemoryManager(Long.MaxValue, 4 * 1024 * 1024) {
+  //判断是否内存溢出
   private var oom = false
 
   override def tryToAcquire(numBytes: Long): Long = {

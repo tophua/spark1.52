@@ -43,6 +43,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
     val planned =
       plannedOption.getOrElse(
         fail(s"Could query play aggregation query $query. Is it an aggregation query?"))
+    //使用case 
     val aggregations = planned.collect { case n if n.nodeName contains "Aggregate" => n }
 
     // For the new aggregation code path, there will be three aggregate operator for

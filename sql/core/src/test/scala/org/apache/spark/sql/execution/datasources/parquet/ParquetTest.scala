@@ -74,13 +74,13 @@ private[sql] trait ParquetTest extends SQLTestUtils {
 
   protected def makeParquetFile[T <: Product: ClassTag: TypeTag](
       data: Seq[T], path: File): Unit = {
-       //当数据输出的位置已存在时,重写
+       //褰撴暟鎹緭鍑虹殑浣嶇疆宸插瓨鍦ㄦ椂,閲嶅啓
     _sqlContext.createDataFrame(data).write.mode(SaveMode.Overwrite).parquet(path.getCanonicalPath)
   }
 
   protected def makeParquetFile[T <: Product: ClassTag: TypeTag](
       df: DataFrame, path: File): Unit = {
-       //当数据输出的位置已存在时,重写
+       //褰撴暟鎹緭鍑虹殑浣嶇疆宸插瓨鍦ㄦ椂,閲嶅啓
     df.write.mode(SaveMode.Overwrite).parquet(path.getCanonicalPath)
   }
 

@@ -30,7 +30,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.util.Utils
 
 /**
- * A test suite that tests various Parquet queries.
+ * A test suite that tests various Parquet queries. 
  */
 class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext {
 
@@ -213,7 +213,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
       val path = dir.getCanonicalPath
 
       def append(df: DataFrame): Unit = {
-      //当数据输出的位置已存在时，在文件后面追加
+      //锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷位锟斤拷锟窖达拷锟斤拷时锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷追锟斤拷
         df.write.mode(SaveMode.Append).parquet(path)
       }
 
@@ -440,7 +440,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
         .coalesce(1)
 
       df1.write.parquet(path)
-       //当数据输出的位置已存在时，在文件后面追加
+       //锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷位锟斤拷锟窖达拷锟斤拷时锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷追锟斤拷
       df2.write.mode(SaveMode.Append).parquet(path)
 
       val userDefinedSchema = new StructType()
@@ -472,7 +472,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
         .range(1, 2)
         .selectExpr("NAMED_STRUCT('a', id, 'b', id + 1, 'c', id + 2) AS s")
         .coalesce(1)
-	 //当数据输出的位置已存在时，在文件后面追加
+	 //锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷位锟斤拷锟窖达拷锟斤拷时锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷追锟斤拷
       df1.write.mode(SaveMode.Append).parquet(path)
       df2.write.mode(SaveMode.Append).parquet(path)
 
@@ -505,7 +505,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
             |) AS s
           """.stripMargin)
         .coalesce(1)
-	 //当数据输出的位置已存在时，在文件后面追加
+	 //锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷位锟斤拷锟窖达拷锟斤拷时锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷追锟斤拷
       df.write.mode(SaveMode.Append).parquet(path)
 
       val userDefinedSchema =

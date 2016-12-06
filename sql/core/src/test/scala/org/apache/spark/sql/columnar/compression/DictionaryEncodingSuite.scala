@@ -67,6 +67,7 @@ class DictionaryEncodingSuite extends SparkFunSuite {
         val buffer = builder.build()
         val headerSize = CompressionScheme.columnHeaderSize(buffer)
         // 4 extra bytes for dictionary size
+        // 4个额外的字节大小的字典
         val dictionarySize = 4 + rows.map(columnType.actualSize(_, 0)).sum
         // 2 bytes for each `Short`
         val compressedSize = 4 + dictionarySize + 2 * inputSeq.length

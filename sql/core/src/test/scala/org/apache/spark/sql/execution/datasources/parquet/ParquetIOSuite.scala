@@ -295,7 +295,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
   test("save - overwrite") {
     withParquetFile((1 to 10).map(i => (i, i.toString))) { file =>
       val newData = (11 to 20).map(i => (i, i.toString))
-       //µ±Êı¾İÊä³öµÄÎ»ÖÃÒÑ´æÔÚÊ±,ÖØĞ´
+       //å½“æ•°æ®è¾“å‡ºçš„ä½ç½®å·²å­˜åœ¨æ—¶,é‡å†™
       newData.toDF().write.format("parquet").mode(SaveMode.Overwrite).save(file)
       checkAnswer(sqlContext.read.parquet(file), newData.map(Row.fromTuple))
     }
@@ -305,7 +305,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     val data = (1 to 10).map(i => (i, i.toString))
     withParquetFile(data) { file =>
       val newData = (11 to 20).map(i => (i, i.toString))
-      //µ±Êı¾İÊä³öµÄÎ»ÖÃÒÑ´æÔÚÊ±,²»Ö´ĞĞÈÎºÎ²Ù×÷
+      //å½“æ•°æ®è¾“å‡ºçš„ä½ç½®å·²å­˜åœ¨æ—¶,ä¸æ‰§è¡Œä»»ä½•æ“ä½œ
       newData.toDF().write.format("parquet").mode(SaveMode.Ignore).save(file)
       checkAnswer(sqlContext.read.parquet(file), data.map(Row.fromTuple))
     }
@@ -316,7 +316,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     withParquetFile(data) { file =>
       val newData = (11 to 20).map(i => (i, i.toString))
       val errorMessage = intercept[Throwable] {
-      //µ±Êı¾İÊä³öµÄÎ»ÖÃÒÑ´æÔÚÊ±£¬Å×³ö´ËÒì³£
+      //å½“æ•°æ®è¾“å‡ºçš„ä½ç½®å·²å­˜åœ¨æ—¶,åœ¨æ–‡ä»¶åé¢è¿½åŠ 
         newData.toDF().write.format("parquet").mode(SaveMode.ErrorIfExists).save(file)
       }.getMessage
       assert(errorMessage.contains("already exists"))
@@ -327,7 +327,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     val data = (1 to 10).map(i => (i, i.toString))
     withParquetFile(data) { file =>
       val newData = (11 to 20).map(i => (i, i.toString))
-      //µ±Êı¾İÊä³öµÄÎ»ÖÃÒÑ´æÔÚÊ±£¬ÔÚÎÄ¼şºóÃæ×·¼Ó
+      //å½“æ•°æ®è¾“å‡ºçš„ä½ç½®å·²å­˜åœ¨æ—¶,åœ¨æ–‡ä»¶åé¢è¿½åŠ 
       newData.toDF().write.format("parquet").mode(SaveMode.Append).save(file)
       checkAnswer(sqlContext.read.parquet(file), (data ++ newData).map(Row.fromTuple))
     }

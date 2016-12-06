@@ -35,6 +35,7 @@ package org.apache.spark.sql.execution.datasources.json;
   private  scala.Function2<org.apache.spark.sql.types.DataType, org.apache.spark.sql.types.DataType, org.apache.spark.sql.types.DataType> compatibleRootType () { throw new RuntimeException(); }
   /**
    * Returns the most general data type for two given data types.
+   * &#x8fd4;&#x56de;&#x4e24;&#x4e2a;&#x7ed9;&#x5b9a;&#x7684;&#x6570;&#x636e;&#x7c7b;&#x578b;&#x6700;&#x5e38;&#x7528;&#x7684;&#x6570;&#x636e;&#x7c7b;&#x578b;
    * @param t1 (undocumented)
    * @param t2 (undocumented)
    * @return (undocumented)

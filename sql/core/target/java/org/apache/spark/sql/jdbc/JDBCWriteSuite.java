@@ -1,9 +1,9 @@
 package org.apache.spark.sql.jdbc;
 public  class JDBCWriteSuite extends org.apache.spark.SparkFunSuite implements org.scalatest.BeforeAndAfter, org.apache.spark.sql.test.SharedSQLContext {
   public   JDBCWriteSuite () { throw new RuntimeException(); }
-  public  java.lang.String url () { throw new RuntimeException(); }
-  public  java.sql.Connection conn () { throw new RuntimeException(); }
   public  java.lang.String url1 () { throw new RuntimeException(); }
+  public  java.sql.Connection conn () { throw new RuntimeException(); }
+  public  java.lang.String url () { throw new RuntimeException(); }
   public  java.sql.Connection conn1 () { throw new RuntimeException(); }
   public  java.util.Properties properties () { throw new RuntimeException(); }
   private  org.apache.spark.SparkContext sc () { throw new RuntimeException(); }

@@ -35,7 +35,7 @@ import org.apache.spark.util.Utils
 class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
   import testImplicits._
 
-  test("Type promotion") {//类型提升
+  test("Type promotion") {//类型转换
     //期望类型,实际类型
     def checkTypePromotion(expected: Any, actual: Any) {
       assert(expected.getClass == actual.getClass,
@@ -114,7 +114,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
         s"Expected $expected as the most general data type for $t1 and $t2, found $actual")
     }
 
-    // NullType
+    // NullType,测试NullType
     checkDataType(NullType, BooleanType, BooleanType)
     checkDataType(NullType, IntegerType, IntegerType)
     checkDataType(NullType, LongType, LongType)
@@ -256,11 +256,18 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       StructField("long", LongType, true) ::
       StructField("null", StringType, true) ::
       StructField("string", StringType, true) :: Nil)
-
+     //获得字段类型
     assert(expectedSchema === jsonDF.schema)
-
+    //必须注意临时表
+    /**
+     *+--------------------+-------+--------------------+-------+-----------+----+--------------------+
+      |          bigInteger|boolean|              double|integer|       long|null|              string|
+      +--------------------+-------+--------------------+-------+-----------+----+--------------------+
+      |92233720368547758070|   true|1.797693134862315...|     10|21474836470|null|this is a simple ...|
+      +--------------------+-------+--------------------+-------+-----------+----+--------------------+
+     */
     jsonDF.registerTempTable("jsonTable")
-
+     sql("select * from jsonTable").show()
     checkAnswer(
       sql("select * from jsonTable"),
       Row(new java.math.BigDecimal("92233720368547758070"),
@@ -326,13 +333,21 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
 
     // Access elements of an array of arrays.
     //数组的访问元素
+    /**
+     *+--------------------+--------------------+--------------------+-------------------+--------------------+--------------------+--------------------+--------------------+-------------+--------------------+--------------------+---------------------+
+      |       arrayOfArray1|       arrayOfArray2|   arrayOfBigInteger|     arrayOfBoolean|       arrayOfDouble|      arrayOfInteger|         arrayOfLong|         arrayOfNull|arrayOfString|       arrayOfStruct|              struct|structWithArrayFields|
+      +--------------------+--------------------+--------------------+-------------------+--------------------+--------------------+--------------------+--------------------+-------------+--------------------+--------------------+---------------------+
+      |[WrappedArray(1, ...|[WrappedArray(1.0...|[9223372036854775...|[true, false, true]|[1.2, 1.797693134...|[1, 2147483647, -...|[21474836470, 922...|[null, null, null...| [str1, str2]|[[true,str1,null]...|[true,92233720368...| [WrappedArray(4, ...|
+      +--------------------+--------------------+--------------------+-------------------+--------------------+--------------------+--------------------+--------------------+-------------+--------------------+--------------------+---------------------+ */
+     sql("select * from jsonTable").show()
     checkAnswer(
+      //arrayOfArray2[0]的访问第一个数组元素,arrayOfArray2[2]第三个数组元素
       sql("select arrayOfArray1[0], arrayOfArray1[1] from jsonTable"),
       Row(Seq("1", "2", "3"), Seq("str1", "str2"))
     )
 
     // Access elements of an array of arrays.
-    //数组的访问元素
+    //arrayOfArray2[0]的访问第一个数组元素,arrayOfArray2[2]第三个数组元素
     checkAnswer(
       sql("select arrayOfArray2[0], arrayOfArray2[1] from jsonTable"),
       Row(Seq(1.0, 2.0, 3.0), Seq(1.1, 2.1, 3.1))
@@ -341,6 +356,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     // Access elements of an array inside a filed with the type of ArrayType(ArrayType).
     //在向数组类型的数组访问元素
     checkAnswer(
+     //arrayOfArray1[1][1]的访问第二数组第二个元素,arrayOfArray2[1][1]的访问第二数组第二个元素
       sql("select arrayOfArray1[1][1], arrayOfArray2[1][1] from jsonTable"),
       Row("str2", 2.1)
     )
@@ -358,7 +374,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     )
 
     // Access a struct and fields inside of it.
-    //访问里面结构和字段
+    //访问结构内的字段
     checkAnswer(
       sql("select struct, struct.field1, struct.field2 from jsonTable"),
       Row(
@@ -413,7 +429,17 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     assert(expectedSchema === jsonDF.schema)
 
     jsonDF.registerTempTable("jsonTable")
-
+    /**
+     *+--------+-----------+--------------------+--------------+--------------------+--------+
+      |num_bool|  num_num_1|           num_num_2|     num_num_3|             num_str|str_bool|
+      +--------+-----------+--------------------+--------------+--------------------+--------+
+      |    true|         11|                null|           1.1|                13.1|    str1|
+      |      12|       null|    2.14748364709E10|          null|                null|    true|
+      |   false|21474836470|9.223372036854776E19|         100.0|                str1|   false|
+      |    null|21474836570|                 1.1|2.147483647E10|92233720368547758070|    null|
+      +--------+-----------+--------------------+--------------+--------------------+--------+
+     */
+    sql("select * from jsonTable").show()
     checkAnswer(
       sql("select * from jsonTable"),
       Row("true", 11L, null, 1.1, "13.1", "str1") ::
@@ -424,6 +450,13 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
 
     // Number and Boolean conflict: resolve the type as number in this query.
     //数和布尔冲突:在这个查询中解析类型为号
+    //sql("select num_bool - 10 from jsonTable where num_bool > 11").show()
+    /**
+     *+---+
+      |_c0|
+      +---+
+      |2.0|
+      +---+*/
     checkAnswer(
       sql("select num_bool - 10 from jsonTable where num_bool > 11"),
       Row(2)
@@ -457,7 +490,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     )
 
     // Number and String conflict: resolve the type as number in this query.
-    //数字和字符串冲突:在这个查询中解决类型为数字
+    //数字和字符串冲突:解析数字类型
     checkAnswer(
       sql("select num_str + 1.2 from jsonTable where num_str > 14"),
       Row(BigDecimal("92233720368547758071.2"))
@@ -470,7 +503,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     )
 
     // String and Boolean conflict: resolve the type as string.
-    //字符串和布尔冲突:解析为字符串的类型
+    //字符串和布尔冲突:解析字符串的类型
     checkAnswer(
       sql("select * from jsonTable where str_bool = 'str1'"),
       Row("true", 11L, null, 1.1, "13.1", "str1")
@@ -599,6 +632,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     assert(expectedSchema === jsonDF.schema)
 
     jsonDF.registerTempTable("jsonTable")
+    jsonDF.show()
   }
 
   test("jsonFile should be based on JSONRelation") {//JSON文件应基于JSON的关系
@@ -630,11 +664,15 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     assert(relationWithSchema.samplingRatio > 0.99)
   }
 
-  test("Loading a JSON dataset from a text file") {//从文本文件加载JSON数据
+  test("Loading a JSON dataset from a text file") {//加载JSON数据来自文本文件
     val dir = Utils.createTempDir()
     dir.delete()
     val path = dir.getCanonicalPath
-    primitiveFieldAndType.map(record => record.replaceAll("\n", " ")).saveAsTextFile(path)
+    //\n换行
+    primitiveFieldAndType.map(record =>
+      //执行替换空格
+         record.replaceAll("\n", " ")    
+        ).saveAsTextFile(path)
     val jsonDF = ctx.read.json(path)
 
     val expectedSchema = StructType(
@@ -661,13 +699,13 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       "this is a simple string.")
     )
   }  
-  //从SQL文本文件加载JSON数据
+  //从文本文件加载JSON数据自动转换SQL
   test("Loading a JSON dataset from a text file with SQL") {
     val dir = Utils.createTempDir()
     dir.delete()
     val path = dir.getCanonicalPath
     primitiveFieldAndType.map(record => record.replaceAll("\n", " ")).saveAsTextFile(path)
-
+    //注意没有 ctx.read.json(path)读取数据
     sql(
       s"""
         |CREATE TEMPORARY TABLE jsonTableSQL
@@ -703,7 +741,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       StructField("long", LongType, true) ::
       StructField("null", StringType, true) ::
       StructField("string", StringType, true) :: Nil)
-
+      //使用模式方式加载数据
     val jsonDF1 = ctx.read.schema(schema).json(path)
 
     assert(schema === jsonDF1.schema)
@@ -745,7 +783,17 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     val jsonWithSimpleMap = ctx.read.schema(schemaWithSimpleMap).json(mapType1)
 
     jsonWithSimpleMap.registerTempTable("jsonWithSimpleMap")
-
+    /**
+     *+-------------------+
+      |                map|
+      +-------------------+
+      |        Map(a -> 1)|
+      |        Map(b -> 2)|
+      |        Map(c -> 3)|
+      |Map(c -> 1, d -> 4)|
+      |     Map(e -> null)|
+      +-------------------+*/
+    sql("select map from jsonWithSimpleMap").show()
     checkAnswer(
       sql("select map from jsonWithSimpleMap"),
       Row(Map("a" -> 1)) ::
@@ -754,8 +802,20 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       Row(Map("c" -> 1, "d" -> 4)) ::
       Row(Map("e" -> null)) :: Nil
     )
-
+    /**
+     *+----+
+      | _c0|
+      +----+
+      |null|
+      |null|
+      |   3|
+      |   1|
+      |null|
+      +----+
+     */
+  sql("select map['c'] from jsonWithSimpleMap").show()
     checkAnswer(
+      //map类型查询
       sql("select map['c'] from jsonWithSimpleMap"),
       Row(null) ::
       Row(null) ::
@@ -773,7 +833,19 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     val jsonWithComplexMap = ctx.read.schema(schemaWithComplexMap).json(mapType2)
 
     jsonWithComplexMap.registerTempTable("jsonWithComplexMap")
-
+    //复杂的Map类型
+    /**
+     *+--------------------+
+      |                 map|
+      +--------------------+
+      |Map(a -> [Wrapped...|
+      |  Map(b -> [null,2])|
+      |Map(c -> [Wrapped...|
+      |Map(c -> [null,3]...|
+      |      Map(e -> null)|
+      |Map(f -> [null,nu...|
+      +--------------------+*/
+    sql("select map from jsonWithComplexMap").show()
     checkAnswer(
       sql("select map from jsonWithComplexMap"),
       Row(Map("a" -> Row(Seq(1, 2, 3, null), null))) ::
@@ -794,7 +866,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       Row(null, null) :: Nil
     )
   }
-  //正确分析点符号
+  //正确解析点符号
   test("SPARK-2096 Correctly parse dot notations") {
     val jsonDF = ctx.read.json(complexFieldAndType2)
     jsonDF.registerTempTable("jsonTable")
@@ -839,7 +911,19 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
   test("SPARK-3308 Read top level JSON arrays") {
     val jsonDF = ctx.read.json(jsonArray)
     jsonDF.registerTempTable("jsonTable")
-
+    /**
+     *+-------+-------+-------+
+      |      a|      b|      c|
+      +-------+-------+-------+
+      |str_a_1|   null|   null|
+      |str_a_2|   null|   null|
+      |   null|str_b_3|   null|
+      |str_a_4|str_b_4|str_c_4|
+      +-------+-------+-------+*/
+sql("""
+          |select a, b, c
+          |from jsonTable
+        """.stripMargin).show()
     checkAnswer(
       sql(
         """
@@ -855,13 +939,24 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
 
   test("Corrupt records") {//损坏的记录
     // Test if we can query corrupt records.
-    //测试,如果我们可以查询损坏的记录
+    //测试,如果我们可以查询损坏的记录,_unparsed列是损坏的记录
     val oldColumnNameOfCorruptRecord = ctx.conf.columnNameOfCorruptRecord
     ctx.setConf(SQLConf.COLUMN_NAME_OF_CORRUPT_RECORD, "_unparsed")
 
     val jsonDF = ctx.read.json(corruptRecords)
     jsonDF.registerTempTable("jsonTable")
-
+    /**
+     *+------------+-------+-------+-------+
+      |   _unparsed|      a|      b|      c|
+      +------------+-------+-------+-------+
+      |           {|   null|   null|   null|
+      |            |   null|   null|   null|
+      |{"a":1, b:2}|   null|   null|   null|
+      |{"a":{, b:3}|   null|   null|   null|
+      |        null|str_a_4|str_b_4|str_c_4|
+      |           ]|   null|   null|   null|
+      +------------+-------+-------+-------+*/
+      jsonDF.show()
     val schema = StructType(
       StructField("_unparsed", StringType, true) ::
       StructField("a", StringType, true) ::
@@ -909,11 +1004,11 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
         Row("""{"a":{, b:3}""") ::
         Row("]") :: Nil
     )
-
+    //重新设置损坏的列
     ctx.setConf(SQLConf.COLUMN_NAME_OF_CORRUPT_RECORD, oldColumnNameOfCorruptRecord)
   }
 
-  test("SPARK-4068: nulls in arrays") {//在数组中空值
+  test("SPARK-4068: nulls in arrays") {//在数组中含有null值
     val jsonDF = ctx.read.json(nullsInArrays)
     jsonDF.registerTempTable("jsonTable")
 
@@ -930,7 +1025,20 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
         ArrayType(ArrayType(ArrayType(LongType, true), true), true), true) :: Nil)
 
     assert(schema === jsonDF.schema)
-
+ sql("""
+          |SELECT field1, field2, field3, field4
+          |FROM jsonTable
+        """.stripMargin).show()
+     /**
+      * +--------------------+--------------------+--------------------+--------------------+
+        |              field1|              field2|              field3|              field4|
+        +--------------------+--------------------+--------------------+--------------------+
+        |[WrappedArray(nul...|                null|                null|                null|
+        |                null|[null, WrappedArr...|                null|                null|
+        |                null|                null|[WrappedArray(nul...|                null|
+        |                null|                null|                null|[WrappedArray(nul...|
+        +--------------------+--------------------+--------------------+--------------------+
+      */
     checkAnswer(
       sql(
         """
@@ -944,7 +1052,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     )
   }
 
-  test("SPARK-4228 DataFrame to JSON") {//数组到JSON
+  test("SPARK-4228 DataFrame to JSON") {//数据集转换JSON
     val schema1 = StructType(
       StructField("f1", IntegerType, false) ::
       StructField("f2", StringType, false) ::
@@ -959,7 +1067,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       }
       Row(values(0).toInt, values(1), values(2).toBoolean, r.split(",").toList, v5)
     }
-
+    //创建StructType对象
     val df1 = ctx.createDataFrame(rowRDD1, schema1)
     df1.registerTempTable("applySchema1")
     val df2 = df1.toDF
@@ -1076,7 +1184,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     )
   }
 
-  test("JSONRelation equality test") {//JSON关系平等的测试
+  test("JSONRelation equality test") {//JSON关系相等的测试
     val relation0 = new JSONRelation(
       Some(empty),
       1.0,

@@ -58,13 +58,14 @@ class BroadcastJoinSuite extends QueryTest with BeforeAndAfterAll {
 
   /**
    * Test whether the specified broadcast join updates the peak execution memory accumulator.
-   * 测试指定的广播连接是否更新峰值执行内存蓄能器
+   * 测试指定的广播连接是否更新峰值执行内存累加器
    */
   private def testBroadcastJoin[T: ClassTag](name: String, joinType: String): Unit = {
     AccumulatorSuite.verifyPeakExecutionMemorySet(sc, name) {
       val df1 = sqlContext.createDataFrame(Seq((1, "4"), (2, "2"))).toDF("key", "value")
       val df2 = sqlContext.createDataFrame(Seq((1, "1"), (2, "2"))).toDF("key", "value")
       // Comparison at the end is for broadcast left semi join
+      //最后的比较是广播左半连接
       val joinExpression = df1("key") === df2("key") && df1("value") > df2("value")
       val df3 = df1.join(broadcast(df2), joinExpression, joinType)
       val plan = df3.queryExecution.executedPlan

@@ -31,10 +31,10 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.util.Utils
 
-
+//SQL测试指标
 class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
   import testImplicits._
-
+  //不应长整形
   test("LongSQLMetric should not box Long") {
     val l = SQLMetrics.createLongMetric(ctx.sparkContext, "long")
     val f = () => {
@@ -77,6 +77,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     val executionIds = ctx.listener.executionIdToData.keySet.diff(previousExecutionIds)
     assert(executionIds.size === 1)
     val executionId = executionIds.head
+    //获得Jobs列表
     val jobs = ctx.listener.getExecution(executionId).get.jobs
     // Use "<=" because there is a race condition that we may miss some jobs
     // TODO Change it to "=" once we fix the race condition that missing the JobStarted event.

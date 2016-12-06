@@ -29,6 +29,7 @@ class BooleanBitSetSuite extends SparkFunSuite {
   def skeleton(count: Int) {
     // -------------
     // Tests encoder
+    // 测试编码
     // -------------
 
     val builder = TestCompressibleColumnBuilder(new NoopColumnStats, BOOLEAN, BooleanBitSet)
@@ -39,6 +40,7 @@ class BooleanBitSetSuite extends SparkFunSuite {
     val buffer = builder.build()
 
     // Column type ID + null count + null positions
+    
     val headerSize = CompressionScheme.columnHeaderSize(buffer)
 
     // Compression scheme ID + element count + bitset words

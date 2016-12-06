@@ -54,7 +54,7 @@ class SQLExecutionSuite extends SparkFunSuite {
 
   /**
    * Trigger SPARK-10548 by mocking a parent and its child thread executing queries concurrently.
-   * 模拟父和它的子线程同时执行查询
+   * 模拟父和它的子线程并发执行查询
    */
   private def testConcurrentQueryExecution(sc: SparkContext): Unit = {
     val sqlContext = new SQLContext(sc)
