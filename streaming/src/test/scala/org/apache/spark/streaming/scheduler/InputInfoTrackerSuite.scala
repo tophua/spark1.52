@@ -39,7 +39,7 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
       ssc = null
     }
   }
-
+  //测试报告并得到InputInfo来自 InputInfoTracker
   test("test report and get InputInfo from InputInfoTracker") {
     val inputInfoTracker = new InputInfoTracker(ssc)
 
@@ -58,7 +58,7 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
     assert(batchTimeToInputInfos(streamId2) === inputInfo2)
     assert(inputInfoTracker.getInfo(time)(streamId1) === inputInfo1)
   }
-
+  //测试清理InputInfo来自InputInfoTracker
   test("test cleanup InputInfo from InputInfoTracker") {
     //测试理清InputInfo
     val inputInfoTracker = new InputInfoTracker(ssc)

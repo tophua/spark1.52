@@ -72,7 +72,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
 
     // Verify whether addData() adds data that is present in generated blocks
-
+    //验证是否addData() 添加数据在目前的数据生成模块
     val data1 = 1 to 10
     data1.foreach { blockGenerator.addData _ }
     withClue("callbacks called on adding data without metadata and without block generation") {
@@ -98,6 +98,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     assert(listener.onAddDataCalled === true)
     listener.addedData should contain theSameElementsInOrderAs (data2)
     listener.addedMetadata should contain theSameElementsInOrderAs (metadata2)
+    //提前时钟产生块
     clock.advance(blockIntervalMs)  // advance clock to generate blocks
     eventually(timeout(1 second)) {
       listener.pushedData should contain theSameElementsInOrderAs (data1 ++ data2)
@@ -124,6 +125,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     thread.join()
 
     // Verify that the generator cannot be used any more
+    //确认产生不能再使用
     intercept[SparkException] {
       blockGenerator.addData(1)
     }
@@ -136,6 +138,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     intercept[SparkException] {
       blockGenerator.start()
     }
+    //应该调用停止
     blockGenerator.stop()   // Calling stop again should be fine
   }
 
@@ -152,10 +155,16 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     data.foreach { blockGenerator.addData _ }
 
     // Verify that stop() shutdowns everything in the right order
+    //验证stop()关闭所有的事情以正确的顺序
     // - First, stop receiving new data
+    // - 第一,停止接收新的数据
     // - Second, wait for final block with all buffered data to be generated
+    // - 第二,等待最后一个块与所有缓冲的数据生成
     // - Finally, wait for all blocks to be pushed
+    // - 最后,等待所有的块被推
+    //确保定时器的另一个间隔完成
     clock.advance(1) // to make sure that the timer for another interval to complete
+    
     val thread = stopBlockGenerator(blockGenerator)
     eventually(timeout(1 second), interval(10 milliseconds)) {
       assert(blockGenerator.isActive() === false)
@@ -175,6 +184,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
 
     // Verify that stop() stays blocked until another block containing all the data is generated
+    //验证stop()停留阻塞直到生成另一块包含的所有数据,这拦截总是成功,由于块要么将抛出一个超时异常
     // This intercept always succeeds, as the body either will either throw a timeout exception
     // (expected as stop() should never complete) or a SparkException (unexpected as stop()
     // completed and thread terminated).
@@ -190,12 +200,16 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
 
     // Verify that the final data is present in the final generated block and
     // pushed before complete stop
+    //确认最终的数据是存在于最终生成的块,并在完全停止之前推送的
+    //产生还没有停止
     assert(blockGenerator.isStopped() === false) // generator has not stopped yet
     eventually(timeout(10 seconds), interval(10 milliseconds)) {
       // Keep calling `advance` to avoid blocking forever in `clock.waitTillTime`
+      //保持调用`advance` 为了避免永远堵塞 `clock.waitTillTime`
       clock.advance(blockIntervalMs)
       assert(thread.isAlive === false)
     }
+    //产生器终于被完全停止
     assert(blockGenerator.isStopped() === true) // generator has finally been completely stopped
     assert(listener.pushedData === data, "All data not pushed by stop()")
   }
@@ -241,8 +255,12 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     thread
   }
 
-  /** A listener for BlockGenerator that records the data in the callbacks */
+  /** 
+   *  A listener for BlockGenerator that records the data in the callbacks 
+   *  一个块产生器记录数据在回调监听器
+   **/
   private class TestBlockGeneratorListener extends BlockGeneratorListener {
+    //
     val pushedData = new mutable.ArrayBuffer[Any] with mutable.SynchronizedBuffer[Any]
     val addedData = new mutable.ArrayBuffer[Any] with mutable.SynchronizedBuffer[Any]
     val addedMetadata = new mutable.ArrayBuffer[Any] with mutable.SynchronizedBuffer[Any]

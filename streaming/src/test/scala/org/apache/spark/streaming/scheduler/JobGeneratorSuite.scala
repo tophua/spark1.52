@@ -35,10 +35,14 @@ class JobGeneratorSuite extends TestSuiteBase {
   // SPARK-6222 is a tricky regression bug which causes received block metadata
   // to be deleted before the corresponding batch has completed. This occurs when
   // the following conditions are met.
+  //当下列条件满足时,会发生此情况
   // 1. streaming checkpointing is enabled by setting streamingContext.checkpoint(dir)
-  // 2. input data is received through a receiver as blocks
+  //    流是启用的设置检查点
+  // 2. input data is received through a receiver as blocks 
+  //    输入数据通过接收器作为块接收
   // 3. a batch processing a set of blocks takes a long time, such that a few subsequent
   //    batches have been generated and submitted for processing.
+  //   成批处理一组块需要很长的时间,这样,已经产生了一些后续批次并提交处理
   //
   // The JobGenerator (as of Mar 16, 2015) checkpoints twice per batch, once after generation
   // of a batch, and another time after the completion of a batch. The cleanup of
@@ -52,12 +56,16 @@ class JobGeneratorSuite extends TestSuiteBase {
   // been completely processed.
   //
   // This test tries to create that scenario by the following.
-  // 1. enable checkpointing
+  // 这个测试试图通过以下来创建这个场景
+  // 1. enable checkpointing 启用检查点
   // 2. generate batches with received blocks
+  //    生成接收块的批处理
   // 3. make the 3rd batch never complete
+  //    使第三批永不完成
   // 4. allow subsequent batches to be generated (to allow premature deletion of 3rd batch metadata)
+  //    允许后续的批量生成,(允许提前删除第三批元数据)
   // 5. verify whether 3rd batch's block metadata still exists
-  //
+  //    是否验证第三批的块元数据是否仍然存在
   test("SPARK-6222: Do not clear received block data too soon(立即,马上)") {//不清除接收块数据太快
     import JobGeneratorSuite._
     val checkpointDir = Utils.createTempDir()

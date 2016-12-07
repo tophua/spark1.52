@@ -507,6 +507,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Test unary DStream operation with a list of inputs, with number of
+   * 试验一元dstream操作与列表的输入,批量运行的数量与预期的输出值相同
    * batches to run same as the number of expected output values
    */
   def testOperation[U: ClassTag, V: ClassTag](
@@ -520,10 +521,11 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Test unary(一元) DStream operation with a list of inputs
+   * 试验一元dstream操作与列表输入
    * [U: ClassTag, V: ClassTag]泛型方法 
-   * @param input      Sequence of input collections
+   * @param input      Sequence of input collections 输入集合序列
    * @param operation  Binary DStream operation to be applied to the 2 inputs
-   * @param expectedOutput Sequence of expected output collections
+   * @param expectedOutput Sequence of expected output collections 期望输出集合的序列
    * @param numBatches Number of batches to run the operation for
    * @param useSet     Compare the output values with the expected output values
    *                   as sets (order matters) or as lists (order does not matter)

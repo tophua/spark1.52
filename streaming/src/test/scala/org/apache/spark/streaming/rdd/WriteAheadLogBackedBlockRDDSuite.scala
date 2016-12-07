@@ -27,7 +27,9 @@ import org.apache.spark.storage.{BlockId, BlockManager, StorageLevel, StreamBloc
 import org.apache.spark.streaming.util.{FileBasedWriteAheadLogSegment, FileBasedWriteAheadLogWriter}
 import org.apache.spark.util.Utils
 import org.apache.spark.{SparkConf, SparkContext, SparkException, SparkFunSuite}
-
+/**
+ * 
+ */
 class WriteAheadLogBackedBlockRDDSuite
   extends SparkFunSuite with BeforeAndAfterAll with BeforeAndAfterEach {
 
@@ -58,6 +60,7 @@ class WriteAheadLogBackedBlockRDDSuite
   }
 
   override def afterAll(): Unit = {
+    //将测试依赖项引入核心测试更为简单
     // Copied from LocalSparkContext, simpler than to introduced test dependencies to core tests.
     sparkContext.stop()
     System.clearProperty("spark.driver.port")
@@ -99,13 +102,16 @@ class WriteAheadLogBackedBlockRDDSuite
    * and the rest to a write ahead log, and then reading reading it all back using the RDD.
    * It can also test if the partitions that were read from the log were again stored in
    * block manager.
+   * 通过写一些分区的数据块管理器和其他的提前一个写日志,然后读取回来使用RDD,
+   * 它也可以测试,如果从日志中读取的分区再次被存储在块管理器中
    *
    *
-   *
-   * @param numPartitions Number of partitions in RDD
+   * @param numPartitions Number of partitions in RDD 在RDD分区数
    * @param numPartitionsInBM Number of partitions to write to the BlockManager.
+   * 												    块写的分区数
    *                          Partitions 0 to (numPartitionsInBM-1) will be written to BlockManager
    * @param numPartitionsInWAL Number of partitions to write to the Write Ahead Log.
+   * 													写入前写入日志的分区数
    *                           Partitions (numPartitions - 1 - numPartitionsInWAL) to
    *                           (numPartitions - 1) will be written to WAL
    * @param testIsBlockValid Test whether setting isBlockValid to false skips block fetching
@@ -114,6 +120,7 @@ class WriteAheadLogBackedBlockRDDSuite
    * @param testStoreInBM   Test whether blocks read from log are stored back into block manager
    *
    * Example with numPartitions = 5, numPartitionsInBM = 3, and numPartitionsInWAL = 4
+   * numPartitions总分区数,numPartitionsInBM块写入的分区 数,numPartitionsInWAL 写入前日志分区
    *
    *   numPartitionsInBM = 3
    *   |------------------|
@@ -136,10 +143,11 @@ class WriteAheadLogBackedBlockRDDSuite
     require(numPartitionsInWAL <= numPartitions,
       "Can't put more partitions in write ahead log than that in RDD")
     val data = Seq.fill(numPartitions, 10)(scala.util.Random.nextString(50))
-
+    data.foreach { x => println }
     // Put the necessary blocks in the block manager
     //把必要的块放在块管理器中
     val blockIds = Array.fill(numPartitions)(StreamBlockId(Random.nextInt(), Random.nextInt()))
+    blockIds.foreach { x => println }
     data.zip(blockIds).take(numPartitionsInBM).foreach { case(block, blockId) =>
       blockManager.putIterator(blockId, block.iterator, StorageLevel.MEMORY_ONLY_SER)
     }

@@ -89,7 +89,7 @@ class ReceiverTrackerSuite extends TestSuiteBase {
       }
     }
   }
-
+  //tasksetmanager应该使用接收机RDD的首选地点
   test("SPARK-11063: TaskSetManager should use Receiver RDD's preferredLocations") {
     // Use ManualClock to prevent from starting batches so that we can make sure the only task is
     // for starting the Receiver
@@ -107,6 +107,7 @@ class ReceiverTrackerSuite extends TestSuiteBase {
       ssc.start()
       eventually(timeout(10 seconds), interval(10 millis)) {
         // If preferredLocations is set correctly, receiverTaskLocality should be NODE_LOCAL
+        //如果设置了正确的首选位置,接收任务的地方应该node_local
         assert(receiverTaskLocality === TaskLocality.NODE_LOCAL)
       }
     }
@@ -192,6 +193,7 @@ private[streaming] object RateTestReceiver {
 
 /**
  * A custom receiver that could be stopped via StoppableReceiver.shouldStop
+ * 可以通过一个自定义的接收器可以停止通过
  */
 class StoppableReceiver extends Receiver[Int](StorageLevel.MEMORY_ONLY) {
 
@@ -213,6 +215,7 @@ class StoppableReceiver extends Receiver[Int](StorageLevel.MEMORY_ONLY) {
     StoppableReceiver.shouldStop = true
     receivingThreadOption.foreach(_.join())
     // Reset it so as to restart it
+    //重新启动它，以便重新启动它
     StoppableReceiver.shouldStop = false
   }
 }
