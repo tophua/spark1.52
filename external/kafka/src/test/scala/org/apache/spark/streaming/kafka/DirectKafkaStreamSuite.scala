@@ -81,8 +81,7 @@ class DirectKafkaStreamSuite
       Utils.deleteRecursively(testDir)
     }
   }
-
-
+  //具有多个主题和最小起始偏移量的基本流接收
   test("basic stream receiving with multiple topics and smallest starting offset") {
     val topics = Set("basic1", "basic2", "basic3")
     val data = Map("a" -> 7, "b" -> 9)
@@ -106,10 +105,12 @@ class DirectKafkaStreamSuite
       new ArrayBuffer[(String, String)] with mutable.SynchronizedBuffer[(String, String)]
 
     // hold a reference to the current offset ranges, so it can be used downstream
+    //保持当前偏移范围的参考,所以它可以用于下游
     var offsetRanges = Array[OffsetRange]()
 
     stream.transform { rdd =>
       // Get the offset ranges in the RDD
+      //在RDD的偏移量范围
       offsetRanges = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
       rdd
     }.foreachRDD { rdd =>
@@ -118,6 +119,7 @@ class DirectKafkaStreamSuite
       }
       val collected = rdd.mapPartitionsWithIndex { (i, iter) =>
       // For each partition, get size of the range in the partition,
+        //每个分区,获取分区中的范围大小,和分区中的项目的数量
       // and the number of items in the partition
         val off = offsetRanges(i)
         val all = iter.toSeq
@@ -127,7 +129,9 @@ class DirectKafkaStreamSuite
       }.collect
 
       // Verify whether number of elements in each partition
+      //是否验证每个分区中的元素数
       // matches with the corresponding offset range
+      //与相应的偏移范围相匹配
       collected.foreach { case (partSize, rangeSize) =>
         assert(partSize === rangeSize, "offset ranges are wrong")
       }
@@ -140,7 +144,7 @@ class DirectKafkaStreamSuite
     }
     ssc.stop()
   }
-
+  //最大的起始偏移量的接收
   test("receiving from largest starting offset") {
     val topic = "largest"
     val topicPartition = TopicAndPartition(topic, 0)
@@ -156,6 +160,7 @@ class DirectKafkaStreamSuite
     }
 
     // Send some initial messages before starting context
+    //在启动上下文之前发送一些初始消息
     kafkaTestUtils.sendMessages(topic, data)
     eventually(timeout(10 seconds), interval(20 milliseconds)) {
       assert(getLatestOffset() > 3)
@@ -163,6 +168,7 @@ class DirectKafkaStreamSuite
     val offsetBeforeStart = getLatestOffset()
 
     // Setup context and kafka stream with largest offset
+    //设置上下文和最大偏移量的kafka流
     ssc = new StreamingContext(sparkConf, Milliseconds(200))
     val stream = withClue("Error creating direct stream") {
       KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
@@ -185,7 +191,7 @@ class DirectKafkaStreamSuite
     assert(!collectedData.contains("a"))
   }
 
-
+  //用偏移创建流
   test("creating stream by offset") {
     val topic = "offset"
     val topicPartition = TopicAndPartition(topic, 0)
@@ -201,6 +207,7 @@ class DirectKafkaStreamSuite
     }
 
     // Send some initial messages before starting context
+    //在启动上下文之前发送一些初始消息
     kafkaTestUtils.sendMessages(topic, data)
     eventually(timeout(10 seconds), interval(20 milliseconds)) {
       assert(getLatestOffset() >= 10)
@@ -208,6 +215,7 @@ class DirectKafkaStreamSuite
     val offsetBeforeStart = getLatestOffset()
 
     // Setup context and kafka stream with largest offset
+    //设置上下文和最大偏移量的kafka流
     ssc = new StreamingContext(sparkConf, Milliseconds(200))
     val stream = withClue("Error creating direct stream") {
       KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder, String](
@@ -232,7 +240,8 @@ class DirectKafkaStreamSuite
   }
 
   // Test to verify the offset ranges can be recovered from the checkpoints
-  test("offset recovery") {
+  //测试来验证偏移范围可以从检查点恢复
+  test("offset recovery") {//偏移恢复
     val topic = "recovery"
     kafkaTestUtils.createTopic(topic)
     testDir = Utils.createTempDir()
@@ -243,6 +252,7 @@ class DirectKafkaStreamSuite
     )
 
     // Send data to Kafka and wait for it to be received
+    //发送数据给Kafka,等待它被接收
     def sendDataAndWaitForReceive(data: Seq[Int]) {
       val strings = data.map { _.toString}
       kafkaTestUtils.sendMessages(topic, strings.map { _ -> 1}.toMap)
@@ -252,6 +262,7 @@ class DirectKafkaStreamSuite
     }
 
     // Setup the streaming context
+    //设置流上下文
     ssc = new StreamingContext(sparkConf, Milliseconds(100))
     val kafkaStream = withClue("Error creating direct stream") {
       KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
@@ -264,23 +275,27 @@ class DirectKafkaStreamSuite
     ssc.checkpoint(testDir.getAbsolutePath)
 
     // This is to collect the raw data received from Kafka
+    //这是收集从Kafka收到的原始数据
     kafkaStream.foreachRDD { (rdd: RDD[(String, String)], time: Time) =>
       val data = rdd.map { _._2 }.collect()
       DirectKafkaStreamSuite.collectedData.appendAll(data)
     }
 
     // This is ensure all the data is eventually receiving only once
+    //这是确保所有的数据最终只接收一次
     stateStream.foreachRDD { (rdd: RDD[(String, Int)]) =>
       rdd.collect().headOption.foreach { x => DirectKafkaStreamSuite.total = x._2 }
     }
     ssc.start()
 
     // Send some data and wait for them to be received
+    //发送一些数据,等待他们收到
     for (i <- (1 to 10).grouped(4)) {
       sendDataAndWaitForReceive(i)
     }
 
     // Verify that offset ranges were generated
+    //确认生成的偏移范围
     val offsetRangesBeforeStop = getOffsetRanges(kafkaStream)
     assert(offsetRangesBeforeStop.size >= 1, "No offset ranges generated")
     assert(
@@ -291,10 +306,12 @@ class DirectKafkaStreamSuite
     logInfo("====== RESTARTING ========")
 
     // Recover context from checkpoints
+    //从检查点恢复上下文
     ssc = new StreamingContext(testDir.getAbsolutePath)
     val recoveredStream = ssc.graph.getInputStreams().head.asInstanceOf[DStream[(String, String)]]
 
     // Verify offset ranges have been recovered
+    //验证偏移范围已恢复
     val recoveredOffsetRanges = getOffsetRanges(recoveredStream)
     assert(recoveredOffsetRanges.size > 0, "No offset ranges recovered")
     val earlierOffsetRangesAsSets = offsetRangesBeforeStop.map { x => (x._1, x._2.toSet) }
@@ -305,7 +322,9 @@ class DirectKafkaStreamSuite
       "Recovered ranges are not the same as the ones generated"
     )
     // Restart context, give more data and verify the total at the end
+    //重新启动上下文,提供更多的数据,并验证结束时的总数
     // If the total is write that means each records has been received only once
+    //如果总的是写,这意味着每一个记录只收到一次
     ssc.start()
     sendDataAndWaitForReceive(11 to 20)
     eventually(timeout(10 seconds), interval(50 milliseconds)) {
@@ -313,7 +332,7 @@ class DirectKafkaStreamSuite
     }
     ssc.stop()
   }
-
+  //直接Kafka流报告输入信息
   test("Direct Kafka stream report input information") {
     val topic = "report-test"
     val data = Map("a" -> 7, "b" -> 9)
@@ -352,7 +371,7 @@ class DirectKafkaStreamSuite
     }
     ssc.stop()
   }
-
+  //使用速率控制器
   test("using rate controller") {
     val topic = "backpressure"
     val topicPartition = TopicAndPartition(topic, 0)
@@ -369,12 +388,15 @@ class DirectKafkaStreamSuite
 
     val sparkConf = new SparkConf()
       // Safe, even with streaming, because we're using the direct API.
+      //安全,事件流,因为我们使用的是直接的
       // Using 1 core is useful to make the test more predictable.
+    //使用1个核心是有用的,使测试更可预测
       .setMaster("local[1]")
       .setAppName(this.getClass.getSimpleName)
       .set("spark.streaming.kafka.maxRatePerPartition", "100")
 
     // Setup the streaming context
+    //设置流上下文
     ssc = new StreamingContext(sparkConf, Milliseconds(batchIntervalMilliseconds))
 
     val kafkaStream = withClue("Error creating direct stream") {
@@ -394,10 +416,12 @@ class DirectKafkaStreamSuite
       new mutable.ArrayBuffer[Array[String]]() with mutable.SynchronizedBuffer[Array[String]]
 
     // Used for assertion failure messages.
+    //用于断言失败消息
     def dataToString: String =
       collectedData.map(_.mkString("[", ",", "]")).mkString("{", ", ", "}")
 
     // This is to collect the raw data received from Kafka
+      //这是收集从Kafka收到的原始数据
     kafkaStream.foreachRDD { (rdd: RDD[(String, String)], time: Time) =>
       val data = rdd.map { _._2 }.collect()
       collectedData += data
@@ -406,11 +430,14 @@ class DirectKafkaStreamSuite
     ssc.start()
 
     // Try different rate limits.
+    //尝试不同的速率限制
     // Send data to Kafka and wait for arrays of data to appear matching the rate.
+    //将数据发送给Kafka,等待数据数组出现匹配的速率
     Seq(100, 50, 20).foreach { rate =>
-      collectedData.clear()       // Empty this buffer on each pass.
-      estimator.updateRate(rate)  // Set a new rate.
+      collectedData.clear()       // Empty this buffer on each pass. 清空每缓冲区
+      estimator.updateRate(rate)  // Set a new rate.设置新速率
       // Expect blocks of data equal to "rate", scaled by the interval length in secs.
+      //预计数据块等于“率”,按秒的间隔长度
       val expectedSize = Math.round(rate * batchIntervalMilliseconds * 0.001)
       kafkaTestUtils.sendMessages(topic, messages)
       eventually(timeout(5.seconds), interval(batchIntervalMilliseconds.milliseconds)) {
@@ -424,7 +451,10 @@ class DirectKafkaStreamSuite
     ssc.stop()
   }
 
-  /** Get the generated offset ranges from the DirectKafkaStream */
+  /** 
+   *  Get the generated offset ranges from the DirectKafkaStream
+   *  把生成的偏移范围从directkafkastream 
+   *  */
   private def getOffsetRanges[K, V](
       kafkaStream: DStream[(K, V)]): Seq[(Time, Array[OffsetRange])] = {
     kafkaStream.generatedRDDs.mapValues { rdd =>

@@ -47,7 +47,7 @@ class KafkaClusterSuite extends SparkFunSuite with BeforeAndAfterAll {
     }
   }
 
-  test("metadata apis") {
+  test("metadata apis") {//元数据API
     val leader = kc.findLeaders(Set(topicAndPartition)).right.get(topicAndPartition)
     val leaderAddress = s"${leader._1}:${leader._2}"
     assert(leaderAddress === kafkaTestUtils.brokerAddress, "didn't get leader")
@@ -59,7 +59,7 @@ class KafkaClusterSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(err.isLeft, "getPartitions for a nonexistant topic should be an error")
   }
 
-  test("leader offset apis") {
+  test("leader offset apis") {//指挥者偏移API
     val earliest = kc.getEarliestLeaderOffsets(Set(topicAndPartition)).right.get
     assert(earliest(topicAndPartition).offset === 0, "didn't get earliest")
 
@@ -67,7 +67,7 @@ class KafkaClusterSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(latest(topicAndPartition).offset === 1, "didn't get latest")
   }
 
-  test("consumer offset apis") {
+  test("consumer offset apis") {//消费者偏移API
     val group = "kcsuitegroup" + Random.nextInt(10000)
 
     val offset = Random.nextInt(10000)

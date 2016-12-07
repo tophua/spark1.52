@@ -51,7 +51,7 @@ class KafkaStreamSuite extends SparkFunSuite with Eventually with BeforeAndAfter
     }
   }
 
-  test("Kafka input stream") {
+  test("Kafka input stream") {//Kafka输入流
     val sparkConf = new SparkConf().setMaster("local[4]").setAppName(this.getClass.getSimpleName)
     ssc = new StreamingContext(sparkConf, Milliseconds(500))
     val topic = "topic1"

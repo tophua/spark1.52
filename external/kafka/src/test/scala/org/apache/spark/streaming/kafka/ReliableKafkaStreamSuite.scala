@@ -84,13 +84,14 @@ class ReliableKafkaStreamSuite extends SparkFunSuite
       ssc = null
     }
   }
-
+  //具有单个主题的可靠的Kafka输入流
   test("Reliable Kafka input stream with single topic") {
     val topic = "test-topic"
     kafkaTestUtils.createTopic(topic)
     kafkaTestUtils.sendMessages(topic, data)
 
     // Verify whether the offset of this group/topic/partition is 0 before starting.
+    //验证此组/主题/分区的偏移量是否在开始前为0
     assert(getCommitOffset(groupId, topic, 0) === None)
 
     val stream = KafkaUtils.createStream[String, String, StringDecoder, StringDecoder](
@@ -107,15 +108,19 @@ class ReliableKafkaStreamSuite extends SparkFunSuite
 
     eventually(timeout(20000 milliseconds), interval(200 milliseconds)) {
       // A basic process verification for ReliableKafkaReceiver.
+      //一个reliablekafkareceiver基本过程验证
       // Verify whether received message number is equal to the sent message number.
+      //验证接收的消息数是否等于所发送的消息数
       assert(data.size === result.size)
       // Verify whether each message is the same as the data to be verified.
+      //验证每个消息是否是相同的作为验证的数据
       data.keys.foreach { k => assert(data(k) === result(k).toInt) }
       // Verify the offset number whether it is equal to the total message number.
+      //验证偏移数是否等于总消息数
       assert(getCommitOffset(groupId, topic, 0) === Some(29L))
     }
   }
-
+  //可靠的Kafka输入流与多个主题
   test("Reliable Kafka input stream with multiple topics") {
     val topics = Map("topic1" -> 1, "topic2" -> 1, "topic3" -> 1)
     topics.foreach { case (t, _) =>
@@ -124,9 +129,11 @@ class ReliableKafkaStreamSuite extends SparkFunSuite
     }
 
     // Before started, verify all the group/topic/partition offsets are 0.
+    //在开始之前,验证所有的组/主题/分区偏移量为0
     topics.foreach { case (t, _) => assert(getCommitOffset(groupId, t, 0) === None) }
 
     // Consuming all the data sent to the broker which will potential commit the offsets internally.
+    //消耗所有发送给代理的数据,这些数据将潜在的提交内部偏移
     val stream = KafkaUtils.createStream[String, String, StringDecoder, StringDecoder](
       ssc, kafkaParams, topics, StorageLevel.MEMORY_ONLY)
     stream.foreachRDD(_ => Unit)
@@ -134,12 +141,16 @@ class ReliableKafkaStreamSuite extends SparkFunSuite
 
     eventually(timeout(20000 milliseconds), interval(100 milliseconds)) {
       // Verify the offset for each group/topic to see whether they are equal to the expected one.
+      //验证每个组/主题的偏移量,看看它们是否等于预期的一个
       topics.foreach { case (t, _) => assert(getCommitOffset(groupId, t, 0) === Some(29L)) }
     }
   }
 
 
-  /** Getting partition offset from Zookeeper. */
+  /** 
+   *  Getting partition offset from Zookeeper. 
+   *  从zookeeper偏移获得分区
+   *  */
   private def getCommitOffset(groupId: String, topic: String, partition: Int): Option[Long] = {
     val topicDirs = new ZKGroupTopicDirs(groupId, topic)
     val zkPath = s"${topicDirs.consumerOffsetDir}/$partition"

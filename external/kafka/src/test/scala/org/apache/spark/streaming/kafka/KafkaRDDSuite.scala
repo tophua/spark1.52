@@ -52,7 +52,7 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     }
   }
 
-  test("basic usage") {
+  test("basic usage") {//基本的使用
     val topic = s"topicbasic-${Random.nextInt}"
     kafkaTestUtils.createTopic(topic)
     val messages = Array("the", "quick", "brown", "fox")
@@ -70,6 +70,7 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(received === messages.toSet)
 
     // size-related method optimizations return sane results
+    //大小相关方法优化返回正常结果
     assert(rdd.count === messages.size)
     assert(rdd.countApprox(0).getFinalValue.mean === messages.size)
     assert(!rdd.isEmpty)
@@ -83,6 +84,7 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(emptyRdd.isEmpty)
 
     // invalid offset ranges throw exceptions
+    //无效偏移范围抛出异常
     val badRanges = Array(OffsetRange(topic, 0, 0, messages.size + 1))
     intercept[SparkException] {
       KafkaUtils.createRDD[String, String, StringDecoder, StringDecoder](
@@ -90,8 +92,9 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     }
   }
 
-  test("iterator boundary conditions") {
+  test("iterator boundary conditions") {//迭代器的边界条件
     // the idea is to find e.g. off-by-one errors between what kafka has available and the rdd
+    //我们的想法是找到如由一个误差之间的k和RDD
     val topic = s"topicboundary-${Random.nextInt}"
     val sent = Map("a" -> 5, "b" -> 3, "c" -> 10)
     kafkaTestUtils.createTopic(topic)
@@ -102,10 +105,12 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     val kc = new KafkaCluster(kafkaParams)
 
     // this is the "lots of messages" case
+    //这是“大量的信息”的情况下
     kafkaTestUtils.sendMessages(topic, sent)
     val sentCount = sent.values.sum
 
     // rdd defined from leaders after sending messages, should get the number sent
+    //RDD定义领导发送消息后,会发送数量
     val rdd = getRdd(kc, Set(topic))
 
     assert(rdd.isDefined)
@@ -119,14 +124,17 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     val rangesMap = ranges.map(o => TopicAndPartition(o.topic, o.partition) -> o.untilOffset).toMap
 
     // make sure consumer offsets are committed before the next getRdd call
+    //确保消费者偏移之前提交下一个调用获得RDD
     kc.setConsumerOffsets(kafkaParams("group.id"), rangesMap).fold(
       err => throw new Exception(err.mkString("\n")),
       _ => ()
     )
 
     // this is the "0 messages" case
+    //这是“0条消息”的情况
     val rdd2 = getRdd(kc, Set(topic))
     // shouldn't get anything, since message is sent after rdd was defined
+    //不应该得到任何东西，因为消息被发送后，定义了RDD
     val sentOnlyOne = Map("d" -> 1)
 
     kafkaTestUtils.sendMessages(topic, sentOnlyOne)
@@ -135,8 +143,10 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(rdd2.get.count === 0, "got messages when there shouldn't be any")
 
     // this is the "exactly 1 message" case, namely the single message from sentOnlyOne above
+    //这是“正是1个消息”的情况下,即从sentonlyone以上单信息
     val rdd3 = getRdd(kc, Set(topic))
     // send lots of messages after rdd was defined, they shouldn't show up
+    //发送大量邮件后定义了RDD，他们不应该出现
     kafkaTestUtils.sendMessages(topic, Map("extra" -> 22))
 
     assert(rdd3.isDefined)
@@ -145,6 +155,7 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
   }
 
   // get an rdd from the committed consumer offsets until the latest leader offsets,
+  //直到新领导人偏移得到于消费者偏移
   private def getRdd(kc: KafkaCluster, topics: Set[String]) = {
     val groupId = kc.kafkaParams("group.id")
     def consumerOffsets(topicPartitions: Set[TopicAndPartition]) = {
