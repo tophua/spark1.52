@@ -22,6 +22,8 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.SparkContext._
 
 /**
+ * 具体参考 
+ * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-code-samples/
  * Executes a roll up-style query against Apache logs.
  * 执行一个查询卷方式对Apache日志
  * Usage: LogQuery [logFile]

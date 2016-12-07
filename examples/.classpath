@@ -263,6 +263,7 @@
 	<classpathentry kind="lib" path="lib/spark-streaming-zeromq_2.10-1.5.3-20151212.002350-63.jar"/>
 	<classpathentry kind="lib" path="lib/spark-unsafe_2.10-1.5.3-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/spark-streaming-mqtt_2.10-1.5.3-20151212.002318-63.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/spark-core"/>
+	<classpathentry kind="lib" path="lib/spark-core_2.10-1.5.3-SNAPSHOT-tests.jar"/>
+	<classpathentry kind="lib" path="lib/spark-core_2.10-1.5.3-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/scala-2.10/classes"/>
 </classpath>
