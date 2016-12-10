@@ -34,6 +34,7 @@ class JobGeneratorSuite extends TestSuiteBase {
 
   // SPARK-6222 is a tricky regression bug which causes received block metadata
   // to be deleted before the corresponding batch has completed. This occurs when
+  //在相应的批处理完成之前，它会导致接收到的块元数据被删除,
   // the following conditions are met.
   //当下列条件满足时,会发生此情况
   // 1. streaming checkpointing is enabled by setting streamingContext.checkpoint(dir)
@@ -46,15 +47,19 @@ class JobGeneratorSuite extends TestSuiteBase {
   //
   // The JobGenerator (as of Mar 16, 2015) checkpoints twice per batch, once after generation
   // of a batch, and another time after the completion of a batch. The cleanup of
+  //一批一批,完成一批后的第二批,检查点数据的清除,Stream必须在第二点已建成,也就是说，批处理后已完全处理
   // checkpoint data (including block metadata, etc.) from DStream must be done only after the
   // 2nd checkpoint has completed, that is, after the batch has been completely processed.
   // However, the issue is that the checkpoint data and along with it received block data is
+  //然而,问题是，检查点数据和它的接收块数据一起被清理，即使在第一个检查点的情况下
   // cleaned even in the case of the 1st checkpoint, causing pre-mature deletion of received block
+  //导致接收块数据的预成熟删除,例如,如果第三批仍然正在处理,第七批可能会产生
   // data. For example, if the 3rd batch is still being process, the 7th batch may get generated,
   // and the corresponding "1st checkpoint" will delete received block metadata of batch older
+  // 和相应的“第一检查点”将删除收到的块元数据的批处理年龄大于第六批
   // than 6th batch. That, is 3rd batch's block metadata gets deleted even before 3rd batch has
   // been completely processed.
-  //
+  // 这是第三批的块的元数据获取甚至前第三批已被删除
   // This test tries to create that scenario by the following.
   // 这个测试试图通过以下来创建这个场景
   // 1. enable checkpointing 启用检查点
@@ -66,11 +71,12 @@ class JobGeneratorSuite extends TestSuiteBase {
   //    允许后续的批量生成,(允许提前删除第三批元数据)
   // 5. verify whether 3rd batch's block metadata still exists
   //    是否验证第三批的块元数据是否仍然存在
-  test("SPARK-6222: Do not clear received block data too soon(立即,马上)") {//不清除接收块数据太快
+  test("SPARK-6222: Do not clear received block data too soon(立即,马上)") {//不立即清除接收块数据
     import JobGeneratorSuite._
     val checkpointDir = Utils.createTempDir()
     val testConf = conf
     testConf.set("spark.streaming.clock", "org.apache.spark.streaming.util.ManualClock")
+    //滚动间隔
     testConf.set("spark.streaming.receiver.writeAheadLog.rollingInterval", "1")
 
     withStreamingContext(new StreamingContext(testConf, batchDuration)) { ssc =>

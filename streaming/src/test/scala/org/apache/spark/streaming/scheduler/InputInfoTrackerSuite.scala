@@ -49,13 +49,15 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
     val inputInfo1 = StreamInputInfo(streamId1, 100L)
     val inputInfo2 = StreamInputInfo(streamId2, 300L)
     inputInfoTracker.reportInfo(time, inputInfo1)
+    
     inputInfoTracker.reportInfo(time, inputInfo2)
     //根据时间获得跟踪批处理信息
-    val batchTimeToInputInfos = inputInfoTracker.getInfo(time)
+    val batchTimeToInputInfos = inputInfoTracker.getInfo(time)   
     assert(batchTimeToInputInfos.size == 2)
     assert(batchTimeToInputInfos.keys === Set(streamId1, streamId2))
     assert(batchTimeToInputInfos(streamId1) === inputInfo1)
     assert(batchTimeToInputInfos(streamId2) === inputInfo2)
+    //getInfo获得Map值,streamId1获得Key对象,科里化函数
     assert(inputInfoTracker.getInfo(time)(streamId1) === inputInfo1)
   }
   //测试清理InputInfo来自InputInfoTracker

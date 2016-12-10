@@ -52,9 +52,9 @@ class StreamingJobProgressListenerSuite extends TestSuiteBase with Matchers {
       Nil, // unused
       properties)
   }
-
+  //毫秒
   override def batchDuration: Duration = Milliseconds(100)
-
+  //批处理的提交,批处理开始运行,批处理完成,批处理接收开始,批处理接收错误,批处理暂停
   test("onBatchSubmitted, onBatchStarted, onBatchCompleted, " +
     "onReceiverStarted, onReceiverError, onReceiverStopped") {
     ssc = setupStreams(input, operation)

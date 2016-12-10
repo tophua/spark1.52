@@ -47,24 +47,31 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     val clock = new ManualClock()
 
     require(blockIntervalMs > 5)
+    //增加数据
     require(listener.onAddDataCalled === false)
+    //产生数据
     require(listener.onGenerateBlockCalled === false)
+    //取出数据
     require(listener.onPushBlockCalled === false)
 
     // Verify that creating the generator does not start it
     //确认创建生成器不启动它
     blockGenerator = new BlockGenerator(listener, 0, conf, clock)
+    //块产生在活动前start()
     assert(blockGenerator.isActive() === false, "block generator active before start()")
+    //块产生在活动前isStopped()
     assert(blockGenerator.isStopped() === false, "block generator stopped before start()")
     assert(listener.onAddDataCalled === false)
     assert(listener.onGenerateBlockCalled === false)
     assert(listener.onPushBlockCalled === false)
 
     // Verify start marks the generator active, but does not call the callbacks
-    //验证的启动标志,但不会调用回调
+    //验证产生的启动标志,但不会调用回调
     blockGenerator.start()
+    //是否已经激活
     assert(blockGenerator.isActive() === true, "block generator active after start()")
     assert(blockGenerator.isStopped() === false, "block generator stopped after start()")
+    //回调函数称为前添加数据
     withClue("callbacks called before adding data") {
       assert(listener.onAddDataCalled === false)
       assert(listener.onGenerateBlockCalled === false)
@@ -72,9 +79,10 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
 
     // Verify whether addData() adds data that is present in generated blocks
-    //验证是否addData() 添加数据在目前的数据生成模块
+    //验证addData() 是否添加数据在目前的数据生成模块
     val data1 = 1 to 10
     data1.foreach { blockGenerator.addData _ }
+    //回调要求添加数据没有元数据和块代
     withClue("callbacks called on adding data without metadata and without block generation") {
       assert(listener.onAddDataCalled === false) // should be called only with addDataWithCallback()
       assert(listener.onGenerateBlockCalled === false)
@@ -82,6 +90,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
     //提前时钟产生块
     clock.advance(blockIntervalMs)  // advance clock to generate blocks
+    //没有生成或被推的块
     withClue("blocks not generated or pushed") {
       eventually(timeout(1 second)) {
         assert(listener.onGenerateBlockCalled === true)
@@ -166,6 +175,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     clock.advance(1) // to make sure that the timer for another interval to complete
     
     val thread = stopBlockGenerator(blockGenerator)
+    //毫秒 milliseconds,1秒
     eventually(timeout(1 second), interval(10 milliseconds)) {
       assert(blockGenerator.isActive() === false)
     }

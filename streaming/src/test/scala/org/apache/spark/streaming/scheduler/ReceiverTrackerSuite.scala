@@ -176,6 +176,7 @@ private[streaming] class RateTestReceiver(receiverId: Int, host: Option[String] 
 /**
  * A helper object to RateTestReceiver that give access to the currently active RateTestReceiver
  * instance.
+ * 一个帮助对象为RateTestReceiver提供目前活跃的RateTestReceiver实例
  */
 private[streaming] object RateTestReceiver {
   @volatile private var activeReceiver: RateTestReceiver = null

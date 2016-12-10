@@ -30,6 +30,7 @@ class RateLimiterSuite extends SparkFunSuite {
     val conf = new SparkConf()
     val rateLimiter = new RateLimiter(conf){}
     rateLimiter.updateRate(105)//速率限制
+    //获得当前限制
     assert(rateLimiter.getCurrentLimit == 105)
   }
 

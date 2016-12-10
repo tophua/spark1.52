@@ -20,40 +20,45 @@ package org.apache.spark.streaming.scheduler
 import scala.collection.mutable
 
 import org.apache.spark.SparkFunSuite
-
+//接收调度策略测试套件
 class ReceiverSchedulingPolicySuite extends SparkFunSuite {
 
   val receiverSchedulingPolicy = new ReceiverSchedulingPolicy
 
-  test("rescheduleReceiver: empty executors") {//空的执行任务
+  test("rescheduleReceiver: empty executors") {//重新安排接收-空的执行任务
     val scheduledExecutors =
       receiverSchedulingPolicy.rescheduleReceiver(0, None, Map.empty, executors = Seq.empty)
     assert(scheduledExecutors === Seq.empty)
   }
 
-  test("rescheduleReceiver: receiver preferredLocation") {//接收器的首选位置
+  test("rescheduleReceiver: receiver preferredLocation") {//重新安排接收-接收器的首选位置
     val receiverTrackingInfoMap = Map(
+        //闲置
       0 -> ReceiverTrackingInfo(0, ReceiverState.INACTIVE, None, None))
+      //重新安排接收
     val scheduledExecutors = receiverSchedulingPolicy.rescheduleReceiver(
       0, Some("host1"), receiverTrackingInfoMap, executors = Seq("host2"))
     assert(scheduledExecutors.toSet === Set("host1", "host2"))
   }
-  //如果有闲置的执行者,返回所有闲置的执行者
+  //重新安排接收-如果有闲置的执行者,返回所有闲置的执行者
   test("rescheduleReceiver: return all idle executors if there are any idle executors") {
     val executors = Seq("host1", "host2", "host3", "host4", "host5")
-    // host3 is idle
+    // host3 is idle 空闲
     val receiverTrackingInfoMap = Map(
       0 -> ReceiverTrackingInfo(0, ReceiverState.ACTIVE, None, Some("host1")))
     val scheduledExecutors = receiverSchedulingPolicy.rescheduleReceiver(
       1, None, receiverTrackingInfoMap, executors)
+      //返回所有闲置的执行者
     assert(scheduledExecutors.toSet === Set("host2", "host3", "host4", "host5"))
   }
   //返回所有执行者具有最小的权重,如果没有空闲的执行者
   test("rescheduleReceiver: return all executors that have minimum weight if no idle executors") {
     val executors = Seq("host1", "host2", "host3", "host4", "host5")
+    //权重:host1 = 1.5, host2 = 0.5, host3 = 1.0, host4 = 0.5, host5 = 0.5
     // Weights: host1 = 1.5, host2 = 0.5, host3 = 1.0, host4 = 0.5, host5 = 0.5
     val receiverTrackingInfoMap = Map(
       0 -> ReceiverTrackingInfo(0, ReceiverState.ACTIVE, None, Some("host1")),
+      //SCHEDULED 预定
       1 -> ReceiverTrackingInfo(1, ReceiverState.SCHEDULED, Some(Seq("host2", "host3")), None),
       2 -> ReceiverTrackingInfo(2, ReceiverState.SCHEDULED, Some(Seq("host1", "host3")), None),
       3 -> ReceiverTrackingInfo(4, ReceiverState.SCHEDULED, Some(Seq("host4", "host5")), None))
@@ -61,7 +66,7 @@ class ReceiverSchedulingPolicySuite extends SparkFunSuite {
       4, None, receiverTrackingInfoMap, executors)
     assert(scheduledExecutors.toSet === Set("host2", "host4", "host5"))
   }
-
+//重新安排接收-计划接收均匀当有更多的执行者
   test("scheduleReceivers: " +
     "schedule receivers evenly when there are more receivers than executors") {
     val receivers = (0 until 6).map(new RateTestReceiver(_))

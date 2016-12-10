@@ -57,7 +57,9 @@ private[streaming] class DummyInputDStream(ssc: StreamingContext) extends InputD
 
 /**
  * This is a input stream just for the testsuites. This is equivalent(相当的) to a checkpointable,
+ * 这只是一个输入流的测试包,这相当于一个检查点,像Kafka可重复、可靠的消息队列,它需要一个序列作为输入
  * replayable(重玩), reliable(可靠) message queue like Kafka. It requires a sequence as input, and
+ * 返回在i_th批下手动时钟的i_th
  * returns the i_th element at the i_th batch unde manual clock.
  */
 class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], numPartitions: Int)
@@ -120,10 +122,12 @@ class TestOutputStream[T: ClassTag](
 
 /**
  * This is a output stream just for the testsuites. All the output is collected into a
+ * 这只是一个输出流的测试包,所有的输出被收集成一个ArrayBuffer
  * ArrayBuffer. This buffer is wiped clean on being restored from checkpoint.
- *
+ * 这个缓冲区是清除干净的从检查点恢复,缓冲区包含一个序列的RDD,每个包含一个分区的序列
  * The buffer contains a sequence of RDD's, each containing a sequence of partitions, each
  * containing a sequence of items.
+ * 每个包含一个项目序列
  */
 class TestOutputStreamWithPartitions[T: ClassTag](
     parent: DStream[T],
@@ -228,7 +232,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   def master: String = "local[2]"
 
   // Batch duration
-  // 间隔时间
+  // 间隔时间1秒
   def batchDuration: Duration = Seconds(1)
 
   // Directory where the checkpoint data will be saved
@@ -330,6 +334,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   /**
    * Set up required DStreams to test the DStream operation using the two sequences
    * of input collections.
+   * 设置所需的dstreams测试dstream操作使用两个序列的输入集合
    */
   def setupStreams[U: ClassTag, V: ClassTag](
       input: Seq[Seq[U]],
@@ -465,6 +470,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
    * Verify whether the output values after running a DStream operation
    * 验证是否输出值运行一个dstream操作
    * is same as the expected output values, by comparing the output
+   * 和预期的输出值相同,通过比较输出集合,无论是列表(命令的事项)或集(顺序不重要)
    * collections either as lists (order matters) or sets (order does not matter)
    */
   def verifyOutput[V: ClassTag](
@@ -548,6 +554,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   /**
    * Test binary DStream operation with two lists of inputs, with number of
    * batches to run same as the number of expected output values
+   * 试验二dstream操作两列输入,随着批量运行的数量与预期的输出值相同
    */
   def testOperation[U: ClassTag, V: ClassTag, W: ClassTag](
       input1: Seq[Seq[U]],
@@ -561,13 +568,18 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Test binary DStream operation with two lists of inputs
-   * @param input1     First sequence of input collections
-   * @param input2     Second sequence of input collections
+   * 试验二个dstream操作两列输入
+   * @param input1     First sequence of input collections 第一个输入序列的集合
+   * @param input2     Second sequence of input collections 第二个输入序列的集合
    * @param operation  Binary DStream operation to be applied to the 2 inputs
+   * 									 二个dstream操作被应用到2个输入
    * @param expectedOutput Sequence of expected output collections
+   * 											 期望输出集合的序列
    * @param numBatches Number of batches to run the operation for
+   * 									 批量运行的操作数
    * @param useSet     Compare the output values with the expected output values
    *                   as sets (order matters) or as lists (order does not matter)
+   *                   	将输出值与预期的输出值进行比较为集(顺序事项)或列表(顺序不重要)
    */
   def testOperation[U: ClassTag, V: ClassTag, W: ClassTag](
       input1: Seq[Seq[U]],

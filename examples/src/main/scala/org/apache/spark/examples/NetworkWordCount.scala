@@ -57,8 +57,9 @@ object NetworkWordCount {
     //请注意,只有在本地运行的存储级别没有重复
     // Replication necessary in distributed scenario for fault tolerance.
     //分布式容错中必要的复制
-    val lines = ssc.socketTextStream("localhost", 9999, StorageLevel.MEMORY_AND_DISK_SER)
+    val lines = ssc.socketTextStream("192.168.0.39", 8088, StorageLevel.MEMORY_AND_DISK_SER)
     val words = lines.flatMap(_.split(" "))//以空格分隔
+    println(">>>>>>>>>>>>>>."+words)
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)//单词计数
     wordCounts.print()
     ssc.start()

@@ -33,11 +33,15 @@ import org.apache.spark.streaming.receiver._
 import org.apache.spark.util.{Utils, ThreadUtils, SerializableConfiguration}
 
 
-/** Enumeration to identify current state of a Receiver */
+/** 
+ *  Enumeration to identify current state of a Receiver 
+ *  枚举类型接收器的当前状态
+ *  */
 private[streaming] object ReceiverState extends Enumeration {
   //定义三个字段，然后用Value调用将它们初始化，每次调用Value都返回内部类的新实例，
   //该内部类也叫做Value，或者你也可以向Value方法传入ID/名称/两个参数都传
   type ReceiverState = Value
+  //INACTIVE 闲置的,不活动的,SCHEDULED 预定,ACTIVE 活动
   val INACTIVE, SCHEDULED, ACTIVE = Value //定义一个枚举类型
 }
 
