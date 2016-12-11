@@ -25,7 +25,7 @@ private[streaming] case class ReceiverErrorInfo(
 
 /**
  * Class having information about a receiver.
- *
+ * 具有关于接收器信息的类
  * @param receiverId the unique receiver id
  * @param state the current Receiver state
  * @param scheduledExecutors the scheduled executors provided by ReceiverSchedulingPolicy

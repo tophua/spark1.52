@@ -28,9 +28,11 @@ import org.apache.spark.util.Utils
 
 /**
  * This is the abstract base class for all input streams. This class provides methods
+ * 这是所有输入流的抽象基类,这个类提供的方法start()和stop()即火花流系统的启动和停止接收数据
  * start() and stop() which is called by Spark Streaming system to start and stop receiving data.
  * Input streams that can generate RDDs from new data by running a service/thread only on
  * the driver node (that is, without running a receiver on worker nodes), can be
+ * 输入流,可以通过在驱动节点运行一个服务线程生成新数据RDDS,可以通过直接输入dstream实现继承
  * implemented by directly inheriting this InputDStream. For example,
  * FileInputDStream, a subclass of InputDStream, monitors a HDFS directory from the driver for
  * new files and generates RDDs with the new files. For implementing input streams
@@ -46,13 +48,20 @@ abstract class InputDStream[T: ClassTag] (@transient ssc_ : StreamingContext)
 
   ssc.graph.addInputStream(this)
 
-  /** This is an unique identifier for the input stream. */
+  /** 
+   *  This is an unique identifier for the input stream.
+   *  对于输入流,这是一个唯一的标识符 
+   *  */
   val id = ssc.getNewInputStreamId()
 
   // Keep track of the freshest rate for this stream using the rateEstimator
+  //跟踪最新率该流的使用rateestimator
   protected[streaming] val rateController: Option[RateController] = None
 
-  /** A human-readable name of this InputDStream */
+  /** 
+   *  A human-readable name of this InputDStream
+   *  这是一个人类可读的名字 InputDStream
+   *  */
   private[streaming] def name: String = {
     // e.g. FlumePollingDStream -> "Flume polling stream"
     val newName = Utils.getFormattedClassName(this)
@@ -67,7 +76,7 @@ abstract class InputDStream[T: ClassTag] (@transient ssc_ : StreamingContext)
 
   /**
    * The base scope associated with the operation that created this DStream.
-   *
+   * 创建这个dstream操作相关的基本范围
    * For InputDStreams, we use the name of this DStream as the scope name.
    * If an outer scope is given, we assume that it includes an alternative name for this stream.
    */
@@ -80,6 +89,7 @@ abstract class InputDStream[T: ClassTag] (@transient ssc_ : StreamingContext)
 
   /**
    * Checks whether the 'time' is valid wrt slideDuration for generating RDD.
+   * 检查是否有'时间'是产生有效的WRT slideduration RDD
    * Additionally it also ensures valid times are in strictly increasing order.
    * This ensures that InputDStream.compute() is called strictly on increasing
    * times.
@@ -106,9 +116,15 @@ abstract class InputDStream[T: ClassTag] (@transient ssc_ : StreamingContext)
     ssc.graph.batchDuration
   }
 
-  /** Method called to start receiving data. Subclasses must implement this method. */
+  /** 
+   *  Method called to start receiving data. Subclasses must implement this method.
+   *  调用开始接收数据的方法, 子类必须实现此方法
+   *  */
   def start()
 
-  /** Method called to stop receiving data. Subclasses must implement this method. */
+  /** 
+   *  Method called to stop receiving data. Subclasses must implement this method.
+   *  称为停止接收数据的方法,子类必须实现此方法
+   *   */
   def stop()
 }

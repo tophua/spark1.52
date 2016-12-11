@@ -21,7 +21,10 @@ import org.apache.spark.storage.StreamBlockId
 import org.apache.spark.streaming.receiver.{ReceivedBlockStoreResult, WriteAheadLogBasedStoreResult}
 import org.apache.spark.streaming.util.WriteAheadLogRecordHandle
 
-/** Information about blocks received by the receiver */
+/** 
+ *  Information about blocks received by the receiver
+ *  接收器接收的块的信息
+ *   */
 private[streaming] case class ReceivedBlockInfo(
     streamId: Int,
     numRecords: Option[Long],
@@ -42,12 +45,16 @@ private[streaming] case class ReceivedBlockInfo(
     }
   }
 
-  /** Is the block ID valid, that is, is the block present in the Spark executors. */
+  /** 
+   *  Is the block ID valid, that is, is the block present in the Spark executors. 
+   *  是块ID有效，即是在Spark的执行者提出的块。
+   *  */
   def isBlockIdValid(): Boolean = _isBlockIdValid
 
   /**
    * Set the block ID as invalid. This is useful when it is known that the block is not present
    * in the Spark executors.
+   * 将块标识设置为无效,这是有用的当它是已知的,块不在Spark的执行现状。
    */
   def setBlockIdInvalid(): Unit = {
     _isBlockIdValid = false

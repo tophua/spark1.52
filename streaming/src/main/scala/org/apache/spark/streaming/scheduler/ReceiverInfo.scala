@@ -23,6 +23,7 @@ import org.apache.spark.rpc.RpcEndpointRef
 /**
  * :: DeveloperApi ::
  * Class having information about a receiver
+ * 具有关于接收器的信息的类
  */
 @DeveloperApi
 case class ReceiverInfo(

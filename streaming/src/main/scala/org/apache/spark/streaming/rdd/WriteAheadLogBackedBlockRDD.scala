@@ -33,8 +33,9 @@ import org.apache.spark.util.SerializableConfiguration
  * Partition class for [[org.apache.spark.streaming.rdd.WriteAheadLogBackedBlockRDD]].
  * It contains information about the id of the blocks having this partition's data and
  * the corresponding record handle in the write ahead log that backs the partition.
- * @param index index of the partition
- * @param blockId id of the block having the partition data
+ * 它包含有这个分区的数据块的标识的信息,以及在备份分区的写前日志中的相应记录句柄
+ * @param index index of the partition 索引分区
+ * @param blockId id of the block having the partition data blockid ID的块具有分区数据
  * @param isBlockIdValid Whether the block Ids are valid (i.e., the blocks are present in the Spark
  *                         executors). If not, then block lookups by the block ids will be skipped.
  *                         By default, this is an empty array signifying true for all the blocks.

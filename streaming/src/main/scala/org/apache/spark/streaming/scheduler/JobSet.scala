@@ -25,6 +25,7 @@ import org.apache.spark.util.Utils
 
 /** Class representing a set of Jobs
   * belong to the same batch.
+  * 表示属于同一批的一组作业的
   */
 private[streaming]
 case class JobSet(
@@ -33,8 +34,11 @@ case class JobSet(
     streamIdToInputInfo: Map[Int, StreamInputInfo] = Map.empty) {
 
   private val incompleteJobs = new HashSet[Job]()
+  //当这jobset提交
   private val submissionTime = System.currentTimeMillis() // when this jobset was submitted
+  //当这jobset第一份工作开始处理
   private var processingStartTime = -1L // when the first job of this jobset started processing
+  //当这jobset最后的工作处理完
   private var processingEndTime = -1L // when the last job of this jobset finished processing
 
   jobs.zipWithIndex.foreach { case (job, i) => job.setOutputOpId(i) }
@@ -54,10 +58,12 @@ case class JobSet(
   def hasCompleted: Boolean = incompleteJobs.isEmpty
 
   // Time taken to process all the jobs from the time they started processing
+  //从他们开始处理的时间来处理所有的工作
   // (i.e. not including the time they wait in the streaming scheduler queue)
   def processingDelay: Long = processingEndTime - processingStartTime
 
   // Time taken to process all the jobs from the time they were submitted
+  //从提交的时间来处理所有的工作时间
   // (i.e. including the time they wait in the streaming scheduler queue)
   def totalDelay: Long = {
     processingEndTime - time.milliseconds

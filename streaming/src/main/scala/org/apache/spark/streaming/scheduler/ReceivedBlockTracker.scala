@@ -30,7 +30,10 @@ import org.apache.spark.streaming.util.{WriteAheadLog, WriteAheadLogUtils}
 import org.apache.spark.util.{Clock, Utils}
 import org.apache.spark.{Logging, SparkConf}
 
-/** Trait representing any event in the ReceivedBlockTracker that updates its state. */
+/** 
+ *  Trait representing any event in the ReceivedBlockTracker that updates its state.
+ *  特征表示,更新其状态receivedblocktracker任何事件
+ *   */
 private[streaming] sealed trait ReceivedBlockTrackerLogEvent
 
 private[streaming] case class BlockAdditionEvent(receivedBlockInfo: ReceivedBlockInfo)
@@ -41,7 +44,10 @@ private[streaming] case class BatchCleanupEvent(times: Seq[Time])
   extends ReceivedBlockTrackerLogEvent
 
 
-/** Class representing the blocks of all the streams allocated to a batch */
+/** 
+ *  Class representing the blocks of all the streams allocated to a batch
+ *  表示将要分配给一个批处理的所有流的块的类
+ *   */
 private[streaming]
 case class AllocatedBlocks(streamIdToAllocatedBlocks: Map[Int, Seq[ReceivedBlockInfo]]) {
   def getBlocksOfStream(streamId: Int): Seq[ReceivedBlockInfo] = {
@@ -52,6 +58,8 @@ case class AllocatedBlocks(streamIdToAllocatedBlocks: Map[Int, Seq[ReceivedBlock
 /**
  * Class that keep track of all the received blocks, and allocate them to batches
  * when required. All actions taken by this class can be saved to a write ahead log
+ * 跟踪所有接收到的块的跟踪的类,并在需要时将它们分配给批处理,
+ * 由这个类所采取的所有操作都可以保存到一个写提前日志,使跟踪者的状态,驱动故障后可以恢复
  * (if a checkpoint directory has been provided), so that the state of the tracker
  * (received blocks and block-to-batch allocations) can be recovered after driver failure.
  *
@@ -76,6 +84,7 @@ private[streaming] class ReceivedBlockTracker(
   private var lastAllocatedBatchTime: Time = null
 
   // Recover block information from write ahead logs
+  //从写入前记录日志中恢复块信息
   if (recoverFromWriteAheadLog) {
     recoverPastEvents()
   }
@@ -100,6 +109,7 @@ private[streaming] class ReceivedBlockTracker(
 
   /**
    * Allocate all unallocated blocks to the given batch.
+   * 所有未分配的块分配到给定的批,此事件将被写入前写日志
    * This event will get written to the write ahead log (if enabled).
    */
   def allocateBlocksToBatch(batchTime: Time): Unit = synchronized {
@@ -114,6 +124,7 @@ private[streaming] class ReceivedBlockTracker(
       allocatedBlocks
     } else {
       // This situation occurs when:
+      // 这种情况发生时：
       // 1. WAL is ended with BatchAllocationEvent, but without BatchCleanupEvent,
       // possibly processed batch job or half-processed batch job need to be processed again,
       // so the batchTime will be equal to lastAllocatedBatchTime.
@@ -124,12 +135,18 @@ private[streaming] class ReceivedBlockTracker(
     }
   }
 
-  /** Get the blocks allocated to the given batch. */
+  /** 
+   *  Get the blocks allocated to the given batch. 
+   *  获取分配给给定批的块
+   *  */
   def getBlocksOfBatch(batchTime: Time): Map[Int, Seq[ReceivedBlockInfo]] = synchronized {
     timeToAllocatedBlocks.get(batchTime).map { _.streamIdToAllocatedBlocks }.getOrElse(Map.empty)
   }
 
-  /** Get the blocks allocated to the given batch and stream. */
+  /** 
+   *  Get the blocks allocated to the given batch and stream. 
+   *  获取分配给给定批处理和流的块
+   *  */
   def getBlocksOfBatchAndStream(batchTime: Time, streamId: Int): Seq[ReceivedBlockInfo] = {
     synchronized {
       timeToAllocatedBlocks.get(batchTime).map {
@@ -138,7 +155,10 @@ private[streaming] class ReceivedBlockTracker(
     }
   }
 
-  /** Check if any blocks are left to be allocated to batches. */
+  /** 
+   *  Check if any blocks are left to be allocated to batches.
+   *  检查是否有任何块被分配给批
+   *   */
   def hasUnallocatedReceivedBlocks: Boolean = synchronized {
     !streamIdToUnallocatedBlockQueues.values.forall(_.isEmpty)
   }
@@ -146,6 +166,7 @@ private[streaming] class ReceivedBlockTracker(
   /**
    * Get blocks that have been added but not yet allocated to any batch. This method
    * is primarily used for testing.
+   * 获取已添加的块,但尚未分配给任何批处理,此方法主要用于测试
    */
   def getUnallocatedBlocks(streamId: Int): Seq[ReceivedBlockInfo] = synchronized {
     getReceivedBlockQueue(streamId).toSeq
@@ -154,6 +175,7 @@ private[streaming] class ReceivedBlockTracker(
   /**
    * Clean up block information of old batches. If waitForCompletion is true, this method
    * returns only after the files are cleaned up.
+   * 清理旧批次的块信息,如果waitforcompletion是true,只返回文件后清理方法。
    */
   def cleanupOldBatches(cleanupThreshTime: Time, waitForCompletion: Boolean): Unit = synchronized {
     require(cleanupThreshTime.milliseconds < clock.getTimeMillis())
@@ -164,7 +186,10 @@ private[streaming] class ReceivedBlockTracker(
     writeAheadLogOption.foreach(_.clean(cleanupThreshTime.milliseconds, waitForCompletion))
   }
 
-  /** Stop the block tracker. */
+  /** 
+   *  Stop the block tracker.
+   *  阻止块跟踪
+   *   */
   def stop() {
     writeAheadLogOption.foreach { _.close() }
   }
@@ -172,9 +197,11 @@ private[streaming] class ReceivedBlockTracker(
   /**
    * Recover all the tracker actions from the write ahead logs to recover the state (unallocated
    * and allocated block info) prior to failure.
+   * 从写前日志恢复状态恢复所有的跟踪行动(未分配和分配的块信息)失败之前
    */
   private def recoverPastEvents(): Unit = synchronized {
     // Insert the recovered block information
+    //插入恢复块信息
     def insertAddedBlock(receivedBlockInfo: ReceivedBlockInfo) {
       logTrace(s"Recovery: Inserting added block $receivedBlockInfo")
       receivedBlockInfo.setBlockIdInvalid()
@@ -182,7 +209,9 @@ private[streaming] class ReceivedBlockTracker(
     }
 
     // Insert the recovered block-to-batch allocations and clear the queue of received blocks
+    //将恢复的块插入到批处理分配中,并清除接收块的队列
     // (when the blocks were originally allocated to the batch, the queue must have been cleared).
+    //(当块最初被分配给批处理时，队列必须被清除)
     def insertAllocatedBatch(batchTime: Time, allocatedBlocks: AllocatedBlocks) {
       logTrace(s"Recovery: Inserting allocated batch for time $batchTime to " +
         s"${allocatedBlocks.streamIdToAllocatedBlocks}")
@@ -192,6 +221,7 @@ private[streaming] class ReceivedBlockTracker(
     }
 
     // Cleanup the batch allocations
+    //清理批分配
     def cleanupBatches(batchTimes: Seq[Time]) {
       logTrace(s"Recovery: Cleaning up batches $batchTimes")
       timeToAllocatedBlocks --= batchTimes
@@ -215,7 +245,10 @@ private[streaming] class ReceivedBlockTracker(
     }
   }
 
-  /** Write an update to the tracker to the write ahead log */
+  /** 
+   *  Write an update to the tracker to the write ahead log 
+   *  向写入前日志的跟踪程序写一个更新
+   *  */
   private def writeToLog(record: ReceivedBlockTrackerLogEvent) {
     if (isWriteAheadLogEnabled) {
       logDebug(s"Writing to log $record")
@@ -225,12 +258,18 @@ private[streaming] class ReceivedBlockTracker(
     }
   }
 
-  /** Get the queue of received blocks belonging to a particular stream */
+  /** 
+   *  Get the queue of received blocks belonging to a particular stream 
+   *  获取属于特定流的接收块的队列
+   *  */
   private def getReceivedBlockQueue(streamId: Int): ReceivedBlockQueue = {
     streamIdToUnallocatedBlockQueues.getOrElseUpdate(streamId, new ReceivedBlockQueue)
   }
 
-  /** Optionally create the write ahead log manager only if the feature is enabled */
+  /** 
+   *  Optionally create the write ahead log manager only if the feature is enabled 
+   *  仅当启用了该功能时,可以选择创建前写日志管理器
+   *  */
   private def createWriteAheadLog(): Option[WriteAheadLog] = {
     checkpointDirOption.map { checkpointDir =>
       val logDir = ReceivedBlockTracker.checkpointDirToLogDir(checkpointDirOption.get)
@@ -238,7 +277,10 @@ private[streaming] class ReceivedBlockTracker(
     }
   }
 
-  /** Check if the write ahead log is enabled. This is only used for testing purposes. */
+  /** 
+   *  Check if the write ahead log is enabled. This is only used for testing purposes.
+   *  检查是否启用了写入日志记录,这只是用于测试的目的
+   *   */
   private[streaming] def isWriteAheadLogEnabled: Boolean = writeAheadLogOption.nonEmpty
 }
 

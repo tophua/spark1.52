@@ -43,6 +43,7 @@ class Job(val time: Time, func: () => _) {
   }
 
   /**
+   * 此作业的全局唯一标识
    * @return the global unique id of this Job.
    */
   def id: String = {

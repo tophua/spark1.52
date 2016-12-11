@@ -34,8 +34,10 @@ import org.apache.spark.util.{SerializableConfiguration, TimeStampedHashMap, Uti
 /**
  * This class represents an input stream that monitors a Hadoop-compatible filesystem for new
  * files and creates a stream out of them. The way it works as follows.
- *
+ * 这类代表一个输入流,监视一个新文件Hadoop文件系统创建一个兼容的流出来,它的工作方式如下
+ * 
  * At each batch interval, the file system is queried for files in the given directory and
+ * 在每个批次间隔,在指定目录中的文件查询和检测到的新文件中选择了一批文件系统
  * detected new files are selected for that batch. In this case "new" means files that
  * became visible to readers during that time period. Some extra care is needed to deal
  * with the fact that files may become visible after they are created. For this purpose, this
@@ -82,7 +84,7 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
 
   /**
    * Minimum duration of remembering the information of selected files. Defaults to 60 seconds.
-   *
+   * 记住选定文件信息的最小持续时间,默认为60秒
    * Files with mod times older than this "window" of remembering will be ignored. So if new
    * files are visible within this window, then the file will get selected in the next batch.
    */
@@ -92,9 +94,11 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
   }
 
   // This is a def so that it works during checkpoint recovery:
+  //这是一个防御使其工作在检查点恢复：
   private def clock = ssc.scheduler.clock
 
   // Data to be saved as part of the streaming checkpoints
+  //作为流检查点的一部分的数据保存
   protected[streaming] override val checkpointData = new FileInputDStreamCheckpointData
 
   // Initial ignore threshold based on which old, existing files in the directory (at the time of
@@ -117,12 +121,15 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
     new mutable.HashMap[Time, Array[String]] with mutable.SynchronizedMap[Time, Array[String]]
 
   // Set of files that were selected in the remembered batches
+  //在被记住的批中选择的文件集
   @transient private var recentlySelectedFiles = new mutable.HashSet[String]()
 
   // Read-through cache of file mod times, used to speed up mod time lookups
+  //通过读取文件修改时间的缓存，用于加速MOD时间查找
   @transient private var fileToModTime = new TimeStampedHashMap[String, Long](true)
 
   // Timestamp of the last round of finding files
+  //最后一轮的查找文件的时间戳
   @transient private var lastNewFileFindingTime = 0L
 
   @transient private var path_ : Path = null
@@ -142,13 +149,15 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
    * the previous call.
    */
   override def compute(validTime: Time): Option[RDD[(K, V)]] = {
-    // Find new files
+    // Find new files 通过findNewFiles找到validTime以后产生的新files的数据
     val newFiles = findNewFiles(validTime.milliseconds)
     logInfo("New files at time " + validTime + ":\n" + newFiles.mkString("\n"))
     batchTimeToSelectedFiles += ((validTime, newFiles))
     recentlySelectedFiles ++= newFiles
+    //找到一些新file,以新的数组为参数,通过filesToRDD生成单个RDD实例
     val rdds = Some(filesToRDD(newFiles))
     // Copy newFiles to immutable.List to prevent from being modified by the user
+    //复制newfiles到不可变,列表来防止用户修改
     val metadata = Map(
       "files" -> newFiles.toList,
       StreamInputInfo.METADATA_KEY_DESCRIPTION -> newFiles.mkString("\n"))
@@ -157,7 +166,10 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
     rdds
   }
 
-  /** Clear the old time-to-files mappings along with old RDDs */
+  /** 
+   *  Clear the old time-to-files mappings along with old RDDs 
+   *  清除旧的文件映射RDDS
+   *  */
   protected[streaming] override def clearMetadata(time: Time) {
     super.clearMetadata(time)
     val oldFiles = batchTimeToSelectedFiles.filter(_._1 < (time - rememberDuration))
@@ -168,6 +180,7 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
     logDebug("Cleared files are:\n" +
       oldFiles.map(p => (p._1, p._2.mkString(", "))).mkString("\n"))
     // Delete file mod times that weren't accessed in the last round of getting new files
+      //删除在最后一轮获得新的文件没有访问的文件时间
     fileToModTime.clearOldValues(lastNewFileFindingTime - 1)
   }
 
@@ -233,11 +246,13 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
   private def isNewFile(path: Path, currentTime: Long, modTimeIgnoreThreshold: Long): Boolean = {
     val pathStr = path.toString
     // Reject file if it does not satisfy filter
+    //拒绝文件,如果它不满足过滤器
     if (!filter(path)) {
       logDebug(s"$pathStr rejected by filter")
       return false
     }
     // Reject file if it was created before the ignore time
+    //拒绝文件,如果它是在忽略时间之前创建的
     val modTime = getFileModTime(path)
     if (modTime <= modTimeIgnoreThreshold) {
       // Use <= instead of < to avoid SPARK-4518
@@ -245,11 +260,13 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
       return false
     }
     // Reject file if mod time > current batch time
+    //拒绝文件,如果修改时间>当前批处理时间
     if (modTime > currentTime) {
       logDebug(s"$pathStr not selected as mod time $modTime > current time $currentTime")
       return false
     }
     // Reject file if it was considered earlier
+    //拒绝文件,如果它被认为较早
     if (recentlySelectedFiles.contains(pathStr)) {
       logDebug(s"$pathStr already considered")
       return false
@@ -258,7 +275,10 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
     return true
   }
 
-  /** Generate one RDD from an array of files */
+  /** 
+   *  Generate one RDD from an array of files
+   *  从文件的数组生成一个RDD 
+   *  */
   private def filesToRDD(files: Seq[String]): RDD[(K, V)] = {
     val fileRDDs = files.map { file =>
       val rdd = serializableConfOpt.map(_.value) match {
@@ -280,7 +300,10 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
     new UnionRDD(context.sparkContext, fileRDDs)
   }
 
-  /** Get file mod time from cache or fetch it from the file system */
+  /** 
+   *  Get file mod time from cache or fetch it from the file system 
+   *  从缓存中获取文件的时间,或从文件系统中读取它
+   *  */
   private def getFileModTime(path: Path) = {
     fileToModTime.getOrElseUpdate(path.toString, fs.getFileStatus(path).getModificationTime())
   }
@@ -312,6 +335,7 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
 
   /**
    * A custom version of the DStreamCheckpointData that stores names of
+   * 对dstreamcheckpointdata存储名字的定制版
    * Hadoop files as checkpoint data.
    */
   private[streaming]
@@ -330,6 +354,7 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
       hadoopFiles.toSeq.sortBy(_._1)(Time.ordering).foreach {
         case (t, f) => {
           // Restore the metadata in both files and generatedRDDs
+          //恢复文件和generatedrdds元数据
           logInfo("Restoring files for time " + t + " - " +
             f.mkString("[", ", ", "]") )
           batchTimeToSelectedFiles += ((t, f))

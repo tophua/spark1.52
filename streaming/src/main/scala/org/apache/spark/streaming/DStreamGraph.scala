@@ -113,7 +113,7 @@ final private[streaming] class DStreamGraph extends Serializable with Logging {
   def getInputStreamName(streamId: Int): Option[String] = synchronized {
     inputStreams.find(_.id == streamId).map(_.name)
   }
-
+  //返回Job序列
   def generateJobs(time: Time): Seq[Job] = {
     logDebug("Generating jobs for time " + time)
     val jobs = this.synchronized {

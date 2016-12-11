@@ -46,15 +46,17 @@ import org.apache.spark.util.{CallSite, MetadataCleaner, Utils}
  * parent DStream.
  *
  * This class contains the basic operations available on all DStreams, such as `map`, `filter` and
+ * 这个类包含了所有可用的基本操作dstreams,例如:map,filter和window
  * `window`. In addition, [[org.apache.spark.streaming.dstream.PairDStreamFunctions]] contains
  * operations available only on DStreams of key-value pairs, such as `groupByKeyAndWindow` and
  * `join`. These operations are automatically available on any DStream of pairs
  * (e.g., DStream[(Int, Int)] through implicit conversions.
  *
  * DStreams internally is characterized by a few basic properties:
- *  - A list of other DStreams that the DStream depends on
- *  - A time interval at which the DStream generates an RDD
- *  - A function that is used to generate an RDD after each time interval
+ * dstreams内部是由几个基本性质:
+ *  - A list of other DStreams that the DStream depends on   
+ *  - A time interval at which the DStream generates an RDD 一个时间间隔dstream生成RDD
+ *  - A function that is used to generate an RDD after each time interval 一个方法,每个时间间隔后用来生成RDD
  */
 
 abstract class DStream[T: ClassTag] (
@@ -65,6 +67,7 @@ abstract class DStream[T: ClassTag] (
 
   // =======================================================================
   // Methods that should be implemented by subclasses of DStream
+  //方法应该由dstream子类实现
   // =======================================================================
 
   /** 
@@ -90,6 +93,7 @@ abstract class DStream[T: ClassTag] (
   // =======================================================================
 
   // RDDs generated, marked as private[streaming] so that testsuites can access it
+  //记录生成RDD,key是一个Time,这个Time是与指定的batchDuration一致,
   @transient
   private[streaming] var generatedRDDs = new HashMap[Time, RDD[T]] ()
 
@@ -148,7 +152,7 @@ abstract class DStream[T: ClassTag] (
 
   /**
    * Make a scope that groups RDDs created in the same DStream operation in the same batch.
-   *
+   * 做一个范围，组RDDS创造了在同一dstream运行在同一批
    * Each DStream produces many scopes and each scope may be shared by other DStreams created
    * in the same operation. Separate calls to the same DStream operation create separate scopes.
    * For instance, `dstream.map(...).map(...)` creates two separate scopes per batch.
@@ -225,6 +229,7 @@ abstract class DStream[T: ClassTag] (
     zeroTime = time
 
     // Set the checkpoint interval to be slideDuration or 10 seconds, which ever is larger
+    //设置检查点间隔为slideduration秒或10秒,这是以往任何时候都大
     if (mustCheckpoint && checkpointDuration == null) {
       checkpointDuration = slideDuration * math.ceil(Seconds(10) / slideDuration).toInt
       logInfo("Checkpoint interval automatically set to " + checkpointDuration)
@@ -370,16 +375,19 @@ abstract class DStream[T: ClassTag] (
   /**
    * Get the RDD corresponding to the given time; either retrieve it from cache
    * or compute-and-cache it.
-   * 从缓存generatedRDDs获取RDD,如果缓存中不存在,则生成RDD并持久化,设置检查点
+   * 生成RDD实例,生成后被放进generatedRDDs里供后续的查询和使用
+   * 
    */
   private[streaming] final def getOrCompute(time: Time): Option[RDD[T]] = {
     // If RDD was already generated, then retrieve it from HashMap,
     // or else compute the RDD    
+    //如果有RDD就直接返回,没有RDD就进行orElse下面的RDD生成步骤
     generatedRDDs.get(time).orElse {
       // Compute the RDD if time is valid (e.g. correct time in a sliding window)
       // of RDD generation, else generate nothing.
+      //验证time是否有效
       if (isTimeValid(time)) {//如果时间有效,则产生RDD
-
+        //然后调用compute方法获得RDD实例,并存入rddOption变更
         val rddOption = createRDDWithLocalProperties(time) {
           // Disable checks for existing output directories in jobs launched by the streaming
           // scheduler, since we may need to write output to an existing directory during checkpoint
@@ -392,6 +400,7 @@ abstract class DStream[T: ClassTag] (
 
         rddOption.foreach { case newRDD =>
           // Register the generated RDD for caching and checkpointing        
+          //注册产生RDD缓存和检查点
           if (storageLevel != StorageLevel.NONE) {
             newRDD.persist(storageLevel)//设置检查点
             logDebug(s"Persisting RDD ${newRDD.id} for time $time to $storageLevel")
@@ -400,9 +409,10 @@ abstract class DStream[T: ClassTag] (
             newRDD.checkpoint()
             logInfo(s"Marking RDD ${newRDD.id} for time $time for checkpointing")
           }
-          //缓存RDD
+          //将刚刚实例化出来的rddOption放入generatedRDDs对应的time位置
           generatedRDDs.put(time, newRDD)
         }
+        //返回刚刚实例化出来的rddOption
         rddOption
       } else {
         None
@@ -440,6 +450,7 @@ abstract class DStream[T: ClassTag] (
       body
     } finally {
       // Restore any state that was modified before returning
+      // 恢复之前修改的任何状态
       ssc.sparkContext.setCallSite(prevCallSite)
       ssc.sparkContext.setLocalProperty(scopeKey, prevScope)
       ssc.sparkContext.setLocalProperty(scopeNoOverrideKey, prevScopeNoOverride)
@@ -486,6 +497,7 @@ abstract class DStream[T: ClassTag] (
       oldRDDs.values.foreach { rdd =>
         rdd.unpersist(false)
         // Explicitly remove blocks of BlockRDD
+        //显式移除块blockrdd
         rdd match {
           case b: BlockRDD[_] =>
             logInfo("Removing blocks of RDD " + b + " of time " + time)

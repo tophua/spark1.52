@@ -25,6 +25,7 @@ import org.apache.spark.util.Utils
 
 /**
  * A class that tries to schedule receivers with evenly distributed. There are two phases for
+ * 试图分配均匀分布的接收器的一类,调度接收器有两个阶段
  * scheduling receivers.
  *
  * - The first phase is global scheduling when ReceiverTracker is starting and we need to schedule

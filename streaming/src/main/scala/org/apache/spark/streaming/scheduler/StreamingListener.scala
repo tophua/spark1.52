@@ -25,6 +25,7 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * :: DeveloperApi ::
  * Base trait for events related to StreamingListener
+ * 有关StreamingListener事件的基础特征
  */
 @DeveloperApi
 sealed trait StreamingListenerEvent
@@ -54,26 +55,45 @@ case class StreamingListenerReceiverStopped(receiverInfo: ReceiverInfo)
  * :: DeveloperApi ::
  * A listener interface for receiving information about an ongoing streaming
  * computation.
+ * 用于接收正在进行的流计算的信息的侦听器接口
  */
 @DeveloperApi
 trait StreamingListener {
 
-  /** Called when a receiver has been started */
+  /** 
+   *  Called when a receiver has been started 
+   *  调用一个接收器已经启动
+   *  */
   def onReceiverStarted(receiverStarted: StreamingListenerReceiverStarted) { }
 
-  /** Called when a receiver has reported an error */
+  /** 
+   *  Called when a receiver has reported an error 
+   *  调用一个接收器报告了一个错误
+   *  */
   def onReceiverError(receiverError: StreamingListenerReceiverError) { }
 
-  /** Called when a receiver has been stopped */
+  /** 
+   *  Called when a receiver has been stopped 
+   *  调用一个接收器被停止
+   *  */
   def onReceiverStopped(receiverStopped: StreamingListenerReceiverStopped) { }
 
-  /** Called when a batch of jobs has been submitted for processing. */
+  /** 
+   *  Called when a batch of jobs has been submitted for processing. 
+   *  调用一批工作已提交处理时
+   *  */
   def onBatchSubmitted(batchSubmitted: StreamingListenerBatchSubmitted) { }
 
-  /** Called when processing of a batch of jobs has started.  */
+  /** 
+   *  Called when processing of a batch of jobs has started. 
+   *  调用处理一批工作已经开始时
+   *   */
   def onBatchStarted(batchStarted: StreamingListenerBatchStarted) { }
 
-  /** Called when processing of a batch of jobs has completed. */
+  /** 
+   *  Called when processing of a batch of jobs has completed. 
+   *  调用处理一批作业完成时调用
+   *  */
   def onBatchCompleted(batchCompleted: StreamingListenerBatchCompleted) { }
 }
 

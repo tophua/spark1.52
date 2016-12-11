@@ -24,7 +24,10 @@ import org.apache.spark.streaming.{Checkpoint, CheckpointWriter, Time}
 import org.apache.spark.streaming.util.RecurringTimer
 import org.apache.spark.util.{Utils, Clock, EventLoop, ManualClock}
 
-/** Event classes for JobGenerator */
+/** 
+ *  Event classes for JobGenerator 
+ *  对于jobgenerator事件类
+ *  */
 private[scheduler] sealed trait JobGeneratorEvent
 private[scheduler] case class GenerateJobs(time: Time) extends JobGeneratorEvent
 private[scheduler] case class ClearMetadata(time: Time) extends JobGeneratorEvent
@@ -73,10 +76,13 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
   }
 
   // eventLoop is created when generator starts.
+  //当生成器启动时创建事件循环
   // This not being null means the scheduler has been started and not stopped
+  //这不是空的意思是调度程序已经启动，而不是停止
   private var eventLoop: EventLoop[JobGeneratorEvent] = null
 
   // last batch whose completion,checkpointing and metadata cleanup has been completed
+  //最后一批的完成,检查点和元数据清除已完成
   private var lastProcessedBatch: Time = null
 
   /** 
@@ -109,10 +115,12 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
   /**
    * Stop generation of jobs. processReceivedData = true makes this wait until jobs
    * of current ongoing time interval has been generated, processed and corresponding
+   * 使此等待,直到当前正在进行的时间间隔的作业已被生成,处理和相应的检查点写
    * checkpoints written.
    * 停止jobs,
    */
   def stop(processReceivedData: Boolean): Unit = synchronized {
+    //产生已被停止
     if (eventLoop == null) return // generator has already been stopped
 
     if (processReceivedData) {
@@ -123,6 +131,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
       val pollTime = 100
 
       // To prevent graceful stop to get stuck permanently
+      //防止优雅的永久停止
       def hasTimedOut: Boolean = {
         val timedOut = (System.currentTimeMillis() - timeWhenStopStarted) > stopTimeoutMs
         if (timedOut) {
@@ -133,6 +142,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
 
       // Wait until all the received blocks in the network input tracker has
       // been consumed by network input DStreams, and jobs have been generated with them
+      //等到所有接收到的块的网络输入跟踪已通过网络输入dstreams消耗,和工作已经产生与他们
       logInfo("Waiting for all received blocks to be consumed for job generation")
       while(!hasTimedOut && jobScheduler.receiverTracker.hasUnallocatedBlocks) {
         Thread.sleep(pollTime)
@@ -140,11 +150,13 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
       logInfo("Waited for all received blocks to be consumed for job generation")
 
       // Stop generating jobs
+      //停止产生Jobs
       val stopTime = timer.stop(interruptTimer = false)
       graph.stop()
       logInfo("Stopped generation timer")
 
       // Wait for the jobs to complete and checkpoints to be written
+      //等待工作完成和检查点写
       def haveAllBatchesBeenProcessed: Boolean = {
         lastProcessedBatch != null && lastProcessedBatch.milliseconds == stopTime
       }
@@ -156,11 +168,13 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     } else {
       logInfo("Stopping JobGenerator immediately")
       // Stop timer and graph immediately, ignore unprocessed data and pending jobs
+      //立即停止定时器图,忽略了未处理的数据和未决的工作
       timer.stop(true)
       graph.stop()
     }
 
     // Stop the event loop and checkpoint writer
+    //停止事件循环和检查点写
     if (shouldCheckpoint) checkpointWriter.stop()
     eventLoop.stop()
     logInfo("Stopped JobGenerator")
@@ -168,6 +182,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
 
   /**
    * Callback called when a batch has been completely processed.
+   * 回调调用时,一个批处理已完全处理
    */
   def onBatchCompletion(time: Time) {
     eventLoop.post(ClearMetadata(time))
@@ -175,6 +190,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
 
   /**
    * Callback called when the checkpoint of a batch has been written.
+   * 当一个批处理的检查点被写入时调用,
    */
   def onCheckpointCompletion(time: Time, clearCheckpointDataLater: Boolean) {
     if (clearCheckpointDataLater) {
@@ -182,7 +198,10 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     }
   }
 
-  /** Processes all events */
+  /** 
+   *  Processes all events 
+   *  处理所有的事件
+   *  */
   private def processEvent(event: JobGeneratorEvent) {
     logDebug("Got event " + event)
     event match {
@@ -194,7 +213,10 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     }
   }
 
-  /** Starts the generator for the first time */
+  /** 
+   *  Starts the generator for the first time 
+   *  开始第一次启动
+   *  */
   private def startFirstTime() {
     val startTime = new Time(timer.getStartTime())
     graph.start(startTime - graph.batchDuration)
@@ -202,9 +224,13 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     logInfo("Started JobGenerator at " + startTime)
   }
 
-  /** Restarts the generator based on the information in checkpoint */
+  /** 
+   *  Restarts the generator based on the information in checkpoint 
+   *  重新启动产生基于信息的检查点
+   *  */
   private def restart() {
     // If manual clock is being used for testing, then
+    //如果手动时钟被用于测试
     // either set the manual clock to the last checkpointed time,
     // or if the property is defined set it to that time
     if (clock.isInstanceOf[ManualClock]) {

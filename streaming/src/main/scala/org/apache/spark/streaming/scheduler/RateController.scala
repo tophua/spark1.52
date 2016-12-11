@@ -46,6 +46,7 @@ private[streaming] abstract class RateController(val streamUID: Int, rateEstimat
 
   /**
    * An initialization method called both from the constructor and Serialization code.
+   * 从构造函数和序列化代码调用的初始化方法
    */
   private def init() {
     executionContext = ExecutionContext.fromExecutorService(
@@ -60,6 +61,7 @@ private[streaming] abstract class RateController(val streamUID: Int, rateEstimat
 
   /**
    * Compute the new rate limit and publish it asynchronously.
+   * 计算新的速率限制并异步发布
    */
   private def computeAndPublish(time: Long, elems: Long, workDelay: Long, waitDelay: Long): Unit =
     Future[Unit] {
