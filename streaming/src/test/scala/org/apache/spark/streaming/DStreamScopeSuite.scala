@@ -152,7 +152,10 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     assert(ssc.sc.getLocalProperty(SparkContext.RDD_SCOPE_NO_OVERRIDE_KEY) == null)
   }
 
-  /** Assert that the given RDD scope inherits the name and ID of the base scope correctly. */
+  /** 
+   *  Assert that the given RDD scope inherits the name and ID of the base scope correctly.
+   *  断言了RDD范围继承了基地范围的名称和ID正确 
+   *  */
   private def assertScopeCorrect(
       baseScope: RDDOperationScope,
       rddScope: RDDOperationScope,
@@ -160,7 +163,10 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     assertScopeCorrect(baseScope.id, baseScope.name, rddScope, batchTime)
   }
 
-  /** Assert that the given RDD scope inherits the base name and ID correctly. */
+  /** 
+   *  Assert that the given RDD scope inherits the base name and ID correctly. 
+   *  断言了RDD范围继承的基名称和ID正确。
+   *  */
   private def assertScopeCorrect(
       baseScopeId: String,
       baseScopeName: String,

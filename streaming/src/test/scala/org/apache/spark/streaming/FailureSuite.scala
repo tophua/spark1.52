@@ -27,6 +27,7 @@ import org.apache.spark.util.Utils
 /**
  * This testsuite tests master failures at random times while the stream is running using
  * the real clock.
+ * 这个测试集测试掌握故障随时而流运行
  */
 class FailureSuite extends SparkFunSuite with BeforeAndAfter with Logging {
 
@@ -46,11 +47,11 @@ class FailureSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     //停止所有活动实时流
     StreamingContext.getActive().foreach { _.stop() }
   }
-
+  //多次失败map
   test("multiple failures with map") {
     MasterFailureTest.testMap(directory.getAbsolutePath, numBatches, batchDuration)
   }
-
+  //多次失败updateStateByKey
   test("multiple failures with updateStateByKey") {
     MasterFailureTest.testUpdateStateByKey(directory.getAbsolutePath, numBatches, batchDuration)
   }

@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.FSDataOutputStream
 
 /**
  * A writer for writing byte-buffers to a write ahead log file.
+ * 提前写入日志文件的字节缓冲
  */
 private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: Configuration)
   extends Closeable {
@@ -34,6 +35,7 @@ private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: 
 
   private lazy val hadoopFlushMethod = {
     // Use reflection to get the right flush operation
+    //使用反射得到正确的刷新操作
     val cls = classOf[FSDataOutputStream]
     Try(cls.getMethod("hflush")).orElse(Try(cls.getMethod("sync"))).toOption
   }
@@ -41,9 +43,13 @@ private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: 
   private var nextOffset = stream.getPos()
   private var closed = false
 
-  /** Write the bytebuffer to the log file */
+  /** 
+   *  Write the bytebuffer to the log file 
+   *  写缓冲区的日志文件
+   *  */
   def write(data: ByteBuffer): FileBasedWriteAheadLogSegment = synchronized {
     assertOpen()
+    //确保缓冲区中的所有数据检索
     data.rewind() // Rewind to ensure all data in the buffer is retrieved
     val lengthToWrite = data.remaining()
     val segment = new FileBasedWriteAheadLogSegment(path, nextOffset, lengthToWrite)
@@ -52,7 +58,9 @@ private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: 
       stream.write(data.array())
     } else {
       // If the buffer is not backed by an array, we transfer using temp array
+      //如果缓冲区没有一个数组支持,我们使用临时数组传输
       // Note that despite the extra array copy, this should be faster than byte-by-byte copy
+      //请注意,尽管额外的数组副本,这应该是更快比字节字节的副本
       while (data.hasRemaining) {
         val array = new Array[Byte](data.remaining)
         data.get(array)

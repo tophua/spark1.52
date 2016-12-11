@@ -31,6 +31,7 @@ import org.apache.spark.ui.SparkUICssErrorHandler
 
 /**
  * Selenium tests for the Spark Streaming Web UI.
+ * 动化测试工具测试Spark流用户界面
  */
 class UISeleniumSuite
   extends SparkFunSuite with WebBrowser with Matchers with BeforeAndAfterAll with TestSuiteBase {
@@ -94,6 +95,7 @@ class UISeleniumSuite
 
       eventually(timeout(10 seconds), interval(50 milliseconds)) {
         // check whether streaming page exists
+        //检查流页面是否存在
         go to (sparkUI.appUIAddress.stripSuffix("/") + "/streaming")
         val h3Text = findAll(cssSelector("h3")).map(_.text).toSeq
         h3Text should contain("Streaming Statistics")

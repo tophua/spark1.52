@@ -41,9 +41,11 @@ object RawTextSender extends Logging {
       System.exit(1)
     }
     // Parse the arguments using a pattern match
+    //解析使用模式匹配的参数
     val Array(IntParam(port), file, IntParam(blockSize), IntParam(bytesPerSec)) = args
 
     // Repeat the input data multiple times to fill in a buffer
+    //多次重复输入数据以填充缓冲区
     val lines = Source.fromFile(file).getLines().toArray
     val bufferStream = new ByteArrayOutputStream(blockSize + 1000)
     val ser = new KryoSerializer(new SparkConf()).newInstance()

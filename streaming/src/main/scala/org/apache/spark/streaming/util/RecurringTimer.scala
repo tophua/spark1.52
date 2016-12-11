@@ -35,8 +35,10 @@ class RecurringTimer(clock: Clock, period: Long, callback: (Long) => Unit, name:
 
   /**
    * Get the time when this timer will fire if it is started right now.
+   * 获取时间,当这个计时器将火,如果它是现在开始
    * The time will be a multiple of this timer's period and more than
    * current system time.
+   * 时间将是这个定时器周期的倍数和超过当前系统时间的倍数
    */
   def getStartTime(): Long = {
     (math.floor(clock.getTimeMillis().toDouble / period) + 1).toLong * period
@@ -44,8 +46,11 @@ class RecurringTimer(clock: Clock, period: Long, callback: (Long) => Unit, name:
 
   /**
    * Get the time when the timer will fire if it is restarted right now.
+   * 得到的时间,当定时器将火,如果它现在重新启动
    * This time depends on when the timer was started the first time, and was stopped
+   * 这个时间取决于当定时器是第一次启动的时候,
    * for whatever reason. The time must be a multiple of this timer's period and
+   * 并被停止的任何原因,时间必须是这个定时器周期的倍数,超过当前时间
    * more than current time.
    */
   def getRestartTime(originalStartTime: Long): Long = {
@@ -55,6 +60,7 @@ class RecurringTimer(clock: Clock, period: Long, callback: (Long) => Unit, name:
 
   /**
    * Start at the given start time.
+   * 在给定的开始时间
    */
   def start(startTime: Long): Long = synchronized {
     nextTime = startTime
@@ -65,6 +71,7 @@ class RecurringTimer(clock: Clock, period: Long, callback: (Long) => Unit, name:
 
   /**
    * Start at the earliest time it can start based on the period.
+   * 从最早开始它可以根据时间开始
    */
   def start(): Long = {
     start(getStartTime())
@@ -72,8 +79,10 @@ class RecurringTimer(clock: Clock, period: Long, callback: (Long) => Unit, name:
 
   /**
    * Stop the timer, and return the last time the callback was made.
-   * - interruptTimer = true will interrupt the callback
+   * 停止计时器,并返回上一次回调的最后一次
+   * - interruptTimer = true will interrupt the callback 将中断回调
    * if it is in progress (not guaranteed to give correct time in this case).
+   * 如果它正在进行中 (不保证在这种情况下给予正确的时间)
    * - interruptTimer = false guarantees that there will be at least one callback after `stop` has
    * been called.
    */
@@ -99,6 +108,7 @@ class RecurringTimer(clock: Clock, period: Long, callback: (Long) => Unit, name:
 
   /**
    * Repeatedly call the callback every interval.
+   * 反复调用回调的每一个间隔
    */
   private def loop() {
     try {

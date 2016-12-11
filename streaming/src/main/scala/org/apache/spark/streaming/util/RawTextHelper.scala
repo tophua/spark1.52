@@ -25,6 +25,7 @@ object RawTextHelper {
 
   /**
    * Splits lines and counts the words.
+   * 分裂行和计数的单词
    */
   def splitAndCountPartitions(iter: Iterator[String]): Iterator[(String, Long)] = {
     val map = new OpenHashMap[String, Long]
@@ -57,6 +58,7 @@ object RawTextHelper {
   /**
    * Gets the top k words in terms of word counts. Assumes that each word exists only once
    * in the `data` iterator (that is, the counts have been reduced).
+   * 从单词计数中获取最上面的k个单词,假设每个单词只存在一次在“数据”迭代器中
    */
   def topK(data: Iterator[(String, Long)], k: Int): Iterator[(String, Long)] = {
     val taken = new Array[(String, Long)](k)

@@ -25,6 +25,7 @@ private[streaming] object HdfsUtils {
     val dfsPath = new Path(path)
     val dfs = getFileSystemForPath(dfsPath, conf)
     // If the file exists and we have append support, append instead of creating a new file
+    //如果文件存在,我们支持追加,而不是创建一个新的文件
     val stream: FSDataOutputStream = {
       if (dfs.isFile(dfsPath)) {
         if (conf.getBoolean("hdfs.append.support", false) || dfs.isInstanceOf[RawLocalFileSystem]) {
@@ -52,7 +53,10 @@ private[streaming] object HdfsUtils {
     }
   }
 
-  /** Get the locations of the HDFS blocks containing the given file segment. */
+  /** 
+   *  Get the locations of the HDFS blocks containing the given file segment. 
+   *  得到的HDFS块包含给定的文件段的位置
+   *  */
   def getFileSegmentLocations(
       path: String, offset: Long, length: Long, conf: Configuration): Array[String] = {
     val dfsPath = new Path(path)
@@ -65,6 +69,7 @@ private[streaming] object HdfsUtils {
   def getFileSystemForPath(path: Path, conf: Configuration): FileSystem = {
     // For local file systems, return the raw local file system, such calls to flush()
     // actually flushes the stream.
+    //对于本地文件系统,返回原始的本地文件系统,这样的要求flush()却冲流
     val fs = path.getFileSystem(conf)
     fs match {
       case localFs: LocalFileSystem => localFs.getRawFileSystem

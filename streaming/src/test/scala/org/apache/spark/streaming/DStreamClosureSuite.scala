@@ -88,6 +88,7 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
   }
 
   // DStream operations
+  //DStream操作
   private def testMap(ds: DStream[Int]): Unit = expectCorrectException {
     ds.map { _ => return; 1 }
   }

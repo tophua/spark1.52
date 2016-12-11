@@ -144,7 +144,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
     }
   }
 
-  ignore("block generator throttling") {
+  ignore("block generator throttling") {//块发生器节流
     val blockGeneratorListener = new FakeBlockGeneratorListener
     val blockIntervalMs = 100
     val maxRate = 1001
@@ -175,7 +175,9 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
     assert(recordedData.toSet === generatedData.toSet, "Received data not same")
 
     // recordedData size should be close to the expected rate; use an error margin proportional to
+    //recordeddata大小应接近预期比率,使用错误保证金与价值成正比
     // the value, so that rate changes don't cause a brittle test
+    //因此，速率变化不会导致脆性测试
     val minExpectedMessages = expectedMessages - 0.05 * expectedMessages
     val maxExpectedMessages = expectedMessages + 0.05 * expectedMessages
     val numMessages = recordedData.size
@@ -254,6 +256,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
       val receiverStream1 = ssc.receiverStream(receiver1)
       val receiverStream2 = ssc.receiverStream(receiver2)
       receiverStream1.register()
+      //3第二窗口
       receiverStream2.window(batchDuration * 6).register()  // 3 second window
       ssc.checkpoint(tempDirectory.getAbsolutePath())
       ssc.start()

@@ -205,7 +205,8 @@ class CheckpointSuite extends TestSuiteBase {
   }
 
   // This tests if "spark.driver.host" and "spark.driver.port" is set by user, can be recovered
-  // with correct value.
+  // with correct value.可以恢复正确的值
+  //获得正确的spark.driver.[host|port]来自检查点 
   test("get correct spark.driver.[host|port] from checkpoint") {
     val conf = Map("spark.driver.host" -> "localhost", "spark.driver.port" -> "9999")
     conf.foreach(kv => System.setProperty(kv._1, kv._2))
@@ -218,6 +219,7 @@ class CheckpointSuite extends TestSuiteBase {
     ssc.stop()
 
     // Serialize/deserialize to simulate write to storage and reading it back
+    //序列化/反序列化进行存储和回读写
     val newCp = Utils.deserialize[Checkpoint](Utils.serialize(cp))
 
     val newCpConf = newCp.createSparkConf()
@@ -236,6 +238,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     // If spark.driver.host and spark.driver.host is not set in system property, these two
     // parameters should not be presented in the newly recovered conf.
+    //这两个参数不应该在新恢复的配置
     conf.foreach(kv => System.clearProperty(kv._1))
     val newCpConf1 = newCp.createSparkConf()
     assert(!newCpConf1.contains("spark.driver.host"))
@@ -243,6 +246,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Spark itself will dispatch a random, not-used port for spark.driver.port if it is not set
     // explicitly.
+    //Spark本身将派遣一个随机,不使用的端口为spark.driver.port如果没有显式设置
     ssc = new StreamingContext(null, newCp, null)
     val restoredConf1 = ssc.conf
     assert(restoredConf1.get("spark.driver.host") === "localhost")
@@ -251,8 +255,9 @@ class CheckpointSuite extends TestSuiteBase {
 
   // This tests whether the system can recover from a master failure with simple
   // non-stateful operations. This assumes as reliable, replayable input
+  //本测试系统是否能从一个简单的无状态操作主机故障中恢复,这是可靠的,可重复的输入源TestInputDStream
   // source - TestInputDStream.
-  test("recovery with map and reduceByKey operations") {
+  test("recovery with map and reduceByKey operations") {//恢复map和reducebykey操作
     testCheckpointedOperation(
       Seq( Seq("a", "a", "b"), Seq("", ""), Seq(), Seq("a", "a", "b"), Seq("", ""), Seq() ),
       (s: DStream[String]) => s.map(x => (x, 1)).reduceByKey(_ + _),
@@ -269,7 +274,9 @@ class CheckpointSuite extends TestSuiteBase {
 
   // This tests whether the ReduceWindowedDStream's RDD checkpoints works correctly such
   // that the system can recover from a master failure. This assumes as reliable,
+  //这个测试是否reducewindoweddstream RDD检查站的正常工作,系统可以从主故障中恢复,可重复的输入源TestInputDStream
   // replayable input source - TestInputDStream.
+  //恢复可逆reduceByKeyAndWindow操作
   test("recovery with invertible reduceByKeyAndWindow operation") {
     val n = 10
     val w = 4
@@ -283,7 +290,7 @@ class CheckpointSuite extends TestSuiteBase {
     }
     testCheckpointedOperation(input, operation, output, 7)
   }
-
+  //恢复saveAsHadoopFiles操作
   test("recovery with saveAsHadoopFiles operation") {
     val tempDir = Utils.createTempDir()
     try {
@@ -312,7 +319,7 @@ class CheckpointSuite extends TestSuiteBase {
       Utils.deleteRecursively(tempDir)
     }
   }
-
+  //恢复saveAsNewAPIHadoopFiles操作
   test("recovery with saveAsNewAPIHadoopFiles operation") {
     val tempDir = Utils.createTempDir()
     try {
@@ -341,7 +348,7 @@ class CheckpointSuite extends TestSuiteBase {
       Utils.deleteRecursively(tempDir)
     }
   }
-
+  //恢复saveAsHadoopFile操作内部转换操作
   test("recovery with saveAsHadoopFile inside transform operation") {
     // Regression test for SPARK-4835.
     //
@@ -389,7 +396,9 @@ class CheckpointSuite extends TestSuiteBase {
 
   // This tests whether the StateDStream's RDD checkpoints works correctly such
   // that the system can recover from a master failure. This assumes as reliable,
+  //这个测试是否statedstream RDD检查站的正常工作，系统可以从主故障中恢复,这是可靠的重复输入源
   // replayable input source - TestInputDStream.
+  //恢复updateStateByKey操作
   test("recovery with updateStateByKey operation") {
     val input = (1 to 10).map(_ => Seq("a")).toSeq
     val output = (1 to 10).map(x => Seq(("a", x))).toSeq
@@ -437,7 +446,7 @@ class CheckpointSuite extends TestSuiteBase {
   // the master failure and uses them again to process a large window operation.
   // It also tests whether batches, whose processing was incomplete due to the
   // failure, are re-processed or not.
-  test("recovery with file input stream") {//用文件输入流恢复
+  test("recovery with file input stream") {//恢复文件输入流
     // Set up the streaming context and input streams
     //设置流上下文和输入流
     val batchDuration = Seconds(2)  // Due to 1-second resolution of setLastModified() on some OS's.
@@ -494,12 +503,14 @@ class CheckpointSuite extends TestSuiteBase {
 
         // Reducing over a large window to ensure that recovery from driver failure
         // requires reprocessing of all the files seen before the failure
+        //减少在一个大的窗口,以确保恢复从驱动程序故障,需要重新处理之前看到的故障的所有文件
         val reducedStream = mappedStream.reduceByWindow(_ + _, batchDuration * 30, batchDuration)
         val outputStream = new TestOutputStream(reducedStream, outputBuffer)
         outputStream.register()
         ssc.start()
 
         // Advance half a batch so that the first file is created after the StreamingContext starts
+        //提前半个批,第一个文件是StreamingContext开始了
         clock.advance(batchDuration.milliseconds / 2)
         // Create files and advance manual clock to process them
         //创建文件和推进手动时钟来处理它们
@@ -507,9 +518,11 @@ class CheckpointSuite extends TestSuiteBase {
           writeFile(i, clock)
           // Advance the clock after creating the file to avoid a race when
           // setting its modification time
+          //在设置修改时间后创建文件以避免竞争的时钟
           clock.advance(batchDuration.milliseconds)
           if (i != 3) {
             // Since we want to shut down while the 3rd batch is processing
+            //因为我们想关闭,而第三批处理
             eventually(eventuallyTimeout) {
               assert(batchCounter.getNumCompletedBatches === i)
             }
@@ -517,20 +530,24 @@ class CheckpointSuite extends TestSuiteBase {
         }
         eventually(eventuallyTimeout) {
           // Wait until all files have been recorded and all batches have started
+          //等待,直到所有的文件被记录,所有批次已经开始
           assert(recordedFiles(ssc) === Seq(1, 2, 3) && batchCounter.getNumStartedBatches === 3)
         }
         clock.advance(batchDuration.milliseconds)
         // Wait for a checkpoint to be written
+        //等待要写的检查点
         eventually(eventuallyTimeout) {
           assert(Checkpoint.getCheckpointFiles(checkpointDir).size === 6)
         }
         ssc.stop()
         // Check that we shut down while the third batch was being processed
+        //检查我们关闭,而第三批正在处理
         assert(batchCounter.getNumCompletedBatches === 2)
         assert(outputStream.output.flatten === Seq(1, 3))
       }
 
       // The original StreamingContext has now been stopped.
+      //原来StreamingContext已经停止了
       CheckpointSuite.batchThreeShouldBlockIndefinitely = false
 
       // Create files while the streaming driver is down
@@ -538,12 +555,14 @@ class CheckpointSuite extends TestSuiteBase {
       for (i <- Seq(4, 5, 6)) {
         writeFile(i, clock)
         // Advance the clock after creating the file to avoid a race when
+        //在设置修改时间后创建文件以避免竞争的时钟
         // setting its modification time
         clock.advance(batchDuration.milliseconds)
       }
 
       // Recover context from checkpoint file and verify whether the files that were
       // recorded before failure were saved and successfully recovered
+      //从检查点文件中恢复上下文,并检查在失败之前记录的文件是否被保存并成功恢复
       logInfo("*********** RESTARTING ************")
       withStreamingContext(new StreamingContext(checkpointDir)) { ssc =>
         // "batchDuration.milliseconds * 3" has gone before restarting StreamingContext. And because
@@ -556,15 +575,19 @@ class CheckpointSuite extends TestSuiteBase {
         val batchCounter = new BatchCounter(ssc)
         val outputStream = ssc.graph.getOutputStreams().head.asInstanceOf[TestOutputStream[Int]]
         // Check that we remember files that were recorded before the restart
+        //请检查我们记得在重新启动前记录的文件
         assert(recordedFiles(ssc) === Seq(1, 2, 3))
 
         // Restart stream computation
+        //重启流计算
         ssc.start()
         // Verify that the clock has traveled forward to the expected time
+        //确认时钟已经向前走到预期的时间
         eventually(eventuallyTimeout) {
           assert(clock.getTimeMillis() === oldClockTime)
         }
         // There are 5 batches between 6000ms and 15000ms (inclusive).
+        //有5个批次6000ms和15000ms之间(含)
         val numBatchesAfterRestart = 5
         eventually(eventuallyTimeout) {
           assert(batchCounter.getNumCompletedBatches === numBatchesAfterRestart)
@@ -584,12 +607,15 @@ class CheckpointSuite extends TestSuiteBase {
 
         // Verify whether files created while the driver was down (4, 5, 6) and files created after
         // recovery (7, 8, 9) have been recorded
+        //验证是否创建的文件,而驱动程序是下降(4，5，6)和恢复后创建的文件(7，8，9)已被记录
         assert(recordedFiles(ssc) === (1 to 9))
 
         // Append the new output to the old buffer
+        //将新的输出添加到旧缓冲区
         outputBuffer ++= outputStream.output
 
         // Verify whether all the elements received are as expected
+        //检查是否所有接收到的元素是否如预期的
         val expectedOutput = Seq(1, 3, 6, 10, 15, 21, 28, 36, 45)
         assert(outputBuffer.flatten.toSet === expectedOutput.toSet)
       }

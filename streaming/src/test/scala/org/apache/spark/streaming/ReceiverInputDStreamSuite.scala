@@ -29,7 +29,9 @@ import org.apache.spark.streaming.receiver.{BlockManagerBasedStoreResult, Receiv
 import org.apache.spark.streaming.scheduler.ReceivedBlockInfo
 import org.apache.spark.streaming.util.{WriteAheadLogRecordHandle, WriteAheadLogUtils}
 import org.apache.spark.{SparkConf, SparkEnv}
-
+/**
+ * ReceiverInputDStream保存关于历次batch的源头数据条数,历次batch计算花费的时间,用来实时计算准确的流量控制信息
+ */
 class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
 
   override def afterAll(): Unit = {

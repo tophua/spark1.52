@@ -87,6 +87,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         ssc.scheduler.listenerBus.waitUntilEmpty(500)
 
         // Verify all "InputInfo"s have been reported
+        //检查所有inputinfo的报告
         assert(ssc.progressListener.numTotalReceivedRecords === input.size)
         assert(ssc.progressListener.numTotalProcessedRecords === input.size)
 
@@ -119,7 +120,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     }
   }
 
-  test("socket input stream - no block in a batch") {//没有
+  test("socket input stream - no block in a batch") {//批理处理没有块
     withTestServer(new TestServer()) { testServer =>
       testServer.start()
 
@@ -209,7 +210,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     }
   }
 
-  test("file input stream - newFilesOnly = true") {
+  test("file input stream - newFilesOnly = true") {//文件输入流
     testFileStream(newFilesOnly = true)
   }
 
@@ -217,7 +218,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     testFileStream(newFilesOnly = false)
   }
 
-  test("multi-thread receiver") {
+  test("multi-thread receiver") {//多线程接收
     // set up the test receiver
     //多线程接收数据
     val numThreads = 10

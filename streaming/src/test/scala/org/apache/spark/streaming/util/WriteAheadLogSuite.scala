@@ -32,7 +32,9 @@ import org.scalatest.BeforeAndAfter
 
 import org.apache.spark.util.{ManualClock, Utils}
 import org.apache.spark.{SparkConf, SparkException, SparkFunSuite}
-
+/**
+ * 提前写日志测试套件
+ */
 class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
 
   import WriteAheadLogSuite._

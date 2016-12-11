@@ -30,9 +30,31 @@ import org.apache.spark.streaming.dstream.ReceiverInputDStream
 import org.apache.spark.streaming.receiver._
 
 /** 
- *  Testsuite for receiver scheduling
- *  测试接收调度集 
- *  */
+ *  Testsuite for receiver schedulin
+ *  
+ * JobScheduler将每个batch的RDD DAG具体生成工作委托给JobGenerator,
+ * 而将源头输入数据的记录工作委托给ReceiverTracker
+ * Spark Streaming在程序刚开始运行时,
+ * 1,由Receiver的总指挥ReceiverTracker分发多个job(每个job有1个task),到多个executor上分别启动ReceiverSupervisor实例
+ * 2,每个executoru端ReceiverSupervisor启动后将马上生成一个用户提供的Receiver实现的实例--
+ * 	  该Receiver实现可以持续产生或者持续接收系统外的数据,比如TwitterReceiver可以实时爬取Twitter的数据,
+ * 	  并在Receiver实例生成后调用Receiver.onStart()
+ * 3,Receiver启动后,就将持续不断地接收外界数据,并持续交给ReceiverSupervisor进行数据转储
+ * 4,ReceiverSupervisor持续不断地接收到Receiver转来的数据:
+ * 		1,如果数据很细小,就需要BlockGenerator攒多条数据成一块BlockGenerator,
+ * 			然后再生成块存储BlockManagerBasedBlockHandler或者WriteAheadLogBasedBlockHandler
+ * 			
+ * 		2,Spark目前支持两种生成块存储方式:一种是由blockManagerBaseHandler直接存到executor的内存或者硬盘
+ *       另一种由WriteAheadLogBasedBlockHander是同时写WAL和executor的内存或硬盘
+ * 5,每次生成块在executor存储完毕后,ReceiverSupervisor就会及时上报块数据的meta信息给Driver端的ReceiverTracker
+ * 	 这里的meta信息包括数据的标识ID,数据的位置,数据的条数,数据的大小等信息
+ * 6,ReceiverTracker再将收到的块数据meta信息直接转给自己的成员ReceivedBlockTracker,由ReceivedBlockTracker专门
+ *   管理收到的数据meta信息.
+ * 
+ * 
+ * 
+ **/
+
 class ReceiverTrackerSuite extends TestSuiteBase {
   //发送速率更新到接收器
   test("send rate update to receivers") {

@@ -24,7 +24,10 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.spark.util.Utils
 import org.apache.spark.{Logging, SparkConf, SparkException}
 
-/** A helper class with utility functions related to the WriteAheadLog interface */
+/** 
+ *  A helper class with utility functions related to the WriteAheadLog interface 
+ *  一个实用的writeaheadlog界面相关功能辅助类
+ *  */
 private[streaming] object WriteAheadLogUtils extends Logging {
   val RECEIVER_WAL_ENABLE_CONF_KEY = "spark.streaming.receiver.writeAheadLog.enable"
   val RECEIVER_WAL_CLASS_CONF_KEY = "spark.streaming.receiver.writeAheadLog.class"

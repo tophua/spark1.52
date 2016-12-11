@@ -311,13 +311,17 @@ object MasterFailureTest extends Logging {
 
   /**
    * Verifies the output value are the same as expected. Since failures can lead to
+   * 验证输出值与预期相同,由于故障可以导致一个被处理的一个批次两次,一批输出可能会出现不止一次
    * a batch being processed twice, a batches output may appear more than once
    * consecutively. To avoid getting confused with those, we eliminate consecutive
+   * 为了避免与那些混淆,我们消除“输出”的值的连续重复批输出,因此
    * duplicate batch outputs of values from the `output`. As a result, the
    * expected output should not have consecutive batches with the same values as output.
+   * 预期的输出不应该具有与输出相同的值的连续批。
    */
   private def verifyOutput[T: ClassTag](output: Seq[T], expectedOutput: Seq[T]) {
     // Verify whether expected outputs do not consecutive batches with same output
+    //验证是否预期输出不连续批具有相同的输出
     for (i <- 0 until expectedOutput.size - 1) {
       assert(expectedOutput(i) != expectedOutput(i + 1),
         "Expected output has consecutive duplicate sequence of values")
@@ -332,12 +336,16 @@ object MasterFailureTest extends Logging {
     // scalastyle:on println
 
     // Match the output with the expected output
+    //将输出与预期输出相匹配
     output.foreach(o =>
       assert(expectedOutput.contains(o), "Expected value " + o + " not found")
     )
   }
 
-  /** Resets counter to prepare for the test */
+  /** 
+   *  Resets counter to prepare for the test
+   *  重置为计数准备测试 
+   *  */
   private def reset() {
     killed = false
     killCount = 0
@@ -392,9 +400,11 @@ class FileGeneratingThread(input: Seq[String], testDir: Path, interval: Long)
     var fs = testDir.getFileSystem(new Configuration())
     val maxTries = 3
     try {
+      //为了确保所有的流上下文已被设置
       Thread.sleep(5000) // To make sure that all the streaming context has been set up
       for (i <- 0 until input.size) {
         // Write the data to a local file and then move it to the target test directory
+        //将数据写入本地文件,然后将其移动到目标测试目录
         val localFile = new File(localTestDir, (i + 1).toString)
         val hadoopFile = new Path(testDir, (i + 1).toString)
         val tempHadoopFile = new Path(testDir, ".tmp_" + (i + 1).toString)

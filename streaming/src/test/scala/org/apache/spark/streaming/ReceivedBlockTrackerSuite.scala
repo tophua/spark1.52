@@ -99,12 +99,12 @@ class ReceivedBlockTrackerSuite
     receivedBlockTracker.getBlocksOfBatchAndStream(2, streamId) shouldBe empty
     receivedBlockTracker.getUnallocatedBlocks(streamId) shouldEqual blockInfos
   }
-
+  //用写日志记录的恢复和清理
   test("recovery and cleanup with write ahead logs") {
     val manualClock = new ManualClock
     // Set the time increment level to twice the rotation interval so that every increment creates
     // a new log file
-
+    //将时间增量级别设置为两倍的旋转间隔,以便每一个增量创建一个新的日志文件
     def incrementTime() {
       val timeIncrementMillis = 2000L
       manualClock.advance(timeIncrementMillis)

@@ -216,12 +216,13 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
 
     // Verify streaming jobs have expected thread-local properties
-    //
+    //验证流作业有预期本地线程的属性
     assert(jobGroupFound === null)
     assert(jobDescFound.contains("Streaming job from"))
     assert(jobInterruptFound === "false")
 
     // Verify current thread's thread-local properties have not changed
+    //验证当前线程的线程本地属性没有更改
     assert(sc.getLocalProperty(SparkContext.SPARK_JOB_GROUP_ID) === "non-streaming")
     assert(sc.getLocalProperty(SparkContext.SPARK_JOB_DESCRIPTION) === "non-streaming")
     assert(sc.getLocalProperty(SparkContext.SPARK_JOB_INTERRUPT_ON_CANCEL) === "true")
@@ -249,6 +250,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("stop before start") {//运行之前停止不抛异常
     ssc = new StreamingContext(master, appName, batchDuration)
     addInputStream(ssc).register()
+    //停止之前启动不应该抛出异常
     ssc.stop()  // stop before start should not throw exception
     assert(ssc.getState() === StreamingContextState.STOPPED)
   }
@@ -375,7 +377,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     assert(runningCount == totalNumRecords)
     Thread.sleep(100)
   }
-//注册和注销的streamingSource
+  //注册和注销的streamingSource
   test ("registering and de-registering of streamingSource") {
     val conf = new SparkConf().setMaster(master).setAppName(appName)
     ssc = new StreamingContext(conf, batchDuration)
@@ -413,6 +415,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
 
     // test whether awaitTermination() does not exit if not time is given
+    //测试是否awaittermination()不存在退出,如果不是时间给定
     val exception = intercept[Exception] {
       failAfter(1000 millis) {
         ssc.awaitTermination()
@@ -465,7 +468,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
     assert(exception.getMessage.contains("map task"), "Expected exception not thrown")
   }
-
+//awaitTermination 有工作生成的错误
   test("awaitTermination with error in job generation") {
     ssc = new StreamingContext(master, appName, batchDuration)
     val inputStream = addInputStream(ssc)
@@ -476,7 +479,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
     assert(exception.getMessage.contains("transform"), "Expected exception not thrown")
   }
-
+//awaitTermination超时
   test("awaitTerminationOrTimeout") {
     ssc = new StreamingContext(master, appName, batchDuration)
     val inputStream = addInputStream(ssc)
@@ -485,12 +488,14 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     ssc.start()
 
     // test whether awaitTerminationOrTimeout() return false after give amount of time
+    //测试是否awaitterminationortimeout()返回false给之后的时间
     failAfter(1000 millis) {
       assert(ssc.awaitTerminationOrTimeout(500) === false)
     }
 
     var t: Thread = null
     // test whether awaitTerminationOrTimeout() return true if context is stopped
+    //10秒,因为Spark需要很长的时间关机
     failAfter(10000 millis) { // 10 seconds because spark takes a long time to shutdown
       t = new Thread() {
         override def run() {
@@ -587,7 +592,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
   }
 
-  test("getActive and getActiveOrCreate") {
+  test("getActive and getActiveOrCreate") {//获得活动和创建
     require(StreamingContext.getActive().isEmpty, "context exists from before")
     sc = new SparkContext(conf)
 
@@ -652,6 +657,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("getActiveOrCreate with checkpoint") {
     // Function to create StreamingContext that has a config to identify it to be new context
+    //函数创建StreamingContext,配置以确定它是新的上下文
     var newContextCreated = false
     def creatingFunction(): StreamingContext = {
       newContextCreated = true
@@ -660,6 +666,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
     // Call ssc.stop after a body of code
     def testGetActiveOrCreate(body: => Unit): Unit = {
+      //没有活动的背景
       require(StreamingContext.getActive().isEmpty) // no active context
       newContextCreated = false
       try {
@@ -697,11 +704,13 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
 
     // getActiveOrCreate should throw exception with fake checkpoint file and createOnError = false
+    //getActiveOrCreate 应该抛出假检查点文件的异常并createOnError = false
     intercept[Exception] {
       ssc = StreamingContext.getOrCreate(corruptedCheckpointPath, creatingFunction _)
     }
 
     // getActiveOrCreate should throw exception with fake checkpoint file
+    //getActiveOrCreate 应该抛出假检查点文件的异常
     intercept[Exception] {
       ssc = StreamingContext.getActiveOrCreate(
         corruptedCheckpointPath, creatingFunction _, createOnError = false)
@@ -709,6 +718,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
     // getActiveOrCreate should create new context with fake
     // checkpoint file and createOnError = true
+    //应该用假检查点文件和createonerror =true的创造新的上下文
     testGetActiveOrCreate {
       ssc = StreamingContext.getActiveOrCreate(
         corruptedCheckpointPath, creatingFunction _, createOnError = true)
@@ -717,6 +727,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
 
     // getActiveOrCreate should recover context with checkpoint path, and recover old configuration
+    //getActiveOrCreate 应恢复检查点路径的上下文,恢复旧配置
     testGetActiveOrCreate {
       ssc = StreamingContext.getActiveOrCreate(checkpointPath, creatingFunction _)
       assert(ssc != null, "no context created")
@@ -744,7 +755,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
     assert(exception.getMessage.contains("StreamingContext"), "Did not get the right exception")
   }
-
+  //dstream产生RDD创建网站
   test("DStream and generated RDD creation sites") {
     testPackage.test()
   }
@@ -771,23 +782,29 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
     ssc.start()
     require(ssc.getState() === StreamingContextState.ACTIVE)
+    //启动后添加输入没有错误
     testForException("no error on adding input after start", "start") {
       addInputStream(ssc) }
+    //启动后添加转换没有错误
     testForException("no error on adding transformation after start", "start") {
       input.map { x => x * 2 } }
+    //启动后添加输出操作没有错误
     testForException("no error on adding output operation after start", "start") {
       transformed.foreachRDD { rdd => rdd.collect() } }
 
     ssc.stop()
     require(ssc.getState() === StreamingContextState.STOPPED)
+    //停止后添加输入时没有错误
     testForException("no error on adding input after stop", "stop") {
       addInputStream(ssc) }
+    //停止后添加转换没有错误
     testForException("no error on adding transformation after stop", "stop") {
       input.map { x => x * 2 } }
+    //停止后添加输出操作没有错误
     testForException("no error on adding output operation after stop", "stop") {
       transformed.foreachRDD { rdd => rdd.collect() } }
   }
-
+  //流不支持检查点队列
   test("queueStream doesn't support checkpointing") {
     val checkpointDirectory = Utils.createTempDir().getAbsolutePath()
     def creatingFunction(): StreamingContext = {
@@ -808,6 +825,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     }
     // StreamingContext.validate changes the message, so use "contains" here
     assert(e.getCause.getMessage.contains("queueStream doesn't support checkpointing. " +
+        //请不要用queuestream当检查点启用
       "Please don't use queueStream when checkpointing is enabled."))
   }
   //创建一个InputDStream,但不使用它不应该崩溃
@@ -820,9 +838,11 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     val batchCount = new BatchCounter(ssc)
     ssc.start()
     // Just wait for completing 2 batches to make sure it triggers
+    //只等待完成2个批次，以确保它触发
     // `DStream.getMaxInputStreamRememberDuration`
     batchCount.waitUntilBatchesCompleted(2, 10000)
     // Throw the exception if crash
+    //如果崩溃抛出异常
     ssc.awaitTerminationOrTimeout(1)
     ssc.stop()
   }
@@ -882,6 +902,7 @@ class TestReceiver extends Receiver[Int](StorageLevel.MEMORY_ONLY) with Logging 
 
   def onStop() {
     // no clean to be done, the receiving thread should stop on it own, so just wait for it.
+    //没有干净的完成,接收线程应该停止在它自己的,所以只是等待它
     receivingThreadOption.foreach(_.join())
   }
 }
@@ -917,6 +938,7 @@ class SlowTestReceiver(totalRecords: Int, recordsPerSecond: Int)
 
   def onStop() {
     // Simulate slow receiver by waiting for all records to be produced
+    //通过等待所有的记录来模拟缓慢的接收器
     while (!SlowTestReceiver.receivedAllRecords) {
       Thread.sleep(100)
     }
@@ -928,7 +950,10 @@ object SlowTestReceiver {
   var receivedAllRecords = false
 }
 
-/** Streaming application for testing DStream and RDD creation sites */
+/** 
+ *  Streaming application for testing DStream and RDD creation sites
+ *  流的测试dstream和RDD创建网站中的应用 
+ *  */
 package object testPackage extends Assertions {
   def test() {
     val conf = new SparkConf().setMaster("local").setAppName("CreationSite test")
@@ -937,6 +962,7 @@ package object testPackage extends Assertions {
       val inputStream = ssc.receiverStream(new TestReceiver)
 
       // Verify creation site of DStream
+      //验证创建dstream
       val creationSite = inputStream.creationSite
       assert(creationSite.shortForm.contains("receiverStream") &&
         creationSite.shortForm.contains("StreamingContextSuite")
@@ -944,6 +970,7 @@ package object testPackage extends Assertions {
       assert(creationSite.longForm.contains("testPackage"))
 
       // Verify creation site of generated RDDs
+      //验证生成的RDDS创作现场
       var rddGenerated = false
       var rddCreationSiteCorrect = false
       var foreachCallSiteCorrect = false
@@ -968,7 +995,9 @@ package object testPackage extends Assertions {
 
 /**
  * Helper methods for testing StreamingContextSuite
+ * 测试streamingcontextsuite辅助方法
  * This includes methods to access private methods and fields in StreamingContext and MetricsSystem
+ * 这包括方法访问私有方法和在StreamingContext和metricssystem领域
  */
 private object StreamingContextSuite extends PrivateMethodTester {
   private val _sources = PrivateMethod[ArrayBuffer[Source]]('sources)

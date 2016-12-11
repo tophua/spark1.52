@@ -29,6 +29,9 @@ import org.apache.spark.streaming._
 import org.apache.spark.util.{ManualClock, Utils}
 /**
  * 定时生成Spark JOB
+ * JobScheduler将每个batch的RDD DAG具体生成工作委托给JobGenerator,
+ * 而将源头输入数据的记录工作委托给ReceiverTracker
+ * JobScheduler 维护一个定时器,周期就是batchDuration,定时为每个batch生成RDD DAG的实体
  */
 class JobGeneratorSuite extends TestSuiteBase {
 

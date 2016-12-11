@@ -24,21 +24,22 @@ import org.apache.spark.storage.StorageLevel
  */
 class WindowOperationsSuite extends TestSuiteBase {
   //窗口测试需要更长的时间
+  //最大等待时间的信息
   override def maxWaitTimeMillis: Int = 20000  // large window tests can sometimes take longer
-  //确保在这个类中是可见
+  //确保在这个类中是可见,间隔时间1秒
   override def batchDuration: Duration = Seconds(1)  // making sure its visible in this class
-
+//较大的滑动输入
   val largerSlideInput = Seq(
     Seq(("a", 1)),
     Seq(("a", 2)),  // 1st window from here,这里的第一个窗口
     Seq(("a", 3)),
-    Seq(("a", 4)),  // 2nd window from here
+    Seq(("a", 4)),  // 2nd window from here 这里的第二个窗口
     Seq(("a", 5)),
-    Seq(("a", 6)),  // 3rd window from here
-    Seq(),
-    Seq()           // 4th window from here
+    Seq(("a", 6)),  // 3rd window from here 这里的第三个窗口
+    Seq(), 
+    Seq()           // 4th window from here 这里的第四个窗口
   )
-
+  //较大的滑动
   val largerSlideReduceOutput = Seq(
     Seq(("a", 3)),
     Seq(("a", 10)),
@@ -46,7 +47,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     Seq(("a", 11))
   )
 
-
+//大的输入
   val bigInput = Seq(
     Seq(("a", 1)),
     Seq(("a", 1), ("b", 1)),
@@ -61,7 +62,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     Seq(("a", 1)),
     Seq()
   )
-
+//大组输出
   val bigGroupByOutput = Seq(
     Seq(("a", Seq(1))),
     Seq(("a", Seq(1, 1)), ("b", Seq(1))),
@@ -77,7 +78,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     Seq(("a", Seq(1)))
   )
 
-
+//大的计算输出
   val bigReduceOutput = Seq(
     Seq(("a", 1)),
     Seq(("a", 2), ("b", 1)),
@@ -95,7 +96,9 @@ class WindowOperationsSuite extends TestSuiteBase {
 
   /*
   The output of the reduceByKeyAndWindow with inverse function but without a filter
+   
   function will be different from the naive reduceByKeyAndWindow, as no keys get
+  
   eliminated from the ReducedWindowedDStream even if the value of a key becomes 0.
   */
 
@@ -115,7 +118,7 @@ class WindowOperationsSuite extends TestSuiteBase {
   )
 
   // Testing window operation
-
+  //测试窗口操作
   testWindow(
     "basic window",
     Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5)),
@@ -129,7 +132,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     Seconds(2),
     Seconds(2)
   )
-
+  //大窗口
   testWindow(
     "larger window",
     Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5)),
@@ -145,7 +148,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     Seconds(2),
     Seconds(3)
   )
-
+  //窗口-持久化级别
   test("window - persistence level") {
     val input = Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5))
     //批处理间隔
@@ -163,7 +166,7 @@ class WindowOperationsSuite extends TestSuiteBase {
   }
 
   // Testing naive reduceByKeyAndWindow (without invertible function,不可逆函数)
-
+  //测试单纯的reduceByKeyAndWindow
   testReduceByKeyAndWindow(
     "basic reduction",
     Seq( Seq(("a", 1), ("a", 3)) ),
@@ -200,7 +203,7 @@ class WindowOperationsSuite extends TestSuiteBase {
   testReduceByKeyAndWindow("big test", bigInput, bigReduceOutput)
 
   // Testing reduceByKeyAndWindow (with invertible reduce function)
-
+//
   testReduceByKeyAndWindowWithInverse(
     "basic reduction",
     Seq(Seq(("a", 1), ("a", 3)) ),
@@ -275,7 +278,7 @@ class WindowOperationsSuite extends TestSuiteBase {
 
 
   // Helper functions
-
+   //辅助功能
   def testWindow(
     name: String,
     input: Seq[Seq[Int]],

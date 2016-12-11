@@ -28,7 +28,7 @@ import org.apache.spark.streaming.util.{FileBasedWriteAheadLogSegment, FileBased
 import org.apache.spark.util.Utils
 import org.apache.spark.{SparkConf, SparkContext, SparkException, SparkFunSuite}
 /**
- * 
+ * 支持提前写入块日志RDD测试套件
  */
 class WriteAheadLogBackedBlockRDDSuite
   extends SparkFunSuite with BeforeAndAfterAll with BeforeAndAfterEach {
@@ -81,17 +81,17 @@ class WriteAheadLogBackedBlockRDDSuite
   test("Read data with partially available in block manager, and rest in write ahead log") {
     testRDD(numPartitions = 5, numPartitionsInBM = 3, numPartitionsInWAL = 2)
   }
-
+  //试验isblockvalid跳过块的读取从blockmanager
   test("Test isBlockValid skips block fetching from BlockManager") {
     testRDD(
       numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 0, testIsBlockValid = true)
   }
-//测试是否删除有效的RDD数据块管理器
+  //测试是否删除有效的RDD数据块管理器
   test("Test whether RDD is valid after removing blocks from block manager") {
     testRDD(
       numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 5, testBlockRemove = true)
   }
-
+  //从写入提前日志返回到块管理器恢复的块的测试存储
   test("Test storing of blocks recovered from write ahead log back into block manager") {
     testRDD(
       numPartitions = 5, numPartitionsInBM = 0, numPartitionsInWAL = 5, testStoreInBM = true)
@@ -100,11 +100,10 @@ class WriteAheadLogBackedBlockRDDSuite
   /**
    * Test the WriteAheadLogBackedRDD, by writing some partitions of the data to block manager
    * and the rest to a write ahead log, and then reading reading it all back using the RDD.
+   * 通过写一些分区的数据块管理器和其他的一个写提前日志,然后使用RDD读取回来,
    * It can also test if the partitions that were read from the log were again stored in
    * block manager.
-   * 通过写一些分区的数据块管理器和其他的提前一个写日志,然后读取回来使用RDD,
    * 它也可以测试,如果从日志中读取的分区再次被存储在块管理器中
-   *
    *
    * @param numPartitions Number of partitions in RDD 在RDD分区数
    * @param numPartitionsInBM Number of partitions to write to the BlockManager.
@@ -115,10 +114,12 @@ class WriteAheadLogBackedBlockRDDSuite
    *                           Partitions (numPartitions - 1 - numPartitionsInWAL) to
    *                           (numPartitions - 1) will be written to WAL
    * @param testIsBlockValid Test whether setting isBlockValid to false skips block fetching
+   * 												 测试是否设置isblockvalid假跳过块的读取
    * @param testBlockRemove Test whether calling rdd.removeBlock() makes the RDD still usable with
    *                        reads falling back to the WAL
+   *                        测试是否调用RDD.removeblock()使得RDD还可从日志系统读回来
    * @param testStoreInBM   Test whether blocks read from log are stored back into block manager
-   *
+   *												测试从日志中读取的块是否被存储到块管理器中
    * Example with numPartitions = 5, numPartitionsInBM = 3, and numPartitionsInWAL = 4
    * numPartitions总分区数,numPartitionsInBM块写入的分区 数,numPartitionsInWAL 写入前日志分区
    *
@@ -159,6 +160,7 @@ class WriteAheadLogBackedBlockRDDSuite
         blockIds.takeRight(numPartitionsInWAL))
 
     // Make sure that the left `numPartitionsInBM` blocks are in block manager, and others are not
+    //确保左` numpartitionsinbm `块是块的管理，而不是别人
     require(
       blockIds.take(numPartitionsInBM).forall(blockManager.get(_).nonEmpty),
       "Expected blocks not in BlockManager"
@@ -169,6 +171,7 @@ class WriteAheadLogBackedBlockRDDSuite
     )
 
     // Make sure that the right `numPartitionsInWAL` blocks are in WALs, and other are not
+    //确保正确的` numpartitionsinwal `块在预写日志系统 ,和其他不
     require(
       recordHandles.takeRight(numPartitionsInWAL).forall(s =>
         new File(s.path.stripPrefix("file://")).exists()),
@@ -187,8 +190,11 @@ class WriteAheadLogBackedBlockRDDSuite
     assert(rdd.collect() === data.flatten)
 
     // Verify that the block fetching is skipped when isBlockValid is set to false.
+    //验证该块的读取是跳过时，isblockvalid设置为false
     // This is done by using a RDD whose data is only in memory but is set to skip block fetching
+    //这是通过使用一个RDD的数据是在内存中进行但设置跳过块的读取使用RDD会抛出异常,
     // Using that RDD will throw exception, as it skips block fetching even if the blocks are in
+    //它跳过块的读取即使块在BlockManager
     // in BlockManager.
     if (testIsBlockValid) {
       require(numPartitionsInBM === numPartitions, "All partitions must be in BlockManager")
@@ -202,6 +208,7 @@ class WriteAheadLogBackedBlockRDDSuite
 
     // Verify that the RDD is not invalid after the blocks are removed and can still read data
     // from write ahead log
+    //验证了RDD是无效后的块删除,还可以读取数据提前写日志
     if (testBlockRemove) {
       require(numPartitions === numPartitionsInWAL, "All partitions must be in WAL for this test")
       require(numPartitionsInBM > 0, "Some partitions must be in BlockManager for this test")

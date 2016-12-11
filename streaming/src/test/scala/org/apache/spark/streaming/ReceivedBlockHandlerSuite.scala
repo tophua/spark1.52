@@ -40,7 +40,9 @@ import org.apache.spark.streaming.util._
 import org.apache.spark.util.{ManualClock, Utils}
 import WriteAheadLogBasedBlockHandler._
 import WriteAheadLogSuite._
-
+/**
+ * 接收块处理测试套件
+ */
 class ReceivedBlockHandlerSuite
   extends SparkFunSuite
   with BeforeAndAfter
@@ -97,7 +99,7 @@ class ReceivedBlockHandlerSuite
     Utils.deleteRecursively(tempDirectory)
   }
 
-  test("BlockManagerBasedBlockHandler - store blocks") {
+  test("BlockManagerBasedBlockHandler - store blocks") {//存储块
     withBlockManagerBasedBlockHandler { handler =>
       testBlockStoring(handler) { case (data, blockIds, storeResults) =>
         // Verify the data in block manager is correct
@@ -162,7 +164,7 @@ class ReceivedBlockHandlerSuite
     }
   }
 
-  test("WriteAheadLogBasedBlockHandler - clean old blocks") {
+  test("WriteAheadLogBasedBlockHandler - clean old blocks") {//清理旧的块
     withWriteAheadLogBasedBlockHandler { handler =>
       val blocks = Seq.tabulate(10) { i => IteratorBlock(Iterator(1 to i)) }
       storeBlocks(handler, blocks)
@@ -182,7 +184,7 @@ class ReceivedBlockHandlerSuite
     }
   }
 
-  test("Test Block - count messages") {
+  test("Test Block - count messages") {//统计消息
     // Test count with BlockManagedBasedBlockHandler
     //测试计数BlockManagedBasedBlockHandler
     testCountWithBlockManagerBasedBlockHandler(true)
@@ -190,7 +192,7 @@ class ReceivedBlockHandlerSuite
     testCountWithBlockManagerBasedBlockHandler(false)
   }
 
-  test("Test Block - isFullyConsumed") {
+  test("Test Block - isFullyConsumed") {//完全消耗
     val sparkConf = new SparkConf()
     sparkConf.set("spark.storage.unrollMemoryThreshold", "512")
     // spark.storage.unrollFraction set to 0.4 for BlockManager
@@ -203,6 +205,7 @@ class ReceivedBlockHandlerSuite
     //没有足够的空间来存储这个块在内存中,
     // But BlockManager will be able to sereliaze this block to WAL
     // and hence count returns correct value.
+    //但BlockManager将序列化这块到WAL,因此count返回正确的值
      testRecordcount(false, StorageLevel.MEMORY_ONLY,
       IteratorBlock((List.fill(70)(new Array[Byte](100))).iterator), blockManager, Some(70))
 
@@ -214,8 +217,10 @@ class ReceivedBlockHandlerSuite
       IteratorBlock((List.fill(70)(new Array[Byte](100))).iterator), blockManager, Some(70))
 
     // there is not enough space to store this block With MEMORY_ONLY StorageLevel.
+    //没有足够的空间来存储这一块MEMORY_ONLY存储级别
     // BlockManager will not be able to unroll this block
     // and hence it will not tryToPut this block, resulting the SparkException
+    //blockmanager将无法打开展开块，因此它不会trytoput这块
     storageLevel = StorageLevel.MEMORY_ONLY
     withBlockManagerBasedBlockHandler { handler =>
       val thrown = intercept[SparkException] {
@@ -226,6 +231,7 @@ class ReceivedBlockHandlerSuite
 
   private def testCountWithBlockManagerBasedBlockHandler(isBlockManagerBasedBlockHandler: Boolean) {
     // ByteBufferBlock-MEMORY_ONLY
+    //字节缓冲区块
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_ONLY,
       ByteBufferBlock(ByteBuffer.wrap(Array.tabulate(100)(i => i.toByte))), blockManager, None)
     // ByteBufferBlock-MEMORY_ONLY_SER
@@ -286,6 +292,7 @@ class ReceivedBlockHandlerSuite
     try {
       if (isBlockManagedBasedBlockHandler) {
         // test received block with BlockManager based handler
+        //测试接收块blockmanager基础处理
         withBlockManagerBasedBlockHandler { handler =>
           val (blockId, blockStoreResult) = storeSingleBlock(handler, receivedBlock)
           bId = blockId
@@ -296,6 +303,7 @@ class ReceivedBlockHandlerSuite
        }
       } else {
         // test received block with WAL based handler
+        //基于WAL的处理程序的测试接收块
         withWriteAheadLogBasedBlockHandler { handler =>
           val (blockId, blockStoreResult) = storeSingleBlock(handler, receivedBlock)
           bId = blockId
@@ -363,12 +371,18 @@ class ReceivedBlockHandlerSuite
     }
   }
 
-  /** Instantiate a BlockManagerBasedBlockHandler and run a code with it */
+  /** 
+   *  Instantiate a BlockManagerBasedBlockHandler and run a code with it
+   *  实例化一个blockmanagerbasedblockhandler和它运行代码
+   *   */
   private def withBlockManagerBasedBlockHandler(body: BlockManagerBasedBlockHandler => Unit) {
     body(new BlockManagerBasedBlockHandler(blockManager, storageLevel))
   }
 
-  /** Instantiate a WriteAheadLogBasedBlockHandler and run a code with it */
+  /** 
+   *  Instantiate a WriteAheadLogBasedBlockHandler and run a code with it 
+   *  实例化一个WriteAheadLogBasedBlockHandler和它运行代码
+   *  */
   private def withWriteAheadLogBasedBlockHandler(body: WriteAheadLogBasedBlockHandler => Unit) {
     require(WriteAheadLogUtils.getRollingIntervalSecs(conf, isDriver = false) === 1)
     val receivedBlockHandler = new WriteAheadLogBasedBlockHandler(blockManager, 1,

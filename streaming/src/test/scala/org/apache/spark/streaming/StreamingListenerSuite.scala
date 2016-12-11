@@ -46,6 +46,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   }
 
   // To make sure that the processing start and end times in collected
+  //为了确保集合信息的处理开始和结束时间是不同的连续批次
   // information are different for successive batches
   override def batchDuration: Duration = Milliseconds(100)
   override def actuallyWait: Boolean = true
