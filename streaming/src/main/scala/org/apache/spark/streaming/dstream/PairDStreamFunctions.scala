@@ -49,6 +49,7 @@ class PairDStreamFunctions[K, V](self: DStream[(K, V)])
   /**
    * Return a new DStream by applying `groupByKey` to each RDD. Hash partitioning is used to
    * generate the RDDs with Spark's default number of partitions.
+   * 哈希分区是用来产生Spark的默认分区数RDDS
    */
   def groupByKey(): DStream[(K, Iterable[V])] = ssc.withScope {
     groupByKey(defaultPartitioner())

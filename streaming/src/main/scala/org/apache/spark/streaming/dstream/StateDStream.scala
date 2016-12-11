@@ -64,17 +64,21 @@ class StateDStream[K: ClassTag, V: ClassTag, S: ClassTag](
   override def compute(validTime: Time): Option[RDD[(K, S)]] = {
 
     // Try to get the previous state RDD
+    //尽量把以前的状态RDD
     getOrCompute(validTime - slideDuration) match {
-
+      //如果以前的状态RDD存在
       case Some(prevStateRDD) => {    // If previous state RDD exists
 
         // Try to get the parent RDD
+        //试图让父RDD
         parent.getOrCompute(validTime) match {
+          //如果父RDD的存在，然后计算像往常一样
           case Some(parentRDD) => {   // If parent RDD exists, then compute as usual
             computeUsingPreviousRDD (parentRDD, prevStateRDD)
           }
+          //如果不存在父RDD
           case None => {    // If parent RDD does not exist
-
+            //重新应用更新功能旧状态RDD
             // Re-apply the update function to the old state RDD
             val updateFuncLocal = updateFunc
             val finalFunc = (iterator: Iterator[(K, S)]) => {
@@ -86,7 +90,7 @@ class StateDStream[K: ClassTag, V: ClassTag, S: ClassTag](
           }
         }
       }
-
+      //如果以前的会话法不存在
       case None => {    // If previous session RDD does not exist (first input data)
 
         // Try to get the parent RDD

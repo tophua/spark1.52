@@ -54,6 +54,7 @@ class SocketReceiver[T: ClassTag](
 
   def onStart() {
     // Start the thread that receives data over a connection
+    //启动接收到连接上的数据的线程
     new Thread("Socket Receiver") {
       setDaemon(true)
       override def run() { receive() }
@@ -62,10 +63,15 @@ class SocketReceiver[T: ClassTag](
 
   def onStop() {
     // There is nothing much to do as the thread calling receive()
+    //没有什么可做的线程调用receive()
     // is designed to stop by itself isStopped() returns false
+    //是为了阻止自己isstopped()返回false
   }
 
-  /** Create a socket connection and receive data until receiver is stopped */
+  /** 
+   *  Create a socket connection and receive data until receiver is stopped 
+   *  创建一个套接字连接并接收数据,直到停止接收为止
+   *  */
   def receive() {
     var socket: Socket = null
     try {
@@ -77,6 +83,7 @@ class SocketReceiver[T: ClassTag](
         store(iterator.next)
       }
       if (!isStopped()) {
+        //套接字数据流没有更多的数据
         restart("Socket data stream had no more data")
       } else {
         logInfo("Stopped receiving")

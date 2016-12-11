@@ -33,8 +33,11 @@ import org.apache.spark.streaming.receiver.Receiver
 
 /**
  * An input stream that reads blocks of serialized objects from a given network address.
+ * 一个输入流读取一个给定的网络地址序列化的对象的块,
  * The blocks will be inserted directly into the block store. This is the fastest way to get
  * data into Spark Streaming, though it requires the sender to batch data and serialize it
+ * 该块将直接插入到块存储区中,这是最快的方式来获得数据到Spark流,
+ * 虽然它需要发送批量数据序列化的格式,它的系统配置
  * in the format that the system is configured with.
  */
 private[streaming]
@@ -58,6 +61,7 @@ class RawNetworkReceiver(host: String, port: Int, storageLevel: StorageLevel)
 
   def onStart() {
     // Open a socket to the target address and keep reading from it
+    //打开一个套接字到目标地址,并保持只读
     logInfo("Connecting to " + host + ":" + port)
     val channel = SocketChannel.open()
     channel.configureBlocking(true)
@@ -97,7 +101,10 @@ class RawNetworkReceiver(host: String, port: Int, storageLevel: StorageLevel)
     if (blockPushingThread != null) blockPushingThread.interrupt()
   }
 
-  /** Read a buffer fully from a given Channel */
+  /** 
+   *  Read a buffer fully from a given Channel
+   *  从一个给定的信道中充分读取一个缓冲区 
+   *  */
   private def readFully(channel: ReadableByteChannel, dest: ByteBuffer) {
     while (dest.position < dest.limit) {
       if (channel.read(dest) == -1) {

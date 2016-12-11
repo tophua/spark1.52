@@ -19,7 +19,9 @@ package org.apache.spark.streaming
 
 /**
  * This is a simple class that represents an absolute instant of time.
+ * 这是一个简单的类，表示时间的绝对时间,
  * Internally, it represents time as the difference, measured in milliseconds, between the current
+ * 在内部它代表时间的差异以毫秒为单位,测量在毫秒之间,在当前时间和午夜之间
  * time and midnight, January 1, 1970 UTC. This is the same format as what is returned by
  * System.currentTimeMillis.
  */

@@ -65,6 +65,7 @@ class StreamingContext private[streaming] (
 
   /**
    * Create a StreamingContext using an existing SparkContext.
+   * 使用存在的sparkcontext创建一个StreamingContext
    * @param sparkContext existing SparkContext
    * @param batchDuration the time interval at which streaming data will be divided into batches
    */
@@ -74,6 +75,7 @@ class StreamingContext private[streaming] (
 
   /**
    * Create a StreamingContext by providing the configuration necessary for a new SparkContext.
+   * 通过提供一个新的sparkcontext必要配置创建一个StreamingContext
    * @param conf a org.apache.spark.SparkConf object specifying Spark parameters
    * @param batchDuration the time interval at which streaming data will be divided into batches
    */
@@ -100,6 +102,7 @@ class StreamingContext private[streaming] (
 
   /**
    * Recreate a StreamingContext from a checkpoint file.
+   * 从检查点文件重新创建StreamingContext
    * @param path Path to the directory that was specified as the checkpoint directory
    * @param hadoopConf Optional, configuration object if necessary for reading from
    *                   HDFS compatible filesystems
@@ -109,12 +112,14 @@ class StreamingContext private[streaming] (
 
   /**
    * Recreate a StreamingContext from a checkpoint file.
+   * \从检查点文件重新创建StreamingContext
    * @param path Path to the directory that was specified as the checkpoint directory
    */
   def this(path: String) = this(path, SparkHadoopUtil.get.conf)
 
   /**
    * Recreate a StreamingContext from a checkpoint file using an existing SparkContext.
+   * 从一个检查点文件创建一个StreamingContext,使用现有的sparkcontext
    * @param path Path to the directory that was specified as the checkpoint directory
    * @param sparkContext Existing SparkContext
    */
@@ -262,6 +267,7 @@ class StreamingContext private[streaming] (
   /**
    * Execute a block of code in a scope such that all new DStreams created in this body will
    * be part of the same scope. For more detail, see the comments in `doCompute`.
+   * 在一个范围,在这个身体中创建的所有新dstreams将相同的范围的一部分执行的代码块
    *
    * Note: Return statements are NOT allowed in the given body.
    */

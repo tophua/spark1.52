@@ -53,6 +53,7 @@ class WriteAheadLogBackedBlockRDDPartition(
 /**
  * This class represents a special case of the BlockRDD where the data blocks in
  * the block manager are also backed by data in write ahead logs. For reading
+ * 这类代表一个特殊的情况下,在块管理器的数据块,通过数据blockrdd也支持提前写日志
  * the data, this RDD first looks up the blocks by their ids in the block manager.
  * If it does not find them, it looks up the WAL using the corresponding record handle.
  * The lookup of the blocks from the block manager can be skipped by setting the corresponding
@@ -93,6 +94,7 @@ class WriteAheadLogBackedBlockRDD[T: ClassTag](
       s" same as number of block Ids (${blockIds.length})")
 
   // Hadoop configuration is not serializable, so broadcast it as a serializable.
+  //Hadoop的配置是不可序列化的,所以广播作为一个序列化。
   @transient private val hadoopConfig = sc.hadoopConfiguration
   private val broadcastedHadoopConf = new SerializableConfiguration(hadoopConfig)
 
@@ -108,6 +110,7 @@ class WriteAheadLogBackedBlockRDD[T: ClassTag](
 
   /**
    * Gets the partition data by getting the corresponding block from the block manager.
+   * 通过从块管理器获取相应的块获取分区数据,如果块不存在,则将数据从写前的日志文件中的相应记录中读取
    * If the block does not exist, then the data is read from the corresponding record
    * in write ahead log files.
    */
@@ -175,6 +178,8 @@ class WriteAheadLogBackedBlockRDD[T: ClassTag](
    * Get the preferred location of the partition. This returns the locations of the block
    * if it is present in the block manager, else if FileBasedWriteAheadLogSegment is used,
    * it returns the location of the corresponding file segment in HDFS .
+   * 获取分区的首选位置,如果在块管理器中存在,则返回该块的位置,如果filebasedwriteaheadlogsegment使用
+   * 它返回在HDFS的相应文件段的位置
    */
   override def getPreferredLocations(split: Partition): Seq[String] = {
     val partition = split.asInstanceOf[WriteAheadLogBackedBlockRDDPartition]

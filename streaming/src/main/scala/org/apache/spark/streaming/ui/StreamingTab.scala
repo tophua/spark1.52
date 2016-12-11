@@ -25,6 +25,7 @@ import StreamingTab._
 
 /**
  * Spark Web UI tab that shows statistics of a streaming job.
+ * 显示一个流作业的统计的Spark网络用户界面标签
  * This assumes the given SparkContext has enabled its SparkUI.
  */
 private[spark] class StreamingTab(val ssc: StreamingContext)

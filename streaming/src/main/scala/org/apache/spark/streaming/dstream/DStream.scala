@@ -459,8 +459,10 @@ abstract class DStream[T: ClassTag] (
 
   /**
    * Generate a SparkStreaming job for the given time. This is an internal method that
+   * 给定的时间生成一个sparkstreaming工作,这是一个不应该直接调用的内部方法
    * should not be called directly. This default implementation creates a job
    * that materializes the corresponding RDD. Subclasses of DStream may override this
+   * 此默认实现创建工作,落实相应的RDD,子类可以重写此dstream产生他们自己的工作
    * to generate their own jobs.
    * 给指定的时间对象生成Job,默认创建一个Job,
    */
@@ -535,11 +537,13 @@ abstract class DStream[T: ClassTag] (
   /**
    * Restore the RDDs in generatedRDDs from the checkpointData. This is an internal method
    * that should not be called directly. This is a default implementation that recreates RDDs
+   * 这是一个内部方法不应该直接调用,这是一个默认的实现,再现RDDS从存储在checkpointdata检查点文件的名字
    * from the checkpoint file names stored in checkpointData. Subclasses of DStream that
    * override the updateCheckpointData() method would also need to override this method.
    */
   private[streaming] def restoreCheckpointData() {
     // Create RDDs from the checkpoint data
+    //从检查点数据创建RDDS
     logInfo("Restoring checkpoint data")
     checkpointData.restore()
     dependencies.foreach(_.restoreCheckpointData())
@@ -590,6 +594,7 @@ abstract class DStream[T: ClassTag] (
 
   /**
    * Return a new DStream by applying a function to all elements of this DStream,
+   * 通过应用一个函数,这个dstream所有元素返回一个新的dstream
    * and then flattening the results
    */
   def flatMap[U: ClassTag](flatMapFunc: T => Traversable[U]): DStream[U] = ssc.withScope {
@@ -797,6 +802,8 @@ abstract class DStream[T: ClassTag] (
    * Return a new DStream in which each RDD contains all the elements in seen in a
    * sliding window of time over this DStream. The new DStream generates RDDs with
    * the same interval as this DStream.
+   * 返回一个在每个RDD包含的所有元素在这dstream看到滑动时间窗口的新dstream,
+   * 新dstream RDDS区间为这dstream产生相同。
    * @param windowDuration width of the window; must be a multiple of this DStream's interval.
    */
   def window(windowDuration: Duration): DStream[T] = window(windowDuration, this.slideDuration)
@@ -878,6 +885,7 @@ abstract class DStream[T: ClassTag] (
   /**
    * Return a new DStream in which each RDD contains the count of distinct elements in
    * RDDs in a sliding window over this DStream. Hash partitioning is used to generate
+   * 返回一个在每个RDD包含在滑动窗口中不同的元素在这dstream RDDS计数新dstream
    * the RDDs with `numPartitions` partitions (Spark's default number of partitions if
    * `numPartitions` not specified).
    * @param windowDuration width of the window; must be a multiple of this DStream's
@@ -952,8 +960,10 @@ abstract class DStream[T: ClassTag] (
 
   /**
    * Save each RDD in this DStream as a Sequence file of serialized objects.
+   * 保存每个RDD这dstream为序列化的对象的序列文件
    * The file name at each batch interval is generated based on `prefix` and
    * `suffix`: "prefix-TIME_IN_MS.suffix".
+   * 在每个批处理间隔中的文件名生成基于“前缀”和 `后缀`：“prefix-time_in_ms。后缀”
    */
   def saveAsObjectFiles(prefix: String, suffix: String = ""): Unit = ssc.withScope {
     val saveFunc = (rdd: RDD[T], time: Time) => {
@@ -966,6 +976,7 @@ abstract class DStream[T: ClassTag] (
   /**
    * Save each RDD in this DStream as at text file, using string representation
    * of elements. The file name at each batch interval is generated based on
+   * 保存每个RDD这dstream为文本文件,使用元素的字符串表示,在每个批处理间隔中生成的文件名
    * `prefix` and `suffix`: "prefix-TIME_IN_MS.suffix".
    */
   def saveAsTextFiles(prefix: String, suffix: String = ""): Unit = ssc.withScope {
@@ -979,6 +990,7 @@ abstract class DStream[T: ClassTag] (
   /**
    * Register this streaming as an output stream. This would ensure that RDDs of this
    * DStream will be generated.
+   * 注册这个流作为一个输出流,这将确保该dstream RDDS将产生
    */
   private[streaming] def register(): DStream[T] = {
     ssc.graph.addOutputStream(this)
@@ -999,14 +1011,20 @@ object DStream {
     new PairDStreamFunctions[K, V](stream)
   }
 
-  /** Get the creation site of a DStream from the stack trace of when the DStream is created. */
+  /** 
+   *  Get the creation site of a DStream from the stack trace of when the DStream is created. 
+   *  获得到从堆栈跟踪一个dstream创建网站时,dstream创建
+   *  */
   private[streaming] def getCreationSite(): CallSite = {
     val SPARK_CLASS_REGEX = """^org\.apache\.spark""".r
     val SPARK_STREAMING_TESTCLASS_REGEX = """^org\.apache\.spark\.streaming\.test""".r
     val SPARK_EXAMPLES_CLASS_REGEX = """^org\.apache\.spark\.examples""".r
     val SCALA_CLASS_REGEX = """^scala""".r
 
-    /** Filtering function that excludes non-user classes for a streaming application */
+    /** 
+     *  Filtering function that excludes non-user classes for a streaming application 
+     *  不包括用于流应用的非用户类的过滤功能
+     *  */
     def streamingExclustionFunction(className: String): Boolean = {
       def doesMatch(r: Regex): Boolean = r.findFirstIn(className).isDefined
       val isSparkClass = doesMatch(SPARK_CLASS_REGEX)

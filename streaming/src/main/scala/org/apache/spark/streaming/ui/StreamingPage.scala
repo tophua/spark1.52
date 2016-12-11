@@ -31,7 +31,7 @@ import org.apache.spark.ui.{UIUtils => SparkUIUtils}
 
 /**
  * A helper class to generate JavaScript and HTML for both timeline and histogram graphs.
- *
+ * 一个助手类生成的JavaScript和HTML两时间表和直方图图
  * @param timelineDivId the timeline `id` used in the html `div` tag
  * @param histogramDivId the timeline `id` used in the html `div` tag
  * @param data the data for the graph
@@ -106,12 +106,14 @@ private[ui] class MillisecondsStatUIData(data: Seq[(Long, Long)]) {
 
   /**
    * Converting the original data as per `unit`.
+   * 转换原始数据为每单位
    */
   def timelineData(unit: TimeUnit): Seq[(Long, Double)] =
     data.map(x => x._1 -> UIUtils.convertToTimeUnit(x._2, unit))
 
   /**
    * Converting the original data as per `unit`.
+   * 转换原始数据为每单位
    */
   def histogramData(unit: TimeUnit): Seq[Double] =
     data.map(x => UIUtils.convertToTimeUnit(x._2, unit))
@@ -138,7 +140,10 @@ private[ui] class EventRateUIData(val data: Seq[(Long, Double)]) {
   val max: Option[Double] = if (data.isEmpty) None else Some(data.map(_._2).max)
 }
 
-/** Page for Spark Web UI that shows statistics of a streaming job */
+/** 
+ *  Page for Spark Web UI that shows statistics of a streaming job 
+ *  用于显示流作业的统计的Spark网络用户界面的页面
+ *  */
 private[ui] class StreamingPage(parent: StreamingTab)
   extends WebUIPage("") with Logging {
 

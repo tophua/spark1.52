@@ -32,9 +32,11 @@ class DStreamCheckpointData[T: ClassTag] (dstream: DStream[T])
   protected val data = new HashMap[Time, AnyRef]()
 
   // Mapping of the batch time to the checkpointed RDD file of that time
+  //该批处理时间的检查点文件的时间映射
   @transient private var timeToCheckpointFile = new HashMap[Time, String]
   // Mapping of the batch time to the time of the oldest checkpointed RDD
   // in that batch's checkpoint data
+  //该批的时候,批的检查点数据建立时间映射旧的RDD
   @transient private var timeToOldestCheckpointFileTime = new HashMap[Time, Time]
 
   @transient private var fileSystem : FileSystem = null
@@ -43,7 +45,9 @@ class DStreamCheckpointData[T: ClassTag] (dstream: DStream[T])
   /**
    * Updates the checkpoint data of the DStream. This gets called every time
    * the graph checkpoint is initiated. Default implementation records the
+   * 更新的dstream检查点数据,每次启动图形检查点时都会被调用
    * checkpoint files to which the generate RDDs of the DStream has been saved.
+   * 默认实现记录的检查点文件,生成的dstream RDDS保存
    */
   def update(time: Time) {
 
@@ -53,6 +57,7 @@ class DStreamCheckpointData[T: ClassTag] (dstream: DStream[T])
     logDebug("Current checkpoint files:\n" + checkpointFiles.toSeq.mkString("\n"))
 
     // Add the checkpoint files to the data to be serialized
+    //添加检查点文件将数据序列化
     if (!checkpointFiles.isEmpty) {
       currentCheckpointFiles.clear()
       currentCheckpointFiles ++= checkpointFiles
@@ -66,11 +71,13 @@ class DStreamCheckpointData[T: ClassTag] (dstream: DStream[T])
 
   /**
    * Cleanup old checkpoint data. This gets called after a checkpoint of `time` has been
+   * 清除旧的检查点数据,这被调用后的一个检查点已被写入到检查点目录
    * written to the checkpoint directory.
    */
   def cleanup(time: Time) {
     // Get the time of the oldest checkpointed RDD that was written as part of the
     // checkpoint of `time`
+    //有时间最早的检查点，写的是RDD的一部分`时间`检查站
     timeToOldestCheckpointFileTime.remove(time) match {
       case Some(lastCheckpointFileTime) =>
         // Find all the checkpointed RDDs (i.e. files) that are older than `lastCheckpointFileTime`
@@ -101,11 +108,14 @@ class DStreamCheckpointData[T: ClassTag] (dstream: DStream[T])
 
   /**
    * Restore the checkpoint data. This gets called once when the DStream graph
+   * 恢复检查点数据,这被称为一次dstream图从图检查点文件恢复
    * (along with its DStreams) are being restored from a graph checkpoint file.
    * Default implementation restores the RDDs from their checkpoint files.
+   * 默认实现恢复RDDS从检查点文件
    */
   def restore() {
     // Create RDDs from the checkpoint data
+    //从检查点数据创建RDDS
     currentCheckpointFiles.foreach {
       case(time, file) => {
         logInfo("Restoring checkpointed RDD for time " + time + " from file '" + file + "'")
