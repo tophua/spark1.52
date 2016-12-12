@@ -116,6 +116,7 @@ class TestOutputStream[T: ClassTag](
   @throws(classOf[IOException])
   private def readObject(ois: ObjectInputStream): Unit = Utils.tryOrIOException {
     ois.defaultReadObject()
+    //清除输出缓冲区
     output.clear()
   }
 }
@@ -304,7 +305,8 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
    * Run a block of code with the given StreamingContext and automatically
    * 给定的StreamingContext自动运行一个代码块
    * stop the context when the block completes or when an exception is thrown.
-   * 停止上下文完成块或抛出异常
+   * 停止上下文完成块或抛出异常,
+   * [R]泛型类型
    */
   def withStreamingContext[R](ssc: StreamingContext)(block: StreamingContext => R): R = {
     try {
@@ -325,6 +327,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
    * 给定的TestServer自动运行一个代码块,停止server完成块或抛出异常
    * 柯里化(Currying)指的是将原来接受两个参数的函数变成新的接受一个参数的函数的过程。
    * 新的函数返回一个以原有第二个参数为参数的函数
+   * [R]泛型类型
    */
   def withTestServer[R](testServer: TestServer)(block: TestServer => R): R = {
     try {
@@ -343,6 +346,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
    * Set up required DStreams to test the DStream operation using the two sequences
    * of input collections.
    * 设置所需dstreams测试dstream,操作使用两个序列的输入集合
+   * operation匿名函数,接收类型DStream,返回类型DStream
    */
   def setupStreams[U: ClassTag, V: ClassTag](
       input: Seq[Seq[U]],
@@ -359,10 +363,10 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     //设置流计算
     val inputStream = new TestInputStream(ssc, input, numPartitions)
     //匿名operation函数接收DStream[U]类型,返回DStream[V]
-    //
     val operatedStream = operation(inputStream)
     val outputStream = new TestOutputStreamWithPartitions(operatedStream,
       new ArrayBuffer[Seq[Seq[V]]] with SynchronizedBuffer[Seq[Seq[V]]])
+    //注册这个流作为一个输出流,这将确保该dstream RDDS将产生
     outputStream.register()
     ssc
   }
@@ -484,7 +488,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Verify whether the output values after running a DStream operation
-   * 验证是否输出值运行一个dstream操作
+   * 验证是否输出值运行一个dstream操作后
    * is same as the expected output values, by comparing the output
    * 和预期的输出值相同,通过比较输出集合,无论是列表(命令的事项)或集(顺序不重要)
    * collections either as lists (order matters) or sets (order does not matter)
@@ -530,9 +534,9 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   }
 
   /**
-   * Test unary DStream operation with a list of inputs, with number of
-   * 试验一元dstream操作与列表的输入,批量运行的数量与预期的输出值相同
+   * Test unary DStream operation with a list of inputs, with number of   
    * batches to run same as the number of expected output values
+   * 测试一个输入列表的DStream操作,批量运行的数与预期数的输出值相同
    */
   def testOperation[U: ClassTag, V: ClassTag](
       input: Seq[Seq[U]],
@@ -544,11 +548,12 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   }
 
   /**
-   * Test unary(一元) DStream operation with a list of inputs
-   * 试验一元dstream操作与列表输入
+   * Test unary DStream operation with a list of inputs
+   * 测试一个输入列表的DStream操作
    * [U: ClassTag, V: ClassTag]泛型方法 
-   * @param input      Sequence of input collections 输入集合序列
+   * @param input      Sequence of input collections 输入集合的序列
    * @param operation  Binary DStream operation to be applied to the 2 inputs
+   * 									 匿名函数,两个DStream操作应用2个输入
    * @param expectedOutput Sequence of expected output collections 期望输出集合的序列
    * @param numBatches Number of batches to run the operation for 批量运行的操作数
    * @param useSet     Compare the output values with the expected output values
@@ -560,7 +565,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       operation: DStream[U] => DStream[V],
       expectedOutput: Seq[Seq[V]],
       numBatches: Int,
-      useSet: Boolean
+      useSet: Boolean //是否使用set
     ) {
     //批量操作
     //默认numBatches的值-1
@@ -569,8 +574,9 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
         //设置运行的参数
         setupStreams[U, V](input, operation)
         ){ ssc =>//匿名
-      //运行
+      //运行流,转换成序列
       val output = runStreams[V](ssc, numBatches_, expectedOutput.size)
+      //验收数据
       verifyOutput[V](output, expectedOutput, useSet)
     }
   }
@@ -578,7 +584,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   /**
    * Test binary DStream operation with two lists of inputs, with number of
    * batches to run same as the number of expected output values
-   * 试验二dstream操作两列输入,随着批量运行的数量与预期的输出值相同
+   * 测试一个输入列表的DStream操作,批量运行的数与预期数的输出值相同
    */
   def testOperation[U: ClassTag, V: ClassTag, W: ClassTag](
       input1: Seq[Seq[U]],
@@ -592,7 +598,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Test binary DStream operation with two lists of inputs
-   * 试验二个dstream操作两列输入
+   * 测试两个输入列表的dstream操作
    * @param input1     First sequence of input collections 第一个输入序列的集合
    * @param input2     Second sequence of input collections 第二个输入序列的集合
    * @param operation  Binary DStream operation to be applied to the 2 inputs
