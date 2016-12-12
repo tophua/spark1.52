@@ -41,13 +41,13 @@ import org.apache.spark.util.{ManualClock, Utils}
  */
 private[streaming] class DummyDStream(ssc: StreamingContext) extends DStream[Int](ssc) {
   override def dependencies: List[DStream[Int]] = List.empty
-  override def slideDuration: Duration = Seconds(1)
+  override def slideDuration: Duration = Seconds(1) //1秒
   override def compute(time: Time): Option[RDD[Int]] = Some(ssc.sc.emptyRDD[Int])
 }
 
 /**
  * A dummy input stream that does absolutely  nothing.
- * 一个没有任何的虚拟流
+ * 一个没有任何的虚拟输入流
  */
 private[streaming] class DummyInputDStream(ssc: StreamingContext) extends InputDStream[Int](ssc) {
   override def start(): Unit = { }
@@ -58,7 +58,7 @@ private[streaming] class DummyInputDStream(ssc: StreamingContext) extends InputD
 /**
  * This is a input stream just for the testsuites. This is equivalent(相当的) to a checkpointable,
  * 这只是一个输入流的测试包,这相当于一个检查点,像Kafka可重复、可靠的消息队列,它需要一个序列作为输入
- * replayable(重玩), reliable(可靠) message queue like Kafka. It requires a sequence as input, and
+ * replayable(可重复), reliable(可靠) message queue like Kafka. It requires a sequence as input, and
  * 返回在i_th批下手动时钟的i_th
  * returns the i_th element at the i_th batch unde manual clock.
  */
@@ -72,7 +72,7 @@ class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], 
   def compute(validTime: Time): Option[RDD[T]] = {
     //计算RDD时间
     logInfo("Computing RDD for time " + validTime)
-    //validTime 有效的时间,slide Duration持续时间
+    //索引开始,validTime 有效的时间,slide Duration持续时间
     val index = ((validTime - zeroTime) / slideDuration - 1).toInt
     //
     val selectedInput = if (index < input.size) input(index) else Seq[T]()
@@ -157,6 +157,7 @@ class TestOutputStreamWithPartitions[T: ClassTag](
 class BatchCounter(ssc: StreamingContext) {
 
   // All access to this state should be guarded by `BatchCounter.this.synchronized`
+  //所有访问状态都应该由`BatchCounter.this.synchronized`保护
   private var numCompletedBatches = 0
   private var numStartedBatches = 0
 
@@ -186,6 +187,8 @@ class BatchCounter(ssc: StreamingContext) {
    * Wait until `expectedNumCompletedBatches` batches are completed, or timeout. Return true if
    * `expectedNumCompletedBatches` batches are completed. Otherwise, return false to indicate it's
    * timeout.
+   * 等到` expectednumcompletedbatches `批次完成,如果expectedNumCompletedBatches批次完成返回true
+   * 否则返回false,指示它的超时
    *
    * @param expectedNumCompletedBatches the `expectedNumCompletedBatches` batches to wait
    * @param timeout the maximum time to wait in milliseconds.
@@ -197,7 +200,9 @@ class BatchCounter(ssc: StreamingContext) {
    * Wait until `expectedNumStartedBatches` batches are completed, or timeout. Return true if
    * `expectedNumStartedBatches` batches are completed. Otherwise, return false to indicate it's
    * timeout.
-   *
+   * 等到` expectednumcompletedbatches `批次完成,如果expectedNumCompletedBatches批次完成返回true
+   * 否则返回false,指示它的超时
+   * 
    * @param expectedNumStartedBatches the `expectedNumStartedBatches` batches to wait
    * @param timeout the maximum time to wait in milliseconds.
    */
@@ -229,6 +234,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   def framework: String = this.getClass.getSimpleName
 
   // Master for Spark context  
+  //Spark Master上下文
   def master: String = "local[2]"
 
   // Batch duration
@@ -248,7 +254,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   def numInputPartitions: Int = 2
 
   // Maximum time to wait before the test times out
-  //超时前等待的最大时间,即超时,
+  //超时前等待的最大时间,即超时1000毫秒,
   def maxWaitTimeMillis: Int = 10000
 
   // Whether to use manual clock or not
@@ -286,6 +292,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   // Default after function for any streaming test suite. Override this
   // if you want to add your stuff to "after" (i.e., don't call after { } )
+  //默认功能任何流测试套件,如果你想添加你的东西到“after”重写
   def afterFunction() {
     System.clearProperty("spark.streaming.clock")
   }
@@ -295,9 +302,9 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Run a block of code with the given StreamingContext and automatically
-   * 与给定的StreamingContext和自动运行的代码块
+   * 给定的StreamingContext自动运行一个代码块
    * stop the context when the block completes or when an exception is thrown.
-   * 阻止块完成或引发异常时的上下文
+   * 停止上下文完成块或抛出异常
    */
   def withStreamingContext[R](ssc: StreamingContext)(block: StreamingContext => R): R = {
     try {
@@ -315,6 +322,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   /**
    * Run a block of code with the given TestServer and automatically
    * stop the server when the block completes or when an exception is thrown.
+   * 给定的TestServer自动运行一个代码块,停止server完成块或抛出异常
    * 柯里化(Currying)指的是将原来接受两个参数的函数变成新的接受一个参数的函数的过程。
    * 新的函数返回一个以原有第二个参数为参数的函数
    */
@@ -334,7 +342,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   /**
    * Set up required DStreams to test the DStream operation using the two sequences
    * of input collections.
-   * 设置所需的dstreams测试dstream操作使用两个序列的输入集合
+   * 设置所需dstreams测试dstream,操作使用两个序列的输入集合
    */
   def setupStreams[U: ClassTag, V: ClassTag](
       input: Seq[Seq[U]],
@@ -350,6 +358,8 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     // Setup the stream computation
     //设置流计算
     val inputStream = new TestInputStream(ssc, input, numPartitions)
+    //匿名operation函数接收DStream[U]类型,返回DStream[V]
+    //
     val operatedStream = operation(inputStream)
     val outputStream = new TestOutputStreamWithPartitions(operatedStream,
       new ArrayBuffer[Seq[Seq[V]]] with SynchronizedBuffer[Seq[Seq[V]]])
@@ -388,7 +398,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
    * Runs the streams set up in `ssc` on manual clock for `numBatches` batches and
    * returns the collected output. It will wait until `numExpectedOutput` number of
    * output data has been collected or timeout (set by `maxWaitTimeMillis`) is reached.
-   * 运行设置` SSC `手动时钟` numbatches `分批返回收集输出流,
+   * 运行设置` SSC `手动时钟` numbatches `数,返回集合输出,  它会等到 `numExpectedOutput`数输出数据完成或超时
    * Returns a sequence of items for each RDD.
    * 返回一个序列的每个RDD项目
    */
@@ -404,11 +414,13 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Runs the streams set up in `ssc` on manual clock for `numBatches` batches and
-   * returns the collected output. It will wait until `numExpectedOutput` number of
+   * 运行流设置StreamingContext,手动时钟的`numBatches`批次,返回集合输出,
+   *  returns the collected output. It will wait until `numExpectedOutput` number of
    * output data has been collected or timeout (set by `maxWaitTimeMillis`) is reached.
    *
    * Returns a sequence of RDD's. Each RDD is represented as several sequences of items, each
    * representing one partition.
+   * 返回一个序列的RDD,每RDD代表的项目数序列,每一个代表一个分区
    */
   def runStreamsWithPartitions[V: ClassTag](
       ssc: StreamingContext,
@@ -434,13 +446,15 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       // Advance manual clock 提前设置时钟
       val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
       logInfo("Manual clock before advancing = " + clock.getTimeMillis())
-      if (actuallyWait) {
+      //实际等待
+      if (actuallyWait) {//默认值false
         for (i <- 1 to numBatches) {
           logInfo("Actually waiting for " + batchDuration)
           clock.advance(batchDuration.milliseconds)
           Thread.sleep(batchDuration.milliseconds)
         }
       } else {
+        logInfo("Actually waiting for " + numBatches * batchDuration.milliseconds)
         clock.advance(numBatches * batchDuration.milliseconds)
       }
       logInfo("Manual clock after advancing = " + clock.getTimeMillis())
@@ -453,9 +467,11 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
         logInfo("output.size = " + output.size + ", numExpectedOutput = " + numExpectedOutput)
         ssc.awaitTerminationOrTimeout(50)
       }
+      //当前时间-开始运行时间
       val timeTaken = System.currentTimeMillis() - startTime
       logInfo("Output generated in " + timeTaken + " milliseconds")
       output.foreach(x => logInfo("[" + x.mkString(",") + "]"))
+      //操作超时后,maxWaitTimeMillis超时等待时间
       assert(timeTaken < maxWaitTimeMillis, "Operation timed out after " + timeTaken + " ms")
       assert(output.size === numExpectedOutput, "Unexpected number of outputs generated")
       //给旧RDDS完成一些时间
@@ -481,7 +497,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     logInfo("--------------------------------")
     logInfo("output.size = " + output.size)
     logInfo("output")
-    //
+    //output序列输出值
     output.foreach(x => logInfo("[" + x.mkString(",") + "]"))
     logInfo("expected output.size = " + expectedOutput.size)
     logInfo("expected output")
@@ -492,7 +508,8 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     // Match the output with the expected output
     //将输出与预期输出相匹配
     for (i <- 0 until output.size) {
-      if (useSet) {
+      if (useSet) {//使用Set集合,默认false
+       //logInfo(output(i).toSet.to+"==="+expectedOutput(i).toSet)
         assert(
           output(i).toSet === expectedOutput(i).toSet,
           s"Set comparison failed\n" +
@@ -500,6 +517,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
             s"Generated output (${output.size} items): ${output.mkString("\n")}"
         )
       } else {
+         logInfo(output(i).toList+"==="+ expectedOutput(i).toList)
         assert(
           output(i).toList === expectedOutput(i).toList,
           s"Ordered list comparison failed\n" +
@@ -532,9 +550,10 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
    * @param input      Sequence of input collections 输入集合序列
    * @param operation  Binary DStream operation to be applied to the 2 inputs
    * @param expectedOutput Sequence of expected output collections 期望输出集合的序列
-   * @param numBatches Number of batches to run the operation for
+   * @param numBatches Number of batches to run the operation for 批量运行的操作数
    * @param useSet     Compare the output values with the expected output values
    *                   as sets (order matters) or as lists (order does not matter)
+   *                   将输出值与预期的输出值(顺序事项)或列表(排序不重要)进行比较
    */
   def testOperation[U: ClassTag, V: ClassTag](
       input: Seq[Seq[U]],
@@ -544,8 +563,13 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       useSet: Boolean
     ) {
     //批量操作
+    //默认numBatches的值-1
     val numBatches_ = if (numBatches > 0) numBatches else expectedOutput.size
-    withStreamingContext(setupStreams[U, V](input, operation)) { ssc =>
+    withStreamingContext(
+        //设置运行的参数
+        setupStreams[U, V](input, operation)
+        ){ ssc =>//匿名
+      //运行
       val output = runStreams[V](ssc, numBatches_, expectedOutput.size)
       verifyOutput[V](output, expectedOutput, useSet)
     }

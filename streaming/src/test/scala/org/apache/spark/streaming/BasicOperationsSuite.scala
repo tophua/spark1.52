@@ -32,10 +32,16 @@ import org.apache.spark.HashPartitioner
 
 class BasicOperationsSuite extends TestSuiteBase {
   test("map") {
-    val input = Seq(1 to 4, 5 to 8, 9 to 12)
+    //input=List(Range(1, 2, 3, 4), Range(5, 6, 7, 8), Range(9, 10, 11, 12))
+    val input = Seq(1 to 4, 5 to 8, 9 to 12)    
     testOperation(
       input,
-      (r: DStream[Int]) => r.map(_.toString),
+      (r: DStream[Int]) => {
+         r.map(p=>{
+           println("------"+p)
+           p.toString
+          })
+         },
       input.map(_.map(_.toString))
     )
   }
@@ -120,7 +126,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     }
   }
 
-  test("groupByKey") {
+  test("groupByKey") {//key分组
     testOperation(
       Seq( Seq("a", "a", "b"), Seq("", ""), Seq() ),
       (s: DStream[String]) => s.map(x => (x, 1)).groupByKey().mapValues(_.toSeq),
@@ -197,7 +203,8 @@ class BasicOperationsSuite extends TestSuiteBase {
     val input = Seq(1 to 4, 101 to 104, 201 to 204)
     val output = Seq(1 to 12, 101 to 112, 201 to 212)
     // union over 3 DStreams
-    testOperation(
+    // 联合覆盖3DStreams
+    testOperation(        
       input,
       (s: DStream[Int]) => s.context.union(Seq(s, s.map(_ + 4), s.map(_ + 8))),
       output
@@ -554,7 +561,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     assert(stateStream.generatedRDDs.contains(Time(10000)))
     assert(!stateStream.generatedRDDs.contains(Time(4000)))
   }
-
+  
   test("rdd cleanup - input blocks and persisted RDDs") {
     // Actually receive data over through receiver to create BlockRDDs
     //其实接收数据通过接收器创建blockrdds

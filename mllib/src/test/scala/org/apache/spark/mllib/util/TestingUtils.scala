@@ -187,11 +187,13 @@ object TestingUtils {
 
   /**
    * Implicit class for comparing two matrices using relative tolerance or absolute tolerance.
+   * 使用相对公差或绝对公差比较两个矩阵的隐式类
    */
   implicit class MatrixWithAlmostEquals(val x: Matrix) {
 
     /**
      * When the difference of two matrices are within eps, returns true; otherwise, returns false.
+     * 当两个矩阵的差异在每股收益之内时,返回真；否则，返回假。
      */
     def ~=(r: CompareMatrixRightSide): Boolean = r.fun(x, r.y, r.eps)
 

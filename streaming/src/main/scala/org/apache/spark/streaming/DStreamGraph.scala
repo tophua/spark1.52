@@ -167,9 +167,11 @@ final private[streaming] class DStreamGraph extends Serializable with Logging {
   /**
    * Get the maximum remember duration across all the input streams. This is a conservative but
    * safe remember duration which can be used to perform cleanup operations.
+   * 获取所有输入流的最大记得时间,这是一个保守的,但安全记住的持续时间,可用于执行清理操作
    */
   def getMaxInputStreamRememberDuration(): Duration = {
     // If an InputDStream is not used, its `rememberDuration` will be null and we can ignore them
+    //如果一个inputdstream不使用,其` rememberduration `会是空的,我们可以忽略它们
     inputStreams.map(_.rememberDuration).filter(_ != null).maxBy(_.milliseconds)
   }
 

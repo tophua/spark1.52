@@ -139,7 +139,7 @@ abstract class DStream[T: ClassTag] (
 
   /**
    * The base scope associated with the operation that created this DStream.
-   * 与创建这个dstream操作相关的基本范围
+   * 创建这个dstream操作相关的基本范围
    * This is the medium through which we pass the DStream operation name (e.g. updatedStateByKey)
    * to the RDDs created by this DStream. Note that we never use this scope directly in RDDs.
    * Instead, we instantiate a new scope during each call to `compute` based on this one.
@@ -780,6 +780,7 @@ abstract class DStream[T: ClassTag] (
   /**
    * Print the first num elements of each RDD generated in this DStream. This is an output
    * operator, so this DStream will be registered as an output stream and there materialized.
+   * 每个RDD产生DStream打印第一个元素,这是一个输出操作符,所以这dstream将被注册为一个输出流实现
    */
   def print(num: Int): Unit = ssc.withScope {
     def foreachFunc: (RDD[T], Time) => Unit = {

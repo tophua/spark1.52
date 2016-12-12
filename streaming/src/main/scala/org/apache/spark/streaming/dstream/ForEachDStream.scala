@@ -23,13 +23,14 @@ import org.apache.spark.streaming.scheduler.Job
 import scala.reflect.ClassTag
 
 private[streaming]
+//每个DStream
 class ForEachDStream[T: ClassTag] (
     parent: DStream[T],
     foreachFunc: (RDD[T], Time) => Unit
   ) extends DStream[Unit](parent.ssc) {
 
   override def dependencies: List[DStream[_]] = List(parent)
-
+  //持续时间
   override def slideDuration: Duration = parent.slideDuration
 
   override def compute(validTime: Time): Option[RDD[Unit]] = None

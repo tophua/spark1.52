@@ -288,6 +288,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     } else {
       // For implicit prefs we use the confidence-weighted RMSE to test (ref Mahout's tests)
+      //隐式参数我们用信心加权均方根误差测试
       var sqErr = 0.0
       var denom = 0.0
       for (u <- 0 until users; p <- 0 until products) {
