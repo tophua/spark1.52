@@ -30,7 +30,9 @@ import org.scalatest.Matchers
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.time.SpanSugar._
 import org.apache.spark.Logging
-
+/**
+ * Streaming监听测试套件
+ */
 class StreamingListenerSuite extends TestSuiteBase with Matchers {
 
   val input = (1 to 4).map(Seq(_)).toSeq

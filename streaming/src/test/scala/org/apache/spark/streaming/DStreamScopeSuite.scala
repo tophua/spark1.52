@@ -26,7 +26,7 @@ import org.apache.spark.streaming.ui.UIUtils
 
 /**
  * Tests whether scope information is passed from DStream operations to RDDs correctly.
- * 测试范围的信息从dstream操作正确通过RDDS
+ * 测试从dstream操作范围的信息正确通过RDDS
  */
 class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAndAfterAll {
   private var ssc: StreamingContext = null

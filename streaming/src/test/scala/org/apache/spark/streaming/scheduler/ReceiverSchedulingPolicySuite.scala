@@ -129,7 +129,7 @@ class ReceiverSchedulingPolicySuite extends SparkFunSuite {
   test("scheduleReceivers: return empty if no receiver") {//如果没有接收器,返回空的
     assert(receiverSchedulingPolicy.scheduleReceivers(Seq.empty, Seq("localhost:10000")).isEmpty)
   }
-
+  //如果没有executors,返回空的调度执行器
   test("scheduleReceivers: return empty scheduled executors if no executors") {
     val receivers = (0 until 3).map(new RateTestReceiver(_))
     val scheduledExecutors = receiverSchedulingPolicy.scheduleReceivers(receivers, Seq.empty)

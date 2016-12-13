@@ -27,7 +27,7 @@ import org.apache.spark.util.Utils
 /**
  * This testsuite tests master failures at random times while the stream is running using
  * the real clock.
- * 这个测试集测试掌握故障随时而流运行
+ * 这个测试套件主节点随机故障在流运行时使用实时
  */
 class FailureSuite extends SparkFunSuite with BeforeAndAfter with Logging {
 

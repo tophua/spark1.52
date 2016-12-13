@@ -279,7 +279,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
 
   /** 
    *  Check if the receiver has started or not. 
-   *  检查接收器是否已启动或不启动
+   *  检查接收器是否已启动或没有启动
    *  */
   def isStarted(): Boolean = {
     supervisor.isReceiverStarted()

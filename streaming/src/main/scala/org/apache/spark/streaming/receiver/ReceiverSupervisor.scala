@@ -131,7 +131,7 @@ private[streaming] abstract class ReceiverSupervisor(
   /**
    * Create a custom [[BlockGenerator]] that the receiver implementation can directly control
    * using their provided [[BlockGeneratorListener]].
-   *
+   * 创建一个自定义的[BlockGenerator],接收器的实现可以直接使用其提供的[blockgeneratorlistener]控制
    * Note: Do not explicitly start or stop the `BlockGenerator`, the `ReceiverSupervisorImpl`
    * will take care of it.
    */

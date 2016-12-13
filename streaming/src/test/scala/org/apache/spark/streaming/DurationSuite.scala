@@ -16,7 +16,7 @@
  */
 
 package org.apache.spark.streaming
-
+//持续时间测试套件
 class DurationSuite extends TestSuiteBase {
 
   test("less") {//小于
