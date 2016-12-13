@@ -114,6 +114,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Restart stream computation using the checkpoint file and check whether
     // checkpointed RDDs have been restored or not
+    //重启流计算使用检查点文件,并检查是否建立RDDS已经恢复或不
     ssc = new StreamingContext(checkpointDir)
     stateStream = ssc.graph.getOutputStreams().head.dependencies.head.dependencies.head
     logInfo("Restored data of state stream = \n[" + stateStream.generatedRDDs.mkString("\n") + "]")
@@ -123,6 +124,7 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Run one batch to generate a new checkpoint file and check whether some RDD
     // is present in the checkpoint data or not
+    //运行一个批处理来生成一个新的检查点文件,检查是否有RDD是在检查点数据或不存在
     ssc.start()
     advanceTimeWithRealDelay(ssc, 1)
     assert(!stateStream.checkpointData.currentCheckpointFiles.isEmpty,
@@ -156,6 +158,7 @@ class CheckpointSuite extends TestSuiteBase {
 
   // This tests whether spark conf persists through checkpoints, and certain
   // configs gets scrubbed 
+  //测试是否通过检查点持久化Spark 配置文件,某些配置项被擦洗
   test("recovery of conf through checkpoints") {//通过检查点的conf文件恢复
     val key = "spark.mykey"
     val value = "myvalue"
@@ -444,8 +447,10 @@ class CheckpointSuite extends TestSuiteBase {
   }
 
   // This tests whether file input stream remembers what files were seen before
+  //此测试是否文件输入流是否记得在主故障之前被看到的文件,并再次使用它们来处理一个大窗口操作
   // the master failure and uses them again to process a large window operation.
   // It also tests whether batches, whose processing was incomplete due to the
+  // 它也测试是否批次,其处理是不完整的,由于故障是否重新处理
   // failure, are re-processed or not.
   test("recovery with file input stream") {//恢复文件输入流
     // Set up the streaming context and input streams
@@ -625,7 +630,7 @@ class CheckpointSuite extends TestSuiteBase {
     }
   }
 
-
+  //批处理中的两个检查站竞争条件
   test("SPARK-11267: the race condition of two checkpoints in a batch") {
     val jobGenerator = mock(classOf[JobGenerator])
     val checkpointDir = Utils.createTempDir().toString
@@ -650,10 +655,12 @@ class CheckpointSuite extends TestSuiteBase {
 
   /**
    * Tests a streaming operation under checkpointing, by restarting the operation
+   * 在流式操作测试检查点,通过重新启动检查点文件的操作,并检查最终输出是否正确
    * from checkpoint file and verifying whether the final output is correct.
    * The output is assumed to have come from a reliable queue which an replay
    * data as required.
-   *
+   *输出被假定为来自一个可靠的队列,所需的重播数据
+   * 注意:这考虑到最后一批处理前主故障将重新处理后重新启动/恢复
    * NOTE: This takes into consideration that the last batch processed before
    * master failure will be re-processed after restart/recovery.
    */
@@ -665,14 +672,17 @@ class CheckpointSuite extends TestSuiteBase {
   ) {
 
     // Current code assumes that:
+    //当前代码假定:
     // number of inputs = number of outputs = number of batches to be run
+    //输入=输出数=要运行的批数
     val totalNumBatches = input.size
     val nextNumBatches = totalNumBatches - initialNumBatches
     val initialNumExpectedOutputs = initialNumBatches
     val nextNumExpectedOutputs = expectedOutput.size - initialNumExpectedOutputs + 1
     // because the last batch will be processed again
-
+    //因为最后一批将再次被处理
     // Do the computation for initial number of batches, create checkpoint file and quit
+    //对初始批数进行计算,创建检查点文件并退出
     ssc = setupStreams[U, V](input, operation)
     ssc.start()
     val output = advanceTimeWithRealDelay[V](ssc, initialNumBatches)
@@ -681,6 +691,7 @@ class CheckpointSuite extends TestSuiteBase {
     Thread.sleep(1000)
 
     // Restart and complete the computation from checkpoint file
+    //重新启动并完成检查点文件的计算
     logInfo(
       "\n-------------------------------------------\n" +
       "        Restarting stream computation          " +
@@ -690,6 +701,7 @@ class CheckpointSuite extends TestSuiteBase {
     ssc.start()
     val outputNew = advanceTimeWithRealDelay[V](ssc, nextNumBatches)
     // the first element will be re-processed data of the last batch before restart
+    //重新启动前的最后一批处理的第一个元素将被重新处理
     verifyOutput[V](outputNew, expectedOutput.takeRight(nextNumExpectedOutputs), true)
     ssc.stop()
     ssc = null
@@ -698,6 +710,7 @@ class CheckpointSuite extends TestSuiteBase {
   /**
    * Advances the manual clock on the streaming scheduler by given number of batches.
    * It also waits for the expected amount of time for each batch.
+   * 通过给定的批数,将人工时钟在流式调度上,它等待每个批次的预期时间
    */
   def advanceTimeWithRealDelay[V: ClassTag](ssc: StreamingContext, numBatches: Long): Seq[Seq[V]] =
   {

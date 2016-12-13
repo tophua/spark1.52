@@ -92,6 +92,7 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
     assertReceiverLogClass[MockWriteAheadLog0](receiverWALConf)
 
     // Verify setting receiver WAL class with 1-arg constructor
+    // 验证设置接收writeAheadLog类型1个参数
     val receiverWALConf2 = new SparkConf().set("spark.streaming.receiver.writeAheadLog.class",
       classOf[MockWriteAheadLog1].getName())
     assertReceiverLogClass[MockWriteAheadLog1](receiverWALConf2)
@@ -346,6 +347,7 @@ object WriteAheadLogSuite {
    *   */
   def writeDataManually(data: Seq[String], file: String): Seq[FileBasedWriteAheadLogSegment] = {
     val segments = new ArrayBuffer[FileBasedWriteAheadLogSegment]()
+    //获得val writer: FSDataOutputStream
     val writer = HdfsUtils.getOutputStream(file, hadoopConf)
     data.foreach { item =>
       val offset = writer.getPos
