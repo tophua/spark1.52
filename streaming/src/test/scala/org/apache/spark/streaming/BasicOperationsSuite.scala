@@ -47,11 +47,18 @@ class BasicOperationsSuite extends TestSuiteBase {
   }
 
   test("flatMap") {
+    //input=List(Range(1, 2, 3, 4), Range(5, 6, 7, 8), Range(9, 10, 11, 12))
     val input = Seq(1 to 4, 5 to 8, 9 to 12)
     testOperation(
-      input,
+      //输入列表
+      input, 
+      //输入列表的操作
       (r: DStream[Int]) => r.flatMap(x => Seq(x, x * 2)),
-      input.map(_.flatMap(x => Array(x, x * 2)))
+      //期望的值
+      input.map(_.flatMap{x => 
+              //println("flatMap:"+x * 2)
+                Array(x, x * 2)
+              })
     )
   }
 
@@ -74,6 +81,7 @@ class BasicOperationsSuite extends TestSuiteBase {
       Seq( Seq(5, 6), Seq(7, 8) ),
       Seq( Seq(9, 10), Seq(11, 12) )
     )
+    //operation匿名函数,接收DStream[Int],返回DStream[Int]
     val operation = (r: DStream[Int]) => r.glom().map(_.toSeq)
     testOperation(input, operation, output)
   }
@@ -108,6 +116,7 @@ class BasicOperationsSuite extends TestSuiteBase {
 
   test("repartition (fewer partitions)") {//重新分配
     val input = Seq(1 to 100, 101 to 200, 201 to 300)
+    //operation匿名函数,接收DStream[Int],返回DStream[Int]
     val operation = (r: DStream[Int]) => r.repartition(2)
     withStreamingContext(setupStreams(input, operation, 5)) { ssc =>
       val output = runStreamsWithPartitions(ssc, 3, 3)
@@ -135,7 +144,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     )
   }
 
-  test("reduceByKey") {
+  test("reduceByKey") {//key分组合计
     testOperation(
       Seq( Seq("a", "a", "b"), Seq("", ""), Seq() ),
       (s: DStream[String]) => s.map(x => (x, 1)).reduceByKey(_ + _),
@@ -144,7 +153,8 @@ class BasicOperationsSuite extends TestSuiteBase {
     )
   }
 
-  test("reduce") {
+  test("reduce") {//计算求和
+     //input=List(Range(1, 2, 3, 4), Range(5, 6, 7, 8), Range(9, 10, 11, 12))
     testOperation(
       Seq(1 to 4, 5 to 8, 9 to 12),
       (s: DStream[Int]) => s.reduce(_ + _),
@@ -152,7 +162,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     )
   }
 
-  test("count") {
+  test("count") {//序列计数
     testOperation(
       Seq(Seq(), 1 to 1, 1 to 2, 1 to 3, 1 to 4),
       (s: DStream[Int]) => s.count(),
@@ -161,18 +171,23 @@ class BasicOperationsSuite extends TestSuiteBase {
   }
 
   test("countByValue") {
+    //res0: Seq[Seq[Int]] = List(Range(1), List(1, 1, 1), Range(1, 2), List(1, 1, 2, 2))
     testOperation(
       Seq(1 to 1, Seq(1, 1, 1), 1 to 2, Seq(1, 1, 2, 2)),
       (s: DStream[Int]) => s.countByValue(),
+      //统计value值数(1, 1L), (2, 1L)2有1个值
       Seq(Seq((1, 1L)), Seq((1, 3L)), Seq((1, 1L), (2, 1L)), Seq((2, 2L), (1, 2L))),
       true
     )
   }
 
   test("mapValues") {
+    //res1: Seq[Seq[String]] = List(List(a, a, b), List("", ""), List())
     testOperation(
       Seq( Seq("a", "a", "b"), Seq("", ""), Seq() ),
+      //以key值分组求和,把值再加10
       (s: DStream[String]) => s.map(x => (x, 1)).reduceByKey(_ + _).mapValues(_ + 10),
+      //a有两个加10=12
       Seq( Seq(("a", 12), ("b", 11)), Seq(("", 12)), Seq() ),
       true
     )
@@ -180,6 +195,7 @@ class BasicOperationsSuite extends TestSuiteBase {
 
   test("flatMapValues") {
     testOperation(
+      //res2: Seq[Seq[String]] = List(List(a, a, b), List("", ""), List())
       Seq( Seq("a", "a", "b"), Seq("", ""), Seq() ),
       (s: DStream[String]) => {
         s.map(x => (x, 1)).reduceByKey(_ + _).flatMapValues(x => Seq(x, x + 10))
@@ -212,6 +228,7 @@ class BasicOperationsSuite extends TestSuiteBase {
   }
 
   test("transform") {
+    //input= List(Range(1, 2, 3, 4), Range(5, 6, 7, 8), Range(9, 10, 11, 12))
     val input = Seq(1 to 4, 5 to 8, 9 to 12)
     testOperation(
       input,
@@ -330,8 +347,9 @@ class BasicOperationsSuite extends TestSuiteBase {
     }
     testOperation(inputData1, inputData2, operation, outputData, true)
   }
-
+  //updateStateByKey可以DStream中的数据进行按key做reduce操作,然后对各个批次的数据进行累加
   test("updateStateByKey") {
+    //输入数据
     val inputData =
       Seq(
         Seq("a"),
@@ -341,7 +359,7 @@ class BasicOperationsSuite extends TestSuiteBase {
         Seq("a"),
         Seq()
       )
-
+    //输出数据
     val outputData =
       Seq(
         Seq(("a", 1)),
@@ -351,17 +369,26 @@ class BasicOperationsSuite extends TestSuiteBase {
         Seq(("a", 5), ("b", 3), ("c", 1)),
         Seq(("a", 5), ("b", 3), ("c", 1))
       )
-
+    //updateStateOperation匿名函数,接收DStream[String]类型,返回DStream[(String, Int)]
     val updateStateOperation = (s: DStream[String]) => {
-      val updateFunc = (values: Seq[Int], state: Option[Int]) => {
+      val updateFunc = (values: Seq[Int], state: Option[Int]) => {      
+        println("values:["+values.mkString(",") +"]\t state:["+ state.mkString(",")+"]")
+        //getOrElse默认值为0
         Some(values.sum + state.getOrElse(0))
       }
+       /**
+       * updateStateByKey可以DStream中的数据进行按key做reduce操作,然后对各个批次的数据进行累加     
+       * updateStateByKey在有新的数据信息进入或更新时,可以让用户保持想要的任何状       
+       * 1)定义状态:可以是任意数据类型
+       * 2)定义状态更新函数:用一个函数指定如何使用先前的状态,从输入流中的新值更新状态。
+       * 对于有状态操作,要不断的把当前和历史的时间切片的RDD累加计算,随着时间的流失,计算的数据规模会变得越来越大。
+       */
       s.map(x => (x, 1)).updateStateByKey[Int](updateFunc)
     }
 
     testOperation(inputData, updateStateOperation, outputData, true)
   }
-
+  //updateStateByKey-简单的RDD初始化值
   test("updateStateByKey - simple with initial value RDD") {
     val initial = Seq(("a", 1), ("c", 2))
 
@@ -390,13 +417,14 @@ class BasicOperationsSuite extends TestSuiteBase {
       val updateFunc = (values: Seq[Int], state: Option[Int]) => {
         Some(values.sum + state.getOrElse(0))
       }
+      //初始化值
       s.map(x => (x, 1)).updateStateByKey[Int](updateFunc,
         new HashPartitioner (numInputPartitions), initialRDD)
     }
 
     testOperation(inputData, updateStateOperation, outputData, true)
   }
-
+ //updateStateByKey-RDD初始化值
   test("updateStateByKey - with initial value RDD") {
     val initial = Seq(("a", 1), ("c", 2))
 
@@ -434,7 +462,7 @@ class BasicOperationsSuite extends TestSuiteBase {
 
     testOperation(inputData, updateStateOperation, outputData, true)
   }
-
+  //updateStateByKey-对象的生命周期
   test("updateStateByKey - object lifecycle") {
     val inputData =
       Seq(
@@ -470,6 +498,7 @@ class BasicOperationsSuite extends TestSuiteBase {
           }
         }
         stateObj.expireCounter match {
+          //两次没有新的值,给它引导
           case 2 => None // seen twice with no new values, give it the boot
           case _ => Option(stateObj)
         }
@@ -480,13 +509,18 @@ class BasicOperationsSuite extends TestSuiteBase {
     testOperation(inputData, updateStateOperation, outputData, true)
   }
 
-  test("slice") {
+  test("slice") {//划分
+    //以1秒为单位输入流
     withStreamingContext(new StreamingContext(conf, Seconds(1))) { ssc =>
+      //input=List(List(1), List(2), List(3), List(4))
       val input = Seq(Seq(1), Seq(2), Seq(3), Seq(4))
       val stream = new TestInputStream[Int](ssc, input, 2)
+      //虚拟输出流,触发Dstrem计算功能
       stream.foreachRDD(_ => {})  // Dummy output stream
       ssc.start()
+      //sleep方法用于将当前线程休眠一定 时间,单位是毫秒 1000毫秒
       Thread.sleep(2000)
+      //获得输入流的切分,参数fromMillis开始毫秒,toMillis结束毫秒
       def getInputFromSlice(fromMillis: Long, toMillis: Long): Set[Int] = {
         stream.slice(new Time(fromMillis), new Time(toMillis)).flatMap(_.collect()).toSet
       }
@@ -497,7 +531,7 @@ class BasicOperationsSuite extends TestSuiteBase {
       assert(getInputFromSlice(2000, 4000) == Set(2, 3, 4))
     }
   }
-  test("slice - has not been initialized") {
+  test("slice - has not been initialized") {//slice -没有被初始化
     withStreamingContext(new StreamingContext(conf, Seconds(1))) { ssc =>
       val input = Seq(Seq(1), Seq(2), Seq(3), Seq(4))
       val stream = new TestInputStream[Int](ssc, input, 2)
@@ -509,7 +543,10 @@ class BasicOperationsSuite extends TestSuiteBase {
   }
 
   val cleanupTestInput = (0 until 10).map(x => Seq(x, x + 1)).toSeq
-
+/**
+ * res0: Vector(List(0, 1), List(1, 2),List(2, 3), List(3, 4), List(4, 5), 
+ * 						List(5, 6), List(6, 7), List(7, 8), List(8,9), List(9, 10))
+ */
   test("rdd cleanup - map and window") {
     val rememberDuration = Seconds(3)
     def operation(s: DStream[Int]): DStream[(Int, Int)] = {
@@ -519,6 +556,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     }
 
     val operatedStream = runCleanupTest(conf, operation _,
+        // 5=cleanupTestInput.size / 2
       numExpectedOutput = cleanupTestInput.size / 2, rememberDuration = Seconds(3))
     val windowedStream2 = operatedStream.asInstanceOf[WindowedDStream[_]]
     val windowedStream1 = windowedStream2.dependencies.head.asInstanceOf[WindowedDStream[_]]
@@ -656,6 +694,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     // Setup the stream computation
     //设置流式计算
     assert(batchDuration === Seconds(1),
+      //批量持续时间已从1秒改变,检查清理测试
       "Batch duration has changed from 1 second, check cleanup tests")
     withStreamingContext(setupStreams(cleanupTestInput, operation)) { ssc =>
       val operatedStream =

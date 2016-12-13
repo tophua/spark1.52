@@ -42,6 +42,7 @@ import org.apache.spark.util.{MutableURLClassLoader, Clock, ManualClock, Utils}
  * This test suites tests the checkpointing functionality of DStreams -
  * the checkpointing of a DStream's RDDs as well as the checkpointing of
  * the whole DStream graph.
+ * 
  */
 class CheckpointSuite extends TestSuiteBase {
 
@@ -59,7 +60,7 @@ class CheckpointSuite extends TestSuiteBase {
     if (ssc != null) ssc.stop()
     Utils.deleteRecursively(new File(checkpointDir))
   }
-  //基本的RDD检查点dstream图检查点恢复
+  //基本的RDD检查点dstream 检查点恢复
   test("basic rdd checkpoints + dstream graph checkpoint recovery") {
 
     assert(batchDuration === Milliseconds(500), "batchDuration for this test must be 1 second")

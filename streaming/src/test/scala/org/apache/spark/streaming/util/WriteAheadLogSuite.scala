@@ -34,6 +34,7 @@ import org.apache.spark.util.{ManualClock, Utils}
 import org.apache.spark.{SparkConf, SparkException, SparkFunSuite}
 /**
  * 提前写日志测试套件
+ * WAL先写入磁盘然后写入Executor中，失败可能性不大
  */
 class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
 
