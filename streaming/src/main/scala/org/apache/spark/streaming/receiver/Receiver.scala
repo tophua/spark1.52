@@ -27,15 +27,17 @@ import org.apache.spark.annotation.DeveloperApi
 
 /**
  * :: DeveloperApi ::
+ * Spark Streaming 内置的输入流接收器或者用户自定义的接收器,用户于从数据源接收源源不断的数据流
  * Abstract class of a receiver that can be run on worker nodes to receive external data. A
+ * 可以在工作节点上运行的接收外部数据的接收器的抽象类,
  * custom receiver can be defined by defining the functions `onStart()` and `onStop()`. `onStart()`
  * should define the setup steps necessary to start receiving data,
+ * 一个自定义的接收器可以通过定义的功能'onstart()'和'onstop()'定义。'onstart()'应该定义设置的必要步骤开始接收数据
  * and `onStop()` should define the cleanup steps necessary to stop receiving data.
+ * 和'onstop()'应该定义清理的必要步骤停止接收数据。
  * Exceptions while receiving can be handled either by restarting the receiver with `restart(...)`
- * or stopped completely by `stop(...)` or
- * Spark Streaming 内置的输入流接收器或者用户自定义的接收器,用户于从数据源接收源源不断的数据流
- * A custom receiver in Scala would look like this.
- *
+ * or stopped completely by `stop(...)` or  A custom receiver in Scala would look like this.
+ * 异常而接收可以处理,通过重新启动接收器与"restart(…)"或停止完全由"stop(...)"或在Scala中自定义接收器看起来像这样
  * {{{
  *  class MyReceiver(storageLevel: StorageLevel) extends NetworkReceiver[String](storageLevel) {
  *      def onStart() {
@@ -143,8 +145,10 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
 
   /**
    * Store an ArrayBuffer of received data as a data block into Spark's memory.
+   * 接收到的数据以数据块为ArrayBuffer存储在Spark内存
    * The metadata will be associated with this block of data
    * for being used in the corresponding InputDStream.
+   * 元数据将相关的数据块使用相应的inputdstream
    */
   def store(dataBuffer: ArrayBuffer[T], metadata: Any) {
     supervisor.pushArrayBuffer(dataBuffer, Some(metadata), None)
@@ -179,6 +183,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
 
   /**
    * Store an iterator of received data as a data block into Spark's memory.
+   * 将接收到的迭代器数据作为数据块存储到Spark内存中
    * The metadata will be associated with this block of data
    * for being used in the corresponding InputDStream.
    */
@@ -190,6 +195,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * Store the bytes of received data as a data block into Spark's memory. Note
    * that the data in the ByteBuffer must be serialized using the same serializer
    * that Spark is configured to use.
+   * 将接收到的ByteBuffer数据作为数据块存储到Spark内存中
    */
   def store(bytes: ByteBuffer) {
     supervisor.pushBytes(bytes, None, None)
@@ -199,6 +205,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * Store the bytes of received data as a data block into Spark's memory.
    * The metadata will be associated with this block of data
    * for being used in the corresponding InputDStream.
+   * 将接收到的ByteBuffer数据作为数据块存储到Spark内存中,元数据将与此块相关联的数据
    */
   def store(bytes: ByteBuffer, metadata: Any) {
     supervisor.pushBytes(bytes, Some(metadata), None)
@@ -219,7 +226,9 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * in a background thread. The delay between the stopping and the starting
    * is defined by the Spark configuration `spark.streaming.receiverRestartDelay`.
    * The `message` will be reported to the driver.
-   * 重新启动接收器,该方法调度重新启动和立即返回
+   * 重新启动接收器,该方法调度重新启动和立即返回,停止和接收机后续启动(通过调用'onstop()'和'onstart()')
+   * 是一个后台线程异步执行,停止和启动,由Spark配置'spark.streaming.receiverRestartDelay'定义之间的延迟
+   * 这的“消息”将报告给driver
    */
   def restart(message: String) {
     supervisor.restartReceiver(message)
@@ -232,6 +241,9 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * in a background thread. The delay between the stopping and the starting
    * is defined by the Spark configuration `spark.streaming.receiverRestartDelay`.
    * The `message` and `exception` will be reported to the driver.
+   * 重新启动接收器,该方法调度重新启动和立即返回,停止和接收机后续启动(通过调用'onstop()'和'onstart()')
+   * 是一个后台线程异步执行,停止和启动,由Spark配置'spark.streaming.receiverRestartDelay'定义之间的延迟
+   * 这的“消息”将报告给driver
    */
   def restart(message: String, error: Throwable) {
     supervisor.restartReceiver(message, Some(error))
@@ -242,6 +254,8 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * immediately. The stopping and subsequent starting of the receiver
    * (by calling `onStop()` and `onStart()`) is performed asynchronously
    * in a background thread.
+   * *重新启动接收器,该方法调度重新启动和立即返回,
+   * 接收器的停止和随后的启动(通过调用'onstop()'和'onstart()')是在后台线程中异步执行
    */
   def restart(message: String, error: Throwable, millisecond: Int) {
     supervisor.restartReceiver(message, Some(error), millisecond)
@@ -310,13 +324,19 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
     id = id_
   }
 
-  /** Attach Network Receiver executor to this receiver. */
+  /** 
+   *  Attach Network Receiver executor to this receiver. 
+   *  将网络接收器执行器连接到该接收器
+   *  */
   private[streaming] def attachSupervisor(exec: ReceiverSupervisor) {
     assert(_supervisor == null)
     _supervisor = exec
   }
 
-  /** Get the attached supervisor. */
+  /** 
+   *  Get the attached supervisor. 
+   *  获得附加的监督
+   *  */
   private[streaming] def supervisor: ReceiverSupervisor = {
     assert(_supervisor != null,
       "A ReceiverSupervisor have not been attached to the receiver yet. Maybe you are starting " +

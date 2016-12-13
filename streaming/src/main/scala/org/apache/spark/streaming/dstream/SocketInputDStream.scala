@@ -109,6 +109,8 @@ object SocketReceiver  {
   /**
    * This methods translates the data from an inputstream (say, from a socket)
    * to '\n' delimited strings and returns an iterator to access the strings.
+   * 该方法将数据从一个输入流(比如,来自一个网络连接)对于"\n"分隔的字符串,并返回一个访问字符串的迭代器
+   * '\n'是换行
    */
   def bytesToLines(inputStream: InputStream): Iterator[String] = {
     val dataInputStream = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))
