@@ -38,6 +38,7 @@ import org.apache.spark.storage.StorageLevel
  */
 object NetworkWordCount {
   def main(args: Array[String]) {
+
     if (args.length < 2) {
       System.err.println("Usage: NetworkWordCount <hostname> <port>")
       System.exit(1)
@@ -58,6 +59,7 @@ object NetworkWordCount {
     // Replication necessary in distributed scenario for fault tolerance.
     val lines = ssc.socketTextStream(args(0), args(1).toInt, StorageLevel.MEMORY_AND_DISK_SER)
     val words = lines.flatMap(_.split(" "))
+    println("================"+words)
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)
     wordCounts.print()
     ssc.start()

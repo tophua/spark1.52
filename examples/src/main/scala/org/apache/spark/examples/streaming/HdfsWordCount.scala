@@ -63,9 +63,9 @@ object HdfsWordCount {
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)
     //打印结果
     wordCounts.print()
-    //启动Spark Streaming
+    //启动Spark Streaming  启动接收
     ssc.start()
-    //一直运行,除非人为干预再停止
+    //等待直到计算终止
     ssc.awaitTermination()
   }
 }
