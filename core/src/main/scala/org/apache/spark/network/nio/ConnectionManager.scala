@@ -50,9 +50,11 @@ private[nio] class ConnectionManager(
 
   /**
    * Used by sendMessageReliably to track messages being sent.
-   * @param message the message that was sent
-   * @param connectionManagerId the connection manager that sent this message
+   * 用于通过可靠地发送消息来跟踪发送的消息
+   * @param message the message that was sent 发送的消息
+   * @param connectionManagerId the connection manager that sent this message 发送此消息的连接管理器
    * @param completionHandler callback that's invoked when the send has completed or failed
+   *			      发送已完成或失败时调用的回调函数
    */
   class MessageStatus(
       val message: Message,
@@ -86,10 +88,10 @@ private[nio] class ConnectionManager(
       conf.get("spark.network.timeout", "120s"))
 
   // Get the thread counts from the Spark Configuration.
-  //
+  // 从Spark配置获取线程计数
   // Even though the ThreadPoolExecutor constructor takes both a minimum and maximum value,
   // we only query for the minimum value because we are using LinkedBlockingDeque.
-  //
+  // 虽然线程池的构造函数需要的最小和最大值,我们只查询的最小值,因为我们使用linkedblockingdeque
   // The JavaDoc for ThreadPoolExecutor points out that when using a LinkedBlockingDeque (which is
   // an unbounded queue) no more than corePoolSize threads will ever be created, so only the "min"
   // parameter is necessary.
@@ -129,6 +131,7 @@ private[nio] class ConnectionManager(
 
   // Use a different, yet smaller, thread pool - infrequently used with very short lived tasks :
   // which should be executed asap
+  //使用一个不同的,但较小的,线程池-很少使用非常短的活动的任务,应尽快执行
   private val handleConnectExecutor = new ThreadPoolExecutor(
     connectThreadCount,
     connectThreadCount,
@@ -146,6 +149,7 @@ private[nio] class ConnectionManager(
 
   private val serverChannel = ServerSocketChannel.open()
   // used to track the SendingConnections waiting to do SASL negotiation
+  //用于跟踪发送连接等待做SASL协商
   private val connectionsAwaitingSasl = new HashMap[ConnectionId, SendingConnection]
     with SynchronizedMap[ConnectionId, SendingConnection]
   private val connectionsByKey =
@@ -183,6 +187,7 @@ private[nio] class ConnectionManager(
 
   // used in combination with the ConnectionManagerId to create unique Connection ids
   // to be able to track asynchronous messages
+  //使用与connectionmanagerid组合创造出唯一的连接IDS能够跟踪异步消息
   private val idCount: AtomicInteger = new AtomicInteger(1)
 
   private val writeRunnableStarted: HashSet[SelectionKey] = new HashSet[SelectionKey]()
@@ -194,6 +199,7 @@ private[nio] class ConnectionManager(
   }
   selectorThread.setDaemon(true)
   // start this thread last, since it invokes run(), which accesses members above
+  //启动此线程上调用,因为它run(),访问以上成员
   selectorThread.start()
 
   private def triggerWrite(key: SelectionKey) {
@@ -203,6 +209,7 @@ private[nio] class ConnectionManager(
     writeRunnableStarted.synchronized {
       // So that we do not trigger more write events while processing this one.
       // The write method will re-register when done.
+      //因此,我们不会触发更多的写事件,而处理这一个,Write方法将重新登记完成
       if (conn.changeInterestForWrite()) conn.unregisterInterest()
       if (writeRunnableStarted.contains(key)) {
         // key.interestOps(key.interestOps() & ~ SelectionKey.OP_WRITE)
@@ -243,7 +250,9 @@ private[nio] class ConnectionManager(
 
     readRunnableStarted.synchronized {
       // So that we do not trigger more read events while processing this one.
+      //因此,我们不会触发更多的读取事件,而处理这一个
       // The read method will re-register when done.
+      //读取方法将重新注册时完成
       if (conn.changeInterestForRead())conn.unregisterInterest()
       if (readRunnableStarted.contains(key)) {
         return
@@ -279,8 +288,9 @@ private[nio] class ConnectionManager(
     val conn = connectionsByKey.getOrElse(key, null).asInstanceOf[SendingConnection]
     if (conn == null) return
 
-    // prevent other events from being triggered
+    // prevent other events from being triggered 防止其他事件被触发
     // Since we are still trying to connect, we do not need to do the additional steps in
+    //因为我们仍在试图连接,我们不需要做额外的步骤triggerwrite
     // triggerWrite
     conn.changeConnectionKeyInterest(0)
 
@@ -310,6 +320,7 @@ private[nio] class ConnectionManager(
   }
 
   // MUST be called within selector loop - else deadlock.
+  /必须在选择器循环-否则死锁
   private def triggerForceCloseByException(key: SelectionKey, e: Exception) {
     try {
       key.interestOps(0)
@@ -322,6 +333,7 @@ private[nio] class ConnectionManager(
     if (conn == null) return
 
     // Pushing to connect threadpool
+    //推动连接线程池
     handleConnectExecutor.execute(new Runnable {
       override def run() {
         try {
@@ -362,6 +374,7 @@ private[nio] class ConnectionManager(
                 key.interestOps(ops)
 
                 // hot loop - prevent materialization of string if trace not enabled.
+		//热度循环-防止字符串如果不启用跟踪。
                 if (isTraceEnabled()) {
                   def intToOpStr(op: Int): String = {
                     val opStrs = ArrayBuffer[String]()
@@ -497,6 +510,7 @@ private[nio] class ConnectionManager(
         logInfo("Accepted connection from [" + newConnection.remoteAddress + "]")
       } catch {
         // might happen in case of issues with registering with selector
+	//可能发生的情况下,与注册与选择器
         case e: Exception => logError("Error in accept loop", e)
       }
 
@@ -570,6 +584,7 @@ private[nio] class ConnectionManager(
       }
     } finally {
       // So that the selection keys can be removed.
+      //使选择键可以被删除
       wakeupSelector()
     }
   }
@@ -583,6 +598,7 @@ private[nio] class ConnectionManager(
   def changeConnectionKeyInterest(connection: Connection, ops: Int) {
     keyInterestChangeRequests += ((connection.key, ops))
     // so that registrations happen !
+    //使注册发生
     wakeupSelector()
   }
 
@@ -678,6 +694,7 @@ private[nio] class ConnectionManager(
           logError("Error in server auth negotiation: " + e)
           // It would probably be better to send an error message telling other side auth failed
           // but for now just close
+ 	  //这很可能是更好的发送错误消息告诉对方认证失败但现在关闭
           connection.close()
         }
       }
@@ -692,17 +709,20 @@ private[nio] class ConnectionManager(
       logDebug("This is security neg message")
 
       // parse as SecurityMessage
+      //解析作为安全消息
       val securityMsg = SecurityMessage.fromBufferMessage(bufferMessage)
       val connectionId = ConnectionId.createConnectionIdFromString(securityMsg.getConnectionId)
 
       connectionsAwaitingSasl.get(connectionId) match {
         case Some(waitingConn) => {
           // Client - this must be in response to us doing Send
+	  //客户端-这必须是响应于我们做发送
           logDebug("Client handleAuth for id: " +  waitingConn.connectionId)
           handleClientAuthentication(waitingConn, securityMsg, connectionId)
         }
         case None => {
           // Server - someone sent us something and we haven't authenticated yet
+	  //服务器-有人给我们发送的东西,我们还没有身份验证
           logDebug("Server handleAuth for id: " + connectionId)
           handleServerAuthentication(conn, securityMsg, connectionId)
         }
@@ -712,6 +732,7 @@ private[nio] class ConnectionManager(
       if (!conn.isSaslComplete()) {
         // We could handle this better and tell the client we need to do authentication
         // negotiation, but for now just ignore them.
+	//我们可以更好地处理这个问题,并告诉客户端我们需要做身份验证协商,但现在只是忽略它们
         logError("message sent that is not security negotiation message on connection " +
                  "not authenticated yet, ignoring it!!")
         return true
@@ -745,10 +766,11 @@ private[nio] class ConnectionManager(
               case None => {
                 /**
                  * We can fall down on this code because of following 2 cases
-                 *
+                 * 我们可以在这个代码上,因为以下2种情况
                  * (1) Invalid ack sent due to buggy code.
-                 *
+                 *     无效的ACK发送由于错误的代码
                  * (2) Late-arriving ack for a SendMessageStatus
+		 *	迟到的ACK发送消息的状态，避免不愿意迟到的应答
                  *     To avoid unwilling late-arriving ack
                  *     caused by long pause like GC, you can set
                  *     larger value than default to spark.core.connection.ack.wait.timeout
@@ -795,7 +817,9 @@ private[nio] class ConnectionManager(
 
   private def checkSendAuthFirst(connManagerId: ConnectionManagerId, conn: SendingConnection) {
     // see if we need to do sasl before writing
+    //看看我们是否需要在写作之前做SASL
     // this should only be the first negotiation as the Client!!!
+    //这应该是客户的第一次协商！！！
     if (!conn.isSaslComplete()) {
       conn.synchronized {
         if (conn.sparkSaslClient == null) {
@@ -826,6 +850,7 @@ private[nio] class ConnectionManager(
   }
 
   // allow us to add messages to the inbox for doing sasl negotiating
+  //让我们添加消息收件箱做SASL协商
   private def sendSecurityMessage(connManagerId: ConnectionManagerId, message: Message) {
     def startNewConnection(): SendingConnection = {
       val inetSocketAddress = new InetSocketAddress(connManagerId.host, connManagerId.port)
@@ -839,12 +864,14 @@ private[nio] class ConnectionManager(
     }
     // I removed the lookupKey stuff as part of merge ... should I re-add it ?
     // We did not find it useful in our test-env ...
+    //我们没有发现它很有用,在我们的测试环境…
     // If we do re-add it, we should consistently use it everywhere I guess ?
     message.senderAddress = id.toSocketAddress()
     logTrace("Sending Security [" + message + "] to [" + connManagerId + "]")
     val connection = connectionsById.getOrElseUpdate(connManagerId, startNewConnection())
 
     // send security message until going connection has been authenticated
+    //发送安全消息,直到连接已被验证
     connection.send(message)
 
     wakeupSelector()
@@ -890,6 +917,7 @@ private[nio] class ConnectionManager(
 
   private def reportSendingMessageFailure(messageId: Int, e: Throwable): Unit = {
     // need to tell sender it failed
+    //需要告诉发送者它失败了
     messageStatuses.synchronized {
       val s = messageStatuses.get(messageId)
       s match {
@@ -911,12 +939,17 @@ private[nio] class ConnectionManager(
 
   /**
    * Send a message and block until an acknowledgment is received or an error occurs.
-   * @param connectionManagerId the message's destination
-   * @param message the message being sent
+   * 发送消息和块,直到接收到或发生错误为止
+   * @param connectionManagerId the message's destination 消息的目的地
+   * @param message the message being sent 正在发送的消息
    * @return a Future that either returns the acknowledgment message or captures an exception.
+   *	     要么返回确认消息或捕获异常的未来
    */
   def sendMessageReliably(connectionManagerId: ConnectionManagerId, message: Message)
       : Future[Message] = {
+     //Future 表示一个可能还没有实际完成的异步任务的结果
+     //针对这个结果可以添加 Callback 以便在任务执行成功或失败后做出对应的操作
+     //而Promise 交由任务执行者,任务执行者通过 Promise 可以标记任务完成或者失败
     val promise = Promise[Message]()
 
     // It's important that the TimerTask doesn't capture a reference to `message`, which can cause
@@ -925,6 +958,7 @@ private[nio] class ConnectionManager(
     // from outside of the TimerTask closure (see SPARK-4393 for more context).
     val messageId = message.id
     // Keep a weak reference to the promise so that the completed promise may be garbage-collected
+    //保持promise弱的引用,以便完成的promise可能垃圾回收
     val promiseReference = new WeakReference(promise)
     val timeoutTask: TimerTask = new TimerTask {
       override def run(timeout: Timeout): Unit = {
@@ -935,14 +969,18 @@ private[nio] class ConnectionManager(
             val p = promiseReference.get
             if (p != null) {
               // Attempt to fail the promise with a Timeout exception
+	      //尝试以超时异常失败的promise
               if (!p.tryFailure(e)) {
                 // If we reach here, then someone else has already signalled success or failure
                 // on this promise, so log a warning:
+		//如果我们到达这里,然后其他人已经暗示了这个promise的成功或失败,所以一个日志警告
                 logError("Ignore error because promise is completed", e)
               }
             } else {
               // The WeakReference was empty, which should never happen because
+	      //WeakReference是空的,这不应该发生
               // sendMessageReliably's caller should have a strong reference to promise.future;
+	      //sendmessagereliably的调用者应该promise.future强引用
               logError("Promise was garbage collected; this should never happen!", e)
             }
           }
@@ -957,6 +995,7 @@ private[nio] class ConnectionManager(
       s match {
         case scala.util.Failure(e) =>
           // Indicates a failure where we either never sent or never got ACK'd
+	  // 指示一个错误我们没有发送或没有ACK'd
           if (!promise.tryFailure(e)) {
             logWarning("Ignore error because promise is completed", e)
           }
