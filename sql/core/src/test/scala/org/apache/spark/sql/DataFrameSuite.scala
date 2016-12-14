@@ -929,7 +929,11 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     df.col("")
     df.col("t.``")
   }
-
+   //NaN 是Not-a-Number的缩写,某些float或double类型不符合标准浮点数语义
+   //NaN == NaN，即：NaN和NaN总是相等
+   //在聚合函数中，所有NaN分到同一组
+   //NaN在join操作中可以当做一个普通的join key
+   //NaN在升序排序中排到最后，比任何其他数值都大
   test("SPARK-8797: sort by float column containing NaN should not crash") {
     //排序float列包含NaN,不应该崩溃
     val inputData = Seq.fill(10)(Tuple1(Float.NaN)) ++ (1 to 20).map(x => Tuple1(x.toFloat))
@@ -960,7 +964,11 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     val df = Random.shuffle(inputData).toDF("a")
     df.orderBy("a").collect()
   }
-
+   //NaN 是Not-a-Number的缩写,某些float或double类型不符合标准浮点数语义
+   //NaN == NaN，即：NaN和NaN总是相等
+   //在聚合函数中，所有NaN分到同一组
+   //NaN在join操作中可以当做一个普通的join key
+   //NaN在升序排序中排到最后，比任何其他数值都大
   test("NaN is greater than all other non-NaN numeric values") {
     val maxDouble = Seq(Double.NaN, Double.PositiveInfinity, Double.MaxValue)
       .map(Tuple1.apply).toDF("a").selectExpr("max(a)").first()

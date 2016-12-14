@@ -61,6 +61,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
 
   test("Simple INSERT OVERWRITE a JSONRelation") {//简单的插入覆盖一个JSON的关系
     //使用INSERT OVERWRITE TABLE插入数据
+    //Overwrite模式,实际操作是,先删除数据,再写新数据
     sql(
       s"""
         |INSERT OVERWRITE TABLE jsonTable SELECT a, b FROM jt
@@ -184,6 +185,8 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
       sql("SELECT a, b FROM jt").collect()
     )
    //插入表数据,注意没有OVERWRITE
+   //Overwrite模式,实际操作是,先删除数据,再写新数据
+
     sql(
       s"""
          |INSERT INTO TABLE jsonTable SELECT a, b FROM jt

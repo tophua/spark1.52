@@ -310,7 +310,11 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       sql("select isnotnull(null), isnotnull('a')"),
       Row(false, true))
   }
-
+   //NaN 是Not-a-Number的缩写,某些float或double类型不符合标准浮点数语义
+   //NaN == NaN，即：NaN和NaN总是相等
+   //在聚合函数中，所有NaN分到同一组
+   //NaN在join操作中可以当做一个普通的join key
+   //NaN在升序排序中排到最后，比任何其他数值都大
   test("isNaN") {//指明提供的值是否是保留值 NaN(不是数字)
     val testData = ctx.createDataFrame(ctx.sparkContext.parallelize(
       Row(Double.NaN, Float.NaN) ::
