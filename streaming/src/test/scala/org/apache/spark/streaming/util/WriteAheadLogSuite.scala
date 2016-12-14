@@ -135,9 +135,9 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
     }
     reader.close()
   }
-
+ //顺序读取数据和写入数据
   test("FileBasedWriteAheadLogReader - sequentially reading data written with writer") {
-    //顺序读取数据和写入数据
+   
     val dataToWrite = generateRandomData()
     writeDataUsingWriter(testFile, dataToWrite)
     val readData = readDataUsingReader(testFile)

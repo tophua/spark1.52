@@ -30,8 +30,8 @@ import org.apache.spark.util.ManualClock
  * 整个引擎是无时无刻不在执行，不管有用没用，一直执行，也就是死循环
  */
 class RecurringTimerSuite extends SparkFunSuite with PrivateMethodTester {
-
-  test("basic") {
+//循环定时器测试套件
+  test("basic") {//基本
     val clock = new ManualClock()
     val results = new mutable.ArrayBuffer[Long]() with mutable.SynchronizedBuffer[Long]
     val timer = new RecurringTimer(clock, 100, time => {
@@ -51,7 +51,7 @@ class RecurringTimerSuite extends SparkFunSuite with PrivateMethodTester {
     }
     assert(timer.stop(interruptTimer = true) === 300L)
   }
-
+  //停止后调用“回调”
   test("SPARK-10224: call 'callback' after stopping") {
     val clock = new ManualClock()
     val results = new mutable.ArrayBuffer[Long]() with mutable.SynchronizedBuffer[Long]
