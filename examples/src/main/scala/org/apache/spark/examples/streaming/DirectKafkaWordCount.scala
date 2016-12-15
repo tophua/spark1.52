@@ -29,8 +29,9 @@ import org.apache.spark.SparkConf
  * 使用消息从Kafka一个或多个主题,做单词计数
  * Usage: DirectKafkaWordCount <brokers> <topics>
  *   <brokers> is a list of one or more Kafka brokers
+ *   					 是一个或多个Kafka broker的列表(一台kafka服务器就是一个broker)
  *   <topics> is a list of one or more kafka topics to consume from
- *
+ *				    是从一个或更多的kafka消费主题的列表
  * Example:
  *    $ bin/run-example streaming.DirectKafkaWordCount broker1-host:port,broker2-host:port \
  *    topic1,topic2
@@ -57,7 +58,7 @@ object DirectKafkaWordCount {
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     // Create direct kafka stream with brokers and topics
-    //创建直接的kafka流与中间商和主题
+    //创建直接的kafka流与broker(一台kafka服务器就是一个broker)和主题
     val topicsSet = topics.split(",").toSet
     val kafkaParams = Map[String, String]("metadata.broker.list" -> brokers)
     val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](

@@ -30,14 +30,17 @@ import org.apache.spark.util.IntParam
 
 /**
  * Counts words in text encoded with UTF8 received from the network every second.
- * 单词计数文本编码UTF8,从网络接收的每一秒
+ * 每一秒从网络接收的文本UTF8编码单词的计数
  * Usage: RecoverableNetworkWordCount <hostname> <port> <checkpoint-directory> <output-file>
  *   <hostname> and <port> describe the TCP server that Spark Streaming would connect to receive
- *   data. <checkpoint-directory> directory to HDFS-compatible file system which checkpoint data
- *   <output-file> file to which the word counts will be appended
- *
+ *   描述:Spark流将接收的TCP服务器数据
+ *   data. 
+ * <checkpoint-directory> directory to HDFS-compatible file system which checkpoint data
+ *   												目录文件系统HDFS兼容检查数据
+ * <output-file> file to which the word counts will be appended
+ *								 将要添加的字计数的文件
  * <checkpoint-directory> and <output-file> must be absolute paths
- *
+ *																					必须是绝对路径
  * To run this on your local machine, you need to first run a Netcat server
  * 运行在本地机器上,你需要先运行一个netcat服务器
  *
@@ -49,12 +52,16 @@ import org.apache.spark.util.IntParam
  *              localhost 9999 ~/checkpoint/ ~/out`
  *
  * If the directory ~/checkpoint/ does not exist (e.g. running for the first time), it will create
+ * 如果~/checkpoint/ 目录不存在(第一次运行),它将创建一个新StreamingContext(将打印“创建新上下文”到控制台)
  * a new StreamingContext (will print "Creating new context" to the console). Otherwise, if
  * checkpoint data exists in ~/checkpoint/, then it will create StreamingContext from
  * the checkpoint data.
+ * 否则,如果检查点数据存在于~/checkpoint/，那么它将创造StreamingContext检查点数据
  *
  * Refer to the online documentation for more details.
+ * 参考联机文档以进行更多细节 * 
  */
+//可恢复的网络单词计数
 object RecoverableNetworkWordCount {
 
   def createContext(ip: String, port: Int, outputPath: String, checkpointDirectory: String)

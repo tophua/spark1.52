@@ -31,9 +31,12 @@ import org.apache.spark.SparkConf
  * 从卡夫卡中的一个或多个主题中消耗消息,并对单词计数
  * Usage: KafkaWordCount <zkQuorum> <group> <topics> <numThreads>
  *   <zkQuorum> is a list of one or more zookeeper servers that make quorum
- *   <group> is the name of kafka consumer group
+ *   					  是一个或多个zookeeper服务器使用数,使用逗号分隔
+ *   <group> is the name of kafka consumer group 是卡夫卡消费组的名称
  *   <topics> is a list of one or more kafka topics to consume from
+ *   					是一个或多个Kafka broker的列表(一台kafka服务器就是一个broker),使用逗号分隔
  *   <numThreads> is the number of threads the kafka consumer should use
+ *   						  是kafka消费者应该使用的线程数
  *
  * Example:
  *    `$ bin/run-example \
@@ -53,8 +56,9 @@ object KafkaWordCount {
     val sparkConf = new SparkConf().setAppName("KafkaWordCount")
     val ssc = new StreamingContext(sparkConf, Seconds(2))
     ssc.checkpoint("checkpoint")
-
+    //numThreads线程数
     val topicMap = topics.split(",").map((_, numThreads.toInt)).toMap
+    //zkQuorum zookeeper服务器,group 卡夫卡消费组的名称,topicMap kafka服务器
     val lines = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap).map(_._2)
     val words = lines.flatMap(_.split(" "))
     val wordCounts = words.map(x => (x, 1L))

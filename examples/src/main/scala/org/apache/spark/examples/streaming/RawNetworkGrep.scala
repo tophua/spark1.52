@@ -25,11 +25,12 @@ import org.apache.spark.util.IntParam
 
 /**
  * Receives text from multiple rawNetworkStreams and counts how many '\n' delimited
- * 接收文本从多个rawnetworkstreams数多少'\n'分隔
+ * 接收文本从多个rawnetworkstreams数多少'\n'分隔,以换行符分隔
  * lines have the word 'the' in them. This is useful for benchmarking purposes. This
  * will only work with spark.streaming.util.RawTextSender running on all worker nodes
  * and with Spark using Kryo serialization (set Java property "spark.serializer" to
  * "org.apache.spark.serializer.KryoSerializer").
+ *  运行在所有工作节点和Spark使用kryo序列化
  * Usage: RawNetworkGrep <numStreams> <host> <port> <batchMillis>
  *   <numStream> is the number rawNetworkStreams, which should be same as number
  *               of work nodes in the cluster

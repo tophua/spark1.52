@@ -34,7 +34,7 @@ object QueueStream {
 
     // Create the queue through which RDDs can be pushed to
     // a QueueInputDStream
-    //创建队列,通过它可以推到一个queueinputdstream RDDS
+    //创建队列,通过RDDs可以推到一个queueinputdstream
     val rddQueue = new SynchronizedQueue[RDD[Int]]()
 
     // Create the QueueInputDStream and use it do some processing
