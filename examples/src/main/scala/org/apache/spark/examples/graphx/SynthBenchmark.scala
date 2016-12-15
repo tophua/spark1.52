@@ -28,23 +28,31 @@ import java.io.{PrintWriter, FileOutputStream}
  * The SynthBenchmark application can be used to run various GraphX algorithms on
  * synthetic log-normal graphs.  The intent of this code is to enable users to
  * profile the GraphX system without access to large graph datasets.
+ * synthbenchmark应用可用于运行该算法合成对数正态图,这段代码的意图是让用户配置该系统没有大规模图数据集
  */
 object SynthBenchmark {
 
   /**
    * To run this program use the following:
-   *
+   * 要运行此程序使用以下
    * MASTER=spark://foobar bin/run-example graphx.SynthBenchmark -app=pagerank
    *
    * Options:
-   *   -app "pagerank" or "cc" for pagerank or connected components. (Default: pagerank)
+   *   -app "pagerank" or "cc" for pagerank or connected components. (Default: pagerank)   *   			
    *   -niters the number of iterations of pagerank to use (Default: 10)
+   *   			使用迭代的PageRank数量
    *   -nverts the number of vertices in the graph (Default: 1000000)
+   *   			图中的顶点数
    *   -numEPart the number of edge partitions in the graph (Default: number of cores)
+   *   			 图中的边缘分区的数目
    *   -partStrategy the graph partitioning strategy to use
+   *   			 图划分策略使用
    *   -mu the mean parameter for the log-normal graph (Default: 4.0)
+   *   			对数正态图的平均参数
    *   -sigma the stdev parameter for the log-normal graph (Default: 1.3)
+   *   			 对于对数正态图的参数
    *   -degFile the local file to save the degree information (Default: Empty)
+   *   			本地文件保存程度信息
    *   -seed seed to use for RNGs (Default: -1, picks seed randomly)
    */
   def main(args: Array[String]) {

@@ -18,7 +18,9 @@
 package org.apache.spark.examples
 
 import org.apache.spark.{SparkConf, SparkContext}
-
+/**
+ * 测试异常处理
+ */
 object ExceptionHandlingTest {//异常处理测试
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setAppName("ExceptionHandlingTest").setMaster("local")
@@ -28,6 +30,7 @@ object ExceptionHandlingTest {//异常处理测试
       val rd=math.random
       println(rd)
       if (rd > 0.75) {
+        //测试异常处理
         throw new Exception("Testing exception handling")
       }
     }

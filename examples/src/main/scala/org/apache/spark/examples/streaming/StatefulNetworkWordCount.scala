@@ -24,9 +24,9 @@ import org.apache.spark.streaming._
 
 /**
  * Counts words cumulatively in UTF8 encoded, '\n' delimited text received from the network every
- * 单词计数累计在UTF8编码,每一个从网络接收到的分隔的文本
+ * 单词计数累计在UTF8编码,每一个从网络接收到的分隔的文本 从字数的初始值开始
  * second starting with initial value of word count.
- * 第二,从字数的初始值开始
+ *
  * Usage: StatefulNetworkWordCount <hostname> <port>
  *   <hostname> and <port> describe the TCP server that Spark Streaming would connect to receive
  *   data.

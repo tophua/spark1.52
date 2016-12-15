@@ -48,6 +48,7 @@ object HBaseTest {
     conf.set(TableInputFormat.INPUT_TABLE, args(0))
 
     // Initialize hBase table if necessary
+    //如果需要初始化HBase表
     val admin = new HBaseAdmin(conf)
     if (!admin.isTableAvailable(args(0))) {
       val tableDesc = new HTableDescriptor(TableName.valueOf(args(0)))

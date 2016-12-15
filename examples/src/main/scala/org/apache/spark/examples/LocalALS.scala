@@ -61,6 +61,7 @@ object LocalALS {
     var XtX: RealMatrix = new Array2DRowRealMatrix(F, F)
     var Xty: RealVector = new ArrayRealVector(F)
     // For each user that rated the movie
+    //为每一个用户评价的电影
     for (j <- 0 until U) {
       val u = us(j)
       // Add u * u^t to XtX
@@ -69,10 +70,12 @@ object LocalALS {
       Xty = Xty.add(u.mapMultiply(R.getEntry(i, j)))
     }
     // Add regularization coefficients to diagonal terms
+    //向对角项的正则化系数
     for (d <- 0 until F) {
       XtX.addToEntry(d, d, LAMBDA * U)
     }
     // Solve it with Cholesky
+    //Cholesky解决它
     new CholeskyDecomposition(XtX).getSolver.solve(Xty)
   }
 
@@ -80,6 +83,7 @@ object LocalALS {
     var XtX: RealMatrix = new Array2DRowRealMatrix(F, F)
     var Xty: RealVector = new ArrayRealVector(F)
     // For each movie that the user rated
+    //对于每一部电影的用户评分
     for (i <- 0 until M) {
       val m = ms(i)
       // Add m * m^t to XtX

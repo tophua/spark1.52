@@ -40,6 +40,7 @@ object SkewedGroupByTest {
       val ranGen = new Random
 
       // map output sizes lineraly increase from the 1st to the last
+      //map输出的大小线性增加从第一到最后
       numKVPairs = (1.0 * (p + 1) / numMappers * numKVPairs).toInt
 
       var arr1 = new Array[(Int, Array[Byte])](numKVPairs)

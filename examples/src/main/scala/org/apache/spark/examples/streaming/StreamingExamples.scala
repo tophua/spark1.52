@@ -21,7 +21,10 @@ import org.apache.spark.Logging
 
 import org.apache.log4j.{Level, Logger}
 
-/** Utility functions for Spark Streaming examples. */
+/** 
+ *  Utility functions for Spark Streaming examples. 
+ *  Spark流的实用功能的例子
+ *  */
 object StreamingExamples extends Logging {
 
   /** 
