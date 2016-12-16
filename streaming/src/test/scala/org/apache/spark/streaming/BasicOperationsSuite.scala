@@ -541,12 +541,12 @@ class BasicOperationsSuite extends TestSuiteBase {
       assert(thrown.getMessage.contains("has not been initialized"))
     }
   }
-
-  val cleanupTestInput = (0 until 10).map(x => Seq(x, x + 1)).toSeq
 /**
  * res0: Vector(List(0, 1), List(1, 2),List(2, 3), List(3, 4), List(4, 5), 
  * 						List(5, 6), List(6, 7), List(7, 8), List(8,9), List(9, 10))
  */
+  val cleanupTestInput = (0 until 10).map(x => Seq(x, x + 1)).toSeq
+
   test("rdd cleanup - map and window") {
     val rememberDuration = Seconds(3)
     def operation(s: DStream[Int]): DStream[(Int, Int)] = {
@@ -569,7 +569,9 @@ class BasicOperationsSuite extends TestSuiteBase {
       rememberDuration + windowedStream2.windowDuration + windowedStream1.windowDuration)
 
     // WindowedStream2 should remember till 7 seconds: 10, 9, 8, 7
+    ///WindowedStream2 应该记住直到7秒:10, 9, 8, 7
     // WindowedStream1 should remember till 4 seconds: 10, 9, 8, 7, 6, 5, 4
+    //WindowedStream1 应该记住直到4秒:10, 9, 8, 7, 6, 5, 4
     // MappedStream should remember till 2 seconds:    10, 9, 8, 7, 6, 5, 4, 3, 2
 
     // WindowedStream2
@@ -655,6 +657,7 @@ class BasicOperationsSuite extends TestSuiteBase {
         testServer.stop()
 
         // verify data has been received
+        //已接收验证数据
         assert(outputBuffer.size > 0)
         assert(blockRdds.size > 0)
         assert(persistentRddIds.size > 0)
@@ -666,10 +669,12 @@ class BasicOperationsSuite extends TestSuiteBase {
         val latestBlockRdd = blockRdds(blockRdds.keySet.max)
         val earliestBlockRdd = blockRdds(blockRdds.keySet.min)
         // verify that the latest mapped RDD is persisted but the earliest one has been unpersisted
+        //验证最新Map RDD持久化,但最早的一个没有持久化
         assert(ssc.sparkContext.persistentRdds.contains(latestPersistedRddId))
         assert(!ssc.sparkContext.persistentRdds.contains(earliestPersistedRddId))
 
         // verify that the latest input blocks are present but the earliest blocks have been removed
+        //验证最新的输入块是否存在,但最早的块已被移除.
         assert(latestBlockRdd.isValid)
         assert(latestBlockRdd.collect != null)
         assert(!earliestBlockRdd.isValid)

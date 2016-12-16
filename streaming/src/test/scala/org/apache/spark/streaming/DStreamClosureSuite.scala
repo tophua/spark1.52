@@ -58,14 +58,14 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
     testTransform(dstream)
     testTransformWith(dstream)
     testReduceByWindow(dstream)
-    // PairDStreamFunctions
+    //PairDStreamFunctions
     testReduceByKey(pairDstream)
     testCombineByKey(pairDstream)
     testReduceByKeyAndWindow(pairDstream)
     testUpdateStateByKey(pairDstream)
     testMapValues(pairDstream)
     testFlatMapValues(pairDstream)
-    // StreamingContext
+    //StreamingContext
     testTransform2(ssc, dstream)
   }
 
@@ -73,7 +73,9 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
    * Verify that the expected exception is thrown.
    * 验证所期望的异常被抛出
    * We use return statements as an indication that a closure is actually being cleaned.
+   * 我们使用返回语句表示关闭实际上正在被清理
    * We expect closure cleaner to find the return statements in the user provided closures.
+   * 我们期望闭包清理器在用户提供的闭包中找到返回语句
    */
   private def expectCorrectException(body: => Unit): Unit = {
     try {
@@ -135,6 +137,7 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
   }
 
   // PairDStreamFunctions operations
+  // 键值对流函数操作
   private def testReduceByKey(ds: DStream[(Int, Int)]): Unit = {
     val reduceF = (_: Int, _: Int) => { return; 1 }
     expectCorrectException { ds.reduceByKey(reduceF) }
@@ -190,7 +193,7 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
     ds.flatMapValues { _ => return; Seq.empty }
   }
 
-  // StreamingContext operations
+  // StreamingContext operations Spark上下文操作
   private def testTransform2(ssc: StreamingContext, ds: DStream[Int]): Unit = {
     val transformF = (rdds: Seq[RDD[_]], time: Time) => { return; ssc.sparkContext.emptyRDD[Int] }
     expectCorrectException { ssc.transform(Seq(ds), transformF) }

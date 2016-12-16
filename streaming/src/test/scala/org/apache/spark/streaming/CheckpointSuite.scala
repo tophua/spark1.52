@@ -42,7 +42,7 @@ import org.apache.spark.util.{MutableURLClassLoader, Clock, ManualClock, Utils}
  * This test suites tests the checkpointing functionality of DStreams -
  * the checkpointing of a DStream's RDDs as well as the checkpointing of
  * the whole DStream graph.
- * 
+ * 这个测试套件的测试dstreams检查点功能,一个dstream的RDDS检查点整个dstream的依赖关系图 
  */
 class CheckpointSuite extends TestSuiteBase {
 
@@ -62,7 +62,7 @@ class CheckpointSuite extends TestSuiteBase {
   }
   //基本的RDD检查点dstream 检查点恢复
   test("basic rdd checkpoints + dstream graph checkpoint recovery") {
-
+    //此测试的批处理时间必须为1秒.
     assert(batchDuration === Milliseconds(500), "batchDuration for this test must be 1 second")
 
     conf.set("spark.streaming.clock", "org.apache.spark.util.ManualClock")
@@ -71,19 +71,35 @@ class CheckpointSuite extends TestSuiteBase {
     val fs = FileSystem.getLocal(new Configuration())
     // this ensure checkpointing occurs at least once
     //这确保检查点至少发生一次
+    //firstNumBatches=4==(1000/500)==2*2
     val firstNumBatches = (stateStreamCheckpointInterval / batchDuration).toLong * 2
+    //secondNumBatches 4
     val secondNumBatches = firstNumBatches
 
     // Setup the streams 设置流    
+    /**
+     * input= Vector(List(a), List(a), List(a), List(a), List(a), List(a), List(a), List(a), List(a), List(a))
+     */
     val input = (1 to 10).map(_ => Seq("a")).toSeq
     val operation = (st: DStream[String]) => {
       val updateFunc = (values: Seq[Int], state: Option[Int]) => {
+        println(values.mkString(",")+"|||"+state.mkString(","))
+        //
         Some(values.sum + state.getOrElse(0))
       }
-      st.map(x => (x, 1))
+      st.map(x => {
+        println("======"+x)
+        //x==a
+        (x, 1)
+        })
+      //updateStateByKey可以DStream中的数据进行按key做reduce操作,然后对各个批次的数据进行累加
       .updateStateByKey(updateFunc)
+      //状态流检查点间隔
       .checkpoint(stateStreamCheckpointInterval)
-      .map(t => (t._1, t._2))
+      .map(t =>{
+        println(t._1+"|map|"+t._2)
+        (t._1, t._2)
+      })
     }
     var ssc = setupStreams(input, operation)
     var stateStream = ssc.graph.getOutputStreams().head.dependencies.head.dependencies.head
@@ -117,6 +133,7 @@ class CheckpointSuite extends TestSuiteBase {
     //重启流计算使用检查点文件,并检查是否建立RDDS已经恢复或不
     ssc = new StreamingContext(checkpointDir)
     stateStream = ssc.graph.getOutputStreams().head.dependencies.head.dependencies.head
+    println("Restored data of state stream 111="+stateStream.generatedRDDs.mkString("\n"))
     logInfo("Restored data of state stream = \n[" + stateStream.generatedRDDs.mkString("\n") + "]")
     assert(!stateStream.generatedRDDs.isEmpty,
       "No restored RDDs in state stream after recovery from first failure")
@@ -142,13 +159,16 @@ class CheckpointSuite extends TestSuiteBase {
     //从新的检查点文件中重新启动流式计算,查看该文件是否具有正确的检查点数据
     ssc = new StreamingContext(checkpointDir)
     stateStream = ssc.graph.getOutputStreams().head.dependencies.head.dependencies.head
+    println("Restored data of state stream 2222="+stateStream.generatedRDDs.mkString("\n"))
     logInfo("Restored data of state stream = \n[" + stateStream.generatedRDDs.mkString("\n") + "]")
+    //从第二次故障失败后,恢复没有RDDS状态流
     assert(!stateStream.generatedRDDs.isEmpty,
       "No restored RDDs in state stream after recovery from second failure")
 
     // Adjust manual clock time as if it is being restarted after a delay; this is a hack because
     // we modify the conf object, but it works for this one property
-    //调整手动时钟的时间,延迟后重新启动,修改conf对象
+    //调整手动时钟的时间,延迟后重新启动,这是一个黑客,因为我们修改conf对象,但它为这一个属性
+    // 3500=batchDuration(500)*5
     ssc.conf.set("spark.streaming.manualClock.jump", (batchDuration.milliseconds * 7).toString)
     ssc.start()
     advanceTimeWithRealDelay(ssc, 4)
@@ -496,6 +516,7 @@ class CheckpointSuite extends TestSuiteBase {
         val fileStream = ssc.textFileStream(testDir.toString)
         // Make value 3 take a large time to process, to ensure that the driver
         // shuts down in the middle of processing the 3rd batch
+        //生产3获取需要大量的时间来处理,确保driver在第三批处理中间关闭
         CheckpointSuite.batchThreeShouldBlockIndefinitely = true
         val mappedStream = fileStream.map(s => {
           val i = s.toInt
@@ -648,6 +669,7 @@ class CheckpointSuite extends TestSuiteBase {
     assert(checkpointFiles.size === 2)
     // Although bytes2 was written with an old time, it contains the latest status, so we should
     // try to read from it at first.
+    //虽然bytes2写的是一个旧时间,它包含了最新的状态,所以我们应该先从中读出,
     assert(Files.toByteArray(checkpointFiles(0)) === bytes2)
     assert(Files.toByteArray(checkpointFiles(1)) === bytes1)
     checkpointWriter.stop()
@@ -715,11 +737,13 @@ class CheckpointSuite extends TestSuiteBase {
   def advanceTimeWithRealDelay[V: ClassTag](ssc: StreamingContext, numBatches: Long): Seq[Seq[V]] =
   {
     val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
+    //提前的手动时钟
     logInfo("Manual clock before advancing = " + clock.getTimeMillis())
     for (i <- 1 to numBatches.toInt) {
       clock.advance(batchDuration.milliseconds)
       Thread.sleep(batchDuration.milliseconds)
     }
+    //提前后的手动时钟
     logInfo("Manual clock after advancing = " + clock.getTimeMillis())
     Thread.sleep(batchDuration.milliseconds)
 

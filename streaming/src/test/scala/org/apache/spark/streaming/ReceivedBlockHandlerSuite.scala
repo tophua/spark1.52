@@ -231,22 +231,22 @@ class ReceivedBlockHandlerSuite
 
   private def testCountWithBlockManagerBasedBlockHandler(isBlockManagerBasedBlockHandler: Boolean) {
     // ByteBufferBlock-MEMORY_ONLY
-    //字节缓冲区块
+    //字节缓冲区块--只在内存中,将RDD 作为反序列化的的对象存储JVM 中
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_ONLY,
       ByteBufferBlock(ByteBuffer.wrap(Array.tabulate(100)(i => i.toByte))), blockManager, None)
-    // ByteBufferBlock-MEMORY_ONLY_SER
+    // ByteBufferBlock-MEMORY_ONLY_SER  MEMORY_ONLY不同的是会将数据备份到集群中两个不同的节点
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_ONLY_SER,
       ByteBufferBlock(ByteBuffer.wrap(Array.tabulate(100)(i => i.toByte))), blockManager, None)
     // ArrayBufferBlock-MEMORY_ONLY
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_ONLY,
       ArrayBufferBlock(ArrayBuffer.fill(25)(0)), blockManager, Some(25))
-    // ArrayBufferBlock-MEMORY_ONLY_SER
+    // ArrayBufferBlock-MEMORY_ONLY_SER MEMORY_ONLY不同的是会将数据备份到集群中两个不同的节点
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_ONLY_SER,
       ArrayBufferBlock(ArrayBuffer.fill(25)(0)), blockManager, Some(25))
     // ArrayBufferBlock-DISK_ONLY
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.DISK_ONLY,
       ArrayBufferBlock(ArrayBuffer.fill(50)(0)), blockManager, Some(50))
-    // ArrayBufferBlock-MEMORY_AND_DISK
+    // ArrayBufferBlock-MEMORY_AND_DISK 在内存空间不足的情况下,将序列化之后的数据存储于磁盘
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_AND_DISK,
       ArrayBufferBlock(ArrayBuffer.fill(75)(0)), blockManager, Some(75))
     // IteratorBlock-MEMORY_ONLY
@@ -255,10 +255,11 @@ class ReceivedBlockHandlerSuite
     // IteratorBlock-MEMORY_ONLY_SER
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_ONLY_SER,
       IteratorBlock((ArrayBuffer.fill(100)(0)).iterator), blockManager, Some(100))
-    // IteratorBlock-DISK_ONLY
+    // IteratorBlock-DISK_ONLY 仅仅使用磁盘存储RDD的数据(未经序列化)
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.DISK_ONLY,
       IteratorBlock((ArrayBuffer.fill(125)(0)).iterator), blockManager, Some(125))
-    // IteratorBlock-MEMORY_AND_DISK
+    // IteratorBlock-MEMORY_AND_DISK 
+    //RDD的数据直接以Java对象的形式存储于JVM的内存中,如果内存空间不中,某些分区的数据会被存储至磁盘,使用的时候从磁盘读取
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_AND_DISK,
       IteratorBlock((ArrayBuffer.fill(150)(0)).iterator), blockManager, Some(150))
   }

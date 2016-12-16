@@ -35,7 +35,14 @@ import org.apache.spark.streaming.scheduler._
 import org.apache.spark.streaming.util.{WriteAheadLogUtils, FileBasedWriteAheadLogReader}
 import org.apache.spark.streaming.util.WriteAheadLogSuite._
 import org.apache.spark.util.{Clock, ManualClock, SystemClock, Utils}
-
+/**
+ * 每次成块在 executor存储完毕后,ReceiverSupervisor 就会及时上报块数据的 meta信息给 driver端的 ReceiverTracker;
+ * 这里的 meta信息包括数据的标识 id,数据的位置,数据的条数,数据的大小等信息;
+ * ReceiverTracker 再将收到的块数据 meta信息直接转给自己的成员 ReceivedBlockTracker,
+ * 由 ReceivedBlockTracker专门管理收到的块数据 meta信息
+ * 块数据的 meta 信息上报到 ReceiverTracker,然后交给 ReceivedBlockTracker做具体的管理。
+ * ReceivedBlockTracker也采用 WAL冷备方式进行备份,在 driver 失效后,由新的 ReceivedBlockTracker读取 WAL并恢复 block的meta信息
+ */
 class ReceivedBlockTrackerSuite
   extends SparkFunSuite with BeforeAndAfter with Matchers with Logging {
 

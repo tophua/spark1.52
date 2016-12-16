@@ -44,6 +44,7 @@ object MasterFailureTest extends Logging {
 
   def main(args: Array[String]) {
     // scalastyle:off println
+    //批量大小以毫秒为单位
     if (args.size < 2) {
       println(
         "Usage: MasterFailureTest <local/HDFS directory> <# batches> " +
