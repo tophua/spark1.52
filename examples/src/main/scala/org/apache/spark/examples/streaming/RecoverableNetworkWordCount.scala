@@ -61,7 +61,17 @@ import org.apache.spark.util.IntParam
  * Refer to the online documentation for more details.
  * 参考联机文档以进行更多细节 * 
  */
-//可恢复的网络单词计数
+/**
+ * 
+ * 可恢复的网络单词计数
+ * 首先需要注意的是:累加器(Accumulators)和广播变量(Broadcast variables)是无法
+ * 从Spark Streaming的检查点中恢复回来,所以如果你开启了检查点功能,
+ * 并同时在使用累加器和广播变量,那么你最好是使用懒惰实例化的单例模式,
+ * 因为这样累加器和广播变量才能在驱动器(driver)故障恢复后重新实例化
+ * 解决问题具体参考:
+ * https://github.com/apache/spark/blob/master/examples/src/main/scala/org/apache/spark/examples/streaming/RecoverableNetworkWordCount.scala
+ * 将网络数据中的单词计数统计结果添加到一个文件中
+ */
 object RecoverableNetworkWordCount {
 
   def createContext(ip: String, port: Int, outputPath: String, checkpointDirectory: String)
@@ -71,6 +81,7 @@ object RecoverableNetworkWordCount {
     //如果你看不到这个打印,这意味着流上下文已从新的检查点加载
     // from the new checkpoint
     println("Creating new context")
+    //将网络数据中的单词计数统计结果添加到一个文件中
     val outputFile = new File(outputPath)
     if (outputFile.exists()) outputFile.delete()
     val sparkConf = new SparkConf().setAppName("RecoverableNetworkWordCount")

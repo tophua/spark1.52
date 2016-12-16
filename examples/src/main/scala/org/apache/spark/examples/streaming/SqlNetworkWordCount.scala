@@ -69,7 +69,7 @@ object SqlNetworkWordCount {
     //转换 RDD单词离散流(dstream)到DataFrame运行SQL查询RDDS
     words.foreachRDD((rdd: RDD[String], time: Time) => {
       // Get the singleton instance of SQLContext
-      //获得单例 的SQLContext
+      //获得SQLContext单例
       val sqlContext = SQLContextSingleton.getInstance(rdd.sparkContext)
       import sqlContext.implicits._
 
@@ -77,11 +77,11 @@ object SqlNetworkWordCount {
       //将RDD[String]类型转换  RDD [case class]到DataFrame,强制类型转换DataFrame
       val wordsDataFrame = rdd.map(w => Record(w)).toDF()
 
-      // Register as table 注册表
+      // Register as table 注册为临时表
       wordsDataFrame.registerTempTable("words")
 
       // Do word count on table using SQL and print it
-      //做单词计数表使用SQL和打印
+      //再用SQL语句查询,并打印出来
       val wordCountsDataFrame =
         sqlContext.sql("select word, count(*) as total from words group by word")
       println(s"========= $time =========")

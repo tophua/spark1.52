@@ -35,6 +35,8 @@ import org.apache.spark.SparkConf
  * Example:
  *    $ bin/run-example streaming.DirectKafkaWordCount broker1-host:port,broker2-host:port \
  *    topic1,topic2
+ *从Kafka Direct API接收数据,为Kafka数据源提供“精确一次”语义保证,
+ * 有了这个输入API，再加上输出算子的“精确一次”保证，你就能真正实现端到端的“精确一次”语义保证
  */
 object DirectKafkaWordCount {
   def main(args: Array[String]) {
