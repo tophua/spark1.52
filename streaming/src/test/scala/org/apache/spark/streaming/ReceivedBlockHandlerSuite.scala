@@ -203,7 +203,7 @@ class ReceivedBlockHandlerSuite
 
     // there is not enough space to store this block in MEMORY,
     //没有足够的空间来存储这个块在内存中,
-    // But BlockManager will be able to sereliaze this block to WAL
+    // But BlockManager will be able to sereliaze this block to WAL(预写式日志)
     // and hence count returns correct value.
     //但BlockManager将序列化这块到WAL,因此count返回正确的值
      testRecordcount(false, StorageLevel.MEMORY_ONLY,
@@ -303,7 +303,7 @@ class ReceivedBlockHandlerSuite
        }
       } else {
         // test received block with WAL based handler
-        //基于WAL的处理程序的测试接收块
+        //基于WAL(预写式日志)的处理程序的测试接收块
         withWriteAheadLogBasedBlockHandler { handler =>
           val (blockId, blockStoreResult) = storeSingleBlock(handler, receivedBlock)
           bId = blockId

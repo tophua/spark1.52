@@ -28,7 +28,9 @@ import org.apache.spark.streaming.util.{FileBasedWriteAheadLogSegment, FileBased
 import org.apache.spark.util.Utils
 import org.apache.spark.{SparkConf, SparkContext, SparkException, SparkFunSuite}
 /**
- * 支持提前写入块日志RDD测试套件
+ * 预写式日志支持块RDD测试套件
+ * WAL(Write-Ahead-Log):在处理数据插入和删除的过程中用来记录操作内容的一种日志
+ * WriteAheadLog BackedBlock 预写式日志支持块
  */
 class WriteAheadLogBackedBlockRDDSuite
   extends SparkFunSuite with BeforeAndAfterAll with BeforeAndAfterEach {
@@ -65,23 +67,23 @@ class WriteAheadLogBackedBlockRDDSuite
     sparkContext.stop()
     System.clearProperty("spark.driver.port")
   }
- //在两个块管理器中读取数据并写日志
+ //在两个块管理器中读取数据并预写日志
   test("Read data available in both block manager and write ahead log") {
     testRDD(numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 5)
   }
- //读取数据只在块管理器,而不是在写提前日志
+ //读取数据只在块管理器,而不是预写日志
   test("Read data available only in block manager, not in write ahead log") {
     testRDD(numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 0)
   }
- //在写前面的日志,而不是在块管理器读取数据
+ //读取数据只在预写日志,而不是在块管理器读取数据
   test("Read data available only in write ahead log, not in block manager") {
     testRDD(numPartitions = 5, numPartitionsInBM = 0, numPartitionsInWAL = 5)
   }
-  //读取部分可用的块管理器的数据,并在前面的日志中休息
+  //读取部分可用的块管理器的数据,剩余部分预写日志
   test("Read data with partially available in block manager, and rest in write ahead log") {
     testRDD(numPartitions = 5, numPartitionsInBM = 3, numPartitionsInWAL = 2)
   }
-  //试验isblockvalid跳过块的读取从blockmanager
+  //测试从blockmanager读取isblockvalid跳过无效的块
   test("Test isBlockValid skips block fetching from BlockManager") {
     testRDD(
       numPartitions = 5, numPartitionsInBM = 5, numPartitionsInWAL = 0, testIsBlockValid = true)
@@ -116,12 +118,12 @@ class WriteAheadLogBackedBlockRDDSuite
    * @param testIsBlockValid Test whether setting isBlockValid to false skips block fetching
    * 												 测试是否设置isblockvalid假跳过块的读取
    * @param testBlockRemove Test whether calling rdd.removeBlock() makes the RDD still usable with
-   *                        reads falling back to the WAL
+   *                        reads falling back to the WAL WAL(预写式日志)
    *                        测试是否调用RDD.removeblock()使得RDD还可从日志系统读回来
    * @param testStoreInBM   Test whether blocks read from log are stored back into block manager
    *												测试从日志中读取的块是否被存储到块管理器中
    * Example with numPartitions = 5, numPartitionsInBM = 3, and numPartitionsInWAL = 4
-   * numPartitions总分区数,numPartitionsInBM块写入的分区 数,numPartitionsInWAL 写入前日志分区
+   * numPartitions总分区数,numPartitionsInBM块写入的分区 数,numPartitionsInWAL WAL(预写式日志)分区
    *
    *   numPartitionsInBM = 3
    *   |------------------|
@@ -143,24 +145,40 @@ class WriteAheadLogBackedBlockRDDSuite
       "Can't put more partitions in BlockManager than that in RDD")
     require(numPartitionsInWAL <= numPartitions,
       "Can't put more partitions in write ahead log than that in RDD")
-    val data = Seq.fill(numPartitions, 10)(scala.util.Random.nextString(50))
-    data.foreach { x => println }
+    //由于出现乱码scala.util.Random.nextString(50),即改成scala.util.Random.nextInt(50).toString()
+      /**
+       *===List(41, 18, 1, 9, 8, 12, 42, 15, 12, 40)
+       *===List(13, 2, 3, 35, 37, 43, 7, 19, 24, 13)
+       *===List(6, 48, 44, 27, 5, 11, 22, 35, 28, 29)
+       *===List(44, 42, 8, 18, 8, 38, 36, 41, 49, 39)
+       *===List(15, 45, 44, 13, 15, 24, 48, 5, 3, 6)
+       */
+    val data = Seq.fill(numPartitions, 10)(scala.util.Random.nextInt(50).toString())
+    data.foreach { x =>  println("==="+x) }
     // Put the necessary blocks in the block manager
     //把必要的块放在块管理器中
+    /**
+     * Random.nextInt()产生数据时有负数 res1: Int = -1874109309
+     *===input-2137828776--551564096
+     *===input--143001680-1841074061
+     *===input--528107763-1366668151
+     *===input--1136078048--1968524650
+     *===input--684369970--1445572881
+     */
     val blockIds = Array.fill(numPartitions)(StreamBlockId(Random.nextInt(), Random.nextInt()))
-    blockIds.foreach { x => println }
+    blockIds.foreach { x => println("==="+x)}
     data.zip(blockIds).take(numPartitionsInBM).foreach { case(block, blockId) =>
       blockManager.putIterator(blockId, block.iterator, StorageLevel.MEMORY_ONLY_SER)
     }
 
     // Generate write ahead log record handles
-    //生成写入前日志记录句柄
+    //生成写入前日志记录句柄,WAL(预写式日志)
     val recordHandles = generateFakeRecordHandles(numPartitions - numPartitionsInWAL) ++
       generateWALRecordHandles(data.takeRight(numPartitionsInWAL),
         blockIds.takeRight(numPartitionsInWAL))
 
     // Make sure that the left `numPartitionsInBM` blocks are in block manager, and others are not
-    //确保左` numpartitionsinbm `块是块的管理，而不是别人
+    //确保左'numpartitionsinbm'块是块的管理,而不是别的
     require(
       blockIds.take(numPartitionsInBM).forall(blockManager.get(_).nonEmpty),
       "Expected blocks not in BlockManager"
@@ -170,16 +188,18 @@ class WriteAheadLogBackedBlockRDDSuite
       "Unexpected blocks in BlockManager"
     )
 
-    // Make sure that the right `numPartitionsInWAL` blocks are in WALs, and other are not
-    //确保正确的` numpartitionsinwal `块在预写日志系统 ,和其他不
+    // Make sure that the right 'numPartitionsInWAL' blocks are in WALs, and other are not
+    //确保正确的'numpartitionsinwal'块在预写日志系统 ,和其他不
     require(
       recordHandles.takeRight(numPartitionsInWAL).forall(s =>
         new File(s.path.stripPrefix("file://")).exists()),
+        //预期块不在预写日志
       "Expected blocks not in write ahead log"
     )
     require(
       recordHandles.take(numPartitions - numPartitionsInWAL).forall(s =>
         !new File(s.path.stripPrefix("file://")).exists()),
+        //在预写日志中的异常的块
       "Unexpected blocks in write ahead log"
     )
 
@@ -222,11 +242,12 @@ class WriteAheadLogBackedBlockRDDSuite
       assert(rdd2.collect() === data.flatten)
       assert(
         blockIds.forall(blockManager.get(_).nonEmpty),
+        //块管理器中没有找到的所有块
         "All blocks not found in block manager"
       )
     }
   }
-
+  //WAL(预写式日志)
   private def generateWALRecordHandles(
       blockData: Seq[Seq[String]],
       blockIds: Seq[BlockId]
@@ -239,7 +260,7 @@ class WriteAheadLogBackedBlockRDDSuite
     writer.close()
     segments
   }
-
+  //产生一个虚拟记录处理
   private def generateFakeRecordHandles(count: Int): Seq[FileBasedWriteAheadLogSegment] = {
     Array.fill(count)(new FileBasedWriteAheadLogSegment("random", 0L, 0))
   }

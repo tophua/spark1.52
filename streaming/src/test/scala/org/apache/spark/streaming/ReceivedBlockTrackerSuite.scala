@@ -128,7 +128,7 @@ class ReceivedBlockTrackerSuite
     }
 
     // Set WAL configuration
-    //设置WAL配置
+    //设置WAL(预写式日志)配置
     conf.set("spark.streaming.driver.writeAheadLog.rollingIntervalSecs", "1")
     require(WriteAheadLogUtils.getRollingIntervalSecs(conf, isDriver = true) === 1)
 
@@ -149,7 +149,7 @@ class ReceivedBlockTrackerSuite
     incrementTime()
 
     // Recovery without recovery from WAL and verify list of unallocated blocks is empty
-    //恢复不恢复从WAL和验证未分配的块列表是空的
+    //恢复不恢复从WAL(预写式日志)和验证未分配的块列表是空的
     val tracker1_ = createTracker(clock = manualClock, recoverFromWriteAheadLog = false)
     tracker1_.getUnallocatedBlocks(streamId) shouldBe empty
     tracker1_.hasUnallocatedReceivedBlocks should be (false)

@@ -22,7 +22,7 @@ import org.apache.spark.SparkFunSuite
 
 /** 
  *  Testsuite for testing the network receiver behavior
- *  测试网络接收行为
+ *  测试网络最大接收速率
  * */
 class RateLimiterSuite extends SparkFunSuite {
 //即使没有maxrate速率限制器初始化设置
@@ -42,6 +42,7 @@ class RateLimiterSuite extends SparkFunSuite {
   }
 
   test("rate limiter stays below maxRate despite large updates") {//速率限制器下maxrate尽最大更新
+    //即：每秒接收记录的条数
     val conf = new SparkConf().set("spark.streaming.receiver.maxRate", "100")
     val rateLimiter = new RateLimiter(conf){}
     rateLimiter.updateRate(105)

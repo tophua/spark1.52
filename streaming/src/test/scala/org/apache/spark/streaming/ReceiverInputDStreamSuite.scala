@@ -30,21 +30,32 @@ import org.apache.spark.streaming.scheduler.ReceivedBlockInfo
 import org.apache.spark.streaming.util.{WriteAheadLogRecordHandle, WriteAheadLogUtils}
 import org.apache.spark.{SparkConf, SparkEnv}
 /**
- * ReceiverInputDStream保存关于历次batch的源头数据条数,历次batch计算花费的时间,用来实时计算准确的流量控制信息
+ * ReceiverInputDStream主要负责数据的产生与导入,
+ * 它除了需要像其它 DStream那样在某个 batch里实例化 RDD以外,还需要额外的 Receiver为这个RDD生产数据!
+ * ReceiverInputDStream保存关于历次batch的源头数据条数,历次batch计算花费的时间,用来实时计算准确的流量控制信息;
+ * Spark Streaming 在程序刚开始运行时:
+ * (1)由 Receiver 的总指挥 ReceiverTracker分发多个 job(每个job有 1个 task),
+ * 		到多个executor上分别启动 ReceiverSupervisor实例
+ * (2)每个 ReceiverSupervisor启动后将马上生成一个用户提供的 Receiver实现的实例 
+ * 		该 Receiver 实现可以持续产生或者持续接收系统外数据,
+ * 		比如 TwitterReceiver可以实时爬取 twitter数据 ——并在 Receiver 实例生成后调用 Receiver.onStart()
+ * 
+ * ReceiverInputDStream在每个batch去检查 ReceiverTracker收到的块数据 meta信息,界定哪些新数据需要在本 batch内处理,
+ * 然后生成相应的 RDD实例去处理这些块数据
  */
 class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
 
   override def afterAll(): Unit = {
     StreamingContext.getActive().map { _.stop() }
   }
-//创建空的blockrdd时没有块信息
+//创建空的blockrdd时没有块信息WAL(预写式日志)
   testWithoutWAL("createBlockRDD creates empty BlockRDD when no block info") { receiverStream =>
     val rdd = receiverStream.createBlockRDD(Time(0), Seq.empty)
     assert(rdd.isInstanceOf[BlockRDD[_]])
     assert(!rdd.isInstanceOf[WriteAheadLogBackedBlockRDD[_]])
     assert(rdd.isEmpty())
   }
-//创建块的信息正确blockrdd
+//创建块的信息正确blockrdd WAL(预写式日志)
   testWithoutWAL("createBlockRDD creates correct BlockRDD with block info") { receiverStream =>
     val blockInfos = Seq.fill(5) { createBlockInfo(withWALInfo = false) }
     val blockIds = blockInfos.map(_.blockId)
@@ -59,7 +70,7 @@ class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
     val blockRDD = rdd.asInstanceOf[BlockRDD[_]]
     assert(blockRDD.blockIds.toSeq === blockIds)
   }
-//创建blockrdd块滤波不存在
+//创建blockrdd块滤波不存在WAL(预写式日志)
   testWithoutWAL("createBlockRDD filters non-existent blocks before creating BlockRDD") {
     receiverStream =>
       val presentBlockInfos = Seq.fill(2)(createBlockInfo(withWALInfo = false, createBlock = true))
@@ -77,14 +88,14 @@ class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
       val blockRDD = rdd.asInstanceOf[BlockRDD[_]]
       assert(blockRDD.blockIds.toSeq === presentBlockInfos.map { _.blockId})
   }
-//创建空的WALBackedBlockRDD没有块信息
+//创建空的WALBackedBlockRDD没有块信息 WAL(预写式日志)
   testWithWAL("createBlockRDD creates empty WALBackedBlockRDD when no block info") {
     receiverStream =>
       val rdd = receiverStream.createBlockRDD(Time(0), Seq.empty)
       assert(rdd.isInstanceOf[WriteAheadLogBackedBlockRDD[_]])
       assert(rdd.isEmpty())
   }
-
+//WAL(预写式日志)
   testWithWAL(
     "createBlockRDD creates correct WALBackedBlockRDD with all block info having WAL info") {
     receiverStream =>
@@ -96,7 +107,7 @@ class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
       assert(blockRDD.blockIds.toSeq === blockIds)
       assert(blockRDD.walRecordHandles.toSeq === blockInfos.map { _.walRecordHandleOption.get })
   }
-//创建blockrdd当某块信息没有WAL信息
+//创建blockrdd当某块信息没有WAL信息 WAL(预写式日志)
   testWithWAL("createBlockRDD creates BlockRDD when some block info dont have WAL info") {
     receiverStream =>
       val blockInfos1 = Seq.fill(2) { createBlockInfo(withWALInfo = true) }
@@ -109,19 +120,20 @@ class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
       assert(blockRDD.blockIds.toSeq === blockIds)
   }
 
-
+  //没有启用WAL(预写式日志)
   private def testWithoutWAL(msg: String)(body: ReceiverInputDStream[_] => Unit): Unit = {
+    
     test(s"Without WAL enabled: $msg") {
       runTest(enableWAL = false, body)
     }
   }
-
+//WAL(预写式日志)
   private def testWithWAL(msg: String)(body: ReceiverInputDStream[_] => Unit): Unit = {
     test(s"With WAL enabled: $msg") {
       runTest(enableWAL = true, body)
     }
   }
-
+//WAL(预写式日志)
   private def runTest(enableWAL: Boolean, body: ReceiverInputDStream[_] => Unit): Unit = {
     val conf = new SparkConf()
     conf.setMaster("local[4]").setAppName("ReceiverInputDStreamSuite")
@@ -139,7 +151,7 @@ class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
   /**
    * Create a block info for input to the ReceiverInputDStream.createBlockRDD
    * 创建一个用于输入到createBlockRDD块信息
-   * @param withWALInfo Create block with WAL info in it
+   * @param withWALInfo Create block with  WAL(预写式日志) info in it
    * @param createBlock Actually create the block in the BlockManager
    * @return
    */

@@ -30,7 +30,10 @@ import org.apache.spark.streaming.util.{WriteAheadLogRecordHandle, WriteAheadLog
 import org.apache.spark.util.{Clock, SystemClock, ThreadUtils}
 import org.apache.spark.{Logging, SparkConf, SparkException}
 
-/** Trait that represents the metadata related to storage of blocks */
+/** 
+ *  Trait that represents the metadata related to storage of blocks
+ *  表示与存储块相关的元数据
+ *   */
 private[streaming] trait ReceivedBlockStoreResult {
   // Any implementation of this trait will store a block id
   //任何实现将存储一个块标识
@@ -40,7 +43,10 @@ private[streaming] trait ReceivedBlockStoreResult {
   def numRecords: Option[Long]
 }
 
-/** Trait that represents a class that handles the storage of blocks received by receiver */
+/** 
+ *  Trait that represents a class that handles the storage of blocks received by receiver
+ *  表示处理接收到的块存储的类
+ *   */
 private[streaming] trait ReceivedBlockHandler {
 
   /** 
@@ -60,6 +66,7 @@ private[streaming] trait ReceivedBlockHandler {
 /**
  * Implementation of [[org.apache.spark.streaming.receiver.ReceivedBlockStoreResult]]
  * that stores the metadata related to storage of blocks using
+ * 存储与存储块相关的元数据.
  * [[org.apache.spark.streaming.receiver.BlockManagerBasedBlockHandler]]
  */
 private[streaming] case class BlockManagerBasedStoreResult(
@@ -70,6 +77,7 @@ private[streaming] case class BlockManagerBasedStoreResult(
 /**
  * Implementation of a [[org.apache.spark.streaming.receiver.ReceivedBlockHandler]] which
  * stores the received blocks into a block manager with the specified storage level.
+ * 将接收到的块存储到块管理器中指定存储级别(内存或硬盘)
  */
 private[streaming] class BlockManagerBasedBlockHandler(
     blockManager: BlockManager, storageLevel: StorageLevel)
@@ -126,7 +134,7 @@ private[streaming] case class WriteAheadLogBasedStoreResult(
 /**
  * Implementation of a [[org.apache.spark.streaming.receiver.ReceivedBlockHandler]] which
  * stores the received blocks in both, a write ahead log and a block manager.
- * 将接收的块存储在两个,一个写前面的日志和一个块管理器
+ * 将接收的块存储在一个写WriteAheadLogBasedBlockHandler和 executor的内存或硬盘
  */
 private[streaming] class WriteAheadLogBasedBlockHandler(
     blockManager: BlockManager,
@@ -238,6 +246,7 @@ private[streaming] object WriteAheadLogBasedBlockHandler {
 
 /**
  * A utility that will wrap the Iterator to get the count
+ * 一个实用工具,将封装迭代器得到计数
  */
 private[streaming] class CountingIterator[T](iterator: Iterator[T]) extends Iterator[T] {
    private var _count = 0

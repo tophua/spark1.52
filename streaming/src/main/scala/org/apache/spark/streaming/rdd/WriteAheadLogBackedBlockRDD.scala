@@ -40,6 +40,8 @@ import org.apache.spark.util.SerializableConfiguration
  *                         executors). If not, then block lookups by the block ids will be skipped.
  *                         By default, this is an empty array signifying true for all the blocks.
  * @param walRecordHandle Handle of the record in a write ahead log having the partition data
+ * WAL(Write-Ahead-Log):在处理数据插入和删除的过程中用来记录操作内容的一种日志
+ * WriteAheadLog BackedBlock 预写式日志支持块
  */
 private[streaming]
 class WriteAheadLogBackedBlockRDDPartition(

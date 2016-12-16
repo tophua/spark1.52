@@ -36,8 +36,12 @@ import org.apache.spark.streaming.receiver.WriteAheadLogBasedBlockHandler._
 import org.apache.spark.util.Utils
 
 /** 
- *  用于测试网络接收行为集
+ *  用于测试网络接收行为
  *  Testsuite for testing the network receiver behavior 
+ *  
+ *  Receiver在 onStart()启动后,就将持续不断地接收外界数据,并持续交给 ReceiverSupervisor进行数据转储;
+ *  
+ *  
  *  */
 class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 
@@ -211,8 +215,8 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
    * and automatically cleaned up. The clean up must be aware of the
    * remember duration of the input streams. E.g., input streams on which window()
    * has been applied must remember the data for longer, and hence corresponding
-   * WALs should be cleaned later.
-   * 清理必须知道输入流的记住持续时间
+   * WALs should be cleaned later. 
+   * 清理必须知道输入流的记住持续时间, write ahead log(预写式日志)
    */
   test("write ahead log - generating and cleaning") {
     val sparkConf = new SparkConf()
@@ -263,7 +267,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 
       // Run until sufficient WAL files have been generated and
       // the first WAL files has been deleted
-      //运行直到有足够的WAL文件生成和第一个WAL文件已被删除
+      //运行直到有足够的WAL(预写式日志)文件生成和第一个WAL文件已被删除
       eventually(timeout(20 seconds), interval(batchDuration.milliseconds millis)) {
         val (logFiles1, logFiles2) = getBothCurrentLogFiles()
         allLogFiles1 ++= logFiles1
@@ -304,6 +308,15 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
    * that can used for verifying that the data has been forwarded correctly.
    * ReceiverSupervisor 接收监听
    * 所有数据存储在一个本地缓冲区中,该数据用于验证数据是否已正确转发
+   * Receiver在 onStart()启动后,就将持续不断地接收外界数据,并持续交给 ReceiverSupervisor进行数据转储
+   * ReceiverSupervisor 持续不断地接收到 Receiver转来的数据:
+   * 	1,如果数据很细小,就需要 BlockGenerator攒多条数据成一块BlockGenerator,
+   * 	然后再成块存储(BlockManagerBasedBlockHandler或WriteAheadLogBasedBlockHandler)
+   *  2,反之就不用攒,直接成块存储(BlockManagerBasedBlockHandler或WriteAheadLogBasedBlockHandler)
+   *  3,目前支持两种成块存储方式一种是由 blockManagerskManagerBasedBlockHandler直接存到executor的内存或硬盘
+   *  	另一种由 WriteAheadLogBasedBlockHandler是同时写 WAL(预写式日志)和 executor的内存或硬盘(blockManagerskManagerBasedBlockHandler)
+   * (5)每次成块在 executor存储完毕后,ReceiverSupervisor就会及时上报块数据的 meta信息给 driver端的 ReceiverTracker;
+   * 		这里的 meta信息包括数据的标识 id,数据的位置,数据的条数,数据的大小等信息;
    */
   class FakeReceiverSupervisor(receiver: FakeReceiver)
     extends ReceiverSupervisor(receiver, new SparkConf()) {

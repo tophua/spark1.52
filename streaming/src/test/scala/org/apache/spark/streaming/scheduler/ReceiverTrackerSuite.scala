@@ -45,14 +45,11 @@ import org.apache.spark.streaming.receiver._
  * 			然后再生成块存储BlockManagerBasedBlockHandler或者WriteAheadLogBasedBlockHandler
  * 			
  * 		2,Spark目前支持两种生成块存储方式:一种是由blockManagerBaseHandler直接存到executor的内存或者硬盘
- *       另一种由WriteAheadLogBasedBlockHander是同时写WAL和executor的内存或硬盘
- * 5,每次生成块在executor存储完毕后,ReceiverSupervisor就会及时上报块数据的meta信息给Driver端的ReceiverTracker
- * 	 这里的meta信息包括数据的标识ID,数据的位置,数据的条数,数据的大小等信息
+ *       另一种由WriteAheadLogBasedBlockHander是同时写WAL(预写式日志)和executor的内存或硬盘
+ * 5,每次生成块在executor存储完毕后,ReceiverSupervisor就会及时上报块数据的meta信息给Driver端的
+ *    ReceiverTracker这里的meta信息包括数据的标识ID,数据的位置,数据的条数,数据的大小等信息
  * 6,ReceiverTracker再将收到的块数据meta信息直接转给自己的成员ReceivedBlockTracker,由ReceivedBlockTracker专门
- *   管理收到的数据meta信息.
- * 
- * 
- * 
+ *   管理收到的数据meta信息.   
  **/
 
 class ReceiverTrackerSuite extends TestSuiteBase {

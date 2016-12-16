@@ -33,7 +33,7 @@ import org.scalatest.BeforeAndAfter
 import org.apache.spark.util.{ManualClock, Utils}
 import org.apache.spark.{SparkConf, SparkException, SparkFunSuite}
 /**
- * 提前写日志测试套件
+ * WriteAheadLog WAL(预写式日志)测试套件
  * WAL先写入磁盘然后写入Executor中，失败可能性不大
  */
 class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
@@ -79,25 +79,25 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
     assertDriverLogClass[FileBasedWriteAheadLog](emptyConf)
     assertReceiverLogClass[FileBasedWriteAheadLog](emptyConf)
 
-    // Verify setting driver WAL class 验证设置驱动程序
+    // Verify setting driver WAL(预写式日志) class 验证设置驱动程序
     val conf1 = new SparkConf().set("spark.streaming.driver.writeAheadLog.class",
       classOf[MockWriteAheadLog0].getName())
     assertDriverLogClass[MockWriteAheadLog0](conf1)
     assertReceiverLogClass[FileBasedWriteAheadLog](conf1)
 
-    // Verify setting receiver WAL class 验证设置接收器
+    // Verify setting receiver WAL(预写式日志) class 验证设置接收器
     val receiverWALConf = new SparkConf().set("spark.streaming.receiver.writeAheadLog.class",
       classOf[MockWriteAheadLog0].getName())
     assertDriverLogClass[FileBasedWriteAheadLog](receiverWALConf)
     assertReceiverLogClass[MockWriteAheadLog0](receiverWALConf)
 
-    // Verify setting receiver WAL class with 1-arg constructor
+    // Verify setting receiver WAL(预写式日志) class with 1-arg constructor
     // 验证设置接收writeAheadLog类型1个参数
     val receiverWALConf2 = new SparkConf().set("spark.streaming.receiver.writeAheadLog.class",
       classOf[MockWriteAheadLog1].getName())
     assertReceiverLogClass[MockWriteAheadLog1](receiverWALConf2)
 
-    // Verify failure setting receiver WAL class with 2-arg constructor
+    // Verify failure setting receiver WAL(预写式日志) class with 2-arg constructor
     intercept[SparkException] {
       val receiverWALConf3 = new SparkConf().set("spark.streaming.receiver.writeAheadLog.class",
         classOf[MockWriteAheadLog2].getName())
@@ -105,7 +105,7 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
     }
   }
 
-  test("FileBasedWriteAheadLogWriter - writing data") {//写数据
+  test("FileBasedWriteAheadLogWriter - writing data") {//WriteAheadLog(预写式日志)
     val dataToWrite = generateRandomData()
     val segments = writeDataUsingWriter(testFile, dataToWrite)
     val writtenData = readDataManually(segments)
