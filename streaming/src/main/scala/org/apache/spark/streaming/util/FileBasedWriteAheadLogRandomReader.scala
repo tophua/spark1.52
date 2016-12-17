@@ -33,15 +33,21 @@ private[streaming] class FileBasedWriteAheadLogRandomReader(path: String, conf: 
 
   private val instream = HdfsUtils.getInputStream(path, conf)
   private var closed = false
-
+  /**
+   * 即给定一个log句柄,返回一条具体的 log
+   */
   def read(segment: FileBasedWriteAheadLogSegment): ByteBuffer = synchronized {
     assertOpen()
+     //seek 到这条 log所在的 offset
     instream.seek(segment.offset)
+    //读一下length
     val nextLength = instream.readInt()
     HdfsUtils.checkState(nextLength == segment.length,
       s"Expected message length to be ${segment.length}, but was $nextLength")
     val buffer = new Array[Byte](nextLength)
+     //读一下具体的内容
     instream.readFully(buffer)
+     //以 ByteBuffer 的形式,返回具体的内容
     ByteBuffer.wrap(buffer)
   }
 

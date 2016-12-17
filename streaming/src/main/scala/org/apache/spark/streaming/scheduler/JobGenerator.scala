@@ -65,8 +65,9 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
   private val timer = new RecurringTimer(clock, ssc.graph.batchDuration.milliseconds,
     longTime => eventLoop.post(GenerateJobs(new Time(longTime))), "JobGenerator")
 
-  // This is marked lazy so that this is initialized after checkpoint duration has been set
+  // This is marked lazy so that this is initialized after checkpoint duration has been set  
   // in the context and the generator has been started.
+  //这是延迟加载,所以这是初始化后检查点的持续时间已被设置在上下文和生成器已启动
   private lazy val shouldCheckpoint = ssc.checkpointDuration != null && ssc.checkpointDir != null
 
   private lazy val checkpointWriter = if (shouldCheckpoint) {
@@ -90,9 +91,11 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
    *  开始运行Job 
    *  */
   def start(): Unit = synchronized {
+    //判断是否已经启动
     if (eventLoop != null) return // generator has already been started
 
     // Call checkpointWriter here to initialize it before eventLoop uses it to avoid a deadlock.
+    //调用checkpointwriter来初始化之前eventloop,使用它来避免死锁
     // See SPARK-10125
     checkpointWriter
 
@@ -270,14 +273,22 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     logInfo("Restarted JobGenerator at " + restartTime)
   }
 
-  /** Generate jobs and perform checkpoint for the given `time`.  */
+  /** 
+   *  Generate jobs and perform checkpoint for the given `time`.  
+   *  为给定的时间生成作业和执行检查点
+   *  */
   private def generateJobs(time: Time) {
     // Set the SparkEnv in this thread, so that job generation code can access the environment
+    //设置sparkenv在这个线程,因此,作业生成代码可以访问环境
     // Example: BlockRDDs are created in this thread, and it needs to access BlockManager
+    // 例如:blockrdds在这个线程创建的,它需要访问blockmanager
     // Update: This is probably redundant after threadlocal stuff in SparkEnv has been removed.
+    //
     SparkEnv.set(ssc.env)
     Try {
+      //分配接收到的块到批处理
       jobScheduler.receiverTracker.allocateBlocksToBatch(time) // allocate received blocks to batch
+      //使用分配的块生成作业
       graph.generateJobs(time) // generate jobs using allocated block
     } match {
       case Success(jobs) =>
@@ -289,18 +300,26 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     eventLoop.post(DoCheckpoint(time, clearCheckpointDataLater = false))
   }
 
-  /** Clear DStream metadata for the given `time`. */
+  /** 
+   *  Clear DStream metadata for the given `time`.
+   *  给定时间清理dstream检查点数据  
+   *  */
   private def clearMetadata(time: Time) {
     ssc.graph.clearMetadata(time)
 
     // If checkpointing is enabled, then checkpoint,
+    //如果检查点已启用,然后调用checkpoint
     // else mark batch to be fully processed
+    //其他标记批处理完全处理
     if (shouldCheckpoint) {
       eventLoop.post(DoCheckpoint(time, clearCheckpointDataLater = true))
     } else {
       // If checkpointing is not enabled, then delete metadata information about
+      //如果检查点未启用,然后删除接收到的块的元数据信息(没有保存在任何情况下的块数据)
       // received blocks (block data not saved in any case). Otherwise, wait for
       // checkpointing of this batch to complete.
+      //否则,这批等待检查点完成
+      
       val maxRememberDuration = graph.getMaxInputStreamRememberDuration()
       jobScheduler.receiverTracker.cleanupOldBlocksAndBatches(time - maxRememberDuration)
       jobScheduler.inputInfoTracker.cleanup(time - maxRememberDuration)
@@ -308,11 +327,15 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     }
   }
 
-  /** Clear DStream checkpoint data for the given `time`. */
+  /** 
+   *  Clear DStream checkpoint data for the given `time`.
+   *  给定时间清理dstream检查点数据 
+   *  */
   private def clearCheckpointData(time: Time) {
     ssc.graph.clearCheckpointData(time)
 
     // All the checkpoint information about which batches have been processed, etc have
+    //已处理的批处理的所有检查点信息.等已保存到检查点,因此,它的安全删除块元数据和数据
     // been saved to checkpoints, so its safe to delete block metadata and data WAL files
     val maxRememberDuration = graph.getMaxInputStreamRememberDuration()
     jobScheduler.receiverTracker.cleanupOldBlocksAndBatches(time - maxRememberDuration)
@@ -320,7 +343,10 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     markBatchFullyProcessed(time)
   }
 
-  /** Perform checkpoint for the give `time`. */
+  /**
+   *  Perform checkpoint for the give `time`. 
+   *  Checkpoint发起的间隔默认的是和 batchDuration一致,即每次 batch 发起、提交了需要运行的job后就做 Checkpoint
+   *  */
   private def doCheckpoint(time: Time, clearCheckpointDataLater: Boolean) {
     if (shouldCheckpoint && (time - graph.zeroTime).isMultipleOf(ssc.checkpointDuration)) {
       logInfo("Checkpointing graph for time " + time)

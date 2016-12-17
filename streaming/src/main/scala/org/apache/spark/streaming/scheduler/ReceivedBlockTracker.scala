@@ -95,7 +95,9 @@ private[streaming] class ReceivedBlockTracker(
    *   */
   def addBlock(receivedBlockInfo: ReceivedBlockInfo): Boolean = synchronized {
     try {
+      //在收到了Receiver 报上来的 meta 信息后,先通过 writeToLog()写到 WAL
       writeToLog(BlockAdditionEvent(receivedBlockInfo))
+      //再将 meta信息索引起来
       getReceivedBlockQueue(receivedBlockInfo.streamId) += receivedBlockInfo
       logDebug(s"Stream ${receivedBlockInfo.streamId} received " +
         s"block ${receivedBlockInfo.blockStoreResult.blockId}")
@@ -118,7 +120,9 @@ private[streaming] class ReceivedBlockTracker(
           (streamId, getReceivedBlockQueue(streamId).dequeueAll(x => true))
       }.toMap
       val allocatedBlocks = AllocatedBlocks(streamIdToBlocks)
+      //在收到 JobGenerator的为最新的 batch划分 meta信息的要求后,先通过 writeToLog()写到 WAL
       writeToLog(BatchAllocationEvent(batchTime, allocatedBlocks))
+      //再将 meta信息划分到最新的 batch里
       timeToAllocatedBlocks(batchTime) = allocatedBlocks
       lastAllocatedBatchTime = batchTime
       allocatedBlocks
@@ -181,8 +185,11 @@ private[streaming] class ReceivedBlockTracker(
     require(cleanupThreshTime.milliseconds < clock.getTimeMillis())
     val timesToCleanup = timeToAllocatedBlocks.keys.filter { _ < cleanupThreshTime }.toSeq
     logInfo("Deleting batches " + timesToCleanup)
+    //在收到了JobGenerator的清除过时的 meta信息要求后先通过 writeToLog()写到 WAL
     writeToLog(BatchCleanupEvent(timesToCleanup))
+    //再将过时的 meta 信息清理掉
     timeToAllocatedBlocks --= timesToCleanup
+    //再将 WAL里过时的 meta信息对应的 log清理掉
     writeAheadLogOption.foreach(_.clean(cleanupThreshTime.milliseconds, waitForCompletion))
   }
 

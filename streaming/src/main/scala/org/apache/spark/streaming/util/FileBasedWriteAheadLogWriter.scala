@@ -26,7 +26,8 @@ import org.apache.hadoop.fs.FSDataOutputStream
 
 /**
  * A writer for writing byte-buffers to a write ahead log file.
- * 提前写入日志文件的字节缓冲
+ * 一个预写式日志文件的字节缓冲
+ * 就是给定一个文件、给定一个块数据,将数据写到文件里面去
  */
 private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: Configuration)
   extends Closeable {
@@ -37,6 +38,7 @@ private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: 
     // Use reflection to get the right flush operation
     //使用反射得到正确的刷新操作
     val cls = classOf[FSDataOutputStream]
+    //在具体的写 HDFS数据块的时候,需要判断一下具体用的方法,优先使用 hflush(),没有的话就使用 sync()
     Try(cls.getMethod("hflush")).orElse(Try(cls.getMethod("sync"))).toOption
   }
 
@@ -52,6 +54,7 @@ private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: 
     //确保缓冲区中的所有数据检索
     data.rewind() // Rewind to ensure all data in the buffer is retrieved
     val lengthToWrite = data.remaining()
+    //数据写到文件完成后,记录一下文件 path、offset 和 length,封装为一个 FileBasedWriteAheadLogSegment返回
     val segment = new FileBasedWriteAheadLogSegment(path, nextOffset, lengthToWrite)
     stream.writeInt(lengthToWrite)
     if (data.hasArray) {
@@ -69,6 +72,7 @@ private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: 
     }
     flush()
     nextOffset = stream.getPos()
+    //数据写到文件完成后,记录一下文件 path、offset 和 length,封装为一个 FileBasedWriteAheadLogSegment返回
     segment
   }
 

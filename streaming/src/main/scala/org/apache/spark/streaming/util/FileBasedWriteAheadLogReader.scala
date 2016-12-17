@@ -24,9 +24,12 @@ import org.apache.spark.Logging
 
 /**
  * A reader for reading write ahead log files written using
+ * 使用FileBasedWriteAheadLogWriter读取预写日志文件
  * [[org.apache.spark.streaming.util.FileBasedWriteAheadLogWriter]]. This reads
  * the records (bytebuffers) in the log file sequentially and return them as an
  * iterator of bytebuffers.
+ * 这种读取记录(ByteBuffers)在日志文件中的顺序迭代器返回迭代遍历所有log
+ * 
  */
 private[streaming] class FileBasedWriteAheadLogReader(path: String, conf: Configuration)
   extends Iterator[ByteBuffer] with Closeable with Logging {
@@ -37,13 +40,15 @@ private[streaming] class FileBasedWriteAheadLogReader(path: String, conf: Config
 
   override def hasNext: Boolean = synchronized {
     if (closed) {
+       //如果已关闭,就肯定不hasNext了
       return false
     }
-
+  
     if (nextItem.isDefined) { // handle the case where hasNext is called without calling next
       true
     } else {
       try {
+         //读出来下一条,如果有,就说明还确实 hasNext
         val length = instream.readInt()
         val buffer = new Array[Byte](length)
         instream.readFully(buffer)
@@ -69,6 +74,7 @@ private[streaming] class FileBasedWriteAheadLogReader(path: String, conf: Config
       throw new IllegalStateException(
         "next called without calling hasNext or after hasNext returned false")
     }
+    //确保下一个调用hasNext加载新的数据
     nextItem = None // Ensure the next hasNext call loads new data.
     data
   }

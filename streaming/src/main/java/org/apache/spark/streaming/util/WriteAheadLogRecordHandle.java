@@ -24,7 +24,8 @@ package org.apache.spark.streaming.util;
  * {@link org.apache.spark.streaming.util.WriteAheadLog WriteAheadLog}.
  * It must contain all the information necessary for the record to be read and returned by
  * an implemenation of the WriteAheadLog class.
- *
+ * 它必须包含所有信息的记录被读取并通过的writeaheadlog类实现返回的必要
+ * WriteAheadLog是多条log的集合,每条具体的 log的引用就是一个 LogRecordHandle
  * @see org.apache.spark.streaming.util.WriteAheadLog
  */
 @org.apache.spark.annotation.DeveloperApi

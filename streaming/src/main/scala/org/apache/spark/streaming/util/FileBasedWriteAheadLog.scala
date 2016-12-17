@@ -31,24 +31,27 @@ import org.apache.spark.{Logging, SparkConf}
 
 /**
  * This class manages write ahead log files.
- * 这个类管理写前面的日志文件
+ * 这个类管理预写式的日志文件
  * - Writes records (bytebuffers) to periodically rotating log files.
  * - 写记录（ByteBuffers:）定期旋转日志文件
  * - Recovers the log files and the reads the recovered records upon failures.
  * -恢复故障时的日志文件和读取恢复记录
  * - Cleans up old log files.
  * -清理旧的日志文件
- *
+ * 基于WriteAheadLog文件的具体实现是 FileBasedWriteAheadLog
  * Uses [[org.apache.spark.streaming.util.FileBasedWriteAheadLogWriter]] to write
  * and [[org.apache.spark.streaming.util.FileBasedWriteAheadLogReader]] to read.
- *
+ * 
  * @param logDirectory Directory when rotating log files will be created.
  * @param hadoopConf Hadoop configuration for reading/writing log files.
  */
 private[streaming] class FileBasedWriteAheadLog(
-    conf: SparkConf,
+    conf: SparkConf, //
+    //WAL 存放的目录
     logDirectory: String,
     hadoopConf: Configuration,
+    //FileBasedWriteAheadLog 的实现把 log写到一个文件里(一般是 HDFS 等可靠存储上的文件),
+    //然后每隔一段时间就关闭已有文件,产生一些新文件继续写,也就是 rolling 写的方式
     rollingIntervalSecs: Int,
     maxFailures: Int
   ) extends WriteAheadLog with Logging {
@@ -64,6 +67,8 @@ private[streaming] class FileBasedWriteAheadLog(
   override protected val logName = s"WriteAheadLogManager $callerNameTag"
 
   private var currentLogPath: Option[String] = None
+  //一个 LogWriter对应一个 log file,而且 log文件本身是 rolling的,那么前一个log文件写完成后,
+  //对应的 writer就可以 close()了,而由新的 writer 负责写新的文件
   private var currentLogWriter: FileBasedWriteAheadLogWriter = null
   private var currentLogWriterStartTime: Long = -1L
   private var currentLogWriterStopTime: Long = -1L
@@ -101,7 +106,9 @@ private[streaming] class FileBasedWriteAheadLog(
     fileSegment
   }
 
+
   def read(segment: WriteAheadLogRecordHandle): ByteBuffer = {
+    //segment里包含了具体的 log file和 offset,就可以直接 seek到这条 log读出数据并返回
     val fileSegment = segment.asInstanceOf[FileBasedWriteAheadLogSegment]
     var reader: FileBasedWriteAheadLogRandomReader = null
     var byteBuffer: ByteBuffer = null

@@ -48,6 +48,7 @@ class Checkpoint(@transient ssc: StreamingContext, val checkpointTime: Time)
 
     // Reload properties for the checkpoint application since user wants to set a reload property
     // or spark had changed its value and user wants to set it back.
+    //对于检查点应用程序,因为用户希望设置重载属性,或Spark改变想使用的属性值
     val propertiesToReload = List(
       "spark.yarn.app.id",
       "spark.yarn.app.attemptId",
@@ -101,7 +102,7 @@ object Checkpoint extends Logging {
 
   /** 
    *  Get checkpoint files present in the give directory, ordered by oldest-first 
-   *  获取给目录中的检查点文件
+   *  获取给目录中的检查点文件,排序旧的第一个
    *  */
   def getCheckpointFiles(checkpointDir: String, fsOption: Option[FileSystem] = None): Seq[Path] = {
 
@@ -131,7 +132,7 @@ object Checkpoint extends Logging {
 
   /** 
    *  Serialize the checkpoint, or throw any exception that occurs 
-   *  序列化的检查站，或将出现的任何异常
+   *  序列化的检查点,或将出现的任何异常
    *  */
   def serialize(checkpoint: Checkpoint, conf: SparkConf): Array[Byte] = {
     val compressionCodec = CompressionCodec.createCodec(conf)
@@ -148,7 +149,7 @@ object Checkpoint extends Logging {
 
   /** 
    *  Deserialize a checkpoint from the input stream, or throw any exception that occurs
-   *  反序列化一个检查站从输入流,或把所出现的任何异常
+   *  从一个输入流的反序列化一个检查点,或抛出任何异常
    *   */
   def deserialize(inputStream: InputStream, conf: SparkConf): Checkpoint = {
     val compressionCodec = CompressionCodec.createCodec(conf)
@@ -157,9 +158,12 @@ object Checkpoint extends Logging {
 
       // ObjectInputStream uses the last defined user-defined class loader in the stack
       // to find classes, which maybe the wrong class loader. Hence, a inherited version
+      // 对象输入流使用堆栈中的最后定义自定义类查找类加载器,这可能是错误的类装载器
       // of ObjectInputStream is used to explicitly use the current thread's default class
       // loader to find and load classes. This is a well know Java issue and has popped up
+      //一个继承对象输入流用于显式地使用当前线程的默认类查找加载器
       // in other places (e.g., http://jira.codehaus.org/browse/GROOVY-1627)
+      //这是一个众所周知的java的问题,已经出现在其他地方
       val zis = compressionCodec.compressedInputStream(inputStream)
       ois = new ObjectInputStreamWithLoader(zis,
         Thread.currentThread().getContextClassLoader)

@@ -16,6 +16,13 @@
  */
 package org.apache.spark.streaming.util
 
-/** Class for representing a segment of data in a write ahead log file */
+/** 
+ *  Class for representing a segment of data in a write ahead log file 
+ *  用于在预写式日志文件中代表数据段的类
+ *  path:给定文件
+ *  offset:偏移
+ *  length:长度
+ *  就可以唯一确定一条log
+ *  */
 private[streaming] case class FileBasedWriteAheadLogSegment(path: String, offset: Long, length: Int)
   extends WriteAheadLogRecordHandle
