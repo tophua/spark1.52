@@ -62,7 +62,7 @@ class WriteAheadLogBackedBlockRDDSuite
   }
 
   override def afterAll(): Unit = {
-    //将测试依赖项引入核心测试更为简单
+    //复制LocalSparkContext,将测试依赖项引入核心测试更为简单
     // Copied from LocalSparkContext, simpler than to introduced test dependencies to core tests.
     sparkContext.stop()
     System.clearProperty("spark.driver.port")
@@ -109,10 +109,11 @@ class WriteAheadLogBackedBlockRDDSuite
    *
    * @param numPartitions Number of partitions in RDD 在RDD分区数
    * @param numPartitionsInBM Number of partitions to write to the BlockManager.
-   * 												    块写的分区数
+   * 												    块写的分区数,分区0到(numpartitionsinbm-1)将被写入块管理器中
    *                          Partitions 0 to (numPartitionsInBM-1) will be written to BlockManager
    * @param numPartitionsInWAL Number of partitions to write to the Write Ahead Log.
-   * 													写入前写入日志的分区数
+   * 													  写入前写入日志的分区数,分区数(分区数-1-numPartitionsInWAL)到(numPartitions - 1)
+   * 													 将写到预写日志
    *                           Partitions (numPartitions - 1 - numPartitionsInWAL) to
    *                           (numPartitions - 1) will be written to WAL
    * @param testIsBlockValid Test whether setting isBlockValid to false skips block fetching
@@ -153,10 +154,9 @@ class WriteAheadLogBackedBlockRDDSuite
        *===List(44, 42, 8, 18, 8, 38, 36, 41, 49, 39)
        *===List(15, 45, 44, 13, 15, 24, 48, 5, 3, 6)
        */
-    val data = Seq.fill(numPartitions, 10)(scala.util.Random.nextInt(50).toString())
+    val data = Seq.fill(numPartitions, 10)("\""+scala.util.Random.nextInt(50).toString()+"\"")
     data.foreach { x =>  println("==="+x) }
-    // Put the necessary blocks in the block manager
-    //把必要的块放在块管理器中
+    
     /**
      * Random.nextInt()产生数据时有负数 res1: Int = -1874109309
      *===input-2137828776--551564096
@@ -167,29 +167,54 @@ class WriteAheadLogBackedBlockRDDSuite
      */
     val blockIds = Array.fill(numPartitions)(StreamBlockId(Random.nextInt(), Random.nextInt()))
     blockIds.foreach { x => println("==="+x)}
+    /**
+     * res2 = List(
+     * (List(0, 20, 0, 0, 48, 5, 0, 48, 28, 24),input-300100004-1533713222), 
+     * (List(31, 36, 1, 37, 33, 47, 36, 38, 38, 31),input-432502173--1035939876), 
+     * (List(22, 46, 45, 17, 49, 16, 33, 30, 2, 35),input--646589726--26132234), 
+     * (List(45, 10, 14, 8, 17, 4, 28, 11, 45, 27),input--1836656533--1370908660), 
+     * (List(45, 34, 26, 40, 20, 37, 22, 18, 12, 32),input-1454315495-1814109189))
+     */
     data.zip(blockIds).take(numPartitionsInBM).foreach { case(block, blockId) =>
+     // Put the necessary blocks in the block manager
+     //把必要的块存放到块管理器中
+      println("["+blockId+"]\t["+block.mkString(",")+"]")
       blockManager.putIterator(blockId, block.iterator, StorageLevel.MEMORY_ONLY_SER)
     }
 
-    // Generate write ahead log record handles
-    //生成写入前日志记录句柄,WAL(预写式日志)
-    val recordHandles = generateFakeRecordHandles(numPartitions - numPartitionsInWAL) ++
-      generateWALRecordHandles(data.takeRight(numPartitionsInWAL),
-        blockIds.takeRight(numPartitionsInWAL))
+    //产生虚拟的记录
+    val fakeRecordHandles=generateFakeRecordHandles(numPartitions - numPartitionsInWAL)
+    //takeRight 返回最后n个元素
+    val blockData=data.takeRight(numPartitionsInWAL)
+    //takeRight 返回最后n个元素
+    val blckIds=blockIds.takeRight(numPartitionsInWAL)
+     // Generate write ahead log record handles
+    //生成预写式日志记录句柄,WAL(预写式日志)
+    val WALRecordHandles=generateWALRecordHandles(blockData,blckIds)
+    /**ArrayBuffer(
+     * 	FileBasedWriteAheadLogSegment(C:\logFile,0,74), 
+     *  FileBasedWriteAheadLogSegment(C:\logFile,78,71), 
+     *  FileBasedWriteAheadLogSegment(C:\logFile,153,74), 
+     *  FileBasedWriteAheadLogSegment(C:\logFile,231,72), 
+     *  FileBasedWriteAheadLogSegment(C:\logFile,307,72))
+     */
+    val recordHandles = fakeRecordHandles ++WALRecordHandles
+        
 
     // Make sure that the left `numPartitionsInBM` blocks are in block manager, and others are not
-    //确保左'numpartitionsinbm'块是块的管理,而不是别的
+    //确保前面的'numpartitionsinbm'块在块管理中
     require(
       blockIds.take(numPartitionsInBM).forall(blockManager.get(_).nonEmpty),
       "Expected blocks not in BlockManager"
     )
+    //确保后边的blockIds数据在块管理器中
     require(
       blockIds.takeRight(numPartitions - numPartitionsInBM).forall(blockManager.get(_).isEmpty),
       "Unexpected blocks in BlockManager"
     )
 
     // Make sure that the right 'numPartitionsInWAL' blocks are in WALs, and other are not
-    //确保正确的'numpartitionsinwal'块在预写日志系统 ,和其他不
+    //确保正确后边的'numpartitionsinwal'块在预写日志系统 
     require(
       recordHandles.takeRight(numPartitionsInWAL).forall(s =>
         new File(s.path.stripPrefix("file://")).exists()),
@@ -207,6 +232,7 @@ class WriteAheadLogBackedBlockRDDSuite
     //创建RDD和验证是否返回的正确数据
     val rdd = new WriteAheadLogBackedBlockRDD[String](sparkContext, blockIds.toArray,
       recordHandles.toArray, storeInBlockManager = false)
+    println("collect:"+rdd.collect()+"\t data:"+data.flatten)
     assert(rdd.collect() === data.flatten)
 
     // Verify that the block fetching is skipped when isBlockValid is set to false.
@@ -228,11 +254,14 @@ class WriteAheadLogBackedBlockRDDSuite
 
     // Verify that the RDD is not invalid after the blocks are removed and can still read data
     // from write ahead log
-    //验证了RDD是无效后的块删除,还可以读取数据提前写日志
+    //验证了RDD是无效后的块删除,还可以读取数据预写日志
     if (testBlockRemove) {
       require(numPartitions === numPartitionsInWAL, "All partitions must be in WAL for this test")
       require(numPartitionsInBM > 0, "Some partitions must be in BlockManager for this test")
+      //rdd.collect().foreach { x => println("befor:"+x) }
       rdd.removeBlocks()
+      //rdd.collect().foreach { x => println("after:"+x) }
+      println("testBlockRemove:"+data.flatten)
       assert(rdd.collect() === data.flatten)
     }
 
@@ -241,21 +270,41 @@ class WriteAheadLogBackedBlockRDDSuite
         recordHandles.toArray, storeInBlockManager = true, storageLevel = StorageLevel.MEMORY_ONLY)
       assert(rdd2.collect() === data.flatten)
       assert(
+        //数据存储到内存管理器中  
         blockIds.forall(blockManager.get(_).nonEmpty),
         //块管理器中没有找到的所有块
         "All blocks not found in block manager"
       )
     }
   }
-  //WAL(预写式日志)
+  //产生WAL(预写式日志)句柄
   private def generateWALRecordHandles(
+      //由于出现乱码scala.util.Random.nextString(50),即改成scala.util.Random.nextInt(50).toString()
+      //随机生成的数据字符改成数据
       blockData: Seq[Seq[String]],
+     // blockData: Seq[Seq[Int]],
       blockIds: Seq[BlockId]
     ): Seq[FileBasedWriteAheadLogSegment] = {
     require(blockData.size === blockIds.size)
+    //生成日志logFile文件
     val writer = new FileBasedWriteAheadLogWriter(new File(dir, "logFile").toString, hadoopConf)
+    //blockData=List(List(49, 34, 36, 13, 23, 16, 31, 38, 10, 26), 
+    //List(24, 6, 22, 10, 33, 14, 40, 35, 7, 20), 
+    //List(22, 5, 10, 32, 44, 24, 39, 16, 27, 9), 
+    //List(1, 47, 18, 15, 22, 25, 43, 3, 29, 10), 
+    //List(44, 1, 33, 9, 15, 18, 30, 48, 19, 8))
+    //blockIds=WrappedArray(input-300100004-1533713222, input-432502173--1035939876, input--646589726--26132234, input--1836656533--1370908660, input-1454315495-1814109189)
+    /**res0: List[(List[Int], String)] = List(
+     * (List(49, 34, 36, 13, 23, 16, 31, 38, 10,26),input-300100004-1533713222), 
+     * (List(24, 6, 22, 10, 33, 14, 40, 35, 7, 20),input-432502173--1035939876),
+     * (List(22, 5, 10, 32, 44, 24, 39, 16, 27, 9),input--646589726--26132234),
+     * (List(1, 47, 18, 15, 22, 25, 43, 3, 29, 10),input--1836656533--1370908660),
+     * (List(44, 1, 33, 9, 15, 18, 30, 48, 19, 8),input-1454315495-1814109189))**/
     val segments = blockData.zip(blockIds).map { case (data, id) =>
-      writer.write(blockManager.dataSerialize(id, data.iterator))
+      println(id+"||"+data.mkString(","))
+      val dataSerialize=blockManager.dataSerialize(id, data.iterator)
+      //每次写入一条数据
+      writer.write(dataSerialize)
     }
     writer.close()
     segments
