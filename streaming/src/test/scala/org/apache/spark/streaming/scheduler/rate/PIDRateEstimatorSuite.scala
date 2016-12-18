@@ -24,7 +24,12 @@ import org.scalatest.Matchers
 
 import org.apache.spark.{SparkConf, SparkFunSuite}
 import org.apache.spark.streaming.Seconds
-
+/**
+ * SparkStreaming有一个rate功能可以控制流入的速率,在这个基础上提供了一套算法,
+ * 根据流入数据和处理时间的比例关系,根据一定的关系,将流入的rate提高或者降低.
+ * PIDRateEstimator 用于评估InputDStream消费数据的能力
+ * 根据消费数据的能力来调整接收数据的速率
+ */
 class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
 
   test("the right estimator is created") {//创建正确的估计量

@@ -46,6 +46,7 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
     val streamId1 = 0
     val streamId2 = 1
     val time = Time(0L)
+    //streamId1输入流标识,100L 批次中记录的数量
     val inputInfo1 = StreamInputInfo(streamId1, 100L)
     val inputInfo2 = StreamInputInfo(streamId2, 300L)
     inputInfoTracker.reportInfo(time, inputInfo1)
@@ -53,8 +54,10 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
     inputInfoTracker.reportInfo(time, inputInfo2)
     //根据时间获得跟踪批处理信息
     val batchTimeToInputInfos = inputInfoTracker.getInfo(time)   
-    assert(batchTimeToInputInfos.size == 2)
+    assert(batchTimeToInputInfos.size == 2)//有二条数据
+    //获得输入流标识
     assert(batchTimeToInputInfos.keys === Set(streamId1, streamId2))
+    //获得输入流批次中记录的数量
     assert(batchTimeToInputInfos(streamId1) === inputInfo1)
     assert(batchTimeToInputInfos(streamId2) === inputInfo2)
     //getInfo获得Map值,streamId1获得Key对象,科里化函数
@@ -64,7 +67,6 @@ class InputInfoTrackerSuite extends SparkFunSuite with BeforeAndAfter {
   test("test cleanup InputInfo from InputInfoTracker") {
     //测试理清InputInfo
     val inputInfoTracker = new InputInfoTracker(ssc)
-    //
     val streamId1 = 0
     val inputInfo1 = StreamInputInfo(streamId1, 100L)
     val inputInfo2 = StreamInputInfo(streamId1, 300L)

@@ -889,10 +889,13 @@ class TestReceiver extends Receiver[Int](StorageLevel.MEMORY_ONLY) with Logging 
   def onStart() {
     val thread = new Thread() {
       override def run() {
+        //接收开始
         logInfo("Receiving started")
         while (!isStopped) {
           store(TestReceiver.counter.getAndIncrement)
         }
+        //接收停止计数值
+        println("接收停止计数值:["+TestReceiver.counter.get()+"]")
         logInfo("Receiving stopped at count value of " + TestReceiver.counter.get())
       }
     }

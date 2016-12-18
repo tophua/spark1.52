@@ -86,7 +86,7 @@ class JobGeneratorSuite extends TestSuiteBase {
     val checkpointDir = Utils.createTempDir()
     val testConf = conf
     testConf.set("spark.streaming.clock", "org.apache.spark.streaming.util.ManualClock")
-    //滚动间隔
+    //日志滚动间隔
     testConf.set("spark.streaming.receiver.writeAheadLog.rollingInterval", "1")
 
     withStreamingContext(new StreamingContext(testConf, batchDuration)) { ssc =>
@@ -113,11 +113,13 @@ class JobGeneratorSuite extends TestSuiteBase {
       // Make sure the only 1 batch of information is to be remembered
       //确保只有1个批次的信息被记住
       assert(inputStream.rememberDuration === batchDuration)
+      //获得接收到的数据对象
       val receiverTracker = ssc.scheduler.receiverTracker
 
       // Get the blocks belonging to a batch
       //获取属于一个批的块
       def getBlocksOfBatch(batchTime: Long): Seq[ReceivedBlockInfo] = {
+        println(batchTime+"["+inputStream.id+"]")
         receiverTracker.getBlocksOfBatchAndStream(Time(batchTime), inputStream.id)
       }
 
@@ -131,8 +133,8 @@ class JobGeneratorSuite extends TestSuiteBase {
 
       // Wait for received blocks to be allocated to a batch
       //等待接收的块被分配给一个批处理
-      def waitForBlocksToBeAllocatedToBatch(batchTime: Long) {
-        eventually(testTimeout) {
+      def waitForBlocksToBeAllocatedToBatch(batchTime: Long) {        
+        eventually(testTimeout) {          
           assert(getBlocksOfBatch(batchTime).nonEmpty)
         }
       }
@@ -142,6 +144,7 @@ class JobGeneratorSuite extends TestSuiteBase {
       for (batchNum <- 1 to numBatches) {
         waitForNewReceivedBlocks()
         clock.advance(batchDuration.milliseconds)
+        println("====="+clock.getTimeMillis())
         waitForBlocksToBeAllocatedToBatch(clock.getTimeMillis())
       }
 
