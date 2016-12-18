@@ -61,15 +61,19 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
   }
 
   test("WriteAheadLogUtils - log selection and creation") {//日志选择和创建
+    //logDir=C:\Temp\spark-0e881ea0-2e18-4bdd-9057-ceb3602ebbda
     val logDir = Utils.createTempDir().getAbsolutePath()
 
     def assertDriverLogClass[T <: WriteAheadLog: ClassTag](conf: SparkConf): WriteAheadLog = {
+      //创建Driver端log
       val log = WriteAheadLogUtils.createLogForDriver(conf, logDir, hadoopConf)
+      //隐式转换ClassTag
       assert(log.getClass === implicitly[ClassTag[T]].runtimeClass)
       log
     }
 
     def assertReceiverLogClass[T: ClassTag](conf: SparkConf): WriteAheadLog = {
+      //创建接收器的日志类
       val log = WriteAheadLogUtils.createLogForReceiver(conf, logDir, hadoopConf)
       assert(log.getClass === implicitly[ClassTag[T]].runtimeClass)
       log
@@ -85,14 +89,14 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
     assertDriverLogClass[MockWriteAheadLog0](conf1)
     assertReceiverLogClass[FileBasedWriteAheadLog](conf1)
 
-    // Verify setting receiver WAL(预写式日志) class 验证设置接收器
+    // Verify setting receiver WAL(预写式日志) class 验证设置接收器类
     val receiverWALConf = new SparkConf().set("spark.streaming.receiver.writeAheadLog.class",
       classOf[MockWriteAheadLog0].getName())
     assertDriverLogClass[FileBasedWriteAheadLog](receiverWALConf)
     assertReceiverLogClass[MockWriteAheadLog0](receiverWALConf)
 
     // Verify setting receiver WAL(预写式日志) class with 1-arg constructor
-    // 验证设置接收writeAheadLog类型1个参数
+    // 验证设置接收预写式日志类型1个参数
     val receiverWALConf2 = new SparkConf().set("spark.streaming.receiver.writeAheadLog.class",
       classOf[MockWriteAheadLog1].getName())
     assertReceiverLogClass[MockWriteAheadLog1](receiverWALConf2)
@@ -105,7 +109,14 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
     }
   }
 
-  test("FileBasedWriteAheadLogWriter - writing data") {//WriteAheadLog(预写式日志)
+  test("FileBasedWriteAheadLogWriter - writing data") {//WriteAheadLog(预写式日志)--写数据
+    /**
+     * Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+     * 	 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 
+     * 	 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 
+     * 	 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 
+     * 	 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100)
+     */
     val dataToWrite = generateRandomData()
     val segments = writeDataUsingWriter(testFile, dataToWrite)
     val writtenData = readDataManually(segments)
@@ -115,8 +126,11 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
   test("FileBasedWriteAheadLogWriter - syncing of data by writing and reading immediately") {
     val dataToWrite = generateRandomData()
     val writer = new FileBasedWriteAheadLogWriter(testFile, hadoopConf)
+    //立即读写数据
     dataToWrite.foreach { data =>
+      //stringToByteBuffer把字符串转换成ByteBuffer
       val segment = writer.write(stringToByteBuffer(data))
+      //读取数据
       val dataRead = readDataManually(Seq(segment)).head
       assert(data === dataRead)
     }
@@ -174,7 +188,7 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
 
   test("FileBasedWriteAheadLogRandomReader - reading data using random reader") {//使用随机数据读取
     // Write data manually for testing the random reader
-    //手动写入数据测试随机读
+    //写入数据测试随机读
     val writtenData = generateRandomData()
     val segments = writeDataManually(writtenData, testFile)
 
@@ -203,20 +217,23 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
     reader.close()
   }
 
-  test("FileBasedWriteAheadLog - write rotating logs") {//日志写的旋转
+  test("FileBasedWriteAheadLog - write rotating logs") {//日志写循环日志文件
     // Write data with rotation using WriteAheadLog class
     val dataToWrite = generateRandomData()
     writeDataUsingWriteAheadLog(testDir, dataToWrite)
 
     // Read data manually to verify the written data
     //手动读取数据以验证写入数据
-    val logFiles = getLogFilesInDirectory(testDir)
+    val logFiles = getLogFilesInDirectory(testDir)//返回日志目录
     assert(logFiles.size > 1)
-    val writtenData = logFiles.flatMap { file => readDataManually(file)}
+    val writtenData = logFiles.flatMap { file => 
+      //日志文件读取
+      readDataManually(file)
+      }
     assert(writtenData === dataToWrite)
   }
 
-  test("FileBasedWriteAheadLog - read rotating logs") {//读取旋转日志
+  test("FileBasedWriteAheadLog - read rotating logs") {//读取循环日志文件
     // Write data manually for testing reading through WriteAheadLog
     val writtenData = (1 to 10).map { i =>
       val data = generateRandomData()
@@ -234,12 +251,13 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
     val readData = readDataUsingWriteAheadLog(testDir)
     assert(readData === writtenData)
   }
-  //创建新的管理器时恢复过来的日志
+  //恢复过来的日志创建新的管理器
   test("FileBasedWriteAheadLog - recover past logs when creating new manager") {
     // Write data with manager, recover with new manager and verify
     //管理器写入数据,新的管理器恢复并验证
     val dataToWrite = generateRandomData()
     writeDataUsingWriteAheadLog(testDir, dataToWrite)
+    //获得日志所有文件
     val logFiles = getLogFilesInDirectory(testDir)
     assert(logFiles.size > 1)
     val readData = readDataUsingWriteAheadLog(testDir)
@@ -247,6 +265,7 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
   }
 
   test("FileBasedWriteAheadLog - clean old logs") {//清除的旧日志
+    //waitForCompletion 是否等待完成
     logCleanUpTest(waitForCompletion = false)
   }
 
@@ -273,7 +292,7 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
       }
     }
   }
-  //读取旋转日志时处理文件错误
+  //读取循环日志文件处理文件错误
   test("FileBasedWriteAheadLog - handling file errors while reading rotating logs") {
     // Generate a set of log files 生成一组日志文件
     val manualClock = new ManualClock
@@ -325,7 +344,9 @@ class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
 }
 
 object WriteAheadLogSuite {
-
+/**
+ * 模拟预定日志
+ */
   class MockWriteAheadLog0() extends WriteAheadLog {
     override def write(record: ByteBuffer, time: Long): WriteAheadLogRecordHandle = { null }
     override def read(handle: WriteAheadLogRecordHandle): ByteBuffer = { null }
@@ -350,6 +371,7 @@ object WriteAheadLogSuite {
     //获得val writer: FSDataOutputStream
     val writer = HdfsUtils.getOutputStream(file, hadoopConf)
     data.foreach { item =>
+      //一个偏移量的int值
       val offset = writer.getPos
       val bytes = Utils.serialize(item)
       writer.writeInt(bytes.size)
@@ -362,14 +384,16 @@ object WriteAheadLogSuite {
 
   /**
    * Write data to a file using the writer class and return an array of the file segments written.
-   * 使用“写入”类将数据写入文件，并返回写入的文件段的数组
+   * 使用写入器类将数据写入文件,并返回写入的文件段的数组.
    */
   def writeDataUsingWriter(
       filePath: String,
       data: Seq[String]
     ): Seq[FileBasedWriteAheadLogSegment] = {
+    //FileBasedWriteAheadLogWriter 日志写入类
     val writer = new FileBasedWriteAheadLogWriter(filePath, hadoopConf)
     val segments = data.map {
+      //一条数据写入
       item => writer.write(item)
     }
     writer.close()
@@ -378,7 +402,7 @@ object WriteAheadLogSuite {
 
   /** 
    *  Write data to rotating files in log directory using the WriteAheadLog class.
-   *  写数据到旋转文件使用writeaheadlog班日志目录
+   *  写数据到循环日志文件使用writeaheadlog班日志目录
    *   */
   def writeDataUsingWriteAheadLog(
       logDirectory: String,
@@ -405,12 +429,18 @@ object WriteAheadLogSuite {
    *   */
   def readDataManually(segments: Seq[FileBasedWriteAheadLogSegment]): Seq[String] = {
     segments.map { segment =>
+      //FSDataInputStream从日志文件读取数据
       val reader = HdfsUtils.getInputStream(segment.path, hadoopConf)
       try {
+        //seek打开的文件中指定当前的读/写位置
         reader.seek(segment.offset)
         val bytes = new Array[Byte](segment.length)
+        //readInt是读取流上的字节直到流上没有字节为止,如果当声明的字节数组长度大于流上的数据长度时就提前返回
         reader.readInt()
+       // println("readInt:"+reader.readInt())
+        //readFully读取流上指定长度的字节数组,也就是说如果声明了长度为len的字节数组
         reader.readFully(bytes)
+        // println("readFully:"+reader.readFully(bytes))
         val data = Utils.deserialize[String](bytes)
         reader.close()
         data
@@ -445,10 +475,11 @@ object WriteAheadLogSuite {
 
   /** 
    *  Read all the data from a log file using reader class and return the list of byte buffers.
-   *  从使用读类器读取日志文件中的所有数据,并返回字节缓冲区的列表
+   *  从日志文件中的读取所有数据,并返回字节缓冲区的列表
    *   */
   def readDataUsingReader(file: String): Seq[String] = {
     val reader = new FileBasedWriteAheadLogReader(file, hadoopConf)
+    //
     val readData = reader.toList.map(byteBufferToString)
     reader.close()
     readData
@@ -488,11 +519,15 @@ object WriteAheadLogSuite {
   def generateRandomData(): Seq[String] = {
     (1 to 100).map { _.toString }
   }
-
+/**
+ * 隐式转换,把字符串转换ByteBuffer
+ */
   implicit def stringToByteBuffer(str: String): ByteBuffer = {
     ByteBuffer.wrap(Utils.serialize(str))
   }
-
+/**
+ * 隐式转换,把byteBuffer转换字符串
+ */
   implicit def byteBufferToString(byteBuffer: ByteBuffer): String = {
     Utils.deserialize[String](byteBuffer.array)
   }

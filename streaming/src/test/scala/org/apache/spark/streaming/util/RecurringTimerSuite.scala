@@ -26,8 +26,8 @@ import org.scalatest.concurrent.Eventually._
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.util.ManualClock
 /**
- * 一直不断的循环，不管有没有数据，有没有任务，也不关心时间间隔，会一直循环，
- * 整个引擎是无时无刻不在执行，不管有用没用，一直执行，也就是死循环
+ * 一直不断的循环,不管有没有数据,有没有任务,也不关心时间间隔,会一直循环,
+ * 整个引擎是无时无刻不在执行,不管有用没用,一直执行,也就是死循环
  */
 class RecurringTimerSuite extends SparkFunSuite with PrivateMethodTester {
 //循环定时器测试套件

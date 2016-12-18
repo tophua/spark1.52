@@ -21,7 +21,9 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit._
 
 import org.apache.spark.SparkFunSuite
-
+/**
+ * 速率限制的输出流测试套件
+ */
 class RateLimitedOutputStreamSuite extends SparkFunSuite {
 
   private def benchmark[U](f: => U): Long = {
@@ -33,6 +35,7 @@ class RateLimitedOutputStreamSuite extends SparkFunSuite {
   test("write") {//写
     val underlying = new ByteArrayOutputStream
     val data = "X" * 41000
+    //desiredBytesPerSec 每秒所需的字节数
     val stream = new RateLimitedOutputStream(underlying, desiredBytesPerSec = 10000)
     val elapsedNs = benchmark { stream.write(data.getBytes("UTF-8")) }
 
