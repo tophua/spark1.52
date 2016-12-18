@@ -71,7 +71,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     //是否已经激活
     assert(blockGenerator.isActive() === true, "block generator active after start()")
     assert(blockGenerator.isStopped() === false, "block generator stopped after start()")
-    //回调函数称为前添加数据
+    //添加数据前回调函数
     withClue("callbacks called before adding data") {
       assert(listener.onAddDataCalled === false)
       assert(listener.onGenerateBlockCalled === false)
@@ -79,10 +79,12 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
 
     // Verify whether addData() adds data that is present in generated blocks
-    //验证addData() 是否添加数据在目前的数据生成模块
+    //验证addData()是否添加数据在目前的数据生成模块
+    //Range(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     val data1 = 1 to 10
+    //生成块数据
     data1.foreach { blockGenerator.addData _ }
-    //回调要求添加数据没有元数据和块代
+    //回调添加数据没有元数据和无块生成
     withClue("callbacks called on adding data without metadata and without block generation") {
       assert(listener.onAddDataCalled === false) // should be called only with addDataWithCallback()
       assert(listener.onGenerateBlockCalled === false)
@@ -99,10 +101,22 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
     listener.pushedData should contain theSameElementsInOrderAs (data1)
     assert(listener.onAddDataCalled === false) // should be called only with addDataWithCallback()
-
+    
+    // 验证addDataWithCallback()函数添加元数据和正确的回调
     // Verify addDataWithCallback() add data+metadata and and callbacks are called correctly
+    /**
+     * data2= Range(11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+     */
     val data2 = 11 to 20
+    /**
+     * metadata2=Vector(11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+     */
     val metadata2 = data2.map { _.toString }
+    /**
+     * res0:IndexedSeq[(Int, String)] = Vector(
+     * 			(11,11), (12,12), (13,13), (14,14), (15,15), 
+     * 			(16,16), (17,17), (18,18), (19,19), (20,20))
+     */
     data2.zip(metadata2).foreach { case (d, m) => blockGenerator.addDataWithCallback(d, m) }
     assert(listener.onAddDataCalled === true)
     listener.addedData should contain theSameElementsInOrderAs (data2)
@@ -114,6 +128,10 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     }
 
     // Verify addMultipleDataWithCallback() add data+metadata and and callbacks are called correctly
+    //验证addMultipleDataWithCallback()函数,添加数据+元数据和正确回调
+    /**
+     * data3: = Range(21, 22, 23, 24, 25, 26, 27, 28, 29, 30)
+     */
     val data3 = 21 to 30
     val metadata3 = "metadata"
     blockGenerator.addMultipleDataWithCallback(data3.iterator, metadata3)
@@ -125,7 +143,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
 
     // Stop the block generator by starting the stop on a different thread and
     // then advancing the manual clock for the stopping to proceed.
-    //通过在另一个线程上启动停止,停止块生成器然后推送手动时钟停止继续进行
+    //暂停块产生不同的线程上启动停止,然后推送手动时钟停止进行
     val thread = stopBlockGenerator(blockGenerator)
     eventually(timeout(1 second), interval(10 milliseconds)) {
       clock.advance(blockIntervalMs)
@@ -231,6 +249,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
        * 而且,当成员变量发生变化时,强迫线程将变化值回写到共享内存
        */
       @volatile var errorReported = false  //
+      //接收块数据,抛出异常
       override def onPushBlock(
           blockId: StreamBlockId, arrayBuffer: mutable.ArrayBuffer[_]): Unit = {
         throw new SparkException("test")
@@ -242,6 +261,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
     blockGenerator = new BlockGenerator(listener, 0, conf)
     blockGenerator.start()
     assert(listener.errorReported === false)
+    //添加数据
     blockGenerator.addData(1)
     eventually(timeout(1 second), interval(10 milliseconds)) {
       assert(listener.errorReported === true)
@@ -251,7 +271,7 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
 
   /**
    * Helper method to stop the block generator with manual clock in a different thread,
-   * 在另一个线程中停止使用手动时钟的块发生器
+   * 在不同的线程中停止使用手动时钟的块发生器
    * so that the main thread can advance the clock that allows the stopping to proceed.
    * 主线程可以提前时钟,允许停止进行
    */
@@ -270,14 +290,14 @@ class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
    *  一个块产生器记录数据在回调监听器
    **/
   private class TestBlockGeneratorListener extends BlockGeneratorListener {
-    //
+    //推送数据块
     val pushedData = new mutable.ArrayBuffer[Any] with mutable.SynchronizedBuffer[Any]
     val addedData = new mutable.ArrayBuffer[Any] with mutable.SynchronizedBuffer[Any]
     val addedMetadata = new mutable.ArrayBuffer[Any] with mutable.SynchronizedBuffer[Any]
     @volatile var onGenerateBlockCalled = false
     @volatile var onAddDataCalled = false
     @volatile var onPushBlockCalled = false
-    //取出数据块
+    //推送数据块
     override def onPushBlock(blockId: StreamBlockId, arrayBuffer: mutable.ArrayBuffer[_]): Unit = {
       pushedData ++= arrayBuffer
       onPushBlockCalled = true
