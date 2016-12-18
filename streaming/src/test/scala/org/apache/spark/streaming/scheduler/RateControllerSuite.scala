@@ -43,7 +43,7 @@ class RateControllerSuite extends TestSuiteBase {
       }
     }
   }
-//发布率达到接收器
+  //发布率达到接收器
   test("ReceiverRateController - published rates reach receivers") {
     val ssc = new StreamingContext(conf, batchDuration)
     withStreamingContext(ssc) { ssc =>
