@@ -509,7 +509,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     testOperation(inputData, updateStateOperation, outputData, true)
   }
 
-  test("slice") {//划分
+  test("slice") {//返回从fromTime到toTime之间的所有RDD的序列
     //以1秒为单位输入流
     withStreamingContext(new StreamingContext(conf, Seconds(1))) { ssc =>
       //input=List(List(1), List(2), List(3), List(4))
@@ -522,6 +522,7 @@ class BasicOperationsSuite extends TestSuiteBase {
       Thread.sleep(2000)
       //获得输入流的切分,参数fromMillis开始毫秒,toMillis结束毫秒
       def getInputFromSlice(fromMillis: Long, toMillis: Long): Set[Int] = {
+      //slice返回从fromTime到toTime之间的所有RDD的序列
         stream.slice(new Time(fromMillis), new Time(toMillis)).flatMap(_.collect()).toSet
       }
 
@@ -536,6 +537,7 @@ class BasicOperationsSuite extends TestSuiteBase {
       val input = Seq(Seq(1), Seq(2), Seq(3), Seq(4))
       val stream = new TestInputStream[Int](ssc, input, 2)
       val thrown = intercept[SparkException] {
+      //slice返回从fromTime到toTime之间的所有RDD的序列
         stream.slice(new Time(0), new Time(1000))
       }
       assert(thrown.getMessage.contains("has not been initialized"))
@@ -595,6 +597,7 @@ class BasicOperationsSuite extends TestSuiteBase {
       Some(values.sum + state.getOrElse(0))
     }
     val stateStream = runCleanupTest(
+	//在interval周期后给生成的RDD设置检查点
       conf, _.map(_ -> 1).updateStateByKey(updateFunc).checkpoint(Seconds(3)))
 
     assert(stateStream.rememberDuration === stateStream.checkpointDuration * 2)

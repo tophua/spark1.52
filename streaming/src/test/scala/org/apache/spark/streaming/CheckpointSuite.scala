@@ -94,7 +94,7 @@ class CheckpointSuite extends TestSuiteBase {
         })
       //updateStateByKey可以DStream中的数据进行按key做reduce操作,然后对各个批次的数据进行累加
       .updateStateByKey(updateFunc)
-      //状态流检查点间隔
+      //在interval周期后给生成的RDD设置检查点
       .checkpoint(stateStreamCheckpointInterval)
       .map(t =>{
         //println(t._1+"|map|"+t._2)
@@ -204,7 +204,7 @@ class CheckpointSuite extends TestSuiteBase {
     ssc = new StreamingContext(master, framework, batchDuration)
     //原始conf文件
     val originalConf = ssc.conf
-
+    //在interval周期后给生成的RDD设置检查点
     val cp = new Checkpoint(ssc, Time(1000))
     //复制conf配置文件
     val cpConf = cp.createSparkConf()
@@ -331,6 +331,7 @@ class CheckpointSuite extends TestSuiteBase {
     val operation = (st: DStream[String]) => {
       st.map(x => (x, 1))
         .reduceByKeyAndWindow(_ + _, _ - _, batchDuration * w, batchDuration)
+	//在interval周期后给生成的RDD设置检查点
         .checkpoint(batchDuration * 2)
     }
     testCheckpointedOperation(input, operation, output, 7)
@@ -453,6 +454,7 @@ class CheckpointSuite extends TestSuiteBase {
       }
       st.map(x => (x, 1))
         .updateStateByKey(updateFunc)
+	//在interval周期后给生成的RDD设置检查点
         .checkpoint(batchDuration * 2)
         .map(t => (t._1, t._2))
     }
@@ -467,8 +469,9 @@ class CheckpointSuite extends TestSuiteBase {
       override val rateController =
         Some(new ReceiverRateController(id, new ConstantEstimator(200)))
     }
-
+   //在interval周期后给生成的RDD设置检查点
     val output = new TestOutputStreamWithPartitions(dstream.checkpoint(batchDuration * 2))
+    //将当前DStream注册到DStreamGraph的输出流中
     output.register()
     runStreams(ssc, 5, 5)
 

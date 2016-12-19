@@ -105,6 +105,7 @@ object MasterFailureTest extends Logging {
       st.flatMap(_.split(" "))
         .map(x => (x, 1L))
         .updateStateByKey[Long](updateFunc)
+	//在interval周期后给生成的RDD设置检查点
         .checkpoint(batchDuration * 5)
     }
 

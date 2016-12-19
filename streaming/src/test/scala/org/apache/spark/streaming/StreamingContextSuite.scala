@@ -107,7 +107,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     val ssc1 = new StreamingContext(myConf, batchDuration)
     addInputStream(ssc1).register()
     ssc1.start()
-    //
+    //在interval周期后给生成的RDD设置检查点
     val cp = new Checkpoint(ssc1, Time(1000))
     assert(
       Utils.timeStringAsSeconds(cp.sparkConfPairs
