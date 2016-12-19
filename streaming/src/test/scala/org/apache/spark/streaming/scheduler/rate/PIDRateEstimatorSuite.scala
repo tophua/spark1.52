@@ -62,6 +62,7 @@ class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
 
   test("first estimate is None") {//第一估计是None
     val p = createDefaultEstimator()
+    //compute:在指定时间生成一个RDD
     p.compute(0, 10, 10, 0) should equal(None)
   }
 
@@ -69,11 +70,13 @@ class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
     val p = createDefaultEstimator()
     p.compute(0, 10, 10, 0)
     // 1000 elements / s
+    //compute:在指定时间生成一个RDD
     p.compute(10, 10, 10, 0) should equal(Some(1000))
   }
   //当不连续非线性估计调用之间的差异
   test("no estimate when no time difference between successive calls") {
     val p = createDefaultEstimator()
+
     p.compute(0, 10, 10, 0)
     p.compute(time = 10, 10, 10, 0) shouldNot equal(None)
     p.compute(time = 10, 10, 10, 0) should equal(None)

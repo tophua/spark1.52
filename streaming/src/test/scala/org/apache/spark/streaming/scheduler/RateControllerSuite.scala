@@ -85,7 +85,7 @@ private[streaming] class ConstantEstimator(@volatile private var rate: Long)
   def updateRate(newRate: Long): Unit = {
     rate = newRate
   }
-
+//compute:在指定时间生成一个RDD
   def compute(
       time: Long,
       elements: Long,

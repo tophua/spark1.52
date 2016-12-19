@@ -43,7 +43,7 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
     ssc = null
   }
   //用户提供的闭包清理
-  test("user provided closures(闭包) are actually cleaned") {
+  test("user provided closures are actually cleaned") {
     //Dummy虚拟
     val dstream = new DummyInputDStream(ssc)
     val pairDstream = dstream.map { i => (i, i) }
@@ -76,6 +76,9 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
    * 我们使用返回语句表示关闭实际上正在被清理
    * We expect closure cleaner to find the return statements in the user provided closures.
    * 我们期望闭包清理器在用户提供的闭包中找到返回语句
+   * 
+   * 名称：=> Unit的格式,本来无参的函数我们也可以写成"名称:( ) => Unit"的格式
+   * 传名参数也可以简单理解为不含参数的函数被传递给另一个参数
    */
   private def expectCorrectException(body: => Unit): Unit = {
     try {

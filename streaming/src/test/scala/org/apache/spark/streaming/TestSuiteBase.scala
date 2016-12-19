@@ -42,6 +42,7 @@ import org.apache.spark.util.{ManualClock, Utils}
 private[streaming] class DummyDStream(ssc: StreamingContext) extends DStream[Int](ssc) {
   override def dependencies: List[DStream[Int]] = List.empty
   override def slideDuration: Duration = Seconds(1) //1秒
+  //compute:在指定时间生成一个RDD
   override def compute(time: Time): Option[RDD[Int]] = Some(ssc.sc.emptyRDD[Int])
 }
 
@@ -52,6 +53,7 @@ private[streaming] class DummyDStream(ssc: StreamingContext) extends DStream[Int
 private[streaming] class DummyInputDStream(ssc: StreamingContext) extends InputDStream[Int](ssc) {
   override def start(): Unit = { }
   override def stop(): Unit = { }
+  //compute:在指定时间生成一个RDD
   override def compute(time: Time): Option[RDD[Int]] = Some(ssc.sc.emptyRDD[Int])
 }
 
@@ -68,7 +70,7 @@ class TestInputStream[T: ClassTag](ssc_ : StreamingContext, input: Seq[Seq[T]], 
   def start() {}
 
   def stop() {}
-
+  //compute:在指定时间生成一个RDD
   def compute(validTime: Time): Option[RDD[T]] = {
     //计算RDD时间
     logInfo("Computing RDD for time " + validTime)
@@ -106,8 +108,11 @@ class TestOutputStream[T: ClassTag](
     parent: DStream[T],
     val output: SynchronizedBuffer[Seq[T]] =
       new ArrayBuffer[Seq[T]] with SynchronizedBuffer[Seq[T]]
-  ) extends ForEachDStream[T](parent, (rdd: RDD[T], t: Time) => {
+  ) extends
+   //扩展ForEachDStream类,构造函数包括匿名方法
+    ForEachDStream[T](parent, (rdd: RDD[T], t: Time) => {
     val collected = rdd.collect()
+   // println("ForEachDStream:"+collected.toString().mkString(","))
     output += collected
   }) {
 

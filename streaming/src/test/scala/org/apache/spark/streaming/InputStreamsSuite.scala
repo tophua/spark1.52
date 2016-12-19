@@ -41,15 +41,18 @@ import org.apache.spark.util.{ManualClock, Utils}
 import org.apache.spark.streaming.dstream.{InputDStream, ReceiverInputDStream}
 import org.apache.spark.streaming.rdd.WriteAheadLogBackedBlockRDD
 import org.apache.spark.streaming.receiver.Receiver
-
+/**
+ * 输入流测试套件
+ */
 class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
   test("socket input stream") {//网络输入流
     withTestServer(new TestServer()) { testServer =>
       // Start the server
-      //开始运行服务
+      //开始运行服务器
+      
       testServer.start()
-
+     
       // Set up the streaming context and input streams
       //设置流上下文和输入流
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
@@ -57,12 +60,15 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
         val input = Seq(1, 2, 3, 4, 5)
         // Use "batchCount" to make sure we check the result after all batches finish
-        //使用“batchcount”检查结果所有批次完成后
+        //使用“batchcount”检查所有批次完成后的结果,注册一个监听器
         val batchCounter = new BatchCounter(ssc)//
+        //连接测试服务器
         val networkStream = ssc.socketTextStream(
           "localhost", testServer.port, StorageLevel.MEMORY_AND_DISK)
+        //同步ArrayBuffer,一个时间内只能有一个线程得到执行
         val outputBuffer = new ArrayBuffer[Seq[String]] with SynchronizedBuffer[Seq[String]]
         val outputStream = new TestOutputStream(networkStream, outputBuffer)
+        //register将当前DStream注册到DStreamGraph的输出流中
         outputStream.register()
         ssc.start()
 
@@ -373,7 +379,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         def start() {}
 
         def stop() {}
-
+	//compute 在指定时间生成一个RDD
         def compute(validTime: Time): Option[RDD[String]] = None
       }
 
@@ -468,14 +474,15 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
  *  这是一个测试网络输入流的服务器 
  *  */
 class TestServer(portToBind: Int = 0) extends Logging {
- //是一个由数组支持的有界阻塞队列。此队列按 FIFO(先进先出)原则对元素进行排序。
- //让容量满时往BlockingQueue中添加数据时会造成阻塞，当容量为空时取元素操作会阻塞
+ //ArrayBlockingQueue是一个由数组支持的有界阻塞队列,此队列按 FIFO(先进先出)原则对元素进行排序。
+ //让容量满时往BlockingQueue中添加数据时会造成阻塞,当容量为空时取元素操作会阻塞
   val queue = new ArrayBlockingQueue[String](100)
-  //服务器端需要创建监听端口的 ServerSocket, ServerSocket 负责接收客户连接请求
+  //服务器端需要创建监听端口的 ServerSocket,ServerSocket负责接收客户连接请求
+  //如果把参数 portToBind设为 0,表示由操作系统来为服务器分配一个任意可用的端口
   val serverSocket = new ServerSocket(portToBind)
-//CountDownLatch,在完成一组正在其他线程中执行的操作之前,它允许一个或多个线程一直等待.
-//是一个同步计数器,构造时传入int参数,该参数就是计数器的初始值，每调用一次countDown()方法，
-//计数器减1,计数器大于0 时，await()方法会阻塞程序继续执行
+  //CountDownLatch,在完成一组正在其他线程中执行的操作之前,它允许一个或多个线程一直等待.
+  //是一个同步计数器,构造时传入int参数,该参数就是计数器的初始值,每调用一次countDown()方法,
+  //计数器减1,计数器大于0 时,await()方法会阻塞程序继续执行
   private val startLatch = new CountDownLatch(1)
 
   val servingThread = new Thread() {
@@ -491,24 +498,27 @@ class TestServer(portToBind: Int = 0) extends Logging {
             if (!clientSocket.isClosed) {
               clientSocket.close()//关闭客户端连接
             }
-           //每调用一次countDown()方法，计数器减1,计数器大于0 时，await()方法会阻塞程序继续执行 
+           //每调用一次countDown()方法,计数器减1,计数器大于0 时,await()方法会阻塞程序继续执行 
             startLatch.countDown()
           } else {
             // Real connections
+            // 实际的连接
             logInfo("New connection")
             try {
-              //客户端向服务器发送数据时，会根据数据包的大小决定是否立即发送
+              //客户端向服务器发送数据时,会根据数据包的大小决定是否立即发送
               clientSocket.setTcpNoDelay(true)
               //创建一个使用默认大小输出缓冲区的缓冲字符输出流
               val outputStream = new BufferedWriter(
-                  //把字节流转化为字符流
+               //返回客户端输出流,把字节流转化为字符流
                 new OutputStreamWriter(clientSocket.getOutputStream))
 
               while (clientSocket.isConnected) {
                 //相当于先get然后再remove掉,参数指定等待的毫秒数,无论I/O是否准备好,poll都会返回
                 val msg = queue.poll(100, TimeUnit.MILLISECONDS)
                 if (msg != null) {
+                  //将文本写入字符输出流,缓冲各个字符
                   outputStream.write(msg)
+                  //刷新该流的缓冲
                   outputStream.flush()
                   logInfo("Message '" + msg + "' sent")
                 }
@@ -534,6 +544,7 @@ class TestServer(portToBind: Int = 0) extends Logging {
 
   def start(): Unit = {
     servingThread.start()
+    //如果服务器启动,如果指定时间启动则返回false
     if (!waitForStart(10000)) {
       stop()
       throw new AssertionError("Timeout: TestServer cannot start in 10 seconds")
@@ -543,26 +554,26 @@ class TestServer(portToBind: Int = 0) extends Logging {
   /**
    * Wait until the server starts. Return true if the server starts in "millis" milliseconds.
    * Otherwise, return false to indicate it's timeout.
-   * 等到服务器启动,如果服务器在“微”毫秒开始返回true,否则,返回错误指示它的超时时间
+   * 等待服务器启动,如果服务器在"millis"毫秒内启动返回true,否则,返回false,表示它启动超时
    */
   private def waitForStart(millis: Long): Boolean = {
     // We will create a test connection to the server so that we can make sure it has started.
-    //将创建一个测试连接到服务器,以便我们可以确保它已经开始
+    //将创建一个测试连接到服务器,以便我们可以确保它已经启动
     val socket = new Socket("localhost", port)
     try {
       //使当前线程在锁存器倒计数至零之前一直等待，除非线程被中断或超出了指定的等待时间     
-      startLatch.await(millis, TimeUnit.MILLISECONDS)//timeout - 要等待的最长时间
+      startLatch.await(millis, TimeUnit.MILLISECONDS)//timeout -(毫秒)要等待的最长时间
     } finally {
       if (!socket.isClosed) {
         socket.close()
       }
     }
   }
-
+  //发送消息
   def send(msg: String) { queue.put(msg) }
-
-  def stop() { servingThread.interrupt() }//在等待时被中断
-
+  //在等待时被中断
+  def stop() { servingThread.interrupt() }
+  //获得本地端口
   def port: Int = serverSocket.getLocalPort
 }
 

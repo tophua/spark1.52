@@ -26,7 +26,7 @@ import org.apache.spark.streaming.ui.UIUtils
 
 /**
  * Tests whether scope information is passed from DStream operations to RDDs correctly.
- * 测试从dstream操作范围的信息正确通过RDDS
+ * 测试从dstream的RDDs正确通过操作范围信息
  */
 class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAndAfterAll {
   private var ssc: StreamingContext = null
@@ -46,11 +46,13 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
   test("dstream without scope") {//没有范围
     val dummyStream = new DummyDStream(ssc)
     dummyStream.initialize(Time(0))
-    //没有初始化
+    //DStream没有在范围内初始化
     // This DStream is not instantiated in any scope, so all RDDs
     // created by this stream should similarly not have a scope
+    //所以这个流创建的所有RDDS应该同样没有范围
     assert(dummyStream.baseScope === None)
-    //获取父DStream的RDD
+    //getOrCompute从缓存generatedRDDs = new HashMap[Time,RDD[T]]中获取RDD,
+    //如果缓存中不存在,则生成RDD并持久化,设置检查点并放入缓存
     assert(dummyStream.getOrCompute(Time(1000)).get.scope === None)
     assert(dummyStream.getOrCompute(Time(2000)).get.scope === None)
     assert(dummyStream.getOrCompute(Time(3000)).get.scope === None)
@@ -61,6 +63,8 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     inputStream.initialize(Time(0))
    //没有输入流范围
     val baseScope = inputStream.baseScope.map(RDDOperationScope.fromJson)
+     //getOrCompute从缓存generatedRDDs = new HashMap[Time,RDD[T]]中获取RDD,
+    //如果缓存中不存在,则生成RDD并持久化,设置检查点并放入缓存
     val scope1 = inputStream.getOrCompute(Time(1000)).get.scope
     val scope2 = inputStream.getOrCompute(Time(2000)).get.scope
     val scope3 = inputStream.getOrCompute(Time(3000)).get.scope
@@ -127,6 +131,8 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
     def testStream(stream: DStream[_]): Unit = {
       if (stream != inputStream) {
         val myScopeBase = stream.baseScope.map(RDDOperationScope.fromJson)
+	 //getOrCompute从缓存generatedRDDs = new HashMap[Time,RDD[T]]中获取RDD,
+	 //如果缓存中不存在,则生成RDD并持久化,设置检查点并放入缓存
         val myScope1 = stream.getOrCompute(Time(1000)).get.scope
         val myScope2 = stream.getOrCompute(Time(2000)).get.scope
         val myScope3 = stream.getOrCompute(Time(3000)).get.scope
