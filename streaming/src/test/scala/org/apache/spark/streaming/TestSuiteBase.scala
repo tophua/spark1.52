@@ -170,12 +170,15 @@ class BatchCounter(ssc: StreamingContext) {
   private val listener = new StreamingListener {
     override def onBatchStarted(batchStarted: StreamingListenerBatchStarted): Unit =
       BatchCounter.this.synchronized {
+       
         numStartedBatches += 1
+         //println("onBatchStarted:"+numStartedBatches)
         BatchCounter.this.notifyAll()
       }
     override def onBatchCompleted(batchCompleted: StreamingListenerBatchCompleted): Unit =
       BatchCounter.this.synchronized {
         numCompletedBatches += 1
+        //println("onBatchCompleted:"+numCompletedBatches)
         BatchCounter.this.notifyAll()
       }
   }
