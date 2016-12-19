@@ -35,6 +35,7 @@ class RateControllerSuite extends TestSuiteBase {
     val ssc = new StreamingContext(conf, batchDuration)
     withStreamingContext(ssc) { ssc =>
       val dstream = new RateTestInputDStream(ssc)
+      //将当前DStream注册到DStreamGraph的输出流中
       dstream.register()
       ssc.start()
 
@@ -52,6 +53,7 @@ class RateControllerSuite extends TestSuiteBase {
         override val rateController =
           Some(new ReceiverRateController(id, estimator))
       }
+      //将当前DStream注册到DStreamGraph的输出流中
       dstream.register()
       ssc.start()
 

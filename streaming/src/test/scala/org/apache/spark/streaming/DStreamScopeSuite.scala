@@ -111,6 +111,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
 
   test("scoping nested operations") {//作用域嵌套操作
     val inputStream = new DummyInputDStream(ssc)
+    //countByWindow对所有元素进行count操作后,每个RDD都只包含一个元素的新的DStream
     val countStream = inputStream.countByWindow(Seconds(10), Seconds(1))
     countStream.initialize(Time(0))
 

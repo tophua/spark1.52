@@ -399,6 +399,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     val operatedStream = operation(inputStream1, inputStream2)
     val outputStream = new TestOutputStreamWithPartitions(operatedStream,
       new ArrayBuffer[Seq[Seq[W]]] with SynchronizedBuffer[Seq[Seq[W]]])
+    //将当前DStream注册到DStreamGraph的输出流中
     outputStream.register()
     ssc
   }

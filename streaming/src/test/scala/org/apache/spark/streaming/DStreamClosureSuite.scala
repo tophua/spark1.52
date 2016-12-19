@@ -135,6 +135,7 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
   }
   private def testReduceByWindow(ds: DStream[Int]): Unit = {
     val reduceF = (_: Int, _: Int) => { return; 1 }
+    //reduceByWindow对所有元素进行count操作后,每个RDD都只包含一个元素的新的DStream
     expectCorrectException { ds.reduceByWindow(reduceF, Seconds(1), Seconds(2)) }
     expectCorrectException { ds.reduceByWindow(reduceF, reduceF, Seconds(1), Seconds(2)) }
   }

@@ -259,8 +259,11 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
       val receiver2 = new FakeReceiver(sendData = true)
       val receiverStream1 = ssc.receiverStream(receiver1)
       val receiverStream2 = ssc.receiverStream(receiver2)
+       //register将当前DStream注册到DStreamGraph的输出流中
       receiverStream1.register()
       //3第二窗口
+      //window返回一个包含了所有在时间滑动窗口中可见元素的新的DStream
+      //register将当前DStream注册到DStreamGraph的输出流中
       receiverStream2.window(batchDuration * 6).register()  // 3 second window
       ssc.checkpoint(tempDirectory.getAbsolutePath())
       ssc.start()

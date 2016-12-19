@@ -138,6 +138,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
           "localhost", testServer.port, StorageLevel.MEMORY_AND_DISK)
         val outputBuffer = new ArrayBuffer[Seq[String]] with SynchronizedBuffer[Seq[String]]
         val outputStream = new TestOutputStream(networkStream, outputBuffer)
+	 //register将当前DStream注册到DStreamGraph的输出流中
         outputStream.register()
         ssc.start()
 
@@ -181,6 +182,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         val outputBuffer = new ArrayBuffer[Seq[Array[Byte]]]
           with SynchronizedBuffer[Seq[Array[Byte]]]
         val outputStream = new TestOutputStream(fileStream, outputBuffer)
+	 //register将当前DStream注册到DStreamGraph的输出流中
         outputStream.register()
         ssc.start()
 
@@ -247,6 +249,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     
     val outputStream = new TestOutputStream(countStream, outputBuffer)
     def output: ArrayBuffer[Long] = outputBuffer.flatMap(x => x)
+     //register将当前DStream注册到DStreamGraph的输出流中
     outputStream.register()
     ssc.start()
 
@@ -282,6 +285,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     val outputBuffer = new ArrayBuffer[Seq[String]] with SynchronizedBuffer[Seq[String]]//
     val outputStream = new TestOutputStream(queueStream, outputBuffer)
     def output: ArrayBuffer[Seq[String]] = outputBuffer.filter(_.size > 0)
+     //register将当前DStream注册到DStreamGraph的输出流中
     outputStream.register()
     ssc.start()
 
@@ -429,6 +433,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
           testDir.toString, (x: Path) => true, newFilesOnly = newFilesOnly).map(_._2.toString)
         val outputBuffer = new ArrayBuffer[Seq[String]] with SynchronizedBuffer[Seq[String]]
         val outputStream = new TestOutputStream(fileStream, outputBuffer)
+	 //register将当前DStream注册到DStreamGraph的输出流中
         outputStream.register()
         ssc.start()
 

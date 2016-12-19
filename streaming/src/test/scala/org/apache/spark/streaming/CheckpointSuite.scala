@@ -555,8 +555,10 @@ class CheckpointSuite extends TestSuiteBase {
         // Reducing over a large window to ensure that recovery from driver failure
         // requires reprocessing of all the files seen before the failure
         //减少在一个大的窗口,以确保恢复从驱动程序故障,需要重新处理之前看到的故障的所有文件
+	//reduceByWindow对所有元素进行count操作后,每个RDD都只包含一个元素的新的DStream
         val reducedStream = mappedStream.reduceByWindow(_ + _, batchDuration * 30, batchDuration)
         val outputStream = new TestOutputStream(reducedStream, outputBuffer)
+	 //register将当前DStream注册到DStreamGraph的输出流中
         outputStream.register()
         ssc.start()
 

@@ -553,6 +553,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     val rememberDuration = Seconds(3)
     def operation(s: DStream[Int]): DStream[(Int, Int)] = {
       s.map(x => (x % 10, 1))
+      //返回一个包含了所有在时间滑动窗口中可见元素的新的DStream
        .window(Seconds(2), Seconds(1))
        .window(Seconds(4), Seconds(2))
     }
@@ -621,7 +622,7 @@ class BasicOperationsSuite extends TestSuiteBase {
         val mappedStream = networkStream.map(_ + ".").persist()
         val outputBuffer = new ArrayBuffer[Seq[String]] with SynchronizedBuffer[Seq[String]]
         val outputStream = new TestOutputStream(mappedStream, outputBuffer)
-
+	 //register将当前DStream注册到DStreamGraph的输出流中
         outputStream.register()
         ssc.start()
 

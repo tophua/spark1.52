@@ -213,6 +213,7 @@ object MasterFailureTest extends Logging {
     val inputStream = ssc.textFileStream(testDir.toString)
     val operatedStream = operation(inputStream)
     val outputStream = new TestOutputStream(operatedStream)
+     //register将当前DStream注册到DStreamGraph的输出流中
     outputStream.register()
     ssc
   }

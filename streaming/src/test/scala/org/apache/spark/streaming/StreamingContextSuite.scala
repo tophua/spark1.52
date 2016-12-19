@@ -105,6 +105,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     //对于那些运行了几小时或者几天的Spark作业（特别是Spark Streaming）设置这个是很有用的
     myConf.set("spark.cleaner.ttl", "10s")
     val ssc1 = new StreamingContext(myConf, batchDuration)
+    //将当前DStream注册到DStreamGraph的输出流中
     addInputStream(ssc1).register()
     ssc1.start()
     //在interval周期后给生成的RDD设置检查点
@@ -137,6 +138,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("start and stop state check") {//启动和停止状态检查
     ssc = new StreamingContext(master, appName, batchDuration)
+    //将当前DStream注册到DStreamGraph的输出流中
     addInputStream(ssc).register()
     //初始化
     assert(ssc.getState() === StreamingContextState.INITIALIZED)
@@ -230,6 +232,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("start multiple times") {//运行多个实时处理
     ssc = new StreamingContext(master, appName, batchDuration)
+    //将当前DStream注册到DStreamGraph的输出流中
     addInputStream(ssc).register()
     ssc.start()
     assert(ssc.getState() === StreamingContextState.ACTIVE)
@@ -239,6 +242,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("stop multiple times") {//暂停多个实时处理
     ssc = new StreamingContext(master, appName, batchDuration)
+    //将当前DStream注册到DStreamGraph的输出流中
     addInputStream(ssc).register()
     ssc.start()
     ssc.stop()
@@ -249,6 +253,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("stop before start") {//运行之前停止不抛异常
     ssc = new StreamingContext(master, appName, batchDuration)
+    //将当前DStream注册到DStreamGraph的输出流中
     addInputStream(ssc).register()
     //停止之前启动不应该抛出异常
     ssc.stop()  // stop before start should not throw exception
@@ -258,6 +263,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("start after stop") {//停止后启动
     // Regression test for SPARK-4301
     ssc = new StreamingContext(master, appName, batchDuration)
+    //将当前DStream注册到DStreamGraph的输出流中
     addInputStream(ssc).register()
     ssc.stop()
     intercept[IllegalStateException] {
@@ -382,6 +388,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     val conf = new SparkConf().setMaster(master).setAppName(appName)
     ssc = new StreamingContext(conf, batchDuration)
     assert(ssc.getState() === StreamingContextState.INITIALIZED)
+    //将当前DStream注册到DStreamGraph的输出流中
     addInputStream(ssc).register()
     ssc.start()
 
@@ -400,6 +407,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("awaitTermination") {//用于等待子线程结束
     ssc = new StreamingContext(master, appName, batchDuration)
     val inputStream = addInputStream(ssc)
+    //将当前DStream注册到DStreamGraph的输出流中
     inputStream.map(x => x).register()
 
     // test whether start() blocks indefinitely or not
@@ -446,6 +454,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("awaitTermination after stop") {//等待终止后停止
     ssc = new StreamingContext(master, appName, batchDuration)
     val inputStream = addInputStream(ssc)
+    //将当前DStream注册到DStreamGraph的输出流中
     inputStream.map(x => x).register()
 
     failAfter(10000 millis) {
@@ -472,6 +481,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("awaitTermination with error in job generation") {
     ssc = new StreamingContext(master, appName, batchDuration)
     val inputStream = addInputStream(ssc)
+    //将当前DStream注册到DStreamGraph的输出流中
     inputStream.transform { rdd => throw new TestException("error in transform"); rdd }.register()
     val exception = intercept[TestException] {
       ssc.start()
@@ -483,7 +493,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("awaitTerminationOrTimeout") {
     ssc = new StreamingContext(master, appName, batchDuration)
     val inputStream = addInputStream(ssc)
-    inputStream.map(x => x).register()
+    inputStream.map(x => x).register()//将当前DStream注册到DStreamGraph的输出流中
 
     ssc.start()
 
@@ -688,6 +698,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     testGetActiveOrCreate {
       ssc = new StreamingContext(
         conf.clone.set("spark.streaming.clock", "org.apache.spark.util.ManualClock"), batchDuration)
+       //将当前DStream注册到DStreamGraph的输出流中
       addInputStream(ssc).register()
       ssc.start()
       val returnedSsc = StreamingContext.getActiveOrCreate(checkpointPath, creatingFunction _)
@@ -811,6 +822,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
       val _ssc = new StreamingContext(conf, batchDuration)
       val rdd = _ssc.sparkContext.parallelize(1 to 10)
       _ssc.checkpoint(checkpointDirectory)
+      //将当前DStream注册到DStreamGraph的输出流中
       _ssc.queueStream[Int](Queue(rdd)).register()
       _ssc
     }
@@ -834,6 +846,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     val input1 = addInputStream(ssc)
     val input2 = addInputStream(ssc)
     val output = new TestOutputStream(input2)
+    //将当前DStream注册到DStreamGraph的输出流中
     output.register()
     val batchCount = new BatchCounter(ssc)
     ssc.start()

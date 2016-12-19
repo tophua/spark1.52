@@ -154,7 +154,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     //批处理间隔
     val ssc = new StreamingContext(conf, batchDuration)
     val inputStream = new TestInputStream[Int](ssc, input, 1)
-    //窗口间隔
+    //窗口间隔,返回一个包含了所有在时间滑动窗口中可见元素的新的DStream
     val windowStream1 = inputStream.window(batchDuration * 2)
     assert(windowStream1.storageLevel === StorageLevel.NONE)
     assert(inputStream.storageLevel === StorageLevel.MEMORY_ONLY_SER)
@@ -259,6 +259,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     val slideDuration = Seconds(1)
     val numBatches = expectedOutput.size * (slideDuration / batchDuration).toInt
     val operation = (s: DStream[Int]) => {
+    //countByWindow对所有元素进行count操作后,每个RDD都只包含一个元素的新的DStream
       s.countByWindow(windowDuration, slideDuration).map(_.toInt)
     }
     testOperation(input, operation, expectedOutput, numBatches, true)

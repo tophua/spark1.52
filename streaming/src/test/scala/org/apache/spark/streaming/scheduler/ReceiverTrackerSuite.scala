@@ -103,6 +103,7 @@ class ReceiverTrackerSuite extends TestSuiteBase {
       })
       val input = ssc.receiverStream(new StoppableReceiver)
       val output = new TestOutputStream(input)
+      //将当前DStream注册到DStreamGraph的输出流中
       output.register()
       ssc.start()
       StoppableReceiver.shouldStop = true
@@ -127,6 +128,7 @@ class ReceiverTrackerSuite extends TestSuiteBase {
       })
       val input = ssc.receiverStream(new TestReceiver)
       val output = new TestOutputStream(input)
+      //将当前DStream注册到DStreamGraph的输出流中
       output.register()
       ssc.start()
       eventually(timeout(10 seconds), interval(10 millis)) {
