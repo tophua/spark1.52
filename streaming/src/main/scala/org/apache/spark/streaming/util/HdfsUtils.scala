@@ -69,7 +69,7 @@ private[streaming] object HdfsUtils {
   def getFileSystemForPath(path: Path, conf: Configuration): FileSystem = {
     // For local file systems, return the raw local file system, such calls to flush()
     // actually flushes the stream.
-    //对于本地文件系统,返回原始的本地文件系统,这样的要求flush()却冲流
+    //对于本地文件系统,返回原始的本地文件系统,这样的要求flush()输出到实际流
     val fs = path.getFileSystem(conf)
     fs match {
       case localFs: LocalFileSystem => localFs.getRawFileSystem

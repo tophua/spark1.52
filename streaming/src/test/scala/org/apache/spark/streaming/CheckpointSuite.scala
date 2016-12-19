@@ -83,12 +83,12 @@ class CheckpointSuite extends TestSuiteBase {
     val input = (1 to 10).map(_ => Seq("a")).toSeq
     val operation = (st: DStream[String]) => {
       val updateFunc = (values: Seq[Int], state: Option[Int]) => {
-        println(values.mkString(",")+"|||"+state.mkString(","))
+        //println(values.mkString(",")+"|||"+state.mkString(","))
         //
         Some(values.sum + state.getOrElse(0))
       }
       st.map(x => {
-        println("======"+x)
+        //println("======"+x)
         //x==a
         (x, 1)
         })
@@ -97,23 +97,36 @@ class CheckpointSuite extends TestSuiteBase {
       //状态流检查点间隔
       .checkpoint(stateStreamCheckpointInterval)
       .map(t =>{
-        println(t._1+"|map|"+t._2)
+        //println(t._1+"|map|"+t._2)
         (t._1, t._2)
       })
     }
+    /**
+     * 设置必须dstreams测试dstream操作,使用两个序列的输入集合
+     * operation匿名函数,接收类型DStream,返回类型DStream
+     */
     var ssc = setupStreams(input, operation)
+    //var stateStream:DStream[_]
     var stateStream = ssc.graph.getOutputStreams().head.dependencies.head.dependencies.head
 
     // Run till a time such that at least one RDD in the stream should have been checkpointed,
     // then check whether some RDD has been checkpointed or not
-    //运行到一个时间至少一个RDD在流应该已经建立,然后检查是否已建立或不见
+    //运行一个时间的至少一个RDD流已在检查点内,然后检查一些RDD是否有在检查点内
     ssc.start()
     advanceTimeWithRealDelay(ssc, firstNumBatches)
+    //状态流检查点数据
     logInfo("Checkpoint data of state stream = \n" + stateStream.checkpointData)
+    //判断当前检查点文件列表是否为空
     assert(!stateStream.checkpointData.currentCheckpointFiles.isEmpty,
       "No checkpointed RDDs in state stream before first failure")
     stateStream.checkpointData.currentCheckpointFiles.foreach {
+      //判断每个检查点
       case (time, file) => {
+        /***
+         * time:1000 ms	 file:file:/C:/Temp/spark-a43d9445-ccbc-4ee9-9b07-d77c1c9fa7f7/d24eb0fc-977e-44c7-b8ef-141807435f11/rdd-10
+				 * time:2000 ms	 file:file:/C:/Temp/spark-a43d9445-ccbc-4ee9-9b07-d77c1c9fa7f7/d24eb0fc-977e-44c7-b8ef-141807435f11/rdd-23
+         */
+        println("time:"+time+"\t file:"+file)
         assert(fs.exists(new Path(file)), "Checkpoint file '" + file +"' for time " + time +
             " for state stream before first failure does not exist")
       }
@@ -121,9 +134,10 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Run till a further time such that previous checkpoint files in the stream would be deleted
     // and check whether the earlier checkpoint files are deleted
-    //运行到进一步的时间,这样流中的以前的检查点文件将被删除,删除之前的检查点
+    // 运行到更远的时间使以前的检查点文件流,将检查以前检查点文件是否被删除
     val checkpointFiles = stateStream.checkpointData.currentCheckpointFiles.map(x => new File(x._2))
     advanceTimeWithRealDelay(ssc, secondNumBatches)
+    //判断检查点文件是否存在
     checkpointFiles.foreach(file =>
       assert(!file.exists, "Checkpoint file '" + file + "' was not deleted"))
     ssc.stop()
@@ -133,7 +147,7 @@ class CheckpointSuite extends TestSuiteBase {
     //重启流计算使用检查点文件,并检查是否建立RDDS已经恢复或不
     ssc = new StreamingContext(checkpointDir)
     stateStream = ssc.graph.getOutputStreams().head.dependencies.head.dependencies.head
-    println("Restored data of state stream 111="+stateStream.generatedRDDs.mkString("\n"))
+    //println("Restored data of state stream 111="+stateStream.generatedRDDs.mkString("\n"))
     logInfo("Restored data of state stream = \n[" + stateStream.generatedRDDs.mkString("\n") + "]")
     assert(!stateStream.generatedRDDs.isEmpty,
       "No restored RDDs in state stream after recovery from first failure")
@@ -141,11 +155,13 @@ class CheckpointSuite extends TestSuiteBase {
 
     // Run one batch to generate a new checkpoint file and check whether some RDD
     // is present in the checkpoint data or not
-    //运行一个批处理来生成一个新的检查点文件,检查是否有RDD是在检查点数据或不存在
+    //运行一个批处理来生成一个新的检查点文件,检查是否有RDD在检查点数据
     ssc.start()
     advanceTimeWithRealDelay(ssc, 1)
+    //判断检查点文件是否存在
     assert(!stateStream.checkpointData.currentCheckpointFiles.isEmpty,
       "No checkpointed RDDs in state stream before second failure")
+    //判断检查点数据
     stateStream.checkpointData.currentCheckpointFiles.foreach {
       case (time, file) => {
         assert(fs.exists(new Path(file)), "Checkpoint file '" + file +"' for time " + time +
@@ -158,10 +174,12 @@ class CheckpointSuite extends TestSuiteBase {
     // correct checkpoint data
     //从新的检查点文件中重新启动流式计算,查看该文件是否具有正确的检查点数据
     ssc = new StreamingContext(checkpointDir)
+    //获得DStream[_]
     stateStream = ssc.graph.getOutputStreams().head.dependencies.head.dependencies.head
-    println("Restored data of state stream 2222="+stateStream.generatedRDDs.mkString("\n"))
+    //println("Restored data of state stream 2222="+stateStream.generatedRDDs.mkString("\n"))
+    //恢复状态流数据
     logInfo("Restored data of state stream = \n[" + stateStream.generatedRDDs.mkString("\n") + "]")
-    //从第二次故障失败后,恢复没有RDDS状态流
+    //从第二次故障失败后恢复RDDS状态流
     assert(!stateStream.generatedRDDs.isEmpty,
       "No restored RDDs in state stream after recovery from second failure")
 
@@ -179,7 +197,7 @@ class CheckpointSuite extends TestSuiteBase {
   // This tests whether spark conf persists through checkpoints, and certain
   // configs gets scrubbed 
   //测试是否通过检查点持久化Spark 配置文件,某些配置项被擦洗
-  test("recovery of conf through checkpoints") {//通过检查点的conf文件恢复
+  test("recovery of conf through checkpoints") {//恢复检查点conf文件
     val key = "spark.mykey"
     val value = "myvalue"
     System.setProperty(key, value)

@@ -210,6 +210,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     event match {
       case GenerateJobs(time) => generateJobs(time)
       case ClearMetadata(time) => clearMetadata(time)
+      //是异步地收到 DoCheckpoint消息后,在一个线程池里执行 doCheckpoint()方法
       case DoCheckpoint(time, clearCheckpointDataLater) =>
         doCheckpoint(time, clearCheckpointDataLater)
       case ClearCheckpointData(time) => clearCheckpointData(time)
@@ -288,7 +289,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     Try {
       //分配接收到的块到批处理
       jobScheduler.receiverTracker.allocateBlocksToBatch(time) // allocate received blocks to batch
-      //使用分配的块生成作业
+      //生成作业使用分配的块
       graph.generateJobs(time) // generate jobs using allocated block
     } match {
       case Success(jobs) =>
@@ -297,6 +298,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
       case Failure(e) =>
         jobScheduler.reportError("Error generating jobs for time " + time, e)
     }
+    //异步地收到 DoCheckpoint消息后
     eventLoop.post(DoCheckpoint(time, clearCheckpointDataLater = false))
   }
 
@@ -351,6 +353,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
     if (shouldCheckpoint && (time - graph.zeroTime).isMultipleOf(ssc.checkpointDuration)) {
       logInfo("Checkpointing graph for time " + time)
       ssc.graph.updateCheckpointData(time)
+      //new一个当前状态的 Checkpoint,然后通过 CheckpointWriter 写出去
       checkpointWriter.write(new Checkpoint(ssc, time), clearCheckpointDataLater)
     }
   }

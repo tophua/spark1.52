@@ -28,7 +28,7 @@ import org.apache.spark.streaming.{Time, StreamingContext}
  * Track the information of input stream at specified batch time.
  * 在指定的批处理时间跟踪输入流的信息
  * @param inputStreamId the input stream id 输入流标识
- * @param numRecords the number of records in a batch 批中记录的数量
+ * @param numRecords the number of records in a batch 批次中记录的数量
  * @param metadata metadata for this batch. It should contain at least one standard field named
  *                 "Description" which maps to the content that will be shown in the UI.
  *                 它应该包含至少一个名为"描述"映射到将在用户界面中显示的内容

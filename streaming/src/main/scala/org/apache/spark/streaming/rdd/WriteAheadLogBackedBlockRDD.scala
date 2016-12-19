@@ -65,14 +65,20 @@ class WriteAheadLogBackedBlockRDDPartition(
  *
  *
  * @param sc SparkContext
- * @param blockIds Ids of the blocks that contains this RDD's data
+ * @param blockIds Ids of the blocks that contains this RDD's data 
+ * 								 IDS的块包含该RDD数据
  * @param walRecordHandles Record handles in write ahead logs that contain this RDD's data
+ * 												预写日志记录处理包含该RDD数据
  * @param isBlockIdValid Whether the block Ids are valid (i.e., the blocks are present in the Spark
  *                         executors). If not, then block lookups by the block ids will be skipped.
+ *                         块标识是否有效(块代表Spark在executors存在),如果不是，那块查找的块ID将被忽略
  *                         By default, this is an empty array signifying true for all the blocks.
+ *                         默认情况下,这意味着真正的所有块空数组,
  * @param storeInBlockManager Whether to store a block in the block manager
  *                            after reading it from the WAL
+ *                            是否将块存储在块管理器中,预写日志从块管理器读取
  * @param storageLevel storage level to store when storing in block manager
+ * 										 存储在块管理器中存储的存储级别
  *                     (applicable when storeInBlockManager = true)
  */
 private[streaming]

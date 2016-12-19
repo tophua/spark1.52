@@ -345,7 +345,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
   /**
    * Set up required DStreams to test the DStream operation using the two sequences
    * of input collections.
-   * 设置所需dstreams测试dstream,操作使用两个序列的输入集合
+   * 设置必须dstreams测试dstream操作,使用两个序列的输入集合
    * operation匿名函数,接收类型DStream,返回类型DStream
    */
   def setupStreams[U: ClassTag, V: ClassTag](

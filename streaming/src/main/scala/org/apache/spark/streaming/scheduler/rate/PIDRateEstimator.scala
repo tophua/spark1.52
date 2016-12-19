@@ -25,32 +25,41 @@ import org.apache.spark.Logging
  * by calculating an '''error''' between a measured output and a desired value. In the
  * case of Spark Streaming the error is the difference between the measured processing
  * rate (number of elements/processing delay) and the previous rate.
- *
+ * 实现了比例积分微分(PID)控制器,它作用于元素进入Spark流的速度,PID控制器通过计算一个''error '之间的测量输出和期望值
+ * 在Spark流的情况下,误差是测量的处理率(元素数/处理延迟)和以前的速率之间的差异
+ * 
  * @see https://en.wikipedia.org/wiki/PID_controller
  *
- * @param batchIntervalMillis the batch duration, in milliseconds
- * @param proportional how much the correction should depend on the current
+ * @param batchIntervalMillis the batch duration, in milliseconds 批量持续时间,以毫秒为单位
+ * @param proportional how much the correction should depend on the current 校正的多少取决于当前的误差
  *        error. This term usually provides the bulk of correction and should be positive or zero.
  *        A value too large would make the controller overshoot the setpoint, while a small value
+ *        这个术语通常提供大量的修正,应该是正的或零的.一个值过大,会使控制器超调量设定值,
  *        would make the controller too insensitive. The default value is 1.
+ *        小值会使控制器太不敏感,默认值为1
  * @param integral how much the correction should depend on the accumulation
  *        of past errors. This value should be positive or 0. This term accelerates the movement
  *        towards the desired value, but a large value may lead to overshooting. The default value
  *        is 0.2.
+ *        多少的校正应取决于过去的积累误差,这个值应该是正的或0。这项加速走向期望值,
+ *        但较大的值,可能导致超调。默认值为0.2。
  * @param derivative how much the correction should depend on a prediction
  *        of future errors, based on current rate of change. This value should be positive or 0.
  *        This term is not used very often, as it impacts stability of the system. The default
  *        value is 0.
- * @param minRate what is the minimum rate that can be estimated.
+ *        校正的多少取决于对未来误差的预测,基于当前变化率。这个值应该是正的或0。
+ *				这个词不经常使用,因为它影响系统的稳定性。默认值为0
+ * @param minRate what is the minimum rate that can be estimated.什么是可估计的最低利率
  *        This must be greater than zero, so that the system always receives some data for rate
  *        estimation to work.
+ *        这必须大于零,因此系统总是接收一些数据进行速率估计来工作.
  */
 private[streaming] class PIDRateEstimator(
-    batchIntervalMillis: Long,
-    proportional: Double,
-    integral: Double,
-    derivative: Double,
-    minRate: Double
+    batchIntervalMillis: Long,//批量持续时间,以毫秒为单位
+    proportional: Double, //比例
+    integral: Double,//积分
+    derivative: Double,//微分
+    minRate: Double//最小速率
   ) extends RateEstimator with Logging {
 
   private var firstRun: Boolean = true

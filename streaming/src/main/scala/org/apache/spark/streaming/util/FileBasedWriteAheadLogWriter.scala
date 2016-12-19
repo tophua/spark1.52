@@ -51,12 +51,14 @@ private[streaming] class FileBasedWriteAheadLogWriter(path: String, hadoopConf: 
    *  */
   def write(data: ByteBuffer): FileBasedWriteAheadLogSegment = synchronized {
     assertOpen()
-    //确保缓冲区中的所有数据检索
+    //rewind 将文件内部的位置指针重新指向一个流(数据流/文件)
     data.rewind() // Rewind to ensure all data in the buffer is retrieved
+    //remaining返回剩余的可用长度,此长度为实际读取的数据长度
     val lengthToWrite = data.remaining()
     //数据写到文件完成后,记录一下文件 path、offset 和 length,封装为一个 FileBasedWriteAheadLogSegment返回
     val segment = new FileBasedWriteAheadLogSegment(path, nextOffset, lengthToWrite)
     stream.writeInt(lengthToWrite)
+    //hasArray 判断是否可通过一个可访问的字节数组实现此缓冲区
     if (data.hasArray) {
       stream.write(data.array())
     } else {
