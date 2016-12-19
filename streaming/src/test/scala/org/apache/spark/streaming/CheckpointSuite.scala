@@ -197,14 +197,16 @@ class CheckpointSuite extends TestSuiteBase {
   // This tests whether spark conf persists through checkpoints, and certain
   // configs gets scrubbed 
   //测试是否通过检查点持久化Spark 配置文件,某些配置项被擦洗
-  test("recovery of conf through checkpoints") {//恢复检查点conf文件
+  test("recovery of conf through checkpoints") {//从检查点恢复conf文件
     val key = "spark.mykey"
     val value = "myvalue"
     System.setProperty(key, value)
     ssc = new StreamingContext(master, framework, batchDuration)
+    //原始conf文件
     val originalConf = ssc.conf
 
     val cp = new Checkpoint(ssc, Time(1000))
+    //复制conf配置文件
     val cpConf = cp.createSparkConf()
     assert(cpConf.get("spark.master") === originalConf.get("spark.master"))
     assert(cpConf.get("spark.app.name") === originalConf.get("spark.app.name"))
@@ -212,7 +214,7 @@ class CheckpointSuite extends TestSuiteBase {
     ssc.stop()
 
     // Serialize/deserialize to simulate write to storage and reading it back
-    //序列化/反序列化进行存储和回读写
+    //序列化/反序列化进行写的存储进行读取
     val newCp = Utils.deserialize[Checkpoint](Utils.serialize(cp))
 
     // Verify new SparkConf has all the previous properties
@@ -251,6 +253,7 @@ class CheckpointSuite extends TestSuiteBase {
   //获得正确的spark.driver.[host|port]来自检查点 
   test("get correct spark.driver.[host|port] from checkpoint") {
     val conf = Map("spark.driver.host" -> "localhost", "spark.driver.port" -> "9999")
+    //设置属性的值
     conf.foreach(kv => System.setProperty(kv._1, kv._2))
     ssc = new StreamingContext(master, framework, batchDuration)
     val originalConf = ssc.conf
