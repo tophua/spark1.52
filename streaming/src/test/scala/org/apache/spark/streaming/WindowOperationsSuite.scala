@@ -307,6 +307,7 @@ class WindowOperationsSuite extends TestSuiteBase {
       val numBatches = expectedOutput.size * (slideDuration / batchDuration).toInt
       val operation = (s: DStream[(String, Int)]) => {
         //基于窗口对原DStream中元素进行聚合得到新的DStream,与reduceByKey相似
+        //应用到一个(K,V)对组成的DStream上,返回一个由(K,V)对组成的新的DStream。每一个key的值均由给定的reduce函数聚集起来
         s.reduceByKeyAndWindow((x: Int, y: Int) => x + y, windowDuration, slideDuration)
       }
       testOperation(input, operation, expectedOutput, numBatches, true)
@@ -325,7 +326,7 @@ class WindowOperationsSuite extends TestSuiteBase {
       val numBatches = expectedOutput.size * (slideDuration / batchDuration).toInt
       val operation = (s: DStream[(String, Int)]) => {
         s.reduceByKeyAndWindow(_ + _, _ - _, windowDuration, slideDuration)
-	//在interval周期后给生成的RDD设置检查点
+	      //在interval周期后给生成的RDD设置检查点
          .checkpoint(Seconds(100)) // Large value to avoid effect of RDD checkpointing
       }
       testOperation(input, operation, expectedOutput, numBatches, true)
@@ -346,7 +347,7 @@ class WindowOperationsSuite extends TestSuiteBase {
       val operation = (s: DStream[(String, Int)]) => {
         s.reduceByKeyAndWindow(_ + _, _ - _, windowDuration, slideDuration, filterFunc = filterFunc)
           .persist()
-	  //在interval周期后给生成的RDD设置检查点
+	      //在interval周期后给生成的RDD设置检查点
           .checkpoint(Seconds(100)) // Large value to avoid effect of RDD checkpointing
       }
       testOperation(input, operation, expectedOutput, numBatches, true)
