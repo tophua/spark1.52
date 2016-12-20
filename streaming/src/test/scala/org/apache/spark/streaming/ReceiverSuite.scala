@@ -38,10 +38,7 @@ import org.apache.spark.util.Utils
 /** 
  *  用于测试网络接收行为
  *  Testsuite for testing the network receiver behavior 
- *  
  *  Receiver在 onStart()启动后,就将持续不断地接收外界数据,并持续交给 ReceiverSupervisor进行数据转储;
- *  
- *  
  *  */
 class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 
@@ -375,6 +372,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 
   /**
    * An implementation of BlockGeneratorListener that is used to test the BlockGenerator.
+   * 测试一块产生实现BlockGeneratorListener监听器
    */
   class FakeBlockGeneratorListener(pushDelay: Long = 0) extends BlockGeneratorListener {
     // buffer of data received as ArrayBuffers

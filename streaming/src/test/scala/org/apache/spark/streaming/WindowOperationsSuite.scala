@@ -62,7 +62,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     Seq(("a", 1)),
     Seq()
   )
-//大组输出
+//大分组输出
   val bigGroupByOutput = Seq(
     Seq(("a", Seq(1))),
     Seq(("a", Seq(1, 1)), ("b", Seq(1))),
@@ -123,12 +123,14 @@ class WindowOperationsSuite extends TestSuiteBase {
     "basic window",
     Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5)),
     Seq( Seq(0), Seq(0, 1), Seq(1, 2), Seq(2, 3), Seq(3, 4), Seq(4, 5))
+    //slideDuration 默认2滑动间隔,windowDuration批处理间隔时间1秒
   )
 
   testWindow(
     "tumbling(翻滚) window",
     Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5)),
     Seq( Seq(0, 1), Seq(2, 3), Seq(4, 5)),
+    //slideDuration 滑动间隔,windowDuration批处理间隔时间
     Seconds(2),
     Seconds(2)
   )
@@ -137,14 +139,16 @@ class WindowOperationsSuite extends TestSuiteBase {
     "larger window",
     Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5)),
     Seq( Seq(0, 1), Seq(0, 1, 2, 3), Seq(2, 3, 4, 5), Seq(4, 5)),
+    //slideDuration 滑动间隔,windowDuration批处理间隔时间
     Seconds(4),
     Seconds(2)
   )
 
-  testWindow(
+  testWindow(//注意数数windowDuration>slideDuration数据丢失
     "non-overlapping(无重叠的) window",
     Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5)),
     Seq( Seq(1, 2), Seq(4, 5)),
+    //slideDuration 滑动间隔,windowDuration批处理间隔时间
     Seconds(2),
     Seconds(3)
   )
@@ -174,7 +178,7 @@ class WindowOperationsSuite extends TestSuiteBase {
   )
 
   testReduceByKeyAndWindow(
-    //Key已存在window和新的值添加到window中
+    //Key已存在window和新值添加到window中
     "key already in window and new value added into window",
     Seq( Seq(("a", 1)), Seq(("a", 1)) ),
     Seq( Seq(("a", 1)), Seq(("a", 2)) )
@@ -196,6 +200,7 @@ class WindowOperationsSuite extends TestSuiteBase {
     "larger slide time",//较大的滑动时间
     largerSlideInput,
     largerSlideReduceOutput,
+    //slideDuration 滑动间隔,windowDuration批处理间隔时间
     Seconds(4),
     Seconds(2)
   )
@@ -203,7 +208,6 @@ class WindowOperationsSuite extends TestSuiteBase {
   testReduceByKeyAndWindow("big test", bigInput, bigReduceOutput)
 
   // Testing reduceByKeyAndWindow (with invertible reduce function)
-//
   testReduceByKeyAndWindowWithInverse(
     "basic reduction",
     Seq(Seq(("a", 1), ("a", 3)) ),
@@ -284,10 +288,13 @@ class WindowOperationsSuite extends TestSuiteBase {
     name: String,
     input: Seq[Seq[Int]],
     expectedOutput: Seq[Seq[Int]],
+    //slideDuration 滑动间隔
     windowDuration: Duration = Seconds(2),
+    //windowDuration批处理间隔时间
     slideDuration: Duration = Seconds(1)
     ) {
     test("window - " + name) {
+      //批次数
       val numBatches = expectedOutput.size * (slideDuration / batchDuration).toInt
       //slideDuration 滑动间隔,windowDuration批处理间隔时间
       val operation = (s: DStream[Int]) => s.window(windowDuration, slideDuration)

@@ -31,7 +31,7 @@ import org.apache.spark.ui.SparkUICssErrorHandler
 
 /**
  * Selenium tests for the Spark Streaming Web UI.
- * 动化测试工具测试Spark流用户界面
+ * 自动化测试工具测试Spark流用户界面
  */
 class UISeleniumSuite
   extends SparkFunSuite with WebBrowser with Matchers with BeforeAndAfterAll with TestSuiteBase {

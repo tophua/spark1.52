@@ -292,6 +292,7 @@ class StreamingListenerSuiteReceiver extends Receiver[Any](StorageLevel.MEMORY_O
 /**
  * A StreamingListener that saves the latest `failureReasons` in `BatchInfo` to the `failureReasons`
  * field.
+ * Streaming监听器最新失败原因在'BatchInfo'保存到FailureReasonsCollector字段失败
  */
 class FailureReasonsCollector extends StreamingListener {
 

@@ -150,7 +150,7 @@ class ReceivedBlockHandlerSuite
           "Unexpected store result type"
         )
         // Verify the data in write ahead log files is correct
-        //在写前面的日志文件中验证数据是正确的
+        //在预写式日志文件中验证数据是正确
         val walSegments = storeResults.map { result =>
           result.asInstanceOf[WriteAheadLogBasedStoreResult].walRecordHandle
         }
@@ -346,6 +346,7 @@ class ReceivedBlockHandlerSuite
       val (blockIds, storeResults) = storeBlocks(receivedBlockHandler, blocks)
       withClue(s"Testing with ${blocks.head.getClass.getSimpleName}s:") {
         // Verify returns store results have correct block ids
+        // 验证返回存储结果是否有正确的块ID
         (storeResults.map { _.blockId }) shouldEqual blockIds
 
         // Call handler-specific verification function
