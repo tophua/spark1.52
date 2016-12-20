@@ -29,7 +29,9 @@ import org.apache.spark.mllib.classification.LogisticRegressionSuite.generateLog
 import org.apache.spark.mllib.util.{LinearDataGenerator, MLlibTestSparkContext}
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.sql.types.StructType
-
+/**
+ * 交叉验证测试套件
+ */
 class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   @transient var dataset: DataFrame = _
