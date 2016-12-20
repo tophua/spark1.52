@@ -48,15 +48,19 @@ class ReceivedBlockHandlerSuite
   with BeforeAndAfter
   with Matchers
   with Logging {
-
+  //日志滚动间隔秒
   val conf = new SparkConf().set("spark.streaming.receiver.writeAheadLog.rollingIntervalSecs", "1")
   val hadoopConf = new Configuration()
   val streamId = 1
+  //创建安全管理
   val securityMgr = new SecurityManager(conf)
+  //MapOutputTrackerMaster中维护的mapStatuses从本地或者其他远程节点读取文件
   val mapOutputTracker = new MapOutputTrackerMaster(conf)
   val shuffleManager = new HashShuffleManager(conf)
+  //对象序列化
   val serializer = new KryoSerializer(conf)
   val manualClock = new ManualClock
+  //块管理大小
   val blockManagerSize = 10000000
   val blockManagerBuffer = new ArrayBuffer[BlockManager]()
 
@@ -75,7 +79,7 @@ class ReceivedBlockHandlerSuite
 
     storageLevel = StorageLevel.MEMORY_ONLY_SER
     blockManager = createBlockManager(blockManagerSize, conf)
-
+    //创建临时目录
     tempDirectory = Utils.createTempDir()
     manualClock.setTime(0)
   }
@@ -83,19 +87,23 @@ class ReceivedBlockHandlerSuite
   after {
     for ( blockManager <- blockManagerBuffer ) {
       if (blockManager != null) {
+        //块管理服务暂停
         blockManager.stop()
       }
     }
     blockManager = null
+    //清空blockManager
     blockManagerBuffer.clear()
     if (blockManagerMaster != null) {
       blockManagerMaster.stop()
       blockManagerMaster = null
     }
+    //远程调用关闭
     rpcEnv.shutdown()
+    //等待终止服务
     rpcEnv.awaitTermination()
     rpcEnv = null
-
+    //递归删除临时目录
     Utils.deleteRecursively(tempDirectory)
   }
 
@@ -263,14 +271,17 @@ class ReceivedBlockHandlerSuite
     testRecordcount(isBlockManagerBasedBlockHandler, StorageLevel.MEMORY_AND_DISK,
       IteratorBlock((ArrayBuffer.fill(150)(0)).iterator), blockManager, Some(150))
   }
-
+  //创建块管理器
   private def createBlockManager(
       maxMem: Long,
       conf: SparkConf,
       name: String = SparkContext.DRIVER_IDENTIFIER): BlockManager = {
+    //创建块传输服务
     val transfer = new NioBlockTransferService(conf, securityMgr)
+    //块管理服务
     val manager = new BlockManager(name, rpcEnv, blockManagerMaster, serializer, maxMem, conf,
       mapOutputTracker, shuffleManager, transfer, securityMgr, 0)
+    //块管理服务初始化
     manager.initialize("app-id")
     blockManagerBuffer += manager
     manager
@@ -397,7 +408,7 @@ class ReceivedBlockHandlerSuite
 
   /** 
    *  Store blocks using a handler
-   *  使用处理程序的存储块 
+   *  处理块的存储 
    *  */
   private def storeBlocks(
       receivedBlockHandler: ReceivedBlockHandler,
@@ -418,7 +429,7 @@ class ReceivedBlockHandlerSuite
   /** 
    *  Store single block using a handler
    *  使用处理程序存储单个块
-   *   */
+   * */
   private def storeSingleBlock(
       handler: ReceivedBlockHandler,
       block: ReceivedBlock
