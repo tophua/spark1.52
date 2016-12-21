@@ -34,7 +34,7 @@ import org.apache.spark.Logging
  * Streaming监听测试套件
  */
 class StreamingListenerSuite extends TestSuiteBase with Matchers {
-
+  //input= Vector(List(1), List(2), List(3), List(4))
   val input = (1 to 4).map(Seq(_)).toSeq
   val operation = (d: DStream[Int]) => d.map(x => x)
 
@@ -54,6 +54,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   override def actuallyWait: Boolean = true
 
   test("batch info reporting") { //批量信息报告
+     //input= Vector(List(1), List(2), List(3), List(4))
     ssc = setupStreams(input, operation)
     val collector = new BatchInfoCollector
     ssc.addStreamingListener(collector)
@@ -64,16 +65,34 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     batchInfosSubmitted should have size 4
 
     batchInfosSubmitted.foreach(info => {
+      //调用延迟
       info.schedulingDelay should be(None)
+      //处理延迟
       info.processingDelay should be(None)
+      //总的延迟
       info.totalDelay should be(None)
     })
 
     batchInfosSubmitted.foreach { info =>
+      println("==="+info.numRecords+"==="+info.batchTime)
+       println("==="+info.processingStartTime+"==="+info.processingEndTime)
+    println("==="+info.submissionTime+"==="+info.numOutputOp)
+    //Map(0 -> StreamInputInfo(0,1,Map()))
+    println("==="+info.streamIdToInputInfo)
+      //记录数
       info.numRecords should be(1L)
+  
       info.streamIdToInputInfo should be(Map(0 -> StreamInputInfo(0, 1L)))
     }
-
+    batchInfosSubmitted.map(x=>{println(x.submissionTime)})
+    //检查一个数字序列是否在递增顺序
+    /**
+     * batchInfosSubmitted.map(_.submissionTime)提交时间
+     *1482309346865
+      1482309346880
+      1482309346917
+      1482309347006
+     */
     isInIncreasingOrder(batchInfosSubmitted.map(_.submissionTime)) should be(true)
 
     // SPARK-6766: processingStartTime of batch info should not be None when starting
@@ -82,30 +101,66 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     batchInfosStarted should have size 4
 
     batchInfosStarted.foreach(info => {
+      //println(info.schedulingDelay)
+      //println(info.schedulingDelay.get)
+      //println( info.processingDelay)
+      //println(info.totalDelay)
+      //调度延迟Some(19)
       info.schedulingDelay should not be None
       info.schedulingDelay.get should be >= 0L
+      //处理延迟 None
       info.processingDelay should be(None)
       info.totalDelay should be(None)
     })
 
     batchInfosStarted.foreach { info =>
-      info.numRecords should be(1L)
+      //记录数
+      //info.numRecords should be(1L)
       info.streamIdToInputInfo should be(Map(0 -> StreamInputInfo(0, 1L)))
     }
-
+   /* batchInfosStarted.map(x=>println("===="+x.submissionTime))
+    batchInfosStarted.map(x=>println("===="+x.processingStartTime.get))*/
+    /**
+     *submissionTime 提交时间
+     *1482310060175
+     *1482310060191
+     *1482310060230
+     *1482310060309
+     */
     isInIncreasingOrder(batchInfosStarted.map(_.submissionTime)) should be(true)
+     /**
+     *processingStartTime 处理开始时间
+     *1482310060189
+     *1482310061004
+     *1482310061142
+     *1482310061246
+     */
     isInIncreasingOrder(batchInfosStarted.map(_.processingStartTime.get)) should be(true)
 
     // test onBatchCompleted 测试批处理完成
     val batchInfosCompleted = collector.batchInfosCompleted
     batchInfosCompleted should have size 4
-
+    /**
+     * 注意完成之后有处理时间和总记录数
+     */
     batchInfosCompleted.foreach(info => {
+     /* println("schedulingDelay:"+info.schedulingDelay)
+      println("processingDelay:"+info.processingDelay)
+      println("totalDelay:"+info.totalDelay)
+      println("schedulingDelay.get:"+info.schedulingDelay.get)
+      println("info.processingDelay.get:"+info.processingDelay.get)      
+       println("info.totalDelay.get:"+info.totalDelay.get)*/
+      //Some(15)
       info.schedulingDelay should not be None
+      //Some(919)
       info.processingDelay should not be None
+      //Some(934)
       info.totalDelay should not be None
+      //15
       info.schedulingDelay.get should be >= 0L
+      //919
       info.processingDelay.get should be >= 0L
+      //934
       info.totalDelay.get should be >= 0L
     })
 
@@ -113,30 +168,44 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
       info.numRecords should be(1L)
       info.streamIdToInputInfo should be(Map(0 -> StreamInputInfo(0, 1L)))
     }
-
+    //submissionTime:1482311354971===processingStartTime:1482311354983===processingEndTime:1482311355753
+    batchInfosCompleted.map(x=>println(x.submissionTime+"==="+x.processingStartTime.get+"==="+x.processingEndTime.get))
+    //判断是否自增顺序
     isInIncreasingOrder(batchInfosCompleted.map(_.submissionTime)) should be(true)
-    isInIncreasingOrder(batchInfosCompleted.map(_.processingStartTime.get)) should be(true)
+    isInIncreasingOrder(batchInfosCompleted.map(_.processingStartTime.get)) should be(true)    
     isInIncreasingOrder(batchInfosCompleted.map(_.processingEndTime.get)) should be(true)
   }
 
   test("receiver info reporting") { //接收信息报告
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
-    inputStream.foreachRDD(_.count)
+    inputStream.foreachRDD(x=>{
+     // println("====="+x.count)
+      x.count
+      })
 
     val collector = new ReceiverInfoCollector
     ssc.addStreamingListener(collector)
 
     ssc.start()
     try {
+     // println("======")
       eventually(timeout(30 seconds), interval(20 millis)) {
+        //接收数据
         collector.startedReceiverStreamIds.size should equal(1)
+        //接收数据数据
         collector.startedReceiverStreamIds(0) should equal(0)
+        //暂停接收数据数
         collector.stoppedReceiverStreamIds should have size 1
+        //暂停接收数据
         collector.stoppedReceiverStreamIds(0) should equal(0)
+        //接收错误的数据
         collector.receiverErrors should have size 1
+        //接收数据错误ID
         collector.receiverErrors(0)._1 should equal(0)
+        //错误异常信息
         collector.receiverErrors(0)._2 should include("report error")
+        //
         collector.receiverErrors(0)._3 should include("report exception")
       }
     } finally {
@@ -150,6 +219,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     inputStream.foreachRDD(_.count)
 
     val failureReasons = startStreamingContextAndCollectFailureReasons(ssc)
+    //一个成功的批量没有设置错误信息
     assert(failureReasons != null && failureReasons.isEmpty,
       "A successful batch should not set errorMessage")
   }
@@ -167,6 +237,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
     assert(failureReasons != null)
     assert(failureReasons.size === 1)
     assert(failureReasons.contains(0))
+    //失败原因
     assert(failureReasons(0).contains("This is a failed job"))
   }
 
@@ -194,6 +265,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
 
   private def startStreamingContextAndCollectFailureReasons(
     _ssc: StreamingContext, isFailed: Boolean = false): Map[Int, String] = {
+    //添加失败原因集合
     val failureReasonsCollector = new FailureReasonsCollector()
     _ssc.addStreamingListener(failureReasonsCollector)
     val batchCounter = new BatchCounter(_ssc)
@@ -250,7 +322,7 @@ class BatchInfoCollector extends StreamingListener {
 
 /** 
  *  Listener that collects information on processed batches
- *  侦听器,收集处理的批次的信息 
+ *  侦听器,处理的批次集合的信息 
  *  */
 class ReceiverInfoCollector extends StreamingListener {
   val startedReceiverStreamIds = new ArrayBuffer[Int] with SynchronizedBuffer[Int]
@@ -278,10 +350,14 @@ class StreamingListenerSuiteReceiver extends Receiver[Any](StorageLevel.MEMORY_O
     //Future 只提供了读取计算值的接口，写入计算值的任务交给了 Promise
     Future {
       logInfo("Started receiver and sleeping")
+      println("Started receiver and sleeping")
       Thread.sleep(10)
+      println("Reporting error and sleeping")
       logInfo("Reporting error and sleeping")
+      
       reportError("test report error", new Exception("test report exception"))
       Thread.sleep(10)
+      println("Stopping")
       logInfo("Stopping")
       stop("test stop error")
     }

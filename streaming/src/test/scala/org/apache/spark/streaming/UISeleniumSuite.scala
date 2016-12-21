@@ -65,6 +65,7 @@ class UISeleniumSuite
   }
 
   private def setupStreams(ssc: StreamingContext): Unit = {
+    //Queue((Range(1, 2, 3, 4),4))
     val rdds = Queue(ssc.sc.parallelize(1 to 4, 4))
     val inputStream = ssc.queueStream(rdds)
     inputStream.foreachRDD { rdd =>
