@@ -43,8 +43,9 @@ import org.apache.spark.util.Utils
 class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 
   test("receiver life cycle") {//接收生命周期
-
+    //Receiver就将持续不断地接收外界数据,并持续交给 ReceiverSupervisor进行数据转储
     val receiver = new FakeReceiver
+    //ReceiverSupervisor 持续不断地接收到 Receiver转来的数据
     val executor = new FakeReceiverSupervisor(receiver)
     val executorStarted = new Semaphore(0)
 
@@ -113,12 +114,13 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
     assert(executor.errors.head.eq(exception))
 
     // Verify restarting actually stops and starts the receiver
-    //验证重新启动实际上停止并启动接收器
+    //验证重新启动实际停止并启动接收器,延迟100毫秒
     receiver.restart("restarting", null, 100)
     eventually(timeout(50 millis), interval(10 millis)) {
       // receiver will be stopped async
-      //接收器将停止异步
+      //接收器将异步停止,判断是否停止
       assert(receiver.isStopped)
+      //接收器已经停止调用
       assert(receiver.onStopCalled)
     }
     eventually(timeout(1000 millis), interval(100 millis)) {
@@ -145,11 +147,11 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
     }
   }
 
-  ignore("block generator throttling") {//块发生器节流
+  ignore("block generator throttling") {//调节块发生器
     val blockGeneratorListener = new FakeBlockGeneratorListener
     val blockIntervalMs = 100
-    val maxRate = 1001
-    //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
+    val maxRate = 1001//最大限制数
+    //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔,毫秒
     val conf = new SparkConf().set("spark.streaming.blockInterval", s"${blockIntervalMs}ms").
       set("spark.streaming.receiver.maxRate", maxRate.toString)
     val blockGenerator = new BlockGenerator(blockGeneratorListener, 1, conf)

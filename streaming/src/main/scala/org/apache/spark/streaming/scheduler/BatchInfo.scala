@@ -23,8 +23,9 @@ import org.apache.spark.streaming.Time
 /**
  * :: DeveloperApi ::
  * Class having information on completed batches.
- * @param batchTime   Time of the batch,批处理间隔
+ * @param batchTime   Time of the batch,批次时间
  * @param streamIdToInputInfo A map of input stream id to its input info
+ * 														输入流ID的映射到它的输入信息
  * @param submissionTime  Clock time of when jobs of this batch was submitted to
  *                        the streaming scheduler queue
  *                        提交作业时间
@@ -35,11 +36,11 @@ import org.apache.spark.streaming.Time
  */
 @DeveloperApi
 case class BatchInfo(
-    batchTime: Time,
-    streamIdToInputInfo: Map[Int, StreamInputInfo],
-    submissionTime: Long,
-    processingStartTime: Option[Long],
-    processingEndTime: Option[Long]
+    batchTime: Time,//批次时间
+    streamIdToInputInfo: Map[Int, StreamInputInfo],//输入信息的流标识
+    submissionTime: Long,//提交时间
+    processingStartTime: Option[Long],//处理开始时间
+    processingEndTime: Option[Long]//处理结果时间
   ) {
 
   private var _failureReasons: Map[Int, String] = Map.empty
@@ -52,6 +53,7 @@ case class BatchInfo(
   /**
    * Time taken for the first job of this batch to start processing from the time this batch
    * was submitted to the streaming scheduler. Essentially, it is
+   * 从批处理开始的时间开始处理第一批作业的时间,被提交给流调度
    * `processingStartTime` - `submissionTime`.
    */
   def schedulingDelay: Option[Long] = processingStartTime.map(_ - submissionTime)

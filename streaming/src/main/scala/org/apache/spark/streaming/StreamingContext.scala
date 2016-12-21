@@ -678,10 +678,11 @@ class StreamingContext private[streaming] (
   /**
    * Wait for the execution to stop. Any exceptions that occurs during the execution
    * will be thrown in this thread.
-   *
-   * @param timeout time to wait in milliseconds
+   * 等待执行停止,执行过程中发生的任何异常都将在此线程中引发
+   * @param timeout time to wait in milliseconds 超时时间以毫秒为单位
    * @return `true` if it's stopped; or throw the reported error during the execution; or `false`
    *         if the waiting time elapsed before returning from the method.
+   *         返回true,如果它停止,或者在执行过程中抛出了异常错误,或者在返回方法之前等待时间超时,返回false
    */
   def awaitTerminationOrTimeout(timeout: Long): Boolean = {
     waiter.waitForStopOrError(timeout)
