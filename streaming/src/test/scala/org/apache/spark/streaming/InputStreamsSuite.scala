@@ -43,6 +43,7 @@ import org.apache.spark.streaming.rdd.WriteAheadLogBackedBlockRDD
 import org.apache.spark.streaming.receiver.Receiver
 /**
  * 输入流测试套件
+ * InputDStream:数据源
  */
 class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 

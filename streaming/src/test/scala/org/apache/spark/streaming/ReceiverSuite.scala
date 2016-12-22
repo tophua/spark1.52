@@ -39,6 +39,8 @@ import org.apache.spark.util.Utils
  *  用于测试网络接收行为
  *  Testsuite for testing the network receiver behavior 
  *  Receiver在 onStart()启动后,就将持续不断地接收外界数据,并持续交给 ReceiverSupervisor进行数据转储;
+ *  接收数据——接收器将数据流分成一系列小块,存储到executor内存中。
+ * 					   另外,在启用以后,数据同时还写入到容错文件系统的预写日志。
  *  */
 class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 

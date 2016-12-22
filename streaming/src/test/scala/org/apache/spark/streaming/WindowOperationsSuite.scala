@@ -28,7 +28,7 @@ class WindowOperationsSuite extends TestSuiteBase {
   override def maxWaitTimeMillis: Int = 20000  // large window tests can sometimes take longer
   //确保在这个类中是可见,间隔时间1秒
   override def batchDuration: Duration = Seconds(1)  // making sure its visible in this class
-//较大的滑动输入
+  //较大的滑动输入
   val largerSlideInput = Seq(
     Seq(("a", 1)),
     Seq(("a", 2)),  // 1st window from here,这里的第一个窗口
@@ -288,9 +288,9 @@ class WindowOperationsSuite extends TestSuiteBase {
     name: String,
     input: Seq[Seq[Int]],
     expectedOutput: Seq[Seq[Int]],
-    //slideDuration 滑动间隔
+    //slideDuration 滑动窗口的宽度
     windowDuration: Duration = Seconds(2),
-    //windowDuration批处理间隔时间
+    //windowDuration 窗口滑动的频率,这两个参数必须是 batch size 的倍数
     slideDuration: Duration = Seconds(1)
     ) {
     test("window - " + name) {

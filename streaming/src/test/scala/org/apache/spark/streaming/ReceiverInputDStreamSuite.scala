@@ -30,6 +30,7 @@ import org.apache.spark.streaming.scheduler.ReceivedBlockInfo
 import org.apache.spark.streaming.util.{WriteAheadLogRecordHandle, WriteAheadLogUtils}
 import org.apache.spark.{SparkConf, SparkEnv}
 /**
+ * 
  * ReceiverInputDStream主要负责数据的产生与导入,
  * 它除了需要像其它 DStream那样在某个 batch里实例化 RDD以外,还需要额外的 Receiver为这个RDD生产数据!
  * ReceiverInputDStream保存关于历次batch的源头数据条数,历次batch计算花费的时间,用来实时计算准确的流量控制信息;
