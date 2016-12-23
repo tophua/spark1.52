@@ -196,6 +196,13 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
         clock.setTime(existingFile.lastModified + batchDuration.milliseconds)
         //注册统计数据一个监听器
         val batchCounter = new BatchCounter(ssc)
+	/**
+	*Spark Streaming将监视该dataDirectory目录,并处理该目录下任何新建的文件(目前还不支持嵌套目录)。
+	*注意:各个文件数据格式必须一致,
+	*     dataDirectory中的文件必须通过moving或者renaming来创建,
+	*     一旦文件move进dataDirectory之后,就不能再改动.
+	*     所以如果这个文件后续还有写入,这些新写入的数据不会被读取。
+	**/
         //二进制记录流,长度为1
         val fileStream = ssc.binaryRecordsStream(testDir.toString, 1)
         val outputBuffer = new ArrayBuffer[Seq[Array[Byte]]]

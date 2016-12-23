@@ -172,6 +172,11 @@ object MasterFailureTest extends Logging {
 
     // Setup the stream computation with the given operation
     //用给定的操作设置流计算,从检查点文件获取StreamingContext
+    //创建新的StreamingContext对象,或者从检查点构造一个
+    /**
+    如果checkpointDirectory目录存在,则context对象会从检查点数据重新构建出来,
+    如果该目录不存在(如:首次运行),则functionToCreateContext函数会被调,
+    创建一个新的StreamingContext对象并定义好DStream数据流**/
     val ssc = StreamingContext.getOrCreate(checkpointDir.toString, () => {
       //返回StreamingContext
       setupStreams(batchDuration, operation, checkpointDir, testDir)
@@ -227,6 +232,9 @@ object MasterFailureTest extends Logging {
       Map())
     //设置检查点目录
     ssc.checkpoint(checkpointDir.toString)
+    //Spark Streaming将监视该dataDirectory目录,并处理该目录下任何新建的文件,不支持嵌套目录
+    //注意:dataDirectory中的文件必须通过moving或者renaming来创建
+    //各个文件数据格式必须一致
     //获得测试目录数据
     val inputStream = ssc.textFileStream(testDir.toString)
     //操作输入流

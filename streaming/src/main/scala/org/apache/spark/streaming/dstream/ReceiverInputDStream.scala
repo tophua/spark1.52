@@ -102,10 +102,12 @@ abstract class ReceiverInputDStream[T: ClassTag](@transient ssc_ : StreamingCont
       val blockIds = blockInfos.map { _.blockId.asInstanceOf[BlockId] }.toArray
 
       // Are WAL record handles present with all the blocks
+      //处理所有块的预写式日志记录
       val areWALRecordHandlesPresent = blockInfos.forall { _.walRecordHandleOption.nonEmpty }
 
       if (areWALRecordHandlesPresent) {
         // If all the blocks have WAL record handle, then create a WALBackedBlockRDD
+        //如果所有的块预写式日志已处理,则创建一个WALBackedBlockRDD
         val isBlockIdValid = blockInfos.map { _.isBlockIdValid() }.toArray
         val walRecordHandles = blockInfos.map { _.walRecordHandleOption.get }.toArray
         new WriteAheadLogBackedBlockRDD[T](
@@ -113,6 +115,7 @@ abstract class ReceiverInputDStream[T: ClassTag](@transient ssc_ : StreamingCont
       } else {
         // Else, create a BlockRDD. However, if there are some blocks with WAL info but not
         // others then that is unexpected and log a warning accordingly.
+        //否则,创建一个BlockRDD
         if (blockInfos.find(_.walRecordHandleOption.nonEmpty).nonEmpty) {
           if (WriteAheadLogUtils.enableReceiverLog(ssc.conf)) {
             logError("Some blocks do not have Write Ahead Log information; " +

@@ -73,7 +73,10 @@ import org.apache.spark.util.IntParam
  * 将网络数据中的单词计数统计结果添加到一个文件中
  */
 object RecoverableNetworkWordCount {
-
+   /**
+     * 如果 checkpointDirectory 目录存在,则context对象会从检查点数据重新构建出来,如果该目录不存在(如:首次运行),
+     * 则 functionToCreateContext函数会被调用,创建一个新的StreamingContext对象并定义好DStream数据流
+     */
   def createContext(ip: String, port: Int, outputPath: String, checkpointDirectory: String)
     : StreamingContext = {
 
@@ -123,6 +126,10 @@ object RecoverableNetworkWordCount {
       System.exit(1)
     }
     val Array(ip, IntParam(port), checkpointDirectory, outputPath) = args
+    /**
+     * 如果 checkpointDirectory 目录存在,则context对象会从检查点数据重新构建出来,如果该目录不存在(如:首次运行),
+     * 则 functionToCreateContext函数会被调用,创建一个新的StreamingContext对象并定义好DStream数据流
+     */
     val ssc = StreamingContext.getOrCreate(checkpointDirectory,
       () => {
         createContext(ip, port, outputPath, checkpointDirectory)

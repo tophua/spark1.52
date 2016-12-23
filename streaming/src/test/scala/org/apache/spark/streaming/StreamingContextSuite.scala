@@ -557,6 +557,11 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     // getOrCreate should create new context with empty path
     //应该用空的路径创建新的上下文
     testGetOrCreate {
+    //getOrCreate创建新的StreamingContext对象,或者从检查点构造一个
+    /**
+    如果checkpointDirectory目录存在,则context对象会从检查点数据重新构建出来,
+    如果该目录不存在(如:首次运行),则functionToCreateContext函数会被调,
+    创建一个新的StreamingContext对象并定义好DStream数据流**/
       ssc = StreamingContext.getOrCreate(emptyPath, creatingFunction _)
       assert(ssc != null, "no context created")
       assert(newContextCreated, "new context not created")
@@ -567,12 +572,18 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     // getOrCreate should throw exception with fake checkpoint file and createOnError = false
     //应该抛出假检查点文件的异常
     intercept[Exception] {
+    //getOrCreate创建新的StreamingContext对象,或者从检查点构造一个
       ssc = StreamingContext.getOrCreate(corruptedCheckpointPath, creatingFunction _)
     }
 
     // getOrCreate should throw exception with fake checkpoint file
     //应该抛出假检查点文件的异常
     intercept[Exception] {
+    //getOrCreate创建新的StreamingContext对象,或者从检查点构造一个
+    /**
+    如果checkpointDirectory目录存在,则context对象会从检查点数据重新构建出来,
+    如果该目录不存在(如:首次运行),则functionToCreateContext函数会被调,
+    创建一个新的StreamingContext对象并定义好DStream数据流**/
       ssc = StreamingContext.getOrCreate(
         corruptedCheckpointPath, creatingFunction _, createOnError = false)
     }
@@ -580,6 +591,11 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     // getOrCreate should create new context with fake checkpoint file and createOnError = true
     //应该创建新的上下文与假检查点文件
     testGetOrCreate {
+    //getOrCreate创建新的StreamingContext对象,或者从检查点构造一个
+    /**
+    如果checkpointDirectory目录存在,则context对象会从检查点数据重新构建出来,
+    如果该目录不存在(如:首次运行),则functionToCreateContext函数会被调,
+    创建一个新的StreamingContext对象并定义好DStream数据流**/
       ssc = StreamingContext.getOrCreate(
         corruptedCheckpointPath, creatingFunction _, createOnError = true)
       assert(ssc != null, "no context created")
@@ -897,6 +913,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     //设置检查点目录
     ssc.checkpoint(checkpointDirectory)
     //操作数据,生成检查点
+    //Spark Streaming将监视该dataDirectory目录,并处理该目录下任何新建的文件,目前还不支持嵌套目录
     ssc.textFileStream(testDirectory).foreachRDD { rdd =>
       //println("createValidCheckpoint:"+rdd.count())
       rdd.count()

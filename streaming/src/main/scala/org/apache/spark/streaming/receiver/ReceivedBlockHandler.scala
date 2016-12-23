@@ -239,7 +239,11 @@ private[streaming] class WriteAheadLogBasedBlockHandler(
 }
 
 private[streaming] object WriteAheadLogBasedBlockHandler {
+  /**
+   * 检查点目录到日志目录
+   */
   def checkpointDirToLogDir(checkpointDir: String, streamId: Int): String = {
+    //checkpointDir父目录,receivedData子目录
     new Path(checkpointDir, new Path("receivedData", streamId.toString)).toString
   }
 }
