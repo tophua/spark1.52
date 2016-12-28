@@ -18,15 +18,19 @@
 // scalastyle:off println
 package org.apache.spark.examples.ml
 
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
-import org.apache.spark.ml.feature.{HashingTF, Tokenizer}
-import org.apache.spark.ml.tuning.{ParamGridBuilder, CrossValidator}
+import org.apache.spark.ml.feature.HashingTF
+import org.apache.spark.ml.feature.Tokenizer
+import org.apache.spark.ml.tuning.CrossValidator
+import org.apache.spark.ml.tuning.ParamGridBuilder
 import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.sql.{Row, SQLContext}
-
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.SQLContext
+import scala.beans.BeanInfo
 /**
  * A simple example demonstrating model selection using CrossValidator.
  * 演示模型选择使用交叉验证一个简单的例子
@@ -40,6 +44,8 @@ import org.apache.spark.sql.{Row, SQLContext}
  * bin/run-example ml.CrossValidatorExample
  * }}}
  */
+
+
 object CrossValidatorExample {
 
   def main(args: Array[String]) {

@@ -43,7 +43,7 @@ import org.apache.spark.streaming.rdd.WriteAheadLogBackedBlockRDD
 import org.apache.spark.streaming.receiver.Receiver
 /**
  * 输入流测试套件
- * InputDStream:数据源
+ * InputDStream:指明数据数据源,例如 socketTextStream,Spark Streaming将以套接字连接作为数据源读取数据
  */
 class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
