@@ -26,7 +26,7 @@ import org.apache.spark.mllib.classification.NaiveBayes
 import org.apache.spark.mllib.util.MLUtils
 
 /**
- * 一个朴素贝叶斯应用实例
+ * 一个朴素贝叶斯应用的例子
  * An example naive Bayes app. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.SparseNaiveBayes [options] <input>
@@ -69,7 +69,7 @@ object SparseNaiveBayes {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"SparseNaiveBayes with $params")
+    val conf = new SparkConf().setAppName(s"SparseNaiveBayes with $params").setMaster("local")
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)

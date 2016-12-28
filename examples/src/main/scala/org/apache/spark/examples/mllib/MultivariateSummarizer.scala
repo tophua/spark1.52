@@ -28,7 +28,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * An example app for summarizing multivariate data from a file. Run with
- * 一个用于汇总文件中的多元数据的示例应用程序
+ * 一个用于汇总多元数据的文件中示例应用程序
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.MultivariateSummarizer
  * }}}
@@ -38,7 +38,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  */
 object MultivariateSummarizer {
 
-  case class Params(input: String = "data/mllib/sample_linear_regression_data.txt")
+  case class Params(input: String = "../data/mllib/sample_linear_regression_data.txt")
     extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -68,7 +68,7 @@ object MultivariateSummarizer {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"MultivariateSummarizer with $params")
+    val conf = new SparkConf().setAppName(s"MultivariateSummarizer with $params").setMaster("local")
     val sc = new SparkContext(conf)
 
     val examples = MLUtils.loadLibSVMFile(sc, params.input).cache()

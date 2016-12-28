@@ -34,7 +34,7 @@ import org.apache.spark.SparkContext._
  */
 object SampledRDDs {
 
-  case class Params(input: String = "data/mllib/sample_binary_classification_data.txt")
+  case class Params(input: String = "../data/mllib/sample_binary_classification_data.txt")
     extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -62,7 +62,7 @@ object SampledRDDs {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"SampledRDDs with $params")
+    val conf = new SparkConf().setAppName(s"SampledRDDs with $params").setMaster("local")
     val sc = new SparkContext(conf)
 
     val fraction = 0.1 // fraction of data to sample 样本数据的分数

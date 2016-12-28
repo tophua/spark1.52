@@ -67,14 +67,18 @@ object StreamingKMeansExample {
     }
 
     val conf = new SparkConf().setMaster("local").setAppName("StreamingKMeansExample")
+    //批次数
     val ssc = new StreamingContext(conf, Seconds(args(2).toLong))
-
+    //文件流,训练目录,解析向量
     val trainingData = ssc.textFileStream(args(0)).map(Vectors.parse)
+    //测试目录
     val testData = ssc.textFileStream(args(1)).map(LabeledPoint.parse)
 
     val model = new StreamingKMeans()
+      //聚类中心点
       .setK(args(3).toInt)
       .setDecayFactor(1.0)
+      //随机中心数
       .setRandomCenters(args(4).toInt, 0.0)
 
     model.trainOn(trainingData)

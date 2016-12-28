@@ -41,7 +41,7 @@ import org.apache.spark.rdd.RDD
 object MovieLensALS {
 
   case class Params(
-      input: String = null,
+      input: String = "../data/mllib/sample_movielens_data.txt",
       kryo: Boolean = false,
       numIterations: Int = 20,
       lambda: Double = 1.0,
@@ -76,8 +76,8 @@ object MovieLensALS {
       opt[Unit]("implicitPrefs")
         .text("use implicit preference")
         .action((_, c) => c.copy(implicitPrefs = true))
-      arg[String]("<input>")
-        .required()
+      opt[String]("<input>")
+       // .required()
         .text("input paths to a MovieLens dataset of ratings")
         .action((x, c) => c.copy(input = x))
       note(
@@ -99,7 +99,7 @@ object MovieLensALS {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"MovieLensALS with $params")
+    val conf = new SparkConf().setAppName(s"MovieLensALS with $params").setMaster("local[*]")
     if (params.kryo) {
       conf.registerKryoClasses(Array(classOf[mutable.BitSet], classOf[Rating]))
         .set("spark.kryoserializer.buffer", "8m")

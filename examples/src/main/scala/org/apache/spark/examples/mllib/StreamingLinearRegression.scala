@@ -25,7 +25,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
  * Train a linear regression model on one stream of data and make predictions
- * 在一个数据流上训练一个线性回归模型，并在另一个数据流上进行预测
+ * 在一个数据流上训练一个线性回归模型,并在另一个数据流上进行预测
  * on another stream, where the data streams arrive as text files
  * into two different directories.
  * 当数据流到达文本文件到两个不同的目录时

@@ -35,7 +35,7 @@ object RandomRDDGeneration {
 
   def main(args: Array[String]) {
 
-    val conf = new SparkConf().setAppName(s"RandomRDDGeneration")
+    val conf = new SparkConf().setAppName(s"RandomRDDGeneration").setMaster("local")
     val sc = new SparkContext(conf)
 
     val numExamples = 10000 // number of examples to generate 生成的实例数
