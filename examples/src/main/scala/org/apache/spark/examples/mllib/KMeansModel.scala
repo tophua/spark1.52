@@ -18,18 +18,19 @@ object KMeansModel {
 
     val conf = new SparkConf().setAppName("test").setMaster("local")
     val sc = new SparkContext(conf)
-    val data = sc.textFile("data/mllib/spykmeans.csv")
+    val data = sc.textFile("../data/mllib/spykmeans.csv")
 
     val header = data.first
+    
    //csv乱码,删除第一行数据,使用Excel报错,没有测试其他工具
-   // val rows = data.filter(l => l != header)
+    val rows = data.filter(l => l != header)
 
     // define case class
     //定义实例类
 
     // comma separator split
     //逗号分隔符分割
-    val allSplit = data.map(line => line.split(","))
+    val allSplit = rows.map(line => line.split(","))
 
     // map parts to case class
     //将映射对到实例类

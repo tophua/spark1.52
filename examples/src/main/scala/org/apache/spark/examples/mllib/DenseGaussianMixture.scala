@@ -24,7 +24,7 @@ import org.apache.spark.mllib.linalg.Vectors
 
 /**
  * An example Gaussian Mixture Model EM app. Run with
- * 一个例子高斯混合模型的应用
+ * 一个高斯混合模型例子的应用
  * {{{
  * ./bin/run-example mllib.DenseGaussianMixture <input> <k> <convergenceTol>
  * }}}

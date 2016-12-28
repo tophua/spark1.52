@@ -28,21 +28,24 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.optimization.{SquaredL2Updater, L1Updater}
 
 /**
- * 二进制分类的一个示例应用程序
+ * 二分类的一个示例应用程序
  * An example app for binary classification. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.BinaryClassification
  * }}}
+ * 
  * A synthetic dataset is located at `data/mllib/sample_binary_classification_data.txt`.
+ * 加载一个虚拟的数据集data/mllib/sample_binary_classification_data.txt
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
+ * 如果你使用模板创建一个App,请你使用Spark-submit 提交App
  */
 object BinaryClassification {
-
+  //算法类型
   object Algorithm extends Enumeration {
     type Algorithm = Value
     val SVM, LR = Value
   }
-
+  //回归类型
   object RegType extends Enumeration {
     type RegType = Value
     val L1, L2 = Value

@@ -27,7 +27,7 @@ import org.apache.spark.mllib.linalg.Vectors
 
 /**
  * An example k-means app. Run with
- * k-均值应用程序的一个例子
+ * 一个k-均值应用程序的例子
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DenseKMeans [options] <input>
  * }}}
@@ -44,6 +44,7 @@ object DenseKMeans {
 
   case class Params(
       input: String = null,
+      //input: String = "../data/mllib/kmeans_data.txt",
       k: Int = -1,
       numIterations: Int = 10,
       initializationMode: InitializationMode = Parallel) extends AbstractParams[Params]

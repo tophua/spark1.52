@@ -8,7 +8,7 @@ import org.apache.spark.mllib.stat.Statistics
 import org.apache.spark.rdd.RDD
 /**
  * Correlation 相关性分析
- * PearsonCorrelation在Spark中是私有成员，不能直接访问，使用时仍然是通过Statistics对象进行
+ * PearsonCorrelation在Spark中是私有成员,不能直接访问,使用时仍然是通过Statistics对象进行
  */
 object CorrelationDemo {
   def main(args: Array[String]) {
@@ -37,7 +37,7 @@ object CorrelationDemo {
     /**
      * 假设某工厂通过随机抽样得到考试成绩与产量之间的关系数据如下：
      * 这里写图片描述
-     * 直观地看，成绩越高产量越高，如果使用pearson相关系数，将得到如下结果：
+     * 直观地看,成绩越高产量越高,如果使用pearson相关系数,将得到如下结果：
      */
     val rdd4: RDD[Double] = sc.parallelize(Array(50.0, 60.0, 70.0, 80.0, 90.0, 95.0))
     val rdd5: RDD[Double] = sc.parallelize(Array(500.0, 510.0, 530.0, 580.0, 560, 1000))

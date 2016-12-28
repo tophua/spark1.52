@@ -34,7 +34,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.util.Utils
 
 /**
- * 决策树和随机森林运行的一个例子
+ * 运行的一个决策树和随机森林树的例子
  * An example runner for decision trees and random forests. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DecisionTreeRunner [options]

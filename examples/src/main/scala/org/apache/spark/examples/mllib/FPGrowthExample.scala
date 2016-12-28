@@ -32,7 +32,8 @@ import org.apache.spark.{SparkConf, SparkContext}
 object FPGrowthExample {
 
   case class Params(
-    input: String = null,
+    //input: String = null,
+    input: String = "../data/mllib/sample_fpgrowth.txt",
     minSupport: Double = 0.3,
     numPartition: Int = -1) extends AbstractParams[Params]
 
@@ -47,10 +48,10 @@ object FPGrowthExample {
       opt[Int]("numPartition")
         .text(s"number of partition, default: ${defaultParams.numPartition}")
         .action((x, c) => c.copy(numPartition = x))
-      arg[String]("<input>")
+      opt[String]("<input>")
         .text("input paths to input data set, whose file format is that each line " +
           "contains a transaction with each item in String and separated by a space")
-        .required()
+       // .required()
         .action((x, c) => c.copy(input = x))
     }
 
@@ -62,7 +63,7 @@ object FPGrowthExample {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"FPGrowthExample with $params")
+    val conf = new SparkConf().setAppName(s"FPGrowthExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     val transactions = sc.textFile(params.input).map(_.split(" ")).cache()
 

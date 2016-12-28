@@ -32,7 +32,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Row, SQLContext, DataFrame}
 
 /**
- * 如何使用作为数据集的一个例子
+ * 如何使用SQL数据集的一个例子
  * An example of how to use [[org.apache.spark.sql.DataFrame]] as a Dataset for ML. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DatasetExample [options]
@@ -43,7 +43,7 @@ import org.apache.spark.sql.{Row, SQLContext, DataFrame}
 object DatasetExample {
 
   case class Params(
-      input: String = "data/mllib/sample_libsvm_data.txt",
+      input: String = "../data/mllib/sample_libsvm_data.txt",
       dataFormat: String = "libsvm") extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -71,20 +71,22 @@ object DatasetExample {
 
   def run(params: Params) {
 
-    val conf = new SparkConf().setAppName(s"DatasetExample with $params")
+    val conf = new SparkConf().setAppName(s"DatasetExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._  // for implicit conversions 隐式转换
 
     // Load input data 加载输入数据
     val origData: RDD[LabeledPoint] = params.dataFormat match {
+      //稠密数据
       case "dense" => MLUtils.loadLabeledPoints(sc, params.input)
+      //libsvm数据
       case "libsvm" => MLUtils.loadLibSVMFile(sc, params.input)
     }
     println(s"Loaded ${origData.count()} instances from file: ${params.input}")
 
     // Convert input data to DataFrame explicitly.
-    //明确转换输入数据帧
+    //显示转换输入数据集
     val df: DataFrame = origData.toDF()
     println(s"Inferred schema:\n${df.schema.prettyJson}")
     println(s"Converted to DataFrame with ${df.count()} records")
@@ -103,8 +105,9 @@ object DatasetExample {
       (summary, feat) => summary.add(feat),
       (sum1, sum2) => sum1.merge(sum2))
     println(s"Selected features column with average values:\n ${featureSummary.mean.toString}")
-
+    //创建临时目录
     val tmpDir = Files.createTempDir()
+    //在JVM进程退出的时候删除文件,通常用在临时文件的删除.
     tmpDir.deleteOnExit()
     val outputDir = new File(tmpDir, "dataset").toString
     println(s"Saving to $outputDir as Parquet file.")

@@ -27,7 +27,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * Compute the similar columns of a matrix, using cosine similarity(相似度度量).
- * 计算一个矩阵的相似列，使用余弦相似性
+ * 计算一个矩阵的相似列,使用余弦相似性
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries
  * 输入矩阵必须以行为导向的密集格式存储,每行一行，其条目由空格隔开
  * separated by space. For example,
@@ -45,7 +45,10 @@ import org.apache.spark.{SparkConf, SparkContext}
  * --threshold 0.1 data/mllib/sample_svm_data.txt
  */
 object CosineSimilarity {
-  case class Params(inputFile: String = null, threshold: Double = 0.1)
+ /* case class Params(inputFile: String = null, threshold: Double = 0.1)
+    extends AbstractParams[Params]*/
+  //阈值 threshold
+    case class Params(inputFile: String = "../data/mllib/sample_svm_data.txt", threshold: Double = 0.1)
     extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -54,11 +57,12 @@ object CosineSimilarity {
     val parser = new OptionParser[Params]("CosineSimilarity") {
       head("CosineSimilarity: an example app.")
       opt[Double]("threshold")
-        .required()
+        //.required()
         .text(s"threshold similarity: to tradeoff computation vs quality estimate")
         .action((x, c) => c.copy(threshold = x))
-      arg[String]("<inputFile>")
-        .required()
+        //arg[String]("<inputFile>")
+       opt[String]("<inputFile>")
+        //.required()
         .text(s"input file, one row per line, space-separated")
         .action((x, c) => c.copy(inputFile = x))
       note(
@@ -79,7 +83,7 @@ object CosineSimilarity {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName("CosineSimilarity")
+    val conf = new SparkConf().setAppName("CosineSimilarity").setMaster("local[*]")
     val sc = new SparkContext(conf)
 
     // Load and parse the data file.

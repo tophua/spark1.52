@@ -35,7 +35,7 @@ import org.apache.spark.rdd.RDD
 /**
  * 聚类 LDA
  * An example Latent Dirichlet Allocation (LDA) app. Run with
- * 例隐含狄利克雷分配（LDA）的应用
+ * 一个狄利克雷分配(LDA)的应用例子
  * {{{
  * ./bin/run-example mllib.LDAExample [options] <input>
  * }}}

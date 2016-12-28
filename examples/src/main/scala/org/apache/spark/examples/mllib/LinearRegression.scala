@@ -27,7 +27,7 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.optimization.{SimpleUpdater, SquaredL2Updater, L1Updater}
 
 /**
- * 线性回归
+ * 一个线性回归的例子
  * An example app for linear regression. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.LinearRegression
@@ -45,7 +45,8 @@ object LinearRegression {
   import RegType._
 
   case class Params(
-      input: String = null,
+      //input: String = null,
+      input: String = "../data/mllib/sample_linear_regression_data.txt",
       numIterations: Int = 100,
       stepSize: Double = 1.0,
       regType: RegType = L2,
@@ -68,8 +69,8 @@ object LinearRegression {
         .action((x, c) => c.copy(regType = RegType.withName(x)))
       opt[Double]("regParam")
         .text(s"regularization parameter, default: ${defaultParams.regParam}")
-      arg[String]("<input>")
-        .required()
+      opt[String]("<input>")
+        //.required()
         .text("input paths to labeled examples in LIBSVM format")
         .action((x, c) => c.copy(input = x))
       note(
@@ -90,7 +91,7 @@ object LinearRegression {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"LinearRegression with $params")
+    val conf = new SparkConf().setAppName(s"LinearRegression with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)

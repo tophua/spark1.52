@@ -20,6 +20,7 @@ object ALSExample {
     val sc = new SparkContext(sparkConf)
     /**文件中每一行包括一个用户id、商品id和评分****/
     val data = sc.textFile("../data/mllib/als/test.data")
+    //匹配类型
     val ratings = data.map(_.split(',') match {
       case Array(user, product, rate) =>
         //用户ID,产品ID,(评级,等级)

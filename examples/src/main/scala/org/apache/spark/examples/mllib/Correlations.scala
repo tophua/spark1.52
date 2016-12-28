@@ -26,18 +26,18 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 /**
- * 一个用于汇总文件中的多元数据的示例应用程序
+ * 一个示例应用程序来自文件中的汇总多元数据
  * An example app for summarizing multivariate data from a file. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.Correlations
  * }}}
  * By default, this loads a synthetic dataset from `data/mllib/sample_linear_regression_data.txt`.
- * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
- * 如果你使用它作为一个模板来创建自己的应用程序
+ * 默认使用,加载虚拟数据集data/mllib/sample_linear_regression_data.txt
+ * If you use it as a template to create your own app, please use `spark-submit` to submit your app. 
  */
 object Correlations {
 
-  case class Params(input: String = "data/mllib/sample_linear_regression_data.txt")
+  case class Params(input: String = "../data/mllib/sample_linear_regression_data.txt")
     extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -52,22 +52,26 @@ object Correlations {
       note(
         """
         |For example, the following command runs this app on a synthetic dataset:
-        |
+        |例如,下面的命令在虚拟数据集上运行这个应用程序：
         | bin/spark-submit --class org.apache.spark.examples.mllib.Correlations \
         |  examples/target/scala-*/spark-examples-*.jar \
         |  --input data/mllib/sample_linear_regression_data.txt
         """.stripMargin)
     }
 
-    parser.parse(args, defaultParams).map { params =>
+    parser.parse(args, defaultParams).map { params =>{
+      //println("========="+params)
       run(params)
+    }
     } getOrElse {
+      
+    
         sys.exit(1)
     }
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"Correlations with $params")
+    val conf = new SparkConf().setAppName(s"Correlations with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
 
     val examples = MLUtils.loadLibSVMFile(sc, params.input).cache()
