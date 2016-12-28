@@ -102,7 +102,9 @@ object RecoverableNetworkWordCount {
     wordCounts.foreachRDD((rdd: RDD[(String, Int)], time: Time) => {
       val counts = "Counts at time " + time + " " + rdd.collect().mkString("[", ", ", "]")
       println(counts)
+      //输出文件路径
       println("Appending to " + outputFile.getAbsolutePath)
+      //文件内容追加,默认字符集
       Files.append(counts + "\n", outputFile, Charset.defaultCharset())
     })
     ssc
