@@ -47,7 +47,7 @@ object ALSExample {
   // $example off$
 
   def main(args: Array[String]) {
-      val conf = new SparkConf().setAppName("CrossValidatorExample").setMaster("local[4]")
+    val conf = new SparkConf().setAppName("ALSExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
   
     val sqlContext = new SQLContext(sc)
