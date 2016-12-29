@@ -104,7 +104,8 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     for (points <- Seq(pointsWithNumFeatures, pointsWithoutNumFeatures)) {
       assert(points.length === 3)
-      assert(points(0).label === 1.0)
+      assert(points(0).label === 1.0)//取出label
+      //取出稀疏特征向量
       assert(points(0).features === Vectors.sparse(6, Seq((0, 1.0), (2, 2.0), (4, 3.0))))
       assert(points(1).label == 0.0)
       assert(points(1).features == Vectors.sparse(6, Seq()))
@@ -113,12 +114,12 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
     //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量
     val multiclassPoints = loadLibSVMFile(sc, path).collect()
-    //字符串使用空格分隔，索引从0开始，以递增的训练排列。导入系统后，特征索引自动转为从0开始索引
+    //字符串使用空格分隔,索引从0开始,以递增的训练排列,导入系统后,特征索引自动转为从0开始索引
     assert(multiclassPoints.length === 3)
     assert(multiclassPoints(0).label === 1.0)
     assert(multiclassPoints(1).label === 0.0)
     assert(multiclassPoints(2).label === 0.0)
-
+    //删除临时文件
     Utils.deleteRecursively(tempDir)
   }
   //加载库支持向量机文件,在索引为零的情况时抛出非法参数异常
@@ -156,19 +157,32 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
     Utils.deleteRecursively(tempDir)
   }
-
+ /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
   test("saveAsLibSVMFile") {//保存为支持向量机文件
     val examples = sc.parallelize(Seq(
+      //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量,需带索引数
       LabeledPoint(1.1, Vectors.sparse(3, Seq((0, 1.23), (2, 4.56)))),
+      //稠密特征向量,自动带索引
       LabeledPoint(0.0, Vectors.dense(1.01, 2.02, 3.03))
     ), 2)
     val tempDir = Utils.createTempDir()
     val outputDir = new File(tempDir, "output")
-    //将LIBSVM格式的数据保存到指定文件
+    //将LIBSVM格式的数据保存到指定outputh目录
     MLUtils.saveAsLibSVMFile(examples, outputDir.toURI.toString)
+    //listFiles 列出指定outputh目录所有文件
     val lines = outputDir.listFiles()
+      //过虑以part-开头的文件
       .filter(_.getName.startsWith("part-"))
-      .flatMap(Source.fromFile(_).getLines())
+      .flatMap(x=>{
+        //println("x:"+x)
+        Source.fromFile(x).getLines()
+      })
       .toSet
     val expected = Set("1.1 1:1.23 3:4.56", "0.0 1:1.01 2:2.02 3:3.03")
     assert(lines === expected)
@@ -235,6 +249,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     val tempDir = Utils.createTempDir()
     val outputDir = new File(tempDir, "vectors")
     val path = outputDir.toURI.toString
+    //保存向量文件
     vectors.saveAsTextFile(path)
     val loaded = loadVectors(sc, path)
     assert(vectors.collect().toSet === loaded.collect().toSet)
@@ -244,7 +259,9 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("loadLabeledPoints") {//加载标记点
     val points = sc.parallelize(Seq(
       LabeledPoint(1.0, Vectors.dense(1.0, 2.0)),
+      //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量,需带索引数
       LabeledPoint(0.0, Vectors.sparse(2, Array(1), Array(-1.0))),
+       //稠密特征向量,自动带索引
       LabeledPoint(1.0, Vectors.dense(0.0, 1.0))
     ), 2)
     val tempDir = Utils.createTempDir()
@@ -257,6 +274,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("log1pExp") {// log1p方法返回参数与1之和的自然对数
+    //println(math.exp(76.3)+"|||"+math.log1p(math.exp(76.3)))
     assert(log1pExp(76.3) ~== math.log1p(math.exp(76.3)) relTol 1E-10)
     assert(log1pExp(87296763.234) ~== 87296763.234 relTol 1E-10)
 

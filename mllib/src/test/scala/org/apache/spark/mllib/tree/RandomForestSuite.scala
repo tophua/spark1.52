@@ -32,9 +32,9 @@ import org.apache.spark.util.Utils
 
 
 /**
- * 随机森林算法是机器学习、计算机视觉等领域内应用极为广泛的一个算法，
- * 它不仅可以用来做分类，也可用来做回归即预测，随机森林机由多个决策树构成，
- * 相比于单个决策树算法，它分类、预测效果更好，不容易出现过度拟合的情况
+ * 随机森林算法是机器学习、计算机视觉等领域内应用极为广泛的一个算法,
+ * 它不仅可以用来做分类,也可用来做回归即预测,随机森林机由多个决策树构成,
+ * 相比于单个决策树算法,它分类、预测效果更好,不容易出现过度拟合的情况
  * RandomForest它们提供了随机森林具体的 trainClassifier
  * Test suite for [[RandomForest]].
  */
@@ -43,7 +43,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 50, 1000)
     val rdd = sc.parallelize(arr)
     val numTrees = 1
-  //featureSubsetStrategy = "auto" 特征子集采样策略，auto 表示算法自主选取
+    //featureSubsetStrategy="auto"特征子集采样策略,auto表示算法自主选取
     val rf = RandomForest.trainClassifier(rdd, strategy, numTrees = numTrees,
       featureSubsetStrategy = "auto", seed = 123)
     assert(rf.trees.size === 1)

@@ -23,7 +23,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SQLContext
 
 trait MLlibTestSparkContext extends BeforeAndAfterAll { 
-  //自身类型（self type）的声明来定义特质时（this: ClassName =>）,只能被混入给定类型的子类当中
+  //自身类型(self type)的声明来定义特质时(this: ClassName =>),只能被混入给定类型的子类当中
   self: Suite =>
   //transient是Java语言的关键字，用来表示一个域不是该对象串行化的一部分。
   //当一个对象被串行化的时候，transient型变量的值不包括在串行化的表示中，然而非transient型的变量是被包括进去的。
