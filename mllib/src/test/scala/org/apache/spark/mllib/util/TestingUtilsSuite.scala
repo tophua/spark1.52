@@ -24,9 +24,14 @@ import org.scalatest.exceptions.TestFailedException
 
 class TestingUtilsSuite extends SparkFunSuite {
 
+ 
+  /**
+   * 绝对误差 =|测量值-真实值 |(即测量值与真实值之差的绝对值)
+   * 相对误差 =|测量值-真实值 |/真实值 (即绝对误差所占真实值的百分比)
+   */
   test("Comparing doubles using relative error.") {//使用相对误差比较doubles
 
-    assert(23.1 ~== 23.52 relTol 0.02)
+    assert(23.1 ~== 23.52 relTol 0.02)//-0.0178571428571429
     assert(23.1 ~== 22.74 relTol 0.02)
     assert(23.1 ~= 23.52 relTol 0.02)
     assert(23.1 ~= 22.74 relTol 0.02)
@@ -35,7 +40,7 @@ class TestingUtilsSuite extends SparkFunSuite {
 
     // Should throw exception with message when test fails.
     //当测试失败时,应抛出异常消息
-    intercept[TestFailedException](23.1 !~== 23.52 relTol 0.02)
+    intercept[TestFailedException](23.1 !~== 23.52 relTol 0.02)//超出绝对值-0.0178571428571429异常
     intercept[TestFailedException](23.1 !~== 22.74 relTol 0.02)
     intercept[TestFailedException](23.1 ~== 23.63 relTol 0.02)
     intercept[TestFailedException](23.1 ~== 22.34 relTol 0.02)
@@ -69,7 +74,7 @@ class TestingUtilsSuite extends SparkFunSuite {
     assert(-Double.MinPositiveValue ~== 1.38 * -Double.MinPositiveValue relTol 0.012)
   }
 
-  test("Comparing doubles using absolute error.") {//使用绝对误差比较doubles
+  test("Comparing doubles using absolute error.") {//比较两个使用绝对误差
 
     assert(17.8 ~== 17.99 absTol 0.2)
     assert(17.8 ~== 17.61 absTol 0.2)
@@ -80,14 +85,14 @@ class TestingUtilsSuite extends SparkFunSuite {
 
     // Should throw exception with message when test fails.
     //当测试失败时,应抛出异常消息
-    intercept[TestFailedException](17.8 !~== 17.99 absTol 0.2)
+    intercept[TestFailedException](17.8 !~== 17.99 absTol 0.2)//-0.19
     intercept[TestFailedException](17.8 !~== 17.61 absTol 0.2)
     intercept[TestFailedException](17.8 ~== 18.01 absTol 0.2)
     intercept[TestFailedException](17.8 ~== 17.59 absTol 0.2)
 
-    assert(17.8 !~== 18.01 absTol 0.2)
-    assert(17.8 !~== 17.59 absTol 0.2)
-    assert(17.8 !~= 18.01 absTol 0.2)
+    assert(17.8 !~== 18.01 absTol 0.2)//-0.19
+    assert(17.8 !~== 17.59 absTol 0.2)//0.21
+    assert(17.8 !~= 18.01 absTol 0.2)//-0.21
     assert(17.8 !~= 17.59 absTol 0.2)
     assert(!(17.8 ~= 18.01 absTol 0.2))
     assert(!(17.8 ~= 17.59 absTol 0.2))
@@ -104,7 +109,10 @@ class TestingUtilsSuite extends SparkFunSuite {
     assert(
       Double.MinPositiveValue !~== -4 * Double.MinPositiveValue absTol 5 * Double.MinPositiveValue)
   }
-
+   /**
+   * 绝对误差 =|测量值-真实值 |(即测量值与真实值之差的绝对值)
+   * 相对误差 =|测量值-真实值 |/真实值 (即绝对误差所占真实值的百分比)
+   */
   test("Comparing vectors using relative error.") {//比较向量使用相对误差
 
     // Comparisons of two dense vectors 两种稠密向量的比较

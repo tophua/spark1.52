@@ -18,7 +18,9 @@
 package org.apache.spark.mllib.util
 
 import org.apache.spark.{SparkException, SparkFunSuite}
-
+/**
+ * 数字解析测试套件
+ */
 class NumericParserSuite extends SparkFunSuite {
 
   test("parser") {//解析
@@ -38,7 +40,7 @@ class NumericParserSuite extends SparkFunSuite {
     }
   }
 
-  test("parser with whitespaces") {//解析器的空格
+  test("parser with whitespaces") {//空格的解析
     val s = "(0.0, [1.0, 2.0])"
     //数字解析
     val parsed = NumericParser.parse(s).asInstanceOf[Seq[_]]

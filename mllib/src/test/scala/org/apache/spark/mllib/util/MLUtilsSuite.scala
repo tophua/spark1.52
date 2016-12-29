@@ -76,7 +76,13 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     }
   }
-
+/**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
   test("loadLibSVMFile") {//加载库支持向量机文件
     //使用三个引号来进行多行字符引用
     val lines =
@@ -84,11 +90,13 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
         |1 1:1.0 3:2.0 5:3.0
         |0
         |0 2:4.0 4:5.0 6:6.0
-      """.stripMargin//stripMargin默认是“|”作为出来连接符，在多行换行的行头前面加一个“|”符号即可
+      """.stripMargin//stripMargin默认是"|"作为出来连接符,在多行换行的行头前面加一个“|”符号即可
     val tempDir = Utils.createTempDir()
+    //创建文件名part-00000
     val file = new File(tempDir.getPath, "part-00000")
+    ///输出lines到part-00000文件,指定文件编码格式
     Files.write(lines, file, Charsets.US_ASCII)
-    val path = tempDir.toURI.toString
+    val path = tempDir.toURI.toString    
     //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量
     val pointsWithNumFeatures = loadLibSVMFile(sc, path, 6).collect()
     //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量

@@ -21,17 +21,18 @@ import org.apache.spark.mllib.linalg.{Matrix, Vector}
 import org.scalatest.exceptions.TestFailedException
 
 object TestingUtils {
-
+  //使用绝对误差
   val ABS_TOL_MSG = " using absolute tolerance"
+  //使用相对误差
   val REL_TOL_MSG = " using relative tolerance"
 
   /**
    * Private helper function for comparing two values using relative tolerance.
-   * 用于比较两个值的相对公差的辅助函数
+   * 用于比较两个值的相对误差的辅助函数
    * Note that if x or y is extremely close to zero, i.e., smaller than Double.MinPositiveValue,
    * 请注意,如果X或Y是非常接近于零
    * the relative tolerance is meaningless, so the exception will be raised to warn users.
-   * 相对宽容是没有意义的,所以会提出警告用户的例外
+   * 相对误差是没有意义的,所以会提出警告用户的例外
    */
   private def RelativeErrorComparison(x: Double, y: Double, eps: Double): Boolean = {
     val absX = math.abs(x)
@@ -49,7 +50,7 @@ object TestingUtils {
 
   /**
    * Private helper function for comparing two values using absolute tolerance.
-   * 用于比较两个值的绝对公差的辅助函数
+   * 用于比较两个值的绝对误差的辅助函数
    */
   private def AbsoluteErrorComparison(x: Double, y: Double, eps: Double): Boolean = {
     math.abs(x - y) < eps
@@ -60,7 +61,7 @@ object TestingUtils {
 
   /**
    * Implicit class for comparing two double values using relative tolerance or absolute tolerance.
-   * 用于比较两个使用相对公差或绝对公差的两个值的隐式类
+   * 用于比较两个使用相对误差或绝对误差的两个值的隐式类
    */
   implicit class DoubleWithAlmostEquals(val x: Double) {
 
@@ -72,7 +73,7 @@ object TestingUtils {
 
     /**
      * When the difference of two values are within eps, returns false; otherwise, returns true.
-     * 当两个值的差值在eps,返回false,否则返回true
+     * 当两个不同的值的eps,返回false,否则返回true
      */
     def !~=(r: CompareDoubleRightSide): Boolean = !r.fun(x, r.y, r.eps)
 
@@ -82,7 +83,9 @@ object TestingUtils {
      * otherwise, returns true.
      */
     def ~==(r: CompareDoubleRightSide): Boolean = {
-      if (!r.fun(x, r.y, r.eps)) {
+      //println(x+"====="+r.y+"===="+r.eps)
+      val right=r.fun(x, r.y, r.eps)
+      if (!right) {
         throw new TestFailedException(
           s"Expected $x and ${r.y} to be within ${r.eps}${r.method}.", 0)
       }
@@ -103,14 +106,14 @@ object TestingUtils {
 
     /**
      * Comparison using absolute tolerance.
-     * 使用绝对公差的比较
+     * 使用绝对误差的比较
      */
     def absTol(eps: Double): CompareDoubleRightSide =
       CompareDoubleRightSide(AbsoluteErrorComparison, x, eps, ABS_TOL_MSG)
 
     /**
      * Comparison using relative tolerance.
-     * 使用相对公差的比较
+     * 使用相对误差的比较
      */
     def relTol(eps: Double): CompareDoubleRightSide =
       CompareDoubleRightSide(RelativeErrorComparison, x, eps, REL_TOL_MSG)
@@ -123,17 +126,19 @@ object TestingUtils {
 
   /**
    * Implicit class for comparing two vectors using relative tolerance or absolute tolerance.
-   * 比较两个向量的相对公差或绝对公差的隐式类
+   * 比较两个向量的相对误差或绝对误差的隐式类
    */
   implicit class VectorWithAlmostEquals(val x: Vector) {
 
     /**
      * When the difference of two vectors are within eps, returns true; otherwise, returns false.
+     * 当两个不同的vectors的eps,返回false,否则返回true
      */
     def ~=(r: CompareVectorRightSide): Boolean = r.fun(x, r.y, r.eps)
 
     /**
      * When the difference of two vectors are within eps, returns false; otherwise, returns true.
+     * 当两个不同的vectors的eps,返回false,否则返回true
      */
     def !~=(r: CompareVectorRightSide): Boolean = !r.fun(x, r.y, r.eps)
 
@@ -187,13 +192,13 @@ object TestingUtils {
 
   /**
    * Implicit class for comparing two matrices using relative tolerance or absolute tolerance.
-   * 使用相对公差或绝对公差比较两个矩阵的隐式类
+   * 使用相对误差或绝对误差比较两个矩阵的隐式类
    */
   implicit class MatrixWithAlmostEquals(val x: Matrix) {
 
     /**
      * When the difference of two matrices are within eps, returns true; otherwise, returns false.
-     * 当两个矩阵的差异在每股收益之内时,返回真；否则，返回假。
+     * 当两个矩阵的误差在每股收益之内时,返回真,否则,返回假
      */
     def ~=(r: CompareMatrixRightSide): Boolean = r.fun(x, r.y, r.eps)
 
@@ -228,7 +233,7 @@ object TestingUtils {
 
     /**
      * Comparison using absolute tolerance.
-     * 使用绝对公差的比较
+     * 使用绝对误差的比较
      */
     def absTol(eps: Double): CompareMatrixRightSide = CompareMatrixRightSide(
       (x: Matrix, y: Matrix, eps: Double) => {
@@ -239,6 +244,7 @@ object TestingUtils {
      * Comparison using relative tolerance. Note that comparing against sparse vector
      * with elements having value of zero will raise exception because it involves with
      * comparing against zero.
+     * 使用相对误差的比较
      */
     def relTol(eps: Double): CompareMatrixRightSide = CompareMatrixRightSide(
       (x: Matrix, y: Matrix, eps: Double) => {
