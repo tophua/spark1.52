@@ -54,6 +54,7 @@ object KafkaWordCount {
 
     val Array(zkQuorum, group, topics, numThreads) = args
     val sparkConf = new SparkConf().setAppName("KafkaWordCount")
+    //批次间隔
     val ssc = new StreamingContext(sparkConf, Seconds(2))
     ssc.checkpoint("checkpoint")
     //numThreads线程数

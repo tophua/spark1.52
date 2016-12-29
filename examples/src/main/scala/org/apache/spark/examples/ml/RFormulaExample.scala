@@ -30,7 +30,7 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 object RFormulaExample {
   def main(args: Array[String]): Unit = {
     
-   val conf = new SparkConf().setAppName("PipelineExample").setMaster("local[4]")
+   val conf = new SparkConf().setAppName("RFormulaExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
   
     val sqlContext = new SQLContext(sc)
@@ -46,6 +46,15 @@ object RFormulaExample {
       .setFeaturesCol("features")
       .setLabelCol("label")
     val output = formula.fit(dataset).transform(dataset)
+    /**
+     *+--------------+-----+
+      |      features|label|
+      +--------------+-----+
+      |[0.0,0.0,18.0]|  1.0|
+      |[0.0,1.0,12.0]|  0.0|
+      |[1.0,0.0,15.0]|  0.0|
+      +--------------+-----+
+     */
     output.select("features", "label").show()
     // $example off$
 

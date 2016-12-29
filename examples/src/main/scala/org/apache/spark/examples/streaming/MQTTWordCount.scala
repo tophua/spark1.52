@@ -107,6 +107,7 @@ object MQTTWordCount {
 
     val Seq(brokerUrl, topic) = args.toSeq
     val sparkConf = new SparkConf().setAppName("MQTTWordCount")
+    //Åú´Î¼ä¸ô
     val ssc = new StreamingContext(sparkConf, Seconds(2))
     val lines = MQTTUtils.createStream(ssc, brokerUrl, topic, StorageLevel.MEMORY_ONLY_SER_2)
     val words = lines.flatMap(x => x.split(" "))

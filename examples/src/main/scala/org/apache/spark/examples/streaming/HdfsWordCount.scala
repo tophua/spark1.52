@@ -48,7 +48,7 @@ object HdfsWordCount {
     val hdfs="hdfs://xcsq:8089/cookbook/input/"
      //创建SparkConf对象
     val sparkConf = new SparkConf().setAppName("HdfsWordCount").setMaster(mast)
-    // Create the context创建上下文
+    // Create the context创建上下文,批次间隔
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     // Create the FileInputDStream on the directory and use the

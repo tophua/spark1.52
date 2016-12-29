@@ -39,7 +39,20 @@ object StringIndexerExample {
     val df = sqlContext.createDataFrame(
       Seq((0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c"))
     ).toDF("id", "category")
-
+    /**
+    *+---+--------+-------------+
+    *| id|category|categoryIndex|
+    *+---+--------+-------------+
+    *|  0|       a|          0.0|
+    *|  1|       b|          2.0|
+    *|  2|       c|          1.0|
+    *|  3|       a|          0.0|
+    *|  4|       a|          0.0|
+    *|  5|       c|          1.0|
+    *+---+--------+-------------+
+     * 1)按照 category 出现的频次对其进行序列编码,按升序排序,a出次3次为0,c出现2次为1,b出现1次为2
+     * 2)fit方法设计和实现上实际上是采用了模板方法的设计模式,具体会调用实现类的 train方法
+     */
     val indexer = new StringIndexer()
       .setInputCol("category")
       .setOutputCol("categoryIndex")

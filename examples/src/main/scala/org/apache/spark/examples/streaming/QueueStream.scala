@@ -29,7 +29,7 @@ object QueueStream {
 
     StreamingExamples.setStreamingLogLevels()
     val sparkConf = new SparkConf().setAppName("QueueStream").setMaster("local[2]")
-    // Create the context 创建上下文
+    // Create the context 创建上下文,批次间隔
     val ssc = new StreamingContext(sparkConf, Seconds(1))
 
     // Create the queue through which RDDs can be pushed to

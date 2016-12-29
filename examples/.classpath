@@ -251,7 +251,7 @@
 	<classpathentry kind="lib" path="lib/spark-graphx_2.10-1.5.3-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/spark-hive_2.10-1.5.3-20151212.001756-64.jar"/>
 	<classpathentry kind="lib" path="lib/spark-launcher_2.10-1.5.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/spark-mllib_2.10-1.5.3-20151212.001626-64.jar"/>
+	<classpathentry kind="lib" path="lib/spark-mllib_2.10-1.5.3-20151212.001626-64.jar" sourcepath="/spark-mllib"/>
 	<classpathentry kind="lib" path="lib/spark-network-common_2.10-1.5.3-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/spark-network-shuffle_2.10-1.5.3-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/spark-sql_2.10-1.5.3-SNAPSHOT.jar"/>

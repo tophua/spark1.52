@@ -37,14 +37,21 @@ object StopWordsRemoverExample {
 
     // $example on$
     val remover = new StopWordsRemover()
-      .setInputCol("raw")
-      .setOutputCol("filtered")
-
+      .setInputCol("raw")//Ô­Ê¼×Ö¶Î
+      .setOutputCol("filtered")//¹ýÂÇºóµÄ×Ö¶Î
+    //É¾³ýÍ£¶Ù´Ê
     val dataSet = sqlContext.createDataFrame(Seq(
       (0, Seq("I", "saw", "the", "red", "baloon")),
       (1, Seq("Mary", "had", "a", "little", "lamb"))
     )).toDF("id", "raw")
-
+/**
+ * +---+--------------------+--------------------+
+ * | id|                 raw|            filtered|
+ * +---+--------------------+--------------------+
+ * |  0|[I, saw, the, red...|  [saw, red, baloon]|
+ * |  1|[Mary, had, a, li...|[Mary, little, lamb]|
+ * +---+--------------------+--------------------+
+ */
     remover.transform(dataSet).show()
     // $example off$
 

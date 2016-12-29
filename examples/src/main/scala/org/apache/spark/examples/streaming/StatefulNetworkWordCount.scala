@@ -61,7 +61,7 @@ object StatefulNetworkWordCount {
 
     val sparkConf = new SparkConf().setAppName("StatefulNetworkWordCount")
     // Create the context with a 1 second batch size
-    //创建上下文一个1秒的批量大小
+    //创建上下文一个1秒的批量大小,批次间隔
     val ssc = new StreamingContext(sparkConf, Seconds(1))
     //使用updateStateByKey前需要设置checkpoint
     ssc.checkpoint(".")

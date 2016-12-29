@@ -53,7 +53,7 @@ object FlumePollingEventCount {
     val batchInterval = Milliseconds(2000)
 
     // Create the context and set the batch size
-    //创建上下文并设置批量大小
+    //创建上下文并设置批量大小,批次间隔
     val sparkConf = new SparkConf().setAppName("FlumePollingEventCount")
     val ssc = new StreamingContext(sparkConf, batchInterval)
 

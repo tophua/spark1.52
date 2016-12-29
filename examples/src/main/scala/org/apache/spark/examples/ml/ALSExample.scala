@@ -18,16 +18,13 @@
 // scalastyle:off println
 package org.apache.spark.examples.ml
 
-// $example on$
-import org.apache.spark.ml.evaluation.RegressionEvaluator
-import org.apache.spark.ml.recommendation.ALS
+import scala.reflect.runtime.universe
+
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.types.StringType
-import org.apache.spark.sql.{SQLContext, DataFrame}
-// $example off$
-
-
+import org.apache.spark.ml.evaluation.RegressionEvaluator
+import org.apache.spark.ml.recommendation.ALS
+import org.apache.spark.sql.SQLContext
 /**
  * An example demonstrating ALS.
  * Run with
@@ -36,9 +33,9 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
  * }}}
  */
 object ALSExample {
-
   // $example on$
   case class Rating(userId: Int, movieId: Int, rating: Float, timestamp: Long)
+  
   def parseRating(str: String): Rating = {
     val fields = str.split("::")
     assert(fields.size == 4)
@@ -66,14 +63,16 @@ object ALSExample {
       .setItemCol("movieId")
       .setRatingCol("rating")
     val model = als.fit(training)
-
+     //import spark.implicits._
     // Evaluate the model by computing the RMSE on the test data
+    //test[userId: int, movieId: int, rating: float, timestamp: bigint]
     val predictions = model.transform(test)
-
-    val evaluator = new RegressionEvaluator()
-      .setMetricName("rmse")
-      .setLabelCol("rating")
-      .setPredictionCol("prediction")
+    predictions.collect()
+    val evaluator = new RegressionEvaluator()  
+      //.setMetricName("rmse")
+      //.setLabelCol("rating")
+      //.setPredictionCol("prediction")
+      //predictions [userId: int, movieId: int, rating: float, timestamp: bigint, prediction: float]
     val rmse = evaluator.evaluate(predictions)
     println(s"Root-mean-square error = $rmse")
     // $example off$

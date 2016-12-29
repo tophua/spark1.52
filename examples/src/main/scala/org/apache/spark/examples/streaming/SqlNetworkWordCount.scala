@@ -51,7 +51,7 @@ object SqlNetworkWordCount {
     StreamingExamples.setStreamingLogLevels()
 
     // Create the context with a 2 second batch size
-    //创建上下文一个2秒批量大小
+    //创建上下文一个2秒批量大小,批次间隔
     val sparkConf = new SparkConf().setAppName("SqlNetworkWordCount")
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 

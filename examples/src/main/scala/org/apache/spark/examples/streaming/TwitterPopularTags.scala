@@ -52,6 +52,7 @@ object TwitterPopularTags {
     System.setProperty("twitter4j.oauth.accessTokenSecret", accessTokenSecret)
 
     val sparkConf = new SparkConf().setAppName("TwitterPopularTags")
+    //Åú´Î¼ä¸ô
     val ssc = new StreamingContext(sparkConf, Seconds(2))
     val stream = TwitterUtils.createStream(ssc, None, filters)
 

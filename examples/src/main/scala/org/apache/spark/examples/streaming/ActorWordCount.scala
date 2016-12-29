@@ -151,7 +151,7 @@ object ActorWordCount {
     val Seq(host, port) = args.toSeq
     val sparkConf = new SparkConf().setAppName("ActorWordCount")
     // Create the context and set the batch size
-    //创建上下文并设置批量大小
+    //创建上下文并设置批量大小,Seconds(2)批次间隔
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     /*

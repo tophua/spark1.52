@@ -86,6 +86,7 @@ object ZeroMQWordCount {
     val Seq(url, topic) = args.toSeq
     val sparkConf = new SparkConf().setAppName("ZeroMQWordCount")
     // Create the context and set the batch size
+    //Åú´Î¼ä¸ô
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     def bytesToStringIterator(x: Seq[ByteString]): Iterator[String] = x.map(_.utf8String).iterator

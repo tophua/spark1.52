@@ -50,6 +50,11 @@ object PolynomialExpansionExample {
       .setOutputCol("polyFeatures")
       .setDegree(3)
     val polyDF = polynomialExpansion.transform(df)
+    /**
+    *[[-2.0,4.0,-8.0,2.3,-4.6,9.2,5.289999999999999,-10.579999999999998,12.166999999999996]]
+    *[[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]]
+    *[[0.6,0.36,0.216,-1.1,-0.66,-0.396,1.2100000000000002,0.7260000000000001,-1.3310000000000004]]
+    */
     polyDF.select("polyFeatures").take(3).foreach(println)
     // $example off$
 

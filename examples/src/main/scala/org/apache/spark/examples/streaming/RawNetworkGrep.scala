@@ -50,7 +50,7 @@ object RawNetworkGrep {
     val Array(IntParam(numStreams), host, IntParam(port), IntParam(batchMillis)) = args
     val sparkConf = new SparkConf().setAppName("RawNetworkGrep")
     // Create the context
-    //创建上下文
+    //创建上下文,批次间隔
     val ssc = new StreamingContext(sparkConf, Duration(batchMillis))
 
     val rawStreams = (1 to numStreams).map(_ =>
