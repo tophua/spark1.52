@@ -49,6 +49,13 @@ object DataTypes {
     val neg = LabeledPoint(0.0, Vectors.sparse(3, Array(0, 2), Array(1.0, 3.0)))
     //稀疏数据,MLlib可以读取以LibSVM格式存储的训练实例,每行代表一个含类标签的稀疏特征向量
     //索引从1开始并且递增,加载被转换为从0开始   
+    /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
     val examples: RDD[LabeledPoint] = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt")
     /**本地密集矩阵***/
     // Create a dense matrix ((1.0, 2.0), (3.0, 4.0), (5.0, 6.0))

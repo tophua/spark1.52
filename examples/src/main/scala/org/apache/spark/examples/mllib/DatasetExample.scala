@@ -44,6 +44,13 @@ object DatasetExample {
 
   case class Params(
       input: String = "../data/mllib/sample_libsvm_data.txt",
+      /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
       dataFormat: String = "libsvm") extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -55,6 +62,13 @@ object DatasetExample {
         .text(s"input path to dataset")
         .action((x, c) => c.copy(input = x))
       opt[String]("dataFormat")
+      /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(input = x))
       checkConfig { params =>
@@ -81,6 +95,13 @@ object DatasetExample {
       //稠密数据
       case "dense" => MLUtils.loadLabeledPoints(sc, params.input)
       //libsvm数据
+      /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
       case "libsvm" => MLUtils.loadLibSVMFile(sc, params.input)
     }
     println(s"Loaded ${origData.count()} instances from file: ${params.input}")

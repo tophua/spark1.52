@@ -23,6 +23,13 @@ object LogisticRegressionWithLBFGSDeom {
     // 加载LIBSVM格式数据    
     // Load and parse the data file
     // Load training data in LIBSVM format.
+ /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
     val data = MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
     // Split data into training (60%) and test (40%).
     //将数据切分训练数据(60%)和测试数据(40%)

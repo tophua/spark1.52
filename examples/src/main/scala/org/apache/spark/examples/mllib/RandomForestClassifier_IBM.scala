@@ -14,6 +14,13 @@ object RandomForestDemo {
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
+ /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
     // 加载数据
     val data = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt")
     // 将数据随机分配为两份，一份用于训练，一份用于测试

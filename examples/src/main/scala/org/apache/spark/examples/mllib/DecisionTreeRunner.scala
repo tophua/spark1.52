@@ -58,6 +58,13 @@ object DecisionTreeRunner {
   case class Params(
       input: String = null,
       testInput: String = "",
+      /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
       dataFormat: String = "libsvm",
       algo: Algo = Classification,
       maxDepth: Int = 5,
@@ -181,6 +188,13 @@ object DecisionTreeRunner {
     //加载训练数据并将其缓存
     val origExamples = dataFormat match {
       case "dense" => MLUtils.loadLabeledPoints(sc, input).cache()
+      /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
       case "libsvm" => MLUtils.loadLibSVMFile(sc, input).cache()
     }
     // For classification, re-index classes if needed.
@@ -229,6 +243,13 @@ object DecisionTreeRunner {
       val numFeatures = examples.take(1)(0).features.size
       val origTestExamples = dataFormat match {
         case "dense" => MLUtils.loadLabeledPoints(sc, testInput)
+	/**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
         case "libsvm" => MLUtils.loadLibSVMFile(sc, testInput, numFeatures)
       }
       algo match {

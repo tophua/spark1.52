@@ -113,6 +113,13 @@ object OneVsRestExample {
   private def run(params: Params) {
     val conf = new SparkConf().setAppName(s"OneVsRestExample with $params")
     val sc = new SparkContext(conf)
+    /**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
     val inputData = MLUtils.loadLibSVMFile(sc, params.input)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
@@ -124,6 +131,13 @@ object OneVsRestExample {
         // compute the number of features in the training set.
         //在训练集中计算功能的数量
         val numFeatures = inputData.first().features.size
+	/**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
         val testData = MLUtils.loadLibSVMFile(sc, t, numFeatures)
         Array[RDD[LabeledPoint]](inputData, testData)
       }

@@ -33,7 +33,13 @@ import org.apache.spark.SparkContext._
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
  */
 object SampledRDDs {
-
+/**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
   case class Params(input: String = "../data/mllib/sample_binary_classification_data.txt")
     extends AbstractParams[Params]
 
@@ -66,7 +72,13 @@ object SampledRDDs {
     val sc = new SparkContext(conf)
 
     val fraction = 0.1 // fraction of data to sample 样本数据的分数
-
+/**
+ *  libSVM的数据格式
+ *  <label> <index1>:<value1> <index2>:<value2> ...
+ *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+ *  <index>是以1开始的整数,可以是不连续
+ *  <value>为实数,也就是我们常说的自变量
+ */
     val examples = MLUtils.loadLibSVMFile(sc, params.input)
     val numExamples = examples.count()
     if (numExamples == 0) {
