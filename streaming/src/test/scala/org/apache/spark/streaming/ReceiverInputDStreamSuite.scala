@@ -160,6 +160,7 @@ class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
     conf.set(WriteAheadLogUtils.RECEIVER_WAL_ENABLE_CONF_KEY, enableWAL.toString)
     //判断预写日志是否可用的状态
     require(WriteAheadLogUtils.enableReceiverLog(conf) === enableWAL)
+    //分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, Seconds(1))
     val receiverStream = new ReceiverInputDStream[Int](ssc) {
       override def getReceiver(): Receiver[Int] = null

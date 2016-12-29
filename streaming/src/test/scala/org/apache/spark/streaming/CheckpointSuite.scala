@@ -201,6 +201,7 @@ class CheckpointSuite extends TestSuiteBase {
     val key = "spark.mykey"
     val value = "myvalue"
     System.setProperty(key, value)
+    //分隔的时间叫作批次间隔
     ssc = new StreamingContext(master, framework, batchDuration)
     //原始conf文件
     val originalConf = ssc.conf

@@ -227,7 +227,7 @@ object MasterFailureTest extends Logging {
     setupCalled = true
 
     // Setup the streaming computation with the given operation
-    //设置给定的流式计算操作
+    //设置给定的流式计算操作,分隔的时间叫作批次间隔
     val ssc = new StreamingContext("local[4]", "MasterFailureTest", batchDuration, null, Nil,
       Map())
     //设置检查点目录

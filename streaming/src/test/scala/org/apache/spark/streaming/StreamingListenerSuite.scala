@@ -225,6 +225,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   }
 
   test("onBatchCompleted with failed batch and one failed job") { //批处理失败和一个失败的Job
+  //分隔的时间叫作批次间隔
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
     inputStream.foreachRDD { _ =>
@@ -242,6 +243,7 @@ class StreamingListenerSuite extends TestSuiteBase with Matchers {
   }
 
   test("onBatchCompleted with failed batch and multiple failed jobs") {
+    //分隔的时间叫作批次间隔
     ssc = new StreamingContext("local[2]", "test", Milliseconds(1000))
     val inputStream = ssc.receiverStream(new StreamingListenerSuiteReceiver)
     inputStream.foreachRDD { _ =>

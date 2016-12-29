@@ -35,6 +35,7 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     val sc = new SparkContext("local", "test")
+    //分隔的时间叫作批次间隔
     ssc = new StreamingContext(sc, Seconds(1))
   }
 

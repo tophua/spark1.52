@@ -62,6 +62,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   }
 
   test("from no conf constructor") { //来自一个没有配置的构造函数
+  //分隔的时间叫作批次间隔
     ssc = new StreamingContext(master, appName, batchDuration)
     assert(ssc.sparkContext.conf.get("spark.master") === master)
     assert(ssc.sparkContext.conf.get("spark.app.name") === appName)
@@ -73,6 +74,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   }
 
   test("from no conf + spark home + env") {
+  //分隔的时间叫作批次间隔
     ssc = new StreamingContext(master, appName, batchDuration,
       sparkHome, Nil, Map(envPair))
     assert(ssc.conf.getExecutorEnv.contains(envPair))
@@ -87,6 +89,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
 
   test("from existing SparkContext") { //从现有sparkcontext
     sc = new SparkContext(master, appName)
+    //分隔的时间叫作批次间隔
     ssc = new StreamingContext(sc, batchDuration)
   }
 
@@ -162,6 +165,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
   test("start with non-seriazable DStream checkpoints") { //运行非序列化DStream检查点
     //创建检查点临时目录
     val checkpointDir = Utils.createTempDir()
+    //分隔的时间叫作批次间隔
     ssc = new StreamingContext(conf, batchDuration)
     //检查点目录
     ssc.checkpoint(checkpointDir.getAbsolutePath)

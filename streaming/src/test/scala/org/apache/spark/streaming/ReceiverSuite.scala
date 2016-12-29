@@ -279,7 +279,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
       //logInfo(s"$message (${files.size} files):\n" + files.mkString("\n"))
        println(s"$message (${files.size} files):\n" + files.mkString("\n"))
     }
-
+	//分隔的时间叫作批次间隔
     withStreamingContext(new StreamingContext(sparkConf, batchDuration)) { ssc =>
       val receiver1 = new FakeReceiver(sendData = true)
       val receiver2 = new FakeReceiver(sendData = true)

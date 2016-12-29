@@ -155,7 +155,7 @@ class WindowOperationsSuite extends TestSuiteBase {
   //窗口-持久化级别
   test("window - persistence level") {
     val input = Seq( Seq(0), Seq(1), Seq(2), Seq(3), Seq(4), Seq(5))
-    //批处理间隔
+   //分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, batchDuration)
     val inputStream = new TestInputStream[Int](ssc, input, 1)
     //窗口间隔,返回一个包含了所有在时间滑动窗口中可见元素的新的DStream

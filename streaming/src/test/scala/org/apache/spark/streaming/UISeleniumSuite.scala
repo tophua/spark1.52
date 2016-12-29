@@ -59,6 +59,7 @@ class UISeleniumSuite
       .setMaster("local")
       .setAppName("test")
       .set("spark.ui.enabled", "true")
+      //分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, Seconds(1))
     assert(ssc.sc.ui.isDefined, "Spark UI is not started!")
     ssc

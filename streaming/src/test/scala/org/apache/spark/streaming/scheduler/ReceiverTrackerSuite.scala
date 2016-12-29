@@ -119,6 +119,7 @@ class ReceiverTrackerSuite extends TestSuiteBase {
     // Use ManualClock to prevent from starting batches so that we can make sure the only task is
     // for starting the Receiver
     val _conf = conf.clone.set("spark.streaming.clock", "org.apache.spark.util.ManualClock")
+    //分隔的时间叫作批次间隔
     withStreamingContext(new StreamingContext(_conf, Milliseconds(100))) { ssc =>
       @volatile var receiverTaskLocality: TaskLocality = null
       ssc.sparkContext.addSparkListener(new SparkListener {

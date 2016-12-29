@@ -32,6 +32,7 @@ class RateControllerSuite extends TestSuiteBase {
   override def batchDuration: Duration = Milliseconds(50)
   //速率控制器发布批量完成后的更新
   test("RateController - rate controller publishes updates after batches complete") {
+  //分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, batchDuration)
     withStreamingContext(ssc) { ssc =>
       val dstream = new RateTestInputDStream(ssc)
@@ -46,6 +47,7 @@ class RateControllerSuite extends TestSuiteBase {
   }
   //发布率达到接收器
   test("ReceiverRateController - published rates reach receivers") {
+  //分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, batchDuration)
     withStreamingContext(ssc) { ssc =>
       val estimator = new ConstantEstimator(100)

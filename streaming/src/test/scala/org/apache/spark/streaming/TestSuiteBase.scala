@@ -362,6 +362,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       numPartitions: Int = numInputPartitions
     ): StreamingContext = {
     // Create StreamingContext,创建实时上下文
+    //分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, batchDuration)
     if (checkpointDir != null) {
       ssc.checkpoint(checkpointDir)//设置检查点
@@ -390,6 +391,7 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
       operation: (DStream[U], DStream[V]) => DStream[W]
     ): StreamingContext = {
     // Create StreamingContext
+    //分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, batchDuration)
     if (checkpointDir != null) {
       ssc.checkpoint(checkpointDir)

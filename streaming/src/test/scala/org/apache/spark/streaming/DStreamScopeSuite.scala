@@ -33,6 +33,7 @@ class DStreamScopeSuite extends SparkFunSuite with BeforeAndAfter with BeforeAnd
   private val batchDuration: Duration = Seconds(1)//批量处理间隔1秒
 
   override def beforeAll(): Unit = {
+  //分隔的时间叫作批次间隔
     ssc = new StreamingContext(new SparkContext("local", "test"), batchDuration)
   }
 

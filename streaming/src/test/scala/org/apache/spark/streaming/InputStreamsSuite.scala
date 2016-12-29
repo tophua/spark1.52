@@ -188,7 +188,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
       assert(existingFile.setLastModified(10000) && existingFile.lastModified === 10000)
 
       // Set up the streaming context and input streams
-      //设置流上下文和输入流
+      //设置流上下文和输入流,分隔的时间叫作批次间隔
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
         // This `setTime` call ensures that the clock is past the creation time of `existingFile`
@@ -271,7 +271,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     MultiThreadTestReceiver.haveAllThreadsFinished = false
 
     // set up the network stream using the test receiver
-    //使用测试接收器设置网络流
+    //使用测试接收器设置网络流,分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, batchDuration)
     //数据源输入
     val networkStream = ssc.receiverStream[Int](testReceiver)
@@ -324,7 +324,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
   test("queue input stream - oneAtATime = true") {//队列输入流,一次一个
     // Set up the streaming context and input streams
-    //设置输入流和上下文
+    //设置输入流和上下文,分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, batchDuration)
     val queue = new SynchronizedQueue[RDD[String]]()//同步队列
     //队列流
@@ -379,7 +379,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
 
   test("queue input stream - oneAtATime = false") {//排队输入流,每次多条
     // Set up the streaming context and input streams
-    //设置流上下文和输入流
+    //设置流上下文和输入流,分隔的时间叫作批次间隔
     val ssc = new StreamingContext(conf, batchDuration)
     val queue = new SynchronizedQueue[RDD[String]]()
     val queueStream = ssc.queueStream(queue, oneAtATime = false)
@@ -437,7 +437,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
     }
   }
 
-  test("test track the number of input stream") {//跟踪数字输入流
+  test("test track the number of input stream") {//跟踪数字输入流,分隔的时间叫作批次间隔
     withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
 
       class TestInputDStream extends InputDStream[String](ssc) {
@@ -483,7 +483,7 @@ class InputStreamsSuite extends TestSuiteBase with BeforeAndAfter {
       assert(existingFile.setLastModified(10000) && existingFile.lastModified === 10000)
 
       // Set up the streaming context and input streams
-      //设置流上下文和输入流
+      //设置流上下文和输入流,分隔的时间叫作批次间隔
       withStreamingContext(new StreamingContext(conf, batchDuration)) { ssc =>
         val clock = ssc.scheduler.clock.asInstanceOf[ManualClock]
         // This `setTime` call ensures that the clock is past the creation time of `existingFile`
