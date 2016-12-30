@@ -38,18 +38,19 @@ import org.apache.spark.mllib.util.TestingUtils._
 class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
   //皮尔森(goodness)适配度检测
   /**
-   * 皮尔森适配度检测，Goodness of Fit test，验证一组观察值的次数分配是否异于理论上的分配。
+   * 皮尔森适配度检测,Goodness of Fit test,验证一组观察值的次数分配是否异于理论上的分配
    * 目前Spark默认的是均匀分配.
    */
   test("chi squared pearson goodness of fit") {
     //配度检测:验证一组观察值的次数分配是否异于理论上的分配
-    val observed = new DenseVector(Array[Double](4, 6, 5))
+    val observed = new DenseVector(Array[Double](4, 6, 5))//密集向量
     //提供了进行Pearson(皮尔森)卡方检验的方法
     val pearson = Statistics.chiSqTest(observed)//卡方检验   
     // Results validated against the R command `chisq.test(c(4, 6, 5), p=c(1/3, 1/3, 1/3))',P值一种概率
     //计算卡方检验的统计值(适配度检测):把每一个观察值和理论值(适配度检测,平均值)的差做平方后、除以理论值、再加总
     println("statistic:"+pearson.statistic+"\t degreesOfFreedom:"+pearson.degreesOfFreedom+"\t pValue:"+pearson.pValue)
     //statistic:0.4	 degreesOfFreedom:2	 pValue:0.8187307530779818
+    //统计值
     assert(pearson.statistic === 0.4)
     //自由度为2
     assert(pearson.degreesOfFreedom === 2)
@@ -61,7 +62,9 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(pearson.nullHypothesis === ChiSqTest.NullHypothesis.goodnessOfFit.toString)
     //独立性检测:验证从两个变量抽出的配对观察值组是否互相独立
     // different expected and observed sum
+    //观察值
     val observed1 = new DenseVector(Array[Double](21, 38, 43, 80))
+    //期望值
     val expected1 = new DenseVector(Array[Double](3, 5, 7, 20))
     //提供了进行Pearson卡方检验的方法
     val pearson1 = Statistics.chiSqTest(observed1, expected1)

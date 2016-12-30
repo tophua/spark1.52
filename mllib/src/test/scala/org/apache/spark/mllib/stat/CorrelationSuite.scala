@@ -28,7 +28,6 @@ import org.apache.spark.mllib.stat.correlation.{
 }
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 /**
- * 相关性操作
  * 相关性是两个变量之间的统计关系,意为当一个变量变化时会导致另一个变更的变化,
  * 相关性分析是度量两个变量的相关程度,如果一个变更的增加导致另一个变量也增加叫正相关
  * 如果一个变量的增加导致另一个变量的降低叫负相关
@@ -61,12 +60,13 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
       Statistics.corr(x, y, "spearman")
     }
   }
-//corr函数是求两个矩阵皮尔森相似度,默认皮尔森相似度
+  //corr函数是求两个矩阵皮尔森相似度,默认皮尔森相似度
   test("corr(x, y) default, pearson") {
     val x = sc.parallelize(xData)
     val y = sc.parallelize(yData)
     val expected = 0.6546537 //期望值
-    val default = Statistics.corr(x, y) //默认皮尔森相关性,default值为 0.6546536707079771
+    //pearson皮尔森相关性算法用于两个连续的变量
+    val default = Statistics.corr(x, y) //默认皮尔森相关性,default值为 0.6546536707079771    
     val p1 = Statistics.corr(x, y, "pearson") //皮尔森相关性
     assert(approxEqual(expected, default))
     assert(approxEqual(expected, p1))
@@ -85,9 +85,8 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
     assert(Statistics.corr(x, z).isNaN)
   }
   /**
-   * spearman 由于利用的等级相关，因而spearman相关性分析也称为spearman等级相关分析或等级差数法，
-   * 但需要注意的是spearman相关性分析方法涉及到等级的排序问题，
-   * 在分布式环境下的排序可能会涉及到大量的网络IO操作，算法效率不是特别高
+   * spearman 由于利用的等级相关,因而spearman相关性分析也称为spearman等级相关分析或等级差数法
+	 * spearman 斯皮漫相关性算法用于一个连续值和一个离散值
    */
 
   test("corr(x, y) spearman") { //斯皮漫相关性 

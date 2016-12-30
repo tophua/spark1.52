@@ -23,9 +23,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.linalg.Vectors
 /**
- * 坐标矩阵（CoordinateMatrix）也是由RDD做底层结构的分布式矩阵。
- * 每个RDD元素是由多个(i : long, j : long, value: Double)组成的元组，其中i是行索引，j是列索引，value是元素值。
- * CoordinateMatrix 只应该应用于矩阵纬度高并且稀疏的情况下
+ * 坐标矩阵(CoordinateMatrix)也是由RDD做底层结构的分布式矩阵
  * CoordinateMatrix是由MatrixEntry组成的矩阵,一个MatrixEntry代表矩阵的一个元素,元素由它的行列索引表示
  */
 class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {

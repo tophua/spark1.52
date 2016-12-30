@@ -36,7 +36,9 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
  */
   val m = 5
   val n = 4
+  //每一行
   val rowPerPart = 2
+  //列每部分
   val colPerPart = 2
   val numPartitions = 3
   var gridBasedMat: BlockMatrix = _

@@ -31,8 +31,7 @@ import org.apache.spark.mllib.util.{ LocalClusterSparkContext, MLlibTestSparkCon
  */
 class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   /**
-   * 行矩阵(RowMatrix)按行分布式存储，无行索引，底层支撑结构是多行数据组成的RDD，每行是一个局部向量。
-   * 正因为每行是局部向量，列数受限于整数的范围，不过在实践中已经够用了
+   * 行矩阵(RowMatrix)按行分布式存储,无行索引,由多行数据组成的RDD,每一行是一个特征向量
    */
   val m = 4
   val n = 3
@@ -50,7 +49,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     Vectors.sparse(3, Seq((0, 6.0), (1, 7.0), (2, 8.0))),
     Vectors.sparse(3, Seq((0, 9.0), (2, 1.0))))
  //主成分分析
-  val principalComponents = BDM(
+  val principalComponents = BDM(//DenseMatrix
     (0.0, 1.0, 0.0),
     (math.sqrt(2.0) / 2.0, 0.0, math.sqrt(2.0) / 2.0),
     (math.sqrt(2.0) / 2.0, 0.0, -math.sqrt(2.0) / 2.0))
@@ -60,10 +59,10 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   override def beforeAll() {
     super.beforeAll()
-    //行矩阵按行分布式存储，这个时候行号没有意义,
-    //特征向量集就可以表示为行矩阵，通过RDD来支撑矩阵的部分行，每行是一个局部向量
+    //行矩阵按行分布式存储,这个时候行号没有意义,
+    //特征向量集就可以表示为行矩阵,通过RDD来支撑矩阵的部分行,每行是一个局部向量
     denseMat = new RowMatrix(sc.parallelize(denseData, 2))
-    //
+    //稀疏矩阵
     sparseMat = new RowMatrix(sc.parallelize(sparseData, 2))
   }
 
@@ -86,7 +85,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toBreeze") {
-    val expected = BDM(
+    val expected = BDM(//DenseMatrix
       (0.0, 1.0, 2.0),
       (3.0, 4.0, 5.0),
       (6.0, 7.0, 8.0),
@@ -106,8 +105,9 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("similar columns") {//相似的列
+    //sqrt 平方根函数
     val colMags = Vectors.dense(math.sqrt(126), math.sqrt(66), math.sqrt(94))
-    val expected = BDM(
+    val expected = BDM(//DenseMatrix
       (0.0, 54.0, 72.0),
       (0.0, 0.0, 78.0),
       (0.0, 0.0, 0.0))
@@ -139,10 +139,10 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("svd of a full-rank matrix") {//一个满秩矩阵的奇异值分解
+  test("svd of a full-rank matrix") {//一个秩矩阵的奇异值分解
     for (mat <- Seq(denseMat, sparseMat)) {
       for (mode <- Seq("auto", "local-svd", "local-eigs", "dist-eigs")) {
-        val localMat = mat.toBreeze()
+        val localMat = mat.toBreeze()//svd
                val brzSvd.SVD(localU, localSigma, localVt) = brzSvd(localMat)
         val localV: BDM[Double] = localVt.t.toDenseMatrix
         for (k <- 1 to n) {
@@ -275,6 +275,7 @@ class RowMatrixClusterSuite extends SparkFunSuite with LocalClusterSparkContext 
     super.beforeAll()
     val m = 4
     val n = 200000
+    //mapPartitionsWithIndex的func接受两个参数,第一个参数是分区的索引,第二个是一个数据集分区的迭代器
     val rows = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
       val random = new Random(idx)
       iter.map(i => Vectors.dense(Array.fill(n)(random.nextDouble())))

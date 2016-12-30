@@ -32,6 +32,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   val m = 4
   val n = 3
+  //创建行索引Seq[IndexedRow]
   val data = Seq(
     (0L, Vectors.dense(0.0, 1.0, 2.0)),
     (1L, Vectors.dense(3.0, 4.0, 5.0)),
@@ -45,10 +46,11 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("size") {
+    //创建行索引矩阵
     val mat1 = new IndexedRowMatrix(indexedRows)
-    assert(mat1.numRows() === m)
-    assert(mat1.numCols() === n)
-
+    assert(mat1.numRows() === m)//3行 
+    assert(mat1.numCols() === n)//4列
+    //创建行索引矩阵,5行,0列
     val mat2 = new IndexedRowMatrix(indexedRows, 5, 0)
     assert(mat2.numRows() === 5)
     assert(mat2.numCols() === n)
@@ -66,6 +68,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toBreeze") {//
+    //创建行索引矩阵
     val mat = new IndexedRowMatrix(indexedRows)
     val expected = BDM(
       (0.0, 1.0, 2.0),
@@ -76,15 +79,18 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toRowMatrix") {//行矩阵
+     //创建行索引矩阵
     val idxRowMat = new IndexedRowMatrix(indexedRows)
+    //转换行矩阵
     val rowMat = idxRowMat.toRowMatrix()
-    assert(rowMat.numCols() === n)
+    assert(rowMat.numCols() === n)//3列
     assert(rowMat.numRows() === 3, "should drop empty rows")
     assert(rowMat.rows.collect().toSeq === data.map(_.vector).toSeq)
   }
 
   test("toCoordinateMatrix") {//协调矩阵
     val idxRowMat = new IndexedRowMatrix(indexedRows)
+    //转换坐标矩阵
     val coordMat = idxRowMat.toCoordinateMatrix()
     assert(coordMat.numRows() === m)
     assert(coordMat.numCols() === n)
@@ -93,9 +99,10 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("toBlockMatrix") {//块矩阵
     val idxRowMat = new IndexedRowMatrix(indexedRows)
+    //转换块矩阵
     val blockMat = idxRowMat.toBlockMatrix(2, 2)
-    assert(blockMat.numRows() === m)
-    assert(blockMat.numCols() === n)
+    assert(blockMat.numRows() === m)//4行
+    assert(blockMat.numCols() === n)//3列
     assert(blockMat.toBreeze() === idxRowMat.toBreeze())
 
     intercept[IllegalArgumentException] {
@@ -116,8 +123,9 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(localC === expected)
   }
 
-  test("gram") {//克
+  test("gram") {//格拉姆矩阵
     val A = new IndexedRowMatrix(indexedRows)
+    //格拉姆矩阵
     val G = A.computeGramianMatrix()
     val expected = BDM(
       (90.0, 12.0, 24.0),
