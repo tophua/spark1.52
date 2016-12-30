@@ -29,6 +29,7 @@ import org.apache.spark.sql.types.DoubleType
 /**
  * :: Experimental ::
  * Evaluator for binary classification, which expects two input columns: rawPrediction and label.
+ * 二元分类评估,其中预计两个输入列
  */
 @Experimental
 class BinaryClassificationEvaluator(override val uid: String)
@@ -38,7 +39,8 @@ class BinaryClassificationEvaluator(override val uid: String)
 
   /**
    * param for metric name in evaluation
-   * Default: areaUnderROC
+   * 评价指标名称参数
+   * Default: areaUnderROC 默认ROC曲线下面积
    * @group param
    */
   val metricName: Param[String] = {

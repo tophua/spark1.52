@@ -29,6 +29,11 @@ import org.apache.spark.mllib.stat.correlation.{
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 /**
  * 相关性操作
+ * 相关性是两个变量之间的统计关系,意为当一个变量变化时会导致另一个变更的变化,
+ * 相关性分析是度量两个变量的相关程度,如果一个变更的增加导致另一个变量也增加叫正相关
+ * 如果一个变量的增加导致另一个变量的降低叫负相关
+ * pearson皮尔森相关性算法用于两个连续的变量
+ * spearman 斯皮漫相关性算法用于一个连续值和一个离散值
  */
 class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 

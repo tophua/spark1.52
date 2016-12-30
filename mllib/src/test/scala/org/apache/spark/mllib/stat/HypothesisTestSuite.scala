@@ -33,7 +33,7 @@ import org.apache.spark.mllib.stat.test.ChiSqTest
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 /**
- * 假设检验
+ * 假设检验是鉴定给定的假说正确性概率的一种方式
  */
 class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
   //皮尔森(goodness)适配度检测

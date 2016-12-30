@@ -26,8 +26,8 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.{ Matrices, Vectors, Vector }
 import org.apache.spark.mllib.util.{ LocalClusterSparkContext, MLlibTestSparkContext }
 /**
- * 分布式矩阵以long整型做索引，以double类型为值，以RDD的方式分布式存储
- * 当存储非常大的分布式矩阵的时候，选择正确的存储方式非常重要
+ * 分布式矩阵以long整型做索引,以double类型为值,以RDD的方式分布式存储
+ * RowMatrix:每一行是一个特征向量
  */
 class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   /**
