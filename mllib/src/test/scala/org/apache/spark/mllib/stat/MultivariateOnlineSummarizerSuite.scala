@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.TestingUtils._
 /**
- * 多元网络概述
+ * 多变量网络概述
  */
 class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
 
@@ -82,14 +82,14 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
     }
   }
 
-  test("dense vector input") {//密集的输入向量
+  test("dense vector input") {//密集向量的输入
     // For column 2, the maximum will be 0.0, and it's not explicitly added since we ignore all
     //对于列2，最大值将是0,它没有显式添加,因为我们忽略了所有的零
     // the zeros; it's a case we need to test. For column 3, the minimum will be 0.0 which we
     // need to test as well.
     //这是一个我们需要测试的案例.对于列3,最低将是0,我们需要测试以及
     val summarizer = (new MultivariateOnlineSummarizer)
-      //密度矩阵，零值也存储
+      //密度矩阵,零值也存储
       .add(Vectors.dense(-1.0, 0.0, 6.0))
       .add(Vectors.dense(3.0, -3.0, 0.0))
     //每列的均值
@@ -125,7 +125,7 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
     assert(summarizer.count === 2)
   }
 
-  test("mixing dense and sparse vector input") {//混合密集和稀疏向量输入
+  test("mixing dense and sparse vector input") {//密集和稀疏向量混合输入
     val summarizer = (new MultivariateOnlineSummarizer)
       .add(Vectors.sparse(3, Seq((0, -2.0), (1, 2.3))))
       .add(Vectors.dense(0.0, -1.0, -3.0))
@@ -150,7 +150,7 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
     assert(summarizer.count === 6)
   }
 
-  test("merging two summarizers") {//合并两摘要
+  test("merging two summarizers") {//合并两个摘要
     val summarizer1 = (new MultivariateOnlineSummarizer)
       .add(Vectors.sparse(3, Seq((0, -2.0), (1, 2.3))))
       .add(Vectors.dense(0.0, -1.0, -3.0))
