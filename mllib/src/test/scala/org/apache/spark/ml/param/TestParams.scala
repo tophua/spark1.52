@@ -20,7 +20,10 @@ package org.apache.spark.ml.param
 import org.apache.spark.ml.param.shared.{HasInputCol, HasMaxIter}
 import org.apache.spark.ml.util.Identifiable
 
-/** A subclass of Params for testing. */
+/** 
+ *  A subclass of Params for testing. 
+ *  一个子类测试的参数
+ *  */
 class TestParams(override val uid: String) extends Params with HasMaxIter with HasInputCol {
 
   def this() = this(Identifiable.randomUID("testParams"))

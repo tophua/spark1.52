@@ -18,7 +18,9 @@
 package org.apache.spark.ml.param
 
 import org.apache.spark.SparkFunSuite
-
+/**
+ * 参数套件
+ */
 class ParamsSuite extends SparkFunSuite {
 
   test("param") {//参数
@@ -217,10 +219,14 @@ object ParamsSuite extends SparkFunSuite {
 
   /**
    * Checks common requirements for [[Params.params]]:
-   *   - params are ordered by names
+   * 检查一般要求[参数]:
+   *   - params are ordered by names 参数是名称的顺序
    *   - param parent has the same UID as the object's UID
+   *   - 父有相同的UID对象的UID
    *   - param name is the same as the param method name
+   *   - 参数名称作为相同参数方法的名称
    *   - obj.copy should return the same type as the obj
+   *   - obj.copy应该作为返回类型相同的对象
    */
   def checkParams(obj: Params): Unit = {
     val clazz = obj.getClass
