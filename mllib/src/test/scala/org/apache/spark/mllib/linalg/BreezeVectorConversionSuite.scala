@@ -23,7 +23,7 @@ import org.apache.spark.SparkFunSuite
 
 /**
  * Test Breeze vector conversions.
- * 测试Breeze矢量转换
+ * 测试Breeze向量转换
  */
 class BreezeVectorConversionSuite extends SparkFunSuite {
 

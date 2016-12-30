@@ -36,7 +36,7 @@ import org.apache.spark.sql.DataFrame
  * Run with
  * {{{
  * bin/run-example ml.LogisticRegressionExample [options]
- * }}}
+ * }}} 
  * A synthetic dataset can be found at `data/mllib/sample_libsvm_data.txt` which can be
  * trained by
  * {{{

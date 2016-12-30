@@ -24,7 +24,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.mllib.linalg.{Matrices, Vectors}
 /**
- * 索引行矩阵(IndexedRowMatrix)跟RowMatrix类似，但是有行索引。其底层支撑结构是索引的行组成的RDD，
+ * 索引行矩阵(IndexedRowMatrix)跟RowMatrix类似,但是有行索引;其底层支撑结构是索引的行组成的RDD
  * 所以每行可以通过索引(long)和局部向量表示
  */
 class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {

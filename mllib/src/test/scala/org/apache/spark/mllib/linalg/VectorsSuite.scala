@@ -24,7 +24,10 @@ import breeze.linalg.{DenseMatrix => BDM, squaredDistance => breezeSquaredDistan
 import org.apache.spark.{Logging, SparkException, SparkFunSuite}
 import org.apache.spark.mllib.util.TestingUtils._
 /**
- * 向量
+ * 密集和稀疏向量
+ * 一个向量(1.0,0.0,3.0)它有2中表示的方法
+ *密集:[1.0,0.0,3.0]其和一般的数组无异
+ *稀疏:(3,[0,2],[1.0,3.0])其表示的含义(向量大小,序号,值)序号从0开始
  */
 class VectorsSuite extends SparkFunSuite with Logging {
 
@@ -35,16 +38,16 @@ class VectorsSuite extends SparkFunSuite with Logging {
   val indices = Array(0, 2, 3)
   //值
   val values = Array(0.1, 0.3, 0.4)
-  //稠密向量(dense vector)使用double数组表示元素值
-  test("dense vector construction with varargs") {//可变参数构建稠密向量
-    //稠密向量
+  //密集向量(dense vector)使用double数组表示元素值
+  test("dense vector construction with varargs") {//可变参数构建密集向量
+    //密集向量
     val vec = Vectors.dense(arr).asInstanceOf[DenseVector]
     assert(vec.size === arr.length)
     assert(vec.values.eq(arr))
   }
   
-  test("dense vector construction from a double array") {//双数组构造稠密矢量
-   //稠密向量
+  test("dense vector construction from a double array") {//双数组构造密集矢量
+   //密集向量
    val vec = Vectors.dense(arr).asInstanceOf[DenseVector]
     assert(vec.size === arr.length)
     assert(vec.values.eq(arr))
@@ -82,12 +85,12 @@ class VectorsSuite extends SparkFunSuite with Logging {
     }
   }
 
-  test("dense to array") {//稠密矩阵转换数组
+  test("dense to array") {//密集矩阵转换数组
     val vec = Vectors.dense(arr).asInstanceOf[DenseVector]
     assert(vec.toArray.eq(arr))
   }
 
-  test("dense argmax") {//稠密矩阵最大元素位置
+  test("dense argmax") {//密集矩阵最大元素位置
     val vec = Vectors.dense(Array.empty[Double]).asInstanceOf[DenseVector]
     assert(vec.argmax === -1)//找出最大元素位置
 
@@ -97,7 +100,12 @@ class VectorsSuite extends SparkFunSuite with Logging {
     val vec3 = Vectors.dense(Array(-1.0, 0.0, -2.0, 1.0)).asInstanceOf[DenseVector]
     assert(vec3.argmax === 3)//找出最大元素位置
   }
-
+  /**
+ * 密集和稀疏向量
+ * 一个向量(1.0,0.0,3.0)它有2中表示的方法
+ *密集:[1.0,0.0,3.0]其和一般的数组无异
+ *稀疏:(3,[0,2],[1.0,3.0])其表示的含义(向量大小,序号,值)序号从0开始
+ */
   test("sparse to array") {//稀疏矩阵转换数组
     val vec = Vectors.sparse(n, indices, values).asInstanceOf[SparseVector]
     assert(vec.toArray === arr)
@@ -105,13 +113,14 @@ class VectorsSuite extends SparkFunSuite with Logging {
 
   test("sparse argmax") {//稀疏矩阵最大元素位置
     val vec = Vectors.sparse(0, Array.empty[Int], Array.empty[Double]).asInstanceOf[SparseVector]
+    //空的向量最大位置为-1
     assert(vec.argmax === -1)//找出最大元素位置
 
     val vec2 = Vectors.sparse(n, indices, values).asInstanceOf[SparseVector]
     assert(vec2.argmax === 3)//找出最大元素位置
 
     val vec3 = Vectors.sparse(5, Array(2, 3, 4), Array(1.0, 0.0, -.7))
-    assert(vec3.argmax === 2)//找出最大元素位置
+    assert(vec3.argmax === 2)//找出最大元素位置,即第二个索引值为1
 
     // check for case that sparse vector is created with
     //检查稀疏向量的情况下,只有负值创建
@@ -129,7 +138,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
     assert(vec7.argmax === 1)//找出最大元素位置
 
     val vec8 = Vectors.sparse(5, Array(1, 2), Array(0.0, -1.0))
-    assert(vec8.argmax === 0)//找出最大元素位置
+    assert(vec8.argmax === 0)//找出最大元素位置,索引的位置从0开始
   }
 
   test("vector equals") {//向量等于
@@ -171,7 +180,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
     }
   }
 
-  test("indexing dense vectors") {//稠密向量索引
+  test("indexing dense vectors") {//密集向量索引
     val vec = Vectors.dense(1.0, 2.0, 3.0, 4.0)
     assert(vec(0) === 1.0)
     assert(vec(3) === 4.0)
@@ -360,7 +369,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
     assert(sv.numNonzeros === 2)
   }
 
-  test("Vector toSparse and toDense") {//向量转换稀疏矩阵和稠密矩阵
+  test("Vector toSparse and toDense") {//向量转换稀疏矩阵和密集矩阵
     val dv0 = Vectors.dense(0.0, 2.0, 3.0, 0.0)
     assert(dv0.toDense === dv0)
     val dv0s = dv0.toSparse
