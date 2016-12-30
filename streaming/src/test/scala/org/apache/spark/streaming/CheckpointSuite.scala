@@ -93,6 +93,12 @@ class CheckpointSuite extends TestSuiteBase {
         (x, 1)
         })
       //updateStateByKey可以DStream中的数据进行按key做reduce操作,然后对各个批次的数据进行累加
+ /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
       .updateStateByKey(updateFunc)
       //在interval周期后给生成的RDD设置检查点
       .checkpoint(stateStreamCheckpointInterval)
@@ -453,6 +459,12 @@ class CheckpointSuite extends TestSuiteBase {
       val updateFunc = (values: Seq[Int], state: Option[Int]) => {
         Some((values.sum + state.getOrElse(0)))
       }
+       /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
       st.map(x => (x, 1))
         .updateStateByKey(updateFunc)
 	//在interval周期后给生成的RDD设置检查点

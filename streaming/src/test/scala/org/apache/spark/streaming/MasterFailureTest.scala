@@ -109,6 +109,12 @@ object MasterFailureTest extends Logging {
       val updateFunc = (values: Seq[Long], state: Option[Long]) => {
         Some(values.foldLeft(0L)(_ + _) + state.getOrElse(0L))
       }
+ /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
       st.flatMap(_.split(" "))
         .map(x => (x, 1L))
         .updateStateByKey[Long](updateFunc)

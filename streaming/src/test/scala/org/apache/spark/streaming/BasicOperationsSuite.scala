@@ -348,6 +348,12 @@ class BasicOperationsSuite extends TestSuiteBase {
     testOperation(inputData1, inputData2, operation, outputData, true)
   }
   //updateStateByKey可以DStream中的数据进行按key做reduce操作,然后对各个批次的数据进行累加
+  /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  */
   test("updateStateByKey") {
     //输入数据
     val inputData =
@@ -370,6 +376,12 @@ class BasicOperationsSuite extends TestSuiteBase {
         Seq(("a", 5), ("b", 3), ("c", 1))
       )
     //updateStateOperation匿名函数,接收DStream[String]类型,返回DStream[(String, Int)]
+  /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
     val updateStateOperation = (s: DStream[String]) => {
       val updateFunc = (values: Seq[Int], state: Option[Int]) => {      
         println("values:["+values.mkString(",") +"]\t state:["+ state.mkString(",")+"]")
@@ -418,6 +430,12 @@ class BasicOperationsSuite extends TestSuiteBase {
         Some(values.sum + state.getOrElse(0))
       }
       //初始化值
+  /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
       s.map(x => (x, 1)).updateStateByKey[Int](updateFunc,
         new HashPartitioner (numInputPartitions), initialRDD)
     }
@@ -456,6 +474,13 @@ class BasicOperationsSuite extends TestSuiteBase {
       val newUpdateFunc = (iterator: Iterator[(String, Seq[Int], Option[Int])]) => {
         iterator.flatMap(t => updateFunc(t._2, t._3).map(s => (t._1, s)))
       }
+/**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
+
       s.map(x => (x, 1)).updateStateByKey[Int](newUpdateFunc,
         new HashPartitioner (numInputPartitions), true, initialRDD)
     }
@@ -503,6 +528,12 @@ class BasicOperationsSuite extends TestSuiteBase {
           case _ => Option(stateObj)
         }
       }
+      /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
       s.map(x => (x, 1)).updateStateByKey[StateObject](updateFunc).mapValues(_.counter)
     }
 
@@ -599,6 +630,12 @@ class BasicOperationsSuite extends TestSuiteBase {
     }
     val stateStream = runCleanupTest(
 	//在interval周期后给生成的RDD设置检查点
+  /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
       conf, _.map(_ -> 1).updateStateByKey(updateFunc).checkpoint(Seconds(3)))
 
     assert(stateStream.rememberDuration === stateStream.checkpointDuration * 2)

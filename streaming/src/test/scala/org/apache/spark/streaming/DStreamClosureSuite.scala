@@ -174,6 +174,12 @@ class DStreamClosureSuite extends SparkFunSuite with BeforeAndAfterAll {
         reduceF, reduceF, Seconds(2), Seconds(3), new HashPartitioner(5), filterF)
     }
   }
+   /**
+  *updateStateByKey 操作返回一个新状态的DStream,
+  *其中传入的函数基于键之前的状态和键新的值更新每个键的状态
+  *updateStateByKey操作对每个键会调用一次,
+  *values表示键对应的值序列,state可以是任务状态
+  **/
   private def testUpdateStateByKey(ds: DStream[(Int, Int)]): Unit = {
     val updateF1 = (_: Seq[Int], _: Option[Int]) => { return; Some(1) }
     val updateF2 = (_: Iterator[(Int, Seq[Int], Option[Int])]) => { return; Seq((1, 1)).toIterator }
