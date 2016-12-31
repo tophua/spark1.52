@@ -69,7 +69,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   //具有有序分类特征的二元分类方法
   test("Binary classification stump with ordered categorical features") {
     val dt = new DecisionTreeClassifier()
-      .setImpurity("gini")
+      .setImpurity("gini")//基尼
       .setMaxDepth(2)
       .setMaxBins(100)
     val categoricalFeatures = Map(0 -> 3, 1-> 3)

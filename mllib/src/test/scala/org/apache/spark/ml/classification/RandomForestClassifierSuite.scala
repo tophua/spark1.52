@@ -33,6 +33,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 
 /**
  * Test suite for [[RandomForestClassifier]].
+ * 随机森林树分类
  */
 class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -154,7 +155,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  // Tests of feature importance
+  // Tests of feature importance 特征重要性试验
   /////////////////////////////////////////////////////////////////////////////
   test("Feature importance with toy data") {
     val numClasses = 2

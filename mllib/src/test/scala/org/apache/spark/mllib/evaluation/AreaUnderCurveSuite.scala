@@ -22,10 +22,11 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 /**
  * AUC是一种用来度量分类模型好坏的一个标准,简单来说就是曲线右下角部分占正方形格子的面积比例
- * AUC的值介于0.5到1.0之间，较大的AUC代表了较好
+ * AUC的值介于0.5到1.0之间,较大的AUC代表了较好
  */
 class AreaUnderCurveSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("auc computation") {//AUC计算
+    //曲线
     val curve = Seq((0.0, 0.0), (1.0, 1.0), (2.0, 3.0), (3.0, 0.0))
     val auc = 4.0
     assert(AreaUnderCurve.of(curve) ~== auc absTol 1E-5) //1e-5的意思就是1乘以10的负5次幂.就是0.000001
@@ -34,6 +35,7 @@ class AreaUnderCurveSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("auc of an empty curve") {//AUC空曲线
+    //曲线
     val curve = Seq.empty[(Double, Double)]
     assert(AreaUnderCurve.of(curve) ~== 0.0 absTol 1E-5)
     val rddCurve = sc.parallelize(curve, 2)
