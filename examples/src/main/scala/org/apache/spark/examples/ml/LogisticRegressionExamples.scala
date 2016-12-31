@@ -23,6 +23,7 @@ import org.apache.spark.util.Utils
  * Spark Coolbook 使用ML创建机器学习流水线
  * ML基本概念:它使用转换器将一个DataFrame转换为另一个DataFrame,
  * 一个转换器的简单例子就是增加一列,你可以等价于关系数据库的"alter table"
+ * 估算使用训练集数据训练算法,然后转换器作出预测
  */
   def main(args: Array[String]) {
     
@@ -62,7 +63,7 @@ import org.apache.spark.util.Utils
     val featuresRDD = testRDD.map(v => Feature(v))
     //将featuresRDD转换为列名features的DataFrame
     val featuresDF = featuresRDD.toDF("features")
-    //在转换器增加预测列features
+    //在转换器增加预测列features,转换器作出预测
     val predictionsDF = transformer.transform(featuresDF)
     println("======")
     predictionsDF.foreach { x =>println _}
