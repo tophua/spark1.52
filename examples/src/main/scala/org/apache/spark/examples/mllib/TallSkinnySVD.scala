@@ -23,19 +23,7 @@ import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.mllib.linalg.Vectors
 
 /**
- * 降维 奇异值分解
- * Compute the singular value decomposition (SVD) of a tall-and-skinny matrix.
- * 计算矩阵的奇异值分解(SVD)一个又高又瘦的矩阵
- * The input matrix must be stored in row-oriented dense format, one line per row with its entries
- * 输入矩阵必须以行为导向的密集格式存储,输入矩阵必须存储在一行密集的格式,每行一行,其条目由空间分隔.例如
- * separated by space. For example,
- * {{{
- * 0.5 1.0
- * 2.0 3.0
- * 4.0 5.0
- * }}}
- * represents a 3-by-2 matrix, whose first row is (0.5, 1.0).
- * 代表3行2列矩阵,第一行是(0.5,1)
+ * 降维奇异值分解
  */
 object TallSkinnySVD {
   def main(args: Array[String]) {

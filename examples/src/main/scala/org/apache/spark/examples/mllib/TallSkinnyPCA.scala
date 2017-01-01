@@ -23,7 +23,7 @@ import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.mllib.linalg.Vectors
 
 /**
- * 降维 主成分分析(PCA)
+ * 降维主成分分析(PCA)
  * Compute the principal components of a tall-and-skinny matrix, whose rows are observations.
  * 计算一个高和瘦矩阵的主要组成部分,谁的行是观察者
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries
