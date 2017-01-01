@@ -31,7 +31,8 @@ private object LassoSuite {
   val model = new LassoModel(weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5)
 }
 /**
- * 岭回归
+ * Lasso(套索)算法是线性回归中一种收缩和选择方法,它可最小化通常的平方差之和
+ * Lasso(套索)算法主要特征:做任意它认为没有用的预测因子,它会把它们的相关系数设为0从而把它们从方程式中删除
  */
 class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
 

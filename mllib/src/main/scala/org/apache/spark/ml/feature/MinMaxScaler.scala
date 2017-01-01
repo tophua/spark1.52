@@ -106,7 +106,7 @@ class MinMaxScaler(override val uid: String)
   override def fit(dataset: DataFrame): MinMaxScalerModel = {
     transformSchema(dataset.schema, logging = true)
     val input = dataset.select($(inputCol)).map { case Row(v: Vector) => v }
-    val summary = Statistics.colStats(input)//计算列概述统计量
+    val summary = Statistics.colStats(input)
     copyValues(new MinMaxScalerModel(uid, summary.min, summary.max).setParent(this))
   }
 

@@ -37,6 +37,7 @@ private object RidgeRegressionSuite {
 }
 /**
  * 岭回归数值计算方法的“稳定性”是指在计算过程中舍入误差是可以控制的
+ * 岭回归而不会把预测因子系数设为0,但它会让他们近似于0.
  */
 class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
