@@ -338,6 +338,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
          * 4.3     4.5
          * 8.8     1.9
          */
+	//math.abs返回数的绝对值
       println(a+"\t"+ math.abs(v))
       a + math.abs(v)
       }) relTol 1E-8)
@@ -346,13 +347,15 @@ class VectorsSuite extends SparkFunSuite with Logging {
     //正平方根
     assert(Vectors.norm(dv, 2.0) ~== math.sqrt(dv.toArray.foldLeft(0.0)((a, v) =>
       a + v * v)) relTol 1E-8)
+      //math.sqrt返回数字的平方根
     assert(Vectors.norm(sv, 2.0) ~== math.sqrt(sv.toArray.foldLeft(0.0)((a, v) =>
       a + v * v)) relTol 1E-8)
-
+    //math.abs返回数的绝对值
     assert(Vectors.norm(dv, Double.PositiveInfinity) ~== dv.toArray.map(math.abs).max relTol 1E-8)
     assert(Vectors.norm(sv, Double.PositiveInfinity) ~== sv.toArray.map(math.abs).max relTol 1E-8)
 
     assert(Vectors.norm(dv, 3.7) ~== math.pow(dv.toArray.foldLeft(0.0)((a, v) =>
+     //math.abs返回数的绝对值
       a + math.pow(math.abs(v), 3.7)), 1.0 / 3.7) relTol 1E-8)
     assert(Vectors.norm(sv, 3.7) ~== math.pow(sv.toArray.foldLeft(0.0)((a, v) =>
       a + math.pow(math.abs(v), 3.7)), 1.0 / 3.7) relTol 1E-8)

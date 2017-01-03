@@ -91,6 +91,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
     // it requires 90 iterations in GD. No matter how hard we increase
     // the number of iterations in GD here, the lossGD will be always
     // larger than lossLBFGS. This is based on observation, no theoretically guaranteed
+     //math.abs返回数的绝对值
     assert(math.abs((lossGD.last - loss.last) / loss.last) < 0.02,
       "LBFGS should match GD result within 2% difference.")
   }

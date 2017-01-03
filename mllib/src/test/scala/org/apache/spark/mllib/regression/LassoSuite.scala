@@ -40,6 +40,7 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
     val numOffPredictions = predictions.zip(input).count { case (prediction, expected) =>
       // A prediction is off if the prediction is more than 0.5 away from expected value.
       //预测是关闭的,如果预测是超过0.5,从预期值
+       //math.abs返回数的绝对值
       math.abs(prediction - expected.label) > 0.5
     }
     // At least 80% of the predictions should be on.

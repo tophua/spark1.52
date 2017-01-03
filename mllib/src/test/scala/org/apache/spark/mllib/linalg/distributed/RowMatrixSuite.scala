@@ -51,6 +51,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
  //主成分分析
   val principalComponents = BDM(//DenseMatrix
     (0.0, 1.0, 0.0),
+    //math.sqrt返回数字的平方根
     (math.sqrt(2.0) / 2.0, 0.0, math.sqrt(2.0) / 2.0),
     (math.sqrt(2.0) / 2.0, 0.0, -math.sqrt(2.0) / 2.0))
 
@@ -122,6 +123,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
         if (expected(i, j) > 0) {
           val actual = expected(i, j)
           val estimate = G(i, j)
+	   //math.abs返回数的绝对值
           assert(math.abs(actual - estimate) / actual < 0.2,
             s"Similarities not close enough: $actual vs $estimate")
         }
@@ -191,6 +193,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   def closeToZero(G: BDM[Double]): Boolean = {
+   //math.abs返回数的绝对值
     G.valuesIterator.map(math.abs).sum < 1e-6
   }
 
@@ -243,6 +246,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(summary.numNonzeros === Vectors.dense(3.0, 3.0, 4.0), "nnz mismatch")
         assert(summary.max === Vectors.dense(9.0, 7.0, 8.0), "max mismatch")
         assert(summary.min === Vectors.dense(0.0, 0.0, 1.0), "column mismatch.")
+	//math.sqrt返回数字的平方根
         assert(summary.normL2 === Vectors.dense(math.sqrt(126), math.sqrt(66), math.sqrt(94)),
           "magnitude mismatch.")
         assert(summary.normL1 === Vectors.dense(18.0, 12.0, 16.0), "L1 norm mismatch")

@@ -66,6 +66,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
       gen.setSeed(seed.toLong)
       val sample = (0 until 100000).map { _ => gen.nextValue()}
       val stats = new StatCounter(sample)
+       //math.abs返回数的绝对值
       assert(math.abs(stats.mean - mean) < epsilon)
       assert(math.abs(stats.stdev - stddev) < epsilon)
     }
@@ -75,6 +76,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
     val uniform = new UniformGenerator()
     apiChecks(uniform)
     // Stddev of uniform distribution = (ub - lb) / math.sqrt(12)
+    //math.sqrt返回数字的平方根
     distributionChecks(uniform, 0.5, 1 / math.sqrt(12))
   }
 
@@ -87,12 +89,13 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
   test("LogNormalGenerator") {//对数正态生成器
     List((0.0, 1.0), (0.0, 2.0), (2.0, 1.0), (2.0, 2.0)).map {
       case (mean: Double, vari: Double) =>
+      //math.sqrt返回数字的平方根
         val normal = new LogNormalGenerator(mean, math.sqrt(vari))
         apiChecks(normal)
 
         // mean of log normal = e^(mean + var / 2)
         val expectedMean = math.exp(mean + 0.5 * vari)
-
+	
         // variance of log normal = (e^var - 1) * e^(2 * mean + var)
         val expectedStd = math.sqrt((math.exp(vari) - 1.0) * math.exp(2.0 * mean + vari))
 
@@ -109,6 +112,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
     for (mean <- List(1.0, 5.0, 100.0)) {
       val poisson = new PoissonGenerator(mean)
       apiChecks(poisson)
+       //math.sqrt返回数字的平方根
       distributionChecks(poisson, mean, math.sqrt(mean), 0.1)
     }
   }
@@ -137,6 +141,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
         // mean of gamma = shape * scale
         val expectedMean = shape * scale
         // var of gamma = shape * scale^2
+	 //math.sqrt返回数字的平方根
         val expectedStd = math.sqrt(shape * scale * scale)
         distributionChecks(gamma, expectedMean, expectedStd, 0.1)
     }

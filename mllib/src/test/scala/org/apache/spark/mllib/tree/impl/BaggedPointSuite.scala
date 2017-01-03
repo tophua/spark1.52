@@ -53,6 +53,7 @@ class BaggedPointSuite extends SparkFunSuite with MLlibTestSparkContext  {
   test("BaggedPoint RDD: with subsampling with replacement (fraction = 0.5)") {
     val numSubsamples = 100
     val subsample = 0.5
+     //math.abs返回数的绝对值
     val (expectedMean, expectedStddev) = (subsample, math.sqrt(subsample))
 
     val seeds = Array(123, 5354, 230, 349867, 23987)
@@ -84,6 +85,7 @@ class BaggedPointSuite extends SparkFunSuite with MLlibTestSparkContext  {
   test("BaggedPoint RDD: with subsampling without replacement (fraction = 0.5)") {
     val numSubsamples = 100
     val subsample = 0.5
+     //math.abs返回数的绝对值
     val (expectedMean, expectedStddev) = (subsample, math.sqrt(subsample * (1 - subsample)))
 
     val seeds = Array(123, 5354, 230, 349867, 23987)

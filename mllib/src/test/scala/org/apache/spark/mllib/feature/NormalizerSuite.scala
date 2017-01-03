@@ -105,7 +105,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }, "The vector type should be preserved after normalization.")
 
     assert((dataInf, dataInfRDD.collect()).zipped.forall((v1, v2) => v1 ~== v2 absTol 1E-5))
-
+    //math.abs返回数的绝对值
     assert(dataInf(0).toArray.map(math.abs).max ~== 1.0 absTol 1E-5)
     assert(dataInf(2).toArray.map(math.abs).max ~== 1.0 absTol 1E-5)
     assert(dataInf(3).toArray.map(math.abs).max ~== 1.0 absTol 1E-5)

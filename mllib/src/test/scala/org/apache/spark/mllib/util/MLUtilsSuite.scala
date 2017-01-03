@@ -220,6 +220,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
           val p = 1 / folds.toFloat
           // Within 3 standard deviations of the mean
           //在平均值的3个标准偏差内
+	   //math.sqrt返回数字的平方根
           val range = 3 * math.sqrt(100 * p * (1 - p))
           val expected = 100 * p
           val lowerBound = expected - range

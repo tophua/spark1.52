@@ -168,6 +168,7 @@ class CorrelationSuite extends SparkFunSuite with MLlibTestSparkContext with Log
       //求绝对值,threshold
      // println("V1:" + v1 + "\t V2:" + v2 + "\t threshold:" + threshold)
       //println("math.abs(v1 - v2):" + math.abs(v1 - v2))
+       //math.abs返回数的绝对值
       val b = math.abs(v1 - v2) <= threshold
 
       b

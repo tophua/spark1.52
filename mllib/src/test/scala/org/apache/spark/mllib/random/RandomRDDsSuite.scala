@@ -44,6 +44,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     val stats = rdd.stats()
     assert(expectedSize === stats.count)
     assert(expectedNumPartitions === rdd.partitions.size)
+     //math.abs返回数的绝对值
     assert(math.abs(stats.mean - expectedMean) < epsilon)
     assert(math.abs(stats.stdev - expectedStddev) < epsilon)
   }
@@ -65,6 +66,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     }}
     assert(expectedRows === values.size / expectedColumns)
     val stats = new StatCounter(values)
+     //math.abs返回数的绝对值
     assert(math.abs(stats.mean - expectedMean) < epsilon)
     assert(math.abs(stats.stdev - expectedStddev) < epsilon)
   }
@@ -119,13 +121,14 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     //自然指数函数 
     val logNormalMean = math.exp(0.5)
     // variance of log normal = (e^var - 1) * e^(2 * mean + var)
-    //
+     //math.sqrt返回数字的平方根
     val logNormalStd = math.sqrt((math.E - 1.0) * math.E)
     val gammaScale = 1.0
     val gammaShape = 2.0
     // mean of gamma = shape * scale
     val gammaMean = gammaShape * gammaScale
     // var of gamma = shape * scale^2
+     //math.sqrt返回数字的平方根
     val gammaStd = math.sqrt(gammaShape * gammaScale * gammaScale)
     val poissonMean = 100.0
     val exponentialMean = 1.0
@@ -133,6 +136,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     for (seed <- 0 until 5) {
       //生成了一个RDD[double], 它服从标准正态分布，然后转成了N(1, 4)分布
       val uniform = RandomRDDs.uniformRDD(sc, size, numPartitions, seed)
+       //math.sqrt返回数字的平方根
       testGeneratedRDD(uniform, size, numPartitions, 0.5, 1 / math.sqrt(12))
       //标准正态分布
       val normal = RandomRDDs.normalRDD(sc, size, numPartitions, seed)
@@ -164,8 +168,10 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     val parts = 10
 
     //  mean of log normal = e^(mean + var / 2)
+     //math.sqrt返回数字的平方根
     val logNormalMean = math.exp(0.5)
     // variance of log normal = (e^var - 1) * e^(2 * mean + var)
+     //math.sqrt返回数字的平方根
     val logNormalStd = math.sqrt((math.E - 1.0) * math.E)
     val gammaScale = 1.0
     val gammaShape = 2.0
@@ -178,6 +184,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
 
     for (seed <- 0 until 5) {
       val uniform = RandomRDDs.uniformVectorRDD(sc, rows, cols, parts, seed)
+       //math.sqrt返回数字的平方根
       testGeneratedVectorRDD(uniform, rows, cols, parts, 0.5, 1 / math.sqrt(12))
 
       val normal = RandomRDDs.normalVectorRDD(sc, rows, cols, parts, seed)

@@ -205,7 +205,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
    * 生成用于测试的ALS一个明确的反馈数据
    * @param numUsers number of users 用户数
    * @param numItems number of items 项目数
-   * @param rank rank 等级
+   * @param rank rank 模型中潜在的特征数
    * @param noiseStd the standard deviation of additive Gaussian noise on training data
    * 				训练数据中加性高斯噪声的标准偏差
    * @param seed random seed 随机种子
@@ -221,6 +221,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     val testFraction = 0.3
     val totalFraction = trainingFraction + testFraction
     val random = new Random(seed)
+    //rank 在模型中潜在的特征数
     val userFactors = genFactors(numUsers, rank, random)
     val itemFactors = genFactors(numItems, rank, random)
     val training = ArrayBuffer.empty[Rating[Int]]
@@ -247,7 +248,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
    * 生成用于测试的ALS的隐式反馈数据
    * @param numUsers number of users 用户数
    * @param numItems number of items 项目数
-   * @param rank rank 等级
+   * @param rank rank  在模型中潜在的特征数
    * @param noiseStd the standard deviation of additive Gaussian noise on training data
    * @param seed random seed
    * @return (training, test)
@@ -267,6 +268,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     val testFraction = 0.3 //测试分数
     val totalFraction = trainingFraction + testFraction
     val random = new Random(seed)
+     //rank 在模型中潜在的特征数
     val userFactors = genFactors(numUsers, rank, random)
     val itemFactors = genFactors(numItems, rank, random)
     val training = ArrayBuffer.empty[Rating[Int]]
@@ -296,7 +298,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
    * Generates random user/item factors, with i.i.d. values drawn from U(a, b).
    * 产生随机的用户/项目因素
    * @param size number of users/items
-   * @param rank number of features
+   * @param rank number of features  模型中潜在的特征数
    * @param random random number generator
    * @param a min value of the support (default: -1)
    * @param b max value of the support (default: 1)
@@ -322,7 +324,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
    * Test ALS using the given training/test splits and parameters.
    * @param training training dataset
    * @param test test dataset
-   * @param rank rank of the matrix factorization
+   * @param rank rank of the matrix factorization  矩阵分解中的特征数
    * @param maxIter max number of iterations
    * @param regParam regularization constant
    * @param implicitPrefs whether to use implicit preference
@@ -367,6 +369,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
         // We limit the ratings and the predictions to interval [0, 1] and compute the weighted RMSE
         // with the confidence scores as weights.
         val (totalWeight, weightedSumSq) = predictions.map { case (rating, prediction) =>
+	  //math.abs返回数的绝对值
           val confidence = 1.0 + alpha * math.abs(rating)
           val rating01 = math.max(math.min(rating, 1.0), 0.0)
           val prediction01 = math.max(math.min(prediction, 1.0), 0.0)
@@ -375,6 +378,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
         }.reduce { case ((c0, e0), (c1, e1)) =>
           (c0 + c1, e0 + e1)
         }
+	//math.sqrt返回数字的平方根
         math.sqrt(weightedSumSq / totalWeight)
       } else {//明确
           val mse = predictions.map { case (rating, prediction) =>
@@ -393,20 +397,20 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     MLTestingUtils.checkCopy(model)
   }
 
-  test("exact rank-1 matrix") {//准确的秩1矩阵
+  test("exact rank-1 matrix") {//矩阵分解中的特征数=1
     val (training, test) = genExplicitTestData(numUsers = 20, numItems = 40, rank = 1)
     testALS(training, test, maxIter = 1, rank = 1, regParam = 1e-5, targetRMSE = 0.001)
     testALS(training, test, maxIter = 1, rank = 2, regParam = 1e-5, targetRMSE = 0.001)
   }
 
-  test("approximate rank-1 matrix") {//近似秩1矩阵
+  test("approximate rank-1 matrix") {//矩阵分解特征数近似秩1
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 1, noiseStd = 0.01)
     testALS(training, test, maxIter = 2, rank = 1, regParam = 0.01, targetRMSE = 0.02)
     testALS(training, test, maxIter = 2, rank = 2, regParam = 0.01, targetRMSE = 0.02)
   }
 
-  test("approximate rank-2 matrix") {//近似似秩2矩阵
+  test("approximate rank-2 matrix") {//矩阵分解特征数近似2
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     testALS(training, test, maxIter = 4, rank = 2, regParam = 0.01, targetRMSE = 0.03)

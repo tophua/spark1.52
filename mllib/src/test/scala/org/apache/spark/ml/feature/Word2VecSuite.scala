@@ -191,6 +191,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
         //println(expected+"||||"+actual)
         //println("kkkkk:"+(expected - actual))
         //math.abs((expected - actual) / expected)
+	////abs返回数的绝对值
         assert(math.abs((expected - actual) / expected) < 1E-5)
     }
 

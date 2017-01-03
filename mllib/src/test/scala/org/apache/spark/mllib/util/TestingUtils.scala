@@ -35,6 +35,7 @@ object TestingUtils {
    * 相对误差是没有意义的,所以会提出警告用户的例外
    */
   private def RelativeErrorComparison(x: Double, y: Double, eps: Double): Boolean = {
+   //math.abs返回数的绝对值
     val absX = math.abs(x)
     val absY = math.abs(y)
     val diff = math.abs(x - y)
@@ -53,6 +54,7 @@ object TestingUtils {
    * 用于比较两个值的绝对误差的辅助函数
    */
   private def AbsoluteErrorComparison(x: Double, y: Double, eps: Double): Boolean = {
+   //math.abs返回数的绝对值
     math.abs(x - y) < eps
   }
 

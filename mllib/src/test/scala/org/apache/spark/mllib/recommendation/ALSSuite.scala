@@ -66,7 +66,7 @@ object ALSSuite {
     val rand = new Random(42)
 
     // Create a random matrix with uniform values from -1 to 1
-    //创建一个具有均匀值的随机矩阵，从-1到1
+    //创建一个具有均匀值的随机矩阵从-1到1
     def randomMatrix(m: Int, n: Int) = {
       if (negativeFactors) {//负面因素
         new DoubleMatrix(m, n, Array.fill(m * n)(rand.nextDouble() * 2 - 1): _*)
@@ -74,9 +74,24 @@ object ALSSuite {
         new DoubleMatrix(m, n, Array.fill(m * n)(rand.nextDouble()): _*)
       }
     }
-
+    /**[0.455127; 0.366447; -0.382561; -0.445843; 0.331098; 0.806745; -0.262434; 
+     *  -0.448504; -0.072693; 0.565804; 0.838656; -0.127018; 0.499812; -0.226866; 
+     *  -0.697937; 0.667732; -0.079387; -0.438856; -0.608072; -0.641453;-0.026819]
+     */
     val userMatrix = randomMatrix(users, features)//用户
+    /**
+     * [-0.158057, 0.265740, 0.399717, -0.369343, 0.143241, -0.257975, 0.743629, 
+     *  0.611462, 0.232427, -0.251281, 0.394497, 0.817229, -0.607706, 0.618250, 
+     *  -0.945372, -0.927031, -0.032312, 0.310107, -0.208467, 0.880345, -0.230778]
+     */
     val productMatrix = randomMatrix(features, products)//产品
+    /**
+     * trueRatings
+     * [-0.071936, 0.120945, 0.181922, -0.168098, 0.065193, -0.117412, 0.338446, 0.278293, 0.105784, 
+     * -0.114365, 0.179547, 0.371943, -0.276584, 0.281382, 0.116452, -0.033316, -0.176972, 0.036328, 
+     *  0.277983, -0.327883, -0.370522, -0.430523, 0.043997, -0.198255, 0.425540, -0.246466, 0.5...] 
+     *  truePrefs:null
+     */
     val (trueRatings, truePrefs) = implicitPrefs match {
       case true =>
         // Generate raw values from [0,9], or if negativeWeights, from [-2,7]
@@ -89,7 +104,11 @@ object ALSSuite {
         (raw, prefs)
       case false => (userMatrix.mmul(productMatrix), null)
     }
-
+    /**
+     * Vector(Rating(0,0,-0.07193587706304089),Rating(0,1,0.12094535474220613),Rating(0,3,-0.1680981500089981), 
+     * Rating(0,4,0.06519272116591945), Rating(0,5,-0.11741167215430767), Rating(0,6,0.3384459909907707),
+     * Rating(0,15,-0.0333159863067016), Rating(0,16,-0.1769724912456509), Rating(0,17,0.03632775091236762))
+     */
     val sampledRatings = {
       for (u <- 0 until users; p <- 0 until products if rand.nextDouble() < samplingRate)
         yield Rating(u, p, trueRatings.get(u, p))
@@ -102,11 +121,12 @@ object ALSSuite {
 
 class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
-  test("rank-1 matrices") {//秩1矩阵
+  test("rank-1 matrices") {//矩阵潜在特征为1
+    //用户数50,产品数100,特征数1,迭代次数15,采样率0.7 匹配阈值 0.3
     testALS(50, 100, 1, 15, 0.7, 0.3)
   }
 
-  test("rank-1 matrices bulk") {//秩1矩阵体积
+  test("rank-1 matrices bulk") {//矩阵分解特征数体积
     testALS(50, 100, 1, 15, 0.7, 0.3, false, true)
   }
 
@@ -182,10 +202,11 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("negative ids") {//负ID
     val data = ALSSuite.generateRatings(50, 50, 2, 0.7, false, false)
-    val ratings = sc.parallelize(data._1.map { case Rating(u, p, r) =>
-      Rating(u - 25, p - 25, r)
+    val ratings = sc.parallelize(data._1.map {
+      case Rating(u, p, r) =>Rating(u - 25, p - 25, r)
     })
     val correct = data._2
+    //训练
     val model = ALS.train(ratings, 5, 15)
 
     val pairs = Array.tabulate(50, 50)((u, p) => (u - 25, p - 25)).flatten
@@ -195,6 +216,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       val p = r.product + 25
       val v = r.rating
       val error = v - correct.get(u, p)
+       //math.abs返回数的绝对值
       assert(math.abs(error) < 0.4)
     }
   }
@@ -205,17 +227,17 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   /**
    * Test if we can correctly factorize R = U * P where U and P are of known rank.
-   * 如果我们能正确地分解测试
-   * @param users number of users 用户数
-   * @param products number of products 产品数量
-   * @param features number of features (rank of problem)特征数
+   * 如果我们能正确地分解因子R = U * P 这里U和P已知潜在特征数
+   * @param users number of users 用户标识
+   * @param products number of products 产品标识
+   * @param features number of features (rank of problem 排名的问题)特征数
    * @param iterations number of iterations to run 运行的迭代次数
    * @param samplingRate what fraction of the user-product pairs are known
-   * 				用户产品对的哪些部分是已知
+   * 				哪一部分的用户产品的已知
    * @param matchThreshold max difference allowed to consider a predicted rating correct
    * 				最大允许差异考虑预测评级正确
-   * @param implicitPrefs flag to test implicit feedback 测试隐式反馈的标志
-   * @param bulkPredict flag to test bulk predicition 检验批量预测标志
+   * @param implicitPrefs flag to test implicit feedback 标志测试隐式反馈
+   * @param bulkPredict flag to test bulk predicition 批量测试产品标志
    * @param negativeWeights whether the generated data can contain negative values
    * 				生成的数据是否可以包含负值
    * @param numUserBlocks number of user blocks to partition users into
@@ -240,7 +262,16 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       numProductBlocks: Int = -1,
       negativeFactors: Boolean = true) {
     // scalastyle:on
-
+     /**
+     * trueRatings
+     * [-0.071936, 0.120945, 0.181922, -0.168098, 0.065193, -0.117412, 0.338446, 0.278293, 0.105784, 
+     * -0.114365, 0.179547, 0.371943, -0.276584, 0.281382, 0.116452, -0.033316, -0.176972, 0.036328, 
+     *  0.277983, -0.327883, -0.370522, -0.430523, 0.043997, -0.198255, 0.425540, -0.246466, 0.5...]    
+     * Vector(Rating(0,0,-0.07193587706304089),Rating(0,1,0.12094535474220613),Rating(0,3,-0.1680981500089981), 
+     * Rating(0,4,0.06519272116591945), Rating(0,5,-0.11741167215430767), Rating(0,6,0.3384459909907707),
+     * Rating(0,15,-0.0333159863067016), Rating(0,16,-0.1769724912456509), Rating(0,17,0.03632775091236762))
+     * truePrefs:null
+     */
     val (sampledRatings, trueRatings, truePrefs) = ALSSuite.generateRatings(users, products,
       features, samplingRate, implicitPrefs, negativeWeights, negativeFactors)
 
@@ -255,31 +286,68 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setSeed(0L)//
       .setNonnegative(!negativeFactors)
       .run(sc.parallelize(sampledRatings))
-
+    /**
+     *[0.436768; 0.352116; -0.368858; -0.430065; 0.317578; 0.774760; -0.253319; -0.432301; -0.069874; 0.545266; 
+     * 0.805510; -0.122209; 0.482757; -0.218839; -0.621789; 0.181787; -0.559713; 0.628474; -0.631657; 0.168301; 
+     * 0.483690; 0.136887; 0.154252; 0.485914; -0.900840; -0.274579; 0.613773; -0.158895; 0.912472; 0.411233;]
+     */
     val predictedU = new DoubleMatrix(users, features)
     for ((u, vec) <- model.userFeatures.collect(); i <- 0 until features) {
       predictedU.put(u, i, vec(i))
     }
+    /**
+     [-0.159104; 0.266854; 0.402118; -0.371319; 0.144135; -0.260481; 0.750064; 0.608005; 0.232232; -0.252072; 
+     0.397453; 0.823892; -0.614564; 0.621769; 0.258227; -0.073655; -0.384947; 0.079571; 0.271885; -0.751692; 
+     -0.005389; -0.950375; -0.928237; -0.032716; 0.312536; -0.209477; 0.888935; -0.231828; 0.293711; 0.542644;
+     ]**/
     val predictedP = new DoubleMatrix(products, features)
     for ((p, vec) <- model.productFeatures.collect(); i <- 0 until features) {
       predictedP.put(p, i, vec(i))
     }
+    /**
+     * [-0.069491, 0.116553, 0.175632, -0.162180, 0.062953, -0.113770, 0.327604, 0.265557, 0.101432, -0.110097,
+     *  0.173595, 0.359850, -0.268422, 0.271569, 0.112785, -0.032170, -0.168132, 0.034754, 0.118751, -0.328315,
+     *  -0.002354, -0.415093, -0.405424, -0.014289, 0.136506, -0.091493, 0.388259, -0.101255, 0.128284,0.237009,]
+     */
     val predictedRatings = bulkPredict match {
+      /**
+       * mmul矩阵相乘,transpose返回转置矩阵复制
+       */
       case false => predictedU.mmul(predictedP.transpose)
       case true =>
+        //创建一个矩阵
         val allRatings = new DoubleMatrix(users, products)
-        val usersProducts = for (u <- 0 until users; p <- 0 until products) yield (u, p)
+        /**
+         * for循环中的 yield 会把当前的元素记下来,保存在集合中,循环结束后将返回该集合.
+         * Scala中 for循环是有返回值的,如果被循环的是 Map,返回的就是  Map,被循环的是 List,返回的就是 List
+         * usersProducts:IndexedSeq[(Int, Int)]
+         * 0|||||||154
+         * 0|||||||155
+         * 0|||||||156      
+         * 1|||||||0
+         * 1|||||||1
+         * 1|||||||2
+         * 1|||||||3
+         */
+        val usersProducts = for (u <- 0 until users; p <- 0 until products)  yield{
+          //println(u+"|||||||"+p)
+          (u, p)
+        }            
         val userProductsRDD = sc.parallelize(usersProducts)
+        //预测
         model.predict(userProductsRDD).collect().foreach { elem =>
+        //矩阵的预测的评级
           allRatings.put(elem.user, elem.product, elem.rating)
         }
         allRatings
     }
 
-    if (!implicitPrefs) {
+    if (!implicitPrefs) {//是否使用隐式特征
       for (u <- 0 until users; p <- 0 until products) {
+        //获得矩阵行和列数
         val prediction = predictedRatings.get(u, p)
         val correct = trueRatings.get(u, p)
+        //abs返回数的绝对值
         if (math.abs(prediction - correct) > matchThreshold) {
           fail(("Model failed to predict (%d, %d): %f vs %f\ncorr: %s\npred: %s\nU: %s\n P: %s")
             .format(u, p, correct, prediction, trueRatings, predictedRatings, predictedU,
@@ -288,17 +356,20 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     } else {
       // For implicit prefs we use the confidence-weighted RMSE to test (ref Mahout's tests)
-      //隐式参数我们用信心加权均方根误差测试
+      //隐式特征首选项参数我们用欺诈加权均方根误差测试
       var sqErr = 0.0
       var denom = 0.0
       for (u <- 0 until users; p <- 0 until products) {
+        //获得矩阵行和列数
         val prediction = predictedRatings.get(u, p)
         val truePref = truePrefs.get(u, p)
+        //abs返回数的绝对值
         val confidence = 1 + 1.0 * abs(trueRatings.get(u, p))
         val err = confidence * (truePref - prediction) * (truePref - prediction)
         sqErr += err
         denom += confidence
       }
+      //math.sqrt返回数字的平方根
       val rmse = math.sqrt(sqErr / denom)
       if (rmse > matchThreshold) {
         fail("Model failed to predict RMSE: %f\ncorr: %s\npred: %s\nU: %s\n P: %s".format(

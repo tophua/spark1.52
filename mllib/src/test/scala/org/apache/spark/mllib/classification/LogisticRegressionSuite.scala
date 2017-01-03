@@ -108,6 +108,7 @@ object LogisticRegressionSuite {
       var i = 0
       val len = vectorArray.length
       while (i < len) {
+      //math.sqrt返回数字的平方根
         vectorArray(i) = vectorArray(i) * math.sqrt(xVariance(i)) + xMean(i)
         i += 1
       }

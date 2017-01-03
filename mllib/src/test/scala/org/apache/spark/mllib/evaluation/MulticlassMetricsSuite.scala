@@ -57,6 +57,7 @@ class MulticlassMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     val f2measure2 = (1 + 2 * 2) * precision2 * recall2 / (2 * 2 * precision2 + recall2)
 
     assert(metrics.confusionMatrix.toArray.sameElements(confusionMatrix.toArray))
+    //math.abs返回数的绝对值
     assert(math.abs(metrics.falsePositiveRate(0.0) - fpRate0) < delta)
     assert(math.abs(metrics.falsePositiveRate(1.0) - fpRate1) < delta)
     assert(math.abs(metrics.falsePositiveRate(2.0) - fpRate2) < delta)
@@ -69,10 +70,11 @@ class MulticlassMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(math.abs(metrics.fMeasure(0.0) - f1measure0) < delta)
     assert(math.abs(metrics.fMeasure(1.0) - f1measure1) < delta)
     assert(math.abs(metrics.fMeasure(2.0) - f1measure2) < delta)
+    //math.abs返回数的绝对值
     assert(math.abs(metrics.fMeasure(0.0, 2.0) - f2measure0) < delta)
     assert(math.abs(metrics.fMeasure(1.0, 2.0) - f2measure1) < delta)
     assert(math.abs(metrics.fMeasure(2.0, 2.0) - f2measure2) < delta)
-
+    //math.abs返回数的绝对值
     assert(math.abs(metrics.recall -
       (2.0 + 3.0 + 1.0) / ((2 + 3 + 1) + (1 + 1 + 1))) < delta)
     assert(math.abs(metrics.recall - metrics.precision) < delta)

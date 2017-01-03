@@ -44,6 +44,7 @@ object EnsembleTestHelper {
       values ++= row
     }
     val stats = new StatCounter(values)
+     //math.abs返回数的绝对值
     assert(math.abs(stats.mean - expectedMean) < epsilon)
     assert(math.abs(stats.stdev - expectedStddev) < epsilon)
   }
@@ -78,6 +79,7 @@ object EnsembleTestHelper {
       case "mse" =>
         errors.map(err => err * err).sum / errors.size
       case "mae" =>
+       //math.abs返回数的绝对值
         errors.map(math.abs).sum / errors.size
     }
 

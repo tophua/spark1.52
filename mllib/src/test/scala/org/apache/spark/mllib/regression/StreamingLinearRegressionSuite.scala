@@ -56,6 +56,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     val numOffPredictions = predictions.zip(input).count { case (prediction, expected) =>
       // A prediction is off if the prediction is more than 0.5 away from expected value.
       //预测是关闭的,如果预测是超过0.5,从预期值
+       //math.abs返回数的绝对值
       math.abs(prediction - expected.label) > 0.5
     }
     // At least 80% of the predictions should be on.
@@ -123,6 +124,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     // (we add a count to ensure the result is a DStream)
     ssc = setupStreams(input, (inputDStream: DStream[LabeledPoint]) => {
       model.trainOn(inputDStream)
+       //math.abs返回数的绝对值
       inputDStream.foreachRDD(x => history.append(math.abs(model.latestModel().weights(0) - 10.0)))
       inputDStream.count()
     })

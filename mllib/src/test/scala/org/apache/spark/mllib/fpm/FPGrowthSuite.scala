@@ -199,6 +199,7 @@ class FPGrowthSuite extends SparkFunSuite with MLlibTestSparkContext {
       .collect()
 
     assert(rules.size === 23)
+     //math.abs返回数的绝对值
     assert(rules.count(rule => math.abs(rule.confidence - 1.0D) < 1e-6) == 23)
   }
 

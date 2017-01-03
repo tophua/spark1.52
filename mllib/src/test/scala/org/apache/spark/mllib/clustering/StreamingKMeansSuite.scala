@@ -155,7 +155,7 @@ class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
     //应该有一个正的中心和一个负的中心
     assert(c0 * c1 < 0.0, "should have one positive center and one negative center")
     // 0.8 is the mean of half-normal distribution
-    //0.8是半正态分布的平均值
+    //0.8是半正态分布的平均值,math.abs返回数的绝对值
     assert(math.abs(c0) ~== 0.8 absTol 0.6)
     assert(math.abs(c1) ~== 0.8 absTol 0.6)
   }

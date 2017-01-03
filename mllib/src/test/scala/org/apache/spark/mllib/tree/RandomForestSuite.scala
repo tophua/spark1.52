@@ -165,12 +165,14 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     checkFeatureSubsetStrategy(numTrees = 1, "auto", numFeatures)
     checkFeatureSubsetStrategy(numTrees = 1, "all", numFeatures)
+     //math.sqrt返回数字的平方根
     checkFeatureSubsetStrategy(numTrees = 1, "sqrt", math.sqrt(numFeatures).ceil.toInt)
     checkFeatureSubsetStrategy(numTrees = 1, "log2",
       (math.log(numFeatures) / math.log(2)).ceil.toInt)
     checkFeatureSubsetStrategy(numTrees = 1, "onethird", (numFeatures / 3.0).ceil.toInt)
 
     checkFeatureSubsetStrategy(numTrees = 2, "all", numFeatures)
+     //math.sqrt返回数字的平方根
     checkFeatureSubsetStrategy(numTrees = 2, "auto", math.sqrt(numFeatures).ceil.toInt)
     checkFeatureSubsetStrategy(numTrees = 2, "sqrt", math.sqrt(numFeatures).ceil.toInt)
     checkFeatureSubsetStrategy(numTrees = 2, "log2",

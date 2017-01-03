@@ -109,6 +109,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     // (we add a count to ensure the result is a DStream)    
     ssc = setupStreams(input, (inputDStream: DStream[LabeledPoint]) => {
       model.trainOn(inputDStream)
+      //math.abs返回数的绝对值
       inputDStream.foreachRDD(x => history.append(math.abs(model.latestModel().weights(0) - B)))
       inputDStream.count()
     })
@@ -158,6 +159,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
 
     // check that at least 60% of predictions are correct on all batches
     //所有批次检查至少有60%的预测是正确
+    //math.abs返回数的绝对值
     val errors = output.map(batch => batch.map(p => math.abs(p._1 - p._2)).sum / nPoints)
 
     assert(errors.forall(x => x <= 0.4))
@@ -190,7 +192,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val output: Seq[Seq[(Double, Double)]] = runStreams(ssc, numBatches, numBatches)
 
     // assert that prediction error improves, ensuring that the updated model is being used
-    //断言，预测误差的改善,确保更新后的模型被使用
+    //断言，预测误差的改善,确保更新后的模型被使用,math.abs返回数的绝对值
     val error = output.map(batch => batch.map(p => math.abs(p._1 - p._2)).sum / nPoints).toList
     assert(error.head > 0.8 & error.last < 0.2)
   }
