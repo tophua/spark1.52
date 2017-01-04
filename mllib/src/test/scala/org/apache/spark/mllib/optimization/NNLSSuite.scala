@@ -31,8 +31,9 @@ class NNLSSuite extends SparkFunSuite {
    *   */
   def genOnesData(n: Int, rand: Random): (DoubleMatrix, DoubleMatrix) = {
     val A = new DoubleMatrix(n, n, Array.fill(n*n)(rand.nextDouble()): _*)
+    // mmul矩阵相乘
     val b = A.mmul(DoubleMatrix.ones(n, 1))
-
+    // mmul矩阵相乘
     val ata = A.transpose.mmul(A)
     val atb = A.transpose.mmul(b)
 
@@ -44,6 +45,7 @@ class NNLSSuite extends SparkFunSuite {
    *  计算目标值 
    *  */
   def computeObjectiveValue(ata: DoubleMatrix, atb: DoubleMatrix, x: DoubleMatrix): Double = {
+    //mmul矩阵相乘
     val res = (x.transpose().mmul(ata).mmul(x)).mul(0.5).sub(atb.dot(x))
     res.get(0)
   }

@@ -32,8 +32,8 @@ import org.apache.spark.storage.StorageLevel
 object ALSSuite {
 /**
  * Llib中对每个解决最小二乘问题的正则化参数lambda做了扩展：
- * 一个是在更新用户因素时用户产生的评分数量；另一个是在更新产品因素时产品被评分的数量。
- * numBlocks 是用于并行化计算的分块个数 (设置为-1，为自动配置)
+ * 一个是在更新用户因素时用户产生的评分数量;另一个是在更新产品因素时产品被评分的数量
+ * numBlocks 是用于并行化计算的分块个数 (设置为-1,为自动配置)
  * rank ALS中因子的个数,通常来说越大越好,但是对内存占用率有直接影响,通常rank在10到200之间
  * iterations 迭代次数，每次迭代都会减少ALS的重构误差。在几次迭代之后,ALS模型都会收敛得到一个不错的结果,所以大多情况下不需要太多的迭代（通常是10次）
  * lambda 模型的正则化参数,控制着避免过度拟合,值越大,越正则化
@@ -74,7 +74,8 @@ object ALSSuite {
         new DoubleMatrix(m, n, Array.fill(m * n)(rand.nextDouble()): _*)
       }
     }
-    /**[0.455127; 0.366447; -0.382561; -0.445843; 0.331098; 0.806745; -0.262434; 
+    /**
+     * [0.455127; 0.366447; -0.382561; -0.445843; 0.331098; 0.806745; -0.262434; 
      *  -0.448504; -0.072693; 0.565804; 0.838656; -0.127018; 0.499812; -0.226866; 
      *  -0.697937; 0.667732; -0.079387; -0.438856; -0.608072; -0.641453;-0.026819]
      */
@@ -95,13 +96,14 @@ object ALSSuite {
     val (trueRatings, truePrefs) = implicitPrefs match {
       case true =>
         // Generate raw values from [0,9], or if negativeWeights, from [-2,7]
-        //从[0]生成原始值,或者如果negativeweights，从[ 2,7 ]
+        //从[0,9]生成原始值,或者如果负权重,从[ -2,7 ]
         val raw = new DoubleMatrix(users, products,
           Array.fill(users * products)(
             (if (negativeWeights) -2 else 0) + rand.nextInt(10).toDouble): _*)
         val prefs =
           new DoubleMatrix(users, products, raw.data.map(v => if (v > 0) 1.0 else 0.0): _*)
         (raw, prefs)
+        // mmul矩阵相乘,transpose返回转置矩阵复制
       case false => (userMatrix.mmul(productMatrix), null)
     }
     /**
@@ -249,24 +251,25 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
    */
   // scalastyle:off
   def testALS(
-      users: Int,
-      products: Int,
+      users: Int,//用户数
+      products: Int,//产品数
       features: Int,//特征数
       iterations: Int,//迭代次数
-      samplingRate: Double,
-      matchThreshold: Double,
-      implicitPrefs: Boolean = false,//制定是否使用显示反馈ALS变体（或者说是对隐式反馈数据的一种适应）
-      bulkPredict: Boolean = false,
-      negativeWeights: Boolean = false,
-      numUserBlocks: Int = -1,//并行计算的块数量,（默认值为-1，表示自动配置）
-      numProductBlocks: Int = -1,
-      negativeFactors: Boolean = true) {
+      samplingRate: Double,//抽样率
+      matchThreshold: Double,//匹配阈值
+      implicitPrefs: Boolean = false,//制定是否使用显示反馈ALS变体(或者说是对隐式反馈数据的一种适应)
+      bulkPredict: Boolean = false,//大部分预测
+      negativeWeights: Boolean = false,//负权重
+      numUserBlocks: Int = -1,//并行计算的用户的数量,(默认值为-1,表示自动配置)
+      numProductBlocks: Int = -1,//并行计算的产品数量
+      negativeFactors: Boolean = true) {//负因子
     // scalastyle:on
      /**
-     * trueRatings
+     * trueRatings 真正的评级
      * [-0.071936, 0.120945, 0.181922, -0.168098, 0.065193, -0.117412, 0.338446, 0.278293, 0.105784, 
      * -0.114365, 0.179547, 0.371943, -0.276584, 0.281382, 0.116452, -0.033316, -0.176972, 0.036328, 
-     *  0.277983, -0.327883, -0.370522, -0.430523, 0.043997, -0.198255, 0.425540, -0.246466, 0.5...]    
+     *  0.277983, -0.327883, -0.370522, -0.430523, 0.043997, -0.198255, 0.425540, -0.246466, 0.5...] 
+     * sampledRatings 采样率   
      * Vector(Rating(0,0,-0.07193587706304089),Rating(0,1,0.12094535474220613),Rating(0,3,-0.1680981500089981), 
      * Rating(0,4,0.06519272116591945), Rating(0,5,-0.11741167215430767), Rating(0,6,0.3384459909907707),
      * Rating(0,15,-0.0333159863067016), Rating(0,16,-0.1769724912456509), Rating(0,17,0.03632775091236762))
@@ -280,8 +283,8 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setProductBlocks(numProductBlocks)//
       .setRank(features)//模型中潜在因素的数量
       .setIterations(iterations)//迭代次数
-      .setAlpha(1.0)//应用于隐式数据的ALS变体，它控制的是观察到偏好的基本置信度
-      .setImplicitPrefs(implicitPrefs)//决定了是用显性反馈ALS的版本还是用适用隐性反馈数据集的版本
+      .setAlpha(1.0)//应用于隐式数据的ALS变体,它控制的是观察到偏好的基本置信度
+      .setImplicitPrefs(implicitPrefs)//决定了是用显性,还是隐性反馈数据集的版本
       .setLambda(0.01)//ALS的正则化参数
       .setSeed(0L)//
       .setNonnegative(!negativeFactors)
@@ -292,7 +295,15 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
      * 0.483690; 0.136887; 0.154252; 0.485914; -0.900840; -0.274579; 0.613773; -0.158895; 0.912472; 0.411233;]
      */
     val predictedU = new DoubleMatrix(users, features)
+    /**
+     * u:0|||0|||0.436768114566803
+		 * u:2|||0|||-0.3688576817512512
+		 * u:4|||0|||0.3175782263278961
+		 * u:6|||0|||-0.2533193826675415
+		 * scala中还有一个和上面的to关键字有类似作用的关键字until,它的不同之处在于不包括最后一个元素
+     */
     for ((u, vec) <- model.userFeatures.collect(); i <- 0 until features) {
+      //println("u:"+u+"|||"+i+"|||"+vec(i))
       predictedU.put(u, i, vec(i))
     }
     /**
@@ -301,13 +312,23 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
      -0.005389; -0.950375; -0.928237; -0.032716; 0.312536; -0.209477; 0.888935; -0.231828; 0.293711; 0.542644;
      ]**/
     val predictedP = new DoubleMatrix(products, features)
+    /**
+   	 * p:0|||0|||-0.15910351276397705
+  	 * p:2|||0|||0.4021179974079132
+  	 * p:4|||0|||0.14413467049598694
+  	 * p:6|||0|||0.7500635981559753
+  	 * p:8|||0|||0.23223192989826202
+  	 * p:10|||0|||0.39745309948921204
+  	 * scala中还有一个和上面的to关键字有类似作用的关键字until,它的不同之处在于不包括最后一个元素
+     */
     for ((p, vec) <- model.productFeatures.collect(); i <- 0 until features) {
+      //println("p:"+p+"|||"+i+"|||"+vec(i))
       predictedP.put(p, i, vec(i))
     }
     /**
      * [-0.069491, 0.116553, 0.175632, -0.162180, 0.062953, -0.113770, 0.327604, 0.265557, 0.101432, -0.110097,
      *  0.173595, 0.359850, -0.268422, 0.271569, 0.112785, -0.032170, -0.168132, 0.034754, 0.118751, -0.328315,
-     *  -0.002354, -0.415093, -0.405424, -0.014289, 0.136506, -0.091493, 0.388259, -0.101255, 0.128284,0.237009,]
+     *  -0.002354, -0.415093, -0.405424, -0.014289, 0.136506, -0.091493, 0.388259, -0.101255, 0.128284,0.237009]
      */
     val predictedRatings = bulkPredict match {
       /**
@@ -317,9 +338,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       case true =>
         //创建一个矩阵
         val allRatings = new DoubleMatrix(users, products)
-        /**
-         * for循环中的 yield 会把当前的元素记下来,保存在集合中,循环结束后将返回该集合.
-         * Scala中 for循环是有返回值的,如果被循环的是 Map,返回的就是  Map,被循环的是 List,返回的就是 List
+        /**        
          * usersProducts:IndexedSeq[(Int, Int)]
          * 0|||||||154
          * 0|||||||155
@@ -328,6 +347,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
          * 1|||||||1
          * 1|||||||2
          * 1|||||||3
+         * scala中还有一个和上面的to关键字有类似作用的关键字until,它的不同之处在于不包括最后一个元素
+         * for循环中的 yield 会把当前的元素记下来,保存在集合中,循环结束后将返回该集合.
+         * Scala中 for循环是有返回值的,如果被循环的是 Map,返回的就是  Map,被循环的是 List,返回的就是 List
          */
         val usersProducts = for (u <- 0 until users; p <- 0 until products)  yield{
           //println(u+"|||||||"+p)
@@ -365,6 +387,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
         val truePref = truePrefs.get(u, p)
         //abs返回数的绝对值
         val confidence = 1 + 1.0 * abs(trueRatings.get(u, p))
+        //
         val err = confidence * (truePref - prediction) * (truePref - prediction)
         sqErr += err
         denom += confidence
