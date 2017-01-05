@@ -144,7 +144,7 @@ object MovieLensALS {
 
     val predictions = model.transform(test.toDF()).cache()
 
-    // Evaluate the model. 评估模型
+    // Evaluate the model.  rmse均方根误差亦称标准误差
     // TODO: Create an evaluator to compute RMSE. 创建一个计算器来计算均方根误差
     val mse = predictions.select("rating", "prediction").rdd
       .flatMap { case Row(rating: Float, prediction: Float) =>
@@ -156,6 +156,7 @@ object MovieLensALS {
           Some(err2)
         }
       }.mean()
+   //rmse均方根误差亦称标准误差
     val rmse = math.sqrt(mse)
     println(s"Test RMSE = $rmse.")
 

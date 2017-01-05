@@ -143,8 +143,9 @@ object LinearRegression {
       val err = p - l
       err * err
     }.reduce(_ + _)
+    //rmse均方根误差亦称标准误差
     val rmse = math.sqrt(loss / numTest)
-
+    //rmse均方根误差亦称标准误差
     println(s"Test RMSE = $rmse.")
 
     sc.stop()

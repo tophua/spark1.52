@@ -74,11 +74,13 @@ object ALSExample {
     val predictions = model.transform(test)
     predictions.collect()
     val evaluator = new RegressionEvaluator()  
+      //rmse均方根误差亦称标准误差
       .setMetricName("rmse")
       .setLabelCol("rating")
       .setPredictionCol("prediction")
       //predictions [userId: int, movieId: int, rating: float, timestamp: bigint, prediction: float]
     val rmse = evaluator.evaluate(predictions)
+    //rmse均方根误差亦称标准误差
     println(s"Root-mean-square error = $rmse")
     // $example off$
    sc.stop()

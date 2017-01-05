@@ -43,7 +43,7 @@ object SparkALS {
     val uh = randomMatrix(U, F)
     mh.multiply(uh.transpose())
   }
-
+//rmse均方根误差亦称标准误差
   def rmse(targetR: RealMatrix, ms: Array[RealVector], us: Array[RealVector]): Double = {
     val r = new Array2DRowRealMatrix(M, U)
     for (i <- 0 until M; j <- 0 until U) {
@@ -136,7 +136,7 @@ object SparkALS {
                 .map(i => update(i, usb.value(i), msb.value, Rc.value.transpose()))
                 .collect()
       usb = sc.broadcast(us) // Re-broadcast us because it was updated
-      //
+      //rmse均方根误差亦称标准误差
       println("RMSE(均方根误差) = " + rmse(R, ms, us))
       println()
     }

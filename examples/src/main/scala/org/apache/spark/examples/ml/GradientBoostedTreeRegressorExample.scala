@@ -82,8 +82,10 @@ object GradientBoostedTreeRegressorExample {
     val evaluator = new RegressionEvaluator()
       .setLabelCol("label")
       .setPredictionCol("prediction")
+       //rmse均方根误差亦称标准误差
       .setMetricName("rmse")
     val rmse = evaluator.evaluate(predictions)
+     //rmse均方根误差亦称标准误差
     println("Root Mean Squared Error (RMSE) on test data = " + rmse)
 
     val gbtModel = model.stages(1).asInstanceOf[GBTRegressionModel]

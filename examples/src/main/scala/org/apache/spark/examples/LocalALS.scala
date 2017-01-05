@@ -42,7 +42,7 @@ object LocalALS {
     val uh = randomMatrix(U, F)
     mh.multiply(uh.transpose())
   }
-
+ //rmse均方根误差亦称标准误差
   def rmse(targetR: RealMatrix, ms: Array[RealVector], us: Array[RealVector]): Double = {
     val r = new Array2DRowRealMatrix(M, U)
     for (i <- 0 until M; j <- 0 until U) {
@@ -138,6 +138,7 @@ object LocalALS {
       println(s"Iteration $iter:")
       ms = (0 until M).map(i => updateMovie(i, ms(i), us, R)).toArray
       us = (0 until U).map(j => updateUser(j, us(j), ms, R)).toArray
+      //rmse均方根误差亦称标准误差
       println("RMSE = " + rmse(R, ms, us))
       println()
     }
