@@ -40,9 +40,17 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
      * data.map(x=> x.label + ", " + x.features(0) + ", " + x.features(1))
      *   .saveAsTextFile("path")
      */
+    /**
+     * ArraySeq((9.27417626363617,[1.5595422042211196,-0.6047158101224187]), 
+     * 				  (-7.657930975818883,[0.3456163126018512,-2.1459276529714737]), 
+     * 					(14.443277316316447,[1.379806446078384,0.23069012156522706]), 
+     * 					(-6.547255888143898,[0.5196967525411738,-2.1509762443049625])
+     * 					(6.7118847606735486,[1.628279808680599,-1.030420831884505]))
+     */
+    val generateLinear=LinearDataGenerator.generateLinearInput(
+        6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1)
     val dataset = sqlContext.createDataFrame(
-      sc.parallelize(LinearDataGenerator.generateLinearInput(
-        6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1), 2))
+      sc.parallelize(generateLinear,2))
 
     /**
      * Using the following R code to load the data, train the model and evaluate metrics.
@@ -64,14 +72,18 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
     predictions.collect()
 
     // default = rmse
+    //默认rmse均方根误差亦称标准误差
     val evaluator = new RegressionEvaluator()
+    println("==MetricName="+evaluator.getMetricName+"=LabelCol="+evaluator.getLabelCol+"=PredictionCol="+evaluator.getPredictionCol)
+    //==MetricName=rmse=LabelCol=label=PredictionCol=prediction,默认rmse 均方根误差亦称标准误差,
     assert(evaluator.evaluate(predictions) ~== 0.1019382 absTol 0.001)
 
     // r2 score 评分
+    //R2平方系统也称判定系数,用来评估模型拟合数据的好坏
     evaluator.setMetricName("r2")
     assert(evaluator.evaluate(predictions) ~== 0.9998196 absTol 0.001)
 
-    // mae 更多
+    //MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均
     evaluator.setMetricName("mae")
     assert(evaluator.evaluate(predictions) ~== 0.08036075 absTol 0.001)
   }

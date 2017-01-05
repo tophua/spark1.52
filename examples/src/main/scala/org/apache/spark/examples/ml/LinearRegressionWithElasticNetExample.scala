@@ -62,7 +62,9 @@ object LinearRegressionWithElasticNetExample {
     println(s"numIterations: ${trainingSummary.totalIterations}")
     println(s"objectiveHistory: ${trainingSummary.objectiveHistory.toList}")
     trainingSummary.residuals.show()
+    //默认rmse均方根误差亦称标准误差
     println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
+    //R2平方系统也称判定系数,用来评估模型拟合数据的好坏
     println(s"r2: ${trainingSummary.r2}")
     // $example off$
 

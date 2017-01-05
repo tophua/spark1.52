@@ -40,6 +40,8 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
   test("constructor") {//构造函数
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
     //预测得分
+    println("========"+model.predict(0, 2))
+    //17.0
     assert(model.predict(0, 2) ~== 17.0 relTol 1e-14)
 
     intercept[IllegalArgumentException] {

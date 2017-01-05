@@ -48,8 +48,14 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
       labels: Seq[Double],
       weights: Seq[Double],
       isotonic: Boolean): IsotonicRegressionModel = {
+    println("labels:"+labels)
+    println("weights:"+weights)
+    /**
+     * labels:List(1.0, 2.0, 3.0, 1.0, 6.0, 17.0, 16.0, 17.0, 18.0)
+		 * weights:WrappedArray(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+     */
     val trainRDD = sc.parallelize(generateIsotonicInput(labels, weights)).cache()
-    //isotonic，默认值是true，此参数指定保序回归是保序的（单调增加）还是不保序的（单调减少）
+    //isotonic，默认值是true,此参数指定保序回归是保序的(单调增加)还是不保序的(单调减少)
     new IsotonicRegression().setIsotonic(isotonic).run(trainRDD)
   }
 
@@ -68,7 +74,6 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
      > y = [1, 2, 3, 1, 6, 17, 16, 17, 18]
      > ir = IsotonicRegression(x, y)
      > print ir.predict(x)
-
      array([  1. ,   2. ,   2. ,   2. ,   6. ,  16.5,  16.5,  17. ,  18. ])
      */
     val model = runIsotonicRegression(Seq(1, 2, 3, 1, 6, 17, 16, 17, 18), true)

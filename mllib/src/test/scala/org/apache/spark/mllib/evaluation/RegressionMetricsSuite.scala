@@ -91,6 +91,7 @@ class RegressionMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
        rmse = sqrt(meanSquaredError)//平方根
        rmse
        > [1] 0.6123724
+       //R2平方系统也称判定系数,用来评估模型拟合数据的好坏
        r2 = 1 - SSerr / SStot
        r2
        > [1] 0.9486081

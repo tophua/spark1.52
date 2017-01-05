@@ -57,10 +57,15 @@ object ALSExample {
 
     // Build the recommendation model using ALS on the training data
     val als = new ALS()
+    //设置最大迭代数
       .setMaxIter(5)
+      //
       .setRegParam(0.01)
+      //设置用户ID列
       .setUserCol("userId")
+      //设置产品ID列
       .setItemCol("movieId")
+      //设置等级
       .setRatingCol("rating")
     val model = als.fit(training)
      //import spark.implicits._
@@ -69,9 +74,9 @@ object ALSExample {
     val predictions = model.transform(test)
     predictions.collect()
     val evaluator = new RegressionEvaluator()  
-      //.setMetricName("rmse")
-      //.setLabelCol("rating")
-      //.setPredictionCol("prediction")
+      .setMetricName("rmse")
+      .setLabelCol("rating")
+      .setPredictionCol("prediction")
       //predictions [userId: int, movieId: int, rating: float, timestamp: bigint, prediction: float]
     val rmse = evaluator.evaluate(predictions)
     println(s"Root-mean-square error = $rmse")

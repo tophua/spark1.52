@@ -79,6 +79,7 @@ object EnsembleTestHelper {
       case "mse" =>
         errors.map(err => err * err).sum / errors.size
       case "mae" =>
+        //MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均
        //math.abs返回数的绝对值
         errors.map(math.abs).sum / errors.size
     }

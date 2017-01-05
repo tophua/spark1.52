@@ -389,7 +389,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
       }
     logInfo(s"Test RMSE is $rmse.")
     //targetRMSE: Double = 0.05
-    //均方差越小，推荐结果较优
+    //均方差越小,推荐结果较优
     assert(rmse < targetRMSE)
 
     // copied model must have the same parent.

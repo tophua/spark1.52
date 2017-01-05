@@ -221,7 +221,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     assert((error.head - error.last) > 2)
   }
 
-  // Test empty RDDs in a stream 测试空RDDS在流
+  // Test empty RDDs in a stream 测试空RDDSr的流
   test("handling empty RDDs in a stream") {
     val model = new StreamingLinearRegressionWithSGD()
       .setInitialWeights(Vectors.dense(0.0, 0.0))

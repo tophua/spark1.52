@@ -104,13 +104,14 @@ object CosineSimilarity {
 
     val exactEntries = exact.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
     val approxEntries = approx.entries.map { case MatrixEntry(i, j, v) => ((i, j), v) }
+     //MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均
     val MAE = exactEntries.leftOuterJoin(approxEntries).values.map {
       case (u, Some(v)) =>
         math.abs(u - v)
       case (u, None) =>
         math.abs(u)
     }.mean()
-
+    //MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均
     println(s"Average absolute error in estimate is: $MAE")
 
     sc.stop()
