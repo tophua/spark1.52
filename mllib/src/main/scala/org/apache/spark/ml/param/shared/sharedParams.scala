@@ -30,6 +30,7 @@ private[ml] trait HasRegParam extends Params {
 
   /**
    * Param for regularization parameter (>= 0).
+   * 正则化参数(>= 0)
    * @group param
    */
   final val regParam: DoubleParam = new DoubleParam(this, "regParam", "regularization parameter (>= 0)", ParamValidators.gtEq(0))
@@ -45,6 +46,7 @@ private[ml] trait HasMaxIter extends Params {
 
   /**
    * Param for maximum number of iterations (>= 0).
+   * 最大迭代次数(> = 0)
    * @group param
    */
   final val maxIter: IntParam = new IntParam(this, "maxIter", "maximum number of iterations (>= 0)", ParamValidators.gtEq(0))
@@ -60,6 +62,7 @@ private[ml] trait HasFeaturesCol extends Params {
 
   /**
    * Param for features column name.
+   * 特色列名称
    * @group param
    */
   final val featuresCol: Param[String] = new Param[String](this, "featuresCol", "features column name")
@@ -72,11 +75,13 @@ private[ml] trait HasFeaturesCol extends Params {
 
 /**
  * Trait for shared param labelCol (default: "label").
+ * 特性共享参数labelCol(默认："label")
  */
 private[ml] trait HasLabelCol extends Params {
 
   /**
    * Param for label column name.
+   * 参数标签列名称
    * @group param
    */
   final val labelCol: Param[String] = new Param[String](this, "labelCol", "label column name")
@@ -89,11 +94,13 @@ private[ml] trait HasLabelCol extends Params {
 
 /**
  * Trait for shared param predictionCol (default: "prediction").
+ * 特性共享参数predictioncol(默认："prediction")
  */
 private[ml] trait HasPredictionCol extends Params {
 
   /**
    * Param for prediction column name.
+   * 预测的列名称
    * @group param
    */
   final val predictionCol: Param[String] = new Param[String](this, "predictionCol", "prediction column name")
@@ -111,6 +118,7 @@ private[ml] trait HasRawPredictionCol extends Params {
 
   /**
    * Param for raw prediction (a.k.a. confidence) column name.
+   * 原预测参数的列名称
    * @group param
    */
   final val rawPredictionCol: Param[String] = new Param[String](this, "rawPredictionCol", "raw prediction (a.k.a. confidence) column name")
@@ -128,6 +136,7 @@ private[ml] trait HasProbabilityCol extends Params {
 
   /**
    * Param for Column name for predicted class conditional probabilities. Note: Not all models output well-calibrated probability estimates! These probabilities should be treated as confidences, not precise probabilities..
+   * 用于预测的类条件概率的列名称参数,
    * @group param
    */
   final val probabilityCol: Param[String] = new Param[String](this, "probabilityCol", "Column name for predicted class conditional probabilities. Note: Not all models output well-calibrated probability estimates! These probabilities should be treated as confidences, not precise probabilities.")
@@ -145,6 +154,7 @@ private[ml] trait HasThreshold extends Params {
 
   /**
    * Param for threshold in binary classification prediction, in range [0, 1].
+   * 在二分类预测的阈值参数,范围[0, 1]
    * @group param
    */
   final val threshold: DoubleParam = new DoubleParam(this, "threshold", "threshold in binary classification prediction, in range [0, 1]", ParamValidators.inRange(0, 1))
@@ -162,6 +172,7 @@ private[ml] trait HasThresholds extends Params {
 
   /**
    * Param for Thresholds in multi-class classification to adjust the probability of predicting each class. Array must have length equal to the number of classes, with values >= 0. The class with largest value p/t is predicted, where p is the original probability of that class and t is the class' threshold..
+   * 在多类分类阈值调整预测每一类的概率参数,数组必须具有与类的数目相等的长度，值为0
    * @group param
    */
   final val thresholds: DoubleArrayParam = new DoubleArrayParam(this, "thresholds", "Thresholds in multi-class classification to adjust the probability of predicting each class. Array must have length equal to the number of classes, with values >= 0. The class with largest value p/t is predicted, where p is the original probability of that class and t is the class' threshold.", (t: Array[Double]) => t.forall(_ >= 0))
@@ -177,6 +188,7 @@ private[ml] trait HasInputCol extends Params {
 
   /**
    * Param for input column name.
+   * 输入列的名称
    * @group param
    */
   final val inputCol: Param[String] = new Param[String](this, "inputCol", "input column name")
@@ -192,6 +204,7 @@ private[ml] trait HasInputCols extends Params {
 
   /**
    * Param for input column names.
+   * 输入列的名称
    * @group param
    */
   final val inputCols: StringArrayParam = new StringArrayParam(this, "inputCols", "input column names")
@@ -207,6 +220,7 @@ private[ml] trait HasOutputCol extends Params {
 
   /**
    * Param for output column name.
+   * 输出列的名称,(默认: uid + "__output")
    * @group param
    */
   final val outputCol: Param[String] = new Param[String](this, "outputCol", "output column name")
@@ -224,6 +238,7 @@ private[ml] trait HasCheckpointInterval extends Params {
 
   /**
    * Param for checkpoint interval (>= 1).
+   * 检查点间隔(> = 1)
    * @group param
    */
   final val checkpointInterval: IntParam = new IntParam(this, "checkpointInterval", "checkpoint interval (>= 1)", ParamValidators.gtEq(1))
@@ -239,6 +254,7 @@ private[ml] trait HasFitIntercept extends Params {
 
   /**
    * Param for whether to fit an intercept term.
+   * 是否适合拦截项
    * @group param
    */
   final val fitIntercept: BooleanParam = new BooleanParam(this, "fitIntercept", "whether to fit an intercept term")
@@ -256,6 +272,7 @@ private[ml] trait HasStandardization extends Params {
 
   /**
    * Param for whether to standardize the training features before fitting the model..
+   * 在模型拟合前是否规范训练特征
    * @group param
    */
   final val standardization: BooleanParam = new BooleanParam(this, "standardization", "whether to standardize the training features before fitting the model.")
@@ -273,6 +290,7 @@ private[ml] trait HasSeed extends Params {
 
   /**
    * Param for random seed.
+   * 随机种子
    * @group param
    */
   final val seed: LongParam = new LongParam(this, "seed", "random seed")
@@ -290,6 +308,7 @@ private[ml] trait HasElasticNetParam extends Params {
 
   /**
    * Param for the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty..
+   * 弹性神经网络混合参数,范围 [0, 1],
    * @group param
    */
   final val elasticNetParam: DoubleParam = new DoubleParam(this, "elasticNetParam", "the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.", ParamValidators.inRange(0, 1))
@@ -305,6 +324,7 @@ private[ml] trait HasTol extends Params {
 
   /**
    * Param for the convergence tolerance for iterative algorithms.
+   * 迭代算法的收敛容差
    * @group param
    */
   final val tol: DoubleParam = new DoubleParam(this, "tol", "the convergence tolerance for iterative algorithms")
@@ -320,6 +340,7 @@ private[ml] trait HasStepSize extends Params {
 
   /**
    * Param for Step size to be used for each iteration of optimization..
+   * 步长用于每次迭代的优化..
    * @group param
    */
   final val stepSize: DoubleParam = new DoubleParam(this, "stepSize", "Step size to be used for each iteration of optimization.")
@@ -335,6 +356,7 @@ private[ml] trait HasWeightCol extends Params {
 
   /**
    * Param for weight column name. If this is not set or empty, we treat all instance weights as 1.0..
+   * 权重列的名字,如果这不是设置或空,我们默认所有实例权重为1
    * @group param
    */
   final val weightCol: Param[String] = new Param[String](this, "weightCol", "weight column name. If this is not set or empty, we treat all instance weights as 1.0.")

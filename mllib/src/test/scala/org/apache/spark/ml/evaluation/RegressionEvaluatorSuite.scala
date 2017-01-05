@@ -33,7 +33,7 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
     /**
      * Here is the instruction describing how to export the test data into CSV format
      * so we can validate the metrics compared with R's mmetric package.
-     *
+     * 这里是指令描述如何导出到CSV格式的测试数据,所以我们可以验证指标R的对称方案相比
      * import org.apache.spark.mllib.util.LinearDataGenerator
      * val data = sc.parallelize(LinearDataGenerator.generateLinearInput(6.3,
      *   Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1))
@@ -49,12 +49,13 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
      */
     val generateLinear=LinearDataGenerator.generateLinearInput(
         6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1)
+        
     val dataset = sqlContext.createDataFrame(
       sc.parallelize(generateLinear,2))
 
     /**
      * Using the following R code to load the data, train the model and evaluate metrics.
-     * 使用下面的R代码加载数据，训练模型和评估指标
+     * 使用下面的R代码加载数据,训练模型和评估指标
      * > library("glmnet")
      * > library("rminer")
      * > data <- read.csv("path", header=FALSE, stringsAsFactors=FALSE)
@@ -72,10 +73,10 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
     predictions.collect()
 
     // default = rmse
-    //默认rmse均方根误差亦称标准误差
+    //默认rmse均方根误差说明样本的离散程度
     val evaluator = new RegressionEvaluator()
     println("==MetricName="+evaluator.getMetricName+"=LabelCol="+evaluator.getLabelCol+"=PredictionCol="+evaluator.getPredictionCol)
-    //==MetricName=rmse=LabelCol=label=PredictionCol=prediction,默认rmse 均方根误差亦称标准误差,
+    //==MetricName=rmse=LabelCol=label=PredictionCol=prediction,默认rmse均方根误差说明样本的离散程度
     assert(evaluator.evaluate(predictions) ~== 0.1019382 absTol 0.001)
 
     // r2 score 评分

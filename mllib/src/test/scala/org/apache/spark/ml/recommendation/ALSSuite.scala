@@ -381,6 +381,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 	//math.sqrt返回数字的平方根
         math.sqrt(weightedSumSq / totalWeight)
       } else {//明确
+	//mse标准差能反映一个数据集的离散程度
           val mse = predictions.map { case (rating, prediction) =>
           val err = rating - prediction
           err * err //平方

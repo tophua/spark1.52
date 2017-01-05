@@ -37,9 +37,16 @@ final class RegressionEvaluator(override val uid: String)
 
   /**
    * param for metric name in evaluation (supports `"rmse"` (default), `"mse"`, `"r2"`, and `"mae"`)
-   *
+   * MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均
+   * R2平方系统也称判定系数,用来评估模型拟合数据的好坏
+   * 默认rmse均方根误差说明样本的离散程度
+   * mse均方误差
+   * 评价指标名称参数支持(supports `"rmse"`均方根误差  (default), `"mse"均方误差`, `"r2"`, and `"mae"`)
+   * 
    * Because we will maximize evaluation value (ref: `CrossValidator`),
+   * 因为我们将最大化评价价值(ref: `CrossValidator`)
    * when we evaluate a metric that is needed to minimize (e.g., `"rmse"`, `"mse"`, `"mae"`),
+   * 当我们评估一个需要最小化的度量
    * we take and output the negative of this metric.
    * @group param
    */
