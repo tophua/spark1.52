@@ -25,7 +25,7 @@ import org.apache.spark.mllib.util.LinearDataGenerator
 import org.apache.spark.streaming.{StreamingContext, TestSuiteBase}
 import org.apache.spark.streaming.dstream.DStream
 /**
- * 实时机器学习
+ * 流式器学习线性回归套件
  */
 class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
 

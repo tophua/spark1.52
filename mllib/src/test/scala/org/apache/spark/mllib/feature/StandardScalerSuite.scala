@@ -75,7 +75,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val standardizer2 = new StandardScaler()
     //
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
-    //fit 计算汇总统计信息，然后返回一个模型，该模型可以根据StandardScaler配置将输入数据转换为标准差为1，均值为0的特征
+    //fit 计算汇总统计信息,然后返回一个模型,该模型可以根据StandardScaler配置将输入数据转换为标准差为1,均值为0的特征
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -152,7 +152,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val data1 = denseData.map(model1.transform)
     val data2 = denseData.map(model2.transform)
     val data3 = denseData.map(model3.transform)
-    //使用该类的好处在于可以保存训练集中的参数（均值、方差）直接使用其对象转换测试集数据
+    //使用该类的好处在于可以保存训练集中的参数(均值、方差)直接使用其对象转换测试集数据
     val data1RDD = model1.transform(dataRDD)
     val data2RDD = model2.transform(dataRDD)
     val data3RDD = model3.transform(dataRDD)
@@ -166,18 +166,21 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
       case (v1: DenseVector, v2: DenseVector, v3: DenseVector) => true
       case (v1: SparseVector, v2: SparseVector, v3: SparseVector) => true
       case _ => false
+      //标准化后应保留矢量类型
     }, "The vector type should be preserved after standardization.")
 
     assert((denseData, data2, data2RDD.collect()).zipped.forall {
       case (v1: DenseVector, v2: DenseVector, v3: DenseVector) => true
       case (v1: SparseVector, v2: SparseVector, v3: SparseVector) => true
       case _ => false
+      //标准化后应保留矢量类型
     }, "The vector type should be preserved after standardization.")
 
     assert((denseData, data3, data3RDD.collect()).zipped.forall {
       case (v1: DenseVector, v2: DenseVector, v3: DenseVector) => true
       case (v1: SparseVector, v2: SparseVector, v3: SparseVector) => true
       case _ => false
+      //标准化后应保留矢量类型
     }, "The vector type should be preserved after standardization.")
 
     assert((data1, data1RDD.collect()).zipped.forall((v1, v2) => v1 ~== v2 absTol 1E-5))
@@ -218,13 +221,13 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val equivalentModel3 = new StandardScalerModel(model3.std, model3.mean, false, true)
 
     val data2 = sparseData.map(equivalentModel2.transform)
-
+    //标准化不能应用于稀疏输入
     withClue("Standardization with mean can not be applied on sparse input.") {
       intercept[IllegalArgumentException] {
         sparseData.map(equivalentModel1.transform)
       }
     }
-
+    //标准化不能应用于稀疏输入
     withClue("Standardization with mean can not be applied on sparse input.") {
       intercept[IllegalArgumentException] {
         sparseData.map(equivalentModel3.transform)
@@ -263,13 +266,13 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model3 = standardizer3.fit(dataRDD)
 
     val data2 = sparseData.map(model2.transform)
-
+    //标准化不能应用于稀疏输入
     withClue("Standardization with mean can not be applied on sparse input.") {
       intercept[IllegalArgumentException] {
         sparseData.map(model1.transform)
       }
     }
-
+    //标准化不能应用于稀疏输入
     withClue("Standardization with mean can not be applied on sparse input.") {
       intercept[IllegalArgumentException] {
         sparseData.map(model3.transform)
@@ -284,6 +287,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
       case (v1: DenseVector, v2: DenseVector, v3: DenseVector) => true
       case (v1: SparseVector, v2: SparseVector, v3: SparseVector) => true
       case _ => false
+      //标准化后应保留矢量类型
     }, "The vector type should be preserved after standardization.")
 
     assert((data2, data2RDD.collect()).zipped.forall((v1, v2) => v1 ~== v2 absTol 1E-5))
@@ -293,7 +297,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(data2(4) ~== Vectors.sparse(3, Seq((0, 0.865538862), (1, -0.22604255))) absTol 1E-5)
     assert(data2(5) ~== Vectors.sparse(3, Seq((1, 0.71580142))) absTol 1E-5)
   }
-
+  //标准化常数输入时提供手段和传播
   test("Standardization with constant input when means and stds are provided") {
 
     val dataRDD = sc.parallelize(constantData, 2)

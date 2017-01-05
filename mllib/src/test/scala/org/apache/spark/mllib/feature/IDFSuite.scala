@@ -120,9 +120,11 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(tfidf2.values(0) ~== (1.0 * expected(1)) absTol 1e-12)
     }
     // Transforms a RDD
+    // 转换一个RDD
     val tfidf = model.transform(termFrequencies).collect()
     assertHelper(tfidf)
     // Transforms local vectors
+    // 转换本地向量
     val localTfidf = localTermFrequencies.map(model.transform(_)).toArray
     assertHelper(localTfidf)
   }

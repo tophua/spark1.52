@@ -233,8 +233,11 @@ object ParamsSuite extends SparkFunSuite {
 
     val params = obj.params
     val paramNames = params.map(_.name)
+    
     require(paramNames === paramNames.sorted, "params must be ordered by names")
     params.foreach { p =>
+     
+      println("===="+p+"==name:"+p.name)
       assert(p.parent === obj.uid)
       assert(obj.getParam(p.name) === p)
       // TODO: Check that setters return self, which needs special handling for generic types.

@@ -40,8 +40,7 @@ class RankingMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     val map = metrics.meanAveragePrecision
    //精度位置
     println("precisionAt:"+metrics.precisionAt(1)+" \t"+1.0/3)
-    //计算所有的查询的平均精度，截断在排名位置
-    
+    //计算所有的查询的平均精度,截断在排名位置    
 
     assert(metrics.precisionAt(1) ~== 1.0/3 absTol eps)
     assert(metrics.precisionAt(2) ~== 1.0/3 absTol eps)

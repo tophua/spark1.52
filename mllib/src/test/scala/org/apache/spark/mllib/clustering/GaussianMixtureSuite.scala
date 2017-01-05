@@ -24,7 +24,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 /**
- * 高斯混合聚类
+ * 高斯混合聚类套件
  */
 class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("single cluster") {//单个集群
@@ -93,7 +93,7 @@ class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(gmm.k === k)
   }
 
-  test("single cluster with sparse data") {//稀疏数据单簇
+  test("single cluster with sparse data") {//单个簇的稀疏数据
     val data = sc.parallelize(Array(
       Vectors.sparse(3, Array(0, 2), Array(4.0, 2.0)),
       Vectors.sparse(3, Array(0, 2), Array(2.0, 4.0)),
@@ -115,11 +115,11 @@ class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("two clusters with sparse data") {//稀疏数据的两个簇
+  test("two clusters with sparse data") {//两个簇的稀疏数据
     val data = sc.parallelize(GaussianTestData.data)
     val sparseData = data.map(point => Vectors.sparse(1, Array(0), point.toArray))
     // we set an initial gaussian to induce expected results
-    //我们设置了一个初始高斯，以诱导预期的结果
+    //我们设置了一个初始高斯,以索引预期的结果
     val initialGmm = new GaussianMixtureModel(
       Array(0.5, 0.5),
       Array(

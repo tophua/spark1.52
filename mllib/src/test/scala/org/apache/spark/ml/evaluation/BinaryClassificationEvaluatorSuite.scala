@@ -23,6 +23,9 @@ import org.apache.spark.ml.param.ParamsSuite
 class BinaryClassificationEvaluatorSuite extends SparkFunSuite {
 
   test("params") {
+    /**
+     *name:labelCol,metricName,rawPredictionCol
+     */
     ParamsSuite.checkParams(new BinaryClassificationEvaluator)
   }
 }

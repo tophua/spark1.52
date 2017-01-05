@@ -186,16 +186,16 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
       val uniform = RandomRDDs.uniformVectorRDD(sc, rows, cols, parts, seed)
        //math.sqrt返回数字的平方根
       testGeneratedVectorRDD(uniform, rows, cols, parts, 0.5, 1 / math.sqrt(12))
-
+      //正常的
       val normal = RandomRDDs.normalVectorRDD(sc, rows, cols, parts, seed)
       testGeneratedVectorRDD(normal, rows, cols, parts, 0.0, 1.0)
-
+      //对数正态分布
       val logNormal = RandomRDDs.logNormalVectorRDD(sc, 0.0, 1.0, rows, cols, parts, seed)
       testGeneratedVectorRDD(logNormal, rows, cols, parts, logNormalMean, logNormalStd, 0.1)
-
+      //泊松
       val poisson = RandomRDDs.poissonVectorRDD(sc, poissonMean, rows, cols, parts, seed)
       testGeneratedVectorRDD(poisson, rows, cols, parts, poissonMean, math.sqrt(poissonMean), 0.1)
-
+      //指数
       val exponential =
         RandomRDDs.exponentialVectorRDD(sc, exponentialMean, rows, cols, parts, seed)
       testGeneratedVectorRDD(exponential, rows, cols, parts, exponentialMean, exponentialMean, 0.1)

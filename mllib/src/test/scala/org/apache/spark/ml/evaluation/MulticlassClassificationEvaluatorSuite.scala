@@ -23,6 +23,9 @@ import org.apache.spark.ml.param.ParamsSuite
 class MulticlassClassificationEvaluatorSuite extends SparkFunSuite {
 
   test("params") {
+     /**
+       * labelCol,metricName,name:predictionCol  
+       */
     ParamsSuite.checkParams(new MulticlassClassificationEvaluator)
   }
 }

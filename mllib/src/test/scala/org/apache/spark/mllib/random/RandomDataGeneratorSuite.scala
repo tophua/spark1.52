@@ -23,6 +23,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.util.StatCounter
 
 // TODO update tests to use TestingUtils for floating point comparison after PR 1367 is merged
+//更新测试使用的testingutils浮点比较后PR 1367合并
 class RandomDataGeneratorSuite extends SparkFunSuite {
 /**
  * 随机数据生成在随机算法、原型开发、性能测试中比较有用
@@ -75,6 +76,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
   test("UniformGenerator") {//均匀分布随机数生成器
     val uniform = new UniformGenerator()
     apiChecks(uniform)
+    //均匀分布的标准差= (ub - lb) / math.sqrt(12)
     // Stddev of uniform distribution = (ub - lb) / math.sqrt(12)
     //math.sqrt返回数字的平方根
     distributionChecks(uniform, 0.5, 1 / math.sqrt(12))
@@ -94,12 +96,15 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
         apiChecks(normal)
 
         // mean of log normal = e^(mean + var / 2)
+        //对数正态平均= e^(mean + var / 2)
         val expectedMean = math.exp(mean + 0.5 * vari)
 	
         // variance of log normal = (e^var - 1) * e^(2 * mean + var)
+        //对数正态方差=(e^var - 1) * e^(2 * mean + var)
         val expectedStd = math.sqrt((math.exp(vari) - 1.0) * math.exp(2.0 * mean + vari))
 
         // since sampling error increases with variance, let's set
+        //由于采样误差随方差增大,让我们把绝对公差定为百分比
         // the absolute tolerance as a percentage
         val epsilon = 0.05 * expectedStd * expectedStd
 
@@ -109,6 +114,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
 
   test("PoissonGenerator") {//泊松生成器
     // mean = 0.0 will not pass the API checks since 0.0 is always deterministically produced.
+    //平均数=0.0 将不能通过API检查自0以来一直是确定性的产生
     for (mean <- List(1.0, 5.0, 100.0)) {
       val poisson = new PoissonGenerator(mean)
       apiChecks(poisson)
@@ -119,12 +125,14 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
 
   test("ExponentialGenerator") {//指数函数生成器
     // mean = 0.0 will not pass the API checks since 0.0 is always deterministically produced.
+    //平均数=0.0  将不能通过API检查自0以来一直是确定性的产生
     for (mean <- List(2.0, 5.0, 10.0, 50.0, 100.0)) {
       val exponential = new ExponentialGenerator(mean)
       apiChecks(exponential)
       // var of exp = lambda^-2 = (1.0 / mean)^-2 = mean^2
 
       // since sampling error increases with variance, let's set
+      //由于采样误差随方差增大,让我们把绝对公差定为百分比
       // the absolute tolerance as a percentage
       val epsilon = 0.05 * mean * mean
 
@@ -134,6 +142,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
 
   test("GammaGenerator") {//伽玛生成器
     // mean = 0.0 will not pass the API checks since 0.0 is always deterministically produced.
+     //平均数=0.0  将不能通过API检查自0以来一直是确定性的产生
     List((1.0, 2.0), (2.0, 2.0), (3.0, 2.0), (5.0, 1.0), (9.0, 0.5)).map {
       case (shape: Double, scale: Double) =>
         val gamma = new GammaGenerator(shape, scale)

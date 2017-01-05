@@ -41,7 +41,7 @@ class ElementwiseProductSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(transformedVec ~== expectedVec absTol 1E-5,
       s"Expected transformed vector $expectedVec but found $transformedVec")
   }
-
+  //元素(Hadamard)产品应正确运用向量的稀疏数据集
   test("elementwise (hadamard) product should properly apply vector to sparse data set") {
     val sparseData = Array(
       Vectors.sparse(3, Seq((1, -1.0), (2, -3.0)))

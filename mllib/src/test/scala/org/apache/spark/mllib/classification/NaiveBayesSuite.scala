@@ -29,7 +29,7 @@ import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkCont
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 /**
- * 朴素贝叶斯:该方法的任务是还原训练样本数据的分布密度，其在多类别分类中有很好的效果
+ * 朴素贝叶斯:该方法的任务是还原训练样本数据的分布密度,其在多类别分类中有很好的效果
  */
 object NaiveBayesSuite {
 
@@ -178,13 +178,14 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   /**
-   * @param model Multinomial Naive Bayes model
-   * @param testData input to compute posterior probabilities for
-   * @return posterior class probabilities (in order of labels) for input
+   * @param model Multinomial Naive Bayes model 多项朴素贝叶斯模型
+   * @param testData input to compute posterior probabilities for 输入计算后验概率
+   * @return posterior class probabilities (in order of labels) for input 输入的类概率(标签顺序)
    */
   private def expectedMultinomialProbabilities(model: NaiveBayesModel, testData: Vector) = {
     val piVector = new BDV(model.pi)
     // model.theta is row-major; treat it as col-major representation of transpose, and transpose:
+    //
     val thetaMatrix = new BDM(model.theta(0).length, model.theta.length, model.theta.flatten).t
     val logClassProbs: BV[Double] = piVector + (thetaMatrix * testData.toBreeze)
     val classProbs = logClassProbs.toArray.map(math.exp)
@@ -215,12 +216,15 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationRDD = sc.parallelize(validationData, 2)
 
     // Test prediction on RDD.
+    //在RDD测试预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Test prediction on Array.
+    //在数组上测试预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
 
     // Test posteriors
+    //测试后验概率
     validationData.map(_.features).foreach { features =>
       val predicted = model.predictProbabilities(features).toArray
       assert(predicted.sum ~== 1.0 relTol 1.0e-10)
@@ -230,9 +234,9 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   /**
-   * @param model Bernoulli Naive Bayes model
-   * @param testData input to compute posterior probabilities for
-   * @return posterior class probabilities (in order of labels) for input
+   * @param model Bernoulli Naive Bayes model 伯努利朴素贝叶斯模型
+   * @param testData input to compute posterior probabilities for 输入计算后验概率
+   * @return posterior class probabilities (in order of labels) for input 输入的类概率(标签顺序)
    */
   private def expectedBernoulliProbabilities(model: NaiveBayesModel, testData: Vector) = {
     val piVector = new BDV(model.pi)
@@ -285,7 +289,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     intercept[SparkException] {
       NaiveBayes.train(sc.makeRDD(badTrain, 2), 1.0, Bernoulli)
     }
-
+    //好的训练
     val okTrain = Seq(
       LabeledPoint(1.0, Vectors.dense(1.0)),
       LabeledPoint(0.0, Vectors.dense(0.0)),
@@ -295,7 +299,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(1.0, Vectors.dense(1.0)),
       LabeledPoint(1.0, Vectors.dense(1.0))
     )
-
+    //坏的预测
     val badPredict = Seq(
       Vectors.dense(1.0),
       Vectors.dense(2.0),
@@ -329,7 +333,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("model save/load: 1.0 to 2.0") {
+  test("model save/load: 1.0 to 2.0") {//模型保存/加载1.0 to 2.0
     val model = NaiveBayesSuite.binaryMultinomialModel
 
     val tempDir = Utils.createTempDir()

@@ -42,6 +42,7 @@ object SVMSuite {
   }
 
   // Generate noisy input of the form Y = signum(x.dot(weights) + intercept + noise)
+  //生成表格的y=signum(x.dot(权重)+intercept+噪声）
   def generateSVMInput(
     intercept: Double,
     weights: Array[Double],
@@ -144,13 +145,15 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationRDD = sc.parallelize(validationData, 2)
 
     // Test prediction on RDD.
+    //在RDD测试预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Test prediction on Array.
+    //在数组测试预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
 
-  test("SVM local random SGD with initial weights") {//VM的局部随机SGD与初始权值
+  test("SVM local random SGD with initial weights") {//SVM的局部随机SGD与初始权值
     val nPoints = 10000
 
     // NOTE: Intercept should be small for generating equal 0s and 1s
@@ -177,9 +180,11 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationRDD = sc.parallelize(validationData, 2)
 
     // Test prediction on RDD.
+    //在RDD测试预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Test prediction on Array.
+    //在数组测试预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
 

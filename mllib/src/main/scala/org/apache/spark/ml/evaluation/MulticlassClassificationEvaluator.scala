@@ -28,6 +28,7 @@ import org.apache.spark.sql.types.DoubleType
 /**
  * :: Experimental ::
  * Evaluator for multiclass classification, which expects two input columns: score and label.
+ * 多类分类评估,其中预计两个输入列:score 和 label
  */
 @Experimental
 class MulticlassClassificationEvaluator (override val uid: String)
@@ -38,6 +39,8 @@ class MulticlassClassificationEvaluator (override val uid: String)
   /**
    * param for metric name in evaluation (supports `"f1"` (default), `"precision"`, `"recall"`,
    * `"weightedPrecision"`, `"weightedRecall"`)
+   * 评价中的度量名称支持(`"f1"`(default),`"precision"`,`"recall"`,`"weightedPrecision"`,`"weightedRecall"`)
+   * 默认precision(精度)
    * @group param
    */
   val metricName: Param[String] = {

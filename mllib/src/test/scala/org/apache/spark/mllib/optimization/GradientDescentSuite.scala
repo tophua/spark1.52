@@ -111,6 +111,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     val updater = new SquaredL2Updater()
 
     // Add a extra variable consisting of all 1.0's for the intercept.
+    //增加一个额外的变量组成的所有1的拦截
     val testData = GradientDescentSuite.generateGDInput(2.0, -1.5, 10000, 42)
     val data = testData.map { case LabeledPoint(label, features) =>
       label -> Vectors.dense(1.0 +: features.toArray)
@@ -159,6 +160,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     val convergenceTolerance = 5.0e-1
 
     // Add a extra variable consisting of all 1.0's for the intercept.
+    //增加一个额外的变量组成的所有1的拦截
     val testData = GradientDescentSuite.generateGDInput(A, B, nPoints, 42)
     val data = testData.map { case LabeledPoint(label, features) =>
       label -> MLUtils.appendBias(features)
@@ -192,6 +194,7 @@ class GradientDescentClusterSuite extends SparkFunSuite with LocalClusterSparkCo
       iter.map(i => (1.0, Vectors.dense(Array.fill(n)(random.nextDouble()))))
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be
+    //如果我们将数据直接在任务结束,该任务序列化的规模将大于1MB,因此Spark会抛出一个错误
     // greater than 1MB and hence Spark would throw an error.
     val (weights, loss) = GradientDescent.runMiniBatchSGD(
       points,

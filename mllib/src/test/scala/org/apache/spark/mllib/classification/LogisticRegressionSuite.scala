@@ -30,7 +30,7 @@ import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkCont
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 /**
- * LogisticRegression:归结为二元分类问题。这个算法的优点是可以给出数据所在类别的概率
+ * LogisticRegression:归结为二元分类问题,这个算法的优点是可以给出数据所在类别的概率
  */
 //逻辑回归广泛应用于二分类问题
 object LogisticRegressionSuite {
@@ -44,7 +44,7 @@ object LogisticRegressionSuite {
   }
 
   // Generate input of the form Y = logistic(offset + scale*X)
-  //来自产生输入
+  //来自 Y = logistic(offset + scale*X)产生输入
   def generateLogisticInput(
       offset: Double,
       scale: Double,
@@ -78,13 +78,16 @@ object LogisticRegressionSuite {
    * @param weights matrix is flatten into a vector; as a result, the dimension of weights vector
    *                will be (k - 1) * (n + 1) if `addIntercept == true`, and
    *                if `addIntercept != true`, the dimension will be (k - 1) * n.
+   *                矩阵被扁平化为一个向量,
    * @param xMean the mean of the generated features. Lots of time, if the features are not properly
    *              standardized, the algorithm with poor implementation will have difficulty
    *              to converge.
-   * @param xVariance the variance of the generated features.
-   * @param addIntercept whether to add intercept.
-   * @param nPoints the number of instance of generated data.
+   *              生成特征的平均值
+   * @param xVariance the variance of the generated features.生成特征的方差
+   * @param addIntercept whether to add intercept.是否添加拦截
+   * @param nPoints the number of instance of generated data.生成数据实例的数目
    * @param seed the seed for random generator. For consistent testing result, it will be fixed.
+   * 						随机发生器的种子,对于一致的测试结果,这将是固定的
    */
   def generateMultinomialLogisticInput(
       weights: Array[Double],
@@ -141,6 +144,7 @@ object LogisticRegressionSuite {
       for (i <- 0 until nClasses) probs(i) /= norm
 
       // Compute the cumulative probability so we can generate a random number and assign a label.
+      //计算累积概率,这样我们就可以生成一个随机数并指定一个标签
       for (i <- 1 until nClasses) probs(i) += probs(i - 1)
       val p = rnd.nextDouble()
       var y = 0
@@ -160,15 +164,15 @@ object LogisticRegressionSuite {
   }
 
   /** 
-   *  Binary labels, 3 features
-   *  二进制标签，3个特征 
+   *  Binary labels,3 features
+   *  二进制标签,3个特征 
    *  */
   private val binaryModel = new LogisticRegressionModel(
     weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5, numFeatures = 3, numClasses = 2)
 
   /** 
-   *  3 classes, 2 features
-   *  3分类，2个特征 
+   *  3 classes,2 features
+   *  3分类,2个特征 
    *  */
   private val multiclassModel = new LogisticRegressionModel(
     weights = Vectors.dense(0.1, 0.2, 0.3, 0.4), intercept = 1.0, numFeatures = 2, numClasses = 3)
@@ -192,10 +196,12 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
       prediction != expected.label
     }
     // At least 83% of the predictions should be on.
+    //应该至少有83%的预测
     ((input.length - numOffPredictions).toDouble / input.length) should be > expectedAcc
   }
   //逻辑回归广泛应用于二分类问题
   // Test if we can correctly learn A, B where Y = logistic(A + B*X)
+  //测试是否能正确学习A, B where Y = logistic(A + B*X)
   test("logistic regression with SGD") {
     val nPoints = 10000
     val A = 2.0
@@ -224,7 +230,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
   }
 
   // Test if we can correctly learn A, B where Y = logistic(A + B*X)
-  //测试如果我们能正确学习A，B
+  //测试如果我们能正确学习A,B where Y = logistic(A + B*X)
   test("logistic regression with LBFGS") {//逻辑回归
     val nPoints = 10000
     val A = 2.0
@@ -286,9 +292,11 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val validationData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 17)
     val validationRDD = sc.parallelize(validationData, 2)
     // Test prediction on RDD.
+    //测试在RDD预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Test prediction on Array.
+    //测试在数组上预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
 
@@ -315,19 +323,23 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val model = lr.run(testRDD, initialWeights)
 
     // Test the weights
+    //测试的权重
     // With regularization, the resulting weights will be smaller.
+    //随着正规化,由此产生的权重将更小
     assert(model.weights(0) ~== -0.14 relTol 0.02)
     assert(model.intercept ~== 0.25 relTol 0.02)
 
     val validationData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 17)
     val validationRDD = sc.parallelize(validationData, 2)
     // Test prediction on RDD.
+    //测试在RDD预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData, 0.8)
 
     // Test prediction on Array.
+     //测试在数组上预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData, 0.8)
   }
-
+  //初始权重Logistic回归LBFGS
   test("logistic regression with initial weights with LBFGS") {
     val nPoints = 10000
     val A = 2.0
@@ -342,28 +354,32 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
 
     // Use half as many iterations as the previous test.
+    //使用以前测试的一半以上的迭代次数
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
 
     val model = lr.run(testRDD, initialWeights)
 
-    // Test the weights
+    // Test the weights 测试的权重
     assert(model.weights(0) ~== B relTol 0.02)
     assert(model.intercept ~== A relTol 0.02)
 
     val validationData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 17)
     val validationRDD = sc.parallelize(validationData, 2)
     // Test prediction on RDD.
+     //测试在RDD上预测
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData)
 
     // Test prediction on Array.
+     //测试在数组上预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData)
   }
-
+  //用Logistic回归分析尺度特征的数值稳定性
   test("numerical stability of scaling features using logistic regression with LBFGS") {
     /**
      * If we rescale the features, the condition number will be changed so the convergence rate
      * and the solution will not equal to the original solution multiple by the scaling factor
      * which it should be.
+     * 如果我们重新缩放功能,条件数将被改变,所以收敛速度和解决方案将不等于原来的解决方案倍数的缩放因子
      *
      * However, since in the LogisticRegressionWithLBFGS, we standardize the training dataset first,
      * no matter how we multiple a scaling factor into the dataset, the convergence rate should be
@@ -418,13 +434,15 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(modelB1.weights(0) !~== modelB2.weights(0) * 1.0E3 absTol 0.1)
     assert(modelB1.weights(0) !~== modelB3.weights(0) * 1.0E6 absTol 0.1)
   }
-
+  //多分类Logistic回归分析
   test("multinomial logistic regression with LBFGS") {
     val nPoints = 10000
 
     /**
      * The following weights and xMean/xVariance are computed from iris dataset with lambda = 0.2.
+     * 以下权重和xMean/xVariance 
      * As a result, we are actually drawing samples from probability distribution of built model.
+     * 因此,我们实际上是绘制样本的概率分布模型
      */
     val weights = Array(
       -0.57997, 0.912083, -0.371077, -0.819866, 2.688191,
@@ -452,9 +470,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     /**
      * The following is the instruction to reproduce the model using R's glmnet package.
-     *
+     * 以下是指令复制模型中使用的glmnet包
      * First of all, using the following scala code to save the data into `path`.
-     *
+     * 首先,使用下面的Scala代码数据保存到`路径`
      *    testRDD.map(x => x.label+ ", " + x.features(0) + ", " + x.features(1) + ", " +
      *      x.features(2) + ", " + x.features(3)).saveAsTextFile("path")
      *
@@ -509,9 +527,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     validatePrediction(model.predict(validationRDD.map(_.features)).collect(), validationData, 0.47)
 
   }
-
+  //二进制分类的模型保存/加载
   test("model save/load: binary classification") {
     // NOTE: This will need to be generalized once there are multiple model format versions.
+    //注意:这将需要推广一旦有多个模式格式版本
     val model = LogisticRegressionSuite.binaryModel
 
     model.clearThreshold()
@@ -521,6 +540,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val path = tempDir.toURI.toString
 
     // Save model, load it back, and compare.
+    //保存模型,加载它回来,并比较
     try {
       model.save(sc, path)
       val sameModel = LogisticRegressionModel.load(sc, path)
@@ -530,6 +550,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     }
 
     // Save model with threshold.
+    //阈值保存模型
     try {
       model.setThreshold(0.7)
       model.save(sc, path)
@@ -539,7 +560,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
       Utils.deleteRecursively(tempDir)
     }
   }
-
+  //多类分类模型保存/加载
   test("model save/load: multiclass classification") {
     // NOTE: This will need to be generalized once there are multiple model format versions.
     val model = LogisticRegressionSuite.multiclassModel
@@ -548,6 +569,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val path = tempDir.toURI.toString
 
     // Save model, load it back, and compare.
+    //保存模型,加载它回来,并比较
     try {
       model.save(sc, path)
       val sameModel = LogisticRegressionModel.load(sc, path)
@@ -558,9 +580,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
   }
 
 }
-
+//逻辑回归集群套件
 class LogisticRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-
+  //使用SGD算法任务规模小在训练和预测
   test("task size should be small in both training and prediction using SGD optimizer") {
     val m = 4
     val n = 200000
@@ -570,14 +592,16 @@ class LogisticRegressionClusterSuite extends SparkFunSuite with LocalClusterSpar
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be
     // greater than 1MB and hence Spark would throw an error.
+    //如果我们将数据直接在任务结束,该序列化任务的将大于1MB,因此Spark会抛出一个错误
     val model = LogisticRegressionWithSGD.train(points, 2)
 
     val predictions = model.predict(points.map(_.features))
 
     // Materialize the RDDs
+    //实现RDDS
     predictions.count()
   }
-
+  //任务规模小在训练和预测采用LBFGS算法
   test("task size should be small in both training and prediction using LBFGS optimizer") {
     val m = 4
     val n = 200000
@@ -586,6 +610,7 @@ class LogisticRegressionClusterSuite extends SparkFunSuite with LocalClusterSpar
       iter.map(i => LabeledPoint(1.0, Vectors.dense(Array.fill(n)(random.nextDouble()))))
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be
+    //如果我们将数据直接在任务结束,该序列化任务的将大于1MB,因此Spark会抛出一个错误
     // greater than 1MB and hence Spark would throw an error.
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
     lr.optimizer.setNumIterations(2)

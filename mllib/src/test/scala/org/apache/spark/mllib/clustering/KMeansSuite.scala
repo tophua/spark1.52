@@ -84,7 +84,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.clusterCenters.size === 2)
   }
 
-  test("more clusters than points") {//更多的集群比点
+  test("more clusters than points") {//更多的聚类点
     val data = sc.parallelize(
       Array(
         Vectors.dense(1.0, 2.0, 3.0),
@@ -92,20 +92,20 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       2)
 
     // Make sure code runs.
-      //确保代码运行
+    //确保代码运行
     var model = KMeans.train(data, k = 3, maxIterations = 1)
     assert(model.clusterCenters.size === 3)
   }
   //确定性的初始化
   test("deterministic initialization") {
     // Create a large-ish set of points for clustering
-    //创建一个大的杂交点集的聚类
+    //创建一个大的设置点的聚类
     val points = List.tabulate(1000)(n => Vectors.dense(n, n))
     val rdd = sc.parallelize(points, 3)
 
     for (initMode <- Seq(RANDOM, K_MEANS_PARALLEL)) {
       // Create three deterministic models and compare cluster means
-      //创建三个确定性模型,并比较集群的方法
+      //创建三个确定性模型,并比较聚类方法
       val model1 = KMeans.train(rdd, k = 10, maxIterations = 2, runs = 1,
         initializationMode = initMode, seed = 42)
       val centers1 = model1.clusterCenters
@@ -120,7 +120,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     }
   }
-//大数据集的单集群
+  //大数据集的单个聚类
   test("single cluster with big dataset") {
     val smallData = Array(
       Vectors.dense(1.0, 2.0, 6.0),
@@ -129,7 +129,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     val data = sc.parallelize((1 to 100).flatMap(_ => smallData), 4)
 
     // No matter how many runs or iterations we use, we should get one cluster,
-    //无论我们使用多少次运行或迭代,我们应该得到一个集群
+    //无论我们使用多少次运行或迭代,我们应该得到一个聚类
     // centered at the mean of the points
     //以点的平均值为中心
 
@@ -230,7 +230,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // K-means|| initialization should place all clusters into distinct centers because
     // it will make at least five passes, and it will give non-zero probability to each
-    //k-均值| |初始化应该把所有的集群在不同的中心，因为它会使至少五遍
+    //k-均值| |初始化应该把所有的集群在不同的中心,因为它会使至少五遍
     // unselected point as long as it hasn't yet selected all of them
     //它将为非零的概率对每个选中的点,只要它还没有选定的所有的人
     var model = KMeans.train(rdd, k = 5, maxIterations = 1)
