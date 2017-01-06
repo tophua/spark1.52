@@ -28,7 +28,9 @@ import org.apache.spark.ml.feature.HashingTF
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.util.MLTestingUtils
 import org.apache.spark.sql.DataFrame
-
+/**
+ * 管道套件
+ */
 class PipelineSuite extends SparkFunSuite {
 
   abstract class MyModel extends Model[MyModel]

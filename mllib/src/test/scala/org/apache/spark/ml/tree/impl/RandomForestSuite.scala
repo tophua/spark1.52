@@ -53,7 +53,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val left2Imp = new GiniCalculator(Array(1.0, 6.0, 1.0))
     val left2 = new LeafNode(0.0, left2Imp.calculate(), left2Imp)
-
+    //重大父母
     val grandParent = TreeTests.buildParentNode(left2, parent, new ContinuousSplit(1, 1.0))
     val grandImp = grandParent.impurityStats
 
@@ -77,6 +77,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Full tree
     //满树
+    //重要特征1
     val feature1importance = grandImp.calculate() * grandImp.count -
       (left2Imp.calculate() * left2Imp.count + parentImp.calculate() * parentImp.count)
     testNode(grandParent, Map(0 -> feature0importance, 1 -> feature1importance))
@@ -86,6 +87,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val trees = Array(parent, grandParent).map { root =>
       new DecisionTreeClassificationModel(root, numClasses = 3).asInstanceOf[DecisionTreeModel]
     }
+    //重要
     val importances: Vector = RandomForest.featureImportances(trees, 2)
     val tree2norm = feature0importance + feature1importance
     val expected = Vectors.dense((1.0 + feature0importance / tree2norm) / 2.0,
@@ -103,7 +105,9 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
 }
-
+/**
+ * 随机森林树套件
+ */
 private object RandomForestSuite {
 
   def mapToVec(map: Map[Int, Double]): Vector = {

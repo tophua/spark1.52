@@ -21,13 +21,15 @@ import scala.collection.mutable
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.ml.param.{ParamMap, TestParams}
-
+/**
+ * 参数网格生成器套件
+ */
 class ParamGridBuilderSuite extends SparkFunSuite {
 
   val solver = new TestParams()
   import solver.{inputCol, maxIter}
 
-  test("param grid builder") {//参数表格生成器
+  test("param grid builder") {//参数网格生成器
     def validateGrid(maps: Array[ParamMap], expected: mutable.Set[(Int, String)]): Unit = {
       assert(maps.size === expected.size)
       maps.foreach { m =>

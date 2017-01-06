@@ -297,9 +297,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
   /**
    * Generates random user/item factors, with i.i.d. values drawn from U(a, b).
    * 产生随机的用户/项目因素
-   * @param size number of users/items
+   * @param size number of users/items 用户/项目数
    * @param rank number of features  模型中潜在的特征数
-   * @param random random number generator
+   * @param random random number generator 随机数发生器
    * @param a min value of the support (default: -1)
    * @param b max value of the support (default: 1)
    * @return a sequence of (ID, factors) pairs
@@ -477,7 +477,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     }
   }
 
-  test("partitioner in returned factors") {//在返回的因素划分
+  test("partitioner in returned factors") {//返回分区因子
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     val (userFactors, itemFactors) = ALS.train(
       ratings, rank = 2, maxIter = 4, numUserBlocks = 3, numItemBlocks = 4, seed = 0)

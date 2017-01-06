@@ -28,7 +28,9 @@ import org.apache.spark.mllib.classification.LogisticRegressionSuite.generateLog
 import org.apache.spark.mllib.util.{LinearDataGenerator, MLlibTestSparkContext}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.StructType
-
+/**
+ * 训练分割验证套件
+ */
 class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("train validation with logistic regression") {//训练验证逻辑回归
     val dataset = sqlContext.createDataFrame(
@@ -106,7 +108,9 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
     }
   }
 }
-
+/**
+ * 训练分割验证套件
+ */
 object TrainValidationSplitSuite {
 
   abstract class MyModel extends Model[MyModel]

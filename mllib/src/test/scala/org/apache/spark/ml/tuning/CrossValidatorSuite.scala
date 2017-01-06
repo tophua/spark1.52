@@ -46,22 +46,13 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
      * (1.0,[-1.1069902863993377]), (0.0,[0.2809776380727795]), (1.0,[0.6846227956326554]), 
      * (1.0,[-0.8172214073987268]), (0.0,[-1.3966434026780434]), (1.0,[-0.19094451307087512]),
      * (1.0,[1.4862133923906502]), (1.0,[0.8023071496873626]), (0.0,[-0.12151292466549345]), 
-     * (1.0,[1.4105062239438624]), (0.0,[-0.6402327822135738]), (0.0,[-1.2096444592532913]), 
-     * (1.0,[0.35375769787202876]), (0.0,[-0.4903496491990076]), (0.0,[0.5507215382743629]), 
-     * (1.0,[-1.2035510019650835]), (1.0,[0.3210160806416416]), (1.0,[1.5511476388671834]), 
-     * (1.0,[0.43853028624710505]), (1.0,[0.4815980608245389]), (1.0,[1.5196310789680683]), 
-     * (0.0,[-0.2768317291873249]), (1.0,[-0.08393897849486337]), (1.0,[1.255833005788796]), 
-     * (0.0,[-0.3252727938665772]), (0.0,[-0.17329033306108363]), (0.0,[-1.8585851445864527]),
-     * (1.0,[1.4238069456328435]), (0.0,[-1.363726024075023]), (0.0,[-1.964666098753878]), 
-     * (1.0,[-0.9185948439341892]), (0.0,[-2.548887393384806]), (0.0,[-1.6309606578419305]), 
-     * (1.0,[-0.12200477461989162]), (1.0,[1.289159071801577]), (1.0,[-0.2691388556559934]), 
      * (1.0,[0.2574914085090889]), (0.0,[-0.3199143760045327]), (0.0,[-1.7684998592513064]))
      */
     dataset = sqlContext.createDataFrame(
       sc.parallelize(generateLogisticInput(1.0, 1.0, 100, 42), 2))
   }
 
-  test("cross validation with logistic regression") {//用逻辑回归的交叉验证
+  test("cross validation with logistic regression") {//逻辑回归的交叉验证
     //交叉验证
     val lr = new LogisticRegression//逻辑回归
     val lrParamMaps = new ParamGridBuilder()
@@ -86,7 +77,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(cvModel.avgMetrics.length === lrParamMaps.length)
   }
 
-  test("cross validation with linear regression") {//用线性回归的交叉验证
+  test("cross validation with linear regression") {//线性回归的交叉验证
     val dataset = sqlContext.createDataFrame(
       sc.parallelize(LinearDataGenerator.generateLinearInput(
         6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1), 2))
@@ -115,7 +106,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(parent2.getMaxIter === 10)
     assert(cvModel2.avgMetrics.length === lrParamMaps.length)
   }
-  //验证参数应检查估计parammaps
+  //验证参数检查评估parammaps
   test("validateParams should check estimatorParamMaps") {
     import CrossValidatorSuite._
 
@@ -139,7 +130,9 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 }
-
+/**
+ * 交叉验证套件
+ */
 object CrossValidatorSuite {
 
   abstract class MyModel extends Model[MyModel]

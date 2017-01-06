@@ -21,11 +21,15 @@ import java.util.Random
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+/**
+ * 秒表测试套件
+ */
 class StopwatchSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   import StopwatchSuite._
-
+/**
+ * 在驱动器秒表的测试
+ */
   private def testStopwatchOnDriver(sw: Stopwatch): Unit = {
     assert(sw.name === "sw")
     assert(sw.elapsed() === 0L)
@@ -101,7 +105,9 @@ class StopwatchSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(sparkElapsed2 === sparkElapsed + acc.value)
   }
 }
-
+/**
+ * 秒表测试套件
+ */
 private object StopwatchSuite extends SparkFunSuite {
 
   /**
