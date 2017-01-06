@@ -28,7 +28,9 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.classification.NaiveBayesSuite._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Row
-
+/**
+ * 朴素贝叶斯套件
+ */
 class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   def validatePrediction(predictionAndLabels: DataFrame): Unit = {
@@ -37,9 +39,10 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
         prediction != label
     }
     // At least 80% of the predictions should be on.
+    //至少有80%的预测
     assert(numOfErrorPredictions < predictionAndLabels.count() / 5)
   }
-
+  //验证模型的转换
   def validateModelFit(
       piData: Vector,
       thetaData: Matrix,
@@ -48,14 +51,14 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
       Vectors.dense(piData.toArray.map(math.exp)) absTol 0.05, "pi mismatch")
     assert(model.theta.map(math.exp) ~== thetaData.map(math.exp) absTol 0.05, "theta mismatch")
   }
-
+  //预期的多项式概率
   def expectedMultinomialProbabilities(model: NaiveBayesModel, feature: Vector): Vector = {
     val logClassProbs: BV[Double] = model.pi.toBreeze + model.theta.multiply(feature).toBreeze
     val classProbs = logClassProbs.toArray.map(math.exp)
     val classProbsSum = classProbs.sum
     Vectors.dense(classProbs.map(_ / classProbsSum))
   }
-
+  //预计伯努利的概率
   def expectedBernoulliProbabilities(model: NaiveBayesModel, feature: Vector): Vector = {
     val negThetaMatrix = model.theta.map(v => math.log(1.0 - math.exp(v)))
     val negFeature = Vectors.dense(feature.toArray.map(v => 1.0 - v))
@@ -65,7 +68,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     val classProbsSum = classProbs.sum
     Vectors.dense(classProbs.map(_ / classProbsSum))
   }
-
+  //验证概率
   def validateProbabilities(
       featureAndProbabilities: DataFrame,
       model: NaiveBayesModel,
@@ -131,7 +134,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
       .select("features", "probability")
     validateProbabilities(featureAndProbabilities, model, "multinomial")
   }
-
+  //朴素贝叶斯伯努利
   test("Naive Bayes Bernoulli") {//伯努利方程是数学中的一种方程
     val nPoints = 10000
     val piArray = Array(0.5, 0.3, 0.2).map(math.log)

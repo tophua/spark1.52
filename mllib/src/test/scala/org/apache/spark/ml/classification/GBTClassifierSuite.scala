@@ -34,13 +34,15 @@ import org.apache.spark.util.Utils
 
 /**
  * Test suite for [[GBTClassifier]].
+ * 梯度提升树(GBT)分类
+ * 
  */
 class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   import GBTClassifierSuite.compareAPIs
 
   // Combinations for estimators, learning rates and subsamplingRate
-  //组合估计
+  //组合评估,学习率和子采样率
   private val testCombinations =
     Array((10, 1.0, 1.0), (10, 0.1, 1.0), (10, 0.5, 0.75), (10, 0.1, 0.75))
 
@@ -59,16 +61,18 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {
     ParamsSuite.checkParams(new GBTClassifier)
+    //梯度提升树(GBT)分类
     val model = new GBTClassificationModel("gbtc",
       Array(new DecisionTreeRegressionModel("dtr", new LeafNode(0.0, 0.0, null))),
       Array(1.0))
     ParamsSuite.checkParams(model)
   }
-
+  //具有连续特征的二分类:对数损失
   test("Binary classification with continuous features: Log Loss") {
     val categoricalFeatures = Map.empty[Int, Int]
     testCombinations.foreach {
       case (maxIter, learningRate, subsamplingRate) =>
+       //梯度提升树(GBT)分类
         val gbt = new GBTClassifier()
           .setMaxDepth(2)
           .setSubsamplingRate(subsamplingRate)
@@ -79,13 +83,14 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("Checkpointing") {
+  test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     sc.setCheckpointDir(path)
 
     val categoricalFeatures = Map.empty[Int, Int]
     val df: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 2)
+    //梯度提升树(GBT)分类
     val gbt = new GBTClassifier()
       .setMaxDepth(2)
       .setLossType("logistic")
@@ -95,6 +100,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = gbt.fit(df)
 
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
 
     sc.checkpointDir = None
@@ -107,6 +113,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     val categoricalFeatures = Map.empty[Int, Int]
     // Set maxIter large enough so that it stops early.
     val maxIter = 20
+    //梯度提升树(GBT)分类
     GBTClassifier.supportedLossTypes.foreach { loss =>
       val gbt = new GBTClassifier()
         .setMaxIter(maxIter)
@@ -132,6 +139,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     val trees = Range(0, 3).map(_ => OldDecisionTreeSuite.createModel(OldAlgo.Regression)).toArray
     val treeWeights = Array(0.1, 0.3, 1.1)
     val oldModel = new OldGBTModel(OldAlgo.Classification, trees, treeWeights)
+    //梯度提升树(GBT)分类
     val newModel = GBTClassificationModel.fromOld(oldModel)
 
     // Save model, load it back, and compare.
@@ -150,12 +158,14 @@ private object GBTClassifierSuite {
 
   /**
    * Train 2 models on the given dataset, one using the old API and one using the new API.
+   * 在给定数据集上训练2种模型,一个使用旧的API和一个使用新的API
    * Convert the old model to the new format, compare them, and fail if they are not exactly equal.
+   * 将旧模型转换为新格式,比较它们,如果它们不完全相等,则会失败
    */
   def compareAPIs(
       data: RDD[LabeledPoint],
       validationData: Option[RDD[LabeledPoint]],
-      gbt: GBTClassifier,
+      gbt: GBTClassifier, //梯度提升树(GBT)分类
       categoricalFeatures: Map[Int, Int]): Unit = {
     val oldBoostingStrategy =
       gbt.getOldBoostingStrategy(categoricalFeatures, OldAlgo.Classification)
@@ -164,6 +174,7 @@ private object GBTClassifierSuite {
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 2)
     val newModel = gbt.fit(newData)
     // Use parent from newTree since this is not checked anyways.
+    //梯度提升树(GBT)分类
     val oldModelAsNew = GBTClassificationModel.fromOld(
       oldModel, newModel.parent.asInstanceOf[GBTClassifier], categoricalFeatures)
     TreeTests.checkEqual(oldModelAsNew, newModel)

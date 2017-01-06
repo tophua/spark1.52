@@ -50,13 +50,6 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     /**
      * res21: = Array(Array(a, b, a, b, a, b, a, b, a, b, a, b, a,
        b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b
-      , a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b,
-      a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a,
-       b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b
-      , a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b,
-      a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a,
-       b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b
-      , a, c, a, c, a, c, a, c, a, c, a, c, a, c, a, c, a, c, a, c), Array(a, b, a, b,
        a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b...
      */
     val doc = sc.parallelize(Seq(sentence, sentence)).map(line => line.split(" "))
@@ -144,8 +137,6 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
      * sentence: String = "a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b
       a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b
       a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b
-      a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b
-      a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b a b
       a b a b a b a b a b a c a c a c a c a c a c a c a c a c a c "
      */
     val sentence = "a b " * 100 + "a c " * 10
@@ -153,13 +144,6 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     /**
      res17: Array[Array[String]] = Array(Array(a, b, a, b, a, b, a, b, a, b, a, b, a,
        b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b
-      , a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b,
-      a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a,
-       b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b
-      , a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b,
-      a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a,
-       b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b
-      , a, c, a, c, a, c, a, c, a, c, a, c, a, c, a, c, a, c, a, c), Array(a, b, a, b,
        a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b, a, b...
      */
     val doc = sc.parallelize(Seq(sentence, sentence)).map(line => line.split(" "))

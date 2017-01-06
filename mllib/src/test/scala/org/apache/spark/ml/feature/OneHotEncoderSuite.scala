@@ -72,7 +72,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
       (3, 1.0, 0.0, 0.0), (4, 1.0, 0.0, 0.0), (5, 0.0, 1.0, 0.0))
     assert(output === expected)
   }
-
+  //删除最后
   test("OneHotEncoder dropLast = true") {
     val transformed = stringIndexed()
     val encoder = new OneHotEncoder()

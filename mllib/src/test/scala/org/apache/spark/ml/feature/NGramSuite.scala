@@ -53,7 +53,7 @@ class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
      }
     //testNGram(nGram, dataset)
   }
-
+  //
   test("NGramLength=4 yields length 4 n-grams") {
     //设置长度为4
     val nGram = new NGram().setInputCol("inputTokens").setOutputCol("nGrams").setN(4)
@@ -68,7 +68,7 @@ class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
     testNGram(nGram, dataset)
   }
-
+  //空输入产生空输出
   test("empty input yields empty output") {
     val nGram = new NGram().setInputCol("inputTokens").setOutputCol("nGrams").setN(4)
     val dataset = sqlContext.createDataFrame(Seq(

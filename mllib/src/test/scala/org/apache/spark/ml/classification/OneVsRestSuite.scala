@@ -32,7 +32,9 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.Metadata
-
+/**
+ * one-vs-rest训练时依次把某个类别的样本归为一类,其他剩余的样本归为另一类
+ */
 class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   @transient var dataset: DataFrame = _
@@ -62,7 +64,9 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = new OneVsRestModel("ovr", Metadata.empty, Array(lrModel))
     ParamsSuite.checkParams(model)
   }
-
+/**
+ * one-vs-rest训练时依次把某个类别的样本归为一类,其他剩余的样本归为另一类
+ */
   test("one-vs-rest: default params") {//默认参数
     val numClasses = 3
     val ova = new OneVsRest()
@@ -72,12 +76,14 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val ovaModel = ova.fit(dataset)
 
     // copied model must have the same parent.
+    // 复制的模型必须有相同的父
     MLTestingUtils.checkCopy(ovaModel)
 
     assert(ovaModel.models.size === numClasses)
     val transformedDataset = ovaModel.transform(dataset)
 
     // check for label metadata in prediction col
+    //检查在预测Col标签元数据
     val predictionColSchema = transformedDataset.schema(ovaModel.getPredictionCol)
     assert(MetadataUtils.getNumClasses(predictionColSchema) === Some(3))
 

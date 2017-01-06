@@ -162,11 +162,12 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
         }
       }
     }
-
+    //auto自动
     checkFeatureSubsetStrategy(numTrees = 1, "auto", numFeatures)
     checkFeatureSubsetStrategy(numTrees = 1, "all", numFeatures)
      //math.sqrt返回数字的平方根
     checkFeatureSubsetStrategy(numTrees = 1, "sqrt", math.sqrt(numFeatures).ceil.toInt)
+    //log2 对数
     checkFeatureSubsetStrategy(numTrees = 1, "log2",
       (math.log(numFeatures) / math.log(2)).ceil.toInt)
     checkFeatureSubsetStrategy(numTrees = 1, "onethird", (numFeatures / 3.0).ceil.toInt)
@@ -174,6 +175,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     checkFeatureSubsetStrategy(numTrees = 2, "all", numFeatures)
      //math.sqrt返回数字的平方根
     checkFeatureSubsetStrategy(numTrees = 2, "auto", math.sqrt(numFeatures).ceil.toInt)
+     //math.sqrt返回数字的平方根
     checkFeatureSubsetStrategy(numTrees = 2, "sqrt", math.sqrt(numFeatures).ceil.toInt)
     checkFeatureSubsetStrategy(numTrees = 2, "log2",
       (math.log(numFeatures) / math.log(2)).ceil.toInt)
@@ -208,6 +210,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       numClasses = 3, categoricalFeaturesInfo = categoricalFeaturesInfo)
     
     /**
+     * 优化后的树结构
      * Tree 0:
         If (feature 3 <= 1.0)
          Predict: 1.0
@@ -223,6 +226,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
           Predict: 2.0
      */
     val model = RandomForest.trainClassifier(input, strategy, numTrees = 2,
+       //sqrt 平方根函数
       featureSubsetStrategy = "sqrt", seed = 12345)
      // model.trees.foreach { x =>println(x.leftSide) }
       println(">>>"+model.trees.toList)

@@ -64,13 +64,13 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     dataFrame = sqlContext.createDataFrame(sc.parallelize(data, 2).map(NormalizerSuite.FeatureData))
     normalizer = new Normalizer().setInputCol("features").setOutputCol("normalized_features")
   }
-
+  //收集的结果
   def collectResult(result: DataFrame): Array[Vector] = {
     result.select("normalized_features").collect().map {
       case Row(features: Vector) => features
     }
   }
-
+  //向量的断言类型
   def assertTypeOfVector(lhs: Array[Vector], rhs: Array[Vector]): Unit = {
     assert((lhs, rhs).zipped.forall {
       case (v1: DenseVector, v2: DenseVector) => true
@@ -78,7 +78,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       case _ => false
     }, "The vector type should be preserved after normalization.")
   }
-
+  //断言值
   def assertValues(lhs: Array[Vector], rhs: Array[Vector]): Unit = {
     assert((lhs, rhs).zipped.forall { (vector1, vector2) =>
       vector1 ~== vector2 absTol 1E-5

@@ -392,12 +392,18 @@ class LogisticRegressionModel private[ml] (
 
   override def getThresholds: Array[Double] = super.getThresholds
 
-  /** Margin (rawPrediction) for class label 1.  For binary classification only. */
+  /** 
+   *  Margin (rawPrediction) for class label 1.  For binary classification only.
+   *  间距(rawprediction)类标签1,仅用于二进制分类
+   *   */
   private val margin: Vector => Double = (features) => {
     BLAS.dot(features, weights) + intercept
   }
 
-  /** Score (probability) for class label 1.  For binary classification only. */
+  /** 
+   *  Score (probability) for class label 1.  For binary classification only. 
+   *  分数(概率)类标签1,仅用于二进制分类
+   *  */
   private val score: Vector => Double = (features) => {
     val m = margin(features)
     1.0 / (1.0 + math.exp(-m))
@@ -409,6 +415,7 @@ class LogisticRegressionModel private[ml] (
 
   /**
    * Gets summary of model on training set. An exception is
+   * 获取训练集模型的总结,
    * thrown if `trainingSummary == None`.
    */
   def summary: LogisticRegressionTrainingSummary = trainingSummary match {
@@ -425,11 +432,15 @@ class LogisticRegressionModel private[ml] (
     this
   }
 
-  /** Indicates whether a training summary exists for this model instance. */
+  /** 
+   *  Indicates whether a training summary exists for this model instance.
+   *  指示此模型实例是否存在训练摘要. 
+   *  */
   def hasSummary: Boolean = trainingSummary.isDefined
 
   /**
    * Evaluates the model on a testset.
+   * 在系统评价模型
    * @param dataset Test dataset to evaluate model on.
    */
   // TODO: decide on a good name before exposing to public API
@@ -439,6 +450,7 @@ class LogisticRegressionModel private[ml] (
 
   /**
    * Predict label for the given feature vector.
+   * 给定特征向量的预测标号
    * The behavior of this can be adjusted using [[thresholds]].
    */
   override protected def predict(features: Vector): Double = {
@@ -563,29 +575,48 @@ private[classification] class MultiClassSummarizer extends Serializable {
 
 /**
  * Abstraction for multinomial Logistic Regression Training results.
+ * 多元logistic回归训练结果的抽象
  */
 sealed trait LogisticRegressionTrainingSummary extends LogisticRegressionSummary {
 
-  /** objective function (scaled loss + regularization) at each iteration. */
+  /** 
+   *  objective function (scaled loss + regularization) at each iteration. 
+   *  目标函数（规模损失+正规化）在每次迭代
+   *  */
   def objectiveHistory: Array[Double]
 
-  /** Number of training iterations until termination */
+  /** 
+   *  Number of training iterations until termination 
+   *  直到结束的训练迭代次数
+   *  */
   def totalIterations: Int = objectiveHistory.length
 
 }
 
 /**
  * Abstraction for Logistic Regression Results for a given model.
+ * 一个给定模型的逻辑回归结果的抽象
  */
 sealed trait LogisticRegressionSummary extends Serializable {
 
-  /** Dataframe outputted by the model's `transform` method. */
+  /** 
+   *  Dataframe outputted by the model's `transform` method.
+   *  通过模型的`转换`输出数据集的方法
+   *  */
   def predictions: DataFrame
 
-  /** Field in "predictions" which gives the calibrated probability of each sample as a vector. */
+  /** 
+   *  Field in "predictions" which gives the calibrated probability of each sample as a vector. 
+   *  在“预测”的字段,它给出了每个样本作为向量的校准概率
+   *  
+   */
   def probabilityCol: String
 
-  /** Field in "predictions" which gives the the true label of each sample. */
+  /** 
+   *  Field in "predictions" which gives the the true label of each sample. 
+   *  在“预测”中给出每个样本的真实标识的字段
+   *  
+   */
   def labelCol: String
 
 }
@@ -593,6 +624,7 @@ sealed trait LogisticRegressionSummary extends Serializable {
 /**
  * :: Experimental ::
  * Logistic regression training results.
+ * 逻辑回归训练结果
  * @param predictions dataframe outputted by the model's `transform` method.
  * @param probabilityCol field in "predictions" which gives the calibrated probability of
  *                       each sample as a vector.
@@ -613,6 +645,7 @@ class BinaryLogisticRegressionTrainingSummary private[classification] (
 /**
  * :: Experimental ::
  * Binary Logistic regression results for a given model.
+ * 给定模型的二元逻辑回归结果
  * @param predictions dataframe outputted by the model's `transform` method.
  * @param probabilityCol field in "predictions" which gives the calibrated probability of
  *                       each sample.
@@ -629,6 +662,7 @@ class BinaryLogisticRegressionSummary private[classification] (
 
   /**
    * Returns a BinaryClassificationMetrics object.
+   * 返回二进制分类度量对象
    */
   // TODO: Allow the user to vary the number of bins using a setBins method in
   // BinaryClassificationMetrics. For now the default is set to 100.
@@ -640,7 +674,9 @@ class BinaryLogisticRegressionSummary private[classification] (
 
   /**
    * Returns the receiver operating characteristic (ROC) curve,
+   * 返回接收机工作特性(ROC)曲线
    * which is an Dataframe having two fields (FPR, TPR)
+   * 这是有两个领域的数据帧(FPR,TPR)
    * with (0.0, 0.0) prepended and (1.0, 1.0) appended to it.
    * @see http://en.wikipedia.org/wiki/Receiver_operating_characteristic
    */
@@ -648,17 +684,20 @@ class BinaryLogisticRegressionSummary private[classification] (
 
   /**
    * Computes the area under the receiver operating characteristic (ROC) curve.
+   * 计算接收操作特性(ROC)曲线下的面积
    */
   lazy val areaUnderROC: Double = binaryMetrics.areaUnderROC()
 
   /**
    * Returns the precision-recall curve, which is an Dataframe containing
    * two fields recall, precision with (0.0, 1.0) prepended to it.
+   * 返回的精密召回的曲线,这是一个数据集包含两个领域召回,精度(0,1)添加到它
    */
   @transient lazy val pr: DataFrame = binaryMetrics.pr().toDF("recall", "precision")
 
   /**
    * Returns a dataframe with two fields (threshold, F-Measure) curve with beta = 1.0.
+   * 返回一个数据集有两个字段(阈值,及F测量)与β= 1的曲线
    */
   @transient lazy val fMeasureByThreshold: DataFrame = {
     binaryMetrics.fMeasureByThreshold().toDF("threshold", "F-Measure")
@@ -666,8 +705,10 @@ class BinaryLogisticRegressionSummary private[classification] (
 
   /**
    * Returns a dataframe with two fields (threshold, precision) curve.
+   * 返回一个数据集有两个字段(阈值精度)曲线
    * Every possible probability obtained in transforming the dataset are used
    * as thresholds used in calculating the precision.
+   * 在转换数据集中获得的每一个可能的概率被用作计算精度中使用的阈值
    */
   @transient lazy val precisionByThreshold: DataFrame = {
     binaryMetrics.precisionByThreshold().toDF("threshold", "precision")

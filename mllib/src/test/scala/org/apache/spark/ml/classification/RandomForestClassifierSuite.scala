@@ -53,7 +53,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   /////////////////////////////////////////////////////////////////////////////
   // Tests calling train()
   /////////////////////////////////////////////////////////////////////////////
-
+  //具有连续特征的二元分类测试
   def binaryClassificationTestWithContinuousFeatures(rf: RandomForestClassifier) {
     val categoricalFeatures = Map.empty[Int, Int]
     val numClasses = 2
@@ -66,7 +66,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     compareAPIs(orderedLabeledPoints50_1000, newRF, categoricalFeatures, numClasses)
   }
 
-  test("params") {
+  test("params") {//参数
     ParamsSuite.checkParams(new RandomForestClassifier)
     val model = new RandomForestClassificationModel("rfc",
       Array(new DecisionTreeClassificationModel("dtc", new LeafNode(0.0, 0.0, null), 2)), 2, 2)
@@ -105,7 +105,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setSeed(12345)
     compareAPIs(rdd, rf, categoricalFeatures, numClasses)
   }
-
+  //采样率在随机森林树
   test("subsampling rate in RandomForest"){
     val rdd = orderedLabeledPoints5_20
     val categoricalFeatures = Map.empty[Int, Int]
@@ -123,7 +123,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rf2 = rf1.setSubsamplingRate(0.5)
     compareAPIs(rdd, rf2, categoricalFeatures, numClasses)
   }
-
+  //原预测和预测概率
   test("predictRaw and predictProbability") {
     val rdd = orderedLabeledPoints5_20
     val rf = new RandomForestClassifier()
@@ -138,6 +138,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val model = rf.fit(df)
 
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
 
     val predictions = model.transform(df)
@@ -157,7 +158,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   /////////////////////////////////////////////////////////////////////////////
   // Tests of feature importance 特征重要性试验
   /////////////////////////////////////////////////////////////////////////////
-  test("Feature importance with toy data") {
+  test("Feature importance with toy data") {//玩具数据的功能的重要性
     val numClasses = 2
     val rf = new RandomForestClassifier()
       .setImpurity("Gini")
@@ -168,7 +169,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setSeed(123)
 
     // In this data, feature 1 is very important.
-    //在这个数据中，特征1是非常重要
+    //在这个数据中,特征1是非常重要
     val data: RDD[LabeledPoint] = sc.parallelize(Seq(
       new LabeledPoint(0, Vectors.dense(1, 0, 0, 0, 1)),
       new LabeledPoint(1, Vectors.dense(1, 1, 0, 1, 0)),
@@ -186,6 +187,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
 
   /////////////////////////////////////////////////////////////////////////////
   // Tests of model save/load
+  // 模型保存/加载测试
   /////////////////////////////////////////////////////////////////////////////
 
   // TODO: Reinstate test once save/load are implemented  SPARK-6725
@@ -215,7 +217,9 @@ private object RandomForestClassifierSuite {
 
   /**
    * Train 2 models on the given dataset, one using the old API and one using the new API.
+   * 给定数据集上训练2个模型,一个使用旧API,另一个使用新API
    * Convert the old model to the new format, compare them, and fail if they are not exactly equal.
+   * 将旧模型转换为新格式,比较它们,如果它们不完全相等,则会失败
    */
   def compareAPIs(
       data: RDD[LabeledPoint],

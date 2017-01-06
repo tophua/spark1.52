@@ -100,7 +100,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     ParamsSuite.checkParams(model)
   }
 
-  test("Cannot fit an empty DataFrame") {//不适合一个空帧
+  test("Cannot fit an empty DataFrame") {//不适合一个空数据集
     val rdd = sqlContext.createDataFrame(sc.parallelize(Array.empty[Vector], 2).map(FeatureData))
     val vectorIndexer = getIndexer
     intercept[IllegalArgumentException] {
@@ -144,7 +144,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     testDenseSparse(densePoints1, sparsePoints1)
     testDenseSparse(densePoints2, sparsePoints2)
   }
-  //建立有效的分类特征值指数,正确转换，检查元数据
+  //建立有效的分类特征值指数,正确转换,检查元数据
   test("Builds valid categorical feature value index, transform correctly, check metadata") {
     def checkCategoryMaps(
         data: DataFrame,

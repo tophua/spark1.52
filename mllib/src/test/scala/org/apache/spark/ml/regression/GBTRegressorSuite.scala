@@ -32,6 +32,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Test suite for [[GBTRegressor]].
+ * 梯度提升回归(GBT)
  */
 class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -60,6 +61,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     GBTRegressor.supportedLossTypes.foreach { loss =>
       testCombinations.foreach {
         case (maxIter, learningRate, subsamplingRate) =>
+	//梯度提升回归(GBT)
           val gbt = new GBTRegressor()
             .setMaxDepth(2)
             .setSubsamplingRate(subsamplingRate)
@@ -80,6 +82,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(9, Vectors.dense(1, 2, 6, 4)),
       LabeledPoint(-4, Vectors.dense(6, 3, 2, 2))
     ))
+    //梯度提升回归(GBT)
     val gbt = new GBTRegressor()
       .setMaxDepth(2)
       .setMaxIter(2)
@@ -101,6 +104,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     sc.setCheckpointDir(path)
 
     val df = sqlContext.createDataFrame(data)
+    //梯度提升回归(GBT)
     val gbt = new GBTRegressor()
       .setMaxDepth(2)
       .setMaxIter(5)
@@ -119,8 +123,9 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val categoricalFeatures = Map.empty[Int, Int]
     // Set maxIter large enough so that it stops early.
     val maxIter = 20
+    //梯度提升回归(GBT)
     GBTRegressor.supportedLossTypes.foreach { loss =>
-      val gbt = new GBTRegressor()
+      val gbt = new GBTRegressor()//梯度提升回归(GBT)
         .setMaxIter(maxIter)
         .setMaxDepth(2)
         .setLossType(loss)
@@ -144,11 +149,12 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val trees = Range(0, 3).map(_ => OldDecisionTreeSuite.createModel(OldAlgo.Regression)).toArray
     val treeWeights = Array(0.1, 0.3, 1.1)
     val oldModel = new OldGBTModel(OldAlgo.Regression, trees, treeWeights)
-    val newModel = GBTRegressionModel.fromOld(oldModel)
+    val newModel = GBTRegressionModel.fromOld(oldModel)//梯度提升回归(GBT)
 
     // Save model, load it back, and compare.
     try {
       newModel.save(sc, path)
+      //梯度提升回归(GBT)
       val sameNewModel = GBTRegressionModel.load(sc, path)
       TreeTests.checkEqual(newModel, sameNewModel)
     } finally {
@@ -157,7 +163,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   */
 }
-
+//梯度提升回归(GBT)
 private object GBTRegressorSuite {
 
   /**

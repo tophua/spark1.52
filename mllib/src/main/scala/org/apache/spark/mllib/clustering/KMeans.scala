@@ -481,13 +481,13 @@ object KMeans {
 
   /**
    * Trains a k-means model using the given set of parameters.
-   *
+   * 使用给定的参数集训练k-均值模型
    * @param data training points stored as `RDD[Vector]`
-   * @param k number of clusters
-   * @param maxIterations max number of iterations
-   * @param runs number of parallel runs, defaults to 1. The best model is returned.
-   * @param initializationMode initialization model, either "random" or "k-means||" (default).
-   * @param seed random seed value for cluster initialization
+   * @param k number of clusters 簇的数量
+   * @param maxIterations max number of iterations 最大迭代次数
+   * @param runs number of parallel runs, defaults to 1. The best model is returned.并行运行数
+   * @param initializationMode initialization model, either "random" or "k-means||" (default).初始化模型
+   * @param seed random seed value for cluster initialization 集类初始化的随机种子值
    */
   @Since("1.3.0")
   def train(
@@ -507,12 +507,12 @@ object KMeans {
 
   /**
    * Trains a k-means model using the given set of parameters.
-   *
-   * @param data training points stored as `RDD[Vector]`
-   * @param k number of clusters
-   * @param maxIterations max number of iterations
-   * @param runs number of parallel runs, defaults to 1. The best model is returned.
-   * @param initializationMode initialization model, either "random" or "k-means||" (default).
+   * 使用给定的参数集训练k-均值模型
+   * @param data training points stored as `RDD[Vector]`训练点存储
+   * @param k number of clusters 簇的数量
+   * @param maxIterations max number of iterations 最大迭代次数
+   * @param runs number of parallel runs, defaults to 1. The best model is returned. 并行运行数
+   * @param initializationMode initialization model, either "random" or "k-means||" (default). 初始化模型
    */
   @Since("0.8.0")
   def train(
@@ -530,6 +530,7 @@ object KMeans {
 
   /**
    * Trains a k-means model using specified parameters and the default values for unspecified.
+   * 使用指定的参数和指定的默认值来训练k-均值模型
    */
   @Since("0.8.0")
   def train(
@@ -541,6 +542,7 @@ object KMeans {
 
   /**
    * Trains a k-means model using specified parameters and the default values for unspecified.
+   * 使用指定的参数和指定的默认值来训练k-均值模型
    */
   @Since("0.8.0")
   def train(
@@ -609,7 +611,7 @@ object KMeans {
 
 /**
  * A vector with its norm for fast distance computation.
- *
+ * 一种向量及其范数快速距离计算
  * @see [[org.apache.spark.mllib.clustering.KMeans#fastSquaredDistance]]
  */
 private[clustering]
@@ -619,6 +621,9 @@ class VectorWithNorm(val vector: Vector, val norm: Double) extends Serializable 
 
   def this(array: Array[Double]) = this(Vectors.dense(array))
 
-  /** Converts the vector to a dense vector. */
+  /** 
+   *  Converts the vector to a dense vector. 
+   *  将向量转换为密集向量
+   *  */
   def toDense: VectorWithNorm = new VectorWithNorm(Vectors.dense(vector.toArray), norm)
 }

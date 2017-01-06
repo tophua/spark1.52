@@ -24,7 +24,9 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.{DataFrame, SQLContext}
 
 private[clustering] case class TestRow(features: Vector)
-
+/**
+ * 聚类套件
+ */
 object KMeansSuite {
   def generateKMeansData(sql: SQLContext, rows: Int, dim: Int, k: Int): DataFrame = {
     val sc = sql.sparkContext
@@ -48,12 +50,17 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("default parameters") {
     //KMeans默认参数
     val kmeans = new KMeans()
+    //
     assert(kmeans.getK === 2)
+    //特征列名
     assert(kmeans.getFeaturesCol === "features")
-    //Prediction预测列
+    //Prediction预测列名
     assert(kmeans.getPredictionCol === "prediction")
+    //最大迭代次数
     assert(kmeans.getMaxIter === 20)
+    //初始化模型k-means||
     assert(kmeans.getInitMode === MLlibKMeans.K_MEANS_PARALLEL)
+    //初始化步骤
     assert(kmeans.getInitSteps === 5)
     assert(kmeans.getTol === 1e-4)
   }
@@ -61,12 +68,19 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("set parameters") {//设置参数
     val kmeans = new KMeans()
       .setK(9)
+      //设置特征列
       .setFeaturesCol("test_feature")
+      //设置预测列
       .setPredictionCol("test_prediction")
+      //最大迭代次数
       .setMaxIter(33)
+      //设置模型
       .setInitMode(MLlibKMeans.RANDOM)
+      //设置初始化步长
       .setInitSteps(3)
+      //设置种子
       .setSeed(123)
+      //
       .setTol(1e-3)
 
     assert(kmeans.getK === 9)

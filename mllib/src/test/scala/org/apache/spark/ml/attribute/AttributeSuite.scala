@@ -24,16 +24,22 @@ class AttributeSuite extends SparkFunSuite {
 
   test("default numeric attribute") {//默认数值属性
     val attr: NumericAttribute = NumericAttribute.defaultAttr
+    //元数据
     val metadata = Metadata.fromJson("{}")
+    //元数据类型,默认类型为数字
     val metadataWithType = Metadata.fromJson("""{"type":"numeric"}""")
+    
     assert(attr.attrType === AttributeType.Numeric)
     assert(attr.isNumeric)
+    //是否列名
     assert(!attr.isNominal)
     assert(attr.name.isEmpty)
     assert(attr.index.isEmpty)
     assert(attr.min.isEmpty)
     assert(attr.max.isEmpty)
+    //标准
     assert(attr.std.isEmpty)
+    //sparsity 稀疏
     assert(attr.sparsity.isEmpty)
     assert(attr.toMetadataImpl() === metadata)
     assert(attr.toMetadataImpl(withType = false) === metadata)

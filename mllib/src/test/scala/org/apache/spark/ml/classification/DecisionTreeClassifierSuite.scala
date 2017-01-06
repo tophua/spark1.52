@@ -29,7 +29,9 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Row
-
+/**
+ * 决策树分类套件
+ */
 class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   import DecisionTreeClassifierSuite.compareAPIs
@@ -56,7 +58,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     categoricalDataPointsForMulticlassForOrderedFeaturesRDD = sc.parallelize(
       OldDecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures())
   }
-
+  //参数
   test("params") {
     ParamsSuite.checkParams(new DecisionTreeClassifier)
     val model = new DecisionTreeClassificationModel("dtc", new LeafNode(0.0, 0.0, null), 2)
@@ -66,7 +68,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   /////////////////////////////////////////////////////////////////////////////
   // Tests calling train()
   /////////////////////////////////////////////////////////////////////////////
-  //具有有序分类特征的二元分类方法
+  //具有序分类特征的二元分类方法
   test("Binary classification stump with ordered categorical features") {
     val dt = new DecisionTreeClassifier()
       .setImpurity("gini")//基尼
@@ -234,7 +236,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
-
+  //预测原数据和预测概率
   test("predictRaw and predictProbability") {
     val rdd = continuousDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
@@ -248,6 +250,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val newTree = dt.fit(newData)
 
     // copied model must have the same parent.
+    //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(newTree)
 
     val predictions = newTree.transform(newData)
@@ -262,7 +265,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
         "probability prediction mismatch")
     }
   }
-
+  //训练一个类别分类特征
   test("training with 1-category categorical feature") {
     val data = sc.parallelize(Seq(
       LabeledPoint(0, Vectors.dense(0, 2, 3)),
@@ -272,9 +275,11 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       LabeledPoint(0, Vectors.dense(0, 2, 6))
     ))
     val df = TreeTests.setMetadata(data, Map(0 -> 1), 2)
+    //最大深度
     val dt = new DecisionTreeClassifier().setMaxDepth(3)
+    //转换模型
     val model = dt.fit(df)
-/*   println("rootNode:"+model.rootNode)
+    /*  println("rootNode:"+model.rootNode)
    println(model.labelCol.name+"\t"+model.labelCol.doc)
    println("getFeaturesCol:"+model.getFeaturesCol)*/
   }
@@ -308,7 +313,9 @@ private[ml] object DecisionTreeClassifierSuite extends SparkFunSuite {
 
   /**
    * Train 2 decision trees on the given dataset, one using the old API and one using the new API.
+   * 在给定数据集上训练2个决策树,一个使用旧的API和一个使用新的API
    * Convert the old tree to the new format, compare them, and fail if they are not exactly equal.
+   * 将旧的树转换为新的格式,比较,失败如果他们不完全平等
    */
   def compareAPIs(
       data: RDD[LabeledPoint],

@@ -131,7 +131,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("IndexToString.transformSchema (SPARK-10573)") {
+  test("IndexToString.transformSchema (SPARK-10573)") {//索引转换字符串
     val idxToStr = new IndexToString().setInputCol("input").setOutputCol("output")
     val inSchema = StructType(Seq(StructField("input", DoubleType)))
     val outSchema = idxToStr.transformSchema(inSchema)

@@ -31,6 +31,7 @@ object EnsembleTestHelper {
    * epsilon of the expected values.
    * 聚合数据中的所有值,和测试均值和标准差期望值
    * @param data  Every element of the data should be an i.i.d. sample from some distribution.
+   *  data 数据的每一个元素应该是一个独立同分布的样本分布
    */
   def testRandomArrays(
       data: Array[Array[Double]],
@@ -44,8 +45,9 @@ object EnsembleTestHelper {
       values ++= row
     }
     val stats = new StatCounter(values)
-     //math.abs返回数的绝对值
+     //math.abs返回数的绝对值,mean,平均数
     assert(math.abs(stats.mean - expectedMean) < epsilon)
+    //stdev 标准差
     assert(math.abs(stats.stdev - expectedStddev) < epsilon)
   }
 

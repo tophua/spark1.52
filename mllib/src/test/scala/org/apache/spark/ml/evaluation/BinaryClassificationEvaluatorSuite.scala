@@ -22,7 +22,7 @@ import org.apache.spark.ml.param.ParamsSuite
 
 class BinaryClassificationEvaluatorSuite extends SparkFunSuite {
 
-  test("params") {
+  test("params") {//评估参数
     /**
      *name:labelCol,metricName,rawPredictionCol
      */
