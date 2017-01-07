@@ -42,19 +42,35 @@ object CountVectorizerExample {
     )).toDF("id", "words")
 
     // fit a CountVectorizerModel from the corpus
+    //是一个特征提取模块里面的一个类
     val cvModel: CountVectorizerModel = new CountVectorizer()
       .setInputCol("words")
       .setOutputCol("features")
-      .setVocabSize(3)
+      .setVocabSize(3)//是以词为键,并且值可以在特征矩阵里可以索引的
       .setMinDF(2)
       .fit(df)
-
+    /**
+     * +--------------------+
+     * |            features|
+     * +--------------------+
+     * |(3,[0,1,2],[1.0,1...|
+     * |(3,[0,1,2],[2.0,2...|
+     * +--------------------+
+     */
+      cvModel.transform(df).select("features").show()
     // alternatively, define CountVectorizerModel with a-priori vocabulary
     val cvm = new CountVectorizerModel(Array("a", "b", "c"))
       .setInputCol("words")
       .setOutputCol("features")
-
-    cvModel.transform(df).select("features").show()
+    /**
+     * +--------------------+
+     * |            features|
+     * +--------------------+
+     * |(3,[0,1,2],[1.0,1...|
+     * |(3,[0,1,2],[2.0,2...|
+     * +--------------------+
+     */
+    cvm.transform(df).select("features").show()
     // $example off$
 
     sc.stop()

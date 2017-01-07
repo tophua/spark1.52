@@ -27,7 +27,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+import org.apache.spark.mllib.util._
+/**
+ * VectorIndexer主要作用:提高决策树或随机森林等ML方法的分类效果。
+ */
 object VectorIndexerExample {
   def main(args: Array[String]): Unit = {
       val conf = new SparkConf().setAppName("TfIdfExample").setMaster("local[4]")
@@ -44,12 +47,17 @@ object VectorIndexerExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
-
+   val datasvm=MLUtils.loadLibSVMFile(sc,"../data/mllib/sample_libsvm_data.txt")
+   val data =sqlContext.createDataFrame(datasvm)
+    //val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
+/**
+ * VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
+ * 它能够自动判断那些特征是离散值型的特征,并对他们进行编号
+ */
     val indexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexed")
-      .setMaxCategories(10)
+      .setMaxCategories(3)//最大类别数为5,(即某一列)中多于10个取值视为连续值
 
     val indexerModel = indexer.fit(data)
 
@@ -59,6 +67,17 @@ object VectorIndexerExample {
 
     // Create new column "indexed" with categorical values transformed to indices
     val indexedData = indexerModel.transform(data)
+    /**
+     * +-----+--------------------+--------------------+
+     * |label|            features|             indexed|
+     * +-----+--------------------+--------------------+
+     * |  0.0|(692,[127,128,129...|(692,[127,128,129...|
+     * |  1.0|(692,[158,159,160...|(692,[158,159,160...|
+     * |  1.0|(692,[124,125,126...|(692,[124,125,126...|
+     * |  1.0|(692,[152,153,154...|(692,[152,153,154...|
+     * |  1.0|(692,[151,152,153...|(692,[151,152,153...|
+     * |  0.0|(692,[129,130,131...|(692,[129,130,131...|
+     */
     indexedData.show()
     // $example off$
 

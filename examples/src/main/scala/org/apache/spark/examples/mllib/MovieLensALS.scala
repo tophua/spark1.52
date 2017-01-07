@@ -168,9 +168,9 @@ object MovieLensALS {
       .setUserBlocks(params.numUserBlocks)
       .setProductBlocks(params.numProductBlocks)
       .run(training)
-     //rmse均方根误差亦称标准误差
+     //rmse均方根误差说明样本的离散程度
     val rmse = computeRmse(model, test, params.implicitPrefs)
-    //rmse均方根误差亦称标准误差
+    //rmse均方根误差说明样本的离散程度
     println(s"Test RMSE = $rmse.")
 
     sc.stop()

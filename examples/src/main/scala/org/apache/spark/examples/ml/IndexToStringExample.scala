@@ -25,7 +25,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * StringIndexer对String按频次进行编号,频次最高的转换为0
+ */
 object IndexToStringExample {
   def main(args: Array[String]) {
    val conf = new SparkConf().setAppName("GradientBoostedTreeClassifierExample").setMaster("local[4]")
@@ -43,18 +45,41 @@ object IndexToStringExample {
       (4, "a"),
       (5, "c")
     )).toDF("id", "category")
-
+    //StringIndexer对String按频次进行编号,频次最高的转换为0
     val indexer = new StringIndexer()
-      .setInputCol("category")
-      .setOutputCol("categoryIndex")
+      .setInputCol("category")//Spark默认预测label行
+      .setOutputCol("categoryIndex")//转换回来的预测label
       .fit(df)
     val indexed = indexer.transform(df)
-
+    /**
+    *+---+--------+-------------+
+    *| id|category|categoryIndex|
+    *+---+--------+-------------+
+    *|  0|       a|          0.0|
+    *|  1|       b|          2.0|
+    *|  2|       c|          1.0|
+    *|  3|       a|          0.0|
+    *|  4|       a|          0.0|
+    *|  5|       c|          1.0|
+    *+---+--------+-------------+
+     */
+    indexed.select("id","category", "categoryIndex").show()
     val converter = new IndexToString()
       .setInputCol("categoryIndex")
       .setOutputCol("originalCategory")
 
     val converted = converter.transform(indexed)
+    /**
+     *+---+----------------+
+      | id|originalCategory|
+      +---+----------------+
+      |  0|               a|
+      |  1|               b|
+      |  2|               c|
+      |  3|               a|
+      |  4|               a|
+      |  5|               c|
+      +---+----------------+*/
     converted.select("id", "originalCategory").show()
     // $example off$
 

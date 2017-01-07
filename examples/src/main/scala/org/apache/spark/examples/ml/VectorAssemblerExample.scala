@@ -26,7 +26,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+*VectorAssembler是一个转换器,它将给定的若干列合并为一列向量
+**/
 object VectorAssemblerExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("TfIdfExample").setMaster("local[4]")
@@ -39,12 +41,15 @@ object VectorAssemblerExample {
     val dataset = sqlContext.createDataFrame(
       Seq((0, 18, 1.0, Vectors.dense(0.0, 10.0, 0.5), 1.0))
     ).toDF("id", "hour", "mobile", "userFeatures", "clicked")
-
+    //VectorAssembler是一个转换器,它将给定的若干列合并为一列向量
     val assembler = new VectorAssembler()
       .setInputCols(Array("hour", "mobile", "userFeatures"))
       .setOutputCol("features")
 
     val output = assembler.transform(dataset)
+    /*
+     * [[18.0,1.0,0.0,10.0,0.5],1.0]
+     */
     println(output.select("features", "clicked").first())
     // $example off$
 

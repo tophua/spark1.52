@@ -25,7 +25,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * 二值化
+ */
 object BinarizerExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("BinarizerExample").setMaster("local[4]")
@@ -35,16 +37,26 @@ object BinarizerExample {
     import sqlContext.implicits._
  
     // $example on$
-    val data = Array((0, 0.1), (1, 0.8), (2, 0.2))
+    val data = Array((0, 0.1), (1, 0.8), (2, 0.2),(2, 0.4),(2, 0.5),(2, 0.6))
     val dataFrame = sqlContext.createDataFrame(data).toDF("label", "feature")
-
+    /**
+     * 二值化
+     */
     val binarizer: Binarizer = new Binarizer()
       .setInputCol("feature")
       .setOutputCol("binarized_feature")
-      .setThreshold(0.5)
+      .setThreshold(0.5)//阈值:如果<=阈值则去舍,>阈值等于1
 
     val binarizedDataFrame = binarizer.transform(dataFrame)
     val binarizedFeatures = binarizedDataFrame.select("binarized_feature")
+    /**
+    *[0.0]
+    *[1.0]
+    *[0.0]
+    *[0.0]
+    *[0.0]
+    *[1.0]
+    */
     binarizedFeatures.collect().foreach(println)
     // $example off$
 

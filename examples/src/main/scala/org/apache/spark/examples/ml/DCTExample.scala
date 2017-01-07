@@ -45,13 +45,22 @@ object DCTExample {
       Vectors.dense(14.0, -2.0, -5.0, 1.0))
 
     val df = sqlContext.createDataFrame(data.map(Tuple1.apply)).toDF("features")
-
+    //¿Î…¢”‡œ“±‰ªª(DCT)
     val dct = new DCT()
       .setInputCol("features")
       .setOutputCol("featuresDCT")
       .setInverse(false)
 
     val dctDf = dct.transform(df)
+    /**
+     * +--------------------+
+     * |         featuresDCT|
+     * +--------------------+
+     * |[1.0,-1.148050297...|
+     * |[-1.0,3.378492794...|
+     * |[4.0,9.3044534219...|
+     * +--------------------+
+     */
     dctDf.select("featuresDCT").show(3)
     // $example off$
 

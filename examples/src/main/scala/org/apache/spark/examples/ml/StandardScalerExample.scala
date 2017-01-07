@@ -26,7 +26,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * StandardScaler 零均值规范化
+ * 将某个特征向量(由所有样本某一个特征组成的向量)进行标准化,使数据均值为0,方差为1
+ */
 object StandardScalerExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("StandardScalerExample").setMaster("local[4]")
@@ -48,8 +51,8 @@ object StandardScalerExample {
     val scaler = new StandardScaler()
       .setInputCol("features")
       .setOutputCol("scaledFeatures")
-      .setWithStd(true)
-      .setWithMean(false)
+      .setWithStd(true)//withStd=true将方差缩放到1
+      .setWithMean(false)//将均值移到0,注意对于稀疏输入矩阵不可以用。默认为false
 
     // Compute summary statistics by fitting the StandardScaler.
     val scalerModel = scaler.fit(dataFrame)

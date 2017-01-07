@@ -374,7 +374,7 @@ object DecisionTreeExample {
     val fullPredictions = model.transform(data).cache()
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
-    //rmse均方根误差亦称标准误差
+    //rmse均方根误差说明样本的离散程度
     val RMSE = new RegressionMetrics(predictions.zip(labels)).rootMeanSquaredError
     println(s"  Root mean squared error (RMSE): $RMSE")
   }

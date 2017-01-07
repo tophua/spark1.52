@@ -74,8 +74,9 @@ object ClassificationPipeline_IBM {
 
     /**
      * Step 3
-     * 使用 VectorAssembler 从源数据中提取特征指标数据，这是一个比较典型且通用的步骤，
+     * 使用 VectorAssembler 从源数据中提取特征指标数据,这是一个比较典型且通用的步骤，
      * 因为我们的原始数据集里，经常会包含一些非指标数据，如 ID，Description 等
+     * VectorAssembler是一个转换器,它将给定的若干列合并为一列向量
      */
     val vectorAssembler = new VectorAssembler()
       .setInputCols(Array("f0", "f1", "f2", "f3"))

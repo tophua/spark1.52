@@ -81,7 +81,7 @@ object RandomForestRegressorExample {
     val evaluator = new RegressionEvaluator()
       .setLabelCol("label")
       .setPredictionCol("prediction")
-      //rmse均方根误差亦称标准误差
+      //rmse均方根误差说明样本的离散程度
       .setMetricName("rmse")
     val rmse = evaluator.evaluate(predictions)
     println("Root Mean Squared Error (RMSE) on test data = " + rmse)
