@@ -25,7 +25,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * Countvectorizer和Countvectorizermodel旨在通过计数来将一个文档转换为向量
+ * 
+ */
 object CountVectorizerExample {
   def main(args: Array[String]) {
     val conf = new SparkConf().setAppName("CountVectorizerExample").setMaster("local[4]")
@@ -36,13 +39,15 @@ object CountVectorizerExample {
  
 
     // $example on$
+    //DataFrame包含id和texts两列
     val df = sqlContext.createDataFrame(Seq(
       (0, Array("a", "b", "c")),
       (1, Array("a", "b", "b", "c", "a"))
     )).toDF("id", "words")
 
     // fit a CountVectorizerModel from the corpus
-    //是一个特征提取模块里面的一个类
+    //文本中的每一行都是一个文档类型的数组(字符串),调用的CountVectorizer产生词汇(a,b,c)的CountVectorizerModel,
+    //转换后的输出向量如下
     val cvModel: CountVectorizerModel = new CountVectorizer()
       .setInputCol("words")
       .setOutputCol("features")

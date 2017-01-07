@@ -20,6 +20,7 @@ package org.apache.spark.examples.ml
 
 // $example on$
 import org.apache.spark.ml.feature.Word2Vec
+
 // $example off$
 
 import org.apache.spark.mllib.linalg.Vectors
@@ -27,6 +28,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
+/**
+ * Word2vec是一个Estimator,它采用一系列代表文档的词语来训练word2vecmodel,该模型将每个词语映射到一个固定大小的向量
+ * word2vecmodel使用文档中每个词语的平均数来将文档转换为向量,然后这个向量可以作为预测的特征,来计算文档相似度计算等等
+ */
 object Word2VecExample {
   def main(args: Array[String]) {
    val conf = new SparkConf().setAppName("Word2VecExample").setMaster("local[4]")
@@ -34,6 +39,10 @@ object Word2VecExample {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
     // $example on$
+    /**
+     * 我们首先用一组文档,其中每一个文档代表一个词语序列。对于每一个文档,我们将其转换为一个特征向量。
+     * 此特征向量可以被传递到一个学习算法。
+     */
     // Input data: Each row is a bag of words from a sentence or document.
     val documentDF = sqlContext.createDataFrame(Seq(
       "Hi I heard about Spark".split(" "),

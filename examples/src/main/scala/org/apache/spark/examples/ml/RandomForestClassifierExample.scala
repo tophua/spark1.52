@@ -29,7 +29,11 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * 随机森林是决策树的集成算法,随机森林包含多个决策树来降低过拟合的风险。
+ * 随机森林同样具有易解释性、可处理类别特征、易扩展到多分类问题、不需特征缩放等性质。
+ * 
+ */
 object RandomForestClassifierExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("RandomForestClassifierExample").setMaster("local[4]")
@@ -40,10 +44,13 @@ object RandomForestClassifierExample {
 
     // $example on$
     // Load and parse the data file, converting it to a DataFrame.
-    val data = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
-
+   // val data = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
+      import org.apache.spark.mllib.util.MLUtils
+      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
+      val data = sqlContext.createDataFrame(dataSVM)
     // Index labels, adding metadata to the label column.
     // Fit on whole dataset to include all labels in index.
+    //训练之前我们使用了两种数据预处理方法来对特征进行转换
     val labelIndexer = new StringIndexer()
       .setInputCol("label")
       .setOutputCol("indexedLabel")
@@ -57,13 +64,14 @@ object RandomForestClassifierExample {
       .fit(data)
 
     // Split the data into training and test sets (30% held out for testing).
+    //使用第一部分数据进行训练,剩下数据来测试
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a RandomForest model.
     val rf = new RandomForestClassifier()
-      .setLabelCol("indexedLabel")
-      .setFeaturesCol("indexedFeatures")
-      .setNumTrees(10)
+      .setLabelCol("indexedLabel")//标签列名
+      .setFeaturesCol("indexedFeatures")//特征列名
+      .setNumTrees(10)//训练的树的数量
 
     // Convert indexed labels back to original labels.
     val labelConverter = new IndexToString()
@@ -86,9 +94,9 @@ object RandomForestClassifierExample {
 
     // Select (prediction, true label) and compute test error.
     val evaluator = new MulticlassClassificationEvaluator()
-      .setLabelCol("indexedLabel")
-      .setPredictionCol("prediction")
-      .setMetricName("accuracy")
+      .setLabelCol("indexedLabel")//标签列名
+      .setPredictionCol("prediction")//特征列名
+      .setMetricName("accuracy")//测量名称
     val accuracy = evaluator.evaluate(predictions)
     println("Test Error = " + (1.0 - accuracy))
 

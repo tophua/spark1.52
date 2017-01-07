@@ -36,6 +36,7 @@ import org.apache.spark.sql.SQLContext
  * An example runner for Multiclass to Binary Reduction with One Vs Rest.
  * The example uses Logistic Regression as the base classifier. All parameters that
  * 这个例子使用逻辑回归为基础的分类,
+ * OneVsRest将一个给定的二分类算法有效地扩展到多分类问题应用中
  * can be specified on the base classifier can be passed in to the runner options.
  * 所有的参数都可以在指定的基分类器,可以通过运行选项
  * Run with
@@ -54,11 +55,11 @@ object OneVsRestExample {
   case class Params private[ml] (
       input: String = null,
       testInput: Option[String] = None,
-      maxIter: Int = 100,
-      tol: Double = 1E-6,
-      fitIntercept: Boolean = true,
-      regParam: Option[Double] = None,
-      elasticNetParam: Option[Double] = None,
+      maxIter: Int = 100,//迭代次数
+      tol: Double = 1E-6,//迭代算法的收敛性
+      fitIntercept: Boolean = true,//是否训练拦截对象
+      regParam: Option[Double] = None,//正则化参数(>=0)
+      elasticNetParam: Option[Double] = None,//
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -151,9 +152,9 @@ object OneVsRestExample {
     // instantiate the base classifier
     //实例化的基分类器
     val classifier = new LogisticRegression()
-      .setMaxIter(params.maxIter)
-      .setTol(params.tol)
-      .setFitIntercept(params.fitIntercept)
+      .setMaxIter(params.maxIter)//迭代次数
+      .setTol(params.tol)//迭代算法的收敛性
+      .setFitIntercept(params.fitIntercept)//是否训练拦截对象
 
     // Set regParam, elasticNetParam if specified in params
     //设置参数,弹性网参数如果指定参数

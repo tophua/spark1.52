@@ -58,11 +58,11 @@ object LogisticRegressionExample {
  *  <value>为实数,也就是我们常说的自变量
  */
       dataFormat: String = "libsvm",
-      regParam: Double = 0.0,
-      elasticNetParam: Double = 0.0,
-      maxIter: Int = 100,
-      fitIntercept: Boolean = true,
-      tol: Double = 1E-6,
+      regParam: Double = 0.0,//正则化参数(>=0)
+      elasticNetParam: Double = 0.0,//弹性网络混合参数,范围[0,1]
+      maxIter: Int = 100,//最多迭代次数(>=0)
+      fitIntercept: Boolean = true,//是否训练拦截对象
+      tol: Double = 1E-6,//迭代算法的收敛性
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -147,13 +147,13 @@ object LogisticRegressionExample {
     stages += labelIndexer
 
     val lor = new LogisticRegression()
-      .setFeaturesCol("features")
-      .setLabelCol("indexedLabel")
-      .setRegParam(params.regParam)
-      .setElasticNetParam(params.elasticNetParam)
-      .setMaxIter(params.maxIter)
-      .setTol(params.tol)
-      .setFitIntercept(params.fitIntercept)
+      .setFeaturesCol("features")//特征列名
+      .setLabelCol("indexedLabel")//标签列名
+      .setRegParam(params.regParam)//正则化参数(>=0)
+      .setElasticNetParam(params.elasticNetParam)//弹性网络混合参数,范围[0,1]
+      .setMaxIter(params.maxIter)//最多迭代次数(>=0)
+      .setTol(params.tol)//迭代算法的收敛性
+      .setFitIntercept(params.fitIntercept)//是否训练拦截对象
 
     stages += lor
     val pipeline = new Pipeline().setStages(stages.toArray)

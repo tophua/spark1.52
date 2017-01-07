@@ -32,7 +32,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.util.Utils
-
+import org.apache.spark.mllib.util.MLUtils
 /**
  * An example of how to use [[org.apache.spark.sql.DataFrame]] for ML. Run with
  * {{{
@@ -81,7 +81,9 @@ object DataFrameExample {
 
     // Load input data
     println(s"Loading LIBSVM file with UDT from ${params.input}.")
-    val df: DataFrame = sqlContext.read.format("libsvm").load(params.input).cache()
+     val dataSVM=MLUtils.loadLibSVMFile(sc, params.input)
+     
+    val df: DataFrame = sqlContext.createDataFrame(dataSVM).cache()
     println("Schema from LIBSVM:")
     df.printSchema()
     println(s"Loaded training data as a DataFrame with ${df.count()} records.")

@@ -28,6 +28,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
  * An example demonstrating Isotonic Regression.
+ * 保序回归是回归算法的一种
  * Run with
  * {{{
  * bin/run-example ml.IsotonicRegressionExample
@@ -46,8 +47,10 @@ object IsotonicRegressionExample {
 
     // $example on$
     // Loads data.
-
-    val dataset = sqlContext.read.format("libsvm")
+    import org.apache.spark.mllib.util.MLUtils
+      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_isotonic_regression_libsvm_data.txt")
+      val dataset = sqlContext.createDataFrame(dataSVM)
+    //val dataset = sqlContext.read.format("libsvm").load("data/mllib/sample_isotonic_regression_libsvm_data.txt")
     /**
  *  libSVM的数据格式
  *  <label> <index1>:<value1> <index2>:<value2> ...
@@ -55,7 +58,7 @@ object IsotonicRegressionExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-      .load("data/mllib/sample_isotonic_regression_libsvm_data.txt")
+      
 
     // Trains an isotonic regression model.
     val ir = new IsotonicRegression()

@@ -31,6 +31,8 @@ import org.apache.spark.sql.SQLContext
  * {{{
  * bin/run-example ml.ALSExample
  * }}}
+ * 从MovieLens dataset读入评分数据,每一行包括用户、电影、评分以及时间戳
+ * 
  */
 object ALSExample {
   // $example on$
@@ -57,15 +59,15 @@ object ALSExample {
 
     // Build the recommendation model using ALS on the training data
     val als = new ALS()
-    //设置最大迭代数
+      //设置最大迭代数
       .setMaxIter(5)
-      //
+      //正则化参数
       .setRegParam(0.01)
-      //设置用户ID列
+      //设置用户列名
       .setUserCol("userId")
-      //设置产品ID列
+      //设置商品编号列名
       .setItemCol("movieId")
-      //设置等级
+      //设置评分列名
       .setRatingCol("rating")
     val model = als.fit(training)
      //import spark.implicits._
@@ -73,6 +75,7 @@ object ALSExample {
     //test[userId: int, movieId: int, rating: float, timestamp: bigint]
     val predictions = model.transform(test)
     predictions.collect()
+    //通过预测评分的均方根误差来评价推荐模型
     val evaluator = new RegressionEvaluator()  
       //rmse均方根误差说明样本的离散程度
       .setMetricName("rmse")

@@ -46,8 +46,10 @@ object RandomForestRegressorExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val data = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
-
+    //val data = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
+      import org.apache.spark.mllib.util.MLUtils
+      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
+      val data = sqlContext.createDataFrame(dataSVM)
     // Automatically identify categorical features, and index them.
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
     val featureIndexer = new VectorIndexer()

@@ -59,7 +59,10 @@ object ModelSelectionViaTrainValidationSplitExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val data = sqlContext.read.format("libsvm").load("data/mllib/sample_linear_regression_data.txt")
+   // val data = sqlContext.read.format("libsvm").load("data/mllib/sample_linear_regression_data.txt")
+    import org.apache.spark.mllib.util.MLUtils
+      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/ample_linear_regression_data.txt")
+      val data = sqlContext.createDataFrame(dataSVM)
     val Array(training, test) = data.randomSplit(Array(0.9, 0.1), seed = 12345)
 
     val lr = new LinearRegression()

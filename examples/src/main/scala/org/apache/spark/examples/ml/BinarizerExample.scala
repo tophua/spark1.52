@@ -26,7 +26,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * 二值化
+ * Binarizer 二值化是根据阀值将连续数值特征转换为0-1特征的过程
+ * 特征值大于阀值将映射为1.0，特征值小于等于阀值将映射为0.0
  */
 object BinarizerExample {
   def main(args: Array[String]): Unit = {

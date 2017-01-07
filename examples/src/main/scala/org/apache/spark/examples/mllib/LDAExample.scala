@@ -33,7 +33,7 @@ import org.apache.spark.rdd.RDD
 
 
 /**
- * 聚类 LDA
+ * 聚类 LDA是一种文档主题生成模型
  * An example Latent Dirichlet Allocation (LDA) app. Run with
  * 一个狄利克雷分配(LDA)的应用例子
  * {{{
@@ -45,14 +45,14 @@ object LDAExample {
 
   private case class Params(
       input: Seq[String] = Seq.empty,
-      k: Int = 20,
-      maxIterations: Int = 10,
-      docConcentration: Double = -1,
-      topicConcentration: Double = -1,
-      vocabSize: Int = 10000,
+      k: Int = 20,//需推断的主题（簇）的数目
+      maxIterations: Int = 10,//迭代次数
+      docConcentration: Double = -1,//文档关于主题("theta")的先验分布集中参数(通常名为“alpha")
+      topicConcentration: Double = -1,//主题关于文字的先验分布集中参数(通常名为“beta"或"eta")
+      vocabSize: Int = 10000,//
       stopwordFile: String = "",
       algorithm: String = "em",
-      checkpointDir: Option[String] = None,
+      checkpointDir: Option[String] = None,//设置检查点间隔(>=1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -147,11 +147,11 @@ object LDAExample {
     }
 
     lda.setOptimizer(optimizer)
-      .setK(params.k)
-      .setMaxIterations(params.maxIterations)
-      .setDocConcentration(params.docConcentration)
-      .setTopicConcentration(params.topicConcentration)
-      .setCheckpointInterval(params.checkpointInterval)
+      .setK(params.k)//需推断的主题(簇)的数目
+      .setMaxIterations(params.maxIterations)//迭代次数
+      .setDocConcentration(params.docConcentration)//文档关于主题（"theta"）的先验分布集中参数
+      .setTopicConcentration(params.topicConcentration)//每个文档的混合主题分布估计的输出列
+      .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔
     if (params.checkpointDir.nonEmpty) {
       sc.setCheckpointDir(params.checkpointDir.get)
     }

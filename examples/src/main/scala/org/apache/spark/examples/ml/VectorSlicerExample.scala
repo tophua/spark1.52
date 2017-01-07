@@ -32,7 +32,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * VectorSlicer是一个转换器输入特征向量,输出原始特征向量子集.
+ * VectorSlicer接收带有特定索引的向量列,通过对这些索引的值进行筛选得到新的向量集
+ */
 object VectorSlicerExample {
   def main(args: Array[String]): Unit = {
   val conf = new SparkConf().setAppName("VectorSlicerExample").setMaster("local[4]")
@@ -53,9 +56,10 @@ object VectorSlicerExample {
   val dataset = sqlContext.createDataFrame(
       Seq((0, 18, 1.0, Vectors.dense(0.0, 10.0, 0.5), 1.0))
     ).toDF("id", "hour", "mobile", "userFeatures", "clicked")
-    
+    // VectorSlicer是一个转换器输入特征向量,输出原始特征向量子集.
     val slicer = new VectorSlicer().setInputCol("userFeatures").setOutputCol("features")
-
+    //1,整数索引,setIndices()
+    //2,字符串索引代表向量中特征的名字
     slicer.setIndices(Array(1)).setNames(Array("f3"))
     // or slicer.setIndices(Array(1, 2)), or slicer.setNames(Array("f2", "f3"))
 

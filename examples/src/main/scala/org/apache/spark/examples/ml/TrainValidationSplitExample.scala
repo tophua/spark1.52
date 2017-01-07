@@ -26,13 +26,15 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * A simple example demonstrating model selection using TrainValidationSplit.
- * 一个简单的例子演示模型选择使用训练验证分割
+ * 一个简单的例子演示模型选择使用训练验证分裂
  *
  * The example is based on [[SimpleParamsExample]] using linear regression.
  * Run with
  * {{{
  * bin/run-example ml.TrainValidationSplitExample
  * }}}
+ * Spark还提供训练验证分裂用以超参数调整。和交叉验证评估K次不同,训练验证分裂只对每组参数评估一次
+ * 与交叉验证相同,确定最佳参数表后,训练验证分裂最后使用最佳参数表基于全部数据来重新拟合估计器
  */
 object TrainValidationSplitExample {
 
@@ -45,7 +47,7 @@ object TrainValidationSplitExample {
     // Prepare training and test data.
     // 准备培训和测试数据
     val data = MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt").toDF()
-   // 将数据随机分配为两份，一份用于训练，一份用于测试
+   // 将数据随机分配为两份,一份用于训练,一份用于测试
     val Array(training, test) = data.randomSplit(Array(0.9, 0.1), seed = 12345)
    //线性回归
     val lr = new LinearRegression()

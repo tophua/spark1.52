@@ -41,8 +41,10 @@ object NormalizerExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val dataFrame = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
-
+   // val dataFrame = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
+     import org.apache.spark.mllib.util.MLUtils
+      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
+      val dataFrame = sqlContext.createDataFrame(dataSVM)
     // Normalize each Vector using $L^1$ norm.
     val normalizer = new Normalizer()
       .setInputCol("features")

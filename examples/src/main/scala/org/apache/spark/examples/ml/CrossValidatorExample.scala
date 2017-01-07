@@ -43,11 +43,17 @@ import scala.beans.BeanInfo
  * {{{
  * bin/run-example ml.CrossValidatorExample
  * }}}
+ * 
+ * CrossValidator将数据集划分为若干子集分别地进行训练和测试。
+ * 如当k＝3时,CrossValidator产生3个训练数据与测试数据对,每个数据对使用2/3的数据来训练,1/3的数据来测试。
  */
 
 
 object CrossValidatorExample {
-
+/**
+ * 如下面例子中,参数网格hashingTF.numFeatures有3个值,lr.regParam有2个值,
+ * CrossValidator使用2折交叉验证。这样就会产生(3*2)*2=12中不同的模型需要进行训练
+ */
   def main(args: Array[String]) {
     val conf = new SparkConf().setAppName("CrossValidatorExample").setMaster("local[4]")
     val sc = new SparkContext(conf)

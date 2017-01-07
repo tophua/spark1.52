@@ -28,8 +28,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
-
+/**
+ * PolynomialExpansion 多项式扩展通过产生n维组合将原始特征将特征扩展到多项式空间
+ */
 object PolynomialExpansionExample {
   def main(args: Array[String]): Unit = {
        val conf = new SparkConf().setAppName("PolynomialExpansionExample").setMaster("local[4]")
@@ -39,6 +40,9 @@ object PolynomialExpansionExample {
     import sqlContext.implicits._
 
     // $example on$
+    /**
+     * 下面的示例会介绍如何将你的特征集拓展到3维多项式空间
+     */
     val data = Array(
       Vectors.dense(-2.0, 2.3),
       Vectors.dense(0.0, 0.0),

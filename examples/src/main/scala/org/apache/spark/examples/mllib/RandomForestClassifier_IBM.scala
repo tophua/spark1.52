@@ -39,7 +39,7 @@ object RandomForestDemo {
     val impurity = "gini"
     //树的最大层次
     val maxDepth = 4
-    //特征最大装箱数
+    //连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val maxBins = 32
     //训练随机森林分类器，trainClassifier 返回的是 RandomForestModel 对象
     val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,

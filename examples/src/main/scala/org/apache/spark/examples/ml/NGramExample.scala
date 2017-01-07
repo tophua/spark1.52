@@ -27,6 +27,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
+/**
+ * NGram的输入为一系列字符串,参数n决定每个n-gram包含的对象个数。
+ * 结果包含一系列n-gram,其中每个n-gram代表一个空格分割的n个连续字符,如果输入少于n个字符串,将没有输出结果
+ */
 object NGramExample {
   def main(args: Array[String]): Unit = {
    val conf = new SparkConf().setAppName("NGramExample").setMaster("local[4]")
@@ -44,6 +48,11 @@ object NGramExample {
 
     val ngram = new NGram().setInputCol("words").setOutputCol("ngrams")
     val ngramDataFrame = ngram.transform(wordDataFrame)
+    /**
+     * List(Hi I, I heard, heard about, about Spark)
+     * List(I wish, wish Java, Java could, could use, use case, case classes)
+     * List(Logistic regression, regression models, models are, are neat)
+     */
     ngramDataFrame.take(3).map(_.getAs[Stream[String]]("ngrams").toList).foreach(println)
     // $example off$
 

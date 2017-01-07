@@ -26,7 +26,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * StopWordsRemover的输入为一系列字符串(如分词器输出),输出中删除了所有停用词
+ * 停用词为在文档中频繁出现,但未承载太多意义的词语,他们不应该被包含在算法输入中。
+ */
 object StopWordsRemoverExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("StopWordsRemoverExample").setMaster("local[4]")

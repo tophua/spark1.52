@@ -62,8 +62,8 @@ object KMeansExample {
     //训练一个k-均值模型
     // Trains a k-means model
     val kmeans = new KMeans()
-      .setK(k)
-      .setFeaturesCol(FEATURES_COL)
+      .setK(k)//聚类簇数
+      .setFeaturesCol(FEATURES_COL)//特征列名
     val model = kmeans.fit(dataset)
 
     // Shows the result 显示结果

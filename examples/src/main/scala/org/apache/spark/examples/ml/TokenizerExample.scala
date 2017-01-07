@@ -25,7 +25,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * Tokenizer(分词器)将文本划分为独立个体(通常为单词)
+ */
 object TokenizerExample {
   def main(args: Array[String]): Unit = {
     
@@ -46,6 +48,13 @@ object TokenizerExample {
     val regexTokenizer = new RegexTokenizer()
       .setInputCol("sentence")
       .setOutputCol("words")
+      /**
+       * 基于正则表达式提供更多的划分选项,
+       * 默认情况下,参数“pattern”为划分文本的分隔符,
+       * 用户可以指定参数“gaps”来指明正则“patten”表示“tokens”而不是分隔符,
+       * 这样来为分词结果找到所有可能匹配的情况
+       */
+      
       .setPattern("\\W") // alternatively .setPattern("\\w+").setGaps(false)
 
     val tokenized = tokenizer.transform(sentenceDataFrame)

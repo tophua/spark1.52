@@ -27,7 +27,10 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.mllib.linalg.Vectors
-
+/**
+ * PCA主成分分析是一种统计学方法,它使用正交转换从一系列可能相关的变量中提取线性无关变量集,
+ * 提取出的变量集中的元素称为主成分,使用PCA方法可以对变量集合进行降维
+ */
 object PCAExample {
   def main(args: Array[String]): Unit = {
   val conf = new SparkConf().setAppName("CrossValidatorExample").setMaster("local[4]")
@@ -36,6 +39,9 @@ object PCAExample {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
     // $example on$
+    /**
+     * 示例将会展示如何将5维特征向量转换为3维主成分向量
+     */
     val data = Array(
       Vectors.sparse(5, Seq((1, 1.0), (3, 7.0))),
       Vectors.dense(2.0, 0.0, 3.0, 4.0, 5.0),
@@ -49,6 +55,15 @@ object PCAExample {
       .fit(df)
     val pcaDF = pca.transform(df)
     val result = pcaDF.select("pcaFeatures")
+    /**
+     * +--------------------+
+     * |         pcaFeatures|
+     * +--------------------+
+     * |[1.64857282308838...|
+     * |[-4.6451043317815...|
+     * |[-6.4288805356764...|
+     * +--------------------+
+     */
     result.show()
     // $example off$
 

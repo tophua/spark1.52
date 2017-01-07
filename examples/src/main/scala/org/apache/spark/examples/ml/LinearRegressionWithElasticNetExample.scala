@@ -43,9 +43,12 @@ object LinearRegressionWithElasticNetExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val training = sqlContext.read.format("libsvm")
-      .load("../data/mllib/sample_linear_regression_data.txt")
-
+    //val training = sqlContext.read.format("libsvm")
+     // .load("../data/mllib/sample_linear_regression_data.txt")
+    import org.apache.spark.mllib.util.MLUtils
+      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_linear_regression_data.txt")
+      val training = sqlContext.createDataFrame(dataSVM)
+      
     val lr = new LinearRegression()
       .setMaxIter(10)
       .setRegParam(0.3)

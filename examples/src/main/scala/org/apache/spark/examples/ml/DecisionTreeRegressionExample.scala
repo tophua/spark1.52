@@ -29,7 +29,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+import org.apache.spark.mllib.util.MLUtils
+/**
+ * 
+ */
 object DecisionTreeRegressionExample {
   def main(args: Array[String]): Unit = {
       val conf = new SparkConf().setAppName("DecisionTreeRegressionExample").setMaster("local[4]")
@@ -48,7 +51,8 @@ object DecisionTreeRegressionExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
+    val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
+    val data = sqlContext.createDataFrame(dataSVM)
 
     // Automatically identify categorical features, and index them.
     // Here, we treat features with > 4 distinct values as continuous.

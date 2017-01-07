@@ -30,6 +30,8 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
  * An example for Multilayer Perceptron Classification.
+ * 多层感知机是基于反向人工神经网络,
+ * 多层感知机含有多层节点,每层节点与网络的下一层节点完全连接
  */
 object MultilayerPerceptronClassifierExample {
 
@@ -49,9 +51,12 @@ object MultilayerPerceptronClassifierExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val data = sqlContext.read.format("libsvm")
-      .load("data/mllib/sample_multiclass_classification_data.txt")
-    // Split the data into train and test
+   // val data = sqlContext.read.format("libsvm")
+    //  .load("data/mllib/sample_multiclass_classification_data.txt")
+   import org.apache.spark.mllib.util.MLUtils
+      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_multiclass_classification_data.txt")
+      val data = sqlContext.createDataFrame(dataSVM)
+      // Split the data into train and test
     val splits = data.randomSplit(Array(0.6, 0.4), seed = 1234L)
     val train = splits(0)
     val test = splits(1)
@@ -61,10 +66,10 @@ object MultilayerPerceptronClassifierExample {
     val layers = Array[Int](4, 5, 4, 3)
     // create the trainer and set its parameters
     val trainer = new MultilayerPerceptronClassifier()
-      .setLayers(layers)
-      .setBlockSize(128)
-      .setSeed(1234L)
-      .setMaxIter(100)
+      .setLayers(layers)//层规模,包括输入规模以及输出规模
+      .setBlockSize(128)//
+      .setSeed(1234L)//随机种子
+      .setMaxIter(100)//迭代次数
     // train the model
     val model = trainer.fit(train)
     // compute accuracy on the test set
