@@ -25,7 +25,9 @@ import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vector, Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.Row
-
+/**
+ * PolynomialExpansion项式扩展通过产生n维组合将原始特征将特征扩展到多项式空间
+ */
 class PolynomialExpansionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {//参数

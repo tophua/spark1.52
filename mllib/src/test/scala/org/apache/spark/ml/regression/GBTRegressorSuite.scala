@@ -32,7 +32,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Test suite for [[GBTRegressor]].
- * 梯度提升回归(GBT)
+ *  梯度提升树是一种决策树的集成算法,它通过反复迭代训练决策树来最小化损失函数。
  */
 class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -61,13 +61,13 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     GBTRegressor.supportedLossTypes.foreach { loss =>
       testCombinations.foreach {
         case (maxIter, learningRate, subsamplingRate) =>
-	//梯度提升回归(GBT)
+	        //梯度提升回归(GBT)
           val gbt = new GBTRegressor()
-            .setMaxDepth(2)
-            .setSubsamplingRate(subsamplingRate)
-            .setLossType(loss)
-            .setMaxIter(maxIter)
-            .setStepSize(learningRate)
+            .setMaxDepth(2)//树的最大深度
+            .setSubsamplingRate(subsamplingRate)//学习一棵决策树使用的训练数据比例，范围[0,1]
+            .setLossType(loss)//损失函数类型
+            .setMaxIter(maxIter)//迭代次数
+            .setStepSize(learningRate)//每次迭代优化步长
           compareAPIs(data, None, gbt, categoricalFeatures)
       }
     }
@@ -84,8 +84,8 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     ))
     //梯度提升回归(GBT)
     val gbt = new GBTRegressor()
-      .setMaxDepth(2)
-      .setMaxIter(2)
+      .setMaxDepth(2)//树的最大深度
+      .setMaxIter(2)//迭代次数
     val model = gbt.fit(df)
 
     // copied model must have the same parent.
@@ -106,10 +106,10 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val df = sqlContext.createDataFrame(data)
     //梯度提升回归(GBT)
     val gbt = new GBTRegressor()
-      .setMaxDepth(2)
-      .setMaxIter(5)
-      .setStepSize(0.1)
-      .setCheckpointInterval(2)
+      .setMaxDepth(2)//树的最大深度
+      .setMaxIter(5)//迭代次数
+      .setStepSize(0.1)//每次迭代优化步长
+      .setCheckpointInterval(2)//设置检查点间隔(>=1)
     val model = gbt.fit(df)
 
     sc.checkpointDir = None

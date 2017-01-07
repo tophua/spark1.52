@@ -22,7 +22,8 @@ import org.apache.spark.ml.param.ParamsSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.{DataFrame, Row}
 /**
- * 二元
+ * Binarizer 二值化是根据阀值将连续数值特征转换为0-1特征的过程
+ * 特征值大于阀值将映射为1.0，特征值小于等于阀值将映射为0.0
  */
 class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -36,7 +37,7 @@ class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("params") {//参数
     ParamsSuite.checkParams(new Binarizer)
   }
-//默认参数
+  //默认参数
   test("Binarize continuous features with default parameter") {//默认参数进行连续的特征
     //defaultBinarized=Array(1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0)
     val defaultBinarized: Array[Double] = data.map(x => if (x > 0.0) 1.0 else 0.0)

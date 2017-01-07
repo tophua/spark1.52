@@ -24,7 +24,10 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
-//向量切分,单词向量它用1和0分别表示是否存在某个词
+/**
+ * VectorSlicer是一个转换器输入特征向量,输出原始特征向量子集.
+ * 向量切分,单词向量它用1和0分别表示是否存在某个词
+ */
 class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("params") {//参数
@@ -43,10 +46,12 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("feature validity checks") {//特征有效性检查
     import VectorSlicer._
+    //如果给定的特征索引是有效的,返回true
     assert(validIndices(Array(0, 1, 8, 2)))
     assert(validIndices(Array.empty[Int]))
     assert(!validIndices(Array(-1)))
     assert(!validIndices(Array(1, 2, 1)))
+    //如果给定的特征名称有效,返回true
     assert(validNames(Array("a", "b")))
     assert(validNames(Array.empty[String]))
     assert(!validNames(Array("", "b")))
@@ -85,7 +90,7 @@ class VectorSlicerSuite extends SparkFunSuite with MLlibTestSparkContext {
     
     val df = sqlContext.createDataFrame(rdd,
         StructType(Array(attrGroup.toStructField(), resultAttrGroup.toStructField())))
-
+    //VectorSlicer是一个转换器输入特征向量,输出原始特征向量子集.
     val vectorSlicer = new VectorSlicer().setInputCol("features").setOutputCol("result")
 
     def validateResults(df: DataFrame): Unit = {

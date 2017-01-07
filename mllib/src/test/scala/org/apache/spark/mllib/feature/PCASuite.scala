@@ -22,7 +22,8 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 /**
- * PCA 算法也叫主成分分析（principal components analysis），主要是用于数据降维 
+ * PCA主成分分析是一种统计学方法,它使用正交转换从一系列可能相关的变量中提取线性无关变量集,
+ * 提取出的变量集中的元素称为主成分,使用PCA方法可以对变量集合进行降维
  */
 class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
 

@@ -28,7 +28,8 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 
 /**
- * 决策树回归,方差
+ * 决策树以及其集成算法是机器学习分类和回归问题中非常流行的算法
+ * 工具提供为分类提供两种不纯度衡量(基尼不纯度和熵),为回归提供一种不纯度衡量(方差)
  */
 
 class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
@@ -58,9 +59,9 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
   //具有二元(有序)分类特征的回归分析
   test("Regression stump with binary (ordered) categorical features") {
     val dt = new DecisionTreeRegressor()
-      .setImpurity("variance")
-      .setMaxDepth(2)
-      .setMaxBins(100)
+      .setImpurity("variance")//计算信息增益的准则
+      .setMaxDepth(2)//树的最大深度
+      .setMaxBins(100)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 2, 1-> 2)
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }
@@ -69,9 +70,9 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val categoricalFeatures = Map(0 -> 2, 1-> 2)
     val df = TreeTests.setMetadata(categoricalDataPointsRDD, categoricalFeatures, numClasses = 0)
     val model = new DecisionTreeRegressor()
-      .setImpurity("variance")
-      .setMaxDepth(2)
-      .setMaxBins(8).fit(df)
+      .setImpurity("variance")//计算信息增益的准则
+      .setMaxDepth(2)//树的最大深度
+      .setMaxBins(8).fit(df)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
     MLTestingUtils.checkCopy(model)
   }
 

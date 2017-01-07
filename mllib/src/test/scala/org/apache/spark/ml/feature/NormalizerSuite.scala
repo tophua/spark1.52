@@ -23,7 +23,11 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 
-//特征提取和转换 归一化(Normalizer,默认使用范数二)
+/**
+ * Normalizer将某个特征向量(由所有样本某一个特征组成的向量)计算其p-范数,然后对该每个元素除以p-范数
+ * 将原始特征Normalizer以后可以使得机器学习算法有更好的表现
+ * 
+ */
 class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   @transient var data: Array[Vector] = _

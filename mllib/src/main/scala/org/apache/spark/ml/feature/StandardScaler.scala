@@ -30,6 +30,8 @@ import org.apache.spark.sql.types.{StructField, StructType}
 
 /**
  * Params for [[StandardScaler]] and [[StandardScalerModel]].
+ * StandardScaler 零均值规范化
+ * 将某个特征向量(由所有样本某一个特征组成的向量)进行标准化,使数据均值为0,方差为1
  */
 private[feature] trait StandardScalerParams extends Params with HasInputCol with HasOutputCol {
 

@@ -50,7 +50,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("default parameters") {
     //KMeans默认参数
     val kmeans = new KMeans()
-    //
+    //聚类簇数
     assert(kmeans.getK === 2)
     //特征列名
     assert(kmeans.getFeaturesCol === "features")
@@ -62,6 +62,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(kmeans.getInitMode === MLlibKMeans.K_MEANS_PARALLEL)
     //初始化步骤
     assert(kmeans.getInitSteps === 5)
+    //迭代算法的收敛性
     assert(kmeans.getTol === 1e-4)
   }
 
@@ -80,7 +81,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInitSteps(3)
       //设置种子
       .setSeed(123)
-      //
+      //迭代算法的收敛性
       .setTol(1e-3)
 
     assert(kmeans.getK === 9)

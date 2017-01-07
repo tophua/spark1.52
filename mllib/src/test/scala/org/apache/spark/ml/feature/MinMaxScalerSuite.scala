@@ -23,7 +23,8 @@ import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.{Row, SQLContext}
 /**
- * 最大最小权值
+ * MinMaxScaler最大-最小规范化
+ * 将所有特征向量线性变换到用户指定最大-最小值之间
  */
 class MinMaxScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -47,18 +48,28 @@ class MinMaxScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
       Vectors.sparse(3, Array(0), Array(-2.5)))
 
     val df = sqlContext.createDataFrame(data.zip(expected)).toDF("features", "expected")
-    val scaler = new MinMaxScaler().setInputCol("features").setOutputCol("scaled").setMin(-5).setMax(5)
+    val scaler = new MinMaxScaler().setInputCol("features").setOutputCol("scaled")
+    //max,min是用户可以重新自定义的范围,将数据线性变换到[-5,5]
+    .setMin(-5).setMax(5)
 
     val model = scaler.fit(df)
     model.transform(df).select("expected", "scaled").collect()
-      .foreach { case Row(vector1: Vector, vector2: Vector) =>
+      .foreach { case Row(vector1: Vector, vector2: Vector) =>{
+        /**
+         * [-5.0,0.0,-5.0]|||[-5.0,0.0,-5.0]
+         * [0.0,0.0,0.0]|||[0.0,0.0,0.0]
+         * (3,[0,2],[5.0,5.0])|||[5.0,0.0,5.0]
+         * (3,[0],[-2.5])|||[-2.5,0.0,0.0]
+         */
+        println(vector1+"|||"+vector2)
         assert(vector1.equals(vector2), "Transformed vector is different with expected.")
+        }
     }
 
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(model)
   }
-  //MinMaxScaler参数最大值必须大于最小值
+  //MinMaxScaler将所有特征向量线性变换到用户指定最大-最小值之间
   test("MinMaxScaler arguments max must be larger than min") {
     withClue("arguments max must be larger than min") {
       intercept[IllegalArgumentException] {

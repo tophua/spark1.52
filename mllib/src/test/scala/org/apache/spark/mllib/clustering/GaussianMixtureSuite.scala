@@ -24,7 +24,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 /**
- * 高斯混合聚类套件
+ * 混合高斯模型描述数据点以一定的概率服从k种高斯子分布的一种混合分布
  */
 class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("single cluster") {//单个集群
@@ -67,8 +67,8 @@ class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
     val Esigma = Array(Matrices.dense(1, 1, Array(1.1098)), Matrices.dense(1, 1, Array(0.86644)))
 
     val gmm = new GaussianMixture()
-      .setK(2)
-      .setInitialModel(initialGmm)
+      .setK(2)//混合模型中独立的高斯数目
+      .setInitialModel(initialGmm)//
       .run(data)
 
     assert(gmm.weights(0) ~== Ew(0) absTol 1E-3)
@@ -87,7 +87,7 @@ class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(GaussianMixture.shouldDistributeGaussians(k, d))
 
     val gmm = new GaussianMixture()
-      .setK(k)
+      .setK(k)//混合模型中独立的高斯数目
       .run(data)
 
     assert(gmm.k === k)
@@ -107,7 +107,7 @@ class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
       )
 
     val seeds = Array(42, 1994, 27, 11, 0)
-    seeds.foreach { seed =>
+    seeds.foreach { seed =>//混合模型中独立的高斯数目,seed随机种子
       val gmm = new GaussianMixture().setK(1).setSeed(seed).run(data)
       assert(gmm.weights(0) ~== Ew absTol 1E-5)
       assert(gmm.gaussians(0).mu ~== Emu absTol 1E-5)
@@ -132,7 +132,7 @@ class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
     val Esigma = Array(Matrices.dense(1, 1, Array(1.1098)), Matrices.dense(1, 1, Array(0.86644)))
 
     val sparseGMM = new GaussianMixture()
-      .setK(2)
+      .setK(2)//混合模型中独立的高斯数目
       .setInitialModel(initialGmm)
       .run(sparseData)
 
@@ -146,7 +146,7 @@ class GaussianMixtureSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("model save / load") {//模型保存/加载
     val data = sc.parallelize(GaussianTestData.data)
-
+    //K混合模型中独立的高斯数目
     val gmm = new GaussianMixture().setK(2).setSeed(0).run(data)
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString

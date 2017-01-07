@@ -31,8 +31,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.col
 /**
- * 使用 VectorAssembler 从源数据中提取特征指标数据, 这是一个比较典型且通用的步骤,
- * 因为我们的原始数据集里,因为我们的原始数据集里，经常会包含一些非指标数据，如 ID，Description 等
+ * VectorAssembler是一个转换器,它将给定的若干列合并为一列向量 
  */
 class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -63,7 +62,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(v2.isInstanceOf[DenseVector])
   }
 
-  test("VectorAssembler") {//向量汇编
+  test("VectorAssembler") {//VectorAssembler是一个转换器，它将给定的若干列合并为一列向量
     //Seq:List((0,0.0,[1.0,2.0],a,(2,[1],[3.0]),10))
     val df = sqlContext.createDataFrame(Seq(
       (0, 0.0, Vectors.dense(1.0, 2.0), "a", Vectors.sparse(2, Array(1), Array(3.0)), 10L)
@@ -81,6 +80,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
       (0, 0.0, Vectors.dense(1.0, 2.0), "a", Vectors.sparse(2, Array(1), Array(3.0)), 10L)
     )
     println("Seq:"+a)
+    //VectorAssembler是一个转换器,它将给定的若干列合并为一列向量
     val assembler = new VectorAssembler()
       .setInputCols(Array("x", "y", "z", "n"))//源数据 DataFrame 中存储文本词数组列的名称
       .setOutputCol("features")//经过处理的数值型特征向量存储列名称
@@ -108,6 +108,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
         col("count"), // "count" is an integer column without ML attribute
         col("user").as("user", user.toMetadata()),
         col("ad")) // "ad" is a vector column without ML attribute
+	//VectorAssembler是一个转换器,它将给定的若干列合并为一列向量
     val assembler = new VectorAssembler()
       //VectorAssembler 从源数据中提取特征指标数据
       .setInputCols(Array("browser", "hour", "count", "user", "ad"))

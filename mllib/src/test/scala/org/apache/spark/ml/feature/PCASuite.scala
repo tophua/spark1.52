@@ -27,8 +27,8 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.feature.{PCAModel => OldPCAModel}
 import org.apache.spark.sql.Row
 /**
- * 主成分分析经常用于减少数据集的维数，同时保持数据集中的对方差贡献最大的特征。
- * 其方法主要是通过对协方差矩阵进行特征分解，以得出数据的主成分（即特征向量）与它们的权值（即特征值）
+ * PCA主成分分析经常用于减少数据集的维数,同时保持数据集中的对方差贡献最大的特征。
+ * 其方法主要是通过对协方差矩阵进行特征分解,以得出数据的主成分(即特征向量)与它们的权值(即特征值)
  * 
  */
 class PCASuite extends SparkFunSuite with MLlibTestSparkContext {

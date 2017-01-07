@@ -35,7 +35,14 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.util.Utils
-
+/**
+ * 参考文档http://blog.csdn.net/liulingyuan6/article/details/53489390
+ * 协同过滤常被用于推荐系统,
+ * Spark.ml目前支持基于模型的协同过滤,其中用户和商品以少量的潜在因子来描述,用以预测缺失项
+ * 注意基于DataFrame的ALS接口目前仅支持整数型的用户和商品编号
+ * 正则化参数regParam来解决用户在更新用户因子时产生新评分或者商品更新商品因子时收到的新评分带来的最小二乘问题
+ * 
+ */
 class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
   private var tempDir: File = _
@@ -212,9 +219,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
    * @return (training, test)
    */
   def genExplicitTestData(
-      numUsers: Int,
-      numItems: Int,
-      rank: Int,
+      numUsers: Int,//用户数目
+      numItems: Int,//商品数目
+      rank: Int,//分解矩阵的排名
       noiseStd: Double = 0.0,
       seed: Long = 11L): (RDD[Rating[Int]], RDD[Rating[Int]]) = {
     val trainingFraction = 0.6
@@ -345,11 +352,11 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     val sqlContext = this.sqlContext
     import sqlContext.implicits._
     val als = new ALS()
-      .setRank(rank)//是模型中隐语义因子的个数
-      .setRegParam(regParam)
+      .setRank(rank)//是模型中隐语义因子的个数,分解矩阵的排名
+      .setRegParam(regParam)//正则化参数
       .setImplicitPrefs(implicitPrefs)//决定了是用显性反馈ALS的版本还是用适用隐性反馈数据集的版本
-      .setNumUserBlocks(numUserBlocks)//是用于并行化计算的分块个数,设置为-1,为自动配置
-      .setNumItemBlocks(numItemBlocks)//是用于并行化计算的分块个数 (设置为-1,为自动配置)
+      .setNumUserBlocks(numUserBlocks)//用户数目(正数)
+      .setNumItemBlocks(numItemBlocks)//商品数目(正数)
       .setSeed(0) //随机种子
     //可以调整这些参数，不断优化结果，使均方差变小。比如：iterations越多，lambda较小，均方差会较小，推荐结果较优。
     val alpha = als.getAlpha //是一个针对于隐性反馈 ALS 版本的参数，这个参数决定了偏好行为强度的基准
@@ -369,7 +376,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
         // We limit the ratings and the predictions to interval [0, 1] and compute the weighted RMSE
         // with the confidence scores as weights.
         val (totalWeight, weightedSumSq) = predictions.map { case (rating, prediction) =>
-	  //math.abs返回数的绝对值
+	       //math.abs返回数的绝对值
           val confidence = 1.0 + alpha * math.abs(rating)
           val rating01 = math.max(math.min(rating, 1.0), 0.0)
           val prediction01 = math.max(math.min(prediction, 1.0), 0.0)
@@ -378,10 +385,10 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
         }.reduce { case ((c0, e0), (c1, e1)) =>
           (c0 + c1, e0 + e1)
         }
-	//math.sqrt返回数字的平方根
+	      //math.sqrt返回数字的平方根
         math.sqrt(weightedSumSq / totalWeight)
       } else {//明确
-	//mse标准差能反映一个数据集的离散程度
+	      //mse标准差能反映一个数据集的离散程度
           val mse = predictions.map { case (rating, prediction) =>
           val err = rating - prediction
           err * err //平方
@@ -460,8 +467,8 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     def isNonnegative(factors: RDD[(Int, Array[Float])]): Boolean = {
       factors.values.map { _.forall(_ >= 0.0) }.reduce(_ && _)
     }
-    assert(isNonnegative(userFactors))
-    assert(isNonnegative(itemFactors))
+    assert(isNonnegative(userFactors))//是否需要非负约束
+    assert(isNonnegative(itemFactors))//是否需要非负约束
     // TODO: Validate the solution.
   }
 

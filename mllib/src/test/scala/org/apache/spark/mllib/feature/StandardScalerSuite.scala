@@ -24,9 +24,11 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.stat.{ MultivariateStatisticalSummary, MultivariateOnlineSummarizer }
 import org.apache.spark.rdd.RDD
 /**
- * StandardScaler标准化:将数据按期属性（按列进行）减去其均值，并处以其方差。
- *       得到的结果是，对于每个属性/每列来说所有数据都聚集在0附近，方差为1
- *数据标准化(Z-score)标准化方法:给予原始数据的均值（mean）和标准差（standard deviation）进行数据的标准化。经过处理的数据符合标准正态分布，即均值为0，标准差为1
+ * StandardScaler标准化:将数据按期属性(按列进行)减去其均值,并处以其方差。
+ *       得到的结果是,对于每个属性/每列来说所有数据都聚集在0附近,方差为1
+ * 数据标准化(Z-score)标准化方法:给予原始数据的均值(mean)和标准差（standard deviation）进行数据的标准化。
+ * 经过处理的数据符合标准正态分布,即均值为0,标准差为1
+ * StandardScaler将某个特征向量(由所有样本某一个特征组成的向量)进行标准化,使数据均值为0,方差为1
  */
 class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -73,7 +75,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
      */
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
-    //
+    //withStd=true,将方差缩放到1,withMean-将均值移到0,注意对于稀疏输入矩阵不可以用。默认为false
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
     //fit 计算汇总统计信息,然后返回一个模型,该模型可以根据StandardScaler配置将输入数据转换为标准差为1,均值为0的特征
     val model1 = standardizer1.fit(dataRDD)

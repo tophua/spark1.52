@@ -33,7 +33,8 @@ object StopWordsRemoverSuite extends SparkFunSuite {
 }
 
 /**
- * 删除停用词
+ * StopWordsRemover的输入为一系列字符串(如分词器输出),输出中删除了所有停用词
+ * 停用词为在文档中频繁出现,但未承载太多意义的词语,他们不应该被包含在算法输入中。
  */
 class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
   import StopWordsRemoverSuite._
@@ -58,6 +59,7 @@ class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
     val remover = new StopWordsRemover()
       .setInputCol("raw")
       .setOutputCol("filtered")
+      //布尔参数caseSensitive指明是否区分大小写(默认为否)
       .setCaseSensitive(true)
     val dataSet = sqlContext.createDataFrame(Seq(
       (Seq("A"), Seq("A")),

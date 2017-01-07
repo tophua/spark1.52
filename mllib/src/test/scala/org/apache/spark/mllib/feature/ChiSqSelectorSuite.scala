@@ -21,7 +21,12 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-//特征提取和转换 卡方选择(ChiSqSelector)
+/**
+ * 特征提取和转换 卡方选择(ChiSqSelector)
+ * ChiSqSelector代表卡方特征选择,它适用于带有类别特征的标签数据。
+ * ChiSqSelector根据类别的独立卡方2检验来对特征排序,然后选取类别标签主要依赖的特征,
+ * 它类似于选取最有预测能力的特征
+ */
 class ChiSqSelectorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   /*

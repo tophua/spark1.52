@@ -156,7 +156,10 @@ final class VectorSlicer(override val uid: String)
 
 private[feature] object VectorSlicer {
 
-  /** Return true if given feature indices are valid */
+  /** 
+   *  Return true if given feature indices are valid
+   *  如果给定的特征索引是有效的,返回true
+   *   */
   def validIndices(indices: Array[Int]): Boolean = {
     if (indices.isEmpty) {
       true
@@ -165,7 +168,10 @@ private[feature] object VectorSlicer {
     }
   }
 
-  /** Return true if given feature names are valid */
+  /** 
+   *  Return true if given feature names are valid 
+   *  如果给定的特征名称有效,返回true
+   *  */
   def validNames(names: Array[String]): Boolean = {
     names.forall(_.nonEmpty) && names.length == names.distinct.length
   }

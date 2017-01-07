@@ -27,7 +27,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 @BeanInfo
 case class TokenizerTestData(rawText: String, wantedTokens: Array[String])
 /**
- * 分词
+ * Tokenizer(分词器)将文本划分为独立个体(通常为单词)
  */
 class TokenizerSuite extends SparkFunSuite {
 
@@ -45,6 +45,11 @@ class RegexTokenizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("RegexTokenizer") {//正则表达式分解器
     val tokenizer0 = new RegexTokenizer()
+    /**
+     * RegexTokenizer基于正则表达式提供更多的划分选项。默认情况下,参数“pattern”为划分文本的分隔符。
+     * 或者,用户可以指定参数“gaps”来指明正则“patten”表示“tokens”而不是分隔符,
+     * 这样来为分词结果找到所有可能匹配的情况。
+     */
       .setGaps(false).setPattern("\\w+|\\p{Punct}").setInputCol("rawText").setOutputCol("tokens")
     val dataset0 = sqlContext.createDataFrame(Seq(
       TokenizerTestData("Test for tokenization.", Array("Test", "for", "tokenization", ".")),

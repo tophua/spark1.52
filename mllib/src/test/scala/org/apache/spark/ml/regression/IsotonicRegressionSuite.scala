@@ -24,7 +24,7 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.{DataFrame, Row}
 /**
- * 保序回归
+ * 保序回归是回归算法的一种
  */
 class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   private def generateIsotonicInput(labels: Seq[Double]): DataFrame = {
@@ -85,12 +85,12 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("default params") {//默认参数
     val dataset = generateIsotonicInput(Seq(1, 2, 3))
     val ir = new IsotonicRegression()
-    assert(ir.getLabelCol === "label")
-    assert(ir.getFeaturesCol === "features")
-    assert(ir.getPredictionCol === "prediction")
-    assert(!ir.isDefined(ir.weightCol))
-    assert(ir.getIsotonic)
-    assert(ir.getFeatureIndex === 0)
+    assert(ir.getLabelCol === "label")//标签列名
+    assert(ir.getFeaturesCol === "features")//特征列名
+    assert(ir.getPredictionCol === "prediction")//预测结果列名
+    assert(!ir.isDefined(ir.weightCol))//列权重
+    assert(ir.getIsotonic)//输出序列为保序/增序(真)或者反序/降序(假)
+    assert(ir.getFeatureIndex === 0)//当特征列维向量时提供索引值,否则不进行处理
 
     val model = ir.fit(dataset)
 
@@ -102,12 +102,12 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .select("label", "features", "prediction", "weight")
       .collect()
 
-    assert(model.getLabelCol === "label")
-    assert(model.getFeaturesCol === "features")
-    assert(model.getPredictionCol === "prediction")
-    assert(!model.isDefined(model.weightCol))
-    assert(model.getIsotonic)
-    assert(model.getFeatureIndex === 0)
+    assert(model.getLabelCol === "label")//标签列名
+    assert(model.getFeaturesCol === "features")//特征列名
+    assert(model.getPredictionCol === "prediction")//预测结果列名
+    assert(!model.isDefined(model.weightCol))//列权重
+    assert(model.getIsotonic)//输出序列为保序/增序(真)或者反序/降序(假)
+    assert(model.getFeatureIndex === 0)//当特征列维向量时提供索引值,否则不进行处理
     assert(model.hasParent)
   }
 

@@ -134,6 +134,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     // minDF: ignore terms with freq < 0.75
+    //minDF:忽略与频率＜0.75
     val cvModel3 = new CountVectorizer()
       .setInputCol("words")
       .setOutputCol("features")

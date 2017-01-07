@@ -72,8 +72,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("Binary classification stump with ordered categorical features") {
     val dt = new DecisionTreeClassifier()
       .setImpurity("gini")//基尼
-      .setMaxDepth(2)
-      .setMaxBins(100)
+      .setMaxDepth(2)//树的最大深度
+      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     val numClasses = 2
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures, numClasses)
@@ -81,8 +81,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   //固定标签0.1熵的二进制分类的树,Gini
   test("Binary classification stump with fixed labels 0,1 for Entropy,Gini") {
     val dt = new DecisionTreeClassifier()
-      .setMaxDepth(3)
-      .setMaxBins(100)
+      .setMaxDepth(3)//树的最大深度
+      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val numClasses = 2
     Array(orderedLabeledPointsWithLabel0RDD, orderedLabeledPointsWithLabel1RDD).foreach { rdd =>
       DecisionTreeClassifier.supportedImpurities.foreach { impurity =>
@@ -96,7 +96,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rdd = categoricalDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")
-      .setMaxDepth(4)
+      .setMaxDepth(4)//树的最大深度
     val numClasses = 3
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -110,8 +110,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       LabeledPoint(1.0, Vectors.dense(3.0)))
     val rdd = sc.parallelize(arr)
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxDepth(4)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxDepth(4)//树的最大深度
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
@@ -124,7 +124,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       LabeledPoint(1.0, Vectors.sparse(2, Seq((1, 2.0)))))
     val rdd = sc.parallelize(arr)
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
+      .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
@@ -146,9 +146,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("Multiclass classification stump with continuous features") {
     val rdd = continuousDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxDepth(4)
-      .setMaxBins(100)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxDepth(4)//最大深度
+      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
@@ -156,9 +156,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("Multiclass classification stump with continuous + unordered categorical features") {
     val rdd = continuousDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxDepth(4)
-      .setMaxBins(100)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxDepth(4)//最大深度
+      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 3)
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -167,9 +167,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("Multiclass classification stump with 10-ary (ordered) categorical features") {
     val rdd = categoricalDataPointsForMulticlassForOrderedFeaturesRDD
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxDepth(4)
-      .setMaxBins(100)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxDepth(4)//最大深度
+      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 10, 1 -> 10)
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -179,9 +179,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       " with just enough bins") {
     val rdd = categoricalDataPointsForMulticlassForOrderedFeaturesRDD
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxDepth(4)
-      .setMaxBins(10)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxDepth(4)//最大深度
+      .setMaxBins(10)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 10, 1 -> 10)
     val numClasses = 3
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -194,9 +194,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 1.0)))))
     val rdd = sc.parallelize(arr)
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxDepth(2)
-      .setMinInstancesPerNode(2)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxDepth(2)//树的最大深度
+      .setMinInstancesPerNode(2)//分裂后自节点最少包含的实例数量
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }  
@@ -213,10 +213,10 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       LabeledPoint(0.0, Vectors.dense(0.0, 0.0)))
     val rdd = sc.parallelize(arr)
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxBins(2)
-      .setMaxDepth(2)
-      .setMinInstancesPerNode(2)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxBins(2)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
+      .setMaxDepth(2)//树的最大深度
+      .setMinInstancesPerNode(2)//分裂后自节点最少包含的实例数量
     val categoricalFeatures = Map(0 -> 2, 1-> 2)
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -230,9 +230,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rdd = sc.parallelize(arr)
 
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxDepth(2)
-      .setMinInfoGain(1.0)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxDepth(2)//树的最大深度
+      .setMinInfoGain(1.0)//分裂节点时所需最小信息增益
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
@@ -240,9 +240,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("predictRaw and predictProbability") {
     val rdd = continuousDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
-      .setMaxDepth(4)
-      .setMaxBins(100)
+      .setImpurity("Gini")//计算信息增益的准则
+      .setMaxDepth(4)//树的最大深度
+      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 3)
     val numClasses = 3
 
@@ -254,6 +254,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     MLTestingUtils.checkCopy(newTree)
 
     val predictions = newTree.transform(newData)
+    
+    //getPredictionCol预测结果列名,getRawPredictionCol原始预测,getProbabilityCol类别条件概率预测结果列名
       .select(newTree.getPredictionCol, newTree.getRawPredictionCol, newTree.getProbabilityCol)
       .collect()
 

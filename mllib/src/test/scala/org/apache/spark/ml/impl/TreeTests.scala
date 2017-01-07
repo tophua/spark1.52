@@ -32,7 +32,7 @@ private[ml] object TreeTests extends SparkFunSuite {
 
   /**
    * Convert the given data to a DataFrame, and set the features and label metadata.
-   * 把给出的数据到一个数据帧，并设置和标签的元数据的特点
+   * 把给出的数据到一个数据集,并设置和标签的元数据的特点
    * @param data  Dataset.  Categorical features and labels must already have 0-based indices.
    *              This must be non-empty.
    * @param categoricalFeatures  Map: categorical feature index -> number of distinct values
