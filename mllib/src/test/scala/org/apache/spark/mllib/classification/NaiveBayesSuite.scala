@@ -135,7 +135,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("get, set params") {//得到的,设置参数
     val nb = new NaiveBayes()
-    nb.setLambda(2.0)
+    nb.setLambda(2.0)//
     assert(nb.getLambda === 2.0)
     nb.setLambda(3.0)
     assert(nb.getLambda === 3.0)
