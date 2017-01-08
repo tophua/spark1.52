@@ -60,6 +60,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       (4,[],[])~==(4,[],[])
       (4,[0,3],[1.0,1.0])~==(4,[0,3],[1.0,1.0])
      */
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     cv.transform(df).select("features", "expected").collect().foreach {
       case Row(features: Vector, expected: Vector) =>
         println(features+"~=="+expected)
@@ -80,7 +81,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       (2, split("c"), Vectors.sparse(5, Seq((2, 1.0)))),
       (3, split("b b b b b"), Vectors.sparse(5, Seq((1, 5.0)))))
     ).toDF("id", "words", "expected")
-   
+   //fit()方法将DataFrame转化为一个Transformer的算法
     val cv = new CountVectorizer().setInputCol("words").setOutputCol("features").fit(df)
     //使用的词汇
     assert(cv.vocabulary === Array("a", "b", "c", "d", "e"))
@@ -115,7 +116,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("words")
       .setOutputCol("features")
       .setVocabSize(3)  // limit vocab size to 3 限制单词列表
-      .fit(df)
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
    //使用的词汇      
     assert(cvModel.vocabulary === Array("a", "b", "c"))
 
@@ -124,7 +125,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("words")
       .setOutputCol("features")
       .setMinDF(3)
-      .fit(df)
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
     //使用的词汇
     assert(cvModel2.vocabulary === Array("a", "b"))
 
@@ -139,9 +140,9 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("words")
       .setOutputCol("features")
       .setMinDF(3.0 / df.count())
-      .fit(df)
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
     assert(cvModel3.vocabulary === Array("a", "b"))
-
+//transform()方法将DataFrame转化为另外一个DataFrame的算法
     cvModel3.transform(df).select("features", "expected").collect().foreach {
       case Row(features: Vector, expected: Vector) =>
         assert(features ~== expected absTol 1e-14)
@@ -159,7 +160,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
         .setOutputCol("features")
         .setVocabSize(3) // limit vocab size to 3 限字的大小为3
         .setMinDF(3)
-        .fit(df)
+        .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
     }
   }
 
@@ -195,6 +196,7 @@ class CountVectorizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("words")
       .setOutputCol("features")
       .setMinTF(0.3)
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     cv.transform(df).select("features", "expected").collect().foreach {
       case Row(features: Vector, expected: Vector) =>
         assert(features ~== expected absTol 1e-14)

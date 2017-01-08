@@ -29,7 +29,8 @@ object SMSClassifierWord2Vec_IBM {
       (eachRow(0), eachRow(1).split(" "))
     })
     val msgDF = sqlCtx.createDataFrame(parsedRDD).toDF("label", "message")
-    //使用 StringIndexer 将原始的文本标签 (“Ham”或者“Spam”) 转化成数值型的表型，以便 Spark ML 处理
+    //使用 StringIndexer 将原始的文本标签 (“Ham”或者“Spam”) 转化成数值型的表型,以便 Spark ML 处理
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val labelIndexer = new StringIndexer().setInputCol("label").setOutputCol("indexedLabel").fit(msgDF)
     //使用 Word2Vec 将短信文本转化成数值型词向量
     val word2Vec = new Word2Vec().setInputCol("message").setOutputCol("features").setVectorSize(VECTOR_SIZE).setMinCount(1)
@@ -47,9 +48,10 @@ object SMSClassifierWord2Vec_IBM {
     //将原始文本数据按照 8:2 的比例分成训练和测试数据集
     val Array(trainingData, testData) = msgDF.randomSplit(Array(0.8, 0.2))
     //ML Pipeline 提供了大量做特征数据提取和转换的工具
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline().setStages(Array(labelIndexer, word2Vec, mlpc, labelConverter))
     val model = pipeline.fit(trainingData)//训练数据
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictionResultDF = model.transform(testData)
     //below 2 lines are for debug use
     //下面2行是调试使用

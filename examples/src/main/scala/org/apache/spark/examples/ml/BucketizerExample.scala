@@ -44,25 +44,27 @@ object BucketizerExample {
     */
     val splits = Array(Double.NegativeInfinity, -0.5, 0.0, 0.5, Double.PositiveInfinity)
 
-    val data = Array(-0.5, -0.3, 0.0, 0.2)
+    val data = Array(-0.5, -0.3, 0.0, 0.5,0.6)//数据
     val dataFrame = sqlContext.createDataFrame(data.map(Tuple1.apply)).toDF("features")
 
     val bucketizer = new Bucketizer()
-      .setInputCol("features")
-      .setOutputCol("bucketedFeatures")
-      .setSplits(splits)//设置分段标准
+      .setInputCol("features")//输入字段
+      .setOutputCol("bucketedFeatures")//输出字段
+      .setSplits(splits)//设置分段标准,注意分隔小于边界值
 
     // Transform original data into its bucket index.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val bucketedData = bucketizer.transform(dataFrame)
     /**
-     * +--------+----------------+
-     * |features|bucketedFeatures|
-     * +--------+----------------+
-     * |    -0.5|             1.0|
-     * |    -0.3|             1.0|
-     * |     0.0|             2.0|
-     * |     0.2|             2.0|
-     * +--------+----------------+
+    +--------+----------------+
+    |features|bucketedFeatures|
+    +--------+----------------+
+    |    -0.5|             1.0|
+    |    -0.3|             1.0|
+    |     0.0|             2.0|
+    |     0.5|             3.0|
+    |     0.6|             3.0|
+    +--------+----------------+
      */
     bucketedData.show()
     // $example off$

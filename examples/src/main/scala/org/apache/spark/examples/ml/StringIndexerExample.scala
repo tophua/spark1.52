@@ -56,7 +56,8 @@ object StringIndexerExample {
     val indexer = new StringIndexer()
       .setInputCol("category")
       .setOutputCol("categoryIndex")
-
+    //fit()方法将DataFrame转化为一个Transformer的算法
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val indexed = indexer.fit(df).transform(df)
     indexed.show()
     // $example off$

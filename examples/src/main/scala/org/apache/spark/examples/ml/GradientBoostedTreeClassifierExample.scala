@@ -54,14 +54,14 @@ object GradientBoostedTreeClassifierExample {
     val labelIndexer = new StringIndexer()
       .setInputCol("label")
       .setOutputCol("indexedLabel")
-      .fit(data)
+      .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
     // Automatically identify categorical features, and index them.
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
       .setMaxCategories(4)
-      .fit(data)
+      .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // Split the data into training and test sets (30% held out for testing).
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
@@ -79,13 +79,16 @@ object GradientBoostedTreeClassifierExample {
       .setLabels(labelIndexer.labels)
 
     // Chain indexers and GBT in a Pipeline.
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline()
       .setStages(Array(labelIndexer, featureIndexer, gbt, labelConverter))
 
     // Train model. This also runs the indexers.
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = pipeline.fit(trainingData)
 
     // Make predictions.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(testData)
 
     // Select example rows to display.

@@ -55,7 +55,7 @@ class PolynomialExpansionSuite extends SparkFunSuite with MLlibTestSparkContext 
     val polynomialExpansion = new PolynomialExpansion()
       .setInputCol("features")
       .setOutputCol("polyFeatures")
-
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     polynomialExpansion.transform(df).select("polyFeatures", "expected").collect().foreach {
       case Row(expanded: DenseVector, expected: DenseVector) =>
         assert(expanded ~== expected absTol 1e-1)
@@ -90,7 +90,7 @@ class PolynomialExpansionSuite extends SparkFunSuite with MLlibTestSparkContext 
       .setInputCol("features")
       .setOutputCol("polyFeatures")
       .setDegree(3)
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     polynomialExpansion.transform(df).select("polyFeatures", "expected").collect().foreach {
       case Row(expanded: DenseVector, expected: DenseVector) =>
         assert(expanded ~== expected absTol 1e-1)

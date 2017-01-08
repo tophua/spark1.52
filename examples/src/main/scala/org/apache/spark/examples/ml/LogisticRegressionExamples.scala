@@ -52,6 +52,7 @@ import org.apache.spark.util.Utils
      */
     val estimator = new LogisticRegression
     //创建一个训练集DataFrame转换器
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val transformer = estimator.fit(trainingDF)
     //创建测试数据john身高90,体重270.0是篮球运动员
     val john = Vectors.dense(90.0, 270.0)
@@ -64,6 +65,7 @@ import org.apache.spark.util.Utils
     //将featuresRDD转换为列名features的DataFrame
     val featuresDF = featuresRDD.toDF("features")
     //在转换器增加预测列features,转换器作出预测
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictionsDF = transformer.transform(featuresDF)
     println("======")
     predictionsDF.foreach { x =>println _}

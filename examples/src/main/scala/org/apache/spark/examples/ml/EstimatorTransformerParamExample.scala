@@ -61,6 +61,7 @@ object EstimatorTransformerParamExample {
       .setRegParam(0.01)
 
     // Learn a LogisticRegression model. This uses the parameters stored in lr.
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = lr.fit(training)
     // Since model1 is a Model (i.e., a Transformer produced by an Estimator),
     // we can view the parameters it used during fit().
@@ -80,6 +81,7 @@ object EstimatorTransformerParamExample {
 
     // Now learn a new model using the paramMapCombined parameters.
     // paramMapCombined overrides all parameters set earlier via lr.set* methods.
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model2 = lr.fit(training, paramMapCombined)
     println("Model 2 was fit using parameters: " + model2.parent.extractParamMap)
 
@@ -94,6 +96,7 @@ object EstimatorTransformerParamExample {
     // LogisticRegression.transform will only use the 'features' column.
     // Note that model2.transform() outputs a 'myProbability' column instead of the usual
     // 'probability' column since we renamed the lr.probabilityCol parameter previously.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model2.transform(test)
       .select("features", "label", "myProbability", "prediction")
       .collect()

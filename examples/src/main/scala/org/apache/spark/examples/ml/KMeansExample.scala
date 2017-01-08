@@ -64,6 +64,7 @@ object KMeansExample {
     val kmeans = new KMeans()
       .setK(k)//聚类簇数
       .setFeaturesCol(FEATURES_COL)//特征列名
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = kmeans.fit(dataset)
 
     // Shows the result 显示结果

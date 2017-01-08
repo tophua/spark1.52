@@ -47,7 +47,7 @@ object BinarizerExample {
       .setInputCol("feature")
       .setOutputCol("binarized_feature")
       .setThreshold(0.5)//阈值:如果<=阈值则去舍,>阈值等于1
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val binarizedDataFrame = binarizer.transform(dataFrame)
     val binarizedFeatures = binarizedDataFrame.select("binarized_feature")
     /**

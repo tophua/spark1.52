@@ -36,8 +36,6 @@ object CountVectorizerExample {
   
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
- 
-
     // $example on$
     //DataFrame包含id和texts两列
     val df = sqlContext.createDataFrame(Seq(
@@ -53,7 +51,7 @@ object CountVectorizerExample {
       .setOutputCol("features")
       .setVocabSize(3)//是以词为键,并且值可以在特征矩阵里可以索引的
       .setMinDF(2)
-      .fit(df)
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
     /**
      * +--------------------+
      * |            features|
@@ -62,6 +60,7 @@ object CountVectorizerExample {
      * |(3,[0,1,2],[2.0,2...|
      * +--------------------+
      */
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
       cvModel.transform(df).select("features").show()
     // alternatively, define CountVectorizerModel with a-priori vocabulary
     val cvm = new CountVectorizerModel(Array("a", "b", "c"))
@@ -75,6 +74,7 @@ object CountVectorizerExample {
      * |(3,[0,1,2],[2.0,2...|
      * +--------------------+
      */
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     cvm.transform(df).select("features").show()
     // $example off$
 

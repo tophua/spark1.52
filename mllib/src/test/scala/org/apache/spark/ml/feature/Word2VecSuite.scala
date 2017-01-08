@@ -84,11 +84,11 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
       //种子
       .setSeed(42L)
       //.minCount 只有当某个词出现的次数大于或者等于 minCount 时，才会被包含到词汇表里，否则会被忽略掉
-      .fit(docDF)
+      .fit(docDF)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(model)
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(docDF).select("result", "expected").collect().foreach {
       case Row(vector1: Vector, vector2: Vector) =>
         assert(vector1 ~== vector2 absTol 1E-5, "Transformed vector is different with expected.")
@@ -113,6 +113,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("text")//设置输入列
       .setOutputCol("result")//设置输出列  
       .setSeed(42L)//设置种子
+      //fit()方法将DataFrame转化为一个Transformer的算法
       .fit(docDF)
 
     val realVectors = model.getVectors.sort("word").select("vector").map {
@@ -150,6 +151,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     //同时文本
     val docDF = doc.zip(doc).toDF("text", "alsotext")
     //特征提取和转换 Word2Vec
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = new Word2Vec().setVectorSize(3).setInputCol("text").setOutputCol("result").setSeed(42L).fit(docDF)
     //查找最相似的2个单词
     val expectedSimilarity = Array(0.2789285076917586, -0.6336972059851644)

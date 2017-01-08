@@ -56,9 +56,11 @@ object NaiveBayesExample {
 
     // Train a NaiveBayes model.
     val model = new NaiveBayes()
+    //fit()方法将DataFrame转化为一个Transformer的算法
       .fit(trainingData)
 
     // Select example rows to display.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(testData)
     predictions.show()
 

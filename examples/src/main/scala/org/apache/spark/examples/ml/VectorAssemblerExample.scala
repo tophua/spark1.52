@@ -45,7 +45,7 @@ object VectorAssemblerExample {
     val assembler = new VectorAssembler()
       .setInputCols(Array("hour", "mobile", "userFeatures"))
       .setOutputCol("features")
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = assembler.transform(dataset)
     /*
      * [[18.0,1.0,0.0,10.0,0.5],1.0]

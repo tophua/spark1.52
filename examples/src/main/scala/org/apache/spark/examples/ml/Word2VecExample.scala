@@ -56,7 +56,9 @@ object Word2VecExample {
       .setOutputCol("result")
       .setVectorSize(3)
       .setMinCount(0)
+     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = word2Vec.fit(documentDF)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = model.transform(documentDF)
     result.select("result").take(3).foreach(println)
     // $example off$

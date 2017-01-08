@@ -78,8 +78,9 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val df = sqlContext.createDataFrame(data.zip(expected)).toDF("features", "expected")
     //计算逆词频 idf
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val idfModel = new IDF().setInputCol("features").setOutputCol("idfValue").fit(df)
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     idfModel.transform(df).select("idfValue", "expected").collect().foreach {
       case Row(x: Vector, y: Vector) =>
         //println(x+"|||"+y)
@@ -111,8 +112,8 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("features")
       .setOutputCol("idfValue")
       .setMinDocFreq(1)
-      .fit(df)
-
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     idfModel.transform(df).select("idfValue", "expected").collect().foreach {
       case Row(x: Vector, y: Vector) =>
         assert(x ~== y absTol 1e-5, "Transformed vector is different with expected vector.")

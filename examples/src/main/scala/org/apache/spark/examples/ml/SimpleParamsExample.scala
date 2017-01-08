@@ -66,7 +66,7 @@ object SimpleParamsExample {
 
     // Learn a LogisticRegression model.  This uses the parameters stored in lr.
     //学习一个逻辑回归模型,这使用存储的参数
-    val model1 = lr.fit(training.toDF())
+    val model1 = lr.fit(training.toDF())//fit()方法将DataFrame转化为一个Transformer的算法
     // Since model1 is a Model (i.e., a Transformer produced by an Estimator),由估计量产生的转换
     // we can view the parameters it used during fit().
     // This prints the parameter (name: value) pairs, where names are unique IDs for this
@@ -104,6 +104,7 @@ object SimpleParamsExample {
     // LogisticRegressionModel.transform will only use the 'features' column.
     // Note that model2.transform() outputs a 'myProbability' column instead of the usual
     // 'probability' column since we renamed the lr.probabilityCol parameter previously.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model2.transform(test.toDF())
       .select("features", "label", "myProbability", "prediction")
       .collect()

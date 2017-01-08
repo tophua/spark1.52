@@ -97,6 +97,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setMaxIter(5)
       .setStepSize(0.1)
       .setCheckpointInterval(2)
+     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = gbt.fit(df)
 
     // copied model must have the same parent.
@@ -172,6 +173,7 @@ private object GBTClassifierSuite {
     val oldGBT = new OldGBT(oldBoostingStrategy)
     val oldModel = oldGBT.run(data)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 2)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val newModel = gbt.fit(newData)
     // Use parent from newTree since this is not checked anyways.
     //梯度提升树(GBT)分类

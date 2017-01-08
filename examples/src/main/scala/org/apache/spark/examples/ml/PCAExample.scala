@@ -52,7 +52,8 @@ object PCAExample {
       .setInputCol("features")
       .setOutputCol("pcaFeatures")
       .setK(3)
-      .fit(df)
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val pcaDF = pca.transform(df)
     val result = pcaDF.select("pcaFeatures")
     /**

@@ -119,6 +119,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     val testDataset = sqlContext.createDataFrame(generateNaiveBayesInput(
       piArray, thetaArray, nPoints, 42, "multinomial"))
     val nb = new NaiveBayes().setSmoothing(1.0).setModelType("multinomial")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = nb.fit(testDataset)
 
     validateModelFit(pi, theta, model)
@@ -126,10 +127,10 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val validationDataset = sqlContext.createDataFrame(generateNaiveBayesInput(
       piArray, thetaArray, nPoints, 17, "multinomial"))
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictionAndLabels = model.transform(validationDataset).select("prediction", "label")
     validatePrediction(predictionAndLabels)
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     val featureAndProbabilities = model.transform(validationDataset)
       .select("features", "probability")
     validateProbabilities(featureAndProbabilities, model, "multinomial")
@@ -149,6 +150,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     val testDataset = sqlContext.createDataFrame(generateNaiveBayesInput(
       piArray, thetaArray, nPoints, 45, "bernoulli"))
     val nb = new NaiveBayes().setSmoothing(1.0).setModelType("bernoulli")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = nb.fit(testDataset)
 
     validateModelFit(pi, theta, model)
@@ -156,10 +158,10 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val validationDataset = sqlContext.createDataFrame(generateNaiveBayesInput(
       piArray, thetaArray, nPoints, 20, "bernoulli"))
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictionAndLabels = model.transform(validationDataset).select("prediction", "label")
     validatePrediction(predictionAndLabels)
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     val featureAndProbabilities = model.transform(validationDataset)
       .select("features", "probability")
     validateProbabilities(featureAndProbabilities, model, "bernoulli")

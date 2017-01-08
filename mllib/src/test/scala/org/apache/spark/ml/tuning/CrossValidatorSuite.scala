@@ -65,6 +65,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setEstimatorParamMaps(lrParamMaps)//评估参数
       .setEvaluator(eval)//评估模型
       .setNumFolds(3)//
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)
 
     // copied model must have the same paren.
@@ -93,6 +94,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setEstimatorParamMaps(lrParamMaps)//设置被评估模型的参数
       .setEvaluator(eval)
       .setNumFolds(3)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)
     val parent = cvModel.bestModel.parent.asInstanceOf[LinearRegression]
     assert(parent.getRegParam === 0.001)
@@ -100,6 +102,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(cvModel.avgMetrics.length === lrParamMaps.length)
 
     eval.setMetricName("r2")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel2 = cv.fit(dataset)
     val parent2 = cvModel2.bestModel.parent.asInstanceOf[LinearRegression]
     assert(parent2.getRegParam === 0.001)
@@ -140,7 +143,7 @@ object CrossValidatorSuite {
   class MyEstimator(override val uid: String) extends Estimator[MyModel] with HasInputCol {
 
     override def validateParams(): Unit = require($(inputCol).nonEmpty)
-
+	//fit()方法将DataFrame转化为一个Transformer的算法
     override def fit(dataset: DataFrame): MyModel = {
       throw new UnsupportedOperationException
     }

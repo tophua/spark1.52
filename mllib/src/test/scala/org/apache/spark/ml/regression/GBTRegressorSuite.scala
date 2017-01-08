@@ -86,11 +86,13 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val gbt = new GBTRegressor()
       .setMaxDepth(2)//树的最大深度
       .setMaxIter(2)//迭代次数
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = gbt.fit(df)
 
     // copied model must have the same parent.
     //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val preds = model.transform(df)
     val predictions = preds.select("prediction").map(_.getDouble(0))
     // Checks based on SPARK-8736 (to ensure it is not doing classification)
@@ -110,6 +112,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setMaxIter(5)//迭代次数
       .setStepSize(0.1)//每次迭代优化步长
       .setCheckpointInterval(2)//设置检查点间隔(>=1)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = gbt.fit(df)
 
     sc.checkpointDir = None

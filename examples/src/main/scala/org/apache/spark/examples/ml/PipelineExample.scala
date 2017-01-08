@@ -59,10 +59,12 @@ object PipelineExample {
     val lr = new LogisticRegression()
       .setMaxIter(10)
       .setRegParam(0.01)
+       //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // Fit the pipeline to training documents.
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = pipeline.fit(training)
     /*
     // Now we can optionally save the fitted pipeline to disk
@@ -83,6 +85,7 @@ object PipelineExample {
     )).toDF("id", "text")
 
     // Make predictions on test documents.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(test)
       .select("id", "text", "probability", "prediction")
       .collect()

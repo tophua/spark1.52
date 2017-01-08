@@ -53,6 +53,7 @@ object PolynomialExpansionExample {
       .setInputCol("features")
       .setOutputCol("polyFeatures")
       .setDegree(3)
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val polyDF = polynomialExpansion.transform(df)
     /**
     *[[-2.0,4.0,-8.0,2.3,-4.6,9.2,5.289999999999999,-10.579999999999998,12.166999999999996]]

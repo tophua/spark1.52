@@ -172,6 +172,7 @@ object OneVsRestExample {
 
     // score the model on test data.
     //评分测试数据模型
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val (predictionDuration, predictions) = time(ovrModel.transform(test))
 
     // evaluate the model 评估模型

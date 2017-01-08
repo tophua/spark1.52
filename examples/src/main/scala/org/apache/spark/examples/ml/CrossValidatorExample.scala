@@ -63,7 +63,7 @@ object CrossValidatorExample {
     // Prepare training documents, which are labeled.
     //准备训练数据
     val training = sc.parallelize(Seq(
-      //id,内容,分类标识
+      //id||内容||分类标识
       LabeledDocument(0L, "a b c d e spark", 1.0),
       LabeledDocument(1L, "b d", 0.0),
       LabeledDocument(2L, "spark f g h", 1.0),
@@ -89,6 +89,7 @@ object CrossValidatorExample {
     //逻辑回归
     val lr = new LogisticRegression()
       .setMaxIter(10)
+      //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
@@ -117,6 +118,7 @@ object CrossValidatorExample {
 
     // Run cross-validation, and choose the best set of parameters.
     //运行交叉验证,并选择最佳的参数集
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = crossval.fit(training.toDF())
 
     // Prepare test documents, which are unlabeled.
@@ -129,6 +131,7 @@ object CrossValidatorExample {
 
     // Make predictions on test documents.对测试文档进行预测 
     //cvModel uses the best model found (lrModel).C-V模型采用最好的模型
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     cvModel.transform(test.toDF())
       .select("id", "text", "probability", "prediction")
       .collect()

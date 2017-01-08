@@ -140,6 +140,7 @@ object LinearRegressionExample {
 
     // Train the model
     val startTime = System.nanoTime()
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val lirModel = lir.fit(training)
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")

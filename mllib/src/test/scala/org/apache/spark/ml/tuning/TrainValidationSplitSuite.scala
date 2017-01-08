@@ -47,6 +47,7 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
       .setEstimatorParamMaps(lrParamMaps)
       .setEvaluator(eval)
       .setTrainRatio(0.5)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)
     val parent = cvModel.bestModel.parent.asInstanceOf[LogisticRegression]
     assert(cv.getTrainRatio === 0.5)
@@ -71,6 +72,7 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
       .setEstimatorParamMaps(lrParamMaps)
       .setEvaluator(eval)
       .setTrainRatio(0.5)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)
     val parent = cvModel.bestModel.parent.asInstanceOf[LinearRegression]
     assert(parent.getRegParam === 0.001)
@@ -78,6 +80,7 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
     assert(cvModel.validationMetrics.length === lrParamMaps.length)
 
       eval.setMetricName("r2")
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel2 = cv.fit(dataset)
     val parent2 = cvModel2.bestModel.parent.asInstanceOf[LinearRegression]
     assert(parent2.getRegParam === 0.001)

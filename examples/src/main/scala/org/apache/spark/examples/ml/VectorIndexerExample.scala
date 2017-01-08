@@ -58,7 +58,7 @@ object VectorIndexerExample {
       .setInputCol("features")
       .setOutputCol("indexed")
       .setMaxCategories(3)//最大类别数为5,(即某一列)中多于10个取值视为连续值
-
+     //fit()方法将DataFrame转化为一个Transformer的算法
     val indexerModel = indexer.fit(data)
 
     val categoricalFeatures: Set[Int] = indexerModel.categoryMaps.keys.toSet
@@ -66,6 +66,7 @@ object VectorIndexerExample {
       categoricalFeatures.mkString(", "))
 
     // Create new column "indexed" with categorical values transformed to indices
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val indexedData = indexerModel.transform(data)
     /**
      * +-----+--------------------+--------------------+

@@ -29,7 +29,7 @@ import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.ml.util.MLTestingUtils
 import org.apache.spark.sql.DataFrame
 /**
- * 管道套件
+ *PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
  */
 class PipelineSuite extends SparkFunSuite {
 
@@ -54,18 +54,22 @@ class PipelineSuite extends SparkFunSuite {
     when(estimator2.copy(any[ParamMap])).thenReturn(estimator2)
     when(model2.copy(any[ParamMap])).thenReturn(model2)
     when(transformer3.copy(any[ParamMap])).thenReturn(transformer3)
-
+    //fit()方法将DataFrame转化为一个Transformer的算法
     when(estimator0.fit(meq(dataset0))).thenReturn(model0)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     when(model0.transform(meq(dataset0))).thenReturn(dataset1)
     when(model0.parent).thenReturn(estimator0)
     when(transformer1.transform(meq(dataset1))).thenReturn(dataset2)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     when(estimator2.fit(meq(dataset2))).thenReturn(model2)
     when(model2.transform(meq(dataset2))).thenReturn(dataset3)
     when(model2.parent).thenReturn(estimator2)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     when(transformer3.transform(meq(dataset3))).thenReturn(dataset4)
-
+    //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline()
       .setStages(Array(estimator0, transformer1, estimator2, transformer3))
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val pipelineModel = pipeline.fit(dataset0)
 
     MLTestingUtils.checkCopy(pipelineModel)
@@ -75,17 +79,19 @@ class PipelineSuite extends SparkFunSuite {
     assert(pipelineModel.stages(1).eq(transformer1))
     assert(pipelineModel.stages(2).eq(model2))
     assert(pipelineModel.stages(3).eq(transformer3))
-
+   //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = pipelineModel.transform(dataset0)
     assert(output.eq(dataset4))
   }
 
   test("pipeline with duplicate stages") {//重复阶段管道
     val estimator = mock[Estimator[MyModel]]
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline()
       .setStages(Array(estimator, estimator))
     val dataset = mock[DataFrame]
     intercept[IllegalArgumentException] {
+     //fit()方法将DataFrame转化为一个Transformer的算法
       pipeline.fit(dataset)
     }
   }
@@ -93,6 +99,7 @@ class PipelineSuite extends SparkFunSuite {
   test("PipelineModel.copy") {//管道模型复制
     val hashingTF = new HashingTF()
       .setNumFeatures(100)
+      //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val model = new PipelineModel("pipeline", Array[Transformer](hashingTF))
     val copied = model.copy(ParamMap(hashingTF.numFeatures -> 10))
     require(copied.stages(0).asInstanceOf[HashingTF].getNumFeatures === 10,
@@ -104,11 +111,13 @@ class PipelineSuite extends SparkFunSuite {
     val model1 = mock[MyModel]
 
     val stages = Array(transform0, model1)
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipelineModel0 = new PipelineModel("pipeline0", stages)
     assert(pipelineModel0.uid === "pipeline0")
     assert(pipelineModel0.stages === stages)
 
     val stagesAsList = stages.toList.asJava
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipelineModel1 = new PipelineModel("pipeline1", stagesAsList)
     assert(pipelineModel1.uid === "pipeline1")
     assert(pipelineModel1.stages === stages)

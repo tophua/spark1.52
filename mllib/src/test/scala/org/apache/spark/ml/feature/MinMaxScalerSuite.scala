@@ -51,8 +51,9 @@ class MinMaxScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val scaler = new MinMaxScaler().setInputCol("features").setOutputCol("scaled")
     //max,min是用户可以重新自定义的范围,将数据线性变换到[-5,5]
     .setMin(-5).setMax(5)
-
+	//fit()方法将DataFrame转化为一个Transformer的算法
     val model = scaler.fit(df)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(df).select("expected", "scaled").collect()
       .foreach { case Row(vector1: Vector, vector2: Vector) =>{
         /**

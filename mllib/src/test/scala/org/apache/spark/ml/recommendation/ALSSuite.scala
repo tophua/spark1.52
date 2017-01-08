@@ -358,9 +358,11 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
       .setNumUserBlocks(numUserBlocks)//用户数目(正数)
       .setNumItemBlocks(numItemBlocks)//商品数目(正数)
       .setSeed(0) //随机种子
-    //可以调整这些参数，不断优化结果，使均方差变小。比如：iterations越多，lambda较小，均方差会较小，推荐结果较优。
-    val alpha = als.getAlpha //是一个针对于隐性反馈 ALS 版本的参数，这个参数决定了偏好行为强度的基准
+    //可以调整这些参数，不断优化结果，使均方差变小。比如：iterations越多,lambda较小,均方差会较小,推荐结果较优。
+    val alpha = als.getAlpha //是一个针对于隐性反馈 ALS 版本的参数,这个参数决定了偏好行为强度的基准
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = als.fit(training.toDF())
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(test.toDF())
       .select("rating", "prediction")
       //实际评级,预测评级

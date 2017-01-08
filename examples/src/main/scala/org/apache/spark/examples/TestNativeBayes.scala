@@ -44,6 +44,7 @@ object TestNativeBayes {
 
     //将词语转换成数组
     var tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var wordsData = tokenizer.transform(trainingDF)
     //output1：（将词语转换成数组）
     println("output1：")   
@@ -51,6 +52,7 @@ object TestNativeBayes {
 
     //计算每个词在文档中的词频
     var hashingTF = new HashingTF().setNumFeatures(500000).setInputCol("words").setOutputCol("rawFeatures")
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var featurizedData = hashingTF.transform(wordsData)
     //output2：（计算每个词在文档中的词频）
     println("output2：")
@@ -58,7 +60,9 @@ object TestNativeBayes {
     //println(">>>>>>>>>>>>>>>."+featurizedData.toString())
     //计算每个词的TF-IDF
     var idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     var idfModel = idf.fit(featurizedData)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var rescaledData = idfModel.transform(featurizedData)
     //output3：（计算每个词的TF-IDF）
     println("output3：")
@@ -85,7 +89,9 @@ object TestNativeBayes {
 
     //测试数据集，做同样的特征表示及格式转换
     var testwordsData = tokenizer.transform(testDF)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var testfeaturizedData = hashingTF.transform(testwordsData)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var testrescaledData = idfModel.transform(testfeaturizedData)
     var testDataRdd = testrescaledData.select($"category", $"features").map {
       case Row(label: String, features: Vector) =>

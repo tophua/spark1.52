@@ -47,6 +47,7 @@ object NGramExample {
     )).toDF("label", "words")
 
     val ngram = new NGram().setInputCol("words").setOutputCol("ngrams")
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val ngramDataFrame = ngram.transform(wordDataFrame)
     /**
      * List(Hi I, I heard, heard about, about Spark)

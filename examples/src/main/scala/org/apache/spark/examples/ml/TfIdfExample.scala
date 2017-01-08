@@ -43,6 +43,7 @@ object TfIdfExample {
     )).toDF("label", "sentence")
 
     val tokenizer = new Tokenizer().setInputCol("sentence").setOutputCol("words")
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val wordsData = tokenizer.transform(sentenceData)
     val hashingTF = new HashingTF()
       .setInputCol("words").setOutputCol("rawFeatures").setNumFeatures(20)
@@ -50,7 +51,9 @@ object TfIdfExample {
     // alternatively, CountVectorizer can also be used to get term frequency vectors
 
     val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val idfModel = idf.fit(featurizedData)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val rescaledData = idfModel.transform(featurizedData)
     rescaledData.select("features", "label").take(3).foreach(println)
     // $example off$

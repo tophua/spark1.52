@@ -41,11 +41,11 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("isotonic regression predictions") {//保序回归预测
     val dataset = generateIsotonicInput(Seq(1, 2, 3, 1, 6, 17, 16, 17, 18))
     val ir = new IsotonicRegression().setIsotonic(true)
-
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = ir.fit(dataset)
 
     val predictions = model
-      .transform(dataset)
+      .transform(dataset) //transform()方法将DataFrame转化为另外一个DataFrame的算法
       .select("prediction").map { case Row(pred) =>
         pred
       }.collect()
@@ -61,12 +61,12 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("antitonic regression predictions") {//逆序回归预测
     val dataset = generateIsotonicInput(Seq(7, 5, 3, 5, 1))
     val ir = new IsotonicRegression().setIsotonic(false)
-
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = ir.fit(dataset)
     val features = generatePredictionInput(Seq(-2.0, -1.0, 0.5, 0.75, 1.0, 2.0, 9.0))
 
     val predictions = model
-      .transform(features)
+      .transform(features) //transform()方法将DataFrame转化为另外一个DataFrame的算法
       .select("prediction").map {
         case Row(pred) => pred
       }.collect()
@@ -78,7 +78,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val dataset = generateIsotonicInput(Seq(1, 2, 3))
     val ir = new IsotonicRegression
     ParamsSuite.checkParams(ir)
-    val model = ir.fit(dataset)
+    val model = ir.fit(dataset)//fit()方法将DataFrame转化为一个Transformer的算法
     ParamsSuite.checkParams(model)
   }
 
@@ -91,13 +91,13 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(!ir.isDefined(ir.weightCol))//列权重
     assert(ir.getIsotonic)//输出序列为保序/增序(真)或者反序/降序(假)
     assert(ir.getFeatureIndex === 0)//当特征列维向量时提供索引值,否则不进行处理
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model = ir.fit(dataset)
 
     // copied model must have the same parent.
     //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(dataset)
       .select("label", "features", "prediction", "weight")
       .collect()
@@ -130,6 +130,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val dataset = generateIsotonicInput(Seq(1, 2, 3))
 
     intercept[IllegalArgumentException] {
+    //fit()方法将DataFrame转化为一个Transformer的算法
       new IsotonicRegression().setWeightCol("w").fit(dataset)
     }
 
@@ -142,6 +143,8 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     intercept[IllegalArgumentException] {
+    //fit()方法将DataFrame转化为一个Transformer的算法
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
       new IsotonicRegression().fit(dataset).setFeaturesCol("f").transform(dataset)
     }
   }
@@ -155,12 +158,13 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val ir = new IsotonicRegression()
       .setFeatureIndex(1)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model = ir.fit(dataset)
 
     val features = generatePredictionInput(Seq(2.0, 3.0, 4.0, 5.0))
 
     val predictions = model
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
       .transform(features)
       .select("prediction").map {
       case Row(pred) => pred

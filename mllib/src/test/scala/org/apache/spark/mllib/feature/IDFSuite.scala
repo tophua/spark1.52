@@ -45,6 +45,7 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
     val termFrequencies = sc.parallelize(localTermFrequencies, 2)
     val idf = new IDF
     //termFrequencies List((4,[1,3],[1.0,2.0]), [0.0,1.0,2.0,3.0], (4,[1],[1.0]))
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = idf.fit(termFrequencies)
     val expected = Vectors.dense(Array(0, 3, 1, 2).map { x =>
       math.log((m + 1.0) / (x + 1.0))//对数
@@ -73,12 +74,14 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(tfidf2.values(0) ~== (1.0 * expected(1)) absTol 1e-12)
     }
     // Transforms a RDD 转换一个RDD
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val tfidf = model.transform(termFrequencies).collect()
     //WrappedArray((4,[1,3],[0.0,0.5753641449035617]), [0.0,0.0,1.3862943611198906,0.8630462173553426], (4,[1],[0.0]))
     println("Transforms:"+tfidf.toSeq)
     assertHelper(tfidf)
     // Transforms local vectors 转换本地向量
     //((4,[1,3],[0.0,0.5753641449035617]), [0.0,0.0,1.3862943611198906,0.8630462173553426], (4,[1],[0.0]))
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val localTfidf = localTermFrequencies.map(model.transform(_)).toArray
      println("localTfidf:"+localTfidf.toSeq)
     assertHelper(localTfidf)
@@ -94,6 +97,7 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
     val m = localTermFrequencies.size
     val termFrequencies = sc.parallelize(localTermFrequencies, 2)
     val idf = new IDF(minDocFreq = 1)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = idf.fit(termFrequencies)
     val expected = Vectors.dense(Array(0, 3, 1, 2).map { x =>
       if (x > 0) {
@@ -120,7 +124,7 @@ class IDFSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(tfidf2.values(0) ~== (1.0 * expected(1)) absTol 1e-12)
     }
     // Transforms a RDD
-    // 转换一个RDD
+   //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val tfidf = model.transform(termFrequencies).collect()
     assertHelper(tfidf)
     // Transforms local vectors

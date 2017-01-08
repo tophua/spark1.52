@@ -72,7 +72,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val model = new DecisionTreeRegressor()
       .setImpurity("variance")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度
-      .setMaxBins(8).fit(df)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
+      .setMaxBins(8).fit(df)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     MLTestingUtils.checkCopy(model)
   }
 
@@ -98,6 +98,7 @@ private[ml] object DecisionTreeRegressorSuite extends SparkFunSuite {
     val oldStrategy = dt.getOldStrategy(categoricalFeatures)
     val oldTree = OldDecisionTree.train(data, oldStrategy)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 0)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val newTree = dt.fit(newData)
     // Use parent from newTree since this is not checked anyways.
     val oldTreeAsNew = DecisionTreeRegressionModel.fromOld(

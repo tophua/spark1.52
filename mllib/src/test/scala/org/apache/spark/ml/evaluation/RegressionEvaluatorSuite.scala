@@ -67,8 +67,10 @@ class RegressionEvaluatorSuite extends SparkFunSuite with MLlibTestSparkContext 
      * > r2 <- mmetric(label, predict(model, features), metric='R2')
      */
     val trainer = new LinearRegression
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = trainer.fit(dataset) //转换
     //Prediction 预测
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(dataset)
     predictions.collect()
 

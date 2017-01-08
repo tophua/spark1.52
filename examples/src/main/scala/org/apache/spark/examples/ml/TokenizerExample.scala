@@ -56,9 +56,10 @@ object TokenizerExample {
        */
       
       .setPattern("\\W") // alternatively .setPattern("\\w+").setGaps(false)
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     val tokenized = tokenizer.transform(sentenceDataFrame)
     tokenized.select("words", "label").take(3).foreach(println)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val regexTokenized = regexTokenizer.transform(sentenceDataFrame)
     regexTokenized.select("words", "label").take(3).foreach(println)
     // $example off$

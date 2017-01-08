@@ -119,6 +119,7 @@ object ClassificationPipeline_IBM {
      * 这个调用会返回一个 PipelineModel 类实例， 进而被用来预测测试数据的标签，它是一个 Transformer
      */
     val pipeline = new Pipeline().setStages(Array(labelIndexer, vectorAssembler, rfClassifier, labelConverter))
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = pipeline.fit(trainingData)
 
     /**
@@ -129,6 +130,7 @@ object ClassificationPipeline_IBM {
      * 因为它可以把 一个不包含预测标签的测试数据集 DataFrame 打上标签转化成另一个包含预测标签的 DataFrame，
      * 显然这样的结果集可以被用来做分析结果的可视化
      */
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictionResultDF = model.transform(testData) //主要是用来把 一个 DataFrame 转换成另一个 DataFrame
 
     /**

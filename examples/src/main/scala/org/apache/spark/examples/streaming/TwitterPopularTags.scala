@@ -60,10 +60,12 @@ object TwitterPopularTags {
 
     val topCounts60 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(60))
                      .map{case (topic, count) => (count, topic)}
+		     //transform()方法将DataFrame转化为另外一个DataFrame的算法
                      .transform(_.sortByKey(false))
 
     val topCounts10 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(10))
                      .map{case (topic, count) => (count, topic)}
+		     //transform()方法将DataFrame转化为另外一个DataFrame的算法
                      .transform(_.sortByKey(false))
 
 

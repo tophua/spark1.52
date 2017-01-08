@@ -40,7 +40,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val data = sc.parallelize(Seq((0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
     //1)按照 Label 出现的频次对其进行序列编码,如0,1,2，… Array[String] = Array(a, c, b),a出次3次,c出现2次,b出现1次
-    //2)fit方法设计和实现上实际上是采用了模板方法的设计模式，具体会调用实现类的 train方法
+    //2)fit()方法将DataFrame转化为一个Transformer的算法
     val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
 
     // copied model must have the same parent.
@@ -64,6 +64,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("StringIndexer with a numeric input column") {//一个数字输入列字符串索引
     val data = sc.parallelize(Seq((0, 100), (1, 200), (2, 300), (3, 100), (4, 100), (5, 300)), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
     val transformed = indexer.transform(df)
     val attr = Attribute.fromStructField(transformed.schema("labelIndex")).asInstanceOf[NominalAttribute]
@@ -82,6 +83,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("label")
       .setOutputCol("labelIndex")
     val df = sqlContext.range(0L, 10L)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     assert(indexerModel.transform(df).eq(df))
   }
 
@@ -100,6 +102,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("index")//输入列
       .setOutputCol("actual")//输出列
       .setLabels(labels)//
+       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     idxToStr0.transform(df0).select("actual", "expected").collect().foreach {
       case Row(actual, expected) =>
         assert(actual === expected)
@@ -119,12 +122,14 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val data = sc.parallelize(Seq((0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
     //indexer.labels = Array(a, c, b)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
     val transformed = indexer.transform(df)
     //labelIndex = Array([0.0,a], [2.0,b], [1.0,c], [0.0,a], [0.0,a], [1.0,c])
     val labelIndex=transformed.select("labelIndex", "label").collect()
     //setLabels 设置标签列表indexer.labels = Array(a, c, b)
     val idx2str = new IndexToString().setInputCol("labelIndex").setOutputCol("sameLabel").setLabels(indexer.labels)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     idx2str.transform(transformed).select("label", "sameLabel").collect().foreach {
       case Row(a: String, b: String) =>
         assert(a === b)

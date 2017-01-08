@@ -85,6 +85,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCols(Array("x", "y", "z", "n"))//源数据 DataFrame 中存储文本词数组列的名称
       .setOutputCol("features")//经过处理的数值型特征向量存储列名称
     //res8: Array[org.apache.spark.sql.Row] = Array([[0.0,1.0,2.0,0.0,3.0,10.0]])
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     assembler.transform(df).select("features").collect().foreach {
       case Row(v: Vector) =>
         //println(">>>>>>>>>>>>"+v)
@@ -114,6 +115,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCols(Array("browser", "hour", "count", "user", "ad"))
       .setOutputCol("features")
     //output: org.apache.spark.sql.DataFrame=[browser,hour,count,user,ad,features]
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = assembler.transform(df)
     val schema = output.schema
     val features = AttributeGroup.fromStructField(schema("features"))

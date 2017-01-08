@@ -79,6 +79,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
     //fit 计算汇总统计信息,然后返回一个模型,该模型可以根据StandardScaler配置将输入数据转换为标准差为1,均值为0的特征
     val model1 = standardizer1.fit(dataRDD)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
 
@@ -89,7 +90,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val data1 = denseData.map(equivalentModel1.transform)
     val data2 = denseData.map(equivalentModel2.transform)
     val data3 = denseData.map(equivalentModel3.transform)
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val data1RDD = equivalentModel1.transform(dataRDD)
     val data2RDD = equivalentModel2.transform(dataRDD)
     val data3RDD = equivalentModel3.transform(dataRDD)
@@ -146,7 +147,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -213,7 +214,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -235,7 +236,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
         sparseData.map(equivalentModel3.transform)
       }
     }
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val data2RDD = equivalentModel2.transform(dataRDD)
 
     val summary = computeSummary(data2RDD)
@@ -262,7 +263,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -280,7 +281,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
         sparseData.map(model3.transform)
       }
     }
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val data2RDD = model2.transform(dataRDD)
 
     val summary = computeSummary(data2RDD)
@@ -307,7 +308,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler(withMean = true, withStd = false)
     val standardizer3 = new StandardScaler(withMean = false, withStd = true)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -335,7 +336,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler(withMean = true, withStd = false)
     val standardizer3 = new StandardScaler(withMean = false, withStd = true)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)

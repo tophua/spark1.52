@@ -62,12 +62,14 @@ object IsotonicRegressionExample {
 
     // Trains an isotonic regression model.
     val ir = new IsotonicRegression()
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = ir.fit(dataset)
 
     println(s"Boundaries in increasing order: ${model.boundaries}")
     println(s"Predictions associated with the boundaries: ${model.predictions}")
 
     // Makes predictions.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(dataset).show()
     // $example off$
 

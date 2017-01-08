@@ -47,7 +47,7 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val bucketizer: Bucketizer = new Bucketizer().setInputCol("feature")//输入字段
       .setOutputCol("result")//输出字段
       .setSplits(splits)//分隔
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     bucketizer.transform(dataFrame).select("result", "expected").collect().foreach {
       case Row(x: Double, y: Double) =>
         /**
@@ -67,12 +67,14 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val badDF1 = sqlContext.createDataFrame(invalidData1.zipWithIndex).toDF("feature", "idx")
     withClue("Invalid feature value -0.9 was not caught as an invalid feature!") {
       intercept[SparkException] {
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
         bucketizer.transform(badDF1).collect()
       }
     }
     val badDF2 = sqlContext.createDataFrame(invalidData2.zipWithIndex).toDF("feature", "idx")
     withClue("Invalid feature value 0.51 was not caught as an invalid feature!") {
       intercept[SparkException] {
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
         bucketizer.transform(badDF2).collect()
       }
     }

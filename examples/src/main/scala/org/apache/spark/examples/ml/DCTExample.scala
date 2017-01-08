@@ -50,7 +50,7 @@ object DCTExample {
       .setInputCol("features")
       .setOutputCol("featuresDCT")
       .setInverse(false)
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val dctDf = dct.transform(df)
     /**
      * +--------------------+

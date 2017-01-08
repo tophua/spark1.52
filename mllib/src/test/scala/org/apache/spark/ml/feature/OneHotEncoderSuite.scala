@@ -42,6 +42,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
      * 0是出现频次最多的,
      * res24: Array([0.0,a,0], [2.0,b,1], [1.0,c,2],[0.0,a,3], [0.0,a,4], [1.0,c,5])
      */
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     indexer.transform(df)
   }
 
@@ -53,8 +54,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
     val transformed = stringIndexed()
     // OneHotEncoder称为一位有效编码，在机器学习任务中，对于这样的特征，通常我们需要对其进行特征数字化
     val encoder = new OneHotEncoder().setInputCol("labelIndex").setOutputCol("labelVec").setDropLast(false)
-    //transform主要是用来把 一个 DataFrame 转换成另一个 DataFrame
-      
+    //transform主要是用来把 一个 DataFrame 转换成另一个 DataFrame     
     val encoded = encoder.transform(transformed)
     /**
      * res26= Array([0,(3,[0],[1.0])], [1,(3,[2],[1.0])], [2,(3,[1],[1.0])], 
@@ -78,6 +78,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
     val encoder = new OneHotEncoder()
       .setInputCol("labelIndex")
       .setOutputCol("labelVec")
+       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val encoded = encoder.transform(transformed)
 
     val output = encoded.select("id", "labelVec").map { r =>
@@ -97,6 +98,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
     val df = sqlContext.createDataFrame(Seq(0.0, 1.0, 2.0, 1.0).map(Tuple1.apply)).toDF("size")
       .select(col("size").as("size", attr.toMetadata()))
     val encoder = new OneHotEncoder().setInputCol("size").setOutputCol("encoded")
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = encoder.transform(df)
     val group = AttributeGroup.fromStructField(output.schema("encoded"))
     assert(group.size === 2)
@@ -107,6 +109,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("input column without ML attribute") {//具输入列没有ML属性
     val df = sqlContext.createDataFrame(Seq(0.0, 1.0, 2.0, 1.0).map(Tuple1.apply)).toDF("index")
     val encoder = new OneHotEncoder().setInputCol("index").setOutputCol("encoded")
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = encoder.transform(df)
     val group = AttributeGroup.fromStructField(output.schema("encoded"))
     assert(group.size === 2)

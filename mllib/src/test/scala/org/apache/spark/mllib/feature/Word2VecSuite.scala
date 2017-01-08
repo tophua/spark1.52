@@ -43,7 +43,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     val doc = sc.parallelize(localDoc).map(line => line.split(" ").toSeq)
     //接着构造Word2Vec实例并使用输入数据拟合出Word2VecModel模型,setVectorSize设置矩阵长度
     //通过计算向量之间的距离（欧式距离、余弦距离等）来体现词与词的相似性,设置向量大小
-    val model = new Word2Vec().setVectorSize(10).setSeed(42L).fit(doc)   
+    val model = new Word2Vec().setVectorSize(10).setSeed(42L).fit(doc) //fit()方法将DataFrame转化为一个Transformer的算法  
     /***
      * 通过计算向量之间的距离（欧式距离、余弦距离等）来体现词与词的相似性
      * res7: Map[String,Array[Float]] = Map(
@@ -73,6 +73,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
       val localDoc = Seq(sentence, sentence)
       val doc = sc.parallelize(localDoc)
         .map(line => line.split(" ").toSeq)
+	//fit()方法将DataFrame转化为一个Transformer的算法
       new Word2Vec().setMinCount(10).fit(doc)
     }
   }

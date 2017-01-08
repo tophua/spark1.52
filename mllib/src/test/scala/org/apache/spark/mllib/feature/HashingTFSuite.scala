@@ -46,6 +46,7 @@ class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(termFreqs.map(_._1).toSet.size === 4, "expecting perfect hashing")//期待完美的哈希
     val expected = Vectors.sparse(n, termFreqs)
     //transform 把每个输入文档映射到一个Vector对象
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     assert(hashingTF.transform(doc) === expected)
   }
 
@@ -56,6 +57,7 @@ class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
       "a b c d a b c".split(" "),
       "c b a c b a a".split(" "))
     val docs = sc.parallelize(localDocs, 2)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     assert(hashingTF.transform(docs).collect().toSet === localDocs.map(hashingTF.transform).toSet)
   }
 }

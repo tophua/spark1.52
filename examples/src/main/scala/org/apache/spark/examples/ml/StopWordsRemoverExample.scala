@@ -55,6 +55,7 @@ object StopWordsRemoverExample {
  * |  1|[Mary, had, a, li...|[Mary, little, lamb]|
  * +---+--------------------+--------------------+
  */
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     remover.transform(dataSet).show()
     // $example off$
 

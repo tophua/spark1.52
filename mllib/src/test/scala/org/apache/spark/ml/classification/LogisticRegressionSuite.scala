@@ -96,11 +96,13 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(lr.getProbabilityCol === "probability")
     assert(lr.getFitIntercept)//适合拦截 true
     assert(lr.getStandardization)//标准化
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
      /**
       * dd: org.apache.spark.sql.DataFrame = 
       * [label: double, features: vector, rawPrediction: vector, probability: vector, prediction: double]
       */
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val dd=model.transform(dataset).select("label", "features","rawPrediction", "probability", "prediction").collect().foreach { 
        case Row(label: Double,features:Vector,rawPrediction:Vector, probability: Vector,prediction: Double) =>
         //文档ID,text文本,probability概率,prediction 预测分类
@@ -167,6 +169,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     //阈值和阈值必须是一致的,阈值不匹配
     withClue("fit with ParamMap should throw error if threshold, thresholds do not match.") {
       intercept[IllegalArgumentException] {
+      //fit()方法将DataFrame转化为一个Transformer的算法
         val lr2model = lr2.fit(dataset,
           lr2.thresholds -> Array(0.3, 0.7), lr2.threshold -> (expectedThreshold / 2.0))
         lr2model.getThreshold
@@ -177,6 +180,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("logistic regression doesn't fit intercept when fitIntercept is off") {
     val lr = new LogisticRegression
     lr.setFitIntercept(false)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
     //默认拦截0.0
     assert(model.intercept === 0.0)
@@ -194,6 +198,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setRegParam(1.0)
       .setThreshold(0.6)
       .setProbabilityCol("myProbability")
+     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
     val parent = model.parent.asInstanceOf[LogisticRegression]
     assert(parent.getMaxIter === 10)
@@ -204,6 +209,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     // Modify model params, and check that the params worked.
     //修改模型参数,并检查工作的参数
     model.setThreshold(1.0)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predAllZero = model.transform(dataset)
       .select("prediction", "myProbability")
       .collect()
@@ -224,6 +230,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     // Call fit() with new params, and check as many params as we can.
     //新的参数调用fit(),我们可以检查的参数
     lr.setThresholds(Array(0.6, 0.4))
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model2 = lr.fit(dataset, lr.maxIter -> 5, lr.regParam -> 0.1,
       lr.probabilityCol -> "theProb")
     val parent2 = model2.parent.asInstanceOf[LogisticRegression]
@@ -237,12 +244,13 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("logistic regression: Predictor, Classifier methods") {//逻辑回归:预测,分类方法
     val sqlContext = this.sqlContext
     val lr = new LogisticRegression
-
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
     //默认分类数
     assert(model.numClasses === 2)
 
     val threshold = model.getThreshold
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val results = model.transform(dataset)
 
     // Compare rawPrediction with probability
@@ -312,7 +320,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("binary logistic regression with intercept without regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(true).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true).setStandardization(false)
-
+	//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -389,7 +397,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setElasticNetParam(1.0).setRegParam(0.12).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true)
       .setElasticNetParam(1.0).setRegParam(0.12).setStandardization(false)
-
+	//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -448,7 +456,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setElasticNetParam(1.0).setRegParam(0.12).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(false)
       .setElasticNetParam(1.0).setRegParam(0.12).setStandardization(false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -508,7 +516,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setElasticNetParam(0.0).setRegParam(1.37).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true)
       .setElasticNetParam(0.0).setRegParam(1.37).setStandardization(false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -567,7 +575,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setElasticNetParam(0.0).setRegParam(1.37).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(false)
       .setElasticNetParam(0.0).setRegParam(1.37).setStandardization(false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -627,7 +635,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true)
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -686,7 +694,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(false)
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -746,7 +754,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setElasticNetParam(1.0).setRegParam(6.0).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true)
       .setElasticNetParam(1.0).setRegParam(6.0).setStandardization(false)
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -812,6 +820,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setMaxIter(10)
       .setRegParam(1.0)
       .setThreshold(0.6)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
     val summary = model.summary.asInstanceOf[BinaryLogisticRegressionSummary]
 
@@ -833,6 +842,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setMaxIter(10)
       .setRegParam(1.0)
       .setThreshold(0.6)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
     assert(
       model.summary

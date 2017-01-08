@@ -46,6 +46,7 @@ class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
       data.zip(defaultBinarized)).toDF("feature", "expected")
     //二元分类,输入字段feature,输出字段binarized_feature
     val binarizer: Binarizer = new Binarizer().setInputCol("feature").setOutputCol("binarized_feature")
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     binarizer.transform(dataFrame).select("binarized_feature", "expected").collect().foreach {
       case Row(x: Double, y: Double) =>
         //println(x+"||||||"+y)
@@ -63,7 +64,7 @@ class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
         data.zip(thresholdBinarized)).toDF("feature", "expected")
 
     val binarizer: Binarizer = new Binarizer().setInputCol("feature").setOutputCol("binarized_feature").setThreshold(threshold)
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     binarizer.transform(dataFrame).select("binarized_feature", "expected").collect().foreach {
       case Row(x: Double, y: Double) =>
         //println(x+"||||||"+y)

@@ -135,12 +135,13 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 2
 
     val df: DataFrame = TreeTests.setMetadata(rdd, categoricalFeatures, numClasses)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = rf.fit(df)
 
     // copied model must have the same parent.
     //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(df)
       .select(rf.getPredictionCol, rf.getRawPredictionCol, rf.getProbabilityCol)
       .collect()
@@ -231,6 +232,7 @@ private object RandomForestClassifierSuite {
     val oldModel = OldRandomForest.trainClassifier(
       data, oldStrategy, rf.getNumTrees, rf.getFeatureSubsetStrategy, rf.getSeed.toInt)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val newModel = rf.fit(newData)
     // Use parent from newTree since this is not checked anyways.
     val oldModelAsNew = RandomForestClassificationModel.fromOld(

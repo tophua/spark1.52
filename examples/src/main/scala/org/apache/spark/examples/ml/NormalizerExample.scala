@@ -50,11 +50,12 @@ object NormalizerExample {
       .setInputCol("features")
       .setOutputCol("normFeatures")
       .setP(1.0)
-
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val l1NormData = normalizer.transform(dataFrame)
     l1NormData.show()
 
     // Normalize each Vector using $L^\infty$ norm.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val lInfNormData = normalizer.transform(dataFrame, normalizer.p -> Double.PositiveInfinity)
     lInfNormData.show()
     // $example off$

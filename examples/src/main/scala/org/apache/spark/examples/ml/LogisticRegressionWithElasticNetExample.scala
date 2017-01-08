@@ -54,6 +54,7 @@ object LogisticRegressionWithElasticNetExample {
       .setElasticNetParam(0.8)
 
     // Fit the model
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val lrModel = lr.fit(training)
 
     // Print the coefficients and intercept for logistic regression

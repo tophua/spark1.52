@@ -78,6 +78,7 @@ object ModelSelectionViaCrossValidationExample {
       .setOutputCol("features")
     val lr = new LogisticRegression()
       .setMaxIter(10)
+       //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
@@ -101,6 +102,7 @@ object ModelSelectionViaCrossValidationExample {
       .setNumFolds(2)  // Use 3+ in practice
 
     // Run cross-validation, and choose the best set of parameters.
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(training)
 
     // Prepare test documents, which are unlabeled (id, text) tuples.
@@ -112,6 +114,7 @@ object ModelSelectionViaCrossValidationExample {
     )).toDF("id", "text")
 
     // Make predictions on test documents. cvModel uses the best model found (lrModel).
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     cvModel.transform(test)
       .select("id", "text", "probability", "prediction")
       .collect()

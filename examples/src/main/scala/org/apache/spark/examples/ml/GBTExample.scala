@@ -193,10 +193,12 @@ object GBTExample {
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
     stages += dt
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline().setStages(stages.toArray)
 
     // Fit the Pipeline 安装管道
     val startTime = System.nanoTime()
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val pipelineModel = pipeline.fit(training)
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")

@@ -35,6 +35,7 @@ object NativeBayesSQL {
     //[1,苹果 梨 香蕉]
     //将分好的词转换为数组
     var tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var wordsData = tokenizer.transform(srcDF)
     wordsData.select($"category", $"text", $"words").take(2).foreach(println)
     //[0,苹果 官网 苹果 宣布,WrappedArray(苹果, 官网, 苹果, 宣布)]
@@ -53,7 +54,9 @@ object NativeBayesSQL {
 
     //逆文档频率(IDF)，用来衡量一个词语特定文档的相关度
     var idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     var idfModel = idf.fit(featurizedData)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var rescaledData = idfModel.transform(featurizedData)
     rescaledData.select($"category", $"words", $"features").take(2).foreach(println)
 

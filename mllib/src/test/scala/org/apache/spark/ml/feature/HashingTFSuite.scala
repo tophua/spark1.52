@@ -44,6 +44,7 @@ class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
     val n = 100
     //words:WrappedArray(a, a, b, b, c, d)
     val hashingTF = new HashingTF().setInputCol("words").setOutputCol("features").setNumFeatures(n)//将词转化为词频
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = hashingTF.transform(df)
     //属性分组
     val attrGroup = AttributeGroup.fromStructField(output.schema("features"))

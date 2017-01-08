@@ -90,6 +90,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("Normalization with default parameter") {//默认参数的正常化
+  //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = collectResult(normalizer.transform(dataFrame))
 
     assertTypeOfVector(data, result)
@@ -99,7 +100,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("Normalization with setter") {//规范化设置
     normalizer.setP(1)
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = collectResult(normalizer.transform(dataFrame))
 
     assertTypeOfVector(data, result)

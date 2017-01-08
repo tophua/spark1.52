@@ -78,6 +78,7 @@ class RegexTokenizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 object RegexTokenizerSuite extends SparkFunSuite {
 
   def testRegexTokenizer(t: RegexTokenizer, dataset: DataFrame): Unit = {
+   //transform()方法将DataFrame转化为另外一个DataFrame的算法
     t.transform(dataset)
       .select("tokens", "wantedTokens")
       .collect()

@@ -69,6 +69,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val l2Normalizer = new Normalizer()
 
     val data2 = data.map(l2Normalizer.transform)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val data2RDD = l2Normalizer.transform(dataRDD)
 
     assert((data, data2, data2RDD.collect()).zipped.forall {
@@ -96,6 +97,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val lInfNormalizer = new Normalizer(Double.PositiveInfinity)
 
     val dataInf = data.map(lInfNormalizer.transform)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val dataInfRDD = lInfNormalizer.transform(dataRDD)
 
     assert((data, dataInf, dataInfRDD.collect()).zipped.forall {

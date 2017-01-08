@@ -42,6 +42,7 @@ class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
         //wantedNGrams
         Array("Test for", "for ngram", "ngram .")
     )))
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     nGram.transform(dataset).select("nGrams", "wantedNGrams").collect().foreach { 
       
       case Row(actualNGrams, wantedNGrams) =>{
@@ -63,6 +64,7 @@ class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
         Array("a", "b", "c", "d", "e"),
         Array("a b c d", "b c d e")
       )))
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
       nGram.transform(dataset).select("nGrams", "wantedNGrams").collect().foreach {       
           case Row(actualNGrams, wantedNGrams) =>  println(actualNGrams+"|||"+wantedNGrams)      
       }
@@ -96,6 +98,7 @@ class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
 object NGramSuite extends SparkFunSuite {
 
   def testNGram(t: NGram, dataset: DataFrame): Unit = {
+  //transform()方法将DataFrame转化为另外一个DataFrame的算法
     t.transform(dataset)
       .select("nGrams", "wantedNGrams")
       .collect()

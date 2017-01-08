@@ -78,11 +78,13 @@ object TrainValidationSplitExample {
 
     // Run train validation split, and choose the best set of parameters.
     //运行训练验证拆分,并选择最佳的参数集
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = trainValidationSplit.fit(training)
 
     // Make predictions on test data. model is the model with combination of parameters
     //对测试数据进行预测,模型是最优的参数组合的模型
     // that performed best.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(test)
       .select("features", "label", "prediction")
       .show()

@@ -54,6 +54,8 @@ object RFormulaExample {
       .setFormula("clicked ~ country + hour")
       .setFeaturesCol("features")
       .setLabelCol("label")
+      //fit()方法将DataFrame转化为一个Transformer的算法
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = formula.fit(dataset).transform(dataset)
     /**
     id | country |hour | clicked | features         | label

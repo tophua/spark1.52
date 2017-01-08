@@ -64,6 +64,7 @@ object DeveloperApiExample {
 
     // Learn a LogisticRegression model.  This uses the parameters stored in lr.
     //学习一个逻辑回归模型,这使用存储的参数
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(training.toDF())
 
     // Prepare test data. 准备测试数据
@@ -73,6 +74,7 @@ object DeveloperApiExample {
       LabeledPoint(1.0, Vectors.dense(0.0, 2.2, -1.5))))
 
     // Make predictions on test data. 对测试数据进行预测
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val sumPredictions: Double = model.transform(test.toDF())
       .select("features", "label", "prediction")
       .collect()

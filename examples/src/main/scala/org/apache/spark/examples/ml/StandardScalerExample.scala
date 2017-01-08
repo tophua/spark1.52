@@ -57,9 +57,11 @@ object StandardScalerExample {
       .setWithMean(false)//将均值移到0,注意对于稀疏输入矩阵不可以用。默认为false
 
     // Compute summary statistics by fitting the StandardScaler.
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val scalerModel = scaler.fit(dataFrame)
 
     // Normalize each feature to have unit standard deviation.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val scaledData = scalerModel.transform(dataFrame)
     scaledData.show()
     // $example off$

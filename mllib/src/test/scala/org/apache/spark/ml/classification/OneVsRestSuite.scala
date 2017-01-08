@@ -73,6 +73,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setClassifier(new LogisticRegression)
     assert(ova.getLabelCol === "label")
     assert(ova.getPredictionCol === "prediction")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val ovaModel = ova.fit(dataset)
 
     // copied model must have the same parent.
@@ -80,6 +81,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     MLTestingUtils.checkCopy(ovaModel)
 
     assert(ovaModel.models.size === numClasses)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val transformedDataset = ovaModel.transform(dataset)
 
     // check for label metadata in prediction col
@@ -113,6 +115,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val labelWithMetadata = dataset("label").as("label", labelMetadata.toMetadata())
     val features = dataset("features").as("features")
     val datasetWithLabelMetadata = dataset.select(labelWithMetadata, features)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     ova.fit(datasetWithLabelMetadata)
   }
   //确保标签的功能和预测列配置
@@ -134,6 +137,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setPredictionCol("p")
 
     val ovaModel = ova.fit(indexedDataset)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val transformedDataset = ovaModel.transform(indexedDataset)
     val outputFields = transformedDataset.schema.fieldNames.toSet
     assert(outputFields.contains("p"))
@@ -144,6 +148,8 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setMaxIter(1)
     val ovr = new OneVsRest()
       .setClassifier(logReg)
+      //fit()方法将DataFrame转化为一个Transformer的算法
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = ovr.fit(dataset).transform(dataset)
     assert(output.schema.fieldNames.toSet === Set("label", "features", "prediction"))
   }
@@ -161,7 +167,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     require(ovr.getClassifier.getOrDefault(lr.maxIter) === 1, "copy should have no side-effects")
     require(ovr1.getClassifier.getOrDefault(lr.maxIter) === 10,
       "copy should handle extra classifier params")
-
+//fit()方法将DataFrame转化为一个Transformer的算法
     val ovrModel = ovr1.fit(dataset).copy(ParamMap(lr.thresholds -> Array(0.9, 0.1)))
     ovrModel.models.foreach { case m: LogisticRegressionModel =>
       require(m.getThreshold === 0.1, "copy should handle extra model params")

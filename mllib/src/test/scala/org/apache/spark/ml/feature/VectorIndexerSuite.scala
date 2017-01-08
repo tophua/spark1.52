@@ -104,21 +104,24 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     val rdd = sqlContext.createDataFrame(sc.parallelize(Array.empty[Vector], 2).map(FeatureData))
     val vectorIndexer = getIndexer
     intercept[IllegalArgumentException] {
+    //fit()方法将DataFrame转化为一个Transformer的算法
       vectorIndexer.fit(rdd)
     }
   }
   //当给定不同RDDS大小的向量抛出异常
   test("Throws error when given RDDs with different size vectors") {
     val vectorIndexer = getIndexer
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = vectorIndexer.fit(densePoints1) // vectors of length 3 长度为3的向量
     
     // copied model must have the same parent.
     //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(densePoints1) // should work
     model.transform(sparsePoints1) // should work
     intercept[SparkException] {
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
       model.transform(densePoints2).collect()
       logInfo("Did not throw error when fit, transform were called on vectors of different lengths")
     }
@@ -132,6 +135,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     def testDenseSparse(densePoints: DataFrame, sparsePoints: DataFrame): Unit = {
       val denseVectorIndexer = getIndexer.setMaxCategories(2)
       val sparseVectorIndexer = getIndexer.setMaxCategories(2)
+      //fit()方法将DataFrame转化为一个Transformer的算法
       val denseModel = denseVectorIndexer.fit(densePoints)
       val sparseModel = sparseVectorIndexer.fit(sparsePoints)
       val denseMap = denseModel.categoryMaps
@@ -155,6 +159,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
         s" categoricalFeatures=${categoricalFeatures.mkString(", ")}"
       try {
         val vectorIndexer = getIndexer.setMaxCategories(maxCategories)
+	//fit()方法将DataFrame转化为一个Transformer的算法
         val model = vectorIndexer.fit(data)
         val categoryMaps = model.categoryMaps
         // Chose correct categorical features
@@ -220,7 +225,9 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     def checkSparsity(data: DataFrame, maxCategories: Int): Unit = {
       val points = data.collect().map(_.getAs[Vector](0))
       val vectorIndexer = getIndexer.setMaxCategories(maxCategories)
+      //fit()方法将DataFrame转化为一个Transformer的算法
       val model = vectorIndexer.fit(data)
+       //transform()方法将DataFrame转化为另外一个DataFrame的算法
       val indexedPoints = model.transform(data).select("indexed").map(_.getAs[Vector](0)).collect()
       points.zip(indexedPoints).foreach {
         case (orig: SparseVector, indexed: SparseVector) =>
@@ -242,6 +249,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     val densePoints1WithMeta =
       densePoints1.select(densePoints1("features").as("features", attrGroup.toMetadata()))
     val vectorIndexer = getIndexer.setMaxCategories(2)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = vectorIndexer.fit(densePoints1WithMeta)
     // Check that ML metadata are preserved.
     //检查是否保留了元数据的元数据。

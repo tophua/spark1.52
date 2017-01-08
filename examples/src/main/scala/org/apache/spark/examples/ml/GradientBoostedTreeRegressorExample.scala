@@ -54,7 +54,7 @@ object GradientBoostedTreeRegressorExample {
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
       .setMaxCategories(4)
-      .fit(data)
+      .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // Split the data into training and test sets (30% held out for testing).
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
@@ -66,13 +66,16 @@ object GradientBoostedTreeRegressorExample {
       .setMaxIter(10)
 
     // Chain indexer and GBT in a Pipeline.
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline()
       .setStages(Array(featureIndexer, gbt))
 
     // Train model. This also runs the indexer.
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = pipeline.fit(trainingData)
 
     // Make predictions.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(testData)
 
     // Select example rows to display.

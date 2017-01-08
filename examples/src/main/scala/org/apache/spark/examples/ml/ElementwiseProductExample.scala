@@ -50,6 +50,7 @@ object ElementwiseProductExample {
       .setOutputCol("transformedVector")
 
     // Batch transform the vectors to create new column:
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     transformer.transform(dataFrame).show()
     // $example off$
 

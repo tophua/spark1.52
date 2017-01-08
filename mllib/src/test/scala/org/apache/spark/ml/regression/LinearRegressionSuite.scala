@@ -76,12 +76,13 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(lir.getElasticNetParam === 0.0)
     assert(lir.getFitIntercept)
     assert(lir.getStandardization)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lir.fit(dataset)
 
     // copied model must have the same parent.
     //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(model)
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(dataset)
       .select("label", "prediction")
       .collect()
@@ -96,6 +97,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     // The result should be the same regardless of standardization without regularization
     //结果应该是相同的,无论标准化,没有正规化
     val trainer2 = (new LinearRegression).setStandardization(false)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
 
@@ -122,7 +124,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model2.intercept ~== interceptR relTol 1E-3)
     assert(model2.weights ~= weightsR relTol 1E-3)
 
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model1.transform(dataset).select("features", "prediction").collect().foreach {
       case Row(features: DenseVector, prediction1: Double) =>
         val prediction2 =
@@ -135,8 +137,10 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val trainer1 = (new LinearRegression).setFitIntercept(false)
     // Without regularization the results should be the same
     val trainer2 = (new LinearRegression).setFitIntercept(false).setStandardization(false)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val modelWithoutIntercept1 = trainer1.fit(datasetWithoutIntercept)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model2 = trainer2.fit(dataset)
     val modelWithoutIntercept2 = trainer2.fit(datasetWithoutIntercept)
 
@@ -180,6 +184,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val trainer1 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
     val trainer2 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
       .setStandardization(false)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
 
@@ -214,7 +219,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model2.intercept ~== interceptR2 relTol 1E-3)
     assert(model2.weights ~= weightsR2 relTol 1E-3)
 
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model1.transform(dataset).select("features", "prediction").collect().foreach {
       case Row(features: DenseVector, prediction1: Double) =>
         val prediction2 =
@@ -228,6 +233,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setFitIntercept(false)
     val trainer2 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
       .setFitIntercept(false).setStandardization(false)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
 
@@ -263,7 +269,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model2.intercept ~== interceptR2 absTol 1E-3)
     assert(model2.weights ~= weightsR2 relTol 1E-3)
 
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model1.transform(dataset).select("features", "prediction").collect().foreach {
       case Row(features: DenseVector, prediction1: Double) =>
         val prediction2 =
@@ -276,6 +282,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val trainer1 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
     val trainer2 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
       .setStandardization(false)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
 
@@ -309,7 +316,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(model2.intercept ~== interceptR2 relTol 1E-3)
     assert(model2.weights ~= weightsR2 relTol 1E-3)
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model1.transform(dataset).select("features", "prediction").collect().foreach {
       case Row(features: DenseVector, prediction1: Double) =>
         val prediction2 =
@@ -323,6 +330,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setFitIntercept(false)
     val trainer2 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
       .setFitIntercept(false).setStandardization(false)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
 
@@ -357,7 +365,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(model2.intercept ~== interceptR2 absTol 1E-3)
     assert(model2.weights ~= weightsR2 relTol 1E-3)
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model1.transform(dataset).select("features", "prediction").collect().foreach {
       case Row(features: DenseVector, prediction1: Double) =>
         val prediction2 =
@@ -370,6 +378,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val trainer1 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
     val trainer2 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
       .setStandardization(false)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
 
@@ -403,7 +412,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(model2.intercept ~== interceptR2 relTol 1E-3)
     assert(model2.weights ~= weightsR2 relTol 1E-3)
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model1.transform(dataset).select("features", "prediction").collect().foreach {
       case Row(features: DenseVector, prediction1: Double) =>
         val prediction2 =
@@ -417,6 +426,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setFitIntercept(false)
     val trainer2 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
       .setFitIntercept(false).setStandardization(false)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
 
@@ -451,7 +461,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(model2.intercept ~== interceptR2 absTol 1E-3)
     assert(model2.weights ~= weightsR2 relTol 1E-3)
-
+ //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model1.transform(dataset).select("features", "prediction").collect().foreach {
       case Row(features: DenseVector, prediction1: Double) =>
         val prediction2 =
@@ -462,6 +472,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   //线性回归模型训练综述
   test("linear regression model training summary") {
     val trainer = new LinearRegression
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = trainer.fit(dataset)
 
     // Training results for the model should be available

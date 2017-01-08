@@ -55,13 +55,14 @@ object OneHotEncoderExample {
     val indexer = new StringIndexer()
       .setInputCol("category")
       .setOutputCol("categoryIndex")
-      .fit(df)
-    val indexed = indexer.transform(df)
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
+    val indexed = indexer.transform(df)//transform()方法将DataFrame转化为另外一个DataFrame的算法
   //对随机分布的类别进行OneHotEncoder，转换后可以当成连续数值输入
     val encoder = new OneHotEncoder()
       .setInputCol("categoryIndex")
       .setOutputCol("categoryVec")
     //注意不需要fit 
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val encoded = encoder.transform(indexed)
     /**
      * 数据会变成稀疏的

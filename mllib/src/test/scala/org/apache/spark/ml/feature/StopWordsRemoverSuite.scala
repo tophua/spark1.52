@@ -23,7 +23,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 
 object StopWordsRemoverSuite extends SparkFunSuite {
   def testStopWordsRemover(t: StopWordsRemover, dataset: DataFrame): Unit = {
-    t.transform(dataset)
+    t.transform(dataset) //transform()方法将DataFrame转化为另外一个DataFrame的算法
       .select("filtered", "expected")
       .collect()
       .foreach { case Row(tokens, wantedTokens) =>

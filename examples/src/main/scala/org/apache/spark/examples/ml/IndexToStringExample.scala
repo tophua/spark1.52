@@ -49,7 +49,8 @@ object IndexToStringExample {
     val indexer = new StringIndexer()
       .setInputCol("category")//Spark默认预测label行
       .setOutputCol("categoryIndex")//转换回来的预测label
-      .fit(df)
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val indexed = indexer.transform(df)
     /**
     *+---+--------+-------------+
@@ -67,7 +68,7 @@ object IndexToStringExample {
     val converter = new IndexToString()
       .setInputCol("categoryIndex")
       .setOutputCol("originalCategory")
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val converted = converter.transform(indexed)
     /**
      *+---+----------------+

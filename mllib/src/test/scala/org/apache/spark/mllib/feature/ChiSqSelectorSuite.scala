@@ -64,8 +64,10 @@ class ChiSqSelectorSuite extends SparkFunSuite with MLlibTestSparkContext {
         LabeledPoint(1.0, Vectors.dense(Array(6.0))),
         LabeledPoint(1.0, Vectors.dense(Array(8.0))),
         LabeledPoint(2.0, Vectors.dense(Array(5.0))))
+	//fit()方法将DataFrame转化为一个Transformer的算法
     val model = new ChiSqSelector(1).fit(labeledDiscreteData)
     val filteredData = labeledDiscreteData.map { lp =>
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
       LabeledPoint(lp.label, model.transform(lp.features))
     }.collect().toSet
     assert(filteredData == preFilteredData)

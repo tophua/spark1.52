@@ -12,7 +12,7 @@ object Word2VecExample {
     val input = sc.textFile("../data/mllib/text8").map(line => line.split(" ").toSeq)
 
     val word2vec = new Word2Vec()
-
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = word2vec.fit(input)
 
     val synonyms = model.findSynonyms("china", 40)

@@ -139,9 +139,9 @@ object MovieLensALS {
       .setMaxIter(params.maxIter)
       .setRegParam(params.regParam)
       .setNumBlocks(params.numBlocks)
-
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = als.fit(training.toDF())
-
+	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(test.toDF()).cache()
 
     // Evaluate the model.  rmse均方根误差说明样本的离散程度

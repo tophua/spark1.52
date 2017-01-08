@@ -62,7 +62,7 @@ class DCTSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("vec")
       .setOutputCol("resultVec")
       .setInverse(inverse)
-
+//transform()方法将DataFrame转化为另外一个DataFrame的算法
     transformer.transform(dataset)
       .select("resultVec", "wantedVec")
       .collect()

@@ -69,10 +69,12 @@ object ALSExample {
       .setItemCol("movieId")
       //设置评分列名
       .setRatingCol("rating")
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = als.fit(training)
      //import spark.implicits._
     // Evaluate the model by computing the RMSE on the test data
     //test[userId: int, movieId: int, rating: float, timestamp: bigint]
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(test)
     predictions.collect()
     //通过预测评分的均方根误差来评价推荐模型

@@ -76,12 +76,13 @@ object SimpleTextClassificationPipeline {
       .setMaxIter(10)//最大迭代次数
       .setRegParam(0.001)
     //将这些操作合并到一个pipeline中,让pipeline实际执行从输入训练数据中构造模型的工作
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // Fit the pipeline to training documents.
     //将管道安装到训练文档
-    //隐式转换为schemaRDD
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = pipeline.fit(training.toDF())
 
     // Prepare test documents, which are unlabeled.
@@ -101,6 +102,7 @@ object SimpleTextClassificationPipeline {
 
     // Make predictions on test documents.
      //注意Model实际上是一个包含所有转换逻辑的pipeline,而不是一个对分类的调用
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(test.toDF())
       .select("id", "text","features", "probability", "prediction")
       .collect()

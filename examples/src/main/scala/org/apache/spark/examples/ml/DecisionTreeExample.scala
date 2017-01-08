@@ -283,10 +283,12 @@ object DecisionTreeExample {
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
     stages += dt
+     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val pipeline = new Pipeline().setStages(stages.toArray)
 
     // Fit the Pipeline 安装管道
     val startTime = System.nanoTime()
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val pipelineModel = pipeline.fit(training)
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
@@ -343,6 +345,7 @@ object DecisionTreeExample {
       model: Transformer,
       data: DataFrame,
       labelColName: String): Unit = {
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val fullPredictions = model.transform(data).cache()
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
@@ -371,6 +374,7 @@ object DecisionTreeExample {
       model: Transformer,
       data: DataFrame,
       labelColName: String): Unit = {
+      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val fullPredictions = model.transform(data).cache()
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))

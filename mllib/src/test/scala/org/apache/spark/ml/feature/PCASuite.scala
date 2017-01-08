@@ -74,7 +74,7 @@ class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
       .setInputCol("features")
       .setOutputCol("pca_features")
       .setK(3)
-      .fit(df)
+      .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(pca)
@@ -83,6 +83,7 @@ class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
  * x:[-4.645104331781534,-1.1167972663619021,-5.526819154542643] y:[-4.645104331781534,-1.1167972663619021,-5.526819154542643]
  * x:[-6.428880535676489,-5.337951427775354,-5.526819154542644]	 y:[-6.428880535676489,-5.337951427775354,-5.526819154542644]
  */
+  //transform()方法将DataFrame转化为另外一个DataFrame的算法
     pca.transform(df).select("pca_features", "expected").collect().foreach {
     
       case Row(x: Vector, y: Vector) =>

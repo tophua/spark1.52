@@ -86,10 +86,12 @@ object ModelSelectionViaTrainValidationSplitExample {
       .setTrainRatio(0.8)
 
     // Run train validation split, and choose the best set of parameters.
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = trainValidationSplit.fit(training)
 
     // Make predictions on test data. model is the model with combination of parameters
     // that performed best.
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(test)
       .select("features", "label", "prediction")
       .show()

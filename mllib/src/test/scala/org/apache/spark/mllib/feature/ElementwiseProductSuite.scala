@@ -34,6 +34,7 @@ class ElementwiseProductSuite extends SparkFunSuite with MLlibTestSparkContext {
     val scalingVec = Vectors.dense(2.0, 0.5, 0.0, 0.25)
     val transformer = new ElementwiseProduct(scalingVec)
     //批理变换和每个变换,得到相同的结果
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val transformedData = transformer.transform(sc.makeRDD(denseData))
     val transformedVecs = transformedData.collect()
     val transformedVec = transformedVecs(0)
@@ -50,6 +51,7 @@ class ElementwiseProductSuite extends SparkFunSuite with MLlibTestSparkContext {
     val scalingVec = Vectors.dense(1.0, 0.0, 0.5)
     val transformer = new ElementwiseProduct(scalingVec)
     val data2 = sparseData.map(transformer.transform)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val data2RDD = transformer.transform(dataRDD)
 
     assert((sparseData, data2, data2RDD.collect()).zipped.forall {

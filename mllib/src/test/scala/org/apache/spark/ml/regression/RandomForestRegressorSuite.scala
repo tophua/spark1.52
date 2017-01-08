@@ -92,7 +92,7 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     ))
     val categoricalFeatures = Map.empty[Int, Int]
     val df: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, 0)
-
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = rf.fit(df)
 
     // copied model must have the same parent.
@@ -143,6 +143,7 @@ private object RandomForestRegressorSuite extends SparkFunSuite {
     val oldModel = OldRandomForest.trainRegressor(
       data, oldStrategy, rf.getNumTrees, rf.getFeatureSubsetStrategy, rf.getSeed.toInt)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 0)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val newModel = rf.fit(newData)
     // Use parent from newTree since this is not checked anyways.
     val oldModelAsNew = RandomForestRegressionModel.fromOld(

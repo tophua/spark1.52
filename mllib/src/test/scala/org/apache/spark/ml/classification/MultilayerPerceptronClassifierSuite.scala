@@ -74,7 +74,8 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
       //tol:优化算法迭代求解过程的收敛阀值。默认值是 1e-4。不能为负数
       //labelCol：输入数据 DataFrame 中标签列的名称。
       //featuresCol:输入数据 DataFrame 中指标特征列的名称。
-    val model = trainer.fit(dataFrame)
+    val model = trainer.fit(dataFrame)//fit()方法将DataFrame转化为一个Transformer的算法
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = model.transform(dataFrame)
     val predictionAndLabels = result.select("prediction", "label").collect()
     predictionAndLabels.foreach { case Row(p: Double, l: Double) =>
@@ -120,7 +121,9 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
       .setSeed(11L)
       //优化算法求解的最大迭代次数。默认值是 100。
       .setMaxIter(numIterations)
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = trainer.fit(dataFrame)
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val mlpPredictionAndLabels = model.transform(dataFrame).select("prediction", "label")
       .map { case Row(p: Double, l: Double) => (p, l) }
     // train multinomial logistic regression

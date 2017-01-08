@@ -32,7 +32,9 @@ class RFormulaSuite extends SparkFunSuite with MLlibTestSparkContext {
     val formula = new RFormula().setFormula("id ~ v1 + v2")
     val original = sqlContext.createDataFrame(
       Seq((0, 1.0, 3.0), (2, 2.0, 5.0))).toDF("id", "v1", "v2")
+      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = formula.fit(original)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = model.transform(original)
     val resultSchema = model.transformSchema(original.schema)
     val expected = sqlContext.createDataFrame(
@@ -50,9 +52,11 @@ class RFormulaSuite extends SparkFunSuite with MLlibTestSparkContext {
     val formula = new RFormula().setFormula("y ~ x").setFeaturesCol("x")
     val original = sqlContext.createDataFrame(Seq((0, 1.0), (2, 2.0))).toDF("x", "y")
     intercept[IllegalArgumentException] {
+    //fit()方法将DataFrame转化为一个Transformer的算法
       formula.fit(original)
     }
     intercept[IllegalArgumentException] {
+    //fit()方法将DataFrame转化为一个Transformer的算法
       formula.fit(original)
     }
   }
@@ -63,14 +67,17 @@ class RFormulaSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = formula.fit(original)
     val resultSchema = model.transformSchema(original.schema)
     assert(resultSchema.length == 3)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     assert(resultSchema.toString == model.transform(original).schema.toString)
   }
 
   test("label column already exists but is not double type") {//标签列已经存在但不是双类型
     val formula = new RFormula().setFormula("y ~ x").setLabelCol("y")
     val original = sqlContext.createDataFrame(Seq((0, 1), (2, 2))).toDF("x", "y")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = formula.fit(original)
     intercept[IllegalArgumentException] {
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
       model.transformSchema(original.schema)
     }
     intercept[IllegalArgumentException] {
@@ -81,6 +88,7 @@ class RFormulaSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("allow missing label column for test datasets") {//允许测试数据集的丢失的标签列
     val formula = new RFormula().setFormula("y ~ x").setLabelCol("label")
     val original = sqlContext.createDataFrame(Seq((0, 1.0), (2, 2.0))).toDF("x", "_not_y")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = formula.fit(original)
     val resultSchema = model.transformSchema(original.schema)
     assert(resultSchema.length == 3)
@@ -93,7 +101,9 @@ class RFormulaSuite extends SparkFunSuite with MLlibTestSparkContext {
     val original = sqlContext.createDataFrame(
       Seq((1, "foo", 4), (2, "bar", 4), (3, "bar", 5), (4, "baz", 5))
     ).toDF("id", "a", "b")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = formula.fit(original)
+     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = model.transform(original)
     val resultSchema = model.transformSchema(original.schema)
     val expected = sqlContext.createDataFrame(
@@ -112,6 +122,7 @@ class RFormulaSuite extends SparkFunSuite with MLlibTestSparkContext {
     val original = sqlContext.createDataFrame(
       Seq((1, "foo", 4), (2, "bar", 4), (3, "bar", 5), (4, "baz", 5))
     ).toDF("id", "a", "b")
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = formula.fit(original)
     val result = model.transform(original)
     val attrs = AttributeGroup.fromStructField(result.schema("features"))

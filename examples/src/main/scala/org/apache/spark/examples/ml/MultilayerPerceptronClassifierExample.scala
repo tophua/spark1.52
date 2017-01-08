@@ -71,8 +71,10 @@ object MultilayerPerceptronClassifierExample {
       .setSeed(1234L)//随机种子
       .setMaxIter(100)//迭代次数
     // train the model
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = trainer.fit(train)
     // compute accuracy on the test set
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = model.transform(test)
     val predictionAndLabels = result.select("prediction", "label")
     val evaluator = new MulticlassClassificationEvaluator()

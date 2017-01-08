@@ -247,12 +247,13 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 3
 
     val newData: DataFrame = TreeTests.setMetadata(rdd, categoricalFeatures, numClasses)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val newTree = dt.fit(newData)
 
     // copied model must have the same parent.
     //复制的模型必须有相同的父
     MLTestingUtils.checkCopy(newTree)
-
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = newTree.transform(newData)
     
     //getPredictionCol预测结果列名,getRawPredictionCol原始预测,getProbabilityCol类别条件概率预测结果列名
@@ -279,7 +280,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val df = TreeTests.setMetadata(data, Map(0 -> 1), 2)
     //最大深度
     val dt = new DecisionTreeClassifier().setMaxDepth(3)
-    //转换模型
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model = dt.fit(df)
     /*  println("rootNode:"+model.rootNode)
    println(model.labelCol.name+"\t"+model.labelCol.doc)
@@ -327,6 +328,7 @@ private[ml] object DecisionTreeClassifierSuite extends SparkFunSuite {
     val oldStrategy = dt.getOldStrategy(categoricalFeatures, numClasses)
     val oldTree = OldDecisionTree.train(data, oldStrategy)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses)
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val newTree = dt.fit(newData)
     // Use parent from newTree since this is not checked anyways.
     val oldTreeAsNew = DecisionTreeClassificationModel.fromOld(
