@@ -85,6 +85,7 @@ object ModelSelectionViaCrossValidationExample {
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
     // With 3 values for hashingTF.numFeatures and 2 values for lr.regParam,
     // this grid will have 3 x 2 = 6 parameter settings for CrossValidator to choose from.
+    //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val paramGrid = new ParamGridBuilder()
       .addGrid(hashingTF.numFeatures, Array(10, 100, 1000))
       .addGrid(lr.regParam, Array(0.1, 0.01))

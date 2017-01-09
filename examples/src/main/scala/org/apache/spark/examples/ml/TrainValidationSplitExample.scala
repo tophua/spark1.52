@@ -27,7 +27,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 /**
  * A simple example demonstrating model selection using TrainValidationSplit.
  * 一个简单的例子演示模型选择使用训练验证分裂
- *
+ * 数据量小的时候可以用CrossValidator进行交叉验证,数据量大的时候可以直接用trainValidationSplit
  * The example is based on [[SimpleParamsExample]] using linear regression.
  * Run with
  * {{{
@@ -57,6 +57,7 @@ object TrainValidationSplitExample {
     // TrainValidationSplit will try all combinations of values and determine best model using
     // the evaluator.
     //trainvalidationsplit将尝试所有的组合和使用评估值确定最佳模型
+    //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val paramGrid = new ParamGridBuilder()
       .addGrid(lr.regParam, Array(0.1, 0.01))
       .addGrid(lr.fitIntercept, Array(true, false))

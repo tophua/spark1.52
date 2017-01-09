@@ -70,6 +70,7 @@ object ModelSelectionViaTrainValidationSplitExample {
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
     // TrainValidationSplit will try all combinations of values and determine best model using
     // the evaluator.
+    //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val paramGrid = new ParamGridBuilder()
       .addGrid(lr.regParam, Array(0.1, 0.01))
       .addGrid(lr.fitIntercept)
@@ -78,6 +79,7 @@ object ModelSelectionViaTrainValidationSplitExample {
 
     // In this case the estimator is simply the linear regression.
     // A TrainValidationSplit requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
+    //数据量小的时候可以用CrossValidator进行交叉验证,数据量大的时候可以直接用trainValidationSplit
     val trainValidationSplit = new TrainValidationSplit()
       .setEstimator(lr)
       .setEvaluator(new RegressionEvaluator)
