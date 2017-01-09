@@ -31,6 +31,7 @@ import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.sql.types.StructType
 /**
  * 交叉验证测试套件
+ * 数据量小的时候可以用CrossValidator进行交叉验证,数据量大的时候可以直接用trainValidationSplit
  */
 class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -55,6 +56,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("cross validation with logistic regression") {//逻辑回归的交叉验证
     //交叉验证
     val lr = new LogisticRegression//逻辑回归
+    //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val lrParamMaps = new ParamGridBuilder()
       .addGrid(lr.regParam, Array(0.001, 1000.0))
       .addGrid(lr.maxIter, Array(0, 10))
@@ -70,8 +72,8 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // copied model must have the same paren.
     //复制模型必须具有相同的实质
-    MLTestingUtils.checkCopy(cvModel)
-    //最好的模型
+     MLTestingUtils.checkCopy(cvModel)
+    //最好的模型参数
     val parent = cvModel.bestModel.parent.asInstanceOf[LogisticRegression]
     assert(parent.getRegParam === 0.001)//正则化参数
     assert(parent.getMaxIter === 10)//最大迭代次数
@@ -84,6 +86,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
         6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1), 2))
 
     val trainer = new LinearRegression
+    //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val lrParamMaps = new ParamGridBuilder() //模型参数
       .addGrid(trainer.regParam, Array(1000.0, 0.001))
       .addGrid(trainer.maxIter, Array(0, 10))
@@ -115,6 +118,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val est = new MyEstimator("est")
     val eval = new MyEvaluator
+    //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val paramMaps = new ParamGridBuilder()
       .addGrid(est.inputCol, Array("input1", "input2"))
       .build()

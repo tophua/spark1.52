@@ -28,7 +28,8 @@ import org.apache.spark.sql.DataFrame
 /**
  * ::Experimental::
  * Evaluator for multiclass classification.
- *
+ * 多类分类评估
+ * RDD(预测,标签)对
  * @param predictionAndLabels an RDD of (prediction, label) pairs.
  */
 @Since("1.1.0")
@@ -37,6 +38,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * An auxiliary constructor taking a DataFrame.
+   * 一个辅助构造函数数据集,数据包括预测和标签
    * @param predictionAndLabels a DataFrame with two double columns: prediction and label
    */
   private[mllib] def this(predictionAndLabels: DataFrame) =
@@ -61,9 +63,9 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
     .collectAsMap()
 
   /**
-   * Returns confusion matrix:
-   * predicted classes are in columns,
-   * they are ordered by class label ascending,
+   * Returns confusion matrix:混淆矩阵
+   * predicted classes are in columns,预测类列在列中,
+   * they are ordered by class label ascending,它们由类标签升序排列
    * as in "labels"
    */
   @Since("1.1.0")
@@ -84,6 +86,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * Returns true positive rate for a given label (category)
+   * 给定标签(类别)的真阳性率
    * @param label the label.
    */
   @Since("1.1.0")
@@ -91,6 +94,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * Returns false positive rate for a given label (category)
+   * 给定标签(类别)的假阳性率
    * @param label the label.
    */
   @Since("1.1.0")
@@ -101,6 +105,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * Returns precision for a given label (category)
+   * 给定标签(类别)的精度
    * @param label the label.
    */
   @Since("1.1.0")
@@ -132,19 +137,20 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * Returns f1-measure for a given label (category)
+   * 对于一个给定的标签（类别）
    * @param label the label.
    */
   @Since("1.1.0")
   def fMeasure(label: Double): Double = fMeasure(label, 1.0)
 
   /**
-   * Returns precision
+   * Returns precision 精度
    */
   @Since("1.1.0")
   lazy val precision: Double = tpByClass.values.sum.toDouble / labelCount
 
   /**
-   * Returns recall
+   * Returns recall召回率(等于精度的多类分类器由于误报的总和等于所有的假阴性)
    * (equals to precision for multiclass classifier
    * because sum of all false positives is equal to sum
    * of all false negatives)
@@ -153,14 +159,14 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   lazy val recall: Double = precision
 
   /**
-   * Returns f-measure
+   * Returns f-measure F度量(等于精度和召回,因为精度等于召回)
    * (equals to precision and recall because precision equals recall)
    */
   @Since("1.1.0")
   lazy val fMeasure: Double = precision
 
   /**
-   * Returns weighted true positive rate
+   * Returns weighted true positive rate 加权真阳性率
    * (equals to precision, recall and f-measure)
    */
   @Since("1.1.0")
@@ -168,6 +174,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * Returns weighted false positive rate
+   * 加权假阳性率
    */
   @Since("1.1.0")
   lazy val weightedFalsePositiveRate: Double = labelCountByClass.map { case (category, count) =>
@@ -175,6 +182,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
+   * 加权平均的召回率(等于精度,Recall和加权平均)
    * Returns weighted averaged recall
    * (equals to precision, recall and f-measure)
    */
@@ -184,7 +192,8 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
-   * Returns weighted averaged precision
+   * 加权平均的精度
+   * Returns weighted averaged precision 
    */
   @Since("1.1.0")
   lazy val weightedPrecision: Double = labelCountByClass.map { case (category, count) =>
@@ -192,8 +201,9 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
+   * 加权平均F1测量
    * Returns weighted averaged f-measure
-   * @param beta the beta parameter.
+   * @param beta the beta parameter. 测试参数
    */
   @Since("1.1.0")
   def weightedFMeasure(beta: Double): Double = labelCountByClass.map { case (category, count) =>
@@ -201,6 +211,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
+   * 加权平均F1测量
    * Returns weighted averaged f1-measure
    */
   @Since("1.1.0")
@@ -209,6 +220,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
+   * 升序排列的标号序列
    * Returns the sequence of labels in ascending order
    */
   @Since("1.1.0")

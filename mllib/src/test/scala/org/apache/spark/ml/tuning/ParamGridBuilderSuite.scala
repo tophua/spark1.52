@@ -40,6 +40,7 @@ class ParamGridBuilderSuite extends SparkFunSuite {
       assert(expected.isEmpty)
     }
     //通过addGrid添加我们需要寻找的最佳参数
+    //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val maps0 = new ParamGridBuilder()
       .baseOn(maxIter -> 10)
       .addGrid(inputCol, Array("input0", "input1"))
