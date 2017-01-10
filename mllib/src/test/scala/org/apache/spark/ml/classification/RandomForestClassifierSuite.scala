@@ -143,6 +143,8 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     MLTestingUtils.checkCopy(model)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(df)
+       //原始的算法预测结果的存储列的名称, 默认是”rawPrediction”
+       //类别预测结果的条件概率值存储列的名称, 默认值是”probability”
       .select(rf.getPredictionCol, rf.getRawPredictionCol, rf.getProbabilityCol)
       .collect()
 

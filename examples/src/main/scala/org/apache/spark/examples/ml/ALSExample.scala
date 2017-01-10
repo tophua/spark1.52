@@ -81,7 +81,9 @@ object ALSExample {
     val evaluator = new RegressionEvaluator()  
       //rmse均方根误差说明样本的离散程度
       .setMetricName("rmse")
+      //标签列的名称
       .setLabelCol("rating")
+      //算法预测结果的存储列的名称, 默认是”prediction”
       .setPredictionCol("prediction")
       //predictions [userId: int, movieId: int, rating: float, timestamp: bigint, prediction: float]
     val rmse = evaluator.evaluate(predictions)

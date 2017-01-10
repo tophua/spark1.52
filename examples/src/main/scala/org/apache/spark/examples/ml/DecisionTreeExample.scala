@@ -61,14 +61,15 @@ object DecisionTreeExample {
       input: String = "../data/mllib/rf_libsvm_data.txt",
       testInput: String = "",
       dataFormat: String = "libsvm",
-      algo: String = "regression",//"Classification",
-      maxDepth: Int = 5,
-      maxBins: Int = 32,
-      minInstancesPerNode: Int = 1,
+      algo: String = "Classification",//"regression",算法类型
+      maxDepth: Int = 5,//最大深度
+      maxBins: Int = 32,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
       minInfoGain: Double = 0.0,
-      fracTest: Double = 0.2,
+      fracTest: Double = 0.2,//测试因子
       cacheNodeIds: Boolean = false,
-      checkpointDir: Option[String] = None,
+      checkpointDir: Option[String] = None,//检查点目录
+      //检查点间隔
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -192,8 +193,9 @@ object DecisionTreeExample {
 
     // Load or create test set 加载或创建测试集
     val splits: Array[RDD[LabeledPoint]] = if (testInput != "") {
-      // Load testInput.
+      // Load testInput. 
       val numFeatures = origExamples.take(1)(0).features.size
+     
       val origTestExamples: RDD[LabeledPoint] =
         loadData(sc, testInput, dataFormat, Some(numFeatures))
       Array(origExamples, origTestExamples)
@@ -207,8 +209,8 @@ object DecisionTreeExample {
     //进行分类,因为我们将索引他们以后,将标签转换为字符串
     def labelsToStrings(data: DataFrame): DataFrame = {
       algo.toLowerCase match {
-        case "classification" =>
-          //withColumn函数就能实现对dataframe中列的添加
+        case "classification" =>//如果算法分类,则添加列字段
+          //withColumn函数就能实现对dataframe中列的添加,data列取字段"label"数据,强制转换字符号串类型
           data.withColumn("labelString", data("label").cast(StringType))
         case "regression" =>
           data
@@ -216,12 +218,12 @@ object DecisionTreeExample {
           throw new IllegalArgumentException("Algo ${params.algo} not supported.")
       }
     }
-    val dataframes = splits.map(_.toDF()).map(labelsToStrings)
+    val dataframes = splits.map(_.toDF()).map(labelsToStrings)   
     val training = dataframes(0).cache()
     val test = dataframes(1).cache()
 
-    val numTraining = training.count()
-    val numTest = test.count()
+    val numTraining = training.count()//训练数据总数
+    val numTest = test.count()//测试数据总数
    /** 
     +-----+--------------------+-----------+
     |label|            features|labelString|
@@ -233,9 +235,13 @@ object DecisionTreeExample {
     |  1.0|(6,[1,2,3],[1.0,1...|        1.0|
     +-----+--------------------+-----------+**/
     training.show()
+    //获取特征数
     val numFeatures = training.select("features").first().getAs[Vector](0).size
+    //(6,[4,5],[1.0,1.0])
+    val tset1=training.select("features").first().getAs[Vector](0)//(0)取1行数据
+     println("==="+tset1)
     println("Loaded data:")
-    //特征数: numTraining = 5, 测试数:numTest = 4
+    //训练总数: numTraining = 5, 测试总数:numTest = 4
     println(s"  numTraining = $numTraining, numTest = $numTest")
     //特征数:numFeatures = 6
     println(s"  numFeatures = $numFeatures")
@@ -256,8 +262,9 @@ object DecisionTreeExample {
 
     // Set up Pipeline 建立管道
     //将特征转换,特征聚合,模型等组成一个管道,并调用它的fit方法拟合出模型*/  
+    //一个 Pipeline 在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
     val stages = new mutable.ArrayBuffer[PipelineStage]()
-    // (1) For classification, re-index classes. 对于分类,重新索引类
+    // (1) For classification, re-index classes. 对于分类模型标签列名:indexedLabel,回归模型标签列名:label
     val labelColName = if (algo == "classification") "indexedLabel" else "label"
     if (algo == "classification") {
       val labelIndexer = new StringIndexer()
@@ -278,6 +285,7 @@ object DecisionTreeExample {
     val dt = algo match {
       case "classification" =>//分类
         new DecisionTreeClassifier()
+	 //训练数据集DataFrame中存储特征数据的列名
           .setFeaturesCol("indexedFeatures")//特征列
           .setLabelCol(labelColName)//标签列
           .setMaxDepth(params.maxDepth)//最大深度
@@ -392,10 +400,10 @@ object DecisionTreeExample {
 
   /**
    * Evaluate the given RegressionModel on data.  Print the results.
-   * 评估给定的数据回归模型,打印结果
+   * 评估给定回归模型数据并打印结果
    * @param model  Must fit RegressionModel abstraction 必须回归模型的抽象
-   * @param data  DataFrame with "prediction" and labelColName columns
-   * @param labelColName  Name of the labelCol parameter for the model 该模型的labelcol参数名称
+   * @param data  DataFrame with "prediction" and labelColName columns 数据集包括prediction列名
+   * @param labelColName  Name of the labelCol parameter for the model 该模型的标签列的参数名称
    *
    * TODO: Change model type to RegressionModel once that API is public. SPARK-5995
    */
@@ -405,8 +413,6 @@ object DecisionTreeExample {
       labelColName: String): Unit = {
       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val fullPredictions = model.transform(data).cache()
-    val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
-    val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
     /***
      * 
      *+-----+--------------------+--------------------+----------+
@@ -419,6 +425,8 @@ object DecisionTreeExample {
       +-----+--------------------+--------------------+----------+
      */
     fullPredictions.show()
+    val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
+    val labels = fullPredictions.select(labelColName).map(_.getDouble(0))    
     val zip=predictions.zip(labels)
    // println("zip:"+zip.)
     //RMSE 均方根误差

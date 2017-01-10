@@ -201,7 +201,8 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
-   * 加权平均F1测量
+   * 加权平均f1-measure
+   * F1-Measure是根据准确率Precision和召回率Recall二者给出的一个综合的评价指标
    * Returns weighted averaged f-measure
    * @param beta the beta parameter. 测试参数
    */
@@ -211,7 +212,8 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
-   * 加权平均F1测量
+   * 加权平均f1-measure
+   * F1-Measure是根据准确率Precision和召回率Recall二者给出的一个综合的评价指标
    * Returns weighted averaged f1-measure
    */
   @Since("1.1.0")

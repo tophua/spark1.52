@@ -173,7 +173,7 @@ private class MyLogisticRegressionModel(
    * The meaning of a "raw" prediction may vary between algorithms, but it intuitively gives
    * 原始”预测的含义可能会有所不同的算法
    * a measure of confidence in each possible label (where larger = more confident).
-   * 但它直观地给出了一个测量每个可能的标签信心
+   * 但它直观地给出了一个测量每个可能的标签信心 rawPredictionCol 原始的算法预测结果的存储列的名称
    * This internal method is used to implement [[transform()]] and output [[rawPredictionCol]].
    *
    * @return  vector where element i is the raw prediction for label i.

@@ -40,7 +40,9 @@ object SMSClassifierWord2Vec_IBM {
     val layers = Array[Int](VECTOR_SIZE, 6,  2)
     //使用 MultilayerPerceptronClassifier 训练一个多层感知器模型
     val mlpc = new MultilayerPerceptronClassifier().setLayers(layers).setBlockSize(512).setFeaturesCol("features")
+    //
     .setMaxIter(128)
+    //算法预测结果的存储列的名称, 默认是”prediction”
     .setLabelCol("indexedLabel").setPredictionCol("prediction")
     .setSeed(1234L)
     //使用 LabelConverter 将预测结果的数值标签转化成原始的文本标签
@@ -59,9 +61,11 @@ object SMSClassifierWord2Vec_IBM {
     predictionResultDF.select("message", "label", "predictedLabel").show(30)
 
     val evaluator = new MulticlassClassificationEvaluator()
+	//标签列的名称
       .setLabelCol("indexedLabel")
+      //算法预测结果的存储列的名称, 默认是”prediction”
       .setPredictionCol("prediction")
-      .setMetricName("precision")
+      .setMetricName("precision")//度量方式 precision准确率
     //最后在测试数据集上测试模型的预测精确度
     val predictionAccuracy = evaluator.evaluate(predictionResultDF)
     println("Testing Accuracy is %2.4f".format(predictionAccuracy * 100) + "%")

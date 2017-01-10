@@ -98,7 +98,8 @@ object RandomForestClassifierExample {
     // Select (prediction, true label) and compute test error.
     val evaluator = new MulticlassClassificationEvaluator()
       .setLabelCol("indexedLabel")//标签列名
-      .setPredictionCol("prediction")//特征列名
+      //算法预测结果的存储列的名称, 默认是”prediction”
+      .setPredictionCol("prediction")
       .setMetricName("accuracy")//测量名称
     val accuracy = evaluator.evaluate(predictions)
     println("Test Error = " + (1.0 - accuracy))

@@ -97,6 +97,7 @@ object GradientBoostedTreeClassifierExample {
     // Select (prediction, true label) and compute test error.
     val evaluator = new MulticlassClassificationEvaluator()
       .setLabelCol("indexedLabel")
+      //算法预测结果的存储列的名称, 默认是”prediction”
       .setPredictionCol("prediction")
       .setMetricName("accuracy")
     val accuracy = evaluator.evaluate(predictions)

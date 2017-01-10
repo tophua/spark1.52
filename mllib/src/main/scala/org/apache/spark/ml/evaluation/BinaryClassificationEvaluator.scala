@@ -55,7 +55,10 @@ class BinaryClassificationEvaluator(override val uid: String)
   /** @group setParam */
   def setMetricName(value: String): this.type = set(metricName, value)
 
-  /** @group setParam */
+  /** 
+  * @group setParam 
+  *  rawPredictionCol 原始的算法预测结果的存储列的名称
+  **/
   def setRawPredictionCol(value: String): this.type = set(rawPredictionCol, value)
 
   /**

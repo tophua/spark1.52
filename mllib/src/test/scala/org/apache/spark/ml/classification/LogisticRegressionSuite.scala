@@ -88,11 +88,11 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(lr.getLabelCol === "label")
     //特征值
     assert(lr.getFeaturesCol === "features")
-    //Prediction 预测
+    //Prediction 算法预测结果的存储列的名称, 默认是”prediction”
     assert(lr.getPredictionCol === "prediction")
-    //原预测
+    //原始的算法预测结果的存储列的名称
     assert(lr.getRawPredictionCol === "rawPrediction")
-    //概率
+    //类别预测结果的条件概率值存储列的名称
     assert(lr.getProbabilityCol === "probability")
     assert(lr.getFitIntercept)//适合拦截 true
     assert(lr.getStandardization)//标准化
@@ -120,9 +120,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.getThreshold === 0.5)
     //特征列名
     assert(model.getFeaturesCol === "features")//特征
-    //Prediction 预测名
+    //Prediction 算法预测结果的存储列的名称, 默认是”prediction”
     assert(model.getPredictionCol === "prediction")
-    //原预测列名
+    //算法预测结果的存储列的名称, 默认是”prediction”
     assert(model.getRawPredictionCol === "rawPrediction")//原预测
     //可能性列名
     assert(model.getProbabilityCol === "probability")//可能性

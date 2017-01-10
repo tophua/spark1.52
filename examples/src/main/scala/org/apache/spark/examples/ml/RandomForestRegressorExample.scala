@@ -85,6 +85,7 @@ object RandomForestRegressorExample {
     // Select (prediction, true label) and compute test error.
     val evaluator = new RegressionEvaluator()
       .setLabelCol("label")
+	//算法预测结果的存储列的名称, 默认是”prediction”
       .setPredictionCol("prediction")
       //rmse均方根误差说明样本的离散程度
       .setMetricName("rmse")

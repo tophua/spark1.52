@@ -68,6 +68,7 @@ object DecisionTreeRegressionExample {
     // Train a DecisionTree model.
     val dt = new DecisionTreeRegressor()
       .setLabelCol("label")
+       //训练数据集DataFrame中存储特征数据的列名
       .setFeaturesCol("indexedFeatures")
 
     // Chain indexer and tree in a Pipeline.
@@ -100,7 +101,9 @@ object DecisionTreeRegressionExample {
     // Select (prediction, true label) and compute test error.
     //回归评估,选择(预测,真实标签)和计算测试错误
     val evaluator = new RegressionEvaluator()
+    //标签列的名称
       .setLabelCol("label")
+      //算法预测结果的存储列的名称, 默认是”prediction”
       .setPredictionCol("prediction")
        //rmse均方根误差说明样本的离散程度
       .setMetricName("rmse")//均方根误差

@@ -78,7 +78,10 @@ abstract class Classifier[
 abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[FeaturesType, M]]
   extends PredictionModel[FeaturesType, M] with ClassifierParams {
 
-  /** @group setParam */
+  /** 
+  * @group setParam 
+  * 原始的算法预测结果的存储列的名称,默认是”rawPrediction”
+  */
   def setRawPredictionCol(value: String): M = set(rawPredictionCol, value).asInstanceOf[M]
 
   /** Number of classes (values which the label can take). */
@@ -89,7 +92,8 @@ abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[Featur
    * parameters:
    *  - predicted labels as [[predictionCol]] of type [[Double]]
    *  - raw predictions (confidences) as [[rawPredictionCol]] of type [[Vector]].
-   *
+   *  probabilityCol 类别预测结果的条件概率值存储列的名称
+   *  rawPredictionCol 原始的算法预测结果的存储列的名称
    * @param dataset input dataset
    * @return transformed dataset
    */

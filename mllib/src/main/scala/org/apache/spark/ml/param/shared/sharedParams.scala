@@ -113,6 +113,7 @@ private[ml] trait HasPredictionCol extends Params {
 
 /**
  * Trait for shared param rawPredictionCol (default: "rawPrediction").
+ * rawPredictionCol 原始的算法预测结果的存储列的名称
  */
 private[ml] trait HasRawPredictionCol extends Params {
 
@@ -125,12 +126,16 @@ private[ml] trait HasRawPredictionCol extends Params {
 
   setDefault(rawPredictionCol, "rawPrediction")
 
-  /** @group getParam */
+  /**
+  * @group getParam 
+  * rawPredictionCol 原始的算法预测结果的存储列的名称
+  */
   final def getRawPredictionCol: String = $(rawPredictionCol)
 }
 
 /**
  * Trait for shared param probabilityCol (default: "probability").
+ * probability 类别预测结果的条件概率值存储列的名称,,默认值是”probability”
  */
 private[ml] trait HasProbabilityCol extends Params {
 

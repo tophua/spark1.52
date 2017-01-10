@@ -150,6 +150,7 @@ object GBTExample {
 
     // Set up Pipeline 建立管道
      //将特征转换,特征聚合,模型等组成一个管道,并调用它的fit方法拟合出模型*/  
+     //一个 Pipeline 在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
     val stages = new mutable.ArrayBuffer[PipelineStage]()
     // (1) For classification, re-index classes. 对于分类,重新索引类
     val labelColName = if (algo == "classification") "indexedLabel" else "label"
@@ -171,21 +172,22 @@ object GBTExample {
     val dt = algo match {
       case "classification" =>
         new GBTClassifier()
+	 //训练数据集DataFrame中存储特征数据的列名
           .setFeaturesCol("indexedFeatures")
           .setLabelCol(labelColName)
-          .setMaxDepth(params.maxDepth)
-          .setMaxBins(params.maxBins)
-          .setMinInstancesPerNode(params.minInstancesPerNode)
+          .setMaxDepth(params.maxDepth)//树的最大深度
+          .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
+          .setMinInstancesPerNode(params.minInstancesPerNode)//
           .setMinInfoGain(params.minInfoGain)
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)
-          .setMaxIter(params.maxIter)
+          .setMaxIter(params.maxIter)//
       case "regression" =>
         new GBTRegressor()
-          .setFeaturesCol("indexedFeatures")
+          .setFeaturesCol("indexedFeatures")//训练数据集DataFrame中存储特征数据的列名
           .setLabelCol(labelColName)
-          .setMaxDepth(params.maxDepth)
-          .setMaxBins(params.maxBins)
+          .setMaxDepth(params.maxDepth)//树的最大深度
+          .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)
           .setMinInfoGain(params.minInfoGain)
           .setCacheNodeIds(params.cacheNodeIds)

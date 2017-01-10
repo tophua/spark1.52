@@ -73,6 +73,7 @@ object DecisionTreeClassificationExample {
     //训练一个决策树模型
     val dt = new DecisionTreeClassifier()
       .setLabelCol("indexedLabel")
+      //训练数据集 DataFrame 中存储特征数据的列名
       .setFeaturesCol("indexedFeatures")
 
     // Convert indexed labels back to original labels.
@@ -113,9 +114,15 @@ object DecisionTreeClassificationExample {
     // Select (prediction, true label) and compute test error.
     //选择(预测,真实标签)和计算测试错误。
     val evaluator = new MulticlassClassificationEvaluator()
+    //标签列的名称
       .setLabelCol("indexedLabel")
-      .setPredictionCol("precision")
+      //算法预测结果的存储列的名称, 默认是”prediction”
+      .setPredictionCol("prediction")
+      //F1-Measure是根据准确率Precision和召回率Recall二者给出的一个综合的评价指标
       //测量名称列参数(f1,precision,recall,weightedPrecision,weightedRecall)
+      //f1        Test Error = 0.04660856384994316
+      //precision Test Error = 0.030303030303030276
+      //recall    Test Error = 0.0
       .setMetricName("precision")//准确率
       //评估
     val accuracy = evaluator.evaluate(predictions)

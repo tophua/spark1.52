@@ -139,7 +139,8 @@ object LogisticRegressionExample {
 
     // Set up Pipeline
     //建立管道
-     //将特征转换,特征聚合,模型等组成一个管道,并调用它的fit方法拟合出模型*/  
+     //将特征转换,特征聚合,模型等组成一个管道,并调用它的fit方法拟合出模型
+     //一个 Pipeline 在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
     val stages = new mutable.ArrayBuffer[PipelineStage]()
 
     val labelIndexer = new StringIndexer()
