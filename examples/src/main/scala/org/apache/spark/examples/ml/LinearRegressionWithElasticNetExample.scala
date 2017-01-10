@@ -50,9 +50,9 @@ object LinearRegressionWithElasticNetExample {
       val training = sqlContext.createDataFrame(dataSVM)
       
     val lr = new LinearRegression()
-      .setMaxIter(10)
-      .setRegParam(0.3)
-      .setElasticNetParam(0.8)
+      .setMaxIter(10)//设置最大迭代次数
+      .setRegParam(0.3)//设置正则化参数
+      .setElasticNetParam(0.8)//设置elasticnet混合参数
 
     // Fit the model
     //fit()方法将DataFrame转化为一个Transformer的算法

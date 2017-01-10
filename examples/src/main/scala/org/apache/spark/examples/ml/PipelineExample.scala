@@ -41,6 +41,7 @@ object PipelineExample {
     import sqlContext.implicits._
     // $example on$
     // Prepare training documents from a list of (id, text, label) tuples.
+    //准备训练文档来自一个列表(ID、文本,标签)元组
     val training = sqlContext.createDataFrame(Seq(
       (0L, "a b c d e spark", 1.0),
       (1L, "b d", 0.0),
@@ -69,15 +70,19 @@ object PipelineExample {
     val model = pipeline.fit(training)
     /*
     // Now we can optionally save the fitted pipeline to disk
+     * 现在我们可以选择性地将安装的管道保存到磁盘上    
     model.write.overwrite().save("/tmp/spark-logistic-regression-model")
 
     // We can also save this unfit pipeline to disk
+     * 我们也可以保存这个不适合管道到磁盘     
     pipeline.write.overwrite().save("/tmp/unfit-lr-model")
 
     // And load it back in during production
+     * 在生产过程中加载     
     val sameModel = PipelineModel.load("/tmp/spark-logistic-regression-model")*/
 
     // Prepare test documents, which are unlabeled (id, text) tuples.
+    //准备测试文档,这是未标记的(ID、文本)的元组
     val test = sqlContext.createDataFrame(Seq(
       (4L, "spark i j k"),
       (5L, "l m n"),
@@ -91,6 +96,12 @@ object PipelineExample {
       .select("id", "text", "probability", "prediction")
       .collect()
       .foreach { case Row(id: Long, text: String, prob: Vector, prediction: Double) =>
+        /**
+         *(4, spark i j k) --> prob=[0.5406433544851448,0.4593566455148551], prediction=0.0
+         *(5, l m n) --> prob=[0.9334382627383266,0.06656173726167328], prediction=0.0
+         *(6, mapreduce spark) --> prob=[0.7799076868203906,0.22009231317960942], prediction=0.0
+         *(7, apache hadoop) --> prob=[0.9768636139518305,0.023136386048169463], prediction=0.0
+         */
         println(s"($id, $text) --> prob=$prob, prediction=$prediction")
       }
     // $example off$

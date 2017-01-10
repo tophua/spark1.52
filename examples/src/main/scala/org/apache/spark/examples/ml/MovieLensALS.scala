@@ -57,8 +57,8 @@ object MovieLensALS {
   }
 
   case class Params(
-      ratings: String = null,
-      movies: String = null,
+      ratings: String = "../data/mllib/als/sample_movielens_ratings.txt",
+      movies: String = "../data/mllib/als/sample_movielens_movies.txt",
       maxIter: Int = 10,
       regParam: Double = 0.1,
       rank: Int = 10,
@@ -70,11 +70,11 @@ object MovieLensALS {
     val parser = new OptionParser[Params]("MovieLensALS") {
       head("MovieLensALS: an example app for ALS on MovieLens data.")
       opt[String]("ratings")
-        .required()
+        //.required()
         .text("path to a MovieLens dataset of ratings")
         .action((x, c) => c.copy(ratings = x))
       opt[String]("movies")
-        .required()
+        //.required()
         .text("path to a MovieLens dataset of movies")
         .action((x, c) => c.copy(movies = x))
       opt[Int]("rank")
@@ -109,7 +109,7 @@ object MovieLensALS {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"MovieLensALS with $params")
+    val conf = new SparkConf().setAppName(s"MovieLensALS with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._

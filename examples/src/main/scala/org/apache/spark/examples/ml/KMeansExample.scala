@@ -38,18 +38,18 @@ object KMeansExample {
   final val FEATURES_COL = "features"
 
   def main(args: Array[String]): Unit = {
-    if (args.length != 2) {
+ /*   if (args.length != 2) {
       // scalastyle:off println
       System.err.println("Usage: ml.KMeansExample <file> <k>")
       // scalastyle:on println
       System.exit(1)
-    }
-    val input = args(0)
-    val k = args(1).toInt
+    }*/
+    val input = "../data/mllib/kmeans_data2.txt"
+    val k = 2
 
     // Creates a Spark context and a SQL context
     //创建一个Spark上下文和SQL上下文
-    val conf = new SparkConf().setAppName(s"${this.getClass.getSimpleName}")
+    val conf = new SparkConf().setAppName(s"${this.getClass.getSimpleName}").setMaster("local[*]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
     //加载和解析数据文件
@@ -69,6 +69,11 @@ object KMeansExample {
 
     // Shows the result 显示结果
     // scalastyle:off println
+    /**
+     * Final Centers: 
+     *   [4.6,4.6,4.6]
+     *   [17.7,18.03333333333333,19.333333333333332]
+     */
     println("Final Centers: ")
     model.clusterCenters.foreach(println)
     // scalastyle:on println

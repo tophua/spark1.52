@@ -49,8 +49,8 @@ object LogisticRegressionWithElasticNetExample {
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
       val training = sqlContext.createDataFrame(dataSVM)
     val lr = new LogisticRegression()
-      .setMaxIter(10)
-      .setRegParam(0.3)
+      .setMaxIter(10)//最大迭代次数
+      .setRegParam(0.3)//正则化参数
       .setElasticNetParam(0.8)
 
     // Fit the model

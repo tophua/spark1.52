@@ -46,7 +46,7 @@ import org.apache.spark.sql.DataFrame
 object LinearRegressionExample {
 
   case class Params(
-      input: String = null,
+      input: String = "../data/mllib/sample_libsvm_data.txt",
       testInput: String = "",
       /**
  *  libSVM的数据格式
@@ -100,10 +100,10 @@ object LinearRegressionExample {
  */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
-      arg[String]("<input>")
+      /*arg[String]("<input>")
         .text("input path to labeled examples")
         .required()
-        .action((x, c) => c.copy(input = x))
+        .action((x, c) => c.copy(input = x))*/
       checkConfig { params =>
         if (params.fracTest < 0 || params.fracTest >= 1) {
           failure(s"fracTest ${params.fracTest} value incorrect; should be in [0,1).")
@@ -121,7 +121,7 @@ object LinearRegressionExample {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"LinearRegressionExample with $params")
+    val conf = new SparkConf().setAppName(s"LinearRegressionExample with $params").setMaster("local")
     val sc = new SparkContext(conf)
 
     println(s"LinearRegressionExample with parameters:\n$params")
@@ -131,12 +131,12 @@ object LinearRegressionExample {
       params.dataFormat, params.testInput, "regression", params.fracTest)
 
     val lir = new LinearRegression()
-      .setFeaturesCol("features")
-      .setLabelCol("label")
-      .setRegParam(params.regParam)
-      .setElasticNetParam(params.elasticNetParam)
-      .setMaxIter(params.maxIter)
-      .setTol(params.tol)
+      .setFeaturesCol("features")//特征名
+      .setLabelCol("label")//标签列
+      .setRegParam(params.regParam)//设置正则化参数
+      .setElasticNetParam(params.elasticNetParam)//设置elasticnet混合参数
+      .setMaxIter(params.maxIter)//设置最大迭代次数
+      .setTol(params.tol)//设置迭代的收敛
 
     // Train the model
     val startTime = System.nanoTime()
@@ -151,6 +151,7 @@ object LinearRegressionExample {
     println("Training data results:")
     DecisionTreeExample.evaluateRegressionModel(lirModel, training, "label")
     println("Test data results:")
+    //Root mean squared error (RMSE): 0.5858636434734112
     DecisionTreeExample.evaluateRegressionModel(lirModel, test, "label")
 
     sc.stop()
