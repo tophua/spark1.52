@@ -37,6 +37,7 @@ class MulticlassClassificationEvaluator (override val uid: String)
   def this() = this(Identifiable.randomUID("mcEval"))
 
   /**
+   * F1-Measure是根据准确率Precision和召回率Recall二者给出的一个综合的评价指标
    * param for metric name in evaluation (supports `"f1"` (default), `"precision"`, `"recall"`,
    * `"weightedPrecision"`, `"weightedRecall"`)
    * 评价中的度量名称支持(`"f1"`(default),`"precision"`,`"recall"`,`"weightedPrecision"`,`"weightedRecall"`)
@@ -61,7 +62,7 @@ class MulticlassClassificationEvaluator (override val uid: String)
 
   /** @group setParam */
   def setLabelCol(value: String): this.type = set(labelCol, value)
-
+//F1-Measure是根据准确率Precision和召回率Recall二者给出的一个综合的评价指标
   setDefault(metricName -> "f1")
 
   override def evaluate(dataset: DataFrame): Double = {
@@ -75,6 +76,7 @@ class MulticlassClassificationEvaluator (override val uid: String)
     }
     val metrics = new MulticlassMetrics(predictionAndLabels)
     val metric = $(metricName) match {
+      //F1-Measure是根据准确率Precision和召回率Recall二者给出的一个综合的评价指标
       case "f1" => metrics.weightedFMeasure
       case "precision" => metrics.precision//准确率
       case "recall" => metrics.recall//召回率
@@ -85,7 +87,7 @@ class MulticlassClassificationEvaluator (override val uid: String)
   }
 
   override def isLargerBetter: Boolean = $(metricName) match {
-    case "f1" => true
+    case "f1" => true//F1-Measure是根据准确率Precision和召回率Recall二者给出的一个综合的评价指标
     case "precision" => true//准确率
     case "recall" => true//召回率
     case "weightedPrecision" => true//加权准确率
