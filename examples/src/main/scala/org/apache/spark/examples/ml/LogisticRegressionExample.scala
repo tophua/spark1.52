@@ -159,6 +159,7 @@ object LogisticRegressionExample {
 
     stages += lor
      //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
+     //一个 Pipeline在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
     val pipeline = new Pipeline().setStages(stages.toArray)
 
     // Fit the Pipeline 安装管道

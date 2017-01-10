@@ -67,6 +67,7 @@ class PipelineSuite extends SparkFunSuite {
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     when(transformer3.transform(meq(dataset3))).thenReturn(dataset4)
     //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
+   //一个 Pipeline在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
     val pipeline = new Pipeline()
       .setStages(Array(estimator0, transformer1, estimator2, transformer3))
       //fit()方法将DataFrame转化为一个Transformer的算法
@@ -87,6 +88,7 @@ class PipelineSuite extends SparkFunSuite {
   test("pipeline with duplicate stages") {//重复阶段管道
     val estimator = mock[Estimator[MyModel]]
      //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
+     //一个 Pipeline在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
     val pipeline = new Pipeline()
       .setStages(Array(estimator, estimator))
     val dataset = mock[DataFrame]

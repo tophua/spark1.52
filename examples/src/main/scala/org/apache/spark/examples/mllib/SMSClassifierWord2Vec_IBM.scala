@@ -51,6 +51,7 @@ object SMSClassifierWord2Vec_IBM {
     val Array(trainingData, testData) = msgDF.randomSplit(Array(0.8, 0.2))
     //ML Pipeline 提供了大量做特征数据提取和转换的工具
      //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
+     //一个 Pipeline在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
     val pipeline = new Pipeline().setStages(Array(labelIndexer, word2Vec, mlpc, labelConverter))
     val model = pipeline.fit(trainingData)//训练数据
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
