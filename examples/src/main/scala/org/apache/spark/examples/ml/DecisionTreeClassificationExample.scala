@@ -116,7 +116,7 @@ object DecisionTreeClassificationExample {
       .setLabelCol("indexedLabel")
       .setPredictionCol("precision")
       //测量名称列参数(f1,precision,recall,weightedPrecision,weightedRecall)
-      .setMetricName("precision")
+      .setMetricName("precision")//准确率
       //评估
     val accuracy = evaluator.evaluate(predictions)
     //println("==="+accuracy)
