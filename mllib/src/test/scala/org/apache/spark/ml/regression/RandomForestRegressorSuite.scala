@@ -50,10 +50,10 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
   def regressionTestWithContinuousFeatures(rf: RandomForestRegressor) {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
     val newRF = rf
-      .setImpurity("variance")
-      .setMaxDepth(2)
-      .setMaxBins(10)
-      .setNumTrees(1)
+      .setImpurity("variance")//树节点选择的不纯度的衡量指标,取值可以是”entroy”或“gini”, 默认是”gini”
+      .setMaxDepth(2)//树的最大深度，默认值是 5
+      .setMaxBins(10)//离散连续性变量时最大的分箱数，默认是 32
+      .setNumTrees(1)//随机森林需要训练的树的个数，默认值是 20
       .setFeatureSubsetStrategy("auto")
       .setSeed(123)
     compareAPIs(orderedLabeledPoints50_1000, newRF, categoricalFeaturesInfo)
@@ -75,8 +75,8 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
   test("Feature importance with toy data") {
     val rf = new RandomForestRegressor()
       .setImpurity("variance")
-      .setMaxDepth(3)
-      .setNumTrees(3)
+      .setMaxDepth(3)//树的最大深度，默认值是 5
+      .setNumTrees(3)//随机森林需要训练的树的个数，默认值是 20
       .setFeatureSubsetStrategy("all")
       .setSubsamplingRate(1.0)
       .setSeed(123)

@@ -66,13 +66,13 @@ object DecisionTreeRunner {
  *  <value>为实数,也就是我们常说的自变量
  */
       dataFormat: String = "libsvm",
-      algo: Algo = Classification,
-      maxDepth: Int = 5,
-      impurity: ImpurityType = Gini,
-      maxBins: Int = 32,
+      algo: Algo = Classification,//算法
+      maxDepth: Int = 5,//树的最大深度，默认值是 5
+      impurity: ImpurityType = Gini,//树节点选择的不纯度的衡量指标，取值可以是”entroy”或“gini”, 默认是”gini”
+      maxBins: Int = 32,//离散连续性变量时最大的分箱数，默认是 32
       minInstancesPerNode: Int = 1,
       minInfoGain: Double = 0.0,
-      numTrees: Int = 1,
+      numTrees: Int = 1,//随机森林需要训练的树的个数，默认值是 20
       featureSubsetStrategy: String = "auto",
       fracTest: Double = 0.2,
       useNodeIdCache: Boolean = false,
