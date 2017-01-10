@@ -50,18 +50,18 @@ import org.apache.spark.sql.DataFrame
 object GBTExample {
 
   case class Params(
-      input: String = null,
+      input: String = "../data/mllib/rf_libsvm_data.txt",
       testInput: String = "",
-      dataFormat: String = "libsvm",
-      algo: String = "classification",
-      maxDepth: Int = 5,
-      maxBins: Int = 32,
+      dataFormat: String = "libsvm",//数据格式
+      algo: String = "classification",//"regression",算法类型
+      maxDepth: Int = 5,//最大深度
+      maxBins: Int = 32,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       minInstancesPerNode: Int = 1,
       minInfoGain: Double = 0.0,
-      maxIter: Int = 10,
+      maxIter: Int = 10,//迭代次数
       fracTest: Double = 0.2,
       cacheNodeIds: Boolean = false,
-      checkpointDir: Option[String] = None,
+      checkpointDir: Option[String] = None,//检查点目录
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -116,10 +116,10 @@ object GBTExample {
       opt[String]("dataFormat")
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
-      arg[String]("<input>")
+     /* arg[String]("<input>")
         .text("input path to labeled examples")
         .required()
-        .action((x, c) => c.copy(input = x))
+        .action((x, c) => c.copy(input = x))*/
       checkConfig { params =>
         if (params.fracTest < 0 || params.fracTest >= 1) {
           failure(s"fracTest ${params.fracTest} value incorrect; should be in [0,1).")
@@ -137,7 +137,7 @@ object GBTExample {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"GBTExample with $params")
+    val conf = new SparkConf().setAppName(s"GBTExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     params.checkpointDir.foreach(sc.setCheckpointDir)
     val algo = params.algo.toLowerCase
@@ -172,9 +172,9 @@ object GBTExample {
     val dt = algo match {
       case "classification" =>
         new GBTClassifier()
-	 //训练数据集DataFrame中存储特征数据的列名
+	         //训练数据集DataFrame中存储特征数据的列名
           .setFeaturesCol("indexedFeatures")
-          .setLabelCol(labelColName)
+          .setLabelCol(labelColName)//标签列的名称
           .setMaxDepth(params.maxDepth)//树的最大深度
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)//
@@ -185,7 +185,7 @@ object GBTExample {
       case "regression" =>
         new GBTRegressor()
           .setFeaturesCol("indexedFeatures")//训练数据集DataFrame中存储特征数据的列名
-          .setLabelCol(labelColName)
+          .setLabelCol(labelColName)//标签列的名称
           .setMaxDepth(params.maxDepth)//树的最大深度
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)
@@ -201,16 +201,19 @@ object GBTExample {
     val pipeline = new Pipeline().setStages(stages.toArray)
 
     // Fit the Pipeline 安装管道
+    //系统计时器的当前值,以毫微秒为单位
     val startTime = System.nanoTime()
     //fit()方法将DataFrame转化为一个Transformer的算法
     val pipelineModel = pipeline.fit(training)
+    //1e9就为1*(10的九次方),也就是十亿
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained GBT from the fitted PipelineModel
-    //从安装管道模型,得到训练的GBT
+    //从管道模型,得到训练的GBT
     algo match {
       case "classification" =>
+          //从管道模型,得到训练的GBT模型
         val rfModel = pipelineModel.stages.last.asInstanceOf[GBTClassificationModel]
         if (rfModel.totalNumNodes < 30) {
           println(rfModel.toDebugString) // Print full model.

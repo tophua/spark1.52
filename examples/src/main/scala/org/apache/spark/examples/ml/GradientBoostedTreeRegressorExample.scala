@@ -46,14 +46,16 @@ object GradientBoostedTreeRegressorExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
-
+    //val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
+    import org.apache.spark.mllib.util.MLUtils
+    val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
+    val data=sqlContext.createDataFrame(dataSVM)
     // Automatically identify categorical features, and index them.
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
-      .setMaxCategories(4)
+      .setMaxCategories(4)//最大类别数为5,(即某一列)中多于4个取值视为连续值,不给予转换
       .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // Split the data into training and test sets (30% held out for testing).
@@ -80,6 +82,17 @@ object GradientBoostedTreeRegressorExample {
     val predictions = model.transform(testData)
 
     // Select example rows to display.
+    /**
+     *+----------+-----+--------------------+
+      |prediction|label|            features|
+      +----------+-----+--------------------+
+      |       1.0|  1.0|(692,[158,159,160...|
+      |       1.0|  0.0|(692,[129,130,131...|
+      |       1.0|  1.0|(692,[158,159,160...|
+      |       1.0|  1.0|(692,[129,130,131...|
+      |       1.0|  0.0|(692,[154,155,156...|
+      +----------+-----+--------------------+
+     */
     predictions.select("prediction", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.

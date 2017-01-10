@@ -312,17 +312,20 @@ object DecisionTreeExample {
     val pipeline = new Pipeline().setStages(stages.toArray)
 
     // Fit the Pipeline 安装管道
+    // 系统计时器的当前值,以毫微秒为单位
     val startTime = System.nanoTime()
     //fit()方法将DataFrame转化为一个Transformer的算法
     val pipelineModel = pipeline.fit(training)
+    //1e9就为1*(10的九次方),也就是十亿
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
+    //打印训练使用的时间    
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained Decision Tree from the fitted PipelineModel
     //从拟合的管道模型中得到训练的决策树
     algo match {
       case "classification" =>//分类
-        //获得管道模型中训练的决策树
+        //获得管道中训练的最后模型决策树
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeClassificationModel]
         if (treeModel.numNodes < 20) {//节点数
           println(treeModel.toDebugString) // Print full model. 打印完整的模型
@@ -361,7 +364,7 @@ object DecisionTreeExample {
 
   /**
    * Evaluate the given ClassificationModel on data.  Print the results.
-   * 评估给定的数据分类模型,打印结果
+   * 评估给定的分类模型数据并打印结果
    * @param model  Must fit ClassificationModel abstraction 必须适合分类模型抽象
    * @param data  DataFrame with "prediction" and labelColName columns “预测”和labelcolname列数据框
    * @param labelColName  Name of the labelCol parameter for the model 该模型的labelcol参数名称
@@ -386,14 +389,24 @@ object DecisionTreeExample {
     +-----+--------------------+-----------+------------+--------------------+-------------+-----------+----------+**/
     fullPredictions.show()
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
+    //获得label列的值
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
     // Print number of classes for reference
-    
+    /**
+     * fullPredictions.schema("indexedLabel")
+     * StructField(indexedLabel,DoubleType,true)||||indexedLabel
+     */
+    println(fullPredictions.schema(labelColName)+"||||"+labelColName)
+    //getNumClasses 检查一个schema标识标签列中分类的数目
     val numClasses = MetadataUtils.getNumClasses(fullPredictions.schema(labelColName)) match {
       case Some(n) => n
       case None => throw new RuntimeException(
+        //分类标签索引时出现未知故障
         "Unknown failure when indexing labels for classification.")
     }
+    //(1.0,1.0)
+    //(1.0,1.0)
+    predictions.zip(labels).foreach(println _)
     //评估指标-多分类
     val accuracy = new MulticlassMetrics(predictions.zip(labels)).precision
     println(s"  Accuracy ($numClasses classes): $accuracy")
@@ -425,10 +438,12 @@ object DecisionTreeExample {
       |  0.0|(6,[0,4,5],[1.0,1...|(6,[0,4,5],[1.0,1...|       0.0|
       +-----+--------------------+--------------------+----------+
      */
-    fullPredictions.show()
+    fullPredictions.show()    
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))    
-    val zip=predictions.zip(labels)
+    //(1.0,1.0)
+    //(1.0,1.0)
+    val zip=predictions.zip(labels)    
    // println("zip:"+zip.)
     //RMSE 均方根误差
     val RMSE = new RegressionMetrics(predictions.zip(labels)).rootMeanSquaredError

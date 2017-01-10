@@ -26,7 +26,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * ElementwiseProduct点乘,就是说每个矩阵元素对应相乘
+ */
 object ElementwiseProductExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("ElementwiseProductExample").setMaster("local[4]")
@@ -39,6 +41,7 @@ object ElementwiseProductExample {
 
     // $example on$
     // Create some vector data; also works for sparse vectors
+    //创建一些向量数据,也适用于稀疏向量
     val dataFrame = sqlContext.createDataFrame(Seq(
       ("a", Vectors.dense(1.0, 2.0, 3.0)),
       ("b", Vectors.dense(4.0, 5.0, 6.0)))).toDF("id", "vector")

@@ -29,7 +29,9 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 
-
+/**
+ * 梯度Boost树分类算法
+ */
 object GradientBoostedTreeClassifierExample {
   def main(args: Array[String]): Unit = {
    val conf = new SparkConf().setAppName("GradientBoostedTreeClassifierExample").setMaster("local[4]")
@@ -47,32 +49,42 @@ object GradientBoostedTreeClassifierExample {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-    val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
+    import org.apache.spark.mllib.util.MLUtils
+    val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
+    val data=sqlContext.createDataFrame(dataSVM)
+    //val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
+  
 
     // Index labels, adding metadata to the label column.
+    // 索引标签,将元数据添加到标签列.
     // Fit on whole dataset to include all labels in index.
     val labelIndexer = new StringIndexer()
       .setInputCol("label")
       .setOutputCol("indexedLabel")
       .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
     // Automatically identify categorical features, and index them.
+      //自动识别分类特征,并对它们进行索引,
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
+     //VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
-      .setMaxCategories(4)
+      .setMaxCategories(4)//最大类别数为5,(即某一列)中多于4个取值视为连续值,不给予转换
       .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // Split the data into training and test sets (30% held out for testing).
+    //将数据分成训练和测试集(30%进行测试)
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a GBT model.
+    //训练GBT分类模型
     val gbt = new GBTClassifier()
       .setLabelCol("indexedLabel")
       .setFeaturesCol("indexedFeatures")
       .setMaxIter(10)
 
     // Convert indexed labels back to original labels.
+    //转换索引标签回到原来的标签
     val labelConverter = new IndexToString()
       .setInputCol("prediction")
       .setOutputCol("predictedLabel")
@@ -93,6 +105,17 @@ object GradientBoostedTreeClassifierExample {
     val predictions = model.transform(testData)
 
     // Select example rows to display.
+    /**
+     *+--------------+-----+--------------------+
+      |predictedLabel|label|            features|
+      +--------------+-----+--------------------+
+      |           0.0|  0.0|(692,[127,128,129...|
+      |           1.0|  1.0|(692,[151,152,153...|
+      |           1.0|  1.0|(692,[158,159,160...|
+      |           0.0|  1.0|(692,[99,100,101,...|
+      |           1.0|  1.0|(692,[97,98,99,12...|
+      +--------------+-----+--------------------+
+     */
     predictions.select("predictedLabel", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.
@@ -100,10 +123,12 @@ object GradientBoostedTreeClassifierExample {
       .setLabelCol("indexedLabel")
       //算法预测结果的存储列的名称, 默认是”prediction”
       .setPredictionCol("prediction")
-      .setMetricName("accuracy")
+      .setMetricName("precision")
+     //预测准确率
     val accuracy = evaluator.evaluate(predictions)
+    //Test Error = 0.03448275862068961
     println("Test Error = " + (1.0 - accuracy))
-
+    //管道模型获得GBTClassificationModel模型
     val gbtModel = model.stages(2).asInstanceOf[GBTClassificationModel]
     println("Learned classification GBT model:\n" + gbtModel.toDebugString)
     // $example off$

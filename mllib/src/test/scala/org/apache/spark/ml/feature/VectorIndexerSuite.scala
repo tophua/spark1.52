@@ -27,7 +27,10 @@ import org.apache.spark.mllib.linalg.{SparseVector, Vector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
-//向量索引 单词向量它用1和0分别表示是否存在某个词
+/**
+ * 向量索引 单词向量它用1和0分别表示是否存在某个词
+ * VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
+ */
 class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
   import VectorIndexerSuite.FeatureData
@@ -52,7 +55,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
       Vectors.dense(0.0, 1.0, 2.0),
       Vectors.dense(0.0, 0.0, -1.0),
       Vectors.dense(1.0, 3.0, 2.0))
-    val sparsePoints1Seq = Seq(
+    val sparsePoints1Seq = Seq(//稀疏数据
       Vectors.sparse(3, Array(0, 1), Array(1.0, 2.0)),
       Vectors.sparse(3, Array(1, 2), Array(1.0, 2.0)),
       Vectors.sparse(3, Array(2), Array(-1.0)),
@@ -119,7 +122,8 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     MLTestingUtils.checkCopy(model)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(densePoints1) // should work
-    model.transform(sparsePoints1) // should work
+    
+    model.transform(sparsePoints1)// should work
     intercept[SparkException] {
      //transform()方法将DataFrame转化为另外一个DataFrame的算法
       model.transform(densePoints2).collect()
@@ -138,6 +142,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
       //fit()方法将DataFrame转化为一个Transformer的算法
       val denseModel = denseVectorIndexer.fit(densePoints)
       val sparseModel = sparseVectorIndexer.fit(sparsePoints)
+      
       val denseMap = denseModel.categoryMaps
       val sparseMap = sparseModel.categoryMaps
       assert(denseMap.keys.toSet == sparseMap.keys.toSet,
@@ -159,7 +164,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
         s" categoricalFeatures=${categoricalFeatures.mkString(", ")}"
       try {
         val vectorIndexer = getIndexer.setMaxCategories(maxCategories)
-	//fit()方法将DataFrame转化为一个Transformer的算法
+	      //fit()方法将DataFrame转化为一个Transformer的算法
         val model = vectorIndexer.fit(data)
         val categoryMaps = model.categoryMaps
         // Chose correct categorical features

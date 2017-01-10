@@ -31,19 +31,21 @@ private[spark] object MetadataUtils {
 
   /**
    * Examine a schema to identify the number of classes in a label column.
+   * 检查一个schema标识标签列中分类的数目
    * Returns None if the number of labels is not specified, or if the label column is continuous.
+   *  None 如果未指定标签的数目,如果标签列是连续的
    */
   def getNumClasses(labelSchema: StructField): Option[Int] = {
     Attribute.fromStructField(labelSchema) match {
-      case binAttr: BinaryAttribute => Some(2)
-      case nomAttr: NominalAttribute => nomAttr.getNumValues
-      case _: NumericAttribute | UnresolvedAttribute => None
+      case binAttr: BinaryAttribute => Some(2) //二分类属性
+      case nomAttr: NominalAttribute => nomAttr.getNumValues //标名属性
+      case _: NumericAttribute | UnresolvedAttribute => None //数字或者未解决属性
     }
   }
 
   /**
    * Examine a schema to identify categorical (Binary and Nominal) features.
-   *
+   * 检查一个schema标识标签列中分类的特征
    * @param featuresSchema  Schema of the features column.
    *                        If a feature does not have metadata, it is assumed to be continuous.
    *                        If a feature is Nominal, then it must have the number of values
