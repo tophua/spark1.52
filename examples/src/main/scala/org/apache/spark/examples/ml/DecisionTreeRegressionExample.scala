@@ -84,16 +84,29 @@ object DecisionTreeRegressionExample {
     val predictions = model.transform(testData)
 
     // Select example rows to display.
+    /**
+     *+----------+-----+--------------------+
+      |prediction|label|            features|
+      +----------+-----+--------------------+
+      |       1.0|  1.0|(692,[158,159,160...|
+      |       1.0|  1.0|(692,[124,125,126...|
+      |       0.0|  1.0|(692,[99,100,101,...|
+      |       0.0|  0.0|(692,[127,128,129...|
+      |       0.0|  0.0|(692,[153,154,155...|
+      +----------+-----+--------------------+
+     **/
     predictions.select("prediction", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.
+    //回归评估,选择(预测,真实标签)和计算测试错误
     val evaluator = new RegressionEvaluator()
       .setLabelCol("label")
       .setPredictionCol("prediction")
        //rmse均方根误差说明样本的离散程度
-      .setMetricName("rmse")
+      .setMetricName("rmse")//均方根误差
     val rmse = evaluator.evaluate(predictions)
      //rmse均方根误差说明样本的离散程度
+    //Root Mean Squared Error (RMSE) on test data = 0.25819888974716115
     println("Root Mean Squared Error (RMSE) on test data = " + rmse)
 
     val treeModel = model.stages(1).asInstanceOf[DecisionTreeRegressionModel]

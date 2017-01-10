@@ -57,21 +57,26 @@ object DecisionTreeClassificationExample {
       .setOutputCol("indexedLabel")
       .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
     // Automatically identify categorical features, and index them.
+    //自动识别分类特征,并对它们进行索引
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
+      //具有4个不同值的特征被为连续
       .setMaxCategories(4) // features with > 4 distinct values are treated as continuous.
       .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // Split the data into training and test sets (30% held out for testing).
+    //将数据分成训练和测试集(30%测试)
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a DecisionTree model.
+    //训练一个决策树模型
     val dt = new DecisionTreeClassifier()
       .setLabelCol("indexedLabel")
       .setFeaturesCol("indexedFeatures")
 
     // Convert indexed labels back to original labels.
+    //转换索引标签回到原来的标签
     val labelConverter = new IndexToString()
       .setInputCol("prediction")
       .setOutputCol("predictedLabel")
@@ -91,14 +96,30 @@ object DecisionTreeClassificationExample {
     val predictions = model.transform(testData)
 
     // Select example rows to display.
+    //选择要显示的示例行
+    /**
+     * +--------------+-----+--------------------+
+     * |predictedLabel|label|            features|
+     * +--------------+-----+--------------------+
+     * |           1.0|  1.0|(692,[151,152,153...|
+     * |           0.0|  0.0|(692,[129,130,131...|
+     * |           0.0|  0.0|(692,[154,155,156...|
+     * |           0.0|  0.0|(692,[127,128,129...|
+     * |           0.0|  0.0|(692,[151,152,153...|
+     * +--------------+-----+--------------------+
+     */
     predictions.select("predictedLabel", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.
+    //选择(预测,真实标签)和计算测试错误。
     val evaluator = new MulticlassClassificationEvaluator()
       .setLabelCol("indexedLabel")
-      .setPredictionCol("prediction")
-      .setMetricName("accuracy")
+      .setPredictionCol("precision")
+      //测量名称列参数(f1,precision,recall,weightedPrecision,weightedRecall)
+      .setMetricName("precision")
+      //评估
     val accuracy = evaluator.evaluate(predictions)
+    //println("==="+accuracy)
     println("Test Error = " + (1.0 - accuracy))
 
     val treeModel = model.stages(2).asInstanceOf[DecisionTreeClassificationModel]

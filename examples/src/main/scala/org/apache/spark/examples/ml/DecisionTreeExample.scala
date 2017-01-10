@@ -58,10 +58,10 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 object DecisionTreeExample {
 
   case class Params(
-      input: String = null,
+      input: String = "../data/mllib/rf_libsvm_data.txt",
       testInput: String = "",
       dataFormat: String = "libsvm",
-      algo: String = "Classification",
+      algo: String = "regression",//"Classification",
       maxDepth: Int = 5,
       maxBins: Int = 32,
       minInstancesPerNode: Int = 1,
@@ -118,10 +118,10 @@ object DecisionTreeExample {
       opt[String]("dataFormat")
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
-      arg[String]("<input>")
-        .text("input path to labeled examples")
-        .required()
-        .action((x, c) => c.copy(input = x))
+      //arg[String]("<input>")
+       // .text("input path to labeled examples")
+        //.required()
+       // .action((x, c) => c.copy(input = x))
       checkConfig { params =>
         if (params.fracTest < 0 || params.fracTest >= 1) {
           failure(s"fracTest ${params.fracTest} value incorrect; should be in [0,1).")
@@ -131,8 +131,10 @@ object DecisionTreeExample {
       }
     }
 
-    parser.parse(args, defaultParams).map { params =>
+    parser.parse(args, defaultParams).map { params =>{
+      //println(">>>>>>>>>")
       run(params)
+      }
     }.getOrElse {
       sys.exit(1)
     }
@@ -151,13 +153,13 @@ object DecisionTreeExample {
       case "dense" => MLUtils.loadLabeledPoints(sc, path)
       case "libsvm" => expectedNumFeatures match {
         case Some(numFeatures) => MLUtils.loadLibSVMFile(sc, path, numFeatures)
-	/**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+      	/**
+       	*  libSVM的数据格式
+       	*  <label> <index1>:<value1> <index2>:<value2> ...
+       	*  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+       	*  <index>是以1开始的整数,可以是不连续
+       	*  <value>为实数,也就是我们常说的自变量
+       	*/
         case None => MLUtils.loadLibSVMFile(sc, path)
       }
       case _ => throw new IllegalArgumentException(s"Bad data format: $format")
@@ -202,10 +204,11 @@ object DecisionTreeExample {
 
     // For classification, convert labels to Strings since we will index them later with    
     // StringIndexer.
-    //进行分类,将标签转换为字符串，因为我们将索引他们以后
+    //进行分类,因为我们将索引他们以后,将标签转换为字符串
     def labelsToStrings(data: DataFrame): DataFrame = {
       algo.toLowerCase match {
         case "classification" =>
+          //withColumn函数就能实现对dataframe中列的添加
           data.withColumn("labelString", data("label").cast(StringType))
         case "regression" =>
           data
@@ -219,16 +222,28 @@ object DecisionTreeExample {
 
     val numTraining = training.count()
     val numTest = test.count()
+   /** 
+    +-----+--------------------+-----------+
+    |label|            features|labelString|
+    +-----+--------------------+-----------+
+    |  0.0| (6,[4,5],[1.0,1.0])|        0.0|
+    |  0.0|(6,[2,4,5],[1.0,1...|        0.0|
+    |  0.0| (6,[4,5],[1.0,1.0])|        0.0|
+    |  1.0|(6,[0,1,2,3],[1.0...|        1.0|
+    |  1.0|(6,[1,2,3],[1.0,1...|        1.0|
+    +-----+--------------------+-----------+**/
+    training.show()
     val numFeatures = training.select("features").first().getAs[Vector](0).size
     println("Loaded data:")
+    //特征数: numTraining = 5, 测试数:numTest = 4
     println(s"  numTraining = $numTraining, numTest = $numTest")
+    //特征数:numFeatures = 6
     println(s"  numFeatures = $numFeatures")
-
     (training, test)
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"DecisionTreeExample with $params")
+    val conf = new SparkConf().setAppName(s"DecisionTreeExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     params.checkpointDir.foreach(sc.setCheckpointDir)
     val algo = params.algo.toLowerCase
@@ -261,26 +276,26 @@ object DecisionTreeExample {
     stages += featuresIndexer
     // (3) Learn Decision Tree 学习决策树
     val dt = algo match {
-      case "classification" =>
+      case "classification" =>//分类
         new DecisionTreeClassifier()
-          .setFeaturesCol("indexedFeatures")
-          .setLabelCol(labelColName)
-          .setMaxDepth(params.maxDepth)
-          .setMaxBins(params.maxBins)
-          .setMinInstancesPerNode(params.minInstancesPerNode)
-          .setMinInfoGain(params.minInfoGain)
-          .setCacheNodeIds(params.cacheNodeIds)
-          .setCheckpointInterval(params.checkpointInterval)
-      case "regression" =>
+          .setFeaturesCol("indexedFeatures")//特征列
+          .setLabelCol(labelColName)//标签列
+          .setMaxDepth(params.maxDepth)//最大深度
+          .setMaxBins(params.maxBins)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
+          .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
+          .setMinInfoGain(params.minInfoGain)//
+          .setCacheNodeIds(params.cacheNodeIds)//
+          .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1)
+      case "regression" =>//回归
         new DecisionTreeRegressor()
-          .setFeaturesCol("indexedFeatures")
-          .setLabelCol(labelColName)
-          .setMaxDepth(params.maxDepth)
-          .setMaxBins(params.maxBins)
-          .setMinInstancesPerNode(params.minInstancesPerNode)
+          .setFeaturesCol("indexedFeatures")//特征列
+          .setLabelCol(labelColName)//标签列
+          .setMaxDepth(params.maxDepth)//最大深度
+          .setMaxBins(params.maxBins)//连续特征离散化的最大数量
+          .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
           .setMinInfoGain(params.minInfoGain)
           .setCacheNodeIds(params.cacheNodeIds)
-          .setCheckpointInterval(params.checkpointInterval)
+          .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1)
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
     stages += dt
@@ -295,16 +310,18 @@ object DecisionTreeExample {
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained Decision Tree from the fitted PipelineModel
-    //从拟合的管道模型中得到训练有素的决策树
+    //从拟合的管道模型中得到训练的决策树
     algo match {
-      case "classification" =>
+      case "classification" =>//分类
+        //获得管道模型中训练的决策树
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeClassificationModel]
-        if (treeModel.numNodes < 20) {
+        if (treeModel.numNodes < 20) {//节点数
           println(treeModel.toDebugString) // Print full model. 打印完整的模型
         } else {
           println(treeModel) // Print model summary. 打印模型综述
         }
-      case "regression" =>
+      case "regression" =>//回归
+        //获得管道模型中训练的决策树
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeRegressionModel]
         if (treeModel.numNodes < 20) {
           println(treeModel.toDebugString) // Print full model.
@@ -316,12 +333,12 @@ object DecisionTreeExample {
 
     // Evaluate model on training, test data 训练评估模型，测试数据
     algo match {
-      case "classification" =>
+      case "classification" =>//分类
         println("Training data results:")
         evaluateClassificationModel(pipelineModel, training, labelColName)
         println("Test data results:")
         evaluateClassificationModel(pipelineModel, test, labelColName)
-      case "regression" =>
+      case "regression" =>//回归
         println("Training data results:")
         evaluateRegressionModel(pipelineModel, training, labelColName)
         println("Test data results:")
@@ -348,6 +365,17 @@ object DecisionTreeExample {
       labelColName: String): Unit = {
       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val fullPredictions = model.transform(data).cache()
+    //获得预测列
+    /**
+    +-----+--------------------+-----------+------------+--------------------+-------------+-----------+----------+
+    |label|            features|labelString|indexedLabel|     indexedFeatures|rawPrediction|probability|prediction|
+    +-----+--------------------+-----------+------------+--------------------+-------------+-----------+----------+
+    |  1.0|(6,[0,1,2,3],[1.0...|        1.0|         1.0|(6,[0,1,2,3],[1.0...|    [0.0,2.0]|  [0.0,1.0]|       1.0|
+    |  1.0|(6,[0,1,3],[1.0,1...|        1.0|         1.0|(6,[0,1,3],[1.0,1...|    [0.0,2.0]|  [0.0,1.0]|       1.0|
+    |  0.0|(6,[0,4,5],[1.0,1...|        0.0|         0.0|(6,[0,4,5],[1.0,1...|    [3.0,0.0]|  [1.0,0.0]|       0.0|
+    |  0.0|(6,[0,4,5],[1.0,1...|        0.0|         0.0|(6,[0,4,5],[1.0,1...|    [3.0,0.0]|  [1.0,0.0]|       0.0|
+    +-----+--------------------+-----------+------------+--------------------+-------------+-----------+----------+**/
+    fullPredictions.show()
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
     // Print number of classes for reference
@@ -379,8 +407,23 @@ object DecisionTreeExample {
     val fullPredictions = model.transform(data).cache()
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
-    //rmse均方根误差说明样本的离散程度
+    /***
+     * 
+     *+-----+--------------------+--------------------+----------+
+      |label|            features|     indexedFeatures|prediction|
+      +-----+--------------------+--------------------+----------+
+      |  1.0|(6,[0,1,2,3],[1.0...|(6,[0,1,2,3],[1.0...|       1.0|
+      |  1.0|(6,[0,1,3],[1.0,1...|(6,[0,1,3],[1.0,1...|       1.0|
+      |  0.0|(6,[0,4,5],[1.0,1...|(6,[0,4,5],[1.0,1...|       0.0|
+      |  0.0|(6,[0,4,5],[1.0,1...|(6,[0,4,5],[1.0,1...|       0.0|
+      +-----+--------------------+--------------------+----------+
+     */
+    fullPredictions.show()
+    val zip=predictions.zip(labels)
+   // println("zip:"+zip.)
+    //RMSE 均方根误差
     val RMSE = new RegressionMetrics(predictions.zip(labels)).rootMeanSquaredError
+    //Root mean squared error (RMSE): 0.0
     println(s"  Root mean squared error (RMSE): $RMSE")
   }
 }

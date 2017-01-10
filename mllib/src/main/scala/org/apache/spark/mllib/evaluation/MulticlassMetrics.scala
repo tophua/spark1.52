@@ -105,7 +105,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * Returns precision for a given label (category)
-   * 给定标签(类别)的精度
+   * 给定标签(类别)的准确率
    * @param label the label.
    */
   @Since("1.1.0")
@@ -137,20 +137,20 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * Returns f1-measure for a given label (category)
-   * 对于一个给定的标签（类别）
+   * 对于一个给定的标签(类别)
    * @param label the label.
    */
   @Since("1.1.0")
   def fMeasure(label: Double): Double = fMeasure(label, 1.0)
 
   /**
-   * Returns precision 精度
+   * Returns precision 准确率
    */
   @Since("1.1.0")
   lazy val precision: Double = tpByClass.values.sum.toDouble / labelCount
 
   /**
-   * Returns recall召回率(等于精度的多类分类器由于误报的总和等于所有的假阴性)
+   * Returns recall召回率(等于准确率的多类分类器由于误报的总和等于所有的假阴性)
    * (equals to precision for multiclass classifier
    * because sum of all false positives is equal to sum
    * of all false negatives)
@@ -159,7 +159,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   lazy val recall: Double = precision
 
   /**
-   * Returns f-measure F度量(等于精度和召回,因为精度等于召回)
+   * Returns f-measure F度量(等于准确率和召回,因为准确率等于召回率)
    * (equals to precision and recall because precision equals recall)
    */
   @Since("1.1.0")
@@ -167,7 +167,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
 
   /**
    * Returns weighted true positive rate 加权真阳性率
-   * (equals to precision, recall and f-measure)
+   * (equals to precision 准确率, recall 召回率 and f-measure)
    */
   @Since("1.1.0")
   lazy val weightedTruePositiveRate: Double = weightedRecall
@@ -182,7 +182,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
-   * 加权平均的召回率(等于精度,Recall和加权平均)
+   * 加权平均的召回率(等于准确率,召回率和加权平均)
    * Returns weighted averaged recall
    * (equals to precision, recall and f-measure)
    */
@@ -192,7 +192,7 @@ class MulticlassMetrics @Since("1.1.0") (predictionAndLabels: RDD[(Double, Doubl
   }.sum
 
   /**
-   * 加权平均的精度
+   * 加权平均的准确率
    * Returns weighted averaged precision 
    */
   @Since("1.1.0")

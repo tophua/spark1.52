@@ -66,7 +66,7 @@ final class RegressionEvaluator(override val uid: String)
 
   /** @group setParam */
   def setLabelCol(value: String): this.type = set(labelCol, value)
-
+  //默认均方根误差
   setDefault(metricName -> "rmse")
 
   override def evaluate(dataset: DataFrame): Double = {
@@ -80,19 +80,22 @@ final class RegressionEvaluator(override val uid: String)
       }     
     val metrics = new RegressionMetrics(predictionAndLabels)
     val metric = $(metricName) match {
+      //均方根误差
       case "rmse" => metrics.rootMeanSquaredError
+      //均方差
       case "mse" => metrics.meanSquaredError
       case "r2" => metrics.r2
+      //平均绝对误差
       case "mae" => metrics.meanAbsoluteError
     }
     metric
   }
 
   override def isLargerBetter: Boolean = $(metricName) match {
-    case "rmse" => false
-    case "mse" => false
-    case "r2" => true
-    case "mae" => false
+    case "rmse" => false//均方根误差
+    case "mse" => false//均方差
+    case "r2" => true//平方系统
+    case "mae" => false//平均绝对误差
   }
 
   override def copy(extra: ParamMap): RegressionEvaluator = defaultCopy(extra)

@@ -80,19 +80,32 @@ object DataFrameExample {
  
 
     // Load input data
+    //Loading LIBSVM file with UDT from ../data/mllib/sample_libsvm_data.txt.
     println(s"Loading LIBSVM file with UDT from ${params.input}.")
      val dataSVM=MLUtils.loadLibSVMFile(sc, params.input)
      
     val df: DataFrame = sqlContext.createDataFrame(dataSVM).cache()
     println("Schema from LIBSVM:")
     df.printSchema()
+    //Loaded training data as a DataFrame with 100 records.
     println(s"Loaded training data as a DataFrame with ${df.count()} records.")
 
     // Show statistical summary of labels.
+    //显示标签统计汇总
     val labelSummary = df.describe("label")
+    /**+-------+------------------+
+      *|summary|             label|
+      *+-------+------------------+
+      *|  count|               100|
+      *|   mean|              0.57|
+      *| stddev|0.4950757517794625|
+      *|    min|               0.0|
+      *|    max|               1.0|
+      *+-------+------------------+**/
     labelSummary.show()
 
     // Convert features column to an RDD of vectors.
+    //转换特征列向量法
     val features = df.select("features").rdd.map { case Row(v: Vector) => v }
    // val featureSummary = features.aggregate(new MultivariateOnlineSummarizer())(
       //(summary, feat) => summary.add(Vectors.fromML(feat)),
@@ -100,12 +113,15 @@ object DataFrameExample {
    // println(s"Selected features column with average values:\n ${featureSummary.mean.toString}")
 
     // Save the records in a parquet file.
+     //保存parquet记录文件
     val tmpDir = Utils.createTempDir()
+    //C:\Users\liushuhua\AppData\Local\Temp\spark-f97fb832-d864-4855-ac6c-d38564a04de5\dataframe
     val outputDir = new File(tmpDir, "dataframe").toString
     println(s"Saving to $outputDir as Parquet file.")
     df.write.parquet(outputDir)
 
     // Load the records back.
+    //重新加载数据
     println(s"Loading Parquet file with UDT from $outputDir.")
     val newDF = sqlContext.read.parquet(outputDir)
     println(s"Schema from Parquet:")

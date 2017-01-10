@@ -44,6 +44,7 @@ object ElementwiseProductExample {
       ("b", Vectors.dense(4.0, 5.0, 6.0)))).toDF("id", "vector")
 
     val transformingVector = Vectors.dense(0.0, 1.0, 2.0)
+    //ElementwiseProduct 点乘,就是说每个矩阵元素对应相乘
     val transformer = new ElementwiseProduct()
       .setScalingVec(transformingVector)
       .setInputCol("vector")
@@ -51,6 +52,14 @@ object ElementwiseProductExample {
 
     // Batch transform the vectors to create new column:
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
+    /**
+     * +---+-------------+-----------------+
+     * | id|       vector|transformedVector|
+     * +---+-------------+-----------------+
+     * |  a|[1.0,2.0,3.0]|    [0.0,2.0,6.0]|
+     * |  b|[4.0,5.0,6.0]|   [0.0,5.0,12.0]|
+     * +---+-------------+-----------------+
+     */
     transformer.transform(dataFrame).show()
     // $example off$
 

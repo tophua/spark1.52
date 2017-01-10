@@ -69,10 +69,16 @@ class Param[T](val parent: String, val name: String, val doc: String, val isVali
     }
   }
 
-  /** Creates a param pair with the given value (for Java). */
+  /** 
+   *  Creates a param pair with the given value (for Java). 
+   *  创建一个具有指定值的参数对(for Java)
+   *  */
   def w(value: T): ParamPair[T] = this -> value
 
-  /** Creates a param pair with the given value (for Scala). */
+  /** 
+   *  Creates a param pair with the given value (for Scala).
+   *  创建一个具有指定值的参数对(for Scala)
+   *   */
   def ->(value: T): ParamPair[T] = ParamPair(this, value)
 
   override final def toString: String = s"${parent}__$name"
@@ -91,15 +97,20 @@ class Param[T](val parent: String, val name: String, val doc: String, val isVali
  * :: DeveloperApi ::
  * Factory methods for common validation functions for [[Param.isValid]].
  * The numerical methods only support Int, Long, Float, and Double.
+ * 数值方法只支持Int, Long, Float, and Double
  */
 @DeveloperApi
 object ParamValidators {
 
-  /** (private[param]) Default validation always return true */
+  /** 
+   *  (private[param]) Default validation always return true
+   *  默认验证总是返回true 
+   *  */
   private[param] def alwaysTrue[T]: T => Boolean = (_: T) => true
 
   /**
    * Private method for checking numerical types and converting to Double.
+   * 提供方法用于检查数值类型转换为Double的方法
    * This is mainly for the sake of compilation; type checks are really handled
    * by [[Params]] setters and the [[ParamPair]] constructor.
    */
@@ -110,32 +121,46 @@ object ParamValidators {
     case x: Double => x.toDouble
     case _ =>
       // The type should be checked before this is ever called.
+      //该类型应检查之前,这是所谓的,
       throw new IllegalArgumentException("Numerical Param validation failed because" +
         s" of unexpected input type: ${value.getClass}")
   }
 
-  /** Check if value > lowerBound */
+  /** 
+   *  Check if value > lowerBound 
+   *  检查值>下界
+   *  */
   def gt[T](lowerBound: Double): T => Boolean = { (value: T) =>
     getDouble(value) > lowerBound
   }
 
-  /** Check if value >= lowerBound */
+  /** 
+   *  Check if value >= lowerBound
+   *  检查值> =下界 
+   *  */
   def gtEq[T](lowerBound: Double): T => Boolean = { (value: T) =>
     getDouble(value) >= lowerBound
   }
 
-  /** Check if value < upperBound */
+  /** 
+   *  Check if value < upperBound 
+   *  检查值＜上界
+   *  */
   def lt[T](upperBound: Double): T => Boolean = { (value: T) =>
     getDouble(value) < upperBound
   }
 
-  /** Check if value <= upperBound */
+  /** 
+   *  Check if value <= upperBound 
+   *  检查值<=上限
+   *  */
   def ltEq[T](upperBound: Double): T => Boolean = { (value: T) =>
     getDouble(value) <= upperBound
   }
 
   /**
    * Check for value in range lowerBound to upperBound.
+   * 检查值范围为上界下界
    * @param lowerInclusive  If true, check for value >= lowerBound.
    *                        If false, check for value > lowerBound.
    * @param upperInclusive  If true, check for value <= upperBound.
@@ -157,17 +182,26 @@ object ParamValidators {
     inRange[T](lowerBound, upperBound, lowerInclusive = true, upperInclusive = true)
   }
 
-  /** Check for value in an allowed set of values. */
+  /** 
+   *  Check for value in an allowed set of values.
+   *  在允许的值集合中检查值 
+   *  */
   def inArray[T](allowed: Array[T]): T => Boolean = { (value: T) =>
     allowed.contains(value)
   }
 
-  /** Check for value in an allowed set of values. */
+  /** 
+   *  Check for value in an allowed set of values. 
+   *  在允许的值集合中检查值
+   *  */
   def inArray[T](allowed: java.util.List[T]): T => Boolean = { (value: T) =>
     allowed.contains(value)
   }
 
-  /** Check that the array length is greater than lowerBound. */
+  /** 
+   *  Check that the array length is greater than lowerBound. 
+   *  检查数组的长度大于下界
+   *  */
   def arrayLengthGt[T](lowerBound: Double): Array[T] => Boolean = { (value: Array[T]) =>
     value.length > lowerBound
   }

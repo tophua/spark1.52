@@ -30,7 +30,7 @@ abstract class Evaluator extends Params {
 
   /**
    * Evaluates model output and returns a scalar metric (larger is better).
-   *
+   * 计算模型输出并返回标量度量(较大为更好)
    * @param dataset a dataset that contains labels/observations and predictions.
    * @param paramMap parameter map that specifies the input columns and output metrics
    * @return metric
@@ -40,7 +40,7 @@ abstract class Evaluator extends Params {
   }
 
   /**
-   * Evaluates the output.
+   * Evaluates the output.评估输出
    * @param dataset a dataset that contains labels/observations and predictions.
    * @return metric
    */

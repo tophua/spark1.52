@@ -76,20 +76,20 @@ class MulticlassClassificationEvaluator (override val uid: String)
     val metrics = new MulticlassMetrics(predictionAndLabels)
     val metric = $(metricName) match {
       case "f1" => metrics.weightedFMeasure
-      case "precision" => metrics.precision
-      case "recall" => metrics.recall
-      case "weightedPrecision" => metrics.weightedPrecision
-      case "weightedRecall" => metrics.weightedRecall
+      case "precision" => metrics.precision//准确率
+      case "recall" => metrics.recall//召回率
+      case "weightedPrecision" => metrics.weightedPrecision//加权准确率
+      case "weightedRecall" => metrics.weightedRecall//加权召回率
     }
     metric
   }
 
   override def isLargerBetter: Boolean = $(metricName) match {
     case "f1" => true
-    case "precision" => true
-    case "recall" => true
-    case "weightedPrecision" => true
-    case "weightedRecall" => true
+    case "precision" => true//准确率
+    case "recall" => true//召回率
+    case "weightedPrecision" => true//加权准确率
+    case "weightedRecall" => true//加权召回率
   }
 
   override def copy(extra: ParamMap): MulticlassClassificationEvaluator = defaultCopy(extra)

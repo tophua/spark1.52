@@ -67,7 +67,7 @@ class BinaryClassificationEvaluator(override val uid: String)
 
   /** @group setParam */
   def setLabelCol(value: String): this.type = set(labelCol, value)
-
+  //ROC曲线下面积
   setDefault(metricName -> "areaUnderROC")
 
   override def evaluate(dataset: DataFrame): Double = {
@@ -82,7 +82,9 @@ class BinaryClassificationEvaluator(override val uid: String)
       }
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
     val metric = $(metricName) match {
+      //ROC曲线下面积
       case "areaUnderROC" => metrics.areaUnderROC()
+      //准确率与召回率
       case "areaUnderPR" => metrics.areaUnderPR()
     }
     metrics.unpersist()
@@ -90,8 +92,8 @@ class BinaryClassificationEvaluator(override val uid: String)
   }
 
   override def isLargerBetter: Boolean = $(metricName) match {
-    case "areaUnderROC" => true
-    case "areaUnderPR" => true
+    case "areaUnderROC" => true//ROC曲线下面积
+    case "areaUnderPR" => true //准确率与召回率
   }
 
   override def copy(extra: ParamMap): BinaryClassificationEvaluator = defaultCopy(extra)
