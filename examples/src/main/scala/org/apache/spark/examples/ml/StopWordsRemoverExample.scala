@@ -47,14 +47,14 @@ object StopWordsRemoverExample {
       (0, Seq("I", "saw", "the", "red", "baloon")),
       (1, Seq("Mary", "had", "a", "little", "lamb"))
     )).toDF("id", "raw")
-/**
- * +---+--------------------+--------------------+
- * | id|                 raw|            filtered|
- * +---+--------------------+--------------------+
- * |  0|[I, saw, the, red...|  [saw, red, baloon]|
- * |  1|[Mary, had, a, li...|[Mary, little, lamb]|
- * +---+--------------------+--------------------+
- */
+    /**
+     * +---+--------------------+--------------------+
+     * | id|                 raw|            filtered|
+     * +---+--------------------+--------------------+
+     * |  0|[I, saw, the, red...|  [saw, red, baloon]|
+     * |  1|[Mary, had, a, li...|[Mary, little, lamb]|
+     * +---+--------------------+--------------------+
+     */
  //transform()方法将DataFrame转化为另外一个DataFrame的算法
     remover.transform(dataSet).show()
     // $example off$

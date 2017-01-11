@@ -57,14 +57,18 @@ object MultilayerPerceptronClassifierExample {
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_multiclass_classification_data.txt")
       val data = sqlContext.createDataFrame(dataSVM)
       // Split the data into train and test
+      //分隔测试和训练数据
     val splits = data.randomSplit(Array(0.6, 0.4), seed = 1234L)
     val train = splits(0)
     val test = splits(1)
     // specify layers for the neural network:
-    // input layer of size 4 (features), two intermediate of size 5 and 4
+    //指定神经网络的层：
+    // input layer of size 4 (features), two intermediate 中间 of size 5 and 4
     // and output of size 3 (classes)
+    //
     val layers = Array[Int](4, 5, 4, 3)
     // create the trainer and set its parameters
+    //创建训练器并设置参数
     val trainer = new MultilayerPerceptronClassifier()
       .setLayers(layers)//层规模,包括输入规模以及输出规模
       .setBlockSize(128)//
@@ -76,9 +80,28 @@ object MultilayerPerceptronClassifierExample {
     // compute accuracy on the test set
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = model.transform(test)
+    /**
+     *+-----+--------------------+----------+
+      |label|            features|prediction|
+      +-----+--------------------+----------+
+      |  2.0|(4,[0,1,2,3],[0.3...|       0.0|
+      |  1.0|(4,[0,1,2,3],[-0....|       1.0|
+      |  0.0|(4,[0,1,2,3],[0.0...|       0.0|
+      |  1.0|(4,[0,1,2,3],[-0....|       1.0|
+      |  1.0|(4,[0,1,2,3],[-0....|       1.0|
+      |  0.0|(4,[0,1,2,3],[0.0...|       0.0|
+      |  2.0|(4,[0,1,2,3],[-0....|       2.0|
+      |  1.0|(4,[0,1,2,3],[-0....|       1.0|
+      |  0.0|(4,[0,1,2,3],[0.1...|       0.0|
+      |  0.0|(4,[0,2,3],[0.444...|       0.0|
+      |  2.0|(4,[0,1,2,3],[0.2...|       2.0|
+      +-----+--------------------+----------+*/
+    result.show(5)
     val predictionAndLabels = result.select("prediction", "label")
+    //多分类评估
     val evaluator = new MulticlassClassificationEvaluator()
-      .setMetricName("accuracy")
+      .setMetricName("precision")
+    //准确率 Accuracy: 0.9636363636363636
     println("Accuracy: " + evaluator.evaluate(predictionAndLabels))
     // $example off$
 

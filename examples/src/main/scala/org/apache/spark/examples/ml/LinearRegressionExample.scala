@@ -144,13 +144,17 @@ object LinearRegressionExample {
     //fit()方法将DataFrame转化为一个Transformer的算法
     val lirModel = lir.fit(training)
     //1e9就为1*(10的九次方),也就是十亿
-    val elapsedTime = (System.nanoTime() - startTime) / 1e9
+    //经过的时间
+    val elapsedTime = (System.nanoTime() - startTime) / 1e9   
+    //Training time: 8.57000559 seconds
     println(s"Training time: $elapsedTime seconds")
 
     // Print the weights and intercept for linear regression.
+    //Weights: (692,[95,96,97,98,99,100,101,102,119]) Intercept: 0.7644843078616104
     println(s"Weights: ${lirModel.weights} Intercept: ${lirModel.intercept}")
 
     println("Training data results:")
+    //Root mean squared error (RMSE): 3.1575761537716335E-4
     DecisionTreeExample.evaluateRegressionModel(lirModel, training, "label")
     println("Test data results:")
     //Root mean squared error (RMSE): 0.5858636434734112

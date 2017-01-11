@@ -25,6 +25,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
+/**
+ * Normalizer标准化例子
+ */
 object NormalizerExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("CrossValidatorExample").setMaster("local[4]")
@@ -46,20 +49,44 @@ object NormalizerExample {
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
       val dataFrame = sqlContext.createDataFrame(dataSVM)
     // Normalize each Vector using $L^1$ norm.
+    // 标准化每个向量使用$L^1$ 标准
     val normalizer = new Normalizer()
       .setInputCol("features")
       .setOutputCol("normFeatures")
       .setP(1.0)
      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val l1NormData = normalizer.transform(dataFrame)
+    /**
+    +-----+--------------------+--------------------+
+    |label|            features|        normFeatures|
+    +-----+--------------------+--------------------+
+    |  0.0|(692,[127,128,129...|(692,[127,128,129...|    
+    |  1.0|(692,[129,130,131...|(692,[129,130,131...|
+    |  0.0|(692,[154,155,156...|(692,[154,155,156...|
+    |  1.0|(692,[150,151,152...|(692,[150,151,152...|
+    |  0.0|(692,[124,125,126...|(692,[124,125,126...|
+    |  0.0|(692,[152,153,154...|(692,[152,153,154...|
+    |  1.0|(692,[97,98,99,12...|(692,[97,98,99,12...|
+    |  1.0|(692,[124,125,126...|(692,[124,125,126...|
+    +-----+--------------------+--------------------+*/
     l1NormData.show()
-
     // Normalize each Vector using $L^\infty$ norm.
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val lInfNormData = normalizer.transform(dataFrame, normalizer.p -> Double.PositiveInfinity)
+    /**
+      +-----+--------------------+--------------------+
+      |label|            features|        normFeatures|
+      +-----+--------------------+--------------------+
+      |  0.0|(692,[127,128,129...|(692,[127,128,129...|
+      |  1.0|(692,[158,159,160...|(692,[158,159,160...|
+      |  1.0|(692,[124,125,126...|(692,[124,125,126...|
+      |  1.0|(692,[129,130,131...|(692,[129,130,131...|
+      |  0.0|(692,[154,155,156...|(692,[154,155,156...|
+      |  1.0|(692,[150,151,152...|(692,[150,151,152...|
+      |  0.0|(692,[124,125,126...|(692,[124,125,126...|
+      +-----+--------------------+--------------------+*/
     lInfNormData.show()
     // $example off$
-
     sc.stop()
   }
 }

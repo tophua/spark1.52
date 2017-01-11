@@ -53,10 +53,12 @@ object PipelineExample {
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
+    //HashingTF使用每个单词对所需向量的长度S取模得出的哈希值,把所有单词映射到一个0到S-1之间的数字上
     val hashingTF = new HashingTF()
       .setNumFeatures(1000)
       .setInputCol(tokenizer.getOutputCol)
       .setOutputCol("features")
+    //逻辑回归
     val lr = new LogisticRegression()
       .setMaxIter(10)
       .setRegParam(0.01)
@@ -92,7 +94,19 @@ object PipelineExample {
 
     // Make predictions on test documents.
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
+    /**
+    +---+---------------+------------------+--------------------+--------------------+--------------------+----------+
+    | id|           text|             words|            features|       rawPrediction|         probability|prediction|
+    +---+---------------+------------------+--------------------+--------------------+--------------------+----------+
+    |  4|    spark i j k|  [spark, i, j, k]|(1000,[105,106,10...|[0.16293291377552...|[0.54064335448514...|       0.0|
+    |  5|          l m n|         [l, m, n]|(1000,[108,109,11...|[2.64074492867998...|[0.93343826273832...|       0.0|
+    |  6|mapreduce spark|[mapreduce, spark]|(1000,[365,810],[...|[1.26512849874491...|[0.77990768682039...|       0.0|
+    |  7|  apache hadoop|  [apache, hadoop]|(1000,[269,894],[...|[3.74294051364937...|[0.97686361395183...|       0.0|
+    +---+---------------+------------------+--------------------+--------------------+--------------------+----------+*/
+    model.transform(test).show()
     model.transform(test)
+    //probability算法预测结果的存储列的名称
+    //probability类别预测结果的条件概率值存储列的名称
       .select("id", "text", "probability", "prediction")
       .collect()
       .foreach { case Row(id: Long, text: String, prob: Vector, prediction: Double) =>

@@ -67,6 +67,7 @@ object DecisionTreeRegressionExample {
     // Automatically identify categorical features, and index them.
      //自动识别分类特征,和索引,在这里,我们训练特征值>4不同值作为连续
     // Here, we treat features with > 4 distinct values as continuous.
+    //VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")

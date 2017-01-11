@@ -54,13 +54,30 @@ object TokenizerExample {
        * 用户可以指定参数“gaps”来指明正则“patten”表示“tokens”而不是分隔符,
        * 这样来为分词结果找到所有可能匹配的情况
        */
-      
       .setPattern("\\W") // alternatively .setPattern("\\w+").setGaps(false)
 	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     val tokenized = tokenizer.transform(sentenceDataFrame)
+    /**
+      +-----+--------------------+--------------------+
+      |label|            sentence|               words|
+      +-----+--------------------+--------------------+
+      |    0|Hi I heard about ...|[hi, i, heard, ab...|
+      |    1|I wish Java could...|[i, wish, java, c...|
+      |    2|Logistic,regressi...|[logistic,regress...|
+      +-----+--------------------+--------------------+*/
+    tokenized.show()
     tokenized.select("words", "label").take(3).foreach(println)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val regexTokenized = regexTokenizer.transform(sentenceDataFrame)
+    /**
+    +-----+--------------------+--------------------+
+    |label|            sentence|               words|
+    +-----+--------------------+--------------------+
+    |    0|Hi I heard about ...|[Hi, I, heard, ab...|
+    |    1|I wish Java could...|[I, wish, Java, c...|
+    |    2|Logistic,regressi...|[Logistic, regres...|
+    +-----+--------------------+--------------------+*/
+    regexTokenized.show()
     regexTokenized.select("words", "label").take(3).foreach(println)
     // $example off$
 

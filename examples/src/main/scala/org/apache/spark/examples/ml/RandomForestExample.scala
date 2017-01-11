@@ -50,7 +50,7 @@ import org.apache.spark.sql.DataFrame
 object RandomForestExample {
 
   case class Params(
-      input: String = null,
+      input: String = "../data/mllib/sample_multiclass_classification_data.txt",
       testInput: String = "",
       /**
  *  libSVM的数据格式
@@ -60,12 +60,12 @@ object RandomForestExample {
  *  <value>为实数,也就是我们常说的自变量
  */
       dataFormat: String = "libsvm",
-      algo: String = "classification",
-      maxDepth: Int = 5,
-      maxBins: Int = 32,
+      algo: String = "classification",//分类
+      maxDepth: Int = 5,//树的最大深度
+      maxBins: Int = 32,//离散连续性变量时最大的分箱数，默认是 32
       minInstancesPerNode: Int = 1,
       minInfoGain: Double = 0.0,
-      numTrees: Int = 10,
+      numTrees: Int = 10,//随机森林需要训练的树的个数，默认值是 20
       featureSubsetStrategy: String = "auto",
       fracTest: Double = 0.2,
       cacheNodeIds: Boolean = false,
@@ -136,10 +136,10 @@ object RandomForestExample {
  */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
-      arg[String]("<input>")
+      /*arg[String]("<input>")
         .text("input path to labeled examples")
-        .required()
-        .action((x, c) => c.copy(input = x))
+        //.required()
+        .action((x, c) => c.copy(input = x))*/
       checkConfig { params =>
         if (params.fracTest < 0 || params.fracTest >= 1) {
           failure(s"fracTest ${params.fracTest} value incorrect; should be in [0,1).")
@@ -157,7 +157,7 @@ object RandomForestExample {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"RandomForestExample with $params")
+    val conf = new SparkConf().setAppName(s"RandomForestExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     params.checkpointDir.foreach(sc.setCheckpointDir)
     val algo = params.algo.toLowerCase
@@ -183,6 +183,7 @@ object RandomForestExample {
     // (2) Identify categorical features using VectorIndexer.确定使用vectorindexer分类特征
     //     Features with more than maxCategories values will be treated as continuous.
     //超过maxcategories值将被视为连续的特点
+    //VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
     val featuresIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
@@ -192,28 +193,28 @@ object RandomForestExample {
     val dt = algo match {
       case "classification" =>
         new RandomForestClassifier()
-          .setFeaturesCol("indexedFeatures")
-          .setLabelCol(labelColName)
-          .setMaxDepth(params.maxDepth)
-          .setMaxBins(params.maxBins)
+          .setFeaturesCol("indexedFeatures")//训练数据集 DataFrame 中存储特征数据的列名
+          .setLabelCol(labelColName)//标签列的名称
+          .setMaxDepth(params.maxDepth)//树的最大深度，默认值是 5
+          .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)
           .setMinInfoGain(params.minInfoGain)
           .setCacheNodeIds(params.cacheNodeIds)
-          .setCheckpointInterval(params.checkpointInterval)
+          .setCheckpointInterval(params.checkpointInterval)//
           .setFeatureSubsetStrategy(params.featureSubsetStrategy)
-          .setNumTrees(params.numTrees)
+          .setNumTrees(params.numTrees)//随机森林需要训练的树的个数，默认值是 20
       case "regression" =>
         new RandomForestRegressor()
-          .setFeaturesCol("indexedFeatures")
-          .setLabelCol(labelColName)
-          .setMaxDepth(params.maxDepth)
-          .setMaxBins(params.maxBins)
+          .setFeaturesCol("indexedFeatures")//训练数据集 DataFrame 中存储特征数据的列名
+          .setLabelCol(labelColName)//标签列的名称
+          .setMaxDepth(params.maxDepth)//树的最大深度，默认值是 5
+          .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)
           .setMinInfoGain(params.minInfoGain)
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)
           .setFeatureSubsetStrategy(params.featureSubsetStrategy)
-          .setNumTrees(params.numTrees)
+          .setNumTrees(params.numTrees)//随机森林需要训练的树的个数，默认值是 20
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
     stages += dt

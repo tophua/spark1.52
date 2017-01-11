@@ -89,7 +89,6 @@ object VectorIndexerExample {
     *多于前面的设置setMaxCategories(5),因此被视为连续值了,不会被转换。
     * 特征1中,(4,5,6,7,9)-->(0,1,2,3,4,5)
     * 特征2中,(2,7,9)-->(0,1,2)
-    * 
     */
     indexedData.show()
     // $example off$

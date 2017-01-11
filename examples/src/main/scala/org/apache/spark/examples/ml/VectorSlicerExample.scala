@@ -64,6 +64,7 @@ object VectorSlicerExample {
     // or slicer.setIndices(Array(1, 2)), or slicer.setNames(Array("f2", "f3"))
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = slicer.transform(dataset)
+    output.show()
     println(output.select("userFeatures", "features").first())
     // $example off$
 

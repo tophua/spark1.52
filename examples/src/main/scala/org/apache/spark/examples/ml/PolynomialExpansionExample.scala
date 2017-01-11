@@ -50,11 +50,20 @@ object PolynomialExpansionExample {
     )
     val df = sqlContext.createDataFrame(data.map(Tuple1.apply)).toDF("features")
     val polynomialExpansion = new PolynomialExpansion()
-      .setInputCol("features")
-      .setOutputCol("polyFeatures")
+      .setInputCol("features")//输入列
+      .setOutputCol("polyFeatures")//输出列
       .setDegree(3)
       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val polyDF = polynomialExpansion.transform(df)
+    /**
+     *+----------+--------------------+
+      |  features|        polyFeatures|
+      +----------+--------------------+
+      |[-2.0,2.3]|[-2.0,4.0,-8.0,2....|
+      | [0.0,0.0]|[0.0,0.0,0.0,0.0,...|
+      |[0.6,-1.1]|[0.6,0.36,0.216,-...|
+      +----------+--------------------+*/
+    polyDF.show()
     /**
     *[[-2.0,4.0,-8.0,2.3,-4.6,9.2,5.289999999999999,-10.579999999999998,12.166999999999996]]
     *[[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]]

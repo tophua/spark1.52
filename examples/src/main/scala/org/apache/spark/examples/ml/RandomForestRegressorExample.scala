@@ -29,7 +29,9 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * 
+ */
 object RandomForestRegressorExample {
   def main(args: Array[String]): Unit = {
       val conf = new SparkConf().setAppName("RandomForestClassifierExample").setMaster("local[4]")
@@ -52,6 +54,7 @@ object RandomForestRegressorExample {
       val data = sqlContext.createDataFrame(dataSVM)
     // Automatically identify categorical features, and index them.
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
+    //VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")

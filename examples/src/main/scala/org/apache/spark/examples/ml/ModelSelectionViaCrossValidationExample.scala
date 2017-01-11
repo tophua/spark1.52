@@ -32,12 +32,11 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 // $example off$
-
-
 /**
  * A simple example demonstrating model selection using CrossValidator.
+ * 演示一个简单的例子,使用选择crossvalidator模型
  * This example also demonstrates how Pipelines are Estimators.
- *
+ * 这个例子还演示管道是如何评估
  * Run with
  * {{{
  * bin/run-example ml.ModelSelectionViaCrossValidationExample
@@ -70,16 +69,21 @@ object ModelSelectionViaCrossValidationExample {
     )).toDF("id", "text", "label")
 
     // Configure an ML pipeline, which consists of three stages: tokenizer, hashingTF, and lr.
+    //配置机器学习管道,由tokenizer, hashingTF, 和 lr评估器 组成
+    //Tokenizer 将分好的词转换为数组
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
+    //特征提取和转换 TF-IDF
+    //HashingTF 从一个文档中计算出给定大小的词频向量,
+    //"a a b b c d" HashingTF (262144,[97,98,99,100],[2.0,2.0,1.0,1.0])
     val hashingTF = new HashingTF()
       .setInputCol(tokenizer.getOutputCol)
       .setOutputCol("features")
     val lr = new LogisticRegression()
-      .setMaxIter(10)
-       //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
-       //一个 Pipeline在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
+      .setMaxIter(10)//设置迭代次数
+    //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
+    //一个 Pipeline在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
@@ -99,15 +103,17 @@ object ModelSelectionViaCrossValidationExample {
     // is areaUnderROC.
     val cv = new CrossValidator()
       .setEstimator(pipeline)
-      .setEvaluator(new BinaryClassificationEvaluator)
+      .setEvaluator(new BinaryClassificationEvaluator)//设置评估模型
       .setEstimatorParamMaps(paramGrid)
       .setNumFolds(2)  // Use 3+ in practice
 
     // Run cross-validation, and choose the best set of parameters.
+    //运行交叉验证,并选择最佳参数集
     //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(training)
 
     // Prepare test documents, which are unlabeled (id, text) tuples.
+    // 准备测试文档,这是未标记的(ID、text)的元组
     val test = sqlContext.createDataFrame(Seq(
       (4L, "spark i j k"),
       (5L, "l m n"),

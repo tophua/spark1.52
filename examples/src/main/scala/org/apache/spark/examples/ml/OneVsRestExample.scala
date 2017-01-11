@@ -53,7 +53,7 @@ import org.apache.spark.sql.SQLContext
 object OneVsRestExample {
 
   case class Params private[ml] (
-      input: String = null,
+      input: String = "../data/mllib/sample_libsvm_data.txt",
       testInput: Option[String] = None,
       maxIter: Int = 100,//迭代次数
       tol: Double = 1E-6,//迭代算法的收敛性
@@ -69,7 +69,7 @@ object OneVsRestExample {
       head("OneVsRest Example: multiclass to binary reduction using OneVsRest")
       opt[String]("input")
         .text("input path to labeled examples. This path must be specified")
-        .required()
+        //.required()
         .action((x, c) => c.copy(input = x))
       opt[Double]("fracTest")
         .text(s"fraction of data to hold out for testing.  If given option testInput, " +
@@ -112,7 +112,7 @@ object OneVsRestExample {
   }
 
   private def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"OneVsRestExample with $params")
+    val conf = new SparkConf().setAppName(s"OneVsRestExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     /**
  *  libSVM的数据格式
@@ -174,7 +174,18 @@ object OneVsRestExample {
     //评分测试数据模型
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val (predictionDuration, predictions) = time(ovrModel.transform(test))
-
+    /**
+     *+-----+--------------------+----------+
+      |label|            features|prediction|
+      +-----+--------------------+----------+
+      |  1.0|(692,[158,159,160...|       1.0|
+      |  1.0|(692,[127,128,154...|       1.0|
+      |  1.0|(692,[128,129,155...|       1.0|
+      |  0.0|(692,[123,124,125...|       0.0|
+      |  1.0|(692,[129,130,131...|       1.0|
+      +-----+--------------------+----------+
+     */
+    predictions.show()
     // evaluate the model 评估模型
     val predictionsAndLabels = predictions.select("prediction", "label")
       .map(row => (row.getDouble(0), row.getDouble(1)))
@@ -185,17 +196,25 @@ object OneVsRestExample {
 
     // compute the false positive rate per label 计算每个标签的假阳性率
     val predictionColSchema = predictions.schema("prediction")
+    //获得元数据分类数
     val numClasses = MetadataUtils.getNumClasses(predictionColSchema).get
     val fprs = Range(0, numClasses).map(p => (p, metrics.falsePositiveRate(p.toDouble)))
-
+   //Training Time 9 sec
     println(s" Training Time ${trainingDuration} sec\n")
-
+    //Prediction Time 0 sec
     println(s" Prediction Time ${predictionDuration} sec\n")
-
+   /**Confusion Matrix
+    9.0  1.0   
+    0.0  15.0**/  
     println(s" Confusion Matrix\n ${confusionMatrix.toString}\n")
 
+    
+    /**
+     * label	fpr
+     *   0		0.0
+     *   1		0.1
+     */
     println("label\tfpr")
-
     println(fprs.map {case (label, fpr) => label + "\t" + fpr}.mkString("\n"))
 
     sc.stop()

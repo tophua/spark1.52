@@ -48,6 +48,16 @@ object TfIdfExample {
     val hashingTF = new HashingTF()
       .setInputCol("words").setOutputCol("rawFeatures").setNumFeatures(20)
     val featurizedData = hashingTF.transform(wordsData)
+    /**
+      +-----+--------------------+--------------------+--------------------+
+      |label|            sentence|               words|         rawFeatures|
+      +-----+--------------------+--------------------+--------------------+
+      |    0|Hi I heard about ...|[hi, i, heard, ab...|(20,[5,6,9],[2.0,...|
+      |    0|I wish Java could...|[i, wish, java, c...|(20,[3,5,12,14,18...|
+      |    1|Logistic regressi...|[logistic, regres...|(20,[5,12,14,18],...|
+      +-----+--------------------+--------------------+--------------------+
+     */
+    featurizedData.show()
     // alternatively, CountVectorizer can also be used to get term frequency vectors
 
     val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
@@ -55,6 +65,15 @@ object TfIdfExample {
     val idfModel = idf.fit(featurizedData)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val rescaledData = idfModel.transform(featurizedData)
+    /**
+    +-----+--------------------+--------------------+--------------------+--------------------+
+    |label|            sentence|               words|         rawFeatures|            features|
+    +-----+--------------------+--------------------+--------------------+--------------------+
+    |    0|Hi I heard about ...|[hi, i, heard, ab...|(20,[5,6,9],[2.0,...|(20,[5,6,9],[0.0,...|
+    |    0|I wish Java could...|[i, wish, java, c...|(20,[3,5,12,14,18...|(20,[3,5,12,14,18...|
+    |    1|Logistic regressi...|[logistic, regres...|(20,[5,12,14,18],...|(20,[5,12,14,18],...|
+    +-----+--------------------+--------------------+--------------------+--------------------+*/
+    rescaledData.show()
     rescaledData.select("features", "label").take(3).foreach(println)
     // $example off$
 

@@ -32,7 +32,7 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
  * 随机森林是决策树的集成算法,随机森林包含多个决策树来降低过拟合的风险。
  * 随机森林同样具有易解释性、可处理类别特征、易扩展到多分类问题、不需特征缩放等性质。
- * 
+ * RandomForestClassifier 随机森林分类树
  */
 object RandomForestClassifierExample {
   def main(args: Array[String]): Unit = {
@@ -57,10 +57,11 @@ object RandomForestClassifierExample {
       .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
     // Automatically identify categorical features, and index them.
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
+    //VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
-      .setMaxCategories(4)
+      .setMaxCategories(4)//最大类别数为4,(即某一列)中多于4个取值视为连续值
       .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // Split the data into training and test sets (30% held out for testing).
@@ -74,6 +75,7 @@ object RandomForestClassifierExample {
       .setNumTrees(10)//训练的树的数量
 
     // Convert indexed labels back to original labels.
+    //转换索引标签回到原来的标签
     val labelConverter = new IndexToString()
       .setInputCol("prediction")
       .setOutputCol("predictedLabel")
@@ -92,20 +94,43 @@ object RandomForestClassifierExample {
     // Make predictions.
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictions = model.transform(testData)
-
+    /**
+      +-----+--------------------+------------+--------------------+-------------+-----------+----------+--------------+
+      |label|            features|indexedLabel|     indexedFeatures|rawPrediction|probability|prediction|predictedLabel|
+      +-----+--------------------+------------+--------------------+-------------+-----------+----------+--------------+
+      |  0.0|(692,[127,128,129...|         1.0|(692,[127,128,129...|   [0.0,10.0]|  [0.0,1.0]|       1.0|           0.0|
+      |  1.0|(692,[152,153,154...|         0.0|(692,[152,153,154...|   [10.0,0.0]|  [1.0,0.0]|       0.0|           1.0|
+      |  0.0|(692,[154,155,156...|         1.0|(692,[154,155,156...|    [6.0,4.0]|  [0.6,0.4]|       0.0|           1.0|
+      |  0.0|(692,[124,125,126...|         1.0|(692,[124,125,126...|   [0.0,10.0]|  [0.0,1.0]|       1.0|           0.0|
+      |  1.0|(692,[124,125,126...|         0.0|(692,[124,125,126...|   [10.0,0.0]|  [1.0,0.0]|       0.0|           1.0|
+      +-----+--------------------+------------+--------------------+-------------+-----------+----------+--------------+*/
+    predictions.show(5)
     // Select example rows to display.
+    /**
+      +--------------+-----+--------------------+
+      |predictedLabel|label|            features|
+      +--------------+-----+--------------------+
+      |           1.0|  1.0|(692,[158,159,160...|
+      |           1.0|  1.0|(692,[124,125,126...|
+      |           0.0|  0.0|(692,[129,130,131...|
+      |           1.0|  1.0|(692,[158,159,160...|
+      |           0.0|  1.0|(692,[99,100,101,...|
+      +--------------+-----+--------------------+*/
     predictions.select("predictedLabel", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.
+    // 选择(预测,标签)计算测试错误
     val evaluator = new MulticlassClassificationEvaluator()
       .setLabelCol("indexedLabel")//标签列名
       //算法预测结果的存储列的名称, 默认是”prediction”
       .setPredictionCol("prediction")
-      .setMetricName("accuracy")//测量名称
+      .setMetricName("precision")//准确率
     val accuracy = evaluator.evaluate(predictions)
+    //Test Error = 0.025000000000000022
     println("Test Error = " + (1.0 - accuracy))
 
     val rfModel = model.stages(2).asInstanceOf[RandomForestClassificationModel]
+    //Learned classification forest model:
     println("Learned classification forest model:\n" + rfModel.toDebugString)
     // $example off$
 

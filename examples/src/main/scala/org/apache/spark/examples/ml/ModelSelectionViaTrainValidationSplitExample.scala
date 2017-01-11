@@ -34,7 +34,8 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
  * A simple example demonstrating model selection using TrainValidationSplit.
- *
+ * 演示一个简单的例子,选择使用trainvalidationsplit模型
+ *数据量小的时候可以用CrossValidator进行交叉验证,数据量大的时候可以直接用trainValidationSplit
  * Run with
  * {{{
  * bin/run-example ml.ModelSelectionViaTrainValidationSplitExample
@@ -61,7 +62,7 @@ object ModelSelectionViaTrainValidationSplitExample {
  */
    // val data = sqlContext.read.format("libsvm").load("data/mllib/sample_linear_regression_data.txt")
     import org.apache.spark.mllib.util.MLUtils
-      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/ample_linear_regression_data.txt")
+      val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_linear_regression_data.txt")
       val data = sqlContext.createDataFrame(dataSVM)
     val Array(training, test) = data.randomSplit(Array(0.9, 0.1), seed = 12345)
 
@@ -82,9 +83,10 @@ object ModelSelectionViaTrainValidationSplitExample {
     //数据量小的时候可以用CrossValidator进行交叉验证,数据量大的时候可以直接用trainValidationSplit
     val trainValidationSplit = new TrainValidationSplit()
       .setEstimator(lr)
-      .setEvaluator(new RegressionEvaluator)
+      .setEvaluator(new RegressionEvaluator)//回归评估
       .setEstimatorParamMaps(paramGrid)
       // 80% of the data will be used for training and the remaining 20% for validation.
+      //80%的数据将用于训练,其余20%用于验证
       .setTrainRatio(0.8)
 
     // Run train validation split, and choose the best set of parameters.
@@ -94,9 +96,20 @@ object ModelSelectionViaTrainValidationSplitExample {
     // Make predictions on test data. model is the model with combination of parameters
     // that performed best.
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
+    /**
+      +--------------------+------------------+--------------------+
+      |            features|             label|          prediction|
+      +--------------------+------------------+--------------------+
+      |(10,[0,1,2,3,4,5,...|-5.082010756207233| -1.0519586530518505|
+      |(10,[0,1,2,3,4,5,...| 7.887786536531237|  1.3995823450701195|
+      |(10,[0,1,2,3,4,5,...| 6.082192787194888|-0.07337670647585792|
+      |(10,[0,1,2,3,4,5,...|-7.481405271455238| -0.9318480964325699|
+      |(10,[0,1,2,3,4,5,...| 4.564039393483412|-0.26155859898173217|
+      +--------------------+------------------+--------------------+
+     */
     model.transform(test)
       .select("features", "label", "prediction")
-      .show()
+      .show(5)
     // $example off$
 
     sc.stop()

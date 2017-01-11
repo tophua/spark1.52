@@ -275,7 +275,7 @@ object DecisionTreeExample {
     // (2) Identify categorical features using VectorIndexer.
     //     确定使用vectorindexer分类特征
     //     Features with more than maxCategories values will be treated as continuous.
-    //    超过maxcategories值将被视为连续的特点
+    //    VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
     val featuresIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
@@ -387,7 +387,7 @@ object DecisionTreeExample {
     |  0.0|(6,[0,4,5],[1.0,1...|        0.0|         0.0|(6,[0,4,5],[1.0,1...|    [3.0,0.0]|  [1.0,0.0]|       0.0|
     |  0.0|(6,[0,4,5],[1.0,1...|        0.0|         0.0|(6,[0,4,5],[1.0,1...|    [3.0,0.0]|  [1.0,0.0]|       0.0|
     +-----+--------------------+-----------+------------+--------------------+-------------+-----------+----------+**/
-    fullPredictions.show()
+    fullPredictions.show(5)
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
     //获得label列的值
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))

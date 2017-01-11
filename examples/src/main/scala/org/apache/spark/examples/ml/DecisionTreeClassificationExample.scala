@@ -57,7 +57,7 @@ object DecisionTreeClassificationExample {
       .setOutputCol("indexedLabel")
       .fit(data)//fit()方法将DataFrame转化为一个Transformer的算法
     // Automatically identify categorical features, and index them.
-    //自动识别分类特征,并对它们进行索引
+    //VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")

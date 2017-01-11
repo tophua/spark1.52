@@ -48,7 +48,7 @@ import org.apache.spark.sql.DataFrame
 object LogisticRegressionExample {
 
   case class Params(
-      input: String = null,
+      input: String = "../data/mllib/sample_libsvm_data.txt",
       testInput: String = "",
       /**
  *  libSVM的数据格式
@@ -106,10 +106,10 @@ object LogisticRegressionExample {
  */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
-      arg[String]("<input>")
+     /* arg[String]("<input>")
         .text("input path to labeled examples")
-        .required()
-        .action((x, c) => c.copy(input = x))
+        //.required()
+        .action((x, c) => c.copy(input = x))*/
       checkConfig { params =>
         if (params.fracTest < 0 || params.fracTest >= 1) {
           failure(s"fracTest ${params.fracTest} value incorrect; should be in [0,1).")
@@ -127,7 +127,7 @@ object LogisticRegressionExample {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"LogisticRegressionExample with $params")
+    val conf = new SparkConf().setAppName(s"LogisticRegressionExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
 
     println(s"LogisticRegressionExample with parameters:\n$params")
@@ -170,15 +170,18 @@ object LogisticRegressionExample {
     //1e9就为1*(10的九次方),也就是十亿
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
-
+    //获得管道中逻辑回归模型
     val lorModel = pipelineModel.stages.last.asInstanceOf[LogisticRegressionModel]
     // Print the weights and intercept for logistic regression.
     //打印逻辑回归的权重和截取
+    //(692,[95,96,97,98,99,100,101,1]) Intercept: -0.3328714265631985
     println(s"Weights: ${lorModel.weights} Intercept: ${lorModel.intercept}")
 
     println("Training data results:")
+    //Accuracy (2 classes): 1.0
     DecisionTreeExample.evaluateClassificationModel(pipelineModel, training, "indexedLabel")
     println("Test data results:")
+    //Accuracy (2 classes): 0.96
     DecisionTreeExample.evaluateClassificationModel(pipelineModel, test, "indexedLabel")
 
     sc.stop()

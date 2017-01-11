@@ -26,7 +26,9 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.sql.functions.max
-
+/**
+ * 逻辑回归摘要的例子
+ */
 object LogisticRegressionSummaryExample {
 
   def main(args: Array[String]): Unit = {
@@ -49,9 +51,9 @@ object LogisticRegressionSummaryExample {
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
       val training = sqlContext.createDataFrame(dataSVM)
     val lr = new LogisticRegression()
-      .setMaxIter(10)
-      .setRegParam(0.3)
-      .setElasticNetParam(0.8)
+      .setMaxIter(10)//迭代次数
+      .setRegParam(0.3)//正则化参数(>=0)
+      .setElasticNetParam(0.8)//设置elasticnet混合参数
 
     // Fit the model
     //fit()方法将DataFrame转化为一个Transformer的算法
@@ -60,24 +62,64 @@ object LogisticRegressionSummaryExample {
     // $example on$
     // Extract the summary from the returned LogisticRegressionModel instance trained in the earlier
     // example
+    //返回实例逻辑回归模型的训练中提取摘要
     val trainingSummary = lrModel.summary
 
     // Obtain the objective per iteration.
+    //获得每次迭代的目标
     val objectiveHistory = trainingSummary.objectiveHistory
+    /**
+     *0.6833149135741656
+      0.6662875751473731
+      0.6217068546034619
+      0.6127265245887888
+      0.606034798680287
+      0.6031750687571562
+      0.5969621534836276
+      0.5940743031983124
+      0.5906089243339021
+      0.5894724576491039
+      0.588218777572959
+     */
     objectiveHistory.foreach(loss => println(loss))
 
     // Obtain the metrics useful to judge performance on test data.
+    // 获得有用的指标来判断测试数据的性能
     // We cast the summary to a BinaryLogisticRegressionSummary since the problem is a
     // binary classification problem.
     val binarySummary = trainingSummary.asInstanceOf[BinaryLogisticRegressionSummary]
 
     // Obtain the receiver-operating characteristic as a dataframe and areaUnderROC.
+    //获得一个数据集areaUnderROC
     val roc = binarySummary.roc
-    roc.show()
+    /**
+   	+---+--------------------+
+    |FPR|                 TPR|
+    +---+--------------------+
+    |0.0|                 0.0|
+    |0.0|0.017543859649122806|
+    |0.0| 0.03508771929824561|
+    |0.0| 0.05263157894736842|
+    |0.0| 0.07017543859649122|
+    +---+--------------------+*/
+    roc.show(5)
+    //1
     println(binarySummary.areaUnderROC)
 
     // Set the model threshold to maximize F-Measure
+    //模型的设定阈值最大值
     val fMeasure = binarySummary.fMeasureByThreshold
+    /**
+     *+------------------+--------------------+
+      |         threshold|           F-Measure|
+      +------------------+--------------------+
+      |0.7845860015371144|0.034482758620689655|
+      |0.7843193344168924| 0.06779661016949151|
+      |0.7842976092510133|                 0.1|
+      |0.7842531051133194| 0.13114754098360656|
+      |0.7835792429453299| 0.16129032258064516|
+      +------------------+--------------------+*/
+    fMeasure.show(5)
     val maxFMeasure = fMeasure.select(max("F-Measure")).head().getDouble(0)
     val bestThreshold = fMeasure.where($"F-Measure" === maxFMeasure)
       .select("threshold").head().getDouble(0)

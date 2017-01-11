@@ -162,7 +162,7 @@ object GBTExample {
     }
     // (2) Identify categorical features using VectorIndexer. 确定使用vectorindexer分类特征
     //     Features with more than maxCategories values will be treated as continuous.
-    //超过maxcategories值将被视为连续的特点。
+    //VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
     val featuresIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")

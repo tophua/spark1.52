@@ -56,7 +56,8 @@ object OneHotEncoderExample {
       .setInputCol("category")
       .setOutputCol("categoryIndex")
       .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
-    val indexed = indexer.transform(df)//transform()方法将DataFrame转化为另外一个DataFrame的算法
+    //transform()方法将DataFrame转化为另外一个DataFrame的算法
+    val indexed = indexer.transform(df)
   //对随机分布的类别进行OneHotEncoder，转换后可以当成连续数值输入
     val encoder = new OneHotEncoder()
       .setInputCol("categoryIndex")
@@ -65,7 +66,7 @@ object OneHotEncoderExample {
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val encoded = encoder.transform(indexed)
     /**
-     * 数据会变成稀疏的
+     * 数据会变成稀疏的,独热编码将类别特征,三个特征
      * +---+-------------+
      * | id|  categoryVec|
      * +---+-------------+

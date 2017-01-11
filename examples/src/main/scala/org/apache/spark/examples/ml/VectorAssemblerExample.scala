@@ -31,7 +31,7 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 **/
 object VectorAssemblerExample {
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf().setAppName("TfIdfExample").setMaster("local[4]")
+    val conf = new SparkConf().setAppName("VectorAssemblerExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
   
     val sqlContext = new SQLContext(sc)
@@ -47,6 +47,13 @@ object VectorAssemblerExample {
       .setOutputCol("features")
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = assembler.transform(dataset)
+    /**
+      +---+----+------+--------------+-------+--------------------+
+      | id|hour|mobile|  userFeatures|clicked|            features|
+      +---+----+------+--------------+-------+--------------------+
+      |  0|  18|   1.0|[0.0,10.0,0.5]|    1.0|[18.0,1.0,0.0,10....|
+      +---+----+------+--------------+-------+--------------------+*/
+    output.show()
     /*
      * [[18.0,1.0,0.0,10.0,0.5],1.0]
      */

@@ -51,6 +51,7 @@ object Word2VecExample {
     ).map(Tuple1.apply)).toDF("text")
 
     // Learn a mapping from words to Vectors.
+    //word2vecmodel使用文档中每个词语的平均数来将文档转换为向量,然后这个向量可以作为预测的特征,来计算文档相似度计算等等
     val word2Vec = new Word2Vec()
       .setInputCol("text")
       .setOutputCol("result")
@@ -60,6 +61,15 @@ object Word2VecExample {
     val model = word2Vec.fit(documentDF)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val result = model.transform(documentDF)
+    /**
+      +--------------------+--------------------+
+      |                text|              result|
+      +--------------------+--------------------+
+      |[Hi, I, heard, ab...|[-0.0412071054801...|
+      |[I, wish, Java, c...|[-0.0281929480178...|
+      |[Logistic, regres...|[-0.0090558481402...|
+      +--------------------+--------------------+*/
+    result.show()
     result.select("result").take(3).foreach(println)
     // $example off$
 
