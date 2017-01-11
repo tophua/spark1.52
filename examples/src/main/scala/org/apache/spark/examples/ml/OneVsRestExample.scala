@@ -202,6 +202,7 @@ object OneVsRestExample {
   }
 
   private def time[R](block: => R): (Long, R) = {
+    //系统计时器的当前值,以毫微秒为单位
     val t0 = System.nanoTime()
     val result = block    // call-by-name
     val t1 = System.nanoTime()

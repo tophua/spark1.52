@@ -120,8 +120,10 @@ object GradientBoostedTreesRunner {
 
     val randomSeed = Utils.random.nextInt()
     if (params.algo == "Classification") {
+     //系统计时器的当前值,以毫微秒为单位
       val startTime = System.nanoTime()
       val model = GradientBoostedTrees.train(training, boostingStrategy)
+      //1e9就为1*(10的九次方),也就是十亿
       val elapsedTime = (System.nanoTime() - startTime) / 1e9
       println(s"Training time: $elapsedTime seconds")
       if (model.totalNumNodes < 30) {
@@ -139,8 +141,10 @@ object GradientBoostedTreesRunner {
         new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
       println(s"Test accuracy = $testAccuracy")
     } else if (params.algo == "Regression") {
+     //系统计时器的当前值,以毫微秒为单位
       val startTime = System.nanoTime()
       val model = GradientBoostedTrees.train(training, boostingStrategy)
+       //1e9就为1*(10的九次方),也就是十亿
       val elapsedTime = (System.nanoTime() - startTime) / 1e9
       println(s"Training time: $elapsedTime seconds")
       if (model.totalNumNodes < 30) {

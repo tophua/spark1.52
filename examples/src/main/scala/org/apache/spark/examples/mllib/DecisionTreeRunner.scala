@@ -320,8 +320,10 @@ object DecisionTreeRunner {
           useNodeIdCache = params.useNodeIdCache,
           checkpointInterval = params.checkpointInterval)
     if (params.numTrees == 1) {
+      //系统计时器的当前值,以毫微秒为单位
       val startTime = System.nanoTime()
       val model = DecisionTree.train(training, strategy)
+      //1e9就为1*(10的九次方),也就是十亿
       val elapsedTime = (System.nanoTime() - startTime) / 1e9
       println(s"Training time: $elapsedTime seconds")
       if (model.numNodes < 20) {
@@ -350,9 +352,11 @@ object DecisionTreeRunner {
       val randomSeed = Utils.random.nextInt()
        /* 
       if (params.algo == Classification) {
+       //系统计时器的当前值,以毫微秒为单位
         val startTime = System.nanoTime()
         val model = RandomForest.trainClassifier(training, strategy, params.numTrees,
           params.featureSubsetStrategy, randomSeed)
+	  //1e9就为1*(10的九次方),也就是十亿
         val elapsedTime = (System.nanoTime() - startTime) / 1e9
         println(s"Training time: $elapsedTime seconds")
         if (model.totalNumNodes < 30) {
@@ -369,9 +373,11 @@ object DecisionTreeRunner {
         println(s"Test accuracy = $testAccuracy")
       }
     if (params.algo == Regression) {
+        //系统计时器的当前值,以毫微秒为单位
         val startTime = System.nanoTime()
         val model = RandomForest.trainRegressor(training, strategy, params.numTrees,
           params.featureSubsetStrategy, randomSeed)
+	//1e9就为1*(10的九次方),也就是十亿
         val elapsedTime = (System.nanoTime() - startTime) / 1e9
         println(s"Training time: $elapsedTime seconds")
         if (model.totalNumNodes < 30) {

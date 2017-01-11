@@ -119,12 +119,14 @@ object LDAExample {
 
     // Load documents, and prepare them for LDA.
     //加载文件,并准备将LDA
+     //系统计时器的当前值,以毫微秒为单位
     val preprocessStart = System.nanoTime()
     val (corpus, vocabArray, actualNumTokens) =
       preprocess(sc, params.input, params.vocabSize, params.stopwordFile)
     corpus.cache()
     val actualCorpusSize = corpus.count()
     val actualVocabSize = vocabArray.size
+     //1e9就为1*(10的九次方),也就是十亿
     val preprocessElapsed = (System.nanoTime() - preprocessStart) / 1e9
 
     println()
@@ -155,8 +157,10 @@ object LDAExample {
     if (params.checkpointDir.nonEmpty) {
       sc.setCheckpointDir(params.checkpointDir.get)
     }
+     //系统计时器的当前值,以毫微秒为单位
     val startTime = System.nanoTime()
     val ldaModel = lda.run(corpus)
+     //1e9就为1*(10的九次方),也就是十亿
     val elapsed = (System.nanoTime() - startTime) / 1e9
     //完成训练LDA模型,总结
     println(s"Finished training LDA model.  Summary:")

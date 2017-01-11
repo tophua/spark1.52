@@ -222,9 +222,11 @@ object RandomForestExample {
     val pipeline = new Pipeline().setStages(stages.toArray)
 
     // Fit the Pipeline 安装管道
+    //系统计时器的当前值,以毫微秒为单位
     val startTime = System.nanoTime()
     //fit()方法将DataFrame转化为一个Transformer的算法
     val pipelineModel = pipeline.fit(training)
+    //1e9就为1*(10的九次方),也就是十亿
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
 
