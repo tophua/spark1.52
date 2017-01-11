@@ -118,6 +118,8 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     for (mat <- Seq(denseMat, sparseMat)) {
+     //columnSimilarities计算矩阵中每两列之间的余弦相似度,
+     //参数:使用近似算法的阈值,值越大则运算速度越快而误差越大
       val G = mat.columnSimilarities(0.11).toBreeze()
       for (i <- 0 until n; j <- 0 until n) {
         if (expected(i, j) > 0) {
@@ -131,6 +133,8 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     for (mat <- Seq(denseMat, sparseMat)) {
+     //columnSimilarities计算矩阵中每两列之间的余弦相似度
+     //参数:使用近似算法的阈值,值越大则运算速度越快而误差越大
       val G = mat.columnSimilarities()
       assert(closeToZero(G.toBreeze() - expected))
     }
@@ -187,7 +191,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("validate k in svd") {
     for (mat <- Seq(denseMat, sparseMat)) {
       intercept[IllegalArgumentException] {
-        mat.computeSVD(-1)
+        mat.computeSVD(-1) //计算svd值
       }
     }
   }
@@ -246,7 +250,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
         assert(summary.numNonzeros === Vectors.dense(3.0, 3.0, 4.0), "nnz mismatch")
         assert(summary.max === Vectors.dense(9.0, 7.0, 8.0), "max mismatch")
         assert(summary.min === Vectors.dense(0.0, 0.0, 1.0), "column mismatch.")
-	//math.sqrt返回数字的平方根
+	      //math.sqrt返回数字的平方根
         assert(summary.normL2 === Vectors.dense(math.sqrt(126), math.sqrt(66), math.sqrt(94)),
           "magnitude mismatch.")
         assert(summary.normL1 === Vectors.dense(18.0, 12.0, 16.0), "L1 norm mismatch")

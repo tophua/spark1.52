@@ -95,11 +95,13 @@ object CosineSimilarity {
     val mat = new RowMatrix(rows)
 
     // Compute similar columns perfectly, with brute force.
-    //完美地计算类似的列,使用强力
+    //计算矩阵中每两列之间的余弦相似度
+    //参数:使用近似算法的阈值,值越大则运算速度越快而误差越大,默认值为0
     val exact = mat.columnSimilarities()
 
     // Compute similar columns with estimation using DIMSUM
-    //估计用点心计算类似的列
+    //计算矩阵中每两列之间的余弦相似度
+    //参数:使用近似算法的阈值,值越大则运算速度越快而误差越大,默认为0
     val approx = mat.columnSimilarities(params.threshold)
 
     val exactEntries = exact.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }

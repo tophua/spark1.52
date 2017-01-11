@@ -80,7 +80,7 @@ abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[Featur
 
   /** 
   * @group setParam 
-  * Ô­Ê¼µÄËã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁÐµÄÃû³Æ,Ä¬ÈÏÊÇ¡±rawPrediction¡±
+  * åŽŸå§‹çš„ç®—æ³•é¢„æµ‹ç»“æžœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€rawPredictionâ€
   */
   def setRawPredictionCol(value: String): M = set(rawPredictionCol, value).asInstanceOf[M]
 
@@ -92,8 +92,8 @@ abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[Featur
    * parameters:
    *  - predicted labels as [[predictionCol]] of type [[Double]]
    *  - raw predictions (confidences) as [[rawPredictionCol]] of type [[Vector]].
-   *  probabilityCol Àà±ðÔ¤²â½á¹ûµÄÌõ¼þ¸ÅÂÊÖµ´æ´¢ÁÐµÄÃû³Æ
-   *  rawPredictionCol Ô­Ê¼µÄËã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁÐµÄÃû³Æ
+   *  probabilityCol ç±»åˆ«é¢„æµ‹ç»“æžœçš„æ¡ä»¶æ¦‚çŽ‡å€¼å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤å€¼æ˜¯â€probabilityâ€
+   *  rawPredictionCol åŽŸå§‹çš„ç®—æ³•é¢„æµ‹ç»“æžœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€rawPredictionâ€
    * @param dataset input dataset
    * @return transformed dataset
    */

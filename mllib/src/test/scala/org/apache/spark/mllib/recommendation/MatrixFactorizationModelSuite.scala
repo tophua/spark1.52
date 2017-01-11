@@ -28,12 +28,16 @@ import org.apache.spark.util.Utils
 class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   val rank = 2 //相关特征因子
+  //userFeatures用户特征
   var userFeatures: RDD[(Int, Array[Double])] = _
+  //prodFeatures 产品特征
   var prodFeatures: RDD[(Int, Array[Double])] = _
 
   override def beforeAll(): Unit = {
     super.beforeAll()
+    //userFeatures用户特征
     userFeatures = sc.parallelize(Seq((0, Array(1.0, 2.0)), (1, Array(3.0, 4.0))))
+    //prodFeatures 产品特征
     prodFeatures = sc.parallelize(Seq((2, Array(5.0, 6.0))))
   }
 
@@ -47,12 +51,12 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
     intercept[IllegalArgumentException] {
       new MatrixFactorizationModel(1, userFeatures, prodFeatures)
     }
-
+    //userFeatures 用户特征
     val userFeatures1 = sc.parallelize(Seq((0, Array(1.0)), (1, Array(3.0))))
     intercept[IllegalArgumentException] {
       new MatrixFactorizationModel(rank, userFeatures1, prodFeatures)
     }
-
+   //prodFeatures 产品特征
     val prodFeatures1 = sc.parallelize(Seq((2, Array(5.0))))
     intercept[IllegalArgumentException] {
       new MatrixFactorizationModel(rank, userFeatures, prodFeatures1)
@@ -70,7 +74,9 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
       model.save(sc, path)
       val newModel = MatrixFactorizationModel.load(sc, path)
       assert(newModel.rank === rank)
+      //用户特征
       assert(collect(newModel.userFeatures) === collect(userFeatures))
+      //产品特征
       assert(collect(newModel.productFeatures) === collect(prodFeatures))
     } finally {
       Utils.deleteRecursively(tempDir)
@@ -80,6 +86,7 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
   test("batch predict API recommendProductsForUsers") {//批量预测API recommendproductsforusers
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
     val topK = 10
+    //为用户推荐个数为num的商品
     val recommendations = model.recommendProductsForUsers(topK).collectAsMap()
 
     assert(recommendations(0)(0).rating ~== 17.0 relTol 1e-14)
@@ -91,6 +98,7 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
     //userFeatures用户因子,prodFeatures商品因子,rank因子个数,因子个数一般越多越好,普通取值10到200
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
     val topK = 10
+    //为用户推荐个数为num的商品
     val recommendations = model.recommendUsersForProducts(topK).collectAsMap()
 
     assert(recommendations(2)(0).user == 1)

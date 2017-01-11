@@ -24,6 +24,8 @@ object RowMatrixDedmo {
     val rowMatirx = new RowMatrix(rdd1)
     //计算列之间的相似度，返回的是CoordinateMatrix，采用
     //case class MatrixEntry(i: Long, j: Long, value: Double)存储值
+    //columnSimilarities计算矩阵中每两列之间的余弦相似度
+    //参数:使用近似算法的阈值,值越大则运算速度越快而误差越大,默认为0
     var coordinateMatrix: CoordinateMatrix = rowMatirx.columnSimilarities()
     //返回矩阵行数、列数
     println(coordinateMatrix.numCols())
@@ -70,6 +72,7 @@ object RowMatrixDedmo {
     //1.0  1.0  1.0  1.0  
     //1.0  1.0  1.0  1.0  
     //1.0  1.0  1.0  1.0  
+    //computeCovariance 计算矩阵中行向量的协方差
     var covariance: Matrix = rowMatirx.computeCovariance()
     //计算拉姆矩阵rowMatirx^T*rowMatirx，T表示转置操作
     //gramianMatrix: org.apache.spark.mllib.linalg.Matrix = 

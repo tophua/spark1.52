@@ -181,11 +181,14 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     val ratings = sc.parallelize(ALSSuite.generateRatings(10, 20, 5, 0.5, false, false)._1, 2)
     val model11 = ALS.train(ratings, 5, 1, 1.0, 2, 1)//训练
     val model12 = ALS.train(ratings, 5, 1, 1.0, 2, 1)//训练
+    //userFeatures用户特征
     val u11 = model11.userFeatures.values.flatMap(_.toList).collect().toList
     println("u11:"+u11.mkString(","))
+    //userFeatures用户特征
     val u12 = model12.userFeatures.values.flatMap(_.toList).collect().toList
     println("u12:"+u12.mkString(","))
     val model2 = ALS.train(ratings, 5, 1, 1.0, 2, 2)
+    //userFeatures用户特征
     val u2 = model2.userFeatures.values.flatMap(_.toList).collect().toList
     assert(u11 == u12)
     assert(u11 != u2)

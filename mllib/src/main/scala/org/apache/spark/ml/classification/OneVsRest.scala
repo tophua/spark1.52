@@ -103,7 +103,8 @@ final class OneVsRestModel private[ml] (
     // update the accumulator column with the result of prediction of models
     val aggregatedDataset = models.zipWithIndex.foldLeft[DataFrame](newDataset) {
       case (df, (model, index)) =>
-        val rawPredictionCol = model.getRawPredictionCol //ԭʼ���㷨Ԥ�����Ĵ洢�е�����
+        //原始的算法预测结果的存储列的名称, 默认是”rawPrediction”
+        val rawPredictionCol = model.getRawPredictionCol 
         val columns = origCols ++ List(col(rawPredictionCol), col(accColName))
 
         // add temporary column to store intermediate scores and update
