@@ -100,7 +100,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     val expected =
       Matrices.dense(n, n, Array(126.0, 54.0, 72.0, 54.0, 66.0, 78.0, 72.0, 78.0, 94.0))
     for (mat <- Seq(denseMat, sparseMat)) {
-      val G = mat.computeGramianMatrix()
+      val G = mat.computeGramianMatrix()//
       assert(G.toBreeze === expected.toBreeze)
     }
   }
@@ -125,7 +125,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
         if (expected(i, j) > 0) {
           val actual = expected(i, j)
           val estimate = G(i, j)
-	   //math.abs返回数的绝对值
+	       //math.abs返回数的绝对值
           assert(math.abs(actual - estimate) / actual < 0.2,
             s"Similarities not close enough: $actual vs $estimate")
         }

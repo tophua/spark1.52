@@ -45,6 +45,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     //以点的平均值为中心
 
     var model = KMeans.train(data, k = 1, maxIterations = 1)
+    //聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 2)
@@ -52,15 +53,19 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 5)
+    //聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 5)
+    //聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 5)
+    //clusterCenters聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 1, initializationMode = RANDOM)
+     //clusterCenters聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(
@@ -137,21 +142,25 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     var model = KMeans.train(data, k = 1, maxIterations = 1)
     assert(model.clusterCenters.size === 1)
+     //clusterCenters聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 2)
+     //clusterCenters聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 5)
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 5)
+     //clusterCenters聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 5)
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 1, initializationMode = RANDOM)
+     //clusterCenters聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 1,
@@ -184,13 +193,13 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     var model = KMeans.train(data, k = 1, maxIterations = 1)
     assert(model.clusterCenters.head ~== center absTol 1E-5)
-
+    //clusterCenters聚类中心点
     model = KMeans.train(data, k = 1, maxIterations = 2)
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 5)
     assert(model.clusterCenters.head ~== center absTol 1E-5)
-
+   //clusterCenters聚类中心点
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 5)
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
@@ -199,7 +208,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 1, initializationMode = RANDOM)
     assert(model.clusterCenters.head ~== center absTol 1E-5)
-
+   //clusterCenters聚类中心点
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 1,
       initializationMode = K_MEANS_PARALLEL)
     assert(model.clusterCenters.head ~== center absTol 1E-5)

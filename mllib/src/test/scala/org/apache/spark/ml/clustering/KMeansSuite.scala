@@ -124,6 +124,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = kmeans.fit(dataset)//返回一个训练模型
     //clusterCenters = Array([1.0,1.0,1.0], [4.0,4.0,4.0], [0.0,0.0,0.0], [3.0,3.0,3.0], [2.0,2.0,2.0])
+    //聚类中心点
     assert(model.clusterCenters.length === k)
     //println("dataset:"+dataset.collect().toSeq)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法

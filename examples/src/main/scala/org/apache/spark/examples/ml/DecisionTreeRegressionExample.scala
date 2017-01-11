@@ -31,7 +31,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.mllib.util.MLUtils
 /**
- * 
+ * 回归决策树例子
  */
 object DecisionTreeRegressionExample {
   def main(args: Array[String]): Unit = {

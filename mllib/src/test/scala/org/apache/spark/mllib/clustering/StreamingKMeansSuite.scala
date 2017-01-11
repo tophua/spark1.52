@@ -76,6 +76,7 @@ class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
     //估计中心流应该完全匹配的所有数据点算术平均值,因为衰减因子被设置为1
     val grandMean =
       input.flatten.map(x => x.toBreeze).reduce(_ + _) / (numBatches * numPoints).toDouble
+       //clusterCenters聚类中心点
     assert(model.latestModel().clusterCenters(0) ~== Vectors.dense(grandMean.toArray) absTol 1E-5)
   }
 
@@ -111,7 +112,7 @@ class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
     // check that estimated centers are close to true centers
     //检查估计的中心是接近真正的中心
     // NOTE exact assignment depends on the initialization!
-    //注意精确分配取决于初始化
+    //注意精确分配取决于初始化  clusterCenters聚类中心点
     assert(centers(0) ~== kMeans.latestModel().clusterCenters(0) absTol 1E-1)
     assert(centers(1) ~== kMeans.latestModel().clusterCenters(1) absTol 1E-1)
   }
@@ -150,6 +151,7 @@ class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
     // NOTE exact assignment depends on the initialization!
     //注意精确分配取决于初始化
     val model = kMeans.latestModel()
+     //clusterCenters聚类中心点
     val c0 = model.clusterCenters(0)(0)
     val c1 = model.clusterCenters(1)(0)
     //应该有一个正的中心和一个负的中心

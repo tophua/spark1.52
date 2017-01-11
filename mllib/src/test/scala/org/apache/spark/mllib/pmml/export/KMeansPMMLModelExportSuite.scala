@@ -41,6 +41,7 @@ class KMeansPMMLModelExportSuite extends SparkFunSuite {
     val pmml = modelExport.asInstanceOf[PMMLModelExport].getPmml
     assert(pmml.getHeader.getDescription === "k-means clustering")
     // check that the number of fields match the single vector size
+     //clusterCenters聚类中心点
     assert(pmml.getDataDictionary.getNumberOfFields === clusterCenters(0).size)
     // This verify that there is a model attached to the pmml object and the model is a clustering
     // one. It also verifies that the pmml model has the same number of clusters of the spark model.

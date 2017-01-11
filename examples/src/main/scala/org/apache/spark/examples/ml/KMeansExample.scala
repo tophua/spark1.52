@@ -57,6 +57,7 @@ object KMeansExample {
     val rowRDD = sc.textFile(input).filter(_.nonEmpty)
     //创建密集型矩阵,得到每行数据 
       .map(_.split(" ").map(_.toDouble)).map(Vectors.dense).map(Row(_))
+    //创建字段名features,类型是VectorUDT,向量自定义类型
     val schema = StructType(Array(StructField(FEATURES_COL, new VectorUDT, false)))
     val dataset = sqlContext.createDataFrame(rowRDD, schema)
     //训练一个k-均值模型
@@ -69,12 +70,13 @@ object KMeansExample {
 
     // Shows the result 显示结果
     // scalastyle:off println
+        println("Final Centers: ")
     /**
      * Final Centers: 
      *   [4.6,4.6,4.6]
      *   [17.7,18.03333333333333,19.333333333333332]
      */
-    println("Final Centers: ")
+    //聚类中心点
     model.clusterCenters.foreach(println)
     // scalastyle:on println
 
