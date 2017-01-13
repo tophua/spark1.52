@@ -43,8 +43,8 @@ object DenseKMeans {
   import InitializationMode._
 
   case class Params(
-      input: String = null,
-      //input: String = "../data/mllib/kmeans_data.txt",
+      //input: String = null,
+      input: String = "../data/mllib/kmeans_data.txt",
       k: Int = -1,
       numIterations: Int = 10,
       initializationMode: InitializationMode = Parallel) extends AbstractParams[Params]
@@ -103,7 +103,10 @@ object DenseKMeans {
       .setK(params.k)
       .setMaxIterations(params.numIterations)
       .run(examples)
-
+     /**
+      * computeCost通过计算所有数据点到其最近的中心点的平方和来评估聚类的效果,
+      * 一般来说,同样的迭代次数和算法跑的次数,这个值越小代表聚类的效果越好
+      */
     val cost = model.computeCost(examples)
 
     println(s"Total cost = $cost.")

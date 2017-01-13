@@ -26,10 +26,10 @@ import org.apache.spark.mllib.linalg.distributed.{MatrixEntry, RowMatrix}
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
- * Compute the similar columns of a matrix, using cosine similarity(相似度度量).
+ * Compute the similar columns of a matrix, using cosine similarity(余弦相似度).
  * 计算一个矩阵的相似列,使用余弦相似性
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries
- * 输入矩阵必须以行为导向的密集格式存储,每行一行，其条目由空格隔开
+ * 输入矩阵必须以行为导向的密集格式存储,每行一行,其条目由空格隔开
  * separated by space. For example,
  * {{{
  * 0.5 1.0
@@ -37,7 +37,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  * 4.0 5.0
  * }}}
  * represents a 3-by-2 matrix, whose first row is (0.5, 1.0).
- * 代表3-by-2矩阵的第一行是(0.5,1)
+ * 代表3行2列矩阵的第一行是(0.5,1)
  *
  * Example invocation:
  *
@@ -89,7 +89,11 @@ object CosineSimilarity {
     // Load and parse the data file.
     //加载和解析数据文件
     val rows = sc.textFile(params.inputFile).map { line =>
-      val values = line.split(' ').map(_.toDouble)
+      val values = line.split(' ').map(x=>{
+        println(x.toDouble)  
+        x.toDouble
+        })
+       //创建一个稠密向量
       Vectors.dense(values)
     }.cache()
     val mat = new RowMatrix(rows)
@@ -103,8 +107,11 @@ object CosineSimilarity {
     //计算矩阵中每两列之间的余弦相似度
     //参数:使用近似算法的阈值,值越大则运算速度越快而误差越大,默认为0
     val approx = mat.columnSimilarities(params.threshold)
-
-    val exactEntries = exact.entries.map { case MatrixEntry(i, j, u) => ((i, j), u) }
+    //MatrixEntry参数i行的索引,j列的索引,实体的值
+    val exactEntries = exact.entries.map { case MatrixEntry(i, j, u) => 
+      println(i+"=="+j+"==="+u)
+      ((i, j), u) 
+      }
     val approxEntries = approx.entries.map { case MatrixEntry(i, j, v) => ((i, j), v) }
      //MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均
     val MAE = exactEntries.leftOuterJoin(approxEntries).values.map {
@@ -114,6 +121,7 @@ object CosineSimilarity {
         math.abs(u)
     }.mean()
     //MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均
+    //Average absolute error in estimate is: 0.052006398205651366
     println(s"Average absolute error in estimate is: $MAE")
 
     sc.stop()

@@ -370,6 +370,10 @@ class KMeansClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
       // greater than 1MB and hence Spark would throw an error.
       val model = KMeans.train(points, 2, 2, 1, initMode)
       val predictions = model.predict(points).collect()
+      /**
+      * computeCost通过计算所有数据点到其最近的中心点的平方和来评估聚类的效果,
+      * 一般来说,同样的迭代次数和算法跑的次数,这个值越小代表聚类的效果越好
+      */
       val cost = model.computeCost(points)
     }
   }
