@@ -218,10 +218,12 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     val lda = new LDA().setK(2)
     val corpus = sc.parallelize(tinyCorpus, 2)
     val op = new OnlineLDAOptimizer().initialize(corpus, lda)
+    //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     op.setKappa(0.9876).setMiniBatchFraction(0.123).setTau0(567)
     assert(op.getAlpha.toArray.forall(_ === 0.5)) // default 1.0 / k
     assert(op.getEta === 0.5)   // default 1.0 / k
     assert(op.getKappa === 0.9876)
+    //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     assert(op.getMiniBatchFraction === 0.123)
     assert(op.getTau0 === 567)
   }
@@ -243,6 +245,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     // Set GammaShape large to avoid the stochastic impact.
     //设置伽玛形状大，以避免随机影响。
     val op = new OnlineLDAOptimizer().setTau0(1024).setKappa(0.51).setGammaShape(1e40)
+    //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
       .setMiniBatchFraction(1)
     val lda = new LDA().setK(k).setMaxIterations(1).setOptimizer(op).setSeed(12345)
 
@@ -271,6 +274,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("OnlineLDAOptimizer with toy data") {//数据在线LDA算法
     val docs = sc.parallelize(toyData)
+    //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(1e10)
     val lda = new LDA().setK(2)
@@ -402,6 +406,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("OnlineLDAOptimizer with asymmetric prior") {//不对称前在线LDA算法
     val docs = sc.parallelize(toyData)
+    //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(1e10)
     val lda = new LDA().setK(2)
@@ -444,6 +449,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
   test("OnlineLDAOptimizer alpha hyperparameter optimization") {//在线LDA算法α超参数优
     val k = 2
     val docs = sc.parallelize(toyData)
+    //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(100).setOptimizeDocConcentration(true).setSampleWithReplacement(false)
     val lda = new LDA().setK(k)

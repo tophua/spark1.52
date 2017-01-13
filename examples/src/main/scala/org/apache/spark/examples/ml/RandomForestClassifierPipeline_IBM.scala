@@ -52,7 +52,7 @@ object ClassificationPipeline_IBM {
       (a(0), a(1), a(2), a(3), a(4))
     })
     val df = sqlCtx.createDataFrame(parsedRDD).toDF(
-      //四列依次是小波变换图像的方差，小波变换图像的偏态，小波变换图像的峰度，图像熵，类别标签,最后一列是真假标识
+      //四列依次是小波变换图像的方差,小波变换图像的偏态,小波变换图像的峰度,图像熵,类别标签,最后一列是真假标识
       "f0", "f1", "f2", "f3", "label").cache()
      df.registerTempTable("data")
    val queryCaseWhen = sqlCtx.sql("select f0,f1,f2,f3,label from data ").show()
@@ -92,7 +92,7 @@ object ClassificationPipeline_IBM {
       .setFeaturesCol("featureVector")//训练数据集 DataFrame 中存储特征数据的列名
       .setProbabilityCol("probability")//类别预测结果的条件概率值存储列的名称, 默认值是”probability”
       .setPredictionCol("prediction")//算法预测结果的存储列的名称, 默认是”prediction”
-      .setNumTrees(5)//并告诉随机森林分类器训练 5 棵独立的子树
+      .setNumTrees(5)//并告诉随机森林分类器训练 5棵独立的子树
 
     /**
      * Step 5
@@ -106,7 +106,7 @@ object ClassificationPipeline_IBM {
 
     //Step 6
     //Randomly split the input data by 8:2, while 80% is for training, the rest is for testing.
-     //随机将输入数据按8:2，而80%是用于训练，其余的用于测试
+     //随机将输入数据按8:2,而80%是用于训练,其余的用于测试
     val Array(trainingData, testData) = df.randomSplit(Array(0.8, 0.2))
 
     /**

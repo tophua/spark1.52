@@ -66,6 +66,7 @@ class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("Normalization using L2 distance") {//使用二级距离数据标准化
+//Normalizer标准化是指:对于训练集中的样本,基于列统计信息将数据除以方差或(且)者将数据减去其均值(结果是方差等于1,数据在0附近)
     val l2Normalizer = new Normalizer()
 
     val data2 = data.map(l2Normalizer.transform)

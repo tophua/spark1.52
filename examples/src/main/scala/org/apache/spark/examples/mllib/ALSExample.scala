@@ -80,7 +80,7 @@ object ALSExample {
 
     //对预测结果按预测的评分排序
     predictions.collect.sortBy(_._2)
-    //对预测结果按用户进行分组，然后合并推荐结果，这部分代码待修正
+    //对预测结果按用户进行分组,然后合并推荐结果,这部分代码待修正
     predictions.map { case ((user, product), rate) => (user, (product, rate)) }.groupByKey.collect
     //格式化测试评分和实际评分的结果
     val formatedRatesAndPreds = ratesAndPreds.map {

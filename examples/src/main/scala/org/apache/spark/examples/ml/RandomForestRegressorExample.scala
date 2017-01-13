@@ -30,7 +30,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * 
+ * 回归随机森林树例子
  */
 object RandomForestRegressorExample {
   def main(args: Array[String]): Unit = {
@@ -84,6 +84,16 @@ object RandomForestRegressorExample {
     val predictions = model.transform(testData)
 
     // Select example rows to display.
+    /**
+      +----------+-----+--------------------+
+      |prediction|label|            features|
+      +----------+-----+--------------------+
+      |       0.0|  0.0|(692,[127,128,129...|
+      |       1.0|  1.0|(692,[158,159,160...|
+      |       1.0|  1.0|(692,[124,125,126...|
+      |       1.0|  1.0|(692,[151,152,153...|
+      |      0.15|  0.0|(692,[129,130,131...|
+      +----------+-----+--------------------+*/
     predictions.select("prediction", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.
@@ -94,6 +104,7 @@ object RandomForestRegressorExample {
       //rmse均方根误差说明样本的离散程度
       .setMetricName("rmse")
     val rmse = evaluator.evaluate(predictions)
+    //Root Mean Squared Error (RMSE) on test data = 0.09854713827168428
     println("Root Mean Squared Error (RMSE) on test data = " + rmse)
 
     val rfModel = model.stages(1).asInstanceOf[RandomForestRegressionModel]

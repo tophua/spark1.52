@@ -153,7 +153,7 @@ object OneVsRestExample {
     //实例化的基分类器
     val classifier = new LogisticRegression()
       .setMaxIter(params.maxIter)//迭代次数
-      .setTol(params.tol)//迭代算法的收敛性
+      .setTol(params.tol)//迭代算法的收敛
       .setFitIntercept(params.fitIntercept)//是否训练拦截对象
 
     // Set regParam, elasticNetParam if specified in params
@@ -164,6 +164,7 @@ object OneVsRestExample {
     // instantiate the One Vs Rest Classifier.
     //实例化的一对多分类器
     val ovr = new OneVsRest()
+    //设置分类器
     ovr.setClassifier(classifier)
 
     // train the multiclass model.
@@ -188,11 +189,12 @@ object OneVsRestExample {
     predictions.show()
     // evaluate the model 评估模型
     val predictionsAndLabels = predictions.select("prediction", "label")
+    //获取每一行数据
       .map(row => (row.getDouble(0), row.getDouble(1)))
     //评估指标-多分类
     val metrics = new MulticlassMetrics(predictionsAndLabels)
-
-    val confusionMatrix = metrics.confusionMatrix
+    
+    val confusionMatrix = metrics.confusionMatrix //匹配矩阵
 
     // compute the false positive rate per label 计算每个标签的假阳性率
     val predictionColSchema = predictions.schema("prediction")
@@ -219,7 +221,10 @@ object OneVsRestExample {
 
     sc.stop()
   }
-
+  /**
+   * 柯里化函数,返回类型(Long,R)
+   * block:没有声明类型,默认方法
+   */  
   private def time[R](block: => R): (Long, R) = {
     //系统计时器的当前值,以毫微秒为单位
     val t0 = System.nanoTime()

@@ -68,6 +68,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   test("parameter accuracy") {//参数的精度
     // create model,梯度下降法
     val model = new StreamingLinearRegressionWithSGD()
+     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))
       .setStepSize(0.2)
       .setNumIterations(25)
@@ -106,6 +107,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   test("parameter convergence") {//参数收敛
     // create model
     val model = new StreamingLinearRegressionWithSGD()
+     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0)).setStepSize(0.2).setNumIterations(25)
 
     // generate sequence of simulated data
@@ -146,6 +148,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     // create model initialized with true weights
     //创建真正的权重初始化模型
     val model = new StreamingLinearRegressionWithSGD()
+     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(10.0, 10.0))
       .setStepSize(0.2)
       .setNumIterations(25)
@@ -178,6 +181,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     // create model initialized with zero weights
     //创建具有零权重的初始化模型
     val model = new StreamingLinearRegressionWithSGD()
+     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))
       .setStepSize(0.2)
       .setNumIterations(25)
@@ -224,6 +228,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   // Test empty RDDs in a stream 测试空RDDSr的流
   test("handling empty RDDs in a stream") {
     val model = new StreamingLinearRegressionWithSGD()
+     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))
       .setStepSize(0.2)
       .setNumIterations(25)

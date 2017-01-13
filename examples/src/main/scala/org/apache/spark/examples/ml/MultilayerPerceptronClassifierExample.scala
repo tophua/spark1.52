@@ -71,7 +71,7 @@ object MultilayerPerceptronClassifierExample {
     //创建训练器并设置参数
     val trainer = new MultilayerPerceptronClassifier()
       .setLayers(layers)//层规模,包括输入规模以及输出规模
-      .setBlockSize(128)//
+      .setBlockSize(128)//块的大小,以加快计算
       .setSeed(1234L)//随机种子
       .setMaxIter(100)//迭代次数
     // train the model

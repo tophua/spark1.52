@@ -27,7 +27,9 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression._
 import org.apache.spark.mllib.util.{MLUtils, LocalClusterSparkContext, MLlibTestSparkContext}
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 随机梯度下降
+ */
 object GradientDescentSuite {
 
   def generateLogisticInputAsList(

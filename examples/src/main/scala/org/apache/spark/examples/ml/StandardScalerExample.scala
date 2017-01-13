@@ -54,7 +54,7 @@ object StandardScalerExample {
       .setInputCol("features")
       .setOutputCol("scaledFeatures")
       .setWithStd(true)//withStd=true将方差缩放到1
-      .setWithMean(false)//将均值移到0,注意对于稀疏输入矩阵不可以用。默认为false
+      .setWithMean(false)//将均值移到0,注意对于稀疏输入矩阵不可以用,默认为false
 
     // Compute summary statistics by fitting the StandardScaler.
     //fit()方法将DataFrame转化为一个Transformer的算法
@@ -63,7 +63,18 @@ object StandardScalerExample {
     // Normalize each feature to have unit standard deviation.
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val scaledData = scalerModel.transform(dataFrame)
-    scaledData.show()
+    /**
+     *+-----+--------------------+--------------------+
+      |label|            features|      scaledFeatures|
+      +-----+--------------------+--------------------+
+      |  0.0|(692,[127,128,129...|(692,[127,128,129...|
+      |  1.0|(692,[158,159,160...|(692,[158,159,160...|
+      |  1.0|(692,[124,125,126...|(692,[124,125,126...|
+      |  1.0|(692,[152,153,154...|(692,[152,153,154...|
+      |  1.0|(692,[151,152,153...|(692,[151,152,153...|
+      +-----+--------------------+--------------------+
+     */
+    scaledData.show(5)
     // $example off$
 
     sc.stop()

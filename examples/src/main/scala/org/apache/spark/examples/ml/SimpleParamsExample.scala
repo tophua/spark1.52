@@ -108,6 +108,11 @@ object SimpleParamsExample {
     model2.transform(test.toDF())
       .select("features", "label", "myProbability", "prediction")
       .collect()
+      /**
+        ([-1.0,1.5,1.3], 1.0) -> prob=[0.05707304171034022,0.9429269582896597], prediction=1.0
+        ([3.0,2.0,-0.1], 0.0) -> prob=[0.9238522311704104,0.07614776882958958], prediction=0.0
+        ([0.0,2.2,-1.5], 1.0) -> prob=[0.10972776114779449,0.8902722388522056], prediction=1.0
+       */
       .foreach { case Row(features: Vector, label: Double, prob: Vector, prediction: Double) =>
         println(s"($features, $label) -> prob=$prob, prediction=$prediction")
       }

@@ -55,10 +55,10 @@ object BinaryClassification {
   import RegType._
 
   case class Params(
-      input: String = null,
-      numIterations: Int = 100,
-      stepSize: Double = 1.0,
-      algorithm: Algorithm = LR,
+      input: String = "../data/mllib/sample_binary_classification_data.txt",
+      numIterations: Int = 100,//迭代次数
+      stepSize: Double = 1.0,//步长
+      algorithm: Algorithm = LR,//逻辑回归
       regType: RegType = L2,
       regParam: Double = 0.01) extends AbstractParams[Params]
 
@@ -84,8 +84,8 @@ object BinaryClassification {
         .action((x, c) => c.copy(regType = RegType.withName(x)))
       opt[Double]("regParam")
         .text(s"regularization parameter, default: ${defaultParams.regParam}")
-      arg[String]("<input>")
-        .required()
+    //  arg[String]("<input>")
+    //    .required()
 	/**
 	 *  libSVM的数据格式
 	 *  <label> <index1>:<value1> <index2>:<value2> ...
@@ -93,8 +93,8 @@ object BinaryClassification {
 	 *  <index>是以1开始的整数,可以是不连续
 	 *  <value>为实数,也就是我们常说的自变量
 	 */
-        .text("input paths to labeled examples in LIBSVM format")
-        .action((x, c) => c.copy(input = x))
+    //    .text("input paths to labeled examples in LIBSVM format")
+    //    .action((x, c) => c.copy(input = x))
       note(
         """
           |For example, the following command runs this app on a synthetic dataset:
@@ -114,7 +114,7 @@ object BinaryClassification {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"BinaryClassification with $params")
+    val conf = new SparkConf().setAppName(s"BinaryClassification with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)

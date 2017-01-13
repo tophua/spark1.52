@@ -51,15 +51,15 @@ object RFormulaExample {
     //如果我们使用RFormula公式clicked ~ country+ hour，
     //则表明我们希望基于country和hour预测clicked
     val formula = new RFormula()
-      .setFormula("clicked ~ country + hour")
-      .setFeaturesCol("features")
+      .setFormula("clicked ~ country + hour")//公式
+      .setFeaturesCol("features")//特征列
       .setLabelCol("label")
       //fit()方法将DataFrame转化为一个Transformer的算法
       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = formula.fit(dataset).transform(dataset)
     /**
     id | country |hour | clicked | features         | label
-    ---|---------|------|---------|------------------|-------
+    ---|---------|-----|---------|------------------|-------
      7 | "US"    | 18  | 1.0     | [0.0, 0.0, 18.0] | 1.0
      8 | "CA"    | 12  | 0.0     | [0.0, 1.0, 12.0] | 0.0
      9 | "NZ"    | 15  | 0.0     | [1.0, 0.0, 15.0] | 0.0

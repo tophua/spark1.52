@@ -68,7 +68,7 @@ object StreamingKMeansExample {
 
     val conf = new SparkConf().setMaster("local").setAppName("StreamingKMeansExample")
     //批次间隔
-    val ssc = new StreamingContext(conf, Seconds(args(2).toLong))
+    val ssc = new StreamingContext(conf, Seconds(3.toLong))
     //文件流,训练目录,解析向量
     val trainingData = ssc.textFileStream(args(0)).map(Vectors.parse)
     //测试目录

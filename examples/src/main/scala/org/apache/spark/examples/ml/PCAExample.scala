@@ -51,20 +51,19 @@ object PCAExample {
     val pca = new PCA()
       .setInputCol("features")
       .setOutputCol("pcaFeatures")
-      .setK(3)
+      .setK(3)//主成分个数
       .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val pcaDF = pca.transform(df)
     val result = pcaDF.select("pcaFeatures")
     /**
-     * +--------------------+
-     * |         pcaFeatures|
-     * +--------------------+
-     * |[1.64857282308838...|
-     * |[-4.6451043317815...|
-     * |[-6.4288805356764...|
-     * +--------------------+
-     */
+    +--------------------+--------------------+
+    |            features|         pcaFeatures|
+    +--------------------+--------------------+
+    | (5,[1,3],[1.0,7.0])|[1.64857282308838...|
+    |[2.0,0.0,3.0,4.0,...|[-4.6451043317815...|
+    |[4.0,0.0,0.0,6.0,...|[-6.4288805356764...|
+    +--------------------+--------------------+*/
     result.show()
     // $example off$
 

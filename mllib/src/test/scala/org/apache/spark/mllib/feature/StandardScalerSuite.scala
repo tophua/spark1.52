@@ -69,9 +69,9 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     //标准化是指：对于训练集中的样本，基于列统计信息将数据除以方差或（且）者将数据减去其均值（结果是方差等于1，数据在0附近）
     //标准化可以提升模型优化阶段的收敛速度，还可以避免方差很大的特征对模型训练产生过大的影响
     /**
-     * withMean 默认值False. 是否从数据中减均值
-     *          这会导致密集型输出，所以在稀疏数据上无效
-     * withStd 默认值True. 是否应用标准差
+     * withMean 默认值False. 在尺度变换(除方差)之前使用均值做居中处理(减去均值)
+     *          这会导致密集型输出,所以在稀疏数据上无效
+     * withStd 默认值True. 将数据缩放(尺度变换)到单位标准差
      */
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
@@ -363,12 +363,14 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     withClue("model needs std to set withStd to true") {//模型需要两个标准
       intercept[IllegalArgumentException] {
         val model = new StandardScalerModel(null, Vectors.dense(0.0))
+	//将数据缩放(尺度变换)到单位标准差
         model.setWithStd(true)
       }
     }
     withClue("model needs mean to set withMean to true") {//模型需要建立真正的平均值
       intercept[IllegalArgumentException] {
         val model = new StandardScalerModel(Vectors.dense(0.0), null)
+	//在尺度变换(除方差)之前使用均值做居中处理(减去均值)
         model.setWithMean(true)
       }
     }

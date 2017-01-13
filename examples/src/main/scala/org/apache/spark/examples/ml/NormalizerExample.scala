@@ -26,7 +26,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * Normalizer标准化例子
+ * 标准化是指:对于训练集中的样本,基于列统计信息将数据除以方差或(且)者将数据减去其均值(结果是方差等于1,数据在0附近)
  */
 object NormalizerExample {
   def main(args: Array[String]): Unit = {
@@ -49,7 +49,7 @@ object NormalizerExample {
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
       val dataFrame = sqlContext.createDataFrame(dataSVM)
     // Normalize each Vector using $L^1$ norm.
-    // 标准化每个向量使用$L^1$ 标准
+    //标准化是指:对于训练集中的样本,基于列统计信息将数据除以方差或(且)者将数据减去其均值(结果是方差等于1,数据在0附近)
     val normalizer = new Normalizer()
       .setInputCol("features")
       .setOutputCol("normFeatures")

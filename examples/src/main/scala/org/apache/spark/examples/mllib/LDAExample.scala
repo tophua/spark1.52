@@ -143,6 +143,7 @@ object LDAExample {
     val optimizer = params.algorithm.toLowerCase match {
       case "em" => new EMLDAOptimizer
       // add (1.0 / actualCorpusSize) to MiniBatchFraction be more robust on tiny datasets.
+      ////miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
       case "online" => new OnlineLDAOptimizer().setMiniBatchFraction(0.05 + 1.0 / actualCorpusSize)
       case _ => throw new IllegalArgumentException(
         s"Only em, online are supported but got ${params.algorithm}.")

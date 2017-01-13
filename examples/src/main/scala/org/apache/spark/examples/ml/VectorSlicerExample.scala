@@ -52,18 +52,25 @@ object VectorSlicerExample {
     val attrGroup = new AttributeGroup("userFeatures", attrs.asInstanceOf[Array[Attribute]])
     
    // val dataset = sqlContext.createDataFrame(data, StructType(Array(attrGroup.toStructField())))
-  //上面系统报错,未调整,主要目的 setIndices方式
+   //上面系统报错,未调整,主要目的 setIndices方式
   val dataset = sqlContext.createDataFrame(
       Seq((0, 18, 1.0, Vectors.dense(0.0, 10.0, 0.5), 1.0))
     ).toDF("id", "hour", "mobile", "userFeatures", "clicked")
     // VectorSlicer是一个转换器输入特征向量,输出原始特征向量子集.
     val slicer = new VectorSlicer().setInputCol("userFeatures").setOutputCol("features")
-    //1,整数索引,setIndices()
+    //1,从0开始整数索引,setIndices()
     //2,字符串索引代表向量中特征的名字
-    slicer.setIndices(Array(1)).setNames(Array("f3"))
+    //从向量列中选择功能的功能名称数组
+    slicer.setIndices(Array(2)).setNames(Array.empty)
     // or slicer.setIndices(Array(1, 2)), or slicer.setNames(Array("f2", "f3"))
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = slicer.transform(dataset)
+    /**
+    +---+----+------+--------------+-------+--------+
+    | id|hour|mobile|  userFeatures|clicked|features|
+    +---+----+------+--------------+-------+--------+
+    |  0|  18|   1.0|[0.0,10.0,0.5]|    1.0|   [0.5]|
+    +---+----+------+--------------+-------+--------+*/
     output.show()
     println(output.select("userFeatures", "features").first())
     // $example off$

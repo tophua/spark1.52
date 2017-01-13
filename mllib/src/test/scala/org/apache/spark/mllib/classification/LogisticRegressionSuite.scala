@@ -416,6 +416,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val modelA1 = lrA.run(testRDD1, initialWeights)
     val modelA2 = lrA.run(testRDD2, initialWeights)
+    //initialWeights初始取值,默认是0向量
     val modelA3 = lrA.run(testRDD3, initialWeights)
 
     val modelB1 = lrB.run(testRDD1, initialWeights)
@@ -425,6 +426,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     // For model trained with feature standardization, the weights should
     // be the same in the scaled space. Note that the weights here are already
     // in the original space, we transform back to scaled space to compare.
+    //initialWeights初始取值,默认是0向量
     assert(modelA1.weights(0) ~== modelA2.weights(0) * 1.0E3 absTol 0.01)
     assert(modelA1.weights(0) ~== modelA3.weights(0) * 1.0E6 absTol 0.01)
 

@@ -25,7 +25,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * TF-IDF是文本挖掘中一种广泛使用的特征向量化方法,F-IDF反映了语料中单词对文档的重要程度,
+ * 假设单词用t表示,文档用d表示,语料用D表示,那么文档频度DF(t, D)是包含单词t的文档数。
+ *  */
 object TfIdfExample {
 
   def main(args: Array[String]) {

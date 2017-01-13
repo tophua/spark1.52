@@ -89,8 +89,11 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     // create model
     //创建模型
     val model = new StreamingLogisticRegressionWithSGD()
+      //initialWeights初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0))
+      //SGD步长,默认为1.0
       .setStepSize(0.2)
+      //iterations迭代次数,默认100
       .setNumIterations(25)
 
     // generate sequence of simulated data
@@ -136,8 +139,10 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     // create model initialized with true weights
     //创建模型初始化的权重
     val model = new StreamingLogisticRegressionWithSGD()
+      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(1.5))
       .setStepSize(0.2)
+      //iterations迭代次数,默认100
       .setNumIterations(25)
 
     // generate sequence of simulated data for testing
@@ -171,6 +176,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     // create model initialized with zero weights
     //创建具有零权重的初始化模型
     val model = new StreamingLogisticRegressionWithSGD()
+    //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(-0.1))
       .setStepSize(0.01)
       .setNumIterations(10)
@@ -201,6 +207,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
   //测试空的RDDS流
   test("handling empty RDDs in a stream") {//处理空的RDDS流
     val model = new StreamingLogisticRegressionWithSGD()
+    //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(-0.1))
       .setStepSize(0.01)
       .setNumIterations(10)

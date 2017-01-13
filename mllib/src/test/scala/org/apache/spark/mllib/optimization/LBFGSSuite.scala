@@ -26,7 +26,9 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkContext}
 import org.apache.spark.mllib.util.TestingUtils._
-
+/**
+ * 有限内存BFGS
+ */
 class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers {
 
   val nPoints = 10000
