@@ -84,7 +84,7 @@ class ReliableKafkaStreamSuite extends SparkFunSuite
       ssc = null
     }
   }
-  //具有单个主题的可靠的Kafka输入流
+  //可靠的Kafka输入流有单个主题
   test("Reliable Kafka input stream with single topic") {
     val topic = "test-topic"
     kafkaTestUtils.createTopic(topic)
@@ -120,7 +120,7 @@ class ReliableKafkaStreamSuite extends SparkFunSuite
       assert(getCommitOffset(groupId, topic, 0) === Some(29L))
     }
   }
-  //可靠的Kafka输入流与多个主题
+  //可靠的Kafka输入流有多个主题
   test("Reliable Kafka input stream with multiple topics") {
     val topics = Map("topic1" -> 1, "topic2" -> 1, "topic3" -> 1)
     topics.foreach { case (t, _) =>
