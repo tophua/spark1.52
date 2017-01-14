@@ -22,6 +22,10 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 /**
  * RankingMetrics类用来计算基于排名的评估指标,K值平均准确率函数
+ * 输出指定K值时的平均准确度,APK它用于衡量针对某个查询返回的"前K个"文档的平均相关性
+ * 如果结果中文档的实际相关性越高且排名也更靠前,那APK分值也就越高,适合评估的好坏,因为推荐系统
+ * 也会计算前K个推荐物,然后呈现给用户,APK和其他基于排名的指标同样适合评估隐式数据集上的推荐
+ * 这里用MSE相对就不那么适合,APK平均准确率
  */
 class RankingMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Ranking metrics: map, ndcg") {
@@ -36,11 +40,11 @@ class RankingMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
    //需要向我们之前的平均准确率函数传入一个键值对类型的RDD,
    //其键为给定用户预测的物品的ID数组,而值则是实际的物品ID数组
     val metrics = new RankingMetrics(predictionAndLabels)
-    //平均精度均值(平均正确率值)
+    //平均准确率(平均正确率值)
     val map = metrics.meanAveragePrecision
    //精度位置
     println("precisionAt:"+metrics.precisionAt(1)+" \t"+1.0/3)
-    //计算所有的查询的平均精度,截断在排名位置    
+    //计算所有的查询的平均准确率,截断在排名位置    
 
     assert(metrics.precisionAt(1) ~== 1.0/3 absTol eps)
     assert(metrics.precisionAt(2) ~== 1.0/3 absTol eps)
