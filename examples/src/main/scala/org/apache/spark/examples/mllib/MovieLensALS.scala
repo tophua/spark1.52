@@ -39,15 +39,14 @@ import org.apache.spark.rdd.RDD
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
  */
 object MovieLensALS {
-
   case class Params(
       input: String = "../data/mllib/sample_movielens_data.txt",
       kryo: Boolean = false,
-      numIterations: Int = 20,
+      numIterations: Int = 20,//迭代次数
       lambda: Double = 1.0,
-      rank: Int = 10,
-      numUserBlocks: Int = -1,
-      numProductBlocks: Int = -1,
+      rank: Int = 10,//正则化参数
+      numUserBlocks: Int = -1,//设置用户数据块的个数和并行度
+      numProductBlocks: Int = -1,//设置物品数据块个数和并行度
       implicitPrefs: Boolean = false) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -161,12 +160,12 @@ object MovieLensALS {
     ratings.unpersist(blocking = false)
 
     val model = new ALS()
-      .setRank(params.rank)
-      .setIterations(params.numIterations)
-      .setLambda(params.lambda)
-      .setImplicitPrefs(params.implicitPrefs)
-      .setUserBlocks(params.numUserBlocks)
-      .setProductBlocks(params.numProductBlocks)
+      .setRank(params.rank)//模型中潜在因素的数量
+      .setIterations(params.numIterations)//迭代次数
+      .setLambda(params.lambda)//正则化
+      .setImplicitPrefs(params.implicitPrefs)//制定是否使用显示反馈ALS变体(或者说是对隐式反馈数据的一种适应)
+      .setUserBlocks(params.numUserBlocks)//设置用户数据块的个数和并行度
+      .setProductBlocks(params.numProductBlocks)//设置物品数据块个数和并行度
       .run(training)
      //rmse均方根误差说明样本的离散程度
     val rmse = computeRmse(model, test, params.implicitPrefs)
