@@ -174,6 +174,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("rank-2 matrices with different user and product blocks") {
+  //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     testALS(100, 200, 2, 15, 0.7, 0.4, numUserBlocks = 4, numProductBlocks = 2)
   }
 
@@ -261,9 +262,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
    * @param negativeWeights whether the generated data can contain negative values
    * 				生成的数据是否可以包含负值
    * @param numUserBlocks number of user blocks to partition users into
-   * 				分区用户的用户块数
+   * 				设置用户数据块的个数和并行度
    * @param numProductBlocks number of product blocks to partition products into
-   * 				产品块的数量划分成
+   * 				设置物品数据块个数和并行度
    * @param negativeFactors whether the generated user/product factors can have negative entries
    * 				是否生成的用户/产品因素可以有负面的条目
    */
@@ -278,8 +279,8 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       implicitPrefs: Boolean = false,//制定是否使用显示反馈ALS变体(或者说是对隐式反馈数据的一种适应)
       bulkPredict: Boolean = false,//大部分预测
       negativeWeights: Boolean = false,//负权重
-      numUserBlocks: Int = -1,//并行计算的用户的数量,(默认值为-1,表示自动配置)
-      numProductBlocks: Int = -1,//并行计算的产品数量
+      numUserBlocks: Int = -1,//设置用户数据块的个数和并行度(默认值为-1,表示自动配置)
+      numProductBlocks: Int = -1,//设置物品数据块个数和并行度
       negativeFactors: Boolean = true) {//负因子
     // scalastyle:on
      /**
@@ -297,8 +298,8 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       features, samplingRate, implicitPrefs, negativeWeights, negativeFactors)
 
     val model = new ALS()
-      .setUserBlocks(numUserBlocks)
-      .setProductBlocks(numProductBlocks)//
+      .setUserBlocks(numUserBlocks),//设置用户数据块的个数和并行度
+      .setProductBlocks(numProductBlocks)//设置物品数据块个数和并行度
       .setRank(features)//模型中潜在因素的数量
       .setIterations(iterations)//迭代次数
       .setAlpha(1.0)//应用于隐式数据的ALS变体,它控制的是观察到偏好的基本置信度

@@ -342,12 +342,12 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
   def testALS(
       training: RDD[Rating[Int]],
       test: RDD[Rating[Int]],
-      rank: Int,
-      maxIter: Int,
-      regParam: Double,
-      implicitPrefs: Boolean = false,
-      numUserBlocks: Int = 2,
-      numItemBlocks: Int = 3,
+      rank: Int,//模型中潜在因素的数量
+      maxIter: Int,//迭代次数
+      regParam: Double,//正则化
+      implicitPrefs: Boolean = false,//制定是否使用显示反馈ALS变体(或者说是对隐式反馈数据的一种适应)
+      numUserBlocks: Int = 2,//设置用户数据块的个数和并行度
+      numItemBlocks: Int = 3,//设置物品数据块个数和并行度
       targetRMSE: Double = 0.05): Unit = {
     val sqlContext = this.sqlContext
     import sqlContext.implicits._
@@ -409,6 +409,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
   test("exact rank-1 matrix") {//矩阵分解中的特征数=1
     val (training, test) = genExplicitTestData(numUsers = 20, numItems = 40, rank = 1)
+    //rank正则化参数,maxIter迭代次数,numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     testALS(training, test, maxIter = 1, rank = 1, regParam = 1e-5, targetRMSE = 0.001)
     testALS(training, test, maxIter = 1, rank = 2, regParam = 1e-5, targetRMSE = 0.001)
   }
@@ -423,6 +424,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
   test("approximate rank-2 matrix") {//矩阵分解特征数近似2
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
+    //rank正则化参数,maxIter迭代次数,numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     testALS(training, test, maxIter = 4, rank = 2, regParam = 0.01, targetRMSE = 0.03)
     testALS(training, test, maxIter = 4, rank = 3, regParam = 0.01, targetRMSE = 0.03)
   }
@@ -431,15 +433,20 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     for ((numUserBlocks, numItemBlocks) <- Seq((1, 1), (1, 2), (2, 1), (2, 2))) {
+     //rank正则化参数,maxIter迭代次数,numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
       testALS(training, test, maxIter = 4, rank = 3, regParam = 0.01, targetRMSE = 0.03,
+       //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
         numUserBlocks = numUserBlocks, numItemBlocks = numItemBlocks)
     }
   }
 
   test("more blocks than ratings") {//多块比评级
     val (training, test) =
+
       genExplicitTestData(numUsers = 4, numItems = 4, rank = 1)
+      //rank正则化参数,maxIter迭代次数,numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     testALS(training, test, maxIter = 2, rank = 1, regParam = 1e-4, targetRMSE = 0.002,
+     //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
      numItemBlocks = 5, numUserBlocks = 5)
   }
 
@@ -489,6 +496,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
   test("partitioner in returned factors") {//返回分区因子
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     val (userFactors, itemFactors) = ALS.train(
+     //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
       ratings, rank = 2, maxIter = 4, numUserBlocks = 3, numItemBlocks = 4, seed = 0)
     for ((tpe, factors) <- Seq(("User", userFactors), ("Item", itemFactors))) {
       assert(userFactors.partitioner.isDefined, s"$tpe factors should have partitioner.")
@@ -506,7 +514,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
   test("als with large number of iterations") {//als具有大量的迭代
     val (ratings, _) = genExplicitTestData(numUsers = 4, numItems = 4, rank = 1)
+    //rank正则化参数,maxIter迭代次数,numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     ALS.train(ratings, rank = 1, maxIter = 50, numUserBlocks = 2, numItemBlocks = 2, seed = 0)
+     //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     ALS.train(ratings, rank = 1, maxIter = 50, numUserBlocks = 2, numItemBlocks = 2,
       implicitPrefs = true, seed = 0)
   }

@@ -101,6 +101,7 @@ private[ml] object DecisionTreeRegressorSuite extends SparkFunSuite {
     //fit()方法将DataFrame转化为一个Transformer的算法
     val newTree = dt.fit(newData)
     // Use parent from newTree since this is not checked anyways.
+    //使用母从零全因为这不检查吧
     val oldTreeAsNew = DecisionTreeRegressionModel.fromOld(
       oldTree, newTree.parent.asInstanceOf[DecisionTreeRegressor], categoricalFeatures)
     TreeTests.checkEqual(oldTreeAsNew, newTree)
