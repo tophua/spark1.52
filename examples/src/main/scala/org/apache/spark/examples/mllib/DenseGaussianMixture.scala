@@ -49,7 +49,7 @@ object DenseGaussianMixture {
     }.cache()
 
     val clusters = new GaussianMixture()
-      .setK(k)
+      .setK(k)//聚类的个数
       .setConvergenceTol(convergenceTol)
       .setMaxIterations(maxIterations)
       .run(data)

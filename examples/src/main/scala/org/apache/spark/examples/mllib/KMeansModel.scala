@@ -66,7 +66,7 @@ object KMeansModel {
     kMeansModel.clusterCenters.foreach(println)
 
     // Get the prediction from the model with the ID so we can link them back to other information
-    //从模型中获取预测，以便我们可以将它们链接到其他信息
+    //从模型中获取预测,以便我们可以将它们链接到其他信息
     val predictions = rowsRDD.map { r => (r._1, kMeansModel.predict(Vectors.dense(r._6, r._7, r._8, r._9, r._10))) }
 
     // convert the rdd to a dataframe

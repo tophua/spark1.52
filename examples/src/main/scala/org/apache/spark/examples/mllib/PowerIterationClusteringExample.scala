@@ -104,7 +104,7 @@ object PowerIterationClusteringExample {
     val circlesRdd = generateCirclesRdd(sc, params.k, params.numPoints, params.outerRadius)
     //聚类 幂迭代聚类(PIC)
     val model = new PowerIterationClustering()
-      .setK(params.k)
+      .setK(params.k)//聚类的个数
       .setMaxIterations(params.maxIterations)
       .run(circlesRdd)
 

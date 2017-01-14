@@ -49,6 +49,7 @@ object KMeansDome {
     //计算测试数据分别属于那个簇类
     parsedData.map(v =>
       {
+	//predict 对新的数据点进行所属聚类的预测
         println(v.toString() + " belong to cluster :" + clusters.predict(v))
       }).collect()
     //计算cost

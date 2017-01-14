@@ -99,9 +99,9 @@ object DenseKMeans {
     }
 
     val model = new KMeans()
-      .setInitializationMode(initMode)
-      .setK(params.k)
-      .setMaxIterations(params.numIterations)
+      .setInitializationMode(initMode)//初始聚类中心点的选择方式
+      .setK(params.k)//聚类的个数
+      .setMaxIterations(params.numIterations)//迭代次数
       .run(examples)
      /**
       * computeCost通过计算所有数据点到其最近的中心点的平方和来评估聚类的效果,

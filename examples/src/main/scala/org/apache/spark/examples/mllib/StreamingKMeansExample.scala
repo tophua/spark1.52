@@ -75,13 +75,14 @@ object StreamingKMeansExample {
     val testData = ssc.textFileStream(args(1)).map(LabeledPoint.parse)
 
     val model = new StreamingKMeans()
-      //聚类中心点
+      //聚类的个数
       .setK(args(3).toInt)
       .setDecayFactor(1.0)
       //随机中心数
       .setRandomCenters(args(4).toInt, 0.0)
 
-    model.trainOn(trainingData)
+    model.trainOn(trainingData)//对数据集进行聚类训练
+    //predict 对新的数据点进行所属聚类的预测
     model.predictOnValues(testData.map(lp => (lp.label, lp.features))).print()
 
     ssc.start()
