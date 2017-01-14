@@ -63,7 +63,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 5)
     //clusterCenters聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
-
+    //initializationMode 表示初始聚类中心点的选择方式
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 1, initializationMode = RANDOM)
      //clusterCenters聚类中心点
     assert(model.clusterCenters.head ~== center absTol 1E-5)
@@ -112,10 +112,12 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       // Create three deterministic models and compare cluster means
       //创建三个确定性模型,并比较聚类方法
       val model1 = KMeans.train(rdd, k = 10, maxIterations = 2, runs = 1,
+      //initializationMode 表示初始聚类中心点的选择方式
         initializationMode = initMode, seed = 42)
       val centers1 = model1.clusterCenters
 
       val model2 = KMeans.train(rdd, k = 10, maxIterations = 2, runs = 1,
+      //initializationMode 表示初始聚类中心点的选择方式
         initializationMode = initMode, seed = 42)
       val centers2 = model2.clusterCenters
 
@@ -164,6 +166,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.clusterCenters.head ~== center absTol 1E-5)
 
     model = KMeans.train(data, k = 1, maxIterations = 1, runs = 1,
+    //initializationMode 表示初始聚类中心点的选择方式
       initializationMode = K_MEANS_PARALLEL)
     assert(model.clusterCenters.head ~== center absTol 1E-5)
   }
@@ -274,7 +277,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       // Two iterations are sufficient no matter where the initial centers are.
       //两次迭代是足够的,无论在哪里初始中心
       val model = KMeans.train(rdd, k = 2, maxIterations = 2, runs = 1, initMode)
-
+	//predict 方法对新的数据点进行所属聚类的预测
       val predicts = model.predict(rdd).collect()
       for(ps<-predicts){
         println(ps)
@@ -319,7 +322,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     val initialModel = new KMeansModel(Array(points(0), points(2)))
 
     val returnModel = new KMeans()
-      .setK(2)
+      .setK(2)//聚类的个数
       .setMaxIterations(0)
       .setInitialModel(initialModel)
       .run(rdd)
@@ -369,6 +372,7 @@ class KMeansClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
       //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB，因此Spark会抛出一个错误
       // greater than 1MB and hence Spark would throw an error.
       val model = KMeans.train(points, 2, 2, 1, initMode)
+      //predict 方法对新的数据点进行所属聚类的预测
       val predictions = model.predict(points).collect()
       /**
       * computeCost通过计算所有数据点到其最近的中心点的平方和来评估聚类的效果,

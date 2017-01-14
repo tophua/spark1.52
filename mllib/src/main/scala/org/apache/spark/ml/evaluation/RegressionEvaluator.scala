@@ -46,7 +46,7 @@ final class RegressionEvaluator(override val uid: String)
    * Because we will maximize evaluation value (ref: `CrossValidator`),
    * 因为我们将最大化评价价值(ref: `CrossValidator`)
    * when we evaluate a metric that is needed to minimize (e.g., `"rmse"`, `"mse"`, `"mae"`),
-   * 当我们评估一个需要最小化的度量
+   * 当我们评估一个需要最小化的度量例如rmse,
    * we take and output the negative of this metric.
    * @group param
    */

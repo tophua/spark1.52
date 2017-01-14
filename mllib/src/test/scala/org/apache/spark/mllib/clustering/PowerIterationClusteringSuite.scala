@@ -52,7 +52,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
       (4, 5, 1.0), (4, 15, 1.0), (5, 6, 1.0), (6, 7, 1.0), (7, 8, 1.0), (8, 9, 1.0), (9, 10, 1.0),
       (10, 11, 1.0), (11, 12, 1.0), (12, 13, 1.0), (13, 14, 1.0), (14, 15, 1.0))
     val model = new PowerIterationClustering()
-      .setK(2)
+      .setK(2)//聚类的个数
       .run(sc.parallelize(similarities, 2))
     val predictions = Array.fill(2)(mutable.Set.empty[Long])
     model.assignments.collect().foreach { a =>
@@ -61,7 +61,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
     assert(predictions.toSet == Set((0 to 3).toSet, (4 to 15).toSet))
 
     val model2 = new PowerIterationClustering()
-      .setK(2)
+      .setK(2)//聚类的个数
       .setInitializationMode("degree")
       .run(sc.parallelize(similarities, 2))
     val predictions2 = Array.fill(2)(mutable.Set.empty[Long])
@@ -100,7 +100,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
     val graph = Graph.fromEdges(sc.parallelize(edges, 2), 0.0)
 
     val model = new PowerIterationClustering()
-      .setK(2)
+      .setK(2)//聚类的个数
       .run(graph)
     val predictions = Array.fill(2)(mutable.Set.empty[Long])
     model.assignments.collect().foreach { a =>
@@ -109,7 +109,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
     assert(predictions.toSet == Set((0 to 3).toSet, (4 to 15).toSet))
 
     val model2 = new PowerIterationClustering()
-      .setK(2)
+      .setK(2)//聚类的个数
       .setInitializationMode("degree")
       .run(sc.parallelize(similarities, 2))
     val predictions2 = Array.fill(2)(mutable.Set.empty[Long])

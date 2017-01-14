@@ -74,7 +74,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Train a model 训练模型
     val lda = new LDA()
-    lda.setK(k)
+    lda.setK(k)//聚类的个数
       .setOptimizer(new EMLDAOptimizer)
       .setDocConcentration(topicSmoothing)
       .setTopicConcentration(termSmoothing)
@@ -200,6 +200,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
   //初始化与α长度！= K或1失
   test("initializing with alpha length != k or 1 fails") {
     intercept[IllegalArgumentException] {
+    //聚类的个数
       val lda = new LDA().setK(2).setAlpha(Vectors.dense(1, 2, 3, 4))
       val corpus = sc.parallelize(tinyCorpus, 2)
       lda.run(corpus)
@@ -208,6 +209,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
   //在α＜0元素初始化失败
   test("initializing with elements in alpha < 0 fails") {
     intercept[IllegalArgumentException] {
+    //聚类的个数
       val lda = new LDA().setK(4).setAlpha(Vectors.dense(-1, 2, 3, 4))
       val corpus = sc.parallelize(tinyCorpus, 2)
       lda.run(corpus)
@@ -215,12 +217,13 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("OnlineLDAOptimizer initialization") {//在线LDA算法的初始化
-    val lda = new LDA().setK(2)
+    val lda = new LDA().setK(2)//聚类的个数
     val corpus = sc.parallelize(tinyCorpus, 2)
     val op = new OnlineLDAOptimizer().initialize(corpus, lda)
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     op.setKappa(0.9876).setMiniBatchFraction(0.123).setTau0(567)
     assert(op.getAlpha.toArray.forall(_ === 0.5)) // default 1.0 / k
+    //聚类的个数
     assert(op.getEta === 0.5)   // default 1.0 / k
     assert(op.getKappa === 0.9876)
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
@@ -247,6 +250,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     val op = new OnlineLDAOptimizer().setTau0(1024).setKappa(0.51).setGammaShape(1e40)
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
       .setMiniBatchFraction(1)
+      //聚类的个数
     val lda = new LDA().setK(k).setMaxIterations(1).setOptimizer(op).setSeed(12345)
 
     val state = op.initialize(corpus, lda)
@@ -277,7 +281,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(1e10)
-    val lda = new LDA().setK(2)
+    val lda = new LDA().setK(2)//聚类的个数
       .setDocConcentration(0.01)
       .setTopicConcentration(0.01)
       .setMaxIterations(100)
@@ -409,7 +413,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(1e10)
-    val lda = new LDA().setK(2)
+    val lda = new LDA().setK(2)//聚类的个数
       .setDocConcentration(Vectors.dense(0.00001, 0.1))
       .setTopicConcentration(0.01)
       .setMaxIterations(100)
@@ -452,7 +456,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(100).setOptimizeDocConcentration(true).setSampleWithReplacement(false)
-    val lda = new LDA().setK(k)
+    val lda = new LDA().setK(k)//聚类的个数
       .setDocConcentration(1D / k)
       .setTopicConcentration(0.01)
       .setMaxIterations(100)
@@ -493,7 +497,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     val docConcentration = 1.2
     val topicConcentration = 1.5
     val lda = new LDA()
-    lda.setK(k)
+    lda.setK(k)//聚类的个数
       .setDocConcentration(docConcentration)
       .setTopicConcentration(topicConcentration)
       .setMaxIterations(5)
@@ -551,7 +555,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val op = new EMLDAOptimizer()
     val lda = new LDA()
-      .setK(3)
+      .setK(3)//聚类的个数
       .setMaxIterations(5)
       .setSeed(12345)
       .setOptimizer(op)
@@ -571,7 +575,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val op = new OnlineLDAOptimizer()
     val lda = new LDA()
-      .setK(3)
+      .setK(3)//聚类的个数
       .setMaxIterations(5)
       .setSeed(12345)
       .setOptimizer(op)

@@ -68,6 +68,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     val stats = new StatCounter(values)
      //math.abs返回数的绝对值
     assert(math.abs(stats.mean - expectedMean) < epsilon)
+    //epsilon代收敛的阀值
     assert(math.abs(stats.stdev - expectedStddev) < epsilon)
   }
 

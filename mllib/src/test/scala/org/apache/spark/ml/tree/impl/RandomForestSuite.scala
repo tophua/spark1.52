@@ -42,6 +42,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       left2       parent
                 left  right
      */
+    //基尼计算器
     val leftImp = new GiniCalculator(Array(3.0, 2.0, 1.0))
     val left = new LeafNode(0.0, leftImp.calculate(), leftImp)
 

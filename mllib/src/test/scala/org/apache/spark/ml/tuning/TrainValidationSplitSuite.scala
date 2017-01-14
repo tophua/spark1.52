@@ -51,10 +51,11 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
       .setTrainRatio(0.5)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)
+    //获得逻辑回归最佳参数
     val parent = cvModel.bestModel.parent.asInstanceOf[LogisticRegression]
-    assert(cv.getTrainRatio === 0.5)
-    assert(parent.getRegParam === 0.001)
-    assert(parent.getMaxIter === 10)
+    assert(cv.getTrainRatio === 0.5)//训练比率
+    assert(parent.getRegParam === 0.001)//正则化参数
+    assert(parent.getMaxIter === 10)//迭代次数
     assert(cvModel.validationMetrics.length === lrParamMaps.length)
   }
 
@@ -77,17 +78,19 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
       .setTrainRatio(0.5)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)
+    //获得线性回归最佳参数
     val parent = cvModel.bestModel.parent.asInstanceOf[LinearRegression]
-    assert(parent.getRegParam === 0.001)
-    assert(parent.getMaxIter === 10)
+    assert(parent.getRegParam === 0.001)//正则化参数
+    assert(parent.getMaxIter === 10)//迭代次数
     assert(cvModel.validationMetrics.length === lrParamMaps.length)
-
+     //定义使用r2方式评估
       eval.setMetricName("r2")
       //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel2 = cv.fit(dataset)
+   //获得线性回归最佳参数
     val parent2 = cvModel2.bestModel.parent.asInstanceOf[LinearRegression]
-    assert(parent2.getRegParam === 0.001)
-    assert(parent2.getMaxIter === 10)
+    assert(parent2.getRegParam === 0.001)//正则化参数
+    assert(parent2.getMaxIter === 10)//迭代次数
     assert(cvModel2.validationMetrics.length === lrParamMaps.length)
   }
 

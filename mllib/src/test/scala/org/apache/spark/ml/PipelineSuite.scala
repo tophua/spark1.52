@@ -74,7 +74,7 @@ class PipelineSuite extends SparkFunSuite {
     val pipelineModel = pipeline.fit(dataset0)
 
     MLTestingUtils.checkCopy(pipelineModel)
-
+    //获得管道个数
     assert(pipelineModel.stages.length === 4)
     assert(pipelineModel.stages(0).eq(model0))
     assert(pipelineModel.stages(1).eq(transformer1))
@@ -103,7 +103,9 @@ class PipelineSuite extends SparkFunSuite {
       .setNumFeatures(100)
       //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
     val model = new PipelineModel("pipeline", Array[Transformer](hashingTF))
+    //管道模型复制
     val copied = model.copy(ParamMap(hashingTF.numFeatures -> 10))
+    //获得管道HashingTF模型
     require(copied.stages(0).asInstanceOf[HashingTF].getNumFeatures === 10,
       "copy should handle extra stage params")
   }

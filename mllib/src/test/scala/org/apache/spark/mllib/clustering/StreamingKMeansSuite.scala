@@ -51,7 +51,7 @@ class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
     // create model with one cluster
     //创建一个聚类模型
     val model = new StreamingKMeans()
-      .setK(1)
+      .setK(1)//聚类的个数
       .setDecayFactor(1.0)
       .setInitialCenters(Array(Vectors.dense(0.0, 0.0, 0.0, 0.0, 0.0)), Array(0.0))
 
@@ -90,7 +90,7 @@ class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
     // create model with two clusters
     //创建两个集群的模型
     val kMeans = new StreamingKMeans()
-      .setK(2)
+      .setK(2)//聚类的个数
       .setHalfLife(2, "batches")
       .setInitialCenters(
         Array(Vectors.dense(-0.1, 0.1, -0.2, -0.3, -0.1),
@@ -127,7 +127,7 @@ class StreamingKMeansSuite extends SparkFunSuite with TestSuiteBase {
     // create model with two clusters
     //创建两个集群的模型
     val kMeans = new StreamingKMeans()
-      .setK(2)
+      .setK(2)//聚类的个数
       .setHalfLife(0.5, "points")
       .setInitialCenters(
         Array(Vectors.dense(0.0), Vectors.dense(1000.0)),

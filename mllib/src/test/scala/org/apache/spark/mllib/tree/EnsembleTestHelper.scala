@@ -38,6 +38,7 @@ object EnsembleTestHelper {
       numCols: Int,
       expectedMean: Double,
       expectedStddev: Double,
+      //epsilon代收敛的阀值
       epsilon: Double) {
     val values = new mutable.ArrayBuffer[Double]()
     data.foreach { row =>

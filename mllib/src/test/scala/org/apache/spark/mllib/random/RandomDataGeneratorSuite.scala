@@ -62,6 +62,7 @@ class RandomDataGeneratorSuite extends SparkFunSuite {
   def distributionChecks(gen: RandomDataGenerator[Double],
       mean: Double = 0.0,
       stddev: Double = 1.0,
+      //epsilon代收敛的阀值
       epsilon: Double = 0.01) {
     for (seed <- 0 until 5) {
       gen.setSeed(seed.toLong)

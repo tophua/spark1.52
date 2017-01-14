@@ -32,7 +32,8 @@ class ParamGridBuilderSuite extends SparkFunSuite {
   test("param grid builder") {//参数网格生成器
     def validateGrid(maps: Array[ParamMap], expected: mutable.Set[(Int, String)]): Unit = {
       assert(maps.size === expected.size)
-      maps.foreach { m =>
+      maps.foreach { m =>//m:ParamMap类型
+        //(10,input0)(10,input1)
         val tuple = (m(maxIter), m(inputCol))
         assert(expected.contains(tuple))
         expected.remove(tuple)

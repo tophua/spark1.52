@@ -66,7 +66,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setEstimator(lr)//被评估模型
       .setEstimatorParamMaps(lrParamMaps)//评估参数
       .setEvaluator(eval)//评估模型
-      .setNumFolds(3)//
+      .setNumFolds(3)//交叉验证的折叠数参数,默认3,必须大于2
       //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)
 
@@ -77,6 +77,15 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val parent = cvModel.bestModel.parent.asInstanceOf[LogisticRegression]
     assert(parent.getRegParam === 0.001)//正则化参数
     assert(parent.getMaxIter === 10)//最大迭代次数
+    //avg Metrics平均指标
+    for(x<-cvModel.avgMetrics){
+      /**
+        avgMetrics:0.5
+        avgMetrics:0.5
+        avgMetrics:0.8332341269841269
+        avgMetrics:0.8332341269841269*/
+      println("avgMetrics:"+x)
+    }
     assert(cvModel.avgMetrics.length === lrParamMaps.length)
   }
 
@@ -84,13 +93,14 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val dataset = sqlContext.createDataFrame(
       sc.parallelize(LinearDataGenerator.generateLinearInput(
         6.3, Array(4.7, 7.2), Array(0.9, -1.3), Array(0.7, 1.2), 100, 42, 0.1), 2))
-
+    //线性回归
     val trainer = new LinearRegression
     //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val lrParamMaps = new ParamGridBuilder() //模型参数
       .addGrid(trainer.regParam, Array(1000.0, 0.001))
       .addGrid(trainer.maxIter, Array(0, 10))
       .build()
+     //回归评估
     val eval = new RegressionEvaluator()
     val cv = new CrossValidator()
       .setEstimator(trainer)
@@ -99,14 +109,17 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setNumFolds(3)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)
+    //获得线性回归最佳参数
     val parent = cvModel.bestModel.parent.asInstanceOf[LinearRegression]
     assert(parent.getRegParam === 0.001)
     assert(parent.getMaxIter === 10)
+    //使用使用准确率
     assert(cvModel.avgMetrics.length === lrParamMaps.length)
-
-    eval.setMetricName("r2")
+    
+    eval.setMetricName("r2")//定义使用r2方式评估
     //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel2 = cv.fit(dataset)
+     //获得线性回归最佳参数
     val parent2 = cvModel2.bestModel.parent.asInstanceOf[LinearRegression]
     assert(parent2.getRegParam === 0.001)
     assert(parent2.getMaxIter === 10)

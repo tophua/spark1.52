@@ -34,9 +34,10 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 
 class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
-
+  //epsilon代收敛的阀值
   test("epsilon computation") {//epsilon表示大于零的最小正Double值计算
     assert(1.0 + EPSILON > 1.0, s"EPSILON is too small: $EPSILON.")
+    //epsilon代收敛的阀值
     assert(1.0 + EPSILON / 2.0 === 1.0, s"EPSILON is too big: $EPSILON.")
   }
 

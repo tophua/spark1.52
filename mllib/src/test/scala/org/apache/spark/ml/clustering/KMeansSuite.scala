@@ -68,7 +68,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("set parameters") {//设置参数
     val kmeans = new KMeans()
-      .setK(9)
+      .setK(9)//聚类的个数
       //设置特征列
       .setFeaturesCol("test_feature")
       //设置预测列
@@ -83,20 +83,27 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setSeed(123)
       //迭代算法的收敛性
       .setTol(1e-3)
-
+     //聚类的个数
     assert(kmeans.getK === 9)
+    //设置特征列
     assert(kmeans.getFeaturesCol === "test_feature")
+    //设置预测列
     assert(kmeans.getPredictionCol === "test_prediction")
+    //最大迭代次数
     assert(kmeans.getMaxIter === 33)
+    //设置模型
     assert(kmeans.getInitMode === MLlibKMeans.RANDOM)
+    //设置初始化步长
     assert(kmeans.getInitSteps === 3)
+    //设置种子
     assert(kmeans.getSeed === 123)
+    //迭代算法的收敛性
     assert(kmeans.getTol === 1e-3)
   }
 
   test("parameters validation") {//参数验证
     intercept[IllegalArgumentException] {
-      new KMeans().setK(1)
+      new KMeans().setK(1)//聚类的个数
     }
     intercept[IllegalArgumentException] {
       new KMeans().setInitMode("no_such_a_mode")
@@ -108,19 +115,13 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("fit & transform") {//适合&转换
     val predictionColName = "kmeans_prediction"
-    //PredictionCol 测量输出的名称
+    //PredictionCol 测量输出的名称 //聚类的个数
     val kmeans = new KMeans().setK(k).setPredictionCol(predictionColName).setSeed(1)
     /**dataset:List([[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
     [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
     [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
     [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]],
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]])**/
+    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]])**/
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = kmeans.fit(dataset)//返回一个训练模型
     //clusterCenters = Array([1.0,1.0,1.0], [4.0,4.0,4.0], [0.0,0.0,0.0], [3.0,3.0,3.0], [2.0,2.0,2.0])
@@ -133,7 +134,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     val expectedColumns = Array("features", predictionColName)
     expectedColumns.foreach { column =>
       //println("column>>>>"+column)
-      //features,kmeans_prediction
+      //判断数据集是否包含features,kmeans_prediction列
       assert(transformed.columns.contains(column))
     }
     val coll=transformed.select("features","kmeans_prediction").collect()
@@ -142,12 +143,6 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     * [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0],
 			[[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], 
 			[[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], 
-			[[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], 
-			[[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], 
-			[[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0], 
-			[[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], 
-			[[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], 
-			[[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], 
     */
 
     val clusters = transformed.select(predictionColName).map(_.getInt(0)).distinct().collect().toSet
