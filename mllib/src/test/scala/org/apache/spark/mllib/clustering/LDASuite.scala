@@ -76,8 +76,8 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     val lda = new LDA()
     lda.setK(k)//聚类的个数
       .setOptimizer(new EMLDAOptimizer)
-      .setDocConcentration(topicSmoothing)
-      .setTopicConcentration(termSmoothing)
+      .setDocConcentration(topicSmoothing)//文档关于主题（"theta"）的先验分布集中参数
+      .setTopicConcentration(termSmoothing)//主题关于文字的先验分布集中参数
       .setMaxIterations(5)
       .setSeed(12345)
     val corpus = sc.parallelize(tinyCorpus, 2)
@@ -193,9 +193,10 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
   test("setter alias") {//设置别名
     val lda = new LDA().setAlpha(2.0).setBeta(3.0)
     assert(lda.getAsymmetricAlpha.toArray.forall(_ === 2.0))
+    //文档关于主题("theta")的先验分布集中参数
     assert(lda.getAsymmetricDocConcentration.toArray.forall(_ === 2.0))
     assert(lda.getBeta === 3.0)
-    assert(lda.getTopicConcentration === 3.0)
+    assert(lda.getTopicConcentration === 3.0)//主题关于文字的先验分布集中参数
   }
   //初始化与α长度！= K或1失
   test("initializing with alpha length != k or 1 fails") {
@@ -282,8 +283,8 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(1e10)
     val lda = new LDA().setK(2)//聚类的个数
-      .setDocConcentration(0.01)
-      .setTopicConcentration(0.01)
+      .setDocConcentration(0.01) //文档关于主题("theta")的先验分布集中参数
+      .setTopicConcentration(0.01)//主题关于文字的先验分布集中参数
       .setMaxIterations(100)
       .setOptimizer(op)
       .setSeed(12345)
@@ -414,8 +415,8 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(1e10)
     val lda = new LDA().setK(2)//聚类的个数
-      .setDocConcentration(Vectors.dense(0.00001, 0.1))
-      .setTopicConcentration(0.01)
+      .setDocConcentration(Vectors.dense(0.00001, 0.1)) //文档关于主题("theta")的先验分布集中参数
+      .setTopicConcentration(0.01)//主题关于文字的先验分布集中参数
       .setMaxIterations(100)
       .setOptimizer(op)
       .setSeed(12345)
@@ -457,8 +458,8 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
       .setGammaShape(100).setOptimizeDocConcentration(true).setSampleWithReplacement(false)
     val lda = new LDA().setK(k)//聚类的个数
-      .setDocConcentration(1D / k)
-      .setTopicConcentration(0.01)
+      .setDocConcentration(1D / k) //文档关于主题("theta")的先验分布集中参数
+      .setTopicConcentration(0.01)//主题关于文字的先验分布集中参数
       .setMaxIterations(100)
       .setOptimizer(op)
       .setSeed(12345)
@@ -494,12 +495,12 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Test for DistributedLDAModel.
     val k = 3
-    val docConcentration = 1.2
-    val topicConcentration = 1.5
+    val docConcentration = 1.2 //文档关于主题("theta")的先验分布集中参数
+    val topicConcentration = 1.5//主题关于文字的先验分布集中参数
     val lda = new LDA()
     lda.setK(k)//聚类的个数
-      .setDocConcentration(docConcentration)
-      .setTopicConcentration(topicConcentration)
+      .setDocConcentration(docConcentration) //文档关于主题("theta")的先验分布集中参数
+      .setTopicConcentration(topicConcentration)//主题关于文字的先验分布集中参数
       .setMaxIterations(5)
       .setSeed(12345)
     val corpus = sc.parallelize(tinyCorpus, 2)
@@ -514,7 +515,9 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(samelocalModel.topicsMatrix === localModel.topicsMatrix)
       assert(samelocalModel.k === localModel.k)
       assert(samelocalModel.vocabSize === localModel.vocabSize)
+       //文档关于主题("theta")的先验分布集中参数
       assert(samelocalModel.docConcentration === localModel.docConcentration)
+      //主题关于文字的先验分布集中参数
       assert(samelocalModel.topicConcentration === localModel.topicConcentration)
       assert(samelocalModel.gammaShape === localModel.gammaShape)
 
@@ -523,6 +526,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(distributedModel.k === sameDistributedModel.k)
       assert(distributedModel.vocabSize === sameDistributedModel.vocabSize)
       assert(distributedModel.iterationTimes === sameDistributedModel.iterationTimes)
+      //主题关于文字的先验分布集中参数
       assert(distributedModel.docConcentration === sameDistributedModel.docConcentration)
       assert(distributedModel.topicConcentration === sameDistributedModel.topicConcentration)
       assert(distributedModel.gammaShape === sameDistributedModel.gammaShape)

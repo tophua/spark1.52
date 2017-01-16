@@ -55,7 +55,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
   lazy val dataRDD = sc.parallelize(data, 2).cache()
   //损失应该减少比赛LBFGS梯度下降的结果
   test("LBFGS loss should be decreasing and match the result of Gradient Descent.") {
-    val regParam = 0
+    val regParam = 0//正则化参数>=0
 
     val initialWeightsWithIntercept = Vectors.dense(1.0 +: initialWeights.toArray)
     val convergenceTol = 1e-12
@@ -68,7 +68,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
       numCorrections,
       convergenceTol,
       numIterations,
-      regParam,
+      regParam,//正则化参数>=0
       initialWeightsWithIntercept)
 
     // Since the cost function is convex, the loss is guaranteed to be monotonically decreasing
@@ -76,16 +76,16 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
     // (SGD doesn't guarantee this, and the loss will be fluctuating in the optimization process.)
     assert((loss, loss.tail).zipped.forall(_ > _), "loss should be monotonically decreasing.")
 
-    val stepSize = 1.0
+    val stepSize = 1.0//每次迭代优化步长
     // Well, GD converges slower, so it requires more iterations!
     val numGDIterations = 50
     val (_, lossGD) = GradientDescent.runMiniBatchSGD(
       dataRDD,
       gradient,
       simpleUpdater,
-      stepSize,
+      stepSize,//每次迭代优化步长
       numGDIterations,
-      regParam,
+      regParam,//正则化参数>=0
       miniBatchFrac,
       initialWeightsWithIntercept)
 
@@ -99,7 +99,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
   }
 
   test("LBFGS and Gradient Descent with L2 regularization should get the same result.") {
-    val regParam = 0.2
+    val regParam = 0.2//正则化参数>=0
 
     // Prepare another non-zero weights to compare the loss in the first iteration.
     //准备另一个非零的权重，以比较第一次迭代中的损失
@@ -114,18 +114,18 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
       numCorrections,
       convergenceTol,
       numIterations,
-      regParam,
+      regParam,//正则化参数>=0
       initialWeightsWithIntercept)
 
     val numGDIterations = 50
-    val stepSize = 1.0
+    val stepSize = 1.0//每次迭代优化步长
     val (weightGD, lossGD) = GradientDescent.runMiniBatchSGD(
       dataRDD,
       gradient,
       squaredL2Updater,
-      stepSize,
+      stepSize,//每次迭代优化步长
       numGDIterations,
-      regParam,
+      regParam,//正则化参数>=0
       miniBatchFrac,
       initialWeightsWithIntercept,
       convergenceTol)
@@ -143,7 +143,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
   }
 
   test("The convergence criteria should work as we expect.") {//收敛准则应该像我们期望的那样工作
-    val regParam = 0.0
+    val regParam = 0.0//正则化参数>=0
 
     /**
      * For the first run, we set the convergenceTol to 0.0, so that the algorithm will
@@ -160,7 +160,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
       numCorrections,
       convergenceTol,
       numIterations,
-      regParam,
+      regParam,//正则化参数>=0
       initialWeightsWithIntercept)
 
     // Note that the first loss is computed with initial weights,
@@ -175,7 +175,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
       numCorrections,
       convergenceTol,
       numIterations,
-      regParam,
+      regParam,//正则化参数>=0
       initialWeightsWithIntercept)
 
     // Based on observation, lossLBFGS2 runs 3 iterations, no theoretically guaranteed.
@@ -190,7 +190,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
       numCorrections,
       convergenceTol,
       numIterations,
-      regParam,
+      regParam,//正则化参数>=0
       initialWeightsWithIntercept)
 
     // With smaller convergenceTol, it takes more steps.
@@ -202,7 +202,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
   }
 
   test("Optimize via class LBFGS.") {
-    val regParam = 0.2
+    val regParam = 0.2//正则化参数>=0
 
     // Prepare another non-zero weights to compare the loss in the first iteration.
     val initialWeightsWithIntercept = Vectors.dense(0.3, 0.12)
@@ -213,19 +213,19 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
       .setNumCorrections(numCorrections)
       .setConvergenceTol(convergenceTol)
       .setNumIterations(numIterations)
-      .setRegParam(regParam)
+      .setRegParam(regParam)//正则化参数>=0
 
     val weightLBFGS = lbfgsOptimizer.optimize(dataRDD, initialWeightsWithIntercept)
 
     val numGDIterations = 50
-    val stepSize = 1.0
+    val stepSize = 1.0//每次迭代优化步长
     val (weightGD, _) = GradientDescent.runMiniBatchSGD(
       dataRDD,
       gradient,
       squaredL2Updater,
-      stepSize,
+      stepSize,//每次迭代优化步长
       numGDIterations,
-      regParam,
+      regParam,//正则化参数>=0
       miniBatchFrac,
       initialWeightsWithIntercept,
       convergenceTol)
@@ -250,7 +250,7 @@ class LBFGSClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
       .setNumCorrections(1)
       .setConvergenceTol(1e-12)
       .setNumIterations(1)
-      .setRegParam(1.0)
+      .setRegParam(1.0)//正则化参数>=0
     val random = new Random(0)
     // If we serialize data directly in the task closure, the size of the serialized task would be
     // greater than 1MB and hence Spark would throw an error.

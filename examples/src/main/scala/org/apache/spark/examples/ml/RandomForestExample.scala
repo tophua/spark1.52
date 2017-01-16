@@ -63,13 +63,14 @@ object RandomForestExample {
       algo: String = "classification",//分类
       maxDepth: Int = 5,//树的最大深度
       maxBins: Int = 32,//离散连续性变量时最大的分箱数，默认是 32
-      minInstancesPerNode: Int = 1,
-      minInfoGain: Double = 0.0,
+      minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
+      minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
       numTrees: Int = 10,//随机森林需要训练的树的个数，默认值是 20
       featureSubsetStrategy: String = "auto",
       fracTest: Double = 0.2,
       cacheNodeIds: Boolean = false,
       checkpointDir: Option[String] = None,
+      //设置检查点间隔(>=1),或不设置检查点(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -86,11 +87,11 @@ object RandomForestExample {
       opt[Int]("maxBins")
         .text(s"max number of bins, default: ${defaultParams.maxBins}")
         .action((x, c) => c.copy(maxBins = x))
-      opt[Int]("minInstancesPerNode")
+      opt[Int]("minInstancesPerNode")//分裂后自节点最少包含的实例数量
         .text(s"min number of instances required at child nodes to create the parent split," +
-        s" default: ${defaultParams.minInstancesPerNode}")
-        .action((x, c) => c.copy(minInstancesPerNode = x))
-      opt[Double]("minInfoGain")
+        s" default: ${defaultParams.minInstancesPerNode}")//分裂后自节点最少包含的实例数量
+        .action((x, c) => c.copy(minInstancesPerNode = x))//分裂后自节点最少包含的实例数量
+      opt[Double]("minInfoGain")//分裂节点时所需最小信息增益
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
         .action((x, c) => c.copy(minInfoGain = x))
       opt[Int]("numTrees")
@@ -198,7 +199,7 @@ object RandomForestExample {
           .setMaxDepth(params.maxDepth)//树的最大深度，默认值是 5
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)
-          .setMinInfoGain(params.minInfoGain)
+          .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)//
           .setFeatureSubsetStrategy(params.featureSubsetStrategy)
@@ -209,10 +210,10 @@ object RandomForestExample {
           .setLabelCol(labelColName)//标签列的名称
           .setMaxDepth(params.maxDepth)//树的最大深度，默认值是 5
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
-          .setMinInstancesPerNode(params.minInstancesPerNode)
-          .setMinInfoGain(params.minInfoGain)
+          .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
+          .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
-          .setCheckpointInterval(params.checkpointInterval)
+          .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1),或不设置检查点(-1)
           .setFeatureSubsetStrategy(params.featureSubsetStrategy)
           .setNumTrees(params.numTrees)//随机森林需要训练的树的个数，默认值是 20
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")

@@ -32,6 +32,7 @@ object BasicStatistics {
     // method is not specified, Pearson's method will be used by default. 
     //pearson皮尔森相关性
     val correlation: Double = Statistics.corr(seriesX, seriesY, "pearson")
+    println("pearson:"+correlation)
     //请注意,每个向量是一个行,而不是一个列
     val data: RDD[Vector] = null // note that each Vector is a row and not a column 
      //spearman 斯皮尔曼相关性
@@ -40,6 +41,7 @@ object BasicStatistics {
     // If a method is not specified, Pearson's method will be used by default. 
     //如果没有指定方法,皮尔森的方法将被默认使用
     val correlMatrix: Matrix = Statistics.corr(data, "pearson")
+    println("correlMatrix:"+correlMatrix.toString())
 
 
   }

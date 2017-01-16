@@ -52,7 +52,7 @@ class PeriodicRDDCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCont
   test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
-    val checkpointInterval = 2
+    val checkpointInterval = 2//设置检查点间隔(>=1),或不设置检查点(-1)
     var rddsToCheck = Seq.empty[RDDToCheck]
     sc.setCheckpointDir(path)
     val rdd1 = createRDD(sc)
@@ -60,6 +60,7 @@ class PeriodicRDDCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCont
     checkpointer.update(rdd1)
     rdd1.count()
     rddsToCheck = rddsToCheck :+ RDDToCheck(rdd1, 1)
+    //设置检查点间隔(>=1),或不设置检查点(-1)
     checkCheckpoint(rddsToCheck, 1, checkpointInterval)
 
     var iteration = 2
@@ -68,6 +69,7 @@ class PeriodicRDDCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCont
       checkpointer.update(rdd)
       rdd.count()
       rddsToCheck = rddsToCheck :+ RDDToCheck(rdd, iteration)
+      //设置检查点间隔(>=1),或不设置检查点(-1)
       checkCheckpoint(rddsToCheck, iteration, checkpointInterval)
       iteration += 1
     }
@@ -118,6 +120,7 @@ private object PeriodicRDDCheckpointerSuite {
 
   def checkCheckpoint(rdds: Seq[RDDToCheck], iteration: Int, checkpointInterval: Int): Unit = {
     rdds.reverse.foreach { g =>
+    //设置检查点间隔(>=1),或不设置检查点(-1)
       checkCheckpoint(g.rdd, g.gIndex, iteration, checkpointInterval)
     }
   }
@@ -141,7 +144,7 @@ private object PeriodicRDDCheckpointerSuite {
   def checkCheckpoint(
       rdd: RDD[_],
       gIndex: Int,
-      iteration: Int,
+      iteration: Int,//设置检查点间隔(>=1),或不设置检查点(-1)
       checkpointInterval: Int): Unit = {
     try {
       if (gIndex % checkpointInterval == 0) {

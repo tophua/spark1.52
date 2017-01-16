@@ -46,7 +46,8 @@ object BinarizerExample {
     val binarizer: Binarizer = new Binarizer()
       .setInputCol("feature")
       .setOutputCol("binarized_feature")
-      .setThreshold(0.5)//阈值:如果<=阈值则去舍,>阈值等于1
+      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+      .setThreshold(0.5)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val binarizedDataFrame = binarizer.transform(dataFrame)
     val binarizedFeatures = binarizedDataFrame.select("binarized_feature")

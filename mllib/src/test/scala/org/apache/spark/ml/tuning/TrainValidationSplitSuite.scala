@@ -40,7 +40,7 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
     val lr = new LogisticRegression
     //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val lrParamMaps = new ParamGridBuilder()
-      .addGrid(lr.regParam, Array(0.001, 1000.0))
+      .addGrid(lr.regParam, Array(0.001, 1000.0))//正则化参数>=0
       .addGrid(lr.maxIter, Array(0, 10))
       .build()
     val eval = new BinaryClassificationEvaluator
@@ -67,7 +67,7 @@ class TrainValidationSplitSuite extends SparkFunSuite with MLlibTestSparkContext
     val trainer = new LinearRegression
     //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val lrParamMaps = new ParamGridBuilder()
-      .addGrid(trainer.regParam, Array(1000.0, 0.001))
+      .addGrid(trainer.regParam, Array(1000.0, 0.001))//正则化参数>=0
       .addGrid(trainer.maxIter, Array(0, 10))
       .build()
     val eval = new RegressionEvaluator()

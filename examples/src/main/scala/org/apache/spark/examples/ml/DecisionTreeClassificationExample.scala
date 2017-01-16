@@ -72,7 +72,7 @@ object DecisionTreeClassificationExample {
     // Train a DecisionTree model.
     //训练一个决策树模型
     val dt = new DecisionTreeClassifier()
-      .setLabelCol("indexedLabel")
+      .setLabelCol("indexedLabel")//标签列名
       //训练数据集 DataFrame 中存储特征数据的列名
       .setFeaturesCol("indexedFeatures")
 

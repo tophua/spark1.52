@@ -55,7 +55,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val model = new StreamingLogisticRegressionWithSGD()
     //初始化权重
       .setInitialWeights(Vectors.dense(0.0))
-      .setStepSize(0.2)
+      .setStepSize(0.2)//每次迭代优化步长
       .setNumIterations(25)
 
     // generate sequence of simulated data
@@ -92,7 +92,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
       //initialWeights初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0))
       //SGD步长,默认为1.0
-      .setStepSize(0.2)
+      .setStepSize(0.2)//每次迭代优化步长
       //iterations迭代次数,默认100
       .setNumIterations(25)
 
@@ -141,7 +141,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val model = new StreamingLogisticRegressionWithSGD()
       //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(1.5))
-      .setStepSize(0.2)
+      .setStepSize(0.2)//每次迭代优化步长
       //iterations迭代次数,默认100
       .setNumIterations(25)
 
@@ -178,7 +178,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val model = new StreamingLogisticRegressionWithSGD()
     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(-0.1))
-      .setStepSize(0.01)
+      .setStepSize(0.01)//每次迭代优化步长
       .setNumIterations(10)
 
     // generate sequence of simulated data for testing
@@ -209,7 +209,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val model = new StreamingLogisticRegressionWithSGD()
     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(-0.1))
-      .setStepSize(0.01)
+      .setStepSize(0.01)//每次迭代优化步长
       .setNumIterations(10)
     val numBatches = 10
     val emptyInput = Seq.empty[Seq[LabeledPoint]]

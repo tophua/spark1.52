@@ -38,17 +38,15 @@ import org.apache.spark.{SparkConf, SparkContext}
  * }}}
  * represents a 3-by-2 matrix, whose first row is (0.5, 1.0).
  * 代表3行2列矩阵的第一行是(0.5,1)
- *
  * Example invocation:
- *
  * bin/run-example mllib.CosineSimilarity \
  * --threshold 0.1 data/mllib/sample_svm_data.txt
  */
 object CosineSimilarity {
  /* case class Params(inputFile: String = null, threshold: Double = 0.1)
     extends AbstractParams[Params]*/
-  //阈值 threshold
-    case class Params(inputFile: String = "../data/mllib/sample_svm_data.txt", threshold: Double = 0.1)
+  //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    case class Params(inputFile: String = "../data/mllib/CosineSimilarity.txt", threshold: Double = 0.1)
     extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -56,6 +54,7 @@ object CosineSimilarity {
 
     val parser = new OptionParser[Params]("CosineSimilarity") {
       head("CosineSimilarity: an example app.")
+      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       opt[Double]("threshold")
         //.required()
         .text(s"threshold similarity: to tradeoff computation vs quality estimate")
@@ -90,17 +89,20 @@ object CosineSimilarity {
     //加载和解析数据文件
     val rows = sc.textFile(params.inputFile).map { line =>
       val values = line.split(' ').map(x=>{
-        println(x.toDouble)  
+       //println(x.toDouble)  
         x.toDouble
         })
        //创建一个稠密向量
       Vectors.dense(values)
     }.cache()
+    //分布式矩阵,RowMatrix直接通过 RDD[Vector]来定义并可以用来统计平均数、方差、协同方差等
     val mat = new RowMatrix(rows)
-
+    //3===2
+   println(mat.numRows()+"==="+mat.numCols())
     // Compute similar columns perfectly, with brute force.
     //计算矩阵中每两列之间的余弦相似度
     //参数:使用近似算法的阈值,值越大则运算速度越快而误差越大,默认值为0
+    //CoordinateMatrix常用于稀疏性比较高的计算中,是由 RDD[MatrixEntry]来构建的,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
     val exact = mat.columnSimilarities()
 
     // Compute similar columns with estimation using DIMSUM
@@ -109,15 +111,24 @@ object CosineSimilarity {
     val approx = mat.columnSimilarities(params.threshold)
     //MatrixEntry参数i行的索引,j列的索引,实体的值
     val exactEntries = exact.entries.map { case MatrixEntry(i, j, u) => 
+      //0==1===0.9954039000135861
       println(i+"=="+j+"==="+u)
       ((i, j), u) 
       }
-    val approxEntries = approx.entries.map { case MatrixEntry(i, j, v) => ((i, j), v) }
+    val approxEntries = approx.entries.map { 
+      case MatrixEntry(i, j, v) =>
+        //println(i+"=="+j+"==="+v)
+        //0==1===0.9954039000135861
+        ((i, j), v) 
+      }
      //MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均
     val MAE = exactEntries.leftOuterJoin(approxEntries).values.map {
       case (u, Some(v)) =>
+        println(u+"==="+v+"==="+(u - v))
+       //0.9954039000135861===0.9954039000135861===0.0
         math.abs(u - v)
       case (u, None) =>
+        println("==="+u)
         math.abs(u)
     }.mean()
     //MAE平均绝对误差是所有单个观测值与算术平均值的偏差的绝对值的平均

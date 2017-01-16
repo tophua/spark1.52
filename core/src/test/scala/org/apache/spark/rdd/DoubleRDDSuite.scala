@@ -36,7 +36,8 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
   test("WorksOnEmpty") {
     // Make sure that it works on an empty input
     val rdd: RDD[Double] = sc.parallelize(Seq())
-    //直方图展示数据生成, 下面俩种用法表示一致，共分为俩个桶：( 0,50 ], ( 50,100 ]
+    //
+    //直方图展示数据生成,,下面俩种用法表示一致,共分为一个桶:( 0,10)
     val buckets = Array(0.0, 10.0)
     /**
      * histogram

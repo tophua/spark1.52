@@ -48,7 +48,7 @@ object LinearRegression {
       //input: String = null,
       input: String = "../data/mllib/sample_linear_regression_data.txt",
       numIterations: Int = 100,
-      stepSize: Double = 1.0,
+      stepSize: Double = 1.0,//每次迭代优化步长
       regType: RegType = L2,
       regParam: Double = 0.01) extends AbstractParams[Params]
 
@@ -60,7 +60,7 @@ object LinearRegression {
       opt[Int]("numIterations")
         .text("number of iterations")
         .action((x, c) => c.copy(numIterations = x))
-      opt[Double]("stepSize")
+      opt[Double]("stepSize")//每次迭代优化步长
         .text(s"initial step size, default: ${defaultParams.stepSize}")
         .action((x, c) => c.copy(stepSize = x))
       opt[String]("regType")
@@ -130,9 +130,9 @@ object LinearRegression {
     val algorithm = new LinearRegressionWithSGD()
     algorithm.optimizer
       .setNumIterations(params.numIterations)
-      .setStepSize(params.stepSize)
+      .setStepSize(params.stepSize)//每次迭代优化步长
       .setUpdater(updater)
-      .setRegParam(params.regParam)
+      .setRegParam(params.regParam)//
 
     val model = algorithm.run(training)
 

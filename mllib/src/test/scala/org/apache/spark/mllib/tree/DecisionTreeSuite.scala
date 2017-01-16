@@ -80,7 +80,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       maxDepth = 2,
       numClasses = 2,//numClasses 分类数
-      maxBins = 100,
+      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       categoricalFeaturesInfo = Map(0 -> 2, 1-> 2))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -105,7 +105,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       maxDepth = 2,
       numClasses = 2,//numClasses 分类数
-      maxBins = 100,
+      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       //用Map存储类别(离散)特征及每个类别对应值(类别)的数量
       //例如 Map(n->k)表示特征n类别(离散)特征,特征值有K个,具体值为(0,1,...K-1)
       //Map中元素的键是特征在输入向量Vector中的下标,Map中元素的值是类别特征的不同取值个数
@@ -212,7 +212,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       maxDepth = 2,
       numClasses = 100,//numClasses 分类数
-      maxBins = 100,
+      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -236,6 +236,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     * ]
     */
     assert(splits(0)(0).feature === 0)
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(splits(0)(0).threshold === Double.MinValue)
     assert(splits(0)(0).featureType === Categorical)
     assert(splits(0)(0).categories.length === 1)
@@ -249,6 +250,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     * ]
     */
     assert(splits(1)(0).feature === 1)
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(splits(1)(0).threshold === Double.MinValue)
     assert(splits(1)(0).featureType === Categorical)
     assert(splits(1)(0).categories.length === 1)
@@ -289,7 +291,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       maxDepth = 2,
       numClasses = 100,//numClasses 分类数
-      maxBins = 100,
+      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       categoricalFeaturesInfo = Map(0 -> 10, 1-> 10))
     //因此,分类的功能将被排序
     // 2^(10-1) - 1 > 100, so categorical features will be ordered
@@ -416,7 +418,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     //熵：代表集合的无序程度
     val strategyOneNode = new Strategy(Classification, Entropy, maxDepth = 1,
     //numClasses 分类数
-      numClasses = 2, maxBins = 100)
+      numClasses = 2, maxBins = 100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val modelOneNode = DecisionTree.train(rdd, strategyOneNode)
     val rootNode1 = modelOneNode.topNode.deepCopy()
     val rootNode2 = modelOneNode.topNode.deepCopy()
@@ -524,8 +526,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Regression,
       Variance,
-      maxDepth = 2,
-      maxBins = 100,
+      maxDepth = 2,//树的最大深度（>=0）
+      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -553,8 +555,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Regression,
       Variance,
-      maxDepth = 2,
-      maxBins = 100,
+      maxDepth = 2,//树的最大深度（>=0）
+      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       categoricalFeaturesInfo = Map(0 -> 2, 1-> 2))
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
     assert(!metadata.isUnordered(featureIndex = 0))
@@ -595,6 +597,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
+    //maxBins连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val strategy = new Strategy(Classification, Gini, maxDepth = 3,
       numClasses = 2, maxBins = 100)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -646,6 +649,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
+    //树的最大深度（>=0）
     val strategy = new Strategy(Classification, Entropy, maxDepth = 3,
       numClasses = 2, maxBins = 100)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -739,8 +743,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val maxBins = 2 * (math.pow(2, 3 - 1).toInt - 1) // just enough bins to allow unordered features
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlass()
     val rdd = sc.parallelize(arr)
+    //树的最大深度（>=0）
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
     //numClasses 分类数
+    //maxBins连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       numClasses = 3, maxBins = maxBins,
       categoricalFeaturesInfo = Map(0 -> 3, 1 -> 3))
     assert(strategy.isMulticlassClassification)
@@ -783,6 +789,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val split = rootNode.split.get
     assert(split.feature === 1)
     assert(split.featureType === Continuous)
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(split.threshold > 1980)
     assert(split.threshold < 2020)
 
@@ -805,6 +812,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val split = rootNode.split.get
     assert(split.feature === 1)
     assert(split.featureType === Continuous)
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(split.threshold > 1980)
     assert(split.threshold < 2020)
   }
@@ -834,7 +842,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures()
     val rdd = sc.parallelize(arr)
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
-    //numClasses 分类数
+    //numClasses 分类数,maxBins连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       numClasses = 3, maxBins = 10,
       categoricalFeaturesInfo = Map(0 -> 10, 1 -> 10))
     assert(strategy.isMulticlassClassification)
@@ -894,7 +902,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     **/
     val strategy = new Strategy(algo = Classification, impurity = Gini,
       maxBins = 2, maxDepth = 2, categoricalFeaturesInfo = Map(0 -> 2, 1-> 2),
-      numClasses = 2, minInstancesPerNode = 2)
+      numClasses = 2, minInstancesPerNode = 2)//分裂后自节点最少包含的实例数量
 
     val rootNode = DecisionTree.train(rdd, strategy).topNode
 

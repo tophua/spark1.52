@@ -51,7 +51,7 @@ object LogisticRegressionWithElasticNetExample {
     val lr = new LogisticRegression()
       .setMaxIter(10)//最大迭代次数
       .setRegParam(0.3)//正则化参数
-      .setElasticNetParam(0.8)//设置elasticnet混合参数
+      .setElasticNetParam(0.8)//弹性网络混合参数,0.0为L2正则化 1.0为L1正则化
 
     // Fit the model
     //fit()方法将DataFrame转化为一个Transformer的算法

@@ -52,7 +52,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val dt = new DecisionTreeRegressor()
       .setImpurity("variance")//设置纯度,方差
       .setMaxDepth(2)//最大深度
-      .setMaxBins(100)//最大桶数
+      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }

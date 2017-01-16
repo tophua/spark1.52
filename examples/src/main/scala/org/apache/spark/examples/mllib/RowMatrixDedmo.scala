@@ -40,7 +40,7 @@ object RowMatrixDedmo {
     //MatrixEntry(0,2,0.9827076298239907))
     println(coordinateMatrix.entries.collect())
 
-    //转成后块矩阵，下一节中详细讲解
+    //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
     coordinateMatrix.toBlockMatrix()
     //转换成索引行矩阵，下一节中详细讲解
     coordinateMatrix.toIndexedRowMatrix()

@@ -121,7 +121,7 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val cvModel2 = cv.fit(dataset)
      //获得线性回归最佳参数
     val parent2 = cvModel2.bestModel.parent.asInstanceOf[LinearRegression]
-    assert(parent2.getRegParam === 0.001)
+    assert(parent2.getRegParam === 0.001)//正则化参数>=0
     assert(parent2.getMaxIter === 10)
     assert(cvModel2.avgMetrics.length === lrParamMaps.length)
   }

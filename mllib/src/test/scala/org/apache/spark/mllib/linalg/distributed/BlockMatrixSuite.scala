@@ -130,7 +130,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
       GridPartitioner(2, 2, suggestedNumPartitions = 0)
     }
   }
-
+//CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
   test("toCoordinateMatrix") {//协调矩阵
     val coordMat = gridBasedMat.toCoordinateMatrix()
     assert(coordMat.numRows() === m)

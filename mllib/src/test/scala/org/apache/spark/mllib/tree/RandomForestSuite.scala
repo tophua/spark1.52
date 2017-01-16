@@ -42,7 +42,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   def binaryClassificationTestWithContinuousFeatures(strategy: Strategy) {
     val arr = EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 50, 1000)
     val rdd = sc.parallelize(arr)
-    val numTrees = 1
+    val numTrees = 1//训练的树的数量
     //featureSubsetStrategy="auto"特征子集采样策略,auto表示算法自主选取
     val rf = RandomForest.trainClassifier(rdd, strategy, numTrees = numTrees,
       featureSubsetStrategy = "auto", seed = 123)
@@ -83,7 +83,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   //featureSubsetStrategy="auto"特征子集采样策略,auto表示算法自主选取
     val rf = RandomForest.trainRegressor(rdd, strategy, numTrees = numTrees,
       featureSubsetStrategy = "auto", seed = 123)
-    assert(rf.trees.size === 1)
+    assert(rf.trees.size === 1)//训练的树的数量
     val rfTree = rf.trees(0)
 
     val dt = DecisionTree.train(rdd, strategy)
@@ -100,6 +100,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
     val strategy = new Strategy(algo = Regression, impurity = Variance,
+    //numClasses 分类数,maxBins连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       maxDepth = 2, maxBins = 10, numClasses = 2,
       categoricalFeaturesInfo = categoricalFeaturesInfo)
     regressionTestWithContinuousFeatures(strategy)
@@ -108,7 +109,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Regression with continuous features and node Id cache :" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
-    
+    //maxDepth 树的最大深度(>=0)
     val strategy = new Strategy(algo = Regression, impurity = Variance,
       maxDepth = 2, maxBins = 10, numClasses = 2,
       categoricalFeaturesInfo = categoricalFeaturesInfo, useNodeIdCache = true)
@@ -123,7 +124,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     // Select feature subset for top nodes.  Return true if OK.
     //选择顶部节点的特征子集,如果确定返回真
     def checkFeatureSubsetStrategy(
-        numTrees: Int,
+        numTrees: Int,//训练的树的数量
         featureSubsetStrategy: String,
         numFeaturesPerNode: Int): Unit = {
       val seeds = Array(123, 5354, 230, 349867, 23987)
@@ -162,7 +163,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
         }
       }
     }
-    //auto自动
+    //auto自动,训练的树的数量
     checkFeatureSubsetStrategy(numTrees = 1, "auto", numFeatures)
     checkFeatureSubsetStrategy(numTrees = 1, "all", numFeatures)
      //math.sqrt返回数字的平方根

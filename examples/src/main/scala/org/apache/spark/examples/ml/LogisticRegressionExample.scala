@@ -81,10 +81,10 @@ object LogisticRegressionExample {
       opt[Int]("maxIter")
         .text(s"maximum number of iterations, default: ${defaultParams.maxIter}")
         .action((x, c) => c.copy(maxIter = x))
-      opt[Boolean]("fitIntercept")
+      opt[Boolean]("fitIntercept")//是否训练拦截对象
         .text(s"whether to fit an intercept term, default: ${defaultParams.fitIntercept}")
         .action((x, c) => c.copy(fitIntercept = x))
-      opt[Double]("tol")
+      opt[Double]("tol")//迭代算法的收敛性
         .text(s"the convergence tolerance of iterations, Smaller value will lead " +
         s"to higher accuracy with the cost of more iterations, default: ${defaultParams.tol}")
         .action((x, c) => c.copy(tol = x))
@@ -152,7 +152,7 @@ object LogisticRegressionExample {
       .setFeaturesCol("features")//特征列名
       .setLabelCol("indexedLabel")//标签列名
       .setRegParam(params.regParam)//正则化参数(>=0)
-      .setElasticNetParam(params.elasticNetParam)//弹性网络混合参数,范围[0,1]
+      .setElasticNetParam(params.elasticNetParam)//弹性网络混合参数,0.0为L2正则化 1.0为L1正则化
       .setMaxIter(params.maxIter)//最多迭代次数(>=0)
       .setTol(params.tol)//迭代算法的收敛性
       .setFitIntercept(params.fitIntercept)//是否训练拦截对象

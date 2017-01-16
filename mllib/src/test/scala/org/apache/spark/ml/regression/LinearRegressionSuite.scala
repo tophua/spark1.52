@@ -69,13 +69,17 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("linear regression: default params") {
     //线性回归
     val lir = new LinearRegression
+    //标签列名
     assert(lir.getLabelCol === "label")
+    //特征列名
     assert(lir.getFeaturesCol === "features")
+    //预测结果列名
     assert(lir.getPredictionCol === "prediction")
     assert(lir.getRegParam === 0.0)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
     assert(lir.getElasticNetParam === 0.0)
     assert(lir.getFitIntercept)
-    assert(lir.getStandardization)
+    assert(lir.getStandardization)//训练模型前是否需要对训练特征进行标准化处理
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lir.fit(dataset)
 
@@ -86,7 +90,9 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     model.transform(dataset)
       .select("label", "prediction")
       .collect()
+      //特征列名
     assert(model.getFeaturesCol === "features")
+      //预测结果列名
     assert(model.getPredictionCol === "prediction")
     assert(model.intercept !== 0.0)
     assert(model.hasParent)
@@ -107,7 +113,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
        library("glmnet")
        data <- read.csv("path", header=FALSE, stringsAsFactors=FALSE)
        features <- as.matrix(data.frame(as.numeric(data$V2), as.numeric(data$V3)))
-       label <- as.numeric(data$V1)
+       label <- as.numeric(data$V1)//family 模型中使用的误差分布类型
        weights <- coef(glmnet(features, label, family="gaussian", alpha = 0, lambda = 0))
        > weights
         3 x 1 sparse Matrix of class "dgCMatrix"
@@ -134,8 +140,9 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //线性回归没有拦截没有正规化
   test("linear regression without intercept without regularization") {
-    val trainer1 = (new LinearRegression).setFitIntercept(false)
+    val trainer1 = (new LinearRegression).setFitIntercept(false)//是否训练拦截对象
     // Without regularization the results should be the same
+    //训练模型前是否需要对训练特征进行标准化处理
     val trainer2 = (new LinearRegression).setFitIntercept(false).setStandardization(false)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
@@ -146,6 +153,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
 
     /*
+    //family 模型中使用的误差分布类型
        weights <- coef(glmnet(features, label, family="gaussian", alpha = 0, lambda = 0,
          intercept = FALSE))
        > weights
@@ -181,8 +189,9 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //与L1正则化的线性回归的截距
   test("linear regression with intercept with L1 regularization") {
+  //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
     val trainer1 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
-    val trainer2 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
+    val trainer2 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)//正则化参数>=0
       .setStandardization(false)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
@@ -229,15 +238,18 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //线性回归不与L1正则化拦截
   test("linear regression without intercept with L1 regularization") {
+  //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
     val trainer1 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
       .setFitIntercept(false)
     val trainer2 = (new LinearRegression).setElasticNetParam(1.0).setRegParam(0.57)
+    //训练模型前是否需要对训练特征进行标准化处理
       .setFitIntercept(false).setStandardization(false)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
 
     /*
+	//family 模型中使用的误差分布类型
        weights <- coef(glmnet(features, label, family="gaussian", alpha = 1.0, lambda = 0.57,
          intercept=FALSE))
        > weights
@@ -279,9 +291,11 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //具有二语正则化的拦截的线性回归
   test("linear regression with intercept with L2 regularization") {
+  //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
     val trainer1 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
+    
     val trainer2 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
-      .setStandardization(false)
+      .setStandardization(false)//训练模型前是否需要对训练特征进行标准化处理
       //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)
     val model2 = trainer2.fit(dataset)
@@ -326,8 +340,9 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //线性回归不与L2正则化的拦截
   test("linear regression without intercept with L2 regularization") {
+  //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
     val trainer1 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
-      .setFitIntercept(false)
+      .setFitIntercept(false)//正则化参数>=0
     val trainer2 = (new LinearRegression).setElasticNetParam(0.0).setRegParam(2.3)
       .setFitIntercept(false).setStandardization(false)
       //fit()方法将DataFrame转化为一个Transformer的算法
@@ -375,6 +390,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //带弹性网正则化的拦截的线性回归
   test("linear regression with intercept with ElasticNet regularization") {
+  //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
     val trainer1 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
     val trainer2 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
       .setStandardization(false)
@@ -422,9 +438,12 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //带弹性网正则化的不带截取的线性回归
   test("linear regression without intercept with ElasticNet regularization") {
+  //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
     val trainer1 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
       .setFitIntercept(false)
+      //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
     val trainer2 = (new LinearRegression).setElasticNetParam(0.3).setRegParam(1.6)
+      //是否训练拦截对象
       .setFitIntercept(false).setStandardization(false)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(dataset)

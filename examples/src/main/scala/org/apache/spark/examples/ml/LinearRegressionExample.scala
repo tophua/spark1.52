@@ -57,9 +57,9 @@ object LinearRegressionExample {
  */
       dataFormat: String = "libsvm",
       regParam: Double = 0.0,
-      elasticNetParam: Double = 0.0,
+      elasticNetParam: Double = 0.0,//ElasticNetParam=0.0为L2正则化 1.0为L1正则化
       maxIter: Int = 100,
-      tol: Double = 1E-6,
+      tol: Double = 1E-6,//迭代算法的收敛性
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -70,7 +70,7 @@ object LinearRegressionExample {
       opt[Double]("regParam")
         .text(s"regularization parameter, default: ${defaultParams.regParam}")
         .action((x, c) => c.copy(regParam = x))
-      opt[Double]("elasticNetParam")
+      opt[Double]("elasticNetParam")//ElasticNetParam=0.0为L2正则化 1.0为L1正则化
         .text(s"ElasticNet mixing parameter. For alpha = 0, the penalty is an L2 penalty. " +
         s"For alpha = 1, it is an L1 penalty. For 0 < alpha < 1, the penalty is a combination of " +
         s"L1 and L2, default: ${defaultParams.elasticNetParam}")
@@ -78,7 +78,7 @@ object LinearRegressionExample {
       opt[Int]("maxIter")
         .text(s"maximum number of iterations, default: ${defaultParams.maxIter}")
         .action((x, c) => c.copy(maxIter = x))
-      opt[Double]("tol")
+      opt[Double]("tol")//迭代算法的收敛性
         .text(s"the convergence tolerance of iterations, Smaller value will lead " +
         s"to higher accuracy with the cost of more iterations, default: ${defaultParams.tol}")
         .action((x, c) => c.copy(tol = x))
@@ -131,10 +131,11 @@ object LinearRegressionExample {
       params.dataFormat, params.testInput, "regression", params.fracTest)
 
     val lir = new LinearRegression()
+    //训练数据集DataFrame中存储特征数据的列名
       .setFeaturesCol("features")//特征名
       .setLabelCol("label")//标签列
       .setRegParam(params.regParam)//设置正则化参数
-      .setElasticNetParam(params.elasticNetParam)//设置elasticnet混合参数
+      .setElasticNetParam(params.elasticNetParam)//ElasticNetParam=0.0为L2正则化 1.0为L1正则化
       .setMaxIter(params.maxIter)//设置最大迭代次数
       .setTol(params.tol)//设置迭代的收敛
 

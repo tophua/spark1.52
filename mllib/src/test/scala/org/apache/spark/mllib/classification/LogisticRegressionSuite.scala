@@ -183,6 +183,7 @@ object LogisticRegressionSuite {
     //numClasses 分类数
     assert(a.numClasses == b.numClasses)
     assert(a.numFeatures == b.numFeatures)
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(a.getThreshold == b.getThreshold)
   }
 }
@@ -214,6 +215,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
     //逻辑回归随机梯度下降
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
+    //每次迭代优化步长
     lr.optimizer.setStepSize(10.0).setRegParam(0.0).setNumIterations(20).setConvergenceTol(0.0005)
     val model = lr.run(testRDD)
     // Test the weights
@@ -279,8 +281,8 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     //使用一半的多次迭代作为以前的测试
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer
-      .setStepSize(10.0)
-      .setRegParam(0.0)
+      .setStepSize(10.0)//每次迭代优化步长
+      .setRegParam(0.0)//正则化参数>=0
       .setNumIterations(10)
 
     val model = lr.run(testRDD, initialWeights)
@@ -317,9 +319,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     // Use half as many iterations as the previous test.
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer.
-      setStepSize(1.0).
+      setStepSize(1.0).//每次迭代优化步长
       setNumIterations(10).
-      setRegParam(1.0)//正则因子
+      setRegParam(1.0)//正则化参数>=0
 
     val model = lr.run(testRDD, initialWeights)
 
@@ -555,6 +557,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     // Save model with threshold.
     //阈值保存模型
     try {
+      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       model.setThreshold(0.7)
       model.save(sc, path)
       val sameModel = LogisticRegressionModel.load(sc, path)

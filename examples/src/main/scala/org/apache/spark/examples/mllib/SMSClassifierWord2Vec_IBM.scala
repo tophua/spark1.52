@@ -58,7 +58,7 @@ object SMSClassifierWord2Vec_IBM {
     val predictionResultDF = model.transform(testData)
     //below 2 lines are for debug use
     //下面2行是调试使用
-    predictionResultDF.printSchema
+    predictionResultDF.printSchema //打印RDD中数据的表模式
     predictionResultDF.select("message", "label", "predictedLabel").show(30)
 
     val evaluator = new MulticlassClassificationEvaluator()

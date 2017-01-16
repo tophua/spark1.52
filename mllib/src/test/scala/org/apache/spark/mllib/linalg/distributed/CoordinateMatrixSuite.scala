@@ -30,6 +30,7 @@ class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   val m = 5
   val n = 4
+  //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
   var mat: CoordinateMatrix = _
 
   override def beforeAll() {

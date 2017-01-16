@@ -23,7 +23,6 @@ object CorrelationDemo {
     //返回值：correlation: Double = 0.959034501397483
     //[-1, 1]，值越接近于1,其相关度越高
     val correlation: Double = Statistics.corr(rdd1, rdd2, "pearson")
-
     val rdd3 = sc.parallelize(
       Array(
         Array(1.0, 2.0, 3.0, 4.0),
@@ -46,6 +45,7 @@ object CorrelationDemo {
     //correlation4: Double = 0.6915716600436548
     //但其实从我们观察的数据来看,它们应该是高度相关的,虽然0.69也一定程度地反应了数据间的相关性
     val correlation4: Double = Statistics.corr(rdd4, rdd5, "pearson")
+    println("pearson:"+correlation4)
     /**     
      * 如表中的第四、第五列数据,通过将成绩和产量替换成等级,那它们之间的相关度会明显提高,这样的话表达能力更强,如下列代码所示：
      */
@@ -53,8 +53,9 @@ object CorrelationDemo {
     //执行结果：
     //correlation5: Double = 0.9428571428571412
     val correlation5: Double = Statistics.corr(rdd4, rdd5, "spearman")
-    //从上面的执行结果来看，相关性从pearson的值0.6915716600436548提高到了0.9428571428571412。由于利用的等级相关，
-    //因而spearman相关性分析也称为spearman等级相关分析或等级差数法，但需要注意的是spearman相关性分析方法涉及到等级的排序问题，
+    println("spearman:"+correlation5)
+    //从上面的执行结果来看,相关性从pearson的值0.6915716600436548提高到了0.9428571428571412,由于利用的等级相关,
+    //因而spearman相关性分析也称为spearman等级相关分析或等级差数法,但需要注意的是spearman相关性分析方法涉及到等级的排序问题，
     //在分布式环境下的排序可能会涉及到大量的网络IO操作，算法效率不是特别高。
   }
 }

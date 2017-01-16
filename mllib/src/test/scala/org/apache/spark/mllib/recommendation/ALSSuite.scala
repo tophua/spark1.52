@@ -61,7 +61,7 @@ object ALSSuite {
       products: Int,//产品数
       features: Int,//特征数
       samplingRate: Double,//采样等级
-      implicitPrefs: Boolean = false,//隐式参数
+      implicitPrefs: Boolean = false,//特征列名
       negativeWeights: Boolean = false,//负数权重
       //负特征
       negativeFactors: Boolean = true): (Seq[Rating], DoubleMatrix, DoubleMatrix) = {
@@ -306,7 +306,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setImplicitPrefs(implicitPrefs)//决定了是用显性,还是隐性反馈数据集的版本
       .setLambda(0.01)//ALS的正则化参数
       .setSeed(0L)//
-      .setNonnegative(!negativeFactors)
+      .setNonnegative(!negativeFactors)//是否需要非负约束
       .run(sc.parallelize(sampledRatings))
     /**
      *[0.436768; 0.352116; -0.368858; -0.430065; 0.317578; 0.774760; -0.253319; -0.432301; -0.069874; 0.545266; 
@@ -416,6 +416,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
      //均方根误差常用下式表示：√[∑di^2/n]=Re,式中：n为测量次数;di为一组测量值与真值的偏差
      //均方根值(RMS)、均方根误差(RMSE)
       val rmse = math.sqrt(sqErr / denom)
+       //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       if (rmse > matchThreshold) {
         fail("Model failed to predict RMSE: %f\ncorr: %s\npred: %s\nU: %s\n P: %s".format(
           rmse, truePrefs, predictedRatings, predictedU, predictedP))

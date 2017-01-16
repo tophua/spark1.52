@@ -57,9 +57,10 @@ object BinaryClassification {
   case class Params(
       input: String = "../data/mllib/sample_binary_classification_data.txt",
       numIterations: Int = 100,//迭代次数
-      stepSize: Double = 1.0,//步长
+      stepSize: Double = 1.0,//每次迭代优化步长
       algorithm: Algorithm = LR,//逻辑回归
       regType: RegType = L2,
+      //正则化
       regParam: Double = 0.01) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -70,7 +71,7 @@ object BinaryClassification {
       opt[Int]("numIterations")
         .text("number of iterations")
         .action((x, c) => c.copy(numIterations = x))
-      opt[Double]("stepSize")
+      opt[Double]("stepSize")//每次迭代优化步长
         .text("initial step size (ignored by logistic regression), " +
           s"default: ${defaultParams.stepSize}")
         .action((x, c) => c.copy(stepSize = x))
@@ -133,6 +134,7 @@ object BinaryClassification {
 
     val numTraining = training.count()
     val numTest = test.count()
+    //Training: 73, test: 27.
     println(s"Training: $numTraining, test: $numTest.")
 
     examples.unpersist(blocking = false)
@@ -146,17 +148,17 @@ object BinaryClassification {
       case LR =>
         val algorithm = new LogisticRegressionWithLBFGS()
         algorithm.optimizer
-          .setNumIterations(params.numIterations)
-          .setUpdater(updater)
-          .setRegParam(params.regParam)
+          .setNumIterations(params.numIterations)//迭代数
+          .setUpdater(updater)//
+          .setRegParam(params.regParam)//正则化
         algorithm.run(training).clearThreshold()
       case SVM =>
         val algorithm = new SVMWithSGD()
         algorithm.optimizer
-          .setNumIterations(params.numIterations)
-          .setStepSize(params.stepSize)
+          .setNumIterations(params.numIterations)//迭代次数
+          .setStepSize(params.stepSize)//每次迭代优化步长
           .setUpdater(updater)
-          .setRegParam(params.regParam)
+          .setRegParam(params.regParam)//正则化
         algorithm.run(training).clearThreshold()
     }
 
@@ -164,8 +166,11 @@ object BinaryClassification {
     val predictionAndLabel = prediction.zip(test.map(_.label))
 
     val metrics = new BinaryClassificationMetrics(predictionAndLabel)
-    
+    //准确率和召回率,areaUnderPR为1等价于一个完美模型,其准确率和召回率达到100%
+    //Test areaUnderPR = 1.0.
     println(s"Test areaUnderPR = ${metrics.areaUnderPR()}.")
+    //AUC下的面积表示平均准确率,平均准确率等于训练样本中被正确分类的数目除以样本总数
+    //Test areaUnderROC = 1.0.
     println(s"Test areaUnderROC = ${metrics.areaUnderROC()}.")
 
     sc.stop()

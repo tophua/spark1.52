@@ -59,7 +59,7 @@ object OneVsRestExample {
       tol: Double = 1E-6,//迭代算法的收敛性
       fitIntercept: Boolean = true,//是否训练拦截对象
       regParam: Option[Double] = None,//正则化参数(>=0)
-      elasticNetParam: Option[Double] = None,//
+      elasticNetParam: Option[Double] = None,//弹性网络混合参数,0.0为L2正则化 1.0为L1正则化
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -82,18 +82,18 @@ object OneVsRestExample {
         .text(s"maximum number of iterations for Logistic Regression." +
           s" default: ${defaultParams.maxIter}")
         .action((x, c) => c.copy(maxIter = x))
-      opt[Double]("tol")
+      opt[Double]("tol")//迭代算法的收敛性
         .text(s"the convergence tolerance of iterations for Logistic Regression." +
           s" default: ${defaultParams.tol}")
         .action((x, c) => c.copy(tol = x))
-      opt[Boolean]("fitIntercept")
+      opt[Boolean]("fitIntercept")//是否训练拦截对象
         .text(s"fit intercept for Logistic Regression." +
-        s" default: ${defaultParams.fitIntercept}")
+        s" default: ${defaultParams.fitIntercept}")//是否训练拦截对象
         .action((x, c) => c.copy(fitIntercept = x))
       opt[Double]("regParam")
         .text(s"the regularization parameter for Logistic Regression.")
         .action((x, c) => c.copy(regParam = Some(x)))
-      opt[Double]("elasticNetParam")
+      opt[Double]("elasticNetParam")//弹性网络混合参数,0.0为L2正则化 1.0为L1正则化
         .text(s"the ElasticNet mixing parameter for Logistic Regression.")
         .action((x, c) => c.copy(elasticNetParam = Some(x)))
       checkConfig { params =>
@@ -159,6 +159,7 @@ object OneVsRestExample {
     // Set regParam, elasticNetParam if specified in params
     //设置参数,弹性网参数如果指定参数
     params.regParam.foreach(classifier.setRegParam)
+    //弹性网络混合参数,0.0为L2正则化 1.0为L1正则化
     params.elasticNetParam.foreach(classifier.setElasticNetParam)
 
     // instantiate the One Vs Rest Classifier.

@@ -60,7 +60,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val newRF = rf
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(2)
-      .setNumTrees(1)
+      .setNumTrees(1)//训练的树的数量
       .setFeatureSubsetStrategy("auto")//每次分裂候选特征数量
       .setSeed(123)
     compareAPIs(orderedLabeledPoints50_1000, newRF, categoricalFeatures, numClasses)
@@ -80,7 +80,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   }
   //具有连续特征和节点标识缓存的二元分类
   test("Binary classification with continuous features and node Id cache:" +
-    " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
+    " comparing DecisionTree vs. RandomForest(numTrees = 1)") {//训练的树的数量
     val rf = new RandomForestClassifier()
       .setCacheNodeIds(true)
     binaryClassificationTestWithContinuousFeatures(rf)
@@ -100,7 +100,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rf = new RandomForestClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(5)
-      .setNumTrees(2)
+      .setNumTrees(2)//训练的树的数量
       .setFeatureSubsetStrategy("sqrt")//每次分裂候选特征数量
       .setSeed(12345)
     compareAPIs(rdd, rf, categoricalFeatures, numClasses)
@@ -129,7 +129,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rf = new RandomForestClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(3)
-      .setNumTrees(3)//numClasses 分类数
+      .setNumTrees(3)//训练的树的数量
       .setSeed(123)
     val categoricalFeatures = Map.empty[Int, Int]
     val numClasses = 2//numClasses 分类数
@@ -166,7 +166,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rf = new RandomForestClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(3)
-      .setNumTrees(3)//
+      .setNumTrees(3)//训练的树的数量
       .setFeatureSubsetStrategy("all")//每次分裂候选特征数量
       .setSubsamplingRate(1.0)//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
       .setSeed(123)

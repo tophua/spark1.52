@@ -56,12 +56,13 @@ object GBTExample {
       algo: String = "classification",//"regression",算法类型
       maxDepth: Int = 5,//最大深度
       maxBins: Int = 32,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
-      minInstancesPerNode: Int = 1,
-      minInfoGain: Double = 0.0,
+      minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
+      minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
       maxIter: Int = 10,//迭代次数
       fracTest: Double = 0.2,
       cacheNodeIds: Boolean = false,
       checkpointDir: Option[String] = None,//检查点目录
+      //设置检查点间隔(>=1),或不设置检查点(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -82,7 +83,7 @@ object GBTExample {
         .text(s"min number of instances required at child nodes to create the parent split," +
         s" default: ${defaultParams.minInstancesPerNode}")
         .action((x, c) => c.copy(minInstancesPerNode = x))
-      opt[Double]("minInfoGain")
+      opt[Double]("minInfoGain")//分裂节点时所需最小信息增益
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
         .action((x, c) => c.copy(minInfoGain = x))
       opt[Int]("maxIter")
@@ -105,9 +106,9 @@ object GBTExample {
           }
         }")
         .action((x, c) => c.copy(checkpointDir = Some(x)))
-      opt[Int]("checkpointInterval")
+      opt[Int]("checkpointInterval")//设置检查点间隔(>=1),或不设置检查点(-1)
         .text(s"how often to checkpoint the node Id cache, " +
-        s"default: ${defaultParams.checkpointInterval}")
+        s"default: ${defaultParams.checkpointInterval}")//设置检查点间隔(>=1),或不设置检查点(-1)
         .action((x, c) => c.copy(checkpointInterval = x))
       opt[String]("testInput")
         .text(s"input path to test dataset.  If given, option fracTest is ignored." +
@@ -172,14 +173,15 @@ object GBTExample {
     val dt = algo match {
       case "classification" =>
         new GBTClassifier()
-	         //训练数据集DataFrame中存储特征数据的列名
+	    //训练数据集DataFrame中存储特征数据的列名
           .setFeaturesCol("indexedFeatures")
           .setLabelCol(labelColName)//标签列的名称
           .setMaxDepth(params.maxDepth)//树的最大深度
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
-          .setMinInstancesPerNode(params.minInstancesPerNode)//
-          .setMinInfoGain(params.minInfoGain)
+          .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
+          .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
+	  //设置检查点间隔(>=1),或不设置检查点(-1)
           .setCheckpointInterval(params.checkpointInterval)
           .setMaxIter(params.maxIter)//
       case "regression" =>
@@ -189,8 +191,9 @@ object GBTExample {
           .setMaxDepth(params.maxDepth)//树的最大深度
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)
-          .setMinInfoGain(params.minInfoGain)
+          .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
+	  //设置检查点间隔(>=1),或不设置检查点(-1)
           .setCheckpointInterval(params.checkpointInterval)
           .setMaxIter(params.maxIter)
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")

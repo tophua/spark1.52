@@ -62,6 +62,7 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
     val testRDD = sc.parallelize(testData, 2).cache()
 
     val ls = new LassoWithSGD()
+    //正则化参数>=0,每次迭代优化步长
     ls.optimizer.setStepSize(1.0).setRegParam(0.01).setNumIterations(40)
 
     val model = ls.run(testRDD)
@@ -108,6 +109,7 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
     val testRDD = sc.parallelize(testData, 2).cache()
 
     val ls = new LassoWithSGD()
+    //正则化参数>=0,每次迭代优化步长
     ls.optimizer.setStepSize(1.0).setRegParam(0.01).setNumIterations(40).setConvergenceTol(0.0005)
 
     val model = ls.run(testRDD, initialWeights)

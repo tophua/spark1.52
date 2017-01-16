@@ -86,6 +86,7 @@ object DataFrameExample {
      
     val df: DataFrame = sqlContext.createDataFrame(dataSVM).cache()
     println("Schema from LIBSVM:")
+    //打印RDD中数据的表模式
     df.printSchema()
     //Loaded training data as a DataFrame with 100 records.
     println(s"Loaded training data as a DataFrame with ${df.count()} records.")
@@ -125,6 +126,7 @@ object DataFrameExample {
     println(s"Loading Parquet file with UDT from $outputDir.")
     val newDF = sqlContext.read.parquet(outputDir)
     println(s"Schema from Parquet:")
+    //打印RDD中数据的表模式
     newDF.printSchema()
 
     sc.stop()

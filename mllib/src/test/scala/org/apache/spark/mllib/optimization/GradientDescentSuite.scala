@@ -76,7 +76,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
 
     val gradient = new LogisticGradient()
     val updater = new SimpleUpdater()
-    val stepSize = 1.0
+    val stepSize = 1.0//每次迭代优化步长
     val numIterations = 10
     val regParam = 0
     val miniBatchFrac = 1.0
@@ -95,9 +95,9 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
       dataRDD,
       gradient,
       updater,
-      stepSize,
+      stepSize,//每次迭代优化步长
       numIterations,
-      regParam,
+      regParam,//正则化参数>=0
       miniBatchFrac,
       initialWeightsWithIntercept)
 
@@ -125,11 +125,11 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     //准备非零权重
     val initialWeightsWithIntercept = Vectors.dense(1.0, 0.5)
 
-    val regParam0 = 0
+    val regParam0 = 0//正则化参数>=0
     val (newWeights0, loss0) = GradientDescent.runMiniBatchSGD(
       dataRDD, gradient, updater, 1, 1, regParam0, 1.0, initialWeightsWithIntercept)
 
-    val regParam1 = 1
+    val regParam1 = 1//正则化参数>=0
     val (newWeights1, loss1) = GradientDescent.runMiniBatchSGD(
       dataRDD, gradient, updater, 1, 1, regParam1, 1.0, initialWeightsWithIntercept)
 
@@ -155,9 +155,9 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
 
     val gradient = new LogisticGradient()
     val updater = new SimpleUpdater()
-    val stepSize = 1.0
+    val stepSize = 1.0//每次迭代优化步长
     val numIterations = 10
-    val regParam = 0
+    val regParam = 0//正则化参数>=0
     val miniBatchFrac = 1.0
     val convergenceTolerance = 5.0e-1
 
@@ -175,9 +175,9 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
       dataRDD,
       gradient,
       updater,
-      stepSize,
+      stepSize,//每次迭代优化步长
       numIterations,
-      regParam,
+      regParam,//正则化参数>=0
       miniBatchFrac,
       initialWeightsWithIntercept,
       convergenceTolerance)

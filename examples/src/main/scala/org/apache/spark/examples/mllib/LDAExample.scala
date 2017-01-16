@@ -53,6 +53,7 @@ object LDAExample {
       stopwordFile: String = "",
       algorithm: String = "em",
       checkpointDir: Option[String] = None,//设置检查点间隔(>=1)
+      //设置检查点间隔(>=1),或不设置检查点(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -66,7 +67,7 @@ object LDAExample {
       opt[Int]("maxIterations")
         .text(s"number of iterations of learning. default: ${defaultParams.maxIterations}")
         .action((x, c) => c.copy(maxIterations = x))
-      opt[Double]("docConcentration")
+      opt[Double]("docConcentration")//平滑参数
         .text(s"amount of topic smoothing to use (> 1.0) (-1=auto)." +
         s"  default: ${defaultParams.docConcentration}")
         .action((x, c) => c.copy(docConcentration = x))

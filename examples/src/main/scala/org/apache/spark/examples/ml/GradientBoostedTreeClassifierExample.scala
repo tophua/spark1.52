@@ -80,6 +80,7 @@ object GradientBoostedTreeClassifierExample {
     //训练GBT分类模型
     val gbt = new GBTClassifier()
       .setLabelCol("indexedLabel")
+       //训练数据集DataFrame中存储特征数据的列名
       .setFeaturesCol("indexedFeatures")
       .setMaxIter(10)
 

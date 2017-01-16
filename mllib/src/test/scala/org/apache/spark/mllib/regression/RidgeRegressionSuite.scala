@@ -74,6 +74,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     // First run without regularization.
     //无正则化第一次运行
     val linearReg = new LinearRegressionWithSGD()
+    //每次迭代优化步长
     linearReg.optimizer.setNumIterations(200).setStepSize(1.0)
     val linearModel = linearReg.run(testRDD)
     val linearErr = predictionError(
@@ -81,8 +82,8 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val ridgeReg = new RidgeRegressionWithSGD()
     ridgeReg.optimizer.setNumIterations(200)
-                      .setRegParam(0.1)
-                      .setStepSize(1.0)
+                      .setRegParam(0.1)//正则化参数>=0
+                      .setStepSize(1.0)//每次迭代优化步长
     val ridgeModel = ridgeReg.run(testRDD)
     val ridgeErr = predictionError(
         ridgeModel.predict(validationRDD.map(_.features)).collect(), validationData)

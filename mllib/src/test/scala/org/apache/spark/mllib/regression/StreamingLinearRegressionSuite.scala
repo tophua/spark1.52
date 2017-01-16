@@ -70,7 +70,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))
-      .setStepSize(0.2)
+      .setStepSize(0.2)//每次迭代优化步长
       .setNumIterations(25)
       .setConvergenceTol(0.0001)
 
@@ -150,7 +150,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(10.0, 10.0))
-      .setStepSize(0.2)
+      .setStepSize(0.2)//每次迭代优化步长
       .setNumIterations(25)
 
     // generate sequence of simulated data for testing
@@ -183,7 +183,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))
-      .setStepSize(0.2)
+      .setStepSize(0.2)//每次迭代优化步长
       .setNumIterations(25)
 
     // generate sequence of simulated data for testing
@@ -230,7 +230,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))
-      .setStepSize(0.2)
+      .setStepSize(0.2)//每次迭代优化步长
       .setNumIterations(25)
     val numBatches = 10
     val nPoints = 100

@@ -96,7 +96,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setLossType("logistic")//损失函数类型
       .setMaxIter(5)//最大迭代次数
       .setStepSize(0.1)//每次迭代优化步长
-      .setCheckpointInterval(2)
+      .setCheckpointInterval(2)//设置检查点间隔(>=1),或不设置检查点(-1)
      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = gbt.fit(df)
 

@@ -26,7 +26,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 /**
- * 一个示例应用程序来自文件中的汇总多元数据
+ * 一个示例应用程序来自文件中的汇总多元汇总
  * An example app for summarizing multivariate data from a file. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.Correlations
@@ -63,9 +63,7 @@ object Correlations {
       //println("========="+params)
       run(params)
     }
-    } getOrElse {
-      
-    
+    } getOrElse {    
         sys.exit(1)
     }
   }
@@ -73,13 +71,13 @@ object Correlations {
   def run(params: Params) {
     val conf = new SparkConf().setAppName(s"Correlations with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
-/**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+  /**
+   *libSVM的数据格式
+   *<label> <index1>:<value1> <index2>:<value2> ...
+   *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+   * <index>是以1开始的整数,可以是不连续
+   * <value>为实数,也就是我们常说的自变量
+   */
     val examples = MLUtils.loadLibSVMFile(sc, params.input).cache()
     //Summary of data file: ../data/mllib/sample_linear_regression_data.txt
     println(s"Summary of data file: ${params.input}")
@@ -88,23 +86,40 @@ object Correlations {
 
     // Calculate label -- feature correlations
     //计算标签-特征相关性
-    val labelRDD = examples.map(_.label)
+    val labelRDD = examples.map(x=>{
+      //-9.490009878824548
+      //(10,[0,1,2,3,4,5,6,7,8,9],[0.4551273600657362,0.36644694351969087,-0.38256108933468047,-0.4458430198517267,
+      //0.33109790358914726,0.8067445293443565,-0.2624341731773887,-0.44850386111659524])
+      //println(x.label+"||"+x.features)
+      x.label
+      })
+      //examples.take(1)(0)(-9.490009878824548,(10,[0,1,2,3,4,5,6,7,8,9],[0.4551273600657362,-0.07269284838169332,0.5658035575800715]))
+    println(examples.take(1)+"=||="+examples.take(1)(0))
+    val test=examples.take(1)(0)//获得数组第一个元素
     val numFeatures = examples.take(1)(0).features.size
-    val corrType = "pearson"
-    println()
-    //Correlation (pearson) between label and each feature
+    
+    val corrType = "pearson"   
     //标签和每个特征之间的相关性(皮尔森)
+    //Correlation (pearson) between label and each feature
     println(s"Correlation ($corrType) between label and each feature")
+    //Feature	Correlation
     println(s"Feature\tCorrelation")
     var feature = 0
+   
     while (feature < numFeatures) {
-      val featureRDD = examples.map(_.features(feature))
+      val featureRDD = examples.map(x=>{
+        //x.features.toArray.map(println)
+       // println("==="+x.features(feature))
+        //提取特征值
+        x.features(feature)
+        })
+      //计算标签和特征值的相关性
       val corr = Statistics.corr(labelRDD, featureRDD)
       //9	   0.03452069517112544
       println(s"$feature\t$corr")
       feature += 1
     }
-    println()
+ 
 
     sc.stop()
   }

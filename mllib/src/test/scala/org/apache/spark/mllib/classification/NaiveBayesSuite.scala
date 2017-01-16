@@ -51,6 +51,7 @@ object NaiveBayesSuite {
     theta: Array[Array[Double]],  // CXD
     nPoints: Int,
     seed: Int,
+    //模型类型(区分大小写)
     modelType: String = Multinomial,
     sample: Int = 10): Seq[LabeledPoint] = {
     val D = theta(0).length
@@ -326,6 +327,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
           assert(model.labels === sameModel.labels)
           assert(model.pi === sameModel.pi)
           assert(model.theta === sameModel.theta)
+	  //模型类型(区分大小写)
           assert(model.modelType === sameModel.modelType)
         } finally {
           Utils.deleteRecursively(tempDir)
@@ -348,6 +350,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(model.labels === sameModel.labels)
       assert(model.pi === sameModel.pi)
       assert(model.theta === sameModel.theta)
+      //模型类型(区分大小写)
       assert(model.modelType === Multinomial)
     } finally {
       Utils.deleteRecursively(tempDir)

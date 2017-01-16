@@ -63,12 +63,12 @@ object DatasetExample {
         .action((x, c) => c.copy(input = x))
       opt[String]("dataFormat")
       /**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+       *  libSVM的数据格式
+       *  <label> <index1>:<value1> <index2>:<value2> ...
+       *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+       *  <index>是以1开始的整数,可以是不连续
+       *  <value>为实数,也就是我们常说的自变量
+       */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(input = x))
       checkConfig { params =>
@@ -96,44 +96,133 @@ object DatasetExample {
       case "dense" => MLUtils.loadLabeledPoints(sc, params.input)
       //libsvm数据
       /**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+       *  libSVM的数据格式
+       *  <label> <index1>:<value1> <index2>:<value2> ...
+       *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+       *  <index>是以1开始的整数,可以是不连续
+       *  <value>为实数,也就是我们常说的自变量
+       */
       case "libsvm" => MLUtils.loadLibSVMFile(sc, params.input)
     }
+    //Loaded 100 instances from file: ../data/mllib/sample_libsvm_data.txt
     println(s"Loaded ${origData.count()} instances from file: ${params.input}")
 
     // Convert input data to DataFrame explicitly.
     //显示转换输入数据集
     val df: DataFrame = origData.toDF()
+    /**
+     Inferred schema:
+    {
+      "type" : "struct",
+      "fields" : [ {
+        "name" : "label",
+        "type" : "double",
+        "nullable" : false,
+        "metadata" : { }
+      }, {
+        "name" : "features",
+        "type" : {
+          "type" : "udt",
+          "class" : "org.apache.spark.mllib.linalg.VectorUDT",
+          "pyClass" : "pyspark.mllib.linalg.VectorUDT",
+          "sqlType" : {
+            "type" : "struct",
+            "fields" : [ {
+              "name" : "type",
+              "type" : "byte",
+              "nullable" : false,
+              "metadata" : { }
+            }, {
+              "name" : "size",
+              "type" : "integer",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "indices",
+              "type" : {
+                "type" : "array",
+                "elementType" : "integer",
+                "containsNull" : false
+              },
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "values",
+              "type" : {
+                "type" : "array",
+                "elementType" : "double",
+                "containsNull" : false
+              },
+              "nullable" : true,
+              "metadata" : { }
+            } ]
+          }
+        },
+        "nullable" : true,
+        "metadata" : { }
+      } ]
+    }*/
     println(s"Inferred schema:\n${df.schema.prettyJson}")
+    //Converted to DataFrame with 100 records
     println(s"Converted to DataFrame with ${df.count()} records")
 
     // Select columns
     //选择列
     val labelsDf: DataFrame = df.select("label")
+    /**
+      +-----+--------------------+
+      |label|            features|
+      +-----+--------------------+
+      |  0.0|(692,[127,128,129...|
+      |  1.0|(692,[158,159,160...|
+      |  1.0|(692,[124,125,126...|
+      |  1.0|(692,[152,153,154...|
+      |  1.0|(692,[151,152,153...|
+      +-----+--------------------+*/
+    df.show(5)
     val labels: RDD[Double] = labelsDf.map { case Row(v: Double) => v }
     val numLabels = labels.count()
-    val meanLabel = labels.fold(0.0)(_ + _) / numLabels
+    //fold操作用于对RDD中的元素进行迭代操作,并且利用了一个变量保存迭代过程中的中间结果
+    val meanLabelFold = labels.fold(0.0)(_ + _)
+    val meanLabel=meanLabelFold/ numLabels
+    //100==57.0==0.57
+    println(numLabels+"=="+meanLabelFold+"=="+meanLabel)
+    //Selected label column with average value 0.57
+    //选定标签列平均值0.57
     println(s"Selected label column with average value $meanLabel")
 
     val featuresDf: DataFrame = df.select("features")
-    val features: RDD[Vector] = featuresDf.map { case Row(v: Vector) => v }
+    /**
+      +--------------------+
+      |            features|
+      +--------------------+
+      |(692,[127,128,129...|
+      |(692,[158,159,160...|
+      |(692,[124,125,126...|
+      |(692,[152,153,154...|
+      |(692,[151,152,153...|
+      +--------------------+*/
+    featuresDf.show(5)
+    val features: RDD[Vector] = featuresDf.map { case Row(v: Vector) => 
+      //(692,[127,128,129,155,156,157,158,182,183,,253.0,138.0])
+      //println(v.toString())
+      v
+      }
+    //聚合 aggregate
     val featureSummary = features.aggregate(new MultivariateOnlineSummarizer())(
       (summary, feat) => summary.add(feat),
       (sum1, sum2) => sum1.merge(sum2))
+    //选定的特征列的平均值
     println(s"Selected features column with average values:\n ${featureSummary.mean.toString}")
     //创建临时目录
     val tmpDir = Files.createTempDir()
     //在JVM进程退出的时候删除文件,通常用在临时文件的删除.
     tmpDir.deleteOnExit()
     val outputDir = new File(tmpDir, "dataset").toString
+    //Saving to C:\Users\liushuhua\AppData\Local\Temp\1484552385342-0\dataset as Parquet file
     println(s"Saving to $outputDir as Parquet file.")
     df.write.parquet(outputDir)
-
+    //Loading Parquet file with UDT from C:\Users\liushuhua\AppData\Local\Temp\1484552385342-0\dataset.
     println(s"Loading Parquet file with UDT from $outputDir.")
     val newDataset = sqlContext.read.parquet(outputDir)
 
@@ -142,6 +231,7 @@ object DatasetExample {
     val newFeaturesSummary = newFeatures.aggregate(new MultivariateOnlineSummarizer())(
       (summary, feat) => summary.add(feat),
       (sum1, sum2) => sum1.merge(sum2))
+    //Selected features column with average values:
     println(s"Selected features column with average values:\n ${newFeaturesSummary.mean.toString}")
 
     sc.stop()

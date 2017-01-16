@@ -177,7 +177,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
         new BoostingStrategy(treeStrategy, loss, numIterations, validationTol = 0.0)
       val gbtValidate = new GradientBoostedTrees(boostingStrategy)
         .runWithValidation(trainRdd, validateRdd)
-      val numTrees = gbtValidate.numTrees
+      val numTrees = gbtValidate.numTrees//训练的树的数量
       assert(numTrees !== numIterations)
 
       // Test that it performs better on the validation dataset.
@@ -198,6 +198,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
       // Note that convergenceTol is set to 0.0
       val evaluationArray = gbt.evaluateEachIteration(validateRdd, loss)
       assert(evaluationArray.length === numIterations)
+      //训练的树的数量
       assert(evaluationArray(numTrees) > evaluationArray(numTrees - 1))
       var i = 1
       while (i < numTrees) {
@@ -215,6 +216,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     val rdd = sc.parallelize(GradientBoostedTreesSuite.data, 2)
 
     val treeStrategy = new Strategy(algo = Regression, impurity = Variance, maxDepth = 2,
+    //设置检查点间隔(>=1),或不设置检查点(-1)
       categoricalFeaturesInfo = Map.empty, checkpointInterval = 2)
     val boostingStrategy = new BoostingStrategy(treeStrategy, SquaredError, 5, 0.1)
 

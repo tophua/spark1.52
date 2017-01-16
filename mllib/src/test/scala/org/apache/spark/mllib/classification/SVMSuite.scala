@@ -97,6 +97,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
     testRDD.cache()
 
     val svm = new SVMWithSGD().setIntercept(true)
+    //正则化参数>=0 //每次迭代优化步长
     svm.optimizer.setStepSize(1.0).setRegParam(1.0).setNumIterations(100)
 
     val model = svm.run(testRDD)
@@ -110,7 +111,8 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(predictions.count(_ == 0.0) != predictions.length)
 
     // High threshold makes all the predictions 0.0
-    //高门槛使所有的预测0
+    //高门槛使所有的预测0.0
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     model.setThreshold(10000.0)
     predictions = model.predict(validationRDD.map(_.features)).collect()
     assert(predictions.count(_ == 0.0) == predictions.length)
@@ -137,6 +139,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
     testRDD.cache()
 
     val svm = new SVMWithSGD().setIntercept(true)
+    //正则化参数>=0 //每次迭代优化步长
     svm.optimizer.setStepSize(1.0).setRegParam(1.0).setNumIterations(100)
 
     val model = svm.run(testRDD)
@@ -172,6 +175,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
     testRDD.cache()
 
     val svm = new SVMWithSGD().setIntercept(true)
+    //正则化参数>=0 每次迭代优化步长
     svm.optimizer.setStepSize(1.0).setRegParam(1.0).setNumIterations(100)
 
     val model = svm.run(testRDD, initialWeights)
@@ -246,6 +250,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
       model.setThreshold(0.7)
       model.save(sc, path)
       val sameModel2 = SVMModel.load(sc, path)
+      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       assert(model.getThreshold.get == sameModel2.getThreshold.get)
     } finally {
       Utils.deleteRecursively(tempDir)

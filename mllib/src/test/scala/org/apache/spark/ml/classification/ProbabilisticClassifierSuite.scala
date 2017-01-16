@@ -45,6 +45,7 @@ class ProbabilisticClassifierSuite extends SparkFunSuite {
 
   test("test thresholding") {//测试阈值
     val thresholds = Array(0.5, 0.2)
+     //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     val testModel = new TestProbabilisticClassificationModel("myuid", 2).setThresholds(thresholds)
     assert(testModel.friendlyPredict(Vectors.dense(Array(1.0, 1.0))) === 1.0)
     assert(testModel.friendlyPredict(Vectors.dense(Array(1.0, 0.2))) === 0.0)

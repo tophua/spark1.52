@@ -53,7 +53,7 @@ object LogisticRegressionSummaryExample {
     val lr = new LogisticRegression()
       .setMaxIter(10)//迭代次数
       .setRegParam(0.3)//正则化参数(>=0)
-      .setElasticNetParam(0.8)//设置elasticnet混合参数
+      .setElasticNetParam(0.8)//弹性网络混合参数,0.0为L2正则化 1.0为L1正则化
 
     // Fit the model
     //fit()方法将DataFrame转化为一个Transformer的算法
@@ -123,6 +123,7 @@ object LogisticRegressionSummaryExample {
     val maxFMeasure = fMeasure.select(max("F-Measure")).head().getDouble(0)
     val bestThreshold = fMeasure.where($"F-Measure" === maxFMeasure)
       .select("threshold").head().getDouble(0)
+     //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     lrModel.setThreshold(bestThreshold)
     // $example off$
 

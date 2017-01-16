@@ -54,7 +54,7 @@ object LinearRegressionWithElasticNetExample {
     val lr = new LinearRegression()
       .setMaxIter(10)//设置最大迭代次数
       .setRegParam(0.3)//设置正则化参数
-      .setElasticNetParam(0.8)//设置elasticnet混合参数
+      .setElasticNetParam(0.8)//ElasticNetParam=0.0为L2正则化 1.0为L1正则化
 
     // Fit the model
     //fit()方法将DataFrame转化为一个Transformer的算法

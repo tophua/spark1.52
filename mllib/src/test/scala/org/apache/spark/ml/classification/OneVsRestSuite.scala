@@ -71,7 +71,8 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val numClasses = 3//numClasses 分类数
     val ova = new OneVsRest()
       .setClassifier(new LogisticRegression)
-    assert(ova.getLabelCol === "label")
+    assert(ova.getLabelCol === "label")//标签列名
+    //预测结果列名
     assert(ova.getPredictionCol === "prediction")
     //fit()方法将DataFrame转化为一个Transformer的算法
     val ovaModel = ova.fit(dataset)
@@ -93,8 +94,9 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val ovaResults = transformedDataset
       .select("prediction", "label")
       .map(row => (row.getDouble(0), row.getDouble(1)))
-  //numClasses 分类数
+     //numClasses 分类数
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true).setNumClasses(numClasses)
+    //正则化参数>=0
     lr.optimizer.setRegParam(0.1).setNumIterations(100)
 
     val model = lr.run(rdd)
@@ -133,8 +135,9 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val ova = new OneVsRest()
     ova.setClassifier(new LogisticRegression())
-      .setLabelCol(labelIndexer.getOutputCol)
-      .setFeaturesCol("f")
+      .setLabelCol(labelIndexer.getOutputCol)//标签列名
+      .setFeaturesCol("f")//训练数据集DataFrame中存储特征数据的列名
+      //预测结果列名
       .setPredictionCol("p")
 
     val ovaModel = ova.fit(indexedDataset)
@@ -168,9 +171,10 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     require(ovr.getClassifier.getOrDefault(lr.maxIter) === 1, "copy should have no side-effects")
     require(ovr1.getClassifier.getOrDefault(lr.maxIter) === 10,
       "copy should handle extra classifier params")
-//fit()方法将DataFrame转化为一个Transformer的算法
+     //fit()方法将DataFrame转化为一个Transformer的算法
     val ovrModel = ovr1.fit(dataset).copy(ParamMap(lr.thresholds -> Array(0.9, 0.1)))
     ovrModel.models.foreach { case m: LogisticRegressionModel =>
+      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       require(m.getThreshold === 0.1, "copy should handle extra model params")
     }
   }

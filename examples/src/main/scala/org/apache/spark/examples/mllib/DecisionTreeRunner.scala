@@ -59,24 +59,25 @@ object DecisionTreeRunner {
       input: String = null,
       testInput: String = "",
       /**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+       *  libSVM的数据格式
+       *  <label> <index1>:<value1> <index2>:<value2> ...
+       *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+       *  <index>是以1开始的整数,可以是不连续
+       *  <value>为实数,也就是我们常说的自变量
+       */
       dataFormat: String = "libsvm",
       algo: Algo = Classification,//算法
       maxDepth: Int = 5,//树的最大深度，默认值是 5
-      impurity: ImpurityType = Gini,//树节点选择的不纯度的衡量指标，取值可以是”entroy”或“gini”, 默认是”gini”
-      maxBins: Int = 32,//离散连续性变量时最大的分箱数，默认是 32
-      minInstancesPerNode: Int = 1,
-      minInfoGain: Double = 0.0,
-      numTrees: Int = 1,//随机森林需要训练的树的个数，默认值是 20
+      impurity: ImpurityType = Gini,//树节点选择的不纯度的衡量指标,取值可以是”entroy”或“gini”,默认是”gini”
+      maxBins: Int = 32,//离散连续性变量时最大的分箱数,默认是 32
+      minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
+      minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
+      numTrees: Int = 1,//随机森林需要训练的树的个数,默认值是 20
       featureSubsetStrategy: String = "auto",
       fracTest: Double = 0.2,
       useNodeIdCache: Boolean = false,
       checkpointDir: Option[String] = None,
+      //设置检查点间隔(>=1),或不设置检查点(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -100,10 +101,10 @@ object DecisionTreeRunner {
       opt[Int]("minInstancesPerNode")
         .text(s"min number of instances required at child nodes to create the parent split," +
           s" default: ${defaultParams.minInstancesPerNode}")
-        .action((x, c) => c.copy(minInstancesPerNode = x))
-      opt[Double]("minInfoGain")
+        .action((x, c) => c.copy(minInstancesPerNode = x))//分裂后自节点最少包含的实例数量
+      opt[Double]("minInfoGain")//分裂节点时所需最小信息增益
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
-        .action((x, c) => c.copy(minInfoGain = x))
+        .action((x, c) => c.copy(minInfoGain = x))//分裂节点时所需最小信息增益
       opt[Int]("numTrees")
         .text(s"number of trees (1 = decision tree, 2+ = random forest)," +
           s" default: ${defaultParams.numTrees}")
@@ -139,10 +140,10 @@ object DecisionTreeRunner {
       opt[String]("dataFormat")
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
-      arg[String]("<input>")
+      /*arg[String]("<input>")
         .text("input path to labeled examples")
         .required()
-        .action((x, c) => c.copy(input = x))
+        .action((x, c) => c.copy(input = x))*/
       checkConfig { params =>
         if (params.fracTest < 0 || params.fracTest > 1) {
           failure(s"fracTest ${params.fracTest} value incorrect; should be in [0,1].")
@@ -189,12 +190,12 @@ object DecisionTreeRunner {
     val origExamples = dataFormat match {
       case "dense" => MLUtils.loadLabeledPoints(sc, input).cache()
       /**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+       *  libSVM的数据格式
+       *  <label> <index1>:<value1> <index2>:<value2> ...
+       *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+       *  <index>是以1开始的整数,可以是不连续
+       *  <value>为实数,也就是我们常说的自变量
+       */
       case "libsvm" => MLUtils.loadLibSVMFile(sc, input).cache()
     }
     // For classification, re-index classes if needed.
@@ -244,12 +245,12 @@ object DecisionTreeRunner {
       val origTestExamples = dataFormat match {
         case "dense" => MLUtils.loadLabeledPoints(sc, testInput)
 	/**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+   *  libSVM的数据格式
+   *  <label> <index1>:<value1> <index2>:<value2> ...
+   *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+   *  <index>是以1开始的整数,可以是不连续
+   *  <value>为实数,也就是我们常说的自变量
+   */
         case "libsvm" => MLUtils.loadLibSVMFile(sc, testInput, numFeatures)
       }
       algo match {
@@ -303,23 +304,23 @@ object DecisionTreeRunner {
     }
 
     params.checkpointDir.foreach(sc.setCheckpointDir)
-/**
- * 最大树深度maxDepth
-	  最小信息增益minInfoGain
-        最小子节点实例数minInstancesPerNode
- */
+  /**
+         最大树深度maxDepth
+  	最小信息增益minInfoGain
+          最小子节点实例数minInstancesPerNode*/
     val strategy
       = new Strategy(
           algo = params.algo,
-          impurity = impurityCalculator,
-          maxDepth = params.maxDepth,
-          maxBins = params.maxBins,
-          numClasses = numClasses,
-          minInstancesPerNode = params.minInstancesPerNode,
-          minInfoGain = params.minInfoGain,
+          impurity = impurityCalculator,//计算信息增益的准则
+          maxDepth = params.maxDepth,//树的最大深度（>=0）
+          maxBins = params.maxBins,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+          numClasses = numClasses,//训练的树的数量
+          minInstancesPerNode = params.minInstancesPerNode,//分裂后自节点最少包含的实例数量
+          minInfoGain = params.minInfoGain,//分裂节点时所需最小信息增益
           useNodeIdCache = params.useNodeIdCache,
+	  //设置检查点间隔(>=1),或不设置检查点(-1)
           checkpointInterval = params.checkpointInterval)
-    if (params.numTrees == 1) {
+    if (params.numTrees == 1) {//训练的树的数量
       //系统计时器的当前值,以毫微秒为单位
       val startTime = System.nanoTime()
       val model = DecisionTree.train(training, strategy)
@@ -337,7 +338,7 @@ object DecisionTreeRunner {
           new MulticlassMetrics(training.map(lp => (model.predict(lp.features), lp.label)))
             .precision
         println(s"Train accuracy = $trainAccuracy")
-	 //评估指标-多分类
+	     //评估指标-多分类
         val testAccuracy =
           new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
         println(s"Test accuracy = $testAccuracy")
@@ -350,13 +351,13 @@ object DecisionTreeRunner {
       }
     } else {
       val randomSeed = Utils.random.nextInt()
-       /* 
+    
       if (params.algo == Classification) {
        //系统计时器的当前值,以毫微秒为单位
         val startTime = System.nanoTime()
         val model = RandomForest.trainClassifier(training, strategy, params.numTrees,
           params.featureSubsetStrategy, randomSeed)
-	  //1e9就为1*(10的九次方),也就是十亿
+	  		//1e9就为1*(10的九次方),也就是十亿
         val elapsedTime = (System.nanoTime() - startTime) / 1e9
         println(s"Training time: $elapsedTime seconds")
         if (model.totalNumNodes < 30) {
@@ -377,7 +378,7 @@ object DecisionTreeRunner {
         val startTime = System.nanoTime()
         val model = RandomForest.trainRegressor(training, strategy, params.numTrees,
           params.featureSubsetStrategy, randomSeed)
-	//1e9就为1*(10的九次方),也就是十亿
+				//1e9就为1*(10的九次方),也就是十亿
         val elapsedTime = (System.nanoTime() - startTime) / 1e9
         println(s"Training time: $elapsedTime seconds")
         if (model.totalNumNodes < 30) {
@@ -389,7 +390,7 @@ object DecisionTreeRunner {
         println(s"Train mean squared error = $trainMSE")
         val testMSE = meanSquaredError(model, test)
         println(s"Test mean squared error = $testMSE")
-      }*/
+      }   /* */
     }
 
     sc.stop()
@@ -397,7 +398,7 @@ object DecisionTreeRunner {
 
   /**
    * Calculates the mean squared error for regression.
-   *计算回归的平均平方误差
+   * 计算回归的平均平方误差
    * This is just for demo purpose. In general, don't copy this code because it is NOT efficient
    * due to the use of structural types, which leads to one reflection call per record.
    */

@@ -47,7 +47,7 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
       expectedFmeasures2: Seq[Double],
       expectedPrecisions: Seq[Double],
       expectedRecalls: Seq[Double]) = {
-    //阈值
+     //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assertSequencesMatch(metrics.thresholds().collect(), expectedThresholds)
     //ROC表示表示分类器性能在不同决策阈值下TPR对FPR的折衷(TPR 真阳性率),(FPR假阳性率)
     assertTupleSequencesMatch(metrics.roc().collect(), expectedROCCurve)
@@ -60,13 +60,13 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
     //
     assertTupleSequencesMatch(metrics.fMeasureByThreshold().collect(),
       expectedThresholds.zip(expectedFMeasures1))
-    //
+      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       assertTupleSequencesMatch(metrics.fMeasureByThreshold(2.0).collect(),
       expectedThresholds.zip(expectedFmeasures2))
     //
     assertTupleSequencesMatch(metrics.precisionByThreshold().collect(),
       expectedThresholds.zip(expectedPrecisions))
-    //
+      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       assertTupleSequencesMatch(metrics.recallByThreshold().collect(),
       expectedThresholds.zip(expectedRecalls))
   }

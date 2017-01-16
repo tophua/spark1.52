@@ -72,6 +72,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
   def validateProbabilities(
       featureAndProbabilities: DataFrame,
       model: NaiveBayesModel,
+      //模型类型(区分大小写)
       modelType: String): Unit = {
     featureAndProbabilities.collect().foreach {
       case Row(features: Vector, probability: Vector) => {
@@ -98,11 +99,11 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("naive bayes: default params") {//朴素贝叶斯分类:默认参数
     val nb = new NaiveBayes
-    assert(nb.getLabelCol === "label")//标签
+    assert(nb.getLabelCol === "label")//标签列名
     assert(nb.getFeaturesCol === "features")//特征
     assert(nb.getPredictionCol === "prediction")//预测
     assert(nb.getSmoothing === 1.0)//光滑
-    assert(nb.getModelType === "multinomial")//多项式
+    assert(nb.getModelType === "multinomial")//模型类型(区分大小写)
   }
 
   test("Naive Bayes Multinomial") {//朴素贝叶斯分类

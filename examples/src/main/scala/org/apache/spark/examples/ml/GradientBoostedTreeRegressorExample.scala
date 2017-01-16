@@ -64,9 +64,9 @@ object GradientBoostedTreeRegressorExample {
 
     // Train a GBT model.
     val gbt = new GBTRegressor()
-      .setLabelCol("label")
-      .setFeaturesCol("indexedFeatures")
-      .setMaxIter(10)
+      .setLabelCol("label")//标签列名
+      .setFeaturesCol("indexedFeatures")//特征列
+      .setMaxIter(10)//迭代次数
 
     // Chain indexer and GBT in a Pipeline.
      //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
@@ -98,7 +98,8 @@ object GradientBoostedTreeRegressorExample {
 
     // Select (prediction, true label) and compute test error.
     val evaluator = new RegressionEvaluator()
-      .setLabelCol("label")
+      .setLabelCol("label")//标签列名
+      //预测结果列名
       .setPredictionCol("prediction")
        //rmse均方根误差说明样本的离散程度
       .setMetricName("rmse")

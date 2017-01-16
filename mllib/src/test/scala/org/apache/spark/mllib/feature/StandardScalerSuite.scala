@@ -140,7 +140,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(data3(1) ~== Vectors.dense(-0.58333333, -0.58333333, -2.8166666666) absTol 1E-5)
     assert(data3(5) ~== Vectors.dense(-0.58333333, 2.316666666, 0.18333333333) absTol 1E-5)
   }
-
+  
   test("Standardization with dense input") {//标准化的密集输入
 
     val dataRDD = sc.parallelize(denseData, 3)

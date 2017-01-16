@@ -65,11 +65,11 @@ object DecisionTreeExample {
       maxDepth: Int = 5,//最大深度
       maxBins: Int = 32,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
-      minInfoGain: Double = 0.0,
+      minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
       fracTest: Double = 0.2,//测试因子
       cacheNodeIds: Boolean = false,
       checkpointDir: Option[String] = None,//检查点目录
-      //检查点间隔
+      //设置检查点间隔(>=1),或不设置检查点(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -90,7 +90,7 @@ object DecisionTreeExample {
         .text(s"min number of instances required at child nodes to create the parent split," +
           s" default: ${defaultParams.minInstancesPerNode}")
         .action((x, c) => c.copy(minInstancesPerNode = x))
-      opt[Double]("minInfoGain")
+      opt[Double]("minInfoGain")//分裂节点时所需最小信息增益
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
         .action((x, c) => c.copy(minInfoGain = x))
       opt[Double]("fracTest")
@@ -108,10 +108,10 @@ object DecisionTreeExample {
            case None => "None"
          }}")
         .action((x, c) => c.copy(checkpointDir = Some(x)))
-      opt[Int]("checkpointInterval")
+      opt[Int]("checkpointInterval")//设置检查点间隔(>=1),或不设置检查点(-1)
         .text(s"how often to checkpoint the node Id cache, " +
-         s"default: ${defaultParams.checkpointInterval}")
-        .action((x, c) => c.copy(checkpointInterval = x))
+         s"default: ${defaultParams.checkpointInterval}")//设置检查点间隔(>=1),或不设置检查点(-1)
+        .action((x, c) => c.copy(checkpointInterval = x))//设置检查点间隔(>=1),或不设置检查点(-1)
       opt[String]("testInput")
         .text(s"input path to test dataset.  If given, option fracTest is ignored." +
           s" default: ${defaultParams.testInput}")
@@ -291,7 +291,7 @@ object DecisionTreeExample {
           .setMaxDepth(params.maxDepth)//最大深度
           .setMaxBins(params.maxBins)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
           .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
-          .setMinInfoGain(params.minInfoGain)//
+          .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)//
           .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1)
       case "regression" =>//回归
@@ -301,7 +301,7 @@ object DecisionTreeExample {
           .setMaxDepth(params.maxDepth)//最大深度
           .setMaxBins(params.maxBins)//连续特征离散化的最大数量
           .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
-          .setMinInfoGain(params.minInfoGain)
+          .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1)
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")

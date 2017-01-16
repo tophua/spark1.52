@@ -87,7 +87,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(rowMat.numRows() === 3, "should drop empty rows")
     assert(rowMat.rows.collect().toSeq === data.map(_.vector).toSeq)
   }
-
+//CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
   test("toCoordinateMatrix") {//协调矩阵
     val idxRowMat = new IndexedRowMatrix(indexedRows)
     //转换坐标矩阵

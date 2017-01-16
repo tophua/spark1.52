@@ -53,7 +53,7 @@ class PeriodicGraphCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCo
   test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
-    val checkpointInterval = 2
+    val checkpointInterval = 2//设置检查点间隔(>=1),或不设置检查点(-1)
     var graphsToCheck = Seq.empty[GraphToCheck]
     sc.setCheckpointDir(path)
     val graph1 = createGraph(sc)
@@ -63,6 +63,7 @@ class PeriodicGraphCheckpointerSuite extends SparkFunSuite with MLlibTestSparkCo
     graph1.edges.count()
     graph1.vertices.count()
     graphsToCheck = graphsToCheck :+ GraphToCheck(graph1, 1)
+    //设置检查点间隔(>=1),或不设置检查点(-1)
     checkCheckpoint(graphsToCheck, 1, checkpointInterval)
 
     var iteration = 2
@@ -156,6 +157,7 @@ private object PeriodicGraphCheckpointerSuite {
       graph: Graph[_, _],
       gIndex: Int,
       iteration: Int,
+      //设置检查点间隔(>=1),或不设置检查点(-1)
       checkpointInterval: Int): Unit = {
     try {
       if (gIndex % checkpointInterval == 0) {

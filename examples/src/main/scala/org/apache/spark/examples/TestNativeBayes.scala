@@ -84,7 +84,7 @@ object TestNativeBayes {
         RawDataRecord(data(0),data(1))
     }.toDF()
 
-    //训练模型
+    //训练模型,modelType模型类型(区分大小写)
     val model = NaiveBayes.train(trainDataRdd, lambda = 1.0, modelType = "multinomial")
 
     //测试数据集，做同样的特征表示及格式转换

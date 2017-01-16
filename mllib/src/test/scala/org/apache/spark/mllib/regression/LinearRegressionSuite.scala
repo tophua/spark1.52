@@ -72,7 +72,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
        *        (-5.245508439024772,[0.03495894704368174,-0.8505720014852347]))
        */
     val linReg = new LinearRegressionWithSGD().setIntercept(true)//是否给数据加上一个干扰特征或者偏差特征--也就是一个值始终未1的特征
-    //迭代次数,步长
+    //每次迭代优化步长
     linReg.optimizer.setNumIterations(1000).setStepSize(1.0)
     //运行模型
     val model = linReg.run(testRDD)
@@ -99,6 +99,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val testRDD = sc.parallelize(LinearDataGenerator.generateLinearInput(
       0.0, Array(10.0, 10.0), 100, 42), 2).cache()
     val linReg = new LinearRegressionWithSGD().setIntercept(false)
+    //每次迭代优化步长
     linReg.optimizer.setNumIterations(1000).setStepSize(1.0)
 
     val model = linReg.run(testRDD)
@@ -133,6 +134,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(label, sv)
     }.cache()
     val linReg = new LinearRegressionWithSGD().setIntercept(false)
+    //每次迭代优化步长
     linReg.optimizer.setNumIterations(1000).setStepSize(1.0)
 
     val model = linReg.run(sparseRDD)

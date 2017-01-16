@@ -21,7 +21,12 @@ object BlockMatrixDemo {
       Array(
         Array(1.0, 20.0, 30.0, 40.0),
         Array(2.0, 50.0, 60.0, 70.0),
-        Array(3.0, 80.0, 90.0, 100.0))).map(f => IndexedRow(f.take(1)(0), Vectors.dense(f.drop(1))))
+        Array(3.0, 80.0, 90.0, 100.0))).map(f =>{
+          //take取前n个元素 drop舍弃前n个元素
+          //1.0|||20.0,30.0,40.0
+          println(f.take(1)(0)+"|||"+f.drop(1).mkString(","))
+          IndexedRow(f.take(1)(0), Vectors.dense(f.drop(1)))
+        })
     val indexRowMatrix = new IndexedRowMatrix(rdd1)
     //将IndexedRowMatrix转换成BlockMatrix，指定每块的行列数
     val blockMatrix: BlockMatrix = indexRowMatrix.toBlockMatrix(2, 2)
@@ -59,6 +64,7 @@ object BlockMatrixDemo {
     blockMatrix.multiply(blockMatrix.transpose)
 
     //转换成CoordinateMatrix
+    //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
     blockMatrix.toCoordinateMatrix()
 
     //转换成IndexedRowMatrix

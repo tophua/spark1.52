@@ -99,7 +99,7 @@ object DataTypes {
     /***三元组矩阵*/
     val entries: RDD[MatrixEntry] = null // an RDD of matrix entries 矩阵元素的RDD
     // Create a CoordinateMatrix from an RDD[MatrixEntry].
-    //创建一个坐标矩阵为RDD
+    //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
     val matCoordinate: CoordinateMatrix = new CoordinateMatrix(entries)
 
     // Get its size.

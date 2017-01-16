@@ -55,14 +55,14 @@ class BinarizerSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
    //设置阀值setThreshold,设置二元连续特征
   test("Binarize continuous features with setter") {
-    //阀值
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     val threshold: Double = 0.2
     //thresholdBinarized: Array[Double] = Array(0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0)
     val thresholdBinarized: Array[Double] = data.map(x => if (x > threshold) 1.0 else 0.0)
     val dataFrame: DataFrame = sqlContext.createDataFrame(
         //res2= Array((0.1,0.0),(-0.5,0.0),(0.2,0.0),(-0.3,0.0),(0.8,1.0),(0.7,1.0),(-0.1,0.0),(-0.4,0.0))
         data.zip(thresholdBinarized)).toDF("feature", "expected")
-
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     val binarizer: Binarizer = new Binarizer().setInputCol("feature").setOutputCol("binarized_feature").setThreshold(threshold)
 	//transform()方法将DataFrame转化为另外一个DataFrame的算法
     binarizer.transform(dataFrame).select("binarized_feature", "expected").collect().foreach {

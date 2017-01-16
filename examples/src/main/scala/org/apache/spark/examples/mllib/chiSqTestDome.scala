@@ -8,7 +8,7 @@ import org.apache.spark.mllib.stat.Statistics
  * 第一个的结果为(1,7,2,3,18)，第二个五角星的结果为(7,8,6,7,9)。
  * 现做出虚无假设：五角星的每个角指向自己的概率是相同的。
  */
-object chiSqTestDome {
+object ChiSqTestDome {
   def main(args: Array[String]) {
     val vec1 = Vectors.dense(1, 7, 2, 3, 18)//31次
     val vec2 = Vectors.dense(7, 8, 6, 7, 9)//73次

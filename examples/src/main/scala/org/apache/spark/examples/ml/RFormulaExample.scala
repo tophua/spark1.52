@@ -53,7 +53,7 @@ object RFormulaExample {
     val formula = new RFormula()
       .setFormula("clicked ~ country + hour")//公式
       .setFeaturesCol("features")//特征列
-      .setLabelCol("label")
+      .setLabelCol("label")//标签列名
       //fit()方法将DataFrame转化为一个Transformer的算法
       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val output = formula.fit(dataset).transform(dataset)

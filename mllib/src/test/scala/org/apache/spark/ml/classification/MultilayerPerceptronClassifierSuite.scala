@@ -132,7 +132,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
       .setIntercept(true)
       //numClasses 分类数
       .setNumClasses(numClasses)
-    lr.optimizer.setRegParam(0.0)
+    lr.optimizer.setRegParam(0.0)//正则化参数>=0
       .setNumIterations(numIterations)
     val lrModel = lr.run(rdd)
     val lrPredictionAndLabels = lrModel.predict(rdd.map(_.features)).zip(rdd.map(_.label))

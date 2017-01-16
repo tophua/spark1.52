@@ -66,7 +66,8 @@ object RandomForestRegressorExample {
 
     // Train a RandomForest model.
     val rf = new RandomForestRegressor()
-      .setLabelCol("label")
+      .setLabelCol("label")//标签列名
+      //训练数据集DataFrame中存储特征数据的列名
       .setFeaturesCol("indexedFeatures")
 
     // Chain indexer and forest in a Pipeline.

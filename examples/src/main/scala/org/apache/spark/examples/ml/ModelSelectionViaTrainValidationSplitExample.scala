@@ -74,7 +74,8 @@ object ModelSelectionViaTrainValidationSplitExample {
     //ParamGridBuilder构建待选参数(如:logistic regression的regParam)
     val paramGrid = new ParamGridBuilder()
       .addGrid(lr.regParam, Array(0.1, 0.01))
-      .addGrid(lr.fitIntercept)
+      .addGrid(lr.fitIntercept)//是否训练拦截对象
+      //弹性网络混合参数,0.0为L2正则化 1.0为L1正则化
       .addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0))
       .build()
 

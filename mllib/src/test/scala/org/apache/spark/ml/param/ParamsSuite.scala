@@ -24,6 +24,7 @@ import org.apache.spark.SparkFunSuite
 class ParamsSuite extends SparkFunSuite {
 
   test("param") {//参数
+   //solver优化的求解算法
     val solver = new TestParams()
     val uid = solver.uid
     import solver.{maxIter, inputCol}

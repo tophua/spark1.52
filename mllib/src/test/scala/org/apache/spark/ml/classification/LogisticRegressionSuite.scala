@@ -84,7 +84,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("logistic regression: default params") {//逻辑回归:默认参数
     val lr = new LogisticRegression
-    //标识
+    //标签列名
     assert(lr.getLabelCol === "label")
     //特征值
     assert(lr.getFeaturesCol === "features")
@@ -94,7 +94,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(lr.getRawPredictionCol === "rawPrediction")
     //类别预测结果的条件概率值存储列的名称
     assert(lr.getProbabilityCol === "probability")
-    assert(lr.getFitIntercept)//适合拦截 true
+    assert(lr.getFitIntercept)//是否训练拦截对象
     assert(lr.getStandardization)//标准化
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
@@ -116,7 +116,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
  			*/
         println(s"label=$label,prediction=$prediction,features=$features,rawPrediction=$rawPrediction,probability=$probability")
       }
-    //阈值
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(model.getThreshold === 0.5)
     //特征列名
     assert(model.getFeaturesCol === "features")//特征
@@ -133,7 +133,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("setThreshold, getThreshold") {//设置和获得阈值
     val lr = new LogisticRegression
-    // default,默认阈值0.5
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(lr.getThreshold === 0.5, "LogisticRegression.threshold should default to 0.5")
     //逻辑回归不应有默认设置的阈值
     withClue("LogisticRegression should not have thresholds set by default.") {
@@ -146,8 +146,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     // Intuition: Large threshold or large thresholds(1) makes class 0 more likely.
     //凭直觉:大的阈值或大阈值1可能0适合
     lr.setThreshold(1.0)
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(lr.getThresholds === Array(0.0, 1.0))
     lr.setThreshold(0.0)
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(lr.getThresholds === Array(1.0, 0.0))
     lr.setThreshold(0.5)
     assert(lr.getThresholds === Array(0.5, 0.5))
@@ -179,7 +181,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   //逻辑回归模型不适合拦截时,fitintercept关闭
   test("logistic regression doesn't fit intercept when fitIntercept is off") {
     val lr = new LogisticRegression
-    lr.setFitIntercept(false)
+    lr.setFitIntercept(false)//是否训练拦截对象
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
     //默认拦截0.0
@@ -195,14 +197,17 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     //设置参数,训练并检查许多参数
     val lr = new LogisticRegression()
       .setMaxIter(10)
-      .setRegParam(1.0)
+      .setRegParam(1.0)//正则化参数>=0
+       //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       .setThreshold(0.6)
+      //类别条件概率预测结果列名
       .setProbabilityCol("myProbability")
      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
     val parent = model.parent.asInstanceOf[LogisticRegression]
     assert(parent.getMaxIter === 10)
-    assert(parent.getRegParam === 1.0)
+    assert(parent.getRegParam === 1.0)//正则化参数>=0
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(parent.getThreshold === 0.6)
     assert(model.getThreshold === 0.6)
 
@@ -221,7 +226,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       //调用变换参数,并检查工作的参数
     val predNotAllZero =
       model.transform(dataset, model.threshold -> 0.0,
-        model.probabilityCol -> "myProb")
+        model.probabilityCol -> "myProb") //类别条件概率预测结果列名
         .select("prediction", "myProb")
         .collect()
         .map { case Row(pred: Double, prob: Vector) => pred }
@@ -232,12 +237,14 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     lr.setThresholds(Array(0.6, 0.4))
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model2 = lr.fit(dataset, lr.maxIter -> 5, lr.regParam -> 0.1,
-      lr.probabilityCol -> "theProb")
+      lr.probabilityCol -> "theProb") //类别条件概率预测结果列名
     val parent2 = model2.parent.asInstanceOf[LogisticRegression]
     assert(parent2.getMaxIter === 5)//最大迭代数
-    assert(parent2.getRegParam === 0.1)//
+    assert(parent2.getRegParam === 0.1)//正则化参数>=0
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(parent2.getThreshold === 0.4)//获得阈值
     assert(model2.getThreshold === 0.4)
+     //类别条件概率预测结果列名
     assert(model2.getProbabilityCol === "theProb")
   }
 
@@ -248,7 +255,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = lr.fit(dataset)
     //默认分类数
     assert(model.numClasses === 2)
-
+    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     val threshold = model.getThreshold
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val results = model.transform(dataset)
@@ -324,6 +331,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //不规则截取的二元逻辑回归
   test("binary logistic regression with intercept without regularization") {
+  //是否训练拦截对象,训练模型前是否需要对训练特征进行标准化处理
     val trainer1 = (new LogisticRegression).setFitIntercept(true).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true).setStandardization(false)
      //fit()方法将DataFrame转化为一个Transformer的算法
@@ -337,6 +345,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
        data <- read.csv("path", header=FALSE)
        label = factor(data$V1)
        features = as.matrix(data.frame(data$V2, data$V3, data$V4, data$V5))
+       family 模型中使用的误差分布类型
        weights = coef(glmnet(features,label, family="binomial", alpha = 0, lambda = 0))
        weights
 
@@ -360,6 +369,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //不规则正则化的二元逻辑回归
   test("binary logistic regression without intercept without regularization") {
+  //是否训练拦截对象,训练模型前是否需要对训练特征进行标准化处理
     val trainer1 = (new LogisticRegression).setFitIntercept(false).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(false).setStandardization(false)
 
@@ -374,6 +384,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
        label = factor(data$V1)
        features = as.matrix(data.frame(data$V2, data$V3, data$V4, data$V5))
        weights =
+	  //family 模型中使用的误差分布类型
            coef(glmnet(features,label, family="binomial", alpha = 0, lambda = 0, intercept=FALSE))
        weights
 
@@ -399,9 +410,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   //使用L1正则化拦截的Logistic回归分析
   test("binary logistic regression with intercept with L1 regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(true)
-      //设置网络神经
+      //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,
       .setElasticNetParam(1.0).setRegParam(0.12).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,训练模型前是否需要对训练特征进行标准化处理
       .setElasticNetParam(1.0).setRegParam(0.12).setStandardization(false)
 	//fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
@@ -458,7 +470,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //Logistic回归分析没有L1正则化拦截
   test("binary logistic regression without intercept with L1 regularization") {
+  //是否训练拦截对象
     val trainer1 = (new LogisticRegression).setFitIntercept(false)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,训练模型前是否需要对训练特征进行标准化处理
       .setElasticNetParam(1.0).setRegParam(0.12).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(false)
       .setElasticNetParam(1.0).setRegParam(0.12).setStandardization(false)
@@ -519,10 +533,12 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   //具有L2正则化的截距的二元Logistic回归
   test("binary logistic regression with intercept with L2 regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(true)
+       //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,RegParam 正则化参数>=0
       .setElasticNetParam(0.0).setRegParam(1.37).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,RegParam 正则化参数>=0
       .setElasticNetParam(0.0).setRegParam(1.37).setStandardization(false)
-//fit()方法将DataFrame转化为一个Transformer的算法
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
     val model2 = trainer2.fit(binaryDataset)
 
@@ -578,8 +594,11 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   //没有拦截的二元Logistic回归与L2正则化
   test("binary logistic regression without intercept with L2 regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(false)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
       .setElasticNetParam(0.0).setRegParam(1.37).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(false)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,RegParam 正则化参数>=0
+    //训练模型前是否需要对训练特征进行标准化处理
       .setElasticNetParam(0.0).setRegParam(1.37).setStandardization(false)
      //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
@@ -638,8 +657,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   //ElasticNet正则化与拦截的Logistic回归分析
   test("binary logistic regression with intercept with ElasticNet regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(true)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,RegParam 正则化参数>=0
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(false)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
@@ -697,8 +718,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   //Logistic回归分析没有ElasticNet正则化与拦截
   test("binary logistic regression without intercept with ElasticNet regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(false)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,训练模型前是否需要对训练特征进行标准化处理
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(false)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,RegParam 正则化参数>=0
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(false)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
@@ -736,6 +759,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
        data <- read.csv("path", header=FALSE)
        label = factor(data$V1)
        features = as.matrix(data.frame(data$V2, data$V3, data$V4, data$V5))
+       family 模型中使用的误差分布类型
        weights = coef(glmnet(features,label, family="binomial", alpha = 0.38, lambda = 0.21,
            intercept=FALSE, standardize=FALSE))
        weights
@@ -757,8 +781,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   //二分类Logistic回归与强大的L1正则化拦截
   test("binary logistic regression with intercept with strong L1 regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(true)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
       .setElasticNetParam(1.0).setRegParam(6.0).setStandardization(true)
     val trainer2 = (new LogisticRegression).setFitIntercept(true)
+    //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,RegParam 正则化参数>=0
       .setElasticNetParam(1.0).setRegParam(6.0).setStandardization(false)
    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = trainer1.fit(binaryDataset)
@@ -801,6 +827,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
        data <- read.csv("path", header=FALSE)
        label = factor(data$V1)
        features = as.matrix(data.frame(data$V2, data$V3, data$V4, data$V5))
+       family 模型中使用的误差分布类型
        weights = coef(glmnet(features,label, family="binomial", alpha = 1.0, lambda = 6.0))
        weights
 
@@ -824,7 +851,8 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     //测试集的评估应与转化的训练数据的评估相同
     val lr = new LogisticRegression()
       .setMaxIter(10)
-      .setRegParam(1.0)
+      .setRegParam(1.0)//正则化参数>=0
+      //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       .setThreshold(0.6)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
@@ -847,7 +875,8 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     //测试，损失是单调递减
     val lr = new LogisticRegression()
       .setMaxIter(10)
-      .setRegParam(1.0)
+      .setRegParam(1.0)//正则化参数>=0
+      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       .setThreshold(0.6)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)

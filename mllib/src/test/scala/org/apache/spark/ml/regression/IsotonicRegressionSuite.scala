@@ -114,15 +114,16 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("set parameters") {//设置参数
     val isotonicRegression = new IsotonicRegression()
       .setIsotonic(false)
-      .setWeightCol("w")
-      .setFeaturesCol("f")
-      .setLabelCol("l")
-      .setPredictionCol("p")
+      .setWeightCol("w")//列权重
+      .setFeaturesCol("f")//特征列
+      .setLabelCol("l")//标签列名
+      .setPredictionCol("p")//预测结果列名
 
     assert(!isotonicRegression.getIsotonic)
-    assert(isotonicRegression.getWeightCol === "w")
-    assert(isotonicRegression.getFeaturesCol === "f")
-    assert(isotonicRegression.getLabelCol === "l")
+    assert(isotonicRegression.getWeightCol === "w")//列权重
+    assert(isotonicRegression.getFeaturesCol === "f")//特征列
+    assert(isotonicRegression.getLabelCol === "l")//标签列名
+    //预测结果列名
     assert(isotonicRegression.getPredictionCol === "p")
   }
 
@@ -131,14 +132,17 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     intercept[IllegalArgumentException] {
     //fit()方法将DataFrame转化为一个Transformer的算法
+    //列权重
       new IsotonicRegression().setWeightCol("w").fit(dataset)
     }
 
     intercept[IllegalArgumentException] {
+      //训练数据集DataFrame中存储特征数据的列名
       new IsotonicRegression().setFeaturesCol("f").fit(dataset)
     }
 
     intercept[IllegalArgumentException] {
+      //标签列名
       new IsotonicRegression().setLabelCol("l").fit(dataset)
     }
 

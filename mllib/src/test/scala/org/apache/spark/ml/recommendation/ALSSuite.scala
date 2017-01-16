@@ -282,6 +282,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     val test = ArrayBuffer.empty[Rating[Int]]
     for ((userId, userFactor) <- userFactors; (itemId, itemFactor) <- itemFactors) {
       val rating = blas.sdot(rank, userFactor, 1, itemFactor, 1)
+       //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
       val threshold = if (rating > 0) positiveFraction else negativeFraction
       val observed = random.nextDouble() < threshold
       if (observed) {
@@ -344,7 +345,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
       test: RDD[Rating[Int]],
       rank: Int,//模型中潜在因素的数量
       maxIter: Int,//迭代次数
-      regParam: Double,//正则化
+      regParam: Double,//正则化参数>=0
       implicitPrefs: Boolean = false,//制定是否使用显示反馈ALS变体(或者说是对隐式反馈数据的一种适应)
       numUserBlocks: Int = 2,//设置用户数据块的个数和并行度
       numItemBlocks: Int = 3,//设置物品数据块个数和并行度
@@ -472,6 +473,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
   test("nonnegative constraint") {//非负约束
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     val (userFactors, itemFactors) =
+    //nonnegative是否需要非负约束
       ALS.train(ratings, rank = 2, maxIter = 4, nonnegative = true, seed = 0)
     def isNonnegative(factors: RDD[(Int, Array[Float])]): Boolean = {
       factors.values.map { _.forall(_ >= 0.0) }.reduce(_ && _)
