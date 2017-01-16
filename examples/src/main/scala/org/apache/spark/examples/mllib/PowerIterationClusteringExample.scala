@@ -96,7 +96,7 @@ object PowerIterationClusteringExample {
   def run(params: Params) {
     val conf = new SparkConf()
       .setMaster("local")
-      .setAppName(s"PowerIterationClustering with $params")
+      .setAppName(s"PowerIterationClustering with $params").setMaster("local")
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)

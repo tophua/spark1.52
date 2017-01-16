@@ -35,7 +35,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
  * 文本文件的行必须在窗体中标记数据点
  * `(y,[x1,x2,x3,...,xn])`
  * Where n is the number of features, y is a binary label,
- * 其中n是特征的个数，Y是一个二进制标签,和n必须是相同的训练和测试
+ * 其中n是特征的个数,Y是一个二进制标签,和n必须是相同的训练和测试
  * and n must be the same for train and test.
  *
  * Usage: StreamingLogisticRegression <trainingDir> <testDir> <batchDuration> <numFeatures>

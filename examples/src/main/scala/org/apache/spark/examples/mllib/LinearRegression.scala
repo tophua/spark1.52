@@ -72,12 +72,12 @@ object LinearRegression {
       opt[String]("<input>")
         //.required()
 	/**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+   *  libSVM的数据格式
+   *  <label> <index1>:<value1> <index2>:<value2> ...
+   *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+   *  <index>是以1开始的整数,可以是不连续
+   *  <value>为实数,也就是我们常说的自变量
+   */
         .text("input paths to labeled examples in LIBSVM format")
         .action((x, c) => c.copy(input = x))
       note(
@@ -102,13 +102,13 @@ object LinearRegression {
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)
-/**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+  /**
+   *  libSVM的数据格式
+   *  <label> <index1>:<value1> <index2>:<value2> ...
+   *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+   *  <index>是以1开始的整数,可以是不连续
+   *  <value>为实数,也就是我们常说的自变量
+   */
     val examples = MLUtils.loadLibSVMFile(sc, params.input).cache()
 
     val splits = examples.randomSplit(Array(0.8, 0.2))
@@ -129,10 +129,10 @@ object LinearRegression {
 
     val algorithm = new LinearRegressionWithSGD()
     algorithm.optimizer
-      .setNumIterations(params.numIterations)
+      .setNumIterations(params.numIterations)//迭代次数
       .setStepSize(params.stepSize)//每次迭代优化步长
       .setUpdater(updater)
-      .setRegParam(params.regParam)//
+      .setRegParam(params.regParam)//正则化
 
     val model = algorithm.run(training)
 

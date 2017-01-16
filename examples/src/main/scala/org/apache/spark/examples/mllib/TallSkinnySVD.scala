@@ -27,17 +27,17 @@ import org.apache.spark.mllib.linalg.Vectors
  */
 object TallSkinnySVD {
   def main(args: Array[String]) {
-    if (args.length != 1) {
+   /* if (args.length != 1) {
       System.err.println("Usage: TallSkinnySVD <input>")
       System.exit(1)
-    }
+    }*/
 
-    val conf = new SparkConf().setAppName("TallSkinnySVD")
+    val conf = new SparkConf().setAppName("TallSkinnySVD").setMaster("local")
     val sc = new SparkContext(conf)
 
     // Load and parse the data file.
     //加载和解析数据文件
-    val rows = sc.textFile(args(0)).map { line =>
+    val rows = sc.textFile("../data/mllib/kmeans_data.txt").map { line =>
       val values = line.split(' ').map(_.toDouble)
       Vectors.dense(values)
     }

@@ -77,6 +77,16 @@ object FPGrowthExample {
     println(s"Number of frequent itemsets: ${model.freqItemsets.count()}")
 
     model.freqItemsets.collect().foreach { itemset =>
+      /**
+      [t], 3
+      [t,x], 3
+      [t,x,z], 3
+      [t,z], 3
+      [x], 4
+      [x,z], 3
+      [r], 3
+      [r,x], 2
+      [r,z], 2*/
       println(itemset.items.mkString("[", ",", "]") + ", " + itemset.freq)
     }
 

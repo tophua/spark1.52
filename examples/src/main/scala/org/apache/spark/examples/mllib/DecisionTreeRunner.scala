@@ -47,16 +47,19 @@ import org.apache.spark.util.Utils
  *       包括分类特征,修改分类特征信息
  */
 object DecisionTreeRunner {
-
+  /**
+   * 定义一个枚举类型
+   */
   object ImpurityType extends Enumeration {
     type ImpurityType = Value
+    //基尼,熵,方差
     val Gini, Entropy, Variance = Value
   }
 
   import ImpurityType._
 
   case class Params(
-      input: String = null,
+      input: String = "../data/mllib/sample_binary_classification_data.txt",
       testInput: String = "",
       /**
        *  libSVM的数据格式
@@ -173,7 +176,7 @@ object DecisionTreeRunner {
    * @param input  Path to input dataset.
    * @param dataFormat  "libsvm" or "dense"
    * @param testInput  Path to test dataset.
-   * @param algo  Classification or Regression
+   * @param algo  Classification or Regression 分类或回归
    * @param fracTest  Fraction of input data to hold out for testing.  Ignored if testInput given.
    * @return  (training dataset, test dataset, number of classes),
    *          where the number of classes is inferred from data (and set to 0 for Regression)
@@ -222,9 +225,13 @@ object DecisionTreeRunner {
           }
         }
         val numExamples = examples.count()
+        //numClasses = 2
         println(s"numClasses = $numClasses.")
         println(s"Per-class example fractions, counts:")
         println(s"Class\tFrac\tCount")
+        /*Class	Frac	Count
+            0.0	0.43	43
+            1.0	0.57	57*/
         sortedClasses.foreach { c =>
           val frac = classCounts(c) / numExamples.toDouble
           println(s"$c\t$frac\t${classCounts(c)}")
@@ -244,13 +251,13 @@ object DecisionTreeRunner {
       val numFeatures = examples.take(1)(0).features.size
       val origTestExamples = dataFormat match {
         case "dense" => MLUtils.loadLabeledPoints(sc, testInput)
-	/**
-   *  libSVM的数据格式
-   *  <label> <index1>:<value1> <index2>:<value2> ...
-   *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
-   *  <index>是以1开始的整数,可以是不连续
-   *  <value>为实数,也就是我们常说的自变量
-   */
+    	/**
+       *  libSVM的数据格式
+       *  <label> <index1>:<value1> <index2>:<value2> ...
+       *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+       *  <index>是以1开始的整数,可以是不连续
+       *  <value>为实数,也就是我们常说的自变量
+       */
         case "libsvm" => MLUtils.loadLibSVMFile(sc, testInput, numFeatures)
       }
       algo match {
@@ -278,6 +285,7 @@ object DecisionTreeRunner {
 
     val numTraining = training.count()
     val numTest = test.count()
+    //numTraining = 84, numTest = 16.
     println(s"numTraining = $numTraining, numTest = $numTest.")
 
     examples.unpersist(blocking = false)
@@ -287,9 +295,26 @@ object DecisionTreeRunner {
 
   def run(params: Params) {
 
-    val conf = new SparkConf().setAppName(s"DecisionTreeRunner with $params")
+    val conf = new SparkConf().setAppName(s"DecisionTreeRunner with $params").setMaster("local")
     val sc = new SparkContext(conf)
-
+    /**
+      {
+        input:	../data/mllib/sample_binary_classification_data.txt,
+        testInput:	,
+        dataFormat:	libsvm,
+        algo:	Classification,
+        maxDepth:	5,
+        impurity:	Gini,
+        maxBins:	32,
+        minInstancesPerNode:	1,
+        minInfoGain:	0.0,
+        numTrees:	1,
+        featureSubsetStrategy:	auto,
+        fracTest:	0.2,
+        useNodeIdCache:	false,
+        checkpointDir:	None,
+        checkpointInterval:	10
+      }*/
     println(s"DecisionTreeRunner with parameters:\n$params")
 
     // Load training and test data and cache it.
@@ -312,13 +337,13 @@ object DecisionTreeRunner {
       = new Strategy(
           algo = params.algo,
           impurity = impurityCalculator,//计算信息增益的准则
-          maxDepth = params.maxDepth,//树的最大深度（>=0）
+          maxDepth = params.maxDepth,//树的最大深度(>=0)
           maxBins = params.maxBins,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
           numClasses = numClasses,//训练的树的数量
           minInstancesPerNode = params.minInstancesPerNode,//分裂后自节点最少包含的实例数量
           minInfoGain = params.minInfoGain,//分裂节点时所需最小信息增益
           useNodeIdCache = params.useNodeIdCache,
-	  //设置检查点间隔(>=1),或不设置检查点(-1)
+	        //设置检查点间隔(>=1),或不设置检查点(-1)
           checkpointInterval = params.checkpointInterval)
     if (params.numTrees == 1) {//训练的树的数量
       //系统计时器的当前值,以毫微秒为单位
@@ -332,7 +357,7 @@ object DecisionTreeRunner {
       } else {
         println(model) // Print model summary.
       }
-      if (params.algo == Classification) {
+      if (params.algo == Classification) {//分类
        //评估指标-多分类
         val trainAccuracy =
           new MulticlassMetrics(training.map(lp => (model.predict(lp.features), lp.label)))
@@ -341,9 +366,10 @@ object DecisionTreeRunner {
 	     //评估指标-多分类
         val testAccuracy =
           new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
+          //Test accuracy = 1.0
         println(s"Test accuracy = $testAccuracy")
       }
-      if (params.algo == Regression) {
+      if (params.algo == Regression) {//回归
         val trainMSE = meanSquaredError(model, training)
         println(s"Train mean squared error = $trainMSE")
         val testMSE = meanSquaredError(model, test)
@@ -351,7 +377,7 @@ object DecisionTreeRunner {
       }
     } else {
       val randomSeed = Utils.random.nextInt()
-    
+      //二分类
       if (params.algo == Classification) {
        //系统计时器的当前值,以毫微秒为单位
         val startTime = System.nanoTime()
@@ -359,18 +385,31 @@ object DecisionTreeRunner {
           params.featureSubsetStrategy, randomSeed)
 	  		//1e9就为1*(10的九次方),也就是十亿
         val elapsedTime = (System.nanoTime() - startTime) / 1e9
+        //Training time: 5.574476103 seconds
         println(s"Training time: $elapsedTime seconds")
         if (model.totalNumNodes < 30) {
+          /**
+           DecisionTreeModel classifier of depth 2 with 5 nodes
+            If (feature 434 <= 0.0)
+             If (feature 100 <= 165.0)
+              Predict: 0.0
+             Else (feature 100 > 165.0)
+              Predict: 1.0
+            Else (feature 434 > 0.0)
+             Predict: 1.0*/
           println(model.toDebugString) // Print full model.
         } else {
           println(model) // Print model summary.
         }
+        
         val trainAccuracy =
           new MulticlassMetrics(training.map(lp => (model.predict(lp.features), lp.label)))
             .precision
+        //Train accuracy = 1.0,训练准确性
         println(s"Train accuracy = $trainAccuracy")
         val testAccuracy =
           new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
+        //测试准确性
         println(s"Test accuracy = $testAccuracy")
       }
     if (params.algo == Regression) {
@@ -390,7 +429,7 @@ object DecisionTreeRunner {
         println(s"Train mean squared error = $trainMSE")
         val testMSE = meanSquaredError(model, test)
         println(s"Test mean squared error = $testMSE")
-      }   /* */
+      }
     }
 
     sc.stop()
@@ -401,13 +440,15 @@ object DecisionTreeRunner {
    * 计算回归的平均平方误差
    * This is just for demo purpose. In general, don't copy this code because it is NOT efficient
    * due to the use of structural types, which leads to one reflection call per record.
+   * 这只是为了演示的目的,一般来说,不要复制此代码,由于使用的不同结构类型,导致每个记录的一个反射调用
    */
   // scalastyle:off structural.type
   private[mllib] def meanSquaredError(
       model: { def predict(features: Vector): Double },
       data: RDD[LabeledPoint]): Double = {
     data.map { y =>
-      val err = model.predict(y.features) - y.label
+      val predict=model.predict(y.features)
+      val err = predict - y.label
       err * err
     }.mean()
   }

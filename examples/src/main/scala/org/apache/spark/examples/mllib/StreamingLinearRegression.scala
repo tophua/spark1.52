@@ -68,7 +68,7 @@ object StreamingLinearRegression {
     val testData = ssc.textFileStream(args(1)).map(LabeledPoint.parse)
 
     val model = new StreamingLinearRegressionWithSGD()
-    //initialWeights初始取值,默认是0向量
+      //initialWeights初始取值,默认是0向量
       .setInitialWeights(Vectors.zeros(args(3).toInt))
 
     model.trainOn(trainingData)

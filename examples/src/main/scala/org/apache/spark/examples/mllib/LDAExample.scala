@@ -113,7 +113,7 @@ object LDAExample {
   }
 
   private def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"LDAExample with $params")
+    val conf = new SparkConf().setAppName(s"LDAExample with $params").setMaster("local")
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)

@@ -77,6 +77,7 @@ object StreamingKMeansExample {
     val model = new StreamingKMeans()
       //聚类的个数
       .setK(args(3).toInt)
+      //直接设置衰减因子
       .setDecayFactor(1.0)
       //随机中心数
       .setRandomCenters(args(4).toInt, 0.0)

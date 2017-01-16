@@ -45,7 +45,7 @@ object DenseKMeans {
   case class Params(
       //input: String = null,
       input: String = "../data/mllib/kmeans_data.txt",
-      k: Int = -1,
+      k: Int = 3,
       numIterations: Int = 10,
       initializationMode: InitializationMode = Parallel) extends AbstractParams[Params]
 
@@ -56,7 +56,7 @@ object DenseKMeans {
       //密集的Kmeans:例k-均值应用程序的数据密集型
       head("DenseKMeans: an example k-means app for dense data.")
       opt[Int]('k', "k")
-        .required()
+        //.required()
         .text(s"number of clusters, required")
         .action((x, c) => c.copy(k = x))
       opt[Int]("numIterations")
@@ -66,10 +66,10 @@ object DenseKMeans {
         .text(s"initialization mode (${InitializationMode.values.mkString(",")}), " +
         s"default: ${defaultParams.initializationMode}")
         .action((x, c) => c.copy(initializationMode = InitializationMode.withName(x)))
-      arg[String]("<input>")
+/*      arg[String]("<input>")
         .text("input paths to examples")
         .required()
-        .action((x, c) => c.copy(input = x))
+        .action((x, c) => c.copy(input = x))*/
     }
 
     parser.parse(args, defaultParams).map { params =>
@@ -80,7 +80,7 @@ object DenseKMeans {
   }
 
   def run(params: Params) {
-    val conf = new SparkConf().setAppName(s"DenseKMeans with $params")
+    val conf = new SparkConf().setAppName(s"DenseKMeans with $params").setMaster("local")
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)
@@ -90,7 +90,7 @@ object DenseKMeans {
     }.cache()
 
     val numExamples = examples.count()
-
+    //numExamples = 6.
     println(s"numExamples = $numExamples.")
 
     val initMode = params.initializationMode match {
@@ -108,7 +108,7 @@ object DenseKMeans {
       * 一般来说,同样的迭代次数和算法跑的次数,这个值越小代表聚类的效果越好
       */
     val cost = model.computeCost(examples)
-
+    //Total cost = 0.07499999999994544.
     println(s"Total cost = $cost.")
 
     sc.stop()
