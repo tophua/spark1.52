@@ -129,9 +129,9 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     //梯度提升回归(GBT)
     GBTRegressor.supportedLossTypes.foreach { loss =>
       val gbt = new GBTRegressor()//梯度提升回归(GBT)
-        .setMaxIter(maxIter)
-        .setMaxDepth(2)
-        .setLossType(loss)
+        .setMaxIter(maxIter)//迭代次数
+        .setMaxDepth(2)//树的最大深度
+        .setLossType(loss)//损失函数类型
         .setValidationTol(0.0)
       compareAPIs(trainData, None, gbt, categoricalFeatures)
       compareAPIs(trainData, Some(validationData), gbt, categoricalFeatures)
@@ -182,7 +182,7 @@ private object GBTRegressorSuite {
       categoricalFeatures: Map[Int, Int]): Unit = {
     val oldBoostingStrategy = gbt.getOldBoostingStrategy(categoricalFeatures, OldAlgo.Regression)
     val oldGBT = new OldGBT(oldBoostingStrategy)
-    val oldModel = oldGBT.run(data)
+    val oldModel = oldGBT.run(data)//numClasses 分类数
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 0)
     val newModel = gbt.fit(newData)
     // Use parent from newTree since this is not checked anyways.

@@ -79,6 +79,7 @@ class PMMLModelExportFactorySuite extends SparkFunSuite {
     /** 3 classes, 2 features */
     val multiclassLogisticRegressionModel = new LogisticRegressionModel(
       weights = Vectors.dense(0.1, 0.2, 0.3, 0.4), intercept = 1.0,
+      //numClasses 分类数
       numFeatures = 2, numClasses = 3)
 
     intercept[IllegalArgumentException] {

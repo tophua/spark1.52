@@ -55,7 +55,7 @@ private[ml] object TreeTests extends SparkFunSuite {
       }
     }.toArray
     val featuresMetadata = new AttributeGroup("features", featuresAttributes).toMetadata()
-    val labelAttribute = if (numClasses == 0) {
+    val labelAttribute = if (numClasses == 0) {//numClasses 分类数
       NumericAttribute.defaultAttr.withName("label")
     } else {
       NominalAttribute.defaultAttr.withName("label").withNumValues(numClasses)

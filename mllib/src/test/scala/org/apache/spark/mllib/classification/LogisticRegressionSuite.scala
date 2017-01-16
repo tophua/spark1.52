@@ -167,19 +167,20 @@ object LogisticRegressionSuite {
    *  Binary labels,3 features
    *  二进制标签,3个特征 
    *  */
-  private val binaryModel = new LogisticRegressionModel(
+  private val binaryModel = new LogisticRegressionModel(//numClasses 分类数
     weights = Vectors.dense(0.1, 0.2, 0.3), intercept = 0.5, numFeatures = 3, numClasses = 2)
 
   /** 
    *  3 classes,2 features
    *  3分类,2个特征 
    *  */
-  private val multiclassModel = new LogisticRegressionModel(
+  private val multiclassModel = new LogisticRegressionModel(//numClasses 分类数
     weights = Vectors.dense(0.1, 0.2, 0.3, 0.4), intercept = 1.0, numFeatures = 2, numClasses = 3)
 
   private def checkModelsEqual(a: LogisticRegressionModel, b: LogisticRegressionModel): Unit = {
     assert(a.weights == b.weights)
     assert(a.intercept == b.intercept)
+    //numClasses 分类数
     assert(a.numClasses == b.numClasses)
     assert(a.numFeatures == b.numFeatures)
     assert(a.getThreshold == b.getThreshold)
@@ -458,7 +459,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-
+    //numClasses 分类数
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true).setNumClasses(3)
     lr.optimizer.setConvergenceTol(1E-15).setNumIterations(200)
 

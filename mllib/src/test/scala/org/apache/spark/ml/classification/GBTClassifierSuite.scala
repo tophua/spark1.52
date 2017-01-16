@@ -74,11 +74,11 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
       case (maxIter, learningRate, subsamplingRate) =>
        //梯度提升树(GBT)分类
         val gbt = new GBTClassifier()
-          .setMaxDepth(2)
-          .setSubsamplingRate(subsamplingRate)
-          .setLossType("logistic")
-          .setMaxIter(maxIter)
-          .setStepSize(learningRate)
+          .setMaxDepth(2)//树的最大深度
+          .setSubsamplingRate(subsamplingRate)//学习一棵决策树使用的训练数据比例，范围[0,1]
+          .setLossType("logistic")//损失函数类型
+          .setMaxIter(maxIter)//最大迭代次数
+          .setStepSize(learningRate)//每次迭代优化步长
         compareAPIs(data, None, gbt, categoricalFeatures)
     }
   }
@@ -92,10 +92,10 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     val df: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 2)
     //梯度提升树(GBT)分类
     val gbt = new GBTClassifier()
-      .setMaxDepth(2)
-      .setLossType("logistic")
-      .setMaxIter(5)
-      .setStepSize(0.1)
+      .setMaxDepth(2)//树的最大深度
+      .setLossType("logistic")//损失函数类型
+      .setMaxIter(5)//最大迭代次数
+      .setStepSize(0.1)//每次迭代优化步长
       .setCheckpointInterval(2)
      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = gbt.fit(df)
@@ -117,9 +117,9 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     //梯度提升树(GBT)分类
     GBTClassifier.supportedLossTypes.foreach { loss =>
       val gbt = new GBTClassifier()
-        .setMaxIter(maxIter)
-        .setMaxDepth(2)
-        .setLossType(loss)
+        .setMaxIter(maxIter)//最大迭代次数
+        .setMaxDepth(2)//树的最大深度
+        .setLossType(loss))//损失函数类型
         .setValidationTol(0.0)
       compareAPIs(trainData, None, gbt, categoricalFeatures)
       compareAPIs(trainData, Some(validationData), gbt, categoricalFeatures)
@@ -172,6 +172,7 @@ private object GBTClassifierSuite {
       gbt.getOldBoostingStrategy(categoricalFeatures, OldAlgo.Classification)
     val oldGBT = new OldGBT(oldBoostingStrategy)
     val oldModel = oldGBT.run(data)
+    //numClasses 分类数
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 2)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val newModel = gbt.fit(newData)

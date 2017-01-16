@@ -54,7 +54,7 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
       .setMaxDepth(2)//树的最大深度，默认值是 5
       .setMaxBins(10)//离散连续性变量时最大的分箱数，默认是 32
       .setNumTrees(1)//随机森林需要训练的树的个数，默认值是 20
-      .setFeatureSubsetStrategy("auto")
+      .setFeatureSubsetStrategy("auto")//每次分裂候选特征数量
       .setSeed(123)
     compareAPIs(orderedLabeledPoints50_1000, newRF, categoricalFeaturesInfo)
   }
@@ -74,11 +74,11 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
   //特征重要的数据
   test("Feature importance with toy data") {
     val rf = new RandomForestRegressor()
-      .setImpurity("variance")
+      .setImpurity("variance")//计算信息增益的准则
       .setMaxDepth(3)//树的最大深度，默认值是 5
       .setNumTrees(3)//随机森林需要训练的树的个数，默认值是 20
-      .setFeatureSubsetStrategy("all")
-      .setSubsamplingRate(1.0)
+      .setFeatureSubsetStrategy("all")//每次分裂候选特征数量
+      .setSubsamplingRate(1.0)//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
       .setSeed(123)
 
     // In this data, feature 1 is very important.
@@ -141,7 +141,9 @@ private object RandomForestRegressorSuite extends SparkFunSuite {
     val oldStrategy =
       rf.getOldStrategy(categoricalFeatures, numClasses = 0, OldAlgo.Regression, rf.getOldImpurity)
     val oldModel = OldRandomForest.trainRegressor(
+    //FeatureSubsetStrategy 每次分裂候选特征数量
       data, oldStrategy, rf.getNumTrees, rf.getFeatureSubsetStrategy, rf.getSeed.toInt)
+      //numClasses 分类数
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 0)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val newModel = rf.fit(newData)

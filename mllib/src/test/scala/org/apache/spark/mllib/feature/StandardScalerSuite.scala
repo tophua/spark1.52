@@ -69,9 +69,9 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     //标准化是指：对于训练集中的样本，基于列统计信息将数据除以方差或（且）者将数据减去其均值（结果是方差等于1，数据在0附近）
     //标准化可以提升模型优化阶段的收敛速度，还可以避免方差很大的特征对模型训练产生过大的影响
     /**
-     * withMean 默认值False. 在尺度变换(除方差)之前使用均值做居中处理(减去均值)
+     * withMean 默认值False. True表示均值正则化(每个值减去均值)
      *          这会导致密集型输出,所以在稀疏数据上无效
-     * withStd 默认值True. 将数据缩放(尺度变换)到单位标准差
+     * withStd 默认值True. 每个值除以标准差进行缩
      */
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
@@ -84,6 +84,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model3 = standardizer3.fit(dataRDD)
 
     val equivalentModel1 = new StandardScalerModel(model1.std, model1.mean)
+    //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val equivalentModel2 = new StandardScalerModel(model2.std, model2.mean, true, false)
     val equivalentModel3 = new StandardScalerModel(model3.std, model3.mean, false, true)
 
@@ -143,11 +144,12 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Standardization with dense input") {//标准化的密集输入
 
     val dataRDD = sc.parallelize(denseData, 3)
-
+    //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
+    //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
-//fit()方法将DataFrame转化为一个Transformer的算法
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -210,11 +212,11 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Standardization with sparse input when means and stds are provided") {
 
     val dataRDD = sc.parallelize(sparseData, 3)
-
+    //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
-//fit()方法将DataFrame转化为一个Transformer的算法
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -259,11 +261,12 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Standardization with sparse input") {
 
     val dataRDD = sc.parallelize(sparseData, 3)
-    //标准化
+    //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler()
+    //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val standardizer3 = new StandardScaler(withMean = true, withStd = false)
-//fit()方法将DataFrame转化为一个Transformer的算法
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
@@ -304,16 +307,17 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Standardization with constant input when means and stds are provided") {
 
     val dataRDD = sc.parallelize(constantData, 2)
-
+   //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler(withMean = true, withStd = false)
     val standardizer3 = new StandardScaler(withMean = false, withStd = true)
-//fit()方法将DataFrame转化为一个Transformer的算法
+     //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)
 
     val equivalentModel1 = new StandardScalerModel(model1.std, model1.mean)
+    //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val equivalentModel2 = new StandardScalerModel(model2.std, model2.mean, true, false)
     val equivalentModel3 = new StandardScalerModel(model3.std, model3.mean, false, true)
 
@@ -332,11 +336,11 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Standardization with constant input") {
 
     val dataRDD = sc.parallelize(constantData, 2)
-
+    //第一个True表示均值正则化(每个值减去均值),第二个True表示正则化标准差(每个值除以标准差进行缩放)
     val standardizer1 = new StandardScaler(withMean = true, withStd = true)
     val standardizer2 = new StandardScaler(withMean = true, withStd = false)
     val standardizer3 = new StandardScaler(withMean = false, withStd = true)
-//fit()方法将DataFrame转化为一个Transformer的算法
+    //fit()方法将DataFrame转化为一个Transformer的算法
     val model1 = standardizer1.fit(dataRDD)
     val model2 = standardizer2.fit(dataRDD)
     val model3 = standardizer3.fit(dataRDD)

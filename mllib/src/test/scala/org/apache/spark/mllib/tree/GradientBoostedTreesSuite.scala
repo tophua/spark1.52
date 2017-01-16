@@ -36,9 +36,10 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
 
   test("Regression with continuous features: SquaredError") {//连续特征的回归:平方误差
     GradientBoostedTreesSuite.testCombinations.foreach {
+    //subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
       case (numIterations, learningRate, subsamplingRate) =>
         val rdd = sc.parallelize(GradientBoostedTreesSuite.data, 2)
-
+	//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
         val treeStrategy = new Strategy(algo = Regression, impurity = Variance, maxDepth = 2,
           categoricalFeaturesInfo = Map.empty, subsamplingRate = subsamplingRate)
         val boostingStrategy =
@@ -68,7 +69,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     GradientBoostedTreesSuite.testCombinations.foreach {
       case (numIterations, learningRate, subsamplingRate) =>
         val rdd = sc.parallelize(GradientBoostedTreesSuite.data, 2)
-
+	//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
         val treeStrategy = new Strategy(algo = Regression, impurity = Variance, maxDepth = 2,
           categoricalFeaturesInfo = Map.empty, subsamplingRate = subsamplingRate)
         val boostingStrategy =
@@ -98,7 +99,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     GradientBoostedTreesSuite.testCombinations.foreach {
       case (numIterations, learningRate, subsamplingRate) =>
         val rdd = sc.parallelize(GradientBoostedTreesSuite.data, 2)
-
+	//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
         val treeStrategy = new Strategy(algo = Classification, impurity = Variance, maxDepth = 2,
           numClasses = 2, categoricalFeaturesInfo = Map.empty,
           subsamplingRate = subsamplingRate)
@@ -230,7 +231,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
 private object GradientBoostedTreesSuite {
 
   // Combinations for estimators, learning rates and subsamplingRate
-  //组合估计,利率和subsamplingrate学习
+  //组合估计,利率和subsamplingrate学习一棵决策树使用的训练数据比例，范围[0,1]
   val testCombinations = Array((10, 1.0, 1.0), (10, 0.1, 1.0), (10, 0.5, 0.75), (10, 0.1, 0.75))
 
   val data = EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 10, 100)

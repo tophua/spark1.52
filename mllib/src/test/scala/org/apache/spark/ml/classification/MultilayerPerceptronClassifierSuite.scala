@@ -130,6 +130,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     //训练多项逻辑回归
     val lr = new LogisticRegressionWithLBFGS()
       .setIntercept(true)
+      //numClasses 分类数
       .setNumClasses(numClasses)
     lr.optimizer.setRegParam(0.0)
       .setNumIterations(numIterations)

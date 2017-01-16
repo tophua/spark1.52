@@ -80,7 +80,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 50, 1000)
     val rdd = sc.parallelize(arr)
     val numTrees = 1
-
+  //featureSubsetStrategy="auto"特征子集采样策略,auto表示算法自主选取
     val rf = RandomForest.trainRegressor(rdd, strategy, numTrees = numTrees,
       featureSubsetStrategy = "auto", seed = 123)
     assert(rf.trees.size === 1)
@@ -248,12 +248,13 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       	最小的桶数应该不小于类别特征中最大的选择个数
      */
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
+      //numClasses 分类数
       numClasses = 2, categoricalFeaturesInfo = Map.empty[Int, Int],
       useNodeIdCache = true)
 
     val rf1 = RandomForest.trainClassifier(rdd, strategy, numTrees = 3,
       featureSubsetStrategy = "auto", seed = 123)
-    strategy.subsamplingRate = 0.5
+    strategy.subsamplingRate = 0.5//学习一棵决策树使用的训练数据比例，范围[0,1]
     val rf2 = RandomForest.trainClassifier(rdd, strategy, numTrees = 3,
       featureSubsetStrategy = "auto", seed = 123)
     assert(rf1.toDebugString != rf2.toDebugString)

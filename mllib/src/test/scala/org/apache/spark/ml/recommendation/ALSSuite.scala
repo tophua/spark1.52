@@ -370,8 +370,8 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
         (rating.toDouble, prediction.toDouble)
       }
     //rmse 均方根误差亦称标准误差,
-    //均方根误差常用下式表示：√[∑di^2/n]=Re，式中：n为测量次数；di为一组测量值与真值的偏差
-    //均方根值（RMS）、均方根误差（RMSE）
+    //均方根误差常用下式表示：√[∑di^2/n]=Re,式中:n为测量次数;di为一组测量值与真值的偏差
+    //均方根值(RMS)、均方根误差（RMSE）
     val rmse =
       if (implicitPrefs) {//隐式
         // TODO: Use a better (rank-based?) evaluation metric for implicit feedback.

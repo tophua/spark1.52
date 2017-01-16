@@ -56,12 +56,12 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   //具有连续特征的二元分类测试
   def binaryClassificationTestWithContinuousFeatures(rf: RandomForestClassifier) {
     val categoricalFeatures = Map.empty[Int, Int]
-    val numClasses = 2
+    val numClasses = 2//numClasses 分类数
     val newRF = rf
-      .setImpurity("Gini")
+      .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(2)
       .setNumTrees(1)
-      .setFeatureSubsetStrategy("auto")
+      .setFeatureSubsetStrategy("auto")//每次分裂候选特征数量
       .setSeed(123)
     compareAPIs(orderedLabeledPoints50_1000, newRF, categoricalFeatures, numClasses)
   }
@@ -95,13 +95,13 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     )
     val rdd = sc.parallelize(arr)
     val categoricalFeatures = Map(0 -> 3, 2 -> 2, 4 -> 4)
-    val numClasses = 3
+    val numClasses = 3//numClasses 分类数
 
     val rf = new RandomForestClassifier()
-      .setImpurity("Gini")
+      .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(5)
       .setNumTrees(2)
-      .setFeatureSubsetStrategy("sqrt")
+      .setFeatureSubsetStrategy("sqrt")//每次分裂候选特征数量
       .setSeed(12345)
     compareAPIs(rdd, rf, categoricalFeatures, numClasses)
   }
@@ -109,17 +109,17 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("subsampling rate in RandomForest"){
     val rdd = orderedLabeledPoints5_20
     val categoricalFeatures = Map.empty[Int, Int]
-    val numClasses = 2
+    val numClasses = 2//numClasses 分类数
 
     val rf1 = new RandomForestClassifier()
-      .setImpurity("Gini")
+      .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(2)
       .setCacheNodeIds(true)
-      .setNumTrees(3)
-      .setFeatureSubsetStrategy("auto")
+      .setNumTrees(3)//numClasses 分类数
+      .setFeatureSubsetStrategy("auto")//每次分裂候选特征数量
       .setSeed(123)
     compareAPIs(rdd, rf1, categoricalFeatures, numClasses)
-
+   //subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
     val rf2 = rf1.setSubsamplingRate(0.5)
     compareAPIs(rdd, rf2, categoricalFeatures, numClasses)
   }
@@ -127,12 +127,12 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("predictRaw and predictProbability") {
     val rdd = orderedLabeledPoints5_20
     val rf = new RandomForestClassifier()
-      .setImpurity("Gini")
+      .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(3)
-      .setNumTrees(3)
+      .setNumTrees(3)//numClasses 分类数
       .setSeed(123)
     val categoricalFeatures = Map.empty[Int, Int]
-    val numClasses = 2
+    val numClasses = 2//numClasses 分类数
 
     val df: DataFrame = TreeTests.setMetadata(rdd, categoricalFeatures, numClasses)
     //fit()方法将DataFrame转化为一个Transformer的算法
@@ -162,13 +162,13 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   // Tests of feature importance 特征重要性试验
   /////////////////////////////////////////////////////////////////////////////
   test("Feature importance with toy data") {//玩具数据的功能的重要性
-    val numClasses = 2
+    val numClasses = 2//numClasses 分类数
     val rf = new RandomForestClassifier()
-      .setImpurity("Gini")
+      .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(3)
-      .setNumTrees(3)
-      .setFeatureSubsetStrategy("all")
-      .setSubsamplingRate(1.0)
+      .setNumTrees(3)//
+      .setFeatureSubsetStrategy("all")//每次分裂候选特征数量
+      .setSubsamplingRate(1.0)//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
       .setSeed(123)
 
     // In this data, feature 1 is very important.
@@ -232,6 +232,7 @@ private object RandomForestClassifierSuite {
     val oldStrategy =
       rf.getOldStrategy(categoricalFeatures, numClasses, OldAlgo.Classification, rf.getOldImpurity)
     val oldModel = OldRandomForest.trainClassifier(
+    //getFeatureSubsetStrategy 每次分裂候选特征数量
       data, oldStrategy, rf.getNumTrees, rf.getFeatureSubsetStrategy, rf.getSeed.toInt)
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses)
     //fit()方法将DataFrame转化为一个Transformer的算法

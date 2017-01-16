@@ -67,7 +67,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
   }
 
   test("copied model must have the same parent") {//复制的模型必须有相同的父
-    val categoricalFeatures = Map(0 -> 2, 1-> 2)
+    val categoricalFeatures = Map(0 -> 2, 1-> 2)//numClasses 分类数
     val df = TreeTests.setMetadata(categoricalDataPointsRDD, categoricalFeatures, numClasses = 0)
     val model = new DecisionTreeRegressor()
       .setImpurity("variance")//计算信息增益的准则
@@ -96,7 +96,7 @@ private[ml] object DecisionTreeRegressorSuite extends SparkFunSuite {
       dt: DecisionTreeRegressor,
       categoricalFeatures: Map[Int, Int]): Unit = {
     val oldStrategy = dt.getOldStrategy(categoricalFeatures)
-    val oldTree = OldDecisionTree.train(data, oldStrategy)
+    val oldTree = OldDecisionTree.train(data, oldStrategy)//numClasses 分类数
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 0)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val newTree = dt.fit(newData)

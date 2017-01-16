@@ -71,11 +71,11 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   //具有序分类特征的二元分类方法
   test("Binary classification stump with ordered categorical features") {
     val dt = new DecisionTreeClassifier()
-      .setImpurity("gini")//基尼
+      .setImpurity("gini")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度
       .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
-    val numClasses = 2
+    val numClasses = 2 //分类树数
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures, numClasses)
   }  
   //固定标签0.1熵的二进制分类的树,Gini
@@ -86,7 +86,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 2
     Array(orderedLabeledPointsWithLabel0RDD, orderedLabeledPointsWithLabel1RDD).foreach { rdd =>
       DecisionTreeClassifier.supportedImpurities.foreach { impurity =>
-        dt.setImpurity(impurity)
+        dt.setImpurity(impurity)//计算信息增益的准则
         compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
       }
     }
@@ -95,7 +95,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("Multiclass classification stump with 3-ary (unordered) categorical features") {
     val rdd = categoricalDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
-      .setImpurity("Gini")
+      .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度
     val numClasses = 3
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
@@ -125,22 +125,22 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rdd = sc.parallelize(arr)
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
-      .setMaxDepth(4)
+      .setMaxDepth(4)//树的最大深度,默认值是 5
     val numClasses = 2
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
   //多类分类的树和无序的分类特征,只要有足够的垃圾箱
   test("Multiclass classification stump with unordered categorical features," +
     " with just enough bins") {
-    //离散连续性变量时最大的分箱数，默认是 32。理论上箱数越大粒度就越细，但是针对特定的数据集总有一个合理的箱数
+    //离散连续性变量时最大的分箱数,默认是 32,理论上箱数越大粒度就越细,但是针对特定的数据集总有一个合理的箱数
     val maxBins = 2 * (math.pow(2, 3 - 1).toInt - 1) // just enough bins to allow unordered features
     val rdd = categoricalDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//树节点选择的不纯度的衡量指标
-      .setMaxDepth(4)//树的最大深度，默认值是 5
-      .setMaxBins(maxBins)//离散连续性变量时最大的分箱数，默认是 32
+      .setMaxDepth(4)//树的最大深度,默认值是 5
+      .setMaxBins(maxBins)//离散连续性变量时最大的分箱数,默认是 32
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
-    val numClasses = 3//随机森林需要训练的树的个数，默认值是 20
+    val numClasses = 3//随机森林需要训练的树的个数,默认值是 20
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
   //多类分类的树和连续性的特点

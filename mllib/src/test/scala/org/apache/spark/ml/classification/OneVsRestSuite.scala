@@ -68,7 +68,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
  * one-vs-rest训练时依次把某个类别的样本归为一类,其他剩余的样本归为另一类
  */
   test("one-vs-rest: default params") {//默认参数
-    val numClasses = 3
+    val numClasses = 3//numClasses 分类数
     val ova = new OneVsRest()
       .setClassifier(new LogisticRegression)
     assert(ova.getLabelCol === "label")
@@ -79,7 +79,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     // copied model must have the same parent.
     // 复制的模型必须有相同的父
     MLTestingUtils.checkCopy(ovaModel)
-
+    //numClasses 分类数
     assert(ovaModel.models.size === numClasses)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val transformedDataset = ovaModel.transform(dataset)
@@ -87,12 +87,13 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     // check for label metadata in prediction col
     //检查在预测Col标签元数据
     val predictionColSchema = transformedDataset.schema(ovaModel.getPredictionCol)
+    //numClasses 分类数
     assert(MetadataUtils.getNumClasses(predictionColSchema) === Some(3))
 
     val ovaResults = transformedDataset
       .select("prediction", "label")
       .map(row => (row.getDouble(0), row.getDouble(1)))
-
+  //numClasses 分类数
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true).setNumClasses(numClasses)
     lr.optimizer.setRegParam(0.1).setNumIterations(100)
 
@@ -107,10 +108,10 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
    //在训练运行过程中正确地传递标签元数据
   test("one-vs-rest: pass label metadata correctly during train") {
-    val numClasses = 3
+    val numClasses = 3//numClasses 分类数
     val ova = new OneVsRest()
     ova.setClassifier(new MockLogisticRegression)
-
+	
     val labelMetadata = NominalAttribute.defaultAttr.withName("label").withNumValues(numClasses)
     val labelWithMetadata = dataset("label").as("label", labelMetadata.toMetadata())
     val features = dataset("features").as("features")

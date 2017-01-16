@@ -298,7 +298,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       features, samplingRate, implicitPrefs, negativeWeights, negativeFactors)
 
     val model = new ALS()
-      .setUserBlocks(numUserBlocks),//设置用户数据块的个数和并行度
+      .setUserBlocks(numUserBlocks)//设置用户数据块的个数和并行度
       .setProductBlocks(numProductBlocks)//设置物品数据块个数和并行度
       .setRank(features)//模型中潜在因素的数量
       .setIterations(iterations)//迭代次数
@@ -413,7 +413,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       }
       //math.sqrt返回数字的平方根
       //rmse 均方根误差亦称标准误差,
-     //均方根误差常用下式表示：√[∑di^2/n]=Re，式中：n为测量次数；di为一组测量值与真值的偏差
+     //均方根误差常用下式表示：√[∑di^2/n]=Re,式中：n为测量次数;di为一组测量值与真值的偏差
      //均方根值(RMS)、均方根误差(RMSE)
       val rmse = math.sqrt(sqErr / denom)
       if (rmse > matchThreshold) {

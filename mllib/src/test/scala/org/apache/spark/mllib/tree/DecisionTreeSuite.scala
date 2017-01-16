@@ -79,7 +79,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Classification,
       Gini,
       maxDepth = 2,
-      numClasses = 2,
+      numClasses = 2,//numClasses 分类数
       maxBins = 100,
       categoricalFeaturesInfo = Map(0 -> 2, 1-> 2))
 
@@ -104,7 +104,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Classification,
       Gini,
       maxDepth = 2,
-      numClasses = 2,
+      numClasses = 2,//numClasses 分类数
       maxBins = 100,
       //用Map存储类别(离散)特征及每个类别对应值(类别)的数量
       //例如 Map(n->k)表示特征n类别(离散)特征,特征值有K个,具体值为(0,1,...K-1)
@@ -211,7 +211,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Classification,
       Gini,
       maxDepth = 2,
-      numClasses = 100,
+      numClasses = 100,//numClasses 分类数
       maxBins = 100,
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
@@ -288,7 +288,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Classification,
       Gini,
       maxDepth = 2,
-      numClasses = 100,
+      numClasses = 100,//numClasses 分类数
       maxBins = 100,
       categoricalFeaturesInfo = Map(0 -> 10, 1-> 10))
     //因此,分类的功能将被排序
@@ -360,7 +360,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(0.0, Vectors.dense(2.0, 0.0, 0.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 2.0, 1.0)))
     val input = sc.parallelize(arr)
-
+    //numClasses 分类数
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 5,
       numClasses = 2, categoricalFeaturesInfo = Map(0 -> 3))
     val metadata = DecisionTreeMetadata.buildMetadata(input, strategy)
@@ -415,6 +415,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     //训练一个一级节点
     //熵：代表集合的无序程度
     val strategyOneNode = new Strategy(Classification, Entropy, maxDepth = 1,
+    //numClasses 分类数
       numClasses = 2, maxBins = 100)
     val modelOneNode = DecisionTree.train(rdd, strategyOneNode)
     val rootNode1 = modelOneNode.topNode.deepCopy()
@@ -619,6 +620,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel0()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
+    //numClasses 分类数
     val strategy = new Strategy(Classification, Entropy, maxDepth = 3,
       numClasses = 2, maxBins = 100)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -738,6 +740,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlass()
     val rdd = sc.parallelize(arr)
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
+    //numClasses 分类数
       numClasses = 3, maxBins = maxBins,
       categoricalFeaturesInfo = Map(0 -> 3, 1 -> 3))
     assert(strategy.isMulticlassClassification)
@@ -767,6 +770,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateContinuousDataPointsForMulticlass()
     val rdd = sc.parallelize(arr)
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
+    //numClasses 分类数
       numClasses = 3, maxBins = 100)
     assert(strategy.isMulticlassClassification)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -830,6 +834,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures()
     val rdd = sc.parallelize(arr)
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
+    //numClasses 分类数
       numClasses = 3, maxBins = 10,
       categoricalFeaturesInfo = Map(0 -> 10, 1 -> 10))
     assert(strategy.isMulticlassClassification)
@@ -845,6 +850,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 1.0)))))
     val rdd = sc.parallelize(arr)
     val strategy = new Strategy(algo = Classification, impurity = Gini,
+    //minInstancesPerNode 分裂后自节点最少包含的实例数量
       maxDepth = 2, numClasses = 2, minInstancesPerNode = 2)
 
     val model = DecisionTree.train(rdd, strategy)

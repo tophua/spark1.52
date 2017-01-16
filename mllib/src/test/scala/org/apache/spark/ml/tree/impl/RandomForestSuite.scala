@@ -85,7 +85,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Forest consisting of (full tree) + (internal node with 2 leafs)
     //林组成(全树)+(2内部节点的叶子)
-    val trees = Array(parent, grandParent).map { root =>
+    val trees = Array(parent, grandParent).map { root =>//numClasses 分类数
       new DecisionTreeClassificationModel(root, numClasses = 3).asInstanceOf[DecisionTreeModel]
     }
     //重要
