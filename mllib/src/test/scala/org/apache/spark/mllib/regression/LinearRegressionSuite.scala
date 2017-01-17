@@ -131,6 +131,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       LinearDataGenerator.generateLinearInput(0.0, Array(10.0, 10.0), 100, 42), 2)
     val sparseRDD = denseRDD.map { case LabeledPoint(label, v) =>
       val sv = Vectors.sparse(10000, Seq((0, v(0)), (9999, v(1))))
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(label, sv)
     }.cache()
     val linReg = new LinearRegressionWithSGD().setIntercept(false)
@@ -149,6 +150,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationData = LinearDataGenerator.generateLinearInput(0.0, Array(10.0, 10.0), 100, 17)
     val sparseValidationData = validationData.map { case LabeledPoint(label, v) =>
       val sv = Vectors.sparse(10000, Seq((0, v(0)), (9999, v(1))))
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(label, sv)
     }
     val sparseValidationRDD = sc.parallelize(sparseValidationData, 2)
@@ -190,6 +192,7 @@ class LinearRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkC
     val n = 200000
     val points = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
       val random = new Random(idx)
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       iter.map(i => LabeledPoint(1.0, Vectors.dense(Array.fill(n)(random.nextDouble()))))
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be

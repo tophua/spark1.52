@@ -43,6 +43,7 @@ class PythonMLLibAPISuite extends SparkFunSuite {
 
   test("pickle labeled point") {
     val points = Seq(
+   
       LabeledPoint(0.0, Vectors.dense(Array.empty[Double])),
       LabeledPoint(1.0, Vectors.dense(0.0)),
       LabeledPoint(-0.5, Vectors.dense(0.0, -2.0)),

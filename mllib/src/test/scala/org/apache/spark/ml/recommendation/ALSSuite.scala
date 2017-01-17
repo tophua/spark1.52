@@ -337,7 +337,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
    * @param regParam regularization constant
    * @param implicitPrefs whether to use implicit preference
    * @param numUserBlocks number of user blocks
-   * @param numItemBlocks number of item blocks
+   * @param numItemBlocks number of item blocks 
    * @param targetRMSE target test RMSE
    */
   def testALS(

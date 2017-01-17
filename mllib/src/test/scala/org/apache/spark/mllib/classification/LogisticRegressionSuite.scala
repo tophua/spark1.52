@@ -58,7 +58,7 @@ object LogisticRegressionSuite {
       val p = 1.0 / (1.0 + math.exp(-(offset + scale * x1(i))))
       if (rnd.nextDouble() < p) 1.0 else 0.0
     }
-
+   //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
     val testData = (0 until nPoints).map(i => LabeledPoint(y(i), Vectors.dense(Array(x1(i)))))
     testData
   }
@@ -213,7 +213,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-    //逻辑回归随机梯度下降
+    //逻辑回归基于梯度下降,仅支持2分类
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     //每次迭代优化步长
     lr.optimizer.setStepSize(10.0).setRegParam(0.0).setNumIterations(20).setConvergenceTol(0.0005)
@@ -243,7 +243,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-    //逻辑回归梯度下降运用于二元因变量预测
+    //基于lbfgs优化损失函数,支持多分类
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
 
     val model = lr.run(testRDD)
@@ -278,7 +278,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
     //逻辑回归梯度下降
     // Use half as many iterations as the previous test.
-    //使用一半的多次迭代作为以前的测试
+    //逻辑回归基于梯度下降,仅支持2分类
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer
       .setStepSize(10.0)//每次迭代优化步长
@@ -317,6 +317,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
     //逻辑回归梯度下降
     // Use half as many iterations as the previous test.
+    //逻辑回归基于梯度下降,仅支持2分类
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer.
       setStepSize(1.0).//每次迭代优化步长
@@ -357,7 +358,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
 
     // Use half as many iterations as the previous test.
-    //使用以前测试的一半以上的迭代次数
+    //基于lbfgs优化损失函数,支持多分类
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
 
     val model = lr.run(testRDD, initialWeights)
@@ -401,9 +402,11 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val testRDD1 = sc.parallelize(testData, 2)
 
     val testRDD2 = sc.parallelize(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       testData.map(x => LabeledPoint(x.label, Vectors.fromBreeze(x.features.toBreeze * 1.0E3))), 2)
 
     val testRDD3 = sc.parallelize(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       testData.map(x => LabeledPoint(x.label, Vectors.fromBreeze(x.features.toBreeze * 1.0E6))), 2)
 
     testRDD1.cache()
@@ -411,9 +414,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD3.cache()
 
     val numIteration = 10
-   //逻辑回归梯度下降
+   //基于lbfgs优化损失函数,支持多分类
     val lrA = new LogisticRegressionWithLBFGS().setIntercept(true)
     lrA.optimizer.setNumIterations(numIteration)
+    //基于lbfgs优化损失函数,支持多分类
     val lrB = new LogisticRegressionWithLBFGS().setIntercept(true).setFeatureScaling(false)
     lrB.optimizer.setNumIterations(numIteration)
 
@@ -461,7 +465,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-    //numClasses 分类数
+    //numClasses 分类数 基于lbfgs优化损失函数,支持多分类
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true).setNumClasses(3)
     lr.optimizer.setConvergenceTol(1E-15).setNumIterations(200)
 
@@ -594,6 +598,7 @@ class LogisticRegressionClusterSuite extends SparkFunSuite with LocalClusterSpar
     val n = 200000
     val points = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
       val random = new Random(idx)
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       iter.map(i => LabeledPoint(1.0, Vectors.dense(Array.fill(n)(random.nextDouble()))))
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be

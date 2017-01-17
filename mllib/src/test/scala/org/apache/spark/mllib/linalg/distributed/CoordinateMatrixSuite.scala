@@ -57,6 +57,7 @@ class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("empty entries") {//空项
     val entries = sc.parallelize(Seq[MatrixEntry](), 1)
+    //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
     val emptyMat = new CoordinateMatrix(entries)
     intercept[RuntimeException] {
       emptyMat.numCols()
@@ -82,6 +83,7 @@ class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toIndexedRowMatrix") {
+  //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val indexedRowMatrix = mat.toIndexedRowMatrix()
     val expected = BDM(
       (1.0, 2.0, 0.0, 0.0),
@@ -105,6 +107,10 @@ class CoordinateMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toBlockMatrix") {//分块矩阵
+    /**
+    * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+    * MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
+    */
     val blockMat = mat.toBlockMatrix(2, 2)
     assert(blockMat.numRows() === m)
     assert(blockMat.numCols() === n)

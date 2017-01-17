@@ -26,8 +26,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.linalg.{ Matrices, Vectors, Vector }
 import org.apache.spark.mllib.util.{ LocalClusterSparkContext, MLlibTestSparkContext }
 /**
- * 分布式矩阵以long整型做索引,以double类型为值,以RDD的方式分布式存储
- * RowMatrix:每一行是一个特征向量
+ * 行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量.
  */
 class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   /**
@@ -54,7 +53,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     //math.sqrt返回数字的平方根
     (math.sqrt(2.0) / 2.0, 0.0, math.sqrt(2.0) / 2.0),
     (math.sqrt(2.0) / 2.0, 0.0, -math.sqrt(2.0) / 2.0))
-
+   //行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量
   var denseMat: RowMatrix = _
   var sparseMat: RowMatrix = _
 
@@ -76,6 +75,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("empty rows") {//空行
     val rows = sc.parallelize(Seq[Vector](), 1)
+    //行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量
     val emptyMat = new RowMatrix(rows)
     intercept[RuntimeException] {
       emptyMat.numCols()
@@ -176,6 +176,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("svd of a low-rank matrix") {//低秩矩阵的SVD
     val rows = sc.parallelize(Array.fill(4)(Vectors.dense(1.0, 1.0, 1.0)), 2)
+    //行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量
     val mat = new RowMatrix(rows, 4, 3)
     for (mode <- Seq("auto", "local-svd", "local-eigs", "dist-eigs")) {
      //第一个参数3意味着取top 2个奇异值，第二个参数true意味着计算矩阵U，第三个参数意味小于1e-6d的奇异值将被抛弃
@@ -276,7 +277,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 class RowMatrixClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-
+//行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量
   var mat: RowMatrix = _
 
   override def beforeAll() {
@@ -288,6 +289,7 @@ class RowMatrixClusterSuite extends SparkFunSuite with LocalClusterSparkContext 
       val random = new Random(idx)
       iter.map(i => Vectors.dense(Array.fill(n)(random.nextDouble())))
     }
+    //行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量
     mat = new RowMatrix(rows)
   }
 

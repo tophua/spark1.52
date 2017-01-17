@@ -88,6 +88,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   //交替的分类和连续特征与多标签测试索引
   test("alternating categorical and continuous features with multiclass labels to test indexing") {
     val arr = Array(
+     //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0, 3.0, 1.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 1.0, 1.0, 1.0, 2.0)),
       LabeledPoint(0.0, Vectors.dense(2.0, 0.0, 0.0, 6.0, 3.0)),

@@ -75,6 +75,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
   //GBTRegressor 数据合理的行为
   test("GBTRegressor behaves reasonably on toy data") {
     val df = sqlContext.createDataFrame(Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(10, Vectors.dense(1, 2, 3, 4)),
       LabeledPoint(-5, Vectors.dense(6, 3, 2, 1)),
       LabeledPoint(11, Vectors.dense(2, 2, 3, 4)),

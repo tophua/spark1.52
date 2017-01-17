@@ -152,6 +152,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     // feature1: 0.5 (1 / 6), 1.5 (2 / 6), 3.5 (3 / 6)
     // feature2: 10.0 (1 / 6), 20.0 (1 / 6), 30.0 (2 / 6), 40.0 (2 / 6)
     val data = Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.dense(0.5, 10.0)),
       LabeledPoint(0.0, Vectors.dense(1.5, 20.0)),
       LabeledPoint(1.0, Vectors.dense(1.5, 30.0)),
@@ -197,6 +198,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
       Statistics.chiSqTest(sc.parallelize(continuousLabel, 2))
     }
     val continuousFeature =
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       Seq.fill(100000)(LabeledPoint(random.nextInt(2), Vectors.dense(random.nextDouble())))
     intercept[SparkException] {
       //提供了进行Pearson卡方检验的方法

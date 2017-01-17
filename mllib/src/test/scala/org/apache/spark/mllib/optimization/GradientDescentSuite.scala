@@ -59,7 +59,7 @@ object GradientDescentSuite {
       val yVal = offset + scale * x1(i) + rLogis(i)
       if (yVal > 0) 1 else 0
     }
-
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
     (0 until nPoints).map(i => LabeledPoint(y(i), Vectors.dense(x1(i))))
   }
 }

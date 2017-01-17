@@ -50,8 +50,8 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val nPoints = 100
     val B = 1.5
 
-    // create model
-    //创建模型
+    // create model  
+    //逻辑回归基于梯度下降,仅支持2分类
     val model = new StreamingLogisticRegressionWithSGD()
     //初始化权重
       .setInitialWeights(Vectors.dense(0.0))
@@ -67,6 +67,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
 
     // apply model training to input stream
     //将模型训练应用于输入流
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
     ssc = setupStreams(input, (inputDStream: DStream[LabeledPoint]) => {
       model.trainOn(inputDStream)
       inputDStream.count()
@@ -87,7 +88,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val nPoints = 100
 
     // create model
-    //创建模型
+    //逻辑回归基于梯度下降,仅支持2分类
     val model = new StreamingLogisticRegressionWithSGD()
       //initialWeights初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0))
@@ -137,7 +138,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val nPoints = 100
 
     // create model initialized with true weights
-    //创建模型初始化的权重
+    //逻辑回归基于梯度下降,仅支持2分类
     val model = new StreamingLogisticRegressionWithSGD()
       //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(1.5))
@@ -174,7 +175,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
   // 测试训练合并预测
   test("training and prediction") {
     // create model initialized with zero weights
-    //创建具有零权重的初始化模型
+   //逻辑回归基于梯度下降,仅支持2分类
     val model = new StreamingLogisticRegressionWithSGD()
     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(-0.1))
@@ -190,6 +191,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     }
 
     // train and predict 训练和预测
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
     ssc = setupStreams(testInput, (inputDStream: DStream[LabeledPoint]) => {
       model.trainOn(inputDStream)
       model.predictOnValues(inputDStream.map(x => (x.label, x.features)))
@@ -206,6 +208,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
   // Test empty RDDs in a stream
   //测试空的RDDS流
   test("handling empty RDDs in a stream") {//处理空的RDDS流
+  //逻辑回归基于梯度下降,仅支持2分类
     val model = new StreamingLogisticRegressionWithSGD()
     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(-0.1))

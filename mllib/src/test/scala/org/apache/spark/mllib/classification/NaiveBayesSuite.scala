@@ -255,6 +255,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("detect negative values") {//检测负价值
     val dense = Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(1.0, Vectors.dense(1.0)),
       LabeledPoint(0.0, Vectors.dense(-1.0)),
       LabeledPoint(1.0, Vectors.dense(1.0)),
@@ -263,6 +264,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
       NaiveBayes.train(sc.makeRDD(dense, 2))
     }
     val sparse = Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(1.0, Vectors.sparse(1, Array(0), Array(1.0))),
       LabeledPoint(0.0, Vectors.sparse(1, Array(0), Array(-1.0))),
       LabeledPoint(1.0, Vectors.sparse(1, Array(0), Array(1.0))),
@@ -271,6 +273,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
       NaiveBayes.train(sc.makeRDD(sparse, 2))
     }
     val nan = Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(1.0, Vectors.sparse(1, Array(0), Array(1.0))),
       LabeledPoint(0.0, Vectors.sparse(1, Array(0), Array(Double.NaN))),
       LabeledPoint(1.0, Vectors.sparse(1, Array(0), Array(1.0))),
@@ -292,6 +295,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
     //好的训练
     val okTrain = Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(1.0, Vectors.dense(1.0)),
       LabeledPoint(0.0, Vectors.dense(0.0)),
       LabeledPoint(1.0, Vectors.dense(1.0)),
@@ -366,6 +370,7 @@ class NaiveBayesClusterSuite extends SparkFunSuite with LocalClusterSparkContext
     val examples = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
       val random = new Random(idx)
       iter.map { i =>
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
         LabeledPoint(random.nextInt(2), Vectors.dense(Array.fill(n)(random.nextDouble())))
       }
     }

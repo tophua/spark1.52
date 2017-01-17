@@ -18,7 +18,9 @@ package org.apache.spark.mllib.fpm
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
-
+/**
+* PrefixSpan算法进行序列模式挖掘
+**/
 class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
   //前缀跨度内(整数序列,0 delim)运行,单集
   test("PrefixSpan internal (integer seq, 0 delim) run, singleton itemsets") {
@@ -43,7 +45,7 @@ class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
       Array(0, 6, 0, 5, 0, 3, 0))
 
     val rdd = sc.parallelize(sequences, 2).cache()
-
+   //PrefixSpan算法进行序列模式挖掘
     val result1 = PrefixSpan.genFreqPatterns(
       rdd, minCount = 2L, maxPatternLength = 50, maxLocalProjDBSize = 16L)
     val expectedValue1 = Array(
@@ -108,6 +110,7 @@ class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
       Array(0, 5, 6, 0, 1, 2, 0, 4, 6, 0, 3, 0, 2, 0),
       Array(0, 5, 0, 7, 0, 1, 6, 0, 3, 0, 2, 0, 3, 0))
     val rdd = sc.parallelize(sequences, 2).cache()
+    //PrefixSpan算法进行序列模式挖掘
     val result = PrefixSpan.genFreqPatterns(
       rdd, minCount = 2, maxPatternLength = 5, maxLocalProjDBSize = 128L)
 
@@ -259,6 +262,7 @@ class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
     val sequences = Seq(
       Array(Array(1, 2), Array(1, 2, 3)))
     val rdd = sc.parallelize(sequences, 2)
+    //PrefixSpan算法进行序列模式挖掘
     val prefixSpan = new PrefixSpan()
       .setMinSupport(1.0)
       .setMaxPatternLength(2)
@@ -286,7 +290,7 @@ class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
       Array(Array(1, 2), Array(5)),
       Array(Array(6)))
     val rdd = sc.parallelize(sequences, 2).cache()
-
+     //PrefixSpan算法进行序列模式挖掘
     val prefixSpan = new PrefixSpan()
       .setMinSupport(0.5)
       .setMaxPatternLength(5)
@@ -317,7 +321,7 @@ class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
         4 <{1},{3}>    0.50
         5   <{1,2}>    0.75
      */
-
+    //PrefixSpan算法进行序列模式挖掘
     val model = prefixSpan.run(rdd)
     val expected = Array(
       (Array(Array(1)), 3L),
@@ -339,7 +343,7 @@ class PrefixSpanSuite extends SparkFunSuite with MLlibTestSparkContext {
       Array(Array(1, 2), Array(5)),
       Array(Array(6))).map(seq => seq.map(itemSet => itemSet.map(intToString)))
     val rdd = sc.parallelize(sequences, 2).cache()
-
+    //PrefixSpan算法进行序列模式挖掘
     val prefixSpan = new PrefixSpan()
       .setMinSupport(0.5)
       .setMaxPatternLength(5)

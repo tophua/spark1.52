@@ -81,6 +81,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       maxDepth = 2,
       numClasses = 2,//numClasses 分类数
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      /**
+      指明特征是类别型的以及每个类别型特征对应值(类别)。
+      Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
+      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
       categoricalFeaturesInfo = Map(0 -> 2, 1-> 2))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -213,6 +217,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       maxDepth = 2,
       numClasses = 100,//numClasses 分类数
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      /**
+      指明特征是类别型的以及每个类别型特征对应值(类别)。
+      Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
+      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -292,6 +300,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       maxDepth = 2,
       numClasses = 100,//numClasses 分类数
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      /**
+      指明特征是类别型的以及每个类别型特征对应值(类别)。
+      Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
+      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
       categoricalFeaturesInfo = Map(0 -> 10, 1-> 10))
     //因此,分类的功能将被排序
     // 2^(10-1) - 1 > 100, so categorical features will be ordered
@@ -310,6 +322,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   //避免在最后一级聚集
   test("Avoid aggregation on the last level") {
     val arr = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 1.0, 1.0)),
       LabeledPoint(0.0, Vectors.dense(2.0, 0.0, 0.0)),
@@ -317,7 +330,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val input = sc.parallelize(arr)
 
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 1,
-        //categoricalFeaturesInfo 所有的特征为连续型变量
+        //categoricalFeaturesInfo 指明哪些特征是类别型的以及每个类别型特征对应值(类别)的数量,
+	//通过map来指定,map的key是特征索引,value是特征值数量
         //numClasses 分类数
       numClasses = 2, categoricalFeaturesInfo = Map(0 -> 3))
     val metadata = DecisionTreeMetadata.buildMetadata(input, strategy)
@@ -357,12 +371,16 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   //避免聚合,如果不纯度是0
   test("Avoid aggregation if impurity is 0.0") {
     val arr = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 1.0, 1.0)),
       LabeledPoint(0.0, Vectors.dense(2.0, 0.0, 0.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 2.0, 1.0)))
     val input = sc.parallelize(arr)
     //numClasses 分类数
+    //categoricalFeaturesInfo 指明哪些特征是类别型的以及每个类别型特征对应值(类别)的数量,
+    //通过map来指定,map的key是特征索引,value是特征值数量
+
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 5,
       numClasses = 2, categoricalFeaturesInfo = Map(0 -> 3))
     val metadata = DecisionTreeMetadata.buildMetadata(input, strategy)
@@ -694,6 +712,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   //有1个连续的特征分类,检查off-by-1误差
   test("Binary classification stump with 1 continuous feature, to check off-by-1 error") {
     val arr = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.dense(0.0)),
       LabeledPoint(1.0, Vectors.dense(1.0)),
       LabeledPoint(1.0, Vectors.dense(2.0)),
@@ -853,6 +872,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   //分裂必须满足每个节点要求的最小实例
   test("split must satisfy min instances per node requirements") {
     val arr = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
       LabeledPoint(1.0, Vectors.sparse(2, Seq((1, 1.0)))),
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 1.0)))))
@@ -914,6 +934,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   //分隔必须满足最小信息增益的要求
   test("split must satisfy min info gain requirements") {
     val arr = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
       LabeledPoint(1.0, Vectors.sparse(2, Seq((1, 1.0)))),
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 1.0)))))
@@ -1033,6 +1054,7 @@ object DecisionTreeSuite extends SparkFunSuite {
     val arr = new Array[LabeledPoint](1000)
     for (i <- 0 until 1000) {
       if (i < 600) {
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
         arr(i) = new LabeledPoint(1.0, Vectors.dense(0.0, 1.0))
       } else {
         arr(i) = new LabeledPoint(0.0, Vectors.dense(1.0, 0.0))
@@ -1050,6 +1072,7 @@ object DecisionTreeSuite extends SparkFunSuite {
     val arr = new Array[LabeledPoint](3000)
     for (i <- 0 until 3000) {
       if (i < 1000) {
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
         arr(i) = new LabeledPoint(2.0, Vectors.dense(2.0, 2.0))
       } else if (i < 2000) {
         arr(i) = new LabeledPoint(1.0, Vectors.dense(1.0, 2.0))
@@ -1077,6 +1100,7 @@ object DecisionTreeSuite extends SparkFunSuite {
     val arr = new Array[LabeledPoint](3000)
     for (i <- 0 until 3000) {
       if (i < 1000) {
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
         arr(i) = new LabeledPoint(2.0, Vectors.dense(2.0, 2.0))
       } else if (i < 2000) {
         arr(i) = new LabeledPoint(1.0, Vectors.dense(1.0, 2.0))

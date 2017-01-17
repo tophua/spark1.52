@@ -76,6 +76,7 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationData = LinearDataGenerator
       .generateLinearInput(A, Array[Double](B, C), nPoints, 17)
       .map { case LabeledPoint(label, features) =>
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(label, Vectors.dense(1.0 +: features.toArray))
     }
     val validationRDD = sc.parallelize(validationData, 2)
@@ -123,6 +124,7 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationData = LinearDataGenerator
       .generateLinearInput(A, Array[Double](B, C), nPoints, 17)
       .map { case LabeledPoint(label, features) =>
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(label, Vectors.dense(1.0 +: features.toArray))
     }
     val validationRDD = sc.parallelize(validationData, 2)
@@ -160,6 +162,7 @@ class LassoClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
     val n = 200000
     val points = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
       val random = new Random(idx)
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       iter.map(i => LabeledPoint(1.0, Vectors.dense(Array.fill(n)(random.nextDouble()))))
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be

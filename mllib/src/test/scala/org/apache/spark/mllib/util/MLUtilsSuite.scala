@@ -260,6 +260,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("loadLabeledPoints") {//加载标记点
     val points = sc.parallelize(Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(1.0, Vectors.dense(1.0, 2.0)),
       //读取LIBSVM格式的训练数据,每行表示一个标记的稀疏特征向量,需带索引数
       LabeledPoint(0.0, Vectors.sparse(2, Array(1), Array(-1.0))),

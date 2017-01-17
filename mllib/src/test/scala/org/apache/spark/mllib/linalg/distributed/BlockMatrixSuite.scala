@@ -26,7 +26,8 @@ import org.apache.spark.mllib.linalg.{SparseMatrix, DenseMatrix, Matrices, Matri
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 /**
- * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock
+ * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+ * MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
  */
 class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 /**
@@ -51,7 +52,10 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
       ((1, 0), new DenseMatrix(2, 2, Array(3.0, 0.0, 1.0, 1.0))),
       ((1, 1), new DenseMatrix(2, 2, Array(1.0, 2.0, 0.0, 1.0))),
       ((2, 1), new DenseMatrix(1, 2, Array(1.0, 5.0))))
-
+/**
+ * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+ * MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
+ */
     gridBasedMat = new BlockMatrix(sc.parallelize(blocks, numPartitions), rowPerPart, colPerPart)
   }
 
@@ -139,12 +143,13 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toIndexedRowMatrix") {//索引行矩阵
+  //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val rowMat = gridBasedMat.toIndexedRowMatrix()
     assert(rowMat.numRows() === m)
     assert(rowMat.numCols() === n)
     assert(rowMat.toBreeze() === gridBasedMat.toBreeze())
   }
-
+  //LocalMatrix局部矩阵使用整型行列索引和浮点(double)数值,存储在单机上
   test("toBreeze and toLocalMatrix") {//和本地矩阵
     val expected = BDM(//期望
       (1.0, 0.0, 0.0, 0.0),
@@ -167,6 +172,10 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
       ((2, 0), new DenseMatrix(1, 2, Array(1.0, 0.0))), // Added block that doesn't exist in A
       ((2, 1), new DenseMatrix(1, 2, Array(1.0, 5.0))))
     val rdd = sc.parallelize(blocks, numPartitions)
+    /**
+    * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+    * MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
+    */
     val B = new BlockMatrix(rdd, rowPerPart, colPerPart)
 
     val expected = BDM(
@@ -180,7 +189,10 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(AplusB.numRows() === m)
     assert(AplusB.numCols() === B.numCols())
     assert(AplusB.toBreeze() === expected)
-
+    /**
+    * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+    * MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
+    */
     val C = new BlockMatrix(rdd, rowPerPart, colPerPart, m, n + 1) // columns don't match
     intercept[IllegalArgumentException] {
       gridBasedMat.add(C)
@@ -207,6 +219,10 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
       ((0, 0), new DenseMatrix(2, 2, Array(1.0, 0.0, 0.0, 1.0))),
       ((1, 1), new DenseMatrix(2, 2, Array(1.0, 0.0, 0.0, 1.0))))
     val rdd = sc.parallelize(blocks, 2)
+    /**
+    * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+    * MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
+    */
     val B = new BlockMatrix(rdd, colPerPart, rowPerPart)
     val expected = BDM(
       (1.0, 0.0, 0.0, 0.0),
@@ -238,6 +254,7 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     val largeA = new BlockMatrix(sc.parallelize(largerAblocks, 10), 6, 4)
     val largeB = new BlockMatrix(sc.parallelize(largerBblocks, 8), 4, 4)
     val largeC = largeA.multiply(largeB)
+    //LocalMatrix局部矩阵使用整型行列索引和浮点(double)数值,存储在单机上
     val localC = largeC.toLocalMatrix()
     val result = largeA.toLocalMatrix().multiply(largeB.toLocalMatrix().asInstanceOf[DenseMatrix])
     assert(largeC.numRows() === largeA.numRows())
@@ -265,6 +282,10 @@ class BlockMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
       wrongColPerParts.validate()
     }
     // Wrong BlockMatrix dimensions 错误的分块矩阵的维度
+    /**
+    * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+    * MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
+    */
     val wrongRowSize = new BlockMatrix(rdd, rowPerPart, colPerPart, 4, 4)
     intercept[AssertionError] {
       wrongRowSize.validate()

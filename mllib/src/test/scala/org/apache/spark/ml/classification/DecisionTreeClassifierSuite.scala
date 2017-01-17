@@ -75,7 +75,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(2)//树的最大深度
       .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
-    val numClasses = 2 //分类树数
+    val numClasses = 2 //分类的类型数量
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures, numClasses)
   }  
   //固定标签0.1熵的二进制分类的树,Gini
@@ -83,7 +83,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setMaxDepth(3)//树的最大深度
       .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
-    val numClasses = 2
+    val numClasses = 2 //分类的类型数量
     Array(orderedLabeledPointsWithLabel0RDD, orderedLabeledPointsWithLabel1RDD).foreach { rdd =>
       DecisionTreeClassifier.supportedImpurities.foreach { impurity =>
         dt.setImpurity(impurity)//计算信息增益的准则
@@ -97,13 +97,14 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度
-    val numClasses = 3
+    val numClasses = 3 //分类的类型数量
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
   //有1个连续的特征分类,检查off-by-1误差
   test("Binary classification stump with 1 continuous feature, to check off-by-1 error") {
     val arr = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.dense(0.0)),
       LabeledPoint(1.0, Vectors.dense(1.0)),
       LabeledPoint(1.0, Vectors.dense(2.0)),
@@ -112,12 +113,13 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度
-    val numClasses = 2
+    val numClasses = 2 //分类的类型数量
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
   //具有2个连续特征的二叉分类
   test("Binary classification stump with 2 continuous features") {
     val arr = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
       LabeledPoint(1.0, Vectors.sparse(2, Seq((1, 1.0)))),
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 0.0)))),
@@ -126,7 +128,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度,默认值是 5
-    val numClasses = 2
+    val numClasses = 2//分类的类型数量
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
   //多类分类的树和无序的分类特征,只要有足够的垃圾箱
@@ -140,7 +142,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(4)//树的最大深度,默认值是 5
       .setMaxBins(maxBins)//离散连续性变量时最大的分箱数,默认是 32
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
-    val numClasses = 3//随机森林需要训练的树的个数,默认值是 20
+    val numClasses = 3//分类的类型数量
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
   //多类分类的树和连续性的特点
@@ -150,7 +152,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//最大深度
       .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
-    val numClasses = 3
+    val numClasses = 3//分类的类型数量
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
   //多类分类的树和连续+无序分类特征
@@ -161,7 +163,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(4)//最大深度
       .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 3)
-    val numClasses = 3//随机森林需要训练的树的个数，默认值是 20
+    val numClasses = 3//分类的类型数量
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
   //多类分类的树和10进制(有序)的分类特征
@@ -172,7 +174,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(4)//最大深度
       .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val categoricalFeatures = Map(0 -> 10, 1 -> 10)
-    val numClasses = 3//随机森林需要训练的树的个数，默认值是 20
+    val numClasses = 3//随机森林需要训练的树的个数,默认值是 20
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
   //多类分类树与10叉(有序)的分类特征,只要有足够的垃圾箱
@@ -208,6 +210,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     // this split is invalid, even though the information gain of split is large.
     //这种分裂是无效的，即使分裂的信息增益是大的
     val arr = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.dense(0.0, 1.0)),
       LabeledPoint(1.0, Vectors.dense(1.0, 1.0)),
       LabeledPoint(0.0, Vectors.dense(0.0, 0.0)),

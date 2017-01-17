@@ -46,7 +46,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("size") {
-    //创建行索引矩阵
+    //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val mat1 = new IndexedRowMatrix(indexedRows)
     assert(mat1.numRows() === m)//3行 
     assert(mat1.numCols() === n)//4列
@@ -58,6 +58,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("empty rows") {//空行
     val rows = sc.parallelize(Seq[IndexedRow](), 1)
+    //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val mat = new IndexedRowMatrix(rows)
     intercept[RuntimeException] {
       mat.numRows()
@@ -68,7 +69,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toBreeze") {//
-    //创建行索引矩阵
+    //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val mat = new IndexedRowMatrix(indexedRows)
     val expected = BDM(
       (0.0, 1.0, 2.0),
@@ -79,7 +80,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toRowMatrix") {//行矩阵
-     //创建行索引矩阵
+     //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val idxRowMat = new IndexedRowMatrix(indexedRows)
     //转换行矩阵
     val rowMat = idxRowMat.toRowMatrix()
@@ -89,8 +90,9 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
   test("toCoordinateMatrix") {//协调矩阵
+  //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val idxRowMat = new IndexedRowMatrix(indexedRows)
-    //转换坐标矩阵
+    //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
     val coordMat = idxRowMat.toCoordinateMatrix()
     assert(coordMat.numRows() === m)
     assert(coordMat.numCols() === n)
@@ -98,6 +100,7 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   test("toBlockMatrix") {//块矩阵
+   //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val idxRowMat = new IndexedRowMatrix(indexedRows)
     //转换块矩阵
     val blockMat = idxRowMat.toBlockMatrix(2, 2)
@@ -108,12 +111,17 @@ class IndexedRowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     intercept[IllegalArgumentException] {
       idxRowMat.toBlockMatrix(-1, 2)
     }
+    /**
+    * 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+    * MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
+    */
     intercept[IllegalArgumentException] {
       idxRowMat.toBlockMatrix(2, 0)
     }
   }
 
   test("multiply a local matrix") {//乘一个局部矩阵
+   //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val A = new IndexedRowMatrix(indexedRows)
     val B = Matrices.dense(3, 2, Array(0.0, 1.0, 2.0, 3.0, 4.0, 5.0))
     val C = A.multiply(B)

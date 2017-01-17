@@ -45,7 +45,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
   //组合评估,学习率和子采样率
   private val testCombinations =
     Array((10, 1.0, 1.0), (10, 0.1, 1.0), (10, 0.5, 0.75), (10, 0.1, 0.75))
-
+//LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
   private var data: RDD[LabeledPoint] = _
   private var trainData: RDD[LabeledPoint] = _
   private var validationData: RDD[LabeledPoint] = _

@@ -48,6 +48,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
   // Add an extra variable consisting of all 1.0's for the intercept.
   //添加一个额外的变量组成的所有1个的拦截
   val testData = GradientDescentSuite.generateGDInput(A, B, nPoints, 42)
+  //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
   val data = testData.map { case LabeledPoint(label, features) =>
     label -> Vectors.dense(1.0 +: features.toArray)
   }

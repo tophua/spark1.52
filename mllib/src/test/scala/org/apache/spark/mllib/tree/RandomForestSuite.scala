@@ -61,6 +61,11 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   //具有连续特征的二元分类,相比决策树,随机森林(numTrees = 1)
   test("Binary classification with continuous features:" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
+      /**
+      指明特征是类别型的以及每个类别型特征对应值(类别)。
+      Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
+      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
+
     val categoricalFeaturesInfo = Map.empty[Int, Int]
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
       numClasses = 2, categoricalFeaturesInfo = categoricalFeaturesInfo)
@@ -200,10 +205,15 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   //交替的分类和连续特征与多标签测试索引
   test("alternating categorical and continuous features with multiclass labels to test indexing") {
     val arr = new Array[LabeledPoint](4)
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
     arr(0) = new LabeledPoint(0.0, Vectors.dense(1.0, 0.0, 0.0, 3.0, 1.0))
     arr(1) = new LabeledPoint(1.0, Vectors.dense(0.0, 1.0, 1.0, 1.0, 2.0))
     arr(2) = new LabeledPoint(0.0, Vectors.dense(2.0, 0.0, 0.0, 6.0, 3.0))
     arr(3) = new LabeledPoint(2.0, Vectors.dense(0.0, 2.0, 1.0, 3.0, 2.0))
+      /**
+      指明特征是类别型的以及每个类别型特征对应值(类别)。
+      Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
+      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
     val categoricalFeaturesInfo = Map(0 -> 3, 2 -> 2, 4 -> 4)
     val input = sc.parallelize(arr)
 
