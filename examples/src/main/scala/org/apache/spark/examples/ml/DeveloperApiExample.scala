@@ -46,6 +46,7 @@ object DeveloperApiExample {
 
     // Prepare training data. 准备训练数据
     val training = sc.parallelize(Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(1.0, Vectors.dense(0.0, 1.1, 0.1)),
       LabeledPoint(0.0, Vectors.dense(2.0, 1.0, -1.0)),
       LabeledPoint(0.0, Vectors.dense(2.0, 1.3, 1.0)),
@@ -69,6 +70,7 @@ object DeveloperApiExample {
 
     // Prepare test data. 准备测试数据
     val test = sc.parallelize(Seq(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(1.0, Vectors.dense(-1.0, 1.5, 1.3)),
       LabeledPoint(0.0, Vectors.dense(3.0, 2.0, -0.1)),
       LabeledPoint(1.0, Vectors.dense(0.0, 2.2, -1.5))))

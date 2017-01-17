@@ -18,6 +18,7 @@ object LogisticRegressionWithLBFGSExample {
      * 以蜘蛛的存在或消失作为标记创建一个LabledPoint数组
      */
     val points = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0,Vectors.dense(0.245)),
       LabeledPoint(0.0,Vectors.dense(0.247)),
       LabeledPoint(1.0,Vectors.dense(0.285)),
@@ -49,6 +50,7 @@ object LogisticRegressionWithLBFGSExample {
     //创建之前数据的RDD
     val spiderRDD = sc.parallelize(points)
     //使用数据训练模型(当所有预测值为0的时候,拦截是有意义的)
+    //逻辑回归,基于lbfgs优化损失函数,支持多分类
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
     val model = lr.run(spiderRDD)
     //预测0.938尺度的蜘蛛的现状

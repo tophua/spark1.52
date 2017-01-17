@@ -7,9 +7,9 @@ import org.apache.spark.mllib.linalg.distributed.BlockMatrix
 import org.apache.spark.mllib.linalg.distributed.IndexedRow
 import org.apache.spark.mllib.linalg.Vectors
 /**
- * BlockMatrix的使用
- * 分块矩阵将一个矩阵分成若干块
- */
+* 分块矩阵(BlockMatrix)是由RDD支撑的分布式矩阵,RDD中的元素为MatrixBlock,
+* MatrixBlock是多个((Int, Int),Matrix)组成的元组,其中(Int,Int)是分块索引,Matriax是指定索引处的子矩阵
+*/
 object BlockMatrixDemo {
   def main(args: Array[String]) {
     //val sparkConf = new SparkConf().setMast("local[2]").setAppName("SparkHdfsLR")
@@ -27,8 +27,9 @@ object BlockMatrixDemo {
           println(f.take(1)(0)+"|||"+f.drop(1).mkString(","))
           IndexedRow(f.take(1)(0), Vectors.dense(f.drop(1)))
         })
+    //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val indexRowMatrix = new IndexedRowMatrix(rdd1)
-    //将IndexedRowMatrix转换成BlockMatrix，指定每块的行列数
+    //将IndexedRowMatrix转换成BlockMatrix,指定每块的行列数
     val blockMatrix: BlockMatrix = indexRowMatrix.toBlockMatrix(2, 2)
 
     //执行后的打印内容：
@@ -55,6 +56,7 @@ object BlockMatrixDemo {
     //80.0  90.0  100.0 
     //从转换后的内容可以看出，在indexRowMatrix.toBlockMatrix(2, 2)
     //操作时，指定行列数与实际矩阵内容不匹配时，会进行相应的零值填充
+    //LocalMatrix局部矩阵使用整型行列索引和浮点(double)数值,存储在单机上
     blockMatrix.toLocalMatrix()
 
     //块矩阵相加
@@ -65,7 +67,7 @@ object BlockMatrixDemo {
 
     //转换成CoordinateMatrix
     //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
-    blockMatrix.toCoordinateMatrix()
+     blockMatrix.toCoordinateMatrix()
 
     //转换成IndexedRowMatrix
     blockMatrix.toIndexedRowMatrix()

@@ -146,6 +146,7 @@ object BinaryClassification {
 
     val model = params.algorithm match {
       case LR =>
+        //基于lbfgs优化损失函数,支持多分类
         val algorithm = new LogisticRegressionWithLBFGS()
         algorithm.optimizer
           .setNumIterations(params.numIterations)//迭代数

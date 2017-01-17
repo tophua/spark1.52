@@ -42,7 +42,7 @@ object RowMatrixDedmo {
 
     //CoordinateMatrix常用于稀疏性比较高的计算中,MatrixEntry是一个 Tuple类型的元素,其中包含行、列和元素值
     coordinateMatrix.toBlockMatrix()
-    //转换成索引行矩阵，下一节中详细讲解
+    //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     coordinateMatrix.toIndexedRowMatrix()
     //转换成RowMatrix
     coordinateMatrix.toRowMatrix()

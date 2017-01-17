@@ -63,7 +63,7 @@ object StreamingLinearRegression {
     val conf = new SparkConf().setMaster("local").setAppName("StreamingLinearRegression")
     //批次间隔
     val ssc = new StreamingContext(conf, Seconds(args(2).toLong))
-
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
     val trainingData = ssc.textFileStream(args(0)).map(LabeledPoint.parse)
     val testData = ssc.textFileStream(args(1)).map(LabeledPoint.parse)
 

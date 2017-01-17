@@ -70,6 +70,7 @@ object NativeBayesSQL {
 
     var trainDataRdd = rescaledData.select($"category", $"features").map {
       case Row(label: String, features: Vector) =>
+      //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
         LabeledPoint(label.toDouble, Vectors.dense(features.toArray))
     }
 

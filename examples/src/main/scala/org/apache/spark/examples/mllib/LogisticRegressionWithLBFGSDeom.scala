@@ -10,7 +10,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
 /**
- * 逻辑回归
+ * 逻辑回归,基于lbfgs优化损失函数,支持多分类
  */
 object LogisticRegressionWithLBFGSDeom {
   def main(args: Array[String]) {
@@ -37,13 +37,14 @@ object LogisticRegressionWithLBFGSDeom {
     val training = splits(0).cache()
     val test = splits(1)
     /**逻辑回归***/
-    //运行训练算法构建模型
+    //逻辑回归,基于lbfgs优化损失函数,支持多分类
     val modelBFGS = new LogisticRegressionWithLBFGS()
       .setNumClasses(10)
       .run(training)
     //在测试数据上计算原始分数
     // Compute raw scores on the test set.
     val predictionAndLabels = test.map {
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       case LabeledPoint(label, features) =>
         val prediction = modelBFGS.predict(features)
         (prediction, label)

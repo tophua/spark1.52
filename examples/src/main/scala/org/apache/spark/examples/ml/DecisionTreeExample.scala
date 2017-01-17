@@ -151,6 +151,7 @@ object DecisionTreeExample {
       format: String,
       expectedNumFeatures: Option[Int] = None): RDD[LabeledPoint] = {
     format match {
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       case "dense" => MLUtils.loadLabeledPoints(sc, path)
       case "libsvm" => expectedNumFeatures match {
         case Some(numFeatures) => MLUtils.loadLibSVMFile(sc, path, numFeatures)

@@ -37,6 +37,7 @@ object DecisionTreeExample {
     //解析数据并把它加载到LablePoint
     val parsedData = data.map {line => 
           val parts = line.split(',').map(_.toDouble)
+	  //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
           LabeledPoint(parts(0), Vectors.dense(parts.tail))
           }
     //用这些数据训练算法

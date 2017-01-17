@@ -46,6 +46,7 @@ object DataTypes {
     val pos = LabeledPoint(1.0, Vectors.dense(1.0, 0.0, 3.0))
 
     // Create a labeled point with a negative label and a sparse feature vector.
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
     val neg = LabeledPoint(0.0, Vectors.sparse(3, Array(0, 2), Array(1.0, 3.0)))
     //稀疏数据,MLlib可以读取以LibSVM格式存储的训练实例,每行代表一个含类标签的稀疏特征向量
     //索引从1开始并且递增,加载被转换为从0开始   
@@ -73,9 +74,8 @@ object DataTypes {
     val sm: Matrix = Matrices.sparse(3, 2, Array(0, 1, 3), Array(0, 2, 1), Array(9, 6, 8))
     /**分布式矩阵**/
     val rows: RDD[Vector] = null // an RDD of local vectors
-    // Create a RowMatrix from an RDD[Vector].
-    //分布式矩阵行
-    /**行分布式矩阵**/
+    // Create a RowMatrix from an RDD[Vector].  
+    //行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量
     val mat: RowMatrix = new RowMatrix(rows)
 
     // Get its size.
@@ -88,6 +88,7 @@ object DataTypes {
     //包涵行索引数据集信息
     val rowsIndex: RDD[IndexedRow] = null // an RDD of indexed rows 索引行的RDD
     // Create an IndexedRowMatrix from an RDD[IndexedRow].
+    //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val matIndex: IndexedRowMatrix = new IndexedRowMatrix(rowsIndex)
 
     // Get its size. 得到它的大小
@@ -108,7 +109,7 @@ object DataTypes {
     val nCoordinate = mat.numCols()
 
     // Convert it to an IndexRowMatrix whose rows are sparse vectors.
-    //将其转换为一个行是稀疏向量的索引行矩阵
+    //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val indexedRowMatrix = matCoordinate.toIndexedRowMatrix()
     /**BlockMatrix块矩阵**/
 

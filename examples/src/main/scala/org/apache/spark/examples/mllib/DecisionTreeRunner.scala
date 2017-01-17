@@ -191,6 +191,7 @@ object DecisionTreeRunner {
     // Load training data and cache it.
     //加载训练数据并将其缓存
     val origExamples = dataFormat match {
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       case "dense" => MLUtils.loadLabeledPoints(sc, input).cache()
       /**
        *  libSVM的数据格式
@@ -221,6 +222,7 @@ object DecisionTreeRunner {
           if (classIndexMap.isEmpty) {
             origExamples
           } else {
+	  //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
             origExamples.map(lp => LabeledPoint(classIndexMap(lp.label), lp.features))
           }
         }
@@ -267,6 +269,7 @@ object DecisionTreeRunner {
             if (classIndexMap.isEmpty) {
               origTestExamples
             } else {
+	    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
               origTestExamples.map(lp => LabeledPoint(classIndexMap(lp.label), lp.features))
             }
           }
@@ -323,9 +326,9 @@ object DecisionTreeRunner {
       params.testInput, params.algo, params.fracTest)
 
     val impurityCalculator = params.impurity match {
-      case Gini => impurity.Gini
-      case Entropy => impurity.Entropy
-      case Variance => impurity.Variance
+      case Gini => impurity.Gini //基尼
+      case Entropy => impurity.Entropy //熵
+      case Variance => impurity.Variance //方差
     }
 
     params.checkpointDir.foreach(sc.setCheckpointDir)
@@ -342,7 +345,7 @@ object DecisionTreeRunner {
           numClasses = numClasses,//训练的树的数量
           minInstancesPerNode = params.minInstancesPerNode,//分裂后自节点最少包含的实例数量
           minInfoGain = params.minInfoGain,//分裂节点时所需最小信息增益
-          useNodeIdCache = params.useNodeIdCache,
+          useNodeIdCache = params.useNodeIdCache,//使用RDD每行的节点ID缓存
 	        //设置检查点间隔(>=1),或不设置检查点(-1)
           checkpointInterval = params.checkpointInterval)
     if (params.numTrees == 1) {//训练的树的数量

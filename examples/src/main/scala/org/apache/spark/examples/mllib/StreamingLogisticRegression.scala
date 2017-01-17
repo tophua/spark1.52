@@ -67,8 +67,9 @@ object StreamingLogisticRegression {
     val ssc = new StreamingContext(conf, Seconds(args(2).toLong))
 
     val trainingData = ssc.textFileStream(args(0)).map(LabeledPoint.parse)
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
     val testData = ssc.textFileStream(args(1)).map(LabeledPoint.parse)
-
+    //SGD基于梯度下降,仅支持2分类
     val model = new StreamingLogisticRegressionWithSGD()
     //initialWeights初始取值,默认是0向量
       .setInitialWeights(Vectors.zeros(args(3).toInt))

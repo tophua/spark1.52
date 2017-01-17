@@ -17,6 +17,7 @@ object RidgeRegressionWithSGDExample {
      * 创建以病态数据体作为标记的LabledPoint数组
      */
     val points = Array(
+    //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(1, Vectors.dense(5, 3, 1, 2, 1, 3, 2, 2, 1)),
       LabeledPoint(2, Vectors.dense(9, 8, 8, 9, 7, 9, 8, 7, 9)))
     //创建之前数据的RDD

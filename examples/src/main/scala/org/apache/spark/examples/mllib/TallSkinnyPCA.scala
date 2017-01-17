@@ -53,6 +53,7 @@ object TallSkinnyPCA {
       val values = line.split(' ').map(_.toDouble)
       Vectors.dense(values)
     }
+    //行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量
     val mat = new RowMatrix(rows)
 
     // Compute principal components.

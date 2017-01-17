@@ -23,6 +23,7 @@ object IndexRowMatrixDemo {
         Array(1.0, 2.0, 3.0, 4.0),
         Array(2.0, 3.0, 4.0, 5.0),
         Array(3.0, 4.0, 5.0, 6.0))).map(f => IndexedRow(f.take(1)(0), Vectors.dense(f.drop(1))))
+     //索引行矩阵(IndexedRowMatrix)按行分布式存储,有行索引,其底层支撑结构是索引的行组成的RDD,所以每行可以通过索引(long)和局部向量表示
     val indexRowMatrix = new IndexedRowMatrix(rdd1)
     //计算拉姆矩阵
     var gramianMatrix: Matrix = indexRowMatrix.computeGramianMatrix()

@@ -66,9 +66,8 @@ object KMeansClustering {
     ks.foreach(cluster => {
       //parsedTrainingData训练模型数据
       val model: KMeansModel = KMeans.train(parsedTrainingData, cluster, 30, 1)
-      //KMeansModel 类里提供了 computeCost 方法，该方法通过计算所有数据点到其最近的中心点的平方和来评估聚类的效果。
-      //一般来说，同样的迭代次数和算法跑的次数，这个值越小代表聚类的效果越好。
-      //但是在实际情况下，我们还要考虑到聚类结果的可解释性，不能一味的选择使 computeCost 结果值最小的那个 K。
+      //KMeansModel 类里提供了 computeCost 方法，该方法通过计算所有数据点到其最近的中心点的平方和来评估聚类的效果。  
+      //统计聚类错误的样本比例
       val ssd = model.computeCost(parsedTrainingData)
       //model.predict(point)
       println("sum of squared distances of points to their nearest center when k=" + cluster + " -> " + ssd)

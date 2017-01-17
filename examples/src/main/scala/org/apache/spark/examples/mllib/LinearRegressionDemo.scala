@@ -25,7 +25,7 @@ object LinearRegressionDemo {
     val parsedData = data.map { line =>
 
       val parts = line.split(',')
-
+	//LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
 
     }
