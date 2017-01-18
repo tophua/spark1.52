@@ -70,7 +70,7 @@ object DecisionTreeRunner {
        */
       dataFormat: String = "libsvm",
       algo: Algo = Classification,//算法
-      maxDepth: Int = 5,//树的最大深度，默认值是 5
+      maxDepth: Int = 5,//树的最大深度,为了防止过拟合,设定划分的终止条件
       impurity: ImpurityType = Gini,//树节点选择的不纯度的衡量指标,取值可以是”entroy”或“gini”,默认是”gini”
       maxBins: Int = 32,//离散连续性变量时最大的分箱数,默认是 32
       minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
@@ -95,7 +95,7 @@ object DecisionTreeRunner {
         .text(s"impurity type (${ImpurityType.values.mkString(",")}), " +
           s"default: ${defaultParams.impurity}")
         .action((x, c) => c.copy(impurity = ImpurityType.withName(x)))
-      opt[Int]("maxDepth")
+      opt[Int]("maxDepth")//树的最大深度,为了防止过拟合,设定划分的终止条件
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("maxBins")
@@ -306,7 +306,7 @@ object DecisionTreeRunner {
         testInput:	,
         dataFormat:	libsvm,
         algo:	Classification,
-        maxDepth:	5,
+        maxDepth:	5,//树的最大深度,为了防止过拟合,设定划分的终止条件
         impurity:	Gini,
         maxBins:	32,
         minInstancesPerNode:	1,
@@ -333,14 +333,14 @@ object DecisionTreeRunner {
 
     params.checkpointDir.foreach(sc.setCheckpointDir)
   /**
-         最大树深度maxDepth
+         最大树深度maxDepth 树的最大深度,为了防止过拟合,设定划分的终止条件
   	最小信息增益minInfoGain
           最小子节点实例数minInstancesPerNode*/
     val strategy
       = new Strategy(
           algo = params.algo,
           impurity = impurityCalculator,//计算信息增益的准则
-          maxDepth = params.maxDepth,//树的最大深度(>=0)
+          maxDepth = params.maxDepth,//树的最大深度,为了防止过拟合,设定划分的终止条件
           maxBins = params.maxBins,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
           numClasses = numClasses,//训练的树的数量
           minInstancesPerNode = params.minInstancesPerNode,//分裂后自节点最少包含的实例数量

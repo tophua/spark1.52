@@ -74,6 +74,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
       case (numIterations, learningRate, subsamplingRate) =>
         val rdd = sc.parallelize(GradientBoostedTreesSuite.data, 2)
 	//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
+	//树的最大深度,为了防止过拟合,设定划分的终止条件
         val treeStrategy = new Strategy(algo = Regression, impurity = Variance, maxDepth = 2,
           categoricalFeaturesInfo = Map.empty, subsamplingRate = subsamplingRate)
         val boostingStrategy =
@@ -104,6 +105,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
       case (numIterations, learningRate, subsamplingRate) =>
         val rdd = sc.parallelize(GradientBoostedTreesSuite.data, 2)
 	//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
+	//树的最大深度,为了防止过拟合,设定划分的终止条件
         val treeStrategy = new Strategy(algo = Classification, impurity = Variance, maxDepth = 2,
           numClasses = 2, categoricalFeaturesInfo = Map.empty,
           subsamplingRate = subsamplingRate)
@@ -175,6 +177,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     val algos = Array(Regression, Regression, Classification)
     val losses = Array(SquaredError, AbsoluteError, LogLoss)
     algos.zip(losses).foreach { case (algo, loss) =>
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
       val treeStrategy = new Strategy(algo = algo, impurity = Variance, maxDepth = 2,
         categoricalFeaturesInfo = Map.empty)
       val boostingStrategy =
@@ -218,7 +221,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     sc.setCheckpointDir(path)
 
     val rdd = sc.parallelize(GradientBoostedTreesSuite.data, 2)
-
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val treeStrategy = new Strategy(algo = Regression, impurity = Variance, maxDepth = 2,
     //设置检查点间隔(>=1),或不设置检查点(-1)
       categoricalFeaturesInfo = Map.empty, checkpointInterval = 2)

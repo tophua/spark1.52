@@ -37,7 +37,7 @@ object RandomForestDemo {
     val featureSubsetStrategy = "auto"
     //纯度计算
     val impurity = "gini"
-    //树的最大层次
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val maxDepth = 4
     //连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val maxBins = 32

@@ -63,7 +63,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
         case (maxIter, learningRate, subsamplingRate) =>
 	        //梯度提升回归(GBT)
           val gbt = new GBTRegressor()
-            .setMaxDepth(2)//树的最大深度
+            .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
             .setSubsamplingRate(subsamplingRate)//学习一棵决策树使用的训练数据比例，范围[0,1]
             .setLossType(loss)//损失函数类型
             .setMaxIter(maxIter)//迭代次数
@@ -85,7 +85,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     ))
     //梯度提升回归(GBT)
     val gbt = new GBTRegressor()
-      .setMaxDepth(2)//树的最大深度
+      .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMaxIter(2)//迭代次数
       //fit()方法将DataFrame转化为一个Transformer的算法
     val model = gbt.fit(df)
@@ -109,7 +109,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     val df = sqlContext.createDataFrame(data)
     //梯度提升回归(GBT)
     val gbt = new GBTRegressor()
-      .setMaxDepth(2)//树的最大深度
+      .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMaxIter(5)//迭代次数
       .setStepSize(0.1)//每次迭代优化步长
       .setCheckpointInterval(2)//设置检查点间隔(>=1)
@@ -131,7 +131,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     GBTRegressor.supportedLossTypes.foreach { loss =>
       val gbt = new GBTRegressor()//梯度提升回归(GBT)
         .setMaxIter(maxIter)//迭代次数
-        .setMaxDepth(2)//树的最大深度
+        .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
         .setLossType(loss)//损失函数类型
         .setValidationTol(0.0)
       compareAPIs(trainData, None, gbt, categoricalFeatures)

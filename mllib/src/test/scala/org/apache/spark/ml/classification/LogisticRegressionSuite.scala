@@ -253,7 +253,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val lr = new LogisticRegression
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
-    //默认分类数
+    //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(model.numClasses === 2)
     //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
     val threshold = model.getThreshold
@@ -287,19 +287,20 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .add(0.0).add(3.0).add(4.0).add(3.0).add(6.0)
     assert(summarizer1.histogram.zip(Array[Long](1, 0, 0, 2, 1, 0, 1)).forall(x => x._1 === x._2))
     assert(summarizer1.countInvalid === 0)
-    assert(summarizer1.numClasses === 7)//分类数
-
+    //如果是分类树,指定有多少种类别,随机森林训练的树的个数
+    assert(summarizer1.numClasses === 7)
     val summarizer2 = (new MultiClassSummarizer)
       .add(1.0).add(5.0).add(3.0).add(0.0).add(4.0).add(1.0)
     assert(summarizer2.histogram.zip(Array[Long](1, 2, 0, 1, 1, 1)).forall(x => x._1 === x._2))
     assert(summarizer2.countInvalid === 0)
-    //numClasses 分类数
+    //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(summarizer2.numClasses === 6)
 
     val summarizer3 = (new MultiClassSummarizer)
       .add(0.0).add(1.3).add(5.2).add(2.5).add(2.0).add(4.0).add(4.0).add(4.0).add(1.0)
     assert(summarizer3.histogram.zip(Array[Long](1, 1, 1, 0, 3)).forall(x => x._1 === x._2))
-    //numClasses 分类数
+
+   //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(summarizer3.countInvalid === 3)
     assert(summarizer3.numClasses === 5)
 
@@ -308,7 +309,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     //直方图
     assert(summarizer4.histogram.zip(Array[Long](0, 1, 1, 1)).forall(x => x._1 === x._2))
     assert(summarizer4.countInvalid === 2)
-    //numClasses 分类数
+    //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(summarizer4.numClasses === 4)
 
     // small map merges large one
@@ -317,8 +318,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(summarizerA.hashCode() === summarizer2.hashCode())
     //直方图
     assert(summarizerA.histogram.zip(Array[Long](2, 2, 0, 3, 2, 1, 1)).forall(x => x._1 === x._2))
-    //numClasses 分类数
+   
     assert(summarizerA.countInvalid === 0)
+     //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(summarizerA.numClasses === 7)
 
     // large map merges small one
@@ -327,6 +329,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(summarizerB.hashCode() === summarizer3.hashCode())
     assert(summarizerB.histogram.zip(Array[Long](1, 2, 2, 1, 3)).forall(x => x._1 === x._2))
     assert(summarizerB.countInvalid === 5)
+     //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(summarizerB.numClasses === 5)
   }
   //不规则截取的二元逻辑回归

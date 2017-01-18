@@ -45,7 +45,7 @@ object GradientBoostedTreesRunner {
       testInput: String = "",
       dataFormat: String = "libsvm",
       algo: String = "Classification",
-      maxDepth: Int = 5,
+      maxDepth: Int = 5,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numIterations: Int = 10,
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
@@ -57,7 +57,7 @@ object GradientBoostedTreesRunner {
       opt[String]("algo")
         .text(s"algorithm (${Algo.values.mkString(",")}), default: ${defaultParams.algo}")
         .action((x, c) => c.copy(algo = x))
-      opt[Int]("maxDepth")
+      opt[Int]("maxDepth")//树的最大深度,为了防止过拟合,设定划分的终止条件
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("numIterations")

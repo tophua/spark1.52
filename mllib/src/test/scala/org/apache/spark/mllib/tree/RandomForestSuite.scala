@@ -75,6 +75,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Binary classification with continuous features and node Id cache :" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
       numClasses = 2, categoricalFeaturesInfo = categoricalFeaturesInfo,
       useNodeIdCache = true)
@@ -106,6 +107,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
     val strategy = new Strategy(algo = Regression, impurity = Variance,
     //numClasses 分类数,maxBins连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
       maxDepth = 2, maxBins = 10, numClasses = 2,
       categoricalFeaturesInfo = categoricalFeaturesInfo)
     regressionTestWithContinuousFeatures(strategy)
@@ -114,7 +116,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Regression with continuous features and node Id cache :" +
     " comparing DecisionTree vs. RandomForest(numTrees = 1)") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
-    //maxDepth 树的最大深度(>=0)
+   //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Regression, impurity = Variance,
       maxDepth = 2, maxBins = 10, numClasses = 2,
       categoricalFeaturesInfo = categoricalFeaturesInfo, useNodeIdCache = true)
@@ -190,6 +192,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   //具有连续特征的二元分类:抽样的特点
   test("Binary classification with continuous features: subsampling features") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
       numClasses = 2, categoricalFeaturesInfo = categoricalFeaturesInfo)
     binaryClassificationTestWithContinuousFeaturesAndSubsampledFeatures(strategy)
@@ -197,6 +200,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
   //具有连续特征和节点标识缓存的二元分类:抽样的特点
   test("Binary classification with continuous features and node Id cache: subsampling features") {
     val categoricalFeaturesInfo = Map.empty[Int, Int]
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
       numClasses = 2, categoricalFeaturesInfo = categoricalFeaturesInfo,
       useNodeIdCache = true)
@@ -216,7 +220,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       注意特征索引是从0开始的，0和4表示第1和第5个特征**/
     val categoricalFeaturesInfo = Map(0 -> 3, 2 -> 2, 4 -> 4)
     val input = sc.parallelize(arr)
-
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 5,
       numClasses = 3, categoricalFeaturesInfo = categoricalFeaturesInfo)
     
@@ -254,7 +258,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
         	空表示所有特征都是数值型（为了方便，示例中直接取空，实际当中并不能这么使用） 
       4.不纯性(impurity)度量：gini或者entropy，不纯度用来衡量一个规则的好坏，
       	好的规则可以将数据划分为等值的两部分，坏规则则相反 
-      5.决策树的最大深度，越深的决策树越有可能产生过度拟合的问题 
+      5.树的最大深度,为了防止过拟合,设定划分的终止条件
       6.决策树的最大桶数，每层使用的决策规则的个数，越多就可能精确，花费的时候也就越多,
       	最小的桶数应该不小于类别特征中最大的选择个数
      */

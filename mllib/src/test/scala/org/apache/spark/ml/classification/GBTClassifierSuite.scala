@@ -74,7 +74,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
       case (maxIter, learningRate, subsamplingRate) =>
        //梯度提升树(GBT)分类
         val gbt = new GBTClassifier()
-          .setMaxDepth(2)//树的最大深度
+          .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setSubsamplingRate(subsamplingRate)//学习一棵决策树使用的训练数据比例，范围[0,1]
           .setLossType("logistic")//损失函数类型
           .setMaxIter(maxIter)//最大迭代次数
@@ -92,7 +92,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     val df: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 2)
     //梯度提升树(GBT)分类
     val gbt = new GBTClassifier()
-      .setMaxDepth(2)//树的最大深度
+      .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setLossType("logistic")//损失函数类型
       .setMaxIter(5)//最大迭代次数
       .setStepSize(0.1)//每次迭代优化步长
@@ -118,7 +118,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     GBTClassifier.supportedLossTypes.foreach { loss =>
       val gbt = new GBTClassifier()
         .setMaxIter(maxIter)//最大迭代次数
-        .setMaxDepth(2)//树的最大深度
+        .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
         .setLossType(loss))//损失函数类型
         .setValidationTol(0.0)
       compareAPIs(trainData, None, gbt, categoricalFeatures)
@@ -172,7 +172,7 @@ private object GBTClassifierSuite {
       gbt.getOldBoostingStrategy(categoricalFeatures, OldAlgo.Classification)
     val oldGBT = new OldGBT(oldBoostingStrategy)
     val oldModel = oldGBT.run(data)
-    //numClasses 分类数
+    //numClasses 如果是分类树,指定有多少种类别,随机森林训练的树的个数
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses = 2)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val newModel = gbt.fit(newData)

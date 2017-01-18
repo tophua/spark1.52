@@ -84,7 +84,7 @@ object CrossValidatorExample {
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
-      //特征提取和转换 TF-IDF
+      //特征提取和转换 TF-IDF算法从文本分词中创建特征向量
       //HashingTF 从一个文档中计算出给定大小的词频向量,
       //"a a b b c d" HashingTF (262144,[97,98,99,100],[2.0,2.0,1.0,1.0])
     val hashingTF = new HashingTF()

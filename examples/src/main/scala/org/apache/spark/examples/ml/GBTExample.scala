@@ -54,7 +54,7 @@ object GBTExample {
       testInput: String = "",
       dataFormat: String = "libsvm",//数据格式
       algo: String = "classification",//"regression",算法类型
-      maxDepth: Int = 5,//最大深度
+      maxDepth: Int = 5,//树的最大深度,为了防止过拟合,设定划分的终止条件
       maxBins: Int = 32,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
       minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
@@ -73,7 +73,7 @@ object GBTExample {
       opt[String]("algo")
         .text(s"algorithm (classification, regression), default: ${defaultParams.algo}")
         .action((x, c) => c.copy(algo = x))
-      opt[Int]("maxDepth")
+      opt[Int]("maxDepth")//树的最大深度,为了防止过拟合,设定划分的终止条件
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("maxBins")
@@ -176,7 +176,7 @@ object GBTExample {
 	    //训练数据集DataFrame中存储特征数据的列名
           .setFeaturesCol("indexedFeatures")
           .setLabelCol(labelColName)//标签列的名称
-          .setMaxDepth(params.maxDepth)//树的最大深度
+          .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
@@ -188,7 +188,7 @@ object GBTExample {
         new GBTRegressor()
           .setFeaturesCol("indexedFeatures")//训练数据集DataFrame中存储特征数据的列名
           .setLabelCol(labelColName)//标签列的名称
-          .setMaxDepth(params.maxDepth)//树的最大深度
+          .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益

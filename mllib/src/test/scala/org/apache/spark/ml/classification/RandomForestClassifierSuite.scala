@@ -59,7 +59,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 2//numClasses 分类数
     val newRF = rf
       .setImpurity("Gini")//计算信息增益的准则
-      .setMaxDepth(2)
+      .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setNumTrees(1)//训练的树的数量
       .setFeatureSubsetStrategy("auto")//每次分裂候选特征数量
       .setSeed(123)
@@ -100,7 +100,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
 
     val rf = new RandomForestClassifier()
       .setImpurity("Gini")//计算信息增益的准则
-      .setMaxDepth(5)
+      .setMaxDepth(5)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setNumTrees(2)//训练的树的数量
       .setFeatureSubsetStrategy("sqrt")//每次分裂候选特征数量
       .setSeed(12345)
@@ -114,7 +114,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
 
     val rf1 = new RandomForestClassifier()
       .setImpurity("Gini")//计算信息增益的准则
-      .setMaxDepth(2)
+      .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setCacheNodeIds(true)
       .setNumTrees(3)//numClasses 分类数
       .setFeatureSubsetStrategy("auto")//每次分裂候选特征数量
@@ -129,7 +129,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rdd = orderedLabeledPoints5_20
     val rf = new RandomForestClassifier()
       .setImpurity("Gini")//计算信息增益的准则
-      .setMaxDepth(3)
+      .setMaxDepth(3)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setNumTrees(3)//训练的树的数量
       .setSeed(123)
     val categoricalFeatures = Map.empty[Int, Int]
@@ -166,7 +166,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val numClasses = 2//numClasses 分类数
     val rf = new RandomForestClassifier()
       .setImpurity("Gini")//计算信息增益的准则
-      .setMaxDepth(3)
+      .setMaxDepth(3)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setNumTrees(3)//训练的树的数量
       .setFeatureSubsetStrategy("all")//每次分裂候选特征数量
       .setSubsamplingRate(1.0)//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]

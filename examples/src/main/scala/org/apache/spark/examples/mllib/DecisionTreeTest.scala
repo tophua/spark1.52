@@ -19,7 +19,7 @@ object DecisionTreeTest {
       LabeledPoint(parts(0), Vectors.dense(parts.tail))
     }
 
-    val maxDepth = 5//树的最大深度，默认值是 5
+    val maxDepth = 5//树的最大深度,为了防止过拟合,设定划分的终止条件
     val model = DecisionTree.train(parsedData, Classification, Gini, maxDepth)
 
     val labelAndPreds = parsedData.map { point =>

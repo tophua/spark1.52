@@ -58,7 +58,7 @@ object TestNativeBayes {
     println("output2：")
     featurizedData.select($"category", $"words", $"rawFeatures").take(1)
     //println(">>>>>>>>>>>>>>>."+featurizedData.toString())
-    //计算每个词的TF-IDF
+    //计算每个词的TF-IDF算法从文本分词中创建特征向量
     var idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
     //fit()方法将DataFrame转化为一个Transformer的算法
     var idfModel = idf.fit(featurizedData)

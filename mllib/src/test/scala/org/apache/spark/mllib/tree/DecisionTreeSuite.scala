@@ -78,7 +78,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Classification,
       Gini,
-      maxDepth = 2,
+      maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 2,//numClasses 分类数
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       /**
@@ -107,7 +107,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Classification,
       Gini,
-      maxDepth = 2,
+      maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 2,//numClasses 分类数
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       //用Map存储类别(离散)特征及每个类别对应值(类别)的数量
@@ -214,7 +214,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Classification,
       Gini,
-      maxDepth = 2,
+      maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 100,//numClasses 分类数
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       /**
@@ -297,7 +297,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Classification,
       Gini,
-      maxDepth = 2,
+      maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 100,//numClasses 分类数
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       /**
@@ -380,7 +380,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     //numClasses 分类数
     //categoricalFeaturesInfo 指明哪些特征是类别型的以及每个类别型特征对应值(类别)的数量,
     //通过map来指定,map的key是特征索引,value是特征值数量
-
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 5,
       numClasses = 2, categoricalFeaturesInfo = Map(0 -> 3))
     val metadata = DecisionTreeMetadata.buildMetadata(input, strategy)
@@ -433,7 +433,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // Train a 1-node model
     //训练一个一级节点
-    //熵：代表集合的无序程度
+    //熵:代表集合的无序程度
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategyOneNode = new Strategy(Classification, Entropy, maxDepth = 1,
     //numClasses 分类数
       numClasses = 2, maxBins = 100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
@@ -507,7 +508,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Classification,
       Gini,
       numClasses = 2,//分类数
-      maxDepth = 2,//最大深度
+      maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       maxBins = 100,//最大箱数
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
@@ -544,7 +545,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Regression,
       Variance,
-      maxDepth = 2,//树的最大深度（>=0）
+      maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
@@ -573,7 +574,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val strategy = new Strategy(
       Regression,
       Variance,
-      maxDepth = 2,//树的最大深度（>=0）
+      maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       categoricalFeaturesInfo = Map(0 -> 2, 1-> 2))
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -591,6 +592,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
     //maxBins离散连续性变量时最大的分箱数，默认是 32
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(Classification, Gini, maxDepth = 3,
       numClasses = 2, maxBins = 100)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -616,6 +618,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
     //maxBins连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(Classification, Gini, maxDepth = 3,
       numClasses = 2, maxBins = 100)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -642,6 +645,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
     //numClasses 分类数
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(Classification, Entropy, maxDepth = 3,
       numClasses = 2, maxBins = 100)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -667,7 +671,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
-    //树的最大深度（>=0）
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(Classification, Entropy, maxDepth = 3,
       numClasses = 2, maxBins = 100)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -718,6 +722,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(1.0, Vectors.dense(2.0)),
       LabeledPoint(1.0, Vectors.dense(3.0)))
     val rdd = sc.parallelize(arr)
+    //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
       numClasses = 2)
 
@@ -816,7 +821,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   //多类分类连续+无序分类特征
   test("Multiclass classification stump with continuous + unordered categorical features") {
     val arr = DecisionTreeSuite.generateContinuousDataPointsForMulticlass()
-    val rdd = sc.parallelize(arr)
+    val rdd = sc.parallelize(arr)//树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
       numClasses = 3, maxBins = 100, categoricalFeaturesInfo = Map(0 -> 3))
     assert(strategy.isMulticlassClassification)
@@ -838,7 +843,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   //多类分类和10进制(有序)的分类特征
   test("Multiclass classification stump with 10-ary (ordered) categorical features") {
     val arr = DecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures()
-    val rdd = sc.parallelize(arr)
+    val rdd = sc.parallelize(arr)//树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
       numClasses = 3, maxBins = 100,
       categoricalFeaturesInfo = Map(0 -> 10, 1 -> 10))
@@ -939,7 +944,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(1.0, Vectors.sparse(2, Seq((1, 1.0)))),
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 1.0)))))
 
-    val input = sc.parallelize(arr)
+    val input = sc.parallelize(arr)//树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
       numClasses = 2, minInfoGain = 1.0)
 

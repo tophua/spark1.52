@@ -61,7 +61,7 @@ object RandomForestExample {
  */
       dataFormat: String = "libsvm",
       algo: String = "classification",//分类
-      maxDepth: Int = 5,//树的最大深度
+      maxDepth: Int = 5,//树的最大深度,为了防止过拟合,设定划分的终止条件
       maxBins: Int = 32,//离散连续性变量时最大的分箱数，默认是 32
       minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
       minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
@@ -81,7 +81,7 @@ object RandomForestExample {
       opt[String]("algo")
         .text(s"algorithm (classification, regression), default: ${defaultParams.algo}")
         .action((x, c) => c.copy(algo = x))
-      opt[Int]("maxDepth")
+      opt[Int]("maxDepth")//树的最大深度,为了防止过拟合,设定划分的终止条件
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("maxBins")
@@ -196,7 +196,7 @@ object RandomForestExample {
         new RandomForestClassifier()
           .setFeaturesCol("indexedFeatures")//训练数据集 DataFrame 中存储特征数据的列名
           .setLabelCol(labelColName)//标签列的名称
-          .setMaxDepth(params.maxDepth)//树的最大深度，默认值是 5
+          .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
@@ -208,7 +208,7 @@ object RandomForestExample {
         new RandomForestRegressor()
           .setFeaturesCol("indexedFeatures")//训练数据集 DataFrame 中存储特征数据的列名
           .setLabelCol(labelColName)//标签列的名称
-          .setMaxDepth(params.maxDepth)//树的最大深度，默认值是 5
+          .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益

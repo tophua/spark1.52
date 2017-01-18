@@ -100,9 +100,9 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val rdd = sc.parallelize(generateMultinomialLogisticInput(
       weights, xMean, xVariance, true, nPoints, 42), 2)
     val dataFrame = sqlContext.createDataFrame(rdd).toDF("label", "features")
-    val numClasses = 3 //分类数
+    val numClasses = 3  //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     val numIterations = 100
-    val layers = Array[Int](4, 5, 4, numClasses)//分为3类
+    val layers = Array[Int](4, 5, 4, numClasses) //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     val trainer = new MultilayerPerceptronClassifier()
      /**
      * setLayers
@@ -130,7 +130,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     //基于lbfgs优化损失函数,支持多分类
     val lr = new LogisticRegressionWithLBFGS()
       .setIntercept(true)
-      //numClasses 分类数
+       //如果是分类树,指定有多少种类别,随机森林训练的树的个数
       .setNumClasses(numClasses)
     lr.optimizer.setRegParam(0.0)//正则化参数>=0
       .setNumIterations(numIterations)
