@@ -34,7 +34,9 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.util.Utils
 
 /**
- * 运行的一个决策树和随机森林树的例子
+ * 随机森林(Random Forests)其实就是多个决策树,每个决策树有一个权重,对未知数据进行预测时,
+ * 会用多个决策树分别预测一个值,然后考虑树的权重,将这多个预测值综合起来,
+ * 对于分类问题,采用多数表决,对于回归问题,直接求平均。
  * An example runner for decision trees and random forests. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DecisionTreeRunner [options]
@@ -101,22 +103,22 @@ object DecisionTreeRunner {
       opt[Int]("maxBins")
         .text(s"max number of bins, default: ${defaultParams.maxBins}")
         .action((x, c) => c.copy(maxBins = x))
-      opt[Int]("minInstancesPerNode")//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
+      opt[Int]("minInstancesPerNode")
         .text(s"min number of instances required at child nodes to create the parent split," +
           s" default: ${defaultParams.minInstancesPerNode}")
-        .action((x, c) => c.copy(minInstancesPerNode = x)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
-      opt[Double]("minInfoGain")//分裂节点时所需最小信息增益
+        .action((x, c) => c.copy(minInstancesPerNode = x))
+      opt[Double]("minInfoGain")
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
-        .action((x, c) => c.copy(minInfoGain = x))//分裂节点时所需最小信息增益
+        .action((x, c) => c.copy(minInfoGain = x))
       opt[Int]("numTrees")
         .text(s"number of trees (1 = decision tree, 2+ = random forest)," +
           s" default: ${defaultParams.numTrees}")
         .action((x, c) => c.copy(numTrees = x))
-      /*opt[String]("featureSubsetStrategy")
+      opt[String]("featureSubsetStrategy")
         .text(s"feature subset sampling strategy" +
           s" (${RandomForest.supportedFeatureSubsetStrategies.mkString(", ")}), " +
           s"default: ${defaultParams.featureSubsetStrategy}")
-        .action((x, c) => c.copy(featureSubsetStrategy = x))*/
+        .action((x, c) => c.copy(featureSubsetStrategy = x))
       opt[Double]("fracTest")
         .text(s"fraction of data to hold out for testing.  If given option testInput, " +
           s"this option is ignored. default: ${defaultParams.fracTest}")

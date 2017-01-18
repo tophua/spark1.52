@@ -28,7 +28,10 @@ import org.apache.spark.util.Utils
 
 
 /**
- *使用梯度提升树,以决策树为弱学习的梯度提升的一个例子
+ * 使用梯度提升树,以决策树为弱学习的梯度提升的一个例子
+ * GBT的训练是每次训练一颗树,然后利用这颗树对每个实例进行预测,通过一个损失函数,计算损失函数的负梯度值作为残差,
+ * 利用这个残差更新样本实例的label,然后再次训练一颗树去拟合残差,如此进行迭代,直到满足模型参数需求。
+ * GBT只适用于二分类和回归,不支持多分类,在预测的时候,不像随机森林那样求平均值,GBT是将所有树的预测值相加求和。
  * An example runner for Gradient Boosting using decision trees as weak learners. Run with
  * {{{
  * ./bin/run-example mllib.GradientBoostedTreesRunner [options]

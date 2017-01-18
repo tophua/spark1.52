@@ -7,7 +7,7 @@ import org.apache.spark.mllib.tree.configuration.{BoostingStrategy, Algo}
 import org.apache.spark.mllib.util.MLUtils
 /**
  *Spark coolbook p139 
- 梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
+ * 梯度提升决策树:综合多个决策树,消除噪声,避免过拟合,GBT只适用于二分类和回归,不支持多分类
  * 梯度提升决策树算法一次训练一个树,其中每个新的树会基于之前训练过树的缺点来改进算法
  * 梯度提升决策树算法目的是给一个人预测他是否拥有良好的信用
  * 标记是良好的信用

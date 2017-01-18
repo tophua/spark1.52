@@ -29,6 +29,9 @@ import org.apache.spark.util.collection.OpenHashMap
 
 /**
  * 随机森林树:综合多个决策树,可以消除噪声,避免过拟合
+ * 随机森林(Random Forests)其实就是多个决策树,每个决策树有一个权重,对未知数据进行预测时,
+ * 会用多个决策树分别预测一个值,然后考虑树的权重,将这多个预测值综合起来,
+ * 对于分类问题,采用多数表决,对于回归问题,直接求平均。
  * Test suite for [[RandomForest]].
  */
 class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {

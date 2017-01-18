@@ -28,7 +28,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
-
+/**
+ * GBT只适用于二分类和回归,不支持多分类,在预测的时候,
+ * 不像随机森林那样求平均值,GBT是将所有树的预测值相加求和
+ */
 object GradientBoostedTreeRegressorExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("GradientBoostedTreeClassifierExample").setMaster("local[4]")
