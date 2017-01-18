@@ -122,6 +122,7 @@ object GradientBoostedTreesRunner {
     if (params.algo == "Classification") {
      //系统计时器的当前值,以毫微秒为单位
       val startTime = System.nanoTime()
+      //梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
       val model = GradientBoostedTrees.train(training, boostingStrategy)
       //1e9就为1*(10的九次方),也就是十亿
       val elapsedTime = (System.nanoTime() - startTime) / 1e9
@@ -143,6 +144,7 @@ object GradientBoostedTreesRunner {
     } else if (params.algo == "Regression") {
      //系统计时器的当前值,以毫微秒为单位
       val startTime = System.nanoTime()
+      //梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
       val model = GradientBoostedTrees.train(training, boostingStrategy)
        //1e9就为1*(10的九次方),也就是十亿
       val elapsedTime = (System.nanoTime() - startTime) / 1e9

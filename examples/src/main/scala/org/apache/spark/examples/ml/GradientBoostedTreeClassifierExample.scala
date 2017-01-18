@@ -30,7 +30,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
- * 梯度Boost树分类算法
+ * 梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
  */
 object GradientBoostedTreeClassifierExample {
   def main(args: Array[String]): Unit = {

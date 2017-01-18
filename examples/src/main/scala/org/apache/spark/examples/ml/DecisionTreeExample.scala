@@ -64,7 +64,7 @@ object DecisionTreeExample {
       algo: String = "Classification",//"regression",算法类型
       maxDepth: Int = 5,//树的最大深度,为了防止过拟合,设定划分的终止条件
       maxBins: Int = 32,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
-      minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
+      minInstancesPerNode: Int = 1,//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
       minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
       fracTest: Double = 0.2,//测试因子
       cacheNodeIds: Boolean = false,
@@ -86,7 +86,7 @@ object DecisionTreeExample {
       opt[Int]("maxBins")
         .text(s"max number of bins, default: ${defaultParams.maxBins}")
         .action((x, c) => c.copy(maxBins = x))
-      opt[Int]("minInstancesPerNode")
+      opt[Int]("minInstancesPerNode")//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
         .text(s"min number of instances required at child nodes to create the parent split," +
           s" default: ${defaultParams.minInstancesPerNode}")
         .action((x, c) => c.copy(minInstancesPerNode = x))
@@ -291,7 +291,7 @@ object DecisionTreeExample {
           .setLabelCol(labelColName)//标签列
           .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setMaxBins(params.maxBins)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
-          .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
+          .setMinInstancesPerNode(params.minInstancesPerNode)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)//
           .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1)
@@ -301,8 +301,8 @@ object DecisionTreeExample {
           .setLabelCol(labelColName)//标签列
           .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setMaxBins(params.maxBins)//连续特征离散化的最大数量
-          .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
-          .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
+          .setMinInstancesPerNode(params.minInstancesPerNode)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
+          .setMinInfoGain(params.minInfoGain)//每次切分至少减少的不确定性,否则停止切分,用于终止迭代计算
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1)
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")

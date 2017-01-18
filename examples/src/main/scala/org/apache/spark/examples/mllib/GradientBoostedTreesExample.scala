@@ -7,6 +7,7 @@ import org.apache.spark.mllib.tree.configuration.{BoostingStrategy, Algo}
 import org.apache.spark.mllib.util.MLUtils
 /**
  *Spark coolbook p139 
+ 梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
  * 梯度提升决策树算法一次训练一个树,其中每个新的树会基于之前训练过树的缺点来改进算法
  * 梯度提升决策树算法目的是给一个人预测他是否拥有良好的信用
  * 标记是良好的信用
@@ -52,7 +53,7 @@ object GradientBoostedTreesExample {
     //创建一个分类的提升策略并设置迭代次数为3(随机森林也支持回归)
     val boostingStrategy =BoostingStrategy.defaultParams("Classification")
         boostingStrategy.numIterations = 3
-    //训练模型
+    //梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
     val model = GradientBoostedTrees.train(trainingData,boostingStrategy)
     //基于测试实例评估模型并计算测试错误
     val testErr = testData.map { point =>

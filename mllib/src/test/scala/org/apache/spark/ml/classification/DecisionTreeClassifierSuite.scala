@@ -73,7 +73,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("gini")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      .setMaxBins(100)//maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     val numClasses = 2 //如果是分类树,指定有多少种类别
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures, numClasses)
@@ -82,7 +82,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   test("Binary classification stump with fixed labels 0,1 for Entropy,Gini") {
     val dt = new DecisionTreeClassifier()
       .setMaxDepth(3)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      .setMaxBins(100)//maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val numClasses = 2 //如果是分类树,指定有多少种类别
     Array(orderedLabeledPointsWithLabel0RDD, orderedLabeledPointsWithLabel1RDD).foreach { rdd =>
       DecisionTreeClassifier.supportedImpurities.foreach { impurity =>
@@ -134,13 +134,13 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   //多类分类的树和无序的分类特征,只要有足够的垃圾箱
   test("Multiclass classification stump with unordered categorical features," +
     " with just enough bins") {
-    //离散连续性变量时最大的分箱数,默认是 32,理论上箱数越大粒度就越细,但是针对特定的数据集总有一个合理的箱数
+    //maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val maxBins = 2 * (math.pow(2, 3 - 1).toInt - 1) // just enough bins to allow unordered features
     val rdd = categoricalDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//树节点选择的不纯度的衡量指标
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(maxBins)//离散连续性变量时最大的分箱数,默认是 32
+      .setMaxBins(maxBins)//maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
     val numClasses = 3//如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -151,7 +151,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      //maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+      .setMaxBins(100)
     val numClasses = 3//如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }
@@ -161,7 +162,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      //maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+      .setMaxBins(100)
     val categoricalFeatures = Map(0 -> 3)
     val numClasses = 3//如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -172,7 +174,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      //maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+      .setMaxBins(100)
     val categoricalFeatures = Map(0 -> 10, 1 -> 10)
     val numClasses = 3//随机森林需要训练的树的个数,默认值是 20,如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -184,7 +187,8 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(10)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      //最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+      .setMaxBins(10)
     val categoricalFeatures = Map(0 -> 10, 1 -> 10)
     val numClasses = 3//随机森林需要训练的树的个数，默认值是 20,如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -199,7 +203,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMinInstancesPerNode(2)//分裂后自节点最少包含的实例数量
+      .setMinInstancesPerNode(2)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
     val numClasses = 2//随机森林需要训练的树的个数，如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }  
@@ -218,9 +222,9 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val rdd = sc.parallelize(arr)
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
-      .setMaxBins(2)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
+      .setMaxBins(2)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMinInstancesPerNode(2)//分裂后自节点最少包含的实例数量
+      .setMinInstancesPerNode(2)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
     val categoricalFeatures = Map(0 -> 2, 1-> 2)
     val numClasses = 22//如果是分类树,指定有多少种类别,随机森林训练的树的个数
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -246,7 +250,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      .setMaxBins(100)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val categoricalFeatures = Map(0 -> 3)
     val numClasses = 3//如果是分类树,指定有多少种类别,随机森林训练的树的个数
 

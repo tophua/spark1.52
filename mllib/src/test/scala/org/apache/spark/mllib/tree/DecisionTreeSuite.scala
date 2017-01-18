@@ -80,7 +80,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 2,//numClasses 分类数
-      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      maxBins = 100,//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       /**
       指明特征是类别型的以及每个类别型特征对应值(类别)。
       Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
@@ -109,7 +109,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 2,//numClasses 分类数
-      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      maxBins = 100,//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       //用Map存储类别(离散)特征及每个类别对应值(类别)的数量
       //例如 Map(n->k)表示特征n类别(离散)特征,特征值有K个,具体值为(0,1,...K-1)
       //Map中元素的键是特征在输入向量Vector中的下标,Map中元素的值是类别特征的不同取值个数
@@ -216,7 +216,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 100,//numClasses 分类数
-      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      maxBins = 100,//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       /**
       指明特征是类别型的以及每个类别型特征对应值(类别)。
       Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
@@ -299,7 +299,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 100,//numClasses 分类数
-      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      maxBins = 100,//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       /**
       指明特征是类别型的以及每个类别型特征对应值(类别)。
       Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
@@ -437,7 +437,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategyOneNode = new Strategy(Classification, Entropy, maxDepth = 1,
     //numClasses 分类数
-      numClasses = 2, maxBins = 100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+    //最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+      numClasses = 2, maxBins = 100)
     val modelOneNode = DecisionTree.train(rdd, strategyOneNode)
     val rootNode1 = modelOneNode.topNode.deepCopy()
     val rootNode2 = modelOneNode.topNode.deepCopy()
@@ -509,7 +510,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Gini,
       numClasses = 2,//分类数
       maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
-      maxBins = 100,//最大箱数
+      //最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+      maxBins = 100,
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -546,7 +548,8 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       Regression,
       Variance,
       maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
-      maxBins = 100,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      //最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+      maxBins = 100,
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -591,7 +594,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val arr = DecisionTreeSuite.generateOrderedLabeledPointsWithLabel0()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
-    //maxBins离散连续性变量时最大的分箱数，默认是 32
+    //maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     //树的最大深度,为了防止过拟合,设定划分的终止条件
     val strategy = new Strategy(Classification, Gini, maxDepth = 3,
       numClasses = 2, maxBins = 100)
@@ -883,7 +886,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(0.0, Vectors.sparse(2, Seq((0, 1.0)))))
     val rdd = sc.parallelize(arr)
     val strategy = new Strategy(algo = Classification, impurity = Gini,
-    //minInstancesPerNode 分裂后自节点最少包含的实例数量
+    //minInstancesPerNode 切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
       maxDepth = 2, numClasses = 2, minInstancesPerNode = 2)
 
     val model = DecisionTree.train(rdd, strategy)
@@ -927,7 +930,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     **/
     val strategy = new Strategy(algo = Classification, impurity = Gini,
       maxBins = 2, maxDepth = 2, categoricalFeaturesInfo = Map(0 -> 2, 1-> 2),
-      numClasses = 2, minInstancesPerNode = 2)//分裂后自节点最少包含的实例数量
+      numClasses = 2, minInstancesPerNode = 2)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
 
     val rootNode = DecisionTree.train(rdd, strategy).topNode
 

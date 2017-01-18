@@ -28,7 +28,7 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.collection.OpenHashMap
 
 /**
- * 随机森林树
+ * 随机森林树:综合多个决策树,可以消除噪声,避免过拟合
  * Test suite for [[RandomForest]].
  */
 class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {

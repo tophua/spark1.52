@@ -52,7 +52,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val dt = new DecisionTreeRegressor()
       .setImpurity("variance")//设置纯度,方差
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(100)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      .setMaxBins(100)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }
@@ -61,7 +61,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val dt = new DecisionTreeRegressor()
       .setImpurity("variance")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(100)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
+      .setMaxBins(100)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val categoricalFeatures = Map(0 -> 2, 1-> 2)
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }
@@ -72,7 +72,7 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val model = new DecisionTreeRegressor()
       .setImpurity("variance")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(8).fit(df)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
+      .setMaxBins(8).fit(df)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     MLTestingUtils.checkCopy(model)
   }
 

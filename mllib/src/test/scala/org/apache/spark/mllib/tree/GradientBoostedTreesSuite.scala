@@ -30,7 +30,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Test suite for [[GradientBoostedTrees]].
- * 梯度提升决策树
+ * 梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
  */
 class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
@@ -48,7 +48,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
           categoricalFeaturesInfo = Map.empty, subsamplingRate = subsamplingRate)
         val boostingStrategy =
           new BoostingStrategy(treeStrategy, SquaredError, numIterations, learningRate)
-
+	//梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
         val gbt = GradientBoostedTrees.train(rdd, boostingStrategy)
 
         assert(gbt.trees.size === numIterations)
@@ -79,7 +79,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
           categoricalFeaturesInfo = Map.empty, subsamplingRate = subsamplingRate)
         val boostingStrategy =
           new BoostingStrategy(treeStrategy, AbsoluteError, numIterations, learningRate)
-
+	//梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
         val gbt = GradientBoostedTrees.train(rdd, boostingStrategy)
 
         assert(gbt.trees.size === numIterations)
@@ -171,6 +171,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     // Set numIterations large enough so that it stops early.
     //集数足够大时,提前停止迭代
     val numIterations = 20
+    //梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
     val trainRdd = sc.parallelize(GradientBoostedTreesSuite.trainData, 2)
     val validateRdd = sc.parallelize(GradientBoostedTreesSuite.validateData, 2)
 
@@ -226,7 +227,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     //设置检查点间隔(>=1),或不设置检查点(-1)
       categoricalFeaturesInfo = Map.empty, checkpointInterval = 2)
     val boostingStrategy = new BoostingStrategy(treeStrategy, SquaredError, 5, 0.1)
-
+    //梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
     val gbt = GradientBoostedTrees.train(rdd, boostingStrategy)
 
     sc.checkpointDir = None
@@ -235,7 +236,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
 
 }
 /**
- * 梯度提高树
+ *梯度提升决策树:综合多个决策树,消除噪声,避免过拟合
  */
 private object GradientBoostedTreesSuite {
 

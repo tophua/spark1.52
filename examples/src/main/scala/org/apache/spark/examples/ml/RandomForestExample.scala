@@ -63,7 +63,7 @@ object RandomForestExample {
       algo: String = "classification",//分类
       maxDepth: Int = 5,//树的最大深度,为了防止过拟合,设定划分的终止条件
       maxBins: Int = 32,//离散连续性变量时最大的分箱数，默认是 32
-      minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
+      minInstancesPerNode: Int = 1,//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
       minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
       numTrees: Int = 10,//随机森林需要训练的树的个数，默认值是 20
       featureSubsetStrategy: String = "auto",
@@ -87,10 +87,10 @@ object RandomForestExample {
       opt[Int]("maxBins")
         .text(s"max number of bins, default: ${defaultParams.maxBins}")
         .action((x, c) => c.copy(maxBins = x))
-      opt[Int]("minInstancesPerNode")//分裂后自节点最少包含的实例数量
+      opt[Int]("minInstancesPerNode")//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
         .text(s"min number of instances required at child nodes to create the parent split," +
-        s" default: ${defaultParams.minInstancesPerNode}")//分裂后自节点最少包含的实例数量
-        .action((x, c) => c.copy(minInstancesPerNode = x))//分裂后自节点最少包含的实例数量
+        s" default: ${defaultParams.minInstancesPerNode}")//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
+        .action((x, c) => c.copy(minInstancesPerNode = x))//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
       opt[Double]("minInfoGain")//分裂节点时所需最小信息增益
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
         .action((x, c) => c.copy(minInfoGain = x))
@@ -198,7 +198,7 @@ object RandomForestExample {
           .setLabelCol(labelColName)//标签列的名称
           .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
-          .setMinInstancesPerNode(params.minInstancesPerNode)
+          .setMinInstancesPerNode(params.minInstancesPerNode)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)//
@@ -210,7 +210,7 @@ object RandomForestExample {
           .setLabelCol(labelColName)//标签列的名称
           .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
           .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
-          .setMinInstancesPerNode(params.minInstancesPerNode)//分裂后自节点最少包含的实例数量
+          .setMinInstancesPerNode(params.minInstancesPerNode)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1),或不设置检查点(-1)

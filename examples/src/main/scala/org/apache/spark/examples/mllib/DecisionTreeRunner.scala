@@ -73,7 +73,7 @@ object DecisionTreeRunner {
       maxDepth: Int = 5,//树的最大深度,为了防止过拟合,设定划分的终止条件
       impurity: ImpurityType = Gini,//树节点选择的不纯度的衡量指标,取值可以是”entroy”或“gini”,默认是”gini”
       maxBins: Int = 32,//离散连续性变量时最大的分箱数,默认是 32
-      minInstancesPerNode: Int = 1,//分裂后自节点最少包含的实例数量
+      minInstancesPerNode: Int = 1,//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
       minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
       numTrees: Int = 1,//随机森林需要训练的树的个数,默认值是 20
       featureSubsetStrategy: String = "auto",
@@ -101,10 +101,10 @@ object DecisionTreeRunner {
       opt[Int]("maxBins")
         .text(s"max number of bins, default: ${defaultParams.maxBins}")
         .action((x, c) => c.copy(maxBins = x))
-      opt[Int]("minInstancesPerNode")
+      opt[Int]("minInstancesPerNode")//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
         .text(s"min number of instances required at child nodes to create the parent split," +
           s" default: ${defaultParams.minInstancesPerNode}")
-        .action((x, c) => c.copy(minInstancesPerNode = x))//分裂后自节点最少包含的实例数量
+        .action((x, c) => c.copy(minInstancesPerNode = x)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
       opt[Double]("minInfoGain")//分裂节点时所需最小信息增益
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
         .action((x, c) => c.copy(minInfoGain = x))//分裂节点时所需最小信息增益
@@ -309,7 +309,7 @@ object DecisionTreeRunner {
         maxDepth:	5,//树的最大深度,为了防止过拟合,设定划分的终止条件
         impurity:	Gini,
         maxBins:	32,
-        minInstancesPerNode:	1,
+        minInstancesPerNode:	1,//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
         minInfoGain:	0.0,
         numTrees:	1,
         featureSubsetStrategy:	auto,
@@ -343,7 +343,7 @@ object DecisionTreeRunner {
           maxDepth = params.maxDepth,//树的最大深度,为了防止过拟合,设定划分的终止条件
           maxBins = params.maxBins,//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
           numClasses = numClasses,//训练的树的数量
-          minInstancesPerNode = params.minInstancesPerNode,//分裂后自节点最少包含的实例数量
+          minInstancesPerNode = params.minInstancesPerNode,//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
           minInfoGain = params.minInfoGain,//分裂节点时所需最小信息增益
           useNodeIdCache = params.useNodeIdCache,//使用RDD每行的节点ID缓存
 	        //设置检查点间隔(>=1),或不设置检查点(-1)
