@@ -23,7 +23,7 @@ object SVMWithSGDExample {
     //训练数据和测试数据赋值
     val trainingData = trainingAndTest(0)
     val testData = trainingAndTest(1)
-    //训练算法产并经过100次迭代构建模型
+    //训练算法产并经过100次迭代构建模型 (SGD随机梯度下降)
     val model = SVMWithSGD.train(trainingData, 100)
     //用模型去为任意数据集预测标签,使用测试数据中的第一个点测试标签
     val label = model.predict(testData.first.features)

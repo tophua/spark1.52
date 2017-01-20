@@ -105,6 +105,7 @@ object CrossValidatorExample {
     // A CrossValidator requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.    
     //CrossValidator需要一个Estimator,一个评估器参数集合,和一个Evaluator
     //注意这里的evaluator是二元分类的BinaryClassificationEvaluator,它默认的度量是areaUnderROC.
+     //ROC平均值,表示评估一个完美的分类器
     val crossval = new CrossValidator()//交叉
       .setEstimator(pipeline)//Estimator:将DataFrame转化为一个Transformer的算法通过实现
       //二分类评估

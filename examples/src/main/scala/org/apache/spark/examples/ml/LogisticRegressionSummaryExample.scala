@@ -91,6 +91,7 @@ object LogisticRegressionSummaryExample {
 
     // Obtain the receiver-operating characteristic as a dataframe and areaUnderROC.
     //获得一个数据集areaUnderROC
+    //ROC平均值,表示评估一个完美的分类器
     val roc = binarySummary.roc
     /**
    	+---+--------------------+

@@ -34,7 +34,7 @@ object LinearRegressionDemo {
     //构建数据模型
 
     val numIterations = 100
-
+    //(SGD随机梯度下降)
     val model = LinearRegressionWithSGD.train(parsedData, numIterations)
 
     // Evaluate model on training examples and compute training error

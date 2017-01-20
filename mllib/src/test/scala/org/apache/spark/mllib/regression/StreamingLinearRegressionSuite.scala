@@ -66,7 +66,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
 
   // Test if we can accurately learn Y = 10*X1 + 10*X2 on streaming data
   test("parameter accuracy") {//参数的精度
-    // create model,梯度下降法
+    // create model,(SGD随机梯度下降)
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))
@@ -105,7 +105,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   // Test that parameter estimates improve when learning Y = 10*X1 on streaming data
   //测试参数估计提高学习y = 10×x1数据流的时
   test("parameter convergence") {//参数收敛
-    // create model
+    // create model (SGD随机梯度下降)
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0)).setStepSize(0.2).setNumIterations(25)
@@ -146,7 +146,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   // Test predictions on a stream 在流上测试预测
   test("predictions") {//预测
     // create model initialized with true weights
-    //创建真正的权重初始化模型
+    //创建真正的权重初始化模型(SGD随机梯度下降)
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(10.0, 10.0))
@@ -179,7 +179,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
   // Test training combined with prediction 测试训练结合预测
   test("training and prediction") {
     // create model initialized with zero weights
-    //创建具有零权重的初始化模型
+    //创建具有零权重的初始化模型(SGD随机梯度下降)
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))
@@ -227,6 +227,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
 
   // Test empty RDDs in a stream 测试空RDDSr的流
   test("handling empty RDDs in a stream") {
+    //(SGD随机梯度下降)
     val model = new StreamingLinearRegressionWithSGD()
      //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0, 0.0))

@@ -96,7 +96,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-
+   //(SGD随机梯度下降)
     val svm = new SVMWithSGD().setIntercept(true)
     //正则化参数>=0 //每次迭代优化步长
     svm.optimizer.setStepSize(1.0).setRegParam(1.0).setNumIterations(100)
@@ -138,7 +138,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-
+   //(SGD随机梯度下降)
     val svm = new SVMWithSGD().setIntercept(true)
     //正则化参数>=0 //每次迭代优化步长
     svm.optimizer.setStepSize(1.0).setRegParam(1.0).setNumIterations(100)
@@ -214,6 +214,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
 
     intercept[SparkException] {
+    //(SGD随机梯度下降)
       SVMWithSGD.train(testRDDInvalid, 100)
     }
 
@@ -272,6 +273,7 @@ class SVMClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
     // If we serialize data directly in the task closure, the size of the serialized task would be
     // greater than 1MB and hence Spark would throw an error.
     //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB，因此Spark会抛出一个错误。
+    //(SGD随机梯度下降)
     val model = SVMWithSGD.train(points, 2)
     val predictions = model.predict(points.map(_.features))
   }

@@ -51,7 +51,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val B = 1.5
 
     // create model  
-    //逻辑回归基于梯度下降,仅支持2分类
+    //逻辑回归基于梯度下降,仅支持2分类,(SGD随机梯度下降)
     val model = new StreamingLogisticRegressionWithSGD()
     //初始化权重
       .setInitialWeights(Vectors.dense(0.0))
@@ -88,7 +88,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val nPoints = 100
 
     // create model
-    //逻辑回归基于梯度下降,仅支持2分类
+    //逻辑回归基于梯度下降,仅支持2分类,SGD随机梯度下降
     val model = new StreamingLogisticRegressionWithSGD()
       //initialWeights初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(0.0))
@@ -138,7 +138,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val nPoints = 100
 
     // create model initialized with true weights
-    //逻辑回归基于梯度下降,仅支持2分类
+    //逻辑回归基于梯度下降,仅支持2分类,(SGD随机梯度下降)
     val model = new StreamingLogisticRegressionWithSGD()
       //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(1.5))
@@ -175,7 +175,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
   // 测试训练合并预测
   test("training and prediction") {
     // create model initialized with zero weights
-   //逻辑回归基于梯度下降,仅支持2分类
+   //逻辑回归基于梯度下降,仅支持2分类,(SGD随机梯度下降)
     val model = new StreamingLogisticRegressionWithSGD()
     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(-0.1))
@@ -208,7 +208,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
   // Test empty RDDs in a stream
   //测试空的RDDS流
   test("handling empty RDDs in a stream") {//处理空的RDDS流
-  //逻辑回归基于梯度下降,仅支持2分类
+  //逻辑回归基于梯度下降,仅支持2分类,(SGD随机梯度下降)
     val model = new StreamingLogisticRegressionWithSGD()
     //initialWeights–初始取值,默认是0向量
       .setInitialWeights(Vectors.dense(-0.1))

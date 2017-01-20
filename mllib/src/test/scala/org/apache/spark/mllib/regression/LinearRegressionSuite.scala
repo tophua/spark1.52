@@ -71,6 +71,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
        *        (10.465315437042944,[0.1789490173139363,0.5584053824232391]), 
        *        (-5.245508439024772,[0.03495894704368174,-0.8505720014852347]))
        */
+       //(SGD随机梯度下降)
     val linReg = new LinearRegressionWithSGD().setIntercept(true)//是否给数据加上一个干扰特征或者偏差特征--也就是一个值始终未1的特征
     //每次迭代优化步长
     linReg.optimizer.setNumIterations(1000).setStepSize(1.0)
@@ -98,6 +99,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("linear regression without intercept") {//无拦截的线性回归
     val testRDD = sc.parallelize(LinearDataGenerator.generateLinearInput(
       0.0, Array(10.0, 10.0), 100, 42), 2).cache()
+      //(SGD随机梯度下降)
     val linReg = new LinearRegressionWithSGD().setIntercept(false)
     //每次迭代优化步长
     linReg.optimizer.setNumIterations(1000).setStepSize(1.0)
@@ -133,7 +135,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       val sv = Vectors.sparse(10000, Seq((0, v(0)), (9999, v(1))))
       //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(label, sv)
-    }.cache()
+    }.cache()//(SGD随机梯度下降)
     val linReg = new LinearRegressionWithSGD().setIntercept(false)
     //每次迭代优化步长
     linReg.optimizer.setNumIterations(1000).setStepSize(1.0)
@@ -198,6 +200,7 @@ class LinearRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkC
     // If we serialize data directly in the task closure, the size of the serialized task would be
     //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB,因此Spark会抛出一个错误
     // greater than 1MB and hence Spark would throw an error.
+    //(SGD随机梯度下降)
     val model = LinearRegressionWithSGD.train(points, 2)
     val predictions = model.predict(points.map(_.features))
   }

@@ -153,7 +153,7 @@ object BinaryClassification {
           .setUpdater(updater)//
           .setRegParam(params.regParam)//正则化
         algorithm.run(training).clearThreshold()
-      case SVM =>
+      case SVM =>//(SGD随机梯度下降)
         val algorithm = new SVMWithSGD()
         algorithm.optimizer
           .setNumIterations(params.numIterations)//迭代次数
@@ -167,10 +167,10 @@ object BinaryClassification {
     val predictionAndLabel = prediction.zip(test.map(_.label))
 
     val metrics = new BinaryClassificationMetrics(predictionAndLabel)
-    //准确率和召回率,areaUnderPR为1等价于一个完美模型,其准确率和召回率达到100%
+     //areaUnderPR平均准确率,通常评价结果的质量,平均准确率等于训练样本中被正确分类的数目除以样本总数   
     //Test areaUnderPR = 1.0.
     println(s"Test areaUnderPR = ${metrics.areaUnderPR()}.")
-    //AUC下的面积表示平均准确率,平均准确率等于训练样本中被正确分类的数目除以样本总数
+    //ROC平均值,表示评估一个完美的分类器
     //Test areaUnderROC = 1.0.
     println(s"Test areaUnderROC = ${metrics.areaUnderROC()}.")
 

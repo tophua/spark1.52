@@ -101,6 +101,7 @@ object ModelSelectionViaCrossValidationExample {
     // A CrossValidator requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
     // Note that the evaluator here is a BinaryClassificationEvaluator and its default metric
     // is areaUnderROC.
+     //ROC平均值,表示评估一个完美的分类器
     val cv = new CrossValidator()
       .setEstimator(pipeline)
       .setEvaluator(new BinaryClassificationEvaluator)//设置评估模型

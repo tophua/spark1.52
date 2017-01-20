@@ -51,13 +51,12 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
     assertSequencesMatch(metrics.thresholds().collect(), expectedThresholds)
     //ROC表示表示分类器性能在不同决策阈值下TPR对FPR的折衷(TPR 真阳性率),(FPR假阳性率)
     assertTupleSequencesMatch(metrics.roc().collect(), expectedROCCurve)
-    //AUC下的面积表示平均准确率,平均准确率等于训练样本中被正确分类的数目除以样本总数
+    //ROC平均值,表示评估一个完美的分类器
     assert(metrics.areaUnderROC() ~== AreaUnderCurve.of(expectedROCCurve) absTol 1E-5)
     //召回率 :定义为真阳性的数目除以真阳性和假阴性的和,其中假阴性是类别 1却被预测为0的样本
     assertTupleSequencesMatch(metrics.pr().collect(), expectedPRCurve)
-    //准确率和召回率,areaUnderPR为1等价于一个完美模型,其准确率和召回率达到100%
-    assert(metrics.areaUnderPR() ~== AreaUnderCurve.of(expectedPRCurve) absTol 1E-5)
-    //
+    //areaUnderPR平均准确率,通常评价结果的质量,平均准确率等于训练样本中被正确分类的数目除以样本总数
+    assert(metrics.areaUnderPR() ~== AreaUnderCurve.of(expectedPRCurve) absTol 1E-5) 
     assertTupleSequencesMatch(metrics.fMeasureByThreshold().collect(),
       expectedThresholds.zip(expectedFMeasures1))
       //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0

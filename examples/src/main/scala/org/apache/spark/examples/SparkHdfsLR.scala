@@ -34,7 +34,7 @@ import org.apache.spark.scheduler.InputFormatInfo
  * 基于逻辑回归的分类
  * This is an example implementation for learning how to use Spark. For more conventional use,
  * 这是一个学习如何使用Spark的例子实现,为更传统的使用
- * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD or
+ * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGD随机梯度下降) or
  * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS based on your needs.
  */
 object SparkHdfsLR {
@@ -57,7 +57,7 @@ object SparkHdfsLR {
   def showWarning() {
     System.err.println(
       """WARN: This is a naive implementation of Logistic Regression and is given as an example!
-        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD or
+        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGD随机梯度下降) or
         |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
         |for more conventional use.
       """.stripMargin)

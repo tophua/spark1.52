@@ -127,7 +127,7 @@ object LinearRegression {
       case L2 => new SquaredL2Updater()
     }
 
-    val algorithm = new LinearRegressionWithSGD()
+    val algorithm = new LinearRegressionWithSGD()//(SGD随机梯度下降)
     algorithm.optimizer
       .setNumIterations(params.numIterations)//迭代次数
       .setStepSize(params.stepSize)//每次迭代优化步长

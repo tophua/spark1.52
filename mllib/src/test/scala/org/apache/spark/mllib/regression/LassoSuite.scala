@@ -60,7 +60,7 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
       LabeledPoint(label, Vectors.dense(1.0 +: features.toArray))
     }
     val testRDD = sc.parallelize(testData, 2).cache()
-
+    //(SGD随机梯度下降)
     val ls = new LassoWithSGD()
     //正则化参数>=0,每次迭代优化步长
     ls.optimizer.setStepSize(1.0).setRegParam(0.01).setNumIterations(40)
@@ -108,7 +108,7 @@ class LassoSuite extends SparkFunSuite with MLlibTestSparkContext {
     val initialWeights = Vectors.dense(initialA, initialB, initialC)
 
     val testRDD = sc.parallelize(testData, 2).cache()
-
+    //(SGD随机梯度下降)
     val ls = new LassoWithSGD()
     //正则化参数>=0,每次迭代优化步长
     ls.optimizer.setStepSize(1.0).setRegParam(0.01).setNumIterations(40).setConvergenceTol(0.0005)
@@ -168,7 +168,7 @@ class LassoClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
     // If we serialize data directly in the task closure, the size of the serialized task would be
     //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB,因此Spark会抛出一个错误
     // greater than 1MB and hence Spark would throw an error.
-    val model = LassoWithSGD.train(points, 2)
+    val model = LassoWithSGD.train(points, 2)//(SGD随机梯度下降)
     val predictions = model.predict(points.map(_.features))
   }
 }

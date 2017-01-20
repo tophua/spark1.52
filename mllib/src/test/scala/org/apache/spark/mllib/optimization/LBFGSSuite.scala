@@ -79,7 +79,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
 
     val stepSize = 1.0//每次迭代优化步长
     // Well, GD converges slower, so it requires more iterations!
-    val numGDIterations = 50
+    val numGDIterations = 50//(SGD随机梯度下降)
     val (_, lossGD) = GradientDescent.runMiniBatchSGD(
       dataRDD,
       gradient,
@@ -120,7 +120,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
 
     val numGDIterations = 50
     val stepSize = 1.0//每次迭代优化步长
-    val (weightGD, lossGD) = GradientDescent.runMiniBatchSGD(
+    val (weightGD, lossGD) = GradientDescent.runMiniBatchSGD(//(SGD随机梯度下降)
       dataRDD,
       gradient,
       squaredL2Updater,
@@ -220,7 +220,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
 
     val numGDIterations = 50
     val stepSize = 1.0//每次迭代优化步长
-    val (weightGD, _) = GradientDescent.runMiniBatchSGD(
+    val (weightGD, _) = GradientDescent.runMiniBatchSGD(//(SGD随机梯度下降)
       dataRDD,
       gradient,
       squaredL2Updater,

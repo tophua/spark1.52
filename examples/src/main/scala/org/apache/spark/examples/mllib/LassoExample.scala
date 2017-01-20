@@ -23,7 +23,7 @@ object RidgeRegressionWithSGDExample {
     //创建之前数据的RDD
     val rdd = sc.parallelize(points)
     //使用数据迭代100次训练模型,这时步长和正则化参数已经手动设置好了
-    val model = RidgeRegressionWithSGD.train(rdd, 100, 0.02, 2.0)
+    val model = RidgeRegressionWithSGD.train(rdd, 100, 0.02, 2.0)//(SGD随机梯度下降)
     /**
      * 岭回归不会把预测因子系数设为0,但它会让它们近似于0
      * [0.049805969577244584,0.029883581746346748,0.009961193915448916,0.019922387830897833,

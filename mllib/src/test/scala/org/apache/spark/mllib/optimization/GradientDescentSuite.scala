@@ -91,7 +91,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     val dataRDD = sc.parallelize(data, 2).cache()
     val initialWeightsWithIntercept = Vectors.dense(initialWeights.toArray :+ 1.0)
 
-    val (_, loss) = GradientDescent.runMiniBatchSGD(
+    val (_, loss) = GradientDescent.runMiniBatchSGD(//(SGD随机梯度下降)
       dataRDD,
       gradient,
       updater,
@@ -125,7 +125,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     //准备非零权重
     val initialWeightsWithIntercept = Vectors.dense(1.0, 0.5)
 
-    val regParam0 = 0//正则化参数>=0
+    val regParam0 = 0//正则化参数>=0,(SGD随机梯度下降)
     val (newWeights0, loss0) = GradientDescent.runMiniBatchSGD(
       dataRDD, gradient, updater, 1, 1, regParam0, 1.0, initialWeightsWithIntercept)
 
@@ -171,7 +171,7 @@ class GradientDescentSuite extends SparkFunSuite with MLlibTestSparkContext with
     val dataRDD = sc.parallelize(data, 2).cache()
     val initialWeightsWithIntercept = Vectors.dense(initialWeights.toArray :+ 1.0)
 
-    val (_, loss) = GradientDescent.runMiniBatchSGD(
+    val (_, loss) = GradientDescent.runMiniBatchSGD(//(SGD随机梯度下降)
       dataRDD,
       gradient,
       updater,
@@ -198,7 +198,7 @@ class GradientDescentClusterSuite extends SparkFunSuite with LocalClusterSparkCo
     // If we serialize data directly in the task closure, the size of the serialized task would be
     //如果我们将数据直接在任务结束,该任务序列化的规模将大于1MB,因此Spark会抛出一个错误
     // greater than 1MB and hence Spark would throw an error.
-    val (weights, loss) = GradientDescent.runMiniBatchSGD(
+    val (weights, loss) = GradientDescent.runMiniBatchSGD(//(SGD随机梯度下降)
       points,
       new LogisticGradient,
       new SquaredL2Updater,

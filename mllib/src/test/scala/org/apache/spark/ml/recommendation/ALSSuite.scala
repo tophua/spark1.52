@@ -41,6 +41,8 @@ import org.apache.spark.util.Utils
  * Spark.ml目前支持基于模型的协同过滤,其中用户和商品以少量的潜在因子来描述,用以预测缺失项
  * 注意基于DataFrame的ALS接口目前仅支持整数型的用户和商品编号
  * 正则化参数regParam来解决用户在更新用户因子时产生新评分或者商品更新商品因子时收到的新评分带来的最小二乘问题
+ * 矩阵分解:将用户(user)对商品(item)的评分矩阵分解为两个矩阵：一个是用户对商品隐含特征的偏好矩阵，另一个是商品所包含的隐含特征的矩阵。
+ * 在这个矩阵分解的过程中，评分缺失项得到了填充，也就是说我们可以基于这个填充的评分来给用户最商品推荐了
  * 
  */
 class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {

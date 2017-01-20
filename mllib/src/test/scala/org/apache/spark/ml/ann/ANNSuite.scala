@@ -80,6 +80,7 @@ class ANNSuite extends SparkFunSuite with MLlibTestSparkContext {
     val topology = FeedForwardTopology.multiLayerPerceptron(layerSizes, false)
     val initialWeights = FeedForwardModel(topology, 23124).weights()
     val trainer = new FeedForwardTrainer(topology, 2, 2)
+    //(SGD随机梯度下降)
     trainer.SGDOptimizer.setNumIterations(2000)
     //initialWeights初始取值,默认是0向量
     trainer.setWeights(initialWeights)

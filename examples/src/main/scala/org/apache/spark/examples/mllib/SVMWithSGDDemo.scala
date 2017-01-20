@@ -40,6 +40,7 @@ object SVMWithSGDDemo {
     //运行训练数据模型构建模型
     // Run training algorithm to build the model    
     val numIterations = 100
+    //(SGD随机梯度下降)
     val model = SVMWithSGD.train(training, numIterations)
     //清除默认阈值
     // Clear the default threshold.
@@ -54,8 +55,9 @@ object SVMWithSGDDemo {
     //获得评估指标
     // Get evaluation metrics.
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
+     //ROC平均值,表示评估一个完美的分类器
     val auROC = metrics.areaUnderROC()
-    //平均准确率
+     //ROC平均值,表示评估一个完美的分类器
     println("Area under ROC = " + auROC)
 
     

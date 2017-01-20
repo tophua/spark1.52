@@ -72,14 +72,14 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val validationRDD = sc.parallelize(validationData, 2).cache()
 
     // First run without regularization.
-    //无正则化第一次运行
+    //无正则化第一次运行,(SGD随机梯度下降)
     val linearReg = new LinearRegressionWithSGD()
     //每次迭代优化步长
     linearReg.optimizer.setNumIterations(200).setStepSize(1.0)
     val linearModel = linearReg.run(testRDD)
     val linearErr = predictionError(
         linearModel.predict(validationRDD.map(_.features)).collect(), validationData)
-
+    //(SGD随机梯度下降)
     val ridgeReg = new RidgeRegressionWithSGD()
     ridgeReg.optimizer.setNumIterations(200)
                       .setRegParam(0.1)//正则化参数>=0
@@ -126,6 +126,7 @@ class RidgeRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkCo
     // If we serialize data directly in the task closure, the size of the serialized task would be
     // greater than 1MB and hence Spark would throw an error.
     //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB,因此Spark会抛出一个错误
+    //(SGD随机梯度下降)
     val model = RidgeRegressionWithSGD.train(points, 2)
     val predictions = model.predict(points.map(_.features))
   }

@@ -23,7 +23,7 @@ object LassoExample {
     //创建之前数据的RDD
     val rdd = sc.parallelize(points)
     //使用数据迭代100次训练模型,这时步长和正则化参数已经手动设置好了
-    val model = LassoWithSGD.train(rdd, 100, 0.02, 2.0)
+    val model = LassoWithSGD.train(rdd, 100, 0.02, 2.0)//(SGD随机梯度下降)
     /**
      * 9个预测因子中有6个的系数被设成了0,这是LassoW主要特征:做任意它认为没有用的预测因子,
      * 它会把它们的相关系数设为0从而把它们从方程式中删除

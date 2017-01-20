@@ -213,7 +213,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-    //逻辑回归基于梯度下降,仅支持2分类
+    //逻辑回归基于梯度下降,仅支持2分类 (SGD随机梯度下降)
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     //每次迭代优化步长
     lr.optimizer.setStepSize(10.0).setRegParam(0.0).setNumIterations(20).setConvergenceTol(0.0005)
@@ -278,7 +278,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
     //逻辑回归梯度下降
     // Use half as many iterations as the previous test.
-    //逻辑回归基于梯度下降,仅支持2分类
+    //逻辑回归基于梯度下降,仅支持2分类 (SGD随机梯度下降)
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer
       .setStepSize(10.0)//每次迭代优化步长
@@ -317,7 +317,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD.cache()
     //逻辑回归梯度下降
     // Use half as many iterations as the previous test.
-    //逻辑回归基于梯度下降,仅支持2分类
+    //逻辑回归基于梯度下降,仅支持2分类 (SGD随机梯度下降)
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer.
       setStepSize(1.0).//每次迭代优化步长
@@ -604,6 +604,7 @@ class LogisticRegressionClusterSuite extends SparkFunSuite with LocalClusterSpar
     // If we serialize data directly in the task closure, the size of the serialized task would be
     // greater than 1MB and hence Spark would throw an error.
     //如果我们将数据直接在任务结束,该序列化任务的将大于1MB,因此Spark会抛出一个错误
+    //(SGD随机梯度下降)
     val model = LogisticRegressionWithSGD.train(points, 2)
 
     val predictions = model.predict(points.map(_.features))
