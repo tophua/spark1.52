@@ -234,7 +234,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
   // Test if we can correctly learn A, B where Y = logistic(A + B*X)
   //测试如果我们能正确学习A,B where Y = logistic(A + B*X)
-  test("logistic regression with LBFGS") {//逻辑回归
+  test("logistic regression with LBFGS") {//逻辑回归(BFGS是逆秩2拟牛顿法)
     val nPoints = 10000
     val A = 2.0
     val B = -1.5
@@ -243,7 +243,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
-    //基于lbfgs优化损失函数,支持多分类
+    //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
 
     val model = lr.run(testRDD)
@@ -283,7 +283,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     lr.optimizer
       .setStepSize(10.0)//每次迭代优化步长
       .setRegParam(0.0)//正则化参数>=0
-      .setNumIterations(10)
+      .setNumIterations(10)//迭代次数
 
     val model = lr.run(testRDD, initialWeights)
 
@@ -321,7 +321,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
     lr.optimizer.
       setStepSize(1.0).//每次迭代优化步长
-      setNumIterations(10).
+      setNumIterations(10).//迭代次数
       setRegParam(1.0)//正则化参数>=0
 
     val model = lr.run(testRDD, initialWeights)
@@ -343,7 +343,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
      //测试在数组上预测
     validatePrediction(validationData.map(row => model.predict(row.features)), validationData, 0.8)
   }
-  //初始权重Logistic回归LBFGS
+  //初始权重Logistic回归LBFGS(BFGS是逆秩2拟牛顿法)
   test("logistic regression with initial weights with LBFGS") {
     val nPoints = 10000
     val A = 2.0
@@ -357,8 +357,8 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
 
-    // Use half as many iterations as the previous test.
-    //基于lbfgs优化损失函数,支持多分类
+    // Use half as many iterations as the previous test.   
+    //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
 
     val model = lr.run(testRDD, initialWeights)
@@ -414,10 +414,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     testRDD3.cache()
 
     val numIteration = 10
-   //基于lbfgs优化损失函数,支持多分类
+     //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val lrA = new LogisticRegressionWithLBFGS().setIntercept(true)
     lrA.optimizer.setNumIterations(numIteration)
-    //基于lbfgs优化损失函数,支持多分类
+   //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val lrB = new LogisticRegressionWithLBFGS().setIntercept(true).setFeatureScaling(false)
     lrB.optimizer.setNumIterations(numIteration)
 
@@ -443,7 +443,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(modelB1.weights(0) !~== modelB2.weights(0) * 1.0E3 absTol 0.1)
     assert(modelB1.weights(0) !~== modelB3.weights(0) * 1.0E6 absTol 0.1)
   }
-  //多分类Logistic回归分析
+ //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
   test("multinomial logistic regression with LBFGS") {
     val nPoints = 10000
 
@@ -624,6 +624,7 @@ class LogisticRegressionClusterSuite extends SparkFunSuite with LocalClusterSpar
     // If we serialize data directly in the task closure, the size of the serialized task would be
     //如果我们将数据直接在任务结束,该序列化任务的将大于1MB,因此Spark会抛出一个错误
     // greater than 1MB and hence Spark would throw an error.
+    //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
     lr.optimizer.setNumIterations(2)
     val model = lr.run(points)

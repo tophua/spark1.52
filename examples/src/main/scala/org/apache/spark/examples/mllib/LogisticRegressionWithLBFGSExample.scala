@@ -50,7 +50,7 @@ object LogisticRegressionWithLBFGSExample {
     //创建之前数据的RDD
     val spiderRDD = sc.parallelize(points)
     //使用数据训练模型(当所有预测值为0的时候,拦截是有意义的)
-    //逻辑回归,基于lbfgs优化损失函数,支持多分类
+    //逻辑回归,基于lbfgs优化损失函数,支持多分类,(BFGS是逆秩2拟牛顿法)
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
     val model = lr.run(spiderRDD)
     //预测0.938尺度的蜘蛛的现状

@@ -53,6 +53,10 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
       .setImpurity("variance")//设置纯度,方差
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMaxBins(100)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+    /**
+     指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }
@@ -62,6 +66,10 @@ class DecisionTreeRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
       .setImpurity("variance")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMaxBins(100)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+     /**
+     指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 2, 1-> 2)
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures)
   }

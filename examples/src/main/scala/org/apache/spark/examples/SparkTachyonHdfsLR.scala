@@ -36,7 +36,7 @@ import org.apache.spark.storage.StorageLevel
  *
  * This is an example implementation for learning how to use Spark. For more conventional use,
  * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGD随机梯度下降) or
- * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS based on your needs.
+ * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGS是逆秩2拟牛顿法) based on your needs.
  */
 object SparkTachyonHdfsLR {
   val D = 10   // Numer of dimensions
@@ -46,7 +46,7 @@ object SparkTachyonHdfsLR {
     System.err.println(
       """WARN: This is a naive implementation of Logistic Regression and is given as an example!
         |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGD随机梯度下降) or
-        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
+        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGS是逆秩2拟牛顿法)
         |for more conventional use.
       """.stripMargin)
   }

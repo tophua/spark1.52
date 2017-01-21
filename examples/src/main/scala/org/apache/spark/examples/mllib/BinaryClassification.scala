@@ -146,7 +146,7 @@ object BinaryClassification {
 
     val model = params.algorithm match {
       case LR =>
-        //基于lbfgs优化损失函数,支持多分类
+        //基于lbfgs优化损失函数,支持多分类,(BFGS是逆秩2拟牛顿法)
         val algorithm = new LogisticRegressionWithLBFGS()
         algorithm.optimizer
           .setNumIterations(params.numIterations)//迭代数
@@ -170,7 +170,7 @@ object BinaryClassification {
      //areaUnderPR平均准确率,通常评价结果的质量,平均准确率等于训练样本中被正确分类的数目除以样本总数   
     //Test areaUnderPR = 1.0.
     println(s"Test areaUnderPR = ${metrics.areaUnderPR()}.")
-    //ROC平均值,表示评估一个完美的分类器
+    //ROC曲线下面积,是一种用来度量分类模型好坏的一个标准
     //Test areaUnderROC = 1.0.
     println(s"Test areaUnderROC = ${metrics.areaUnderROC()}.")
 

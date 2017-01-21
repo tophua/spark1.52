@@ -55,14 +55,14 @@ object SVMWithSGDDemo {
     //获得评估指标
     // Get evaluation metrics.
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
-     //ROC平均值,表示评估一个完美的分类器
+    //ROC曲线下面积,是一种用来度量分类模型好坏的一个标准
     val auROC = metrics.areaUnderROC()
-     //ROC平均值,表示评估一个完美的分类器
+   //ROC曲线下面积,是一种用来度量分类模型好坏的一个标准
     println("Area under ROC = " + auROC)
 
     
     /**逻辑回归***/
-    //逻辑回归,基于lbfgs优化损失函数,支持多分类
+    //逻辑回归,基于lbfgs优化损失函数,支持多分类,(BFGS是逆秩2拟牛顿法)
     val modelBFGS = new LogisticRegressionWithLBFGS()
       .setNumClasses(10)
       .run(training)

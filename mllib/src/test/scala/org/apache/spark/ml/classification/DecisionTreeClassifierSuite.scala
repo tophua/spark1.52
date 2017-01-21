@@ -31,6 +31,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Row
 /**
  * 决策树分类套件
+ * 特征值不需要正则化,优化调整迭代次数
  */
 class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -45,18 +46,18 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
 
   override def beforeAll() {
     super.beforeAll()
-    categoricalDataPointsRDD =
-      sc.parallelize(OldDecisionTreeSuite.generateCategoricalDataPoints())
-    orderedLabeledPointsWithLabel0RDD =
-      sc.parallelize(OldDecisionTreeSuite.generateOrderedLabeledPointsWithLabel0())
-    orderedLabeledPointsWithLabel1RDD =
-      sc.parallelize(OldDecisionTreeSuite.generateOrderedLabeledPointsWithLabel1())
-    categoricalDataPointsForMulticlassRDD =
-      sc.parallelize(OldDecisionTreeSuite.generateCategoricalDataPointsForMulticlass())
-    continuousDataPointsForMulticlassRDD =
-      sc.parallelize(OldDecisionTreeSuite.generateContinuousDataPointsForMulticlass())
-    categoricalDataPointsForMulticlassForOrderedFeaturesRDD = sc.parallelize(
-      OldDecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures())
+    val cateor=OldDecisionTreeSuite.generateCategoricalDataPoints()
+    categoricalDataPointsRDD =sc.parallelize(cateor)
+    val cateor1=OldDecisionTreeSuite.generateOrderedLabeledPointsWithLabel0()
+    orderedLabeledPointsWithLabel0RDD =sc.parallelize(cateor1)
+    val cateor2=OldDecisionTreeSuite.generateOrderedLabeledPointsWithLabel1()
+    orderedLabeledPointsWithLabel1RDD =sc.parallelize(cateor2)
+    val cateor3=OldDecisionTreeSuite.generateCategoricalDataPointsForMulticlass()
+    categoricalDataPointsForMulticlassRDD =sc.parallelize(cateor3)
+    val cateor4=OldDecisionTreeSuite.generateContinuousDataPointsForMulticlass()
+    continuousDataPointsForMulticlassRDD =sc.parallelize(cateor4)
+    val cateor5=OldDecisionTreeSuite.generateCategoricalDataPointsForMulticlassForOrderedFeatures()
+    categoricalDataPointsForMulticlassForOrderedFeaturesRDD = sc.parallelize(cateor5)
   }
   //参数
   test("params") {
@@ -68,12 +69,16 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   /////////////////////////////////////////////////////////////////////////////
   // Tests calling train()
   /////////////////////////////////////////////////////////////////////////////
-  //具有序分类特征的二元分类方法
+  //有序特征的二元分类方法
   test("Binary classification stump with ordered categorical features") {
     val dt = new DecisionTreeClassifier()
       .setImpurity("gini")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMaxBins(100)//maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+     /**
+           指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     val numClasses = 2 //如果是分类树,指定有多少种类别
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures, numClasses)
@@ -85,6 +90,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxBins(100)//maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val numClasses = 2 //如果是分类树,指定有多少种类别
     Array(orderedLabeledPointsWithLabel0RDD, orderedLabeledPointsWithLabel1RDD).foreach { rdd =>
+      //访问支持不纯度
       DecisionTreeClassifier.supportedImpurities.foreach { impurity =>
         dt.setImpurity(impurity)//计算信息增益的准则
         compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
@@ -98,10 +104,14 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
     val numClasses = 3 //如果是分类树,指定有多少种类别
+     /**
+             指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
-  //有1个连续的特征分类,检查off-by-1误差
+  //二分类1个连续的特征,检查off-by-1误差
   test("Binary classification stump with 1 continuous feature, to check off-by-1 error") {
     val arr = Array(
     //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
@@ -141,6 +151,10 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setImpurity("Gini")//树节点选择的不纯度的衡量指标
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMaxBins(maxBins)//maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+     /**
+             指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 3, 1 -> 3)
     val numClasses = 3//如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -164,6 +178,10 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
       //maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       .setMaxBins(100)
+     /**
+             指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 3)
     val numClasses = 3//如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -176,6 +194,10 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
       //maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       .setMaxBins(100)
+     /**
+             指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 10, 1 -> 10)
     val numClasses = 3//随机森林需要训练的树的个数,默认值是 20,如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -189,6 +211,10 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
       //最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       .setMaxBins(10)
+    /**
+             指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 10, 1 -> 10)
     val numClasses = 3//随机森林需要训练的树的个数，默认值是 20,如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -225,6 +251,10 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxBins(2)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMinInstancesPerNode(2)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
+     /**
+             指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map(0 -> 2, 1-> 2)
     val numClasses = 22//如果是分类树,指定有多少种类别,随机森林训练的树的个数
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
@@ -251,6 +281,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(4)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMaxBins(100)//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
+   //指定离散特征,是一个map,featureId->K,其中K表示特征值可能的情况(0, 1, …, K-1)
     val categoricalFeatures = Map(0 -> 3)
     val numClasses = 3//如果是分类树,指定有多少种类别,随机森林训练的树的个数
 
@@ -285,11 +316,12 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       LabeledPoint(1, Vectors.dense(0, 3, 9)),
       LabeledPoint(0, Vectors.dense(0, 2, 6))
     ))
+    //DataFrame
     val df = TreeTests.setMetadata(data, Map(0 -> 1), 2)
     //树的最大深度,为了防止过拟合,设定划分的终止条件
     val dt = new DecisionTreeClassifier().setMaxDepth(3)
     //fit()方法将DataFrame转化为一个Transformer的算法
-    val model = dt.fit(df)
+    val model = dt.fit(df)    
     /*  println("rootNode:"+model.rootNode)
    println(model.labelCol.name+"\t"+model.labelCol.doc)
    println("getFeaturesCol:"+model.getFeaturesCol)*/

@@ -862,7 +862,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val summary = model.summary.asInstanceOf[BinaryLogisticRegressionSummary]
 
     val sameSummary = model.evaluate(dataset).asInstanceOf[BinaryLogisticRegressionSummary]
-    //ROC平均值,表示评估一个完美的分类器
+    //ROC曲线下面积,是一种用来度量分类模型好坏的一个标准
     assert(summary.areaUnderROC === sameSummary.areaUnderROC)
     assert(summary.roc.collect() === sameSummary.roc.collect())
     assert(summary.pr.collect === sameSummary.pr.collect())

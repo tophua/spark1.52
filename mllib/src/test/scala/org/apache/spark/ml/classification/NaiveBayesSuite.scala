@@ -30,6 +30,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Row
 /**
  * 朴素贝叶斯套件
+ * 特征不需要标准化
  */
 class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 

@@ -35,6 +35,7 @@ import org.apache.spark.util.Utils
 /**
  *决策树是一个预测模型
  *决策树:分类与回归树(Classification and Regression Trees ,CART)算法常用于特征含有类别信息的分类或者回归问题
+ * 特征值不标准化,优化需调整迭代次数
  */
 class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -45,11 +46,6 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
   //具有连续特征的二元分类:分裂和计算
   test("Binary classification with continuous features(连续特征): split and bin calculation") {
     /**
-     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
-     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
-     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
-     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
-     * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
      * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
      * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
      * (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), 
@@ -68,23 +64,24 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(splits(0).length === 99)
     assert(bins(0).length === 100)
   }
-  //具有二元（有序）分类特征的二元分类:分裂和计算
+  //具有二元(有序)分类特征的二元分类:分裂和计算
   test("Binary classification with binary (ordered) categorical features:" +
     " split and bin calculation") {
     //[(1.0,[0.0,1.0]), (0.0,[1.0, 0.0]), (1.0,[0.0,1.0]), (0.0,[1.0, 0.0])]
     val arr = DecisionTreeSuite.generateCategoricalDataPoints()
     assert(arr.length === 1000)
     val rdd = sc.parallelize(arr)
+    //策略
     val strategy = new Strategy(
-      Classification,
+      Classification,//分类
       Gini,
       maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       numClasses = 2,//numClasses 分类数
       maxBins = 100,//最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
-      /**
-      指明特征是类别型的以及每个类别型特征对应值(类别)。
-      Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
-      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
+     /**
+             指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
       categoricalFeaturesInfo = Map(0 -> 2, 1-> 2))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -512,6 +509,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       maxDepth = 2,//树的最大深度,为了防止过拟合,设定划分的终止条件
       //最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
       maxBins = 100,
+      /**
+     指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -775,6 +776,10 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     //numClasses 分类数
     //maxBins连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
       numClasses = 3, maxBins = maxBins,
+     /**
+     指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
       categoricalFeaturesInfo = Map(0 -> 3, 1 -> 3))
     assert(strategy.isMulticlassClassification)
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -996,7 +1001,9 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 object DecisionTreeSuite extends SparkFunSuite {
-
+/**
+ * 验证分类器
+ */
   def validateClassifier(
       model: DecisionTreeModel,
       input: Seq[LabeledPoint],
@@ -1009,7 +1016,9 @@ object DecisionTreeSuite extends SparkFunSuite {
     assert(accuracy >= requiredAccuracy,
       s"validateClassifier calculated accuracy $accuracy but required $requiredAccuracy.")
   }
-
+/**
+ * 验证回归
+ */
   def validateRegressor(
       model: DecisionTreeModel,
       input: Seq[LabeledPoint],
@@ -1022,7 +1031,9 @@ object DecisionTreeSuite extends SparkFunSuite {
     val mse = squaredError / input.length
     assert(mse <= requiredMSE, s"validateRegressor calculated MSE $mse but required $requiredMSE.")
   }
-
+/**
+ *生成有序标签数据点
+ */
   def generateOrderedLabeledPointsWithLabel0(): Array[LabeledPoint] = {
     val arr = new Array[LabeledPoint](1000)
     for (i <- 0 until 1000) {
@@ -1057,7 +1068,10 @@ object DecisionTreeSuite extends SparkFunSuite {
     }
     arr
   }
-
+/**
+ * 生成二分类数据
+ * [(1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0])]
+ */
   def generateCategoricalDataPoints(): Array[LabeledPoint] = {
     val arr = new Array[LabeledPoint](1000)
     for (i <- 0 until 1000) {
@@ -1075,7 +1089,10 @@ object DecisionTreeSuite extends SparkFunSuite {
   def generateCategoricalDataPointsAsJavaList(): java.util.List[LabeledPoint] = {
     generateCategoricalDataPoints().toList.asJava
   }
-
+/**
+ * 生成多类分类数据
+ * [(1.0,[0.0,1.0]), (2.0,[0.0,1.0]), (1.0,[0.0,1.0]), (2.0,[0.0,1.0]), (1.0,[0.0,1.0])]
+ */
   def generateCategoricalDataPointsForMulticlass(): Array[LabeledPoint] = {
     val arr = new Array[LabeledPoint](3000)
     for (i <- 0 until 3000) {
@@ -1090,7 +1107,10 @@ object DecisionTreeSuite extends SparkFunSuite {
     }
     arr
   }
-
+/**
+ * 生成多类连续数据
+ * [(1.0,[0.0,1.0]), (2.0,[0.0,1.0]), (1.0,[0.0,1.0]), (2.0,[0.0,1.0]), (1.0,[0.0,1.0])]
+ */
   def generateContinuousDataPointsForMulticlass(): Array[LabeledPoint] = {
     val arr = new Array[LabeledPoint](3000)
     for (i <- 0 until 3000) {

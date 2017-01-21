@@ -90,6 +90,10 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
       new LabeledPoint(0, Vectors.dense(1, 0, 0, 0, 0)),
       new LabeledPoint(1, Vectors.dense(1, 1, 0, 0, 0))
     ))
+     /**
+     指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+     Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
+     **/
     val categoricalFeatures = Map.empty[Int, Int]
     val df: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, 0)
     //fit()方法将DataFrame转化为一个Transformer的算法

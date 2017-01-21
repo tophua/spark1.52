@@ -127,7 +127,7 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val mlpPredictionAndLabels = model.transform(dataFrame).select("prediction", "label")
       .map { case Row(p: Double, l: Double) => (p, l) }
     // train multinomial logistic regression
-    //基于lbfgs优化损失函数,支持多分类
+    //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val lr = new LogisticRegressionWithLBFGS()
       .setIntercept(true)
        //如果是分类树,指定有多少种类别,随机森林训练的树的个数

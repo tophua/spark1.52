@@ -35,7 +35,7 @@ import org.apache.spark.scheduler.InputFormatInfo
  * This is an example implementation for learning how to use Spark. For more conventional use,
  * 这是一个学习如何使用Spark的例子实现,为更传统的使用
  * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGD随机梯度下降) or
- * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS based on your needs.
+ * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGS是逆秩2拟牛顿法) based on your needs.
  */
 object SparkHdfsLR {
   val D = 5   // Numer of dimensions 维度
@@ -58,7 +58,7 @@ object SparkHdfsLR {
     System.err.println(
       """WARN: This is a naive implementation of Logistic Regression and is given as an example!
         |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGD随机梯度下降) or
-        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
+        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGS是逆秩2拟牛顿法)
         |for more conventional use.
       """.stripMargin)
   }

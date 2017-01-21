@@ -53,11 +53,12 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   override def beforeAll() {
     super.beforeAll()
-    data = sc.parallelize(EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 10, 100), 2)
-    trainData =
-      sc.parallelize(EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 20, 120), 2)
-    validationData =
-      sc.parallelize(EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 20, 80), 2)
+    val data1=EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 10, 100)
+    data = sc.parallelize(data1, 2)
+    val data2=EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 20, 120)
+    trainData =sc.parallelize(data2, 2)
+    val data3=EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 20, 80)
+    validationData =sc.parallelize(data3, 2)
   }
 
   test("params") {
@@ -110,7 +111,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
 
   // TODO: Reinstate test once runWithValidation is implemented   SPARK-7132
-  /*
+
   test("runWithValidation stops early and performs better on a validation dataset") {
     val categoricalFeatures = Map.empty[Int, Int]
     // Set maxIter large enough so that it stops early.
@@ -120,13 +121,13 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
       val gbt = new GBTClassifier()
         .setMaxIter(maxIter)//最大迭代次数
         .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-        .setLossType(loss))//损失函数类型
-        .setValidationTol(0.0)
+        .setLossType(loss) //损失函数类型
+       // .setValidationTol(0.0)
       compareAPIs(trainData, None, gbt, categoricalFeatures)
       compareAPIs(trainData, Some(validationData), gbt, categoricalFeatures)
     }
   }
-  */
+ 
 
   /////////////////////////////////////////////////////////////////////////////
   // Tests of model save/load

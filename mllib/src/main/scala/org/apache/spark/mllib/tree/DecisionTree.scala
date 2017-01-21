@@ -940,14 +940,16 @@ object DecisionTree extends Serializable with Logging {
 
   /**
    * Returns splits and bins for decision tree calculation.
+   * 决策树计算返回的分裂和分箱
    * Continuous and categorical features are handled differently.
-   *
-   * Continuous features:
+   * 连续和分类特征处理不同
+   * Continuous features:连续的特征
    *   For each feature, there are numBins - 1 possible splits representing the possible binary
    *   decisions at each node in the tree.
+   *   分箱数-1可能的分裂二进制表示树中的每个节点的决定
    *   This finds locations (feature values) for splits using a subsample of the data.
-   *
-   * Categorical features:
+   *   查找位置(特征值)为将使用其中一个样本的数据
+   * Categorical features:类别特征
    *   For each feature, there is 1 bin per split.
    *   Splits and bins are handled in 2 ways:
    *   (a) "unordered features"

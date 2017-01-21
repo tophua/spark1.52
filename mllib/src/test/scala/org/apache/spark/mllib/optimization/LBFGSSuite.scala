@@ -107,7 +107,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
     val initialWeightsWithIntercept = Vectors.dense(0.3, 0.12)
     val convergenceTol = 1e-12
     val numIterations = 10
-
+     //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val (weightLBFGS, lossLBFGS) = LBFGS.runLBFGS(
       dataRDD,
       gradient,
@@ -215,7 +215,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
       .setConvergenceTol(convergenceTol)
       .setNumIterations(numIterations)
       .setRegParam(regParam)//正则化参数>=0
-
+     //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val weightLBFGS = lbfgsOptimizer.optimize(dataRDD, initialWeightsWithIntercept)
 
     val numGDIterations = 50
@@ -247,6 +247,7 @@ class LBFGSClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
       val random = new Random(idx)
       iter.map(i => (1.0, Vectors.dense(Array.fill(n)(random.nextDouble))))
     }.cache()
+    //基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val lbfgs = new LBFGS(new LogisticGradient, new SquaredL2Updater)
       .setNumCorrections(1)
       .setConvergenceTol(1e-12)

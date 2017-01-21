@@ -42,6 +42,7 @@ class StandardScalerSuite extends SparkFunSuite with MLlibTestSparkContext {
   //稀疏向量(sparse vector)通过两个并列的数组来表示：一个表示索引，一个表示数值
   val sparseData = Array(
     //3表示此向量的长度，后面的比较直观，Seq里面每一对都是(索引，值）的形式。
+    //稀疏向量标准化要设置withMean为false,规免产生大量的值
     Vectors.sparse(3, Seq((0, -2.0), (1, 2.3))),
     Vectors.sparse(3, Seq((1, -1.0), (2, -3.0))),
     Vectors.sparse(3, Seq((1, -5.1))),

@@ -91,7 +91,7 @@ object LogisticRegressionSummaryExample {
 
     // Obtain the receiver-operating characteristic as a dataframe and areaUnderROC.
     //获得一个数据集areaUnderROC
-    //ROC平均值,表示评估一个完美的分类器
+    //ROC曲线下面积,是一种用来度量分类模型好坏的一个标准
     val roc = binarySummary.roc
     /**
    	+---+--------------------+
@@ -105,6 +105,7 @@ object LogisticRegressionSummaryExample {
     +---+--------------------+*/
     roc.show(5)
     //1
+    //ROC曲线下面积,是一种用来度量分类模型好坏的一个标准
     println(binarySummary.areaUnderROC)
 
     // Set the model threshold to maximize F-Measure

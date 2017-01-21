@@ -37,7 +37,7 @@ object LogisticRegressionWithLBFGSDeom {
     val training = splits(0).cache()
     val test = splits(1)
     /**逻辑回归***/
-    //逻辑回归,基于lbfgs优化损失函数,支持多分类
+    //逻辑回归,基于lbfgs优化损失函数,支持多分类(BFGS是逆秩2拟牛顿法)
     val modelBFGS = new LogisticRegressionWithLBFGS()
       .setNumClasses(10)
       .run(training)

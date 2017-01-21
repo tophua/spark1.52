@@ -51,7 +51,7 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
     assertSequencesMatch(metrics.thresholds().collect(), expectedThresholds)
     //ROC表示表示分类器性能在不同决策阈值下TPR对FPR的折衷(TPR 真阳性率),(FPR假阳性率)
     assertTupleSequencesMatch(metrics.roc().collect(), expectedROCCurve)
-    //ROC平均值,表示评估一个完美的分类器
+   //ROC曲线下面积,是一种用来度量分类模型好坏的一个标准
     assert(metrics.areaUnderROC() ~== AreaUnderCurve.of(expectedROCCurve) absTol 1E-5)
     //召回率 :定义为真阳性的数目除以真阳性和假阴性的和,其中假阴性是类别 1却被预测为0的样本
     assertTupleSequencesMatch(metrics.pr().collect(), expectedPRCurve)
@@ -143,7 +143,7 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
     val scoreAndLabelsRDD = sc.parallelize(scoreAndLabels, 1)
 
     val original = new BinaryClassificationMetrics(scoreAndLabelsRDD)
-    //ROC表示表示分类器性能在不同决策阈值下TPR对FPR的折衷(TPR 真阳性率),(FPR假阳性率)
+    //AUC是一种用来度量分类模型好坏的一个标准
     val originalROC = original.roc().collect().sorted.toList
     // Add 2 for (0,0) and (1,1) appended at either end
     assert(2 + scoreAndLabels.size == originalROC.size)
