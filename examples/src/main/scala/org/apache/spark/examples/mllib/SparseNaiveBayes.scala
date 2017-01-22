@@ -36,20 +36,20 @@ import org.apache.spark.mllib.util.MLUtils
 object SparseNaiveBayes {
 
   case class Params(
-      input: String = null,
+      input: String = "../data/mllib/sample_libsvm_data.txt",
       minPartitions: Int = 0,
       numFeatures: Int = -1,
       lambda: Double = 1.0) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
     val defaultParams = Params()
-/**
- *  libSVM的数据格式
- *  <label> <index1>:<value1> <index2>:<value2> ...
- *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
- *  <index>是以1开始的整数,可以是不连续
- *  <value>为实数,也就是我们常说的自变量
- */
+  /**
+   *  libSVM的数据格式
+   *  <label> <index1>:<value1> <index2>:<value2> ...
+   *  其中<label>是训练数据集的目标值,对于分类,它是标识某类的整数(支持多个类);对于回归,是任意实数
+   *  <index>是以1开始的整数,可以是不连续
+   *  <value>为实数,也就是我们常说的自变量
+   */
     val parser = new OptionParser[Params]("SparseNaiveBayes") {
       head("SparseNaiveBayes: an example naive Bayes app for LIBSVM data.")
       opt[Int]("numPartitions")
@@ -61,10 +61,10 @@ object SparseNaiveBayes {
       opt[Double]("lambda")
         .text(s"lambda (smoothing constant), default: ${defaultParams.lambda}")
         .action((x, c) => c.copy(lambda = x))
-      arg[String]("<input>")
+     /* arg[String]("<input>")
         .text("input paths to labeled examples in LIBSVM format")
-        .required()
-        .action((x, c) => c.copy(input = x))
+        //.required()
+        .action((x, c) => c.copy(input = x))*/
     }
 
     parser.parse(args, defaultParams).map { params =>
@@ -95,7 +95,7 @@ object SparseNaiveBayes {
 
     val numTraining = training.count()
     val numTest = test.count()
-
+    //numTraining = 81, numTest = 19.
     println(s"numTraining = $numTraining, numTest = $numTest.")
 
     val model = new NaiveBayes().setLambda(params.lambda).run(training)
@@ -103,7 +103,7 @@ object SparseNaiveBayes {
     val prediction = model.predict(test.map(_.features))
     val predictionAndLabel = prediction.zip(test.map(_.label))
     val accuracy = predictionAndLabel.filter(x => x._1 == x._2).count().toDouble / numTest
-
+   //Test accuracy = 1.0. 准确率
     println(s"Test accuracy = $accuracy.")
 
     sc.stop()
