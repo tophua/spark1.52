@@ -103,9 +103,9 @@ class CrossValidatorSuite extends SparkFunSuite with MLlibTestSparkContext {
      //回归评估
     val eval = new RegressionEvaluator()
     val cv = new CrossValidator()
-      .setEstimator(trainer)
+      .setEstimator(trainer)//算法模型
       .setEstimatorParamMaps(lrParamMaps)//设置被评估模型的参数
-      .setEvaluator(eval)
+      .setEvaluator(eval)//评估
       .setNumFolds(3)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val cvModel = cv.fit(dataset)

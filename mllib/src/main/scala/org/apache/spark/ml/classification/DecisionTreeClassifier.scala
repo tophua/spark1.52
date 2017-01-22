@@ -79,7 +79,10 @@ final class DecisionTreeClassifier(override val uid: String)
     trees.head.asInstanceOf[DecisionTreeClassificationModel]
   }
 
-  /** (private[ml]) Create a Strategy instance to use with the old API. */
+  /** 
+   *  (private[ml]) Create a Strategy instance to use with the old API.
+   *  创建与旧API一起使用的策略实例 
+   *  */
   private[ml] def getOldStrategy(
       categoricalFeatures: Map[Int, Int],
       numClasses: Int): OldStrategy = {
@@ -156,7 +159,10 @@ final class DecisionTreeClassificationModel private[ml] (
 
 private[ml] object DecisionTreeClassificationModel {
 
-  /** (private[ml]) Convert a model from the old API */
+  /** 
+   *  (private[ml]) Convert a model from the old API
+   *  从旧的接口转换模型 
+   *  */
   def fromOld(
       oldModel: OldDecisionTreeModel,
       parent: DecisionTreeClassifier,

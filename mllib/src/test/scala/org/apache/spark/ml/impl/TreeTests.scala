@@ -32,12 +32,12 @@ private[ml] object TreeTests extends SparkFunSuite {
 
   /**
    * Convert the given data to a DataFrame, and set the features and label metadata.
-   * 把给出的数据到一个数据集,并设置和标签的元数据的特点
+   * 把给出的数据转换到一个DataFrame数据集,并设置特征和标签的元数据
    * @param data  Dataset.  Categorical features and labels must already have 0-based indices.
    * 												分类特征和标签必须已经有0指标
    *              This must be non-empty.
    * @param categoricalFeatures  Map: categorical feature index -> number of distinct values
-   * 														Map:分类特征  索引>不同值的数字
+   * 														指定离散特征,是一个map,featureId->K,其中K表示特征值可能的情况(0, 1, …, K-1)
    * @param numClasses  Number of classes label can take.  If 0, mark as continuous.
    * 										可采取的类的数量,如果0,连续
    * @return DataFrame with metadata
@@ -59,11 +59,14 @@ private[ml] object TreeTests extends SparkFunSuite {
     |  1.0|[0.0,3.0,9.0]|
     |  0.0|[0.0,2.0,6.0]|
     +-----+-------------+*/
-    df.show()
+    df.show(5)
     val numFeatures = data.first().features.size
+    //获得特征数3
     val featuresAttributes = Range(0, numFeatures).map { feature =>
     // println(">>>>"+feature)
+      // Map(0 -> 1)判断key是否包含feature
       if (categoricalFeatures.contains(feature)) {
+        //创建可更改属性的副本
         NominalAttribute.defaultAttr.withIndex(feature).withNumValues(categoricalFeatures(feature))
       } else {
         NumericAttribute.defaultAttr.withIndex(feature)
@@ -88,7 +91,7 @@ private[ml] object TreeTests extends SparkFunSuite {
       |[0.0,2.0,6.0]|  0.0|
       +-------------+-----+*/
     df.select(df("features").as("features", featuresMetadata),
-      df("label").as("label", labelMetadata)).show()
+      df("label").as("label", labelMetadata)).show(5)
     df.select(df("features").as("features", featuresMetadata),
       df("label").as("label", labelMetadata))
       

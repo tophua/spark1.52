@@ -25,7 +25,7 @@ import org.apache.spark.sql.{DataFrame, SQLContext}
 
 private[clustering] case class TestRow(features: Vector)
 /**
- * 聚类套件
+ * 聚类测试套件
  */
 object KMeansSuite {
   def generateKMeansData(sql: SQLContext, rows: Int, dim: Int, k: Int): DataFrame = {
@@ -117,11 +117,16 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     val predictionColName = "kmeans_prediction"
     //PredictionCol 测量输出的名称 //聚类的个数
     val kmeans = new KMeans().setK(k).setPredictionCol(predictionColName).setSeed(1)
-    /**dataset:List([[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]], 
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]],
-    [[0.0,0.0,0.0]], [[1.0,1.0,1.0]], [[2.0,2.0,2.0]], [[3.0,3.0,3.0]], [[4.0,4.0,4.0]])**/
+  /** +-------------+
+      |     features|
+      +-------------+
+      |[1.0,1.0,1.0]|
+      |[2.0,2.0,2.0]|
+      |[3.0,3.0,3.0]|
+      |[4.0,4.0,4.0]|
+      |[0.0,0.0,0.0]|
+      +-------------+*/
+    dataset.show(5)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = kmeans.fit(dataset)//返回一个训练模型
     //clusterCenters = Array([1.0,1.0,1.0], [4.0,4.0,4.0], [0.0,0.0,0.0], [3.0,3.0,3.0], [2.0,2.0,2.0])
@@ -130,6 +135,17 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     //println("dataset:"+dataset.collect().toSeq)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val transformed = model.transform(dataset)//转换成DataFrame
+    /**
+      +-------------+-----------------+
+      |     features|kmeans_prediction|
+      +-------------+-----------------+
+      |[1.0,1.0,1.0]|                3|
+      |[2.0,2.0,2.0]|                2|
+      |[3.0,3.0,3.0]|                4|
+      |[4.0,4.0,4.0]|                0|
+      |[0.0,0.0,0.0]|                1|
+      +-------------+-----------------+*/
+    transformed.show(5)
     //期望值列
     val expectedColumns = Array("features", predictionColName)
     expectedColumns.foreach { column =>
@@ -138,13 +154,6 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
       assert(transformed.columns.contains(column))
     }
     val coll=transformed.select("features","kmeans_prediction").collect()
-   /**
-    * res2: Array[org.apache.spark.sql.Row] = Array([[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4],
-    * [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], [[1.0,1.0,1.0],0],
-			[[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], [[0.0,0.0,0.0],2], 
-			[[1.0,1.0,1.0],0], [[2.0,2.0,2.0],4], [[3.0,3.0,3.0],3], [[4.0,4.0,4.0],1], 
-    */
-
     val clusters = transformed.select(predictionColName).map(_.getInt(0)).distinct().collect().toSet
     assert(clusters.size === k)
     assert(clusters === Set(0, 1, 2, 3, 4))

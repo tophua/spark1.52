@@ -397,7 +397,10 @@ class NominalAttribute private[ml] (
     }
   }
 
-  /** Creates a copy of this attribute with optional changes. */
+  /** 
+   *  Creates a copy of this attribute with optional changes.
+   *  创建可更改属性的副本. 
+   *  */
   private def copy(
       name: Option[String] = name,
       index: Option[Int] = index,
@@ -450,7 +453,10 @@ class NominalAttribute private[ml] (
 @DeveloperApi
 object NominalAttribute extends AttributeFactory {
 
-  /** The default nominal attribute. */
+  /** 
+   *  The default nominal attribute.
+   *  默认列名的属性 
+   *  */
   final val defaultAttr: NominalAttribute = new NominalAttribute
 
   private[attribute] override def fromMetadata(metadata: Metadata): NominalAttribute = {

@@ -480,7 +480,7 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(model2.intercept ~== interceptR2 absTol 1E-3)
     assert(model2.weights ~= weightsR2 relTol 1E-3)
- //transform()方法将DataFrame转化为另外一个DataFrame的算法
+   //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model1.transform(dataset).select("features", "prediction").collect().foreach {
       case Row(features: DenseVector, prediction1: Double) =>
         val prediction2 =
@@ -524,7 +524,9 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
                [,1]
        s0 0.9998749
      */
+    //meanSquaredError 绝对均方误差
     assert(model.summary.meanSquaredError ~== 0.00972035 relTol 1E-5)
+    //均方误差
     assert(model.summary.meanAbsoluteError ~== 0.07863206  relTol 1E-5)
     assert(model.summary.r2 ~== 0.9998749 relTol 1E-5)
 
@@ -544,8 +546,10 @@ class LinearRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     // Evaluating on training dataset should yield results summary equal to training summary
     //训练数据集的评价应得到结果汇总,等于培训总结
     val testSummary = model.evaluate(dataset)
+    //meanSquaredError 均方误差
     assert(model.summary.meanSquaredError ~== testSummary.meanSquaredError relTol 1E-5)
     assert(model.summary.r2 ~== testSummary.r2 relTol 1E-5)
+    //label - predicted value
     model.summary.residuals.select("residuals").collect()
       .zip(testSummary.residuals.select("residuals").collect())
       .forall { case (Row(r1: Double), Row(r2: Double)) => r1 ~== r2 relTol 1E-5 }

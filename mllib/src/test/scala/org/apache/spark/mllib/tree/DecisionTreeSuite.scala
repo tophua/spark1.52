@@ -1070,8 +1070,14 @@ object DecisionTreeSuite extends SparkFunSuite {
   }
 /**
  * 生成二分类数据
- * [(1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0]), (1.0,[0.0,1.0])]
- */
+    +-----+---------+
+    |label| features|
+    +-----+---------+
+    |  1.0|[0.0,1.0]|
+    |  1.0|[0.0,1.0]|
+    |  0.0|[1.0,0.0]|
+    |  0.0|[1.0,0.0]|
+    +-----+---------+*/
   def generateCategoricalDataPoints(): Array[LabeledPoint] = {
     val arr = new Array[LabeledPoint](1000)
     for (i <- 0 until 1000) {

@@ -52,6 +52,7 @@ import org.apache.spark.util.random.XORShiftRandom
 private[recommendation] trait ALSModelParams extends Params with HasPredictionCol {
   /**
    * Param for the column name for user ids.
+   * 参数列名称是用户的ID
    * Default: "user"
    * @group param
    */
@@ -62,6 +63,7 @@ private[recommendation] trait ALSModelParams extends Params with HasPredictionCo
 
   /**
    * Param for the column name for item ids.
+   * 参数列名称是用户的ID
    * Default: "item"
    * @group param
    */
@@ -79,6 +81,7 @@ private[recommendation] trait ALSParams extends ALSModelParams with HasMaxIter w
 
   /**
    * Param for rank of the matrix factorization (>= 1).
+   * 参数分别是矩阵秩(>=1)
    * Default: 10
    * @group param
    */
@@ -89,6 +92,7 @@ private[recommendation] trait ALSParams extends ALSModelParams with HasMaxIter w
 
   /**
    * Param for number of user blocks (>= 1).
+   * 参数用户并发块
    * Default: 10
    * @group param
    */
@@ -111,6 +115,7 @@ private[recommendation] trait ALSParams extends ALSModelParams with HasMaxIter w
 
   /**
    * Param to decide whether to use implicit preference.
+   * 参数来决定是否使用隐式偏好
    * Default: false
    * @group param
    */
@@ -132,6 +137,7 @@ private[recommendation] trait ALSParams extends ALSModelParams with HasMaxIter w
 
   /**
    * Param for the column name for ratings.
+   * 参数评级的列名
    * Default: "rating"
    * @group param
    */
@@ -142,6 +148,7 @@ private[recommendation] trait ALSParams extends ALSModelParams with HasMaxIter w
 
   /**
    * Param for whether to apply nonnegativity constraints.
+   * 参数是否应用非负约束
    * Default: false
    * @group param
    */
@@ -157,6 +164,7 @@ private[recommendation] trait ALSParams extends ALSModelParams with HasMaxIter w
 
   /**
    * Validates and transforms the input schema.
+   * 验证并转换输入模式
    * @param schema input schema
    * @return output schema
    */
@@ -227,7 +235,7 @@ class ALSModel private[ml] (
 /**
  * :: Experimental ::
  * Alternating Least Squares (ALS) matrix factorization.
- *
+ * 交替最小二乘(ALS)矩阵分解
  * ALS attempts to estimate the ratings matrix `R` as the product of two lower-rank matrices,
  * `X` and `Y`, i.e. `X * Yt = R`. Typically these approximations are called 'factor' matrices.
  * The general approach is iterative. During each iteration, one of the factor matrices is held
@@ -353,11 +361,15 @@ object ALS extends Logging {
   /**
    * :: DeveloperApi ::
    * Rating class for better code readability.
+   * 为更好的代码可读性评级类
    */
   @DeveloperApi
   case class Rating[@specialized(Int, Long) ID](user: ID, item: ID, rating: Float)
 
-  /** Trait for least squares solvers applied to the normal equation. */
+  /** 
+   *  Trait for least squares solvers applied to the normal equation.
+   *  应用于正态方程的最小二乘解算器的特征
+   *   */
   private[recommendation] trait LeastSquaresNESolver extends Serializable {
     /** Solves a least squares problem with regularization (possibly with other constraints). */
     def solve(ne: NormalEquation, lambda: Double): Array[Float]
@@ -1189,7 +1201,7 @@ object ALS extends Logging {
 
   /**
    * Encoder for storing (blockId, localIndex) into a single integer.
-   *
+   *编码器的存储(blockid,localindex)为一个整数
    * We use the leading bits (including the sign bit) to store the block id and the rest to store
    * the local index. This is based on the assumption that users/items are approximately evenly
    * partitioned. With this assumption, we should be able to encode two billion distinct values.

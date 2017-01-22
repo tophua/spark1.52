@@ -39,7 +39,9 @@ class BinaryClassificationEvaluator(override val uid: String)
 
   /**
    * param for metric name in evaluation
-   * 评价指标名称参数
+   * 评价指标名称参数,
+   * ROC下的面积为1.0时表示一个完美的分类器,0.5则表示一个随机的性能
+   * areaUnderPR 平均准确率
    * Default: areaUnderROC 默认ROC曲线下面积
    * @group param
    */
@@ -85,7 +87,7 @@ class BinaryClassificationEvaluator(override val uid: String)
       }
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
     val metric = $(metricName) match {
-      //ROC曲线下面积
+      //ROC曲线下面积为1.0时表示一个完美的分类器
       case "areaUnderROC" => metrics.areaUnderROC()
       //准确率与召回率
       case "areaUnderPR" => metrics.areaUnderPR()
@@ -95,7 +97,7 @@ class BinaryClassificationEvaluator(override val uid: String)
   }
 
   override def isLargerBetter: Boolean = $(metricName) match {
-    case "areaUnderROC" => true//ROC曲线下面积
+    case "areaUnderROC" => true//ROC曲线下面积为1.0时表示一个完美的分类器,0.5则表示一个随机的性能
     case "areaUnderPR" => true //准确率与召回率
   }
 

@@ -36,7 +36,22 @@ class MulticlassMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
     val labels = Array(0.0, 1.0, 2.0)
     val predictionAndLabels = sc.parallelize(//预测和标签
       Seq((0.0, 0.0), (0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0),
-        (1.0, 1.0), (1.0, 1.0), (2.0, 2.0), (2.0, 0.0)), 2)
+        (1.0, 1.0), (1.0, 1.0), (2.0, 2.0), (2.0, 0.0)), 2)    
+    /**
+      +---+---+
+      | _1| _2|
+      +---+---+
+      |0.0|0.0|
+      |0.0|1.0|
+      |0.0|0.0|
+      |1.0|0.0|
+      |1.0|1.0|
+      |1.0|1.0|
+      |1.0|1.0|
+      |2.0|2.0|
+      |2.0|0.0|
+      +---+---+*/
+    sqlContext.createDataFrame(predictionAndLabels).show()
      //评估指标-多分类
     val metrics = new MulticlassMetrics(predictionAndLabels)
     val delta = 0.0000001

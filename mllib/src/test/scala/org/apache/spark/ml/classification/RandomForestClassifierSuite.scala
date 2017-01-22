@@ -56,7 +56,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   //具有连续特征的二元分类测试
   def binaryClassificationTestWithContinuousFeatures(rf: RandomForestClassifier) {
      /**
-     指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
+           指明特征的类别对应值(类别),注意特征索引是从0开始的,0和4表示第1和第5个特征
      Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
      **/
     val categoricalFeatures = Map.empty[Int, Int]
@@ -66,7 +66,7 @@ class RandomForestClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setNumTrees(1)//训练的树的数量
       .setFeatureSubsetStrategy("auto")//每次分裂候选特征数量
-      .setSeed(123)
+      .setSeed(123)//随机数
     compareAPIs(orderedLabeledPoints50_1000, newRF, categoricalFeatures, numClasses)
   }
 

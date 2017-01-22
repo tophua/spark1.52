@@ -120,6 +120,17 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val testDataset = sqlContext.createDataFrame(generateNaiveBayesInput(
       piArray, thetaArray, nPoints, 42, "multinomial"))
+      /**
+        +-----+-----------------+
+        |label|         features|
+        +-----+-----------------+
+        |  2.0|[2.0,0.0,5.0,3.0]|
+        |  2.0|[1.0,1.0,7.0,1.0]|
+        |  0.0|[7.0,0.0,0.0,3.0]|
+        |  0.0|[6.0,2.0,1.0,1.0]|
+        |  2.0|[1.0,1.0,8.0,0.0]|
+        +-----+-----------------+*/
+      testDataset.show(5)
     val nb = new NaiveBayes().setSmoothing(1.0).setModelType("multinomial")
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = nb.fit(testDataset)
@@ -129,10 +140,10 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val validationDataset = sqlContext.createDataFrame(generateNaiveBayesInput(
       piArray, thetaArray, nPoints, 17, "multinomial"))
-	//transform()方法将DataFrame转化为另外一个DataFrame的算法
+	   //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val predictionAndLabels = model.transform(validationDataset).select("prediction", "label")
     validatePrediction(predictionAndLabels)
-	//transform()方法将DataFrame转化为另外一个DataFrame的算法
+	   //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val featureAndProbabilities = model.transform(validationDataset)
       .select("features", "probability")
     validateProbabilities(featureAndProbabilities, model, "multinomial")

@@ -76,7 +76,17 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(ova.getPredictionCol === "prediction")
     //fit()方法将DataFrame转化为一个Transformer的算法
     val ovaModel = ova.fit(dataset)
-
+    /**
+         +-----+--------------------+
+        |label|            features|
+        +-----+--------------------+
+        |  1.0|[6.78850863404891...|
+        |  0.0|[6.07565219906821...|
+        |  0.0|[5.68489609831355...|
+        |  0.0|[7.01091278142546...|
+        |  2.0|[5.43698575281309...|
+     */
+    dataset.show(5)
     // copied model must have the same parent.
     // 复制的模型必须有相同的父
     MLTestingUtils.checkCopy(ovaModel)
@@ -84,7 +94,17 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(ovaModel.models.size === numClasses)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val transformedDataset = ovaModel.transform(dataset)
-
+    /**
+      +-----+--------------------+----------+
+      |label|            features|prediction|
+      +-----+--------------------+----------+
+      |  1.0|[6.78850863404891...|       1.0|
+      |  0.0|[6.07565219906821...|       1.0|
+      |  2.0|[5.43698575281309...|       1.0|
+      |  2.0|[7.12736523182829...|       0.0|
+			|  0.0|[6.79168473192127...|       2.0|
+      +-----+--------------------+----------+*/
+    transformedDataset.show()
     // check for label metadata in prediction col
     //检查在预测Col标签元数据
     val predictionColSchema = transformedDataset.schema(ovaModel.getPredictionCol)
@@ -123,16 +143,38 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   //确保标签的功能和预测列配置
   test("SPARK-8092: ensure label features and prediction cols are configurable") {
+    //将原始的文本标签 (“Ham”或者“Spam”)转化成数值型的表型
     val labelIndexer = new StringIndexer()
       .setInputCol("label")
       .setOutputCol("indexed")
-
+      /**
+      +-----+--------------------+
+      |label|            features|
+      +-----+--------------------+
+      |  1.0|[6.78850863404891...|
+      |  0.0|[6.07565219906821...|
+      |  2.0|[5.43698575281309...|
+      |  2.0|[5.69951392993245...|
+      |  1.0|[4.21623748806139...|
+      |  1.0|[5.74197886783151...|
+      +-----+--------------------+*/
+     dataset.show(10)
     val indexedDataset = labelIndexer
       .fit(dataset)
       .transform(dataset)
       .drop("label")
       .withColumnRenamed("features", "f")
-
+     /**
+        +--------------------+-------+
+        |                   f|indexed|
+        +--------------------+-------+
+        |[6.78850863404891...|    2.0|
+        |[6.07565219906821...|    1.0|
+        |[7.01091278142546...|    1.0|
+        |[5.69951392993245...|    0.0|
+        |[5.74197886783151...|    2.0|
+        +--------------------+-------+*/
+    indexedDataset.show(10)
     val ova = new OneVsRest()
     ova.setClassifier(new LogisticRegression())
       .setLabelCol(labelIndexer.getOutputCol)//标签列名
@@ -143,6 +185,19 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val ovaModel = ova.fit(indexedDataset)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val transformedDataset = ovaModel.transform(indexedDataset)
+    /**
+      +--------------------+-------+---+
+      |                   f|indexed|  p|
+      +--------------------+-------+---+
+      |[6.78850863404891...|    2.0|2.0|
+      |[6.07565219906821...|    1.0|2.0|
+      |[5.57810780572612...|    0.0|0.0|
+      |[6.76761634517981...|    1.0|1.0|
+      |[6.06733217136926...|    2.0|1.0|
+      |[7.67483907248304...|    0.0|1.0|
+      +--------------------+-------+---+
+     */
+    transformedDataset.show()
     val outputFields = transformedDataset.schema.fieldNames.toSet
     assert(outputFields.contains("p"))
   }

@@ -81,6 +81,16 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
      **/
     val categoricalFeatures = Map(0 -> 3, 1-> 3)
     val numClasses = 2 //如果是分类树,指定有多少种类别
+   /**
+    categoricalDataPointsRDD
+    +-----+---------+    
+    |label| features|
+    +-----+---------+
+    |  1.0|[0.0,1.0]|
+    |  1.0|[0.0,1.0]|
+    |  0.0|[1.0,0.0]|
+    |  0.0|[1.0,0.0]|
+    +-----+---------+**/
     compareAPIs(categoricalDataPointsRDD, dt, categoricalFeatures, numClasses)
   }  
   //固定标签0.1熵的二进制分类的树,Gini
@@ -89,6 +99,17 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setMaxDepth(3)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMaxBins(100)//maxBins最大分箱数,当某个特征的特征值为连续时,该参数意思是将连续的特征值离散化为多少份
     val numClasses = 2 //如果是分类树,指定有多少种类别
+    /**
+     * orderedLabeledPointsWithLabel0RDD,orderedLabeledPointsWithLabel1RDD
+          +-----+------------+	+-----+-----------+
+          |label|    features|	|label|   features|
+          +-----+------------+	+-----+-----------+
+          |  0.0| [0.0,1000.0]|	|  1.0|[0.0,999.0]|
+          |  0.0| [1.0,999.0]|	|  1.0|[1.0,998.0]|
+          |  0.0| [2.0,998.0]|	|  1.0|[2.0,997.0]|
+          |  0.0| [3.0,997.0]|	|  1.0|[3.0,996.0]|
+          |  0.0| [4.0,996.0]|	|  1.0|[4.0,995.0]|
+          +-----+------------+	+-----+-----------+*/
     Array(orderedLabeledPointsWithLabel0RDD, orderedLabeledPointsWithLabel1RDD).foreach { rdd =>
       //访问支持不纯度
       DecisionTreeClassifier.supportedImpurities.foreach { impurity =>
@@ -99,6 +120,17 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
   }
   //多类分类的树和三元（无序）的分类特征
   test("Multiclass classification stump with 3-ary (unordered) categorical features") {
+    /**categoricalDataPointsForMulticlassRDD
+     *+-----+---------+
+      |label| features|
+      +-----+---------+
+      |  2.0|[2.0,2.0]|
+      |  1.0|[1.0,2.0]|
+      |  2.0|[2.0,2.0]|
+      |  1.0|[1.0,2.0]|
+      |  2.0|[2.0,2.0]|
+      +-----+---------+
+     */
     val rdd = categoricalDataPointsForMulticlassRDD
     val dt = new DecisionTreeClassifier()
       .setImpurity("Gini")//计算信息增益的准则
@@ -316,12 +348,25 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       LabeledPoint(1, Vectors.dense(0, 3, 9)),
       LabeledPoint(0, Vectors.dense(0, 2, 6))
     ))
-    //DataFrame
+    //setMetadata 把给出的数据转换到一个数据集,并设置特征和标签的元数据
     val df = TreeTests.setMetadata(data, Map(0 -> 1), 2)
     //树的最大深度,为了防止过拟合,设定划分的终止条件
     val dt = new DecisionTreeClassifier().setMaxDepth(3)
     //fit()方法将DataFrame转化为一个Transformer的算法
-    val model = dt.fit(df)    
+    val formdata= sqlContext.createDataFrame(data)
+  
+    val model = dt.fit(df) 
+    /**
+     *+-----+-------------+-------------+-----------+----------+
+      |label|     features|rawPrediction|probability|prediction|
+      +-----+-------------+-------------+-----------+----------+
+      |  0.0|[0.0,2.0,3.0]|    [3.0,0.0]|  [1.0,0.0]|       0.0|
+      |  1.0|[0.0,3.0,1.0]|    [0.0,2.0]|  [0.0,1.0]|       1.0|
+      |  0.0|[0.0,2.0,2.0]|    [3.0,0.0]|  [1.0,0.0]|       0.0|
+      |  1.0|[0.0,3.0,9.0]|    [0.0,2.0]|  [0.0,1.0]|       1.0|
+      |  0.0|[0.0,2.0,6.0]|    [3.0,0.0]|  [1.0,0.0]|       0.0|
+      +-----+-------------+-------------+-----------+----------+*/
+    model.transform(formdata).show()
     /*  println("rootNode:"+model.rootNode)
    println(model.labelCol.name+"\t"+model.labelCol.doc)
    println("getFeaturesCol:"+model.getFeaturesCol)*/
@@ -358,19 +403,24 @@ private[ml] object DecisionTreeClassifierSuite extends SparkFunSuite {
    * Train 2 decision trees on the given dataset, one using the old API and one using the new API.
    * 在给定数据集上训练2个决策树,一个使用旧的API和一个使用新的API
    * Convert the old tree to the new format, compare them, and fail if they are not exactly equal.
-   * 将旧的树转换为新的格式,比较,失败如果他们不完全平等
+   * 将旧的树转换为新的格式,比较它们,如果失败他们不完全平等
    */
   def compareAPIs(
       data: RDD[LabeledPoint],
       dt: DecisionTreeClassifier,
       categoricalFeatures: Map[Int, Int],
       numClasses: Int): Unit = {
+    //创建一个策略实例 
     val oldStrategy = dt.getOldStrategy(categoricalFeatures, numClasses)
+    //
     val oldTree = OldDecisionTree.train(data, oldStrategy)
+    //把给出的数据转换到一个DataFrame数据集
     val newData: DataFrame = TreeTests.setMetadata(data, categoricalFeatures, numClasses)
+    //newData.show(5)
     //fit()方法将DataFrame转化为一个Transformer的算法
     val newTree = dt.fit(newData)
     // Use parent from newTree since this is not checked anyways.
+    //使用newTree父树,因为这是没有检查反正
     val oldTreeAsNew = DecisionTreeClassificationModel.fromOld(
       oldTree, newTree.parent.asInstanceOf[DecisionTreeClassifier], categoricalFeatures)
     TreeTests.checkEqual(oldTreeAsNew, newTree)

@@ -45,11 +45,13 @@ import org.apache.spark.storage.StorageLevel
  * Note: If you create the model directly using constructor, please be aware that fast prediction
  * requires cached user/product features and their associated partitioners.
  *
- * @param rank Rank for the features in this model.
+ * @param rank Rank for the features in this model. 在这个模型中的功能排名
  * @param userFeatures RDD of tuples where each tuple represents the userId and
  *                     the features computed for this user.
+ *                     RDD的元组,每个元组代表用户标识和特征对用户计算机
  * @param productFeatures RDD of tuples where each tuple represents the productId
  *                        and the features computed for this product.
+ *                        RDD的元组,每个元组代表ProductID和特点对该产品的计算
  */
 @Since("0.8.0")
 class MatrixFactorizationModel @Since("0.8.0") (
@@ -75,7 +77,10 @@ class MatrixFactorizationModel @Since("0.8.0") (
     }
   }
 
-  /** Predict the rating of one user for one product. */
+  /** 
+   *  Predict the rating of one user for one product.
+   *  预测一个产品的一个用户的评级
+   *   */
   @Since("0.8.0")
   def predict(user: Int, product: Int): Double = {
     val userVector = userFeatures.lookup(user).head

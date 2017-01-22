@@ -29,6 +29,7 @@ import org.apache.spark.mllib.regression._
 import org.apache.spark.mllib.util.{LocalClusterSparkContext, MLlibTestSparkContext}
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
+import org.apache.spark.sql.SQLContext
 /**
  * LogisticRegression:归结为二元分类问题,这个算法的优点是可以给出数据所在类别的概率
  */
@@ -65,8 +66,9 @@ object LogisticRegressionSuite {
 
   /**
    * Generates `k` classes multinomial synthetic logistic input in `n` dimensional space given the
-   * model weights and mean/variance of the features. The synthetic data will be drawn from
+   * model weights and mean(平均)/variance(方差) of the features. The synthetic data will be drawn from
    * the probability distribution constructed by weights using the following formula.
+   * 合成的数据将绘制从使用下列公式构成权重的概率分布
    *
    * P(y = 0 | x) = 1 / norm
    * P(y = 1 | x) = exp(x * w_1) / norm
@@ -204,18 +206,32 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
   //逻辑回归广泛应用于二分类问题
   // Test if we can correctly learn A, B where Y = logistic(A + B*X)
   //测试是否能正确学习A, B where Y = logistic(A + B*X)
-  test("logistic regression with SGD") {
+  test("logistic regression with SGD") {//随机梯度下降法SGD
     val nPoints = 10000
     val A = 2.0
     val B = -1.5
 
     val testData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 42)
-
+    /**
+      +-----+--------------------+
+      |label|            features|
+      +-----+--------------------+
+      |  1.0|[1.1419053154730547]|
+      |  0.0|[0.9194079489827879]|
+      |  1.0|[-0.1909445130708...|
+      |  0.0|[1.4862133923906502]|
+      |  1.0|[-0.1215129246654...|
+      |  0.0|[1.4105062239438624]|
+      |  1.0|[-0.6402327822135...|
+      +-----+--------------------+
+     */
+     sqlContext.createDataFrame(testData).show()
+    
     val testRDD = sc.parallelize(testData, 2)
     testRDD.cache()
     //逻辑回归基于梯度下降,仅支持2分类 (SGD随机梯度下降)
     val lr = new LogisticRegressionWithSGD().setIntercept(true)
-    //每次迭代优化步长
+    //每次迭代优化步长,设置正则化,迭代次数,收敛性
     lr.optimizer.setStepSize(10.0).setRegParam(0.0).setNumIterations(20).setConvergenceTol(0.0005)
     val model = lr.run(testRDD)
     // Test the weights
@@ -223,6 +239,20 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     assert(model.weights(0) ~== B relTol 0.02)
     assert(model.intercept ~== A relTol 0.02)
     val validationData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 17)
+    /**
+      +-----+--------------------+
+      |label|            features|
+      +-----+--------------------+
+      |  1.0|[1.0721860468478341]|
+      |  0.0|[1.2759094383805523]|
+      |  1.0|[0.9808725898193915]|
+      |  0.0|[1.1572325750064227]|
+      |  1.0|[0.6633713216304589]|
+      |  1.0|[1.6755299283911749]|
+      |  0.0| [0.474699954399465]|
+      |  1.0|[-0.2368968409976...|
+      +-----+--------------------+*/
+     sqlContext.createDataFrame(validationData).show()
     val validationRDD = sc.parallelize(validationData, 2)
     // Test prediction on RDD.
     //测试RDD预测
@@ -290,9 +320,11 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     // Test the weights
     //测试权重
     assert(model.weights(0) ~== B relTol 0.02)
+    //此模型计算的拦截
     assert(model.intercept ~== A relTol 0.02)
 
     val validationData = LogisticRegressionSuite.generateLogisticInput(A, B, nPoints, 17)
+    
     val validationRDD = sc.parallelize(validationData, 2)
     // Test prediction on RDD.
     //测试在RDD预测

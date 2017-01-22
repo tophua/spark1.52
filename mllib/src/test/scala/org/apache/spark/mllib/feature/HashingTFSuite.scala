@@ -25,8 +25,8 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
  * HashTF从一个文档中计算出给定大小的词频向量。为了将词和向量顺序对应起来，所以使用了哈希。
  * HashingTF使用每个单词对所需向量的长度S取模得出的哈希值，把所有单词映射到一个0到S-1之间的数字上。
  * 由此可以保证生成一个S维的向量。随后当构建好词频向量后，使用IDF来计算逆文档频率,然后将它们与词频相乘计算TF-IDF
- * 
  */
+
 class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("hashing tf on a single doc") {//散列在一个单一的文件
@@ -56,7 +56,7 @@ class HashingTFSuite extends SparkFunSuite with MLlibTestSparkContext {
       "a a b b b c d".split(" "),
       "a b c d a b c".split(" "),
       "c b a c b a a".split(" "))
-    val docs = sc.parallelize(localDocs, 2)
+    val docs = sc.parallelize(localDocs, 2)    
      //transform()方法将DataFrame转化为另外一个DataFrame的算法
     assert(hashingTF.transform(docs).collect().toSet === localDocs.map(hashingTF.transform).toSet)
   }

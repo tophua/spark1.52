@@ -64,16 +64,17 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
          + x.features(2) + ", " + x.features(3)).saveAsTextFile("path")
      */
     binaryDataset = {
-      val nPoints = 10000
-      val weights = Array(-0.57997, 0.912083, -0.371077, -0.819866, 2.688191)
-      val xMean = Array(5.843, 3.057, 3.758, 1.199)
-      val xVariance = Array(0.6856, 0.1899, 3.116, 0.581)
+      val nPoints = 10000//数据
+      val weights = Array(-0.57997, 0.912083, -0.371077, -0.819866, 2.688191)//权重
+      val xMean = Array(5.843, 3.057, 3.758, 1.199)//平均数
+      val xVariance = Array(0.6856, 0.1899, 3.116, 0.581)//方差
 
       val testData = generateMultinomialLogisticInput(weights, xMean, xVariance, true, nPoints, 42)
 
-      sqlContext.createDataFrame(
-        generateMultinomialLogisticInput(weights, xMean, xVariance, true, nPoints, 42))
+      sqlContext.createDataFrame(testData)
+       
     }
+     binaryDataset.show(5)
   }
 
   test("params") {//参数
@@ -97,6 +98,18 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(lr.getFitIntercept)//是否训练拦截对象
     assert(lr.getStandardization)//标准化
     //fit()方法将DataFrame转化为一个Transformer的算法
+    /**dataset
+      +-----+--------------------+
+      |label|            features|
+      +-----+--------------------+
+      |  0.0|[6.78850863404891...|
+      |  1.0|[6.07565219906821...|
+      |  1.0|[5.68489609831355...|
+      |  0.0|[7.01091278142546...|
+      |  0.0|[5.43698575281309...|
+      |  0.0|[7.12736523182829...|
+      +-----+--------------------+
+     */
     val model = lr.fit(dataset)
      /**
       * dd: org.apache.spark.sql.DataFrame = 
@@ -105,7 +118,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val dd=model.transform(dataset).select("label", "features","rawPrediction", "probability", "prediction").collect().foreach { 
        case Row(label: Double,features:Vector,rawPrediction:Vector, probability: Vector,prediction: Double) =>
-        //文档ID,text文本,probability概率,prediction 预测分类
+        //文档ID,text文本,probability概率,prediction 预测结果
        /**
       label=1.0, features=[1.1419053154730547],rawPrediction=[-2.7045709478814164,2.7045709478814164],probability=[0.06270417307424182,0.9372958269257582],prediction=1.0
       label=0.0, features=[0.9194079489827879],rawPrediction=[-2.3705881157542494,2.3705881157542494],probability=[0.08544317131357694,0.914556828686423],prediction=1.0
@@ -126,7 +139,8 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.getRawPredictionCol === "rawPrediction")//原预测
     //可能性列名
     assert(model.getProbabilityCol === "probability")//可能性
-    //拦截值
+    //intercept:0.9904977554715637
+    println("intercept:"+model.intercept)
     assert(model.intercept !== 0.0)//拦截
     assert(model.hasParent)
   }
@@ -183,6 +197,17 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val lr = new LogisticRegression
     lr.setFitIntercept(false)//是否训练拦截对象
     //fit()方法将DataFrame转化为一个Transformer的算法
+      /**dataset
+      +-----+--------------------+
+      |label|            features|
+      +-----+--------------------+
+      |  0.0|[6.78850863404891...|
+      |  1.0|[6.07565219906821...|
+      |  1.0|[5.68489609831355...|
+      |  0.0|[7.01091278142546...|
+      |  0.0|[7.12736523182829...|
+      +-----+--------------------+
+     */
     val model = lr.fit(dataset)
     //默认拦截0.0
     assert(model.intercept === 0.0)
@@ -204,6 +229,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setProbabilityCol("myProbability")
      //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)
+    //获得算法模型
     val parent = model.parent.asInstanceOf[LogisticRegression]
     assert(parent.getMaxIter === 10)
     assert(parent.getRegParam === 1.0)//正则化参数>=0
@@ -261,7 +287,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val results = model.transform(dataset)
 
     // Compare rawPrediction with probability
-    //用概率比较原始预测
+    //比较原始预测,概率
     results.select("rawPrediction", "probability").collect().foreach {
       case Row(raw: Vector, prob: Vector) =>
         assert(raw.size === 2)
@@ -286,18 +312,22 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val summarizer1 = (new MultiClassSummarizer)
       .add(0.0).add(3.0).add(4.0).add(3.0).add(6.0)
     assert(summarizer1.histogram.zip(Array[Long](1, 0, 0, 2, 1, 0, 1)).forall(x => x._1 === x._2))
+    summarizer1.histogram.zip(Array[Long](1, 0, 0, 2, 1, 0, 1)).foreach(x =>println("====="+x) )
+    //计数无效数
     assert(summarizer1.countInvalid === 0)
     //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(summarizer1.numClasses === 7)
     val summarizer2 = (new MultiClassSummarizer)
       .add(1.0).add(5.0).add(3.0).add(0.0).add(4.0).add(1.0)
     assert(summarizer2.histogram.zip(Array[Long](1, 2, 0, 1, 1, 1)).forall(x => x._1 === x._2))
+    //统计无效数
     assert(summarizer2.countInvalid === 0)
     //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(summarizer2.numClasses === 6)
 
     val summarizer3 = (new MultiClassSummarizer)
       .add(0.0).add(1.3).add(5.2).add(2.5).add(2.0).add(4.0).add(4.0).add(4.0).add(1.0)
+      
     assert(summarizer3.histogram.zip(Array[Long](1, 1, 1, 0, 3)).forall(x => x._1 === x._2))
 
    //如果是分类树,指定有多少种类别,随机森林训练的树的个数
@@ -307,6 +337,8 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val summarizer4 = (new MultiClassSummarizer)
       .add(3.1).add(4.3).add(2.0).add(1.0).add(3.0)
     //直方图
+      summarizer4.histogram.zip(Array[Long](0, 1, 1, 1)).foreach(x =>println("====="+x) )
+      //(0,0)(1,1)(1,1)(1,1)
     assert(summarizer4.histogram.zip(Array[Long](0, 1, 1, 1)).forall(x => x._1 === x._2))
     assert(summarizer4.countInvalid === 2)
     //如果是分类树,指定有多少种类别,随机森林训练的树的个数

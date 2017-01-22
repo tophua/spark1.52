@@ -156,7 +156,9 @@ private[ml] trait DecisionTreeParams extends PredictorParams {
   /** @group expertGetParam */
   final def getCheckpointInterval: Int = $(checkpointInterval)
 
-  /** (private[ml]) Create a Strategy instance to use with the old API. */
+  /** 
+   *  (private[ml]) Create a Strategy instance to use with the old API. 
+   *  */
   private[ml] def getOldStrategy(
       categoricalFeatures: Map[Int, Int],
       numClasses: Int,
@@ -203,7 +205,10 @@ private[ml] trait TreeClassifierParams extends Params {
   /** @group getParam */
   final def getImpurity: String = $(impurity).toLowerCase
 
-  /** Convert new impurity to old impurity. */
+  /** 
+   *  Convert new impurity to old impurity.
+   *  将新的不纯度转化为旧的不纯度 
+   *  */
   private[ml] def getOldImpurity: OldImpurity = {
     getImpurity match {
       case "entropy" => OldEntropy

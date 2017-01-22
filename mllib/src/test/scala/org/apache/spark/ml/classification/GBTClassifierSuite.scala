@@ -30,11 +30,11 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.util.Utils
-
+import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
  * Test suite for [[GBTClassifier]].
- * GBT的训练是每次训练一颗树,然后利用这颗树对每个实例进行预测,通过一个损失函数,计算损失函数的负梯度值作为残差,
+ * 梯度提升树(GBT)分类的训练是每次训练一颗树,然后利用这颗树对每个实例进行预测,通过一个损失函数,计算损失函数的负梯度值作为残差,
  * 利用这个残差更新样本实例的label,然后再次训练一颗树去拟合残差,如此进行迭代,直到满足模型参数需求。
  * GBT只适用于二分类和回归,不支持多分类,在预测的时候,不像随机森林那样求平均值,GBT是将所有树的预测值相加求和。 
  */
@@ -54,8 +54,14 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
   override def beforeAll() {
     super.beforeAll()
     val data1=EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 10, 100)
+
     data = sc.parallelize(data1, 2)
+    val sqlContext = new SQLContext(data.sparkContext)
+    import sqlContext.implicits._
+    val df = data.toDF()
+    df.show(5)
     val data2=EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 20, 120)
+    
     trainData =sc.parallelize(data2, 2)
     val data3=EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 20, 80)
     validationData =sc.parallelize(data3, 2)
@@ -81,6 +87,18 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
           .setLossType("logistic")//损失函数类型
           .setMaxIter(maxIter)//最大迭代次数
           .setStepSize(learningRate)//每次迭代优化步长
+       /**
+        * +-----+--------------------+
+          |label|            features|
+          +-----+--------------------+
+          |  0.0|[0.0,0.0,0.0,0.0,...|
+          |  0.0|[1.0,1.0,1.0,1.0,...|
+          |  0.0|[2.0,2.0,2.0,2.0,...|
+          |  0.0|[3.0,3.0,3.0,3.0,...|
+          |  0.0|[4.0,4.0,4.0,4.0,...|
+          |  0.0|[5.0,5.0,5.0,5.0,...|
+          +-----+--------------------+   
+        */
         compareAPIs(data, None, gbt, categoricalFeatures)
     }
   }

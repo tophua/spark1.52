@@ -73,6 +73,19 @@ class BinaryClassificationMetricsSuite extends SparkFunSuite with MLlibTestSpark
   test("binary evaluation metrics") {
     val scoreAndLabels = sc.parallelize(//评分和标签
       Seq((0.1, 0.0), (0.1, 1.0), (0.4, 0.0), (0.6, 0.0), (0.6, 1.0), (0.6, 1.0), (0.8, 1.0)), 2)
+      /**
+      +---+---+
+      | _1| _2|
+      +---+---+
+      |0.1|0.0|
+      |0.1|1.0|
+      |0.4|0.0|
+      |0.6|0.0|
+      |0.6|1.0|
+      |0.6|1.0|
+      |0.8|1.0|
+      +---+---+*/
+      sqlContext.createDataFrame(scoreAndLabels).show()
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
     //阀值
     val thresholds = Seq(0.8, 0.6, 0.4, 0.1)

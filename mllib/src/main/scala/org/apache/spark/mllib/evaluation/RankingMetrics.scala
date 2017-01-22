@@ -42,7 +42,7 @@ class RankingMetrics[T: ClassTag](predictionAndLabels: RDD[(Array[T], Array[T])]
 
   /**
    * Compute the average precision of all the queries, truncated at ranking position k.
-   *
+   * 计算所有查询的平均精度,截断在排名位置K
    * If for a query, the ranking algorithm returns n (n < k) results, the precision value will be
    * computed as #(relevant items retrieved) / k. This formula also applies when the size of the
    * ground truth set is less than k.

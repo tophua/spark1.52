@@ -46,22 +46,37 @@ class RegexTokenizerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("RegexTokenizer") {//正则表达式分解器
     val tokenizer0 = new RegexTokenizer()
     /**
-     * RegexTokenizer基于正则表达式提供更多的划分选项。默认情况下,参数“pattern”为划分文本的分隔符。
-     * 或者,用户可以指定参数“gaps”来指明正则“patten”表示“tokens”而不是分隔符,
-     * 这样来为分词结果找到所有可能匹配的情况。
-     */
+     * RegexTokenizer基于正则表达式提供更多的划分选项。默认情况下,参数“pattern”为划分文本的分隔符
+     * 或者,用户可以指定参数“gaps”来指明正则“patten”表示“tokens”而不是分隔符*/
       .setGaps(false).setPattern("\\w+|\\p{Punct}").setInputCol("rawText").setOutputCol("tokens")
     val dataset0 = sqlContext.createDataFrame(Seq(
       TokenizerTestData("Test for tokenization.", Array("Test", "for", "tokenization", ".")),
       TokenizerTestData("Te,st. punct", Array("Te", ",", "st", ".", "punct"))
     ))
+    /**
+      +--------------------+--------------------+
+      |             rawText|        wantedTokens|
+      +--------------------+--------------------+
+      |Test for tokeniza...|[Test, for, token...|
+      |        Te,st. punct|[Te, ,, st, ., pu...|
+      +--------------------+--------------------+*/
+    dataset0.show()
     testRegexTokenizer(tokenizer0, dataset0)
 
     val dataset1 = sqlContext.createDataFrame(Seq(
       TokenizerTestData("Test for tokenization.", Array("Test", "for", "tokenization")),
       TokenizerTestData("Te,st. punct", Array("punct"))
     ))
+    /**
+      +--------------------+--------------------+
+      |             rawText|        wantedTokens|
+      +--------------------+--------------------+
+      |Test for tokeniza...|[Test, for, token...|
+      |        Te,st. punct|             [punct]|
+      +--------------------+--------------------+*/
+    dataset1.show()
     tokenizer0.setMinTokenLength(3)
+    
     testRegexTokenizer(tokenizer0, dataset1)
 
     val tokenizer2 = new RegexTokenizer()

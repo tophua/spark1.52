@@ -28,8 +28,10 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.DataFrame
 /**
- * 向量索引 单词向量它用1和0分别表示是否存在某个词
  * VectorIndexer是对数据集特征向量中的类别(离散值)特征进行编号
+ * 它能够自动判断那些特征是离散值型的特征,并对他们进行编号,具体做法是通过设置一个maxCategories,
+ * 特征向量中某一个特征不重复取值个数小于maxCategories,则被重新编号为0～K(K<=maxCategories-1)
+ * 
  */
 class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
 
@@ -122,7 +124,26 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
     MLTestingUtils.checkCopy(model)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     model.transform(densePoints1) // should work
-    
+    /**
+      +--------------+-------------+
+      |      features|      indexed|
+      +--------------+-------------+
+      | [1.0,2.0,0.0]|[1.0,2.0,0.0]|
+      | [0.0,1.0,2.0]|[0.0,1.0,2.0]|
+      |[0.0,0.0,-1.0]|[0.0,0.0,1.0]|
+      | [1.0,3.0,2.0]|[1.0,3.0,2.0]|
+      +--------------+-------------+*/
+    model.transform(densePoints1).show()
+    /**
+      +--------------------+--------------------+
+      |            features|             indexed|
+      +--------------------+--------------------+
+      | (3,[0,1],[1.0,2.0])| (3,[0,1],[1.0,2.0])|
+      | (3,[1,2],[1.0,2.0])| (3,[1,2],[1.0,2.0])|
+      |      (3,[2],[-1.0])|       (3,[2],[1.0])|
+      |(3,[0,1,2],[1.0,3...|(3,[0,1,2],[1.0,3...|
+      +--------------------+--------------------+*/
+    model.transform(sparsePoints1).show()
     model.transform(sparsePoints1)// should work
     intercept[SparkException] {
      //transform()方法将DataFrame转化为另外一个DataFrame的算法
@@ -233,6 +254,7 @@ class VectorIndexerSuite extends SparkFunSuite with MLlibTestSparkContext with L
       //fit()方法将DataFrame转化为一个Transformer的算法
       val model = vectorIndexer.fit(data)
        //transform()方法将DataFrame转化为另外一个DataFrame的算法
+      model.transform(data).show()
       val indexedPoints = model.transform(data).select("indexed").map(_.getAs[Vector](0)).collect()
       points.zip(indexedPoints).foreach {
         case (orig: SparseVector, indexed: SparseVector) =>

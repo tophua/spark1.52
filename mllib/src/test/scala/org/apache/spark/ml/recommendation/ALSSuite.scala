@@ -76,10 +76,10 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     }
   }
 
-  test("normal equation construction") {//构建标准相等
+  test("normal equation construction") {//标准相等的构建
     //线性回归
     val k = 2
-    //NormalEquation 另一种线性回归方法
+    //NormalEquation 标准方程
     val ne0 = new NormalEquation(k).add(Array(1.0f, 2.0f), 3.0).add(Array(4.0f, 5.0f), 6.0, 2.0) // weighted
     assert(ne0.k === k)
     assert(ne0.triK === k * (k + 1) / 2)
@@ -366,6 +366,21 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = als.fit(training.toDF())
      //transform()方法将DataFrame转化为另外一个DataFrame的算法
+    /**
+     *+-----------+----------+------------+------------+
+      |       user|      item|      rating|  prediction|
+      +-----------+----------+------------+------------+
+      |  919154311|1940909433|   -0.201669| -0.20149253|
+      |  -79074260|1940909433|  0.44795045|   0.4476502|
+      | 1525869989|1940909433| -0.11397148| -0.11388531|
+      |  113375480|-739181961|-0.049516156|-0.049473286|
+      |-1591288030|-739181961|-0.031804726|-0.031776465|
+      |-1158177819|-739181961|    0.507647|   0.5070719|
+      | 1022899383|-739181961|  -0.7780471|  -0.7773425|
+      | 1228230215|-739181961|  -0.4406039| -0.44020513|
+      +-----------+----------+------------+------------+
+     */
+     model.transform(test.toDF()).show()     
     val predictions = model.transform(test.toDF())
       .select("rating", "prediction")
       //实际评级,预测评级

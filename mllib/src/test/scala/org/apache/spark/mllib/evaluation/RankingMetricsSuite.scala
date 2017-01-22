@@ -37,15 +37,33 @@ class RankingMetricsSuite extends SparkFunSuite with MLlibTestSparkContext {
         (Array[Int](1, 2, 3, 4, 5), Array[Int]())
       ), 2)
     val eps: Double = 1E-5
-   //需要向我们之前的平均准确率函数传入一个键值对类型的RDD,
-   //其键为给定用户预测的物品的ID数组,而值则是实际的物品ID数组
+    /**
+      +--------------------+---------------+
+      |                  _1|             _2|
+      +--------------------+---------------+
+      |[1, 6, 2, 7, 8, 3...|[1, 2, 3, 4, 5]|
+      |[4, 1, 5, 6, 2, 7...|      [1, 2, 3]|
+      |     [1, 2, 3, 4, 5]|             []|
+      +--------------------+---------------+
+     */
+     sqlContext.createDataFrame(predictionAndLabels).show()
+    //需要向我们之前的平均准确率函数传入一个键值对类型的RDD,
+    //其键为给定用户预测的物品的ID数组,而值则是实际的物品ID数组
     val metrics = new RankingMetrics(predictionAndLabels)
     //平均准确率(平均正确率值)
     val map = metrics.meanAveragePrecision
-   //精度位置
+     //精度位置
+    //precisionAt:0.3333333333333333 	0.3333333333333333
     println("precisionAt:"+metrics.precisionAt(1)+" \t"+1.0/3)
+    //precisionAt:0.3333333333333333
+     println("precisionAt:"+metrics.precisionAt(4)+" \t"+1.0/3)
+     //precisionAt:0.25 
+     println("precisionAt:"+metrics.precisionAt(5)+" \t"+1.0/3)
+     //precisionAt:0.26666666666666666 
+     println("precisionAt:"+metrics.precisionAt(10))
+     //precisionAt:0.17777777777777778
+     println("precisionAt:"+metrics.precisionAt(15))
     //计算所有的查询的平均准确率,截断在排名位置    
-
     assert(metrics.precisionAt(1) ~== 1.0/3 absTol eps)
     assert(metrics.precisionAt(2) ~== 1.0/3 absTol eps)
     assert(metrics.precisionAt(3) ~== 1.0/3 absTol eps)

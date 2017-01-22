@@ -50,8 +50,19 @@ class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
       (Seq("A", "The", "AN"), Seq()),
       (Seq(null), Seq(null)),
       (Seq(), Seq())
-    )).toDF("raw", "expected")//未加工值,期望值
-
+    )).toDF("raw", "expected")//期望值
+    /**
+      +------------+------------+
+      |         raw|    expected|
+      +------------+------------+
+      |[test, test]|[test, test]|
+      |[a, b, c, d]|   [b, c, d]|
+      |[a, the, an]|          []|
+      |[A, The, AN]|          []|
+      |      [null]|      [null]|
+      |          []|          []|
+      +------------+------------+*/
+    dataSet.show()
     testStopWordsRemover(remover, dataSet)
   }
 
@@ -65,7 +76,15 @@ class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
       (Seq("A"), Seq("A")),
       (Seq("The", "the"), Seq("The"))
     )).toDF("raw", "expected")
-
+    /**
+      +----------+--------+
+      |       raw|expected|
+      +----------+--------+
+      |       [A]|     [A]|
+      |[The, the]|   [The]|
+      +----------+--------+
+     */
+    dataSet.show()
     testStopWordsRemover(remover, dataSet)
   }
 
@@ -74,12 +93,19 @@ class StopWordsRemoverSuite extends SparkFunSuite with MLlibTestSparkContext {
     val remover = new StopWordsRemover()
       .setInputCol("raw")
       .setOutputCol("filtered")
-      .setStopWords(stopWords)
+      .setStopWords(stopWords)//设置信停用词列表
     val dataSet = sqlContext.createDataFrame(Seq(
       (Seq("python", "scala", "a"), Seq()),
       (Seq("Python", "Scala", "swift"), Seq("swift"))
     )).toDF("raw", "expected")
-
+      /**
+        +--------------------+--------+
+        |                 raw|expected|
+        +--------------------+--------+
+        |  [python, scala, a]|      []|
+        |[Python, Scala, s...| [swift]|
+        +--------------------+--------+*/
+    dataSet.show()
     testStopWordsRemover(remover, dataSet)
   }
 }

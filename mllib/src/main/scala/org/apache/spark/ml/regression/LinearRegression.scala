@@ -362,12 +362,14 @@ class LinearRegressionSummary private[regression] (
   /**
    * Returns the mean absolute error, which is a risk function corresponding to the
    * expected value of the absolute error loss or l1-norm loss.
+   * 绝对平均误差
    */
   val meanAbsoluteError: Double = metrics.meanAbsoluteError
 
   /**
    * Returns the mean squared error, which is a risk function corresponding to the
    * expected value of the squared error loss or quadratic loss.
+   * 均方误差
    */
   val meanSquaredError: Double = metrics.meanSquaredError
 

@@ -29,7 +29,6 @@ import org.apache.spark.sql.Row
 /**
  * PCA主成分分析经常用于减少数据集的维数,同时保持数据集中的对方差贡献最大的特征。
  * 其方法主要是通过对协方差矩阵进行特征分解,以得出数据的主成分(即特征向量)与它们的权值(即特征值)
- * 
  */
 class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -59,7 +58,7 @@ class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
      *    0.21650756651919933   -0.5652958773533948   -0.795459443083758    
      *    -0.8476512931126826   -0.11560340501314653  -0.14938466335164732 
      */
-    println("pc numRows:"+pc.numRows+"\t numCols:"+pc.numCols)
+    //println("pc numRows:"+pc.numRows+"\t numCols:"+pc.numCols)
     //multiply 矩阵相乘积操作
     val expected = mat.multiply(pc).rows//multiply 矩阵相乘积操作
     println("expected numRows:"+mat.multiply(pc).numRows()+"\t"+expected)
@@ -67,9 +66,17 @@ class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
     //([2.0,0.0,3.0,4.0,5.0],[-4.645104331781534,-1.1167972663619021,-5.526819154542643]), 
     //([4.0,0.0,0.0,6.0,7.0],[-6.428880535676489,-5.337951427775354,-5.526819154542644]))
 
-    println("zip:"+dataRDD.zip(expected).collect().toSet)
+    //println("zip:"+dataRDD.zip(expected).collect().toSet)
     val df = sqlContext.createDataFrame(dataRDD.zip(expected)).toDF("features", "expected")
-
+    /**
+      +--------------------+--------------------+
+      |            features|            expected|
+      +--------------------+--------------------+
+      | (5,[1,3],[1.0,7.0])|[1.64857282308838...|
+      |[2.0,0.0,3.0,4.0,...|[-4.6451043317815...|
+      |[4.0,0.0,0.0,6.0,...|[-6.4288805356764...|
+      +--------------------+--------------------+*/
+    df.show()
     val pca = new PCA()
       .setInputCol("features")
       .setOutputCol("pca_features")
@@ -78,16 +85,20 @@ class PCASuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // copied model must have the same parent.
     MLTestingUtils.checkCopy(pca)
-/**
- * x:[1.6485728230883807,-4.013282700516295,-5.526819154542645]	 y:[1.6485728230883807,-4.013282700516295,-5.526819154542645]
- * x:[-4.645104331781534,-1.1167972663619021,-5.526819154542643] y:[-4.645104331781534,-1.1167972663619021,-5.526819154542643]
- * x:[-6.428880535676489,-5.337951427775354,-5.526819154542644]	 y:[-6.428880535676489,-5.337951427775354,-5.526819154542644]
- */
+    /**
+    +--------------------+--------------------+
+    |        pca_features|            expected|
+    +--------------------+--------------------+
+    |[1.64857282308838...|[1.64857282308838...|
+    |[-4.6451043317815...|[-4.6451043317815...|
+    |[-6.4288805356764...|[-6.4288805356764...|
+    +--------------------+--------------------+*/
+    pca.transform(df).select("pca_features", "expected").show()
   //transform()方法将DataFrame转化为另外一个DataFrame的算法
     pca.transform(df).select("pca_features", "expected").collect().foreach {
     
       case Row(x: Vector, y: Vector) =>
-        println("x:"+x+"\t y:"+y)
+        //println("x:"+x+"\t y:"+y)
         //assert(x ~== y absTol 1e-5, "Transformed vector is different with expected vector.")
     }
   }

@@ -50,6 +50,8 @@ import org.apache.spark.mllib.tree.configuration.QuantileStrategy._
  *                                k) implies the feature n is categorical with k categories 0,
  *                                1, 2, ... , k-1. It's important to note that features are
  *                                zero-indexed.
+ *                                指定离散特征,是一个map,featureId->K,其中K表示特征值可能的情况(0, 1, …, K-1)
+ *                                最重要特征索引从0开始
  * @param minInstancesPerNode Minimum number of instances each child must have after split.
  *                            Default value is 1. If a split cause left or right child
  *                            to have less than minInstancesPerNode,

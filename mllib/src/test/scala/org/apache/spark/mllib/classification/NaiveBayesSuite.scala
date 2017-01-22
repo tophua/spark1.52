@@ -147,6 +147,8 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
     val nPoints = 1000
     //math.log 对数
     val pi = Array(0.5, 0.1, 0.4).map(math.log)
+    //pi:-0.6931471805599453,-2.3025850929940455,-0.916290731874155
+    //println("pi.log:"+pi.mkString(","))
     val theta = Array(
       Array(0.70, 0.10, 0.10, 0.10), // label 0
       Array(0.10, 0.70, 0.10, 0.10), // label 1
@@ -155,6 +157,18 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val testData = NaiveBayesSuite.generateNaiveBayesInput(pi, theta, nPoints, 42, Multinomial)
     val testRDD = sc.parallelize(testData, 2)
+    /**
+      +-----+------------------+
+      |label|          features|
+      +-----+------------------+
+      |  2.0| [0.0,0.0,7.0,3.0]|     
+      |  1.0| [5.0,3.0,0.0,2.0]|
+      |  0.0| [8.0,0.0,1.0,1.0]|
+      |  2.0| [3.0,0.0,6.0,1.0]|
+      |  0.0| [5.0,0.0,1.0,4.0]|
+      |  1.0| [3.0,5.0,1.0,1.0]|
+      +-----+------------------+*/
+     sqlContext.createDataFrame(testRDD).show()
     testRDD.cache()
 
     val model = NaiveBayes.train(testRDD, 1.0, Multinomial)

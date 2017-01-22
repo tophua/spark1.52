@@ -39,11 +39,26 @@ class MatrixFactorizationModelSuite extends SparkFunSuite with MLlibTestSparkCon
     userFeatures = sc.parallelize(Seq((0, Array(1.0, 2.0)), (1, Array(3.0, 4.0))))
     //prodFeatures 产品特征
     prodFeatures = sc.parallelize(Seq((2, Array(5.0, 6.0))))
+    /**
+      +---+----------+
+      | _1|        _2|
+      +---+----------+
+      |  0|[1.0, 2.0]|
+      |  1|[3.0, 4.0]|
+      +---+----------+*/
+    sqlContext.createDataFrame(userFeatures).show()
+    /**
+    +---+----------+
+    | _1|        _2|
+    +---+----------+
+    |  2|[5.0, 6.0]|
+    +---+----------+*/
+    sqlContext.createDataFrame(prodFeatures).show()
   }
 
   test("constructor") {//构造函数
     val model = new MatrixFactorizationModel(rank, userFeatures, prodFeatures)
-    //预测得分
+    //预测得分,用户ID,产品ID
     println("========"+model.predict(0, 2))
     //17.0
     assert(model.predict(0, 2) ~== 17.0 relTol 1e-14)
