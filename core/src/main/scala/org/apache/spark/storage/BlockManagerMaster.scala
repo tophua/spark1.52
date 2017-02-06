@@ -31,7 +31,7 @@ import org.apache.spark.util.{ ThreadUtils, RpcUtils }
  * Executor移除等
  */
 private[spark] class BlockManagerMaster(
-  var driverEndpoint: RpcEndpointRef, //RpcEndpointRef该对象引用Worker,与Driver的通信，
+  var driverEndpoint: RpcEndpointRef, //RpcEndpointRef该对象引用Worker,与Driver的通信,
   conf: SparkConf,
   isDriver: Boolean)
     extends Logging {
@@ -190,7 +190,7 @@ private[spark] class BlockManagerMaster(
   /**
    * Return the block's status on all block managers, if any. NOTE: This is a
    * potentially expensive operation and should only be used for testing.
-   * 根据blockId向Master返回该Block的状态,注意：这是一个潜在的昂贵的操作，应该只用于测试
+   * 根据blockId向Master返回该Block的状态,注意：这是一个潜在的昂贵的操作,应该只用于测试
    * If askSlaves is true, this invokes the master to query each block manager for the most
    * updated block statuses. This is useful when the master is not informed of the given block
    * by all block managers.

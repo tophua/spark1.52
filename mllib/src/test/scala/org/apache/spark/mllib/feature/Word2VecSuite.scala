@@ -26,7 +26,7 @@ import org.apache.spark.util.Utils
  * Word2Vec模型来根据词义比较两个字词相似性
  * Word2Vec将词语转换为向量,
  * 通过测量两个向量内积空间的夹角的余弦值来度量它们之间的相似性,
- * Word2Vec 计算单词的向量表示。这种表示的主要优点是相似的词在向量空间中离得近，
+ * Word2Vec 计算单词的向量表示。这种表示的主要优点是相似的词在向量空间中离得近,
  * 这使得向新模式的泛化更容易并且模型估计更鲁棒。向量表示在诸如命名实体识别、歧义消除、句子解析、
  * 打标签以及机器翻译等自然语言处理程序中比较有用.
  */
@@ -34,10 +34,10 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   // TODO: add more tests
   /**
-   * word2vec计算的是余弦值，距离范围为0-1之间，值越大代表这两个词关联度越高，所以越排在上面的词与输入的词越紧密
+   * word2vec计算的是余弦值,距离范围为0-1之间,值越大代表这两个词关联度越高,所以越排在上面的词与输入的词越紧密
    */
   test("Word2Vec") {
-    //首先导入文本文件，然后将数据解析为RDD[Seq[String]]
+    //首先导入文本文件,然后将数据解析为RDD[Seq[String]]
     val sentence = "a b " * 100 + "a c " * 10
     val localDoc = Seq(sentence, sentence)
     val doc = sc.parallelize(localDoc).map(line => line.split(" ").toSeq)
@@ -81,7 +81,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("Word2VecModel") {//word2vec模型
     val num = 2
     val word2VecMap = Map(
-        //每个单词都关联两个向量，分别表示词向量和上下文向量
+        //每个单词都关联两个向量,分别表示词向量和上下文向量
       ("china", Array(0.50f, 0.50f, 0.50f, 0.50f)),
       ("japan", Array(0.40f, 0.50f, 0.50f, 0.50f)),
       ("taiwan", Array(0.60f, 0.50f, 0.50f, 0.50f)),
@@ -89,7 +89,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     )
     
     //word2vec是一个将单词转换成向量形式的工具。
-    //可以把对文本内容的处理简化为向量空间中的向量运算，计算出向量空间上的相似度，来表示文本语义上的相似度
+    //可以把对文本内容的处理简化为向量空间中的向量运算,计算出向量空间上的相似度,来表示文本语义上的相似度
     val model = new Word2VecModel(word2VecMap)
     //显示了指定单词的2个同义词,
     val syms = model.findSynonyms("china", num)

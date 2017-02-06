@@ -111,7 +111,7 @@ class BucketizerSuite extends SparkFunSuite with MLlibTestSparkContext {
     // length 4, with -inf and inf
     checkBinarySearch(Array(Double.NegativeInfinity, 0.0, 1.0, Double.PositiveInfinity))
   }
- //与线性搜索相反的二进制搜索的正确性，对随机数据
+ //与线性搜索相反的二进制搜索的正确性,对随机数据
   test("Binary search correctness in contrast with linear search, on random data") {
     val data = Array.fill(100)(Random.nextDouble())
     val splits: Array[Double] = Double.NegativeInfinity +:

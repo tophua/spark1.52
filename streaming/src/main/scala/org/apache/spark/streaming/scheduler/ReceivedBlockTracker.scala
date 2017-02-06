@@ -218,7 +218,7 @@ private[streaming] class ReceivedBlockTracker(
     // Insert the recovered block-to-batch allocations and clear the queue of received blocks
     //将恢复的块插入到批处理分配中,并清除接收块的队列
     // (when the blocks were originally allocated to the batch, the queue must have been cleared).
-    //(当块最初被分配给批处理时，队列必须被清除)
+    //(当块最初被分配给批处理时,队列必须被清除)
     def insertAllocatedBatch(batchTime: Time, allocatedBlocks: AllocatedBlocks) {
       logTrace(s"Recovery: Inserting allocated batch for time $batchTime to " +
         s"${allocatedBlocks.streamIdToAllocatedBlocks}")

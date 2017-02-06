@@ -360,7 +360,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       Seq(Row("1"), Row("2")))
   }
 
-  test("SPARK-8828 sum should return null if all input values are null") {//如果所有的输入值为空，则应返回null
+  test("SPARK-8828 sum should return null if all input values are null") {//如果所有的输入值为空,则应返回null
     withSQLConf(SQLConf.USE_SQL_AGGREGATE2.key -> "true") {
       withSQLConf(SQLConf.CODEGEN_ENABLED.key -> "true") {
         checkAnswer(
@@ -505,7 +505,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("Add Parser of SQL COALESCE()") {//添加解析SQL合并
     checkAnswer(
-        //依次参考各参数表达式，遇到非null值即停止并返回该值
+        //依次参考各参数表达式,遇到非null值即停止并返回该值
       sql("""SELECT COALESCE(1, 2)"""),
       Row(1))
     checkAnswer(

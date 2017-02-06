@@ -65,7 +65,7 @@ object SimpleSkewedGroupByTest {
     //打印每个reducer有多少键(用于调试)
     // println("RESULT: " + pairs1.groupByKey(numReducers)
     //                           .map{case (k,v) => (k, v.size)}
-    //collectAsMap对(K,V)型的RDD数据返回一个单机HashMap,对于重复K的RDD元素，后面的元素覆盖前面的元素
+    //collectAsMap对(K,V)型的RDD数据返回一个单机HashMap,对于重复K的RDD元素,后面的元素覆盖前面的元素
     //                           .collectAsMap)
 
     sc.stop()

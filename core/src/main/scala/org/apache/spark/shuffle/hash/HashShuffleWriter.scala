@@ -61,7 +61,7 @@ private[spark] class HashShuffleWriter[K, V](
   override def write(records: Iterator[Product2[K, V]]): Unit = {
     //判断aggregator是否被定义,需要做Map端聚合操作
     val iter = if (dep.aggregator.isDefined) {
-      if (dep.mapSideCombine) {//判断是否需要聚合,如果需要，聚合records执行map端的聚合
+      if (dep.mapSideCombine) {//判断是否需要聚合,如果需要,聚合records执行map端的聚合
         //汇聚工作,reducebyKey是一分为二的,一部在ShuffleMapTask中进行聚合
         //另一部分在resultTask中聚合
         dep.aggregator.get.combineValuesByKey(records, context)

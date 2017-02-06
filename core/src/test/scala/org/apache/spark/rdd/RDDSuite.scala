@@ -46,20 +46,20 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(dups.distinct().collect === dups.distinct().collect)
     //分区数
     assert(dups.distinct(2).collect === dups.distinct().collect)
-    //reduce接收一个函数，作用在两个类型 相同的元素上，返回一个类型相同的元素
+    //reduce接收一个函数,作用在两个类型 相同的元素上,返回一个类型相同的元素
     //最常用的一个函数是加法
    //合并RDD中的元素
     assert(nums.reduce(_ + _) === 10)
-    //fold操作用于对RDD中的元素进行迭代操作，并且利用了一个变量保存迭代过程中的中间结果
-    //与reduce 相似，在每个分区的初始化调用的时候多了个"0"值
+    //fold操作用于对RDD中的元素进行迭代操作,并且利用了一个变量保存迭代过程中的中间结果
+    //与reduce 相似,在每个分区的初始化调用的时候多了个"0"值
     assert(nums.fold(0)(_ + _) === 10)
-    //map 是把 function 作用到每个 element，针对的是 element
+    //map 是把 function 作用到每个 element,针对的是 element
     assert(nums.map(_.toString).collect().toList === List("1", "2", "3", "4"))
     assert(nums.filter(_ > 2).collect().toList === List(3, 4))
     assert(nums.flatMap(x => 1 to x).collect().toList === List(1, 1, 2, 1, 2, 3, 1, 2, 3, 4))
     //两个RDD合为一个
     assert(nums.union(nums).collect().toList === List(1, 2, 3, 4, 1, 2, 3, 4))
-    //glom函数将每个分区形成一个数组，内部实现是返回的GlommedRDD
+    //glom函数将每个分区形成一个数组,内部实现是返回的GlommedRDD
     assert(nums.glom().map(_.toList).collect().toList === List(List(1, 2), List(3, 4)))
     //
     assert(nums.collect(
@@ -70,14 +70,14 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(!nums.isEmpty())
     assert(nums.max() === 4)
     assert(nums.min() === 1)
-    //mapPartitions 是把 function 作用到每个 partition，针对的是 partition 内部的 iterator
-    //mapPartitions 如果在映射的过程中需要频繁创建额外的对象，map就显得不高效了
-    //map的输入函数是应用于RDD中每个元素，而mapPartitions的输入函数是应用于每个分区，
+    //mapPartitions 是把 function 作用到每个 partition,针对的是 partition 内部的 iterator
+    //mapPartitions 如果在映射的过程中需要频繁创建额外的对象,map就显得不高效了
+    //map的输入函数是应用于RDD中每个元素,而mapPartitions的输入函数是应用于每个分区,
     // 也就是把每个分区中的内容作为整体来处理
     val partitionSums = nums.mapPartitions(iter => Iterator(iter.reduceLeft(_ + _)))
     //第一个分区是和3,第二个分区是和 7
     assert(partitionSums.collect().toList === List(3, 7))
-    //mapPartitions函数会对每个分区依次调用分区函数处理，然后将处理的结果(若干个Iterator)生成新的RDDs
+    //mapPartitions函数会对每个分区依次调用分区函数处理,然后将处理的结果(若干个Iterator)生成新的RDDs
     val partitionSumsWithSplit = nums.mapPartitionsWithIndex {
       case(split, iter) => Iterator((split, iter.reduceLeft(_ + _)))
     }
@@ -107,8 +107,8 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val size = 1000
     val uniformDistro = for (i <- 1 to 5000) yield i % size
     val simpleRdd = sc.makeRDD(uniformDistro, 10)
-    //countApproxDistinct : RDD的一个方法，作用是对RDD集合内容进行去重统计。
-    //该统计是一个大约的统计，参数relativeSD控制统计的精确度。 relativeSD越小，结果越准确
+    //countApproxDistinct : RDD的一个方法,作用是对RDD集合内容进行去重统计。
+    //该统计是一个大约的统计,参数relativeSD控制统计的精确度。 relativeSD越小,结果越准确
     
     val a=simpleRdd.countApproxDistinct(8, 0)
     val b=simpleRdd.countApproxDistinct(12, 0)
@@ -292,7 +292,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
     // Split partitions
     //分隔分区
-    val repartitioned2 = data.repartition(20)//增加分区，提高并行度
+    val repartitioned2 = data.repartition(20)//增加分区,提高并行度
     assert(repartitioned2.partitions.size == 20)
     val partitions2 = repartitioned2.glom().collect()
     assert(partitions2(0).length > 0)
@@ -340,10 +340,10 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
   }
 
   test("coalesced RDDs") {//合并RDD
-    //联合，合并 coalesced
+    //联合,合并 coalesced
     val data = sc.parallelize(1 to 10, 10)
-    //coalesce函数用于将RDD进行重分区，使用HashPartitioner。
-        //第一个参数为重分区的数目，第二个为是否进行shuffle，默认为false;
+    //coalesce函数用于将RDD进行重分区,使用HashPartitioner。
+        //第一个参数为重分区的数目,第二个为是否进行shuffle,默认为false;
     
     val coalesced1 = data.coalesce(2) //分区减少
     assert(coalesced1.collect().toList === (1 to 10).toList)
@@ -382,7 +382,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val isEquals = coalesced5.dependencies.head.rdd.dependencies.head.rdd.
       asInstanceOf[ShuffledRDD[_, _, _]] != null
     assert(isEquals)
-  //如果重分区的数目大于原来的分区数，那么必须指定shuffle参数为true，//否则，分区数不变
+  //如果重分区的数目大于原来的分区数,那么必须指定shuffle参数为true,//否则,分区数不变
     // when shuffling, we can increase the number of partitions
     val coalesced6 = data.coalesce(20, shuffle = true)
     assert(coalesced6.partitions.size === 20)
@@ -392,7 +392,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
   test("coalesced RDDs with locality") {
     val data3 = sc.makeRDD(List((1, List("a", "c")), (2, List("a", "b", "c")), (3, List("b"))))
     val coal3 = data3.coalesce(3)
-    //preferredLocation（最佳位置） 返回每一个数据块所在的机器名或者IP地址，如果每一块数据是多分存储的，那么就会返回多个机器地址
+    //preferredLocation（最佳位置） 返回每一个数据块所在的机器名或者IP地址,如果每一块数据是多分存储的,那么就会返回多个机器地址
     val list3 = coal3.partitions.flatMap(_.asInstanceOf[CoalescedRDDPartition].preferredLocation)
     assert(list3.sorted === Array("a", "b", "c"), "Locality preferences are dropped")
 
@@ -761,7 +761,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val col1 = Array("4|60|C", "5|50|A", "6|40|B")
     val col2 = Array("6|40|B", "5|50|A", "4|60|C")
     val col3 = Array("5|50|A", "6|40|B", "4|60|C")
-     //0 升序，1  降序,2 中间排序
+     //0 升序,1  降序,2 中间排序
     //第一个参数是一个函数,该函数的也有一个带T泛型的参数,返回类型和RDD中元素的类型是一致的
     //第二个参数是ascending,从字面的意思大家应该可以猜到,这参数决定排序后RDD中的元素是升序还是降序
     //默认是true,也就是升序
@@ -798,7 +798,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
                             "Jane|Smith|40",
                             "Karen|Williams|60",
                             "Thomas|Williams|30")
-  //匿名函数箭头左边是参数列表，右边是函数体
+  //匿名函数箭头左边是参数列表,右边是函数体
     val parse = (s: String) => {
       val split = s.split("\\|")
       Person(split(0), split(1), split(2).toInt)

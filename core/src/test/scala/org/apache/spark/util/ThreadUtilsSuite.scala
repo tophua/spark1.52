@@ -38,7 +38,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
         threadName = Thread.currentThread().getName()
       }
     })
-    //shutdown不是一个阻塞方法,本身的执行很快，执行完后线程池可能仍处于运行中
+    //shutdown不是一个阻塞方法,本身的执行很快,执行完后线程池可能仍处于运行中
     executor.shutdown()
     //awaitTermination是一个阻塞方法。它必须等线程池退出后才会结束自身
     executor.awaitTermination(10, TimeUnit.SECONDS)
@@ -113,7 +113,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     val f = Future {
       Thread.currentThread().getName()
     }(ThreadUtils.sameThread)
-    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+    //Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
     val futureThreadName = Await.result(f, 10.seconds)
     assert(futureThreadName === callerThreadName)
   }

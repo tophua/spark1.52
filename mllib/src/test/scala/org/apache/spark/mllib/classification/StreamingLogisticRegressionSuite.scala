@@ -26,7 +26,7 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{StreamingContext, TestSuiteBase}
 /**
- * 用时间间隔的数据作为特征训练流式模型，这里的场景非常简单，只是为了说明问题。
+ * 用时间间隔的数据作为特征训练流式模型,这里的场景非常简单,只是为了说明问题。
  * 实际的产品模型需要结合前面讨论的按天和周末的模型来提高预测的准确性
  */
 class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase {
@@ -123,7 +123,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     //计算误差的变化
     val deltas = history.drop(1).zip(history.dropRight(1))
     // check error stability (it always either shrinks, or increases with small tol)
-    //检查错误的稳定性（它总是要么收缩，或增加小公差）
+    //检查错误的稳定性（它总是要么收缩,或增加小公差）
     assert(deltas.forall(x => (x._1 - x._2) <= 0.1))
     // check that error shrunk on at least 2 batches
     //检查至少2个批次的错误缩水
@@ -200,7 +200,7 @@ class StreamingLogisticRegressionSuite extends SparkFunSuite with TestSuiteBase 
     val output: Seq[Seq[(Double, Double)]] = runStreams(ssc, numBatches, numBatches)
 
     // assert that prediction error improves, ensuring that the updated model is being used
-    //断言，预测误差的改善,确保更新后的模型被使用,math.abs返回数的绝对值
+    //断言,预测误差的改善,确保更新后的模型被使用,math.abs返回数的绝对值
     val error = output.map(batch => batch.map(p => math.abs(p._1 - p._2)).sum / nPoints).toList
     assert(error.head > 0.8 & error.last < 0.2)
   }

@@ -182,7 +182,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
     // recordedData size should be close to the expected rate; use an error margin proportional to
     //recordeddata大小应接近预期比率,使用错误保证金与价值成正比
     // the value, so that rate changes don't cause a brittle test
-    //因此，速率变化不会导致脆性测试
+    //因此,速率变化不会导致脆性测试
     val minExpectedMessages = expectedMessages - 0.05 * expectedMessages
     val maxExpectedMessages = expectedMessages + 0.05 * expectedMessages
     val numMessages = recordedData.size
@@ -198,7 +198,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
     val receivedBlockSizes = recordedBlocks.map { _.size }.mkString(",")
 
     // the first and last block may be incomplete, so we slice them out
-    //第一个和最后一个块可能是不完整的，所以我们把它们切片
+    //第一个和最后一个块可能是不完整的,所以我们把它们切片
     val validBlocks = recordedBlocks.drop(1).dropRight(1)
     val averageBlockSize = validBlocks.map(block => block.size).sum / validBlocks.size
 

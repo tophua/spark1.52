@@ -427,7 +427,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
   /**
    * A simple listener that saves the task indices for all task events.
-   * 一个简单的侦听器，可以保存所有任务事件的任务索引
+   * 一个简单的侦听器,可以保存所有任务事件的任务索引
    */
   private class SaveTaskEvents extends SparkListener {
     val startedTasks = new mutable.HashSet[Int]()

@@ -25,7 +25,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
 /**
- * one-hot一个有N个不同取值的类别特征可以变成N个数值特征,变换后的每个数值型特征的取值为0或1，
+ * one-hot一个有N个不同取值的类别特征可以变成N个数值特征,变换后的每个数值型特征的取值为0或1,
  * 在N个特征中,有且只有一个特征值为1,其他特征值都为0
  */
 class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
@@ -97,7 +97,7 @@ class OneHotEncoderSuite extends SparkFunSuite with MLlibTestSparkContext {
     }.collect().toSet
     // a -> 0, b -> 2, c -> 1 表示意思[a, c, b]
     //StringIndexer 按照 Label出现的频次对其进行升序编码,a编码0(3次现),b编码2次现,c编码1次现,
-    //采用One-Hot编码的方式对上述的样本["a","b","c"]编码，a对应[1.0, 0.0, 0.0],b对应[0.0, 0.0, 1.0],b对应[0.0, 1.0, 0.0]
+    //采用One-Hot编码的方式对上述的样本["a","b","c"]编码,a对应[1.0, 0.0, 0.0],b对应[0.0, 0.0, 1.0],b对应[0.0, 1.0, 0.0]
     //(0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")
     val expected = Set((0, 1.0, 0.0, 0.0), (1, 0.0, 0.0, 1.0), (2, 0.0, 1.0, 0.0),
       (3, 1.0, 0.0, 0.0), (4, 1.0, 0.0, 0.0), (5, 0.0, 1.0, 0.0))

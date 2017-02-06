@@ -15,7 +15,7 @@ object SparkRDDAPIExamples {
    //CollectAsMap例子
     val a1 = sc.parallelize(List(1, 2, 1, 3), 1)
     //zip函数将传进来的参数中相应位置上的元素组成一个pair数组。
-    //如果其中一个参数元素比较长，那么多余的参数会被删掉
+    //如果其中一个参数元素比较长,那么多余的参数会被删掉
     val b = a1.zip(a1)
     b.collectAsMap //Map(2 -> 2, 1 -> 1, 3 -> 3)
     println(b.collectAsMap)

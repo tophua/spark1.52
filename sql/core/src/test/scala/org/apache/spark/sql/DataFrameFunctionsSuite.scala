@@ -160,7 +160,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("one", "not_one"))
   }
 
-  test("nvl function") {//如果E1为NULL，则函数返回E2，否则返回E1本身函数
+  test("nvl function") {//如果E1为NULL,则函数返回E2,否则返回E1本身函数
     checkAnswer(
       sql("SELECT nvl(null, 'x'), nvl('y', 'x'), nvl(null, null)"),
       Row("x", "y", null))
@@ -233,7 +233,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
       Row(-1)
     )
     sql("SELECT least(a, 2) as l from testData2 order by l").show()
-    //least返回从值列表（N1，N2，N3，和等）的项最少值
+    //least返回从值列表（N1,N2,N3,和等）的项最少值
     checkAnswer(
       sql("SELECT least(a, 2) as l from testData2 order by l"),
       Seq(Row(1), Row(1), Row(2), Row(2), Row(2), Row(2))
@@ -241,7 +241,7 @@ class DataFrameFunctionsSuite extends QueryTest with SharedSQLContext {
   }
 
   test("conditional function: greatest") {//条件函数最大的值
-     //greatest返回从值列表（N1，N2，N3，和等）的项最大值
+     //greatest返回从值列表（N1,N2,N3,和等）的项最大值
     checkAnswer(
       testData2.select(greatest(lit(2), lit(3), col("a"), col("b"))).limit(1),
       Row(3)

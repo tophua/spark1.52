@@ -229,7 +229,7 @@ class OneVsRestSuite extends SparkFunSuite with MLlibTestSparkContext {
      //fit()方法将DataFrame转化为一个Transformer的算法
     val ovrModel = ovr1.fit(dataset).copy(ParamMap(lr.thresholds -> Array(0.9, 0.1)))
     ovrModel.models.foreach { case m: LogisticRegressionModel =>
-      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+      //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       require(m.getThreshold === 0.1, "copy should handle extra model params")
     }
   }

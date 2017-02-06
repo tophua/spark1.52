@@ -319,7 +319,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   // This function allows components created by SparkEnv to be mocked in unit tests:
   //这个功能允许创建的sparkenv,在单元测试中被模拟
-  //SparkEnv是一个很重要的变量，其内包括了很多Spark执行时的重要组件（变量），包括 MapOutputTracker、ShuffleFetcher、BlockManager等，
+  //SparkEnv是一个很重要的变量,其内包括了很多Spark执行时的重要组件（变量）,包括 MapOutputTracker、ShuffleFetcher、BlockManager等,
   // 这里是通过SparkEnv类的伴生对象SparkEnv Object内的Create方法实现的
   private[spark] def createSparkEnv(
       conf: SparkConf,
@@ -487,7 +487,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
     _jars = _conf.getOption("spark.jars").map(_.split(",")).map(_.filter(_.size != 0)).toSeq.flatten//转换 
     _files = _conf.getOption("spark.files").map(_.split(",")).map(_.filter(_.size != 0)).toSeq.flatten
-   //保存日志相关信息的路径，可以是hdfs://开头的HDFS路径，也可以是file://开头的本地路径，都需要提前创建
+   //保存日志相关信息的路径,可以是hdfs://开头的HDFS路径,也可以是file://开头的本地路径,都需要提前创建
     _eventLogDir =
       if (isEventLogEnabled) {
         val unresolvedDir = conf.get("spark.eventLog.dir", EventLoggingListener.DEFAULT_LOG_DIR)
@@ -498,7 +498,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       }
 
     _eventLogCodec = {
-    //是否压缩记录Spark事件，前提spark.eventLog.enabled为true
+    //是否压缩记录Spark事件,前提spark.eventLog.enabled为true
       val compress = _conf.getBoolean("spark.eventLog.compress", false)
       if (compress && isEventLogEnabled) {
         Some(CompressionCodec.getCodecName(_conf)).map(CompressionCodec.getShortName)
@@ -973,7 +973,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * Hadoop-supported file system URI. Each file is read as a single record and returned in a
    * key-value pair, where the key is the path of each file, the value is the content of each file.
    * 在HDFS中读一个目录下的文本文件,本地文件系统(可在所有节点上),Hadoop文件系统或任何支持URI,
-   * 每个文件被读取为一个记录，并返回一个关键值对,其中键是每个文件的路径,值是每个文件的内容
+   * 每个文件被读取为一个记录,并返回一个关键值对,其中键是每个文件的路径,值是每个文件的内容
    * <p> For example, if you have the following files:
    * {{{
    *   hdfs://a-hdfs-path/part-00000
@@ -1892,7 +1892,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
                   //现在只需要日志一个错误,但允许通过这样的Spark的例子工作
                   // The spark examples don't really need the jar distributed since its also
                   // the app jar.
-                  //Spark的例子并不真的需要它的jar，因为它也是应用程序jar
+                  //Spark的例子并不真的需要它的jar,因为它也是应用程序jar
                   logError("Error adding jar (" + e + "), was the --addJars option used?")
                   null
               }
@@ -2352,7 +2352,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private val nextShuffleId = new AtomicInteger(0)
 
   private[spark] def newShuffleId(): Int = nextShuffleId.getAndIncrement()
-  //AtomicInteger，一个提供原子操作的Integer的类,++i和i++操作并不是线程安全的，不可避免的会用到synchronized关键字。
+  //AtomicInteger,一个提供原子操作的Integer的类,++i和i++操作并不是线程安全的,不可避免的会用到synchronized关键字。
   //而AtomicInteger则通过一种线程安全的加减操作接口
   private val nextRddId = new AtomicInteger(0)
 
@@ -2442,7 +2442,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /** 
    *  Post the environment update event once the task scheduler is ready 
-   *  一旦任务调度程序准备就绪后，发布环境更新事件
+   *  一旦任务调度程序准备就绪后,发布环境更新事件
    *  */
   private def postEnvironmentUpdate() {
     if (taskScheduler != null) {
@@ -2479,7 +2479,7 @@ object SparkContext extends Logging {
 
   /**
    * Lock that guards access to global variables that track SparkContext construction.
-   * 锁保护访问全局变量，跟踪sparkcontext构造
+   * 锁保护访问全局变量,跟踪sparkcontext构造
    */
   private val SPARK_CONTEXT_CONSTRUCTOR_LOCK = new Object()
 

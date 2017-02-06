@@ -40,7 +40,7 @@ class KMeansSuite extends SparkFunSuite with MLlibTestSparkContext {
     val center = Vectors.dense(1.0, 3.0, 4.0)
 
     // No matter how many runs or iterations we use, we should get one cluster,
-    //无论我们使用多少次运行或迭代，我们都应该得到一个集群
+    //无论我们使用多少次运行或迭代,我们都应该得到一个集群
     // centered at the mean of the points 
     //以点的平均值为中心
 
@@ -359,7 +359,7 @@ object KMeansSuite extends SparkFunSuite {
 }
 
 class KMeansClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-  //在训练和预测中，任务的大小应该是小的
+  //在训练和预测中,任务的大小应该是小的
   test("task size should be small in both training and prediction") {
     val m = 4
     val n = 200000
@@ -369,7 +369,7 @@ class KMeansClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
     }.cache()
     for (initMode <- Seq(KMeans.RANDOM, KMeans.K_MEANS_PARALLEL)) {
       // If we serialize data directly in the task closure, the size of the serialized task would be
-      //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB，因此Spark会抛出一个错误
+      //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB,因此Spark会抛出一个错误
       // greater than 1MB and hence Spark would throw an error.
       val model = KMeans.train(points, 2, 2, 1, initMode)
       //predict 方法对新的数据点进行所属聚类的预测

@@ -27,10 +27,10 @@ import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.mllib.feature.{Word2VecModel => OldWord2VecModel}
 /**
  Word2Vec模型来根据词义比较两个字词相似性
- Word2Vec 是一个用来将词表示为数值型向量的工具，其基本思想是将文本中的词映射成一个 K 维数值向量 (K 通常作为算法的超参数)，
- 这样文本中的所有词就组成一个 K 维向量空间， 这样我们可以通过计算向量间的欧氏距离或者余弦相似度得到文本语义的相似度。
- Word2Vec 采用的是 Distributed representation 的词向量表示方式，这种表达方式不仅可以有效控制词向量的维度，
- 避免维数灾难 (相对于 one-hot representation)，而且可以保证意思相近的词在向量空间中的距离较近。
+ Word2Vec 是一个用来将词表示为数值型向量的工具,其基本思想是将文本中的词映射成一个 K 维数值向量 (K 通常作为算法的超参数),
+ 这样文本中的所有词就组成一个 K 维向量空间, 这样我们可以通过计算向量间的欧氏距离或者余弦相似度得到文本语义的相似度。
+ Word2Vec 采用的是 Distributed representation 的词向量表示方式,这种表达方式不仅可以有效控制词向量的维度,
+ 避免维数灾难 (相对于 one-hot representation),而且可以保证意思相近的词在向量空间中的距离较近。
  */
 class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -75,7 +75,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
     val docDF = doc.zip(expected).toDF("text", "expected")
 
     val model = new Word2Vec()
-      //目标数值向量的维度大小，默认是 100
+      //目标数值向量的维度大小,默认是 100
       .setVectorSize(3)
       //源数据 DataFrame 中存储文本词数组列的名称
       .setInputCol("text")
@@ -83,7 +83,7 @@ class Word2VecSuite extends SparkFunSuite with MLlibTestSparkContext {
       .setOutputCol("result") 
       //种子
       .setSeed(42L)
-      //.minCount 只有当某个词出现的次数大于或者等于 minCount 时，才会被包含到词汇表里，否则会被忽略掉
+      //.minCount 只有当某个词出现的次数大于或者等于 minCount 时,才会被包含到词汇表里,否则会被忽略掉
       .fit(docDF)//fit()方法将DataFrame转化为一个Transformer的算法
 
     // copied model must have the same parent.

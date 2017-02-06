@@ -21,8 +21,8 @@ object ClassificationPipeline_IBM {
     val sqlCtx = new SQLContext(sc)
 
     /**
-     * 这是一个从纸币鉴别过程中的图片里提取的数据集，总共包含五个列，前 4 列是指标值 (连续型)，最后一列是真假标识
-     * 四列依次是小波变换图像的方差，小波变换图像的偏态，小波变换图像的峰度，图像熵，类别标签
+     * 这是一个从纸币鉴别过程中的图片里提取的数据集,总共包含五个列,前 4 列是指标值 (连续型),最后一列是真假标识
+     * 四列依次是小波变换图像的方差,小波变换图像的偏态,小波变换图像的峰度,图像熵,类别标签
      * Step 1
      * Read the source data file and convert it to be a dataframe with columns named.
      * 3.6216,8.6661,-2.8073,-0.44699,0
@@ -62,20 +62,20 @@ object ClassificationPipeline_IBM {
     /**
      * *
      * Step 2
-     * 使用 StringIndexer 去把源数据里的字符 Label，按照 Label 出现的频次对其进行序列编码, 如，0,1,2，…。
-     * 在本例的数据中，可能这个步骤的作用不甚明显，因为我们的数据格式良好，Label 本身也只有两种，
-     * 并且已经是类序列编码的”0”和”1”格式。但是对于多分类问题或者是 Label 本身是字符串的编码方式，
-     * 如”High”,”Low”,”Medium”等，那么这个步骤就很有用，转换后的格式，才能被 Spark 更好的处理
+     * 使用 StringIndexer 去把源数据里的字符 Label,按照 Label 出现的频次对其进行序列编码, 如,0,1,2,…。
+     * 在本例的数据中,可能这个步骤的作用不甚明显,因为我们的数据格式良好,Label 本身也只有两种,
+     * 并且已经是类序列编码的”0”和”1”格式。但是对于多分类问题或者是 Label 本身是字符串的编码方式,
+     * 如”High”,”Low”,”Medium”等,那么这个步骤就很有用,转换后的格式,才能被 Spark 更好的处理
      */
     val labelIndexer = new StringIndexer()
       .setInputCol("label") //
       .setOutputCol("indexedLabel")
-      .fit(df)// fit 方法设计和实现上实际上是采用了模板方法的设计模式，具体会调用实现类的 train 方法
+      .fit(df)// fit 方法设计和实现上实际上是采用了模板方法的设计模式,具体会调用实现类的 train 方法
 
     /**
      * Step 3
-     * 使用 VectorAssembler 从源数据中提取特征指标数据,这是一个比较典型且通用的步骤，
-     * 因为我们的原始数据集里，经常会包含一些非指标数据，如 ID，Description 等
+     * 使用 VectorAssembler 从源数据中提取特征指标数据,这是一个比较典型且通用的步骤,
+     * 因为我们的原始数据集里,经常会包含一些非指标数据,如 ID,Description 等
      * VectorAssembler是一个转换器,它将给定的若干列合并为一列向量
      */
     val vectorAssembler = new VectorAssembler()
@@ -84,8 +84,8 @@ object ClassificationPipeline_IBM {
 
     /**
      * Step 4
-     * 创建一个随机森林分类器 RandomForestClassifier 实例，并设定相关参数，
-     * 主要是告诉随机森林算法输入 DataFrame 数据里哪个列是特征向量，哪个是类别标识.
+     * 创建一个随机森林分类器 RandomForestClassifier 实例,并设定相关参数,
+     * 主要是告诉随机森林算法输入 DataFrame 数据里哪个列是特征向量,哪个是类别标识.
      */
     val rfClassifier = new RandomForestClassifier()
       .setLabelCol("indexedLabel")//标签列的名称
@@ -96,8 +96,8 @@ object ClassificationPipeline_IBM {
 
     /**
      * Step 5
-     *我们使用 IndexToString Transformer 去把之前的序列编码后的 Label 转化成原始的 Label，恢复之前的可读性比较高的 Label，
-     *这样不论是存储还是显示模型的测试结果，可读性都会比较高
+     *我们使用 IndexToString Transformer 去把之前的序列编码后的 Label 转化成原始的 Label,恢复之前的可读性比较高的 Label,
+     *这样不论是存储还是显示模型的测试结果,可读性都会比较高
      */
     val labelConverter = new IndexToString()
       .setInputCol("prediction")
@@ -111,12 +111,12 @@ object ClassificationPipeline_IBM {
 
     /**
      * Step 7
-     * 构建 Pipeline 实例，并且会按照顺序执行，最终我们根据得到的 PipelineModel 实例，
-     * 进一步调用其 transform 方法，去用训练好的模型预测测试数据集的分类,
-     * 要构建一个 Pipeline，首先我们需要定义 Pipeline 中的各个 PipelineStage，如指标提取和转换模型训练等
+     * 构建 Pipeline 实例,并且会按照顺序执行,最终我们根据得到的 PipelineModel 实例,
+     * 进一步调用其 transform 方法,去用训练好的模型预测测试数据集的分类,
+     * 要构建一个 Pipeline,首先我们需要定义 Pipeline 中的各个 PipelineStage,如指标提取和转换模型训练等
      * 例如:al pipeline = new Pipeline().setStages(Array(stage1,stage2,stage3,…))
-     * 然后就可以把训练数据集作为入参并调用 Pipelin 实例的 fit 方法来开始以流的方式来处理源训练数据，
-     * 这个调用会返回一个 PipelineModel 类实例， 进而被用来预测测试数据的标签，它是一个 Transformer
+     * 然后就可以把训练数据集作为入参并调用 Pipelin 实例的 fit 方法来开始以流的方式来处理源训练数据,
+     * 这个调用会返回一个 PipelineModel 类实例, 进而被用来预测测试数据的标签,它是一个 Transformer
      */
     val pipeline = new Pipeline().setStages(Array(labelIndexer, vectorAssembler, rfClassifier, labelConverter))
     //fit()方法将DataFrame转化为一个Transformer的算法
@@ -126,8 +126,8 @@ object ClassificationPipeline_IBM {
      * Step 8
      * Perform predictions about testing data. This transform method will return a result DataFrame
      * with new prediction column appended towards previous DataFrame.
-     * 主要是用来把 一个 DataFrame 转换成另一个 DataFrame,比如一个模型就是一个 Transformer，
-     * 因为它可以把 一个不包含预测标签的测试数据集 DataFrame 打上标签转化成另一个包含预测标签的 DataFrame，
+     * 主要是用来把 一个 DataFrame 转换成另一个 DataFrame,比如一个模型就是一个 Transformer,
+     * 因为它可以把 一个不包含预测标签的测试数据集 DataFrame 打上标签转化成另一个包含预测标签的 DataFrame,
      * 显然这样的结果集可以被用来做分析结果的可视化
      */
      //transform()方法将DataFrame转化为另外一个DataFrame的算法

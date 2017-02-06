@@ -98,7 +98,7 @@ object EstimatorTransformerParamExample {
     //支持指定参数的几种方法
     val paramMap = ParamMap(lr.maxIter -> 20)
       .put(lr.maxIter, 30)  // Specify 1 Param. This overwrites the original maxIter.
-      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+      //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       .put(lr.regParam -> 0.1, lr.threshold -> 0.55)  // Specify multiple Params.
 
     // One can also combine ParamMaps.

@@ -70,15 +70,15 @@ class MyRDD(
   override def toString: String = "DAGSchedulerSuiteRDD " + id
 }
 /**
- * DAGScheduler决定了运行Task的理想位置，并把这些信息传递给下层的TaskScheduler
- * DAGScheduler还处理由于Shuffle数据丢失导致的失败，
+ * DAGScheduler决定了运行Task的理想位置,并把这些信息传递给下层的TaskScheduler
+ * DAGScheduler还处理由于Shuffle数据丢失导致的失败,
  * 这有可能需要重新提交运行之前的Stage（非Shuffle数据丢失导致的Task失败由TaskScheduler处理）
  */
 
 class DAGSchedulerSuiteDummyException extends Exception
 //DAGSchedulerDAGScheduler的主要任务是基于Stage构建DAG,
 //决定每个任务的最佳位置 记录哪个RDD或者Stage输出被物化 面向stage的调度层
-//为job生成以stage组成的DAG，提交TaskSet给TaskScheduler执行
+//为job生成以stage组成的DAG,提交TaskSet给TaskScheduler执行
 //重新提交shuffle输出丢失的stage
 class DAGSchedulerSuite
   extends SparkFunSuite with BeforeAndAfter with LocalSparkContext with Timeouts {
@@ -409,8 +409,8 @@ class DAGSchedulerSuite
     // getPreferredLocs runs quickly, indicating that exponential graph traversal is avoided.
     //getPreferredLocs运行快速,避免索引遍历
     failAfter(10 seconds) {
-      //返回每一个数据数据块所在的机器名或者IP地址，
-      //如果每一块数据是多份存储的，那么就会返回多个机器地址
+      //返回每一个数据数据块所在的机器名或者IP地址,
+      //如果每一块数据是多份存储的,那么就会返回多个机器地址
       val preferredLocs = scheduler.getPreferredLocs(rdd, 0) 
       // No preferred locations are returned.
       //返回没有首选的位置
@@ -456,7 +456,7 @@ class DAGSchedulerSuite
 
   test("job cancellation no-kill backend") {//作业取消不杀死后端
     // make sure that the DAGScheduler doesn't crash when the TaskScheduler
-    //确保DAGScheduler不崩溃时，任务调度器不执行killtask()
+    //确保DAGScheduler不崩溃时,任务调度器不执行killtask()
     // doesn't implement killTask()
     val noKillTaskScheduler = new TaskScheduler() {
       override def rootPool: Pool = null
@@ -943,22 +943,22 @@ class DAGSchedulerSuite
    * later, active job if they were previously run under a job that is no longer active, even when
    * there are fetch failures
    */
-  //两个工作阶段使用的阶段，一些获取失败,第一个Job不再活跃
+  //两个工作阶段使用的阶段,一些获取失败,第一个Job不再活跃
   test("stage used by two jobs, some fetch failures, and the first job no longer active " +
     "(SPARK-6880)") {
     val shuffleDep1 = launchJobsThatShareStageAndCancelFirst()
-    //askset优先运行阶段，以"job2"为activejob
+    //askset优先运行阶段,以"job2"为activejob
     val job2Id = 1  // TaskSet priority for Stages run with "job2" as the ActiveJob
 
     // lets say there is a fetch failure in this task set, which makes us go back and   
     // run stage 0, attempt 1
-    //可以说在这个任务集里有一个获取失败的,这使我们回到和运行阶段0，尝试1
+    //可以说在这个任务集里有一个获取失败的,这使我们回到和运行阶段0,尝试1
     complete(taskSets(1), Seq(
       (FetchFailed(makeBlockManagerId("hostA"), shuffleDep1.shuffleId, 0, 0, "ignored"), null)))
     scheduler.resubmitFailedStages()
 
     // stage 0, attempt 1 should have the properties of job2
-    //0阶段，尝试1应具有的job2特性
+    //0阶段,尝试1应具有的job2特性
     assert(taskSets(2).stageId === 0)
     assert(taskSets(2).stageAttemptId === 1)
     checkJobPropertiesAndPriority(taskSets(2), "job2", job2Id)
@@ -1095,7 +1095,7 @@ class DAGSchedulerSuite
    *  Any subsequent task WILL throw a legitimate java.lang.UnsupportedOperationException.
    *  任何后续任务都将抛出一个合法的UnsupportedOperationException
    *  If multiple tasks, there exists a race condition between the SparkDriverExecutionExceptions
-   *  如果多个任务,存在一个竞争条件SparkDriverExecutionExceptions和他们的不同的原因，这将代表工作的结果…
+   *  如果多个任务,存在一个竞争条件SparkDriverExecutionExceptions和他们的不同的原因,这将代表工作的结果…
    *  and their differing causes as to which will represent result for job...
    */
   test("misbehaved resultHandler should not crash DAGScheduler and SparkContext") {

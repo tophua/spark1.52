@@ -21,7 +21,7 @@ package org.apache.spark.scheduler
  * A backend interface for scheduling systems that allows plugging in different ones under
  * TaskSchedulerImpl. We assume a Mesos-like model where the application gets resource offers as
  * machines become available and can launch tasks on them.
-  * 实现用于与底层资源调度系统交互（如mesos/YARN），配合TaskScheduler实现具体任务执行所需的资源分配，
+  * 实现用于与底层资源调度系统交互（如mesos/YARN）,配合TaskScheduler实现具体任务执行所需的资源分配,
   * 核心接口是receiveOffers
  */
 private[spark] trait SchedulerBackend {
@@ -50,7 +50,7 @@ private[spark] trait SchedulerBackend {
   def applicationId(): String = appId
 
   /**
-   * 获取此运行的尝试标识，如果群集管理器支持多个尝试
+   * 获取此运行的尝试标识,如果群集管理器支持多个尝试
    * Get the attempt ID for this run, if the cluster manager supports multiple
    * attempts. Applications run in client mode will not have attempt IDs.
    *如果可用的应用程序尝试Id

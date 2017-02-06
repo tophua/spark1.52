@@ -252,7 +252,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     testOneToOneMathFunction(expm1, math.expm1)
   }
 
-  test("signum / sign") {//函数返回一个整型变量，指出参数的正负号
+  test("signum / sign") {//函数返回一个整型变量,指出参数的正负号
     testOneToOneMathFunction[Double](signum, math.signum)
 
     checkAnswer(

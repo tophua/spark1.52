@@ -47,7 +47,7 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
   }
 
   /**
-   * 创建数据流前，根据实际消费情况更新消费offsets
+   * 创建数据流前,根据实际消费情况更新消费offsets
    * @param topics
    * @param groupId
    */
@@ -62,22 +62,22 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
       if (hasConsumed) {
         // 消费过
         /**
-         * 如果zk上保存的offsets已经过时了，即kafka的定时清理策略已经将包含该offsets的文件删除。
-         * 针对这种情况，只要判断一下zk上的consumerOffsets和earliestLeaderOffsets的大小，
-         * 如果consumerOffsets比earliestLeaderOffsets还小的话，说明consumerOffsets已过时,
+         * 如果zk上保存的offsets已经过时了,即kafka的定时清理策略已经将包含该offsets的文件删除。
+         * 针对这种情况,只要判断一下zk上的consumerOffsets和earliestLeaderOffsets的大小,
+         * 如果consumerOffsets比earliestLeaderOffsets还小的话,说明consumerOffsets已过时,
          * 这时把consumerOffsets更新为earliestLeaderOffsets
          */
         val earliestLeaderOffsets = kc.getEarliestLeaderOffsets(partitions).right.get
         val consumerOffsets = consumerOffsetsE.right.get
 
-        // 可能只是存在部分分区consumerOffsets过时，所以只更新过时分区的consumerOffsets为earliestLeaderOffsets
+        // 可能只是存在部分分区consumerOffsets过时,所以只更新过时分区的consumerOffsets为earliestLeaderOffsets
         var offsets: Map[TopicAndPartition, Long] = Map()
         consumerOffsets.foreach({
           case (tp, n) =>
             val earliestLeaderOffset = earliestLeaderOffsets(tp).offset
             if (n < earliestLeaderOffset) {
               println("consumer group:" + groupId + ",topic:" + tp.topic + ",partition:" + tp.partition +
-                " offsets已经过时，更新为" + earliestLeaderOffset)
+                " offsets已经过时,更新为" + earliestLeaderOffset)
               offsets += (tp -> earliestLeaderOffset)
             }
         })

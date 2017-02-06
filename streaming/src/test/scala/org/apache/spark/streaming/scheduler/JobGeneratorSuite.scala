@@ -35,7 +35,7 @@ import org.apache.spark.util.{ManualClock, Utils}
  * 每次 RDD DAG 实际生成包含 5 个步骤
  * (1) 要求 ReceiverTracker将目前已收到的数据进行一次分配,即将上次 batch切分后的数据切分到到本次新的 batch里;
  * (2) 要求 DStreamGraph复制出一套新的 RDD DAG 的实例,具体过程是：DStreamGraph将要求图里的尾 DStream节点生成具体的 RDD实例
- * 		 并递归的调用尾 DStream 的上游 DStream 节点……以此遍历整个 DStreamGraph，遍历结束也就正好生成了 RDD DAG 的实例;
+ * 		 并递归的调用尾 DStream 的上游 DStream 节点……以此遍历整个 DStreamGraph,遍历结束也就正好生成了 RDD DAG 的实例;
  * (3) 获取第 1 步 ReceiverTracker分配到本 batch的源头数据的 meta信息;
  * (4) 将第 2 步生成的本 batch 的 RDD DAG,和第 3 步获取到的 meta 信息,一同提交给 JobScheduler 异步执行;
  * (5) 只要提交结束(不管是否已开始异步执行),就马上对整个系统的当前运行状态做一个 checkpoint。
@@ -44,7 +44,7 @@ class JobGeneratorSuite extends TestSuiteBase {
 
   // SPARK-6222 is a tricky regression bug which causes received block metadata
   // to be deleted before the corresponding batch has completed. This occurs when
-  //在相应的批处理完成之前，它会导致接收到的块元数据被删除,
+  //在相应的批处理完成之前,它会导致接收到的块元数据被删除,
   // the following conditions are met.
   //当下列条件满足时,会发生此情况
   // 1. streaming checkpointing is enabled by setting streamingContext.checkpoint(dir)
@@ -57,11 +57,11 @@ class JobGeneratorSuite extends TestSuiteBase {
   //
   // The JobGenerator (as of Mar 16, 2015) checkpoints twice per batch, once after generation
   // of a batch, and another time after the completion of a batch. The cleanup of
-  //一批一批,完成一批后的第二批,检查点数据的清除,Stream必须在第二点已建成,也就是说，批处理后已完全处理
+  //一批一批,完成一批后的第二批,检查点数据的清除,Stream必须在第二点已建成,也就是说,批处理后已完全处理
   // checkpoint data (including block metadata, etc.) from DStream must be done only after the
   // 2nd checkpoint has completed, that is, after the batch has been completely processed.
   // However, the issue is that the checkpoint data and along with it received block data is
-  //然而,问题是，检查点数据和它的接收块数据一起被清理，即使在第一个检查点的情况下
+  //然而,问题是,检查点数据和它的接收块数据一起被清理,即使在第一个检查点的情况下
   // cleaned even in the case of the 1st checkpoint, causing pre-mature deletion of received block
   //导致接收块数据的预成熟删除,例如,如果第三批仍然正在处理,第七批可能会产生
   // data. For example, if the 3rd batch is still being process, the 7th batch may get generated,

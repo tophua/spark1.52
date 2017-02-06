@@ -40,7 +40,7 @@ import org.apache.spark.ui.SparkUI
  * the current behavior -- the developer must verify that behavior is correct.
  *
  * Similarly, if the behavior is changed, HistoryServerSuite.main can be run to update the
- * 同样地，如果行为发生了改变,可以运行historyserversuite.main更新的期望值,然而,在一般来说,这应该是极端谨慎
+ * 同样地,如果行为发生了改变,可以运行historyserversuite.main更新的期望值,然而,在一般来说,这应该是极端谨慎
  * expectations.  However, in general this should be done with extreme caution, as the metrics
  * are considered part of Spark's public api.
  */
@@ -173,7 +173,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
   }
 
   // Test that the files are downloaded correctly, and validate them.
-  //测试文件是否正确下载，并验证它们的正确性。
+  //测试文件是否正确下载,并验证它们的正确性。
   def doDownloadTest(appId: String, attemptId: Option[Int], legacy: Boolean = false): Unit = {
 
     val url = attemptId match {

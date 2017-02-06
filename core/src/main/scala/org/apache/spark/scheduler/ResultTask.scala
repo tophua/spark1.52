@@ -61,14 +61,14 @@ private[spark] class ResultTask[T, U](
     val deserializeStartTime = System.currentTimeMillis()
      //获取反序列化器  
     val ser = SparkEnv.get.closureSerializer.newInstance()
-    //调用反序列化器ser的deserialize()方法，得到RDD和FUNC，数据来自taskBinary  
+    //调用反序列化器ser的deserialize()方法,得到RDD和FUNC,数据来自taskBinary  
     val (rdd, func) = ser.deserialize[(RDD[T], (TaskContext, Iterator[T]) => U)](
       ByteBuffer.wrap(taskBinary.value), Thread.currentThread.getContextClassLoader)
      //计算反序列化时间_executorDeserializeTime  
     _executorDeserializeTime = System.currentTimeMillis() - deserializeStartTime
     //Task的taskMetrics信息
     metrics = Some(context.taskMetrics)
-   // 调针对RDD中的每个分区，迭代执行func方法，执行Task  
+   // 调针对RDD中的每个分区,迭代执行func方法,执行Task  
     func(context, rdd.iterator(partition, context))
   }
 

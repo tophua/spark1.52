@@ -23,7 +23,7 @@ import org.apache.spark.{Logging, Partitioner, RangePartitioner}
 import org.apache.spark.annotation.DeveloperApi
 
 /**
- * 该扩展类的方法需要输入数据是2元tuple，并且key能够排序
+ * 该扩展类的方法需要输入数据是2元tuple,并且key能够排序
  * Extra functions available on RDDs of (key, value) pairs where the key is sortable through
  * an implicit conversion. They will work with any key type `K` that has an implicit `Ordering[K]`
  * in scope. Ordering objects already exist for all of the standard primitive types. Users can also
@@ -51,14 +51,14 @@ class OrderedRDDFunctions[K : Ordering : ClassTag,
   private val ordering = implicitly[Ordering[K]]
 
   /**
-   * 这个方法按Key进行排序，并输出新RDD。输出的RDD数据是经过shuffled之后的，因为在在输出的reducer里数据已经被shuffle了
+   * 这个方法按Key进行排序,并输出新RDD。输出的RDD数据是经过shuffled之后的,因为在在输出的reducer里数据已经被shuffle了
    * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
    * `collect` or `save` on the resulting RDD will return or output an ordered list of records
    * (in the `save` case, they will be written to multiple `part-X` files in the filesystem, in
    * order of the keys).
-   * sortByKey函数作用于Key-Value形式的RDD，并对Key进行排序
-   * 它主要接受两个函数，含义和sortBy一样，这里就不进行解释了。该函数返回的RDD一定是ShuffledRDD类型的，
-   * 因为对源RDD进行排序，必须进行Shuffle操作，而Shuffle操作的结果RDD就是ShuffledRDD
+   * sortByKey函数作用于Key-Value形式的RDD,并对Key进行排序
+   * 它主要接受两个函数,含义和sortBy一样,这里就不进行解释了。该函数返回的RDD一定是ShuffledRDD类型的,
+   * 因为对源RDD进行排序,必须进行Shuffle操作,而Shuffle操作的结果RDD就是ShuffledRDD
    */
   // TODO: this currently doesn't work on P other than Tuple2!
   def sortByKey(ascending: Boolean = true, numPartitions: Int = self.partitions.length)

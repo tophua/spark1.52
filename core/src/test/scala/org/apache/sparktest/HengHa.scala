@@ -25,7 +25,7 @@ class Ha extends Actor {
 
 object HengHa {
   def main(args: Array[String]): Unit = {
-    //ActorSystem是重量级的对象，会创建1...N个线程，所以一个application一个ActorSystem
+    //ActorSystem是重量级的对象,会创建1...N个线程,所以一个application一个ActorSystem
     val system = ActorSystem("HengHaSystem")
    //actorOf要创建Actor,
     val ha = system.actorOf(Props[Ha], name = "ha")

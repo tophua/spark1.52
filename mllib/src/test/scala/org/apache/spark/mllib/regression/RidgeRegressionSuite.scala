@@ -59,7 +59,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     org.jblas.util.Random.seed(42)
     // Pick weights as random values distributed uniformly in [-0.5, 0.5]
-    //选择权重为随机值分布的均匀分布在[ 0.5，0.5 ]
+    //选择权重为随机值分布的均匀分布在[ 0.5,0.5 ]
     val w = DoubleMatrix.rand(numFeatures, 1).subi(0.5)
 
     // Use half of data for training and other half for validation

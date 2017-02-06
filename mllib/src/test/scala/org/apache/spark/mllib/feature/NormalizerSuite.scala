@@ -24,7 +24,7 @@ import org.apache.spark.mllib.linalg.{ DenseVector, SparseVector, Vectors }
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 /**
- * 数据标准化(min-max):也称为离差标准化，是对原始数据的线性变换，使结果值映射到[0 - 1]之间
+ * 数据标准化(min-max):也称为离差标准化,是对原始数据的线性变换,使结果值映射到[0 - 1]之间
  */
 class NormalizerSuite extends SparkFunSuite with MLlibTestSparkContext {
 

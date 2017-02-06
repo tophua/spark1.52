@@ -36,7 +36,7 @@ case class Document(id: Long, text: String)
   /**
    * 简单分类分类示例
    * A simple text classification pipeline that recognizes "spark" from input text. This is to show
-   * 一个简单的文本分类管道，从“Spark”输入文本中识别
+   * 一个简单的文本分类管道,从“Spark”输入文本中识别
    * how to create and configure an ML pipeline. Run with
    * 这是显示如何创建和配置一个ML的管道
    * {{{

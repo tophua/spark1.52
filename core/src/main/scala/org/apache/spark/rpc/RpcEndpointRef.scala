@@ -25,13 +25,13 @@ import org.apache.spark.{SparkException, Logging, SparkConf}
 
 /**
  * 用于发送消息
- * RpcEndpointRef 一个远程RpcEndpoint的引用，通过它可以给远程RpcEndpoint发送消息，可以是同步可以是异步
+ * RpcEndpointRef 一个远程RpcEndpoint的引用,通过它可以给远程RpcEndpoint发送消息,可以是同步可以是异步
  * A reference for a remote [[RpcEndpoint]]. [[RpcEndpointRef]] is thread-safe(线程安全).
  * 
- * 1)处理RpcEndpointRef.send或RpcCallContext.reply方法，如果收到不匹配的消息，将抛出SparkException
+ * 1)处理RpcEndpointRef.send或RpcCallContext.reply方法,如果收到不匹配的消息,将抛出SparkException
  * 		def receive: PartialFunction[Any, Unit] = {
 					case _ => throw new SparkException(self + " does not implement 'receive'")}
-	 2)处理RpcEndpointRef.ask方法，如果不匹配消息，将抛出SparkException
+	 2)处理RpcEndpointRef.ask方法,如果不匹配消息,将抛出SparkException
 			def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
 					case _ => context.sendFailure(new SparkException(self + " won't reply anything"))}
 	 3).当处理消息发生异常时
@@ -63,7 +63,7 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   def send(message: Any): Unit
 
   /**
-   * 发送一个消息给RpcEndpoint.receiveAndReply并返回一个Future在指定的时间内接受响应，
+   * 发送一个消息给RpcEndpoint.receiveAndReply并返回一个Future在指定的时间内接受响应,
    * Send a message to the corresponding(类似,相配) [[RpcEndpoint.receiveAndReply)]] and return a [[Future]] to
    * receive the reply within the specified timeout.
    * 本方法值请求一次
@@ -80,13 +80,13 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   def ask[T: ClassTag](message: Any): Future[T] = ask(message, defaultAskTimeout)
 
   /**
-   * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果，否则抛出SparkException，
-   * 注意，本方法是一个阻塞操作可能消耗时间，所以不要早消息循环中调用它
+   * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果,否则抛出SparkException,
+   * 注意,本方法是一个阻塞操作可能消耗时间,所以不要早消息循环中调用它
    * Send a message to the corresponding(相当) [[RpcEndpoint]] and get its result within a default
    * timeout, or throw a SparkException if this fails even after the default number of retries.
    * The default `timeout` will be used in every trial of calling `sendWithReply`. Because this
    * method retries, the message handling in the receiver side should be idempotent.
-   *注意，本方法是一个阻塞操作可能消耗时间，所以不要在消息循环中调用它
+   *注意,本方法是一个阻塞操作可能消耗时间,所以不要在消息循环中调用它
    * Note: this is a blocking action which may cost a lot of time,  so don't call it in an message
    * loop of [[RpcEndpoint]].
    *
@@ -97,12 +97,12 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   def askWithRetry[T: ClassTag](message: Any): T = askWithRetry(message, defaultAskTimeout)
 
   /**
-   * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果，否则抛出SparkException
+   * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果,否则抛出SparkException
    * Send a message to the corresponding [[RpcEndpoint.receive]] and get its result within a
    * specified timeout, throw a SparkException if this fails even after the specified number of
    * retries. `timeout` will be used in every trial of calling `sendWithReply`. Because this method
    * retries, the message handling in the receiver side should be idempotent.
-   * 注意，本方法是一个阻塞操作可能消耗时间，所以不要在消息循环中调用它
+   * 注意,本方法是一个阻塞操作可能消耗时间,所以不要在消息循环中调用它
    * Note: this is a blocking action which may cost a lot of time, so don't call it in an message
    * loop of [[RpcEndpoint]].
    *
@@ -121,9 +121,9 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
       try {
         val future = ask[T](message, timeout)
         /**
-         * 在规定时间内返回对象， Await是scala并发库中的一个对象，result在duration时间片内返回Awaitable的执行结果，
-         * ready表示duration时间片内Awaitable的状态变成complete,两个方法都是阻塞的，Awaitable相当java中的future，
-         * 当然scala也有future类，正是继承该类。它的伴生对象主要是配置文件中获取时间值然后生成该对象
+         * 在规定时间内返回对象, Await是scala并发库中的一个对象,result在duration时间片内返回Awaitable的执行结果,
+         * ready表示duration时间片内Awaitable的状态变成complete,两个方法都是阻塞的,Awaitable相当java中的future,
+         * 当然scala也有future类,正是继承该类。它的伴生对象主要是配置文件中获取时间值然后生成该对象
          */
         val result = timeout.awaitResult(future)
         if (result == null) {

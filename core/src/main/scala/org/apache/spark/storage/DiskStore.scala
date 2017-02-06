@@ -63,7 +63,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       file.getName, Utils.bytesToString(bytes.limit), finishTime - startTime))
     PutResult(bytes.limit(), Right(bytes.duplicate()))//复制一个可读可写的缓冲区
   }
-//将BlockId对应的Array数据存储到磁盘，该方法先将Array序列化，然后存储到相应的文件。
+//将BlockId对应的Array数据存储到磁盘,该方法先将Array序列化,然后存储到相应的文件。
   override def putArray(
       blockId: BlockId,
       values: Array[Any],
@@ -71,7 +71,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       returnValues: Boolean): PutResult = {
     putIterator(blockId, values.toIterator, level, returnValues)
   }
-//将BlockId对应的Iterator数据存储到磁盘，该方法先将Iterator序列化，然后存储到相应的文件。
+//将BlockId对应的Iterator数据存储到磁盘,该方法先将Iterator序列化,然后存储到相应的文件。
   override def putIterator(
       blockId: BlockId,
       values: Iterator[Any],
@@ -116,8 +116,8 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     }
   }
    /**
-    * 读取文件中偏移为offset，长度为length的内容。
-    * 该方法会判断length是否大于minMemoryMapBytes，若大于，则做内存映射，否则直接读取到字节缓存中。
+    * 读取文件中偏移为offset,长度为length的内容。
+    * 该方法会判断length是否大于minMemoryMapBytes,若大于,则做内存映射,否则直接读取到字节缓存中。
     */
   private def getBytes(file: File, offset: Long, length: Long): Option[ByteBuffer] = {
     val channel = new RandomAccessFile(file, "r").getChannel
@@ -126,9 +126,9 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
       if (length < minMemoryMapBytes) {
         /**
          * 从FileChannel读取数据
-         * 1)首先，allocate分配一个Buffer,从FileChannel中读取的数据将被读到Buffer中
+         * 1)首先,allocate分配一个Buffer,从FileChannel中读取的数据将被读到Buffer中
          * 2)调用FileChannel.read()方法。该方法将数据从FileChannel读取到Buffer中。
-         *   read()方法返回的int值表示了有多少字节被读到了Buffer中。如果返回-1，表示到了文件末尾。
+         *   read()方法返回的int值表示了有多少字节被读到了Buffer中。如果返回-1,表示到了文件末尾。
          */
         val buf = ByteBuffer.allocate(length.toInt) //分配块缓冲区
         channel.position(offset)//位置
@@ -154,11 +154,11 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     val file = diskManager.getFile(blockId.name)
     getBytes(file, 0, file.length)
   }
-  //根据FileSegment读取内容，其中 FileSegment存放文件和要读取数据的偏移和大小
+  //根据FileSegment读取内容,其中 FileSegment存放文件和要读取数据的偏移和大小
   def getBytes(segment: FileSegment): Option[ByteBuffer] = {
     getBytes(segment.file, segment.offset, segment.length)
   }
-//读取BlockId对应的内容，并反序列化为Iterator
+//读取BlockId对应的内容,并反序列化为Iterator
   override def getValues(blockId: BlockId): Option[Iterator[Any]] = {
     getBytes(blockId).map(buffer => blockManager.dataDeserialize(blockId, buffer))
   }
@@ -166,7 +166,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
   /**
    * A version of getValues that allows a custom serializer. This is used as part of the
    * shuffle short-circuit code.
-   * 读取BlockId对应的内容，并根据自定义的Serializer反序列化为Iterator。
+   * 读取BlockId对应的内容,并根据自定义的Serializer反序列化为Iterator。
    */
   def getValues(blockId: BlockId, serializer: Serializer): Option[Iterator[Any]] = {
     // TODO: Should bypass getBytes and use a stream based implementation, so that

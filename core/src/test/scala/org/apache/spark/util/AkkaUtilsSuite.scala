@@ -118,7 +118,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     slaveTracker.updateEpoch(masterTracker.getEpoch)
 
     // this should succeed since security off
-    //这应该成功，因为安全关闭
+    //这应该成功,因为安全关闭
     assert(slaveTracker.getMapSizesByExecutorId(10, 0).toSeq ===
            Seq((BlockManagerId("a", "hostA", 1000),
              ArrayBuffer((ShuffleBlockId(10, 0, 0), size1000)))))
@@ -168,7 +168,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     slaveTracker.updateEpoch(masterTracker.getEpoch)
 
     // this should succeed since security on and passwords match
-    //这应该成功，因为安全性和密码匹配
+    //这应该成功,因为安全性和密码匹配
     assert(slaveTracker.getMapSizesByExecutorId(10, 0) ===
            Seq((BlockManagerId("a", "hostA", 1000),
              ArrayBuffer((ShuffleBlockId(10, 0, 0), size1000)))))

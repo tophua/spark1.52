@@ -58,9 +58,9 @@ private[spark] class EventLoggingListener(
   def this(appId: String, appAttemptId : Option[String], logBaseDir: URI, sparkConf: SparkConf) =
     this(appId, appAttemptId, logBaseDir, sparkConf,
       SparkHadoopUtil.get.newConfiguration(sparkConf))
-  //是否压缩记录Spark事件，前提spark.eventLog.enabled为true
+  //是否压缩记录Spark事件,前提spark.eventLog.enabled为true
   private val shouldCompress = sparkConf.getBoolean("spark.eventLog.compress", false)
-   //是否覆盖Spark事件日志文件，前提spark.eventLog.enabled为true
+   //是否覆盖Spark事件日志文件,前提spark.eventLog.enabled为true
   private val shouldOverwrite = sparkConf.getBoolean("spark.eventLog.overwrite", false)
   private val testing = sparkConf.getBoolean("spark.eventLog.testing", false)
   //Spark日志的输出大小

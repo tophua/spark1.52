@@ -85,14 +85,14 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     sql(
       //TEST.PEOPLE表名,对应的foobar临时表
         //注意使用jdbc方式
-	//dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+	//dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
       s"""
         |CREATE TEMPORARY TABLE foobar
         |USING org.apache.spark.sql.jdbc
         |OPTIONS (url '$url', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
      //决定了每次数据取多少行 fetchSize 2参数
-     //dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+     //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE fetchtwo
@@ -100,7 +100,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
         |OPTIONS (url '$url', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass',
         |         fetchSize '2')
       """.stripMargin.replaceAll("\n", " "))
-//dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+//dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE parts
@@ -117,7 +117,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     conn.prepareStatement("insert into test.inttypes values (null, null, null, null, null)"
         ).executeUpdate()
     conn.commit()
-    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE inttypes
@@ -135,7 +135,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     stmt.setBytes(5, testBytes)
     stmt.setString(6, "I am a clob!")
     stmt.executeUpdate()
-    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE strtypes
@@ -150,7 +150,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     conn.prepareStatement("insert into test.timetypes values ('12:34:56', "
       + "null, '2002-02-20 11:22:33.543543543')").executeUpdate()
     conn.commit()
-    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE timetypes
@@ -166,7 +166,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       + "1.00000011920928955078125, "
       + "123456789012345.543215432154321)").executeUpdate()
     conn.commit()
-    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE flttypes
@@ -184,7 +184,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
       + "null, null, null, null, null, null, null, null, null, "
       + "null, null, null, null, null, null)").executeUpdate()
     conn.commit()
-    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
          |CREATE TEMPORARY TABLE nulltypes
@@ -272,7 +272,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(ids(1) === 2)
     assert(ids(2) === 3)
   }
-//dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+//dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
   test("Register JDBC query with renamed fields") {//注册JDBC查询重命名字段
     // Regression test for bug SPARK-7345
     sql(
@@ -438,7 +438,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(result(0).getAs[BigDecimal](0) ===
       new BigDecimal("123456789012345.543215432154321000"))
   }
-//dbtable需要读取的JDBC表。任何在From子句中的元素都可以，例如表或者子查询等
+//dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
   test("SQL query as table name") {//SQL查询的表名
     sql(
       s"""

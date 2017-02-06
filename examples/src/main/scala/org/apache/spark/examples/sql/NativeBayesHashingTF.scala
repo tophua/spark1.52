@@ -18,8 +18,6 @@ import org.apache.spark.sql.Row
  * 主要包括中文分词、文本表示（TF-IDF）、模型训练、分类预测等
  * http://lxw1234.com/archives/2016/01/605.htm
  */
-
-
 case class RawDataRecord(category: String, text: String)
 object NativeBayesHashingTF {
   def main(args: Array[String]) {
@@ -33,24 +31,21 @@ object NativeBayesHashingTF {
     var srcRDD = sc.textFile("../data/mllib/sougou/C000007/").filter(!_.isEmpty).map {
       x =>
         // println("==="+x+"===========")
-        var data = x.split("，")
+        var data = x.split(",")
         println("==="+data(0)+"\t======"+data(1))
         RawDataRecord(data(0), data(1))
     }
-    
-
-    //70%作为训练数据，30%作为测试数据
+    //70%作为训练数据,30%作为测试数据
     val splits = srcRDD.randomSplit(Array(0.7, 0.3))
     var trainingDF = splits(0).toDF()
     var testDF = splits(1).toDF()
-
     //将词语转换成数组
     var tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var wordsData = tokenizer.transform(trainingDF)
     //output1：（将词语转换成数组）
     wordsData.show()
-    println("output1：")   
+    println("output1：")
     /**
      *+--------------------+--------------------+--------------------+
       |            category|                text|               words|
@@ -60,8 +55,7 @@ object NativeBayesHashingTF {
      */
     wordsData.select($"category", $"text", $"words").show(1)
     //wordsData.select($"category", $"text", $"words").take(1)
-
-    //计算每个词在文档中的词频
+   //将每个词转换成Int型,并计算其在文档中的词频(TF)
     var hashingTF = new HashingTF().setNumFeatures(500000).setInputCol("words").setOutputCol("rawFeatures")
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var featurizedData = hashingTF.transform(wordsData)
@@ -76,7 +70,7 @@ object NativeBayesHashingTF {
      */
     featurizedData.select($"category", $"words", $"rawFeatures").show()
     //println(">>>>>>>>>>>>>>>."+featurizedData.toString())
-    //计算每个词的TF-IDF算法从文本分词中创建特征向量
+    //逆文档频率(IDF),用来衡量一个词语特定文档的相关度,计算TF-IDF值
     var idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
     //fit()方法将DataFrame转化为一个Transformer的算法
     var idfModel = idf.fit(featurizedData)
@@ -92,14 +86,21 @@ object NativeBayesHashingTF {
     +--------------------+--------------------+
      */
     rescaledData.select($"category", $"features").show()
-
-    //转换成Bayes的输入格式
+    /**
+     * 将上面的数据转换成Bayes算法需要的格式:
+     		0,1 0 0
+        0,2 0 0
+        1,0 1 0
+        1,0 2 0
+        2,0 0 1
+        2,0 0 2
+     */
     var trainDataRdd = rescaledData.select($"category", $"features").map {
       case Row(label: String, features: Vector) =>
       //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
         LabeledPoint(label.toDouble, Vectors.dense(features.toArray))
     }
-    //output4：（Bayes算法的输入数据格式）
+    //output4:(Bayes算法的输入数据格式)
     println("output4：")
     trainDataRdd.take(1)
 
@@ -110,15 +111,23 @@ object NativeBayesHashingTF {
         RawDataRecord(data(0),data(1))
     }.toDF()
 
-    //训练模型,modelType模型类型(区分大小写)
+    //训练模型,modelType模型类型(区分大小写)multinomial多分类
     val model = NaiveBayes.train(trainDataRdd, lambda = 1.0, modelType = "multinomial")
-
-    //测试数据集，做同样的特征表示及格式转换
+    //测试数据集,做同样的特征表示及格式转换
     var testwordsData = tokenizer.transform(testDF)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var testfeaturizedData = hashingTF.transform(testwordsData)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     var testrescaledData = idfModel.transform(testfeaturizedData)
+    /**
+     * 将上面的数据转换成Bayes算法需要的格式:
+     		0,1 0 0
+        0,2 0 0
+        1,0 1 0
+        1,0 2 0
+        2,0 0 1
+        2,0 0 2
+     */
     var testDataRdd = testrescaledData.select($"category", $"features").map {
       case Row(label: String, features: Vector) =>
       //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
@@ -132,7 +141,7 @@ object NativeBayesHashingTF {
     var testaccuracy = 1.0 * testpredictionAndLabel.filter(x => x._1 == x._2).count() / testDataRdd.count()
     //output5：（测试数据集分类准确率）
     println("output5：")
-   //准确率90%，还可以。接下来需要收集分类更细，时间更新的数据来训练和测试了。 
+   //准确率90%,还可以。接下来需要收集分类更细,时间更新的数据来训练和测试了。 
     println(testaccuracy)
 
   }

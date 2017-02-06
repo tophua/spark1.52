@@ -154,7 +154,7 @@ private[ml] object TreeTests extends SparkFunSuite {
    * Check if the two models are exactly the same.
    * 检查两个模型是否完全相同
    * If the models are not equal, this throws an exception.
-   * 如果模型不相等，则抛出一个异常
+   * 如果模型不相等,则抛出一个异常
    */
   def checkEqual(a: TreeEnsembleModel, b: TreeEnsembleModel): Unit = {
     try {

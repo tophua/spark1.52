@@ -236,7 +236,7 @@ class WriteAheadLogBackedBlockRDDSuite
     assert(rdd.collect() === data.flatten)
 
     // Verify that the block fetching is skipped when isBlockValid is set to false.
-    //验证该块的读取是跳过时，isblockvalid设置为false
+    //验证该块的读取是跳过时,isblockvalid设置为false
     // This is done by using a RDD whose data is only in memory but is set to skip block fetching
     //这是通过使用一个RDD的数据是在内存中进行但设置跳过块的读取使用RDD会抛出异常,
     // Using that RDD will throw exception, as it skips block fetching even if the blocks are in

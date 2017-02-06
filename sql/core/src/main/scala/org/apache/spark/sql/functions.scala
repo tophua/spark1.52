@@ -494,7 +494,7 @@ object functions {
    * Window function: returns the ntile group id (from 1 to `n` inclusive) in an ordered window
    * partition. Fow example, if `n` is 4, the first quarter of the rows will get value 1, the second
    * quarter will get 2, the third quarter will get 3, and the last quarter will get 4.
-   * NTILE函数对一个数据分区中的有序结果集进行划分，将其分组为各个桶，并为每个小组分配一个唯一的组编号
+   * NTILE函数对一个数据分区中的有序结果集进行划分,将其分组为各个桶,并为每个小组分配一个唯一的组编号
    * This is equivalent to the NTILE function in SQL.
    *
    * @group window_funcs
@@ -528,7 +528,7 @@ object functions {
    * sequence when there are ties. That is, if you were ranking a competition using denseRank
    * and had three people tie for second place, you would say that all three were in second
    * place and that the next person came in third.
-   * RANK 返回数据项在分组中的排名，排名相等会在名次中留下空位
+   * RANK 返回数据项在分组中的排名,排名相等会在名次中留下空位
    * This is equivalent to the RANK function in SQL.
    *
    * @group window_funcs
@@ -774,7 +774,7 @@ object functions {
 
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
-   * 评估一个条件的列表，并返回多个可能的结果之一
+   * 评估一个条件的列表,并返回多个可能的结果之一
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
    * 如果没有其他定义,则结束,返回无法匹配的条件
    * {{{
@@ -808,7 +808,7 @@ object functions {
 
   /**
    * Parses the expression string into the column that it represents, similar to
-   * 解析表达式字符串的列，它代表类似dataframe.selectexpr
+   * 解析表达式字符串的列,它代表类似dataframe.selectexpr
    * DataFrame.selectExpr
    * {{{
    *   // get the number of words of each length
@@ -864,7 +864,7 @@ object functions {
   /**
    * Computes the tangent inverse of the given value.
    * 计算给定值的切线
-   * 奇函数，关于原点对称
+   * 奇函数,关于原点对称
    * @group math_funcs
    * @since 1.4.0
    */
@@ -881,7 +881,7 @@ object functions {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   * atan2是偶函数，关于y轴对称
+   * atan2是偶函数,关于y轴对称
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1044,7 +1044,7 @@ object functions {
 
   /**
    * Computes the exponential of the given value.
-   * 使用EXP(x)函数计算e的乘方,计算e的x次方，即ex
+   * 使用EXP(x)函数计算e的乘方,计算e的x次方,即ex
    * @group math_funcs
    * @since 1.4.0
    */
@@ -1101,7 +1101,7 @@ object functions {
   /**
    * Returns the greatest value of the list of values, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   * GREATEST()的函数返回输入参数的集合（N1，N2，N3，第二等）的最大值
+   * GREATEST()的函数返回输入参数的集合（N1,N2,N3,第二等）的最大值
    * GREATEST()函数返回从一组数值的最大数
    * @group normal_funcs
    * @since 1.5.0
@@ -1115,7 +1115,7 @@ object functions {
   /**
    * Returns the greatest value of the list of column names, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   * GREATEST()的函数返回输入参数的集合（N1，N2，N3，第二等）的最大值
+   * GREATEST()的函数返回输入参数的集合（N1,N2,N3,第二等）的最大值
    * GREATEST()函数返回从一组数值的最大数
    * @group normal_funcs
    * @since 1.5.0
@@ -1422,7 +1422,7 @@ object functions {
   /**
    * Shift the the given value numBits left. If the given value is a long value, this function
    * will return a long value else it will return an integer value.
-   * 如果给定的值是一个long的值,此函数将返回一个long的值，否则将返回一个整数值
+   * 如果给定的值是一个long的值,此函数将返回一个long的值,否则将返回一个整数值
    * @group math_funcs
    * @since 1.5.0
    */

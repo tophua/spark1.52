@@ -161,7 +161,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val a3 = new Array[Byte](4000)
 
     // Putting a1, a2  and a3 in memory and telling master only about a1 and a2
-    //把A1，A2和A3在内存中告诉主节点只有A1和A2
+    //把A1,A2和A3在内存中告诉主节点只有A1和A2
     store.putSingle("a1", a1, StorageLevel.MEMORY_ONLY)
     store.putSingle("a2", a2, StorageLevel.MEMORY_ONLY)
     store.putSingle("a3", a3, StorageLevel.MEMORY_ONLY, tellMaster = false)
@@ -834,15 +834,15 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     }
 
     // Make sure get a1 doesn't hang and returns None.
-    //确保获得A1暂停，返回None,
+    //确保获得A1暂停,返回None,
     failAfter(1 second) {
       assert(store.getSingle("a1") == None, "a1 should not be in store")
     }
   }
   //内存映射和非内存映射文件的读取是等效的
   test("reads of memory-mapped and non memory-mapped files are equivalent") {
-  //以字节为单位的块大小，用于磁盘读取一个块大小时进行内存映射。这可以防止Spark在内存映射时使用很小块，
-//一般情况下，对块进行内存映射的开销接近或低于操作系统的页大小
+  //以字节为单位的块大小,用于磁盘读取一个块大小时进行内存映射。这可以防止Spark在内存映射时使用很小块,
+//一般情况下,对块进行内存映射的开销接近或低于操作系统的页大小
     val confKey = "spark.storage.memoryMapThreshold"
 
     // Create a non-trivial (not all zeros) byte array
@@ -1056,7 +1056,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     //根据同一法规则,rdd_1_0应更换这里。
     store.putSingle(rdd(0, 1), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     // rdd_1_0 should have been replaced, even it's not least recently used.
-    //rdd_1_0应该被取代，即使它不是最近最少使用。
+    //rdd_1_0应该被取代,即使它不是最近最少使用。
     assert(store.memoryStore.contains(rdd(0, 0)), "rdd_0_0 was not in store")
     assert(store.memoryStore.contains(rdd(0, 1)), "rdd_0_1 was not in store")
     assert(!store.memoryStore.contains(rdd(1, 0)), "rdd_1_0 was in store")
@@ -1302,7 +1302,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(unrollMemoryAfterB6 === unrollMemoryAfterB4)
     assert(unrollMemoryAfterB7 === unrollMemoryAfterB4)
   }
-  //延迟创造大字节缓冲区，避免内存溢出,如果它不能被放在内存中
+  //延迟创造大字节缓冲区,避免内存溢出,如果它不能被放在内存中
   test("lazily create a big ByteBuffer to avoid OOM if it cannot be put into MemoryStore") {
     store = makeBlockManager(12000)
     val memoryStore = store.memoryStore

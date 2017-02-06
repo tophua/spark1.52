@@ -38,11 +38,11 @@ private[scheduler] case class ClearCheckpointData(time: Time) extends JobGenerat
 /**
  * This class generates jobs from DStreams as well as drives checkpointing and cleaning
  * up DStream metadata.
- * JobScheduler 将每个 batch 的 RDD DAG 具体生成工作委托给 JobGenerator，而将源头输入数据的记录工作委托给 ReceiverTracker
+ * JobScheduler 将每个 batch 的 RDD DAG 具体生成工作委托给 JobGenerator,而将源头输入数据的记录工作委托给 ReceiverTracker
  */
 private[streaming]
 /**
- * JobGenerator 维护了一个定时器，周期就是我们刚刚提到的 batchDuration，定时为每个 batch 生成 RDD DAG 的实例
+ * JobGenerator 维护了一个定时器,周期就是我们刚刚提到的 batchDuration,定时为每个 batch 生成 RDD DAG 的实例
  */
 class JobGenerator(jobScheduler: JobScheduler) extends Logging {
 
@@ -79,7 +79,7 @@ class JobGenerator(jobScheduler: JobScheduler) extends Logging {
   // eventLoop is created when generator starts.
   //当生成器启动时创建事件循环
   // This not being null means the scheduler has been started and not stopped
-  //这不是空的意思是调度程序已经启动，而不是停止
+  //这不是空的意思是调度程序已经启动,而不是停止
   private var eventLoop: EventLoop[JobGeneratorEvent] = null
 
   // last batch whose completion,checkpointing and metadata cleanup has been completed

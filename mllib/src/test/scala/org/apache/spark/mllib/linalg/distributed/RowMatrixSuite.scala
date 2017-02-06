@@ -179,7 +179,7 @@ class RowMatrixSuite extends SparkFunSuite with MLlibTestSparkContext {
     //行矩阵(RowMatrix)按行分布式存储,无行索引,底层支撑结构是多行数据组成的RDD,每行是一个局部向量
     val mat = new RowMatrix(rows, 4, 3)
     for (mode <- Seq("auto", "local-svd", "local-eigs", "dist-eigs")) {
-     //第一个参数3意味着取top 2个奇异值，第二个参数true意味着计算矩阵U，第三个参数意味小于1e-6d的奇异值将被抛弃
+     //第一个参数3意味着取top 2个奇异值,第二个参数true意味着计算矩阵U,第三个参数意味小于1e-6d的奇异值将被抛弃
       val svd = mat.computeSVD(2, computeU = true, 1e-6, 300, 1e-10, mode)
       assert(svd.s.size === 1, s"should not return zero singular values but got ${svd.s}")
       assert(svd.U.numRows() === 4)
@@ -294,7 +294,7 @@ class RowMatrixClusterSuite extends SparkFunSuite with LocalClusterSparkContext 
   }
 
   test("task size should be small in svd") {//任务应该是小规模的奇异值分解
-    //第一个参数1意味着取top 1个奇异值，第二个参数true意味着计算矩阵U
+    //第一个参数1意味着取top 1个奇异值,第二个参数true意味着计算矩阵U
     val svd = mat.computeSVD(1, computeU = true)
   }
 

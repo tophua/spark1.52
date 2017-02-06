@@ -79,7 +79,7 @@ class PersistenceEngineSuite extends SparkFunSuite {
     val testRpcEnv = RpcEnv.create("test", "localhost", 12345, conf, new SecurityManager(conf))
     try {
       // Create a real endpoint so that we can test RpcEndpointRef deserialization
-      //创造一个真正的终点，我们可以测试RpcEndpointRef反序列化
+      //创造一个真正的终点,我们可以测试RpcEndpointRef反序列化
       val workerEndpoint = testRpcEnv.setupEndpoint("worker", new RpcEndpoint {
         override val rpcEnv: RpcEnv = testRpcEnv
       })

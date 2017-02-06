@@ -69,7 +69,7 @@ class SparkEnv(
      * 保存Shuffle Map Task输出的位置信息,其中在Driver上的Tracer是MapOutputTrackerMaster
      * 而在Executor上的Tracker是MapOutputTrackerWorker,它会从MapOutputTrackerMaster获取信息
      */
-    val mapOutputTracker: MapOutputTracker, //用来缓存MapStatus信息，并提供从MapOutputMaster获取信息的功能
+    val mapOutputTracker: MapOutputTracker, //用来缓存MapStatus信息,并提供从MapOutputMaster获取信息的功能
     /**
      * Shuffle管理者,其中Driver端会注册Shuffle的信息,而Executor会上报和获取Shuffle信息
      * 现阶段内部支持Hash base Shuffle和 Sort Based Shuffle

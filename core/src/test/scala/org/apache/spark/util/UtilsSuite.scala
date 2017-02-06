@@ -329,7 +329,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(Utils.offsetBytes(files, 8, 18) === "89abcdefgh")
 
     // Read bytes across 1st, 2nd and 3rd file
-    //读取第一个，第二个和第三个文件的字节数
+    //读取第一个,第二个和第三个文件的字节数
     assert(Utils.offsetBytes(files, 5, 24) === "56789abcdefghijABCD")
 
     // Read some nonexistent bytes in the beginning
@@ -542,8 +542,8 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     val tempDir2 = Utils.createTempDir()
     val sourceFile1 = new File(tempDir2, "foo.txt")
     /**
-     * touch是用来修改指定的文件的访问和修改时间属性，如果指定的文件不存在，
-     * 将建立一个新的空文件，并以当前的时间来设置文件的访问和修改时间
+     * touch是用来修改指定的文件的访问和修改时间属性,如果指定的文件不存在,
+     * 将建立一个新的空文件,并以当前的时间来设置文件的访问和修改时间
      */
     Files.touch(sourceFile1)
     assert(sourceFile1.exists())

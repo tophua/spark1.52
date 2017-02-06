@@ -46,8 +46,8 @@ class HashShuffleManagerSuite extends SparkFunSuite with LocalSparkContext {
     // an object is written. So if the codepaths assume writeObject is end of data, this should
     // flush those bugs out. This was common bug in ExternalAppendOnlyMap, etc.
     conf.set("spark.serializer.objectStreamReset", "1")
-    //如果为true，在shuffle时就合并中间文件，对于有大量Reduce任务的shuffle来说，合并文件可 以提高文件系统性能，
-    //如果使用的是ext4 或 xfs 文件系统，建议设置为true；对于ext3，由于文件系统的限制，设置为true反而会使内核>8的机器降低性能
+    //如果为true,在shuffle时就合并中间文件,对于有大量Reduce任务的shuffle来说,合并文件可 以提高文件系统性能,
+    //如果使用的是ext4 或 xfs 文件系统,建议设置为true；对于ext3,由于文件系统的限制,设置为true反而会使内核>8的机器降低性能
     conf.set("spark.shuffle.consolidateFiles", "true")
     conf.set("spark.serializer", "org.apache.spark.serializer.JavaSerializer")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.hash.HashShuffleManager")

@@ -66,7 +66,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
 	        //梯度提升回归(GBT)
           val gbt = new GBTRegressor()
             .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-            .setSubsamplingRate(subsamplingRate)//学习一棵决策树使用的训练数据比例，范围[0,1]
+            .setSubsamplingRate(subsamplingRate)//学习一棵决策树使用的训练数据比例,范围[0,1]
             .setLossType(loss)//损失函数类型
             .setMaxIter(maxIter)//迭代次数
             .setStepSize(learningRate)//每次迭代优化步长
@@ -176,7 +176,7 @@ private object GBTRegressorSuite {
    * Train 2 models on the given dataset, one using the old API and one using the new API.
    * 在给定的数据集上训练2个模型,一个使用旧的和一个使用新的
    * Convert the old model to the new format, compare them, and fail if they are not exactly equal.
-   * 将旧的模型转换为新的格式，比较它们，如果它们不是完全相等的话，则失败了
+   * 将旧的模型转换为新的格式,比较它们,如果它们不是完全相等的话,则失败了
    */
   def compareAPIs(
       data: RDD[LabeledPoint],

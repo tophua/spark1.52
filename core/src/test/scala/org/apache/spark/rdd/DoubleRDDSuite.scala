@@ -41,9 +41,9 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
     val buckets = Array(0.0, 10.0)
     /**
      * histogram
-     * 针对数据类型为Double的RDD统计直方图。可以输入分桶数进行平均分桶，也可以输入自定义的分桶区间。
-     * 平均分桶情况下会输出两个数组，第一个是每个分桶边界值，第二个是每个分桶的统计数。
-     * 自定义分桶情况下只输出一个数组，即每个分桶的统计数。
+     * 针对数据类型为Double的RDD统计直方图。可以输入分桶数进行平均分桶,也可以输入自定义的分桶区间。
+     * 平均分桶情况下会输出两个数组,第一个是每个分桶边界值,第二个是每个分桶的统计数。
+     * 自定义分桶情况下只输出一个数组,即每个分桶的统计数。
      */
     val histogramResults = rdd.histogram(buckets)
     val histogramResults2 = rdd.histogram(buckets, true)
@@ -96,7 +96,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
     // Verify that out of range works with two buckets
     //用两个桶检查出范围内的工作
     val rdd = sc.parallelize(Seq(10.01, -0.01))
-    val buckets = Array(0.0, 5.0, 10.0) //第一个是每个分桶边界值，第二个是每个分桶的统计数
+    val buckets = Array(0.0, 5.0, 10.0) //第一个是每个分桶边界值,第二个是每个分桶的统计数
     val histogramResults = rdd.histogram(buckets)
     val histogramResults2 = rdd.histogram(buckets, true)
     val expectedHistogramResults = Array(0, 0)
@@ -107,7 +107,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
   test("WorksWithOutOfRangeWithTwoUnEvenBuckets") {
     // Verify that out of range works with two un even buckets
     val rdd = sc.parallelize(Seq(10.01, -0.01))
-    val buckets = Array(0.0, 4.0, 10.0) //第一个是每个分桶边界值，第二个是每个分桶的统计数
+    val buckets = Array(0.0, 4.0, 10.0) //第一个是每个分桶边界值,第二个是每个分桶的统计数
     val histogramResults = rdd.histogram(buckets)
     val expectedHistogramResults = Array(0, 0)
     assert(histogramResults === expectedHistogramResults)
@@ -116,7 +116,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
   test("WorksInRangeWithTwoBuckets") {
     // Make sure that it works with two equally spaced buckets and elements in each
     val rdd = sc.parallelize(Seq(1, 2, 3, 5, 6))
-    val buckets = Array(0.0, 5.0, 10.0) //第一个是每个分桶边界值，第二个是每个分桶的统计数
+    val buckets = Array(0.0, 5.0, 10.0) //第一个是每个分桶边界值,第二个是每个分桶的统计数
     val histogramResults = rdd.histogram(buckets)
     val histogramResults2 = rdd.histogram(buckets, true)
     val expectedHistogramResults = Array(3, 2)
@@ -127,7 +127,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
   test("WorksInRangeWithTwoBucketsAndNaN") {
     // Make sure that it works with two equally spaced buckets and elements in each
     val rdd = sc.parallelize(Seq(1, 2, 3, 5, 6, Double.NaN))
-    val buckets = Array(0.0, 5.0, 10.0) //第一个是每个分桶边界值，第二个是每个分桶的统计数
+    val buckets = Array(0.0, 5.0, 10.0) //第一个是每个分桶边界值,第二个是每个分桶的统计数
     val histogramResults = rdd.histogram(buckets)
     val histogramResults2 = rdd.histogram(buckets, true)
     val expectedHistogramResults = Array(3, 2)
@@ -138,7 +138,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
   test("WorksInRangeWithTwoUnevenBuckets") {
     // Make sure that it works with two unequally spaced buckets and elements in each
     val rdd = sc.parallelize(Seq(1, 2, 3, 5, 6))
-    val buckets = Array(0.0, 5.0, 11.0) //第一个是每个分桶边界值，第二个是每个分桶的统计数
+    val buckets = Array(0.0, 5.0, 11.0) //第一个是每个分桶边界值,第二个是每个分桶的统计数
     val histogramResults = rdd.histogram(buckets)
     val expectedHistogramResults = Array(3, 2)
     assert(histogramResults === expectedHistogramResults)
@@ -147,7 +147,7 @@ class DoubleRDDSuite extends SparkFunSuite with SharedSparkContext {
   test("WorksMixedRangeWithTwoUnevenBuckets") {
     // Make sure that it works with two unequally spaced buckets and elements in each
     val rdd = sc.parallelize(Seq(-0.01, 0.0, 1, 2, 3, 5, 6, 11.0, 11.01))
-    val buckets = Array(0.0, 5.0, 11.0) //第一个是每个分桶边界值，第二个是每个分桶的统计数
+    val buckets = Array(0.0, 5.0, 11.0) //第一个是每个分桶边界值,第二个是每个分桶的统计数
     val histogramResults = rdd.histogram(buckets)
     val expectedHistogramResults = Array(4, 3)
     assert(histogramResults === expectedHistogramResults)

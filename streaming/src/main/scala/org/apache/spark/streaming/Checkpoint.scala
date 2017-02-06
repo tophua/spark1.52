@@ -342,7 +342,7 @@ object CheckpointReader extends Logging {
    * files, then return None, else try to return the latest valid checkpoint object. If no
    * checkpoint files could be read correctly, then return None (if ignoreReadError = true),
    * or throw exception (if ignoreReadError = false).
-   * 读取给定检查点目录中的检查点文件,如果没有检查点文件，则返回无检查点文件,否则尝试返回最新的有效的检查点对象
+   * 读取给定检查点目录中的检查点文件,如果没有检查点文件,则返回无检查点文件,否则尝试返回最新的有效的检查点对象
    * 如果没有检查点文件,可以正确读取
    */
   def read(
@@ -382,7 +382,7 @@ object CheckpointReader extends Logging {
     })
 
     // If none of checkpoint files could be read, then throw exception
-    //如果没有一个检查点文件可以读取，则抛出异常
+    //如果没有一个检查点文件可以读取,则抛出异常
     if (!ignoreReadError) {
       throw new SparkException(
         s"Failed to read checkpoint from directory $checkpointPath", readError)

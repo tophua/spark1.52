@@ -38,7 +38,7 @@ private[spark] trait ListenerBus[L <: AnyRef, E] extends Logging {
 
   /**
    * Add a listener to listen events. This method is thread-safe and can be called in any thread.
-   * 添加一个监听事件,此方法是线程安全的，可以在任何线程中调用
+   * 添加一个监听事件,此方法是线程安全的,可以在任何线程中调用
    */
   final def addListener(listener: L) {
     listeners.add(listener)

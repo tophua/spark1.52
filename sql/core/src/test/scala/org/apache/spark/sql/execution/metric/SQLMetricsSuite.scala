@@ -259,7 +259,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
         testSparkPlanMetrics(df, 1, Map(
           1L -> ("SortMergeJoin", Map(
             // It's 4 because we only read 3 rows in the first partition and 1 row in the second one
-            //这是4，因为我们只在第一个分区中读取3行和第二个分区中的1行
+            //这是4,因为我们只在第一个分区中读取3行和第二个分区中的1行
             "number of left rows" -> 4L,
             "number of right rows" -> 2L,
             "number of output rows" -> 4L)))
@@ -553,7 +553,7 @@ private class BoxingFinder(
           val m = MethodIdentifier(classOfMethodOwner, name, desc)
           if (!visitedMethods.contains(m)) {
             // Keep track of visited methods to avoid potential infinite cycles
-            //跟踪访问的方法，以避免潜在的无限周期
+            //跟踪访问的方法,以避免潜在的无限周期
             visitedMethods += m
             BoxingFinder.getClassReader(classOfMethodOwner).foreach { cl =>
               visitedMethods += m

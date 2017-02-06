@@ -272,7 +272,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     //  1) First it creates an iterator for p1 首先创建一个迭代器P1
     //  2) Creates an iterator for p2 创建一个迭代器为P2
     //  3) Reads the first element of p1 and then all the elements of p2
-    //    读取P1的第一个元素的所有元素，然后P2
+    //    读取P1的第一个元素的所有元素,然后P2
     //  4) proceeds to the next element of p1 从P1的下一个元素
     //  5) Creates a new iterator for p2 创建一个新的迭代器P2
     //  6) rinse and repeat. 冲洗和重复

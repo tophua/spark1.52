@@ -243,7 +243,7 @@ class StoppableReceiver extends Receiver[Int](StorageLevel.MEMORY_ONLY) {
     StoppableReceiver.shouldStop = true
     receivingThreadOption.foreach(_.join())
     // Reset it so as to restart it
-    //重新启动它，以便重新启动它
+    //重新启动它,以便重新启动它
     StoppableReceiver.shouldStop = false
   }
 }

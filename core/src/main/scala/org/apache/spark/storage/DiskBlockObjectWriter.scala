@@ -77,11 +77,11 @@ private[spark] class DiskBlockObjectWriter(
    * -----: Current writes to the underlying file.
    * xxxxx: Existing contents of the file.
    */
-  //Block在File中开始的位置，不变量，值为file.length()，即位File中已经被其他Block写入的数据量
+  //Block在File中开始的位置,不变量,值为file.length(),即位File中已经被其他Block写入的数据量
   private val initialPosition = file.length()
-  //Block在File中结束的位置，初始值为-1，当调用commitAndClose方法时更新为当前File的大小，然后不可再改变。
+  //Block在File中结束的位置,初始值为-1,当调用commitAndClose方法时更新为当前File的大小,然后不可再改变。
   private var finalPosition: Long = -1
-  //当前数据写入的位置，初始值为initialPosition，每写入32条数据时更新为channel.position()
+  //当前数据写入的位置,初始值为initialPosition,每写入32条数据时更新为channel.position()
   private var reportedPosition = initialPosition
 
   /**
@@ -158,7 +158,7 @@ private[spark] class DiskBlockObjectWriter(
    * Reverts writes that haven't been flushed yet. Callers should invoke this function
    * when there are runtime exceptions. This method will not throw, though it may be
    * unsuccessful in truncating written data.
-   * 撤销所有的写入操作，将文件中的内容恢复到写入数据之前。
+   * 撤销所有的写入操作,将文件中的内容恢复到写入数据之前。
    */
   def revertPartialWritesAndClose() {
     // Discard current writes. We do this by flushing the outstanding writes and then
@@ -225,7 +225,7 @@ private[spark] class DiskBlockObjectWriter(
   /**
    * Returns the file segment of committed data that this Writer has written.
    * This is only valid after commitAndClose() has been called.
-   * 返回FileSegment，该方法只有在commitAndClose方法调用之后才有效。
+   * 返回FileSegment,该方法只有在commitAndClose方法调用之后才有效。
    * FileSegment表示文件的一个连续的片段
    */
   def fileSegment(): FileSegment = {

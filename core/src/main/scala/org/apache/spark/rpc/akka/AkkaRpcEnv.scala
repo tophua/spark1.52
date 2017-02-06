@@ -224,8 +224,8 @@ private[spark] class AkkaRpcEnv private[akka] (
 
   override def asyncSetupEndpointRefByURI(uri: String): Future[RpcEndpointRef] = {
     import actorSystem.dispatcher
-    //创建远程 Actor,resolveOne 方法来获得对应Actor的ActorRef。 如果指定的Actor存在，
-    //那么返回一个和该匹配Actor对应的Future对象，反之返回一个[akka.actor.ActorNotFound]错误
+    //创建远程 Actor,resolveOne 方法来获得对应Actor的ActorRef。 如果指定的Actor存在,
+    //那么返回一个和该匹配Actor对应的Future对象,反之返回一个[akka.actor.ActorNotFound]错误
     actorSystem.actorSelection(uri).resolveOne(defaultLookupTimeout.duration).
       map(new AkkaRpcEndpointRef(defaultAddress, _, conf)).
       // this is just in case there is a timeout from creating the future in resolveOne, we want the

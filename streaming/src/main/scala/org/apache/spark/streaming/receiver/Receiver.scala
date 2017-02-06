@@ -108,7 +108,7 @@ abstract class Receiver[T](val storageLevel: StorageLevel) extends Serializable 
    * 可以调用停止接收数据
    * (iii) `restart(...)` can be called to restart the receiver. This will call `onStop()`
    * immediately, and then `onStart()` after a delay.
-   * 就将持续不断地接收外界数据，并持续交给 ReceiverSupervisor 进行数据转储
+   * 就将持续不断地接收外界数据,并持续交给 ReceiverSupervisor 进行数据转储
    */
   def onStart()
 

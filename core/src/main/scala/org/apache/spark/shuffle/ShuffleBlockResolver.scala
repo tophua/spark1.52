@@ -36,7 +36,7 @@ trait ShuffleBlockResolver {
   /**
    * Retrieve the data for the specified block. If the data for that block is not available,
    * throws an unspecified exception.
-   * 需要通过先读取Index索引文件获得每个partition的起始位置后，才能读取真正的数据文件
+   * 需要通过先读取Index索引文件获得每个partition的起始位置后,才能读取真正的数据文件
    */
   def getBlockData(blockId: ShuffleBlockId): ManagedBuffer
 

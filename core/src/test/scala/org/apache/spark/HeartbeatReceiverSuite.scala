@@ -86,7 +86,7 @@ class HeartbeatReceiverSuite//接收心跳测试
 
   /**
    * After each test, clean up all state and stop the [[SparkContext]].
-   * 每次测试后，清理所有状态并停止SparkContext
+   * 每次测试后,清理所有状态并停止SparkContext
    */
   override def afterEach(): Unit = {
     super.afterEach()
@@ -118,7 +118,7 @@ class HeartbeatReceiverSuite//接收心跳测试
   test("reregister if scheduler is not ready yet") {//注册如果调度器是还没有准备好
     addExecutorAndVerify(executorId1)
     // Task scheduler is not set yet in HeartbeatReceiver, so executors should reregister
-    //任务调度是不在HeartbeatReceiver，所以执行者应该重新注册
+    //任务调度是不在HeartbeatReceiver,所以执行者应该重新注册
     triggerHeartbeat(executorId1, executorShouldReregister = true)
   }
   //如果未注册的执行者的心跳
@@ -135,7 +135,7 @@ class HeartbeatReceiverSuite//接收心跳测试
     addExecutorAndVerify(executorId1)
     addExecutorAndVerify(executorId2)
     // Remove the second executor but not the first
-    //删除第二个执行者，但不是第一个
+    //删除第二个执行者,但不是第一个
     removeExecutorAndVerify(executorId2)
     // Now trigger the heartbeats
     //现在引发的心跳
@@ -315,7 +315,7 @@ private class FakeClusterManager(override val rpcEnv: RpcEnv) extends RpcEndpoin
 
   def getTargetNumExecutors: Int = targetNumExecutors
   def getExecutorIdsToKill: Set[String] = executorIdsToKill.toSet
-  //处理RpcEndpointRef.ask方法，如果不匹配消息，将抛出异常
+  //处理RpcEndpointRef.ask方法,如果不匹配消息,将抛出异常
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case RequestExecutors(requestedTotal, _, _) =>
       targetNumExecutors = requestedTotal

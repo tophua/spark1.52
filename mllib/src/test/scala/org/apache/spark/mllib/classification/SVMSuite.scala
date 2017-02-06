@@ -28,7 +28,7 @@ import org.apache.spark.mllib.regression._
 import org.apache.spark.mllib.util.{ LocalClusterSparkContext, MLlibTestSparkContext }
 import org.apache.spark.util.Utils
 /**
- * 线性支持向量机(SVM):对于大规模的分类任务来说，线性支持向量机是标准方法.
+ * 线性支持向量机(SVM):对于大规模的分类任务来说,线性支持向量机是标准方法.
  * 
  */
 object SVMSuite {
@@ -69,7 +69,7 @@ object SVMSuite {
 
 }
 /**
- * Llib提供两种线性方法用于分类：线性支持向量机(SVM)和逻辑回归。SVM只支持二分类，而逻辑回归既支持二分类又支持多分类
+ * Llib提供两种线性方法用于分类：线性支持向量机(SVM)和逻辑回归。SVM只支持二分类,而逻辑回归既支持二分类又支持多分类
  */
 class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
 
@@ -113,7 +113,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     // High threshold makes all the predictions 0.0
     //高门槛使所有的预测0.0
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     model.setThreshold(10000.0)
     predictions = model.predict(validationRDD.map(_.features)).collect()
     assert(predictions.count(_ == 0.0) == predictions.length)
@@ -252,7 +252,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
       model.setThreshold(0.7)
       model.save(sc, path)
       val sameModel2 = SVMModel.load(sc, path)
-      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+      //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       assert(model.getThreshold.get == sameModel2.getThreshold.get)
     } finally {
       Utils.deleteRecursively(tempDir)
@@ -261,7 +261,7 @@ class SVMSuite extends SparkFunSuite with MLlibTestSparkContext {
 }
 
 class SVMClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
-  //在训练和预测中，任务的大小应该是小的
+  //在训练和预测中,任务的大小应该是小的
   test("task size should be small in both training and prediction") {
     val m = 4
     val n = 200000
@@ -272,7 +272,7 @@ class SVMClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
     }.cache()
     // If we serialize data directly in the task closure, the size of the serialized task would be
     // greater than 1MB and hence Spark would throw an error.
-    //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB，因此Spark会抛出一个错误。
+    //如果我们将数据直接在任务结束,该系列任务的规模将大于1MB,因此Spark会抛出一个错误。
     //(SGD随机梯度下降)
     val model = SVMWithSGD.train(points, 2)
     val predictions = model.predict(points.map(_.features))

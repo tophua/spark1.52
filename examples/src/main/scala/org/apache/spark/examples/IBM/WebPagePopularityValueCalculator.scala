@@ -66,7 +66,7 @@ object WebPagePopularityValueCalculator {
       }
     }
     //sum the previous popularity value and current value
-    //定义一个匿名函数去把网页热度上一次的计算结果值和新计算的值相加，得到最新的热度值
+    //定义一个匿名函数去把网页热度上一次的计算结果值和新计算的值相加,得到最新的热度值
     val updatePopularityValue = (iterator: Iterator[(String, Seq[Double], Option[Double])]) => {
       iterator.flatMap(t => {
         val newValue: Double = t._2.sum

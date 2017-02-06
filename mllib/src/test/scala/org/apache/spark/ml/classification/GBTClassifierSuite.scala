@@ -83,7 +83,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
        //梯度提升树(GBT)分类
         val gbt = new GBTClassifier()
           .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-          .setSubsamplingRate(subsamplingRate)//学习一棵决策树使用的训练数据比例，范围[0,1]
+          .setSubsamplingRate(subsamplingRate)//学习一棵决策树使用的训练数据比例,范围[0,1]
           .setLossType("logistic")//损失函数类型
           .setMaxIter(maxIter)//最大迭代次数
           .setStepSize(learningRate)//每次迭代优化步长

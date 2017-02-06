@@ -182,7 +182,7 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
         val reference = Option(referenceQueue.remove(ContextCleaner.REF_QUEUE_POLL_TIMEOUT))
           .map(_.asInstanceOf[CleanupTaskWeakReference])
         // Synchronize here to avoid being interrupted on stop()
-        //在这里同步，以避免被中断停止
+        //在这里同步,以避免被中断停止
         synchronized {
           reference.map(_.task).foreach { task =>
             logDebug("Got cleaning task " + task)

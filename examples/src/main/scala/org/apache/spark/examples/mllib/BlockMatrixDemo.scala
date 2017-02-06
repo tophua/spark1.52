@@ -54,8 +54,8 @@ object BlockMatrixDemo {
     //20.0  30.0  40.0   
     //50.0  60.0  70.0   
     //80.0  90.0  100.0 
-    //从转换后的内容可以看出，在indexRowMatrix.toBlockMatrix(2, 2)
-    //操作时，指定行列数与实际矩阵内容不匹配时，会进行相应的零值填充
+    //从转换后的内容可以看出,在indexRowMatrix.toBlockMatrix(2, 2)
+    //操作时,指定行列数与实际矩阵内容不匹配时,会进行相应的零值填充
     //LocalMatrix局部矩阵使用整型行列索引和浮点(double)数值,存储在单机上
     blockMatrix.toLocalMatrix()
 

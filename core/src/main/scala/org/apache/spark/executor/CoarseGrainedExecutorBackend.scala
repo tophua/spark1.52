@@ -101,7 +101,7 @@ private[spark] class CoarseGrainedExecutorBackend(
     sys.env.filterKeys(_.startsWith(prefix))
       .map(e => (e._1.substring(prefix.length).toLowerCase, e._2))
   }
-//定义偏函数是具有类型PartialFunction[-A,+B]的一种函数。A是其接受的函数类型，B是其返回的结果类型
+//定义偏函数是具有类型PartialFunction[-A,+B]的一种函数。A是其接受的函数类型,B是其返回的结果类型
   override def receive: PartialFunction[Any, Unit] = {
       /**
        * 主要向DriverAction发送RegisterExecutor消息,DriverActor接到RegisterExecutor消息后处理步骤:
@@ -131,11 +131,11 @@ private[spark] class CoarseGrainedExecutorBackend(
      */
     case LaunchTask(data) =>
       if (executor == null) {
-        //如果不存在Executor则会报错，退出系统  
+        //如果不存在Executor则会报错,退出系统  
         logError("Received LaunchTask command but executor was null")
         System.exit(1)
       } else {
-        //反序列化Task，得到TaskDescription信息  
+        //反序列化Task,得到TaskDescription信息  
         val taskDesc = ser.deserialize[TaskDescription](data.value)
         logInfo("Got assigned task " + taskDesc.taskId)
         //调用executor#launchTask在executor上加载任务  

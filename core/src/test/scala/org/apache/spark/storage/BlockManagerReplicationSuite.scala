@@ -303,7 +303,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
     val initialStores = (1 to 2).map { i => makeBlockManager(storeSize, s"store$i") }
 
     // Insert a block with given replication factor and return the number of copies of the block\
-    //用给定的复制因子插入一个块，并返回块的拷贝数
+    //用给定的复制因子插入一个块,并返回块的拷贝数
     def replicateAndGetNumCopies(blockId: String, replicationFactor: Int): Int = {
       val storageLevel = StorageLevel(true, true, false, true, replicationFactor)
       initialStores.head.putSingle(blockId, new Array[Byte](blockSize), storageLevel)
@@ -443,7 +443,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
 
         // If the block is supposed to be in disk (after dropping or otherwise, then
         // test whether master has correct disk usage for this store
-        //如果该块应该是在磁盘,在删除或以其他方式，然后测试是否主节点有正确的磁盘使用此存储
+        //如果该块应该是在磁盘,在删除或以其他方式,然后测试是否主节点有正确的磁盘使用此存储
         if (storageLevel.useDisk) {
           assert(master.getBlockStatus(blockId)(testStore.blockManagerId).diskSize >= blockSize,
             s"after dropping, master does not know size of ${blockId.name} " +

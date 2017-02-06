@@ -64,10 +64,10 @@ private[spark] object ThreadUtils {
       prefix: String, maxThreadNumber: Int, keepAliveSeconds: Int = 60): ThreadPoolExecutor = {
     val threadFactory = namedThreadFactory(prefix)    
     val threadPool = new ThreadPoolExecutor(
-      maxThreadNumber, // corePoolSize: 核心线程数，会一直存活，即使没有任务，线程池也会维护线程的最少数量
+      maxThreadNumber, // corePoolSize: 核心线程数,会一直存活,即使没有任务,线程池也会维护线程的最少数量
       maxThreadNumber, // maximumPoolSize:线程池维护线程的最大数量
-      keepAliveSeconds,//线程池维护线程所允许的空闲时间，当线程空闲时间达到keepAliveTime，该线程会退出，
-      //直到线程数量等于corePoolSize。如果allowCoreThreadTimeout设置为true，则所有线程均会退出直到线程数量为0
+      keepAliveSeconds,//线程池维护线程所允许的空闲时间,当线程空闲时间达到keepAliveTime,该线程会退出,
+      //直到线程数量等于corePoolSize。如果allowCoreThreadTimeout设置为true,则所有线程均会退出直到线程数量为0
       TimeUnit.SECONDS,//线程池维护线程所允许的空闲时间的单位
       new LinkedBlockingQueue[Runnable],//线程池所使用的缓冲队列
       threadFactory)//执行程序创建新线程时使用的工厂
@@ -94,7 +94,7 @@ private[spark] object ThreadUtils {
 
   /**
    * Wrapper over ScheduledThreadPoolExecutor.
-   * ScheduledExecutorService定时周期执行指定的任务,基于时间的延迟，不会由于系统时间的改变发生执行变化
+   * ScheduledExecutorService定时周期执行指定的任务,基于时间的延迟,不会由于系统时间的改变发生执行变化
    * Timer执行周期任务时依赖系统时间,如果当前系统时间发生变化会出现一些执行上的变化
    */
   def newDaemonSingleThreadScheduledExecutor(threadName: String): ScheduledExecutorService = {

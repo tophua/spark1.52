@@ -92,7 +92,7 @@ class ExternalAppendOnlyMap[K, V, C](
   def diskBytesSpilled: Long = _diskBytesSpilled
 
   // Use getSizeAsKb (not bytes) to maintain backwards compatibility if no units are provided
-  // 在ShuffleMapTask端通常也会增大Map任务的写磁盘的缓存，默认情况下是32K
+  // 在ShuffleMapTask端通常也会增大Map任务的写磁盘的缓存,默认情况下是32K
   private val fileBufferSize =
     sparkConf.getSizeAsKb("spark.shuffle.file.buffer", "32k").toInt * 1024
 

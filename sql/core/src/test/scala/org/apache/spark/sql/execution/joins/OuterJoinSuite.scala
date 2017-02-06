@@ -32,7 +32,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
     ctx.sparkContext.parallelize(Seq(
       Row(1, 2.0),
       Row(2, 100.0),
-      //这行是重复的，以确保我们将有多个缓冲匹配
+      //这行是重复的,以确保我们将有多个缓冲匹配
       Row(2, 1.0), // This row is duplicated to ensure that we will have multiple buffered matches
       Row(2, 1.0),
       Row(3, 3.0),
@@ -44,7 +44,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
   private lazy val right = ctx.createDataFrame(
     ctx.sparkContext.parallelize(Seq(
       Row(0, 0.0),
-      //这行是重复的，以确保我们将有多个缓冲匹配
+      //这行是重复的,以确保我们将有多个缓冲匹配
       Row(2, 3.0), // This row is duplicated to ensure that we will have multiple buffered matches
       Row(2, -1.0),
       Row(2, -1.0),

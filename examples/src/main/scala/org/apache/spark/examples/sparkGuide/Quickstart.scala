@@ -21,7 +21,7 @@ object Quickstart {
     val Mathmax = textFile.map(line => line.split(" ").size).reduce((a, b) => Math.max(a, b))
     //reduceByKey对Key相同的元素的值求和
     val wordCounts = textFile.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_+_)
-    //collect将RDD转成Scala数组，并返回
+    //collect将RDD转成Scala数组,并返回
     wordCounts.collect()
     linesWithSpark.cache()
     linesWithSpark.count()

@@ -48,7 +48,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
     logDebug(s"Looking for partition $key")
     blockManager.get(key) match {//向BlockManager查询是否有缓存,如果有将它封装为InterruptibleIterator并返回
       case Some(blockResult) =>//val blockResult: BlockResult
-        //缓存命中，更新统计信息，将缓存作为结果返回
+        //缓存命中,更新统计信息,将缓存作为结果返回
         // Partition is already materialized, so just return its values
         val existingMetrics = context.taskMetrics
           .getInputMetricsForReadMethod(blockResult.readMethod)
@@ -62,14 +62,14 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
             delegate.next()
           }
         }
-      case None =>  //没有缓存命中，需要重新计算或从CheckPion中获取数据,并调用putInBlockManager方法将数据写入
+      case None =>  //没有缓存命中,需要重新计算或从CheckPion中获取数据,并调用putInBlockManager方法将数据写入
         //缓存后封装为InterruptibleIterator并返回
         // Acquire a lock for loading this partition
         // If another thread already holds the lock, wait for it to finish return its results
         //判断当前是否有线程在处理当前partition,如果有那么等待它结束后,直接从BlockManager中读取处理结果数据
         //如果没有线程在计算,那么storedvalue就是none,否则就是计算结果
         val storedValues = acquireLockForPartition[T](key)
-        if (storedValues.isDefined) {//已经被其他线程处理了，直接返回计算结果
+        if (storedValues.isDefined) {//已经被其他线程处理了,直接返回计算结果
           return new InterruptibleIterator[T](context, storedValues.get)
         }
 

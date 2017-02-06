@@ -22,22 +22,22 @@ import org.apache.spark.mllib.linalg.distributed.BlockMatrix
  */
 object DataTypes {
 /**
- * 稀疏矩阵:在矩阵中，若数值为0的元素数目远远多于非0元素的数目时，则称该矩阵为稀疏矩阵
- * 密集矩阵:在矩阵中，若非0元素数目占大多数时，则称该矩阵为密集矩阵
+ * 稀疏矩阵:在矩阵中,若数值为0的元素数目远远多于非0元素的数目时,则称该矩阵为稀疏矩阵
+ * 密集矩阵:在矩阵中,若非0元素数目占大多数时,则称该矩阵为密集矩阵
  */
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
     /**创建本地向量**/
-    //本地向量（Local Vector）存储在单台机器上，索引采用0开始的整型表示，值采用Double类型的值表示
+    //本地向量（Local Vector）存储在单台机器上,索引采用0开始的整型表示,值采用Double类型的值表示
     // Create a dense vector (1.0, 0.0, 3.0).
-    //密度矩阵，零值也存储
+    //密度矩阵,零值也存储
     val dv: Vector = Vectors.dense(1.0, 0.0, 3.0)
     // Create a sparse vector (1.0, 0.0, 3.0) by specifying its indices and values corresponding to nonzero entries.
-   //创建稀疏矩阵，指定元素的个数、索引及非零值，数组方式
+   //创建稀疏矩阵,指定元素的个数、索引及非零值,数组方式
     val sv1: Vector = Vectors.sparse(3, Array(0, 2), Array(1.0, 3.0))
     // Create a sparse vector (1.0, 0.0, 3.0) by specifying its nonzero entries.
-    // 创建稀疏矩阵，指定元素的个数、索引及非零值，采用序列方式
+    // 创建稀疏矩阵,指定元素的个数、索引及非零值,采用序列方式
     val sv2: Vector = Vectors.sparse(3, Seq((0, 1.0), (2, 3.0)))
 
     /**含标签点**/
@@ -66,7 +66,7 @@ object DataTypes {
     1.0 0.0 4.0
     0.0 3.0 5.0
     2.0 0.0 6.0
-		如果采用稀疏矩阵存储的话，其存储信息包括按列的形式：
+		如果采用稀疏矩阵存储的话,其存储信息包括按列的形式：
 		实际存储值： [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`,
 		矩阵元素对应的行索引：rowIndices=[0, 2, 1, 0, 1, 2]`
 		列起始位置索引： `colPointers=[0, 2, 3, 6]**/

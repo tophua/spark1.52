@@ -36,7 +36,7 @@ private[spark] class ReliableRDDCheckpointData[T: ClassTag](@transient rdd: RDD[
   private val cpDir: String =
     ReliableRDDCheckpointData.checkpointPath(rdd.context, rdd.id)
       .map(_.toString)
-      //如果 Option 里有东西就拿出来，不然就给个默认值,抛出异常
+      //如果 Option 里有东西就拿出来,不然就给个默认值,抛出异常
       .getOrElse { throw new SparkException("Checkpoint dir must be specified.") }
 
   /**  

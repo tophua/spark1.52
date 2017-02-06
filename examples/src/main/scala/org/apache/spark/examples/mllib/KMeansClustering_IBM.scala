@@ -4,7 +4,7 @@ import org.apache.spark.mllib.clustering.{ KMeans, KMeansModel }
 import org.apache.spark.mllib.linalg.Vectors
 /**
  * http://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice4/index.html
- * 我们将根据目标客户的消费数据，将每一列视为一个特征指标，对数据集进行聚类分析(共8列)
+ * 我们将根据目标客户的消费数据,将每一列视为一个特征指标,对数据集进行聚类分析(共8列)
  */
 object KMeansClustering {
   def main(args: Array[String]) {
@@ -31,7 +31,7 @@ object KMeansClustering {
     val numIterations = 10 //表示方法单次运行最大的迭代次数
     val runTimes = 3 //表示算法被运行的次数,选出最优解
     var clusterIndex: Int = 0 
-    //train方法对数据集进行聚类训练，这个方法会返回 KMeansModel 类实例
+    //train方法对数据集进行聚类训练,这个方法会返回 KMeansModel 类实例
     val clusters: KMeansModel =
       KMeans.train(parsedTrainingData, numClusters, numIterations, runTimes)
      //聚类中心点
@@ -66,7 +66,7 @@ object KMeansClustering {
     ks.foreach(cluster => {
       //parsedTrainingData训练模型数据
       val model: KMeansModel = KMeans.train(parsedTrainingData, cluster, 30, 1)
-      //KMeansModel 类里提供了 computeCost 方法，该方法通过计算所有数据点到其最近的中心点的平方和来评估聚类的效果。  
+      //KMeansModel 类里提供了 computeCost 方法,该方法通过计算所有数据点到其最近的中心点的平方和来评估聚类的效果。  
       //统计聚类错误的样本比例
       val ssd = model.computeCost(parsedTrainingData)
       //model.predict(point)

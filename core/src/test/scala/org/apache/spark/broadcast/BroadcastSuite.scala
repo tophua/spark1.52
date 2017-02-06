@@ -234,7 +234,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     }
 
     // Verify that blocks are unpersisted on all executors, and on all nodes if removeFromDriver
-    //验证块在执行者未持久化块,并在所有节点上，如果删除从驱动程序是真的
+    //验证块在执行者未持久化块,并在所有节点上,如果删除从驱动程序是真的
     // is true. In the latter case, also verify that the broadcast file is deleted on the driver.
     //在后一种情况下,还验证了在驱动程序上删除广播文件
     def afterUnpersist(broadcastId: Long, bmm: BlockManagerMaster) {
@@ -261,7 +261,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
    * Verify the persistence of state associated with an TorrentBroadcast in a local-cluster.
    * 验证在本地群集中的Torrent广播变量关联的持久性状态,
    * This test creates a broadcast variable, uses it on all executors, and then unpersists it.
-   * 此测试创建一个广播变量,使用它在所有的执行者，然后未持久化它
+   * 此测试创建一个广播变量,使用它在所有的执行者,然后未持久化它
    * In between each step, this test verifies that the broadcast blocks are present only on the
    * 在每一步之间,此测试验证广播块仅存在于预期的节点上
    * expected nodes.
@@ -293,7 +293,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     }
 
     // Verify that blocks are unpersisted on all executors, and on all nodes if removeFromDriver
-    //验证块在执行者未持久化块,并在所有节点上，如果删除从驱动程序是真的
+    //验证块在执行者未持久化块,并在所有节点上,如果删除从驱动程序是真的
     // is true.
     def afterUnpersist(broadcastId: Long, bmm: BlockManagerMaster) {
       var blockId = BroadcastBlockId(broadcastId)
@@ -375,7 +375,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     // should throw SparkExceptions. Otherwise, the result should be the same as before.
     if (removeFromDriver) {
       // Using this variable on the executors crashes them, which hangs the test.
-      //使用执行者对广播变量销毁，悬挂试验
+      //使用执行者对广播变量销毁,悬挂试验
       // Instead, crash the driver by directly accessing the broadcast value.
       //广播变量值不能访问
       intercept[SparkException] { broadcast.value }

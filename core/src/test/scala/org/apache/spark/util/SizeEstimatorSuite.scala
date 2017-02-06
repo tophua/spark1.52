@@ -135,7 +135,7 @@ class SizeEstimatorSuite
     assertResult(56)(SizeEstimator.estimate(Array(new DummyClass1, new DummyClass2)))
 
     // Past size 100, our samples 100 elements, but we should still get the right size.
-    //过去大小100,我们的样本100个元素，但我们仍然应该得到正确的大小
+    //过去大小100,我们的样本100个元素,但我们仍然应该得到正确的大小
     assertResult(28016)(SizeEstimator.estimate(Array.fill(1000)(new DummyClass3)))
 
 

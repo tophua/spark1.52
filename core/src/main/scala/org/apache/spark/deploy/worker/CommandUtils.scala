@@ -53,7 +53,7 @@ object CommandUtils extends Logging {
     val localCommand = buildLocalCommand(
       command, securityMgr, substituteArguments, classPaths, env)
     val commandSeq = buildCommandSeq(localCommand, memory, sparkHome)
-    //ProcessBuilder此类用于创建操作系统进程，它提供一种启动和管理进程（也就是应用程序）的方法
+    //ProcessBuilder此类用于创建操作系统进程,它提供一种启动和管理进程（也就是应用程序）的方法
     val builder = new ProcessBuilder(commandSeq: _*)
     val environment = builder.environment()
     for ((key, value) <- localCommand.environment) {
@@ -120,7 +120,7 @@ object CommandUtils extends Logging {
 
   /** 
    *  Spawn a thread that will redirect a given stream to a file 
-   *  生成一个线程，将一个给定的流重定向到一个文件
+   *  生成一个线程,将一个给定的流重定向到一个文件
    *  */
   def redirectStream(in: InputStream, file: File) {
     val out = new FileOutputStream(file, true)

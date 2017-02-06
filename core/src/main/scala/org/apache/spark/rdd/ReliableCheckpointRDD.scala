@@ -29,7 +29,7 @@ import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.util.{SerializableConfiguration, Utils}
 
 /**
- * RDD，读取检查点文件来至之前写入的分布式存储
+ * RDD,读取检查点文件来至之前写入的分布式存储
  * An RDD that reads from checkpoint files previously written to reliable storage.
  */
 private[spark] class ReliableCheckpointRDD[T: ClassTag](

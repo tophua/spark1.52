@@ -8,7 +8,7 @@ import org.apache.spark.mllib.linalg.Vectors
 /**
  * 聚类算法
  * http://blog.selfup.cn/728.html,
- * 将一组目标object划分为若干个簇，每个簇之间的object尽可能的相似，簇与簇之间的object尽可能的相异
+ * 将一组目标object划分为若干个簇,每个簇之间的object尽可能的相似,簇与簇之间的object尽可能的相异
  */
 object KMeansDome {
   def main(args: Array[String]) {
@@ -38,9 +38,9 @@ object KMeansDome {
     // Cluster the data into two classes using KMeans
     val numClusters = 3 //预测分为3个簇类
     val numIterations = 20 //迭代20次
-    val runTimes = 10 //运行10次，选出最优解
+    val runTimes = 10 //运行10次,选出最优解
     var clusterIndex: Int = 0
-    //train方法对数据集进行聚类训练，这个方法会返回 KMeansModel 类实例
+    //train方法对数据集进行聚类训练,这个方法会返回 KMeansModel 类实例
     val clusters: KMeansModel =
       KMeans.train(parsedData, numClusters, numIterations, runTimes)
       

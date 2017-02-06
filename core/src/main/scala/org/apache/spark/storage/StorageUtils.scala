@@ -43,7 +43,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
 
   /**
    * Storage information of the blocks that entails memory, disk, and off-heap memory usage.
-   * 存储的块的存储信息，包括内存、磁盘和内存堆内存使用情况,
+   * 存储的块的存储信息,包括内存、磁盘和内存堆内存使用情况,
    * As with the block maps, we store the storage information separately for RDD blocks and
    * non-RDD blocks for the same reason. In particular, RDD storage information is stored
    * in a map indexed by the RDD ID to the following 4-tuple:

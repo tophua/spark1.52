@@ -108,13 +108,13 @@ final class Word2Vec(override val uid: String) extends Estimator[Word2VecModel] 
   /** @group setParam 优化算法的每一次迭代的学习速率。默认值是 0.025*/
   def setStepSize(value: Double): this.type = set(stepSize, value)
 
-  /** @group setParam 训练数据的分区数，默认是 1*/
+  /** @group setParam 训练数据的分区数,默认是 1*/
   def setNumPartitions(value: Int): this.type = set(numPartitions, value)
 
   /** @group setParam 优化算法求解的最大迭代次数。默认值是 100*/
   def setMaxIter(value: Int): this.type = set(maxIter, value)
 
-  /** @group setParam 只有当某个词出现的次数大于或者等于 minCount 时，才会被包含到词汇表里，否则会被忽略掉*/
+  /** @group setParam 只有当某个词出现的次数大于或者等于 minCount 时,才会被包含到词汇表里,否则会被忽略掉*/
   def setSeed(value: Long): this.type = set(seed, value)
 
   /** @group setParam */

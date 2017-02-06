@@ -770,7 +770,7 @@ private[nio] class ConnectionManager(
                  * (1) Invalid ack sent due to buggy code.
                  *     无效的ACK发送由于错误的代码
                  * (2) Late-arriving ack for a SendMessageStatus
-		 *	迟到的ACK发送消息的状态，避免不愿意迟到的应答
+		 *	迟到的ACK发送消息的状态,避免不愿意迟到的应答
                  *     To avoid unwilling late-arriving ack
                  *     caused by long pause like GC, you can set
                  *     larger value than default to spark.core.connection.ack.wait.timeout
@@ -1087,7 +1087,7 @@ private[spark] object ConnectionManager {
 
     (0 until count).map(i => {
       val bufferMessage = Message.createBufferMessage(buffer.duplicate)
-      //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+      //Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
       Await.result(manager.sendMessageReliably(manager.id, bufferMessage), Duration.Inf)
     })
     println("--------------------------")

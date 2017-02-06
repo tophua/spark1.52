@@ -93,7 +93,7 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
     assert(0 === taskDescriptions.length)
 
     // No tasks should run as we only have 1 core free.
-    //没有任务应该运行，因为我们只有1个核心空闲
+    //没有任务应该运行,因为我们只有1个核心空闲
     val numFreeCores = 1
     val singleCoreWorkerOffers = Seq(new WorkerOffer("executor0", "host0", numFreeCores),
       new WorkerOffer("executor1", "host1", numFreeCores))
@@ -257,7 +257,7 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
 
     // attempt 1 finished (this can happen even if it was marked zombie earlier -- all tasks were
     // already submitted, and then they finish)
-    //尝试完成1,（这可能发生，即使它被标记为僵尸早期-所有的任务都是已经提交,然后他们完成)
+    //尝试完成1,（这可能发生,即使它被标记为僵尸早期-所有的任务都是已经提交,然后他们完成)
     taskScheduler.taskSetFinished(mgr1)
 
     // now with another resource offer, we should still schedule all the tasks in attempt2

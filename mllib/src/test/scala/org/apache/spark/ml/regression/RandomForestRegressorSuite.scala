@@ -52,8 +52,8 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val newRF = rf
       .setImpurity("variance")//树节点选择的不纯度的衡量指标,取值可以是”entroy”或“gini”, 默认是”gini”
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setMaxBins(10)//离散连续性变量时最大的分箱数，默认是 32
-      .setNumTrees(1)//随机森林需要训练的树的个数，默认值是 20
+      .setMaxBins(10)//离散连续性变量时最大的分箱数,默认是 32
+      .setNumTrees(1)//随机森林需要训练的树的个数,默认值是 20
       .setFeatureSubsetStrategy("auto")//每次分裂候选特征数量
       .setSeed(123)
     compareAPIs(orderedLabeledPoints50_1000, newRF, categoricalFeaturesInfo)
@@ -76,7 +76,7 @@ class RandomForestRegressorSuite extends SparkFunSuite with MLlibTestSparkContex
     val rf = new RandomForestRegressor()
       .setImpurity("variance")//计算信息增益的准则
       .setMaxDepth(3)//树的最大深度,为了防止过拟合,设定划分的终止条件
-      .setNumTrees(3)//随机森林需要训练的树的个数，默认值是 20
+      .setNumTrees(3)//随机森林需要训练的树的个数,默认值是 20
       .setFeatureSubsetStrategy("all")//每次分裂候选特征数量
       .setSubsamplingRate(1.0)//subsamplingRate学习一棵决策树使用的训练数据比例,范围[0,1]
       .setSeed(123)

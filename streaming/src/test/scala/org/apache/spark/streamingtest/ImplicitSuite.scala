@@ -35,7 +35,7 @@ class ImplicitSuite {
 
   def testToPairDStreamFunctions(): Unit = {
     val dstream: org.apache.spark.streaming.dstream.DStream[(Int, Int)] = mockDStream
-    //groupByKey也是对每个key进行操作，但只生成一个sequence
+    //groupByKey也是对每个key进行操作,但只生成一个sequence
     dstream.groupByKey()
   }
 }

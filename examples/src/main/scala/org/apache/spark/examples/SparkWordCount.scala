@@ -31,7 +31,7 @@ object SparkWordCount {
     sc.parallelize(1 until 10000).count
     sc.parallelize(1 until 10000).map( x => (x%30,x)).groupByKey().count
     val textFile = sc.textFile("people.txt");//textFile：生成一个HadoopRDD.map,创建了一个MapPartitionsRDD
-    //flatMap：前面生成的MapPartitionsRDD[String]，调用flatMap函数，生成了MapPartitionsRDD[String] 
+    //flatMap：前面生成的MapPartitionsRDD[String],调用flatMap函数,生成了MapPartitionsRDD[String] 
     val wordCounts = textFile.flatMap(line => line.split(" ")).map(
       word => (word, 1))
       

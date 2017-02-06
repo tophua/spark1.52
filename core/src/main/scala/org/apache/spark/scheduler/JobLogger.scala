@@ -207,7 +207,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /**
    * When stage is completed, record stage completion status
-   * 当阶段(Stage)完成时，记录阶段(Stage)完成状态
+   * 当阶段(Stage)完成时,记录阶段(Stage)完成状态
    * @param stageCompleted Stage completed event
    */
   override def onStageCompleted(stageCompleted: SparkListenerStageCompleted) {

@@ -66,7 +66,7 @@ private[spark] class TaskSchedulerImpl(
   val conf = sc.conf
 
   // How often to check for speculative(推测) tasks
-  //Spark多长时间进行检查task运行状态用以推测，以毫秒为单位
+  //Spark多长时间进行检查task运行状态用以推测,以毫秒为单位
   val SPECULATION_INTERVAL_MS = conf.getTimeAsMs("spark.speculation.interval", "100ms")
 
   private val speculationScheduler =
@@ -103,7 +103,7 @@ private[spark] class TaskSchedulerImpl(
   // in turn is used to decide when we can attain data locality on a given host
   //执行设定每个主机还活着,key为 host,value 为该 host 上的 active executors
   protected val executorsByHost = new HashMap[String, HashSet[String]]
-  //hostsByRack保存key为rack，value为该 rack上所有作为 taskSetManager优先位置的 hosts
+  //hostsByRack保存key为rack,value为该 rack上所有作为 taskSetManager优先位置的 hosts
   protected val hostsByRack = new HashMap[String, HashSet[String]]
 
   protected val executorIdToHost = new HashMap[String, String]
@@ -168,8 +168,8 @@ private[spark] class TaskSchedulerImpl(
   override def start() {
     //向actorSystem注册了LocalActor
     backend.start()
-    //spark.speculation为true 对于非本地模式，那么对于指定时间未返回的task将会启动另外的task来执行
-    //其实对于一般的应用，这个的确可能会减少任务的执行时间，但是也浪费了集群的计算资源。因此对于离线应用来说，这个设置是不推荐的
+    //spark.speculation为true 对于非本地模式,那么对于指定时间未返回的task将会启动另外的task来执行
+    //其实对于一般的应用,这个的确可能会减少任务的执行时间,但是也浪费了集群的计算资源。因此对于离线应用来说,这个设置是不推荐的
     if (!isLocal && conf.getBoolean("spark.speculation", false)) {
       logInfo("Starting speculative execution thread")
       speculationScheduler.scheduleAtFixedRate(new Runnable {
@@ -190,7 +190,7 @@ private[spark] class TaskSchedulerImpl(
     logInfo("Adding task set " + taskSet.id + " with " + tasks.length + " tasks")
     this.synchronized { // 使用synchronized进行同步  
       //为taskSet创建一个TaskSetManager任务集管理器,最大提交任务失败次数
-      //TaskSetManager跟踪每个task的执行状况，设置任务集调度策略
+      //TaskSetManager跟踪每个task的执行状况,设置任务集调度策略
       val manager = createTaskSetManager(taskSet, maxTaskFailures)
       //获取taskSet对应的stageId  
       val stage = taskSet.stageId
@@ -199,7 +199,7 @@ private[spark] class TaskSchedulerImpl(
       val stageTaskSets =
         taskSetsByStageIdAndAttempt.getOrElseUpdate(stage, new HashMap[Int, TaskSetManager])
       stageTaskSets(taskSet.stageAttemptId) = manager
-      //查看是否存在冲突的taskSet,如果存在，抛出IllegalStateException异常  
+      //查看是否存在冲突的taskSet,如果存在,抛出IllegalStateException异常  
       val conflictingTaskSet = stageTaskSets.exists {
         case (_, ts) =>
           ts.taskSet != taskSet && !ts.isZombie
@@ -294,8 +294,8 @@ private[spark] class TaskSchedulerImpl(
       //根据WorkerOffer的executorId和host找到需要执行的任务并进一步资源处理  
       val execId = shuffledOffers(i).executorId
       val host = shuffledOffers(i).host
-      //如果executor上可利用cpu数目大于每个task需要的数目，则继续task分配  
-      //CPUS_PER_TASK为参数spark.task.cpus配置的值，未配置的话默认为1
+      //如果executor上可利用cpu数目大于每个task需要的数目,则继续task分配  
+      //CPUS_PER_TASK为参数spark.task.cpus配置的值,未配置的话默认为1
       if (availableCpus(i) >= CPUS_PER_TASK) { //每台机器可用的计算资源
         try {
           //调用每个TaskSetManager的resourceOffer方法,根据execId,host找到需要执行的任务最佳位置
@@ -336,7 +336,7 @@ private[spark] class TaskSchedulerImpl(
 
   /**
    * *
-   * resourceOffers方法会将已经提交的tasks进行一次优先级排序，这个排序算法目前是两种：FIFO或FAIR。
+   * resourceOffers方法会将已经提交的tasks进行一次优先级排序,这个排序算法目前是两种：FIFO或FAIR。
    * 响应CoarseGrainedSchedulerBackend的资源调度请求,为每个Task具体分配资源
    */
   def resourceOffers(offers: Seq[WorkerOffer]): Seq[Seq[TaskDescription]] = synchronized {
@@ -344,14 +344,14 @@ private[spark] class TaskSchedulerImpl(
     // Also track if new executor is added
     //newExecAvail为false,这个标志位是在新的slave被添加时被设置的一个标志true
     var newExecAvail = false
-    //循环offers，WorkerOffer为包含executorId、host、cores的结构体，代表集群中的可用executor资源  
+    //循环offers,WorkerOffer为包含executorId、host、cores的结构体,代表集群中的可用executor资源  
     for (o <- offers) {
       // 利用HashMap存储executorId->host映射的集合  
       executorIdToHost(o.executorId) = o.host
       //保存集群当前所有可用的 executor id->HashSet
       activeExecutorIds += o.executorId
       //如果有新Executor加入,executors的集合 
-      // 这个executorsByHost被用来计算host活跃性，反过来我们用它来决定在给定的主机上何时实现数据本地性  
+      // 这个executorsByHost被用来计算host活跃性,反过来我们用它来决定在给定的主机上何时实现数据本地性  
       if (!executorsByHost.contains(o.host)) { //如果executorsByHost中不存在对应的host
         //executorsByHost中添加一条记录,key为host,value为new HashSet[String]()  
         executorsByHost(o.host) = new HashSet[String]()
@@ -555,9 +555,9 @@ private[spark] class TaskSchedulerImpl(
 
   // Check for speculatable tasks in all our active jobs.
   /**
-   * 所谓的推测执行,就是当所有task都开始运行之后,Job Tracker会统计所有任务的平均进度，
+   * 所谓的推测执行,就是当所有task都开始运行之后,Job Tracker会统计所有任务的平均进度,
    * 如果某个task所在的task node机器配置比较低或者CPU load很高(原因很多),
-   * 导致任务执行比总体任务的平均执行要慢，此时Job Tracker会启动一个新的任务(duplicate task),
+   * 导致任务执行比总体任务的平均执行要慢,此时Job Tracker会启动一个新的任务(duplicate task),
    * 原有任务和新任务哪个先执行完就把另外一个kill掉,
    */
   def checkSpeculatableTasks() {
@@ -598,7 +598,7 @@ private[spark] class TaskSchedulerImpl(
 
   /** 
    *  Remove an executor from all our data structures and mark it as lost 
-   *  从所有的数据结构中删除一个executor，并将其标记为丢失
+   *  从所有的数据结构中删除一个executor,并将其标记为丢失
    *  */
   private def removeExecutor(executorId: String) {
     activeExecutorIds -= executorId //从存集群删除当前可用的 executor id

@@ -30,7 +30,7 @@ import org.apache.spark.util.Utils
 /**
  * LDA是一个三层贝叶斯概率模型,包含词,主题和文档三层结构
  * LDA 文档生成模型
- * 按照文档生成的过程，使用贝叶斯估计统计学方法，将文档用多个主题来表示。LDA不只解决了同义词的问题，还解决了一次多义的问题。
+ * 按照文档生成的过程,使用贝叶斯估计统计学方法,将文档用多个主题来表示。LDA不只解决了同义词的问题,还解决了一次多义的问题。
  * 目前训练LDA模型的方法有原始论文中的基于EM和 差分贝叶斯方法以及后来出现的Gibbs Samplings 采样算法
  */
 class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
@@ -169,7 +169,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
       if (topTopicAssignments.contains(docID)) {
         val (inds, vals) = topTopicAssignments(docID)
         assert(inds.length === doc.numNonzeros)
-        // For "term" in actual doc, 在实际文档中的“术语”，
+        // For "term" in actual doc, 在实际文档中的“术语”,
         // check that it has a topic assigned. 检查它是否有一个指定的主题。
         doc.foreachActive((term, wcnt) => assert(wcnt === 0 || inds.contains(term)))
       } else {
@@ -240,14 +240,14 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     val vocabSize = 6
 
     def docs: Array[(Long, Vector)] = Array(
-      //苹果，橘子，香蕉 
+      //苹果,橘子,香蕉 
       Vectors.sparse(vocabSize, Array(0, 1, 2), Array(1, 1, 1)), // apple, orange, banana
-      Vectors.sparse(vocabSize, Array(3, 4, 5), Array(1, 1, 1)) // tiger, cat, dog 老虎，猫，狗
+      Vectors.sparse(vocabSize, Array(3, 4, 5), Array(1, 1, 1)) // tiger, cat, dog 老虎,猫,狗
     ).zipWithIndex.map { case (wordCounts, docId) => (docId.toLong, wordCounts) }
     val corpus = sc.parallelize(docs, 2)
 
     // Set GammaShape large to avoid the stochastic impact.
-    //设置伽玛形状大，以避免随机影响。
+    //设置伽玛形状大,以避免随机影响。
     val op = new OnlineLDAOptimizer().setTau0(1024).setKappa(0.51).setGammaShape(1e40)
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
       .setMiniBatchFraction(1)
@@ -267,7 +267,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     state.submitMiniBatch(corpus)
 
     // verify the result, Note this generate the identical result as
-    //验证结果，请注意，这将产生相同的结果
+    //验证结果,请注意,这将产生相同的结果
     // [[https://github.com/Blei-Lab/onlineldavb]]
     val topic1: Vector = Vectors.fromBreeze(op.getLambda(0, ::).t)
     val topic2: Vector = Vectors.fromBreeze(op.getLambda(1, ::).t)

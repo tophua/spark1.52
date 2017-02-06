@@ -39,7 +39,7 @@ import org.apache.spark.util.io.ByteArrayChunkOutputStream
  * The driver divides the serialized object into small chunks and
  * stores those chunks in the BlockManager of the driver.
  * driver将序列化对象划分一个个小块,交给BlockManager处理存储,每一个执行器executor将首先尝试从BlockManager获取的对象
- * 如果没有找到，它然后使用远程从driver或者其他executor抓取数据块,一旦它得到的这个数据块，它会把块在自己的BlockManager,
+ * 如果没有找到,它然后使用远程从driver或者其他executor抓取数据块,一旦它得到的这个数据块,它会把块在自己的BlockManager,
  * 准备其他executors从获取
  * On each executor, the executor first attempts to fetch the object from its BlockManager. If
  * it does not exist, it then uses remote fetches to fetch the small chunks from the driver and/or
@@ -96,7 +96,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
 
   /**
    * Divide the object into multiple blocks and put those blocks in the block manager.
-   * 将该对象划分为多个块，并将这些块放在块管理器中
+   * 将该对象划分为多个块,并将这些块放在块管理器中
    * @param value the object to divide
    * @return number of blocks this broadcast variable is divided into
    */
@@ -183,7 +183,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   private def readBroadcastBlock(): T = Utils.tryOrIOException {
     TorrentBroadcast.synchronized {
       setConf(SparkEnv.get.conf)
-       //从本地的blockManager里读这个被broadcast的对象，根据broadcastId
+       //从本地的blockManager里读这个被broadcast的对象,根据broadcastId
       SparkEnv.get.blockManager.getLocal(broadcastId).map(_.data.next()) match {
         case Some(x) =>//本地有
           x.asInstanceOf[T]
@@ -191,7 +191,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
         case None =>//本地无
           logInfo("Started reading broadcast variable " + id)
           val startTimeMs = System.currentTimeMillis()
-          val blocks = readBlocks()//如果本地没有broadcastId对应的broadcast的block，就读
+          val blocks = readBlocks()//如果本地没有broadcastId对应的broadcast的block,就读
           logInfo("Reading broadcast variable " + id + " took" + Utils.getUsedTimeMs(startTimeMs))
 
           val obj = TorrentBroadcast.unBlockifyObject[T](

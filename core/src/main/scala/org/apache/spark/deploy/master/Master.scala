@@ -59,7 +59,7 @@ private[deploy] class Master(
   private val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
 
   private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss") //精确到秒 For application IDs 
-  //如果master没有收到worker的心跳,那么将在这么多秒之后，master将丢弃该worker（默认60秒（60000毫秒）
+  //如果master没有收到worker的心跳,那么将在这么多秒之后,master将丢弃该worker（默认60秒（60000毫秒）
   private val WORKER_TIMEOUT_MS = conf.getLong("spark.worker.timeout", 60) * 1000
   //web UI上最多展示几个已结束应用。更早的应用的数将被删除
   private val RETAINED_APPLICATIONS = conf.getInt("spark.deploy.retainedApplications", 200)
@@ -128,13 +128,13 @@ private[deploy] class Master(
   // As a temporary workaround before better ways of configuring memory, we allow users to set
   // a flag that will perform round-robin scheduling across the nodes (spreading out each app
   // among all the nodes) instead of trying to consolidate each app onto a small # of nodes.
-  //Executor的分配方式有两种，一种是倾向于把任务分散在多个节点上，一种是在尽量少的节点上运行，
-  //由参数spark.deploy.spreadOut参数来决定的，默认是true，把任务分散到多个节点上
+  //Executor的分配方式有两种,一种是倾向于把任务分散在多个节点上,一种是在尽量少的节点上运行,
+  //由参数spark.deploy.spreadOut参数来决定的,默认是true,把任务分散到多个节点上
   private val spreadOutApps = conf.getBoolean("spark.deploy.spreadOut", true)
 
   // Default maxCores for applications that don't specify it (i.e. pass Int.MaxValue)
-  //如果没有设置spark.cores.max，该参数设置Standalone集群分配给应用程序的最大内核数，
-  //如果不设置，应用程序获取所有的有效内核。
+  //如果没有设置spark.cores.max,该参数设置Standalone集群分配给应用程序的最大内核数,
+  //如果不设置,应用程序获取所有的有效内核。
   private val defaultCores = conf.getInt("spark.deploy.defaultCores", Int.MaxValue)
   if (defaultCores < 1) {
     throw new SparkException("spark.deploy.defaultCores must be positive")
@@ -324,7 +324,7 @@ private[deploy] class Master(
         //注册Application的过程
         registerApplication(app)
         logInfo("Registered app " + description.name + " with ID " + app.id)
-        //持久化app的元数据信息，可以选择持久化到ZooKeeper，本地文件系统，或者不持久化
+        //持久化app的元数据信息,可以选择持久化到ZooKeeper,本地文件系统,或者不持久化
         persistenceEngine.addApplication(app)
         //向ClientEndpoint发送RegisteredAppliction消息
         driver.send(RegisteredApplication(app.id, self))
@@ -422,7 +422,7 @@ private[deploy] class Master(
       }
     }
 /**
- * AppClient收到后改变其保存的Master的信息，包括URL和Master actor的信息，
+ * AppClient收到后改变其保存的Master的信息,包括URL和Master actor的信息,
  * 回复MasterChangeAcknowledged(appId)
  */
     case MasterChangeAcknowledged(appId) => {
@@ -434,16 +434,16 @@ private[deploy] class Master(
         case None =>
           logWarning("Master change ack from unknown app: " + appId)
       }
-    //检查如果所有的worker和Application的状态都不是UNKNOWN，那么恢复结束，调用completeRecovery()
+    //检查如果所有的worker和Application的状态都不是UNKNOWN,那么恢复结束,调用completeRecovery()
       if (canCompleteRecovery) { completeRecovery() }
     }
 /**
  * 恢复Worker的步骤:
- * 1)重新注册Worker（实际上是更新Master本地维护的数据结构），置状态为UNKNOWN
+ * 1)重新注册Worker（实际上是更新Master本地维护的数据结构）,置状态为UNKNOWN
  * 2)向Worker发送Master Changed的消息
- * 3)Worker收到消息后，向Master回复WorkerSchedulerStateResponse消息，并通过该消息上报executor和driver的信息
- * 4)Master收到WorkerSchedulerStateResponse消息后，会置该Worker的状态为ALIVE，并且会检查该Worker上报的信息是否与自己从ZK中获取的数据一致，包括executor和driver。
- *         一致的executor和driver将被恢复。对于Driver，其状态被置为RUNNING。
+ * 3)Worker收到消息后,向Master回复WorkerSchedulerStateResponse消息,并通过该消息上报executor和driver的信息
+ * 4)Master收到WorkerSchedulerStateResponse消息后,会置该Worker的状态为ALIVE,并且会检查该Worker上报的信息是否与自己从ZK中获取的数据一致,包括executor和driver。
+ *         一致的executor和driver将被恢复。对于Driver,其状态被置为RUNNING。
  */
     case WorkerSchedulerStateResponse(workerId, executors, driverIds) => {
       idToWorker.get(workerId) match {
@@ -487,12 +487,12 @@ private[deploy] class Master(
     //接收Client发送RequestSubmitDriver消息
     case RequestSubmitDriver(description) => {      
       if (state != RecoveryState.ALIVE) {
-        //如果master不是active，返回错误
+        //如果master不是active,返回错误
         val msg = s"${Utils.BACKUP_STANDALONE_MASTER_PREFIX}: $state. " +
           "Can only accept driver submissions in ALIVE state."
         context.reply(SubmitDriverResponse(self, false, None, msg))
       } else {
-        //否则创建driver，返回成功的消息
+        //否则创建driver,返回成功的消息
         logInfo("Driver submitted " + description.command.mainClass)
         //创建Driver
         val driver = createDriver(description)
@@ -513,7 +513,7 @@ private[deploy] class Master(
 
     case RequestKillDriver(driverId) => {
       if (state != RecoveryState.ALIVE) {
-        //如果master不是active，返回错误
+        //如果master不是active,返回错误
         val msg = s"${Utils.BACKUP_STANDALONE_MASTER_PREFIX}: $state. " +
           s"Can only kill drivers in ALIVE state."
         context.reply(KillDriverResponse(self, driverId, success = false, msg))
@@ -524,7 +524,7 @@ private[deploy] class Master(
         driver match {
           case Some(d) =>
             if (waitingDrivers.contains(d)) {
-              //如果driver仍然在等待队列，从等待队列删除并且更新driver状态为KILLED
+              //如果driver仍然在等待队列,从等待队列删除并且更新driver状态为KILLED
               waitingDrivers -= d
               self.send(DriverStateChanged(driverId, DriverState.KILLED, None))
             } else {
@@ -537,12 +537,12 @@ private[deploy] class Master(
               }
             }
             // TODO: It would be nice for this to be a synchronous response
-            //注意，此时driver不一定被kill，master只是通知了worker去kill driver。
+            //注意,此时driver不一定被kill,master只是通知了worker去kill driver。
             val msg = s"Kill request for $driverId submitted"
             logInfo(msg)
             context.reply(KillDriverResponse(self, driverId, success = true, msg))
           case None =>
-            // driver已经被kill，直接返回结果
+            // driver已经被kill,直接返回结果
             val msg = s"Driver $driverId has already finished or does not exist"
             logWarning(msg)
             context.reply(KillDriverResponse(self, driverId, success = false, msg))
@@ -557,7 +557,7 @@ private[deploy] class Master(
         context.reply(
           DriverStatusResponse(found = false, None, None, None, Some(new Exception(msg))))
       } else {
-        // 查找请求的driver，如果找到则返回driver的状态
+        // 查找请求的driver,如果找到则返回driver的状态
         (drivers ++ completedDrivers).find(_.id == driverId) match {
           case Some(driver) =>
             context.reply(DriverStatusResponse(found = true, Some(driver.state),
@@ -611,9 +611,9 @@ private[deploy] class Master(
       logInfo("Trying to recover app: " + app.id)
       try {
         registerApplication(app)
-        //ApplicationState.UNKNOWN置待恢复的Application的状态为UNKNOWN，向AppClient发送MasterChanged的消息
+        //ApplicationState.UNKNOWN置待恢复的Application的状态为UNKNOWN,向AppClient发送MasterChanged的消息
         app.state = ApplicationState.UNKNOWN
-        //向AppClient发送Master变化的消息，AppClient会回复MasterChangeAcknowledged
+        //向AppClient发送Master变化的消息,AppClient会回复MasterChangeAcknowledged
         app.driver.send(MasterChanged(self, masterWebUiUrl))
       } catch {
         case e: Exception => logInfo("App " + app.id + " had exception on reconnect")
@@ -623,7 +623,7 @@ private[deploy] class Master(
     for (driver <- storedDrivers) {
       // Here we just read in the list of drivers. Any drivers associated with now-lost workers
       // will be re-launched when we detect that the worker is missing.
-      //在Worker恢复后，Worker会主动上报运行其上的executors和drivers从而使得Master恢复executor和driver的信息。
+      //在Worker恢复后,Worker会主动上报运行其上的executors和drivers从而使得Master恢复executor和driver的信息。
       drivers += driver
     }
 
@@ -632,7 +632,7 @@ private[deploy] class Master(
       try {
         registerWorker(worker)//重新注册Worker,置状态为UNKNOWN
         worker.state = WorkerState.UNKNOWN
-        //向Worker发送Master变化Changed的消息，Worker会回复WorkerSchedulerStateResponse
+        //向Worker发送Master变化Changed的消息,Worker会回复WorkerSchedulerStateResponse
         worker.endpoint.send(MasterChanged(self, masterWebUiUrl))
       } catch {
         case e: Exception => logInfo("Worker " + worker.id + " had exception on reconnect")
@@ -643,7 +643,7 @@ private[deploy] class Master(
 /**
  * 调用时机
  * 1. 在恢复开始后的60s会被强制调用
- * 2. 在每次收到AppClient和Worker的消息回复后会检查如果Application和worker的状态都不为UNKNOWN，则调用
+ * 2. 在每次收到AppClient和Worker的消息回复后会检查如果Application和worker的状态都不为UNKNOWN,则调用
  */
   private def completeRecovery() {
     // Ensure "only-once" recovery semantics using a short synchronization period.
@@ -657,7 +657,7 @@ private[deploy] class Master(
     //对于未分配Woker的Driver client(有可能Worker已经死掉)
     //确定是否需要重新启动
     // Reschedule drivers which were not claimed by any workers
-    drivers.filter(_.worker.isEmpty).foreach { d =>//如果driver的worker为空，则relaunchDriver。
+    drivers.filter(_.worker.isEmpty).foreach { d =>//如果driver的worker为空,则relaunchDriver。
       logWarning(s"Driver ${d.id} was not found after master recovery")
       if (d.desc.supervise) {//需要重新启动Driver Client
         logWarning(s"Re-launching ${d.id}")
@@ -723,14 +723,14 @@ private[deploy] class Master(
     //每个Worker的分配新的执行者
     val assignedExecutors = new Array[Int](numUsable) // Number of new executors on each worker
     //求最小值,
-    //为啥要求最小值：因为可能我们的程序需要1000个cores，但是集群中只有100个cores。
-    //所以只能先分配100个cores，所以就要增加批次    
+    //为啥要求最小值：因为可能我们的程序需要1000个cores,但是集群中只有100个cores。
+    //所以只能先分配100个cores,所以就要增加批次    
     var coresToAssign = math.min(app.coresLeft, 
         //app.coresLeft程序需要的cores,可用的Worker上面的free cores总和
         usableWorkers.map(_.coresFree).sum)
     /** Return whether the specified worker can launch an executor for this app.筛选条件 */
     def canLaunchExecutor(pos: Int): Boolean = {
-      //必须要大于等于，因为如果默认一个cores都不能满足的话，无法启动了。
+      //必须要大于等于,因为如果默认一个cores都不能满足的话,无法启动了。
       val keepScheduling = coresToAssign >= minCoresPerExecutor   
       val enoughCores = usableWorkers(pos).coresFree - assignedCores(pos) >= minCoresPerExecutor
       // If we allow multiple executors per worker, then we can always launch new executors.
@@ -748,7 +748,7 @@ private[deploy] class Master(
         // We're adding cores to an existing executor, so no need
 	//我们正在向一个存在的执行者添加内核,所以不需要检查内存和执行器限制
         // to check memory and executor limits
-        //如果Worker上的executor已经存在，可用直接往executor上增加cores
+        //如果Worker上的executor已经存在,可用直接往executor上增加cores
         keepScheduling && enoughCores
       }
     }
@@ -759,8 +759,8 @@ private[deploy] class Master(
     //或者如果我们已经达到了这个应用程序的限制
     //根据filter就过滤出来满足在Worker上launchExecutor的条件
     var freeWorkers = (0 until numUsable).filter(canLaunchExecutor)
-    while (freeWorkers.nonEmpty) {//可用的Worker不是空的话，就执行下面的循环。
-      //如果不是spreadOutApps的时候，每次都会给executor增加一个core，
+    while (freeWorkers.nonEmpty) {//可用的Worker不是空的话,就执行下面的循环。
+      //如果不是spreadOutApps的时候,每次都会给executor增加一个core,
       //会一直循环当前程序的executor上的freeCores,所以会占用本机器上的尽可能多的cores
       freeWorkers.foreach { pos =>
         var keepScheduling = true      
@@ -768,7 +768,7 @@ private[deploy] class Master(
           coresToAssign -= minCoresPerExecutor
           assignedCores(pos) += minCoresPerExecutor
            // If we are launching one executor per worker, then every iteration assigns 1 core
-	  //如果是每个Worker下面只能够为当前的应用程序分配一个Executor的话，每次迭代执行者只分配一个内核
+	  //如果是每个Worker下面只能够为当前的应用程序分配一个Executor的话,每次迭代执行者只分配一个内核
           // to the executor. Otherwise, every iteration assigns cores to a new executor.
 	  //否则,每一次迭代将内核分配给一个新的执行者
           if (oneExecutorPerWorker) {
@@ -781,7 +781,7 @@ private[deploy] class Master(
           // scheduling executors on this worker until we use all of its resources.
 	        //如果spreadOut为false,worker节点调度直到使用它的所有的内核资源
           // Otherwise, just move on to the next worker.否则,就转移到下一个worker节点均匀分配内核
-          //如果spreadOutApps为false，会尽可能用当前的机器去处理程序的一切的cores需求，也就是executor会占用尽可能多的cores	 
+          //如果spreadOutApps为false,会尽可能用当前的机器去处理程序的一切的cores需求,也就是executor会占用尽可能多的cores	 
           if (spreadOutApps) {
             keepScheduling = false
           }
@@ -812,7 +812,7 @@ private[deploy] class Master(
     //app.coresLeft是Application需要的内核数coresLeft
     // 遍历一下app
     for (app <- waitingApps if app.coresLeft > 0) {//使用FIFO(先进先出)的方式为等待的app分配资源,
-      //为应用程序具体分配Executor之前要判断应用程序是否还需要分配cores，如果不需要，则不会为应用程序分配Executor
+      //为应用程序具体分配Executor之前要判断应用程序是否还需要分配cores,如果不需要,则不会为应用程序分配Executor
       val coresPerExecutor: Option[Int] = app.desc.coresPerExecutor //获得每个Executor上分配多少个cores
       // Filter out workers that don't have enough resources to launch an executor
     /**给Application分配CPU核数处理步骤如下
@@ -832,7 +832,7 @@ private[deploy] class Master(
       // Now that we've decided how many cores to allocate on each worker, let's allocate them
       //计算资源物理分配,即计算资源物理分配是指给Application物理分配Worker的内存以及核数
       for (pos <- 0 until usableWorkers.length if assignedCores(pos) > 0) {     
-        //然后就是分配了，准备好具体要为当前应用程序分配的Executor信息后，
+        //然后就是分配了,准备好具体要为当前应用程序分配的Executor信息后,
         //具体Master要通过远程通信发指令给Worker来具体启动ExecutorBackEnd进程
         allocateWorkerResourceToExecutors(
           app, assignedCores(pos), coresPerExecutor, usableWorkers(pos))
@@ -867,7 +867,7 @@ private[deploy] class Master(
       val exec = app.addExecutor(worker, coresToAssign)
       //物理分配通过调用launchExecutor,在worker上启动Executor
       launchExecutor(worker, exec)
-      //分配executor之后，application就为RUNNING
+      //分配executor之后,application就为RUNNING
       app.state = ApplicationState.RUNNING 
     }
   }
@@ -881,15 +881,15 @@ private[deploy] class Master(
    */
   private def schedule(): Unit = {
     if (state != RecoveryState.ALIVE) { return }
-    //Master必须是Alive的状态才能进行资源的调度，如果不是Alive的状态，会直接返回
+    //Master必须是Alive的状态才能进行资源的调度,如果不是Alive的状态,会直接返回
     // Drivers take strict precedence over executors
     //把当前workers这个HashSet的顺序随机打乱
     val shuffledWorkers = Random.shuffle(workers) // Randomization helps balance drivers
     for (worker <- shuffledWorkers if worker.state == WorkerState.ALIVE) {//遍历活着的workers
       for (driver <- waitingDrivers) {//在等待队列中的Driver会进行资源分配
-	        //当前的worker内存和cpu均大于当前driver请求的mem和cpu，启动launchDriver
+	        //当前的worker内存和cpu均大于当前driver请求的mem和cpu,启动launchDriver
         if (worker.memoryFree >= driver.desc.mem && worker.coresFree >= driver.desc.cores) {
-          //启动Driver 内部实现是发送启动Driver命令给指定Worker，Worker来启动Driver
+          //启动Driver 内部实现是发送启动Driver命令给指定Worker,Worker来启动Driver
           launchDriver(worker, driver)
 	        //把启动过的Driver从队列移除
           waitingDrivers -= driver
@@ -1109,7 +1109,7 @@ private[deploy] class Master(
     idToApp.get(appId) match {
       case Some(appInfo) =>
         logInfo(s"Application $appId requests to kill executors: " + executorIds.mkString(", "))
-        val (known, unknown) = executorIds.partition(appInfo.executors.contains)//第一部分为满足条件p的元素，第二部分为不满足条件p的元素
+        val (known, unknown) = executorIds.partition(appInfo.executors.contains)//第一部分为满足条件p的元素,第二部分为不满足条件p的元素
         known.foreach { executorId =>
           val desc = appInfo.executors(executorId)
           appInfo.removeExecutor(desc)
@@ -1341,7 +1341,7 @@ private[deploy] object Master extends Logging {
   }
 
   /**
-   * Rpc Environment(RpcEnv)是一个RpcEndpoints用于处理消息的环境，
+   * Rpc Environment(RpcEnv)是一个RpcEndpoints用于处理消息的环境,
    * 它管理着整个RpcEndpoints的声明周期：(1)根据name或uri注册endpoints(2)管理各种消息的处理(3)停止endpoints。
    * RpcEnv必须通过工厂类RpcEnvFactory创建
    * Start the Master and return a three tuple of:

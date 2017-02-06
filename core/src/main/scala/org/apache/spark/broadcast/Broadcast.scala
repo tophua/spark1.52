@@ -31,7 +31,7 @@ import scala.reflect.ClassTag
  * cached on each machine rather than shipping a copy of it with tasks. They can be used, for
  * 他们可以使用例子,给每个节点复制一个大的输入数据集的一个有效的方式
  * example, to give every node a copy of a large input dataset in an efficient manner. Spark also
- * Spark还尝试使用高效的广播算法来分配广播变量，以降低通信成本
+ * Spark还尝试使用高效的广播算法来分配广播变量,以降低通信成本
  * attempts to distribute broadcast variables using efficient broadcast algorithms to reduce
  * communication cost.
  *
@@ -52,7 +52,7 @@ import scala.reflect.ClassTag
  * }}}
  *
  * After the broadcast variable is created, it should be used instead of the value `v` in any
- * 创建广播变量后,它应该被任何运行在集群的方法使用值的“V”，“V”值不止一次传递节点,
+ * 创建广播变量后,它应该被任何运行在集群的方法使用值的“V”,“V”值不止一次传递节点,
  * functions run on the cluster so that `v` is not shipped to the nodes more than once.
  * In addition, the object `v` should not be modified after it is broadcast in order to ensure
  * 此外,广播后不应该修改对象的v,以确保所有的节点得到相同的广播变量的值

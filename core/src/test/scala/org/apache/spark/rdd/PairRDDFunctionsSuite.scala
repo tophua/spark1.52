@@ -45,7 +45,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val sets = pairs.aggregateByKey(new HashSet[Int]())(_ += _, _ ++= _).collect() //tuple元组
     // Array((1,Set(1)), (3,Set(2)), (5,Set(1, 3))),元组取值方式
     assert(sets.size === 3)
-    val valuesFor1 = sets.find(_._1 == 1).get._2 //查找k==1，Set(1),取出map value值
+    val valuesFor1 = sets.find(_._1 == 1).get._2 //查找k==1,Set(1),取出map value值
     assert(valuesFor1.toList.sorted === List(1))
     val valuesFor3 = sets.find(_._1 == 3).get._2
     assert(valuesFor3.toList.sorted === List(2))
@@ -58,7 +58,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val groups = pairs.groupByKey().collect() //RDD的各个元素根据这个key进行分组
     assert(groups.size === 2)
     //groups: Array[(Int, Iterable[Int])] = Array((1,CompactBuffer(1, 2, 3)), (2,CompactBuffer(1)))
-    val valuesFor1 = groups.find(_._1 == 1).get._2 //查找k==1，Set(1),取出map value值
+    val valuesFor1 = groups.find(_._1 == 1).get._2 //查找k==1,Set(1),取出map value值
     assert(valuesFor1.toList.sorted === List(1, 2, 3))
     val valuesFor2 = groups.find(_._1 == 2).get._2
     assert(valuesFor2.toList.sorted === List(1))
@@ -160,7 +160,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
   test("sampleByKeyExact") {
     val defaultSeed = 1L
     //spark对于分层抽样支持两个版本sampleByKey和sampleByKeyExact。
-    //它是一个根据RDD的Key-Value来抽样的功能，可以为每个key设置其被选中的概率
+    //它是一个根据RDD的Key-Value来抽样的功能,可以为每个key设置其被选中的概率
     // vary RDD size
     for (n <- List(100, 1000, 1000000)) {
       val data = sc.parallelize(1 to n, 2)
@@ -324,7 +324,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
   test("cogroup with empty RDD") {
     import scala.reflect.classTag
     val intPairCT = classTag[(Int, Int)]
-    //做集合性操作的基础api，包括各种join、求交等
+    //做集合性操作的基础api,包括各种join、求交等
     val rdd1 = sc.parallelize(Array((1, 1), (1, 2), (2, 1), (3, 1)))
     val rdd2 = sc.emptyRDD[(Int, Int)](intPairCT)
 
@@ -393,7 +393,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val rdd1 = sc.parallelize(Array((1, 1), (1, 2), (2, 1), (3, 1)))
     val rdd2 = sc.parallelize(Array((1, 'x'), (2, 'y'), (2, 'z'), (4, 'w')))
     /**
-     * groupWith 将RDD rdd2与对象自身进行连接，并按key进行分组，返回一个数据集，组成元素为(K, Seq[V], Seq[W]) Tuples
+     * groupWith 将RDD rdd2与对象自身进行连接,并按key进行分组,返回一个数据集,组成元素为(K, Seq[V], Seq[W]) Tuples
      */
     val joined = rdd1.groupWith(rdd2).collect()
     assert(joined.size === 4)
@@ -414,7 +414,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val rdd2 = sc.parallelize(Array((1, 'x'), (2, 'y'), (2, 'z'), (4, 'w')))
     val rdd3 = sc.parallelize(Array((1, 'a'), (3, 'b'), (4, 'c'), (4, 'd')))
     /**
-     * groupWith 将RDD rdd2与对象自身进行连接，并按key进行分组，返回一个数据集，组成元素为(K, Seq[V], Seq[W]) Tuples
+     * groupWith 将RDD rdd2与对象自身进行连接,并按key进行分组,返回一个数据集,组成元素为(K, Seq[V], Seq[W]) Tuples
      */
     val joined = rdd1.groupWith(rdd2, rdd3).collect()
     assert(joined.size === 4)
@@ -433,7 +433,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val rdd3 = sc.parallelize(Array((1, 'a'), (3, 'b'), (4, 'c'), (4, 'd')))
     val rdd4 = sc.parallelize(Array((2, '@')))
     /**
-     * groupWith 将RDD rdd2与对象自身进行连接，并按key进行分组，返回一个数据集，组成元素为(K, Seq[V], Seq[W]) Tuples
+     * groupWith 将RDD rdd2与对象自身进行连接,并按key进行分组,返回一个数据集,组成元素为(K, Seq[V], Seq[W]) Tuples
      */
     val joined = rdd1.groupWith(rdd2, rdd3, rdd4).collect()
     assert(joined.size === 4)
@@ -489,7 +489,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
   }
 
   test("subtract") { //返回在RDD中出现,并且不在otherRDD中出现的元素,不去重
-    //去除两个RDD中相同的元素，不同的RDD将保留下来 
+    //去除两个RDD中相同的元素,不同的RDD将保留下来 
     val a = sc.parallelize(Array(1, 2, 3), 2)
     val b = sc.parallelize(Array(2, 3, 4), 4)
     //subtract 本RDD有、它RDD无的元素留下来

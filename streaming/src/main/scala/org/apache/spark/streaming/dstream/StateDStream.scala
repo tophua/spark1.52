@@ -72,7 +72,7 @@ class StateDStream[K: ClassTag, V: ClassTag, S: ClassTag](
         // Try to get the parent RDD
         //试图让父RDD
         parent.getOrCompute(validTime) match {
-          //如果父RDD的存在，然后计算像往常一样
+          //如果父RDD的存在,然后计算像往常一样
           case Some(parentRDD) => {   // If parent RDD exists, then compute as usual
             computeUsingPreviousRDD (parentRDD, prevStateRDD)
           }

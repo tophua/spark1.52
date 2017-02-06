@@ -112,7 +112,7 @@ private[streaming] class BlockGenerator(
     val Initialized, Active, StoppedAddingData, StoppedGeneratingBlocks, StoppedAll = Value
   }
   import GeneratorState._
-  //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔，毫秒
+  //Spark Streaming接收器将接收数据合并成数据块并存储在Spark里的时间间隔,毫秒
   private val blockIntervalMs = conf.getTimeAsMs("spark.streaming.blockInterval", "200ms")
   require(blockIntervalMs > 0, s"'spark.streaming.blockInterval' should be a positive value")
   //以一个固定间隔生成block(默认200ms),用于将CurrentBuffer中缓存的数据流封装为Block后放入blocksForPushing
@@ -230,7 +230,7 @@ private[streaming] class BlockGenerator(
   def addMultipleDataWithCallback(dataIterator: Iterator[Any], metadata: Any): Unit = {
     if (state == Active) {
       // Unroll iterator into a temp buffer, and wait for pushing in the process
-      //将迭代器为临时缓冲，等待过程中的推送
+      //将迭代器为临时缓冲,等待过程中的推送
       val tempBuffer = new ArrayBuffer[Any]
       dataIterator.foreach { data =>
         //提供限制在接收器消费数据的速率

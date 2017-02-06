@@ -193,13 +193,13 @@ class ExecutorAllocationManagerSuite
     assert(numExecutorsToAdd(manager) === 1)
 
     // Verify that running a task once we're at our limit doesn't blow things up
-    //确认运行一个任务的极限，
+    //确认运行一个任务的极限,
     sc.listenerBus.postToAll(SparkListenerTaskStart(2, 0, createTaskInfo(0, 1, "executor-1")))
     assert(addExecutors(manager) === 0)
     assert(numExecutorsTarget(manager) === 10)
   }
 
-  test("cancel pending executors when no longer needed") {//取消挂起的执行者，当不再需要
+  test("cancel pending executors when no longer needed") {//取消挂起的执行者,当不再需要
     sc = createSparkContext(0, 10, 0)
     val manager = sc.executorAllocationManager.get
     sc.listenerBus.postToAll(SparkListenerStageSubmitted(createStageInfo(2, 5)))
@@ -598,7 +598,7 @@ class ExecutorAllocationManagerSuite
 
     // Start two different stages 开始两个不同的阶段
     // The add timer should be canceled only if all tasks in both stages start running
-    //只有在两个阶段的所有任务开始运行时，才应该取消添加计时器
+    //只有在两个阶段的所有任务开始运行时,才应该取消添加计时器
     sc.listenerBus.postToAll(SparkListenerStageSubmitted(createStageInfo(1, numTasks)))
     sc.listenerBus.postToAll(SparkListenerStageSubmitted(createStageInfo(2, numTasks)))
     assert(addTime(manager) !== NOT_SET)
@@ -628,7 +628,7 @@ class ExecutorAllocationManagerSuite
     assert(!removeTimes(manager).contains("executor-2"))
 
     // Finishing all tasks running on an executor should start the remove timer for that executor
-    //完成执行器上运行的所有任务，应启动该执行器的删除计时器
+    //完成执行器上运行的所有任务,应启动该执行器的删除计时器
     sc.listenerBus.postToAll(SparkListenerTaskEnd(
       0, 0, "task-type", Success, createTaskInfo(0, 0, "executor-1"), new TaskMetrics))
     sc.listenerBus.postToAll(SparkListenerTaskEnd(

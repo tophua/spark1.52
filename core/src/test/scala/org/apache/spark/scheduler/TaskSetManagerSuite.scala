@@ -141,7 +141,7 @@ class FakeTaskScheduler(sc: SparkContext, liveExecutors: (String, String)* /* ex
 
 /**
  * A Task implementation that results in a large serialized task.
- * 一个任务的执行，结果在一个大的系列任务
+ * 一个任务的执行,结果在一个大的系列任务
  */
 class LargeTask(stageId: Int) extends Task[Array[Byte]](stageId, 0, 0, Seq.empty) {
   val randomBuffer = new Array[Byte](TaskSetManager.TASK_SIZE_TO_WARN_KB * 1024)
@@ -190,7 +190,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     sc = new SparkContext("local", "test")
     val sched = new FakeTaskScheduler(sc, ("exec1", "host1"))
     val taskSet = FakeTask.createTaskSet(3)
-    //在taskSchedulerImpl中，一组任务交给一个新的TaskSetManager实例进行管理,
+    //在taskSchedulerImpl中,一组任务交给一个新的TaskSetManager实例进行管理,
     //所有的TaskSetManager经由SchedulableBuilder根据特定的调度策略进度排序
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES)
 
@@ -330,7 +330,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     clock.advance(LOCALITY_WAIT_MS)
 
     // After another delay, we can go ahead and launch that task non-locally
-    //在另一个延迟后,我们可以继续前进，并启动非本地任务
+    //在另一个延迟后,我们可以继续前进,并启动非本地任务
     assert(manager.resourceOffer("exec2", "host2", ANY).get.index === 3)
   }
 
@@ -459,7 +459,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     }
 
     // Run the task on exec1.1 - should work, and then fail it on exec1.1
-    //运行在exec1.1的任务工作，然后失败了exec1.1
+    //运行在exec1.1的任务工作,然后失败了exec1.1
     {
       val offerResult = manager.resourceOffer("exec1.1", "host1", NODE_LOCAL)
       assert(offerResult.isDefined,
@@ -479,7 +479,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     }
 
     // Run the task on exec2 - should work, and then fail it on exec2
-    //运行在exec2的任务工作，然后失败了exec2
+    //运行在exec2的任务工作,然后失败了exec2
     {
       val offerResult = manager.resourceOffer("exec2", "host2", ANY)
       assert(offerResult.isDefined, "Expect resource offer to return a task")
@@ -545,7 +545,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     sched.addExecutor("execC", "host2")
     manager.executorAdded()
     // Valid locality should contain PROCESS_LOCAL, NODE_LOCAL, RACK_LOCAL and ANY
-    //有效的地方应包含process_local，node_local，rack_local和任何
+    //有效的地方应包含process_local,node_local,rack_local和任何
     assert(manager.myLocalityLevels.sameElements(
       Array(PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY)))
     // test if the valid locality is recomputed when the executor is lost

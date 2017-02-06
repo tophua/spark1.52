@@ -628,7 +628,7 @@ class TestServer(portToBind: Int = 0) extends Logging {
     //将创建一个测试连接到服务器,以便我们可以确保它已经启动
     val socket = new Socket("localhost", port)
     try {
-      //使当前线程在锁存器倒计数至零之前一直等待，除非线程被中断或超出了指定的等待时间     
+      //使当前线程在锁存器倒计数至零之前一直等待,除非线程被中断或超出了指定的等待时间     
       startLatch.await(millis, TimeUnit.MILLISECONDS)//timeout -(毫秒)要等待的最长时间
     } finally {
       if (!socket.isClosed) {

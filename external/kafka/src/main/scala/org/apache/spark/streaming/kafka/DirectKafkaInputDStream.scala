@@ -51,10 +51,10 @@ import org.apache.spark.streaming.scheduler.rate.RateEstimator
  *  starting point of the stream
  * @param messageHandler function for translating each message into the desired type
  * 
- * DirectKafkaInputDStream：负责侦测最新 offset，并将 offset 分配至唯一个 batch
- *	会在每次 batch 生成时，依靠 latestLeaderOffsets() 方法去侦测最新的 offset
- * 然后与上一个 batch 侦测到的 offset 相减，就能得到一个 offset 的范围 offsetRange
- * 把这个 offset 范围内的数据，唯一分配到本 batch 来处理
+ * DirectKafkaInputDStream：负责侦测最新 offset,并将 offset 分配至唯一个 batch
+ *	会在每次 batch 生成时,依靠 latestLeaderOffsets() 方法去侦测最新的 offset
+ * 然后与上一个 batch 侦测到的 offset 相减,就能得到一个 offset 的范围 offsetRange
+ * 把这个 offset 范围内的数据,唯一分配到本 batch 来处理
  */
 private[streaming]
 class DirectKafkaInputDStream[

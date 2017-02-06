@@ -58,7 +58,7 @@ object OneHotEncoderExample {
       .fit(df)//fit()方法将DataFrame转化为一个Transformer的算法
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val indexed = indexer.transform(df)
-  //对随机分布的类别进行OneHotEncoder，转换后可以当成连续数值输入
+  //对随机分布的类别进行OneHotEncoder,转换后可以当成连续数值输入
     val encoder = new OneHotEncoder()
       .setInputCol("categoryIndex")
       .setOutputCol("categoryVec")

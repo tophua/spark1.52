@@ -152,7 +152,7 @@ abstract class DStream[T: ClassTag] (
 
   /**
    * Make a scope that groups RDDs created in the same DStream operation in the same batch.
-   * 做一个范围，组RDDS创造了在同一dstream运行在同一批
+   * 做一个范围,组RDDS创造了在同一dstream运行在同一批
    * Each DStream produces many scopes and each scope may be shared by other DStreams created
    * in the same operation. Separate calls to the same DStream operation create separate scopes.
    * For instance, `dstream.map(...).map(...)` creates two separate scopes per batch.
@@ -486,9 +486,9 @@ abstract class DStream[T: ClassTag] (
    * this to clear their own metadata along with the generated RDDs.
    */
   private[streaming] def clearMetadata(time: Time) {
-  //如果设置为true，强迫将SparkStreaming持久化的RDD数据从Spark内存中清理，
-  //同样 的，SparkStreaming接收的原始输入数据也会自动被清理；如果设置为false，
-  //则允许原始输入数据和持久化的RDD数据可被外部的 Streaming应用程序访问，因为这些数据不会自动清理
+  //如果设置为true,强迫将SparkStreaming持久化的RDD数据从Spark内存中清理,
+  //同样 的,SparkStreaming接收的原始输入数据也会自动被清理；如果设置为false,
+  //则允许原始输入数据和持久化的RDD数据可被外部的 Streaming应用程序访问,因为这些数据不会自动清理
     val unpersistData = ssc.conf.getBoolean("spark.streaming.unpersist", true)
     val oldRDDs = generatedRDDs.filter(_._1 <= (time - rememberDuration))
     logDebug("Clearing references to old RDDs: [" +

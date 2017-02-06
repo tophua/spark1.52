@@ -87,7 +87,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
         1L, "test", None),
       SparkListenerApplicationEnd(4L))
 
-    // Write an unfinished app, new-style.写一个未完成的应用程序，新型
+    // Write an unfinished app, new-style.写一个未完成的应用程序,新型
     val newAppIncomplete = newLogFile("new2", None, inProgress = true)
     writeFile(newAppIncomplete, true, None,
       SparkListenerApplicationStart(newAppIncomplete.getName(), Some("new-incomplete"), 1L, "test",
@@ -102,7 +102,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
 
     // Check for logs so that we force the older unfinished app to be loaded, to make
     // sure unfinished apps are also sorted correctly.
-    //检查日志，使我们迫使旧的未完成的应用程序将被加载,为了确保未完成的应用程序也正确分类。
+    //检查日志,使我们迫使旧的未完成的应用程序将被加载,为了确保未完成的应用程序也正确分类。
     provider.checkForLogs()
 
     // Write an unfinished app, old-style. 写一个未完成的应用程序,旧的风格
@@ -394,14 +394,14 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     val provider = new FsHistoryProvider(createTestConf())
 
     // Write a new log file without an app id, to make sure it's ignored.
-    //写一个新的日志文件，没有一个应用程序的ID,以确保它被忽略。
+    //写一个新的日志文件,没有一个应用程序的ID,以确保它被忽略。
     val logFile1 = newLogFile("app1", None, inProgress = true)
     writeFile(logFile1, true, None,
       SparkListenerLogStart("1.4")
     )
 
     // Write a 1.2 log file with no start event (= no app id), it should be ignored.
-    //写一个1.2日志文件，没有启动事件（=没有应用程序的身份证），它应该被忽略。
+    //写一个1.2日志文件,没有启动事件（=没有应用程序的身份证）,它应该被忽略。
     writeOldLog("v12Log", "1.2", None, false)
 
     // Write 1.0 and 1.1 logs, which don't have app ids.
@@ -422,7 +422,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
   /**
    * Asks the provider to check for logs and calls a function to perform checks on the updated
    * app list.
-   * 请提供程序检查日志，并调用一个函数来执行更新的应用程序列表的检查 
+   * 请提供程序检查日志,并调用一个函数来执行更新的应用程序列表的检查 
    * Example:
    *
    *     updateAndCheck(provider) { list =>

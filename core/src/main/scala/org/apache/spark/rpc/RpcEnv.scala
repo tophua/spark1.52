@@ -31,18 +31,18 @@ import org.apache.spark.util.{RpcUtils, Utils}
 /**
  * A RpcEnv implementation must have a [[RpcEnvFactory]] implementation with an empty constructor
  * so that it can be created via Reflection.
- *  RpcEnv是一个RpcEndpoints用于处理消息的环境，管理着整个RpcEndpoint的生命周期
+ *  RpcEnv是一个RpcEndpoints用于处理消息的环境,管理着整个RpcEndpoint的生命周期
    * 1)根据name或uri注册endpoints
    * 2)管理各种消息的处理
    * 3)停止endpoints
    * 4)RpcEnv必须通过工厂类create创建
    * 
-   * RpcEnv里面有setupEndpoint方法， RpcEndpoint和RpcEndpointRef向RpcEnv进行注册。
-		客户端通过RpcEndpointRef发消息，首先通过RpcEnv来处理这个消息，找到这个消息具体发给谁，	然后路由给RpcEndpoint实体。
-		现在有两种方式，一种是AkkaRpcEnv，另一种是NettyRpcEnv。Spark默认使用更加高效的NettyRpcEnv。
-          对于Rpc捕获到的异常消息，RpcEnv将会用RpcCallContext.sendFailure将失败消息发送给发送者，
-          或者将没有发送者，‘NotSerializableException’等记录到日志中。
-          同时，
+   * RpcEnv里面有setupEndpoint方法, RpcEndpoint和RpcEndpointRef向RpcEnv进行注册。
+		客户端通过RpcEndpointRef发消息,首先通过RpcEnv来处理这个消息,找到这个消息具体发给谁,	然后路由给RpcEndpoint实体。
+		现在有两种方式,一种是AkkaRpcEnv,另一种是NettyRpcEnv。Spark默认使用更加高效的NettyRpcEnv。
+          对于Rpc捕获到的异常消息,RpcEnv将会用RpcCallContext.sendFailure将失败消息发送给发送者,
+          或者将没有发送者,‘NotSerializableException’等记录到日志中。
+          同时,
     RpcEnv也提供了根据name或uri获取RpcEndpointRef的方法。
  */
 private[spark] object RpcEnv {
@@ -69,8 +69,8 @@ private[spark] object RpcEnv {
 
 }
 /**
- * RpcEnv处理从RpcEndpointRef或远程节点发送过来的消息，然后把响应消息给RpcEndpoint
-        对于Rpc捕获到的异常消息，RpcEnv将会用RpcCallContext.sendFailure将失败消息发送给发送者，
+ * RpcEnv处理从RpcEndpointRef或远程节点发送过来的消息,然后把响应消息给RpcEndpoint
+        对于Rpc捕获到的异常消息,RpcEnv将会用RpcCallContext.sendFailure将失败消息发送给发送者,
         或者将没有发送者、‘NotSerializableException’等记录到日志中
  * An RPC environment. [[RpcEndpoint]]s need to register itself with a name to [[RpcEnv]] to
  * receives messages. Then [[RpcEnv]] will process messages sent from [[RpcEndpointRef]] or remote
@@ -85,7 +85,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
   private[spark] val defaultLookupTimeout = RpcUtils.lookupRpcTimeout(conf)
 
   /**
-   * 根据RpcEndpoint返回RpcEndpointRef，具体实现在RpcEndpoint.self方法中，如果RpcEndpointRef不存在，将返回null
+   * 根据RpcEndpoint返回RpcEndpointRef,具体实现在RpcEndpoint.self方法中,如果RpcEndpointRef不存在,将返回null
    * Return RpcEndpointRef of the registered [[RpcEndpoint]]. Will be used to implement
    * [[RpcEndpoint.self]]. Return `null` if the corresponding [[RpcEndpointRef]] does not exist.
    * endpoint(服务端点)
@@ -99,12 +99,12 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
   def address: RpcAddress
 
   /**
-   * RpcEnv是一个RpcEndpoints用于处理消息的环境，管理着整个RpcEndpoint的生命周期
+   * RpcEnv是一个RpcEndpoints用于处理消息的环境,管理着整个RpcEndpoint的生命周期
    * 1)根据name或uri注册endpoints
    * 2)管理各种消息的处理
    * 3)停止endpoints
    * 
-   * RpcEnv里面有setupEndpoint方法， RpcEndpoint和RpcEndpointRef向RpcEnv进行注册
+   * RpcEnv里面有setupEndpoint方法, RpcEndpoint和RpcEndpointRef向RpcEnv进行注册
    * 
    * 根据name注册RpcEndpoint到RpcEnv中并返回它的一个引用RpcEndpointRef
    * Register a [[RpcEndpoint]] with a name and return its [[RpcEndpointRef]]. [[RpcEnv]] does not
@@ -121,7 +121,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
   def asyncSetupEndpointRefByURI(uri: String): Future[RpcEndpointRef]
 
   /**   
-   * 根据url同步获取RpcEndpointRef，这是一个阻塞操作
+   * 根据url同步获取RpcEndpointRef,这是一个阻塞操作
    * Retrieve the [[RpcEndpointRef]] represented by `uri`. This is a blocking action.
    */
   def setupEndpointRefByURI(uri: String): RpcEndpointRef = {
@@ -130,7 +130,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
 
   /**
    * 异步获取RpcEndpointRef 
-   * 根据systemName、address、endpointName获取RpcEndpointRef，其实是将三者拼接为uri，
+   * 根据systemName、address、endpointName获取RpcEndpointRef,其实是将三者拼接为uri,
    * 根据uri获取异步获取
    * Retrieve the [[RpcEndpointRef]] represented by `systemName`, `address` and `endpointName`
    * asynchronously.
@@ -142,7 +142,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
 
   /**
    * 同步获取RpcEndpointRef
-   * 根据systemName、address、endpointName获取RpcEndpointRef，其实是将三者拼接为uri
+   * 根据systemName、address、endpointName获取RpcEndpointRef,其实是将三者拼接为uri
    * Retrieve the [[RpcEndpointRef]] represented by `systemName`, `address` and `endpointName`.
    * This is a blocking action.
    */
@@ -179,7 +179,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
   def uriOf(systemName: String, address: RpcAddress, endpointName: String): String
 
   /**
-   * RpcEndpointRef需要RpcEnv来反序列化，所以当反序列化RpcEndpointRefs的任何object时，应该通过该方法来操作
+   * RpcEndpointRef需要RpcEnv来反序列化,所以当反序列化RpcEndpointRefs的任何object时,应该通过该方法来操作
    * [[RpcEndpointRef]] cannot be deserialized without [[RpcEnv]]. So when deserializing any object
    * that contains [[RpcEndpointRef]]s, the deserialization codes should be wrapped by this method.
    */
@@ -273,8 +273,8 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
   }
 
   /**
-   * 在规定时间内返回对象， Await是scala并发库中的一个对象，result在duration时间片内返回Awaitable的执行结果。
-   * future类继承于Awaitable类，
+   * 在规定时间内返回对象, Await是scala并发库中的一个对象,result在duration时间片内返回Awaitable的执行结果。
+   * future类继承于Awaitable类,
    * Wait for the completed result and return it. If the result is not available within this
    * timeout, throw a [[RpcTimeoutException]] to indicate which configuration controls the timeout.
    * @param  awaitable  the `Awaitable` to be awaited(可等待)
@@ -284,10 +284,10 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
   def awaitResult[T](awaitable: Awaitable[T]): T = {
     try {
       /**
-       * Await 它有两个方法，一个是Await.ready，当Future的状态为完成时返回，
-       *                    一种是Await.result，直接返回Future持有的结果
+       * Await 它有两个方法,一个是Await.ready,当Future的状态为完成时返回,
+       *                    一种是Await.result,直接返回Future持有的结果
        * Future还提供了一些map,filter,foreach等操作
-       * Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+       * Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
        */
       Await.result(awaitable, duration)
     } catch addMessageIfTimeout

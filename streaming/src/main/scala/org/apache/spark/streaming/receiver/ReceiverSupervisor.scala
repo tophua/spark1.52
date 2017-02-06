@@ -161,7 +161,7 @@ private[streaming] abstract class ReceiverSupervisor(
 
   /** 
    *  Called when receiver is started. Return true if the driver accepts us 
-   *  当接收器启动时调用,如果Driver接受我们的话，返回真的
+   *  当接收器启动时调用,如果Driver接受我们的话,返回真的
    *  */
   protected def onReceiverStart(): Boolean
 
@@ -287,7 +287,7 @@ private[streaming] abstract class ReceiverSupervisor(
 
   /** 
    *  Wait the thread until the supervisor is stopped 
-   *  等待线程，直到监督者停止
+   *  等待线程,直到监督者停止
    *  */
   def awaitTermination() {
     logInfo("Waiting for receiver to be stopped")

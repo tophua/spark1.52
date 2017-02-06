@@ -201,7 +201,7 @@ object MasterFailureTest extends Logging {
 
     // Run the streams and repeatedly kill it until the last expected output
     // has been generated, or until it has run for twice the expected time
-    //运行流，并多次杀死它，直到最后一个预期的输出已产生,或者直到它运行了两倍的预期时间
+    //运行流,并多次杀死它,直到最后一个预期的输出已产生,或者直到它运行了两倍的预期时间
     val lastExpectedOutput = expectedOutput.last  //取出最后一个值10
     val maxTimeToRun = expectedOutput.size * batchDuration.milliseconds * 2//10x1000X2=20000
     //合并输出值

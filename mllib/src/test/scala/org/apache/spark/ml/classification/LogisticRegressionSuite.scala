@@ -129,7 +129,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
  			*/
         println(s"label=$label,prediction=$prediction,features=$features,rawPrediction=$rawPrediction,probability=$probability")
       }
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(model.getThreshold === 0.5)
     //特征列名
     assert(model.getFeaturesCol === "features")//特征
@@ -147,7 +147,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("setThreshold, getThreshold") {//设置和获得阈值
     val lr = new LogisticRegression
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(lr.getThreshold === 0.5, "LogisticRegression.threshold should default to 0.5")
     //逻辑回归不应有默认设置的阈值
     withClue("LogisticRegression should not have thresholds set by default.") {
@@ -160,10 +160,10 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     // Intuition: Large threshold or large thresholds(1) makes class 0 more likely.
     //凭直觉:大的阈值或大阈值1可能0适合
     lr.setThreshold(1.0)
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(lr.getThresholds === Array(0.0, 1.0))
     lr.setThreshold(0.0)
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(lr.getThresholds === Array(1.0, 0.0))
     lr.setThreshold(0.5)
     assert(lr.getThresholds === Array(0.5, 0.5))
@@ -223,7 +223,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val lr = new LogisticRegression()
       .setMaxIter(10)
       .setRegParam(1.0)//正则化参数>=0
-       //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+       //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       .setThreshold(0.6)
       //类别条件概率预测结果列名
       .setProbabilityCol("myProbability")
@@ -233,7 +233,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val parent = model.parent.asInstanceOf[LogisticRegression]
     assert(parent.getMaxIter === 10)
     assert(parent.getRegParam === 1.0)//正则化参数>=0
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(parent.getThreshold === 0.6)
     assert(model.getThreshold === 0.6)
 
@@ -267,7 +267,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val parent2 = model2.parent.asInstanceOf[LogisticRegression]
     assert(parent2.getMaxIter === 5)//最大迭代数
     assert(parent2.getRegParam === 0.1)//正则化参数>=0
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(parent2.getThreshold === 0.4)//获得阈值
     assert(model2.getThreshold === 0.4)
      //类别条件概率预测结果列名
@@ -281,7 +281,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     val model = lr.fit(dataset)
     //如果是分类树,指定有多少种类别,随机森林训练的树的个数
     assert(model.numClasses === 2)
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     val threshold = model.getThreshold
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val results = model.transform(dataset)
@@ -907,11 +907,11 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("statistics on training data") {//训练数据统计
     // Test that loss is monotonically decreasing.
-    //测试，损失是单调递减
+    //测试,损失是单调递减
     val lr = new LogisticRegression()
       .setMaxIter(10)
       .setRegParam(1.0)//正则化参数>=0
-      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+      //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       .setThreshold(0.6)
       //fit()方法将DataFrame转化为一个Transformer的算法
     val model = lr.fit(dataset)

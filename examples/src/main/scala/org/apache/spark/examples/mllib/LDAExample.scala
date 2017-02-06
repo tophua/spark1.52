@@ -272,7 +272,7 @@ object LDAExample {
  * Simple Tokenizer.
  *简单的分解器
  * TODO: Formalize the interface, and make this a public class in mllib.feature
- * 正式的接口，使mllib.feature公共类
+ * 正式的接口,使mllib.feature公共类
  */
 private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Serializable {
 
@@ -308,7 +308,7 @@ private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Se
       // Convert to lowercase 转换小写
       val word: String = text.substring(current, end).toLowerCase
       // Remove short words and strings that aren't only letters
-      //删除短的单词和字符串，不仅是字母
+      //删除短的单词和字符串,不仅是字母
       word match {
         case allWordRegex(w) if w.length >= minWordLength && !stopwords.contains(w) =>
           words += w

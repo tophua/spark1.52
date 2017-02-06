@@ -125,7 +125,7 @@ object LogisticRegressionSummaryExample {
     val maxFMeasure = fMeasure.select(max("F-Measure")).head().getDouble(0)
     val bestThreshold = fMeasure.where($"F-Measure" === maxFMeasure)
       .select("threshold").head().getDouble(0)
-     //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+     //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     lrModel.setThreshold(bestThreshold)
     // $example off$
 

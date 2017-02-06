@@ -152,7 +152,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     // find splits should not return identical splits
     //查找拆分不应该返回相同的拆分
     // when there are not enough split candidates, reduce the number of splits in metadata
-    //当没有足够的分割候选时，减少元数据中的分裂次数
+    //当没有足够的分割候选时,减少元数据中的分裂次数
     {
       val fakeMetadata = new DecisionTreeMetadata(1, 0, 0, 0,
         Map(), Set(),
@@ -217,7 +217,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       /**
       指明特征是类别型的以及每个类别型特征对应值(类别)。
       Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
-      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
+      注意特征索引是从0开始的,0和4表示第1和第5个特征**/
       categoricalFeaturesInfo = Map(0 -> 3, 1-> 3))
 
     val metadata = DecisionTreeMetadata.buildMetadata(rdd, strategy)
@@ -241,7 +241,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     * ]
     */
     assert(splits(0)(0).feature === 0)
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(splits(0)(0).threshold === Double.MinValue)
     assert(splits(0)(0).featureType === Categorical)
     assert(splits(0)(0).categories.length === 1)
@@ -255,7 +255,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     * ]
     */
     assert(splits(1)(0).feature === 1)
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(splits(1)(0).threshold === Double.MinValue)
     assert(splits(1)(0).featureType === Categorical)
     assert(splits(1)(0).categories.length === 1)
@@ -300,7 +300,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       /**
       指明特征是类别型的以及每个类别型特征对应值(类别)。
       Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
-      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
+      注意特征索引是从0开始的,0和4表示第1和第5个特征**/
       categoricalFeaturesInfo = Map(0 -> 10, 1-> 10))
     //因此,分类的功能将被排序
     // 2^(10-1) - 1 > 100, so categorical features will be ordered
@@ -400,7 +400,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
       nodesForGroup, treeToNodeToIndexInfo, splits, bins, nodeQueue)
 
     // don't enqueue a node into node queue if its impurity is 0.0
-    //不要将一个节点到节点的队列，如果不纯度0
+    //不要将一个节点到节点的队列,如果不纯度0
     assert(nodeQueue.isEmpty)
 
     // set impurity and predict for topNode
@@ -746,13 +746,13 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val rdd = sc.parallelize(arr)
     /**
     1.训练数据集 
-    2.目标类别个数，即结果有几种选择 
-    3.Map中的键值分别对应Vector下标和该下标对应类别特征的取值情况，
-               空表示所有特征都是数值型（为了方便，示例中直接取空，实际当中并不能这么使用） 
-    4.不纯性(impurity)度量：gini或者entropy，不纯度用来衡量一个规则的好坏，
-               好的规则可以将数据划分为等值的两部分，坏规则则相反 
-    5.决策树的最大深度，越深的决策树越有可能产生过度拟合的问题 
-    6.决策树的最大桶数，每层使用的决策规则的个数，越多就可能精确，花费的时候也就越多,
+    2.目标类别个数,即结果有几种选择 
+    3.Map中的键值分别对应Vector下标和该下标对应类别特征的取值情况,
+               空表示所有特征都是数值型（为了方便,示例中直接取空,实际当中并不能这么使用） 
+    4.不纯性(impurity)度量：gini或者entropy,不纯度用来衡量一个规则的好坏,
+               好的规则可以将数据划分为等值的两部分,坏规则则相反 
+    5.决策树的最大深度,越深的决策树越有可能产生过度拟合的问题 
+    6.决策树的最大桶数,每层使用的决策规则的个数,越多就可能精确,花费的时候也就越多,
                  最小的桶数应该不小于类别特征中最大的选择个数
      */
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 4,
@@ -821,7 +821,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val split = rootNode.split.get
     assert(split.feature === 1)
     assert(split.featureType === Continuous)
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(split.threshold > 1980)
     assert(split.threshold < 2020)
 
@@ -844,7 +844,7 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val split = rootNode.split.get
     assert(split.feature === 1)
     assert(split.featureType === Continuous)
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(split.threshold > 1980)
     assert(split.threshold < 2020)
   }
@@ -924,13 +924,13 @@ class DecisionTreeSuite extends SparkFunSuite with MLlibTestSparkContext {
     val rdd = sc.parallelize(arr)
     /**
       1.训练数据集 
-      2.目标类别个数，即结果有几种选择 
-      3.Map中的键值分别对应Vector下标和该下标对应类别特征的取值情况，
-                 空表示所有特征都是数值型（为了方便，示例中直接取空，实际当中并不能这么使用） 
-      4.不纯性(impurity)度量：gini或者entropy，不纯度用来衡量一个规则的好坏，
-                 好的规则可以将数据划分为等值的两部分，坏规则则相反 
-      5.决策树的最大深度，越深的决策树越有可能产生过度拟合的问题 
-      6.决策树的最大桶数，每层使用的决策规则的个数，越多就可能精确，花费的时候也就越多,
+      2.目标类别个数,即结果有几种选择 
+      3.Map中的键值分别对应Vector下标和该下标对应类别特征的取值情况,
+                 空表示所有特征都是数值型（为了方便,示例中直接取空,实际当中并不能这么使用） 
+      4.不纯性(impurity)度量：gini或者entropy,不纯度用来衡量一个规则的好坏,
+                 好的规则可以将数据划分为等值的两部分,坏规则则相反 
+      5.决策树的最大深度,越深的决策树越有可能产生过度拟合的问题 
+      6.决策树的最大桶数,每层使用的决策规则的个数,越多就可能精确,花费的时候也就越多,
                    最小的桶数应该不小于类别特征中最大的选择个数
     **/
     val strategy = new Strategy(algo = Classification, impurity = Gini,

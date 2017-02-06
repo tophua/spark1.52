@@ -290,7 +290,7 @@ object DecisionTreeExample {
           .setFeaturesCol("indexedFeatures")//特征列
           .setLabelCol(labelColName)//标签列
           .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
-          .setMaxBins(params.maxBins)//连续特征离散化的最大数量，以及选择每个节点分裂特征的方式
+          .setMaxBins(params.maxBins)//连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
           .setMinInstancesPerNode(params.minInstancesPerNode)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)//
@@ -344,7 +344,7 @@ object DecisionTreeExample {
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
 
-    // Evaluate model on training, test data 训练评估模型，测试数据
+    // Evaluate model on training, test data 训练评估模型,测试数据
     algo match {
       case "classification" =>//分类
         println("Training data results:")

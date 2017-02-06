@@ -34,7 +34,7 @@ import org.apache.spark.util.{ManualClock, Utils}
 import org.apache.spark.{SparkConf, SparkException, SparkFunSuite}
 /**
  * WriteAheadLog WAL(预写式日志)测试套件
- * WAL先写入磁盘然后写入Executor中，失败可能性不大
+ * WAL先写入磁盘然后写入Executor中,失败可能性不大
  */
 class WriteAheadLogSuite extends SparkFunSuite with BeforeAndAfter {
 
@@ -414,7 +414,7 @@ object WriteAheadLogSuite {
     val wal = new FileBasedWriteAheadLog(new SparkConf(), logDirectory, hadoopConf, 1, 1)
 
     // Ensure that 500 does not get sorted after 2000, so put a high base value.
-    //确保500不被排序后的2000，所以放一个高的基础值。
+    //确保500不被排序后的2000,所以放一个高的基础值。
     data.foreach { item =>
       manualClock.advance(500)
       wal.write(item, manualClock.getTimeMillis())

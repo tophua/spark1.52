@@ -28,7 +28,7 @@ import org.apache.spark.rpc.{RpcCallContext, RpcEndpointRef, RpcEnv, ThreadSafeR
 import org.apache.spark.scheduler._
 import org.apache.spark.scheduler.cluster.ExecutorInfo
 /**
- * ReviveOffers本身是一个空的case object对象,只是起到触发底层资源调度的作用，
+ * ReviveOffers本身是一个空的case object对象,只是起到触发底层资源调度的作用,
  * 在有Task提交或者计算资源变动的时候会发送ReviveOffers这个消息作为触发器
  */
 private case class ReviveOffers()
@@ -60,7 +60,7 @@ private[spark] class LocalEndpoint(
   private val executor = new Executor(
     localExecutorId, localExecutorHostname, SparkEnv.get, userClassPath, isLocal = true)
 /**
- * 处理RpcEndpointRef.send或RpcCallContext.reply方法，如果收到不匹配的消息
+ * 处理RpcEndpointRef.send或RpcCallContext.reply方法,如果收到不匹配的消息
  * PartialFunction[Any, Unit]Any接收任务类型,Unit返回值
  */
   override def receive: PartialFunction[Any, Unit] = {
@@ -77,7 +77,7 @@ private[spark] class LocalEndpoint(
     case KillTask(taskId, interruptThread) =>
       executor.killTask(taskId, interruptThread)
   }
-//处理RpcEndpointRef.ask方法，默认如果不匹配消息
+//处理RpcEndpointRef.ask方法,默认如果不匹配消息
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case StopExecutor =>
       executor.stop()
@@ -125,7 +125,7 @@ private[spark] class LocalBackend(
    * @param conf Spark configuration.
    */
   def getUserClasspath(conf: SparkConf): Seq[URL] = {
-    //追加到executor类路径中的附加类路径，主要为了兼容旧版本的Spark
+    //追加到executor类路径中的附加类路径,主要为了兼容旧版本的Spark
     val userClassPathStr = conf.getOption("spark.executor.extraClassPath")
     userClassPathStr.map(_.split(File.pathSeparator)).toSeq.flatten.map(new File(_).toURI.toURL)
   }

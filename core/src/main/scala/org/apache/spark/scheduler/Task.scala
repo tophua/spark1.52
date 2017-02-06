@@ -90,7 +90,7 @@ private[spark] abstract class Task[T](
     context.taskMetrics.setAccumulatorsUpdater(context.collectInternalAccumulators)
     //task线程为当前线程 ,在被打断的时候可以通过来停止该线程
     taskThread = Thread.currentThread()
-    if (_killed) {//如果需要杀死task,调用kill()方法，且调用的方式为不中断线程  
+    if (_killed) {//如果需要杀死task,调用kill()方法,且调用的方式为不中断线程  
       kill(interruptThread = false)
     }
     try {
@@ -139,7 +139,7 @@ private[spark] abstract class Task[T](
   @transient protected var context: TaskContextImpl = _
 
   // The actual Thread on which the task is running, if any. Initialized in run().
-  //任务正在运行的实际线程，如果有。在run()初始化。
+  //任务正在运行的实际线程,如果有。在run()初始化。
   @volatile @transient private var taskThread: Thread = _
 
   // A flag to indicate whether the task is killed. This is used in case context is not yet
@@ -175,7 +175,7 @@ private[spark] abstract class Task[T](
       context.markInterrupted()
     }
     if (interruptThread && taskThread != null) {
-      //方法不会中断一个正在运行的线程。在线程受到阻塞时抛出一个中断信号，这样线程就得以退出阻塞的状态
+      //方法不会中断一个正在运行的线程。在线程受到阻塞时抛出一个中断信号,这样线程就得以退出阻塞的状态
       taskThread.interrupt()
     }
   }

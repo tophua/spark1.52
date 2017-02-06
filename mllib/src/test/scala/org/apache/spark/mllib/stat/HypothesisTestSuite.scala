@@ -54,7 +54,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(pearson.statistic === 0.4)
     //自由度为2
     assert(pearson.degreesOfFreedom === 2)
-    //P 值，一般以P < 0.05 为显著， P <0.01 为非常显著，其含义是样本间的差异由抽样误差所致的概率小于0.05 或0.01
+    //P 值,一般以P < 0.05 为显著, P <0.01 为非常显著,其含义是样本间的差异由抽样误差所致的概率小于0.05 或0.01
     assert(pearson.pValue ~== 0.8187 relTol 1e-4)//假定值、假设机率,由于总是介于0和1之间
     //名称
     assert(pearson.method === ChiSqTest.PEARSON.name)
@@ -110,7 +110,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
   }
   /**皮尔森独立性(independence)检测**/
   /**
-   * 独立性检测，independence test，验证从两个变量抽出的配对观察值组是否互相独立。
+   * 独立性检测,independence test,验证从两个变量抽出的配对观察值组是否互相独立。
    * 其虚无假设是：两个变量呈统计独立性。
    */
   test("chi squared pearson matrix independence") {//卡方皮尔森矩阵独立性
@@ -125,7 +125,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     // `chisq.test(rbind(c(40, 56, 31, 30),c(24, 32, 10, 15), c(29, 42, 0, 12)))`
     
     assert(chi.statistic ~== 21.9958 relTol 1e-4)
-    //自由度 df=(r−1)(c−1)=(3−1)∗(4−1)=6 //其中r为行数，c为列数
+    //自由度 df=(r−1)(c−1)=(3−1)∗(4−1)=6 //其中r为行数,c为列数
     assert(chi.degreesOfFreedom === 6)
     assert(chi.pValue ~== 0.001213 relTol 1e-4)//概率值
     assert(chi.method === ChiSqTest.PEARSON.name)
@@ -257,7 +257,7 @@ class HypothesisTestSuite extends SparkFunSuite with MLlibTestSparkContext {
     // Testing the use of a user provided CDF function
     //测试一个用户提供的CDF函数的使用
     // Distribution is not serializable, so will have to create in the lambda
-    //分布是不可序列化的，所以要在lambda创建
+    //分布是不可序列化的,所以要在lambda创建
     val expCDF = (x: Double) => new ExponentialDistribution(0.2).cumulativeProbability(x)
 
     // Comparing an exponential sample with mean X to an exponential distribution with mean Y

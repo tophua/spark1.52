@@ -26,17 +26,17 @@ object RandomForestDemo {
  */
     // 加载数据
     val data = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt")
-    // 将数据随机分配为两份，一份用于训练，一份用于测试
+    // 将数据随机分配为两份,一份用于训练,一份用于测试
     val splits = data.randomSplit(Array(0.7, 0.3))
     val (trainingData, testData) = (splits(0), splits(1))
     // 随机森林训练参数设置
     //分类数
     val numClasses = 2
-    // categoricalFeaturesInfo 为空，意味着所有的特征为连续型变量
+    // categoricalFeaturesInfo 为空,意味着所有的特征为连续型变量
     val categoricalFeaturesInfo = Map[Int, Int]()
     //树的个数
     val numTrees = 3
-    //特征子集采样策略，auto 表示算法自主选取
+    //特征子集采样策略,auto 表示算法自主选取
     val featureSubsetStrategy = "auto"
     //纯度计算
     val impurity = "gini"
@@ -44,7 +44,7 @@ object RandomForestDemo {
     val maxDepth = 4
     //连续特征离散化的最大数量,以及选择每个节点分裂特征的方式
     val maxBins = 32
-    //训练随机森林分类器，trainClassifier 返回的是 RandomForestModel 对象
+    //训练随机森林分类器,trainClassifier 返回的是 RandomForestModel 对象
     val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
       numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
     // 测试数据评价训练好的分类器并计算错误率

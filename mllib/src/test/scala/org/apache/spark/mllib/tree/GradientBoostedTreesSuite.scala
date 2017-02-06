@@ -47,7 +47,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
       /**
       指明特征是类别型的以及每个类别型特征对应值(类别)。
       Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
-      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
+      注意特征索引是从0开始的,0和4表示第1和第5个特征**/
           categoricalFeaturesInfo = Map.empty, subsamplingRate = subsamplingRate)
         val boostingStrategy =
           new BoostingStrategy(treeStrategy, SquaredError, numIterations, learningRate)
@@ -247,7 +247,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
 private object GradientBoostedTreesSuite {
 
   // Combinations for estimators, learning rates and subsamplingRate
-  //组合估计,利率和subsamplingrate学习一棵决策树使用的训练数据比例，范围[0,1]
+  //组合估计,利率和subsamplingrate学习一棵决策树使用的训练数据比例,范围[0,1]
   val testCombinations = Array((10, 1.0, 1.0), (10, 0.1, 1.0), (10, 0.5, 0.75), (10, 0.1, 0.75))
 
   val data = EnsembleTestHelper.generateOrderedLabeledPoints(numFeatures = 10, 100)

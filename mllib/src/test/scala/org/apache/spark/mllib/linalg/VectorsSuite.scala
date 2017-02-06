@@ -54,8 +54,8 @@ class VectorsSuite extends SparkFunSuite with Logging {
   }
 
   test("sparse vector construction") {
-    //稀疏向量 第一参数4表示此向量的长度，第二个参数Array(0,2,3)表示的索引，第三个参数表示值Array(0.1, 0.3, 0.4)
-    //与前面的Array(0, 2, 3)是相互对应的，表示第0个位置的值为1.0，第2个位置的值为3,即第2位置为0
+    //稀疏向量 第一参数4表示此向量的长度,第二个参数Array(0,2,3)表示的索引,第三个参数表示值Array(0.1, 0.3, 0.4)
+    //与前面的Array(0, 2, 3)是相互对应的,表示第0个位置的值为1.0,第2个位置的值为3,即第2位置为0
     val vec = Vectors.sparse(n, indices, values).asInstanceOf[SparseVector]
     assert(vec.size === n)//稀疏矩阵长度 
     assert(vec.indices.eq(indices))//稀疏矩阵索引
@@ -187,8 +187,8 @@ class VectorsSuite extends SparkFunSuite with Logging {
   }
 
   test("indexing sparse vectors") {//索引稀疏向量
-    //稀疏向量 第一参数7表示此向量的长度，第二个参数Array(0, 2, 4, 6)表示的索引，第三个参数Array(1.0, 2.0, 3.0, 4.0)
-    //与前面的Array(0, 2, 4, 6)是相互对应的，表示第0个位置的值为1.0，第2个位置的值为2,第4个位置的值为3,第6个位置的值为4
+    //稀疏向量 第一参数7表示此向量的长度,第二个参数Array(0, 2, 4, 6)表示的索引,第三个参数Array(1.0, 2.0, 3.0, 4.0)
+    //与前面的Array(0, 2, 4, 6)是相互对应的,表示第0个位置的值为1.0,第2个位置的值为2,第4个位置的值为3,第6个位置的值为4
     val vec = Vectors.sparse(7, Array(0, 2, 4, 6), Array(1.0, 2.0, 3.0, 4.0))
     assert(vec(0) === 1.0)
     assert(vec(1) === 0.0)//第一个Array没有1值,数据为0
@@ -301,7 +301,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
 
   test("foreachActive") {//迭代活动
     val dv = Vectors.dense(0.0, 1.2, 3.1, 0.0)
-    //4表示此向量的长度，后面的比较直观，Seq里面每一对都是(索引，值）的形式。
+    //4表示此向量的长度,后面的比较直观,Seq里面每一对都是(索引,值）的形式。
     val sv = Vectors.sparse(4, Seq((1, 1.2), (2, 3.1), (3, 0.0)))
 
     val dvMap = scala.collection.mutable.Map[Int, Double]()
@@ -313,7 +313,7 @@ class VectorsSuite extends SparkFunSuite with Logging {
     assert(dvMap.get(1) === Some(1.2))
     assert(dvMap.get(2) === Some(3.1))
     assert(dvMap.get(3) === Some(0.0))
-    //4表示此向量的长度，后面的比较直观，Seq里面每一对都是(索引，值）的形式。
+    //4表示此向量的长度,后面的比较直观,Seq里面每一对都是(索引,值）的形式。
     val svMap = scala.collection.mutable.Map[Int, Double]()
     sv.foreachActive { (index, value) =>
       svMap.put(index, value)

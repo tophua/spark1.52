@@ -42,7 +42,7 @@ class FailureSuite extends SparkFunSuite with LocalSparkContext {
 
   // Run a 3-task map job in which task 1 deterministically fails once, and check
   // whether the job completes successfully and we ran 4 tasks in total.
-  //工作是否成功完成，我们总共完成了4项任务
+  //工作是否成功完成,我们总共完成了4项任务
   //运行一个3-task map的工作任务1确定一次失败
   test("failure in a single-stage job") {//单个的阶段Worker失败
     sc = new SparkContext("local[1,2]", "test")

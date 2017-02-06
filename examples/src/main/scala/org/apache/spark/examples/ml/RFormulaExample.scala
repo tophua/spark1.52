@@ -29,8 +29,8 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
  * RFormula通过R模型公式来选择列,支持R操作中的部分操作
  * 1. ~分隔目标和对象
- * 2. +合并对象，“+ 0”意味着删除空格
- * 3. :交互（数值相乘，类别二值化）
+ * 2. +合并对象,“+ 0”意味着删除空格
+ * 3. :交互（数值相乘,类别二值化）
  * 4. . 除了目标外的全部列
  */
 object RFormulaExample {
@@ -48,7 +48,7 @@ object RFormulaExample {
       (8, "CA", 12, 0.0),
       (9, "NZ", 15, 0.0)
     )).toDF("id", "country", "hour", "clicked")
-    //如果我们使用RFormula公式clicked ~ country+ hour，
+    //如果我们使用RFormula公式clicked ~ country+ hour,
     //则表明我们希望基于country和hour预测clicked
     val formula = new RFormula()
       .setFormula("clicked ~ country + hour")//公式

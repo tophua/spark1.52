@@ -41,7 +41,7 @@ private[spark] class MapOutputTrackerMasterEndpoint(
     override val rpcEnv: RpcEnv, tracker: MapOutputTrackerMaster, conf: SparkConf)
   extends RpcEndpoint with Logging {
   val maxAkkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)//返回Akka消息最大值
- //定义偏函数是具有类型PartialFunction[-A,+B]的一种函数。A是其接受的函数类型，B是其返回的结果类型
+ //定义偏函数是具有类型PartialFunction[-A,+B]的一种函数。A是其接受的函数类型,B是其返回的结果类型
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case GetMapOutputStatuses(shuffleId: Int) =>
       //sender返回发送消息信息
@@ -279,7 +279,7 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
    //registerMapOutPuts来保存计算结果,这个结果不是真实的数据,而是这些数据的位置,大小等元数据信息,
    //这些下游的task就可以通过这些元数据信息获取其他需要处理的数据
   def registerShuffle(shuffleId: Int, numMaps: Int) {
-    //将shuffleId、numMaps大小和MapStatus类型的Array数组的映射关系，放入mapStatuses中  
+    //将shuffleId、numMaps大小和MapStatus类型的Array数组的映射关系,放入mapStatuses中  
     //mapStatuses为TimeStampedHashMap[Int, Array[MapStatus]]类型的数据结构  
     if (mapStatuses.put(shuffleId, new Array[MapStatus](numMaps)).isDefined) {
       throw new IllegalArgumentException("Shuffle ID " + shuffleId + " registered twice")
@@ -337,7 +337,7 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
   /**
    * Return a list of locations that each have fraction of map output greater than the specified
    * threshold.
-   * 返回一个位置列表，每个位置都有大于指定阈值的Map输出。
+   * 返回一个位置列表,每个位置都有大于指定阈值的Map输出。
    * @param shuffleId id of the shuffle
    * @param reducerId id of the reduce task
    * @param numReducers total number of reducers in the shuffle

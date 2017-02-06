@@ -348,8 +348,8 @@ class ReceiverInfoCollector extends StreamingListener {
 
 class StreamingListenerSuiteReceiver extends Receiver[Any](StorageLevel.MEMORY_ONLY) with Logging {
   def onStart() {
-    //Future 只能写一次： 当一个 future 完成后，它就不能再被改变了,
-    //Future 只提供了读取计算值的接口，写入计算值的任务交给了 Promise
+    //Future 只能写一次： 当一个 future 完成后,它就不能再被改变了,
+    //Future 只提供了读取计算值的接口,写入计算值的任务交给了 Promise
     Future {
       logInfo("Started receiver and sleeping")
       println("Started receiver and sleeping")

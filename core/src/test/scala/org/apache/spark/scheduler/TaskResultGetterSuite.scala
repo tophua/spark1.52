@@ -137,7 +137,7 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
    * This test compiles a jar containing an exception and tests that when it is thrown on the
    * executor, enqueueFailedTask can correctly deserialize the failure and identify the thrown
    * exception as the cause.
-	 * 这个测试编译包含一个异常和测试，当它执行器被抛出异常
+	 * 这个测试编译包含一个异常和测试,当它执行器被抛出异常
    * Before this fix, enqueueFailedTask would throw a ClassNotFoundException when deserializing
    * the exception, resulting in an UnknownReason for the TaskEndResult.   
    */

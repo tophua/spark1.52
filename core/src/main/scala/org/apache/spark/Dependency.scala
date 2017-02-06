@@ -25,7 +25,7 @@ import org.apache.spark.shuffle.ShuffleHandle
 /**
  * :: DeveloperApi ::
  * Base class for dependencies.
- * Dependency代表了RDD之间的依赖关系，即血缘
+ * Dependency代表了RDD之间的依赖关系,即血缘
  */
 @DeveloperApi
 abstract class Dependency[T] extends Serializable {

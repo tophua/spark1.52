@@ -126,7 +126,7 @@ class CoGroupedRDD[K](@transient var rdds: Seq[RDD[_ <: Product2[K, _]]], part: 
 
   override def compute(s: Partition, context: TaskContext): Iterator[(K, Array[Iterable[_]])] = {
     val sparkConf = SparkEnv.get.conf
-   //如果为true，在shuffle期间通过溢出数据到磁盘来降低了内存使用总量，溢出阈值是由spark.shuffle.memoryFraction指定的
+   //如果为true,在shuffle期间通过溢出数据到磁盘来降低了内存使用总量,溢出阈值是由spark.shuffle.memoryFraction指定的
     val externalSorting = sparkConf.getBoolean("spark.shuffle.spill", true)
     val split = s.asInstanceOf[CoGroupPartition]
     val numRdds = dependencies.length

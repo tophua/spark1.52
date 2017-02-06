@@ -45,7 +45,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 object CosineSimilarity {
  /* case class Params(inputFile: String = null, threshold: Double = 0.1)
     extends AbstractParams[Params]*/
-  //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+  //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     case class Params(inputFile: String = "../data/mllib/CosineSimilarity.txt", threshold: Double = 0.1)
     extends AbstractParams[Params]
 
@@ -54,7 +54,7 @@ object CosineSimilarity {
 
     val parser = new OptionParser[Params]("CosineSimilarity") {
       head("CosineSimilarity: an example app.")
-      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+      //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       opt[Double]("threshold")
         //.required()
         .text(s"threshold similarity: to tradeoff computation vs quality estimate")

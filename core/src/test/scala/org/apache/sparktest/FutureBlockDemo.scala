@@ -12,11 +12,11 @@ object FutureBlockDemo {
   def main(args: Array[String]): Unit = {
     implicit val baseTime = System.currentTimeMillis
     /**
-     * 1)被传递给Future的代码块会被缺省的Dispatcher所执行，代码块的返回结果会被用来完成Future。
-     * 2)Await.result方法将阻塞1秒时间来等待Future结果返回，如果Future在规定时间内没有返回，将抛出java.util.concurrent.TimeoutException异常。
-     * 3)通过导入scala.concurrent.duration._，可以用一种方便的方式来声明时间间隔，
-     *   如100 nanos，500 millis，5 seconds、1 minute、1 hour，3 days。
-     *   还可以通过Duration(100, MILLISECONDS)，Duration(200, "millis")来创建时间间隔。
+     * 1)被传递给Future的代码块会被缺省的Dispatcher所执行,代码块的返回结果会被用来完成Future。
+     * 2)Await.result方法将阻塞1秒时间来等待Future结果返回,如果Future在规定时间内没有返回,将抛出java.util.concurrent.TimeoutException异常。
+     * 3)通过导入scala.concurrent.duration._,可以用一种方便的方式来声明时间间隔,
+     *   如100 nanos,500 millis,5 seconds、1 minute、1 hour,3 days。
+     *   还可以通过Duration(100, MILLISECONDS),Duration(200, "millis")来创建时间间隔。
      */
     // create a Future
     val f = Future {

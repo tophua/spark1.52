@@ -177,7 +177,7 @@ private[ml] trait HasThresholds extends Params {
 
   /**
    * Param for Thresholds in multi-class classification to adjust the probability of predicting each class. Array must have length equal to the number of classes, with values >= 0. The class with largest value p/t is predicted, where p is the original probability of that class and t is the class' threshold..
-   * 在多类分类阈值调整预测每一类的概率参数,数组必须具有与类的数目相等的长度，值为0
+   * 在多类分类阈值调整预测每一类的概率参数,数组必须具有与类的数目相等的长度,值为0
    * @group param
    */
   final val thresholds: DoubleArrayParam = new DoubleArrayParam(this, "thresholds", "Thresholds in multi-class classification to adjust the probability of predicting each class. Array must have length equal to the number of classes, with values >= 0. The class with largest value p/t is predicted, where p is the original probability of that class and t is the class' threshold.", (t: Array[Double]) => t.forall(_ >= 0))

@@ -59,7 +59,7 @@ import org.apache.spark.util.random.{
  * [[org.apache.spark.rdd.DoubleRDDFunctions]] contains operations available only on RDDs of
  * Doubles; 包括了只能用于Double类型RDD的操作 and 
  * [[org.apache.spark.rdd.SequenceFileRDDFunctions]] contains operations available on RDDs that
- * can be saved as SequenceFiles.包括了能被保存为SequenceFile的RDD支持的操作。通过隐式转换,只要RDD的类型正确，
+ * can be saved as SequenceFiles.包括了能被保存为SequenceFile的RDD支持的操作。通过隐式转换,只要RDD的类型正确,
  * 相关的操作就自动可用
  * All operations are automatically available on any RDD of the right type (e.g. RDD[(Int, Int)]
  * through implicit.
@@ -83,9 +83,9 @@ import org.apache.spark.util.random.{
  * RDD主构造器
  */
 abstract class RDD[T: ClassTag](
-    //在所有有父子关系的RDD，共享的是同一个SparkContext
+    //在所有有父子关系的RDD,共享的是同一个SparkContext
     @transient private var _sc: SparkContext,
-    //而子RDD的deps变量，也被赋值为一个List，里面包含一个OneToOneDependency实例，表明父RDD和子RDD之间的关系 
+    //而子RDD的deps变量,也被赋值为一个List,里面包含一个OneToOneDependency实例,表明父RDD和子RDD之间的关系 
     @transient private var deps: Seq[Dependency[_]]) extends Serializable with Logging {
       if (classOf[RDD[_]].isAssignableFrom(elementClassTag.runtimeClass)) {
       // This is a warning instead of an exception in order to avoid breaking user programs that
@@ -107,7 +107,7 @@ abstract class RDD[T: ClassTag](
   /** 
    *  Construct an RDD with just a one-to-one dependency on one parent
    *  RDD辅助构造器
-   *  this是把父RDD的SparkContext(oneParent.context)和一个列表List(new OneToOneDependency(oneParent)))，
+   *  this是把父RDD的SparkContext(oneParent.context)和一个列表List(new OneToOneDependency(oneParent))),
    *  传入了另一个RDD的构造函数
    *   */
   def this(@transient oneParent: RDD[_]) =
@@ -172,7 +172,7 @@ abstract class RDD[T: ClassTag](
   @transient var name: String = null
 /**
  * this.type表示当前对象（this)的类型。this指代当前的对象。
- * this.type被用于变量，函数参数和函数返回值的类型声明
+ * this.type被用于变量,函数参数和函数返回值的类型声明
  */
   /** Assign a name to this RDD */
   def setName(_name: String): this.type = {
@@ -183,7 +183,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Mark this RDD for persisting using the specified level.
    * this.type表示当前对象（this)的类型。this指代当前的对象。
-   * this.type被用于变量，函数参数和函数返回值的类型声明
+   * this.type被用于变量,函数参数和函数返回值的类型声明
    * @param newLevel the target storage level
    * @param allowOverride whether to override any existing level with the new one
    */
@@ -211,7 +211,7 @@ abstract class RDD[T: ClassTag](
    */
   def persist(newLevel: StorageLevel): this.type = {
     if (isLocallyCheckpointed) {
-      //之前已经调用过localCheckpoint(),这里应该标记RDD待久化,在这里我们应该重写旧的存储级别，一个是由用户显式请求
+      //之前已经调用过localCheckpoint(),这里应该标记RDD待久化,在这里我们应该重写旧的存储级别,一个是由用户显式请求
       // This means the user previously called localCheckpoint(), which should have already
       // marked this RDD for persisting. Here we should override the old storage level with
       // one that is explicitly requested by the user (after adapting it to use disk).
@@ -312,7 +312,7 @@ abstract class RDD[T: ClassTag](
    */
   final def iterator(split: Partition, context: TaskContext): Iterator[T] = {
     if (storageLevel != StorageLevel.NONE) {
-      //如果存储级别不是NONE 那么先检查是否有缓存，没有缓存则要进行计算
+      //如果存储级别不是NONE 那么先检查是否有缓存,没有缓存则要进行计算
       SparkEnv.get.cacheManager.getOrCompute(this, split, context, storageLevel)
       //SparkEnv包含运行时节点所需要的环境信息
       //cacheManager负责调用BlockManager来管理RDD的缓存,如果当前RDD原来计算过并且把结果缓存起来.
@@ -378,12 +378,12 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a new RDD by applying a function to all elements of this RDD.
-   * 返回一个新的分布式数据集，由每个原元素经过func函数转换后组成
+   * 返回一个新的分布式数据集,由每个原元素经过func函数转换后组成
    */
   def map[U: ClassTag](f: T => U): RDD[U] = withScope{
     //调用ClosureCleaner的clean清除闭包中的不能序列化的变更,防止RDD在网络传输过程中反序列化失败
     val cleanF = sc.clean(f)
-    //这里this,会调用父类的构造函数RDD[U](prev),就是之前生成的HadoopRDD，MapPartitionsRDD的构造函数，， 
+    //这里this,会调用父类的构造函数RDD[U](prev),就是之前生成的HadoopRDD,MapPartitionsRDD的构造函数,, 
     //这个this(例如也就是hadoopRdd),会被赋值给prev
     new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.map(cleanF))
   }
@@ -391,8 +391,8 @@ abstract class RDD[T: ClassTag](
   /**
    *  Return a new RDD by first applying a function to all elements of this
    *  RDD, and then flattening the results.
-   *  类似于map，但是每一个输入元素，会被映射为0到多个输出元素
-   *  （因此，func函数的返回值是一个Seq，而不是单一元素）
+   *  类似于map,但是每一个输入元素,会被映射为0到多个输出元素
+   *  （因此,func函数的返回值是一个Seq,而不是单一元素）
    */
   def flatMap[U: ClassTag](f: T => TraversableOnce[U]): RDD[U] = withScope {
     val cleanF = sc.clean(f)
@@ -401,7 +401,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a new RDD containing only the elements that satisfy a predicate.
-   * 对RDD中的数据单元进行过滤。如果过滤函数f返回true，则当前被验证的数据单元会被过滤。
+   * 对RDD中的数据单元进行过滤。如果过滤函数f返回true,则当前被验证的数据单元会被过滤。
    */
   def filter(f: T => Boolean): RDD[T] = withScope {
     val cleanF = sc.clean(f)
@@ -428,10 +428,10 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
-   * 该函数用于将RDD进行重分区，使用HashPartitioner。
+   * 该函数用于将RDD进行重分区,使用HashPartitioner。
    * 该函数其实就是coalesce函数第二个参数为true的实现
    * Return a new RDD that has exactly(正确) numPartitions partitions.
-   *repartition用于增减rdd分区。coalesce特指减少分区，可以通过一次窄依赖的映射避免shuffle
+   *repartition用于增减rdd分区。coalesce特指减少分区,可以通过一次窄依赖的映射避免shuffle
    * Can increase(增加) or decrease(减少) the level of parallelism in this RDD. Internally, this uses
    * a shuffle to redistribute data.
    *
@@ -444,8 +444,8 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a new RDD that is reduced into `numPartitions` partitions. 联合
-   *该函数用于将RDD进行重分区，使用HashPartitioner。
-          第一个参数为重分区的数目，第二个为是否进行shuffle，默认为false
+   *该函数用于将RDD进行重分区,使用HashPartitioner。
+          第一个参数为重分区的数目,第二个为是否进行shuffle,默认为false
    * This results in a narrow dependency, e.g. if you go from 1000 partitions
    * to 100 partitions, there will not be a shuffle, instead(替代) each of the 100
    * new partitions will claim 10 of the current partitions.
@@ -488,7 +488,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a sampled subset of this RDD.
-   * 根据给定的随机种子seed，随机抽样出数量为frac的数据
+   * 根据给定的随机种子seed,随机抽样出数量为frac的数据
    * @param withReplacement can elements be sampled multiple times (replaced when sampled out)
    * @param fraction expected size of the sample as a fraction of this RDD's size
    *  without replacement: probability that each element is chosen; fraction must be [0, 1]
@@ -509,9 +509,9 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Randomly(随机) splits this RDD with the provided weights.
-   * 该函数根据weights权重，将一个RDD切分成多个RDD。
+   * 该函数根据weights权重,将一个RDD切分成多个RDD。
 	 * 该权重参数为一个Double数组
-   * 第二个参数为random的种子，基本可忽略
+   * 第二个参数为random的种子,基本可忽略
    * @param weights weights for splits, will be normalized if they don't sum to 1
    * @param seed random seed
    *
@@ -545,7 +545,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a fixed-size sampled subset of this RDD in an array
-   *返回一个数组，在数据集中随机采样num个元素组成，可以选择是否用随机数替换不足的部分，
+   *返回一个数组,在数据集中随机采样num个元素组成,可以选择是否用随机数替换不足的部分,
    * Seed用于指定的随机数生成器种子
    * @param withReplacement whether sampling is done with replacement
    * @param num size of the returned sample
@@ -601,7 +601,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the union of this RDD and another one. Any identical elements will appear multiple
    * times (use `.distinct()` to eliminate them).
-   * 将两个RDD进行合并，不去重
+   * 将两个RDD进行合并,不去重
    * 
    */
   def union(other: RDD[T]): RDD[T] = withScope {
@@ -622,12 +622,12 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return this RDD sorted by the given key function.
-   * 这个方法将RDD的数据排序并存入新的RDD，第一个参数传入方法指定排序key，第二个参数指定是逆序还是顺序
+   * 这个方法将RDD的数据排序并存入新的RDD,第一个参数传入方法指定排序key,第二个参数指定是逆序还是顺序
    * sortBy根据给定的排序k函数将RDD中的元素进行排序
    * 该函数最多可以传三个参数：
-　 * 第一个参数是一个函数，该函数的也有一个带T泛型的参数，返回类型和RDD中元素的类型是一致的；
-　 * 第二个参数是ascending，决定排序后RDD中的元素是升序还是降序，默认是true，也就是升序；
-　 * 第三个参数是numPartitions，该参数决定排序后的RDD的分区个数，默认排序后的分区个数和排序之前的个数相等，即为this.partitions.size
+　 * 第一个参数是一个函数,该函数的也有一个带T泛型的参数,返回类型和RDD中元素的类型是一致的；
+　 * 第二个参数是ascending,决定排序后RDD中的元素是升序还是降序,默认是true,也就是升序；
+　 * 第三个参数是numPartitions,该参数决定排序后的RDD的分区个数,默认排序后的分区个数和排序之前的个数相等,即为this.partitions.size
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Seq(3,6,7,1,2,0),2)
    * scala> rdd1.sortBy(x => x).collect
@@ -657,7 +657,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the intersection of this RDD and another one. The output will not contain any duplicate
    * elements, even if the input RDDs did.
-   * 该函数返回两个RDD的交集，并且去重
+   * 该函数返回两个RDD的交集,并且去重
    * Note that this method performs a shuffle internally.
    */
   def intersection(other: RDD[T]): RDD[T] = withScope {
@@ -696,14 +696,14 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an RDD created by coalescing(聚合) all elements within each partition into an array.
-   * 将RDD中每一个分区中类型为T的元素转换成Array[T]，这样每一个分区就只有一个数组元素
+   * 将RDD中每一个分区中类型为T的元素转换成Array[T],这样每一个分区就只有一个数组元素
    * 例如:
    * scala> var rdd = sc.makeRDD(1 to 10,3)
 	 * scala> rdd.partitions.size
 	 * res33: Int = 3  //该RDD有3个分区
 	 * scala> rdd.glom().collect
 	 * res35: Array[Array[Int]] = Array(Array(1, 2, 3), Array(4, 5, 6), Array(7, 8, 9, 10))
-	 * //glom将每个分区中的元素放到一个数组中，这样，结果就变成了3个数组
+	 * //glom将每个分区中的元素放到一个数组中,这样,结果就变成了3个数组
    */
   def glom(): RDD[Array[T]] = withScope {
     new MapPartitionsRDD[Array[T], T](this, (context, pid, iter) => Iterator(iter.toArray))
@@ -719,8 +719,8 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
-   * 在一个由（K,V）对组成的数据集上调用，返回一个（K，Seq[V])对的数据集。
-   * 注意：默认情况下，使用8个并行任务进行分组，你可以传入numTask可选参数，根据数据量设置不同数目的Task
+   * 在一个由（K,V）对组成的数据集上调用,返回一个（K,Seq[V])对的数据集。
+   * 注意：默认情况下,使用8个并行任务进行分组,你可以传入numTask可选参数,根据数据量设置不同数目的Task
    * Return an RDD of grouped items. Each group consists of a key and a sequence of elements
    * mapping to that key. The ordering of elements within each group is not guaranteed, and
    * may even differ each time the resulting RDD is evaluated.
@@ -811,8 +811,8 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a new RDD by applying a function to each partition of this RDD.
-   * 该函数和map函数类似，只不过映射函数的参数由RDD中的每一个元素变成了RDD中每一个分区的迭代器。
-   * 如果在映射的过程中需要频繁创建额外的对象，使用mapPartitions要比map高效的过
+   * 该函数和map函数类似,只不过映射函数的参数由RDD中的每一个元素变成了RDD中每一个分区的迭代器。
+   * 如果在映射的过程中需要频繁创建额外的对象,使用mapPartitions要比map高效的过
    * 参数preservesPartitioning表示是否保留父RDD的partitioner分区信息
    * `preservesPartitioning` indicates whether the input function preserves the partitioner, which
    * should be `false` unless this is a pair RDD and the input function doesn't modify the keys.
@@ -831,7 +831,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return a new RDD by applying a function to each partition of this RDD, while tracking the index
    * of the original partition.
-   * 函数作用同mapPartitions，不过提供了两个参数，第一个参数为分区的索引
+   * 函数作用同mapPartitions,不过提供了两个参数,第一个参数为分区的索引
    * `preservesPartitioning` indicates whether the input function preserves the partitioner, which
    * should be `false` unless this is a pair RDD and the input function doesn't modify the keys.
    */
@@ -935,7 +935,7 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
-   * zip函数用于将两个RDD组合成Key/Value形式的RDD,这里默认两个RDD的partition数量以及元素数量都相同，否则会抛出异常
+   * zip函数用于将两个RDD组合成Key/Value形式的RDD,这里默认两个RDD的partition数量以及元素数量都相同,否则会抛出异常
    * Zips this RDD with another one, returning key-value pairs with the first element in each RDD,
    * second element in each RDD, etc. Assumes that the two RDDs have the *same number of
    * partitions* and the *same number of elements in each partition* (e.g. one was made through
@@ -960,7 +960,7 @@ abstract class RDD[T: ClassTag](
    * applying a function to the zipped partitions. Assumes that all the RDDs have the
    * *same number of partitions*, but does *not* require them to have the same number
    * of elements in each partition.
-   * zipPartitions函数将多个RDD按照partition组合成为新的RDD，该函数需要组合的RDD具有相同的分区数，但对于每个分区内的元素数量没有要求
+   * zipPartitions函数将多个RDD按照partition组合成为新的RDD,该函数需要组合的RDD具有相同的分区数,但对于每个分区内的元素数量没有要求
    */
   def zipPartitions[B: ClassTag, V: ClassTag](rdd2: RDD[B], preservesPartitioning: Boolean)(f: (Iterator[T], Iterator[B]) => Iterator[V]): RDD[V] = withScope {
     new ZippedPartitionsRDD2(sc, sc.clean(f), this, rdd2, preservesPartitioning)
@@ -991,7 +991,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Applies a function f to all elements of this RDD.
    * foreach用于遍历RDD,将函数f应用于每一个元素。
-   * 但要注意，如果对RDD执行foreach，只会在Executor端有效，而并不是Driver端
+   * 但要注意,如果对RDD执行foreach,只会在Executor端有效,而并不是Driver端
    */
   def foreach(f: T => Unit): Unit = withScope {
     val cleanF = sc.clean(f)
@@ -1000,7 +1000,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Applies a function f to each partition of this RDD.
-   * 在数据集的每一个分区上，运行函数func。这通常用于更新一个累加器变量，或者和外部存储系统做交互
+   * 在数据集的每一个分区上,运行函数func。这通常用于更新一个累加器变量,或者和外部存储系统做交互
    */
   def foreachPartition(f: Iterator[T] => Unit): Unit = withScope {
     val cleanF = sc.clean(f)
@@ -1009,18 +1009,18 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an array that contains all of the elements in this RDD.
-   * 在Driver的程序中，collect用于将一个RDD转换成数组
+   * 在Driver的程序中,collect用于将一个RDD转换成数组
    */
   def collect(): Array[T] = withScope {
-    //需要注意的是这里传入了一个函数，这个函数就是这个Job的要执行的任务,
-    //它将会被包装并序列化后发送到要执行它的executor上，并在要处理的RDD上的每个分区上被调用执行
+    //需要注意的是这里传入了一个函数,这个函数就是这个Job的要执行的任务,
+    //它将会被包装并序列化后发送到要执行它的executor上,并在要处理的RDD上的每个分区上被调用执行
     val results = sc.runJob(this, (iter: Iterator[T]) => iter.toArray)
     Array.concat(results: _*)
   }
 
   /**
    * Return an iterator that contains all of the elements in this RDD.
-   *把所有数据以迭代器返回，rdd实现是调用sc.runJob()，每个分区迭代器转array，
+   *把所有数据以迭代器返回,rdd实现是调用sc.runJob(),每个分区迭代器转array,
    *收集到driver端再flatMap一次打散成大迭代器。理解为一种比较特殊的driver端cache
    * The iterator will consume as much memory as the largest partition in this RDD.
    *
@@ -1045,7 +1045,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an RDD that contains all matching values by applying `f`.
-   * 在数据集的每一个元素上，运行函数func,以数组的形式,返回数据集的所有元素
+   * 在数据集的每一个元素上,运行函数func,以数组的形式,返回数据集的所有元素
    */
   def collect[U: ClassTag](f: PartialFunction[T, U]): RDD[U] = withScope {
     val cleanF = sc.clean(f)
@@ -1054,7 +1054,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
-   * 返回在RDD中出现，并且不在other RDD中出现的元素(交集,相当于进行集合的差操作)，不去重
+   * 返回在RDD中出现,并且不在other RDD中出现的元素(交集,相当于进行集合的差操作),不去重
    * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
    * RDD will be &lt;= us.
    * 例如:
@@ -1079,7 +1079,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
-   * 但返回在RDD中出现，并且不在otherRDD中出现的元素，不去重
+   * 但返回在RDD中出现,并且不在otherRDD中出现的元素,不去重
    */
   def subtract(
     other: RDD[T],
@@ -1102,7 +1102,7 @@ abstract class RDD[T: ClassTag](
   }
 
   /**
-   * 根据映射函数f(Func函数接受2个参数，返回一个值)，对RDD中的元素进行二元计算，返回计算结果
+   * 根据映射函数f(Func函数接受2个参数,返回一个值),对RDD中的元素进行二元计算,返回计算结果
    * Reduces the elements of this RDD using the specified commutative and
    * associative binary operator.
    * 例如:
@@ -1200,7 +1200,7 @@ abstract class RDD[T: ClassTag](
    * allowed to modify and return their first argument instead of creating a new U to avoid memory
    * allocation.
    * 带初始值、reduce聚合、merge聚合三个完整条件的聚合方法。
-   * rdd的做法是把函数传入分区里去做计算，最后汇总各分区的结果再一次combOp计算
+   * rdd的做法是把函数传入分区里去做计算,最后汇总各分区的结果再一次combOp计算
    * 
    */
   def aggregate[U: ClassTag](zeroValue: U)(seqOp: (U, T) => U, combOp: (U, U) => U): U = withScope {
@@ -1399,8 +1399,8 @@ abstract class RDD[T: ClassTag](
 
   /**
    * 
-   * 返回一个数组，由数据集的前n个元素组成。注意，这个操作目前并非在多个节点上，并行执行，
-   * 而是Driver程序所在机器，单机计算所有的元素(Gateway的内存压力会增大，需要谨慎使用）
+   * 返回一个数组,由数据集的前n个元素组成。注意,这个操作目前并非在多个节点上,并行执行,
+   * 而是Driver程序所在机器,单机计算所有的元素(Gateway的内存压力会增大,需要谨慎使用）
    * Take the first num elements of the RDD. It works by first scanning one partition, and use the
    * results from that partition to estimate the number of additional partitions needed to satisfy
    * the limit.
@@ -1459,7 +1459,7 @@ abstract class RDD[T: ClassTag](
    * Returns the top k (largest) elements from this RDD as defined by the specified
    * implicit Ordering[T]. This does the opposite of [[takeOrdered]]. For example:
    * {{{
-   * top函数用于从RDD中，按照默认（降序）或者指定的排序规则，返回前num个元素。
+   * top函数用于从RDD中,按照默认（降序）或者指定的排序规则,返回前num个元素。
    *   sc.parallelize(Seq(10, 4, 2, 12, 3)).top(1)
    *   // returns Array(12)
    *
@@ -1478,7 +1478,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Returns the first k (smallest) elements from this RDD as defined by the specified
    * implicit Ordering[T] and maintains the ordering. This does the opposite of [[top]].
-   * akeOrdered和top类似，只不过以和top相反的顺序返回元素。
+   * akeOrdered和top类似,只不过以和top相反的顺序返回元素。
    * For example:
    * {{{
    *   sc.parallelize(Seq(10, 4, 2, 12, 3)).takeOrdered(1)
@@ -1543,8 +1543,8 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Save this RDD as a text file, using string representations of elements.
-   * 将数据集的元素，以textfile的形式，保存到本地文件系统，hdfs或者任何其它hadoop支持的文件系统。
-   * Spark将会调用每个元素的toString方法，并将它转换为文件中的一行文本
+   * 将数据集的元素,以textfile的形式,保存到本地文件系统,hdfs或者任何其它hadoop支持的文件系统。
+   * Spark将会调用每个元素的toString方法,并将它转换为文件中的一行文本
    */
   def saveAsTextFile(path: String): Unit = withScope {
     // https://issues.apache.org/jira/browse/SPARK-2075
@@ -1600,7 +1600,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Creates tuples of the elements in this RDD by applying `f`.
-   * 为RDD中的每个数据单元增加一个key，即生成key-value对。输入的函数是key的构造函数
+   * 为RDD中的每个数据单元增加一个key,即生成key-value对。输入的函数是key的构造函数
    * 例如:
    *  val a = sc.parallelize(List("dog", "salmon", "salmon", "rat", "elephant"), 3)
 	 *	val b = a.keyBy(_.length)
@@ -1725,7 +1725,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Gets the name of the directory to which this RDD was checkpointed.
    * This is not defined if the RDD is checkpointed locally.
-   * 获取checkpoint文件，如果RDD没有被checkpoint则返回null
+   * 获取checkpoint文件,如果RDD没有被checkpoint则返回null
    */
   def getCheckpointFile: Option[String] = {
     checkpointData match {
@@ -1761,8 +1761,8 @@ abstract class RDD[T: ClassTag](
   private[spark] var checkpointData: Option[RDDCheckpointData[T]] = None
 
   /** Returns the first parent RDD */
-  //依赖第一个父RDD,在获取first parent的时候，子类经常会使用下面这个方法
-  //Seq里的第一个dependency应该是直接的parent，从而从第一个dependency类里获得了rdd，这个rdd就是父RDD
+  //依赖第一个父RDD,在获取first parent的时候,子类经常会使用下面这个方法
+  //Seq里的第一个dependency应该是直接的parent,从而从第一个dependency类里获得了rdd,这个rdd就是父RDD
   protected[spark] def firstParent[U: ClassTag]: RDD[U] = {
     dependencies.head.rdd.asInstanceOf[RDD[U]]
   }
@@ -1810,7 +1810,7 @@ abstract class RDD[T: ClassTag](
     RDDOperationScope.withScope(sc, "checkpoint", allowNesting = false, ignoreParent = true) {
       if (!doCheckpointCalled) {
         doCheckpointCalled = true
-        if (checkpointData.isDefined) {//如果可选值是 Some 的实例返回 true，否则返回 false
+        if (checkpointData.isDefined) {//如果可选值是 Some 的实例返回 true,否则返回 false
           checkpointData.get.checkpoint()
         } else {
           dependencies.foreach(_.rdd.doCheckpoint())

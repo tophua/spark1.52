@@ -106,8 +106,8 @@ private[spark] class BlockManager(
   // Check that we're not using external shuffle service with consolidated shuffle files.
   // 检查外部不使用合并文件的shuffle服务
   if (externalShuffleServiceEnabled
-    //如果为true，在shuffle时就合并中间文件，对于有大量Reduce任务的shuffle来说，合并文件可 以提高文件系统性能，
-    //如果使用的是ext4 或 xfs 文件系统，建议设置为true；对于ext3，由于文件系统的限制，设置为true反而会使内核>8的机器降低性能
+    //如果为true,在shuffle时就合并中间文件,对于有大量Reduce任务的shuffle来说,合并文件可 以提高文件系统性能,
+    //如果使用的是ext4 或 xfs 文件系统,建议设置为true；对于ext3,由于文件系统的限制,设置为true反而会使内核>8的机器降低性能
     && conf.getBoolean("spark.shuffle.consolidateFiles", false)
     && shuffleManager.isInstanceOf[HashShuffleManager]) {
     throw new UnsupportedOperationException("Cannot use external shuffle service with consolidated"
@@ -144,13 +144,13 @@ private[spark] class BlockManager(
   //压缩算法
   private val compressBroadcast = conf.getBoolean("spark.broadcast.compress", true)
   // Whether to compress shuffle output that are stored
-  //是否压缩map输出文件，压缩将使用spark.io.compression.codec
+  //是否压缩map输出文件,压缩将使用spark.io.compression.codec
   private val compressShuffle = conf.getBoolean("spark.shuffle.compress", true)
   // Whether to compress RDD partitions that are stored serialized
   //是否压缩RDD分区
   private val compressRdds = conf.getBoolean("spark.rdd.compress", false)
   // Whether to compress shuffle output temporarily spilled to disk
-  //是否压缩在shuffle期间溢出的数据，如果压缩将使用spark.io.compression.codec。
+  //是否压缩在shuffle期间溢出的数据,如果压缩将使用spark.io.compression.codec。
   private val compressShuffleSpill = conf.getBoolean("spark.shuffle.spill.compress", true)
   //向查找或注册BlockManagerSlaveEndpoint
   private val slaveEndpoint = rpcEnv.setupEndpoint(
@@ -270,8 +270,8 @@ private[spark] class BlockManager(
    * Report all blocks to the BlockManager again. This may be necessary if we are dropped
    * by the BlockManager and come back or if we become capable of recovering blocks on disk after
    * an executor crash.
-   * 再次将所有的blocks汇报给BlockManager,这个方法强调所有的blocks必须都能在BlockManager的管理下，
-   * 因为可能会出现各种因素，如slave需要重新注册、进程冲突导致block变化等,让blocks产生变化
+   * 再次将所有的blocks汇报给BlockManager,这个方法强调所有的blocks必须都能在BlockManager的管理下,
+   * 因为可能会出现各种因素,如slave需要重新注册、进程冲突导致block变化等,让blocks产生变化
    * This function deliberately(故意) fails silently if the master returns false (indicating that
    * the slave needs to re-register). The error condition will be detected again by the next
    * heart beat attempt or new block registration and another try to re-register all blocks
@@ -398,7 +398,7 @@ private[spark] class BlockManager(
    * it is still valid). This ensures that update in master will compensate for the increase in
    * memory on slave.
    * 向master报告block所在存储位置的状况,这个信息不仅反映了block当前的状态,还用于更新block的信息。
-   * 但是这个存储状态的信息,如磁盘、内存、cache存储等等,并不一定是block的Information中所期望的存储信息，
+   * 但是这个存储状态的信息,如磁盘、内存、cache存储等等,并不一定是block的Information中所期望的存储信息,
    * 例如MEMORY_AND_DISK等
    *
    * reportBlockStatus 用于向BlockManagerMasterActor报告block所在存储位置的状况
@@ -520,7 +520,7 @@ private[spark] class BlockManager(
    * 当reduce任务与map任务处于同一个节点,不需要远程拉取,只需要doGetLocal方法从本地获得中间处理结果
    */
   private def doGetLocal(blockId: BlockId, asBlockResult: Boolean): Option[Any] = {
-    val info = blockInfo.get(blockId).orNull //如果选项包含有值返回选项值，否则返回 null
+    val info = blockInfo.get(blockId).orNull //如果选项包含有值返回选项值,否则返回 null
     if (info != null) {
       info.synchronized { //BlockInfom线程同步
         // Double check to make sure the block is still there. There is a small chance(小的机会) that the
@@ -583,7 +583,7 @@ private[spark] class BlockManager(
         }
 
         // Look for block on disk, potentially storing it back in memory if required
-        //查找硬盘上块,如果需要的话，可能会在内存中存储它
+        //查找硬盘上块,如果需要的话,可能会在内存中存储它
         if (level.useDisk) {
           logDebug(s"Getting block $blockId from disk")
           val bytes: ByteBuffer = diskStore.getBytes(blockId) match {
@@ -597,7 +597,7 @@ private[spark] class BlockManager(
 
           if (!level.useMemory) {
             // If the block shouldn't be stored in memory, we can just return it
-            //如果块不应该被存储在内存中，我们可以只返回它
+            //如果块不应该被存储在内存中,我们可以只返回它
             if (asBlockResult) {
               return Some(new BlockResult(dataDeserialize(blockId, bytes), DataReadMethod.Disk,
                 info.size))
@@ -619,7 +619,7 @@ private[spark] class BlockManager(
                 val copyForMemory = ByteBuffer.allocate(bytes.limit) //Buffer对象首先要进行分配
                 copyForMemory.put(bytes)
               })
-              //rewind将position设回0，所以你可以重读Buffer中的所有数据,limit保持不变      
+              //rewind将position设回0,所以你可以重读Buffer中的所有数据,limit保持不变      
               bytes.rewind()
             }
             if (!asBlockResult) {
@@ -862,7 +862,7 @@ private[spark] class BlockManager(
     val putLevel = effectiveStorageLevel.getOrElse(level)   
     // If we're storing bytes, then initiate the replication before storing them locally.
     // This is faster as data is already serialized and ready to send.
-    //如果我们存储字节，然后启动复制存放在本地,这是因为数据已经序列化并准备发送
+    //如果我们存储字节,然后启动复制存放在本地,这是因为数据已经序列化并准备发送
     
     val replicationFuture = data match {
       case b: ByteBufferValues if putLevel.replication > 1 =>
@@ -1248,7 +1248,7 @@ private[spark] class BlockManager(
   /**
    * Remove all blocks belonging to the given RDD.
    * @return The number of blocks removed.
-   * 将指定RDD的block全部移除，返回移除的block的数量。
+   * 将指定RDD的block全部移除,返回移除的block的数量。
    */
   def removeRdd(rddId: Int): Int = {
     // TODO: Avoid a linear scan by creating another mapping of RDD.id to blocks.
@@ -1339,7 +1339,7 @@ private[spark] class BlockManager(
     }
   }
   /**
-   * 判断是否经过压缩,共有四种压缩包——shuffle，broadcast，rdds，shuffleSpill
+   * 判断是否经过压缩,共有四种压缩包——shuffle,broadcast,rdds,shuffleSpill
    */
   private def shouldCompress(blockId: BlockId): Boolean = {
     blockId match {
@@ -1354,7 +1354,7 @@ private[spark] class BlockManager(
 
   /**
    * Wrap an output stream for compression if block compression is enabled for its block type
-   * 有两种加载方式，根据参数决定是压缩输入流还是压缩输出流
+   * 有两种加载方式,根据参数决定是压缩输入流还是压缩输出流
    */
   def wrapForCompression(blockId: BlockId, s: OutputStream): OutputStream = {
     if (shouldCompress(blockId)) compressionCodec.compressedOutputStream(s) else s
@@ -1452,7 +1452,7 @@ private[spark] object BlockManager extends Logging {
     //Spark用于缓存的内存大小所占用的Java堆的比率
     val memoryFraction = conf.getDouble("spark.storage.memoryFraction", 0.6)
     val safetyFraction = conf.getDouble("spark.storage.safetyFraction", 0.9)
-    //execution内存最多仅占JVM heap的0.6*0.9=54%,对于无需cache数据的应用，大部分heap内存都被浪费了
+    //execution内存最多仅占JVM heap的0.6*0.9=54%,对于无需cache数据的应用,大部分heap内存都被浪费了
     //而（shuffle等）中间数据却被频繁spill到磁盘并读取
     (Runtime.getRuntime.maxMemory * memoryFraction * safetyFraction).toLong
   }

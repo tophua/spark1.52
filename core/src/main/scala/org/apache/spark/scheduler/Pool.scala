@@ -97,13 +97,13 @@ private[spark] class Pool(
   }
   //对rootPool中的所有TaskSetManager按照调度算法排序
   override def getSortedTaskSetQueue: ArrayBuffer[TaskSetManager] = {
-    //创建一个ArrayBuffer，存储TaskSetManager  
+    //创建一个ArrayBuffer,存储TaskSetManager  
     var sortedTaskSetQueue = new ArrayBuffer[TaskSetManager]
-    // taskSetSchedulingAlgorithm为调度算法，包括FIFO和FAIR两种  
+    // taskSetSchedulingAlgorithm为调度算法,包括FIFO和FAIR两种  
     // 这里针对调度队列,按照调度算法对其排序,生成一个序列sortedSchedulableQueue  
     val sortedSchedulableQueue =
       schedulableQueue.toSeq.sortWith(taskSetSchedulingAlgorithm.comparator)
-    //循环sortedSchedulableQueue中所有的TaskSetManager，通过其getSortedTaskSetQueue来填充sortedTaskSetQueue  
+    //循环sortedSchedulableQueue中所有的TaskSetManager,通过其getSortedTaskSetQueue来填充sortedTaskSetQueue  
     for (schedulable <- sortedSchedulableQueue) {
       sortedTaskSetQueue ++= schedulable.getSortedTaskSetQueue
     }

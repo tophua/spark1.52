@@ -52,7 +52,7 @@ import org.apache.spark.util.Utils
  * instead of the one expected by the client. If the construction of this error response itself
  * 而不是客户期望的,如果此错误响应本身的构造失败
  * fails, the response will consist of an empty body with a response code that indicates internal
- * 响应将包括一个空,一个响应代码，表示内部服务器错误
+ * 响应将包括一个空,一个响应代码,表示内部服务器错误
  * server error.
  */
 private[spark] abstract class RestSubmissionServer(

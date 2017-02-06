@@ -87,7 +87,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   protected var localityAwareTasks = 0
 /**
  * 
- * 整个程序运行时候的驱动器,例如接收CoarseGrainedExecutorBackend的注册，是CoarseGrainedExecutorBackend的内部成员
+ * 整个程序运行时候的驱动器,例如接收CoarseGrainedExecutorBackend的注册,是CoarseGrainedExecutorBackend的内部成员
  * 并与Cluster Manager进行通信与调度
  */
   class DriverEndpoint(override val rpcEnv: RpcEnv, sparkProperties: Seq[(String, String)])
@@ -252,7 +252,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
       val activeExecutors = executorDataMap.filterKeys(!executorsPendingToRemove.contains(_))
       //获取workOffers即资源 
       val workOffers = activeExecutors.map { case (id, executorData) =>
-        //activeExecutors中executorData的executorHost、freeCores，获取workOffers，即资源
+        //activeExecutors中executorData的executorHost、freeCores,获取workOffers,即资源
         new WorkerOffer(id, executorData.executorHost, executorData.freeCores)
       }.toSeq
       //调用scheduler的resourceOffers()方法,分配资源  
@@ -390,16 +390,16 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
  * reviveOffers用于向driverEndpoint发送ReviveOffers
  */
   override def reviveOffers() {
-    //SchedulerBackend把自己手头上的可用资源交给TaskScheduler，TaskScheduler根据调度策略分配给排队的任务吗，
-    // 返回一批可执行的任务描述，SchedulerBackend负责launchTask，
-    // 即最终把task塞到了executor模型上，executor里的线程池会执行task的run
+    //SchedulerBackend把自己手头上的可用资源交给TaskScheduler,TaskScheduler根据调度策略分配给排队的任务吗,
+    // 返回一批可执行的任务描述,SchedulerBackend负责launchTask,
+    // 即最终把task塞到了executor模型上,executor里的线程池会执行task的run
     driverEndpoint.send(ReviveOffers)
   }
 
   override def killTask(taskId: Long, executorId: String, interruptThread: Boolean) {
     driverEndpoint.send(KillTask(taskId, executorId, interruptThread))
   }
-///如果用户不设置，系统使用集群中运行shuffle操作的默认任务数
+///如果用户不设置,系统使用集群中运行shuffle操作的默认任务数
   override def defaultParallelism(): Int = {
     conf.getInt("spark.default.parallelism", math.max(totalCoreCount.get(), 2))
   }

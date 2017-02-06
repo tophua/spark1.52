@@ -290,13 +290,13 @@ object EventLoggingListenerSuite {
    *   */
   def getLoggingConf(logDir: Path, compressionCodec: Option[String] = None): SparkConf = {
     val conf = new SparkConf
-    //是否记录Spark事件，用于应用程序在完成后重构webUI
+    //是否记录Spark事件,用于应用程序在完成后重构webUI
     conf.set("spark.eventLog.enabled", "true")
     conf.set("spark.eventLog.testing", "true")
-    //如果spark.eventLog.enabled为 true，该属性为记录spark事件的根目录,
-    //在此根目录中，Spark为每个应用程序创建分目录，并将应用程序的事件记录到在此目录中
+    //如果spark.eventLog.enabled为 true,该属性为记录spark事件的根目录,
+    //在此根目录中,Spark为每个应用程序创建分目录,并将应用程序的事件记录到在此目录中
     conf.set("spark.eventLog.dir", logDir.toString)
-    //是否压缩记录Spark事件，前提spark.eventLog.enabled为true
+    //是否压缩记录Spark事件,前提spark.eventLog.enabled为true
     compressionCodec.foreach { codec =>
       conf.set("spark.eventLog.compress", "true")
       //用于压缩内部数据如 RDD分区和shuffle输出的编码解码器

@@ -963,7 +963,7 @@ private[spark] object Utils extends Logging {
    * @param dir must be the path to a directory, or IllegalArgumentException is thrown
    * @param cutoff measured in seconds(以秒测量的截止). Returns true if there are any files or directories in the
    *               given directory whose last modified time is later than this many seconds ago
-   * 如果在给定目录中的任何文件或目录的最后修改时间比此多秒前的最后一次修改时，则返回真
+   * 如果在给定目录中的任何文件或目录的最后修改时间比此多秒前的最后一次修改时,则返回真
    */
   def doesDirectoryContainAnyNewFiles(dir: File, cutoff: Long): Boolean = {
     if (!dir.isDirectory) {
@@ -981,7 +981,7 @@ private[spark] object Utils extends Logging {
   /**
    * Convert a time parameter such as (50s, 100ms, or 250us) to microseconds for internal use. If
    * no suffix is provided, the passed number is assumed to be in ms.
-   * 将一个时间参数如（50s，100ms，或250us）以微秒,如果没有任务后缀默认为毫秒
+   * 将一个时间参数如（50s,100ms,或250us）以微秒,如果没有任务后缀默认为毫秒
    */
   def timeStringAsMs(str: String): Long = {
     JavaUtils.timeStringAsMs(str)
@@ -990,7 +990,7 @@ private[spark] object Utils extends Logging {
   /**
    * Convert a time parameter such as (50s, 100ms, or 250us) to microseconds for internal use. If
    * no suffix is provided, the passed number is assumed to be in seconds.
-   * 将一个时间参数如（50s，100ms，或250us）以微秒。如果没有提供后缀，默认为秒
+   * 将一个时间参数如（50s,100ms,或250us）以微秒。如果没有提供后缀,默认为秒
    */
   def timeStringAsSeconds(str: String): Long = {
     JavaUtils.timeStringAsSec(str)
@@ -998,7 +998,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m) to bytes for internal use.
-   * 将通过字节字符串（例如50B，100K，或250m）字节,如没有提供后缀默认为byte
+   * 将通过字节字符串（例如50B,100K,或250m）字节,如没有提供后缀默认为byte
    * If no suffix is provided, the passed number is assumed to be in bytes.
    */
   def byteStringAsBytes(str: String): Long = {
@@ -1237,7 +1237,7 @@ private[spark] object Utils extends Logging {
 
   /** 
    *  Executes the given block. Log non-fatal errors if any, and only throw fatal errors 
-   *  执行给定的块,如果有任何错误，只抛出致命错误,日志非致命错误
+   *  执行给定的块,如果有任何错误,只抛出致命错误,日志非致命错误
    *  */
   def tryLogNonFatalError(block: => Unit) {
     try {
@@ -1251,7 +1251,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code, then a finally block, but if exceptions happen in
    * the finally block, do not suppress the original exception.
-   * 执行一个代码块,然后一个最后块,但如果在最后块中发生异常，抛出原始的异常
+   * 执行一个代码块,然后一个最后块,但如果在最后块中发生异常,抛出原始的异常
    * This is primarily an issue with `finally { out.close() }` blocks, where
    * close needs to be called to clean up `out`, but if an exception happened
    * in `out.write`, it's likely `out` may be corrupted and `out.close` will
@@ -1267,7 +1267,7 @@ private[spark] object Utils extends Logging {
     } catch {
       case t: Throwable =>
         // Purposefully not using NonFatal, because even fatal exceptions
-        //故意不使用非致命性的，因为即使是致命的例外
+        //故意不使用非致命性的,因为即使是致命的例外
         // we don't want to have our finallyBlock suppress
         //我们不想抑制finallyBlock
         originalThrowable = t
@@ -1759,7 +1759,7 @@ private[spark] object Utils extends Logging {
   /**
    * Return the stderr of a process after waiting for the process to terminate.
    * If the process does not terminate within the specified timeout, return None.
-   * 等待进程结束后返回一个进程的标准错误,如果进程在指定的超时时间内不终止，返回None。
+   * 等待进程结束后返回一个进程的标准错误,如果进程在指定的超时时间内不终止,返回None。
    */
   def getStderr(process: Process, timeoutMs: Long): Option[String] = {
     val terminated = Utils.waitForProcess(process, timeoutMs)
@@ -1774,7 +1774,7 @@ private[spark] object Utils extends Logging {
    * Execute the given block, logging and re-throwing any uncaught exception. 
    * This is particularly useful for wrapping code that runs in a thread, to ensure
    * that exceptions are printed, and to avoid having to catch Throwable.
-   * 执行给定的块，重新抛出任何未捕获的异常,包装在一个线程中运行的代码,确保异常打印,并避免捕获Throwable
+   * 执行给定的块,重新抛出任何未捕获的异常,包装在一个线程中运行的代码,确保异常打印,并避免捕获Throwable
    */
   def logUncaughtExceptions[T](f: => T): T = {
     try {
@@ -1790,7 +1790,7 @@ private[spark] object Utils extends Logging {
 
   /** 
    *  Executes the given block in a Try, logging any uncaught exceptions.
-   *  给定的块中尝试执行，记录任何未捕获的异常
+   *  给定的块中尝试执行,记录任何未捕获的异常
    *   */
   def tryLog[T](f: => T): Try[T] = {
     try {
@@ -1807,7 +1807,7 @@ private[spark] object Utils extends Logging {
 
   /** 
    *  Returns true if the given exception was fatal. See docs for scala.util.control.NonFatal. 
-   *  如果给定的异常是致命的，则返回真
+   *  如果给定的异常是致命的,则返回真
    *  */
   def isFatalError(e: Throwable): Boolean = {
     e match {
@@ -1982,7 +1982,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Maximum number of retries when binding to a port before giving up.
-   * 最大重试次数时，绑定到一个端口
+   * 最大重试次数时,绑定到一个端口
    */
   def portMaxRetries(conf: SparkConf): Int = {
     val maxRetries = conf.getOption("spark.port.maxRetries").map(_.toInt)
@@ -2112,7 +2112,7 @@ private[spark] object Utils extends Logging {
   }
 
   // Limit of bytes for total size of results (default is 1GB)
-  //如果结果的大小大于1GB，那么直接丢弃，
+  //如果结果的大小大于1GB,那么直接丢弃,
    // 可以在spark.driver.maxResultSize设置
   def getMaxResultSize(conf: SparkConf): Long = {
     memoryStringToMb(conf.get("spark.driver.maxResultSize", "1g")).toLong << 20
@@ -2276,7 +2276,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Returns a path of temporary file which is in the same directory with `path`.
-   * 返回一个临时文件的路径，它位于同一个目录中的“路径”。
+   * 返回一个临时文件的路径,它位于同一个目录中的“路径”。
    */
   def tempFileWith(path: File): File = {
     new File(path.getAbsolutePath + "." + UUID.randomUUID())

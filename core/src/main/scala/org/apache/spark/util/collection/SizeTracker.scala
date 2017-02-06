@@ -33,7 +33,7 @@ private[spark] trait SizeTracker {
 
   /**
    * Controls the base of the exponential which governs the rate of sampling.
-   * 控制指数的基础，控制采样率,将意味着我们的样本1,2,4,8,18
+   * 控制指数的基础,控制采样率,将意味着我们的样本1,2,4,8,18
    * E.g., a value of 2 would mean we sample at 1, 2, 4, 8, ... elements.
    */
   private val SAMPLE_GROWTH_RATE = 1.1

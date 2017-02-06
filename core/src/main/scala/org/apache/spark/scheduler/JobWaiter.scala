@@ -86,9 +86,9 @@ private[spark] class JobWaiter[T](
     jobResult = JobFailed(exception)
     this.notifyAll()
   }
-  //这个方法是一个阻塞方法，会在Job完成之前一直阻塞等待，直到Job执行完成之后返回所得的结果
+  //这个方法是一个阻塞方法,会在Job完成之前一直阻塞等待,直到Job执行完成之后返回所得的结果
   def awaitResult(): JobResult = synchronized {
-    //循环,如果标志位_jobFinished为false，则一直循环，否则退出，返回JobResult  
+    //循环,如果标志位_jobFinished为false,则一直循环,否则退出,返回JobResult  
     while (!_jobFinished) {
       this.wait()
     }

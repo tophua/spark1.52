@@ -34,7 +34,7 @@ import org.apache.spark.util.Utils
  * This message is intended to be serialized to and deserialized from JSON in the exchange.
  * 这一消息是序列化和反序列化的JSON的交换
  * Each message can either be a request or a response and consists of three common fields:
- * 每个消息可以是一个请求或响应，由三个公共字段组成
+ * 每个消息可以是一个请求或响应,由三个公共字段组成
  *   (1) the action, which fully specifies the type of the message
  *   		 该操作,它完全指定消息的类型
  *   (2) the Spark version of the client / server

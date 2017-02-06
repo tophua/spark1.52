@@ -51,7 +51,7 @@ class BlockRDD[T: ClassTag](@transient sc: SparkContext, @transient val blockIds
         throw new Exception("Could not compute split, block " + blockId + " not found")
     }
   }
-//返回每个 partiton 都对应一组 hosts，这组 hosts 上往往存放着该 partition 的输入数据
+//返回每个 partiton 都对应一组 hosts,这组 hosts 上往往存放着该 partition 的输入数据
   override def getPreferredLocations(split: Partition): Seq[String] = {
     assertValid()
     _locations(split.asInstanceOf[BlockRDDPartition].blockId)

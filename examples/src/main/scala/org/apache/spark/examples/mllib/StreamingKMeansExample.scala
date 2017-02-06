@@ -27,7 +27,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 /**
  * 聚类 流式K均值
  * Estimate clusters on one stream of data and make predictions
- * 在一个数据流上估计集群，并在另一个流上进行预测,
+ * 在一个数据流上估计集群,并在另一个流上进行预测,
  * on another stream, where the data streams arrive as text files
  * into two different directories.
  * 当数据流到达文本文件到两个不同的目录时

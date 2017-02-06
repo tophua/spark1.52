@@ -38,12 +38,12 @@ class StagePageSuite extends SparkFunSuite with LocalSparkContext {
     val targetString = "peak execution memory"
     assert(html.contains(targetString))
     // Disable unsafe and make sure it's not there
-    //禁用不安全的，并确保它不在那里
+    //禁用不安全的,并确保它不在那里
     val conf2 = new SparkConf(false).set(unsafeConf, "false")
     val html2 = renderStagePage(conf2).toString().toLowerCase
     assert(!html2.contains(targetString))
     // Avoid setting anything; it should be displayed by default
-    //避免设置任何东西，它应该默认显示
+    //避免设置任何东西,它应该默认显示
     val conf3 = new SparkConf(false)
     val html3 = renderStagePage(conf3).toString().toLowerCase
     assert(html3.contains(targetString))

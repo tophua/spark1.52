@@ -153,7 +153,7 @@ private[spark] class Executor(
     env.metricsSystem.report()
     env.rpcEnv.stop(executorEndpoint)
     heartbeater.shutdown()//线程池就会不再接受任务。
-    heartbeater.awaitTermination(10, TimeUnit.SECONDS)//等待关闭线程池，每次等待的超时时间为10秒
+    heartbeater.awaitTermination(10, TimeUnit.SECONDS)//等待关闭线程池,每次等待的超时时间为10秒
     threadPool.shutdown()//线程池就会不再接受任务。
     if (!isLocal) {
       env.stop()
@@ -220,7 +220,7 @@ private[spark] class Executor(
       startGCTime = computeTotalGcTime()
 
       try {
-        //反序列化Task的依赖，得到的结果中有taskFile(运行的文件),taskJar(环境依 赖),taskBytes(相当于缓冲池)  
+        //反序列化Task的依赖,得到的结果中有taskFile(运行的文件),taskJar(环境依 赖),taskBytes(相当于缓冲池)  
         val (taskFiles, taskJars, taskBytes) = Task.deserializeWithDependencies(serializedTask)
         //下载Task运行缺少的依赖
         updateDependencies(taskFiles, taskJars)
@@ -243,11 +243,11 @@ private[spark] class Executor(
         env.mapOutputTracker.updateEpoch(task.epoch)
 
         // Run the actual task and measure its runtime.
-        //运行的实际任务，并测量它的运行时间。  
+        //运行的实际任务,并测量它的运行时间。  
         taskStart = System.currentTimeMillis()
         var threwException = true        
         val (value, accumUpdates) = try {
-          //调用task#run方法，得到task运行的结果  
+          //调用task#run方法,得到task运行的结果  
           val res = task.run(
             taskAttemptId = taskId,
             attemptNumber = attemptNumber,
@@ -307,14 +307,14 @@ private[spark] class Executor(
         //对直接返回的结果对象大小进行判断  
         val serializedResult: ByteBuffer = {
           if (maxResultSize > 0 && resultSize > maxResultSize) {
-            // 如果结果的大小大于1GB，那么直接丢弃，
+            // 如果结果的大小大于1GB,那么直接丢弃,
             // 可以在spark.driver.maxResultSize设置
             logWarning(s"Finished $taskName (TID $taskId). Result is larger than maxResultSize " +
               s"(${Utils.bytesToString(resultSize)} > ${Utils.bytesToString(maxResultSize)}), " +
               s"dropping it.")
             ser.serialize(new IndirectTaskResult[Any](TaskResultBlockId(taskId), resultSize))
           } else if (resultSize >= akkaFrameSize - AkkaUtils.reservedSizeBytes) {
-             //结果大小大于设定的阀值，则放入BlockManager中   
+             //结果大小大于设定的阀值,则放入BlockManager中   
             val blockId = TaskResultBlockId(taskId)
             env.blockManager.putBytes(
               blockId, serializedDirectResult, StorageLevel.MEMORY_AND_DISK_SER)
@@ -541,8 +541,8 @@ private[spark] class Executor(
       override def run(): Unit = Utils.logUncaughtExceptions(reportHeartBeat())
     }
     /**
-     * schedule和scheduleAtFixedRate的区别在于：如果指定开始执行的时间在当前系统运行时间之前，
-     * scheduleAtFixedRate会把已经过去的时间也作为周期执行，而schedule不会把过去的时间算上。
+     * schedule和scheduleAtFixedRate的区别在于：如果指定开始执行的时间在当前系统运行时间之前,
+     * scheduleAtFixedRate会把已经过去的时间也作为周期执行,而schedule不会把过去的时间算上。
      */
     heartbeater.scheduleAtFixedRate(heartbeatTask, initialDelay, intervalMs, TimeUnit.MILLISECONDS)
   }

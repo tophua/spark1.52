@@ -311,7 +311,7 @@ private[history] class FsHistoryProvider(conf: SparkConf, clock: Clock)
 
   /**
    * Replay the log files in the list and merge the list of old applications with new ones
-   * 重试列表中的日志文,，并将旧的应用程序的列表合并新的日志文件
+   * 重试列表中的日志文,,并将旧的应用程序的列表合并新的日志文件
    */
   private def mergeApplicationListing(logs: Seq[FileStatus]): Unit = {
     val newAttempts = logs.flatMap { fileStatus =>

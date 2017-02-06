@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
 
 /**
  * An append-only, non-threadsafe, array-backed vector that is optimized for primitive types.
- * 一个追加,非线程安全的,阵列的支持向量，是原始vector类型的优化
+ * 一个追加,非线程安全的,阵列的支持向量,是原始vector类型的优化
  */
 private[spark]
 class PrimitiveVector[@specialized(Long, Int, Double) V: ClassTag](initialSize: Int = 64) {

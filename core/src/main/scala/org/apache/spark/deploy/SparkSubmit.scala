@@ -78,7 +78,7 @@ object SparkSubmit {
 
   // A special jar name that indicates the class being run is inside of Spark itself, and therefore
   // no user jar is needed.
-  //特别是一类特别的名字是jar运行是在放电本身，因此是没有用户需要的JAR
+  //特别是一类特别的名字是jar运行是在放电本身,因此是没有用户需要的JAR
   private val SPARK_INTERNAL = "spark-internal"//
 
   // Special primary resource names that represent shells rather than application jars. 
@@ -486,7 +486,7 @@ object SparkSubmit {
       OptionAssigner(args.executorMemory, STANDALONE | MESOS | YARN, ALL_DEPLOY_MODES,
         sysProp = "spark.executor.memory"),//分配给每个executor进程总内存
       OptionAssigner(args.totalExecutorCores, STANDALONE | MESOS, ALL_DEPLOY_MODES,
-      //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
+      //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候,最多可以请求多少个CPU核心。默认是所有的都能用
         sysProp = "spark.cores.max"),
       OptionAssigner(args.files, LOCAL | STANDALONE | MESOS, ALL_DEPLOY_MODES,
         sysProp = "spark.files"),

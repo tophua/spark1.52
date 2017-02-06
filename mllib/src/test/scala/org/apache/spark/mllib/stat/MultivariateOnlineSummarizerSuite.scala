@@ -84,7 +84,7 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
 
   test("dense vector input") {//密集向量的输入
     // For column 2, the maximum will be 0.0, and it's not explicitly added since we ignore all
-    //对于列2，最大值将是0,它没有显式添加,因为我们忽略了所有的零
+    //对于列2,最大值将是0,它没有显式添加,因为我们忽略了所有的零
     // the zeros; it's a case we need to test. For column 3, the minimum will be 0.0 which we
     // need to test as well.
     //这是一个我们需要测试的案例.对于列3,最低将是0,我们需要测试以及
@@ -108,7 +108,7 @@ class MultivariateOnlineSummarizerSuite extends SparkFunSuite {
 
   test("sparse vector input") {//稀疏向量输入
     val summarizer = (new MultivariateOnlineSummarizer)
-      //创建稀疏矩阵，指定元素的个数、索引及非零值，数组方式
+      //创建稀疏矩阵,指定元素的个数、索引及非零值,数组方式
       .add(Vectors.sparse(3, Seq((0, -1.0), (2, 6.0))))
       .add(Vectors.sparse(3, Seq((0, 3.0), (1, -3.0))))
     //每列的均值

@@ -200,7 +200,7 @@ trait AccumulableParam[R, T] extends Serializable {
    * Return the "zero" (identity) value for an accumulator type, given its initial value. For
    * 返回一个累加器类型的"零"(标识)值,给定它的初始值
    * example, if R was a vector of N dimensions, this would return a vector of N zeroes.
-   * 如果R是一个N维向量，这将返回一个N个零向量
+   * 如果R是一个N维向量,这将返回一个N个零向量
    */
   def zero(initialValue: R): R
 }

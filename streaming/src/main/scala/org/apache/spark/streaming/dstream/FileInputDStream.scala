@@ -125,7 +125,7 @@ class FileInputDStream[K, V, F <: NewInputFormat[K, V]](
   @transient private var recentlySelectedFiles = new mutable.HashSet[String]()
 
   // Read-through cache of file mod times, used to speed up mod time lookups
-  //通过读取文件修改时间的缓存，用于加速MOD时间查找
+  //通过读取文件修改时间的缓存,用于加速MOD时间查找
   @transient private var fileToModTime = new TimeStampedHashMap[String, Long](true)
 
   // Timestamp of the last round of finding files

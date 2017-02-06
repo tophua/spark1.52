@@ -54,7 +54,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
   override def beforeAll() {
     super.beforeAll()
     // We don't want to write logs during testing
-    //在测试过程中，我们不想写日志
+    //在测试过程中,我们不想写日志
     SparkSubmitUtils.printStream = new BufferPrintStream
     tempIvyPath = Utils.createTempDir(namePrefix = "ivy").getAbsolutePath()
   }

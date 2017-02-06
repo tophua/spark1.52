@@ -25,7 +25,7 @@ import org.apache.spark.storage.RDDInfo
 /**
  * :: DeveloperApi ::
  * Stores information about a stage to pass from the scheduler to SparkListeners.
- * 存储一个阶段的信息，从调度程序到SparkListeners
+ * 存储一个阶段的信息,从调度程序到SparkListeners
  */
 @DeveloperApi
 class StageInfo(
@@ -49,7 +49,7 @@ class StageInfo(
   var completionTime: Option[Long] = None
   /** 
    *  If the stage failed, the reason why. 
-   *  如果阶段失败了，原因为什么
+   *  如果阶段失败了,原因为什么
    *  */
   var failureReason: Option[String] = None
   /** 

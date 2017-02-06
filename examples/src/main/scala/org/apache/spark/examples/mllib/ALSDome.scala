@@ -16,7 +16,7 @@ object ALSDome {
      * 使用ALS对 ratings 进行训练
      * 通过 model 对用户商品进行预测评分：((user, product), rate)
      * 从 ratings 得到用户商品的实际评分：((user, product), rate)
-     * 合并预测评分和实际评分的两个数据集，并求均方差
+     * 合并预测评分和实际评分的两个数据集,并求均方差
      */
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("ALSExample")
     val sc = new SparkContext(sparkConf)

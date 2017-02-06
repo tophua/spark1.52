@@ -28,7 +28,7 @@ class NotSerializableExn(val notSer: NotSerializableClass) extends Throwable() {
 
 //分布式
 class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContext {
-  //1 CPU核数，1024内存数
+  //1 CPU核数,1024内存数
   val clusterUrl = "local-cluster[2,1,1024]"
 
   test("task throws not serializable exception") {//task任务抛出不能序列化异常
@@ -196,7 +196,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
 
     // Get all the locations of the first partition and try to fetch the partitions
-    //获取第一个分区的所有位置，并试图从这些位置取分区
+    //获取第一个分区的所有位置,并试图从这些位置取分区
     // from those locations.
     val blockIds = data.partitions.indices.map(index => RDDBlockId(data.id, index)).toArray
     val blockId = blockIds(0)
@@ -286,7 +286,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     DistributedSuite.amMaster = true
     // Using more than two nodes so we don't have a symmetric communication pattern and might
     // cache a partially correct list of peers.
-    //使用两个以上的节点，所以我们没有一个对称的通信模式，并可能缓存部分正确的对等节点列表
+    //使用两个以上的节点,所以我们没有一个对称的通信模式,并可能缓存部分正确的对等节点列表
     sc = new SparkContext("local-cluster[3,1,1024]", "test")
     for (i <- 1 to 3) {
       val data = sc.parallelize(Seq(true, false, false, false), 4)

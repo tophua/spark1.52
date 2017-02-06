@@ -180,13 +180,13 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val submissionId1 = submitResponse1.submissionId
     val submissionId2 = submitResponse2.submissionId
     // kill only submission 1, but not submission 2
-    //只杀死提交1，但不提交2
+    //只杀死提交1,但不提交2
     val response3 = client.killSubmission(submissionId1)
     val killResponse = getKillResponse(response3)
     assert(killResponse.success)
     assert(killResponse.submissionId === submissionId1)
     // request status for both submissions: 1 should be KILLED but 2 should be RUNNING still
-    //提交意见书的请求状态：1应该被杀死，但2应该运行
+    //提交意见书的请求状态：1应该被杀死,但2应该运行
     val response4 = client.requestSubmissionStatus(submissionId1)
     val response5 = client.requestSubmissionStatus(submissionId2)
     val statusResponse1 = getStatusResponse(response4)
@@ -372,9 +372,9 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val conn1 = sendHttpRequest(submitRequestPath, "POST", json)
     intercept[SubmitRestProtocolException] { client.readResponse(conn1) }
     // server attempts to send invalid response, but fails internally on validation
-    //服务器试图发送无效的响应，但在内部验证失败
+    //服务器试图发送无效的响应,但在内部验证失败
     // client should receive an error response as server is able to recover
-    //客户端应该接收到一个错误响应，因为服务器能够恢复
+    //客户端应该接收到一个错误响应,因为服务器能够恢复
     val conn2 = sendHttpRequest(killRequestPath, "POST")
     val response2 = client.readResponse(conn2)
     getErrorResponse(response2)
@@ -406,7 +406,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   /** 
    *  Start a smarter dummy server that keeps track of submitted driver states. 
-   *  启动一个更聪明的虚拟服务器，跟踪提交的驱动程序状态
+   *  启动一个更聪明的虚拟服务器,跟踪提交的驱动程序状态
    *  */
   private def startSmartServer(): String = {
     startServer(new SmarterMaster(_))
@@ -443,7 +443,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
       }
     val port = _server.start()
     // set these to clean them up after every test
-    //设置这些清理后，每一个测试
+    //设置这些清理后,每一个测试
     rpcEnv = Some(_rpcEnv)
     server = Some(_server)
     s"spark://$localhost:$port"
@@ -472,7 +472,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   /** 
    *  Return the response as a submit response, or fail with error otherwise. 
-   *  返回响应作为提交响应，否则会失败，否则会出错。
+   *  返回响应作为提交响应,否则会失败,否则会出错。
    *  */
   private def getSubmitResponse(response: SubmitRestProtocolResponse): CreateSubmissionResponse = {
     response match {

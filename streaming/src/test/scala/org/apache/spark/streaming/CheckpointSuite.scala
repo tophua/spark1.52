@@ -449,7 +449,7 @@ class CheckpointSuite extends TestSuiteBase {
 
   // This tests whether the StateDStream's RDD checkpoints works correctly such
   // that the system can recover from a master failure. This assumes as reliable,
-  //这个测试是否statedstream RDD检查站的正常工作，系统可以从主故障中恢复,这是可靠的重复输入源
+  //这个测试是否statedstream RDD检查站的正常工作,系统可以从主故障中恢复,这是可靠的重复输入源
   // replayable input source - TestInputDStream.
   //恢复updateStateByKey操作
   test("recovery with updateStateByKey operation") {
@@ -673,7 +673,7 @@ class CheckpointSuite extends TestSuiteBase {
 
         // Verify whether files created while the driver was down (4, 5, 6) and files created after
         // recovery (7, 8, 9) have been recorded
-        //验证是否创建的文件,而驱动程序是下降(4，5，6)和恢复后创建的文件(7，8，9)已被记录
+        //验证是否创建的文件,而驱动程序是下降(4,5,6)和恢复后创建的文件(7,8,9)已被记录
         assert(recordedFiles(ssc) === (1 to 9))
 
         // Append the new output to the old buffer

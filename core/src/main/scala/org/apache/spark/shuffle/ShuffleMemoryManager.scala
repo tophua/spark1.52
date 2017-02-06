@@ -43,7 +43,7 @@ import org.apache.spark.{Logging, SparkException, SparkConf, TaskContext}
  * @param maxMemory total amount of memory available for execution, in bytes.
  * @param pageSizeBytes number of bytes for each page, by default.
  * 
- * 负责全局计数和内存调度(policy enforcement)。它是核心仲裁者，根据task当前内存用量决定如何进行分配。
+ * 负责全局计数和内存调度(policy enforcement)。它是核心仲裁者,根据task当前内存用量决定如何进行分配。
  * 一个JVM里仅有一个实例
  * ShuffleMemoryManager 用于为执行Shuffle操作的线程分配内存池,每种磁盘溢出集合都能从内存池获得内存
  * 当溢出集合的数据已经输出到存储系统,获得的内存会释放,当线程执行的任务结束,整个内存池都会被Executor释放

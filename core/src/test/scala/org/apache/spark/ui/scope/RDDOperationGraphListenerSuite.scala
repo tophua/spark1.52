@@ -169,7 +169,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     val listener = new RDDOperationGraphListener(conf)
 
     // Run 3 jobs and 8 stages, finishing all 3 jobs but only 2 stages
-    //运行3个工作和8个阶段,完成所有3个工作，但只有2个阶段
+    //运行3个工作和8个阶段,完成所有3个工作,但只有2个阶段
     startJob(5, listener)
     startJob(1, listener)
     startJob(2, listener)

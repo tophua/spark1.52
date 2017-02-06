@@ -156,8 +156,8 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     import scala.collection.JavaConversions._
     val executor = Executors.newSingleThreadScheduledExecutor()
          /**
-          * scheduleAtFixedRate有两个时间参数，initialDelay和period，
-          * 对应该方法的两个主要功能，即延迟运行任务和周期性执行任务
+          * scheduleAtFixedRate有两个时间参数,initialDelay和period,
+          * 对应该方法的两个主要功能,即延迟运行任务和周期性执行任务
           */
     val sf = executor.scheduleAtFixedRate(new Runnable {
       override def run(): Unit =

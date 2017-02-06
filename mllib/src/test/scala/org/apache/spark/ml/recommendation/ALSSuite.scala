@@ -41,8 +41,8 @@ import org.apache.spark.util.Utils
  * Spark.ml目前支持基于模型的协同过滤,其中用户和商品以少量的潜在因子来描述,用以预测缺失项
  * 注意基于DataFrame的ALS接口目前仅支持整数型的用户和商品编号
  * 正则化参数regParam来解决用户在更新用户因子时产生新评分或者商品更新商品因子时收到的新评分带来的最小二乘问题
- * 矩阵分解:将用户(user)对商品(item)的评分矩阵分解为两个矩阵：一个是用户对商品隐含特征的偏好矩阵，另一个是商品所包含的隐含特征的矩阵。
- * 在这个矩阵分解的过程中，评分缺失项得到了填充，也就是说我们可以基于这个填充的评分来给用户最商品推荐了
+ * 矩阵分解:将用户(user)对商品(item)的评分矩阵分解为两个矩阵：一个是用户对商品隐含特征的偏好矩阵,另一个是商品所包含的隐含特征的矩阵。
+ * 在这个矩阵分解的过程中,评分缺失项得到了填充,也就是说我们可以基于这个填充的评分来给用户最商品推荐了
  * 
  */
 class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
@@ -284,7 +284,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     val test = ArrayBuffer.empty[Rating[Int]]
     for ((userId, userFactor) <- userFactors; (itemId, itemFactor) <- itemFactors) {
       val rating = blas.sdot(rank, userFactor, 1, itemFactor, 1)
-       //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+       //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       val threshold = if (rating > 0) positiveFraction else negativeFraction
       val observed = random.nextDouble() < threshold
       if (observed) {
@@ -361,7 +361,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
       .setNumUserBlocks(numUserBlocks)//用户数目(正数)
       .setNumItemBlocks(numItemBlocks)//商品数目(正数)
       .setSeed(0) //随机种子
-    //可以调整这些参数，不断优化结果，使均方差变小。比如：iterations越多,lambda较小,均方差会较小,推荐结果较优。
+    //可以调整这些参数,不断优化结果,使均方差变小。比如：iterations越多,lambda较小,均方差会较小,推荐结果较优。
     val alpha = als.getAlpha //是一个针对于隐性反馈 ALS 版本的参数,这个参数决定了偏好行为强度的基准
     //fit()方法将DataFrame转化为一个Transformer的算法
     val model = als.fit(training.toDF())

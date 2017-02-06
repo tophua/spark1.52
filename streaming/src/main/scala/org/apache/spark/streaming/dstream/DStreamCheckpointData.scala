@@ -77,7 +77,7 @@ class DStreamCheckpointData[T: ClassTag] (dstream: DStream[T])
   def cleanup(time: Time) {
     // Get the time of the oldest checkpointed RDD that was written as part of the
     // checkpoint of `time`
-    //有时间最早的检查点，写的是RDD的一部分`时间`检查站
+    //有时间最早的检查点,写的是RDD的一部分`时间`检查站
     timeToOldestCheckpointFileTime.remove(time) match {
       case Some(lastCheckpointFileTime) =>
         // Find all the checkpointed RDDs (i.e. files) that are older than `lastCheckpointFileTime`

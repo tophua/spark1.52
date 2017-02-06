@@ -47,7 +47,7 @@ private[streaming] case class ReceivedBlockInfo(
 
   /** 
    *  Is the block ID valid, that is, is the block present in the Spark executors. 
-   *  是块ID有效，即是在Spark的执行者提出的块。
+   *  是块ID有效,即是在Spark的执行者提出的块。
    *  */
   def isBlockIdValid(): Boolean = _isBlockIdValid
 

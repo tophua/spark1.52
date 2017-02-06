@@ -49,7 +49,7 @@ import org.apache.spark.util.Utils
  * Note that 172.17.42.1 is the default docker ip for the host and 2181 is the default ZK port.
  *
  * In case of failure, make sure to kill off prior docker containers before restarting:
- * 在失败的情况下，一定要杀死前docker容器之前重新启动
+ * 在失败的情况下,一定要杀死前docker容器之前重新启动
  *   docker kill $(docker ps -q)
  *
  * Unfortunately(不幸), due to the Docker dependency this suite cannot be run automatically without a
@@ -61,7 +61,7 @@ import org.apache.spark.util.Utils
 private object FaultToleranceTest extends App with Logging {
 
   private val conf = new SparkConf()
-  //zooKeeper保存恢复状态的目录，缺省为/spark
+  //zooKeeper保存恢复状态的目录,缺省为/spark
   private val ZK_DIR = conf.get("spark.deploy.zookeeper.dir", "/spark")
 
   private val masters = ListBuffer[TestMasterInfo]()
@@ -253,7 +253,7 @@ private object FaultToleranceTest extends App with Logging {
 
   /** 
    *  This includes Client retry logic, so it may take a while if the cluster is recovering. 
-   *  这包括客户端重试逻辑,如果集群正在恢复,它可能需要一段时间，
+   *  这包括客户端重试逻辑,如果集群正在恢复,它可能需要一段时间,
    *  */
   private def assertUsable() = {
     val f = future {
@@ -270,7 +270,7 @@ private object FaultToleranceTest extends App with Logging {
     }
 
     // Avoid waiting indefinitely (e.g., we could register but get no executors).
-    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+    //Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
     assertTrue(Await.result(f, 120 seconds))
   }
 
@@ -325,7 +325,7 @@ private object FaultToleranceTest extends App with Logging {
     }
 
     try {
-    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+    //Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
       assertTrue(Await.result(f, 120 seconds))
     } catch {
       case e: TimeoutException =>

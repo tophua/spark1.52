@@ -49,7 +49,7 @@ private[rest] class CreateSubmissionRequest extends SubmitRestProtocolRequest {
     assertPropertyIsSet("spark.app.name")
     assertPropertyIsBoolean("spark.driver.supervise")
     assertPropertyIsNumeric("spark.driver.cores")
-     //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
+     //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候,最多可以请求多少个CPU核心。默认是所有的都能用
     assertPropertyIsNumeric("spark.cores.max")
     assertPropertyIsMemory("spark.driver.memory")
     assertPropertyIsMemory("spark.executor.memory")//分配给每个executor进程总内存

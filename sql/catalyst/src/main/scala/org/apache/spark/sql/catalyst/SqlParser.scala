@@ -96,7 +96,7 @@ object SqlParser extends AbstractSparkSQLParser with DataTypeParser {
   protected val ORDER = Keyword("ORDER")
   protected val SORT = Keyword("SORT")
   protected val OUTER = Keyword("OUTER")
-  //Overwrite模式，实际操作是，先删除数据，再写新数据
+  //Overwrite模式,实际操作是,先删除数据,再写新数据
   protected val OVERWRITE = Keyword("OVERWRITE")
   protected val REGEXP = Keyword("REGEXP")
   protected val RIGHT = Keyword("RIGHT")

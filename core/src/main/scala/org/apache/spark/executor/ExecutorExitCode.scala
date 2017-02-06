@@ -32,7 +32,7 @@ object ExecutorExitCode {
 
   /** 
    *  DiskStore failed to create a local temporary directory after many attempts. 
-   *  DiskStore失败53次尝试后，创建一个本地临时目录
+   *  DiskStore失败53次尝试后,创建一个本地临时目录
    *  */
   val DISK_STORE_FAILED_TO_CREATE_DIR = 53
 

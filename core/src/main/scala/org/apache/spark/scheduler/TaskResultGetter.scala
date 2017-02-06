@@ -38,7 +38,7 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
   private val THREADS = sparkEnv.conf.getInt("spark.resultGetter.threads", 4)
   private val getTaskResultExecutor = ThreadUtils.newDaemonFixedThreadPool(
     THREADS, "task-result-getter")
-//hreadLocal为变量在每个线程中都创建了一个副本，那么每个线程可以访问自己内部的副本变量
+//hreadLocal为变量在每个线程中都创建了一个副本,那么每个线程可以访问自己内部的副本变量
   protected val serializer = new ThreadLocal[SerializerInstance] {
     override def initialValue(): SerializerInstance = {
       sparkEnv.closureSerializer.newInstance()

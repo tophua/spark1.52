@@ -27,8 +27,8 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.storage.StorageLevel
 /**
- * 矩阵分解:将用户(user)对商品(item)的评分矩阵分解为两个矩阵：一个是用户对商品隐含特征的偏好矩阵，另一个是商品所包含的隐含特征的矩阵。
- * 在这个矩阵分解的过程中，评分缺失项得到了填充，也就是说我们可以基于这个填充的评分来给用户最商品推荐了
+ * 矩阵分解:将用户(user)对商品(item)的评分矩阵分解为两个矩阵：一个是用户对商品隐含特征的偏好矩阵,另一个是商品所包含的隐含特征的矩阵。
+ * 在这个矩阵分解的过程中,评分缺失项得到了填充,也就是说我们可以基于这个填充的评分来给用户最商品推荐了
  */
 object ALSSuite {
 /**
@@ -36,7 +36,7 @@ object ALSSuite {
  * 一个是在更新用户因素时用户产生的评分数量;另一个是在更新产品因素时产品被评分的数量
  * numBlocks 是用于并行化计算的分块个数 (设置为-1,为自动配置)
  * rank ALS中因子的个数,通常来说越大越好,但是对内存占用率有直接影响,通常rank在10到200之间
- * iterations 迭代次数，每次迭代都会减少ALS的重构误差。在几次迭代之后,ALS模型都会收敛得到一个不错的结果,所以大多情况下不需要太多的迭代（通常是10次）
+ * iterations 迭代次数,每次迭代都会减少ALS的重构误差。在几次迭代之后,ALS模型都会收敛得到一个不错的结果,所以大多情况下不需要太多的迭代（通常是10次）
  * lambda 模型的正则化参数,控制着避免过度拟合,值越大,越正则化
  * implicitPrefs 决定了是用显性反馈ALS的版本还是用适用隐性反馈数据集的版本
  * alpha 是一个针对于隐性反馈 ALS 版本的参数,这个参数决定了偏好行为强度的基准
@@ -417,7 +417,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
      //均方根误差常用下式表示：√[∑di^2/n]=Re,式中：n为测量次数;di为一组测量值与真值的偏差
      //均方根值(RMS)、均方根误差(RMSE)
       val rmse = math.sqrt(sqErr / denom)
-       //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+       //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       if (rmse > matchThreshold) {
         fail("Model failed to predict RMSE: %f\ncorr: %s\npred: %s\nU: %s\n P: %s".format(
           rmse, truePrefs, predictedRatings, predictedU, predictedP))

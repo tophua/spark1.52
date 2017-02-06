@@ -36,7 +36,7 @@ import org.apache.spark.util.{MetadataCleaner, MetadataCleanerType, TimeStampedH
  * (through a HTTP server running at the driver) and stored in the BlockManager of the
  * executor to speed up future accesses.
  * 实现HTTP Server作为广播机制,第一次HTTP广播变量（发送一部分任务）反序列化执行,
- * 从driver（在driver上执行的HTTP Server）抓取广播数据，然后存储到Block中，以便下次更快速度访问
+ * 从driver（在driver上执行的HTTP Server）抓取广播数据,然后存储到Block中,以便下次更快速度访问
  */
 private[spark] class HttpBroadcast[T: ClassTag](
     @transient var value_ : T, isLocal: Boolean, id: Long)

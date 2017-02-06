@@ -185,7 +185,7 @@ object LogisticRegressionSuite {
     //numClasses 分类数
     assert(a.numClasses == b.numClasses)
     assert(a.numFeatures == b.numFeatures)
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     assert(a.getThreshold == b.getThreshold)
   }
 }
@@ -593,7 +593,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     // Save model with threshold.
     //阈值保存模型
     try {
-      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+      //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       model.setThreshold(0.7)
       model.save(sc, path)
       val sameModel = LogisticRegressionModel.load(sc, path)

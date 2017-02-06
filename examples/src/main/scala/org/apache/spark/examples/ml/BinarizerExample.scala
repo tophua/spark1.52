@@ -27,7 +27,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
  * Binarizer 二值化是根据阀值将连续数值特征转换为0-1特征的过程
- * 特征值大于阀值将映射为1.0，特征值小于等于阀值将映射为0.0
+ * 特征值大于阀值将映射为1.0,特征值小于等于阀值将映射为0.0
  */
 object BinarizerExample {
   def main(args: Array[String]): Unit = {
@@ -46,7 +46,7 @@ object BinarizerExample {
     val binarizer: Binarizer = new Binarizer()
       .setInputCol("feature")
       .setOutputCol("binarized_feature")
-      //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+      //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
       .setThreshold(0.5)
     //transform()方法将DataFrame转化为另外一个DataFrame的算法
     val binarizedDataFrame = binarizer.transform(dataFrame)

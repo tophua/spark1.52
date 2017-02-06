@@ -70,7 +70,7 @@ private[spark] class PipedRDD[T: ClassTag](
       !name.equals(filterName)
     }
   }
-//调用了第一个父类的compute，把结果RDD copy返回
+//调用了第一个父类的compute,把结果RDD copy返回
   override def compute(split: Partition, context: TaskContext): Iterator[String] = {
     val pb = new ProcessBuilder(command)
     // Add the environmental variables to the process.

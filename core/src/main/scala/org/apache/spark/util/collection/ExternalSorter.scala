@@ -48,7 +48,7 @@ import org.apache.spark.storage.{ BlockId, DiskBlockObjectWriter }
  * `spark.shuffle.compress`).  We may need to revisit this if ExternalSorter is used in other
  * non-shuffle contexts where we might want to use different configuration settings.
  * 注意:仅管ExternalSorte是一个比较通用的sorter,但是它的一些配置是和它在基于sort(分类)的shuffle的用处紧密相连的
- *(比如，它的block压缩是通过‘spark.shuffle.compress‘控制的).如果在非shuffle情况下使用ExternalSorter时
+ *(比如,它的block压缩是通过‘spark.shuffle.compress‘控制的).如果在非shuffle情况下使用ExternalSorter时
  * 我们想要另外的配置,可能就需要重新审视一下它的实现。
  * 
  * 				
@@ -66,8 +66,8 @@ import org.apache.spark.storage.{ BlockId, DiskBlockObjectWriter }
  * probably want to pass None as the ordering to avoid extra sorting. On the other hand, if you do
  * want to do combining, having an Ordering is more efficient than not having it.
  * 
- * 注意,如果提供了Ordering， 那么我们就总会使用它进行排序(是指对partition内部的key排序),
- * 因此,只有在真正需要输出的数据按照key排列时才提供ordering.例如，在一个没有map-side combine的map任务中,
+ * 注意,如果提供了Ordering, 那么我们就总会使用它进行排序(是指对partition内部的key排序),
+ * 因此,只有在真正需要输出的数据按照key排列时才提供ordering.例如,在一个没有map-side combine的map任务中,
  * 你应该会需要传递None作为ordering,这样会避免额外的排序.另一方面,如果你的确需要combining, 提供一个Ordering会更好。
 
  * Users interact with this class in the following way:
@@ -80,7 +80,7 @@ import org.apache.spark.storage.{ BlockId, DiskBlockObjectWriter }
  *     - or -
  *    Invoke writePartitionedFile() to create a file containing sorted/aggregated outputs
  *    that can be used in Spark's sort shuffle.
- *		请求一个iterator()来遍历排序/聚合后的数据。或者，调用writePartitionedFiles来创建一个包含了排序/聚合后数据的文件，
+ *		请求一个iterator()来遍历排序/聚合后的数据。或者,调用writePartitionedFiles来创建一个包含了排序/聚合后数据的文件,
  * 		这个文件可以用于Spark的sort shuffle。
  * At a high level, this class works internally as follows:
  * 这个类在内部是这么工作的:
@@ -89,25 +89,25 @@ import org.apache.spark.storage.{ BlockId, DiskBlockObjectWriter }
  *   don't. Inside these buffers, we sort elements by partition ID and then possibly also by key.
  *   To avoid calling the partitioner multiple times with each key, we store the partition ID
  *   alongside each record.
- *  我们重复地将数据填满内存中的buffer，如果我们想要combine，就使用PartitionedAppendOnlyMap作为buffer, 
- *  如果不想要combine，就使用PartitionedSerializedPairBuffer或者PartitionedPariBuffer。
- *  在这里buffer内部，我们使用partition Id对元素排序，如果需要，就也按key排序(对同样partition Id的元素)。
- *  为了避免重复调用partitioner，我们会把record和partition ID存储在一起。
+ *  我们重复地将数据填满内存中的buffer,如果我们想要combine,就使用PartitionedAppendOnlyMap作为buffer, 
+ *  如果不想要combine,就使用PartitionedSerializedPairBuffer或者PartitionedPariBuffer。
+ *  在这里buffer内部,我们使用partition Id对元素排序,如果需要,就也按key排序(对同样partition Id的元素)。
+ *  为了避免重复调用partitioner,我们会把record和partition ID存储在一起。
  * - When each buffer reaches our memory limit, we spill it to a file. This file is sorted first
  *   by partition ID and possibly second by key or by hash code of the key, if we want to do
  *   aggregation. For each file, we track how many objects were in each partition in memory, so we
  *   don't have to write out the partition ID for every element.
- *   当buffer达到了容量上限以后，我们把它spill到文件。这个文件首先按partition ID排序，然后如果需要进行聚合，
- *   就用key或者key的hashcode作为第二顺序。对于每个文件，我们会追踪在内存时，每个partition里包括多少个对象，
+ *   当buffer达到了容量上限以后,我们把它spill到文件。这个文件首先按partition ID排序,然后如果需要进行聚合,
+ *   就用key或者key的hashcode作为第二顺序。对于每个文件,我们会追踪在内存时,每个partition里包括多少个对象,
  *   所以我们在写文件 时候就不必要为每个元素记录partition ID了
  * - When the user requests an iterator or file output, the spilled files are merged, along with
  *   any remaining in-memory data, using the same sort order defined above (unless both sorting
  *   and aggregation are disabled). If we need to aggregate by key, we either use a total ordering
  *   from the ordering parameter, or read the keys with the same hash code and compare them with
  *   each other for equality to merge values.
- *	 当用户请求获取迭代器或者文件时，spill出来的文件就会和内存中的数据一起被merge，
- *  并且使用上边定义的排列顺序(除非排序和聚合都没有开启)。如果我们需要按照key聚合，
- *  我们要不使用Ordering参数进行全排序，要不就读取有相同hash code的key,并且对它们进行比较来确定相等性,以进行merge。
+ *	 当用户请求获取迭代器或者文件时,spill出来的文件就会和内存中的数据一起被merge,
+ *  并且使用上边定义的排列顺序(除非排序和聚合都没有开启)。如果我们需要按照key聚合,
+ *  我们要不使用Ordering参数进行全排序,要不就读取有相同hash code的key,并且对它们进行比较来确定相等性,以进行merge。
  * - Users are expected to call stop() at the end to delete all the intermediate files.
  * 	  用户最后应该使用stop()来删除中间文件。
  * 
@@ -152,7 +152,7 @@ private[spark] class ExternalSorter[K, V, C](
   private val spillingEnabled = conf.getBoolean("spark.shuffle.spill", true)
 
   // Use getSizeAsKb (not bytes) to maintain backwards compatibility if no units are provided
-  // 在ShuffleMapTask端通常也会增大Map任务的写磁盘的缓存，默认情况下是32K
+  // 在ShuffleMapTask端通常也会增大Map任务的写磁盘的缓存,默认情况下是32K
   private val fileBufferSize = conf.getSizeAsKb("spark.shuffle.file.buffer", "32k").toInt * 1024
 
   // Size of object batches when reading/writing from serializers.
@@ -167,7 +167,7 @@ private[spark] class ExternalSorter[K, V, C](
   private val useSerializedPairBuffer =
     ordering.isEmpty && //没有提供Ordering,即不需要对partition内部的kv再排序
       conf.getBoolean("spark.shuffle.sort.serializeMapOutputs", true) &&//它默认即为true
-      //即在序列化输出流写了两个对象以后，把这两个对象对应的字节块交换位置，序列化输出流仍然能读出这两个对象
+      //即在序列化输出流写了两个对象以后,把这两个对象对应的字节块交换位置,序列化输出流仍然能读出这两个对象
       ser.supportsRelocationOfSerializedObjects//支持relocate序列化以后的对象
   private val kvChunkSize = conf.getInt("spark.shuffle.sort.kvChunkSize", 1 << 22) // 4 MB
   /**
@@ -254,11 +254,11 @@ private[spark] class ExternalSorter[K, V, C](
       // Combine values in-memory first using our AppendOnlyMap    
       val mergeValue = aggregator.get.mergeValue //聚合函数获取例如reduceByKey(_+_) 
       //创建组合
-      val createCombiner = aggregator.get.createCombiner //通过一个Value元素生成组合元素，会被多次调用
+      val createCombiner = aggregator.get.createCombiner //通过一个Value元素生成组合元素,会被多次调用
       //kv就是records每次遍历得到的中的(K V)值
       var kv: Product2[K, V] = null
-      //定义update函数,它接受两个参数，1.是否在Map中包含了值hasValue2.旧值是多少，如果还不存在，那是null，
-      //在scala中，null也是一个对象     
+      //定义update函数,它接受两个参数,1.是否在Map中包含了值hasValue2.旧值是多少,如果还不存在,那是null,
+      //在scala中,null也是一个对象     
       val update = (hadValue: Boolean, oldValue: C) => {
          //如果已经存在,则进行merge,根据Key进行merge(所谓的merge,就是调用mergeValue方法),否则调用createCombiner获取值
          //createCombiner方法是(v:V)=>v就是原样输出值
@@ -446,7 +446,7 @@ private[spark] class ExternalSorter[K, V, C](
 
   /**
    * Merge-sort a sequence of (K, C) iterators using a given a comparator for the keys.
-   * 使用一个给定比较器迭代器,合并序列的排序(k，c)
+   * 使用一个给定比较器迭代器,合并序列的排序(k,c)
    */
   private def mergeSort(iterators: Seq[Iterator[Product2[K, C]]], comparator: Comparator[K]): Iterator[Product2[K, C]] =
     {
@@ -480,7 +480,7 @@ private[spark] class ExternalSorter[K, V, C](
    * iterator is sorted by key with a given comparator. If the comparator is not a total ordering
    * (e.g. when we sort objects by hash code and different keys may compare as equal although
    * they're not), we still merge them by doing equality tests for all keys that compare as equal.
-   * 合并一个序列(k，c)通过聚合值对于每个关键的迭代器,假设每个迭代器都是由一个给定比较器的键进行排序,
+   * 合并一个序列(k,c)通过聚合值对于每个关键的迭代器,假设每个迭代器都是由一个给定比较器的键进行排序,
    * 如果比较器不是一个总排序,通过做所有键的相等性测试来合并它们,作为相等的比较
    */
   private def mergeWithAggregation(
@@ -497,7 +497,7 @@ private[spark] class ExternalSorter[K, V, C](
         //我们只有一个部分排序,通过哈希代码比较,这意味着多个不同的键可能被视为相等的顺序,
         //需要读取所有的键被认为是相等的顺序比较
         new Iterator[Iterator[Product2[K, C]]] {
-          //先按comparator进行merge sort，不aggregate
+          //先按comparator进行merge sort,不aggregate
           val sorted = mergeSort(iterators, comparator).buffered
 
           // Buffers reused across elements to decrease memory allocation
@@ -519,21 +519,21 @@ private[spark] class ExternalSorter[K, V, C](
             combiners += firstPair._2//第一个pair的combiner放在combiners里
             val key = firstPair._1//第一个pair的key
             while (sorted.hasNext && comparator.compare(sorted.head._1, key) == 0) {
-               //获取sorted中跟前key compare以后为0的下一个kv。注意，compare为0不一定 ==号成立
+               //获取sorted中跟前key compare以后为0的下一个kv。注意,compare为0不一定 ==号成立
               val pair = sorted.next()
               var i = 0
               var foundKey = false
               while (i < keys.size && !foundKey) {
-               //用当前取出的这个kc的key与keys中key依次比较，找到一个==的，
-                //就对combiner进行aggregate，然后结果放在combiners里，并且结束循环             
+               //用当前取出的这个kc的key与keys中key依次比较,找到一个==的,
+                //就对combiner进行aggregate,然后结果放在combiners里,并且结束循环             
                 if (keys(i) == pair._1) {
                   combiners(i) = mergeCombiners(combiners(i), pair._2)
                   foundKey = true
                 }
                 i += 1
               }
-             //如果这个kc里的key与keys里所有key都不==，意味着它与它当前缓存的所有keycompare为0但不==，
-             //所以它是一个新的key，就放在keys里，它的combiner放在combiners里
+             //如果这个kc里的key与keys里所有key都不==,意味着它与它当前缓存的所有keycompare为0但不==,
+             //所以它是一个新的key,就放在keys里,它的combiner放在combiners里
               if (!foundKey) {
                 keys += pair._1
                 combiners += pair._2
@@ -548,7 +548,7 @@ private[spark] class ExternalSorter[K, V, C](
         }.flatMap(i => i)//flatMap之前是Iteator[compare为0的所有kc聚合而成的Iteator[K, C]],所以直接flatMap(i => i)就成了
       } else {
         // We have a total ordering, so the objects with the same key are sequential.
-        //因为是total ordering的,意味着用Ordering排序，所以==的key是挨在一起的
+        //因为是total ordering的,意味着用Ordering排序,所以==的key是挨在一起的
         new Iterator[Product2[K, C]] {
           val sorted = mergeSort(iterators, comparator).buffered
 
@@ -563,7 +563,7 @@ private[spark] class ExternalSorter[K, V, C](
             //第一个pair的key放在keys里
             val k = elem._1//第一个pair的key
             var c = elem._2
-            while (sorted.hasNext && sorted.head._1 == k) {//取出所有==的kc，进行merge
+            while (sorted.hasNext && sorted.head._1 == k) {//取出所有==的kc,进行merge
               val pair = sorted.next()
               c = mergeCombiners(c, pair._2)
             }
@@ -654,7 +654,7 @@ private[spark] class ExternalSorter[K, V, C](
     /**
      * Return the next (K, C) pair from the deserialization stream and update partitionId,
      * indexInPartition, indexInBatch and such to match its location.
-     * 返回下一个(k，C)对,反序列化流和更新partitionid,相匹配的位置
+     * 返回下一个(k,C)对,反序列化流和更新partitionid,相匹配的位置
      * If the current batch is drained, construct a stream for the next batch and read from it.
      * If no more pairs are left, return null.
      * 如果当前批处理被耗尽,读取构建下一个批次流,如果没有更多的对返回
@@ -791,7 +791,7 @@ private[spark] class ExternalSorter[K, V, C](
     //溢出到分区文件后合并 
     if (spills.isEmpty) {
       // Case where we only have in-memory data
-      //说明只有内存中的数据，并没有发生spill
+      //说明只有内存中的数据,并没有发生spill
       val collection = if (aggregator.isDefined) map else buffer
       //获取
       val it = collection.destructiveSortedWritablePartitionedIterator(comparator)
@@ -803,7 +803,7 @@ private[spark] class ExternalSorter[K, V, C](
         while (it.hasNext && it.nextPartition() == partitionId) {
           it.writeNext(writer)//把与这个partition id相同的数据全写入
           }
-       //这个writer只用于写入这个partition的数据,因此当此partition数据写完后,需要commitAndClose，以使得reader可读这个文件段。 
+       //这个writer只用于写入这个partition的数据,因此当此partition数据写完后,需要commitAndClose,以使得reader可读这个文件段。 
         writer.commitAndClose()
         val segment = writer.fileSegment()
         //把这个partition对应的文件里数据的长度添加到lengths里

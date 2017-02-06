@@ -22,7 +22,7 @@ import org.apache.spark.mllib.linalg.{DenseVector, SparseVector, Vectors}
 import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 /**
- * 元素智能乘积 ,点乘，就是说每个矩阵元素对应相乘
+ * 元素智能乘积 ,点乘,就是说每个矩阵元素对应相乘
  * ElementwiseProduct 采用逐个相乘的方式,使用给定的权重与每个输入向量相乘
  */
 class ElementwiseProductSuite extends SparkFunSuite with MLlibTestSparkContext {

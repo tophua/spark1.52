@@ -62,7 +62,7 @@ class VectorAssemblerSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(v2.isInstanceOf[DenseVector])
   }
 
-  test("VectorAssembler") {//VectorAssembler是一个转换器，它将给定的若干列合并为一列向量
+  test("VectorAssembler") {//VectorAssembler是一个转换器,它将给定的若干列合并为一列向量
     //Seq:List((0,0.0,[1.0,2.0],a,(2,[1],[3.0]),10))
     val df = sqlContext.createDataFrame(Seq(
       (0, 0.0, Vectors.dense(1.0, 2.0), "a", Vectors.sparse(2, Array(1), Array(3.0)), 10L)

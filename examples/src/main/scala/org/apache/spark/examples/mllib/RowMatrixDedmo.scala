@@ -22,7 +22,7 @@ object RowMatrixDedmo {
         Array(3.0, 4.0, 5.0, 6.0))).map(f => Vectors.dense(f))
     //创建分布式矩阵 RowMatrix
     val rowMatirx = new RowMatrix(rdd1)
-    //计算列之间的相似度，返回的是CoordinateMatrix，采用
+    //计算列之间的相似度,返回的是CoordinateMatrix,采用
     //case class MatrixEntry(i: Long, j: Long, value: Double)存储值
     //columnSimilarities计算矩阵中每两列之间的余弦相似度
     //参数:使用近似算法的阈值,值越大则运算速度越快而误差越大,默认为0
@@ -30,7 +30,7 @@ object RowMatrixDedmo {
     //返回矩阵行数、列数
     println(coordinateMatrix.numCols())
     println(coordinateMatrix.numRows())
-    //查看返回值，查看列与列之间的相似度
+    //查看返回值,查看列与列之间的相似度
     //Array[org.apache.spark.mllib.linalg.distributed.MatrixEntry] 
     //= Array(MatrixEntry(2,3,0.9992204753914715), 
     //MatrixEntry(0,1,0.9925833339709303), 
@@ -74,14 +74,14 @@ object RowMatrixDedmo {
     //1.0  1.0  1.0  1.0  
     //computeCovariance 计算矩阵中行向量的协方差
     var covariance: Matrix = rowMatirx.computeCovariance()
-    //计算拉姆矩阵rowMatirx^T*rowMatirx，T表示转置操作
+    //计算拉姆矩阵rowMatirx^T*rowMatirx,T表示转置操作
     //gramianMatrix: org.apache.spark.mllib.linalg.Matrix = 
     //14.0  20.0  26.0  32.0  
     //20.0  29.0  38.0  47.0  
     //26.0  38.0  50.0  62.0  
     //32.0  47.0  62.0  77.0  
     var gramianMatrix: Matrix = rowMatirx.computeGramianMatrix()
-    //对矩阵进行主成分分析，参数指定返回的列数，即主分成个数
+    //对矩阵进行主成分分析,参数指定返回的列数,即主分成个数
     //PCA算法是一种经典的降维算法
     //principalComponents: org.apache.spark.mllib.linalg.Matrix = 
     //-0.5000000000000002  0.8660254037844388    
@@ -91,8 +91,8 @@ object RowMatrixDedmo {
     var principalComponents = rowMatirx.computePrincipalComponents(2)
 
     /**
-     * 对矩阵进行奇异值分解，设矩阵为A(m x n). 奇异值分解将计算三个矩阵，分别是U,S,V
-     * 它们满足 A ~= U * S * V', S包含了设定的k个奇异值，U，V为相应的奇异值向量
+     * 对矩阵进行奇异值分解,设矩阵为A(m x n). 奇异值分解将计算三个矩阵,分别是U,S,V
+     * 它们满足 A ~= U * S * V', S包含了设定的k个奇异值,U,V为相应的奇异值向量
      */
     //   svd: org.apache.spark.mllib.linalg.SingularValueDecomposition[org.apache.spark.mllib.linalg.distributed.RowMatrix,org.apache.spark.mllib.linalg.Matrix] = 
     //SingularValueDecomposition(org.apache.spark.mllib.linalg.distributed.RowMatrix@688884e,[13.011193721236575,0.8419251442105343,7.793650306633694E-8],-0.2830233037672786  -0.7873358937103356  -0.5230588083704528  

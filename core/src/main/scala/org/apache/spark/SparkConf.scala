@@ -393,7 +393,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
         "the cluster manager (via SPARK_LOCAL_DIRS in mesos/standalone and LOCAL_DIRS in YARN)."
       logWarning(msg)
     }
-  //传递给executor的额外JVM 选项，但是不能使用它来设置Spark属性或堆空间大小
+  //传递给executor的额外JVM 选项,但是不能使用它来设置Spark属性或堆空间大小
     val executorOptsKey = "spark.executor.extraJavaOptions"
     //追加到executor类路径中的附加类路径
     val executorClasspathKey = "spark.executor.extraClassPath"
@@ -551,9 +551,9 @@ private[spark] object SparkConf extends Logging {
    * present in the user's configuration, a warning is logged.
    */
   private val configsWithAlternatives = Map[String, Seq[AlternateConfig]](
-  //executor在加载类的时候是否优先使用用户自定义的JAR包，而不是Spark带有的JAR包，目前，该属性只是一项试验功能
+  //executor在加载类的时候是否优先使用用户自定义的JAR包,而不是Spark带有的JAR包,目前,该属性只是一项试验功能
     "spark.executor.userClassPathFirst" -> Seq(
-    //executor在加载类的时候是否优先使用用户自定义的JAR包，而不是Spark带有的JAR包
+    //executor在加载类的时候是否优先使用用户自定义的JAR包,而不是Spark带有的JAR包
       AlternateConfig("spark.files.userClassPathFirst", "1.3")),
     "spark.history.fs.update.interval" -> Seq(
       AlternateConfig("spark.history.fs.update.interval.seconds", "1.4"),

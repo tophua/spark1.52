@@ -27,7 +27,7 @@ import org.apache.spark.{Logging, SparkConf}
  */
 private[spark] class MetadataCleaner(
     cleanerType: MetadataCleanerType.MetadataCleanerType,//清理的元数据类型
-    cleanupFunc: (Long) => Unit,//清理函数，MetadataCleaner以periodSeconds为间隔周期性的调用该函数
+    cleanupFunc: (Long) => Unit,//清理函数,MetadataCleaner以periodSeconds为间隔周期性的调用该函数
     conf: SparkConf)
   extends Logging
 {
@@ -69,12 +69,12 @@ private[spark] class MetadataCleaner(
 private[spark] object MetadataCleanerType extends Enumeration {
   //枚举类
   /**
-   * MAP_OUTPUT_TRACKER，executor跟踪各个map任务输出的存储位置的数据，根据spark.cleaner.ttl.MAP_OUTPUT_TRACKER设置清理时间，默认值为-1，表示不清理
-   * SPARK_CONTEXT，SparkContext中记录缓存到内存中的RDD的数据结构，根据spark.cleaner.ttl.SPARK_CONTEXT设置清理时间，默认值为-1，表示不清理
-   * HTTP_BROADCAST，采用http方式广播broadcast的元数据，根据spark.cleaner.ttl.HTTP_BROADCAST设置清理时间，默认值为-1，表示不清理
-   * BLOCK_MANAGER，BlockManager中非Broadcast类型的Block数据，根据spark.cleaner.ttl.BLOCK_MANAGER设置清理时间，默认值为-1，表示不清理；
-   * SHUFFLE_BLOCK_MANAGER，shuffle输出的数据，根据spark.cleaner.ttl.SHUFFLE_BLOCK_MANAGER设置清理时间，默认值为-1，表示不清理；
-   * BROADCAST_VARS，Torrent方式广播broadcast的元数据，底层依赖于BlockManager，根据spark.cleaner.ttl.BROADCAST_VARS设置清理时间，默认值为-1，表示不清理
+   * MAP_OUTPUT_TRACKER,executor跟踪各个map任务输出的存储位置的数据,根据spark.cleaner.ttl.MAP_OUTPUT_TRACKER设置清理时间,默认值为-1,表示不清理
+   * SPARK_CONTEXT,SparkContext中记录缓存到内存中的RDD的数据结构,根据spark.cleaner.ttl.SPARK_CONTEXT设置清理时间,默认值为-1,表示不清理
+   * HTTP_BROADCAST,采用http方式广播broadcast的元数据,根据spark.cleaner.ttl.HTTP_BROADCAST设置清理时间,默认值为-1,表示不清理
+   * BLOCK_MANAGER,BlockManager中非Broadcast类型的Block数据,根据spark.cleaner.ttl.BLOCK_MANAGER设置清理时间,默认值为-1,表示不清理；
+   * SHUFFLE_BLOCK_MANAGER,shuffle输出的数据,根据spark.cleaner.ttl.SHUFFLE_BLOCK_MANAGER设置清理时间,默认值为-1,表示不清理；
+   * BROADCAST_VARS,Torrent方式广播broadcast的元数据,底层依赖于BlockManager,根据spark.cleaner.ttl.BROADCAST_VARS设置清理时间,默认值为-1,表示不清理
    */
   val MAP_OUTPUT_TRACKER, SPARK_CONTEXT, HTTP_BROADCAST, BLOCK_MANAGER,
   SHUFFLE_BLOCK_MANAGER, BROADCAST_VARS = Value
@@ -92,7 +92,7 @@ private[spark] object MetadataCleaner {
   def getDelaySeconds(conf: SparkConf): Int = {
     //spark记录任何元数据的持续时间,设置清理时间  -1清理
     //周期性清除保证在这个时间之前的元数据会被清理。
-    //当程序长时间几小时，几天的运行Spark的时候设置这个是很有用的。注意：任何内存中的RDD只要过了这个时间就会被清除掉。
+    //当程序长时间几小时,几天的运行Spark的时候设置这个是很有用的。注意：任何内存中的RDD只要过了这个时间就会被清除掉。
     conf.getTimeAsSeconds("spark.cleaner.ttl", "-1").toInt
   }
 
@@ -117,8 +117,8 @@ private[spark] object MetadataCleaner {
    * @param resetAll whether to reset all to default 是否重置
    */
   def setDelaySeconds(conf: SparkConf, delay: Int, resetAll: Boolean = true) {
-    //Spark记忆任何元数据(stages生成，任务生成等等)的时间(秒)。周期性清除保证在这个时间之前的元数据会被遗忘。
-    //当长时间几小时，几天的运行Spark的时候设置这个是很有用的。注意：任何内存中的RDD只要过了这个时间就会被清除掉。
+    //Spark记忆任何元数据(stages生成,任务生成等等)的时间(秒)。周期性清除保证在这个时间之前的元数据会被遗忘。
+    //当长时间几小时,几天的运行Spark的时候设置这个是很有用的。注意：任何内存中的RDD只要过了这个时间就会被清除掉。
     conf.set("spark.cleaner.ttl", delay.toString)
     if (resetAll) {
       for (cleanerType <- MetadataCleanerType.values) {

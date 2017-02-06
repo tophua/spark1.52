@@ -45,7 +45,7 @@ object SizeEstimator extends Logging {
    * Estimate the number of bytes that the given object takes up on the JVM heap. The estimate
    * includes space taken up by objects referenced by the given object, their references, and so on
    * and so forth.
-   * 估计的字节数，给定的对象占用的JVM堆,该估计包括由给定对象引用的对象所占用的空间
+   * 估计的字节数,给定的对象占用的JVM堆,该估计包括由给定对象引用的对象所占用的空间
    * This is useful for determining the amount of heap space a broadcast variable will occupy on
    * each executor or the amount of space each object will take when caching objects in
    * deserialized form. This is not the same as the serialized size of the object, which will

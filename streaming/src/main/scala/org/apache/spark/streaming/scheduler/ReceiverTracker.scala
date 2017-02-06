@@ -38,8 +38,8 @@ import org.apache.spark.util.{Utils, ThreadUtils, SerializableConfiguration}
  *  枚举类型接收器的当前状态
  *  */
 private[streaming] object ReceiverState extends Enumeration {
-  //定义三个字段，然后用Value调用将它们初始化，每次调用Value都返回内部类的新实例，
-  //该内部类也叫做Value，或者你也可以向Value方法传入ID/名称/两个参数都传
+  //定义三个字段,然后用Value调用将它们初始化,每次调用Value都返回内部类的新实例,
+  //该内部类也叫做Value,或者你也可以向Value方法传入ID/名称/两个参数都传
   type ReceiverState = Value
   //INACTIVE 闲置的,不活动的,SCHEDULED 预定,ACTIVE 活动
   val INACTIVE, SCHEDULED, ACTIVE = Value //定义一个枚举类型
@@ -288,7 +288,7 @@ class ReceiverTracker(ssc: StreamingContext, skipReceiverLaunch: Boolean = false
     val scheduledExecutors = receiverTrackingInfos(streamId).scheduledExecutors
     val accetableExecutors = if (scheduledExecutors.nonEmpty) {
         // This receiver is registering and it's scheduled by
-      //该接收器是注册的，它的计划scheduleReceivers
+      //该接收器是注册的,它的计划scheduleReceivers
         // ReceiverSchedulingPolicy.scheduleReceivers. So use "scheduledExecutors" to check it.
         scheduledExecutors.get
       } else {
@@ -590,7 +590,7 @@ class ReceiverTracker(ssc: StreamingContext, skipReceiverLaunch: Boolean = false
 
     /**
      * Start a receiver along with its scheduled executors
-     *  ReceiverTracker 再将收到的块数据 meta 信息直接转给自己的成员 ReceivedBlockTracker，由ReceivedBlockTracker 专门管理收到的块数据 meta 信息
+     *  ReceiverTracker 再将收到的块数据 meta 信息直接转给自己的成员 ReceivedBlockTracker,由ReceivedBlockTracker 专门管理收到的块数据 meta 信息
      */
     private def startReceiver(receiver: Receiver[_], scheduledExecutors: Seq[String]): Unit = {
       def shouldStartReceiver: Boolean = {

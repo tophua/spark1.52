@@ -73,13 +73,13 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
 
   // Turning off shuffle file consolidation causes all shuffle Blocks to get their own file.
   // TODO: Remove this once the shuffle file consolidation feature is stable.
-  //如果为true，在shuffle时就合并中间文件，对于有大量Reduce任务的shuffle来说，合并文件可 以提高文件系统性能，
-  //如果使用的是ext4 或 xfs 文件系统，建议设置为true；对于ext3，由于文件系统的限制，设置为true反而会使内核>8的机器降低性能
+  //如果为true,在shuffle时就合并中间文件,对于有大量Reduce任务的shuffle来说,合并文件可 以提高文件系统性能,
+  //如果使用的是ext4 或 xfs 文件系统,建议设置为true；对于ext3,由于文件系统的限制,设置为true反而会使内核>8的机器降低性能
   val consolidateShuffleFiles =
     conf.getBoolean("spark.shuffle.consolidateFiles", false)
 
   // Use getSizeAsKb (not bytes) to maintain backwards compatibility if no units are provided
-  // 在ShuffleMapTask端通常也会增大Map任务的写磁盘的缓存，默认情况下是32K
+  // 在ShuffleMapTask端通常也会增大Map任务的写磁盘的缓存,默认情况下是32K
   private val bufferSize = conf.getSizeAsKb("spark.shuffle.file.buffer", "32k").toInt * 1024
 
   /**
@@ -132,7 +132,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
           //如果blockFile已经存在,那么删除它并打印日志
           val blockFile = blockManager.diskBlockManager.getFile(blockId)           
           val tmp = Utils.tempFileWith(blockFile)    
-          //tmp也就是blockFile如果已经存在则，在后面追加数据
+          //tmp也就是blockFile如果已经存在则,在后面追加数据
           blockManager.getDiskWriter(blockId, tmp, serializerInstance, bufferSize, writeMetrics)
         }
       }

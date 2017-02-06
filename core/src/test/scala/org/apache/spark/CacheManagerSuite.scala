@@ -69,7 +69,7 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
   test("get uncached rdd") {//得到未缓存的RDD
     // Do not mock this test, because attempting to match Array[Any], which is not covariant,
     // in blockManager.put is a losing battle(可能失败). You have been warned.
-    //不要模拟这个测试,因为试图匹配数组[任何]，这不是协变的,blockManager插入可能失败,你被警告了
+    //不要模拟这个测试,因为试图匹配数组[任何],这不是协变的,blockManager插入可能失败,你被警告了
     blockManager = sc.env.blockManager
     cacheManager = sc.env.cacheManager
     val context = TaskContext.empty()

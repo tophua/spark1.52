@@ -74,7 +74,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
   test("two threads requesting full memory") {//两个线程请求全部内存
     // Two threads request 500 bytes first, wait for each other to get it, and then request
     // 500 more; we should immediately return 0 as both are now at 1 / N
-    //两个线程请求500个字节,等待对方得到它,然后再请求500个,我们应该立即返回0，因为现在都是
+    //两个线程请求500个字节,等待对方得到它,然后再请求500个,我们应该立即返回0,因为现在都是
     val manager = ShuffleMemoryManager.createForTesting(maxMemory = 1000L)
 
     class State {

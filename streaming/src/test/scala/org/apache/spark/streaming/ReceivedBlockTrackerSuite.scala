@@ -81,7 +81,7 @@ class ReceivedBlockTrackerSuite
 
 
     // Allocate the blocks to a batch and verify that all of them have been allocated
-    //将块分配给一个批处理，并验证所有这些块已被分配
+    //将块分配给一个批处理,并验证所有这些块已被分配
     receivedBlockTracker.allocateBlocksToBatch(1)
     receivedBlockTracker.getBlocksOfBatchAndStream(1, streamId) shouldEqual blockInfos
     receivedBlockTracker.getBlocksOfBatch(1) shouldEqual Map(streamId -> blockInfos)
@@ -179,7 +179,7 @@ class ReceivedBlockTrackerSuite
     tracker2.getBlocksOfBatch(batchTime1) shouldEqual Map(streamId -> blockInfos1)
 
     // Add more blocks and allocate to another batch
-    //添加更多块，并分配到另一个批次
+    //添加更多块,并分配到另一个批次
     incrementTime()
     val batchTime2 = manualClock.getTimeMillis()
     val blockInfos2 = addBlockInfos(tracker2)
@@ -203,7 +203,7 @@ class ReceivedBlockTrackerSuite
     tracker3.getUnallocatedBlocks(streamId) shouldBe empty
 
     // Cleanup first batch but not second batch
-    //清理第一批，但不是第二批
+    //清理第一批,但不是第二批
     val oldestLogFile = getWriteAheadLogFiles().head
     incrementTime()
     tracker3.cleanupOldBatches(batchTime2, waitForCompletion = true)

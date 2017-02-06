@@ -41,7 +41,7 @@ class StringIndexerSuite extends SparkFunSuite with MLlibTestSparkContext {
   test("StringIndexer") {//StringIndexer可以把一个属性列里的值映射成数值类型
     val data = sc.parallelize(Seq((0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")), 2)
     val df = sqlContext.createDataFrame(data).toDF("id", "label")
-    //1)按照 Label 出现的频次对其进行序列编码,如0,1,2，… Array[String] = Array(a, c, b),a出次3次,c出现2次,b出现1次
+    //1)按照 Label 出现的频次对其进行序列编码,如0,1,2,… Array[String] = Array(a, c, b),a出次3次,c出现2次,b出现1次
     //2)fit()方法将DataFrame转化为一个Transformer的算法
     val indexer = new StringIndexer().setInputCol("label").setOutputCol("labelIndex").fit(df)
 

@@ -106,7 +106,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
    * @param sc Used to stop the SparkContext in case the listener thread dies.
    */
   def start(sc: SparkContext) {
-    //如果当前值与期望值(第一个参数)相等，则设置为新值(第二个参数)，设置成功返回true
+    //如果当前值与期望值(第一个参数)相等,则设置为新值(第二个参数),设置成功返回true
     if (started.compareAndSet(false, true)) {
       sparkContext = sc
       listenerThread.start()
@@ -178,7 +178,7 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
       // Call eventLock.release() so that listenerThread will poll `null` from `eventQueue` and know
       // `stop` is called.
       eventLock.release() //释放资源
-      listenerThread.join()//thread.join()应该是让当前线程block住，等thread执行完之后，再继续执行
+      listenerThread.join()//thread.join()应该是让当前线程block住,等thread执行完之后,再继续执行
     } else {
       // Keep quiet
     }

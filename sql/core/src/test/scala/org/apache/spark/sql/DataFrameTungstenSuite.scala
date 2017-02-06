@@ -24,10 +24,10 @@ import org.apache.spark.sql.types._
 /**
  * An end-to-end test suite specifically for testing Tungsten (Unsafe/CodeGen) mode.
  *一种专门用于测试钨模式的终端到终端的测试套件
- Tungsten项目能够大幅度提高Spark的内存和CPU使用效率，使其性能接近于硬件的极限，主要体现以下几点：
-  1.内存管理和二进制处理，充分利用应用程序语义明确管理内存，消除JVM对象模型和垃圾收集机制的开销。
-  2.缓存敏感型计算，算法和数据结构都是利用内存层次结构。
-  3.代码生成，使用代码生成器充分利用现代编译器和CPU。
+ Tungsten项目能够大幅度提高Spark的内存和CPU使用效率,使其性能接近于硬件的极限,主要体现以下几点：
+  1.内存管理和二进制处理,充分利用应用程序语义明确管理内存,消除JVM对象模型和垃圾收集机制的开销。
+  2.缓存敏感型计算,算法和数据结构都是利用内存层次结构。
+  3.代码生成,使用代码生成器充分利用现代编译器和CPU。
  * This is here for now so I can make sure Tungsten project is tested without refactoring existing
  * end-to-end test infra. In the long run this should just go away.
  */

@@ -179,7 +179,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
       .orElse(sparkProperties.get("spark.executor.cores"))
       .orElse(env.get("SPARK_EXECUTOR_CORES"))
       .orNull
-   //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
+   //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候,最多可以请求多少个CPU核心。默认是所有的都能用
     totalExecutorCores = Option(totalExecutorCores)
       .orElse(sparkProperties.get("spark.cores.max"))
       .orNull

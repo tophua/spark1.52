@@ -103,7 +103,7 @@ private[spark] class ParallelCollectionRDD[T: ClassTag](
   override def compute(s: Partition, context: TaskContext): Iterator[T] = {
     new InterruptibleIterator(context, s.asInstanceOf[ParallelCollectionPartition[T]].iterator)
   }
-//返回每个 partiton 都对应一组 hosts，这组 hosts 上往往存放着该 partition 的输入数据
+//返回每个 partiton 都对应一组 hosts,这组 hosts 上往往存放着该 partition 的输入数据
   override def getPreferredLocations(s: Partition): Seq[String] = {
     locationPrefs.getOrElse(s.index, Nil)
   }

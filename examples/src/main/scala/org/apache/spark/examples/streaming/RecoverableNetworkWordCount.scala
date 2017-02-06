@@ -56,7 +56,7 @@ import org.apache.spark.util.IntParam
  * a new StreamingContext (will print "Creating new context" to the console). Otherwise, if
  * checkpoint data exists in ~/checkpoint/, then it will create StreamingContext from
  * the checkpoint data.
- * 否则,如果检查点数据存在于~/checkpoint/，那么它将创造StreamingContext检查点数据
+ * 否则,如果检查点数据存在于~/checkpoint/,那么它将创造StreamingContext检查点数据
  *
  * Refer to the online documentation for more details.
  * 参考联机文档以进行更多细节 * 

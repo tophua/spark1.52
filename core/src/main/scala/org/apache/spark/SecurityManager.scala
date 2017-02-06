@@ -197,7 +197,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   private val authOn = sparkConf.getBoolean(SecurityManager.SPARK_AUTH_CONF, false)
   // keep spark.ui.acls.enable for backwards compatibility with 1.0
-  //Spark webUI存取权限是否启用。如果启用，在用户浏览web界面的时候会检查用户是否有访问权限
+  //Spark webUI存取权限是否启用。如果启用,在用户浏览web界面的时候会检查用户是否有访问权限
   private var aclsOn =
     sparkConf.getBoolean("spark.acls.enable", sparkConf.getBoolean("spark.ui.acls.enable", false))
 

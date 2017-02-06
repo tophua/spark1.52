@@ -27,7 +27,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.test.{ExamplePointUDT, ExamplePoint, SharedSQLContext}
 /**
- * DataFrame是一个分布式的，按照命名列的形式组织的数据集合,与关系型数据库中的数据库表类似
+ * DataFrame是一个分布式的,按照命名列的形式组织的数据集合,与关系型数据库中的数据库表类似
  * 
  */
 class DataFrameSuite extends QueryTest with SharedSQLContext {
@@ -78,9 +78,9 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       Row(1, 1) :: Nil)
   }
 
-  test("invalid plan toString, debug mode") {//无效的计划方法，调试模式
+  test("invalid plan toString, debug mode") {//无效的计划方法,调试模式
     // Turn on debug mode so we can see invalid query plans.
-    //打开调试模式，这样我们就可以看到无效的查询计划。
+    //打开调试模式,这样我们就可以看到无效的查询计划。
     import org.apache.spark.sql.execution.debug._
 
     withSQLConf(SQLConf.DATAFRAME_EAGER_ANALYSIS.key -> "true") {
@@ -539,7 +539,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     val joinedDf = person.join(newSalary,
       person("id") === newSalary("id"), "inner")
     // remove only the "id" column that was associated with newSalary
-      //只删除“ID”列，与薪酬
+      //只删除“ID”列,与薪酬
     val df = joinedDf.drop(col)
     checkAnswer(
       df,
@@ -884,7 +884,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     assert(res3.count == 0)
 
     // start is positive, end is negative, step is negative
-    //开始是正的，结束是负数，一步是负数
+    //开始是正的,结束是负数,一步是负数
     val res4 = sqlContext.range(1, -2, -2, 6).select("id")
     assert(res4.count == 2)//df.agg() 求聚合用的相关函数
     assert(res4.agg(sum("id")).as("sumid").collect() === Seq(Row(0)))
@@ -930,10 +930,10 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     df.col("t.``")
   }
    //NaN 是Not-a-Number的缩写,某些float或double类型不符合标准浮点数语义
-   //NaN == NaN，即：NaN和NaN总是相等
-   //在聚合函数中，所有NaN分到同一组
+   //NaN == NaN,即：NaN和NaN总是相等
+   //在聚合函数中,所有NaN分到同一组
    //NaN在join操作中可以当做一个普通的join key
-   //NaN在升序排序中排到最后，比任何其他数值都大
+   //NaN在升序排序中排到最后,比任何其他数值都大
   test("SPARK-8797: sort by float column containing NaN should not crash") {
     //排序float列包含NaN,不应该崩溃
     val inputData = Seq.fill(10)(Tuple1(Float.NaN)) ++ (1 to 20).map(x => Tuple1(x.toFloat))
@@ -965,10 +965,10 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     df.orderBy("a").collect()
   }
    //NaN 是Not-a-Number的缩写,某些float或double类型不符合标准浮点数语义
-   //NaN == NaN，即：NaN和NaN总是相等
-   //在聚合函数中，所有NaN分到同一组
+   //NaN == NaN,即：NaN和NaN总是相等
+   //在聚合函数中,所有NaN分到同一组
    //NaN在join操作中可以当做一个普通的join key
-   //NaN在升序排序中排到最后，比任何其他数值都大
+   //NaN在升序排序中排到最后,比任何其他数值都大
   test("NaN is greater than all other non-NaN numeric values") {
     val maxDouble = Seq(Double.NaN, Double.PositiveInfinity, Double.MaxValue)
       .map(Tuple1.apply).toDF("a").selectExpr("max(a)").first()

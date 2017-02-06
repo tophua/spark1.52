@@ -64,10 +64,10 @@ object RandomForestExample {
       dataFormat: String = "libsvm",
       algo: String = "classification",//分类
       maxDepth: Int = 5,//树的最大深度,为了防止过拟合,设定划分的终止条件
-      maxBins: Int = 32,//离散连续性变量时最大的分箱数，默认是 32
+      maxBins: Int = 32,//离散连续性变量时最大的分箱数,默认是 32
       minInstancesPerNode: Int = 1,//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
       minInfoGain: Double = 0.0,//分裂节点时所需最小信息增益
-      numTrees: Int = 10,//随机森林需要训练的树的个数，默认值是 20
+      numTrees: Int = 10,//随机森林需要训练的树的个数,默认值是 20
       featureSubsetStrategy: String = "auto",
       fracTest: Double = 0.2,
       cacheNodeIds: Boolean = false,
@@ -199,25 +199,25 @@ object RandomForestExample {
           .setFeaturesCol("indexedFeatures")//训练数据集 DataFrame 中存储特征数据的列名
           .setLabelCol(labelColName)//标签列的名称
           .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
-          .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
+          .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)//
           .setFeatureSubsetStrategy(params.featureSubsetStrategy)
-          .setNumTrees(params.numTrees)//随机森林需要训练的树的个数，默认值是 20
+          .setNumTrees(params.numTrees)//随机森林需要训练的树的个数,默认值是 20
       case "regression" =>
         new RandomForestRegressor()
           .setFeaturesCol("indexedFeatures")//训练数据集 DataFrame 中存储特征数据的列名
           .setLabelCol(labelColName)//标签列的名称
           .setMaxDepth(params.maxDepth)//树的最大深度,为了防止过拟合,设定划分的终止条件
-          .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数，默认是 32
+          .setMaxBins(params.maxBins)//离散连续性变量时最大的分箱数,默认是 32
           .setMinInstancesPerNode(params.minInstancesPerNode)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1),或不设置检查点(-1)
           .setFeatureSubsetStrategy(params.featureSubsetStrategy)
-          .setNumTrees(params.numTrees)//随机森林需要训练的树的个数，默认值是 20
+          .setNumTrees(params.numTrees)//随机森林需要训练的树的个数,默认值是 20
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
     stages += dt
@@ -235,7 +235,7 @@ object RandomForestExample {
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained Random Forest from the fitted PipelineModel
-    //从安装管道模型，得到训练随机森林
+    //从安装管道模型,得到训练随机森林
     algo match {
       case "classification" =>
         val rfModel = pipelineModel.stages.last.asInstanceOf[RandomForestClassificationModel]

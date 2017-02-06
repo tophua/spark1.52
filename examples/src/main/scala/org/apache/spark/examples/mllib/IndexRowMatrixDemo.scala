@@ -16,8 +16,8 @@ object IndexRowMatrixDemo {
     val sc = new SparkContext(conf)
     //定义一个隐式转换函数
     implicit def double2long(x: Double) = x.toLong
-    //数据中的第一个元素为IndexedRow中的index，剩余的映射到vector
-    //f.take(1)(0)获取到第一个元素并自动进行隐式转换，转换成Long类型
+    //数据中的第一个元素为IndexedRow中的index,剩余的映射到vector
+    //f.take(1)(0)获取到第一个元素并自动进行隐式转换,转换成Long类型
     val rdd1 = sc.parallelize(
       Array(
         Array(1.0, 2.0, 3.0, 4.0),
@@ -29,6 +29,6 @@ object IndexRowMatrixDemo {
     var gramianMatrix: Matrix = indexRowMatrix.computeGramianMatrix()
     //转换成行矩阵RowMatrix
     var rowMatrix: RowMatrix = indexRowMatrix.toRowMatrix()
-    //其它方法例如computeSVD计算奇异值、multiply矩阵相乘等操作，方法使用与RowMaxtrix相同
+    //其它方法例如computeSVD计算奇异值、multiply矩阵相乘等操作,方法使用与RowMaxtrix相同
   }
 }

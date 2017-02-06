@@ -103,9 +103,9 @@ private[spark] class TaskContextImpl(
   }
   //如果任务已完成,则返回真 
   override def isCompleted(): Boolean = completed
-  //如果任务在驱动程序中运行本地运行，则返回真
+  //如果任务在驱动程序中运行本地运行,则返回真
   override def isRunningLocally(): Boolean = runningLocally
-  //如果任务已被杀死，返回真 
+  //如果任务已被杀死,返回真 
   override def isInterrupted(): Boolean = interrupted
 
   override def getMetricsSources(sourceName: String): Seq[Source] =

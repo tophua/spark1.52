@@ -66,7 +66,7 @@ private[spark] object AkkaUtils extends Logging {
     val akkaThreads = conf.getInt("spark.akka.threads", 4)
     //设置批量处理大小
     val akkaBatchSize = conf.getInt("spark.akka.batchSize", 15)
-    //Spark节点之间通信的超时时间，以秒为单位
+    //Spark节点之间通信的超时时间,以秒为单位
     val akkaTimeoutS = conf.getTimeAsSeconds("spark.akka.timeout",
       conf.get("spark.network.timeout", "120s"))
     val akkaFrameSize = maxFrameSizeBytes(conf)

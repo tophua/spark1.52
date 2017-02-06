@@ -27,7 +27,7 @@ import org.apache.spark.Partition
  * [ Initialized --> checkpointing in progress(检查点进程) --> checkpointed ].
  */
 private[spark] object CheckpointState extends Enumeration {
-  type CheckpointState = Value //type关键字，用来给类型或者是操作起别名，用起来很是方便 ,Value扩展枚举类型
+  type CheckpointState = Value //type关键字,用来给类型或者是操作起别名,用起来很是方便 ,Value扩展枚举类型
   val Initialized, CheckpointingInProgress, Checkpointed = Value
 }
 
@@ -47,7 +47,7 @@ private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD
   protected var cpState = Initialized
 
   // The RDD that contains our checkpointed data,包含RDD检查点的数据
-  private var cpRDD: Option[CheckpointRDD[T]] = None //如果返回的是None，则代表没有给值
+  private var cpRDD: Option[CheckpointRDD[T]] = None //如果返回的是None,则代表没有给值
 
   // TODO: are we sure we need to use a global lock in the following methods?
 
@@ -79,7 +79,7 @@ private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD
 
     // Update our state and truncate the RDD lineage
     RDDCheckpointData.synchronized {
-      cpRDD = Some(newRDD) //当回传Some的时候，代表这个函式成功地给了值
+      cpRDD = Some(newRDD) //当回传Some的时候,代表这个函式成功地给了值
       cpState = Checkpointed//检查点保存完成
       rdd.markCheckpointed()//清除原始RDD和partitions的依赖
     }

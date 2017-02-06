@@ -62,7 +62,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
         case msg: String => message = msg
       }
     })
-    //RpcEndpointRef 一个远程RpcEndpoint的引用，通过它可以给远程RpcEndpoint发送消息
+    //RpcEndpointRef 一个远程RpcEndpoint的引用,通过它可以给远程RpcEndpoint发送消息
     rpcEndpointRef.send("hello")
     eventually(timeout(5 seconds), interval(10 millis)) {
       assert("hello" === message)

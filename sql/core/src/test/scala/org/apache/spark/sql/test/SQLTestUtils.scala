@@ -59,7 +59,7 @@ private[sql] trait SQLTestUtils
   /**
    * =>符号可以看做是创建函数实例的语法糖,
    * val sql: String => DataFrame 函数类型
-   * 例如： String => DataFrame 表示一个函数的输入参数类型是String，返回值类型是DataFrame
+   * 例如： String => DataFrame 表示一个函数的输入参数类型是String,返回值类型是DataFrame
    */
   
   
@@ -108,12 +108,12 @@ private[sql] trait SQLTestUtils
   /**
    * Sets all SQL configurations specified in `pairs`, calls `f`, and then restore all SQL
    * configurations.
-   * 将所有的SQL配置指定`对`,调用` F `，然后恢复所有SQL配置
+   * 将所有的SQL配置指定`对`,调用` F `,然后恢复所有SQL配置
    * 
    * @todo Probably this method should be moved to a more general place
    */
   protected def withSQLConf(pairs: (String, String)*)(f: => Unit): Unit = {
-    //unzip把对偶列表拆分还原为两个列表，其中一个列表由每对对偶的第一个元素组成,另一个由第二个元素组成
+    //unzip把对偶列表拆分还原为两个列表,其中一个列表由每对对偶的第一个元素组成,另一个由第二个元素组成
     val (keys, values) = pairs.unzip
     //Try[A]则表示一种计算:这种计算在成功的情况下,返回类型为 A 的值,在出错的情况下,返回 Throwable 
     val currentValues = keys.map(key => Try(_sqlContext.conf.getConfString(key)).toOption)

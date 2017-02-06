@@ -80,7 +80,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
 
   /**
    *  Creates and binds the TransportServer, possibly trying multiple ports. 
-   *  创建和绑定transportserver，可能在多个端口
+   *  创建和绑定transportserver,可能在多个端口
    *  */
   private def createServer(bootstraps: List[TransportServerBootstrap]): TransportServer = {
     def startService(port: Int): (TransportServer, Int) = {

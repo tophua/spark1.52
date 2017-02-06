@@ -71,7 +71,7 @@ object SimpleParamsExample {
     // Since model1 is a Model (i.e., a Transformer produced by an Estimator),由估计量产生的转换
     // we can view the parameters it used during fit().
     // This prints the parameter (name: value) pairs, where names are unique IDs for this
-    //此打印参数(名称:值)对,在这个逻辑回归实例中，名称是唯一的标识
+    //此打印参数(名称:值)对,在这个逻辑回归实例中,名称是唯一的标识
     // LogisticRegression instance.
     println("Model 1 was fit using parameters: " + model1.parent.extractParamMap())
 
@@ -82,7 +82,7 @@ object SimpleParamsExample {
     val paramMap = ParamMap(lr.maxIter -> 20)
     //指定1个参数,这将覆盖原maxiter。
     paramMap.put(lr.maxIter, 30) // Specify 1 Param.  This overwrites the original maxIter.
-    //在二进制分类中设置阈值,范围为[0，1],如果类标签1的估计概率>Threshold,则预测1,否则0
+    //在二进制分类中设置阈值,范围为[0,1],如果类标签1的估计概率>Threshold,则预测1,否则0
     paramMap.put(lr.regParam -> 0.1, lr.thresholds -> Array(0.45, 0.55)) // Specify multiple Params.
 
     // One can also combine ParamMaps. 你也可以将参数映射

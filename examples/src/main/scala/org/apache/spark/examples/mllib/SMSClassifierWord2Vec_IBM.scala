@@ -23,8 +23,8 @@ object SMSClassifierWord2Vec_IBM {
     val conf = new SparkConf().setMaster("local[2]").setAppName("SMS Message Classification (HAM or SPAM)")
     val sc = new SparkContext(conf)
     val sqlCtx = new SQLContext(sc)
-    //读取原始数据集，并创建一个 DataFrame
-    //该数据集结构非常简单，只有两列，第一列是短信的标签 ，第二列是短信内容，两列之间用制表符 (tab) 分隔
+    //读取原始数据集,并创建一个 DataFrame
+    //该数据集结构非常简单,只有两列,第一列是短信的标签 ,第二列是短信内容,两列之间用制表符 (tab) 分隔
     val parsedRDD = sc.textFile("../data/mllib/SMSSpamCollection").map(_.split("\t")).map(eachRow => {
       (eachRow(0), eachRow(1).split(" "))
     })
@@ -34,8 +34,8 @@ object SMSClassifierWord2Vec_IBM {
     val labelIndexer = new StringIndexer().setInputCol("label").setOutputCol("indexedLabel").fit(msgDF)
     //使用 Word2Vec 将短信文本转化成数值型词向量
     val word2Vec = new Word2Vec().setInputCol("message").setOutputCol("features").setVectorSize(VECTOR_SIZE).setMinCount(1)
-   //这个参数是一个整型数组类型，第一个元素需要和特征向量的维度相等，最后一个元素需要训练数据的标签取值个数相等，
-    //如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层，元素的取值代表了该层的神经元的个数。
+   //这个参数是一个整型数组类型,第一个元素需要和特征向量的维度相等,最后一个元素需要训练数据的标签取值个数相等,
+    //如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层,元素的取值代表了该层的神经元的个数。
     //例如val layers = Array[Int](100,6,5,2)
     val layers = Array[Int](VECTOR_SIZE, 6,  2)
     //使用 MultilayerPerceptronClassifier 训练一个多层感知器模型

@@ -18,8 +18,8 @@
 package org.apache.spark.ml.classification
 /**
  * 参考资料
- * Spark ML 在 1.5 版本后提供一个使用 BP(反向传播，Back Propagation) 算法训练的多层感知器实现，
- * BP 算法的学习目的是对网络的连接权值进行调整，使得调整后的网络对任一输入都能得到所期望的输出。
+ * Spark ML 在 1.5 版本后提供一个使用 BP(反向传播,Back Propagation) 算法训练的多层感知器实现,
+ * BP 算法的学习目的是对网络的连接权值进行调整,使得调整后的网络对任一输入都能得到所期望的输出。
  * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice6/
  * 
  */
@@ -33,7 +33,7 @@ import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.sql.Row
 /**
  * 多层感知器分类器 (MultilayerPerceptronClassifer),
- *  BP(反向传播，Back Propagation) 算法训练的多层感知器实现，BP 算法的学习目的是对网络的连接权值进行调整，
+ *  BP(反向传播,Back Propagation) 算法训练的多层感知器实现,BP 算法的学习目的是对网络的连接权值进行调整,
  *  使得调整后的网络对任一输入都能得到所期望的输出
  */
 class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
@@ -47,8 +47,8 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     ).toDF("features", "label")
     /**
      * setLayers
-     * 这个参数是一个整型数组类型，第一个元素需要和特征向量的维度相等，最后一个元素需要训练数据的标签取值个数相等，
-     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层，元素的取值代表了该层的神经元的个数。
+     * 这个参数是一个整型数组类型,第一个元素需要和特征向量的维度相等,最后一个元素需要训练数据的标签取值个数相等,
+     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层,元素的取值代表了该层的神经元的个数。
      * 例如val layers = Array[Int](2,5,2)。
      */
     val layers = Array[Int](2, 5, 2)
@@ -56,16 +56,16 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val trainer = new MultilayerPerceptronClassifier()
     /**
      * setLayers
-     * 这个参数是一个整型数组类型，第一个元素需要和特征向量的维度相等，最后一个元素需要训练数据的标签取值个数相等，
-     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层，元素的取值代表了该层的神经元的个数。
+     * 这个参数是一个整型数组类型,第一个元素需要和特征向量的维度相等,最后一个元素需要训练数据的标签取值个数相等,
+     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层,元素的取值代表了该层的神经元的个数。
      * 例如val layers = Array[Int](2,5,2)。
      */
       .setLayers(layers)
     /**
      * setBlockSize
-     * 该参数被前馈网络训练器用来将训练样本数据的每个分区都按照 blockSize 大小分成不同组，
-     * 并且每个组内的每个样本都会被叠加成一个向量，以便于在各种优化算法间传递。
-     * 该参数的推荐值是 10-1000，默认值是 128
+     * 该参数被前馈网络训练器用来将训练样本数据的每个分区都按照 blockSize 大小分成不同组,
+     * 并且每个组内的每个样本都会被叠加成一个向量,以便于在各种优化算法间传递。
+     * 该参数的推荐值是 10-1000,默认值是 128
      */
       .setBlockSize(1)//
       .setSeed(11L)//设置种子
@@ -106,16 +106,16 @@ class MultilayerPerceptronClassifierSuite extends SparkFunSuite with MLlibTestSp
     val trainer = new MultilayerPerceptronClassifier()
      /**
      * setLayers
-     * 这个参数是一个整型数组类型，第一个元素需要和特征向量的维度相等，最后一个元素需要训练数据的标签取值个数相等，
-     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层，元素的取值代表了该层的神经元的个数。
+     * 这个参数是一个整型数组类型,第一个元素需要和特征向量的维度相等,最后一个元素需要训练数据的标签取值个数相等,
+     * 如 2 分类问题就写 2。中间的元素有多少个就代表神经网络有多少个隐层,元素的取值代表了该层的神经元的个数。
      * 例如val layers = Array[Int](100,6,5,2)。
      */
       .setLayers(layers)
      /**
      * setBlockSize
-     * 该参数被前馈网络训练器用来将训练样本数据的每个分区都按照 blockSize 大小分成不同组，
-     * 并且每个组内的每个样本都会被叠加成一个向量，以便于在各种优化算法间传递。
-     * 该参数的推荐值是 10-1000，默认值是 128
+     * 该参数被前馈网络训练器用来将训练样本数据的每个分区都按照 blockSize 大小分成不同组,
+     * 并且每个组内的每个样本都会被叠加成一个向量,以便于在各种优化算法间传递。
+     * 该参数的推荐值是 10-1000,默认值是 128
      */
       .setBlockSize(1)      
       .setSeed(11L)

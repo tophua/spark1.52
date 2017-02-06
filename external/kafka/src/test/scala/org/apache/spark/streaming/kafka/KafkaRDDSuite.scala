@@ -134,7 +134,7 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     //这是“0条消息”的情况
     val rdd2 = getRdd(kc, Set(topic))
     // shouldn't get anything, since message is sent after rdd was defined
-    //不应该得到任何东西，因为消息被发送后，定义了RDD
+    //不应该得到任何东西,因为消息被发送后,定义了RDD
     val sentOnlyOne = Map("d" -> 1)
 
     kafkaTestUtils.sendMessages(topic, sentOnlyOne)
@@ -146,7 +146,7 @@ class KafkaRDDSuite extends SparkFunSuite with BeforeAndAfterAll {
     //这是“正是1个消息”的情况下,即从sentonlyone以上单信息
     val rdd3 = getRdd(kc, Set(topic))
     // send lots of messages after rdd was defined, they shouldn't show up
-    //发送大量邮件后定义了RDD，他们不应该出现
+    //发送大量邮件后定义了RDD,他们不应该出现
     kafkaTestUtils.sendMessages(topic, Map("extra" -> 22))
 
     assert(rdd3.isDefined)

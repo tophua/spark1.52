@@ -39,8 +39,8 @@ object BucketizerExample {
     // $example on$
     /**
     * 分类的标准是自己定义的,在Spark中为split参数,定义如下：
-		*	double[] splits = {0, 18, 35,50， Double.PositiveInfinity}
-		* 将数值年龄分为四类0-18，18-35，35-50，55+四个段
+		*	double[] splits = {0, 18, 35,50, Double.PositiveInfinity}
+		* 将数值年龄分为四类0-18,18-35,35-50,55+四个段
     */
     val splits = Array(Double.NegativeInfinity, -0.5, 0.0, 0.5, Double.PositiveInfinity)
 

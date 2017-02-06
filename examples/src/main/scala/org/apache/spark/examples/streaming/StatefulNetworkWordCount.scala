@@ -47,11 +47,11 @@ object StatefulNetworkWordCount {
     StreamingExamples.setStreamingLogLevels()
 
     val updateFunc = (values: Seq[Int], state: Option[Int]) => {
-      //通过Spark内部的reduceByKey按key规约，然后这里传入某key当前批次的Seq/List,再计算当前批次的总和
+      //通过Spark内部的reduceByKey按key规约,然后这里传入某key当前批次的Seq/List,再计算当前批次的总和
       val currentCount = values.sum
      // 已累加的值
       val previousCount = state.getOrElse(0)
-     // 返回累加后的结果，是一个Option[Int]类型
+     // 返回累加后的结果,是一个Option[Int]类型
       Some(currentCount + previousCount)
     }
 
@@ -80,7 +80,7 @@ object StatefulNetworkWordCount {
     // Update the cumulative(累积) count using updateStateByKey
     //使用updateStateByKey更新累积计数
     // This will give a Dstream made of state (which is the cumulative count of the words)
-    //updateStateByKey可以DStream中的数据进行按key做reduce操作，然后对各个批次的数据进行累加
+    //updateStateByKey可以DStream中的数据进行按key做reduce操作,然后对各个批次的数据进行累加
     val stateDstream = wordDstream.updateStateByKey[Int](newUpdateFunc,
       new HashPartitioner (ssc.sparkContext.defaultParallelism), true, initialRDD)
     stateDstream.print()

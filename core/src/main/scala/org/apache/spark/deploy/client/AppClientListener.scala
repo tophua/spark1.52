@@ -27,16 +27,16 @@ package org.apache.spark.deploy.client
  * Users of this API should *not* block inside the callback methods.
  */
 private[spark] trait AppClientListener {
-  /**向Master成功注册Application，即成功链接到集群；**/
+  /**向Master成功注册Application,即成功链接到集群；**/
   def connected(appId: String): Unit
-  /**断开连接，如果当前SparkDeploySchedulerBackend::stop == false，那么可能原来的Master实效了，待新的Master ready后，会重新恢复原来的连接**/
+  /**断开连接,如果当前SparkDeploySchedulerBackend::stop == false,那么可能原来的Master实效了,待新的Master ready后,会重新恢复原来的连接**/
   /** Disconnection may be a temporary state, as we fail over to a new Master. */
   def disconnected(): Unit
-  /**Application由于不可恢复的错误停止了，这个时候需要重新提交出错的TaskSet**/
+  /**Application由于不可恢复的错误停止了,这个时候需要重新提交出错的TaskSet**/
   /** An application death is an unrecoverable failure condition. */
   def dead(reason: String): Unit
-  /**添加一个Executor，在这里的实现仅仅是打印了log，并没有额外的逻辑**/
+  /**添加一个Executor,在这里的实现仅仅是打印了log,并没有额外的逻辑**/
   def executorAdded(fullId: String, workerId: String, hostPort: String, cores: Int, memory: Int)
-  /**删除一个Executor，可能有两个原因，一个是Executor退出了，这里可以得到Executor的退出码，或者由于Worker的退出导致了运行其上的Executor退出**/
+  /**删除一个Executor,可能有两个原因,一个是Executor退出了,这里可以得到Executor的退出码,或者由于Worker的退出导致了运行其上的Executor退出**/
   def executorRemoved(fullId: String, message: String, exitStatus: Option[Int]): Unit
 }

@@ -134,7 +134,7 @@ class UISeleniumSuite
         batchLinks.size should be >= 1
 
         // Check a normal batch page 检查一个正常的批处理页面
-        //最后应该是第一批，所以它会有一些工作
+        //最后应该是第一批,所以它会有一些工作
         go to (batchLinks.last) // Last should be the first batch, so it will have some jobs
         val summaryText = findAll(cssSelector("li strong")).map(_.text).toSeq
         summaryText should contain ("Batch Duration:")

@@ -89,7 +89,7 @@ private[spark] trait Spillable[C] extends Logging {
       val granted = shuffleMemoryManager.tryToAcquire(amountToRequest)     
       //将申请的内存添加到能接受的内存阀值之上,即增加可忍受的内存阀值
       myMemoryThreshold += granted
-      //此时的内存阀值还是小于当前使用两，则必须进行spill
+      //此时的内存阀值还是小于当前使用两,则必须进行spill
       if (myMemoryThreshold <= currentMemory) {
         // We were granted too little memory to grow further (either tryToAcquire returned 0,
         // or we already had more memory than myMemoryThreshold); spill the current collection

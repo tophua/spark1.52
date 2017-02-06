@@ -165,7 +165,7 @@ class StandaloneDynamicAllocationSuite
     // This highlights a limitation of using dynamic allocation with max cores WITHOUT
     // setting cores per executor: once an application scales down and then scales back
     // up, its executors may not be spread out anymore!
-    //要求1以上,这一个不会去通过，因为我们已经在最大的核心
+    //要求1以上,这一个不会去通过,因为我们已经在最大的核心
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)
@@ -179,7 +179,7 @@ class StandaloneDynamicAllocationSuite
     // kill all existing executors; we should end up with 3 - 1 = 2 executor
     //杀死所有现有的执行者,我们应该以3 - 1 = 2执行者
     // Note: we scheduled these executors together, so their cores should be evenly distributed
-    //注：我们将这些执行者在一起，所以他们的核心应该是均匀分布的
+    //注：我们将这些执行者在一起,所以他们的核心应该是均匀分布的
     assert(killAllExecutors(sc))
     apps = getApplications()
     assert(apps.head.executors.size === 2)
@@ -201,7 +201,7 @@ class StandaloneDynamicAllocationSuite
   }
   //动态分配最大内核大于等于每个Worker 内存数
   test("dynamic allocation with max cores > cores per worker") {
-   //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
+   //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候,最多可以请求多少个CPU核心。默认是所有的都能用
     sc = new SparkContext(appConf.set("spark.cores.max", "16"))
     val appId = sc.applicationId
     eventually(timeout(10.seconds), interval(10.millis)) {
@@ -309,7 +309,7 @@ class StandaloneDynamicAllocationSuite
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
     // request many more; this increases the limit well beyond the cluster capacity
-    //要求更多,这增加了限制，远远超出了集群容量
+    //要求更多,这增加了限制,远远超出了集群容量
     assert(sc.requestExecutors(1000))
     apps = getApplications()
     assert(apps.head.executors.size === 10)
@@ -317,7 +317,7 @@ class StandaloneDynamicAllocationSuite
   }
   //动态分配每个执行器最大内核
   test("dynamic allocation with cores per executor AND max cores") {
-   //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
+   //当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候,最多可以请求多少个CPU核心。默认是所有的都能用
     sc = new SparkContext(appConf
       .set("spark.executor.cores", "2")
       .set("spark.cores.max", "8"))
@@ -425,7 +425,7 @@ class StandaloneDynamicAllocationSuite
     val executors = getExecutorIds(sc)
     assert(executors.size === 2)
     // kill executor 1, and replace it
-    //杀死执行者1，并取代它
+    //杀死执行者1,并取代它
     assert(sc.killAndReplaceExecutor(executors.head))
     eventually(timeout(10.seconds), interval(10.millis)) {
       val apps = getApplications()

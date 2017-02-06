@@ -39,7 +39,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
 
   test("default size avoids broadcast") {//默认大小避免广播
     // TODO: Improve this test when we have better statistics
-    //当我们有更好的统计数据时，改进这个测试
+    //当我们有更好的统计数据时,改进这个测试
     ctx.sparkContext.parallelize(1 to 10).map(i => TestData(i, i.toString))
       .toDF().registerTempTable("sizeTst")
     ctx.cacheTable("sizeTst")

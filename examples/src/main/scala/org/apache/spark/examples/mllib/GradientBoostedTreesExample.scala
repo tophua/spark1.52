@@ -46,7 +46,7 @@ object GradientBoostedTreesExample {
  */
     // 加载数据
     val data = MLUtils.loadLibSVMFile(sc, "../data/mllib/rf_libsvm_data.txt")
-    // 将数据随机分配为两份，一份用于训练，一份用于测试
+    // 将数据随机分配为两份,一份用于训练,一份用于测试
     val splits = data.randomSplit(Array(0.7, 0.3))
     //数据分成训练和测试数据集
     val (trainingData, testData) = (splits(0), splits(1))

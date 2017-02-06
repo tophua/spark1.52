@@ -98,7 +98,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     sc = new SparkContext("local", "test")
 
     // Run from 1 to 10, and then block and wait for the task to be killed.
-    //从1运行到10，然后阻止和等待任务被杀死
+    //从1运行到10,然后阻止和等待任务被杀死
     val rdd = sc.parallelize(1 to 1000, 2).map { x =>
       if (x > 10) {
         taskStartedSemaphore.release()//释放资源
@@ -147,7 +147,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     sc.clearJobGroup()
     val jobB = sc.parallelize(1 to 100, 2).countAsync()
     sc.cancelJobGroup("jobA")
-    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+    //Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
     val e = intercept[SparkException] { Await.result(jobA, Duration.Inf) }
     assert(e.getMessage contains "cancel")
 
@@ -219,7 +219,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     sc.clearJobGroup()
     val jobB = sc.parallelize(1 to 100, 2).countAsync()
     sc.cancelJobGroup("jobA")
-    //Await.result或者Await.ready会导致当前线程被阻塞，并等待actor通过它的应答来完成Future
+    //Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
     val e = intercept[SparkException] { Await.result(jobA, 5.seconds) }
     assert(e.getMessage contains "cancel")
 
@@ -229,7 +229,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
 
   test("two jobs sharing the same stage") {//两个共享同一阶段的Job
     // sem1: make sure cancel is issued after some tasks are launched
-    //在启动某些任务后，请确认取消是发出的
+    //在启动某些任务后,请确认取消是发出的
     // twoJobsSharingStageSemaphore:
     //   make sure the first stage is not finished until cancel is issued
     //确保第一阶段没有完成,直到取消发行

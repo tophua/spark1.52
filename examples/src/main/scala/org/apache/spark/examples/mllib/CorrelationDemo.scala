@@ -21,7 +21,7 @@ object CorrelationDemo {
     val rdd2: RDD[Double] = sc.parallelize(Array(11.0, 20.0, 13.0, 16.0))
     //两个rdd间的相关性
     //返回值：correlation: Double = 0.959034501397483
-    //[-1, 1]，值越接近于1,其相关度越高
+    //[-1, 1],值越接近于1,其相关度越高
     val correlation: Double = Statistics.corr(rdd1, rdd2, "pearson")
     val rdd3 = sc.parallelize(
       Array(
@@ -55,7 +55,7 @@ object CorrelationDemo {
     val correlation5: Double = Statistics.corr(rdd4, rdd5, "spearman")
     println("spearman:"+correlation5)
     //从上面的执行结果来看,相关性从pearson的值0.6915716600436548提高到了0.9428571428571412,由于利用的等级相关,
-    //因而spearman相关性分析也称为spearman等级相关分析或等级差数法,但需要注意的是spearman相关性分析方法涉及到等级的排序问题，
-    //在分布式环境下的排序可能会涉及到大量的网络IO操作，算法效率不是特别高。
+    //因而spearman相关性分析也称为spearman等级相关分析或等级差数法,但需要注意的是spearman相关性分析方法涉及到等级的排序问题,
+    //在分布式环境下的排序可能会涉及到大量的网络IO操作,算法效率不是特别高。
   }
 }

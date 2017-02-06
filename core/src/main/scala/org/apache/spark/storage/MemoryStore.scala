@@ -48,7 +48,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   @volatile private var currentMemory = 0L
  
   // Ensure only one thread is putting, and if necessary, dropping blocks at any given time
-  //同步锁，保证只有一个线程在写和删除Block
+  //同步锁,保证只有一个线程在写和删除Block
   private val accountingLock = new Object
 
   // A mapping from taskAttemptId to amount of memory used for unrolling a block (in bytes)
@@ -119,7 +119,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   /**
    * Use `size` to test if there is enough space in MemoryStore. If so, create the ByteBuffer and
    * put it into MemoryStore. Otherwise, the ByteBuffer won't be created.
-   * 将字节缓存形式的Block存储到内存中，若level.deserialized为真，则需要将字节缓存反序列化，
+   * 将字节缓存形式的Block存储到内存中,若level.deserialized为真,则需要将字节缓存反序列化,
    * 以数组的形式（Array[Any]）存储；若为假则以字节缓存形式（ByteBuffer）存储
    * The caller should guarantee that `size` is correct.
    */
@@ -262,7 +262,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       }
     }
   }
-//清空entries，并令currentMemory为0
+//清空entries,并令currentMemory为0
   override def clear() {
     entries.synchronized {
       entries.clear()
@@ -579,7 +579,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
  */
   private def currentTaskAttemptId(): Long = {
     // In case this is called on the driver, return an invalid task attempt id.
-    //如果Driver上调用，则返回一个无效的任务尝试标识
+    //如果Driver上调用,则返回一个无效的任务尝试标识
     Option(TaskContext.get()).map(_.taskAttemptId()).getOrElse(-1L)
   }
 
@@ -626,7 +626,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   /**
    * Reserve the unroll memory of current unroll successful block used by this task
    * until actually put the block into memory entry.
-   * 清理当前task已经展开的block对应的预展开的内存，释放更多的空间
+   * 清理当前task已经展开的block对应的预展开的内存,释放更多的空间
    */
   def reservePendingUnrollMemoryForThisTask(memory: Long): Unit = {
     val taskAttemptId = currentTaskAttemptId()
@@ -638,7 +638,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
   /**
    * Release pending unroll memory of current unroll successful block used by this task
-   * 清理当前task已经展开的block对应的预展开的内存，释放更多的空间
+   * 清理当前task已经展开的block对应的预展开的内存,释放更多的空间
    */
   def releasePendingUnrollMemoryForThisTask(): Unit = {
     val taskAttemptId = currentTaskAttemptId()

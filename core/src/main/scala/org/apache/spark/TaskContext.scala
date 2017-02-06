@@ -93,13 +93,13 @@ abstract class TaskContext extends Serializable {
 
   /**
    * Returns true if the task has completed.
-   * 如果任务已完成，则返回真
+   * 如果任务已完成,则返回真
    */
   def isCompleted(): Boolean
 
   /**
    * Returns true if the task has been killed.
-   * 如果任务已被杀死，返回真
+   * 如果任务已被杀死,返回真
    */
   def isInterrupted(): Boolean
 
@@ -108,7 +108,7 @@ abstract class TaskContext extends Serializable {
 
   /**
    * Returns true if the task is running locally in the driver program.
-   * 如果任务在驱动程序中运行本地运行，则返回真
+   * 如果任务在驱动程序中运行本地运行,则返回真
    * @return
    */
   def isRunningLocally(): Boolean

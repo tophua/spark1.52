@@ -103,7 +103,7 @@ class LBFGSSuite extends SparkFunSuite with MLlibTestSparkContext with Matchers 
     val regParam = 0.2//正则化参数>=0
 
     // Prepare another non-zero weights to compare the loss in the first iteration.
-    //准备另一个非零的权重，以比较第一次迭代中的损失
+    //准备另一个非零的权重,以比较第一次迭代中的损失
     val initialWeightsWithIntercept = Vectors.dense(0.3, 0.12)
     val convergenceTol = 1e-12
     val numIterations = 10

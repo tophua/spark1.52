@@ -24,7 +24,7 @@ import org.apache.spark.mllib.util.MLlibTestSparkContext
 import org.apache.spark.mllib.util.TestingUtils._
 import org.apache.spark.util.Utils
 /**
- * 保序回归:从该序列的首元素往后观察，一旦出现乱序现象停止该轮观察，从该乱序元素开始逐个吸收元素组成一个序列，
+ * 保序回归:从该序列的首元素往后观察,一旦出现乱序现象停止该轮观察,从该乱序元素开始逐个吸收元素组成一个序列,
  * 					直到该序列所有元素的平均值小于或等于下一个待吸收的元素.
  * http://blog.csdn.net/fsz521/article/details/7706250 具体规则
  */
@@ -55,7 +55,7 @@ class IsotonicRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 		 * weights:WrappedArray(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
      */
     val trainRDD = sc.parallelize(generateIsotonicInput(labels, weights)).cache()
-    //isotonic，默认值是true,此参数指定保序回归是保序的(单调增加)还是不保序的(单调减少)
+    //isotonic,默认值是true,此参数指定保序回归是保序的(单调增加)还是不保序的(单调减少)
     new IsotonicRegression().setIsotonic(isotonic).run(trainRDD)
   }
 

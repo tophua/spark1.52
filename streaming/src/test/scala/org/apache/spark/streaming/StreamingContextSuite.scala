@@ -889,7 +889,7 @@ class StreamingContextSuite extends SparkFunSuite with BeforeAndAfter with Timeo
     val batchCount = new BatchCounter(ssc)
     ssc.start()
     // Just wait for completing 2 batches to make sure it triggers
-    //只等待完成2个批次，以确保它触发
+    //只等待完成2个批次,以确保它触发
     // `DStream.getMaxInputStreamRememberDuration`
     batchCount.waitUntilBatchesCompleted(2, 10000)
     // Throw the exception if crash

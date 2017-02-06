@@ -64,7 +64,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       /**
       指明特征是类别型的以及每个类别型特征对应值(类别)。
       Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
-      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
+      注意特征索引是从0开始的,0和4表示第1和第5个特征**/
 
     val categoricalFeaturesInfo = Map.empty[Int, Int]
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
@@ -217,7 +217,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
       /**
       指明特征是类别型的以及每个类别型特征对应值(类别)。
       Map(0 -> 2, 4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}。
-      注意特征索引是从0开始的，0和4表示第1和第5个特征**/
+      注意特征索引是从0开始的,0和4表示第1和第5个特征**/
     val categoricalFeaturesInfo = Map(0 -> 3, 2 -> 2, 4 -> 4)
     val input = sc.parallelize(arr)
     //树的最大深度,为了防止过拟合,设定划分的终止条件
@@ -253,13 +253,13 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
     val rdd = sc.parallelize(arr)
      /**
      * 1.训练数据集 
-      2.目标类别个数，即结果有几种选择 
-      3.Map中的键值分别对应Vector下标和该下标对应类别特征的取值情况，
-        	空表示所有特征都是数值型（为了方便，示例中直接取空，实际当中并不能这么使用） 
-      4.不纯性(impurity)度量：gini或者entropy，不纯度用来衡量一个规则的好坏，
-      	好的规则可以将数据划分为等值的两部分，坏规则则相反 
+      2.目标类别个数,即结果有几种选择 
+      3.Map中的键值分别对应Vector下标和该下标对应类别特征的取值情况,
+        	空表示所有特征都是数值型（为了方便,示例中直接取空,实际当中并不能这么使用） 
+      4.不纯性(impurity)度量：gini或者entropy,不纯度用来衡量一个规则的好坏,
+      	好的规则可以将数据划分为等值的两部分,坏规则则相反 
       5.树的最大深度,为了防止过拟合,设定划分的终止条件
-      6.决策树的最大桶数，每层使用的决策规则的个数，越多就可能精确，花费的时候也就越多,
+      6.决策树的最大桶数,每层使用的决策规则的个数,越多就可能精确,花费的时候也就越多,
       	最小的桶数应该不小于类别特征中最大的选择个数
      */
     val strategy = new Strategy(algo = Classification, impurity = Gini, maxDepth = 2,
@@ -269,7 +269,7 @@ class RandomForestSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     val rf1 = RandomForest.trainClassifier(rdd, strategy, numTrees = 3,
       featureSubsetStrategy = "auto", seed = 123)
-    strategy.subsamplingRate = 0.5//学习一棵决策树使用的训练数据比例，范围[0,1]
+    strategy.subsamplingRate = 0.5//学习一棵决策树使用的训练数据比例,范围[0,1]
     val rf2 = RandomForest.trainClassifier(rdd, strategy, numTrees = 3,
       featureSubsetStrategy = "auto", seed = 123)
     assert(rf1.toDebugString != rf2.toDebugString)

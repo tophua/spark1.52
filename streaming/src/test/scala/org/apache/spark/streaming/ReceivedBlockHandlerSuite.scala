@@ -228,7 +228,7 @@ class ReceivedBlockHandlerSuite
     //没有足够的空间来存储这一块MEMORY_ONLY存储级别
     // BlockManager will not be able to unroll this block
     // and hence it will not tryToPut this block, resulting the SparkException
-    //blockmanager将无法打开展开块，因此它不会trytoput这块
+    //blockmanager将无法打开展开块,因此它不会trytoput这块
     storageLevel = StorageLevel.MEMORY_ONLY
     withBlockManagerBasedBlockHandler { handler =>
       val thrown = intercept[SparkException] {

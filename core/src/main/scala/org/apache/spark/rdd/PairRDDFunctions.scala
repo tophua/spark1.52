@@ -71,19 +71,19 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    *
    * In addition, users can control the partitioning of the output RDD, and whether to perform
    * map-side aggregation (if a mapper can produce multiple items with the same key).
-   * 在一个由（K,V）对组成的数据集上调用，返回一个（K，Seq[V])对的数据集。
-   * 注意：默认情况下，使用8个并行任务进行分组，你可以传入numTask可选参数，根据数据量设置不同数目的Task
+   * 在一个由（K,V）对组成的数据集上调用,返回一个（K,Seq[V])对的数据集。
+   * 注意：默认情况下,使用8个并行任务进行分组,你可以传入numTask可选参数,根据数据量设置不同数目的Task
    * 1)创建Aggregator(其中mergeValue)
    * 
    */
   def combineByKey[C](createCombiner: V => C,//一个组合函数,用于将RDD[K,V]中的V转换成一个新的值C1
-      mergeValue: (C, V) => C,//合并值函数，将一个C1类型值和一个V类型值合并成一个C2类型，输入参数为(C1,V)，输出为新的C2
+      mergeValue: (C, V) => C,//合并值函数,将一个C1类型值和一个V类型值合并成一个C2类型,输入参数为(C1,V),输出为新的C2
       mergeCombiners: (C, C) => C,//该函数把2个元素集合C合并
       partitioner: Partitioner,  
       mapSideCombine: Boolean = true,//是否需要在worker端进行combine操作
       serializer: Serializer = null): RDD[(K, C)] = self.withScope {
     require(mergeCombiners != null, "mergeCombiners must be defined") // required as of Spark 0.9.0
-    if (keyClass.isArray) {//key是数组时需要特殊的partitioner，默认的HashPartitioner不支持数组 
+    if (keyClass.isArray) {//key是数组时需要特殊的partitioner,默认的HashPartitioner不支持数组 
       if (mapSideCombine) {//是否需要在worker端进行combine操作
         throw new SparkException("Cannot use map-side combining with array keys.")
       }
@@ -358,7 +358,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
   /**
    * Count the number of elements for each key, collecting the results to a local Map.
    * 用于统计RDD[K,V]中每个K的数量
-   * 返回一个(K，Int)对的Map，表示每一个key对应的元素个数
+   * 返回一个(K,Int)对的Map,表示每一个key对应的元素个数
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("B",3)))
    * scala> rdd1.countByKey
@@ -484,8 +484,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * partitioning of the resulting key-value pair RDD by passing a Partitioner.
    * The ordering of elements within each group is not guaranteed, and may even differ
    * each time the resulting RDD is evaluated.
-   * 在一个由（K,V）对组成的数据集上调用，返回一个（K，Seq[V])对的数据集。
-   * 注意：默认情况下，使用8个并行任务进行分组，你可以传入numTask可选参数，根据数据量设置不同数目的Task 
+   * 在一个由（K,V）对组成的数据集上调用,返回一个（K,Seq[V])对的数据集。
+   * 注意：默认情况下,使用8个并行任务进行分组,你可以传入numTask可选参数,根据数据量设置不同数目的Task 
    * Note: This operation may be very expensive. If you are grouping in order to perform an
    * aggregation (such as a sum or average) over each key, using [[PairRDDFunctions.aggregateByKey]]
    * or [[PairRDDFunctions.reduceByKey]] will provide much better performance.
@@ -493,7 +493,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Note: As currently implemented, groupByKey must be able to hold all the key-value pairs for any
    * key in memory. If a key has too many values, it can result in an [[OutOfMemoryError]]
    * 
-   * 该函数用于将RDD[K,V]中每个K对应的V值，返回一个（K,Seq[V])对的数据集
+   * 该函数用于将RDD[K,V]中每个K对应的V值,返回一个（K,Seq[V])对的数据集
    * 参数partitioner用于指定分区
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
@@ -548,8 +548,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Return an RDD containing all pairs of elements with matching keys in `this` and `other`. Each
    * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
    * (k, v2) is in `other`. Uses the given Partitioner to partition the output RDD.
-   * 在类型为（K,V)和（K,W)类型的数据集上调用时，返回一个相同key对应的所有元素对在一起的(K, (V, W))数据集
-   * join相当于SQL中的内关联join，只返回两个RDD根据K可以关联上的结果，join只能用于两个RDD之间的关联，如果要多个RDD关联，多关联几次即可
+   * 在类型为（K,V)和（K,W)类型的数据集上调用时,返回一个相同key对应的所有元素对在一起的(K, (V, W))数据集
+   * join相当于SQL中的内关联join,只返回两个RDD根据K可以关联上的结果,join只能用于两个RDD之间的关联,如果要多个RDD关联,多关联几次即可
    */
   def join[W](other: RDD[(K, W)], partitioner: Partitioner): RDD[(K, (V, W))] = self.withScope {
     this.cogroup(other, partitioner).flatMapValues( pair =>
@@ -562,8 +562,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in `other`, or the
    * pair (k, (v, None)) if no elements in `other` have key k. Uses the given Partitioner to
    * partition the output RDD.
-   * leftOuterJoin类似于SQL中的左外关联left outer join，返回结果以前面的RDD为主，关联不上的记录为空。
-   * 只能用于两个RDD之间的关联，如果要多个RDD关联，多关联几次即可。
+   * leftOuterJoin类似于SQL中的左外关联left outer join,返回结果以前面的RDD为主,关联不上的记录为空。
+   * 只能用于两个RDD之间的关联,如果要多个RDD关联,多关联几次即可。
    */
   def leftOuterJoin[W](
       other: RDD[(K, W)],
@@ -582,8 +582,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in `this`, or the
    * pair (k, (None, w)) if no elements in `this` have key k. Uses the given Partitioner to
    * partition the output RDD.
-   * rightOuterJoin类似于SQL中的有外关联right outer join，返回结果以参数中的RDD为主，关联不上的记录为空。
-   * 只能用于两个RDD之间的关联，如果要多个RDD关联，多关联几次即可
+   * rightOuterJoin类似于SQL中的有外关联right outer join,返回结果以参数中的RDD为主,关联不上的记录为空。
+   * 只能用于两个RDD之间的关联,如果要多个RDD关联,多关联几次即可
    */
   def rightOuterJoin[W](other: RDD[(K, W)], partitioner: Partitioner)
       : RDD[(K, (Option[V], W))] = self.withScope {
@@ -742,7 +742,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
   /**
    * Pass each value in the key-value pair RDD through a map function without changing the keys;
    * this also retains the original RDD's partitioning.
-   * 将输入的二元tuple数据的value值逐一转换处理，并输出包含原有key和处理后value的二元tuple，最终输出处理后二元tuple的RDD
+   * 将输入的二元tuple数据的value值逐一转换处理,并输出包含原有key和处理后value的二元tuple,最终输出处理后二元tuple的RDD
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array((1,"A"),(2,"B"),(3,"C"),(4,"D")),2)
    * scala> rdd1.mapValues(x => x + "_").collect
@@ -758,7 +758,7 @@ preservesPartitioning = true)
   /**
    * Pass each value in the key-value pair RDD through a flatMap function without changing the
    * keys; this also retains the original RDD's partitioning.
-   * 同基本转换操作中的flatMap，只不过flatMapValues是针对[K,V]中的V值进行flatMap操作
+   * 同基本转换操作中的flatMap,只不过flatMapValues是针对[K,V]中的V值进行flatMap操作
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array((1,"A"),(2,"B"),(3,"C"),(4,"D")),2)
    * scala> rdd1.flatMapValues(x => x + "_").collect
@@ -777,8 +777,8 @@ preservesPartitioning = true)
    * For each key k in `this` or `other1` or `other2` or `other3`,
    * return a resulting RDD that contains a tuple with the list of values
    * for that key in `this`, `other1`, `other2` and `other3`.
-   * 在类型为（K,V)和（K,W)的数据集上调用，返回一个 (K, Seq[V], Seq[W])元组的数据集
-   * cogroup相当于SQL中的全外关联full outer join，返回左右RDD中的记录，关联不上的为空。
+   * 在类型为（K,V)和（K,W)的数据集上调用,返回一个 (K, Seq[V], Seq[W])元组的数据集
+   * cogroup相当于SQL中的全外关联full outer join,返回左右RDD中的记录,关联不上的为空。
    * 参数partitioner用于指定分区函数
    */
   def cogroup[W1, W2, W3](other1: RDD[(K, W1)],
@@ -909,8 +909,8 @@ preservesPartitioning = true)
 
   /**
    * Return an RDD with the pairs from `this` whose keys are not in `other`.
-   * 返回在RDD中出现，并且不在other RDD中出现的元素(交集,相当于进行集合的差操作)，不去重,
-   * 只不过这里是针对K的，返回在主RDD中出现，并且不在otherRDD中出现的元素。
+   * 返回在RDD中出现,并且不在other RDD中出现的元素(交集,相当于进行集合的差操作),不去重,
+   * 只不过这里是针对K的,返回在主RDD中出现,并且不在otherRDD中出现的元素。
    * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
    * RDD will be <= us.
    * 例如:
@@ -925,7 +925,7 @@ preservesPartitioning = true)
 
   /** 
    *  Return an RDD with the pairs from `this` whose keys are not in `other`. 
-   *  返回在RDD中出现，并且不在other RDD中出现的元素(交集,相当于进行集合的差操作)，不去重
+   *  返回在RDD中出现,并且不在other RDD中出现的元素(交集,相当于进行集合的差操作),不去重
    *  */
   def subtractByKey[W: ClassTag](
       other: RDD[(K, W)],
@@ -935,7 +935,7 @@ preservesPartitioning = true)
 
   /** 
    *  Return an RDD with the pairs from `this` whose keys are not in `other`. 
-   *  返回在RDD中出现，并且不在other RDD中出现的元素(交集,相当于进行集合的差操作)，不去重
+   *  返回在RDD中出现,并且不在other RDD中出现的元素(交集,相当于进行集合的差操作),不去重
    *  */
   def subtractByKey[W: ClassTag](other: RDD[(K, W)], p: Partitioner): RDD[(K, V)] = self.withScope {
     new SubtractedRDD[K, V, W](self, other, p)
@@ -944,8 +944,8 @@ preservesPartitioning = true)
   /**
    * Return the list of values in the RDD for key `key`. This operation is done efficiently if the
    * RDD has a known partitioner by only searching the partition that the key maps to.
-   * lookup用于(K,V)类型的RDD,指定K值，返回RDD中该K对应的所有V值。
-   * 遍历RDD中所有的key，找到符合输入key的value，并输出scala的seq数据
+   * lookup用于(K,V)类型的RDD,指定K值,返回RDD中该K对应的所有V值。
+   * 遍历RDD中所有的key,找到符合输入key的value,并输出scala的seq数据
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
    * scala> rdd1.lookup("A")

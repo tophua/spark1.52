@@ -37,7 +37,7 @@ class ClientSuite extends SparkFunSuite with Matchers {
     ClientArguments.isValidJarUrl("file://jarFile.jar") should be (false)
 
     // file scheme without authority but with triple slash is valid.
-    //没有权限的文件计划，但三重斩是有效的。
+    //没有权限的文件计划,但三重斩是有效的。
     ClientArguments.isValidJarUrl("file:///some/path/to/a/jarFile.jar") should be (true)
     ClientArguments.isValidJarUrl("hdfs://someHost:1234/foo.jar") should be (true)
 

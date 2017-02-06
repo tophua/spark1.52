@@ -66,7 +66,7 @@ private[spark] object LocalRDDCheckpointData {
 
   /**
    * Transform the specified storage level to one that uses disk.
-   * 将指定的存储级别转换为磁盘,这保证了RDD可以进行多次正确重新计算，只要执行者不失败
+   * 将指定的存储级别转换为磁盘,这保证了RDD可以进行多次正确重新计算,只要执行者不失败
    * This guarantees that the RDD can be recomputed multiple times correctly as long as
    * executors do not fail. Otherwise, if the RDD is cached in memory only, for instance,
    * the checkpoint data will be lost if the relevant block is evicted from memory.

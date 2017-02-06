@@ -135,7 +135,7 @@ class RandomRDDsSuite extends SparkFunSuite with MLlibTestSparkContext with Seri
     val exponentialMean = 1.0
 
     for (seed <- 0 until 5) {
-      //生成了一个RDD[double], 它服从标准正态分布，然后转成了N(1, 4)分布
+      //生成了一个RDD[double], 它服从标准正态分布,然后转成了N(1, 4)分布
       val uniform = RandomRDDs.uniformRDD(sc, size, numPartitions, seed)
        //math.sqrt返回数字的平方根
       testGeneratedRDD(uniform, size, numPartitions, 0.5, 1 / math.sqrt(12))

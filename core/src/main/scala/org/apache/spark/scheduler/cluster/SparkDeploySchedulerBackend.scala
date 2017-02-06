@@ -43,7 +43,7 @@ private[spark] class SparkDeploySchedulerBackend(
   @volatile private var appId: String = _
 
   private val registrationBarrier = new Semaphore(0)
-//当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候，最多可以请求多少个CPU核心。默认是所有的都能用
+//当运行在一个独立部署集群上或者是一个粗粒度共享模式的Mesos集群上的时候,最多可以请求多少个CPU核心。默认是所有的都能用
   private val maxCores = conf.getOption("spark.cores.max").map(_.toInt)
   private val totalExpectedCores = maxCores.getOrElse(0)
 /**
@@ -63,7 +63,7 @@ private[spark] class SparkDeploySchedulerBackend(
     //运行driver的主机名或 IP 地址
       RpcAddress(sc.conf.get("spark.driver.host"), sc.conf.get("spark.driver.port").toInt),
       CoarseGrainedSchedulerBackend.ENDPOINT_NAME)
-    //现在executor还没有申请，因此关于executor的所有信息都是未知的。
+    //现在executor还没有申请,因此关于executor的所有信息都是未知的。
     //这些参数将会在org.apache.spark.deploy.worker.ExecutorRunner启动ExecutorBackend的时候替换这些参数
     val args = Seq(
       "--driver-url", driverUrl,

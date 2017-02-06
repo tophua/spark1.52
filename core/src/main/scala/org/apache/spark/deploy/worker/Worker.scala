@@ -80,7 +80,7 @@ private[deploy] class Worker(
   private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
   // Send a heartbeat every (heartbeat timeout) / 4 milliseconds
   //HEARTBEAT_MILLIS （默认是15秒（15000毫秒）
-  //System.getProperty("spark.worker.timeout", "60").toLong * 1000 / 4）为时间间隔，定期向master发送心跳, 
+  //System.getProperty("spark.worker.timeout", "60").toLong * 1000 / 4）为时间间隔,定期向master发送心跳, 
   private val HEARTBEAT_MILLIS = conf.getLong("spark.worker.timeout", 60) * 1000 / 4
 
   // Model retries to connect to the master, after Hadoop's model.
@@ -398,7 +398,7 @@ private[deploy] class Worker(
       forwordMessageScheduler.scheduleAtFixedRate(new Runnable {
         override def run(): Unit = Utils.tryLogNonFatalError {
           self.send(SendHeartbeat) //启动定时调用给自己发送SendHeartbeat
-        }//默认是15秒,1 / 4分为时间间隔，定期向master发送心跳
+        }//默认是15秒,1 / 4分为时间间隔,定期向master发送心跳
       }, 0, HEARTBEAT_MILLIS, TimeUnit.MILLISECONDS)
       if (CLEANUP_ENABLED) {
         logInfo(s"Worker cleanup enabled; old application directories will be deleted in: $workDir")
@@ -442,9 +442,9 @@ private[deploy] class Worker(
       }(cleanupThreadExecutor)
 /**
  * 恢复Worker的步骤:
- * 1)重新注册Worker（实际上是更新Master本地维护的数据结构），置状态为UNKNOWN
+ * 1)重新注册Worker（实际上是更新Master本地维护的数据结构）,置状态为UNKNOWN
  * 2)向Worker发送Master Changed的消息
- * 3)Worker收到消息后，向Master回复WorkerSchedulerStateResponse消息，并通过该消息上报executor和driver的信息
+ * 3)Worker收到消息后,向Master回复WorkerSchedulerStateResponse消息,并通过该消息上报executor和driver的信息
  */
     case MasterChanged(masterRef, masterWebUiUrl) =>
       logInfo("Master has changed, new master is at " + masterRef.address.toSparkURL)
@@ -530,8 +530,8 @@ private[deploy] class Worker(
           sendToMaster(ExecutorStateChanged(appId, execId, manager.state, None, None))
         } catch {
           /**
-           * 如果在这过程中有异常抛出，那么需要check是否是executor已经加到Hash Map中，
-           * 如果有则首先停止它，然后从Hash Map中删除它。并且向Master report Executor是FAILED的。
+           * 如果在这过程中有异常抛出,那么需要check是否是executor已经加到Hash Map中,
+           * 如果有则首先停止它,然后从Hash Map中删除它。并且向Master report Executor是FAILED的。
            * Master会重新启动新的Executor
            */
           case e: Exception => {
@@ -656,7 +656,7 @@ private[deploy] class Worker(
   /**
    * Send a message to the current master. If we have not yet registered successfully with any
    * master, the message will be dropped.
-   * 发送一个消息到当前Master,如果我们还没有成功注册任何的Master，该消息将被删除。
+   * 发送一个消息到当前Master,如果我们还没有成功注册任何的Master,该消息将被删除。
    */
   private def sendToMaster(message: Any): Unit = {
     master match {
@@ -772,7 +772,7 @@ private[deploy] object Worker extends Logging {
     rpcEnv.awaitTermination()
   }
   /**
-   * Rpc Environment(RpcEnv)是一个RpcEndpoints用于处理消息的环境，
+   * Rpc Environment(RpcEnv)是一个RpcEndpoints用于处理消息的环境,
    * 它管理着整个RpcEndpoints的声明周期：(1)根据name或uri注册endpoints(2)管理各种消息的处理(3)停止endpoints。
    * RpcEnv必须通过工厂类RpcEnvFactory创建
    * 创建,启动Worker的ActorSystem,所有Worker的ActorSystem的Akka的访问地址以akka://sparkWorker加编号访问

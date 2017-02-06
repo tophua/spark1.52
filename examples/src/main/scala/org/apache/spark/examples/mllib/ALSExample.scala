@@ -14,7 +14,7 @@ object ALSExample {
      * 使用ALS对 ratings 进行训练
      * 通过 model 对用户商品进行预测评分：((user, product), rate)
      * 从 ratings 得到用户商品的实际评分：((user, product), rate)
-     * 合并预测评分和实际评分的两个数据集，并求均方差
+     * 合并预测评分和实际评分的两个数据集,并求均方差
      */
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
@@ -27,7 +27,7 @@ object ALSExample {
         Rating(user.toInt, product.toInt, rate.toDouble)
     })
     //使用ALS训练数据建立推荐模型
-    val rank = 10 //模型中隐语义因子的个数(隐分类模型),ALS中因子的个数，通常来说越大越好，但是对内存占用率有直接影响，通常rank在10到200之间
+    val rank = 10 //模型中隐语义因子的个数(隐分类模型),ALS中因子的个数,通常来说越大越好,但是对内存占用率有直接影响,通常rank在10到200之间
     val numIterations = 20 //迭代数
     val model = ALS.train(ratings, rank, numIterations, 0.01)
     //从 ratings 中获得只包含用户和商品的数据集 
@@ -35,7 +35,7 @@ object ALSExample {
       case Rating(user, product, rate) =>
         (user, product)
     }
-    //使用推荐模型对用户商品进行预测评分，得到预测评分的数据集
+    //使用推荐模型对用户商品进行预测评分,得到预测评分的数据集
     val predictions =
       model.predict(usersProducts).map {
         case Rating(user, product, rate) =>
@@ -46,7 +46,7 @@ object ALSExample {
       case Rating(user, product, rate) =>
         ((user, product), rate)
     }.join(predictions).sortByKey() //ascending or descending 
-    //然后计算均方差，注意这里没有调用 math.sqrt方法
+    //然后计算均方差,注意这里没有调用 math.sqrt方法
     val MSE = ratesAndPreds.map {
       case ((user, product), (r1, r2)) =>
         val err = (r1 - r2)
@@ -58,7 +58,7 @@ object ALSExample {
 
     /***用户推荐商品**/
 
-    //为每个用户进行推荐，推荐的结果可以以用户id为key，结果为value存入redis或者hbase中
+    //为每个用户进行推荐,推荐的结果可以以用户id为key,结果为value存入redis或者hbase中
     val users = data.map(_.split(",") match {
       case Array(user, product, rate) => (user)
     }).distinct().collect()

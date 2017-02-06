@@ -29,7 +29,7 @@ case class NGramTestData(inputTokens: Array[String], wantedNGrams: Array[String]
 class NGramSuite extends SparkFunSuite with MLlibTestSparkContext {
   import org.apache.spark.ml.feature.NGramSuite._
 /**
- * ngrams该模型基于这样一种假设，第n个词的出现只与前面N-1个词相关，而与其它任何词都不相关,
+ * ngrams该模型基于这样一种假设,第n个词的出现只与前面N-1个词相关,而与其它任何词都不相关,
  * 整句的概率就是各个词出现概率的乘积。
  */
   test("default behavior yields bigram features") {//默认方法产生二元特征

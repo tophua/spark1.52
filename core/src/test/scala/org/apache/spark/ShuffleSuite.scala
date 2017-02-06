@@ -130,7 +130,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
   }
 
   test("zero sized blocks without kryo") {//没有低零大小的块
-    //使用本地群集与2个进程，以确保有两个本地和远程块
+    //使用本地群集与2个进程,以确保有两个本地和远程块
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
 
@@ -159,7 +159,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
 
   test("shuffle on mutable pairs") {//可变shuffle对
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
-    //使用本地群集与2个进程，以确保有两个本地和远程块
+    //使用本地群集与2个进程,以确保有两个本地和远程块
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     def p[T1, T2](_1: T1, _2: T2): MutablePair[T1, T2] = MutablePair(_1, _2)
     val data = Array(p(1, 1), p(1, 2), p(1, 3), p(2, 1))
@@ -215,7 +215,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     assert(results(3)(1).contains("3"))
   }
 
-  test("subtract mutable pairs") {//返回在RDD中出现，并且不在otherRDD中出现的元素，不去重
+  test("subtract mutable pairs") {//返回在RDD中出现,并且不在otherRDD中出现的元素,不去重
     // Use a local cluster with 2 processes to make sure there are both local and remote blocks
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     def p[T1, T2](_1: T1, _2: T2): MutablePair[T1, T2] = MutablePair(_1, _2)
@@ -271,7 +271,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
       val myConf = conf.clone()
         .setAppName("test")
         .setMaster("local")
-	//是否压缩在shuffle期间溢出的数据，如果压缩将使用spark.io.compression.codec。
+	//是否压缩在shuffle期间溢出的数据,如果压缩将使用spark.io.compression.codec。
         .set("spark.shuffle.spill.compress", shuffleSpillCompress.toString)
         .set("spark.shuffle.compress", shuffleCompress.toString)
         .set("spark.shuffle.memoryFraction", "0.001")

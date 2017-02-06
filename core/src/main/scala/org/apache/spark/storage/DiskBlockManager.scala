@@ -38,7 +38,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   extends Logging {
 
   private[spark]
-  //每个本地根目录生成子目录的个数，生成子目录是为了避免生成过多的索引节点
+  //每个本地根目录生成子目录的个数,生成子目录是为了避免生成过多的索引节点
   val subDirsPerLocalDir = blockManager.conf.getInt("spark.diskStore.subDirectories", 64)
 
   /* Create one local directory for each path mentioned in spark.local.dir; then, inside this
@@ -61,7 +61,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   // This method should be kept in sync with
   // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getFile().
   /**
-   * 从磁盘获取文件,根据文件名，取得文件,该方法先将filename哈希到相应的子目录，然后判断子目录是否存在，若不存在则生成
+   * 从磁盘获取文件,根据文件名,取得文件,该方法先将filename哈希到相应的子目录,然后判断子目录是否存在,若不存在则生成
    * 目录结构如下所述
    * /tmp/spark-local-20140723092540-7f24
    * /tmp/spark-local-20140723092540-7f24/0d

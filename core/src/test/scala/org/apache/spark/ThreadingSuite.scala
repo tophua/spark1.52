@@ -43,7 +43,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     sc = new SparkContext("local", "test")
     val nums = sc.parallelize(1 to 10, 2)
     val sem = new Semaphore(0)//是负责协调各个线程, 以保证它们能够正确、合理的使用公共资源
-    //volatile允许线程访问共享变量，为了确保共享变量能被准确和一致的更新，线程应该确保通过排他锁单独获得这个变量
+    //volatile允许线程访问共享变量,为了确保共享变量能被准确和一致的更新,线程应该确保通过排他锁单独获得这个变量
     //在某些情况下比锁更加方便,如果一个字段被声明成volatile,java线程内存模型确保所有线程看到这个变量的值是一致的
     @volatile var answer1: Int = 0
     @volatile var answer2: Int = 0
@@ -63,7 +63,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     sc = new SparkContext("local", "test")
     val nums = sc.parallelize(1 to 10, 2)
     val sem = new Semaphore(0)
-    //volatile允许线程访问共享变量，为了确保共享变量能被准确和一致的更新，线程应该确保通过排他锁单独获得这个变量
+    //volatile允许线程访问共享变量,为了确保共享变量能被准确和一致的更新,线程应该确保通过排他锁单独获得这个变量
     //在某些情况下比锁更加方便,如果一个字段被声明成volatile,java线程内存模型确保所有线程看到这个变量的值是一致的
     @volatile var ok = true
     for (i <- 0 until 10) {

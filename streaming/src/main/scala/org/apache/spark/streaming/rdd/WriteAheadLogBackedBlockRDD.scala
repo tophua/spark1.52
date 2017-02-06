@@ -71,7 +71,7 @@ class WriteAheadLogBackedBlockRDDPartition(
  * 												预写日志记录处理包含该RDD数据
  * @param isBlockIdValid Whether the block Ids are valid (i.e., the blocks are present in the Spark
  *                         executors). If not, then block lookups by the block ids will be skipped.
- *                         块标识是否有效(块代表Spark在executors存在),如果不是，那块查找的块ID将被忽略
+ *                         块标识是否有效(块代表Spark在executors存在),如果不是,那块查找的块ID将被忽略
  *                         By default, this is an empty array signifying true for all the blocks.
  *                         默认情况下,这意味着真正的所有块空数组,
  * @param storeInBlockManager Whether to store a block in the block manager

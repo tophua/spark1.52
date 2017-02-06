@@ -23,7 +23,7 @@ import org.apache.spark.{SparkConf, TaskContext, ShuffleDependency}
 import org.apache.spark.shuffle._
 import org.apache.spark.shuffle.hash.HashShuffleReader
 /**
- * sorted Shuffle就会极大的节省内存和磁盘的访问，所以更有利于更大规模的计算
+ * sorted Shuffle就会极大的节省内存和磁盘的访问,所以更有利于更大规模的计算
  */
 private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager {
 
@@ -62,7 +62,7 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
   override def getWriter[K, V](handle: ShuffleHandle, mapId: Int, context: TaskContext)
       : ShuffleWriter[K, V] = {
     val baseShuffleHandle = handle.asInstanceOf[BaseShuffleHandle[K, V, _]]
-    //ConcurrentHashMap put和putIfAbsent的区别就是一个是直接放入并替换，另一个是有就不替换
+    //ConcurrentHashMap put和putIfAbsent的区别就是一个是直接放入并替换,另一个是有就不替换
     shuffleMapNumber.putIfAbsent(baseShuffleHandle.shuffleId, baseShuffleHandle.numMaps)
     
     //创建SortShuffleWriter对象,shuffleBlockResolver：index文件

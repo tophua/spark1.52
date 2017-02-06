@@ -25,7 +25,7 @@ class LabeledPointSuite extends SparkFunSuite {
        标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
    MLlib的标记点用于有监督学习算法
       使用double来存储标签值,这样标记点既可以用于回归又可以用于分类。
-      在二分类中,标签要么是0要么是1;在多分类中，标签是0, 1, 2, **/
+      在二分类中,标签要么是0要么是1;在多分类中,标签是0, 1, 2, **/
   test("parse labeled points") {//解析标记点
     val points = Seq(
     //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)

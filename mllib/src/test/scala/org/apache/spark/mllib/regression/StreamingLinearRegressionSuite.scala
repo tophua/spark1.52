@@ -136,7 +136,7 @@ class StreamingLinearRegressionSuite extends SparkFunSuite with TestSuiteBase {
     //计算误差的变化
     val deltas = history.drop(1).zip(history.dropRight(1))
     // check error stability (it always either shrinks, or increases with small tol)
-    //检查错误的稳定性(它总是要么收缩，或增加小公差)
+    //检查错误的稳定性(它总是要么收缩,或增加小公差)
     assert(deltas.forall(x => (x._1 - x._2) <= 0.1))
     // check that error shrunk on at least 2 batches
     //检查至少2个批次的错误缩水

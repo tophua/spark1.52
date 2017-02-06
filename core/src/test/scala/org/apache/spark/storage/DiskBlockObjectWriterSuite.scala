@@ -52,7 +52,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     //度量不更新在每一个写
     assert(writeMetrics.shuffleBytesWritten == 0)
     // After 32 writes, metrics should update
-    //32写后，指标应该更新
+    //32写后,指标应该更新
     for (i <- 0 until 32) {
       writer.flush()
       writer.write(Long.box(i), Long.box(i))

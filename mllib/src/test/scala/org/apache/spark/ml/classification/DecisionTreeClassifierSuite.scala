@@ -248,7 +248,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
      Map(0 -> 2,4->10)表示特征0有两个特征值(0和1),特征4有10个特征值{0,1,2,3,…,9}             
      **/
     val categoricalFeatures = Map(0 -> 10, 1 -> 10)
-    val numClasses = 3//随机森林需要训练的树的个数，默认值是 20,如果是分类树,指定有多少种类别
+    val numClasses = 3//随机森林需要训练的树的个数,默认值是 20,如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures, numClasses)
   }
   //分裂必须满足每个节点要求的最小实例
@@ -262,7 +262,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
       .setImpurity("Gini")//计算信息增益的准则
       .setMaxDepth(2)//树的最大深度,为了防止过拟合,设定划分的终止条件
       .setMinInstancesPerNode(2)//切分后每个子节点至少包含的样本实例数,否则停止切分,于终止迭代计算
-    val numClasses = 2//随机森林需要训练的树的个数，如果是分类树,指定有多少种类别
+    val numClasses = 2//随机森林需要训练的树的个数,如果是分类树,指定有多少种类别
     compareAPIs(rdd, dt, categoricalFeatures = Map.empty[Int, Int], numClasses)
   }  
   //不要选择不满足每个节点要求的最小实例的分割
@@ -270,7 +270,7 @@ class DecisionTreeClassifierSuite extends SparkFunSuite with MLlibTestSparkConte
     // if a split does not satisfy min instances per node requirements,
     //如果一个分裂不满足每个节点的要求的最小实例
     // this split is invalid, even though the information gain of split is large.
-    //这种分裂是无效的，即使分裂的信息增益是大的
+    //这种分裂是无效的,即使分裂的信息增益是大的
     val arr = Array(
     //LabeledPoint标记点是局部向量,向量可以是密集型或者稀疏型,每个向量会关联了一个标签(label)
       LabeledPoint(0.0, Vectors.dense(0.0, 1.0)),

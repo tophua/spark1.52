@@ -142,7 +142,7 @@ private class MyLogisticRegression(override val uid: String)
     val numFeatures = oldDataset.take(1)(0).features.size
     val weights = Vectors.zeros(numFeatures) // Learning would happen here. 学习会发生在这里
 
-    // Create a model, and return it. 创建一个模型，并返回它
+    // Create a model, and return it. 创建一个模型,并返回它
     new MyLogisticRegressionModel(uid, weights).setParent(this)
   }
 
@@ -161,7 +161,7 @@ private class MyLogisticRegressionModel(
   with MyLogisticRegressionParams {
 
   // This uses the default implementation of transform(), which reads column "features" and outputs
-  //这是用transform()默认实现，读取和输出列的“特点”
+  //这是用transform()默认实现,读取和输出列的“特点”
   // columns "prediction" and "rawPrediction."
   //列“预测”和“rawprediction。”
 
@@ -198,7 +198,7 @@ private class MyLogisticRegressionModel(
   /**
    * Create a copy of the model.创建模型的副本
    * The copy is shallow, except for the embedded paramMap, which gets a deep copy.
-   * 复制是浅，除了嵌入式parammap，得到深拷贝
+   * 复制是浅,除了嵌入式parammap,得到深拷贝
    * This is used for the default implementation of [[transform()]].
    */
   override def copy(extra: ParamMap): MyLogisticRegressionModel = {

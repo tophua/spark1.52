@@ -340,7 +340,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
-   * 评估一个条件列表,并返回多个可能结果表达式的一个,如果没有其他定义，则返回无法匹配的条件
+   * 评估一个条件列表,并返回多个可能结果表达式的一个,如果没有其他定义,则返回无法匹配的条件
    * {{{
    *   // Example: encoding gender string column into integer.
    *
@@ -369,7 +369,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
-   * 评估一个条件列表,并返回多个可能结果表达式的一个,如果没有其他定义，则返回无法匹配的条件
+   * 评估一个条件列表,并返回多个可能结果表达式的一个,如果没有其他定义,则返回无法匹配的条件
    * {{{
    *   // Example: encoding gender string column into integer.
    *

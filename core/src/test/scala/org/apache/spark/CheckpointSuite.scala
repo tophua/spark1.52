@@ -249,7 +249,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     )
   }
 /**
- * 自身类型:任何混入该特质的具体类必须确保它的类型符合特质的自身类型，自身类型最通常的应用是为了把大类分成若干特质
+ * 自身类型:任何混入该特质的具体类必须确保它的类型符合特质的自身类型,自身类型最通常的应用是为了把大类分成若干特质
  */
   runTest("CheckpointRDD with zero partitions") { reliableCheckpoint: Boolean => //自身类型
     val rdd = new BlockRDD[Int](sc, Array[BlockId]())
