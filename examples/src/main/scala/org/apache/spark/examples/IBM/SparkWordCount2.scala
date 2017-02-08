@@ -9,9 +9,6 @@ object SparkWordCount2 {
       println("Usage:SparkWordCount FileName");
       System.exit(1);
     }*/
-    
-    
-    
     val conf = new SparkConf().setMaster("local").setAppName("Spark Exercise: Spark Version Word Count Program");
     val sc = new SparkContext(conf);
     

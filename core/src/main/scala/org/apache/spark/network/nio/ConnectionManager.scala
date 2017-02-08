@@ -320,7 +320,7 @@ private[nio] class ConnectionManager(
   }
 
   // MUST be called within selector loop - else deadlock.
-  /必须在选择器循环-否则死锁
+  //必须在选择器循环-否则死锁
   private def triggerForceCloseByException(key: SelectionKey, e: Exception) {
     try {
       key.interestOps(0)
@@ -374,7 +374,7 @@ private[nio] class ConnectionManager(
                 key.interestOps(ops)
 
                 // hot loop - prevent materialization of string if trace not enabled.
-		//热度循环-防止字符串如果不启用跟踪。
+		            //热度循环-防止字符串如果不启用跟踪。
                 if (isTraceEnabled()) {
                   def intToOpStr(op: Int): String = {
                     val opStrs = ArrayBuffer[String]()
