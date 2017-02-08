@@ -77,7 +77,6 @@ object WebPagePopularityValueCalculator {
     //
     val initialRDD = ssc.sparkContext.parallelize(List(("page1", 0.00)))
     //调用 updateStateByKey 原语并传入上面定义的匿名函数更新网页热度值
-    //
     val stateDstream = popularityData.updateStateByKey[Double](updatePopularityValue,
       new HashPartitioner(ssc.sparkContext.defaultParallelism), true, initialRDD)
     //set the checkpoint interval to avoid too frequently data checkpoint which may
