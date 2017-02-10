@@ -47,7 +47,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
  * As you add text files to `trainingDir` the model will continuously update.
  * 当你添加文本文件` trainingdir `模型将不断更新
  * Anytime you add text files to `testDir`, you'll see predictions from the current model.
- * 任何时候你添加文本文件` testdir `,你将从目前看到的预测模型。
+ * 任何时候你添加文本文件` testdir `,你会看到使用当前的模型的预测
  *
  */
 object StreamingLinearRegression {

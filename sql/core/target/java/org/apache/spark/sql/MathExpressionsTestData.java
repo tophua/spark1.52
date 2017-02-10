@@ -17,7 +17,6 @@ public  class MathExpressionsTestData {
   }
   static public  class NullDoubles implements scala.Product, scala.Serializable {
     public  java.lang.Double a () { throw new RuntimeException(); }
-    // not preceding
     public   NullDoubles (java.lang.Double a) { throw new RuntimeException(); }
   }
   // no position

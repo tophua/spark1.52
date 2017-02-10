@@ -64,7 +64,7 @@ public  class functions$ {
   /**
    * Returns the greatest value of the list of values, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   * GREATEST()&#x7684;&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7684;&#x96c6;&#x5408;&#xff08;N1&#xff0c;N2&#xff0c;N3&#xff0c;&#x7b2c;&#x4e8c;&#x7b49;&#xff09;&#x7684;&#x6700;&#x5927;&#x503c;
+   * GREATEST()&#x7684;&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7684;&#x96c6;&#x5408;&#xff08;N1,N2,N3,&#x7b2c;&#x4e8c;&#x7b49;&#xff09;&#x7684;&#x6700;&#x5927;&#x503c;
    * GREATEST()&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x4ece;&#x4e00;&#x7ec4;&#x6570;&#x503c;&#x7684;&#x6700;&#x5927;&#x6570;
    * @group normal_funcs
    * @since 1.5.0
@@ -75,7 +75,7 @@ public  class functions$ {
   /**
    * Returns the greatest value of the list of column names, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   * GREATEST()&#x7684;&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7684;&#x96c6;&#x5408;&#xff08;N1&#xff0c;N2&#xff0c;N3&#xff0c;&#x7b2c;&#x4e8c;&#x7b49;&#xff09;&#x7684;&#x6700;&#x5927;&#x503c;
+   * GREATEST()&#x7684;&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7684;&#x96c6;&#x5408;&#xff08;N1,N2,N3,&#x7b2c;&#x4e8c;&#x7b49;&#xff09;&#x7684;&#x6700;&#x5927;&#x503c;
    * GREATEST()&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x4ece;&#x4e00;&#x7ec4;&#x6570;&#x503c;&#x7684;&#x6700;&#x5927;&#x6570;
    * @group normal_funcs
    * @since 1.5.0
@@ -598,7 +598,7 @@ public  class functions$ {
    * Window function: returns the ntile group id (from 1 to <code>n</code> inclusive) in an ordered window
    * partition. Fow example, if <code>n</code> is 4, the first quarter of the rows will get value 1, the second
    * quarter will get 2, the third quarter will get 3, and the last quarter will get 4.
-   * NTILE&#x51fd;&#x6570;&#x5bf9;&#x4e00;&#x4e2a;&#x6570;&#x636e;&#x5206;&#x533a;&#x4e2d;&#x7684;&#x6709;&#x5e8f;&#x7ed3;&#x679c;&#x96c6;&#x8fdb;&#x884c;&#x5212;&#x5206;&#xff0c;&#x5c06;&#x5176;&#x5206;&#x7ec4;&#x4e3a;&#x5404;&#x4e2a;&#x6876;&#xff0c;&#x5e76;&#x4e3a;&#x6bcf;&#x4e2a;&#x5c0f;&#x7ec4;&#x5206;&#x914d;&#x4e00;&#x4e2a;&#x552f;&#x4e00;&#x7684;&#x7ec4;&#x7f16;&#x53f7;
+   * NTILE&#x51fd;&#x6570;&#x5bf9;&#x4e00;&#x4e2a;&#x6570;&#x636e;&#x5206;&#x533a;&#x4e2d;&#x7684;&#x6709;&#x5e8f;&#x7ed3;&#x679c;&#x96c6;&#x8fdb;&#x884c;&#x5212;&#x5206;,&#x5c06;&#x5176;&#x5206;&#x7ec4;&#x4e3a;&#x5404;&#x4e2a;&#x6876;,&#x5e76;&#x4e3a;&#x6bcf;&#x4e2a;&#x5c0f;&#x7ec4;&#x5206;&#x914d;&#x4e00;&#x4e2a;&#x552f;&#x4e00;&#x7684;&#x7ec4;&#x7f16;&#x53f7;
    * This is equivalent to the NTILE function in SQL.
    * <p>
    * @group window_funcs
@@ -629,7 +629,7 @@ public  class functions$ {
    * sequence when there are ties. That is, if you were ranking a competition using denseRank
    * and had three people tie for second place, you would say that all three were in second
    * place and that the next person came in third.
-   * RANK &#x8fd4;&#x56de;&#x6570;&#x636e;&#x9879;&#x5728;&#x5206;&#x7ec4;&#x4e2d;&#x7684;&#x6392;&#x540d;&#xff0c;&#x6392;&#x540d;&#x76f8;&#x7b49;&#x4f1a;&#x5728;&#x540d;&#x6b21;&#x4e2d;&#x7559;&#x4e0b;&#x7a7a;&#x4f4d;
+   * RANK &#x8fd4;&#x56de;&#x6570;&#x636e;&#x9879;&#x5728;&#x5206;&#x7ec4;&#x4e2d;&#x7684;&#x6392;&#x540d;,&#x6392;&#x540d;&#x76f8;&#x7b49;&#x4f1a;&#x5728;&#x540d;&#x6b21;&#x4e2d;&#x7559;&#x4e0b;&#x7a7a;&#x4f4d;
    * This is equivalent to the RANK function in SQL.
    * <p>
    * @group window_funcs
@@ -874,7 +874,7 @@ public  class functions$ {
   public  org.apache.spark.sql.Column struct (java.lang.String colName, scala.collection.Seq<java.lang.String> colNames) { throw new RuntimeException(); }
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
-   * &#x8bc4;&#x4f30;&#x4e00;&#x4e2a;&#x6761;&#x4ef6;&#x7684;&#x5217;&#x8868;&#xff0c;&#x5e76;&#x8fd4;&#x56de;&#x591a;&#x4e2a;&#x53ef;&#x80fd;&#x7684;&#x7ed3;&#x679c;&#x4e4b;&#x4e00;
+   * &#x8bc4;&#x4f30;&#x4e00;&#x4e2a;&#x6761;&#x4ef6;&#x7684;&#x5217;&#x8868;,&#x5e76;&#x8fd4;&#x56de;&#x591a;&#x4e2a;&#x53ef;&#x80fd;&#x7684;&#x7ed3;&#x679c;&#x4e4b;&#x4e00;
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
    * &#x5982;&#x679c;&#x6ca1;&#x6709;&#x5176;&#x4ed6;&#x5b9a;&#x4e49;,&#x5219;&#x7ed3;&#x675f;,&#x8fd4;&#x56de;&#x65e0;&#x6cd5;&#x5339;&#x914d;&#x7684;&#x6761;&#x4ef6;
    * <pre><code>
@@ -909,7 +909,7 @@ public  class functions$ {
   public  org.apache.spark.sql.Column bitwiseNOT (org.apache.spark.sql.Column e) { throw new RuntimeException(); }
   /**
    * Parses the expression string into the column that it represents, similar to
-   * &#x89e3;&#x6790;&#x8868;&#x8fbe;&#x5f0f;&#x5b57;&#x7b26;&#x4e32;&#x7684;&#x5217;&#xff0c;&#x5b83;&#x4ee3;&#x8868;&#x7c7b;&#x4f3c;dataframe.selectexpr
+   * &#x89e3;&#x6790;&#x8868;&#x8fbe;&#x5f0f;&#x5b57;&#x7b26;&#x4e32;&#x7684;&#x5217;,&#x5b83;&#x4ee3;&#x8868;&#x7c7b;&#x4f3c;dataframe.selectexpr
    * DataFrame.selectExpr
    * <pre><code>
    *   // get the number of words of each length
@@ -966,7 +966,7 @@ public  class functions$ {
   /**
    * Computes the tangent inverse of the given value.
    * &#x8ba1;&#x7b97;&#x7ed9;&#x5b9a;&#x503c;&#x7684;&#x5207;&#x7ebf;
-   * &#x5947;&#x51fd;&#x6570;&#xff0c;&#x5173;&#x4e8e;&#x539f;&#x70b9;&#x5bf9;&#x79f0;
+   * &#x5947;&#x51fd;&#x6570;,&#x5173;&#x4e8e;&#x539f;&#x70b9;&#x5bf9;&#x79f0;
    * @group math_funcs
    * @since 1.4.0
    * @param e (undocumented)
@@ -985,7 +985,7 @@ public  class functions$ {
   /**
    * Returns the angle theta from the conversion of rectangular coordinates (x, y) to
    * polar coordinates (r, theta).
-   * atan2&#x662f;&#x5076;&#x51fd;&#x6570;&#xff0c;&#x5173;&#x4e8e;y&#x8f74;&#x5bf9;&#x79f0;
+   * atan2&#x662f;&#x5076;&#x51fd;&#x6570;,&#x5173;&#x4e8e;y&#x8f74;&#x5bf9;&#x79f0;
    * @group math_funcs
    * @since 1.4.0
    * @param l (undocumented)
@@ -1175,7 +1175,7 @@ public  class functions$ {
   public  org.apache.spark.sql.Column cosh (java.lang.String columnName) { throw new RuntimeException(); }
   /**
    * Computes the exponential of the given value.
-   * &#x4f7f;&#x7528;EXP(x)&#x51fd;&#x6570;&#x8ba1;&#x7b97;e&#x7684;&#x4e58;&#x65b9;,&#x8ba1;&#x7b97;e&#x7684;x&#x6b21;&#x65b9;&#xff0c;&#x5373;ex
+   * &#x4f7f;&#x7528;EXP(x)&#x51fd;&#x6570;&#x8ba1;&#x7b97;e&#x7684;&#x4e58;&#x65b9;,&#x8ba1;&#x7b97;e&#x7684;x&#x6b21;&#x65b9;,&#x5373;ex
    * @group math_funcs
    * @since 1.4.0
    * @param e (undocumented)
@@ -1239,7 +1239,7 @@ public  class functions$ {
   /**
    * Returns the greatest value of the list of values, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   * GREATEST()&#x7684;&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7684;&#x96c6;&#x5408;&#xff08;N1&#xff0c;N2&#xff0c;N3&#xff0c;&#x7b2c;&#x4e8c;&#x7b49;&#xff09;&#x7684;&#x6700;&#x5927;&#x503c;
+   * GREATEST()&#x7684;&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7684;&#x96c6;&#x5408;&#xff08;N1,N2,N3,&#x7b2c;&#x4e8c;&#x7b49;&#xff09;&#x7684;&#x6700;&#x5927;&#x503c;
    * GREATEST()&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x4ece;&#x4e00;&#x7ec4;&#x6570;&#x503c;&#x7684;&#x6700;&#x5927;&#x6570;
    * @group normal_funcs
    * @since 1.5.0
@@ -1250,7 +1250,7 @@ public  class functions$ {
   /**
    * Returns the greatest value of the list of column names, skipping null values.
    * This function takes at least 2 parameters. It will return null iff all parameters are null.
-   * GREATEST()&#x7684;&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7684;&#x96c6;&#x5408;&#xff08;N1&#xff0c;N2&#xff0c;N3&#xff0c;&#x7b2c;&#x4e8c;&#x7b49;&#xff09;&#x7684;&#x6700;&#x5927;&#x503c;
+   * GREATEST()&#x7684;&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7684;&#x96c6;&#x5408;&#xff08;N1,N2,N3,&#x7b2c;&#x4e8c;&#x7b49;&#xff09;&#x7684;&#x6700;&#x5927;&#x503c;
    * GREATEST()&#x51fd;&#x6570;&#x8fd4;&#x56de;&#x4ece;&#x4e00;&#x7ec4;&#x6570;&#x503c;&#x7684;&#x6700;&#x5927;&#x6570;
    * @group normal_funcs
    * @since 1.5.0
@@ -1604,7 +1604,7 @@ public  class functions$ {
   /**
    * Shift the the given value numBits left. If the given value is a long value, this function
    * will return a long value else it will return an integer value.
-   * &#x5982;&#x679c;&#x7ed9;&#x5b9a;&#x7684;&#x503c;&#x662f;&#x4e00;&#x4e2a;long&#x7684;&#x503c;,&#x6b64;&#x51fd;&#x6570;&#x5c06;&#x8fd4;&#x56de;&#x4e00;&#x4e2a;long&#x7684;&#x503c;&#xff0c;&#x5426;&#x5219;&#x5c06;&#x8fd4;&#x56de;&#x4e00;&#x4e2a;&#x6574;&#x6570;&#x503c;
+   * &#x5982;&#x679c;&#x7ed9;&#x5b9a;&#x7684;&#x503c;&#x662f;&#x4e00;&#x4e2a;long&#x7684;&#x503c;,&#x6b64;&#x51fd;&#x6570;&#x5c06;&#x8fd4;&#x56de;&#x4e00;&#x4e2a;long&#x7684;&#x503c;,&#x5426;&#x5219;&#x5c06;&#x8fd4;&#x56de;&#x4e00;&#x4e2a;&#x6574;&#x6570;&#x503c;
    * @group math_funcs
    * @since 1.5.0
    * @param e (undocumented)

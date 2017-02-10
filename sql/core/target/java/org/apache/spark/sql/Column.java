@@ -172,7 +172,7 @@ public  class Column implements org.apache.spark.Logging {
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
-   * &#x8bc4;&#x4f30;&#x4e00;&#x4e2a;&#x6761;&#x4ef6;&#x5217;&#x8868;,&#x5e76;&#x8fd4;&#x56de;&#x591a;&#x4e2a;&#x53ef;&#x80fd;&#x7ed3;&#x679c;&#x8868;&#x8fbe;&#x5f0f;&#x7684;&#x4e00;&#x4e2a;,&#x5982;&#x679c;&#x6ca1;&#x6709;&#x5176;&#x4ed6;&#x5b9a;&#x4e49;&#xff0c;&#x5219;&#x8fd4;&#x56de;&#x65e0;&#x6cd5;&#x5339;&#x914d;&#x7684;&#x6761;&#x4ef6;
+   * &#x8bc4;&#x4f30;&#x4e00;&#x4e2a;&#x6761;&#x4ef6;&#x5217;&#x8868;,&#x5e76;&#x8fd4;&#x56de;&#x591a;&#x4e2a;&#x53ef;&#x80fd;&#x7ed3;&#x679c;&#x8868;&#x8fbe;&#x5f0f;&#x7684;&#x4e00;&#x4e2a;,&#x5982;&#x679c;&#x6ca1;&#x6709;&#x5176;&#x4ed6;&#x5b9a;&#x4e49;,&#x5219;&#x8fd4;&#x56de;&#x65e0;&#x6cd5;&#x5339;&#x914d;&#x7684;&#x6761;&#x4ef6;
    * <pre><code>
    *   // Example: encoding gender string column into integer.
    *
@@ -197,7 +197,7 @@ public  class Column implements org.apache.spark.Logging {
   /**
    * Evaluates a list of conditions and returns one of multiple possible result expressions.
    * If otherwise is not defined at the end, null is returned for unmatched conditions.
-   * &#x8bc4;&#x4f30;&#x4e00;&#x4e2a;&#x6761;&#x4ef6;&#x5217;&#x8868;,&#x5e76;&#x8fd4;&#x56de;&#x591a;&#x4e2a;&#x53ef;&#x80fd;&#x7ed3;&#x679c;&#x8868;&#x8fbe;&#x5f0f;&#x7684;&#x4e00;&#x4e2a;,&#x5982;&#x679c;&#x6ca1;&#x6709;&#x5176;&#x4ed6;&#x5b9a;&#x4e49;&#xff0c;&#x5219;&#x8fd4;&#x56de;&#x65e0;&#x6cd5;&#x5339;&#x914d;&#x7684;&#x6761;&#x4ef6;
+   * &#x8bc4;&#x4f30;&#x4e00;&#x4e2a;&#x6761;&#x4ef6;&#x5217;&#x8868;,&#x5e76;&#x8fd4;&#x56de;&#x591a;&#x4e2a;&#x53ef;&#x80fd;&#x7ed3;&#x679c;&#x8868;&#x8fbe;&#x5f0f;&#x7684;&#x4e00;&#x4e2a;,&#x5982;&#x679c;&#x6ca1;&#x6709;&#x5176;&#x4ed6;&#x5b9a;&#x4e49;,&#x5219;&#x8fd4;&#x56de;&#x65e0;&#x6cd5;&#x5339;&#x914d;&#x7684;&#x6761;&#x4ef6;
    * <pre><code>
    *   // Example: encoding gender string column into integer.
    *

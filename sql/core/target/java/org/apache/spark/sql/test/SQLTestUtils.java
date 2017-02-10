@@ -17,7 +17,7 @@ package org.apache.spark.sql.test;
   /**
    * =&gt;&#x7b26;&#x53f7;&#x53ef;&#x4ee5;&#x770b;&#x505a;&#x662f;&#x521b;&#x5efa;&#x51fd;&#x6570;&#x5b9e;&#x4f8b;&#x7684;&#x8bed;&#x6cd5;&#x7cd6;,
    * val sql: String =&gt; DataFrame &#x51fd;&#x6570;&#x7c7b;&#x578b;
-   * &#x4f8b;&#x5982;&#xff1a; String =&gt; DataFrame &#x8868;&#x793a;&#x4e00;&#x4e2a;&#x51fd;&#x6570;&#x7684;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7c7b;&#x578b;&#x662f;String&#xff0c;&#x8fd4;&#x56de;&#x503c;&#x7c7b;&#x578b;&#x662f;DataFrame
+   * &#x4f8b;&#x5982;&#xff1a; String =&gt; DataFrame &#x8868;&#x793a;&#x4e00;&#x4e2a;&#x51fd;&#x6570;&#x7684;&#x8f93;&#x5165;&#x53c2;&#x6570;&#x7c7b;&#x578b;&#x662f;String,&#x8fd4;&#x56de;&#x503c;&#x7c7b;&#x578b;&#x662f;DataFrame
    * @return (undocumented)
    */
   public  scala.Function1<java.lang.String, org.apache.spark.sql.DataFrame> sql () ;
@@ -49,7 +49,7 @@ package org.apache.spark.sql.test;
   /**
    * Sets all SQL configurations specified in <code>pairs</code>, calls <code>f</code>, and then restore all SQL
    * configurations.
-   * &#x5c06;&#x6240;&#x6709;&#x7684;SQL&#x914d;&#x7f6e;&#x6307;&#x5b9a;<code>&#x5bf9;</code>,&#x8c03;&#x7528;<code> F </code>&#xff0c;&#x7136;&#x540e;&#x6062;&#x590d;&#x6240;&#x6709;SQL&#x914d;&#x7f6e;
+   * &#x5c06;&#x6240;&#x6709;&#x7684;SQL&#x914d;&#x7f6e;&#x6307;&#x5b9a;<code>&#x5bf9;</code>,&#x8c03;&#x7528;<code> F </code>,&#x7136;&#x540e;&#x6062;&#x590d;&#x6240;&#x6709;SQL&#x914d;&#x7f6e;
    * <p>
    * @todo Probably this method should be moved to a more general place
    * @param pairs (undocumented)
