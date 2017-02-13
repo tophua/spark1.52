@@ -26,9 +26,9 @@ import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext._
 
 /**
-  * Simple test for reading and writing to a distributed
-  * 分布式文件系统读写的简单测试,这个例子做了以下
-  * file system.  This example does the following:
+  * Simple test for reading and writing to a distributed file system. 
+  * 简单测试的分布式文件系统读写,这个例子做以下
+  *  This example does the following:
   *
   *   1. Reads local file 读取本地文件
   *   2. Computes word count on local file 计算本地文件上的字计数

@@ -20,7 +20,9 @@ package org.apache.spark.examples
 
 import org.apache.spark._
 
-
+/**
+ * HDFS≤‚ ‘
+ */
 object HdfsTest {
 
   /** 
@@ -28,15 +30,16 @@ object HdfsTest {
    *   π”√HDFS≤‚ ‘ 
    *  */
   def main(args: Array[String]) {
-   if (args.length < 1) {
+    val hdfs="hdfs://xcsq:8089/cookbook/input/shu.txt"
+    /*if (args.length < 1) {
       System.err.println("Usage: HdfsTest <file>")
       System.exit(1)
-    }
+    }*/
     
     val sparkConf = new SparkConf().setAppName("HdfsTest").setMaster("local")
     val sc = new SparkContext(sparkConf)
    // val files="D:\\spark\\spark-1.5.0-hadoop2.6\\CHANGES.txt"
-    val file = sc.textFile(args(0))
+    val file = sc.textFile(hdfs)
     
     val mapped = file.map(s => s.length).cache()
     for (iter <- 1 to 10) {

@@ -31,10 +31,12 @@ object HBaseTest {
     val sc = new SparkContext(sparkConf)
 
     // please ensure HBASE_CONF_DIR is on classpath of spark driver
+    //请确保hbase_conf_dir在Spark驱动器路径   
     // e.g: set it through spark.driver.extraClassPath property
     // in spark-defaults.conf or through --driver-class-path
     // command line option of spark-submit
-
+    //例如：它通过spark-defaults.conf或通过spark.driver.extraclasspath属性选项--
+    //指定驱动程序类路径的命令行Spark提交
     val conf = HBaseConfiguration.create()
 
     if (args.length < 1) {

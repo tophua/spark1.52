@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
 import org.apache.spark.util.Utils
 
 /** Prints out environmental information, sleeps, and then exits. Made to
- *  打印环境信息,睡眠,然后退出,在独立调度程序中对测试驱动程序提交
+ *  打印环境信息,睡眠,然后退出,在独立调度中对测试驱动程序提交
   * test driver submission in the standalone scheduler. */
 object DriverSubmissionTest {
   def main(args: Array[String]) {
@@ -33,10 +33,11 @@ object DriverSubmissionTest {
     }*/
     val numSecondsToSleep = 1//args(0).toInt
 
-    val env = System.getenv()
+    val env = System.getenv()//环境信息
     val properties = Utils.getSystemProperties
     //包含环境变量
     println("Environment variables containing SPARK_TEST:")
+    //打印包括SPARK_TEST信息
     env.filter{case (k, v) => k.contains("SPARK_TEST")}.foreach(println)
     //系统属性包含spark.test
     println("System properties containing spark.test:")

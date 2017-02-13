@@ -24,10 +24,10 @@ import org.apache.spark.sql.functions._
 
 // One method for defining the schema of an RDD is to make a case class with the desired column
 // names and types.
-//用于定义一个RDD架构方法与所需的列名称和类型一个实例类
+//用于定义一个RDD结构与所需的列名称的一个实例类
 case class Record(key: Int, value: String)
 
-object RDDRelation {
+object RDDRelationBySQL {
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local").setAppName("RDDRelation")
     val sc = new SparkContext(sparkConf)
@@ -36,11 +36,11 @@ object RDDRelation {
     // Importing the SQL context gives access to all the SQL functions and implicit conversions.
     //导入SQL上下文可以访问所有的SQL函数和隐式转换
     import sqlContext.implicits._
-
+    //把RDD转换DataFrame类型
     val df = sc.parallelize((1 to 100).map(i => Record(i, s"val_$i"))).toDF()
-    // Any RDD containing case classes can be registered as a table.  The schema of the table is
-    //任何含有类RDD可以注册为一个表,表的架构自动使用Scala的反射推断
+    // Any RDD containing case classes can be registered as a table.  The schema of the table is    
     // automatically inferred using scala reflection.
+    //任何含有类RDD可以注册为一个表,表的结构自动使用Scala的反射推断
     df.registerTempTable("records")
 
     // Once tables have been registered, you can run SQL queries over them.
@@ -49,15 +49,14 @@ object RDDRelation {
     sqlContext.sql("SELECT * FROM records").collect().foreach(println)
 
     // Aggregation queries are also supported.
-    //聚集查询也支持
+    //支持聚集查询,获得第一条查询数据
     val count = sqlContext.sql("SELECT COUNT(*) FROM records").collect().head.getLong(0)
     println(s"COUNT(*): $count")
 
-    // The results of SQL queries are themselves RDDs and support all normal RDD functions.  The
-    //SQL查询的结果都是自己支持RDDs和所有正常的RDD功能,在RDD项目类型的行,你可以按顺序访问每一列
+    // The results of SQL queries are themselves RDDs and support all normal RDD functions.  The    
     // items in the RDD are of type Row, which allows you to access each column by ordinal.
+    //SQL结果都支持RDDs查询和所有正常的RDD函数,在RDD项目类型的行,你可以按顺序访问每一列
     val rddFromSql = sqlContext.sql("SELECT key, value FROM records WHERE key < 10")
-
     println("Result of RDD.map:")
     rddFromSql.map(row => s"Key: ${row(0)}, Value: ${row(1)}").collect().foreach(println)
 
@@ -67,7 +66,7 @@ object RDDRelation {
 
     // Write out an RDD as a parquet file.
     //RDD写一个parquet文件,Parquet是面向分析型业务的列式存储格式
-    //df.write.parquet("pair.parquet")
+    df.write.parquet("pair.parquet")
 
     // Read in parquet file.  Parquet files are self-describing so the schmema is preserved.
     //读取parquet file,Parquet files是自描述的schmema保存

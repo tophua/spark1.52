@@ -14,11 +14,11 @@ import scala.util.Success
  */
 object SparkAvailabilityCheck {
   def main(args: Array[String]) {
-    val b39=isSparkOnline(URI.create("spark://192.168.0.39:7079"))
-    val b27=isSparkOnline(URI.create("spark://192.168.0.27:7079"))
+    val b39=isSparkOnline(URI.create("spark://192.168.0.40:8088"))
+    val b27=isSparkOnline(URI.create("spark://192.168.0.13:8088"))
     println("Connect-> b39:"+b39+"\t b27:"+b27)
     //local[*]
-     SparkUtility.Connect(SparkUtility.Conf("spark://mzhy:7079", "appname")) match {
+     SparkUtility.Connect(SparkUtility.Conf("spark://appdept3:8088", "appname")) match {
       case Success(sc) => println("Success")
       case Failure(f) => println("Failure")
     }
