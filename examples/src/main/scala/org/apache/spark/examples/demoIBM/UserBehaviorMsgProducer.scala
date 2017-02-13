@@ -1,4 +1,4 @@
-package org.apache.spark.examples.IBM
+package org.apache.spark.examples.demoIBM
 import scala.util.Random
 import java.util.Properties
 import kafka.producer.KeyedMessage

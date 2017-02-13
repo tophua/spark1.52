@@ -1,4 +1,4 @@
-package org.apache.spark.examples.IBM
+package org.apache.spark.examples.demoIBM
 
 import java.io.File
 import java.util.Random

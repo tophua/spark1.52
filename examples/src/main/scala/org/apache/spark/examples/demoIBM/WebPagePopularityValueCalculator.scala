@@ -1,4 +1,4 @@
-package org.apache.spark.examples.IBM
+package org.apache.spark.examples.demoIBM
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.streaming.StreamingContext
