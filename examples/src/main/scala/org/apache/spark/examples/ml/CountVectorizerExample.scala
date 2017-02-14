@@ -27,7 +27,6 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
  * Countvectorizer和Countvectorizermodel旨在通过计数来将一个文档转换为向量
- * 
  */
 object CountVectorizerExample {
   def main(args: Array[String]) {
