@@ -43,10 +43,13 @@ private[sql] abstract class SparkPlanTest extends SparkFunSuite {
 
   /**
    * Runs the plan and makes sure the answer matches the expected result.
-   * @param input the input data to be used.
+   * 运行计划,确保答案符合预期的结果
+   * @param input the input data to be used.使用的输入数据
    * @param planFunction a function which accepts the input SparkPlan and uses it to instantiate
    *                     the physical operator that's being tested.
+   *                      一个函数接受输入的Spark计划和使用它来实例化正在测试的物理运算符
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
+   * 											预期的结果在一个[序列]的的[行]
    * @param sortAnswers if true, the answers will be sorted by their toString representations prior
    *                    to being compared.
    */
@@ -64,8 +67,9 @@ private[sql] abstract class SparkPlanTest extends SparkFunSuite {
 
   /**
    * Runs the plan and makes sure the answer matches the expected result.
-   * @param left the left input data to be used.
-   * @param right the right input data to be used.
+   * 运行计划,确保答案符合预期的结果
+   * @param left the left input data to be used. 使用的左输入数据
+   * @param right the right input data to be used.使用的右输入数据
    * @param planFunction a function which accepts the input SparkPlan and uses it to instantiate
    *                     the physical operator that's being tested.
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
@@ -87,9 +91,11 @@ private[sql] abstract class SparkPlanTest extends SparkFunSuite {
 
   /**
    * Runs the plan and makes sure the answer matches the expected result.
-   * @param input the input data to be used.
+   * 运行计划,确保答案符合预期的结果
+   * @param input the input data to be used. 使用的输入数据
    * @param planFunction a function which accepts a sequence of input SparkPlans and uses them to
    *                     instantiate the physical operator that's being tested.
+   *                     一个函数接受一个输入序列Spark计划并使用它们来实例化物理运算符被检测
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
    * @param sortAnswers if true, the answers will be sorted by their toString representations prior
    *                    to being compared.
@@ -107,15 +113,19 @@ private[sql] abstract class SparkPlanTest extends SparkFunSuite {
 
   /**
    * Runs the plan and makes sure the answer matches the result produced by a reference plan.
-   * @param input the input data to be used.
+   * 运行计划,确保答案匹配参考计划的结果
+   * @param input the input data to be used. 使用的输入数据
    * @param planFunction a function which accepts the input SparkPlan and uses it to instantiate
    *                     the physical operator that's being tested.
+   *                     一个函数接受输入的Spark计划和使用它来实例化正在测试的物理运算符
    * @param expectedPlanFunction a function which accepts the input SparkPlan and uses it to
    *                             instantiate a reference implementation of the physical operator
    *                             that's being tested. The result of executing this plan will be
    *                             treated as the source-of-truth for the test.
+   *                             一个函数接受输入sparkplan和用它来实例化一个物理运算符被检测的参考实现。
+   *                             执行此计划的结果将被视为测试的真实来源。
    * @param sortAnswers if true, the answers will be sorted by their toString representations prior
-   *                    to being compared.
+   *                    to being compared. 如果为true,答案将由他们的toString表示,相比之前的排序
    */
   protected def checkThatPlansAgree(
       input: DataFrame,
@@ -132,14 +142,17 @@ private[sql] abstract class SparkPlanTest extends SparkFunSuite {
 
 /**
  * Helper methods for writing tests of individual physical operators.
+ * 用于编写单个物理运算符的测试的辅助方法
  */
 object SparkPlanTest {
 
   /**
    * Runs the plan and makes sure the answer matches the result produced by a reference plan.
-   * @param input the input data to be used.
+   * 运行计划,并确保答案匹配的结果所产生的参考计划
+   * @param input the input data to be used. 使用的输入数据
    * @param planFunction a function which accepts the input SparkPlan and uses it to instantiate
    *                     the physical operator that's being tested.
+   *                     一个函数接受输入sparkplan和用它来实例化物理运算符被检测
    * @param expectedPlanFunction a function which accepts the input SparkPlan and uses it to
    *                             instantiate a reference implementation of the physical operator
    *                             that's being tested. The result of executing this plan will be
@@ -199,12 +212,16 @@ object SparkPlanTest {
 
   /**
    * Runs the plan and makes sure the answer matches the expected result.
-   * @param input the input data to be used.
+   * 运行计划,确保答案符合预期的结果
+   * @param input the input data to be used.使用的输入数据
    * @param planFunction a function which accepts the input SparkPlan and uses it to instantiate
    *                     the physical operator that's being tested.
+   *                     一个函数接受输入sparkplan和用它来实例化正在测试的物理运算符
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
+   * 										预期的结果在一个[序列]的的[行]
    * @param sortAnswers if true, the answers will be sorted by their toString representations prior
    *                    to being compared.
+   *                    如果为true,答案将由他们的toString表示相比之前的排序
    */
   def checkAnswer(
       input: Seq[DataFrame],

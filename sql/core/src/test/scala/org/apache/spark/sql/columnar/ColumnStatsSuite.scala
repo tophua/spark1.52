@@ -21,7 +21,7 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.types._
-
+//列统计测试套件
 class ColumnStatsSuite extends SparkFunSuite {
   testColumnStats(classOf[BooleanColumnStats], BOOLEAN, createRow(true, false, 0))
   testColumnStats(classOf[ByteColumnStats], BYTE, createRow(Byte.MaxValue, Byte.MinValue, 0))
@@ -38,7 +38,7 @@ class ColumnStatsSuite extends SparkFunSuite {
   testDecimalColumnStats(createRow(null, null, 0))
 
   def createRow(values: Any*): GenericInternalRow = new GenericInternalRow(values.toArray)
-
+//测试列统计
   def testColumnStats[T <: AtomicType, U <: ColumnStats](
       columnStatsClass: Class[U],
       columnType: NativeColumnType[T],
@@ -75,7 +75,7 @@ class ColumnStatsSuite extends SparkFunSuite {
       }
     }
   }
-
+  //测试十进制列统计
   def testDecimalColumnStats[T <: AtomicType, U <: ColumnStats](
       initialStatistics: GenericInternalRow): Unit = {
 

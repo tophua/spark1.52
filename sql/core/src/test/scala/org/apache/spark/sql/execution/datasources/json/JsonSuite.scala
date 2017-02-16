@@ -31,7 +31,7 @@ import org.apache.spark.sql.execution.datasources.json.InferSchema.compatibleTyp
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
 import org.apache.spark.util.Utils
-
+//Json测试套件
 class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
   import testImplicits._
 
@@ -77,7 +77,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     val doubleNumber: Double = 1.7976931348623157E308d
     //Double转换类型
     checkTypePromotion(doubleNumber.toDouble, enforceCorrectType(doubleNumber, DoubleType))
-
+    //检查类型提升
     checkTypePromotion(DateTimeUtils.fromJavaTimestamp(new Timestamp(intNumber)),
         enforceCorrectType(intNumber, TimestampType))
     checkTypePromotion(DateTimeUtils.fromJavaTimestamp(new Timestamp(intNumber.toLong)),
@@ -104,7 +104,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       enforceCorrectType(ISO8601Time2, DateType))
   }
 
-  test("Get compatible type") {//得到兼容的类型
+  test("Get compatible type") {//获得兼容的类型
     def checkDataType(t1: DataType, t2: DataType, expected: DataType) {
       var actual = compatibleType(t1, t2)
       assert(actual == expected,
@@ -126,7 +126,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkDataType(NullType, StructType(Nil), StructType(Nil))
     checkDataType(NullType, NullType, NullType)
 
-    // BooleanType
+    // BooleanType 布尔类型
     checkDataType(BooleanType, BooleanType, BooleanType)
     checkDataType(BooleanType, IntegerType, StringType)
     checkDataType(BooleanType, LongType, StringType)
@@ -137,7 +137,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkDataType(BooleanType, ArrayType(IntegerType), StringType)
     checkDataType(BooleanType, StructType(Nil), StringType)
 
-    // IntegerType
+    // IntegerType 整型类型
     checkDataType(IntegerType, IntegerType, IntegerType)
     checkDataType(IntegerType, LongType, LongType)
     checkDataType(IntegerType, DoubleType, DoubleType)
@@ -147,7 +147,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkDataType(IntegerType, ArrayType(IntegerType), StringType)
     checkDataType(IntegerType, StructType(Nil), StringType)
 
-    // LongType
+    // LongType 长整型类型
     checkDataType(LongType, LongType, LongType)
     checkDataType(LongType, DoubleType, DoubleType)
     checkDataType(LongType, DecimalType.SYSTEM_DEFAULT, DecimalType.SYSTEM_DEFAULT)
@@ -155,26 +155,26 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkDataType(LongType, ArrayType(IntegerType), StringType)
     checkDataType(LongType, StructType(Nil), StringType)
 
-    // DoubleType
+    // DoubleType 双精度类型
     checkDataType(DoubleType, DoubleType, DoubleType)
     checkDataType(DoubleType, DecimalType.SYSTEM_DEFAULT, DoubleType)
     checkDataType(DoubleType, StringType, StringType)
     checkDataType(DoubleType, ArrayType(IntegerType), StringType)
     checkDataType(DoubleType, StructType(Nil), StringType)
 
-    // DecimalType
+    // DecimalType 十制度类型
     checkDataType(DecimalType.SYSTEM_DEFAULT, DecimalType.SYSTEM_DEFAULT,
       DecimalType.SYSTEM_DEFAULT)
     checkDataType(DecimalType.SYSTEM_DEFAULT, StringType, StringType)
     checkDataType(DecimalType.SYSTEM_DEFAULT, ArrayType(IntegerType), StringType)
     checkDataType(DecimalType.SYSTEM_DEFAULT, StructType(Nil), StringType)
 
-    // StringType
+    // StringType 字符串类型
     checkDataType(StringType, StringType, StringType)
     checkDataType(StringType, ArrayType(IntegerType), StringType)
     checkDataType(StringType, StructType(Nil), StringType)
 
-    // ArrayType
+    // ArrayType 数组类型
     checkDataType(ArrayType(IntegerType), ArrayType(IntegerType), ArrayType(IntegerType))
     checkDataType(ArrayType(IntegerType), ArrayType(LongType), ArrayType(LongType))
     checkDataType(ArrayType(IntegerType), ArrayType(StringType), ArrayType(StringType))
@@ -192,7 +192,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     checkDataType(
       ArrayType(IntegerType, false), ArrayType(IntegerType, true), ArrayType(IntegerType, true))
 
-    // StructType
+    // StructType 自定义类型
     //StructType代表一张表,StructField代表一个字段
     checkDataType(StructType(Nil), StructType(Nil), StructType(Nil))
     checkDataType(
@@ -529,7 +529,9 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     )
 
     // Right now, the analyzer does not know that num_bool should be treated as a boolean.
+    //现在,分析不知道num_bool应该被视为一个布尔。
     // Number and Boolean conflict: resolve the type as boolean in this query.
+    //数和布尔冲突：在查询中解析类型为布尔值
     checkAnswer(
       sql("select num_bool from jsonTable where num_bool"),
       Row(true)
@@ -1267,6 +1269,7 @@ sql("""
       val df = ctx.read.schema(schemaWithSimpleMap).json(mapType1)
       df.write.mode("overwrite").parquet(temp)
       // order of MapType is not defined
+      //以Map类型没有定义
       assert(ctx.read.parquet(temp).count() == 5)
 
       val df2 = ctx.read.json(corruptRecords)

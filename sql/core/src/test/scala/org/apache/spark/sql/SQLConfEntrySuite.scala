@@ -19,7 +19,7 @@ package org.apache.spark.sql
 
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.SQLConf._
-
+//SQL配置实体测试套件
 class SQLConfEntrySuite extends SparkFunSuite {
 
   val conf = new SQLConf

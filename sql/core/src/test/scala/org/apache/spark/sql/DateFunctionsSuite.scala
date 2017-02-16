@@ -25,7 +25,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.unsafe.types.CalendarInterval
 /**
- * 日期函数测试
+ * 日期函数测试套件
  */
 class DateFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._

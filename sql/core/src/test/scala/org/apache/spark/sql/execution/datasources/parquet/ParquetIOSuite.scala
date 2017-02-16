@@ -42,8 +42,10 @@ import org.apache.spark.sql.types._
 
 // Write support class for nested groups: ParquetWriter initializes GroupWriteSupport
 // with an empty configuration (it is after all not intended to be used in this way?)
+//有一个空的配置(它毕竟是不打算使用这种方式？)
 // and members are private so we need to make our own in order to pass the schema
-// to the writer.
+// to the writer.成员是私有的,所以我们需要自己做才能把模式传
+//测试组写支持
 private[parquet] class TestGroupWriteSupport(schema: MessageType) extends WriteSupport[Group] {
   var groupWriter: GroupWriter = null
 
@@ -62,17 +64,19 @@ private[parquet] class TestGroupWriteSupport(schema: MessageType) extends WriteS
 
 /**
  * A test suite that tests basic Parquet I/O.
+ * 一个测试套件的基本Parquet I/O
  */
 class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
   import testImplicits._
 
   /**
    * Writes `data` to a Parquet file, reads it back and check file contents.
+   * 写数据到文件Parquet,读回检查文件内容
    */
   protected def checkParquetFile[T <: Product : ClassTag: TypeTag](data: Seq[T]): Unit = {
     withParquetDataFrame(data)(r => checkAnswer(r, data.map(Row.fromTuple)))
   }
-
+  //基本数据类型(无二进制)
   test("basic data types (without binary)") {
     val data = (1 to 4).map { i =>
       (i % 2 == 0, i, i.toLong, i.toFloat, i.toDouble)
@@ -80,7 +84,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     checkParquetFile(data)
   }
 
-  test("raw binary") {
+  test("raw binary") {//原始的二进制
     val data = (1 to 4).map(i => Tuple1(Array.fill(3)(i.toByte)))
     withParquetDataFrame(data) { df =>
       assertResult(data.map(_._1.mkString(",")).sorted) {
@@ -89,7 +93,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("string") {
+  test("string") {//字符串
     val data = (1 to 4).map(i => Tuple1(i.toString))
     // Property spark.sql.parquet.binaryAsString shouldn't affect Parquet files written by Spark SQL
     // as we store Spark SQL schema in the extra metadata.
@@ -97,13 +101,14 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     withSQLConf(SQLConf.PARQUET_BINARY_AS_STRING.key -> "true")(checkParquetFile(data))
   }
 
-  test("fixed-length decimals") {
+  test("fixed-length decimals") {//固定长度的小数
     def makeDecimalRDD(decimal: DecimalType): DataFrame =
       sqlContext.sparkContext
         .parallelize(0 to 1000)
         .map(i => Tuple1(i / 100.0))
         .toDF()
         // Parquet doesn't allow column names with spaces, have to add an alias here
+        //Parquet不允许使用空格栏位名称,必须添加一个别名在这里
         .select($"_1" cast decimal as "dec")
 
     for ((precision, scale) <- Seq((5, 2), (1, 0), (1, 1), (18, 10), (18, 17), (19, 0), (38, 37))) {
@@ -115,10 +120,11 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("date type") {
+  test("date type") {//日期类型
     def makeDateRDD(): DataFrame =
       sqlContext.sparkContext
         .parallelize(0 to 1000)
+        //元组,转换成日期
         .map(i => Tuple1(DateTimeUtils.toJavaDate(i)))
         .toDF()
         .select($"_1")
@@ -135,17 +141,17 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     checkParquetFile(data)
   }
 
-  test("array") {
+  test("array") {//数组
     val data = (1 to 4).map(i => Tuple1(Seq(i, i + 1)))
     checkParquetFile(data)
   }
 
-  test("array and double") {
+  test("array and double") {//双精度数据
     val data = (1 to 4).map(i => (i.toDouble, Seq(i.toDouble, (i + 1).toDouble)))
     checkParquetFile(data)
   }
 
-  test("struct") {
+  test("struct") {//
     val data = (1 to 4).map(i => Tuple1((i, s"val_$i")))
     withParquetDataFrame(data) { df =>
       // Structs are converted to `Row`s
@@ -154,7 +160,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
       })
     }
   }
-
+  //数组嵌套构造字段
   test("nested struct with array of array as field") {
     val data = (1 to 4).map(i => Tuple1((i, Seq(Seq(s"val_$i")))))
     withParquetDataFrame(data) { df =>
@@ -164,7 +170,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
       })
     }
   }
-
+  //嵌套map构造字段
   test("nested map with struct as value type") {
     val data = (1 to 4).map(i => Tuple1(Map(i -> (i, s"val_$i"))))
     withParquetDataFrame(data) { df =>
@@ -189,7 +195,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("nones") {
+  test("nones") {//无一
     val allNones = (
       None.asInstanceOf[Option[Int]],
       None.asInstanceOf[Option[Long]],
@@ -202,7 +208,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("compression codec") {
+  test("compression codec") {//压缩编解码
     def compressionCodecFor(path: String): String = {
       val codecs = ParquetTypesConverter
         .readMetaData(new Path(path), Some(configuration))
@@ -227,7 +233,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
       }
     }
 
-    // Checks default compression codec
+    // Checks default compression codec 检查默认压缩编码
     checkCompressionCodec(CompressionCodecName.fromConf(sqlContext.conf.parquetCompressionCodec))
 
     checkCompressionCodec(CompressionCodecName.UNCOMPRESSED)
@@ -235,7 +241,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     checkCompressionCodec(CompressionCodecName.SNAPPY)
   }
 
-  test("read raw Parquet file") {
+  test("read raw Parquet file") {//读原始Parquet文件
     def makeRawParquetFile(path: Path): Unit = {
       val schema = MessageTypeParser.parseMessageType(
         """
@@ -273,7 +279,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("write metadata") {
+  test("write metadata") {//写元数据
     withTempPath { file =>
       val path = new Path(file.toURI.toString)
       val fs = FileSystem.getLocal(configuration)
@@ -292,7 +298,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("save - overwrite") {
+  test("save - overwrite") {//保存-覆盖
     withParquetFile((1 to 10).map(i => (i, i.toString))) { file =>
       val newData = (11 to 20).map(i => (i, i.toString))
        //当数据输出的位置已存在时,重写
@@ -301,7 +307,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("save - ignore") {
+  test("save - ignore") {//保存-存在忽略
     val data = (1 to 10).map(i => (i, i.toString))
     withParquetFile(data) { file =>
       val newData = (11 to 20).map(i => (i, i.toString))
@@ -311,7 +317,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("save - throw") {
+  test("save - throw") {//保存-抛出异常
     val data = (1 to 10).map(i => (i, i.toString))
     withParquetFile(data) { file =>
       val newData = (11 to 20).map(i => (i, i.toString))
@@ -323,7 +329,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("save - append") {
+  test("save - append") {//保存-追加
     val data = (1 to 10).map(i => (i, i.toString))
     withParquetFile(data) { file =>
       val newData = (11 to 20).map(i => (i, i.toString))
@@ -333,7 +339,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("SPARK-6315 regression test") {
+  test("SPARK-6315 regression test") {//回归测试
     // Spark 1.1 and prior versions write Spark schema as case class string into Parquet metadata.
     // This has been deprecated by JSON format since 1.2.  Notice that, 1.3 further refactored data
     // types API, and made StructType.fields an array.  This makes the result of StructType.toString
@@ -370,11 +376,13 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("SPARK-6352 DirectParquetOutputCommitter") {
+  test("SPARK-6352 DirectParquetOutputCommitter") {//直接Parquet输出提交
     val clonedConf = new Configuration(configuration)
 
     // Write to a parquet file and let it fail.
+    //写一个parquet文件并让它失败
     // _temporary should be missing if direct output committer works.
+    //_temporary应该如果直接输出工作失踪者
     try {
       configuration.set("spark.sql.parquet.output.committer.class",
         classOf[DirectParquetOutputCommitter].getCanonicalName)
@@ -393,7 +401,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
       clonedConf.foreach(entry => configuration.set(entry.getKey, entry.getValue))
     }
   }
-
+  //合格名称应向后兼容
   test("SPARK-9849 DirectParquetOutputCommitter qualified name should be backward compatible") {
     val clonedConf = new Configuration(configuration)
 
@@ -418,7 +426,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-
+  //不应该被重写
   test("SPARK-8121: spark.sql.parquet.output.committer.class shouldn't be overridden") {
     withTempPath { dir =>
       val clonedConf = new Configuration(configuration)
@@ -443,7 +451,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }
   }
 
-  test("SPARK-6330 regression test") {
+  test("SPARK-6330 regression test") {//回归测试
     // In 1.3.0, save to fs other than file: without configuring core-site.xml would get:
     // IllegalArgumentException: Wrong FS: hdfs://..., expected: file:///
     intercept[Throwable] {
@@ -454,7 +462,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
     }.toString
     assert(errorMessage.contains("UnknownHostException"))
   }
-
+  //不要关闭输出两committask()写失败
   test("SPARK-7837 Do not close output writer twice when commitTask() fails") {
     val clonedConf = new Configuration(configuration)
 

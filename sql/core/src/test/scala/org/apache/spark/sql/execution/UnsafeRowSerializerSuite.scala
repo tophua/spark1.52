@@ -32,7 +32,9 @@ import org.apache.spark._
 
 
 /**
- * used to test close InputStream in UnsafeRowSerializer
+ * used to test close InputStream in UnsafeRowSerializer 
+ * 用于测试在关闭输入流不安全的行序列化
+ * 关闭输入流的字节数组
  */
 class ClosableByteArrayInputStream(buf: Array[Byte]) extends ByteArrayInputStream(buf) {
   var closed: Boolean = false
@@ -41,21 +43,21 @@ class ClosableByteArrayInputStream(buf: Array[Byte]) extends ByteArrayInputStrea
     super.close()
   }
 }
-
+//不安全的行序列化测试套件
 class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
 
   private def toUnsafeRow(row: Row, schema: Array[DataType]): UnsafeRow = {
     val converter = unsafeRowConverter(schema)
     converter(row)
   }
-
+  //不安全的行转换化器
   private def unsafeRowConverter(schema: Array[DataType]): Row => UnsafeRow = {
     val converter = UnsafeProjection.create(schema)
     (row: Row) => {
       converter(CatalystTypeConverters.convertToCatalyst(row).asInstanceOf[InternalRow])
     }
   }
-
+  //tounsaferow()测试辅助方法
   test("toUnsafeRow() test helper method") {
     // This currently doesnt work because the generic getter throws an exception.
     //目前不工作因为一般人抛出一个异常
@@ -95,7 +97,7 @@ class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
     assert(!deserializerIter.hasNext)
     assert(input.closed)
   }
-//外部排序溢出行序列化程序不安全
+   //外部排序溢出行序列化程序不安全
   test("SPARK-10466: external sorter spilling with unsafe row serializer") {
     var sc: SparkContext = null
     var outputFile: File = null

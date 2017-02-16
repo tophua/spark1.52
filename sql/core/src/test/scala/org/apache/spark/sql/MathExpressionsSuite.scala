@@ -36,7 +36,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
 
   private lazy val nullDoubles =
     Seq(NullDoubles(1.0), NullDoubles(2.0), NullDoubles(3.0), NullDoubles(null)).toDF()
-
+    //测试一对一数学函数
   private def testOneToOneMathFunction[@specialized(Int, Long, Float, Double) T](
       c: Column => Column,
       f: T => T): Unit = {
@@ -55,7 +55,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       (1 to 10).map(_ => Row(null))
     )
   }
-
+  //测试一对一非负函数
   private def testOneToOneNonNegativeMathFunction(c: Column => Column, f: Double => Double): Unit =
   {
     checkAnswer(
@@ -75,7 +75,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
       (1 to 10).map(_ => Row(null))
     )
   }
-
+  //测试二对一数学函数
   private def testTwoToOneMathFunction(
       c: (Column, Column) => Column,
       d: (Column, Double) => Column,

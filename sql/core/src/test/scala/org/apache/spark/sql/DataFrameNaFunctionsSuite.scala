@@ -21,7 +21,7 @@ import scala.collection.JavaConversions._
 
 import org.apache.spark.sql.test.SharedSQLContext
 
-
+//数据集函数测试套件
 class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

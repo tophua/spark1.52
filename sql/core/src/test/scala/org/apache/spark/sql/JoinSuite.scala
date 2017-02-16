@@ -21,7 +21,7 @@ import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.execution.joins._
 import org.apache.spark.sql.test.SharedSQLContext
 
-
+//连接测试套件
 class JoinSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
@@ -392,6 +392,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
         Row(null, null, 6, "F") :: Nil)
 
     // Make sure we are UnknownPartitioning as the outputPartitioning for the outer join operator.
+    //确保我们是未知的分区作为外连接运算符的输出分区
     checkAnswer(
       sql(
         """
@@ -440,7 +441,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
         """.stripMargin),
       Row(null, 10))
   }
-
+  //广播左半连接操作的选择
   test("broadcasted left semi join operator selection") {
     ctx.cacheManager.clearCache()
     sql("CACHE TABLE testData")

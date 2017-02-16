@@ -22,7 +22,7 @@ import org.apache.spark.sql.test.SharedSQLContext
 
 /**
  * A test suite to test DataFrame/SQL functionalities with complex types (i.e. array, struct, map).
- * 一个测试套件的测试数据框架/ SQL类型复杂的功能
+ * 一个测试套件的测试数据集/ SQL类型复杂的功能
  */
 class DataFrameComplexTypeSuite extends QueryTest with SharedSQLContext {
   import testImplicits._

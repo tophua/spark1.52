@@ -24,7 +24,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericMutableRow
 import org.apache.spark.sql.columnar._
 import org.apache.spark.sql.columnar.ColumnarTestUtils._
 import org.apache.spark.sql.types.AtomicType
-
+//字典编码测试套件
 class DictionaryEncodingSuite extends SparkFunSuite {
   testDictionaryEncoding(new IntColumnStats, INT)
   testDictionaryEncoding(new LongColumnStats, LONG)
@@ -39,7 +39,7 @@ class DictionaryEncodingSuite extends SparkFunSuite {
     def buildDictionary(buffer: ByteBuffer) = {
       (0 until buffer.getInt()).map(columnType.extract(buffer) -> _.toShort).toMap
     }
-
+    //稳定的不同
     def stableDistinct(seq: Seq[Int]): Seq[Int] = if (seq.isEmpty) {
       Seq.empty
     } else {
@@ -48,7 +48,7 @@ class DictionaryEncodingSuite extends SparkFunSuite {
 
     def skeleton(uniqueValueCount: Int, inputSeq: Seq[Int]) {
       // -------------
-      // Tests encoder
+      // Tests encoder 检查编码
       // -------------
 
       val builder = TestCompressibleColumnBuilder(columnStats, columnType, DictionaryEncoding)
@@ -69,12 +69,14 @@ class DictionaryEncodingSuite extends SparkFunSuite {
         // 4 extra bytes for dictionary size
         // 4个额外的字节大小的字典
         val dictionarySize = 4 + rows.map(columnType.actualSize(_, 0)).sum
-        // 2 bytes for each `Short`
+        // 2 bytes for each `Short` 2字节为每个'Short'
         val compressedSize = 4 + dictionarySize + 2 * inputSeq.length
         // 4 extra bytes for compression scheme type ID
+        //4额外字节压缩方案类型ID
         assertResult(headerSize + compressedSize, "Wrong buffer capacity")(buffer.capacity)
 
         // Skips column header
+        // 跳过的列标题
         buffer.position(headerSize)
         assertResult(DictionaryEncoding.typeId, "Wrong compression scheme ID")(buffer.getInt())
 
@@ -91,10 +93,11 @@ class DictionaryEncodingSuite extends SparkFunSuite {
         }
 
         // -------------
-        // Tests decoder
+        // Tests decoder 测试解码
         // -------------
 
         // Rewinds, skips column header and 4 more bytes for compression scheme ID
+        //Rewinds,压缩方案ID列头和4字节的跳转
         buffer.rewind().position(headerSize + 4)
 
         val decoder = DictionaryEncoding.decoder(buffer, columnType)

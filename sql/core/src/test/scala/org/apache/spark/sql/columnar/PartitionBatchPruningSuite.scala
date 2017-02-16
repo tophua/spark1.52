@@ -21,11 +21,12 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.test.SQLTestData._
-
+//分区批量修剪套件
 class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
   import testImplicits._
-
+  //原始列批量
   private lazy val originalColumnBatchSize = ctx.conf.columnBatchSize
+  //原内存分区修剪
   private lazy val originalInMemoryPartitionPruning = ctx.conf.inMemoryPartitionPruning
 
   override protected def beforeAll(): Unit = {
@@ -77,7 +78,7 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
     (1 to 10) ++ (21 to 30) ++ (41 to 50) ++ (61 to 70) ++ (81 to 90)
   }
 
-  // IS NOT NULL
+  // IS NOT NULL  不为NULL
   checkBatchPruning("SELECT key FROM pruningData WHERE value IS NOT NULL", 5, 5) {
     (11 to 20) ++ (31 to 40) ++ (51 to 60) ++ (71 to 80) ++ (91 to 100)
   }
@@ -91,6 +92,7 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
   }
   checkBatchPruning("SELECT key FROM pruningData WHERE NOT (key < 88)", 1, 2) {
     // Although the `NOT` operator isn't supported directly, the optimizer can transform
+    //虽然“NOT”操作符不直接支持,优化器可以转换  NOT (a < b)` to `b >= a
     // `NOT (a < b)` to `b >= a`
     88 to 100
   }
@@ -104,7 +106,7 @@ class PartitionBatchPruningSuite extends SparkFunSuite with SharedSQLContext {
     }
   }
 
-  def checkBatchPruning(
+  def checkBatchPruning(//检验批的修剪
       query: String,
       expectedReadPartitions: Int,
       expectedReadBatches: Int)(

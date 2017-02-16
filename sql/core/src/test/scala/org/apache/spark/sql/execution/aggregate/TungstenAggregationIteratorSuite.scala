@@ -23,10 +23,10 @@ import org.apache.spark.sql.catalyst.expressions.InterpretedMutableProjection
 import org.apache.spark.sql.execution.metric.SQLMetrics
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.unsafe.memory.TaskMemoryManager
-
+//钨丝聚合迭代器测试套件
 class TungstenAggregationIteratorSuite extends SparkFunSuite with SharedSQLContext {
 
-  test("memory acquired on construction") {//构建上获得内存
+  test("memory acquired on construction") {//在内存上构建
     val taskMemoryManager = new TaskMemoryManager(SparkEnv.get.executorMemoryManager)
     val taskContext = new TaskContextImpl(0, 0, 0, 0, taskMemoryManager, null, Seq.empty)
     TaskContext.setTaskContext(taskContext)

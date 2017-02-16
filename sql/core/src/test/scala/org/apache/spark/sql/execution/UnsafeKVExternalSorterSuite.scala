@@ -29,6 +29,7 @@ import org.apache.spark.unsafe.memory.{ExecutorMemoryManager, MemoryAllocator, T
 
 /**
  * Test suite for [[UnsafeKVExternalSorter]], with randomly generated test data.
+ * 测试套件[unsafekvexternalsorter],随机生成的测试数据。
  */
 class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
   private val keyTypes = Seq(IntegerType, FloatType, DoubleType, StringType)
@@ -50,17 +51,22 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
    * Create a test case using randomly generated data for the given key and value schema.
    * 使用给定的键和值模式随机生成的数据创建一个测试用例
    * The approach works as follows:
-   *
+   * 该方法的工作原理如下：
    * - Create input by randomly generating data based on the given schema
+   *  用输入随机生成的数据的基础上给出了模式
    * - Run [[UnsafeKVExternalSorter]] on the generated data
+   * 	运行[unsafekvexternalsorter]上产生的数据
    * - Collect the output from the sorter, and make sure the keys are sorted in ascending order
+   *   从分类收集输出,并确保钥匙在升序排序
    * - Sort the input by both key and value, and sort the sorter output also by both key and value.
    *   Compare the sorted input and sorted output together to make sure all the key/values match.
+   *   由键和值输入排序,排序分类器的输出也由键和值,比较排序的输入和排序输出一起确保所有的键/值匹配。
    *
    * If spill is set to true, the sorter will spill probabilistically roughly every 100 records.
+   * 如果泄漏被设置为true,分类将泄漏的概率大约每100条记录
    */
   private def testKVSorter(keySchema: StructType, valueSchema: StructType, spill: Boolean): Unit = {
-    // Create the data converters
+    // Create the data converters 创建数据转换器
     val kExternalConverter = CatalystTypeConverters.createToCatalystConverter(keySchema)
     val vExternalConverter = CatalystTypeConverters.createToCatalystConverter(valueSchema)
     val kConverter = UnsafeProjection.create(keySchema)
@@ -93,14 +99,18 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
    * Create a test case using the given input data for the given key and value schema.
    * 使用给定的键和值模式的给定输入数据创建一个测试用例
    * The approach works as follows:
-   *
+   * 该方法的工作原理如下：
    * - Create input by randomly generating data based on the given schema
-   * - Run [[UnsafeKVExternalSorter]] on the input data
+   *   根据给定的模式随机生成数据
+   * - Run [[UnsafeKVExternalSorter]] on the input data 运行[unsafekvexternalsorter]对输入数据
    * - Collect the output from the sorter, and make sure the keys are sorted in ascending order
+   *   从分类收集输出,并确保Key在升序排序
    * - Sort the input by both key and value, and sort the sorter output also by both key and value.
+   * 	 由键和值输入排序,排序分类的输出也由键和值
    *   Compare the sorted input and sorted output together to make sure all the key/values match.
-   *
+   *   将排序的输入和排序输出进行比较,以确保所有的键/值匹配
    * If spill is set to true, the sorter will spill probabilistically roughly every 100 records.
+   *  如果泄漏被设置为true,分类将泄漏的概率大约每100条记录
    */
   private def testKVSorter(
       keySchema: StructType,
@@ -124,16 +134,18 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
       keySchema, valueSchema, SparkEnv.get.blockManager, shuffleMemMgr, pageSize)
 
     // Insert the keys and values into the sorter
+    //插入键和值的分类
     inputData.foreach { case (k, v) =>
       sorter.insertKV(k.asInstanceOf[UnsafeRow], v.asInstanceOf[UnsafeRow])
       // 1% chance we will spill
+      //1%的机会,我们将溢出
       if (rand.nextDouble() < 0.01 && spill) {
         shuffleMemMgr.markAsOutOfMemory()
         sorter.closeCurrentPage()
       }
     }
 
-    // Collect the sorted output
+    // Collect the sorted output 收集排序输出
     val out = new scala.collection.mutable.ArrayBuffer[(InternalRow, InternalRow)]
     val iter = sorter.sortedIterator()
     while (iter.next()) {
@@ -153,6 +165,7 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
     }
 
     // Testing to make sure output from the sorter is sorted by key
+    //测试从分类确保输出排序的关键
     var prevK: InternalRow = null
     out.zipWithIndex.foreach { case ((k, v), i) =>
       if (prevK != null) {
@@ -167,9 +180,11 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
     }
 
     // Testing to make sure the key/value in output matches input
+    //测试以确保输入输出的键/值匹配输入
     assert(out.sorted(kvOrdering) === inputData.sorted(kvOrdering))
 
     // Make sure there is no memory leak
+    //确保没有内存泄漏
     val leakedUnsafeMemory: Long = taskMemMgr.cleanUpAllAllocatedMemory
     if (shuffleMemMgr != null) {
       val leakedShuffleMemory: Long = shuffleMemMgr.getMemoryConsumptionForThisTask()
@@ -178,7 +193,7 @@ class UnsafeKVExternalSorterSuite extends SparkFunSuite with SharedSQLContext {
     assert(0 === leakedUnsafeMemory)
     TaskContext.unset()
   }
-
+  //记录超过页大小的记录
   test("kv sorting with records that exceed page size") {
     val pageSize = 128
   //StructType代表一张表,StructField代表一个字段

@@ -19,7 +19,7 @@ package org.apache.spark.sql.columnar.compression
 
 import org.apache.spark.sql.columnar._
 import org.apache.spark.sql.types.AtomicType
-
+//测试可压缩列生成器
 class TestCompressibleColumnBuilder[T <: AtomicType](
     override val columnStats: ColumnStats,
     override val columnType: NativeColumnType[T],

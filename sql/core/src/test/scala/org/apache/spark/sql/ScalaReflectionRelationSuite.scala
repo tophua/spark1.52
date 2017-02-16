@@ -22,7 +22,7 @@ import java.sql.{Date, Timestamp}
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.test.SharedSQLContext
 
-case class ReflectData(
+case class ReflectData(//反射数据
     stringField: String,
     intField: Int,
     longField: Long,
@@ -36,7 +36,7 @@ case class ReflectData(
     timestampField: Timestamp,
     seqInt: Seq[Int])
 
-case class NullReflectData(
+case class NullReflectData(//空反射数据
     intField: java.lang.Integer,
     longField: java.lang.Long,
     floatField: java.lang.Float,
@@ -45,7 +45,7 @@ case class NullReflectData(
     byteField: java.lang.Byte,
     booleanField: java.lang.Boolean)
 
-case class OptionalReflectData(
+case class OptionalReflectData(//操作反射数据
     intField: Option[Int],
     longField: Option[Long],
     floatField: Option[Float],
@@ -54,18 +54,18 @@ case class OptionalReflectData(
     byteField: Option[Byte],
     booleanField: Option[Boolean])
 
-case class ReflectBinary(data: Array[Byte])
+case class ReflectBinary(data: Array[Byte])//返射二进制
 
-case class Nested(i: Option[Int], s: String)
+case class Nested(i: Option[Int], s: String)//嵌套
 
-case class Data(
+case class Data(//数据
     array: Seq[Int],
     arrayContainsNull: Seq[Option[Int]],
     map: Map[Int, Long],
     mapContainsNul: Map[Int, Option[Long]],
     nested: Nested)
 
-case class ComplexReflectData(
+case class ComplexReflectData(//复合反射数据
     arrayField: Seq[Int],
     arrayFieldContainsNull: Seq[Option[Int]],
     mapField: Map[Int, Long],

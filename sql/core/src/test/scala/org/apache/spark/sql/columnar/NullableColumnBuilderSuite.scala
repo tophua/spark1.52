@@ -20,7 +20,7 @@ package org.apache.spark.sql.columnar
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.execution.SparkSqlSerializer
 import org.apache.spark.sql.types._
-
+//测试空列生成器
 class TestNullableColumnBuilder[JvmType](columnType: ColumnType[JvmType])
   extends BasicColumnBuilder[JvmType](new NoopColumnStats, columnType)
   with NullableColumnBuilder
@@ -33,7 +33,7 @@ object TestNullableColumnBuilder {
     builder
   }
 }
-
+//空列生成器套件
 class NullableColumnBuilderSuite extends SparkFunSuite {
   import ColumnarTestUtils._
 
@@ -49,7 +49,7 @@ class NullableColumnBuilderSuite extends SparkFunSuite {
 
     val typeName = columnType.getClass.getSimpleName.stripSuffix("$")
 
-    test(s"$typeName column builder: empty column") {
+    test(s"$typeName column builder: empty column") {//空列
       val columnBuilder = TestNullableColumnBuilder(columnType)
       val buffer = columnBuilder.build()
 
@@ -58,7 +58,7 @@ class NullableColumnBuilderSuite extends SparkFunSuite {
       assert(!buffer.hasRemaining)
     }
 
-    test(s"$typeName column builder: buffer size auto growth") {
+    test(s"$typeName column builder: buffer size auto growth") {//缓存大小自动增长
       val columnBuilder = TestNullableColumnBuilder(columnType)
       val randomRow = makeRandomRow(columnType)
 
@@ -87,10 +87,10 @@ class NullableColumnBuilderSuite extends SparkFunSuite {
       assertResult(columnType.typeId, "Wrong column type ID")(buffer.getInt())
       assertResult(4, "Wrong null count")(buffer.getInt())
 
-      // For null positions
+      // For null positions 空位置
       (1 to 7 by 2).foreach(assertResult(_, "Wrong null position")(buffer.getInt()))
 
-      // For non-null values
+      // For non-null values 对于非空值
       (0 until 4).foreach { _ =>
         val actual = if (columnType.isInstanceOf[GENERIC]) {
           SparkSqlSerializer.deserialize[Any](columnType.extract(buffer).asInstanceOf[Array[Byte]])

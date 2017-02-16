@@ -51,7 +51,7 @@ class DDLSourceLoadSuite extends DataSourceTest with SharedSQLContext {
   }
 }
 
-
+//假数据源之一
 class FakeSourceOne extends RelationProvider with DataSourceRegister {
 
   def shortName(): String = "Fluet da Bomb"
@@ -64,7 +64,7 @@ class FakeSourceOne extends RelationProvider with DataSourceRegister {
         StructType(Seq(StructField("stringType", StringType, nullable = false)))
     }
 }
-
+//假数据源之二
 class FakeSourceTwo extends RelationProvider  with DataSourceRegister {
 
   def shortName(): String = "Fluet da Bomb"
@@ -77,7 +77,7 @@ class FakeSourceTwo extends RelationProvider  with DataSourceRegister {
         StructType(Seq(StructField("stringType", StringType, nullable = false)))
     }
 }
-
+//假数据源之三
 class FakeSourceThree extends RelationProvider with DataSourceRegister {
 
   def shortName(): String = "gathering quorum"

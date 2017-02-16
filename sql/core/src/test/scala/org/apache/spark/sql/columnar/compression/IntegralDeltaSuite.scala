@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericMutableRow
 import org.apache.spark.sql.columnar._
 import org.apache.spark.sql.columnar.ColumnarTestUtils._
 import org.apache.spark.sql.types.IntegralType
-
+//积分三角测试套件
 class IntegralDeltaSuite extends SparkFunSuite {
   testIntegralDelta(new IntColumnStats, INT, IntDelta)
   testIntegralDelta(new LongColumnStats, LONG, LongDelta)
@@ -34,7 +34,7 @@ class IntegralDeltaSuite extends SparkFunSuite {
 
     def skeleton(input: Seq[I#InternalType]) {
       // -------------
-      // Tests encoder
+      // Tests encoder 测试编码
       // -------------
 
       val builder = TestCompressibleColumnBuilder(columnStats, columnType, scheme)
@@ -55,9 +55,11 @@ class IntegralDeltaSuite extends SparkFunSuite {
 
       val buffer = builder.build()
       // Column type ID + null count + null positions
+      //列类型ID +空计数+空位置
       val headerSize = CompressionScheme.columnHeaderSize(buffer)
 
       // Compression scheme ID + compressed contents
+      //压缩方案+压缩内容
       val compressedSize = 4 + (if (deltas.isEmpty) {
         0
       } else {
@@ -68,6 +70,7 @@ class IntegralDeltaSuite extends SparkFunSuite {
       })
 
       // 4 extra bytes for compression scheme type ID
+      //4额外字节压缩方案类型ID
       assertResult(headerSize + compressedSize, "Wrong buffer capacity")(buffer.capacity)
 
       buffer.position(headerSize)
@@ -88,10 +91,11 @@ class IntegralDeltaSuite extends SparkFunSuite {
       }
 
       // -------------
-      // Tests decoder
+      // Tests decoder 测试解码
       // -------------
 
       // Rewinds, skips column header and 4 more bytes for compression scheme ID
+      //Rewinds,压缩方案ID列头和4字节的跳转
       buffer.rewind().position(headerSize + 4)
 
       val decoder = scheme.decoder(buffer, columnType)

@@ -58,10 +58,11 @@ case class SimpleDDLScan(from: Int, to: Int, table: String)(@transient val sqlCo
         )
       )
     ))
-
+   //需要转换
   override def needConversion: Boolean = false
 
   override def buildScan(): RDD[Row] = {
+    //依靠一个类型删掉黑客通过RDD[internalrow]回到RDD[行]
     // Rely on a type erasure hack to pass RDD[InternalRow] back as RDD[Row]
     sqlContext.sparkContext.parallelize(from to to).map { e =>
       InternalRow(UTF8String.fromString(s"people$e"), e * 2)
@@ -106,7 +107,7 @@ class DDLTestSuite extends DataSourceTest with SharedSQLContext {
         Row("arrayType", "array<string>", ""),
         Row("structType", "struct<f1:string,f2:int>", "")
       ))
-
+  //描述命令应该有正确的物理计划输出属性
   test("SPARK-7686 DescribeCommand should have correct physical plan output attributes") {
     val attributes = sql("describe ddlPeople")
       .queryExecution.executedPlan.output

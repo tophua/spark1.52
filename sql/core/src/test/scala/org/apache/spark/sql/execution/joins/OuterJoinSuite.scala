@@ -63,6 +63,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
 
   // Note: the input dataframes and expression must be evaluated lazily because
   // the SQLContext should be used only within a test to keep SQL tests stable
+  ///注：输入数据帧和表达必须被评估,延迟加载地因为sqlcontext应该只在一个测试中保持稳定的SQL测试使用
   private def testOuterJoin(
       testName: String,
       leftRows: => DataFrame,
@@ -186,7 +187,7 @@ class OuterJoinSuite extends SparkPlanTest with SharedSQLContext {
   )
 
   // --- Both inputs empty ------------------------------------------------------------------------
-
+  //输入空
   testOuterJoin(//左外连接与两个输入空
     "left outer join with both inputs empty",
     left.filter("false"),

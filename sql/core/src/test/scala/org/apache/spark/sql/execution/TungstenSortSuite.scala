@@ -27,7 +27,7 @@ import org.apache.spark.sql.types._
 
 /**
  * A test suite that generates randomized data to test the [[TungstenSort]] operator.
- * 一个测试用例生成随机数据测试tungstensort ] [ [ ]算子
+ * 一个测试用例随机生成数据测试[tungstensort]操作
  */
 class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
 

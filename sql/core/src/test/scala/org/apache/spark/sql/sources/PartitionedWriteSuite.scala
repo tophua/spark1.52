@@ -28,7 +28,7 @@ class PartitionedWriteSuite extends QueryTest with SharedSQLContext {
   test("write many partitions") {//写入更多分区
     val path = Utils.createTempDir()
     path.delete()
-
+    //val df: DataFrame
     val df = ctx.range(100).select($"id", lit(1).as("data"))
     df.write.partitionBy("id").save(path.getCanonicalPath)
 

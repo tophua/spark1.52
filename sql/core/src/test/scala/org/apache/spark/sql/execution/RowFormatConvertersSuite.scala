@@ -40,53 +40,53 @@ class RowFormatConvertersSuite extends SparkPlanTest with SharedSQLContext {
   assert(!outputsSafe.outputsUnsafeRows)
   private val outputsUnsafe = TungstenSort(Nil, false, PhysicalRDD(Seq.empty, null, "name"))
   assert(outputsUnsafe.outputsUnsafeRows)
-
+  //计划在需要时插入不安全的安全转换
   test("planner should insert unsafe->safe conversions when required") {
     val plan = Limit(10, outputsUnsafe)
     val preparedPlan = ctx.prepareForExecution.execute(plan)
     assert(preparedPlan.children.head.isInstanceOf[ConvertToSafe])
   }
-
+  //过滤器可以处理不安全的行
   test("filter can process unsafe rows") {
     val plan = Filter(IsNull(IsNull(Literal(1))), outputsUnsafe)
     val preparedPlan = ctx.prepareForExecution.execute(plan)
     assert(getConverters(preparedPlan).size === 1)
     assert(preparedPlan.outputsUnsafeRows)
   }
-
+  //过滤器可以处理安全行
   test("filter can process safe rows") {
     val plan = Filter(IsNull(IsNull(Literal(1))), outputsSafe)
     val preparedPlan = ctx.prepareForExecution.execute(plan)
     assert(getConverters(preparedPlan).isEmpty)
     assert(!preparedPlan.outputsUnsafeRows)
   }
-
+  //execute()断言失败如果输入行不同的格式
   test("execute() fails an assertion if inputs rows are of different formats") {
     val e = intercept[AssertionError] {
       Union(Seq(outputsSafe, outputsUnsafe)).execute()
     }
     assert(e.getMessage.contains("format"))
   }
-
+  //联合要求所有的输入行格式一致
   test("union requires all of its input rows' formats to agree") {
     val plan = Union(Seq(outputsSafe, outputsUnsafe))
     assert(plan.canProcessSafeRows && plan.canProcessUnsafeRows)
     val preparedPlan = ctx.prepareForExecution.execute(plan)
     assert(preparedPlan.outputsUnsafeRows)
   }
-
+  //可以处理安全行
   test("union can process safe rows") {
     val plan = Union(Seq(outputsSafe, outputsSafe))
     val preparedPlan = ctx.prepareForExecution.execute(plan)
     assert(!preparedPlan.outputsUnsafeRows)
   }
-
+ //可以处理不安全行
   test("union can process unsafe rows") {
     val plan = Union(Seq(outputsUnsafe, outputsUnsafe))
     val preparedPlan = ctx.prepareForExecution.execute(plan)
     assert(preparedPlan.outputsUnsafeRows)
   }
-
+  //返转换到不安全和转换为安全
   test("round trip with ConvertToUnsafe and ConvertToSafe") {
     val input = Seq(("hello", 1), ("world", 2))
     checkAnswer(
@@ -95,7 +95,7 @@ class RowFormatConvertersSuite extends SparkPlanTest with SharedSQLContext {
       input.map(Row.fromTuple)
     )
   }
-
+  //当转换为UTF8字符串复制阵列/地图安全不安全
   test("SPARK-9683: copy UTF8String when convert unsafe array/map to safe") {
     SparkPlan.currentContext.set(ctx)
     val schema = ArrayType(StringType)
@@ -111,15 +111,17 @@ class RowFormatConvertersSuite extends SparkPlanTest with SharedSQLContext {
     assert(plan.execute().collect().map(_.getUTF8String(0).toString) === (1 to 100).map(_.toString))
   }
 }
-
+//假计划
 case class DummyPlan(child: SparkPlan) extends UnaryNode {
 
   override protected def doExecute(): RDD[InternalRow] = {
     child.execute().mapPartitions { iter =>
+      //这个“虚拟计划”处于安全模式,所以我们不需要做拷贝,即使我们持有一些从传入行得到的值
       // This `DummyPlan` is in safe mode, so we don't need to do copy even we hold some
       // values gotten from the incoming rows.
       // we cache all strings here to make sure we have deep copied UTF8String inside incoming
       // safe InternalRow.
+      //我们的高速缓存中的所有字符串来确保我们有深复制UTF8字符串里面输入安全的内部行
       val strings = new scala.collection.mutable.ArrayBuffer[UTF8String]
       iter.foreach { row =>
         strings += row.getArray(0).getUTF8String(0)

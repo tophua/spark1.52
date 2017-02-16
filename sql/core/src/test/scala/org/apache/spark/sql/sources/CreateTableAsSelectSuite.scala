@@ -26,7 +26,7 @@ import org.apache.spark.sql.execution.datasources.DDLException
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.util.Utils
 
-
+//创建表作为选择套件
 class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with BeforeAndAfter {
   protected override lazy val sql = caseInsensitiveContext.sql _
   private lazy val sparkContext = caseInsensitiveContext.sparkContext

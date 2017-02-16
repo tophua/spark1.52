@@ -70,14 +70,14 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
       "create table test.people1 (name TEXT(32) NOT NULL, theid INTEGER NOT NULL)").executeUpdate()
     conn1.commit()
     conn.commit()
-//dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
+   //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE PEOPLE
         |USING org.apache.spark.sql.jdbc
         |OPTIONS (url '$url1', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass')
       """.stripMargin.replaceAll("\n", " "))
-//dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
+    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE PEOPLE1

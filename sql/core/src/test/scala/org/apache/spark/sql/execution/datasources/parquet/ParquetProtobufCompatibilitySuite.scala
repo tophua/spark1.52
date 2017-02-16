@@ -21,16 +21,16 @@ import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.test.SharedSQLContext
 
 class ParquetProtobufCompatibilitySuite extends ParquetCompatibilityTest with SharedSQLContext {
-
+  //读Parquet protobuf文件
   private def readParquetProtobufFile(name: String): DataFrame = {
     val url = Thread.currentThread().getContextClassLoader.getResource(name)
     sqlContext.read.parquet(url.toString)
   }
-
+  //原始类型的数组处理
   test("unannotated array of primitive type") {
     checkAnswer(readParquetProtobufFile("old-repeated-int.parquet"), Row(Seq(1, 2, 3)))
   }
-
+  //未加说明的阵列结构
   test("unannotated array of struct") {
     checkAnswer(
       readParquetProtobufFile("old-repeated-message.parquet"),
@@ -63,13 +63,13 @@ class ParquetProtobufCompatibilitySuite extends ParquetCompatibilityTest with Sh
             Row("2 - 0 - 1", "2 - 0 - 2", "2 - 0 - 3"),
             Row("2 - 1 - 1", "2 - 1 - 2", "2 - 1 - 3")))))
   }
-
+  //与未加说明的阵列结构
   test("struct with unannotated array") {
     checkAnswer(
       readParquetProtobufFile("proto-struct-with-array.parquet"),
       Row(10, 9, Seq.empty, null, Row(9), Seq(Row(9), Row(10))))
   }
-
+  //注释与阵列结构数组
   test("unannotated array of struct with unannotated array") {
     checkAnswer(
       readParquetProtobufFile("nested-array-struct.parquet"),
@@ -78,7 +78,7 @@ class ParquetProtobufCompatibilitySuite extends ParquetCompatibilityTest with Sh
         Row(5, Seq(Row(4, Seq(Row(6))))),
         Row(8, Seq(Row(7, Seq(Row(9)))))))
   }
-
+  //字符串处理的阵列
   test("unannotated array of string") {
     checkAnswer(
       readParquetProtobufFile("proto-repeated-string.parquet"),

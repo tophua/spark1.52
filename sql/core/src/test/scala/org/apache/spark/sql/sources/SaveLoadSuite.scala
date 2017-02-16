@@ -25,7 +25,7 @@ import org.apache.spark.sql.{AnalysisException, SaveMode, SQLConf, DataFrame}
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
 import org.apache.spark.util.Utils
-//保存加载套件
+//保存加载测试套件
 class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndAfter {
   protected override lazy val sql = caseInsensitiveContext.sql _
   private lazy val sparkContext = caseInsensitiveContext.sparkContext
@@ -65,6 +65,7 @@ class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndA
     checkAnswer(caseInsensitiveContext.read.load(path.toString), expectedDF.collect())
 
     // Test if we can pick up the data source name passed in load.
+    //测试,如果我们可以拿起数据源名称传递的负载
     caseInsensitiveContext.conf.setConf(SQLConf.DEFAULT_DATA_SOURCE_NAME, "not a source name")
     checkAnswer(caseInsensitiveContext.read.format("json").load(path.toString),
       expectedDF.collect())

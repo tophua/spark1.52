@@ -96,7 +96,7 @@ case class AllDataTypesScan(
     }
   }
 }
-
+//表扫描测试套件
 class TableScanSuite extends DataSourceTest with SharedSQLContext {
   protected override lazy val sql = caseInsensitiveContext.sql _
 

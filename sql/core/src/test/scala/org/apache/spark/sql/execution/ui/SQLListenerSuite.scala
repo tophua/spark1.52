@@ -26,7 +26,7 @@ import org.apache.spark.scheduler._
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.sql.execution.SQLExecution
 import org.apache.spark.sql.test.SharedSQLContext
-
+//SQL的监听测试套件
 class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
   import testImplicits._
 
@@ -36,13 +36,13 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
       (2, 2)
     ).toDF().filter("_1 > 1")
   }
-
+  //创建属性
   private def createProperties(executionId: Long): Properties = {
     val properties = new Properties()
     properties.setProperty(SQLExecution.EXECUTION_ID_KEY, executionId.toString)
     properties
   }
-
+  //创建阶段的信息
   private def createStageInfo(stageId: Int, attemptId: Int): StageInfo = new StageInfo(
     stageId = stageId,
     attemptId = attemptId,
@@ -54,7 +54,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     parentIds = Nil,
     details = ""
   )
-
+  //创建任务的信息
   private def createTaskInfo(taskId: Int, attemptNumber: Int): TaskInfo = new TaskInfo(
     taskId = taskId,
     attemptNumber = attemptNumber,
@@ -67,7 +67,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     taskLocality = null,
     speculative = false
   )
-
+  //创建任务指标
   private def createTaskMetrics(accumulatorUpdates: Map[Long, Long]): TaskMetrics = {
     val metrics = new TaskMetrics
     metrics.setAccumulatorsUpdater(() => accumulatorUpdates.mapValues(new LongSQLMetricValue(_)))
@@ -113,6 +113,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
 
     listener.onExecutorMetricsUpdate(SparkListenerExecutorMetricsUpdate("", Seq(
       // (task id, stage id, stage attempt, metrics)
+      //(任务ID,阶段标识,阶段尝试,度量)
       (0L, 0, 0, createTaskMetrics(accumulatorUpdates)),
       (1L, 0, 0, createTaskMetrics(accumulatorUpdates))
     )))
@@ -121,6 +122,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
 
     listener.onExecutorMetricsUpdate(SparkListenerExecutorMetricsUpdate("", Seq(
       // (task id, stage id, stage attempt, metrics)
+      //(任务ID,阶段标识,阶段尝试,度量)
       (0L, 0, 0, createTaskMetrics(accumulatorUpdates)),
       (1L, 0, 0, createTaskMetrics(accumulatorUpdates.mapValues(_ * 2)))
     )))
@@ -132,6 +134,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
 
     listener.onExecutorMetricsUpdate(SparkListenerExecutorMetricsUpdate("", Seq(
       // (task id, stage id, stage attempt, metrics)
+      //(任务ID,阶段标识,阶段尝试,度量)
       (0L, 0, 1, createTaskMetrics(accumulatorUpdates)),
       (1L, 0, 1, createTaskMetrics(accumulatorUpdates))
     )))
@@ -331,7 +334,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
   }
 
 }
-
+//SQL监听内存泄漏套件
 class SQLListenerMemoryLeakSuite extends SparkFunSuite {
 
   test("no memory leak") {//没有内存泄漏

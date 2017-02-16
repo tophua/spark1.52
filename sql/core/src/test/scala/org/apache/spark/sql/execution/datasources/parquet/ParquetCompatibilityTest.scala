@@ -33,7 +33,7 @@ private[sql] abstract class ParquetCompatibilityTest extends QueryTest with Parq
   protected def readParquetSchema(path: String): MessageType = {
     readParquetSchema(path, { path => !path.getName.startsWith("_") })
   }
-
+  //读Parquet模式
   protected def readParquetSchema(path: String, pathFilter: Path => Boolean): MessageType = {
     val fsPath = new Path(path)
     val fs = fsPath.getFileSystem(configuration)
@@ -52,7 +52,7 @@ private[sql] abstract class ParquetCompatibilityTest extends QueryTest with Parq
        """.stripMargin)
   }
 }
-
+//复合Parquet的兼容性测试
 object ParquetCompatibilityTest {
   def makeNullable[T <: AnyRef](i: Int)(f: => T): T = {
     if (i % 3 == 0) null.asInstanceOf[T] else f

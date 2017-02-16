@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericMutableRow
 import org.apache.spark.sql.columnar.ColumnarTestUtils._
 import org.apache.spark.sql.columnar.{BOOLEAN, NoopColumnStats}
-
+//布尔位集测试套件
 class BooleanBitSetSuite extends SparkFunSuite {
   import BooleanBitSet._
 
@@ -40,19 +40,23 @@ class BooleanBitSetSuite extends SparkFunSuite {
     val buffer = builder.build()
 
     // Column type ID + null count + null positions
+    //列类型ID +空计数+空位置
     
     val headerSize = CompressionScheme.columnHeaderSize(buffer)
 
     // Compression scheme ID + element count + bitset words
+    //压缩方案ID +元素计数+ bitset的话
     val compressedSize = 4 + 4 + {
       val extra = if (count % BITS_PER_LONG == 0) 0 else 1
       (count / BITS_PER_LONG + extra) * 8
     }
 
     // 4 extra bytes for compression scheme type ID
+    //4额外字节压缩方案类型ID
     assertResult(headerSize + compressedSize, "Wrong buffer capacity")(buffer.capacity)
 
     // Skips column header
+    //跳过的列标题
     buffer.position(headerSize)
     assertResult(BooleanBitSet.typeId, "Wrong compression scheme ID")(buffer.getInt())
     assertResult(count, "Wrong element count")(buffer.getInt())
@@ -67,10 +71,11 @@ class BooleanBitSetSuite extends SparkFunSuite {
     }
 
     // -------------
-    // Tests decoder
+    // Tests decoder 测试解码器
     // -------------
 
     // Rewinds, skips column header and 4 more bytes for compression scheme ID
+    //rewind,压缩方案ID列头和4字节的跳转
     buffer.rewind().position(headerSize + 4)
 
     val decoder = BooleanBitSet.decoder(buffer, BOOLEAN)

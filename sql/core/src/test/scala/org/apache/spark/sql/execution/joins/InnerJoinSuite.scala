@@ -57,8 +57,9 @@ class InnerJoinSuite extends SparkPlanTest with SharedSQLContext {
     (3, 2)
   ).toDF("a", "b")
 
-  // Note: the input dataframes and expression must be evaluated lazily because
+  // Note: the input dataframes and expression must be evaluated lazily because  
   // the SQLContext should be used only within a test to keep SQL tests stable
+  //输入的数据帧和表达必须被评估,延迟加载因为sqlcontext应该只在一个测试中保持稳定的SQL测试使用
   private def testInnerJoin(
       testName: String,
       leftRows: => DataFrame,
@@ -70,7 +71,7 @@ class InnerJoinSuite extends SparkPlanTest with SharedSQLContext {
       val join = Join(leftRows.logicalPlan, rightRows.logicalPlan, Inner, Some(condition()))
       ExtractEquiJoinKeys.unapply(join)
     }
-
+    //使广播哈希连接
     def makeBroadcastHashJoin(
         leftKeys: Seq[Expression],
         rightKeys: Seq[Expression],
@@ -82,7 +83,7 @@ class InnerJoinSuite extends SparkPlanTest with SharedSQLContext {
         execution.joins.BroadcastHashJoin(leftKeys, rightKeys, side, leftPlan, rightPlan)
       boundCondition.map(Filter(_, broadcastHashJoin)).getOrElse(broadcastHashJoin)
     }
-
+    //使混合哈希联接
     def makeShuffledHashJoin(
         leftKeys: Seq[Expression],
         rightKeys: Seq[Expression],
@@ -96,7 +97,7 @@ class InnerJoinSuite extends SparkPlanTest with SharedSQLContext {
         boundCondition.map(Filter(_, shuffledHashJoin)).getOrElse(shuffledHashJoin)
       EnsureRequirements(sqlContext).apply(filteredJoin)
     }
-
+    //排序合并连接
     def makeSortMergeJoin(
         leftKeys: Seq[Expression],
         rightKeys: Seq[Expression],

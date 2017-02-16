@@ -18,7 +18,7 @@
 package org.apache.spark.sql
 
 import org.apache.spark.sql.test.SharedSQLContext
-//DataFrame隐式转换测试
+//DataFrame数据庥隐式转换测试
 class DataFrameImplicitsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

@@ -263,7 +263,7 @@ class InsertSuite extends DataSourceTest with SharedSQLContext {
 //    caseInsensitiveContext.uncacheTable("jsonTable")
 //    assertCached(sql("SELECT * FROM jsonTable"), 0)
   }
-
+  //它不允许插入的关系,不是一个可插入的关系
   test("it's not allowed to insert into a relation that is not an InsertableRelation") {
     sql(
       """

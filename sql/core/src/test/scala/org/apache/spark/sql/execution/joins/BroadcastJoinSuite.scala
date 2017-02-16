@@ -27,10 +27,13 @@ import org.apache.spark.sql.{SQLConf, SQLContext, QueryTest}
 
 /**
  * Test various broadcast join operators with unsafe enabled.
+ * 测试启用不安全的各种广播连接运算符
  *
  * Tests in this suite we need to run Spark in local-cluster mode. In particular, the use of
+ * 测试此套件中,我们需要运行Spark在本地群集模式,特别,使用不安全map[UnsafeHashedRelation]不触发
  * unsafe map in [[org.apache.spark.sql.execution.joins.UnsafeHashedRelation]] is not triggered
  * without serializing the hashed relation, which does not happen in local mode.
+ * 没有进行散列的关系,不发生在本地模式
  */
 class BroadcastJoinSuite extends QueryTest with BeforeAndAfterAll {
   private var sc: SparkContext = null
@@ -38,6 +41,7 @@ class BroadcastJoinSuite extends QueryTest with BeforeAndAfterAll {
 
   /**
    * Create a new [[SQLContext]] running in local-cluster mode with unsafe and codegen enabled.
+   * 创建一个新的[sqlcontext]与不安全代码生成本地集群运行模式启用
    */
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -73,15 +77,15 @@ class BroadcastJoinSuite extends QueryTest with BeforeAndAfterAll {
       plan.executeCollect()
     }
   }
-
+  //不安全广播散列加入更新峰值执行内存
   test("unsafe broadcast hash join updates peak execution memory") {
     testBroadcastJoin[BroadcastHashJoin]("unsafe broadcast hash join", "inner")
   }
-
+  //不安全广播散列外部连接更新峰值执行内存
   test("unsafe broadcast hash outer join updates peak execution memory") {
     testBroadcastJoin[BroadcastHashOuterJoin]("unsafe broadcast hash outer join", "left_outer")
   }
-
+  //不安全广播左半连接更新峰值执行存储器
   test("unsafe broadcast left semi join updates peak execution memory") {
     testBroadcastJoin[BroadcastLeftSemiJoinHash]("unsafe broadcast left semi join", "leftsemi")
   }

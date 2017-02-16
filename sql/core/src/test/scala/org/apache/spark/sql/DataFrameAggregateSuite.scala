@@ -21,7 +21,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types.DecimalType
 
-
+//数据集聚合测试
 class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

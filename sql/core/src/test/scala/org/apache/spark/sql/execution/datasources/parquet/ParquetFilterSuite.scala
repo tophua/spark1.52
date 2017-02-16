@@ -29,6 +29,7 @@ import org.apache.spark.sql.test.SharedSQLContext
 
 /**
  * A test suite that tests Parquet filter2 API based filter pushdown optimization.
+ * 一个测试套件的Parquet过滤器基于API的过滤下推优化
  *
  * NOTE:
  *
@@ -74,7 +75,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
     }
   }
 
-  private def checkFilterPredicate
+  private def checkFilterPredicate//检查过滤断言
       (predicate: Predicate, filterClass: Class[_ <: FilterPredicate], expected: Seq[Row])
       (implicit df: DataFrame): Unit = {
     checkFilterPredicate(df, predicate, filterClass, checkAnswer(_, _: Seq[Row]), expected)
@@ -97,13 +98,13 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
 
     checkFilterPredicate(df, predicate, filterClass, checkBinaryAnswer _, expected)
   }
-
+  //检查二进制过滤器谓词
   private def checkBinaryFilterPredicate
       (predicate: Predicate, filterClass: Class[_ <: FilterPredicate], expected: Array[Byte])
       (implicit df: DataFrame): Unit = {
     checkBinaryFilterPredicate(predicate, filterClass, Seq(Row(expected)))(df)
   }
-
+  //过滤器下推-布尔
   test("filter pushdown - boolean") {
     withParquetDataFrame((true :: false :: Nil).map(b => Tuple1.apply(Option(b)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -114,7 +115,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       checkFilterPredicate('_1 !== true, classOf[NotEq[_]], false)
     }
   }
-
+  //过滤型整数
   test("filter pushdown - integer") {
     withParquetDataFrame((1 to 4).map(i => Tuple1(Option(i)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -140,7 +141,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       checkFilterPredicate('_1 < 2 || '_1 > 3, classOf[Operators.Or], Seq(Row(1), Row(4)))
     }
   }
-
+  //过滤器下推长
   test("filter pushdown - long") {
     withParquetDataFrame((1 to 4).map(i => Tuple1(Option(i.toLong)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -166,7 +167,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       checkFilterPredicate('_1 < 2 || '_1 > 3, classOf[Operators.Or], Seq(Row(1), Row(4)))
     }
   }
-
+  //过滤器下推浮点
   test("filter pushdown - float") {
     withParquetDataFrame((1 to 4).map(i => Tuple1(Option(i.toFloat)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -192,7 +193,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       checkFilterPredicate('_1 < 2 || '_1 > 3, classOf[Operators.Or], Seq(Row(1), Row(4)))
     }
   }
-
+  //过滤器下推双精度
   test("filter pushdown - double") {
     withParquetDataFrame((1 to 4).map(i => Tuple1(Option(i.toDouble)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -220,6 +221,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
   }
 
   // See https://issues.apache.org/jira/browse/SPARK-11153
+  //过滤器下推字符串
   ignore("filter pushdown - string") {
     withParquetDataFrame((1 to 4).map(i => Tuple1(i.toString))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -282,7 +284,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
         '_1 < 2.b || '_1 > 3.b, classOf[Operators.Or], Seq(Row(1.b), Row(4.b)))
     }
   }
-
+  //不要按下引用分区列的断点
   test("SPARK-6554: don't push down predicates which reference partition columns") {
     import testImplicits._
 
@@ -293,13 +295,14 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
 
         // If the "part = 1" filter gets pushed down, this query will throw an exception since
         // "part" is not a valid column in the actual Parquet file
+        //如果“部分= 1”过滤器被向下推,此查询将抛出一个异常,因为“部分”是不实际的Parquet文件有效的列
         checkAnswer(
           sqlContext.read.parquet(path).filter("part = 1"),
           (1 to 3).map(i => Row(i, i.toString, 1)))
       }
     }
   }
-
+  //过滤器组合分区键和DataSource属性不工作扫描
   test("SPARK-10829: Filter combine partition key and attribute doesn't work in DataSource scan") {
     import testImplicits._
 
@@ -316,7 +319,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       }
     }
   }
-
+  //滤波器应用于合并Parquet模式新列失败
   test("SPARK-11103: Filter applied on merged Parquet schema with new column fails") {
     import testImplicits._
 
@@ -336,7 +339,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       }
     }
   }
-
+  //不包括在Parquet过滤下推
   test("SPARK-12218: 'Not' is included in Parquet filter pushdown") {
     import testImplicits._
 

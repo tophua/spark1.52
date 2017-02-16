@@ -35,7 +35,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
   import testImplicits._
 
   setupTestData()
-
+  //测试部分聚合计划
   private def testPartialAggregationPlan(query: LogicalPlan): Unit = {
     val _ctx = ctx
     import _ctx.planner._
@@ -229,8 +229,10 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
   // --- Unit tests of EnsureRequirements ---------------------------------------------------------
 
   // When it comes to testing whether EnsureRequirements properly ensures distribution requirements,
+  //当涉及到测试是否确保要求适当确保分配要求
   // there two dimensions that need to be considered: are the child partitionings compatible and
   // do they satisfy the distribution requirements? As a result, we need at least four test cases.
+  //有两个方面需要考虑:是子分割兼容是否满足分配要求?因此,我们至少需要四个测试用例。
 
   private def assertDistributionRequirementsAreSatisfied(outputPlan: SparkPlan): Unit = {
     if (outputPlan.children.length > 1

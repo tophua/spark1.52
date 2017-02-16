@@ -21,13 +21,13 @@ import java.util.Random
 
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.test.SharedSQLContext
-//DataFrame统计测试
+//DataFrame统计测试套件
 class DataFrameStatSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
   private def toLetter(i: Int): String = (i + 97).toChar.toString
 
-  test("sample with replacement") {//样品与替换
+  test("sample with replacement") {//采样与替换
     val n = 100
     val data = ctx.sparkContext.parallelize(1 to n, 2).toDF("id")
     checkAnswer(
@@ -36,7 +36,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     )
   }
 
-  test("sample without replacement") {//样品不替换
+  test("sample without replacement") {//采样不替换
     val n = 100
     val data = ctx.sparkContext.parallelize(1 to n, 2).toDF("id")
     checkAnswer(

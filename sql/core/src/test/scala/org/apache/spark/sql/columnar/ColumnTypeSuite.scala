@@ -30,7 +30,7 @@ import org.apache.spark.sql.execution.SparkSqlSerializer
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
-
+//列类型测试套件
 class ColumnTypeSuite extends SparkFunSuite with Logging {
   private val DEFAULT_BUFFER_SIZE = 512
   private val MAP_GENERIC = GENERIC(MapType(IntegerType, StringType))
@@ -78,7 +78,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
     val generic = Map(1 -> "a")
     checkActualSize(MAP_GENERIC, SparkSqlSerializer.serialize(generic), 4 + 8)
   }
-
+  //测试本地列类型
   testNativeColumnType(BOOLEAN)(
     (buffer: ByteBuffer, v: Boolean) => {
       buffer.put((if (v) 1 else 0).toByte)
@@ -86,13 +86,13 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
     (buffer: ByteBuffer) => {
       buffer.get() == 1
     })
-
+  //测试本地列类型
   testNativeColumnType(BYTE)(_.put(_), _.get)
-
+  //测试本地列类型
   testNativeColumnType(SHORT)(_.putShort(_), _.getShort)
-
+  //测试本地列类型
   testNativeColumnType(INT)(_.putInt(_), _.getInt)
-
+  //测试本地列类型
   testNativeColumnType(DATE)(_.putInt(_), _.getInt)
 
   testNativeColumnType(LONG)(_.putLong(_), _.getLong)
@@ -102,7 +102,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
   testNativeColumnType(FLOAT)(_.putFloat(_), _.getFloat)
 
   testNativeColumnType(DOUBLE)(_.putDouble(_), _.getDouble)
-
+   //测试本地列类型
   testNativeColumnType(FIXED_DECIMAL(15, 10))(
     (buffer: ByteBuffer, decimal: Decimal) => {
       buffer.putLong(decimal.toUnscaledLong)
@@ -111,7 +111,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
       Decimal(buffer.getLong(), 15, 10)
     })
 
-
+  //测试本地列类型
   testNativeColumnType(STRING)(
     (buffer: ByteBuffer, string: UTF8String) => {
       val bytes = string.getBytes
@@ -124,7 +124,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
       buffer.get(bytes)
       UTF8String.fromBytes(bytes)
     })
-
+  //测试本地列类型
   testColumnType[Array[Byte]](
     BINARY,
     (buffer: ByteBuffer, bytes: Array[Byte]) => {
@@ -137,7 +137,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
       bytes
     })
 
-  test("GENERIC") {
+  test("GENERIC") {//通用
     val buffer = ByteBuffer.allocate(512)
     val obj = Map(1 -> "spark", 2 -> "sql")
     val serializedObj = SparkSqlSerializer.serialize(obj)
@@ -163,7 +163,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
     }
   }
 
-  test("CUSTOM") {
+  test("CUSTOM") {//自定义
     val conf = new SparkConf()
     conf.set("spark.kryo.registrator", "org.apache.spark.sql.columnar.Registrator")
     val serializer = new SparkSqlSerializer(conf).newInstance()
@@ -197,7 +197,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
       serializer.deserialize(ByteBuffer.wrap(MAP_GENERIC.extract(buffer)))
     }
   }
-
+  //测试本地列类型
   def testNativeColumnType[T <: AtomicType](
       columnType: NativeColumnType[T])
       (putter: (ByteBuffer, T#InternalType) => Unit,
@@ -242,11 +242,11 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
       }
     }
   }
-
+  //十六进制转储
   private def hexDump(value: Any): String = {
     value.toString.map(ch => Integer.toHexString(ch & 0xffff)).mkString(" ")
   }
-
+  //转储缓冲
   private def dumpBuffer(buff: ByteBuffer): Any = {
     val sb = new StringBuilder()
     while (buff.hasRemaining) {
@@ -256,7 +256,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
     if (sb.nonEmpty) sb.setLength(sb.length - 1)
     sb.toString()
   }
-
+  //具有不同精度的十进制列类型
   test("column type for decimal types with different precision") {
     (1 to 18).foreach { i =>
       assertResult(FIXED_DECIMAL(i, 0)) {
@@ -271,7 +271,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
 }
 
 private[columnar] final case class CustomClass(a: Int, b: Long)
-
+//客户的序列化
 private[columnar] object CustomerSerializer extends Serializer[CustomClass] {
   override def write(kryo: Kryo, output: Output, t: CustomClass) {
     output.writeInt(t.a)
@@ -283,7 +283,7 @@ private[columnar] object CustomerSerializer extends Serializer[CustomClass] {
     CustomClass(a, b)
   }
 }
-
+//注册器
 private[columnar] final class Registrator extends KryoRegistrator {
   override def registerClasses(kryo: Kryo) {
     kryo.register(classOf[CustomClass], CustomerSerializer)

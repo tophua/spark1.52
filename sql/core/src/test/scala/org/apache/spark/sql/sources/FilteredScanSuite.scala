@@ -33,7 +33,7 @@ class FilteredScanSource extends RelationProvider {
     SimpleFilteredScan(parameters("from").toInt, parameters("to").toInt)(sqlContext)
   }
 }
-
+//简单的过滤扫描
 case class SimpleFilteredScan(from: Int, to: Int)(@transient val sqlContext: SQLContext)
   extends BaseRelation
   with PrunedFilteredScan {
@@ -101,6 +101,7 @@ case class SimpleFilteredScan(from: Int, to: Int)(@transient val sqlContext: SQL
 }
 
 // A hack for better error messages when filter pushdown fails.
+//一个好的错误信息时,过滤下推未失败
 object FiltersPushed {
   var list: Seq[Filter] = Nil
 }

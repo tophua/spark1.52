@@ -23,14 +23,14 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericMutableRow
 import org.apache.spark.sql.types.{DataType, Decimal, AtomicType}
 import org.apache.spark.unsafe.types.UTF8String
-
+//列测试工具
 object ColumnarTestUtils {
   def makeNullRow(length: Int): GenericMutableRow = {
     val row = new GenericMutableRow(length)
     (0 until length).foreach(row.setNullAt)
     row
   }
-
+  //产生随机值
   def makeRandomValue[JvmType](columnType: ColumnType[JvmType]): JvmType = {
     def randomBytes(length: Int) = {
       val bytes = new Array[Byte](length)
@@ -53,6 +53,7 @@ object ColumnarTestUtils {
       case FIXED_DECIMAL(precision, scale) => Decimal(Random.nextLong() % 100, precision, scale)
       case _ =>
         // Using a random one-element map instead of an arbitrary object
+        //使用随机一元映射代替任意对象
         Map(Random.nextInt() -> Random.nextString(Random.nextInt(32)))
     }).asInstanceOf[JvmType]
   }
@@ -64,7 +65,7 @@ object ColumnarTestUtils {
   def makeRandomValues(columnTypes: Seq[ColumnType[_]]): Seq[Any] = {
     columnTypes.map(makeRandomValue(_))
   }
-
+ //使唯一随机值
   def makeUniqueRandomValues[JvmType](
       columnType: ColumnType[JvmType],
       count: Int): Seq[JvmType] = {
@@ -85,7 +86,7 @@ object ColumnarTestUtils {
     }
     row
   }
-
+  //使唯一值和单值行
   def makeUniqueValuesAndSingleValueRows[T <: AtomicType](
       columnType: NativeColumnType[T],
       count: Int): (Seq[T#InternalType], Seq[GenericMutableRow]) = {

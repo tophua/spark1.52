@@ -24,7 +24,7 @@ import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.test.SQLTestData._
 import org.apache.spark.sql.types._
 import org.apache.spark.storage.StorageLevel.MEMORY_ONLY
-
+//内存列查询测试套件
 class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
@@ -134,7 +134,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
       sql("SELECT * FROM withEmptyParts"),
       withEmptyParts.collect().toSeq.map(Row.fromTuple))
   }
-
+  //缓存的复杂类型
   test("SPARK-4182 Caching complex types") {
     complexData.cache().count()
     // Shouldn't throw
@@ -237,9 +237,10 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
     )
 
     // Drop the cache.
+    //放弃缓存
     cached.unpersist()
   }
-
+  //谓词推到内存中的柱状桌子不正确评价
   test("SPARK-10859: Predicates pushed to InMemoryColumnarTableScan are not evaluated correctly") {
     val data = sqlContext.range(10).selectExpr("id", "cast(id as string) as s")
     data.cache()

@@ -18,7 +18,7 @@
 package org.apache.spark.sql
 
 import org.apache.spark.sql.test.SharedSQLContext
-
+//JSON函数测试套件
 class JsonFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

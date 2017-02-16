@@ -22,13 +22,13 @@ import java.nio.ByteBuffer
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.catalyst.expressions.GenericMutableRow
 import org.apache.spark.sql.types.{StringType, ArrayType, DataType}
-
+//试验可为空的列的访问
 class TestNullableColumnAccessor[JvmType](
     buffer: ByteBuffer,
     columnType: ColumnType[JvmType])
   extends BasicColumnAccessor(buffer, columnType)
   with NullableColumnAccessor
-
+//试验可为空的列的访问
 object TestNullableColumnAccessor {
   def apply[JvmType](buffer: ByteBuffer, columnType: ColumnType[JvmType])
     : TestNullableColumnAccessor[JvmType] = {
@@ -37,7 +37,7 @@ object TestNullableColumnAccessor {
     new TestNullableColumnAccessor(buffer, columnType)
   }
 }
-
+//空列存取器套件
 class NullableColumnAccessorSuite extends SparkFunSuite {
   import ColumnarTestUtils._
 
@@ -47,19 +47,19 @@ class NullableColumnAccessorSuite extends SparkFunSuite {
     .foreach {
     testNullableColumnAccessor(_)
   }
-
+  //试验可为空的列的访问
   def testNullableColumnAccessor[JvmType](
       columnType: ColumnType[JvmType]): Unit = {
 
     val typeName = columnType.getClass.getSimpleName.stripSuffix("$")
     val nullRow = makeNullRow(1)
-
+    //空值
     test(s"Nullable $typeName column accessor: empty column") {
       val builder = TestNullableColumnBuilder(columnType)
       val accessor = TestNullableColumnAccessor(builder.build(), columnType)
       assert(!accessor.hasNext)
     }
-
+    //访问空值
     test(s"Nullable $typeName column accessor: access null values") {
       val builder = TestNullableColumnBuilder(columnType)
       val randomRow = makeRandomRow(columnType)

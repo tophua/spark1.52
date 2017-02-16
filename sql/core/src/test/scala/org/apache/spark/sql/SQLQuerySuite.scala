@@ -35,7 +35,7 @@ import org.apache.spark.sql.types._
  *  用于测试目的的SQL方言,它不能嵌套类型
  *  */
 class MyDialect extends DefaultParserDialect
-
+//SQL查询测试套件
 class SQLQuerySuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

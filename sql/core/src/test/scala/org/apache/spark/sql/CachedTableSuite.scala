@@ -29,7 +29,7 @@ import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.storage.{StorageLevel, RDDBlockId}
 
 private case class BigData(s: String)
-
+//缓存表测试套件
 class CachedTableSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
@@ -42,7 +42,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
         fail(s"Table $tableName is not cached\n" + executedPlan)
     }.head
   }
-
+  //是否被物化
   def isMaterialized(rddId: Int): Boolean = {
     ctx.sparkContext.env.blockManager.get(RDDBlockId(rddId, 0)).nonEmpty
   }
@@ -166,7 +166,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     })
   }
 
-  test("SPARK-1669: cacheTable should be idempotent") {//缓存表
+  test("SPARK-1669: cacheTable should be idempotent") {//缓存表应该是幂等
     assume(!ctx.table("testData").logicalPlan.isInstanceOf[InMemoryRelation])
 
     ctx.cacheTable("testData")
@@ -223,7 +223,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
       unCachedAnswer.toSeq)
     ctx.uncacheTable("testData")
   }
-
+  //“缓存表'和未缓存表的SQL语句
   test("'CACHE TABLE' and 'UNCACHE TABLE' SQL statement") {
     sql("CACHE TABLE testData")
     assertCached(ctx.table("testData"))

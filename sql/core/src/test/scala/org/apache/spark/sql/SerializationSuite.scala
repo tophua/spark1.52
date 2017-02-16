@@ -20,7 +20,7 @@ package org.apache.spark.sql
 import org.apache.spark.{SparkConf, SparkFunSuite}
 import org.apache.spark.serializer.JavaSerializer
 import org.apache.spark.sql.test.SharedSQLContext
-
+//序列化测试套件
 class SerializationSuite extends SparkFunSuite with SharedSQLContext {
 
   test("[SPARK-5235] SQLContext should be serializable") {//SQLContext应该序列化

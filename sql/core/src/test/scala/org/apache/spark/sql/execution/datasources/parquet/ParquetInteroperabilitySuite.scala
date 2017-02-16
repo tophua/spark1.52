@@ -23,6 +23,7 @@ import org.apache.spark.sql.Row
 import org.apache.spark.sql.test.SharedSQLContext
 
 class ParquetInteroperabilitySuite extends ParquetCompatibilityTest with SharedSQLContext {
+  //parquet文件与不同的物理架构,共享相同的逻辑架构
   test("parquet files with different physical schemas but share the same logical schema") {
     // This test case writes two Parquet files, both representing the following Catalyst schema
     //

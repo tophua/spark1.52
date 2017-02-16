@@ -36,6 +36,7 @@ import org.apache.spark.unsafe.types.UTF8String
  * Test suite for [[UnsafeFixedWidthAggregationMap]].
  *
  * Use [[testWithMemoryLeakDetection]] rather than [[test]] to construct test cases.
+ * 不安全固定宽度聚合映射测试套件
  */
 class UnsafeFixedWidthAggregationMapSuite
   extends SparkFunSuite
@@ -93,7 +94,7 @@ class UnsafeFixedWidthAggregationMapSuite
       Seq.fill(rand.nextInt(100))(rand.nextPrintableChar()).mkString
     }.distinct
   }
-
+  //测试内存泄漏检测
   testWithMemoryLeakDetection("supported schemas") {
   //StructType代表一张表,StructField代表一个字段
     assert(supportsAggregationBufferSchema(
@@ -104,7 +105,7 @@ class UnsafeFixedWidthAggregationMapSuite
     assert(
       !supportsAggregationBufferSchema(StructType(StructField("x", ArrayType(IntegerType)) :: Nil)))
   }
-
+  //内存泄漏检测
   testWithMemoryLeakDetection("empty map") {
     val map = new UnsafeFixedWidthAggregationMap(
       emptyAggregationBuffer,
@@ -149,7 +150,7 @@ class UnsafeFixedWidthAggregationMapSuite
 
     map.free()
   }
-
+  //内存泄漏检测
   testWithMemoryLeakDetection("inserting large random keys") {//插入大随机键
     val map = new UnsafeFixedWidthAggregationMap(
       emptyAggregationBuffer,
@@ -176,7 +177,7 @@ class UnsafeFixedWidthAggregationMapSuite
     assert(seenKeys === groupKeys)
     map.free()
   }
-
+  //内存泄漏检测
   testWithMemoryLeakDetection("test external sorting") {//测试外部排序
     // Memory consumption in the beginning of the task.
     //任务开始时的内存消耗
@@ -188,9 +189,9 @@ class UnsafeFixedWidthAggregationMapSuite
       groupKeySchema,
       taskMemoryManager,
       shuffleMemoryManager,
-      128, // initial capacity
+      128, // initial capacity 初始容量
       PAGE_SIZE_BYTES,
-      false // disable perf metrics
+      false // disable perf metrics 禁用的性能指标
     )
 
     val keys = randomStrings(1024).take(512)
@@ -245,15 +246,17 @@ class UnsafeFixedWidthAggregationMapSuite
       groupKeySchema,
       taskMemoryManager,
       shuffleMemoryManager,
-      128, // initial capacity
+      128, // initial capacity 初始容量
       PAGE_SIZE_BYTES,
-      false // disable perf metrics
+      false // disable perf metrics 禁用的性能指标
     )
 
     // Convert the map into a sorter
+   
     val sorter = map.destructAndCreateExternalSorter()
 
     // Add more keys to the sorter and make sure the results come out sorted.
+    //添加更多的键的分拣和确定出来的结果排序
     val additionalKeys = randomStrings(1024)
     val keyConverter = UnsafeProjection.create(groupKeySchema)
     val valueConverter = UnsafeProjection.create(aggBufferSchema)
@@ -273,6 +276,7 @@ class UnsafeFixedWidthAggregationMapSuite
     val iter = sorter.sortedIterator()
     while (iter.next()) {
       // At here, we also test if copy is correct.
+      //在这里,我们也测试如果复制是正确
       val key = iter.getKey.copy()
       val value = iter.getValue.copy()
       assert(key.getString(0).length === value.getInt(0))
@@ -296,9 +300,9 @@ class UnsafeFixedWidthAggregationMapSuite
       StructType(Nil),
       taskMemoryManager,
       shuffleMemoryManager,
-      128, // initial capacity
+      128, // initial capacity 初始容量
       PAGE_SIZE_BYTES,
-      false // disable perf metrics
+      false // disable perf metrics 禁用的性能指标
     )
 
     (1 to 10).foreach { i =>
@@ -307,6 +311,7 @@ class UnsafeFixedWidthAggregationMapSuite
     }
 
     // Convert the map into a sorter. Right now, it contains one record.
+    ///将map到分类,现在它包含一个记录。
     val sorter = map.destructAndCreateExternalSorter()
 
     withClue(s"destructAndCreateExternalSorter should release memory used by the map") {
@@ -314,6 +319,7 @@ class UnsafeFixedWidthAggregationMapSuite
     }
 
     // Add more keys to the sorter and make sure the results come out sorted.
+    //添加更多的键的分类和确定出来的结果排序
     (1 to 4096).foreach { i =>
       sorter.insertKV(UnsafeRow.createFromByteArray(0, 0), UnsafeRow.createFromByteArray(0, 0))
 
@@ -349,9 +355,9 @@ class UnsafeFixedWidthAggregationMapSuite
       groupKeySchema,
       taskMemoryManager,
       smm,
-      128, // initial capacity
+      128, // initial capacity 初始容量
       pageSize,
-      false // disable perf metrics
+      false // disable perf metrics 禁用的性能指标
     )
 
     // Insert into the map until we've run out of space

@@ -34,7 +34,7 @@ import org.apache.spark.util.Utils
 //SQL测试指标
 class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
   import testImplicits._
-  //不应长整形
+  //SQL长整度量,不宜长盒
   test("LongSQLMetric should not box Long") {
     val l = SQLMetrics.createLongMetric(ctx.sparkContext, "long")
     val f = () => {
@@ -61,11 +61,12 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
 
   /**
    * Call `df.collect()` and verify if the collected metrics are same as "expectedMetrics".
-   *
+   * 调用 `df.collect()`并验证所收集的度量是否与expectedMetrics
    * @param df `DataFrame` to run
-   * @param expectedNumOfJobs number of jobs that will run
-   * @param expectedMetrics the expected metrics. The format is
+   * @param expectedNumOfJobs number of jobs that will run 将运行的作业数
+   * @param expectedMetrics the expected metrics. The format is 预期测量
    *                        `nodeId -> (operatorName, metric name -> metric value)`.
+   *                        格式是` NodeID ->(operatorname,度量名称->度量值)`
    */
   private def testSparkPlanMetrics(
       df: DataFrame,
@@ -84,6 +85,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     assert(jobs.size <= expectedNumOfJobs)
     if (jobs.size == expectedNumOfJobs) {
       // If we can track all jobs, check the metric values
+      //如果我们可以跟踪所有作业,请检查度量值
       val metricValues = ctx.listener.getExecutionMetrics(executionId)
       val actualMetrics = SparkPlanGraph(df.queryExecution.executedPlan).nodes.filter { node =>
         expectedMetrics.contains(node.id)
@@ -509,9 +511,12 @@ private case class MethodIdentifier[T](cls: Class[T], name: String, desc: String
 
 /**
  * If `method` is null, search all methods of this class recursively to find if they do some boxing.
+ * 如果“方法”为空,则递归地搜索该类的所有方法,以查找它们是否执行了一些装箱
  * If `method` is specified, only search this method of the class to speed up the searching.
+ * 如果指定了“方法”,只能搜索该类的方法以加快搜索速度
  *
  * This method will skip the methods in `visitedMethods` to avoid potential infinite cycles.
+ * 该方法将跳过的方法'visitedmethods'避免潜在的无限循环
  */
 private class BoxingFinder(
     method: MethodIdentifier[_] = null,
@@ -574,11 +579,13 @@ private object BoxingFinder {
     val baos = new ByteArrayOutputStream(128)
     // Copy data over, before delegating to ClassReader -
     // else we can run out of open file handles.
+    //复制数据,在委托类的读取-否则我们可以跑出来,打开的文件句柄。
     Utils.copyStream(resourceStream, baos, true)
     // ASM4 doesn't support Java 8 classes, which requires ASM5.
     // So if the class is ASM5 (E.g., java.lang.Long when using JDK8 runtime to run these codes),
     // then ClassReader will throw IllegalArgumentException,
     // However, since this is only for testing, it's safe to skip these classes.
+    //然而,因为这仅用于测试,跳过这些类是安全的。
     try {
       Some(new ClassReader(new ByteArrayInputStream(baos.toByteArray)))
     } catch {

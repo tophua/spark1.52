@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericMutableRow
 import org.apache.spark.sql.columnar._
 import org.apache.spark.sql.columnar.ColumnarTestUtils._
 import org.apache.spark.sql.types.AtomicType
-
+//运行长度解码测试套件
 class RunLengthEncodingSuite extends SparkFunSuite {
   testRunLengthEncoding(new NoopColumnStats, BOOLEAN)
   testRunLengthEncoding(new ByteColumnStats, BYTE)
@@ -39,7 +39,7 @@ class RunLengthEncodingSuite extends SparkFunSuite {
 
     def skeleton(uniqueValueCount: Int, inputRuns: Seq[(Int, Int)]) {
       // -------------
-      // Tests encoder
+      // Tests encoder 测试解码
       // -------------
 
       val builder = TestCompressibleColumnBuilder(columnStats, columnType, RunLengthEncoding)
@@ -52,18 +52,23 @@ class RunLengthEncodingSuite extends SparkFunSuite {
       val buffer = builder.build()
 
       // Column type ID + null count + null positions
+      //列类型ID +空计数+空位置
       val headerSize = CompressionScheme.columnHeaderSize(buffer)
 
       // Compression scheme ID + compressed contents
+      //压缩方案+压缩内容
       val compressedSize = 4 + inputRuns.map { case (index, _) =>
         // 4 extra bytes each run for run length
+        //4个额外的字节每次运行长度
         columnType.actualSize(rows(index), 0) + 4
       }.sum
 
       // 4 extra bytes for compression scheme type ID
+      //4额外字节压缩方案类型ID
       assertResult(headerSize + compressedSize, "Wrong buffer capacity")(buffer.capacity)
 
       // Skips column header
+      //跳过的列标题
       buffer.position(headerSize)
       assertResult(RunLengthEncoding.typeId, "Wrong compression scheme ID")(buffer.getInt())
 
@@ -73,10 +78,11 @@ class RunLengthEncodingSuite extends SparkFunSuite {
       }
 
       // -------------
-      // Tests decoder
+      // Tests decoder 测试解码
       // -------------
 
       // Rewinds, skips column header and 4 more bytes for compression scheme ID
+      //压缩方案ID列头和4字节的跳转
       buffer.rewind().position(headerSize + 4)
 
       val decoder = RunLengthEncoding.decoder(buffer, columnType)

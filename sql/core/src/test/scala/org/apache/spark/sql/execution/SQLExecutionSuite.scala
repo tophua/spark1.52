@@ -23,11 +23,12 @@ import scala.collection.parallel.CompositeThrowable
 
 import org.apache.spark.{SparkConf, SparkContext, SparkFunSuite}
 import org.apache.spark.sql.SQLContext
-
+//SQL执行测试套件
 class SQLExecutionSuite extends SparkFunSuite {
   //并发查询执行
   test("concurrent query execution (SPARK-10548)") {
     // Try to reproduce the issue with the old SparkContext
+    //尝试旧sparkcontext再现问题
     val conf = new SparkConf()
       .setMaster("local[*]")
       .setAppName("test")
@@ -99,6 +100,7 @@ class SQLExecutionSuite extends SparkFunSuite {
 /**
  * A bad [[SparkContext]] that does not clone the inheritable thread local properties
  * when passing them to children threads.
+ * 一个坏的[sparkcontext]不克隆遗传线程局部性质时,传递给子的线程,
  */
 private class BadSparkContext(conf: SparkConf) extends SparkContext(conf) {
   protected[spark] override val localProperties = new InheritableThreadLocal[Properties] {

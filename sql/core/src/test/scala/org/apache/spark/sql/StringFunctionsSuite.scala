@@ -21,7 +21,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types.Decimal
 
-
+//字符串函数测试套件
 class StringFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
@@ -59,7 +59,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       Row("a||b"))
   }
 
-  test("string Levenshtein distance") {//字符串编辑距离
+  test("string Levenshtein distance") {//字符串莱文斯坦距离
     val df = Seq(("kitten", "sitting"), ("frog", "fog")).toDF("l", "r")
     
     checkAnswer(df.select(levenshtein($"l", $"r")), Seq(Row(3), Row(1)))

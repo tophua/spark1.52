@@ -114,14 +114,14 @@ class UnsafeRowSuite extends SparkFunSuite {
 
     assert(bytesFromArrayBackedRow === bytesFromOffheapRow)
   }
-
+  //在null列上调用getDouble和getFloat
   test("calling getDouble() and getFloat() on null columns") {
     val row = InternalRow.apply(null, null)
     val unsafeRow = UnsafeProjection.create(Array[DataType](FloatType, DoubleType)).apply(row)
     assert(unsafeRow.getFloat(0) === row.getFloat(0))
     assert(unsafeRow.getDouble(1) === row.getDouble(1))
   }
-
+//在null列上调用get(序数,datatype)
   test("calling get(ordinal, datatype) on null columns") {
     val row = InternalRow.apply(null)
     val unsafeRow = UnsafeProjection.create(Array[DataType](NullType)).apply(row)
@@ -129,7 +129,7 @@ class UnsafeRowSuite extends SparkFunSuite {
       assert(unsafeRow.get(0, dataType) === null)
     }
   }
-
+  //从字节数组创建并从
   test("createFromByteArray and copyFrom") {
     val row = InternalRow(1, UTF8String.fromString("abc"))
     val converter = UnsafeProjection.create(Array[DataType](IntegerType, StringType))

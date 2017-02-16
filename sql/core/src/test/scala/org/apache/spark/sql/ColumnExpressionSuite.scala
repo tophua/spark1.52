@@ -24,7 +24,7 @@ import org.apache.spark.sql.execution.{Project, TungstenProject}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
-
+//列表达式测试套件
 class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 

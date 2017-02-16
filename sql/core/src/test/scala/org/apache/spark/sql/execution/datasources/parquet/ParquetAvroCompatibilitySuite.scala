@@ -31,7 +31,7 @@ import org.apache.parquet.avro.AvroParquetWriter
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.execution.datasources.parquet.test.avro._
 import org.apache.spark.sql.test.SharedSQLContext
-
+//Parquet Avro兼容性套件
 class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with SharedSQLContext {
   private def withWriter[T <: IndexedRecord]
       (path: String, schema: Schema)
@@ -254,7 +254,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
       .setComplexColumn(makeComplexColumn(i))
       .build()
   }
-
+//下推涉枚举列的谓词
   test("SPARK-9407 Push down predicates involving Parquet ENUM columns") {
     import testImplicits._
 

@@ -25,7 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.{And, LessThan, Expression}
 import org.apache.spark.sql.execution.{EnsureRequirements, SparkPlan, SparkPlanTest}
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types.{DoubleType, IntegerType, StructType}
-
+//半连接测试套件
 class SemiJoinSuite extends SparkPlanTest with SharedSQLContext {
 
   private lazy val left = ctx.createDataFrame(
@@ -102,7 +102,7 @@ class SemiJoinSuite extends SparkPlanTest with SharedSQLContext {
       }
     }
   }
-
+  //测试左半连接
   testLeftSemiJoin(
     "basic test",
     left,

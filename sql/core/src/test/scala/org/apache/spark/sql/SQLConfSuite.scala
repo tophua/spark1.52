@@ -19,7 +19,7 @@ package org.apache.spark.sql
 
 import org.apache.spark.sql.test.SharedSQLContext
 
-
+//SQL配置测试套件
 class SQLConfSuite extends QueryTest with SharedSQLContext {
   private val testKey = "test.key.0"
   private val testVal = "test.val.0"
