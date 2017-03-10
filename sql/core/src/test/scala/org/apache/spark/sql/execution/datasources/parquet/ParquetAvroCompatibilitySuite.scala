@@ -37,6 +37,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
       (path: String, schema: Schema)
       (f: AvroParquetWriter[T] => Unit): Unit = {
     logInfo(
+        //使用以下Avro模式将Avro记录写入Parquet文件
       s"""Writing Avro records with the following Avro schema into Parquet file:
          |
          |${schema.toString(true)}
@@ -162,12 +163,12 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
       })
     }
   }
-  //空数组
+  //可空数组(parquet-avro 1.7.0不能正确支持这个)
   ignore("nullable arrays (parquet-avro 1.7.0 does not properly support this)") {
     // TODO Complete this test case after upgrading to parquet-mr 1.8+
   }
 
-  test("SPARK-10136 array of primitive array") {//原始数组数组
+  test("SPARK-10136 array of primitive array") {//原始数组
     withTempPath { dir =>
       val path = dir.getCanonicalPath
 
@@ -188,7 +189,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
     }
   }
 
-  test("map of primitive array") {//原始数组映射
+  test("map of primitive array") {//原始数组
     withTempPath { dir =>
       val path = dir.getCanonicalPath
 
@@ -214,13 +215,30 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
   test("various complex types") {//各种复杂类型
     withTempPath { dir =>
       val path = dir.getCanonicalPath
-
+      //C:\Users\liushuhua\AppData\Local\Temp\spark-0315827e-7087-4666-b17a-ff0a263039f1
+      //println(path)
       withWriter[ParquetAvroCompat](path, ParquetAvroCompat.getClassSchema) { writer =>
         (0 until 10).foreach(i => writer.write(makeParquetAvroCompat(i)))
       }
 
       logParquetSchema(path)
-
+      /**
+       *  +--------------------+--------------------+--------------------+
+          |      strings_column|string_to_int_column|      complex_column|
+          +--------------------+--------------------+--------------------+
+          |[arr_0, arr_1, ar...|Map(0 -> 0, 1 -> ...|Map(0 -> WrappedA...|
+          |[arr_1, arr_2, ar...|Map(0 -> 1, 1 -> ...|Map(1 -> WrappedA...|
+          |[arr_2, arr_3, ar...|Map(0 -> 2, 1 -> ...|Map(2 -> WrappedA...|
+          |[arr_3, arr_4, ar...|Map(0 -> 3, 1 -> ...|Map(3 -> WrappedA...|
+          |[arr_4, arr_5, ar...|Map(0 -> 4, 1 -> ...|Map(4 -> WrappedA...|
+          |[arr_5, arr_6, ar...|Map(0 -> 5, 1 -> ...|Map(5 -> WrappedA...|
+          |[arr_6, arr_7, ar...|Map(0 -> 6, 1 -> ...|Map(6 -> WrappedA...|
+          |[arr_7, arr_8, ar...|Map(0 -> 7, 1 -> ...|Map(7 -> WrappedA...|
+          |[arr_8, arr_9, ar...|Map(0 -> 8, 1 -> ...|Map(8 -> WrappedA...|
+          |[arr_9, arr_10, a...|Map(0 -> 9, 1 -> ...|Map(9 -> WrappedA...|
+          +--------------------+--------------------+--------------------+
+       */
+      //sqlContext.read.parquet(path).show()
       checkAnswer(sqlContext.read.parquet(path), (0 until 10).map { i =>
         Row(
           Seq.tabulate(3)(n => s"arr_${i + n}"),
@@ -254,7 +272,7 @@ class ParquetAvroCompatibilitySuite extends ParquetCompatibilityTest with Shared
       .setComplexColumn(makeComplexColumn(i))
       .build()
   }
-//下推涉枚举列的谓词
+  //下推涉及Parquet ENUM列的谓词
   test("SPARK-9407 Push down predicates involving Parquet ENUM columns") {
     import testImplicits._
 

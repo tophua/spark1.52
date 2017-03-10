@@ -21,11 +21,14 @@ import java.io.File
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.test.SharedSQLContext
-
+/**
+ * Interoperability 互操作性
+ */
 class ParquetInteroperabilitySuite extends ParquetCompatibilityTest with SharedSQLContext {
-  //parquet文件与不同的物理架构,共享相同的逻辑架构
+  //具有不同物理模式但具有相同逻辑模式的parquet文件
   test("parquet files with different physical schemas but share the same logical schema") {
     // This test case writes two Parquet files, both representing the following Catalyst schema
+    // 测试转换写两个Parquet文件,这个两个代表下列Catalyst模式
     //
     //   StructType(
     //     StructField(
@@ -40,7 +43,11 @@ class ParquetInteroperabilitySuite extends ParquetCompatibilityTest with SharedS
       import DirectParquetWriter._
 
       val avroStylePath = new File(dir, "avro-style").getCanonicalPath
+
       val protobufStylePath = new File(dir, "protobuf-style").getCanonicalPath
+      //C:\Users\liushuhua\AppData\Local\Temp\spark-f4548b7f-98c1-4523-846d-1fcdc6dc25a9\avro-style
+      //C:\Users\liushuhua\AppData\Local\Temp\spark-f4548b7f-98c1-4523-846d-1fcdc6dc25a9\protobuf-style
+     
 
       val avroStyleSchema =
         """message avro_style {
@@ -49,8 +56,7 @@ class ParquetInteroperabilitySuite extends ParquetCompatibilityTest with SharedS
           |  }
           |}
         """.stripMargin
-
-      writeDirect(avroStylePath, avroStyleSchema) { writer =>
+       writeDirect(avroStylePath, avroStyleSchema) { writer =>
         message(writer) { rc =>
           field(rc, "f") {
             group(rc) {
@@ -60,7 +66,7 @@ class ParquetInteroperabilitySuite extends ParquetCompatibilityTest with SharedS
               }
             }
           }
-        }
+        }     
 
         message(writer) { rc =>
           field(rc, "f") {
@@ -72,10 +78,8 @@ class ParquetInteroperabilitySuite extends ParquetCompatibilityTest with SharedS
             }
           }
         }
-      }
-
+      }   
       logParquetSchema(avroStylePath)
-
       val protobufStyleSchema =
         """message protobuf_style {
           |  repeated int32 f;
@@ -99,7 +103,10 @@ class ParquetInteroperabilitySuite extends ParquetCompatibilityTest with SharedS
       }
 
       logParquetSchema(protobufStylePath)
-
+      /**
+       *
+       */
+      sqlContext.read.parquet(dir.getCanonicalPath).show()
       checkAnswer(
         sqlContext.read.parquet(dir.getCanonicalPath),
         Seq(

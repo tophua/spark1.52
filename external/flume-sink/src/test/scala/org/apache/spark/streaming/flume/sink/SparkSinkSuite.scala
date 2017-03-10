@@ -38,7 +38,13 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 // that fail if this is detected.
 //scalastyle:off
 import org.scalatest.FunSuite
-
+/**
+ * flume的核心是把数据从数据源收集过来,再送到目的地。
+ * 为了保证输送一定成功,在送到目的地之前,会先缓存数据,待数据真正到达目的地后,删除自己缓存的数据。
+ * source可以接收外部源发送过来的数据,不同的source,可以接受不同的数据格式。
+ * channel是一个存储地,接收source的输出,直到有sink消费掉channel中的数据。
+ * sink组件会消费channel中的数据,然后送给外部源或者其他source,如数据可以写入到HDFS或者HBase中。
+ */
 class SparkSinkSuite extends FunSuite {
 //scalastyle:on
 

@@ -3,6 +3,7 @@ public abstract class ParquetSchemaTest extends org.apache.spark.SparkFunSuite i
   public   ParquetSchemaTest () { throw new RuntimeException(); }
   /**
    * Checks whether the reflected Parquet message type for product type <code>T</code> conforms <code>messageType</code>.
+   * &#x68c0;&#x67e5;&#x4ea7;&#x54c1;&#x7c7b;&#x578b;<code>T'&#x7684;&#x53cd;&#x5c04;Parquet&#x6d88;&#x606f;&#x7c7b;&#x578b;&#x662f;&#x5426;&#x7b26;&#x5408;</code>messageType<code>
    * @param testName (undocumented)
    * @param messageType (undocumented)
    * @param binaryAsString (undocumented)

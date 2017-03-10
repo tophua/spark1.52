@@ -50,6 +50,7 @@ private[sql] object PartitioningUtils {
 
   /**
    * Given a group of qualified paths, tries to parse them and returns a partition specification.
+   * 给定一组合格路径,尝试解析它们并返回分区规范
    * For example, given:
    * {{{
    *   hdfs://<host>:<port>/path/to/partition/a=1/b=hello/c=3.14
@@ -82,6 +83,7 @@ private[sql] object PartitioningUtils {
 
     if (pathsWithPartitionValues.isEmpty) {
       // This dataset is not partitioned.
+      //此数据集未分区
       PartitionSpec.emptySpec
     } else {
       // This dataset is partitioned. We need to check whether all partitions have the same

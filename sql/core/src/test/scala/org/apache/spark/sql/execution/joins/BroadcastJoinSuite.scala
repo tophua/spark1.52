@@ -27,10 +27,10 @@ import org.apache.spark.sql.{SQLConf, SQLContext, QueryTest}
 
 /**
  * Test various broadcast join operators with unsafe enabled.
- * 测试启用不安全的各种广播连接运算符
+ * 测试各种具有不安全启用的广播加入运算符
  *
  * Tests in this suite we need to run Spark in local-cluster mode. In particular, the use of
- * 测试此套件中,我们需要运行Spark在本地群集模式,特别,使用不安全map[UnsafeHashedRelation]不触发
+ * 在这个套件中测试我们需要在本地集群模式下运行Spark,特别,使用不安全map[UnsafeHashedRelation]不触发
  * unsafe map in [[org.apache.spark.sql.execution.joins.UnsafeHashedRelation]] is not triggered
  * without serializing the hashed relation, which does not happen in local mode.
  * 没有进行散列的关系,不发生在本地模式

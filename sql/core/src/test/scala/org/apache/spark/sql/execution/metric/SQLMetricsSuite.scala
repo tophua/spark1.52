@@ -99,8 +99,11 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
       assert(expectedMetrics === actualMetrics)
     } else {
       // TODO Remove this "else" once we fix the race condition that missing the JobStarted event.
+      //删除这个“else”一旦我们修正了缺少JobStarted事件的竞争条件,
       // Since we cannot track all jobs, the metric values could be wrong and we should not check
       // them.
+      //由于我们无法跟踪所有作业,度量值可能是错误的,我们不应该检查它们
+      //由于竞争条件,我们错过了一些作业,无法验证度量标准值
       logWarning("Due to a race condition, we miss some jobs and cannot verify the metric values")
     }
   }
@@ -127,6 +130,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
       SQLConf.TUNGSTEN_ENABLED.key -> "true") {
       // Assume the execution plan is
       // PhysicalRDD(nodeId = 1) -> TungstenProject(nodeId = 0)
+      //假设执行计划是PhysicalRDD(nodeId = 1) - > TungstenProject(nodeId = 0)
       val df = person.select('name)
       testSparkPlanMetrics(df, 1, Map(
         0L ->("TungstenProject", Map(
@@ -138,6 +142,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
   test("Filter metrics") {//过滤器的指标
     // Assume the execution plan is
     // PhysicalRDD(nodeId = 1) -> Filter(nodeId = 0)
+    //假设执行计划是PhysicalRDD(nodeId = 1) - > Filter(nodeId = 0)
     val df = person.filter('age < 25)
     testSparkPlanMetrics(df, 1, Map(
       0L -> ("Filter", Map(
@@ -164,7 +169,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
       )
 
       // 2 partitions and each partition contains 2 keys
-      //2个分区和每个分区包含2个键
+      // 2个分区,每个分区包含2个键
       val df2 = testData2.groupBy('a).count()
       testSparkPlanMetrics(df2, 1, Map(
         2L -> ("Aggregate", Map(
@@ -250,6 +255,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
   test("SortMergeJoin metrics") {//排序合并连接度量
     // Because SortMergeJoin may skip different rows if the number of partitions is different, this
     // test should use the deterministic number of partitions.
+    //因为SortMergeJoin可能会跳过不同的行,如果分区的数量不同,这个测试应该使用确定性的分区数
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "true") {
       val testDataForJoin = testData2.filter('a < 2) // TestData2(1, 1) :: TestData2(1, 2)
       testDataForJoin.registerTempTable("testDataForJoin")
@@ -297,6 +303,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
         testSparkPlanMetrics(df2, 1, Map(
           1L -> ("SortMergeOuterJoin", Map(
             // It's 4 because we only read 3 rows in the first partition and 1 row in the second one
+            //这是4,因为我们只读取第一个分区中的3行和第二个中的1行
             "number of left rows" -> 2L,
             "number of right rows" -> 6L,
             "number of output rows" -> 8L)))

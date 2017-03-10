@@ -1,5 +1,10 @@
 package org.apache.spark.sql.execution.datasources.parquet;
 // no position
+/**+-----------+
+ |       name|
+ +-----------+
+ |67123.45000|
+ +-----------+**/
 public  class TestingUDT {
   static public  class NestedStruct implements scala.Product, scala.Serializable {
     public  java.lang.Integer a () { throw new RuntimeException(); }

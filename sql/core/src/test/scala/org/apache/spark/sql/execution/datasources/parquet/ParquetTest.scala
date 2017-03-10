@@ -27,11 +27,13 @@ import org.apache.spark.sql.{DataFrame, SaveMode, SQLContext}
 
 /**
  * A helper trait that provides convenient facilities for Parquet testing.
- * 一个辅助的特点,提供了便利的设施Parquet测试
+ * 帮助性能,为Parquet测试提供方便的设施
  *
  * NOTE: Considering classes `Tuple1` ... `Tuple22` all extend `Product`, it would be more
  * convenient to use tuples rather than special case classes when writing test cases/suites.
+ * 在编写测试用例/套件时使用元组而不是特殊情况类会更方便,
  * Especially, `Tuple1.apply` can be used to easily wrap a single type/value.
+ * 特别是,`Tuple1.apply`可以用来轻松包装一个类型/值
  */
 private[sql] trait ParquetTest extends SQLTestUtils {
   protected def _sqlContext: SQLContext
@@ -39,12 +41,13 @@ private[sql] trait ParquetTest extends SQLTestUtils {
   /**
    * Writes `data` to a Parquet file, which is then passed to `f` and will be deleted after `f`
    * returns.
-   * 写`数据`到Parquet的文件,然后通过` F `和将被删除后` F `返回
+   * 将`data`写入Parquet文件,然后将其传递给`f`,并在`f`返回后被删除
    */
   protected def withParquetFile[T <: Product: ClassTag: TypeTag]
       (data: Seq[T])
       (f: String => Unit): Unit = {
     withTempPath { file =>
+      // _sqlContext.createDataFrame(data).show()
       _sqlContext.createDataFrame(data).write.parquet(file.getCanonicalPath)
       f(file.getCanonicalPath)
     }
@@ -52,9 +55,8 @@ private[sql] trait ParquetTest extends SQLTestUtils {
 
   /**
    * Writes `data` to a Parquet file and reads it back as a [[DataFrame]],
-   * 写`数据`到Parquet的文件并读取它回到作为一个[ 数据集 ],
    * which is then passed to `f`. The Parquet file will be deleted after `f` returns.
-   * 然后被传递到f,Parquet文件将被删除后` F `返回。
+   * 将`data`写入Parquet文件,并将其读回[[DataFrame]],然后传递给`f`, `f`返回后,Parquet文件将被删除。
    */
   protected def withParquetDataFrame[T <: Product: ClassTag: TypeTag]
       (data: Seq[T])
@@ -65,13 +67,15 @@ private[sql] trait ParquetTest extends SQLTestUtils {
   /**
    * Writes `data` to a Parquet file, reads it back as a [[DataFrame]] and registers it as a
    * temporary table named `tableName`, then call `f`. The temporary table together with the
-   * 写数据到Parquet文件,读取它回到作为一个[数据集]和寄存器是一个临时表命名` TableName `
    * Parquet file will be dropped/deleted after `f` returns.
+   * 将`data`写入Parquet文件,将其读取为[[DataFrame]]并将其注册为名为`tableName`的临时表,然后调用`f`,
+   *  `f`返回后,临时表和Parquet文件将被删除/删除
    */
   protected def withParquetTable[T <: Product: ClassTag: TypeTag]
       (data: Seq[T], tableName: String)
       (f: => Unit): Unit = {
     withParquetDataFrame(data) { df =>
+      //注册数据集及表
       _sqlContext.registerDataFrameAsTable(df, tableName)
       withTempTable(tableName)(f)
     }

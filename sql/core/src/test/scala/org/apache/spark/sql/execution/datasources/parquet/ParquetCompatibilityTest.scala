@@ -47,6 +47,7 @@ private[sql] abstract class ParquetCompatibilityTest extends QueryTest with Parq
 
   protected def logParquetSchema(path: String): Unit = {
     logInfo(
+      //由parquet-avro写的Parquet文件的模式
       s"""Schema of the Parquet file written by parquet-avro:
          |${readParquetSchema(path)}
        """.stripMargin)

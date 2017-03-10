@@ -59,7 +59,7 @@ class InnerJoinSuite extends SparkPlanTest with SharedSQLContext {
 
   // Note: the input dataframes and expression must be evaluated lazily because  
   // the SQLContext should be used only within a test to keep SQL tests stable
-  //输入的数据帧和表达必须被评估,延迟加载因为sqlcontext应该只在一个测试中保持稳定的SQL测试使用
+  //输入数据集和表达式必须进行延迟评估,因为SQLContext只应在测试中使用以保持SQL测试稳定
   private def testInnerJoin(
       testName: String,
       leftRows: => DataFrame,

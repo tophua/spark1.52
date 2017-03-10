@@ -239,7 +239,7 @@ class StreamingJobProgressListenerSuite extends TestSuiteBase with Matchers {
       val batchInfoStarted = BatchInfo(Time(1000), streamIdToInputInfo, 1000, Some(2000), None)
       listener.onBatchStarted(StreamingListenerBatchStarted(batchInfoStarted))
 
-      // onJobStart
+      // onJobStart 
       val jobStart1 = createJobStart(Time(1000), outputOpId = 0, jobId = 0)
       listener.onJobStart(jobStart1)
 

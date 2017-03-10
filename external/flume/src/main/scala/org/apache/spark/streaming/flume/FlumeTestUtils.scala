@@ -39,6 +39,7 @@ import org.apache.spark.SparkConf
 
 /**
  * Share codes for Scala and Python unit tests
+ * 
  */
 private[flume] class FlumeTestUtils {
 

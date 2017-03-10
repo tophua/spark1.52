@@ -18,6 +18,7 @@ package org.apache.spark.sql.execution.datasources;
   static public  java.lang.String DEFAULT_PARTITION_NAME () { throw new RuntimeException(); }
   /**
    * Given a group of qualified paths, tries to parse them and returns a partition specification.
+   * &#x7ed9;&#x5b9a;&#x4e00;&#x7ec4;&#x5408;&#x683c;&#x8def;&#x5f84;,&#x5c1d;&#x8bd5;&#x89e3;&#x6790;&#x5b83;&#x4eec;&#x5e76;&#x8fd4;&#x56de;&#x5206;&#x533a;&#x89c4;&#x8303;
    * For example, given:
    * <pre><code>
    *   hdfs://&lt;host&gt;:&lt;port&gt;/path/to/partition/a=1/b=hello/c=3.14

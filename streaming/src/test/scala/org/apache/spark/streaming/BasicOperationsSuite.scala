@@ -29,7 +29,7 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.dstream.{DStream, WindowedDStream}
 import org.apache.spark.util.{Clock, ManualClock}
 import org.apache.spark.HashPartitioner
-
+//基本操作套件
 class BasicOperationsSuite extends TestSuiteBase {
   test("map") {
     //input=List(Range(1, 2, 3, 4), Range(5, 6, 7, 8), Range(9, 10, 11, 12))

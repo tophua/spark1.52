@@ -25,14 +25,14 @@ package org.apache.spark.sql.test;
   protected  class testImplicits extends org.apache.spark.sql.SQLImplicits {
     /**
      * A helper object for importing SQL implicits.
-     * &#x5bfc;&#x5165;SQL&#x9690;&#x542b;&#x7740;&#x4e00;&#x4e2a;&#x5e2e;&#x52a9;&#x5bf9;&#x8c61;
+     * &#x7528;&#x4e8e;&#x5bfc;&#x5165;SQL&#x9690;&#x5f0f;&#x7684;&#x5e2e;&#x52a9;&#x7a0b;&#x5e8f;&#x5bf9;&#x8c61;
      * <p>
      * Note that the alternative of importing <code>sqlContext.implicits._</code> is not possible here.
-     * &#x6ce8;&#x610f;:&#x4ee3;&#x66ff;&#x5bfc;&#x5165;'sqlContext.implicits._<code>&#x4e0d;&#x53ef;&#x80fd;&#x5728;&#x8fd9;&#x91cc;
+     * &#x6ce8;&#x610f;,&#x5bfc;&#x5165;<code>sqlContext.implicits._</code>&#x7684;&#x66ff;&#x4ee3;&#x65b9;&#x6cd5;&#x5728;&#x8fd9;&#x91cc;&#x662f;&#x4e0d;&#x53ef;&#x80fd;&#x7684;
      * This is because we create the {@link SQLContext} immediately before the first test is run,
-     * &#x8fd9;&#x662f;&#x56e0;&#x4e3a;&#x6211;&#x4eec;&#x521b;&#x5efa; SQLContext&#x4e4b;&#x524d;&#x5148;&#x6d4b;&#x8bd5;&#x8fd0;&#x884c;
+     * &#x8fd9;&#x662f;&#x56e0;&#x4e3a;&#x6211;&#x4eec;&#x5728;&#x8fd0;&#x884c;&#x7b2c;&#x4e00;&#x4e2a;&#x6d4b;&#x8bd5;&#x4e4b;&#x524d;&#x7acb;&#x5373;&#x521b;&#x5efa;{@link SQLContext}
      * but the implicits import is needed in the constructor.
-     * &#x4f46;&#x9690;&#x5f0f;&#x5728;&#x6784;&#x9020;&#x51fd;&#x6570;&#x9700;&#x8981;&#x5bfc;&#x5165;
+     * &#x4f46;&#x5728;&#x6784;&#x9020;&#x51fd;&#x6570;&#x4e2d;&#x9700;&#x8981;&#x8f93;&#x5165;implicits
      */
     public   testImplicits () { throw new RuntimeException(); }
     protected  org.apache.spark.sql.SQLContext _sqlContext () { throw new RuntimeException(); }
@@ -49,9 +49,10 @@ package org.apache.spark.sql.test;
   /**
    * Sets all SQL configurations specified in <code>pairs</code>, calls <code>f</code>, and then restore all SQL
    * configurations.
-   * &#x5c06;&#x6240;&#x6709;&#x7684;SQL&#x914d;&#x7f6e;&#x6307;&#x5b9a;<code>&#x5bf9;</code>,&#x8c03;&#x7528;<code> F </code>,&#x7136;&#x540e;&#x6062;&#x590d;&#x6240;&#x6709;SQL&#x914d;&#x7f6e;
+   * &#x8bbe;&#x7f6e;&#x5728;&amp;ldquo;pair&amp;rdquo;&#x4e2d;&#x6307;&#x5b9a;&#x7684;&#x6240;&#x6709;SQL&#x914d;&#x7f6e;,&#x8c03;&#x7528;&amp;ldquo;f&amp;rdquo;,&#x7136;&#x540e;&#x8fd8;&#x539f;&#x6240;&#x6709;SQL&#x914d;&#x7f6e;
    * <p>
    * @todo Probably this method should be moved to a more general place
+   * &#x53ef;&#x80fd;&#x8fd9;&#x4e2a;&#x65b9;&#x6cd5;&#x5e94;&#x8be5;&#x79fb;&#x52a8;&#x5230;&#x66f4;&#x4e00;&#x822c;&#x7684;&#x5730;&#x65b9;
    * @param pairs (undocumented)
    * @param f (undocumented)
    */

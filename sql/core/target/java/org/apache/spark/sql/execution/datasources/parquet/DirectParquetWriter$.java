@@ -1,5 +1,9 @@
 package org.apache.spark.sql.execution.datasources.parquet;
 // no position
+/**
+ * Parquet&#x662f;&#x4e00;&#x79cd;&#x9762;&#x5411;&#x5217;&#x5b58;&#x5b58;&#x50a8;&#x7684;&#x6587;&#x4ef6;&#x683c;&#x5f0f;
+ * &#x76f4;&#x63a5;&#x5199;&#x5165;Parquet
+ */
   class DirectParquetWriter$ {
   /**
    * Static reference to the singleton instance of this Scala object.

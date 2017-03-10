@@ -56,7 +56,7 @@ case class SimpleFilteredScan(from: Int, to: Int)(@transient val sqlContext: SQL
     FiltersPushed.list = filters
 
     // Predicate test on integer column
-    //测试整数列
+    //在整数列上测试
     //Int => Boolean表示一个函数的输入参数类型是Int,返回值类型是Boolean
     //=方法实现
     def translateFilterOnA(filter: Filter): Int => Boolean = filter match {

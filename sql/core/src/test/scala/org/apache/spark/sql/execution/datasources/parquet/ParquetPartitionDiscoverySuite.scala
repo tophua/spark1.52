@@ -35,13 +35,13 @@ import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
 // The data where the partitioning key exists only in the directory structure.
-//分区键仅存在于目录结构中的数据
+//其中分区键仅存在于目录结构中的数据
 case class ParquetData(intField: Int, stringField: String)
 
 // The data that also includes the partitioning key
 //包含分区键的数据
 case class ParquetDataWithKey(intField: Int, pi: Int, stringField: String, ps: String)
-
+//Parquet分区发现测试
 class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with SharedSQLContext {
   import PartitioningUtils._
   import testImplicits._
@@ -317,7 +317,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       }
     }
   }
-  //读分区表分区键包括Parquet文件
+  //读分区表 - Parquet文件中包含的分区键
   test("read partitioned table - partition key included in Parquet file") {
     withTempDir { base =>
       for {
@@ -364,7 +364,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       }
     }
   }
-  //有空读分区表
+  //读取分区表 - 具有null
   test("read partitioned table - with nulls") {
     withTempDir { base =>
       for {
@@ -405,7 +405,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       }
     }
   }
-  //读分区表的分区键与空值,包括Parquet文件
+  //读取分区表 -使用空值和分区键包含在Parquet文件中
   test("read partitioned table - with nulls and partition keys are included in Parquet file") {
     withTempDir { base =>
       for {
@@ -463,7 +463,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       }
     }
   }
-  //非分区表应具有空分区规格
+  //非分区表应该有空分区规范
   test("SPARK-7749 Non-partitioned table should have empty partition spec") {
     withTempPath { dir =>
       (1 to 10).map(i => (i, i.toString)).toDF("a", "b").write.parquet(dir.getCanonicalPath)
@@ -476,7 +476,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       }
     }
   }
-  //动态分区的目录路径和非转义逃逸
+  //动态分区目录路径转义和转义
   test("SPARK-7847: Dynamic partition directory path escaping and unescaping") {
     withTempPath { dir =>
       val df = Seq("/", "[]", "?").zipWithIndex.map(_.swap).toDF("i", "s")
@@ -484,7 +484,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       checkAnswer(sqlContext.read.parquet(dir.getCanonicalPath), df.collect())
     }
   }
-  //不同分区值类型
+  //各种分区值类型
   test("Various partition value types") {
     val row =
       Row(
@@ -529,7 +529,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       checkAnswer(sqlContext.read.load(dir.toString).select(fields: _*), row)
     }
   }
-  //忽略文件的名称开始点
+  //忽略名称以dot开头的文件
   test("SPARK-8037: Ignores files whose name starts with dot") {
     withTempPath { dir =>
       val df = (1 to 3).map(i => (i, i, i, i)).toDF("a", "b", "c", "d")
@@ -546,7 +546,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
     }
   }
 
-  test("listConflictingPartitionColumns") {//列出冲突分区列
+  test("listConflictingPartitionColumns") {//列表冲突分区列
     def makeExpectedMessage(colNameLists: Seq[String], paths: Seq[String]): String = {
       val conflictingColNameLists = colNameLists.zipWithIndex.map { case (list, index) =>
         s"\tPartition column name list #$index: $list"

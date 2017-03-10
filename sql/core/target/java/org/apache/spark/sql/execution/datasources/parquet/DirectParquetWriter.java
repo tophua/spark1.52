@@ -1,9 +1,14 @@
 package org.apache.spark.sql.execution.datasources.parquet;
 // no position
+/**
+ * Parquet&#x662f;&#x4e00;&#x79cd;&#x9762;&#x5411;&#x5217;&#x5b58;&#x5b58;&#x50a8;&#x7684;&#x6587;&#x4ef6;&#x683c;&#x5f0f;
+ * &#x76f4;&#x63a5;&#x5199;&#x5165;Parquet
+ */
   class DirectParquetWriter {
   /**
    * A testing Parquet {@link WriteSupport} implementation used to write manually constructed Parquet
    * records with arbitrary structures.
+   * &#x6d4b;&#x8bd5;Parquet[writesupport]&#x7528;&#x6765;&#x624b;&#x52a8;&#x5199;&#x5165;Parquet&#x8bb0;&#x5f55;&#x4efb;&#x610f;&#x7ed3;&#x6784;
    */
   static private  class DirectWriteSupport extends org.apache.parquet.hadoop.api.WriteSupport<scala.Function1<org.apache.parquet.io.api.RecordConsumer, scala.runtime.BoxedUnit>> {
     public   DirectWriteSupport (org.apache.parquet.schema.MessageType schema, scala.collection.immutable.Map<java.lang.String, java.lang.String> metadata) { throw new RuntimeException(); }

@@ -1,6 +1,6 @@
 package org.apache.spark.sql;
 /**
- * &#x65e5;&#x671f;&#x51fd;&#x6570;&#x6d4b;&#x8bd5;
+ * &#x65e5;&#x671f;&#x51fd;&#x6570;&#x6d4b;&#x8bd5;&#x5957;&#x4ef6;
  */
 public  class DateFunctionsSuite extends org.apache.spark.sql.QueryTest implements org.apache.spark.sql.test.SharedSQLContext {
   public   DateFunctionsSuite () { throw new RuntimeException(); }

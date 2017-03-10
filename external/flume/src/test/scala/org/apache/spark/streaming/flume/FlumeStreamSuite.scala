@@ -33,20 +33,29 @@ import org.scalatest.concurrent.Eventually._
 import org.apache.spark.{Logging, SparkConf, SparkFunSuite}
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.{Milliseconds, StreamingContext, TestOutputStream}
-
+/**
+ * flume的核心是把数据从数据源收集过来,再送到目的地。
+ * 为了保证输送一定成功,在送到目的地之前,会先缓存数据,待数据真正到达目的地后,删除自己缓存的数据。
+ * source可以接收外部源发送过来的数据,不同的source,可以接受不同的数据格式。
+ * channel是一个存储地,接收source的输出,直到有sink消费掉channel中的数据。
+ * sink组件会消费channel中的数据,然后送给外部源或者其他source,如数据可以写入到HDFS或者HBase中。
+ */
 class FlumeStreamSuite extends SparkFunSuite with BeforeAndAfter with Matchers with Logging {
   val conf = new SparkConf().setMaster("local[4]").setAppName("FlumeStreamSuite")
   var ssc: StreamingContext = null
 
-  test("flume input stream") {
+  test("flume input stream") {//flume的输入流
     testFlumeStream(testCompression = false)
   }
 
-  test("flume input compressed stream") {
+  test("flume input compressed stream") {//flume的压缩输入流
     testFlumeStream(testCompression = true)
   }
 
-  /** Run test on flume stream */
+  /** 
+   *  Run test on flume stream
+   *  在flume流运行测试 
+   *  */
   private def testFlumeStream(testCompression: Boolean): Unit = {
     val input = (1 to 100).map { _.toString }
     val utils = new FlumeTestUtils
@@ -74,7 +83,10 @@ class FlumeStreamSuite extends SparkFunSuite with BeforeAndAfter with Matchers w
     }
   }
 
-  /** Setup and start the streaming context */
+  /** 
+   *  Setup and start the streaming context 
+   *  设置和启动流上下文
+   *  */
   private def startContext(
       testPort: Int, testCompression: Boolean): (ArrayBuffer[Seq[SparkFlumeEvent]]) = {
     ssc = new StreamingContext(conf, Milliseconds(200))
@@ -88,7 +100,10 @@ class FlumeStreamSuite extends SparkFunSuite with BeforeAndAfter with Matchers w
     outputBuffer
   }
 
-  /** Class to create socket channel with compression */
+  /** 
+   *  Class to create socket channel with compression 
+   *  使用压缩类创建套接字通道
+   *  */
   private class CompressionChannelFactory(compressionLevel: Int)
     extends NioClientSocketChannelFactory {
 

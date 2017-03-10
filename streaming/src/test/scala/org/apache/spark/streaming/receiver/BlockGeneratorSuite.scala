@@ -28,7 +28,7 @@ import org.scalatest.time.SpanSugar._
 import org.apache.spark.storage.StreamBlockId
 import org.apache.spark.util.ManualClock
 import org.apache.spark.{SparkException, SparkConf, SparkFunSuite}
-
+//块产生套件
 class BlockGeneratorSuite extends SparkFunSuite with BeforeAndAfter {
 
   private val blockIntervalMs = 10 //间隔10毫秒

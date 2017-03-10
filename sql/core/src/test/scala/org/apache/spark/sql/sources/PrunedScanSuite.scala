@@ -24,7 +24,7 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types._
 //PrunedScan 可以指定列,其他的列数据源可以不用返回
-class PrunedScanSource extends RelationProvider {
+class PrunedScanSource extends RelationProvider {//提供关系
   override def createRelation(
       sqlContext: SQLContext,
       parameters: Map[String, String]): BaseRelation = {
@@ -49,7 +49,7 @@ case class SimplePrunedScan(from: Int, to: Int)(@transient val sqlContext: SQLCo
         Seq(i * 2)
       }
     }
-    //分区数
+    //parallelize 分区数
     sqlContext.sparkContext.parallelize(from to to).map(i =>
       Row.fromSeq(rowBuilders.map(_(i)).reduceOption(_ ++ _).getOrElse(Seq.empty)))
   }
@@ -133,7 +133,9 @@ class PrunedScanSuite extends DataSourceTest with SharedSQLContext {
   testPruning("SELECT b, b FROM oneToTenPruned", "b")
   testPruning("SELECT a FROM oneToTenPruned", "a")
   testPruning("SELECT b FROM oneToTenPruned", "b")
-
+/**
+ * 测试剪枝
+ */
   def testPruning(sqlString: String, expectedColumns: String*): Unit = {
     test(s"Columns output ${expectedColumns.mkString(",")}: $sqlString") {
       val queryExecution = sql(sqlString).queryExecution

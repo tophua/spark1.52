@@ -31,12 +31,22 @@ import org.apache.spark.util.Utils
 
 /**
  * A test suite that tests various Parquet queries. 
- * 一个测试套件,测试各种Parquet查询
+ * 测试各种Parquet查询的测试套件
  */
 class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext {
 
   test("simple select queries") {//简单的选择查询
+    /**
+      +---+
+      | _1|
+      +---+
+      |  6|
+      |  7|
+      |  8|
+      |  9|
+      +---+*/
     withParquetTable((0 until 10).map(i => (i, i.toString)), "t") {
+      //sql("SELECT _1 FROM t where t._1 > 5").show()
       checkAnswer(sql("SELECT _1 FROM t where t._1 > 5"), (6 until 10).map(Row.apply(_)))
       checkAnswer(sql("SELECT _1 FROM t as tmp where tmp._1 < 5"), (0 until 5).map(Row.apply(_)))
     }
@@ -45,8 +55,21 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
   test("appending") {//添加
     val data = (0 until 10).map(i => (i, i.toString))
     ctx.createDataFrame(data).toDF("c1", "c2").registerTempTable("tmp")
+    /**
+      +---+---+
+      | _1| _2|
+      +---+---+
+      |  0|  0|
+      |  1|  1|
+      |  2|  2|
+      |  3|  3|
+      |  4|  4|
+      |  5|  5|
+      +---+---+*/
     withParquetTable(data, "t") {
       sql("INSERT INTO TABLE t SELECT * FROM tmp")
+     // sql("INSERT INTO TABLE t SELECT * FROM tmp").show()
+      //ctx.table("t").show()
       checkAnswer(ctx.table("t"), (data ++ data).map(Row.fromTuple))
     }
     ctx.catalog.unregisterTable(Seq("tmp"))
@@ -55,6 +78,23 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
   test("overwriting") {//覆盖
     val data = (0 until 10).map(i => (i, i.toString))
     ctx.createDataFrame(data).toDF("c1", "c2").registerTempTable("tmp")
+    /**
+      +---+---+
+      | c1| c2|
+      +---+---+
+      |  0|  0|
+      |  1|  1|
+      |  2|  2|
+      |  3|  3|
+      |  4|  4|
+      |  5|  5|
+      |  6|  6|
+      |  7|  7|
+      |  8|  8|
+      |  9|  9|
+      +---+---+*/
+     sql("SELECT * FROM tmp").show()
+     
     withParquetTable(data, "t") {
       sql("INSERT OVERWRITE TABLE t SELECT * FROM tmp")
       checkAnswer(ctx.table("t"), data.map(Row.fromTuple))
@@ -64,7 +104,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
 
   test("self-join") {//自连接
     // 4 rows, cells of column 1 of row 2 and row 4 are null
-    //4行,行第2行和第行第1列的单元格为空
+    //4行,行2和行4的列1的单元为空
     val data = (1 to 4).map { i =>
       val maybeInt = if (i % 2 == 0) None else Some(i)
       (maybeInt, i.toString)
@@ -85,7 +125,24 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
 
   test("nested data - struct with array field") {//嵌套数据结构数组的字段
     val data = (1 to 10).map(i => Tuple1((i, Seq("val_$i"))))
+    //data.to
+    /**
+      +------+
+      |   _c0|
+      +------+
+      |val_$i|
+      |val_$i|
+      |val_$i|
+      |val_$i|
+      |val_$i|
+      |val_$i|
+      |val_$i|
+      |val_$i|
+      |val_$i|
+      |val_$i|
+      +------+*/
     withParquetTable(data, "t") {
+      //sql("SELECT _1._2[0] FROM t").show()
       checkAnswer(sql("SELECT _1._2[0] FROM t"), data.map {
         case Tuple1((_, Seq(string))) => Row(string)
       })
@@ -93,26 +150,72 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
   }
   //嵌套数组列结构
   test("nested data - array of struct") {
+    /**
+    +------+
+    |   _c0|
+    +------+
+    |val_$i|
+    |val_$i|
+    |val_$i|
+    |val_$i|
+    |val_$i|
+    |val_$i|
+    |val_$i|
+    |val_$i|
+    |val_$i|
+    |val_$i|
+    +------+*/
     val data = (1 to 10).map(i => Tuple1(Seq(i -> "val_$i")))
     withParquetTable(data, "t") {
+      sql("SELECT _1[0]._2 FROM t").show()
       checkAnswer(sql("SELECT _1[0]._2 FROM t"), data.map {
         case Tuple1(Seq((_, string))) => Row(string)
       })
     }
   }
-  //仅由向下推的过滤器引用的列应该保持
+  //仅由下推过滤器引用的列应保留
   test("SPARK-1913 regression: columns only referenced by pushed down filters should remain") {
+    /**
+      +---+
+      | _1|
+      +---+
+      |  1|
+      |  2|
+      |  3|
+      |  4|
+      |  5|
+      |  6|
+      |  7|
+      |  8|
+      |  9|
+      +---+*/
     withParquetTable((1 to 10).map(Tuple1.apply), "t") {
+      //sql("SELECT _1 FROM t WHERE _1 < 10").show()
       checkAnswer(sql("SELECT _1 FROM t WHERE _1 < 10"), (1 to 9).map(Row.apply(_)))
     }
   }
-  //使用字典压缩存储的字符串在parquet
+  //使用字典压缩在拼版中存储的字符串
   test("SPARK-5309 strings stored using dictionary compression in parquet") {
+    /**
+     * sql("SELECT _1, _2, SUM(_3) FROM t GROUP BY _1, _2").show()
+      +----+-----+---+
+      |  _1|   _2|_c2|
+      +----+-----+---+
+      |same|run_1|100|
+      |same|run_6|100|
+      |same|run_2|100|
+      |same|run_7|100|
+      |same|run_3|100|
+      |same|run_8|100|
+      |same|run_4|100|
+      |same|run_9|100|
+      |same|run_0|100|
+      |same|run_5|100|
+      +----+-----+---+*/
     withParquetTable((0 until 1000).map(i => ("same", "run_" + i /100, 1)), "t") {
-
+    
       checkAnswer(sql("SELECT _1, _2, SUM(_3) FROM t GROUP BY _1, _2"),
         (0 until 10).map(i => Row("same", "run_" + i, 100)))
-
       checkAnswer(sql("SELECT _1, _2, SUM(_3) FROM t WHERE _2 = 'run_5' GROUP BY _1, _2"),
         List(Row("same", "run_5", 100)))
     }
@@ -123,7 +226,23 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
     val schema = StructType(List(StructField("d", DecimalType(18, 0), false),
       StructField("time", TimestampType, false)).toArray)
     withTempPath { file =>
+      /**
+       *+---+--------------------+
+        |  d|                time|
+        +---+--------------------+
+        |  1|1969-12-31 16:00:...|
+        |  2|1969-12-31 16:00:...|
+        |  3|1969-12-31 16:00:...|
+        |  4|1969-12-31 16:00:...|
+        |  5|1969-12-31 16:00:...|
+        |  6|1969-12-31 16:00:...|
+        |  7|1969-12-31 16:00:...|
+        |  8|1969-12-31 16:00:...|
+        |  9|1969-12-31 16:00:...|
+        | 10|1969-12-31 16:00:...|
+        +---+--------------------+*/
       val df = ctx.createDataFrame(ctx.sparkContext.parallelize(data), schema)
+      //df.show()
       df.write.parquet(file.getCanonicalPath)
       val df2 = ctx.read.parquet(file.getCanonicalPath)
       checkAnswer(df2, df.collect().toSeq)
@@ -172,7 +291,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
       testSchemaMerging(2)
     }
   }
-  //应尊重用户指定选项
+  //应该尊重用户指定的选项
   test("SPARK-8990 DataFrameReader.parquet() should respect user specified options") {
     withTempPath { dir =>
       val basePath = dir.getCanonicalPath
@@ -203,13 +322,19 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
       val schema = StructType(Array(StructField("name", DecimalType(10, 5), false)))
       val rowRDD = sqlContext.sparkContext.parallelize(Array(Row(Decimal("67123.45"))))
       val df = sqlContext.createDataFrame(rowRDD, schema)
+      /**+-----------+
+        |       name|
+        +-----------+
+        |67123.45000|
+        +-----------+**/
+      //df.show()
       df.write.parquet(basePath)
 
       val decimal = sqlContext.read.parquet(basePath).first().getDecimal(0)
       assert(Decimal("67123.45") === Decimal(decimal))
     }
   }
-  //嵌套结构模式的合并
+  //嵌套结构的模式合并
   test("SPARK-10005 Schema merging for nested struct") {
     val sqlContext = _sqlContext
     import sqlContext.implicits._
@@ -224,7 +349,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
 
       // Note that both the following two DataFrames contain a single struct column with multiple
       // nested fields.
-      //需要注意的是以下两个数据集包含一个具有多个嵌套字段的单个结构列
+      //请注意,以下两个数据集都包含具有多个嵌套字段的单个结构列
       append((1 to 2).map(i => Tuple1((i, i))).toDF())
       append((1 to 2).map(i => Tuple1((i, i, i))).toDF())
 
@@ -239,7 +364,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
       }
     }
   }
-  //请求的架构裁剪-相同的模式
+  //请求模式剪辑 - 相同的模式
   test("SPARK-10301 requested schema clipping - same schema") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -262,7 +387,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
   }
 
   // This test case is ignored because of parquet-mr bug PARQUET-370
-  //这个测试的情况下,由于忽视错误parquet-370
+  //请求模式剪辑 - 具有不相交字段集的模式
   ignore("SPARK-10301 requested schema clipping - schemas with disjoint sets of fields") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -283,7 +408,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
         Row(Row(null, null)))
     }
   }
-  //请求的架构裁剪请求的架构包含物理模式
+  //请求模式剪辑 - 请求模式包含物理模式
   test("SPARK-10301 requested schema clipping - requested schema contains physical schema") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -327,7 +452,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
         Row(Row(0L, null, null, 3L)))
     }
   }
-  //请求架构裁剪-物理架构包含所请求的模式
+  //请求模式剪辑 - 物理模式包含请求的模式
   test("SPARK-10301 requested schema clipping - physical schema contains requested schema") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -375,7 +500,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
         Row(Row(0L, 3L)))
     }
   }
-  //要求的架构裁剪-架构重叠,但不包含对方
+  //请求模式限制 - 模式重叠但不包含对方
   test("SPARK-10301 requested schema clipping - schemas overlap but don't contain each other") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -401,7 +526,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
         Row(Row(1L, 2L, null)))
     }
   }
-  //要求裁剪-深度嵌套的结构图式
+  //请求模式剪辑 - 深层嵌套结构
   test("SPARK-10301 requested schema clipping - deeply nested struct") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -431,7 +556,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
         Row(Row(Seq(Row(0, null)))))
     }
   }
-  //请求架构裁剪
+  //请求模式修剪 - 乱序
   test("SPARK-10301 requested schema clipping - out of order") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -465,7 +590,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
           Row(Row(null, 2, 4))))
     }
   }
-  //请求架构剪辑-架构合并
+  //请求模式剪辑 - 模式合并
   test("SPARK-10301 requested schema clipping - schema merging") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -494,7 +619,7 @@ class ParquetQuerySuite extends QueryTest with ParquetTest with SharedSQLContext
           Row(1, 2, 3)))
     }
   }
-  //请求模式剪辑- UDT
+  //请求模式剪辑 - UDT
   test("SPARK-10301 requested schema clipping - UDT") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath

@@ -26,14 +26,17 @@ import org.apache.parquet.hadoop.api.WriteSupport
 import org.apache.parquet.hadoop.api.WriteSupport.WriteContext
 import org.apache.parquet.io.api.RecordConsumer
 import org.apache.parquet.schema.{MessageType, MessageTypeParser}
-//直接写入Parquet
+/**
+ * Parquet是一种面向列存存储的文件格式
+ * 直接写入Parquet
+ */
 private[sql] object DirectParquetWriter {
   type RecordBuilder = RecordConsumer => Unit
 
   /**
    * A testing Parquet [[WriteSupport]] implementation used to write manually constructed Parquet
    * records with arbitrary structures.
-   * 测试地板[writesupport]用来手动构建Parquet记录任意结构
+   * 测试Parquet[writesupport]用来手动写入Parquet记录任意结构
    */
   private class DirectWriteSupport(schema: MessageType, metadata: Map[String, String])
     extends WriteSupport[RecordBuilder] {
@@ -58,9 +61,12 @@ private[sql] object DirectParquetWriter {
   def writeDirect
       (path: String, schema: String, metadata: Map[String, String] = Map.empty)
       (f: ParquetWriter[RecordBuilder] => Unit): Unit = {
+    //println("==1111==")
     val messageType = MessageTypeParser.parseMessageType(schema)
     val writeSupport = new DirectWriteSupport(messageType, metadata)
+    // println("==2222==")
     val parquetWriter = new ParquetWriter[RecordBuilder](new Path(path), writeSupport)
+     // println("==3333==")
     try f(parquetWriter) finally parquetWriter.close()
   }
   //消息

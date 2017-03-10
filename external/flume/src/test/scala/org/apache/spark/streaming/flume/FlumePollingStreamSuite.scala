@@ -33,7 +33,13 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.dstream.ReceiverInputDStream
 import org.apache.spark.streaming.{Seconds, TestOutputStream, StreamingContext}
 import org.apache.spark.util.{ManualClock, Utils}
-
+/**
+ * flume的核心是把数据从数据源收集过来,再送到目的地。
+ * 为了保证输送一定成功,在送到目的地之前,会先缓存数据,待数据真正到达目的地后,删除自己缓存的数据。
+ * source可以接收外部源发送过来的数据,不同的source,可以接受不同的数据格式。
+ * channel是一个存储地,接收source的输出,直到有sink消费掉channel中的数据。
+ * sink组件会消费channel中的数据,然后送给外部源或者其他source,如数据可以写入到HDFS或者HBase中。
+ */
 class FlumePollingStreamSuite extends SparkFunSuite with BeforeAndAfter with Logging {
 
   val maxAttempts = 5
@@ -56,7 +62,9 @@ class FlumePollingStreamSuite extends SparkFunSuite with BeforeAndAfter with Log
 
   /**
    * Run the given test until no more java.net.BindException's are thrown.
+   * 运行给定测试直到没有更多的java.net BindException的抛出
    * Do this only up to a certain attempt limit.
+   * 这样做只能达到一定的尝试极限
    */
   private def testMultipleTimes(test: () => Unit): Unit = {
     var testPassed = false
@@ -97,6 +105,7 @@ class FlumePollingStreamSuite extends SparkFunSuite with BeforeAndAfter with Log
 
   def writeAndVerify(sinkPorts: Seq[Int]): Unit = {
     // Set up the streaming context and input streams
+    //设置流上下文和输入流
     val ssc = new StreamingContext(conf, batchDuration)
     val addresses = sinkPorts.map(port => new InetSocketAddress("localhost", port))
     val flumeStream: ReceiverInputDStream[SparkFlumeEvent] =
@@ -114,6 +123,7 @@ class FlumePollingStreamSuite extends SparkFunSuite with BeforeAndAfter with Log
       clock.advance(batchDuration.milliseconds)
 
       // The eventually is required to ensure that all data in the batch has been processed.
+      //最终需要确保批处理中的所有数据已被处理
       eventually(timeout(10 seconds), interval(100 milliseconds)) {
         val flattenOutputBuffer = outputBuffer.flatten
         val headers = flattenOutputBuffer.map(_.event.getHeaders.map {

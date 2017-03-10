@@ -85,7 +85,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     sql(
       //TEST.PEOPLE表名,对应的foobar临时表
         //注意使用jdbc方式
-	//dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
+	  //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
       s"""
         |CREATE TEMPORARY TABLE foobar
         |USING org.apache.spark.sql.jdbc
@@ -100,7 +100,7 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
         |OPTIONS (url '$url', dbtable 'TEST.PEOPLE', user 'testUser', password 'testPass',
         |         fetchSize '2')
       """.stripMargin.replaceAll("\n", " "))
-//dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
+    //dbtable需要读取的JDBC表。任何在From子句中的元素都可以,例如表或者子查询等
     sql(
       s"""
         |CREATE TEMPORARY TABLE parts

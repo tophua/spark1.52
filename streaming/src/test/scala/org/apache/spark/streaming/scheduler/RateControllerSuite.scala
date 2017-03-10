@@ -24,7 +24,7 @@ import org.scalatest.time.SpanSugar._
 
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.scheduler.rate.RateEstimator
-
+//速率控制器测试套件
 class RateControllerSuite extends TestSuiteBase {
 
   override def useManualClock: Boolean = false
@@ -82,7 +82,7 @@ class RateControllerSuite extends TestSuiteBase {
     }
   }
 }
-
+//常数的估计
 private[streaming] class ConstantEstimator(@volatile private var rate: Long)
   extends RateEstimator {
 

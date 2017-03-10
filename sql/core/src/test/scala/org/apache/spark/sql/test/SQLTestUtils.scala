@@ -67,14 +67,14 @@ private[sql] trait SQLTestUtils
 
   /**
    * A helper object for importing SQL implicits.
-   * 导入SQL隐含着一个帮助对象
+   * 用于导入SQL隐式的帮助程序对象
    *
    * Note that the alternative of importing `sqlContext.implicits._` is not possible here.
-   * 注意:代替导入'sqlContext.implicits._`不可能在这里
+   * 注意,导入`sqlContext.implicits._`的替代方法在这里是不可能的
    * This is because we create the [[SQLContext]] immediately before the first test is run,
-   * 这是因为我们创建 SQLContext之前先测试运行
+   * 这是因为我们在运行第一个测试之前立即创建[[SQLContext]]
    * but the implicits import is needed in the constructor.
-   * 但隐式在构造函数需要导入
+   * 但在构造函数中需要输入implicits
    */
   protected object testImplicits extends SQLImplicits {
     protected override def _sqlContext: SQLContext = self._sqlContext
@@ -84,7 +84,7 @@ private[sql] trait SQLTestUtils
    * Materialize the test data immediately after the [[SQLContext]] is set up.
    * 实现测试数据后立即设置[SQLContext]
    * This is necessary if the data is accessed by name but not through direct reference.
-   * 这是必要的,如果数据访问的名称,但不通过直接引用
+   * 如果通过名称而不是通过直接引用访问数据,则这是必需的
    */
   protected def setupTestData(): Unit = {
     loadTestDataBeforeTests = true
@@ -108,9 +108,10 @@ private[sql] trait SQLTestUtils
   /**
    * Sets all SQL configurations specified in `pairs`, calls `f`, and then restore all SQL
    * configurations.
-   * 将所有的SQL配置指定`对`,调用` F `,然后恢复所有SQL配置
+   * 设置在“pair”中指定的所有SQL配置,调用“f”,然后还原所有SQL配置
    * 
    * @todo Probably this method should be moved to a more general place
+   * 可能这个方法应该移动到更一般的地方
    */
   protected def withSQLConf(pairs: (String, String)*)(f: => Unit): Unit = {
     //unzip把对偶列表拆分还原为两个列表,其中一个列表由每对对偶的第一个元素组成,另一个由第二个元素组成
@@ -139,10 +140,14 @@ private[sql] trait SQLTestUtils
     val path = Utils.createTempDir()
     //删除文件
     path.delete()
-    try f(path) 
-    finally
-    //递归删除
+    try{
+      f(path)
+    }
+    finally{
+      //递归删除
     Utils.deleteRecursively(path)
+    }
+    
   }
 
   /**

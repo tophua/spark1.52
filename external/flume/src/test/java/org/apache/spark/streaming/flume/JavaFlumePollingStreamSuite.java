@@ -29,6 +29,7 @@ public class JavaFlumePollingStreamSuite extends LocalJavaStreamingContext {
   @Test
   public void testFlumeStream() {
     // tests the API, does not actually test data receiving
+    //测试API,不实际测试数据接收
     InetSocketAddress[] addresses = new InetSocketAddress[] {
         new InetSocketAddress("localhost", 12345)
     };
