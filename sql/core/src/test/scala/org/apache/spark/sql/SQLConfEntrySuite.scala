@@ -49,15 +49,12 @@ class SQLConfEntrySuite extends SparkFunSuite {
     val key = "spark.sql.SQLConfEntrySuite.long"
     val confEntry = SQLConfEntry.longConf(key)
     assert(conf.getConf(confEntry, 5L) === 5L)
-
     conf.setConf(confEntry, 10L)
     assert(conf.getConf(confEntry, 5L) === 10L)
-
     conf.setConfString(key, "20")
     assert(conf.getConfString(key, "5") === "20")
     assert(conf.getConfString(key) === "20")
     assert(conf.getConf(confEntry, 5L) === 20L)
-
     val e = intercept[IllegalArgumentException] {
       conf.setConfString(key, "abc")
     }
@@ -68,15 +65,12 @@ class SQLConfEntrySuite extends SparkFunSuite {
     val key = "spark.sql.SQLConfEntrySuite.boolean"
     val confEntry = SQLConfEntry.booleanConf(key)
     assert(conf.getConf(confEntry, false) === false)
-
     conf.setConf(confEntry, true)
     assert(conf.getConf(confEntry, false) === true)
-
     conf.setConfString(key, "true")
     assert(conf.getConfString(key, "false") === "true")
     assert(conf.getConfString(key) === "true")
     assert(conf.getConf(confEntry, false) === true)
-
     val e = intercept[IllegalArgumentException] {
       conf.setConfString(key, "abc")
     }

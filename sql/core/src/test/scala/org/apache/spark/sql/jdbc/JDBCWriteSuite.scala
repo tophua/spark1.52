@@ -115,6 +115,14 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
      * "mary", 222
      */
     df.write.jdbc(url, "TEST.BASICCREATETEST", new Properties)
+    /**
+      +----+---+
+      |NAME| ID|
+      +----+---+
+      |dave| 42|
+      |mary|222|
+      +----+---+*/
+    //ctx.read.jdbc(url, "TEST.BASICCREATETEST", new Properties).show()
     //读取数据库的数据
     assert(2 === ctx.read.jdbc(url, "TEST.BASICCREATETEST", new Properties).count)
     //取出第一行数据,leng代表几列数据
@@ -126,13 +134,42 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     val df2 = ctx.createDataFrame(sc.parallelize(arr1x2), schema2)
 
     df.write.jdbc(url1, "TEST.DROPTEST", properties)
+    /**
+      +----+---+---+
+      |NAME| ID|SEQ|
+      +----+---+---+
+      |dave| 42|  1|
+      |mary|222|  2|
+      +----+---+---+*/
+    //ctx.read.jdbc(url1, "TEST.DROPTEST", properties).show()
     //总数据
     assert(2 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).count)
     //获得第1行,3列
+    /**
+     *+----+---+---+
+      |NAME| ID|SEQ|
+      +----+---+---+
+      |mary|222|  2|
+      |dave| 42|  1|
+      +----+---+---+*/
+    //ctx.read.jdbc(url1, "TEST.DROPTEST", properties).show()
     assert(3 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).collect()(0).length)
     //覆盖数据模式,即原来的数据删除
     //当数据输出的位置已存在时,重写
+    /**df2.show()
+    +----+---+
+    |name| id|
+    +----+---+
+    |fred|  3|
+    +----+---+*/
     df2.write.mode(SaveMode.Overwrite).jdbc(url1, "TEST.DROPTEST", properties)
+    /**
+      +----+---+
+      |NAME| ID|
+      +----+---+
+      |fred|  3|
+      +----+---+*/
+    //ctx.read.jdbc(url1, "TEST.DROPTEST", properties).show()
     assert(1 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).count)
     //表构造2列
     assert(2 === ctx.read.jdbc(url1, "TEST.DROPTEST", properties).collect()(0).length)
@@ -144,9 +181,25 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     //插入2行2列数据,
     df.write.jdbc(url, "TEST.APPENDTEST", new Properties)
      assert(2 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).count)
+    // df2.show()
+     /**
+      +----+---+
+      |name| id|
+      +----+---+
+      |fred|  3|
+      +----+---+*/
     //当数据输出的位置已存在时,在文件后面追加
     df2.write.mode(SaveMode.Append).jdbc(url, "TEST.APPENDTEST", new Properties)
     //插入1行2列数据,
+    //ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).show
+    /**
+      +----+---+
+      |NAME| ID|
+      +----+---+
+      |mary|222|
+      |dave| 42|
+      |fred|  3|
+      +----+---+*/
     assert(3 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).count)
     assert(2 === ctx.read.jdbc(url, "TEST.APPENDTEST", new Properties).collect()(0).length)
   }
@@ -156,11 +209,36 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
     val df2 = ctx.createDataFrame(sc.parallelize(arr1x2), schema2)
 
     df.write.jdbc(url1, "TEST.TRUNCATETEST", properties)
+    //ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).show()
     //2行数据
+    /**
+      +----+---+
+      |NAME| ID|
+      +----+---+
+      |dave| 42|
+      |mary|222|
+      +----+---+*/
     assert(2 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).count)
     //当数据输出的位置已存在时,重写
+    
+    /**
+      df2.show()
+      +----+---+
+      |name| id|
+      +----+---+
+      |fred|  3|
+      +----+---+
+     */
     df2.write.mode(SaveMode.Overwrite).jdbc(url1, "TEST.TRUNCATETEST", properties)
     //1行数据
+    /**
+     * 
+    +----+---+
+    |NAME| ID|
+    +----+---+
+    |fred|  3|
+    +----+---+*/
+   // ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).show()
     assert(1 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).count)
     assert(2 === ctx.read.jdbc(url1, "TEST.TRUNCATETEST", properties).collect()(0).length)
   }
@@ -168,9 +246,26 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
   test("Incompatible INSERT to append") {//不匹配插入与追加
     //二列数据
     val df = ctx.createDataFrame(sc.parallelize(arr2x2), schema2)
+    /**
+      df.show
+      +----+---+
+      |name| id|
+      +----+---+
+      |dave| 42|
+      |mary|222|
+      +----+---+*/
+    
     //三列数据
     val df2 = ctx.createDataFrame(sc.parallelize(arr2x3), schema3)
-
+    /**
+      df2.show()
+      +----+---+---+
+      |name| id|seq|
+      +----+---+---+
+      |dave| 42|  1|
+      |mary|222|  2|
+      +----+---+---+*/
+   
     df.write.jdbc(url, "TEST.INCOMPATIBLETEST", new Properties)
     intercept[org.apache.spark.SparkException] {//追加三列数据报告
     //当数据输出的位置已存在时,在文件后面追加
@@ -179,13 +274,38 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
   }
 
   test("INSERT to JDBC Datasource") {//插入JDBC数据源
+     sql("SELECT * FROM PEOPLE").show()
+     /**
+        +----+-----+
+        |NAME|THEID|
+        +----+-----+
+        |fred|    1|
+        |mary|    2|
+        +----+-----+*/
     sql("INSERT INTO TABLE PEOPLE1 SELECT * FROM PEOPLE")
+    /**
+      +----+-----+
+      |NAME|THEID|
+      +----+-----+
+      |fred|    1|
+      |mary|    2|
+      +----+-----+*/
+    //ctx.read.jdbc(url1, "TEST.PEOPLE1", properties).show()
     assert(2 === ctx.read.jdbc(url1, "TEST.PEOPLE1", properties).count)
     assert(2 === ctx.read.jdbc(url1, "TEST.PEOPLE1", properties).collect()(0).length)
   }
 
-  test("INSERT to JDBC Datasource with overwrite") {//插入与改写JDBC数据源
-    sql("INSERT INTO TABLE PEOPLE1 SELECT * FROM PEOPLE")
+  test("INSERT to JDBC Datasource with overwrite") {//插入与重写JDBC数据源
+    /**
+     * sql("SELECT * FROM PEOPLE").show
+      +----+-----+
+      |NAME|THEID|
+      +----+-----+
+      |fred|    1|
+      |mary|    2|
+      +----+-----+*/
+      
+    sql("INSERT INTO TABLE PEOPLE1 SELECT * FROM PEOPLE")    
     sql("INSERT OVERWRITE TABLE PEOPLE1 SELECT * FROM PEOPLE")
     assert(2 === ctx.read.jdbc(url1, "TEST.PEOPLE1", properties).count)
     assert(2 === ctx.read.jdbc(url1, "TEST.PEOPLE1", properties).collect()(0).length)

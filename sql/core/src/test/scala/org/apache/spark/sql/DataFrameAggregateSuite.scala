@@ -27,6 +27,19 @@ class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
 
   test("groupBy") {//分组
     /**
+      testData2.show()
+      +---+---+
+      |  a|  b|
+      +---+---+
+      |  1|  1|
+      |  1|  2|
+      |  2|  1|
+      |  2|  2|
+      |  3|  1|
+      |  3|  2|
+      +---+---+*/
+    
+    /**
      *+---+------+
       |  a|sum(b)|
       +---+------+
@@ -34,7 +47,7 @@ class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
       |  2|     3|
       |  3|     3|
       +---+------+
-     */
+     */   
     testData2.groupBy("a").agg(sum($"b")).show()
     checkAnswer(
       testData2.groupBy("a").agg(sum($"b")),//df.agg() 求聚合用的相关函数
@@ -84,7 +97,20 @@ class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
     ctx.conf.setConf(SQLConf.DATAFRAME_RETAIN_GROUP_COLUMNS, true)
   }
 
-  test("agg without groups") {//无分组
+  test("agg without groups") {//聚合无分组
+    
+    /**
+     * testData2.show()
+      +---+---+
+      |  a|  b|
+      +---+---+
+      |  1|  1|
+      |  1|  2|
+      |  2|  1|
+      |  2|  2|
+      |  3|  1|
+      |  3|  2|
+    	+---+---+*/
     checkAnswer(
       testData2.agg(sum('b)),//df.agg() 求聚合用的相关函数
       Row(9)
@@ -123,6 +149,15 @@ class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
   }
 
   test("null average") {//空平均
+    
+    /**
+      testData3.show()
+      +---+----+
+      |  a|   b|
+      +---+----+
+      |  1|null|
+      |  2|   2|
+      +---+----+*/
     checkAnswer(
       testData3.agg(avg('b)),
       Row(2.0))
@@ -155,7 +190,15 @@ class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
       Row(6, 6.0))
   }
 
-  test("null count") {//空计算
+  test("null count") {//空计算   
+    /**
+      testData3.show()
+      +---+----+
+      |  a|   b|
+      +---+----+
+      |  1|null|
+      |  2|   2|
+      +---+----+*/
     checkAnswer(
       testData3.groupBy('a).agg(count('b)),//df.agg() 求聚合用的相关函数
       Seq(Row(1, 0), Row(2, 1))

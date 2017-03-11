@@ -30,12 +30,28 @@ class DataFrameComplexTypeSuite extends QueryTest with SharedSQLContext {
   test("UDF on struct") {//自定义函数构造
     val f = udf((a: String) => a)
     val df = sqlContext.sparkContext.parallelize(Seq((1, 1))).toDF("a", "b")
+    /**
+      df.show()
+      +---+---+
+      |  a|  b|
+      +---+---+
+      |  1|  1|
+      +---+---+*/
+    df.select(struct($"a").as("s")).select(f($"s.a")).show()
+    /**
+      +--------+
+      |UDF(s.a)|
+      +--------+
+      |       1|
+      +--------+*/
     df.select(struct($"a").as("s")).select(f($"s.a")).collect()
   }
 
   test("UDF on named_struct") {
     val f = udf((a: String) => a)
     val df = sqlContext.sparkContext.parallelize(Seq((1, 1))).toDF("a", "b")
+    //df.show()    
+    //df.selectExpr("named_struct('a', a) s").select(f($"s.a")).show()    
     df.selectExpr("named_struct('a', a) s").select(f($"s.a")).collect()
   }
 

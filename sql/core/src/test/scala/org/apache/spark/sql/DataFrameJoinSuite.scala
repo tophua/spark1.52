@@ -25,9 +25,35 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
   test("join - join using") {//使用连接
+     /**
+     * df.show()
+      +---+---+
+      |int|str|
+      +---+---+
+      |  1|  1|
+      |  2|  2|
+      |  3|  3|
+      +---+---+*/
     val df = Seq(1, 2, 3).map(i => (i, i.toString)).toDF("int", "str")
-    val df2 = Seq(1, 2, 3).map(i => (i, (i + 1).toString)).toDF("int", "str")
-    
+   /**
+    	df2.show()
+      +---+---+
+      |int|str|
+      +---+---+
+      |  1|  2|
+      |  2|  3|
+      |  3|  4|
+      +---+---+*/
+    val df2 = Seq(1, 2, 3).map(i => (i, (i + 1).toString)).toDF("int", "str")    
+    /**
+    df.join(df2, "int").show()
+    +---+---+---+
+    |int|str|str|
+    +---+---+---+
+    |  1|  1|  2|
+    |  2|  2|  3|
+    |  3|  3|  4|
+    +---+---+---+*/    
     checkAnswer(
       //使用内连接
       df.join(df2, "int"),

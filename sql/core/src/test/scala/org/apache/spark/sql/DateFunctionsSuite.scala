@@ -29,7 +29,6 @@ import org.apache.spark.unsafe.types.CalendarInterval
  */
 class DateFunctionsSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
-
   test("function current_date") {//当前日期函数
     val df1 = Seq((1, 2), (3, 1)).toDF("a", "b")
     //H2数据库日期函数

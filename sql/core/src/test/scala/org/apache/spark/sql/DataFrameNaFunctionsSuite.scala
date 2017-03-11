@@ -36,12 +36,23 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
       ).toDF("name", "age", "height")//标题
   }
 
-  test("drop") {//放弃
+  test("drop") {//删除
     val input = createDF()
     val rows = input.collect()
-
+    /**
+     * input.show()
+      +-----+----+------+
+      | name| age|height|
+      +-----+----+------+
+      |  Bob|  16| 176.5|
+      |Alice|null| 164.3|
+      |David|  60|  null|
+      | Nina|  25|   NaN|
+      |  Amy|null|  null|
+      | null|null|  null|
+      +-----+----+------+*/
     checkAnswer(
-        //删除包含null值的行
+      //删除包含null值的行
       input.na.drop("name" :: Nil).select("name"),
       Row("Bob") :: Row("Alice") :: Row("David") :: Row("Nina") :: Row("Amy") :: Nil)
 
@@ -167,9 +178,20 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("replace") {//替换
     val input = createDF()
-
+    /**
+     * input.show()
+      +-----+----+------+
+      | name| age|height|
+      +-----+----+------+
+      |  Bob|  16| 176.5|
+      |Alice|null| 164.3|
+      |David|  60|  null|
+      | Nina|  25|   NaN|
+      |  Amy|null|  null|
+      | null|null|  null|
+      +-----+----+------+*/
     // Replace two numeric columns: age and height
-    //更换两个数字列：年龄和身高
+    //更换两个数字列:年龄和身高
     val out = input.na.replace(Seq("age", "height"), Map(
       16 -> 61,
       60 -> 6,

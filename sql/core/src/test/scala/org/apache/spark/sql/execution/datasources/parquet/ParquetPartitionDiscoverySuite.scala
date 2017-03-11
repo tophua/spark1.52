@@ -283,7 +283,32 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
       new File(base.getCanonicalPath, "_temporary").mkdir()
 
       sqlContext.read.parquet(base.getCanonicalPath).registerTempTable("t")
-
+      /**
+        +--------+-----------+---+---+
+        |intField|stringField| pi| ps|
+        +--------+-----------+---+---+
+        |       6|          6|  2|foo|
+        |       7|          7|  2|foo|
+        |       8|          8|  2|foo|
+        |       9|          9|  2|foo|
+        |      10|         10|  2|foo|
+        |       1|          1|  2|foo|
+        |       2|          2|  2|foo|
+        |       3|          3|  2|foo|
+        |       4|          4|  2|foo|
+        |       5|          5|  2|foo|
+        |       1|          1|  1|foo|
+        |       2|          2|  1|foo|
+        |       3|          3|  1|foo|
+        |       4|          4|  1|foo|
+        |       5|          5|  1|foo|
+        |       6|          6|  1|foo|
+        |       7|          7|  1|foo|
+        |       8|          8|  1|foo|
+        |       9|          9|  1|foo|
+        |      10|         10|  1|foo|
+        +--------+-----------+---+---+*/
+      sql("SELECT * FROM t").show()
       withTempTable("t") {
         checkAnswer(
           sql("SELECT * FROM t"),

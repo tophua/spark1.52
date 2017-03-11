@@ -30,7 +30,11 @@ class UDFSuite extends QueryTest with SharedSQLContext {
 
   test("built-in fixed arity expressions") {//内置固定数量的表达
     val df = ctx.emptyDataFrame    
-    //val df = ctx.    
+    /**
+      +-------+--------+--------+----------+
+      |'rand()|'randn()|'rand(5)|'randn(50)|
+      +-------+--------+--------+----------+
+      +-------+--------+--------+----------+*/
     df.selectExpr("rand()", "randn()", "rand(5)", "randn(50)").show()
   }
 
@@ -105,8 +109,24 @@ class UDFSuite extends QueryTest with SharedSQLContext {
       data.write.parquet(dir.getCanonicalPath)
       ctx.read.parquet(dir.getCanonicalPath).registerTempTable("test_table")
       val answer = sql("select input_file_name() from test_table").head().getString(0)
-      println(answer)
-      assert(answer.contains(dir.getCanonicalPath))
+      //println(answer)
+      //assert(answer.contains(dir.getCanonicalPath))
+      /**
+       *  +--------------------+
+          |                 _c0|
+          +--------------------+
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          |file:/C:/Users/li...|
+          +--------------------+*/
       sql("select input_file_name() from test_table").show()
       
       assert(sql("select input_file_name() from test_table").distinct().collect().length >= 2)

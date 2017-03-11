@@ -44,16 +44,15 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   test("having clause") {//HAVING子句   
     Seq(("one", 1), ("two", 2), ("three", 3), ("one", 5)).toDF("k", "v").registerTempTable("hav")
     /**
-     *  +-----+---+
+     * sql("SELECT * FROM hav ").show()
+     	  +-----+---+
         |    k|  v|
         +-----+---+
         |  one|  1|
         |  two|  2|
         |three|  3|
         |  one|  5|
-        +-----+---+
-     */
-    sql("SELECT * FROM hav ").show()
+        +-----+---+*/    
     checkAnswer(
       sql("SELECT k, sum(v) FROM hav GROUP BY k HAVING sum(v) > 2"),
       Row("one", 6) :: Row("three", 3) :: Nil)
@@ -230,7 +229,21 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
           |  1|  1|       1|
           +---+---+--------+
          */
-    sql("select a.* from df1 a").show()
+    //sql("select a.* from df1 a").show()
+    /**
+      +---+---+
+      |str|_c1|
+      +---+---+
+      |  2|  1|
+      |  3|  1|
+      |  1|  1|
+      +---+---+*/
+/*    sql(
+        """
+          |SELECT x.str, SUM(x.strCount)
+          |FROM df x JOIN df y ON x.str = y.str
+          |GROUP BY x.str
+        """.stripMargin).show()*/        
     checkAnswer(
       sql(
         """
@@ -274,7 +287,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     assert(newContext.getSQLDialect().getClass === classOf[DefaultParserDialect])
   }
 
-  test("SPARK-4625 support SORT BY in SimpleSQLParser & DSL") {//通过简单的SQL解析器支持排序
+  test("SPARK-4625 support SORT BY in SimpleSQLParser & DSL") {//通过简单的SQL解析器支持排序    
     checkAnswer(
       //TestData2(a: Int, b: Int)
       sql("SELECT a FROM testData2 SORT BY a"),
@@ -504,10 +517,24 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("Add Parser of SQL COALESCE()") {//添加解析SQL合并
+    /**
+     * sql("""SELECT COALESCE(1, 2)""").show()
+        +---+
+        |_c0|
+        +---+
+        |  1|
+        +---+*/
     checkAnswer(
         //依次参考各参数表达式,遇到非null值即停止并返回该值
       sql("""SELECT COALESCE(1, 2)"""),
       Row(1))
+      /**
+       *sql("SELECT COALESCE(null, 1, 1.5)").show()
+        +---+
+        |_c0|
+        +---+
+        |1.0|
+        +---+*/     
     checkAnswer(
         //coalesce函数可以接受一系列的值,如果第一个为null,使用第二个值,如果第二个值为null,使用第三个值,以此类推
       sql("SELECT COALESCE(null, 1, 1.5)"),
@@ -555,6 +582,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       |2.6457513110645907|  7|
       |2.8284271247461903|  8|
       |               3.0|  9|
+      +----------------------+
      */
     sql("SELECT SQRT(key) as SQRT ,key FROM testData").show()
     checkAnswer(      
@@ -564,6 +592,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("SQRT with automatic string casts") {//平方根函数 cast强转换字符类型
+    //sql("SELECT SQRT(CAST(key AS STRING)) FROM testData").show()
     checkAnswer(
       sql("SELECT SQRT(CAST(key AS STRING)) FROM testData"),
       (1 to 100).map(x => Row(math.sqrt(x.toDouble))).toSeq
@@ -598,17 +627,17 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     //用数据集创建一个time对象的DataFrame,将DataFrame注册为一个表
     //DataFrame 与关系型数据库中的数据库表类似
     /**
-     *+--------------------+
+      sql("SELECT time FROM timestamps").show()
+      +--------------------+
       |                time|
       +--------------------+
       |1969-12-31 16:00:...|
       |1969-12-31 16:00:...|
       |1969-12-31 16:00:...|
       |1969-12-31 16:00:...|
-      +--------------------+
-     */
+      +--------------------+*/
     (0 to 3).map(i => Tuple1(new Timestamp(i))).toDF("time").registerTempTable("timestamps")
-    sql("SELECT time FROM timestamps").show()
+   
     checkAnswer(sql(
       "SELECT time FROM timestamps WHERE time='1969-12-31 16:00:00.0'"),
       Row(java.sql.Timestamp.valueOf("1969-12-31 16:00:00")))
@@ -652,8 +681,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       |[1, 2, 3]|  1|  3|  2|
       |[2, 3, 4]|  2|  5|  3|
       +---------+---+---+---+ */
-    sql("SELECT data, data[0], data[0] + data[1], data[0 + 1] FROM arrayData").show()
-    
+    sql("SELECT data, data[0], data[0] + data[1], data[0 + 1] FROM arrayData").show()    
     checkAnswer(
       sql("SELECT data, data[0], data[0] + data[1], data[0 + 1] FROM arrayData"),
       arrayData.map(d => Row(d.data, d.data(0), d.data(0) + d.data(1), d.data(1))).collect())
@@ -672,7 +700,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       |  3|  2|
       +---+---+
      */
-    sql("SELECT * FROM testData2").show()
+    //sql("SELECT * FROM testData2").show()
     checkAnswer(// IN/EXISTS 子查询的一种更高效的实现
       sql("SELECT * FROM testData2 x LEFT SEMI JOIN testData2 y ON x.a >= y.a + 2"),
       Seq(Row(3, 1), Row(3, 2))
@@ -724,7 +752,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       |  3|  2|
       +---+---+
      */
-    sql("SELECT * FROM testData2 ").show()
+    //sql("SELECT * FROM testData2 ").show()
     checkAnswer(
         //分组求和
       sql("SELECT a, SUM(b) FROM testData2 GROUP BY a"),
@@ -746,7 +774,6 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       +---+---+
      */
       checkAnswer(
-        //
         sql("SELECT a, count(1) FROM testData2 GROUP BY a, 1"),
         Seq(Row(1, 2), Row(2, 2), Row(3, 2)))
       checkAnswer(
@@ -783,7 +810,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
      */
     sql("SELECT * FROM nullInts").show()
     checkAnswer(
-        //最小,最大,平均,求和,计数
+      //最小,最大,平均,求和,计数
       sql("SELECT MIN(a), MAX(a), AVG(a), SUM(a), COUNT(a) FROM nullInts"),
       Row(1, 3, 2, 6, 3)
     )
@@ -945,6 +972,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("average overflow") {//平均数溢出
     /**
+     *sql("SELECT * FROM largeAndSmallInts").show()
      *+----------+---+
       |         a|  b|
       +----------+---+
@@ -955,15 +983,14 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       |2147483646|  1|
       |         3|  2|
       +----------+---+
-     */
-    sql("SELECT * FROM largeAndSmallInts").show()
+     */    
     checkAnswer(
       sql("SELECT AVG(a),b FROM largeAndSmallInts group by b"),
       Seq(Row(2147483645.0, 1), Row(2.0, 2)))
   }
 
   test("count") {//计数
-    sql("SELECT COUNT(*) FROM testData2").show()
+    //sql("SELECT COUNT(*) FROM testData2").show()
     checkAnswer(
       sql("SELECT COUNT(*) FROM testData2"),
       Row(testData2.count()))
@@ -1033,7 +1060,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
      */
      sql("SELECT a.*,b.* FROM upperCaseData a,lowerCaseData b where a.N=b.n").show()
     checkAnswer(
-        //大写小写匹配
+      //大写小写匹配
       sql("SELECT * FROM upperCaseData JOIN lowerCaseData WHERE n = N"),
       Seq(
         Row(1, "A", 1, "a"),
@@ -1043,6 +1070,16 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   }
 
   test("inner join ON, one match per row") {//内部连接,每行一个匹配
+    /**
+      sql("SELECT * FROM upperCaseData JOIN lowerCaseData ON n = N").show()
+      +---+---+---+---+
+      |  N|  L|  n|  l|
+      +---+---+---+---+
+      |  1|  A|  1|  a|
+      |  2|  B|  2|  b|
+      |  3|  C|  3|  c|
+      |  4|  D|  4|  d|
+      +---+---+---+---+*/    
     checkAnswer(
       sql("SELECT * FROM upperCaseData JOIN lowerCaseData ON n = N"),
       Seq(
@@ -1205,7 +1242,8 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
   test("system function upper()") {//系统函数upper
     /**
-     *+---+---+
+      sql("SELECT * FROM lowerCaseData").show()
+      +---+---+
       |  n|  l|
       +---+---+
       |  1|  a|
@@ -1213,9 +1251,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       |  3|  c|
       |  4|  d|
       +---+---+
-     */
-    sql("SELECT * FROM lowerCaseData").show()
-    
+     */   
     checkAnswer(//转换大写,UPPER列名
       sql("SELECT n,UPPER(l) FROM lowerCaseData"),
       Seq(
@@ -1296,7 +1332,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       |  4|  d|
       +---+---+
      */
-    sql("SELECT a.* FROM lowerCaseData a").show()
+    //sql("SELECT a.* FROM lowerCaseData a").show()
     /**
      *+---+---+
       |  N|  L|
@@ -1309,7 +1345,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       |  6|  F|
       +---+---+
      */
-    sql("SELECT b.* FROM upperCaseData b").show()
+    //sql("SELECT b.* FROM upperCaseData b").show()
     //EXCEPT 返回两个结果集的差
     checkAnswer(
       sql("SELECT * FROM lowerCaseData EXCEPT SELECT * FROM upperCaseData"),
@@ -1429,6 +1465,16 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
 
     val df2 = sqlContext.createDataFrame(rowRDD2, schema2)
     df2.registerTempTable("applySchema2")
+    /**
+      +---------+--------------------+
+      |       f1|                  f2|
+      +---------+--------------------+
+      | [1,true]|     Map(A1 -> null)|
+      |[2,false]|     Map(B2 -> null)|
+      | [3,true]|     Map(C3 -> null)|
+      | [4,true]|Map(D4 -> 2147483...|
+      +---------+--------------------+*/
+    //df2.show()
     checkAnswer(
       sql("SELECT * FROM applySchema2"),
       Row(Row(1, true), Map("A1" -> null)) ::
@@ -1506,7 +1552,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
      * 		StructField(age,IntegerType,false))
      */
     val schema = person.schema
-    println(schema)
+    //println(schema)
     val docKey = "doc"
     val docValue = "first name"
     val metadata = new MetadataBuilder()
@@ -1800,6 +1846,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     //数组对象转换成RDD对象
     val rdd = sqlContext.sparkContext.parallelize((0 to 1).map(i => data(i)))
     rdd.toDF().registerTempTable("distinctData")
+    
     checkAnswer(sql("SELECT COUNT(DISTINCT key,value) FROM distinctData"), Row(2))
   }
 
@@ -2057,7 +2104,6 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
   test("SPARK-10215 Div of Decimal returns null") {
     val d = Decimal(1.12321)
     val df = Seq((d, 1)).toDF("a", "b")
-
     checkAnswer(
       df.selectExpr("b * a / b"),
       Seq(Row(d.toBigDecimal)))

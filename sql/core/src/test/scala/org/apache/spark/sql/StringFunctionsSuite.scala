@@ -28,18 +28,17 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
   test("string concat") {//字符串连接
     val df = Seq[(String, String, String)](("a", "b", null)).toDF("a", "b", "c")
     /***
+     * df.show()
      *+---+---+----+
       |  a|  b|   c|
       +---+---+----+
       |  a|  b|null|
       +---+---+----+
-     */
-    df.show()
+     */    
     checkAnswer(
       df.select(concat($"a", $"b"), concat($"a", $"b", $"c")),
       //注意如果有一个字段为null,连接为null
       Row("ab", null))
-
     checkAnswer(
         //表达式的形式字符串连接
       df.selectExpr("concat(a, b)", "concat(a, b, c)"),
@@ -48,13 +47,18 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string concat_ws") {//字符串连接
     val df = Seq[(String, String, String)](("a", "b", null)).toDF("a", "b", "c")
-
+    /**df.select(concat_ws("||", $"a", $"b", $"c")).show()
+      +-------------------+
+      |concat_ws(||,a,b,c)|
+      +-------------------+
+      |               a||b|
+      +-------------------+*/
     checkAnswer(//将多个输入字符串列成一个字符串列,使用给定的分隔符,如果字段null,则可以连接
       df.select(concat_ws("||", $"a", $"b", $"c")),
       Row("a||b"))
 
     checkAnswer(
-        //表达式方式
+      //表达式方式
       df.selectExpr("concat_ws('||', a, b, c)"),
       Row("a||b"))
   }
@@ -71,7 +75,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       ("100-200", "(\\d+)-(\\d+)", "300"),
       ("100-200", "(\\d+)-(\\d+)", "400"),
       ("100-200", "(\\d+)", "400")).toDF("a", "b", "c")
-    df.show()
+    //df.show()
     /**
      * +-------+-----------+---+
        |      a|          b|  c|
@@ -201,7 +205,21 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string translate") {//字符替换函数
     val df = Seq(("translate", "")).toDF("a", "b")
+    /**
+     * df.show()
+      +---------+---+
+      |        a|  b|
+      +---------+---+
+      |translate|   |
+      +---------+---+*/
     
+    /**
+      df.select(translate($"a", "rnlt", "123")).show()        
+      +---------------------+
+      |translate(a,rnlt,123)|
+      +---------------------+
+      |              1a2s3ae|
+      +---------------------+*/    
     checkAnswer(df.select(translate($"a", "rnlt", "123")), Row("1a2s3ae"))
     checkAnswer(df.selectExpr("""translate(a, "rnlt", "")"""), Row("asae"))
   }
@@ -220,9 +238,16 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string formatString function") {//字符串格式化函数
     val df = Seq(("aa%d%s", 123, "cc")).toDF("a", "b", "c")
-
+    /**
+     * df.show()
+      +------+---+---+
+      |     a|  b|  c|
+      +------+---+---+
+      |aa%d%s|123| cc|
+      +------+---+---+*/
+   
     checkAnswer(
-        //%d表示数字,%s表示字符串
+        //格式化字符串,%d表示数字,%s表示字符串
       df.select(format_string("aa%d%s", $"b", $"c")),
       Row("aa123cc"))
 
@@ -242,7 +267,13 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string instr function") {//返回要截取的字符串在源字符串中的位置
     val df = Seq(("aaads", "aa", "zz")).toDF("a", "b", "c")
-
+    /**
+     * df.show()
+      +-----+---+---+
+      |    a|  b|  c|
+      +-----+---+---+
+      |aaads| aa| zz|
+      +-----+---+---+*/
     checkAnswer(
         //返回要截取的字符串在源字符串中开始的位置
       df.select(instr($"a", "aa")),
@@ -255,7 +286,13 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string substring_index function") {//截取子字符串索引函数
     val df = Seq(("www.apache.org", ".", "zz")).toDF("a", "b", "c")
-  
+    /**
+      df.show()
+      +--------------+---+---+
+      |             a|  b|  c|
+      +--------------+---+---+
+      |www.apache.org|  .| zz|
+      +--------------+---+---+*/    
     checkAnswer(
         //截取子字符串索引函数,2匹配索引截取的位置
       df.select(substring_index($"a", ".", 2)),
@@ -268,7 +305,6 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string locate function") {//字符串查找匹配定位函数
     val df = Seq(("aaads", "aa", "zz", 1)).toDF("a", "b", "c", "d")
-
     checkAnswer(
       //locate 确定…的位置
       df.select(locate("aa", $"a"), locate("aa", $"a", 1)),
@@ -304,8 +340,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
   }
 
   test("string reverse function") {//字符串反转函数
-    val df = Seq(("hi", "hhhi")).toDF("a", "b")
-
+    val df = Seq(("hi", "hhhi")).toDF("a", "b")    
     checkAnswer(
       df.select(reverse($"a"), reverse($"b")),
       Row("ih", "ihhh"))
@@ -325,7 +360,13 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string split function") {//字符串分隔函数,返回数组
     val df = Seq(("aa2bb3cc", "[1-9]+")).toDF("a", "b")
-    
+    /**
+     * df.show()
+      +--------+------+
+      |       a|     b|
+      +--------+------+
+      |aa2bb3cc|[1-9]+|
+      +--------+------+*/
     checkAnswer(
       df.select(split($"a", "[1-9]+")),
       Row(Seq("aa", "bb", "cc")))

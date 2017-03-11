@@ -82,11 +82,11 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     df.show()
     //1.0
     val corr1 = df.stat.corr("a", "b", "pearson")
-    println(1e-12)
+    //println(1e-12)
     assert(math.abs(corr1 - 1.0) < 1e-12)
     //-1.0
     val corr2 = df.stat.corr("a", "c", "pearson")
-     println(corr2)
+    //println(corr2)
     assert(math.abs(corr2 + 1.0) < 1e-12)
     // non-trivial example. To reproduce in python, use:
     // >>> from scipy.stats import pearsonr
@@ -127,7 +127,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
       +---+-----+*/
    
     val df2 = Seq.tabulate(20)(x => (x, x * x - 2 * x + 3.5)).toDF("a", "b")
-     df2.show()
+    // df2.show()
     //0.9572339139475857
     val corr3 = df2.stat.corr("a", "b", "pearson")
     println(corr3)
@@ -154,7 +154,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     df.show()
     val results = df.stat.cov("singles", "doubles")
     //18.333333333333332
-    println(results)
+    //println(results)
     assert(math.abs(results - 55.0 / 3) < 1e-12)
     intercept[IllegalArgumentException] {
       df.stat.cov("singles", "letters") // doesn't accept non-numerical dataTypes

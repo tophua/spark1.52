@@ -28,7 +28,6 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.test.{ExamplePointUDT, ExamplePoint, SharedSQLContext}
 /**
  * DataFrame是一个分布式的,按照命名列的形式组织的数据集合,与关系型数据库中的数据库表类似
- * 
  */
 class DataFrameSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
@@ -71,7 +70,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       |  1|[1,1]|
       +---+-----+
      */
-    df.show()
+    //df.show()
     checkAnswer(
         //第一列分组,合计第二列,第一个值
       df.groupBy("_1").agg(sum("_2._1")).toDF("key", "total"),
@@ -188,6 +187,15 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
    //explode函数把字符串分割为数组
   test("SPARK-8930: explode should fail with a meaningful message if it takes a star") {
     val df = Seq(("1", "1,2"), ("2", "4"), ("3", "7,8,9")).toDF("prefix", "csv")
+    /**
+    df.show()
+    +------+-----+
+    |prefix|  csv|
+    +------+-----+
+    |     1|  1,2|
+    |     2|    4|
+    |     3|7,8,9|
+    +------+-----+*/    
     val e = intercept[AnalysisException] {
       df.explode($"*") { case Row(prefix: String, csv: String) =>
         csv.split(",").map(v => Tuple1(prefix + ":" + v)).toSeq
@@ -210,9 +218,10 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   }
 
   test("selectExpr") {//选择表达式
-    testData.show()
+    
     /**
-     *+---+-----+
+     *testData.show()
+      +---+-----+
       |  1|    1|
       |  2|    2|
       |  3|    3|
@@ -224,10 +233,8 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       | 19|   19|
       | 20|   20|
       +---+-----+ */
-    //
-     testData.selectExpr("abs(key)", "value").show()
-    checkAnswer(
-        
+     //testData.selectExpr("abs(key)", "value").show()
+    checkAnswer(        
       testData.selectExpr("abs(key)", "value"),
       testData.collect().map(row => Row(math.abs(row.getInt(0)), row.getString(1))).toSeq)
   }
@@ -244,7 +251,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     testData.selectExpr("key as k").select("k").show()
     
     checkAnswer(
-        //表达式使用别名
+      //表达式使用别名
       testData.selectExpr("key as k").select("k"),
       testData.select("key").collect().toSeq)
   }
@@ -322,7 +329,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
 
   test("global sorting") {//全局排序
     checkAnswer(
-        //使用字段排序
+      //使用字段排序
       testData2.orderBy('a.asc, 'b.asc),
       Seq(Row(1, 1), Row(1, 2), Row(2, 1), Row(2, 2), Row(3, 1), Row(3, 2)))
 
@@ -358,7 +365,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       arrayData.toDF().collect().sortBy(_.getAs[Seq[Int]](0)(0)).toSeq)
 
     checkAnswer(
-          //使用data数组字段第一个值排序(即1),降序
+      //使用data数组字段第一个值排序(即1),降序
       arrayData.toDF().orderBy('data.getItem(0).desc),
       arrayData.toDF().collect().sortBy(_.getAs[Seq[Int]](0)(0)).reverse.toSeq)
 
@@ -411,9 +418,8 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
 
   test("udf") {//自定义方法
     val foo = udf((a: Int, b: String) => a.toString + b)
-
     checkAnswer(
-      // SELECT *, foo(key, value) FROM testData
+      //SELECT *, foo(key, value) FROM testData
       testData.select($"*", foo('key, 'value)).limit(3),
       Row(1, "1", "11") :: Row(2, "2", "22") :: Row(3, "3", "33") :: Nil
     )
@@ -440,7 +446,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   test("withColumn") {//使用列
     //使用新列
     val df = testData.toDF().withColumn("newCol", col("key") + 1)
-    df.show()
+     //df.show()
     checkAnswer(
       df,
       testData.collect().map { case Row(key: Int, value: String) =>
@@ -624,7 +630,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       val df = Seq((1, 22)).toDF("a", "b")
       //parquet目录
       val parquetDir = new File(dir, "parquet").getCanonicalPath
-      println(parquetDir)
+      //println(parquetDir)
       //保存parquet格式文件
       //df.write.json(parquetDir)
       df.write.parquet(parquetDir)
@@ -632,7 +638,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       val parquetDF = sqlContext.read.parquet(parquetDir)
       //判断输入文件不为空nonEmpty,nonEmpty测试可遍历迭代器是不是为空
       //读取数据成功
-      println(parquetDF.inputFiles.nonEmpty)
+      //println(parquetDF.inputFiles.nonEmpty)
       assert(parquetDF.inputFiles.nonEmpty)
 
       val jsonDir = new File(dir, "json").getCanonicalPath

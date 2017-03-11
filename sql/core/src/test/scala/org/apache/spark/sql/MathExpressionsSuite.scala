@@ -228,7 +228,7 @@ class MathExpressionsSuite extends QueryTest with SharedSQLContext {
     | 55|
     |555|
     +---+*/
-    df.select('a).show()
+    //df.select('a).show()
     checkAnswer(
       //ROUND(21.5, -1)将 21.5左侧一位四舍五入即20
       df.select(round('a), round('a, -1), round('a, -2)),
