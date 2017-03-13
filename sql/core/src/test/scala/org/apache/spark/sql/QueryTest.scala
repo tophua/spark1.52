@@ -37,18 +37,18 @@ class QueryTest extends PlanTest {
   /**
    * Runs the plan and makes sure the answer contains all of the keywords, or the
    * none of keywords are listed in the answer
-   * 运行该计划,并确保答案包含所有的关键字
+   * 运行计划,并确保答案包含所有关键字,或没有一个关键字列在答案中
    * @param df the [[DataFrame]] to be executed
    * @param exists true for make sure the keywords are listed in the output, otherwise
-   * 				确实为确保关键字在输出中列出,否则,确保关键字没有在输出中列出
-   *               to make sure none of the keyword are not listed in the output
+   * 										 to make sure none of the keyword are not listed in the output
+   * 				     存在true,以确保关键字列在输出中,否则确保关键字没有列在输出中
    * @param keywords keyword in string array 字符串数组中的关键字
    */
   def checkExistence(df: DataFrame, exists: Boolean, keywords: String*) {
     val outputs = df.collect().map(_.mkString).mkString
     for (key <- keywords) {
       if (exists) {//是否包含关键字
-        //doesn't exist in result 结果不存在
+        //doesn't exist in result 在结果中不存在
         assert(outputs.contains(key), s"Failed for $df ($key doesn't exist in result)")
       } else {
         assert(!outputs.contains(key), s"Failed for $df ($key existed in the result)")
@@ -58,10 +58,10 @@ class QueryTest extends PlanTest {
 
   /**
    * Runs the plan and makes sure the answer matches the expected result.
-   * 运行该计划并确保答案与预期结果相匹配
+   * 运行计划并确保答案与预期结果匹配
    * @param df the [[DataFrame]] to be executed 被执行DataFrame
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
-   * 											 预期的结果在一序列的行
+   * 											在[[Row]]的[[Seq]]中的预期结果
    */
   protected def checkAnswer(df: DataFrame, expectedAnswer: Seq[Row]): Unit = {
     QueryTest.checkAnswer(df, expectedAnswer) match {
@@ -101,20 +101,20 @@ class QueryTest extends PlanTest {
 object QueryTest {
   /**
    * Runs the plan and makes sure the answer matches the expected result.
-   * 运行该计划,并确保答案与预期结果相匹配
-   * If there was exception during the execution or the contents of the DataFrame does not
-   * 如果DataFrame执行或内容中有异常,不符合预期的结果,将返回一个错误消息,否则,一个[没有]将被返回。
+   * 运行计划并确保答案与预期结果匹配
+   * If there was exception during the execution or the contents of the DataFrame does not  
    * match the expected result, an error message will be returned. Otherwise, a [[None]] will
    * be returned.
+   * 如果在执行期间有异常或者DataFrame的内容与预期结果不匹配,将返回一条错误消息,否则,将返回[[无]]
    * @param df the [[DataFrame]] to be executed
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
+   * 				在[[Row]]的[[Seq]]中的预期结果
    */
   def checkAnswer(df: DataFrame, expectedAnswer: Seq[Row]): Option[String] = {
     //nonEmpty测试容器是否包含元素
     val isSorted = df.logicalPlan.collect { case s: logical.Sort => s }.nonEmpty
-
     // We need to call prepareRow recursively to handle schemas with struct types.
-    //我们需要调用preparerow递归处理模式与结构类型
+    //我们需要递归调用prepareRow来处理带有struct类型的模式
     def prepareRow(row: Row): Row = {
       Row.fromSeq(row.toSeq.map {
         case null => null
@@ -128,8 +128,8 @@ object QueryTest {
     }
     //准备回答
     def prepareAnswer(answer: Seq[Row]): Seq[Row] = {
-      // Converts data to types that we can do equality comparison using Scala collections.
-      //转换数据,我们可以使用Scala集合类型的相等比较的大数字类型
+      //Converts data to types that we can do equality comparison using Scala collections.
+      //将数据转换为类型,我们可以使用Scala集合进行等式比较。
       // For BigDecimal type, the Scala type has a better definition of equality test (similar to
       // Java's java.math.BigDecimal.compareTo).
       //Scala类型具有平等性测试更好的定义

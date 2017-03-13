@@ -44,7 +44,7 @@ private[sql] trait ParquetTest extends SQLTestUtils {
    * 将`data`写入Parquet文件,然后将其传递给`f`,并在`f`返回后被删除
    */
   protected def withParquetFile[T <: Product: ClassTag: TypeTag]
-      (data: Seq[T])
+      (data: Seq[T])//科里化函数
       (f: String => Unit): Unit = {
     withTempPath { file =>
       // _sqlContext.createDataFrame(data).show()
@@ -68,31 +68,31 @@ private[sql] trait ParquetTest extends SQLTestUtils {
    * Writes `data` to a Parquet file, reads it back as a [[DataFrame]] and registers it as a
    * temporary table named `tableName`, then call `f`. The temporary table together with the
    * Parquet file will be dropped/deleted after `f` returns.
-   * 将`data`写入Parquet文件,将其读取为[[DataFrame]]并将其注册为名为`tableName`的临时表,然后调用`f`,
+   * 将`data`写入Parquet文件,将其读取为[DataFrame]并将其注册为名为`tableName`的临时表,然后调用`f`,
    *  `f`返回后,临时表和Parquet文件将被删除/删除
    */
   protected def withParquetTable[T <: Product: ClassTag: TypeTag]
       (data: Seq[T], tableName: String)
       (f: => Unit): Unit = {
     withParquetDataFrame(data) { df =>
-      //注册数据集及表
+      //注册数据集Seq及临时表名
       _sqlContext.registerDataFrameAsTable(df, tableName)
       withTempTable(tableName)(f)
     }
   }
-  //生产Parquet文件
+  //产生Parquet文件
   protected def makeParquetFile[T <: Product: ClassTag: TypeTag](
       data: Seq[T], path: File): Unit = {
-       //当数据输出的位置已存在时,重写
+       //当数据输出的位置已存在时,覆盖重写
     _sqlContext.createDataFrame(data).write.mode(SaveMode.Overwrite).parquet(path.getCanonicalPath)
   }
-  //生产Parquet文件
+  //产生Parquet文件
   protected def makeParquetFile[T <: Product: ClassTag: TypeTag](
       df: DataFrame, path: File): Unit = {
        //当数据输出的位置已存在时,重写
     df.write.mode(SaveMode.Overwrite).parquet(path.getCanonicalPath)
   }
-//生产分区目录
+  //产生分区目录
   protected def makePartitionDir(
       basePath: File,
       defaultPartitionName: String,

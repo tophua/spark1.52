@@ -206,7 +206,7 @@ class FilteredScanSuite extends DataSourceTest with SharedSQLContext {
   sqlTest(
     "SELECT a, b, c FROM oneToTenFiltered WHERE c like '%eE%'",
     Seq(Row(5, 5 * 2, "e" * 5 + "E" * 5)))
-
+  //下推
   testPushDown("SELECT * FROM oneToTenFiltered WHERE A = 1", 1)
   testPushDown("SELECT a FROM oneToTenFiltered WHERE A = 1", 1)
   testPushDown("SELECT b FROM oneToTenFiltered WHERE A = 1", 1)

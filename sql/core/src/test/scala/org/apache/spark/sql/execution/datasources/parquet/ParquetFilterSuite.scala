@@ -34,8 +34,8 @@ import org.apache.spark.sql.test.SharedSQLContext
  * NOTE:
  *
  * 1. `!(a cmp b)` is always transformed to its negated form `a cmp' b` by the
- *    `BooleanSimplification` optimization rule whenever possible. As a result, predicate `!(a < 1)`
- *    results in a `GtEq` filter predicate rather than a `Not`.
+ *    `BooleanSimplification` optimization rule whenever possible. As a result, predicate(谓词) `!(a < 1)`
+ *    results in a `GtEq` filter predicate(过虑谓词) rather than a `Not`.
  *
  * 2. `Tuple1(Option(x))` is used together with `AnyVal` types like `Int` to ensure the inferred
  *    data type is nullable.
@@ -43,9 +43,9 @@ import org.apache.spark.sql.test.SharedSQLContext
  */
 class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContext {
 
-  private def checkFilterPredicate(
+  private def checkFilterPredicate(//过虑谓词
       df: DataFrame,
-      predicate: Predicate,
+      predicate: Predicate,//谓词
       filterClass: Class[_ <: FilterPredicate],
       checker: (DataFrame, Seq[Row]) => Unit,
       expected: Seq[Row]): Unit = {
@@ -106,7 +106,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       (implicit df: DataFrame): Unit = {
     checkBinaryFilterPredicate(predicate, filterClass, Seq(Row(expected)))(df)
   }
-  //过滤器下推-布尔
+  //过滤下推-布尔
   test("filter pushdown - boolean") {
     withParquetDataFrame((true :: false :: Nil).map(b => Tuple1.apply(Option(b)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -117,7 +117,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       checkFilterPredicate('_1 !== true, classOf[NotEq[_]], false)
     }
   }
-  //过滤器下推 - 整数
+  //过滤下推 - 整数
   test("filter pushdown - integer") {
     withParquetDataFrame((1 to 4).map(i => Tuple1(Option(i)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -143,7 +143,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
       checkFilterPredicate('_1 < 2 || '_1 > 3, classOf[Operators.Or], Seq(Row(1), Row(4)))
     }
   }
-  //过滤器下推 - 长整型
+  //过滤下推 - 长整型
   test("filter pushdown - long") {
     withParquetDataFrame((1 to 4).map(i => Tuple1(Option(i.toLong)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
@@ -287,7 +287,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
         '_1 < 2.b || '_1 > 3.b, classOf[Operators.Or], Seq(Row(1.b), Row(4.b)))
     }
   }  
-  //不要下推引用分区列的谓词
+  //不要谓词下推引用分区列
   test("SPARK-6554: don't push down predicates which reference partition columns") {
     import testImplicits._
 
