@@ -30,8 +30,8 @@ object SparkWordCount {
     val sc = new SparkContext(conf);
     sc.parallelize(1 until 10000).count
     sc.parallelize(1 until 10000).map( x => (x%30,x)).groupByKey().count
-    val textFile = sc.textFile("people.txt");//textFile：生成一个HadoopRDD.map,创建了一个MapPartitionsRDD
-    //flatMap：前面生成的MapPartitionsRDD[String],调用flatMap函数,生成了MapPartitionsRDD[String] 
+    val textFile = sc.textFile("people.txt");//textFile?????????HadoopRDD.map,?????????MapPartitionsRDD
+    //flatMap??????????MapPartitionsRDD[String],????flatMap????,??????MapPartitionsRDD[String] 
     val wordCounts = textFile.flatMap(line => line.split(" ")).map(
       word => (word, 1))
       
@@ -46,11 +46,11 @@ object SparkWordCount {
      *
      *
      * val wordcount = textFile.flatMap(_.split(' ')).map((_,1)).reduceByKey(_+_)
-     * .map(x => (x._2, x._1))//K V调换位置
-     * .sortByKey(false)//K表示倒序排列
-     * .map(x => (x._2, x._1))//K V调换位置
+     * .map(x => (x._2, x._1))//K V????λ??
+     * .sortByKey(false)//K???????????
+     * .map(x => (x._2, x._1))//K V????λ??
      */
-    val tsets = wordCounts.reduceByKey((a, b) => a + b) //reduceByKey(_+_)功能一样 
+    val tsets = wordCounts.reduceByKey((a, b) => a + b) //reduceByKey(_+_)??????? 
     //print the results,for debug use.
     //println("Word Count program running results:");
 

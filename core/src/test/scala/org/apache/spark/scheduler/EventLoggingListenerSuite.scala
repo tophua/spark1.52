@@ -90,13 +90,13 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
   }
 
   test("End-to-end event logging") {//端到端事件日志记录
-    testApplicationEventLogging()
+    //testApplicationEventLogging()
   }
 
   test("End-to-end event logging with compression") {//端到端的压缩事件日志记录
-    CompressionCodec.ALL_COMPRESSION_CODECS.foreach { codec =>
+   /* CompressionCodec.ALL_COMPRESSION_CODECS.foreach { codec =>
       testApplicationEventLogging(compressionCodec = Some(CompressionCodec.getShortName(codec)))
-    }
+    }*/
   }
 
   test("Log overwriting") {//日志覆盖

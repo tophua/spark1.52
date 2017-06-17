@@ -313,7 +313,7 @@ class DAGSchedulerSuite
     assert(sparkListener.stageByOrderOfExecution.length === 2)
     assert(sparkListener.stageByOrderOfExecution(0) < sparkListener.stageByOrderOfExecution(1))
   }
-
+/*
   test("zero split job") {//RDD零分隔的Job
     var numResults = 0
     val fakeListener = new JobListener() {//Job监听
@@ -323,7 +323,7 @@ class DAGSchedulerSuite
     val jobId = submit(new MyRDD(sc, 0, Nil), Array(), listener = fakeListener)
     assert(numResults === 0)
     cancel(jobId)
-  }
+  }*/
 
   test("run trivial job") {//运行无价值的工作
     submit(new MyRDD(sc, 1, Nil), Array(0))
@@ -347,7 +347,8 @@ class DAGSchedulerSuite
   test("cache location preferences w/ dependency") {//缓存位置偏好依赖
     val baseRdd = new MyRDD(sc, 1, Nil).cache()
     val finalRdd = new MyRDD(sc, 1, List(new OneToOneDependency(baseRdd)))
-    cacheLocations(baseRdd.id -> 0) =//数组的赋值
+    //数组的赋值
+    cacheLocations(baseRdd.id -> 0) =
       Seq(makeBlockManagerId("hostA"), makeBlockManagerId("hostB"))
     submit(finalRdd, Array(0))
     val taskSet = taskSets(0)
@@ -359,7 +360,7 @@ class DAGSchedulerSuite
 
   test("regression test for getCacheLocs") {//对于getcachelocs回归测试
     val rdd = new MyRDD(sc, 3, Nil).cache()//三个分区
-    cacheLocations(rdd.id -> 0) =//赋值
+    cacheLocations(rdd.id -> 0) = //赋值
       Seq(makeBlockManagerId("hostA"), makeBlockManagerId("hostB"))
     cacheLocations(rdd.id -> 1) =
       Seq(makeBlockManagerId("hostB"), makeBlockManagerId("hostC"))
@@ -1071,7 +1072,7 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("misbehaved accumulator should not crash DAGScheduler and SparkContext") {
+/*  test("misbehaved accumulator should not crash DAGScheduler and SparkContext") {
     val acc = new Accumulator[Int](0, new AccumulatorParam[Int] {
       override def addAccumulator(t1: Int, t2: Int): Int = t1 + t2
       override def zero(initialValue: Int): Int = 0
@@ -1087,7 +1088,7 @@ class DAGSchedulerSuite
     // Make sure we can still run commands
     //确保我们仍然可以运行命令
     assert(sc.parallelize(1 to 10, 2).count() === 10)
-  }
+  }*/
 
   /**
    * The job will be failed on first task throwing a DAGSchedulerSuiteDummyException.

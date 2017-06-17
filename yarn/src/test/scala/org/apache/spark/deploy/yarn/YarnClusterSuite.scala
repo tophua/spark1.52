@@ -275,7 +275,7 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
       }
     val argv =
       Seq(
-        new File(sys.props("spark.test.home"), "bin/spark-submit").getAbsolutePath(),
+        new File(sys.props("spark.test.home"), "/bin/spark-submit").getAbsolutePath(),
         "--master", master,
         "--num-executors", "1",
         "--properties-file", propsFile.getAbsolutePath()) ++

@@ -193,8 +193,8 @@ From: 'The Apache Software Foundation' (http://www.apache.org/)
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Apache Commons Codec (http://commons.apache.org/proper/commons-codec/) commons-codec:commons-codec:jar:1.10
     License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - Commons Collections (http://commons.apache.org/collections/) commons-collections:commons-collections:jar:3.2.1
-    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Apache Commons Collections (http://commons.apache.org/collections/) commons-collections:commons-collections:jar:3.2.2
+    License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Commons IO (http://commons.apache.org/io/) commons-io:commons-io:jar:2.4
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Commons Lang (http://commons.apache.org/lang/) commons-lang:commons-lang:jar:2.6

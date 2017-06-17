@@ -42,7 +42,7 @@ class UnsafeShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
     conf.set("spark.shuffle.memoryFraction", "0.5")
   } 
   //正确清理将使用新的shuffle路径文件
-  test("UnsafeShuffleManager properly cleans up files for shuffles that use the new shuffle path") {
+ /* test("UnsafeShuffleManager properly cleans up files for shuffles that use the new shuffle path") {
     val tmpDir = Utils.createTempDir()
     try {
       val myConf = conf.clone()
@@ -109,5 +109,5 @@ class UnsafeShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
     } finally {
       Utils.deleteRecursively(tmpDir)
     }
-  }
+  }*/
 }
