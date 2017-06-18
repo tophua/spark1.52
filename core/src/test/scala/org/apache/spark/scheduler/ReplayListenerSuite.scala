@@ -106,7 +106,8 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
     fileSystem.mkdirs(logDirPath)
 
     val conf = EventLoggingListenerSuite.getLoggingConf(logDirPath, codecName)
-    val sc = new SparkContext("local-cluster[2,1,1024]", "Test replay", conf)
+    //val sc = new SparkContext("local-cluster[2,1,1024]", "Test replay", conf)
+    val sc = new SparkContext("local[*]", "Test replay", conf)
 
     // Run a few jobs
     //运行几个工作

@@ -145,9 +145,11 @@ class HiveSparkSubmitSuite
       history += logLine
     }
 
+
     val process = builder.start()
     new ProcessOutputCapturer(process.getInputStream, captureOutput("stdout")).start()
     new ProcessOutputCapturer(process.getErrorStream, captureOutput("stderr")).start()
+
 
     try {
       val exitCode = failAfter(300.seconds) { process.waitFor() }

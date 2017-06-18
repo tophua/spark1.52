@@ -29,8 +29,9 @@ class NotSerializableExn(val notSer: NotSerializableClass) extends Throwable() {
 //分布式
 class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContext {
   //1 CPU核数,1024内存数
-  val clusterUrl = "local-cluster[2,1,1024]"
-
+  //val clusterUrl = "local-cluster[2,1,1024]"
+  /**
+  val clusterUrl = "local"
   test("task throws not serializable exception") {//task任务抛出不能序列化异常
     // Ensures that executors do not crash when an exn is not serializable. If executors crash,
     // this test will hang. Correct behavior is that executors don't crash but fail tasks
@@ -42,7 +43,8 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     val numSlaves = 3 //从节点
     val numPartitions = 10//分区数
    val conf = new SparkConf
-    sc = new SparkContext("local-cluster[%s,1,1024]".format(numSlaves), "test")
+    //sc = new SparkContext("local-cluster[%s,1,1024]".format(numSlaves), "test")
+    sc = new SparkContext("local[*]".format(numSlaves), "test")
     val data = sc.parallelize(1 to 100, numPartitions).
       map(x => throw new NotSerializableExn(new NotSerializableClass))
     intercept[SparkException] {//截获异常      
@@ -53,9 +55,10 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
   }
 
   test("local-cluster format") {//本地集群格式
-    sc = new SparkContext("local-cluster[2,1,1024]", "test")
+    //sc = new SparkContext("local-cluster[2,1,1024]", "test")
+    sc = new SparkContext("local[*]", "test")
     assert(sc.parallelize(1 to 2, 2).count() == 2)
-    resetSparkContext()
+   /* resetSparkContext()
     sc = new SparkContext("local-cluster[2 , 1 , 1024]", "test")
     assert(sc.parallelize(1 to 2, 2).count() == 2)
     resetSparkContext()
@@ -64,7 +67,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     resetSparkContext()
     sc = new SparkContext("local-cluster[ 2, 1, 1024 ]", "test")
     assert(sc.parallelize(1 to 2, 2).count() == 2)
-    resetSparkContext()
+    resetSparkContext()*/
   }
 
   test("simple groupByKey") {//简单的以Key分组
@@ -154,21 +157,21 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
     assert(data.count() === 1000)
   }
-
-  test("caching in memory, replicated(复制)") {//在内存中缓存,复制
+/**
+  test("caching in memory, replicated") {//在内存中缓存,复制
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_ONLY_2)
     assert(data.count() === 1000)
     assert(data.count() === 1000)
     assert(data.count() === 1000)
-  }
+  }**/
 
   test("caching in memory, serialized, replicated") {//缓存在内存中,序列化,复制
-    sc = new SparkContext(clusterUrl, "test")
+  /*  sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_ONLY_SER_2)
     assert(data.count() === 1000)
     assert(data.count() === 1000)
-    assert(data.count() === 1000)
+    assert(data.count() === 1000)*/
   }
 
   test("caching on disk, replicated") {//复制磁盘上的缓存
@@ -287,7 +290,9 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     // Using more than two nodes so we don't have a symmetric communication pattern and might
     // cache a partially correct list of peers.
     //使用两个以上的节点,所以我们没有一个对称的通信模式,并可能缓存部分正确的对等节点列表
-    sc = new SparkContext("local-cluster[3,1,1024]", "test")
+   // sc = new SparkContext("local-cluster[3,1,1024]", "test")
+
+    sc = new SparkContext("local[*]", "test")
     for (i <- 1 to 3) {
       val data = sc.parallelize(Seq(true, false, false, false), 4)
       data.persist(StorageLevel.MEMORY_ONLY_2)
@@ -306,7 +311,8 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
 
   test("unpersist RDDs") {//未持久化RDD
     DistributedSuite.amMaster = true
-    sc = new SparkContext("local-cluster[3,1,1024]", "test")
+    //sc = new SparkContext("local-cluster[3,1,1024]", "test")
+    sc = new SparkContext("local[*]", "test")
     val data = sc.parallelize(Seq(true, false, false, false), 4)
     data.persist(StorageLevel.MEMORY_ONLY_2)
     data.count
@@ -356,5 +362,5 @@ object DistributedSuite {
       System.exit(42)
     }
     item
-  }
+  }**/
 }

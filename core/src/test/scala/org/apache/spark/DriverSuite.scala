@@ -30,7 +30,8 @@ class DriverSuite extends SparkFunSuite with Timeouts {
   ignore("driver should exit after finishing without cleanup (SPARK-530)") {
     //driver退出后无需清理
     val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
-    val masters = Table("master", "local", "local-cluster[2,1,1024]")
+   // val masters = Table("master", "local", "local-cluster[2,1,1024]")
+   val masters = Table("master", "local", "local[*]")
     forAll(masters) { (master: String) =>
       val process = Utils.executeCommand(
         Seq(s"$sparkHome/bin/spark-class", "org.apache.spark.DriverWithoutCleanup", master),

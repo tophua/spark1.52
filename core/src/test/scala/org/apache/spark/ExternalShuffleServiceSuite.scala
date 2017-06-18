@@ -51,6 +51,7 @@ class ExternalShuffleServiceSuite extends ShuffleSuite with BeforeAndAfterAll {
 
   // This test ensures that the external shuffle service is actually in use for the other tests.
   //此测试确保外部shuffle服务,在其他测试中实际使用
+  /**
   test("using external shuffle service") {
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
     sc.env.blockManager.externalShuffleServiceEnabled should equal(true)
@@ -82,5 +83,5 @@ class ExternalShuffleServiceSuite extends ShuffleSuite with BeforeAndAfterAll {
       rdd.count()
     }
     e.getMessage should include ("Fetch failure will not retry stage due to testing config")
-  }
+  }**/
 }

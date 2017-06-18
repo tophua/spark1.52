@@ -142,7 +142,8 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
   }
   //一个独立的群集上分布式文件
   test("Distributing files on a standalone cluster") {
-    sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
+    //sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
+    sc = new SparkContext("local[*]", "test", newConf)
     sc.addFile(tmpFile.toString)
     val testData = Array((1, 1), (1, 1), (2, 1), (3, 5), (2, 2), (3, 0))
     val result = sc.parallelize(testData).reduceByKey {
@@ -156,7 +157,8 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
   }
   //独立的集群上动态添加jar
   test ("Dynamically adding JARS on a standalone cluster") {
-    sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
+    //sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
+    sc = new SparkContext("local[*]", "test", newConf)
     sc.addJar(tmpJarUrl)
     val testData = Array((1, 1))
     sc.parallelize(testData).foreach { x =>
@@ -167,7 +169,8 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
   }
   //独立的集群中动态添加本地的jar和URL
   test ("Dynamically adding JARS on a standalone cluster using local: URL") {
-    sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
+    //sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
+    sc = new SparkContext("local[*]", "test", newConf)
     sc.addJar(tmpJarUrl.replace("file", "local"))
     val testData = Array((1, 1))
     sc.parallelize(testData).foreach { x =>

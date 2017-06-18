@@ -36,8 +36,8 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
   private val WAIT_TIMEOUT_MILLIS = 10000
   //验证正确的日志网址从工作节点传递
   test("verify that correct log urls get propagated from workers") {
-    sc = new SparkContext("local-cluster[2,1,1024]", "test")
-
+    //sc = new SparkContext("local-cluster[2,1,1024]", "test")
+    sc = new SparkContext("local[*]", "test")
     val listener = new SaveExecutorInfo
     sc.addSparkListener(listener)
 
@@ -57,6 +57,7 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
  //Spark master和workers使用的公共DNS（默认空）
+  /**
   test("verify that log urls reflect SPARK_PUBLIC_DNS (SPARK-6175)") {
     val SPARK_PUBLIC_DNS = "public_dns"
     class MySparkConf extends SparkConf(false) {
@@ -71,7 +72,8 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
     }
     val conf = new MySparkConf().set(
       "spark.extraListeners", classOf[SaveExecutorInfo].getName)
-    sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
+    //sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
+    sc = new SparkContext("local[*]", "test", conf)
 
     // Trigger a job so that executors get added
     ///添加执行者触发工作
@@ -87,7 +89,7 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
         assert(new URL(logUrl).getHost === SPARK_PUBLIC_DNS)
       }
     }
-  }
+  }**/
 }
 
 private[spark] class SaveExecutorInfo extends SparkListener {
