@@ -23,6 +23,7 @@ import org.apache.spark.sql.hive.test.TestHive._
 
 /**
  * A set of test cases based on the big-data-benchmark.
+  * 一套基于大数据的基准测试用例
  * https://amplab.cs.berkeley.edu/benchmark/
  */
 class BigDataBenchmarkSuite extends HiveComparisonTest {
