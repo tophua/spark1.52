@@ -47,7 +47,8 @@ object HiveFromSpark {
     val hiveContext = new HiveContext(sc)
     import hiveContext.implicits._
     import hiveContext.sql
-
+    sql("SHOW TABLES").toString
+    sql("SELECT * FROM src").toString
     sql("USE default")
     sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING)")
     sql(s"LOAD DATA LOCAL INPATH '${kv1File.getAbsolutePath}' INTO TABLE src")

@@ -36,10 +36,11 @@ import org.apache.spark.sql.hive.test.TestHive
  * and catalyst, comparing the results.
  *
  * The "golden" results from Hive are cached in an retrieved both from the classpath and
- * [[answerCache]] to speed up testing.
+ * [answerCache] to speed up testing.
  *
  * See the documentation of public vals in this class for information on how test execution can be
  * configured using system properties.
+  * 看到这类公共vals类信息如何测试执行可以配置使用系统属性
  */
 abstract class HiveComparisonTest
   extends SparkFunSuite with BeforeAndAfterAll with GivenWhenThen with Logging {
@@ -92,7 +93,10 @@ abstract class HiveComparisonTest
   /** The [[ClassLoader]] that contains test dependencies.  Used to look for golden answers. */
   protected val testClassLoader = this.getClass.getClassLoader
 
-  /** Directory containing a file for each test case that passes. */
+  /**
+    * Directory containing a file for each test case that passes.
+    * 目录包含每个测试用例的文件
+    * */
   val passedDirectory = new File(targetDir, s"$suiteName.passed")
   if (!passedDirectory.exists()) {
     passedDirectory.mkdir() // Not atomic!
@@ -193,6 +197,7 @@ abstract class HiveComparisonTest
 
   // This list contains indicators for those lines which do not have actual results and we
   // want to ignore.
+  //这个列表包含了那些没有实际结果和我们想要忽略索引的行
   lazy val ignoredLineIndicators = Seq(
     "# Partition Information",
     "# col_name"
@@ -241,6 +246,7 @@ abstract class HiveComparisonTest
       logDebug(s"=== HIVE TEST: $testCaseName ===")
 
       // Clear old output for this testcase.
+      //这个测试用例清除旧的输出
       outputDirectories.map(new File(_, testCaseName)).filter(_.exists()).foreach(_.delete())
 
       val sqlWithoutComment =

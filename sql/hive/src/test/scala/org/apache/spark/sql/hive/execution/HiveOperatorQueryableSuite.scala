@@ -22,12 +22,14 @@ import org.apache.spark.sql.hive.test.TestHive._
 
 /**
  * A set of tests that validates commands can also be queried by like a table
+  *  一组验证命令的测试也可以像表一样被查询
  */
 class HiveOperatorQueryableSuite extends QueryTest {
   test("SPARK-5324 query result of describe command") {
     loadTestTable("src")
 
     // register a describe command to be a temp table
+    // 将描述命令注册为临时表
     sql("desc src").registerTempTable("mydesc")
     checkAnswer(
       sql("desc mydesc"),
