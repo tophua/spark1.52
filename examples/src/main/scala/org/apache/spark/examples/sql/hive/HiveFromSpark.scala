@@ -37,7 +37,7 @@ object HiveFromSpark {
   ByteStreams.copy(kv1Stream, Files.newOutputStreamSupplier(kv1File))
 
   def main(args: Array[String]) {
-    val sparkConf = new SparkConf().setAppName("HiveFromSpark")
+    val sparkConf = new SparkConf().setMaster("local").setAppName("HiveFromSpark")
     val sc = new SparkContext(sparkConf)
 
     // A hive context adds support for finding tables in the MetaStore and writing queries
@@ -48,6 +48,7 @@ object HiveFromSpark {
     import hiveContext.implicits._
     import hiveContext.sql
 
+    sql("USE default")
     sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING)")
     sql(s"LOAD DATA LOCAL INPATH '${kv1File.getAbsolutePath}' INTO TABLE src")
 

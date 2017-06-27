@@ -242,15 +242,18 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
       sys.props("java.class.path") +
       File.pathSeparator +
       extraClassPath.mkString(File.pathSeparator)
-    props.setProperty("spark.driver.extraClassPath", childClasspath)
+    props.setProperty("spark.driver.extraClassPath", "")
     props.setProperty("spark.executor.extraClassPath", childClasspath)
 
     // SPARK-4267: make sure java options are propagated correctly.
     props.setProperty("spark.driver.extraJavaOptions", "-Dfoo=\"one two three\"")
     props.setProperty("spark.executor.extraJavaOptions", "-Dfoo=\"one two three\"")
 
-    yarnCluster.getConfig().foreach { e =>
+    yarnCluster.getConfig().foreach { e =>{
+      println("key:"+e.getKey()+"\t value:"+e.getValue())
       props.setProperty("spark.hadoop." + e.getKey(), e.getValue())
+    }
+
     }
 
     sys.props.foreach { case (k, v) =>
@@ -273,8 +276,12 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
       } else {
         Seq("--class", klass, fakeSparkJar.getAbsolutePath())
       }
+
+    sys.env.getOrElse("spark.test.home", "/software/spark2.1/")
     val argv =
       Seq(
+        //设置环境变量SparkHome
+
         new File(sys.props("spark.test.home"), "/bin/spark-submit").getAbsolutePath(),
         "--master", master,
         "--num-executors", "1",
@@ -327,6 +334,7 @@ private object YarnClusterDriver extends Logging with Matchers {
   val WAIT_TIMEOUT_MILLIS = 10000
 
   def main(args: Array[String]): Unit = {
+//    args(0)="/home/liush"
     if (args.length != 1) {
       // scalastyle:off println
       System.err.println(

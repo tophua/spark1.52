@@ -56,8 +56,8 @@ object TestHive
 /**
  * A locally running test instance of Spark's Hive execution engine.
  *
- * Data from [[testTables]] will be automatically loaded whenever a query is run over those tables.
- * Calling [[reset]] will delete all tables and other state in the database, leaving the database
+ * Data from testTables will be automatically loaded whenever a query is run over those tables.
+ * Calling reset will delete all tables and other state in the database, leaving the database
  * in a "clean" state.
  *
  * TestHive is singleton object version of this class because instantiating multiple copies of the

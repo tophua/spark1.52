@@ -121,11 +121,15 @@ class HiveSparkSubmitSuite
   // NOTE: This is an expensive operation in terms of time (10 seconds+). Use sparingly.
   // This is copied from org.apache.spark.deploy.SparkSubmitSuite
   private def runSparkSubmit(args: Seq[String]): Unit = {
-    val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
+
+    //env.put("SPARK_HOME", sparkHome)
+    val sparkHome = sys.props.getOrElse("spark.test.home", "/software/spark2.1/")
+    //val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
+
     val history = ArrayBuffer.empty[String]
     val commands = Seq("./bin/spark-submit") ++ args
     val commandLine = commands.mkString("'", "' '", "'")
-
+    //ProcessBuilder 此类用于创建操作系统进程,它提供一种启动和管理进程（也就是应用程序）的方法
     val builder = new ProcessBuilder(commands: _*).directory(new File(sparkHome))
     val env = builder.environment()
     env.put("SPARK_TESTING", "1")
@@ -144,13 +148,10 @@ class HiveSparkSubmitSuite
       // scalastyle:on println
       history += logLine
     }
-
-
-    val process = builder.start()
+    val process = builder.start()//启动的进程
+    //Process.getInputStream() 方法来访问子进程的标准输出流 和 Process.getErrorStream() 方法来访问子进程的错误输出流。
     new ProcessOutputCapturer(process.getInputStream, captureOutput("stdout")).start()
     new ProcessOutputCapturer(process.getErrorStream, captureOutput("stderr")).start()
-
-
     try {
       val exitCode = failAfter(300.seconds) { process.waitFor() }
       if (exitCode != 0) {

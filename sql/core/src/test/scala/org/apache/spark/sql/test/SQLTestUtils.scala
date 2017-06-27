@@ -197,7 +197,8 @@ private[sql] trait SQLTestUtils
     try {
       //创建数据库
       _sqlContext.sql(s"CREATE DATABASE $dbName")
-    } catch { case cause: Throwable =>//失败抛出异常
+    } catch { case cause: Throwable =>
+      //失败抛出异常
       fail("Failed to create temporary database", cause)
     }
     //执行f函数,最后级联(CASCADE)删除数据库dbName

@@ -106,7 +106,8 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
    *   - The CTAS statement specifies SequenceFile (STORED AS SEQUENCEFILE) as the file format
    *     and no SerDe is specified (no ROW FORMAT SERDE clause).
    */
-  protected[sql] def convertCTAS: Boolean = getConf(CONVERT_CTAS)
+  protected[sql] def convertCTAS: Boolean = getConf(CONVE
+    RT_CTAS)
 
   /**
    * The version of the hive client that will be used to communicate with the metastore.  Note that
