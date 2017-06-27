@@ -66,7 +66,7 @@ class ScalaAggregateFunction(schema: StructType) extends UserDefinedAggregateFun
     Row.fromSeq(buffer.toSeq)
   }
 }
-
+//聚集查询套件
 abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with BeforeAndAfterAll {
   override def _sqlContext: SQLContext = TestHive
   protected val sqlContext = _sqlContext
@@ -128,6 +128,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
 
   test("empty table") {
     // If there is no GROUP BY clause and the table is empty, we will generate a single row.
+    //  如果没有按组子句和表是空的，我们将生成一行
     checkAnswer(
       sqlContext.sql(
         """
@@ -164,6 +165,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       Row(null, 0, 0, 0, null, null, null, null, null, 0) :: Nil)
 
     // If there is a GROUP BY clause and the table is empty, there is no output.
+    // 如果有一个组BY子句,表是空的,则没有输出
     checkAnswer(
       sqlContext.sql(
         """
