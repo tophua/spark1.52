@@ -20,7 +20,7 @@ package org.apache.spark.sql.hive
 import org.apache.spark.sql.hive.test.TestHive
 import org.apache.spark.sql.test.SQLTestUtils
 import org.apache.spark.sql.{AnalysisException, QueryTest, SQLContext, SaveMode}
-
+//多数据库套件
 class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
   override val _sqlContext: HiveContext = TestHive
   private val sqlContext = _sqlContext

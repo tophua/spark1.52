@@ -24,6 +24,7 @@ import org.apache.spark.sql.hive.test.TestHive.implicits._
 class HiveDataFrameJoinSuite extends QueryTest {
 
   // We should move this into SQL package if we make case sensitivity configurable in SQL.
+  //如果我们在SQL中配置区分大小写,我们应该将其移植到SQL包中
   test("join - self join auto resolve ambiguity with case insensitivity") {
     val df = Seq((1, "1"), (2, "2")).toDF("key", "value")
     checkAnswer(

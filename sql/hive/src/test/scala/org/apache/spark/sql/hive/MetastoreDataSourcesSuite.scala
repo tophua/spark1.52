@@ -38,6 +38,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Tests for persisting tables created though the data sources API into the metastore.
+  *测试通过数据源API创建的持久化表到元数据存储
  */
 class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeAndAfterAll
   with Logging {
@@ -118,7 +119,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
       }
     }
   }
-
+  //解析缩短提供商名称
   test("resolve shortened provider names") {
     withTable("jsonTable") {
       sql(
@@ -322,6 +323,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
            """.stripMargin)
 
         // Create the table again should trigger a AnalysisException.
+        //再次创建表应该触发一个AnalysisException
         val message = intercept[AnalysisException] {
           sql(
             s"""CREATE TABLE ctasJsonTable

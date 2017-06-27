@@ -250,6 +250,7 @@ object SparkSubmitClassLoaderTest extends Logging {
 
 // This object is used for testing SPARK-8020: https://issues.apache.org/jira/browse/SPARK-8020.
 // We test if we can correctly set spark sql configurations when HiveContext is used.
+//当使用HiveContext时,我们测试是否可以正确设置spark sql配置
 object SparkSQLConfTest extends Logging {
   def main(args: Array[String]) {
     Utils.configTestLog4j("INFO")
