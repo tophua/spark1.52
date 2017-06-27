@@ -23,7 +23,7 @@ import org.apache.spark.sql.catalyst.util._
 
 /**
  * A framework for running the query tests that are listed as a set of text files.
- *
+ * 用于运行列为文本文件集的查询测试的框架
  * TestSuites that derive from this class must provide a map of testCaseName -> testCaseFiles
  * that should be included. Additionally, there is support for whitelisting and blacklisting
  * tests as development progresses.
@@ -58,6 +58,7 @@ abstract class HiveQueryFileTest extends HiveComparisonTest {
       } else if (realWhiteList.map(_.r.pattern.matcher(testCaseName).matches()).reduceLeft(_||_) ||
         runAll) {
         // Build a test case and submit it to scala test framework...
+        //构建一个测试用例并将其提交到Scala测试框架…
         val queriesString = fileToString(testCaseFile)
         createQueryTest(testCaseName, queriesString)
       } else {

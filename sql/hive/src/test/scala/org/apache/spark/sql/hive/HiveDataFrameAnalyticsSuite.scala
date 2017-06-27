@@ -25,8 +25,10 @@ import org.apache.spark.sql.hive.test.TestHive.implicits._
 import org.scalatest.BeforeAndAfterAll
 
 // TODO ideally we should put the test suite into the package `sql`, as
+//TODO理想情况下,我们应该将测试套件放入“sql”包中
 // `hive` package is optional in compiling, however, `SQLContext.sql` doesn't
-// support the `cube` or `rollup` yet.
+// support the `cube` or `rollup` yet. 不支持“cube”或“rollup”
+//Hive DataFrame分析套件
 class HiveDataFrameAnalyticsSuite extends QueryTest with BeforeAndAfterAll {
   private var testData: DataFrame = _
 

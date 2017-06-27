@@ -39,6 +39,7 @@ case class TestData(a: Int, b: String)
 /**
  * A set of test cases expressed in Hive QL that are not covered by the tests
  * included in the hive distribution.
+  * 一组测试用例用Hive QL覆盖不到的测试包括在hive分布
  */
 class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
   private val originalTimeZone = TimeZone.getDefault
@@ -49,8 +50,10 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
   override def beforeAll() {
     TestHive.cacheTables = true
     // Timezone is fixed to America/Los_Angeles for those timezone sensitive tests (timestamp_*)
+    //时区是固定到美国/洛杉矶  那些时区敏感试验（timestamp_ *）
     TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
     // Add Locale setting
+    //添加区域设置
     Locale.setDefault(Locale.US)
   }
 
@@ -60,14 +63,14 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
     Locale.setDefault(originalLocale)
     sql("DROP TEMPORARY FUNCTION udtf_count2")
   }
-
+  //并发本hive地本地命令
   test("SPARK-4908: concurrent hive native commands") {
     (1 to 100).par.map { _ =>
       sql("USE default")
       sql("SHOW DATABASES")
     }
   }
-
+  // GROUP BY 的 WITH ROLLUP 字句可以检索出更多的分组聚合信息，它不仅仅能像一般的 GROUP BY 语句那样检索出各组的聚合信息，还能检索出本组类的整体聚合信息
   createQueryTest("SPARK-8976 Wrong Result for Rollup #1",
     """
       SELECT count(*) AS cnt, key % 5,GROUPING__ID FROM src group by key%5 WITH ROLLUP
@@ -145,7 +148,8 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       |    SELECT explode(array(1,2,3)) FROM src LIMIT 3;
       |  SELECT key FROM gen_tmp ORDER BY key ASC;
     """.stripMargin)
-
+  // explode(ARRAY)  列表中的每个元素生成一行
+  // explode(MAP) map中每个key-value对,生成一行,key为一列,value为一列
   test("multiple generators in projection") {
     intercept[AnalysisException] {
       sql("SELECT explode(array(key, key)), explode(array(key, key)) FROM src").collect()
@@ -170,10 +174,10 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       lower(repeat("AA", 3)), "12",
       printf("bb%d", 12), "13",
       repeat(printf("s%d", 14), 2), "14") FROM src LIMIT 1""")
-
+  //NaN到十进制
   createQueryTest("NaN to Decimal",
     "SELECT CAST(CAST('NaN' AS DOUBLE) AS DECIMAL(1,1)) FROM src LIMIT 1")
-
+  //常数null测试
   createQueryTest("constant null testing",
     """SELECT
       |IF(FALSE, CAST(NULL AS STRING), CAST(1 AS STRING)) AS COL1,
@@ -201,7 +205,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       |IF(FALSE, CAST(NULL AS DECIMAL), CAST(1 AS DECIMAL)) AS COL23,
       |IF(TRUE, CAST(NULL AS DECIMAL), CAST(1 AS DECIMAL)) AS COL24
       |FROM src LIMIT 1""".stripMargin)
-
+  //常数数组
   createQueryTest("constant array",
   """
     |SELECT sort_array(
@@ -225,7 +229,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
 
   createQueryTest("having no references",
     "SELECT key FROM src GROUP BY key HAVING COUNT(*) > 1")
-
+  //没有from 条件
   createQueryTest("no from clause",
     "SELECT 1, +1, -1")
 
@@ -240,7 +244,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       |  2 = false, 2L = false, 2Y = false, false = 2, false = 2L, false = 2Y
       |FROM src LIMIT 1
     """.stripMargin)
-
+  //CREATE TABLE AS运行一次
   test("CREATE TABLE AS runs once") {
     sql("CREATE TABLE foo AS SELECT 1 FROM src LIMIT 1").collect()
     assert(sql("SELECT COUNT(*) FROM foo").collect().head.getLong(0) === 1,
@@ -273,14 +277,14 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
   test("Query expressed in HiveQL") {
     sql("FROM src SELECT key").collect()
   }
-
+  //查询与常量折叠CAST
   test("Query with constant folding the CAST") {
     sql("SELECT CAST(CAST('123' AS binary) AS binary) FROM src LIMIT 1").collect()
   }
-
+  //AVG(平均) SUM(总和) COUNT(计数)的恒定折叠优化
   createQueryTest("Constant Folding Optimization for AVG_SUM_COUNT",
     "SELECT AVG(0), SUM(0), COUNT(null), COUNT(value) FROM src GROUP BY key")
-
+  //Cast类型转换,如果转换失败返回NULL
   createQueryTest("Cast Timestamp to Timestamp in UDF",
     """
       | SELECT DATEDIFF(CAST(value AS timestamp), CAST('2002-03-21 00:00:00' AS timestamp))
@@ -294,7 +298,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       | CAST(CAST('1970-01-01 23:00:00' AS timestamp) AS date)
       | FROM src LIMIT 1
     """.stripMargin)
-
+  //简单平均
   createQueryTest("Simple Average",
     "SELECT AVG(key) FROM src")
 
@@ -312,32 +316,32 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
 
   createQueryTest("IgnoreExplain",
     """EXPLAIN SELECT key FROM src""")
-
+  //简单加入where子句
   createQueryTest("trivial join where clause",
     "SELECT * FROM src a JOIN src b WHERE a.key = b.key")
-
+  //简单的加入ON子句
   createQueryTest("trivial join ON clause",
     "SELECT * FROM src a JOIN src b ON a.key = b.key")
-
+  //
   createQueryTest("small.cartesian",
     "SELECT a.key, b.key FROM (SELECT key FROM src WHERE key < 1) a JOIN " +
       "(SELECT key FROM src WHERE key = 2) b")
 
   createQueryTest("length.udf",
     "SELECT length(\"test\") FROM src LIMIT 1")
-
+  //分区表扫描
   createQueryTest("partitioned table scan",
     "SELECT ds, hr, key, value FROM srcpart")
 
   createQueryTest("hash",
     "SELECT hash('test') FROM src LIMIT 1")
-
+  //创建表
   createQueryTest("create table as",
     """
       |CREATE TABLE createdtable AS SELECT * FROM src;
       |SELECT * FROM createdtable
     """.stripMargin)
-
+  //用db命名创建表
   createQueryTest("create table as with db name",
     """
       |CREATE DATABASE IF NOT EXISTS testdb;
@@ -345,7 +349,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       |SELECT * FROM testdb.createdtable;
       |DROP DATABASE IF EXISTS testdb CASCADE
     """.stripMargin)
-
+  //在反引号中创建表与db名称
   createQueryTest("create table as with db name within backticks",
     """
       |CREATE DATABASE IF NOT EXISTS testdb;
@@ -353,7 +357,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       |SELECT * FROM testdb.createdtable;
       |DROP DATABASE IF EXISTS testdb CASCADE
     """.stripMargin)
-
+  //使用db名称插入表
   createQueryTest("insert table with db name",
     """
       |CREATE DATABASE IF NOT EXISTS testdb;
@@ -362,7 +366,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       |SELECT * FROM testdb.createdtable;
       |DROP DATABASE IF EXISTS testdb CASCADE
     """.stripMargin)
-
+  //插入并插入覆盖
   createQueryTest("insert into and insert overwrite",
     """
       |CREATE TABLE createdtable like src;
@@ -372,7 +376,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       |INSERT OVERWRITE TABLE createdtable SELECT * FROM src WHERE key = 86;
       |SELECT * FROM createdtable;
     """.stripMargin)
-
+  //比较表输出时考虑动态分区
   test("SPARK-7270: consider dynamic partition when comparing table output") {
     sql(s"CREATE TABLE test_partition (a STRING) PARTITIONED BY (b BIGINT, c STRING)")
     sql(s"CREATE TABLE ptest (a STRING, b BIGINT, c STRING)")

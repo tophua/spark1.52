@@ -23,12 +23,14 @@ import org.apache.spark.SparkFunSuite
 
 /**
  * Verify that some classes load and that others are not found on the classpath.
- *
- *
+ * 验证某些类是否加载，并且在类路径中找不到其他类。
+ * Classpath依赖套件
  * This is used to detect classpath and shading conflict, especially between
  * Spark's required Kryo version and that which can be found in some Hive versions.
+  * 这用于检测类路径和阴影冲突,特别是在之间Spark的必需的Kryo版本以及可以在一些Hive版本中找到的版本
  */
 class ClasspathDependenciesSuite extends SparkFunSuite {
+  //ClassLoader就是用来动态加载class文件到内存当中用
   private val classloader = this.getClass.getClassLoader
 
   private def assertLoads(classname: String): Unit = {

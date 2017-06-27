@@ -406,6 +406,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
 
   test("single distinct column set") {
     // DISTINCT is not meaningful with Max and Min, so we just ignore the DISTINCT keyword.
+    //对于Max和Min,DISTINCT无意义,所以我们忽略DISTINCT关键字
     checkAnswer(
       sqlContext.sql(
         """

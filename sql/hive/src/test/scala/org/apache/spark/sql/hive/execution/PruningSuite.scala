@@ -26,17 +26,19 @@ import scala.collection.JavaConversions._
 
 /**
  * A set of test cases that validate partition and column pruning.
+  * 一组验证分区和列修剪的测试用例
  */
 class PruningSuite extends HiveComparisonTest with BeforeAndAfter {
   TestHive.cacheTables = false
 
   // Column/partition pruning is not implemented for `InMemoryColumnarTableScan` yet, need to reset
   // the environment to ensure all referenced tables in this suites are not cached in-memory.
+  //需要重置环境,以确保此套件中的所有引用表都不会缓存在内存中
   // Refer to https://issues.apache.org/jira/browse/SPARK-2283 for details.
   TestHive.reset()
 
   // Column pruning tests
-
+  //列修剪 - 分区表
   createPruningTest("Column pruning - with partitioned table",
     "SELECT key FROM srcpart WHERE ds = '2008-04-08' LIMIT 3",
     Seq("key"),
@@ -44,43 +46,43 @@ class PruningSuite extends HiveComparisonTest with BeforeAndAfter {
     Seq(
       Seq("2008-04-08", "11"),
       Seq("2008-04-08", "12")))
-
+  //列修剪 - 使用非分区表
   createPruningTest("Column pruning - with non-partitioned table",
     "SELECT key FROM src WHERE key > 10 LIMIT 3",
     Seq("key"),
     Seq("key"),
     Seq.empty)
-
+  //列修剪 - 多个项目
   createPruningTest("Column pruning - with multiple projects",
     "SELECT c1 FROM (SELECT key AS c1 FROM src WHERE key > 10) t1 LIMIT 3",
     Seq("c1"),
     Seq("key"),
     Seq.empty)
-
+  //列修剪 - 项目别名替换
   createPruningTest("Column pruning - projects alias substituting",
     "SELECT c1 AS c2 FROM (SELECT key AS c1 FROM src WHERE key > 10) t1 LIMIT 3",
     Seq("c2"),
     Seq("key"),
     Seq.empty)
-
+  //列修剪 - 过滤别名内嵌
   createPruningTest("Column pruning - filter alias in-lining",
     "SELECT c1 FROM (SELECT key AS c1 FROM src WHERE key > 10) t1 WHERE c1 < 100 LIMIT 3",
     Seq("c1"),
     Seq("key"),
     Seq.empty)
-
+  //列修剪 - 无过滤器
   createPruningTest("Column pruning - without filters",
     "SELECT c1 FROM (SELECT key AS c1 FROM src) t1 LIMIT 3",
     Seq("c1"),
     Seq("key"),
     Seq.empty)
-
+  //列修剪 - 简单的顶级项目没有别名
   createPruningTest("Column pruning - simple top project without aliases",
     "SELECT key FROM (SELECT key FROM src WHERE key > 10) t1 WHERE key < 100 LIMIT 3",
     Seq("key"),
     Seq("key"),
     Seq.empty)
-
+  //列修剪 - 不平凡的顶级项目与别名
   createPruningTest("Column pruning - non-trivial top project with aliases",
     "SELECT c1 * 2 AS dbl FROM (SELECT key AS c1 FROM src WHERE key > 10) t1 LIMIT 3",
     Seq("dbl"),
@@ -88,19 +90,19 @@ class PruningSuite extends HiveComparisonTest with BeforeAndAfter {
     Seq.empty)
 
   // Partition pruning tests
-
+  //分区修剪 - 非分区,非平凡项目
   createPruningTest("Partition pruning - non-partitioned, non-trivial project",
     "SELECT key * 2 AS dbl FROM src WHERE value IS NOT NULL",
     Seq("dbl"),
     Seq("key", "value"),
     Seq.empty)
-
+  //分区修剪 - 非分区表
   createPruningTest("Partition pruning - non-partitioned table",
     "SELECT value FROM src WHERE key IS NOT NULL",
     Seq("value"),
     Seq("value", "key"),
     Seq.empty)
-
+  //分区修剪 - 对字符串分区键进行过滤
   createPruningTest("Partition pruning - with filter on string partition key",
     "SELECT value, hr FROM srcpart1 WHERE ds = '2008-04-08'",
     Seq("value", "hr"),
@@ -108,7 +110,7 @@ class PruningSuite extends HiveComparisonTest with BeforeAndAfter {
     Seq(
       Seq("2008-04-08", "11"),
       Seq("2008-04-08", "12")))
-
+  //分区修剪 - 用int分区键过滤
   createPruningTest("Partition pruning - with filter on int partition key",
     "SELECT value, hr FROM srcpart1 WHERE hr < 12",
     Seq("value", "hr"),
@@ -123,7 +125,7 @@ class PruningSuite extends HiveComparisonTest with BeforeAndAfter {
     Seq("value", "hr"),
     Seq(
       Seq("2008-04-08", "11")))
-
+  //分区修剪 - 修剪所有分区
   createPruningTest("Partition pruning - all partitions pruned",
     "SELECT value, hr FROM srcpart1 WHERE ds = '2014-01-27' AND hr = 11",
     Seq("value", "hr"),

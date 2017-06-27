@@ -23,6 +23,7 @@ import org.apache.spark.sql.hive.test.TestHive
 
 /**
  * A set of tests that validates support for Hive SerDe.
+  * 一组验证支持Hive SerDe的测试
  */
 class HiveSerDeSuite extends HiveComparisonTest with BeforeAndAfterAll {
   override def beforeAll(): Unit = {
@@ -38,6 +39,7 @@ class HiveSerDeSuite extends HiveComparisonTest with BeforeAndAfterAll {
   }
 
   // table sales is not a cache table, and will be clear after reset
+  //sales表不是缓存表,重置后会清除
   createQueryTest("Read with RegexSerDe", "SELECT * FROM sales", false)
 
   createQueryTest(

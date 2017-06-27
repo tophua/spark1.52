@@ -99,7 +99,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     val query = sql("SELECT c1, v FROM table1 LATERAL VIEW stack(3, 1, c1 + 1, c1 + 2) d AS v")
     checkAnswer(query, Row(1, 1) :: Row(1, 2) :: Row(1, 3) :: Nil)
   }
-
+  //自动转换parquet tables
   test("SPARK-6851: Self-joined converted parquet tables") {
     val orders = Seq(
       Order(1, "Atlas", "MTB", 234, "2015-01-07", "John D", "Pacifica", "CA", 20151),
@@ -1129,6 +1129,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
 
   test("SPARK-8588 HiveTypeCoercion.inConversion fires too early") {
     val df =
+      //从本地Seq创建一个DataFrame
       TestHive.createDataFrame(Seq((1, "2014-01-01"), (2, "2015-01-01"), (3, "2016-01-01")))
     df.toDF("id", "datef").registerTempTable("test_SPARK8588")
     checkAnswer(
@@ -1141,7 +1142,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     )
     TestHive.dropTempTable("test_SPARK8588")
   }
-
+  //修复hive上下文列名中特殊字符的支持
   test("SPARK-9371: fix the support for special chars in column names for hive context") {
     TestHive.read.json(TestHive.sparkContext.makeRDD(
       """{"a": {"c.b": 1}, "b.$q": [{"a@!.q": 1}], "q.w": {"w.i&": [1]}}""" :: Nil))
@@ -1149,9 +1150,10 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
 
     checkAnswer(sql("SELECT a.`c.b`, `b.$q`[0].`a@!.q`, `q.w`.`w.i&`[0] FROM t"), Row(1, 1, 1))
   }
-
+//将hive间隔项转换为Literal of CalendarIntervalType
   test("Convert hive interval term into Literal of CalendarIntervalType") {
     checkAnswer(sql("select interval '10-9' year to month"),
+      //间隔10年9个月
       Row(CalendarInterval.fromString("interval 10 years 9 months")))
     checkAnswer(sql("select interval '20 15:40:32.99899999' day to second"),
       Row(CalendarInterval.fromString("interval 2 weeks 6 days 15 hours 40 minutes " +
@@ -1170,7 +1172,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       Row(CalendarInterval.fromString(
         "interval 4 minutes 59 seconds 889 milliseconds 987 microseconds")))
   }
-
+  //不允许为临时表指定数据库名称
   test("specifying database name for a temporary table is not allowed") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -1191,9 +1193,11 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
           |)
         """.stripMargin)
       }.getMessage
+      //不允许指定数据库名称或其他限定符
       assert(message.contains("Specifying database name or other qualifiers are not allowed"))
 
       // If you use backticks to quote the name of a temporary table having dot in it.
+      // 如果您使用反引号来引用具有点的临时表的名称
       sqlContext.sql(
         s"""
           |CREATE TEMPORARY TABLE `db.t`
@@ -1205,7 +1209,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       checkAnswer(sqlContext.table("`db.t`"), df)
     }
   }
-
+  //侧视图中的列名相同
   test("SPARK-10593 same column names in lateral view") {
     val df = sqlContext.sql(
     """
