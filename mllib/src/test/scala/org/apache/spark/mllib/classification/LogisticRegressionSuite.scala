@@ -603,7 +603,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     }
   }
   //多类分类模型保存/加载
-  test("model save/load: multiclass classification") {
+ /* test("model save/load: multiclass classification") {
     // NOTE: This will need to be generalized once there are multiple model format versions.
     val model = LogisticRegressionSuite.multiclassModel
 
@@ -619,7 +619,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
     } finally {
       Utils.deleteRecursively(tempDir)
     }
-  }
+  }*/
 
 }
 //逻辑回归集群套件

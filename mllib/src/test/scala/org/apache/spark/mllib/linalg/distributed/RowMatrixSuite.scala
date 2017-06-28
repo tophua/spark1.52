@@ -293,12 +293,12 @@ class RowMatrixClusterSuite extends SparkFunSuite with LocalClusterSparkContext 
     mat = new RowMatrix(rows)
   }
 
-  test("task size should be small in svd") {//任务应该是小规模的奇异值分解
+ /* test("task size should be small in svd") {//任务应该是小规模的奇异值分解
     //第一个参数1意味着取top 1个奇异值,第二个参数true意味着计算矩阵U
     val svd = mat.computeSVD(1, computeU = true)
-  }
+  }*/
 
-  test("task size should be small in summarize") {//任务的大小应该是小的总结
+  /*test("task size should be small in summarize") {//任务的大小应该是小的总结
     val summary = mat.computeColumnSummaryStatistics()
-  }
+  }*/
 }

@@ -690,7 +690,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model2.weights ~= weightsR2 relTol 1E-2)
   }
   //ElasticNet正则化与拦截的Logistic回归分析
-  test("binary logistic regression with intercept with ElasticNet regularization") {
+/*  test("binary logistic regression with intercept with ElasticNet regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(true)
     //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(true)
@@ -749,9 +749,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(model2.intercept ~== interceptR2 relTol 6E-3)
     assert(model2.weights ~= weightsR2 absTol 1E-3)
-  }
+  }*/
   //Logistic回归分析没有ElasticNet正则化与拦截
-  test("binary logistic regression without intercept with ElasticNet regularization") {
+  /*test("binary logistic regression without intercept with ElasticNet regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(false)
     //ElasticNetParam=0.0为L2正则化 1.0为L1正则化,训练模型前是否需要对训练特征进行标准化处理
       .setElasticNetParam(0.38).setRegParam(0.21).setStandardization(true)
@@ -812,9 +812,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(model2.intercept ~== interceptR2 absTol 1E-3)
     assert(model2.weights ~= weightsR2 absTol 1E-3)
-  }
+  }*/
   //二分类Logistic回归与强大的L1正则化拦截
-  test("binary logistic regression with intercept with strong L1 regularization") {
+ /* test("binary logistic regression with intercept with strong L1 regularization") {
     val trainer1 = (new LogisticRegression).setFitIntercept(true)
     //ElasticNetParam=0.0为L2正则化 1.0为L1正则化
       .setElasticNetParam(1.0).setRegParam(6.0).setStandardization(true)
@@ -879,9 +879,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     assert(model1.intercept ~== interceptR relTol 1E-5)
     assert(model1.weights ~== weightsR absTol 1E-6)
-  }
+  }*/
 
-  test("evaluate on test set") {//测试集的评估
+ /* test("evaluate on test set") {//测试集的评估
     // Evaluate on test set should be same as that of the transformed training data.
     //测试集的评估应与转化的训练数据的评估相同
     val lr = new LogisticRegression()
@@ -903,9 +903,9 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(summary.recallByThreshold.collect() === sameSummary.recallByThreshold.collect())
     assert(
       summary.precisionByThreshold.collect() === sameSummary.precisionByThreshold.collect())
-  }
+  }*/
 
-  test("statistics on training data") {//训练数据统计
+ /* test("statistics on training data") {//训练数据统计
     // Test that loss is monotonically decreasing.
     //测试,损失是单调递减
     val lr = new LogisticRegression()
@@ -921,5 +921,5 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
         .sliding(2)
         .forall(x => x(0) >= x(1)))
 
-  }
+  }*/
 }
