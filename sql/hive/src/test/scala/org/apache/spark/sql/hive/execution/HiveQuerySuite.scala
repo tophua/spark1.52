@@ -49,10 +49,10 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
 
   override def beforeAll() {
     TestHive.cacheTables = true
-    // Timezone is fixed to America/Los_Angeles for those timezone sensitive tests (timestamp_*)
+    //Timezone is fixed to America/Los_Angeles for those timezone sensitive tests (timestamp_*)
     //时区是固定到美国/洛杉矶  那些时区敏感试验（timestamp_ *）
     TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
-    // Add Locale setting
+     // Add Locale setting
     //添加区域设置
     Locale.setDefault(Locale.US)
   }
@@ -70,8 +70,8 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
       sql("SHOW DATABASES")
     }
   }
-  // GROUP BY 的 WITH ROLLUP 字句可以检索出更多的分组聚合信息，它不仅仅能像一般的 GROUP BY 语句那样检索出各组的聚合信息，还能检索出本组类的整体聚合信息
-  createQueryTest("SPARK-8976 Wrong Result for Rollup #1",
+  //GROUP BY 的 WITH ROLLUP 字句可以检索出更多的分组聚合信息，它不仅仅能像一般的 GROUP BY 语句那样检索出各组的聚合信息，还能检索出本组类的整体聚合信息
+  /**createQueryTest("SPARK-8976 Wrong Result for Rollup #1",
     """
       SELECT count(*) AS cnt, key % 5,GROUPING__ID FROM src group by key%5 WITH ROLLUP
     """.stripMargin)
@@ -96,9 +96,9 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
         GROUPING__ID as k3
       FROM (SELECT key, key%2, key - 5 FROM src) t group by key%5, key-5
       WITH ROLLUP ORDER BY cnt, k1, k2, k3 LIMIT 10
-    """.stripMargin)
+    """.stripMargin)**/
 
-  createQueryTest("SPARK-8976 Wrong Result for CUBE #1",
+  /**createQueryTest("SPARK-8976 Wrong Result for CUBE #1",
     """
       SELECT count(*) AS cnt, key % 5,GROUPING__ID FROM src group by key%5 WITH CUBE
     """.stripMargin)
@@ -123,7 +123,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
         GROUPING__ID as k3
       FROM (SELECT key, key%2, key - 5 FROM src) t group by key%5, key-5
       GROUPING SETS (key%5, key-5) ORDER BY cnt, k1, k2, k3 LIMIT 10
-    """.stripMargin)
+    """.stripMargin)**/
 
   createQueryTest("insert table with generator with column name",
     """
@@ -226,9 +226,8 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
 
   createQueryTest("case else null",
     """SELECT case when 1 = 2 then 1 when 2 = 2 then 3 else null end FROM src LIMIT 1""")
-
-  createQueryTest("having no references",
-    "SELECT key FROM src GROUP BY key HAVING COUNT(*) > 1")
+/*  createQueryTest("having no references",
+    "SELECT key FROM src GROUP BY key HAVING COUNT(*) > 1")*/
   //没有from 条件
   createQueryTest("no from clause",
     "SELECT 1, +1, -1")

@@ -50,7 +50,7 @@ class NNLSSuite extends SparkFunSuite {
     res.get(0)
   }
 
-  test("NNLS: exact solution cases") {
+/*  test("NNLS: exact solution cases") {
     val n = 20
     val rand = new Random(12346)
     val ws = NNLS.createWorkspace(n)
@@ -71,7 +71,7 @@ class NNLSSuite extends SparkFunSuite {
     }
 
     assert(numSolved > 50)
-  }
+  }*/
 
   test("NNLS: nonnegativity constraint active") {
     val n = 5

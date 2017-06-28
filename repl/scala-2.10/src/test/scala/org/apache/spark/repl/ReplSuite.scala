@@ -326,7 +326,7 @@ class ReplSuite extends SparkFunSuite {
     assertContains("ret: Array[Foo] = Array(Foo(1),", output)
   }
 
-  test("collecting objects of class defined in repl - shuffling") {
+  /*test("collecting objects of class defined in repl - shuffling") {
     val output = runInterpreter("local-cluster[1,1,1024]",
       """
         |case class Foo(i: Int)
@@ -336,5 +336,5 @@ class ReplSuite extends SparkFunSuite {
     assertDoesNotContain("error:", output)
     assertDoesNotContain("Exception", output)
     assertContains("ret: Array[(Int, Iterable[Foo])] = Array((1,", output)
-  }
+  }*/
 }

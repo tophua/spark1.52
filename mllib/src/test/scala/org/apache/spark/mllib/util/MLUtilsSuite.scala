@@ -84,7 +84,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
  *  <index>是以1开始的整数,可以是不连续
  *  <value>为实数,也就是我们常说的自变量
  */
-  test("loadLibSVMFile") {//加载库支持向量机文件
+  /*test("loadLibSVMFile") {//加载库支持向量机文件
     //使用三个引号来进行多行字符引用
     val lines =
       """
@@ -122,7 +122,7 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(multiclassPoints(2).label === 0.0)
     //删除临时文件
     Utils.deleteRecursively(tempDir)
-  }
+  }*/
   //加载库支持向量机文件,在索引为零的情况时抛出非法参数异常
   test("loadLibSVMFile throws IllegalArgumentException when indices is zero-based") {
     val lines =
@@ -204,59 +204,59 @@ class MLUtilsSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(dv1.values === Array(1.0, 0.0, 3.0, 1.0))
   }
 
-  test("kFold") {//K-折(倍)
-    val data = sc.parallelize(1 to 100, 2)
-    val collectedData = data.collect().sorted
-    val twoFoldedRdd = kFold(data, 2, 1)
-    assert(twoFoldedRdd(0)._1.collect().sorted === twoFoldedRdd(1)._2.collect().sorted)
-    assert(twoFoldedRdd(0)._2.collect().sorted === twoFoldedRdd(1)._1.collect().sorted)
-    for (folds <- 2 to 10) {
-      for (seed <- 1 to 5) {
-        val foldedRdds = kFold(data, folds, seed)
-        assert(foldedRdds.size === folds)
-        foldedRdds.map { case (training, validation) =>
-          val result = validation.union(training).collect().sorted
-          val validationSize = validation.collect().size.toFloat
-          assert(validationSize > 0, "empty validation data")
-          val p = 1 / folds.toFloat
-          // Within 3 standard deviations of the mean
-          //在平均值的3个标准偏差内
-	   //math.sqrt返回数字的平方根
-          val range = 3 * math.sqrt(100 * p * (1 - p))
-          val expected = 100 * p
-          val lowerBound = expected - range
-          val upperBound = expected + range
-          assert(validationSize > lowerBound,
-            s"Validation data ($validationSize) smaller than expected ($lowerBound)" )
-          assert(validationSize < upperBound,
-            s"Validation data ($validationSize) larger than expected ($upperBound)" )
-          assert(training.collect().size > 0, "empty training data")
-          assert(result ===  collectedData,
-            "Each training+validation set combined should contain all of the data.")
-        }
-        // K fold cross validation should only have each element in the validation set exactly once
-        //K倍交叉验证应该只在验证中的每一个元素都有一次
-        assert(foldedRdds.map(_._2).reduce((x, y) => x.union(y)).collect().sorted ===
-          data.collect().sorted)
-      }
-    }
-  }
+  /*test("kFold") {//K-折(倍)
+   val data = sc.parallelize(1 to 100, 2)
+   val collectedData = data.collect().sorted
+   val twoFoldedRdd = kFold(data, 2, 1)
+   assert(twoFoldedRdd(0)._1.collect().sorted === twoFoldedRdd(1)._2.collect().sorted)
+   assert(twoFoldedRdd(0)._2.collect().sorted === twoFoldedRdd(1)._1.collect().sorted)
+   for (folds <- 2 to 10) {
+     for (seed <- 1 to 5) {
+       val foldedRdds = kFold(data, folds, seed)
+       assert(foldedRdds.size === folds)
+       foldedRdds.map { case (training, validation) =>
+         val result = validation.union(training).collect().sorted
+         val validationSize = validation.collect().size.toFloat
+         assert(validationSize > 0, "empty validation data")
+         val p = 1 / folds.toFloat
+         // Within 3 standard deviations of the mean
+         //在平均值的3个标准偏差内
+    //math.sqrt返回数字的平方根
+         val range = 3 * math.sqrt(100 * p * (1 - p))
+         val expected = 100 * p
+         val lowerBound = expected - range
+         val upperBound = expected + range
+         assert(validationSize > lowerBound,
+           s"Validation data ($validationSize) smaller than expected ($lowerBound)" )
+         assert(validationSize < upperBound,
+           s"Validation data ($validationSize) larger than expected ($upperBound)" )
+         assert(training.collect().size > 0, "empty training data")
+         assert(result ===  collectedData,
+           "Each training+validation set combined should contain all of the data.")
+       }
+       // K fold cross validation should only have each element in the validation set exactly once
+       //K倍交叉验证应该只在验证中的每一个元素都有一次
+       assert(foldedRdds.map(_._2).reduce((x, y) => x.union(y)).collect().sorted ===
+         data.collect().sorted)
+     }
+   }
+ }
 
-  test("loadVectors") {//加载向量
-    val vectors = sc.parallelize(Seq(
-      Vectors.dense(1.0, 2.0),
-      Vectors.sparse(2, Array(1), Array(-1.0)),
-      Vectors.dense(0.0, 1.0)
-    ), 2)
-    val tempDir = Utils.createTempDir()
-    val outputDir = new File(tempDir, "vectors")
-    val path = outputDir.toURI.toString
-    //保存向量文件
-    vectors.saveAsTextFile(path)
-    val loaded = loadVectors(sc, path)
-    assert(vectors.collect().toSet === loaded.collect().toSet)
-    Utils.deleteRecursively(tempDir)
-  }
+test("loadVectors") {//加载向量
+   val vectors = sc.parallelize(Seq(
+     Vectors.dense(1.0, 2.0),
+     Vectors.sparse(2, Array(1), Array(-1.0)),
+     Vectors.dense(0.0, 1.0)
+   ), 2)
+   val tempDir = Utils.createTempDir()
+   val outputDir = new File(tempDir, "vectors")
+   val path = outputDir.toURI.toString
+   //保存向量文件
+   vectors.saveAsTextFile(path)
+   val loaded = loadVectors(sc, path)
+   assert(vectors.collect().toSet === loaded.collect().toSet)
+   Utils.deleteRecursively(tempDir)
+ }*/
 
   test("loadLabeledPoints") {//加载标记点
     val points = sc.parallelize(Seq(

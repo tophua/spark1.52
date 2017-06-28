@@ -584,7 +584,8 @@ trait TestSuiteBase extends SparkFunSuite with BeforeAndAfter with Logging {
     withStreamingContext(
         //设置运行的参数
         setupStreams[U, V](input, operation)
-        ){ ssc =>//匿名
+        ){ ssc =>
+      //匿名
       //运行流,转换成序列
       val output = runStreams[V](ssc, numBatches_, expectedOutput.size)
       //验收数据

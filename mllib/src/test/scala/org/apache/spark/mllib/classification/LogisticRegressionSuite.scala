@@ -625,7 +625,7 @@ class LogisticRegressionSuite extends SparkFunSuite with MLlibTestSparkContext w
 //逻辑回归集群套件
 class LogisticRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
   //使用SGD算法任务规模小在训练和预测
-  test("task size should be small in both training and prediction using SGD optimizer") {
+  /*test("task size should be small in both training and prediction using SGD optimizer") {
     val m = 4
     val n = 200000
     val points = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
@@ -665,6 +665,6 @@ class LogisticRegressionClusterSuite extends SparkFunSuite with LocalClusterSpar
 
     // Materialize the RDDs
     predictions.count()
-  }
+  }*/
 
 }

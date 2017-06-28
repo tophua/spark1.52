@@ -318,7 +318,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     testOperation(inputData1, inputData2, operation, outputData, true)
   }
 
-  test("rightOuterJoin") {
+ /* test("rightOuterJoin") {
     val inputData1 = Seq( Seq("a", "b"), Seq("a", ""), Seq(""), Seq() )
     val inputData2 = Seq( Seq("a", "b"), Seq("b", ""), Seq(), Seq("")   )
     val outputData = Seq(
@@ -331,7 +331,7 @@ class BasicOperationsSuite extends TestSuiteBase {
       s1.map(x => (x, 1)).rightOuterJoin(s2.map(x => (x, "x")))
     }
     testOperation(inputData1, inputData2, operation, outputData, true)
-  }
+  }*/
 
   test("fullOuterJoin") {
     val inputData1 = Seq( Seq("a", "b"), Seq("a", ""), Seq(""), Seq() )
@@ -354,7 +354,7 @@ class BasicOperationsSuite extends TestSuiteBase {
   *updateStateByKey操作对每个键会调用一次,
   *values表示键对应的值序列,state可以是任务状态
   */
-  test("updateStateByKey") {
+  /*test("updateStateByKey") {
     //输入数据
     val inputData =
       Seq(
@@ -399,7 +399,7 @@ class BasicOperationsSuite extends TestSuiteBase {
     }
 
     testOperation(inputData, updateStateOperation, outputData, true)
-  }
+  }*/
   //updateStateByKey-简单的RDD初始化值
   test("updateStateByKey - simple with initial value RDD") {
     val initial = Seq(("a", 1), ("c", 2))

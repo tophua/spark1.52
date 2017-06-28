@@ -207,7 +207,7 @@ class ReplSuite extends SparkFunSuite {
     assertContains("res2: Long = 3", output)
     Utils.deleteRecursively(tempDir)
   }
-
+/**
   test("local-cluster mode") {
     val output = runInterpreter("local-cluster[1,1,1024]",
       """
@@ -228,7 +228,7 @@ class ReplSuite extends SparkFunSuite {
     assertContains("res1: Int = 100", output)
     assertContains("res2: Array[Int] = Array(0, 0, 0, 0, 0)", output)
     assertContains("res4: Array[Int] = Array(0, 0, 0, 0, 0)", output)
-  }
+  }**/
 
   test("SPARK-1199 two instances of same class don't type check.") {
     val output = runInterpreter("local-cluster[1,1,1024]",
@@ -251,7 +251,7 @@ class ReplSuite extends SparkFunSuite {
     assertDoesNotContain("error:", output)
     assertDoesNotContain("Exception", output)
   }
-
+  /**
   test("SPARK-2576 importing SQLContext.createDataFrame.") {
     // We need to use local-cluster to test this case.
     val output = runInterpreter("local-cluster[1,1,1024]",
@@ -263,7 +263,7 @@ class ReplSuite extends SparkFunSuite {
       """.stripMargin)
     assertDoesNotContain("error:", output)
     assertDoesNotContain("Exception", output)
-  }
+  }**/
 
   test("SPARK-2632 importing a method from non serializable class and not using it.") {
     val output = runInterpreter("local",
@@ -313,7 +313,7 @@ class ReplSuite extends SparkFunSuite {
     assertContains("ret: Array[Foo] = Array(Foo(1),", output)
   }
 
-  test("collecting objects of class defined in repl - shuffling") {
+  /*test("collecting objects of class defined in repl - shuffling") {
     val output = runInterpreter("local-cluster[1,1,1024]",
       """
         |case class Foo(i: Int)
@@ -323,5 +323,5 @@ class ReplSuite extends SparkFunSuite {
     assertDoesNotContain("error:", output)
     assertDoesNotContain("Exception", output)
     assertContains("ret: Array[(Int, Iterable[Foo])] = Array((1,", output)
-  }
+  }*/
 }

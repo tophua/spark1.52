@@ -99,7 +99,7 @@ class ExecutorClassLoaderSuite
     }
   }
 
-  test("failing to fetch classes from HTTP server should not leak resources (SPARK-6209)") {
+  /*test("failing to fetch classes from HTTP server should not leak resources (SPARK-6209)") {
     // This is a regression test for SPARK-6209, a bug where each failed attempt to load a class
     // from the driver's class server would leak a HTTP connection, causing the class server's
     // thread / connection pool to be exhausted.
@@ -146,6 +146,6 @@ class ExecutorClassLoaderSuite
       }
     }
     failAfter(10 seconds)(tryAndFailToLoadABunchOfClasses())(interruptor)
-  }
+  }*/
 
 }

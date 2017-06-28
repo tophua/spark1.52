@@ -78,7 +78,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
       classOf[AnalyzeTable])
   }
 
-  test("analyze MetastoreRelations") {
+  /*test("analyze MetastoreRelations") {
     def queryTotalSize(tableName: String): BigInt =
       ctx.catalog.lookupRelation(Seq(tableName)).statistics.sizeInBytes
 
@@ -138,7 +138,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
     assert(sizes.size === 1, s"Size wrong for:\n ${df.queryExecution}")
     assert(sizes(0).equals(BigInt(5812)),
       s"expected exact size 5812 for test table 'src', got: ${sizes(0)}")
-  }
+  }*/
 
   test("auto converts to broadcast hash join, by size estimate of a relation") {
     def mkTest(
