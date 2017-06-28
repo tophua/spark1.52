@@ -17,6 +17,8 @@ From: 'an unknown organization'
     License: New BSD License  (http://www.opensource.org/licenses/bsd-license.php)
   - FindBugs-jsr305 (http://findbugs.sourceforge.net/) com.google.code.findbugs:jsr305:jar:1.3.9
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+  - Guava: Google Core Libraries for Java (http://code.google.com/p/guava-libraries/guava) com.google.guava:guava:bundle:14.0.1
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Compress-LZF (http://github.com/ning/compress) com.ning:compress-lzf:bundle:1.0.3
     License: Apache License 2.0  (http://www.apache.org/licenses/LICENSE-2.0.html)
   - ParaNamer Core (http://paranamer.codehaus.org/paranamer) com.thoughtworks.paranamer:paranamer:jar:2.6
@@ -103,13 +105,13 @@ From: 'Apache Software Foundation' (http://www.apache.org)
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 From: 'com.fasterxml.jackson.module'
-  - jackson-module-scala (http://wiki.fasterxml.com/JacksonModuleScala) com.fasterxml.jackson.module:jackson-module-scala_2.10:bundle:2.4.4
+  - jackson-module-scala (http://wiki.fasterxml.com/JacksonModuleScala) com.fasterxml.jackson.module:jackson-module-scala_2.11:bundle:2.4.4
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 From: 'com.twitter'
   - chill-java (https://github.com/twitter/chill) com.twitter:chill-java:jar:0.5.0
     License: Apache 2  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - chill (https://github.com/twitter/chill) com.twitter:chill_2.10:jar:0.5.0
+  - chill (https://github.com/twitter/chill) com.twitter:chill_2.11:jar:0.5.0
     License: Apache 2  (http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 From: 'com.typesafe'
@@ -135,14 +137,14 @@ From: 'Google' (http://www.google.com/)
     License: New BSD license  (http://www.opensource.org/licenses/bsd-license.php)
 
 From: 'LAMP/EPFL' (http://lamp.epfl.ch/)
-  - Scala Compiler (http://www.scala-lang.org/) org.scala-lang:scala-compiler:jar:2.10.4
-    License: BSD-like  (http://www.scala-lang.org/downloads/license.html)
-  - Scala Library (http://www.scala-lang.org/) org.scala-lang:scala-library:jar:2.10.4
-    License: BSD-like  (http://www.scala-lang.org/downloads/license.html)
-  - Scala Compiler (http://www.scala-lang.org/) org.scala-lang:scala-reflect:jar:2.10.4
-    License: BSD-like  (http://www.scala-lang.org/downloads/license.html)
-  - Scalap (http://www.scala-lang.org/) org.scala-lang:scalap:jar:2.10.4
-    License: BSD-like  (http://www.scala-lang.org/downloads/license.html)
+  - Scala Compiler (http://www.scala-lang.org/) org.scala-lang:scala-compiler:jar:2.11.7
+    License: BSD 3-Clause  (http://www.scala-lang.org/license.html)
+  - Scala Library (http://www.scala-lang.org/) org.scala-lang:scala-library:jar:2.11.7
+    License: BSD 3-Clause  (http://www.scala-lang.org/license.html)
+  - Scala Compiler (http://www.scala-lang.org/) org.scala-lang:scala-reflect:jar:2.11.7
+    License: BSD 3-Clause  (http://www.scala-lang.org/license.html)
+  - Scalap (http://www.scala-lang.org/) org.scala-lang:scalap:jar:2.11.7
+    License: BSD 3-Clause  (http://www.scala-lang.org/license.html)
 
 From: 'Mort Bay Consulting' (http://www.mortbay.com)
   - Jetty Orbit :: Servlet API (http://www.eclipse.org/jetty/jetty-orbit/javax.servlet) org.eclipse.jetty.orbit:javax.servlet:orbit:3.0.0.v201112011016
@@ -161,12 +163,18 @@ From: 'Oracle Corporation' (http://www.oracle.com/)
     License: CDDL 1.1  (http://glassfish.java.net/public/CDDL+GPL_1_1.html)    License: GPL2 w/ CPE  (http://glassfish.java.net/public/CDDL+GPL_1_1.html)
 
 From: 'org.json4s' (https://github.com/json4s/json4s)
-  - json4s-ast (https://github.com/json4s/json4s) org.json4s:json4s-ast_2.10:jar:3.2.10
+  - json4s-ast (https://github.com/json4s/json4s) org.json4s:json4s-ast_2.11:jar:3.2.10
     License: ASL  (http://github.com/json4s/json4s/raw/HEAD/LICENSE)
-  - json4s-core (https://github.com/json4s/json4s) org.json4s:json4s-core_2.10:jar:3.2.10
+  - json4s-core (https://github.com/json4s/json4s) org.json4s:json4s-core_2.11:jar:3.2.10
     License: ASL  (http://github.com/json4s/json4s/raw/HEAD/LICENSE)
-  - json4s-jackson (https://github.com/json4s/json4s) org.json4s:json4s-jackson_2.10:jar:3.2.10
+  - json4s-jackson (https://github.com/json4s/json4s) org.json4s:json4s-jackson_2.11:jar:3.2.10
     License: ASL  (http://github.com/json4s/json4s/raw/HEAD/LICENSE)
+
+From: 'org.scala-lang.modules' (http://www.scala-lang.org/)
+  - scala-parser-combinators (http://www.scala-lang.org/) org.scala-lang.modules:scala-parser-combinators_2.11:bundle:1.0.1
+    License: BSD 3-clause  (http://opensource.org/licenses/BSD-3-Clause)
+  - scala-xml (http://www.scala-lang.org/) org.scala-lang.modules:scala-xml_2.11:bundle:1.0.2
+    License: BSD 3-clause  (http://opensource.org/licenses/BSD-3-Clause)
 
 From: 'QOS.ch' (http://www.qos.ch)
   - JCL 1.1.1 implemented over SLF4J (http://www.slf4j.org) org.slf4j:jcl-over-slf4j:jar:1.7.10
@@ -237,17 +245,17 @@ From: 'The Apache Software Foundation' (http://www.apache.org/)
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Apache Parquet Jackson (https://parquet.apache.org) org.apache.parquet:parquet-jackson:jar:1.7.0
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
-  - Spark Project Catalyst (http://spark.apache.org/) org.apache.spark:spark-catalyst_2.10:jar:1.5.3-SNAPSHOT
+  - Spark Project Catalyst (http://spark.apache.org/) org.apache.spark:spark-catalyst_2.11:jar:1.5.3-SNAPSHOT
     License: Apache 2.0 License  (http://www.apache.org/licenses/LICENSE-2.0.html)
-  - Spark Project Core (http://spark.apache.org/) org.apache.spark:spark-core_2.10:jar:1.5.3-SNAPSHOT
+  - Spark Project Core (http://spark.apache.org/) org.apache.spark:spark-core_2.11:jar:1.5.3-SNAPSHOT
     License: Apache 2.0 License  (http://www.apache.org/licenses/LICENSE-2.0.html)
-  - Spark Project Launcher (http://spark.apache.org/) org.apache.spark:spark-launcher_2.10:jar:1.5.3-SNAPSHOT
+  - Spark Project Launcher (http://spark.apache.org/) org.apache.spark:spark-launcher_2.11:jar:1.5.3-SNAPSHOT
     License: Apache 2.0 License  (http://www.apache.org/licenses/LICENSE-2.0.html)
-  - Spark Project Networking (http://spark.apache.org/) org.apache.spark:spark-network-common_2.10:jar:1.5.3-SNAPSHOT
+  - Spark Project Networking (http://spark.apache.org/) org.apache.spark:spark-network-common_2.11:jar:1.5.3-SNAPSHOT
     License: Apache 2.0 License  (http://www.apache.org/licenses/LICENSE-2.0.html)
-  - Spark Project Shuffle Streaming Service (http://spark.apache.org/) org.apache.spark:spark-network-shuffle_2.10:jar:1.5.3-SNAPSHOT
+  - Spark Project Shuffle Streaming Service (http://spark.apache.org/) org.apache.spark:spark-network-shuffle_2.11:jar:1.5.3-SNAPSHOT
     License: Apache 2.0 License  (http://www.apache.org/licenses/LICENSE-2.0.html)
-  - Spark Project Unsafe (http://spark.apache.org/) org.apache.spark:spark-unsafe_2.10:jar:1.5.3-SNAPSHOT
+  - Spark Project Unsafe (http://spark.apache.org/) org.apache.spark:spark-unsafe_2.11:jar:1.5.3-SNAPSHOT
     License: Apache 2.0 License  (http://www.apache.org/licenses/LICENSE-2.0.html)
 
 From: 'The Netty Project' (http://netty.io/)
@@ -257,11 +265,11 @@ From: 'The Netty Project' (http://netty.io/)
     License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
 
 From: 'Typesafe Inc.' (http://www.typesafe.com)
-  - akka-actor (http://akka.io/) com.typesafe.akka:akka-actor_2.10:jar:2.3.11
+  - akka-actor (http://akka.io/) com.typesafe.akka:akka-actor_2.11:jar:2.3.11
     License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
-  - akka-remote (http://akka.io/) com.typesafe.akka:akka-remote_2.10:jar:2.3.11
+  - akka-remote (http://akka.io/) com.typesafe.akka:akka-remote_2.11:jar:2.3.11
     License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
-  - akka-slf4j (http://akka.io/) com.typesafe.akka:akka-slf4j_2.10:jar:2.3.11
+  - akka-slf4j (http://akka.io/) com.typesafe.akka:akka-slf4j_2.11:jar:2.3.11
     License: Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
 
 From: 'xerial.org'

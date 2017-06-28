@@ -48,7 +48,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     assert(nextTaskSetToSchedule.get.stageId === expectedStageId)
   }
 
- /* test("FIFO Scheduler Test") {//先进先出调度测试
+  test("FIFO Scheduler Test") {//先进先出调度测试
     sc = new SparkContext("local", "TaskSchedulerImplSuite")
     val taskScheduler = new TaskSchedulerImpl(sc)
 
@@ -69,7 +69,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     scheduleTaskAndVerifyId(3, rootPool, 1)
     scheduleTaskAndVerifyId(4, rootPool, 2)
     scheduleTaskAndVerifyId(5, rootPool, 2)
-  }*/
+  }
 
   /**
    * This test creates three scheduling pools, and creates task set managers in the first
@@ -78,7 +78,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
    * 测试验证任务的计划,公平调度算法两个调度池正确的顺序
    * algorithm properly orders the two scheduling pools.
    */
- /* test("Fair Scheduler Test") {//公平调度测试
+test("Fair Scheduler Test") {//公平调度测试
     val xmlPath = getClass.getClassLoader.getResource("fairscheduler.xml").getFile()
     val conf = new SparkConf().set("spark.scheduler.allocation.file", xmlPath)
     sc = new SparkContext("local", "TaskSchedulerImplSuite", conf)
@@ -147,9 +147,9 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     // tasks.
     //池1运行任务:4.池2运行任务:3 ,2被调度因为较少的运行任务
     scheduleTaskAndVerifyId(7, rootPool, 4)
-  }*/
+  }
 
-/*  test("Nested Pool Test") {//测试嵌套的调度算法池
+ test("Nested Pool Test") {//测试嵌套的调度算法池
     sc = new SparkContext("local", "TaskSchedulerImplSuite")
     val taskScheduler = new TaskSchedulerImpl(sc)
 
@@ -193,5 +193,5 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     scheduleTaskAndVerifyId(1, rootPool, 4)
     scheduleTaskAndVerifyId(2, rootPool, 6)
     scheduleTaskAndVerifyId(3, rootPool, 2)
-  }*/
+  }
 }
