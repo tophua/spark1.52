@@ -352,7 +352,8 @@ object KMeansSuite extends SparkFunSuite {
         assert(ca === cb)
       case (ca: DenseVector, cb: DenseVector) =>
         assert(ca === cb)
-      case _ =>//checkequal失败以来,两簇是不相同的
+      case _ =>
+        //checkequal失败以来,两簇是不相同的
         throw new AssertionError("checkEqual failed since the two clusters were not identical.\n")
     }
   }
@@ -360,7 +361,7 @@ object KMeansSuite extends SparkFunSuite {
 
 class KMeansClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
   //在训练和预测中,任务的大小应该是小的
-  test("task size should be small in both training and prediction") {
+  /*test("task size should be small in both training and prediction") {
     val m = 4
     val n = 200000
     val points = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
@@ -380,5 +381,5 @@ class KMeansClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
       */
       val cost = model.computeCost(points)
     }
-  }
+  }*/
 }

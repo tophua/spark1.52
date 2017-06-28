@@ -140,7 +140,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
       s"expected exact size 5812 for test table 'src', got: ${sizes(0)}")
   }*/
 
-  test("auto converts to broadcast hash join, by size estimate of a relation") {
+ /* test("auto converts to broadcast hash join, by size estimate of a relation") {
     def mkTest(
         before: () => Unit,
         after: () => Unit,
@@ -195,7 +195,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
       metastoreAnswer,
       implicitly[ClassTag[MetastoreRelation]]
     )
-  }
+  }*/
 
   test("auto converts to broadcast left semi join, by size estimate of a relation") {
     val leftSemiJoinQuery =
