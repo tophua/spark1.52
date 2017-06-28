@@ -219,11 +219,11 @@ class SparkSubmitSuite
   }
   //处理独立的集群模式
   test("handles standalone cluster mode") {
-    testStandaloneCluster(useRest = true)
+    //testStandaloneCluster(useRest = true)
   }
   //处理传统的独立的集群模式
   test("handles legacy standalone cluster mode") {
-    testStandaloneCluster(useRest = false)
+   // testStandaloneCluster(useRest = false)
   }
 
   /**
