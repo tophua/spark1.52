@@ -7,6 +7,8 @@ Spark Project Parent POM
 
 
 From: 'an unknown organization'
+  - Guava: Google Core Libraries for Java (http://code.google.com/p/guava-libraries/guava) com.google.guava:guava:bundle:14.0.1
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - empty (http://nexus.sonatype.org/oss-repository-hosting.html/unused) org.spark-project.spark:unused:jar:1.0.0
     License: The Apache License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
 
