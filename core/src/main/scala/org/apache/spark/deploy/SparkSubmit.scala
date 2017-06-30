@@ -195,9 +195,13 @@ object SparkSubmit {
      // In standalone cluster mode, there are two submission gateways:
      // 在独立的集群模式中,有两个提交方式：
      //   (1) The traditional Akka gateway using o.a.s.deploy.Client as a wrapper
+     //       传统的Akka网关使用o.a.s.deploy.Client作为包装器
      //   (2) The new REST-based gateway introduced in Spark 1.3
+    //        在Spark 1.3中引入的新的基于REST的网关
      // The latter is the default behavior as of Spark 1.3, but Spark submit will fail over
+     // 后者是Spark 1.3的默认行为,但Spark提交将失败
      // to use the legacy gateway if the master endpoint turns out to be not a REST server.
+     // 如果主端点不是REST服务器,则使用传统网关。
     if (args.isStandaloneCluster && args.useRest) {
       try {
         // scalastyle:off println
@@ -296,6 +300,7 @@ object SparkSubmit {
 
     // Resolve maven dependencies if there are any and add classpath to jars. Add them to py-files
     // too for packages that include Python code
+    //解决maven依赖关系,如果有任何的,并添加classpath到jar.将它们添加到包含Python代码的包中的py文件中
     val exclusions: Seq[String] =
       if (!StringUtils.isBlank(args.packagesExclusions)) {
         args.packagesExclusions.split(",")
@@ -372,11 +377,13 @@ object SparkSubmit {
         args.childArgs = ArrayBuffer(args.primaryResource, args.pyFiles) ++ args.childArgs
         if (clusterManager != YARN) {
           // The YARN backend distributes the primary file differently, so don't merge it.
+          //YARN后端分发主文件不同,所以不要合并
           args.files = mergeFileLists(args.files, args.primaryResource)
         }
       }
       if (clusterManager != YARN) {
         // The YARN backend handles python files differently, so don't merge the lists.
+        //YARN后端处理python文件不同，所以不要合并列表
         args.files = mergeFileLists(args.files, args.pyFiles)
       }
       if (args.pyFiles != null) {
