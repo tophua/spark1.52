@@ -35,6 +35,7 @@ import org.apache.spark.util.{ResetSystemProperties, Utils}
 
 // Note: this suite mixes in ResetSystemProperties because SparkSubmit.main() sets a bunch
 // of properties that neeed to be cleared after tests.
+//设置一组需要在测试后清除的属性
 class SparkSubmitSuite
   extends SparkFunSuite
   with Matchers

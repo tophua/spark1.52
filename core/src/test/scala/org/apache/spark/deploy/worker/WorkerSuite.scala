@@ -98,7 +98,8 @@ class WorkerSuite extends SparkFunSuite with Matchers {
       "sparkWorker1", "Worker", "/tmp", conf, new SecurityManager(conf))
     // initialize workers 初始化工作节点
     for (i <- 0 until 50) {
-      worker.executors += s"app1/$i" -> createExecutorRunner(i)
+      //Map
+  worker.executors += s"app1/$i" -> createExecutorRunner(i)
     }
     // initialize ExecutorStateChanged Message 初始化信息
     worker.handleExecutorStateChanged(
