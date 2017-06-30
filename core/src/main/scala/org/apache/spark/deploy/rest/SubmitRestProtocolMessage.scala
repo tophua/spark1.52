@@ -58,7 +58,7 @@ private[rest] abstract class SubmitRestProtocolMessage {
   /**
    * Serialize the message to JSON.将消息序列化JSON
    * This also ensures that the message is valid and its fields are in the expected format.
-   * 这也确保消息是有效的,并且它的字段是在预期的格式中
+   * 这也确保消息是有效的,并且它的字段是在预期的格式中,将对象转换成json格式
    */
   def toJson: String = {
     validate()
@@ -121,7 +121,7 @@ private[spark] object SubmitRestProtocolMessage {
 
   /**
    * Parse the value of the action field from the given JSON.
-   * 解析的作用域的值从给定的JSON
+   * 从给定的JSON解析的作用域的值
    * If the action field is not found, throw a [[SubmitRestMissingFieldException]].
    * 如果找不到动作的字段,抛出异常
    */
@@ -153,10 +153,11 @@ private[spark] object SubmitRestProtocolMessage {
 
   /**
    * Construct a [[SubmitRestProtocolMessage]] from its JSON representation.
-   *
+   * 从JSON构造一个[[SubmitRestProtocolMessage]]
    * This method determines the type of the message from the class provided instead of
    * inferring it from the action field. This is useful for deserializing JSON that
-   * represents custom user-defined messages.
+   * represents custom user-defined messages
+    * 该方法从提供的类确定消息的类型,而不是从操作字段推断消息的类型。 这对反序列化表示自定义用户定义消息的JSON非常有用。
    */
   def fromJson[T <: SubmitRestProtocolMessage](json: String, clazz: Class[T]): T = {
     mapper.readValue(json, clazz)

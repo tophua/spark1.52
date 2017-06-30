@@ -237,7 +237,6 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
   
   test("SPARK-5582: empty log directory") {//空的日志目录
     val provider = new FsHistoryProvider(createTestConf())
-
     val logFile1 = newLogFile("app1", None, inProgress = true)
     writeFile(logFile1, true, None,
       SparkListenerApplicationStart("app1", Some("app1"), 1L, "test", None),
@@ -245,7 +244,6 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
 
     val oldLog = new File(testDir, "old1")
     oldLog.mkdir()
-
     provider.checkForLogs()
     val appListAfterRename = provider.getListing()
     appListAfterRename.size should be (1)
@@ -257,7 +255,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     val attempt1 = newLogFile("app1", Some("attempt1"), inProgress = true)
     writeFile(attempt1, true, None,
       SparkListenerApplicationStart("app1", Some("app1"), 1L, "test", Some("attempt1"))
-      )
+     )
 
     updateAndCheck(provider) { list =>
       list.size should be (1)

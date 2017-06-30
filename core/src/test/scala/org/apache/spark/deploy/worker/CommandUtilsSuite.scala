@@ -27,18 +27,18 @@ class CommandUtilsSuite extends SparkFunSuite with Matchers with PrivateMethodTe
   test("set libraryPath correctly") {//正确设置库路径
     val appId = "12345-worker321-9876"
     //返回当前系统路径名,windows默认PATH
-    val libraryPath = Utils.libraryPathEnvName   
-    //System.setProperty("spark.testing.home", "true")
-   // val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
-   //  val sparkHome = sys.props.getOrElse("spark.test.home", "test.home")
+    val libraryPath = Utils.libraryPathEnvName
+    //sys.env("spark.testing.home").getOrElse("/software/spark2.1")
+    val sparkHome = sys.props.getOrElse("spark.test.home", "/software/spark1.6")
+     // val sparkHome = sys.props.getOrElse("spark.test.home", "test.home")
     //Command
     val cmd = new Command("mainClass", Seq(), Map(), Seq(), Seq("libraryPathToB"), Seq())
     //构建ProcessBuilder
-  /*  val builder = CommandUtils.buildProcessBuilder(
+   val builder = CommandUtils.buildProcessBuilder(
       cmd, new SecurityManager(new SparkConf), 512, sparkHome, t => t)
    val env = builder.environment
     env.keySet should contain(libraryPath)
-    assert(env.get(libraryPath).startsWith("libraryPathToB"))*/
+    assert(env.get(libraryPath).startsWith("libraryPathToB"))
   }
 
   test("auth secret shouldn't appear in java opts") {//认证密码不应该出现在java选择

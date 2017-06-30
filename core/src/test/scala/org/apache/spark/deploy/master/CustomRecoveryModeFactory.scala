@@ -57,6 +57,7 @@ object CustomRecoveryModeFactory {
 }
 
 class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine {
+  //HashMap 创建方式
   val data = mutable.HashMap[String, Array[Byte]]()
 
   CustomPersistenceEngine.lastInstance = Some(this)//最后的实例
@@ -69,8 +70,10 @@ class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine 
   override def persist(name: String, obj: Object): Unit = {
     CustomPersistenceEngine.persistAttempts += 1
     val serialized = serializer.newInstance().serialize(obj)
+    //创建Array对象,初始化数组长度
     val bytes = new Array[Byte](serialized.remaining())//返回剩余的可用长度
     serialized.get(bytes)
+    //MAP追加方式(key:name,value:bytes)
     data += name -> bytes
   }
 
@@ -90,6 +93,7 @@ class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine 
    */
   override def read[T: ClassTag](prefix: String): Seq[T] = {
     CustomPersistenceEngine.readAttempts += 1
+    //map迭代方式
     val results = for ((name, bytes) <- data; if name.startsWith(prefix))
       yield serializer.newInstance().deserialize[T](ByteBuffer.wrap(bytes))
     results.toSeq

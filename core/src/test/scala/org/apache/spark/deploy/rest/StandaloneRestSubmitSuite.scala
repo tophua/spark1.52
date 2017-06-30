@@ -50,8 +50,9 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   test("construct submit request") {//构造提交请求
     val appArgs = Array("one", "two", "three")
+    //map 初始化
     val sparkProperties = Map("spark.app.name" -> "pi")
-    //环境变量
+    //环境变量，map 初始化以逗号分隔
     val environmentVariables = Map("SPARK_ONE" -> "UN", "SPARK_TWO" -> "DEUX")
     //提交客户端
     val request = new RestSubmissionClient("spark://host:port").constructSubmitRequest(
@@ -458,6 +459,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
       appArgs: Array[String] = Array.empty): CreateSubmissionRequest = {
     val mainClass = "main-class-not-used"
     val mainJar = "dummy-jar-not-used.jar"
+    //数组初始化
     val commandLineArgs = Array(
       "--deploy-mode", "cluster",
       "--master", masterUrl,
@@ -465,7 +467,9 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
       "--class", mainClass,
       mainJar) ++ appArgs
     val args = new SparkSubmitArguments(commandLineArgs)
+    //准备提交环境
     val (_, _, sparkProperties, _) = SparkSubmit.prepareSubmitEnvironment(args)
+    //创建一个提交请求与实际参数使用Spark提交
     new RestSubmissionClient("spark://host:port").constructSubmitRequest(
       mainJar, mainClass, appArgs, sparkProperties.toMap, Map.empty)
   }

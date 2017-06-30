@@ -71,7 +71,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newRequest.message === null)
   }
 
-  test("response to and from JSON") {//从JSON响应
+  test("response to and from JSON") {//响应来自JSON
     val response = new DummyResponse
     response.serverSparkVersion = "3.3.4"
     response.success = true
@@ -84,7 +84,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newResponse.message === null)
   }
 
-  test("CreateSubmissionRequest") {//创建提交请求
+  test("CreateSubmissionRequest") {//创建请求提交
     val message = new CreateSubmissionRequest
     intercept[SubmitRestProtocolException] { message.validate() }
     message.clientSparkVersion = "1.2.3"
@@ -92,9 +92,10 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     message.mainClass = "org.apache.spark.examples.SparkPie"
     val conf = new SparkConf(false)
     conf.set("spark.app.name", "SparkPie")
+    //conf.getAll.toMap获得所有属性转换成map
     message.sparkProperties = conf.getAll.toMap
     message.validate()
-    // optional fields 可选字段
+    // optional fields 可选字段,jars多个jar逗号分隔
     conf.set("spark.jars", "mayonnaise.jar,ketchup.jar")
     conf.set("spark.files", "fireball.png")
     conf.set("spark.driver.memory", s"${Utils.DEFAULT_DRIVER_MEM_MB}m")
@@ -303,7 +304,10 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
       |}
     """.stripMargin
 
-  /** Assert that the contents in the two JSON strings are equal after ignoring whitespace. */
+  /**
+    * Assert that the contents in the two JSON strings are equal after ignoring whitespace.
+    * 断言两个JSON字符串中的内容在忽略空格之后是相等的。
+    * */
   private def assertJsonEquals(jsonString1: String, jsonString2: String): Unit = {
     val trimmedJson1 = jsonString1.trim
     val trimmedJson2 = jsonString2.trim

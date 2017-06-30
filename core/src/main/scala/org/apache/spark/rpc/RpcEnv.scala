@@ -168,6 +168,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
    * Wait until [[RpcEnv]] exits.
    * 等待直到RpcEnv退出
    * TODO do we need a timeout parameter?
+    * 我们需要一个超时参数吗?
    */
   def awaitTermination(): Unit
 

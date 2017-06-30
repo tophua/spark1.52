@@ -105,6 +105,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
       rpcEnv.setupEndpointRef(Master.SYSTEM_NAME, rpcEnv.address, Master.ENDPOINT_NAME)
 
       CustomPersistenceEngine.lastInstance.isDefined shouldBe true
+      //option使用的方式
       val persistenceEngine = CustomPersistenceEngine.lastInstance.get
 
       persistenceEngine.addApplication(appToPersist)
@@ -126,17 +127,21 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
   }
   //主节点/工作节点网站界面可用
   test("master/worker web ui available") {
+    //json4s
     implicit val formats = org.json4s.DefaultFormats
     val conf = new SparkConf()
     val localCluster = new LocalSparkCluster(2, 2, 512, conf)
     localCluster.start()
     try {
       eventually(timeout(5 seconds), interval(100 milliseconds)) {
+        //读取json文件格式方式
         val json = Source.fromURL(s"http://localhost:${localCluster.masterWebUIPort}/json")
           .getLines().mkString("\n")
+        //json4s 调用DefaultFormats类parse,解析json
         val JArray(workers) = (parse(json) \ "workers")
-        workers.size should be (2)
+          //workers.size should be (2)
         workers.foreach { workerSummaryJson =>
+          println(workerSummaryJson)
           val JString(workerWebUi) = workerSummaryJson \ "webuiaddress"
           val workerResponse = parse(Source.fromURL(s"${workerWebUi}/json")
             .getLines().mkString("\n"))

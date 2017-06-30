@@ -28,6 +28,7 @@ class LogPageSuite extends SparkFunSuite with PrivateMethodTester {
 
   test("get logs simple") {//获得简单日志
     val webui = mock(classOf[WorkerWebUI])
+    //获得临时目录
     val tmpDir = new File(sys.props("java.io.tmpdir"))
     val workDir = new File(tmpDir, "work-dir")
     workDir.mkdir()

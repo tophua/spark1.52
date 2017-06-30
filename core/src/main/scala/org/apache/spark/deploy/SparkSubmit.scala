@@ -216,10 +216,10 @@ object SparkSubmit {
    * Prepare the environment for submitting an application.
    * 准备提交应用程序的环境
    * This returns a 4-tuple:
-   *   (1) the arguments for the child process,
-   *   (2) a list of classpath entries for the child,
-   *   (3) a map of system properties, and
-   *   (4) the main class for the child
+   *   (1) the arguments for the child process, 子进程的参数
+   *   (2) a list of classpath entries for the child,子进程的类路径条目列表
+   *   (3) a map of system properties, and 系统属性的映射
+   *   (4) the main class for the child 子进程main类
    * Exposed for testing.
    */
   private[deploy] def prepareSubmitEnvironment(args: SparkSubmitArguments)
