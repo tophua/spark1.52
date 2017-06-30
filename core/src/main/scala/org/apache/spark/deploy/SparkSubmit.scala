@@ -257,6 +257,8 @@ object SparkSubmit {
     // Because "yarn-cluster" and "yarn-client" encapsulate both the master
     // and deploy mode, we have some logic to infer the master and deploy mode
     // from each other if only one is specified, or exit early if they are at odds.
+    //因为“yarn集群”和“yarn客户端”都封装了主机和部署模式，所以我们有一些逻辑可以推断主机和部署模式，
+    //如果只有一个被指定，或者如果它们有差异
     if (clusterManager == YARN) {
       if (args.master == "yarn-standalone") {
         printWarning("\"yarn-standalone\" is deprecated. Use \"yarn-cluster\" instead.")
@@ -274,6 +276,7 @@ object SparkSubmit {
       }
 
       // Make sure YARN is included in our build if we're trying to use it
+      //如果我们试图使用它，请确保YARN已包含在我们的构建中
       if (!Utils.classIsLoadable("org.apache.spark.deploy.yarn.Client") && !Utils.isTesting) {
         printErrorAndExit(
           "Could not load YARN classes. " +
@@ -282,6 +285,7 @@ object SparkSubmit {
     }
 
     // Update args.deployMode if it is null. It will be passed down as a Spark property later.
+    //更新args.deployMode（如果为null）,稍后将以Spark属性传递
     (args.deployMode, deployMode) match {
       case (null, CLIENT) => args.deployMode = "client"
       case (null, CLUSTER) => args.deployMode = "cluster"
@@ -315,6 +319,7 @@ object SparkSubmit {
 
     // Require all python files to be local, so we can add them to the PYTHONPATH
     // In YARN cluster mode, python files are distributed as regular files, which can be non-local
+    //要求所有python文件都是本地的,所以我们可以将它们添加到PYTHONPATH在YARN集群模式下,python文件作为普通文件分发,可以是非本地的
     if (args.isPython && !isYarnCluster) {
       if (Utils.nonLocalPaths(args.primaryResource).nonEmpty) {
         printErrorAndExit(s"Only local python files are supported: $args.primaryResource")
@@ -356,6 +361,7 @@ object SparkSubmit {
     }
 
     // If we're running a python app, set the main class to our specific python runner
+    //如果我们正在运行一个python应用程序,请将主类设置为特定的python运行器
     if (args.isPython && deployMode == CLIENT) {
       if (args.primaryResource == PYSPARK_SHELL) {
         args.mainClass = "org.apache.spark.api.python.PythonGatewayServer"
@@ -465,6 +471,7 @@ object SparkSubmit {
         sysProp = "spark.driver.extraLibraryPath"),
 
       // Yarn client only
+      //Yarn 客户端
       OptionAssigner(args.queue, YARN, CLIENT, sysProp = "spark.yarn.queue"),
       OptionAssigner(args.numExecutors, YARN, ALL_DEPLOY_MODES,
         sysProp = "spark.executor.instances"),
@@ -474,6 +481,7 @@ object SparkSubmit {
       OptionAssigner(args.keytab, YARN, CLIENT, sysProp = "spark.yarn.keytab"),
 
       // Yarn cluster only
+      //Yarn集群
       OptionAssigner(args.name, YARN, CLUSTER, clOption = "--name"),
       OptionAssigner(args.driverMemory, YARN, CLUSTER, clOption = "--driver-memory"),
       OptionAssigner(args.driverCores, YARN, CLUSTER, clOption = "--driver-cores"),
@@ -562,6 +570,7 @@ object SparkSubmit {
     }
 
     // Let YARN know it's a pyspark app, so it distributes needed libraries.
+    //让YARN知道这是一个pyspark应用程序,所以它分发所需的库。
     if (clusterManager == YARN) {
       if (args.isPython) {
         sysProps.put("spark.yarn.isPython", "true")
@@ -584,6 +593,7 @@ object SparkSubmit {
     }
 
     // In yarn-cluster mode, use yarn.Client as a wrapper around the user class
+    //在yarn群集模式下，使用yarn客户端作为用户类的包装
     if (isYarnCluster) {
       childMainClass = "org.apache.spark.deploy.yarn.Client"
       if (args.isPython) {
@@ -772,6 +782,7 @@ object SparkSubmit {
 
   /**
    * Return whether the given primary resource represents a shell.
+    * 返回给定的主资源是否代表一个shell
    */
   private[deploy] def isShell(res: String): Boolean = {
     (res == SPARK_SHELL || res == PYSPARK_SHELL || res == SPARKR_SHELL)
@@ -779,13 +790,15 @@ object SparkSubmit {
 
   /**
    * Return whether the given main class represents a sql shell.
+    * 返回给定的主类是否代表一个sql shell
    */
   private[deploy] def isSqlShell(mainClass: String): Boolean = {
     mainClass == "org.apache.spark.sql.hive.thriftserver.SparkSQLCLIDriver"
   }
 
   /**
-   * Return whether the given main class represents a thrift server.   
+   * Return whether the given main class represents a thrift server.
+    * 返回给定的主类是否代表thrift服务器
    */
   private def isThriftServer(mainClass: String): Boolean = {
     mainClass == "org.apache.spark.sql.hive.thriftserver.HiveThriftServer2"
@@ -793,6 +806,7 @@ object SparkSubmit {
 
   /**
    * Return whether the given primary resource requires running python.
+    * 返回给定的主要资源是否需要运行python。
    */
   private[deploy] def isPython(res: String): Boolean = {
     res != null && res.endsWith(".py") || res == PYSPARK_SHELL
@@ -812,8 +826,10 @@ object SparkSubmit {
   /**
    * Merge a sequence of comma-separated file lists, some of which may be null to indicate
    * no files, into a single comma-separated string.
+    * 合并一个逗号分隔文件列表,其中一些逗号分隔的文件列表可能为null,表示没有文件,单个逗号分隔的字符串
    */
   private def mergeFileLists(lists: String*): String = {
+    //filterNot返回所有使假设条件返回false的元素组成的新集合
     val merged = lists.filterNot(StringUtils.isBlank)
                       .flatMap(_.split(","))
                       .mkString(",")
@@ -861,10 +877,14 @@ private[spark] object SparkSubmitUtils {
     }
   }
 
-  /** Path of the local Maven cache. */
+  /**
+    * Path of the local Maven cache.
+    * 本地Maven缓存的路径
+    * */
   private[spark] def m2Path: File = {
     if (Utils.isTesting) {
       // test builds delete the maven cache, and this can cause flakiness
+      // 测试构建删除maven缓存,这可能会导致片断
       new File("dummy", ".m2" + File.separator + "repository")
     } else {
       new File(System.getProperty("user.home"), ".m2" + File.separator + "repository")
@@ -989,12 +1009,16 @@ private[spark] object SparkSubmitUtils {
     }
   }
 
-  /** A nice function to use in tests as well. Values are dummy strings. */
+  /**
+    * A nice function to use in tests as well. Values are dummy strings.
+    * 在测试中使用的一个很好的功能,值是虚拟字符串,
+    * */
   def getModuleDescriptor: DefaultModuleDescriptor = DefaultModuleDescriptor.newDefaultInstance(
     ModuleRevisionId.newInstance("org.apache.spark", "spark-submit-parent", "1.0"))
 
   /**
    * Resolves any dependencies that were supplied through maven coordinates
+    * 解决通过maven坐标提供的任何依赖关系
    * @param coordinates Comma-delimited string of maven coordinates
    * @param remoteRepos Comma-delimited string of remote repositories other than maven central
    * @param ivyPath The path to the local ivy repository
@@ -1110,6 +1134,7 @@ private[spark] object SparkSubmitUtils {
 /**
  * Provides an indirection layer for passing arguments as system properties or flags to
  * the user's driver program or to downstream launcher tools.
+  * 提供一个间接层,用于将参数作为系统属性或标志传递给用户的驱动程序或下游启动器工具
  */
 private case class OptionAssigner(
     value: String,
