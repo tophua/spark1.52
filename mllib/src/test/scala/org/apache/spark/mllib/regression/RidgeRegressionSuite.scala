@@ -115,7 +115,7 @@ class RidgeRegressionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
 class RidgeRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
    //在训练和预测中,任务的大小应该是小
-  test("task size should be small in both training and prediction") {
+ /* test("task size should be small in both training and prediction") {
     val m = 4
     val n = 200000
     val points = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
@@ -129,5 +129,5 @@ class RidgeRegressionClusterSuite extends SparkFunSuite with LocalClusterSparkCo
     //(SGD随机梯度下降)
     val model = RidgeRegressionWithSGD.train(points, 2)
     val predictions = model.predict(points.map(_.features))
-  }
+  }*/
 }

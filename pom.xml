@@ -706,6 +706,7 @@
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-reflect</artifactId>
         <version>${scala.version}</version>
+	 <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.scala-lang</groupId>
@@ -2061,7 +2062,7 @@
               <configuration>
                 <!-- This includes dependencies with 'runtime' and 'compile' scopes;
                      see the docs for includeScope for more details -->
-                <includeScope>runtime</includeScope>
+                <includeScope>compile</includeScope>
               </configuration>
             </execution>
           </executions>

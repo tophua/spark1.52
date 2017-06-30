@@ -25,7 +25,7 @@ import scala.util.Random
 import org.apache.spark.sql.catalyst.plans.logical.OneRowRelation
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.test.{ExamplePointUDT, ExamplePoint, SharedSQLContext}
+import org.apache.spark.sql.test.{SharedSQLContext}
 /**
  * DataFrame是一个分布式的,按照命名列的形式组织的数据集合,与关系型数据库中的数据库表类似
  */
@@ -757,14 +757,14 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
   //  assert(testData.select($"*").filter($"key" < 0).showString(1) === expectedAnswer)
   }
 //StructType代表一张表,StructField代表一个字段
-  test("createDataFrame(RDD[Row], StructType) should convert UDTs (SPARK-6672)") {
+ /* test("createDataFrame(RDD[Row], StructType) should convert UDTs (SPARK-6672)") {
     val rowRDD = sqlContext.sparkContext.parallelize(Seq(Row(new ExamplePoint(1.0, 2.0))))
     //StructType代表一张表,StructField代表一个字段
     val schema = StructType(Array(StructField("point", new ExamplePointUDT(), false)))
     //schema方式创建RDD
     val df = sqlContext.createDataFrame(rowRDD, schema)
     df.rdd.collect()
-  }
+  }*/
 
   test("SPARK-6899: type should match when using codegen") {//配合使用时代码生成
     withSQLConf(SQLConf.CODEGEN_ENABLED.key -> "true") {
@@ -962,7 +962,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     +----+*/
     df.show(10)
     //排序包括NaN,没有值,即不能排序操作
-    df.orderBy("a").collect().foreach { x => println _}
+    //df.orderBy("a").collect().foreach { x => println _}
   }
   //排序double列包含NaN,不应该崩溃
   test("SPARK-8797: sort by double column containing NaN should not crash") {

@@ -447,6 +447,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
     }
     //输出流
     val writer = new OutputStreamWriter(bstream, "UTF-8")
+    //科里化含数没有返回值调用方式
     Utils.tryWithSafeFinally {
       events.foreach(e => writer.write(compact(render(JsonProtocol.sparkEventToJson(e))) + "\n"))
     } {

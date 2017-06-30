@@ -73,7 +73,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     //是否在发送之前压缩广播变量
     conf.set("spark.broadcast.compress", "true")
     //sc = new SparkContext("local-cluster[%d, 1, 1024]".format(numSlaves), "test", conf)
-    sc = new SparkContext("local[*]".format(numSlaves), "test", conf)
+    sc = new SparkContext("local[*]", "test", conf)
     val list = List[Int](1, 2, 3, 4)
     val broadcast = sc.broadcast(list)
     val results = sc.parallelize(1 to numSlaves).map(x => (x, broadcast.value.sum))
@@ -103,7 +103,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     //是否在发送之前压缩广播变量
     conf.set("spark.broadcast.compress", "true")
     //sc = new SparkContext("local-cluster[%d, 1, 1024]".format(numSlaves), "test", conf)
-    sc = new SparkContext("local[*]".format(numSlaves), "test", conf)
+    sc = new SparkContext("local[*]", "test", conf)
     val list = List[Int](1, 2, 3, 4)
     val broadcast = sc.broadcast(list)
     val results = sc.parallelize(1 to numSlaves).map(x => (x, broadcast.value.sum))
@@ -134,12 +134,12 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     val numSlaves = 2
     val conf = torrentConf.clone
     //sc = new SparkContext("local-cluster[%d, 1, 1024]".format(numSlaves), "test", conf)
-    sc = new SparkContext("local[*]".format(numSlaves), "test", conf)
+    sc = new SparkContext("local[*]", "test", conf)
     val rdd = sc.parallelize(1 to numSlaves)
 
     val results = new DummyBroadcastClass(rdd).doSomething()
 
-//    assert(results.toSet === (1 to numSlaves).map(x => (x, false)).toSet)
+    assert(results.toSet === (1 to numSlaves).map(x => (x, false)).toSet)
   }
   //在执行未持久化HTTP广播变量在本地模式
   test("Unpersisting HttpBroadcast on executors only in local mode") {
@@ -179,14 +179,14 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     //testPackage.runCallSiteTest(sc)
   }
   //SparkContext停止后,不能创建广播变量
-/*  test("Broadcast variables cannot be created after SparkContext is stopped (SPARK-5065)") {
+ test("Broadcast variables cannot be created after SparkContext is stopped (SPARK-5065)") {
     sc = new SparkContext("local", "test")
     sc.stop()
     val thrown = intercept[IllegalStateException] {
       sc.broadcast(Seq(1, 2, 3))
     }
     assert(thrown.getMessage.toLowerCase.contains("stopped"))
-  }*/
+  }
 
   /**
    * Verify the persistence of state associated with an HttpBroadcast in either local mode or

@@ -36,8 +36,8 @@ import org.apache.spark.util.Utils
 @DeveloperApi
 trait Logging {
   // Make the log field transient so that objects with Logging can
-  //使用日志字段进行日志字段的临时,以便用日志记录可被序列化并用另一台机器上
   // be serialized and used on another machine
+  //使用日志字段进行日志字段的临时,以便用日志记录可被序列化并用另一台机器上
   @transient private var log_ : Logger = null
 
   // Method to get the logger name for this object

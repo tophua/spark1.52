@@ -425,13 +425,13 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     MLTestingUtils.checkCopy(model)
   }
 
-  test("exact rank-1 matrix") {//矩阵分解中的特征数=1
+ /* test("exact rank-1 matrix") {//矩阵分解中的特征数=1
     val (training, test) = genExplicitTestData(numUsers = 20, numItems = 40, rank = 1)
     //rank正则化参数,maxIter迭代次数,numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     testALS(training, test, maxIter = 1, rank = 1, regParam = 1e-5, targetRMSE = 0.001)
     testALS(training, test, maxIter = 1, rank = 2, regParam = 1e-5, targetRMSE = 0.001)
-  }
-
+  }*/
+/*
   test("approximate rank-1 matrix") {//矩阵分解特征数近似秩1
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 1, noiseStd = 0.01)
@@ -445,9 +445,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     //rank正则化参数,maxIter迭代次数,numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     testALS(training, test, maxIter = 4, rank = 2, regParam = 0.01, targetRMSE = 0.03)
     testALS(training, test, maxIter = 4, rank = 3, regParam = 0.01, targetRMSE = 0.03)
-  }
+  }*/
 
-  test("different block settings") {//不同块设置
+  /*test("different block settings") {//不同块设置
     val (training, test) =
       genExplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     for ((numUserBlocks, numItemBlocks) <- Seq((1, 1), (1, 2), (2, 1), (2, 2))) {
@@ -466,16 +466,16 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     testALS(training, test, maxIter = 2, rank = 1, regParam = 1e-4, targetRMSE = 0.002,
      //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
      numItemBlocks = 5, numUserBlocks = 5)
-  }
+  }*/
 
-  test("implicit feedback") {//隐式反馈
+ /* test("implicit feedback") {//隐式反馈
     val (training, test) =
       genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     testALS(training, test, maxIter = 4, rank = 2, regParam = 0.01, implicitPrefs = true,
       targetRMSE = 0.3)
-  }
+  }*/
 
-  test("using generic ID types") {//使用通用的身份标识类型
+  /*test("using generic ID types") {//使用通用的身份标识类型
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
 
     val longRatings = ratings.map(r => Rating(r.user.toLong, r.item.toLong, r.rating))
@@ -485,9 +485,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     val strRatings = ratings.map(r => Rating(r.user.toString, r.item.toString, r.rating))
     val (strUserFactors, _) = ALS.train(strRatings, rank = 2, maxIter = 4, seed = 0)
     assert(strUserFactors.first()._1.getClass === classOf[String])
-  }
+  }*/
 
-  test("nonnegative constraint") {//非负约束
+ /* test("nonnegative constraint") {//非负约束
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     val (userFactors, itemFactors) =
     //nonnegative是否需要非负约束
@@ -498,7 +498,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     assert(isNonnegative(userFactors))//是否需要非负约束
     assert(isNonnegative(itemFactors))//是否需要非负约束
     // TODO: Validate the solution.
-  }
+  }*/
 
   test("als partitioner is a projection") {//als分区是一个投影
     for (p <- Seq(1, 10, 100, 1000)) {
@@ -512,7 +512,7 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
     }
   }
 
-  test("partitioner in returned factors") {//返回分区因子
+/*  test("partitioner in returned factors") {//返回分区因子
     val (ratings, _) = genImplicitTestData(numUsers = 20, numItems = 40, rank = 2, noiseStd = 0.01)
     val (userFactors, itemFactors) = ALS.train(
      //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
@@ -529,14 +529,14 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext with Logging {
         Iterator.empty
       }.count()
     }
-  }
+  }*/
 
-  test("als with large number of iterations") {//als具有大量的迭代
+/*  test("als with large number of iterations") {//als具有大量的迭代
     val (ratings, _) = genExplicitTestData(numUsers = 4, numItems = 4, rank = 1)
     //rank正则化参数,maxIter迭代次数,numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     ALS.train(ratings, rank = 1, maxIter = 50, numUserBlocks = 2, numItemBlocks = 2, seed = 0)
      //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
     ALS.train(ratings, rank = 1, maxIter = 50, numUserBlocks = 2, numItemBlocks = 2,
       implicitPrefs = true, seed = 0)
-  }
+  }*/
 }

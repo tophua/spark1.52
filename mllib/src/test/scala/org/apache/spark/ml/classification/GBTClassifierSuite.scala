@@ -103,7 +103,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("Checkpointing") {//检查点
+/*  test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     sc.setCheckpointDir(path)
@@ -126,11 +126,11 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
 
     sc.checkpointDir = None
     Utils.deleteRecursively(tempDir)
-  }
+  }*/
 
   // TODO: Reinstate test once runWithValidation is implemented   SPARK-7132
 
-  test("runWithValidation stops early and performs better on a validation dataset") {
+ /* test("runWithValidation stops early and performs better on a validation dataset") {
     val categoricalFeatures = Map.empty[Int, Int]
     // Set maxIter large enough so that it stops early.
     val maxIter = 20
@@ -144,7 +144,7 @@ class GBTClassifierSuite extends SparkFunSuite with MLlibTestSparkContext {
       compareAPIs(trainData, None, gbt, categoricalFeatures)
       compareAPIs(trainData, Some(validationData), gbt, categoricalFeatures)
     }
-  }
+  }*/
  
 
   /////////////////////////////////////////////////////////////////////////////

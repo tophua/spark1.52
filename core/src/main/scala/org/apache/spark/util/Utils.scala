@@ -1251,7 +1251,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code, then a finally block, but if exceptions happen in
    * the finally block, do not suppress the original exception.
-   * 执行一个代码块,然后一个最后块,但如果在最后块中发生异常,抛出原始的异常
+   * 执行一个代码块,然后执行一个最后块,但如果在最后块中发生异常,抛出原始的异常
    * This is primarily an issue with `finally { out.close() }` blocks, where
    * close needs to be called to clean up `out`, but if an exception happened
    * in `out.write`, it's likely `out` may be corrupted and `out.close` will

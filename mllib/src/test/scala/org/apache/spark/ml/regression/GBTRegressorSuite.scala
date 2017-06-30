@@ -103,7 +103,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(predictions.min() < -1)
   }
 
-  test("Checkpointing") {//检查点
+  /*test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     sc.setCheckpointDir(path)
@@ -121,7 +121,7 @@ class GBTRegressorSuite extends SparkFunSuite with MLlibTestSparkContext {
     sc.checkpointDir = None
     Utils.deleteRecursively(tempDir)
 
-  }
+  }*/
 
   // TODO: Reinstate test once runWithValidation is implemented  SPARK-7132
   /*

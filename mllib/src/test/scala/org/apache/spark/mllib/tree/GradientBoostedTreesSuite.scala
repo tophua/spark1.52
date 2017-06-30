@@ -170,7 +170,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
     }
   }
   //runwithvalidation停止前在验证数据集的表现更好
-  test("runWithValidation stops early and performs better on a validation dataset") {
+  /*test("runWithValidation stops early and performs better on a validation dataset") {
     // Set numIterations large enough so that it stops early.
     //集数足够大时,提前停止迭代
     val numIterations = 20
@@ -217,9 +217,9 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
         i += 1
       }
     }
-  }
+  }*/
 
-  test("Checkpointing") {//检查点
+ /* test("Checkpointing") {//检查点
     val tempDir = Utils.createTempDir()
     val path = tempDir.toURI.toString
     sc.setCheckpointDir(path)
@@ -235,7 +235,7 @@ class GradientBoostedTreesSuite extends SparkFunSuite with MLlibTestSparkContext
 
     sc.checkpointDir = None
     Utils.deleteRecursively(tempDir)
-  }
+  }*/
 
 }
 /**

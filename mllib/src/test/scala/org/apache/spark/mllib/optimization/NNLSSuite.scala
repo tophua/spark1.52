@@ -95,7 +95,7 @@ class NNLSSuite extends SparkFunSuite {
     }
   }
 
-  test("NNLS: objective value test") {
+/*  test("NNLS: objective value test") {
     val n = 5
     val ata = new DoubleMatrix(5, 5
       , 517399.13534, 242529.67289, -153644.98976, 130802.84503, -798452.29283
@@ -117,5 +117,5 @@ class NNLSSuite extends SparkFunSuite {
     val obj = computeObjectiveValue(ata, atb, x)
 
     assert(obj < refObj + 1E-5)
-  }
+  }*/
 }

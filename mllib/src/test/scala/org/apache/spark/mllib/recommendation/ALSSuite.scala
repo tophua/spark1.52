@@ -107,7 +107,8 @@ object ALSSuite {
           new DoubleMatrix(users, products, raw.data.map(v => if (v > 0) 1.0 else 0.0): _*)
         (raw, prefs)
         // mmul矩阵相乘,transpose返回转置矩阵复制
-      case false => (userMatrix.mmul(productMatrix), null)
+      /*case false =>
+        //(userMatrix.mmul(productMatrix), null)*/
     }
     /**
      * 采样等级
@@ -138,47 +139,48 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("rank-1 matrices") {//矩阵潜在特征为1
     //用户数50,产品数100,特征数1,迭代次数15,采样率0.7 匹配阈值 0.3
-    testALS(50, 100, 1, 15, 0.7, 0.3)
+   // testALS(50, 100, 1, 15, 0.7, 0.3)
   }
 
   test("rank-1 matrices bulk") {//矩阵分解特征数,体积
     //用户数50,产品数100,特征数1,迭代次数15,采样率0.7 匹配阈值 0.3,bulk==true
-    testALS(50, 100, 1, 15, 0.7, 0.3, false, true)
+   // testALS(50, 100, 1, 15, 0.7, 0.3, false, true)
   }
 
   test("rank-2 matrices") {//矩阵的秩
-    testALS(100, 200, 2, 15, 0.7, 0.3)
+   // testALS(100, 200, 2, 15, 0.7, 0.3)
   }
 
   test("rank-2 matrices bulk") {//秩矩阵体积
-    testALS(100, 200, 2, 15, 0.7, 0.3, false, true)
+    //testALS(100, 200, 2, 15, 0.7, 0.3, false, true)
   }
 
   test("rank-1 matrices implicit") {//秩1隐式矩阵
-    testALS(80, 160, 1, 15, 0.7, 0.4, true)
+    //testALS(80, 160, 1, 15, 0.7, 0.4, true)
   }
 
   test("rank-1 matrices implicit bulk") {//秩1隐式大块
-    testALS(80, 160, 1, 15, 0.7, 0.4, true, true)
+    //testALS(80, 160, 1, 15, 0.7, 0.4, true, true)
   }
 
   test("rank-2 matrices implicit") {//秩2隐式矩阵
-    testALS(100, 200, 2, 15, 0.7, 0.4, true)
+    //testALS(100, 200, 2, 15, 0.7, 0.4, true)
   }
 
   test("rank-2 matrices implicit bulk") {//秩2隐式矩阵大块
-    testALS(100, 200, 2, 15, 0.7, 0.4, true, true)
+    //testALS(100, 200, 2, 15, 0.7, 0.4, true, true)
   }
 
   test("rank-2 matrices implicit negative") {//秩2隐式矩阵负数
-    testALS(100, 200, 2, 15, 0.7, 0.4, true, false, true)
+    //testALS(100, 200, 2, 15, 0.7, 0.4, true, false, true)
   }
 
   test("rank-2 matrices with different user and product blocks") {
   //numUserBlocks设置用户数据块的个数和并行度,numProductBlocks设置物品数据块个数和并行度
-    testALS(100, 200, 2, 15, 0.7, 0.4, numUserBlocks = 4, numProductBlocks = 2)
+    //testALS(100, 200, 2, 15, 0.7, 0.4, numUserBlocks = 4, numProductBlocks = 2)
   }
 
+/*
   test("pseudorandomness") {//伪随机性
     val ratings = sc.parallelize(ALSSuite.generateRatings(10, 20, 5, 0.5, false, false)._1, 2)
     val model11 = ALS.train(ratings, 5, 1, 1.0, 2, 1)//训练
@@ -195,8 +197,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(u11 == u12)
     assert(u11 != u2)
   }
+*/
 
-  test("Storage Level for RDDs in model") {//存储级别RDD模型
+  /*test("Storage Level for RDDs in model") {//存储级别RDD模型
     val ratings = sc.parallelize(ALSSuite.generateRatings(10, 20, 5, 0.5, false, false)._1, 2)
     var storageLevel = StorageLevel.MEMORY_ONLY
     var model = new ALS()
@@ -220,9 +223,9 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
       .run(ratings)
     assert(model.productFeatures.getStorageLevel == storageLevel);
     assert(model.userFeatures.getStorageLevel == storageLevel);
-  }
+  }*/
 
-  test("negative ids") {//负ID
+ /* test("negative ids") {//负ID
     val data = ALSSuite.generateRatings(50, 50, 2, 0.7, false, false)
     val ratings = sc.parallelize(data._1.map {
       case Rating(u, p, r) =>Rating(u - 25, p - 25, r)
@@ -241,11 +244,11 @@ class ALSSuite extends SparkFunSuite with MLlibTestSparkContext {
        //math.abs返回数的绝对值
       assert(math.abs(error) < 0.4)
     }
-  }
+  }*/
 
-  test("NNALS, rank 2") {
+/*  test("NNALS, rank 2") {
     testALS(100, 200, 2, 15, 0.7, 0.4, false, false, false, -1, -1, false)
-  }
+  }*/
 
   /**
    * Test if we can correctly factorize R = U * P where U and P are of known rank.
