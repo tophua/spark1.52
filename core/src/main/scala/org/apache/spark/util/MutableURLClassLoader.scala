@@ -25,6 +25,7 @@ import scala.collection.JavaConversions._
 
 /**
  * URL class loader that exposes the `addURL` and `getURLs` methods in URLClassLoader.
+  *在URLClassLoader中显示“addURL”和“getURLs”方法的URL类加载器
  */
 private[spark] class MutableURLClassLoader(urls: Array[URL], parent: ClassLoader)
   extends URLClassLoader(urls, parent) {
@@ -42,6 +43,7 @@ private[spark] class MutableURLClassLoader(urls: Array[URL], parent: ClassLoader
 /**
  * A mutable class loader that gives preference to its own URLs over the parent class loader
  * when loading classes and resources.
+  * 一个可变类加载器,当加载类和资源时,可以通过父类加载器优先选择自己的URL.
  */
 private[spark] class ChildFirstURLClassLoader(urls: Array[URL], parent: ClassLoader)
   extends MutableURLClassLoader(urls, null) {
@@ -51,9 +53,11 @@ private[spark] class ChildFirstURLClassLoader(urls: Array[URL], parent: ClassLoa
   /**
    * Used to implement fine-grained class loading locks similar to what is done by Java 7. This
    * prevents deadlock issues when using non-hierarchical class loaders.
+    * 用于实现类似于Java 7所做的细粒度类加载锁定防止在使用非层次化类加载器时出现死锁问题。
    *
    * Note that due to some issues with implementing class loaders in
    * Scala, Java 7's `ClassLoader.registerAsParallelCapable` method is not called.
+    * 请注意，由于实现类加载器的一些问题Scala，Java 7的`ClassLoader.registerAsParallelCapable`方法不被调用
    */
   private val locks = new ConcurrentHashMap[String, Object]()
 

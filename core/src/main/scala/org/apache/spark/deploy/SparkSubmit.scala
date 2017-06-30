@@ -48,7 +48,7 @@ import org.apache.spark.util.{ChildFirstURLClassLoader, MutableURLClassLoader, U
 /**
  * Whether to submit, kill, or request the status of an application.
  * The latter two operations are currently supported only for standalone cluster mode.
- * 后两个模式支持独立模式及集群模式
+ * 是否提交，删除或请求应用程序的状态,后两个模式支持独立模式及集群模式
  */
 private[deploy] object SparkSubmitAction extends Enumeration {
   type SparkSubmitAction = Value
@@ -61,10 +61,12 @@ private[deploy] object SparkSubmitAction extends Enumeration {
  * Spark 应用的主要启动入口,这和个程序主要处理相关的类路径,提供不同的集群部署模式
  * This program handles setting up the classpath with relevant Spark dependencies and provides
  * a layer over the different cluster managers and deploy modes that Spark supports.
+  * 该程序处理使用相关的Spark依赖关系设置类路径,并为不同的集群管理器提供一个层,并支持Spark支持的部署模式。
  */
 object SparkSubmit {
 
   // Cluster managers
+  // 集群管理器
   private val YARN = 1
   private val STANDALONE = 2
   private val MESOS = 4
@@ -78,10 +80,11 @@ object SparkSubmit {
 
   // A special jar name that indicates the class being run is inside of Spark itself, and therefore
   // no user jar is needed.
-  //特别是一类特别的名字是jar运行是在放电本身,因此是没有用户需要的JAR
+  //一个特殊的jar名称,表示正在运行的类在Spark本身之内,因此不需要用户jar
   private val SPARK_INTERNAL = "spark-internal"//
 
-  // Special primary resource names that represent shells rather than application jars. 
+  // Special primary resource names that represent shells rather than application jars.
+  //代表shell而不是应用程序jar的特殊主要资源名称
   private val SPARK_SHELL = "spark-shell"
   private val PYSPARK_SHELL = "pyspark-shell"
   private val SPARKR_SHELL = "sparkr-shell"
@@ -139,6 +142,7 @@ object SparkSubmit {
   /**
    * Request the status of an existing submission using the REST protocol.
    * Standalone and Mesos cluster mode only.
+    * 使用REST协议请求现有提交的状态,独立和Mesos群集模式,
    */
   private def requestStatus(args: SparkSubmitArguments): Unit = {
     new RestSubmissionClient(args.master)
@@ -153,6 +157,8 @@ object SparkSubmit {
    * running the child main class based on the cluster manager and the deploy mode.
    * Second, we use this launch environment to invoke the main method of the child
    * main class.
+    *  这有两个步骤, 首先,我们通过设置适当的类路径,系统属性和应用程序参数来准备启动环境,
+    *  以便基于群集管理器和部署模式运行子主类,其次,我们使用这个启动环境来调用子主类的main方法。
    */
   private def submit(args: SparkSubmitArguments): Unit = {
     val (childArgs, childClasspath, sysProps, childMainClass) = prepareSubmitEnvironment(args)
@@ -656,6 +662,7 @@ object SparkSubmit {
    * 
    * Note that this main class will not be the one provided by the user if we're
    * running cluster deploy mode or python applications.
+    * 请注意,如果我们运行群集部署模式或python应用程序,这个主类不会是用户提供的类。
    */
   private def runMain(
       childArgs: Seq[String],
