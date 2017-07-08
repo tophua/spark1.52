@@ -178,7 +178,7 @@ b    NULL       42          73          0       1
       FROM (SELECT key, key%2, key - 5 FROM src) t group by key%5, key-5
       WITH CUBE ORDER BY cnt, k1, k2, k3 LIMIT 10
     """.stripMargin)
-
+//grouping sets就是由多个group by联合起来,
   createQueryTest("SPARK-8976 Wrong Result for GroupingSet",
     """
       SELECT
@@ -189,7 +189,7 @@ b    NULL       42          73          0       1
       FROM (SELECT key, key%2, key - 5 FROM src) t group by key%5, key-5
       GROUPING SETS (key%5, key-5) ORDER BY cnt, k1, k2, k3 LIMIT 10
     """.stripMargin)
-
+//explode 它能够将一行数据拆成多行数据
   createQueryTest("insert table with generator with column name",
     """
       |  CREATE TABLE gen_tmp (key Int);
