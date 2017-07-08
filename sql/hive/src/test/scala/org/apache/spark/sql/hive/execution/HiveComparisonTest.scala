@@ -209,6 +209,7 @@ abstract class HiveComparisonTest
 
   /**
    * Removes non-deterministic paths from `str` so cached answers will compare correctly.
+    *从“str”中删除非确定性路径，因此缓存的答案将正确比较。
    */
   protected def cleanPaths(str: String): String = {
     str.replaceAll("file:\\/.*\\/", "<PATH>")
