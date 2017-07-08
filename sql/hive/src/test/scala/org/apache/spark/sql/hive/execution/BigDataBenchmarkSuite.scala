@@ -28,7 +28,6 @@ import org.apache.spark.sql.hive.test.TestHive._
  */
 class BigDataBenchmarkSuite extends HiveComparisonTest {
   val testDataDirectory = new File("target" + File.separator + "big-data-benchmark-testdata")
-
   val userVisitPath = new File(testDataDirectory, "uservisits").getCanonicalPath
   val testTables = Seq(
     TestTable(
