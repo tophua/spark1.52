@@ -30,7 +30,7 @@ object HiveFromSpark {
   case class Record(key: Int, value: String)
 
   // Copy kv1.txt file from classpath to temporary directory
-  //¸´ÖÆÎÄ¼þµ½ÁÙÊ±Ä¿Â¼ÖÐkv1.txt
+  //ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê±Ä¿Â¼ï¿½ï¿½kv1.txt
   val kv1Stream = HiveFromSpark.getClass.getResourceAsStream("/kv1.txt")
   val kv1File = File.createTempFile("kv1", "txt")
   kv1File.deleteOnExit()
@@ -54,33 +54,33 @@ object HiveFromSpark {
     sql(s"LOAD DATA LOCAL INPATH '${kv1File.getAbsolutePath}' INTO TABLE src")
 
     // Queries are expressed in HiveQL
-    //²éÑ¯ÊÇ±íÊ¾ÔÚHiveQL
+    //ï¿½ï¿½Ñ¯ï¿½Ç±ï¿½Ê¾ï¿½ï¿½HiveQL
     println("Result of 'SELECT *': ")
     sql("SELECT * FROM src").collect().foreach(println)
 
     // Aggregation queries are also supported.
-    //¾Û¼¯²éÑ¯Ò²Ö§³Ö
+    //ï¿½Û¼ï¿½ï¿½ï¿½Ñ¯Ò²Ö§ï¿½ï¿½
     val count = sql("SELECT COUNT(*) FROM src").collect().head.getLong(0)
     println(s"COUNT(*): $count")
 
     // The results of SQL queries are themselves RDDs and support all normal RDD functions.  The
-    //SQL²éÑ¯µÄ½á¹û¶¼ÊÇ×Ô¼ºÖ§³ÖRDDsºÍËùÓÐÕý³£µÄRDD¹¦ÄÜ
+    //SQLï¿½ï¿½Ñ¯ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½Ö§ï¿½ï¿½RDDsï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½RDDï¿½ï¿½ï¿½ï¿½
     // items in the RDD are of type Row, which allows you to access each column by ordinal.
-    //ÔÚRDDÏîÄ¿ÀàÐÍµÄÐÐ,Äã¿ÉÒÔ°´Ë³Ðò·ÃÎÊÃ¿Ò»ÁÐ
+    //ï¿½ï¿½RDDï¿½ï¿½Ä¿ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½Ô°ï¿½Ë³ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿Ò»ï¿½ï¿½
     val rddFromSql = sql("SELECT key, value FROM src WHERE key < 10 ORDER BY key")
 
     println("Result of RDD.map:")
     val rddAsStrings = rddFromSql.map {
-      case Row(key: Int, value: String) => s"Key: $key, Value: $value"
+      case Row(key: Int, value: String) => Record(key, s"val_$val")
     }
-
+    rddAsStrings.toDF().show()
     // You can also register RDDs as temporary tables within a HiveContext.
-    //ÄãÒ²¿ÉÒÔµÇ¼ÇÎªÁÙÊ±±íÔÚhivecontext RDDS
+    //ï¿½ï¿½Ò²ï¿½ï¿½ï¿½ÔµÇ¼ï¿½Îªï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½hivecontext RDDS
     val rdd = sc.parallelize((1 to 100).map(i => Record(i, s"val_$i")))
     rdd.toDF().registerTempTable("records")
 
     // Queries can then join RDD data with data stored in Hive.
-    //²éÑ¯¿ÉÒÔ¼ÓÈëRDDÊý¾ÝÓë´æ´¢ÔÚHiveÊý¾Ý
+    //ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½RDDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ´¢ï¿½ï¿½Hiveï¿½ï¿½ï¿½ï¿½
     println("Result of SELECT *:")
     sql("SELECT * FROM records r JOIN src s ON r.key = s.key").collect().foreach(println)
 

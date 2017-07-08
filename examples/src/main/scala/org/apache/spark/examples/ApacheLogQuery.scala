@@ -22,40 +22,40 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.SparkContext._
 
 /**
- * ¾ßÌå²Î¿¼ 
- * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-code-samples/
- * ¾ßÌå²Î¿¼apache ÈÕÖ¾Ïê½â
- * http://www.51testing.com/html/33/564333-848186.html
- * Executes a roll up-style query against Apache logs.
- * Ö´ÐÐÒ»¸ö²éÑ¯¾í·½Ê½¶ÔApacheÈÕÖ¾
- * Usage: LogQuery [logFile]
- */
+  * å…·ä½“å‚è€ƒ
+  * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-code-samples/
+  * å…·ä½“å‚è€ƒapache æ—¥å¿—è¯¦è§£
+  * http://www.51testing.com/html/33/564333-848186.html
+  * Executes a roll up-style query against Apache logs.
+  * æ‰§è¡Œä¸€ä¸ªæŸ¥è¯¢å·æ–¹å¼å¯¹Apacheæ—¥å¿—
+  * Usage: LogQuery [logFile]
+  */
 object ApacheLogQuery {
   val exampleApacheLogs = List(
-      /**
-       * ×´Ì¬Âë,Ò»°ãÀ´Ëµ,ÕâÏîÖµÒÔ2¿ªÍ·µÄ±íÊ¾ÇëÇó³É¹¦,ÒÔ3¿ªÍ·µÄ±íÊ¾ÖØ¶¨Ïò,
-       * ÒÔ4¿ªÍ·µÄ±êÊ¾¿Í»§¶Ë´æÔÚÄ³Ð©µÄ´íÎó,ÒÔ5¿ªÍ·µÄ±êÊ¾·þÎñÆ÷¶Ë ´æÔÚÄ³Ð©´íÎó
-       * 10.10.10.10 - "FRED" [18/Jan/2013:17:56:07 +1100] "GET http://images.com/2013/Generic.jpg HTTP/1.1" 
-       * 304 315 "http://referall.com/" "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB7.4; .NET CLR 2.0.50727; 
-       * .NET CLR 3.0.04506.30; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 1.0.3705; 
-       * .NET CLR 1.1.4322; .NET CLR 3.5.30729; Release=ARP)" "UD-1" - "image/jpeg" "whatever" 0.350 "-" - "" 265 923 934 "" 
-       * 62.24.11.25 images.com 1358492167 - Whatup
-       */
     /**
-     * ¸ñÊ½·ÖÎö
-     * remote_addr:10.10.10.10 ¼ÇÂ¼¿Í»§¶ËµÄIPµØÖ·
-     * remote_usr:¼ÇÂ¼¿Í»§¶ËÓÃ»§Ãû³Æ,±¾ÁÐ:-
-     * authuser:ÓÃ»§¼ÇÂ¼ÓÃ»§HTTPµÄÉí·ÝÑéÖ¤,¼ÇÂ¼ÓÃ»§µÄÉí·ÝÐÅÏ¢,±¾Àý:FRED 
-     * time_local:¼ÇÂ¼·ÃÎÊÊ±¼äÓëÊ±Çø:[18/Jan/2013:17:56:07 +1100]
-     * request:¼ÇÂ¼ÇëÇóµÄURLÓëhttpÐ­Òé "GET http://images.com/2013/Generic.jpg HTTP/1.1" 
-     * status:ÕâÊÇÒ»¸ö×´Ì¬Âë,ÓÉ·þÎñÆ÷¶Ë·¢ËÍ»Ø¿Í»§¶Ë,Ëü¸æËßÎÒÃÇ¿Í»§¶ËµÄÇëÇóÊÇ·ñ³É¹¦,±¾ÁÐ304
-     * body_byte_sent:±íÊ¾·þÎñÆ÷Ïò¿Í»§¶Ë·¢ËÍÁË¶àÉÙµÄ×Ö½Ú,315,
-     * 								°ÑÕâÐ©×Ö½Ú¼ÓÆðÀ´¾Í¿ÉÒÔµÃÖª·þÎñÆ÷ÔÚÄ³µãÊ±¼äÄÚ×ÜµÄ·¢ËÍÊý¾ÝÁ¿ÊÇ¶àÉÙ 
-     * http_referer:¼ÇÂ¼µÄÊÇ¿Í»§ÔÚÌá³öÇëÇóÊ±ËùÔÚµÄÄ¿Â¼»òURL,ÓÃ»§À´¼ÇÂ¼´ÓÄÄ¸öÒ³ÃæÁ¬½Ó·ÃÎÊ¹ýÀ´µÄ
-     * 							http://referall.com/
-     * http_usr_agent:¼ÇÂ¼¿Í»§¶Ëä¯ÀÀÆ÷µÄÏà¹ØÐÅÏ¢,Mozilla/4.0
-     * 
-     */
+      * çŠ¶æ€ç ,ä¸€èˆ¬æ¥è¯´,è¿™é¡¹å€¼ä»¥2å¼€å¤´çš„è¡¨ç¤ºè¯·æ±‚æˆåŠŸ,ä»¥3å¼€å¤´çš„è¡¨ç¤ºé‡å®šå‘,
+      * ä»¥4å¼€å¤´çš„æ ‡ç¤ºå®¢æˆ·ç«¯å­˜åœ¨æŸäº›çš„é”™è¯¯,ä»¥5å¼€å¤´çš„æ ‡ç¤ºæœåŠ¡å™¨ç«¯ å­˜åœ¨æŸäº›é”™è¯¯
+      * 10.10.10.10 - "FRED" [18/Jan/2013:17:56:07 +1100] "GET http://images.com/2013/Generic.jpg HTTP/1.1"
+      * 304 315 "http://referall.com/" "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB7.4; .NET CLR 2.0.50727;
+      * .NET CLR 3.0.04506.30; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 1.0.3705;
+      * .NET CLR 1.1.4322; .NET CLR 3.5.30729; Release=ARP)" "UD-1" - "image/jpeg" "whatever" 0.350 "-" - "" 265 923 934 ""
+      * 62.24.11.25 images.com 1358492167 - Whatup
+      */
+    /**
+      * æ ¼å¼åˆ†æž
+      * remote_addr:10.10.10.10 è®°å½•å®¢æˆ·ç«¯çš„IPåœ°å€
+      * remote_usr:è®°å½•å®¢æˆ·ç«¯ç”¨æˆ·åç§°,æœ¬åˆ—:-
+      * authuser:ç”¨æˆ·è®°å½•ç”¨æˆ·HTTPçš„èº«ä»½éªŒè¯,è®°å½•ç”¨æˆ·çš„èº«ä»½ä¿¡æ¯,æœ¬ä¾‹:FRED
+      * time_local:è®°å½•è®¿é—®æ—¶é—´ä¸Žæ—¶åŒº:[18/Jan/2013:17:56:07 +1100]
+      * request:è®°å½•è¯·æ±‚çš„URLä¸Žhttpåè®® "GET http://images.com/2013/Generic.jpg HTTP/1.1"
+      * status:è¿™æ˜¯ä¸€ä¸ªçŠ¶æ€ç ,ç”±æœåŠ¡å™¨ç«¯å‘é€å›žå®¢æˆ·ç«¯,å®ƒå‘Šè¯‰æˆ‘ä»¬å®¢æˆ·ç«¯çš„è¯·æ±‚æ˜¯å¦æˆåŠŸ,æœ¬åˆ—304
+      * body_byte_sent:è¡¨ç¤ºæœåŠ¡å™¨å‘å®¢æˆ·ç«¯å‘é€äº†å¤šå°‘çš„å­—èŠ‚,315,
+      * 								æŠŠè¿™äº›å­—èŠ‚åŠ èµ·æ¥å°±å¯ä»¥å¾—çŸ¥æœåŠ¡å™¨åœ¨æŸç‚¹æ—¶é—´å†…æ€»çš„å‘é€æ•°æ®é‡æ˜¯å¤šå°‘
+      * http_referer:è®°å½•çš„æ˜¯å®¢æˆ·åœ¨æå‡ºè¯·æ±‚æ—¶æ‰€åœ¨çš„ç›®å½•æˆ–URL,ç”¨æˆ·æ¥è®°å½•ä»Žå“ªä¸ªé¡µé¢è¿žæŽ¥è®¿é—®è¿‡æ¥çš„
+      * 							http://referall.com/
+      * http_usr_agent:è®°å½•å®¢æˆ·ç«¯æµè§ˆå™¨çš„ç›¸å…³ä¿¡æ¯,Mozilla/4.0
+      *
+      */
     """10.10.10.10 - "FRED" [18/Jan/2013:17:56:07 +1100] "GET http://images.com/2013/Generic.jpg
       | HTTP/1.1" 304 315 "http://referall.com/" "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1;
       | GTB7.4; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30; .NET CLR 3.0.04506.648; .NET CLR
@@ -68,7 +68,6 @@ object ApacheLogQuery {
       | 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 1.0.3705; .NET CLR 1.1.4322; .NET CLR
       | 3.5.30729; Release=ARP)" "UD-1" - "image/jpeg" "whatever" 0.352 "-" - "" 256 977 988 ""
       | 0 73.23.2.15 images.com 1358492557 - Whatup""".stripMargin.lines.mkString
-  )
 
   def main(args: Array[String]) {
 
@@ -78,32 +77,32 @@ object ApacheLogQuery {
     val dataSet =
       if (args.length == 1) sc.textFile(args(0)) else sc.parallelize(exampleApacheLogs)
     // scalastyle:off
-      
+
     val apacheLogRegex =
       """^([\d.]+) (\S+) (\S+) \[([\w\d:/]+\s[+\-]\d{4})\] "(.+?)" (\d{3}) ([\d\-]+) "([^"]+)" "([^"]+)".*""".r
-      //Õý²â±í´ïÊ½:^([\d.]+) (\S+) (\S+) \[([\w\d:/]+\s[+\-]\d{4})\] "(.+?)" (\d{3}) ([\d\-]+) "([^"]+)" "([^"]+)".*
-      //^([\d.]+)Æ¥ÅäIP 10.10.10.10,(\S+)Æ¥Åä - (\S+)Æ¥Åä  "FRED" \[([\w\d:/]+\s[+\-]\d{4})\]Æ¥Åä [18/Jan/2013:17:56:07 +1100] 
-      //"(.+?)"Æ¥Åä "GET http://images.com/2013/Generic.jpg HTTP/1.1" (\d{3}) Æ¥Åä 304 ([\d\-]+)Æ¥Åä315 
-      //"([^"]+)"Æ¥Åä "http://referall.com/" 
-      //"([^"]+)".* Æ¥Åä  "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB7.4; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 1.0.3705; .NET CLR 1.1.4322; .NET CLR 3.5.30729; Release=ARP)" "UD-1" - "image/jpeg" "whatever" 0.350 "-" - "" 265 923 934 "" 62.24.11.25 images.com 1358492167 - Whatup
+    //æ­£æµ‹è¡¨è¾¾å¼:^([\d.]+) (\S+) (\S+) \[([\w\d:/]+\s[+\-]\d{4})\] "(.+?)" (\d{3}) ([\d\-]+) "([^"]+)" "([^"]+)".*
+    //^([\d.]+)åŒ¹é…IP 10.10.10.10,(\S+)åŒ¹é… - (\S+)åŒ¹é…  "FRED" \[([\w\d:/]+\s[+\-]\d{4})\]åŒ¹é… [18/Jan/2013:17:56:07 +1100]
+    //"(.+?)"åŒ¹é… "GET http://images.com/2013/Generic.jpg HTTP/1.1" (\d{3}) åŒ¹é… 304 ([\d\-]+)åŒ¹é…315
+    //"([^"]+)"åŒ¹é… "http://referall.com/"
+    //"([^"]+)".* åŒ¹é…  "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB7.4; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 1.0.3705; .NET CLR 1.1.4322; .NET CLR 3.5.30729; Release=ARP)" "UD-1" - "image/jpeg" "whatever" 0.350 "-" - "" 265 923 934 "" 62.24.11.25 images.com 1358492167 - Whatup
     // scalastyle:on
-    /** 
-     *  Tracks the total query count and number of aggregate bytes for a particular group.
-     *  ¸ú×Ù×Ü²éÑ¯¼ÆÊýºÍÒ»¸öÌØ¶¨×éµÄ×Ü×Ö½ÚÊý
-     *  */
+    /**
+      *  Tracks the total query count and number of aggregate bytes for a particular group.
+      *  è·Ÿè¸ªæ€»æŸ¥è¯¢è®¡æ•°å’Œä¸€ä¸ªç‰¹å®šç»„çš„æ€»å­—èŠ‚æ•°
+      *  */
     class Stats(val count: Int, val numBytes: Int) extends Serializable {
       def merge(other: Stats): Stats = new Stats(count + other.count, numBytes + other.numBytes)
       override def toString: String = "bytes=%s\tn=%s".format(numBytes, count)
     }
 
-    def extractKey(line: String): (String, String, String) = {//ÌáÈ¡¼üÖµ
-        //apacheLogRegeÅäÖÃÕý²â±í´ïÊ½
+    def extractKey(line: String): (String, String, String) = {//æå–é”®å€¼
+      //apacheLogRegeé…ç½®æ­£æµ‹è¡¨è¾¾å¼
       apacheLogRegex.findFirstIn(line) match {
-        //apacheLogRegeÕý²â±í´ïÊ½ÌáÈ¡·Ö×é
-        //ipµØÖ·,user ¼ÇÂ¼ÓÃ»§µÄÉí·ÝÐÅÏ¢,dateTime ¼ÇÂ¼·ÃÎÊÊ±¼äÓëÊ±Çø
-        //query¼ÇÂ¼ÇëÇóµÄURLÓëhttpÐ­Òé,status×´Ì¬Âë,ÓÉ·þÎñÆ÷¶Ë·¢ËÍ»Ø¿Í»§¶Ë
-        //bytes±íÊ¾·þÎñÆ÷Ïò¿Í»§¶Ë·¢ËÍÁË¶àÉÙµÄ×Ö½Ú,referer¼ÇÂ¼µÄÊÇ¿Í»§ÔÚÌá³öÇëÇóÊ±ËùÔÚµÄÄ¿Â¼»òURL
-        //ua ¼ÇÂ¼¿Í»§¶Ëä¯ÀÀÆ÷µÄÏà¹ØÐÅÏ¢
+        //apacheLogRegeæ­£æµ‹è¡¨è¾¾å¼æå–åˆ†ç»„
+        //ipåœ°å€,user è®°å½•ç”¨æˆ·çš„èº«ä»½ä¿¡æ¯,dateTime è®°å½•è®¿é—®æ—¶é—´ä¸Žæ—¶åŒº
+        //queryè®°å½•è¯·æ±‚çš„URLä¸Žhttpåè®®,statusçŠ¶æ€ç ,ç”±æœåŠ¡å™¨ç«¯å‘é€å›žå®¢æˆ·ç«¯
+        //bytesè¡¨ç¤ºæœåŠ¡å™¨å‘å®¢æˆ·ç«¯å‘é€äº†å¤šå°‘çš„å­—èŠ‚,refererè®°å½•çš„æ˜¯å®¢æˆ·åœ¨æå‡ºè¯·æ±‚æ—¶æ‰€åœ¨çš„ç›®å½•æˆ–URL
+        //ua è®°å½•å®¢æˆ·ç«¯æµè§ˆå™¨çš„ç›¸å…³ä¿¡æ¯
         case Some(apacheLogRegex(ip, _, user, dateTime, query, status, bytes, referer, ua)) =>
           //(10.10.10.10,"FRED",GET http://images.com/2013/Generic.jpg HTTP/1.1)
           if (user != "\"-\"") (ip, user, query)
@@ -112,7 +111,7 @@ object ApacheLogQuery {
       }
     }
 
-    def extractStats(line: String): Stats = {//ÌáÈ¡×´Ì¬
+    def extractStats(line: String): Stats = {//æå–çŠ¶æ€
       apacheLogRegex.findFirstIn(line) match {
         case Some(apacheLogRegex(ip, _, user, dateTime, query, status, bytes, referer, ua)) =>
           new Stats(1, bytes.toInt)
@@ -121,12 +120,12 @@ object ApacheLogQuery {
     }
 
     val datamap=dataSet.map(line => (extractKey(line), extractStats(line)))
-    //reduceByKey¸Ãº¯ÊýÓÃÓÚ½«RDD[K,V]ÖÐÃ¿¸öK¶ÔÓ¦µÄVÖµ¸ù¾ÝÓ³Éäº¯ÊýÀ´ÔËËã(¶ÔKeyÏàÍ¬µÄÔªËØµÄÖµÇóºÍ)
-      val datareduce=datamap.reduceByKey((a, b) => a.merge(b))//a´ú±íextractStats¼´valueÖµ
+    //reduceByKeyè¯¥å‡½æ•°ç”¨äºŽå°†RDD[K,V]ä¸­æ¯ä¸ªKå¯¹åº”çš„Vå€¼æ ¹æ®æ˜ å°„å‡½æ•°æ¥è¿ç®—(å¯¹Keyç›¸åŒçš„å…ƒç´ çš„å€¼æ±‚å’Œ)
+    val datareduce=datamap.reduceByKey((a, b) => a.merge(b))//aä»£è¡¨extractStatså³valueå€¼
       .collect().foreach{
-      //user±íÊ¾extractKey,query±íÊ¾extractStats
-       case (user, query) => println("%s\t%s".format(user, query))      
-       }
+      //userè¡¨ç¤ºextractKey,queryè¡¨ç¤ºextractStats
+      case (user, query) => println("%s\t%s".format(user, query))
+    }
 
     sc.stop()
   }

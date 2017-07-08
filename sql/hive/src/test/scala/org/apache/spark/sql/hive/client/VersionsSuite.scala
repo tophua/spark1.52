@@ -47,7 +47,7 @@ class VersionsSuite extends SparkFunSuite with Logging {
       "javax.jdo.option.ConnectionURL" -> s"jdbc:derby:;databaseName=$metastorePath;create=true",
       "hive.metastore.warehouse.dir" -> warehousePath.toString)
   }
-
+  //sanity 正常
   test("success sanity check") {
     val badClient = IsolatedClientLoader.forVersion(HiveContext.hiveExecutionVersion,
       buildConf(),
@@ -92,17 +92,18 @@ class VersionsSuite extends SparkFunSuite with Logging {
   private var client: ClientInterface = null
 
   versions.foreach { version =>
+    //创建客户端
     test(s"$version: create client") {
       client = null
       System.gc() // Hack to avoid SEGV on some JVM versions.
       client = IsolatedClientLoader.forVersion(version, buildConf(), ivyPath).client
     }
-
+  //创建数据库
     test(s"$version: createDatabase") {
       val db = HiveDatabase("default", "")
       client.createDatabase(db)
     }
-
+  //创建表
     test(s"$version: createTable") {
       val table =
         HiveTable(
@@ -123,46 +124,46 @@ class VersionsSuite extends SparkFunSuite with Logging {
 
       client.createTable(table)
     }
-
+    //获得表
     test(s"$version: getTable") {
       client.getTable("default", "src")
     }
-
+    //获得列表
     test(s"$version: listTables") {
       assert(client.listTables("default") === Seq("src"))
     }
-
+    //当前数据库
     test(s"$version: currentDatabase") {
       assert(client.currentDatabase === "default")
     }
-
+    //当前数据库
     test(s"$version: getDatabase") {
       client.getDatabase("default")
     }
-
+    //修改表
     test(s"$version: alterTable") {
       client.alterTable(client.getTable("default", "src"))
     }
-
+    //设置命令
     test(s"$version: set command") {
       client.runSqlHive("SET spark.sql.test.key=1")
     }
-
+    //创建分区表的DDL
     test(s"$version: create partitioned table DDL") {
       client.runSqlHive("CREATE TABLE src_part (value INT) PARTITIONED BY (key INT)")
       client.runSqlHive("ALTER TABLE src_part ADD PARTITION (key = '1')")
     }
-
+    //得到的分区
     test(s"$version: getPartitions") {
       client.getAllPartitions(client.getTable("default", "src_part"))
     }
-
+    //通过过滤器获取分区
     test(s"$version: getPartitionsByFilter") {
       client.getPartitionsByFilter(client.getTable("default", "src_part"), Seq(EqualTo(
         AttributeReference("key", IntegerType, false)(NamedExpression.newExprId),
         Literal(1))))
     }
-
+    //加载分区
     test(s"$version: loadPartition") {
       client.loadPartition(
         emptyDir,
@@ -173,7 +174,7 @@ class VersionsSuite extends SparkFunSuite with Logging {
         false,
         false)
     }
-
+    //加载表
     test(s"$version: loadTable") {
       client.loadTable(
         emptyDir,
@@ -192,7 +193,7 @@ class VersionsSuite extends SparkFunSuite with Logging {
         false,
         false)
     }
-
+    //创建索引并重置
     test(s"$version: create index and reset") {
       client.runSqlHive("CREATE TABLE indexed_table (key INT)")
       client.runSqlHive("CREATE INDEX index_1 ON TABLE indexed_table(key) " +
