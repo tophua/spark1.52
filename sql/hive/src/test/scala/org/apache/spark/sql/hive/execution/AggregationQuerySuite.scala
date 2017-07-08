@@ -66,7 +66,7 @@ class ScalaAggregateFunction(schema: StructType) extends UserDefinedAggregateFun
     Row.fromSeq(buffer.toSeq)
   }
 }
-//聚集查询套件
+//聚集含数查询
 abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with BeforeAndAfterAll {
   override def _sqlContext: SQLContext = TestHive
   protected val sqlContext = _sqlContext
@@ -184,7 +184,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         """.stripMargin),
       Nil)
   }
-
+  //null 文字
   test("null literal") {
     checkAnswer(
       sqlContext.sql(
@@ -200,7 +200,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         """.stripMargin),
       Row(null, 0, null, null, null, null, null) :: Nil)
   }
-
+  //只做分组
   test("only do grouping") {
     checkAnswer(
       sqlContext.sql(
@@ -246,7 +246,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(null, 3) ::
         Row(null, null) :: Nil)
   }
-
+  //大小写敏感度解析
   test("case in-sensitive resolution") {
     checkAnswer(
       sqlContext.sql(
@@ -280,7 +280,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(-102) ::
         Row(null) :: Nil)
   }
-
+  //测试平均没有key输出
   test("test average no key in output") {
     checkAnswer(
       sqlContext.sql(
@@ -291,7 +291,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         """.stripMargin),
       Row(-0.5) :: Row(20.0) :: Row(null) :: Row(10.0) :: Nil)
   }
-
+  //测试平均值
   test("test average") {
     checkAnswer(
       sqlContext.sql(
@@ -403,7 +403,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(null, null, 3, null, null) ::
         Row(null, null, null, null, 10.0) :: Nil)
   }
-
+  //单独的列集
   test("single distinct column set") {
     // DISTINCT is not meaningful with Max and Min, so we just ignore the DISTINCT keyword.
     //对于Max和Min,DISTINCT无意义,所以我们忽略DISTINCT关键字
