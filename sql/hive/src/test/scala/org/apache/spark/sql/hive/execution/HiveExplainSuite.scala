@@ -24,6 +24,7 @@ import org.apache.spark.sql.test.SQLTestUtils
 
 /**
  * A set of tests that validates support for Hive Explain command.
+  * 验证支持Hive Explain命令的一组测试。
  */
 class HiveExplainSuite extends QueryTest with SQLTestUtils {
   override def _sqlContext: SQLContext = TestHive
