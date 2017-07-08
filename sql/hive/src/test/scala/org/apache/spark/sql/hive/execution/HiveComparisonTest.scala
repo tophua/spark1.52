@@ -227,6 +227,7 @@ abstract class HiveComparisonTest
     }
 
     // Skip tests found in directories specified by user.
+    // 在用户指定的目录中跳过测试
     skipDirectories
       .map(new File(_, testCaseName))
       .filter(_.exists)
