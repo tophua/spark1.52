@@ -74,7 +74,10 @@ class BigDataBenchmarkSuite extends HiveComparisonTest {
         |LOCATION "${new File(testDataDirectory, "crawl").getCanonicalPath}"
       """.stripMargin.cmd))
 
+
   testTables.foreach(registerTestTable)
+
+
 
   if (!testDataDirectory.exists()) {
     // TODO: Auto download the files on demand.
