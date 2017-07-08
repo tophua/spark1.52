@@ -52,7 +52,7 @@ abstract class HiveComparisonTest
    * usually stale.
    */
   val recomputeCache = System.getProperty("spark.hive.recomputeCache") != null
-
+  //testshard=0:4
   protected val shardRegEx = "(\\d+):(\\d+)".r
   /**
    * Allows multiple JVMs to be run in parallel, each responsible for portion of all test cases.
@@ -126,6 +126,7 @@ abstract class HiveComparisonTest
     failedDirectory,
     wrongDirectory,
     hiveFailedDirectory)
+
 
   protected val cacheDigest = java.security.MessageDigest.getInstance("MD5")
   protected def getMd5(str: String): String = {
