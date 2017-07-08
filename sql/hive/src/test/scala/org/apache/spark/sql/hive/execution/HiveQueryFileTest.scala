@@ -29,12 +29,16 @@ import org.apache.spark.sql.catalyst.util._
  * tests as development progresses.
  */
 abstract class HiveQueryFileTest extends HiveComparisonTest {
-  /** A list of tests deemed out of scope and thus completely disregarded */
+  /**
+    * A list of tests deemed out of scope and thus completely disregarded
+    * 被列为范围的测试列表，因此被完全忽视
+    * */
   def blackList: Seq[String] = Nil
 
   /**
    * The set of tests that are believed to be working in catalyst. Tests not in whiteList
    * blacklist are implicitly marked as ignored.
+    *被认为在催化剂中工作的一组测试,不在whiteList黑名单中的测试被隐式标记为忽略
    */
   def whiteList: Seq[String] = ".*" :: Nil
 
@@ -51,6 +55,7 @@ abstract class HiveQueryFileTest extends HiveComparisonTest {
     Option(System.getProperty(whiteListProperty)).map(_.split(",").toSeq).getOrElse(whiteList)
 
   // Go through all the test cases and add them to scala test.
+  //通过所有的测试用例,并添加到scala测试
   testCases.sorted.foreach {
     case (testCaseName, testCaseFile) =>
       if (blackList.map(_.r.pattern.matcher(testCaseName).matches()).reduceLeft(_||_)) {

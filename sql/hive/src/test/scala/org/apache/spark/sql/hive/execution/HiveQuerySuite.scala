@@ -71,7 +71,37 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
     }
   }
   //GROUP BY 的 WITH ROLLUP 字句可以检索出更多的分组聚合信息，它不仅仅能像一般的 GROUP BY 语句那样检索出各组的聚合信息，还能检索出本组类的整体聚合信息
-  /**createQueryTest("SPARK-8976 Wrong Result for Rollup #1",
+
+  /**
+      select dep,pos,avg(sal) from employee group by dep,pos;
+    * +------+------+-----------+
+    * | dep | pos | avg(sal) |
+    * +------+------+-----------+
+    * | 01 | 01 | 1500.0000 |
+    * | 01 | 02 | 1950.0000 |
+    * | 02 | 01 | 1500.0000 |
+    * | 02 | 02 | 2450.0000 |
+    * | 03 | 01 | 2500.0000 |
+    * | 03 | 02 | 2550.0000 |
+    * +------+------+-----------+
+      select dep,pos,avg(sal) from employee group by dep,pos with rollup;
+    //ROLLUP 生成的结果集显示了所选列中值的某一层次结构的聚合。
+    * +------+------+-----------+
+    * | dep | pos | avg(sal) |
+    * +------+------+-----------+
+    * | 01 | 01 | 1500.0000 |
+    * | 01 | 02 | 1950.0000 |
+    * | 01 | NULL | 1725.0000 |
+    * | 02 | 01 | 1500.0000 |
+    * | 02 | 02 | 2450.0000 |
+    * | 02 | NULL | 2133.3333 |
+    * | 03 | 01 | 2500.0000 |
+    * | 03 | 02 | 2550.0000 |
+    * | 03 | NULL | 2533.3333 |
+    * | NULL | NULL | 2090.0000 |
+    * +------+------+-----------+
+    */
+  createQueryTest("SPARK-8976 Wrong Result for Rollup #1",
     """
       SELECT count(*) AS cnt, key % 5,GROUPING__ID FROM src group by key%5 WITH ROLLUP
     """.stripMargin)
@@ -96,9 +126,44 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
         GROUPING__ID as k3
       FROM (SELECT key, key%2, key - 5 FROM src) t group by key%5, key-5
       WITH ROLLUP ORDER BY cnt, k1, k2, k3 LIMIT 10
-    """.stripMargin)**/
+    """.stripMargin)
 
-  /**createQueryTest("SPARK-8976 Wrong Result for CUBE #1",
+//CUBE 生成的结果集显示了所选列中值的所有组合的聚合。
+//当用 CUBE 或 ROLLUP 运算符添加行时，附加的列输出值为1，当所添加的行不是由 CUBE 或 ROLLUP 产生时，附加列值为0。
+  /**
+    * SELECT  名称,出版商,SUM(价格1) AS 价格1,SUM(价格2) AS 价格2,
+      GROUPING(名称) AS CHECK名称,GROUPING(出版商) AS CHECK出版商 FROM @T GROUP BY 名称,出版商 WITH CUBE
+  名称   出版商      价格1      价格2   CHECK名称 CHECK出版商
+  ---- ---------- ----------- ----------- ------- --------
+  a    北京         11          22          0       0
+  a    四川         22          33          0       0
+  a    NULL        33          55          0       1
+  b    北京         10          20          0       0
+  b    昆明         20          30          0       0
+  b    四川         12          23          0       0
+  b    NULL        42          73          0       1
+  NULL NULL        75          128         1       1
+  NULL 北京         21          42          1       0
+  NULL 昆明         20          30          1       0
+  NULL 四川         34          56          1       0
+
+--分析
+group by 两列：名称有两个类别A,B;所有由CUBE运算而生成行的是
+名称   出版商     价格1     价格2       CHECK名称 CHECK出版商
+---- ---------- ----------- ----------- ------- --------
+a    NULL       33          55          0       1
+b    NULL       42          73          0       1
+出版商有三个类别，所有由CUBE运算而生成行的是
+  名称   出版商      价格1       价格2        CHECK名称 CHECK出版商
+  ---- ---------- ----------- ----------- ------- --------
+  NULL 北京         21          42          1       0
+  NULL 昆明         20          30          1       0
+  NULL 四川         34          56          1       0
+  以及
+  NULL NULL        75          128         1       1
+**/
+
+ createQueryTest("SPARK-8976 Wrong Result for CUBE #1",
     """
       SELECT count(*) AS cnt, key % 5,GROUPING__ID FROM src group by key%5 WITH CUBE
     """.stripMargin)
@@ -123,7 +188,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
         GROUPING__ID as k3
       FROM (SELECT key, key%2, key - 5 FROM src) t group by key%5, key-5
       GROUPING SETS (key%5, key-5) ORDER BY cnt, k1, k2, k3 LIMIT 10
-    """.stripMargin)**/
+    """.stripMargin)
 
   createQueryTest("insert table with generator with column name",
     """

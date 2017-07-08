@@ -221,6 +221,7 @@ abstract class HiveComparisonTest
     assert(!testCaseName.contains(":"))
 
     // If test sharding is enable, skip tests that are not in the correct shard.
+    //如果测试分片已启用,请跳过不在正确分片中的测试.
     shardInfo.foreach {
       case (shardId, numShards) if testCaseName.hashCode % numShards != shardId => return
       case (shardId, _) => logDebug(s"Shard $shardId includes test '$testCaseName'")
@@ -235,6 +236,7 @@ abstract class HiveComparisonTest
 
     // If runonlytests is set, skip this test unless we find a file in one of the specified
     // directories.
+    //如果设置了runonlytests,请跳过此测试,除非我们在指定的目录之一中找到一个文件.
     val runIndicators =
       runOnlyDirectories
         .map(new File(_, testCaseName))
