@@ -111,6 +111,10 @@
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>jetty-servlet</artifactId>
+      </dependency>
   </dependencies>
   <build>
     <outputDirectory>target/scala-${scala.binary.version}/classes</outputDirectory>
