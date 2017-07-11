@@ -32,7 +32,7 @@ import org.apache.spark.SparkConf
 
 /**
  * A simple publisher for demonstration purposes, repeatedly publishes random Messages
- * Ò»¸ö¼òµ¥µÄ·¢ĞĞÑİÊ¾µÄÄ¿µÄ,Ã¿Ò»ÃëÖØ¸´·¢²¼Ëæ»úÏûÏ¢
+ * ä¸€ä¸ªç®€å•çš„å‘è¡Œæ¼”ç¤ºçš„ç›®çš„,æ¯ä¸€ç§’é‡å¤å‘å¸ƒéšæœºæ¶ˆæ¯
  * every one second.
  */
 object SimpleZeroMQPublisher {
@@ -60,7 +60,7 @@ object SimpleZeroMQPublisher {
 // scalastyle:off
 /**
  * A sample wordcount with ZeroMQStream stream
- * Ò»¸ö¼òµ¥µÄµ¥´Ê¼ÆËãzeromqstreamÁ÷
+ * ä¸€ä¸ªç®€å•çš„å•è¯è®¡ç®—zeromqstreamæµ
  * To work with zeroMQ, some native libraries have to be installed.
  * Install zeroMQ (release 2.1) core libraries. [ZeroMQ Install guide]
  * (http://www.zeromq.org/intro:get-the-software)
@@ -86,7 +86,7 @@ object ZeroMQWordCount {
     val Seq(url, topic) = args.toSeq
     val sparkConf = new SparkConf().setAppName("ZeroMQWordCount")
     // Create the context and set the batch size
-    //Åú´Î¼ä¸ô
+    //æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     def bytesToStringIterator(x: Seq[ByteString]): Iterator[String] = x.map(_.utf8String).iterator

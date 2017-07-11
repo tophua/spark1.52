@@ -4,31 +4,31 @@ import org.apache.spark.SparkContext
 import org.apache.spark.mllib.recommendation.ALS
 import org.apache.spark.mllib.recommendation.Rating
 /**
- * ÒþÐÔ·´À¡µÄÐ­Í¬¹ýÂÇ
+ * éšæ€§åé¦ˆçš„ååŒè¿‡è™‘
  */
 object ALStrainImplicit {
   def main(args: Array[String]) {
     /**
-     * Ð­Í¬¹ýÂËALSËã·¨ÍÆ¼ö¹ý³ÌÈçÏÂ£º
-     * ¼ÓÔØÊý¾Ýµ½ ratings RDD,Ã¿ÐÐ¼ÇÂ¼°üÀ¨:user,product,rate
-     * ´Ó ratings µÃµ½ÓÃ»§ÉÌÆ·µÄÊý¾Ý¼¯:(user, product)
-     * Ê¹ÓÃALS¶Ô ratings ½øÐÐÑµÁ·
-     * Í¨¹ý model ¶ÔÓÃ»§ÉÌÆ·½øÐÐÔ¤²âÆÀ·Ö:((user, product),rate)
-     * ´Ó ratings µÃµ½ÓÃ»§ÉÌÆ·µÄÊµ¼ÊÆÀ·Ö:((user, product),rate)
-     * ºÏ²¢Ô¤²âÆÀ·ÖºÍÊµ¼ÊÆÀ·ÖµÄÁ½¸öÊý¾Ý¼¯,²¢Çó¾ù·½²î
+     * ååŒè¿‡æ»¤ALSç®—æ³•æŽ¨èè¿‡ç¨‹å¦‚ä¸‹ï¼š
+     * åŠ è½½æ•°æ®åˆ° ratings RDD,æ¯è¡Œè®°å½•åŒ…æ‹¬:user,product,rate
+     * ä»Ž ratings å¾—åˆ°ç”¨æˆ·å•†å“çš„æ•°æ®é›†:(user, product)
+     * ä½¿ç”¨ALSå¯¹ ratings è¿›è¡Œè®­ç»ƒ
+     * é€šè¿‡ model å¯¹ç”¨æˆ·å•†å“è¿›è¡Œé¢„æµ‹è¯„åˆ†:((user, product),rate)
+     * ä»Ž ratings å¾—åˆ°ç”¨æˆ·å•†å“çš„å®žé™…è¯„åˆ†:((user, product),rate)
+     * åˆå¹¶é¢„æµ‹è¯„åˆ†å’Œå®žé™…è¯„åˆ†çš„ä¸¤ä¸ªæ•°æ®é›†,å¹¶æ±‚å‡æ–¹å·®
      */
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
-    /**ÎÄ¼þÖÐÃ¿Ò»ÐÐ°üÀ¨Ò»¸öÓÃ»§id¡¢ÉÌÆ·idºÍÆÀ·Ö****/
-    //½«kaggle_songsÊý¾Ýµ¼Èëµ½RDD
+    /**æ–‡ä»¶ä¸­æ¯ä¸€è¡ŒåŒ…æ‹¬ä¸€ä¸ªç”¨æˆ·idã€å•†å“idå’Œè¯„åˆ†****/
+    //å°†kaggle_songsæ•°æ®å¯¼å…¥åˆ°RDD
     val songs = sc.textFile("../data/mllib/als/kaggle_songs.txt")
-    //½«kaggle_usersÊý¾Ýµ¼Èëµ½RDD
+    //å°†kaggle_usersæ•°æ®å¯¼å…¥åˆ°RDD
     val users = sc.textFile("../data/mllib/als/kaggle_users.txt")
-    //½«kaggle_visible_evaluation_tripletsÊý¾Ýµ¼Èëµ½RDD
+    //å°†kaggle_visible_evaluation_tripletsæ•°æ®å¯¼å…¥åˆ°RDD
     val triplets = sc.textFile("../data/mllib/als/kaggle_visible_evaluation_triplets.txt")
-    //½«¸èÇúÊý¾Ý×ª»»ÎªPairRDD
+    //å°†æ­Œæ›²æ•°æ®è½¬æ¢ä¸ºPairRDD
     val songIndex = songs.map(_.split("\\W+")).map(v =>(v(0),v(1).toInt))
-    //½«songIndex×ª»»ÎªmapÊý×é
+    //å°†songIndexè½¬æ¢ä¸ºmapæ•°ç»„
      /**
      * Map(SOWZAXW12A8C13FDF2 -> 345316, 
         SOJPVJN12A6BD4FE30 -> 152438, 
@@ -41,9 +41,9 @@ object ALStrainImplicit {
         SODRTXS12A8C13CC3F -> 59311)
      */
     val songMap = songIndex.collectAsMap
-    //½«ÓÃ»§Êý¾Ý×ª»»ÎªPairRDD
+    //å°†ç”¨æˆ·æ•°æ®è½¬æ¢ä¸ºPairRDD
     val userIndex = users.zipWithIndex.map( t => (t._1,t._2.toInt))
-    //½«UserIndex×ª»»ÎªMapÊý×é
+    //å°†UserIndexè½¬æ¢ä¸ºMapæ•°ç»„
     /**
      * Map(af42f25800f70fe00eb91e6d5a7215493e1386cb -> 58435, 
        d54d311bcbdb6486ef17cc22414e5ce9a7f4834e -> 64818, 
@@ -57,32 +57,32 @@ object ALStrainImplicit {
        9475c8039e9bab7221b57ab23db7ccb4193ff6c7 -> 14820)
      */
     val userMap = userIndex.collectAsMap
-    //¹ã²¥userMap
+    //å¹¿æ’­userMap
     val broadcastUserMap = sc.broadcast(userMap)
-    //¹ã²¥songMap
+    //å¹¿æ’­songMap
     val broadcastSongMap = sc.broadcast(songMap)
-    //½«tripletsÊý¾Ý×ª»»ÎªÒ»¸öÊý×é
+    //å°†tripletsæ•°æ®è½¬æ¢ä¸ºä¸€ä¸ªæ•°ç»„
     val tripArray = triplets.map(_.split("\\W+"))
-    //µ¼ÈëRating°ü
+    //å¯¼å…¥RatingåŒ…
     import org.apache.spark.mllib.recommendation.Rating
-    //½«tripArrayÊý×é×ª»»ÎªÆÀ¼¶¶ÔÏóRDD
+    //å°†tripArrayæ•°ç»„è½¬æ¢ä¸ºè¯„çº§å¯¹è±¡RDD
     val ratings = tripArray.map { case Array(user, song, plays)=>
     val userId = broadcastUserMap.value.getOrElse(user, 0)
     val songId = broadcastUserMap.value.getOrElse(song, 0)
     Rating(userId, songId, plays.toDouble)
     }
-    //µ¼ÈëALS
+    //å¯¼å…¥ALS
     import org.apache.spark.mllib.recommendation.ALS
-    //½«RankÉèÖÃÎª10,µü´ú´ÎÊýÉèÎª10,RankÄ£ÐÍÖÐµÄÇ±ÔÚÌØÕ÷Êý    
+    //å°†Rankè®¾ç½®ä¸º10,è¿­ä»£æ¬¡æ•°è®¾ä¸º10,Rankæ¨¡åž‹ä¸­çš„æ½œåœ¨ç‰¹å¾æ•°    
     val model = ALS.trainImplicit(ratings, 10, 10)
-    //´ÓtripletÖÐµ¼³öÓÃ»§ºÍ¸èÇúÔª×é
+    //ä»Žtripletä¸­å¯¼å‡ºç”¨æˆ·å’Œæ­Œæ›²å…ƒç»„
     val usersSongs = ratings.map( r => {
       println(r.user+"|||"+r.product)
       (r.user, r.product) 
     })
   
 
-    //Ô¤²âÓÃ»§ºÍ¸èÇú
+    //é¢„æµ‹ç”¨æˆ·å’Œæ­Œæ›²
     val predictions = model.predict(usersSongs)
     predictions.foreach { x => println(x.user.toString()+"|||||"+x.rating.toString()+"======="+x.product.toString()) }
   }

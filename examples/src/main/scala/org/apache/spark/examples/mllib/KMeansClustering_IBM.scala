@@ -4,7 +4,7 @@ import org.apache.spark.mllib.clustering.{ KMeans, KMeansModel }
 import org.apache.spark.mllib.linalg.Vectors
 /**
  * http://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice4/index.html
- * ÎÒÃÇ½«¸ù¾İÄ¿±ê¿Í»§µÄÏû·ÑÊı¾İ,½«Ã¿Ò»ÁĞÊÓÎªÒ»¸öÌØÕ÷Ö¸±ê,¶ÔÊı¾İ¼¯½øĞĞ¾ÛÀà·ÖÎö(¹²8ÁĞ)
+ * æˆ‘ä»¬å°†æ ¹æ®ç›®æ ‡å®¢æˆ·çš„æ¶ˆè´¹æ•°æ®,å°†æ¯ä¸€åˆ—è§†ä¸ºä¸€ä¸ªç‰¹å¾æŒ‡æ ‡,å¯¹æ•°æ®é›†è¿›è¡Œèšç±»åˆ†æ(å…±8åˆ—)
  */
 object KMeansClustering {
   def main(args: Array[String]) {
@@ -20,24 +20,24 @@ object KMeansClustering {
      * 7684 2405 3516 7844
      */
     val rawTrainingData = sc.textFile("../data/mllib/wholesale_customers_data_training.txt")
-    //isColumnNameLine ¹ıÂÇµô±êÌâ 
+    //isColumnNameLine è¿‡è™‘æ‰æ ‡é¢˜ 
     val parsedTrainingData =
       rawTrainingData.filter(!isColumnNameLine(_)).map(line => {
         // println(">>>>>>>>>>>>" + line.split(",").map(_.trim).filter(!"".equals(_)))
         Vectors.dense(line.split(",").map(_.trim).filter(!"".equals(_)).map(_.toDouble))
       }).cache()
     // Cluster the data into two classes using KMeans
-    val numClusters = 6//k ±íÊ¾ÆÚÍûµÄ¾ÛÀàµÄ¸öÊı
-    val numIterations = 10 //±íÊ¾·½·¨µ¥´ÎÔËĞĞ×î´óµÄµü´ú´ÎÊı
-    val runTimes = 3 //±íÊ¾Ëã·¨±»ÔËĞĞµÄ´ÎÊı,Ñ¡³ö×îÓÅ½â
+    val numClusters = 6//k è¡¨ç¤ºæœŸæœ›çš„èšç±»çš„ä¸ªæ•°
+    val numIterations = 10 //è¡¨ç¤ºæ–¹æ³•å•æ¬¡è¿è¡Œæœ€å¤§çš„è¿­ä»£æ¬¡æ•°
+    val runTimes = 3 //è¡¨ç¤ºç®—æ³•è¢«è¿è¡Œçš„æ¬¡æ•°,é€‰å‡ºæœ€ä¼˜è§£
     var clusterIndex: Int = 0 
-    //train·½·¨¶ÔÊı¾İ¼¯½øĞĞ¾ÛÀàÑµÁ·,Õâ¸ö·½·¨»á·µ»Ø KMeansModel ÀàÊµÀı
+    //trainæ–¹æ³•å¯¹æ•°æ®é›†è¿›è¡Œèšç±»è®­ç»ƒ,è¿™ä¸ªæ–¹æ³•ä¼šè¿”å› KMeansModel ç±»å®ä¾‹
     val clusters: KMeansModel =
       KMeans.train(parsedTrainingData, numClusters, numIterations, runTimes)
-     //¾ÛÀàÖĞĞÄµã
+     //èšç±»ä¸­å¿ƒç‚¹
     println("Cluster Number:" + clusters.clusterCenters.length)
     println("Cluster Centers Information Overview:")
-    //´òÓ¡³öÖĞĞÄµã
+    //æ‰“å°å‡ºä¸­å¿ƒç‚¹
     clusters.clusterCenters.foreach(
       x => {
         println("Center Point of Cluster " + clusterIndex + ":")
@@ -48,32 +48,32 @@ object KMeansClustering {
     val rawTestData = sc.textFile("../data/mllib/wholesale_customers_data_test.txt")
     val parsedTestData = rawTestData.filter(!isColumnNameLine(_)).map(line =>
       {
-        //´òÓ¡Ã¿ÁĞÖµ
+        //æ‰“å°æ¯åˆ—å€¼
      /*   line.split(",").map(_.trim).filter(!"".equals(_)).map{line=>
           println(line)
         }*/
         Vectors.dense(line.split(",").map(_.trim).filter(!"".equals(_)).map(_.toDouble))
       })
     parsedTestData.collect().foreach(testDataLine => {
-      //¼ÆËã²âÊÔÊı¾İ·Ö±ğÊôÓÚÄÇ¸ö´ØÀà
+      //è®¡ç®—æµ‹è¯•æ•°æ®åˆ†åˆ«å±äºé‚£ä¸ªç°‡ç±»
       val predictedClusterIndex: Int = clusters.predict(testDataLine)
-      println("²âÊÔÑù±¾: " + testDataLine.toString + " ÊôÓÚ¾ÛÀà " +
+      println("æµ‹è¯•æ ·æœ¬: " + testDataLine.toString + " å±äºèšç±» " +
         predictedClusterIndex)
     })
     println("Spark MLlib K-means clustering test finished.")
-    //ÆÀ¹ÀKMeansÄ£ĞÍ ÈçºÎÑ¡ÔñKÖµ
+    //è¯„ä¼°KMeansæ¨¡å‹ å¦‚ä½•é€‰æ‹©Kå€¼
     val ks: Array[Int] = Array(3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 50, 80, 100)
     ks.foreach(cluster => {
-      //parsedTrainingDataÑµÁ·Ä£ĞÍÊı¾İ
+      //parsedTrainingDataè®­ç»ƒæ¨¡å‹æ•°æ®
       val model: KMeansModel = KMeans.train(parsedTrainingData, cluster, 30, 1)
-      //KMeansModel ÀàÀïÌá¹©ÁË computeCost ·½·¨,¸Ã·½·¨Í¨¹ı¼ÆËãËùÓĞÊı¾İµãµ½Æä×î½üµÄÖĞĞÄµãµÄÆ½·½ºÍÀ´ÆÀ¹À¾ÛÀàµÄĞ§¹û¡£  
-      //Í³¼Æ¾ÛÀà´íÎóµÄÑù±¾±ÈÀı
+      //KMeansModel ç±»é‡Œæä¾›äº† computeCost æ–¹æ³•,è¯¥æ–¹æ³•é€šè¿‡è®¡ç®—æ‰€æœ‰æ•°æ®ç‚¹åˆ°å…¶æœ€è¿‘çš„ä¸­å¿ƒç‚¹çš„å¹³æ–¹å’Œæ¥è¯„ä¼°èšç±»çš„æ•ˆæœã€‚  
+      //ç»Ÿè®¡èšç±»é”™è¯¯çš„æ ·æœ¬æ¯”ä¾‹
       val ssd = model.computeCost(parsedTrainingData)
       //model.predict(point)
       println("sum of squared distances of points to their nearest center when k=" + cluster + " -> " + ssd)
     })
   }
-  //¹ıÂË±êÌâĞĞ
+  //è¿‡æ»¤æ ‡é¢˜è¡Œ
   private def isColumnNameLine(line: String): Boolean = {
     if (line != null &&
       line.contains("Channel")) true

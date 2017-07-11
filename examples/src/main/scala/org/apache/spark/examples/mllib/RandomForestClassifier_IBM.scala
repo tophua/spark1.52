@@ -6,48 +6,48 @@ import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
 import org.apache.spark.mllib.util.MLUtils
 /**
- * ²Î¿¼ÎÄÏ×:
+ * å‚è€ƒæ–‡çŒ®:
  * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-random-forest/
- * Ëæ»úÉ­ÁÖËã·¨Ëã·¨Ê¹ÓÃ demo
- * Ëæ»úÉ­ÁÖ(Random Forests)ÆäÊµ¾ÍÊÇ¶à¸ö¾ö²ßÊ÷,Ã¿¸ö¾ö²ßÊ÷ÓĞÒ»¸öÈ¨ÖØ,¶ÔÎ´ÖªÊı¾İ½øĞĞÔ¤²âÊ±,
- * »áÓÃ¶à¸ö¾ö²ßÊ÷·Ö±ğÔ¤²âÒ»¸öÖµ,È»ºó¿¼ÂÇÊ÷µÄÈ¨ÖØ,½«Õâ¶à¸öÔ¤²âÖµ×ÛºÏÆğÀ´,
- * ¶ÔÓÚ·ÖÀàÎÊÌâ,²ÉÓÃ¶àÊı±í¾ö,¶ÔÓÚ»Ø¹éÎÊÌâ,Ö±½ÓÇóÆ½¾ù¡£
+ * éšæœºæ£®æ—ç®—æ³•ç®—æ³•ä½¿ç”¨ demo
+ * éšæœºæ£®æ—(Random Forests)å…¶å®å°±æ˜¯å¤šä¸ªå†³ç­–æ ‘,æ¯ä¸ªå†³ç­–æ ‘æœ‰ä¸€ä¸ªæƒé‡,å¯¹æœªçŸ¥æ•°æ®è¿›è¡Œé¢„æµ‹æ—¶,
+ * ä¼šç”¨å¤šä¸ªå†³ç­–æ ‘åˆ†åˆ«é¢„æµ‹ä¸€ä¸ªå€¼,ç„¶åè€ƒè™‘æ ‘çš„æƒé‡,å°†è¿™å¤šä¸ªé¢„æµ‹å€¼ç»¼åˆèµ·æ¥,
+ * å¯¹äºåˆ†ç±»é—®é¢˜,é‡‡ç”¨å¤šæ•°è¡¨å†³,å¯¹äºå›å½’é—®é¢˜,ç›´æ¥æ±‚å¹³å‡ã€‚
  */
 object RandomForestDemo {
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
  /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
-    // ¼ÓÔØÊı¾İ
+    // åŠ è½½æ•°æ®
     val data = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt")
-    // ½«Êı¾İËæ»ú·ÖÅäÎªÁ½·İ,Ò»·İÓÃÓÚÑµÁ·,Ò»·İÓÃÓÚ²âÊÔ
+    // å°†æ•°æ®éšæœºåˆ†é…ä¸ºä¸¤ä»½,ä¸€ä»½ç”¨äºè®­ç»ƒ,ä¸€ä»½ç”¨äºæµ‹è¯•
     val splits = data.randomSplit(Array(0.7, 0.3))
     val (trainingData, testData) = (splits(0), splits(1))
-    // Ëæ»úÉ­ÁÖÑµÁ·²ÎÊıÉèÖÃ
-    //·ÖÀàÊı
+    // éšæœºæ£®æ—è®­ç»ƒå‚æ•°è®¾ç½®
+    //åˆ†ç±»æ•°
     val numClasses = 2
-    // categoricalFeaturesInfo Îª¿Õ,ÒâÎ¶×ÅËùÓĞµÄÌØÕ÷ÎªÁ¬ĞøĞÍ±äÁ¿
+    // categoricalFeaturesInfo ä¸ºç©º,æ„å‘³ç€æ‰€æœ‰çš„ç‰¹å¾ä¸ºè¿ç»­å‹å˜é‡
     val categoricalFeaturesInfo = Map[Int, Int]()
-    //Ê÷µÄ¸öÊı
+    //æ ‘çš„ä¸ªæ•°
     val numTrees = 3
-    //ÌØÕ÷×Ó¼¯²ÉÑù²ßÂÔ,auto ±íÊ¾Ëã·¨×ÔÖ÷Ñ¡È¡
+    //ç‰¹å¾å­é›†é‡‡æ ·ç­–ç•¥,auto è¡¨ç¤ºç®—æ³•è‡ªä¸»é€‰å–
     val featureSubsetStrategy = "auto"
-    //´¿¶È¼ÆËã
+    //çº¯åº¦è®¡ç®—
     val impurity = "gini"
-    //Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
+    //æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
     val maxDepth = 4
-    //Á¬ĞøÌØÕ÷ÀëÉ¢»¯µÄ×î´óÊıÁ¿,ÒÔ¼°Ñ¡ÔñÃ¿¸ö½Úµã·ÖÁÑÌØÕ÷µÄ·½Ê½
+    //è¿ç»­ç‰¹å¾ç¦»æ•£åŒ–çš„æœ€å¤§æ•°é‡,ä»¥åŠé€‰æ‹©æ¯ä¸ªèŠ‚ç‚¹åˆ†è£‚ç‰¹å¾çš„æ–¹å¼
     val maxBins = 32
-    //ÑµÁ·Ëæ»úÉ­ÁÖ·ÖÀàÆ÷,trainClassifier ·µ»ØµÄÊÇ RandomForestModel ¶ÔÏó
+    //è®­ç»ƒéšæœºæ£®æ—åˆ†ç±»å™¨,trainClassifier è¿”å›çš„æ˜¯ RandomForestModel å¯¹è±¡
     val model = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
       numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
-    // ²âÊÔÊı¾İÆÀ¼ÛÑµÁ·ºÃµÄ·ÖÀàÆ÷²¢¼ÆËã´íÎóÂÊ
+    // æµ‹è¯•æ•°æ®è¯„ä»·è®­ç»ƒå¥½çš„åˆ†ç±»å™¨å¹¶è®¡ç®—é”™è¯¯ç‡
     val labelAndPreds = testData.map { point =>
       val prediction = model.predict(point.features)
       (point.label, prediction)
@@ -55,9 +55,9 @@ object RandomForestDemo {
     val testErr = labelAndPreds.filter(r => r._1 != r._2).count.toDouble / testData.count()
     println("Test Error = " + testErr)
     println("Learned classification forest model:\n" + model.toDebugString)
-    // ½«ÑµÁ·ºóµÄËæ»úÉ­ÁÖÄ£ĞÍ³Ö¾Ã»¯
+    // å°†è®­ç»ƒåçš„éšæœºæ£®æ—æ¨¡å‹æŒä¹…åŒ–
     model.save(sc, "myModelPath")
-    //¼ÓÔØËæ»úÉ­ÁÖÄ£ĞÍµ½ÄÚ´æ
+    //åŠ è½½éšæœºæ£®æ—æ¨¡å‹åˆ°å†…å­˜
     val sameModel = RandomForestModel.load(sc, "myModelPath")
 
   }

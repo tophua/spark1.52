@@ -5,9 +5,9 @@ import org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.linalg.Vectors
 /**
- *2006Äê¶ÔÈÕ±¾²»Í¬É³Ì²ÉÏÖ©ÖëµÄ·Ö²¼×öÒ»Ğ©ÑĞ¾¿
- * ¹ØÓÚÖ©ÖëµÄÁ£¶È´óĞ¡ºÍÏÖ´æ×´Ì¬µÄÊı¾İ
- * 0±íÊ¾ÏûÊ§,1±íÊ¾´æÔÚ
+ *2006å¹´å¯¹æ—¥æœ¬ä¸åŒæ²™æ»©ä¸Šèœ˜è››çš„åˆ†å¸ƒåšä¸€äº›ç ”ç©¶
+ * å…³äºèœ˜è››çš„ç²’åº¦å¤§å°å’Œç°å­˜çŠ¶æ€çš„æ•°æ®
+ * 0è¡¨ç¤ºæ¶ˆå¤±,1è¡¨ç¤ºå­˜åœ¨
  */
 object LogisticRegressionWithLBFGSExample {
   def main(args: Array[String]) {
@@ -15,10 +15,10 @@ object LogisticRegressionWithLBFGSExample {
     val conf = new SparkConf().setAppName("CountVectorizerExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
     /**
-     * ÒÔÖ©ÖëµÄ´æÔÚ»òÏûÊ§×÷Îª±ê¼Ç´´½¨Ò»¸öLabledPointÊı×é
+     * ä»¥èœ˜è››çš„å­˜åœ¨æˆ–æ¶ˆå¤±ä½œä¸ºæ ‡è®°åˆ›å»ºä¸€ä¸ªLabledPointæ•°ç»„
      */
     val points = Array(
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       LabeledPoint(0.0,Vectors.dense(0.245)),
       LabeledPoint(0.0,Vectors.dense(0.247)),
       LabeledPoint(1.0,Vectors.dense(0.285)),
@@ -47,13 +47,13 @@ object LogisticRegressionWithLBFGSExample {
       LabeledPoint(1.0,Vectors.dense(0.938)),
       LabeledPoint(1.0,Vectors.dense(1.036)),
       LabeledPoint(1.0,Vectors.dense(1.045)))
-    //´´½¨Ö®Ç°Êı¾İµÄRDD
+    //åˆ›å»ºä¹‹å‰æ•°æ®çš„RDD
     val spiderRDD = sc.parallelize(points)
-    //Ê¹ÓÃÊı¾İÑµÁ·Ä£ĞÍ(µ±ËùÓĞÔ¤²âÖµÎª0µÄÊ±ºò,À¹½ØÊÇÓĞÒâÒåµÄ)
-    //Âß¼­»Ø¹é,»ùÓÚlbfgsÓÅ»¯ËğÊ§º¯Êı,Ö§³Ö¶à·ÖÀà,(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨)
+    //ä½¿ç”¨æ•°æ®è®­ç»ƒæ¨¡å‹(å½“æ‰€æœ‰é¢„æµ‹å€¼ä¸º0çš„æ—¶å€™,æ‹¦æˆªæ˜¯æœ‰æ„ä¹‰çš„)
+    //é€»è¾‘å›å½’,åŸºäºlbfgsä¼˜åŒ–æŸå¤±å‡½æ•°,æ”¯æŒå¤šåˆ†ç±»,(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•)
     val lr = new LogisticRegressionWithLBFGS().setIntercept(true)
     val model = lr.run(spiderRDD)
-    //Ô¤²â0.938³ß¶ÈµÄÖ©ÖëµÄÏÖ×´
+    //é¢„æµ‹0.938å°ºåº¦çš„èœ˜è››çš„ç°çŠ¶
     val predict = model.predict(Vectors.dense(0.938))
  
   }

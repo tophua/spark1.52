@@ -23,18 +23,18 @@ import java.util.Random
 import breeze.linalg.{Vector, DenseVector}
 
 /**
- * Logistic regression based classification.
- * »ùÓÚÂß¼­»Ø¹éµÄ·ÖÀà,
- * This is an example implementation for learning how to use Spark. For more conventional use,
- * ÕâÊÇÒ»¸öÑ§Ï°ÈçºÎÊ¹ÓÃSparkµÄÀı×ÓÊµÏÖ,Îª¸ü´«Í³µÄÊ¹ÓÃ(SGDËæ»úÌİ¶ÈÏÂ½µ)
- * please refer to either(¸ù¾İÄãµÄĞèÒªÇë²ÎÔÄ) org.apache.spark.mllib.classification.LogisticRegressionWithSGD or
- * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨) based on your needs.
- */
+  * Logistic regression based classification.
+  * åŸºäºé€»è¾‘å›å½’çš„åˆ†ç±»,
+  * This is an example implementation for learning how to use Spark. For more conventional use,
+  * è¿™æ˜¯ä¸€ä¸ªå­¦ä¹ å¦‚ä½•ä½¿ç”¨Sparkçš„ä¾‹å­å®ç°,ä¸ºæ›´ä¼ ç»Ÿçš„ä½¿ç”¨(SGDéšæœºæ¢¯åº¦ä¸‹é™)
+  * please refer to either(æ ¹æ®ä½ çš„éœ€è¦è¯·å‚é˜…) org.apache.spark.mllib.classification.LogisticRegressionWithSGD or
+  * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•) based on your needs.
+  */
 object LocalLR {
-  val N = 10000  // Number of data points Êı¾İµã
-  val D = 10   // Number of dimensions Î¬¶È
-  val R = 0.7  // Scaling factor ±ÈÀıÒò×Ó
-  val ITERATIONS = 5 //µü´ú´ÎÊı
+  val N = 10000  // Number of data points æ•°æ®ç‚¹
+  val D = 10   // Number of dimensions ç»´åº¦
+  val R = 0.7  // Scaling factor æ¯”ä¾‹å› å­
+  val ITERATIONS = 5 //è¿­ä»£æ¬¡æ•°
   val rand = new Random(42)
 
   case class DataPoint(x: Vector[Double], y: Double)
@@ -52,8 +52,8 @@ object LocalLR {
   def showWarning() {
     System.err.println(
       """WARN: This is a naive implementation of Logistic Regression and is given as an example!
-        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDËæ»úÌİ¶ÈÏÂ½µ) or 
-        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨)
+        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDéšæœºæ¢¯åº¦ä¸‹é™) or
+        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•)
         |for more conventional use.
       """.stripMargin)
   }
@@ -64,20 +64,20 @@ object LocalLR {
 
     val data = generateData
     //Initialize w to a random value
-    //³õÊ¼»¯Wµ½Ò»¸öËæ»úÖµ
+    //åˆå§‹åŒ–Wåˆ°ä¸€ä¸ªéšæœºå€¼
     var w = DenseVector.fill(D){2 * rand.nextDouble - 1}
     /**
-     * Initial w: 
-     * DenseVector(-0.8066603352924779, -0.5488747509304204, -0.7351625370864459, 
-     * 						 0.8228539509375878, -0.6662446067860872, -0.33245457898921527, 
-     *             0.9664202269036932, -0.20407887461434115, 0.4120993933386614, 
-     *             -0.8125908063470539)
-     */
+      * Initial w:
+      * DenseVector(-0.8066603352924779, -0.5488747509304204, -0.7351625370864459,
+      * 						 0.8228539509375878, -0.6662446067860872, -0.33245457898921527,
+      *             0.9664202269036932, -0.20407887461434115, 0.4120993933386614,
+      *             -0.8125908063470539)
+      */
     println("Initial w: " + w)
 
     for (i <- 1 to ITERATIONS) {
-      println("On iteration " + i)//µü´ú´ÎÊı
-      var gradient = DenseVector.zeros[Double](D)//ÃÜ¼¯ÏòÁ¿Î¬¶È10
+      println("On iteration " + i)//è¿­ä»£æ¬¡æ•°
+      var gradient = DenseVector.zeros[Double](D)//å¯†é›†å‘é‡ç»´åº¦10
       for (p <- data) {
         val scale = (1 / (1 + math.exp(-p.y * (w.dot(p.x)))) - 1) * p.y
         gradient +=  p.x * scale
@@ -85,11 +85,11 @@ object LocalLR {
       w -= gradient
     }
     /**
-     * Final w: DenseVector(5816.075967498844, 5222.008066011373, 5754.751978607454, 
-     * 											3853.1772062206874, 5593.565827145935, 5282.38787420105, 
-     * 											3662.9216051953567, 4890.782103406075, 4223.371512250295, 
-     * 											5767.368579668877)
-     */
+      * Final w: DenseVector(5816.075967498844, 5222.008066011373, 5754.751978607454,
+      * 											3853.1772062206874, 5593.565827145935, 5282.38787420105,
+      * 											3662.9216051953567, 4890.782103406075, 4223.371512250295,
+      * 											5767.368579668877)
+      */
     println("Final w: " + w)
   }
 }

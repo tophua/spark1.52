@@ -21,26 +21,26 @@ package org.apache.spark.examples
 import org.apache.spark._
 
 /**
- * HDFS²âÊÔ
- */
+  * HDFSæµ‹è¯•
+  */
 object HdfsTest {
 
-  /** 
-   *  Usage: HdfsTest [file]
-   *  Ê¹ÓÃHDFS²âÊÔ 
-   *  */
+  /**
+    *  Usage: HdfsTest [file]
+    *  ä½¿ç”¨HDFSæµ‹è¯•
+    *  */
   def main(args: Array[String]) {
     val hdfs="hdfs://xcsq:8089/cookbook/input/shu.txt"
     /*if (args.length < 1) {
       System.err.println("Usage: HdfsTest <file>")
       System.exit(1)
     }*/
-    
+
     val sparkConf = new SparkConf().setAppName("HdfsTest").setMaster("local")
     val sc = new SparkContext(sparkConf)
-   // val files="D:\\spark\\spark-1.5.0-hadoop2.6\\CHANGES.txt"
+    // val files="D:\\spark\\spark-1.5.0-hadoop2.6\\CHANGES.txt"
     val file = sc.textFile(hdfs)
-    
+
     val mapped = file.map(s => s.length).cache()
     for (iter <- 1 to 10) {
       val start = System.currentTimeMillis()

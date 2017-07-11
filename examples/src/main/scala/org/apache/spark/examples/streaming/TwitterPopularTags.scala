@@ -52,7 +52,7 @@ object TwitterPopularTags {
     System.setProperty("twitter4j.oauth.accessTokenSecret", accessTokenSecret)
 
     val sparkConf = new SparkConf().setAppName("TwitterPopularTags")
-    //Åú´Î¼ä¸ô
+    //æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(sparkConf, Seconds(2))
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
@@ -60,12 +60,12 @@ object TwitterPopularTags {
 
     val topCounts60 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(60))
                      .map{case (topic, count) => (count, topic)}
-		     //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+		     //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
                      .transform(_.sortByKey(false))
 
     val topCounts10 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(10))
                      .map{case (topic, count) => (count, topic)}
-		     //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+		     //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
                      .transform(_.sortByKey(false))
 
 

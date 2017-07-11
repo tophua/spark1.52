@@ -28,8 +28,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * NGramµÄÊäÈëÎªÒ»ÏµÁĞ×Ö·û´®,²ÎÊın¾ö¶¨Ã¿¸ön-gram°üº¬µÄ¶ÔÏó¸öÊı¡£
- * ½á¹û°üº¬Ò»ÏµÁĞn-gram,ÆäÖĞÃ¿¸ön-gram´ú±íÒ»¸ö¿Õ¸ñ·Ö¸îµÄn¸öÁ¬Ğø×Ö·û,Èç¹ûÊäÈëÉÙÓÚn¸ö×Ö·û´®,½«Ã»ÓĞÊä³ö½á¹û
+ * NGramçš„è¾“å…¥ä¸ºä¸€ç³»åˆ—å­—ç¬¦ä¸²,å‚æ•°nå†³å®šæ¯ä¸ªn-gramåŒ…å«çš„å¯¹è±¡ä¸ªæ•°ã€‚
+ * ç»“æœåŒ…å«ä¸€ç³»åˆ—n-gram,å…¶ä¸­æ¯ä¸ªn-gramä»£è¡¨ä¸€ä¸ªç©ºæ ¼åˆ†å‰²çš„nä¸ªè¿ç»­å­—ç¬¦,å¦‚æœè¾“å…¥å°‘äºnä¸ªå­—ç¬¦ä¸²,å°†æ²¡æœ‰è¾“å‡ºç»“æœ
  */
 object NGramExample {
   def main(args: Array[String]): Unit = {
@@ -47,7 +47,7 @@ object NGramExample {
     )).toDF("label", "words")
 
     val ngram = new NGram().setInputCol("words").setOutputCol("ngrams")
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val ngramDataFrame = ngram.transform(wordDataFrame)
     /**
      * List(Hi I, I heard, heard about, about Spark)

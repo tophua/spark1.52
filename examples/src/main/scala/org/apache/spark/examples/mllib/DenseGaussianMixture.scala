@@ -24,7 +24,7 @@ import org.apache.spark.mllib.linalg.Vectors
 
 /**
  * An example Gaussian Mixture Model EM app. Run with
- * Ò»¸ö¸ßË¹»ìºÏÄ£ĞÍÀı×ÓµÄÓ¦ÓÃ
+ * ä¸€ä¸ªé«˜æ–¯æ··åˆæ¨¡å‹ä¾‹å­çš„åº”ç”¨
  * {{{
  * ./bin/run-example mllib.DenseGaussianMixture <input> <k> <convergenceTol>
  * }}}
@@ -49,7 +49,7 @@ object DenseGaussianMixture {
     }.cache()
 
     val clusters = new GaussianMixture()
-      .setK(k)//¾ÛÀàµÄ¸öÊı
+      .setK(k)//èšç±»çš„ä¸ªæ•°
       .setConvergenceTol(convergenceTol)
       .setMaxIterations(maxIterations)
       .run(data)

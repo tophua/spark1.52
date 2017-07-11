@@ -34,9 +34,9 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.util.Utils
 
 /**
- * Ëæ»úÉ­ÁÖ(Random Forests)ÆäÊµ¾ÍÊÇ¶à¸ö¾ö²ßÊ÷,Ã¿¸ö¾ö²ßÊ÷ÓĞÒ»¸öÈ¨ÖØ,¶ÔÎ´ÖªÊı¾İ½øĞĞÔ¤²âÊ±,
- * »áÓÃ¶à¸ö¾ö²ßÊ÷·Ö±ğÔ¤²âÒ»¸öÖµ,È»ºó¿¼ÂÇÊ÷µÄÈ¨ÖØ,½«Õâ¶à¸öÔ¤²âÖµ×ÛºÏÆğÀ´,
- * ¶ÔÓÚ·ÖÀàÎÊÌâ,²ÉÓÃ¶àÊı±í¾ö,¶ÔÓÚ»Ø¹éÎÊÌâ,Ö±½ÓÇóÆ½¾ù¡£
+ * éšæœºæ£®æ—(Random Forests)å…¶å®å°±æ˜¯å¤šä¸ªå†³ç­–æ ‘,æ¯ä¸ªå†³ç­–æ ‘æœ‰ä¸€ä¸ªæƒé‡,å¯¹æœªçŸ¥æ•°æ®è¿›è¡Œé¢„æµ‹æ—¶,
+ * ä¼šç”¨å¤šä¸ªå†³ç­–æ ‘åˆ†åˆ«é¢„æµ‹ä¸€ä¸ªå€¼,ç„¶åè€ƒè™‘æ ‘çš„æƒé‡,å°†è¿™å¤šä¸ªé¢„æµ‹å€¼ç»¼åˆèµ·æ¥,
+ * å¯¹äºåˆ†ç±»é—®é¢˜,é‡‡ç”¨å¤šæ•°è¡¨å†³,å¯¹äºå›å½’é—®é¢˜,ç›´æ¥æ±‚å¹³å‡ã€‚
  * An example runner for decision trees and random forests. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DecisionTreeRunner [options]
@@ -44,17 +44,17 @@ import org.apache.spark.util.Utils
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
  *
  * Note: This script treats all features as real-valued (not categorical).
- * 			 Õâ¸ö½Å±¾½«ËùÓĞµÄ¹¦ÄÜ¶¼ÊÓÎªÕæÕıµÄÖµ(Ã»ÓĞ·ÖÀà)
+ * 			 è¿™ä¸ªè„šæœ¬å°†æ‰€æœ‰çš„åŠŸèƒ½éƒ½è§†ä¸ºçœŸæ­£çš„å€¼(æ²¡æœ‰åˆ†ç±»)
  *       To include categorical features, modify categoricalFeaturesInfo.
- *       °üÀ¨·ÖÀàÌØÕ÷,ĞŞ¸Ä·ÖÀàÌØÕ÷ĞÅÏ¢
+ *       åŒ…æ‹¬åˆ†ç±»ç‰¹å¾,ä¿®æ”¹åˆ†ç±»ç‰¹å¾ä¿¡æ¯
  */
 object DecisionTreeRunner {
   /**
-   * ¶¨ÒåÒ»¸öÃ¶¾ÙÀàĞÍ
+   * å®šä¹‰ä¸€ä¸ªæšä¸¾ç±»å‹
    */
   object ImpurityType extends Enumeration {
     type ImpurityType = Value
-    //»ùÄá,ìØ,·½²î
+    //åŸºå°¼,ç†µ,æ–¹å·®
     val Gini, Entropy, Variance = Value
   }
 
@@ -64,25 +64,25 @@ object DecisionTreeRunner {
       input: String = "../data/mllib/sample_binary_classification_data.txt",
       testInput: String = "",
       /**
-       *  libSVMµÄÊı¾İ¸ñÊ½
+       *  libSVMçš„æ•°æ®æ ¼å¼
        *  <label> <index1>:<value1> <index2>:<value2> ...
-       *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-       *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-       *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+       *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+       *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+       *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
        */
       dataFormat: String = "libsvm",
-      algo: Algo = Classification,//Ëã·¨
-      maxDepth: Int = 5,//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-      impurity: ImpurityType = Gini,//Ê÷½ÚµãÑ¡ÔñµÄ²»´¿¶ÈµÄºâÁ¿Ö¸±ê,È¡Öµ¿ÉÒÔÊÇ¡±entroy¡±»ò¡°gini¡±,Ä¬ÈÏÊÇ¡±gini¡±
-      maxBins: Int = 32,//ÀëÉ¢Á¬ĞøĞÔ±äÁ¿Ê±×î´óµÄ·ÖÏäÊı,Ä¬ÈÏÊÇ 32
-      minInstancesPerNode: Int = 1,//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-      minInfoGain: Double = 0.0,//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
-      numTrees: Int = 1,//Ëæ»úÉ­ÁÖĞèÒªÑµÁ·µÄÊ÷µÄ¸öÊı,Ä¬ÈÏÖµÊÇ 20
+      algo: Algo = Classification,//ç®—æ³•
+      maxDepth: Int = 5,//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+      impurity: ImpurityType = Gini,//æ ‘èŠ‚ç‚¹é€‰æ‹©çš„ä¸çº¯åº¦çš„è¡¡é‡æŒ‡æ ‡,å–å€¼å¯ä»¥æ˜¯â€entroyâ€æˆ–â€œginiâ€,é»˜è®¤æ˜¯â€giniâ€
+      maxBins: Int = 32,//ç¦»æ•£è¿ç»­æ€§å˜é‡æ—¶æœ€å¤§çš„åˆ†ç®±æ•°,é»˜è®¤æ˜¯ 32
+      minInstancesPerNode: Int = 1,//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+      minInfoGain: Double = 0.0,//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
+      numTrees: Int = 1,//éšæœºæ£®æ—éœ€è¦è®­ç»ƒçš„æ ‘çš„ä¸ªæ•°,é»˜è®¤å€¼æ˜¯ 20
       featureSubsetStrategy: String = "auto",
       fracTest: Double = 0.2,
       useNodeIdCache: Boolean = false,
       checkpointDir: Option[String] = None,
-      //ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+      //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -97,7 +97,7 @@ object DecisionTreeRunner {
         .text(s"impurity type (${ImpurityType.values.mkString(",")}), " +
           s"default: ${defaultParams.impurity}")
         .action((x, c) => c.copy(impurity = ImpurityType.withName(x)))
-      opt[Int]("maxDepth")//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
+      opt[Int]("maxDepth")//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("maxBins")
@@ -174,11 +174,11 @@ object DecisionTreeRunner {
 
   /**
    * Load training and test data from files.
-   * ´ÓÎÄ¼şÖĞ¼ÓÔØÑµÁ·ºÍ²âÊÔÊı¾İ
+   * ä»æ–‡ä»¶ä¸­åŠ è½½è®­ç»ƒå’Œæµ‹è¯•æ•°æ®
    * @param input  Path to input dataset.
    * @param dataFormat  "libsvm" or "dense"
    * @param testInput  Path to test dataset.
-   * @param algo  Classification or Regression ·ÖÀà»ò»Ø¹é
+   * @param algo  Classification or Regression åˆ†ç±»æˆ–å›å½’
    * @param fracTest  Fraction of input data to hold out for testing.  Ignored if testInput given.
    * @return  (training dataset, test dataset, number of classes),
    *          where the number of classes is inferred from data (and set to 0 for Regression)
@@ -191,21 +191,21 @@ object DecisionTreeRunner {
       algo: Algo,
       fracTest: Double): (RDD[LabeledPoint], RDD[LabeledPoint], Int) = {
     // Load training data and cache it.
-    //¼ÓÔØÑµÁ·Êı¾İ²¢½«Æä»º´æ
+    //åŠ è½½è®­ç»ƒæ•°æ®å¹¶å°†å…¶ç¼“å­˜
     val origExamples = dataFormat match {
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       case "dense" => MLUtils.loadLabeledPoints(sc, input).cache()
       /**
-       *  libSVMµÄÊı¾İ¸ñÊ½
+       *  libSVMçš„æ•°æ®æ ¼å¼
        *  <label> <index1>:<value1> <index2>:<value2> ...
-       *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-       *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-       *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+       *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+       *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+       *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
        */
       case "libsvm" => MLUtils.loadLibSVMFile(sc, input).cache()
     }
     // For classification, re-index classes if needed.
-    //¶ÔÓÚ·ÖÀà,Èç¹ûĞèÒªµÄ»°,ÖØĞÂË÷ÒıÀà
+    //å¯¹äºåˆ†ç±»,å¦‚æœéœ€è¦çš„è¯,é‡æ–°ç´¢å¼•ç±»
     val (examples, classIndexMap, numClasses) = algo match {
       case Classification => {
         // classCounts: class --> # examples in class
@@ -224,7 +224,7 @@ object DecisionTreeRunner {
           if (classIndexMap.isEmpty) {
             origExamples
           } else {
-	  //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+	  //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
             origExamples.map(lp => LabeledPoint(classIndexMap(lp.label), lp.features))
           }
         }
@@ -249,18 +249,18 @@ object DecisionTreeRunner {
     }
 
     // Create training, test sets.
-    //´´½¨ÑµÁ·,²âÊÔ¼¯
+    //åˆ›å»ºè®­ç»ƒ,æµ‹è¯•é›†
     val splits = if (testInput != "") {
-      // Load testInput. ¼ÓÔØ²âÊÔÊäÈë
+      // Load testInput. åŠ è½½æµ‹è¯•è¾“å…¥
       val numFeatures = examples.take(1)(0).features.size
       val origTestExamples = dataFormat match {
         case "dense" => MLUtils.loadLabeledPoints(sc, testInput)
     	/**
-       *  libSVMµÄÊı¾İ¸ñÊ½
+       *  libSVMçš„æ•°æ®æ ¼å¼
        *  <label> <index1>:<value1> <index2>:<value2> ...
-       *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-       *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-       *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+       *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+       *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+       *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
        */
         case "libsvm" => MLUtils.loadLibSVMFile(sc, testInput, numFeatures)
       }
@@ -271,7 +271,7 @@ object DecisionTreeRunner {
             if (classIndexMap.isEmpty) {
               origTestExamples
             } else {
-	    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+	    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
               origTestExamples.map(lp => LabeledPoint(classIndexMap(lp.label), lp.features))
             }
           }
@@ -282,7 +282,7 @@ object DecisionTreeRunner {
       }
     } else {
       // Split input into training, test.
-      //½«ÊäÈë²ğ·ÖÎªÑµÁ·,²âÊÔ
+      //å°†è¾“å…¥æ‹†åˆ†ä¸ºè®­ç»ƒ,æµ‹è¯•
       examples.randomSplit(Array(1.0 - fracTest, fracTest))
     }
     val training = splits(0).cache()
@@ -308,10 +308,10 @@ object DecisionTreeRunner {
         testInput:	,
         dataFormat:	libsvm,
         algo:	Classification,
-        maxDepth:	5,//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
+        maxDepth:	5,//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
         impurity:	Gini,
         maxBins:	32,
-        minInstancesPerNode:	1,//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
+        minInstancesPerNode:	1,//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
         minInfoGain:	0.0,
         numTrees:	1,
         featureSubsetStrategy:	auto,
@@ -323,38 +323,38 @@ object DecisionTreeRunner {
     println(s"DecisionTreeRunner with parameters:\n$params")
 
     // Load training and test data and cache it.
-    //¼ÓÔØÑµÁ·ºÍ²âÊÔÊı¾İ²¢½«Æä»º´æ
+    //åŠ è½½è®­ç»ƒå’Œæµ‹è¯•æ•°æ®å¹¶å°†å…¶ç¼“å­˜
     val (training, test, numClasses) = loadDatasets(sc, params.input, params.dataFormat,
       params.testInput, params.algo, params.fracTest)
 
     val impurityCalculator = params.impurity match {
-      case Gini => impurity.Gini //»ùÄá
-      case Entropy => impurity.Entropy //ìØ
-      case Variance => impurity.Variance //·½²î
+      case Gini => impurity.Gini //åŸºå°¼
+      case Entropy => impurity.Entropy //ç†µ
+      case Variance => impurity.Variance //æ–¹å·®
     }
 
     params.checkpointDir.foreach(sc.setCheckpointDir)
   /**
-         ×î´óÊ÷Éî¶ÈmaxDepth Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-  	×îĞ¡ĞÅÏ¢ÔöÒæminInfoGain
-          ×îĞ¡×Ó½ÚµãÊµÀıÊıminInstancesPerNode*/
+         æœ€å¤§æ ‘æ·±åº¦maxDepth æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+  	æœ€å°ä¿¡æ¯å¢ç›ŠminInfoGain
+          æœ€å°å­èŠ‚ç‚¹å®ä¾‹æ•°minInstancesPerNode*/
     val strategy
       = new Strategy(
           algo = params.algo,
-          impurity = impurityCalculator,//¼ÆËãĞÅÏ¢ÔöÒæµÄ×¼Ôò
-          maxDepth = params.maxDepth,//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-          maxBins = params.maxBins,//Á¬ĞøÌØÕ÷ÀëÉ¢»¯µÄ×î´óÊıÁ¿,ÒÔ¼°Ñ¡ÔñÃ¿¸ö½Úµã·ÖÁÑÌØÕ÷µÄ·½Ê½
-          numClasses = numClasses,//ÑµÁ·µÄÊ÷µÄÊıÁ¿
-          minInstancesPerNode = params.minInstancesPerNode,//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-          minInfoGain = params.minInfoGain,//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
-          useNodeIdCache = params.useNodeIdCache,//Ê¹ÓÃRDDÃ¿ĞĞµÄ½ÚµãID»º´æ
-	        //ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+          impurity = impurityCalculator,//è®¡ç®—ä¿¡æ¯å¢ç›Šçš„å‡†åˆ™
+          maxDepth = params.maxDepth,//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+          maxBins = params.maxBins,//è¿ç»­ç‰¹å¾ç¦»æ•£åŒ–çš„æœ€å¤§æ•°é‡,ä»¥åŠé€‰æ‹©æ¯ä¸ªèŠ‚ç‚¹åˆ†è£‚ç‰¹å¾çš„æ–¹å¼
+          numClasses = numClasses,//è®­ç»ƒçš„æ ‘çš„æ•°é‡
+          minInstancesPerNode = params.minInstancesPerNode,//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+          minInfoGain = params.minInfoGain,//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
+          useNodeIdCache = params.useNodeIdCache,//ä½¿ç”¨RDDæ¯è¡Œçš„èŠ‚ç‚¹IDç¼“å­˜
+	        //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
           checkpointInterval = params.checkpointInterval)
-    if (params.numTrees == 1) {//ÑµÁ·µÄÊ÷µÄÊıÁ¿
-      //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+    if (params.numTrees == 1) {//è®­ç»ƒçš„æ ‘çš„æ•°é‡
+      //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
       val startTime = System.nanoTime()
       val model = DecisionTree.train(training, strategy)
-      //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+      //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
       val elapsedTime = (System.nanoTime() - startTime) / 1e9
       println(s"Training time: $elapsedTime seconds")
       if (model.numNodes < 20) {
@@ -362,19 +362,19 @@ object DecisionTreeRunner {
       } else {
         println(model) // Print model summary.
       }
-      if (params.algo == Classification) {//·ÖÀà
-       //ÆÀ¹ÀÖ¸±ê-¶à·ÖÀà
+      if (params.algo == Classification) {//åˆ†ç±»
+       //è¯„ä¼°æŒ‡æ ‡-å¤šåˆ†ç±»
         val trainAccuracy =
           new MulticlassMetrics(training.map(lp => (model.predict(lp.features), lp.label)))
             .precision
         println(s"Train accuracy = $trainAccuracy")
-	     //ÆÀ¹ÀÖ¸±ê-¶à·ÖÀà
+	     //è¯„ä¼°æŒ‡æ ‡-å¤šåˆ†ç±»
         val testAccuracy =
           new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
           //Test accuracy = 1.0
         println(s"Test accuracy = $testAccuracy")
       }
-      if (params.algo == Regression) {//»Ø¹é
+      if (params.algo == Regression) {//å›å½’
         val trainMSE = meanSquaredError(model, training)
         println(s"Train mean squared error = $trainMSE")
         val testMSE = meanSquaredError(model, test)
@@ -382,13 +382,13 @@ object DecisionTreeRunner {
       }
     } else {
       val randomSeed = Utils.random.nextInt()
-      //¶ş·ÖÀà
+      //äºŒåˆ†ç±»
       if (params.algo == Classification) {
-       //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+       //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
         val startTime = System.nanoTime()
         val model = RandomForest.trainClassifier(training, strategy, params.numTrees,
           params.featureSubsetStrategy, randomSeed)
-	  		//1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+	  		//1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
         val elapsedTime = (System.nanoTime() - startTime) / 1e9
         //Training time: 5.574476103 seconds
         println(s"Training time: $elapsedTime seconds")
@@ -410,19 +410,19 @@ object DecisionTreeRunner {
         val trainAccuracy =
           new MulticlassMetrics(training.map(lp => (model.predict(lp.features), lp.label)))
             .precision
-        //Train accuracy = 1.0,ÑµÁ·×¼È·ĞÔ
+        //Train accuracy = 1.0,è®­ç»ƒå‡†ç¡®æ€§
         println(s"Train accuracy = $trainAccuracy")
         val testAccuracy =
           new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
-        //²âÊÔ×¼È·ĞÔ
+        //æµ‹è¯•å‡†ç¡®æ€§
         println(s"Test accuracy = $testAccuracy")
       }
     if (params.algo == Regression) {
-        //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+        //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
         val startTime = System.nanoTime()
         val model = RandomForest.trainRegressor(training, strategy, params.numTrees,
           params.featureSubsetStrategy, randomSeed)
-				//1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+				//1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
         val elapsedTime = (System.nanoTime() - startTime) / 1e9
         println(s"Training time: $elapsedTime seconds")
         if (model.totalNumNodes < 30) {
@@ -442,10 +442,10 @@ object DecisionTreeRunner {
 
   /**
    * Calculates the mean squared error for regression.
-   * ¼ÆËã»Ø¹éµÄÆ½¾ùÆ½·½Îó²î
+   * è®¡ç®—å›å½’çš„å¹³å‡å¹³æ–¹è¯¯å·®
    * This is just for demo purpose. In general, don't copy this code because it is NOT efficient
    * due to the use of structural types, which leads to one reflection call per record.
-   * ÕâÖ»ÊÇÎªÁËÑİÊ¾µÄÄ¿µÄ,Ò»°ãÀ´Ëµ,²»Òª¸´ÖÆ´Ë´úÂë,ÓÉÓÚÊ¹ÓÃµÄ²»Í¬½á¹¹ÀàĞÍ,µ¼ÖÂÃ¿¸ö¼ÇÂ¼µÄÒ»¸ö·´Éäµ÷ÓÃ
+   * è¿™åªæ˜¯ä¸ºäº†æ¼”ç¤ºçš„ç›®çš„,ä¸€èˆ¬æ¥è¯´,ä¸è¦å¤åˆ¶æ­¤ä»£ç ,ç”±äºä½¿ç”¨çš„ä¸åŒç»“æ„ç±»å‹,å¯¼è‡´æ¯ä¸ªè®°å½•çš„ä¸€ä¸ªåå°„è°ƒç”¨
    */
   // scalastyle:off structural.type
   private[mllib] def meanSquaredError(

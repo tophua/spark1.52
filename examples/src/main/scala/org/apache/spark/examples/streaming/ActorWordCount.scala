@@ -36,7 +36,7 @@ case class UnsubscribeReceiver(receiverActor: ActorRef)
 /**
  * Sends the random content to every receiver subscribed with 1/2
  *  second delay.
- * ½«Ëæ»úÄÚÈİ·¢ËÍ¸øÃ¿Ò»¸öÓĞ1 / 2ÃëÑÓ³ÙµÄ½ÓÊÕ»ú
+ * å°†éšæœºå†…å®¹å‘é€ç»™æ¯ä¸€ä¸ªæœ‰1 / 2ç§’å»¶è¿Ÿçš„æ¥æ”¶æœº
  */
 class FeederActor extends Actor {
 
@@ -52,7 +52,7 @@ class FeederActor extends Actor {
 
   /*
    * A thread to generate random messages
-   * Éú³ÉËæ»úÏûÏ¢µÄÒ»¸öÏß³Ì
+   * ç”Ÿæˆéšæœºæ¶ˆæ¯çš„ä¸€ä¸ªçº¿ç¨‹
    */
   new Thread() {
     override def run() {
@@ -78,7 +78,7 @@ class FeederActor extends Actor {
 
 /**
  * A sample actor as receiver, is also simplest. This receiver actor
- * Ò»¸ö¼òµ¥µÄ½ÓÊÕÆ÷,Ò²ÊÇ×î¼òµ¥µÄ,Õâ¸ö½ÓÊÕÆ÷actorÈ¥ºÍ¶©ÔÄÒ»¸öµäĞÍµÄ·¢²¼/·´À£ÑİÔ±ºÍ½ÓÊÕÊı¾İ
+ * ä¸€ä¸ªç®€å•çš„æ¥æ”¶å™¨,ä¹Ÿæ˜¯æœ€ç®€å•çš„,è¿™ä¸ªæ¥æ”¶å™¨actorå»å’Œè®¢é˜…ä¸€ä¸ªå…¸å‹çš„å‘å¸ƒ/åæºƒæ¼”å‘˜å’Œæ¥æ”¶æ•°æ®
  * goes and subscribe to a typical publisher/feeder actor and receives
  * data.
  *
@@ -101,7 +101,7 @@ extends Actor with ActorHelper {
 
 /**
  * A sample feeder actor
- *Ò»¸ö¼òµ¥µÄfeeder actor
+ *ä¸€ä¸ªç®€å•çš„feeder actor
  * Usage: FeederActor <hostname> <port>
  *   <hostname> and <port> describe the AkkaSystem that Spark Sample feeder would start on.
  */
@@ -129,7 +129,7 @@ object FeederActor {
 /**
  * A sample word count program demonstrating the use of plugging in
  * Actor as Receiver
- * Ò»¸öÊ¾Àı×Ö¼ÆÊı³ÌĞò,ÑİÊ¾ÁË²åÈëµÄÊ¹ÓÃActor×÷Îª½ÓÊÕ»ú
+ * ä¸€ä¸ªç¤ºä¾‹å­—è®¡æ•°ç¨‹åº,æ¼”ç¤ºäº†æ’å…¥çš„ä½¿ç”¨Actorä½œä¸ºæ¥æ”¶æœº
  * Usage: ActorWordCount <hostname> <port>
  *   <hostname> and <port> describe the AkkaSystem that Spark Sample feeder is running on.
  *
@@ -151,12 +151,12 @@ object ActorWordCount {
     val Seq(host, port) = args.toSeq
     val sparkConf = new SparkConf().setAppName("ActorWordCount")
     // Create the context and set the batch size
-    //´´½¨ÉÏÏÂÎÄ²¢ÉèÖÃÅúÁ¿´óĞ¡,Seconds(2)Åú´Î¼ä¸ô
+    //åˆ›å»ºä¸Šä¸‹æ–‡å¹¶è®¾ç½®æ‰¹é‡å¤§å°,Seconds(2)æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     /*
      * Following is the use of actorStream to plug in custom actor as receiver
-     * ÒÔÏÂÊÇactorstream²åÈë×Ô¶¨ÒåµÄÑİÔ±×÷Îª½ÓÊÕ»úµÄÊ¹ÓÃ
+     * ä»¥ä¸‹æ˜¯actorstreamæ’å…¥è‡ªå®šä¹‰çš„æ¼”å‘˜ä½œä¸ºæ¥æ”¶æœºçš„ä½¿ç”¨
      * An important point to note:
      * Since Actor may exist outside the spark framework, It is thus user's responsibility
      * to ensure the type safety, i.e type of data received and InputDstream
@@ -170,7 +170,7 @@ object ActorWordCount {
       Props(new SampleActorReceiver[String]("akka.tcp://test@%s:%s/user/FeederActor".format(
         host, port.toInt))), "SampleReceiver")
 
-    // compute wordcount ¼ÆËãÖ´ĞĞ
+    // compute wordcount è®¡ç®—æ‰§è¡Œ
     lines.flatMap(_.split("\\s+")).map(x => (x, 1)).reduceByKey(_ + _).print()
 
     ssc.start()

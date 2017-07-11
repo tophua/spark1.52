@@ -27,7 +27,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.sql.functions.max
 /**
- * Âß¼­»Ø¹éÕªÒªµÄÀı×Ó
+ * é€»è¾‘å›å½’æ‘˜è¦çš„ä¾‹å­
  */
 object LogisticRegressionSummaryExample {
 
@@ -40,33 +40,33 @@ object LogisticRegressionSummaryExample {
 
     // Load training data
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     //val training = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
       import org.apache.spark.mllib.util.MLUtils
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
       val training = sqlContext.createDataFrame(dataSVM)
     val lr = new LogisticRegression()
-      .setMaxIter(10)//µü´ú´ÎÊı
-      .setRegParam(0.3)//ÕıÔò»¯²ÎÊı(>=0)
-      .setElasticNetParam(0.8)//µ¯ĞÔÍøÂç»ìºÏ²ÎÊı,0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
+      .setMaxIter(10)//è¿­ä»£æ¬¡æ•°
+      .setRegParam(0.3)//æ­£åˆ™åŒ–å‚æ•°(>=0)
+      .setElasticNetParam(0.8)//å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
 
     // Fit the model
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val lrModel = lr.fit(training)
 
     // $example on$
     // Extract the summary from the returned LogisticRegressionModel instance trained in the earlier
     // example
-    //·µ»ØÊµÀıÂß¼­»Ø¹éÄ£ĞÍµÄÑµÁ·ÖĞÌáÈ¡ÕªÒª
+    //è¿”å›å®ä¾‹é€»è¾‘å›å½’æ¨¡å‹çš„è®­ç»ƒä¸­æå–æ‘˜è¦
     val trainingSummary = lrModel.summary
 
     // Obtain the objective per iteration.
-    //»ñµÃÃ¿´Îµü´úµÄÄ¿±ê
+    //è·å¾—æ¯æ¬¡è¿­ä»£çš„ç›®æ ‡
     val objectiveHistory = trainingSummary.objectiveHistory
     /**
      *0.6833149135741656
@@ -84,14 +84,14 @@ object LogisticRegressionSummaryExample {
     objectiveHistory.foreach(loss => println(loss))
 
     // Obtain the metrics useful to judge performance on test data.
-    // »ñµÃÓĞÓÃµÄÖ¸±êÀ´ÅĞ¶Ï²âÊÔÊı¾İµÄĞÔÄÜ
+    // è·å¾—æœ‰ç”¨çš„æŒ‡æ ‡æ¥åˆ¤æ–­æµ‹è¯•æ•°æ®çš„æ€§èƒ½
     // We cast the summary to a BinaryLogisticRegressionSummary since the problem is a
     // binary classification problem.
     val binarySummary = trainingSummary.asInstanceOf[BinaryLogisticRegressionSummary]
 
     // Obtain the receiver-operating characteristic as a dataframe and areaUnderROC.
-    //»ñµÃÒ»¸öÊı¾İ¼¯areaUnderROC
-    //ROCÇúÏßÏÂÃæ»ı,ÊÇÒ»ÖÖÓÃÀ´¶ÈÁ¿·ÖÀàÄ£ĞÍºÃ»µµÄÒ»¸ö±ê×¼
+    //è·å¾—ä¸€ä¸ªæ•°æ®é›†areaUnderROC
+    //ROCæ›²çº¿ä¸‹é¢ç§¯,æ˜¯ä¸€ç§ç”¨æ¥åº¦é‡åˆ†ç±»æ¨¡å‹å¥½åçš„ä¸€ä¸ªæ ‡å‡†
     val roc = binarySummary.roc
     /**
    	+---+--------------------+
@@ -105,11 +105,11 @@ object LogisticRegressionSummaryExample {
     +---+--------------------+*/
     roc.show(5)
     //1
-    //ROCÇúÏßÏÂÃæ»ı,ÊÇÒ»ÖÖÓÃÀ´¶ÈÁ¿·ÖÀàÄ£ĞÍºÃ»µµÄÒ»¸ö±ê×¼
+    //ROCæ›²çº¿ä¸‹é¢ç§¯,æ˜¯ä¸€ç§ç”¨æ¥åº¦é‡åˆ†ç±»æ¨¡å‹å¥½åçš„ä¸€ä¸ªæ ‡å‡†
     println(binarySummary.areaUnderROC)
 
     // Set the model threshold to maximize F-Measure
-    //Ä£ĞÍµÄÉè¶¨ãĞÖµ×î´óÖµ
+    //æ¨¡å‹çš„è®¾å®šé˜ˆå€¼æœ€å¤§å€¼
     val fMeasure = binarySummary.fMeasureByThreshold
     /**
      *+------------------+--------------------+
@@ -125,7 +125,7 @@ object LogisticRegressionSummaryExample {
     val maxFMeasure = fMeasure.select(max("F-Measure")).head().getDouble(0)
     val bestThreshold = fMeasure.where($"F-Measure" === maxFMeasure)
       .select("threshold").head().getDouble(0)
-     //ÔÚ¶ş½øÖÆ·ÖÀàÖĞÉèÖÃãĞÖµ,·¶Î§Îª[0,1],Èç¹ûÀà±êÇ©1µÄ¹À¼Æ¸ÅÂÊ>Threshold,ÔòÔ¤²â1,·ñÔò0
+     //åœ¨äºŒè¿›åˆ¶åˆ†ç±»ä¸­è®¾ç½®é˜ˆå€¼,èŒƒå›´ä¸º[0,1],å¦‚æœç±»æ ‡ç­¾1çš„ä¼°è®¡æ¦‚ç‡>Threshold,åˆ™é¢„æµ‹1,å¦åˆ™0
     lrModel.setThreshold(bestThreshold)
     // $example off$
 

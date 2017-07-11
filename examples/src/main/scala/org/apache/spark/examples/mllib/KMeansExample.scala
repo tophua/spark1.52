@@ -6,10 +6,10 @@ import org.apache.spark.mllib.clustering.KMeans
 import org.apache.spark.mllib.clustering.KMeansModel
 import org.apache.spark.mllib.linalg.Vectors
 /**
- * ¾ÛÀàËã·¨:ÊÇ°ÑÊı¾İ»®·Ö³É¶à¸ö×é,ÆäÖĞÒ»¸ö×éµÄÊı¾İÓëÆäËû×éµÄÊı¾İÏàËÆ
- * ¼à¶½Ñ§Ï°ÓÃ±ê¼ÇºÃµÄÊı¾İÈ¥ÑµÁ·Ëã·¨,ÎŞ¼à¶½Ñ§Ï°ÈÃËã·¨×Ô¼ºÈ¥ÕÒÄÚ²¿½á¹¹
- * Ê¹ÓÃ¼ÓÖİÊĞµÄ·¿ÎİÊı¾İÕ¼µØÃæ»ıºÍ·¿Îİ¼Û¸ñ
- * Õ¼µØÃæ»ı|·¿Îİ¼Û¸ñ
+ * èšç±»ç®—æ³•:æ˜¯æŠŠæ•°æ®åˆ’åˆ†æˆå¤šä¸ªç»„,å…¶ä¸­ä¸€ä¸ªç»„çš„æ•°æ®ä¸å…¶ä»–ç»„çš„æ•°æ®ç›¸ä¼¼
+ * ç›‘ç£å­¦ä¹ ç”¨æ ‡è®°å¥½çš„æ•°æ®å»è®­ç»ƒç®—æ³•,æ— ç›‘ç£å­¦ä¹ è®©ç®—æ³•è‡ªå·±å»æ‰¾å†…éƒ¨ç»“æ„
+ * ä½¿ç”¨åŠ å·å¸‚çš„æˆ¿å±‹æ•°æ®å åœ°é¢ç§¯å’Œæˆ¿å±‹ä»·æ ¼
+ * å åœ°é¢ç§¯|æˆ¿å±‹ä»·æ ¼
  * 12839	 |2405
  * 10000	 |2200
  * 8040		 |1400
@@ -25,23 +25,23 @@ object KMeansExample {
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("KMeansClustering")
     val sc = new SparkContext(sparkConf)
-    //¼ÓÔØsaratogaµ½RDD
+    //åŠ è½½saratogaåˆ°RDD
     val data = sc.textFile("../data/mllib/saratoga.csv")
-    //°ÑÊı¾İ×ª»»³ÉÃÜ¼¯ÏòÁ¿µÄRDD
+    //æŠŠæ•°æ®è½¬æ¢æˆå¯†é›†å‘é‡çš„RDD
    val parsedData = data.map( line => Vectors.dense(line.split(',').map(_.toDouble)))
-   //ÒÔ4¸ö´ØºÍ5´Îµü´úÑµÁ·Ä£ĞÍ
+   //ä»¥4ä¸ªç°‡å’Œ5æ¬¡è¿­ä»£è®­ç»ƒæ¨¡å‹
    val kmmodel= KMeans.train(parsedData,4,5)
-   //°ÑparsedDataÊı¾İÊÕ¼¯±¾µØÊı¾İ¼¯
+   //æŠŠparsedDataæ•°æ®æ”¶é›†æœ¬åœ°æ•°æ®é›†
    val houses = parsedData.collect
-   //Ô¤²âµÚ1¸öÔªËØµÄ´Ø,KMeansËã·¨»á´Ó0¸ø³ö´ØµÄID,
+   //é¢„æµ‹ç¬¬1ä¸ªå…ƒç´ çš„ç°‡,KMeansç®—æ³•ä¼šä»0ç»™å‡ºç°‡çš„ID,
    val prediction1 = kmmodel.predict(houses(0))
-   //Ô¤²âhouses(18)µÄÊı¾İ,Õ¼µØÃæ»ı876,¼Û¸ñ66.5ÊôÓÚÄÇ¸ö´Ø
+   //é¢„æµ‹houses(18)çš„æ•°æ®,å åœ°é¢ç§¯876,ä»·æ ¼66.5å±äºé‚£ä¸ªç°‡
    val prediction2 = kmmodel.predict(houses(18))
-   //Ô¤²âhouses(35)µÄÊı¾İ,Õ¼µØÃæ»ı15750,¼Û¸ñ112ÊôÓÚÄÇ¸ö´Ø
+   //é¢„æµ‹houses(35)çš„æ•°æ®,å åœ°é¢ç§¯15750,ä»·æ ¼112å±äºé‚£ä¸ªç°‡
    val prediction3 = kmmodel.predict(houses(35))
-   //Ô¤²âhouses(6)µÄÊı¾İ,Õ¼µØÃæ»ı38768,¼Û¸ñ272ÊôÓÚÄÇ¸ö´Ø
+   //é¢„æµ‹houses(6)çš„æ•°æ®,å åœ°é¢ç§¯38768,ä»·æ ¼272å±äºé‚£ä¸ªç°‡
    val prediction4 = kmmodel.predict(houses(6))
-   //Ô¤²âhouses(15)µÄÊı¾İ,Õ¼µØÃæ»ı69696,¼Û¸ñ275ÊôÓÚÄÇ¸ö´Ø
+   //é¢„æµ‹houses(15)çš„æ•°æ®,å åœ°é¢ç§¯69696,ä»·æ ¼275å±äºé‚£ä¸ªç°‡
    val prediction5 = kmmodel.predict(houses(15))
     
   }

@@ -35,10 +35,10 @@ import org.apache.spark.sql.SQLContext
 /**
  * An example runner for Multiclass to Binary Reduction with One Vs Rest.
  * The example uses Logistic Regression as the base classifier. All parameters that
- * Õâ¸öÀý×ÓÊ¹ÓÃÂß¼­»Ø¹éÎª»ù´¡µÄ·ÖÀà,
- * OneVsRest½«Ò»¸ö¸ø¶¨µÄ¶þ·ÖÀàËã·¨ÓÐÐ§µØÀ©Õ¹µ½¶à·ÖÀàÎÊÌâÓ¦ÓÃÖÐ
+ * è¿™ä¸ªä¾‹å­ä½¿ç”¨é€»è¾‘å›žå½’ä¸ºåŸºç¡€çš„åˆ†ç±»,
+ * OneVsRestå°†ä¸€ä¸ªç»™å®šçš„äºŒåˆ†ç±»ç®—æ³•æœ‰æ•ˆåœ°æ‰©å±•åˆ°å¤šåˆ†ç±»é—®é¢˜åº”ç”¨ä¸­
  * can be specified on the base classifier can be passed in to the runner options.
- * ËùÓÐµÄ²ÎÊý¶¼¿ÉÒÔÔÚÖ¸¶¨µÄ»ù·ÖÀàÆ÷,¿ÉÒÔÍ¨¹ýÔËÐÐÑ¡Ïî
+ * æ‰€æœ‰çš„å‚æ•°éƒ½å¯ä»¥åœ¨æŒ‡å®šçš„åŸºåˆ†ç±»å™¨,å¯ä»¥é€šè¿‡è¿è¡Œé€‰é¡¹
  * Run with
  * {{{
  * ./bin/run-example ml.OneVsRestExample [options]
@@ -55,11 +55,11 @@ object OneVsRestExample {
   case class Params private[ml] (
       input: String = "../data/mllib/sample_libsvm_data.txt",
       testInput: Option[String] = None,
-      maxIter: Int = 100,//µü´ú´ÎÊý
-      tol: Double = 1E-6,//µü´úËã·¨µÄÊÕÁ²ÐÔ
-      fitIntercept: Boolean = true,//ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
-      regParam: Option[Double] = None,//ÕýÔò»¯²ÎÊý(>=0)
-      elasticNetParam: Option[Double] = None,//µ¯ÐÔÍøÂç»ìºÏ²ÎÊý,0.0ÎªL2ÕýÔò»¯ 1.0ÎªL1ÕýÔò»¯
+      maxIter: Int = 100,//è¿­ä»£æ¬¡æ•°
+      tol: Double = 1E-6,//è¿­ä»£ç®—æ³•çš„æ”¶æ•›æ€§
+      fitIntercept: Boolean = true,//æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
+      regParam: Option[Double] = None,//æ­£åˆ™åŒ–å‚æ•°(>=0)
+      elasticNetParam: Option[Double] = None,//å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -82,18 +82,18 @@ object OneVsRestExample {
         .text(s"maximum number of iterations for Logistic Regression." +
           s" default: ${defaultParams.maxIter}")
         .action((x, c) => c.copy(maxIter = x))
-      opt[Double]("tol")//µü´úËã·¨µÄÊÕÁ²ÐÔ
+      opt[Double]("tol")//è¿­ä»£ç®—æ³•çš„æ”¶æ•›æ€§
         .text(s"the convergence tolerance of iterations for Logistic Regression." +
           s" default: ${defaultParams.tol}")
         .action((x, c) => c.copy(tol = x))
-      opt[Boolean]("fitIntercept")//ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
+      opt[Boolean]("fitIntercept")//æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
         .text(s"fit intercept for Logistic Regression." +
-        s" default: ${defaultParams.fitIntercept}")//ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
+        s" default: ${defaultParams.fitIntercept}")//æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
         .action((x, c) => c.copy(fitIntercept = x))
       opt[Double]("regParam")
         .text(s"the regularization parameter for Logistic Regression.")
         .action((x, c) => c.copy(regParam = Some(x)))
-      opt[Double]("elasticNetParam")//µ¯ÐÔÍøÂç»ìºÏ²ÎÊý,0.0ÎªL2ÕýÔò»¯ 1.0ÎªL1ÕýÔò»¯
+      opt[Double]("elasticNetParam")//å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
         .text(s"the ElasticNet mixing parameter for Logistic Regression.")
         .action((x, c) => c.copy(elasticNetParam = Some(x)))
       checkConfig { params =>
@@ -115,29 +115,29 @@ object OneVsRestExample {
     val conf = new SparkConf().setAppName(s"OneVsRestExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     /**
- *  libSVMµÄÊý¾Ý¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖÐ<label>ÊÇÑµÁ·Êý¾Ý¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊý(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊý
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊý,¿ÉÒÔÊÇ²»Á¬Ðø
- *  <value>ÎªÊµÊý,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºŽåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºŽå›žå½’,æ˜¯ä»»æ„å®žæ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿žç»­
+ *  <value>ä¸ºå®žæ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     val inputData = MLUtils.loadLibSVMFile(sc, params.input)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
     // compute the train/test split: if testInput is not provided use part of input.
-    //¼ÆËãÑµÁ·/²âÊÔ·ÖÀë,Èç¹ûtestinput²»Ìá¹©Ê¹ÓÃ²¿·ÖÊäÈë
+    //è®¡ç®—è®­ç»ƒ/æµ‹è¯•åˆ†ç¦»,å¦‚æžœtestinputä¸æä¾›ä½¿ç”¨éƒ¨åˆ†è¾“å…¥
     val data = params.testInput match {
       case Some(t) => {
         // compute the number of features in the training set.
-        //ÔÚÑµÁ·¼¯ÖÐ¼ÆËã¹¦ÄÜµÄÊýÁ¿
+        //åœ¨è®­ç»ƒé›†ä¸­è®¡ç®—åŠŸèƒ½çš„æ•°é‡
         val numFeatures = inputData.first().features.size
 	/**
- *  libSVMµÄÊý¾Ý¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖÐ<label>ÊÇÑµÁ·Êý¾Ý¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊý(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊý
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊý,¿ÉÒÔÊÇ²»Á¬Ðø
- *  <value>ÎªÊµÊý,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºŽåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºŽå›žå½’,æ˜¯ä»»æ„å®žæ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿žç»­
+ *  <value>ä¸ºå®žæ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
         val testData = MLUtils.loadLibSVMFile(sc, t, numFeatures)
         Array[RDD[LabeledPoint]](inputData, testData)
@@ -150,31 +150,31 @@ object OneVsRestExample {
     val Array(train, test) = data.map(_.toDF().cache())
 
     // instantiate the base classifier
-    //ÊµÀý»¯µÄ»ù·ÖÀàÆ÷
+    //å®žä¾‹åŒ–çš„åŸºåˆ†ç±»å™¨
     val classifier = new LogisticRegression()
-      .setMaxIter(params.maxIter)//µü´ú´ÎÊý
-      .setTol(params.tol)//µü´úËã·¨µÄÊÕÁ²
-      .setFitIntercept(params.fitIntercept)//ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
+      .setMaxIter(params.maxIter)//è¿­ä»£æ¬¡æ•°
+      .setTol(params.tol)//è¿­ä»£ç®—æ³•çš„æ”¶æ•›
+      .setFitIntercept(params.fitIntercept)//æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
 
     // Set regParam, elasticNetParam if specified in params
-    //ÉèÖÃ²ÎÊý,µ¯ÐÔÍø²ÎÊýÈç¹ûÖ¸¶¨²ÎÊý
+    //è®¾ç½®å‚æ•°,å¼¹æ€§ç½‘å‚æ•°å¦‚æžœæŒ‡å®šå‚æ•°
     params.regParam.foreach(classifier.setRegParam)
-    //µ¯ÐÔÍøÂç»ìºÏ²ÎÊý,0.0ÎªL2ÕýÔò»¯ 1.0ÎªL1ÕýÔò»¯
+    //å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
     params.elasticNetParam.foreach(classifier.setElasticNetParam)
 
     // instantiate the One Vs Rest Classifier.
-    //ÊµÀý»¯µÄÒ»¶Ô¶à·ÖÀàÆ÷
+    //å®žä¾‹åŒ–çš„ä¸€å¯¹å¤šåˆ†ç±»å™¨
     val ovr = new OneVsRest()
-    //ÉèÖÃ·ÖÀàÆ÷
+    //è®¾ç½®åˆ†ç±»å™¨
     ovr.setClassifier(classifier)
 
     // train the multiclass model.
-    //ÑµÁ·¶àÀàÄ£ÐÍ
+    //è®­ç»ƒå¤šç±»æ¨¡åž‹
     val (trainingDuration, ovrModel) = time(ovr.fit(train))
 
     // score the model on test data.
-    //ÆÀ·Ö²âÊÔÊý¾ÝÄ£ÐÍ
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //è¯„åˆ†æµ‹è¯•æ•°æ®æ¨¡åž‹
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val (predictionDuration, predictions) = time(ovrModel.transform(test))
     /**
      *+-----+--------------------+----------+
@@ -188,18 +188,18 @@ object OneVsRestExample {
       +-----+--------------------+----------+
      */
     predictions.show()
-    // evaluate the model ÆÀ¹ÀÄ£ÐÍ
+    // evaluate the model è¯„ä¼°æ¨¡åž‹
     val predictionsAndLabels = predictions.select("prediction", "label")
-    //»ñÈ¡Ã¿Ò»ÐÐÊý¾Ý
+    //èŽ·å–æ¯ä¸€è¡Œæ•°æ®
       .map(row => (row.getDouble(0), row.getDouble(1)))
-    //ÆÀ¹ÀÖ¸±ê-¶à·ÖÀà
+    //è¯„ä¼°æŒ‡æ ‡-å¤šåˆ†ç±»
     val metrics = new MulticlassMetrics(predictionsAndLabels)
     
-    val confusionMatrix = metrics.confusionMatrix //Æ¥Åä¾ØÕó
+    val confusionMatrix = metrics.confusionMatrix //åŒ¹é…çŸ©é˜µ
 
-    // compute the false positive rate per label ¼ÆËãÃ¿¸ö±êÇ©µÄ¼ÙÑôÐÔÂÊ
+    // compute the false positive rate per label è®¡ç®—æ¯ä¸ªæ ‡ç­¾çš„å‡é˜³æ€§çŽ‡
     val predictionColSchema = predictions.schema("prediction")
-    //»ñµÃÔªÊý¾Ý·ÖÀàÊý
+    //èŽ·å¾—å…ƒæ•°æ®åˆ†ç±»æ•°
     val numClasses = MetadataUtils.getNumClasses(predictionColSchema).get
     val fprs = Range(0, numClasses).map(p => (p, metrics.falsePositiveRate(p.toDouble)))
    //Training Time 9 sec
@@ -223,11 +223,11 @@ object OneVsRestExample {
     sc.stop()
   }
   /**
-   * ¿ÂÀï»¯º¯Êý,·µ»ØÀàÐÍ(Long,R)
-   * block:Ã»ÓÐÉùÃ÷ÀàÐÍ,Ä¬ÈÏ·½·¨
+   * æŸ¯é‡ŒåŒ–å‡½æ•°,è¿”å›žç±»åž‹(Long,R)
+   * block:æ²¡æœ‰å£°æ˜Žç±»åž‹,é»˜è®¤æ–¹æ³•
    */  
   private def time[R](block: => R): (Long, R) = {
-    //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+    //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
     val t0 = System.nanoTime()
     val result = block    // call-by-name
     val t1 = System.nanoTime()

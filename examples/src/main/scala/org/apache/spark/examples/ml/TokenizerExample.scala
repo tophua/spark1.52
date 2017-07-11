@@ -26,7 +26,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * Tokenizer(·Ö´ÊÆ÷)½«ÎÄ±¾»®·ÖÎª¶ÀÁ¢¸öÌå(Í¨³£Îªµ¥´Ê)
+ * Tokenizer(åˆ†è¯å™¨)å°†æ–‡æœ¬åˆ’åˆ†ä¸ºç‹¬ç«‹ä¸ªä½“(é€šå¸¸ä¸ºå•è¯)
  */
 object TokenizerExample {
   def main(args: Array[String]): Unit = {
@@ -49,13 +49,13 @@ object TokenizerExample {
       .setInputCol("sentence")
       .setOutputCol("words")
       /**
-       * »ùÓÚÕıÔò±í´ïÊ½Ìá¹©¸ü¶àµÄ»®·ÖÑ¡Ïî,
-       * Ä¬ÈÏÇé¿öÏÂ,²ÎÊı¡°pattern¡±Îª»®·ÖÎÄ±¾µÄ·Ö¸ô·û,
-       * ÓÃ»§¿ÉÒÔÖ¸¶¨²ÎÊı¡°gaps¡±À´Ö¸Ã÷ÕıÔò¡°patten¡±±íÊ¾¡°tokens¡±¶ø²»ÊÇ·Ö¸ô·û,
-       * ÕâÑùÀ´Îª·Ö´Ê½á¹ûÕÒµ½ËùÓĞ¿ÉÄÜÆ¥ÅäµÄÇé¿ö
+       * åŸºäºæ­£åˆ™è¡¨è¾¾å¼æä¾›æ›´å¤šçš„åˆ’åˆ†é€‰é¡¹,
+       * é»˜è®¤æƒ…å†µä¸‹,å‚æ•°â€œpatternâ€ä¸ºåˆ’åˆ†æ–‡æœ¬çš„åˆ†éš”ç¬¦,
+       * ç”¨æˆ·å¯ä»¥æŒ‡å®šå‚æ•°â€œgapsâ€æ¥æŒ‡æ˜æ­£åˆ™â€œpattenâ€è¡¨ç¤ºâ€œtokensâ€è€Œä¸æ˜¯åˆ†éš”ç¬¦,
+       * è¿™æ ·æ¥ä¸ºåˆ†è¯ç»“æœæ‰¾åˆ°æ‰€æœ‰å¯èƒ½åŒ¹é…çš„æƒ…å†µ
        */
       .setPattern("\\W") // alternatively .setPattern("\\w+").setGaps(false)
-	//transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+	//transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val tokenized = tokenizer.transform(sentenceDataFrame)
     /**
       +-----+--------------------+--------------------+
@@ -67,7 +67,7 @@ object TokenizerExample {
       +-----+--------------------+--------------------+*/
     tokenized.show()
     tokenized.select("words", "label").take(3).foreach(println)
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val regexTokenized = regexTokenizer.transform(sentenceDataFrame)
     /**
     +-----+--------------------+--------------------+

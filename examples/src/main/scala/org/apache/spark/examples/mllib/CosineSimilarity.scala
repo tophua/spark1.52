@@ -26,10 +26,10 @@ import org.apache.spark.mllib.linalg.distributed.{MatrixEntry, RowMatrix}
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
- * Compute the similar columns of a matrix, using cosine similarity(ÓàÏÒÏàËÆ¶È).
- * ¼ÆËãÒ»¸ö¾ØÕóµÄÏàËÆÁĞ,Ê¹ÓÃÓàÏÒÏàËÆĞÔ
+ * Compute the similar columns of a matrix, using cosine similarity(ä½™å¼¦ç›¸ä¼¼åº¦).
+ * è®¡ç®—ä¸€ä¸ªçŸ©é˜µçš„ç›¸ä¼¼åˆ—,ä½¿ç”¨ä½™å¼¦ç›¸ä¼¼æ€§
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries
- * ÊäÈë¾ØÕó±ØĞëÒÔĞĞÎªµ¼ÏòµÄÃÜ¼¯¸ñÊ½´æ´¢,Ã¿ĞĞÒ»ĞĞ,ÆäÌõÄ¿ÓÉ¿Õ¸ñ¸ô¿ª
+ * è¾“å…¥çŸ©é˜µå¿…é¡»ä»¥è¡Œä¸ºå¯¼å‘çš„å¯†é›†æ ¼å¼å­˜å‚¨,æ¯è¡Œä¸€è¡Œ,å…¶æ¡ç›®ç”±ç©ºæ ¼éš”å¼€
  * separated by space. For example,
  * {{{
  * 0.5 1.0
@@ -37,7 +37,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  * 4.0 5.0
  * }}}
  * represents a 3-by-2 matrix, whose first row is (0.5, 1.0).
- * ´ú±í3ĞĞ2ÁĞ¾ØÕóµÄµÚÒ»ĞĞÊÇ(0.5,1)
+ * ä»£è¡¨3è¡Œ2åˆ—çŸ©é˜µçš„ç¬¬ä¸€è¡Œæ˜¯(0.5,1)
  * Example invocation:
  * bin/run-example mllib.CosineSimilarity \
  * --threshold 0.1 data/mllib/sample_svm_data.txt
@@ -45,7 +45,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 object CosineSimilarity {
  /* case class Params(inputFile: String = null, threshold: Double = 0.1)
     extends AbstractParams[Params]*/
-  //ÔÚ¶ş½øÖÆ·ÖÀàÖĞÉèÖÃãĞÖµ,·¶Î§Îª[0,1],Èç¹ûÀà±êÇ©1µÄ¹À¼Æ¸ÅÂÊ>Threshold,ÔòÔ¤²â1,·ñÔò0
+  //åœ¨äºŒè¿›åˆ¶åˆ†ç±»ä¸­è®¾ç½®é˜ˆå€¼,èŒƒå›´ä¸º[0,1],å¦‚æœç±»æ ‡ç­¾1çš„ä¼°è®¡æ¦‚ç‡>Threshold,åˆ™é¢„æµ‹1,å¦åˆ™0
     case class Params(inputFile: String = "../data/mllib/CosineSimilarity.txt", threshold: Double = 0.1)
     extends AbstractParams[Params]
 
@@ -54,7 +54,7 @@ object CosineSimilarity {
 
     val parser = new OptionParser[Params]("CosineSimilarity") {
       head("CosineSimilarity: an example app.")
-      //ÔÚ¶ş½øÖÆ·ÖÀàÖĞÉèÖÃãĞÖµ,·¶Î§Îª[0,1],Èç¹ûÀà±êÇ©1µÄ¹À¼Æ¸ÅÂÊ>Threshold,ÔòÔ¤²â1,·ñÔò0
+      //åœ¨äºŒè¿›åˆ¶åˆ†ç±»ä¸­è®¾ç½®é˜ˆå€¼,èŒƒå›´ä¸º[0,1],å¦‚æœç±»æ ‡ç­¾1çš„ä¼°è®¡æ¦‚ç‡>Threshold,åˆ™é¢„æµ‹1,å¦åˆ™0
       opt[Double]("threshold")
         //.required()
         .text(s"threshold similarity: to tradeoff computation vs quality estimate")
@@ -86,30 +86,30 @@ object CosineSimilarity {
     val sc = new SparkContext(conf)
 
     // Load and parse the data file.
-    //¼ÓÔØºÍ½âÎöÊı¾İÎÄ¼ş
+    //åŠ è½½å’Œè§£ææ•°æ®æ–‡ä»¶
     val rows = sc.textFile(params.inputFile).map { line =>
       val values = line.split(' ').map(x=>{
        //println(x.toDouble)  
         x.toDouble
         })
-       //´´½¨Ò»¸ö³íÃÜÏòÁ¿
+       //åˆ›å»ºä¸€ä¸ªç¨ å¯†å‘é‡
       Vectors.dense(values)
     }.cache()
-    //·Ö²¼Ê½¾ØÕó,RowMatrixÖ±½ÓÍ¨¹ı RDD[Vector]À´¶¨Òå²¢¿ÉÒÔÓÃÀ´Í³¼ÆÆ½¾ùÊı¡¢·½²î¡¢Ğ­Í¬·½²îµÈ
+    //åˆ†å¸ƒå¼çŸ©é˜µ,RowMatrixç›´æ¥é€šè¿‡ RDD[Vector]æ¥å®šä¹‰å¹¶å¯ä»¥ç”¨æ¥ç»Ÿè®¡å¹³å‡æ•°ã€æ–¹å·®ã€ååŒæ–¹å·®ç­‰
     val mat = new RowMatrix(rows)
     //3===2
    println(mat.numRows()+"==="+mat.numCols())
     // Compute similar columns perfectly, with brute force.
-    //¼ÆËã¾ØÕóÖĞÃ¿Á½ÁĞÖ®¼äµÄÓàÏÒÏàËÆ¶È
-    //²ÎÊı:Ê¹ÓÃ½üËÆËã·¨µÄãĞÖµ,ÖµÔ½´óÔòÔËËãËÙ¶ÈÔ½¿ì¶øÎó²îÔ½´ó,Ä¬ÈÏÖµÎª0
-    //CoordinateMatrix³£ÓÃÓÚÏ¡ÊèĞÔ±È½Ï¸ßµÄ¼ÆËãÖĞ,ÊÇÓÉ RDD[MatrixEntry]À´¹¹½¨µÄ,MatrixEntryÊÇÒ»¸ö TupleÀàĞÍµÄÔªËØ,ÆäÖĞ°üº¬ĞĞ¡¢ÁĞºÍÔªËØÖµ
+    //è®¡ç®—çŸ©é˜µä¸­æ¯ä¸¤åˆ—ä¹‹é—´çš„ä½™å¼¦ç›¸ä¼¼åº¦
+    //å‚æ•°:ä½¿ç”¨è¿‘ä¼¼ç®—æ³•çš„é˜ˆå€¼,å€¼è¶Šå¤§åˆ™è¿ç®—é€Ÿåº¦è¶Šå¿«è€Œè¯¯å·®è¶Šå¤§,é»˜è®¤å€¼ä¸º0
+    //CoordinateMatrixå¸¸ç”¨äºç¨€ç–æ€§æ¯”è¾ƒé«˜çš„è®¡ç®—ä¸­,æ˜¯ç”± RDD[MatrixEntry]æ¥æ„å»ºçš„,MatrixEntryæ˜¯ä¸€ä¸ª Tupleç±»å‹çš„å…ƒç´ ,å…¶ä¸­åŒ…å«è¡Œã€åˆ—å’Œå…ƒç´ å€¼
     val exact = mat.columnSimilarities()
 
     // Compute similar columns with estimation using DIMSUM
-    //¼ÆËã¾ØÕóÖĞÃ¿Á½ÁĞÖ®¼äµÄÓàÏÒÏàËÆ¶È
-    //²ÎÊı:Ê¹ÓÃ½üËÆËã·¨µÄãĞÖµ,ÖµÔ½´óÔòÔËËãËÙ¶ÈÔ½¿ì¶øÎó²îÔ½´ó,Ä¬ÈÏÎª0
+    //è®¡ç®—çŸ©é˜µä¸­æ¯ä¸¤åˆ—ä¹‹é—´çš„ä½™å¼¦ç›¸ä¼¼åº¦
+    //å‚æ•°:ä½¿ç”¨è¿‘ä¼¼ç®—æ³•çš„é˜ˆå€¼,å€¼è¶Šå¤§åˆ™è¿ç®—é€Ÿåº¦è¶Šå¿«è€Œè¯¯å·®è¶Šå¤§,é»˜è®¤ä¸º0
     val approx = mat.columnSimilarities(params.threshold)
-    //MatrixEntry²ÎÊıiĞĞµÄË÷Òı,jÁĞµÄË÷Òı,ÊµÌåµÄÖµ
+    //MatrixEntryå‚æ•°iè¡Œçš„ç´¢å¼•,jåˆ—çš„ç´¢å¼•,å®ä½“çš„å€¼
     val exactEntries = exact.entries.map { case MatrixEntry(i, j, u) => 
       //0==1===0.9954039000135861
       println(i+"=="+j+"==="+u)
@@ -121,7 +121,7 @@ object CosineSimilarity {
         //0==1===0.9954039000135861
         ((i, j), v) 
       }
-     //MAEÆ½¾ù¾ø¶ÔÎó²îÊÇËùÓĞµ¥¸ö¹Û²âÖµÓëËãÊõÆ½¾ùÖµµÄÆ«²îµÄ¾ø¶ÔÖµµÄÆ½¾ù
+     //MAEå¹³å‡ç»å¯¹è¯¯å·®æ˜¯æ‰€æœ‰å•ä¸ªè§‚æµ‹å€¼ä¸ç®—æœ¯å¹³å‡å€¼çš„åå·®çš„ç»å¯¹å€¼çš„å¹³å‡
     val MAE = exactEntries.leftOuterJoin(approxEntries).values.map {
       case (u, Some(v)) =>
         println(u+"==="+v+"==="+(u - v))
@@ -131,7 +131,7 @@ object CosineSimilarity {
         println("==="+u)
         math.abs(u)
     }.mean()
-    //MAEÆ½¾ù¾ø¶ÔÎó²îÊÇËùÓĞµ¥¸ö¹Û²âÖµÓëËãÊõÆ½¾ùÖµµÄÆ«²îµÄ¾ø¶ÔÖµµÄÆ½¾ù
+    //MAEå¹³å‡ç»å¯¹è¯¯å·®æ˜¯æ‰€æœ‰å•ä¸ªè§‚æµ‹å€¼ä¸ç®—æœ¯å¹³å‡å€¼çš„åå·®çš„ç»å¯¹å€¼çš„å¹³å‡
     //Average absolute error in estimate is: 0.052006398205651366
     println(s"Average absolute error in estimate is: $MAE")
 

@@ -27,7 +27,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * ElementwiseProductµã³Ë,¾ÍÊÇËµÃ¿¸ö¾ØÕóÔªËØ¶ÔÓ¦Ïà³Ë
+ * ElementwiseProductç‚¹ä¹˜,å°±æ˜¯è¯´æ¯ä¸ªçŸ©é˜µå…ƒç´ å¯¹åº”ç›¸ä¹˜
  */
 object ElementwiseProductExample {
   def main(args: Array[String]): Unit = {
@@ -41,20 +41,20 @@ object ElementwiseProductExample {
 
     // $example on$
     // Create some vector data; also works for sparse vectors
-    //´´½¨Ò»Ğ©ÏòÁ¿Êı¾İ,Ò²ÊÊÓÃÓÚÏ¡ÊèÏòÁ¿
+    //åˆ›å»ºä¸€äº›å‘é‡æ•°æ®,ä¹Ÿé€‚ç”¨äºç¨€ç–å‘é‡
     val dataFrame = sqlContext.createDataFrame(Seq(
       ("a", Vectors.dense(1.0, 2.0, 3.0)),
       ("b", Vectors.dense(4.0, 5.0, 6.0)))).toDF("id", "vector")
 
     val transformingVector = Vectors.dense(0.0, 1.0, 2.0)
-    //ElementwiseProduct µã³Ë,¾ÍÊÇËµÃ¿¸ö¾ØÕóÔªËØ¶ÔÓ¦Ïà³Ë
+    //ElementwiseProduct ç‚¹ä¹˜,å°±æ˜¯è¯´æ¯ä¸ªçŸ©é˜µå…ƒç´ å¯¹åº”ç›¸ä¹˜
     val transformer = new ElementwiseProduct()
       .setScalingVec(transformingVector)
       .setInputCol("vector")
       .setOutputCol("transformedVector")
 
     // Batch transform the vectors to create new column:
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     /**
      * +---+-------------+-----------------+
      * | id|       vector|transformedVector|

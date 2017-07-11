@@ -19,9 +19,9 @@ object Quickstart {
     textFile.map(line => line.split(" ").size).foreach { x => println _ }
     val max = textFile.map(line => line.split(" ").size).reduce((a, b) => if (a > b) a else b)
     val Mathmax = textFile.map(line => line.split(" ").size).reduce((a, b) => Math.max(a, b))
-    //reduceByKey¶ÔKeyÏàÍ¬µÄÔªËØµÄÖµÇóºÍ
+    //reduceByKeyå¯¹Keyç›¸åŒçš„å…ƒç´ çš„å€¼æ±‚å’Œ
     val wordCounts = textFile.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_+_)
-    //collect½«RDD×ª³ÉScalaÊı×é,²¢·µ»Ø
+    //collectå°†RDDè½¬æˆScalaæ•°ç»„,å¹¶è¿”å›
     wordCounts.collect()
     linesWithSpark.cache()
     linesWithSpark.count()

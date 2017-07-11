@@ -30,10 +30,10 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
- * Ìİ¶ÈÌáÉı¾ö²ßÊ÷:×ÛºÏ¶à¸ö¾ö²ßÊ÷,Ïû³ıÔëÉù,±ÜÃâ¹ıÄâºÏ
- * GBTµÄÑµÁ·ÊÇÃ¿´ÎÑµÁ·Ò»¿ÅÊ÷,È»ºóÀûÓÃÕâ¿ÅÊ÷¶ÔÃ¿¸öÊµÀı½øĞĞÔ¤²â,Í¨¹ıÒ»¸öËğÊ§º¯Êı,¼ÆËãËğÊ§º¯ÊıµÄ¸ºÌİ¶ÈÖµ×÷Îª²Ğ²î,
- * ÀûÓÃÕâ¸ö²Ğ²î¸üĞÂÑù±¾ÊµÀıµÄlabel,È»ºóÔÙ´ÎÑµÁ·Ò»¿ÅÊ÷È¥ÄâºÏ²Ğ²î,Èç´Ë½øĞĞµü´ú,Ö±µ½Âú×ãÄ£ĞÍ²ÎÊıĞèÇó¡£
- * GBTÖ»ÊÊÓÃÓÚ¶ş·ÖÀàºÍ»Ø¹é,²»Ö§³Ö¶à·ÖÀà,ÔÚÔ¤²âµÄÊ±ºò,²»ÏñËæ»úÉ­ÁÖÄÇÑùÇóÆ½¾ùÖµ,GBTÊÇ½«ËùÓĞÊ÷µÄÔ¤²âÖµÏà¼ÓÇóºÍ¡£
+ * æ¢¯åº¦æå‡å†³ç­–æ ‘:ç»¼åˆå¤šä¸ªå†³ç­–æ ‘,æ¶ˆé™¤å™ªå£°,é¿å…è¿‡æ‹Ÿåˆ
+ * GBTçš„è®­ç»ƒæ˜¯æ¯æ¬¡è®­ç»ƒä¸€é¢—æ ‘,ç„¶ååˆ©ç”¨è¿™é¢—æ ‘å¯¹æ¯ä¸ªå®ä¾‹è¿›è¡Œé¢„æµ‹,é€šè¿‡ä¸€ä¸ªæŸå¤±å‡½æ•°,è®¡ç®—æŸå¤±å‡½æ•°çš„è´Ÿæ¢¯åº¦å€¼ä½œä¸ºæ®‹å·®,
+ * åˆ©ç”¨è¿™ä¸ªæ®‹å·®æ›´æ–°æ ·æœ¬å®ä¾‹çš„label,ç„¶åå†æ¬¡è®­ç»ƒä¸€é¢—æ ‘å»æ‹Ÿåˆæ®‹å·®,å¦‚æ­¤è¿›è¡Œè¿­ä»£,ç›´åˆ°æ»¡è¶³æ¨¡å‹å‚æ•°éœ€æ±‚ã€‚
+ * GBTåªé€‚ç”¨äºäºŒåˆ†ç±»å’Œå›å½’,ä¸æ”¯æŒå¤šåˆ†ç±»,åœ¨é¢„æµ‹çš„æ—¶å€™,ä¸åƒéšæœºæ£®æ—é‚£æ ·æ±‚å¹³å‡å€¼,GBTæ˜¯å°†æ‰€æœ‰æ ‘çš„é¢„æµ‹å€¼ç›¸åŠ æ±‚å’Œã€‚
  */
 object GradientBoostedTreeClassifierExample {
   def main(args: Array[String]): Unit = {
@@ -46,11 +46,11 @@ object GradientBoostedTreeClassifierExample {
     // $example on$
     // Load and parse the data file, converting it to a DataFrame.
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     import org.apache.spark.mllib.util.MLUtils
     val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
@@ -59,53 +59,53 @@ object GradientBoostedTreeClassifierExample {
   
 
     // Index labels, adding metadata to the label column.
-    // Ë÷Òı±êÇ©,½«ÔªÊı¾İÌí¼Óµ½±êÇ©ÁĞ.
+    // ç´¢å¼•æ ‡ç­¾,å°†å…ƒæ•°æ®æ·»åŠ åˆ°æ ‡ç­¾åˆ—.
     // Fit on whole dataset to include all labels in index.
     val labelIndexer = new StringIndexer()
       .setInputCol("label")
       .setOutputCol("indexedLabel")
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     // Automatically identify categorical features, and index them.
-      //×Ô¶¯Ê¶±ğ·ÖÀàÌØÕ÷,²¢¶ÔËüÃÇ½øĞĞË÷Òı,
+      //è‡ªåŠ¨è¯†åˆ«åˆ†ç±»ç‰¹å¾,å¹¶å¯¹å®ƒä»¬è¿›è¡Œç´¢å¼•,
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
-     //VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+     //VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
-      .setMaxCategories(4)//×î´óÀà±ğÊıÎª5,(¼´Ä³Ò»ÁĞ)ÖĞ¶àÓÚ4¸öÈ¡ÖµÊÓÎªÁ¬ĞøÖµ,²»¸øÓè×ª»»
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .setMaxCategories(4)//æœ€å¤§ç±»åˆ«æ•°ä¸º5,(å³æŸä¸€åˆ—)ä¸­å¤šäº4ä¸ªå–å€¼è§†ä¸ºè¿ç»­å€¼,ä¸ç»™äºˆè½¬æ¢
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
 
     // Split the data into training and test sets (30% held out for testing).
-    //½«Êı¾İ·Ö³ÉÑµÁ·ºÍ²âÊÔ¼¯(30%½øĞĞ²âÊÔ)
+    //å°†æ•°æ®åˆ†æˆè®­ç»ƒå’Œæµ‹è¯•é›†(30%è¿›è¡Œæµ‹è¯•)
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a GBT model.
-    //ÑµÁ·GBT·ÖÀàÄ£ĞÍ
+    //è®­ç»ƒGBTåˆ†ç±»æ¨¡å‹
     val gbt = new GBTClassifier()
       .setLabelCol("indexedLabel")
-       //ÑµÁ·Êı¾İ¼¯DataFrameÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
+       //è®­ç»ƒæ•°æ®é›†DataFrameä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
       .setFeaturesCol("indexedFeatures")
       .setMaxIter(10)
 
     // Convert indexed labels back to original labels.
-    //×ª»»Ë÷Òı±êÇ©»Øµ½Ô­À´µÄ±êÇ©
+    //è½¬æ¢ç´¢å¼•æ ‡ç­¾å›åˆ°åŸæ¥çš„æ ‡ç­¾
     val labelConverter = new IndexToString()
       .setInputCol("prediction")
       .setOutputCol("predictedLabel")
       .setLabels(labelIndexer.labels)
 
     // Chain indexers and GBT in a Pipeline.
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(labelIndexer, featureIndexer, gbt, labelConverter))
 
     // Train model. This also runs the indexers.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(trainingData)
 
     // Make predictions.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(testData)
 
     // Select example rows to display.
@@ -125,14 +125,14 @@ object GradientBoostedTreeClassifierExample {
     // Select (prediction, true label) and compute test error.
     val evaluator = new MulticlassClassificationEvaluator()
       .setLabelCol("indexedLabel")
-      //Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
+      //ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
       .setPredictionCol("prediction")
       .setMetricName("precision")
-     //Ô¤²â×¼È·ÂÊ
+     //é¢„æµ‹å‡†ç¡®ç‡
     val accuracy = evaluator.evaluate(predictions)
     //Test Error = 0.03448275862068961
     println("Test Error = " + (1.0 - accuracy))
-    //¹ÜµÀÄ£ĞÍ»ñµÃGBTClassificationModelÄ£ĞÍ
+    //ç®¡é“æ¨¡å‹è·å¾—GBTClassificationModelæ¨¡å‹
     val gbtModel = model.stages(2).asInstanceOf[GBTClassificationModel]
     println("Learned classification GBT model:\n" + gbtModel.toDebugString)
     // $example off$

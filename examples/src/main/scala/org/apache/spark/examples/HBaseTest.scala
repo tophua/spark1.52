@@ -31,12 +31,12 @@ object HBaseTest {
     val sc = new SparkContext(sparkConf)
 
     // please ensure HBASE_CONF_DIR is on classpath of spark driver
-    //ÇëÈ·±£hbase_conf_dirÔÚSparkÇı¶¯Æ÷Â·¾¶   
+    //è¯·ç¡®ä¿hbase_conf_diråœ¨Sparké©±åŠ¨å™¨è·¯å¾„
     // e.g: set it through spark.driver.extraClassPath property
     // in spark-defaults.conf or through --driver-class-path
     // command line option of spark-submit
-    //ÀıÈç£ºËüÍ¨¹ıspark-defaults.conf»òÍ¨¹ıspark.driver.extraclasspathÊôĞÔÑ¡Ïî--
-    //Ö¸¶¨Çı¶¯³ÌĞòÀàÂ·¾¶µÄÃüÁîĞĞSparkÌá½»
+    //ä¾‹å¦‚ï¼šå®ƒé€šè¿‡spark-defaults.confæˆ–é€šè¿‡spark.driver.extraclasspathå±æ€§é€‰é¡¹--
+    //æŒ‡å®šé©±åŠ¨ç¨‹åºç±»è·¯å¾„çš„å‘½ä»¤è¡ŒSparkæäº¤
     val conf = HBaseConfiguration.create()
 
     if (args.length < 1) {
@@ -45,12 +45,12 @@ object HBaseTest {
     }
 
     // Other options for configuring scan behavior are available. More information available at
-    //ÅäÖÃÉ¨ÃèĞĞÎªµÄÆäËûÑ¡Ïî¿ÉÓÃ
+    //é…ç½®æ‰«æè¡Œä¸ºçš„å…¶ä»–é€‰é¡¹å¯ç”¨
     // http://hbase.apache.org/apidocs/org/apache/hadoop/hbase/mapreduce/TableInputFormat.html
     conf.set(TableInputFormat.INPUT_TABLE, args(0))
 
     // Initialize hBase table if necessary
-    //Èç¹ûĞèÒª³õÊ¼»¯HBase±í
+    //å¦‚æœéœ€è¦åˆå§‹åŒ–HBaseè¡¨
     val admin = new HBaseAdmin(conf)
     if (!admin.isTableAvailable(args(0))) {
       val tableDesc = new HTableDescriptor(TableName.valueOf(args(0)))

@@ -2,16 +2,16 @@ package org.apache.spark.examples.futuePromise
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 /**
- * Future ±íÊ¾Ò»¸ö¿ÉÄÜ»¹Ã»ÓĞÊµ¼ÊÍê³ÉµÄÒì²½ÈÎÎñµÄ½á¹û
- * scalaµÄFuture±íÊ¾Ò»¸öÒì²½²Ù×÷µÄ½á¹û×´Ì¬,Ëü³ÖÓĞÒ»¸öÖµ,ÔÚÎ´À´µÄÄ³¸öÖ®¼äµã¿ÉÓÃ,¸ÃÖµÊÇÒì²½²Ù×÷µÄ½á¹û,
- * µ±Òì²½²Ù×÷Ã»ÓĞÍê³É,ÄÇÃ´FutureµÄisCompletedÎªfalse,µ±Òì²½²Ù×÷Íê³ÉÁËÇÒ·µ»ØÁËÖµ,
- * ÄÇÃ´FutureµÄisCompleted·µ»ØtrueÇÒÊÇsuccess,
- * Èç¹ûÒì²½²Ù×÷Ã»ÓĞÍê³É»òÕßÒì³£ÖÕÖ¹,ÄÇÃ´FutureµÄisCompletedÒ²·µ»Øtrueµ«ÊÇÊÇfailed.
- * FutureµÄÖµ²»ÖªµÀÊ²Ã´Ê±ºò¿ÉÓÃ,ËùÒÔĞèÒªÒ»ÖÖ»úÖÆÀ´»ñÈ¡Òì²½²Ù×÷µÄ½á¹û,
- * Ò»ÖÖÊÇ²»Í£µÄ²é¿´FutureµÄÍê³É×´Ì¬,ÁíÒ»¸ö²ÉÓÃ×èÈûµÄ·½Ê½,
- * scalaÌá¹©ÁËµÚ¶şÖÖ·½Ê½µÄÖ§³Ö,Ê¹ÓÃscala.concurrent.Await,
- * ËüÓĞÁ½¸ö·½·¨,Ò»¸öÊÇAwait.ready,µ±FutureµÄ×´Ì¬ÎªÍê³ÉÊ±·µ»Ø,Ò»ÖÖÊÇAwait.result,Ö±½Ó·µ»ØFuture³ÖÓĞµÄ½á¹û¡£
- * Future»¹Ìá¹©ÁËÒ»Ğ©map,filter,foreachµÈ²Ù×÷
+ * Future è¡¨ç¤ºä¸€ä¸ªå¯èƒ½è¿˜æ²¡æœ‰å®é™…å®Œæˆçš„å¼‚æ­¥ä»»åŠ¡çš„ç»“æœ
+ * scalaçš„Futureè¡¨ç¤ºä¸€ä¸ªå¼‚æ­¥æ“ä½œçš„ç»“æœçŠ¶æ€,å®ƒæŒæœ‰ä¸€ä¸ªå€¼,åœ¨æœªæ¥çš„æŸä¸ªä¹‹é—´ç‚¹å¯ç”¨,è¯¥å€¼æ˜¯å¼‚æ­¥æ“ä½œçš„ç»“æœ,
+ * å½“å¼‚æ­¥æ“ä½œæ²¡æœ‰å®Œæˆ,é‚£ä¹ˆFutureçš„isCompletedä¸ºfalse,å½“å¼‚æ­¥æ“ä½œå®Œæˆäº†ä¸”è¿”å›äº†å€¼,
+ * é‚£ä¹ˆFutureçš„isCompletedè¿”å›trueä¸”æ˜¯success,
+ * å¦‚æœå¼‚æ­¥æ“ä½œæ²¡æœ‰å®Œæˆæˆ–è€…å¼‚å¸¸ç»ˆæ­¢,é‚£ä¹ˆFutureçš„isCompletedä¹Ÿè¿”å›trueä½†æ˜¯æ˜¯failed.
+ * Futureçš„å€¼ä¸çŸ¥é“ä»€ä¹ˆæ—¶å€™å¯ç”¨,æ‰€ä»¥éœ€è¦ä¸€ç§æœºåˆ¶æ¥è·å–å¼‚æ­¥æ“ä½œçš„ç»“æœ,
+ * ä¸€ç§æ˜¯ä¸åœçš„æŸ¥çœ‹Futureçš„å®ŒæˆçŠ¶æ€,å¦ä¸€ä¸ªé‡‡ç”¨é˜»å¡çš„æ–¹å¼,
+ * scalaæä¾›äº†ç¬¬äºŒç§æ–¹å¼çš„æ”¯æŒ,ä½¿ç”¨scala.concurrent.Await,
+ * å®ƒæœ‰ä¸¤ä¸ªæ–¹æ³•,ä¸€ä¸ªæ˜¯Await.ready,å½“Futureçš„çŠ¶æ€ä¸ºå®Œæˆæ—¶è¿”å›,ä¸€ç§æ˜¯Await.result,ç›´æ¥è¿”å›FutureæŒæœ‰çš„ç»“æœã€‚
+ * Futureè¿˜æä¾›äº†ä¸€äº›map,filter,foreachç­‰æ“ä½œ
  */
 object FutureTestextendsApp extends App {
   val s = "Hello"
@@ -21,5 +21,5 @@ object FutureTestextendsApp extends App {
   f onSuccess {
     case msg => println(msg)
   }
-  println(s) //²»¼ÓÕâ¾ä, f onSuccess¾Í²»Ö´ĞĞ
+  println(s) //ä¸åŠ è¿™å¥, f onSuccesså°±ä¸æ‰§è¡Œ
 }

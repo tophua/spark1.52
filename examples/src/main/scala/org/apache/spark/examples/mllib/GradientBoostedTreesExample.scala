@@ -7,22 +7,22 @@ import org.apache.spark.mllib.tree.configuration.{BoostingStrategy, Algo}
 import org.apache.spark.mllib.util.MLUtils
 /**
  *Spark coolbook p139 
- * ÌÝ¶ÈÌáÉý¾ö²ßÊ÷:×ÛºÏ¶à¸ö¾ö²ßÊ÷,Ïû³ýÔëÉù,±ÜÃâ¹ýÄâºÏ,GBTÖ»ÊÊÓÃÓÚ¶þ·ÖÀàºÍ»Ø¹é,²»Ö§³Ö¶à·ÖÀà
- * ÌÝ¶ÈÌáÉý¾ö²ßÊ÷Ëã·¨Ò»´ÎÑµÁ·Ò»¸öÊ÷,ÆäÖÐÃ¿¸öÐÂµÄÊ÷»á»ùÓÚÖ®Ç°ÑµÁ·¹ýÊ÷µÄÈ±µãÀ´¸Ä½øËã·¨
- * ÌÝ¶ÈÌáÉý¾ö²ßÊ÷Ëã·¨Ä¿µÄÊÇ¸øÒ»¸öÈËÔ¤²âËûÊÇ·ñÓµÓÐÁ¼ºÃµÄÐÅÓÃ
- * ±ê¼ÇÊÇÁ¼ºÃµÄÐÅÓÃ
- * ÐÕÃû	±ê¼Ç	¿¶¿®	   ÔðÈÎ¸Ð	°®ÐÄ  ÌõÀíÐÔ	  »Ó»ô	Ò×Å­
-        ½Ü¿Ë		0		0		0			0			0				1			1
-        ½ÜÎ÷¿¨   1		1		1			1			1				0			0
-        ÕäÄÝ		0		0		0			1			0				1			1
-        Èð¿Ë		1		1		1			0			1				0			0
-        ÅÁÌØ		0		0		0			0			0				1			1
-        ½Ü²¼		1		1		1			1			0				0			0
-        ½ÜÒÁ		1		0		1			1			1				0			0
-        ÄÉÌØ		0		1		0			0			0				1			1
-        ÂÞ¶÷		1		0		1			1			1				0			0
-        ÂóÌØ		0		1		0			0			0				1			1
-      Ê¹ÓÃlibsvm¸ñÊ½±íÊ¾·½Ê½
+ * æ¢¯åº¦æå‡å†³ç­–æ ‘:ç»¼åˆå¤šä¸ªå†³ç­–æ ‘,æ¶ˆé™¤å™ªå£°,é¿å…è¿‡æ‹Ÿåˆ,GBTåªé€‚ç”¨äºŽäºŒåˆ†ç±»å’Œå›žå½’,ä¸æ”¯æŒå¤šåˆ†ç±»
+ * æ¢¯åº¦æå‡å†³ç­–æ ‘ç®—æ³•ä¸€æ¬¡è®­ç»ƒä¸€ä¸ªæ ‘,å…¶ä¸­æ¯ä¸ªæ–°çš„æ ‘ä¼šåŸºäºŽä¹‹å‰è®­ç»ƒè¿‡æ ‘çš„ç¼ºç‚¹æ¥æ”¹è¿›ç®—æ³•
+ * æ¢¯åº¦æå‡å†³ç­–æ ‘ç®—æ³•ç›®çš„æ˜¯ç»™ä¸€ä¸ªäººé¢„æµ‹ä»–æ˜¯å¦æ‹¥æœ‰è‰¯å¥½çš„ä¿¡ç”¨
+ * æ ‡è®°æ˜¯è‰¯å¥½çš„ä¿¡ç”¨
+ * å§“å	æ ‡è®°	æ…·æ…¨	   è´£ä»»æ„Ÿ	çˆ±å¿ƒ  æ¡ç†æ€§	  æŒ¥éœ	æ˜“æ€’
+        æ°å…‹		0		0		0			0			0				1			1
+        æ°è¥¿å¡   1		1		1			1			1				0			0
+        çå¦®		0		0		0			1			0				1			1
+        ç‘žå…‹		1		1		1			0			1				0			0
+        å¸•ç‰¹		0		0		0			0			0				1			1
+        æ°å¸ƒ		1		1		1			1			0				0			0
+        æ°ä¼Š		1		0		1			1			1				0			0
+        çº³ç‰¹		0		1		0			0			0				1			1
+        ç½—æ©		1		0		1			1			1				0			0
+        éº¦ç‰¹		0		1		0			0			0				1			1
+      ä½¿ç”¨libsvmæ ¼å¼è¡¨ç¤ºæ–¹å¼
         0 5:1 6:1
         1 1:1 2:1 3:1 4:1
         0 3:1 5:1 6:1
@@ -38,31 +38,31 @@ object GradientBoostedTreesExample {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
  /**
- *  libSVMµÄÊý¾Ý¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖÐ<label>ÊÇÑµÁ·Êý¾Ý¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊý(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊý
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊý,¿ÉÒÔÊÇ²»Á¬Ðø
- *  <value>ÎªÊµÊý,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºŽåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºŽå›žå½’,æ˜¯ä»»æ„å®žæ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿žç»­
+ *  <value>ä¸ºå®žæ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
-    // ¼ÓÔØÊý¾Ý
+    // åŠ è½½æ•°æ®
     val data = MLUtils.loadLibSVMFile(sc, "../data/mllib/rf_libsvm_data.txt")
-    // ½«Êý¾ÝËæ»ú·ÖÅäÎªÁ½·Ý,Ò»·ÝÓÃÓÚÑµÁ·,Ò»·ÝÓÃÓÚ²âÊÔ
+    // å°†æ•°æ®éšæœºåˆ†é…ä¸ºä¸¤ä»½,ä¸€ä»½ç”¨äºŽè®­ç»ƒ,ä¸€ä»½ç”¨äºŽæµ‹è¯•
     val splits = data.randomSplit(Array(0.7, 0.3))
-    //Êý¾Ý·Ö³ÉÑµÁ·ºÍ²âÊÔÊý¾Ý¼¯
+    //æ•°æ®åˆ†æˆè®­ç»ƒå’Œæµ‹è¯•æ•°æ®é›†
     val (trainingData, testData) = (splits(0), splits(1))
-    //´´½¨Ò»¸ö·ÖÀàµÄÌáÉý²ßÂÔ²¢ÉèÖÃµü´ú´ÎÊýÎª3(Ëæ»úÉ­ÁÖÒ²Ö§³Ö»Ø¹é)
+    //åˆ›å»ºä¸€ä¸ªåˆ†ç±»çš„æå‡ç­–ç•¥å¹¶è®¾ç½®è¿­ä»£æ¬¡æ•°ä¸º3(éšæœºæ£®æž—ä¹Ÿæ”¯æŒå›žå½’)
     val boostingStrategy =BoostingStrategy.defaultParams("Classification")
         boostingStrategy.numIterations = 3
-    //ÌÝ¶ÈÌáÉý¾ö²ßÊ÷:×ÛºÏ¶à¸ö¾ö²ßÊ÷,Ïû³ýÔëÉù,±ÜÃâ¹ýÄâºÏ
+    //æ¢¯åº¦æå‡å†³ç­–æ ‘:ç»¼åˆå¤šä¸ªå†³ç­–æ ‘,æ¶ˆé™¤å™ªå£°,é¿å…è¿‡æ‹Ÿåˆ
     val model = GradientBoostedTrees.train(trainingData,boostingStrategy)
-    //»ùÓÚ²âÊÔÊµÀýÆÀ¹ÀÄ£ÐÍ²¢¼ÆËã²âÊÔ´íÎó
+    //åŸºäºŽæµ‹è¯•å®žä¾‹è¯„ä¼°æ¨¡åž‹å¹¶è®¡ç®—æµ‹è¯•é”™è¯¯
     val testErr = testData.map { point =>
-            //Ô¤²â
+            //é¢„æµ‹
             val prediction = model.predict(point.features)
             if (point.label == prediction) 
                 1.0 
-            else 0.0}.mean()//Æ½¾ùÊý
-    //¼ì²éÄ£ÐÍ
+            else 0.0}.mean()//å¹³å‡æ•°
+    //æ£€æŸ¥æ¨¡åž‹
     println("Test Error = " + testErr)
     println("Learned Random Forest:n" + model.toDebugString)
   }

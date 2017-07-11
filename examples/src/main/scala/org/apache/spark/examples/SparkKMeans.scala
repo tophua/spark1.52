@@ -24,13 +24,13 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.SparkContext._
 
 /**
- * K-means clustering.
- * k-¾ù¾ÛÀà
- *
- * This is an example implementation for learning how to use Spark. For more conventional use,
- * ÕâÊÇÒ»¸öÑ§Ï°ÈçºÎÊ¹ÓÃSparkµÄÀı×ÓÊµÏÖ,Îª¸ü´«Í³µÄÊ¹ÓÃ
- * please refer to org.apache.spark.mllib.clustering.KMeans
- */
+  * K-means clustering.
+  * k-å‡èšç±»
+  *
+  * This is an example implementation for learning how to use Spark. For more conventional use,
+  * è¿™æ˜¯ä¸€ä¸ªå­¦ä¹ å¦‚ä½•ä½¿ç”¨Sparkçš„ä¾‹å­å®ç°,ä¸ºæ›´ä¼ ç»Ÿçš„ä½¿ç”¨
+  * please refer to org.apache.spark.mllib.clustering.KMeans
+  */
 object SparkKMeans {
 
   def parseVector(line: String): Vector[Double] = {

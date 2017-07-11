@@ -28,7 +28,7 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 // $example off$
 
 /**
- * ÆÓËØ±´Ò¶Ë¹·¨ÊÇ»ùÓÚ±´Ò¶Ë¹¶¨ÀíÓëÌØÕ÷Ìõ¼ş¶ÀÁ¢¼ÙÉèµÄ·ÖÀà·½·¨
+ * æœ´ç´ è´å¶æ–¯æ³•æ˜¯åŸºäºè´å¶æ–¯å®šç†ä¸ç‰¹å¾æ¡ä»¶ç‹¬ç«‹å‡è®¾çš„åˆ†ç±»æ–¹æ³•
  */
 object NaiveBayesExample {
   def main(args: Array[String]): Unit = {
@@ -41,11 +41,11 @@ object NaiveBayesExample {
     // $example on$
     // Load the data stored in LIBSVM format as a DataFrame.
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     //val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
     import org.apache.spark.mllib.util.MLUtils
@@ -55,17 +55,17 @@ object NaiveBayesExample {
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3), seed = 1234L)
 
     // Train a NaiveBayes model.
-    //ÑµÁ·Ò»¸öÆÓËØ±´Ò¶Ë¹Ä£ĞÍ
+    //è®­ç»ƒä¸€ä¸ªæœ´ç´ è´å¶æ–¯æ¨¡å‹
     val model = new NaiveBayes()
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
       .fit(trainingData)
 
     // Select example rows to display.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(testData)
-    //rawPredictionÔ­Ê¼µÄËã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ
-    //probability Àà±ğÔ¤²â½á¹ûµÄÌõ¼ş¸ÅÂÊÖµ´æ´¢ÁĞµÄÃû³Æ
-    //prediction Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ
+    //rawPredictionåŸå§‹çš„ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°
+    //probability ç±»åˆ«é¢„æµ‹ç»“æœçš„æ¡ä»¶æ¦‚ç‡å€¼å­˜å‚¨åˆ—çš„åç§°
+    //prediction ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°
     /**
       +-----+--------------------+--------------------+-----------+----------+
       |label|            features|       rawPrediction|probability|prediction|
@@ -80,9 +80,9 @@ object NaiveBayesExample {
 
     // Select (prediction, true label) and compute test error
     val evaluator = new MulticlassClassificationEvaluator()
-      .setLabelCol("label")//±êÇ©ÁĞÃû
-      .setPredictionCol("prediction")//Ô¤²â½á¹ûÁĞÃû
-      .setMetricName("precision")//×¼È·ÂÊ
+      .setLabelCol("label")//æ ‡ç­¾åˆ—å
+      .setPredictionCol("prediction")//é¢„æµ‹ç»“æœåˆ—å
+      .setMetricName("precision")//å‡†ç¡®ç‡
     //Accuracy: 1.0
     val accuracy = evaluator.evaluate(predictions)
     println("Accuracy: " + accuracy)

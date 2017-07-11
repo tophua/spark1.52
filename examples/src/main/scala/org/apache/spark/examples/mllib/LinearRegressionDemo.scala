@@ -8,51 +8,51 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.regression.LinearRegressionWithSGD
 /**
- * ÏßĞÔ»Ø¹é
+ * çº¿æ€§å›å½’
  */
 object LinearRegressionDemo {
   def main(args: Array[String]): Unit = {
 
-    // ÆÁ±Î²»±ØÒªµÄÈÕÖ¾ÏÔÊ¾ÖÕ¶ËÉÏ
+    // å±è”½ä¸å¿…è¦çš„æ—¥å¿—æ˜¾ç¤ºç»ˆç«¯ä¸Š
     Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
     Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
-    // ÉèÖÃÔËĞĞ»·¾³
+    // è®¾ç½®è¿è¡Œç¯å¢ƒ
     val conf = new SparkConf().setAppName("LinearRegressionDemo").setMaster("local[4]")
     val sc = new SparkContext(conf)
-    // ¼ÓÔØÊı¾İ
+    // åŠ è½½æ•°æ®
     val data = sc.textFile("../data/mllib/ridge-data/lpsa.data")
 
     val parsedData = data.map { line =>
 
       val parts = line.split(',')
-	//LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+	//LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(' ').map(_.toDouble)))
 
     }
 
     // Building the model
-    //¹¹½¨Êı¾İÄ£ĞÍ
+    //æ„å»ºæ•°æ®æ¨¡å‹
 
     val numIterations = 100
-    //(SGDËæ»úÌİ¶ÈÏÂ½µ)
+    //(SGDéšæœºæ¢¯åº¦ä¸‹é™)
     val model = LinearRegressionWithSGD.train(parsedData, numIterations)
 
     // Evaluate model on training examples and compute training error
-    //Ê¹ÓÃÑµÁ·Ñù±¾¼ÆËãÄ£ĞÍ²¢ÇÒ¼ÆËãÑµÁ·Îó²î
+    //ä½¿ç”¨è®­ç»ƒæ ·æœ¬è®¡ç®—æ¨¡å‹å¹¶ä¸”è®¡ç®—è®­ç»ƒè¯¯å·®
     val valuesAndPreds = parsedData.map { point =>
 
       val prediction = model.predict(point.features)
       //println("point.label:"+point.label+"\t prediction:"+prediction)
       (point.label, prediction)
     }
-    //¾ù·½Îó²î
+    //å‡æ–¹è¯¯å·®
     val MSE = valuesAndPreds.map { case (x, y) =>
            var w=math.pow((x - y), 2)
            println("x:"+x+"\t y:"+y+"\t x-y:"+(x - y)+"\t pow:"+math.pow((x - y), 2))
            w      
     }.reduce(_ + _) / valuesAndPreds.count //
-    //¾ù·½Îó²î,µÚ¶şÖÖ·½Ê½¾ù·½²îÀ´ÆÀ¹ÀÔ¤²âÖµ
-    val MSE2 = valuesAndPreds.map { case (v, p) => math.pow((v - p), 2)}.mean() //ÇóÆ½¾ùÖµ
+    //å‡æ–¹è¯¯å·®,ç¬¬äºŒç§æ–¹å¼å‡æ–¹å·®æ¥è¯„ä¼°é¢„æµ‹å€¼
+    val MSE2 = valuesAndPreds.map { case (v, p) => math.pow((v - p), 2)}.mean() //æ±‚å¹³å‡å€¼
     println("training Mean Squared Error = " + MSE + "\t MSE2:" + MSE2)
 
     sc.stop()

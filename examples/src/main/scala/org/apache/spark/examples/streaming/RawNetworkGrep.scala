@@ -25,12 +25,12 @@ import org.apache.spark.util.IntParam
 
 /**
  * Receives text from multiple rawNetworkStreams and counts how many '\n' delimited
- * ½ÓÊÕÎÄ±¾´Ó¶à¸örawnetworkstreamsÊı¶àÉÙ'\n'·Ö¸ô,ÒÔ»»ĞĞ·û·Ö¸ô
+ * æ¥æ”¶æ–‡æœ¬ä»å¤šä¸ªrawnetworkstreamsæ•°å¤šå°‘'\n'åˆ†éš”,ä»¥æ¢è¡Œç¬¦åˆ†éš”
  * lines have the word 'the' in them. This is useful for benchmarking purposes. This
  * will only work with spark.streaming.util.RawTextSender running on all worker nodes
  * and with Spark using Kryo serialization (set Java property "spark.serializer" to
  * "org.apache.spark.serializer.KryoSerializer").
- *  ÔËĞĞÔÚËùÓĞ¹¤×÷½ÚµãºÍSparkÊ¹ÓÃkryoĞòÁĞ»¯
+ *  è¿è¡Œåœ¨æ‰€æœ‰å·¥ä½œèŠ‚ç‚¹å’ŒSparkä½¿ç”¨kryoåºåˆ—åŒ–
  * Usage: RawNetworkGrep <numStreams> <host> <port> <batchMillis>
  *   <numStream> is the number rawNetworkStreams, which should be same as number
  *               of work nodes in the cluster
@@ -50,7 +50,7 @@ object RawNetworkGrep {
     val Array(IntParam(numStreams), host, IntParam(port), IntParam(batchMillis)) = args
     val sparkConf = new SparkConf().setAppName("RawNetworkGrep")
     // Create the context
-    //´´½¨ÉÏÏÂÎÄ,Åú´Î¼ä¸ô
+    //åˆ›å»ºä¸Šä¸‹æ–‡,æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(sparkConf, Duration(batchMillis))
 
     val rawStreams = (1 to numStreams).map(_ =>

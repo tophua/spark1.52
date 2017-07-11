@@ -28,7 +28,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
  * An example demonstrating Isotonic Regression.
- * ±£Ğò»Ø¹éÊÇ»Ø¹éËã·¨µÄÒ»ÖÖ
+ * ä¿åºå›å½’æ˜¯å›å½’ç®—æ³•çš„ä¸€ç§
  * Run with
  * {{{
  * bin/run-example ml.IsotonicRegressionExample
@@ -52,17 +52,17 @@ object IsotonicRegressionExample {
       val dataset = sqlContext.createDataFrame(dataSVM)
     //val dataset = sqlContext.read.format("libsvm").load("data/mllib/sample_isotonic_regression_libsvm_data.txt")
     /**
-     *  libSVMµÄÊı¾İ¸ñÊ½
+     *  libSVMçš„æ•°æ®æ ¼å¼
      *  <label> <index1>:<value1> <index2>:<value2> ...
-     *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-     *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-     *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+     *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+     *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+     *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
      */
       
 
     // Trains an isotonic regression model.
     val ir = new IsotonicRegression()
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = ir.fit(dataset)
    //Boundaries in increasing order: [0.01,0.17,0.18,0.27,0.28,0.29,0.3,0.31,0.34,0.35,0.36,0.41,0.42,0.71,0.72,0.74,0.75,0.76,0.77,0.78,0.79,0.8,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,1.0]
    //Predictions associated with the boundaries: [0.15715271294117658,0.15715271294117658,0.18913819599999995,0.18913819599999995,0.20040796,0.29576747,0.43396226,0.5081591025000001,0.5081591025000001,0.54156043,0.5504844466666667,0.5504844466666667,0.5639299669999999,0.5639299669999999,0.5660377366666668,0.5660377366666668,0.56603774,0.57929628,0.64762876,0.66241713,0.67210607,0.67210607,0.674655785,0.674655785,0.73890872,0.73992861,0.84242733,0.89673636,0.89673636,0.90719021,0.9272055075000002,0.9272055075000002]
@@ -70,7 +70,7 @@ object IsotonicRegressionExample {
     println(s"Predictions associated with the boundaries: ${model.predictions}")
 
     // Makes predictions.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     /**
      *+----------+--------------+-------------------+
       |     label|      features|         prediction|

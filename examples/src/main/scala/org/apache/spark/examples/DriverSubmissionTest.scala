@@ -23,23 +23,23 @@ import scala.collection.JavaConversions._
 import org.apache.spark.util.Utils
 
 /** Prints out environmental information, sleeps, and then exits. Made to
- *  ´òÓ¡»·¾³ĞÅÏ¢,Ë¯Ãß,È»ºóÍË³ö,ÔÚ¶ÀÁ¢µ÷¶ÈÖĞ¶Ô²âÊÔÇı¶¯³ÌĞòÌá½»
+  *  æ‰“å°ç¯å¢ƒä¿¡æ¯,ç¡çœ ,ç„¶åé€€å‡º,åœ¨ç‹¬ç«‹è°ƒåº¦ä¸­å¯¹æµ‹è¯•é©±åŠ¨ç¨‹åºæäº¤
   * test driver submission in the standalone scheduler. */
 object DriverSubmissionTest {
   def main(args: Array[String]) {
-  /*  if (args.size < 1) {
-      println("Usage: DriverSubmissionTest <seconds-to-sleep>")
-      System.exit(0)
-    }*/
+    /*  if (args.size < 1) {
+        println("Usage: DriverSubmissionTest <seconds-to-sleep>")
+        System.exit(0)
+      }*/
     val numSecondsToSleep = 1//args(0).toInt
 
-    val env = System.getenv()//»·¾³ĞÅÏ¢
+    val env = System.getenv()//ç¯å¢ƒä¿¡æ¯
     val properties = Utils.getSystemProperties
-    //°üº¬»·¾³±äÁ¿
+    //åŒ…å«ç¯å¢ƒå˜é‡
     println("Environment variables containing SPARK_TEST:")
-    //´òÓ¡°üÀ¨SPARK_TESTĞÅÏ¢
+    //æ‰“å°åŒ…æ‹¬SPARK_TESTä¿¡æ¯
     env.filter{case (k, v) => k.contains("SPARK_TEST")}.foreach(println)
-    //ÏµÍ³ÊôĞÔ°üº¬spark.test
+    //ç³»ç»Ÿå±æ€§åŒ…å«spark.test
     println("System properties containing spark.test:")
     properties.filter{case (k, v) => k.toString.contains("spark.test")}.foreach(println)
 

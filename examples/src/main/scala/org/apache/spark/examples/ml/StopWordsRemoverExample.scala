@@ -27,8 +27,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * StopWordsRemoverµÄÊäÈëÎªÒ»ÏµÁĞ×Ö·û´®(Èç·Ö´ÊÆ÷Êä³ö),Êä³öÖĞÉ¾³ıÁËËùÓĞÍ£ÓÃ´Ê
- * Í£ÓÃ´ÊÎªÔÚÎÄµµÖĞÆµ·±³öÏÖ,µ«Î´³ĞÔØÌ«¶àÒâÒåµÄ´ÊÓï,ËûÃÇ²»Ó¦¸Ã±»°üº¬ÔÚËã·¨ÊäÈëÖĞ¡£
+ * StopWordsRemoverçš„è¾“å…¥ä¸ºä¸€ç³»åˆ—å­—ç¬¦ä¸²(å¦‚åˆ†è¯å™¨è¾“å‡º),è¾“å‡ºä¸­åˆ é™¤äº†æ‰€æœ‰åœç”¨è¯
+ * åœç”¨è¯ä¸ºåœ¨æ–‡æ¡£ä¸­é¢‘ç¹å‡ºç°,ä½†æœªæ‰¿è½½å¤ªå¤šæ„ä¹‰çš„è¯è¯­,ä»–ä»¬ä¸åº”è¯¥è¢«åŒ…å«åœ¨ç®—æ³•è¾“å…¥ä¸­ã€‚
  */
 object StopWordsRemoverExample {
   def main(args: Array[String]): Unit = {
@@ -40,9 +40,9 @@ object StopWordsRemoverExample {
 
     // $example on$
     val remover = new StopWordsRemover()
-      .setInputCol("raw")//Ô­Ê¼×Ö¶Î
-      .setOutputCol("filtered")//¹ıÂÇºóµÄ×Ö¶Î
-    //É¾³ıÍ£¶Ù´Ê
+      .setInputCol("raw")//åŸå§‹å­—æ®µ
+      .setOutputCol("filtered")//è¿‡è™‘åçš„å­—æ®µ
+    //åˆ é™¤åœé¡¿è¯
     val dataSet = sqlContext.createDataFrame(Seq(
       (0, Seq("I", "saw", "the", "red", "baloon")),
       (1, Seq("Mary", "had", "a", "little", "lamb"))
@@ -55,7 +55,7 @@ object StopWordsRemoverExample {
      * |  1|[Mary, had, a, li...|[Mary, little, lamb]|
      * +---+--------------------+--------------------+
      */
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     remover.transform(dataSet).show()
     // $example off$
 

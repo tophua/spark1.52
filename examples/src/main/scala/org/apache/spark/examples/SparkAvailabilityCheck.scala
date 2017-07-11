@@ -10,23 +10,23 @@ import scala.util.Try
 import scala.util.Failure
 import scala.util.Success
 /**
- * ²âÊÔÊÇ·ñÁ¬½Óµ½·þÎñÆ÷¼ì²â
- */
+  * æµ‹è¯•æ˜¯å¦è¿žæŽ¥åˆ°æœåŠ¡å™¨æ£€æµ‹
+  */
 object SparkAvailabilityCheck {
   def main(args: Array[String]) {
     val b39=isSparkOnline(URI.create("spark://192.168.0.40:8088"))
     val b27=isSparkOnline(URI.create("spark://192.168.0.13:8088"))
     println("Connect-> b39:"+b39+"\t b27:"+b27)
     //local[*]
-     SparkUtility.Connect(SparkUtility.Conf("spark://appdept3:8088", "appname")) match {
+    SparkUtility.Connect(SparkUtility.Conf("spark://appdept3:8088", "appname")) match {
       case Success(sc) => println("Success")
       case Failure(f) => println("Failure")
     }
-  } 
-  
+  }
+
   /**
-   * ²âÊÔTCPÁ¬½ÓÕý³£
-   */
+    * æµ‹è¯•TCPè¿žæŽ¥æ­£å¸¸
+    */
   def isSparkOnline(masterLocation: URI): Boolean = {
     try {
       val host = InetAddress.getByName(masterLocation.getHost)
@@ -34,12 +34,12 @@ object SparkAvailabilityCheck {
       socket.close()
       true
     } catch {
-      case ex: ConnectException =>false       
+      case ex: ConnectException =>false
     }
   }
 }
- /**
-  * Spark »·¾³Á¬½ÓÕý³£
+/**
+  * Spark çŽ¯å¢ƒè¿žæŽ¥æ­£å¸¸
   */
 object SparkUtility {
   def Conf(url: String, app: String): SparkConf =

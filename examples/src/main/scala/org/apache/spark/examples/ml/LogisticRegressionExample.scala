@@ -32,7 +32,7 @@ import org.apache.spark.sql.DataFrame
 
 /**
  * An example runner for logistic regression with elastic-net (mixing L1/L2) regularization.
- * ÔËĞĞÂß¼­»Ø¹éµÄÀı×Ó,µ¯ĞÔÍøÂç£¨»ìºÏL1»òL2£©ÕıÔò»¯
+ * è¿è¡Œé€»è¾‘å›å½’çš„ä¾‹å­,å¼¹æ€§ç½‘ç»œï¼ˆæ··åˆL1æˆ–L2ï¼‰æ­£åˆ™åŒ–
  * Run with
  * {{{
  * bin/run-example ml.LogisticRegressionExample [options]
@@ -51,18 +51,18 @@ object LogisticRegressionExample {
       input: String = "../data/mllib/sample_libsvm_data.txt",
       testInput: String = "",
       /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
       dataFormat: String = "libsvm",
-      regParam: Double = 0.0,//ÕıÔò»¯²ÎÊı(>=0)
-      elasticNetParam: Double = 0.0,//µ¯ĞÔÍøÂç»ìºÏ²ÎÊı,·¶Î§[0,1]
-      maxIter: Int = 100,//×î¶àµü´ú´ÎÊı(>=0)
-      fitIntercept: Boolean = true,//ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
-      tol: Double = 1E-6,//µü´úËã·¨µÄÊÕÁ²ĞÔ
+      regParam: Double = 0.0,//æ­£åˆ™åŒ–å‚æ•°(>=0)
+      elasticNetParam: Double = 0.0,//å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,èŒƒå›´[0,1]
+      maxIter: Int = 100,//æœ€å¤šè¿­ä»£æ¬¡æ•°(>=0)
+      fitIntercept: Boolean = true,//æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
+      tol: Double = 1E-6,//è¿­ä»£ç®—æ³•çš„æ”¶æ•›æ€§
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -81,10 +81,10 @@ object LogisticRegressionExample {
       opt[Int]("maxIter")
         .text(s"maximum number of iterations, default: ${defaultParams.maxIter}")
         .action((x, c) => c.copy(maxIter = x))
-      opt[Boolean]("fitIntercept")//ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
+      opt[Boolean]("fitIntercept")//æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
         .text(s"whether to fit an intercept term, default: ${defaultParams.fitIntercept}")
         .action((x, c) => c.copy(fitIntercept = x))
-      opt[Double]("tol")//µü´úËã·¨µÄÊÕÁ²ĞÔ
+      opt[Double]("tol")//è¿­ä»£ç®—æ³•çš„æ”¶æ•›æ€§
         .text(s"the convergence tolerance of iterations, Smaller value will lead " +
         s"to higher accuracy with the cost of more iterations, default: ${defaultParams.tol}")
         .action((x, c) => c.copy(tol = x))
@@ -98,11 +98,11 @@ object LogisticRegressionExample {
         .action((x, c) => c.copy(testInput = x))
       opt[String]("dataFormat")
       /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
@@ -133,14 +133,14 @@ object LogisticRegressionExample {
     println(s"LogisticRegressionExample with parameters:\n$params")
 
     // Load training and test data and cache it.
-    //¼ÓÔØÑµÁ·ºÍ²âÊÔÊı¾İ²¢½«Æä»º´æ
+    //åŠ è½½è®­ç»ƒå’Œæµ‹è¯•æ•°æ®å¹¶å°†å…¶ç¼“å­˜
     val (training: DataFrame, test: DataFrame) = DecisionTreeExample.loadDatasets(sc, params.input,
       params.dataFormat, params.testInput, "classification", params.fracTest)
 
     // Set up Pipeline
-    //½¨Á¢¹ÜµÀ
-     //½«ÌØÕ÷×ª»»,ÌØÕ÷¾ÛºÏ,Ä£ĞÍµÈ×é³ÉÒ»¸ö¹ÜµÀ,²¢µ÷ÓÃËüµÄfit·½·¨ÄâºÏ³öÄ£ĞÍ
-     //Ò»¸ö Pipeline ÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+    //å»ºç«‹ç®¡é“
+     //å°†ç‰¹å¾è½¬æ¢,ç‰¹å¾èšåˆ,æ¨¡å‹ç­‰ç»„æˆä¸€ä¸ªç®¡é“,å¹¶è°ƒç”¨å®ƒçš„fitæ–¹æ³•æ‹Ÿåˆå‡ºæ¨¡å‹
+     //ä¸€ä¸ª Pipeline åœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val stages = new mutable.ArrayBuffer[PipelineStage]()
 
     val labelIndexer = new StringIndexer()
@@ -149,31 +149,31 @@ object LogisticRegressionExample {
     stages += labelIndexer
 
     val lor = new LogisticRegression()
-      .setFeaturesCol("features")//ÌØÕ÷ÁĞÃû
-      .setLabelCol("indexedLabel")//±êÇ©ÁĞÃû
-      .setRegParam(params.regParam)//ÕıÔò»¯²ÎÊı(>=0)
-      .setElasticNetParam(params.elasticNetParam)//µ¯ĞÔÍøÂç»ìºÏ²ÎÊı,0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
-      .setMaxIter(params.maxIter)//×î¶àµü´ú´ÎÊı(>=0)
-      .setTol(params.tol)//µü´úËã·¨µÄÊÕÁ²ĞÔ
-      .setFitIntercept(params.fitIntercept)//ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
+      .setFeaturesCol("features")//ç‰¹å¾åˆ—å
+      .setLabelCol("indexedLabel")//æ ‡ç­¾åˆ—å
+      .setRegParam(params.regParam)//æ­£åˆ™åŒ–å‚æ•°(>=0)
+      .setElasticNetParam(params.elasticNetParam)//å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
+      .setMaxIter(params.maxIter)//æœ€å¤šè¿­ä»£æ¬¡æ•°(>=0)
+      .setTol(params.tol)//è¿­ä»£ç®—æ³•çš„æ”¶æ•›æ€§
+      .setFitIntercept(params.fitIntercept)//æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
 
     stages += lor
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline().setStages(stages.toArray)
 
-    // Fit the Pipeline °²×°¹ÜµÀ
-     // ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+    // Fit the Pipeline å®‰è£…ç®¡é“
+     // ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
     val startTime = System.nanoTime()
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val pipelineModel = pipeline.fit(training)
-    //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+    //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
-    //»ñµÃ¹ÜµÀÖĞÂß¼­»Ø¹éÄ£ĞÍ
+    //è·å¾—ç®¡é“ä¸­é€»è¾‘å›å½’æ¨¡å‹
     val lorModel = pipelineModel.stages.last.asInstanceOf[LogisticRegressionModel]
     // Print the weights and intercept for logistic regression.
-    //´òÓ¡Âß¼­»Ø¹éµÄÈ¨ÖØºÍ½ØÈ¡
+    //æ‰“å°é€»è¾‘å›å½’çš„æƒé‡å’Œæˆªå–
     //(692,[95,96,97,98,99,100,101,1]) Intercept: -0.3328714265631985
     println(s"Weights: ${lorModel.weights} Intercept: ${lorModel.intercept}")
 

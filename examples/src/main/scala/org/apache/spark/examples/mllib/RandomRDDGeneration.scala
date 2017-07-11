@@ -25,7 +25,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * An example app for randomly generated RDDs. Run with
- * ¶ÔÓÚËæ»úÉú³ÉµÄRDDSÒ»¸öÊ¾ÀıÓ¦ÓÃ³ÌĞò
+ * å¯¹äºéšæœºç”Ÿæˆçš„RDDSä¸€ä¸ªç¤ºä¾‹åº”ç”¨ç¨‹åº
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.RandomRDDGeneration
  * }}}
@@ -38,17 +38,17 @@ object RandomRDDGeneration {
     val conf = new SparkConf().setAppName(s"RandomRDDGeneration").setMaster("local")
     val sc = new SparkContext(conf)
 
-    val numExamples = 10000 // number of examples to generate Éú³ÉµÄÊµÀıÊı
-    val fraction = 0.1 // fraction of data to sample Ñù±¾Êı¾İµÄ·ÖÊı
+    val numExamples = 10000 // number of examples to generate ç”Ÿæˆçš„å®ä¾‹æ•°
+    val fraction = 0.1 // fraction of data to sample æ ·æœ¬æ•°æ®çš„åˆ†æ•°
 
-    // Example: RandomRDDs.normalRDD Õı³£µÄRDD
+    // Example: RandomRDDs.normalRDD æ­£å¸¸çš„RDD
     val normalRDD: RDD[Double] = RandomRDDs.normalRDD(sc, numExamples)
     println(s"Generated RDD of ${normalRDD.count()}" +
       " examples sampled from the standard normal distribution")
     println("  First 5 samples:")
     normalRDD.take(5).foreach( x => println(s"    $x") )
 
-    // Example: RandomRDDs.normalVectorRDD Õı³£ÏòÁ¿RDD
+    // Example: RandomRDDs.normalVectorRDD æ­£å¸¸å‘é‡RDD
     val normalVectorRDD = RandomRDDs.normalVectorRDD(sc, numRows = numExamples, numCols = 2)
     println(s"Generated RDD of ${normalVectorRDD.count()} examples of length-2 vectors.")
     println("  First 5 samples:")

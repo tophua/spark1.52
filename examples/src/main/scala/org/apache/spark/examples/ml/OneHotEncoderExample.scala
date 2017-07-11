@@ -27,10 +27,10 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * oneHotEncoder ÀëÉ¢<->Á¬ĞøÌØÕ÷»òLabelÏà»¥×ª»»
- * ¶ÀÈÈ±àÂë½«Àà±ğÌØÕ÷(ÀëÉ¢µÄ,ÒÑ¾­×ª»»ÎªÊı×Ö±àºÅĞÎÊ½),Ó³Éä³É¶ÀÈÈ±àÂë¡£
- * ÔÚÖîÈçLogistic»Ø¹éÕâÑùĞèÒªÁ¬ĞøÊıÖµÖµ×÷ÎªÌØÕ÷ÊäÈëµÄ·ÖÀàÆ÷ÖĞÒ²¿ÉÒÔÊ¹ÓÃÀà±ğ(ÀëÉ¢)ÌØÕ÷
- * ½â¾öÁË·ÖÀàÆ÷²»ºÃ´¦ÀíÊôĞÔÊı¾İµÄÎÊÌâ
+ * oneHotEncoder ç¦»æ•£<->è¿ç»­ç‰¹å¾æˆ–Labelç›¸äº’è½¬æ¢
+ * ç‹¬çƒ­ç¼–ç å°†ç±»åˆ«ç‰¹å¾(ç¦»æ•£çš„,å·²ç»è½¬æ¢ä¸ºæ•°å­—ç¼–å·å½¢å¼),æ˜ å°„æˆç‹¬çƒ­ç¼–ç ã€‚
+ * åœ¨è¯¸å¦‚Logisticå›å½’è¿™æ ·éœ€è¦è¿ç»­æ•°å€¼å€¼ä½œä¸ºç‰¹å¾è¾“å…¥çš„åˆ†ç±»å™¨ä¸­ä¹Ÿå¯ä»¥ä½¿ç”¨ç±»åˆ«(ç¦»æ•£)ç‰¹å¾
+ * è§£å†³äº†åˆ†ç±»å™¨ä¸å¥½å¤„ç†å±æ€§æ•°æ®çš„é—®é¢˜
  */
 object OneHotEncoderExample {
   def main(args: Array[String]): Unit = {
@@ -51,22 +51,22 @@ object OneHotEncoderExample {
       (4, "a"),
       (5, "c")
     )).toDF("id", "category")
-  //onehotencoderÇ°ĞèÒª×ª»»Îªstring->numerical
+  //onehotencoderå‰éœ€è¦è½¬æ¢ä¸ºstring->numerical
     val indexer = new StringIndexer()
       .setInputCol("category")
       .setOutputCol("categoryIndex")
-      .fit(df)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+      .fit(df)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val indexed = indexer.transform(df)
-  //¶ÔËæ»ú·Ö²¼µÄÀà±ğ½øĞĞOneHotEncoder,×ª»»ºó¿ÉÒÔµ±³ÉÁ¬ĞøÊıÖµÊäÈë
+  //å¯¹éšæœºåˆ†å¸ƒçš„ç±»åˆ«è¿›è¡ŒOneHotEncoder,è½¬æ¢åå¯ä»¥å½“æˆè¿ç»­æ•°å€¼è¾“å…¥
     val encoder = new OneHotEncoder()
       .setInputCol("categoryIndex")
       .setOutputCol("categoryVec")
-    //×¢Òâ²»ĞèÒªfit 
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //æ³¨æ„ä¸éœ€è¦fit 
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val encoded = encoder.transform(indexed)
     /**
-     * Êı¾İ»á±ä³ÉÏ¡ÊèµÄ,¶ÀÈÈ±àÂë½«Àà±ğÌØÕ÷,Èı¸öÌØÕ÷
+     * æ•°æ®ä¼šå˜æˆç¨€ç–çš„,ç‹¬çƒ­ç¼–ç å°†ç±»åˆ«ç‰¹å¾,ä¸‰ä¸ªç‰¹å¾
      * +---+-------------+
      * | id|  categoryVec|
      * +---+-------------+

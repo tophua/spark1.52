@@ -18,7 +18,7 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
   private def kc = new KafkaCluster(kafkaParams)
 
   /**
-   * ´´½¨Êý¾ÝÁ÷
+   * åˆ›å»ºæ•°æ®æµ
    * @param ssc
    * @param kafkaParams
    * @param topics
@@ -32,10 +32,10 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
             // kafkaParams: Map[String, String],
             topics: Set[String]): InputDStream[(K, V)] = {
     val groupId = kafkaParams.get("group.id").get
-    // ÔÚzookeeperÉÏ¶ÁÈ¡offsetsÇ°ÏÈ¸ù¾ÝÊµ¼ÊÇé¿ö¸üÐÂoffsets
+    // åœ¨zookeeperä¸Šè¯»å–offsetså‰å…ˆæ ¹æ®å®žé™…æƒ…å†µæ›´æ–°offsets
     setOrUpdateOffsets(topics, groupId)
 
-    //´ÓzookeeperÉÏ¶ÁÈ¡offset¿ªÊ¼Ïû·Ñmessage
+    //ä»Žzookeeperä¸Šè¯»å–offsetå¼€å§‹æ¶ˆè´¹message
     val partitionsE = kc.getPartitions(topics)
     if (partitionsE.isLeft) throw new SparkException("get kafka partition failed:")
     val partitions = partitionsE.right.get
@@ -47,7 +47,7 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
   }
 
   /**
-   * ´´½¨Êý¾ÝÁ÷Ç°,¸ù¾ÝÊµ¼ÊÏû·ÑÇé¿ö¸üÐÂÏû·Ñoffsets
+   * åˆ›å»ºæ•°æ®æµå‰,æ ¹æ®å®žé™…æ¶ˆè´¹æƒ…å†µæ›´æ–°æ¶ˆè´¹offsets
    * @param topics
    * @param groupId
    */
@@ -60,24 +60,24 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
       val consumerOffsetsE = kc.getConsumerOffsets(groupId, partitions)
       if (consumerOffsetsE.isLeft) hasConsumed = false
       if (hasConsumed) {
-        // Ïû·Ñ¹ý
+        // æ¶ˆè´¹è¿‡
         /**
-         * Èç¹ûzkÉÏ±£´æµÄoffsetsÒÑ¾­¹ýÊ±ÁË,¼´kafkaµÄ¶¨Ê±ÇåÀí²ßÂÔÒÑ¾­½«°üº¬¸ÃoffsetsµÄÎÄ¼þÉ¾³ý¡£
-         * Õë¶ÔÕâÖÖÇé¿ö,Ö»ÒªÅÐ¶ÏÒ»ÏÂzkÉÏµÄconsumerOffsetsºÍearliestLeaderOffsetsµÄ´óÐ¡,
-         * Èç¹ûconsumerOffsets±ÈearliestLeaderOffsets»¹Ð¡µÄ»°,ËµÃ÷consumerOffsetsÒÑ¹ýÊ±,
-         * ÕâÊ±°ÑconsumerOffsets¸üÐÂÎªearliestLeaderOffsets
+         * å¦‚æžœzkä¸Šä¿å­˜çš„offsetså·²ç»è¿‡æ—¶äº†,å³kafkaçš„å®šæ—¶æ¸…ç†ç­–ç•¥å·²ç»å°†åŒ…å«è¯¥offsetsçš„æ–‡ä»¶åˆ é™¤ã€‚
+         * é’ˆå¯¹è¿™ç§æƒ…å†µ,åªè¦åˆ¤æ–­ä¸€ä¸‹zkä¸Šçš„consumerOffsetså’ŒearliestLeaderOffsetsçš„å¤§å°,
+         * å¦‚æžœconsumerOffsetsæ¯”earliestLeaderOffsetsè¿˜å°çš„è¯,è¯´æ˜ŽconsumerOffsetså·²è¿‡æ—¶,
+         * è¿™æ—¶æŠŠconsumerOffsetsæ›´æ–°ä¸ºearliestLeaderOffsets
          */
         val earliestLeaderOffsets = kc.getEarliestLeaderOffsets(partitions).right.get
         val consumerOffsets = consumerOffsetsE.right.get
 
-        // ¿ÉÄÜÖ»ÊÇ´æÔÚ²¿·Ö·ÖÇøconsumerOffsets¹ýÊ±,ËùÒÔÖ»¸üÐÂ¹ýÊ±·ÖÇøµÄconsumerOffsetsÎªearliestLeaderOffsets
+        // å¯èƒ½åªæ˜¯å­˜åœ¨éƒ¨åˆ†åˆ†åŒºconsumerOffsetsè¿‡æ—¶,æ‰€ä»¥åªæ›´æ–°è¿‡æ—¶åˆ†åŒºçš„consumerOffsetsä¸ºearliestLeaderOffsets
         var offsets: Map[TopicAndPartition, Long] = Map()
         consumerOffsets.foreach({
           case (tp, n) =>
             val earliestLeaderOffset = earliestLeaderOffsets(tp).offset
             if (n < earliestLeaderOffset) {
               println("consumer group:" + groupId + ",topic:" + tp.topic + ",partition:" + tp.partition +
-                " offsetsÒÑ¾­¹ýÊ±,¸üÐÂÎª" + earliestLeaderOffset)
+                " offsetså·²ç»è¿‡æ—¶,æ›´æ–°ä¸º" + earliestLeaderOffset)
               offsets += (tp -> earliestLeaderOffset)
             }
         })
@@ -85,7 +85,7 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
           kc.setConsumerOffsets(groupId, offsets)
         }
       } else {
-        // Ã»ÓÐÏû·Ñ¹ý
+        // æ²¡æœ‰æ¶ˆè´¹è¿‡
         val reset = kafkaParams.get("auto.offset.reset").map(_.toLowerCase)
         var leaderOffsets: Map[TopicAndPartition, LeaderOffset] = null
         if (reset == Some("smallest")) {
@@ -102,7 +102,7 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
   }
 
   /**
-   * ¸üÐÂzookeeperÉÏµÄÏû·Ñoffsets
+   * æ›´æ–°zookeeperä¸Šçš„æ¶ˆè´¹offsets
    * @param rdd
    */
   def updateZKOffsets(rdd: RDD[(String, String)]): Unit = {

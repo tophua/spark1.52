@@ -38,23 +38,23 @@ object LogisticRegressionWithElasticNetExample {
     // $example on$
     // Load training data
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     //val training = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
     import org.apache.spark.mllib.util.MLUtils
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
       val training = sqlContext.createDataFrame(dataSVM)
     val lr = new LogisticRegression()
-      .setMaxIter(10)//×î´óµü´ú´ÎÊı
-      .setRegParam(0.3)//ÕıÔò»¯²ÎÊı
-      .setElasticNetParam(0.8)//µ¯ĞÔÍøÂç»ìºÏ²ÎÊı,0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
+      .setMaxIter(10)//æœ€å¤§è¿­ä»£æ¬¡æ•°
+      .setRegParam(0.3)//æ­£åˆ™åŒ–å‚æ•°
+      .setElasticNetParam(0.8)//å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
 
     // Fit the model
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val lrModel = lr.fit(training)
 
     // Print the coefficients and intercept for logistic regression

@@ -20,10 +20,10 @@ import org.apache.spark.util.Utils
    case class Feature(v: Vector)
   object LogisticRegressionExamples {
 /**
- * Spark Coolbook Ê¹ÓÃML´´½¨»úÆ÷Ñ§Ï°Á÷Ë®Ïß
- * ML»ù±¾¸ÅÄî:ËüÊ¹ÓÃ×ª»»Æ÷½«Ò»¸öDataFrame×ª»»ÎªÁíÒ»¸öDataFrame,
- * Ò»¸ö×ª»»Æ÷µÄ¼òµ¥Àı×Ó¾ÍÊÇÔö¼ÓÒ»ÁĞ,Äã¿ÉÒÔµÈ¼ÛÓÚ¹ØÏµÊı¾İ¿âµÄ"alter table"
- * ¹ÀËãÊ¹ÓÃÑµÁ·¼¯Êı¾İÑµÁ·Ëã·¨,È»ºó×ª»»Æ÷×÷³öÔ¤²â
+ * Spark Coolbook ä½¿ç”¨MLåˆ›å»ºæœºå™¨å­¦ä¹ æµæ°´çº¿
+ * MLåŸºæœ¬æ¦‚å¿µ:å®ƒä½¿ç”¨è½¬æ¢å™¨å°†ä¸€ä¸ªDataFrameè½¬æ¢ä¸ºå¦ä¸€ä¸ªDataFrame,
+ * ä¸€ä¸ªè½¬æ¢å™¨çš„ç®€å•ä¾‹å­å°±æ˜¯å¢åŠ ä¸€åˆ—,ä½ å¯ä»¥ç­‰ä»·äºå…³ç³»æ•°æ®åº“çš„"alter table"
+ * ä¼°ç®—ä½¿ç”¨è®­ç»ƒé›†æ•°æ®è®­ç»ƒç®—æ³•,ç„¶åè½¬æ¢å™¨ä½œå‡ºé¢„æµ‹
  */
   def main(args: Array[String]) {
     
@@ -32,46 +32,46 @@ import org.apache.spark.util.Utils
     val sqlContext = new SQLContext(sc)
     
     import sqlContext.implicits._
-    //´´½¨Ò»¸öÃû½ĞLebronµÄÀºÇòÔË¶¯Ô±µÄÏòÁ¿±êÇ© 80¸ß,250ÖØ
+    //åˆ›å»ºä¸€ä¸ªåå«Lebronçš„ç¯®çƒè¿åŠ¨å‘˜çš„å‘é‡æ ‡ç­¾ 80é«˜,250é‡
     val lebron = LabeledPoint(1.0, Vectors.dense(80.0, 250.0))
-    //´´½¨Ò»¸öÃû½ĞtimµÄÀºÇòÔË¶¯Ô±µÄÏòÁ¿±êÇ© 70¸ß,150ÖØ
+    //åˆ›å»ºä¸€ä¸ªåå«timçš„ç¯®çƒè¿åŠ¨å‘˜çš„å‘é‡æ ‡ç­¾ 70é«˜,150é‡
     val tim = LabeledPoint(0.0, Vectors.dense(70.0, 150.0))
-    //´´½¨Ò»¸öÃû½ĞbrittanµÄÀºÇòÔË¶¯Ô±µÄÏòÁ¿±êÇ© 80¸ß,207ÖØ
+    //åˆ›å»ºä¸€ä¸ªåå«brittançš„ç¯®çƒè¿åŠ¨å‘˜çš„å‘é‡æ ‡ç­¾ 80é«˜,207é‡
     val brittany = LabeledPoint(1.0, Vectors.dense(80.0, 207.0))
-    //´´½¨Ò»¸öÃû½ĞStaceyµÄÀºÇòÔË¶¯Ô±µÄÏòÁ¿±êÇ© 65¸ß,120ÖØ
+    //åˆ›å»ºä¸€ä¸ªåå«Staceyçš„ç¯®çƒè¿åŠ¨å‘˜çš„å‘é‡æ ‡ç­¾ 65é«˜,120é‡
     val stacey = LabeledPoint(0.0, Vectors.dense(65.0, 120.0))    
-    //´´½¨Ò»¸öÑµÁ·¼¯RDD    
+    //åˆ›å»ºä¸€ä¸ªè®­ç»ƒé›†RDD    
     val trainingRDD = sc.parallelize(List(lebron, tim, brittany, stacey))
-    //´´½¨Ò»¸öÑµÁ·¼¯DataFrame
+    //åˆ›å»ºä¸€ä¸ªè®­ç»ƒé›†DataFrame
    val  trainingDF=sqlContext.createDataFrame(trainingRDD)
     //val trainingDF = sqlContext.toDF()
     /** 
-     * ¹ÀËã(estimator):´ú±í×Å»úÆ÷Ñ§Ï°Ëã·¨,¼´´Ó»úÆ÷ÖĞÑ§Ï°,¹ÀËãµÄÊäÈëÒ»¸öDataFrame,Êä³öÊÇÒ»¸ö×ª»»Æ÷
-     * Ã¿¸ö¹ÀËã¶¼ÓĞÒ»¸öfit()·½·¨,ÓÃÓÚÑµÁ·Ëã·¨
-     * ´´½¨Ò»¸öLogisticRegression¹ÀËã
+     * ä¼°ç®—(estimator):ä»£è¡¨ç€æœºå™¨å­¦ä¹ ç®—æ³•,å³ä»æœºå™¨ä¸­å­¦ä¹ ,ä¼°ç®—çš„è¾“å…¥ä¸€ä¸ªDataFrame,è¾“å‡ºæ˜¯ä¸€ä¸ªè½¬æ¢å™¨
+     * æ¯ä¸ªä¼°ç®—éƒ½æœ‰ä¸€ä¸ªfit()æ–¹æ³•,ç”¨äºè®­ç»ƒç®—æ³•
+     * åˆ›å»ºä¸€ä¸ªLogisticRegressionä¼°ç®—
      */
     val estimator = new LogisticRegression
-    //´´½¨Ò»¸öÑµÁ·¼¯DataFrame×ª»»Æ÷
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //åˆ›å»ºä¸€ä¸ªè®­ç»ƒé›†DataFrameè½¬æ¢å™¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val transformer = estimator.fit(trainingDF)
-    //´´½¨²âÊÔÊı¾İjohnÉí¸ß90,ÌåÖØ270.0ÊÇÀºÇòÔË¶¯Ô±
+    //åˆ›å»ºæµ‹è¯•æ•°æ®johnèº«é«˜90,ä½“é‡270.0æ˜¯ç¯®çƒè¿åŠ¨å‘˜
     val john = Vectors.dense(90.0, 270.0)
-    //´´½¨²âÊÔÊı¾İtomÉí¸ß62,ÌåÖØ120.0²»ÊÇÀºÇòÔË¶¯Ô±
+    //åˆ›å»ºæµ‹è¯•æ•°æ®tomèº«é«˜62,ä½“é‡120.0ä¸æ˜¯ç¯®çƒè¿åŠ¨å‘˜
     val tom = Vectors.dense(62.0, 120.0)
-    //´´½¨ÑµÁ·¼¯RDD
+    //åˆ›å»ºè®­ç»ƒé›†RDD
     val testRDD =  sc.parallelize(List(john, tom))
-    //Ó³ÉätestRDDºÍFeature RDD
+    //æ˜ å°„testRDDå’ŒFeature RDD
     val featuresRDD = testRDD.map(v => Feature(v))
-    //½«featuresRDD×ª»»ÎªÁĞÃûfeaturesµÄDataFrame
+    //å°†featuresRDDè½¬æ¢ä¸ºåˆ—åfeaturesçš„DataFrame
     val featuresDF = featuresRDD.toDF("features")
-    //ÔÚ×ª»»Æ÷Ôö¼ÓÔ¤²âÁĞfeatures,×ª»»Æ÷×÷³öÔ¤²â
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //åœ¨è½¬æ¢å™¨å¢åŠ é¢„æµ‹åˆ—features,è½¬æ¢å™¨ä½œå‡ºé¢„æµ‹
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictionsDF = transformer.transform(featuresDF)
     println("======")
     predictionsDF.foreach { x =>println _}
-    //ÔÚpredictionsDFÔö¼ÓÁË3ÁĞ,ĞĞÔ¤²â,¿ÉÄÜĞÔºÍÔ¤²â,ÎÒÃÇÖ»Ñ¡ÔñÌØÕ÷ĞÔºÍÔ¤²âÁĞ
+    //åœ¨predictionsDFå¢åŠ äº†3åˆ—,è¡Œé¢„æµ‹,å¯èƒ½æ€§å’Œé¢„æµ‹,æˆ‘ä»¬åªé€‰æ‹©ç‰¹å¾æ€§å’Œé¢„æµ‹åˆ—
     val shorterPredictionsDF = predictionsDF.select("features", "prediction")
-    //½«Ô¤²âÁĞ(prediction)ÖØÃûÎªisBasketBallPlayer
+    //å°†é¢„æµ‹åˆ—(prediction)é‡åä¸ºisBasketBallPlayer
     val playerDF = shorterPredictionsDF.toDF("features", "isBasketBallPlayer")
     playerDF.foreach { x =>println _ }
     /**
@@ -79,7 +79,7 @@ import org.apache.spark.util.Utils
 		 *[[90.0,270.0],[-61.88475862618768,61.88475862618768],[1.3298137364599064E-27,1.0],1.0]
      */
     playerDF.collect().foreach { x =>println _}
-    //´òÓ¡playerDFÊı¾İ½á¹¹
+    //æ‰“å°playerDFæ•°æ®ç»“æ„
     playerDF.printSchema
     
   }

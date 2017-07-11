@@ -26,7 +26,7 @@ import org.apache.spark.util.IntParam
 
 /**
  *  Produces a count of events received from Flume.
- *  ²úÉú´ÓFlumeÊÕµ½µÄÊÂ¼ş¼ÆÊı
+ *  äº§ç”Ÿä»Flumeæ”¶åˆ°çš„äº‹ä»¶è®¡æ•°
  *  This should be used in conjunction with an AvroSink in Flume. It will start
  *  an Avro server on at the request host:port address and listen for requests.
  *  Your Flume AvroSink should be pointed to this address.
@@ -54,15 +54,15 @@ object FlumeEventCount {
     val batchInterval = Milliseconds(2000)
 
     // Create the context and set the batch size
-    //´´½¨ÉÏÏÂÎÄ²¢ÉèÖÃÅúÁ¿´óĞ¡,Åú´Î¼ä¸ô
+    //åˆ›å»ºä¸Šä¸‹æ–‡å¹¶è®¾ç½®æ‰¹é‡å¤§å°,æ‰¹æ¬¡é—´éš”
     val sparkConf = new SparkConf().setAppName("FlumeEventCount")
     val ssc = new StreamingContext(sparkConf, batchInterval)
 
-    // Create a flume stream ´´½¨Ò»¸öflumeÁ÷
+    // Create a flume stream åˆ›å»ºä¸€ä¸ªflumeæµ
     val stream = FlumeUtils.createStream(ssc, host, port, StorageLevel.MEMORY_ONLY_SER_2)
 
     // Print out the count of events received from this server in each batch
-    //´òÓ¡ÔÚÃ¿¸öÅú´ÎÖĞ´ÓÕâ¸ö·şÎñÆ÷½ÓÊÕµ½µÄÊÂ¼şµÄ¼ÆÊı
+    //æ‰“å°åœ¨æ¯ä¸ªæ‰¹æ¬¡ä¸­ä»è¿™ä¸ªæœåŠ¡å™¨æ¥æ”¶åˆ°çš„äº‹ä»¶çš„è®¡æ•°
     stream.count().map(cnt => "Received " + cnt + " flume events." ).print()
 
     ssc.start()

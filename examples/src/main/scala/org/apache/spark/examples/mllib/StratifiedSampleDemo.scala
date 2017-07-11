@@ -3,8 +3,8 @@ package org.apache.spark.examples.mllib
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 /**
- * ·Ö²ã²ÉÑù£¨Stratified sampling£©
- * ±¾Ğ¡½ÚÊ¹ÓÃspark×Ô´øµÄREADME.mdÎÄ¼ş½øĞĞÏàÓ¦µÄÑİÊ¾²Ù×÷
+ * åˆ†å±‚é‡‡æ ·ï¼ˆStratified samplingï¼‰
+ * æœ¬å°èŠ‚ä½¿ç”¨sparkè‡ªå¸¦çš„README.mdæ–‡ä»¶è¿›è¡Œç›¸åº”çš„æ¼”ç¤ºæ“ä½œ
  */
 object StratifiedSampleDemo {
   def main(args: Array[String]) {
@@ -12,18 +12,18 @@ object StratifiedSampleDemo {
 
     val conf = new SparkConf().setAppName("test").setMaster("local")
     val sc = new SparkContext(conf)
-    //¶ÁÈ¡HDFSÉÏµÄREADME.mdÎÄ¼ş
+    //è¯»å–HDFSä¸Šçš„README.mdæ–‡ä»¶
     val textFile = sc.textFile("/README.md")
-    //wordCount²Ù×÷,·µ»Ø£¨K,V)»ã×Ü½á¹û
+    //wordCountæ“ä½œ,è¿”å›ï¼ˆK,V)æ±‡æ€»ç»“æœ
     val wordCounts = textFile.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey((a, b) => a + b)
 
-    //¶¨ÒåkeyÎªspark,²ÉÑù±ÈÂÊÎª0.5
+    //å®šä¹‰keyä¸ºspark,é‡‡æ ·æ¯”ç‡ä¸º0.5
     val fractions: Map[String, Double] = Map("Spark" -> 0.5)
 
-    //Ê¹ÓÃsampleByKey·½·¨½øĞĞ²ÉÑù
+    //ä½¿ç”¨sampleByKeyæ–¹æ³•è¿›è¡Œé‡‡æ ·
     val approxSample = wordCounts.sampleByKey(false, fractions)
-    //Ê¹ÓÃsampleByKeyExact·½·¨½øĞĞ²ÉÑù,¸Ã·½·¨×ÊÔ´ÏûºÄ½ÏsampleByKey¸ü´ó
-    //µ«²ÉÑùºóµÄ´óĞ¡ÓëÔ¤ÆÚ´óĞ¡¸ü½Ó½ü,¿ÉĞÅ¶È´ïµ½99.99%
+    //ä½¿ç”¨sampleByKeyExactæ–¹æ³•è¿›è¡Œé‡‡æ ·,è¯¥æ–¹æ³•èµ„æºæ¶ˆè€—è¾ƒsampleByKeyæ›´å¤§
+    //ä½†é‡‡æ ·åçš„å¤§å°ä¸é¢„æœŸå¤§å°æ›´æ¥è¿‘,å¯ä¿¡åº¦è¾¾åˆ°99.99%
     val exactSample = wordCounts.sampleByKeyExact(false, fractions)
   }
 }

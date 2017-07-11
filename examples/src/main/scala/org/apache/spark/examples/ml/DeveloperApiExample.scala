@@ -28,8 +28,8 @@ import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 
 /**
  * A simple example demonstrating how to write your own learning algorithm using Estimator,
- * Ò»¸ö¼òµ¥µÄÀı×ÓÑİÊ¾ÈçºÎÓÃ¹À¼ÆĞ´×Ô¼ºµÄÑ§Ï°Ëã·¨
- * Transformer, and other abstractions.×ª»»ºÍÆäËû³éÏó
+ * ä¸€ä¸ªç®€å•çš„ä¾‹å­æ¼”ç¤ºå¦‚ä½•ç”¨ä¼°è®¡å†™è‡ªå·±çš„å­¦ä¹ ç®—æ³•
+ * Transformer, and other abstractions.è½¬æ¢å’Œå…¶ä»–æŠ½è±¡
  * This mimics [[org.apache.spark.ml.classification.LogisticRegression]].
  * Run with
  * {{{
@@ -44,39 +44,39 @@ object DeveloperApiExample {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
-    // Prepare training data. ×¼±¸ÑµÁ·Êı¾İ
+    // Prepare training data. å‡†å¤‡è®­ç»ƒæ•°æ®
     val training = sc.parallelize(Seq(
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       LabeledPoint(1.0, Vectors.dense(0.0, 1.1, 0.1)),
       LabeledPoint(0.0, Vectors.dense(2.0, 1.0, -1.0)),
       LabeledPoint(0.0, Vectors.dense(2.0, 1.3, 1.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 1.2, -0.5))))
 
     // Create a LogisticRegression instance.  This instance is an Estimator.
-      //´´½¨Ò»¸öÂß¼­»Ø¹éÊµÀı,Õâ¸öÊµÀıÊÇÒ»¸ö¹À¼ÆÁ¿
+      //åˆ›å»ºä¸€ä¸ªé€»è¾‘å›å½’å®ä¾‹,è¿™ä¸ªå®ä¾‹æ˜¯ä¸€ä¸ªä¼°è®¡é‡
     val lr = new MyLogisticRegression()
     // Print out the parameters, documentation, and any default values.
-    //´òÓ¡²ÎÊı¡¢ÎÄµµºÍÈÎºÎÄ¬ÈÏÖµ
+    //æ‰“å°å‚æ•°ã€æ–‡æ¡£å’Œä»»ä½•é»˜è®¤å€¼
     println("MyLogisticRegression parameters:\n" + lr.explainParams() + "\n")
 
     // We may set parameters using setter methods.
-    //ÎÒÃÇ¿ÉÒÔÊ¹ÓÃsetter·½·¨ÉèÖÃ²ÎÊı
+    //æˆ‘ä»¬å¯ä»¥ä½¿ç”¨setteræ–¹æ³•è®¾ç½®å‚æ•°
     lr.setMaxIter(10)
 
     // Learn a LogisticRegression model.  This uses the parameters stored in lr.
-    //Ñ§Ï°Ò»¸öÂß¼­»Ø¹éÄ£ĞÍ,ÕâÊ¹ÓÃ´æ´¢µÄ²ÎÊı
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //å­¦ä¹ ä¸€ä¸ªé€»è¾‘å›å½’æ¨¡å‹,è¿™ä½¿ç”¨å­˜å‚¨çš„å‚æ•°
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = lr.fit(training.toDF())
 
-    // Prepare test data. ×¼±¸²âÊÔÊı¾İ
+    // Prepare test data. å‡†å¤‡æµ‹è¯•æ•°æ®
     val test = sc.parallelize(Seq(
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       LabeledPoint(1.0, Vectors.dense(-1.0, 1.5, 1.3)),
       LabeledPoint(0.0, Vectors.dense(3.0, 2.0, -0.1)),
       LabeledPoint(1.0, Vectors.dense(0.0, 2.2, -1.5))))
 
-    // Make predictions on test data. ¶Ô²âÊÔÊı¾İ½øĞĞÔ¤²â
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    // Make predictions on test data. å¯¹æµ‹è¯•æ•°æ®è¿›è¡Œé¢„æµ‹
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val sumPredictions: Double = model.transform(test.toDF())
       .select("features", "label", "prediction")
       .collect()
@@ -92,21 +92,21 @@ object DeveloperApiExample {
 
 /**
  * Example of defining a parameter trait for a user-defined type of [[Classifier]].
- * ¶¨ÒåÒ»¸öÓÃ»§¶¨ÒåÀàĞÍµÄ²ÎÊıÌØÕ÷µÄÀı×Ó
+ * å®šä¹‰ä¸€ä¸ªç”¨æˆ·å®šä¹‰ç±»å‹çš„å‚æ•°ç‰¹å¾çš„ä¾‹å­
  * NOTE: This is private since it is an example.  In practice, you may not want it to be private.
  */
 private trait MyLogisticRegressionParams extends ClassifierParams {
 
   /**
    * Param for max number of iterations
-   * ×î´óÊıÁ¿µÄµü´ú²ÎÊı
+   * æœ€å¤§æ•°é‡çš„è¿­ä»£å‚æ•°
    * NOTE: The usual way to add a parameter to a model or algorithm is to include:
-   * Í¨³£µÄ·½·¨À´Ìí¼ÓÒ»¸öÄ£ĞÍ»òËã·¨µÄ²ÎÊıÊÇ°üÀ¨
+   * é€šå¸¸çš„æ–¹æ³•æ¥æ·»åŠ ä¸€ä¸ªæ¨¡å‹æˆ–ç®—æ³•çš„å‚æ•°æ˜¯åŒ…æ‹¬
    *   - val myParamName: ParamType
    *   - def getMyParamName
    *   - def setMyParamName
    * Here, we have a trait to be mixed in with the Estimator and Model (MyLogisticRegression
-   * ÓĞÒ»¸öÌØÖÊÓë¹À¼ÆºÍÄ£ĞÍ»ìºÏÔÚÒ»Æğ
+   * æœ‰ä¸€ä¸ªç‰¹è´¨ä¸ä¼°è®¡å’Œæ¨¡å‹æ··åˆåœ¨ä¸€èµ·
    * and MyLogisticRegressionModel).  We place the setter (setMaxIter) method in the Estimator
    * class since the maxIter parameter is only used during training (not in the Model).
    */
@@ -116,7 +116,7 @@ private trait MyLogisticRegressionParams extends ClassifierParams {
 
 /**
  * Example of defining a type of [[Classifier]].
- * ¶¨ÒåÒ»¸öÀàĞÍµÄÀı×Ó[ [·ÖÀà] ]
+ * å®šä¹‰ä¸€ä¸ªç±»å‹çš„ä¾‹å­[ [åˆ†ç±»] ]
  * NOTE: This is private since it is an example.  In practice, you may not want it to be private.
  */
 private class MyLogisticRegression(override val uid: String)
@@ -128,21 +128,21 @@ private class MyLogisticRegression(override val uid: String)
   setMaxIter(100) // Initialize
 
   // The parameter setter is in this class since it should return type MyLogisticRegression.
-  //²ÎÊıÉèÖÃÆ÷ÊÇÒòÎªËüÓ¦¸Ã·µ»ØÀàĞÍmylogisticregression
+  //å‚æ•°è®¾ç½®å™¨æ˜¯å› ä¸ºå®ƒåº”è¯¥è¿”å›ç±»å‹mylogisticregression
   def setMaxIter(value: Int): this.type = set(maxIter, value)
 
-  // This method is used by fit()ÕâÖÖ·½·¨ÊÇÓÃfit()
+  // This method is used by fit()è¿™ç§æ–¹æ³•æ˜¯ç”¨fit()
   override protected def train(dataset: DataFrame): MyLogisticRegressionModel = {
     // Extract columns from data using helper method.
-    //Ê¹ÓÃ¸¨Öú·½·¨´ÓÊı¾İÖĞÌáÈ¡ÁĞ
+    //ä½¿ç”¨è¾…åŠ©æ–¹æ³•ä»æ•°æ®ä¸­æå–åˆ—
     val oldDataset = extractLabeledPoints(dataset)
 
     // Do learning to estimate the weight vector.
-    //×öÑ§Ï°¹À¼ÆÈ¨ÖØÏòÁ¿
+    //åšå­¦ä¹ ä¼°è®¡æƒé‡å‘é‡
     val numFeatures = oldDataset.take(1)(0).features.size
-    val weights = Vectors.zeros(numFeatures) // Learning would happen here. Ñ§Ï°»á·¢ÉúÔÚÕâÀï
+    val weights = Vectors.zeros(numFeatures) // Learning would happen here. å­¦ä¹ ä¼šå‘ç”Ÿåœ¨è¿™é‡Œ
 
-    // Create a model, and return it. ´´½¨Ò»¸öÄ£ĞÍ,²¢·µ»ØËü
+    // Create a model, and return it. åˆ›å»ºä¸€ä¸ªæ¨¡å‹,å¹¶è¿”å›å®ƒ
     new MyLogisticRegressionModel(uid, weights).setParent(this)
   }
 
@@ -151,7 +151,7 @@ private class MyLogisticRegression(override val uid: String)
 
 /**
  * Example of defining a type of [[ClassificationModel]].
- * ¶¨ÒåÒ»¸öÀàĞÍµÄ[·ÖÀàÄ£ĞÍ]µÄÀı×Ó
+ * å®šä¹‰ä¸€ä¸ªç±»å‹çš„[åˆ†ç±»æ¨¡å‹]çš„ä¾‹å­
  * NOTE: This is private since it is an example.  In practice, you may not want it to be private.
  */
 private class MyLogisticRegressionModel(
@@ -161,21 +161,21 @@ private class MyLogisticRegressionModel(
   with MyLogisticRegressionParams {
 
   // This uses the default implementation of transform(), which reads column "features" and outputs
-  //ÕâÊÇÓÃtransform()Ä¬ÈÏÊµÏÖ,¶ÁÈ¡ºÍÊä³öÁĞµÄ¡°ÌØµã¡±
+  //è¿™æ˜¯ç”¨transform()é»˜è®¤å®ç°,è¯»å–å’Œè¾“å‡ºåˆ—çš„â€œç‰¹ç‚¹â€
   // columns "prediction" and "rawPrediction."
-  //ÁĞ¡°Ô¤²â¡±ºÍ¡°rawprediction¡£¡±
+  //åˆ—â€œé¢„æµ‹â€å’Œâ€œrawpredictionã€‚â€
 
   // This uses the default implementation of predict(), which chooses the label corresponding to
-  //ÕâÊÇÓÃpredict()Ä¬ÈÏÊµÏÖ
+  //è¿™æ˜¯ç”¨predict()é»˜è®¤å®ç°
   // the maximum value returned by [[predictRaw()]].
-  //Ñ¡Ôñ±êÇ©¶ÔÓ¦×î´óÖµ·µ»ØµÄpredictraw() 
+  //é€‰æ‹©æ ‡ç­¾å¯¹åº”æœ€å¤§å€¼è¿”å›çš„predictraw() 
 
   /**
-   * Raw prediction for each possible label. ¶ÔÃ¿¸ö¿ÉÄÜµÄ±êÇ©µÄÔ­Ê¼Ô¤²â
+   * Raw prediction for each possible label. å¯¹æ¯ä¸ªå¯èƒ½çš„æ ‡ç­¾çš„åŸå§‹é¢„æµ‹
    * The meaning of a "raw" prediction may vary between algorithms, but it intuitively gives
-   * Ô­Ê¼¡±Ô¤²âµÄº¬Òå¿ÉÄÜ»áÓĞËù²»Í¬µÄËã·¨
+   * åŸå§‹â€é¢„æµ‹çš„å«ä¹‰å¯èƒ½ä¼šæœ‰æ‰€ä¸åŒçš„ç®—æ³•
    * a measure of confidence in each possible label (where larger = more confident).
-   * µ«ËüÖ±¹ÛµØ¸ø³öÁËÒ»¸ö²âÁ¿Ã¿¸ö¿ÉÄÜµÄ±êÇ©ĞÅĞÄ rawPredictionCol Ô­Ê¼µÄËã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ
+   * ä½†å®ƒç›´è§‚åœ°ç»™å‡ºäº†ä¸€ä¸ªæµ‹é‡æ¯ä¸ªå¯èƒ½çš„æ ‡ç­¾ä¿¡å¿ƒ rawPredictionCol åŸå§‹çš„ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°
    * This internal method is used to implement [[transform()]] and output [[rawPredictionCol]].
    *
    * @return  vector where element i is the raw prediction for label i.
@@ -191,14 +191,14 @@ private class MyLogisticRegressionModel(
 
   /** 
    *  Number of classes the label can take.  2 indicates binary classification.
-   *  ±êÇ©¿ÉÒÔ²ÉÈ¡µÄÀàµÄÊıÁ¿, 2±íÊ¾¶ş½øÖÆ·ÖÀà
+   *  æ ‡ç­¾å¯ä»¥é‡‡å–çš„ç±»çš„æ•°é‡, 2è¡¨ç¤ºäºŒè¿›åˆ¶åˆ†ç±»
    *  */
   override val numClasses: Int = 2
 
   /**
-   * Create a copy of the model.´´½¨Ä£ĞÍµÄ¸±±¾
+   * Create a copy of the model.åˆ›å»ºæ¨¡å‹çš„å‰¯æœ¬
    * The copy is shallow, except for the embedded paramMap, which gets a deep copy.
-   * ¸´ÖÆÊÇÇ³,³ıÁËÇ¶ÈëÊ½parammap,µÃµ½Éî¿½±´
+   * å¤åˆ¶æ˜¯æµ…,é™¤äº†åµŒå…¥å¼parammap,å¾—åˆ°æ·±æ‹·è´
    * This is used for the default implementation of [[transform()]].
    */
   override def copy(extra: ParamMap): MyLogisticRegressionModel = {

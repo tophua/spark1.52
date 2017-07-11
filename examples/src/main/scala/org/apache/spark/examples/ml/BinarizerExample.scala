@@ -26,8 +26,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * Binarizer ¶şÖµ»¯ÊÇ¸ù¾İ·§Öµ½«Á¬ĞøÊıÖµÌØÕ÷×ª»»Îª0-1ÌØÕ÷µÄ¹ı³Ì
- * ÌØÕ÷Öµ´óÓÚ·§Öµ½«Ó³ÉäÎª1.0,ÌØÕ÷ÖµĞ¡ÓÚµÈÓÚ·§Öµ½«Ó³ÉäÎª0.0
+ * Binarizer äºŒå€¼åŒ–æ˜¯æ ¹æ®é˜€å€¼å°†è¿ç»­æ•°å€¼ç‰¹å¾è½¬æ¢ä¸º0-1ç‰¹å¾çš„è¿‡ç¨‹
+ * ç‰¹å¾å€¼å¤§äºé˜€å€¼å°†æ˜ å°„ä¸º1.0,ç‰¹å¾å€¼å°äºç­‰äºé˜€å€¼å°†æ˜ å°„ä¸º0.0
  */
 object BinarizerExample {
   def main(args: Array[String]): Unit = {
@@ -41,14 +41,14 @@ object BinarizerExample {
     val data = Array((0, 0.1), (1, 0.8), (2, 0.2),(2, 0.4),(2, 0.5),(2, 0.6))
     val dataFrame = sqlContext.createDataFrame(data).toDF("label", "feature")
     /**
-     * ¶şÖµ»¯
+     * äºŒå€¼åŒ–
      */
     val binarizer: Binarizer = new Binarizer()
       .setInputCol("feature")
       .setOutputCol("binarized_feature")
-      //ÔÚ¶ş½øÖÆ·ÖÀàÖĞÉèÖÃãĞÖµ,·¶Î§Îª[0,1],Èç¹ûÀà±êÇ©1µÄ¹À¼Æ¸ÅÂÊ>Threshold,ÔòÔ¤²â1,·ñÔò0
+      //åœ¨äºŒè¿›åˆ¶åˆ†ç±»ä¸­è®¾ç½®é˜ˆå€¼,èŒƒå›´ä¸º[0,1],å¦‚æœç±»æ ‡ç­¾1çš„ä¼°è®¡æ¦‚ç‡>Threshold,åˆ™é¢„æµ‹1,å¦åˆ™0
       .setThreshold(0.5)
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val binarizedDataFrame = binarizer.transform(dataFrame)
     val binarizedFeatures = binarizedDataFrame.select("binarized_feature")
     /**

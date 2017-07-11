@@ -27,7 +27,7 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.optimization.{SimpleUpdater, SquaredL2Updater, L1Updater}
 
 /**
- * Ò»¸öÏßĞÔ»Ø¹éµÄÀı×Ó
+ * ä¸€ä¸ªçº¿æ€§å›å½’çš„ä¾‹å­
  * An example app for linear regression. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.LinearRegression
@@ -48,7 +48,7 @@ object LinearRegression {
       //input: String = null,
       input: String = "../data/mllib/sample_linear_regression_data.txt",
       numIterations: Int = 100,
-      stepSize: Double = 1.0,//Ã¿´Îµü´úÓÅ»¯²½³¤
+      stepSize: Double = 1.0,//æ¯æ¬¡è¿­ä»£ä¼˜åŒ–æ­¥é•¿
       regType: RegType = L2,
       regParam: Double = 0.01) extends AbstractParams[Params]
 
@@ -60,7 +60,7 @@ object LinearRegression {
       opt[Int]("numIterations")
         .text("number of iterations")
         .action((x, c) => c.copy(numIterations = x))
-      opt[Double]("stepSize")//Ã¿´Îµü´úÓÅ»¯²½³¤
+      opt[Double]("stepSize")//æ¯æ¬¡è¿­ä»£ä¼˜åŒ–æ­¥é•¿
         .text(s"initial step size, default: ${defaultParams.stepSize}")
         .action((x, c) => c.copy(stepSize = x))
       opt[String]("regType")
@@ -72,11 +72,11 @@ object LinearRegression {
       opt[String]("<input>")
         //.required()
 	/**
-   *  libSVMµÄÊı¾İ¸ñÊ½
+   *  libSVMçš„æ•°æ®æ ¼å¼
    *  <label> <index1>:<value1> <index2>:<value2> ...
-   *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-   *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-   *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+   *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+   *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+   *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
    */
         .text("input paths to labeled examples in LIBSVM format")
         .action((x, c) => c.copy(input = x))
@@ -103,11 +103,11 @@ object LinearRegression {
 
     Logger.getRootLogger.setLevel(Level.WARN)
   /**
-   *  libSVMµÄÊı¾İ¸ñÊ½
+   *  libSVMçš„æ•°æ®æ ¼å¼
    *  <label> <index1>:<value1> <index2>:<value2> ...
-   *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-   *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-   *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+   *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+   *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+   *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
    */
     val examples = MLUtils.loadLibSVMFile(sc, params.input).cache()
 
@@ -127,12 +127,12 @@ object LinearRegression {
       case L2 => new SquaredL2Updater()
     }
 
-    val algorithm = new LinearRegressionWithSGD()//(SGDËæ»úÌİ¶ÈÏÂ½µ)
+    val algorithm = new LinearRegressionWithSGD()//(SGDéšæœºæ¢¯åº¦ä¸‹é™)
     algorithm.optimizer
-      .setNumIterations(params.numIterations)//µü´ú´ÎÊı
-      .setStepSize(params.stepSize)//Ã¿´Îµü´úÓÅ»¯²½³¤
+      .setNumIterations(params.numIterations)//è¿­ä»£æ¬¡æ•°
+      .setStepSize(params.stepSize)//æ¯æ¬¡è¿­ä»£ä¼˜åŒ–æ­¥é•¿
       .setUpdater(updater)
-      .setRegParam(params.regParam)//ÕıÔò»¯
+      .setRegParam(params.regParam)//æ­£åˆ™åŒ–
 
     val model = algorithm.run(training)
 
@@ -143,9 +143,9 @@ object LinearRegression {
       val err = p - l
       err * err
     }.reduce(_ + _)
-    //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+    //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     val rmse = math.sqrt(loss / numTest)
-    //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+    //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     println(s"Test RMSE = $rmse.")
 
     sc.stop()

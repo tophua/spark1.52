@@ -26,7 +26,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * ±ê×¼»¯ÊÇÖ¸:¶ÔÓÚÑµÁ·¼¯ÖÐµÄÑù±¾,»ùÓÚÁÐÍ³¼ÆÐÅÏ¢½«Êý¾Ý³ýÒÔ·½²î»ò(ÇÒ)Õß½«Êý¾Ý¼õÈ¥Æä¾ùÖµ(½á¹ûÊÇ·½²îµÈÓÚ1,Êý¾ÝÔÚ0¸½½ü)
+ * æ ‡å‡†åŒ–æ˜¯æŒ‡:å¯¹äºŽè®­ç»ƒé›†ä¸­çš„æ ·æœ¬,åŸºäºŽåˆ—ç»Ÿè®¡ä¿¡æ¯å°†æ•°æ®é™¤ä»¥æ–¹å·®æˆ–(ä¸”)è€…å°†æ•°æ®å‡åŽ»å…¶å‡å€¼(ç»“æžœæ˜¯æ–¹å·®ç­‰äºŽ1,æ•°æ®åœ¨0é™„è¿‘)
  */
 object NormalizerExample {
   def main(args: Array[String]): Unit = {
@@ -38,23 +38,23 @@ object NormalizerExample {
 
     // $example on$
     /**
- *  libSVMµÄÊý¾Ý¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖÐ<label>ÊÇÑµÁ·Êý¾Ý¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊý(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊý
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊý,¿ÉÒÔÊÇ²»Á¬Ðø
- *  <value>ÎªÊµÊý,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºŽåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºŽå›žå½’,æ˜¯ä»»æ„å®žæ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿žç»­
+ *  <value>ä¸ºå®žæ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
    // val dataFrame = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
      import org.apache.spark.mllib.util.MLUtils
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
       val dataFrame = sqlContext.createDataFrame(dataSVM)
     // Normalize each Vector using $L^1$ norm.
-    //±ê×¼»¯ÊÇÖ¸:¶ÔÓÚÑµÁ·¼¯ÖÐµÄÑù±¾,»ùÓÚÁÐÍ³¼ÆÐÅÏ¢½«Êý¾Ý³ýÒÔ·½²î»ò(ÇÒ)Õß½«Êý¾Ý¼õÈ¥Æä¾ùÖµ(½á¹ûÊÇ·½²îµÈÓÚ1,Êý¾ÝÔÚ0¸½½ü)
+    //æ ‡å‡†åŒ–æ˜¯æŒ‡:å¯¹äºŽè®­ç»ƒé›†ä¸­çš„æ ·æœ¬,åŸºäºŽåˆ—ç»Ÿè®¡ä¿¡æ¯å°†æ•°æ®é™¤ä»¥æ–¹å·®æˆ–(ä¸”)è€…å°†æ•°æ®å‡åŽ»å…¶å‡å€¼(ç»“æžœæ˜¯æ–¹å·®ç­‰äºŽ1,æ•°æ®åœ¨0é™„è¿‘)
     val normalizer = new Normalizer()
       .setInputCol("features")
       .setOutputCol("normFeatures")
       .setP(1.0)
-     //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+     //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val l1NormData = normalizer.transform(dataFrame)
     /**
     +-----+--------------------+--------------------+
@@ -71,7 +71,7 @@ object NormalizerExample {
     +-----+--------------------+--------------------+*/
     l1NormData.show()
     // Normalize each Vector using $L^\infty$ norm.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val lInfNormData = normalizer.transform(dataFrame, normalizer.p -> Double.PositiveInfinity)
     /**
       +-----+--------------------+--------------------+

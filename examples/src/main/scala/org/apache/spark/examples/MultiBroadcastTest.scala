@@ -23,7 +23,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Usage: MultiBroadcastTest [slices] [numElem]
-  * Ê¹ÓÃ:¶à²¥
+  * ä½¿ç”¨:å¤šæ’­
   */
 object MultiBroadcastTest {
   def main(args: Array[String]) {
@@ -44,14 +44,14 @@ object MultiBroadcastTest {
       arr2(i) = i
     }
 
-    val barr1 = sc.broadcast(arr1)//¹ã²¥±äÁ¿
-    val barr2 = sc.broadcast(arr2)//¹ã²¥±äÁ¿
-    //¹Û²ìµ½µÄ´óÐ¡
+    val barr1 = sc.broadcast(arr1)//å¹¿æ’­å˜é‡
+    val barr2 = sc.broadcast(arr2)//å¹¿æ’­å˜é‡
+    //è§‚å¯Ÿåˆ°çš„å¤§å°
     val observedSizes: RDD[(Int, Int)] = sc.parallelize(1 to 10, slices).map { _ =>
       (barr1.value.size, barr2.value.size)
     }
     // Collect the small RDD so we can print the observed sizes locally.
-    //ÊÕ¼¯Ð¡RDD¿ÉÒÔ´òÓ¡³ß´çµÄ¾Ö²¿¹Û²ì
+    //æ”¶é›†å°RDDå¯ä»¥æ‰“å°å°ºå¯¸çš„å±€éƒ¨è§‚å¯Ÿ
     observedSizes.collect().foreach(i => println(i))
 
     sc.stop()

@@ -26,17 +26,17 @@ import org.apache.spark.SparkConf
 
 /**
  * Consumes messages from one or more topics in Kafka and does wordcount.
- * Ê¹ÓÃÏûÏ¢´ÓKafkaÒ»¸ö»ò¶à¸öÖ÷Ìâ,×öµ¥´Ê¼ÆÊı
+ * ä½¿ç”¨æ¶ˆæ¯ä»Kafkaä¸€ä¸ªæˆ–å¤šä¸ªä¸»é¢˜,åšå•è¯è®¡æ•°
  * Usage: DirectKafkaWordCount <brokers> <topics>
  *   <brokers> is a list of one or more Kafka brokers
- *   					 ÊÇÒ»¸ö»ò¶à¸öKafka brokerµÄÁĞ±í(Ò»Ì¨kafka·şÎñÆ÷¾ÍÊÇÒ»¸öbroker)
+ *   					 æ˜¯ä¸€ä¸ªæˆ–å¤šä¸ªKafka brokerçš„åˆ—è¡¨(ä¸€å°kafkaæœåŠ¡å™¨å°±æ˜¯ä¸€ä¸ªbroker)
  *   <topics> is a list of one or more kafka topics to consume from
- *				    ÊÇ´ÓÒ»¸ö»ò¸ü¶àµÄkafkaÏû·ÑÖ÷ÌâµÄÁĞ±í
+ *				    æ˜¯ä»ä¸€ä¸ªæˆ–æ›´å¤šçš„kafkaæ¶ˆè´¹ä¸»é¢˜çš„åˆ—è¡¨
  * Example:
  *    $ bin/run-example streaming.DirectKafkaWordCount broker1-host:port,broker2-host:port \
  *    topic1,topic2
- *´ÓKafka Direct API½ÓÊÕÊı¾İ,ÎªKafkaÊı¾İÔ´Ìá¹©¡°¾«È·Ò»´Î¡±ÓïÒå±£Ö¤,
- * ÓĞÁËÕâ¸öÊäÈëAPI,ÔÙ¼ÓÉÏÊä³öËã×ÓµÄ¡°¾«È·Ò»´Î¡±±£Ö¤,Äã¾ÍÄÜÕæÕıÊµÏÖ¶Ëµ½¶ËµÄ¡°¾«È·Ò»´Î¡±ÓïÒå±£Ö¤
+ *ä»Kafka Direct APIæ¥æ”¶æ•°æ®,ä¸ºKafkaæ•°æ®æºæä¾›â€œç²¾ç¡®ä¸€æ¬¡â€è¯­ä¹‰ä¿è¯,
+ * æœ‰äº†è¿™ä¸ªè¾“å…¥API,å†åŠ ä¸Šè¾“å‡ºç®—å­çš„â€œç²¾ç¡®ä¸€æ¬¡â€ä¿è¯,ä½ å°±èƒ½çœŸæ­£å®ç°ç«¯åˆ°ç«¯çš„â€œç²¾ç¡®ä¸€æ¬¡â€è¯­ä¹‰ä¿è¯
  */
 object DirectKafkaWordCount {
   def main(args: Array[String]) {
@@ -55,25 +55,25 @@ object DirectKafkaWordCount {
     val Array(brokers, topics) = args
 
     // Create context with 2 second batch interval
-    //´´½¨2ÃëÅú´Î¼ä¸ôµÄÉÏÏÂÎÄ
+    //åˆ›å»º2ç§’æ‰¹æ¬¡é—´éš”çš„ä¸Šä¸‹æ–‡
     val sparkConf = new SparkConf().setAppName("DirectKafkaWordCount")
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     // Create direct kafka stream with brokers and topics
-    //´´½¨Ö±½ÓµÄkafkaÁ÷Óëbroker(Ò»Ì¨kafka·şÎñÆ÷¾ÍÊÇÒ»¸öbroker)ºÍÖ÷Ìâ
+    //åˆ›å»ºç›´æ¥çš„kafkaæµä¸broker(ä¸€å°kafkaæœåŠ¡å™¨å°±æ˜¯ä¸€ä¸ªbroker)å’Œä¸»é¢˜
     val topicsSet = topics.split(",").toSet
     val kafkaParams = Map[String, String]("metadata.broker.list" -> brokers)
     val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
       ssc, kafkaParams, topicsSet)
 
     // Get the lines, split them into words, count the words and print
-    //»ñÈ¡ĞĞ,½«ËüÃÇ·Ö¸î³Éµ¥´Ê,È»ºóÊıµ¥´ÊºÍ´òÓ¡
+    //è·å–è¡Œ,å°†å®ƒä»¬åˆ†å‰²æˆå•è¯,ç„¶åæ•°å•è¯å’Œæ‰“å°
     val lines = messages.map(_._2)
     val words = lines.flatMap(_.split(" "))
     val wordCounts = words.map(x => (x, 1L)).reduceByKey(_ + _)
     wordCounts.print()
 
-    // Start the computation ¿ªÊ¼¼ÆËã
+    // Start the computation å¼€å§‹è®¡ç®—
     ssc.start()
     ssc.awaitTermination()
   }

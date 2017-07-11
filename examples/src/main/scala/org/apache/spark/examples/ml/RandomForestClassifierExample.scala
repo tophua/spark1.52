@@ -30,10 +30,10 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * Ëæ»úÉ­ÁÖ(Random Forests)ÆäÊµ¾ÍÊÇ¶à¸ö¾ö²ßÊ÷,Ã¿¸ö¾ö²ßÊ÷ÓĞÒ»¸öÈ¨ÖØ,¶ÔÎ´ÖªÊı¾İ½øĞĞÔ¤²âÊ±,
- * »áÓÃ¶à¸ö¾ö²ßÊ÷·Ö±ğÔ¤²âÒ»¸öÖµ,È»ºó¿¼ÂÇÊ÷µÄÈ¨ÖØ,½«Õâ¶à¸öÔ¤²âÖµ×ÛºÏÆğÀ´,
- * ¶ÔÓÚ·ÖÀàÎÊÌâ,²ÉÓÃ¶àÊı±í¾ö,¶ÔÓÚ»Ø¹éÎÊÌâ,Ö±½ÓÇóÆ½¾ù¡£
- * RandomForestClassifier Ëæ»úÉ­ÁÖ·ÖÀàÊ÷
+ * éšæœºæ£®æ—(Random Forests)å…¶å®å°±æ˜¯å¤šä¸ªå†³ç­–æ ‘,æ¯ä¸ªå†³ç­–æ ‘æœ‰ä¸€ä¸ªæƒé‡,å¯¹æœªçŸ¥æ•°æ®è¿›è¡Œé¢„æµ‹æ—¶,
+ * ä¼šç”¨å¤šä¸ªå†³ç­–æ ‘åˆ†åˆ«é¢„æµ‹ä¸€ä¸ªå€¼,ç„¶åè€ƒè™‘æ ‘çš„æƒé‡,å°†è¿™å¤šä¸ªé¢„æµ‹å€¼ç»¼åˆèµ·æ¥,
+ * å¯¹äºåˆ†ç±»é—®é¢˜,é‡‡ç”¨å¤šæ•°è¡¨å†³,å¯¹äºå›å½’é—®é¢˜,ç›´æ¥æ±‚å¹³å‡ã€‚
+ * RandomForestClassifier éšæœºæ£®æ—åˆ†ç±»æ ‘
  */
 object RandomForestClassifierExample {
   def main(args: Array[String]): Unit = {
@@ -51,49 +51,49 @@ object RandomForestClassifierExample {
       val data = sqlContext.createDataFrame(dataSVM)
     // Index labels, adding metadata to the label column.
     // Fit on whole dataset to include all labels in index.
-    //ÑµÁ·Ö®Ç°ÎÒÃÇÊ¹ÓÃÁËÁ½ÖÖÊı¾İÔ¤´¦Àí·½·¨À´¶ÔÌØÕ÷½øĞĞ×ª»»
+    //è®­ç»ƒä¹‹å‰æˆ‘ä»¬ä½¿ç”¨äº†ä¸¤ç§æ•°æ®é¢„å¤„ç†æ–¹æ³•æ¥å¯¹ç‰¹å¾è¿›è¡Œè½¬æ¢
     val labelIndexer = new StringIndexer()
       .setInputCol("label")
       .setOutputCol("indexedLabel")
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     // Automatically identify categorical features, and index them.
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
-    //VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+    //VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
-      .setMaxCategories(4)//×î´óÀà±ğÊıÎª4,(¼´Ä³Ò»ÁĞ)ÖĞ¶àÓÚ4¸öÈ¡ÖµÊÓÎªÁ¬ĞøÖµ
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .setMaxCategories(4)//æœ€å¤§ç±»åˆ«æ•°ä¸º4,(å³æŸä¸€åˆ—)ä¸­å¤šäº4ä¸ªå–å€¼è§†ä¸ºè¿ç»­å€¼
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
 
     // Split the data into training and test sets (30% held out for testing).
-    //Ê¹ÓÃµÚÒ»²¿·ÖÊı¾İ½øĞĞÑµÁ·,Ê£ÏÂÊı¾İÀ´²âÊÔ
+    //ä½¿ç”¨ç¬¬ä¸€éƒ¨åˆ†æ•°æ®è¿›è¡Œè®­ç»ƒ,å‰©ä¸‹æ•°æ®æ¥æµ‹è¯•
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a RandomForest model.
     val rf = new RandomForestClassifier()
-      .setLabelCol("indexedLabel")//±êÇ©ÁĞÃû
-      .setFeaturesCol("indexedFeatures")//ÌØÕ÷ÁĞÃû
-      .setNumTrees(10)//ÑµÁ·µÄÊ÷µÄÊıÁ¿
+      .setLabelCol("indexedLabel")//æ ‡ç­¾åˆ—å
+      .setFeaturesCol("indexedFeatures")//ç‰¹å¾åˆ—å
+      .setNumTrees(10)//è®­ç»ƒçš„æ ‘çš„æ•°é‡
 
     // Convert indexed labels back to original labels.
-    //×ª»»Ë÷Òı±êÇ©»Øµ½Ô­À´µÄ±êÇ©
+    //è½¬æ¢ç´¢å¼•æ ‡ç­¾å›åˆ°åŸæ¥çš„æ ‡ç­¾
     val labelConverter = new IndexToString()
       .setInputCol("prediction")
       .setOutputCol("predictedLabel")
       .setLabels(labelIndexer.labels)
 
     // Chain indexers and forest in a Pipeline.
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(labelIndexer, featureIndexer, rf, labelConverter))
 
     // Train model. This also runs the indexers.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(trainingData)
 
     // Make predictions.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(testData)
     /**
       +-----+--------------------+------------+--------------------+-------------+-----------+----------+--------------+
@@ -120,12 +120,12 @@ object RandomForestClassifierExample {
     predictions.select("predictedLabel", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.
-    // Ñ¡Ôñ(Ô¤²â,±êÇ©)¼ÆËã²âÊÔ´íÎó
+    // é€‰æ‹©(é¢„æµ‹,æ ‡ç­¾)è®¡ç®—æµ‹è¯•é”™è¯¯
     val evaluator = new MulticlassClassificationEvaluator()
-      .setLabelCol("indexedLabel")//±êÇ©ÁĞÃû
-      //Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
+      .setLabelCol("indexedLabel")//æ ‡ç­¾åˆ—å
+      //ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
       .setPredictionCol("prediction")
-      .setMetricName("precision")//×¼È·ÂÊ
+      .setMetricName("precision")//å‡†ç¡®ç‡
     val accuracy = evaluator.evaluate(predictions)
     //Test Error = 0.025000000000000022
     println("Test Error = " + (1.0 - accuracy))

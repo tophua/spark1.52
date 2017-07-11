@@ -25,29 +25,29 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
  * Train a linear regression model on one stream of data and make predictions
- * ÔÚÒ»¸öÊı¾İÁ÷ÉÏÑµÁ·Ò»¸öÏßĞÔ»Ø¹éÄ£ĞÍ,²¢ÔÚÁíÒ»¸öÊı¾İÁ÷ÉÏ½øĞĞÔ¤²â
+ * åœ¨ä¸€ä¸ªæ•°æ®æµä¸Šè®­ç»ƒä¸€ä¸ªçº¿æ€§å›å½’æ¨¡å‹,å¹¶åœ¨å¦ä¸€ä¸ªæ•°æ®æµä¸Šè¿›è¡Œé¢„æµ‹
  * on another stream, where the data streams arrive as text files
  * into two different directories.
- * µ±Êı¾İÁ÷µ½´ïÎÄ±¾ÎÄ¼şµ½Á½¸ö²»Í¬µÄÄ¿Â¼Ê±
+ * å½“æ•°æ®æµåˆ°è¾¾æ–‡æœ¬æ–‡ä»¶åˆ°ä¸¤ä¸ªä¸åŒçš„ç›®å½•æ—¶
  * 
  * The rows of the text files must be labeled data points in the form
- * ÎÄ±¾ÎÄ¼şµÄĞĞ±ØĞëÔÚ´°ÌåÖĞ±ê¼ÇÊı¾İµã
+ * æ–‡æœ¬æ–‡ä»¶çš„è¡Œå¿…é¡»åœ¨çª—ä½“ä¸­æ ‡è®°æ•°æ®ç‚¹
  * `(y,[x1,x2,x3,...,xn])`
  * Where n is the number of features. n must be the same for train and test.
- * ÖĞnÊÇÌØÕ÷µÄÊıÁ¿,ÑµÁ·ºÍ²âÊÔ±ØĞëÊÇÏàÍ¬µÄ
+ * ä¸­næ˜¯ç‰¹å¾çš„æ•°é‡,è®­ç»ƒå’Œæµ‹è¯•å¿…é¡»æ˜¯ç›¸åŒçš„
  *
  * Usage: StreamingLinearRegression <trainingDir> <testDir> <batchDuration> <numFeatures>
  *
  * To run on your local machine using the two directories `trainingDir` and `testDir`,
- * ÔËĞĞÔÚ±¾µØ»úÆ÷ÉÏÊ¹ÓÃÁ½¸öÄ¿Â¼` trainingdir `ºÍ` testdir `
+ * è¿è¡Œåœ¨æœ¬åœ°æœºå™¨ä¸Šä½¿ç”¨ä¸¤ä¸ªç›®å½•` trainingdir `å’Œ` testdir `
  * with updates every 5 seconds, and 2 features per data point, call:
- * Ã¿5Ãë¸üĞÂÒ»´Î,Ã¿¸öÊı¾İµãµÄ2¸öÌØÕ÷
+ * æ¯5ç§’æ›´æ–°ä¸€æ¬¡,æ¯ä¸ªæ•°æ®ç‚¹çš„2ä¸ªç‰¹å¾
  *    $ bin/run-example mllib.StreamingLinearRegression trainingDir testDir 5 2
  *
  * As you add text files to `trainingDir` the model will continuously update.
- * µ±ÄãÌí¼ÓÎÄ±¾ÎÄ¼ş` trainingdir `Ä£ĞÍ½«²»¶Ï¸üĞÂ
+ * å½“ä½ æ·»åŠ æ–‡æœ¬æ–‡ä»¶` trainingdir `æ¨¡å‹å°†ä¸æ–­æ›´æ–°
  * Anytime you add text files to `testDir`, you'll see predictions from the current model.
- * ÈÎºÎÊ±ºòÄãÌí¼ÓÎÄ±¾ÎÄ¼ş` testdir `,Äã»á¿´µ½Ê¹ÓÃµ±Ç°µÄÄ£ĞÍµÄÔ¤²â
+ * ä»»ä½•æ—¶å€™ä½ æ·»åŠ æ–‡æœ¬æ–‡ä»¶` testdir `,ä½ ä¼šçœ‹åˆ°ä½¿ç”¨å½“å‰çš„æ¨¡å‹çš„é¢„æµ‹
  *
  */
 object StreamingLinearRegression {
@@ -61,14 +61,14 @@ object StreamingLinearRegression {
     }
 
     val conf = new SparkConf().setMaster("local").setAppName("StreamingLinearRegression")
-    //Åú´Î¼ä¸ô
+    //æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(conf, Seconds(args(2).toLong))
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
     val trainingData = ssc.textFileStream(args(0)).map(LabeledPoint.parse)
     val testData = ssc.textFileStream(args(1)).map(LabeledPoint.parse)
 
-    val model = new StreamingLinearRegressionWithSGD()//(SGDËæ»úÌİ¶ÈÏÂ½µ)
-      //initialWeights³õÊ¼È¡Öµ,Ä¬ÈÏÊÇ0ÏòÁ¿
+    val model = new StreamingLinearRegressionWithSGD()//(SGDéšæœºæ¢¯åº¦ä¸‹é™)
+      //initialWeightsåˆå§‹å–å€¼,é»˜è®¤æ˜¯0å‘é‡
       .setInitialWeights(Vectors.zeros(args(3).toInt))
 
     model.trainOn(trainingData)

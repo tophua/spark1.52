@@ -26,33 +26,33 @@ import org.apache.spark.ml.recommendation.ALS
 import org.apache.spark.sql.{Row, SQLContext}
 
 /**
- * Ğ­Í¬¹ıÂË,½»Ìæ×îĞ¡¶ş³Ë(ALS)ÏÔÊ½·´À¡ºÍÒşÊ½·´À¡
+ * ååŒè¿‡æ»¤,äº¤æ›¿æœ€å°äºŒä¹˜(ALS)æ˜¾å¼åé¦ˆå’Œéšå¼åé¦ˆ
  * An example app for ALS on MovieLens data (http://grouplens.org/datasets/movielens/).
- * ALSµÄMovieLensÊı¾İÉÏµÄÒ»¸öÊ¾ÀıÓ¦ÓÃ³ÌĞò
+ * ALSçš„MovieLensæ•°æ®ä¸Šçš„ä¸€ä¸ªç¤ºä¾‹åº”ç”¨ç¨‹åº
  * Run with
  * {{{
  * bin/run-example ml.MovieLensALS
  * }}}
  */
 object MovieLensALS {
-  //¶¨ÒåÒ»¸öÆÀ¼¶Àà,ÓÃ»§ID,µçÓ°ID,ÆÀ¼¶,ÆÀ¼¶Ê±¼ä
+  //å®šä¹‰ä¸€ä¸ªè¯„çº§ç±»,ç”¨æˆ·ID,ç”µå½±ID,è¯„çº§,è¯„çº§æ—¶é—´
   case class Rating(userId: Int, movieId: Int, rating: Float, timestamp: Long)
 
   object Rating {
     def parseRating(str: String): Rating = {
-      val fields = str.split("::")//ÒÔ::·Ö¸ô
-      assert(fields.size == 4)//·Ö¸ôÊı
+      val fields = str.split("::")//ä»¥::åˆ†éš”
+      assert(fields.size == 4)//åˆ†éš”æ•°
       Rating(fields(0).toInt, fields(1).toInt, fields(2).toFloat, fields(3).toLong)
     }
   }
-  //¶¨ÒåµçÓ°Àà,µçÓ°ID,±êÌâ,µçÓ°ÀàĞÍ
+  //å®šä¹‰ç”µå½±ç±»,ç”µå½±ID,æ ‡é¢˜,ç”µå½±ç±»å‹
   case class Movie(movieId: Int, title: String, genres: Seq[String])
 
   object Movie {
-    //½âÎöµçÓ°
+    //è§£æç”µå½±
     def parseMovie(str: String): Movie = {
       val fields = str.split("::")
-      assert(fields.size == 3)//\\|·Ö¸ô
+      assert(fields.size == 3)//\\|åˆ†éš”
       Movie(fields(0).toInt, fields(1), fields(2).split("\\|"))
     }
   }
@@ -60,9 +60,9 @@ object MovieLensALS {
   case class Params(
       ratings: String = "../data/mllib/als/sample_movielens_ratings.txt",
       movies: String = "../data/mllib/als/sample_movielens_movies.txt",
-      maxIter: Int = 10,//µü´ú´ÎÊı
-      regParam: Double = 0.1,//ÕıÔò»¯²ÎÊı
-      rank: Int = 10,////ÊÇÄ£ĞÍÖĞÒşÓïÒåÒò×ÓµÄ¸öÊı,·Ö½â¾ØÕóµÄÅÅÃû
+      maxIter: Int = 10,//è¿­ä»£æ¬¡æ•°
+      regParam: Double = 0.1,//æ­£åˆ™åŒ–å‚æ•°
+      rank: Int = 10,////æ˜¯æ¨¡å‹ä¸­éšè¯­ä¹‰å› å­çš„ä¸ªæ•°,åˆ†è§£çŸ©é˜µçš„æ’å
       numBlocks: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -114,25 +114,25 @@ object MovieLensALS {
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
-    //¼ÓÔØÆÀ¼¶sample_movielens_ratings.txtÊı¾İ,²¢½âÎöÊı¾İ
+    //åŠ è½½è¯„çº§sample_movielens_ratings.txtæ•°æ®,å¹¶è§£ææ•°æ®
     val ratings = sc.textFile(params.ratings).map(Rating.parseRating).cache()
-    //ÆÀ¼¶Êı
+    //è¯„çº§æ•°
     val numRatings = ratings.count()
-    //ÓÃ»§Êı
+    //ç”¨æˆ·æ•°
     val numUsers = ratings.map(_.userId).distinct().count()
-    //µçÓ°Êı
+    //ç”µå½±æ•°
     val numMovies = ratings.map(_.movieId).distinct().count()
-    //Got 1501 ratings(ÆÀ¼¶) from 30 users(ÓÃ»§) on 100 movies(µçÓ°).
+    //Got 1501 ratings(è¯„çº§) from 30 users(ç”¨æˆ·) on 100 movies(ç”µå½±).
     println(s"Got $numRatings ratings from $numUsers users on $numMovies movies.")
-    //·Ö¸ôÊı¾İ
+    //åˆ†éš”æ•°æ®
     val splits = ratings.randomSplit(Array(0.8, 0.2), 0L)
-    //ÑµÁ·Êı¾İ
+    //è®­ç»ƒæ•°æ®
     val training = splits(0).cache()
-    //²âÊÔÊı¾İ
+    //æµ‹è¯•æ•°æ®
     val test = splits(1).cache()
-    //ÑµÁ·Êı
+    //è®­ç»ƒæ•°
     val numTraining = training.count()
-    //²âÊÔÊı
+    //æµ‹è¯•æ•°
     val numTest = test.count()
     //Training: 1168, test: 333.
     println(s"Training: $numTraining, test: $numTest.")
@@ -140,15 +140,15 @@ object MovieLensALS {
     ratings.unpersist(blocking = false)
 
     val als = new ALS()
-      .setUserCol("userId")//ÉèÖÃÓÃ»§ID
-      .setItemCol("movieId")//²úÆ·ID
-      .setRank(params.rank)//ÊÇÄ£ĞÍÖĞÒşÓïÒåÒò×ÓµÄ¸öÊı,·Ö½â¾ØÕóµÄÅÅÃû
-      .setMaxIter(params.maxIter)//×î´óµü´úÊı
-      .setRegParam(params.regParam)//ÕıÔò»¯²ÎÊı
+      .setUserCol("userId")//è®¾ç½®ç”¨æˆ·ID
+      .setItemCol("movieId")//äº§å“ID
+      .setRank(params.rank)//æ˜¯æ¨¡å‹ä¸­éšè¯­ä¹‰å› å­çš„ä¸ªæ•°,åˆ†è§£çŸ©é˜µçš„æ’å
+      .setMaxIter(params.maxIter)//æœ€å¤§è¿­ä»£æ•°
+      .setRegParam(params.regParam)//æ­£åˆ™åŒ–å‚æ•°
       .setNumBlocks(params.numBlocks)
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = als.fit(training.toDF())
-	  //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+	  //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(test.toDF()).cache()
     /**
       +------+-------+------+----------+----------+
@@ -162,8 +162,8 @@ object MovieLensALS {
       +------+-------+------+----------+----------+
      */
       predictions.show(5)
-    // Evaluate the model.  rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
-    // TODO: Create an evaluator to compute RMSE. ´´½¨Ò»¸ö¼ÆËãÆ÷À´¼ÆËã¾ù·½¸ùÎó²î
+    // Evaluate the model.  rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
+    // TODO: Create an evaluator to compute RMSE. åˆ›å»ºä¸€ä¸ªè®¡ç®—å™¨æ¥è®¡ç®—å‡æ–¹æ ¹è¯¯å·®
     /**
       +------+----------+
       |rating|prediction|
@@ -175,7 +175,7 @@ object MovieLensALS {
       |   2.0| 2.3467884|
       +------+----------+*/
     predictions.select("rating", "prediction").show(5)
-    //ratingÔ­ĞÍÆÀ¼¶,predictionÆÀ¹ÀµÈ¼¶ mse ¾ù·½²î
+    //ratingåŸå‹è¯„çº§,predictionè¯„ä¼°ç­‰çº§ mse å‡æ–¹å·®
     val mse = predictions.select("rating", "prediction").rdd
       .flatMap { case Row(rating: Float, prediction: Float) =>
         val err = rating.toDouble - prediction
@@ -186,19 +186,19 @@ object MovieLensALS {
           Some(err2)
         }
       }.mean()
-   //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+   //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     val rmse = math.sqrt(mse)
     //Test RMSE = 1.135149010495338.
     println(s"Test RMSE = $rmse.")
 
-    // Inspect false positives. ¼ì²é¼ÙÑôĞÔ
-    // Note: We reference columns in 2 ways: ÎÒÃÇ²Î¿¼ÁĞ2ÖÖ·½Ê½
+    // Inspect false positives. æ£€æŸ¥å‡é˜³æ€§
+    // Note: We reference columns in 2 ways: æˆ‘ä»¬å‚è€ƒåˆ—2ç§æ–¹å¼
     //  (1) predictions("movieId") lets us specify the movieId column in the predictions
     //      DataFrame, rather than the movieId column in the movies DataFrame.
     //  (2) $"userId" specifies the userId column in the predictions DataFrame.
     //      We could also write predictions("userId") but do not have to since
     //      the movies DataFrame does not have a column "userId."
-    //¼ÓÔØµçÓ°Êı¾İ,²¢½âÎöÊı
+    //åŠ è½½ç”µå½±æ•°æ®,å¹¶è§£ææ•°
     val movies = sc.textFile(params.movies).map(Movie.parseMovie).toDF()
     predictions.join(movies).show(5)
     /**
@@ -213,8 +213,8 @@ object MovieLensALS {
       +------+-------+------+----------+----------+-------+-------+-------------------+
      */
     val falsePositives = predictions.join(movies)
-      .where((predictions("movieId") === movies("movieId"))//µçÓ°ÏàµÈ
-        && ($"rating" <= 1) && ($"prediction" >= 4))//µÈ¼¶<=1²¢ÇÒ Ô¤²âÁĞ>=4
+      .where((predictions("movieId") === movies("movieId"))//ç”µå½±ç›¸ç­‰
+        && ($"rating" <= 1) && ($"prediction" >= 4))//ç­‰çº§<=1å¹¶ä¸” é¢„æµ‹åˆ—>=4
       .select($"userId", predictions("movieId"), $"title", $"rating", $"prediction")      
       /**
        *+------+-------+-----+------+----------+
@@ -224,7 +224,7 @@ object MovieLensALS {
        */
       falsePositives.show(5)
     val numFalsePositives = falsePositives.count()
-    //²éÕÒ²»ÕıÈ·µÄÊı¾İ
+    //æŸ¥æ‰¾ä¸æ­£ç¡®çš„æ•°æ®
     println(s"Found $numFalsePositives false positives")
     if (numFalsePositives > 0) {
       println(s"Example false positives:")

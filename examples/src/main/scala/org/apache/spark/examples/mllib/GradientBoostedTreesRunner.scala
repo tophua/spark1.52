@@ -28,10 +28,10 @@ import org.apache.spark.util.Utils
 
 
 /**
- * Ê¹ÓÃÌİ¶ÈÌáÉıÊ÷,ÒÔ¾ö²ßÊ÷ÎªÈõÑ§Ï°µÄÌİ¶ÈÌáÉıµÄÒ»¸öÀı×Ó
- * GBTµÄÑµÁ·ÊÇÃ¿´ÎÑµÁ·Ò»¿ÅÊ÷,È»ºóÀûÓÃÕâ¿ÅÊ÷¶ÔÃ¿¸öÊµÀı½øĞĞÔ¤²â,Í¨¹ıÒ»¸öËğÊ§º¯Êı,¼ÆËãËğÊ§º¯ÊıµÄ¸ºÌİ¶ÈÖµ×÷Îª²Ğ²î,
- * ÀûÓÃÕâ¸ö²Ğ²î¸üĞÂÑù±¾ÊµÀıµÄlabel,È»ºóÔÙ´ÎÑµÁ·Ò»¿ÅÊ÷È¥ÄâºÏ²Ğ²î,Èç´Ë½øĞĞµü´ú,Ö±µ½Âú×ãÄ£ĞÍ²ÎÊıĞèÇó¡£
- * GBTÖ»ÊÊÓÃÓÚ¶ş·ÖÀàºÍ»Ø¹é,²»Ö§³Ö¶à·ÖÀà,ÔÚÔ¤²âµÄÊ±ºò,²»ÏñËæ»úÉ­ÁÖÄÇÑùÇóÆ½¾ùÖµ,GBTÊÇ½«ËùÓĞÊ÷µÄÔ¤²âÖµÏà¼ÓÇóºÍ¡£
+ * ä½¿ç”¨æ¢¯åº¦æå‡æ ‘,ä»¥å†³ç­–æ ‘ä¸ºå¼±å­¦ä¹ çš„æ¢¯åº¦æå‡çš„ä¸€ä¸ªä¾‹å­
+ * GBTçš„è®­ç»ƒæ˜¯æ¯æ¬¡è®­ç»ƒä¸€é¢—æ ‘,ç„¶ååˆ©ç”¨è¿™é¢—æ ‘å¯¹æ¯ä¸ªå®ä¾‹è¿›è¡Œé¢„æµ‹,é€šè¿‡ä¸€ä¸ªæŸå¤±å‡½æ•°,è®¡ç®—æŸå¤±å‡½æ•°çš„è´Ÿæ¢¯åº¦å€¼ä½œä¸ºæ®‹å·®,
+ * åˆ©ç”¨è¿™ä¸ªæ®‹å·®æ›´æ–°æ ·æœ¬å®ä¾‹çš„label,ç„¶åå†æ¬¡è®­ç»ƒä¸€é¢—æ ‘å»æ‹Ÿåˆæ®‹å·®,å¦‚æ­¤è¿›è¡Œè¿­ä»£,ç›´åˆ°æ»¡è¶³æ¨¡å‹å‚æ•°éœ€æ±‚ã€‚
+ * GBTåªé€‚ç”¨äºäºŒåˆ†ç±»å’Œå›å½’,ä¸æ”¯æŒå¤šåˆ†ç±»,åœ¨é¢„æµ‹çš„æ—¶å€™,ä¸åƒéšæœºæ£®æ—é‚£æ ·æ±‚å¹³å‡å€¼,GBTæ˜¯å°†æ‰€æœ‰æ ‘çš„é¢„æµ‹å€¼ç›¸åŠ æ±‚å’Œã€‚
  * An example runner for Gradient Boosting using decision trees as weak learners. Run with
  * {{{
  * ./bin/run-example mllib.GradientBoostedTreesRunner [options]
@@ -48,7 +48,7 @@ object GradientBoostedTreesRunner {
       testInput: String = "",
       dataFormat: String = "libsvm",
       algo: String = "Classification",
-      maxDepth: Int = 5,//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
+      maxDepth: Int = 5,//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
       numIterations: Int = 10,
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
@@ -60,7 +60,7 @@ object GradientBoostedTreesRunner {
       opt[String]("algo")
         .text(s"algorithm (${Algo.values.mkString(",")}), default: ${defaultParams.algo}")
         .action((x, c) => c.copy(algo = x))
-      opt[Int]("maxDepth")//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
+      opt[Int]("maxDepth")//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("numIterations")
@@ -76,11 +76,11 @@ object GradientBoostedTreesRunner {
         .action((x, c) => c.copy(testInput = x))
       opt[String]("dataFormat")
       /**
-       *  libSVMµÄÊı¾İ¸ñÊ½
+       *  libSVMçš„æ•°æ®æ ¼å¼
        *  <label> <index1>:<value1> <index2>:<value2> ...
-       *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-       *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-       *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+       *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+       *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+       *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
        */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
@@ -112,7 +112,7 @@ object GradientBoostedTreesRunner {
     println(s"GradientBoostedTreesRunner with parameters:\n$params")
 
     // Load training and test data and cache it.
-    //¼ÓÔØÑµÁ·ºÍ²âÊÔÊı¾İ²¢½«Æä»º´æ
+    //åŠ è½½è®­ç»ƒå’Œæµ‹è¯•æ•°æ®å¹¶å°†å…¶ç¼“å­˜
     val (training, test, numClasses) = DecisionTreeRunner.loadDatasets(sc, params.input,
       params.dataFormat, params.testInput, Algo.withName(params.algo), params.fracTest)
 
@@ -123,11 +123,11 @@ object GradientBoostedTreesRunner {
 
     val randomSeed = Utils.random.nextInt()
     if (params.algo == "Classification") {
-     //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+     //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
       val startTime = System.nanoTime()
-      //Ìİ¶ÈÌáÉı¾ö²ßÊ÷:×ÛºÏ¶à¸ö¾ö²ßÊ÷,Ïû³ıÔëÉù,±ÜÃâ¹ıÄâºÏ
+      //æ¢¯åº¦æå‡å†³ç­–æ ‘:ç»¼åˆå¤šä¸ªå†³ç­–æ ‘,æ¶ˆé™¤å™ªå£°,é¿å…è¿‡æ‹Ÿåˆ
       val model = GradientBoostedTrees.train(training, boostingStrategy)
-      //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+      //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
       val elapsedTime = (System.nanoTime() - startTime) / 1e9
       println(s"Training time: $elapsedTime seconds")
       if (model.totalNumNodes < 30) {
@@ -135,21 +135,21 @@ object GradientBoostedTreesRunner {
       } else {
         println(model) // Print model summary.
       }
-       //ÆÀ¹ÀÖ¸±ê-¶à·ÖÀà
+       //è¯„ä¼°æŒ‡æ ‡-å¤šåˆ†ç±»
       val trainAccuracy =
         new MulticlassMetrics(training.map(lp => (model.predict(lp.features), lp.label)))
           .precision
       println(s"Train accuracy = $trainAccuracy")
-       //ÆÀ¹ÀÖ¸±ê-¶à·ÖÀà
+       //è¯„ä¼°æŒ‡æ ‡-å¤šåˆ†ç±»
       val testAccuracy =
         new MulticlassMetrics(test.map(lp => (model.predict(lp.features), lp.label))).precision
       println(s"Test accuracy = $testAccuracy")
     } else if (params.algo == "Regression") {
-     //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+     //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
       val startTime = System.nanoTime()
-      //Ìİ¶ÈÌáÉı¾ö²ßÊ÷:×ÛºÏ¶à¸ö¾ö²ßÊ÷,Ïû³ıÔëÉù,±ÜÃâ¹ıÄâºÏ
+      //æ¢¯åº¦æå‡å†³ç­–æ ‘:ç»¼åˆå¤šä¸ªå†³ç­–æ ‘,æ¶ˆé™¤å™ªå£°,é¿å…è¿‡æ‹Ÿåˆ
       val model = GradientBoostedTrees.train(training, boostingStrategy)
-       //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+       //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
       val elapsedTime = (System.nanoTime() - startTime) / 1e9
       println(s"Training time: $elapsedTime seconds")
       if (model.totalNumNodes < 30) {

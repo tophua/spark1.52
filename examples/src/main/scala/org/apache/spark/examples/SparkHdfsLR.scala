@@ -30,15 +30,15 @@ import org.apache.spark.scheduler.InputFormatInfo
 
 
 /**
- * Logistic regression based classification.
- * »ùÓÚÂß¼­»Ø¹éµÄ·ÖÀà
- * This is an example implementation for learning how to use Spark. For more conventional use,
- * ÕâÊÇÒ»¸öÑ§Ï°ÈçºÎÊ¹ÓÃSparkµÄÀı×ÓÊµÏÖ,Îª¸ü´«Í³µÄÊ¹ÓÃ
- * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDËæ»úÌİ¶ÈÏÂ½µ) or
- * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨) based on your needs.
- */
+  * Logistic regression based classification.
+  * åŸºäºé€»è¾‘å›å½’çš„åˆ†ç±»
+  * This is an example implementation for learning how to use Spark. For more conventional use,
+  * è¿™æ˜¯ä¸€ä¸ªå­¦ä¹ å¦‚ä½•ä½¿ç”¨Sparkçš„ä¾‹å­å®ç°,ä¸ºæ›´ä¼ ç»Ÿçš„ä½¿ç”¨
+  * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDéšæœºæ¢¯åº¦ä¸‹é™) or
+  * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•) based on your needs.
+  */
 object SparkHdfsLR {
-  val D = 5   // Numer of dimensions Î¬¶È
+  val D = 5   // Numer of dimensions ç»´åº¦
   val rand = new Random(42)
 
   case class DataPoint(x: Vector[Double], y: Double)
@@ -57,19 +57,19 @@ object SparkHdfsLR {
   def showWarning() {
     System.err.println(
       """WARN: This is a naive implementation of Logistic Regression and is given as an example!
-        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDËæ»úÌİ¶ÈÏÂ½µ) or
-        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨)
+        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDéšæœºæ¢¯åº¦ä¸‹é™) or
+        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•)
         |for more conventional use.
       """.stripMargin)
   }
 
   def main(args: Array[String]) {
 
-  /*  if (args.length < 2) {
-      System.err.println("Usage: SparkHdfsLR <file> <iters>")
-      System.exit(1)
-    }
-*/
+    /*  if (args.length < 2) {
+        System.err.println("Usage: SparkHdfsLR <file> <iters>")
+        System.exit(1)
+      }
+  */
     showWarning()
 
     val sparkConf = new SparkConf().setAppName("SparkHdfsLR").setMaster("local[2]")
@@ -80,18 +80,18 @@ object SparkHdfsLR {
         Seq(new InputFormatInfo(conf, classOf[org.apache.hadoop.mapred.TextInputFormat], inputPath))
       ))
     val lines = sc.textFile(inputPath)
-    val points = lines.map(parsePoint _).cache()//»º´æ
-    val ITERATIONS = 6 //args(1).toInt µü´ú´ÎÊı
+    val points = lines.map(parsePoint _).cache()//ç¼“å­˜
+    val ITERATIONS = 6 //args(1).toInt è¿­ä»£æ¬¡æ•°
 
     // Initialize w to a random value
-    //³õÊ¼»¯Wµ½Ò»¸öËæ»úÖµ
+    //åˆå§‹åŒ–Wåˆ°ä¸€ä¸ªéšæœºå€¼
     var w = DenseVector.fill(D){2 * rand.nextDouble - 1}
     println("Initial w: " + w)
 
     for (i <- 1 to ITERATIONS) {
       println("On iteration " + i)
       val gradient = points.map { p =>
-        //p´ú±íDataPoint Vector 
+        //pä»£è¡¨DataPoint Vector
         p.x * (1 / (1 + exp(-p.y * (w.dot(p.x)))) - 1) * p.y
       }.reduce(_ + _)
       w -= gradient

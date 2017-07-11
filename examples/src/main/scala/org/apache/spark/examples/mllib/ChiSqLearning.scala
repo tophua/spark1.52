@@ -7,10 +7,10 @@ import org.apache.spark.{
 
 }
 /**
- * �����������ͳ��������ʵ�ʹ۲�ֵ�������ƶ�ֵ֮���ƫ��̶�,ʵ�ʹ۲�ֵ�������ƶ�ֵ֮���ƫ��̶Ⱦ;�������ֵ�Ĵ�С
- * ����ֵԽ��,Խ������;����ֵԽС,ƫ��ԽС,Խ���ڷ���,
- * ������ֵ��ȫ���ʱ,����ֵ��Ϊ0,��������ֵ��ȫ����
- * ���ɶ�v=(����-1) (����-1)=1
+ * 卡方检验就是统计样本的实际观测值与理论推断值之间的偏离程度,实际观测值与理论推断值之间的偏离程度就决定卡方值的大小
+ * 卡方值越大,越不符合;卡方值越小,偏差越小,越趋于符合,
+ * 若两个值完全相等时,卡方值就为0,表明理论值完全符合
+ * 自由度v=(行数-1) (列数-1)=1
  */
 object ChiSqLearning {
   def main(args: Array[String]) {
@@ -24,7 +24,7 @@ object ChiSqLearning {
     println(mtx)
     println(mtxResult)
     
-    //print :���������ɶȡ�������ͳ������pֵ,���۷����ĸ���p
+    //print :方法、自由度、方法的统计量、p值,推论犯错的概率p
     println("-------------------------------")
     val mtx2 = Matrices.dense(2, 2, Array(19.0, 34, 24, 10.0))
     printChiSqTest(mtx2)

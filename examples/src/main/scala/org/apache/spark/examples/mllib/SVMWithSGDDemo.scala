@@ -10,71 +10,71 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.evaluation.MulticlassMetrics
 import org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS
 /**
- * ÏßĞÔÖ§³ÖÏòÁ¿»úÓÃÓÚ´ó¹æÄ£·ÖÀàÈÎÎñµÄ±ê×¼·½·¨
+ * çº¿æ€§æ”¯æŒå‘é‡æœºç”¨äºå¤§è§„æ¨¡åˆ†ç±»ä»»åŠ¡çš„æ ‡å‡†æ–¹æ³•
  */
 object SVMWithSGDDemo {
   def main(args: Array[String]) {
-    // ÆÁ±Î²»±ØÒªµÄÈÕÖ¾ÏÔÊ¾ÖÕ¶ËÉÏ
+    // å±è”½ä¸å¿…è¦çš„æ—¥å¿—æ˜¾ç¤ºç»ˆç«¯ä¸Š
     Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
     Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
-    // ÉèÖÃÔËĞĞ»·¾³
+    // è®¾ç½®è¿è¡Œç¯å¢ƒ
     val conf = new SparkConf().setAppName("SVMWithSGDDemo").setMaster("local[4]")
     val sc = new SparkContext(conf)
 /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
-    // ¼ÓÔØLIBSVM¸ñÊ½Êı¾İ    
+    // åŠ è½½LIBSVMæ ¼å¼æ•°æ®    
     // Load and parse the data file
     // Load training data in LIBSVM format.
-    //¼ÓÔØÑµÁ·libsvm¸ñÊ½µÄÊı¾İ
+    //åŠ è½½è®­ç»ƒlibsvmæ ¼å¼çš„æ•°æ®
     val data = MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
     // Split data into training (60%) and test (40%).
-    //½«Êı¾İÇĞ·ÖÑµÁ·Êı¾İ(60%)ºÍ²âÊÔÊı¾İ(40%)
+    //å°†æ•°æ®åˆ‡åˆ†è®­ç»ƒæ•°æ®(60%)å’Œæµ‹è¯•æ•°æ®(40%)
     val splits = data.randomSplit(Array(0.6, 0.4), seed = 11L)
     val training = splits(0).cache()
     val test = splits(1)
-    //ÔËĞĞÑµÁ·Êı¾İÄ£ĞÍ¹¹½¨Ä£ĞÍ
+    //è¿è¡Œè®­ç»ƒæ•°æ®æ¨¡å‹æ„å»ºæ¨¡å‹
     // Run training algorithm to build the model    
     val numIterations = 100
-    //(SGDËæ»úÌİ¶ÈÏÂ½µ)
+    //(SGDéšæœºæ¢¯åº¦ä¸‹é™)
     val model = SVMWithSGD.train(training, numIterations)
-    //Çå³ıÄ¬ÈÏãĞÖµ
+    //æ¸…é™¤é»˜è®¤é˜ˆå€¼
     // Clear the default threshold.
     model.clearThreshold()
-    //ÔÚ²âÊÔÊı¾İÉÏ¼ÆËãÔ­Ê¼·ÖÊı
+    //åœ¨æµ‹è¯•æ•°æ®ä¸Šè®¡ç®—åŸå§‹åˆ†æ•°
     // Compute raw scores on the test set.
     val scoreAndLabels = test.map { point =>
       val score = model.predict(point.features)
       println(">>" + score + "\t" + point.label)
       (score, point.label)
     }
-    //»ñµÃÆÀ¹ÀÖ¸±ê
+    //è·å¾—è¯„ä¼°æŒ‡æ ‡
     // Get evaluation metrics.
     val metrics = new BinaryClassificationMetrics(scoreAndLabels)
-    //ROCÇúÏßÏÂÃæ»ı,ÊÇÒ»ÖÖÓÃÀ´¶ÈÁ¿·ÖÀàÄ£ĞÍºÃ»µµÄÒ»¸ö±ê×¼
+    //ROCæ›²çº¿ä¸‹é¢ç§¯,æ˜¯ä¸€ç§ç”¨æ¥åº¦é‡åˆ†ç±»æ¨¡å‹å¥½åçš„ä¸€ä¸ªæ ‡å‡†
     val auROC = metrics.areaUnderROC()
-   //ROCÇúÏßÏÂÃæ»ı,ÊÇÒ»ÖÖÓÃÀ´¶ÈÁ¿·ÖÀàÄ£ĞÍºÃ»µµÄÒ»¸ö±ê×¼
+   //ROCæ›²çº¿ä¸‹é¢ç§¯,æ˜¯ä¸€ç§ç”¨æ¥åº¦é‡åˆ†ç±»æ¨¡å‹å¥½åçš„ä¸€ä¸ªæ ‡å‡†
     println("Area under ROC = " + auROC)
 
     
-    /**Âß¼­»Ø¹é***/
-    //Âß¼­»Ø¹é,»ùÓÚlbfgsÓÅ»¯ËğÊ§º¯Êı,Ö§³Ö¶à·ÖÀà,(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨)
+    /**é€»è¾‘å›å½’***/
+    //é€»è¾‘å›å½’,åŸºäºlbfgsä¼˜åŒ–æŸå¤±å‡½æ•°,æ”¯æŒå¤šåˆ†ç±»,(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•)
     val modelBFGS = new LogisticRegressionWithLBFGS()
       .setNumClasses(10)
       .run(training)
-    //ÔÚ²âÊÔÊı¾İÉÏ¼ÆËãÔ­Ê¼·ÖÊı
+    //åœ¨æµ‹è¯•æ•°æ®ä¸Šè®¡ç®—åŸå§‹åˆ†æ•°
     // Compute raw scores on the test set.
     val predictionAndLabels = test.map {
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       case LabeledPoint(label, features) =>
         val prediction = model.predict(features)
         (prediction, label)
     }
-    //»ñÈ¡ÆÀ¹ÀÖ¸±ê
+    //è·å–è¯„ä¼°æŒ‡æ ‡
     // Get evaluation metrics.
     val metricsBFGS = new MulticlassMetrics(predictionAndLabels)
     val precision = metricsBFGS.precision

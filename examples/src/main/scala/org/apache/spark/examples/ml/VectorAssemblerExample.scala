@@ -27,7 +27,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
-*VectorAssemblerÊÇÒ»¸ö×ª»»Æ÷,Ëü½«¸ø¶¨µÄÈô¸ÉÁĞºÏ²¢ÎªÒ»ÁĞÏòÁ¿
+*VectorAssembleræ˜¯ä¸€ä¸ªè½¬æ¢å™¨,å®ƒå°†ç»™å®šçš„è‹¥å¹²åˆ—åˆå¹¶ä¸ºä¸€åˆ—å‘é‡
 **/
 object VectorAssemblerExample {
   def main(args: Array[String]): Unit = {
@@ -41,11 +41,11 @@ object VectorAssemblerExample {
     val dataset = sqlContext.createDataFrame(
       Seq((0, 18, 1.0, Vectors.dense(0.0, 10.0, 0.5), 1.0))
     ).toDF("id", "hour", "mobile", "userFeatures", "clicked")
-    //VectorAssemblerÊÇÒ»¸ö×ª»»Æ÷,Ëü½«¸ø¶¨µÄÈô¸ÉÁĞºÏ²¢ÎªÒ»ÁĞÏòÁ¿
+    //VectorAssembleræ˜¯ä¸€ä¸ªè½¬æ¢å™¨,å®ƒå°†ç»™å®šçš„è‹¥å¹²åˆ—åˆå¹¶ä¸ºä¸€åˆ—å‘é‡
     val assembler = new VectorAssembler()
       .setInputCols(Array("hour", "mobile", "userFeatures"))
       .setOutputCol("features")
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val output = assembler.transform(dataset)
     /**
       +---+----+------+--------------+-------+--------------------+

@@ -26,7 +26,7 @@ import org.apache.spark.SparkContext._
 
 /**
  * An example app for randomly generated and sampled RDDs. Run with
- * Ëæ»úÉú³ÉºÍ²ÉÑùRDDSÒ»¸öÊ¾ÀıÓ¦ÓÃ³ÌĞò
+ * éšæœºç”Ÿæˆå’Œé‡‡æ ·RDDSä¸€ä¸ªç¤ºä¾‹åº”ç”¨ç¨‹åº
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.SampledRDDs
  * }}}
@@ -34,11 +34,11 @@ import org.apache.spark.SparkContext._
  */
 object SampledRDDs {
 /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
   case class Params(input: String = "../data/mllib/sample_binary_classification_data.txt")
     extends AbstractParams[Params]
@@ -71,13 +71,13 @@ object SampledRDDs {
     val conf = new SparkConf().setAppName(s"SampledRDDs with $params").setMaster("local")
     val sc = new SparkContext(conf)
 
-    val fraction = 0.1 // fraction of data to sample Ñù±¾Êı¾İµÄ·ÖÊı
+    val fraction = 0.1 // fraction of data to sample æ ·æœ¬æ•°æ®çš„åˆ†æ•°
     /**
-     *  libSVMµÄÊı¾İ¸ñÊ½
+     *  libSVMçš„æ•°æ®æ ¼å¼
      *  <label> <index1>:<value1> <index2>:<value2> ...
-     *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-     *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-     *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+     *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+     *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+     *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
      */
     val examples = MLUtils.loadLibSVMFile(sc, params.input)
     val numExamples = examples.count()
@@ -95,8 +95,8 @@ object SampledRDDs {
     println(s"  RDD.takeSample(): sample has ${sampledArray.size} examples")
 
     println()
-     //spark¶ÔÓÚ·Ö²ã³éÑùÖ§³ÖÁ½¸ö°æ±¾sampleByKeyºÍsampleByKeyExact¡£
-     //ËüÊÇÒ»¸ö¸ù¾İRDDµÄKey-ValueÀ´³éÑùµÄ¹¦ÄÜ,¿ÉÒÔÎªÃ¿¸ökeyÉèÖÃÆä±»Ñ¡ÖĞµÄ¸ÅÂÊ
+     //sparkå¯¹äºåˆ†å±‚æŠ½æ ·æ”¯æŒä¸¤ä¸ªç‰ˆæœ¬sampleByKeyå’ŒsampleByKeyExactã€‚
+     //å®ƒæ˜¯ä¸€ä¸ªæ ¹æ®RDDçš„Key-Valueæ¥æŠ½æ ·çš„åŠŸèƒ½,å¯ä»¥ä¸ºæ¯ä¸ªkeyè®¾ç½®å…¶è¢«é€‰ä¸­çš„æ¦‚ç‡
     // Example: RDD.sampleByKey() and RDD.sampleByKeyExact()
     val keyedRDD = examples.map { lp => (lp.label.toInt, lp.features) }
     println(s"  Keyed data using label (Int) as key ==> Orig")
@@ -104,7 +104,7 @@ object SampledRDDs {
     val keyCounts = keyedRDD.countByKey()
 
     //  Subsample, and count examples per label in sampled data. (approximate)
-    //Ñù±¾,²¢ÔÚ²ÉÑùÊı¾İµÄÃ¿¸ö±êÇ©¼ÆÊıµÄÀı×Ó,(½üËÆµÄ)
+    //æ ·æœ¬,å¹¶åœ¨é‡‡æ ·æ•°æ®çš„æ¯ä¸ªæ ‡ç­¾è®¡æ•°çš„ä¾‹å­,(è¿‘ä¼¼çš„)
     val fractions = keyCounts.keys.map((_, fraction)).toMap
     val sampledByKeyRDD = keyedRDD.sampleByKey(withReplacement = true, fractions = fractions)
     val keyCountsB = sampledByKeyRDD.countByKey()
@@ -113,7 +113,7 @@ object SampledRDDs {
       " ==> Approx Sample")
 
     //  Subsample, and count examples per label in sampled data. (approximate)
-    //Ñù±¾,²¢ÔÚ²ÉÑùÊı¾İµÄÃ¿¸ö±êÇ©¼ÆÊıµÄÀı×Ó(½üËÆµÄ)
+    //æ ·æœ¬,å¹¶åœ¨é‡‡æ ·æ•°æ®çš„æ¯ä¸ªæ ‡ç­¾è®¡æ•°çš„ä¾‹å­(è¿‘ä¼¼çš„)
     val sampledByKeyRDDExact =
       keyedRDD.sampleByKeyExact(withReplacement = true, fractions = fractions)
     val keyCountsBExact = sampledByKeyRDDExact.countByKey()
@@ -121,7 +121,7 @@ object SampledRDDs {
     println(s"  Sampled $sizeBExact examples using exact stratified sampling (by label)." +
       " ==> Exact Sample")
 
-    //  Compare samples±È½ÏÑùÆ·
+    //  Compare samplesæ¯”è¾ƒæ ·å“
     println(s"   \tFractions of examples with key")
     println(s"Key\tOrig\tApprox Sample\tExact Sample")
     keyCounts.keys.toSeq.sorted.foreach { key =>

@@ -41,7 +41,7 @@ object PipelineExample {
     import sqlContext.implicits._
     // $example on$
     // Prepare training documents from a list of (id, text, label) tuples.
-    //×¼±¸ÑµÁ·ÎÄµµÀ´×ÔÒ»¸öÁÐ±í(ID¡¢ÎÄ±¾,±êÇ©)Ôª×é
+    //å‡†å¤‡è®­ç»ƒæ–‡æ¡£æ¥è‡ªä¸€ä¸ªåˆ—è¡¨(IDã€æ–‡æœ¬,æ ‡ç­¾)å…ƒç»„
     val training = sqlContext.createDataFrame(Seq(
       (0L, "a b c d e spark", 1.0),
       (1L, "b d", 0.0),
@@ -53,38 +53,38 @@ object PipelineExample {
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
-    //HashingTFÊ¹ÓÃÃ¿¸öµ¥´Ê¶ÔËùÐèÏòÁ¿µÄ³¤¶ÈSÈ¡Ä£µÃ³öµÄ¹þÏ£Öµ,°ÑËùÓÐµ¥´ÊÓ³Éäµ½Ò»¸ö0µ½S-1Ö®¼äµÄÊý×ÖÉÏ
+    //HashingTFä½¿ç”¨æ¯ä¸ªå•è¯å¯¹æ‰€éœ€å‘é‡çš„é•¿åº¦Så–æ¨¡å¾—å‡ºçš„å“ˆå¸Œå€¼,æŠŠæ‰€æœ‰å•è¯æ˜ å°„åˆ°ä¸€ä¸ª0åˆ°S-1ä¹‹é—´çš„æ•°å­—ä¸Š
     val hashingTF = new HashingTF()
       .setNumFeatures(1000)
       .setInputCol(tokenizer.getOutputCol)
       .setOutputCol("features")
-    //Âß¼­»Ø¹é
+    //é€»è¾‘å›žå½’
     val lr = new LogisticRegression()
       .setMaxIter(10)
       .setRegParam(0.01)
-       //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-       //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+       //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+       //ä¸€ä¸ª Pipelineåœ¨ç»“æž„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // Fit the pipeline to training documents.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(training)
     /*
     // Now we can optionally save the fitted pipeline to disk
-     * ÏÖÔÚÎÒÃÇ¿ÉÒÔÑ¡ÔñÐÔµØ½«°²×°µÄ¹ÜµÀ±£´æµ½´ÅÅÌÉÏ    
+     * çŽ°åœ¨æˆ‘ä»¬å¯ä»¥é€‰æ‹©æ€§åœ°å°†å®‰è£…çš„ç®¡é“ä¿å­˜åˆ°ç£ç›˜ä¸Š    
     model.write.overwrite().save("/tmp/spark-logistic-regression-model")
 
     // We can also save this unfit pipeline to disk
-     * ÎÒÃÇÒ²¿ÉÒÔ±£´æÕâ¸ö²»ÊÊºÏ¹ÜµÀµ½´ÅÅÌ     
+     * æˆ‘ä»¬ä¹Ÿå¯ä»¥ä¿å­˜è¿™ä¸ªä¸é€‚åˆç®¡é“åˆ°ç£ç›˜     
     pipeline.write.overwrite().save("/tmp/unfit-lr-model")
 
     // And load it back in during production
-     * ÔÚÉú²ú¹ý³ÌÖÐ¼ÓÔØ     
+     * åœ¨ç”Ÿäº§è¿‡ç¨‹ä¸­åŠ è½½     
     val sameModel = PipelineModel.load("/tmp/spark-logistic-regression-model")*/
 
     // Prepare test documents, which are unlabeled (id, text) tuples.
-    //×¼±¸²âÊÔÎÄµµ,ÕâÊÇÎ´±ê¼ÇµÄ(ID¡¢ÎÄ±¾)µÄÔª×é
+    //å‡†å¤‡æµ‹è¯•æ–‡æ¡£,è¿™æ˜¯æœªæ ‡è®°çš„(IDã€æ–‡æœ¬)çš„å…ƒç»„
     val test = sqlContext.createDataFrame(Seq(
       (4L, "spark i j k"),
       (5L, "l m n"),
@@ -93,7 +93,7 @@ object PipelineExample {
     )).toDF("id", "text")
 
     // Make predictions on test documents.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     /**
     +---+---------------+------------------+--------------------+--------------------+--------------------+----------+
     | id|           text|             words|            features|       rawPrediction|         probability|prediction|
@@ -105,8 +105,8 @@ object PipelineExample {
     +---+---------------+------------------+--------------------+--------------------+--------------------+----------+*/
     model.transform(test).show()
     model.transform(test)
-    //probabilityËã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁÐµÄÃû³Æ
-    //probabilityÀà±ðÔ¤²â½á¹ûµÄÌõ¼þ¸ÅÂÊÖµ´æ´¢ÁÐµÄÃû³Æ
+    //probabilityç®—æ³•é¢„æµ‹ç»“æžœçš„å­˜å‚¨åˆ—çš„åç§°
+    //probabilityç±»åˆ«é¢„æµ‹ç»“æžœçš„æ¡ä»¶æ¦‚çŽ‡å€¼å­˜å‚¨åˆ—çš„åç§°
       .select("id", "text", "probability", "prediction")
       .collect()
       .foreach { case Row(id: Long, text: String, prob: Vector, prediction: Double) =>

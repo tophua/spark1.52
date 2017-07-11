@@ -26,7 +26,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * ÏßĞÔ»Ø¹éÍøÂçÉñ¾­Àı×Ó
+ * çº¿æ€§å›å½’ç½‘ç»œç¥ç»ä¾‹å­
  */
 object LinearRegressionWithElasticNetExample {
 
@@ -39,11 +39,11 @@ object LinearRegressionWithElasticNetExample {
     // $example on$
     // Load training data
    /**
-   *  libSVMµÄÊı¾İ¸ñÊ½
+   *  libSVMçš„æ•°æ®æ ¼å¼
    *  <label> <index1>:<value1> <index2>:<value2> ...
-   *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-   *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-   *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+   *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+   *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+   *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
    */
     //val training = sqlContext.read.format("libsvm")
      // .load("../data/mllib/sample_linear_regression_data.txt")
@@ -52,19 +52,19 @@ object LinearRegressionWithElasticNetExample {
       val training = sqlContext.createDataFrame(dataSVM)
       
     val lr = new LinearRegression()
-      .setMaxIter(10)//ÉèÖÃ×î´óµü´ú´ÎÊı
-      .setRegParam(0.3)//ÉèÖÃÕıÔò»¯²ÎÊı
-      .setElasticNetParam(0.8)//ElasticNetParam=0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
+      .setMaxIter(10)//è®¾ç½®æœ€å¤§è¿­ä»£æ¬¡æ•°
+      .setRegParam(0.3)//è®¾ç½®æ­£åˆ™åŒ–å‚æ•°
+      .setElasticNetParam(0.8)//ElasticNetParam=0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
 
     // Fit the model
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val lrModel = lr.fit(training)
 
     // Print the coefficients and intercept for linear regression
     //println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
 
     // Summarize the model over the training set and print out some metrics
-    // ×Ü½áÄ£ĞÍÔÚÑµÁ·¼¯ºÍ´òÓ¡³öÒ»Ğ©Ö¸±ê
+    // æ€»ç»“æ¨¡å‹åœ¨è®­ç»ƒé›†å’Œæ‰“å°å‡ºä¸€äº›æŒ‡æ ‡
     val trainingSummary = lrModel.summary
     //numIterations: 7
     println(s"numIterations: ${trainingSummary.totalIterations}")
@@ -85,10 +85,10 @@ object LinearRegressionWithElasticNetExample {
       +-------------------+
      */
     trainingSummary.residuals.show()
-    //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+    //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     //RMSE: 10.189126225286143
     println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
-    //R2Æ½·½ÏµÍ³Ò²³ÆÅĞ¶¨ÏµÊı,ÓÃÀ´ÆÀ¹ÀÄ£ĞÍÄâºÏÊı¾İµÄºÃ»µ
+    //R2å¹³æ–¹ç³»ç»Ÿä¹Ÿç§°åˆ¤å®šç³»æ•°,ç”¨æ¥è¯„ä¼°æ¨¡å‹æ‹Ÿåˆæ•°æ®çš„å¥½å
     //r2: 0.02285205756871944
     println(s"r2: ${trainingSummary.r2}")
     // $example off$

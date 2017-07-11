@@ -24,7 +24,7 @@ import org.apache.spark.mllib.fpm.FPGrowth
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
-  Æµ·±Ä£Ê½ÍÚ¾ò-FP-growth
+  é¢‘ç¹æ¨¡å¼æŒ–æŽ˜-FP-growth
  * Example for mining frequent itemsets using FP-growth.
  * Example usage: ./bin/run-example mllib.FPGrowthExample \
  *   --minSupport 0.8 --numPartition 2 ./data/mllib/sample_fpgrowth.txt
@@ -73,7 +73,7 @@ object FPGrowthExample {
       .setMinSupport(params.minSupport)
       .setNumPartitions(params.numPartition)
       .run(transactions)
-     //Æµ·±Ïî¼¯Êý
+     //é¢‘ç¹é¡¹é›†æ•°
     println(s"Number of frequent itemsets: ${model.freqItemsets.count()}")
 
     model.freqItemsets.collect().foreach { itemset =>

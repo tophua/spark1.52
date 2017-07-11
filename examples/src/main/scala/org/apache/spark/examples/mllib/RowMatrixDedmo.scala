@@ -14,23 +14,23 @@ object RowMatrixDedmo {
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
-    // ´´½¨RDD[Vector]
+    // åˆ›å»ºRDD[Vector]
     val rdd1 = sc.parallelize(
       Array(
         Array(1.0, 2.0, 3.0, 4.0),
         Array(2.0, 3.0, 4.0, 5.0),
         Array(3.0, 4.0, 5.0, 6.0))).map(f => Vectors.dense(f))
-    //´´½¨·Ö²¼Ê½¾ØÕó RowMatrix
+    //åˆ›å»ºåˆ†å¸ƒå¼çŸ©é˜µ RowMatrix
     val rowMatirx = new RowMatrix(rdd1)
-    //¼ÆËãÁĞÖ®¼äµÄÏàËÆ¶È,·µ»ØµÄÊÇCoordinateMatrix,²ÉÓÃ
-    //case class MatrixEntry(i: Long, j: Long, value: Double)´æ´¢Öµ
-    //columnSimilarities¼ÆËã¾ØÕóÖĞÃ¿Á½ÁĞÖ®¼äµÄÓàÏÒÏàËÆ¶È
-    //²ÎÊı:Ê¹ÓÃ½üËÆËã·¨µÄãĞÖµ,ÖµÔ½´óÔòÔËËãËÙ¶ÈÔ½¿ì¶øÎó²îÔ½´ó,Ä¬ÈÏÎª0
+    //è®¡ç®—åˆ—ä¹‹é—´çš„ç›¸ä¼¼åº¦,è¿”å›çš„æ˜¯CoordinateMatrix,é‡‡ç”¨
+    //case class MatrixEntry(i: Long, j: Long, value: Double)å­˜å‚¨å€¼
+    //columnSimilaritiesè®¡ç®—çŸ©é˜µä¸­æ¯ä¸¤åˆ—ä¹‹é—´çš„ä½™å¼¦ç›¸ä¼¼åº¦
+    //å‚æ•°:ä½¿ç”¨è¿‘ä¼¼ç®—æ³•çš„é˜ˆå€¼,å€¼è¶Šå¤§åˆ™è¿ç®—é€Ÿåº¦è¶Šå¿«è€Œè¯¯å·®è¶Šå¤§,é»˜è®¤ä¸º0
     var coordinateMatrix: CoordinateMatrix = rowMatirx.columnSimilarities()
-    //·µ»Ø¾ØÕóĞĞÊı¡¢ÁĞÊı
+    //è¿”å›çŸ©é˜µè¡Œæ•°ã€åˆ—æ•°
     println(coordinateMatrix.numCols())
     println(coordinateMatrix.numRows())
-    //²é¿´·µ»ØÖµ,²é¿´ÁĞÓëÁĞÖ®¼äµÄÏàËÆ¶È
+    //æŸ¥çœ‹è¿”å›å€¼,æŸ¥çœ‹åˆ—ä¸åˆ—ä¹‹é—´çš„ç›¸ä¼¼åº¦
     //Array[org.apache.spark.mllib.linalg.distributed.MatrixEntry] 
     //= Array(MatrixEntry(2,3,0.9992204753914715), 
     //MatrixEntry(0,1,0.9925833339709303), 
@@ -40,49 +40,49 @@ object RowMatrixDedmo {
     //MatrixEntry(0,2,0.9827076298239907))
     println(coordinateMatrix.entries.collect())
 
-    //CoordinateMatrix³£ÓÃÓÚÏ¡ÊèĞÔ±È½Ï¸ßµÄ¼ÆËãÖĞ,MatrixEntryÊÇÒ»¸ö TupleÀàĞÍµÄÔªËØ,ÆäÖĞ°üº¬ĞĞ¡¢ÁĞºÍÔªËØÖµ
+    //CoordinateMatrixå¸¸ç”¨äºç¨€ç–æ€§æ¯”è¾ƒé«˜çš„è®¡ç®—ä¸­,MatrixEntryæ˜¯ä¸€ä¸ª Tupleç±»å‹çš„å…ƒç´ ,å…¶ä¸­åŒ…å«è¡Œã€åˆ—å’Œå…ƒç´ å€¼
     coordinateMatrix.toBlockMatrix()
-    //Ë÷ÒıĞĞ¾ØÕó(IndexedRowMatrix)°´ĞĞ·Ö²¼Ê½´æ´¢,ÓĞĞĞË÷Òı,Æäµ×²ãÖ§³Å½á¹¹ÊÇË÷ÒıµÄĞĞ×é³ÉµÄRDD,ËùÒÔÃ¿ĞĞ¿ÉÒÔÍ¨¹ıË÷Òı(long)ºÍ¾Ö²¿ÏòÁ¿±íÊ¾
+    //ç´¢å¼•è¡ŒçŸ©é˜µ(IndexedRowMatrix)æŒ‰è¡Œåˆ†å¸ƒå¼å­˜å‚¨,æœ‰è¡Œç´¢å¼•,å…¶åº•å±‚æ”¯æ’‘ç»“æ„æ˜¯ç´¢å¼•çš„è¡Œç»„æˆçš„RDD,æ‰€ä»¥æ¯è¡Œå¯ä»¥é€šè¿‡ç´¢å¼•(long)å’Œå±€éƒ¨å‘é‡è¡¨ç¤º
     coordinateMatrix.toIndexedRowMatrix()
-    //×ª»»³ÉRowMatrix
+    //è½¬æ¢æˆRowMatrix
     coordinateMatrix.toRowMatrix()
 
-    //¼ÆËãÁĞÍ³¼ÆĞÅÏ¢
+    //è®¡ç®—åˆ—ç»Ÿè®¡ä¿¡æ¯
     var mss: MultivariateStatisticalSummary = rowMatirx.computeColumnSummaryStatistics()
-    //Ã¿ÁĞµÄ¾ùÖµ, org.apache.spark.mllib.linalg.Vector = [2.0,3.0,4.0,5.0]
+    //æ¯åˆ—çš„å‡å€¼, org.apache.spark.mllib.linalg.Vector = [2.0,3.0,4.0,5.0]
     mss.mean
-    // Ã¿ÁĞµÄ×î´óÖµorg.apache.spark.mllib.linalg.Vector = [3.0,4.0,5.0,6.0]
+    // æ¯åˆ—çš„æœ€å¤§å€¼org.apache.spark.mllib.linalg.Vector = [3.0,4.0,5.0,6.0]
     mss.max
-    // Ã¿ÁĞµÄ×îĞ¡Öµ org.apache.spark.mllib.linalg.Vector = [1.0,2.0,3.0,4.0]
+    // æ¯åˆ—çš„æœ€å°å€¼ org.apache.spark.mllib.linalg.Vector = [1.0,2.0,3.0,4.0]
     mss.min
-    //Ã¿ÁĞ·ÇÁãÔªËØµÄ¸öÊıorg.apache.spark.mllib.linalg.Vector = [3.0,3.0,3.0,3.0]
+    //æ¯åˆ—éé›¶å…ƒç´ çš„ä¸ªæ•°org.apache.spark.mllib.linalg.Vector = [3.0,3.0,3.0,3.0]
     mss.numNonzeros
-    //¾ØÕóÁĞµÄ1-·¶Êı,||x||1 = sum£¨abs(xi)£©£»
+    //çŸ©é˜µåˆ—çš„1-èŒƒæ•°,||x||1 = sumï¼ˆabs(xi)ï¼‰ï¼›
     //org.apache.spark.mllib.linalg.Vector = [6.0,9.0,12.0,15.0]
     mss.normL1
-    //¾ØÕóÁĞµÄ2-·¶Êı,||x||2 = sqrt(sum(xi.^2))£»
+    //çŸ©é˜µåˆ—çš„2-èŒƒæ•°,||x||2 = sqrt(sum(xi.^2))ï¼›
     // org.apache.spark.mllib.linalg.Vector = [3.7416573867739413,5.385164807134504,7.0710678118654755,8.774964387392123]
     mss.normL2
-    //¾ØÕóÁĞµÄ·½²î
+    //çŸ©é˜µåˆ—çš„æ–¹å·®
     //org.apache.spark.mllib.linalg.Vector = [1.0,1.0,1.0,1.0]
     mss.variance
-    //¼ÆËãĞ­·½²î
+    //è®¡ç®—åæ–¹å·®
     //covariance: org.apache.spark.mllib.linalg.Matrix = 
     //1.0  1.0  1.0  1.0  
     //1.0  1.0  1.0  1.0  
     //1.0  1.0  1.0  1.0  
     //1.0  1.0  1.0  1.0  
-    //computeCovariance ¼ÆËã¾ØÕóÖĞĞĞÏòÁ¿µÄĞ­·½²î
+    //computeCovariance è®¡ç®—çŸ©é˜µä¸­è¡Œå‘é‡çš„åæ–¹å·®
     var covariance: Matrix = rowMatirx.computeCovariance()
-    //¼ÆËãÀ­Ä·¾ØÕórowMatirx^T*rowMatirx,T±íÊ¾×ªÖÃ²Ù×÷
+    //è®¡ç®—æ‹‰å§†çŸ©é˜µrowMatirx^T*rowMatirx,Tè¡¨ç¤ºè½¬ç½®æ“ä½œ
     //gramianMatrix: org.apache.spark.mllib.linalg.Matrix = 
     //14.0  20.0  26.0  32.0  
     //20.0  29.0  38.0  47.0  
     //26.0  38.0  50.0  62.0  
     //32.0  47.0  62.0  77.0  
     var gramianMatrix: Matrix = rowMatirx.computeGramianMatrix()
-    //¶Ô¾ØÕó½øĞĞÖ÷³É·Ö·ÖÎö,²ÎÊıÖ¸¶¨·µ»ØµÄÁĞÊı,¼´Ö÷·Ö³É¸öÊı
-    //PCAËã·¨ÊÇÒ»ÖÖ¾­µäµÄ½µÎ¬Ëã·¨
+    //å¯¹çŸ©é˜µè¿›è¡Œä¸»æˆåˆ†åˆ†æ,å‚æ•°æŒ‡å®šè¿”å›çš„åˆ—æ•°,å³ä¸»åˆ†æˆä¸ªæ•°
+    //PCAç®—æ³•æ˜¯ä¸€ç§ç»å…¸çš„é™ç»´ç®—æ³•
     //principalComponents: org.apache.spark.mllib.linalg.Matrix = 
     //-0.5000000000000002  0.8660254037844388    
     //-0.5000000000000002  -0.28867513459481275  
@@ -91,8 +91,8 @@ object RowMatrixDedmo {
     var principalComponents = rowMatirx.computePrincipalComponents(2)
 
     /**
-     * ¶Ô¾ØÕó½øĞĞÆæÒìÖµ·Ö½â,Éè¾ØÕóÎªA(m x n). ÆæÒìÖµ·Ö½â½«¼ÆËãÈı¸ö¾ØÕó,·Ö±ğÊÇU,S,V
-     * ËüÃÇÂú×ã A ~= U * S * V', S°üº¬ÁËÉè¶¨µÄk¸öÆæÒìÖµ,U,VÎªÏàÓ¦µÄÆæÒìÖµÏòÁ¿
+     * å¯¹çŸ©é˜µè¿›è¡Œå¥‡å¼‚å€¼åˆ†è§£,è®¾çŸ©é˜µä¸ºA(m x n). å¥‡å¼‚å€¼åˆ†è§£å°†è®¡ç®—ä¸‰ä¸ªçŸ©é˜µ,åˆ†åˆ«æ˜¯U,S,V
+     * å®ƒä»¬æ»¡è¶³ A ~= U * S * V', SåŒ…å«äº†è®¾å®šçš„kä¸ªå¥‡å¼‚å€¼,U,Vä¸ºç›¸åº”çš„å¥‡å¼‚å€¼å‘é‡
      */
     //   svd: org.apache.spark.mllib.linalg.SingularValueDecomposition[org.apache.spark.mllib.linalg.distributed.RowMatrix,org.apache.spark.mllib.linalg.Matrix] = 
     //SingularValueDecomposition(org.apache.spark.mllib.linalg.distributed.RowMatrix@688884e,[13.011193721236575,0.8419251442105343,7.793650306633694E-8],-0.2830233037672786  -0.7873358937103356  -0.5230588083704528  
@@ -101,7 +101,7 @@ object RowMatrixDedmo {
     //-0.6736518758358616  0.4961785466773299   -0.4698336353414313  )
     var svd: SingularValueDecomposition[RowMatrix, Matrix] = rowMatirx.computeSVD(3, true)
 
-    //¾ØÕóÏà³Ë»ı²Ù×÷
+    //çŸ©é˜µç›¸ä¹˜ç§¯æ“ä½œ
     var multiplyMatrix: RowMatrix = rowMatirx.multiply(Matrices.dense(4, 1, Array(1, 2, 3, 4)))
   }
 }

@@ -28,24 +28,24 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.optimization.{SquaredL2Updater, L1Updater}
 
 /**
- * ¶ş·ÖÀàµÄÒ»¸öÊ¾ÀıÓ¦ÓÃ³ÌĞò
+ * äºŒåˆ†ç±»çš„ä¸€ä¸ªç¤ºä¾‹åº”ç”¨ç¨‹åº
  * An example app for binary classification. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.BinaryClassification
  * }}}
  * 
  * A synthetic dataset is located at `data/mllib/sample_binary_classification_data.txt`.
- * ¼ÓÔØÒ»¸öĞéÄâµÄÊı¾İ¼¯data/mllib/sample_binary_classification_data.txt
+ * åŠ è½½ä¸€ä¸ªè™šæ‹Ÿçš„æ•°æ®é›†data/mllib/sample_binary_classification_data.txt
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
- * Èç¹ûÄãÊ¹ÓÃÄ£°å´´½¨Ò»¸öApp,ÇëÄãÊ¹ÓÃSpark-submit Ìá½»App
+ * å¦‚æœä½ ä½¿ç”¨æ¨¡æ¿åˆ›å»ºä¸€ä¸ªApp,è¯·ä½ ä½¿ç”¨Spark-submit æäº¤App
  */
 object BinaryClassification {
-  //Ëã·¨ÀàĞÍ
+  //ç®—æ³•ç±»å‹
   object Algorithm extends Enumeration {
     type Algorithm = Value
     val SVM, LR = Value
   }
-  //»Ø¹éÀàĞÍ
+  //å›å½’ç±»å‹
   object RegType extends Enumeration {
     type RegType = Value
     val L1, L2 = Value
@@ -56,11 +56,11 @@ object BinaryClassification {
 
   case class Params(
       input: String = "../data/mllib/sample_binary_classification_data.txt",
-      numIterations: Int = 100,//µü´ú´ÎÊı
-      stepSize: Double = 1.0,//Ã¿´Îµü´úÓÅ»¯²½³¤
-      algorithm: Algorithm = LR,//Âß¼­»Ø¹é
+      numIterations: Int = 100,//è¿­ä»£æ¬¡æ•°
+      stepSize: Double = 1.0,//æ¯æ¬¡è¿­ä»£ä¼˜åŒ–æ­¥é•¿
+      algorithm: Algorithm = LR,//é€»è¾‘å›å½’
       regType: RegType = L2,
-      //ÕıÔò»¯
+      //æ­£åˆ™åŒ–
       regParam: Double = 0.01) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -71,7 +71,7 @@ object BinaryClassification {
       opt[Int]("numIterations")
         .text("number of iterations")
         .action((x, c) => c.copy(numIterations = x))
-      opt[Double]("stepSize")//Ã¿´Îµü´úÓÅ»¯²½³¤
+      opt[Double]("stepSize")//æ¯æ¬¡è¿­ä»£ä¼˜åŒ–æ­¥é•¿
         .text("initial step size (ignored by logistic regression), " +
           s"default: ${defaultParams.stepSize}")
         .action((x, c) => c.copy(stepSize = x))
@@ -88,11 +88,11 @@ object BinaryClassification {
     //  arg[String]("<input>")
     //    .required()
 	/**
-	 *  libSVMµÄÊı¾İ¸ñÊ½
+	 *  libSVMçš„æ•°æ®æ ¼å¼
 	 *  <label> <index1>:<value1> <index2>:<value2> ...
-	 *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-	 *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-	 *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+	 *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+	 *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+	 *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
 	 */
     //    .text("input paths to labeled examples in LIBSVM format")
     //    .action((x, c) => c.copy(input = x))
@@ -120,11 +120,11 @@ object BinaryClassification {
 
     Logger.getRootLogger.setLevel(Level.WARN)
 /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     val examples = MLUtils.loadLibSVMFile(sc, params.input).cache()
 
@@ -146,20 +146,20 @@ object BinaryClassification {
 
     val model = params.algorithm match {
       case LR =>
-        //»ùÓÚlbfgsÓÅ»¯ËğÊ§º¯Êı,Ö§³Ö¶à·ÖÀà,(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨)
+        //åŸºäºlbfgsä¼˜åŒ–æŸå¤±å‡½æ•°,æ”¯æŒå¤šåˆ†ç±»,(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•)
         val algorithm = new LogisticRegressionWithLBFGS()
         algorithm.optimizer
-          .setNumIterations(params.numIterations)//µü´úÊı
+          .setNumIterations(params.numIterations)//è¿­ä»£æ•°
           .setUpdater(updater)//
-          .setRegParam(params.regParam)//ÕıÔò»¯
+          .setRegParam(params.regParam)//æ­£åˆ™åŒ–
         algorithm.run(training).clearThreshold()
-      case SVM =>//(SGDËæ»úÌİ¶ÈÏÂ½µ)
+      case SVM =>//(SGDéšæœºæ¢¯åº¦ä¸‹é™)
         val algorithm = new SVMWithSGD()
         algorithm.optimizer
-          .setNumIterations(params.numIterations)//µü´ú´ÎÊı
-          .setStepSize(params.stepSize)//Ã¿´Îµü´úÓÅ»¯²½³¤
+          .setNumIterations(params.numIterations)//è¿­ä»£æ¬¡æ•°
+          .setStepSize(params.stepSize)//æ¯æ¬¡è¿­ä»£ä¼˜åŒ–æ­¥é•¿
           .setUpdater(updater)
-          .setRegParam(params.regParam)//ÕıÔò»¯
+          .setRegParam(params.regParam)//æ­£åˆ™åŒ–
         algorithm.run(training).clearThreshold()
     }
 
@@ -167,10 +167,10 @@ object BinaryClassification {
     val predictionAndLabel = prediction.zip(test.map(_.label))
 
     val metrics = new BinaryClassificationMetrics(predictionAndLabel)
-     //areaUnderPRÆ½¾ù×¼È·ÂÊ,Í¨³£ÆÀ¼Û½á¹ûµÄÖÊÁ¿,Æ½¾ù×¼È·ÂÊµÈÓÚÑµÁ·Ñù±¾ÖĞ±»ÕıÈ··ÖÀàµÄÊıÄ¿³ıÒÔÑù±¾×ÜÊı   
+     //areaUnderPRå¹³å‡å‡†ç¡®ç‡,é€šå¸¸è¯„ä»·ç»“æœçš„è´¨é‡,å¹³å‡å‡†ç¡®ç‡ç­‰äºè®­ç»ƒæ ·æœ¬ä¸­è¢«æ­£ç¡®åˆ†ç±»çš„æ•°ç›®é™¤ä»¥æ ·æœ¬æ€»æ•°   
     //Test areaUnderPR = 1.0.
     println(s"Test areaUnderPR = ${metrics.areaUnderPR()}.")
-    //ROCÇúÏßÏÂÃæ»ı,ÊÇÒ»ÖÖÓÃÀ´¶ÈÁ¿·ÖÀàÄ£ĞÍºÃ»µµÄÒ»¸ö±ê×¼
+    //ROCæ›²çº¿ä¸‹é¢ç§¯,æ˜¯ä¸€ç§ç”¨æ¥åº¦é‡åˆ†ç±»æ¨¡å‹å¥½åçš„ä¸€ä¸ªæ ‡å‡†
     //Test areaUnderROC = 1.0.
     println(s"Test areaUnderROC = ${metrics.areaUnderROC()}.")
 

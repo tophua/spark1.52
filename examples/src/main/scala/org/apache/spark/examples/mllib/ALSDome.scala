@@ -10,28 +10,28 @@ import org.apache.spark.mllib.recommendation.Rating
 object ALSDome {
   def main(args: Array[String]) {
     /**
-     * Ğ­Í¬¹ıÂËALSËã·¨ÍÆ¼ö¹ı³ÌÈçÏÂ£º
-     * ¼ÓÔØÊı¾İµ½ ratings RDD,Ã¿ĞĞ¼ÇÂ¼°üÀ¨£ºuser, product, rate
-     * ´Ó ratings µÃµ½ÓÃ»§ÉÌÆ·µÄÊı¾İ¼¯£º(user, product)
-     * Ê¹ÓÃALS¶Ô ratings ½øĞĞÑµÁ·
-     * Í¨¹ı model ¶ÔÓÃ»§ÉÌÆ·½øĞĞÔ¤²âÆÀ·Ö£º((user, product), rate)
-     * ´Ó ratings µÃµ½ÓÃ»§ÉÌÆ·µÄÊµ¼ÊÆÀ·Ö£º((user, product), rate)
-     * ºÏ²¢Ô¤²âÆÀ·ÖºÍÊµ¼ÊÆÀ·ÖµÄÁ½¸öÊı¾İ¼¯,²¢Çó¾ù·½²î
+     * ååŒè¿‡æ»¤ALSç®—æ³•æ¨èè¿‡ç¨‹å¦‚ä¸‹ï¼š
+     * åŠ è½½æ•°æ®åˆ° ratings RDD,æ¯è¡Œè®°å½•åŒ…æ‹¬ï¼šuser, product, rate
+     * ä» ratings å¾—åˆ°ç”¨æˆ·å•†å“çš„æ•°æ®é›†ï¼š(user, product)
+     * ä½¿ç”¨ALSå¯¹ ratings è¿›è¡Œè®­ç»ƒ
+     * é€šè¿‡ model å¯¹ç”¨æˆ·å•†å“è¿›è¡Œé¢„æµ‹è¯„åˆ†ï¼š((user, product), rate)
+     * ä» ratings å¾—åˆ°ç”¨æˆ·å•†å“çš„å®é™…è¯„åˆ†ï¼š((user, product), rate)
+     * åˆå¹¶é¢„æµ‹è¯„åˆ†å’Œå®é™…è¯„åˆ†çš„ä¸¤ä¸ªæ•°æ®é›†,å¹¶æ±‚å‡æ–¹å·®
      */
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("ALSExample")
     val sc = new SparkContext(sparkConf)
-    /**ÎÄ¼şÖĞÃ¿Ò»ĞĞ°üÀ¨Ò»¸öÓÃ»§id¡¢ÉÌÆ·idºÍÆÀ·Ö****/
+    /**æ–‡ä»¶ä¸­æ¯ä¸€è¡ŒåŒ…æ‹¬ä¸€ä¸ªç”¨æˆ·idã€å•†å“idå’Œè¯„åˆ†****/
     val data = sc.textFile("../data/mllib/u.data")
-    //½«valÊı¾İ×ª»»(transform)µ½ÆÀ·Ö(Rating)RDD
+    //å°†valæ•°æ®è½¬æ¢(transform)åˆ°è¯„åˆ†(Rating)RDD
     val ratings = data.map { line =>
         val Array(userId, itemId, rating, _) = line.split("\t")
-        //ÓÃ»§ID,²úÆ·ID,(ÆÀ¼¶,µÈ¼¶)
+        //ç”¨æˆ·ID,äº§å“ID,(è¯„çº§,ç­‰çº§)
         Rating(userId.toInt, itemId.toInt, rating.toDouble)
     }
     
-    //½«¸öÈËÆÀ·ÖÊı¾İµ¼ÈëRDD
+    //å°†ä¸ªäººè¯„åˆ†æ•°æ®å¯¼å…¥RDD
     /**
-     * ÓÃ»§ID,µçÓ°ID,ÆÀ·Ö
+     * ç”¨æˆ·ID,ç”µå½±ID,è¯„åˆ†
      * 944,313,5
        944,2,3
        944,1,1
@@ -46,18 +46,18 @@ object ALSDome {
     val pratings = pdata.map { line =>
         val Array(userId, itemId, rating) = line.split(",")
         println(userId.toInt+"||"+itemId.toInt+"||"+rating.toDouble)
-         /**ÎÄ¼şÖĞÃ¿Ò»ĞĞ°üÀ¨Ò»¸öÓÃ»§id¡¢ÉÌÆ·idºÍÆÀ·Ö****/
+         /**æ–‡ä»¶ä¸­æ¯ä¸€è¡ŒåŒ…æ‹¬ä¸€ä¸ªç”¨æˆ·idã€å•†å“idå’Œè¯„åˆ†****/
         Rating(userId.toInt, itemId.toInt, rating.toDouble)
        }
-   //°ó¶¨ÆÀ·ÖÊı¾İºÍ¸öÈËÆÀ·ÖÊı¾İ
+   //ç»‘å®šè¯„åˆ†æ•°æ®å’Œä¸ªäººè¯„åˆ†æ•°æ®
     val movieratings = ratings.union(pratings)
-    //Ê¹ÓÃALS½¨Á¢Ä£ĞÍ,Éè¶¨rankÎª5,µü´ú´ÎÊıÎª10ÒÔ¼°lambdaÎª0.01
+    //ä½¿ç”¨ALSå»ºç«‹æ¨¡å‹,è®¾å®šrankä¸º5,è¿­ä»£æ¬¡æ•°ä¸º10ä»¥åŠlambdaä¸º0.01
     val model = ALS.train(movieratings, 10, 10, 0.01)
-     //ÔÚÄ£ĞÍÉÏÑ¡¶¨Ò»²¿µçÓ°Ô¤²âÎÒµÄÆÀ·Ö,ÈÃÎÒÃÇ´ÓµçÓ°IDÎª195µÄ<ÖÕ½áÕß>¿ªÊ¼
+     //åœ¨æ¨¡å‹ä¸Šé€‰å®šä¸€éƒ¨ç”µå½±é¢„æµ‹æˆ‘çš„è¯„åˆ†,è®©æˆ‘ä»¬ä»ç”µå½±IDä¸º195çš„<ç»ˆç»“è€…>å¼€å§‹
     model.predict(sc.parallelize(Array((944,195)))).collect.foreach(println)
-    //ÔÚÄ£ĞÍÉÏÑ¡¶¨Ò»²¿µçÓ°Ô¤²âÎÒµÄÆÀ·Ö,ÈÃÎÒÃÇ´ÓµçÓ°IDÎª402<ÈË¹íÇéÎ´ÁË>
+    //åœ¨æ¨¡å‹ä¸Šé€‰å®šä¸€éƒ¨ç”µå½±é¢„æµ‹æˆ‘çš„è¯„åˆ†,è®©æˆ‘ä»¬ä»ç”µå½±IDä¸º402<äººé¬¼æƒ…æœªäº†>
     model.predict(sc.parallelize(Array((944,402)))).collect.foreach(println)
-    //ÔÚÄ£ĞÍÉÏÑ¡¶¨Ò»²¿µçÓ°Ô¤²âÎÒµÄÆÀ·Ö,ÈÃÎÒÃÇ´ÓµçÓ°IDÎª148<ºÚÒ¹ÓÄÁé>
+    //åœ¨æ¨¡å‹ä¸Šé€‰å®šä¸€éƒ¨ç”µå½±é¢„æµ‹æˆ‘çš„è¯„åˆ†,è®©æˆ‘ä»¬ä»ç”µå½±IDä¸º148<é»‘å¤œå¹½çµ>
     model.predict(sc.parallelize(Array((944,402)))).collect.foreach(println)  
   }
 }

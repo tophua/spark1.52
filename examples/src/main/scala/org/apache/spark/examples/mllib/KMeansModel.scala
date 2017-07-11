@@ -9,7 +9,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.mllib.linalg.Vectors
-//case class ±ØĞëÇ°Ãæ
+//case class å¿…é¡»å‰é¢
 case class CC1(ID: String, LABEL: String, RTN5: Double, FIVE_DAY_GL: Double, CLOSE: Double, RSI2: Double, RSI_CLOSE_3: Double, PERCENT_RANK_100: Double, RSI_STREAK_2: Double, CRSI: Double)
 
 object KMeansModel {
@@ -22,55 +22,55 @@ object KMeansModel {
 
     val header = data.first
     
-   //csvÂÒÂë,É¾³ıµÚÒ»ĞĞÊı¾İ,Ê¹ÓÃExcel±¨´í,Ã»ÓĞ²âÊÔÆäËû¹¤¾ß
+   //csvä¹±ç ,åˆ é™¤ç¬¬ä¸€è¡Œæ•°æ®,ä½¿ç”¨ExcelæŠ¥é”™,æ²¡æœ‰æµ‹è¯•å…¶ä»–å·¥å…·
     val rows = data.filter(l => l != header)
 
     // define case class
-    //¶¨ÒåÊµÀıÀà
+    //å®šä¹‰å®ä¾‹ç±»
 
     // comma separator split
-    //¶ººÅ·Ö¸ô·û·Ö¸î
+    //é€—å·åˆ†éš”ç¬¦åˆ†å‰²
     val allSplit = rows.map(line => line.split(","))
 
     // map parts to case class
-    //½«Ó³Éä¶Ôµ½ÊµÀıÀà
+    //å°†æ˜ å°„å¯¹åˆ°å®ä¾‹ç±»
     val allData = allSplit.map(p => CC1(p(0).toString, p(1).toString, p(2).trim.toDouble, p(3).trim.toDouble, p(4).trim.toDouble, p(5).trim.toDouble, p(6).trim.toDouble, p(7).trim.toDouble, p(8).trim.toDouble, p(9).trim.toDouble))
 
     val sqlContext = new SQLContext(sc)
     // convert rdd to dataframe
-    //RDDÊı¾İÖ¡µÄ×ª»»
+    //RDDæ•°æ®å¸§çš„è½¬æ¢
     import sqlContext.implicits._
     import sqlContext._
 
     val allDF = allData.toDF()
 
     // convert back to rdd and cache the data
-    //×ª»»»ØRDDºÍ»º´æÊı¾İ
+    //è½¬æ¢å›RDDå’Œç¼“å­˜æ•°æ®
 
     val rowsRDD = allDF.rdd.map(r => (r.getString(0), r.getString(1), r.getDouble(2), r.getDouble(3), r.getDouble(4), r.getDouble(5), r.getDouble(6), r.getDouble(7), r.getDouble(8), r.getDouble(9)))
 
     rowsRDD.cache()
 
     // convert data to RDD which will be passed to KMeans and cache the data. We are passing in RSI2, RSI_CLOSE_3, PERCENT_RANK_100, RSI_STREAK_2 and CRSI to KMeans. These are the attributes we want to use to assign the instance to a cluster
-   //½«Êı¾İ×ª»»ÎªRDD½«Í¨¹ıkmeansºÍ»º´æÊı¾İ
+   //å°†æ•°æ®è½¬æ¢ä¸ºRDDå°†é€šè¿‡kmeanså’Œç¼“å­˜æ•°æ®
     val vectors = allDF.rdd.map(r => Vectors.dense(r.getDouble(5), r.getDouble(6), r.getDouble(7), r.getDouble(8), r.getDouble(9)))
 
     vectors.cache()
 
     //KMeans model with 2 clusters and 20 iterations
-   //K¾ùÖµÄ£ĞÍ2´ØºÍ20´Îµü´ú
+   //Kå‡å€¼æ¨¡å‹2ç°‡å’Œ20æ¬¡è¿­ä»£
     val kMeansModel = KMeans.train(vectors, 2, 20)
 
     //Print the center of each cluster
-   //´òÓ¡Ã¿¸ö´ØµÄÖĞĞÄ
+   //æ‰“å°æ¯ä¸ªç°‡çš„ä¸­å¿ƒ
     kMeansModel.clusterCenters.foreach(println)
 
     // Get the prediction from the model with the ID so we can link them back to other information
-    //´ÓÄ£ĞÍÖĞ»ñÈ¡Ô¤²â,ÒÔ±ãÎÒÃÇ¿ÉÒÔ½«ËüÃÇÁ´½Óµ½ÆäËûĞÅÏ¢
+    //ä»æ¨¡å‹ä¸­è·å–é¢„æµ‹,ä»¥ä¾¿æˆ‘ä»¬å¯ä»¥å°†å®ƒä»¬é“¾æ¥åˆ°å…¶ä»–ä¿¡æ¯
     val predictions = rowsRDD.map { r => (r._1, kMeansModel.predict(Vectors.dense(r._6, r._7, r._8, r._9, r._10))) }
 
     // convert the rdd to a dataframe
-    //½«RDD×ª»»dataframe
+    //å°†RDDè½¬æ¢dataframe
     val predDF = predictions.toDF("ID", "CLUSTER")
   }
 }

@@ -14,8 +14,8 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.sql.Row
 
 /**
- *Ê¹ÓÃSpark MLlibÌá¹©µÄÆÓËØ±´Ò¶Ë¹(Native Bayes)Ëã·¨,Íê³É¶ÔÖĞÎÄÎÄ±¾µÄ·ÖÀà¹ı³Ì¡£
- * Ö÷Òª°üÀ¨ÖĞÎÄ·Ö´Ê¡¢ÎÄ±¾±íÊ¾£¨TF-IDF£©¡¢Ä£ĞÍÑµÁ·¡¢·ÖÀàÔ¤²âµÈ
+ *ä½¿ç”¨Spark MLlibæä¾›çš„æœ´ç´ è´å¶æ–¯(Native Bayes)ç®—æ³•,å®Œæˆå¯¹ä¸­æ–‡æ–‡æœ¬çš„åˆ†ç±»è¿‡ç¨‹ã€‚
+ * ä¸»è¦åŒ…æ‹¬ä¸­æ–‡åˆ†è¯ã€æ–‡æœ¬è¡¨ç¤ºï¼ˆTF-IDFï¼‰ã€æ¨¡å‹è®­ç»ƒã€åˆ†ç±»é¢„æµ‹ç­‰
  * http://lxw1234.com/archives/2016/01/605.htm
  */
 case class RawDataRecord(category: String, text: String)
@@ -26,7 +26,7 @@ object NativeBayesHashingTF {
     val sc = new SparkContext(conf)
 
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
-    //ÒşÊ½µ¼Èë,×Ô¶¯×ª»»toDF
+    //éšå¼å¯¼å…¥,è‡ªåŠ¨è½¬æ¢toDF
     import sqlContext.implicits._
     var srcRDD = sc.textFile("../data/mllib/sougou/C000007/").filter(!_.isEmpty).map {
       x =>
@@ -35,59 +35,59 @@ object NativeBayesHashingTF {
         println("==="+data(0)+"\t======"+data(1))
         RawDataRecord(data(0), data(1))
     }
-    //70%×÷ÎªÑµÁ·Êı¾İ,30%×÷Îª²âÊÔÊı¾İ
+    //70%ä½œä¸ºè®­ç»ƒæ•°æ®,30%ä½œä¸ºæµ‹è¯•æ•°æ®
     val splits = srcRDD.randomSplit(Array(0.7, 0.3))
     var trainingDF = splits(0).toDF()
     var testDF = splits(1).toDF()
-    //½«´ÊÓï×ª»»³ÉÊı×é
+    //å°†è¯è¯­è½¬æ¢æˆæ•°ç»„
     var tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     var wordsData = tokenizer.transform(trainingDF)
-    //output1£º£¨½«´ÊÓï×ª»»³ÉÊı×é£©
+    //output1ï¼šï¼ˆå°†è¯è¯­è½¬æ¢æˆæ•°ç»„ï¼‰
     wordsData.show()
-    println("output1£º")
+    println("output1ï¼š")
     /**
      *+--------------------+--------------------+--------------------+
       |            category|                text|               words|
       +--------------------+--------------------+--------------------+
-      |ÔÚÕş¸®²¿ÃÅÃ÷È·±íÊ¾Æû³µÍ¶×Ê¹ıÈÈ...|ÈÕÇ°ĞÂ·É¼¯ÍÅÈ´ÄæÁ÷¶øÉÏ£º×¨ÓÃÆû³µ¹¤...|[ÈÕÇ°ĞÂ·É¼¯ÍÅÈ´ÄæÁ÷¶øÉÏ£º×¨ÓÃÆû³µ...|
+      |åœ¨æ”¿åºœéƒ¨é—¨æ˜ç¡®è¡¨ç¤ºæ±½è½¦æŠ•èµ„è¿‡çƒ­...|æ—¥å‰æ–°é£é›†å›¢å´é€†æµè€Œä¸Šï¼šä¸“ç”¨æ±½è½¦å·¥...|[æ—¥å‰æ–°é£é›†å›¢å´é€†æµè€Œä¸Šï¼šä¸“ç”¨æ±½è½¦...|
       +--------------------+--------------------+--------------------+
      */
     wordsData.select($"category", $"text", $"words").show(1)
     //wordsData.select($"category", $"text", $"words").take(1)
-   //½«Ã¿¸ö´Ê×ª»»³ÉIntĞÍ,²¢¼ÆËãÆäÔÚÎÄµµÖĞµÄ´ÊÆµ(TF)
+   //å°†æ¯ä¸ªè¯è½¬æ¢æˆIntå‹,å¹¶è®¡ç®—å…¶åœ¨æ–‡æ¡£ä¸­çš„è¯é¢‘(TF)
     var hashingTF = new HashingTF().setNumFeatures(500000).setInputCol("words").setOutputCol("rawFeatures")
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     var featurizedData = hashingTF.transform(wordsData)
-    //output2£º£¨¼ÆËãÃ¿¸ö´ÊÔÚÎÄµµÖĞµÄ´ÊÆµ£©
-    println("output2£º")
+    //output2ï¼šï¼ˆè®¡ç®—æ¯ä¸ªè¯åœ¨æ–‡æ¡£ä¸­çš„è¯é¢‘ï¼‰
+    println("output2ï¼š")
     /**
     +--------------------+--------------------+--------------------+
     |            category|               words|         rawFeatures|
     +--------------------+--------------------+--------------------+
-    |ÔÚÕş¸®²¿ÃÅÃ÷È·±íÊ¾Æû³µÍ¶×Ê¹ıÈÈ...|[ÈÕÇ°ĞÂ·É¼¯ÍÅÈ´ÄæÁ÷¶øÉÏ£º×¨ÓÃÆû³µ...|(500000,[372412],...|
+    |åœ¨æ”¿åºœéƒ¨é—¨æ˜ç¡®è¡¨ç¤ºæ±½è½¦æŠ•èµ„è¿‡çƒ­...|[æ—¥å‰æ–°é£é›†å›¢å´é€†æµè€Œä¸Šï¼šä¸“ç”¨æ±½è½¦...|(500000,[372412],...|
     +--------------------+--------------------+--------------------+
      */
     featurizedData.select($"category", $"words", $"rawFeatures").show()
     //println(">>>>>>>>>>>>>>>."+featurizedData.toString())
-    //ÄæÎÄµµÆµÂÊ(IDF),ÓÃÀ´ºâÁ¿Ò»¸ö´ÊÓïÌØ¶¨ÎÄµµµÄÏà¹Ø¶È,¼ÆËãTF-IDFÖµ
+    //é€†æ–‡æ¡£é¢‘ç‡(IDF),ç”¨æ¥è¡¡é‡ä¸€ä¸ªè¯è¯­ç‰¹å®šæ–‡æ¡£çš„ç›¸å…³åº¦,è®¡ç®—TF-IDFå€¼
     var idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     var idfModel = idf.fit(featurizedData)
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     var rescaledData = idfModel.transform(featurizedData)
-    //output3£º£¨¼ÆËãÃ¿¸ö´ÊµÄTF-IDF£©
-    println("output3£º")
+    //output3ï¼šï¼ˆè®¡ç®—æ¯ä¸ªè¯çš„TF-IDFï¼‰
+    println("output3ï¼š")
     /**
     +--------------------+--------------------+
     |            category|            features|
     +--------------------+--------------------+
-          ÔÚÕş¸®²¿ÃÅÃ÷È·±íÊ¾Æû³µÍ¶×Ê¹ıÈÈ...|(500000,[372412],...|
+          åœ¨æ”¿åºœéƒ¨é—¨æ˜ç¡®è¡¨ç¤ºæ±½è½¦æŠ•èµ„è¿‡çƒ­...|(500000,[372412],...|
     +--------------------+--------------------+
      */
     rescaledData.select($"category", $"features").show()
     /**
-     * ½«ÉÏÃæµÄÊı¾İ×ª»»³ÉBayesËã·¨ĞèÒªµÄ¸ñÊ½:
+     * å°†ä¸Šé¢çš„æ•°æ®è½¬æ¢æˆBayesç®—æ³•éœ€è¦çš„æ ¼å¼:
      		0,1 0 0
         0,2 0 0
         1,0 1 0
@@ -97,11 +97,11 @@ object NativeBayesHashingTF {
      */
     var trainDataRdd = rescaledData.select($"category", $"features").map {
       case Row(label: String, features: Vector) =>
-      //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+      //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
         LabeledPoint(label.toDouble, Vectors.dense(features.toArray))
     }
-    //output4:(BayesËã·¨µÄÊäÈëÊı¾İ¸ñÊ½)
-    println("output4£º")
+    //output4:(Bayesç®—æ³•çš„è¾“å…¥æ•°æ®æ ¼å¼)
+    println("output4ï¼š")
     trainDataRdd.take(1)
 
     
@@ -111,16 +111,16 @@ object NativeBayesHashingTF {
         RawDataRecord(data(0),data(1))
     }.toDF()
 
-    //ÑµÁ·Ä£ĞÍ,modelTypeÄ£ĞÍÀàĞÍ(Çø·Ö´óĞ¡Ğ´)multinomial¶à·ÖÀà
+    //è®­ç»ƒæ¨¡å‹,modelTypeæ¨¡å‹ç±»å‹(åŒºåˆ†å¤§å°å†™)multinomialå¤šåˆ†ç±»
     val model = NaiveBayes.train(trainDataRdd, lambda = 1.0, modelType = "multinomial")
-    //²âÊÔÊı¾İ¼¯,×öÍ¬ÑùµÄÌØÕ÷±íÊ¾¼°¸ñÊ½×ª»»
+    //æµ‹è¯•æ•°æ®é›†,åšåŒæ ·çš„ç‰¹å¾è¡¨ç¤ºåŠæ ¼å¼è½¬æ¢
     var testwordsData = tokenizer.transform(testDF)
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     var testfeaturizedData = hashingTF.transform(testwordsData)
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     var testrescaledData = idfModel.transform(testfeaturizedData)
     /**
-     * ½«ÉÏÃæµÄÊı¾İ×ª»»³ÉBayesËã·¨ĞèÒªµÄ¸ñÊ½:
+     * å°†ä¸Šé¢çš„æ•°æ®è½¬æ¢æˆBayesç®—æ³•éœ€è¦çš„æ ¼å¼:
      		0,1 0 0
         0,2 0 0
         1,0 1 0
@@ -130,18 +130,18 @@ object NativeBayesHashingTF {
      */
     var testDataRdd = testrescaledData.select($"category", $"features").map {
       case Row(label: String, features: Vector) =>
-      //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+      //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
         LabeledPoint(label.toDouble, Vectors.dense(features.toArray))
     }
 
-    //¶Ô²âÊÔÊı¾İ¼¯Ê¹ÓÃÑµÁ·Ä£ĞÍ½øĞĞ·ÖÀàÔ¤²â
+    //å¯¹æµ‹è¯•æ•°æ®é›†ä½¿ç”¨è®­ç»ƒæ¨¡å‹è¿›è¡Œåˆ†ç±»é¢„æµ‹
     val testpredictionAndLabel = testDataRdd.map(p => (model.predict(p.features), p.label))
 
-    //Í³¼Æ·ÖÀà×¼È·ÂÊ
+    //ç»Ÿè®¡åˆ†ç±»å‡†ç¡®ç‡
     var testaccuracy = 1.0 * testpredictionAndLabel.filter(x => x._1 == x._2).count() / testDataRdd.count()
-    //output5£º£¨²âÊÔÊı¾İ¼¯·ÖÀà×¼È·ÂÊ£©
-    println("output5£º")
-   //×¼È·ÂÊ90%,»¹¿ÉÒÔ¡£½ÓÏÂÀ´ĞèÒªÊÕ¼¯·ÖÀà¸üÏ¸,Ê±¼ä¸üĞÂµÄÊı¾İÀ´ÑµÁ·ºÍ²âÊÔÁË¡£ 
+    //output5ï¼šï¼ˆæµ‹è¯•æ•°æ®é›†åˆ†ç±»å‡†ç¡®ç‡ï¼‰
+    println("output5ï¼š")
+   //å‡†ç¡®ç‡90%,è¿˜å¯ä»¥ã€‚æ¥ä¸‹æ¥éœ€è¦æ”¶é›†åˆ†ç±»æ›´ç»†,æ—¶é—´æ›´æ–°çš„æ•°æ®æ¥è®­ç»ƒå’Œæµ‹è¯•äº†ã€‚ 
     println(testaccuracy)
 
   }

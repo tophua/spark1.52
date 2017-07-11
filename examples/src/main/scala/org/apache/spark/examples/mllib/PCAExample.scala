@@ -32,10 +32,10 @@ import org.apache.spark.mllib.linalg.{ Vector, Vectors }
 import org.apache.spark.rdd.RDD
 
 /**
- * Ö÷³É·ÖÎöµÄ½µÎ¬
- * ½µÎ¬:½µµÍÎ¬¶È»òÕß½µµÍÌØÕ÷ÊıÁ¿µÄ¹ı³Ì.
- * ÎªÊ²Ã´Òª×öÌØÕ÷Ëõ·Å:Ã»ÓĞ±ØÒª°ÑÌØÕ÷·Åµ½Í¬Ò»¸öÆ½µÈµÄ¼¶±ğ(ÌØÕ÷Öµ¼õÈ¥Æ½¾ùÖµ,È»ºó³ıÒÔ±ê×¼²î)
- * ·¿ÎİÃæ»ı	Õ¼µØÃæ»ı 		Ëõ·ÅµÄ·¿ÎİÃæ»ı 		Ëõ·ÅµÄÕ¼µØÃæ»ı 		·¿Îİ¼Û¸ñ
+ * ä¸»æˆåˆ†æçš„é™ç»´
+ * é™ç»´:é™ä½ç»´åº¦æˆ–è€…é™ä½ç‰¹å¾æ•°é‡çš„è¿‡ç¨‹.
+ * ä¸ºä»€ä¹ˆè¦åšç‰¹å¾ç¼©æ”¾:æ²¡æœ‰å¿…è¦æŠŠç‰¹å¾æ”¾åˆ°åŒä¸€ä¸ªå¹³ç­‰çš„çº§åˆ«(ç‰¹å¾å€¼å‡å»å¹³å‡å€¼,ç„¶åé™¤ä»¥æ ‡å‡†å·®)
+ * æˆ¿å±‹é¢ç§¯	å åœ°é¢ç§¯ 		ç¼©æ”¾çš„æˆ¿å±‹é¢ç§¯ 		ç¼©æ”¾çš„å åœ°é¢ç§¯ 		æˆ¿å±‹ä»·æ ¼
  * 2524,		12839,		-0.025,					-0.231,					2405
  * 2937,		10000,			0.323,				-0.4,						2200
  * 1778,		8040,			-0.654,					-0.517,					1400
@@ -48,22 +48,22 @@ object PCAExample {
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("KMeansClustering")
     val sc = new SparkContext(sparkConf)
-    //¼ÓÔØÊı¾İµ½RDD
+    //åŠ è½½æ•°æ®åˆ°RDD
     val data = sc.textFile("../data/mllib/scaledhousedata.csv")
-    //Êı¾İ×ª»»³ÉÃÜ¼¯ÏòÁ¿µÄRDD
+    //æ•°æ®è½¬æ¢æˆå¯†é›†å‘é‡çš„RDD
     val parsedData = data.map(line => Vectors.dense(line.
       split(',').map(_.toDouble)))
-    //¸ù¾İparsedData´´½¨Ò»¸öRowMatrix(ĞĞ¾ØÕó)
+    //æ ¹æ®parsedDataåˆ›å»ºä¸€ä¸ªRowMatrix(è¡ŒçŸ©é˜µ)
     val mat = new RowMatrix(parsedData)
-    //¼ÆËãÒ»¸öÖ÷Òª(³É)·ÖÎö
+    //è®¡ç®—ä¸€ä¸ªä¸»è¦(æˆ)åˆ†æ
     val pc = mat.computePrincipalComponents(1)
     /**
      * -0.9995710763570875
 		 * -0.02928588926998105
      */
-    //Í¨¹ıÀ©ÕÅÖ÷Òª³É·Ö°ÑĞĞÍ¶Ó°µ½ÏßĞÔ¿Õ¼ä
+    //é€šè¿‡æ‰©å¼ ä¸»è¦æˆåˆ†æŠŠè¡ŒæŠ•å½±åˆ°çº¿æ€§ç©ºé—´
     val projected = mat.multiply(pc)
-    //°ÑÍ¶Ó°¹ıµÄRowMatrix×ª»»³ÉRDD
+    //æŠŠæŠ•å½±è¿‡çš„RowMatrixè½¬æ¢æˆRDD
     val projectedRDD = projected.rows
     
     projectedRDD.saveAsTextFile("phdata")

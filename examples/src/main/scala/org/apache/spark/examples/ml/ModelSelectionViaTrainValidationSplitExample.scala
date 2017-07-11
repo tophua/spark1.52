@@ -34,8 +34,8 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
  * A simple example demonstrating model selection using TrainValidationSplit.
- * ÑİÊ¾Ò»¸ö¼òµ¥µÄÀı×Ó,Ñ¡ÔñÊ¹ÓÃtrainvalidationsplitÄ£ĞÍ
- *Êı¾İÁ¿Ğ¡µÄÊ±ºò¿ÉÒÔÓÃCrossValidator½øĞĞ½»²æÑéÖ¤,Êı¾İÁ¿´óµÄÊ±ºò¿ÉÒÔÖ±½ÓÓÃtrainValidationSplit
+ * æ¼”ç¤ºä¸€ä¸ªç®€å•çš„ä¾‹å­,é€‰æ‹©ä½¿ç”¨trainvalidationsplitæ¨¡å‹
+ *æ•°æ®é‡å°çš„æ—¶å€™å¯ä»¥ç”¨CrossValidatorè¿›è¡Œäº¤å‰éªŒè¯,æ•°æ®é‡å¤§çš„æ—¶å€™å¯ä»¥ç›´æ¥ç”¨trainValidationSplit
  * Run with
  * {{{
  * bin/run-example ml.ModelSelectionViaTrainValidationSplitExample
@@ -54,11 +54,11 @@ object ModelSelectionViaTrainValidationSplitExample {
     // $example on$
     // Prepare training and test data.
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
    // val data = sqlContext.read.format("libsvm").load("data/mllib/sample_linear_regression_data.txt")
     import org.apache.spark.mllib.util.MLUtils
@@ -71,32 +71,32 @@ object ModelSelectionViaTrainValidationSplitExample {
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
     // TrainValidationSplit will try all combinations of values and determine best model using
     // the evaluator.
-    //ParamGridBuilder¹¹½¨´ıÑ¡²ÎÊı(Èç:logistic regressionµÄregParam)
+    //ParamGridBuilderæ„å»ºå¾…é€‰å‚æ•°(å¦‚:logistic regressionçš„regParam)
     val paramGrid = new ParamGridBuilder()
       .addGrid(lr.regParam, Array(0.1, 0.01))
-      .addGrid(lr.fitIntercept)//ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
-      //µ¯ĞÔÍøÂç»ìºÏ²ÎÊı,0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
+      .addGrid(lr.fitIntercept)//æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
+      //å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
       .addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0))
       .build()
 
     // In this case the estimator is simply the linear regression.
     // A TrainValidationSplit requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
-    //Êı¾İÁ¿Ğ¡µÄÊ±ºò¿ÉÒÔÓÃCrossValidator½øĞĞ½»²æÑéÖ¤,Êı¾İÁ¿´óµÄÊ±ºò¿ÉÒÔÖ±½ÓÓÃtrainValidationSplit
+    //æ•°æ®é‡å°çš„æ—¶å€™å¯ä»¥ç”¨CrossValidatorè¿›è¡Œäº¤å‰éªŒè¯,æ•°æ®é‡å¤§çš„æ—¶å€™å¯ä»¥ç›´æ¥ç”¨trainValidationSplit
     val trainValidationSplit = new TrainValidationSplit()
       .setEstimator(lr)
-      .setEvaluator(new RegressionEvaluator)//»Ø¹éÆÀ¹À
+      .setEvaluator(new RegressionEvaluator)//å›å½’è¯„ä¼°
       .setEstimatorParamMaps(paramGrid)
       // 80% of the data will be used for training and the remaining 20% for validation.
-      //80%µÄÊı¾İ½«ÓÃÓÚÑµÁ·,ÆäÓà20%ÓÃÓÚÑéÖ¤
+      //80%çš„æ•°æ®å°†ç”¨äºè®­ç»ƒ,å…¶ä½™20%ç”¨äºéªŒè¯
       .setTrainRatio(0.8)
 
     // Run train validation split, and choose the best set of parameters.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = trainValidationSplit.fit(training)
 
     // Make predictions on test data. model is the model with combination of parameters
     // that performed best.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     /**
       +--------------------+------------------+--------------------+
       |            features|             label|          prediction|

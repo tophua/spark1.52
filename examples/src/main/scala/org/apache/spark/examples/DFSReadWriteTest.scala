@@ -27,15 +27,15 @@ import org.apache.spark.SparkContext._
 
 /**
   * Simple test for reading and writing to a distributed file system. 
-  * ¼òµ¥²âÊÔµÄ·Ö²¼Ê½ÎÄ¼şÏµÍ³¶ÁĞ´,Õâ¸öÀı×Ó×öÒÔÏÂ
+  * ç®€å•æµ‹è¯•çš„åˆ†å¸ƒå¼æ–‡ä»¶ç³»ç»Ÿè¯»å†™,è¿™ä¸ªä¾‹å­åšä»¥ä¸‹
   *  This example does the following:
   *
-  *   1. Reads local file ¶ÁÈ¡±¾µØÎÄ¼ş
-  *   2. Computes word count on local file ¼ÆËã±¾µØÎÄ¼şÉÏµÄ×Ö¼ÆÊı
-  *   3. Writes local file to a DFS Ğ´±¾µØÎÄ¼şµ½DFS
-  *   4. Reads the file back from the DFS ½«ÎÄ¼ş´ÓDFS¶Á»ØÀ´
-  *   5. Computes word count on the file using Spark ÓÃSpark¼ÆËãÎÄ¼şÉÏµÄ×Ö¼ÆÊı
-  *   6. Compares the word count results ±È½Ï×Ö¼ÆÊı½á¹û
+  *   1. Reads local file è¯»å–æœ¬åœ°æ–‡ä»¶
+  *   2. Computes word count on local file è®¡ç®—æœ¬åœ°æ–‡ä»¶ä¸Šçš„å­—è®¡æ•°
+  *   3. Writes local file to a DFS å†™æœ¬åœ°æ–‡ä»¶åˆ°DFS
+  *   4. Reads the file back from the DFS å°†æ–‡ä»¶ä»DFSè¯»å›æ¥
+  *   5. Computes word count on the file using Spark ç”¨Sparkè®¡ç®—æ–‡ä»¶ä¸Šçš„å­—è®¡æ•°
+  *   6. Compares the word count results æ¯”è¾ƒå­—è®¡æ•°ç»“æœ
   */
 object DFSReadWriteTest {
 
@@ -44,86 +44,86 @@ object DFSReadWriteTest {
 
   private val NPARAMS = 2
   /**
-   * ¶ÁÈ¡ÎÄ¼ş
-   */
+    * è¯»å–æ–‡ä»¶
+    */
   private def readFile(filename: String): List[String] = {
     val lineIter: Iterator[String] = fromFile(filename).getLines()
-    val lineList: List[String] = lineIter.toList //Iterator×ª»»List
+    val lineList: List[String] = lineIter.toList //Iteratorè½¬æ¢List
     lineList
   }
- /**
-  * ´òÓ¡Ê¹ÓÃ
-  */
+  /**
+    * æ‰“å°ä½¿ç”¨
+    */
   private def printUsage(): Unit = {
     val usage: String = "DFS Read-Write Test\n" +
-    "\n" +
-    "Usage: localFile dfsDir\n" +
-    "\n" +
-    "localFile - (string) local file to use in test\n" +
-    "dfsDir - (string) DFS directory for read/write tests\n"
+      "\n" +
+      "Usage: localFile dfsDir\n" +
+      "\n" +
+      "localFile - (string) local file to use in test\n" +
+      "dfsDir - (string) DFS directory for read/write tests\n"
 
     println(usage)
   }
   /**
-   * ½âÎö²ÎÊıÅĞ¶ÏÊÇ·ñÎÄ¼ş
-   */
+    * è§£æå‚æ•°åˆ¤æ–­æ˜¯å¦æ–‡ä»¶
+    */
   private def parseArgs(args: Array[String]): Unit = {
-    if (args.length != NPARAMS) {//Èç¹û²ÎÊı²»ÏàÓÚ2ÔòÍË³ö
+    if (args.length != NPARAMS) {//å¦‚æœå‚æ•°ä¸ç›¸äº2åˆ™é€€å‡º
       printUsage()
       System.exit(1)
     }
 
     var i = 0
 
-    localFilePath = new File(args(i))//È¡³öµÚÒ»¸ö²ÎÊıÎÄ¼ş
-    if (!localFilePath.exists) {//Èç¹ûÎÄ¼ş²»´æÔÚ,Ôò¸ø¶¨µÄÂ·¾¶ÎÄ¼ş²»´æÔÚ
+    localFilePath = new File(args(i))//å–å‡ºç¬¬ä¸€ä¸ªå‚æ•°æ–‡ä»¶
+    if (!localFilePath.exists) {//å¦‚æœæ–‡ä»¶ä¸å­˜åœ¨,åˆ™ç»™å®šçš„è·¯å¾„æ–‡ä»¶ä¸å­˜åœ¨
       System.err.println("Given path (" + args(i) + ") does not exist.\n")
       printUsage()
       System.exit(1)
     }
 
-    if (!localFilePath.isFile) {//Èç¹ûÎÄ¼ş²»ÊÇÎÄ¼ş,Ôò¸ø¶¨µÄÂ·¾¶²»ÊÇÎÄ¼ş
+    if (!localFilePath.isFile) {//å¦‚æœæ–‡ä»¶ä¸æ˜¯æ–‡ä»¶,åˆ™ç»™å®šçš„è·¯å¾„ä¸æ˜¯æ–‡ä»¶
       System.err.println("Given path (" + args(i) + ") is not a file.\n")
       printUsage()
       System.exit(1)
     }
 
     i += 1
-    dfsDirPath = args(i)//´æ·ÅÎÄ¼şÎ»ÖÃµÄÄ¿Â¼
+    dfsDirPath = args(i)//å­˜æ”¾æ–‡ä»¶ä½ç½®çš„ç›®å½•
   }
-/**
- * ÔËĞĞ±¾µØµ¥´Ê¼ÆÊı
- */
+  /**
+    * è¿è¡Œæœ¬åœ°å•è¯è®¡æ•°
+    */
   def runLocalWordCount(fileContents: List[String]): Int = {
-    fileContents.flatMap(_.split(" "))//ÒÔ¿Õ¸ñ·Ö¸ô
-      .flatMap(_.split("\t"))//Ë®Æ½ÖÆ±í(HT)(Ìøµ½ÏÂÒ»¸öTABÎ»ÖÃ)
-      .filter(_.size > 0)//¹ıÂËµô³¤¶È´óĞ¡ÓÚ0
-      .groupBy(w => w)//·Ö×é
-      .mapValues(_.size)//´óĞ¡
-      .values//×ª»»Öµ
-      .sum//ÇóºÍ
+    fileContents.flatMap(_.split(" "))//ä»¥ç©ºæ ¼åˆ†éš”
+      .flatMap(_.split("\t"))//æ°´å¹³åˆ¶è¡¨(HT)(è·³åˆ°ä¸‹ä¸€ä¸ªTABä½ç½®)
+      .filter(_.size > 0)//è¿‡æ»¤æ‰é•¿åº¦å¤§å°äº0
+      .groupBy(w => w)//åˆ†ç»„
+      .mapValues(_.size)//å¤§å°
+      .values//è½¬æ¢å€¼
+      .sum//æ±‚å’Œ
   }
 
-  def main(args: Array[String]): Unit = {//µÚÒ»²ÎÊı¶ÁÈ¡ÎÄ¼ş,µÚ¶ş²ÎÊıÊÇ´æÎÄ¼şÄ¿Â¼
-    val args1=Array("D:\\spark\\spark-1.5.0-hadoop2.6\\README.md","D:\\spark\\spark-1.5.0-hadoop2.6\\")
+  def main(args: Array[String]): Unit = {//ç¬¬ä¸€å‚æ•°è¯»å–æ–‡ä»¶,ç¬¬äºŒå‚æ•°æ˜¯å­˜æ–‡ä»¶ç›®å½•
+  val args1=Array("D:\\spark\\spark-1.5.0-hadoop2.6\\README.md","D:\\spark\\spark-1.5.0-hadoop2.6\\")
     //parseArgs(args)
     parseArgs(args1)
 
-    println("Performing local word count")//Ö´ĞĞ±¾µØ×Ö¼ÆÊı
-    val fileContents = readFile(localFilePath.toString())//¶ÁÈ¡ÎÄ¼ş
+    println("Performing local word count")//æ‰§è¡Œæœ¬åœ°å­—è®¡æ•°
+    val fileContents = readFile(localFilePath.toString())//è¯»å–æ–‡ä»¶
     val localWordCount = runLocalWordCount(fileContents)
 
-    println("Creating SparkConf")//´´½¨SparkÅäÖÃÎÄ¼ş
+    println("Creating SparkConf")//åˆ›å»ºSparké…ç½®æ–‡ä»¶
     val conf = new SparkConf().setAppName("DFS Read Write Test").setMaster("local")
 
-    println("Creating SparkContext")//´´½¨SparkÉÏÏÂÎÄ
+    println("Creating SparkContext")//åˆ›å»ºSparkä¸Šä¸‹æ–‡
     val sc = new SparkContext(conf)
 
-    println("Writing local file to DFS")//Ğ´±¾µØÎÄ¼şµ½DFS
-    val dfsFilename = dfsDirPath + "/dfs_read_write_test"//´æ·Å¶ÁÈ¡ÎÄ¼şµÄÎ»ÖÃ
-    val fileRDD = sc.parallelize(fileContents)//×ª»»RDDÎÄ¼ş
-    fileRDD.saveAsTextFile(dfsFilename)//±£´æÎÄ¼ş
-    //´ÓDFSÔÄ¶ÁÎÄ¼şºÍÔËĞĞ×ÖÊı
+    println("Writing local file to DFS")//å†™æœ¬åœ°æ–‡ä»¶åˆ°DFS
+    val dfsFilename = dfsDirPath + "/dfs_read_write_test"//å­˜æ”¾è¯»å–æ–‡ä»¶çš„ä½ç½®
+    val fileRDD = sc.parallelize(fileContents)//è½¬æ¢RDDæ–‡ä»¶
+    fileRDD.saveAsTextFile(dfsFilename)//ä¿å­˜æ–‡ä»¶
+    //ä»DFSé˜…è¯»æ–‡ä»¶å’Œè¿è¡Œå­—æ•°
     println("Reading file from DFS and running Word Count")
     val readFileRDD = sc.textFile(dfsFilename)
 
@@ -138,7 +138,7 @@ object DFSReadWriteTest {
 
     sc.stop()
 
-    if (localWordCount == dfsWordCount) {//Èç¹û±¾µØµ¥´ÊÍ³¼ÆÊıºÍdfsµ¥´ÊÍ³¼ÆÊıÏàÍ¬,Ôò±íÊ¾Êı¾İ¶ÁÈ¡³É¹¦
+    if (localWordCount == dfsWordCount) {//å¦‚æœæœ¬åœ°å•è¯ç»Ÿè®¡æ•°å’Œdfså•è¯ç»Ÿè®¡æ•°ç›¸åŒ,åˆ™è¡¨ç¤ºæ•°æ®è¯»å–æˆåŠŸ
       println(s"Success! Local Word Count ($localWordCount) " +
         s"and DFS Word Count ($dfsWordCount) agree.")
     } else {

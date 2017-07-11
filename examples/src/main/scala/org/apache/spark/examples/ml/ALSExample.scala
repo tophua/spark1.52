@@ -31,7 +31,7 @@ import org.apache.spark.sql.SQLContext
  * {{{
  * bin/run-example ml.ALSExample
  * }}}
- * ´ÓMovieLens dataset¶ÁÈëÆÀ·ÖÊı¾İ,Ã¿Ò»ĞĞ°üÀ¨ÓÃ»§¡¢µçÓ°¡¢ÆÀ·ÖÒÔ¼°Ê±¼ä´Á
+ * ä»MovieLens datasetè¯»å…¥è¯„åˆ†æ•°æ®,æ¯ä¸€è¡ŒåŒ…æ‹¬ç”¨æˆ·ã€ç”µå½±ã€è¯„åˆ†ä»¥åŠæ—¶é—´æˆ³
  * 
  */
 object ALSExample {
@@ -59,35 +59,35 @@ object ALSExample {
 
     // Build the recommendation model using ALS on the training data
     val als = new ALS()
-      //ÉèÖÃ×î´óµü´úÊı
+      //è®¾ç½®æœ€å¤§è¿­ä»£æ•°
       .setMaxIter(5)
-      //ÕıÔò»¯²ÎÊı
+      //æ­£åˆ™åŒ–å‚æ•°
       .setRegParam(0.01)
-      //ÉèÖÃÓÃ»§ÁĞÃû
+      //è®¾ç½®ç”¨æˆ·åˆ—å
       .setUserCol("userId")
-      //ÉèÖÃÉÌÆ·±àºÅÁĞÃû
+      //è®¾ç½®å•†å“ç¼–å·åˆ—å
       .setItemCol("movieId")
-      //ÉèÖÃÆÀ·ÖÁĞÃû
+      //è®¾ç½®è¯„åˆ†åˆ—å
       .setRatingCol("rating")
-      //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = als.fit(training)
      //import spark.implicits._
     // Evaluate the model by computing the RMSE on the test data
     //test[userId: int, movieId: int, rating: float, timestamp: bigint]
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(test)
     predictions.collect()
-    //Í¨¹ıÔ¤²âÆÀ·ÖµÄ¾ù·½¸ùÎó²îÀ´ÆÀ¼ÛÍÆ¼öÄ£ĞÍ
+    //é€šè¿‡é¢„æµ‹è¯„åˆ†çš„å‡æ–¹æ ¹è¯¯å·®æ¥è¯„ä»·æ¨èæ¨¡å‹
     val evaluator = new RegressionEvaluator()  
-      //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+      //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
       .setMetricName("rmse")
-      //±êÇ©ÁĞµÄÃû³Æ
+      //æ ‡ç­¾åˆ—çš„åç§°
       .setLabelCol("rating")
-      //Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
+      //ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
       .setPredictionCol("prediction")
       //predictions [userId: int, movieId: int, rating: float, timestamp: bigint, prediction: float]
     val rmse = evaluator.evaluate(predictions)
-    //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+    //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     println(s"Root-mean-square error = $rmse")
     // $example off$
    sc.stop()

@@ -34,9 +34,9 @@ import org.apache.spark.sql.DataFrame
 
 /**
  * An example runner for decision trees. Run with
- * Ëæ»úÉ­ÁÖ(Random Forests)ÆäÊµ¾ÍÊÇ¶à¸ö¾ö²ßÊ÷,Ã¿¸ö¾ö²ßÊ÷ÓĞÒ»¸öÈ¨ÖØ,¶ÔÎ´ÖªÊı¾İ½øĞĞÔ¤²âÊ±,
- * »áÓÃ¶à¸ö¾ö²ßÊ÷·Ö±ğÔ¤²âÒ»¸öÖµ,È»ºó¿¼ÂÇÊ÷µÄÈ¨ÖØ,½«Õâ¶à¸öÔ¤²âÖµ×ÛºÏÆğÀ´,
- * ¶ÔÓÚ·ÖÀàÎÊÌâ,²ÉÓÃ¶àÊı±í¾ö,¶ÔÓÚ»Ø¹éÎÊÌâ,Ö±½ÓÇóÆ½¾ù¡£
+ * éšæœºæ£®æ—(Random Forests)å…¶å®å°±æ˜¯å¤šä¸ªå†³ç­–æ ‘,æ¯ä¸ªå†³ç­–æ ‘æœ‰ä¸€ä¸ªæƒé‡,å¯¹æœªçŸ¥æ•°æ®è¿›è¡Œé¢„æµ‹æ—¶,
+ * ä¼šç”¨å¤šä¸ªå†³ç­–æ ‘åˆ†åˆ«é¢„æµ‹ä¸€ä¸ªå€¼,ç„¶åè€ƒè™‘æ ‘çš„æƒé‡,å°†è¿™å¤šä¸ªé¢„æµ‹å€¼ç»¼åˆèµ·æ¥,
+ * å¯¹äºåˆ†ç±»é—®é¢˜,é‡‡ç”¨å¤šæ•°è¡¨å†³,å¯¹äºå›å½’é—®é¢˜,ç›´æ¥æ±‚å¹³å‡ã€‚
  * {{{
  * ./bin/run-example ml.RandomForestExample [options]
  * }}}
@@ -55,24 +55,24 @@ object RandomForestExample {
       input: String = "../data/mllib/sample_multiclass_classification_data.txt",
       testInput: String = "",
       /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
       dataFormat: String = "libsvm",
-      algo: String = "classification",//·ÖÀà
-      maxDepth: Int = 5,//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-      maxBins: Int = 32,//ÀëÉ¢Á¬ĞøĞÔ±äÁ¿Ê±×î´óµÄ·ÖÏäÊı,Ä¬ÈÏÊÇ 32
-      minInstancesPerNode: Int = 1,//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-      minInfoGain: Double = 0.0,//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
-      numTrees: Int = 10,//Ëæ»úÉ­ÁÖĞèÒªÑµÁ·µÄÊ÷µÄ¸öÊı,Ä¬ÈÏÖµÊÇ 20
+      algo: String = "classification",//åˆ†ç±»
+      maxDepth: Int = 5,//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+      maxBins: Int = 32,//ç¦»æ•£è¿ç»­æ€§å˜é‡æ—¶æœ€å¤§çš„åˆ†ç®±æ•°,é»˜è®¤æ˜¯ 32
+      minInstancesPerNode: Int = 1,//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+      minInfoGain: Double = 0.0,//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
+      numTrees: Int = 10,//éšæœºæ£®æ—éœ€è¦è®­ç»ƒçš„æ ‘çš„ä¸ªæ•°,é»˜è®¤å€¼æ˜¯ 20
       featureSubsetStrategy: String = "auto",
       fracTest: Double = 0.2,
       cacheNodeIds: Boolean = false,
       checkpointDir: Option[String] = None,
-      //ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+      //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -83,17 +83,17 @@ object RandomForestExample {
       opt[String]("algo")
         .text(s"algorithm (classification, regression), default: ${defaultParams.algo}")
         .action((x, c) => c.copy(algo = x))
-      opt[Int]("maxDepth")//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
+      opt[Int]("maxDepth")//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("maxBins")
         .text(s"max number of bins, default: ${defaultParams.maxBins}")
         .action((x, c) => c.copy(maxBins = x))
-      opt[Int]("minInstancesPerNode")//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
+      opt[Int]("minInstancesPerNode")//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
         .text(s"min number of instances required at child nodes to create the parent split," +
-        s" default: ${defaultParams.minInstancesPerNode}")//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-        .action((x, c) => c.copy(minInstancesPerNode = x))//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-      opt[Double]("minInfoGain")//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
+        s" default: ${defaultParams.minInstancesPerNode}")//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+        .action((x, c) => c.copy(minInstancesPerNode = x))//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+      opt[Double]("minInfoGain")//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
         .action((x, c) => c.copy(minInfoGain = x))
       opt[Int]("numTrees")
@@ -131,11 +131,11 @@ object RandomForestExample {
         .action((x, c) => c.copy(testInput = x))
       opt[String]("dataFormat")
       /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
@@ -167,15 +167,15 @@ object RandomForestExample {
 
     println(s"RandomForestExample with parameters:\n$params")
 
-    // Load training and test data and cache it.¼ÓÔØÑµÁ·ºÍ²âÊÔÊı¾İ²¢½«Æä»º´æ
+    // Load training and test data and cache it.åŠ è½½è®­ç»ƒå’Œæµ‹è¯•æ•°æ®å¹¶å°†å…¶ç¼“å­˜
     val (training: DataFrame, test: DataFrame) = DecisionTreeExample.loadDatasets(sc, params.input,
       params.dataFormat, params.testInput, algo, params.fracTest)
 
-    // Set up Pipeline ½¨Á¢¹ÜµÀ
-     //½«ÌØÕ÷×ª»»,ÌØÕ÷¾ÛºÏ,Ä£ĞÍµÈ×é³ÉÒ»¸ö¹ÜµÀ,²¢µ÷ÓÃËüµÄfit·½·¨ÄâºÏ³öÄ£ĞÍ
-     //Ò»¸ö Pipeline ÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+    // Set up Pipeline å»ºç«‹ç®¡é“
+     //å°†ç‰¹å¾è½¬æ¢,ç‰¹å¾èšåˆ,æ¨¡å‹ç­‰ç»„æˆä¸€ä¸ªç®¡é“,å¹¶è°ƒç”¨å®ƒçš„fitæ–¹æ³•æ‹Ÿåˆå‡ºæ¨¡å‹
+     //ä¸€ä¸ª Pipeline åœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val stages = new mutable.ArrayBuffer[PipelineStage]()
-    // (1) For classification, re-index classes.¶ÔÓÚ·ÖÀà,ÖØĞÂË÷ÒıÀà
+    // (1) For classification, re-index classes.å¯¹äºåˆ†ç±»,é‡æ–°ç´¢å¼•ç±»
     val labelColName = if (algo == "classification") "indexedLabel" else "label"
     if (algo == "classification") {
       val labelIndexer = new StringIndexer()
@@ -183,59 +183,59 @@ object RandomForestExample {
         .setOutputCol(labelColName)
       stages += labelIndexer
     }
-    // (2) Identify categorical features using VectorIndexer.È·¶¨Ê¹ÓÃvectorindexer·ÖÀàÌØÕ÷
+    // (2) Identify categorical features using VectorIndexer.ç¡®å®šä½¿ç”¨vectorindexeråˆ†ç±»ç‰¹å¾
     //     Features with more than maxCategories values will be treated as continuous.
-    //³¬¹ımaxcategoriesÖµ½«±»ÊÓÎªÁ¬ĞøµÄÌØµã
-    //VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+    //è¶…è¿‡maxcategorieså€¼å°†è¢«è§†ä¸ºè¿ç»­çš„ç‰¹ç‚¹
+    //VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featuresIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
       .setMaxCategories(10)
     stages += featuresIndexer 
-    // (3) Learn Random Forest Ñ§Ï°Ëæ»úÉ­ÁÖ
+    // (3) Learn Random Forest å­¦ä¹ éšæœºæ£®æ—
     val dt = algo match {
       case "classification" =>
         new RandomForestClassifier()
-          .setFeaturesCol("indexedFeatures")//ÑµÁ·Êı¾İ¼¯ DataFrame ÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
-          .setLabelCol(labelColName)//±êÇ©ÁĞµÄÃû³Æ
-          .setMaxDepth(params.maxDepth)//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-          .setMaxBins(params.maxBins)//ÀëÉ¢Á¬ĞøĞÔ±äÁ¿Ê±×î´óµÄ·ÖÏäÊı,Ä¬ÈÏÊÇ 32
-          .setMinInstancesPerNode(params.minInstancesPerNode)//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-          .setMinInfoGain(params.minInfoGain)//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
+          .setFeaturesCol("indexedFeatures")//è®­ç»ƒæ•°æ®é›† DataFrame ä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
+          .setLabelCol(labelColName)//æ ‡ç­¾åˆ—çš„åç§°
+          .setMaxDepth(params.maxDepth)//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+          .setMaxBins(params.maxBins)//ç¦»æ•£è¿ç»­æ€§å˜é‡æ—¶æœ€å¤§çš„åˆ†ç®±æ•°,é»˜è®¤æ˜¯ 32
+          .setMinInstancesPerNode(params.minInstancesPerNode)//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+          .setMinInfoGain(params.minInfoGain)//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
           .setCacheNodeIds(params.cacheNodeIds)
           .setCheckpointInterval(params.checkpointInterval)//
           .setFeatureSubsetStrategy(params.featureSubsetStrategy)
-          .setNumTrees(params.numTrees)//Ëæ»úÉ­ÁÖĞèÒªÑµÁ·µÄÊ÷µÄ¸öÊı,Ä¬ÈÏÖµÊÇ 20
+          .setNumTrees(params.numTrees)//éšæœºæ£®æ—éœ€è¦è®­ç»ƒçš„æ ‘çš„ä¸ªæ•°,é»˜è®¤å€¼æ˜¯ 20
       case "regression" =>
         new RandomForestRegressor()
-          .setFeaturesCol("indexedFeatures")//ÑµÁ·Êı¾İ¼¯ DataFrame ÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
-          .setLabelCol(labelColName)//±êÇ©ÁĞµÄÃû³Æ
-          .setMaxDepth(params.maxDepth)//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-          .setMaxBins(params.maxBins)//ÀëÉ¢Á¬ĞøĞÔ±äÁ¿Ê±×î´óµÄ·ÖÏäÊı,Ä¬ÈÏÊÇ 32
-          .setMinInstancesPerNode(params.minInstancesPerNode)//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-          .setMinInfoGain(params.minInfoGain)//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
+          .setFeaturesCol("indexedFeatures")//è®­ç»ƒæ•°æ®é›† DataFrame ä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
+          .setLabelCol(labelColName)//æ ‡ç­¾åˆ—çš„åç§°
+          .setMaxDepth(params.maxDepth)//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+          .setMaxBins(params.maxBins)//ç¦»æ•£è¿ç»­æ€§å˜é‡æ—¶æœ€å¤§çš„åˆ†ç®±æ•°,é»˜è®¤æ˜¯ 32
+          .setMinInstancesPerNode(params.minInstancesPerNode)//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+          .setMinInfoGain(params.minInfoGain)//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
           .setCacheNodeIds(params.cacheNodeIds)
-          .setCheckpointInterval(params.checkpointInterval)//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+          .setCheckpointInterval(params.checkpointInterval)//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
           .setFeatureSubsetStrategy(params.featureSubsetStrategy)
-          .setNumTrees(params.numTrees)//Ëæ»úÉ­ÁÖĞèÒªÑµÁ·µÄÊ÷µÄ¸öÊı,Ä¬ÈÏÖµÊÇ 20
+          .setNumTrees(params.numTrees)//éšæœºæ£®æ—éœ€è¦è®­ç»ƒçš„æ ‘çš„ä¸ªæ•°,é»˜è®¤å€¼æ˜¯ 20
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
     stages += dt
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline().setStages(stages.toArray)
 
-    // Fit the Pipeline °²×°¹ÜµÀ
-    //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+    // Fit the Pipeline å®‰è£…ç®¡é“
+    //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
     val startTime = System.nanoTime()
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val pipelineModel = pipeline.fit(training)
-    //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+    //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained Random Forest from the fitted PipelineModel
-    //´Ó°²×°¹ÜµÀÄ£ĞÍ,µÃµ½ÑµÁ·Ëæ»úÉ­ÁÖ
+    //ä»å®‰è£…ç®¡é“æ¨¡å‹,å¾—åˆ°è®­ç»ƒéšæœºæ£®æ—
     algo match {
       case "classification" =>
         val rfModel = pipelineModel.stages.last.asInstanceOf[RandomForestClassificationModel]
@@ -255,14 +255,14 @@ object RandomForestExample {
     }
 
     // Evaluate model on training, test data
-    //ÑµÁ·ÆÀ¹ÀÄ£ĞÍ,²âÊÔÊı¾İ
+    //è®­ç»ƒè¯„ä¼°æ¨¡å‹,æµ‹è¯•æ•°æ®
     algo match {
-      case "classification" =>//·ÖÀà
+      case "classification" =>//åˆ†ç±»
         println("Training data results:")
         DecisionTreeExample.evaluateClassificationModel(pipelineModel, training, labelColName)
         println("Test data results:")
         DecisionTreeExample.evaluateClassificationModel(pipelineModel, test, labelColName)
-      case "regression" =>//»Ø¹é
+      case "regression" =>//å›å½’
         println("Training data results:")
         DecisionTreeExample.evaluateRegressionModel(pipelineModel, training, labelColName)
         println("Test data results:")

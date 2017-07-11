@@ -27,7 +27,7 @@ import org.apache.spark.sql.{Row, SQLContext}
 
 /**
  * A simple example demonstrating ways to specify parameters for Estimators and Transformers.
- * Ò»¸ö¼òµ¥µÄÀı×ÓÑİÊ¾µÄ·½·¨À´Ö¸¶¨²ÎÊı¹À¼ÆºÍ×ª»»
+ * ä¸€ä¸ªç®€å•çš„ä¾‹å­æ¼”ç¤ºçš„æ–¹æ³•æ¥æŒ‡å®šå‚æ•°ä¼°è®¡å’Œè½¬æ¢
  * Run with
  * {{{
  * bin/run-example ml.SimpleParamsExample
@@ -41,64 +41,64 @@ object SimpleParamsExample {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
-    // Prepare training data.×¼±¸ÑµÁ·Êı¾İ
+    // Prepare training data.å‡†å¤‡è®­ç»ƒæ•°æ®
     // We use LabeledPoint, which is a case class.  Spark SQL can convert RDDs of case classes
-    //ÎÒÃÇÊ¹ÓÃ±ê¼Çµã,ÕâÊÇÒ»¸ö°¸ÀıÀà,Spark SQL¿ÉÒÔ×ª»»°¸Àı¿ÎRDDs³ÉÊı¾İÖ¡
+    //æˆ‘ä»¬ä½¿ç”¨æ ‡è®°ç‚¹,è¿™æ˜¯ä¸€ä¸ªæ¡ˆä¾‹ç±»,Spark SQLå¯ä»¥è½¬æ¢æ¡ˆä¾‹è¯¾RDDsæˆæ•°æ®å¸§
     // into DataFrames, where it uses the case class metadata to infer the schema.
-    //ËüÊ¹ÓÃ°¸ÀıÀàµÄÔªÊı¾İÀ´ÍÆ¶ÏÄ£Ê½
+    //å®ƒä½¿ç”¨æ¡ˆä¾‹ç±»çš„å…ƒæ•°æ®æ¥æ¨æ–­æ¨¡å¼
     val training = sc.parallelize(Seq(
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       LabeledPoint(1.0, Vectors.dense(0.0, 1.1, 0.1)),
       LabeledPoint(0.0, Vectors.dense(2.0, 1.0, -1.0)),
       LabeledPoint(0.0, Vectors.dense(2.0, 1.3, 1.0)),
       LabeledPoint(1.0, Vectors.dense(0.0, 1.2, -0.5))))
 
     // Create a LogisticRegression instance.  This instance is an Estimator.
-    //´´½¨Ò»¸öÂß¼­»Ø¹éÊµÀı,Õâ¸öÊµÀıÊÇÒ»¸ö¹À¼ÆÁ¿
+    //åˆ›å»ºä¸€ä¸ªé€»è¾‘å›å½’å®ä¾‹,è¿™ä¸ªå®ä¾‹æ˜¯ä¸€ä¸ªä¼°è®¡é‡
     val lr = new LogisticRegression()
     // Print out the parameters, documentation, and any default values.
-    //´òÓ¡²ÎÊı¡¢ÎÄµµºÍÈÎºÎÄ¬ÈÏÖµ
+    //æ‰“å°å‚æ•°ã€æ–‡æ¡£å’Œä»»ä½•é»˜è®¤å€¼
     println("LogisticRegression parameters:\n" + lr.explainParams() + "\n")
 
     // We may set parameters using setter methods.
-    //ÎÒÃÇ¿ÉÒÔÊ¹ÓÃsetter·½·¨ÉèÖÃ²ÎÊı
+    //æˆ‘ä»¬å¯ä»¥ä½¿ç”¨setteræ–¹æ³•è®¾ç½®å‚æ•°
     lr.setMaxIter(10)
       .setRegParam(0.01)
 
     // Learn a LogisticRegression model.  This uses the parameters stored in lr.
-    //Ñ§Ï°Ò»¸öÂß¼­»Ø¹éÄ£ĞÍ,ÕâÊ¹ÓÃ´æ´¢µÄ²ÎÊı
-    val model1 = lr.fit(training.toDF())//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
-    // Since model1 is a Model (i.e., a Transformer produced by an Estimator),ÓÉ¹À¼ÆÁ¿²úÉúµÄ×ª»»
+    //å­¦ä¹ ä¸€ä¸ªé€»è¾‘å›å½’æ¨¡å‹,è¿™ä½¿ç”¨å­˜å‚¨çš„å‚æ•°
+    val model1 = lr.fit(training.toDF())//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
+    // Since model1 is a Model (i.e., a Transformer produced by an Estimator),ç”±ä¼°è®¡é‡äº§ç”Ÿçš„è½¬æ¢
     // we can view the parameters it used during fit().
     // This prints the parameter (name: value) pairs, where names are unique IDs for this
-    //´Ë´òÓ¡²ÎÊı(Ãû³Æ:Öµ)¶Ô,ÔÚÕâ¸öÂß¼­»Ø¹éÊµÀıÖĞ,Ãû³ÆÊÇÎ¨Ò»µÄ±êÊ¶
+    //æ­¤æ‰“å°å‚æ•°(åç§°:å€¼)å¯¹,åœ¨è¿™ä¸ªé€»è¾‘å›å½’å®ä¾‹ä¸­,åç§°æ˜¯å”¯ä¸€çš„æ ‡è¯†
     // LogisticRegression instance.
     println("Model 1 was fit using parameters: " + model1.parent.extractParamMap())
 
     // We may alternatively specify parameters using a ParamMap,
-    //ÎÒÃÇ¿ÉÒÔ½»ÌæÊ¹ÓÃparammapÖ¸¶¨²ÎÊı
+    //æˆ‘ä»¬å¯ä»¥äº¤æ›¿ä½¿ç”¨parammapæŒ‡å®šå‚æ•°
     // which supports several methods for specifying parameters.
-    //ËüÖ§³Ö¼¸ÖÖÖ¸¶¨²ÎÊıµÄ·½·¨
+    //å®ƒæ”¯æŒå‡ ç§æŒ‡å®šå‚æ•°çš„æ–¹æ³•
     val paramMap = ParamMap(lr.maxIter -> 20)
-    //Ö¸¶¨1¸ö²ÎÊı,Õâ½«¸²¸ÇÔ­maxiter¡£
+    //æŒ‡å®š1ä¸ªå‚æ•°,è¿™å°†è¦†ç›–åŸmaxiterã€‚
     paramMap.put(lr.maxIter, 30) // Specify 1 Param.  This overwrites the original maxIter.
-    //ÔÚ¶ş½øÖÆ·ÖÀàÖĞÉèÖÃãĞÖµ,·¶Î§Îª[0,1],Èç¹ûÀà±êÇ©1µÄ¹À¼Æ¸ÅÂÊ>Threshold,ÔòÔ¤²â1,·ñÔò0
+    //åœ¨äºŒè¿›åˆ¶åˆ†ç±»ä¸­è®¾ç½®é˜ˆå€¼,èŒƒå›´ä¸º[0,1],å¦‚æœç±»æ ‡ç­¾1çš„ä¼°è®¡æ¦‚ç‡>Threshold,åˆ™é¢„æµ‹1,å¦åˆ™0
     paramMap.put(lr.regParam -> 0.1, lr.thresholds -> Array(0.45, 0.55)) // Specify multiple Params.
 
-    // One can also combine ParamMaps. ÄãÒ²¿ÉÒÔ½«²ÎÊıÓ³Éä
-    val paramMap2 = ParamMap(lr.probabilityCol -> "myProbability") // Change output column name ¸ü¸ÄÊä³öÁĞÃû³Æ
+    // One can also combine ParamMaps. ä½ ä¹Ÿå¯ä»¥å°†å‚æ•°æ˜ å°„
+    val paramMap2 = ParamMap(lr.probabilityCol -> "myProbability") // Change output column name æ›´æ”¹è¾“å‡ºåˆ—åç§°
     val paramMapCombined = paramMap ++ paramMap2
 
     // Now learn a new model using the paramMapCombined parameters.
-    //ÏÖÔÚÑ§Ï°Ò»¸öĞÂµÄÄ£ĞÍÊ¹ÓÃparammapcombined²ÎÊı
+    //ç°åœ¨å­¦ä¹ ä¸€ä¸ªæ–°çš„æ¨¡å‹ä½¿ç”¨parammapcombinedå‚æ•°
     // paramMapCombined overrides all parameters set earlier via lr.set* methods.
-    //¸²¸ÇËùÓĞ²ÎÊıÉèÖÃÖ®Ç°Í¨¹ıLR¶¨·½·¨
+    //è¦†ç›–æ‰€æœ‰å‚æ•°è®¾ç½®ä¹‹å‰é€šè¿‡LRå®šæ–¹æ³•
     val model2 = lr.fit(training.toDF(), paramMapCombined)
     println("Model 2 was fit using parameters: " + model2.parent.extractParamMap())
 
-    // Prepare test data.×¼±¸²âÊÔÊı¾İ
+    // Prepare test data.å‡†å¤‡æµ‹è¯•æ•°æ®
     val test = sc.parallelize(Seq(
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       LabeledPoint(1.0, Vectors.dense(-1.0, 1.5, 1.3)),
       LabeledPoint(0.0, Vectors.dense(3.0, 2.0, -0.1)),
       LabeledPoint(1.0, Vectors.dense(0.0, 2.2, -1.5))))
@@ -107,7 +107,7 @@ object SimpleParamsExample {
     // LogisticRegressionModel.transform will only use the 'features' column.
     // Note that model2.transform() outputs a 'myProbability' column instead of the usual
     // 'probability' column since we renamed the lr.probabilityCol parameter previously.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     model2.transform(test.toDF())
       .select("features", "label", "myProbability", "prediction")
       .collect()

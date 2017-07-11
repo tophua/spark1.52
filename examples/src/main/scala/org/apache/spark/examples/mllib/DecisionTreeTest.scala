@@ -6,7 +6,7 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.tree.configuration.Algo._
 import org.apache.spark.mllib.tree.impurity.Gini
 /**
- * ¾ö²ßÊ÷²âÊÔ
+ * å†³ç­–æ ‘æµ‹è¯•
  */
 object DecisionTreeTest {
   def main(args: Array[String]) {
@@ -15,11 +15,11 @@ object DecisionTreeTest {
     val data = sc.textFile("../data/mllib/sample_tree_data.csv")    
     val parsedData = data.map { line =>
       val parts = line.split(',').map(_.toDouble)
-      //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ÐÍ»òÕßÏ¡ÊèÐÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+      //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†åž‹æˆ–è€…ç¨€ç–åž‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       LabeledPoint(parts(0), Vectors.dense(parts.tail))
     }
 
-    val maxDepth = 5//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ýÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼þ
+    val maxDepth = 5//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
     val model = DecisionTree.train(parsedData, Classification, Gini, maxDepth)
 
     val labelAndPreds = parsedData.map { point =>

@@ -31,13 +31,13 @@ import org.apache.spark.storage.StorageLevel
 
 
 /**
- * Logistic regression based classification.
- * This example uses Tachyon to persist rdds during computation.
- *
- * This is an example implementation for learning how to use Spark. For more conventional use,
- * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDËæ»úÌİ¶ÈÏÂ½µ) or
- * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨) based on your needs.
- */
+  * Logistic regression based classification.
+  * This example uses Tachyon to persist rdds during computation.
+  *
+  * This is an example implementation for learning how to use Spark. For more conventional use,
+  * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDéšæœºæ¢¯åº¦ä¸‹é™) or
+  * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•) based on your needs.
+  */
 object SparkTachyonHdfsLR {
   val D = 10   // Numer of dimensions
   val rand = new Random(42)
@@ -45,8 +45,8 @@ object SparkTachyonHdfsLR {
   def showWarning() {
     System.err.println(
       """WARN: This is a naive implementation of Logistic Regression and is given as an example!
-        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDËæ»úÌİ¶ÈÏÂ½µ) or
-        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨)
+        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDéšæœºæ¢¯åº¦ä¸‹é™) or
+        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•)
         |for more conventional use.
       """.stripMargin)
   }

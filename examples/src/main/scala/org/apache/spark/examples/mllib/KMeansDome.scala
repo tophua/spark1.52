@@ -6,9 +6,9 @@ import org.apache.spark.mllib.clustering.KMeans
 import org.apache.spark.mllib.clustering.KMeansModel
 import org.apache.spark.mllib.linalg.Vectors
 /**
- * ¾ÛÀàËã·¨
+ * èšç±»ç®—æ³•
  * http://blog.selfup.cn/728.html,
- * ½«Ò»×éÄ¿±êobject»®·ÖÎªÈô¸É¸ö´Ø,Ã¿¸ö´ØÖ®¼äµÄobject¾¡¿ÉÄÜµÄÏàËÆ,´ØÓë´ØÖ®¼äµÄobject¾¡¿ÉÄÜµÄÏàÒì
+ * å°†ä¸€ç»„ç›®æ ‡objectåˆ’åˆ†ä¸ºè‹¥å¹²ä¸ªç°‡,æ¯ä¸ªç°‡ä¹‹é—´çš„objectå°½å¯èƒ½çš„ç›¸ä¼¼,ç°‡ä¸ç°‡ä¹‹é—´çš„objectå°½å¯èƒ½çš„ç›¸å¼‚
  */
 object KMeansDome {
   def main(args: Array[String]) {
@@ -21,52 +21,52 @@ object KMeansDome {
       }).cache()
 
     val pointsData = Seq(
-      /***======¾ÛÖĞĞÄµãÁĞÏà¼Ó³ı3============**/
+      /***======èšä¸­å¿ƒç‚¹åˆ—ç›¸åŠ é™¤3============**/
       Vectors.dense(0.0, 0.0, 0.0),
       Vectors.dense(0.1, 0.1, 0.1),
       Vectors.dense(0.2, 0.2, 0.2),
-      /***======¾ÛÖĞĞÄµãÁĞÏà¼Ó³ı3============**/
+      /***======èšä¸­å¿ƒç‚¹åˆ—ç›¸åŠ é™¤3============**/
       Vectors.dense(9.0, 9.0, 9.0),
       Vectors.dense(9.1, 9.1, 9.1),
       Vectors.dense(9.2, 9.2, 9.2),
-      /***======¾ÛÖĞĞÄµãÁĞÏà¼Ó³ı3============**/
+      /***======èšä¸­å¿ƒç‚¹åˆ—ç›¸åŠ é™¤3============**/
       Vectors.dense(15.1, 16.1, 17.0),
       Vectors.dense(18.0, 17.0, 19.0),
       Vectors.dense(20.0, 21.0, 22.0))
     val parsedDataRdd = sc.parallelize(pointsData, 3)
 
     // Cluster the data into two classes using KMeans
-    val numClusters = 3 //Ô¤²â·ÖÎª3¸ö´ØÀà
-    val numIterations = 20 //µü´ú20´Î
-    val runTimes = 10 //ÔËĞĞ10´Î,Ñ¡³ö×îÓÅ½â
+    val numClusters = 3 //é¢„æµ‹åˆ†ä¸º3ä¸ªç°‡ç±»
+    val numIterations = 20 //è¿­ä»£20æ¬¡
+    val runTimes = 10 //è¿è¡Œ10æ¬¡,é€‰å‡ºæœ€ä¼˜è§£
     var clusterIndex: Int = 0
-    //train·½·¨¶ÔÊı¾İ¼¯½øĞĞ¾ÛÀàÑµÁ·,Õâ¸ö·½·¨»á·µ»Ø KMeansModel ÀàÊµÀı
+    //trainæ–¹æ³•å¯¹æ•°æ®é›†è¿›è¡Œèšç±»è®­ç»ƒ,è¿™ä¸ªæ–¹æ³•ä¼šè¿”å› KMeansModel ç±»å®ä¾‹
     val clusters: KMeansModel =
       KMeans.train(parsedData, numClusters, numIterations, runTimes)
       
      
      
-    //¼ÆËã²âÊÔÊı¾İ·Ö±ğÊôÓÚÄÇ¸ö´ØÀà
+    //è®¡ç®—æµ‹è¯•æ•°æ®åˆ†åˆ«å±äºé‚£ä¸ªç°‡ç±»
     parsedData.map(v =>
       {
-	//predict ¶ÔĞÂµÄÊı¾İµã½øĞĞËùÊô¾ÛÀàµÄÔ¤²â
+	//predict å¯¹æ–°çš„æ•°æ®ç‚¹è¿›è¡Œæ‰€å±èšç±»çš„é¢„æµ‹
         println(v.toString() + " belong to cluster :" + clusters.predict(v))
       }).collect()
-    //¼ÆËãcost
+    //è®¡ç®—cost
      /**
-      * computeCostÍ¨¹ı¼ÆËãËùÓĞÊı¾İµãµ½Æä×î½üµÄÖĞĞÄµãµÄÆ½·½ºÍÀ´ÆÀ¹À¾ÛÀàµÄĞ§¹û,
-      * Í³¼Æ¾ÛÀà´íÎóµÄÑù±¾±ÈÀı
+      * computeCosté€šè¿‡è®¡ç®—æ‰€æœ‰æ•°æ®ç‚¹åˆ°å…¶æœ€è¿‘çš„ä¸­å¿ƒç‚¹çš„å¹³æ–¹å’Œæ¥è¯„ä¼°èšç±»çš„æ•ˆæœ,
+      * ç»Ÿè®¡èšç±»é”™è¯¯çš„æ ·æœ¬æ¯”ä¾‹
       */
     val wssse = clusters.computeCost(parsedData)
     println("Within Set Sum of Squared Errors = " + wssse)
-    //´òÓ¡³öÖĞĞÄµã
+    //æ‰“å°å‡ºä¸­å¿ƒç‚¹
     /**
-              ÖĞĞÄµã(Cluster centers):
+              ä¸­å¿ƒç‚¹(Cluster centers):
  			[17.7,18.03333333333333,19.333333333333332]
  			[0.1,0.1,0.1]
  			[9.1,9.1,9.1]
      */
-    println("ÖĞĞÄµã(Cluster centers):")
+    println("ä¸­å¿ƒç‚¹(Cluster centers):")
     for (center <- clusters.clusterCenters) {
       println(" " + center);
     }
@@ -82,12 +82,12 @@ object KMeansDome {
 
     val pointsdens = clusters.predict(rdd).collect()
     
-    //Ô¤²â¾ÛÀàÀà±ğ
+    //é¢„æµ‹èšç±»ç±»åˆ«
     for (p <- pointsdens) {
       println(p)
 
     }
-    //½øĞĞÒ»Ğ©Ô¤²â
+    //è¿›è¡Œä¸€äº›é¢„æµ‹
     val l = clusters.predict(data1).collect()
     val ll = clusters.predict(data2).collect()
     val lll = clusters.predict(data3).collect()
@@ -99,8 +99,8 @@ object KMeansDome {
     println("Prediction of (21.1, 17.1, 16.1): " + lll(0))
      import breeze.linalg._
     import breeze.numerics.pow
-    //¶¨ÒåÅ·À­¾àÀëÖ®ºÍ,¾ØÕóÆ½·½²îÖ®ºÍ
-    def computeDistance(v1: DenseVector[Double], v2: DenseVector[Double]): Double = pow(v1 - v2, 2).sum //Æ½·½²îÖ®ºÍ
+    //å®šä¹‰æ¬§æ‹‰è·ç¦»ä¹‹å’Œ,çŸ©é˜µå¹³æ–¹å·®ä¹‹å’Œ
+    def computeDistance(v1: DenseVector[Double], v2: DenseVector[Double]): Double = pow(v1 - v2, 2).sum //å¹³æ–¹å·®ä¹‹å’Œ
 
   }
  

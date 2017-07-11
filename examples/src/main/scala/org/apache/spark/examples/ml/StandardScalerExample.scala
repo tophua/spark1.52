@@ -27,8 +27,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * StandardScaler Áã¾ùÖµ¹æ·¶»¯
- * ½«Ä³¸öÌØÕ÷ÏòÁ¿(ÓÉËùÓĞÑù±¾Ä³Ò»¸öÌØÕ÷×é³ÉµÄÏòÁ¿)½øĞĞ±ê×¼»¯,Ê¹Êı¾İ¾ùÖµÎª0,·½²îÎª1
+ * StandardScaler é›¶å‡å€¼è§„èŒƒåŒ–
+ * å°†æŸä¸ªç‰¹å¾å‘é‡(ç”±æ‰€æœ‰æ ·æœ¬æŸä¸€ä¸ªç‰¹å¾ç»„æˆçš„å‘é‡)è¿›è¡Œæ ‡å‡†åŒ–,ä½¿æ•°æ®å‡å€¼ä¸º0,æ–¹å·®ä¸º1
  */
 object StandardScalerExample {
   def main(args: Array[String]): Unit = {
@@ -40,11 +40,11 @@ object StandardScalerExample {
 
     // $example on$
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     //val dataFrame = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
       import org.apache.spark.mllib.util.MLUtils
@@ -53,15 +53,15 @@ object StandardScalerExample {
     val scaler = new StandardScaler()
       .setInputCol("features")
       .setOutputCol("scaledFeatures")
-      .setWithStd(true)//withStd=true½«·½²îËõ·Åµ½1
-      .setWithMean(false)//½«¾ùÖµÒÆµ½0,×¢Òâ¶ÔÓÚÏ¡ÊèÊäÈë¾ØÕó²»¿ÉÒÔÓÃ,Ä¬ÈÏÎªfalse
+      .setWithStd(true)//withStd=trueå°†æ–¹å·®ç¼©æ”¾åˆ°1
+      .setWithMean(false)//å°†å‡å€¼ç§»åˆ°0,æ³¨æ„å¯¹äºç¨€ç–è¾“å…¥çŸ©é˜µä¸å¯ä»¥ç”¨,é»˜è®¤ä¸ºfalse
 
     // Compute summary statistics by fitting the StandardScaler.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val scalerModel = scaler.fit(dataFrame)
 
     // Normalize each feature to have unit standard deviation.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val scaledData = scalerModel.transform(dataFrame)
     /**
      *+-----+--------------------+--------------------+

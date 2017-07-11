@@ -25,37 +25,37 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
- * ¾ÛÀà Á÷Ê½K¾ùÖµ
+ * èšç±» æµå¼Kå‡å€¼
  * Estimate clusters on one stream of data and make predictions
- * ÔÚÒ»¸öÊı¾İÁ÷ÉÏ¹À¼Æ¼¯Èº,²¢ÔÚÁíÒ»¸öÁ÷ÉÏ½øĞĞÔ¤²â,
+ * åœ¨ä¸€ä¸ªæ•°æ®æµä¸Šä¼°è®¡é›†ç¾¤,å¹¶åœ¨å¦ä¸€ä¸ªæµä¸Šè¿›è¡Œé¢„æµ‹,
  * on another stream, where the data streams arrive as text files
  * into two different directories.
- * µ±Êı¾İÁ÷µ½´ïÎÄ±¾ÎÄ¼şµ½Á½¸ö²»Í¬µÄÄ¿Â¼Ê±
+ * å½“æ•°æ®æµåˆ°è¾¾æ–‡æœ¬æ–‡ä»¶åˆ°ä¸¤ä¸ªä¸åŒçš„ç›®å½•æ—¶
  *
  * The rows of the training text files must be vector data in the form
- * ÑµÁ·ÎÄ±¾ÎÄ¼şµÄĞĞ±ØĞëÊÇ´°ÌåÖĞµÄÏòÁ¿Êı¾İ,ÆäÖĞnÊÇÎ¬ÊıµÄÊıÄ¿
+ * è®­ç»ƒæ–‡æœ¬æ–‡ä»¶çš„è¡Œå¿…é¡»æ˜¯çª—ä½“ä¸­çš„å‘é‡æ•°æ®,å…¶ä¸­næ˜¯ç»´æ•°çš„æ•°ç›®
  * `[x1,x2,x3,...,xn]`
  * Where n is the number of dimensions.
- * ÆäÖĞnÊÇÎ¬Êı
+ * å…¶ä¸­næ˜¯ç»´æ•°
  * The rows of the test text files must be labeled data in the form
- * ²âÊÔÎÄ±¾ÎÄ¼şµÄĞĞ±ØĞëÔÚ´°ÌåÖĞ±êÊ¾µÄÊı¾İ
+ * æµ‹è¯•æ–‡æœ¬æ–‡ä»¶çš„è¡Œå¿…é¡»åœ¨çª—ä½“ä¸­æ ‡ç¤ºçš„æ•°æ®
  * `(y,[x1,x2,x3,...,xn])`
  * Where y is some identifier. n must be the same for train and test.
- * ÔÚÄÄÀïYÊÇÒ»Ğ©±êÊ¶·û,ÑµÁ·ºÍ²âÊÔ±ØĞëÊÇÏàÍ¬
+ * åœ¨å“ªé‡ŒYæ˜¯ä¸€äº›æ ‡è¯†ç¬¦,è®­ç»ƒå’Œæµ‹è¯•å¿…é¡»æ˜¯ç›¸åŒ
  *
  * Usage:
  *   StreamingKMeansExample <trainingDir> <testDir> <batchDuration> <numClusters> <numDimensions>
  *
  * To run on your local machine using the two directories `trainingDir` and `testDir`,
- * Ê¹ÓÃÁ½¸öÄ¿Â¼ÔÚ±¾µØ»úÆ÷ÉÏÔËĞĞ`trainingDir` ºÍ `testDir`,ÑµÁ·Ä¿Â¼ºÍ²âÊÔÄ¿Â¼
+ * ä½¿ç”¨ä¸¤ä¸ªç›®å½•åœ¨æœ¬åœ°æœºå™¨ä¸Šè¿è¡Œ`trainingDir` å’Œ `testDir`,è®­ç»ƒç›®å½•å’Œæµ‹è¯•ç›®å½•
  * with updates every 5 seconds, 2 dimensions per data point, and 3 clusters, call:
- * Ã¿5Ãë¸üĞÂÒ»´Î,Ã¿Ò»¸öÊı¾İµãµÄ2¸öÎ¬¶ÈºÍ3¸ö×å
+ * æ¯5ç§’æ›´æ–°ä¸€æ¬¡,æ¯ä¸€ä¸ªæ•°æ®ç‚¹çš„2ä¸ªç»´åº¦å’Œ3ä¸ªæ—
  *    $ bin/run-example mllib.StreamingKMeansExample trainingDir testDir 5 3 2
  *
  * As you add text files to `trainingDir` the clusters will continuously update.
- * µ±ÄãÌí¼ÓÎÄ±¾ÎÄ¼ş` trainingdir `¼¯Èº½«²»¶Ï¸üĞÂ
+ * å½“ä½ æ·»åŠ æ–‡æœ¬æ–‡ä»¶` trainingdir `é›†ç¾¤å°†ä¸æ–­æ›´æ–°
  * Anytime you add text files to `testDir`, you'll see predicted labels using the current model.
- * ÈÎºÎÊ±ºòÄãÌí¼ÓÎÄ±¾ÎÄ¼ş` testdir `,Äã»á¿´µ½Ê¹ÓÃµ±Ç°µÄÄ£ĞÍµÄÔ¤²â±êÇ©
+ * ä»»ä½•æ—¶å€™ä½ æ·»åŠ æ–‡æœ¬æ–‡ä»¶` testdir `,ä½ ä¼šçœ‹åˆ°ä½¿ç”¨å½“å‰çš„æ¨¡å‹çš„é¢„æµ‹æ ‡ç­¾
  */
 object StreamingKMeansExample {
 
@@ -68,23 +68,23 @@ object StreamingKMeansExample {
     }
 
     val conf = new SparkConf().setMaster("local").setAppName("StreamingKMeansExample")
-    //Åú´Î¼ä¸ô
+    //æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(conf, Seconds(3.toLong))
-    //ÎÄ¼şÁ÷,ÑµÁ·Ä¿Â¼,½âÎöÏòÁ¿
+    //æ–‡ä»¶æµ,è®­ç»ƒç›®å½•,è§£æå‘é‡
     val trainingData = ssc.textFileStream(args(0)).map(Vectors.parse)
-    //²âÊÔÄ¿Â¼
+    //æµ‹è¯•ç›®å½•
     val testData = ssc.textFileStream(args(1)).map(LabeledPoint.parse)
 
     val model = new StreamingKMeans()
-      //¾ÛÀàµÄ¸öÊı
+      //èšç±»çš„ä¸ªæ•°
       .setK(args(3).toInt)
-      //Ö±½ÓÉèÖÃË¥¼õÒò×Ó
+      //ç›´æ¥è®¾ç½®è¡°å‡å› å­
       .setDecayFactor(1.0)
-      //Ëæ»úÖĞĞÄÊı
+      //éšæœºä¸­å¿ƒæ•°
       .setRandomCenters(args(4).toInt, 0.0)
 
-    model.trainOn(trainingData)//¶ÔÊı¾İ¼¯½øĞĞ¾ÛÀàÑµÁ·
-    //predict ¶ÔĞÂµÄÊı¾İµã½øĞĞËùÊô¾ÛÀàµÄÔ¤²â
+    model.trainOn(trainingData)//å¯¹æ•°æ®é›†è¿›è¡Œèšç±»è®­ç»ƒ
+    //predict å¯¹æ–°çš„æ•°æ®ç‚¹è¿›è¡Œæ‰€å±èšç±»çš„é¢„æµ‹
     model.predictOnValues(testData.map(lp => (lp.label, lp.features))).print()
 
     ssc.start()

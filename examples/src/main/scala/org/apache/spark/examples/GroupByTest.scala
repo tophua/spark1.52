@@ -25,7 +25,7 @@ import org.apache.spark.SparkContext._
 
 /**
   * Usage: GroupByTest [numMappers] [numKVPairs] [KeySize] [numReducers]
-  * ÓÃ·¨:
+  * ç”¨æ³•:
   */
 object GroupByTest {
   def main(args: Array[String]) {
@@ -42,16 +42,16 @@ object GroupByTest {
       var arr1 = new Array[(Int, Array[Byte])](numKVPairs)
       for (i <- 0 until numKVPairs) {
         val byteArr = new Array[Byte](valSize)
-        ranGen.nextBytes(byteArr)//ÓÃÓÚÉú³ÉËæ»ú×Ö½Ú²¢½«ÆäÖÃÓÚÓÃ»§Ìá¹©µÄ×Ö½ÚÊý×é
-        //nextIntÓÃÓÚ»ñÈ¡Ò»¸öÎ±Ëæ»ú,ÔÚ0(°üÀ¨)ºÍÖ¸¶¨Öµ(²»°üÀ¨),´Ó´ËËæ»úÊýÉú³ÉÆ÷µÄÐòÁÐÖÐÈ¡³ö¾ùÔÈ·Ö²¼µÄintÖµ
+        ranGen.nextBytes(byteArr)//ç”¨äºŽç”Ÿæˆéšæœºå­—èŠ‚å¹¶å°†å…¶ç½®äºŽç”¨æˆ·æä¾›çš„å­—èŠ‚æ•°ç»„
+        //nextIntç”¨äºŽèŽ·å–ä¸€ä¸ªä¼ªéšæœº,åœ¨0(åŒ…æ‹¬)å’ŒæŒ‡å®šå€¼(ä¸åŒ…æ‹¬),ä»Žæ­¤éšæœºæ•°ç”Ÿæˆå™¨çš„åºåˆ—ä¸­å–å‡ºå‡åŒ€åˆ†å¸ƒçš„intå€¼
         arr1(i) = (ranGen.nextInt(Int.MaxValue), byteArr)
       }
       arr1
     }.cache()
     // Enforce that everything has been calculated and in cache
-    //Ö´ÐÐËùÓÐµÄ¼ÆËãºÍ»º´æ
+    //æ‰§è¡Œæ‰€æœ‰çš„è®¡ç®—å’Œç¼“å­˜
     pairs1.count()
-    //ÔÚÒ»¸öÓÉ(K,V)¶Ô×é³ÉµÄÊý¾Ý¼¯ÉÏµ÷ÓÃ,·µ»ØÒ»¸ö(K,Seq[V])¶ÔµÄÊý¾Ý¼¯
+    //åœ¨ä¸€ä¸ªç”±(K,V)å¯¹ç»„æˆçš„æ•°æ®é›†ä¸Šè°ƒç”¨,è¿”å›žä¸€ä¸ª(K,Seq[V])å¯¹çš„æ•°æ®é›†
     println(pairs1.groupByKey(numReducers).count())
 
     sc.stop()

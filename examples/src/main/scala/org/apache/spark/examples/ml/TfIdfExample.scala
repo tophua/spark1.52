@@ -26,8 +26,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * TF-IDFËã·¨´ÓÎÄ±¾·Ö´ÊÖĞ´´½¨ÌØÕ÷ÏòÁ¿,F-IDF·´Ó³ÁËÓïÁÏÖĞµ¥´Ê¶ÔÎÄµµµÄÖØÒª³Ì¶È,
- * ¼ÙÉèµ¥´ÊÓÃt±íÊ¾,ÎÄµµÓÃd±íÊ¾,ÓïÁÏÓÃD±íÊ¾,ÄÇÃ´ÎÄµµÆµ¶ÈDF(t, D)ÊÇ°üº¬µ¥´ÊtµÄÎÄµµÊı¡£
+ * TF-IDFç®—æ³•ä»æ–‡æœ¬åˆ†è¯ä¸­åˆ›å»ºç‰¹å¾å‘é‡,F-IDFåæ˜ äº†è¯­æ–™ä¸­å•è¯å¯¹æ–‡æ¡£çš„é‡è¦ç¨‹åº¦,
+ * å‡è®¾å•è¯ç”¨tè¡¨ç¤º,æ–‡æ¡£ç”¨dè¡¨ç¤º,è¯­æ–™ç”¨Dè¡¨ç¤º,é‚£ä¹ˆæ–‡æ¡£é¢‘åº¦DF(t, D)æ˜¯åŒ…å«å•è¯tçš„æ–‡æ¡£æ•°ã€‚
  *  */
 object TfIdfExample {
 
@@ -46,7 +46,7 @@ object TfIdfExample {
     )).toDF("label", "sentence")
 
     val tokenizer = new Tokenizer().setInputCol("sentence").setOutputCol("words")
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val wordsData = tokenizer.transform(sentenceData)
     val hashingTF = new HashingTF()
       .setInputCol("words").setOutputCol("rawFeatures").setNumFeatures(20)
@@ -64,9 +64,9 @@ object TfIdfExample {
     // alternatively, CountVectorizer can also be used to get term frequency vectors
 
     val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val idfModel = idf.fit(featurizedData)
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val rescaledData = idfModel.transform(featurizedData)
     /**
     +-----+--------------------+--------------------+--------------------+--------------------+

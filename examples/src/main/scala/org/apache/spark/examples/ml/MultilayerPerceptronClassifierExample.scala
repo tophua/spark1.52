@@ -30,8 +30,8 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
  * An example for Multilayer Perceptron Classification.
- * ¶à²ã¸ĞÖª»úÊÇ»ùÓÚ·´ÏòÈË¹¤Éñ¾­ÍøÂç,
- * ¶à²ã¸ĞÖª»úº¬ÓĞ¶à²ã½Úµã,Ã¿²ã½ÚµãÓëÍøÂçµÄÏÂÒ»²ã½ÚµãÍêÈ«Á¬½Ó
+ * å¤šå±‚æ„ŸçŸ¥æœºæ˜¯åŸºäºåå‘äººå·¥ç¥ç»ç½‘ç»œ,
+ * å¤šå±‚æ„ŸçŸ¥æœºå«æœ‰å¤šå±‚èŠ‚ç‚¹,æ¯å±‚èŠ‚ç‚¹ä¸ç½‘ç»œçš„ä¸‹ä¸€å±‚èŠ‚ç‚¹å®Œå…¨è¿æ¥
  */
 object MultilayerPerceptronClassifierExample {
 
@@ -45,11 +45,11 @@ object MultilayerPerceptronClassifierExample {
     // $example on$
     // Load the data stored in LIBSVM format as a DataFrame.
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
    // val data = sqlContext.read.format("libsvm")
     //  .load("data/mllib/sample_multiclass_classification_data.txt")
@@ -57,28 +57,28 @@ object MultilayerPerceptronClassifierExample {
       val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_multiclass_classification_data.txt")
       val data = sqlContext.createDataFrame(dataSVM)
       // Split the data into train and test
-      //·Ö¸ô²âÊÔºÍÑµÁ·Êı¾İ
+      //åˆ†éš”æµ‹è¯•å’Œè®­ç»ƒæ•°æ®
     val splits = data.randomSplit(Array(0.6, 0.4), seed = 1234L)
     val train = splits(0)
     val test = splits(1)
     // specify layers for the neural network:
-    //Ö¸¶¨Éñ¾­ÍøÂçµÄ²ã£º
-    // input layer of size 4 (features), two intermediate ÖĞ¼ä of size 5 and 4
+    //æŒ‡å®šç¥ç»ç½‘ç»œçš„å±‚ï¼š
+    // input layer of size 4 (features), two intermediate ä¸­é—´ of size 5 and 4
     // and output of size 3 (classes)
     //
     val layers = Array[Int](4, 5, 4, 3)
     // create the trainer and set its parameters
-    //´´½¨ÑµÁ·Æ÷²¢ÉèÖÃ²ÎÊı
+    //åˆ›å»ºè®­ç»ƒå™¨å¹¶è®¾ç½®å‚æ•°
     val trainer = new MultilayerPerceptronClassifier()
-      .setLayers(layers)//²ã¹æÄ£,°üÀ¨ÊäÈë¹æÄ£ÒÔ¼°Êä³ö¹æÄ£
-      .setBlockSize(128)//¿éµÄ´óĞ¡,ÒÔ¼Ó¿ì¼ÆËã
-      .setSeed(1234L)//Ëæ»úÖÖ×Ó
-      .setMaxIter(100)//µü´ú´ÎÊı
+      .setLayers(layers)//å±‚è§„æ¨¡,åŒ…æ‹¬è¾“å…¥è§„æ¨¡ä»¥åŠè¾“å‡ºè§„æ¨¡
+      .setBlockSize(128)//å—çš„å¤§å°,ä»¥åŠ å¿«è®¡ç®—
+      .setSeed(1234L)//éšæœºç§å­
+      .setMaxIter(100)//è¿­ä»£æ¬¡æ•°
     // train the model
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = trainer.fit(train)
     // compute accuracy on the test set
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val result = model.transform(test)
     /**
      *+-----+--------------------+----------+
@@ -98,10 +98,10 @@ object MultilayerPerceptronClassifierExample {
       +-----+--------------------+----------+*/
     result.show(5)
     val predictionAndLabels = result.select("prediction", "label")
-    //¶à·ÖÀàÆÀ¹À
+    //å¤šåˆ†ç±»è¯„ä¼°
     val evaluator = new MulticlassClassificationEvaluator()
       .setMetricName("precision")
-    //×¼È·ÂÊ Accuracy: 0.9636363636363636
+    //å‡†ç¡®ç‡ Accuracy: 0.9636363636363636
     println("Accuracy: " + evaluator.evaluate(predictionAndLabels))
     // $example off$
 

@@ -23,11 +23,11 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.examples.streaming.StreamingExamples
 // scalastyle:off
 /** Analyses a streaming dataset of web page views. This class demonstrates several types of
- *  ·ÖÎöÁËÒ»¸öWebÒ³ÃæÊÓÍ¼µÄÁ÷Êý¾Ý¼¯,Õâ¸öÀàÑÝÊ¾ÁËÔÚSparkÁ÷ÖÐ¿ÉÓÃµÄ¼¸ÖÖÀàÐÍµÄ²Ù×÷ÈËÔ±
+ *  åˆ†æžäº†ä¸€ä¸ªWebé¡µé¢è§†å›¾çš„æµæ•°æ®é›†,è¿™ä¸ªç±»æ¼”ç¤ºäº†åœ¨Sparkæµä¸­å¯ç”¨çš„å‡ ç§ç±»åž‹çš„æ“ä½œäººå‘˜
   * operators available in Spark streaming.
   *
   * This should be used in tandem with PageViewStream.scala. Example:
-  * ÕâÊÇÒ»¸öÓ¦ÓÃÓÚ´®Áª,ÔËÐÐÉú³ÉÆ÷
+  * è¿™æ˜¯ä¸€ä¸ªåº”ç”¨äºŽä¸²è”,è¿è¡Œç”Ÿæˆå™¨
   * To run the generator
   * `$ bin/run-example org.apache.spark.examples.streaming.clickstream.PageViewGenerator 44444 10`
   * To process the generated stream
@@ -48,28 +48,28 @@ object PageViewStream {
     val host = args(1)
     val port = args(2).toInt
 
-    // Create the context ´´½¨ÉÏÏÂÎÄ,Åú´Î¼ä¸ô
+    // Create the context åˆ›å»ºä¸Šä¸‹æ–‡,æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext("local[2]", "PageViewStream", Seconds(1),
       System.getenv("SPARK_HOME"), StreamingContext.jarOfClass(this.getClass).toSeq)
 
     // Create a ReceiverInputDStream on target host:port and convert each line to a PageView
-    //´´½¨Ò»¸öreceiverinputdstreamÄ¿±êÖ÷»ú¶Ë¿Ú×ª»»£ºÃ¿ÐÐÊý
+    //åˆ›å»ºä¸€ä¸ªreceiverinputdstreamç›®æ ‡ä¸»æœºç«¯å£è½¬æ¢ï¼šæ¯è¡Œæ•°
     val pageViews = ssc.socketTextStream(host, port)
                        .flatMap(_.split("\n"))
                        .map(PageView.fromString(_))
 
     // Return a count of views per URL seen in each batch
-    //·µ»ØÃ¿¸öÅúÖÐ¿´µ½µÄÃ¿¸öÍøÖ·µÄ¼ÆÊý
+    //è¿”å›žæ¯ä¸ªæ‰¹ä¸­çœ‹åˆ°çš„æ¯ä¸ªç½‘å€çš„è®¡æ•°
     val pageCounts = pageViews.map(view => view.url).countByValue()
 
     // Return a sliding window of page views per URL in the last ten seconds
-    //ÔÚ×îºóÊ®ÃëÖÐ·µ»ØÃ¿Ò»¸öÍøÖ·µÄÒ³Ãæä¯ÀÀÁ¿µÄ»¬¶¯´°¿Ú
+    //åœ¨æœ€åŽåç§’ä¸­è¿”å›žæ¯ä¸€ä¸ªç½‘å€çš„é¡µé¢æµè§ˆé‡çš„æ»‘åŠ¨çª—å£
     val slidingPageCounts = pageViews.map(view => view.url)
                                      .countByValueAndWindow(Seconds(10), Seconds(2))
 
 
     // Return the rate of error pages (a non 200 status) in each zip code over the last 30 seconds
-    //ÔÚ¹ýÈ¥µÄ30ÃëµÄÃ¿¸öÓÊÕþ±àÂëµÄ´íÎóÒ³Ãæ(Ò»¸ö·Ç200×´Ì¬)µÄËÙ¶È
+    //åœ¨è¿‡åŽ»çš„30ç§’çš„æ¯ä¸ªé‚®æ”¿ç¼–ç çš„é”™è¯¯é¡µé¢(ä¸€ä¸ªéž200çŠ¶æ€)çš„é€Ÿåº¦
     val statusesPerZipCode = pageViews.window(Seconds(30), Seconds(2))
                                       .map(view => ((view.zipCode, view.status)))
                                       .groupByKey()
@@ -86,7 +86,7 @@ object PageViewStream {
     }
 
     // Return the number unique users in last 15 seconds
-    //ÔÚ×îºó15ÃëÖÐ·µ»ØÎ¨Ò»µÄÓÃ»§
+    //åœ¨æœ€åŽ15ç§’ä¸­è¿”å›žå”¯ä¸€çš„ç”¨æˆ·
     val activeUserCount = pageViews.window(Seconds(15), Seconds(2))
                                    .map(view => (view.userID, 1))
                                    .groupByKey()
@@ -94,7 +94,7 @@ object PageViewStream {
                                    .map("Unique active users: " + _)
 
     // An external dataset we want to join to this stream
-    //ÎÒÃÇÒª¼ÓÈëµ½¸ÃÁ÷µÄÍâ²¿Êý¾Ý¼¯
+    //æˆ‘ä»¬è¦åŠ å…¥åˆ°è¯¥æµçš„å¤–éƒ¨æ•°æ®é›†
     val userList = ssc.sparkContext.parallelize(
        Map(1 -> "Patrick Wendell", 2->"Reynold Xin", 3->"Matei Zaharia").toSeq)
 
@@ -105,7 +105,7 @@ object PageViewStream {
       case "activeUserCount" => activeUserCount.print()
       case "popularUsersSeen" =>
         // Look for users in our existing dataset and print it out if we have a match
-        //ÔÚÎÒÃÇÏÖÓÐµÄÊý¾Ý¼¯ÉÏÑ°ÕÒÓÃ»§,²¢´òÓ¡³öÀ´,Èç¹ûÎÒÃÇÓÐÒ»¸öÆ¥Åä
+        //åœ¨æˆ‘ä»¬çŽ°æœ‰çš„æ•°æ®é›†ä¸Šå¯»æ‰¾ç”¨æˆ·,å¹¶æ‰“å°å‡ºæ¥,å¦‚æžœæˆ‘ä»¬æœ‰ä¸€ä¸ªåŒ¹é…
         pageViews.map(view => (view.userID, 1))
           .foreachRDD((rdd, time) => rdd.join(userList)
             .map(_._2._2)

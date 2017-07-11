@@ -26,7 +26,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * StringIndexer¶ÔString°´Æµ´Î½øĞĞ±àºÅ,Æµ´Î×î¸ßµÄ×ª»»Îª0
+ * StringIndexerå¯¹StringæŒ‰é¢‘æ¬¡è¿›è¡Œç¼–å·,é¢‘æ¬¡æœ€é«˜çš„è½¬æ¢ä¸º0
  */
 object IndexToStringExample {
   def main(args: Array[String]) {
@@ -45,12 +45,12 @@ object IndexToStringExample {
       (4, "a"),
       (5, "c")
     )).toDF("id", "category")
-    //StringIndexer¶ÔString°´Æµ´Î½øĞĞ±àºÅ,Æµ´Î×î¸ßµÄ×ª»»Îª0
+    //StringIndexerå¯¹StringæŒ‰é¢‘æ¬¡è¿›è¡Œç¼–å·,é¢‘æ¬¡æœ€é«˜çš„è½¬æ¢ä¸º0
     val indexer = new StringIndexer()
-      .setInputCol("category")//SparkÄ¬ÈÏÔ¤²âlabelĞĞ
-      .setOutputCol("categoryIndex")//×ª»»»ØÀ´µÄÔ¤²âlabel
-      .fit(df)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
-      //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+      .setInputCol("category")//Sparké»˜è®¤é¢„æµ‹labelè¡Œ
+      .setOutputCol("categoryIndex")//è½¬æ¢å›æ¥çš„é¢„æµ‹label
+      .fit(df)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
+      //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val indexed = indexer.transform(df)
     /**
     *+---+--------+-------------+
@@ -68,7 +68,7 @@ object IndexToStringExample {
     val converter = new IndexToString()
       .setInputCol("categoryIndex")
       .setOutputCol("originalCategory")
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val converted = converter.transform(indexed)
     /**
      *+---+----------------+

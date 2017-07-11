@@ -23,7 +23,7 @@ import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.mllib.linalg.Vectors
 
 /**
- * ½µÎ¬ÆæÒìÖµ·Ö½â
+ * é™ç»´å¥‡å¼‚å€¼åˆ†è§£
  */
 object TallSkinnySVD {
   def main(args: Array[String]) {
@@ -36,14 +36,14 @@ object TallSkinnySVD {
     val sc = new SparkContext(conf)
 
     // Load and parse the data file.
-    //¼ÓÔØºÍ½âÎöÊý¾ÝÎÄ¼þ
+    //åŠ è½½å’Œè§£æžæ•°æ®æ–‡ä»¶
     val rows = sc.textFile("../data/mllib/kmeans_data.txt").map { line =>
       val values = line.split(' ').map(_.toDouble)
       Vectors.dense(values)
     }
     val mat = new RowMatrix(rows)
 
-    // Compute SVD. ¼ÆËãSVD
+    // Compute SVD. è®¡ç®—SVD
     val svd = mat.computeSVD(mat.numCols().toInt)
 
     println("Singular values are " + svd.s)

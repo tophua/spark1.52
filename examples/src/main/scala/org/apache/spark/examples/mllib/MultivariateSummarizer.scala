@@ -28,21 +28,21 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * An example app for summarizing multivariate data from a file. Run with
- * Ò»¸öÓÃÓÚ»ã×Ü¶àÔªÊı¾İµÄÎÄ¼şÖĞÊ¾ÀıÓ¦ÓÃ³ÌĞò
+ * ä¸€ä¸ªç”¨äºæ±‡æ€»å¤šå…ƒæ•°æ®çš„æ–‡ä»¶ä¸­ç¤ºä¾‹åº”ç”¨ç¨‹åº
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.MultivariateSummarizer
  * }}}
  * By default, this loads a synthetic dataset from `data/mllib/sample_linear_regression_data.txt`.
- * Ä¬ÈÏ,Õâ¸ö¼ÓÔØÒ»¸öºÏ³ÉÊı¾İ¼¯À´×Ô`data/mllib/sample_linear_regression_data.txt`
+ * é»˜è®¤,è¿™ä¸ªåŠ è½½ä¸€ä¸ªåˆæˆæ•°æ®é›†æ¥è‡ª`data/mllib/sample_linear_regression_data.txt`
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
  */
 object MultivariateSummarizer {
 /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
   case class Params(input: String = "../data/mllib/sample_linear_regression_data.txt")
     extends AbstractParams[Params]
@@ -77,11 +77,11 @@ object MultivariateSummarizer {
     val conf = new SparkConf().setAppName(s"MultivariateSummarizer with $params").setMaster("local")
     val sc = new SparkContext(conf)
     /**
-     *  libSVMµÄÊı¾İ¸ñÊ½
+     *  libSVMçš„æ•°æ®æ ¼å¼
      *  <label> <index1>:<value1> <index2>:<value2> ...
-     *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-     *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-     *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+     *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+     *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+     *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
      */
     val examples = MLUtils.loadLibSVMFile(sc, params.input).cache()
 
@@ -89,13 +89,13 @@ object MultivariateSummarizer {
     println(s"${examples.count()} data points")
 
     // Summarize labels
-    //×Ü½á±êÇ©
+    //æ€»ç»“æ ‡ç­¾
     val labelSummary = examples.aggregate(new MultivariateOnlineSummarizer())(
       (summary, lp) => summary.add(Vectors.dense(lp.label)),
       (sum1, sum2) => sum1.merge(sum2))
 
     // Summarize features
-    //×Ü½áÌØµã
+    //æ€»ç»“ç‰¹ç‚¹
     val featureSummary = examples.aggregate(new MultivariateOnlineSummarizer())(
       (summary, lp) => summary.add(lp.features),
       (sum1, sum2) => sum1.merge(sum2))

@@ -31,7 +31,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.mllib.util.MLUtils
 /**
- * »Ø¹é¾ö²ßÊ÷Àı×Ó
+ * å›å½’å†³ç­–æ ‘ä¾‹å­
  */
 object DecisionTreeRegressionExample {
   def main(args: Array[String]): Unit = {
@@ -45,11 +45,11 @@ object DecisionTreeRegressionExample {
     // $example on$
     // Load the data stored in LIBSVM format as a DataFrame.
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
     val data = sqlContext.createDataFrame(dataSVM)
@@ -65,38 +65,38 @@ object DecisionTreeRegressionExample {
     +-----+--------------------+*/
      data.show()
     // Automatically identify categorical features, and index them.
-     //×Ô¶¯Ê¶±ğ·ÖÀàÌØÕ÷,ºÍË÷Òı,ÔÚÕâÀï,ÎÒÃÇÑµÁ·ÌØÕ÷Öµ>4²»Í¬Öµ×÷ÎªÁ¬Ğø
+     //è‡ªåŠ¨è¯†åˆ«åˆ†ç±»ç‰¹å¾,å’Œç´¢å¼•,åœ¨è¿™é‡Œ,æˆ‘ä»¬è®­ç»ƒç‰¹å¾å€¼>4ä¸åŒå€¼ä½œä¸ºè¿ç»­
     // Here, we treat features with > 4 distinct values as continuous.
-    //VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+    //VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
-      .setMaxCategories(4)//×î´ó·ÖÀà
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .setMaxCategories(4)//æœ€å¤§åˆ†ç±»
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
 
     // Split the data into training and test sets (30% held out for testing).
-    // ½«Êı¾İ·Ö³ÉÑµÁ·ºÍ²âÊÔ¼¯(30%½øĞĞ²âÊÔ)
+    // å°†æ•°æ®åˆ†æˆè®­ç»ƒå’Œæµ‹è¯•é›†(30%è¿›è¡Œæµ‹è¯•)
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a DecisionTree model.
-    // ÑµÁ·Ò»¸ö¾ö²ßÄ£ĞÍ
+    // è®­ç»ƒä¸€ä¸ªå†³ç­–æ¨¡å‹
     val dt = new DecisionTreeRegressor()
       .setLabelCol("label")
-       //ÑµÁ·Êı¾İ¼¯DataFrameÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
+       //è®­ç»ƒæ•°æ®é›†DataFrameä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
       .setFeaturesCol("indexedFeatures")
 
     // Chain indexer and tree in a Pipeline.
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(featureIndexer, dt))
 
     // Train model. This also runs the indexer.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(trainingData)
 
     // Make predictions.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(testData)
 
     // Select example rows to display.
@@ -114,19 +114,19 @@ object DecisionTreeRegressionExample {
     predictions.select("prediction", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.
-    //»Ø¹éÆÀ¹À,Ñ¡Ôñ(Ô¤²â,ÕæÊµ±êÇ©)ºÍ¼ÆËã²âÊÔ´íÎó
+    //å›å½’è¯„ä¼°,é€‰æ‹©(é¢„æµ‹,çœŸå®æ ‡ç­¾)å’Œè®¡ç®—æµ‹è¯•é”™è¯¯
     val evaluator = new RegressionEvaluator()
-      //±êÇ©ÁĞµÄÃû³Æ
+      //æ ‡ç­¾åˆ—çš„åç§°
       .setLabelCol("label")
-      //Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
+      //ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
       .setPredictionCol("prediction")
-       //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
-      .setMetricName("rmse")//¾ù·½¸ùÎó²î
+       //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
+      .setMetricName("rmse")//å‡æ–¹æ ¹è¯¯å·®
     val rmse = evaluator.evaluate(predictions)
-     //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+     //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     //Root Mean Squared Error (RMSE) on test data = 0.25819888974716115
     println("Root Mean Squared Error (RMSE) on test data = " + rmse)
-    //´Ó¹ÜµÀÄ£ĞÍ»ñµÃ¾ö²ßÊ÷»Ø¹éÄ£ĞÍ
+    //ä»ç®¡é“æ¨¡å‹è·å¾—å†³ç­–æ ‘å›å½’æ¨¡å‹
     val treeModel = model.stages(1).asInstanceOf[DecisionTreeRegressionModel]
     println("Learned regression tree model:\n" + treeModel.toDebugString)
     // $example off$

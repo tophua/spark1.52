@@ -27,7 +27,7 @@ import org.apache.spark.mllib.linalg.Vectors
 
 /**
  * An example k-means app. Run with
- * Ò»¸ök-¾ùÖµÓ¦ÓÃ³ÌĞòµÄÀı×Ó
+ * ä¸€ä¸ªk-å‡å€¼åº”ç”¨ç¨‹åºçš„ä¾‹å­
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DenseKMeans [options] <input>
  * }}}
@@ -53,7 +53,7 @@ object DenseKMeans {
     val defaultParams = Params()
 
     val parser = new OptionParser[Params]("DenseKMeans") {
-      //ÃÜ¼¯µÄKmeans:Àık-¾ùÖµÓ¦ÓÃ³ÌĞòµÄÊı¾İÃÜ¼¯ĞÍ
+      //å¯†é›†çš„Kmeans:ä¾‹k-å‡å€¼åº”ç”¨ç¨‹åºçš„æ•°æ®å¯†é›†å‹
       head("DenseKMeans: an example k-means app for dense data.")
       opt[Int]('k', "k")
         //.required()
@@ -99,13 +99,13 @@ object DenseKMeans {
     }
 
     val model = new KMeans()
-      .setInitializationMode(initMode)//³õÊ¼¾ÛÀàÖĞĞÄµãµÄÑ¡Ôñ·½Ê½
-      .setK(params.k)//¾ÛÀàµÄ¸öÊı
-      .setMaxIterations(params.numIterations)//µü´ú´ÎÊı
+      .setInitializationMode(initMode)//åˆå§‹èšç±»ä¸­å¿ƒç‚¹çš„é€‰æ‹©æ–¹å¼
+      .setK(params.k)//èšç±»çš„ä¸ªæ•°
+      .setMaxIterations(params.numIterations)//è¿­ä»£æ¬¡æ•°
       .run(examples)
      /**
-      * computeCostÍ¨¹ı¼ÆËãËùÓĞÊı¾İµãµ½Æä×î½üµÄÖĞĞÄµãµÄÆ½·½ºÍÀ´ÆÀ¹À¾ÛÀàµÄĞ§¹û,
-      * Í³¼Æ¾ÛÀà´íÎóµÄÑù±¾±ÈÀı
+      * computeCosté€šè¿‡è®¡ç®—æ‰€æœ‰æ•°æ®ç‚¹åˆ°å…¶æœ€è¿‘çš„ä¸­å¿ƒç‚¹çš„å¹³æ–¹å’Œæ¥è¯„ä¼°èšç±»çš„æ•ˆæœ,
+      * ç»Ÿè®¡èšç±»é”™è¯¯çš„æ ·æœ¬æ¯”ä¾‹
       */
     val cost = model.computeCost(examples)
     //Total cost = 0.07499999999994544.

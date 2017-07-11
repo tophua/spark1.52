@@ -41,14 +41,14 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 
 /**
  * An example runner for decision trees. Run with
- * ¾ö²ßÊ÷µÄÒ»¸öÀı×Ó
+ * å†³ç­–æ ‘çš„ä¸€ä¸ªä¾‹å­
  * {{{
  * ./bin/run-example ml.DecisionTreeExample [options]
  * }}}
  * Note that Decision Trees can take a large amount of memory.  If the run-example command above
- * Çë×¢Òâ,¾ö²ßÊ÷¿ÉÒÔ²ÉÈ¡´óÁ¿µÄÄÚ´æ,Èç¹ûÉÏÃæµÄÔËĞĞÊ¾ÀıÃüÁîÊ§°Ü,ÊÔÔËĞĞÍ¨¹ıSparkÌá½»Ö¸¶¨µÄÄÚ´æÁ¿ÎªÖÁÉÙ1G
+ * è¯·æ³¨æ„,å†³ç­–æ ‘å¯ä»¥é‡‡å–å¤§é‡çš„å†…å­˜,å¦‚æœä¸Šé¢çš„è¿è¡Œç¤ºä¾‹å‘½ä»¤å¤±è´¥,è¯•è¿è¡Œé€šè¿‡Sparkæäº¤æŒ‡å®šçš„å†…å­˜é‡ä¸ºè‡³å°‘1G
  * fails, try running via spark-submit and specifying the amount of memory as at least 1g.
- * For local mode, run ±¾µØÄ£Ê½
+ * For local mode, run æœ¬åœ°æ¨¡å¼
  * {{{
  * ./bin/spark-submit --class org.apache.spark.examples.ml.DecisionTreeExample --driver-memory 1g
  *   [examples JAR path] [options]
@@ -61,15 +61,15 @@ object DecisionTreeExample {
       input: String = "../data/mllib/rf_libsvm_data.txt",
       testInput: String = "",
       dataFormat: String = "libsvm",
-      algo: String = "Classification",//"regression",Ëã·¨ÀàĞÍ
-      maxDepth: Int = 5,//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-      maxBins: Int = 32,//Á¬ĞøÌØÕ÷ÀëÉ¢»¯µÄ×î´óÊıÁ¿,ÒÔ¼°Ñ¡ÔñÃ¿¸ö½Úµã·ÖÁÑÌØÕ÷µÄ·½Ê½
-      minInstancesPerNode: Int = 1,//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-      minInfoGain: Double = 0.0,//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
-      fracTest: Double = 0.2,//²âÊÔÒò×Ó
+      algo: String = "Classification",//"regression",ç®—æ³•ç±»å‹
+      maxDepth: Int = 5,//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+      maxBins: Int = 32,//è¿ç»­ç‰¹å¾ç¦»æ•£åŒ–çš„æœ€å¤§æ•°é‡,ä»¥åŠé€‰æ‹©æ¯ä¸ªèŠ‚ç‚¹åˆ†è£‚ç‰¹å¾çš„æ–¹å¼
+      minInstancesPerNode: Int = 1,//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+      minInfoGain: Double = 0.0,//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
+      fracTest: Double = 0.2,//æµ‹è¯•å› å­
       cacheNodeIds: Boolean = false,
-      checkpointDir: Option[String] = None,//¼ì²éµãÄ¿Â¼
-      //ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+      checkpointDir: Option[String] = None,//æ£€æŸ¥ç‚¹ç›®å½•
+      //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -80,17 +80,17 @@ object DecisionTreeExample {
       opt[String]("algo")
         .text(s"algorithm (classification, regression), default: ${defaultParams.algo}")
         .action((x, c) => c.copy(algo = x))
-      opt[Int]("maxDepth")//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
+      opt[Int]("maxDepth")//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("maxBins")
         .text(s"max number of bins, default: ${defaultParams.maxBins}")
         .action((x, c) => c.copy(maxBins = x))
-      opt[Int]("minInstancesPerNode")//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
+      opt[Int]("minInstancesPerNode")//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
         .text(s"min number of instances required at child nodes to create the parent split," +
           s" default: ${defaultParams.minInstancesPerNode}")
         .action((x, c) => c.copy(minInstancesPerNode = x))
-      opt[Double]("minInfoGain")//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
+      opt[Double]("minInfoGain")//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
         .action((x, c) => c.copy(minInfoGain = x))
       opt[Double]("fracTest")
@@ -108,10 +108,10 @@ object DecisionTreeExample {
            case None => "None"
          }}")
         .action((x, c) => c.copy(checkpointDir = Some(x)))
-      opt[Int]("checkpointInterval")//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+      opt[Int]("checkpointInterval")//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
         .text(s"how often to checkpoint the node Id cache, " +
-         s"default: ${defaultParams.checkpointInterval}")//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
-        .action((x, c) => c.copy(checkpointInterval = x))//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+         s"default: ${defaultParams.checkpointInterval}")//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
+        .action((x, c) => c.copy(checkpointInterval = x))//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
       opt[String]("testInput")
         .text(s"input path to test dataset.  If given, option fracTest is ignored." +
           s" default: ${defaultParams.testInput}")
@@ -143,7 +143,7 @@ object DecisionTreeExample {
 
   /** 
    *  Load a dataset from the given path, using the given format
-   *  ´Ó¸ø¶¨µÄÂ·¾¶¼ÓÔØÊı¾İ¼¯,Ê¹ÓÃ¸ø¶¨µÄ¸ñÊ½
+   *  ä»ç»™å®šçš„è·¯å¾„åŠ è½½æ•°æ®é›†,ä½¿ç”¨ç»™å®šçš„æ ¼å¼
    *   */
   private[ml] def loadData(
       sc: SparkContext,
@@ -151,16 +151,16 @@ object DecisionTreeExample {
       format: String,
       expectedNumFeatures: Option[Int] = None): RDD[LabeledPoint] = {
     format match {
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
       case "dense" => MLUtils.loadLabeledPoints(sc, path)
       case "libsvm" => expectedNumFeatures match {
         case Some(numFeatures) => MLUtils.loadLibSVMFile(sc, path, numFeatures)
       	/**
-       	*  libSVMµÄÊı¾İ¸ñÊ½
+       	*  libSVMçš„æ•°æ®æ ¼å¼
        	*  <label> <index1>:<value1> <index2>:<value2> ...
-       	*  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-       	*  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-       	*  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+       	*  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+       	*  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+       	*  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
        	*/
         case None => MLUtils.loadLibSVMFile(sc, path)
       }
@@ -170,13 +170,13 @@ object DecisionTreeExample {
 
   /**
    * Load training and test data from files.
-   * ´ÓÎÄ¼şÖĞ¼ÓÔØÑµÁ·ºÍ²âÊÔÊı¾İ
-   * @param input  Path to input dataset. ÊäÈëÊı¾İ¼¯µÄÂ·¾¶
+   * ä»æ–‡ä»¶ä¸­åŠ è½½è®­ç»ƒå’Œæµ‹è¯•æ•°æ®
+   * @param input  Path to input dataset. è¾“å…¥æ•°æ®é›†çš„è·¯å¾„
    * @param dataFormat  "libsvm" or "dense"
-   * @param testInput  Path to test dataset. ²âÊÔÊı¾İ¼¯µÄÂ·¾¶
-   * @param algo  Classification or Regression ·ÖÀà»ò»Ø¹é
+   * @param testInput  Path to test dataset. æµ‹è¯•æ•°æ®é›†çš„è·¯å¾„
+   * @param algo  Classification or Regression åˆ†ç±»æˆ–å›å½’
    * @param fracTest  Fraction of input data to hold out for testing.  Ignored if testInput given.
-   * 				ÓÃÓÚ²âÊÔµÄÊäÈëÊı¾İµÄ·ÖÊı,Èç¹ûtestinput¸øºöÂÔÁË
+   * 				ç”¨äºæµ‹è¯•çš„è¾“å…¥æ•°æ®çš„åˆ†æ•°,å¦‚æœtestinputç»™å¿½ç•¥äº†
    * @return  (training dataset, test dataset)
    */
   private[ml] def loadDatasets(
@@ -189,10 +189,10 @@ object DecisionTreeExample {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
 
-    // Load training data ¼ÓÔØ ÑµÁ·Êı¾İ
+    // Load training data åŠ è½½ è®­ç»ƒæ•°æ®
     val origExamples: RDD[LabeledPoint] = loadData(sc, input, dataFormat)
 
-    // Load or create test set ¼ÓÔØ»ò´´½¨²âÊÔ¼¯
+    // Load or create test set åŠ è½½æˆ–åˆ›å»ºæµ‹è¯•é›†
     val splits: Array[RDD[LabeledPoint]] = if (testInput != "") {
       // Load testInput. 
       val numFeatures = origExamples.take(1)(0).features.size
@@ -201,17 +201,17 @@ object DecisionTreeExample {
         loadData(sc, testInput, dataFormat, Some(numFeatures))
       Array(origExamples, origTestExamples)
     } else {
-      // Split input into training, test. ½«ÊäÈë²ğ·ÖÎªÑµÁ·,²âÊÔ
+      // Split input into training, test. å°†è¾“å…¥æ‹†åˆ†ä¸ºè®­ç»ƒ,æµ‹è¯•
       origExamples.randomSplit(Array(1.0 - fracTest, fracTest), seed = 12345)
     }
 
     // For classification, convert labels to Strings since we will index them later with    
     // StringIndexer.
-    //½øĞĞ·ÖÀà,ÒòÎªÎÒÃÇ½«Ë÷ÒıËûÃÇÒÔºó,½«±êÇ©×ª»»Îª×Ö·û´®
+    //è¿›è¡Œåˆ†ç±»,å› ä¸ºæˆ‘ä»¬å°†ç´¢å¼•ä»–ä»¬ä»¥å,å°†æ ‡ç­¾è½¬æ¢ä¸ºå­—ç¬¦ä¸²
     def labelsToStrings(data: DataFrame): DataFrame = {
       algo.toLowerCase match {
-        case "classification" =>//Èç¹ûËã·¨·ÖÀà,ÔòÌí¼ÓÁĞ×Ö¶Î
-          //withColumnº¯Êı¾ÍÄÜÊµÏÖ¶ÔdataframeÖĞÁĞµÄÌí¼Ó,dataÁĞÈ¡×Ö¶Î"label"Êı¾İ,Ç¿ÖÆ×ª»»×Ö·ûºÅ´®ÀàĞÍ
+        case "classification" =>//å¦‚æœç®—æ³•åˆ†ç±»,åˆ™æ·»åŠ åˆ—å­—æ®µ
+          //withColumnå‡½æ•°å°±èƒ½å®ç°å¯¹dataframeä¸­åˆ—çš„æ·»åŠ ,dataåˆ—å–å­—æ®µ"label"æ•°æ®,å¼ºåˆ¶è½¬æ¢å­—ç¬¦å·ä¸²ç±»å‹
           data.withColumn("labelString", data("label").cast(StringType))
         case "regression" =>
           data
@@ -223,8 +223,8 @@ object DecisionTreeExample {
     val training = dataframes(0).cache()
     val test = dataframes(1).cache()
 
-    val numTraining = training.count()//ÑµÁ·Êı¾İ×ÜÊı
-    val numTest = test.count()//²âÊÔÊı¾İ×ÜÊı
+    val numTraining = training.count()//è®­ç»ƒæ•°æ®æ€»æ•°
+    val numTest = test.count()//æµ‹è¯•æ•°æ®æ€»æ•°
    /** 
     +-----+--------------------+-----------+
     |label|            features|labelString|
@@ -236,15 +236,15 @@ object DecisionTreeExample {
     |  1.0|(6,[1,2,3],[1.0,1...|        1.0|
     +-----+--------------------+-----------+**/
     training.show()
-    //»ñÈ¡ÌØÕ÷Êı
+    //è·å–ç‰¹å¾æ•°
     val numFeatures = training.select("features").first().getAs[Vector](0).size
     //(6,[4,5],[1.0,1.0])
-    val tset1=training.select("features").first().getAs[Vector](0)//(0)È¡1ĞĞÊı¾İ
+    val tset1=training.select("features").first().getAs[Vector](0)//(0)å–1è¡Œæ•°æ®
      println("==="+tset1)
     println("Loaded data:")
-    //ÑµÁ·×ÜÊı: numTraining = 5, ²âÊÔ×ÜÊı:numTest = 4
+    //è®­ç»ƒæ€»æ•°: numTraining = 5, æµ‹è¯•æ€»æ•°:numTest = 4
     println(s"  numTraining = $numTraining, numTest = $numTest")
-    //ÌØÕ÷Êı:numFeatures = 6
+    //ç‰¹å¾æ•°:numFeatures = 6
     println(s"  numFeatures = $numFeatures")
     (training, test)
   }
@@ -257,15 +257,15 @@ object DecisionTreeExample {
 
     println(s"DecisionTreeExample with parameters:\n$params")
 
-    // Load training and test data and cache it. ¼ÓÔØÑµÁ·ºÍ²âÊÔÊı¾İ²¢½«Æä»º´æ
+    // Load training and test data and cache it. åŠ è½½è®­ç»ƒå’Œæµ‹è¯•æ•°æ®å¹¶å°†å…¶ç¼“å­˜
     val (training: DataFrame, test: DataFrame) =
       loadDatasets(sc, params.input, params.dataFormat, params.testInput, algo, params.fracTest)
 
-    // Set up Pipeline ½¨Á¢¹ÜµÀ
-    //½«ÌØÕ÷×ª»»,ÌØÕ÷¾ÛºÏ,Ä£ĞÍµÈ×é³ÉÒ»¸ö¹ÜµÀ,²¢µ÷ÓÃËüµÄfit·½·¨ÄâºÏ³öÄ£ĞÍ*/  
-    //Ò»¸ö Pipeline ÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+    // Set up Pipeline å»ºç«‹ç®¡é“
+    //å°†ç‰¹å¾è½¬æ¢,ç‰¹å¾èšåˆ,æ¨¡å‹ç­‰ç»„æˆä¸€ä¸ªç®¡é“,å¹¶è°ƒç”¨å®ƒçš„fitæ–¹æ³•æ‹Ÿåˆå‡ºæ¨¡å‹*/  
+    //ä¸€ä¸ª Pipeline åœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val stages = new mutable.ArrayBuffer[PipelineStage]()
-    // (1) For classification, re-index classes. ¶ÔÓÚ·ÖÀàÄ£ĞÍ±êÇ©ÁĞÃû:indexedLabel,»Ø¹éÄ£ĞÍ±êÇ©ÁĞÃû:label
+    // (1) For classification, re-index classes. å¯¹äºåˆ†ç±»æ¨¡å‹æ ‡ç­¾åˆ—å:indexedLabel,å›å½’æ¨¡å‹æ ‡ç­¾åˆ—å:label
     val labelColName = if (algo == "classification") "indexedLabel" else "label"
     if (algo == "classification") {
       val labelIndexer = new StringIndexer()
@@ -274,67 +274,67 @@ object DecisionTreeExample {
       stages += labelIndexer
     }
     // (2) Identify categorical features using VectorIndexer.
-    //     È·¶¨Ê¹ÓÃvectorindexer·ÖÀàÌØÕ÷
+    //     ç¡®å®šä½¿ç”¨vectorindexeråˆ†ç±»ç‰¹å¾
     //     Features with more than maxCategories values will be treated as continuous.
-    //    VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+    //    VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featuresIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
       .setMaxCategories(10)
     stages += featuresIndexer
-    // (3) Learn Decision Tree Ñ§Ï°¾ö²ßÊ÷
+    // (3) Learn Decision Tree å­¦ä¹ å†³ç­–æ ‘
     val dt = algo match {
-      case "classification" =>//·ÖÀà
+      case "classification" =>//åˆ†ç±»
         new DecisionTreeClassifier()
-	 //ÑµÁ·Êı¾İ¼¯DataFrameÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
-          .setFeaturesCol("indexedFeatures")//ÌØÕ÷ÁĞ
-          .setLabelCol(labelColName)//±êÇ©ÁĞ
-          .setMaxDepth(params.maxDepth)//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-          .setMaxBins(params.maxBins)//Á¬ĞøÌØÕ÷ÀëÉ¢»¯µÄ×î´óÊıÁ¿,ÒÔ¼°Ñ¡ÔñÃ¿¸ö½Úµã·ÖÁÑÌØÕ÷µÄ·½Ê½
-          .setMinInstancesPerNode(params.minInstancesPerNode)//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-          .setMinInfoGain(params.minInfoGain)//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
+	 //è®­ç»ƒæ•°æ®é›†DataFrameä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
+          .setFeaturesCol("indexedFeatures")//ç‰¹å¾åˆ—
+          .setLabelCol(labelColName)//æ ‡ç­¾åˆ—
+          .setMaxDepth(params.maxDepth)//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+          .setMaxBins(params.maxBins)//è¿ç»­ç‰¹å¾ç¦»æ•£åŒ–çš„æœ€å¤§æ•°é‡,ä»¥åŠé€‰æ‹©æ¯ä¸ªèŠ‚ç‚¹åˆ†è£‚ç‰¹å¾çš„æ–¹å¼
+          .setMinInstancesPerNode(params.minInstancesPerNode)//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+          .setMinInfoGain(params.minInfoGain)//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
           .setCacheNodeIds(params.cacheNodeIds)//
-          .setCheckpointInterval(params.checkpointInterval)//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1)
-      case "regression" =>//»Ø¹é
+          .setCheckpointInterval(params.checkpointInterval)//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1)
+      case "regression" =>//å›å½’
         new DecisionTreeRegressor()
-          .setFeaturesCol("indexedFeatures")//ÌØÕ÷ÁĞ
-          .setLabelCol(labelColName)//±êÇ©ÁĞ
-          .setMaxDepth(params.maxDepth)//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-          .setMaxBins(params.maxBins)//Á¬ĞøÌØÕ÷ÀëÉ¢»¯µÄ×î´óÊıÁ¿
-          .setMinInstancesPerNode(params.minInstancesPerNode)//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-          .setMinInfoGain(params.minInfoGain)//Ã¿´ÎÇĞ·ÖÖÁÉÙ¼õÉÙµÄ²»È·¶¨ĞÔ,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÃÓÚÖÕÖ¹µü´ú¼ÆËã
+          .setFeaturesCol("indexedFeatures")//ç‰¹å¾åˆ—
+          .setLabelCol(labelColName)//æ ‡ç­¾åˆ—
+          .setMaxDepth(params.maxDepth)//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+          .setMaxBins(params.maxBins)//è¿ç»­ç‰¹å¾ç¦»æ•£åŒ–çš„æœ€å¤§æ•°é‡
+          .setMinInstancesPerNode(params.minInstancesPerNode)//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+          .setMinInfoGain(params.minInfoGain)//æ¯æ¬¡åˆ‡åˆ†è‡³å°‘å‡å°‘çš„ä¸ç¡®å®šæ€§,å¦åˆ™åœæ­¢åˆ‡åˆ†,ç”¨äºç»ˆæ­¢è¿­ä»£è®¡ç®—
           .setCacheNodeIds(params.cacheNodeIds)
-          .setCheckpointInterval(params.checkpointInterval)//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1)
+          .setCheckpointInterval(params.checkpointInterval)//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1)
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
     stages += dt
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-    //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+    //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline().setStages(stages.toArray)
 
-    // Fit the Pipeline °²×°¹ÜµÀ
-    // ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+    // Fit the Pipeline å®‰è£…ç®¡é“
+    // ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
     val startTime = System.nanoTime()
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val pipelineModel = pipeline.fit(training)
-    //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+    //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
-    //´òÓ¡ÑµÁ·Ê¹ÓÃµÄÊ±¼ä    
+    //æ‰“å°è®­ç»ƒä½¿ç”¨çš„æ—¶é—´    
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained Decision Tree from the fitted PipelineModel
-    //´ÓÄâºÏµÄ¹ÜµÀÄ£ĞÍÖĞµÃµ½ÑµÁ·µÄ¾ö²ßÊ÷
+    //ä»æ‹Ÿåˆçš„ç®¡é“æ¨¡å‹ä¸­å¾—åˆ°è®­ç»ƒçš„å†³ç­–æ ‘
     algo match {
-      case "classification" =>//·ÖÀà
-        //»ñµÃ¹ÜµÀÖĞÑµÁ·µÄ×îºóÄ£ĞÍ¾ö²ßÊ÷
+      case "classification" =>//åˆ†ç±»
+        //è·å¾—ç®¡é“ä¸­è®­ç»ƒçš„æœ€åæ¨¡å‹å†³ç­–æ ‘
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeClassificationModel]
-        if (treeModel.numNodes < 20) {//½ÚµãÊı
-          println(treeModel.toDebugString) // Print full model. ´òÓ¡ÍêÕûµÄÄ£ĞÍ
+        if (treeModel.numNodes < 20) {//èŠ‚ç‚¹æ•°
+          println(treeModel.toDebugString) // Print full model. æ‰“å°å®Œæ•´çš„æ¨¡å‹
         } else {
-          println(treeModel) // Print model summary. ´òÓ¡Ä£ĞÍ×ÛÊö
+          println(treeModel) // Print model summary. æ‰“å°æ¨¡å‹ç»¼è¿°
         }
-      case "regression" =>//»Ø¹é
-        //»ñµÃ¹ÜµÀÄ£ĞÍÖĞÑµÁ·µÄ¾ö²ßÊ÷
+      case "regression" =>//å›å½’
+        //è·å¾—ç®¡é“æ¨¡å‹ä¸­è®­ç»ƒçš„å†³ç­–æ ‘
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeRegressionModel]
         if (treeModel.numNodes < 20) {
           println(treeModel.toDebugString) // Print full model.
@@ -344,14 +344,14 @@ object DecisionTreeExample {
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
 
-    // Evaluate model on training, test data ÑµÁ·ÆÀ¹ÀÄ£ĞÍ,²âÊÔÊı¾İ
+    // Evaluate model on training, test data è®­ç»ƒè¯„ä¼°æ¨¡å‹,æµ‹è¯•æ•°æ®
     algo match {
-      case "classification" =>//·ÖÀà
+      case "classification" =>//åˆ†ç±»
         println("Training data results:")
         evaluateClassificationModel(pipelineModel, training, labelColName)
         println("Test data results:")
         evaluateClassificationModel(pipelineModel, test, labelColName)
-      case "regression" =>//»Ø¹é
+      case "regression" =>//å›å½’
         println("Training data results:")
         evaluateRegressionModel(pipelineModel, training, labelColName)
         println("Test data results:")
@@ -365,10 +365,10 @@ object DecisionTreeExample {
 
   /**
    * Evaluate the given ClassificationModel on data.  Print the results.
-   * ÆÀ¹À¸ø¶¨µÄ·ÖÀàÄ£ĞÍÊı¾İ²¢´òÓ¡½á¹û
-   * @param model  Must fit ClassificationModel abstraction ±ØĞëÊÊºÏ·ÖÀàÄ£ĞÍ³éÏó
-   * @param data  DataFrame with "prediction" and labelColName columns ¡°Ô¤²â¡±ºÍlabelcolnameÁĞÊı¾İ¿ò
-   * @param labelColName  Name of the labelCol parameter for the model ¸ÃÄ£ĞÍµÄlabelcol²ÎÊıÃû³Æ
+   * è¯„ä¼°ç»™å®šçš„åˆ†ç±»æ¨¡å‹æ•°æ®å¹¶æ‰“å°ç»“æœ
+   * @param model  Must fit ClassificationModel abstraction å¿…é¡»é€‚åˆåˆ†ç±»æ¨¡å‹æŠ½è±¡
+   * @param data  DataFrame with "prediction" and labelColName columns â€œé¢„æµ‹â€å’Œlabelcolnameåˆ—æ•°æ®æ¡†
+   * @param labelColName  Name of the labelCol parameter for the model è¯¥æ¨¡å‹çš„labelcolå‚æ•°åç§°
    *
    * TODO: Change model type to ClassificationModel once that API is public. SPARK-5995
    */
@@ -376,9 +376,9 @@ object DecisionTreeExample {
       model: Transformer,
       data: DataFrame,
       labelColName: String): Unit = {
-      //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+      //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val fullPredictions = model.transform(data).cache()
-    //»ñµÃÔ¤²âÁĞ
+    //è·å¾—é¢„æµ‹åˆ—
     /**
     +-----+--------------------+-----------+------------+--------------------+-------------+-----------+----------+
     |label|            features|labelString|indexedLabel|     indexedFeatures|rawPrediction|probability|prediction|
@@ -390,7 +390,7 @@ object DecisionTreeExample {
     +-----+--------------------+-----------+------------+--------------------+-------------+-----------+----------+**/
     fullPredictions.show(5)
     val predictions = fullPredictions.select("prediction").map(_.getDouble(0))
-    //»ñµÃlabelÁĞµÄÖµ
+    //è·å¾—labelåˆ—çš„å€¼
     val labels = fullPredictions.select(labelColName).map(_.getDouble(0))
     // Print number of classes for reference
     /**
@@ -398,27 +398,27 @@ object DecisionTreeExample {
      * StructField(indexedLabel,DoubleType,true)||||indexedLabel
      */
     println(fullPredictions.schema(labelColName)+"||||"+labelColName)
-    //getNumClasses ¼ì²éÒ»¸öschema±êÊ¶±êÇ©ÁĞÖĞ·ÖÀàµÄÊıÄ¿
+    //getNumClasses æ£€æŸ¥ä¸€ä¸ªschemaæ ‡è¯†æ ‡ç­¾åˆ—ä¸­åˆ†ç±»çš„æ•°ç›®
     val numClasses = MetadataUtils.getNumClasses(fullPredictions.schema(labelColName)) match {
       case Some(n) => n
       case None => throw new RuntimeException(
-        //·ÖÀà±êÇ©Ë÷ÒıÊ±³öÏÖÎ´Öª¹ÊÕÏ
+        //åˆ†ç±»æ ‡ç­¾ç´¢å¼•æ—¶å‡ºç°æœªçŸ¥æ•…éšœ
         "Unknown failure when indexing labels for classification.")
     }
     //(1.0,1.0)
     //(1.0,1.0)
     predictions.zip(labels).foreach(println _)
-    //ÆÀ¹ÀÖ¸±ê-¶à·ÖÀà
+    //è¯„ä¼°æŒ‡æ ‡-å¤šåˆ†ç±»
     val accuracy = new MulticlassMetrics(predictions.zip(labels)).precision
     println(s"  Accuracy ($numClasses classes): $accuracy")
   }
 
   /**
    * Evaluate the given RegressionModel on data.  Print the results.
-   * ÆÀ¹À¸ø¶¨»Ø¹éÄ£ĞÍÊı¾İ²¢´òÓ¡½á¹û
-   * @param model  Must fit RegressionModel abstraction ±ØĞë»Ø¹éÄ£ĞÍµÄ³éÏó
-   * @param data  DataFrame with "prediction" and labelColName columns Êı¾İ¼¯°üÀ¨predictionÁĞÃû
-   * @param labelColName  Name of the labelCol parameter for the model ¸ÃÄ£ĞÍµÄ±êÇ©ÁĞµÄ²ÎÊıÃû³Æ
+   * è¯„ä¼°ç»™å®šå›å½’æ¨¡å‹æ•°æ®å¹¶æ‰“å°ç»“æœ
+   * @param model  Must fit RegressionModel abstraction å¿…é¡»å›å½’æ¨¡å‹çš„æŠ½è±¡
+   * @param data  DataFrame with "prediction" and labelColName columns æ•°æ®é›†åŒ…æ‹¬predictionåˆ—å
+   * @param labelColName  Name of the labelCol parameter for the model è¯¥æ¨¡å‹çš„æ ‡ç­¾åˆ—çš„å‚æ•°åç§°
    *
    * TODO: Change model type to RegressionModel once that API is public. SPARK-5995
    */
@@ -426,7 +426,7 @@ object DecisionTreeExample {
       model: Transformer,
       data: DataFrame,
       labelColName: String): Unit = {
-      //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+      //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val fullPredictions = model.transform(data).cache()
     /***
      * 
@@ -446,7 +446,7 @@ object DecisionTreeExample {
     //(1.0,1.0)
     val zip=predictions.zip(labels)    
    // println("zip:"+zip.)
-    //RMSE ¾ù·½¸ùÎó²î
+    //RMSE å‡æ–¹æ ¹è¯¯å·®
     val RMSE = new RegressionMetrics(predictions.zip(labels)).rootMeanSquaredError
     //Root mean squared error (RMSE): 0.0
     println(s"  Root mean squared error (RMSE): $RMSE")

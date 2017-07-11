@@ -31,7 +31,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * ÆÀ¹À×ª»»²ÎÊýÀý×Ó
+ * è¯„ä¼°è½¬æ¢å‚æ•°ä¾‹å­
  */
 object EstimatorTransformerParamExample {
 
@@ -46,7 +46,7 @@ object EstimatorTransformerParamExample {
 
     // $example on$
     // Prepare training data from a list of (label, features) tuples.
-    // ×¼±¸ÑµÁ·À´×ÔÒ»Ñ®(±êÇ©,ÌØÕ÷)µÄÔª×é
+    // å‡†å¤‡è®­ç»ƒæ¥è‡ªä¸€æ—¬(æ ‡ç­¾,ç‰¹å¾)çš„å…ƒç»„
     val training = sqlContext.createDataFrame(Seq(
       (1.0, Vectors.dense(0.0, 1.1, 0.1)),
       (0.0, Vectors.dense(2.0, 1.0, -1.0)),
@@ -55,24 +55,24 @@ object EstimatorTransformerParamExample {
     )).toDF("label", "features")
 
     // Create a LogisticRegression instance. This instance is an Estimator.
-    //´´½¨Ò»¸öÂß¼­»Ø¹éÊµÀý,ÊµÀý»¯Ò»¸öÆÀ¹À
+    //åˆ›å»ºä¸€ä¸ªé€»è¾‘å›žå½’å®žä¾‹,å®žä¾‹åŒ–ä¸€ä¸ªè¯„ä¼°
     val lr = new LogisticRegression()
     // Print out the parameters, documentation, and any default values.
-     //´òÓ¡Êä³ö²ÎÊý,ÎÄµµºÍÒ»Ð©Ä¬ÈÏÖµ
+     //æ‰“å°è¾“å‡ºå‚æ•°,æ–‡æ¡£å’Œä¸€äº›é»˜è®¤å€¼
     println("LogisticRegression parameters:\n" + lr.explainParams() + "\n")
 
     // We may set parameters using setter methods.
-    //ÉèÖÃ²ÎÊýÊ¹ÓÃset·½·¨
+    //è®¾ç½®å‚æ•°ä½¿ç”¨setæ–¹æ³•
     lr.setMaxIter(10)
       .setRegParam(0.01)
 
     // Learn a LogisticRegression model. This uses the parameters stored in lr.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model1 = lr.fit(training)
     // Since model1 is a Model (i.e., a Transformer produced by an Estimator),
     // we can view the parameters it used during fit().
     // This prints the parameter (name: value) pairs, where names are unique IDs for this
-    // ´òÓ¡²ÎÊý²¿·Ö(Ãû³Æ:Öµ),ÕâÀïµÄÃû×ÖÂß¼­»Ø¹éÊµÀýÎ¨Ò»Ê¶
+    // æ‰“å°å‚æ•°éƒ¨åˆ†(åç§°:å€¼),è¿™é‡Œçš„åå­—é€»è¾‘å›žå½’å®žä¾‹å”¯ä¸€è¯†
     // LogisticRegression instance.
     /**
      * Model 1 was fit using parameters: {
@@ -93,12 +93,12 @@ object EstimatorTransformerParamExample {
     println("Model 1 was fit using parameters: " + model1.parent.extractParamMap)
 
     // We may alternatively specify parameters using a ParamMap,
-    //Ê¹ÓÃparammapÖ¸¶¨²ÎÊý
+    //ä½¿ç”¨parammapæŒ‡å®šå‚æ•°
     // which supports several methods for specifying parameters.
-    //Ö§³ÖÖ¸¶¨²ÎÊýµÄ¼¸ÖÖ·½·¨
+    //æ”¯æŒæŒ‡å®šå‚æ•°çš„å‡ ç§æ–¹æ³•
     val paramMap = ParamMap(lr.maxIter -> 20)
       .put(lr.maxIter, 30)  // Specify 1 Param. This overwrites the original maxIter.
-      //ÔÚ¶þ½øÖÆ·ÖÀàÖÐÉèÖÃãÐÖµ,·¶Î§Îª[0,1],Èç¹ûÀà±êÇ©1µÄ¹À¼Æ¸ÅÂÊ>Threshold,ÔòÔ¤²â1,·ñÔò0
+      //åœ¨äºŒè¿›åˆ¶åˆ†ç±»ä¸­è®¾ç½®é˜ˆå€¼,èŒƒå›´ä¸º[0,1],å¦‚æžœç±»æ ‡ç­¾1çš„ä¼°è®¡æ¦‚çŽ‡>Threshold,åˆ™é¢„æµ‹1,å¦åˆ™0
       .put(lr.regParam -> 0.1, lr.threshold -> 0.55)  // Specify multiple Params.
 
     // One can also combine ParamMaps.
@@ -107,7 +107,7 @@ object EstimatorTransformerParamExample {
 
     // Now learn a new model using the paramMapCombined parameters.
     // paramMapCombined overrides all parameters set earlier via lr.set* methods.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model2 = lr.fit(training, paramMapCombined)
     /**
      * Model 2 was fit using parameters: {
@@ -128,7 +128,7 @@ object EstimatorTransformerParamExample {
     println("Model 2 was fit using parameters: " + model2.parent.extractParamMap)
 
     // Prepare test data.
-    //×¼±¸²âÊÔÊý¾Ý
+    //å‡†å¤‡æµ‹è¯•æ•°æ®
     val test = sqlContext.createDataFrame(Seq(
       (1.0, Vectors.dense(-1.0, 1.5, 1.3)),
       (0.0, Vectors.dense(3.0, 2.0, -0.1)),
@@ -139,10 +139,10 @@ object EstimatorTransformerParamExample {
     // LogisticRegression.transform will only use the 'features' column.
     // Note that model2.transform() outputs a 'myProbability' column instead of the usual
     // 'probability' column since we renamed the lr.probabilityCol parameter previously.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     model2.transform(test)
-      //Àà±ðÔ¤²â½á¹ûµÄÌõ¼þ¸ÅÂÊÖµ´æ´¢ÁÐµÄÃû³Æ,Ä¬ÈÏÖµÊÇ¡±probability¡±
-      //Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁÐµÄÃû³Æ,Ä¬ÈÏÊÇ¡±prediction¡±
+      //ç±»åˆ«é¢„æµ‹ç»“æžœçš„æ¡ä»¶æ¦‚çŽ‡å€¼å­˜å‚¨åˆ—çš„åç§°,é»˜è®¤å€¼æ˜¯â€probabilityâ€
+      //ç®—æ³•é¢„æµ‹ç»“æžœçš„å­˜å‚¨åˆ—çš„åç§°,é»˜è®¤æ˜¯â€predictionâ€
       .select("features", "label", "myProbability", "prediction")
       .collect()
       .foreach { case Row(features: Vector, label: Double, prob: Vector, prediction: Double) =>

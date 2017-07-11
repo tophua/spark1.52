@@ -26,11 +26,11 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
- * ¾ÛÀà Ãİµü´ú¾ÛÀà(PIC)
- * Ò»¸öÊµÀıÃİµü´ú¾ÛÀà
+ * èšç±» å¹‚è¿­ä»£èšç±»(PIC)
+ * ä¸€ä¸ªå®ä¾‹å¹‚è¿­ä»£èšç±»
  * An example Power Iteration Clustering http://www.icml2010.org/papers/387.pdf app.
  * Takes an input of K concentric circles and the number of points in the innermost circle.
- * ĞèÒªÒ»¸ök¸öÍ¬ĞÄÔ²µÄÊäÈëºÍ×îÀïÃæµÄµãµÄ¸öÊı
+ * éœ€è¦ä¸€ä¸ªkä¸ªåŒå¿ƒåœ†çš„è¾“å…¥å’Œæœ€é‡Œé¢çš„ç‚¹çš„ä¸ªæ•°
  * The output should be K clusters - each cluster containing precisely the points associated
  * with each of the input circles.
  *
@@ -38,17 +38,17 @@ import org.apache.spark.{SparkConf, SparkContext}
  * {{{
  * ./bin/run-example mllib.PowerIterationClusteringExample [options]
  *
- * Where options include:ÆäÖĞÑ¡Ïî°üÀ¨
- *   k:  Number of circles/clusters Ñ­»·´ÎÊı/´Ø
+ * Where options include:å…¶ä¸­é€‰é¡¹åŒ…æ‹¬
+ *   k:  Number of circles/clusters å¾ªç¯æ¬¡æ•°/ç°‡
  *   n:  Number of sampled points on innermost circle.. There are proportionally more points
- *   		ÄÚÔ²ÉÏ²ÉÑùµãµÄ¸öÊı,ÕâÀïÓĞÔÚÍâ/´óÔ²È¦µÄ±ÈÀı¸ü¶àµã
+ *   		å†…åœ†ä¸Šé‡‡æ ·ç‚¹çš„ä¸ªæ•°,è¿™é‡Œæœ‰åœ¨å¤–/å¤§åœ†åœˆçš„æ¯”ä¾‹æ›´å¤šç‚¹
  *      within the outer/larger circles
- *   maxIterations:   Number of Power Iterations Ãİ´Îµü´ú´ÎÊı
+ *   maxIterations:   Number of Power Iterations å¹‚æ¬¡è¿­ä»£æ¬¡æ•°
  *   outerRadius:  radius of the outermost of the concentric circles
  * }}}
  *
  * Here is a sample run and output:
- * ÕâÀïÊÇÒ»¸öÊ¾ÀıÔËĞĞºÍÊä³ö
+ * è¿™é‡Œæ˜¯ä¸€ä¸ªç¤ºä¾‹è¿è¡Œå’Œè¾“å‡º
  * ./bin/run-example mllib.PowerIterationClusteringExample -k 3 --n 30 --maxIterations 15
  *
  * Cluster assignments: 1 -> [0,1,2,3,4],2 -> [5,6,7,8,9,10,11,12,13,14],
@@ -102,9 +102,9 @@ object PowerIterationClusteringExample {
     Logger.getRootLogger.setLevel(Level.WARN)
 
     val circlesRdd = generateCirclesRdd(sc, params.k, params.numPoints, params.outerRadius)
-    //¾ÛÀà Ãİµü´ú¾ÛÀà(PIC)
+    //èšç±» å¹‚è¿­ä»£èšç±»(PIC)
     val model = new PowerIterationClustering()
-      .setK(params.k)//¾ÛÀàµÄ¸öÊı
+      .setK(params.k)//èšç±»çš„ä¸ªæ•°
       .setMaxIterations(params.maxIterations)
       .run(circlesRdd)
 

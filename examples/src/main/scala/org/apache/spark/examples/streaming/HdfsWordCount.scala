@@ -23,17 +23,17 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 /**
  * Counts words in new text files created in the given directory
- * ÔÚ¸ø¶¨Ä¿Â¼ÖĞ´´½¨µÄĞÂÎÄ±¾ÎÄ¼şÖĞµÄµ¥´ÊÊı
+ * åœ¨ç»™å®šç›®å½•ä¸­åˆ›å»ºçš„æ–°æ–‡æœ¬æ–‡ä»¶ä¸­çš„å•è¯æ•°
  * Usage: HdfsWordCount <directory>
  *   <directory> is the directory that Spark Streaming will use to find and read new text files.
- *	ÊÇSparkÁ÷½«ÓÃÓÚ²éÕÒºÍ¶ÁÈ¡ĞÂµÄÎÄ±¾ÎÄ¼şµÄÄ¿Â¼
+ *	æ˜¯Sparkæµå°†ç”¨äºæŸ¥æ‰¾å’Œè¯»å–æ–°çš„æ–‡æœ¬æ–‡ä»¶çš„ç›®å½•
  * To run this on your local machine on directory `localdir`, run this example
- * ÔËĞĞÔÚ±¾µØ»úÆ÷ÉÏµÄÄ¿Â¼'localdir',ÔËĞĞ´ËÊ¾Àı
+ * è¿è¡Œåœ¨æœ¬åœ°æœºå™¨ä¸Šçš„ç›®å½•'localdir',è¿è¡Œæ­¤ç¤ºä¾‹
  *    $ bin/run-example \
  *       org.apache.spark.examples.streaming.HdfsWordCount localdir
  *
  * Then create a text file in `localdir` and the words in the file will get counted.
- * È»ºó´´½¨Ò»¸öÎÄ±¾ÎÄ¼şÖĞµÄ` localdir `ºÍÎÄ¼şµÄ»°»á¼ÆËã
+ * ç„¶ååˆ›å»ºä¸€ä¸ªæ–‡æœ¬æ–‡ä»¶ä¸­çš„` localdir `å’Œæ–‡ä»¶çš„è¯ä¼šè®¡ç®—
  */
 object HdfsWordCount {
   def main(args: Array[String]) {
@@ -46,26 +46,26 @@ object HdfsWordCount {
     
     val mast="spark://dept3:8088"
     val hdfs="hdfs://xcsq:8089/cookbook/input/"
-     //´´½¨SparkConf¶ÔÏó
+     //åˆ›å»ºSparkConfå¯¹è±¡
     val sparkConf = new SparkConf().setAppName("HdfsWordCount").setMaster(mast)
-    // Create the context´´½¨ÉÏÏÂÎÄ,Åú´Î¼ä¸ô
+    // Create the contextåˆ›å»ºä¸Šä¸‹æ–‡,æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(sparkConf, Seconds(2))
 
     // Create the FileInputDStream on the directory and use the
     // stream to count words in new files created
-    //´´½¨Ä¿Â¼µÄfileinputdstreamºÍÊ¹ÓÃÁ÷¼ÆÊıµ¥´Ê´´½¨ĞÂÎÄ¼ş
+    //åˆ›å»ºç›®å½•çš„fileinputdstreamå’Œä½¿ç”¨æµè®¡æ•°å•è¯åˆ›å»ºæ–°æ–‡ä»¶
     //val lines = ssc.textFileStream(args(0))
-     //Èç¹ûÄ¿Â¼ÖĞÓĞĞÂ´´½¨µÄÎÄ¼ş,Ôò¶ÁÈ¡
+     //å¦‚æœç›®å½•ä¸­æœ‰æ–°åˆ›å»ºçš„æ–‡ä»¶,åˆ™è¯»å–
     val lines = ssc.textFileStream(hdfs)
-   //·Ö¸îÎªµ¥´Ê
+   //åˆ†å‰²ä¸ºå•è¯
     val words = lines.flatMap(_.split(" ")) 
-    //Í³¼Æµ¥´Ê³öÏÖ´ÎÊı
+    //ç»Ÿè®¡å•è¯å‡ºç°æ¬¡æ•°
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)
-    //´òÓ¡½á¹û
+    //æ‰“å°ç»“æœ
     wordCounts.print()
-    //Æô¶¯Spark Streaming  Æô¶¯½ÓÊÕ
+    //å¯åŠ¨Spark Streaming  å¯åŠ¨æ¥æ”¶
     ssc.start()
-    //µÈ´ıÖ±µ½¼ÆËãÖÕÖ¹
+    //ç­‰å¾…ç›´åˆ°è®¡ç®—ç»ˆæ­¢
     ssc.awaitTermination()
   }
 }

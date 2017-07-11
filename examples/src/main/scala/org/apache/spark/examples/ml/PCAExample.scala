@@ -28,8 +28,8 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.mllib.linalg.Vectors
 /**
- * PCAÖ÷³É·Ö·ÖÎöÊÇÒ»ÖÖÍ³¼ÆÑ§·½·¨,ËüÊ¹ÓÃÕı½»×ª»»´ÓÒ»ÏµÁĞ¿ÉÄÜÏà¹ØµÄ±äÁ¿ÖĞÌáÈ¡ÏßĞÔÎŞ¹Ø±äÁ¿¼¯,
- * ÌáÈ¡³öµÄ±äÁ¿¼¯ÖĞµÄÔªËØ³ÆÎªÖ÷³É·Ö,Ê¹ÓÃPCA·½·¨¿ÉÒÔ¶Ô±äÁ¿¼¯ºÏ½øĞĞ½µÎ¬
+ * PCAä¸»æˆåˆ†åˆ†ææ˜¯ä¸€ç§ç»Ÿè®¡å­¦æ–¹æ³•,å®ƒä½¿ç”¨æ­£äº¤è½¬æ¢ä»ä¸€ç³»åˆ—å¯èƒ½ç›¸å…³çš„å˜é‡ä¸­æå–çº¿æ€§æ— å…³å˜é‡é›†,
+ * æå–å‡ºçš„å˜é‡é›†ä¸­çš„å…ƒç´ ç§°ä¸ºä¸»æˆåˆ†,ä½¿ç”¨PCAæ–¹æ³•å¯ä»¥å¯¹å˜é‡é›†åˆè¿›è¡Œé™ç»´
  */
 object PCAExample {
   def main(args: Array[String]): Unit = {
@@ -40,7 +40,7 @@ object PCAExample {
     import sqlContext.implicits._
     // $example on$
     /**
-     * Ê¾Àı½«»áÕ¹Ê¾ÈçºÎ½«5Î¬ÌØÕ÷ÏòÁ¿×ª»»Îª3Î¬Ö÷³É·ÖÏòÁ¿
+     * ç¤ºä¾‹å°†ä¼šå±•ç¤ºå¦‚ä½•å°†5ç»´ç‰¹å¾å‘é‡è½¬æ¢ä¸º3ç»´ä¸»æˆåˆ†å‘é‡
      */
     val data = Array(
       Vectors.sparse(5, Seq((1, 1.0), (3, 7.0))),
@@ -51,9 +51,9 @@ object PCAExample {
     val pca = new PCA()
       .setInputCol("features")
       .setOutputCol("pcaFeatures")
-      .setK(3)//Ö÷³É·Ö¸öÊı
-      .fit(df)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
-      //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+      .setK(3)//ä¸»æˆåˆ†ä¸ªæ•°
+      .fit(df)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
+      //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val pcaDF = pca.transform(df)
     val result = pcaDF.select("pcaFeatures")
     /**

@@ -26,15 +26,15 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * A simple example demonstrating model selection using TrainValidationSplit.
- * Ò»¸ö¼òµ¥µÄÀı×ÓÑİÊ¾Ä£ĞÍÑ¡ÔñÊ¹ÓÃÑµÁ·ÑéÖ¤·ÖÁÑ
- * Êı¾İÁ¿Ğ¡µÄÊ±ºò¿ÉÒÔÓÃCrossValidator½øĞĞ½»²æÑéÖ¤,Êı¾İÁ¿´óµÄÊ±ºò¿ÉÒÔÖ±½ÓÓÃtrainValidationSplit
+ * ä¸€ä¸ªç®€å•çš„ä¾‹å­æ¼”ç¤ºæ¨¡å‹é€‰æ‹©ä½¿ç”¨è®­ç»ƒéªŒè¯åˆ†è£‚
+ * æ•°æ®é‡å°çš„æ—¶å€™å¯ä»¥ç”¨CrossValidatorè¿›è¡Œäº¤å‰éªŒè¯,æ•°æ®é‡å¤§çš„æ—¶å€™å¯ä»¥ç›´æ¥ç”¨trainValidationSplit
  * The example is based on [[SimpleParamsExample]] using linear regression.
  * Run with
  * {{{
  * bin/run-example ml.TrainValidationSplitExample
  * }}}
- * Spark»¹Ìá¹©ÑµÁ·ÑéÖ¤·ÖÁÑÓÃÒÔ³¬²ÎÊıµ÷Õû¡£ºÍ½»²æÑéÖ¤ÆÀ¹ÀK´Î²»Í¬,ÑµÁ·ÑéÖ¤·ÖÁÑÖ»¶ÔÃ¿×é²ÎÊıÆÀ¹ÀÒ»´Î
- * Óë½»²æÑéÖ¤ÏàÍ¬,È·¶¨×î¼Ñ²ÎÊı±íºó,ÑµÁ·ÑéÖ¤·ÖÁÑ×îºóÊ¹ÓÃ×î¼Ñ²ÎÊı±í»ùÓÚÈ«²¿Êı¾İÀ´ÖØĞÂÄâºÏ¹À¼ÆÆ÷
+ * Sparkè¿˜æä¾›è®­ç»ƒéªŒè¯åˆ†è£‚ç”¨ä»¥è¶…å‚æ•°è°ƒæ•´ã€‚å’Œäº¤å‰éªŒè¯è¯„ä¼°Kæ¬¡ä¸åŒ,è®­ç»ƒéªŒè¯åˆ†è£‚åªå¯¹æ¯ç»„å‚æ•°è¯„ä¼°ä¸€æ¬¡
+ * ä¸äº¤å‰éªŒè¯ç›¸åŒ,ç¡®å®šæœ€ä½³å‚æ•°è¡¨å,è®­ç»ƒéªŒè¯åˆ†è£‚æœ€åä½¿ç”¨æœ€ä½³å‚æ•°è¡¨åŸºäºå…¨éƒ¨æ•°æ®æ¥é‡æ–°æ‹Ÿåˆä¼°è®¡å™¨
  */
 object TrainValidationSplitExample {
 
@@ -45,49 +45,49 @@ object TrainValidationSplitExample {
     import sqlContext.implicits._
 
     // Prepare training and test data.
-    // ×¼±¸ÅàÑµºÍ²âÊÔÊı¾İ
+    // å‡†å¤‡åŸ¹è®­å’Œæµ‹è¯•æ•°æ®
     val data = MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt").toDF()
-   // ½«Êı¾İËæ»ú·ÖÅäÎªÁ½·İ,Ò»·İÓÃÓÚÑµÁ·,Ò»·İÓÃÓÚ²âÊÔ
+   // å°†æ•°æ®éšæœºåˆ†é…ä¸ºä¸¤ä»½,ä¸€ä»½ç”¨äºè®­ç»ƒ,ä¸€ä»½ç”¨äºæµ‹è¯•
     val Array(training, test) = data.randomSplit(Array(0.9, 0.1), seed = 12345)
-   //ÏßĞÔ»Ø¹é
+   //çº¿æ€§å›å½’
     val lr = new LinearRegression()
 
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
-    //ÎÒÃÇÓÃÒ»¸öparamgridbuilder¹¹½¨Íø¸ñ²ÎÊıËÑË÷
+    //æˆ‘ä»¬ç”¨ä¸€ä¸ªparamgridbuilderæ„å»ºç½‘æ ¼å‚æ•°æœç´¢
     // TrainValidationSplit will try all combinations of values and determine best model using
     // the evaluator.
-    //trainvalidationsplit½«³¢ÊÔËùÓĞµÄ×éºÏºÍÊ¹ÓÃÆÀ¹ÀÖµÈ·¶¨×î¼ÑÄ£ĞÍ
-    //ParamGridBuilder¹¹½¨´ıÑ¡²ÎÊı(Èç:logistic regressionµÄregParam)
+    //trainvalidationsplitå°†å°è¯•æ‰€æœ‰çš„ç»„åˆå’Œä½¿ç”¨è¯„ä¼°å€¼ç¡®å®šæœ€ä½³æ¨¡å‹
+    //ParamGridBuilderæ„å»ºå¾…é€‰å‚æ•°(å¦‚:logistic regressionçš„regParam)
     val paramGrid = new ParamGridBuilder()
       .addGrid(lr.regParam, Array(0.1, 0.01))
-      //ÊÇ·ñÑµÁ·À¹½Ø¶ÔÏó
+      //æ˜¯å¦è®­ç»ƒæ‹¦æˆªå¯¹è±¡
       .addGrid(lr.fitIntercept, Array(true, false))
-      //µ¯ĞÔÍøÂç»ìºÏ²ÎÊı,0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
+      //å¼¹æ€§ç½‘ç»œæ··åˆå‚æ•°,0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
       .addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0))
       .build()
 
     // In this case the estimator is simply the linear regression.
-    //ÔÚÕâÖÖÇé¿öÏÂ,¹À¼ÆÊÇ¼òµ¥µÄÏßĞÔ»Ø¹é
+    //åœ¨è¿™ç§æƒ…å†µä¸‹,ä¼°è®¡æ˜¯ç®€å•çš„çº¿æ€§å›å½’
     // A TrainValidationSplit requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
-    //Ò»¸ötrainvalidationsplitĞèÒª¹À¼Æ,Ò»Ì×¹À¼Æparammaps,ºÍÆÀ¹À
-    val trainValidationSplit = new TrainValidationSplit()//À´×öÄ£ĞÍ³¬²ÎÊıÓÅ»¯
-      .setEstimator(lr)//ÆÀ¹ÀÆ÷»òÊÊÅäÆ÷
-      .setEvaluator(new RegressionEvaluator)//ÆÀ¹ÀÆ÷»òÊÊÅäÆ÷
+    //ä¸€ä¸ªtrainvalidationsplitéœ€è¦ä¼°è®¡,ä¸€å¥—ä¼°è®¡parammaps,å’Œè¯„ä¼°
+    val trainValidationSplit = new TrainValidationSplit()//æ¥åšæ¨¡å‹è¶…å‚æ•°ä¼˜åŒ–
+      .setEstimator(lr)//è¯„ä¼°å™¨æˆ–é€‚é…å™¨
+      .setEvaluator(new RegressionEvaluator)//è¯„ä¼°å™¨æˆ–é€‚é…å™¨
       .setEstimatorParamMaps(paramGrid)
 
     // 80% of the data will be used for training and the remaining 20% for validation.
-    //80%µÄÊı¾İ½«ÓÃÓÚÑµÁ·ºÍÊ£ÓàµÄ20%½øĞĞÑéÖ¤
+    //80%çš„æ•°æ®å°†ç”¨äºè®­ç»ƒå’Œå‰©ä½™çš„20%è¿›è¡ŒéªŒè¯
     trainValidationSplit.setTrainRatio(0.8)//
 
     // Run train validation split, and choose the best set of parameters.
-    //ÔËĞĞÑµÁ·ÑéÖ¤²ğ·Ö,²¢Ñ¡Ôñ×î¼ÑµÄ²ÎÊı¼¯
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //è¿è¡Œè®­ç»ƒéªŒè¯æ‹†åˆ†,å¹¶é€‰æ‹©æœ€ä½³çš„å‚æ•°é›†
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = trainValidationSplit.fit(training)
 
     // Make predictions on test data. model is the model with combination of parameters
-    //¶Ô²âÊÔÊı¾İ½øĞĞÔ¤²â,Ä£ĞÍÊÇ×îÓÅµÄ²ÎÊı×éºÏµÄÄ£ĞÍ
+    //å¯¹æµ‹è¯•æ•°æ®è¿›è¡Œé¢„æµ‹,æ¨¡å‹æ˜¯æœ€ä¼˜çš„å‚æ•°ç»„åˆçš„æ¨¡å‹
     // that performed best.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     /**
       +--------------------+-----+--------------------+
       |            features|label|          prediction|

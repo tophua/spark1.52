@@ -25,7 +25,7 @@ import org.apache.spark.SparkContext._
 
 /**
   * Usage: GroupByTest [numMappers] [numKVPairs] [KeySize] [numReducers]
-  * 
+  *
   */
 object SkewedGroupByTest {
   def main(args: Array[String]) {
@@ -41,7 +41,7 @@ object SkewedGroupByTest {
       val ranGen = new Random
 
       // map output sizes lineraly increase from the 1st to the last
-      //mapÊä³öµÄ´óĞ¡ÏßĞÔÔö¼Ó´ÓµÚÒ»µ½×îºó
+      //mapè¾“å‡ºçš„å¤§å°çº¿æ€§å¢åŠ ä»ç¬¬ä¸€åˆ°æœ€å
       numKVPairs = (1.0 * (p + 1) / numMappers * numKVPairs).toInt
 
       var arr1 = new Array[(Int, Array[Byte])](numKVPairs)
@@ -53,7 +53,7 @@ object SkewedGroupByTest {
       arr1
     }.cache()
     // Enforce that everything has been calculated and in cache
-    //Ö´ĞĞËùÓĞµÄ¼ÆËãºÍ»º´æ
+    //æ‰§è¡Œæ‰€æœ‰çš„è®¡ç®—å’Œç¼“å­˜
     pairs1.count()
 
     println(pairs1.groupByKey(numReducers).count())

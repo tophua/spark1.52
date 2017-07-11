@@ -23,15 +23,15 @@ import java.util.Random
 import breeze.linalg.{Vector, DenseVector}
 
 /**
- * Logistic regression based classification.
- * »ùÓÚÂß¼­»Ø¹éµÄ·ÖÀà
- * This is an example implementation for learning how to use Spark. For more conventional use,
- * ÕâÊÇÒ»¸öÑ§Ï°ÈçºÎÊ¹ÓÃSparkµÄÀı×ÓÊµÏÖ,Îª¸ü´«Í³µÄÊ¹ÓÃ,LogisticRegressionWithSGD(SGDËæ»úÌİ¶ÈÏÂ½µ)
- * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD or
- * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨) based on your needs.
- */
+  * Logistic regression based classification.
+  * åŸºäºé€»è¾‘å›å½’çš„åˆ†ç±»
+  * This is an example implementation for learning how to use Spark. For more conventional use,
+  * è¿™æ˜¯ä¸€ä¸ªå­¦ä¹ å¦‚ä½•ä½¿ç”¨Sparkçš„ä¾‹å­å®ç°,ä¸ºæ›´ä¼ ç»Ÿçš„ä½¿ç”¨,LogisticRegressionWithSGD(SGDéšæœºæ¢¯åº¦ä¸‹é™)
+  * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD or
+  * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•) based on your needs.
+  */
 object LocalFileLR {
-  val D = 10   // Numer of dimensions Î¬¶È
+  val D = 10   // Numer of dimensions ç»´åº¦
   val rand = new Random(42)
 
   case class DataPoint(x: Vector[Double], y: Double)
@@ -45,7 +45,7 @@ object LocalFileLR {
     System.err.println(
       """WARN: This is a naive implementation of Logistic Regression and is given as an example!
         |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD or
-        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨)
+        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•)
         |for more conventional use.
       """.stripMargin)
   }
@@ -59,7 +59,7 @@ object LocalFileLR {
     val ITERATIONS = args(1).toInt
 
     // Initialize w to a random value
-    //³õÊ¼»¯Wµ½Ò»¸öËæ»úÖµ
+    //åˆå§‹åŒ–Wåˆ°ä¸€ä¸ªéšæœºå€¼
     var w = DenseVector.fill(D){2 * rand.nextDouble - 1}
     println("Initial w: " + w)
 

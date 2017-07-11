@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 import org.apache.spark.Logging
 
 /**
- * ×Ô¼º¶¨ÒåÁËÒ»¸ö Scala Àà ImageInputDStream,ÓÃÓÚ¼ÓÔØ JavaµÄ¶ÁÈëÍ¼Æ¬Àà
+ * è‡ªå·±å®šä¹‰äº†ä¸€ä¸ª Scala ç±» ImageInputDStream,ç”¨äºåŠ è½½ Javaçš„è¯»å…¥å›¾ç‰‡ç±»
   * Created by wallace on 2016/10/31.
   */
 class ImageInputDStream(@transient ssc_ : StreamingContext, host: String, port:

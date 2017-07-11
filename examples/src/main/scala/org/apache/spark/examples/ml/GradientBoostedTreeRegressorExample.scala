@@ -29,8 +29,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * GBTÖ»ÊÊÓÃÓÚ¶ş·ÖÀàºÍ»Ø¹é,²»Ö§³Ö¶à·ÖÀà,ÔÚÔ¤²âµÄÊ±ºò,
- * ²»ÏñËæ»úÉ­ÁÖÄÇÑùÇóÆ½¾ùÖµ,GBTÊÇ½«ËùÓĞÊ÷µÄÔ¤²âÖµÏà¼ÓÇóºÍ
+ * GBTåªé€‚ç”¨äºäºŒåˆ†ç±»å’Œå›å½’,ä¸æ”¯æŒå¤šåˆ†ç±»,åœ¨é¢„æµ‹çš„æ—¶å€™,
+ * ä¸åƒéšæœºæ£®æ—é‚£æ ·æ±‚å¹³å‡å€¼,GBTæ˜¯å°†æ‰€æœ‰æ ‘çš„é¢„æµ‹å€¼ç›¸åŠ æ±‚å’Œ
  */
 object GradientBoostedTreeRegressorExample {
   def main(args: Array[String]): Unit = {
@@ -43,11 +43,11 @@ object GradientBoostedTreeRegressorExample {
     // $example on$
     // Load and parse the data file, converting it to a DataFrame.
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     //val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
     import org.apache.spark.mllib.util.MLUtils
@@ -55,34 +55,34 @@ object GradientBoostedTreeRegressorExample {
     val data=sqlContext.createDataFrame(dataSVM)
     // Automatically identify categorical features, and index them.
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
-    //VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+    //VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
-      .setMaxCategories(4)//×î´óÀà±ğÊıÎª5,(¼´Ä³Ò»ÁĞ)ÖĞ¶àÓÚ4¸öÈ¡ÖµÊÓÎªÁ¬ĞøÖµ,²»¸øÓè×ª»»
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .setMaxCategories(4)//æœ€å¤§ç±»åˆ«æ•°ä¸º5,(å³æŸä¸€åˆ—)ä¸­å¤šäº4ä¸ªå–å€¼è§†ä¸ºè¿ç»­å€¼,ä¸ç»™äºˆè½¬æ¢
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
 
     // Split the data into training and test sets (30% held out for testing).
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a GBT model.
     val gbt = new GBTRegressor()
-      .setLabelCol("label")//±êÇ©ÁĞÃû
-      .setFeaturesCol("indexedFeatures")//ÌØÕ÷ÁĞ
-      .setMaxIter(10)//µü´ú´ÎÊı
+      .setLabelCol("label")//æ ‡ç­¾åˆ—å
+      .setFeaturesCol("indexedFeatures")//ç‰¹å¾åˆ—
+      .setMaxIter(10)//è¿­ä»£æ¬¡æ•°
 
     // Chain indexer and GBT in a Pipeline.
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(featureIndexer, gbt))
 
     // Train model. This also runs the indexer.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(trainingData)
 
     // Make predictions.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(testData)
 
     // Select example rows to display.
@@ -101,13 +101,13 @@ object GradientBoostedTreeRegressorExample {
 
     // Select (prediction, true label) and compute test error.
     val evaluator = new RegressionEvaluator()
-      .setLabelCol("label")//±êÇ©ÁĞÃû
-      //Ô¤²â½á¹ûÁĞÃû
+      .setLabelCol("label")//æ ‡ç­¾åˆ—å
+      //é¢„æµ‹ç»“æœåˆ—å
       .setPredictionCol("prediction")
-       //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+       //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
       .setMetricName("rmse")
     val rmse = evaluator.evaluate(predictions)
-     //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+     //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     println("Root Mean Squared Error (RMSE) on test data = " + rmse)
 
     val gbtModel = model.stages(1).asInstanceOf[GBTRegressionModel]

@@ -27,15 +27,15 @@ import breeze.linalg.{Vector, DenseVector}
 import org.apache.spark._
 
 /**
- * Logistic regression based classification.
- * »ùÓÚÂß¼­»Ø¹éµÄ·ÖÀà
- * Usage: SparkLR [slices]
- *
- * This is an example implementation for learning how to use Spark. For more conventional use,
- * ÕâÊÇÒ»¸öÑ§Ï°ÈçºÎÊ¹ÓÃSparkµÄÀı×ÓÊµÏÖ,Îª¸ü´«Í³µÄÊ¹ÓÃ
- * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDËæ»úÌİ¶ÈÏÂ½µ) or
- * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨) based on your needs.
- */
+  * Logistic regression based classification.
+  * åŸºäºé€»è¾‘å›å½’çš„åˆ†ç±»
+  * Usage: SparkLR [slices]
+  *
+  * This is an example implementation for learning how to use Spark. For more conventional use,
+  * è¿™æ˜¯ä¸€ä¸ªå­¦ä¹ å¦‚ä½•ä½¿ç”¨Sparkçš„ä¾‹å­å®ç°,ä¸ºæ›´ä¼ ç»Ÿçš„ä½¿ç”¨
+  * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDéšæœºæ¢¯åº¦ä¸‹é™) or
+  * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•) based on your needs.
+  */
 object SparkLR {
   val N = 10000  // Number of data points
   val D = 10   // Numer of dimensions
@@ -57,8 +57,8 @@ object SparkLR {
   def showWarning() {
     System.err.println(
       """WARN: This is a naive implementation of Logistic Regression and is given as an example!
-        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDËæ»úÌİ¶ÈÏÂ½µ) or
-        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSÊÇÄæÖÈ2ÄâÅ£¶Ù·¨)
+        |Please use either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGDéšæœºæ¢¯åº¦ä¸‹é™) or
+        |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGSæ˜¯é€†ç§©2æ‹Ÿç‰›é¡¿æ³•)
         |for more conventional use.
       """.stripMargin)
   }

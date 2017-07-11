@@ -7,8 +7,8 @@ import org.apache.spark.mllib.linalg.distributed.BlockMatrix
 import org.apache.spark.mllib.linalg.distributed.IndexedRow
 import org.apache.spark.mllib.linalg.Vectors
 /**
-* ·Ö¿é¾ØÕó(BlockMatrix)ÊÇÓÉRDDÖ§³ÅµÄ·Ö²¼Ê½¾ØÕó,RDDÖĞµÄÔªËØÎªMatrixBlock,
-* MatrixBlockÊÇ¶à¸ö((Int, Int),Matrix)×é³ÉµÄÔª×é,ÆäÖĞ(Int,Int)ÊÇ·Ö¿éË÷Òı,MatriaxÊÇÖ¸¶¨Ë÷Òı´¦µÄ×Ó¾ØÕó
+* åˆ†å—çŸ©é˜µ(BlockMatrix)æ˜¯ç”±RDDæ”¯æ’‘çš„åˆ†å¸ƒå¼çŸ©é˜µ,RDDä¸­çš„å…ƒç´ ä¸ºMatrixBlock,
+* MatrixBlockæ˜¯å¤šä¸ª((Int, Int),Matrix)ç»„æˆçš„å…ƒç»„,å…¶ä¸­(Int,Int)æ˜¯åˆ†å—ç´¢å¼•,Matriaxæ˜¯æŒ‡å®šç´¢å¼•å¤„çš„å­çŸ©é˜µ
 */
 object BlockMatrixDemo {
   def main(args: Array[String]) {
@@ -22,17 +22,17 @@ object BlockMatrixDemo {
         Array(1.0, 20.0, 30.0, 40.0),
         Array(2.0, 50.0, 60.0, 70.0),
         Array(3.0, 80.0, 90.0, 100.0))).map(f =>{
-          //takeÈ¡Ç°n¸öÔªËØ dropÉáÆúÇ°n¸öÔªËØ
+          //takeå–å‰nä¸ªå…ƒç´  dropèˆå¼ƒå‰nä¸ªå…ƒç´ 
           //1.0|||20.0,30.0,40.0
           println(f.take(1)(0)+"|||"+f.drop(1).mkString(","))
           IndexedRow(f.take(1)(0), Vectors.dense(f.drop(1)))
         })
-    //Ë÷ÒıĞĞ¾ØÕó(IndexedRowMatrix)°´ĞĞ·Ö²¼Ê½´æ´¢,ÓĞĞĞË÷Òı,Æäµ×²ãÖ§³Å½á¹¹ÊÇË÷ÒıµÄĞĞ×é³ÉµÄRDD,ËùÒÔÃ¿ĞĞ¿ÉÒÔÍ¨¹ıË÷Òı(long)ºÍ¾Ö²¿ÏòÁ¿±íÊ¾
+    //ç´¢å¼•è¡ŒçŸ©é˜µ(IndexedRowMatrix)æŒ‰è¡Œåˆ†å¸ƒå¼å­˜å‚¨,æœ‰è¡Œç´¢å¼•,å…¶åº•å±‚æ”¯æ’‘ç»“æ„æ˜¯ç´¢å¼•çš„è¡Œç»„æˆçš„RDD,æ‰€ä»¥æ¯è¡Œå¯ä»¥é€šè¿‡ç´¢å¼•(long)å’Œå±€éƒ¨å‘é‡è¡¨ç¤º
     val indexRowMatrix = new IndexedRowMatrix(rdd1)
-    //½«IndexedRowMatrix×ª»»³ÉBlockMatrix,Ö¸¶¨Ã¿¿éµÄĞĞÁĞÊı
+    //å°†IndexedRowMatrixè½¬æ¢æˆBlockMatrix,æŒ‡å®šæ¯å—çš„è¡Œåˆ—æ•°
     val blockMatrix: BlockMatrix = indexRowMatrix.toBlockMatrix(2, 2)
 
-    //Ö´ĞĞºóµÄ´òÓ¡ÄÚÈİ£º
+    //æ‰§è¡Œåçš„æ‰“å°å†…å®¹ï¼š
     //Index:(0,0)MatrixContent:2 x 2 CSCMatrix
     //(1,0) 20.0
     //(1,1) 30.0
@@ -46,33 +46,33 @@ object BlockMatrixDemo {
     //(1,1) 90.0
     //Index:(0,1)MatrixContent:2 x 1 CSCMatrix
     //(1,0) 40.0
-    //´Ó´òÓ¡ÄÚÈİ¿ÉÒÔ¿´³ö£º¸÷·Ö¿é¾ØÕó²ÉÓÃµÄÊÇÏ¡Êè¾ØÕóCSC¸ñÊ½´æ´¢
+    //ä»æ‰“å°å†…å®¹å¯ä»¥çœ‹å‡ºï¼šå„åˆ†å—çŸ©é˜µé‡‡ç”¨çš„æ˜¯ç¨€ç–çŸ©é˜µCSCæ ¼å¼å­˜å‚¨
     blockMatrix.blocks.foreach(f => println("Index:" + f._1 + "MatrixContent:" + f._2))
 
-    //×ª»»³É±¾µØ¾ØÕó
+    //è½¬æ¢æˆæœ¬åœ°çŸ©é˜µ
     //0.0   0.0   0.0    
     //20.0  30.0  40.0   
     //50.0  60.0  70.0   
     //80.0  90.0  100.0 
-    //´Ó×ª»»ºóµÄÄÚÈİ¿ÉÒÔ¿´³ö,ÔÚindexRowMatrix.toBlockMatrix(2, 2)
-    //²Ù×÷Ê±,Ö¸¶¨ĞĞÁĞÊıÓëÊµ¼Ê¾ØÕóÄÚÈİ²»Æ¥ÅäÊ±,»á½øĞĞÏàÓ¦µÄÁãÖµÌî³ä
-    //LocalMatrix¾Ö²¿¾ØÕóÊ¹ÓÃÕûĞÍĞĞÁĞË÷ÒıºÍ¸¡µã(double)ÊıÖµ,´æ´¢ÔÚµ¥»úÉÏ
+    //ä»è½¬æ¢åçš„å†…å®¹å¯ä»¥çœ‹å‡º,åœ¨indexRowMatrix.toBlockMatrix(2, 2)
+    //æ“ä½œæ—¶,æŒ‡å®šè¡Œåˆ—æ•°ä¸å®é™…çŸ©é˜µå†…å®¹ä¸åŒ¹é…æ—¶,ä¼šè¿›è¡Œç›¸åº”çš„é›¶å€¼å¡«å……
+    //LocalMatrixå±€éƒ¨çŸ©é˜µä½¿ç”¨æ•´å‹è¡Œåˆ—ç´¢å¼•å’Œæµ®ç‚¹(double)æ•°å€¼,å­˜å‚¨åœ¨å•æœºä¸Š
     blockMatrix.toLocalMatrix()
 
-    //¿é¾ØÕóÏà¼Ó
+    //å—çŸ©é˜µç›¸åŠ 
     blockMatrix.add(blockMatrix)
 
-    //¿é¾ØÕóÏà³ËblockMatrix*blockMatrix^T£¨T±íÊ¾×ªÖÃ£©
+    //å—çŸ©é˜µç›¸ä¹˜blockMatrix*blockMatrix^Tï¼ˆTè¡¨ç¤ºè½¬ç½®ï¼‰
     blockMatrix.multiply(blockMatrix.transpose)
 
-    //×ª»»³ÉCoordinateMatrix
-    //CoordinateMatrix³£ÓÃÓÚÏ¡ÊèĞÔ±È½Ï¸ßµÄ¼ÆËãÖĞ,MatrixEntryÊÇÒ»¸ö TupleÀàĞÍµÄÔªËØ,ÆäÖĞ°üº¬ĞĞ¡¢ÁĞºÍÔªËØÖµ
+    //è½¬æ¢æˆCoordinateMatrix
+    //CoordinateMatrixå¸¸ç”¨äºç¨€ç–æ€§æ¯”è¾ƒé«˜çš„è®¡ç®—ä¸­,MatrixEntryæ˜¯ä¸€ä¸ª Tupleç±»å‹çš„å…ƒç´ ,å…¶ä¸­åŒ…å«è¡Œã€åˆ—å’Œå…ƒç´ å€¼
      blockMatrix.toCoordinateMatrix()
 
-    //×ª»»³ÉIndexedRowMatrix
+    //è½¬æ¢æˆIndexedRowMatrix
     blockMatrix.toIndexedRowMatrix()
 
-    //ÑéÖ¤·Ö¿é¾ØÕóµÄºÏ·¨ĞÔ
+    //éªŒè¯åˆ†å—çŸ©é˜µçš„åˆæ³•æ€§
     blockMatrix.validate()
   }
 }

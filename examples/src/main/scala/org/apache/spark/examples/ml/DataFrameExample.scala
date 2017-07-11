@@ -42,11 +42,11 @@ import org.apache.spark.mllib.util.MLUtils
  */
 object DataFrameExample {
 /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
   case class Params(input: String = "../data/mllib/sample_libsvm_data.txt")
     extends AbstractParams[Params]
@@ -86,13 +86,13 @@ object DataFrameExample {
      
     val df: DataFrame = sqlContext.createDataFrame(dataSVM).cache()
     println("Schema from LIBSVM:")
-    //´òÓ¡RDDÖĞÊı¾İµÄ±íÄ£Ê½
+    //æ‰“å°RDDä¸­æ•°æ®çš„è¡¨æ¨¡å¼
     df.printSchema()
     //Loaded training data as a DataFrame with 100 records.
     println(s"Loaded training data as a DataFrame with ${df.count()} records.")
 
     // Show statistical summary of labels.
-    //ÏÔÊ¾±êÇ©Í³¼Æ»ã×Ü
+    //æ˜¾ç¤ºæ ‡ç­¾ç»Ÿè®¡æ±‡æ€»
     val labelSummary = df.describe("label")
     /**+-------+------------------+
       *|summary|             label|
@@ -106,7 +106,7 @@ object DataFrameExample {
     labelSummary.show()
 
     // Convert features column to an RDD of vectors.
-    //×ª»»ÌØÕ÷ÁĞÏòÁ¿·¨
+    //è½¬æ¢ç‰¹å¾åˆ—å‘é‡æ³•
     val features = df.select("features").rdd.map { case Row(v: Vector) => v }
    // val featureSummary = features.aggregate(new MultivariateOnlineSummarizer())(
       //(summary, feat) => summary.add(Vectors.fromML(feat)),
@@ -114,7 +114,7 @@ object DataFrameExample {
    // println(s"Selected features column with average values:\n ${featureSummary.mean.toString}")
 
     // Save the records in a parquet file.
-     //±£´æparquet¼ÇÂ¼ÎÄ¼ş
+     //ä¿å­˜parquetè®°å½•æ–‡ä»¶
     val tmpDir = Utils.createTempDir()
     //C:\Users\liushuhua\AppData\Local\Temp\spark-f97fb832-d864-4855-ac6c-d38564a04de5\dataframe
     val outputDir = new File(tmpDir, "dataframe").toString
@@ -122,11 +122,11 @@ object DataFrameExample {
     df.write.parquet(outputDir)
 
     // Load the records back.
-    //ÖØĞÂ¼ÓÔØÊı¾İ
+    //é‡æ–°åŠ è½½æ•°æ®
     println(s"Loading Parquet file with UDT from $outputDir.")
     val newDF = sqlContext.read.parquet(outputDir)
     println(s"Schema from Parquet:")
-    //´òÓ¡RDDÖĞÊı¾İµÄ±íÄ£Ê½
+    //æ‰“å°RDDä¸­æ•°æ®çš„è¡¨æ¨¡å¼
     newDF.printSchema()
 
     sc.stop()

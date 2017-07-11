@@ -29,8 +29,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * Word2vecÊÇÒ»¸öEstimator,Ëü²ÉÓÃÒ»ÏµÁĞ´ú±íÎÄµµµÄ´ÊÓïÀ´ÑµÁ·word2vecmodel,¸ÃÄ£ĞÍ½«Ã¿¸ö´ÊÓïÓ³Éäµ½Ò»¸ö¹Ì¶¨´óĞ¡µÄÏòÁ¿
- * word2vecmodelÊ¹ÓÃÎÄµµÖĞÃ¿¸ö´ÊÓïµÄÆ½¾ùÊıÀ´½«ÎÄµµ×ª»»ÎªÏòÁ¿,È»ºóÕâ¸öÏòÁ¿¿ÉÒÔ×÷ÎªÔ¤²âµÄÌØÕ÷,À´¼ÆËãÎÄµµÏàËÆ¶È¼ÆËãµÈµÈ
+ * Word2vecæ˜¯ä¸€ä¸ªEstimator,å®ƒé‡‡ç”¨ä¸€ç³»åˆ—ä»£è¡¨æ–‡æ¡£çš„è¯è¯­æ¥è®­ç»ƒword2vecmodel,è¯¥æ¨¡å‹å°†æ¯ä¸ªè¯è¯­æ˜ å°„åˆ°ä¸€ä¸ªå›ºå®šå¤§å°çš„å‘é‡
+ * word2vecmodelä½¿ç”¨æ–‡æ¡£ä¸­æ¯ä¸ªè¯è¯­çš„å¹³å‡æ•°æ¥å°†æ–‡æ¡£è½¬æ¢ä¸ºå‘é‡,ç„¶åè¿™ä¸ªå‘é‡å¯ä»¥ä½œä¸ºé¢„æµ‹çš„ç‰¹å¾,æ¥è®¡ç®—æ–‡æ¡£ç›¸ä¼¼åº¦è®¡ç®—ç­‰ç­‰
  */
 object Word2VecExample {
   def main(args: Array[String]) {
@@ -40,8 +40,8 @@ object Word2VecExample {
     import sqlContext.implicits._
     // $example on$
     /**
-     * ÎÒÃÇÊ×ÏÈÓÃÒ»×éÎÄµµ,ÆäÖĞÃ¿Ò»¸öÎÄµµ´ú±íÒ»¸ö´ÊÓïĞòÁĞ¡£¶ÔÓÚÃ¿Ò»¸öÎÄµµ,ÎÒÃÇ½«Æä×ª»»ÎªÒ»¸öÌØÕ÷ÏòÁ¿¡£
-     * ´ËÌØÕ÷ÏòÁ¿¿ÉÒÔ±»´«µİµ½Ò»¸öÑ§Ï°Ëã·¨¡£
+     * æˆ‘ä»¬é¦–å…ˆç”¨ä¸€ç»„æ–‡æ¡£,å…¶ä¸­æ¯ä¸€ä¸ªæ–‡æ¡£ä»£è¡¨ä¸€ä¸ªè¯è¯­åºåˆ—ã€‚å¯¹äºæ¯ä¸€ä¸ªæ–‡æ¡£,æˆ‘ä»¬å°†å…¶è½¬æ¢ä¸ºä¸€ä¸ªç‰¹å¾å‘é‡ã€‚
+     * æ­¤ç‰¹å¾å‘é‡å¯ä»¥è¢«ä¼ é€’åˆ°ä¸€ä¸ªå­¦ä¹ ç®—æ³•ã€‚
      */
     // Input data: Each row is a bag of words from a sentence or document.
     val documentDF = sqlContext.createDataFrame(Seq(
@@ -51,15 +51,15 @@ object Word2VecExample {
     ).map(Tuple1.apply)).toDF("text")
 
     // Learn a mapping from words to Vectors.
-    //word2vecmodelÊ¹ÓÃÎÄµµÖĞÃ¿¸ö´ÊÓïµÄÆ½¾ùÊıÀ´½«ÎÄµµ×ª»»ÎªÏòÁ¿,È»ºóÕâ¸öÏòÁ¿¿ÉÒÔ×÷ÎªÔ¤²âµÄÌØÕ÷,À´¼ÆËãÎÄµµÏàËÆ¶È¼ÆËãµÈµÈ
+    //word2vecmodelä½¿ç”¨æ–‡æ¡£ä¸­æ¯ä¸ªè¯è¯­çš„å¹³å‡æ•°æ¥å°†æ–‡æ¡£è½¬æ¢ä¸ºå‘é‡,ç„¶åè¿™ä¸ªå‘é‡å¯ä»¥ä½œä¸ºé¢„æµ‹çš„ç‰¹å¾,æ¥è®¡ç®—æ–‡æ¡£ç›¸ä¼¼åº¦è®¡ç®—ç­‰ç­‰
     val word2Vec = new Word2Vec()
       .setInputCol("text")
       .setOutputCol("result")
       .setVectorSize(3)
       .setMinCount(0)
-     //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+     //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = word2Vec.fit(documentDF)
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val result = model.transform(documentDF)
     /**
       +--------------------+--------------------+

@@ -52,14 +52,14 @@ object StringIndexerExample {
     *|  4|       a|          0.0|
     *|  5|       c|          1.0|
     *+---+--------+-------------+
-     * 1)°´ÕÕ category ³öÏÖµÄÆµ´Î¶ÔÆä½øĞĞĞòÁĞ±àÂë,°´ÉıĞòÅÅĞò,a³ö´Î3´ÎÎª0,c³öÏÖ2´ÎÎª1,b³öÏÖ1´ÎÎª2
-     * 2)fit·½·¨Éè¼ÆºÍÊµÏÖÉÏÊµ¼ÊÉÏÊÇ²ÉÓÃÁËÄ£°å·½·¨µÄÉè¼ÆÄ£Ê½,¾ßÌå»áµ÷ÓÃÊµÏÖÀàµÄ train·½·¨
+     * 1)æŒ‰ç…§ category å‡ºç°çš„é¢‘æ¬¡å¯¹å…¶è¿›è¡Œåºåˆ—ç¼–ç ,æŒ‰å‡åºæ’åº,aå‡ºæ¬¡3æ¬¡ä¸º0,cå‡ºç°2æ¬¡ä¸º1,bå‡ºç°1æ¬¡ä¸º2
+     * 2)fitæ–¹æ³•è®¾è®¡å’Œå®ç°ä¸Šå®é™…ä¸Šæ˜¯é‡‡ç”¨äº†æ¨¡æ¿æ–¹æ³•çš„è®¾è®¡æ¨¡å¼,å…·ä½“ä¼šè°ƒç”¨å®ç°ç±»çš„ trainæ–¹æ³•
      */
     val indexer = new StringIndexer()
       .setInputCol("category")
       .setOutputCol("categoryIndex")
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val indexed = indexer.fit(df).transform(df)
     indexed.show()
     // $example off$

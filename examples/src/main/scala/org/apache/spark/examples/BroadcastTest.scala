@@ -22,13 +22,13 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Usage: BroadcastTest [slices] [numElem] [broadcastAlgo] [blockSize]
-  * Ê¹ÓÃ:¹ã²¥²âÊÔ  [·ÖÆ¬] [ÔªËØÊý] [¹ã²¥Ëã·¨] [¿éµÄ´óÐ¡]
+  * ä½¿ç”¨:å¹¿æ’­æµ‹è¯•  [åˆ†ç‰‡] [å…ƒç´ æ•°] [å¹¿æ’­ç®—æ³•] [å—çš„å¤§å°]
   */
 object BroadcastTest {
   def main(args: Array[String]) {
 
     val bcName = if (args.length > 2) args(2) else "Http"
-    val blockSize = if (args.length > 3) args(3) else "4096" //4Õ××Ö½Ú
+    val blockSize = if (args.length > 3) args(3) else "4096" //4å…†å­—èŠ‚
 
     val sparkConf = new SparkConf().setAppName("Broadcast Test").setMaster("local")
       .set("spark.broadcast.factory", s"org.apache.spark.broadcast.${bcName}BroadcastFactory")
@@ -43,14 +43,14 @@ object BroadcastTest {
     for (i <- 0 until 3) {
       println("Iteration " + i)
       println("===========")
-      val startTime = System.nanoTime  //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+      val startTime = System.nanoTime  //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
       val barr1 = sc.broadcast(arr1)
       val observedSizes = sc.parallelize(1 to 10, slices).map(_ => barr1.value.size)
       // Collect the small RDD so we can print the observed sizes locally.
-      //ÊÕ¼¯Ð¡RDD¿ÉÒÔ´òÓ¡³ß´çµÄ±¾µØ¹Û²ì
-      observedSizes.collect().foreach(i => println(i))  
+      //æ”¶é›†å°RDDå¯ä»¥æ‰“å°å°ºå¯¸çš„æœ¬åœ°è§‚å¯Ÿ
+      observedSizes.collect().foreach(i => println(i))
       //1E6==1000000.0
-      println("Iteration %d took %.0f milliseconds(ºÁÃë)".format(i, (System.nanoTime - startTime) / 1E6))
+      println("Iteration %d took %.0f milliseconds(æ¯«ç§’)".format(i, (System.nanoTime - startTime) / 1E6))
     }
 
     sc.stop()

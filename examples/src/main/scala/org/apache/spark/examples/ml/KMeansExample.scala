@@ -25,9 +25,9 @@ import org.apache.spark.sql.types.{StructField, StructType}
 
 
 /**
- * ¾ÛÀà,K¾ùÖµ
+ * èšç±»,Kå‡å€¼
  * An example demonstrating a k-means clustering.
- * Ò»¸öÕ¹Ê¾k-¾ùÖµ¾ÛÀàµÄÀı×Ó
+ * ä¸€ä¸ªå±•ç¤ºk-å‡å€¼èšç±»çš„ä¾‹å­
  * Run with
  * {{{
  * bin/run-example ml.KMeansExample <file> <k>
@@ -48,27 +48,27 @@ object KMeansExample {
     val k = 2
 
     // Creates a Spark context and a SQL context
-    //´´½¨Ò»¸öSparkÉÏÏÂÎÄºÍSQLÉÏÏÂÎÄ
+    //åˆ›å»ºä¸€ä¸ªSparkä¸Šä¸‹æ–‡å’ŒSQLä¸Šä¸‹æ–‡
     val conf = new SparkConf().setAppName(s"${this.getClass.getSimpleName}").setMaster("local[*]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
-    //¼ÓÔØºÍ½âÎöÊı¾İÎÄ¼ş
+    //åŠ è½½å’Œè§£ææ•°æ®æ–‡ä»¶
     // Loads data
     val rowRDD = sc.textFile(input).filter(_.nonEmpty)
-    //´´½¨ÃÜ¼¯ĞÍ¾ØÕó,µÃµ½Ã¿ĞĞÊı¾İ 
+    //åˆ›å»ºå¯†é›†å‹çŸ©é˜µ,å¾—åˆ°æ¯è¡Œæ•°æ® 
       .map(_.split(" ").map(_.toDouble)).map(Vectors.dense).map(Row(_))
-    //´´½¨×Ö¶ÎÃûfeatures,ÀàĞÍÊÇVectorUDT,ÏòÁ¿×Ô¶¨ÒåÀàĞÍ
+    //åˆ›å»ºå­—æ®µåfeatures,ç±»å‹æ˜¯VectorUDT,å‘é‡è‡ªå®šä¹‰ç±»å‹
     val schema = StructType(Array(StructField(FEATURES_COL, new VectorUDT, false)))
     val dataset = sqlContext.createDataFrame(rowRDD, schema)
-    //ÑµÁ·Ò»¸ök-¾ùÖµÄ£ĞÍ
+    //è®­ç»ƒä¸€ä¸ªk-å‡å€¼æ¨¡å‹
     // Trains a k-means model
     val kmeans = new KMeans()
-      .setK(k)//¾ÛÀà´ØÊı
-      .setFeaturesCol(FEATURES_COL)//ÌØÕ÷ÁĞÃû
-      //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .setK(k)//èšç±»ç°‡æ•°
+      .setFeaturesCol(FEATURES_COL)//ç‰¹å¾åˆ—å
+      //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = kmeans.fit(dataset)
 
-    // Shows the result ÏÔÊ¾½á¹û
+    // Shows the result æ˜¾ç¤ºç»“æœ
     // scalastyle:off println
         println("Final Centers: ")
     /**
@@ -76,7 +76,7 @@ object KMeansExample {
      *   [4.6,4.6,4.6]
      *   [17.7,18.03333333333333,19.333333333333332]
      */
-    //¾ÛÀàÖĞĞÄµã
+    //èšç±»ä¸­å¿ƒç‚¹
     model.clusterCenters.foreach(println)
     // scalastyle:on println
 

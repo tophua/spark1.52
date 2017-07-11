@@ -23,11 +23,11 @@ import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.mllib.linalg.Vectors
 
 /**
- * ½µÎ¬Ö÷³É·Ö·ÖÎö(PCA)
+ * é™ç»´ä¸»æˆåˆ†åˆ†æ(PCA)
  * Compute the principal components of a tall-and-skinny matrix, whose rows are observations.
- * ¼ÆËãÒ»¸öÖ÷³É·ÖÎöÓÖ¸ßÓÖÊİµÄ¾ØÕó,¹Û²ìĞĞÖµ
+ * è®¡ç®—ä¸€ä¸ªä¸»æˆåˆ†æåˆé«˜åˆç˜¦çš„çŸ©é˜µ,è§‚å¯Ÿè¡Œå€¼
  * The input matrix must be stored in row-oriented dense format, one line per row with its entries
- * ÊäÈë¾ØÕó±ØĞëÒÔĞĞÎªµ¼ÏòµÄÃÜ¼¯¸ñÊ½´æ´¢,Ã¿ĞĞÒ»ĞĞµÄÌõÄ¿ÓÉ¿Õ¸ñ¸ô¿ª
+ * è¾“å…¥çŸ©é˜µå¿…é¡»ä»¥è¡Œä¸ºå¯¼å‘çš„å¯†é›†æ ¼å¼å­˜å‚¨,æ¯è¡Œä¸€è¡Œçš„æ¡ç›®ç”±ç©ºæ ¼éš”å¼€
  * separated by space. For example,
  * {{{
  * 0.5 1.0
@@ -35,15 +35,15 @@ import org.apache.spark.mllib.linalg.Vectors
  * 4.0 5.0
  * }}}
  * represents a 3-by-2 matrix, whose first row is (0.5, 1.0).
- * ´ú±í3ĞĞ2ÁĞ¾ØÕó,µÚÒ»ĞĞÊÇ(0.5,1)
- * PCAËã·¨²½Öè:
- * ÉèÓĞmÌõnÎ¬Êı¾İ
- *   1)½«Ô­Ê¼Êı¾İ°´ÁĞ×é³ÉnĞĞmÁĞ¾ØÕóX
- *   2)½«XµÄÃ¿Ò»ĞĞ(´ú±íÒ»¸öÊôĞÔ×Ö¶Î)½øĞĞÁã¾ùÖµ»¯,¼´¼õÈ¥ÕâÒ»ĞĞµÄ¾ùÖµ
- *   3)Çó³öĞ­·½²î¾ØÕóC=\frac{1}{m}XX^\mathsf{T}
- *   4)Çó³öĞ­·½²î¾ØÕóµÄÌØÕ÷Öµ¼°¶ÔÓ¦µÄÌØÕ÷ÏòÁ¿
- *   5)½«ÌØÕ÷ÏòÁ¿°´¶ÔÓ¦ÌØÕ÷Öµ´óĞ¡´ÓÉÏµ½ÏÂ°´ĞĞÅÅÁĞ³É¾ØÕó,È¡Ç°kĞĞ×é³É¾ØÕóP
- *   6)Y=PX¼´Îª½µÎ¬µ½kÎ¬ºóµÄÊı¾İ
+ * ä»£è¡¨3è¡Œ2åˆ—çŸ©é˜µ,ç¬¬ä¸€è¡Œæ˜¯(0.5,1)
+ * PCAç®—æ³•æ­¥éª¤:
+ * è®¾æœ‰mæ¡nç»´æ•°æ®
+ *   1)å°†åŸå§‹æ•°æ®æŒ‰åˆ—ç»„æˆnè¡Œmåˆ—çŸ©é˜µX
+ *   2)å°†Xçš„æ¯ä¸€è¡Œ(ä»£è¡¨ä¸€ä¸ªå±æ€§å­—æ®µ)è¿›è¡Œé›¶å‡å€¼åŒ–,å³å‡å»è¿™ä¸€è¡Œçš„å‡å€¼
+ *   3)æ±‚å‡ºåæ–¹å·®çŸ©é˜µC=\frac{1}{m}XX^\mathsf{T}
+ *   4)æ±‚å‡ºåæ–¹å·®çŸ©é˜µçš„ç‰¹å¾å€¼åŠå¯¹åº”çš„ç‰¹å¾å‘é‡
+ *   5)å°†ç‰¹å¾å‘é‡æŒ‰å¯¹åº”ç‰¹å¾å€¼å¤§å°ä»ä¸Šåˆ°ä¸‹æŒ‰è¡Œæ’åˆ—æˆçŸ©é˜µ,å–å‰kè¡Œç»„æˆçŸ©é˜µP
+ *   6)Y=PXå³ä¸ºé™ç»´åˆ°kç»´åçš„æ•°æ®
  */
 object TallSkinnyPCA {
   def main(args: Array[String]) {
@@ -56,7 +56,7 @@ object TallSkinnyPCA {
     val sc = new SparkContext(conf)
 
     // Load and parse the data file.
-    //¼ÓÔØºÍ½âÎöÊı¾İÎÄ¼ş
+    //åŠ è½½å’Œè§£ææ•°æ®æ–‡ä»¶
     /**
      *{{{
      * 0.5 1.0
@@ -68,12 +68,12 @@ object TallSkinnyPCA {
       val values = line.split(' ').map(_.toDouble)
       Vectors.dense(values)
     }
-    //ĞĞ¾ØÕó(RowMatrix)°´ĞĞ·Ö²¼Ê½´æ´¢,ÎŞĞĞË÷Òı,µ×²ãÖ§³Å½á¹¹ÊÇ¶àĞĞÊı¾İ×é³ÉµÄRDD,Ã¿ĞĞÊÇÒ»¸ö¾Ö²¿ÏòÁ¿
+    //è¡ŒçŸ©é˜µ(RowMatrix)æŒ‰è¡Œåˆ†å¸ƒå¼å­˜å‚¨,æ— è¡Œç´¢å¼•,åº•å±‚æ”¯æ’‘ç»“æ„æ˜¯å¤šè¡Œæ•°æ®ç»„æˆçš„RDD,æ¯è¡Œæ˜¯ä¸€ä¸ªå±€éƒ¨å‘é‡
     val mat = new RowMatrix(rows)
     ///numCols:2
     println("numCols:"+mat.numCols())
     // Compute principal components.
-    //¼ÆËãÖ÷³É·Ö
+    //è®¡ç®—ä¸»æˆåˆ†
     val pc = mat.computePrincipalComponents(mat.numCols().toInt)
     /**  
       Principal components are:

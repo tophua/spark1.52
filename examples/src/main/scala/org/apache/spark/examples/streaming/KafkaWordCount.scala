@@ -28,15 +28,15 @@ import org.apache.spark.SparkConf
 
 /**
  * Consumes messages from one or more topics in Kafka and does wordcount.
- * ´Ó¿¨·ò¿¨ÖĞµÄÒ»¸ö»ò¶à¸öÖ÷ÌâÖĞÏûºÄÏûÏ¢,²¢¶Ôµ¥´Ê¼ÆÊı
+ * ä»å¡å¤«å¡ä¸­çš„ä¸€ä¸ªæˆ–å¤šä¸ªä¸»é¢˜ä¸­æ¶ˆè€—æ¶ˆæ¯,å¹¶å¯¹å•è¯è®¡æ•°
  * Usage: KafkaWordCount <zkQuorum> <group> <topics> <numThreads>
  *   <zkQuorum> is a list of one or more zookeeper servers that make quorum
- *   					  ÊÇÒ»¸ö»ò¶à¸özookeeper·şÎñÆ÷Ê¹ÓÃÊı,Ê¹ÓÃ¶ººÅ·Ö¸ô
- *   <group> is the name of kafka consumer group ÊÇ¿¨·ò¿¨Ïû·Ñ×éµÄÃû³Æ
+ *   					  æ˜¯ä¸€ä¸ªæˆ–å¤šä¸ªzookeeperæœåŠ¡å™¨ä½¿ç”¨æ•°,ä½¿ç”¨é€—å·åˆ†éš”
+ *   <group> is the name of kafka consumer group æ˜¯å¡å¤«å¡æ¶ˆè´¹ç»„çš„åç§°
  *   <topics> is a list of one or more kafka topics to consume from
- *   					ÊÇÒ»¸ö»ò¶à¸öKafka brokerµÄÁĞ±í(Ò»Ì¨kafka·şÎñÆ÷¾ÍÊÇÒ»¸öbroker),Ê¹ÓÃ¶ººÅ·Ö¸ô
+ *   					æ˜¯ä¸€ä¸ªæˆ–å¤šä¸ªKafka brokerçš„åˆ—è¡¨(ä¸€å°kafkaæœåŠ¡å™¨å°±æ˜¯ä¸€ä¸ªbroker),ä½¿ç”¨é€—å·åˆ†éš”
  *   <numThreads> is the number of threads the kafka consumer should use
- *   						  ÊÇkafkaÏû·ÑÕßÓ¦¸ÃÊ¹ÓÃµÄÏß³ÌÊı
+ *   						  æ˜¯kafkaæ¶ˆè´¹è€…åº”è¯¥ä½¿ç”¨çš„çº¿ç¨‹æ•°
  *
  * Example:
  *    `$ bin/run-example \
@@ -54,12 +54,12 @@ object KafkaWordCount {
 
     val Array(zkQuorum, group, topics, numThreads) = args
     val sparkConf = new SparkConf().setAppName("KafkaWordCount")
-    //Åú´Î¼ä¸ô
+    //æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(sparkConf, Seconds(2))
     ssc.checkpoint("checkpoint")
-    //numThreadsÏß³ÌÊı
+    //numThreadsçº¿ç¨‹æ•°
     val topicMap = topics.split(",").map((_, numThreads.toInt)).toMap
-    //zkQuorum zookeeper·şÎñÆ÷,group ¿¨·ò¿¨Ïû·Ñ×éµÄÃû³Æ,topicMap kafka·şÎñÆ÷
+    //zkQuorum zookeeperæœåŠ¡å™¨,group å¡å¤«å¡æ¶ˆè´¹ç»„çš„åç§°,topicMap kafkaæœåŠ¡å™¨
     val lines = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap).map(_._2)
     val words = lines.flatMap(_.split(" "))
     val wordCounts = words.map(x => (x, 1L))
@@ -72,7 +72,7 @@ object KafkaWordCount {
 }
 
 // Produces some random words between 1 and 100.
-//ÔÚ100µ½1Ö®¼ä²úÉúÒ»Ğ©Ëæ»úµÄµ¥´Ê
+//åœ¨100åˆ°1ä¹‹é—´äº§ç”Ÿä¸€äº›éšæœºçš„å•è¯
 object KafkaWordCountProducer {
 
   def main(args: Array[String]) {
@@ -84,7 +84,7 @@ object KafkaWordCountProducer {
 
     val Array(brokers, topic, messagesPerSec, wordsPerMessage) = args
 
-    // Zookeeper connection properties Á¬½ÓÊôĞÔ
+    // Zookeeper connection properties è¿æ¥å±æ€§
     val props = new HashMap[String, Object]()
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
@@ -94,7 +94,7 @@ object KafkaWordCountProducer {
 
     val producer = new KafkaProducer[String, String](props)
 
-    // Send some messages ·¢ËÍÒ»Ğ©ĞÅÏ¢
+    // Send some messages å‘é€ä¸€äº›ä¿¡æ¯
     while(true) {
       (1 to messagesPerSec.toInt).foreach { messageNum =>
         val str = (1 to wordsPerMessage.toInt).map(x => scala.util.Random.nextInt(10).toString)

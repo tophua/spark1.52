@@ -34,9 +34,9 @@ import org.apache.spark.sql.SQLContext
 import scala.beans.BeanInfo
 /**
  * A simple example demonstrating model selection using CrossValidator.
- * ÑÝÊ¾Ä£ÐÍÑ¡ÔñÊ¹ÓÃ½»²æÑéÖ¤Ò»¸ö¼òµ¥µÄÀý×Ó
+ * æ¼”ç¤ºæ¨¡åž‹é€‰æ‹©ä½¿ç”¨äº¤å‰éªŒè¯ä¸€ä¸ªç®€å•çš„ä¾‹å­
  * This example also demonstrates how Pipelines are Estimators.
- * Õâ¸öÀý×Ó»¹ÑÝÊ¾ÁËÈçºÎ¹ÜµÀ¹À¼Æ
+ * è¿™ä¸ªä¾‹å­è¿˜æ¼”ç¤ºäº†å¦‚ä½•ç®¡é“ä¼°è®¡
  * This example uses the [[LabeledDocument]] and [[Document]] case classes from
  * [[SimpleTextClassificationPipeline]].
  *
@@ -45,15 +45,15 @@ import scala.beans.BeanInfo
  * bin/run-example ml.CrossValidatorExample
  * }}}
  * 
- * CrossValidator½«Êý¾Ý¼¯»®·ÖÎªÈô¸É×Ó¼¯·Ö±ðµØ½øÐÐÑµÁ·ºÍ²âÊÔ¡£
- * Èçµ±k£½3Ê±,CrossValidator²úÉú3¸öÑµÁ·Êý¾ÝÓë²âÊÔÊý¾Ý¶Ô,Ã¿¸öÊý¾Ý¶ÔÊ¹ÓÃ2/3µÄÊý¾ÝÀ´ÑµÁ·,1/3µÄÊý¾ÝÀ´²âÊÔ¡£
+ * CrossValidatorå°†æ•°æ®é›†åˆ’åˆ†ä¸ºè‹¥å¹²å­é›†åˆ†åˆ«åœ°è¿›è¡Œè®­ç»ƒå’Œæµ‹è¯•ã€‚
+ * å¦‚å½“kï¼3æ—¶,CrossValidatoräº§ç”Ÿ3ä¸ªè®­ç»ƒæ•°æ®ä¸Žæµ‹è¯•æ•°æ®å¯¹,æ¯ä¸ªæ•°æ®å¯¹ä½¿ç”¨2/3çš„æ•°æ®æ¥è®­ç»ƒ,1/3çš„æ•°æ®æ¥æµ‹è¯•ã€‚
  */
 
 
 object CrossValidatorExample {
 /**
- * ÈçÏÂÃæÀý×ÓÖÐ,²ÎÊýÍø¸ñhashingTF.numFeaturesÓÐ3¸öÖµ,lr.regParamÓÐ2¸öÖµ,
- * CrossValidatorÊ¹ÓÃ2ÕÛ½»²æÑéÖ¤,ÕâÑù¾Í»á²úÉú(3*2)*2=12ÖÐ²»Í¬µÄÄ£ÐÍÐèÒª½øÐÐÑµÁ·
+ * å¦‚ä¸‹é¢ä¾‹å­ä¸­,å‚æ•°ç½‘æ ¼hashingTF.numFeaturesæœ‰3ä¸ªå€¼,lr.regParamæœ‰2ä¸ªå€¼,
+ * CrossValidatorä½¿ç”¨2æŠ˜äº¤å‰éªŒè¯,è¿™æ ·å°±ä¼šäº§ç”Ÿ(3*2)*2=12ä¸­ä¸åŒçš„æ¨¡åž‹éœ€è¦è¿›è¡Œè®­ç»ƒ
  */
   def main(args: Array[String]) {
     val conf = new SparkConf().setAppName("CrossValidatorExample").setMaster("local[4]")
@@ -62,9 +62,9 @@ object CrossValidatorExample {
     import sqlContext.implicits._
 
     // Prepare training documents, which are labeled.
-    //×¼±¸ÑµÁ·Êý¾Ý,id ÄÚÈÝ,±êÇ©
+    //å‡†å¤‡è®­ç»ƒæ•°æ®,id å†…å®¹,æ ‡ç­¾
     val training = sc.parallelize(Seq(
-      //id||ÄÚÈÝ||·ÖÀà±êÊ¶
+      //id||å†…å®¹||åˆ†ç±»æ ‡è¯†
       LabeledDocument(0L, "a b c d e spark", 1.0),
       LabeledDocument(1L, "b d", 0.0),
       LabeledDocument(2L, "spark f g h", 1.0),
@@ -79,59 +79,59 @@ object CrossValidatorExample {
       LabeledDocument(11L, "hadoop software", 0.0)))
 
     // Configure an ML pipeline, which consists of three stages: tokenizer, hashingTF, and lr.
-      //ÅäÖÃ»úÆ÷Ñ§Ï°¹ÜµÀ,ÓÉtokenizer, hashingTF, ºÍ lrÆÀ¹ÀÆ÷ ×é³É
-      //Tokenizer ½«·ÖºÃµÄ´Ê×ª»»ÎªÊý×é
+      //é…ç½®æœºå™¨å­¦ä¹ ç®¡é“,ç”±tokenizer, hashingTF, å’Œ lrè¯„ä¼°å™¨ ç»„æˆ
+      //Tokenizer å°†åˆ†å¥½çš„è¯è½¬æ¢ä¸ºæ•°ç»„
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
-      //ÌØÕ÷ÌáÈ¡ºÍ×ª»» TF-IDFËã·¨´ÓÎÄ±¾·Ö´ÊÖÐ´´½¨ÌØÕ÷ÏòÁ¿
-      //HashingTF ´ÓÒ»¸öÎÄµµÖÐ¼ÆËã³ö¸ø¶¨´óÐ¡µÄ´ÊÆµÏòÁ¿,
+      //ç‰¹å¾æå–å’Œè½¬æ¢ TF-IDFç®—æ³•ä»Žæ–‡æœ¬åˆ†è¯ä¸­åˆ›å»ºç‰¹å¾å‘é‡
+      //HashingTF ä»Žä¸€ä¸ªæ–‡æ¡£ä¸­è®¡ç®—å‡ºç»™å®šå¤§å°çš„è¯é¢‘å‘é‡,
       //"a a b b c d" HashingTF (262144,[97,98,99,100],[2.0,2.0,1.0,1.0])
     val hashingTF = new HashingTF()
       .setInputCol(tokenizer.getOutputCol)
       .setOutputCol("features")
-    //Âß¼­»Ø¹é
+    //é€»è¾‘å›žå½’
     val lr = new LogisticRegression()
       .setMaxIter(10)
-      //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-      //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+      //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+      //ä¸€ä¸ª Pipelineåœ¨ç»“æž„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // We now treat the Pipeline as an Estimator, wrapping it in a CrossValidator instance.
-    //ÏÖÔÚÎÒÃÇ°Ñ¹ÜµÀ¿´×ö³ÉÒ»¸öEstimator,°ÑËü°ü×°µ½CrossValidatorÊµÀýÖÐ
+    //çŽ°åœ¨æˆ‘ä»¬æŠŠç®¡é“çœ‹åšæˆä¸€ä¸ªEstimator,æŠŠå®ƒåŒ…è£…åˆ°CrossValidatorå®žä¾‹ä¸­
     // This will allow us to jointly choose parameters for all Pipeline stages.
-    //Õâ¿ÉÒÔÈÃÎÒÃÇÁ¬´øµÄÎª¹ÜµÀµÄËùÓÐstageÑ¡Ôñ²ÎÊý
+    //è¿™å¯ä»¥è®©æˆ‘ä»¬è¿žå¸¦çš„ä¸ºç®¡é“çš„æ‰€æœ‰stageé€‰æ‹©å‚æ•°
     // A CrossValidator requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.    
-    //CrossValidatorÐèÒªÒ»¸öEstimator,Ò»¸öÆÀ¹ÀÆ÷²ÎÊý¼¯ºÏ,ºÍÒ»¸öEvaluator
-    //×¢ÒâÕâÀïµÄevaluatorÊÇ¶þÔª·ÖÀàµÄBinaryClassificationEvaluator,ËüÄ¬ÈÏµÄ¶ÈÁ¿ÊÇareaUnderROC.
-     //ROCÆ½¾ùÖµ,±íÊ¾ÆÀ¹ÀÒ»¸öÍêÃÀµÄ·ÖÀàÆ÷
-    val crossval = new CrossValidator()//½»²æ
-      .setEstimator(pipeline)//Estimator:½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨Í¨¹ýÊµÏÖ
-      //¶þ·ÖÀàÆÀ¹À
+    //CrossValidatoréœ€è¦ä¸€ä¸ªEstimator,ä¸€ä¸ªè¯„ä¼°å™¨å‚æ•°é›†åˆ,å’Œä¸€ä¸ªEvaluator
+    //æ³¨æ„è¿™é‡Œçš„evaluatoræ˜¯äºŒå…ƒåˆ†ç±»çš„BinaryClassificationEvaluator,å®ƒé»˜è®¤çš„åº¦é‡æ˜¯areaUnderROC.
+     //ROCå¹³å‡å€¼,è¡¨ç¤ºè¯„ä¼°ä¸€ä¸ªå®Œç¾Žçš„åˆ†ç±»å™¨
+    val crossval = new CrossValidator()//äº¤å‰
+      .setEstimator(pipeline)//Estimator:å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•é€šè¿‡å®žçŽ°
+      //äºŒåˆ†ç±»è¯„ä¼°
       .setEvaluator(new BinaryClassificationEvaluator)
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
-    //Ê¹ÓÃParamGridBuilder ¹¹ÔìÒ»¸ö²ÎÊýÍø¸ñ
+    //ä½¿ç”¨ParamGridBuilder æž„é€ ä¸€ä¸ªå‚æ•°ç½‘æ ¼
     // With 3 values for hashingTF.numFeatures and 2 values for lr.regParam,
-    //hashingTF.numFeaturesÓÐ3¸öÖµ,lr.regParamÓÐ2¸öÖµ
+    //hashingTF.numFeaturesæœ‰3ä¸ªå€¼,lr.regParamæœ‰2ä¸ªå€¼
     // this grid will have 3 x 2 = 6 parameter settings for CrossValidator to choose from.
-     //Õâ¸öÍø¸ñÓÐ6¸ö²ÎÊý¸øCrossValidatorÀ´Ñ¡Ôñ
-     //ParamGridBuilder¹¹½¨´ýÑ¡²ÎÊý(Èç:logistic regressionµÄregParam)
-    val paramGrid = new ParamGridBuilder()//Í¨¹ýaddGridÌí¼ÓÎÒÃÇÐèÒªÑ°ÕÒµÄ×î¼Ñ²ÎÊý  
-      .addGrid(hashingTF.numFeatures, Array(10, 100, 1000))//ÉèÖÃHashingTF.numFeaturesÎªÈý¸öÖµ
-      .addGrid(lr.regParam, Array(0.1, 0.01))//ÉèÖÃLogisticRegressionÕýÔò»¯²ÎÊýÁ½¸öÖµ
-     .addGrid(lr.maxIter, Array(0, 10,50,100))//ÉèÖÃLogisticRegressionÕýÔò»¯²ÎÊýÁ½¸öÖµ
-      .build()//¹¹Ôì´ýÑ¡²ÎÊý
-    crossval.setEstimatorParamMaps(paramGrid)//ÉèÖÃ¹¹½¨´ýÑ¡²ÎÊý
-    crossval.setNumFolds(2) // Use 3+ in practice ÔÚÊµ¼ùÖÐÊ¹ÓÃ3 +
+     //è¿™ä¸ªç½‘æ ¼æœ‰6ä¸ªå‚æ•°ç»™CrossValidatoræ¥é€‰æ‹©
+     //ParamGridBuilderæž„å»ºå¾…é€‰å‚æ•°(å¦‚:logistic regressionçš„regParam)
+    val paramGrid = new ParamGridBuilder()//é€šè¿‡addGridæ·»åŠ æˆ‘ä»¬éœ€è¦å¯»æ‰¾çš„æœ€ä½³å‚æ•°  
+      .addGrid(hashingTF.numFeatures, Array(10, 100, 1000))//è®¾ç½®HashingTF.numFeaturesä¸ºä¸‰ä¸ªå€¼
+      .addGrid(lr.regParam, Array(0.1, 0.01))//è®¾ç½®LogisticRegressionæ­£åˆ™åŒ–å‚æ•°ä¸¤ä¸ªå€¼
+     .addGrid(lr.maxIter, Array(0, 10,50,100))//è®¾ç½®LogisticRegressionæ­£åˆ™åŒ–å‚æ•°ä¸¤ä¸ªå€¼
+      .build()//æž„é€ å¾…é€‰å‚æ•°
+    crossval.setEstimatorParamMaps(paramGrid)//è®¾ç½®æž„å»ºå¾…é€‰å‚æ•°
+    crossval.setNumFolds(2) // Use 3+ in practice åœ¨å®žè·µä¸­ä½¿ç”¨3 +
 
     // Run cross-validation, and choose the best set of parameters.
-    //ÔËÐÐ½»²æÑéÖ¤,²¢Ñ¡Ôñ×îºÃµÄ²ÎÊý¼¯
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //è¿è¡Œäº¤å‰éªŒè¯,å¹¶é€‰æ‹©æœ€å¥½çš„å‚æ•°é›†
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val cvModel = crossval.fit(training.toDF())
 
     // Prepare test documents, which are unlabeled.
-    //×¼±¸²âÊÔÎÄµµ,ÕâÐ©ÎÄ¼þÊÇÎ´±ê¼ÇµÄ
+    //å‡†å¤‡æµ‹è¯•æ–‡æ¡£,è¿™äº›æ–‡ä»¶æ˜¯æœªæ ‡è®°çš„
     val test = sc.parallelize(Seq(
       Document(4L, "spark i j k"),
       Document(5L, "l m n"),
@@ -139,20 +139,20 @@ object CrossValidatorExample {
       Document(7L, "apache hadoop")))
 
     // Make predictions on test documents.cvModel uses the best model found (lrModel)
-    //ÔÚ²âÊÔÎÄµµÉÏ×öÔ¤²â,cvModelÊÇÑ¡Ôñ³öÀ´µÄ×îºÃµÄÄ£ÐÍ
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
-    //×îºÃµÄÄ£ÐÍ²ÎÊý  
+    //åœ¨æµ‹è¯•æ–‡æ¡£ä¸Šåšé¢„æµ‹,cvModelæ˜¯é€‰æ‹©å‡ºæ¥çš„æœ€å¥½çš„æ¨¡åž‹
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
+    //æœ€å¥½çš„æ¨¡åž‹å‚æ•°  
     val parent = cvModel.bestModel.parent.asInstanceOf[Pipeline]    
     val p=parent.getStages(1).asInstanceOf[HashingTF]
     import org.apache.spark.ml.param.ParamMap
     val lrp=parent.getStages(2).copy(ParamMap.empty).asInstanceOf[LogisticRegression]
-    //×îºÃµÄÄ£ÐÍ²ÎÊý
+    //æœ€å¥½çš„æ¨¡åž‹å‚æ•°
     println("numFeatures:"+p.getNumFeatures)    
     println(lrp.getMaxIter+"|||"+lrp.getRegParam)
-    //println(parent.getRegParam)//ÕýÔò»¯²ÎÊý
-    //println(parent.getMaxIter)//×î´óµü´ú´ÎÊý
+    //println(parent.getRegParam)//æ­£åˆ™åŒ–å‚æ•°
+    //println(parent.getMaxIter)//æœ€å¤§è¿­ä»£æ¬¡æ•°
     cvModel.transform(test.toDF())
-     //textÎÄ±¾||probability ¸ÅÂÊ||predictionÔ¤²â
+     //textæ–‡æœ¬||probability æ¦‚çŽ‡||predictioné¢„æµ‹
       .select("id", "text", "probability", "prediction")
       .collect()
       .foreach { case Row(id: Long, text: String, prob: Vector, prediction: Double) =>

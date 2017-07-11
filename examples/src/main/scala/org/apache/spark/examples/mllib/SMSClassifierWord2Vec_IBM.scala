@@ -8,8 +8,8 @@ import org.apache.spark.ml.feature.{ IndexToString, StringIndexer, Word2Vec }
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.{ SparkContext, SparkConf }
 /**
- * Spark ML µÄÎÄ±¾·ÖÀà
- * ²Î¿¼×ÊÁÏ
+ * Spark ML çš„æ–‡æœ¬åˆ†ç±»
+ * å‚è€ƒèµ„æ–™
  * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice6/
  */
 object SMSClassifierWord2Vec_IBM {
@@ -23,51 +23,51 @@ object SMSClassifierWord2Vec_IBM {
     val conf = new SparkConf().setMaster("local[2]").setAppName("SMS Message Classification (HAM or SPAM)")
     val sc = new SparkContext(conf)
     val sqlCtx = new SQLContext(sc)
-    //¶ÁÈ¡Ô­Ê¼Êı¾İ¼¯,²¢´´½¨Ò»¸ö DataFrame
-    //¸ÃÊı¾İ¼¯½á¹¹·Ç³£¼òµ¥,Ö»ÓĞÁ½ÁĞ,µÚÒ»ÁĞÊÇ¶ÌĞÅµÄ±êÇ© ,µÚ¶şÁĞÊÇ¶ÌĞÅÄÚÈİ,Á½ÁĞÖ®¼äÓÃÖÆ±í·û (tab) ·Ö¸ô
+    //è¯»å–åŸå§‹æ•°æ®é›†,å¹¶åˆ›å»ºä¸€ä¸ª DataFrame
+    //è¯¥æ•°æ®é›†ç»“æ„éå¸¸ç®€å•,åªæœ‰ä¸¤åˆ—,ç¬¬ä¸€åˆ—æ˜¯çŸ­ä¿¡çš„æ ‡ç­¾ ,ç¬¬äºŒåˆ—æ˜¯çŸ­ä¿¡å†…å®¹,ä¸¤åˆ—ä¹‹é—´ç”¨åˆ¶è¡¨ç¬¦ (tab) åˆ†éš”
     val parsedRDD = sc.textFile("../data/mllib/SMSSpamCollection").map(_.split("\t")).map(eachRow => {
       (eachRow(0), eachRow(1).split(" "))
     })
     val msgDF = sqlCtx.createDataFrame(parsedRDD).toDF("label", "message")
-    //Ê¹ÓÃ StringIndexer ½«Ô­Ê¼µÄÎÄ±¾±êÇ© (¡°Ham¡±»òÕß¡°Spam¡±) ×ª»¯³ÉÊıÖµĞÍµÄ±íĞÍ,ÒÔ±ã Spark ML ´¦Àí
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //ä½¿ç”¨ StringIndexer å°†åŸå§‹çš„æ–‡æœ¬æ ‡ç­¾ (â€œHamâ€æˆ–è€…â€œSpamâ€) è½¬åŒ–æˆæ•°å€¼å‹çš„è¡¨å‹,ä»¥ä¾¿ Spark ML å¤„ç†
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val labelIndexer = new StringIndexer().setInputCol("label").setOutputCol("indexedLabel").fit(msgDF)
-    //Ê¹ÓÃ Word2Vec ½«¶ÌĞÅÎÄ±¾×ª»¯³ÉÊıÖµĞÍ´ÊÏòÁ¿
+    //ä½¿ç”¨ Word2Vec å°†çŸ­ä¿¡æ–‡æœ¬è½¬åŒ–æˆæ•°å€¼å‹è¯å‘é‡
     val word2Vec = new Word2Vec().setInputCol("message").setOutputCol("features").setVectorSize(VECTOR_SIZE).setMinCount(1)
-   //Õâ¸ö²ÎÊıÊÇÒ»¸öÕûĞÍÊı×éÀàĞÍ,µÚÒ»¸öÔªËØĞèÒªºÍÌØÕ÷ÏòÁ¿µÄÎ¬¶ÈÏàµÈ,×îºóÒ»¸öÔªËØĞèÒªÑµÁ·Êı¾İµÄ±êÇ©È¡Öµ¸öÊıÏàµÈ,
-    //Èç 2 ·ÖÀàÎÊÌâ¾ÍĞ´ 2¡£ÖĞ¼äµÄÔªËØÓĞ¶àÉÙ¸ö¾Í´ú±íÉñ¾­ÍøÂçÓĞ¶àÉÙ¸öÒş²ã,ÔªËØµÄÈ¡Öµ´ú±íÁË¸Ã²ãµÄÉñ¾­ÔªµÄ¸öÊı¡£
-    //ÀıÈçval layers = Array[Int](100,6,5,2)
+   //è¿™ä¸ªå‚æ•°æ˜¯ä¸€ä¸ªæ•´å‹æ•°ç»„ç±»å‹,ç¬¬ä¸€ä¸ªå…ƒç´ éœ€è¦å’Œç‰¹å¾å‘é‡çš„ç»´åº¦ç›¸ç­‰,æœ€åä¸€ä¸ªå…ƒç´ éœ€è¦è®­ç»ƒæ•°æ®çš„æ ‡ç­¾å–å€¼ä¸ªæ•°ç›¸ç­‰,
+    //å¦‚ 2 åˆ†ç±»é—®é¢˜å°±å†™ 2ã€‚ä¸­é—´çš„å…ƒç´ æœ‰å¤šå°‘ä¸ªå°±ä»£è¡¨ç¥ç»ç½‘ç»œæœ‰å¤šå°‘ä¸ªéšå±‚,å…ƒç´ çš„å–å€¼ä»£è¡¨äº†è¯¥å±‚çš„ç¥ç»å…ƒçš„ä¸ªæ•°ã€‚
+    //ä¾‹å¦‚val layers = Array[Int](100,6,5,2)
     val layers = Array[Int](VECTOR_SIZE, 6,  2)
-    //Ê¹ÓÃ MultilayerPerceptronClassifier ÑµÁ·Ò»¸ö¶à²ã¸ĞÖªÆ÷Ä£ĞÍ
+    //ä½¿ç”¨ MultilayerPerceptronClassifier è®­ç»ƒä¸€ä¸ªå¤šå±‚æ„ŸçŸ¥å™¨æ¨¡å‹
     val mlpc = new MultilayerPerceptronClassifier().setLayers(layers).setBlockSize(512).setFeaturesCol("features")
     //
     .setMaxIter(128)
-    //Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
+    //ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
     .setLabelCol("indexedLabel").setPredictionCol("prediction")
     .setSeed(1234L)
-    //Ê¹ÓÃ LabelConverter ½«Ô¤²â½á¹ûµÄÊıÖµ±êÇ©×ª»¯³ÉÔ­Ê¼µÄÎÄ±¾±êÇ©
+    //ä½¿ç”¨ LabelConverter å°†é¢„æµ‹ç»“æœçš„æ•°å€¼æ ‡ç­¾è½¬åŒ–æˆåŸå§‹çš„æ–‡æœ¬æ ‡ç­¾
     val labelConverter = new IndexToString().setInputCol("prediction").setOutputCol("predictedLabel").setLabels(labelIndexer.labels)
-    //½«Ô­Ê¼ÎÄ±¾Êı¾İ°´ÕÕ 8:2 µÄ±ÈÀı·Ö³ÉÑµÁ·ºÍ²âÊÔÊı¾İ¼¯
+    //å°†åŸå§‹æ–‡æœ¬æ•°æ®æŒ‰ç…§ 8:2 çš„æ¯”ä¾‹åˆ†æˆè®­ç»ƒå’Œæµ‹è¯•æ•°æ®é›†
     val Array(trainingData, testData) = msgDF.randomSplit(Array(0.8, 0.2))
-    //ML Pipeline Ìá¹©ÁË´óÁ¿×öÌØÕ÷Êı¾İÌáÈ¡ºÍ×ª»»µÄ¹¤¾ß
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+    //ML Pipeline æä¾›äº†å¤§é‡åšç‰¹å¾æ•°æ®æå–å’Œè½¬æ¢çš„å·¥å…·
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline().setStages(Array(labelIndexer, word2Vec, mlpc, labelConverter))
-    val model = pipeline.fit(trainingData)//ÑµÁ·Êı¾İ
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    val model = pipeline.fit(trainingData)//è®­ç»ƒæ•°æ®
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictionResultDF = model.transform(testData)
     //below 2 lines are for debug use
-    //ÏÂÃæ2ĞĞÊÇµ÷ÊÔÊ¹ÓÃ
-    predictionResultDF.printSchema //´òÓ¡RDDÖĞÊı¾İµÄ±íÄ£Ê½
+    //ä¸‹é¢2è¡Œæ˜¯è°ƒè¯•ä½¿ç”¨
+    predictionResultDF.printSchema //æ‰“å°RDDä¸­æ•°æ®çš„è¡¨æ¨¡å¼
     predictionResultDF.select("message", "label", "predictedLabel").show(30)
 
     val evaluator = new MulticlassClassificationEvaluator()
-	//±êÇ©ÁĞµÄÃû³Æ
+	//æ ‡ç­¾åˆ—çš„åç§°
       .setLabelCol("indexedLabel")
-      //Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
+      //ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
       .setPredictionCol("prediction")
-      .setMetricName("precision")//¶ÈÁ¿·½Ê½ precision×¼È·ÂÊ
-    //×îºóÔÚ²âÊÔÊı¾İ¼¯ÉÏ²âÊÔÄ£ĞÍµÄÔ¤²â¾«È·¶È
+      .setMetricName("precision")//åº¦é‡æ–¹å¼ precisionå‡†ç¡®ç‡
+    //æœ€ååœ¨æµ‹è¯•æ•°æ®é›†ä¸Šæµ‹è¯•æ¨¡å‹çš„é¢„æµ‹ç²¾ç¡®åº¦
     val predictionAccuracy = evaluator.evaluate(predictionResultDF)
     println("Testing Accuracy is %2.4f".format(predictionAccuracy * 100) + "%")
     sc.stop

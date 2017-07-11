@@ -26,8 +26,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * ·ÖÏä(·Ö¶Î´¦Àí):½«Á¬ĞøÊıÖµ×ª»»ÎªÀëÉ¢Àà±ğ
- * ±ÈÈçÌØÕ÷ÊÇÄêÁä,ÊÇÒ»¸öÁ¬ĞøÊıÖµ,ĞèÒª½«Æä×ª»»ÎªÀëÉ¢Àà±ğ(Î´³ÉÄêÈË¡¢ÇàÄêÈË¡¢ÖĞÄêÈË¡¢ÀÏÄêÈË),¾ÍÒªÓÃµ½BucketizerÁË
+ * åˆ†ç®±(åˆ†æ®µå¤„ç†):å°†è¿ç»­æ•°å€¼è½¬æ¢ä¸ºç¦»æ•£ç±»åˆ«
+ * æ¯”å¦‚ç‰¹å¾æ˜¯å¹´é¾„,æ˜¯ä¸€ä¸ªè¿ç»­æ•°å€¼,éœ€è¦å°†å…¶è½¬æ¢ä¸ºç¦»æ•£ç±»åˆ«(æœªæˆå¹´äººã€é’å¹´äººã€ä¸­å¹´äººã€è€å¹´äºº),å°±è¦ç”¨åˆ°Bucketizeräº†
  */
 object BucketizerExample {
   def main(args: Array[String]): Unit = {
@@ -38,22 +38,22 @@ object BucketizerExample {
     import sqlContext.implicits._
     // $example on$
     /**
-    * ·ÖÀàµÄ±ê×¼ÊÇ×Ô¼º¶¨ÒåµÄ,ÔÚSparkÖĞÎªsplit²ÎÊı,¶¨ÒåÈçÏÂ£º
+    * åˆ†ç±»çš„æ ‡å‡†æ˜¯è‡ªå·±å®šä¹‰çš„,åœ¨Sparkä¸­ä¸ºsplitå‚æ•°,å®šä¹‰å¦‚ä¸‹ï¼š
 		*	double[] splits = {0, 18, 35,50, Double.PositiveInfinity}
-		* ½«ÊıÖµÄêÁä·ÖÎªËÄÀà0-18,18-35,35-50,55+ËÄ¸ö¶Î
+		* å°†æ•°å€¼å¹´é¾„åˆ†ä¸ºå››ç±»0-18,18-35,35-50,55+å››ä¸ªæ®µ
     */
     val splits = Array(Double.NegativeInfinity, -0.5, 0.0, 0.5, Double.PositiveInfinity)
 
-    val data = Array(-0.5, -0.3, 0.0, 0.5,0.6)//Êı¾İ
+    val data = Array(-0.5, -0.3, 0.0, 0.5,0.6)//æ•°æ®
     val dataFrame = sqlContext.createDataFrame(data.map(Tuple1.apply)).toDF("features")
 
     val bucketizer = new Bucketizer()
-      .setInputCol("features")//ÊäÈë×Ö¶Î
-      .setOutputCol("bucketedFeatures")//Êä³ö×Ö¶Î
-      .setSplits(splits)//ÉèÖÃ·Ö¶Î±ê×¼,×¢Òâ·Ö¸ôĞ¡ÓÚ±ß½çÖµ
+      .setInputCol("features")//è¾“å…¥å­—æ®µ
+      .setOutputCol("bucketedFeatures")//è¾“å‡ºå­—æ®µ
+      .setSplits(splits)//è®¾ç½®åˆ†æ®µæ ‡å‡†,æ³¨æ„åˆ†éš”å°äºè¾¹ç•Œå€¼
 
     // Transform original data into its bucket index.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val bucketedData = bucketizer.transform(dataFrame)
     /**
     +--------+----------------+

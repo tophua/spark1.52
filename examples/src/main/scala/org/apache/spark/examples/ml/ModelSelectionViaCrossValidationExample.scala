@@ -34,9 +34,9 @@ import org.apache.spark.sql.{SQLContext, DataFrame}
 // $example off$
 /**
  * A simple example demonstrating model selection using CrossValidator.
- * ÑİÊ¾Ò»¸ö¼òµ¥µÄÀı×Ó,Ê¹ÓÃÑ¡ÔñcrossvalidatorÄ£ĞÍ
+ * æ¼”ç¤ºä¸€ä¸ªç®€å•çš„ä¾‹å­,ä½¿ç”¨é€‰æ‹©crossvalidatoræ¨¡å‹
  * This example also demonstrates how Pipelines are Estimators.
- * Õâ¸öÀı×Ó»¹ÑİÊ¾¹ÜµÀÊÇÈçºÎÆÀ¹À
+ * è¿™ä¸ªä¾‹å­è¿˜æ¼”ç¤ºç®¡é“æ˜¯å¦‚ä½•è¯„ä¼°
  * Run with
  * {{{
  * bin/run-example ml.ModelSelectionViaCrossValidationExample
@@ -69,28 +69,28 @@ object ModelSelectionViaCrossValidationExample {
     )).toDF("id", "text", "label")
 
     // Configure an ML pipeline, which consists of three stages: tokenizer, hashingTF, and lr.
-    //ÅäÖÃ»úÆ÷Ñ§Ï°¹ÜµÀ,ÓÉtokenizer, hashingTF, ºÍ lrÆÀ¹ÀÆ÷ ×é³É
-    //Tokenizer ½«·ÖºÃµÄ´Ê×ª»»ÎªÊı×é
+    //é…ç½®æœºå™¨å­¦ä¹ ç®¡é“,ç”±tokenizer, hashingTF, å’Œ lrè¯„ä¼°å™¨ ç»„æˆ
+    //Tokenizer å°†åˆ†å¥½çš„è¯è½¬æ¢ä¸ºæ•°ç»„
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
-    //ÌØÕ÷ÌáÈ¡ºÍ×ª»» TF-IDFËã·¨´ÓÎÄ±¾·Ö´ÊÖĞ´´½¨ÌØÕ÷ÏòÁ¿
-    //HashingTF ´ÓÒ»¸öÎÄµµÖĞ¼ÆËã³ö¸ø¶¨´óĞ¡µÄ´ÊÆµÏòÁ¿,
+    //ç‰¹å¾æå–å’Œè½¬æ¢ TF-IDFç®—æ³•ä»æ–‡æœ¬åˆ†è¯ä¸­åˆ›å»ºç‰¹å¾å‘é‡
+    //HashingTF ä»ä¸€ä¸ªæ–‡æ¡£ä¸­è®¡ç®—å‡ºç»™å®šå¤§å°çš„è¯é¢‘å‘é‡,
     //"a a b b c d" HashingTF (262144,[97,98,99,100],[2.0,2.0,1.0,1.0])
     val hashingTF = new HashingTF()
       .setInputCol(tokenizer.getOutputCol)
       .setOutputCol("features")
     val lr = new LogisticRegression()
-      .setMaxIter(10)//ÉèÖÃµü´ú´ÎÊı
-    //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-    //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+      .setMaxIter(10)//è®¾ç½®è¿­ä»£æ¬¡æ•°
+    //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+    //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // We use a ParamGridBuilder to construct a grid of parameters to search over.
     // With 3 values for hashingTF.numFeatures and 2 values for lr.regParam,
     // this grid will have 3 x 2 = 6 parameter settings for CrossValidator to choose from.
-    //ParamGridBuilder¹¹½¨´ıÑ¡²ÎÊı(Èç:logistic regressionµÄregParam)
+    //ParamGridBuilderæ„å»ºå¾…é€‰å‚æ•°(å¦‚:logistic regressionçš„regParam)
     val paramGrid = new ParamGridBuilder()
       .addGrid(hashingTF.numFeatures, Array(10, 100, 1000))
       .addGrid(lr.regParam, Array(0.1, 0.01))
@@ -101,20 +101,20 @@ object ModelSelectionViaCrossValidationExample {
     // A CrossValidator requires an Estimator, a set of Estimator ParamMaps, and an Evaluator.
     // Note that the evaluator here is a BinaryClassificationEvaluator and its default metric
     // is areaUnderROC.
-    //ROCÇúÏßÏÂÃæ»ı,ÊÇÒ»ÖÖÓÃÀ´¶ÈÁ¿·ÖÀàÄ£ĞÍºÃ»µµÄÒ»¸ö±ê×¼
+    //ROCæ›²çº¿ä¸‹é¢ç§¯,æ˜¯ä¸€ç§ç”¨æ¥åº¦é‡åˆ†ç±»æ¨¡å‹å¥½åçš„ä¸€ä¸ªæ ‡å‡†
     val cv = new CrossValidator()
       .setEstimator(pipeline)
-      .setEvaluator(new BinaryClassificationEvaluator)//ÉèÖÃÆÀ¹ÀÄ£ĞÍ
+      .setEvaluator(new BinaryClassificationEvaluator)//è®¾ç½®è¯„ä¼°æ¨¡å‹
       .setEstimatorParamMaps(paramGrid)
       .setNumFolds(2)  // Use 3+ in practice
 
     // Run cross-validation, and choose the best set of parameters.
-    //ÔËĞĞ½»²æÑéÖ¤,²¢Ñ¡Ôñ×î¼Ñ²ÎÊı¼¯
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //è¿è¡Œäº¤å‰éªŒè¯,å¹¶é€‰æ‹©æœ€ä½³å‚æ•°é›†
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val cvModel = cv.fit(training)
 
     // Prepare test documents, which are unlabeled (id, text) tuples.
-    // ×¼±¸²âÊÔÎÄµµ,ÕâÊÇÎ´±ê¼ÇµÄ(ID¡¢text)µÄÔª×é
+    // å‡†å¤‡æµ‹è¯•æ–‡æ¡£,è¿™æ˜¯æœªæ ‡è®°çš„(IDã€text)çš„å…ƒç»„
     val test = sqlContext.createDataFrame(Seq(
       (4L, "spark i j k"),
       (5L, "l m n"),
@@ -123,7 +123,7 @@ object ModelSelectionViaCrossValidationExample {
     )).toDF("id", "text")
 
     // Make predictions on test documents. cvModel uses the best model found (lrModel).
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     cvModel.transform(test)
       .select("id", "text", "probability", "prediction")
       .collect()

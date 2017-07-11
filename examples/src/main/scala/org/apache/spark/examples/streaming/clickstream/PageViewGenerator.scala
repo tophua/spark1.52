@@ -24,7 +24,7 @@ import util.Random
 
 /** 
  *  Represents a page view on a website with associated dimension data.
- *  ±íÊ¾Óë¹ØÁªµÄÎ¬¶ÈÊı¾İµÄÍøÕ¾µÄÒ³ÃæÊÓÍ¼ 
+ *  è¡¨ç¤ºä¸å…³è”çš„ç»´åº¦æ•°æ®çš„ç½‘ç«™çš„é¡µé¢è§†å›¾ 
  *  */
 class PageView(val url : String, val status : Int, val zipCode : Int, val userID : Int)
     extends Serializable {
@@ -42,7 +42,7 @@ object PageView extends Serializable {
 
 // scalastyle:off
 /** Generates streaming events to simulate page views on a website.
-  * ³ÉÁ÷ÊÂ¼şÀ´Ä£ÄâÍøÕ¾ÉÏµÄÒ³ÃæÊÓÍ¼
+  * æˆæµäº‹ä»¶æ¥æ¨¡æ‹Ÿç½‘ç«™ä¸Šçš„é¡µé¢è§†å›¾
   * This should be used in tandem with PageViewStream.scala. Example:
   *
   * To run the generator

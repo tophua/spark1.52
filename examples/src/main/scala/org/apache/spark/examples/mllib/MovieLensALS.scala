@@ -30,7 +30,7 @@ import org.apache.spark.rdd.RDD
 
 /**
  * An example app for ALS on MovieLens data (http://grouplens.org/datasets/movielens/).
- * ALSµÄMovieLensÊı¾İÉÏµÄÒ»¸öÊ¾ÀıÓ¦ÓÃ³ÌĞò
+ * ALSçš„MovieLensæ•°æ®ä¸Šçš„ä¸€ä¸ªç¤ºä¾‹åº”ç”¨ç¨‹åº
  * Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.MovieLensALS
@@ -42,11 +42,11 @@ object MovieLensALS {
   case class Params(
       input: String = "../data/mllib/sample_movielens_data.txt",
       kryo: Boolean = false,
-      numIterations: Int = 20,//µü´ú´ÎÊı
+      numIterations: Int = 20,//è¿­ä»£æ¬¡æ•°
       lambda: Double = 1.0,
-      rank: Int = 10,//ÕıÔò»¯²ÎÊı
-      numUserBlocks: Int = -1,//ÉèÖÃÓÃ»§Êı¾İ¿éµÄ¸öÊıºÍ²¢ĞĞ¶È
-      numProductBlocks: Int = -1,//ÉèÖÃÎïÆ·Êı¾İ¿é¸öÊıºÍ²¢ĞĞ¶È
+      rank: Int = 10,//æ­£åˆ™åŒ–å‚æ•°
+      numUserBlocks: Int = -1,//è®¾ç½®ç”¨æˆ·æ•°æ®å—çš„ä¸ªæ•°å’Œå¹¶è¡Œåº¦
+      numProductBlocks: Int = -1,//è®¾ç½®ç‰©å“æ•°æ®å—ä¸ªæ•°å’Œå¹¶è¡Œåº¦
       implicitPrefs: Boolean = false) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -106,9 +106,9 @@ object MovieLensALS {
     val sc = new SparkContext(conf)
 
     Logger.getRootLogger.setLevel(Level.WARN)
-    //ÊÇ·ñÏÔĞÔ·´À¡
+    //æ˜¯å¦æ˜¾æ€§åé¦ˆ
     val implicitPrefs = params.implicitPrefs
-    //Êı¾İ¼¯
+    //æ•°æ®é›†
     val ratings = sc.textFile(params.input).map { line =>
       val fields = line.split("::")
       if (implicitPrefs) {
@@ -137,7 +137,7 @@ object MovieLensALS {
     val numMovies = ratings.map(_.product).distinct().count()
 
     println(s"Got $numRatings ratings from $numUsers users on $numMovies movies.")
-   //²ğ·ÖÊı¾İ,80%ÎªÑµÁ·¼¯,20%Îª²âÊÔ¼¯
+   //æ‹†åˆ†æ•°æ®,80%ä¸ºè®­ç»ƒé›†,20%ä¸ºæµ‹è¯•é›†
     val splits = ratings.randomSplit(Array(0.8, 0.2))
     val training = splits(0).cache()
     val test = if (params.implicitPrefs) {
@@ -160,16 +160,16 @@ object MovieLensALS {
     ratings.unpersist(blocking = false)
 
     val model = new ALS()
-      .setRank(params.rank)//Ä£ĞÍÖĞÇ±ÔÚÒòËØµÄÊıÁ¿
-      .setIterations(params.numIterations)//µü´ú´ÎÊı
-      .setLambda(params.lambda)//ÕıÔò»¯
-      .setImplicitPrefs(params.implicitPrefs)//ÖÆ¶¨ÊÇ·ñÊ¹ÓÃÏÔÊ¾·´À¡ALS±äÌå(»òÕßËµÊÇ¶ÔÒşÊ½·´À¡Êı¾İµÄÒ»ÖÖÊÊÓ¦)
-      .setUserBlocks(params.numUserBlocks)//ÉèÖÃÓÃ»§Êı¾İ¿éµÄ¸öÊıºÍ²¢ĞĞ¶È
-      .setProductBlocks(params.numProductBlocks)//ÉèÖÃÎïÆ·Êı¾İ¿é¸öÊıºÍ²¢ĞĞ¶È
+      .setRank(params.rank)//æ¨¡å‹ä¸­æ½œåœ¨å› ç´ çš„æ•°é‡
+      .setIterations(params.numIterations)//è¿­ä»£æ¬¡æ•°
+      .setLambda(params.lambda)//æ­£åˆ™åŒ–
+      .setImplicitPrefs(params.implicitPrefs)//åˆ¶å®šæ˜¯å¦ä½¿ç”¨æ˜¾ç¤ºåé¦ˆALSå˜ä½“(æˆ–è€…è¯´æ˜¯å¯¹éšå¼åé¦ˆæ•°æ®çš„ä¸€ç§é€‚åº”)
+      .setUserBlocks(params.numUserBlocks)//è®¾ç½®ç”¨æˆ·æ•°æ®å—çš„ä¸ªæ•°å’Œå¹¶è¡Œåº¦
+      .setProductBlocks(params.numProductBlocks)//è®¾ç½®ç‰©å“æ•°æ®å—ä¸ªæ•°å’Œå¹¶è¡Œåº¦
       .run(training)
-     //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+     //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     val rmse = computeRmse(model, test, params.implicitPrefs)
-    //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+    //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
     println(s"Test RMSE = $rmse.")
 
     sc.stop()
@@ -177,7 +177,7 @@ object MovieLensALS {
 
   /** 
    *  Compute RMSE (Root Mean Squared Error).
-   *  ¼ÆËã¾ù·½¸ùÎó²î(¾ù·½¸ùÎó²î) 
+   *  è®¡ç®—å‡æ–¹æ ¹è¯¯å·®(å‡æ–¹æ ¹è¯¯å·®) 
    *  */
   def computeRmse(model: MatrixFactorizationModel, data: RDD[Rating], implicitPrefs: Boolean)
     : Double = {

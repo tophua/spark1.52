@@ -9,12 +9,12 @@ import org.apache.spark.sql.SQLContext
 case class Person(name: String, age: Int)
 
 /**
- * ¼òµ¥µÄSpark SQLÓ¦ÓÃÀı×Ó 
+ * ç®€å•çš„Spark SQLåº”ç”¨ä¾‹å­ 
  */
 object SparkSqlExample {
   def main(args: Array[String]) {
     sys.env.foreach(println _)
-    //»ñµÃ»·¾³±äÁ¿ĞÅÏ¢(JAVA_HOME,D:\jdk\jdk17_64)
+    //è·å¾—ç¯å¢ƒå˜é‡ä¿¡æ¯(JAVA_HOME,D:\jdk\jdk17_64)
     val conf = sys.env.get("SPARK_AUDIT_MASTER") match {
       case Some(master) => new SparkConf().setAppName("Simple Sql App").setMaster(master)
       case None         => new SparkConf().setAppName("Simple Sql App").setMaster("local")
@@ -24,12 +24,12 @@ object SparkSqlExample {
 
     import sqlContext.implicits._
     import sqlContext._
-    //Éú³ÉRDD,×ª»»³ÉDataFrame¶ÔÏó
+    //ç”ŸæˆRDD,è½¬æ¢æˆDataFrameå¯¹è±¡
     val people = sc.makeRDD(1 to 100, 10).map(x => Person(s"Name$x", x)).toDF()
-    people.registerTempTable("people")//×¢²á¶ÔÏó 
-    //·µ»ØDataFrame,²éÑ¯ÄêÁä´óÓÚµÈÓÚ13Ğ¡ÓÚµÈÓÚ19
+    people.registerTempTable("people")//æ³¨å†Œå¯¹è±¡ 
+    //è¿”å›DataFrame,æŸ¥è¯¢å¹´é¾„å¤§äºç­‰äº13å°äºç­‰äº19
     val teenagers = sql("SELECT name,age FROM people WHERE age >= 13 AND age <= 19")
-    //·µ»Ø teenagerNames: Array[String],»ñµÃSQLÓï¾äname,age×Ö¶ÎÖµ
+    //è¿”å› teenagerNames: Array[String],è·å¾—SQLè¯­å¥name,ageå­—æ®µå€¼
     val teenagerNames = teenagers.map(t => "Name: " + t(0)+ " age:"+t(1)).collect()
     teenagerNames.foreach(println)
 
@@ -39,7 +39,7 @@ object SparkSqlExample {
         System.exit(-1)
       }
     }
-    //Òì³£ÊıÁ¿µÄÑ¡¶¨ÔªËØ
+    //å¼‚å¸¸æ•°é‡çš„é€‰å®šå…ƒç´ 
     test(teenagerNames.size == 7, "Unexpected number of selected elements: " + teenagerNames)
     println("Test succeeded")
     sc.stop()

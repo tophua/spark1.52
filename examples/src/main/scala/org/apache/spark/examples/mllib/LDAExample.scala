@@ -33,9 +33,9 @@ import org.apache.spark.rdd.RDD
 
 
 /**
- * ¾ÛÀà LDAÊÇÒ»ÖÖÎÄµµÖ÷ÌâÉú³ÉÄ£ĞÍ
+ * èšç±» LDAæ˜¯ä¸€ç§æ–‡æ¡£ä¸»é¢˜ç”Ÿæˆæ¨¡å‹
  * An example Latent Dirichlet Allocation (LDA) app. Run with
- * Ò»¸öµÒÀû¿ËÀ×·ÖÅä(LDA)µÄÓ¦ÓÃÀı×Ó
+ * ä¸€ä¸ªç‹„åˆ©å…‹é›·åˆ†é…(LDA)çš„åº”ç”¨ä¾‹å­
  * {{{
  * ./bin/run-example mllib.LDAExample [options] <input>
  * }}}
@@ -45,15 +45,15 @@ object LDAExample {
 
   private case class Params(
       input: Seq[String] = Seq.empty,
-      k: Int = 20,//ĞèÍÆ¶ÏµÄÖ÷Ìâ£¨´Ø£©µÄÊıÄ¿
-      maxIterations: Int = 10,//µü´ú´ÎÊı
-      docConcentration: Double = -1,//ÎÄµµ¹ØÓÚÖ÷Ìâ("theta")µÄÏÈÑé·Ö²¼¼¯ÖĞ²ÎÊı(Í¨³£ÃûÎª¡°alpha")
-      topicConcentration: Double = -1,//Ö÷Ìâ¹ØÓÚÎÄ×ÖµÄÏÈÑé·Ö²¼¼¯ÖĞ²ÎÊı(Í¨³£ÃûÎª¡°beta"»ò"eta")
+      k: Int = 20,//éœ€æ¨æ–­çš„ä¸»é¢˜ï¼ˆç°‡ï¼‰çš„æ•°ç›®
+      maxIterations: Int = 10,//è¿­ä»£æ¬¡æ•°
+      docConcentration: Double = -1,//æ–‡æ¡£å…³äºä¸»é¢˜("theta")çš„å…ˆéªŒåˆ†å¸ƒé›†ä¸­å‚æ•°(é€šå¸¸åä¸ºâ€œalpha")
+      topicConcentration: Double = -1,//ä¸»é¢˜å…³äºæ–‡å­—çš„å…ˆéªŒåˆ†å¸ƒé›†ä¸­å‚æ•°(é€šå¸¸åä¸ºâ€œbeta"æˆ–"eta")
       vocabSize: Int = 10000,//
       stopwordFile: String = "",
       algorithm: String = "em",
-      checkpointDir: Option[String] = None,//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1)
-      //ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+      checkpointDir: Option[String] = None,//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1)
+      //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -67,7 +67,7 @@ object LDAExample {
       opt[Int]("maxIterations")
         .text(s"number of iterations of learning. default: ${defaultParams.maxIterations}")
         .action((x, c) => c.copy(maxIterations = x))
-      opt[Double]("docConcentration")//Æ½»¬²ÎÊı
+      opt[Double]("docConcentration")//å¹³æ»‘å‚æ•°
         .text(s"amount of topic smoothing to use (> 1.0) (-1=auto)." +
         s"  default: ${defaultParams.docConcentration}")
         .action((x, c) => c.copy(docConcentration = x))
@@ -119,15 +119,15 @@ object LDAExample {
     Logger.getRootLogger.setLevel(Level.WARN)
 
     // Load documents, and prepare them for LDA.
-    //¼ÓÔØÎÄ¼ş,²¢×¼±¸½«LDA
-     //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+    //åŠ è½½æ–‡ä»¶,å¹¶å‡†å¤‡å°†LDA
+     //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
     val preprocessStart = System.nanoTime()
     val (corpus, vocabArray, actualNumTokens) =
       preprocess(sc, params.input, params.vocabSize, params.stopwordFile)
     corpus.cache()
     val actualCorpusSize = corpus.count()
     val actualVocabSize = vocabArray.size
-     //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+     //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
     val preprocessElapsed = (System.nanoTime() - preprocessStart) / 1e9
 
     println()
@@ -144,27 +144,27 @@ object LDAExample {
     val optimizer = params.algorithm.toLowerCase match {
       case "em" => new EMLDAOptimizer
       // add (1.0 / actualCorpusSize) to MiniBatchFraction be more robust on tiny datasets.
-      ////miniBatchFraction¨CÃ¿Ò»ÂÖµü´ú,²ÎÈëÑµÁ·µÄÑù±¾±ÈÀı,Ä¬ÈÏ1.0(È«²¿²ÎÈë)
+      ////miniBatchFractionâ€“æ¯ä¸€è½®è¿­ä»£,å‚å…¥è®­ç»ƒçš„æ ·æœ¬æ¯”ä¾‹,é»˜è®¤1.0(å…¨éƒ¨å‚å…¥)
       case "online" => new OnlineLDAOptimizer().setMiniBatchFraction(0.05 + 1.0 / actualCorpusSize)
       case _ => throw new IllegalArgumentException(
         s"Only em, online are supported but got ${params.algorithm}.")
     }
 
     lda.setOptimizer(optimizer)
-      .setK(params.k)//ĞèÍÆ¶ÏµÄÖ÷Ìâ(´Ø)µÄÊıÄ¿
-      .setMaxIterations(params.maxIterations)//µü´ú´ÎÊı
-      .setDocConcentration(params.docConcentration)//ÎÄµµ¹ØÓÚÖ÷Ìâ£¨"theta"£©µÄÏÈÑé·Ö²¼¼¯ÖĞ²ÎÊı
-      .setTopicConcentration(params.topicConcentration)//Ã¿¸öÎÄµµµÄ»ìºÏÖ÷Ìâ·Ö²¼¹À¼ÆµÄÊä³öÁĞ
-      .setCheckpointInterval(params.checkpointInterval)//ÉèÖÃ¼ì²éµã¼ä¸ô
+      .setK(params.k)//éœ€æ¨æ–­çš„ä¸»é¢˜(ç°‡)çš„æ•°ç›®
+      .setMaxIterations(params.maxIterations)//è¿­ä»£æ¬¡æ•°
+      .setDocConcentration(params.docConcentration)//æ–‡æ¡£å…³äºä¸»é¢˜ï¼ˆ"theta"ï¼‰çš„å…ˆéªŒåˆ†å¸ƒé›†ä¸­å‚æ•°
+      .setTopicConcentration(params.topicConcentration)//æ¯ä¸ªæ–‡æ¡£çš„æ··åˆä¸»é¢˜åˆ†å¸ƒä¼°è®¡çš„è¾“å‡ºåˆ—
+      .setCheckpointInterval(params.checkpointInterval)//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”
     if (params.checkpointDir.nonEmpty) {
       sc.setCheckpointDir(params.checkpointDir.get)
     }
-     //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+     //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
     val startTime = System.nanoTime()
     val ldaModel = lda.run(corpus)
-     //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+     //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
     val elapsed = (System.nanoTime() - startTime) / 1e9
-    //Íê³ÉÑµÁ·LDAÄ£ĞÍ,×Ü½á
+    //å®Œæˆè®­ç»ƒLDAæ¨¡å‹,æ€»ç»“
     println(s"Finished training LDA model.  Summary:")
     println(s"\t Training time: $elapsed sec")
 
@@ -176,7 +176,7 @@ object LDAExample {
     }
 
     // Print the topics, showing the top-weighted terms for each topic.
-    //´òÓ¡Ö÷Ìâ,ÏÔÊ¾Ã¿¸öÖ÷ÌâµÄ¶¥²¿¼ÓÈ¨Ïî
+    //æ‰“å°ä¸»é¢˜,æ˜¾ç¤ºæ¯ä¸ªä¸»é¢˜çš„é¡¶éƒ¨åŠ æƒé¡¹
     val topicIndices = ldaModel.describeTopics(maxTermsPerTopic = 10)
     val topics = topicIndices.map { case (terms, termWeights) =>
       terms.zip(termWeights).map { case (term, weight) => (vocabArray(term.toInt), weight) }
@@ -194,7 +194,7 @@ object LDAExample {
 
   /**
    * Load documents, tokenize them, create vocabulary, and prepare documents as term count vectors.
-   * ¼ÓÔØÎÄ¼ş,±ê¼ÇËûÃÇ,´´Ôì´Ê»ã,²¢×¼±¸ÎÄ¼ş×÷Îª³¤ÆÚ¼ÆÊıÊ¸Á¿
+   * åŠ è½½æ–‡ä»¶,æ ‡è®°ä»–ä»¬,åˆ›é€ è¯æ±‡,å¹¶å‡†å¤‡æ–‡ä»¶ä½œä¸ºé•¿æœŸè®¡æ•°çŸ¢é‡
    * @return (corpus, vocabulary as array, total token count in corpus)
    */
   private def preprocess(
@@ -204,17 +204,17 @@ object LDAExample {
       stopwordFile: String): (RDD[(Long, Vector)], Array[String], Long) = {
 
     // Get dataset of document texts
-    //»ñÈ¡ÎÄµµÎÄ±¾Êı¾İ¼¯
+    //è·å–æ–‡æ¡£æ–‡æœ¬æ•°æ®é›†
     // One document per line in each text file. If the input consists of many small files,
-    //Ã¿¸öÎÄ±¾ÎÄ¼şÖĞµÄÃ¿ĞĞÒ»¸öÎÄµµ,Èç¹ûÊäÈëÓÉĞí¶àĞ¡µÄÎÄ¼ş
+    //æ¯ä¸ªæ–‡æœ¬æ–‡ä»¶ä¸­çš„æ¯è¡Œä¸€ä¸ªæ–‡æ¡£,å¦‚æœè¾“å…¥ç”±è®¸å¤šå°çš„æ–‡ä»¶
     // this can result in a large number of small partitions, which can degrade performance.
-    //Õâ¿ÉÄÜ»áµ¼ÖÂ´óÁ¿µÄĞ¡·ÖÇø,Ëü¿ÉÒÔ½µµÍĞÔÄÜ
+    //è¿™å¯èƒ½ä¼šå¯¼è‡´å¤§é‡çš„å°åˆ†åŒº,å®ƒå¯ä»¥é™ä½æ€§èƒ½
     // In this case, consider using coalesce() to create fewer, larger partitions.
-    //ÔÚÕâÖÖÇé¿öÏÂ,¿ÉÒÔ¿¼ÂÇÊ¹ÓÃcoalesce()´´Ôì¸üÉÙ,¸ü´óµÄ·ÖÇø
+    //åœ¨è¿™ç§æƒ…å†µä¸‹,å¯ä»¥è€ƒè™‘ä½¿ç”¨coalesce()åˆ›é€ æ›´å°‘,æ›´å¤§çš„åˆ†åŒº
     val textRDD: RDD[String] = sc.textFile(paths.mkString(","))
 
     // Split text into words
-    //½«ÎÄ±¾·Ö¸î³Éµ¥´Ê
+    //å°†æ–‡æœ¬åˆ†å‰²æˆå•è¯
     val tokenizer = new SimpleTokenizer(sc, stopwordFile)
     val tokenized: RDD[(Long, IndexedSeq[String])] = textRDD.zipWithIndex().map { case (text, id) =>
       id -> tokenizer.getWords(text)
@@ -222,23 +222,23 @@ object LDAExample {
     tokenized.cache()
 
     // Counts words: RDD[(word, wordCount)]
-    //ÊıÁ¿ ×Ö
+    //æ•°é‡ å­—
     val wordCounts: RDD[(String, Long)] = tokenized
       .flatMap { case (_, tokens) => tokens.map(_ -> 1L) }
       .reduceByKey(_ + _)
     wordCounts.cache()
     val fullVocabSize = wordCounts.count()
     // Select vocab
-    //Ñ¡Ôñ´Ê»ã
+    //é€‰æ‹©è¯æ±‡
     //  (vocab: Map[word -> id], total tokens after selecting vocab)
     val (vocab: Map[String, Int], selectedTokenCount: Long) = {
       val tmpSortedWC: Array[(String, Long)] = if (vocabSize == -1 || fullVocabSize <= vocabSize) {
         // Use all terms
-        //Ê¹ÓÃµÄËùÓĞÏîÄ¿
+        //ä½¿ç”¨çš„æ‰€æœ‰é¡¹ç›®
         wordCounts.collect().sortBy(-_._2)
       } else {
         // Sort terms to select vocab
-        //ÅÅĞòÑ¡Ôñ´Ê»ã
+        //æ’åºé€‰æ‹©è¯æ±‡
         wordCounts.sortBy(_._2, ascending = false).take(vocabSize)
       }
       (tmpSortedWC.map(_._1).zipWithIndex.toMap, tmpSortedWC.map(_._2).sum)
@@ -246,7 +246,7 @@ object LDAExample {
 
     val documents = tokenized.map { case (id, tokens) =>
       // Filter tokens by vocabulary, and create word count vector representation of document.
-      //Í¨¹ı´Ê»ã±í¹ıÂË±ê¼Ç,²¢´´½¨µ¥´Ê¼ÆÊıÏòÁ¿±íÊ¾ÎÄµµ
+      //é€šè¿‡è¯æ±‡è¡¨è¿‡æ»¤æ ‡è®°,å¹¶åˆ›å»ºå•è¯è®¡æ•°å‘é‡è¡¨ç¤ºæ–‡æ¡£
       val wc = new mutable.HashMap[Int, Int]()
       tokens.foreach { term =>
         if (vocab.contains(term)) {
@@ -270,9 +270,9 @@ object LDAExample {
 
 /**
  * Simple Tokenizer.
- *¼òµ¥µÄ·Ö½âÆ÷
+ *ç®€å•çš„åˆ†è§£å™¨
  * TODO: Formalize the interface, and make this a public class in mllib.feature
- * ÕıÊ½µÄ½Ó¿Ú,Ê¹mllib.feature¹«¹²Àà
+ * æ­£å¼çš„æ¥å£,ä½¿mllib.featureå…¬å…±ç±»
  */
 private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Serializable {
 
@@ -284,11 +284,11 @@ private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Se
   }
 
   // Matches sequences of Unicode letters
-  //Æ¥ÅäUnicode×ÖÄ¸ĞòÁĞ
+  //åŒ¹é…Unicodeå­—æ¯åºåˆ—
   private val allWordRegex = "^(\\p{L}*)$".r
 
   // Ignore words shorter than this length.
-  //ºöÂÔµ¥´Ê¶ÌµÄ³¤¶È
+  //å¿½ç•¥å•è¯çŸ­çš„é•¿åº¦
   private val minWordLength = 3
 
   def getWords(text: String): IndexedSeq[String] = {
@@ -296,19 +296,19 @@ private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Se
     val words = new mutable.ArrayBuffer[String]()
 
     // Use Java BreakIterator to tokenize text into words.
-    //Ê¹ÓÃjavaµü´úÆ÷ÇĞ·ÖÎÄ±¾ºÍµ¥´Ê
+    //ä½¿ç”¨javaè¿­ä»£å™¨åˆ‡åˆ†æ–‡æœ¬å’Œå•è¯
     val wb = BreakIterator.getWordInstance
     wb.setText(text)
 
     // current,end index start,end of each word
-    //µ±Ç°,½áÊøË÷Òı¿ªÊ¼,Ã¿¸öµ¥´ÊµÄ½áÎ²
+    //å½“å‰,ç»“æŸç´¢å¼•å¼€å§‹,æ¯ä¸ªå•è¯çš„ç»“å°¾
     var current = wb.first()
     var end = wb.next()
     while (end != BreakIterator.DONE) {
-      // Convert to lowercase ×ª»»Ğ¡Ğ´
+      // Convert to lowercase è½¬æ¢å°å†™
       val word: String = text.substring(current, end).toLowerCase
       // Remove short words and strings that aren't only letters
-      //É¾³ı¶ÌµÄµ¥´ÊºÍ×Ö·û´®,²»½öÊÇ×ÖÄ¸
+      //åˆ é™¤çŸ­çš„å•è¯å’Œå­—ç¬¦ä¸²,ä¸ä»…æ˜¯å­—æ¯
       word match {
         case allWordRegex(w) if w.length >= minWordLength && !stopwords.contains(w) =>
           words += w
@@ -320,11 +320,11 @@ private class SimpleTokenizer(sc: SparkContext, stopwordFile: String) extends Se
         end = wb.next()
       } catch {
         case e: Exception =>
-          // Ignore remaining text in line.ºöÂÔĞĞÖĞµÄÊ£ÓàÎÄ±¾
+          // Ignore remaining text in line.å¿½ç•¥è¡Œä¸­çš„å‰©ä½™æ–‡æœ¬
           // This is a known bug in BreakIterator (for some Java versions),
-          //ÕâÊÇ´òÆÆµü´úÆ÷Ò»¸öÒÑÖªµÄbug(Ò»Ğ©java°æ±¾)
+          //è¿™æ˜¯æ‰“ç ´è¿­ä»£å™¨ä¸€ä¸ªå·²çŸ¥çš„bug(ä¸€äº›javaç‰ˆæœ¬)
           // which fails when it sees certain characters.
-          //µ±Ëü¿´µ½Ä³Ğ©×Ö·ûÊ±,ËüÊ§°ÜÁË
+          //å½“å®ƒçœ‹åˆ°æŸäº›å­—ç¬¦æ—¶,å®ƒå¤±è´¥äº†
           end = BreakIterator.DONE
       }
     }

@@ -8,69 +8,69 @@ import org.apache.spark.mllib.recommendation.Rating
 object ALSExample {
   def main(args: Array[String]) {
     /**
-     * Ð­Í¬¹ýÂËALSËã·¨ÍÆ¼ö¹ý³ÌÈçÏÂ£º
-     * ¼ÓÔØÊý¾Ýµ½ ratings RDD,Ã¿ÐÐ¼ÇÂ¼°üÀ¨£ºuser, product, rate
-     * ´Ó ratings µÃµ½ÓÃ»§ÉÌÆ·µÄÊý¾Ý¼¯£º(user, product)
-     * Ê¹ÓÃALS¶Ô ratings ½øÐÐÑµÁ·
-     * Í¨¹ý model ¶ÔÓÃ»§ÉÌÆ·½øÐÐÔ¤²âÆÀ·Ö£º((user, product), rate)
-     * ´Ó ratings µÃµ½ÓÃ»§ÉÌÆ·µÄÊµ¼ÊÆÀ·Ö£º((user, product), rate)
-     * ºÏ²¢Ô¤²âÆÀ·ÖºÍÊµ¼ÊÆÀ·ÖµÄÁ½¸öÊý¾Ý¼¯,²¢Çó¾ù·½²î
+     * ååŒè¿‡æ»¤ALSç®—æ³•æŽ¨èè¿‡ç¨‹å¦‚ä¸‹ï¼š
+     * åŠ è½½æ•°æ®åˆ° ratings RDD,æ¯è¡Œè®°å½•åŒ…æ‹¬ï¼šuser, product, rate
+     * ä»Ž ratings å¾—åˆ°ç”¨æˆ·å•†å“çš„æ•°æ®é›†ï¼š(user, product)
+     * ä½¿ç”¨ALSå¯¹ ratings è¿›è¡Œè®­ç»ƒ
+     * é€šè¿‡ model å¯¹ç”¨æˆ·å•†å“è¿›è¡Œé¢„æµ‹è¯„åˆ†ï¼š((user, product), rate)
+     * ä»Ž ratings å¾—åˆ°ç”¨æˆ·å•†å“çš„å®žé™…è¯„åˆ†ï¼š((user, product), rate)
+     * åˆå¹¶é¢„æµ‹è¯„åˆ†å’Œå®žé™…è¯„åˆ†çš„ä¸¤ä¸ªæ•°æ®é›†,å¹¶æ±‚å‡æ–¹å·®
      */
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
-    /**ÎÄ¼þÖÐÃ¿Ò»ÐÐ°üÀ¨Ò»¸öÓÃ»§id¡¢ÉÌÆ·idºÍÆÀ·Ö****/
+    /**æ–‡ä»¶ä¸­æ¯ä¸€è¡ŒåŒ…æ‹¬ä¸€ä¸ªç”¨æˆ·idã€å•†å“idå’Œè¯„åˆ†****/
     val data = sc.textFile("../data/mllib/als/test.data")
-    //Æ¥ÅäÀàÐÍ
+    //åŒ¹é…ç±»åž‹
     val ratings = data.map(_.split(',') match {
       case Array(user, product, rate) =>
-        //ÓÃ»§ID,²úÆ·ID,(ÆÀ¼¶,µÈ¼¶)
+        //ç”¨æˆ·ID,äº§å“ID,(è¯„çº§,ç­‰çº§)
         Rating(user.toInt, product.toInt, rate.toDouble)
     })
-    //Ê¹ÓÃALSÑµÁ·Êý¾Ý½¨Á¢ÍÆ¼öÄ£ÐÍ
-    val rank = 10 //Ä£ÐÍÖÐÒþÓïÒåÒò×ÓµÄ¸öÊý(Òþ·ÖÀàÄ£ÐÍ),ALSÖÐÒò×ÓµÄ¸öÊý,Í¨³£À´ËµÔ½´óÔ½ºÃ,µ«ÊÇ¶ÔÄÚ´æÕ¼ÓÃÂÊÓÐÖ±½ÓÓ°Ïì,Í¨³£rankÔÚ10µ½200Ö®¼ä
-    val numIterations = 20 //µü´úÊý
+    //ä½¿ç”¨ALSè®­ç»ƒæ•°æ®å»ºç«‹æŽ¨èæ¨¡åž‹
+    val rank = 10 //æ¨¡åž‹ä¸­éšè¯­ä¹‰å› å­çš„ä¸ªæ•°(éšåˆ†ç±»æ¨¡åž‹),ALSä¸­å› å­çš„ä¸ªæ•°,é€šå¸¸æ¥è¯´è¶Šå¤§è¶Šå¥½,ä½†æ˜¯å¯¹å†…å­˜å ç”¨çŽ‡æœ‰ç›´æŽ¥å½±å“,é€šå¸¸rankåœ¨10åˆ°200ä¹‹é—´
+    val numIterations = 20 //è¿­ä»£æ•°
     val model = ALS.train(ratings, rank, numIterations, 0.01)
-    //´Ó ratings ÖÐ»ñµÃÖ»°üº¬ÓÃ»§ºÍÉÌÆ·µÄÊý¾Ý¼¯ 
+    //ä»Ž ratings ä¸­èŽ·å¾—åªåŒ…å«ç”¨æˆ·å’Œå•†å“çš„æ•°æ®é›† 
     val usersProducts = ratings.map {
       case Rating(user, product, rate) =>
         (user, product)
     }
-    //Ê¹ÓÃÍÆ¼öÄ£ÐÍ¶ÔÓÃ»§ÉÌÆ·½øÐÐÔ¤²âÆÀ·Ö,µÃµ½Ô¤²âÆÀ·ÖµÄÊý¾Ý¼¯
+    //ä½¿ç”¨æŽ¨èæ¨¡åž‹å¯¹ç”¨æˆ·å•†å“è¿›è¡Œé¢„æµ‹è¯„åˆ†,å¾—åˆ°é¢„æµ‹è¯„åˆ†çš„æ•°æ®é›†
     val predictions =
       model.predict(usersProducts).map {
         case Rating(user, product, rate) =>
           ((user, product), rate)
       }
-    //½«ÕæÊµÆÀ·ÖÊý¾Ý¼¯ÓëÔ¤²âÆÀ·ÖÊý¾Ý¼¯½øÐÐºÏ²¢
+    //å°†çœŸå®žè¯„åˆ†æ•°æ®é›†ä¸Žé¢„æµ‹è¯„åˆ†æ•°æ®é›†è¿›è¡Œåˆå¹¶
     val ratesAndPreds = ratings.map {
       case Rating(user, product, rate) =>
         ((user, product), rate)
     }.join(predictions).sortByKey() //ascending or descending 
-    //È»ºó¼ÆËã¾ù·½²î,×¢ÒâÕâÀïÃ»ÓÐµ÷ÓÃ math.sqrt·½·¨
+    //ç„¶åŽè®¡ç®—å‡æ–¹å·®,æ³¨æ„è¿™é‡Œæ²¡æœ‰è°ƒç”¨ math.sqrtæ–¹æ³•
     val MSE = ratesAndPreds.map {
       case ((user, product), (r1, r2)) =>
         val err = (r1 - r2)
         err * err
     }.mean()
-    //´òÓ¡³ö¾ù·½²îÖµ  
+    //æ‰“å°å‡ºå‡æ–¹å·®å€¼  
     println("Mean Squared Error = " + MSE)
     //Mean Squared Error = 1.37797097094789E-5
 
-    /***ÓÃ»§ÍÆ¼öÉÌÆ·**/
+    /***ç”¨æˆ·æŽ¨èå•†å“**/
 
-    //ÎªÃ¿¸öÓÃ»§½øÐÐÍÆ¼ö,ÍÆ¼öµÄ½á¹û¿ÉÒÔÒÔÓÃ»§idÎªkey,½á¹ûÎªvalue´æÈëredis»òÕßhbaseÖÐ
+    //ä¸ºæ¯ä¸ªç”¨æˆ·è¿›è¡ŒæŽ¨è,æŽ¨èçš„ç»“æžœå¯ä»¥ä»¥ç”¨æˆ·idä¸ºkey,ç»“æžœä¸ºvalueå­˜å…¥redisæˆ–è€…hbaseä¸­
     val users = data.map(_.split(",") match {
       case Array(user, product, rate) => (user)
     }).distinct().collect()
     //users: Array[String] = Array(4, 2, 3, 1)
     users.foreach(
       user => {
-        //ÒÀ´ÎÎªÓÃ»§ÍÆ¼öÉÌÆ·   
+        //ä¾æ¬¡ä¸ºç”¨æˆ·æŽ¨èå•†å“   
         var rs = model.recommendProducts(user.toInt, numIterations)
         var value = ""
         var key = 0
 
-        //Æ´½ÓÍÆ¼ö½á¹û
+        //æ‹¼æŽ¥æŽ¨èç»“æžœ
         rs.foreach(r => {
           key = r.user
           value = value + r.product + ":" + r.rating + ","
@@ -78,11 +78,11 @@ object ALSExample {
         println(key.toString + "   " + value)
       })
 
-    //¶ÔÔ¤²â½á¹û°´Ô¤²âµÄÆÀ·ÖÅÅÐò
+    //å¯¹é¢„æµ‹ç»“æžœæŒ‰é¢„æµ‹çš„è¯„åˆ†æŽ’åº
     predictions.collect.sortBy(_._2)
-    //¶ÔÔ¤²â½á¹û°´ÓÃ»§½øÐÐ·Ö×é,È»ºóºÏ²¢ÍÆ¼ö½á¹û,Õâ²¿·Ö´úÂë´ýÐÞÕý
+    //å¯¹é¢„æµ‹ç»“æžœæŒ‰ç”¨æˆ·è¿›è¡Œåˆ†ç»„,ç„¶åŽåˆå¹¶æŽ¨èç»“æžœ,è¿™éƒ¨åˆ†ä»£ç å¾…ä¿®æ­£
     predictions.map { case ((user, product), rate) => (user, (product, rate)) }.groupByKey.collect
-    //¸ñÊ½»¯²âÊÔÆÀ·ÖºÍÊµ¼ÊÆÀ·ÖµÄ½á¹û
+    //æ ¼å¼åŒ–æµ‹è¯•è¯„åˆ†å’Œå®žé™…è¯„åˆ†çš„ç»“æžœ
     val formatedRatesAndPreds = ratesAndPreds.map {
       case ((user, product), (rate, pred)) => user + "," + product + "," + rate + "," + pred
     }

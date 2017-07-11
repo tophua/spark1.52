@@ -27,11 +27,11 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * RFormulaÍ¨¹ıRÄ£ĞÍ¹«Ê½À´Ñ¡ÔñÁĞ,Ö§³ÖR²Ù×÷ÖĞµÄ²¿·Ö²Ù×÷
- * 1. ~·Ö¸ôÄ¿±êºÍ¶ÔÏó
- * 2. +ºÏ²¢¶ÔÏó,¡°+ 0¡±ÒâÎ¶×ÅÉ¾³ı¿Õ¸ñ
- * 3. :½»»¥£¨ÊıÖµÏà³Ë,Àà±ğ¶şÖµ»¯£©
- * 4. . ³ıÁËÄ¿±êÍâµÄÈ«²¿ÁĞ
+ * RFormulaé€šè¿‡Ræ¨¡å‹å…¬å¼æ¥é€‰æ‹©åˆ—,æ”¯æŒRæ“ä½œä¸­çš„éƒ¨åˆ†æ“ä½œ
+ * 1. ~åˆ†éš”ç›®æ ‡å’Œå¯¹è±¡
+ * 2. +åˆå¹¶å¯¹è±¡,â€œ+ 0â€æ„å‘³ç€åˆ é™¤ç©ºæ ¼
+ * 3. :äº¤äº’ï¼ˆæ•°å€¼ç›¸ä¹˜,ç±»åˆ«äºŒå€¼åŒ–ï¼‰
+ * 4. . é™¤äº†ç›®æ ‡å¤–çš„å…¨éƒ¨åˆ—
  */
 object RFormulaExample {
   def main(args: Array[String]): Unit = {
@@ -42,20 +42,20 @@ object RFormulaExample {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
     // $example on$
-    //¼ÙÉèÎÒÃÇÓĞÒ»¸öDataFrameº¬ÓĞid,country, hourºÍclickedËÄÁĞ£º
+    //å‡è®¾æˆ‘ä»¬æœ‰ä¸€ä¸ªDataFrameå«æœ‰id,country, hourå’Œclickedå››åˆ—ï¼š
     val dataset = sqlContext.createDataFrame(Seq(
       (7, "US", 18, 1.0),
       (8, "CA", 12, 0.0),
       (9, "NZ", 15, 0.0)
     )).toDF("id", "country", "hour", "clicked")
-    //Èç¹ûÎÒÃÇÊ¹ÓÃRFormula¹«Ê½clicked ~ country+ hour,
-    //Ôò±íÃ÷ÎÒÃÇÏ£Íû»ùÓÚcountryºÍhourÔ¤²âclicked
+    //å¦‚æœæˆ‘ä»¬ä½¿ç”¨RFormulaå…¬å¼clicked ~ country+ hour,
+    //åˆ™è¡¨æ˜æˆ‘ä»¬å¸Œæœ›åŸºäºcountryå’Œhouré¢„æµ‹clicked
     val formula = new RFormula()
-      .setFormula("clicked ~ country + hour")//¹«Ê½
-      .setFeaturesCol("features")//ÌØÕ÷ÁĞ
-      .setLabelCol("label")//±êÇ©ÁĞÃû
-      //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
-      //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+      .setFormula("clicked ~ country + hour")//å…¬å¼
+      .setFeaturesCol("features")//ç‰¹å¾åˆ—
+      .setLabelCol("label")//æ ‡ç­¾åˆ—å
+      //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
+      //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val output = formula.fit(dataset).transform(dataset)
     /**
     id | country |hour | clicked | features         | label

@@ -14,22 +14,22 @@ object SVMWithSGDExample {
 
     val conf = new SparkConf().setAppName("SVMWithSGDExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
-    //°ÑÊı¾İ¼ÓÔØ³ÉRDD
+    //æŠŠæ•°æ®åŠ è½½æˆRDD
     val svmData = MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
-    //¼ÆËã¼ÇÂ¼µÄÊıÄ¿
+    //è®¡ç®—è®°å½•çš„æ•°ç›®
     svmData.count
-    //°ÑÊı¾İ¼¯·Ö³ÉÁ½°ë,Ò»°ëÑµÁ·Êı¾İºÍÒ»°ë²âÊÔÊı¾İ
+    //æŠŠæ•°æ®é›†åˆ†æˆä¸¤åŠ,ä¸€åŠè®­ç»ƒæ•°æ®å’Œä¸€åŠæµ‹è¯•æ•°æ®
     val trainingAndTest = svmData.randomSplit(Array(0.5, 0.5))
-    //ÑµÁ·Êı¾İºÍ²âÊÔÊı¾İ¸³Öµ
+    //è®­ç»ƒæ•°æ®å’Œæµ‹è¯•æ•°æ®èµ‹å€¼
     val trainingData = trainingAndTest(0)
     val testData = trainingAndTest(1)
-    //ÑµÁ·Ëã·¨²ú²¢¾­¹ı100´Îµü´ú¹¹½¨Ä£ĞÍ (SGDËæ»úÌİ¶ÈÏÂ½µ)
+    //è®­ç»ƒç®—æ³•äº§å¹¶ç»è¿‡100æ¬¡è¿­ä»£æ„å»ºæ¨¡å‹ (SGDéšæœºæ¢¯åº¦ä¸‹é™)
     val model = SVMWithSGD.train(trainingData, 100)
-    //ÓÃÄ£ĞÍÈ¥ÎªÈÎÒâÊı¾İ¼¯Ô¤²â±êÇ©,Ê¹ÓÃ²âÊÔÊı¾İÖĞµÄµÚÒ»¸öµã²âÊÔ±êÇ©
+    //ç”¨æ¨¡å‹å»ä¸ºä»»æ„æ•°æ®é›†é¢„æµ‹æ ‡ç­¾,ä½¿ç”¨æµ‹è¯•æ•°æ®ä¸­çš„ç¬¬ä¸€ä¸ªç‚¹æµ‹è¯•æ ‡ç­¾
     val label = model.predict(testData.first.features)
-    //´´½¨Ò»¸öÔª×é,ÆäÖĞµÚÒ»¸öÔªËØÊÇ²âÊÔÊı¾İµÄÔ¤²â±êÇ©,µÚ¶ş¸öÔªËØÊÇÊµ¼Ê±êÇ©
+    //åˆ›å»ºä¸€ä¸ªå…ƒç»„,å…¶ä¸­ç¬¬ä¸€ä¸ªå…ƒç´ æ˜¯æµ‹è¯•æ•°æ®çš„é¢„æµ‹æ ‡ç­¾,ç¬¬äºŒä¸ªå…ƒç´ æ˜¯å®é™…æ ‡ç­¾
     val predictionsAndLabels = testData.map(r => (model.predict(r.features), r.label))
-    //¼ÆËãÓĞ¶àÉÙÔ¤²â±êÇ©ºÍÊµ¼Ê±êÇ©²»Æ¥ÅäµÄ¼ÇÂ¼
+    //è®¡ç®—æœ‰å¤šå°‘é¢„æµ‹æ ‡ç­¾å’Œå®é™…æ ‡ç­¾ä¸åŒ¹é…çš„è®°å½•
     predictionsAndLabels.filter(p => p._1 != p._2).count
   }
 }

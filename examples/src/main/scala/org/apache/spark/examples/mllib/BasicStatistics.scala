@@ -7,39 +7,39 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
 import org.apache.spark.mllib.linalg.Matrix
 /**
- * »ù±¾Í³¼Æ¹¦ÄÜ
+ * åŸºæœ¬ç»Ÿè®¡åŠŸèƒ½
  */
 object BasicStatistics {
 
   def main(args: Array[String]) {
-    val observations: RDD[Vector] = null // an RDD of Vectors Ò»¸öÏòÁ¿µÄRDD
-    // Compute column summary statistics. ¼ÆËãÁĞ»ã×ÜÍ³¼Æ
-    //·µ»ØÒ»¸öMultivariateStatisticalSummaryÊµÀıÀïÃæ°üÀ¨ÃæÏòÁĞµÄ×î´óÖµ
-    //×îĞ¡Öµ,¾ùÖµ,·½²î,·ÇÁãÖµ¸öÊı¼°×ÜÊı
+    val observations: RDD[Vector] = null // an RDD of Vectors ä¸€ä¸ªå‘é‡çš„RDD
+    // Compute column summary statistics. è®¡ç®—åˆ—æ±‡æ€»ç»Ÿè®¡
+    //è¿”å›ä¸€ä¸ªMultivariateStatisticalSummaryå®ä¾‹é‡Œé¢åŒ…æ‹¬é¢å‘åˆ—çš„æœ€å¤§å€¼
+    //æœ€å°å€¼,å‡å€¼,æ–¹å·®,éé›¶å€¼ä¸ªæ•°åŠæ€»æ•°
     val summary: MultivariateStatisticalSummary = Statistics.colStats(observations)
-    //Ò»¸ö°üº¬Ã¿¸öÁĞµÄÆ½¾ùÖµµÄ³íÃÜÏòÁ¿
+    //ä¸€ä¸ªåŒ…å«æ¯ä¸ªåˆ—çš„å¹³å‡å€¼çš„ç¨ å¯†å‘é‡
     println(summary.mean) // a dense vector containing the mean value for each column
-    println(summary.variance) // column-wise variance ÁĞµÄ·½²î
-    println(summary.numNonzeros) // number of nonzeros in each column ÔÚÃ¿Ò»ÁĞµÄ¾ØÕóµÄ·ÇÁãÔªËØÊı
+    println(summary.variance) // column-wise variance åˆ—çš„æ–¹å·®
+    println(summary.numNonzeros) // number of nonzeros in each column åœ¨æ¯ä¸€åˆ—çš„çŸ©é˜µçš„éé›¶å…ƒç´ æ•°
 
-    /***Ìá¹©ÁĞ¼äÏà¹ØĞÔ**/
+    /***æä¾›åˆ—é—´ç›¸å…³æ€§**/
     val sc: SparkContext = null
-    val seriesX: RDD[Double] = null // a series Ò»ÏµÁĞ
-    //±ØĞëÓĞÏàÍ¬ÊıÁ¿µÄ·ÖÇøºÍ»ùÊıµÄÍâĞÍ
+    val seriesX: RDD[Double] = null // a series ä¸€ç³»åˆ—
+    //å¿…é¡»æœ‰ç›¸åŒæ•°é‡çš„åˆ†åŒºå’ŒåŸºæ•°çš„å¤–å‹
     val seriesY: RDD[Double] = null // must have the same number of partitions and cardinality as seriesX
 
     // compute the correlation using Pearson's method. Enter "spearman" for Spearman's method. If a 
     // method is not specified, Pearson's method will be used by default. 
-    //pearsonÆ¤¶ûÉ­Ïà¹ØĞÔ
+    //pearsonçš®å°”æ£®ç›¸å…³æ€§
     val correlation: Double = Statistics.corr(seriesX, seriesY, "pearson")
     println("pearson:"+correlation)
-    //Çë×¢Òâ,Ã¿¸öÏòÁ¿ÊÇÒ»¸öĞĞ,¶ø²»ÊÇÒ»¸öÁĞ
+    //è¯·æ³¨æ„,æ¯ä¸ªå‘é‡æ˜¯ä¸€ä¸ªè¡Œ,è€Œä¸æ˜¯ä¸€ä¸ªåˆ—
     val data: RDD[Vector] = null // note that each Vector is a row and not a column 
-     //spearman Ë¹Æ¤¶ûÂüÏà¹ØĞÔ
+     //spearman æ–¯çš®å°”æ›¼ç›¸å…³æ€§
     // calculate the correlation matrix using Pearson's method. Use "spearman" for Spearman's method.
-    //ÓÃÆ¤¶ûÉ­·¨¼ÆËãÏà¹Ø¾ØÕó,ÓÃ¡°Ë¹Æ¤¶ûÂü¡±µÄË¹Æ¤¶ûÂü·½·¨
+    //ç”¨çš®å°”æ£®æ³•è®¡ç®—ç›¸å…³çŸ©é˜µ,ç”¨â€œæ–¯çš®å°”æ›¼â€çš„æ–¯çš®å°”æ›¼æ–¹æ³•
     // If a method is not specified, Pearson's method will be used by default. 
-    //Èç¹ûÃ»ÓĞÖ¸¶¨·½·¨,Æ¤¶ûÉ­µÄ·½·¨½«±»Ä¬ÈÏÊ¹ÓÃ
+    //å¦‚æœæ²¡æœ‰æŒ‡å®šæ–¹æ³•,çš®å°”æ£®çš„æ–¹æ³•å°†è¢«é»˜è®¤ä½¿ç”¨
     val correlMatrix: Matrix = Statistics.corr(data, "pearson")
     println("correlMatrix:"+correlMatrix.toString())
 

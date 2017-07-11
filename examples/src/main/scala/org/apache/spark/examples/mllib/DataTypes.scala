@@ -18,64 +18,64 @@ import org.apache.spark.mllib.linalg.distributed.MatrixEntry
 import org.apache.spark.mllib.linalg.distributed.BlockMatrix
 
 /**
- * Êı¾İÀàĞÍ²âÊÔ
+ * æ•°æ®ç±»å‹æµ‹è¯•
  */
 object DataTypes {
 /**
- * Ï¡Êè¾ØÕó:ÔÚ¾ØÕóÖĞ,ÈôÊıÖµÎª0µÄÔªËØÊıÄ¿Ô¶Ô¶¶àÓÚ·Ç0ÔªËØµÄÊıÄ¿Ê±,Ôò³Æ¸Ã¾ØÕóÎªÏ¡Êè¾ØÕó
- * ÃÜ¼¯¾ØÕó:ÔÚ¾ØÕóÖĞ,Èô·Ç0ÔªËØÊıÄ¿Õ¼´ó¶àÊıÊ±,Ôò³Æ¸Ã¾ØÕóÎªÃÜ¼¯¾ØÕó
+ * ç¨€ç–çŸ©é˜µ:åœ¨çŸ©é˜µä¸­,è‹¥æ•°å€¼ä¸º0çš„å…ƒç´ æ•°ç›®è¿œè¿œå¤šäºé0å…ƒç´ çš„æ•°ç›®æ—¶,åˆ™ç§°è¯¥çŸ©é˜µä¸ºç¨€ç–çŸ©é˜µ
+ * å¯†é›†çŸ©é˜µ:åœ¨çŸ©é˜µä¸­,è‹¥é0å…ƒç´ æ•°ç›®å å¤§å¤šæ•°æ—¶,åˆ™ç§°è¯¥çŸ©é˜µä¸ºå¯†é›†çŸ©é˜µ
  */
   def main(args: Array[String]) {
     val sparkConf = new SparkConf().setMaster("local[2]").setAppName("SparkHdfsLR")
     val sc = new SparkContext(sparkConf)
-    /**´´½¨±¾µØÏòÁ¿**/
-    //±¾µØÏòÁ¿£¨Local Vector£©´æ´¢ÔÚµ¥Ì¨»úÆ÷ÉÏ,Ë÷Òı²ÉÓÃ0¿ªÊ¼µÄÕûĞÍ±íÊ¾,Öµ²ÉÓÃDoubleÀàĞÍµÄÖµ±íÊ¾
+    /**åˆ›å»ºæœ¬åœ°å‘é‡**/
+    //æœ¬åœ°å‘é‡ï¼ˆLocal Vectorï¼‰å­˜å‚¨åœ¨å•å°æœºå™¨ä¸Š,ç´¢å¼•é‡‡ç”¨0å¼€å§‹çš„æ•´å‹è¡¨ç¤º,å€¼é‡‡ç”¨Doubleç±»å‹çš„å€¼è¡¨ç¤º
     // Create a dense vector (1.0, 0.0, 3.0).
-    //ÃÜ¶È¾ØÕó,ÁãÖµÒ²´æ´¢
+    //å¯†åº¦çŸ©é˜µ,é›¶å€¼ä¹Ÿå­˜å‚¨
     val dv: Vector = Vectors.dense(1.0, 0.0, 3.0)
     // Create a sparse vector (1.0, 0.0, 3.0) by specifying its indices and values corresponding to nonzero entries.
-   //´´½¨Ï¡Êè¾ØÕó,Ö¸¶¨ÔªËØµÄ¸öÊı¡¢Ë÷Òı¼°·ÇÁãÖµ,Êı×é·½Ê½
+   //åˆ›å»ºç¨€ç–çŸ©é˜µ,æŒ‡å®šå…ƒç´ çš„ä¸ªæ•°ã€ç´¢å¼•åŠéé›¶å€¼,æ•°ç»„æ–¹å¼
     val sv1: Vector = Vectors.sparse(3, Array(0, 2), Array(1.0, 3.0))
     // Create a sparse vector (1.0, 0.0, 3.0) by specifying its nonzero entries.
-    // ´´½¨Ï¡Êè¾ØÕó,Ö¸¶¨ÔªËØµÄ¸öÊı¡¢Ë÷Òı¼°·ÇÁãÖµ,²ÉÓÃĞòÁĞ·½Ê½
+    // åˆ›å»ºç¨€ç–çŸ©é˜µ,æŒ‡å®šå…ƒç´ çš„ä¸ªæ•°ã€ç´¢å¼•åŠéé›¶å€¼,é‡‡ç”¨åºåˆ—æ–¹å¼
     val sv2: Vector = Vectors.sparse(3, Seq((0, 1.0), (2, 3.0)))
 
-    /**º¬±êÇ©µã**/
+    /**å«æ ‡ç­¾ç‚¹**/
 
     // Create a labeled point with a positive label and a dense feature vector.
     val pos = LabeledPoint(1.0, Vectors.dense(1.0, 0.0, 3.0))
 
     // Create a labeled point with a negative label and a sparse feature vector.
-    //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+    //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
     val neg = LabeledPoint(0.0, Vectors.sparse(3, Array(0, 2), Array(1.0, 3.0)))
-    //Ï¡ÊèÊı¾İ,MLlib¿ÉÒÔ¶ÁÈ¡ÒÔLibSVM¸ñÊ½´æ´¢µÄÑµÁ·ÊµÀı,Ã¿ĞĞ´ú±íÒ»¸öº¬Àà±êÇ©µÄÏ¡ÊèÌØÕ÷ÏòÁ¿
-    //Ë÷Òı´Ó1¿ªÊ¼²¢ÇÒµİÔö,¼ÓÔØ±»×ª»»Îª´Ó0¿ªÊ¼   
+    //ç¨€ç–æ•°æ®,MLlibå¯ä»¥è¯»å–ä»¥LibSVMæ ¼å¼å­˜å‚¨çš„è®­ç»ƒå®ä¾‹,æ¯è¡Œä»£è¡¨ä¸€ä¸ªå«ç±»æ ‡ç­¾çš„ç¨€ç–ç‰¹å¾å‘é‡
+    //ç´¢å¼•ä»1å¼€å§‹å¹¶ä¸”é€’å¢,åŠ è½½è¢«è½¬æ¢ä¸ºä»0å¼€å§‹   
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     val examples: RDD[LabeledPoint] = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt")
-    /**±¾µØÃÜ¼¯¾ØÕó***/
+    /**æœ¬åœ°å¯†é›†çŸ©é˜µ***/
     // Create a dense matrix ((1.0, 2.0), (3.0, 4.0), (5.0, 6.0))
     val dm: Matrix = Matrices.dense(3, 2, Array(1.0, 3.0, 5.0, 2.0, 4.0, 6.0))
-    /**±¾µØÏ¡Êè¾ØÕó***/
-    /**ÏÂÁĞ¾ØÕó
+    /**æœ¬åœ°ç¨€ç–çŸ©é˜µ***/
+    /**ä¸‹åˆ—çŸ©é˜µ
     1.0 0.0 4.0
     0.0 3.0 5.0
     2.0 0.0 6.0
-		Èç¹û²ÉÓÃÏ¡Êè¾ØÕó´æ´¢µÄ»°,Æä´æ´¢ĞÅÏ¢°üÀ¨°´ÁĞµÄĞÎÊ½£º
-		Êµ¼Ê´æ´¢Öµ£º [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`,
-		¾ØÕóÔªËØ¶ÔÓ¦µÄĞĞË÷Òı£ºrowIndices=[0, 2, 1, 0, 1, 2]`
-		ÁĞÆğÊ¼Î»ÖÃË÷Òı£º `colPointers=[0, 2, 3, 6]**/
+		å¦‚æœé‡‡ç”¨ç¨€ç–çŸ©é˜µå­˜å‚¨çš„è¯,å…¶å­˜å‚¨ä¿¡æ¯åŒ…æ‹¬æŒ‰åˆ—çš„å½¢å¼ï¼š
+		å®é™…å­˜å‚¨å€¼ï¼š [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]`,
+		çŸ©é˜µå…ƒç´ å¯¹åº”çš„è¡Œç´¢å¼•ï¼šrowIndices=[0, 2, 1, 0, 1, 2]`
+		åˆ—èµ·å§‹ä½ç½®ç´¢å¼•ï¼š `colPointers=[0, 2, 3, 6]**/
     // Create a sparse matrix ((9.0, 0.0), (0.0, 8.0), (0.0, 6.0))
     val sm: Matrix = Matrices.sparse(3, 2, Array(0, 1, 3), Array(0, 2, 1), Array(9, 6, 8))
-    /**·Ö²¼Ê½¾ØÕó**/
+    /**åˆ†å¸ƒå¼çŸ©é˜µ**/
     val rows: RDD[Vector] = null // an RDD of local vectors
     // Create a RowMatrix from an RDD[Vector].  
-    //ĞĞ¾ØÕó(RowMatrix)°´ĞĞ·Ö²¼Ê½´æ´¢,ÎŞĞĞË÷Òı,µ×²ãÖ§³Å½á¹¹ÊÇ¶àĞĞÊı¾İ×é³ÉµÄRDD,Ã¿ĞĞÊÇÒ»¸ö¾Ö²¿ÏòÁ¿
+    //è¡ŒçŸ©é˜µ(RowMatrix)æŒ‰è¡Œåˆ†å¸ƒå¼å­˜å‚¨,æ— è¡Œç´¢å¼•,åº•å±‚æ”¯æ’‘ç»“æ„æ˜¯å¤šè¡Œæ•°æ®ç»„æˆçš„RDD,æ¯è¡Œæ˜¯ä¸€ä¸ªå±€éƒ¨å‘é‡
     val mat: RowMatrix = new RowMatrix(rows)
 
     // Get its size.
@@ -84,42 +84,42 @@ object DataTypes {
 
     // QR decomposition 
     val qrResult = mat.tallSkinnyQR(true)
-    /**Ë÷ÒıĞĞ·Ö²¼Ê½¾ØÕó**/
-    //°üº­ĞĞË÷ÒıÊı¾İ¼¯ĞÅÏ¢
-    val rowsIndex: RDD[IndexedRow] = null // an RDD of indexed rows Ë÷ÒıĞĞµÄRDD
+    /**ç´¢å¼•è¡Œåˆ†å¸ƒå¼çŸ©é˜µ**/
+    //åŒ…æ¶µè¡Œç´¢å¼•æ•°æ®é›†ä¿¡æ¯
+    val rowsIndex: RDD[IndexedRow] = null // an RDD of indexed rows ç´¢å¼•è¡Œçš„RDD
     // Create an IndexedRowMatrix from an RDD[IndexedRow].
-    //Ë÷ÒıĞĞ¾ØÕó(IndexedRowMatrix)°´ĞĞ·Ö²¼Ê½´æ´¢,ÓĞĞĞË÷Òı,Æäµ×²ãÖ§³Å½á¹¹ÊÇË÷ÒıµÄĞĞ×é³ÉµÄRDD,ËùÒÔÃ¿ĞĞ¿ÉÒÔÍ¨¹ıË÷Òı(long)ºÍ¾Ö²¿ÏòÁ¿±íÊ¾
+    //ç´¢å¼•è¡ŒçŸ©é˜µ(IndexedRowMatrix)æŒ‰è¡Œåˆ†å¸ƒå¼å­˜å‚¨,æœ‰è¡Œç´¢å¼•,å…¶åº•å±‚æ”¯æ’‘ç»“æ„æ˜¯ç´¢å¼•çš„è¡Œç»„æˆçš„RDD,æ‰€ä»¥æ¯è¡Œå¯ä»¥é€šè¿‡ç´¢å¼•(long)å’Œå±€éƒ¨å‘é‡è¡¨ç¤º
     val matIndex: IndexedRowMatrix = new IndexedRowMatrix(rowsIndex)
 
-    // Get its size. µÃµ½ËüµÄ´óĞ¡
+    // Get its size. å¾—åˆ°å®ƒçš„å¤§å°
     val mIndex = matIndex.numRows()
     val nIndex = matIndex.numCols()
 
-    // Drop its row indices. ÏÂ½µĞĞË÷Òı
+    // Drop its row indices. ä¸‹é™è¡Œç´¢å¼•
     val rowMat: RowMatrix = matIndex.toRowMatrix()
-    /***ÈıÔª×é¾ØÕó*/
-    val entries: RDD[MatrixEntry] = null // an RDD of matrix entries ¾ØÕóÔªËØµÄRDD
+    /***ä¸‰å…ƒç»„çŸ©é˜µ*/
+    val entries: RDD[MatrixEntry] = null // an RDD of matrix entries çŸ©é˜µå…ƒç´ çš„RDD
     // Create a CoordinateMatrix from an RDD[MatrixEntry].
-    //CoordinateMatrix³£ÓÃÓÚÏ¡ÊèĞÔ±È½Ï¸ßµÄ¼ÆËãÖĞ,MatrixEntryÊÇÒ»¸ö TupleÀàĞÍµÄÔªËØ,ÆäÖĞ°üº¬ĞĞ¡¢ÁĞºÍÔªËØÖµ
+    //CoordinateMatrixå¸¸ç”¨äºç¨€ç–æ€§æ¯”è¾ƒé«˜çš„è®¡ç®—ä¸­,MatrixEntryæ˜¯ä¸€ä¸ª Tupleç±»å‹çš„å…ƒç´ ,å…¶ä¸­åŒ…å«è¡Œã€åˆ—å’Œå…ƒç´ å€¼
     val matCoordinate: CoordinateMatrix = new CoordinateMatrix(entries)
 
     // Get its size.
-    //µÃµ½ËüµÄ´óĞ¡
+    //å¾—åˆ°å®ƒçš„å¤§å°
     val mCoordinate = mat.numRows()
     val nCoordinate = mat.numCols()
 
     // Convert it to an IndexRowMatrix whose rows are sparse vectors.
-    //Ë÷ÒıĞĞ¾ØÕó(IndexedRowMatrix)°´ĞĞ·Ö²¼Ê½´æ´¢,ÓĞĞĞË÷Òı,Æäµ×²ãÖ§³Å½á¹¹ÊÇË÷ÒıµÄĞĞ×é³ÉµÄRDD,ËùÒÔÃ¿ĞĞ¿ÉÒÔÍ¨¹ıË÷Òı(long)ºÍ¾Ö²¿ÏòÁ¿±íÊ¾
+    //ç´¢å¼•è¡ŒçŸ©é˜µ(IndexedRowMatrix)æŒ‰è¡Œåˆ†å¸ƒå¼å­˜å‚¨,æœ‰è¡Œç´¢å¼•,å…¶åº•å±‚æ”¯æ’‘ç»“æ„æ˜¯ç´¢å¼•çš„è¡Œç»„æˆçš„RDD,æ‰€ä»¥æ¯è¡Œå¯ä»¥é€šè¿‡ç´¢å¼•(long)å’Œå±€éƒ¨å‘é‡è¡¨ç¤º
     val indexedRowMatrix = matCoordinate.toIndexedRowMatrix()
-    /**BlockMatrix¿é¾ØÕó**/
+    /**BlockMatrixå—çŸ©é˜µ**/
 
     val coordMat: CoordinateMatrix = new CoordinateMatrix(entries)
 
     val matA: BlockMatrix = coordMat.toBlockMatrix().cache()
 
     // Validate whether the BlockMatrix is set up properly. Throws an Exception when it is not valid.
-    //ÑéÖ¤ÊÇ·ñÕıÈ·ÉèÖÃÊôĞÔ,µ±ËüÎŞĞ§Ê±Å×³öÒ»¸öÒì³£
-    // Nothing happens if it is valid.Èç¹ûËüÊÇÓĞĞ§µÄ,Ê²Ã´¶¼²»»á·¢Éú
+    //éªŒè¯æ˜¯å¦æ­£ç¡®è®¾ç½®å±æ€§,å½“å®ƒæ— æ•ˆæ—¶æŠ›å‡ºä¸€ä¸ªå¼‚å¸¸
+    // Nothing happens if it is valid.å¦‚æœå®ƒæ˜¯æœ‰æ•ˆçš„,ä»€ä¹ˆéƒ½ä¸ä¼šå‘ç”Ÿ
     matA.validate()
 
     // Calculate A^T A.

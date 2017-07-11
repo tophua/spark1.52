@@ -49,17 +49,17 @@ object LinearRegressionExample {
       input: String = "../data/mllib/sample_libsvm_data.txt",
       testInput: String = "",
       /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
       dataFormat: String = "libsvm",
       regParam: Double = 0.0,
-      elasticNetParam: Double = 0.0,//ElasticNetParam=0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
+      elasticNetParam: Double = 0.0,//ElasticNetParam=0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
       maxIter: Int = 100,
-      tol: Double = 1E-6,//µü´úËã·¨µÄÊÕÁ²ĞÔ
+      tol: Double = 1E-6,//è¿­ä»£ç®—æ³•çš„æ”¶æ•›æ€§
       fracTest: Double = 0.2) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -70,7 +70,7 @@ object LinearRegressionExample {
       opt[Double]("regParam")
         .text(s"regularization parameter, default: ${defaultParams.regParam}")
         .action((x, c) => c.copy(regParam = x))
-      opt[Double]("elasticNetParam")//ElasticNetParam=0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
+      opt[Double]("elasticNetParam")//ElasticNetParam=0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
         .text(s"ElasticNet mixing parameter. For alpha = 0, the penalty is an L2 penalty. " +
         s"For alpha = 1, it is an L1 penalty. For 0 < alpha < 1, the penalty is a combination of " +
         s"L1 and L2, default: ${defaultParams.elasticNetParam}")
@@ -78,7 +78,7 @@ object LinearRegressionExample {
       opt[Int]("maxIter")
         .text(s"maximum number of iterations, default: ${defaultParams.maxIter}")
         .action((x, c) => c.copy(maxIter = x))
-      opt[Double]("tol")//µü´úËã·¨µÄÊÕÁ²ĞÔ
+      opt[Double]("tol")//è¿­ä»£ç®—æ³•çš„æ”¶æ•›æ€§
         .text(s"the convergence tolerance of iterations, Smaller value will lead " +
         s"to higher accuracy with the cost of more iterations, default: ${defaultParams.tol}")
         .action((x, c) => c.copy(tol = x))
@@ -92,11 +92,11 @@ object LinearRegressionExample {
         .action((x, c) => c.copy(testInput = x))
       opt[String]("dataFormat")
       /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(dataFormat = x))
@@ -131,21 +131,21 @@ object LinearRegressionExample {
       params.dataFormat, params.testInput, "regression", params.fracTest)
 
     val lir = new LinearRegression()
-    //ÑµÁ·Êı¾İ¼¯DataFrameÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
-      .setFeaturesCol("features")//ÌØÕ÷Ãû
-      .setLabelCol("label")//±êÇ©ÁĞ
-      .setRegParam(params.regParam)//ÉèÖÃÕıÔò»¯²ÎÊı
-      .setElasticNetParam(params.elasticNetParam)//ElasticNetParam=0.0ÎªL2ÕıÔò»¯ 1.0ÎªL1ÕıÔò»¯
-      .setMaxIter(params.maxIter)//ÉèÖÃ×î´óµü´ú´ÎÊı
-      .setTol(params.tol)//ÉèÖÃµü´úµÄÊÕÁ²
+    //è®­ç»ƒæ•°æ®é›†DataFrameä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
+      .setFeaturesCol("features")//ç‰¹å¾å
+      .setLabelCol("label")//æ ‡ç­¾åˆ—
+      .setRegParam(params.regParam)//è®¾ç½®æ­£åˆ™åŒ–å‚æ•°
+      .setElasticNetParam(params.elasticNetParam)//ElasticNetParam=0.0ä¸ºL2æ­£åˆ™åŒ– 1.0ä¸ºL1æ­£åˆ™åŒ–
+      .setMaxIter(params.maxIter)//è®¾ç½®æœ€å¤§è¿­ä»£æ¬¡æ•°
+      .setTol(params.tol)//è®¾ç½®è¿­ä»£çš„æ”¶æ•›
 
     // Train the model
-    // ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+    // ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
     val startTime = System.nanoTime()
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val lirModel = lir.fit(training)
-    //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
-    //¾­¹ıµÄÊ±¼ä
+    //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
+    //ç»è¿‡çš„æ—¶é—´
     val elapsedTime = (System.nanoTime() - startTime) / 1e9   
     //Training time: 8.57000559 seconds
     println(s"Training time: $elapsedTime seconds")

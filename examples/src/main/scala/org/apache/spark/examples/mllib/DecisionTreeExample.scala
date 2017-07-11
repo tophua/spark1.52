@@ -8,7 +8,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 /**
  * Spark coolbook p131
- * ¾ö²ßÊ÷
+ * å†³ç­–æ ‘
  */
 object DecisionTreeExample {
    def main(args: Array[String]) {
@@ -16,13 +16,13 @@ object DecisionTreeExample {
     val conf = new SparkConf().setAppName("DecisionTreeExample").setMaster("local[4]")
     val sc = new SparkContext(conf)
     /**
-     * ´´½¨ÒÔ²¡Ì¬Êı¾İÌå×÷Îª±ê¼ÇµÄLabledPointÊı×é
+     * åˆ›å»ºä»¥ç—…æ€æ•°æ®ä½“ä½œä¸ºæ ‡è®°çš„LabledPointæ•°ç»„
      */   
     /**
-     * ÏÂÓêÊÇ·ñ(2,1)
-     * ·ç´óÊÇ·ñ(2,1)
-     * ÎÂ¶È¸ß,Õı³£,Àä(3,2,1)
-     *ÊÇ·ñ´òÍøÇò|ÏÂÓê|·ç´ó|ÎÂ¶È| 
+     * ä¸‹é›¨æ˜¯å¦(2,1)
+     * é£å¤§æ˜¯å¦(2,1)
+     * æ¸©åº¦é«˜,æ­£å¸¸,å†·(3,2,1)
+     *æ˜¯å¦æ‰“ç½‘çƒ|ä¸‹é›¨|é£å¤§|æ¸©åº¦| 
       0.0,			1.0,	1.0,2.0
       0.0,			1.0,	1.0,1.0
       0.0,			1.0,	1.0,0.0
@@ -32,19 +32,19 @@ object DecisionTreeExample {
       1.0,			0.0,	0.0,1.0
       0.0,			0.0,	0.0,0.0 
      */
-    //¼ÓÔØÎÄ¼ş
+    //åŠ è½½æ–‡ä»¶
     val data = sc.textFile("../data/mllib/tennis.csv")
-    //½âÎöÊı¾İ²¢°ÑËü¼ÓÔØµ½LablePoint
+    //è§£ææ•°æ®å¹¶æŠŠå®ƒåŠ è½½åˆ°LablePoint
     val parsedData = data.map {line => 
           val parts = line.split(',').map(_.toDouble)
-	  //LabeledPoint±ê¼ÇµãÊÇ¾Ö²¿ÏòÁ¿,ÏòÁ¿¿ÉÒÔÊÇÃÜ¼¯ĞÍ»òÕßÏ¡ÊèĞÍ,Ã¿¸öÏòÁ¿»á¹ØÁªÁËÒ»¸ö±êÇ©(label)
+	  //LabeledPointæ ‡è®°ç‚¹æ˜¯å±€éƒ¨å‘é‡,å‘é‡å¯ä»¥æ˜¯å¯†é›†å‹æˆ–è€…ç¨€ç–å‹,æ¯ä¸ªå‘é‡ä¼šå…³è”äº†ä¸€ä¸ªæ ‡ç­¾(label)
           LabeledPoint(parts(0), Vectors.dense(parts.tail))
           }
-    //ÓÃÕâĞ©Êı¾İÑµÁ·Ëã·¨
+    //ç”¨è¿™äº›æ•°æ®è®­ç»ƒç®—æ³•
    val model = DecisionTree.train(parsedData, Classification,Entropy, 3)
-    //´´½¨Ò»¸öÏòÁ¿±íÊ¾ÎŞÓê,·ç´ó,µÍÎÂ
+    //åˆ›å»ºä¸€ä¸ªå‘é‡è¡¨ç¤ºæ— é›¨,é£å¤§,ä½æ¸©
    val v=Vectors.dense(0.0,1.0,0.0)
-   //Ô¤²âÊÇ·ñ´òÍøÇò
+   //é¢„æµ‹æ˜¯å¦æ‰“ç½‘çƒ
    model.predict(v)
   
   }

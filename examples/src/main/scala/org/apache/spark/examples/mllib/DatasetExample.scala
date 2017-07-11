@@ -32,24 +32,24 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Row, SQLContext, DataFrame}
 
 /**
- * ÈçºÎÊ¹ÓÃSQLÊı¾İ¼¯µÄÒ»¸öÀı×Ó
+ * å¦‚ä½•ä½¿ç”¨SQLæ•°æ®é›†çš„ä¸€ä¸ªä¾‹å­
  * An example of how to use [[org.apache.spark.sql.DataFrame]] as a Dataset for ML. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.DatasetExample [options]
  * }}}
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
- * Èç¹ûÄãÊ¹ÓÃËü×÷ÎªÒ»¸öÄ£°åÀ´´´½¨×Ô¼ºµÄÓ¦ÓÃ³ÌĞò
+ * å¦‚æœä½ ä½¿ç”¨å®ƒä½œä¸ºä¸€ä¸ªæ¨¡æ¿æ¥åˆ›å»ºè‡ªå·±çš„åº”ç”¨ç¨‹åº
  */
 object DatasetExample {
 
   case class Params(
       input: String = "../data/mllib/sample_libsvm_data.txt",
       /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
       dataFormat: String = "libsvm") extends AbstractParams[Params]
 
@@ -63,11 +63,11 @@ object DatasetExample {
         .action((x, c) => c.copy(input = x))
       opt[String]("dataFormat")
       /**
-       *  libSVMµÄÊı¾İ¸ñÊ½
+       *  libSVMçš„æ•°æ®æ ¼å¼
        *  <label> <index1>:<value1> <index2>:<value2> ...
-       *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-       *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-       *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+       *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+       *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+       *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
        */
         .text("data format: libsvm (default), dense (deprecated in Spark v1.1)")
         .action((x, c) => c.copy(input = x))
@@ -88,19 +88,19 @@ object DatasetExample {
     val conf = new SparkConf().setAppName(s"DatasetExample with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
-    import sqlContext.implicits._  // for implicit conversions ÒşÊ½×ª»»
+    import sqlContext.implicits._  // for implicit conversions éšå¼è½¬æ¢
 
-    // Load input data ¼ÓÔØÊäÈëÊı¾İ
+    // Load input data åŠ è½½è¾“å…¥æ•°æ®
     val origData: RDD[LabeledPoint] = params.dataFormat match {
-      //³íÃÜÊı¾İ
+      //ç¨ å¯†æ•°æ®
       case "dense" => MLUtils.loadLabeledPoints(sc, params.input)
-      //libsvmÊı¾İ
+      //libsvmæ•°æ®
       /**
-       *  libSVMµÄÊı¾İ¸ñÊ½
+       *  libSVMçš„æ•°æ®æ ¼å¼
        *  <label> <index1>:<value1> <index2>:<value2> ...
-       *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-       *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-       *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+       *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+       *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+       *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
        */
       case "libsvm" => MLUtils.loadLibSVMFile(sc, params.input)
     }
@@ -108,7 +108,7 @@ object DatasetExample {
     println(s"Loaded ${origData.count()} instances from file: ${params.input}")
 
     // Convert input data to DataFrame explicitly.
-    //ÏÔÊ¾×ª»»ÊäÈëÊı¾İ¼¯
+    //æ˜¾ç¤ºè½¬æ¢è¾“å…¥æ•°æ®é›†
     val df: DataFrame = origData.toDF()
     /**
      Inferred schema:
@@ -167,7 +167,7 @@ object DatasetExample {
     println(s"Converted to DataFrame with ${df.count()} records")
 
     // Select columns
-    //Ñ¡ÔñÁĞ
+    //é€‰æ‹©åˆ—
     val labelsDf: DataFrame = df.select("label")
     /**
       +-----+--------------------+
@@ -182,13 +182,13 @@ object DatasetExample {
     df.show(5)
     val labels: RDD[Double] = labelsDf.map { case Row(v: Double) => v }
     val numLabels = labels.count()
-    //fold²Ù×÷ÓÃÓÚ¶ÔRDDÖĞµÄÔªËØ½øĞĞµü´ú²Ù×÷,²¢ÇÒÀûÓÃÁËÒ»¸ö±äÁ¿±£´æµü´ú¹ı³ÌÖĞµÄÖĞ¼ä½á¹û
+    //foldæ“ä½œç”¨äºå¯¹RDDä¸­çš„å…ƒç´ è¿›è¡Œè¿­ä»£æ“ä½œ,å¹¶ä¸”åˆ©ç”¨äº†ä¸€ä¸ªå˜é‡ä¿å­˜è¿­ä»£è¿‡ç¨‹ä¸­çš„ä¸­é—´ç»“æœ
     val meanLabelFold = labels.fold(0.0)(_ + _)
     val meanLabel=meanLabelFold/ numLabels
     //100==57.0==0.57
     println(numLabels+"=="+meanLabelFold+"=="+meanLabel)
     //Selected label column with average value 0.57
-    //Ñ¡¶¨±êÇ©ÁĞÆ½¾ùÖµ0.57
+    //é€‰å®šæ ‡ç­¾åˆ—å¹³å‡å€¼0.57
     println(s"Selected label column with average value $meanLabel")
 
     val featuresDf: DataFrame = df.select("features")
@@ -208,15 +208,15 @@ object DatasetExample {
       //println(v.toString())
       v
       }
-    //¾ÛºÏ aggregate
+    //èšåˆ aggregate
     val featureSummary = features.aggregate(new MultivariateOnlineSummarizer())(
       (summary, feat) => summary.add(feat),
       (sum1, sum2) => sum1.merge(sum2))
-    //Ñ¡¶¨µÄÌØÕ÷ÁĞµÄÆ½¾ùÖµ
+    //é€‰å®šçš„ç‰¹å¾åˆ—çš„å¹³å‡å€¼
     println(s"Selected features column with average values:\n ${featureSummary.mean.toString}")
-    //´´½¨ÁÙÊ±Ä¿Â¼
+    //åˆ›å»ºä¸´æ—¶ç›®å½•
     val tmpDir = Files.createTempDir()
-    //ÔÚJVM½ø³ÌÍË³öµÄÊ±ºòÉ¾³ıÎÄ¼ş,Í¨³£ÓÃÔÚÁÙÊ±ÎÄ¼şµÄÉ¾³ı.
+    //åœ¨JVMè¿›ç¨‹é€€å‡ºçš„æ—¶å€™åˆ é™¤æ–‡ä»¶,é€šå¸¸ç”¨åœ¨ä¸´æ—¶æ–‡ä»¶çš„åˆ é™¤.
     tmpDir.deleteOnExit()
     val outputDir = new File(tmpDir, "dataset").toString
     //Saving to C:\Users\liushuhua\AppData\Local\Temp\1484552385342-0\dataset as Parquet file

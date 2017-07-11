@@ -41,11 +41,11 @@ object DecisionTreeClassificationExample {
     // $example on$
     // Load the data stored in LIBSVM format as a DataFrame.
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     val dataSVM=MLUtils.loadLibSVMFile(sc, "../data/mllib/sample_libsvm_data.txt")
    // val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
@@ -55,50 +55,50 @@ object DecisionTreeClassificationExample {
     val labelIndexer = new StringIndexer()
       .setInputCol("label")
       .setOutputCol("indexedLabel")
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     // Automatically identify categorical features, and index them.
-    //VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+    //VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
-      //¾ßÓĞ4¸ö²»Í¬ÖµµÄÌØÕ÷±»ÎªÁ¬Ğø
+      //å…·æœ‰4ä¸ªä¸åŒå€¼çš„ç‰¹å¾è¢«ä¸ºè¿ç»­
       .setMaxCategories(4) // features with > 4 distinct values are treated as continuous.
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
 
     // Split the data into training and test sets (30% held out for testing).
-    //½«Êı¾İ·Ö³ÉÑµÁ·ºÍ²âÊÔ¼¯(30%²âÊÔ)
+    //å°†æ•°æ®åˆ†æˆè®­ç»ƒå’Œæµ‹è¯•é›†(30%æµ‹è¯•)
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a DecisionTree model.
-    //ÑµÁ·Ò»¸ö¾ö²ßÊ÷Ä£ĞÍ
+    //è®­ç»ƒä¸€ä¸ªå†³ç­–æ ‘æ¨¡å‹
     val dt = new DecisionTreeClassifier()
-      .setLabelCol("indexedLabel")//±êÇ©ÁĞÃû
-      //ÑµÁ·Êı¾İ¼¯ DataFrame ÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
+      .setLabelCol("indexedLabel")//æ ‡ç­¾åˆ—å
+      //è®­ç»ƒæ•°æ®é›† DataFrame ä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
       .setFeaturesCol("indexedFeatures")
 
     // Convert indexed labels back to original labels.
-    //×ª»»Ë÷Òı±êÇ©»Øµ½Ô­À´µÄ±êÇ©
+    //è½¬æ¢ç´¢å¼•æ ‡ç­¾å›åˆ°åŸæ¥çš„æ ‡ç­¾
     val labelConverter = new IndexToString()
       .setInputCol("prediction")
       .setOutputCol("predictedLabel")
       .setLabels(labelIndexer.labels)
 
     // Chain indexers and tree in a Pipeline.
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(labelIndexer, featureIndexer, dt, labelConverter))
 
     // Train model. This also runs the indexers.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(trainingData)
 
     // Make predictions.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(testData)
 
     // Select example rows to display.
-    //Ñ¡ÔñÒªÏÔÊ¾µÄÊ¾ÀıĞĞ
+    //é€‰æ‹©è¦æ˜¾ç¤ºçš„ç¤ºä¾‹è¡Œ
     /**
      * +--------------+-----+--------------------+
      * |predictedLabel|label|            features|
@@ -113,19 +113,19 @@ object DecisionTreeClassificationExample {
     predictions.select("predictedLabel", "label", "features").show(5)
 
     // Select (prediction, true label) and compute test error.
-    //Ñ¡Ôñ(Ô¤²â,ÕæÊµ±êÇ©)ºÍ¼ÆËã²âÊÔ´íÎó¡£
+    //é€‰æ‹©(é¢„æµ‹,çœŸå®æ ‡ç­¾)å’Œè®¡ç®—æµ‹è¯•é”™è¯¯ã€‚
     val evaluator = new MulticlassClassificationEvaluator()
-    //±êÇ©ÁĞµÄÃû³Æ
+    //æ ‡ç­¾åˆ—çš„åç§°
       .setLabelCol("indexedLabel")
-      //Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
+      //ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
       .setPredictionCol("prediction")
-      //F1-MeasureÊÇ¸ù¾İ×¼È·ÂÊPrecisionºÍÕÙ»ØÂÊRecall¶şÕß¸ø³öµÄÒ»¸ö×ÛºÏµÄÆÀ¼ÛÖ¸±ê
-      //²âÁ¿Ãû³ÆÁĞ²ÎÊı(f1,precision,recall,weightedPrecision,weightedRecall)
+      //F1-Measureæ˜¯æ ¹æ®å‡†ç¡®ç‡Precisionå’Œå¬å›ç‡RecalläºŒè€…ç»™å‡ºçš„ä¸€ä¸ªç»¼åˆçš„è¯„ä»·æŒ‡æ ‡
+      //æµ‹é‡åç§°åˆ—å‚æ•°(f1,precision,recall,weightedPrecision,weightedRecall)
       //f1        Test Error = 0.04660856384994316
       //precision Test Error = 0.030303030303030276
       //recall    Test Error = 0.0
-      .setMetricName("precision")//×¼È·ÂÊ
-      //ÆÀ¹À
+      .setMetricName("precision")//å‡†ç¡®ç‡
+      //è¯„ä¼°
     val accuracy = evaluator.evaluate(predictions)
     //println("==="+accuracy)
     println("Test Error = " + (1.0 - accuracy))

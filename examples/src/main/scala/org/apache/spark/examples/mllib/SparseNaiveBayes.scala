@@ -26,7 +26,7 @@ import org.apache.spark.mllib.classification.NaiveBayes
 import org.apache.spark.mllib.util.MLUtils
 
 /**
- * Ò»¸öÆÓËØ±´Ò¶Ë¹Ó¦ÓÃÏ¡ÊèµÄÀı×Ó
+ * ä¸€ä¸ªæœ´ç´ è´å¶æ–¯åº”ç”¨ç¨€ç–çš„ä¾‹å­
  * An example naive Bayes app. Run with
  * {{{
  * ./bin/run-example org.apache.spark.examples.mllib.SparseNaiveBayes [options] <input>
@@ -44,11 +44,11 @@ object SparseNaiveBayes {
   def main(args: Array[String]) {
     val defaultParams = Params()
   /**
-   *  libSVMµÄÊı¾İ¸ñÊ½
+   *  libSVMçš„æ•°æ®æ ¼å¼
    *  <label> <index1>:<value1> <index2>:<value2> ...
-   *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-   *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-   *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+   *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+   *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+   *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
    */
     val parser = new OptionParser[Params]("SparseNaiveBayes") {
       head("SparseNaiveBayes: an example naive Bayes app for LIBSVM data.")
@@ -86,7 +86,7 @@ object SparseNaiveBayes {
     val examples =
       MLUtils.loadLibSVMFile(sc, params.input, params.numFeatures, minPartitions)
     // Cache examples because it will be used in both training and evaluation.
-    //»º´æµÄÀı×Ó,ÒòÎªËü½«±»ÓÃÓÚÔÚÑµÁ·ºÍÆÀ¹À¡£
+    //ç¼“å­˜çš„ä¾‹å­,å› ä¸ºå®ƒå°†è¢«ç”¨äºåœ¨è®­ç»ƒå’Œè¯„ä¼°ã€‚
     examples.cache()
 
     val splits = examples.randomSplit(Array(0.8, 0.2))
@@ -103,7 +103,7 @@ object SparseNaiveBayes {
     val prediction = model.predict(test.map(_.features))
     val predictionAndLabel = prediction.zip(test.map(_.label))
     val accuracy = predictionAndLabel.filter(x => x._1 == x._2).count().toDouble / numTest
-   //Test accuracy = 1.0. ×¼È·ÂÊ
+   //Test accuracy = 1.0. å‡†ç¡®ç‡
     println(s"Test accuracy = $accuracy.")
 
     sc.stop()

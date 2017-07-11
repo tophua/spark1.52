@@ -5,9 +5,9 @@ import java.util.TimerTask
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 /**
- * ScalaµÄPromise¿ÉÒÔ±»ÈÏÎªÒ»¸öÊÇ¿ÉĞ´µÄ,¾²Ì¬µ¥¸³Öµ,
- * Ëü¿ÉÒÔ´´½¨Ò»¸öFutureºÍÍê³ÉÒ»¸öFuture(success completeºÍfailed complete)promise×ÖÃæÒâË¼ÊÇ³ĞÅµ,
- * ÒÔÎªËû¿ÉÒÔ¿ØÖÆÒì²½²Ù×÷µÄ½á¹û
+ * Scalaçš„Promiseå¯ä»¥è¢«è®¤ä¸ºä¸€ä¸ªæ˜¯å¯å†™çš„,é™æ€å•èµ‹å€¼,
+ * å®ƒå¯ä»¥åˆ›å»ºä¸€ä¸ªFutureå’Œå®Œæˆä¸€ä¸ªFuture(success completeå’Œfailed complete)promiseå­—é¢æ„æ€æ˜¯æ‰¿è¯º,
+ * ä»¥ä¸ºä»–å¯ä»¥æ§åˆ¶å¼‚æ­¥æ“ä½œçš„ç»“æœ
  */
 object PromiseTimedEventTestApp extends App {
   val timer = new Timer

@@ -24,7 +24,7 @@ import org.apache.spark.sql.functions._
 
 // One method for defining the schema of an RDD is to make a case class with the desired column
 // names and types.
-//ÓÃÓÚ¶¨ÒåÒ»¸öRDD½á¹¹ÓëËùĞèµÄÁĞÃû³ÆµÄÒ»¸öÊµÀıÀà
+//ç”¨äºå®šä¹‰ä¸€ä¸ªRDDç»“æ„ä¸æ‰€éœ€çš„åˆ—åç§°çš„ä¸€ä¸ªå®ä¾‹ç±»
 case class Record(key: Int, value: String)
 
 object RDDRelationBySQL {
@@ -34,50 +34,50 @@ object RDDRelationBySQL {
     val sqlContext = new SQLContext(sc)
 
     // Importing the SQL context gives access to all the SQL functions and implicit conversions.
-    //µ¼ÈëSQLÉÏÏÂÎÄ¿ÉÒÔ·ÃÎÊËùÓĞµÄSQLº¯ÊıºÍÒşÊ½×ª»»
+    //å¯¼å…¥SQLä¸Šä¸‹æ–‡å¯ä»¥è®¿é—®æ‰€æœ‰çš„SQLå‡½æ•°å’Œéšå¼è½¬æ¢
     import sqlContext.implicits._
-    //°ÑRDD×ª»»DataFrameÀàĞÍ
+    //æŠŠRDDè½¬æ¢DataFrameç±»å‹
     val df = sc.parallelize((1 to 100).map(i => Record(i, s"val_$i"))).toDF()
     // Any RDD containing case classes can be registered as a table.  The schema of the table is    
     // automatically inferred using scala reflection.
-    //ÈÎºÎº¬ÓĞÀàRDD¿ÉÒÔ×¢²áÎªÒ»¸ö±í,±íµÄ½á¹¹×Ô¶¯Ê¹ÓÃScalaµÄ·´ÉäÍÆ¶Ï
+    //ä»»ä½•å«æœ‰ç±»RDDå¯ä»¥æ³¨å†Œä¸ºä¸€ä¸ªè¡¨,è¡¨çš„ç»“æ„è‡ªåŠ¨ä½¿ç”¨Scalaçš„åå°„æ¨æ–­
     df.registerTempTable("records")
 
     // Once tables have been registered, you can run SQL queries over them.
-    //Ò»µ©±íÒÑ±»×¢²á,Äã¿ÉÒÔÔËĞĞSQL²éÑ¯¹ıËûÃÇ
+    //ä¸€æ—¦è¡¨å·²è¢«æ³¨å†Œ,ä½ å¯ä»¥è¿è¡ŒSQLæŸ¥è¯¢è¿‡ä»–ä»¬
     println("Result of SELECT *:")
     sqlContext.sql("SELECT * FROM records").collect().foreach(println)
 
     // Aggregation queries are also supported.
-    //Ö§³Ö¾Û¼¯²éÑ¯,»ñµÃµÚÒ»Ìõ²éÑ¯Êı¾İ
+    //æ”¯æŒèšé›†æŸ¥è¯¢,è·å¾—ç¬¬ä¸€æ¡æŸ¥è¯¢æ•°æ®
     val count = sqlContext.sql("SELECT COUNT(*) FROM records").collect().head.getLong(0)
     println(s"COUNT(*): $count")
 
     // The results of SQL queries are themselves RDDs and support all normal RDD functions.  The    
     // items in the RDD are of type Row, which allows you to access each column by ordinal.
-    //SQL½á¹û¶¼Ö§³ÖRDDs²éÑ¯ºÍËùÓĞÕı³£µÄRDDº¯Êı,ÔÚRDDÏîÄ¿ÀàĞÍµÄĞĞ,Äã¿ÉÒÔ°´Ë³Ğò·ÃÎÊÃ¿Ò»ÁĞ
+    //SQLç»“æœéƒ½æ”¯æŒRDDsæŸ¥è¯¢å’Œæ‰€æœ‰æ­£å¸¸çš„RDDå‡½æ•°,åœ¨RDDé¡¹ç›®ç±»å‹çš„è¡Œ,ä½ å¯ä»¥æŒ‰é¡ºåºè®¿é—®æ¯ä¸€åˆ—
     val rddFromSql = sqlContext.sql("SELECT key, value FROM records WHERE key < 10")
     println("Result of RDD.map:")
     rddFromSql.map(row => s"Key: ${row(0)}, Value: ${row(1)}").collect().foreach(println)
 
     // Queries can also be written using a LINQ-like Scala DSL.
-    //²éÑ¯Ò²¿ÉÒÔÊ¹ÓÃLINQÏ²»¶Scala DSL
+    //æŸ¥è¯¢ä¹Ÿå¯ä»¥ä½¿ç”¨LINQå–œæ¬¢Scala DSL
     df.where($"key" === 1).orderBy($"value".asc).select($"key").collect().foreach(println)
 
     // Write out an RDD as a parquet file.
-    //RDDĞ´Ò»¸öparquetÎÄ¼ş,ParquetÊÇÃæÏò·ÖÎöĞÍÒµÎñµÄÁĞÊ½´æ´¢¸ñÊ½
+    //RDDå†™ä¸€ä¸ªparquetæ–‡ä»¶,Parquetæ˜¯é¢å‘åˆ†æå‹ä¸šåŠ¡çš„åˆ—å¼å­˜å‚¨æ ¼å¼
     df.write.parquet("pair.parquet")
 
     // Read in parquet file.  Parquet files are self-describing so the schmema is preserved.
-    //¶ÁÈ¡parquet file,Parquet filesÊÇ×ÔÃèÊöµÄschmema±£´æ
+    //è¯»å–parquet file,Parquet filesæ˜¯è‡ªæè¿°çš„schmemaä¿å­˜
     val parquetFile = sqlContext.read.parquet("pair.parquet")
 
     // Queries can be run using the DSL on parequet files just like the original RDD.
-    //²éÑ¯¿ÉÒÔÊ¹ÓÃDSLÔÚparequetÎÄ¼ş¾ÍÏñÔ­À´µÄRDD
+    //æŸ¥è¯¢å¯ä»¥ä½¿ç”¨DSLåœ¨parequetæ–‡ä»¶å°±åƒåŸæ¥çš„RDD
     parquetFile.where($"key" === 1).select($"value".as("a")).collect().foreach(println)
 
     // These files can also be registered as tables.
-    //ÕâĞ©ÎÄ¼şÒ²¿ÉÒÔ×¢²áÎª±í
+    //è¿™äº›æ–‡ä»¶ä¹Ÿå¯ä»¥æ³¨å†Œä¸ºè¡¨
     parquetFile.registerTempTable("parquetFile")
     sqlContext.sql("SELECT * FROM parquetFile").collect().foreach(println)
 

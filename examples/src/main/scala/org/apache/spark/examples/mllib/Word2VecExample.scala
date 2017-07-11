@@ -12,13 +12,13 @@ object Word2VecExample {
     val input = sc.textFile("../data/mllib/text8").map(line => line.split(" ").toSeq)
 
     val word2vec = new Word2Vec()
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = word2vec.fit(input)
 
     val synonyms = model.findSynonyms("china", 40)
 
     for ((synonym, cosineSimilarity) <- synonyms) {
-      //ÏàËÆÐÔµÃ·Ö
+      //ç›¸ä¼¼æ€§å¾—åˆ†
       println(s"$synonym $cosineSimilarity")
     }
 

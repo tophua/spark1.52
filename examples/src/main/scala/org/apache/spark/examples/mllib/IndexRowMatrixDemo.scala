@@ -14,21 +14,21 @@ object IndexRowMatrixDemo {
 
     val conf = new SparkConf().setAppName("test").setMaster("local")
     val sc = new SparkContext(conf)
-    //¶¨ÒåÒ»¸öÒşÊ½×ª»»º¯Êı
+    //å®šä¹‰ä¸€ä¸ªéšå¼è½¬æ¢å‡½æ•°
     implicit def double2long(x: Double) = x.toLong
-    //Êı¾İÖĞµÄµÚÒ»¸öÔªËØÎªIndexedRowÖĞµÄindex,Ê£ÓàµÄÓ³Éäµ½vector
-    //f.take(1)(0)»ñÈ¡µ½µÚÒ»¸öÔªËØ²¢×Ô¶¯½øĞĞÒşÊ½×ª»»,×ª»»³ÉLongÀàĞÍ
+    //æ•°æ®ä¸­çš„ç¬¬ä¸€ä¸ªå…ƒç´ ä¸ºIndexedRowä¸­çš„index,å‰©ä½™çš„æ˜ å°„åˆ°vector
+    //f.take(1)(0)è·å–åˆ°ç¬¬ä¸€ä¸ªå…ƒç´ å¹¶è‡ªåŠ¨è¿›è¡Œéšå¼è½¬æ¢,è½¬æ¢æˆLongç±»å‹
     val rdd1 = sc.parallelize(
       Array(
         Array(1.0, 2.0, 3.0, 4.0),
         Array(2.0, 3.0, 4.0, 5.0),
         Array(3.0, 4.0, 5.0, 6.0))).map(f => IndexedRow(f.take(1)(0), Vectors.dense(f.drop(1))))
-     //Ë÷ÒıĞĞ¾ØÕó(IndexedRowMatrix)°´ĞĞ·Ö²¼Ê½´æ´¢,ÓĞĞĞË÷Òı,Æäµ×²ãÖ§³Å½á¹¹ÊÇË÷ÒıµÄĞĞ×é³ÉµÄRDD,ËùÒÔÃ¿ĞĞ¿ÉÒÔÍ¨¹ıË÷Òı(long)ºÍ¾Ö²¿ÏòÁ¿±íÊ¾
+     //ç´¢å¼•è¡ŒçŸ©é˜µ(IndexedRowMatrix)æŒ‰è¡Œåˆ†å¸ƒå¼å­˜å‚¨,æœ‰è¡Œç´¢å¼•,å…¶åº•å±‚æ”¯æ’‘ç»“æ„æ˜¯ç´¢å¼•çš„è¡Œç»„æˆçš„RDD,æ‰€ä»¥æ¯è¡Œå¯ä»¥é€šè¿‡ç´¢å¼•(long)å’Œå±€éƒ¨å‘é‡è¡¨ç¤º
     val indexRowMatrix = new IndexedRowMatrix(rdd1)
-    //¼ÆËãÀ­Ä·¾ØÕó
+    //è®¡ç®—æ‹‰å§†çŸ©é˜µ
     var gramianMatrix: Matrix = indexRowMatrix.computeGramianMatrix()
-    //×ª»»³ÉĞĞ¾ØÕóRowMatrix
+    //è½¬æ¢æˆè¡ŒçŸ©é˜µRowMatrix
     var rowMatrix: RowMatrix = indexRowMatrix.toRowMatrix()
-    //ÆäËü·½·¨ÀıÈçcomputeSVD¼ÆËãÆæÒìÖµ¡¢multiply¾ØÕóÏà³ËµÈ²Ù×÷,·½·¨Ê¹ÓÃÓëRowMaxtrixÏàÍ¬
+    //å…¶å®ƒæ–¹æ³•ä¾‹å¦‚computeSVDè®¡ç®—å¥‡å¼‚å€¼ã€multiplyçŸ©é˜µç›¸ä¹˜ç­‰æ“ä½œ,æ–¹æ³•ä½¿ç”¨ä¸RowMaxtrixç›¸åŒ
   }
 }

@@ -26,7 +26,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * CountvectorizerºÍCountvectorizermodelÖ¼ÔÚÍ¨¹ı¼ÆÊıÀ´½«Ò»¸öÎÄµµ×ª»»ÎªÏòÁ¿
+ * Countvectorizerå’ŒCountvectorizermodelæ—¨åœ¨é€šè¿‡è®¡æ•°æ¥å°†ä¸€ä¸ªæ–‡æ¡£è½¬æ¢ä¸ºå‘é‡
  */
 object CountVectorizerExample {
   def main(args: Array[String]) {
@@ -36,21 +36,21 @@ object CountVectorizerExample {
     val sqlContext = new SQLContext(sc)
     import sqlContext.implicits._
     // $example on$
-    //DataFrame°üº¬idºÍtextsÁ½ÁĞ
+    //DataFrameåŒ…å«idå’Œtextsä¸¤åˆ—
     val df = sqlContext.createDataFrame(Seq(
       (0, Array("a", "b", "c")),
       (1, Array("a", "b", "b", "c", "a"))
     )).toDF("id", "words")
 
     // fit a CountVectorizerModel from the corpus
-    //ÎÄ±¾ÖĞµÄÃ¿Ò»ĞĞ¶¼ÊÇÒ»¸öÎÄµµÀàĞÍµÄÊı×é(×Ö·û´®),µ÷ÓÃµÄCountVectorizer²úÉú´Ê»ã(a,b,c)µÄCountVectorizerModel,
-    //×ª»»ºóµÄÊä³öÏòÁ¿ÈçÏÂ
+    //æ–‡æœ¬ä¸­çš„æ¯ä¸€è¡Œéƒ½æ˜¯ä¸€ä¸ªæ–‡æ¡£ç±»å‹çš„æ•°ç»„(å­—ç¬¦ä¸²),è°ƒç”¨çš„CountVectorizeräº§ç”Ÿè¯æ±‡(a,b,c)çš„CountVectorizerModel,
+    //è½¬æ¢åçš„è¾“å‡ºå‘é‡å¦‚ä¸‹
     val cvModel: CountVectorizerModel = new CountVectorizer()
       .setInputCol("words")
       .setOutputCol("features")
-      .setVocabSize(3)//ÊÇÒÔ´ÊÎª¼ü,²¢ÇÒÖµ¿ÉÒÔÔÚÌØÕ÷¾ØÕóÀï¿ÉÒÔË÷ÒıµÄ
+      .setVocabSize(3)//æ˜¯ä»¥è¯ä¸ºé”®,å¹¶ä¸”å€¼å¯ä»¥åœ¨ç‰¹å¾çŸ©é˜µé‡Œå¯ä»¥ç´¢å¼•çš„
       .setMinDF(2)
-      .fit(df)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .fit(df)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     /**
      * +--------------------+
      * |            features|
@@ -59,7 +59,7 @@ object CountVectorizerExample {
      * |(3,[0,1,2],[2.0,2...|
      * +--------------------+
      */
-     //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+     //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
       cvModel.transform(df).select("features").show()
     // alternatively, define CountVectorizerModel with a-priori vocabulary
     val cvm = new CountVectorizerModel(Array("a", "b", "c"))
@@ -73,7 +73,7 @@ object CountVectorizerExample {
      * |(3,[0,1,2],[2.0,2...|
      * +--------------------+
      */
-     //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+     //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     cvm.transform(df).select("features").show()
     // $example off$
 

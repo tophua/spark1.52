@@ -26,13 +26,13 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 /**
- * Ò»¸öÊ¾ÀıÓ¦ÓÃ³ÌĞòÀ´×ÔÎÄ¼şÖĞµÄ»ã×Ü¶àÔª»ã×Ü
+ * ä¸€ä¸ªç¤ºä¾‹åº”ç”¨ç¨‹åºæ¥è‡ªæ–‡ä»¶ä¸­çš„æ±‡æ€»å¤šå…ƒæ±‡æ€»
  * An example app for summarizing multivariate data from a file. Run with
  * {{{
  * bin/run-example org.apache.spark.examples.mllib.Correlations
  * }}}
  * By default, this loads a synthetic dataset from `data/mllib/sample_linear_regression_data.txt`.
- * Ä¬ÈÏÊ¹ÓÃ,¼ÓÔØĞéÄâÊı¾İ¼¯data/mllib/sample_linear_regression_data.txt
+ * é»˜è®¤ä½¿ç”¨,åŠ è½½è™šæ‹Ÿæ•°æ®é›†data/mllib/sample_linear_regression_data.txt
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app. 
  */
 object Correlations {
@@ -52,7 +52,7 @@ object Correlations {
       note(
         """
         |For example, the following command runs this app on a synthetic dataset:
-        |ÀıÈç,ÏÂÃæµÄÃüÁîÔÚĞéÄâÊı¾İ¼¯ÉÏÔËĞĞÕâ¸öÓ¦ÓÃ³ÌĞò£º
+        |ä¾‹å¦‚,ä¸‹é¢çš„å‘½ä»¤åœ¨è™šæ‹Ÿæ•°æ®é›†ä¸Šè¿è¡Œè¿™ä¸ªåº”ç”¨ç¨‹åºï¼š
         | bin/spark-submit --class org.apache.spark.examples.mllib.Correlations \
         |  examples/target/scala-*/spark-examples-*.jar \
         |  --input data/mllib/sample_linear_regression_data.txt
@@ -72,11 +72,11 @@ object Correlations {
     val conf = new SparkConf().setAppName(s"Correlations with $params").setMaster("local[*]")
     val sc = new SparkContext(conf)
   /**
-   *libSVMµÄÊı¾İ¸ñÊ½
+   *libSVMçš„æ•°æ®æ ¼å¼
    *<label> <index1>:<value1> <index2>:<value2> ...
-   *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
-   * <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
-   * <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+   *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+   * <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+   * <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
    */
     val examples = MLUtils.loadLibSVMFile(sc, params.input).cache()
     //Summary of data file: ../data/mllib/sample_linear_regression_data.txt
@@ -85,7 +85,7 @@ object Correlations {
     println(s"${examples.count()} data points")
 
     // Calculate label -- feature correlations
-    //¼ÆËã±êÇ©-ÌØÕ÷Ïà¹ØĞÔ
+    //è®¡ç®—æ ‡ç­¾-ç‰¹å¾ç›¸å…³æ€§
     val labelRDD = examples.map(x=>{
       //-9.490009878824548
       //(10,[0,1,2,3,4,5,6,7,8,9],[0.4551273600657362,0.36644694351969087,-0.38256108933468047,-0.4458430198517267,
@@ -95,11 +95,11 @@ object Correlations {
       })
       //examples.take(1)(0)(-9.490009878824548,(10,[0,1,2,3,4,5,6,7,8,9],[0.4551273600657362,-0.07269284838169332,0.5658035575800715]))
     println(examples.take(1)+"=||="+examples.take(1)(0))
-    val test=examples.take(1)(0)//»ñµÃÊı×éµÚÒ»¸öÔªËØ
+    val test=examples.take(1)(0)//è·å¾—æ•°ç»„ç¬¬ä¸€ä¸ªå…ƒç´ 
     val numFeatures = examples.take(1)(0).features.size
     
     val corrType = "pearson"   
-    //±êÇ©ºÍÃ¿¸öÌØÕ÷Ö®¼äµÄÏà¹ØĞÔ(Æ¤¶ûÉ­)
+    //æ ‡ç­¾å’Œæ¯ä¸ªç‰¹å¾ä¹‹é—´çš„ç›¸å…³æ€§(çš®å°”æ£®)
     //Correlation (pearson) between label and each feature
     println(s"Correlation ($corrType) between label and each feature")
     //Feature	Correlation
@@ -110,10 +110,10 @@ object Correlations {
       val featureRDD = examples.map(x=>{
         //x.features.toArray.map(println)
        // println("==="+x.features(feature))
-        //ÌáÈ¡ÌØÕ÷Öµ
+        //æå–ç‰¹å¾å€¼
         x.features(feature)
         })
-      //¼ÆËã±êÇ©ºÍÌØÕ÷ÖµµÄÏà¹ØĞÔ
+      //è®¡ç®—æ ‡ç­¾å’Œç‰¹å¾å€¼çš„ç›¸å…³æ€§
       val corr = Statistics.corr(labelRDD, featureRDD)
       //9	   0.03452069517112544
       println(s"$feature\t$corr")

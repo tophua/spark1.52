@@ -27,7 +27,7 @@ import org.apache.spark.graphx.PartitionStrategy._
 
 /**
  * Driver program for running graph algorithms.
- * 用于运行图算法的驱动程序
+ * 鐢ㄤ簬杩愯鍥剧畻娉曠殑椹卞姩绋嬪簭
  */
 object Analytics extends Logging {
 

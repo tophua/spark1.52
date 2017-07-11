@@ -22,23 +22,23 @@ import scala.collection.mutable.SynchronizedQueue
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-//¶ÓÁÐÁ÷
+//é˜Ÿåˆ—æµ
 object QueueStream {
 
   def main(args: Array[String]) {
 
     StreamingExamples.setStreamingLogLevels()
     val sparkConf = new SparkConf().setAppName("QueueStream").setMaster("local[2]")
-    // Create the context ´´½¨ÉÏÏÂÎÄ,Åú´Î¼ä¸ô
+    // Create the context åˆ›å»ºä¸Šä¸‹æ–‡,æ‰¹æ¬¡é—´éš”
     val ssc = new StreamingContext(sparkConf, Seconds(1))
 
     // Create the queue through which RDDs can be pushed to
     // a QueueInputDStream
-    //´´½¨¶ÓÁÐ,Í¨¹ýRDDs¿ÉÒÔÍÆµ½Ò»¸öqueueinputdstream
+    //åˆ›å»ºé˜Ÿåˆ—,é€šè¿‡RDDså¯ä»¥æŽ¨åˆ°ä¸€ä¸ªqueueinputdstream
     val rddQueue = new SynchronizedQueue[RDD[Int]]()
 
     // Create the QueueInputDStream and use it do some processing
-    //´´½¨queueinputdstreamÓÃËü×öÒ»Ð©´¦Àí
+    //åˆ›å»ºqueueinputdstreamç”¨å®ƒåšä¸€äº›å¤„ç†
     val inputStream = ssc.queueStream(rddQueue)
     val mappedStream = inputStream.map(x => (x % 10, 1))
     val reducedStream = mappedStream.reduceByKey(_ + _)
@@ -46,7 +46,7 @@ object QueueStream {
     ssc.start()
 
     // Create and push some RDDs into
-    //´´ÔìºÍÍÆ¶¯Ò»Ð©RDD
+    //åˆ›é€ å’ŒæŽ¨åŠ¨ä¸€äº›RDD
     for (i <- 1 to 9) {  
       rddQueue += ssc.sparkContext.makeRDD(1 to 1000, 10)
       Thread.sleep(1000)

@@ -34,11 +34,11 @@ case class LabeledDocument(id: Long, text: String, label: Double)
 case class Document(id: Long, text: String)
 
   /**
-   * ¼òµ¥·ÖÀà·ÖÀàÊ¾Àý
+   * ç®€å•åˆ†ç±»åˆ†ç±»ç¤ºä¾‹
    * A simple text classification pipeline that recognizes "spark" from input text. This is to show
-   * Ò»¸ö¼òµ¥µÄÎÄ±¾·ÖÀà¹ÜµÀ,´Ó¡°Spark¡±ÊäÈëÎÄ±¾ÖÐÊ¶±ð
+   * ä¸€ä¸ªç®€å•çš„æ–‡æœ¬åˆ†ç±»ç®¡é“,ä»Žâ€œSparkâ€è¾“å…¥æ–‡æœ¬ä¸­è¯†åˆ«
    * how to create and configure an ML pipeline. Run with
-   * ÕâÊÇÏÔÊ¾ÈçºÎ´´½¨ºÍÅäÖÃÒ»¸öMLµÄ¹ÜµÀ
+   * è¿™æ˜¯æ˜¾ç¤ºå¦‚ä½•åˆ›å»ºå’Œé…ç½®ä¸€ä¸ªMLçš„ç®¡é“
    * {{{
    * bin/run-example ml.SimpleTextClassificationPipeline
    * }}}
@@ -52,43 +52,43 @@ object SimpleTextClassificationPipeline {
     import sqlContext.implicits._
 
     // Prepare training documents, which are labeled.
-    //×¼±¸ÑµÁ·ÎÄµµ,ÕâÐ©ÎÄ¼þ¶¼ÊÇÓÐ±êÇ©
+    //å‡†å¤‡è®­ç»ƒæ–‡æ¡£,è¿™äº›æ–‡ä»¶éƒ½æ˜¯æœ‰æ ‡ç­¾
     val training = sc.parallelize(Seq(
-      //ÎÄµµID,ÄÚÈÝ,±êºÅ
+      //æ–‡æ¡£ID,å†…å®¹,æ ‡å·
       LabeledDocument(0L, "a b c d e spark", 1.0),
       LabeledDocument(1L, "b d", 0.0),
       LabeledDocument(2L, "spark f g h", 1.0),
       LabeledDocument(3L, "hadoop mapreduce", 0.0)))
 
     // Configure an ML pipeline, which consists of three stages: tokenizer, hashingTF, and lr.
-    //ÅäÖÃML¹ÜÀí,ÆäÖÐ°üÀ¨Èý¸ö½×¶Î
-    //Ê¹ÓÃ½«ÎÄ±¾²ð·Ö³Éµ¥´Ê
+    //é…ç½®MLç®¡ç†,å…¶ä¸­åŒ…æ‹¬ä¸‰ä¸ªé˜¶æ®µ
+    //ä½¿ç”¨å°†æ–‡æœ¬æ‹†åˆ†æˆå•è¯
     val tokenizer = new Tokenizer()
       .setInputCol("text")
       .setOutputCol("words")
-    //ÌØÕ÷ÌáÈ¡ºÍ×ª»» TF-IDFËã·¨´ÓÎÄ±¾·Ö´ÊÖÐ´´½¨ÌØÕ÷ÏòÁ¿
+    //ç‰¹å¾æå–å’Œè½¬æ¢ TF-IDFç®—æ³•ä»Žæ–‡æœ¬åˆ†è¯ä¸­åˆ›å»ºç‰¹å¾å‘é‡
     val hashingTF = new HashingTF()
-      .setNumFeatures(1000)//ÉèÖÃÌØÕ÷Öµ
+      .setNumFeatures(1000)//è®¾ç½®ç‰¹å¾å€¼
       .setInputCol(tokenizer.getOutputCol)
-      .setOutputCol("features")//text=spark hadoop spark,features=(1000,[269,365],[1.0,2.0]) //2´ú±íspark³öÏÖ2´Î
-    //°Ñ´ÊÆµ×÷ÎªÊäÈëÌØÕ÷´´½¨Âß¼­»Ø¹é·ÖÀàÆ÷
+      .setOutputCol("features")//text=spark hadoop spark,features=(1000,[269,365],[1.0,2.0]) //2ä»£è¡¨sparkå‡ºçŽ°2æ¬¡
+    //æŠŠè¯é¢‘ä½œä¸ºè¾“å…¥ç‰¹å¾åˆ›å»ºé€»è¾‘å›žå½’åˆ†ç±»å™¨
     val lr = new LogisticRegression()
-      .setMaxIter(10)//×î´óµü´ú´ÎÊý
+      .setMaxIter(10)//æœ€å¤§è¿­ä»£æ¬¡æ•°
       .setRegParam(0.001)
-    //½«ÕâÐ©²Ù×÷ºÏ²¢µ½Ò»¸öpipelineÖÐ,ÈÃpipelineÊµ¼ÊÖ´ÐÐ´ÓÊäÈëÑµÁ·Êý¾ÝÖÐ¹¹ÔìÄ£ÐÍµÄ¹¤×÷
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+    //å°†è¿™äº›æ“ä½œåˆå¹¶åˆ°ä¸€ä¸ªpipelineä¸­,è®©pipelineå®žé™…æ‰§è¡Œä»Žè¾“å…¥è®­ç»ƒæ•°æ®ä¸­æž„é€ æ¨¡åž‹çš„å·¥ä½œ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æž„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(tokenizer, hashingTF, lr))
 
     // Fit the pipeline to training documents.
-    //½«¹ÜµÀ°²×°µ½ÑµÁ·ÎÄµµ
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //å°†ç®¡é“å®‰è£…åˆ°è®­ç»ƒæ–‡æ¡£
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(training.toDF())
 
     // Prepare test documents, which are unlabeled.
-    //×¼±¸²âÊÔÎÄµµ,ÕâÐ©ÎÄ¼þÊÇÎ´±ê¼ÇµÄ
-    //½«Ä£ÐÍÓÃÓÚÐÂÎÄµµµÄ·ÖÀà,
+    //å‡†å¤‡æµ‹è¯•æ–‡æ¡£,è¿™äº›æ–‡ä»¶æ˜¯æœªæ ‡è®°çš„
+    //å°†æ¨¡åž‹ç”¨äºŽæ–°æ–‡æ¡£çš„åˆ†ç±»,
     /**
       LabeledDocument(0L, "a b c d e spark", 1.0),
       LabeledDocument(1L, "b d",0.0),
@@ -102,8 +102,8 @@ object SimpleTextClassificationPipeline {
       Document(7L, "apache hadoop")))
 
     // Make predictions on test documents.
-     //×¢ÒâModelÊµ¼ÊÉÏÊÇÒ»¸ö°üº¬ËùÓÐ×ª»»Âß¼­µÄpipeline,¶ø²»ÊÇÒ»¸ö¶Ô·ÖÀàµÄµ÷ÓÃ
-     //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+     //æ³¨æ„Modelå®žé™…ä¸Šæ˜¯ä¸€ä¸ªåŒ…å«æ‰€æœ‰è½¬æ¢é€»è¾‘çš„pipeline,è€Œä¸æ˜¯ä¸€ä¸ªå¯¹åˆ†ç±»çš„è°ƒç”¨
+     //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     /**
     +---+------------------+--------------------+--------------------+--------------------+--------------------+----------+
     | id|              text|               words|            features|       rawPrediction|         probability|prediction|
@@ -118,7 +118,7 @@ object SimpleTextClassificationPipeline {
       .select("id", "text","features", "probability", "prediction")
       .collect()
       .foreach { case Row(id: Long, text: String,  features: Vector, prob: Vector, prediction: Double) =>
-        //ÎÄµµID,textÎÄ±¾,probability¸ÅÂÊ,prediction Ô¤²â·ÖÀà
+        //æ–‡æ¡£ID,textæ–‡æœ¬,probabilityæ¦‚çŽ‡,prediction é¢„æµ‹åˆ†ç±»
         println(s"($id, $text) --> prob=$prob, prediction=$prediction,text=$text,features=$features")
       }
    

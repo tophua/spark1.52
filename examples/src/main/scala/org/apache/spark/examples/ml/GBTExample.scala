@@ -34,7 +34,7 @@ import org.apache.spark.sql.DataFrame
 
 /**
  * An example runner for decision trees. Run with
- * ¾ö²ßÊ÷µÄÒ»¸öÀı×Ó,ÔËĞĞ
+ * å†³ç­–æ ‘çš„ä¸€ä¸ªä¾‹å­,è¿è¡Œ
  * {{{
  * ./bin/run-example ml.GBTExample [options]
  * }}}
@@ -52,17 +52,17 @@ object GBTExample {
   case class Params(
       input: String = "../data/mllib/rf_libsvm_data.txt",
       testInput: String = "",
-      dataFormat: String = "libsvm",//Êı¾İ¸ñÊ½
-      algo: String = "classification",//"regression",Ëã·¨ÀàĞÍ
-      maxDepth: Int = 5,//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-      maxBins: Int = 32,//Á¬ĞøÌØÕ÷ÀëÉ¢»¯µÄ×î´óÊıÁ¿,ÒÔ¼°Ñ¡ÔñÃ¿¸ö½Úµã·ÖÁÑÌØÕ÷µÄ·½Ê½
-      minInstancesPerNode: Int = 1,//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-      minInfoGain: Double = 0.0,//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
-      maxIter: Int = 10,//µü´ú´ÎÊı
+      dataFormat: String = "libsvm",//æ•°æ®æ ¼å¼
+      algo: String = "classification",//"regression",ç®—æ³•ç±»å‹
+      maxDepth: Int = 5,//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+      maxBins: Int = 32,//è¿ç»­ç‰¹å¾ç¦»æ•£åŒ–çš„æœ€å¤§æ•°é‡,ä»¥åŠé€‰æ‹©æ¯ä¸ªèŠ‚ç‚¹åˆ†è£‚ç‰¹å¾çš„æ–¹å¼
+      minInstancesPerNode: Int = 1,//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+      minInfoGain: Double = 0.0,//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
+      maxIter: Int = 10,//è¿­ä»£æ¬¡æ•°
       fracTest: Double = 0.2,
       cacheNodeIds: Boolean = false,
-      checkpointDir: Option[String] = None,//¼ì²éµãÄ¿Â¼
-      //ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+      checkpointDir: Option[String] = None,//æ£€æŸ¥ç‚¹ç›®å½•
+      //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
       checkpointInterval: Int = 10) extends AbstractParams[Params]
 
   def main(args: Array[String]) {
@@ -73,17 +73,17 @@ object GBTExample {
       opt[String]("algo")
         .text(s"algorithm (classification, regression), default: ${defaultParams.algo}")
         .action((x, c) => c.copy(algo = x))
-      opt[Int]("maxDepth")//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
+      opt[Int]("maxDepth")//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
         .text(s"max depth of the tree, default: ${defaultParams.maxDepth}")
         .action((x, c) => c.copy(maxDepth = x))
       opt[Int]("maxBins")
         .text(s"max number of bins, default: ${defaultParams.maxBins}")
         .action((x, c) => c.copy(maxBins = x))
-      opt[Int]("minInstancesPerNode")//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
+      opt[Int]("minInstancesPerNode")//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
         .text(s"min number of instances required at child nodes to create the parent split," +
-        s" default: ${defaultParams.minInstancesPerNode}")//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
+        s" default: ${defaultParams.minInstancesPerNode}")//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
         .action((x, c) => c.copy(minInstancesPerNode = x))
-      opt[Double]("minInfoGain")//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
+      opt[Double]("minInfoGain")//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
         .text(s"min info gain required to create a split, default: ${defaultParams.minInfoGain}")
         .action((x, c) => c.copy(minInfoGain = x))
       opt[Int]("maxIter")
@@ -106,9 +106,9 @@ object GBTExample {
           }
         }")
         .action((x, c) => c.copy(checkpointDir = Some(x)))
-      opt[Int]("checkpointInterval")//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+      opt[Int]("checkpointInterval")//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
         .text(s"how often to checkpoint the node Id cache, " +
-        s"default: ${defaultParams.checkpointInterval}")//ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+        s"default: ${defaultParams.checkpointInterval}")//è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
         .action((x, c) => c.copy(checkpointInterval = x))
       opt[String]("testInput")
         .text(s"input path to test dataset.  If given, option fracTest is ignored." +
@@ -145,15 +145,15 @@ object GBTExample {
 
     println(s"GBTExample with parameters:\n$params")
 
-    // Load training and test data and cache it.¼ÓÔØÑµÁ·ºÍ²âÊÔÊı¾İ²¢½«Æä»º´æ
+    // Load training and test data and cache it.åŠ è½½è®­ç»ƒå’Œæµ‹è¯•æ•°æ®å¹¶å°†å…¶ç¼“å­˜
     val (training: DataFrame, test: DataFrame) = DecisionTreeExample.loadDatasets(sc, params.input,
       params.dataFormat, params.testInput, algo, params.fracTest)
 
-    // Set up Pipeline ½¨Á¢¹ÜµÀ
-     //½«ÌØÕ÷×ª»»,ÌØÕ÷¾ÛºÏ,Ä£ĞÍµÈ×é³ÉÒ»¸ö¹ÜµÀ,²¢µ÷ÓÃËüµÄfit·½·¨ÄâºÏ³öÄ£ĞÍ*/  
-     //Ò»¸ö Pipeline ÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+    // Set up Pipeline å»ºç«‹ç®¡é“
+     //å°†ç‰¹å¾è½¬æ¢,ç‰¹å¾èšåˆ,æ¨¡å‹ç­‰ç»„æˆä¸€ä¸ªç®¡é“,å¹¶è°ƒç”¨å®ƒçš„fitæ–¹æ³•æ‹Ÿåˆå‡ºæ¨¡å‹*/  
+     //ä¸€ä¸ª Pipeline åœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val stages = new mutable.ArrayBuffer[PipelineStage]()
-    // (1) For classification, re-index classes. ¶ÔÓÚ·ÖÀà,ÖØĞÂË÷ÒıÀà
+    // (1) For classification, re-index classes. å¯¹äºåˆ†ç±»,é‡æ–°ç´¢å¼•ç±»
     val labelColName = if (algo == "classification") "indexedLabel" else "label"
     if (algo == "classification") {
       val labelIndexer = new StringIndexer()
@@ -161,9 +161,9 @@ object GBTExample {
         .setOutputCol(labelColName)
       stages += labelIndexer
     }
-    // (2) Identify categorical features using VectorIndexer. È·¶¨Ê¹ÓÃvectorindexer·ÖÀàÌØÕ÷
+    // (2) Identify categorical features using VectorIndexer. ç¡®å®šä½¿ç”¨vectorindexeråˆ†ç±»ç‰¹å¾
     //     Features with more than maxCategories values will be treated as continuous.
-    //VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+    //VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featuresIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
@@ -173,50 +173,50 @@ object GBTExample {
     val dt = algo match {
       case "classification" =>
         new GBTClassifier()
-	    //ÑµÁ·Êı¾İ¼¯DataFrameÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
+	    //è®­ç»ƒæ•°æ®é›†DataFrameä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
           .setFeaturesCol("indexedFeatures")
-          .setLabelCol(labelColName)//±êÇ©ÁĞµÄÃû³Æ
-          .setMaxDepth(params.maxDepth)//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-          .setMaxBins(params.maxBins)//ÀëÉ¢Á¬ĞøĞÔ±äÁ¿Ê±×î´óµÄ·ÖÏäÊı,Ä¬ÈÏÊÇ 32
-          .setMinInstancesPerNode(params.minInstancesPerNode)//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-          .setMinInfoGain(params.minInfoGain)//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
+          .setLabelCol(labelColName)//æ ‡ç­¾åˆ—çš„åç§°
+          .setMaxDepth(params.maxDepth)//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+          .setMaxBins(params.maxBins)//ç¦»æ•£è¿ç»­æ€§å˜é‡æ—¶æœ€å¤§çš„åˆ†ç®±æ•°,é»˜è®¤æ˜¯ 32
+          .setMinInstancesPerNode(params.minInstancesPerNode)//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+          .setMinInfoGain(params.minInfoGain)//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
           .setCacheNodeIds(params.cacheNodeIds)
-	  //ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+	  //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
           .setCheckpointInterval(params.checkpointInterval)
           .setMaxIter(params.maxIter)//
       case "regression" =>
         new GBTRegressor()
-          .setFeaturesCol("indexedFeatures")//ÑµÁ·Êı¾İ¼¯DataFrameÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
-          .setLabelCol(labelColName)//±êÇ©ÁĞµÄÃû³Æ
-          .setMaxDepth(params.maxDepth)//Ê÷µÄ×î´óÉî¶È,ÎªÁË·ÀÖ¹¹ıÄâºÏ,Éè¶¨»®·ÖµÄÖÕÖ¹Ìõ¼ş
-          .setMaxBins(params.maxBins)//ÀëÉ¢Á¬ĞøĞÔ±äÁ¿Ê±×î´óµÄ·ÖÏäÊı,Ä¬ÈÏÊÇ 32
-          .setMinInstancesPerNode(params.minInstancesPerNode)//ÇĞ·ÖºóÃ¿¸ö×Ó½ÚµãÖÁÉÙ°üº¬µÄÑù±¾ÊµÀıÊı,·ñÔòÍ£Ö¹ÇĞ·Ö,ÓÚÖÕÖ¹µü´ú¼ÆËã
-          .setMinInfoGain(params.minInfoGain)//·ÖÁÑ½ÚµãÊ±ËùĞè×îĞ¡ĞÅÏ¢ÔöÒæ
+          .setFeaturesCol("indexedFeatures")//è®­ç»ƒæ•°æ®é›†DataFrameä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
+          .setLabelCol(labelColName)//æ ‡ç­¾åˆ—çš„åç§°
+          .setMaxDepth(params.maxDepth)//æ ‘çš„æœ€å¤§æ·±åº¦,ä¸ºäº†é˜²æ­¢è¿‡æ‹Ÿåˆ,è®¾å®šåˆ’åˆ†çš„ç»ˆæ­¢æ¡ä»¶
+          .setMaxBins(params.maxBins)//ç¦»æ•£è¿ç»­æ€§å˜é‡æ—¶æœ€å¤§çš„åˆ†ç®±æ•°,é»˜è®¤æ˜¯ 32
+          .setMinInstancesPerNode(params.minInstancesPerNode)//åˆ‡åˆ†åæ¯ä¸ªå­èŠ‚ç‚¹è‡³å°‘åŒ…å«çš„æ ·æœ¬å®ä¾‹æ•°,å¦åˆ™åœæ­¢åˆ‡åˆ†,äºç»ˆæ­¢è¿­ä»£è®¡ç®—
+          .setMinInfoGain(params.minInfoGain)//åˆ†è£‚èŠ‚ç‚¹æ—¶æ‰€éœ€æœ€å°ä¿¡æ¯å¢ç›Š
           .setCacheNodeIds(params.cacheNodeIds)
-	  //ÉèÖÃ¼ì²éµã¼ä¸ô(>=1),»ò²»ÉèÖÃ¼ì²éµã(-1)
+	  //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”(>=1),æˆ–ä¸è®¾ç½®æ£€æŸ¥ç‚¹(-1)
           .setCheckpointInterval(params.checkpointInterval)
           .setMaxIter(params.maxIter)
       case _ => throw new IllegalArgumentException("Algo ${params.algo} not supported.")
     }
     stages += dt
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline().setStages(stages.toArray)
 
-    // Fit the Pipeline °²×°¹ÜµÀ
-    //ÏµÍ³¼ÆÊ±Æ÷µÄµ±Ç°Öµ,ÒÔºÁÎ¢ÃëÎªµ¥Î»
+    // Fit the Pipeline å®‰è£…ç®¡é“
+    //ç³»ç»Ÿè®¡æ—¶å™¨çš„å½“å‰å€¼,ä»¥æ¯«å¾®ç§’ä¸ºå•ä½
     val startTime = System.nanoTime()
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val pipelineModel = pipeline.fit(training)
-    //1e9¾ÍÎª1*(10µÄ¾Å´Î·½),Ò²¾ÍÊÇÊ®ÒÚ
+    //1e9å°±ä¸º1*(10çš„ä¹æ¬¡æ–¹),ä¹Ÿå°±æ˜¯åäº¿
     val elapsedTime = (System.nanoTime() - startTime) / 1e9
     println(s"Training time: $elapsedTime seconds")
 
     // Get the trained GBT from the fitted PipelineModel
-    //´Ó¹ÜµÀÄ£ĞÍ,µÃµ½ÑµÁ·µÄGBT
+    //ä»ç®¡é“æ¨¡å‹,å¾—åˆ°è®­ç»ƒçš„GBT
     algo match {
       case "classification" =>
-          //´Ó¹ÜµÀÄ£ĞÍ,µÃµ½ÑµÁ·µÄGBTÄ£ĞÍ
+          //ä»ç®¡é“æ¨¡å‹,å¾—åˆ°è®­ç»ƒçš„GBTæ¨¡å‹
         val rfModel = pipelineModel.stages.last.asInstanceOf[GBTClassificationModel]
         if (rfModel.totalNumNodes < 30) {
           println(rfModel.toDebugString) // Print full model.
@@ -234,7 +234,7 @@ object GBTExample {
     }
 
     // Evaluate model on training, test data
-    //ÑµÁ·ÆÀ¹ÀÄ£ĞÍ,²âÊÔÊı¾İ
+    //è®­ç»ƒè¯„ä¼°æ¨¡å‹,æµ‹è¯•æ•°æ®
     algo match {
       case "classification" =>
         println("Training data results:")

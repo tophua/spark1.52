@@ -21,9 +21,9 @@ import scala.reflect.runtime.universe._
 
 /**
  * Abstract class for parameter case classes.
- * ³éÏó²ÎÊýµÄÀà
+ * æŠ½è±¡å‚æ•°çš„ç±»
  * This overrides the [[toString]] method to print all case class fields by name and value.
- * Õâ½«ÖØÐ´toString·½·¨´òÓ¡ÊµÀýÀàËùÓÐµÄ×Ö¶ÎÃûºÍÖµ
+ * è¿™å°†é‡å†™toStringæ–¹æ³•æ‰“å°å®žä¾‹ç±»æ‰€æœ‰çš„å­—æ®µåå’Œå€¼
  * @tparam T  Concrete parameter class.
  */
 abstract class AbstractParams[T: TypeTag] {
@@ -32,7 +32,7 @@ abstract class AbstractParams[T: TypeTag] {
 
   /**
    * Finds all case class fields in concrete class instance, and outputs them in JSON-style format:
-   * ÔÚÊµÀýÀàÖÐ²éÕÒËù×Ö¶Î,Êä³öJSON·ç¸ñµÄ¸ñÊ½
+   * åœ¨å®žä¾‹ç±»ä¸­æŸ¥æ‰¾æ‰€å­—æ®µ,è¾“å‡ºJSONé£Žæ ¼çš„æ ¼å¼
    * {
    *   [field name]:\t[field value]\n
    *   [field name]:\t[field value]\n
@@ -42,8 +42,8 @@ abstract class AbstractParams[T: TypeTag] {
   override def toString: String = {
     val tpe = tag.tpe
     val allAccessors = tpe.declarations.collect {
-      //Symbol·ûºÅ 
-      case m: MethodSymbol if m.isCaseAccessor => m //·ÃÎÊÆ÷»òÕß·ÃÎÊÆ÷·½·¨
+      //Symbolç¬¦å· 
+      case m: MethodSymbol if m.isCaseAccessor => m //è®¿é—®å™¨æˆ–è€…è®¿é—®å™¨æ–¹æ³•
     }
     val mirror = runtimeMirror(getClass.getClassLoader)
     val instanceMirror = mirror.reflect(this)

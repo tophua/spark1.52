@@ -33,8 +33,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * VectorSlicerÊÇÒ»¸ö×ª»»Æ÷ÊäÈëÌØÕ÷ÏòÁ¿,Êä³öÔ­Ê¼ÌØÕ÷ÏòÁ¿×Ó¼¯.
- * VectorSlicer½ÓÊÕ´øÓĞÌØ¶¨Ë÷ÒıµÄÏòÁ¿ÁĞ,Í¨¹ı¶ÔÕâĞ©Ë÷ÒıµÄÖµ½øĞĞÉ¸Ñ¡µÃµ½ĞÂµÄÏòÁ¿¼¯
+ * VectorSliceræ˜¯ä¸€ä¸ªè½¬æ¢å™¨è¾“å…¥ç‰¹å¾å‘é‡,è¾“å‡ºåŸå§‹ç‰¹å¾å‘é‡å­é›†.
+ * VectorSliceræ¥æ”¶å¸¦æœ‰ç‰¹å®šç´¢å¼•çš„å‘é‡åˆ—,é€šè¿‡å¯¹è¿™äº›ç´¢å¼•çš„å€¼è¿›è¡Œç­›é€‰å¾—åˆ°æ–°çš„å‘é‡é›†
  */
 object VectorSlicerExample {
   def main(args: Array[String]): Unit = {
@@ -52,18 +52,18 @@ object VectorSlicerExample {
     val attrGroup = new AttributeGroup("userFeatures", attrs.asInstanceOf[Array[Attribute]])
     
    // val dataset = sqlContext.createDataFrame(data, StructType(Array(attrGroup.toStructField())))
-   //ÉÏÃæÏµÍ³±¨´í,Î´µ÷Õû,Ö÷ÒªÄ¿µÄ setIndices·½Ê½
+   //ä¸Šé¢ç³»ç»ŸæŠ¥é”™,æœªè°ƒæ•´,ä¸»è¦ç›®çš„ setIndicesæ–¹å¼
   val dataset = sqlContext.createDataFrame(
       Seq((0, 18, 1.0, Vectors.dense(0.0, 10.0, 0.5), 1.0))
     ).toDF("id", "hour", "mobile", "userFeatures", "clicked")
-    // VectorSlicerÊÇÒ»¸ö×ª»»Æ÷ÊäÈëÌØÕ÷ÏòÁ¿,Êä³öÔ­Ê¼ÌØÕ÷ÏòÁ¿×Ó¼¯.
+    // VectorSliceræ˜¯ä¸€ä¸ªè½¬æ¢å™¨è¾“å…¥ç‰¹å¾å‘é‡,è¾“å‡ºåŸå§‹ç‰¹å¾å‘é‡å­é›†.
     val slicer = new VectorSlicer().setInputCol("userFeatures").setOutputCol("features")
-    //1,´Ó0¿ªÊ¼ÕûÊıË÷Òı,setIndices()
-    //2,×Ö·û´®Ë÷Òı´ú±íÏòÁ¿ÖĞÌØÕ÷µÄÃû×Ö
-    //´ÓÏòÁ¿ÁĞÖĞÑ¡Ôñ¹¦ÄÜµÄ¹¦ÄÜÃû³ÆÊı×é
+    //1,ä»0å¼€å§‹æ•´æ•°ç´¢å¼•,setIndices()
+    //2,å­—ç¬¦ä¸²ç´¢å¼•ä»£è¡¨å‘é‡ä¸­ç‰¹å¾çš„åå­—
+    //ä»å‘é‡åˆ—ä¸­é€‰æ‹©åŠŸèƒ½çš„åŠŸèƒ½åç§°æ•°ç»„
     slicer.setIndices(Array(2)).setNames(Array.empty)
     // or slicer.setIndices(Array(1, 2)), or slicer.setNames(Array("f2", "f3"))
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val output = slicer.transform(dataset)
     /**
     +---+----+------+--------------+-------+--------+

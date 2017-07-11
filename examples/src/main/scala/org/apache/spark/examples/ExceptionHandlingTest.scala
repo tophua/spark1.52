@@ -19,22 +19,22 @@ package org.apache.spark.examples
 
 import org.apache.spark.{SparkConf, SparkContext}
 /**
- * 测试异常处理
- */
-object ExceptionHandlingTest {//异常处理测试
-  def main(args: Array[String]) {
-    val sparkConf = new SparkConf().setAppName("ExceptionHandlingTest").setMaster("local")
-    val sc = new SparkContext(sparkConf)
-    println("sc.defaultParallelism:"+sc.defaultParallelism)
-    sc.parallelize(0 until sc.defaultParallelism).foreach { i =>
-      val rd=math.random
-      println(rd)
-      if (rd > 0.75) {
-        //测试异常处理
-        throw new Exception("Testing exception handling")
-      }
+  * 娴嬭瘯寮傚父澶勭悊
+  */
+object ExceptionHandlingTest {//寮傚父澶勭悊娴嬭瘯
+def main(args: Array[String]) {
+  val sparkConf = new SparkConf().setAppName("ExceptionHandlingTest").setMaster("local")
+  val sc = new SparkContext(sparkConf)
+  println("sc.defaultParallelism:"+sc.defaultParallelism)
+  sc.parallelize(0 until sc.defaultParallelism).foreach { i =>
+    val rd=math.random
+    println(rd)
+    if (rd > 0.75) {
+      //娴嬭瘯寮傚父澶勭悊
+      throw new Exception("Testing exception handling")
     }
-
-    sc.stop()
   }
+
+  sc.stop()
+}
 }

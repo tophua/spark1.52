@@ -8,7 +8,7 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.{ SparkConf, SparkContext }
 /**
  * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice5/
- * Ê¹ÓÃ ML Pipeline ¹¹½¨»úÆ÷Ñ§Ï°¹¤×÷Á÷
+ * ä½¿ç”¨ ML Pipeline æ„å»ºæœºå™¨å­¦ä¹ å·¥ä½œæµ
  */
 object ClassificationPipeline_IBM {
   def main(args: Array[String]) {
@@ -21,8 +21,8 @@ object ClassificationPipeline_IBM {
     val sqlCtx = new SQLContext(sc)
 
     /**
-     * ÕâÊÇÒ»¸ö´ÓÖ½±Ò¼ø±ğ¹ı³ÌÖĞµÄÍ¼Æ¬ÀïÌáÈ¡µÄÊı¾İ¼¯,×Ü¹²°üº¬Îå¸öÁĞ,Ç° 4 ÁĞÊÇÖ¸±êÖµ (Á¬ĞøĞÍ),×îºóÒ»ÁĞÊÇÕæ¼Ù±êÊ¶
-     * ËÄÁĞÒÀ´ÎÊÇĞ¡²¨±ä»»Í¼ÏñµÄ·½²î,Ğ¡²¨±ä»»Í¼ÏñµÄÆ«Ì¬,Ğ¡²¨±ä»»Í¼ÏñµÄ·å¶È,Í¼ÏñìØ,Àà±ğ±êÇ©
+     * è¿™æ˜¯ä¸€ä¸ªä»çº¸å¸é‰´åˆ«è¿‡ç¨‹ä¸­çš„å›¾ç‰‡é‡Œæå–çš„æ•°æ®é›†,æ€»å…±åŒ…å«äº”ä¸ªåˆ—,å‰ 4 åˆ—æ˜¯æŒ‡æ ‡å€¼ (è¿ç»­å‹),æœ€åä¸€åˆ—æ˜¯çœŸå‡æ ‡è¯†
+     * å››åˆ—ä¾æ¬¡æ˜¯å°æ³¢å˜æ¢å›¾åƒçš„æ–¹å·®,å°æ³¢å˜æ¢å›¾åƒçš„åæ€,å°æ³¢å˜æ¢å›¾åƒçš„å³°åº¦,å›¾åƒç†µ,ç±»åˆ«æ ‡ç­¾
      * Step 1
      * Read the source data file and convert it to be a dataframe with columns named.
      * 3.6216,8.6661,-2.8073,-0.44699,0
@@ -34,7 +34,7 @@ object ClassificationPipeline_IBM {
      */
     
     
-     /***=======spark-shell.cmdÖ´ĞĞÃüÁî===========
+     /***=======spark-shell.cmdæ‰§è¡Œå‘½ä»¤===========
      val parsedRDD = sc.textFile("./ml-100k/data_banknote_authentication.txt").map(_.split(",")).map(eachRow => {
       val a = eachRow.map(x => x.toDouble)
       (a(0), a(1), a(2), a(3), a(4))
@@ -52,7 +52,7 @@ object ClassificationPipeline_IBM {
       (a(0), a(1), a(2), a(3), a(4))
     })
     val df = sqlCtx.createDataFrame(parsedRDD).toDF(
-      //ËÄÁĞÒÀ´ÎÊÇĞ¡²¨±ä»»Í¼ÏñµÄ·½²î,Ğ¡²¨±ä»»Í¼ÏñµÄÆ«Ì¬,Ğ¡²¨±ä»»Í¼ÏñµÄ·å¶È,Í¼ÏñìØ,Àà±ğ±êÇ©,×îºóÒ»ÁĞÊÇÕæ¼Ù±êÊ¶
+      //å››åˆ—ä¾æ¬¡æ˜¯å°æ³¢å˜æ¢å›¾åƒçš„æ–¹å·®,å°æ³¢å˜æ¢å›¾åƒçš„åæ€,å°æ³¢å˜æ¢å›¾åƒçš„å³°åº¦,å›¾åƒç†µ,ç±»åˆ«æ ‡ç­¾,æœ€åä¸€åˆ—æ˜¯çœŸå‡æ ‡è¯†
       "f0", "f1", "f2", "f3", "label").cache()
      df.registerTempTable("data")
    val queryCaseWhen = sqlCtx.sql("select f0,f1,f2,f3,label from data ").show()
@@ -62,21 +62,21 @@ object ClassificationPipeline_IBM {
     /**
      * *
      * Step 2
-     * Ê¹ÓÃ StringIndexer È¥°ÑÔ´Êı¾İÀïµÄ×Ö·û Label,°´ÕÕ Label ³öÏÖµÄÆµ´Î¶ÔÆä½øĞĞĞòÁĞ±àÂë, Èç,0,1,2,¡­¡£
-     * ÔÚ±¾ÀıµÄÊı¾İÖĞ,¿ÉÄÜÕâ¸ö²½ÖèµÄ×÷ÓÃ²»ÉõÃ÷ÏÔ,ÒòÎªÎÒÃÇµÄÊı¾İ¸ñÊ½Á¼ºÃ,Label ±¾ÉíÒ²Ö»ÓĞÁ½ÖÖ,
-     * ²¢ÇÒÒÑ¾­ÊÇÀàĞòÁĞ±àÂëµÄ¡±0¡±ºÍ¡±1¡±¸ñÊ½¡£µ«ÊÇ¶ÔÓÚ¶à·ÖÀàÎÊÌâ»òÕßÊÇ Label ±¾ÉíÊÇ×Ö·û´®µÄ±àÂë·½Ê½,
-     * Èç¡±High¡±,¡±Low¡±,¡±Medium¡±µÈ,ÄÇÃ´Õâ¸ö²½Öè¾ÍºÜÓĞÓÃ,×ª»»ºóµÄ¸ñÊ½,²ÅÄÜ±» Spark ¸üºÃµÄ´¦Àí
+     * ä½¿ç”¨ StringIndexer å»æŠŠæºæ•°æ®é‡Œçš„å­—ç¬¦ Label,æŒ‰ç…§ Label å‡ºç°çš„é¢‘æ¬¡å¯¹å…¶è¿›è¡Œåºåˆ—ç¼–ç , å¦‚,0,1,2,â€¦ã€‚
+     * åœ¨æœ¬ä¾‹çš„æ•°æ®ä¸­,å¯èƒ½è¿™ä¸ªæ­¥éª¤çš„ä½œç”¨ä¸ç”šæ˜æ˜¾,å› ä¸ºæˆ‘ä»¬çš„æ•°æ®æ ¼å¼è‰¯å¥½,Label æœ¬èº«ä¹Ÿåªæœ‰ä¸¤ç§,
+     * å¹¶ä¸”å·²ç»æ˜¯ç±»åºåˆ—ç¼–ç çš„â€0â€å’Œâ€1â€æ ¼å¼ã€‚ä½†æ˜¯å¯¹äºå¤šåˆ†ç±»é—®é¢˜æˆ–è€…æ˜¯ Label æœ¬èº«æ˜¯å­—ç¬¦ä¸²çš„ç¼–ç æ–¹å¼,
+     * å¦‚â€Highâ€,â€Lowâ€,â€Mediumâ€ç­‰,é‚£ä¹ˆè¿™ä¸ªæ­¥éª¤å°±å¾ˆæœ‰ç”¨,è½¬æ¢åçš„æ ¼å¼,æ‰èƒ½è¢« Spark æ›´å¥½çš„å¤„ç†
      */
     val labelIndexer = new StringIndexer()
       .setInputCol("label") //
       .setOutputCol("indexedLabel")
-      .fit(df)// fit ·½·¨Éè¼ÆºÍÊµÏÖÉÏÊµ¼ÊÉÏÊÇ²ÉÓÃÁËÄ£°å·½·¨µÄÉè¼ÆÄ£Ê½,¾ßÌå»áµ÷ÓÃÊµÏÖÀàµÄ train ·½·¨
+      .fit(df)// fit æ–¹æ³•è®¾è®¡å’Œå®ç°ä¸Šå®é™…ä¸Šæ˜¯é‡‡ç”¨äº†æ¨¡æ¿æ–¹æ³•çš„è®¾è®¡æ¨¡å¼,å…·ä½“ä¼šè°ƒç”¨å®ç°ç±»çš„ train æ–¹æ³•
 
     /**
      * Step 3
-     * Ê¹ÓÃ VectorAssembler ´ÓÔ´Êı¾İÖĞÌáÈ¡ÌØÕ÷Ö¸±êÊı¾İ,ÕâÊÇÒ»¸ö±È½ÏµäĞÍÇÒÍ¨ÓÃµÄ²½Öè,
-     * ÒòÎªÎÒÃÇµÄÔ­Ê¼Êı¾İ¼¯Àï,¾­³£»á°üº¬Ò»Ğ©·ÇÖ¸±êÊı¾İ,Èç ID,Description µÈ
-     * VectorAssemblerÊÇÒ»¸ö×ª»»Æ÷,Ëü½«¸ø¶¨µÄÈô¸ÉÁĞºÏ²¢ÎªÒ»ÁĞÏòÁ¿
+     * ä½¿ç”¨ VectorAssembler ä»æºæ•°æ®ä¸­æå–ç‰¹å¾æŒ‡æ ‡æ•°æ®,è¿™æ˜¯ä¸€ä¸ªæ¯”è¾ƒå…¸å‹ä¸”é€šç”¨çš„æ­¥éª¤,
+     * å› ä¸ºæˆ‘ä»¬çš„åŸå§‹æ•°æ®é›†é‡Œ,ç»å¸¸ä¼šåŒ…å«ä¸€äº›éæŒ‡æ ‡æ•°æ®,å¦‚ ID,Description ç­‰
+     * VectorAssembleræ˜¯ä¸€ä¸ªè½¬æ¢å™¨,å®ƒå°†ç»™å®šçš„è‹¥å¹²åˆ—åˆå¹¶ä¸ºä¸€åˆ—å‘é‡
      */
     val vectorAssembler = new VectorAssembler()
       .setInputCols(Array("f0", "f1", "f2", "f3"))
@@ -84,20 +84,20 @@ object ClassificationPipeline_IBM {
 
     /**
      * Step 4
-     * ´´½¨Ò»¸öËæ»úÉ­ÁÖ·ÖÀàÆ÷ RandomForestClassifier ÊµÀı,²¢Éè¶¨Ïà¹Ø²ÎÊı,
-     * Ö÷ÒªÊÇ¸æËßËæ»úÉ­ÁÖËã·¨ÊäÈë DataFrame Êı¾İÀïÄÄ¸öÁĞÊÇÌØÕ÷ÏòÁ¿,ÄÄ¸öÊÇÀà±ğ±êÊ¶.
+     * åˆ›å»ºä¸€ä¸ªéšæœºæ£®æ—åˆ†ç±»å™¨ RandomForestClassifier å®ä¾‹,å¹¶è®¾å®šç›¸å…³å‚æ•°,
+     * ä¸»è¦æ˜¯å‘Šè¯‰éšæœºæ£®æ—ç®—æ³•è¾“å…¥ DataFrame æ•°æ®é‡Œå“ªä¸ªåˆ—æ˜¯ç‰¹å¾å‘é‡,å“ªä¸ªæ˜¯ç±»åˆ«æ ‡è¯†.
      */
     val rfClassifier = new RandomForestClassifier()
-      .setLabelCol("indexedLabel")//±êÇ©ÁĞµÄÃû³Æ
-      .setFeaturesCol("featureVector")//ÑµÁ·Êı¾İ¼¯ DataFrame ÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
-      .setProbabilityCol("probability")//Àà±ğÔ¤²â½á¹ûµÄÌõ¼ş¸ÅÂÊÖµ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÖµÊÇ¡±probability¡±
-      .setPredictionCol("prediction")//Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
-      .setNumTrees(5)//²¢¸æËßËæ»úÉ­ÁÖ·ÖÀàÆ÷ÑµÁ· 5¿Ã¶ÀÁ¢µÄ×ÓÊ÷
+      .setLabelCol("indexedLabel")//æ ‡ç­¾åˆ—çš„åç§°
+      .setFeaturesCol("featureVector")//è®­ç»ƒæ•°æ®é›† DataFrame ä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
+      .setProbabilityCol("probability")//ç±»åˆ«é¢„æµ‹ç»“æœçš„æ¡ä»¶æ¦‚ç‡å€¼å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤å€¼æ˜¯â€probabilityâ€
+      .setPredictionCol("prediction")//ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
+      .setNumTrees(5)//å¹¶å‘Šè¯‰éšæœºæ£®æ—åˆ†ç±»å™¨è®­ç»ƒ 5æ£µç‹¬ç«‹çš„å­æ ‘
 
     /**
      * Step 5
-     *ÎÒÃÇÊ¹ÓÃ IndexToString Transformer È¥°ÑÖ®Ç°µÄĞòÁĞ±àÂëºóµÄ Label ×ª»¯³ÉÔ­Ê¼µÄ Label,»Ö¸´Ö®Ç°µÄ¿É¶ÁĞÔ±È½Ï¸ßµÄ Label,
-     *ÕâÑù²»ÂÛÊÇ´æ´¢»¹ÊÇÏÔÊ¾Ä£ĞÍµÄ²âÊÔ½á¹û,¿É¶ÁĞÔ¶¼»á±È½Ï¸ß
+     *æˆ‘ä»¬ä½¿ç”¨ IndexToString Transformer å»æŠŠä¹‹å‰çš„åºåˆ—ç¼–ç åçš„ Label è½¬åŒ–æˆåŸå§‹çš„ Label,æ¢å¤ä¹‹å‰çš„å¯è¯»æ€§æ¯”è¾ƒé«˜çš„ Label,
+     *è¿™æ ·ä¸è®ºæ˜¯å­˜å‚¨è¿˜æ˜¯æ˜¾ç¤ºæ¨¡å‹çš„æµ‹è¯•ç»“æœ,å¯è¯»æ€§éƒ½ä¼šæ¯”è¾ƒé«˜
      */
     val labelConverter = new IndexToString()
       .setInputCol("prediction")
@@ -106,39 +106,39 @@ object ClassificationPipeline_IBM {
 
     //Step 6
     //Randomly split the input data by 8:2, while 80% is for training, the rest is for testing.
-     //Ëæ»ú½«ÊäÈëÊı¾İ°´8:2,¶ø80%ÊÇÓÃÓÚÑµÁ·,ÆäÓàµÄÓÃÓÚ²âÊÔ
+     //éšæœºå°†è¾“å…¥æ•°æ®æŒ‰8:2,è€Œ80%æ˜¯ç”¨äºè®­ç»ƒ,å…¶ä½™çš„ç”¨äºæµ‹è¯•
     val Array(trainingData, testData) = df.randomSplit(Array(0.8, 0.2))
 
     /**
      * Step 7
-     * ¹¹½¨ Pipeline ÊµÀı,²¢ÇÒ»á°´ÕÕË³ĞòÖ´ĞĞ,×îÖÕÎÒÃÇ¸ù¾İµÃµ½µÄ PipelineModel ÊµÀı,
-     * ½øÒ»²½µ÷ÓÃÆä transform ·½·¨,È¥ÓÃÑµÁ·ºÃµÄÄ£ĞÍÔ¤²â²âÊÔÊı¾İ¼¯µÄ·ÖÀà,
-     * Òª¹¹½¨Ò»¸ö Pipeline,Ê×ÏÈÎÒÃÇĞèÒª¶¨Òå Pipeline ÖĞµÄ¸÷¸ö PipelineStage,ÈçÖ¸±êÌáÈ¡ºÍ×ª»»Ä£ĞÍÑµÁ·µÈ
-     * ÀıÈç:al pipeline = new Pipeline().setStages(Array(stage1,stage2,stage3,¡­))
-     * È»ºó¾Í¿ÉÒÔ°ÑÑµÁ·Êı¾İ¼¯×÷ÎªÈë²Î²¢µ÷ÓÃ Pipelin ÊµÀıµÄ fit ·½·¨À´¿ªÊ¼ÒÔÁ÷µÄ·½Ê½À´´¦ÀíÔ´ÑµÁ·Êı¾İ,
-     * Õâ¸öµ÷ÓÃ»á·µ»ØÒ»¸ö PipelineModel ÀàÊµÀı, ½ø¶ø±»ÓÃÀ´Ô¤²â²âÊÔÊı¾İµÄ±êÇ©,ËüÊÇÒ»¸ö Transformer
+     * æ„å»º Pipeline å®ä¾‹,å¹¶ä¸”ä¼šæŒ‰ç…§é¡ºåºæ‰§è¡Œ,æœ€ç»ˆæˆ‘ä»¬æ ¹æ®å¾—åˆ°çš„ PipelineModel å®ä¾‹,
+     * è¿›ä¸€æ­¥è°ƒç”¨å…¶ transform æ–¹æ³•,å»ç”¨è®­ç»ƒå¥½çš„æ¨¡å‹é¢„æµ‹æµ‹è¯•æ•°æ®é›†çš„åˆ†ç±»,
+     * è¦æ„å»ºä¸€ä¸ª Pipeline,é¦–å…ˆæˆ‘ä»¬éœ€è¦å®šä¹‰ Pipeline ä¸­çš„å„ä¸ª PipelineStage,å¦‚æŒ‡æ ‡æå–å’Œè½¬æ¢æ¨¡å‹è®­ç»ƒç­‰
+     * ä¾‹å¦‚:al pipeline = new Pipeline().setStages(Array(stage1,stage2,stage3,â€¦))
+     * ç„¶åå°±å¯ä»¥æŠŠè®­ç»ƒæ•°æ®é›†ä½œä¸ºå…¥å‚å¹¶è°ƒç”¨ Pipelin å®ä¾‹çš„ fit æ–¹æ³•æ¥å¼€å§‹ä»¥æµçš„æ–¹å¼æ¥å¤„ç†æºè®­ç»ƒæ•°æ®,
+     * è¿™ä¸ªè°ƒç”¨ä¼šè¿”å›ä¸€ä¸ª PipelineModel ç±»å®ä¾‹, è¿›è€Œè¢«ç”¨æ¥é¢„æµ‹æµ‹è¯•æ•°æ®çš„æ ‡ç­¾,å®ƒæ˜¯ä¸€ä¸ª Transformer
      */
     val pipeline = new Pipeline().setStages(Array(labelIndexer, vectorAssembler, rfClassifier, labelConverter))
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(trainingData)
 
     /**
      * Step 8
      * Perform predictions about testing data. This transform method will return a result DataFrame
      * with new prediction column appended towards previous DataFrame.
-     * Ö÷ÒªÊÇÓÃÀ´°Ñ Ò»¸ö DataFrame ×ª»»³ÉÁíÒ»¸ö DataFrame,±ÈÈçÒ»¸öÄ£ĞÍ¾ÍÊÇÒ»¸ö Transformer,
-     * ÒòÎªËü¿ÉÒÔ°Ñ Ò»¸ö²»°üº¬Ô¤²â±êÇ©µÄ²âÊÔÊı¾İ¼¯ DataFrame ´òÉÏ±êÇ©×ª»¯³ÉÁíÒ»¸ö°üº¬Ô¤²â±êÇ©µÄ DataFrame,
-     * ÏÔÈ»ÕâÑùµÄ½á¹û¼¯¿ÉÒÔ±»ÓÃÀ´×ö·ÖÎö½á¹ûµÄ¿ÉÊÓ»¯
+     * ä¸»è¦æ˜¯ç”¨æ¥æŠŠ ä¸€ä¸ª DataFrame è½¬æ¢æˆå¦ä¸€ä¸ª DataFrame,æ¯”å¦‚ä¸€ä¸ªæ¨¡å‹å°±æ˜¯ä¸€ä¸ª Transformer,
+     * å› ä¸ºå®ƒå¯ä»¥æŠŠ ä¸€ä¸ªä¸åŒ…å«é¢„æµ‹æ ‡ç­¾çš„æµ‹è¯•æ•°æ®é›† DataFrame æ‰“ä¸Šæ ‡ç­¾è½¬åŒ–æˆå¦ä¸€ä¸ªåŒ…å«é¢„æµ‹æ ‡ç­¾çš„ DataFrame,
+     * æ˜¾ç„¶è¿™æ ·çš„ç»“æœé›†å¯ä»¥è¢«ç”¨æ¥åšåˆ†æç»“æœçš„å¯è§†åŒ–
      */
-     //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
-    val predictionResultDF = model.transform(testData) //Ö÷ÒªÊÇÓÃÀ´°Ñ Ò»¸ö DataFrame ×ª»»³ÉÁíÒ»¸ö DataFrame
+     //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
+    val predictionResultDF = model.transform(testData) //ä¸»è¦æ˜¯ç”¨æ¥æŠŠ ä¸€ä¸ª DataFrame è½¬æ¢æˆå¦ä¸€ä¸ª DataFrame
 
     /**
      * Step 9
      * Select features,label,and predicted label from the DataFrame to display.
-     * ÌØÕ÷Ñ¡Ôñ,±êÇ©,ºÍÔ¤²âµÄÖ¡ÏÔÊ¾±êÇ©
+     * ç‰¹å¾é€‰æ‹©,æ ‡ç­¾,å’Œé¢„æµ‹çš„å¸§æ˜¾ç¤ºæ ‡ç­¾
      * We only show 20 rows, it is just for reference.
-     * ÎÒÃÇÖ»ÏÔÊ¾20ĞĞ,ËüÖ»ÊÇ¹©²Î¿¼
+     * æˆ‘ä»¬åªæ˜¾ç¤º20è¡Œ,å®ƒåªæ˜¯ä¾›å‚è€ƒ
       +--------+--------+--------+---------+-----+--------------+
       |      f0|      f1|      f2|       f3|label|predictedLabel|
       +--------+--------+--------+---------+-----+--------------+
@@ -169,14 +169,14 @@ object ClassificationPipeline_IBM {
     /**
      * Step 10
      * The evaluator code is used to compute the prediction accuracy, this is
-     * ¼ÆËã´úÂëÊÇÓÃÀ´¼ÆËãÔ¤²â¾«¶È,
+     * è®¡ç®—ä»£ç æ˜¯ç”¨æ¥è®¡ç®—é¢„æµ‹ç²¾åº¦,
      * usually a valuable feature to estimate prediction accuracy the trained model.
-     * ÕâÍ¨³£ÊÇÒ»¸öÓĞ¼ÛÖµµÄÌØÕ÷À´¹À¼ÆÔ¤²âµÄ×¼È·ĞÔÑµÁ·Ä£ĞÍ
+     * è¿™é€šå¸¸æ˜¯ä¸€ä¸ªæœ‰ä»·å€¼çš„ç‰¹å¾æ¥ä¼°è®¡é¢„æµ‹çš„å‡†ç¡®æ€§è®­ç»ƒæ¨¡å‹
      */
     val evaluator = new MulticlassClassificationEvaluator()
-      .setLabelCol("label")//±êÇ©ÁĞµÄÃû³Æ
-      .setPredictionCol("prediction")//Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
-      .setMetricName("precision")//²âÁ¿Ãû³Æ
+      .setLabelCol("label")//æ ‡ç­¾åˆ—çš„åç§°
+      .setPredictionCol("prediction")//ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
+      .setMetricName("precision")//æµ‹é‡åç§°
     //predictionAccuracy: Double = 0.9825783972125436
     val predictionAccuracy = evaluator.evaluate(predictionResultDF)   
     //Testing Error = 0.017421602787456414
@@ -184,7 +184,7 @@ object ClassificationPipeline_IBM {
     /**
      * Step 11(Optional)
      * You can choose to print or save the the model structure.
-     * Äú¿ÉÒÔÑ¡Ôñ´òÓ¡»ò±£´æÄ£ĞÍ½á¹¹
+     * æ‚¨å¯ä»¥é€‰æ‹©æ‰“å°æˆ–ä¿å­˜æ¨¡å‹ç»“æ„
      */
     val randomForestModel = model.stages(2).asInstanceOf[RandomForestClassificationModel]
     println("Trained Random Forest Model is:\n" + randomForestModel.toDebugString)

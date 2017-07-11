@@ -29,7 +29,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * PolynomialExpansion ¶àÏîÊ½À©Õ¹Í¨¹ı²úÉúnÎ¬×éºÏ½«Ô­Ê¼ÌØÕ÷½«ÌØÕ÷À©Õ¹µ½¶àÏîÊ½¿Õ¼ä
+ * PolynomialExpansion å¤šé¡¹å¼æ‰©å±•é€šè¿‡äº§ç”Ÿnç»´ç»„åˆå°†åŸå§‹ç‰¹å¾å°†ç‰¹å¾æ‰©å±•åˆ°å¤šé¡¹å¼ç©ºé—´
  */
 object PolynomialExpansionExample {
   def main(args: Array[String]): Unit = {
@@ -41,7 +41,7 @@ object PolynomialExpansionExample {
 
     // $example on$
     /**
-     * ÏÂÃæµÄÊ¾Àı»á½éÉÜÈçºÎ½«ÄãµÄÌØÕ÷¼¯ÍØÕ¹µ½3Î¬¶àÏîÊ½¿Õ¼ä
+     * ä¸‹é¢çš„ç¤ºä¾‹ä¼šä»‹ç»å¦‚ä½•å°†ä½ çš„ç‰¹å¾é›†æ‹“å±•åˆ°3ç»´å¤šé¡¹å¼ç©ºé—´
      */
     val data = Array(
       Vectors.dense(-2.0, 2.3),
@@ -50,10 +50,10 @@ object PolynomialExpansionExample {
     )
     val df = sqlContext.createDataFrame(data.map(Tuple1.apply)).toDF("features")
     val polynomialExpansion = new PolynomialExpansion()
-      .setInputCol("features")//ÊäÈëÁĞ
-      .setOutputCol("polyFeatures")//Êä³öÁĞ
+      .setInputCol("features")//è¾“å…¥åˆ—
+      .setOutputCol("polyFeatures")//è¾“å‡ºåˆ—
       .setDegree(3)
-      //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+      //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val polyDF = polynomialExpansion.transform(df)
     /**
      *+----------+--------------------+

@@ -29,7 +29,7 @@ import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 import org.apache.spark.mllib.util._
 /**
- * VectorIndexerÖ÷Òª×÷ÓÃ:Ìá¸ß¾ö²ßÊ÷»òËæ»úÉ­ÁÖµÈML·½·¨µÄ·ÖÀàĞ§¹û¡£
+ * VectorIndexerä¸»è¦ä½œç”¨:æé«˜å†³ç­–æ ‘æˆ–éšæœºæ£®æ—ç­‰MLæ–¹æ³•çš„åˆ†ç±»æ•ˆæœã€‚
  */
 object VectorIndexerExample {
   def main(args: Array[String]): Unit = {
@@ -41,24 +41,24 @@ object VectorIndexerExample {
 
     // $example on$
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
    val datasvm=MLUtils.loadLibSVMFile(sc,"../data/mllib/sample_libsvm_data.txt")
    val data =sqlContext.createDataFrame(datasvm)
     //val data = sqlContext.read.format("libsvm").load("../data/mllib/sample_libsvm_data.txt")
     /**
-     * VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
-     * ËüÄÜ¹»×Ô¶¯ÅĞ¶ÏÄÇĞ©ÌØÕ÷ÊÇÀëÉ¢ÖµĞÍµÄÌØÕ÷,²¢¶ÔËûÃÇ½øĞĞ±àºÅ
+     * VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
+     * å®ƒèƒ½å¤Ÿè‡ªåŠ¨åˆ¤æ–­é‚£äº›ç‰¹å¾æ˜¯ç¦»æ•£å€¼å‹çš„ç‰¹å¾,å¹¶å¯¹ä»–ä»¬è¿›è¡Œç¼–å·
      */
     val indexer = new VectorIndexer()
-      .setInputCol("features")//ÊäÈëÁĞ
-      .setOutputCol("indexed")//Êä³öÁĞ
-      .setMaxCategories(5)//×î´óÀà±ğÊıÎª5,(¼´Ä³Ò»ÁĞ)ÖĞ¶àÓÚ5¸öÈ¡ÖµÊÓÎªÁ¬ĞøÖµ
-     //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .setInputCol("features")//è¾“å…¥åˆ—
+      .setOutputCol("indexed")//è¾“å‡ºåˆ—
+      .setMaxCategories(5)//æœ€å¤§ç±»åˆ«æ•°ä¸º5,(å³æŸä¸€åˆ—)ä¸­å¤šäº5ä¸ªå–å€¼è§†ä¸ºè¿ç»­å€¼
+     //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val indexerModel = indexer.fit(data)
 
     val categoricalFeatures: Set[Int] = indexerModel.categoryMaps.keys.toSet
@@ -66,7 +66,7 @@ object VectorIndexerExample {
       categoricalFeatures.mkString(", "))
 
     // Create new column "indexed" with categorical values transformed to indices
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val indexedData = indexerModel.transform(data)
     /**
     +-------------------------+-------------------------+
@@ -78,12 +78,12 @@ object VectorIndexerExample {
     |(3,[0,1,2],[3.0,6.0,2.0])|(3,[0,1,2],[3.0,2.0,0.0])|
     |(3,[0,1,2],[5.0,9.0,2.0])|(3,[0,1,2],[5.0,4.0,0.0])|
     +-------------------------+-------------------------+
-    *½á¹û·ÖÎö:ÌØÕ÷ÏòÁ¿°üº¬3¸öÌØÕ÷,¼´ÌØÕ÷0,ÌØÕ÷1,ÌØÕ÷2,
-    *ÈçRow=1,¶ÔÓ¦µÄÌØÕ÷·Ö±ğÊÇ2.0,5.0,7.0.±»×ª»»Îª2.0,1.0,1.0
-    *ÎÒÃÇ·¢ÏÖÖ»ÓĞÌØÕ÷1,ÌØÕ÷2±»×ª»»ÁË,ÌØÕ÷0Ã»ÓĞ±»×ª»»,ÕâÊÇÒòÎªÌØÕ÷0ÓĞ6ÖĞÈ¡Öµ(2,3,4,5,8,,9),
-    *¶àÓÚÇ°ÃæµÄÉèÖÃsetMaxCategories(5),Òò´Ë±»ÊÓÎªÁ¬ĞøÖµÁË,²»»á±»×ª»»¡£
-    * ÌØÕ÷1ÖĞ,(4,5,6,7,9)-->(0,1,2,3,4,5)
-    * ÌØÕ÷2ÖĞ,(2,7,9)-->(0,1,2)
+    *ç»“æœåˆ†æ:ç‰¹å¾å‘é‡åŒ…å«3ä¸ªç‰¹å¾,å³ç‰¹å¾0,ç‰¹å¾1,ç‰¹å¾2,
+    *å¦‚Row=1,å¯¹åº”çš„ç‰¹å¾åˆ†åˆ«æ˜¯2.0,5.0,7.0.è¢«è½¬æ¢ä¸º2.0,1.0,1.0
+    *æˆ‘ä»¬å‘ç°åªæœ‰ç‰¹å¾1,ç‰¹å¾2è¢«è½¬æ¢äº†,ç‰¹å¾0æ²¡æœ‰è¢«è½¬æ¢,è¿™æ˜¯å› ä¸ºç‰¹å¾0æœ‰6ä¸­å–å€¼(2,3,4,5,8,,9),
+    *å¤šäºå‰é¢çš„è®¾ç½®setMaxCategories(5),å› æ­¤è¢«è§†ä¸ºè¿ç»­å€¼äº†,ä¸ä¼šè¢«è½¬æ¢ã€‚
+    * ç‰¹å¾1ä¸­,(4,5,6,7,9)-->(0,1,2,3,4,5)
+    * ç‰¹å¾2ä¸­,(2,7,9)-->(0,1,2)
     */
     indexedData.show()
     // $example off$

@@ -30,9 +30,9 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{SQLContext, DataFrame}
 /**
- * Ëæ»úÉ­ÁÖ(Random Forests)ÆäÊµ¾ÍÊÇ¶à¸ö¾ö²ßÊ÷,Ã¿¸ö¾ö²ßÊ÷ÓĞÒ»¸öÈ¨ÖØ,¶ÔÎ´ÖªÊı¾İ½øĞĞÔ¤²âÊ±,
- * »áÓÃ¶à¸ö¾ö²ßÊ÷·Ö±ğÔ¤²âÒ»¸öÖµ,È»ºó¿¼ÂÇÊ÷µÄÈ¨ÖØ,½«Õâ¶à¸öÔ¤²âÖµ×ÛºÏÆğÀ´,
- * ¶ÔÓÚ·ÖÀàÎÊÌâ,²ÉÓÃ¶àÊı±í¾ö,¶ÔÓÚ»Ø¹éÎÊÌâ,Ö±½ÓÇóÆ½¾ù¡£
+ * éšæœºæ£®æ—(Random Forests)å…¶å®å°±æ˜¯å¤šä¸ªå†³ç­–æ ‘,æ¯ä¸ªå†³ç­–æ ‘æœ‰ä¸€ä¸ªæƒé‡,å¯¹æœªçŸ¥æ•°æ®è¿›è¡Œé¢„æµ‹æ—¶,
+ * ä¼šç”¨å¤šä¸ªå†³ç­–æ ‘åˆ†åˆ«é¢„æµ‹ä¸€ä¸ªå€¼,ç„¶åè€ƒè™‘æ ‘çš„æƒé‡,å°†è¿™å¤šä¸ªé¢„æµ‹å€¼ç»¼åˆèµ·æ¥,
+ * å¯¹äºåˆ†ç±»é—®é¢˜,é‡‡ç”¨å¤šæ•°è¡¨å†³,å¯¹äºå›å½’é—®é¢˜,ç›´æ¥æ±‚å¹³å‡ã€‚
  */
 object RandomForestRegressorExample {
   def main(args: Array[String]): Unit = {
@@ -44,11 +44,11 @@ object RandomForestRegressorExample {
     // $example on$
     // Load and parse the data file, converting it to a DataFrame.
     /**
- *  libSVMµÄÊı¾İ¸ñÊ½
+ *  libSVMçš„æ•°æ®æ ¼å¼
  *  <label> <index1>:<value1> <index2>:<value2> ...
- *  ÆäÖĞ<label>ÊÇÑµÁ·Êı¾İ¼¯µÄÄ¿±êÖµ,¶ÔÓÚ·ÖÀà,ËüÊÇ±êÊ¶Ä³ÀàµÄÕûÊı(Ö§³Ö¶à¸öÀà);¶ÔÓÚ»Ø¹é,ÊÇÈÎÒâÊµÊı
- *  <index>ÊÇÒÔ1¿ªÊ¼µÄÕûÊı,¿ÉÒÔÊÇ²»Á¬Ğø
- *  <value>ÎªÊµÊı,Ò²¾ÍÊÇÎÒÃÇ³£ËµµÄ×Ô±äÁ¿
+ *  å…¶ä¸­<label>æ˜¯è®­ç»ƒæ•°æ®é›†çš„ç›®æ ‡å€¼,å¯¹äºåˆ†ç±»,å®ƒæ˜¯æ ‡è¯†æŸç±»çš„æ•´æ•°(æ”¯æŒå¤šä¸ªç±»);å¯¹äºå›å½’,æ˜¯ä»»æ„å®æ•°
+ *  <index>æ˜¯ä»¥1å¼€å§‹çš„æ•´æ•°,å¯ä»¥æ˜¯ä¸è¿ç»­
+ *  <value>ä¸ºå®æ•°,ä¹Ÿå°±æ˜¯æˆ‘ä»¬å¸¸è¯´çš„è‡ªå˜é‡
  */
     //val data = sqlContext.read.format("libsvm").load("data/mllib/sample_libsvm_data.txt")
       import org.apache.spark.mllib.util.MLUtils
@@ -56,34 +56,34 @@ object RandomForestRegressorExample {
       val data = sqlContext.createDataFrame(dataSVM)
     // Automatically identify categorical features, and index them.
     // Set maxCategories so features with > 4 distinct values are treated as continuous.
-    //VectorIndexerÊÇ¶ÔÊı¾İ¼¯ÌØÕ÷ÏòÁ¿ÖĞµÄÀà±ğ(ÀëÉ¢Öµ)ÌØÕ÷½øĞĞ±àºÅ
+    //VectorIndexeræ˜¯å¯¹æ•°æ®é›†ç‰¹å¾å‘é‡ä¸­çš„ç±»åˆ«(ç¦»æ•£å€¼)ç‰¹å¾è¿›è¡Œç¼–å·
     val featureIndexer = new VectorIndexer()
       .setInputCol("features")
       .setOutputCol("indexedFeatures")
       .setMaxCategories(4)
-      .fit(data)//fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+      .fit(data)//fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
 
     // Split the data into training and test sets (30% held out for testing).
     val Array(trainingData, testData) = data.randomSplit(Array(0.7, 0.3))
 
     // Train a RandomForest model.
     val rf = new RandomForestRegressor()
-      .setLabelCol("label")//±êÇ©ÁĞÃû
-      //ÑµÁ·Êı¾İ¼¯DataFrameÖĞ´æ´¢ÌØÕ÷Êı¾İµÄÁĞÃû
+      .setLabelCol("label")//æ ‡ç­¾åˆ—å
+      //è®­ç»ƒæ•°æ®é›†DataFrameä¸­å­˜å‚¨ç‰¹å¾æ•°æ®çš„åˆ—å
       .setFeaturesCol("indexedFeatures")
 
     // Chain indexer and forest in a Pipeline.
-     //PipeLine:½«¶à¸öDataFrameºÍEstimatorËã·¨´®³ÉÒ»¸öÌØ¶¨µÄML Wolkflow
-     //Ò»¸ö PipelineÔÚ½á¹¹ÉÏ»á°üº¬Ò»¸ö»ò¶à¸ö PipelineStage,Ã¿Ò»¸ö PipelineStage ¶¼»áÍê³ÉÒ»¸öÈÎÎñ
+     //PipeLine:å°†å¤šä¸ªDataFrameå’ŒEstimatorç®—æ³•ä¸²æˆä¸€ä¸ªç‰¹å®šçš„ML Wolkflow
+     //ä¸€ä¸ª Pipelineåœ¨ç»“æ„ä¸Šä¼šåŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ª PipelineStage,æ¯ä¸€ä¸ª PipelineStage éƒ½ä¼šå®Œæˆä¸€ä¸ªä»»åŠ¡
     val pipeline = new Pipeline()
       .setStages(Array(featureIndexer, rf))
 
     // Train model. This also runs the indexer.
-    //fit()·½·¨½«DataFrame×ª»¯ÎªÒ»¸öTransformerµÄËã·¨
+    //fit()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºä¸€ä¸ªTransformerçš„ç®—æ³•
     val model = pipeline.fit(trainingData)
 
     // Make predictions.
-    //transform()·½·¨½«DataFrame×ª»¯ÎªÁíÍâÒ»¸öDataFrameµÄËã·¨
+    //transform()æ–¹æ³•å°†DataFrameè½¬åŒ–ä¸ºå¦å¤–ä¸€ä¸ªDataFrameçš„ç®—æ³•
     val predictions = model.transform(testData)
 
     // Select example rows to display.
@@ -102,9 +102,9 @@ object RandomForestRegressorExample {
     // Select (prediction, true label) and compute test error.
     val evaluator = new RegressionEvaluator()
       .setLabelCol("label")
-	//Ëã·¨Ô¤²â½á¹ûµÄ´æ´¢ÁĞµÄÃû³Æ, Ä¬ÈÏÊÇ¡±prediction¡±
+	//ç®—æ³•é¢„æµ‹ç»“æœçš„å­˜å‚¨åˆ—çš„åç§°, é»˜è®¤æ˜¯â€predictionâ€
       .setPredictionCol("prediction")
-      //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+      //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
       .setMetricName("rmse")
     val rmse = evaluator.evaluate(predictions)
     //Root Mean Squared Error (RMSE) on test data = 0.09854713827168428

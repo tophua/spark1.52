@@ -64,7 +64,7 @@ object TwitterAlgebirdCMS {
 
     val filters = args
     val sparkConf = new SparkConf().setAppName("TwitterAlgebirdCMS")
-    //批次间隔
+    //鎵规闂撮殧
     val ssc = new StreamingContext(sparkConf, Seconds(10))
     val stream = TwitterUtils.createStream(ssc, None, filters, StorageLevel.MEMORY_ONLY_SER_2)
 

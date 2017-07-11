@@ -23,27 +23,27 @@ import org.apache.commons.math3.linear._
 import org.apache.spark._
 
 /**
- * Alternating least squares matrix factorization.
- * ½»Ìæ×îĞ¡¶ş³Ë¾ØÕó·Ö½â
- * This is an example implementation for learning how to use Spark. For more conventional use,
- * please refer to org.apache.spark.mllib.recommendation.ALS
- */
+  * Alternating least squares matrix factorization.
+  * äº¤æ›¿æœ€å°äºŒä¹˜çŸ©é˜µåˆ†è§£
+  * This is an example implementation for learning how to use Spark. For more conventional use,
+  * please refer to org.apache.spark.mllib.recommendation.ALS
+  */
 object SparkALS {
 
   // Parameters set through command line arguments
-  //Í¨¹ıÃüÁîĞĞ²ÎÊıÉèÖÃµÄ²ÎÊı
-  var M = 0 // Number of movies  µçÓ°Êı
-  var U = 0 // Number of users   ÓÃ»§Êı
-  var F = 0 // Number of features ÌØÕ÷Êı
+  //é€šè¿‡å‘½ä»¤è¡Œå‚æ•°è®¾ç½®çš„å‚æ•°
+  var M = 0 // Number of movies  ç”µå½±æ•°
+  var U = 0 // Number of users   ç”¨æˆ·æ•°
+  var F = 0 // Number of features ç‰¹å¾æ•°
   var ITERATIONS = 0
-  val LAMBDA = 0.01 // Regularization coefficient ÕıÔò»¯ÏµÊı
+  val LAMBDA = 0.01 // Regularization coefficient æ­£åˆ™åŒ–ç³»æ•°
 
   def generateR(): RealMatrix = {
     val mh = randomMatrix(M, F)
     val uh = randomMatrix(U, F)
     mh.multiply(uh.transpose())
   }
-//rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
+  //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
   def rmse(targetR: RealMatrix, ms: Array[RealVector], us: Array[RealVector]): Double = {
     val r = new Array2DRowRealMatrix(M, U)
     for (i <- 0 until M; j <- 0 until U) {
@@ -64,7 +64,7 @@ object SparkALS {
     var XtX: RealMatrix = new Array2DRowRealMatrix(F, F)
     var Xty: RealVector = new ArrayRealVector(F)
     // For each user that rated the movie
-    //ÎªÃ¿Ò»¸öÓÃ»§ÆÀ¼ÛµÄµçÓ°
+    //ä¸ºæ¯ä¸€ä¸ªç”¨æˆ·è¯„ä»·çš„ç”µå½±
     for (j <- 0 until U) {
       val u = us(j)
       // Add u * u^t to XtX
@@ -73,7 +73,7 @@ object SparkALS {
       Xty = Xty.add(u.mapMultiply(R.getEntry(i, j)))
     }
     // Add regularization coefs to diagonal terms
-    //Ìí¼ÓÕıÔòcoefs¶Ô½ÇÏî
+    //æ·»åŠ æ­£åˆ™coefså¯¹è§’é¡¹
     for (d <- 0 until F) {
       XtX.addToEntry(d, d, LAMBDA * U)
     }
@@ -100,8 +100,8 @@ object SparkALS {
         M = m.getOrElse("10").toInt //
         U = u.getOrElse("50").toInt //
         F = f.getOrElse("5").toInt //
-        ITERATIONS = iters.getOrElse("5").toInt//µü´ú´ÎÊı5
-        slices = slices_.getOrElse("2").toInt//·ÖÆ¬Êı2
+        ITERATIONS = iters.getOrElse("5").toInt//è¿­ä»£æ¬¡æ•°5
+        slices = slices_.getOrElse("2").toInt//åˆ†ç‰‡æ•°2
       case _ =>
         System.err.println("Usage: SparkALS [M] [U] [F] [iters] [slices]")
         System.exit(1)
@@ -117,27 +117,27 @@ object SparkALS {
     val R = generateR()
 
     // Initialize m and u randomly
-    //Ëæ»ú³õÊ¼»¯MºÍU
+    //éšæœºåˆå§‹åŒ–Må’ŒU
     var ms = Array.fill(M)(randomVector(F))
     var us = Array.fill(U)(randomVector(F))
 
     // Iteratively update movies then users
-    //µü´ú¸üĞÂµçÓ°È»ÓÃ»§
+    //è¿­ä»£æ›´æ–°ç”µå½±ç„¶ç”¨æˆ·
     val Rc = sc.broadcast(R)
     var msb = sc.broadcast(ms)
     var usb = sc.broadcast(us)
     for (iter <- 1 to ITERATIONS) {
       println(s"Iteration $iter:")
       ms = sc.parallelize(0 until M, slices)
-                .map(i => update(i, msb.value(i), usb.value, Rc.value))
-                .collect()
+        .map(i => update(i, msb.value(i), usb.value, Rc.value))
+        .collect()
       msb = sc.broadcast(ms) // Re-broadcast ms because it was updated
       us = sc.parallelize(0 until U, slices)
-                .map(i => update(i, usb.value(i), msb.value, Rc.value.transpose()))
-                .collect()
+        .map(i => update(i, usb.value(i), msb.value, Rc.value.transpose()))
+        .collect()
       usb = sc.broadcast(us) // Re-broadcast us because it was updated
-      //rmse¾ù·½¸ùÎó²îËµÃ÷Ñù±¾µÄÀëÉ¢³Ì¶È
-      println("RMSE(¾ù·½¸ùÎó²î) = " + rmse(R, ms, us))
+      //rmseå‡æ–¹æ ¹è¯¯å·®è¯´æ˜æ ·æœ¬çš„ç¦»æ•£ç¨‹åº¦
+      println("RMSE(å‡æ–¹æ ¹è¯¯å·®) = " + rmse(R, ms, us))
       println()
     }
 
