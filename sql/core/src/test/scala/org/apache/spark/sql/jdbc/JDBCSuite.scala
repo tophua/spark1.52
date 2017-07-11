@@ -32,11 +32,11 @@ import org.apache.spark.util.Utils
 class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext {
   import testImplicits._
 
-  //val url = "jdbc:h2:mem:TEST0"
-  val url = "jdbc:h2:tcp://localhost/~/TEST0"
+  val url = "jdbc:h2:mem:TEST0"
+  //val url = "jdbc:h2:tcp://localhost/~/TEST0"
   ///  val url = "jdbc:testUserql://192.168.10.198:3306/testUser"
-   //val urlWithUserAndPass = "jdbc:h2:mem:TEST0;user=testUser;password=testPass"
-  val urlWithUserAndPass = "jdbc:h2:tcp://localhost/~/TEST0;user=testUser;password=testPass"
+   val urlWithUserAndPass = "jdbc:h2:mem:TEST0;user=testUser;password=testPass"
+  //val urlWithUserAndPass = "jdbc:h2:tcp://localhost/~/TEST0;user=testUser;password=testPass"
   // val urlWithUserAndPass = "jdbc:testUserql://192.168.10.198:3306/testUser?user=testUser&password=testPass"
   var conn: java.sql.Connection = null
 
@@ -500,7 +500,8 @@ class JDBCSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext 
     assert(rows(0).getDouble(1) === 1.00000011920928955)
      assert(rows(0).getAs[BigDecimal](2) ===
       new BigDecimal("123456789012345.543215432154321000"))
-    assert(rows(0).getAs[BigDecimal](2) ===//强制转大数据类型
+    //强制转大数据类型
+    assert(rows(0).getAs[BigDecimal](2)===
       new BigDecimal("123456789012345.543215432154321000"))
       //获取字段类型及长度
     assert(rows(0).schema.fields(2).dataType === DecimalType(38, 18))
