@@ -134,7 +134,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       df.select(explode('intList)),
       Row(1) :: Row(2) :: Row(3) :: Nil)
   }
-
+  //把行转换成列
   test("explode and other columns") {//其他列函数把字符串分割为数组
     val df = Seq((1, Seq(1, 2, 3))).toDF("a", "intList")
     /**
@@ -178,7 +178,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
       df.select(explode('intList).as('int)).select(sum('int)),
       Row(6) :: Nil)
   }
-
+  //Map转换成行
   test("explode on map") {//Map函数把字符串分割为数组
     val df = Seq((1, Map("a" -> "b"))).toDF("a", "map")
     //map形式分隔
@@ -457,7 +457,7 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
 
     checkAnswer(testData.filter($"a".between($"b", $"c")), expectAnswer)
   }
-
+  //字段访问方式
   test("in") {
     val df = Seq((1, "x"), (2, "y"), (3, "z")).toDF("a", "b")
     checkAnswer(df.filter($"a".isin(1, 2)),

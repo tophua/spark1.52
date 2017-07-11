@@ -349,6 +349,7 @@ b    NULL       42          73          0       1
   createQueryTest("Constant Folding Optimization for AVG_SUM_COUNT",
     "SELECT AVG(0), SUM(0), COUNT(null), COUNT(value) FROM src GROUP BY key")
   //Cast类型转换,如果转换失败返回NULL
+  // DATEDIFF返回 Variant (Long) 的值,表示两个指定日期间的时间间隔数目,
   createQueryTest("Cast Timestamp to Timestamp in UDF",
     """
       | SELECT DATEDIFF(CAST(value AS timestamp), CAST('2002-03-21 00:00:00' AS timestamp))
@@ -459,7 +460,7 @@ b    NULL       42          73          0       1
       hasCast
     }
   }
-
+//
   createQueryTest("transform",
     "SELECT TRANSFORM (key) USING 'cat' AS (tKey) FROM src")
 
@@ -536,7 +537,7 @@ b    NULL       42          73          0       1
       |'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' WITH SERDEPROPERTIES
       |('serialization.last.column.takes.rest'='true') FROM src;
     """.stripMargin.replaceAll(System.lineSeparator(), " "))
-
+//
   createQueryTest("LIKE",
     "SELECT * FROM src WHERE value LIKE '%1%'")
 
@@ -545,7 +546,7 @@ b    NULL       42          73          0       1
 
   createQueryTest("empty aggregate input",
     "SELECT SUM(key) FROM (SELECT * FROM src LIMIT 0) a")
-
+  //LATERAL VIEW explode它能够将一行数据拆成多行数据，在此基础上可以对拆分后的数据进行聚合
   createQueryTest("lateral view1",
     "SELECT tbl.* FROM src LATERAL VIEW explode(array(1,2)) tbl as a")
 
@@ -556,6 +557,7 @@ b    NULL       42          73          0       1
     "FROM src SELECT key, D.* lateral view explode(array(key+3, key+4)) D as CX")
 
   // scalastyle:off
+  //多表插入
   createQueryTest("lateral view4",
     """
       |create table src_lv1 (key string, value string);
@@ -657,6 +659,7 @@ b    NULL       42          73          0       1
 
   // test get_json_object again Hive, because the HiveCompatabilitySuite cannot handle result
   // with newline in it.
+  //
   createQueryTest("get_json_object #1",
     "SELECT get_json_object(src_json.json, '$') FROM src_json")
 
@@ -965,12 +968,14 @@ b    NULL       42          73          0       1
     sql("select * from src join t1 on src.key = t1.a")
     sql("DROP TABLE t1")
   }
-
+  //添加文件
   test("ADD FILE command") {
     val testFile = TestHive.getHiveFile("data/files/v1.txt").getCanonicalFile
+
     sql(s"ADD FILE $testFile")
 
     val checkAddFileRDD = sparkContext.parallelize(1 to 2, 1).mapPartitions { _ =>
+      //获得文件
       Iterator.single(new File(SparkFiles.get("v1.txt")).canRead)
     }
 

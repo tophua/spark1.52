@@ -6,7 +6,7 @@ import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.HashPartitioner
 import org.apache.spark.streaming.Duration
 /**
- * ¾ßÌå²Î¿¼:
+ * å…·ä½“å‚è€ƒ:
  * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice2/
  */
 object WebPagePopularityValueCalculator {
@@ -31,27 +31,27 @@ object WebPagePopularityValueCalculator {
       .setJars(Array(jarpath + "spark-streaming-kafka_2.10-1.5.3-20151212.002413-63.jar", jarpath + "kafka_2.10-0.10.1.0.jar", jarpath + "kafka-clients-0.10.1.0.jar", jarpath + "zkclient-0.3.jar", jarpath + "metrics-core-2.2.0.jar", "D:\\testjar\\spark-examples-ibm.jar"))
     val ssc = new StreamingContext(conf, Seconds(processingInterval.toInt))
     //using updateStateByKey asks for enabling checkpoint
-    //²¢ÇÒ¿ªÆô checkpoint ¹¦ÄÜ,ÒòÎªÎÒÃÇÐèÒªÊ¹ÓÃ updateStateByKey Ô­ÓïÈ¥ÀÛ¼ÆµÄ¸üÐÂÍøÒ³»°ÌâµÄÈÈ¶ÈÖµ
+    //å¹¶ä¸”å¼€å¯ checkpoint åŠŸèƒ½,å› ä¸ºæˆ‘ä»¬éœ€è¦ä½¿ç”¨ updateStateByKey åŽŸè¯­åŽ»ç´¯è®¡çš„æ›´æ–°ç½‘é¡µè¯é¢˜çš„çƒ­åº¦å€¼
     ssc.checkpoint(checkpointDir)
-    //ÀûÓÃ SparkÌá¹©µÄ KafkaUtils.createStream·½·¨Ïû·ÑÏûÏ¢Ö÷Ìâ,Õâ¸ö·½·¨»á·µ»Ø ReceiverInputDStream¶ÔÏóÊµÀý
+    //åˆ©ç”¨ Sparkæä¾›çš„ KafkaUtils.createStreamæ–¹æ³•æ¶ˆè´¹æ¶ˆæ¯ä¸»é¢˜,è¿™ä¸ªæ–¹æ³•ä¼šè¿”å›ž ReceiverInputDStreamå¯¹è±¡å®žä¾‹
     val kafkaStream = KafkaUtils.createStream(
       //Spark streaming context
-      //´´½¨Ò»¸öStreamingContext¶ÔÏó
+      //åˆ›å»ºä¸€ä¸ªStreamingContextå¯¹è±¡
       ssc,
-      //zookeeper quorum. e.g zkserver1:2181,zkserver2:2181,...zookeeper·þÎñÆ÷Î»ÖÃ
-      //ÅäÖÃZookeeperµÄÐÅÏ¢,ÒòÎªÒª¸ß¿ÉÓÃ,ËùÒÔÓÃZookeeper½øÐÐ¼¯Èº¼à¿Ø¡¢×Ô¶¯¹ÊÕÏ»Ö¸´
+      //zookeeper quorum. e.g zkserver1:2181,zkserver2:2181,...zookeeperæœåŠ¡å™¨ä½ç½®
+      //é…ç½®Zookeeperçš„ä¿¡æ¯,å› ä¸ºè¦é«˜å¯ç”¨,æ‰€ä»¥ç”¨Zookeeperè¿›è¡Œé›†ç¾¤ç›‘æŽ§ã€è‡ªåŠ¨æ•…éšœæ¢å¤
       zkServers,
       //kafka message consumer group ID
-      //kafkaÏûÏ¢Ïû·Ñ×é
+      //kafkaæ¶ˆæ¯æ¶ˆè´¹ç»„
       msgConsumerGroup,
       //Map of (topic_name -> numPartitions) to consume. Each partition is consumed in its own thread
-      //Map of (topic_name -> numPartitions) to Ïû·ÑÕß,Ã¿¸ö·ÖÇø¶¼ÔÚ×Ô¼ºµÄÏß³ÌÖÐ±»ÏûºÄµô
+      //Map of (topic_name -> numPartitions) to æ¶ˆè´¹è€…,æ¯ä¸ªåˆ†åŒºéƒ½åœ¨è‡ªå·±çš„çº¿ç¨‹ä¸­è¢«æ¶ˆè€—æŽ‰
       Map("user-behavior-topic" -> 3))
     //
     val msgDataRDD = kafkaStream.map(_._2)
     //for debug use only
-    //½öÓÃÓÚµ÷ÊÔ
-    //ÔÚ´Ë¼ä¸ôÖÐµÄÊý¾Ý
+    //ä»…ç”¨äºŽè°ƒè¯•
+    //åœ¨æ­¤é—´éš”ä¸­çš„æ•°æ®
     println("Coming data in this interval...")
     //msgDataRDD.print()
     // e.g page37|5|1.5119122|-1
@@ -60,13 +60,13 @@ object WebPagePopularityValueCalculator {
         val dataArr: Array[String] = msgLine.split("\\|")
         val pageID = dataArr(0)
         //calculate the popularity value
-        //¶ÔÓÚÃ¿Ò»ÌõÏûÏ¢,ÀûÓÃÉÏÎÄµÄ¹«Ê½¼ÆËãÍøÒ³»°ÌâµÄÈÈ¶ÈÖµ
+        //å¯¹äºŽæ¯ä¸€æ¡æ¶ˆæ¯,åˆ©ç”¨ä¸Šæ–‡çš„å…¬å¼è®¡ç®—ç½‘é¡µè¯é¢˜çš„çƒ­åº¦å€¼
         val popValue: Double = dataArr(1).toFloat * 0.8 + dataArr(2).toFloat * 0.8 + dataArr(3).toFloat * 1
         (pageID, popValue)
       }
     }
     //sum the previous popularity value and current value
-    //¶¨ÒåÒ»¸öÄäÃûº¯ÊýÈ¥°ÑÍøÒ³ÈÈ¶ÈÉÏÒ»´ÎµÄ¼ÆËã½á¹ûÖµºÍÐÂ¼ÆËãµÄÖµÏà¼Ó,µÃµ½×îÐÂµÄÈÈ¶ÈÖµ
+    //å®šä¹‰ä¸€ä¸ªåŒ¿åå‡½æ•°åŽ»æŠŠç½‘é¡µçƒ­åº¦ä¸Šä¸€æ¬¡çš„è®¡ç®—ç»“æžœå€¼å’Œæ–°è®¡ç®—çš„å€¼ç›¸åŠ ,å¾—åˆ°æœ€æ–°çš„çƒ­åº¦å€¼
     val updatePopularityValue = (iterator: Iterator[(String, Seq[Double], Option[Double])]) => {
       iterator.flatMap(t => {
         val newValue: Double = t._2.sum
@@ -76,15 +76,15 @@ object WebPagePopularityValueCalculator {
     }
     //
     val initialRDD = ssc.sparkContext.parallelize(List(("page1", 0.00)))
-    //µ÷ÓÃ updateStateByKey Ô­Óï²¢´«ÈëÉÏÃæ¶¨ÒåµÄÄäÃûº¯Êý¸üÐÂÍøÒ³ÈÈ¶ÈÖµ
+    //è°ƒç”¨ updateStateByKey åŽŸè¯­å¹¶ä¼ å…¥ä¸Šé¢å®šä¹‰çš„åŒ¿åå‡½æ•°æ›´æ–°ç½‘é¡µçƒ­åº¦å€¼
     val stateDstream = popularityData.updateStateByKey[Double](updatePopularityValue,
       new HashPartitioner(ssc.sparkContext.defaultParallelism), true, initialRDD)
     //set the checkpoint interval to avoid too frequently data checkpoint which may
     //may significantly reduce operation throughput
-    //ÉèÖÃ¼ì²éµã¼ä¸ô,ÒÔ±ÜÃâ¹ýÓÚÆµ·±µÄÊý¾Ý¼ì²éµã,Õâ¿ÉÄÜ»áÏÔ×Å½µµÍ²Ù×÷ÍÌÍÂÁ¿
+    //è®¾ç½®æ£€æŸ¥ç‚¹é—´éš”,ä»¥é¿å…è¿‡äºŽé¢‘ç¹çš„æ•°æ®æ£€æŸ¥ç‚¹,è¿™å¯èƒ½ä¼šæ˜¾ç€é™ä½Žæ“ä½œåžåé‡
     stateDstream.checkpoint(Duration(8 * processingInterval.toInt * 1000))
     //after calculation, we need to sort the result and only show the top 10 hot pages
-    //¼ÆËãºó,ÎÒÃÇÐèÒª¶Ô½á¹û½øÐÐÅÅÐò,Ö»ÏÔÊ¾Ç°10¸öÈÈÃÅÒ³Ãæ
+    //è®¡ç®—åŽ,æˆ‘ä»¬éœ€è¦å¯¹ç»“æžœè¿›è¡ŒæŽ’åº,åªæ˜¾ç¤ºå‰10ä¸ªçƒ­é—¨é¡µé¢
     stateDstream.foreachRDD { rdd =>
       {
         val sortedData = rdd.map { case (k, v) => (v, k) }.sortByKey(false)

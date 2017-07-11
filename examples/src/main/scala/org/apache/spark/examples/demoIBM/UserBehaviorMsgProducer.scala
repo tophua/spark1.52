@@ -6,10 +6,10 @@ import kafka.producer.ProducerConfig
 import kafka.producer.Producer
 /**
  * https://www.ibm.com/developerworks/cn/opensource/os-cn-spark-practice2/
- * Éú²úĞĞÎªÊı¾İÏûÏ¢
- * ¸Ã³ÌĞòÃ¿¸ô 5 ÃëÖÓ»áËæ»úµÄÏò user-behavior-topic Ö÷ÌâÍÆËÍ 0 µ½ 50 ÌõĞĞÎªÊı¾İÏûÏ¢,
- * Õâ¸ö³ÌĞò°çÑİÏûÏ¢Éú²úÕßµÄ½ÇÉ«,ÔÚÊµ¼ÊÓ¦ÓÃÖĞ,Õâ¸ö¹¦ÄÜÒ»°ã»áÓÉÒ»¸öÏµÍ³À´Ìá¹©.
- * ÎªÁË¼ò»¯ÏûÏ¢´¦Àí,ÎÒÃÇ¶¨ÒåÏûÏ¢µÄ¸ñÊ½ÈçÏÂ:ÍøÒ³ ID|µã»÷´ÎÊı|Í£ÁôÊ±¼ä (·ÖÖÓ)|ÊÇ·ñµãÔŞ
+ * ç”Ÿäº§è¡Œä¸ºæ•°æ®æ¶ˆæ¯
+ * è¯¥ç¨‹åºæ¯éš” 5 ç§’é’Ÿä¼šéšæœºçš„å‘ user-behavior-topic ä¸»é¢˜æ¨é€ 0 åˆ° 50 æ¡è¡Œä¸ºæ•°æ®æ¶ˆæ¯,
+ * è¿™ä¸ªç¨‹åºæ‰®æ¼”æ¶ˆæ¯ç”Ÿäº§è€…çš„è§’è‰²,åœ¨å®é™…åº”ç”¨ä¸­,è¿™ä¸ªåŠŸèƒ½ä¸€èˆ¬ä¼šç”±ä¸€ä¸ªç³»ç»Ÿæ¥æä¾›.
+ * ä¸ºäº†ç®€åŒ–æ¶ˆæ¯å¤„ç†,æˆ‘ä»¬å®šä¹‰æ¶ˆæ¯çš„æ ¼å¼å¦‚ä¸‹:ç½‘é¡µ ID|ç‚¹å‡»æ¬¡æ•°|åœç•™æ—¶é—´ (åˆ†é’Ÿ)|æ˜¯å¦ç‚¹èµ
  */
 class UserBehaviorMsgProducer(brokers: String, topic: String) extends Runnable {
   private val brokerList = brokers
@@ -25,7 +25,7 @@ class UserBehaviorMsgProducer(brokers: String, topic: String) extends Runnable {
   private val MAX_MSG_NUM = 3
   private val MAX_CLICK_TIME = 5
   private val MAX_STAY_TIME = 10
-  //´ú±íÊÇ·ñµãÔŞ,1 ÎªÔŞ,-1 ±íÊ¾²È,0 ±íÊ¾ÖĞÁ¢
+  //ä»£è¡¨æ˜¯å¦ç‚¹èµ,1 ä¸ºèµ,-1 è¡¨ç¤ºè¸©,0 è¡¨ç¤ºä¸­ç«‹
   //Like,1;Dislike -1;No Feeling 0
   private val LIKE_OR_NOT = Array[Int](1, 0, -1)
 
@@ -33,11 +33,11 @@ class UserBehaviorMsgProducer(brokers: String, topic: String) extends Runnable {
     val rand = new Random()
     while (true) {
       //how many user behavior messages will be produced
-      //½«²úÉú¶àÉÙÓÃ»§ĞĞÎªÏûÏ¢
+      //å°†äº§ç”Ÿå¤šå°‘ç”¨æˆ·è¡Œä¸ºæ¶ˆæ¯
       val msgNum = rand.nextInt(MAX_MSG_NUM) + 1
       try {
         //generate the message with format like page1|2|7.123|1
-        //²úÉúÏûÏ¢µÄ¸ñÊ½Ïñ 
+        //äº§ç”Ÿæ¶ˆæ¯çš„æ ¼å¼åƒ 
         for (i <- 0 to msgNum) {
           var msg = new StringBuilder()
           msg.append("page" + (rand.nextInt(PAGE_NUM) + 1))

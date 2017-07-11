@@ -84,6 +84,7 @@ class HiveResolutionSuite extends HiveComparisonTest {
       .toDF().registerTempTable("caseSensitivityTest")
 
     val query = sql("SELECT a, b, A, B, n.a, n.b, n.A, n.B FROM caseSensitivityTest")
+    //获得字段方式
     assert(query.schema.fields.map(_.name) === Seq("a", "b", "A", "B", "a", "b", "A", "B"),
       "The output schema did not preserve the case of the query.")
     query.collect()

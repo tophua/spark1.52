@@ -21,8 +21,11 @@ import java.io.{IOException, InputStream}
 
 import scala.sys.process.BasicIO
 //进程测试工具类
+/**
+  * 用法参考HiveSparkSubmitSuite
+  */
 object ProcessTestUtils {
-  class ProcessOutputCapturer(stream: InputStream, capture: String => Unit) extends Thread {
+  class HiveSparkSubmitSuite(stream: InputStream, capture: String => Unit) extends Thread {
     this.setDaemon(true)
 
     override def run(): Unit = {

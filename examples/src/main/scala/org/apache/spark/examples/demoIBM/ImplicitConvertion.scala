@@ -3,7 +3,7 @@ package org.apache.spark.examples.demoIBM
 import scala.io.Source
 import java.io.File
 /**
- * ÒþÊ½×ª»»
+ * éšå¼è½¬æ¢
  * Created by zhiwang on 2015/7/21.
  */
 
@@ -11,24 +11,24 @@ class RichFile(val file: File) {
   def read() = Source.fromFile(file.getPath()).mkString
 }
 object Context {
-  //File -> RichFile,±ØÐëÓÐimplicit¹Ø¼ü×Ö
+  //File -> RichFile,å¿…é¡»æœ‰implicitå…³é”®å­—
   implicit def file2RichFile(file: File) = new RichFile(file)
 }
 /**
- ´úÂëµÄÖ´ÐÐ¹ý³ÌÈçÏÂ£º 
-1. µ÷ÓÃFile µÄread ·½·¨ 
-2. µ±±àÒëÆ÷·¢ÏÖFileÀàÃ»ÓÐread ·½·¨Ê±,²»ÊÇÖ±½Ó±¨´í,¶øÊÇÖ´ÐÐµÚÈý²½ 
-3. ¼ì²éµ±Ç°×÷ÓÃÓòÖÐÊÇ·ñÓÐ½ÓÊÜFileµÄ implicit ·½·¨,ÈçÃ»ÓÐÖ±½Ó±¨´í,ÈçÓÐ,Ö´ÐÐµÚ4²½ 
-4. ½«File×÷Îª²ÎÊýÊµÀý»¯RichFile,ÔÙ¼ì²éÊÇ·ñÓÐread ·½·¨,ÈçÃ»ÓÐÖ±½Ó±¨´í 
-5. Ö´ÐÐread·½·¨
-Õû¸öÖ´ÐÐ¹ý³ÌÖÐ,ÐèÒªÌØ±ð×¢ÒâµÄÊÇ, ×÷ÓÃÓò
+ ä»£ç çš„æ‰§è¡Œè¿‡ç¨‹å¦‚ä¸‹ï¼š 
+1. è°ƒç”¨File çš„read æ–¹æ³• 
+2. å½“ç¼–è¯‘å™¨å‘çŽ°Fileç±»æ²¡æœ‰read æ–¹æ³•æ—¶,ä¸æ˜¯ç›´æŽ¥æŠ¥é”™,è€Œæ˜¯æ‰§è¡Œç¬¬ä¸‰æ­¥ 
+3. æ£€æŸ¥å½“å‰ä½œç”¨åŸŸä¸­æ˜¯å¦æœ‰æŽ¥å—Fileçš„ implicit æ–¹æ³•,å¦‚æ²¡æœ‰ç›´æŽ¥æŠ¥é”™,å¦‚æœ‰,æ‰§è¡Œç¬¬4æ­¥ 
+4. å°†Fileä½œä¸ºå‚æ•°å®žä¾‹åŒ–RichFile,å†æ£€æŸ¥æ˜¯å¦æœ‰read æ–¹æ³•,å¦‚æ²¡æœ‰ç›´æŽ¥æŠ¥é”™ 
+5. æ‰§è¡Œreadæ–¹æ³•
+æ•´ä¸ªæ‰§è¡Œè¿‡ç¨‹ä¸­,éœ€è¦ç‰¹åˆ«æ³¨æ„çš„æ˜¯, ä½œç”¨åŸŸ
 **/
 object ImplicitConvertion {
   def main(args: Array[String]) {
-    //ÔÚµ±Ç°×÷ÓÃÓòÒýÈëÒþÊ½×ª»»
+    //åœ¨å½“å‰ä½œç”¨åŸŸå¼•å…¥éšå¼è½¬æ¢
     import Context.file2RichFile
-    //ÎÄ¼þÖ»ÄÜÓ¢ÎÄ,²»ÄÜ°üÀ¨ÖÐÎÄ
-    //File±¾ÉíÊÇÃ»ÓÐread·½·¨µÄ,ÐèÒªÒþÊ½×ª»»Îª×Ô¶¨ÒåµÄRichFile
+    //æ–‡ä»¶åªèƒ½è‹±æ–‡,ä¸èƒ½åŒ…æ‹¬ä¸­æ–‡
+    //Fileæœ¬èº«æ˜¯æ²¡æœ‰readæ–¹æ³•çš„,éœ€è¦éšå¼è½¬æ¢ä¸ºè‡ªå®šä¹‰çš„RichFile
     println(new File("c:\\aa.txt").read())
   }
 }

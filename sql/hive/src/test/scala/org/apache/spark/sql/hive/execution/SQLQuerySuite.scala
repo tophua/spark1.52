@@ -69,7 +69,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
   override def _sqlContext: SQLContext = TestHive
   private val sqlContext = _sqlContext
 
-/*  test("UDTF") {
+  test("UDTF") {
     val jarPath = TestHive.getHiveFile("TestUDTF.jar").getCanonicalPath
 
     // SPARK-11595 Fixes ADD JAR when input path contains URL scheme
@@ -91,7 +91,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     checkAnswer(
       sql("SELECT udtf_count2(a) FROM (SELECT 1 AS a FROM src LIMIT 3) t"),
       Row(3) :: Row(3) :: Nil)
-  }*/
+  }
 
   test("SPARK-6835: udtf in lateral view") {
     val df = Seq((1, 1)).toDF("c1", "c2")
@@ -1133,6 +1133,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       TestHive.createDataFrame(Seq((1, "2014-01-01"), (2, "2015-01-01"), (3, "2016-01-01")))
     df.toDF("id", "datef").registerTempTable("test_SPARK8588")
     checkAnswer(
+      //concat将两个字符串连接起来
       TestHive.sql(
         """
           |select id, concat(year(datef))

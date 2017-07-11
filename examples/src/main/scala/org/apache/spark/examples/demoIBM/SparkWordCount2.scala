@@ -14,7 +14,7 @@ object SparkWordCount2 {
     
     val textFile = sc.textFile("people.txt");
     
-    //flatMapÓëmapÀàËÆ,Çø±ðÊÇÔ­RDDÖÐµÄÔªËØ¾­map´¦ÀíºóÖ»ÄÜÉú³ÉÒ»¸öÔªËØ,¶øÔ­RDDÖÐµÄÔªËØ¾­flatmap´¦Àíºó¿ÉÉú³É¶à¸öÔªËØÀ´¹¹½¨ÐÂRDD¡£
+    //flatMapä¸Žmapç±»ä¼¼,åŒºåˆ«æ˜¯åŽŸRDDä¸­çš„å…ƒç´ ç»mapå¤„ç†åŽåªèƒ½ç”Ÿæˆä¸€ä¸ªå…ƒç´ ,è€ŒåŽŸRDDä¸­çš„å…ƒç´ ç»flatmapå¤„ç†åŽå¯ç”Ÿæˆå¤šä¸ªå…ƒç´ æ¥æž„å»ºæ–°RDDã€‚
     val wordCounts = textFile.flatMap(line => line.split(" ")).map(
       word => (word, 1))
        wordCounts.foreach(e => {
@@ -28,13 +28,13 @@ object SparkWordCount2 {
 		 * res7: Array[(Int, Int)] = Array((1,2), (3,10))
      */
     
-     ///educeByKey¾ÍÊÇ¶ÔÔªËØÎªKV¶ÔµÄRDDÖÐKeyÏàÍ¬µÄÔªËØµÄValue½øÐÐreduce,
-     //KeyÏàÍ¬µÄ¶à¸öÔªËØµÄÖµ±»reduceÎªÒ»¸öÖµ,È»ºóÓëÔ­RDDÖÐµÄKey×é³ÉÒ»¸öÐÂµÄKV¶Ô
+     ///educeByKeyå°±æ˜¯å¯¹å…ƒç´ ä¸ºKVå¯¹çš„RDDä¸­Keyç›¸åŒçš„å…ƒç´ çš„Valueè¿›è¡Œreduce,
+     //Keyç›¸åŒçš„å¤šä¸ªå…ƒç´ çš„å€¼è¢«reduceä¸ºä¸€ä¸ªå€¼,ç„¶åŽä¸ŽåŽŸRDDä¸­çš„Keyç»„æˆä¸€ä¸ªæ–°çš„KVå¯¹
   
-    val tsets=  wordCounts.reduceByKey(_+_)//educeByKey¶ÔKeyÏàÍ¬µÄÔªËØµÄÖµÇóºÍ
+    val tsets=  wordCounts.reduceByKey(_+_)//educeByKeyå¯¹Keyç›¸åŒçš„å…ƒç´ çš„å€¼æ±‚å’Œ
     //print the results,for debug use.
     //println("Word Count program running results:");
-    //collect½«RDD×ª³ÉScalaÊý×é,²¢·µ»Ø
+    //collectå°†RDDè½¬æˆScalaæ•°ç»„,å¹¶è¿”å›ž
    tsets.collect().foreach(e => {
     val (k,v) = e
      println(k+"="+v)

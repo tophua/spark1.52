@@ -37,8 +37,8 @@ class SimpleScanSource extends RelationProvider {
 //全表扫描 TableScan,@transient说明一个属性是临时的,不会被序列化
 case class SimpleScan(from: Int, to: Int)(@transient val sqlContext: SQLContext)
   extends BaseRelation with TableScan {
-
-  override def schema: StructType =//StructType代表一张表,StructField代表一个字段
+  //StructType代表一张表,StructField代表一个字段
+  override def schema: StructType =
     StructType(StructField("i", IntegerType, nullable = false) :: Nil)
 
   override def buildScan(): RDD[Row] = sqlContext.sparkContext.parallelize(from to to).map(Row(_))
