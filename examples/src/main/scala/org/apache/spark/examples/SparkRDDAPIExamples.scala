@@ -21,15 +21,11 @@ object SparkRDDAPIExamples {
     println(b.collectAsMap)
     //sortBy 例子
     val data = List(3,1,90,3,5,12)
-
     val rdd = sc.parallelize(data)
     rdd.collect
     //默认升序,Array(1, 3, 3, 5, 12, 90)
     rdd.sortBy(x => x).collect
     //使用降序,Array(90, 12, 5, 3, 3, 1)
     rdd.sortBy(x => x, false).collect.toString()
-    //
-
-
   }
 }
