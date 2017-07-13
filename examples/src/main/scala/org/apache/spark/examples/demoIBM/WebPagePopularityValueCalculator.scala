@@ -2,7 +2,7 @@ package org.apache.spark.examples.demoIBM
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.streaming.StreamingContext
-import org.apache.spark.streaming.kafka.KafkaUtils
+
 import org.apache.spark.HashPartitioner
 import org.apache.spark.streaming.Duration
 /**
@@ -34,7 +34,7 @@ object WebPagePopularityValueCalculator {
     //并且开启 checkpoint 功能,因为我们需要使用 updateStateByKey 原语去累计的更新网页话题的热度值
     ssc.checkpoint(checkpointDir)
     //利用 Spark提供的 KafkaUtils.createStream方法消费消息主题,这个方法会返回 ReceiverInputDStream对象实例
-    val kafkaStream = KafkaUtils.createStream(
+   /* val kafkaStream = KafkaUtils.createStream(
       //Spark streaming context
       //创建一个StreamingContext对象
       ssc,
@@ -93,7 +93,7 @@ object WebPagePopularityValueCalculator {
           println(x)
         })
       }
-    }
+    }*/
     ssc.start()
     ssc.awaitTermination()
   }

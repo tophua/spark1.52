@@ -303,7 +303,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("LocalLDAModel logLikelihood") {//对于本地的LDA模型
+  ignore("LocalLDAModel logLikelihood") {//对于本地的LDA模型
     val ldaModel: LocalLDAModel = toyModel
 
     val docsSingleWord = sc.parallelize(Array(Vectors.sparse(6, Array(0), Array(1)))
@@ -340,7 +340,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(ldaModel.logLikelihood(docsRepeatedWord) ~== -31.441  relTol 1E-3D)
   }
 
-  test("LocalLDAModel logPerplexity") {//当地的LDA模型的日志的困惑
+  ignore("LocalLDAModel logPerplexity") {//当地的LDA模型的日志的困惑
     val docs = sc.parallelize(toyData)
     val ldaModel: LocalLDAModel = toyModel
 
@@ -366,7 +366,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(ldaModel.logPerplexity(docs) ~== 3.690D relTol 1E-3D)
   }
 
-  test("LocalLDAModel predict") {//预测 LocalLDAModel
+  ignore("LocalLDAModel predict") {//预测 LocalLDAModel
     val docs = sc.parallelize(toyData)
     val ldaModel: LocalLDAModel = toyModel
 
@@ -409,7 +409,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("OnlineLDAOptimizer with asymmetric prior") {//不对称前在线LDA算法
+  ignore("OnlineLDAOptimizer with asymmetric prior") {//不对称前在线LDA算法
     val docs = sc.parallelize(toyData)
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
     val op = new OnlineLDAOptimizer().setMiniBatchFraction(1).setTau0(1024).setKappa(0.51)
@@ -451,7 +451,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("OnlineLDAOptimizer alpha hyperparameter optimization") {//在线LDA算法α超参数优
+  ignore("OnlineLDAOptimizer alpha hyperparameter optimization") {//在线LDA算法α超参数优
     val k = 2
     val docs = sc.parallelize(toyData)
     //miniBatchFraction–每一轮迭代,参入训练的样本比例,默认1.0(全部参入)
@@ -486,7 +486,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(ldaModel.docConcentration ~== Vectors.dense(0.42582646, 0.43511073) absTol 0.05)
   }
 
-  test("model save/load") {//模型保存/加载
+  ignore("model save/load") {//模型保存/加载
     // Test for LocalLDAModel.
     val localModel = new LocalLDAModel(tinyTopics,
       Vectors.dense(Array.fill(tinyTopics.numRows)(0.01)), 0.5D, 10D)
@@ -548,7 +548,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     }
   }
 
-  test("EMLDAOptimizer with empty docs") {//EM LDA优化空文档
+  ignore("EMLDAOptimizer with empty docs") {//EM LDA优化空文档
     val vocabSize = 6
     val emptyDocsArray = Array.fill(6)(Vectors.sparse(vocabSize, Array.empty, Array.empty))
     val emptyDocs = emptyDocsArray
@@ -568,7 +568,7 @@ class LDASuite extends SparkFunSuite with MLlibTestSparkContext {
     assert(model.vocabSize === vocabSize)
   }
 
-  test("OnlineLDAOptimizer with empty docs") {//
+  ignore("OnlineLDAOptimizer with empty docs") {//
     val vocabSize = 6
     val emptyDocsArray = Array.fill(6)(Vectors.sparse(vocabSize, Array.empty, Array.empty))
     val emptyDocs = emptyDocsArray

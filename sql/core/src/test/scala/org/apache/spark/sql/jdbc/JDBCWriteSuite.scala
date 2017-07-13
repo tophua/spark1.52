@@ -30,22 +30,14 @@ import org.apache.spark.util.Utils
 
 class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLContext {
 
-  //val url1 = "jdbc:h2:mem:testdb2"
-  val url1 = "jdbc:h2:tcp://localhost/~/testdb2"
-  //val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
-  //val url = "jdbc:postgresql://192.168.10.198:3306/postgres?user=postgres&password=admin"
+  val url = "jdbc:h2:mem:testdb2"
   var conn: java.sql.Connection = null
-   val url = "jdbc:h2:mem:testdb3"
-  //  val url = "jdbc:h2:tcp://localhost/~/testdb3?user=testUser&password=testPass"
-  //val url1 = "jdbc:postgresql://192.168.10.198:3306/postgres"
-  
+  val url1 = "jdbc:h2:mem:testdb3"
   var conn1: java.sql.Connection = null
   val properties = new Properties()
-   properties.setProperty("user", "testUser")
-   properties.setProperty("password", "testPass")
-   //properties.setProperty("user", "postgres")
-   //properties.setProperty("password", "admin")
-   properties.setProperty("rowId", "false")
+  properties.setProperty("user", "testUser")
+  properties.setProperty("password", "testPass")
+  properties.setProperty("rowId", "false")
 
   before {
     Utils.classForName("org.h2.Driver")

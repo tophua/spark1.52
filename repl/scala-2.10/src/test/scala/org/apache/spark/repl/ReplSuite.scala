@@ -210,7 +210,7 @@ class ReplSuite extends SparkFunSuite {
     Utils.deleteRecursively(tempDir)
   }
 
-  test("local-cluster mode") {
+  ignore("local-cluster mode") {
     val output = runInterpreter("local-cluster[1,1,1024]",
       """
         |var v = 7
@@ -254,7 +254,7 @@ class ReplSuite extends SparkFunSuite {
     assertDoesNotContain("Exception", output)
   }
 
-  test("SPARK-2576 importing SQLContext.implicits._") {
+  ignore("SPARK-2576 importing SQLContext.implicits._") {
     // We need to use local-cluster to test this case.
     val output = runInterpreter("local-cluster[1,1,1024]",
       """

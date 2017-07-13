@@ -201,7 +201,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       Row(null, 0, null, null, null, null, null) :: Nil)
   }
   //只做分组
-  test("only do grouping") {
+  ignore("only do grouping") {
     checkAnswer(
       sqlContext.sql(
         """
@@ -247,7 +247,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(null, null) :: Nil)
   }
   //大小写敏感度解析
-  test("case in-sensitive resolution") {
+  ignore("case in-sensitive resolution") {
     checkAnswer(
       sqlContext.sql(
         """
@@ -281,7 +281,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(null) :: Nil)
   }
   //测试平均没有key输出
-  test("test average no key in output") {
+  ignore("test average no key in output") {
     checkAnswer(
       sqlContext.sql(
         """
@@ -292,7 +292,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       Row(-0.5) :: Row(20.0) :: Row(null) :: Row(10.0) :: Nil)
   }
   //测试平均值
-  test("test average") {
+  ignore("test average") {
     checkAnswer(
       sqlContext.sql(
         """
@@ -328,7 +328,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       Row(11.125) :: Nil)
   }
 
-  test("udaf") {
+  ignore("udaf") {
     checkAnswer(
       sqlContext.sql(
         """
@@ -348,7 +348,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(null, null, 110.0, null, null, 10.0) :: Nil)
   }
 
-  test("non-AlgebraicAggregate aggreguate function") {
+  ignore("non-AlgebraicAggregate aggreguate function") {
     checkAnswer(
       sqlContext.sql(
         """
@@ -373,7 +373,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       Row(null) :: Nil)
   }
 
-  test("non-AlgebraicAggregate and AlgebraicAggregate aggreguate function") {
+  ignore("non-AlgebraicAggregate and AlgebraicAggregate aggreguate function") {
     checkAnswer(
       sqlContext.sql(
         """
@@ -404,7 +404,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(null, null, null, null, 10.0) :: Nil)
   }
   //单独的列集
-  test("single distinct column set") {
+  ignore("single distinct column set") {
     // DISTINCT is not meaningful with Max and Min, so we just ignore the DISTINCT keyword.
     //对于Max和Min,DISTINCT无意义,所以我们忽略DISTINCT关键字
     checkAnswer(
@@ -475,7 +475,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(3, 4, 4, 3, null) :: Nil)
   }
 
-  test("test count") {
+  ignore("test count") {
     checkAnswer(
       sqlContext.sql(
         """

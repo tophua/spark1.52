@@ -130,7 +130,7 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
 //测试Torrent延迟广播变量
-  test("Test Lazy Broadcast variables with TorrentBroadcast") {
+  ignore("Test Lazy Broadcast variables with TorrentBroadcast") {
     val numSlaves = 2
     val conf = torrentConf.clone
     //sc = new SparkContext("local-cluster[%d, 1, 1024]".format(numSlaves), "test", conf)

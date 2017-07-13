@@ -81,7 +81,7 @@ public class JavaLDASuite implements Serializable {
     }
   }
 
-  @Test
+ // @Test
   public void distributedLDAModel() {
     int k = 3;
     double topicSmoothing = 1.2;
@@ -143,7 +143,7 @@ public class JavaLDASuite implements Serializable {
     assertEquals(termIndices2.length, topicIndices2.length);
   }
 
-  @Test
+  //@Test
   public void OnlineOptimizerCompatibility() {
     int k = 3;
     double topicSmoothing = 1.2;

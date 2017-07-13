@@ -275,7 +275,7 @@ class OrcQuerySuite extends QueryTest with BeforeAndAfterAll with OrcTest {
     }
   }
 
-  test("SPARK-5309 strings stored using dictionary compression in orc") {
+  ignore("SPARK-5309 strings stored using dictionary compression in orc") {
     withOrcTable((0 until 1000).map(i => ("same", "run_" + i / 100, 1)), "t") {
       checkAnswer(
         sql("SELECT `_1`, `_2`, SUM(`_3`) FROM t GROUP BY `_1`, `_2`"),

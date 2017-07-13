@@ -778,7 +778,7 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
       )
     }
 
-    test(s"project the partitioning column $table") {
+    ignore(s"project the partitioning column $table") {
       checkAnswer(
         sql(s"SELECT p, count(*) FROM $table group by p"),
         Row(1, 10) ::
@@ -794,7 +794,7 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
       )
     }
 
-    test(s"project partitioning and non-partitioning columns $table") {
+    ignore(s"project partitioning and non-partitioning columns $table") {
       checkAnswer(
         sql(s"SELECT stringField, p, count(intField) FROM $table GROUP BY p, stringField"),
         Row("part-1", 1, 10) ::

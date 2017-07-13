@@ -379,7 +379,7 @@ class NaiveBayesSuite extends SparkFunSuite with MLlibTestSparkContext {
 
 class NaiveBayesClusterSuite extends SparkFunSuite with LocalClusterSparkContext {
   //在训练和预测中,任务的大小应该是小的
-  test("task size should be small in both training and prediction") {
+  ignore("task size should be small in both training and prediction") {
     val m = 10
     val n = 200000
     val examples = sc.parallelize(0 until m, 2).mapPartitionsWithIndex { (idx, iter) =>
