@@ -43,9 +43,9 @@ object ArrayBufferTest {
    // 4、常用算法：scala有很多便捷内建函数，如
    println("sum:"+ arrbuff1.sum) //对arrbuff1元素求和
     Array("asd","sdf","ss").max //求最大元素
-    println(arrbuff1.sorted(_ < _))  //将arrbuff1元素从小到大排序
-    println(arrbuff1.sorted(_ > _))  //从大到小排序
-    util.Sorting.quickSort(Array) //针对数组排序，单不能对数组缓冲排序
+    //println(arrbuff1.sorted(_<_ ))  //将arrbuff1元素从小到大排序
+   // println(arrbuff1.sorted(_> _))  //从大到小排序
+    println("==="+util.Sorting.quickSort(Array("asd","sdf","ss"))) //针对数组排序，单不能对数组缓冲排序
     val arrb = Array(1,23,4,2,45)
     println(arrb.mkString(",")) //指定分割符
     println(arrb.mkString("(",",",")")) //指定前缀、分隔符、后缀*/
