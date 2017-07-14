@@ -33,7 +33,7 @@ object MultiBroadcastTest {
 
     val slices = if (args.length > 0) args(0).toInt else 2
     val num = if (args.length > 1) args(1).toInt else 1000000
-
+    //创建固定长度数组num
     val arr1 = new Array[Int](num)
     for (i <- 0 until arr1.length) {
       arr1(i) = i
@@ -52,7 +52,10 @@ object MultiBroadcastTest {
     }
     // Collect the small RDD so we can print the observed sizes locally.
     //收集小RDD可以打印尺寸的局部观察
-    observedSizes.collect().foreach(i => println(i))
+    //
+    observedSizes.collect().foreach{case (k:Int, v:Int) =>
+      println(k+"==="+v)
+    }
 
     sc.stop()
   }
