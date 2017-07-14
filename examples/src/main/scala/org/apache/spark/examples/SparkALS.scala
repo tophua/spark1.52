@@ -92,10 +92,12 @@ object SparkALS {
   def main(args: Array[String]) {
 
     var slices = 0
-
+   //Some 使用方式
+    //把数组转换成Option方式及Option匹配方式
     val options = (0 to 4).map(i => if (i < args.length) Some(args(i)) else None)
-
+    //Option匹配方式
     options.toArray match {
+        //参数的value
       case Array(m, u, f, iters, slices_) =>
         M = m.getOrElse("10").toInt //
         U = u.getOrElse("50").toInt //
