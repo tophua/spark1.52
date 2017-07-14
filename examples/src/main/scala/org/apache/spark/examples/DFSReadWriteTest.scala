@@ -44,7 +44,7 @@ object DFSReadWriteTest {
 
   private val NPARAMS = 2
   /**
-    * 读取文件
+    * 本地文件读取
     */
   private def readFile(filename: String): List[String] = {
     val lineIter: Iterator[String] = fromFile(filename).getLines()
@@ -89,7 +89,7 @@ object DFSReadWriteTest {
     }
 
     i += 1
-    dfsDirPath = args(i)//存放文件位置的目录
+    dfsDirPath = args(i)//存放hdfs文件位置的目录
   }
   /**
     * 运行本地单词计数
@@ -105,7 +105,7 @@ object DFSReadWriteTest {
   }
 
   def main(args: Array[String]): Unit = {//第一参数读取文件,第二参数是存文件目录
-  val args1=Array("D:\\spark\\spark-1.5.0-hadoop2.6\\README.md","D:\\spark\\spark-1.5.0-hadoop2.6\\")
+  val args1=Array("/home/liush/s3/S3_2016002.txt","hdfs://name-node1:8020/user/liush")
     //parseArgs(args)
     parseArgs(args1)
 
@@ -113,8 +113,14 @@ object DFSReadWriteTest {
     val fileContents = readFile(localFilePath.toString())//读取文件
     val localWordCount = runLocalWordCount(fileContents)
 
+    val HADOOP_USER = "hdfs"
+    // 设置访问spark使用的用户名
+    System.setProperty("user.name", HADOOP_USER);
+    // 设置访问hadoop使用的用户名
+    System.setProperty("HADOOP_USER_NAME", HADOOP_USER);
     println("Creating SparkConf")//创建Spark配置文件
-    val conf = new SparkConf().setAppName("DFS Read Write Test").setMaster("local")
+    val conf = new SparkConf().setAppName("DFS Read Write Test").setMaster("local").setExecutorEnv("HADOOP_USER_NAME", HADOOP_USER)
+
 
     println("Creating SparkContext")//创建Spark上下文
     val sc = new SparkContext(conf)
