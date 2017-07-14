@@ -1,11 +1,9 @@
-package org.apache.spark.examples
+package demo
 
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.TimerTask
-import java.util.Timer
+import java.util.{Timer, TimerTask}
 
-object schedule {
+object TimerSchedule {
   /**
     * 在java中,Timer类主要用于定时性、周期性任务 的触发,这个类中有两个方法比较难理解,
     * 那就是schedule和scheduleAtFixedRate方法,在这里就用实例分析一下

@@ -1,18 +1,14 @@
-package org.apache.spark.examples
+package demo
 
-import java.net.ConnectException
-import java.net.InetAddress
-import java.net.Socket
-import java.net.URI
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
-import scala.util.Try
-import scala.util.Failure
-import scala.util.Success
+import java.net.{ConnectException, InetAddress, Socket, URI}
+
+import org.apache.spark.{SparkConf, SparkContext}
+
+import scala.util.{Failure, Success, Try}
 /**
   * 测试是否连接到服务器检测
   */
-object SparkAvailabilityCheck {
+object SparkConnectCheckTest {
   def main(args: Array[String]) {
     val b39=isSparkOnline(URI.create("spark://192.168.0.40:8088"))
     val b27=isSparkOnline(URI.create("spark://192.168.0.13:8088"))
