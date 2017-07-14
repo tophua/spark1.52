@@ -78,10 +78,12 @@ private[spark] object Utils extends Logging {
 
   /** 
    *  Serialize an object using Java serialization
-   *  使用java序列化序列化一个对象
+   *  使用java序列化序列化一个对象,返回二进数组
    *  */
   def serialize[T](o: T): Array[Byte] = {
+    //字节数组输出流在内存中创建一个字节数组缓冲区，转换成字节数组
     val bos = new ByteArrayOutputStream()
+    //对基本数据和对象进行序列化操作支持
     val oos = new ObjectOutputStream(bos)
     oos.writeObject(o)
     oos.close()
@@ -95,6 +97,7 @@ private[spark] object Utils extends Logging {
   def deserialize[T](bytes: Array[Byte]): T = {
     val bis = new ByteArrayInputStream(bytes)
     val ois = new ObjectInputStream(bis)
+    //来实现序列化和反序列化的操作
     ois.readObject.asInstanceOf[T]
   }
 
@@ -177,6 +180,8 @@ private[spark] object Utils extends Logging {
    *  */
   def classIsLoadable(clazz: String): Boolean = {
     // scalastyle:off classforname
+    //Try: 解决函数可能会抛出异常问题
+    //Try来包裹它，得到Try的子类Success或者Failure，如果计算成功，返回Success的实例，如果抛出异常，返回Failure并携带相关信息
     Try { Class.forName(clazz, false, getContextOrSparkClassLoader) }.isSuccess
     // scalastyle:on classforname
   }
@@ -1165,7 +1170,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code that evaluates to Unit, forwarding any uncaught exceptions to the
    * default UncaughtExceptionHandler
-   * 执行一个代码块为单位,,转发任何未捕获的异常到默认UncaughtExceptionHandler
+   * 执行一个代码块为单位,转发任何未捕获的异常到默认UncaughtExceptionHandler
    * NOTE: This method is to be called by the spark-started JVM process.
    * 这种方法被称为Spark开始JVM进程
    */
