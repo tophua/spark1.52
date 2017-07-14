@@ -31,17 +31,18 @@ object DriverSubmissionTest {
         println("Usage: DriverSubmissionTest <seconds-to-sleep>")
         System.exit(0)
       }*/
-    val numSecondsToSleep = 1//args(0).toInt
+    val numSecondsToSleep = 10//args(0).toInt
 
     val env = System.getenv()//环境信息
     val properties = Utils.getSystemProperties
     //包含环境变量
     println("Environment variables containing SPARK_TEST:")
     //打印包括SPARK_TEST信息
-    env.filter{case (k, v) => k.contains("SPARK_TEST")}.foreach(println)
+    //_TEST
+    env.filter{case (k, v) => k.contains("SPARK")}.foreach(println)
     //系统属性包含spark.test
     println("System properties containing spark.test:")
-    properties.filter{case (k, v) => k.toString.contains("spark.test")}.foreach(println)
+    properties.filter{case (k, v) => k.toString.contains("spark")}.foreach(println)
 
     for (i <- 1 until numSecondsToSleep) {
       println(s"Alive for $i out of $numSecondsToSleep seconds")

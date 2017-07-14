@@ -26,7 +26,8 @@ def main(args: Array[String]) {
   val sparkConf = new SparkConf().setAppName("ExceptionHandlingTest").setMaster("local")
   val sc = new SparkContext(sparkConf)
   println("sc.defaultParallelism:"+sc.defaultParallelism)
-  sc.parallelize(0 until sc.defaultParallelism).foreach { i =>
+  //sc.defaultParallelism
+  sc.parallelize(0 until 100).foreach { i =>
     val rd=math.random
     println(rd)
     if (rd > 0.75) {
