@@ -20,6 +20,7 @@ object testPartitionBy {
     println(sc.parallelize(Seq(1, 2, 3), 3).filter(_ < 0).isEmpty())
 
     logDataB.filter(_._1.startsWith("94266375d0a8")).foreach(println)
+    logDataB.filter{case (k, v) => k.contains("94266375d0a8")}.foreach(println)
     logFileA.foreach(println _)
 
     //logFileA.filter()
