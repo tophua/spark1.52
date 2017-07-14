@@ -20,14 +20,20 @@ object testPartitionBy {
     println(sc.parallelize(Seq(1, 2, 3), 3).filter(_ < 0).isEmpty())
 
     logDataB.filter(_._1.startsWith("94266375d0a8")).foreach(println)
-  logFileA.foreach(println _)
+    logFileA.foreach(println _)
+
+    //logFileA.filter()
+
+
+   /* def startsWith(prefix: String, toffset: Int) = {
+
+      true
+    }*/
 
     /* logFileA.filter((a:String,b:Int)=>{
       a.startsWith("942663")
      })  */
-    /*logFileA.filter((String,Int) =>{
-      if (i < 4) 0 == prng42.nextInt(3) else 0 == prng43.nextInt(3)
-    })*/
+
 
 /*   logDataB.filter(a =>{
       System.out.println(a)
