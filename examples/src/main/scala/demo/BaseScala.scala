@@ -1,5 +1,6 @@
 package demo
 
+import java.io._
 import java.util.Date
 
 /**
@@ -9,7 +10,7 @@ import java.util.Date
   * 对于这种情况，Scala提供按名称参数调用函数。
   * 按名称调用机制传递一个代码块给被调用者并且每次被调用方传接入参数，代码块被执行，值被计算。
   */
-object FunctionNameCall {
+object BaseScala {
   def main(args: Array[String]):Unit= {
     printInt(b=5, a=7)
     delayed(time())
@@ -102,8 +103,86 @@ object FunctionNameCall {
     //查找最小元素，迭代器就是在这个方法返回后结束
     println("Minimum valued element " + itb.min )
 
+    //Scala模式匹配
+    println("匹配一个整数值:"+matchTestValue(3))
+
+    println("不同类型的模式值:"+matchTest("two"))
+    println("不同类型的模式值:"+matchTest("test"))
+    println("不同类型的模式值:"+matchTest(1))
+
+
+    //case classes是用于模式匹配与case 表达式指定类
+    val alice = new Person("Alice", 25)
+    val bob = new Person("Bob", 32)
+    val charlie = new Person("Charlie", 32)
+    //case classes是用于模式匹配与case 表达式指定类
+    for (person <- List(alice, bob, charlie)) {
+      person match {
+        case Person("Alice", 25) => println("Hi Alice!")
+        case Person("Bob", 32) => println("Hi Bob!")
+        case Person(name, age) =>
+          println("Age: " + age + " year, name: " + name + "?")
+      }
+    }
+
+
+    //Scala正则表达式
+    //Scala支持通过Regex类的scala.util.matching封装正则表达式
+    //我们创建一个字符串，并调用r()方法就可以了。Scala中字符串隐式转换为一个RichString并调用该方法来获得正则表达式的一个实例
+    val pattern = "Scala".r
+    val str = "Scala is Scalable and cool"
+    //从Scala中一个语句中找出单词：
+    //找到第一个正则表达式匹配，只需调用findFirstIn()方法
+    println(pattern findFirstIn str)
+
+
+
+    //Scala异常处理
+    //Scala中try/catch在一个单独的块捕捉任何异常，然后使用case块进行模式匹配
+    try {
+      val f = new FileReader("input.txt")
+    } catch {
+      case ex: FileNotFoundException =>{
+        println("Missing file exception")
+      }
+      case ex: IOException => {
+        println("IO Exception")
+      }
+    }finally {
+      println("Exiting finally...")
+    }
+
+
+    //Scala文件I/O
+    //写入文件的一个例子：
+    val writer = new PrintWriter(new File("test.txt" ))
+
+    writer.write("Hello Scala")
+    writer.close()
+
+    //从屏幕读取一行
+    print("Please enter your input : " )
+   // val line = Console.readLine()
+
+   // println("Thanks, you just typed: " + line)
 
   }
+  // case class, empty one.
+  case class Person(name: String, age: Int)
+  //它匹配针对不同类型的模式值：
+  def matchTest(x: Any): Any = x match {
+    case 1 => "one"
+    case "two" => 2
+    case y: Int => "scala.Int"
+    case _ => "many"
+  }
+//匹配一个整数值
+  def matchTestValue(x: Int): String = x match {
+    case 1 => "one"
+    case 2 => "two"
+    case _ => "many"
+  }
+
   def time() = {
     println("Getting time in nano seconds")
     System.nanoTime
@@ -183,4 +262,6 @@ def strcat(s1: String)(s2: String) = {
     case Some(s) => s
     case None => "?"
   }
+
+  //
 }
