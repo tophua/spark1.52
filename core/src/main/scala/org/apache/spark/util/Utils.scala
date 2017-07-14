@@ -203,7 +203,7 @@ private[spark] object Utils extends Logging {
       //arrayOffset 返回此缓冲区中的第一个元素在缓冲区的底层实现数组中的偏移量
       //position 即缓冲区开始读或者写数据的位置
       //remaining 返回剩余的可用长度,此长度为实际读取的数据长度
-      //array 返回的 array 长度
+      //array 返回支持此缓冲区的字节数组
       out.write(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining())
     } else {
       val bbval = new Array[Byte](bb.remaining())
