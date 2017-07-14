@@ -1,5 +1,7 @@
 package demo
 
+import java.util.Date
+
 /**
   * Created by liush on 17-7-14.
   * Scala函数按名称调用
@@ -36,6 +38,70 @@ object FunctionNameCall {
     println( factorial(1) )
     println( factorial(2) )
     println( factorial(3) )
+
+
+    val date = new Date
+    //Scala部分应用函数
+    //如果只发送了几个参数，会得到一个部分函数应用。也可以绑定一些参数，剩下其余的稍后再填补上
+
+    /**
+      * log()方法有两个参数：date和message。如果想多次调用这个方法，如：date 使用不同的值，而 message 的值相同。
+      * 我们可以消除部分参数传递给 log() 方法，因为传递 date 在每个调用都可能会有干扰。要做到这一点，
+      * 我们首先绑定一个值到 date 参数，并把下划线放在其位置第二个参数之后
+      */
+    val logWithDateBound = log(date, _ : String)
+
+    logWithDateBound("message1" )
+    Thread.sleep(1000)
+    logWithDateBound("message2" )
+    Thread.sleep(1000)
+    logWithDateBound("message3" )
+
+
+    ///遍历元组
+    //Tuple.productIterator()方法来遍历一个元组的所有元素
+    val t = (4,3,2,1)
+
+    t.productIterator.foreach{ i =>println("Value = " + i )}
+
+    /**
+      * Scala的Option[T]是容器对于给定的类型的零个或一个元件。Option[T]可以是一些[T]或None对象，它代表一个缺失值。
+      * Scala映射get方法产生，如果给定的键没有在映射定义的一些(值)，如果对应于给定键的值已经找到，或None。
+      * 选项Option类型常用于Scala程序，可以比较这对null值Java可用这表明没有任何值
+      */
+    val capitals = Map("France" -> "Paris", "Japan" -> "Tokyo")
+    println("capitals.get( 'France' ) : " +  capitals.get( "France" ))
+    println("capitals.get( 'India' ) : " +  capitals.get( "India" ))
+    //區別Scala的Option
+    println("show(capitals.get( 'Japan')) : " +show(capitals.get( "Japan")) )
+    println("show(capitals.get( 'India')) : " +show(capitals.get( "India")) )
+
+    val a:Option[Int] = Some(5)
+    val b:Option[Int] = None
+    //getOrElse()来访问值或使用默认值
+    println("a.getOrElse(0): " + a.getOrElse(0) )
+    println("b.getOrElse(10): " + b.getOrElse(10) )
+    //isEmpty()检查该选项是否为 None
+    println("a.isEmpty: " + a.isEmpty )
+    println("b.isEmpty: " + b.isEmpty )
+
+
+    //迭代器不是集合，而是一种由一个访问的集合之一的元素
+    //调用 it.next()将返回迭代器的下一个元素
+    //是否有更多的元素使用迭代器的it.hasNext方法返回
+    val it = Iterator("a", "number", "of", "words")
+
+    while (it.hasNext){
+      println(it.next())
+    }
+
+    val ita = Iterator(20,40,2,50,69, 90)
+    val itb = Iterator(20,40,2,50,69, 90)
+  //查找最大元素。迭代器就是在这个方法返回后结束
+    println("Maximum valued element " + ita.max )
+    //查找最小元素，迭代器就是在这个方法返回后结束
+    println("Minimum valued element " + itb.min )
+
 
   }
   def time() = {
@@ -104,5 +170,17 @@ def strcat(s1: String)(s2: String) = {
         fact(i - 1, i * accumulator)
     }
     fact(i, 1)
+  }
+
+  //Scala部分应用函数
+  //
+  def log(date: Date, message: String)  = {
+    println(date + "----" + message)
+  }
+
+  //Scala的Option[T]是容器对于给定的类型的零个或一个元件
+  def show(x: Option[String]) = x match {
+    case Some(s) => s
+    case None => "?"
   }
 }
