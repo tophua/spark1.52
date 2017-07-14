@@ -1,9 +1,8 @@
-package org.apache.spark.examples.futuePromise
+package demo
 
-import java.util.Timer
-import java.util.TimerTask
+import java.util.{Timer, TimerTask}
+
 import scala.concurrent._
-import ExecutionContext.Implicits.global
 /**
  * Scala的Promise可以被认为一个是可写的,静态单赋值,
  * 它可以创建一个Future和完成一个Future(success complete和failed complete)promise字面意思是承诺,

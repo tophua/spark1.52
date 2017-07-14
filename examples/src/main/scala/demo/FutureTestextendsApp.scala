@@ -1,6 +1,7 @@
-package org.apache.spark.examples.futuePromise
+package demo
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
-import ExecutionContext.Implicits.global
 /**
  * Future 表示一个可能还没有实际完成的异步任务的结果
  * scala的Future表示一个异步操作的结果状态,它持有一个值,在未来的某个之间点可用,该值是异步操作的结果,
