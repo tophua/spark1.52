@@ -1,7 +1,8 @@
-package org.apache.spark.examples.demoIBM
+package demo
+
+import java.io.File
 
 import scala.io.Source
-import java.io.File
 /**
  * 隐式转换
  * Created by zhiwang on 2015/7/21.

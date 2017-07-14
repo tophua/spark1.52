@@ -1,4 +1,4 @@
-package org.apache.spark.examples.demoIBM
+package demo
 
 import java.net.Socket
 

@@ -1,10 +1,9 @@
-package org.apache.spark.examples.demoIBM
+package demo
 
-import java.io.File
+import java.io.{File, FileWriter}
 import java.util.Random
-import java.io.FileWriter
 
-object SampleDataFileGenerator {
+object FileWrite {
   def main(args: Array[String]) {
     val writer = new FileWriter(new File("D:\\eclipse44_64\\workspace\\spark1.5\\examples\\sample_age_data.txt"), false)
     val rand = new Random()
