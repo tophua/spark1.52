@@ -30,7 +30,7 @@ object HdfsTest {
     *  使用HDFS测试
     *  */
   def main(args: Array[String]) {
-    val hdfs="hdfs://xcsq:8089/cookbook/input/shu.txt"
+    val hdfs="hdfs://name-node1:8020/user/liush/dfs_read_write_test/"
     /*if (args.length < 1) {
       System.err.println("Usage: HdfsTest <file>")
       System.exit(1)
@@ -44,7 +44,10 @@ object HdfsTest {
     val mapped = file.map(s => s.length).cache()
     for (iter <- 1 to 10) {
       val start = System.currentTimeMillis()
-      for (x <- mapped) { x + 2 }
+      for (x <- mapped) {
+       // println("x:"+x)
+        x + 2
+      }
       val end = System.currentTimeMillis()
       println("Iteration " + iter + " took " + (end-start) + " ms")
     }

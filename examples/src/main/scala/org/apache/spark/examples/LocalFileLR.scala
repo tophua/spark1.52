@@ -35,7 +35,7 @@ object LocalFileLR {
   val rand = new Random(42)
 
   case class DataPoint(x: Vector[Double], y: Double)
-
+  //解析每一行数据,生成DataPoint对像
   def parsePoint(line: String): DataPoint = {
     val nums = line.split(' ').map(_.toDouble)
     DataPoint(new DenseVector(nums.slice(1, D + 1)), nums(0))
@@ -53,13 +53,14 @@ object LocalFileLR {
   def main(args: Array[String]) {
 
     showWarning()
-
+    //fromFile读取文件,转换成Array[String]
     val lines = scala.io.Source.fromFile(args(0)).getLines().toArray
+    //调用parsePoint解析每一行数据
     val points = lines.map(parsePoint _)
     val ITERATIONS = args(1).toInt
 
     // Initialize w to a random value
-    //初始化W到一个随机值
+    //初始化W到一个随机值,可数组
     var w = DenseVector.fill(D){2 * rand.nextDouble - 1}
     println("Initial w: " + w)
 

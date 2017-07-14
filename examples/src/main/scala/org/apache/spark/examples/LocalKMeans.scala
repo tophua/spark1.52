@@ -79,6 +79,7 @@ object LocalKMeans {
     showWarning()
 
     val data = generateData
+    //可变HashSet,措施化
     var points = new HashSet[Vector[Double]]
     var kPoints = new HashMap[Int, Vector[Double]]
     var tempDist = 1.0
