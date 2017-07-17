@@ -540,6 +540,7 @@ class SparkSubmitSuite
   // scalastyle:on println
 
   // NOTE: This is an expensive operation in terms of time (10 seconds+). Use sparingly.
+  //注意：根据时间（10秒+）,这是一个昂贵的操作,有节制地使用
   private def runSparkSubmit(args: Seq[String]): Unit = {
     val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
  /*   val process = Utils.executeCommand(
