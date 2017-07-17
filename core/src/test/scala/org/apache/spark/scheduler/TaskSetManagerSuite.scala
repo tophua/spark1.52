@@ -759,8 +759,8 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     assert(manager.resourceOffer("execA", "host1", NO_PREF).get.index === 0)
     assert(manager.resourceOffer("execA", "host1", ANY) == None)
   }
-
-  test("Ensure TaskSetManager is usable after addition of levels") { //确保tasksetmanager添加水平后可使用
+  //确保TaskSetManager在添加级别后可用
+  test("Ensure TaskSetManager is usable after addition of levels") {
     // Regression test for SPARK-2931
     // 回归测试
     sc = new SparkContext("local", "test")
@@ -794,7 +794,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     //为解决之前,这导致了一个对象的大小时抛出
     assert(manager.resourceOffer("execC", "host3", ANY) !== None)
   }
-
+ //测试使用HDFSCacheTaskLocation的位置被视为PROCESS_LOCAL
   test("Test that locations with HDFSCacheTaskLocation are treated as PROCESS_LOCAL.") {
     // Regression test for SPARK-2931
     //回归测试
