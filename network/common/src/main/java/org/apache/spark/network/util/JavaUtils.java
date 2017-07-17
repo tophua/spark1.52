@@ -66,6 +66,7 @@ public class JavaUtils {
   /**
    * Convert the given string to a byte buffer. The resulting buffer can be
    * converted back to the same string through {@link #bytesToString(ByteBuffer)}.
+   * 将给定字符串转换为字节缓冲区,生成的缓冲区可以通过相同的字符串转换回
    */
   public static ByteBuffer stringToBytes(String s) {
     return Unpooled.wrappedBuffer(s.getBytes(Charsets.UTF_8)).nioBuffer();
@@ -74,6 +75,7 @@ public class JavaUtils {
   /**
    * Convert the given byte buffer to a string. The resulting string can be
    * converted back to the same byte buffer through {@link #stringToBytes(String)}.
+   * 将给定的字节缓冲区转换为字符串。得到的字符串可以是,转换回相同的字节缓冲区通过
    */
   public static String bytesToString(ByteBuffer b) {
     return Unpooled.wrappedBuffer(b).toString(Charsets.UTF_8);
@@ -81,6 +83,7 @@ public class JavaUtils {
 
   /*
    * Delete a file or directory and its contents recursively.
+   * 递归删除文件或目录及其内容。如果他们不按照目录的符号链接,如果删除失败,则引发异常。
    * Don't follow directories if they are symlinks.
    * Throws an exception if deletion is unsuccessful.
    */
@@ -103,12 +106,13 @@ public class JavaUtils {
     }
 
     boolean deleted = file.delete();
-    // Delete can also fail if the file simply did not exist.
+      // Delete can also fail if the file simply did not exist.
+      //如果文件不存在，删除也可能失败
     if (!deleted && file.exists()) {
       throw new IOException("Failed to delete: " + file.getAbsolutePath());
     }
   }
-
+  //安全文件列表
   private static File[] listFilesSafely(File file) throws IOException {
     if (file.exists()) {
       File[] files = file.listFiles();
@@ -120,7 +124,7 @@ public class JavaUtils {
       return new File[0];
     }
   }
-
+  //是或连接文件
   private static boolean isSymlink(File file) throws IOException {
     Preconditions.checkNotNull(file);
     File fileInCanonicalDir = null;
@@ -131,7 +135,7 @@ public class JavaUtils {
     }
     return !fileInCanonicalDir.getCanonicalFile().equals(fileInCanonicalDir.getAbsoluteFile());
   }
-
+  //时间后缀,不可改变Map
   private static final ImmutableMap<String, TimeUnit> timeSuffixes = 
     ImmutableMap.<String, TimeUnit>builder()
       .put("us", TimeUnit.MICROSECONDS)
@@ -142,7 +146,7 @@ public class JavaUtils {
       .put("h", TimeUnit.HOURS)
       .put("d", TimeUnit.DAYS)
       .build();
-
+    //不可改变Map
   private static final ImmutableMap<String, ByteUnit> byteSuffixes =
     ImmutableMap.<String, ByteUnit>builder()
       .put("b", ByteUnit.BYTE)
@@ -161,6 +165,7 @@ public class JavaUtils {
   /**
    * Convert a passed time string (e.g. 50s, 100ms, or 250us) to a time count for
    * internal use. If no suffix is provided a direct conversion is attempted.
+   * 将一个字符串(例如通过时间50s,100ms,或250us)一次计数内部使用。如果没有后缀，则尝试直接转换。
    */
   private static long parseTimeString(String str, TimeUnit unit) {
     String lower = str.toLowerCase().trim();
@@ -175,11 +180,13 @@ public class JavaUtils {
       String suffix = m.group(2);
       
       // Check for invalid suffixes
+        //检查无效后缀
       if (suffix != null && !timeSuffixes.containsKey(suffix)) {
         throw new NumberFormatException("Invalid suffix: \"" + suffix + "\"");
       }
       
       // If suffix is valid use that, otherwise none was provided and use the default passed
+        //如果后缀是有效的,则使用它,否则没有提供并使用默认传递。
       return unit.convert(val, suffix != null ? timeSuffixes.get(suffix) : unit);
     } catch (NumberFormatException e) {
       String timeError = "Time must be specified as seconds (s), " +
@@ -193,6 +200,7 @@ public class JavaUtils {
   /**
    * Convert a time parameter such as (50s, 100ms, or 250us) to milliseconds for internal use. If
    * no suffix is provided, the passed number is assumed to be in ms.
+   *将一个时间参数如（50，100ms，或250us）以毫秒为单位内部使用,如果不提供后缀，所传递的数字被假定为MS。
    */
   public static long timeStringAsMs(String str) {
     return parseTimeString(str, TimeUnit.MILLISECONDS);

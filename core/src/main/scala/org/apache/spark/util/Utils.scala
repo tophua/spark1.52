@@ -50,7 +50,10 @@ import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.network.util.JavaUtils
 import org.apache.spark.serializer.{DeserializationStream, SerializationStream, SerializerInstance}
 
-/** CallSite represents a place in user code. It can have a short and a long form. */
+/**
+  * CallSite represents a place in user code. It can have a short and a long form.
+  * CallSite代表用户代码中的一个位置,它可以有一个短而长的形式。
+  * */
 private[spark] case class CallSite(shortForm: String, longForm: String)
 
 private[spark] object CallSite {
@@ -68,7 +71,7 @@ private[spark] object Utils extends Logging {
   /**
    * Define a default value for driver memory here since this value is referenced across the code
    * base and nearly all files already use Utils.scala
-   * 定义一个Driver程序内存的默认值
+   * 这里定义驱动程序内存的默认值，因为该值是跨代码引用的基础和几乎所有的文件已经使用Utils.scala
    */
   val DEFAULT_DRIVER_MEM_MB = JavaUtils.DEFAULT_DRIVER_MEM_MB.toInt
   //最大目录创建次数
@@ -120,6 +123,7 @@ private[spark] object Utils extends Logging {
    *  */
   def deserializeLongValue(bytes: Array[Byte]) : Long = {
     // Note: we assume that we are given a Long value encoded in network (big-endian) byte order
+    //注意：我们假设我们被给予一个以网络（大端）字节顺序编码的长值
     var result = bytes(7) & 0xFFL
     result = result + ((bytes(6) & 0xFFL) << 8)
     result = result + ((bytes(5) & 0xFFL) << 16)
@@ -130,7 +134,10 @@ private[spark] object Utils extends Logging {
     result + ((bytes(0) & 0xFFL) << 56)
   }
 
-  /** Serialize via nested stream using specific serializer */
+  /**
+    * Serialize via nested stream using specific serializer
+    * 使用特定的序列化程序通过嵌套流序列化
+    * */
   def serializeViaNestedStream(os: OutputStream, ser: SerializerInstance)(
       f: SerializationStream => Unit): Unit = {
     val osWrapper = ser.serializeStream(new OutputStream {
@@ -144,7 +151,10 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Deserialize via nested stream using specific serializer */
+  /**
+    * Deserialize via nested stream using specific serializer
+    * 使用特定的序列化器通过嵌套流反序列化
+    * */
   def deserializeViaNestedStream(is: InputStream, ser: SerializerInstance)(
       f: DeserializationStream => Unit): Unit = {
     val isWrapper = ser.deserializeStream(new InputStream {
@@ -415,28 +425,31 @@ private[spark] object Utils extends Logging {
       executeAndGetOutput(Seq("tar", "-xf", fileName), targetDir)
     }
     // Make the file executable - That's necessary for scripts
+    //使文件可执行 - 脚本是必需的
     FileUtil.chmod(targetFile.getAbsolutePath, "a+x")
 
     // Windows does not grant read permission by default to non-admin users
     // Add read permission to owner explicitly
+    //默认情况下，Windows不会向非管理员用户授予读取权限
+    //显式添加读取权限给所有者
     if (isWindows) {
       FileUtil.chmod(targetFile.getAbsolutePath, "u+r")
     }
   }
 
   /**
-   * Download `in` to `tempFile`, then move it to `destFile`.
-   * 下载`到` tempfile `,然后将它移到`destfile `
-   * If `destFile` already exists:
-   *   - no-op if its contents equal those of `sourceFile`,
-   *   - throw an exception if `fileOverwrite` is false,
+   * Download in to tempFile, then move it to destFile.
+   * 下载到 tempfile ,然后将它移到destfile
+   * If destFile already exists:
+   *   - no-op if its contents equal those of sourceFile,
+   *   - throw an exception if fileOverwrite is false,
    *   - attempt to overwrite it otherwise.
    *
-   * @param url URL that `sourceFile` originated from, for logging purposes.
+   * @param url URL that sourceFile originated from, for logging purposes.
    * @param in InputStream to download.
-   * @param destFile File path to move `tempFile` to.
-   * @param fileOverwrite Whether to delete/overwrite an existing `destFile` that does not match
-   *                      `sourceFile`
+   * @param destFile File path to move tempFile to.
+   * @param fileOverwrite Whether to delete/overwrite an existing destFile that does not match
+   *                      sourceFile
    */
   private def downloadFile(
       url: String,
@@ -515,6 +528,7 @@ private[spark] object Utils extends Logging {
     }
 
     // The file does not exist in the target directory. Copy or move it there.
+    //文件不存在于目标目录中,复制或移动它
     if (removeSourceFile) {
       Files.move(sourceFile, destFile)
     } else {
@@ -522,7 +536,7 @@ private[spark] object Utils extends Logging {
       copyRecursive(sourceFile, destFile)
     }
   }
-
+  //文件相等递归
   private def filesEqualRecursive(file1: File, file2: File): Boolean = {
     if (file1.isDirectory && file2.isDirectory) {
       val subfiles1 = file1.listFiles()
@@ -539,13 +553,16 @@ private[spark] object Utils extends Logging {
       false
     }
   }
-
+  //递归复制
   private def copyRecursive(source: File, dest: File): Unit = {
     if (source.isDirectory) {
       if (!dest.mkdir()) {
         throw new IOException(s"Failed to create directory ${dest.getPath}")
       }
+      //子文件
       val subfiles = source.listFiles()
+      //dest父抽象路径名,child 子路径名字符串
+      //File 通过给定的父抽象路径名和子路径名字符串创建一个新的File实例
       subfiles.foreach(f => copyRecursive(f, new File(dest, f.getName)))
     } else {
       Files.copy(source, dest)
@@ -573,6 +590,7 @@ private[spark] object Utils extends Logging {
     val uri = new URI(url)
     //通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时,是否覆盖目标文件
     val fileOverwrite = conf.getBoolean("spark.files.overwrite", defaultValue = false)
+    //getScheme 返回当前链接使用的协议,getOrElse输出默认值file
     Option(uri.getScheme).getOrElse("file") match {
       case "http" | "https" | "ftp" =>
         var uc: URLConnection = null
@@ -580,13 +598,14 @@ private[spark] object Utils extends Logging {
           logDebug("fetchFile with security enabled")
           val newuri = constructURIForAuthentication(uri, securityMgr)
           uc = newuri.toURL().openConnection()
+          //设置该URLConnection的allowUserInteraction请求头字段的值
           uc.setAllowUserInteraction(false)
         } else {
           logDebug("fetchFile not using security")
           uc = new URL(url).openConnection()
         }
         Utils.setupSecureURLConnection(uc, securityMgr)
-	//在获取由driver通过SparkContext.addFile()添加的文件时,是否使用通信时间超时
+	      //在获取由driver通过SparkContext.addFile()添加的文件时,是否使用通信时间超时
         val timeoutMs =
           conf.getTimeAsSeconds("spark.files.fetchTimeout", "60s").toInt * 1000
         uc.setConnectTimeout(timeoutMs)
@@ -597,6 +616,8 @@ private[spark] object Utils extends Logging {
       case "file" =>
         // In the case of a local file, copy the local file to the target directory.
         // Note the difference between uri vs url.
+        //在本地文件的情况下.将本地文件复制到目标目录.
+        //注意uri和url之间的区别
         val sourceFile = if (uri.isAbsolute) new File(uri) else new File(url)
         copyFile(url, sourceFile, targetFile, fileOverwrite)
       case _ =>
@@ -609,8 +630,9 @@ private[spark] object Utils extends Logging {
 
   /**
    * Fetch a file or directory from a Hadoop-compatible filesystem.
-   *
+   * 从Hadoop兼容的文件系统中获取文件或目录。
    * Visible for testing
+    * 可见测试
    */
   private[spark] def fetchHcfsFile(
       path: Path,
@@ -639,7 +661,7 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * 查询Spark本地文件的一级目录
+   * 查询Spark本地文件的一级目录,Spark的本地目录可以通过配置多重设置,它们具有以下优先级：
    * Get the path of a temporary directory.  Spark's local directories can be configured through
    * multiple settings, which are used with the following precedence:
    *
@@ -686,7 +708,7 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * 获取可写的本地Spark配置文件
+   * 获取可写的本地Spark配置文件,该方法本身并不创建任何目录,只能根据部署模式封装查找本地目录的逻辑。
    * Return the configured local directories where Spark can write files. This
    * method does not create any directories on its own, it only encapsulates the
    * logic of locating the local directories according to deployment mode.
@@ -730,7 +752,9 @@ private[spark] object Utils extends Logging {
     }.toArray
   }
 
-  /** Get the Yarn approved local directories. */
+  /** Get the Yarn approved local directories.
+    * 获得Yarn批准的本地目录。
+    * */
   private def getYarnLocalDirs(conf: SparkConf): String = {
     // Hadoop 0.23 and 2.x have different Environment variable names for the
     // local dirs, so lets check both. We assume one of the 2 is set.
@@ -745,7 +769,10 @@ private[spark] object Utils extends Logging {
     localDirs
   }
 
-  /** Used by unit tests. Do not call from other places. */
+  /**
+    * Used by unit tests. Do not call from other places.
+    * 单元测试使用,不要从别的地方调用
+    *  */
   private[spark] def clearLocalRootDirs(): Unit = {
     localRootDirs = null
   }
@@ -754,6 +781,7 @@ private[spark] object Utils extends Logging {
    * Shuffle the elements of a collection into a random order, returning the
    * result in a new collection. Unlike scala.util.Random.shuffle, this method
    * uses a local random number generator, avoiding inter-thread contention.
+    * 将集合的元素随机排列为随机顺序，将结果返回到新集合中,该方法使用本地随机数发生器,避免线间争用
    */
   def randomize[T: ClassTag](seq: TraversableOnce[T]): Seq[T] = {
     randomizeInPlace(seq.toArray)
@@ -762,6 +790,7 @@ private[spark] object Utils extends Logging {
   /**
    * Shuffle the elements of an array into a random order, modifying the
    * original array. Returns the original array.
+    * 将数组的元素随机排列为随机顺序,修改原始数组,返回原始数组。
    */
   def randomizeInPlace[T](arr: Array[T], rand: Random = new Random): Array[T] = {
     for (i <- (arr.length - 1) to 1 by -1) {
@@ -775,7 +804,10 @@ private[spark] object Utils extends Logging {
 
   /**
    * Get the local host's IP address in dotted-quad format (e.g. 1.2.3.4).
+    * 以虚拟四格格式获取本地主机的IP地址
    * Note, this is typically not used from within core spark.
+    * 注意,这通常不在核心Spark中使用
+    *
    */
   private lazy val localIpAddress: InetAddress = findLocalInetAddress()
 /**
@@ -790,6 +822,7 @@ private[spark] object Utils extends Logging {
       if (address.isLoopbackAddress) {
         // Address resolves to something like 127.0.1.1, which happens on Debian; try to find
         // a better address using the local network interfaces
+        //地址解析为127.0.1.1,发生在Debian上,尝试使用本地网络接口找到更好的地址
         // getNetworkInterfaces returns ifs in reverse order compared to ifconfig output order
         // on unix-like system. On windows, it returns in index order.
         // It's more proper to pick ip address following system output order.
@@ -825,6 +858,7 @@ private[spark] object Utils extends Logging {
   /**
    * Allow setting a custom host name because when we run on Mesos we need to use the same
    * hostname it reports to the master.
+    *允许设置自定义主机名称,因为当我们在Mesos上运行时,我们需要使用与主机报告相同的主机名。
    */
   def setCustomHostname(hostname: String) {
     // DEBUG code
@@ -842,6 +876,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Get the local machine's URI.
+    * 获取本地机器的URI
    */
   def localHostNameForURI(): String = {
     customHostname.getOrElse(InetAddresses.toUriString(localIpAddress))
@@ -857,6 +892,8 @@ private[spark] object Utils extends Logging {
 
   // Typically, this will be of order of number of nodes in cluster
   // If not, we should change it to LRUCache or something.
+  //通常,这将是群集中节点数量的顺序
+  //如果没有,我们应该将其更改为LRUCache或某些东西
   private val hostPortParseResults = new ConcurrentHashMap[String, (String, Int)]()
 
   def parseHostPort(hostPort: String): (String, Int) = {
@@ -883,7 +920,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return the string to tell how long has passed in milliseconds.
-   * 返回字符串告诉过了多久时间
+   * 返回字符串,以告诉传输多长时间以毫秒为单位。
    */
   def getUsedTimeMs(startTimeMs: Long): String = {
     " " + (System.currentTimeMillis - startTimeMs) + " ms"
@@ -906,6 +943,8 @@ private[spark] object Utils extends Logging {
    * Delete a file or directory and its contents recursively(递归).
    * Don't follow directories if they are symlinks.
    * Throws an exception if deletion is unsuccessful.
+    * 如果他们不按照目录的符号链接
+    *如果删除失败，则引发异常
    */
   def deleteRecursively(file: File) {
     if (file != null) {
@@ -917,6 +956,7 @@ private[spark] object Utils extends Logging {
               deleteRecursively(child)
             } catch {
               // In case of multiple exceptions, only last one will be thrown
+              // 如果有多个异常,则只抛出最后一个异常。
               case ioe: IOException => savedIOException = ioe
             }
           }
@@ -928,6 +968,7 @@ private[spark] object Utils extends Logging {
       } finally {
         if (!file.delete()) {
           // Delete can also fail if the file simply did not exist
+          //如果文件不存在,删除也可能失败。
           if (file.exists()) {
             throw new IOException("Failed to delete: " + file.getAbsolutePath)
           }
@@ -1110,6 +1151,7 @@ private[spark] object Utils extends Logging {
       workingDir: File = new File("."),
       extraEnvironment: Map[String, String] = Map.empty,
       redirectStderr: Boolean = true): Process = {
+    //包含程序及其参数的字符串数组,注意Seq数组的传递方式
     val builder = new ProcessBuilder(command: _*).directory(workingDir)
     val environment = builder.environment()
     for ((key, value) <- extraEnvironment) {
@@ -1118,6 +1160,7 @@ private[spark] object Utils extends Logging {
     val process = builder.start()
     if (redirectStderr) {
       val threadName = "redirect stderr for command " + command(0)
+      //读取日志文件
       def log(s: String): Unit = logInfo(s)
       processStreamByLine(threadName, process.getErrorStream, log)
     }
@@ -1126,6 +1169,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * 执行一条command命令,并且获取它的输出,调用stdoutThread的join方法,让当前线程等待stdoutThread执行完成
+    * 如果产生非0的代码，则抛出异常。
    * Execute a command and get its output, throwing an exception if it yields a code other than 0.
    */
   def executeAndGetOutput(
@@ -1136,9 +1180,11 @@ private[spark] object Utils extends Logging {
     val process = executeCommand(command, workingDir, extraEnvironment, redirectStderr)
     val output = new StringBuffer
     val threadName = "read stdout for " + command(0)
+    //读取日志文件
     def appendToOutput(s: String): Unit = output.append(s)
     val stdoutThread = processStreamByLine(threadName, process.getInputStream, appendToOutput)
     val exitCode = process.waitFor()
+    //等待它完成读取输出
     stdoutThread.join()   // Wait for it to finish reading output
     if (exitCode != 0) {
       logError(s"Process $command exited with code $exitCode: $output")
@@ -1157,6 +1203,7 @@ private[spark] object Utils extends Logging {
       processLine: String => Unit): Thread = {
     val t = new Thread(threadName) {
       override def run() {
+        //注意inputStream流的读取方式
         for (line <- Source.fromInputStream(inputStream).getLines()) {
           processLine(line)
         }
@@ -1172,7 +1219,9 @@ private[spark] object Utils extends Logging {
    * default UncaughtExceptionHandler
    * 执行一个代码块为单位,转发任何未捕获的异常到默认UncaughtExceptionHandler
    * NOTE: This method is to be called by the spark-started JVM process.
+    * 注意：这个方法将由Spark启动的JVM进程调用,
    * 这种方法被称为Spark开始JVM进程
+    * block: => T表示函数输入参数为空
    */
   def tryOrExit(block: => Unit) {
     try {
@@ -1190,6 +1239,7 @@ private[spark] object Utils extends Logging {
    * NOTE: This method is to be called by the driver-side components to avoid stopping the
    * user-started JVM process completely; in contrast, tryOrExit is to be called in the
    * spark-started JVM process .
+    * 此方法将由驱动端组件调用,以避免停止用户启动JVM进程完全,相反tryorexit被称为Spark启动JVM进程。
    */
   def tryOrStopSparkContext(sc: SparkContext)(block: => Unit) {
     try {
@@ -1215,6 +1265,7 @@ private[spark] object Utils extends Logging {
    * read and write methods, since Java's serializer will not report non-IOExceptions properly;
    * see SPARK-4080 for more context.
    * 执行一个计算单元的代码块,抛出任何非致命的未捕获的异常作为IOException
+    *这是在实现Externalizable和序列化的读写方法,因为java的序列化程序将不报告不正确ioexceptions
    */
   def tryOrIOException(block: => Unit) {
     try {
@@ -1458,6 +1509,8 @@ private[spark] object Utils extends Logging {
    * Split a string of potentially quoted arguments from the command line the way that a shell
    * would do it to determine arguments to a command. For example, if the string is 'a "b c" d',
    * then it would be parsed as three arguments: 'a', 'b c' and 'd'.
+    * 从命令行中以shell的方式分割出一系列潜在引用的参数,将它用于确定命令的参数。例如，如果字符串是“A”、“C”、“D”,
+    *它将被解析为三个参数：“A”、“B”和“D”。
    */
   def splitCommandString(s: String): Seq[String] = {
     val buf = new ArrayBuffer[String]
@@ -1479,6 +1532,7 @@ private[spark] object Utils extends Logging {
           if (i < s.length - 1) {
             // Append the next character directly, because only " and \ may be escaped in
             // double quotes after the shell's own expansion
+            //直接添加下一个字符，因为只有“和”可以转义 shell扩展后的双引号
             curWord.append(s.charAt(i + 1))
             i += 1
           }
@@ -1492,6 +1546,7 @@ private[spark] object Utils extends Logging {
           curWord.append(nextChar)
         }
         // Backslashes are not treated specially in single quotes
+        //反斜杠不单引号特殊处理
       } else if (nextChar == '"') {
         inWord = true
         inDoubleQuote = true
@@ -1524,6 +1579,7 @@ private[spark] object Utils extends Logging {
 
   // Handles idiosyncracies with hash (add more as required)
   // This method should be kept in sync with
+  /// /处理的个性与哈希（添加更多的要求）此方法应与
   // org.apache.spark.network.util.JavaUtils#nonNegativeHash().
   def nonNegativeHash(obj: AnyRef): Int = {
 
@@ -1670,7 +1726,10 @@ private[spark] object Utils extends Logging {
     obj.getClass.getSimpleName.replace("$", "")
   }
 
-  /** Return an option that translates JNothing to None */
+  /**
+    * Return an option that translates JNothing to None
+    * 返回一个选项,将jnothing首屈一指
+    * */
   def jsonOption(json: JValue): Option[JValue] = {
     json match {
       case JNothing => None
@@ -1678,11 +1737,14 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Return an empty JSON object */
+  /** Return an empty JSON object
+    *返回空JSON对象
+    * */
   def emptyJson: JsonAST.JObject = JObject(List[JField]())
 
   /**
    * Return a Hadoop FileSystem with the scheme encoded in the given path.
+    * 用给定路径编码的scheme返回Hadoop文件系统。
    */
   def getHadoopFileSystem(path: URI, conf: Configuration): FileSystem = {
     FileSystem.get(path, conf)
@@ -1690,6 +1752,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return a Hadoop FileSystem with the scheme encoded in the given path.
+    * 用给定路径编码的scheme返回Hadoop文件系统
    */
   def getHadoopFileSystem(path: String, conf: Configuration): FileSystem = {
     getHadoopFileSystem(new URI(path), conf)
@@ -1719,12 +1782,13 @@ private[spark] object Utils extends Logging {
 
   /**
    * Pattern for matching a Windows drive, which contains only a single alphabet character.
-   * 
+   * 匹配Windows驱动器的模式，其中只包含单个字母字符。
    */
   val windowsDrive = "([a-zA-Z])".r
 
   /**
    * Indicates whether Spark is currently running unit tests.
+    *
    */
   def isTesting: Boolean = {
     sys.env.contains("SPARK_TESTING") || sys.props.contains("spark.testing")
@@ -1732,6 +1796,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Strip the directory from a path name
+    * 从路径名中剥离目录
    */
   def stripDirectory(path: String): String = {
     new File(path).getName
@@ -1740,7 +1805,7 @@ private[spark] object Utils extends Logging {
   /**
    * Wait for a process to terminate for at most the specified duration.
    * Return whether the process actually terminated after the given timeout.
-   * 等待一个进程在指定的时间终止,返回给定超时后是否实际终止的过程
+    * 等待进程终止至多指定的持续时间,返回进程是否在给定超时后终止。
    */
   def waitForProcess(process: Process, timeoutMs: Long): Boolean = {
     var terminated = false
@@ -1752,6 +1817,7 @@ private[spark] object Utils extends Logging {
       } catch {
         case e: IllegalThreadStateException =>
           // Process not terminated yet
+          //进程尚未终止
           if (System.currentTimeMillis - startTime > timeoutMs) {
             return false
           }
@@ -1779,7 +1845,7 @@ private[spark] object Utils extends Logging {
    * Execute the given block, logging and re-throwing any uncaught exception. 
    * This is particularly useful for wrapping code that runs in a thread, to ensure
    * that exceptions are printed, and to avoid having to catch Throwable.
-   * 执行给定的块,重新抛出任何未捕获的异常,包装在一个线程中运行的代码,确保异常打印,并避免捕获Throwable
+    * 执行给定的块,记录并重新抛出任何未捕获的异常。这对于包装在线程中运行的代码特别有用，以确保打印出异常，并避免不得不捕获Throwable。
    */
   def logUncaughtExceptions[T](f: => T): T = {
     try {
@@ -1834,9 +1900,10 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return a well-formed URI for the file described by a user input string.
-   *
+   * 返回用户输入字符串描述的文件的格式良好的URI
    * If the supplied path does not contain a scheme, or is a relative path, it will be
    * converted into an absolute path with a file:// scheme.
+    * 如果提供的路径不包含方案,或者是相对路径,则将是使用file：//方案转换为绝对路径。
    */
   def resolveURI(path: String): URI = {
     try {
@@ -1846,6 +1913,7 @@ private[spark] object Utils extends Logging {
       }
       // make sure to handle if the path has a fragment (applies to yarn
       // distributed cache)
+      //确保处理路径有片段（适用于YAR分布式缓存）
       if (uri.getFragment() != null) {
         val absoluteURI = new File(uri.getPath()).getAbsoluteFile().toURI()
         return new URI(absoluteURI.getScheme(), absoluteURI.getHost(), absoluteURI.getPath(),
@@ -1947,13 +2015,14 @@ private[spark] object Utils extends Logging {
   /**
    * Return a nice string representation of the exception. It will call "printStackTrace" to
    * recursively generate the stack trace including the exception and its causes.
-   * 返回异常的的字符串形式
+   * 返回异常的一个很好的字符串表示形式。 它会调用“printStackTrace”递归生成堆栈跟踪，包括异常及其原因。
    */
   def exceptionString(e: Throwable): String = {
     if (e == null) {
       ""
     } else {
       // Use e.printStackTrace here because e.getStackTrace doesn't include the cause
+      //在这里使用e.printStackTrace，因为e.getStackTrace不包括原因
       val stringWriter = new StringWriter()
       e.printStackTrace(new PrintWriter(stringWriter))
       stringWriter.toString
@@ -2024,10 +2093,12 @@ private[spark] object Utils extends Logging {
     val maxRetries = portMaxRetries(conf)
     for (offset <- 0 to maxRetries) {
       // Do not increment port if startPort is 0, which is treated as a special port
+      // 如果startPort为0，则不要递增端口，这被视为特殊端口
       val tryPort = if (startPort == 0) {
         startPort
       } else {
         // If the new port wraps around, do not try a privilege port
+        // 如果新端口包围，请勿尝试特权端口
         ((startPort + offset - 1024) % (65536 - 1024)) + 1024
       }
       try {
@@ -2041,6 +2112,7 @@ private[spark] object Utils extends Logging {
               s"${e.getMessage}: Service$serviceString failed after $maxRetries retries!"
             val exception = new BindException(exceptionMessage)
             // restore original stack trace
+            // 恢复原始堆栈跟踪
             exception.setStackTrace(e.getStackTrace)
             throw exception
           }
@@ -2079,6 +2151,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * config a log4j properties used for testsuite
+    * 配置用于testsuite的log4j属性
    */
   def configTestLog4j(level: String): Unit = {
     val pro = new Properties()
@@ -2094,6 +2167,7 @@ private[spark] object Utils extends Logging {
   /**
    * If the given URL connection is HttpsURLConnection, it sets the SSL socket factory and
    * the host verifier from the given security manager.
+    *如果给定的URL连接是HttpsURLConnection，它将设置SSL套接字工厂和来自给定安全管理员的主机验证者
    */
   def setupSecureURLConnection(urlConnection: URLConnection, sm: SecurityManager): URLConnection = {
     urlConnection match {
@@ -2141,6 +2215,8 @@ private[spark] object Utils extends Logging {
    * Return the prefix of a command that appends the given library paths to the
    * system-specific library path environment variable. On Unix, for instance,
    * this returns the string LD_LIBRARY_PATH="path1:path2:$LD_LIBRARY_PATH".
+    * 返回将给定库路径附加到系统特定库路径环境变量的命令的前缀。
+    * 例如,在Unix上,这将返回字符串LD_LIBRARY_PATH =“path1：path2：$ LD_LIBRARY_PATH”。
    */
   def libraryPathEnvPrefix(libraryPaths: Seq[String]): String = {
     val libraryPathScriptVar = if (isWindows) {
@@ -2162,6 +2238,7 @@ private[spark] object Utils extends Logging {
    * Return the value of a config either through the SparkConf or the Hadoop configuration
    * if this is Yarn mode. In the latter case, this defaults to the value set through SparkConf
    * if the key is not set in the Hadoop configuration.
+    * 如果是Yarn模式，则通过SparkConf或Hadoop配置返回配置值,在后一种情况下,如果在Hadoop配置中未设置密钥,则此值将默认为通过SparkConf设置的值。
    */
   def getSparkOrYarnConfig(conf: SparkConf, key: String, default: String): String = {
     val sparkValue = conf.get(key, default)
@@ -2204,6 +2281,7 @@ private[spark] object Utils extends Logging {
   /**
    * Returns the current user name. This is the currently logged in user, unless that's been
    * overridden by the `SPARK_USER` environment variable.
+    * 返回当前用户名,这是当前登录的用户,除非已经登录被“SPARK_USER”环境变量所覆盖。
    */
   def getCurrentUserName(): String = {
     Option(System.getenv("SPARK_USER"))
@@ -2236,6 +2314,7 @@ private[spark] object Utils extends Logging {
   /**
    * To avoid calling `Utils.getCallSite` for every single RDD we create in the body,
    * set a dummy call site that RDDs use instead. This is for performance optimization.
+    * 为了避免在身体中创建的每个RDD调用“Utils.getCallSite”,设置RDD使用的虚拟调用站点,这是为了性能优化。
    */
   def withDummyCallSite[T](sc: SparkContext)(body: => T): T = {
     val oldShortCallSite = sc.getLocalProperty(CallSite.SHORT_FORM)
@@ -2246,6 +2325,7 @@ private[spark] object Utils extends Logging {
       body
     } finally {
       // Restore the old ones here
+      //在这里恢复旧的
       sc.setLocalProperty(CallSite.SHORT_FORM, oldShortCallSite)
       sc.setLocalProperty(CallSite.LONG_FORM, oldLongCallSite)
     }
@@ -2273,6 +2353,7 @@ private[spark] object Utils extends Logging {
    * Dynamic allocation and explicitly setting the number of executors are inherently
    * incompatible. In environments where dynamic allocation is turned on by default,
    * the latter should override the former (SPARK-9092).
+    * 返回是否在给定的conf中启用了动态分配动态分配和明确设置执行程序的数量本质上是不兼容的,在默认情况下打开动态分配的环境中
    */
   def isDynamicAllocationEnabled(conf: SparkConf): Boolean = {
     conf.getBoolean("spark.dynamicAllocation.enabled", false) &&
@@ -2324,6 +2405,7 @@ private[spark] class RedirectThread(
  * An [[OutputStream]] that will store the last 10 kilobytes (by default) written to it
  * in a circular buffer. The current contents of the buffer can be accessed using
  * the toString method.
+  * 一个[[OutputStream]]，将存储写入它的最后10千字节（默认）在循环缓冲区,缓冲区的当前内容可以使用toString方法。
  */
 private[spark] class CircularBuffer(sizeInBytes: Int = 10240) extends java.io.OutputStream {
   var pos: Int = 0
