@@ -18,19 +18,22 @@
 package org.apache.sparktest
 
 /**
- * A test suite to make sure all `implicit` functions work correctly.
- * Please don't `import org.apache.spark.SparkContext._` in this class.
- *
- * As `implicit` is a compiler feature, we don't need to run this class.
+ * A test suite to make sure all implicit functions work correctly.
+ * Please don't import org.apache.spark.SparkContext._ in this class.
+ * 一个测试套件，以确保所有“隐式”功能正常工作。请不要在此类中导入org.apache.spark.SparkContext._。
+ * As implicit is a compiler feature, we don't need to run this class.
  * What we need to do is making the compiler happy.
+  * 由于implicit是一个编译器功能，我们不需要运行这个类,我们需要做的是使编译器变得快乐。
  */
 class ImplicitSuite {
 
   // We only want to test if `implict` works well with the compiler, so we don't need a real
   // SparkContext.
+  //我们只想测试“implicit”是否与编译器配合使用，所以我们不需要真正的SparkContext
   def mockSparkContext[T]: org.apache.spark.SparkContext = null
 
   // We only want to test if `implict` works well with the compiler, so we don't need a real RDD.
+  // 我们只想测试“implicit”是否与编译器配合良好,所以我们不需要真正的RDD。
   def mockRDD[T]: org.apache.spark.rdd.RDD[T] = null
 
   def testRddToPairRDDFunctions(): Unit = {
