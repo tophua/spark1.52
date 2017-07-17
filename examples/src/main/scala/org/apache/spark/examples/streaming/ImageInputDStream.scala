@@ -12,7 +12,8 @@ import org.apache.spark.Logging
 
 /**
  * 自己定义了一个 Scala 类 ImageInputDStream,用于加载 Java的读入图片类
-  * Created by wallace on 2016/10/31.
+  * Created by liush on 2016/10/31.
+  * 注意StreamingContext上下文的传递
   */
 class ImageInputDStream(@transient ssc_ : StreamingContext, host: String, port:
 Int, storageLevel: StorageLevel) extends
