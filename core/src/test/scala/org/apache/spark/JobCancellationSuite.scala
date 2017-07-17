@@ -67,7 +67,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     assert(sc.parallelize(1 to 10, 2).count === 10)
   }
   //Spark的任务调度模式,先进先出原则
-  /**
+
   test("cluster mode, FIFO scheduler") {
     val conf = new SparkConf().set("spark.scheduler.mode", "FIFO")
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
@@ -89,7 +89,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
     // Make sure we can still launch tasks.
     //确保可以启动任务
     assert(sc.parallelize(1 to 10, 2).count === 10)
-  }**/
+  }
 
   test("do not put partially executed partitions into cache") {//不要将部分执行的分区放在缓存中
     // In this test case, we create a scenario in which a partition is only partially executed,

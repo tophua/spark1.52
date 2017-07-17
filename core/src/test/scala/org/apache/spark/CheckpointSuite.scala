@@ -50,7 +50,8 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     Utils.deleteRecursively(checkpointDir)
   }
   //基本的检查点
-  runTest("basic checkpointing") { reliableCheckpoint: Boolean =>//科里化函数
+  runTest("basic checkpointing") { reliableCheckpoint: Boolean =>
+    //科里化函数
     val parCollection = sc.makeRDD(1 to 4)
     val flatMappedRDD = parCollection.flatMap(x => 1 to x)
     checkpoint(flatMappedRDD, reliableCheckpoint)//设置检查点

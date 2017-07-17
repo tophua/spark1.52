@@ -79,8 +79,8 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     super.afterAll()
     Utils.deleteRecursively(tmpDir)
   }
-
-  test("Distributing files locally") {//分布式本地文件
+  //分布式本地文件
+  test("Distributing files locally") {
     sc = new SparkContext("local[4]", "test", newConf)
     sc.addFile(tmpFile.toString)
     val testData = Array((1, 1), (1, 1), (2, 1), (3, 5), (2, 2), (3, 0))
@@ -93,8 +93,8 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     }.collect()
     assert(result.toSet === Set((1, 200), (2, 300), (3, 500)))
   }
-
-  test("Distributing files locally security On") {//分布式本地安全文件
+  //分布式本地安全文件
+  test("Distributing files locally security On") {
     val sparkConf = new SparkConf(false)
     //是否启用内部身份验证
     sparkConf.set("spark.authenticate", "true")
@@ -140,7 +140,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
   }
-  //一个独立的群集上分布式文件
+  //在独立群集上分发文件
   test("Distributing files on a standalone cluster") {
     //sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
     sc = new SparkContext("local[*]", "test", newConf)
@@ -167,7 +167,8 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
   }
-  //独立的集群中动态添加本地的jar和URL
+
+  //使用local：URL在独立群集上动态添加JARS
   test ("Dynamically adding JARS on a standalone cluster using local: URL") {
     //sc = new SparkContext("local-cluster[1,1,1024]", "test", newConf)
     sc = new SparkContext("local[*]", "test", newConf)
@@ -179,7 +180,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
   }
-
+  //HttpFileServer应该使用SSL
   test ("HttpFileServer should work with SSL") {
     val sparkConf = sparkSSLConfig()
     val sm = new SecurityManager(sparkConf)
@@ -192,7 +193,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       server.stop()
     }
   }
-
+  //HttpFileServer应该使用SSL和良好的凭据
   test ("HttpFileServer should work with SSL and good credentials") {
     val sparkConf = sparkSSLConfig()
      //是否启用内部身份验证
@@ -245,7 +246,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       server.stop()
     }
   }
-
+  //文件传输测试
   def fileTransferTest(server: HttpFileServer, sm: SecurityManager = null): Unit = {
     val randomContent = RandomUtils.nextBytes(100)
     val file = File.createTempFile("FileServerSuite", "sslTests", tmpDir)

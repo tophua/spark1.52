@@ -19,6 +19,7 @@ package org.apache.spark
 
 import java.util.concurrent.{Callable, CyclicBarrier, ExecutorService, Executors}
 
+import org.apache.spark.ShuffleSuite.NonJavaSerializableClass
 import org.scalatest.Matchers
 
 //import org.apache.spark.ShuffleSuite.NonJavaSerializableClass
@@ -39,7 +40,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
   //确保DAGScheduler不重试阶段其获取失败,准确地测试Shuffle的Worker
 
 conf.set("spark.test.noStageRetry", "true") //Retry 再试
-/*
+
 test("groupByKey without compression") { //没有压缩
   val myConf = conf.clone().set("spark.shuffle.compress", "false")
   sc = new SparkContext("local", "test", myConf)
@@ -79,9 +80,9 @@ test("shuffle non-zero block size") {//非零块的大小
     val statuses = SparkEnv.get.mapOutputTracker.getMapSizesByExecutorId(shuffleId, id)
     assert(statuses.forall(_._2.forall(blockIdSizePair => blockIdSizePair._2 > 0)))
   }
-}**/
+}
 
-/*test("shuffle serializer") {//shuffle 序列化
+test("shuffle serializer") {//shuffle 序列化
   // Use a local cluster with 2 processes to make sure there are both local and remote blocks
   //使用本地群集2个进程,以确保有两个本地和远程块
   sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
@@ -156,8 +157,8 @@ test("zero sized blocks without kryo") {//没有低零大小的块
   // We should have at most 4 non-zero sized partitions
   //我们应该有至多4个非零大小的分区
   assert(nonEmptyBlocks.size <= 4)
-}*/
-  /**
+}
+
 test("shuffle on mutable pairs") {//可变shuffle对
   // Use a local cluster with 2 processes to make sure there are both local and remote blocks
   //使用本地群集与2个进程,以确保有两个本地和远程块
@@ -215,8 +216,8 @@ test("cogroup using mutable pairs") {//使用可变的双
   assert(results(3)(0).length === 0)
   assert(results(3)(1).contains("3"))
 }
-    **/
-/*test("subtract mutable pairs") {//返回在RDD中出现,并且不在otherRDD中出现的元素,不去重
+
+test("subtract mutable pairs") {//返回在RDD中出现,并且不在otherRDD中出现的元素,不去重
   // Use a local cluster with 2 processes to make sure there are both local and remote blocks
   sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
   def p[T1, T2](_1: T1, _2: T2): MutablePair[T1, T2] = MutablePair(_1, _2)
@@ -244,9 +245,9 @@ test("sort with Java non serializable class - Kryo") {//用java非序列化类�
   // default Java serializer cannot handle the non serializable class.
   val c = b.sortByKey().map(x => x._2)
   assert(c.collect() === Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
-}*/
+}
 
-/*test("sort with Java non serializable class - Java") {//用java非序列化类排序
+test("sort with Java non serializable class - Java") {//用java非序列化类排序
   // Use a local cluster with 2 processes to make sure there are both local and remote blocks
   //使用本地群集与2个进程,以确保有两个本地和远程块
   sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
@@ -262,9 +263,9 @@ test("sort with Java non serializable class - Kryo") {//用java非序列化类�
 
   assert(thrown.getClass === classOf[SparkException])
   assert(thrown.getMessage.toLowerCase.contains("serializable"))
-}*/
+}
 
-/*test("shuffle with different compression settings (SPARK-3426)") {//设置不同shuffle的压缩
+test("shuffle with different compression settings (SPARK-3426)") {//设置不同shuffle的压缩
   for (
     shuffleSpillCompress <- Set(true, false);
     //shuffleCompress <- Set(true, false)
@@ -287,9 +288,9 @@ test("sort with Java non serializable class - Kryo") {//用java非序列化类�
         throw new Exception(errMsg, e)
     }
   }
-}*/
+}
 //重新运行Map阶段,如果降低阶段不能找到本地文件
-/*test("[SPARK-4085] rerun map stage if reduce stage cannot find its local shuffle file") {
+test("[SPARK-4085] rerun map stage if reduce stage cannot find its local shuffle file") {
   val myConf = conf.clone().set("spark.test.noStageRetry", "false")
   sc = new SparkContext("local", "test", myConf)
   val rdd = sc.parallelize(1 to 10, 2).map((_, 1)).reduceByKey(_ + _)
@@ -311,9 +312,9 @@ test("sort with Java non serializable class - Kryo") {//用java非序列化类�
   // This count should retry the execution of the previous stage and rerun shuffle.
   //应该重新执行前一阶段和重新洗牌
   rdd.count()
-}*/
+}
 
-/*test("metrics for shuffle without aggregation") {//没有聚合的Shuffle的度量
+test("metrics for shuffle without aggregation") {//没有聚合的Shuffle的度量
   sc = new SparkContext("local", "test", conf.clone())
   val numRecords = 10000
 
@@ -328,9 +329,9 @@ test("sort with Java non serializable class - Kryo") {//用java非序列化类�
   assert(metrics.recordsWritten === numRecords)
   assert(metrics.bytesWritten === metrics.byresRead)
   assert(metrics.bytesWritten > 0)
-}*/
+}
 
-/*  test("metrics for shuffle with aggregation") {//聚合的洗牌的度量
+test("metrics for shuffle with aggregation") {//聚合的洗牌的度量
   sc = new SparkContext("local", "test", conf.clone())
   val numRecords = 10000
 
@@ -406,7 +407,7 @@ test("multiple simultaneous attempts for one task (SPARK-8029)") {//同时尝试
   assert(readData === data1.toIndexedSeq || readData === data2.toIndexedSeq)
 
   manager.unregisterShuffle(0)
-}*/
+}
 }
 
 /**

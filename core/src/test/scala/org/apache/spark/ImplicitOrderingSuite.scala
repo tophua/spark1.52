@@ -21,18 +21,21 @@ import org.apache.spark.rdd.RDD
 
 class ImplicitOrderingSuite extends SparkFunSuite with LocalSparkContext {
   // Tests that PairRDDFunctions grabs an implicit Ordering in various cases where it should.
+  //测试PairRDDFunctions在各种情况下抓取隐式排序
   test("basic inference of Orderings"){
     sc = new SparkContext("local", "test")
     val rdd = sc.parallelize(1 to 10)
 
     // These RDD methods are in the companion object so that the unserializable ScalaTest Engine
     // won't be reachable from the closure object
-
+      //这些RDD方法在配对对象中，使得不可串行化的ScalaTest引擎将无法从闭包对象中访问
     // Infer orderings after basic maps to particular types
+    //在基本映射到特定类型之后进行排序
     val basicMapExpectations = ImplicitOrderingSuite.basicMapExpectations(rdd)
     basicMapExpectations.map({case (met, explain) => assert(met, explain)})
 
     // Infer orderings for other RDD methods
+    //对其他RDD方法进行排序
     val otherRDDMethodExpectations = ImplicitOrderingSuite.otherRDDMethodExpectations(rdd)
     otherRDDMethodExpectations.map({case (met, explain) => assert(met, explain)})
   }
