@@ -72,7 +72,10 @@ class SorterSuite extends SparkFunSuite with Logging {
     (0 to data.length - 2).foreach(i => assert(data(i) <= data(i + 1)))
   }
 
-  /** Runs an experiment several times. */
+  /**
+    * Runs an experiment several times.
+    * 多次做实验
+    * */
   def runExperiment(name: String, skip: Boolean = false)(f: => Unit, prepare: () => Unit): Unit = {
     if (skip) {
       logInfo(s"Skipped experiment $name.")
@@ -160,6 +163,7 @@ class SorterSuite extends SparkFunSuite with Logging {
    * Ideally these would be executed one at a time, each in their own JVM, so their listing
    * here is mainly to have the code. Running multiple tests within the same JVM session would
    * prevent JIT inlining overridden methods and hence hurt the performance.
+    * 原始int数组的分类器基准
    */
   ignore("Sorter benchmark for primitive int array") {
     val numElements = 25000000 // 25 mil
@@ -180,7 +184,7 @@ class SorterSuite extends SparkFunSuite with Logging {
     val prepareIntObjectArray = () => {
       System.arraycopy(intObjects, 0, intObjectArray, 0, numElements)
     }
-
+  //
     runExperiment("Java Arrays.sort() on non-primitive int array")({
       Arrays.sort(intObjectArray, new Comparator[JInteger] {
         override def compare(x: JInteger, y: JInteger): Int = x.compareTo(y)

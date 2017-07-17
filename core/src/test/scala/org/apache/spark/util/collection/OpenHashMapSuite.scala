@@ -25,14 +25,16 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.util.SizeEstimator
 
 class OpenHashMapSuite extends SparkFunSuite with Matchers {
-
+  //专门化原始值的大小
   test("size for specialized, primitive value (int)") {
     val capacity = 1024
     val map = new OpenHashMap[String, Int](capacity)
     val actualSize = SizeEstimator.estimate(map)
     // 64 bit for pointers, 32 bit for ints, and 1 bit for the bitset.
+    //
     val expectedSize = capacity * (64 + 32 + 1) / 8
     // Make sure we are not allocating a significant amount of memory beyond our expected.
+    // 确保我们没有分配超出预期的大量内存
     actualSize should be <= (expectedSize * 1.1).toLong
   }
 
