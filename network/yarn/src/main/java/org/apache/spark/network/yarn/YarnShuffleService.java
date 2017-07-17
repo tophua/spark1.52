@@ -64,21 +64,27 @@ public class YarnShuffleService extends AuxiliaryService {
   private final Logger logger = LoggerFactory.getLogger(YarnShuffleService.class);
 
   // Port on which the shuffle server listens for fetch requests
+    //随机播放服务器侦听提取请求的端口
   private static final String SPARK_SHUFFLE_SERVICE_PORT_KEY = "spark.shuffle.service.port";
   private static final int DEFAULT_SPARK_SHUFFLE_SERVICE_PORT = 7337;
 
   // Whether the shuffle server should authenticate fetch requests
+    //随机播放服务器是否应验证抓取请求
   private static final String SPARK_AUTHENTICATE_KEY = "spark.authenticate";
   private static final boolean DEFAULT_SPARK_AUTHENTICATE = false;
 
   // An entity that manages the shuffle secret per application
   // This is used only if authentication is enabled
+    //管理每个应用程序的随机密钥的实体
+  //仅在启用身份验证时使用
   private ShuffleSecretManager secretManager;
 
   // The actual server that serves shuffle files
+    //提供随机播放文件的实际服务器
   private TransportServer shuffleServer = null;
 
   // Handles registering executors and opening shuffle blocks
+    //处理注册执行者并打开洗牌
   private ExternalShuffleBlockHandler blockHandler;
 
   public YarnShuffleService() {
@@ -97,6 +103,7 @@ public class YarnShuffleService extends AuxiliaryService {
 
   /**
    * Start the shuffle server with the given configuration.
+   * 使用给定的配置启动洗牌服务器
    */
   @Override
   protected void serviceInit(Configuration conf) {
@@ -163,6 +170,7 @@ public class YarnShuffleService extends AuxiliaryService {
 
   /**
    * Close the shuffle server to clean up any associated state.
+   * 关闭随机服务器以清除任何关联的状态
    */
   @Override
   protected void serviceStop() {
