@@ -20,7 +20,7 @@ package org.apache.sparktest
 /**
  * A test suite to make sure all implicit functions work correctly.
  * Please don't import org.apache.spark.SparkContext._ in this class.
- * 一个测试套件，以确保所有“隐式”功能正常工作。请不要在此类中导入org.apache.spark.SparkContext._。
+ * 一个测试套件，以确保所有“隐式”功能正常工作,请不要在此类中导入org.apache.spark.SparkContext._。
  * As implicit is a compiler feature, we don't need to run this class.
  * What we need to do is making the compiler happy.
   * 由于implicit是一个编译器功能，我们不需要运行这个类,我们需要做的是使编译器变得快乐。

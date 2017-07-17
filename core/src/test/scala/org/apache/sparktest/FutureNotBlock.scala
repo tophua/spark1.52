@@ -26,6 +26,7 @@ object FutureNotBlock {
     }
 
     // do the rest of your work
+    //做其余的工作
     println("A ...")
     Thread.sleep(100)
     println("B ....")
