@@ -20,12 +20,12 @@ package org.apache.spark.api.python
 import org.apache.spark.{SharedSparkContext, SparkFunSuite}
 
 class SerDeUtilSuite extends SparkFunSuite with SharedSparkContext {
-
+  //将空对RDD转换为python不会引发异常
   test("Converting an empty pair RDD to python does not throw an exception (SPARK-5441)") {
     val emptyRdd = sc.makeRDD(Seq[(Any, Any)]())
     SerDeUtil.pairRDDToPython(emptyRdd, 10)
   }
-
+  //将空python RDD转换为RDD不会引发异常
   test("Converting an empty python RDD to pair RDD does not throw an exception (SPARK-5441)") {
     val emptyRdd = sc.makeRDD(Seq[(Any, Any)]())
     val javaRdd = emptyRdd.toJavaRDD()

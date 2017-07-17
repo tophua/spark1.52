@@ -31,6 +31,7 @@ import static org.junit.Assert.*;
 
 /**
  * These tests require the Spark assembly to be built before they can be run.
+ * 这些测试要求Spark组件在运行之前进行构建
  */
 public class SparkLauncherSuite {
 

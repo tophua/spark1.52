@@ -22,13 +22,13 @@ import java.io.{ByteArrayOutputStream, DataOutputStream}
 import org.apache.spark.SparkFunSuite
 
 class PythonRDDSuite extends SparkFunSuite {
-
+  //写大串给worker
   test("Writing large strings to the worker") {
     val input: List[String] = List("a"*100000)
     val buffer = new DataOutputStream(new ByteArrayOutputStream)
     PythonRDD.writeIteratorToStream(input.iterator, buffer)
   }
-
+  //很好的处理null
   test("Handle nulls gracefully") {
     val buffer = new DataOutputStream(new ByteArrayOutputStream)
     // Should not have NPE when write an Iterator with null in it

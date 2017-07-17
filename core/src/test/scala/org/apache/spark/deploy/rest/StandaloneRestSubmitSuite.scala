@@ -584,7 +584,7 @@ private class DummyMaster(
 
 /**
  * A mock standalone Master that keeps track of drivers that have been submitted.
- *
+ * 模拟已提交的驱动程序的模拟独立主机
  * If a driver is submitted, its state is immediately set to RUNNING.
  * If an existing driver is killed, its state is immediately set to KILLED.
  * If an existing driver's status is requested, its state is returned in the response.
@@ -636,7 +636,10 @@ private class FaultyStandaloneRestServer(
   protected override val killRequestServlet = new InvalidKillServlet
   protected override val statusRequestServlet = new ExplodingStatusServlet
 
-  /** A faulty servlet that produces malformed responses. */
+  /**
+    * A faulty servlet that produces malformed responses.
+    * 产生错误响应的错误servlet
+    * */
   class MalformedSubmitServlet
     extends StandaloneSubmitRequestServlet(masterEndpoint, masterUrl, masterConf) {
     protected override def sendResponse(
@@ -647,7 +650,10 @@ private class FaultyStandaloneRestServer(
     }
   }
 
-  /** A faulty servlet that produces invalid responses. */
+  /**
+    *  A faulty servlet that produces invalid responses.
+    *  产生无效响应的错误servlet
+    * */
   class InvalidKillServlet extends StandaloneKillRequestServlet(masterEndpoint, masterConf) {
     protected override def handleKill(submissionId: String): KillSubmissionResponse = {
       val k = super.handleKill(submissionId)
@@ -656,7 +662,10 @@ private class FaultyStandaloneRestServer(
     }
   }
 
-  /** A faulty status servlet that explodes. */
+  /**
+    * A faulty status servlet that explodes.
+    * 爆炸状态错误的servlet
+    *  */
   class ExplodingStatusServlet extends StandaloneStatusRequestServlet(masterEndpoint, masterConf) {
     private def explode: Int = 1 / 0
     protected override def handleStatus(submissionId: String): SubmissionStatusResponse = {
