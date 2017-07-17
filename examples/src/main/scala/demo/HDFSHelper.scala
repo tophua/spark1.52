@@ -3,6 +3,7 @@ package demo
 /**
   * Created by liush on 17-7-17.
   * scala中hdfs文件的操作
+  * FileSystem定义了hadoop的一个文件系统接口
   * 对于org.apache.Hadoop.fs.Path来说，
 
     path.getName只是文件名，不包括路径
@@ -67,6 +68,7 @@ object HDFSHelper {
 
   /**
     * create a target file and provide parent folder if necessary
+    * 创建目标文件，并在必要时提供父文件夹
     */
   def createLocalFile(fullName : String) : File = {
     val target : File = new File(fullName)
@@ -87,6 +89,7 @@ object HDFSHelper {
 
   /**
     * delete file in hdfs
+    * 删除文件在HDFS
     * @return true: success, false: failed
     */
   def deleteFile(hdfs : FileSystem, path: String) : Boolean = {
@@ -98,6 +101,7 @@ object HDFSHelper {
 
   /**
     * get all file children's full name of a hdfs dir, not include dir children
+    * 把所有文件子的HDFS目录，不包括你的孩子
     * @param fullName the hdfs dir's full name
     */
   def listChildren(hdfs : FileSystem, fullName : String, holder : ListBuffer[String]) : ListBuffer[String] = {

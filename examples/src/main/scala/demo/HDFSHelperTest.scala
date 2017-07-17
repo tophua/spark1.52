@@ -5,6 +5,7 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import scala.collection.mutable.ListBuffer
 /**
   * Created by liush on 17-7-17.
+  * FileSystem定义了hadoop的一个文件系统接口
   */
 object HDFSHelperTest {
   def start(args: Array[String]): Unit = {
@@ -27,7 +28,9 @@ object HDFSHelperTest {
     val holder : ListBuffer[String] = new ListBuffer[String]
     val paths : List[String] = HDFSHelper.listChildren(hdfs, hdfsPath, holder).toList
     for(path <- paths){
+      //path.toString才是文件的全路径名
       System.out.println("--------- path = " + path)
+      //path.getName只是文件名，不包括路径
       System.out.println("--------- Path.getname = " + new Path(path).getName)
     }
   }
