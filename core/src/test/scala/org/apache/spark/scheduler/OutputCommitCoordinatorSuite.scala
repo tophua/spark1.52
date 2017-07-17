@@ -98,6 +98,7 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
       override def answer(invoke: InvocationOnMock): Unit = {
         // Submit the tasks, then force the task scheduler to dequeue the
         // speculated task
+        //提交任务,然后强制任务调度程序对推测的任务进行排队
         invoke.callRealMethod()
         mockTaskScheduler.backend.reviveOffers()
       }
@@ -134,23 +135,24 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
     tempDir.delete()
     outputCommitCoordinator = null
   }
-
+  //只有两个重复提交任务之一应该提交
   test("Only one of two duplicate commit tasks should commit") {
     val rdd = sc.parallelize(Seq(1), 1)
     sc.runJob(rdd, OutputCommitFunctions(tempDir.getAbsolutePath).commitSuccessfully _,
       0 until rdd.partitions.size)
     assert(tempDir.list().size === 1)
   }
-
+  //如果commit失败，如果任务被重试，它不应被锁定，并且将成功
   test("If commit fails, if task is retried it should not be locked, and will succeed.") {
     val rdd = sc.parallelize(Seq(1), 1)
     sc.runJob(rdd, OutputCommitFunctions(tempDir.getAbsolutePath).failFirstCommitAttempt _,
       0 until rdd.partitions.size)
     assert(tempDir.list().size === 1)
   }
-
+  //如果所有提交被拒绝，作业都不应该完成
   test("Job should not complete if all commits are denied") {
     // Create a mock OutputCommitCoordinator that denies all attempts to commit
+    // 创建一个模拟OutputCommitCoordinator，拒绝所有尝试提交
     doReturn(false).when(outputCommitCoordinator).handleAskPermissionToCommit(
       Matchers.any(), Matchers.any(), Matchers.any())
     val rdd: RDD[Int] = sc.parallelize(Seq(1), 1)
@@ -160,13 +162,14 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
       0 until rdd.partitions.size, resultHandler, () => Unit)
     // It's an error if the job completes successfully even though no committer was authorized,
     // so throw an exception if the job was allowed to complete.
+    //即使没有提交者被授权,作业成功完成也是一个错误,因此如果作业被允许完成,则抛出异常。
     intercept[TimeoutException] {
     //Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
       Await.result(futureAction, 5 seconds)
     }
     assert(tempDir.list().size === 0)
   }
-
+  //只有授权的提交者失败才能清除授权的提交者锁定
   test("Only authorized committer failures can clear the authorized committer lock (SPARK-6614)") {
     val stage: Int = 1
     val partition: Int = 2
@@ -177,18 +180,23 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
     assert(outputCommitCoordinator.canCommit(stage, partition, authorizedCommitter))
     assert(!outputCommitCoordinator.canCommit(stage, partition, nonAuthorizedCommitter))
     // The non-authorized committer fails
+    //未授权的提交程序失败
     outputCommitCoordinator.taskCompleted(
       stage, partition, attemptNumber = nonAuthorizedCommitter, reason = TaskKilled)
     // New tasks should still not be able to commit because the authorized committer has not failed
+    // 新任务仍然无法提交，因为授权的提交者没有失败
     assert(
       !outputCommitCoordinator.canCommit(stage, partition, nonAuthorizedCommitter + 1))
     // The authorized committer now fails, clearing the lock
+    //授权的提交者现在失败，清除锁定
     outputCommitCoordinator.taskCompleted(
       stage, partition, attemptNumber = authorizedCommitter, reason = TaskKilled)
     // A new task should now be allowed to become the authorized committer
+    //现在应该允许一个新的任务成为授权的提交者
     assert(
       outputCommitCoordinator.canCommit(stage, partition, nonAuthorizedCommitter + 2))
     // There can only be one authorized committer
+    //只能有一个授权的提交者
     assert(
       !outputCommitCoordinator.canCommit(stage, partition, nonAuthorizedCommitter + 3))
   }
@@ -196,10 +204,12 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
 
 /**
  * Class with methods that can be passed to runJob to test commits with a mock committer.
+  * 使用可以传递给runJob的方法来测试使用模拟提交者的提交的类。
  */
 private case class OutputCommitFunctions(tempDirPath: String) {
 
   // Mock output committer that simulates a successful commit (after commit is authorized)
+  //模拟成功提交的模拟输出提交者（提交授权后）
   private def successfulOutputCommitter = new FakeOutputCommitter {
     override def commitTask(context: TaskAttemptContext): Unit = {
       Utils.createDirectory(tempDirPath)
@@ -207,6 +217,7 @@ private case class OutputCommitFunctions(tempDirPath: String) {
   }
 
   // Mock output committer that simulates a failed commit (after commit is authorized)
+  // 模拟一个失败的提交的模拟输出提交者（授权后提交）
   private def failingOutputCommitter = new FakeOutputCommitter {
     override def commitTask(taskAttemptContext: TaskAttemptContext) {
       throw new RuntimeException

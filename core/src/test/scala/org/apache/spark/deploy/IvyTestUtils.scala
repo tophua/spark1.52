@@ -55,7 +55,9 @@ private[deploy] object IvyTestUtils {
     new File(prefix, artifactPath)
   }
 
-  /** Returns the artifact naming based on standard ivy or maven format. */
+  /** Returns the artifact naming based on standard ivy or maven format.
+    * 返回基于标准ivy或maven格式的工件命名
+    * */
   private[deploy] def artifactName(
       artifact: MavenCoordinate,
       useIvyLayout: Boolean,
@@ -67,7 +69,10 @@ private[deploy] object IvyTestUtils {
     }
   }
 
-  /** Returns the directory for the given groupId based on standard ivy or maven format. */
+  /**
+    * Returns the directory for the given groupId based on standard ivy or maven format.
+    * 根据标准ivy或maven格式返回给定groupId的目录
+    * */
   private def getBaseGroupDirectory(artifact: MavenCoordinate, useIvyLayout: Boolean): String = {
     if (!useIvyLayout) {
       artifact.groupId.replace(".", File.separator)
@@ -76,7 +81,10 @@ private[deploy] object IvyTestUtils {
     }
   }
 
-  /** Write the contents to a file to the supplied directory. */
+  /**
+    * Write the contents to a file to the supplied directory.
+    * 将内容写入文件到提供的目录
+    *  */
   private[deploy] def writeFile(dir: File, fileName: String, contents: String): File = {
     val outputFile = new File(dir, fileName)
     val outputStream = new FileOutputStream(outputFile)
@@ -85,7 +93,10 @@ private[deploy] object IvyTestUtils {
     outputFile
   }
 
-  /** Create an example Python file. */
+  /**
+    * Create an example Python file.
+    * 创建一个示例Python文件
+    * */
   private def createPythonFile(dir: File): File = {
     val contents =
       """def myfunc(x):
@@ -94,7 +105,10 @@ private[deploy] object IvyTestUtils {
     writeFile(dir, "mylib.py", contents)
   }
 
-  /** Create an example R package that calls the given Java class. */
+  /**
+    * Create an example R package that calls the given Java class.
+    * 创建一个调用给定Java类的示例R包
+    * */
   private def createRFiles(
       dir: File,
       className: String,

@@ -50,7 +50,7 @@ class WorkerArgumentsTest extends SparkFunSuite {
       new WorkerArguments(args, conf)
     }
   }
-
+  //当SPARK_WORKER_MEMORY env属性追加G时，内存正确设置
   test("Memory correctly set when SPARK_WORKER_MEMORY env property appends G") {
     val args = Array("spark://localhost:0000  ")
 
@@ -68,7 +68,7 @@ class WorkerArgumentsTest extends SparkFunSuite {
     val workerArgs = new WorkerArguments(args, conf)
     assert(workerArgs.memory === 5120)
   }
-  //设置正确内存参数
+  //从附加到内存值的M的args正确设置内存
   test("Memory correctly set from args with M appended to memory value") {
     val conf = new SparkConf
     val args = Array("-m", "10000M", "spark://localhost:0000  ")

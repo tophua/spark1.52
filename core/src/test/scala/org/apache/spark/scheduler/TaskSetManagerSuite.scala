@@ -237,7 +237,8 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     // Because there are no alive PROCESS_LOCAL executors, the base locality level should be
     // NODE_LOCAL. So, we should schedule the task on this offered NODE_LOCAL executor before
     // any of the locality wait timers expire.
-    //因为没有活着process_local执行者,
+    //因为没有活着的PROCESS_LOCAL执行器，所以base locality级别应该是NODE_LOCAL
+    //所以，我们应该在任何地点等待计时器到期之前安排这个提供的NODE_LOCAL执行器的任务
     assert(manager.resourceOffer("execA", "host1", ANY).get.index === 0)
   }
 

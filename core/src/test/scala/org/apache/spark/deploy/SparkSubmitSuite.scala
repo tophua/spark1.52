@@ -543,7 +543,7 @@ class SparkSubmitSuite
   //注意：根据时间（10秒+）,这是一个昂贵的操作,有节制地使用
   private def runSparkSubmit(args: Seq[String]): Unit = {
     val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
- /*   val process = Utils.executeCommand(
+   val process = Utils.executeCommand(
       Seq("./bin/spark-submit") ++ args,
       new File(sparkHome),
       Map("SPARK_TESTING" -> "1", "SPARK_HOME" -> sparkHome))
@@ -555,8 +555,9 @@ class SparkSubmitSuite
       }
     } finally {
       // Ensure we still kill the process in case it timed out
+      // 确保我们仍然杀死进程,以防超时
       process.destroy()
-    }*/
+    }
   }
 
   private def forConfDir(defaults: Map[String, String]) (f: String => Unit) = {
