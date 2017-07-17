@@ -133,21 +133,21 @@ class SortingSuite extends SparkFunSuite with SharedSparkContext with Matchers w
     val range = sorted.filterByRange(20, 40).collect()//过虑范围
     assert((20 to 40).toArray === range.map(_._1))
   }
-
+  //在递减排序的RDD中，通过多个分区获取一系列元素
   test("get a range of elements over multiple partitions in a descendingly sorted RDD") {
     val pairArr = (1000 to 1 by -1).map(x => (x, x)).toArray
     val sorted = sc.parallelize(pairArr, 10).sortByKey(false)
     val range = sorted.filterByRange(200, 800).collect()//过虑范围
     assert((800 to 200 by -1).toArray === range.map(_._1))
   }
-
+  //获取一个数组中不受范围分隔符分区的元素范围
   test("get a range of elements in an array not partitioned by a range partitioner") {
     val pairArr = util.Random.shuffle((1 to 1000).toList).map(x => (x, x))
     val pairs = sc.parallelize(pairArr, 10)
     val range = pairs.filterByRange(200, 800).collect()
     assert((800 to 200 by -1).toArray.sorted === range.map(_._1).sorted)
   }
-
+  //通过多个分区获取一系列元素，但不占用完整分区
   test("get a range of elements over multiple partitions but not taking up full partitions") {
     val pairArr = (1000 to 1 by -1).map(x => (x, x)).toArray
     val sorted = sc.parallelize(pairArr, 10).sortByKey(false)

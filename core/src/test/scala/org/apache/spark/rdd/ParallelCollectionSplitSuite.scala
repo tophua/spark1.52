@@ -115,7 +115,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices.map(_.size).reduceLeft(_ + _) === 100)
     assert(slices.forall(_.isInstanceOf[Range]))
   }
-
+  //距离和数值范围相同的切片大小
   test("identical slice sizes between Range and NumericRange") {
     val r = ParallelCollectionRDD.slice(1 to 7, 4)
     val nr = ParallelCollectionRDD.slice(1L to 7L, 4)
@@ -124,7 +124,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
       assert(r(i).size === nr(i).size)
     }
   }
-
+  //列表和数值范围之间相同的切片大小
   test("identical slice sizes between List and NumericRange") {
     val r = ParallelCollectionRDD.slice(List(1, 2), 4)
     val nr = ParallelCollectionRDD.slice(1L to 2L, 4)
@@ -232,7 +232,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices.map(_.size).reduceLeft(_ + _) === 100)
     assert(slices.forall(_.isInstanceOf[NumericRange[_]]))
   }
-
+  //包容的范围与int.maxvalue和int.minvalue
   test("inclusive ranges with Int.MaxValue and Int.MinValue") {
     val data1 = 1 to Int.MaxValue
     val slices1 = ParallelCollectionRDD.slice(data1, 3)
@@ -245,7 +245,7 @@ class ParallelCollectionSplitSuite extends SparkFunSuite with Checkers {
     assert(slices2.map(_.size).sum === Int.MaxValue)
     assert(slices2(2).isInstanceOf[Range.Inclusive])
   }
-
+  //空的范围与int.maxvalue和int.minvalue
   test("empty ranges with Int.MaxValue and Int.MinValue") {
     val data1 = Int.MaxValue until Int.MaxValue
     val slices1 = ParallelCollectionRDD.slice(data1, 5)

@@ -128,20 +128,20 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     assert(sc.union(Seq(nums)).collect().toList === List(1, 2, 3, 4))
     assert(sc.union(Seq(nums, nums)).collect().toList === List(1, 2, 3, 4, 1, 2, 3, 4))
   }
-
+  //创建unionrdd如果至少一个RDD没有分割
   test("SparkContext.union creates UnionRDD if at least one RDD has no partitioner") {
     val rddWithPartitioner = sc.parallelize(Seq(1->true)).partitionBy(new HashPartitioner(1))
     val rddWithNoPartitioner = sc.parallelize(Seq(2->true))
     val unionRdd = sc.union(rddWithNoPartitioner, rddWithPartitioner)
     assert(unionRdd.isInstanceOf[UnionRDD[_]])
   }
-
+  //
   test("SparkContext.union creates PartitionAwareUnionRDD if all RDDs have partitioners") {
     val rddWithPartitioner = sc.parallelize(Seq(1->true)).partitionBy(new HashPartitioner(1))
     val unionRdd = sc.union(rddWithPartitioner, rddWithPartitioner)
     assert(unionRdd.isInstanceOf[PartitionerAwareUnionRDD[_]])
   }
-
+  //如果至少有一个RDD没有分区器,则会引发异常
   test("PartitionAwareUnionRDD raises exception if at least one RDD has no partitioner") {
     val rddWithPartitioner = sc.parallelize(Seq(1->true)).partitionBy(new HashPartitioner(1))
     val rddWithNoPartitioner = sc.parallelize(Seq(2->true))
@@ -409,6 +409,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
     // If we try to coalesce into more partitions than the original RDD, it should just
     // keep the original number of partitions.
+    //如果我们尝试合并到比原始RDD更多的分区,那应该是保留分区的原始数量。
     val coalesced4 = data.coalesce(20)
     val listOfLists = coalesced4.glom().collect().map(_.toList).toList
     val sortedList = listOfLists.sortWith{ (x, y) => !x.isEmpty && (y.isEmpty || (x(0) < y(0))) }

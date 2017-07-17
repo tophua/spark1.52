@@ -673,6 +673,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     }
 
     // Without replacement validation
+    //无需更换验证
     def testBernoulli(stratifiedData: RDD[(String, Int)],
       exact: Boolean,
       samplingRate: Double,
