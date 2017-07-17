@@ -56,7 +56,7 @@ class NextIteratorSuite extends SparkFunSuite with Matchers {
     i.hasNext should be (false)
     i.closeCalled should be (1)
   }
-
+  //关闭被称为一次非空迭代
   test("close is called once for non-empty iterations") {
     val i = new StubIterator(Buffer(1, 2))
     i.next should be (1)

@@ -30,7 +30,7 @@ import org.apache.spark.SparkFunSuite
 
 class EventLoopSuite extends SparkFunSuite with Timeouts {
 
-  test("EventLoop") {
+  test("EventLoop") {//事件循环
     val buffer = new mutable.ArrayBuffer[Int] with mutable.SynchronizedBuffer[Int]
     val eventLoop = new EventLoop[Int]("test") {
 
@@ -48,7 +48,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     eventLoop.stop()
   }
 
-  test("EventLoop: start and stop") {//启动和停止
+  test("EventLoop: start and stop") {//事件循环 启动和停止
     val eventLoop = new EventLoop[Int]("test") {
 
       override def onReceive(event: Int): Unit = {}
@@ -62,7 +62,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     assert(false === eventLoop.isActive)
   }
 
-  test("EventLoop: onError") {//错误
+  test("EventLoop: onError") {//事件循环 错误
     val e = new RuntimeException("Oops")
     @volatile var receivedError: Throwable = null
     val eventLoop = new EventLoop[Int]("test") {
@@ -82,7 +82,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     }
     eventLoop.stop()
   }
-  //错误不应该冲突事件的线程
+  //事件循环 错误不应该冲突事件的线程
   test("EventLoop: error thrown from onError should not crash the event thread") {
     val e = new RuntimeException("Oops")
     @volatile var receivedError: Throwable = null
@@ -130,7 +130,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     assert(1 === onStopTimes)
   }
 
-  test("EventLoop: post event in multiple threads") {//多线程中的事件
+  test("EventLoop: post event in multiple threads") {//事件循环 多线程中的事件
     @volatile var receivedEventsCount = 0
     val eventLoop = new EventLoop[Int]("test") {
 
@@ -159,7 +159,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     }
     eventLoop.stop()
   }
-
+  //事件循环在接收中断Exception
   test("EventLoop: onReceive swallows InterruptException") {
     val onReceiveLatch = new CountDownLatch(1)
     val eventLoop = new EventLoop[Int]("test") {

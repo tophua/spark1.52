@@ -117,6 +117,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
   runTest("ShuffleRDD") { reliableCheckpoint: Boolean =>
     testRDD(rdd => {
       // Creating ShuffledRDD directly as PairRDDFunctions.combineByKey produces a MapPartitionedRDD
+      //直接创建ShuffledRDD作为PairRDDFunctions.combineByKey生成一个MapPartitionedRDD
       new ShuffledRDD[Int, Int, Int](rdd.map(x => (x % 2, 1)), partitioner)
     }, reliableCheckpoint)
   }
@@ -126,7 +127,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     testRDD(_.union(otherRDD), reliableCheckpoint)
     testRDDPartitions(_.union(otherRDD), reliableCheckpoint)
   }
-
+  //笛卡尔RDD
   runTest("CartesianRDD") { reliableCheckpoint: Boolean =>
     def otherRDD: RDD[Int] = sc.makeRDD(1 to 10, 1)
     testRDD(new CartesianRDD(sc, _, otherRDD), reliableCheckpoint)
@@ -149,7 +150,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
       "CartesianRDD.s1 and CartesianRDD.s2 not updated after parent RDD is checkpointed"
     )
   }
-
+  //合并RDD
   runTest("CoalescedRDD") { reliableCheckpoint: Boolean =>
     testRDD(_.coalesce(2), reliableCheckpoint)
     testRDDPartitions(_.coalesce(2), reliableCheckpoint)
@@ -171,11 +172,12 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
       "CoalescedRDDPartition.parents not updated after parent RDD is checkpointed"
     )
   }
-
+  //分组RDD
   runTest("CoGroupedRDD") { reliableCheckpoint: Boolean =>
     val longLineageRDD1 = generateFatPairRDD()
 
     // Collect the RDD as sequences instead of arrays to enable equality tests in testRDD
+    //收集RDD作为序列而不是数组，以启用testRDD中的相等性测试
     val seqCollectFunc = (rdd: RDD[(Int, Array[Iterable[Int]])]) =>
       rdd.map{case (p, a) => (p, a.toSeq)}.collect(): Any
 
@@ -189,7 +191,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
         longLineageRDD2, sc.makeRDD(1 to 2, 2).map(x => (x % 2, 1)), partitioner)
     }, reliableCheckpoint, seqCollectFunc)
   }
-
+  //拉链分区
   runTest("ZippedPartitionsRDD") { reliableCheckpoint: Boolean =>
     testRDD(rdd => rdd.zip(rdd.map(x => x)), reliableCheckpoint)
     testRDDPartitions(rdd => rdd.zip(rdd.map(x => x)), reliableCheckpoint)
@@ -214,7 +216,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
       "ZippedPartitionsRDD partition 0 (or 1) not updated after parent RDDs are checkpointed"
     )
   }
-
+  //分区意识联合RDD
   runTest("PartitionerAwareUnionRDD") { reliableCheckpoint: Boolean =>
     testRDD(rdd => {
       new PartitionerAwareUnionRDD[(Int, Int)](sc, Array(
@@ -396,9 +398,11 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     initializeRdd(operatedRDD)
 
     // Find serialized sizes before and after the checkpoint
+    //查找检查点前后的序列化大小
     logInfo("RDD after checkpoint: " + operatedRDD + "\n" + operatedRDD.toDebugString)
     val (rddSizeBeforeCheckpoint, partitionSizeBeforeCheckpoint) = getSerializedSizes(operatedRDD)
     // checkpoint the parent RDD, not the generated one
+    //检查点父级RDD，而不是生成的RDD
     parentRDDs.foreach { rdd =>
       checkpoint(rdd, reliableCheckpoint)
     }
@@ -408,9 +412,11 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     logInfo("RDD after checkpoint: " + operatedRDD + "\n" + operatedRDD.toDebugString)
 
     // Test whether the data in the checkpointed RDD is same as original
+    // 检查检查点RDD中的数据是否与原始数据相同
     assert(collectFunc(operatedRDD) === result)
 
     // Test whether serialized size of the partitions has reduced
+    // 测试分区的序列化大小是否减少
     logInfo("Size of partitions of " + rddType +
       " [" + partitionSizeBeforeCheckpoint + " --> " + partitionSizeAfterCheckpoint + "]")
     assert(
@@ -469,6 +475,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
    * Serialize and deserialize an object. This is useful to verify the objects
    * contents after deserialization (e.g., the contents of an RDD split after
    * it is sent to a slave along with a task)
+    * 序列化和反序列化对象,这对验证对象非常有用反序列化后的内容(例如，RDD之后的内容一个任务发送到一个奴隶)
    */
   private def serializeDeserialize[T](obj: T): T = {
     val bytes = Utils.serialize(obj)//序列化
@@ -477,6 +484,7 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
 
   /**
    * Recursively(递归) force the initialization of the all members of an RDD and it parents.
+    * 递归强制RDD的所有成员及其父RDD的初始化
    */
   private def initializeRdd(rdd: RDD[_]): Unit = {
     rdd.partitions // forces the
@@ -496,7 +504,7 @@ class FatPartition(val partition: Partition) extends Partition {
 
 /** 
  *  RDD that has large serialized size.
- *   
+ *  具有大序列化大小的RDD
  *  */
 class FatRDD(parent: RDD[Int]) extends RDD[Int](parent) {
   val bigData = new Array[Byte](100000)
@@ -510,7 +518,10 @@ class FatRDD(parent: RDD[Int]) extends RDD[Int](parent) {
   }
 }
 
-/** Pair RDD that has large serialized size. */
+/**
+  *  Pair RDD that has large serialized size.
+  *  对RDD具有较大的序列化大小
+  * */
 class FatPairRDD(parent: RDD[Int], _partitioner: Partitioner) extends RDD[(Int, Int)](parent) {
   val bigData = new Array[Byte](100000)
 
@@ -527,6 +538,7 @@ class FatPairRDD(parent: RDD[Int], _partitioner: Partitioner) extends RDD[(Int, 
 
 object CheckpointSuite {
   // This is a custom cogroup function that does not use mapValues like
+  //这是一个不使用mapValues的自定义cogroup函数
   // the PairRDDFunctions.cogroup()
   def cogroup[K, V](first: RDD[(K, V)], second: RDD[(K, V)], part: Partitioner)
     : RDD[(K, Array[Iterable[V]])] = {

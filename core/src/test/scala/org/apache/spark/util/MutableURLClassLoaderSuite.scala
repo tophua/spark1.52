@@ -54,7 +54,7 @@ class MutableURLClassLoaderSuite extends SparkFunSuite {
     assert(fakeClass.getClass === fakeClass2.getClass)
   }
 
-  test("child first can fall back") {//
+  test("child first can fall back") {//子第一次可以倒退
     val parentLoader = new URLClassLoader(urls2, null)
     val classLoader = new ChildFirstURLClassLoader(urls, parentLoader)
     val fakeClass = classLoader.loadClass("FakeClass3").newInstance()
@@ -62,7 +62,7 @@ class MutableURLClassLoaderSuite extends SparkFunSuite {
     assert(fakeClassVersion === "2")
   }
 
-  test("child first can fail") {
+  test("child first can fail") {//子第一次可以失败
     val parentLoader = new URLClassLoader(urls2, null)
     val classLoader = new ChildFirstURLClassLoader(urls, parentLoader)
     intercept[java.lang.ClassNotFoundException] {

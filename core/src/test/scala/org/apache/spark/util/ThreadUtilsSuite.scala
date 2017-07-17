@@ -30,7 +30,7 @@ import org.apache.spark.SparkFunSuite
 
 class ThreadUtilsSuite extends SparkFunSuite {
 
-  test("newDaemonSingleThreadExecutor") {
+  test("newDaemonSingleThreadExecutor") {//新的守护进程单线程执行器
     val executor = ThreadUtils.newDaemonSingleThreadExecutor("this-is-a-thread-name")
     @volatile var threadName = ""
     executor.submit(new Runnable {
@@ -63,7 +63,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     }
   }
 
-  test("newDaemonCachedThreadPool") {
+  test("newDaemonCachedThreadPool") {//新的守护程序缓存线程池
     val maxThreadNumber = 10
     val startThreadsLatch = new CountDownLatch(maxThreadNumber)
     val latch = new CountDownLatch(1)

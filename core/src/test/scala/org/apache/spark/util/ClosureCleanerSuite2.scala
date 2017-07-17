@@ -134,7 +134,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
   private def getOuterClassesAndObjects(closure: AnyRef): (List[Class[_]], List[AnyRef]) = {
     ClosureCleaner invokePrivate _getOuterClassesAndObjects(closure)
   }
-
+//获取内部闭包类
   test("get inner closure classes") {
     val closure1 = () => 1
     val closure2 = () => { () => 1 }
@@ -160,7 +160,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     assert(inner3.forall(isClosure))
     assert(inner4.forall(isClosure))
   }
-
+  //获取外部类和对象
   test("get outer classes and objects") {
     val localValue = someSerializableValue
     val closure1 = () => 1
@@ -196,7 +196,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     assert(outerObjects3(1) === this)
     assert(outerObjects4(1) === this)
   }
-
+//获取外部类和嵌套对象
   test("get outer classes and objects with nesting") {
     val localValue = someSerializableValue
 
@@ -247,7 +247,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     test1()
     test2()
   }
-
+  //找到访问的领域
   test("find accessed fields") {
     val localValue = someSerializableValue
     val closure1 = () => 1

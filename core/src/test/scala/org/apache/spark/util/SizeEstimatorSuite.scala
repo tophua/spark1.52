@@ -206,7 +206,7 @@ class SizeEstimatorSuite
     assertResult(24)(SizeEstimator.estimate(new java.lang.Float(1.0)))
     assertResult(24)(SizeEstimator.estimate(new java.lang.Double(1.0d)))
   }
-
+  //不使用CompressionOops，在64位VM上舍入的类字段块
   test("class field blocks rounding on 64-bit VM without useCompressedOops") {
     assertResult(24)(SizeEstimator.estimate(new DummyClass5))
     assertResult(32)(SizeEstimator.estimate(new DummyClass6))

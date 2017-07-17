@@ -39,7 +39,7 @@ class JsonProtocolSuite extends SparkFunSuite {
 
   val executorAddedTime = 1421458410000L
   val executorRemovedTime = 1421458922000L
-
+  //Spark监听事件
   test("SparkListenerEvent") {
     val stageSubmitted =
       SparkListenerStageSubmitted(makeStageInfo(100, 200, 300, 400L, 500L), properties)

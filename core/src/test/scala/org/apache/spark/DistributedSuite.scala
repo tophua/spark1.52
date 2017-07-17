@@ -30,7 +30,7 @@ class NotSerializableExn(val notSer: NotSerializableClass) extends Throwable() {
 class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContext {
   //1 CPU核数,1024内存数
   //val clusterUrl = "local-cluster[2,1,1024]"
-  /**
+
   val clusterUrl = "local"
   test("task throws not serializable exception") {//task任务抛出不能序列化异常
     // Ensures that executors do not crash when an exn is not serializable. If executors crash,
@@ -157,21 +157,21 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
     assert(data.count() === 1000)
   }
-/**
+
   test("caching in memory, replicated") {//在内存中缓存,复制
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_ONLY_2)
     assert(data.count() === 1000)
     assert(data.count() === 1000)
     assert(data.count() === 1000)
-  }**/
+  }
 
   test("caching in memory, serialized, replicated") {//缓存在内存中,序列化,复制
-  /*  sc = new SparkContext(clusterUrl, "test")
+ sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_ONLY_SER_2)
     assert(data.count() === 1000)
     assert(data.count() === 1000)
-    assert(data.count() === 1000)*/
+    assert(data.count() === 1000)
   }
 
   test("caching on disk, replicated") {//复制磁盘上的缓存
@@ -342,10 +342,12 @@ object DistributedSuite {
 
   // Set by test to remember if we are in the driver program so we can assert
   // that we are not.
+  //通过测试设置，以记住我们是否在驱动程序中，所以我们可以断言
 
   var amMaster = false
 
   // Act like an identity function, but if the argument is true, set mark to true.
+  //像一个身份函数一样，但如果参数为true，则将标记设置为true。
   def markNodeIfIdentity(item: Boolean): Boolean = {
     if (item) {
       assert(!amMaster)
