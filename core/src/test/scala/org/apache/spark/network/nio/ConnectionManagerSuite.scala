@@ -192,7 +192,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     manager.stop()
     managerServer.stop()
   }
-/**
+
   test("security auth off") {//安全认证
     val conf = new SparkConf
      //是否启用内部身份验证
@@ -266,7 +266,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     manager.stop()
     managerServer.stop()
 
-  }**/
+  }
 
   test("sendMessageReliably timeout") {//sendMessageReliably超时
     val clientConf = new SparkConf

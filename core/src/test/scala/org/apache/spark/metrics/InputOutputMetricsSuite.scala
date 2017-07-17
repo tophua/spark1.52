@@ -75,7 +75,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
   after {
     Utils.deleteRecursively(tmpDir)
   }
-
+  //输入标准为旧的hadoop与合并
   test("input metrics for old hadoop with coalesce") {//合并
     val bytesRead = runAndReturnBytesRead {
       sc.textFile(tmpFilePath, 4).count()
@@ -87,9 +87,10 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     assert(bytesRead == bytesRead2)
     assert(bytesRead2 >= tmpFile.length())
   }
-
-  test("input metrics with cache and coalesce") {//输入数据缓存和合并
+  //输入数据缓存和合并
+  test("input metrics with cache and coalesce") {
     // prime the cache manager
+    //引导缓存管理器
     val rdd = sc.textFile(tmpFilePath, 4).cache() //缓存
     rdd.collect()
 
@@ -101,6 +102,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     }
 
     // for count and coelesce, the same bytes should be read.
+    //对于计数和合并,应该读取相同的字节。
     assert(bytesRead != 0)
     assert(bytesRead2 == bytesRead)
   }
