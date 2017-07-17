@@ -364,5 +364,5 @@ object DistributedSuite {
       System.exit(42)
     }
     item
-  }**/
+  }
 }

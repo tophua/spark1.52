@@ -30,7 +30,7 @@ object FutureBlockDemo {
     val result = Await.result(f, 1 second) //1秒
     // 如果Future没有在Await规定的时间里返回,
     // 将抛出java.util.concurrent.TimeoutException
-    println(result)
+    println("==="+result)
     Thread.sleep(4000)
     println(">>>>>>>>>>>")
   }
