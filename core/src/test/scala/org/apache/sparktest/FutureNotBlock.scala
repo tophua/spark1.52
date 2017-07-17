@@ -21,6 +21,7 @@ object FutureNotBlock {
 
     println("before onComplete")
     f.onComplete {
+      //得到回调,意思
       case Success(value) => println(s"Got the callback, meaning = $value")
       case Failure(e)     => e.printStackTrace
     }

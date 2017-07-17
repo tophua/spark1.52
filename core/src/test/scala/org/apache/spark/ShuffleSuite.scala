@@ -265,7 +265,7 @@ test("sort with Java non serializable class - Java") {//用java非序列化类�
   assert(thrown.getMessage.toLowerCase.contains("serializable"))
 }
 
-test("shuffle with different compression settings (SPARK-3426)") {//设置不同shuffle的压缩
+/*test("shuffle with different compression settings (SPARK-3426)") {//设置不同shuffle的压缩
   for (
     shuffleSpillCompress <- Set(true, false);
     //shuffleCompress <- Set(true, false)
@@ -288,7 +288,7 @@ test("shuffle with different compression settings (SPARK-3426)") {//设置不同
         throw new Exception(errMsg, e)
     }
   }
-}
+}*/
 //重新运行Map阶段,如果降低阶段不能找到本地文件
 test("[SPARK-4085] rerun map stage if reduce stage cannot find its local shuffle file") {
   val myConf = conf.clone().set("spark.test.noStageRetry", "false")
