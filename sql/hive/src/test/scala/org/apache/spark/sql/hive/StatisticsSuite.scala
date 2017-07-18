@@ -35,7 +35,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
   }
 
   import ctx.sql
-
+  //解析分析命令
   test("parse analyze commands") {
     def assertAnalyzeCommand(analyzeCommand: String, c: Class[_]) {
       val parsed = HiveQl.parseSql(analyzeCommand)
@@ -55,6 +55,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
     }
 
     // Ensure session state is initialized.
+    //确保会话状态被初始化
     ctx.parseSql("use default")
 
     assertAnalyzeCommand(
@@ -77,12 +78,12 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
       "ANALYZE TABLE Table1 COMPUTE STATISTICS nOscAn",
       classOf[AnalyzeTable])
   }
-
+  //分析Metastore关系
   test("analyze MetastoreRelations") {
     def queryTotalSize(tableName: String): BigInt =
       ctx.catalog.lookupRelation(Seq(tableName)).statistics.sizeInBytes
 
-    // Non-partitioned table
+    // Non-partitioned table 非分区表
     sql("CREATE TABLE analyzeTable (key STRING, value STRING)").collect()
     sql("INSERT INTO TABLE analyzeTable SELECT * FROM src").collect()
     sql("INSERT INTO TABLE analyzeTable SELECT * FROM src").collect()
@@ -93,7 +94,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
 
     sql("DROP TABLE analyzeTable").collect()
 
-    // Partitioned table
+    // Partitioned table 分区表
     sql(
       """
         |CREATE TABLE analyzeTable_part (key STRING, value STRING) PARTITIONED BY (ds STRING)
@@ -122,14 +123,14 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
 
     sql("DROP TABLE analyzeTable_part").collect()
 
-    // Try to analyze a temp table
+    // Try to analyze a temp table 尝试分析一个临时表
     sql("""SELECT * FROM src""").registerTempTable("tempTable")
     intercept[UnsupportedOperationException] {
       ctx.analyze("tempTable")
     }
     ctx.catalog.unregisterTable(Seq("tempTable"))
   }
-
+  //估计MetastoreRelation测试的大小
   test("estimates the size of a test MetastoreRelation") {
     val df = sql("""SELECT * FROM src""")
     val sizes = df.queryExecution.analyzed.collect { case mr: MetastoreRelation =>
@@ -139,7 +140,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
     assert(sizes(0).equals(BigInt(5812)),
       s"expected exact size 5812 for test table 'src', got: ${sizes(0)}")
   }
-
+  //通过关系的大小估计自动转换为广播散列连接
  test("auto converts to broadcast hash join, by size estimate of a relation") {
     def mkTest(
         before: () => Unit,
@@ -152,6 +153,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
       var df = sql(query)
 
       // Assert src has a size smaller than the threshold.
+      //Assert src的大小小于阈值
       val sizes = df.queryExecution.analyzed.collect {
         case r if ct.runtimeClass.isAssignableFrom(r.getClass) => r.statistics.sizeInBytes
       }
@@ -161,10 +163,11 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
 
       // Using `sparkPlan` because for relevant patterns in HashJoin to be
       // matched, other strategies need to be applied.
+      //使用`sparkPlan`，因为HashJoin中的相关模式是匹配，其他策略需要应用。
       var bhj = df.queryExecution.sparkPlan.collect { case j: BroadcastHashJoin => j }
       assert(bhj.size === 1,
         s"actual query plans do not contain broadcast join: ${df.queryExecution}")
-
+    //检查输出的正确性
       checkAnswer(df, expectedAnswer) // check correctness of output
 
       ctx.conf.settings.synchronized {
@@ -185,7 +188,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
       after()
     }
 
-    /** Tests for MetastoreRelation */
+    /** Tests for MetastoreRelation  MetastoreRelation测试*/
     val metastoreQuery = """SELECT * FROM src a JOIN src b ON a.key = 238 AND a.key = b.key"""
     val metastoreAnswer = Seq.fill(4)(Row(238, "val_238", 238, "val_238"))
     mkTest(
@@ -196,7 +199,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
       implicitly[ClassTag[MetastoreRelation]]
     )
   }
-
+  //根据关系的大小估计自动转换为广播左半连接
 test("auto converts to broadcast left semi join, by size estimate of a relation") {
     val leftSemiJoinQuery =
       """SELECT * FROM src a
@@ -206,6 +209,7 @@ test("auto converts to broadcast left semi join, by size estimate of a relation"
     var df = sql(leftSemiJoinQuery)
 
     // Assert src has a size smaller than the threshold.
+    //Assert src的大小小于阈值
     val sizes = df.queryExecution.analyzed.collect {
       case r if implicitly[ClassTag[MetastoreRelation]].runtimeClass
         .isAssignableFrom(r.getClass) =>

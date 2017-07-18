@@ -37,7 +37,7 @@ class OrcHadoopFsRelationSuite extends HadoopFsRelationTest {
     case _: UserDefinedType[_] => false
     case _ => true
   }
-
+  //分区表 - 简单查询 - 数据中的分区列
   test("save()/load() - partitioned table - simple queries - partition columns in data") {
     withTempDir { file =>
       val basePath = new Path(file.getCanonicalPath)
@@ -62,7 +62,7 @@ class OrcHadoopFsRelationSuite extends HadoopFsRelationTest {
           "dataSchema" -> dataSchemaWithPartition.json)).format(dataSourceName).load())
     }
   }
-
+  //“不”包含在ORC滤镜下推中
   test("SPARK-12218: 'Not' is included in ORC filter pushdown") {
     import testImplicits._
 

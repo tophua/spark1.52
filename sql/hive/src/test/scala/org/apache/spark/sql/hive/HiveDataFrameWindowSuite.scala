@@ -24,7 +24,7 @@ import org.apache.spark.sql.hive.test.TestHive._
 import org.apache.spark.sql.hive.test.TestHive.implicits._
 
 class HiveDataFrameWindowSuite extends QueryTest {
-
+  //利用窗口partitionby
   test("reuse window partitionBy") {
     val df = Seq((1, "1"), (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
     val w = Window.partitionBy("key").orderBy("value")
@@ -35,7 +35,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
         lead("value", 1).over(w)),
       Row(1, "1") :: Row(2, "2") :: Row(null, null) :: Row(null, null) :: Nil)
   }
-
+  //利用窗口进行排序
   test("reuse window orderBy") {
     val df = Seq((1, "1"), (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
     val w = Window.orderBy("value").partitionBy("key")
@@ -72,7 +72,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
           | lag(value) OVER (PARTITION BY key ORDER BY value)
           | FROM window_table""".stripMargin).collect())
   }
-
+//默认值引导
   test("lead with default value") {
     val df = Seq((1, "1"), (1, "1"), (2, "2"), (1, "1"),
                  (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
@@ -85,7 +85,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
           | lead(value, 2, "n/a") OVER (PARTITION BY key ORDER BY value)
           | FROM window_table""".stripMargin).collect())
   }
-
+  //默认值滞后
   test("lag with default value") {
     val df = Seq((1, "1"), (1, "1"), (2, "2"), (1, "1"),
                  (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
@@ -98,7 +98,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
           | lag(value, 2, "n/a") OVER (PARTITION BY key ORDER BY value)
           | FROM window_table""".stripMargin).collect())
   }
-
+  //在非特定窗口中的排名函数
   test("rank functions in unspecific window") {
     val df = Seq((1, "1"), (2, "2"), (1, "2"), (2, "2")).toDF("key", "value")
     df.registerTempTable("window_table")
@@ -132,7 +132,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
            |percent_rank() over (partition by value order by key)
            |FROM window_table""".stripMargin).collect())
   }
-
+  //聚合和行之间
   test("aggregation and rows between") {
     val df = Seq((1, "1"), (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
     df.registerTempTable("window_table")
@@ -145,7 +145,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
           |   (PARTITION BY value ORDER BY key ROWS BETWEEN 1 preceding and 2 following)
           | FROM window_table""".stripMargin).collect())
   }
-
+  //聚合和范围之间
   test("aggregation and range betweens") {
     val df = Seq((1, "1"), (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
     df.registerTempTable("window_table")
@@ -158,7 +158,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
           |   (PARTITION BY value ORDER BY key RANGE BETWEEN 1 preceding and 1 following)
           | FROM window_table""".stripMargin).collect())
   }
-
+  //聚合和无界的行
   test("aggregation and rows betweens with unbounded") {
     val df = Seq((1, "1"), (2, "2"), (2, "3"), (1, "3"), (3, "2"), (4, "3")).toDF("key", "value")
     df.registerTempTable("window_table")
@@ -181,7 +181,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
           |   (PARTITION BY value ORDER BY key ROWS between 1 preceding and 3 following)
           | FROM window_table""".stripMargin).collect())
   }
-
+  //聚合和范围在无界之间
   test("aggregation and range betweens with unbounded") {
     val df = Seq((5, "1"), (5, "2"), (4, "2"), (6, "2"), (3, "1"), (2, "2")).toDF("key", "value")
     df.registerTempTable("window_table")
@@ -212,7 +212,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
           |   (PARTITION BY value ORDER BY key RANGE BETWEEN 1 preceding and current row)
           | FROM window_table""".stripMargin).collect())
   }
-
+  //反向滑动范围框架
   test("reverse sliding range frame") {
     val df = Seq(
       (1, "Thin", "Cell Phone", 6000),
@@ -241,7 +241,8 @@ class HiveDataFrameWindowSuite extends QueryTest {
   }
 
   // This is here to illustrate the fact that reverse order also reverses offsets.
-  test("reverse unbounded range frame") {
+  //这是为了说明反向顺序也反转偏移的事实
+  test("reverse unbounded range frame") {//反向无限范围框架
     val df = Seq(1, 2, 4, 3, 2, 1).
       map(Tuple1.apply).
       toDF("value")

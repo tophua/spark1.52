@@ -45,42 +45,50 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
   before {
     // Since every we are doing tests for DDL statements,
     // it is better to reset before every test.
+    //由于我们正在为DDL语句进行测试,最好在每次测试之前进行重置。
     TestHive.reset()
     // Register the testData, which will be used in every test.
+    //注册testData,将在每次测试中使用。
     testData.registerTempTable("testData")
   }
-
+  //插入Into（）HiveTable
   test("insertInto() HiveTable") {
     sql("CREATE TABLE createAndInsertTest (key int, value string)")
 
     // Add some data.
+    //添加一些数据
     testData.write.mode(SaveMode.Append).insertInto("createAndInsertTest")
 
     // Make sure the table has also been updated.
+    //确保表格也已更新
     checkAnswer(
       sql("SELECT * FROM createAndInsertTest"),
       testData.collect().toSeq
     )
 
     // Add more data.
+    //添加更多数据
     testData.write.mode(SaveMode.Append).insertInto("createAndInsertTest")
 
     // Make sure the table has been updated.
+    //确保表已更新
     checkAnswer(
       sql("SELECT * FROM createAndInsertTest"),
       testData.toDF().collect().toSeq ++ testData.toDF().collect().toSeq
     )
 
     // Now overwrite.
+    //现在覆盖
     testData.write.mode(SaveMode.Overwrite).insertInto("createAndInsertTest")
 
     // Make sure the registered table has also been updated.
+    //确保已注册的表格也已更新
     checkAnswer(
       sql("SELECT * FROM createAndInsertTest"),
       testData.collect().toSeq
     )
   }
-
+  //当allowExisting = false时，双重创建失败
   test("Double create fails when allowExisting = false") {
     sql("CREATE TABLE doubleCreateAndInsertTest (key int, value string)")
 
@@ -88,12 +96,12 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
       sql("CREATE TABLE doubleCreateAndInsertTest (key int, value string)")
     }
   }
-
+  //当allowExisting = true时，双重创建不会失败
   test("Double create does not fail when allowExisting = true") {
     sql("CREATE TABLE doubleCreateAndInsertTest (key int, value string)")
     sql("CREATE TABLE IF NOT EXISTS doubleCreateAndInsertTest (key int, value string)")
   }
-
+  //scala.collection.Map作为MapType的值类型
   test("SPARK-4052: scala.collection.Map as value type of MapType") {
     val schema = StructType(StructField("m", MapType(StringType, StringType), true) :: Nil)
     val rowRDD = TestHive.sparkContext.parallelize(
@@ -110,7 +118,7 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
 
     sql("DROP TABLE hiveTableWithMapValue")
   }
-
+  //随机分区目录顺序
   test("SPARK-4203:random partition directory order") {
     sql("CREATE TABLE tmp_table (key int, value string)")
     val tmpDir = Utils.createTempDir()
@@ -165,7 +173,7 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
     sql("DROP TABLE table_with_partition")
     sql("DROP TABLE tmp_table")
   }
-
+  //插入ArrayType.containsNull == false
   test("Insert ArrayType.containsNull == false") {
     val schema = StructType(Seq(
       StructField("a", ArrayType(StringType, containsNull = false))))
@@ -181,7 +189,7 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
 
     sql("DROP TABLE hiveTableWithArrayValue")
   }
-
+  //插入MapType.valueContainsNull == false
   test("Insert MapType.valueContainsNull == false") {
     val schema = StructType(Seq(
       StructField("m", MapType(StringType, StringType, valueContainsNull = false))))
@@ -198,7 +206,7 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
 
     sql("DROP TABLE hiveTableWithMapValue")
   }
-
+  //插入StructType.fields.exists（_。nullable == false）
   test("Insert StructType.fields.exists(_.nullable == false)") {
     val schema = StructType(Seq(
       StructField("s", StructType(Seq(StructField("f", StringType, nullable = false))))))
@@ -215,7 +223,7 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
 
     sql("DROP TABLE hiveTableWithStructValue")
   }
-
+  //分区模式与表模式不匹配
   test("SPARK-5498:partition schema does not match table schema") {
     val testData = TestHive.sparkContext.parallelize(
       (1 to 10).map(i => TestData(i, i.toString))).toDF()
@@ -237,24 +245,28 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
       """.stripMargin)
 
     // test schema the same between partition and table
+    //分区和表之间的测试模式相同
     sql("ALTER TABLE table_with_partition CHANGE COLUMN key key BIGINT")
     checkAnswer(sql("select key,value from table_with_partition where ds='1' "),
       testData.collect().toSeq
     )
 
     // test difference type of field
+    //测试差异类型的字段
     sql("ALTER TABLE table_with_partition CHANGE COLUMN key key BIGINT")
     checkAnswer(sql("select key,value from table_with_partition where ds='1' "),
       testData.collect().toSeq
     )
 
     // add column to table
+    //添加列到表
     sql("ALTER TABLE table_with_partition ADD COLUMNS(key1 string)")
     checkAnswer(sql("select key,value,key1 from table_with_partition where ds='1' "),
       testDatawithNull.collect().toSeq
     )
 
     // change column name to table
+    //将列名更改为表
     sql("ALTER TABLE table_with_partition CHANGE COLUMN key keynew BIGINT")
     checkAnswer(sql("select keynew,value from table_with_partition where ds='1' "),
       testData.collect().toSeq

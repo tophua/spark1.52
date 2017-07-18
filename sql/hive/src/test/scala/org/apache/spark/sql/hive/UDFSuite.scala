@@ -23,7 +23,7 @@ case class FunctionResult(f1: String, f2: String)
 
 class UDFSuite extends QueryTest {
   private lazy val ctx = org.apache.spark.sql.hive.test.TestHive
-
+  //UDF不区分大小写
   test("UDF case insensitive") {
     ctx.udf.register("random0", () => { Math.random() })
     ctx.udf.register("RANDOM1", () => { Math.random() })

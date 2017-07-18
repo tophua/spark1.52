@@ -159,7 +159,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
     checkDataType(ois.map(inspectorToDataType), dataTypes)
     checkDataType(dataTypes.map(toWritableInspector).map(inspectorToDataType), dataTypes)
   }
-
+  //包装/拆零，零和writables常数
   test("wrap / unwrap null, constant null and writables") {
     val writableOIs = dataTypes.map(toWritableInspector)
     val nullRow = data.map(d => null)
@@ -169,6 +169,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
     })
 
     // struct couldn't be constant, sweep it out
+    //结构不能常量，把它扫出来
     val constantExprs = data.filter(!_.dataType.isInstanceOf[StructType])
     val constantTypes = constantExprs.map(_.dataType)
     val constantData = constantExprs.map(_.eval())
@@ -189,7 +190,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
       case ((d, oi), dt) => unwrap(wrap(d, oi, dt), oi)
     })
   }
-
+  //包/解包原始写检查对象
   test("wrap / unwrap primitive writable object inspector") {
     val writableOIs = dataTypes.map(toWritableInspector)
 
@@ -197,7 +198,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
       case ((data, oi), dt) => unwrap(wrap(data, oi, dt), oi)
     })
   }
-
+  //包/解包原始java对象督察
   test("wrap / unwrap primitive java object inspector") {
     val ois = dataTypes.map(toInspector)
 

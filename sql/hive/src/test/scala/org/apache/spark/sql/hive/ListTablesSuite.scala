@@ -33,6 +33,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     // The catalog in HiveContext is a case insensitive one.
+    //HiveContext中的目录是不区分大小写的
     catalog.registerTable(Seq("ListTablesSuiteTable"), df.logicalPlan)
     sql("CREATE TABLE HiveListTablesSuiteTable (key int, value string)")
     sql("CREATE DATABASE IF NOT EXISTS ListTablesSuiteDB")
@@ -45,7 +46,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfterAll {
     sql("DROP TABLE IF EXISTS ListTablesSuiteDB.HiveInDBListTablesSuiteTable")
     sql("DROP DATABASE IF EXISTS ListTablesSuiteDB")
   }
-
+  //获取当前数据库的所有表
   test("get all tables of current database") {
     Seq(tables(), sql("SHOW TABLes")).foreach {
       case allTables =>
@@ -59,7 +60,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfterAll {
         assert(allTables.filter("tableName = 'hiveindblisttablessuitetable'").count() === 0)
     }
   }
-
+  //获取具有数据库名称的所有表
   test("getting all tables with a database name") {
     Seq(tables("listtablessuiteDb"), sql("SHOW TABLes in listTablesSuitedb")).foreach {
       case allTables =>

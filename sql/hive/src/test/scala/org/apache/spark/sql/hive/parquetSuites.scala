@@ -34,8 +34,10 @@ import org.apache.spark.sql.types._
 import org.apache.spark.util.Utils
 
 // The data where the partitioning key exists only in the directory structure.
+//分区键只存在于目录结构中的数据。
 case class ParquetData(intField: Int, stringField: String)
 // The data that also includes the partitioning key
+//还包括分区键的数据
 case class ParquetDataWithKey(p: Int, intField: Int, stringField: String)
 
 case class StructContainer(intStructField: Int, stringStructField: String)
@@ -56,6 +58,7 @@ case class ParquetDataWithKeyAndComplexTypes(
 /**
  * A suite to test the automatic conversion of metastore tables with parquet data to use the
  * built in parquet support.
+  *套件,用于测试使用镶木地板数据进行自动转换的转台内置parquet支撑。
  */
 class ParquetMetastoreSuite extends ParquetPartitioningTest {
   override def beforeAll(): Unit = {
@@ -189,7 +192,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
        "test_parquet")
     setConf(HiveContext.CONVERT_METASTORE_PARQUET, false)
   }
-
+  //转换正在工作
   test(s"conversion is working") {
     assert(
       sql("SELECT * FROM normal_parquet").queryExecution.executedPlan.collect {
@@ -200,7 +203,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
         case _: PhysicalRDD => true
       }.nonEmpty)
   }
-
+//扫描一个空的parquet表
   test("scan an empty parquet table") {
     checkAnswer(sql("SELECT count(*) FROM test_parquet"), Row(0))
   }
@@ -208,7 +211,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
   test("scan an empty parquet table with upper case") {
     checkAnswer(sql("SELECT count(INTFIELD) FROM TEST_parquet"), Row(0))
   }
-
+  //插入一个空的parquet
   test("insert into an empty parquet table") {
     dropTables("test_insert_parquet")
     sql(
@@ -225,12 +228,13 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
       """.stripMargin)
 
     // Insert into am empty table.
+    //插入一张空的表
     sql("insert into table test_insert_parquet select a, b from jt where jt.a > 5")
     checkAnswer(
       sql(s"SELECT intField, stringField FROM test_insert_parquet WHERE intField < 8"),
       Row(6, "str6") :: Row(7, "str7") :: Nil
     )
-    // Insert overwrite.
+    // Insert overwrite. 插入覆盖
     sql("insert overwrite table test_insert_parquet select a, b from jt where jt.a < 5")
     checkAnswer(
       sql(s"SELECT intField, stringField FROM test_insert_parquet WHERE intField > 2"),
@@ -238,7 +242,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
     )
     dropTables("test_insert_parquet")
 
-    // Create it again.
+    // Create it again. 重新创建它
     sql(
       """
         |create table test_insert_parquet
@@ -251,13 +255,13 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
         |  INPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
         |  OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
       """.stripMargin)
-    // Insert overwrite an empty table.
+    // Insert overwrite an empty table. 插入覆盖一个空表
     sql("insert overwrite table test_insert_parquet select a, b from jt where jt.a < 5")
     checkAnswer(
       sql(s"SELECT intField, stringField FROM test_insert_parquet WHERE intField > 2"),
       Row(3, "str3") :: Row(4, "str4") :: Nil
     )
-    // Insert into the table.
+    // Insert into the table. 插入表中
     sql("insert into table test_insert_parquet select a, b from jt")
     checkAnswer(
       sql(s"SELECT intField, stringField FROM test_insert_parquet"),
@@ -321,7 +325,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
       )
     }
   }
-
+  //在InsertIntoHiveTable中将被转换
   test("MetastoreRelation in InsertIntoHiveTable will be converted") {
     withTable("test_insert_parquet") {
       sql(
@@ -351,7 +355,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
       )
     }
   }
-
+  //回归测试
   test("SPARK-6450 regression test") {
     withTable("ms_convert") {
       sql(
@@ -363,6 +367,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
         """.stripMargin)
 
       // This shouldn't throw AnalysisException
+      //这不应该抛出AnalysisException
       val analyzed = sql(
         """SELECT key FROM ms_convert
           |UNION ALL
@@ -385,7 +390,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
       fail(s"Expecting a ParquetRelation2, but got:\n$plan")
     }
   }
-
+  //非分割转移Parquet table lookup应使用缓存关系
   test("SPARK-7749: non-partitioned metastore Parquet table lookup should use cached relation") {
     withTable("nonPartitioned") {
       sql(
@@ -397,14 +402,17 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
          """.stripMargin)
 
       // First lookup fills the cache
+      //首先查找填充缓存
       val r1 = collectParquetRelation(table("nonPartitioned"))
       // Second lookup should reuse the cache
+      //第二次查找应该重用缓存
       val r2 = collectParquetRelation(table("nonPartitioned"))
       // They should be the same instance
+      //他们应该是一样的
       assert(r1 eq r2)
     }
   }
-
+  //分割的转移Parquet表查找应使用缓存关系
   test("SPARK-7749: partitioned metastore Parquet table lookup should use cached relation") {
     withTable("partitioned") {
       sql(
@@ -417,14 +425,17 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
        """.stripMargin)
 
       // First lookup fills the cache
+      //首先查找填充缓存
       val r1 = collectParquetRelation(table("partitioned"))
       // Second lookup should reuse the cache
+      //第二次查找应该重用缓存
       val r2 = collectParquetRelation(table("partitioned"))
       // They should be the same instance
+      //他们应该是一样的
       assert(r1 eq r2)
     }
   }
-
+  //高速缓存转换数据源Parquet Relations
   test("Caching converted data source Parquet Relations") {
     def checkCached(tableIdentifier: catalog.QualifiedTableName): Unit = {
       // Converted test_parquet should be cached.
@@ -456,12 +467,15 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
     var tableIdentifier = catalog.QualifiedTableName("default", "test_insert_parquet")
 
     // First, make sure the converted test_parquet is not cached.
+    //首先，确保转换的test_parquet不被缓存。
     assert(catalog.cachedDataSourceTables.getIfPresent(tableIdentifier) === null)
     // Table lookup will make the table cached.
+    //表查找将使表缓存
     table("test_insert_parquet")
     checkCached(tableIdentifier)
     // For insert into non-partitioned table, we will do the conversion,
     // so the converted test_insert_parquet should be cached.
+    //要插入到非分区表中,我们将进行转换,所以转换的test_insert_parquet应该被缓存。
     invalidateTable("test_insert_parquet")
     assert(catalog.cachedDataSourceTables.getIfPresent(tableIdentifier) === null)
     sql(
@@ -471,14 +485,17 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
       """.stripMargin)
     checkCached(tableIdentifier)
     // Make sure we can read the data.
+    //确保我们可以读取数据
     checkAnswer(
       sql("select * from test_insert_parquet"),
       sql("select a, b from jt").collect())
     // Invalidate the cache.
+    //无效缓存
     invalidateTable("test_insert_parquet")
     assert(catalog.cachedDataSourceTables.getIfPresent(tableIdentifier) === null)
 
     // Create a partitioned table.
+    //创建分区表
     sql(
       """
         |create table test_parquet_partitioned_cache_test
@@ -503,6 +520,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
       """.stripMargin)
     // Right now, insert into a partitioned Parquet is not supported in data source Parquet.
     // So, we expect it is not cached.
+    //现在，数据源Parquet中不支持插入分区。所以我们期望它不被缓存
     assert(catalog.cachedDataSourceTables.getIfPresent(tableIdentifier) === null)
     sql(
       """
@@ -513,9 +531,11 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
     assert(catalog.cachedDataSourceTables.getIfPresent(tableIdentifier) === null)
 
     // Make sure we can cache the partitioned table.
+    //确保我们可以缓存分区表
     table("test_parquet_partitioned_cache_test")
     checkCached(tableIdentifier)
     // Make sure we can read the data.
+    //确保我们可以读取数据
     checkAnswer(
       sql("select STRINGField, `date`, intField from test_parquet_partitioned_cache_test"),
       sql(
@@ -534,6 +554,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
 
 /**
  * A suite of tests for the Parquet support through the data sources API.
+  * 通过数据源API为Parquet支持提供一套测试
  */
 class ParquetSourceSuite extends ParquetPartitioningTest {
   override def beforeAll(): Unit = {
@@ -584,11 +605,12 @@ class ParquetSourceSuite extends ParquetPartitioningTest {
       )
     """)
   }
-
+  //确保使用最新的页脚
   test("SPARK-6016 make sure to use the latest footers") {
     sql("drop table if exists spark_6016_fix")
 
     // Create a DataFrame with two partitions. So, the created table will have two parquet files.
+    //创建一个具有两个分区的DataFrame,所以,创建的表将有两个parquet文件。
     val df1 = read.json(sparkContext.parallelize((1 to 10).map(i => s"""{"a":$i}"""), 2))
     df1.write.mode(SaveMode.Overwrite).format("parquet").saveAsTable("spark_6016_fix")
     checkAnswer(
@@ -597,6 +619,7 @@ class ParquetSourceSuite extends ParquetPartitioningTest {
     )
 
     // Create a DataFrame with four partitions. So, the created table will have four parquet files.
+    //用四个分区创建一个DataFrame。 所以，创建的表将有四个parquet文件。
     val df2 = read.json(sparkContext.parallelize((1 to 10).map(i => s"""{"b":$i}"""), 4))
     df2.write.mode(SaveMode.Overwrite).format("parquet").saveAsTable("spark_6016_fix")
     // For the bug of SPARK-6016, we are caching two outdated footers for df1. Then,
@@ -610,7 +633,7 @@ class ParquetSourceSuite extends ParquetPartitioningTest {
 
     sql("drop table spark_6016_fix")
   }
-
+  //与Hive中的struct数组的兼容性
   test("SPARK-8811: compatibility with array of struct in Hive") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -635,7 +658,7 @@ class ParquetSourceSuite extends ParquetPartitioningTest {
       }
     }
   }
-
+  //存储在parquet中的数组和地图中的值总是为空
   test("values in arrays and maps stored in parquet are always nullable") {
     val df = createDataFrame(Tuple2(Map(2 -> 3), Seq(4, 5, 6)) :: Nil).toDF("m", "a")
     val mapType1 = MapType(IntegerType, IntegerType, valueContainsNull = false)
@@ -663,7 +686,7 @@ class ParquetSourceSuite extends ParquetPartitioningTest {
         Row(Map(2 -> 3), Seq(4, 5, 6)))
     }
   }
-
+  //聚合属性名称不能包含特殊字符
   test("Aggregation attribute names can't contain special chars \" ,;{}()\\n\\t=\"") {
     val tempDir = Utils.createTempDir()
     val filePath = new File(tempDir, "testParquet").getCanonicalPath
@@ -683,6 +706,7 @@ class ParquetSourceSuite extends ParquetPartitioningTest {
 
 /**
  * A collection of tests for parquet data with various forms of partitioning.
+  * 用于具有各种形式分割的Parquet数据的测试集合。
  */
 abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with BeforeAndAfterAll {
   override def _sqlContext: SQLContext = TestHive
@@ -752,6 +776,7 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
 
   /**
    * Drop named tables if they exist
+    * 删除命名表，如果它们存在
    * @param tableNames tables to drop
    */
   def dropTables(tableNames: String*): Unit = {
@@ -870,6 +895,7 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
     }
 
     // Re-enable this after SPARK-5508 is fixed
+    //SPARK-5508固定后重新启用
     ignore(s"SPARK-5775 read array from $table") {
       checkAnswer(
         sql(s"SELECT arrayField, p FROM $table WHERE p = 1"),

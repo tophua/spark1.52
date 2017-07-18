@@ -32,7 +32,7 @@ class ErrorPositionSuite extends QueryTest with BeforeAndAfter {
   before {
     Seq((1, 1, 1)).toDF("a", "a", "b").registerTempTable("dupAttributes")
   }
-
+  //模糊属性参考1
   positionTest("ambiguous attribute reference 1",
     "SELECT a from dupAttributes", "a")
 
@@ -111,7 +111,7 @@ class ErrorPositionSuite extends QueryTest with BeforeAndAfter {
   /**
    * Creates a test that checks to see if the error thrown when analyzing a given query includes
    * the location of the given token in the query string.
-   *
+   **创建一个测试，检查是否在分析给定查询时抛出的错误包括查询字符串中给定令牌的位置。
    * @param name the name of the test
    * @param query the query to analyze
    * @param token a unique token in the string that should be indicated by the exception

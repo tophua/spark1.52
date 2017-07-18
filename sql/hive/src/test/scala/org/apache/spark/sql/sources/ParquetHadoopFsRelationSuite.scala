@@ -34,12 +34,13 @@ class ParquetHadoopFsRelationSuite extends HadoopFsRelationTest {
   import sqlContext.implicits._
 
   // Parquet does not play well with NullType.
+  //Parquet与NullType不兼容。
   override protected def supportsDataType(dataType: DataType): Boolean = dataType match {
     case _: NullType => false
     case _: CalendarIntervalType => false
     case _ => true
   }
-
+  //save（）/ load（） - 分区表 - 简单查询 - 数据中的分区列
   test("save()/load() - partitioned table - simple queries - partition columns in data") {
     withTempDir { file =>
       val basePath = new Path(file.getCanonicalPath)
@@ -63,7 +64,7 @@ class ParquetHadoopFsRelationSuite extends HadoopFsRelationTest {
           .load(file.getCanonicalPath))
     }
   }
-
+  //临时目录应该被忽略
   test("SPARK-7868: _temporary directories should be ignored") {
     withTempPath { dir =>
       val df = Seq("a", "b", "c").zipWithIndex.toDF()
@@ -79,7 +80,7 @@ class ParquetHadoopFsRelationSuite extends HadoopFsRelationTest {
       checkAnswer(read.format("parquet").load(dir.getCanonicalPath), df.collect())
     }
   }
-
+  //当SaveMode不是SaveMode.Append时，避免扫描输出目录
   test("SPARK-8014: Avoid scanning output directory when SaveMode isn't SaveMode.Append") {
     withTempDir { dir =>
       val path = dir.getCanonicalPath
@@ -87,33 +88,39 @@ class ParquetHadoopFsRelationSuite extends HadoopFsRelationTest {
 
       // Creates an arbitrary file.  If this directory gets scanned, ParquetRelation2 will throw
       // since it's not a valid Parquet file.
+      //创建一个任意文件。 如果该目录被扫描，ParquetRelation2将抛出
+      //因为它不是一个有效的Parquet文件。
       val emptyFile = new File(path, "empty")
       Files.createParentDirs(emptyFile)
       Files.touch(emptyFile)
 
       // This shouldn't throw anything.
+      //这不应该扔任何东西。
       df.write.format("parquet").mode(SaveMode.Ignore).save(path)
 
       // This should only complain that the destination directory already exists, rather than file
       // "empty" is not a Parquet file.
+      //这应该只是抱怨目的地目录已经存在，而不是文件“empty”不是Parquet文件
       assert {
         intercept[AnalysisException] {
           df.write.format("parquet").mode(SaveMode.ErrorIfExists).save(path)
         }.getMessage.contains("already exists")
       }
 
-      // This shouldn't throw anything.
+      // This shouldn't throw anything. 这不应该扔任何东西。
       df.write.format("parquet").mode(SaveMode.Overwrite).save(path)
       checkAnswer(read.format("parquet").load(path), df)
     }
   }
-
+  //避免从BaseWriterContainer.abortJob抛出NPE
   test("SPARK-8079: Avoid NPE thrown from BaseWriterContainer.abortJob") {
     withTempPath { dir =>
       intercept[AnalysisException] {
         // Parquet doesn't allow field names with spaces.  Here we are intentionally making an
         // exception thrown from the `ParquetRelation2.prepareForWriteJob()` method to trigger
         // the bug.  Please refer to spark-8079 for more details.
+        // Parquet不允许带空格的字段名称。 在这里我们有意制作从“ParquetRelation2.prepareForWriteJob（）”方法抛出的异常触发
+        // 错误。 更多详情请参考spark-8079。
         range(1, 10)
           .withColumnRenamed("id", "a b")
           .write
@@ -122,7 +129,7 @@ class ParquetHadoopFsRelationSuite extends HadoopFsRelationTest {
       }
     }
   }
-
+  //Parquet数据源应该在附加的时候写入汇总文件
   test("SPARK-8604: Parquet data source should write summary file while doing appending") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath
@@ -143,7 +150,7 @@ class ParquetHadoopFsRelationSuite extends HadoopFsRelationTest {
       assert(fs.exists(commonSummaryPath))
     }
   }
-
+  //投影和过滤器应保持实物计划
   test("SPARK-10334 Projections and filters should be kept in physical plan") {
     withTempPath { dir =>
       val path = dir.getCanonicalPath

@@ -29,6 +29,7 @@ class SimpleTextHadoopFsRelationSuite extends HadoopFsRelationTest {
 
   // We have a very limited number of supported types at here since it is just for a
   // test relation and we do very basic testing at here.
+  //我们在这里支持的类型数量非常有限，因为它只是一个测试关系,我们在这里进行非常基本的测试。
   override protected def supportsDataType(dataType: DataType): Boolean = dataType match {
     case _: BinaryType => false
     // We are using random data generator and the generated strings are not really valid string.
@@ -43,7 +44,7 @@ class SimpleTextHadoopFsRelationSuite extends HadoopFsRelationTest {
     case _: UserDefinedType[_] => false
     case _ => true
   }
-
+  //save（）/ load（） - 分区表 - 简单查询 - 数据中的分区列
   test("save()/load() - partitioned table - simple queries - partition columns in data") {
     withTempDir { file =>
       val basePath = new Path(file.getCanonicalPath)

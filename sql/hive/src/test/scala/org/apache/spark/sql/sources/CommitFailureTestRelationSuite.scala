@@ -30,13 +30,16 @@ class CommitFailureTestRelationSuite extends SparkFunSuite with SQLTestUtils {
   private val sqlContext = _sqlContext
 
   // When committing a task, `CommitFailureTestSource` throws an exception for testing purpose.
+  //提交任务时，“CommitFailureTestSource”会为测试目的引发异常
   val dataSourceName: String = classOf[CommitFailureTestSource].getCanonicalName
-
+  //commitTask（）失败应该回退到abortTask（）
   test("SPARK-7684: commitTask() failure should fallback to abortTask()") {
     withTempPath { file =>
       // Here we coalesce partition number to 1 to ensure that only a single task is issued.  This
       // prevents race condition happened when FileOutputCommitter tries to remove the `_temporary`
       // directory while committing/aborting the job.  See SPARK-8513 for more details.
+      //这里我们将分区号合并为1，以确保只发出一个任务, 这个防止当FileOutputCommitter尝试删除`_temporary`时发生竞争条件
+      //目录提交/中止作业, 有关详细信息，请参阅SPARK-8513
       val df = sqlContext.range(0, 10).coalesce(1)
       intercept[SparkException] {
         df.write.format(dataSourceName).save(file.getCanonicalPath)

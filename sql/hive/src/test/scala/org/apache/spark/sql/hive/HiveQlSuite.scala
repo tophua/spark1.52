@@ -175,7 +175,7 @@ class HiveQlSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(desc.serde == Option("org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe"))
     assert(desc.properties == Map(("tbl_p1" -> "p11"), ("tbl_p2" -> "p22")))
   }
-
+  //无效的间隔期限应该把analysisexception
   test("Invalid interval term should throw AnalysisException") {
     def assertError(sql: String, errorMessage: String): Unit = {
       val e = intercept[AnalysisException] {

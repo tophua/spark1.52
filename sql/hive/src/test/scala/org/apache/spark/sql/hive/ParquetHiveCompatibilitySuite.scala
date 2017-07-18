@@ -33,6 +33,7 @@ class ParquetHiveCompatibilitySuite extends ParquetCompatibilityTest with Before
 
   /**
    * Set the staging directory (and hence path to ignore Parquet files under)
+    * 设置暂存目录（因此，忽略Parquet文件的路径）
    * to that set by [[HiveConf.ConfVars.STAGINGDIR]].
    */
   private val stagingDir = new HiveConf().getVar(HiveConf.ConfVars.STAGINGDIR)
@@ -67,9 +68,11 @@ class ParquetHiveCompatibilitySuite extends ParquetCompatibilityTest with Before
         val path = dir.getCanonicalPath
 
         // Hive columns are always nullable, so here we append a all-null row.
+        //Hive列总是可空的，所以这里我们附加一个全空的行
         val rows = row :: Row(Seq.fill(row.length)(null): _*) :: Nil
 
         // Don't convert Hive metastore Parquet tables to let Hive write those Parquet files.
+        //不要转换Hive转移的Parquet表,让Hive写这些Parquet文件
         withSQLConf(HiveContext.CONVERT_METASTORE_PARQUET.key -> "false") {
           withTempTable("data") {
             val fields = hiveTypes.zipWithIndex.map { case (typ, index) => s"  col_$index $typ" }
@@ -100,19 +103,21 @@ class ParquetHiveCompatibilitySuite extends ParquetCompatibilityTest with Before
 
         // Unfortunately parquet-hive doesn't add `UTF8` annotation to BINARY when writing strings.
         // Have to assume all BINARY values are strings here.
+        //不幸的是，编写字符串时，parquet-hive不会将“UTF8”注释添加到BINARY。
+        //必须假设所有BINARY值都是字符串。
         withSQLConf(SQLConf.PARQUET_BINARY_AS_STRING.key -> "true") {
           checkAnswer(sqlContext.read.parquet(path), rows)
         }
       }
     }
   }
-
+  //简单的原始
   test("simple primitives") {
     testParquetHiveCompatibility(
       Row(true, 1.toByte, 2.toShort, 3, 4.toLong, 5.1f, 6.1d, "foo"),
       "BOOLEAN", "TINYINT", "SMALLINT", "INT", "BIGINT", "FLOAT", "DOUBLE", "STRING")
   }
-
+  //时间戳
   test("SPARK-10177 timestamp") {
     testParquetHiveCompatibility(Row(Timestamp.valueOf("2015-08-24 00:31:00")), "TIMESTAMP")
   }
@@ -140,6 +145,7 @@ class ParquetHiveCompatibilitySuite extends ParquetCompatibilityTest with Before
   }
 
   // HIVE-11625: Parquet map entries with null keys are dropped by Hive
+  //使用空键映射条目
   ignore("map entries with null keys") {
     testParquetHiveCompatibility(
       Row(

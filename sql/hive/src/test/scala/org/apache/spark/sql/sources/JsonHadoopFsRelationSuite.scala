@@ -31,13 +31,14 @@ class JsonHadoopFsRelationSuite extends HadoopFsRelationTest {
   import sqlContext._
 
   // JSON does not write data of NullType and does not play well with BinaryType.
+  //JSON不会写入Null Type的数据，并且不能使用二进制类型播放
   override protected def supportsDataType(dataType: DataType): Boolean = dataType match {
     case _: NullType => false
     case _: BinaryType => false
     case _: CalendarIntervalType => false
     case _ => true
   }
-
+  //save（）/ load（） - 分区表 - 简单查询 - 数据中的分区列
   test("save()/load() - partitioned table - simple queries - partition columns in data") {
     withTempDir { file =>
       val basePath = new Path(file.getCanonicalPath)
@@ -60,7 +61,7 @@ class JsonHadoopFsRelationSuite extends HadoopFsRelationTest {
           .load(file.getCanonicalPath))
     }
   }
-
+  //将复杂类型保存到JSON
   test("SPARK-9894: save complex types to JSON") {
     withTempDir { file =>
       file.delete()
@@ -75,17 +76,17 @@ class JsonHadoopFsRelationSuite extends HadoopFsRelationTest {
           Row(Seq(5L, 6L, 7L), Map("m2" -> Row(10L))) :: Nil
       val df = createDataFrame(sparkContext.parallelize(data), schema)
 
-      // Write the data out.
+      // Write the data out.写出数据
       df.write.format(dataSourceName).save(file.getCanonicalPath)
 
-      // Read it back and check the result.
+      // Read it back and check the result. 把它读回来检查结果
       checkAnswer(
         read.format(dataSourceName).schema(schema).load(file.getCanonicalPath),
         df
       )
     }
   }
-
+  //将十进制类型保存到JSON
   test("SPARK-10196: save decimal type to JSON") {
     withTempDir { file =>
       file.delete()
@@ -100,10 +101,10 @@ class JsonHadoopFsRelationSuite extends HadoopFsRelationTest {
           Row(new BigDecimal("10000")) :: Nil
       val df = createDataFrame(sparkContext.parallelize(data), schema)
 
-      // Write the data out.
+      // Write the data out. 写出数据
       df.write.format(dataSourceName).save(file.getCanonicalPath)
 
-      // Read it back and check the result.
+      // Read it back and check the result. 把它读回来检查结果
       checkAnswer(
         read.format(dataSourceName).schema(schema).load(file.getCanonicalPath),
         df

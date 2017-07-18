@@ -30,7 +30,7 @@ class QueryPartitionSuite extends QueryTest with SQLTestUtils {
   import ctx.implicits._
 
   protected def _sqlContext = ctx
-
+  //当路径不存在时查询数据
   test("SPARK-5068: query data when path doesn't exist"){
     withSQLConf((SQLConf.HIVE_VERIFY_PARTITION_PATH.key, "true")) {
       val testData = ctx.sparkContext.parallelize(
@@ -38,7 +38,7 @@ class QueryPartitionSuite extends QueryTest with SQLTestUtils {
       testData.registerTempTable("testData")
 
       val tmpDir = Files.createTempDir()
-      // create the table for test
+      // create the table for test 创建表进行测试
       sql(s"CREATE TABLE table_with_partition(key int,value string) " +
         s"PARTITIONED by (ds string) location '${tmpDir.toURI.toString}' ")
       sql("INSERT OVERWRITE TABLE table_with_partition  partition (ds='1') " +
@@ -50,17 +50,17 @@ class QueryPartitionSuite extends QueryTest with SQLTestUtils {
       sql("INSERT OVERWRITE TABLE table_with_partition  partition (ds='4') " +
         "SELECT key,value FROM testData")
 
-      // test for the exist path
+      // test for the exist path 测试存在的路径
       checkAnswer(sql("select key,value from table_with_partition"),
         testData.toDF.collect ++ testData.toDF.collect
           ++ testData.toDF.collect ++ testData.toDF.collect)
 
-      // delete the path of one partition
+      // delete the path of one partition 删除一个分区的路径
       tmpDir.listFiles
         .find { f => f.isDirectory && f.getName().startsWith("ds=") }
         .foreach { f => Utils.deleteRecursively(f) }
 
-      // test for after delete the path
+      // test for after delete the path 测试后删除路径
       checkAnswer(sql("select key,value from table_with_partition"),
         testData.toDF.collect ++ testData.toDF.collect ++ testData.toDF.collect)
 

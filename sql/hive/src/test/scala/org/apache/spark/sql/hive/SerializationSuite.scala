@@ -21,7 +21,7 @@ import org.apache.spark.{SparkConf, SparkFunSuite}
 import org.apache.spark.serializer.JavaSerializer
 
 class SerializationSuite extends SparkFunSuite {
-
+  //HiveContext应该是可序列化的
   test("[SPARK-5840] HiveContext should be serializable") {
     val hiveContext = org.apache.spark.sql.hive.test.TestHive
     hiveContext.hiveconf

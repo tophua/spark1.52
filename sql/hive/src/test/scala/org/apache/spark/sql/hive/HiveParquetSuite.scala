@@ -26,7 +26,7 @@ case class Cases(lower: String, UPPER: String)
 class HiveParquetSuite extends QueryTest with ParquetTest {
   private val ctx = TestHive
   override def _sqlContext: SQLContext = ctx
-
+  //不区分大小写的属性名
   test("Case insensitive attribute names") {
     withParquetTable((1 to 4).map(i => Cases(i.toString, i.toString)), "cases") {
       val expected = (1 to 4).map(i => Row(i.toString))
@@ -34,7 +34,7 @@ class HiveParquetSuite extends QueryTest with ParquetTest {
       checkAnswer(sql("SELECT LOWER FROM cases"), expected)
     }
   }
-
+  //
   test("SELECT on Parquet table") {
     val data = (1 to 4).map(i => (i, s"val_$i"))
     withParquetTable(data, "t") {

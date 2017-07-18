@@ -83,6 +83,8 @@ class SimpleTextOutputWriter(path: String, context: TaskAttemptContext) extends 
  * A simple example [[HadoopFsRelation]], used for testing purposes.  Data are stored as comma
  * separated string lines.  When scanning data, schema must be explicitly provided via data source
  * option `"dataSchema"`.
+  * 一个简单的例子[[HadoopFsRelation]]，用于测试目的。数据存储为逗号分隔的字符串行。
+  * 扫描数据时，模式必须通过数据源明确提供选项`“dataSchema”`。
  */
 class SimpleTextRelation(
     override val paths: Array[String],
@@ -117,8 +119,10 @@ class SimpleTextRelation(
       Row(record.split(",", -1).zip(fields).map { case (v, dataType) =>
         val value = if (v == "") null else v
         // `Cast`ed values are always of Catalyst types (i.e. UTF8String instead of String, etc.)
+        //“Cast”的值总是Catalyst类型（即UTF8String而不是String等）
         val catalystValue = Cast(Literal(value), dataType).eval()
         // Here we're converting Catalyst values to Scala values to test `needsConversion`
+        //这里我们将Catalyst值转换为Scala值来测试`needsConversion`
         CatalystTypeConverters.convertToScala(catalystValue, dataType)
       }: _*)
     }

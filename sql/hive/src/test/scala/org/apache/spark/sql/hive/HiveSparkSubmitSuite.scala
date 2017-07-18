@@ -38,12 +38,14 @@ import org.apache.spark.util.{ResetSystemProperties, Utils}
 
 /**
  * This suite tests spark-submit with applications using HiveContext.
+  * 这个测试套件提供的应用程序使用hivecontext Spark。
  */
 class HiveSparkSubmitSuite
   extends SparkFunSuite
   with Matchers
   // This test suite sometimes gets extremely slow out of unknown reason on Jenkins.  Here we
   // add a timestamp to provide more diagnosis information.
+    // 这个测试套件有时会因为杰金斯的不明原因而变得非常慢,在这里,我们添加时间戳以提供更多的诊断信息。
   with ResetSystemProperties
   with Timeouts {
 
@@ -52,7 +54,7 @@ class HiveSparkSubmitSuite
   def beforeAll() {
     System.setProperty("spark.testing", "true")
   }
-
+  //包括通过--jars传递的jars
   ignore("SPARK-8368: includes jars passed in through --jars") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val jar1 = TestUtils.createJarWithClasses(Seq("SparkSubmitClassA"))
@@ -70,7 +72,7 @@ class HiveSparkSubmitSuite
       unusedJar.toString, "SparkSubmitClassA", "SparkSubmitClassB")
     runSparkSubmit(args)
   }
-
+  //在spark conf中设置sql conf
   ignore("SPARK-8020: set sql conf in spark conf") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
@@ -82,7 +84,7 @@ class HiveSparkSubmitSuite
       unusedJar.toString)
     runSparkSubmit(args)
   }
-
+  //反射时缺少需求错误
   ignore("SPARK-8489: MissingRequirementError during reflection") {
     // This test uses a pre-built jar to test SPARK-8489. In a nutshell, this test creates
     // a HiveContext and uses it to create a data frame from an RDD using reflection.
@@ -97,7 +99,7 @@ class HiveSparkSubmitSuite
       testJar)
     runSparkSubmit(args)
   }
-
+  //使用小数列的Parquet关系
   ignore("SPARK-9757 Persist Parquet relation with decimal column") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
@@ -107,7 +109,7 @@ class HiveSparkSubmitSuite
       unusedJar.toString)
     runSparkSubmit(args)
   }
-
+  //在群集模式下修复Window函数的错误结果
   ignore("SPARK-11009 fix wrong result of Window function in cluster mode") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
@@ -120,6 +122,8 @@ class HiveSparkSubmitSuite
 
   // NOTE: This is an expensive operation in terms of time (10 seconds+). Use sparingly.
   // This is copied from org.apache.spark.deploy.SparkSubmitSuite
+  ////注意：这是一个昂贵的操作时间（10秒+）。 谨慎使用
+  //这是从org.apache.spark.deploy.SparkSubmitSuite复制
   private def runSparkSubmit(args: Seq[String]): Unit = {
 
    // env.put("SPARK_HOME", sparkHome)
@@ -137,11 +141,13 @@ class HiveSparkSubmitSuite
 
     def captureOutput(source: String)(line: String): Unit = {
       // This test suite has some weird behaviors when executed on Jenkins:
-      //
+      //这个测试套件在Jenkins执行时有一些奇怪的行为：
       // 1. Sometimes it gets extremely slow out of unknown reason on Jenkins.  Here we add a
-      //    timestamp to provide more diagnosis information.
+      //    timestamp to provide more diagnosis information.有时候，詹金斯因为不明原因而变得非常慢。
+      //     这里我们加一个时间戳来提供更多的诊断信息。
       // 2. Log lines are not correctly redirected to unit-tests.log as expected, so here we print
-      //    them out for debugging purposes.
+      //    them out for debugging purposes.日志行没有按预期正确地重定向到unit-tests.log，所以我们在这里打印
+      //    它们用于调试目的。
       val logLine = s"${new Timestamp(new Date().getTime)} - $source> $line"
       // scalastyle:off println
       println(logLine)
@@ -157,6 +163,7 @@ class HiveSparkSubmitSuite
       if (exitCode != 0) {
         // include logs in output. Note that logging is async and may not have completed
         // at the time this exception is raised
+        //包括输出中的日志。 请注意，日志记录是异步的，可能还没有完成在引发异常时
         Thread.sleep(1000)
         val historyLog = history.mkString("\n")
         fail {
@@ -176,6 +183,7 @@ class HiveSparkSubmitSuite
         case t: Throwable => throw t
     } finally {
       // Ensure we still kill the process in case it timed out
+      //确保我们仍然杀死进程，以防超时
       process.destroy()
     }
   }
@@ -183,6 +191,7 @@ class HiveSparkSubmitSuite
 
 // This object is used for testing SPARK-8368: https://issues.apache.org/jira/browse/SPARK-8368.
 // We test if we can load user jars in both driver and executors when HiveContext is used.
+//我们测试当使用HiveContext时是否可以在驱动程序和执行程序中加载用户jar。
 object SparkSubmitClassLoaderTest extends Logging {
   def main(args: Array[String]) {
     Utils.configTestLog4j("INFO")
@@ -192,6 +201,7 @@ object SparkSubmitClassLoaderTest extends Logging {
     val df = hiveContext.createDataFrame((1 to 100).map(i => (i, i))).toDF("i", "j")
     logInfo("Testing load classes at the driver side.")
     // First, we load classes at driver side.
+    //首先,我们在驱动程序方面加载类。
     try {
       Utils.classForName(args(0))
       Utils.classForName(args(1))
@@ -200,6 +210,7 @@ object SparkSubmitClassLoaderTest extends Logging {
         throw new Exception("Could not load user class from jar:\n", t)
     }
     // Second, we load classes at the executor side.
+    //其次,我们在执行者方面加载课程
     logInfo("Testing load classes at the executor side.")
     val result = df.mapPartitions { x =>
       var exception: String = null
@@ -218,6 +229,7 @@ object SparkSubmitClassLoaderTest extends Logging {
     }
 
     // Load a Hive UDF from the jar.
+    //从jar加载Hive UDF
     logInfo("Registering temporary Hive UDF provided in a jar.")
     hiveContext.sql(
       """
@@ -228,6 +240,7 @@ object SparkSubmitClassLoaderTest extends Logging {
       hiveContext.createDataFrame((1 to 10).map(i => (i, s"str$i"))).toDF("key", "val")
     source.registerTempTable("sourceTable")
     // Load a Hive SerDe from the jar.
+    //从jar加载一个Hive SerDe
     logInfo("Creating a Hive table with a SerDe provided in a jar.")
     hiveContext.sql(
       """
@@ -235,6 +248,7 @@ object SparkSubmitClassLoaderTest extends Logging {
         |ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
       """.stripMargin)
     // Actually use the loaded UDF and SerDe.
+    //实际上使用加载的UDF和SerDe
     logInfo("Writing data into the table.")
     hiveContext.sql(
       "INSERT INTO TABLE t1 SELECT example_max(key) as key, val FROM sourceTable GROUP BY val")
@@ -268,20 +282,24 @@ object SparkSQLConfTest extends Logging {
           conf == "spark.sql.hive.metastore.version" || conf == "spark.sql.hive.metastore.jars"
         }
         // If there is any metastore settings, remove them.
+        //如果有任何转移设置，请删除它们
         val filteredSettings = super.getAll.filterNot(e => isMetastoreSetting(e._1))
 
         // Always add these two metastore settings at the beginning.
+        //始终在开头添加这两个转移设置
         ("spark.sql.hive.metastore.version" -> "0.12") +:
         ("spark.sql.hive.metastore.jars" -> "maven") +:
         filteredSettings
       }
 
       // For this simple test, we do not really clone this object.
+      //对于这个简单的测试,我们不会克隆这个对象。
       override def clone: SparkConf = this
     }
     val sc = new SparkContext(conf)
     val hiveContext = new TestHiveContext(sc)
     // Run a simple command to make sure all lazy vals in hiveContext get instantiated.
+    //运行一个简单的命令来确保hiveContext中的所有延迟值都被实例化
     hiveContext.tables().collect()
     sc.stop()
   }

@@ -31,7 +31,7 @@ import org.apache.spark.{Logging, SparkFunSuite}
 
 
 class HiveMetastoreCatalogSuite extends SparkFunSuite with Logging {
-
+  //结构域应接受子列名称中的下划线
   test("struct field should accept underscore in sub-column name") {
     val hiveTypeStr = "struct<a: int, b_1: string, c: string>"
     val dateType = HiveMetastoreTypes.toDataType(hiveTypeStr)
@@ -44,7 +44,7 @@ class HiveMetastoreCatalogSuite extends SparkFunSuite with Logging {
       HiveMetastoreTypes.toMetastoreType(udt)
     }
   }
-
+  //复制元数据的关系
   test("duplicated metastore relations") {
     val df = sql("SELECT * FROM src")
     logInfo(df.queryExecution.toString)

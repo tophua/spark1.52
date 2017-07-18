@@ -34,7 +34,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
 
     assert(metastoreTable.serdeProperties("path") === expectedPath)
   }
-
+  //saveAsTable（）到非默认数据库 - 使用USE - 覆盖
   test(s"saveAsTable() to non-default database - with USE - Overwrite") {
     withTempDatabase { db =>
       activateDatabase(db) {
@@ -49,7 +49,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       checkTablePath(db, "t")
     }
   }
-
+  //saveAsTable（）到非默认数据库 - 不使用 - 覆盖
   test(s"saveAsTable() to non-default database - without USE - Overwrite") {
     withTempDatabase { db =>
       df.write.mode(SaveMode.Overwrite).saveAsTable(s"$db.t")
@@ -59,7 +59,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       checkTablePath(db, "t")
     }
   }
-
+  //createExternalTable（）到非默认数据库 - 使用USE
   test(s"createExternalTable() to non-default database - with USE") {
     withTempDatabase { db =>
       activateDatabase(db) {
@@ -85,7 +85,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       }
     }
   }
-
+  //createExternalTable（）到非默认数据库 - 不使用
   test(s"createExternalTable() to non-default database - without USE") {
     withTempDatabase { db =>
       withTempPath { dir =>
@@ -109,7 +109,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       }
     }
   }
-
+  //saveAsTable（）到非默认数据库 - 使用USE - 追加
   test(s"saveAsTable() to non-default database - with USE - Append") {
     withTempDatabase { db =>
       activateDatabase(db) {
@@ -125,7 +125,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       checkTablePath(db, "t")
     }
   }
-
+  //saveAsTable（）到非默认数据库 - 不使用 - 附加
   test(s"saveAsTable() to non-default database - without USE - Append") {
     withTempDatabase { db =>
       df.write.mode(SaveMode.Overwrite).saveAsTable(s"$db.t")
@@ -136,7 +136,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       checkTablePath(db, "t")
     }
   }
-
+  //insertInto（）非默认数据库 - 使用USE
   test(s"insertInto() non-default database - with USE") {
     withTempDatabase { db =>
       activateDatabase(db) {
@@ -162,7 +162,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       checkAnswer(sqlContext.table(s"$db.t"), df.unionAll(df))
     }
   }
-
+  //在非默认数据库中查找表
   test("Looks up tables in non-default database") {
     withTempDatabase { db =>
       activateDatabase(db) {
@@ -173,7 +173,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       checkAnswer(sqlContext.table(s"$db.t"), sqlContext.emptyDataFrame)
     }
   }
-
+  //在非默认数据库中删除表
   test("Drops a table in a non-default database") {
     withTempDatabase { db =>
       activateDatabase(db) {
@@ -195,7 +195,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       assert(!sqlContext.tableNames(db).contains("t"))
     }
   }
-
+  //刷新非默认数据库中的表 - 使用USE
   test("Refreshes a table in a non-default database - with USE") {
     import org.apache.spark.sql.functions.lit
 
@@ -228,7 +228,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       }
     }
   }
-
+  //刷新非默认数据库中的表 - 不使用
   test("Refreshes a table in a non-default database - without USE") {
     import org.apache.spark.sql.functions.lit
 
@@ -259,7 +259,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       }
     }
   }
-
+  //无效的数据库名称和表名
   test("invalid database name and table names") {
     {
       val message = intercept[AnalysisException] {
