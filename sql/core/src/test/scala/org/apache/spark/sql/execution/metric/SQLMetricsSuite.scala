@@ -81,6 +81,7 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
     //获得Jobs列表
     val jobs = ctx.listener.getExecution(executionId).get.jobs
     // Use "<=" because there is a race condition that we may miss some jobs
+    //使用“<=”，因为有竞争条件，我们可能会错过一些工作
     // TODO Change it to "=" once we fix the race condition that missing the JobStarted event.
     assert(jobs.size <= expectedNumOfJobs)
     if (jobs.size == expectedNumOfJobs) {
@@ -508,6 +509,8 @@ class SQLMetricsSuite extends SparkFunSuite with SharedSQLContext {
       val metricValues = ctx.listener.getExecutionMetrics(executionId)
       // Because "save" will create a new DataFrame internally, we cannot get the real metric id.
       // However, we still can check the value.
+      //因为“保存”会在内部创建一个新的DataFrame，所以我们无法获取真正的度量标识。
+      //但是，我们仍然可以检查值。
       assert(metricValues.values.toSeq === Seq(2L))
     }
   }

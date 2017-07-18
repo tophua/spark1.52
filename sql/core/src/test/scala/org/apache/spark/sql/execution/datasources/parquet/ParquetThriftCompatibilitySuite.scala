@@ -50,6 +50,7 @@ class ParquetThriftCompatibilitySuite extends ParquetCompatibilityTest with Shar
         s"val_$i",
         s"val_$i",
         // Thrift ENUM values are converted to Parquet binaries containing UTF-8 strings
+        //节省ENUM值将转换为包含UTF-8字符串的Parquet二进制文件
         suits(i % 4),
 
         nullable(i % 2 == 0: java.lang.Boolean),

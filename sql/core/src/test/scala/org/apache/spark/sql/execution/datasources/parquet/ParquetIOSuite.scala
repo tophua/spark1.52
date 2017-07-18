@@ -672,6 +672,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
       }
     } finally {
       // Hadoop 1 doesn't have `Configuration.unset`
+      //Hadoop 1没有`Configuration.unset`
       configuration.clear()
       clonedConf.foreach(entry => configuration.set(entry.getKey, entry.getValue))
     }

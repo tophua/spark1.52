@@ -316,6 +316,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
     // Since the ID is only materialized once, then all of the records
     // should come from the cache, not by re-computing. Otherwise, the ID
     // will be different
+    //由于ID只实现一次,所有的记录应该来自缓存,而不是重新计算, 否则 ID会不同
     assert(d0.map(_(0)) === d2.map(_(0)))
     assert(d0.map(_(1)) === d2.map(_(1)))
 

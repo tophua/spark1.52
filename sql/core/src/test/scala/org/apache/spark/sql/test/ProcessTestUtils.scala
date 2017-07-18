@@ -34,6 +34,7 @@ object ProcessTestUtils {
       } catch { case _: IOException =>
         // Ignores the IOException thrown when the process termination, which closes the input
         // stream abruptly.
+        //忽略当进程终止时抛出的IOException，它关闭输入流
       }
     }
   }

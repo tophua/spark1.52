@@ -248,21 +248,25 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
           s"$child output partitioning does not satisfy $requiredDist:\n$outputPlan")
     }
   }
-
+  //确保具有满足分发的不兼容子分区的要求
   test("EnsureRequirements with incompatible child partitionings which satisfy distribution") {
     // Consider an operator that requires inputs that are clustered by two expressions (e.g.
     // sort merge join where there are multiple columns in the equi-join condition)
+    //考虑一个需要由两个表达式聚类的输入的运算符（例如，排序合并连接，等于连接条件中有多个列）
     val clusteringA = Literal(1) :: Nil
     val clusteringB = Literal(2) :: Nil
     val distribution = ClusteredDistribution(clusteringA ++ clusteringB)
     // Say that the left and right inputs are each partitioned by _one_ of the two join columns:
+    //假设左和右输入都由两个连接列的_one_分隔：
     val leftPartitioning = HashPartitioning(clusteringA, 1)
     val rightPartitioning = HashPartitioning(clusteringB, 1)
     // Individually, each input's partitioning satisfies the clustering distribution:
+    //单独地，每个输入的分区满足聚类分布：
     assert(leftPartitioning.satisfies(distribution))
     assert(rightPartitioning.satisfies(distribution))
     // However, these partitionings are not compatible with each other, so we still need to
     // repartition both inputs prior to performing the join:
+    //但是，这些分区是不兼容的，所以我们仍然需要,在执行连接之前重新分配两个输入：
     assert(!leftPartitioning.compatibleWith(rightPartitioning))
     assert(!rightPartitioning.compatibleWith(leftPartitioning))
     val inputPlan = DummySparkPlan(
@@ -279,10 +283,11 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
       fail(s"Exchange should have been added:\n$outputPlan")
     }
   }
-
+  //确保具有不同数量输出分区的子分区的要求
   test("EnsureRequirements with child partitionings with different numbers of output partitions") {
     // This is similar to the previous test, except it checks that partitionings are not compatible
     // unless they produce the same number of partitions.
+    //这与以前的测试类似，只不过它检查分区是不兼容的除非它们产生相同数量的分区。
     val clustering = Literal(1) :: Nil
     val distribution = ClusteredDistribution(clustering)
     val inputPlan = DummySparkPlan(
@@ -296,11 +301,12 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
     val outputPlan = EnsureRequirements(sqlContext).apply(inputPlan)
     assertDistributionRequirementsAreSatisfied(outputPlan)
   }
-
+  //确保具有不满足分发的兼容子分区的要求
   test("EnsureRequirements with compatible child partitionings that do not satisfy distribution") {
     val distribution = ClusteredDistribution(Literal(1) :: Nil)
     // The left and right inputs have compatible partitionings but they do not satisfy the
     // distribution because they are clustered on different columns. Thus, we need to shuffle.
+    //左和右输入具有兼容的分区,但不符合分布，因为它们聚集在不同的列上。 因此，我们需要洗牌。
     val childPartitioning = HashPartitioning(Literal(2) :: Nil, 1)
     assert(!childPartitioning.satisfies(distribution))
     val inputPlan = DummySparkPlan(
@@ -317,9 +323,10 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
       fail(s"Exchange should have been added:\n$outputPlan")
     }
   }
-
+  //确保具有满足分发的兼容子分区的要求
   test("EnsureRequirements with compatible child partitionings that satisfy distribution") {
     // In this case, all requirements are satisfied and no exchange should be added.
+    //在这种情况下,所有要求都得到满足,不得添加任何交换,
     val distribution = ClusteredDistribution(Literal(1) :: Nil)
     val childPartitioning = HashPartitioning(Literal(1) :: Nil, 5)
     assert(childPartitioning.satisfies(distribution))
@@ -339,6 +346,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
   }
 
   // This is a regression test for SPARK-9703
+  //这是SPARK-9703的回归测试如果只有订购要求不满足要求，则不要重新分配
   test("EnsureRequirements should not repartition if only ordering requirement is unsatisfied") {
     // Consider an operator that imposes both output distribution and  ordering requirements on its
     // children, such as sort sort merge join. If the distribution requirements are satisfied but
@@ -360,7 +368,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
       fail(s"No Exchanges should have been added:\n$outputPlan")
     }
   }
-
+  //当没有现有的订单时，EnsureRequirements会添加排序
   test("EnsureRequirements adds sort when there is no existing ordering") {
     val orderingA = SortOrder(Literal(1), Ascending)
     val orderingB = SortOrder(Literal(2), Ascending)
@@ -376,7 +384,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
       fail(s"Sort should have been added:\n$outputPlan")
     }
   }
-
+  //当需要排序是现有排序的前缀时，请务必跳过排序
   test("EnsureRequirements skips sort when required ordering is prefix of existing ordering") {
     val orderingA = SortOrder(Literal(1), Ascending)
     val orderingB = SortOrder(Literal(2), Ascending)
@@ -394,6 +402,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
   }
 
   // This is a regression test for SPARK-11135
+  //EnsureRequirements在需要时添加排序，而不是现有排序的前缀
   test("EnsureRequirements adds sort when required ordering isn't a prefix of existing ordering") {
     val orderingA = SortOrder(Literal(1), Ascending)
     val orderingB = SortOrder(Literal(2), Ascending)

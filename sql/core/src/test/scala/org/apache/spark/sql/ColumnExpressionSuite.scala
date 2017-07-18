@@ -518,6 +518,8 @@ class ColumnExpressionSuite extends QueryTest with SharedSQLContext {
 
     // Without the ending otherwise, return null for unmatched conditions.
     // Also test putting a non-literal value in the expression.
+    //如果没有结束，否则返回不匹配条件的null。
+    //也测试在表达式中放置非文字值。
     checkAnswer(
       testData.select(when($"key" === 1, lit(0) - $"key").when($"key" === 2, -2)),
       Seq(Row(-1), Row(-2), Row(null))

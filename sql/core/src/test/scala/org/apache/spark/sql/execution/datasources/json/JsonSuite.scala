@@ -337,7 +337,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
      *+--------------------+--------------------+--------------------+-------------------+--------------------+--------------------+--------------------+--------------------+-------------+--------------------+--------------------+---------------------+
       |       arrayOfArray1|       arrayOfArray2|   arrayOfBigInteger|     arrayOfBoolean|       arrayOfDouble|      arrayOfInteger|         arrayOfLong|         arrayOfNull|arrayOfString|       arrayOfStruct|              struct|structWithArrayFields|
       +--------------------+--------------------+--------------------+-------------------+--------------------+--------------------+--------------------+--------------------+-------------+--------------------+--------------------+---------------------+
-      |[WrappedArray(1, ...|[WrappedArray(1.0...|[9223372036854775...|[true, false, true]|[1.2, 1.797693134...|[1, 2147483647, -...|[21474836470, 922...|[null, null, null...| [str1, str2]|[[true,str1,null]...|[true,92233720368...| [WrappedArray(4, ...|
+      |[WrappedArray(1, ...|[WrappedArray(1.0...|[9223372036854775...|[true, false, true]|[1.2, 1.797693134...|[1, 2147483647, -...|[21474836470, 922...|[null, null, null...| [str1, str2]|[true,str1,null]...|[true,92233720368...| [WrappedArray(4, ...|
       +--------------------+--------------------+--------------------+-------------------+--------------------+--------------------+--------------------+--------------------+-------------+--------------------+--------------------+---------------------+ */
      sql("select * from jsonTable").show()
     checkAnswer(
@@ -497,6 +497,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
     )
 
     // Number and String conflict: resolve the type as number in this query.
+    //数字和字符串冲突：将此查询中的类型解析为数字
     checkAnswer(
       sql("select num_str + 1.2 from jsonTable where num_str >= 92233720368547758060"),
       Row(new java.math.BigDecimal("92233720368547758071.2"))
@@ -542,7 +543,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       Row(false)
     )
 
-    // The plan of the following DSL is
+    // The plan of the following DSL is v
     // Project [(CAST(num_str#65:4, DoubleType) + 1.2) AS num#78]
     //  Filter (CAST(CAST(num_str#65:4, DoubleType), DecimalType) > 92233720368547758060)
     //    ExistingRdd [num_bool#61,num_num_1#62L,num_num_2#63,num_num_3#64,num_str#65,str_bool#66]
@@ -555,7 +556,7 @@ class JsonSuite extends QueryTest with SharedSQLContext with TestJsonData {
       Row(new java.math.BigDecimal("92233720368547758071.2").doubleValue())
     )
 
-    // The following test will fail. The type of num_str is StringType.
+    // The following test will fail. The type of num_str is StringType. 以下测试将失败。 num_str的类型是StringType。
     // So, to evaluate num_str + 1.2, we first need to use Cast to convert the type.
     // In our test data, one value of num_str is 13.1.
     // The result of (CAST(num_str#65:4, DoubleType) + 1.2) for this value is 14.299999999999999,

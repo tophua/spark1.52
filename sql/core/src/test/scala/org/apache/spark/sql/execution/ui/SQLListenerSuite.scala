@@ -220,7 +220,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
 
     assert(listener.getExecutionMetrics(0) === accumulatorUpdates.mapValues(_ * 11))
   }
-
+  //onExecutionEnd发生在onJobEnd（JobSucceeded）之前
   test("onExecutionEnd happens before onJobEnd(JobSucceeded)") {
     val listener = new SQLListener(ctx)
     val executionId = 0
@@ -249,7 +249,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     assert(executionUIData.succeededJobs === Seq(0))
     assert(executionUIData.failedJobs.isEmpty)
   }
-
+  //onExecutionEnd发生在多个onJobEnd（JobSucceeded）之前
   test("onExecutionEnd happens before multiple onJobEnd(JobSucceeded)s") {
     val listener = new SQLListener(ctx)
     val executionId = 0
@@ -289,7 +289,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     assert(executionUIData.succeededJobs.sorted === Seq(0, 1))
     assert(executionUIData.failedJobs.isEmpty)
   }
-
+  //onExecutionEnd发生在onJobEnd（JobFailed）之前
   test("onExecutionEnd happens before onJobEnd(JobFailed)") {
     val listener = new SQLListener(ctx)
     val executionId = 0
@@ -318,7 +318,7 @@ class SQLListenerSuite extends SparkFunSuite with SharedSQLContext {
     assert(executionUIData.succeededJobs.isEmpty)
     assert(executionUIData.failedJobs === Seq(0))
   }
-
+    //运行noSQL作业时没有内存泄漏
   test("SPARK-11126: no memory leak when running non SQL jobs") {
     val previousStageNumber = sqlContext.listener.stageIdToStageMetrics.size
     sqlContext.sparkContext.parallelize(1 to 10).foreach(i => ())

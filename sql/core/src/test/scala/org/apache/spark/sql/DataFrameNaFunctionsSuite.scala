@@ -96,7 +96,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
       input.na.drop("all", Seq("age", "height")).select("name"),
       Row("Bob") :: Row("Alice") :: Row("David") :: Row("Nina") :: Nil)
   }
-
+  //删除与阈值
   test("drop with threshold") {
     val input = createDF()
     val rows = input.collect()
@@ -150,6 +150,7 @@ class DataFrameNaFunctionsSuite extends QueryTest with SharedSQLContext {
         Row(null, 50) :: Nil)
 
     // fill string with subset columns
+    //用字符串填充子集列
     checkAnswer(
       Seq[(String, String)]((null, null)).toDF("col1", "col2").na.fill("test", "col1" :: Nil),
       Row("test", null))

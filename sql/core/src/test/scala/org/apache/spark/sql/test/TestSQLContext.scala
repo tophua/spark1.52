@@ -23,6 +23,7 @@ import org.apache.spark.sql.{SQLConf, SQLContext}
 
 /**
   * A special [[SQLContext]] prepared for testing.
+  * 准备测试的特殊[[SQLContext]]。
   */
 private[sql] class TestSQLContext(sc: SparkContext) extends SQLContext(sc) { self =>
 
@@ -31,17 +32,20 @@ private[sql] class TestSQLContext(sc: SparkContext) extends SQLContext(sc) { sel
       new SparkConf().set("spark.sql.testkey", "true")))
   }
 
-  // Use fewer partitions to speed up testing
+  // Use fewer partitions to speed up testing 使用较少的分区来加快测试速度
   protected[sql] override def createSession(): SQLSession = new this.SQLSession()
 
-  /** A special [[SQLSession]] that uses fewer shuffle partitions than normal. */
+  /**
+    * A special [[SQLSession]] that uses fewer shuffle partitions than normal.
+    * 一个特殊的[[SQLSession]]，使用较少的shuffle分区比正常。
+    * */
   protected[sql] class SQLSession extends super.SQLSession {
     protected[sql] override lazy val conf: SQLConf = new SQLConf {
       override def numShufflePartitions: Int = this.getConf(SQLConf.SHUFFLE_PARTITIONS, 5)
     }
   }
 
-  // Needed for Java tests
+  // Needed for Java tests需要Java测试
   def loadTestData(): Unit = {
     testData.loadTestData()
   }

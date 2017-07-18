@@ -117,7 +117,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     assertCached(sql("SELECT COUNT(*) FROM tempTable2"))
 
     // Is this valid?
-    //Is this valid?
+    //Is this valid? 这是否有效？
     ctx.uncacheTable("tempTable2")
 
     // Should this be cached?
@@ -255,7 +255,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
       assert(!isMaterialized(rddId), "Uncached in-memory table should have been unpersisted")
     }
   }
-
+  //缓存表的选择
   test("CACHE TABLE tableName AS SELECT ...") {
     sql("CACHE TABLE testCacheTable AS SELECT key FROM testData LIMIT 10")
     assertCached(ctx.table("testCacheTable"))

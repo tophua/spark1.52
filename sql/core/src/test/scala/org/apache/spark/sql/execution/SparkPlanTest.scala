@@ -299,6 +299,7 @@ object SparkPlanTest {
   private def executePlan(outputPlan: SparkPlan, _sqlContext: SQLContext): Seq[Row] = {
     // A very simple resolver to make writing tests easier. In contrast to the real resolver
     // this is always case sensitive and does not try to handle scoping or complex type resolution.
+    //一个非常简单的解析器,使写测试更容易, 与真正的解析器相反这总是区分大小写,并且不尝试处理范围或复杂的类型解析。
     val resolvedPlan = _sqlContext.prepareForExecution.execute(
       outputPlan transform {
         case plan: SparkPlan =>

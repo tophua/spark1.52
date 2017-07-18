@@ -105,7 +105,7 @@ object QueryTest {
    * If there was exception during the execution or the contents of the DataFrame does not  
    * match the expected result, an error message will be returned. Otherwise, a [[None]] will
    * be returned.
-   * 如果在执行期间有异常或者DataFrame的内容与预期结果不匹配,将返回一条错误消息,否则,将返回[[无]]
+   * 如果在执行期间有异常或者DataFrame的内容与预期结果不匹配,将返回一条错误消息,否则,将返回[无]
    * @param df the [[DataFrame]] to be executed
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
    * 				在[[Row]]的[[Seq]]中的预期结果

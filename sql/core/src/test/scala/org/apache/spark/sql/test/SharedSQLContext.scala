@@ -72,8 +72,8 @@ trait SharedSQLContext extends SQLTestUtils {
   }
 
   /**
-   * Converts $"col name" into an [[Column]].
-   * 转换$"col name"到[[Column]]
+   * Converts $"col name" into an Column.
+   * 转换$"col name"到Column
    * @since 1.3.0
    */
   // This must be duplicated here to preserve binary compatibility with Spark < 1.5.

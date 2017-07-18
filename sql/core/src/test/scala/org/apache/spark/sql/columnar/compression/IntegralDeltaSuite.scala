@@ -128,6 +128,7 @@ class IntegralDeltaSuite extends SparkFunSuite {
 
     test(s"$scheme: long random series") {
       // Have to workaround with `Any` since no `ClassTag[I#JvmType]` available here.
+      //因为没有`ClassTag [I＃JvmType]`这里可以使用`Any`解决方法
       val input = Array.fill[Any](10000)(makeRandomValue(columnType))
       skeleton(input.map(_.asInstanceOf[I#InternalType]))
     }

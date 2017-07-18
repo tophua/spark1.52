@@ -144,6 +144,7 @@ class InMemoryColumnarQuerySuite extends QueryTest with SharedSQLContext {
 
   test("decimal type") {//十进制类型
     // Casting is required here because ScalaReflection can't capture decimal precision information.
+    //因为ScalaReflection无法捕获十进制精度信息,因此需要投射
     val df = (1 to 10)
       .map(i => Tuple1(Decimal(i, 15, 10)))
       .toDF("dec")

@@ -135,9 +135,11 @@ class DataFrameJoinSuite extends QueryTest with SharedSQLContext {
     assert(plan2.collect { case p: BroadcastHashJoin => p }.size === 0)
 
     // planner should not crash without a join
+    //计划者不应该没有连接崩溃
     broadcast(df1).queryExecution.executedPlan
 
     // SPARK-12275: no physical plan for BroadcastHint in some condition
+    //在某些情况下没有广播的实际计划
     withTempPath { path =>
       df1.write.parquet(path.getCanonicalPath)
       val pf1 = sqlContext.read.parquet(path.getCanonicalPath)

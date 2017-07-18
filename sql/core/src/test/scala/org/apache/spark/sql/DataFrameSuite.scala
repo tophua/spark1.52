@@ -275,7 +275,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       testData.select('key).collect().toSeq)
   }
 
-  test("coalesce") {//合并分区,引用字段使用'
+  test("coalesce") {//合并分区,引用字段使用
     assert(testData.select('key).coalesce(1).rdd.partitions.size === 1)
 
     checkAnswer(
@@ -288,7 +288,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       testData.where($"key" === lit(1)).select($"value"),
       Row("1"))
   }
-
+  //将Scala Symbol'attrname转换为未解析的属性
   test("convert Scala Symbol 'attrname into unresolved attribute") {
     checkAnswer(
       testData.where('key === lit(1)).select('value),
@@ -508,7 +508,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
       testData.collect().toSeq)
     assert(df.schema.map(_.name) === Seq("key", "value"))
   }
-
+  //使用列引用将具有相同名称（no-op）的未知列删除
   test("drop unknown column with same name (no-op) with column reference") {
     val col = Column("key")//删除未知的列,但列没有引用
     val df = testData.drop(col)
@@ -518,7 +518,7 @@ class DataFrameSuite extends QueryTest with SharedSQLContext {
     //查找列名的方法
     assert(df.schema.map(_.name) === Seq("key", "value"))
   }
-
+  //使用列引用加入重复列后删除列
   test("drop column after join with duplicate columns using column reference") {
     /**
      *+--------+------+

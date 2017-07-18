@@ -71,7 +71,7 @@ class NullableColumnBuilderSuite extends SparkFunSuite {
       assertResult(columnType.typeId, "Wrong column type ID")(buffer.getInt())
       assertResult(0, "Wrong null count")(buffer.getInt())
     }
-
+  //列生成器：空值
     test(s"$typeName column builder: null values") {
       val columnBuilder = TestNullableColumnBuilder(columnType)
       val randomRow = makeRandomRow(columnType)

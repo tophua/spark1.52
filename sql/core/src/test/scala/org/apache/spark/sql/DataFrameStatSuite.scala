@@ -248,6 +248,7 @@ class DataFrameStatSuite extends QueryTest with SharedSQLContext {
     // counts than those that existed in the map when the map was full. This test should also fail
     // if anything like SPARK-9614 is observed once again
     val df = rows.mapPartitionsWithIndex { (idx, iter) =>
+      //必须来自后来的合并之一，因此更高的分区指数
       if (idx == 3) { // must come from one of the later merges, therefore higher partition index
         Iterator("3", "3", "3", "3", "3")
       } else {

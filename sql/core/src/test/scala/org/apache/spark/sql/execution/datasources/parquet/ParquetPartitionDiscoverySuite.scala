@@ -526,7 +526,7 @@ class ParquetPartitionDiscoverySuite extends QueryTest with ParquetTest with Sha
         "This is a string, /[]?=:",
         "This is not a partition column")
 
-    // BooleanType is not supported yet
+    // BooleanType is not supported yet 不支持BooleanType
     val partitionColumnTypes =
       Seq(
         ByteType,
