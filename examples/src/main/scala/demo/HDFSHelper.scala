@@ -12,6 +12,7 @@ package demo
 
     path.toString才是文件的全路径名
   */
+
 import java.io.{FileSystem => _, _}
 
 import org.apache.hadoop.fs._

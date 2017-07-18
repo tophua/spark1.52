@@ -51,7 +51,8 @@ private[spark] case class CoalescedRDDPartition(
   /**
    * Computes the fraction of the parents' partitions containing preferredLocation within
    * their getPreferredLocs.
-   * @return locality of this coalesced partition between 0 and 1
+    * 计算其中包含preferredLocation的父级分区的分数他们的getPreferredLocs。
+   * @return locality of this coalesced partition between 0 and 1 这种合并分区在0和1之间的位置
    */
   def localFraction: Double = {
     val loc = parents.count { p =>
@@ -68,9 +69,11 @@ private[spark] case class CoalescedRDDPartition(
  * so that each new partition has roughly the same number of parent partitions and that
  * the preferred location of each new partition overlaps with as many preferred locations of its
  * parent partitions
- * @param prev RDD to be coalesced
- * @param maxPartitions number of desired partitions in the coalesced RDD (must be positive)
- * @param balanceSlack used to trade-off balance and locality. 1.0 is all locality, 0 is all balance
+  * 表示具有比其父RDD更少的分区的合并RDD此类使用PartitionCoalescer类来找到父RDD的良好分区,
+  * 所以每个新的分区有大致相同数量的父分区每个新分区的首选位置与其的优先位置重叠父分区
+ * @param prev RDD to be coalesced RDD要合并
+ * @param maxPartitions number of desired partitions in the coalesced RDD (must be positive) 合并RDD中所需分区的数量（必须为正）
+ * @param balanceSlack used to trade-off balance and locality. 1.0 is all locality, 0 is all balance 用于平衡和地域的权衡。 1.0是所有地方,0是全部平衡
  */
 private[spark] class CoalescedRDD[T: ClassTag](
     @transient var prev: RDD[T],
@@ -112,6 +115,7 @@ private[spark] class CoalescedRDD[T: ClassTag](
   /**
    * Returns the preferred machine for the partition. If split is of type CoalescedRDDPartition,
    * then the preferred machine will be one which most parent splits prefer too.
+    * 返回分区的首选机器,如果拆分类型为CoalescedRDDPartition,那么首选机器将是大多数父分割的机器
    * @param partition
    * @return the machine most preferred by split
    */
@@ -159,21 +163,27 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
   val rnd = new scala.util.Random(7919) // keep this class deterministic
 
   // each element of groupArr represents one coalesced partition
+  //groupArr的每个元素表示一个合并的分区
   val groupArr = ArrayBuffer[PartitionGroup]()
 
   // hash used to check whether some machine is already in groupArr
+  //哈希用来检查某些机器是否已经在groupArr中
   val groupHash = mutable.Map[String, ArrayBuffer[PartitionGroup]]()
 
   // hash used for the first maxPartitions (to avoid duplicates)
+  //用于第一个maxPartitions的哈希（以避免重复）
   val initialHash = mutable.Set[Partition]()
 
   // determines the tradeoff between load-balancing the partitions sizes and their locality
   // e.g. balanceSlack=0.10 means that it allows up to 10% imbalance in favor of locality
+  //确定负载平衡分区大小及其位置之间的权衡
+  //例如 balanceSlack = 0.10意味着它允许高达10％的不平衡有利于地方
   val slack = (balanceSlack * prev.partitions.length).toInt
-
+  //如果对父级RDD不存在优先选择,则为true
   var noLocality = true  // if true if no preferredLocations exists for parent RDD
 
   // gets the *current* preferred locations from the DAGScheduler (as opposed to the static ones)
+  //从DAGScheduler获取* current *首选位置（而不是静态的）
   def currPrefLocs(part: Partition): Seq[String] = {
     prev.context.getPreferredLocs(prev, part.index).map(tl => tl.host)
   }
@@ -182,6 +192,9 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
   // next() returns the next preferred machine that a partition is replicated on
   // the rotator first goes through the first replica copy of each partition, then second, third
   // the iterators return type is a tuple: (replicaString, partition)
+  //这个类只是在RDD的分区上无限次迭代和旋转next()返回分区复制的下一个首选计算机
+  //旋转器首先遍历每个分区的第一个副本,然后是第二个,第三个
+  //迭代器返回类型是一个元组：(replicaString，partition)
   class LocationIterator(prev: RDD[_]) extends Iterator[(String, Partition)] {
 
     var it: Iterator[(String, Partition)] = resetIterator()
@@ -189,6 +202,7 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
     override val isEmpty = !it.hasNext
 
     // initializes/resets to start iterating from the beginning
+    //初始化/重置从头开始迭代
     def resetIterator(): Iterator[(String, Partition)] = {
       val iterators = (0 to 2).map( x =>
         prev.partitions.iterator.flatMap(p => {
@@ -199,13 +213,16 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
     }
 
     // hasNext() is false iff there are no preferredLocations for any of the partitions of the RDD
+    //如果没有RDD的任何分区的首选地址,则hasNext()为false
     override def hasNext: Boolean = { !isEmpty }
 
     // return the next preferredLocation of some partition of the RDD
+    //返回RDD的某个分区的下一个首选位置
     override def next(): (String, Partition) = {
       if (it.hasNext) {
         it.next()
       } else {
+        //跑出优先位置，重置并旋转到开始
         it = resetIterator() // ran out of preferred locations, reset and rotate to the beginning
         it.next()
       }
@@ -215,6 +232,7 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
   /**
    * Sorts and gets the least element of the list associated with key in groupHash
    * The returned PartitionGroup is the least loaded of all groups that represent the machine "key"
+    * 排序并获取与groupHash中的键相关联的列表的最小元素返回的PartitionGroup是代表机器“key”的所有组中最少的加载
    * @param key string representing a partitioned group on preferred machine key
    * @return Option of PartitionGroup that has least elements for key
    */
@@ -224,7 +242,9 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
 
   def addPartToPGroup(part: Partition, pgroup: PartitionGroup): Boolean = {
     if (!initialHash.contains(part)) {
+      //已经分配了这个元素
       pgroup.arr += part           // already assign this element
+      //需要避免将分区分配给多个存储桶
       initialHash += part // needed to avoid assigning partitions to multiple buckets
       true
     } else { false }
@@ -234,12 +254,14 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
    * Initializes targetLen partition groups and assigns a preferredLocation
    * This uses coupon collector to estimate how many preferredLocations it must rotate through
    * until it has seen most of the preferred locations (2 * n log(n))
+    * 初始化targetLen分区组并分配一个preferredLocation这使用优惠券收集器来估计它必须旋转多少个优先选择直到看到大多数优选位置(2 * n log(n))
    * @param targetLen
    */
   def setupGroups(targetLen: Int) {
     val rotIt = new LocationIterator(prev)
 
     // deal with empty case, just create targetLen partition groups with no preferred location
+    //处理空的情况，只需创建没有首选位置的targetLen分区组
     if (!rotIt.hasNext) {
       (1 to targetLen).foreach(x => groupArr += PartitionGroup())
       return
@@ -248,11 +270,13 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
     noLocality = false
 
     // number of iterations needed to be certain that we've seen most preferred locations
+    //需要确定我们已经看到最喜欢的位置的迭代次数
     val expectedCoupons2 = 2 * (math.log(targetLen)*targetLen + targetLen + 0.5).toInt
     var numCreated = 0
     var tries = 0
 
     // rotate through until either targetLen unique/distinct preferred locations have been created
+    //旋转直到任何一个targetLen唯一/不同的首选位置被创建
     // OR we've rotated expectedCoupons2, in which case we have likely seen all preferred locations,
     // i.e. likely targetLen >> number of preferred locations (more buckets than there are machines)
     while (numCreated < targetLen && tries < expectedCoupons2) {
@@ -266,7 +290,7 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
         numCreated += 1
       }
     }
-
+    //如果我们没有足够的分区组，则创建重复项
     while (numCreated < targetLen) {  // if we don't have enough partition groups, create duplicates
       var (nxt_replica, nxt_part) = rotIt.next()
       val pgroup = PartitionGroup(nxt_replica)
@@ -286,6 +310,7 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
    * Takes a parent RDD partition and decides which of the partition groups to put it in
    * Takes locality into account, but also uses power of 2 choices to load balance
    * It strikes a balance between the two use the balanceSlack variable
+    * 使用父RDD分区，并决定将哪个分区组放入考虑到地方,但也使用2种选择的权力来平衡负荷,两者之间的平衡使用balanceSlack变量
    * @param p partition (ball to be thrown)
    * @return partition group (bin to be put in)
    */
@@ -298,6 +323,7 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
     val minPowerOfTwo = if (groupArr(r1).size < groupArr(r2).size) groupArr(r1) else groupArr(r2)
     if (prefPart.isEmpty) {
       // if no preferred locations, just use basic power of two
+      //如果没有首选的位置，只要使用两个基本的力量
       return minPowerOfTwo
     }
 
@@ -311,12 +337,14 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
   }
 
   def throwBalls() {
+    //父RDD中没有优先选择，无需随机化
     if (noLocality) {  // no preferredLocations in parent RDD, no randomization needed
       if (maxPartitions > groupArr.size) { // just return prev.partitions
         for ((p, i) <- prev.partitions.zipWithIndex) {
           groupArr(i).arr += p
         }
       } else { // no locality available, then simply split partitions based on positions in array
+        //没有地方可用，然后简单地根据阵列中的位置拆分分区
         for (i <- 0 until maxPartitions) {
           val rangeStart = ((i.toLong * prev.partitions.length) / maxPartitions).toInt
           val rangeEnd = (((i.toLong + 1) * prev.partitions.length) / maxPartitions).toInt
@@ -335,6 +363,7 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
   /**
    * Runs the packing algorithm and returns an array of PartitionGroups that if possible are
    * load balanced and grouped by locality
+    * 运行打包算法并返回一个PartitionGroups数组,如果可能的话负载均衡,按地区分组
    * @return array of partition groups
    */
   def run(): Array[PartitionGroup] = {
