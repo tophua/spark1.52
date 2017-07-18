@@ -163,13 +163,13 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     assert(iter.next() === (6, Nil))
     sorter.stop()
   }
-
+  //用kryo ser溢出本地集群
   test("spilling in local cluster with kryo ser") {
     // Load defaults, otherwise SPARK_HOME is not found
     //加载默认值,否则spark_home没有找到
     testSpillingInLocalCluster(createSparkConf(true, true))
   }
-
+  //用java ser溢出本地集群
   test("spilling in local cluster with java ser") {
     // Load defaults, otherwise SPARK_HOME is not found
     //加载默认值,否则spark_home没有找到
@@ -192,6 +192,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }
 
     // groupByKey - should spill ~17 times
+    //groupByKey - 应该溢出〜17次
     val rddB = sc.parallelize(0 until 100000).map(i => (i/4, i))
     val resultB = rddB.groupByKey().collect()
     assert(resultB.length == 25000)
@@ -304,6 +305,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }
 
     // larger cogroup - should spill ~4 times per executor
+    //较大的共同组织 - 应该每个执行人溢出〜4次
     val rddD1 = sc.parallelize(0 until 10000).map(i => (i/2, i))
     val rddD2 = sc.parallelize(0 until 10000).map(i => (i/2, i))
     val resultD = rddD1.cogroup(rddD2).collect()
@@ -319,6 +321,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }
 
     // sortByKey - should spill ~8 times per executor
+    //sortByKey - 应该每个执行者溢出〜8次
     val rddE = sc.parallelize(0 until 100000).map(i => (i/4, i))
     val resultE = rddE.sortByKey().collect().toSeq
     assert(resultE === (0 until 100000).map(i => (i/4, i)).toSeq)

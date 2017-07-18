@@ -122,7 +122,8 @@ class BlockStatusListenerSuite extends SparkFunSuite {
     // Remove the last block manager
     //删除最后一个块管理器
     listener.onBlockManagerRemoved(SparkListenerBlockManagerRemoved(0, blockManagerId))
-    // No block manager now so we should dop all block managers    
+    // No block manager now so we should dop all block managers
+    //现在没有块管理，所以我们应该把所有的块管理器
     assert(listener.allExecutorStreamBlockStatus.isEmpty)
   }
 

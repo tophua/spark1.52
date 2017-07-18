@@ -362,12 +362,14 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
     eventually(timeout(5 seconds), interval(10 millis)) {
       // Calling `self` in `onStop` will return null, so selfOption will be None
+      //在`onStop'中调用`self`将返回null，因此selfOption将为None
       assert(selfOption == None)
     }
   }
 
   test("call receive in sequence") {//顺序调用接收
     // If a RpcEnv implementation breaks the `receive` contract, hope this test can expose it
+    //如果一个RpcEnv实现打破了'receive`合同，希望这个测试能够暴露出来
     for (i <- 0 until 100) {
       @volatile var result = 0
       val endpointRef = env.setupEndpoint(s"receive-in-sequence-$i", new ThreadSafeRpcEndpoint {

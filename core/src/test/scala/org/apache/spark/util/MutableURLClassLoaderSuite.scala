@@ -74,6 +74,8 @@ class MutableURLClassLoaderSuite extends SparkFunSuite {
     // Test the case where the driver program sets a context classloader and then runs a job
     // in local mode. This is what happens when ./spark-submit is called with "local" as the
     // master.
+    //测试驱动程序设置上下文类加载器然后运行作业的情况
+    //在本地模式,当./spark-submit以“local”作为调用时，会发生什么master
     val original = Thread.currentThread().getContextClassLoader
 
     val className = "ClassForDriverTest"

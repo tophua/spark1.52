@@ -162,6 +162,7 @@ class RandomSamplerSuite extends SparkFunSuite with Matchers {
 
   test("bernoulli sampling") {
     // Tests expect maximum gap sampling fraction to be this value
+    //测试期望最大间隙采样分数为该值
     RandomSampler.defaultMaxGapSamplingFraction should be (0.4)
 
     var d: Double = 0.0
@@ -182,14 +183,16 @@ class RandomSamplerSuite extends SparkFunSuite with Matchers {
     d should be < D
 
     // sampling at different frequencies should show up as statistically different:
+    //不同频率的采样应显示出统计学差异：
     sampler = new BernoulliSampler[Int](0.5)
     sampler.setSeed(rngSeed.nextLong)
     d = medianKSD(gaps(sampler.sample(Iterator.from(0))), gaps(sample(Iterator.from(0), 0.6)))
     d should be > D
   }
-
+  //bernoulli采样与间隙采样优化
   test("bernoulli sampling with gap sampling optimization") {
     // Tests expect maximum gap sampling fraction to be this value
+    //测试期望最大间隙采样分数为该值
     RandomSampler.defaultMaxGapSamplingFraction should be (0.4)
 
     var d: Double = 0.0

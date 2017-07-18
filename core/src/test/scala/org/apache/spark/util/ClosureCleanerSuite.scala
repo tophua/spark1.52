@@ -148,7 +148,8 @@ object TestObject {
     //柯里化(Currying)指的是将原来接受两个参数的函数变成新的接受一个参数的函数的过程,
     //新的函数返回一个以原有第二个参数为参数的函数.
     
-    withSpark(new SparkContext("local", "test")) { sc =>//匿名方法
+    withSpark(new SparkContext("local", "test")) { sc =>
+      //匿名方法
       //柯里化第二个匿名方法调用方式
       val nums = sc.parallelize(Array(1, 2, 3, 4))
       //6+7+8+9=30
@@ -185,6 +186,8 @@ class TestClassWithoutDefaultConstructor(x: Int) extends Serializable {
 
 // This class is not serializable, but we aren't using any of its fields in our
 // closures, so they won't have a $outer pointing to it and should still work.
+//这个类不是可序列化的，但是我们没有使用任何它的字段
+//关闭，所以他们不会有一个$外指向它，应该仍然工作。
 class TestClassWithoutFieldAccess {
   var nonSer = new NonSerializable
 
@@ -216,6 +219,7 @@ object TestObjectWithNestedReturns {
       val nums = sc.parallelize(Array(1, 2, 3, 4))
       nums.map {x =>
         // this return is fine since it will not transfer control outside the closure
+        //这个回报是很好的，因为它不会将控制权转移到关闭之外
         def foo(): Int = { return 5; 1 }
         foo()
       }

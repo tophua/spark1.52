@@ -48,18 +48,20 @@ class StorageTabSuite extends SparkFunSuite with BeforeAndAfter {
     bus.addListener(storageStatusListener)
     bus.addListener(storageListener)
   }
-
+  //阶段提交/完成
   test("stage submitted / completed") {
     assert(storageListener._rddInfoMap.isEmpty)
     assert(storageListener.rddInfoList.isEmpty)
 
     // 2 RDDs are known, but none are cached
+    //2 RDD是已知的，但没有缓存
     val stageInfo0 = new StageInfo(0, 0, "0", 100, Seq(rddInfo0, rddInfo1), Seq.empty, "details")
     bus.postToAll(SparkListenerStageSubmitted(stageInfo0))
     assert(storageListener._rddInfoMap.size === 2)
     assert(storageListener.rddInfoList.isEmpty)
 
     // 4 RDDs are known, but only 2 are cached
+    //4个RDD是已知的，但只有2个缓存
     val rddInfo2Cached = rddInfo2
     val rddInfo3Cached = rddInfo3
     rddInfo2Cached.numCachedPartitions = 1
@@ -71,6 +73,7 @@ class StorageTabSuite extends SparkFunSuite with BeforeAndAfter {
     assert(storageListener.rddInfoList.size === 2)
 
     // Submitting RDDInfos with duplicate IDs does nothing
+    //使用重复的ID提交RDDInfos什么都不做
     val rddInfo0Cached = new RDDInfo(0, "freedom", 100, StorageLevel.MEMORY_ONLY, Seq(10))
     rddInfo0Cached.numCachedPartitions = 1
     val stageInfo0Cached = new StageInfo(0, 0, "0", 100, Seq(rddInfo0), Seq.empty, "details")
@@ -79,6 +82,7 @@ class StorageTabSuite extends SparkFunSuite with BeforeAndAfter {
     assert(storageListener.rddInfoList.size === 2)
 
     // We only keep around the RDDs that are cached
+    //我们只是围绕缓存的RDD
     bus.postToAll(SparkListenerStageCompleted(stageInfo0))
     assert(storageListener._rddInfoMap.size === 2)
     assert(storageListener.rddInfoList.size === 2)
@@ -105,7 +109,7 @@ class StorageTabSuite extends SparkFunSuite with BeforeAndAfter {
     assert(storageListener.rddInfoList.size === 0)
   }
 
-  test("task end") {
+  test("task end") {//任务结束
     val myRddInfo0 = rddInfo0
     val myRddInfo1 = rddInfo1
     val myRddInfo2 = rddInfo2
@@ -120,11 +124,13 @@ class StorageTabSuite extends SparkFunSuite with BeforeAndAfter {
     assert(!storageListener._rddInfoMap(2).isCached)
 
     // Task end with no updated blocks. This should not change anything.
+    //任务结束,没有更新块。 这不应该改变任何东西。
     bus.postToAll(SparkListenerTaskEnd(0, 0, "obliteration", Success, taskInfo, new TaskMetrics))
     assert(storageListener._rddInfoMap.size === 3)
     assert(storageListener.rddInfoList.size === 0)
 
     // Task end with a few new persisted blocks, some from the same RDD
+    //任务结束与一些新的持久性块，一些来自同一个RDD
     val metrics1 = new TaskMetrics
     metrics1.updatedBlocks = Some(Seq(
       (RDDBlockId(0, 100), BlockStatus(memAndDisk, 400L, 0L, 0L)),
@@ -147,10 +153,12 @@ class StorageTabSuite extends SparkFunSuite with BeforeAndAfter {
     assert(storageListener._rddInfoMap(2).numCachedPartitions === 0)
 
     // Task end with a few dropped blocks
+    //任务结束与几个丢弃的块
     val metrics2 = new TaskMetrics
     metrics2.updatedBlocks = Some(Seq(
       (RDDBlockId(0, 100), BlockStatus(none, 0L, 0L, 0L)),
       (RDDBlockId(1, 20), BlockStatus(none, 0L, 0L, 0L)),
+      //实际上并不存在
       (RDDBlockId(2, 40), BlockStatus(none, 0L, 0L, 0L)), // doesn't actually exist
       (RDDBlockId(4, 80), BlockStatus(none, 0L, 0L, 0L)) // doesn't actually exist
     ))
@@ -165,7 +173,7 @@ class StorageTabSuite extends SparkFunSuite with BeforeAndAfter {
     assert(!storageListener._rddInfoMap(2).isCached)
     assert(storageListener._rddInfoMap(2).numCachedPartitions === 0)
   }
-
+  //验证StorageTab包含所有缓存的rdds
   test("verify StorageTab contains all cached rdds") {
 
     val rddInfo0 = new RDDInfo(0, "rdd0", 1, memOnly, Seq(4))

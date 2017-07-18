@@ -246,7 +246,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
     /*
       Create a system of three block managers / stores. One of them (say, failableStore)
       cannot receive blocks. So attempts to use that as replication target fails.
-
+    创建一个三个块管理器/存储的系统。 其中一个（说，failableStore）不能接收块。 因此尝试将其用作复制目标失败。
             +-----------/fails/-----------> failableStore
             |
         normalStore
@@ -258,6 +258,8 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
         copies of a block. Then we are going to add another normal block manager
         (i.e., anotherNormalStore), and test that now 2x replication works as the
         new store will be used for replication.
+        我们首先要添加一个正常的块管理器（即normalStore）和可用的块manager（即failableStore），并测试2x复制是否无法创建两个
+         一个块的副本。 然后我们要添加另一个正常的块管理器（即anotherNormalStore），并测试现在2x复制的作用新店将用于复制。
      */
 
     // Add a normal block manager
@@ -275,7 +277,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
 
     // Add a failable block manager with a mock transfer service that does not
     // allow receiving of blocks. So attempts to use it as a replication target will fail.
-    //添加一个模拟传输服务,不允许接收块,所以尝试复制目标将失败
+    //添加一个模拟传输服务,不允许接收块,所以尝试将其用作复制目标将失败
     val failableTransfer = mock(classOf[BlockTransferService]) // this wont actually work 这不会真正的工作
     when(failableTransfer.hostName).thenReturn("some-hostname")
     when(failableTransfer.port).thenReturn(1000)
@@ -357,6 +359,8 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
    * whether the block is present and also tests the master whether its knowledge of blocks
    * is correct. Then it also drops the block from memory of each store (using LRU) and
    * again checks whether the master's knowledge gets updated.
+    * 测试具有不同存储级别的块的复制（各种组合内存，磁盘和序列化）。 对于每个存储级别，此功能测试每个存储
+    * 块是否存在,并测试主是否知道块是正确的。 然后它也从每个商店的内存（使用LRU）和再次检查主人的知识是否更新。
    */
   private def testReplication(maxReplication: Int, storageLevels: Seq[StorageLevel]) {
     import org.apache.spark.storage.StorageLevel._

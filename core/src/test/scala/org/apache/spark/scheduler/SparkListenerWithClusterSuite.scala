@@ -48,6 +48,7 @@ class SparkListenerWithClusterSuite extends SparkFunSuite with LocalSparkContext
 
     // This test will check if the number of executors received by "SparkListener" is same as the
     // number of all executors, so we need to wait until all executors are up
+    //此测试将检查“SparkListener”接收到的执行程序的数量是否相同,所有执行者的数量，所以我们需要等到所有的执行者都开始了
     sc.jobProgressListener.waitUntilExecutorsUp(2, 10000)
 
     val rdd1 = sc.parallelize(1 to 100, 4)

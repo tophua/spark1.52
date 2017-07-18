@@ -78,6 +78,7 @@ class StorageSuite extends SparkFunSuite {
   }
 
   // For testing add, update, remove, get, and contains etc. for both RDD and non-RDD blocks
+  //用于测试RDD和非RDD块的添加，更新，删除，获取和包含等
   private def storageStatus2: StorageStatus = {
     val status = new StorageStatus(BlockManagerId("big", "dog", 1), 1000L)
     assert(status.rddBlocks.isEmpty)
@@ -277,6 +278,7 @@ class StorageSuite extends SparkFunSuite {
   }
 
   // For testing StorageUtils.updateRddInfo and StorageUtils.getRddBlockLocations
+  //用于测试StorageUtils.updateRddInfo和StorageUtils.getRddBlockLocations
   private def stockStorageStatuses: Seq[StorageStatus] = {
     val status1 = new StorageStatus(BlockManagerId("big", "dog", 1), 1000L)
     val status2 = new StorageStatus(BlockManagerId("fat", "duck", 2), 2000L)
@@ -293,6 +295,7 @@ class StorageSuite extends SparkFunSuite {
   }
 
   // For testing StorageUtils.updateRddInfo
+  //用于测试StorageUtils.updateRddInfo
   private def stockRDDInfos: Seq[RDDInfo] = {
     val info0 = new RDDInfo(0, "0", 10, memAndDisk, Seq(3))
     val info1 = new RDDInfo(1, "1", 3, memAndDisk, Seq(4))

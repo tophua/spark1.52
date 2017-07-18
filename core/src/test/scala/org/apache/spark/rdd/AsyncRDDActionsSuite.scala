@@ -118,6 +118,8 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
 
     // Use a semaphore to make sure onSuccess and onComplete's success path will be called.
     // If not, the test will hang.
+    //使用信号量来确保onSuccess和onComplete的成功路径将被调用。
+    //如果没有，测试将挂起。
     val sem = new Semaphore(0)
 
     f.onComplete {
@@ -146,6 +148,7 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
   /**
    * Make sure onComplete, onSuccess, and onFailure are invoked correctly in the case
    * of a failed job execution.
+    * 确保在这种情况下onComplete，onSuccess和onFailure被正确调用失败的工作执行。
    */
   test("async failure handling") { //异步故障处理
     val f = sc.parallelize(1 to 10, 2).map { i =>
@@ -154,6 +157,7 @@ class AsyncRDDActionsSuite extends SparkFunSuite with BeforeAndAfterAll with Tim
 
     // Use a semaphore to make sure onFailure and onComplete's failure path will be called.
     // If not, the test will hang.
+    //使用信号量来确保onFailure和onComplete的失败路径将被调用,如果没有，测试将挂起。
     val sem = new Semaphore(0)
 
     f.onComplete {

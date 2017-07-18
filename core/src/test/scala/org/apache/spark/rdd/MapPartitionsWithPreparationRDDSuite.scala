@@ -29,6 +29,7 @@ class MapPartitionsWithPreparationRDDSuite extends SparkFunSuite with LocalSpark
     sc = new SparkContext("local", "test")
 
     // Have the parent partition push a number to the list
+    //让父分区将一个数字推到列表中
     //mapPartitions 
     val parent = sc.parallelize(1 to 100, 1).mapPartitions { iter =>
       TestObject.things.append(20)
@@ -59,6 +60,7 @@ class MapPartitionsWithPreparationRDDSuite extends SparkFunSuite with LocalSpark
 
     TestObject.things.clear()
     // Zip two of these RDDs, both should be prepared before the parent is executed
+    //这两个RDD中的两个都应该在父执行之前准备好
     val rdd2 = new MapPartitionsWithPreparationRDD[Int, Int, Unit](
       parent, preparePartition, executePartition)
     val result2 = rdd.zipPartitions(rdd2)((a, b) => a).collect()

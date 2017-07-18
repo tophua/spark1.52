@@ -23,6 +23,7 @@ import org.apache.spark.scheduler._
 
 /**
  * Test the behavior of StorageStatusListener in response to all relevant events.
+  * 测试StorageStatusListener响应所有相关事件的行为
  */
 class StorageStatusListenerSuite extends SparkFunSuite {
   private val bm1 = BlockManagerId("big", "dog", 1)

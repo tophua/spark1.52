@@ -34,6 +34,8 @@ class UISuite extends SparkFunSuite {
   /**
    * Create a test SparkContext with the SparkUI enabled.
    * It is safe to `get` the SparkUI directly from the SparkContext returned here.
+    * 在启用SparkUI的情况下创建一个测试SparkContext。
+    *从这里返回的SparkContext直接“获取”SparkUI是安全的。
    */
   private def newSparkContext(): SparkContext = {
     val conf = new SparkConf()
@@ -49,6 +51,7 @@ class UISuite extends SparkFunSuite {
     //柯里化方法
     withSpark(newSparkContext()) { sc =>
       // test if the ui is visible, and all the expected tabs are visible
+      //测试ui是否可见,并且所有预期的选项卡都可见
       eventually(timeout(10 seconds), interval(50 milliseconds)) {
         val html = Source.fromURL(sc.ui.get.appUIAddress).mkString
         assert(!html.contains("random data that should not be present"))
@@ -63,13 +66,14 @@ class UISuite extends SparkFunSuite {
   ignore("visibility at localhost:4040") {//可见性
     withSpark(newSparkContext()) { sc =>
       // test if visible from http://localhost:4040
+      //测试是否可以从http：// localhost：4040查看
       eventually(timeout(10 seconds), interval(50 milliseconds)) {
         val html = Source.fromURL("http://localhost:4040").mkString
         assert(html.toLowerCase.contains("stages"))
       }
     }
   }
-
+  //jetty选择处于争用不同的端口
   test("jetty selects different port under contention") {
     val server = new ServerSocket(0)
     val startPort = server.getLocalPort
@@ -78,6 +82,7 @@ class UISuite extends SparkFunSuite {
     val serverInfo2 = JettyUtils.startJettyServer(
       "0.0.0.0", startPort, Seq[ServletContextHandler](), new SparkConf)
     // Allow some wiggle room in case ports on the machine are under contention
+    //如果机器上的端口受到争用，请允许一些摆动的空间
     val boundPort1 = serverInfo1.boundPort
     val boundPort2 = serverInfo2.boundPort
     assert(boundPort1 != startPort)
@@ -87,7 +92,7 @@ class UISuite extends SparkFunSuite {
     serverInfo2.server.stop()
     server.close()
   }
-
+  //jetty正确绑定到端口0
   test("jetty binds to port 0 correctly") {
     val serverInfo = JettyUtils.startJettyServer(
       "0.0.0.0", 0, Seq[ServletContextHandler](), new SparkConf)
@@ -100,7 +105,7 @@ class UISuite extends SparkFunSuite {
       case Failure(e) =>
     }
   }
-
+  //验证appUIAddress包含该方案
   test("verify appUIAddress contains the scheme") {
     withSpark(newSparkContext()) { sc =>
       val ui = sc.ui.get
@@ -109,7 +114,7 @@ class UISuite extends SparkFunSuite {
       assert(uiAddress.equals("http://" + uiHostPort))
     }
   }
-
+  //验证appUIAddress包含端口
   test("verify appUIAddress contains the port") {
     withSpark(newSparkContext()) { sc =>
       val ui = sc.ui.get

@@ -128,14 +128,14 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
       LocalRDDCheckpointData.DEFAULT_STORAGE_LEVEL,
       50)
   }
-
+  //检查点不排除迭代器 - 在检查点之前进行缓存
   test("checkpoint without draining iterator - caching before checkpointing") {
     testWithoutDrainingIterator(
       newSortedRdd.persist(StorageLevel.MEMORY_ONLY).localCheckpoint(),
       StorageLevel.MEMORY_AND_DISK,
       50)
   }
-
+  //检查点不排除迭代器 - 检查点之后的缓存
   test("checkpoint without draining iterator - caching after checkpointing") {
     testWithoutDrainingIterator(
       newSortedRdd.localCheckpoint().persist(StorageLevel.MEMORY_ONLY),
@@ -209,7 +209,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * Helper method to test basic lineage truncation with caching.
-   *
+   * 用缓存方法测试基本谱系截断。
    * @param rdd an RDD that is both marked for caching and local checkpointing
    */
   private def testBasicLineageTruncationWithCaching[T](
@@ -230,9 +230,10 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * Helper method to test indirect lineage truncation.间接
-   *
+   * Helper方法测试间接谱系截断
    * Indirect lineage truncation here means the action is called on one of the
    * checkpointed RDD's descendants, but not on the checkpointed RDD itself.
+    *这里的直接谱系截断意味着在其中一个上调用动作,检查点的RDD的后代，但不在检查点的RDD本身。
    *
    * @param rdd a locally checkpointed RDD
    */

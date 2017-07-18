@@ -220,7 +220,8 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     val listener = new SaveStageAndTaskInfo
     sc.addSparkListener(listener)
     sc.addSparkListener(new StatsReportListener)
-    // just to make sure some of the tasks take a noticeable amount of time    
+    // just to make sure some of the tasks take a noticeable amount of time
+    //只是为了确保一些任务花费明显的时间
     val w = { i: Int =>
       if (i == 0) {
         Thread.sleep(100)
@@ -247,6 +248,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
       /**
        * Small test, so some tasks might take less than 1 millisecond, but average should be greater
        * than 0 ms.
+        * 小测试，所以一些任务可能需要不到1毫秒，但平均值应该更大超过0 ms
        */
       checkNonZeroAvg(
         taskInfoMetrics.map(_._2.executorRunTime),
@@ -334,6 +336,8 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
     val f = sc.parallelize(1 to 10000, numTasks).map { i => Thread.sleep(10); i }.countAsync()
     // Wait until one task has started (because we want to make sure that any tasks that are started
     // have corresponding end events sent to the listener).
+    //等到一个任务开始（因为我们想确保任何已经启动的任务
+    //将相应的结束事件发送给侦听器）
     var finishTime = System.currentTimeMillis + WAIT_TIMEOUT_MILLIS
     listener.synchronized {
       var remainingWait = finishTime - System.currentTimeMillis

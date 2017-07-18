@@ -204,7 +204,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
       assert(!eventLoop.isActive)
     }
   }
-
+  //eventLoop：stop（）onStart应该调用onStop
   test("EventLoop: stop() in onStart should call onStop") {
     @volatile var onStopCalled: Boolean = false
     val eventLoop = new EventLoop[Int]("test") {
@@ -229,7 +229,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     }
     assert(onStopCalled)
   }
-
+  //eventLoop：stop（）在onReceive中应该调用onStop
   test("EventLoop: stop() in onReceive should call onStop") {
     @volatile var onStopCalled: Boolean = false
     val eventLoop = new EventLoop[Int]("test") {

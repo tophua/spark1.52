@@ -115,8 +115,9 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
     //清晰的强引用“K1”
     strongRef = null
     val startTime = System.currentTimeMillis
-    //尽最大努力运行垃圾收集
+    //尽最大努力运行垃圾收集。 它通常*运行GC。
     System.gc() // Make a best effort to run the garbage collection. It *usually* runs GC.
+    //尽力在所有清洁的对象上调用终结器。
     System.runFinalization()  // Make a best effort to call finalizer on all cleaned objects.
     while(System.currentTimeMillis - startTime < 10000 && weakRef.get != null) {
       System.gc()

@@ -39,7 +39,7 @@ import org.apache.spark.shuffle.FetchFailedException
 class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodTester {
   // Some of the tests are quite tricky because we are testing the cleanup behavior
   // in the presence of faults.
-
+  //一些测试非常棘手，因为我们正在测试存在故障的清理行为
   /** Creates a mock [[BlockTransferService]] that returns data from the given map. */
   private def createMockTransfer(data: Map[BlockId, ManagedBuffer]): BlockTransferService = {
     val transfer = mock(classOf[BlockTransferService])
@@ -215,6 +215,7 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
     )
 
     // Semaphore to coordinate event sequence in two different threads.
+    //信号量在两个不同的线程中协调事件序列
     val sem = new Semaphore(0)
 
     val transfer = mock(classOf[BlockTransferService])
@@ -247,11 +248,12 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
       48 * 1024 * 1024)
 
     // Continue only after the mock calls onBlockFetchFailure
+    //只有在mock调用onBlockFetchFailure之后才能继续
     sem.acquire()
 
     // The first block should be returned without an exception, and the last two should throw
     // FetchFailedExceptions (due to failure) 由于故障
-    //第一个块应该抛出异常返回
+    //应该返回第一个块而不会有异常，最后一个块应抛出FetchFailedExceptions（由于失败）
     iterator.next()
     intercept[FetchFailedException] { iterator.next() }
     intercept[FetchFailedException] { iterator.next() }

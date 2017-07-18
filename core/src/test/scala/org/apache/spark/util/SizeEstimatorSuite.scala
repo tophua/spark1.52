@@ -185,6 +185,8 @@ class SizeEstimatorSuite
 
   // NOTE: The String class definition varies across JDK versions (1.6 vs. 1.7) and vendors
   // (Sun vs IBM). Use a DummyString class to make tests deterministic.
+  //注意：String类定义因JDK版本（1.6对1.7）和供应商而异
+  //（Sun vs IBM）。 使用DummyString类来测试确定性。
   test("64-bit arch with no compressed oops") {
     System.setProperty("os.arch", "amd64")
     System.setProperty("spark.test.useCompressedOops", "false")
@@ -211,7 +213,7 @@ class SizeEstimatorSuite
     assertResult(24)(SizeEstimator.estimate(new DummyClass5))
     assertResult(32)(SizeEstimator.estimate(new DummyClass6))
   }
-
+  //检查s390x arch的64位检测
   test("check 64-bit detection for s390x arch") {
     System.setProperty("os.arch", "s390x")
     val initialize = PrivateMethod[Unit]('initialize)

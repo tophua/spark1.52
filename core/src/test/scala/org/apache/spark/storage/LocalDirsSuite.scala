@@ -27,6 +27,7 @@ import org.apache.spark.{SparkConf, SparkFunSuite}
 
 /**
  * Tests for the spark.local.dir and SPARK_LOCAL_DIRS configuration options.
+  * 测试spark.local.dir和SPARK_LOCAL_DIRS配置选项。
  */
 class LocalDirsSuite extends SparkFunSuite with BeforeAndAfter {
 
@@ -46,6 +47,7 @@ class LocalDirsSuite extends SparkFunSuite with BeforeAndAfter {
     // Regression test for SPARK-2975
     assert(!new File("/NONEXISTENT_DIR").exists())
     // SPARK_LOCAL_DIRS is a valid directory:
+    //SPARK_LOCAL_DIRS是一个有效的目录
     class MySparkConf extends SparkConf(false) {
       override def getenv(name: String): String = {
         if (name == "SPARK_LOCAL_DIRS") System.getProperty("java.io.tmpdir")

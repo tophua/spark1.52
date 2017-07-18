@@ -84,11 +84,13 @@ class HashShuffleManagerSuite extends SparkFunSuite with LocalSparkContext {
     shuffle2.releaseWriters(success = true)
 
     // Now comes the test :
+    //现在考试来了：
     // Write to shuffle 3; and close it, but before registering it, check if the file lengths for
     // previous task (forof shuffle1) is the same as 'segments'. Earlier, we were inferring length
     // of block based on remaining data in file : which could mess things up when there is
     // concurrent read and writes happening to the same shuffle group.
-
+    //写到洗牌3；并关闭它，但在注册它之前，检查文件长度是否为以前的任务（给shuffle1）是为“段相同。早些时候，我们推断长度。
+    //块基于文件中剩余的数据：当有数据时可能会把事情弄得一团糟并发读取和写入发生在同一个洗牌组中。
     val shuffle3 = shuffleBlockResolver.forMapTask(1, 3, 1, new JavaSerializer(testConf),
       new ShuffleWriteMetrics)
     for (writer <- shuffle3.writers) {

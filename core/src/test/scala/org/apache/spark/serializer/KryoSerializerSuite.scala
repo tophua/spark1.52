@@ -160,6 +160,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     def check[T: ClassTag](t: T) {
       assert(ser.deserialize[T](ser.serialize(t)) === t)
       // Check that very long ranges don't get written one element at a time
+      //检查一个很长的范围不会一次写入一个元素
       assert(ser.serialize(t).limit < 100)
     }
     check(1 to 1000000)
@@ -364,6 +365,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
 
   // Regression test for SPARK-7766, an issue where disabling auto-reset and enabling
   // reference-tracking would lead to corrupted output when serializer instances are re-used
+  // SPARK-7766的回归测试，这是禁用自动复位和启用的问题,引用跟踪会导致在重复使用序列化器实例时出现损坏的输出
   for (referenceTracking <- Set(true, false); autoReset <- Set(true, false)) {
     test(s"instance reuse with autoReset = $autoReset, referenceTracking = $referenceTracking") {
       testSerializerInstanceReuse(autoReset = autoReset, referenceTracking = referenceTracking)
@@ -390,8 +392,10 @@ class KryoSerializerAutoResetDisabledSuite extends SparkFunSuite with SharedSpar
     val world = "World"
     // Here, we serialize the same value twice, so the reference-tracking should cause us to store
     // references to some of these values
+    //这里我们串行化相同的值两次,所以引用跟踪应该使我们存储引用这些值中的一些
     val helloHello = serInstance.serialize((hello, hello))
     // Here's a stream which only contains one value
+    //这是一个只包含一个值的流
     val worldWorld: Array[Byte] = {
       val baos = new ByteArrayOutputStream()
       val serStream = serInstance.serializeStream(baos)

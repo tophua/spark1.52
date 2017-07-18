@@ -74,8 +74,10 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     //记录每一个写的度量更新
     assert(writeMetrics.shuffleRecordsWritten === 1)
     // Metrics don't update on every write
+    //每次写入时，指标都不会更新
     assert(writeMetrics.shuffleBytesWritten == 0)
     // After 32 writes, metrics should update
+    //32写后，指标应更新
     for (i <- 0 until 32) {
       writer.flush()
       writer.write(Long.box(i), Long.box(i))
@@ -115,7 +117,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(writeMetrics.shuffleRecordsWritten === 1000)
     assert(writeMetrics.shuffleBytesWritten === bytesWritten)
   }
-
+  //应该是幂等的
   test("commitAndClose() should be idempotent") {
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
@@ -133,7 +135,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(writeMetrics.shuffleBytesWritten === bytesWritten)
     assert(writeMetrics.shuffleWriteTime === writeTime)
   }
-
+  //应该是幂等的
   test("revertPartialWritesAndClose() should be idempotent") {
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
@@ -151,7 +153,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(writeMetrics.shuffleBytesWritten === bytesWritten)
     assert(writeMetrics.shuffleWriteTime === writeTime)
   }
-
+  //只能在commitAndClose（）被调用后调用
   test("fileSegment() can only be called after commitAndClose() has been called") {
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()

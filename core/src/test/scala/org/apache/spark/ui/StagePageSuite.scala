@@ -54,12 +54,14 @@ class StagePageSuite extends SparkFunSuite with LocalSparkContext {
     val conf = new SparkConf(false).set(unsafeConf, "true")
     val html = renderStagePage(conf).toString().toLowerCase
     // verify min/25/50/75/max show task value not cumulative values
+    //验证min / 25/50/75 / max显示任务值不是累积值
     assert(html.contains("<td>10.0 b</td>" * 5))
   }
 
   /**
    * Render a stage page started with the given conf and return the HTML.
    * This also runs a dummy stage to populate the page with useful content.
+    * 渲染由给定conf开始的阶段页面,并返回HTML,这也运行一个虚拟阶段来填充页面与有用的内容。
    */
   private def renderStagePage(conf: SparkConf): Seq[Node] = {
     val jobListener = new JobProgressListener(conf)

@@ -126,7 +126,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
   test("tasks cannot grow past 1 / N") {//任务不能增长过去的1 / N
     // Two tasks request 250 bytes first, wait for each other to get it, and then request
     // 500 more; we should only grant 250 bytes to each of them on this second request
-
+    //两个任务首先请求250个字节，等待对方获取它，然后请求500；在第二个请求中，我们只允许给它们每个字节250个字节。
     val manager = ShuffleMemoryManager.createForTesting(maxMemory = 1000L)
 
     class State {
@@ -178,7 +178,8 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
     // t1 grabs 1000 bytes and then waits until t2 is ready to make a request. It sleeps
     // for a bit and releases 250 bytes, which should then be granted to t2. Further requests
     // by t2 will return false right away because it now has 1 / 2N of the memory.
-
+    // t1抓取1000字节，然后等待，直到t2准备好发出请求。 睡了一点，释放250个字节，然后应该被授予t2。 进一步要求
+    //由t2将立即返回false，因为它现在有1 / 2N的内存。
     val manager = ShuffleMemoryManager.createForTesting(maxMemory = 1000L)
 
     class State {
@@ -202,6 +203,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       }
       // Sleep a bit before releasing our memory; this is hacky but it would be difficult to make
       // sure the other thread blocks for some time otherwise
+      ///在释放我们的记忆之前睡一会儿 这是黑客，但很难做到否则肯定其他线程阻塞一段时间
       Thread.sleep(300)
       manager.release(250L)
     }
@@ -220,6 +222,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       state.synchronized {
         state.t2Result = result
         // A second call should return 0 because we're now already at 1 / 2N
+        //第二次调用应该返回0，因为我们现在已经是1 / 2N
         state.t2Result2 = manager.tryToAcquire(100L)
         state.t2WaitTime = endTime - startTime
       }
@@ -232,6 +235,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
 
     // Both threads should've been able to acquire their memory; the second one will have waited
     // until the first one acquired 1000 bytes and then released 250
+    // 这两个线程都应该能够获取它们的内存; 第二个将等待直到第一个获得1000字节，然后释放250
     state.synchronized {
       assert(state.t1Result === 1000L, "t1 could not allocate memory")
       assert(state.t2Result === 250L, "t2 could not allocate memory")
@@ -243,7 +247,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
   test("releaseMemoryForThisTask") {
     // t1 grabs 1000 bytes and then waits until t2 is ready to make a request. It sleeps
     // for a bit and releases all its memory. t2 should now be able to grab all the memory.
-
+    // t1抓取1000字节，然后等待，直到t2准备好发出请求。 睡了一点点，释放所有的内存。 t2现在应该能够抓住所有的记忆。
     val manager = ShuffleMemoryManager.createForTesting(maxMemory = 1000L)
 
     class State {
@@ -268,6 +272,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       }
       // Sleep a bit before releasing our memory; this is hacky but it would be difficult to make
       // sure the other task blocks for some time otherwise
+      //在释放我们的记忆之前睡一会儿 这是黑客，但很难做到则其他任务会阻塞一段时间
       Thread.sleep(300)
       manager.releaseMemoryForThisTask()
     }
@@ -300,6 +305,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
 
     // Both tasks should've been able to acquire their memory; the second one will have waited
     // until the first one acquired 1000 bytes and then released all of it
+    //这两个任务都应该能够获得记忆; 第二个将等待直到第一个获取了1000个字节，然后释放它
     state.synchronized {
       assert(state.t1Result === 1000L, "t1 could not allocate memory")
       assert(state.t2Result1 === 500L, "t2 didn't get 500 bytes the first time")
@@ -318,6 +324,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       manager.tryToAcquire(300L)
       latch.countDown()
     }
+    //等到`t1`调用`tryToAcquire`
     latch.await() // Wait until `t1` calls `tryToAcquire`
 
     val granted = manager.tryToAcquire(300L)

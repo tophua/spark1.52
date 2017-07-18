@@ -26,6 +26,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Integration tests for the OutputCommitCoordinator.
+  * OutputCommitCoordinator的集成测试
  *
  * See also: [[OutputCommitCoordinatorSuite]] for unit tests that use mocks.
  */

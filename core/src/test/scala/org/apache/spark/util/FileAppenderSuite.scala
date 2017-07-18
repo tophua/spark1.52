@@ -126,7 +126,8 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
   test("file appender selection") {//文件附加选择
     // Test whether FileAppender.apply() returns the right type of the FileAppender based
     // on SparkConf settings.
-
+    //测试FileAppender.apply（）是否返回正确的FileAppender类型
+    // on SparkConf设置。
     def testAppenderSelection[ExpectedAppender: ClassTag, ExpectedRollingPolicy](
         properties: Seq[(String, String)], expectedRollingPolicyParam: Long = -1): Unit = {
 

@@ -25,6 +25,7 @@ import scala.reflect.ClassTag
 
 /**
  * A serializer implementation that always returns two elements in a deserialization stream.
+  * 一个总是在反序列化流中返回两个元素的串行器实现。
  */
 class TestSerializer extends Serializer {
   override def newInstance(): TestSerializerInstance = new TestSerializerInstance

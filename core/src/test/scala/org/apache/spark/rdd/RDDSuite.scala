@@ -150,7 +150,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     }
   }
 
-  test("partitioner aware union") {//分区清楚联合
+  test("partitioner aware union") {//分区识别联合
     def makeRDDWithPartitioner(seq: Seq[Int]): RDD[Int] = {
       sc.makeRDD(seq, 1)
         .map(x => (x, null))
@@ -184,6 +184,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     val ser = SparkEnv.get.closureSerializer.newInstance()
     val union = rdd1.union(rdd2)
     // The UnionRDD itself should be large, but each individual partition should be small.
+    //UnionRDD开发计划署本身应该很大，但每个单独的分区应该很小。
     assert(ser.serialize(union).limit() > 2000)
     assert(ser.serialize(union.partitions.head).limit() < 2000)
   }
@@ -687,32 +688,34 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
     }
     for (seed <- 1 to 5) {
       val sample = data.takeSample(withReplacement = false, 100, seed)
-      assert(sample.size === 100)        // Got only 100 elements
-      assert(sample.toSet.size === 100)  // Elements are distinct
+      assert(sample.size === 100)        // Got only 100 elements 只有100个元素
+      assert(sample.toSet.size === 100)  // Elements are distinct 元素是不同的
       assert(sample.forall(x => 1 <= x && x <= n), s"elements not in [1, $n]")
     }
     for (seed <- 1 to 5) {
       val sample = data.takeSample(withReplacement = true, 20, seed)
-      assert(sample.size === 20)        // Got exactly 20 elements
+      assert(sample.size === 20)        // Got exactly 20 elements 有20个元素
       assert(sample.forall(x => 1 <= x && x <= n), s"elements not in [1, $n]")
     }
     {
       val sample = data.takeSample(withReplacement = true, num = 20)
-      assert(sample.size === 20)        // Got exactly 100 elements
+      assert(sample.size === 20)        // Got exactly 100 elements 有100个元素
       assert(sample.toSet.size <= 20, "sampling with replacement returned all distinct elements")
       assert(sample.forall(x => 1 <= x && x <= n), s"elements not in [1, $n]")
     }
     {
       val sample = data.takeSample(withReplacement = true, num = n)
-      assert(sample.size === n)        // Got exactly 100 elements
+      assert(sample.size === n)        // Got exactly 100 elements 有100个元素
       // Chance of getting all distinct elements is astronomically low, so test we got < 100
+      //获得所有不同元素的机会天文学低，所以测试我们得到<100
       assert(sample.toSet.size < n, "sampling with replacement returned all distinct elements")
       assert(sample.forall(x => 1 <= x && x <= n), s"elements not in [1, $n]")
     }
     for (seed <- 1 to 5) {
       val sample = data.takeSample(withReplacement = true, n, seed)
-      assert(sample.size === n)        // Got exactly 100 elements
+      assert(sample.size === n)        // Got exactly 100 elements 有100个元素
       // Chance of getting all distinct elements is astronomically low, so test we got < 100
+      //获得所有不同元素的机会天文学低，所以测试我们得到<100
       assert(sample.toSet.size < n, "sampling with replacement returned all distinct elements")
     }
     for (seed <- 1 to 5) {
@@ -1056,7 +1059,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
   /** 
    *  A contrived RDD that allows the manual addition of dependencies after creation. 
-   * 
+   * 创建后可以手动添加依赖关系的RDD。
    *  */
   private class CyclicalDependencyRDD[T: ClassTag] extends RDD[T](sc, Nil) {
     private val mutableDependencies: ArrayBuffer[Dependency[_]] = ArrayBuffer.empty

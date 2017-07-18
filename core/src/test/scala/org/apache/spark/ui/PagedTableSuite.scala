@@ -49,8 +49,9 @@ class PagedDataSourceSuite extends SparkFunSuite {
 }
 
 class PagedTableSuite extends SparkFunSuite {
-  test("pageNavigation") {
+  test("pageNavigation") {//页面导航
     // Create a fake PagedTable to test pageNavigation
+    //创建一个假的PagedTable来测试pageNavigation
     val pagedTable = new PagedTable[Int] {
       override def tableId: String = ""
 

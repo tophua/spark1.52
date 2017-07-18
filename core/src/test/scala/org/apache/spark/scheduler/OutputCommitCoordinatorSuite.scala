@@ -92,6 +92,7 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
       }
     }
     // Use Mockito.spy() to maintain the default infrastructure everywhere else
+    //使用Mockito.spy（）来维护其他地方的默认基础架构
     val mockTaskScheduler = spy(sc.taskScheduler.asInstanceOf[TaskSchedulerImpl])
 
     doAnswer(new Answer[Unit]() {

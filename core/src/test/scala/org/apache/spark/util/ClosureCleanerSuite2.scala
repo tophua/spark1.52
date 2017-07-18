@@ -174,12 +174,14 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     val (outerClasses4, outerObjects4) = getOuterClassesAndObjects(closure4)
 
     // The classes and objects should have the same size
+    //类和对象应具有相同的大小
     assert(outerClasses1.size === outerObjects1.size)
     assert(outerClasses2.size === outerObjects2.size)
     assert(outerClasses3.size === outerObjects3.size)
     assert(outerClasses4.size === outerObjects4.size)
 
     // These do not have $outer pointers because they reference only local variables
+    //这些没有$外部指针，因为它们仅引用局部变量
     assert(outerClasses1.isEmpty)
     assert(outerClasses2.isEmpty)
 
@@ -225,6 +227,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
       assert(outerClasses2.size === outerObjects2.size)
       assert(outerClasses3.size === outerObjects3.size)
       // Same as above, this closure only references local variables
+      //与上述相同，此关闭仅引用局部变量
       assert(outerClasses1.isEmpty)
       // This closure references the "test2" scope because it needs to find the method `y`
       // Scope hierarchy: "test2" < "FunSuite#test" < ClosureCleanerSuite2

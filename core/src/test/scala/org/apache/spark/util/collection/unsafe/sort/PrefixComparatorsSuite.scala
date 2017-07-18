@@ -92,7 +92,7 @@ class PrefixComparatorsSuite extends SparkFunSuite with PropertyChecks {
       testPrefixComparison(s1.getBytes("UTF-8"), s2.getBytes("UTF-8"))
     }
   }
-
+  //双前缀比较器正确处理NaN
   test("double prefix comparator handles NaNs properly") {
     val nan1: Double = java.lang.Double.longBitsToDouble(0x7ff0000000000001L)
     val nan2: Double = java.lang.Double.longBitsToDouble(0x7fffffffffffffffL)

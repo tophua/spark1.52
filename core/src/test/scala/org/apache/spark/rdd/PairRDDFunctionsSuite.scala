@@ -180,6 +180,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     }
 
     // Use the same data for the rest of the tests
+    //对于其余的测试使用相同的数据
     val fractionPositive = 0.3
     val n = 100
     val data = sc.parallelize(1 to n, 2)
@@ -256,10 +257,14 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val sp = 0
     // When p = 20, the relative accuracy is about 0.001. So with high probability, the
     // relative error should be smaller than the threshold 0.01 we use here.
+    //当p = 20时，相对精度约为0.001。 所以有很高的概率
+    //相对误差应该小于我们在这里使用的阈值0.01。
     val relativeSD = 0.01
 
     // For each value i, there are i tuples with first element equal to i.
     // Therefore, the expected count for key i would be i.
+    //对于每个值，我有第一个元素等于i的元组。
+    //因此，关键我的预期计数将是i。
     val stacked = (1 to 100).flatMap(i => (1 to i).map(j => (i, j)))
     val rdd1 = sc.parallelize(stacked)
     //countApproxDistinctByKey作用是对RDD集合内容进行去重统计,统计是一个大约的统计
@@ -269,6 +274,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val rnd = new Random(42)
 
     // The expected count for key num would be num
+    //键值num的预期计数将为num
     val randStacked = (1 to 100).flatMap { i =>
       val num = rnd.nextInt() % 500
       (1 to num).map(j => (num, j))
@@ -576,7 +582,10 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
 
     /*
       Check that configurable formats get configured:
-               检查可配置的格式配置：
+       检查可配置的格式配置：
+       如果我们尝试写，ConfigTestFormat会抛出异常
+       当setConf尚未被首先调用时。
+       断言在ConfigTestFormat.getRecordWriter中。
       ConfigTestFormat throws an exception if we try to write
       to it when setConf hasn't been called first.
       Assertion is in ConfigTestFormat.getRecordWriter.
@@ -653,6 +662,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
       }
       val stdev = if (withReplacement) math.sqrt(expected) else math.sqrt(expected * p * (1 - p))
       // Very forgiving margin since we're dealing with very small sample sizes most of the time
+      //非常宽容，因为我们在大多数时间处理非常小的样本大小
       math.abs(actual - expected) <= 6 * stdev
     }
 
@@ -721,6 +731,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
       for ((key, v) <- groupedByKey) {
         if (expectedSampleSize(key) >= 100 && samplingRate >= 0.1) {
           // sample large enough for there to be repeats with high likelihood
+          //样本足够大，可能会重复，可能性很高
           assert(v.toSet.size < expectedSampleSize(key))
         } else {
           if (exact) {
@@ -737,8 +748,9 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
 }
 
 /*
-  These classes are fakes for testing
+  These classes are fakes for testing 这些类是假的测试
     "saveNewAPIHadoopFile should call setConf if format is configurable".
+    如果格式是可配置的，saveNewAPIHadoopFile应该调用setConf
   Unfortunately, they have to be top level classes, and not defined in
   the test method, because otherwise Scala won't generate no-args constructors
   and the test will therefore throw InstantiationException when saveAsNewAPIHadoopFile
@@ -771,6 +783,7 @@ class FakeOutputCommitter() extends OutputCommitter() {
 
 /*
  * Used to communicate state between the test harness and the OutputCommitter.
+ * 用于在测试线束和OutputCommitter之间通信状态
  */
 object FakeOutputCommitter {
   var ran = false

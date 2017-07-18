@@ -31,6 +31,7 @@ class SortShuffleWriterSuite extends SparkFunSuite {
     val ord = implicitly[Ordering[Int]]
 
     // Numbers of partitions that are above and below the default bypassMergeThreshold    /
+    //那上面和下面的默认bypassmergethreshold分区数
     val FEW_PARTITIONS = 50
     val MANY_PARTITIONS = 10000
 

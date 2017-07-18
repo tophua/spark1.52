@@ -534,16 +534,21 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     store.putSingle(rdd(0, 2), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     store.putSingle(rdd(1, 1), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     // At this point rdd_1_1 should've replaced rdd_0_1
+    //此时rdd_1_1应该已经取代了rdd_0_1
     assert(store.memoryStore.contains(rdd(1, 1)), "rdd_1_1 was not in store")
     assert(!store.memoryStore.contains(rdd(0, 1)), "rdd_0_1 was in store")
     assert(store.memoryStore.contains(rdd(0, 2)), "rdd_0_2 was not in store")
     // Do a get() on rdd_0_2 so that it is the most recently used item
+    //在rdd_0_2上执行get（），以便它是最近使用的item
     assert(store.getSingle(rdd(0, 2)).isDefined, "rdd_0_2 was not in store")
     // Put in more partitions from RDD 0; they should replace rdd_1_1
+    //从RDD 0放入更多的分区; 他们应该取代rdd_1_1
     store.putSingle(rdd(0, 3), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     store.putSingle(rdd(0, 4), new Array[Byte](4000), StorageLevel.MEMORY_ONLY)
     // Now rdd_1_1 should be dropped to add rdd_0_3, but then rdd_0_2 should *not* be dropped
     // when we try to add rdd_0_4.
+    //现在rdd_1_1应该被删除以添加rdd_0_3，但是rdd_0_2应该不会被删除
+    //当我们尝试添加rdd_0_4。
     assert(!store.memoryStore.contains(rdd(1, 1)), "rdd_1_1 was in store")
     assert(!store.memoryStore.contains(rdd(0, 1)), "rdd_0_1 was in store")
     assert(!store.memoryStore.contains(rdd(0, 4)), "rdd_0_4 was in store")
@@ -857,6 +862,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // This sequence of mocks makes these tests fairly brittle. It would
     // be nice to refactor classes involved in disk storage in a way that
     // allows for easier testing.
+    //这个模拟序列使得这些测试相当脆弱。 它会以很好的方式重构涉及磁盘存储的类允许更容易的测试。
     val blockManager = mock(classOf[BlockManager])
     when(blockManager.conf).thenReturn(conf.clone.set(confKey, "0"))
     val diskBlockManager = new DiskBlockManager(blockManager, conf)
@@ -871,6 +877,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val notMapped = diskStoreNotMapped.getBytes(blockId).get
 
     // Not possible to do isInstanceOf due to visibility of HeapByteBuffer
+    //由于HeapByteBuffer的可见性,不可能做isInstanceOf
     assert(notMapped.getClass.getName.endsWith("HeapByteBuffer"),
       "Expected HeapByteBuffer for un-mapped read")
     assert(mapped.isInstanceOf[MappedByteBuffer], "Expected MappedByteBuffer for mapped read")
@@ -1181,12 +1188,13 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
 
     // Re-put these two blocks so block manager knows about them too. Otherwise, block manager
     // would not know how to drop them from memory later.
+    //重新整理这两个块，所以块管理也知道他们。 否则，块管理器不知道如何将它们从内存中删除。
     memoryStore.remove("b1")
     memoryStore.remove("b2")
     store.putIterator("b1", smallIterator, memOnly)
     store.putIterator("b2", smallIterator, memOnly)
-    //将没有足够的空间,这应该是成功的但踢出B1的过程中
     // Unroll with not enough space. This should succeed but kick out b1 in the process.
+    //展开空间不足,这应该是成功的，但在这个过程中踢出b1。
     val result3 = memoryStore.putIterator("b3", smallIterator, memOnly, returnValues = true)
     assert(result3.size > 0)
     assert(result3.data.isLeft)
@@ -1287,11 +1295,13 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(unrollMemoryAfterB3 > 0)
 
     // The unroll memory owned by this thread builds on top of its value after the previous unrolls
+    //此线程拥有的展开内存在上一个展开之后建立在其值之上
     memoryStore.putIterator("b4", smallIterator, memOnly, returnValues = true)
     val unrollMemoryAfterB4 = memoryStore.currentUnrollMemoryForThisTask
     assert(unrollMemoryAfterB4 > unrollMemoryAfterB3)
 
     // ... but only to a certain extent (until we run out of free space to grant new unroll memory)
+    //...但只有在一定程度上（直到我们用尽了空闲空间才能授予新的展开内存）
     memoryStore.putIterator("b5", smallIterator, memOnly, returnValues = true)
     val unrollMemoryAfterB5 = memoryStore.currentUnrollMemoryForThisTask
     memoryStore.putIterator("b6", smallIterator, memOnly, returnValues = true)

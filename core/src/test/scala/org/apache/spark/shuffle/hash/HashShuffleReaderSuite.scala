@@ -67,7 +67,7 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
     val testConf = new SparkConf(false)
     // Create a SparkContext as a convenient way of setting SparkEnv (needed because some of the
     // shuffle code calls SparkEnv.get()).
-    //创建一个sparkcontext作为一种实用设定sparkenv,
+    //创建一个sparkcontext作为一种实用设定sparkenv,因为一些洗牌代码调用sparkenv get()
     sc = new SparkContext("local", "test", testConf)
 
     val reduceId = 15
@@ -78,10 +78,12 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
 
     // Make a mock BlockManager that will return RecordingManagedByteBuffers of data, so that we
     // can ensure retain() and release() are properly called.
+    //模拟recordingmanagedbytebuffers blockmanager将返回数据,这样我们可以确保retain()和release()被称作。
     val blockManager = mock(classOf[BlockManager])
 
     // Create a return function to use for the mocked wrapForCompression method that just returns
     // the original input stream.
+    //创建一个用于模拟wrapforcompression方法只是返回原来的输入流返回功能。
     val dummyCompressionFunction = new Answer[InputStream] {
       override def answer(invocation: InvocationOnMock): InputStream =
         invocation.getArguments()(1).asInstanceOf[InputStream]
@@ -89,6 +91,7 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
 
     // Create a buffer with some randomly generated key-value pairs to use as the shuffle data
     // from each mappers (all mappers return the same shuffle data).
+    //创建一个带有随机生成的键值对用作缓冲区数据的缓冲区。从每个映射(所有映射返回相同的洗牌的数据)。
     val byteOutputStream = new ByteArrayOutputStream()
     val serializationStream = serializer.newInstance().serializeStream(byteOutputStream)
     (0 until keyValuePairsPerMap).foreach { i =>
@@ -108,6 +111,7 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
 
       // Setup the blockManager mock so the buffer gets returned when the shuffle code tries to
       // fetch shuffle data.
+      //设置blockManager模拟,以便shuffle代码尝试时返回缓冲区获取shuffle数据。
       val shuffleBlockId = ShuffleBlockId(shuffleId, mapId, reduceId)
       when(blockManager.getBlockData(shuffleBlockId)).thenReturn(managedBuffer)
       when(blockManager.wrapForCompression(meq(shuffleBlockId), isA(classOf[InputStream])))
@@ -118,10 +122,12 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
 
     // Make a mocked MapOutputTracker for the shuffle reader to use to determine what
     // shuffle data to read.
+    // 让读者使用的洗牌要确定一个模拟 MapOutputTracker将数据混为读
     val mapOutputTracker = mock(classOf[MapOutputTracker])
     when(mapOutputTracker.getMapSizesByExecutorId(shuffleId, reduceId)).thenReturn {
       // Test a scenario where all data is local, to avoid creating a bunch of additional mocks
       // for the code to read data over the network.
+      //测试的情况下,所有的数据都是局部的,以避免创建一组额外的模拟用于在网络上读取数据的代码。
       val shuffleBlockIdsAndSizes = (0 until numMaps).map { mapId =>
         val shuffleBlockId = ShuffleBlockId(shuffleId, mapId, reduceId)
         (shuffleBlockId, byteOutputStream.size().toLong)
@@ -130,6 +136,7 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
     }
 
     // Create a mocked shuffle handle to pass into HashShuffleReader.
+    //创建一个模拟洗牌处理进入HashShuffleReader。
     val shuffleHandle = {
       val dependency = mock(classOf[ShuffleDependency[Int, Int, Int]])
       when(dependency.serializer).thenReturn(Some(serializer))
@@ -150,6 +157,7 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
 
     // Calling .length above will have exhausted the iterator; make sure that exhausting the
     // iterator caused retain and release to be called on each buffer.
+    //调用.上面的长度将耗尽迭代器；确保耗尽迭代器导致在每个缓冲区上被调用的保留和释放
     buffers.foreach { buffer =>
       assert(buffer.callsToRetain === 1)
       assert(buffer.callsToRelease === 1)

@@ -88,6 +88,7 @@ object SerializerPropertiesSuite extends Assertions {
     for (_ <- 1 to NUM_TRIALS) {
       val items = {
         // Make sure that we have duplicate occurrences of the same object in the stream:
+        //确保我们在流中重复出现相同的对象：
         val randomItems = Seq.fill(10)(generateRandomItem(rand))
         randomItems ++ randomItems.take(5)
       }

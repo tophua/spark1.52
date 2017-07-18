@@ -207,6 +207,7 @@ class StoragePageSuite extends SparkFunSuite {
     assert(((blockTable \\ "tr")(2) \\ "td").map(_.text.trim) ===
       Seq("input-1-1", "2", "localhost:10000", "Disk", "100.0 B"))
     // Check "rowspan=2" for the first 2 columns
+    //检查前2列的“rowspan = 2”
     assert(((blockTable \\ "tr")(2) \\ "td")(0).attribute("rowspan").map(_.text) === Some("2"))
     assert(((blockTable \\ "tr")(2) \\ "td")(1).attribute("rowspan").map(_.text) === Some("2"))
 
@@ -216,10 +217,11 @@ class StoragePageSuite extends SparkFunSuite {
     assert(((blockTable \\ "tr")(4) \\ "td").map(_.text.trim) ===
       Seq("input-2-2", "1", "localhost:10001", "External", "200.0 B"))
     // Check "rowspan=1" for the first 2 columns
+    //检查前2列的“rowspan = 1”
     assert(((blockTable \\ "tr")(4) \\ "td")(0).attribute("rowspan").map(_.text) === Some("1"))
     assert(((blockTable \\ "tr")(4) \\ "td")(1).attribute("rowspan").map(_.text) === Some("1"))
   }
-
+  //空的receiverBlockTables
   test("empty receiverBlockTables") {
     assert(storagePage.receiverBlockTables(Seq.empty).isEmpty)
 

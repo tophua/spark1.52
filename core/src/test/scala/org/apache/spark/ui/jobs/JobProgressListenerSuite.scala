@@ -81,7 +81,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
       assert(size === 0, s"$fieldName was not empty")
     }
   }
-
+  //测试LRU驱逐阶段
   test("test LRU eviction of stages") {
     val conf = new SparkConf()
     //在GC之前webUI保留的stage数量
@@ -97,7 +97,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     listener.completedStages.size should be (5)
     listener.completedStages.map(_.stageId).toSet should be (Set(50, 49, 48, 47, 46))
   }
-
+  //测试清除stageIdToActiveJobs
   test("test clearing of stageIdToActiveJobs") {
     val conf = new SparkConf()
     //在GC之前webUI保留的stage数量
@@ -106,6 +106,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     val jobId = 0
     val stageIds = 1 to 50
     // Start a job with 50 stages
+    //开始50个阶段的工作
     listener.onJobStart(createJobStartEvent(jobId, stageIds))
     for (stageId <- stageIds) {
       listener.onStageSubmitted(createStageStartEvent(stageId))
@@ -113,6 +114,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     listener.stageIdToActiveJobIds.size should be > 0
 
     // Complete the stages and job
+    //完成阶段和工作
     for (stageId <- stageIds) {
       listener.onStageCompleted(createStageEndEvent(stageId, failed = false))
     }
@@ -120,13 +122,14 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     assertActiveJobsStateIsEmpty(listener)
     listener.stageIdToActiveJobIds.size should be (0)
   }
-
+  //测试清除jobGroupToJobIds
   test("test clearing of jobGroupToJobIds") {
     val conf = new SparkConf()
     conf.set("spark.ui.retainedJobs", 5.toString)
     val listener = new JobProgressListener(conf)
 
     // Run 50 jobs, each with one stage
+    //运行50个工作，每个工作都有一个阶段
     for (jobId <- 0 to 50) {
       listener.onJobStart(createJobStartEvent(jobId, Seq(0), jobGroup = Some(jobId.toString)))
       listener.onStageSubmitted(createStageStartEvent(0))
@@ -135,9 +138,10 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     }
     assertActiveJobsStateIsEmpty(listener)
     // This collection won't become empty, but it should be bounded by spark.ui.retainedJobs
+    //该集合不会变为空，但它应该由spark.ui.retainedJobs限定
     listener.jobGroupToJobIds.size should be (5)
   }
-
+  //测试LRU驱逐工作
   test("test LRU eviction of jobs") {
     val conf = new SparkConf()
     //在GC之前webUI保留的stage数量
@@ -147,6 +151,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
 
     // Run a bunch of jobs to get the listener into a state where we've exceeded both the
     // job and stage retention limits:
+    //运行一堆工作，让听众进入一个我们已经超过这两个的状态工作和阶段保留限制：
     for (jobId <- 1 to 10) {
       runJob(listener, jobId, shouldFail = false)
     }
@@ -155,12 +160,15 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     }
     assertActiveJobsStateIsEmpty(listener)
     // Snapshot the sizes of various soft- and hard-size-limited collections:
+    //Snapshot各种软和硬尺寸限制收藏的大小：
     val softLimitSizes = listener.getSizesOfSoftSizeLimitedCollections
     val hardLimitSizes = listener.getSizesOfHardSizeLimitedCollections
     // Run some more jobs:
+    //再运行一些工作：
     for (jobId <- 11 to 50) {
       runJob(listener, jobId, shouldFail = false)
       // We shouldn't exceed the hard / soft limit sizes after the jobs have finished:
+      //作业完成后，我们不应超过硬/软限制尺寸：
       listener.getSizesOfSoftSizeLimitedCollections should be (softLimitSizes)
       listener.getSizesOfHardSizeLimitedCollections should be (hardLimitSizes)
     }
@@ -171,12 +179,14 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     for (jobId <- 51 to 100) {
       runJob(listener, jobId, shouldFail = true)
       // We shouldn't exceed the hard / soft limit sizes after the jobs have finished:
+      //作业完成后，我们不应超过硬/软限制尺寸：
       listener.getSizesOfSoftSizeLimitedCollections should be (softLimitSizes)
       listener.getSizesOfHardSizeLimitedCollections should be (hardLimitSizes)
     }
     assertActiveJobsStateIsEmpty(listener)
 
     // Completed and failed jobs each their own size limits, so this should still be the same:
+    //完成和失败的工作每个自己的大小限制，所以这应该是一样的：
     listener.completedJobs.size should be (5)
     listener.completedJobs.map(_.jobId).toSet should be (Set(50, 49, 48, 47, 46))
     listener.failedJobs.size should be (5)
@@ -191,6 +201,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     assert(listener.stageIdToData.size === 0)
 
     // finish this task, should get updated shuffleRead
+    //完成这个任务，应该更新shuffleRead
     shuffleReadMetrics.incRemoteBytesRead(1000)
     taskMetrics.setShuffleReadMetrics(Some(shuffleReadMetrics))
     var taskInfo = new TaskInfo(1234L, 0, 1, 0L, "exe-1", "host1", TaskLocality.NODE_LOCAL, false)
@@ -203,6 +214,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
       .executorSummary.getOrElse("exe-1", fail()).shuffleRead === 1000)
 
     // finish a task with unknown executor-id, nothing should happen
+    //完成一个未知执行者ID的任务，什么都不应该发生
     taskInfo =
       new TaskInfo(1234L, 0, 1, 1000L, "exe-unknown", "host1", TaskLocality.NODE_LOCAL, true)
     taskInfo.finishTime = 1
@@ -212,6 +224,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     assert(listener.stageIdToData.size === 1)
 
     // finish this task, should get updated duration
+    //完成这个任务，应该得到更新的持续时间
     taskInfo = new TaskInfo(1235L, 0, 1, 0L, "exe-1", "host1", TaskLocality.NODE_LOCAL, false)
     taskInfo.finishTime = 1
     task = new ShuffleMapTask(0)
@@ -230,7 +243,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     assert(listener.stageIdToData.getOrElse((0, 0), fail())
       .executorSummary.getOrElse("exe-2", fail()).shuffleRead === 1000)
   }
-
+  //测试任务成功与不同任务结束原因的故障计数
   test("test task success vs failure counting for different task end reasons") {
     val conf = new SparkConf()
     val listener = new JobProgressListener(conf)
@@ -241,6 +254,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     val taskType = Utils.getFormattedClassName(task)
 
     // Go through all the failure cases to make sure we are counting them as failures.
+    //通过所有的失败案例，确保我们将其视为失败。
     val taskFailedReasons = Seq(
       Resubmitted,
       new FetchFailed(null, 0, 0, 0, "ignored"),
@@ -259,12 +273,13 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     }
 
     // Make sure we count success as success.
+    //确保我们成功取得成功。
     listener.onTaskEnd(
       SparkListenerTaskEnd(task.stageId, 1, taskType, Success, taskInfo, metrics))
     assert(listener.stageIdToData((task.stageId, 1)).numCompleteTasks === 1)
     assert(listener.stageIdToData((task.stageId, 0)).numFailedTasks === failCount)
   }
-
+  //测试更新指标
   test("test update metrics") {
     val conf = new SparkConf()
     val listener = new JobProgressListener(conf)
@@ -345,8 +360,11 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     stage1Data = listener.stageIdToData.get((1, 0)).get
     // Task 1235 contributed (100+1)+(100+9) = 210 shuffle bytes, and task 1234 contributed
     // (300+1)+(300+9) = 610 total shuffle bytes, so the total for the stage is 820.
+    //任务1235贡献（100 + 1）+（100 + 9）= 210随机字节，任务1234贡献
+    //（300 + 1）+（300 + 9）= 610总混音字节，所以舞台的总数是820。
     assert(stage0Data.shuffleReadTotalBytes == 820)
     // Task 1236 contributed 410 shuffle bytes, and task 1237 contributed 810 shuffle bytes.
+    //任务1236贡献了410个随机字节，任务1237贡献了810个随机字节。
     assert(stage1Data.shuffleReadTotalBytes == 1220)
     assert(stage0Data.shuffleWriteBytes == 406)
     assert(stage1Data.shuffleWriteBytes == 606)

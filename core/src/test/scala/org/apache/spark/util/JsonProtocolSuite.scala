@@ -296,6 +296,7 @@ class JsonProtocolSuite extends SparkFunSuite {
 
   test("ExecutorLostFailure backward compatibility") {//执行器失败后向后兼容性
     // ExecutorLostFailure in Spark 1.1.0 does not have an "Executor ID" property.
+    //在Spark 1.1.0中的ExecutorLostFailure没有“Executor ID”属性。
     val executorLostFailure = ExecutorLostFailure("100")
     val oldEvent = JsonProtocol.taskEndReasonToJson(executorLostFailure)
       .removeField({ _._1 == "Executor ID" })
@@ -305,6 +306,7 @@ class JsonProtocolSuite extends SparkFunSuite {
 
   test("SparkListenerJobStart backward compatibility") {
     // Prior to Spark 1.2.0, SparkListenerJobStart did not have a "Stage Infos" property.
+    //在Spark 1.2.0之前，SparkListenerJobStart没有“Stage Infos”属性
     val stageIds = Seq[Int](1, 2, 3, 4)
     val stageInfos = stageIds.map(x => makeStageInfo(x, x * 200, x * 300, x * 400, x * 500))
     val dummyStageInfos =
@@ -336,6 +338,7 @@ class JsonProtocolSuite extends SparkFunSuite {
 
   test("RDDInfo backward compatibility (scope, parent IDs)") {//rddinfo向后兼容性
     // Prior to Spark 1.4.0, RDDInfo did not have the "Scope" and "Parent IDs" properties
+    //在Spark 1.4.0之前，RDDInfo没有“范围”和“父ID”属性
     val rddInfo = new RDDInfo(
       1, "one", 100, StorageLevel.NONE, Seq(1, 6, 8), Some(new RDDOperationScope("fable")))
     val oldRddInfoJson = JsonProtocol.rddInfoToJson(rddInfo)

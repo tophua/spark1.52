@@ -219,7 +219,7 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
     val mgr = taskScheduler.taskIdToTaskSetManager.get(taskDescriptions3(0).taskId).get
     assert(mgr.taskSet.stageAttemptId === 1)
   }
-
+  //如果僵尸尝试完成，则继续安排非僵尸尝试的任务
   test("if a zombie attempt finishes, continue scheduling tasks for non-zombie attempts") {
     sc = new SparkContext("local", "TaskSchedulerImplSuite")
     val taskScheduler = new TaskSchedulerImpl(sc)
