@@ -351,7 +351,8 @@ abstract class RDD[T: ClassTag](
 
     visit(this)
 
-    // In case there is a cycle, do not include the root itself,不包括自己RDD
+    // In case there is a cycle, do not include the root itself
+    //如果有一个循环,不要包括根本身
     ancestors.filterNot(_ == this).toSeq
   }
 
@@ -435,12 +436,14 @@ abstract class RDD[T: ClassTag](
    * 该函数用于将RDD进行重分区,使用HashPartitioner。
    * 该函数其实就是coalesce函数第二个参数为true的实现
    * Return a new RDD that has exactly(正确) numPartitions partitions.
-   *repartition用于增减rdd分区。coalesce特指减少分区,可以通过一次窄依赖的映射避免shuffle
-   * Can increase(增加) or decrease(减少) the level of parallelism in this RDD. Internally, this uses
+   * repartition用于增减rdd分区。coalesce特指减少分区,可以通过一次窄依赖的映射避免shuffle
+   * Can increase or decrease the level of parallelism in this RDD. Internally, this uses
    * a shuffle to redistribute data.
+    * 可以增加或减少此RDD中的并行度,在内部使用重新分发数据。
    *
-   * If you are decreasing the number of partitions in this RDD, consider(考虑) using `coalesce`,
+   * If you are decreasing the number of partitions in this RDD, consider using `coalesce`,
    * which can avoid performing a shuffle.
+    * 如果您减少此RDD中的分区数,请使用coalesce可以避免执行洗牌
    */
   def repartition(numPartitions: Int)(implicit ord: Ordering[T] = null): RDD[T] = withScope {
     coalesce(numPartitions, shuffle = true)
@@ -756,11 +759,13 @@ abstract class RDD[T: ClassTag](
    * Return an RDD of grouped elements. Each group consists of a key and a sequence of elements
    * mapping to that key. The ordering of elements within each group is not guaranteed, and
    * may even differ each time the resulting RDD is evaluated.
-   *
+   *返回分组项目的RDD。每个组由一个键和一系列元素组成映射到该键,每个组中的元素的排序不能保证,并且每次得到的RDD被评估时甚至可能不同。
    * Note: This operation may be very expensive(耗时). If you are grouping in order to perform an
    * aggregation (such as a sum or average) over each key(如果你要分在每个键上执行聚合),
    * using [[PairRDDFunctions.aggregateByKey]] or [[PairRDDFunctions.reduceByKey]] 
    * will provide much better performance(将提供更好性能).
+    *注意：此操作可能非常昂贵。如果您正在分组以执行使用[[PairRDDFunctions.aggregateByKey]]或[[PairRDDFunctions.reduceByKey]]
+    * 在每个键上的聚合（如和或平均值）将提供更好的性能。
    */
   def groupBy[K](
     f: T => K,
@@ -772,10 +777,13 @@ abstract class RDD[T: ClassTag](
    * Return an RDD of grouped items. Each group consists of a key and a sequence of elements
    * mapping to that key. The ordering of elements within each group is not guaranteed, and
    * may even differ each time the resulting RDD is evaluated.
+    * 返回分组项目的RDD。每个组由一个键和一系列元素组成映射到该键,每个组中的元素的排序不能保证,并且每次得到的RDD被评估时甚至可能不同。
    *
    * Note: This operation may be very expensive. If you are grouping in order to perform an
    * aggregation (such as a sum or average) over each key, using [[PairRDDFunctions.aggregateByKey]]
    * or [[PairRDDFunctions.reduceByKey]] will provide much better performance.
+    * 注意：此操作可能非常昂贵。 如果您正在分组以执行使用[[PairRDDFunctions.aggregateByKey]]或[[PairRDDFunctions.reduceByKey]]
+    * 在每个键上的聚合（如和或平均值）将提供更好的性能。
    */
   def groupBy[K](f: T => K, p: Partitioner)(implicit kt: ClassTag[K], ord: Ordering[K] = null): RDD[(K, Iterable[T])] = withScope {
     val cleanF = sc.clean(f)
@@ -792,6 +800,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return an RDD created by piping elements to a forked external process.
+    * 将由管道元素创建的RDD返回到分叉的外部过程
    */
   def pipe(command: String, env: Map[String, String]): RDD[String] = withScope {
     new PipedRDD(this, command, env)
@@ -1038,6 +1047,9 @@ abstract class RDD[T: ClassTag](
     //需要注意的是这里传入了一个函数,这个函数就是这个Job的要执行的任务,
     //它将会被包装并序列化后发送到要执行它的executor上,并在要处理的RDD上的每个分区上被调用执行
     val results = sc.runJob(this, (iter: Iterator[T]) => iter.toArray)
+    //表示可以传不定个数的参数
+    //:_*让你把列表、数组、系列转为一个变长,传给接受不定长参数的函数
+    //: _*是表示传入该函数(Array.concat)的参数的类型为任意类型且多参数，换言之，传入的参数会被转换为多个Array
     Array.concat(results: _*)
   }
 
@@ -1050,6 +1062,8 @@ abstract class RDD[T: ClassTag](
    * Note: this results in multiple Spark jobs, and if the input RDD is the result
    * of a wide transformation (e.g. join with different partitioners), to avoid
    * recomputing the input RDD should be cached first.
+    * 注意：这会导致多个Spark作业，如果输入RDD是结果进行广泛的转换(例如，与不同的分区器连接),以避免
+    *重新计算输入RDD应该先被缓存。
    */
   def toLocalIterator: Iterator[T] = withScope {
     def collectPartition(p: Int): Array[T] = {
@@ -1136,7 +1150,6 @@ abstract class RDD[T: ClassTag](
    */
   def reduce(f: (T, T) => T): T = withScope {
     val cleanF = sc.clean(f)
-    //
     val reducePartition: Iterator[T] => Option[T] = iter => {//不明白函数定义?
       if (iter.hasNext) {
         Some(iter.reduceLeft(cleanF))
@@ -1262,8 +1275,10 @@ abstract class RDD[T: ClassTag](
       val scale = math.max(math.ceil(math.pow(numPartitions, 1.0 / depth)).toInt, 2)
       // If creating an extra level doesn't help reduce
       // the wall-clock time, we stop tree aggregation.
-
+      //如果创建一个额外的级别没有帮助减少
+      //挂钟时间,我们停止树聚合。
       // Don't trigger TreeAggregation when it doesn't save wall-clock time
+      //当不保存挂钟时间时,不要触发TreeAggregation
       while (numPartitions > scale + math.ceil(numPartitions.toDouble / scale)) {
         numPartitions /= scale
         val curNumPartitions = numPartitions
@@ -1405,11 +1420,14 @@ abstract class RDD[T: ClassTag](
    * Zips this RDD with generated unique Long ids. Items in the kth partition will get ids k, n+k,
    * 2*n+k, ..., where n is the number of partitions. So there may exist gaps, but this method
    * won't trigger a spark job, which is different from [[org.apache.spark.rdd.RDD#zipWithIndex]].
-   *
+   * 拉链这RDD生成唯一的ID,第k个分区中的项目将获得ids k,n+k,2*n+k, ...,其中n是分区的数量,所以可能存在差距,
+    * 但这种方法不会触发Spark job,
    * Note that some RDDs, such as those returned by groupBy(), do not guarantee order of
    * elements in a partition. The unique ID assigned to each element is therefore not guaranteed,
    * and may even change if the RDD is reevaluated. If a fixed ordering is required to guarantee
    * the same index assignments, you should sort the RDD with sortByKey() or save it to a file.
+    * 请注意,某些RDD(例如由groupBy()返回的RDD)不保证顺序分区中的元素 因此,不保证分配给每个元素的唯一ID,
+    * 如果RDD被重新评估,甚至可能会改变,如果需要固定的订购来保证相同的索引分配，您应该使用sortByKey()对RDD进行排序或将其保存到文件中。
    */
   def zipWithUniqueId(): RDD[(T, Long)] = withScope {
     val n = this.partitions.length.toLong
