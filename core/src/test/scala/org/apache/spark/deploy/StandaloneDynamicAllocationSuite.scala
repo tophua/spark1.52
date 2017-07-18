@@ -395,6 +395,7 @@ class StandaloneDynamicAllocationSuite
     }
     // sync executors between the Master and the driver, needed because
     // the driver refuses to kill executors it does not know about
+    //同步执行器之间的Master和driver，因为需要driver拒绝杀死不知道的执行者
     syncExecutors(sc)
     // kill the same executor twice
     //杀死同一执行者两次
@@ -421,6 +422,7 @@ class StandaloneDynamicAllocationSuite
     }
     // sync executors between the Master and the driver, needed because
     // the driver refuses to kill executors it does not know about
+    //同步执行器之间的Master和driver，因为需要driver拒绝杀死不知道的执行者
     syncExecutors(sc)
     val executors = getExecutorIds(sc)
     assert(executors.size === 2)

@@ -54,14 +54,14 @@ class HiveTableScanSuite extends HiveComparisonTest {
     """
       |SELECT key, value FROM src SORT BY key, value
     """.stripMargin)
-
+  //小写问题
   test("Spark-4041: lowercase issue") {
     TestHive.sql("CREATE TABLE tb (KEY INT, VALUE STRING) STORED AS ORC")
     TestHive.sql("insert into table tb select key, value from src")
     TestHive.sql("select KEY from tb where VALUE='just_for_test' limit 5").collect()
     TestHive.sql("drop table tb")
   }
-
+  //时间戳查询空值
   test("Spark-4077: timestamp query for null value") {
     TestHive.sql("DROP TABLE IF EXISTS timestamp_query_null")
     TestHive.sql(
@@ -79,7 +79,7 @@ class HiveTableScanSuite extends HiveComparisonTest {
       === Array(Row(java.sql.Timestamp.valueOf("2014-12-11 00:00:00")), Row(null)))
     TestHive.sql("DROP TABLE timestamp_query_null")
   }
-
+  //使用投影中的选择查询时，属性区分大小写
   test("Spark-4959 Attributes are case sensitive when using a select query from a projection") {
     sql("create table spark_4959 (col1 string)")
     sql("""insert into table spark_4959 select "hi" from src limit 1""")

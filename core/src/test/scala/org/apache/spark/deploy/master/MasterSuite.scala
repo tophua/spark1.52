@@ -139,7 +139,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
           .getLines().mkString("\n")
         //json4s 调用DefaultFormats类parse,解析json
         val JArray(workers) = (parse(json) \ "workers")
-          //workers.size should be (2)
+          //workers.size should be (2) workers.size应该是（2）
         workers.foreach { workerSummaryJson =>
           println(workerSummaryJson)
           val JString(workerWebUi) = workerSummaryJson \ "webuiaddress"

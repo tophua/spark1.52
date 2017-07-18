@@ -34,7 +34,7 @@ class HivePlanTest extends QueryTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //共享相同分区的窗口表达式和order by子句
   test("window expressions sharing the same partition by and order by clause") {
     val df = Seq.empty[(Int, String, Int, Int)].toDF("id", "grp", "seq", "val")
     val window = Window.

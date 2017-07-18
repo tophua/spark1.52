@@ -458,7 +458,7 @@ class SparkSubmitSuite
 
     val tmpDir = Utils.createTempDir()
 
-    // Test jars and files
+    // Test jars and files 测试jar和文件
     val f1 = File.createTempFile("test-submit-jars-files", "", tmpDir)
     val writer1 = new PrintWriter(f1)
     writer1.println("spark.jars " + jars)
@@ -476,6 +476,7 @@ class SparkSubmitSuite
     sysProps("spark.files") should be(Utils.resolveURIs(files))
 
     // Test files and archives (Yarn)
+    //测试文件和档案（Yarn）
     val f2 = File.createTempFile("test-submit-files-archives", "", tmpDir)
     val writer2 = new PrintWriter(f2)
     writer2.println("spark.yarn.dist.files " + files)
@@ -492,7 +493,7 @@ class SparkSubmitSuite
     sysProps2("spark.yarn.dist.files") should be(Utils.resolveURIs(files))
     sysProps2("spark.yarn.dist.archives") should be(Utils.resolveURIs(archives))
 
-    // Test python files
+    // Test python files 测试python文件
     val f3 = File.createTempFile("test-submit-python-files", "", tmpDir)
     val writer3 = new PrintWriter(f3)
     writer3.println("spark.submit.pyFiles " + pyFiles)
@@ -520,7 +521,7 @@ class SparkSubmitSuite
       "--conf", "spark.ui.enabled=false",
       "--conf", "spark.master.rest.enabled=false",
       userJar.toString)
-   // runSparkSubmit(args)
+    runSparkSubmit(args)
   }
 
   test("SPARK_CONF_DIR overrides spark-defaults.conf") {

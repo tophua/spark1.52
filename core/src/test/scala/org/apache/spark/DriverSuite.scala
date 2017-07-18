@@ -48,6 +48,7 @@ class DriverSuite extends SparkFunSuite with Timeouts {
 /**
  * Program that creates a Spark driver but doesn't call SparkContext#stop() or
  * sys.exit() after finishing.
+  * 创建Spark驱动程序但不调用SparkContext＃stop（）或的程序sys.exit（）完成后。
  */
 object DriverWithoutCleanup {
   def main(args: Array[String]) {

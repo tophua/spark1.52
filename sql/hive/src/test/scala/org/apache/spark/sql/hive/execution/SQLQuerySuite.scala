@@ -57,13 +57,17 @@ case class WindowData(
     month: Int,
     area: String,
     product: Int)
-/** A SQL Dialect for testing purpose, and it can not be nested type */
+/**
+  *  A SQL Dialect for testing purpose, and it can not be nested type
+  *  用于测试目的的SQL方言，不能嵌套类型
+  * */
 class MyDialect extends DefaultParserDialect
 
 /**
  * A collection of hive query tests where we generate the answers ourselves instead of depending on
  * Hive to generate them (in contrast to HiveQuerySuite).  Often this is because the query is
  * valid, but Hive currently cannot execute it.
+  * 通常这是因为查询是有效,但Hive目前无法执行。
  */
 class SQLQuerySuite extends QueryTest with SQLTestUtils {
   override def _sqlContext: SQLContext = TestHive
@@ -73,10 +77,12 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     val jarPath = TestHive.getHiveFile("TestUDTF.jar").getCanonicalPath
 
     // SPARK-11595 Fixes ADD JAR when input path contains URL scheme
+    //当输入路径包含URL方案时修复ADD JAR
     val jarURL = s"file://$jarPath"
 
     sql(s"ADD JAR $jarURL")
     // The function source code can be found at:
+    //函数源代码可以在以下位置找到：
     // https://cwiki.apache.org/confluence/display/Hive/DeveloperGuide+UDTF
     sql(
       """
@@ -92,7 +98,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("SELECT udtf_count2(a) FROM (SELECT 1 AS a FROM src LIMIT 3) t"),
       Row(3) :: Row(3) :: Nil)
   }
-
+  //udtf在侧面看
   test("SPARK-6835: udtf in lateral view") {
     val df = Seq((1, 1)).toDF("c1", "c2")
     df.registerTempTable("table1")
@@ -165,7 +171,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         """.stripMargin),
       (1 to 6).map(_ => Row("CA", 20151)))
   }
-
+  //显示功能
   test("show functions") {
     val allFunctions =
       (FunctionRegistry.builtin.listFunction().toSet[String] ++
@@ -182,9 +188,10 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     // this probably will failed if we add more function with `sha` prefixing.
     checkAnswer(sql("SHOW functions `sha.*`"), Row("sha") :: Row("sha1") :: Row("sha2") :: Nil)
   }
-
+  //描述功能
   test("describe functions") {
     // The Spark SQL built-in functions
+    //Spark SQL内置函数
     checkExistence(sql("describe function extended upper"), true,
       "Function: upper",
       "Class: org.apache.spark.sql.catalyst.expressions.Upper",
@@ -209,7 +216,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       "Class: org.apache.hadoop.hive.ql.udf.UDFOPBitNot",
       "Usage: ~ n - Bitwise not")
   }
-
+  //与null和sum结合
   test("SPARK-5371: union with null and sum") {
     val df = Seq((1, 1)).toDF("c1", "c2")
     df.registerTempTable("table1")
@@ -233,7 +240,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       """.stripMargin)
     checkAnswer(query, Row(1, 1) :: Nil)
   }
-
+  //CTAS WITH WITH子句
   test("CTAS with WITH clause") {
     val df = Seq((1, 1)).toDF("c1", "c2")
     df.registerTempTable("table1")
@@ -251,21 +258,21 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     val query = sql("SELECT * FROM with_table1")
     checkAnswer(query, Row(1, 1) :: Nil)
   }
-
+  //爆炸嵌套字段
   test("explode nested Field") {
     Seq(NestedArray1(NestedArray2(Seq(1, 2, 3)))).toDF.registerTempTable("nestedArray")
     checkAnswer(
       sql("SELECT ints FROM nestedArray LATERAL VIEW explode(a.b) a AS ints"),
       Row(1) :: Row(2) :: Row(3) :: Nil)
   }
-
+  //修复使用SORT BY时的属性参考解析错误
   test("SPARK-4512 Fix attribute reference resolution error when using SORT BY") {
     checkAnswer(
       sql("SELECT * FROM (SELECT key + key AS a FROM src SORT BY value) t ORDER BY t.a"),
       sql("SELECT key + key as a FROM src ORDER BY a").collect().toSeq
     )
   }
-
+  //没有serde的CTAS
   test("CTAS without serde") {
     def checkRelation(tableName: String, isDataSourceParquet: Boolean): Unit = {
       val relation = EliminateSubQueries(catalog.lookupRelation(Seq(tableName)))
@@ -336,7 +343,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("DROP TABLE IF EXISTS ctas1")
     }
   }
-
+  //SQL方言切换
   test("SQL Dialect Switching") {
     assert(getSQLDialect().getClass === classOf[HiveQLDialect])
     setConf("spark.sql.dialect", classOf[MyDialect].getCanonicalName())
@@ -344,18 +351,20 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     assert(sql("SELECT 1").collect() === Array(Row(1)))
 
     // set the dialect back to the DefaultSQLDialect
+    //将方言设置回DefaultSQLDialect
     sql("SET spark.sql.dialect=sql")
     assert(getSQLDialect().getClass === classOf[DefaultParserDialect])
     sql("SET spark.sql.dialect=hiveql")
     assert(getSQLDialect().getClass === classOf[HiveQLDialect])
 
-    // set invalid dialect
+    // set invalid dialect 设置无效方言
     sql("SET spark.sql.dialect.abc=MyTestClass")
     sql("SET spark.sql.dialect=abc")
     intercept[Exception] {
       sql("SELECT 1")
     }
     // test if the dialect set back to HiveQLDialect
+    //测试方言是否回到HiveQLDialect
     getSQLDialect().getClass === classOf[HiveQLDialect]
 
     sql("SET spark.sql.dialect=MyTestClass")
@@ -363,6 +372,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("SELECT 1")
     }
     // test if the dialect set back to HiveQLDialect
+    //测试方言是否回到HiveQLDialect
     assert(getSQLDialect().getClass === classOf[HiveQLDialect])
   }
 
@@ -387,6 +397,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         |   ORDER BY key, value""".stripMargin).collect()
 
     // the table schema may like (key: integer, value: string)
+    //表格可能会喜欢（key：integer，value：string）
     sql(
       """CREATE TABLE IF NOT EXISTS ctas4 AS
         | SELECT 1 AS key, value FROM src LIMIT 1""".stripMargin).collect()
@@ -453,7 +464,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         sql("SELECT key, value FROM src ORDER BY key, value").collect().toSeq)
     }
   }
-
+  //指定CTAS的列列表
   test("specifying the column list for CTAS") {
     Seq((1, "111111"), (2, "222222")).toDF("key", "value").registerTempTable("mytable1")
 
@@ -471,7 +482,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
 
     sql("drop table mytable1")
   }
-
+  //命令替换
   test("command substitution") {
     sql("set tbl=src")
     checkAnswer(
@@ -489,13 +500,13 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("SELECT key FROM ${hiveconf:tbl2} ORDER BY key, value limit 1"),
       sql("SELECT key FROM src ORDER BY key, value limit 1").collect().toSeq)
   }
-
+  //排序不在选择
   test("ordering not in select") {
     checkAnswer(
       sql("SELECT key FROM src ORDER BY value"),
       sql("SELECT key FROM (SELECT key, value FROM src ORDER BY value) a").collect().toSeq)
   }
-
+  //排序不在agg
   test("ordering not in agg") {
     checkAnswer(
       sql("SELECT key FROM src GROUP BY key, value ORDER BY value"),
@@ -507,7 +518,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
           GROUP BY key, value
           ORDER BY value) a""").collect().toSeq)
   }
-
+  //double嵌套数据
   test("double nested data") {
     sparkContext.parallelize(Nested1(Nested2(Nested3(1))) :: Nil)
       .toDF().registerTempTable("nested")
@@ -524,14 +535,14 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("CREATE TABLE test_ctas_12345 AS SELECT * from notexists").collect()
     }
   }
-
+  //测试CTAS
   test("test CTAS") {
     checkAnswer(sql("CREATE TABLE test_ctas_123 AS SELECT key, value FROM src"), Seq.empty[Row])
     checkAnswer(
       sql("SELECT key, value FROM test_ctas_123 ORDER BY key"),
       sql("SELECT key, value FROM src ORDER BY key").collect().toSeq)
   }
-
+  //保存加入表
   test("SPARK-4825 save join to table") {
     val testData = sparkContext.parallelize(1 to 10).map(i => TestData(i, i.toString)).toDF()
     sql("CREATE TABLE test1 (key INT, value STRING)")
@@ -544,53 +555,53 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       table("test"),
       sql("SELECT COUNT(a.value) FROM test1 a JOIN test2 b ON a.key = b.key").collect().toSeq)
   }
-
+ //反引号没有正确处理是别名
   test("SPARK-3708 Backticks aren't handled correctly is aliases") {
     checkAnswer(
       sql("SELECT k FROM (SELECT `key` AS `k` FROM src) a"),
       sql("SELECT `key` FROM src").collect().toSeq)
   }
-
+//在子查询别名中反引号不正确处理
   test("SPARK-3834 Backticks not correctly handled in subquery aliases") {
     checkAnswer(
       sql("SELECT a.key FROM (SELECT key FROM src) `a`"),
       sql("SELECT `key` FROM src").collect().toSeq)
   }
-
+//支持Bitwise和运算符
   test("SPARK-3814 Support Bitwise & operator") {
     checkAnswer(
       sql("SELECT case when 1&1=1 then 1 else 0 end FROM src"),
       sql("SELECT 1 FROM src").collect().toSeq)
   }
-
+//支持Bitwise |操作者
   test("SPARK-3814 Support Bitwise | operator") {
     checkAnswer(
       sql("SELECT case when 1|0=1 then 1 else 0 end FROM src"),
       sql("SELECT 1 FROM src").collect().toSeq)
   }
-
+  //支持Bitwise ^运算符
   test("SPARK-3814 Support Bitwise ^ operator") {
     checkAnswer(
       sql("SELECT case when 1^0=1 then 1 else 0 end FROM src"),
       sql("SELECT 1 FROM src").collect().toSeq)
   }
-
+  //支持Bitwise〜operator
   test("SPARK-3814 Support Bitwise ~ operator") {
     checkAnswer(
       sql("SELECT case when ~1=-2 then 1 else 0 end FROM src"),
       sql("SELECT 1 FROM src").collect().toSeq)
   }
-
+  //如果Spark SQL和HQL中的“不在”之间，则查询不起作用
   test("SPARK-4154 Query does not work if it has 'not between' in Spark SQL and HQL") {
     checkAnswer(sql("SELECT key FROM src WHERE key not between 0 and 10 order by key"),
       sql("SELECT key FROM src WHERE key between 11 and 500 order by key").collect().toSeq)
   }
-
+  //SumDistinct部分聚合
   test("SPARK-2554 SumDistinct partial aggregation") {
     checkAnswer(sql("SELECT sum( distinct key) FROM src group by key order by key"),
       sql("SELECT distinct key FROM src order by key").collect().toSeq)
   }
-
+  //可变行上的DataFrame示例返回错误的结果
   test("SPARK-4963 DataFrame sample on mutable row return wrong result") {
     sql("SELECT * FROM src WHERE key % 2 = 0")
       .sample(withReplacement = false, fraction = 0.3)
@@ -601,13 +612,13 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         Seq.empty[Row])
     }
   }
-
+  //默认情况下,HiveContext不区分大小写
   test("SPARK-4699 HiveContext should be case insensitive by default") {
     checkAnswer(
       sql("SELECT KEY FROM Src ORDER BY value"),
       sql("SELECT key FROM src ORDER BY value").collect().toSeq)
   }
-
+  //当内部复杂类型字段具有空值时,插入Hive会抛出NPE
   test("SPARK-5284 Insert into Hive throws NPE when a inner complex type field has a null value") {
     val schema = StructType(
       StructField("s",
@@ -642,7 +653,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     sql("DROP TABLE nullValuesInInnerComplexTypes")
     dropTempTable("testTable")
   }
-
+  //将Hive UDF分组为子表达式
   test("SPARK-4296 Grouping field with Hive UDF as sub expression") {
     val rdd = sparkContext.makeRDD( """{"a": "str", "b":"1", "c":"1970-01-01 00:00:00"}""" :: Nil)
     read.json(rdd).registerTempTable("data")
@@ -657,14 +668,14 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
 
     dropTempTable("data")
   }
-
+  //解决投影＃1中的udtf
   test("resolve udtf in projection #1") {
     val rdd = sparkContext.makeRDD((1 to 5).map(i => s"""{"a":[$i, ${i + 1}]}"""))
     read.json(rdd).registerTempTable("data")
     val df = sql("SELECT explode(a) AS val FROM data")
     val col = df("val")
   }
-
+  //在投影＃2中解析udtf
   test("resolve udtf in projection #2") {
     val rdd = sparkContext.makeRDD((1 to 2).map(i => s"""{"a":[$i, ${i + 1}]}"""))
     read.json(rdd).registerTempTable("data")
@@ -680,6 +691,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
   }
 
   // TGF with non-TGF in project is allowed in Spark SQL, but not in Hive
+  //在项目中使用非TGF-β的TGF-β在Spark SQL中允许，但不在Hive中
   test("TGF with non-TGF in projection") {
     val rdd = sparkContext.makeRDD( """{"a": "1", "b":"1"}""" :: Nil)
     read.json(rdd).registerTempTable("data")
@@ -687,7 +699,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("SELECT explode(map(a, b)) as (k1, k2), a, b FROM data"),
       Row("1", "1", "1", "1") :: Nil)
   }
-
+  //如果它包含聚合或生成器，则不应该解决它
   test("logical.Project should not be resolved if it contains aggregates or generators") {
     // This test is used to test the fix of SPARK-5875.
     // The original issue was that Project's resolved will be true when it contains
@@ -720,7 +732,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       setConf(HiveContext.CONVERT_CTAS, originalConf)
     }
   }
-
+  //理性测试
   test("sanity test for SPARK-6618") {
     (1 to 100).par.map { i =>
       val tableName = s"SPARK_6618_table_$i"
@@ -731,7 +743,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql(s"DROP TABLE $tableName")
     }
   }
-
+  //与不同的十进制精度联合
   test("SPARK-5203 union with different decimal precision") {
     Seq.empty[(Decimal, Decimal)]
       .toDF("d1", "d2")
@@ -741,7 +753,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     sql("select d from dn union all select d * 2 from dn")
       .queryExecution.analyzed
   }
-
+  //测试脚本转换为stdout
   test("test script transform for stdout") {
     val data = (1 to 100000).map { i => (i, i, i) }
     data.toDF("d1", "d2", "d3").registerTempTable("script_trans")
@@ -757,7 +769,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("SELECT TRANSFORM (d1, d2, d3) USING 'cat 1>&2' AS (a,b,c) FROM script_trans")
         .queryExecution.toRdd.count())
   }
-
+  //测试脚本转换数据类型
   test("test script transform data type") {
     val data = (1 to 5).map { i => (i, i) }
     data.toDF("key", "value").registerTempTable("test")
@@ -767,7 +779,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
           |SELECT thing1 + 1
         """.stripMargin), (2 to 6).map(i => Row(i)))
   }
-
+  //窗口函数：udaf与聚合表达式
   test("window function: udaf with aggregate expressin") {
     val data = Seq(
       WindowData(1, "a", 5),
@@ -839,7 +851,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         ("c", 9, 9d/17)
       ).map(i => Row(i._1, i._2, i._3)))
   }
-
+  //窗口功能：在内部选择块中引用列
   test("window function: refer column in inner select block") {
     val data = Seq(
       WindowData(1, "a", 5),
@@ -866,7 +878,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         ("c", 3)
       ).map(i => Row(i._1, i._2)))
   }
-
+  //窗口功能：分区和顺序表达式
   test("window function: partition and order expressions") {
     val data = Seq(
       WindowData(1, "a", 5),
@@ -909,7 +921,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         (6, "c", 10, 10)
       ).map(i => Row(i._1, i._2, i._3, i._4)))
   }
-
+  //窗口函数：窗口参数中的表达式
   test("window function: expressions in arguments of a window functions") {
     val data = Seq(
       WindowData(1, "a", 5),
@@ -937,7 +949,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         (6, "c", 0, 6)
       ).map(i => Row(i._1, i._2, i._3, i._4)))
   }
-
+  //窗口函数：单个表达式中的多个窗口表达式
   test("window function: multiple window expressions in a single expression") {
     val nums = sparkContext.parallelize(1 to 10).map(x => (x, x % 2)).toDF("x", "y")
     nums.registerTempTable("nums")
@@ -973,14 +985,14 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
 
     dropTempTable("nums")
   }
-
+  //测试用例键时
   test("test case key when") {
     (1 to 5).map(i => (i, i.toString)).toDF("k", "v").registerTempTable("t")
     checkAnswer(
       sql("SELECT CASE k WHEN 2 THEN 22 WHEN 4 THEN 44 ELSE 0 END, v FROM t"),
       Row(0, "1") :: Row(22, "2") :: Row(0, "3") :: Row(44, "4") :: Row(0, "5") :: Nil)
   }
-
+  //窗口会导致自我解决失败
   test("SPARK-7595: Window will cause resolve failed with self join") {
     sql("SELECT * FROM src") // Force loading of src table.
 
@@ -992,7 +1004,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         | select * from v2 order by key limit 1
       """.stripMargin), Row(0, 3))
   }
-
+  //检查分析失败，不区分大小写
   test("SPARK-7269 Check analysis failed in case in-sensitive") {
     Seq(1, 2, 3).map { i =>
       (i.toString, i.toString)
@@ -1010,7 +1022,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("SELECT cast(key+2 as Int) from df_analysis A group by cast(key+1 as int)")
     }
   }
-
+  //将STRING投放到BIGINT
   test("Cast STRING to BIGINT") {
     checkAnswer(sql("SELECT CAST('775983671874188101' as BIGINT)"), Row(775983671874188101L))
   }
@@ -1037,7 +1049,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         java.lang.Math.exp(1.0).toString,
         java.lang.Math.floor(1.9).toString))
   }
-
+  //动态分区值测试
   test("dynamic partition value test") {
     try {
       sql("set hive.exec.dynamic.partition.mode=nonstrict")
@@ -1070,12 +1082,13 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       sql("set hive.exec.dynamic.partition.mode=strict")
     }
   }
-
+  //调用添加jar在不同的线程
   test("Call add jar in a different thread (SPARK-8306)") {
     @volatile var error: Option[Throwable] = None
     val thread = new Thread {
       override def run() {
         // To make sure this test works, this jar should not be loaded in another place.
+        //为了确保这个测试工作,这个jar不应该被加载到别的地方。
         TestHive.sql(
           s"ADD JAR ${TestHive.getHiveFile("hive-contrib-0.13.1.jar").getCanonicalPath()}")
         try {
@@ -1098,7 +1111,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
       case None => // OK
     }
   }
-
+  //HiveQuerySuite - 日期比较测试2
   test("SPARK-6785: HiveQuerySuite - Date comparison test 2") {
     checkAnswer(
       sql("SELECT CAST(CAST(0 AS timestamp) AS date) > CAST(0 AS timestamp) FROM src LIMIT 1"),
@@ -1126,7 +1139,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         Timestamp.valueOf("1970-01-01 00:00:00")))
 
   }
-
+  //HiveTypeCoercion.inConversion启动的时间太早
   test("SPARK-8588 HiveTypeCoercion.inConversion fires too early") {
     val df =
       //从本地Seq创建一个DataFrame
@@ -1224,7 +1237,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
 
     checkAnswer(df, Row("text inside layer 2") :: Nil)
   }
-
+  //脚本转换使用默认输入/输出SerDe和记录读写器
   test("SPARK-10310: " +
     "script transformation using default input/output SerDe and record reader/writer") {
     sqlContext

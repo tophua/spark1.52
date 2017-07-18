@@ -20,6 +20,7 @@ package org.apache.spark.executor
 import org.apache.spark.SparkFunSuite
 
 class TaskMetricsSuite extends SparkFunSuite {
+ // updateShuffleReadMetrics：当shuffle时，ShuffleReadMetrics不被添加
   test("[SPARK-5701] updateShuffleReadMetrics: ShuffleReadMetrics not added when no shuffle deps") {
     val taskMetrics = new TaskMetrics()
     taskMetrics.updateShuffleReadMetrics()

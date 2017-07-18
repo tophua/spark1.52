@@ -51,6 +51,7 @@ abstract class HiveQueryFileTest extends HiveComparisonTest {
 
   val whiteListProperty = "spark.hive.whitelist"
   // Allow the whiteList to be overridden by a system property
+  //允许系统属性覆盖白名单
   val realWhiteList =
     Option(System.getProperty(whiteListProperty)).map(_.split(",").toSeq).getOrElse(whiteList)
 
@@ -69,6 +70,7 @@ abstract class HiveQueryFileTest extends HiveComparisonTest {
       } else {
         // Only output warnings for the built in whitelist as this clutters the output when the user
         // trying to execute a single test from the commandline.
+        //只能输出内置白名单的警告,因为这个用户将输出的输出尝试从命令行执行单个测试。
         if (System.getProperty(whiteListProperty) == null && !runAll) {
           ignore(testCaseName) {}
         }

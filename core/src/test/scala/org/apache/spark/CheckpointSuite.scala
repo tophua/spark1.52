@@ -134,6 +134,8 @@ class CheckpointSuite extends SparkFunSuite with LocalSparkContext with Logging 
     testRDDPartitions(new CartesianRDD(sc, _, otherRDD), reliableCheckpoint)
 
     // Test that the CartesianRDD updates parent partitions (CartesianRDD.s1/s2) after
+    //测试CartesianRDD之后更新父分区（CartesianRDD.s1 / s2）父RDD已经被检查点，并且父分区已经被改变。
+    //请注意，此测试对于CartesianRDD的当前实现非常具体。
     // the parent RDD has been checkpointed and parent partitions have been changed.
     // Note that this test is very specific to the current implementation of CartesianRDD.
     val ones = sc.makeRDD(1 to 100, 10).map(x => x)

@@ -23,6 +23,7 @@ import org.apache.spark.sql.hive.test.TestHive
 
 /**
  * A set of tests that validate type promotion and coercion rules.
+  * 一组验证类型推广和胁迫规则的测试
  */
 class HiveTypeCoercionSuite extends HiveComparisonTest {
   val baseTypes = Seq("1", "1.0", "1L", "1S", "1Y", "'1'")
@@ -40,7 +41,7 @@ class HiveTypeCoercionSuite extends HiveComparisonTest {
     createQueryTest(s"case when then $nullVal else $i end ",
       s"SELECT case when true then $nullVal else $i end FROM src limit 1")
   }
-
+  //应该删除布尔值的boolean cast
   test("[SPARK-2210] boolean cast on boolean value should be removed") {
     val q = "select cast(cast(key=0 as boolean) as boolean) from src"
     val project = TestHive.sql(q).queryExecution.executedPlan.collect { case e: Project => e }.head

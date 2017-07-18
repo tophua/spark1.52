@@ -72,6 +72,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
     val settings = new IvySettings
     val res1 = SparkSubmitUtils.createRepoResolvers(None, settings)
     // should have central and spark-packages by default
+    //默认情况下应该有中心和spark-packages
     assert(res1.getResolvers.size() === 4)
     assert(res1.getResolvers.get(0).asInstanceOf[IBiblioResolver].getName === "local-m2-cache")
     assert(res1.getResolvers.get(1).asInstanceOf[FileSystemResolver].getName === "local-ivy-cache")

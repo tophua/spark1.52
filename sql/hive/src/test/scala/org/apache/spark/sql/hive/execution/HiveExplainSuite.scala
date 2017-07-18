@@ -29,7 +29,7 @@ import org.apache.spark.sql.test.SQLTestUtils
 class HiveExplainSuite extends QueryTest with SQLTestUtils {
   override def _sqlContext: SQLContext = TestHive
   private val sqlContext = _sqlContext
-
+  //解释扩展命令
   test("explain extended command") {
     checkExistence(sql(" explain   select * from src where key=123 "), true,
                    "== Physical Plan ==")
@@ -44,7 +44,7 @@ class HiveExplainSuite extends QueryTest with SQLTestUtils {
                    "== Physical Plan ==",
                    "Code Generation")
   }
-
+  //解释create table命令
   test("explain create table command") {
     checkExistence(sql("explain create table temp__b as select * from src limit 2"), true,
                    "== Physical Plan ==",
@@ -80,7 +80,7 @@ class HiveExplainSuite extends QueryTest with SQLTestUtils {
       "Limit",
       "src")
   }
-
+  //CTAS的EXPLAIN输出仅显示分析的计划
   test("SPARK-6212: The EXPLAIN output of CTAS only shows the analyzed plan") {
     withTempTable("jt") {
       val rdd = sparkContext.parallelize((1 to 10).map(i => s"""{"a":$i, "b":"str$i"}"""))

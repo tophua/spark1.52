@@ -78,7 +78,7 @@ class ScriptTransformationSuite extends SparkPlanTest {
       )(TestHive),
       rowsDf.collect())
   }
-
+  //脚本转换不应该从上游运营商（无serde）
   test("script transformation should not swallow errors from upstream operators (no serde)") {
     val rowsDf = Seq("a", "b", "c").map(Tuple1.apply).toDF("a")
     val e = intercept[TestFailedException] {
@@ -95,7 +95,7 @@ class ScriptTransformationSuite extends SparkPlanTest {
     }
     assert(e.getMessage().contains("intentional exception"))
   }
-
+  //脚本转换不应该从上游运营商（使用serde）
   test("script transformation should not swallow errors from upstream operators (with serde)") {
     val rowsDf = Seq("a", "b", "c").map(Tuple1.apply).toDF("a")
     val e = intercept[TestFailedException] {

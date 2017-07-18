@@ -102,13 +102,16 @@ abstract class HiveComparisonTest
     passedDirectory.mkdir() // Not atomic!
   }
 
-  /** Directory containing output of tests that fail to execute with Catalyst. */
+  /** Directory containing output of tests that fail to execute with Catalyst.
+    * 包含无法使用Catalyst执行的测试输出的目录
+    *  */
   val failedDirectory = new File(targetDir, s"$suiteName.failed")
   if (!failedDirectory.exists()) {
     failedDirectory.mkdir() // Not atomic!
   }
 
-  /** Directory containing output of tests where catalyst produces the wrong answer. */
+  /** Directory containing output of tests where catalyst produces the wrong answer.
+    * 目录包含催化剂产生错误答案的测试输出 */
   val wrongDirectory = new File(targetDir, s"$suiteName.wrong")
   if (!wrongDirectory.exists()) {
     wrongDirectory.mkdir() // Not atomic!
@@ -120,7 +123,10 @@ abstract class HiveComparisonTest
     hiveFailedDirectory.mkdir() // Not atomic!
   }
 
-  /** All directories that contain per-query output files */
+  /**
+    * All directories that contain per-query output files
+    * 包含每个查询输出文件的所有目录
+    * */
   val outputDirectories = Seq(
     passedDirectory,
     failedDirectory,

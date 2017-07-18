@@ -45,12 +45,13 @@ case class ListStringCaseClass(l: Seq[String])
 
 /**
  * A test suite for Hive custom UDFs.
+  * Hive定制UDF的测试套件
  */
 class HiveUDFSuite extends QueryTest {
 
   import TestHive.{udf, sql}
   import TestHive.implicits._
-
+  //spark sql udf测试返回一个结构体
   test("spark sql udf test that returns a struct") {
     udf.register("getStruct", (_: Int) => Fields(1, 2, 3, 4, 5))
     assert(sql(
@@ -62,7 +63,7 @@ class HiveUDFSuite extends QueryTest {
         |       getStruct(1).f5 FROM src LIMIT 1
       """.stripMargin).head() === Row(1, 2, 3, 4, 5))
   }
-
+  //当调用参数引用列字段时，PMOD抛出NPE
   test("SPARK-4785 When called with arguments referring column fields, PMOD throws NPE") {
     checkAnswer(
       sql("SELECT PMOD(CAST(key as INT), 10) FROM src LIMIT 1"),

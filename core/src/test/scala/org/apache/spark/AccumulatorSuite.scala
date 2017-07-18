@@ -372,6 +372,7 @@ private[spark] object AccumulatorSuite {
         assert(!accums.exists(_.name == InternalAccumulator.PEAK_EXECUTION_MEMORY))
       } else {
         // In the subsequent jobs, verify that peak execution memory is updated
+        //在后续作业中,验证峰值执行存储器是否更新
         val accum = listener.getCompletedStageInfos
           .flatMap(_.accumulables.values)
           .find(_.name == InternalAccumulator.PEAK_EXECUTION_MEMORY)

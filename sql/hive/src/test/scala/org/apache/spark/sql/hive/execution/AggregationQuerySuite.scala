@@ -612,8 +612,10 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         StructField(s"col$index", dataType, nullable = true)
       }
       // The schema used for data generator.
+      //用于数据生成器的模式
       val schemaForGenerator = StructType(fields)
       // The schema used for the DataFrame df.
+      //用于DataFrame df的模式
       val schema = StructType(StructField("id", IntegerType) +: fields)
 
       logInfo(s"Testing schema: ${schema.treeString}")
@@ -621,6 +623,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       val udaf = new ScalaAggregateFunction(schema)
       // Generate data at the driver side. We need to materialize the data first and then
       // create RDD.
+      //在驱动程序端生成数据。 我们首先需要实现数据创建RDD
       val maybeDataGenerator =
         RandomDataGenerator.forType(
           dataType = schemaForGenerator,
@@ -640,6 +643,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       }
 
       // Create a DF for the schema with random data.
+      //使用随机数据为模式创建一个DF
       val rdd = sqlContext.sparkContext.parallelize(data, 1)
       val df = sqlContext.createDataFrame(rdd, schema)
 
@@ -651,6 +655,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       checkAnswer(
         df.groupBy().agg(udaf(allColumns: _*)),
         // udaf returns a Row as the output value.
+        //udaf返回一行作为输出值
         Row(expectedAnaswer)
       )
     }
@@ -734,11 +739,13 @@ class TungstenAggregationQueryWithControlledFallbackSuite extends AggregationQue
   }
 
   // Override it to make sure we call the actually overridden checkAnswer.
+  //覆盖它，以确保我们调用实际覆盖的checkAnswer
   override protected def checkAnswer(df: DataFrame, expectedAnswer: Row): Unit = {
     checkAnswer(df, Seq(expectedAnswer))
   }
 
   // Override it to make sure we call the actually overridden checkAnswer.
+  //覆盖它,以确保我们调用实际覆盖的checkAnswer
   override protected def checkAnswer(df: DataFrame, expectedAnswer: DataFrame): Unit = {
     checkAnswer(df, expectedAnswer.collect())
   }

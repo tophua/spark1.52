@@ -22,7 +22,7 @@ import org.apache.spark.sql.hive.test.TestHiveContext
 import org.scalatest.BeforeAndAfterAll
 
 class ConcurrentHiveSuite extends SparkFunSuite with BeforeAndAfterAll {
-  ignore("multiple instances not supported") {
+  ignore("multiple instances not supported") {//不支持多个实例
     test("Multiple Hive Instances") {
       (1 to 10).map { i =>
         val ts =

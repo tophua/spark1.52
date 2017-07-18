@@ -45,25 +45,25 @@ class CommandUtilsSuite extends SparkFunSuite with Matchers with PrivateMethodTe
     val buildLocalCommand = PrivateMethod[Command]('buildLocalCommand)
     val conf = new SparkConf
     val secret = "This is the secret sauce"
-    // set auth secret
+    // set auth secret 设置秘密
     conf.set(SecurityManager.SPARK_AUTH_SECRET_CONF, secret)
     val command = new Command("mainClass", Seq(), Map(), Seq(), Seq("lib"),
       Seq("-D" + SecurityManager.SPARK_AUTH_SECRET_CONF + "=" + secret))
 
-    // auth is not set
+    // auth is not set auth没有设置
     var cmd = CommandUtils invokePrivate buildLocalCommand(
       command, new SecurityManager(conf), (t: String) => t, Seq(), Map())
     assert(!cmd.javaOpts.exists(_.startsWith("-D" + SecurityManager.SPARK_AUTH_SECRET_CONF)))
     assert(!cmd.environment.contains(SecurityManager.ENV_AUTH_SECRET))
 
-    // auth is set to false
+    // auth is set to false auth设置为false
     conf.set(SecurityManager.SPARK_AUTH_CONF, "false")
     cmd = CommandUtils invokePrivate buildLocalCommand(
       command, new SecurityManager(conf), (t: String) => t, Seq(), Map())
     assert(!cmd.javaOpts.exists(_.startsWith("-D" + SecurityManager.SPARK_AUTH_SECRET_CONF)))
     assert(!cmd.environment.contains(SecurityManager.ENV_AUTH_SECRET))
 
-    // auth is set to true
+    // auth is set to true auth设置为true
     conf.set(SecurityManager.SPARK_AUTH_CONF, "true")
     cmd = CommandUtils invokePrivate buildLocalCommand(
       command, new SecurityManager(conf), (t: String) => t, Seq(), Map())

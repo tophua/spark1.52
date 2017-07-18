@@ -30,6 +30,7 @@ import org.apache.spark.sql.types._
 /**
  * A set of tests for the filter conversion logic used when pushing partition pruning into the
  * metastore
+  * 在将分区修剪推入时使用的过滤器转换逻辑的一组测试转移
  */
 class FiltersSuite extends SparkFunSuite with Logging {
   private val shim = new Shim_v0_13
@@ -39,19 +40,19 @@ class FiltersSuite extends SparkFunSuite with Logging {
   varCharCol.setName("varchar")
   varCharCol.setType(serdeConstants.VARCHAR_TYPE_NAME)
   testTable.setPartCols(varCharCol :: Nil)
-
+  //字符串过滤器
   filterTest("string filter",
     (a("stringcol", StringType) > Literal("test")) :: Nil,
     "stringcol > \"test\"")
-
+  //字符串过滤器向后
   filterTest("string filter backwards",
     (Literal("test") > a("stringcol", StringType)) :: Nil,
     "\"test\" > stringcol")
-
+  //int过滤器
   filterTest("int filter",
     (a("intcol", IntegerType) === Literal(1)) :: Nil,
     "intcol = 1")
-
+  //int向后过滤
   filterTest("int filter backwards",
     (Literal(1) === a("intcol", IntegerType)) :: Nil,
     "1 = intcol")

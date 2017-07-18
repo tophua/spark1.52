@@ -37,6 +37,7 @@ public class CommandBuilderUtilsSuite {
     testOpt(" a b c \\\\ ", Arrays.asList("a", "b", "c", "\\"));
 
     // Following tests ported from UtilsSuite.scala.
+      //以下测试从UtilsSuite.scala移植。
     testOpt("", new ArrayList<String>());
     testOpt("a", Arrays.asList("a"));
     testOpt("aaa", Arrays.asList("aaa"));
@@ -69,8 +70,8 @@ public class CommandBuilderUtilsSuite {
   }
 
   @Test
-  public void testWindowsBatchQuoting() {
-    assertEquals("abc", quoteForBatchScript("abc"));
+  public void testWindowsBatchQuoting() {//测试Windows批量引号
+      assertEquals("abc", quoteForBatchScript("abc"));
     assertEquals("\"a b c\"", quoteForBatchScript("a b c"));
     assertEquals("\"a \"\"b\"\" c\"", quoteForBatchScript("a \"b\" c"));
     assertEquals("\"a\"\"b\"\"c\"", quoteForBatchScript("a\"b\"c"));

@@ -189,7 +189,7 @@ b    NULL       42          73          0       1
       FROM (SELECT key, key%2, key - 5 FROM src) t group by key%5, key-5
       GROUPING SETS (key%5, key-5) ORDER BY cnt, k1, k2, k3 LIMIT 10
     """.stripMargin)
-//explode 它能够将一行数据拆成多行数据
+//插入带有列名称的生成器的表
   createQueryTest("insert table with generator with column name",
     """
       |  CREATE TABLE gen_tmp (key Int);
@@ -197,7 +197,7 @@ b    NULL       42          73          0       1
       |    SELECT explode(array(1,2,3)) AS val FROM src LIMIT 3;
       |  SELECT key FROM gen_tmp ORDER BY key ASC;
     """.stripMargin)
-
+//插入具有多个列名称的生成器的表
   createQueryTest("insert table with generator with multiple column names",
     """
       |  CREATE TABLE gen_tmp (key Int, value String);
@@ -205,7 +205,7 @@ b    NULL       42          73          0       1
       |    SELECT explode(map(key, value)) as (k1, k2) FROM src LIMIT 3;
       |  SELECT key, value FROM gen_tmp ORDER BY key, value ASC;
     """.stripMargin)
-
+  //插入表与发生器没有列名称
   createQueryTest("insert table with generator without column name",
     """
       |  CREATE TABLE gen_tmp (key Int);
@@ -231,7 +231,7 @@ b    NULL       42          73          0       1
       |  SELECT 1 AS a UNION ALL SELECT 2 AS a) t
       |WHERE !(a>1)
     """.stripMargin)
-
+  //常规对象检查器，用于通用udf
   createQueryTest("constant object inspector for generic udf",
     """SELECT named_struct(
       lower("AA"), "10",
@@ -322,6 +322,7 @@ b    NULL       42          73          0       1
     "SELECT 1 DIV 2, 1 div 2, 1 dIv 2, 100 DIV 51, 100 DIV 49 FROM src LIMIT 1")
 
   // Jdk version leads to different query output for double, so not use createQueryTest here
+  //Jdk版本导致不同的查询输出为双，所以在这里不使用createQueryTest
   test("division") {
     val res = sql("SELECT 2 / 1, 1 / 2, 1 / 3, 1 / COUNT(*) FROM src LIMIT 1").collect().head
     Seq(2.0, 0.5, 0.3333333333333333, 0.002).zip(res.toSeq).foreach( x =>
@@ -331,7 +332,7 @@ b    NULL       42          73          0       1
   createQueryTest("modulus",
     "SELECT 11 % 10, IF((101.1 % 100.0) BETWEEN 1.01 AND 1.11, \"true\", \"false\"), " +
       "(101 / 2) % 10 FROM src LIMIT 1")
-
+  //以SQL表示的查询
   test("Query expressed in SQL") {
     setConf("spark.sql.dialect", "sql")
     assert(sql("SELECT 1").collect() === Array(Row(1)))
@@ -355,7 +356,7 @@ b    NULL       42          73          0       1
       | SELECT DATEDIFF(CAST(value AS timestamp), CAST('2002-03-21 00:00:00' AS timestamp))
       | FROM src LIMIT 1
     """.stripMargin)
-
+  //日期比较测试1
   createQueryTest("Date comparison test 1",
     """
       | SELECT
@@ -369,16 +370,16 @@ b    NULL       42          73          0       1
 
   createQueryTest("Simple Average + 1",
     "SELECT AVG(key) + 1.0 FROM src")
-
+  //简单平均+ 1与组
   createQueryTest("Simple Average + 1 with group",
     "SELECT AVG(key) + 1.0, value FROM src group by value")
-
+  //字符串字面量
   createQueryTest("string literal",
     "SELECT 'test' FROM src")
-
+  //转义序列
   createQueryTest("Escape sequences",
     """SELECT key, '\\\t\\' FROM src WHERE key = 86""")
-
+  //忽略解释
   createQueryTest("IgnoreExplain",
     """EXPLAIN SELECT key FROM src""")
   //简单加入where子句
@@ -387,7 +388,7 @@ b    NULL       42          73          0       1
   //简单的加入ON子句
   createQueryTest("trivial join ON clause",
     "SELECT * FROM src a JOIN src b ON a.key = b.key")
-  //
+  //小笛卡尔
   createQueryTest("small.cartesian",
     "SELECT a.key, b.key FROM (SELECT key FROM src WHERE key < 1) a JOIN " +
       "(SELECT key FROM src WHERE key = 2) b")
@@ -463,7 +464,7 @@ b    NULL       42          73          0       1
 //
   createQueryTest("transform",
     "SELECT TRANSFORM (key) USING 'cat' AS (tKey) FROM src")
-
+  //无模式的变换
   createQueryTest("schema-less transform",
     """
       |SELECT TRANSFORM (key, value) USING 'cat' FROM src;
@@ -471,19 +472,19 @@ b    NULL       42          73          0       1
     """.stripMargin)
 
   val delimiter = "'\t'"
-
+  //使用自定义字段分隔符转换
   createQueryTest("transform with custom field delimiter",
     s"""
       |SELECT TRANSFORM (key) ROW FORMAT DELIMITED FIELDS TERMINATED BY ${delimiter}
       |USING 'cat' AS (tKey) ROW FORMAT DELIMITED FIELDS TERMINATED BY ${delimiter} FROM src;
     """.stripMargin.replaceAll("\n", " "))
-
+  //自定义字段delimiter2变换
   createQueryTest("transform with custom field delimiter2",
     s"""
       |SELECT TRANSFORM (key, value) ROW FORMAT DELIMITED FIELDS TERMINATED BY ${delimiter}
       |USING 'cat' ROW FORMAT DELIMITED FIELDS TERMINATED BY ${delimiter} FROM src;
     """.stripMargin.replaceAll("\n", " "))
-
+  //自定义字段delimiter3变换
   createQueryTest("transform with custom field delimiter3",
     s"""
       |SELECT TRANSFORM (*) ROW FORMAT DELIMITED FIELDS TERMINATED BY ${delimiter}
@@ -543,7 +544,7 @@ b    NULL       42          73          0       1
 
   createQueryTest("DISTINCT",
     "SELECT DISTINCT key, value FROM src")
-
+  //空总输入
   createQueryTest("empty aggregate input",
     "SELECT SUM(key) FROM (SELECT * FROM src LIMIT 0) a")
   //LATERAL VIEW explode它能够将一行数据拆成多行数据，在此基础上可以对拆分后的数据进行聚合
@@ -568,7 +569,7 @@ b    NULL       42          73          0       1
       |insert overwrite table src_lv2 SELECT key, D.* lateral view explode(array(key+3, key+4)) D as CX
     """.stripMargin)
   // scalastyle:on
-
+  //
   createQueryTest("lateral view5",
     "FROM src SELECT explode(array(key+3, key+4))")
 
@@ -587,19 +588,19 @@ b    NULL       42          73          0       1
     sql("SHOW TABLES").toString
     sql("SELECT * FROM src").toString
   }
-
+  //case语句的关键# 1
   createQueryTest("case statements with key #1",
     "SELECT (CASE 1 WHEN 2 THEN 3 END) FROM src where key < 15")
-
+  //case语句的关键# 2
   createQueryTest("case statements with key #2",
     "SELECT (CASE key WHEN 2 THEN 3 ELSE 0 END) FROM src WHERE key < 15")
-
+  //case语句的关键# 3
   createQueryTest("case statements with key #3",
     "SELECT (CASE key WHEN 2 THEN 3 WHEN NULL THEN 4 END) FROM src WHERE key < 15")
-
+  //case语句的关键# 4
   createQueryTest("case statements with key #4",
     "SELECT (CASE key WHEN 2 THEN 3 WHEN NULL THEN 4 ELSE 0 END) FROM src WHERE key < 15")
-
+  //case语句没有关键WITHOUT＃1
   createQueryTest("case statements WITHOUT key #1",
     "SELECT (CASE WHEN key > 2 THEN 3 END) FROM src WHERE key < 15")
 
@@ -613,6 +614,7 @@ b    NULL       42          73          0       1
     "SELECT (CASE WHEN key > 2 THEN 3 WHEN 2 > key THEN 2 ELSE 0 END) FROM src WHERE key < 15")
 
   // Jdk version leads to different query output for double, so not use createQueryTest here
+  //Jdk版本导致不同的查询输出为双，所以在这里不使用createQueryTest
   test("timestamp cast #1") {
     val res = sql("SELECT CAST(CAST(1 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1").collect().head
     assert(0.001 == res.getDouble(0))
@@ -734,15 +736,16 @@ b    NULL       42          73          0       1
 
   // TODO: adopt this test when Spark SQL has the functionality / framework to report errors.
   // See https://github.com/apache/spark/pull/1055#issuecomment-45820167 for a discussion.
+  //case中的非布尔条件是非法的
   ignore("non-boolean conditions in a CaseWhen are illegal") {
     intercept[Exception] {
       sql("SELECT (CASE WHEN key > 2 THEN 3 WHEN 1 THEN 2 ELSE 0 END) FROM src").collect()
     }
   }
-
+  //查询Hive表时区分大小写
   createQueryTest("case sensitivity when query Hive table",
     "SELECT srcalias.KEY, SRCALIAS.value FROM sRc SrCAlias WHERE SrCAlias.kEy < 15")
-
+  //区分大小写：注册表
   test("case sensitivity: registered table") {
     val testData =
       TestHive.sparkContext.parallelize(
@@ -760,7 +763,7 @@ b    NULL       42          73          0       1
     val explanation = result.select('plan).collect().map { case Row(plan: String) => plan }
     explanation.contains("== Physical Plan ==")
   }
-
+  //将命令解释为DataFrame
   test("SPARK-1704: Explain commands as a DataFrame") {
     sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING)")
 
@@ -769,7 +772,7 @@ b    NULL       42          73          0       1
 
     TestHive.reset()
   }
-
+  //在GROUP BY子句中支持（正）
   test("SPARK-2180: HAVING support in GROUP BY clauses (positive)") {
     val fixture = List(("foo", 2), ("bar", 1), ("foo", 4), ("bar", 3))
       .zipWithIndex.map {case Pair(Pair(value, attr), key) => HavingRow(key, value, attr)}
@@ -782,11 +785,11 @@ b    NULL       42          73          0       1
     assert(results === Array(Pair("foo", 4)))
     TestHive.reset()
   }
-
+  //拥有非布尔子句不会引发异常。
   test("SPARK-2180: HAVING with non-boolean clause raises no exceptions") {
     sql("select key, count(*) c from src group by key having c").collect()
   }
-
+  //无组转为简单过滤器
   test("SPARK-2225: turn HAVING without GROUP BY into a simple filter") {
     assert(sql("select key from src having key > 490").collect().size < 100)
   }
@@ -802,14 +805,14 @@ b    NULL       42          73          0       1
         .collect()
         .size == 5)
   }
-
+  //在udf中解析星号表达式
   test("SPARK-5367: resolve star expression in udf") {
     assert(sql("select concat(*) from src limit 5").collect().size == 5)
     assert(sql("select array(*) from src limit 5").collect().size == 5)
     assert(sql("select concat(key, *) from src limit 5").collect().size == 5)
     assert(sql("select array(key, *) from src limit 5").collect().size == 5)
   }
-
+  //查询Hive本机命令执行结果
   test("Query Hive native command execution result") {
     val databaseName = "test_native_commands"
 
@@ -832,18 +835,20 @@ b    NULL       42          73          0       1
 
     TestHive.reset()
   }
-
+  //完全一次DDL和命令语句的语义
   test("Exactly once semantics for DDL and command statements") {
     val tableName = "test_exactly_once"
     val q0 = sql(s"CREATE TABLE $tableName(key INT, value STRING)")
 
     // If the table was not created, the following assertion would fail
+    //如果表未创建，则以下断言将失败
     assert(Try(table(tableName)).isSuccess)
 
     // If the CREATE TABLE command got executed again, the following assertion would fail
+    //如果再次执行CREATE TABLE命令，则以下断言将失败
     assert(Try(q0.count()).isSuccess)
   }
-
+  //DESCRIBE命令
   test("DESCRIBE commands") {
     sql(s"CREATE TABLE test_describe_commands1 (key INT, value STRING) PARTITIONED BY (dt STRING)")
 
@@ -868,6 +873,7 @@ b    NULL       42          73          0       1
     }
 
     // Describe a table with a fully qualified table name
+    //描述具有完全限定表名称的表
     assertResult(
       Array(
         Row("key", "int", null),
@@ -883,6 +889,7 @@ b    NULL       42          73          0       1
     }
 
     // Describe a column is a native command
+    //描述一个列是一个本机命令
     assertResult(Array(Array("value", "string", "from deserializer"))) {
       sql("DESCRIBE test_describe_commands1 value")
         .select('result)
@@ -891,6 +898,7 @@ b    NULL       42          73          0       1
     }
 
     // Describe a column is a native command
+    //描述一个列是一个本机命令
     assertResult(Array(Array("value", "string", "from deserializer"))) {
       sql("DESCRIBE default.test_describe_commands1 value")
         .select('result)
@@ -899,6 +907,7 @@ b    NULL       42          73          0       1
     }
 
     // Describe a partition is a native command
+    //描述一个分区是一个本机命令
     assertResult(
       Array(
         Array("key", "int"),
@@ -917,6 +926,7 @@ b    NULL       42          73          0       1
     }
 
     // Describe a registered temporary table.
+    //描述一个注册的临时表
     val testData =
       TestHive.sparkContext.parallelize(
         TestData(1, "str1") ::
@@ -933,7 +943,7 @@ b    NULL       42          73          0       1
         .collect()
     }
   }
-
+  //插入地图<K，V>值
   test("SPARK-2263: Insert Map<K, V> values") {
     sql("CREATE TABLE m(value MAP<INT, STRING>)")
     sql("INSERT OVERWRITE TABLE m SELECT MAP(key, value) FROM src LIMIT 10")
@@ -943,7 +953,7 @@ b    NULL       42          73          0       1
         assert(map.head === (key, value))
     }
   }
-
+  //ADD JAR命令
   test("ADD JAR command") {
     val testJar = TestHive.getHiveFile("data/files/TestSerDe.jar").getCanonicalPath
     sql("CREATE TABLE alter1(a INT, b INT)")
@@ -984,8 +994,8 @@ b    NULL       42          73          0       1
 
   case class LogEntry(filename: String, message: String)
   case class LogFile(name: String)
-
-/*  createQueryTest("dynamic_partition",
+  //动态分区
+ createQueryTest("dynamic_partition",
     """
       |DROP TABLE IF EXISTS dynamic_part_table;
       |CREATE TABLE dynamic_part_table(intcol INT) PARTITIONED BY (partcol1 INT, partcol2 INT);
@@ -1005,8 +1015,8 @@ b    NULL       42          73          0       1
       |SELECT 1, NULL, NULL FROM src WHERE key=150;
       |
       |DROP TABLE IF EXISTS dynamic_part_table;
-    """.stripMargin)*/
-
+    """.stripMargin)
+  //动态分区文件夹布局
   ignore("Dynamic partition folder layout") {
     sql("DROP TABLE IF EXISTS dynamic_part_table")
     sql("CREATE TABLE dynamic_part_table(intcol INT) PARTITIONED BY (partcol1 INT, partcol2 INT)")
@@ -1036,6 +1046,7 @@ b    NULL       42          73          0       1
         .mkString("/")
 
       // Loads partition data to a temporary table to verify contents
+      //将分区数据加载到临时表以验证内容
       val path = s"$warehousePath/dynamic_part_table/$partFolder/part-00000"
 
       sql("DROP TABLE IF EXISTS dp_verify")
@@ -1061,7 +1072,7 @@ b    NULL       42          73          0       1
     sql("insert overwrite table sc_part partition(ts) select * from sc")
     sql("drop table sc_part")
   }
-
+  //分区规范验证
   test("Partition spec validation") {
     sql("DROP TABLE IF EXISTS dp_test")
     sql("CREATE TABLE dp_test(key INT, value STRING) PARTITIONED BY (dp INT, sp INT)")
@@ -1078,6 +1089,7 @@ b    NULL       42          73          0       1
     sql("SET hive.exec.dynamic.partition.mode=nonstrict")
 
     // Should throw when a static partition appears after a dynamic partition
+    //动态分区后静态分区出现时应该抛出
     intercept[SparkException] {
       sql(
         """INSERT INTO TABLE dp_test PARTITION(dp, sp = 1)
@@ -1085,7 +1097,7 @@ b    NULL       42          73          0       1
         """.stripMargin)
     }
   }
-
+  //回归：在注册临时表时应该存储分析的逻辑计划
   test("SPARK-3414 regression: should store analyzed logical plan when registering a temp table") {
     sparkContext.makeRDD(Seq.empty[LogEntry]).toDF().registerTempTable("rawLogs")
     sparkContext.makeRDD(Seq.empty[LogFile]).toDF().registerTempTable("logFiles")
@@ -1102,6 +1114,7 @@ b    NULL       42          73          0       1
       """).registerTempTable("boom")
 
     // This should be successfully analyzed
+    //应该成功分析
     sql("SELECT * FROM boom").queryExecution.analyzed
   }
 
@@ -1139,9 +1152,10 @@ b    NULL       42          73          0       1
       }.size
     }
   }
-
+  //解析HQL集命令
   test("parse HQL set commands") {
     // Adapted from its SQL counterpart.
+    //改编自其SQL对应
     val testKey = "spark.sql.key.usedfortestonly"
     val testVal = "val0,val_1,val2.3,my_table"
 
@@ -1159,7 +1173,7 @@ b    NULL       42          73          0       1
     sql(s"set $testKey=")
     assert(getConf(testKey, "0") == "")
   }
-
+  //SET命令HiveContext的语义
   test("SET commands semantics for a HiveContext") {
     // Adapted from its SQL counterpart.
     val testKey = "spark.sql.key.usedfortestonly"
