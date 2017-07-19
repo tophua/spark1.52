@@ -45,6 +45,7 @@ class LogPageSuite extends SparkFunSuite with PrivateMethodTester {
     val tmpErrBad = new File(tmpDir, "stderr") // outside the working directory
     val tmpOutBad = new File(tmpDir, "stdout")
     val tmpRand = new File(workDir, "random")
+    //将指定的字符串写入文件
     write(tmpOut, out)
     write(tmpErr, err)
     write(tmpOutBad, out)
