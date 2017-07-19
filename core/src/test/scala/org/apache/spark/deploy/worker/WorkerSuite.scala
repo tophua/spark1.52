@@ -28,7 +28,7 @@ import org.apache.spark.{SecurityManager, SparkConf, SparkFunSuite}
 class WorkerSuite extends SparkFunSuite with Matchers {
 
   import org.apache.spark.deploy.DeployTestUtils._
-
+  //可变长度
   def cmd(javaOpts: String*): Command = {
     Command("", Seq.empty, Map.empty, Seq.empty, Seq.empty, Seq(javaOpts : _*))
   }

@@ -145,7 +145,9 @@ private[spark] abstract class AsynchronousListenerBus[L <: AnyRef, E](name: Stri
           s"The event queue is not empty after $timeoutMillis milliseconds")
       }
       /* Sleep rather than using wait/notify, because this is used only for testing and
-       * wait/notify add overhead in the general case. */
+       * wait/notify add overhead in the general case.
+       * 睡眠而不是使用wait / notify,因为这仅用于测试和一般情况下等待/通知添加开销
+       * */
       Thread.sleep(10)
     }
   }

@@ -69,6 +69,7 @@ class SparkSubmitSuite
    *   */
   private def testPrematureExit(input: Array[String], searchString: String) = {
     val printStream = new BufferPrintStream()
+    //PrintStream 为其他输出流添加了功能，使它们能够方便地打印各种数据值表示形式
     SparkSubmit.printStream = printStream
 
     @volatile var exitedCleanly = false
@@ -86,8 +87,10 @@ class SparkSubmitSuite
       }
     }
     thread.start()
+    //让“主线程”等待“子线程”结束之后才能继续运行
     thread.join()
     val joined = printStream.lineBuffer.mkString("\n")
+    println("===="+joined)
     if (!joined.contains(searchString)) {
       fail(s"Search string '$searchString' not found in $joined")
     }

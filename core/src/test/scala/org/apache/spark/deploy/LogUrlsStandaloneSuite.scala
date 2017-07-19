@@ -44,16 +44,20 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
     // Trigger a job so that executors get added
     //触发工作,添加执行者
     sc.parallelize(1 to 100, 4).map(_.toString).count()
-
+    //println("==="+"=====")
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     listener.addedExecutorInfos.values.foreach { info =>
+       //println("==="+info)
       assert(info.logUrlMap.nonEmpty)
       // Browse to each URL to check that it's valid
       //浏览到每个网址,以检查它的有效性
       info.logUrlMap.foreach { case (logType, logUrl) =>
+      //  println("===" + logType)
         val html = Source.fromURL(logUrl).mkString
         assert(html.contains(s"$logType log page"))
-      }
+
+
+    }
     }
   }
  //Spark master和workers使用的公共DNS（默认空）
@@ -81,12 +85,15 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
 
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     val listeners = sc.listenerBus.findListenersByClass[SaveExecutorInfo]
-    assert(listeners.size === 1)
+
     val listener = listeners(0)
     listener.addedExecutorInfos.values.foreach { info =>
       assert(info.logUrlMap.nonEmpty)
+
       info.logUrlMap.values.foreach { logUrl =>
+       // println("==="+logUrl)
         assert(new URL(logUrl).getHost === SPARK_PUBLIC_DNS)
+
       }
     }
   }

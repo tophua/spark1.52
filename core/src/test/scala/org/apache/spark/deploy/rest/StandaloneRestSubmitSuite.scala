@@ -410,8 +410,6 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
    *  启动一个更聪明的虚拟服务器,跟踪提交的驱动程序状态
    *  */
   private def startSmartServer(): String = {
-    //_占位符
-    val rpcEnv: RpcEnv= _
     startServer(new SmarterMaster(_))
   }
 

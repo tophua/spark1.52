@@ -249,7 +249,10 @@ private[deploy] object IvyTestUtils {
     writeFile(dir, "ivy.xml", content.trim)
   }
 
-  /** Create the jar for the given maven coordinate, using the supplied files. */
+  /**
+    * Create the jar for the given maven coordinate, using the supplied files.
+    * 使用提供的文件创建给定的maven坐标的jar
+    * */
   private[deploy] def packJar(
       dir: File,
       artifact: MavenCoordinate,
@@ -288,7 +291,7 @@ private[deploy] object IvyTestUtils {
    * Creates a jar and pom file, mocking a Maven repository. The root path can be supplied with
    * `tempDir`, dependencies can be created into the same repo, and python files can also be packed
    * inside the jar.
-   *
+   * 创建一个jar和pom文件,模拟一个Maven仓库。 可以提供根路径tempDir,依赖关系可以被创建到同一个repo中,python文件也可以打包jar
    * @param artifact The maven coordinate to generate the jar and pom for.
    * @param dependencies List of dependencies this artifact might have to also create jars and poms.
    * @param tempDir The root folder of the repository
@@ -304,10 +307,13 @@ private[deploy] object IvyTestUtils {
       withPython: Boolean = false,
       withR: Boolean = false): File = {
     // Where the root of the repository exists, and what Ivy will search in
+    //存储库的根目录存在，以及Ivy搜索的内容
     val tempPath = tempDir.getOrElse(Files.createTempDir())
     // Create directory if it doesn't exist
+    //创建目录如果不存在
     Files.createParentDirs(tempPath)
     // Where to create temporary class files and such
+    //在哪里创建临时类文件等
     val root = new File(tempPath, tempPath.hashCode().toString)
     Files.createParentDirs(new File(root, "dummy"))
     try {
@@ -317,6 +323,7 @@ private[deploy] object IvyTestUtils {
 
       val javaClass = createJavaClass(root, className, artifact.groupId)
       // A tuple of files representation in the jar, and the file
+      // 在jar中的文件表示的文件和文件
       val javaFile = (artifact.groupId.replace(".", "/") + "/" + javaClass.getName, javaClass)
       val allFiles = ArrayBuffer[(String, File)](javaFile)
       if (withPython) {
@@ -339,6 +346,7 @@ private[deploy] object IvyTestUtils {
 
   /**
    * Creates a suite of jars and poms, with or without dependencies, mocking a maven repository.
+    * 创建一个jars和poms,有或没有依赖，模拟一个maven仓库。
    * @param artifact The main maven coordinate to generate the jar and pom for.
    * @param dependencies List of dependencies this artifact might have to also create jars and poms.
    * @param rootDir The root folder of the repository (like `~/.m2/repositories`)
@@ -363,6 +371,7 @@ private[deploy] object IvyTestUtils {
 
   /**
    * Creates a repository for a test, and cleans it up afterwards.
+    * 创建一个测试库，然后进行清理。
    *
    * @param artifact The main maven coordinate to generate the jar and pom for.
    * @param dependencies List of dependencies this artifact might have to also create jars and poms.
@@ -407,6 +416,7 @@ private[deploy] object IvyTestUtils {
       dependencies: Option[Seq[MavenCoordinate]],
       ivySettings: IvySettings): Unit = {
     // delete the artifact from the cache as well if it already exists
+    //如果它已经存在,也可以从缓存中删除工件
     FileUtils.deleteDirectory(new File(ivySettings.getDefaultCache, artifact.groupId))
     dependencies.foreach { _.foreach { dep =>
         FileUtils.deleteDirectory(new File(ivySettings.getDefaultCache, dep.groupId))
