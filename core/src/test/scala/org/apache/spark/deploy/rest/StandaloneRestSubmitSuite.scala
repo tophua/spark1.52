@@ -54,7 +54,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val sparkProperties = Map("spark.app.name" -> "pi")
     //环境变量，map 初始化以逗号分隔
     val environmentVariables = Map("SPARK_ONE" -> "UN", "SPARK_TWO" -> "DEUX")
-    //提交客户端
+    //Rest提交客户端
     val request = new RestSubmissionClient("spark://host:port").constructSubmitRequest(
       "my-app-resource", "my-main-class", appArgs, sparkProperties, environmentVariables)
     assert(request.action === Utils.getFormattedClassName(request))
@@ -476,7 +476,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   /** 
    *  Return the response as a submit response, or fail with error otherwise. 
-   *  返回响应作为提交响应,否则会失败,否则会出错。
+   *  作为提交响应返回响应,否则失败,否则为错误
    *  */
   private def getSubmitResponse(response: SubmitRestProtocolResponse): CreateSubmissionResponse = {
     response match {
