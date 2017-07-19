@@ -57,7 +57,7 @@ object CustomRecoveryModeFactory {
 }
 
 class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine {
-  //HashMap 创建方式
+  //HashMap mutable(可变)创建方式
   val data = mutable.HashMap[String, Array[Byte]]()
 
   CustomPersistenceEngine.lastInstance = Some(this)//最后的实例
@@ -72,6 +72,7 @@ class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine 
     val serialized = serializer.newInstance().serialize(obj)
     //创建Array对象,初始化数组长度
     val bytes = new Array[Byte](serialized.remaining())//返回剩余的可用长度
+    //get方法将此缓冲区中的字节传读到给定的目标数组
     serialized.get(bytes)
     //MAP追加方式(key:name,value:bytes)
     data += name -> bytes
@@ -83,6 +84,7 @@ class CustomPersistenceEngine(serializer: Serializer) extends PersistenceEngine 
    */
   override def unpersist(name: String): Unit = {
     CustomPersistenceEngine.unpersistAttempts += 1
+    //MAP删除key值的方式(key:name)
     data -= name
   }
 
