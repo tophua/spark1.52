@@ -150,6 +150,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
       //比较成本差异不会导致失败等格式
       import org.json4s._
       import org.json4s.jackson.JsonMethods._
+      //比较json
       val jsonAst = parse(json)
       val expAst = parse(exp)
       assertValidDataInJson(jsonAst, expAst)
@@ -177,7 +178,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
   // Test that the files are downloaded correctly, and validate them.
   //测试文件是否正确下载,并验证它们的正确性。
   def doDownloadTest(appId: String, attemptId: Option[Int], legacy: Boolean = false): Unit = {
-
+    //尝试ID
     val url = attemptId match {
       case Some(id) =>
         new URL(s"${generateURL(s"applications/$appId")}/$id/logs")
@@ -189,7 +190,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
     code should be (HttpServletResponse.SC_OK)// HTTP 状态码 200：OK
     inputStream should not be None //输入不等于空
     error should be (None)
-
+    //是字节输入流的所有类的超类
     val zipStream = new ZipInputStream(inputStream.get)
     var entry = zipStream.getNextEntry
     entry should not be null
@@ -286,6 +287,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
   def generateExpectation(name: String, path: String): Unit = {
     val json = getUrl(path)
     val file = new File(expRoot, HistoryServerSuite.sanitizePath(name) + "_expectation.json")
+    //FileWriter类从OutputStreamReader类继承而来。该类按字符向流中写入数据
     val out = new FileWriter(file)
     out.write(json)
     out.close()
@@ -310,13 +312,15 @@ object HistoryServerSuite {
       suite.stop()
     }
   }
-
+  //获取内容和代码
   def getContentAndCode(url: URL): (Int, Option[String], Option[String]) = {
     val (code, in, errString) = connectAndGetInputStream(url)
+   //Apache Commons IO操作  IOUtils.toString 将文件读取为一个字符串
+    //将InputStream转换成字符串
     val inString = in.map(IOUtils.toString)
     (code, inString, errString)
   }
-
+  //连接并获取输入流
   def connectAndGetInputStream(url: URL): (Int, Option[InputStream], Option[String]) = {
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]//获得HttpURL连接
     connection.setRequestMethod("GET")//get方式请求
@@ -329,6 +333,7 @@ object HistoryServerSuite {
     }
     val errString = try {
       val err = Option(connection.getErrorStream())//如果连接失败但服务器仍然发送了有用数据,则返回错误流
+      //将InputStream转换成字符串
       err.map(IOUtils.toString)
     } catch {
       case io: IOException => None
@@ -336,9 +341,12 @@ object HistoryServerSuite {
     (code, inStream, errString)
   }
 
-
+  //消毒路径
   def sanitizePath(path: String): String = {
     // this doesn't need to be perfect, just good enough to avoid collisions
+    //这不需要是完美的,只是足够好以避免碰撞
+    //\W：匹配任何非单词字符,
+    // 例如stage task summary w shuffle read == stage_task_summary_w_shuffle_read
     path.replaceAll("\\W", "_")
   }
 
