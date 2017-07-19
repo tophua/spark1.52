@@ -410,6 +410,8 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
    *  启动一个更聪明的虚拟服务器,跟踪提交的驱动程序状态
    *  */
   private def startSmartServer(): String = {
+    //_占位符
+    val rpcEnv: RpcEnv= _
     startServer(new SmarterMaster(_))
   }
 
@@ -418,6 +420,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
    *  在许多方面启动一个错误的虚拟服务器…
    *  */
   private def startFaultyServer(): String = {
+    //_占位符
     startServer(new DummyMaster(_), faulty = true)
   }
 
@@ -523,7 +526,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   /**
    * Send an HTTP request to the given URL using the method and the body specified.
-   * 发送HTTP请求到指定的URL的使用方法和机构规定。
+   * 使用方法和指定的主体向给定的URL发送HTTP请求。
    * Return the connection object.
    * 返回连接对象
    */
@@ -533,8 +536,11 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
       body: String = ""): HttpURLConnection = {
     val conn = new URL(url).openConnection().asInstanceOf[HttpURLConnection]
     conn.setRequestMethod(method)
+    //非空
     if (body.nonEmpty) {
+      //URL 连接可用于输入和/或输出。如果打算使用 URL 连接进行输出，则将 DoOutput 标志设置为 true；如果不打算使用，则设置为 false。默认值为 false。
       conn.setDoOutput(true)
+      //数据输出流
       val out = new DataOutputStream(conn.getOutputStream)
       out.write(body.getBytes(Charsets.UTF_8))
       out.close()

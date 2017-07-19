@@ -34,6 +34,7 @@ private[rest] abstract class SubmitRestProtocolRequest extends SubmitRestProtoco
 
 /**
  * A request to launch a new application in the REST application submission protocol.
+  *在REST应用程序提交协议中启动新应用程序的请求
  */
 private[rest] class CreateSubmissionRequest extends SubmitRestProtocolRequest {
   var appResource: String = null
@@ -67,7 +68,10 @@ private[rest] class CreateSubmissionRequest extends SubmitRestProtocolRequest {
   private def assertPropertyIsMemory(key: String): Unit =
     assertProperty[Int](key, "memory", Utils.memoryStringToMb)
 
-  /** Assert that a Spark property can be converted to a certain type. */
+  /**
+    * Assert that a Spark property can be converted to a certain type.
+    * 断言Spark属性可以转换为某种类型,泛型及匿名方法使用
+    *  */
   private def assertProperty[T](key: String, valueType: String, convert: (String => T)): Unit = {
     sparkProperties.get(key).foreach { value =>
       Try(convert(value)).getOrElse {
