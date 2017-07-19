@@ -58,7 +58,7 @@ class FsHistoryProviderSuite extends SparkFunSuite with BeforeAndAfter with Matc
   private def newLogFile(
       appId: String,
       appAttemptId: Option[String],
-      inProgress: Boolean,//进程中
+      inProgress: Boolean,//进行中
       codec: Option[String] = None): File = {
     val ip = if (inProgress) EventLoggingListener.IN_PROGRESS else "" //
     //file:/C:/Users/liushuhua/AppData/Local/Temp/spark-70339850-a7c7-4622-b5da-6042400cac01/new1

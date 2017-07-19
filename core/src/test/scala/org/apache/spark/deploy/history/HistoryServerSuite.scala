@@ -142,6 +142,8 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
       jsonOpt should be ('defined)
       errOpt should be (None)
       val json = jsonOpt.get
+      //Apache Commons IO操作  IOUtils.toString 将文件读取为一个字符串
+      // FileInputStream 从文件系统中的某个文件中获得输入字节
       val exp = IOUtils.toString(new FileInputStream(
         new File(expRoot, HistoryServerSuite.sanitizePath(name) + "_expectation.json")))
       // compare the ASTs so formatting differences don't cause failures
