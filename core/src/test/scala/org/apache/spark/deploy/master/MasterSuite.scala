@@ -228,7 +228,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
   //基本调度,是否展开
   private def basicScheduling(spreadOut: Boolean): Unit = {
     val master = makeMaster()
-    val appInfo = makeAppInfo(1024)//应用程序1024
+    val appInfo = makeAppInfo(1024)//应用程序1024MB
     val scheduledCores = scheduleExecutorsOnWorkers(master, appInfo, workerInfos, spreadOut)
     //返回为每个Worker上分配内核的数组
     assert(scheduledCores === Array(10, 10, 10))
@@ -236,7 +236,7 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
  //基本调度具有更多的内存
   private def basicSchedulingWithMoreMemory(spreadOut: Boolean): Unit = {
     val master = makeMaster()
-    val appInfo = makeAppInfo(3072)//应用程序3072
+    val appInfo = makeAppInfo(3072)//应用程序3072MB
      //返回为每个Worker上分配内核的数组
     val scheduledCores = scheduleExecutorsOnWorkers(master, appInfo, workerInfos, spreadOut)
      //如果spreadOut(false),worker节点调度直到使用它的所有的内核资源,否则,就转移到下一个worker节点均匀分配内核
