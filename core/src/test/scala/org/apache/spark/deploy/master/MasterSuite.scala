@@ -133,11 +133,12 @@ class MasterSuite extends SparkFunSuite with Matchers with Eventually with Priva
     val localCluster = new LocalSparkCluster(2, 2, 512, conf)
     localCluster.start()
     try {
+
       eventually(timeout(5 seconds), interval(100 milliseconds)) {
         //读取json文件格式方式
         val json = Source.fromURL(s"http://localhost:${localCluster.masterWebUIPort}/json")
           .getLines().mkString("\n")
-        //json4s 调用DefaultFormats类parse,解析json
+        //读取json文件格式方式 json4s 调用DefaultFormats类parse,解析json
         val JArray(workers) = (parse(json) \ "workers")
           //workers.size should be (2) workers.size应该是（2）
         workers.foreach { workerSummaryJson =>
