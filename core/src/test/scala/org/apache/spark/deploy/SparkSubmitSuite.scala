@@ -636,6 +636,7 @@ object UserClasspathFirstTest {
     val resource = ccl.getResourceAsStream("test.resource")
     val bytes = ByteStreams.toByteArray(resource)
     val contents = new String(bytes, 0, bytes.length, UTF_8)
+    println("==UserClasspathFirstTest=="+contents)
     if (contents != "USER") {
       throw new SparkException("Should have read user resource, but instead read: " + contents)
     }
