@@ -71,7 +71,6 @@ class SparkSubmitSuite
     val printStream = new BufferPrintStream()
     //PrintStream 为其他输出流添加了功能，使它们能够方便地打印各种数据值表示形式
     SparkSubmit.printStream = printStream
-
     @volatile var exitedCleanly = false
     SparkSubmit.exitFn = (_) => exitedCleanly = true
 
