@@ -269,7 +269,7 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
     )
     dropTables("test_insert_parquet")
   }
-
+  //CTAS(create table .. as select)
   test("scan a parquet table created through a CTAS statement") {
     withTable("test_parquet_ctas") {
       sql(

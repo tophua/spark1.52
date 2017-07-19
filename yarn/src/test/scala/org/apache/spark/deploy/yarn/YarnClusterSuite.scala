@@ -140,17 +140,18 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
     System.clearProperty("SPARK_YARN_MODE")
     super.afterAll()
   }
-
+  //在yarn客户端模式下运行Spark
   ignore("run Spark in yarn-client mode") {
     testBasicYarnApp(true)
   }
-
+  //在yarn群集模式下运行Spark
   ignore("run Spark in yarn-cluster mode") {
     testBasicYarnApp(false)
   }
-
+  //在yarn群集模式下运行Spark失败
   ignore("run Spark in yarn-cluster mode unsuccessfully") {
     // Don't provide arguments so the driver will fail.
+    //不提供参数，因此驱动程序将失败。
     val exception = intercept[SparkException] {
       runSpark(false, mainClassName(YarnClusterDriver.getClass))
       fail("Spark application should have failed.")

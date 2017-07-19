@@ -996,6 +996,9 @@ b    NULL       42          73          0       1
   case class LogFile(name: String)
   //动态分区
  createQueryTest("dynamic_partition",
+   //使用动态分区要先设置hive.exec.dynamic.partition参数值为true，默认值为false
+   //假设我想向stat_date='20110728'这个分区下面插入数据，至于province插入到哪个子分区下面让数据库自己来判断
+   //
     """
       |DROP TABLE IF EXISTS dynamic_part_table;
       |CREATE TABLE dynamic_part_table(intcol INT) PARTITIONED BY (partcol1 INT, partcol2 INT);
@@ -1020,6 +1023,7 @@ b    NULL       42          73          0       1
   ignore("Dynamic partition folder layout") {
     sql("DROP TABLE IF EXISTS dynamic_part_table")
     sql("CREATE TABLE dynamic_part_table(intcol INT) PARTITIONED BY (partcol1 INT, partcol2 INT)")
+    //hive.exec.dynamic.partition.mode设置为nonstrict。当然，Hive也支持insert overwrite方式来插入数据
     sql("SET hive.exec.dynamic.partition.mode=nonstrict")
 
     val data = Map(

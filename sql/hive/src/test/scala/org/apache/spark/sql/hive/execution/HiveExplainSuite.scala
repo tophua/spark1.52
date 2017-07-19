@@ -80,7 +80,7 @@ class HiveExplainSuite extends QueryTest with SQLTestUtils {
       "Limit",
       "src")
   }
-  //CTAS的EXPLAIN输出仅显示分析的计划
+  //CTAS的EXPLAIN输出仅显示分析的计划 CTAS(create table .. as select)
   test("SPARK-6212: The EXPLAIN output of CTAS only shows the analyzed plan") {
     withTempTable("jt") {
       val rdd = sparkContext.parallelize((1 to 10).map(i => s"""{"a":$i, "b":"str$i"}"""))

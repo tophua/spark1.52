@@ -73,7 +73,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
       scriptFile.delete()
     }
   }
-
+  //Yarn配置覆盖
   test("Yarn configuration override") {
     val key = "yarn.nodemanager.hostname"
     val default = new YarnConfiguration()
@@ -86,10 +86,11 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     yarnConf.get(key) should not be default.get(key)
   }
 
-
+  //
   test("test getApplicationAclsForYarn acls on") {
 
     // spark acls on, just pick up default user
+    //spark acls，只是拿起默认用户
     val sparkConf = new SparkConf()
     sparkConf.set("spark.acls.enable", "true")
 
@@ -179,7 +180,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
       YarnSparkHadoopUtil.getClassPathSeparator() should be (":")
     }
   }
-
+  //检查访问nns为空
   test("check access nns empty") {
     val sparkConf = new SparkConf()
     val util = new YarnSparkHadoopUtil
