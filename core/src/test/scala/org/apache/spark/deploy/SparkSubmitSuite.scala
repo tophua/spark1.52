@@ -527,7 +527,10 @@ class SparkSubmitSuite
   }
 
   test("SPARK_CONF_DIR overrides spark-defaults.conf") {
+    //注意克里化函数实现方式,大扩号
     forConfDir(Map("spark.executor.memory" -> "2.3g")) { path =>
+      //====/tmp/spark-99a6da51-17b0-4a9a-89e1-fab6c501ca71 是文件路径
+      println("===="+path)
       val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
       val args = Seq(
         "--class", SimpleApplicationTest.getClass.getName.stripSuffix("$"),
@@ -562,16 +565,17 @@ class SparkSubmitSuite
       process.destroy()
     }
   }
-
+  //科里化函数,文件读取与写入
   private def forConfDir(defaults: Map[String, String]) (f: String => Unit) = {
     val tmpDir = Utils.createTempDir()
 
     val defaultsConf = new File(tmpDir.getAbsolutePath, "spark-defaults.conf")
     val writer = new OutputStreamWriter(new FileOutputStream(defaultsConf))
-    for ((key, value) <- defaults) writer.write(s"$key $value\n")
+    for ((key, value) <- defaults)
+      writer.write(s"$key $value\n")
 
     writer.close()
-
+    //传递字符串参数
     try {
       f(tmpDir.getAbsolutePath)
     } finally {
