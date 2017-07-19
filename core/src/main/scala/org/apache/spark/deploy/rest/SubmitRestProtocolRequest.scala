@@ -70,10 +70,14 @@ private[rest] class CreateSubmissionRequest extends SubmitRestProtocolRequest {
 
   /**
     * Assert that a Spark property can be converted to a certain type.
-    * 断言Spark属性可以转换为某种类型,泛型及匿名方法使用
+    * 断言Spark属性可以转换为某种类型,泛型及匿名方法使用接收String类型,还回T类型
+    *
     *  */
   private def assertProperty[T](key: String, valueType: String, convert: (String => T)): Unit = {
     sparkProperties.get(key).foreach { value =>
+      //Scala2.10提供了Try来更优雅的实现这一功能。对于有可能抛出异常的操作。我们可以使用Try来包裹它，得到Try的子类Success或者Failure，
+      // 如果计算成功，返回Success的实例，如果抛出异常，返回Failure并携带相关信息
+      //Success和Failure 是Try的子类,getOrElse如果不存在则返回一个默认值,即抛出SubmitRestProtocolException异常
       Try(convert(value)).getOrElse {
         throw new SubmitRestProtocolException(
           s"Property '$key' expected $valueType value: actual was '$value'.")
