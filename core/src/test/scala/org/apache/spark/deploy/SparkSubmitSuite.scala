@@ -89,7 +89,7 @@ class SparkSubmitSuite
     //让“主线程”等待“子线程”结束之后才能继续运行
     thread.join()
     val joined = printStream.lineBuffer.mkString("\n")
-    println("===="+joined)
+    //println("===="+joined)
     if (!joined.contains(searchString)) {
       fail(s"Search string '$searchString' not found in $joined")
     }

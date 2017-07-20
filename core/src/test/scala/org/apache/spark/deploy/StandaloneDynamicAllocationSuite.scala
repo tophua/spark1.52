@@ -95,7 +95,7 @@ class StandaloneDynamicAllocationSuite
     }
     // kill all executors
     //杀死所有的执行者
-   // assert(killAllExecutors(sc))
+    assert(killAllExecutors(sc))
     var apps = getApplications()
     assert(apps.head.executors.size === 0)
     assert(apps.head.getExecutorLimit === 0)
@@ -541,6 +541,7 @@ class StandaloneDynamicAllocationSuite
     //虽然执行者是短暂,主节点相同进程信息不会序列化,这里很安全
     // serialized and it's safe here.
     //keys获得HashMap的keys值,把Int转换字符串
+    //mutable.HashMap[Int, ExecutorDesc]
     app.get.executors.keys.map(_.toString).toSeq
   }
 

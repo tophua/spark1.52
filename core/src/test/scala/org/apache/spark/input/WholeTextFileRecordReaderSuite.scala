@@ -69,6 +69,7 @@ class WholeTextFileRecordReaderSuite extends SparkFunSuite with BeforeAndAfterAl
  */
   private def createNativeFile(inputDir: File, fileName: String, contents: Array[Byte],
                                compress: Boolean) = {
+
     val out = if (compress) {//是否压缩
       val codec = new GzipCodec
       val path = s"${inputDir.toString}/$fileName${codec.getDefaultExtension}"

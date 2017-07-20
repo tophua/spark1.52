@@ -174,7 +174,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
       SparkSubmitUtils.resolveMavenCoordinates("a:b:c", None, None, isTest = true)
     }
   }
-  //忽略火Spark和Spark的依赖关系
+  //忽略Spark和Spark的依赖关系
   test("neglects Spark and Spark's dependencies") {
     val components = Seq("bagel_", "catalyst_", "core_", "graphx_", "hive_", "mllib_", "repl_",
       "sql_", "streaming_", "yarn_", "network-common_", "network-shuffle_", "network-yarn_")
