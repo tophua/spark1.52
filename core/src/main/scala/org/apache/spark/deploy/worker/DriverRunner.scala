@@ -193,13 +193,14 @@ private[deploy] class DriverRunner(
     }
     runCommandWithRetry(ProcessBuilderLike(builder), initialize, supervise)
   }
-
+  //运行命令重试
   def runCommandWithRetry(
       command: ProcessBuilderLike, initialize: Process => Unit, supervise: Boolean): Unit = {
     // Time to wait between submission retries.
     //时间在提交重试等待
     var waitSeconds = 1
-    // A run of this many seconds resets the exponential back-off.    
+    // A run of this many seconds resets the exponential back-off.
+    //
     val successfulRunDuration = 5
 
     var keepTrying = !killed
@@ -210,6 +211,7 @@ private[deploy] class DriverRunner(
       synchronized {
         if (killed) { return }
         process = Some(command.start())
+        print("initialize:"+initialize)
         initialize(process.get)
       }
 
@@ -236,6 +238,7 @@ private[deploy] trait Sleeper {
 }
 
 // Needed because ProcessBuilder is a final class and cannot be mocked
+//需要因为ProcessBuilder是一个最终的类，不能被模拟
 private[deploy] trait ProcessBuilderLike {
   def start(): Process
   def command: Seq[String]

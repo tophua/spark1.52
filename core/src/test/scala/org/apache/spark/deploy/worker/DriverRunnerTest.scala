@@ -36,7 +36,7 @@ class DriverRunnerTest extends SparkFunSuite {
     new DriverRunner(conf, "driverId", new File("workDir"), new File("sparkHome"),
       driverDescription, null, "akka://1.2.3.4/worker/", new SecurityManager(conf))
   }
-
+  //创建ProcessBuilder和进程
   private def createProcessBuilderAndProcess(): (ProcessBuilderLike, Process) = {
     val processBuilder = mock(classOf[ProcessBuilderLike])
     when(processBuilder.command).thenReturn(Seq("mocked", "command"))
@@ -55,9 +55,11 @@ class DriverRunnerTest extends SparkFunSuite {
     // One failure then a successful run
     //一个失败,那么一个成功的运行
     when(process.waitFor()).thenReturn(0)
+    //
     runner.runCommandWithRetry(processBuilder, p => (), supervise = true)
-
+    //一个失败
     verify(process, times(1)).waitFor()
+    //成功的运行
     verify(sleeper, times(0)).sleep(anyInt())
   }
   //进程失败几次,然后成功

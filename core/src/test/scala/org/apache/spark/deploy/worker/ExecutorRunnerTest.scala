@@ -36,6 +36,9 @@ class ExecutorRunnerTest extends SparkFunSuite {
       ExecutorState.RUNNING)
   val builder = CommandUtils.buildProcessBuilder(
       appDesc.command, new SecurityManager(conf), 512, sparkHome, er.substituteVariables)
+    //
+    val test=builder.command()
+   // test.map(println _)
     assert(builder.command().last === appId)
   }
 }
