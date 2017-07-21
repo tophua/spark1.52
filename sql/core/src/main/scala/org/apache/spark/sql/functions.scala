@@ -202,7 +202,7 @@ object functions {
 
   /**
    * Aggregate function: returns the number of distinct items in a group.
-   * 聚合函数:返回一组中不同的项目的数量
+   * 聚合函数:计算非重复结果的数目
    * @group agg_funcs
    * @since 1.3.0
    */
