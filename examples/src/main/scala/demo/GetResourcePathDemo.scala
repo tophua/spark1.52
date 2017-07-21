@@ -8,6 +8,8 @@ import java.net.URL
   */
 object GetResourcePathDemo extends  App{
 
+  val file=getClass.getClassLoader.getResource("hdfs-site.xml").getFile
+  println(file)
   val url = Thread.currentThread.getContextClassLoader.getResource("hdfs-site.xml")
   // final URL testLocalResource =ThreadLocal.class.getClassLoader().getResource("core-site.xml");
   System.out.println("==========" + url)
