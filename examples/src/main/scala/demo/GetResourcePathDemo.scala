@@ -15,6 +15,7 @@ object GetResourcePathDemo extends  App{
   System.out.println("==========" + url)
   val HADOOP_HOME = "/opt/cloudera/parcels/CDH/lib/hadoop/"
   val HADOOP_CONF_DIR = "/etc/hadoop/conf/"
+  val keyStorePath = new File(this.getClass.getResource("/keystore").toURI).getAbsolutePath
 
   //String path=Thread.currentThread().getContextClassLoader().getResource("core-site.xml").toURI().getPath();
   val path = Thread.currentThread.getContextClassLoader.getResource("hdfs-site.xml").toURI.getPath
