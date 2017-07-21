@@ -75,9 +75,11 @@ class JdbcRDDSuite extends SparkFunSuite with BeforeAndAfter with LocalSparkCont
     sc = new SparkContext("local", "test")
     val rdd = new JdbcRDD(
       sc,
+      //无参匿名函数
       () => { DriverManager.getConnection("jdbc:derby:target/JdbcRDDSuiteDb") },
     "SELECT DATA FROM FOO WHERE ? <= ID AND ID <= ?",
     1, 100, 3,//3是分区数
+      //
     (r: ResultSet) => { r.getInt(1) } ).cache()
 
     assert(rdd.count === 100)

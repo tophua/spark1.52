@@ -283,7 +283,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     assert(cartesianBytes != 0)
     assert(cartesianBytes == firstSize * numPartitions + (cartVector.length  * secondSize))
   }
-
+  //没有参数函数,没有还回类型
   private def runAndReturnBytesRead(job: => Unit): Long = {
     runAndReturnMetrics(job, _.taskMetrics.inputMetrics.map(_.bytesRead))
   }

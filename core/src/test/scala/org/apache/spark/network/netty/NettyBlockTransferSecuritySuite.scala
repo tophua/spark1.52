@@ -41,12 +41,13 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
     val conf = new SparkConf()
       .set("spark.app.id", "app-id")
     testConnection(conf, conf) match {
+        //_泛型系统有一个通配符类型
       case Success(_) => // expected
       case Failure(t) => fail(t)
     }
   }
-
-  test("security on same password") {//安全相同的密码
+  //相同密码的安全
+  test("security on same password") {
     val conf = new SparkConf()
      //是否启用内部身份验证
       .set("spark.authenticate", "true")
@@ -54,6 +55,7 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
       .set("spark.authenticate.secret", "good")
       .set("spark.app.id", "app-id")
     testConnection(conf, conf) match {
+      //_泛型系统有一个通配符类型
       case Success(_) => // expected
       case Failure(t) => fail(t)
     }
@@ -148,7 +150,12 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
       from: BlockTransferService,
       execId: String,
       blockId: BlockId): Try[ManagedBuffer] = {
-
+    /**
+      * Future和Promise,其中的 Future 表示一个可能还没有实际完成的异步任务的结果，针对这个结果可以添加 Callback
+      * 以便在任务执行成功或失败后做出对应的操作，而 Promise 交由任务执行者，任务执行者通过 Promise 可以标记任务完成或者失败。
+      * 可以说这一套模型是很多异步非阻塞架构的基础
+      *
+      */
     val promise = Promise[ManagedBuffer]()
 
     self.fetchBlocks(from.hostName, from.port, execId, Array(blockId.toString),
@@ -163,6 +170,7 @@ class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar wi
       })
 
     Await.ready(promise.future, FiniteDuration(1000, TimeUnit.MILLISECONDS))
+    //
     promise.future.value.get
   }
 }

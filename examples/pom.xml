@@ -272,6 +272,18 @@
               </exclusion>
           </exclusions>
       </dependency>
+      <!-- https://mvnrepository.com/artifact/javax.persistence/persistence-api -->
+      <dependency>
+          <groupId>javax.persistence</groupId>
+          <artifactId>persistence-api</artifactId>
+          <version>1.0</version>
+      </dependency>
+      <dependency>
+          <groupId>javax.validation</groupId>
+          <artifactId>validation-api</artifactId>
+          <version>1.0.0.GA</version>
+      </dependency>
+
       <!-- Added for selenium only, and should match its dependent version: -->
       <dependency>
           <groupId>xml-apis</groupId>
@@ -1557,6 +1569,11 @@
           <groupId>org.apache.spark</groupId>
           <artifactId>spark-core_2.10</artifactId>
           <version>1.5.2</version>
+      </dependency>
+      <dependency>
+          <groupId>javax.annotation</groupId>
+          <artifactId>javax.annotation-api</artifactId>
+          <version>1.2</version>
       </dependency>
       <dependency>
           <groupId>org.apache.spark</groupId>
