@@ -13,6 +13,7 @@ object PeopleInfoCalculator {
     val sc = new SparkContext(conf)
     val dataFile = sc.textFile("sample_people_info.txt", 5);
     val maleData = dataFile.filter(line => line.contains("M")).map(
+      //取数组的第一个值(1),第二个值(2)
       line => (line.split(" ")(1) + " " + line.split(" ")(2)))
     val femaleData = dataFile.filter(line => line.contains("F")).map(
       line => (line.split(" ")(1) + " " + line.split(" ")(2)))
