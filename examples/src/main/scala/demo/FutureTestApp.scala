@@ -14,7 +14,7 @@ import scala.concurrent._
  * 它有两个方法,一个是Await.ready,当Future的状态为完成时返回,一种是Await.result,直接返回Future持有的结果。
  * Future还提供了一些map,filter,foreach等操作
  */
-object FutureTestextendsApp extends App {
+object FutureTestApp extends App {
   val s = "Hello"
   val f: Future[String] = future {
     s + " future!"

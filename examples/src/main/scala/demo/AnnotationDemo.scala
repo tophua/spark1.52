@@ -1,12 +1,11 @@
 package demo
 
 
-import scala.annotation.target._
-import scala.reflect.BeanProperty
-import javax.persistence.Entity
-import javax.persistence.Id
+import javax.persistence.{Entity, Id}
 import javax.validation.constraints.NotNull
+
 import scala.annotation.target.beanGetter
+import scala.beans.BeanProperty
 /**
   * Created by liush on 17-7-21.
   */
