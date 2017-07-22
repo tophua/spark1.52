@@ -184,4 +184,84 @@ object MatchDemo extends App{
     // Note that amt is printed nicely, thanks to the generated toString
     println(amt + ": " + result)
   }
+
+
+  abstract class Item
+  case class Article(description: String, price: Double) extends Item
+  case class Bundle(description: String, discount: Double, items: Item*) extends Item
+
+  val special = Bundle("Father's day special", 20.0,
+    Article("Scala for the Impatient", 39.95),
+    Bundle("Anchor Distillery Sampler", 10.0,
+      Article("Old Potrero Straight Rye Whiskey", 79.95),
+      Article("Junípero Gin", 32.95)))
+
+  special match {
+    case Bundle(_, _, Article(descr, _), _*) =>
+      //======Scala for the Impatient
+      println("Bundle(_, _, Article(descr, _), _*) ======"+descr)
+      descr
+  }
+
+  special match {
+    case Bundle(_, _, art @ Article(_, _), rest @ _*) =>
+      //Article(Scala for the Impatient,39.95)====WrappedArray(Bundle(Anchor Distillery Sampler,10.0,WrappedArray(Article(Old Potrero Straight Rye Whiskey,79.95), Article(Junípero Gin,32.95))))
+      println("Bundle(_, _, art @ Article(_, _), rest @ _*)======"+art+"===="+rest)
+      (art, rest)
+  }
+
+  special match {
+    case Bundle(_, _, art @ Article(_, _), rest) =>
+      //======Article(Scala for the Impatient,39.95)====Bundle(Anchor Distillery Sampler,10.0,WrappedArray(Article(Old Potrero Straight Rye Whiskey,79.95), Article(Junípero Gin,32.95)))
+      println("Bundle(_, _, art @ Article(_, _), rest)======"+art+"===="+rest)
+      (art, rest)
+  }
+
+  def price(it: Item): Double = it match {
+    case Article(_, p) =>
+     // Article(_, p):39.95
+     // Article(_, p):79.95
+    //  Article(_, p):32.95
+      println("Article(_, p):"+p)
+      p
+    case Bundle(_, disc, its @ _*) =>
+      //Bundle(_, disc, its @ _*)===102.9===WrappedArray(Article(Old Potrero Straight Rye Whiskey,79.95), Article(Junípero Gin,32.95))
+      //Bundle(_, disc, its @ _*)===122.85000000000002===WrappedArray(Article(Scala for the Impatient,39.95), Bundle(Anchor Distillery Sampler,10.0,WrappedArray(Article(Old Potrero Straight Rye Whiskey,79.95), Article(Junípero Gin,32.95))))
+
+      val sun=its.map(price _).sum - disc
+      println("Bundle(_, disc, its @ _*)==="+sun+"==="+its)
+      sun
+  }
+
+  price(special)
+
+
+  val scores = Map("Alice" -> 1729, "Fred" -> 42)
+
+  scores.get("Alice") match {
+    case Some(score) => println(score)
+    case None => println("No score")
+  }
+
+  val alicesScore = scores.get("Alice")
+  if (alicesScore.isEmpty) { println("No score")
+  } else println(alicesScore.get)
+
+  println(alicesScore.getOrElse("No score"))
+
+  println(scores.getOrElse("Alice", "No score"))
+
+  for (score <- scores.get("Alice")) println(score)
+
+  scores.get("Alice").foreach(println _)
+
+
+  //\{转义
+  val varPattern = """\{([0-9]+)\}""".r
+  val message = "At {1}, there was {2} on {0}"
+  val vars = Map("{0}" -> "planet 7", "{1}" -> "12:30 pm",
+    "{2}" -> "a disturbance of the force.")
+  //lift接受一个函数,把这部分功能为普通函数返回一个`选项`结果
+  val result = varPattern.replaceSomeIn(message, m => vars.lift(m.matched))
+  println(result)
 }

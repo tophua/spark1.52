@@ -95,6 +95,7 @@ object SparkSQLGroup extends  App{
     +------+-------+---+
     */
   df2.show(false)
+
   // agg将每个分区里面的元素进行聚合,返回dataframe类型,同数学计算求值
   /**
     * 计算非重复结果的数目 countDistinct

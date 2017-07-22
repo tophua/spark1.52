@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull
 
 import scala.annotation.target.beanGetter
 import scala.beans.BeanProperty
+import scala.reflect.BeanProperty
 /**
   * Created by liush on 17-7-21.
   */
@@ -20,6 +21,16 @@ import scala.beans.BeanProperty
   @(Id @beanGetter) @BeanProperty var id = 0
   // @Id is only applied to the bean getter
 }
+
+import scala.reflect.BeanProperty
+import javax.persistence.Entity
+import javax.persistence.Id
+
+@Entity class Credentialsb {
+  @Id @BeanProperty var username : String = _
+  @BeanProperty var password : String = _
+}
+
 
 object AnnotationDemo extends App {
 
