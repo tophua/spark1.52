@@ -1,11 +1,11 @@
-package scalaDemo
+package sparkDemo
 
 import org.apache.spark.{HashPartitioner, SparkConf, SparkContext}
 
 /**
   * Created by liush on 17-7-13.
   */
-object testPartitionBy {
+object PartitionByDemo {
   def main(args: Array[String]):Unit= {
     val conf = new SparkConf().setMaster("local").setAppName("testPartitionBy")
     val sc = new SparkContext(conf)

@@ -60,6 +60,7 @@ object ConcurrentCollections extends App {
   
   def getUrlSpec(): Future[Seq[String]] = Future {
     val f = Source.fromURL("http://www.w3.org/Addressing/URL/url-spec.txt")
+    //f.close() 关闭流的连接
     try f.getLines.toList finally f.close()
   }
   
