@@ -46,6 +46,7 @@ private[spark] class Pool(
   var priority = 0 //优先级
 
   // A pool's stage id is used to break the tie in scheduling.
+  //池的阶段id用于打破调度的关系
   var stageId = -1
   var name = poolName
   var parent: Pool = null

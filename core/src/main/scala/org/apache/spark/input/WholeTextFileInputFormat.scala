@@ -51,6 +51,7 @@ private[spark] class WholeTextFileInputFormat
   /**
    * Allow minPartitions set by end-user in order to keep compatibility with old Hadoop API,
    * which is set through setMaxSplitSize
+    *允许最终用户设置的minPartition，以保持与旧Hadoop API的兼容性,通过setMaxSplitSize设置
    */
   def setMinPartitions(context: JobContext, minPartitions: Int) {
     val files = listStatus(context)

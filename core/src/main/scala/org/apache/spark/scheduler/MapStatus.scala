@@ -62,6 +62,7 @@ private[spark] object MapStatus {
 
   /**
    * Compress a size in bytes to 8 bits for efficient reporting of map output sizes.
+    * 压缩字节大小为8位，以便有效地报告map输出大小,我们通过将大小的日志基础1.1编码为整数来完成,可以支持高达35 GB的大小,最多10％的错误。
    * We do this by encoding the log base 1.1 of the size as an integer, which can support
    * sizes up to 35 GB with at most 10% error.
    */
@@ -77,6 +78,7 @@ private[spark] object MapStatus {
 
   /**
    * Decompress an 8-bit encoded block size, using the reverse operation of compressSize.
+    * 使用compressSize的反向操作解压缩8位编码块大小
    */
   def decompressSize(compressedSize: Byte): Long = {
     if (compressedSize == 0) {
@@ -91,7 +93,7 @@ private[spark] object MapStatus {
 /**
  * A [[MapStatus]] implementation that tracks the size of each block. Size for each block is
  * represented using a single byte.
- *
+ * 跟踪每个块的大小的实现,每个块的大小用单个字节表示
  * @param loc location where the task is being executed.
  * @param compressedSizes size of the blocks, indexed by reduce partition id.
  */
@@ -130,6 +132,7 @@ private[spark] class CompressedMapStatus(
  * A [[MapStatus]] implementation that only stores the average size of non-empty blocks,
  * plus a bitmap for tracking which blocks are empty.  During serialization, this bitmap
  * is compressed.
+  * 仅存储非空块的平均大小的实现,以及跟踪哪些块为空的位图。在序列化期间,该位图被压缩。
  *
  * @param loc location where the task is being executed
  * @param numNonEmptyBlocks the number of non-empty blocks
@@ -144,6 +147,7 @@ private[spark] class HighlyCompressedMapStatus private (
   extends MapStatus with Externalizable {
 
   // loc could be null when the default constructor is called during deserialization
+  //在反序列化期间调用默认构造函数时,loc可以为null
   require(loc == null || avgSize > 0 || numNonEmptyBlocks == 0,
     "Average size can only be zero for map stages that produced no output")
 

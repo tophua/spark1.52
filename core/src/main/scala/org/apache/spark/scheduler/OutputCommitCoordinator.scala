@@ -30,7 +30,7 @@ private case class AskPermissionToCommitOutput(stage: Int, partition: Int, attem
 /**
  * Authority that decides whether tasks can commit output to HDFS. Uses a "first committer wins"
  * policy.
- * 任务输出到HDFS
+ * 决定任务是否可以将输出提交到HDFS的权限
  * OutputCommitCoordinator is instantiated in both the drivers and executors. On executors, it is
  * configured with a reference to the driver's OutputCommitCoordinatorEndpoint, so requests to
  * commit output will be forwarded to the driver's OutputCommitCoordinator.
@@ -50,6 +50,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
   /**
    * Map from active stages's id => partition id => task attempt with exclusive lock on committing
    * output for that partition.
+   * 从活动阶段的ID =>分区id =>任务尝试与提交排他锁输出该分区
    * 
    * Entries are added to the top-level map when stages start and are removed they finish
    * (either successfully or unsuccessfully).
@@ -62,6 +63,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
 
   /**
    * Returns whether the OutputCommitCoordinator's internal data structures are all empty.
+    * 返回OutputCommitCoordinator的内部数据结构是否为空
    */
   def isEmpty: Boolean = {
     authorizedCommittersByStage.isEmpty
@@ -69,10 +71,12 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
 
   /**
    * Called by tasks to ask whether they can commit their output to HDFS.
-   *
+   * 由任务调用询问他们是否可以将其输出提交到HDFS
+    *
    * If a task attempt has been authorized to commit, then all other attempts to commit the same
    * task will be denied.  If the authorized task attempt fails (e.g. due to its executor being
    * lost), then a subsequent task attempt may be authorized to commit its output.
+    *
    *
    * @param stage the stage number
    * @param partition the partition number
@@ -107,6 +111,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
   }
 
   // Called by DAGScheduler
+  //调用DAGScheduler
   private[scheduler] def taskCompleted(
       stage: StageId,
       partition: PartitionId,
@@ -119,6 +124,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
     reason match {
       case Success =>
       // The task output has been committed successfully
+        //任务输出已成功提交
       case denied: TaskCommitDenied =>
         logInfo(s"Task was denied committing, stage: $stage, partition: $partition, " +
           s"attempt: $attemptNumber")
@@ -140,6 +146,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
   }
 
   // Marked private[scheduler] instead of private so this can be mocked in tests
+  //标记为private [scheduler]而不是private,所以这可以在测试中嘲笑
   private[scheduler] def handleAskPermissionToCommit(
       stage: StageId,
       partition: PartitionId,
@@ -168,6 +175,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
 private[spark] object OutputCommitCoordinator {
 
   // This endpoint is used only for RPC
+  //此端点仅用于RPC
   private[spark] class OutputCommitCoordinatorEndpoint(
       override val rpcEnv: RpcEnv, outputCommitCoordinator: OutputCommitCoordinator)
     extends RpcEndpoint with Logging {

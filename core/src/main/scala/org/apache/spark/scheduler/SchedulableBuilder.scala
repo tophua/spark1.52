@@ -141,6 +141,7 @@ private[spark] class FairSchedulableBuilder(val rootPool: Pool, conf: SparkConf)
       if (parentPool == null) {
         // we will create a new pool that user has configured in app
         // instead of being defined in xml file
+        //我们将创建一个用户在应用程序中配置的新池,而不是在xml文件中定义
         parentPool = new Pool(poolName, DEFAULT_SCHEDULING_MODE,
           DEFAULT_MINIMUM_SHARE, DEFAULT_WEIGHT)
         rootPool.addSchedulable(parentPool)

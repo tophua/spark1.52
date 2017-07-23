@@ -389,6 +389,7 @@ private[spark] class Executor(
    */
   private def createClassLoader(): MutableURLClassLoader = {
     // Bootstrap the list of jars with the user class path.
+    //使用用户类路径引导jar列表
     val now = System.currentTimeMillis()
     userClassPath.foreach { url =>
       currentJars(url.getPath().split("/").last) = now
@@ -398,6 +399,8 @@ private[spark] class Executor(
 
     // For each of the jars in the jarSet, add them to the class loader.
     // We assume each of the files has already been fetched.
+    //对于jarSet中的每个jar,将它们添加到类加载器中
+    //我们假设每个文件已经被提取
     val urls = userClassPath.toArray ++ currentJars.keySet.map { uri =>
       new File(uri.split("/").last).toURI.toURL
     }
