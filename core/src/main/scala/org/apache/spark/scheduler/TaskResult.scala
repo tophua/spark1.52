@@ -29,15 +29,22 @@ import org.apache.spark.storage.BlockId
 import org.apache.spark.util.Utils
 
 // Task result. Also contains updates to accumulator variables.
+//任务结果,还包含累加器变量的更新,
 
 private[spark] sealed trait TaskResult[T]
 
-/** A reference to a DirectTaskResult that has been stored(存储) in the worker's BlockManager. */
+/**
+  *  A reference to a DirectTaskResult that has been stored(存储) in the worker's BlockManager.
+  *  对存储在工作者的BlockManager中的DirectTaskResult的引用
+  *  */
 
 private[spark] case class IndirectTaskResult[T](blockId: BlockId, size: Int)
   extends TaskResult[T] with Serializable
 
-/** A TaskResult that contains the task's return value and accumulator updates. */
+/**
+  *  A TaskResult that contains the task's return value and accumulator updates.
+  *  包含任务的返回值和累加器更新的TaskResult
+  * */
 private[spark]
 class DirectTaskResult[T](var valueBytes: ByteBuffer, var accumUpdates: Map[Long, Any],
     var metrics: TaskMetrics)
@@ -95,6 +102,7 @@ class DirectTaskResult[T](var valueBytes: ByteBuffer, var accumUpdates: Map[Long
     } else {
       // This should not run when holding a lock because it may cost dozens of seconds for a large
       // value.
+      //这不应该在持有锁时运行,因为它可能花费数十秒钟值
       val resultSer = SparkEnv.get.serializer.newInstance()
       valueObject = resultSer.deserialize(valueBytes)
       valueObjectDeserialized = true

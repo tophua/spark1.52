@@ -62,6 +62,7 @@ private[spark] object TaskLocation {
 
   /**
    * Create a TaskLocation from a string returned by getPreferredLocations.
+    * 由getPreferredLocations返回的字符串创建一个TaskLocation。
    * These strings have the form [hostname] or hdfs_cache_[hostname], depending on whether the
    * location is cached.
    */

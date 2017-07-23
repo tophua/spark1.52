@@ -55,7 +55,7 @@ private[spark] abstract class Task[T](
   /**
    * The key of the Map is the accumulator id and the value of the Map is the latest accumulator
    * local value.
-   * 
+    * Map的关键是累加器ID,Map的值是最新的累加器本地值
    */
   type AccumulatorUpdates = Map[Long, Any]
 
@@ -229,9 +229,10 @@ private[spark] object Task {
 
   /**
    * Deserialize the list of dependencies in a task serialized with serializeWithDependencies,
-   * 
+   * 对序列化为serializeWithDependencies的任务中的依赖关系列表进行反序列化
    * and return the task itself as a serialized ByteBuffer. The caller can then update its
-   * ClassLoaders and deserialize the task.  
+   * ClassLoaders and deserialize the task.
+    * 并将任务本身作为序列化ByteBuffer返回,然后呼叫者可以更新它ClassLoaders和反序列化任务。
    * @return (taskFiles, taskJars, taskBytes)
    */
   def deserializeWithDependencies(serializedTask: ByteBuffer)
@@ -240,14 +241,14 @@ private[spark] object Task {
     val in = new ByteBufferInputStream(serializedTask)
     val dataIn = new DataInputStream(in)
 
-    // Read task's files
+    // Read task's files 读任务文件
     val taskFiles = new HashMap[String, Long]()
     val numFiles = dataIn.readInt()
     for (i <- 0 until numFiles) {
       taskFiles(dataIn.readUTF()) = dataIn.readLong()
     }
 
-    // Read task's JARs
+    // Read task's JARs 读任务的JAR
     val taskJars = new HashMap[String, Long]()
     val numJars = dataIn.readInt()
     for (i <- 0 until numJars) {
@@ -255,6 +256,7 @@ private[spark] object Task {
     }
 
     // Create a sub-buffer for the rest of the data, which is the serialized Task object
+    //为其余的数据创建一个子缓冲区,这是序列化的Task对象
     val subBuffer = serializedTask.slice()  // ByteBufferInputStream will have read just up to task
     (taskFiles, taskJars, subBuffer)
   }
