@@ -229,7 +229,7 @@ object SynchronizedBadPool extends App {
 }
 
 /**
- * main线程准备了Some消息,使之显示该消息
+ * 同步守卫的块,main线程准备了Some消息,使之显示该消息
  */
 object SynchronizedGuardedBlocks extends App {
   val lock = new AnyRef //locak对象中的监控器,
@@ -240,13 +240,13 @@ object SynchronizedGuardedBlocks extends App {
     lock.synchronized {
       //当线程T调用了某个对象中的wait方法后,线程T就会释放该对象的监控器并切换到等待状态,直到其他线程调用了
       //该对象中的notify方法后,线程T才会切换回正在运行状态.
-      while (message == None) lock.wait()//将线程切换为等待状态
+      while (message == None) lock.wait()//将线程切换为等待状态,并释放资源和锁
       log(message.get)
     }
   }
   lock.synchronized {
     message = Some("Hello!")
-    lock.notify()//将线程切换为正在运行状态
+    lock.notify()//将线程切换为正在运行状态,并释放资源和锁
   }
   greeter.join()
 }
@@ -269,6 +269,7 @@ object SynchronizedPool extends App {
     
     setDaemon(true)
     def poll() = tasks.synchronized {
+      //空等待,耗费资源
       while (tasks.isEmpty) tasks.wait()
       tasks.dequeue()
     }
@@ -289,7 +290,7 @@ object SynchronizedPool extends App {
   asynchronous { log("World!") }
 }
 
-
+//同步优雅关闭线程
 object SynchronizedGracefulShutdown extends App {
   import scala.collection._
   import scala.annotation.tailrec
@@ -300,17 +301,18 @@ object SynchronizedGracefulShutdown extends App {
   object Worker extends Thread {
     var terminated = false
     def poll(): Option[() => Unit] = tasks.synchronized {
+      //wait将线程切换为等待状态,并释放资源和锁
       while (tasks.isEmpty && !terminated) tasks.wait()
-      //
       if (!terminated) Some(tasks.dequeue()) else None
     }
+    //注意@tailrec,run尾递归调用
     @tailrec override def run() = poll() match {
       case Some(task) => task(); run()
       case None =>
     }
     def shutdown() = tasks.synchronized {
       terminated = true
-      //唤醒线程
+      //唤醒线程,将线程切换为正在运行状态,,并释放资源和锁
       tasks.notify()
     }
   }
@@ -319,6 +321,7 @@ object SynchronizedGracefulShutdown extends App {
 
   def asynchronous(body: =>Unit) = tasks.synchronized {
     tasks.enqueue(() => body)
+    //唤醒线程,将线程切换为正在运行状态,并释放资源和锁
     tasks.notify()
   }
 
