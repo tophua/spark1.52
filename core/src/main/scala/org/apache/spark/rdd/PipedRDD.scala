@@ -88,7 +88,7 @@ private[spark] class PipedRDD[T: ClassTag](
 
     // When spark.worker.separated.working.directory option is turned on, each
     // task will be run in separate directory. This should be resolve file
-    // access conflict issue
+    // access conflict issue 每个任务将在单独的目录中运行,这应该是解决文件访问冲突的问题
     val taskDirectory = "tasks" + File.separator + java.util.UUID.randomUUID.toString
     var workInTaskDirectory = false
     logDebug("taskDirectory = " + taskDirectory)
@@ -105,6 +105,8 @@ private[spark] class PipedRDD[T: ClassTag](
         // directories and other files not known to the SparkContext that were added via the
         // Hadoop distributed cache.  We also don't want to symlink to the /tasks directories we
         // are creating here.
+        //需要添加链接到文件和目录的jar,我们可以对纱线的目录和其他文件,不知道的sparkcontext被添加通过Hadoop分布式缓存
+        //我们也不想链接我们正在/任务目录
         for (file <- currentDir.list(tasksDirFilter)) {
           val fileWithDir = new File(currentDir, file)
           Utils.symlink(new File(fileWithDir.getAbsolutePath()),
@@ -142,6 +144,7 @@ private[spark] class PipedRDD[T: ClassTag](
 
         // scalastyle:off println
         // input the pipe context firstly
+        //首先输入管道上下文
         if (printPipeContext != null) {
           printPipeContext(out.println(_))
         }
