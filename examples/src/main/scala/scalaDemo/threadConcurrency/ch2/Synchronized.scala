@@ -7,7 +7,6 @@ import ch2._
 
 /**
  * synchronized可以确保线程写入操作的可见性,还可以限制对共享内存区域进行的并发访问,限制访问共享资源的同步机制通常称为锁
- * 
  */
 
 object SynchronizedProtectedUid extends App {
@@ -36,10 +35,11 @@ object SynchronizedProtectedUid extends App {
 
 }
 /**
- * this.synchronized写入操作都是原子化,而且对对象x执行synchronized语句的所有线程都能够读到其他线程执行这些写入操作的情况
+ * this.synchronized写入操作都是原子化,而且对象x执行synchronized语句的所有线程都能够读到其他线程执行这些写入操作的情况
  */
 
 // we should skip this one
+//调整次序
 object SynchronizedSharedStateAccess extends App {
   for (i <- 0 until 10000) {
     var t1started = false
@@ -310,6 +310,7 @@ object SynchronizedGracefulShutdown extends App {
     }
     def shutdown() = tasks.synchronized {
       terminated = true
+      //唤醒线程
       tasks.notify()
     }
   }

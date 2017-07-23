@@ -76,10 +76,14 @@ object ThreadsSleep extends App{
 
 }
 
-
+//线程不确定性
 object ThreadsNondeterminism extends App {
   /**
    * log语句,在变量t线程中的调用log方法的语句之前,可能之后出现.大多数线程非确定
+   * main: ...
+   * Thread-0: New thread running.
+   * main: ...
+   * main: New thread joined.
    */
   val t = thread { log("New thread running.") }
   log("...")
@@ -89,14 +93,14 @@ object ThreadsNondeterminism extends App {
 
 }
 
-
+//线程通信
 object ThreadsCommunicate extends App {
    /**
-    * 原方式执行, t.join()彼此等待对方直到执行完毕,交出处理器控制权之前执行,对result变量执行的赋值操作.
+    * t.join()彼此等待对方直到执行完毕,交出处理器控制权之前执行,对result变量执行的赋值操作.
     * 所以result永远不会为null值
     */
   var result: String = null
-  val t = thread { result = "\nTitle\n" + "=" * 5 }
+  val t = thread { result = "Title" + "=" * 5 }
   t.join()
   log(result)
 }
@@ -105,9 +109,6 @@ object ThreadsCommunicate extends App {
  * 线程不安全访问
  */
 object ThreadsUnprotectedUid extends App {
-  /**
-   * 
-   */
   var uidCount = 0L//并发方式读取变量uidCount的值,该变量的初始值为0,
   def getUniqueId() = {
     val freshUid = uidCount + 1  //freshUid 是一个局部变量,它获得是线程栈内存,所有线程都能够看到该变量的独立实例
@@ -120,7 +121,7 @@ object ThreadsUnprotectedUid extends App {
     val uids = for (i <- 0 until n) yield getUniqueId()
     log(s"Generated uids: $uids")
   }
-  //线程处理
+  //二个线程处理
   val t = thread {
     printUniqueIds(5)//线程并发执行
   }

@@ -9,6 +9,7 @@ import ch2._
  * volatile变量能够以原子方式被读取和修改,而且大多用作状态标志
  * 优点:1,在单个线程中,对volatile变量执行写入和读取操作的次序是不会改变
  * 			2,对volatile变量执行写入操作的情况会立刻展示给所有线程
+  *volatile:变量的语义比较复杂,而且容易出错,volatile变量的多重读取和写入操作不是原子,都数情况下使用synchronized
  */
 
 object Volatile extends App {
