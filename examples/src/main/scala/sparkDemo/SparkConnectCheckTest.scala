@@ -1,4 +1,4 @@
-package SparkDemo
+package sparkDemo
 
 import java.net.{ConnectException, InetAddress, Socket, URI}
 

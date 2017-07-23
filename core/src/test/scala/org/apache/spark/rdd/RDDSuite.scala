@@ -82,7 +82,10 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
       case(split, iter) => Iterator((split, iter.reduceLeft(_ + _)))
     }
     assert(partitionSumsWithSplit.collect().toList === List((0, 3), (1, 7)))
-
+    /**
+      * mapPartitionsWithIndex与mapPartitions基本相同,只是在处理函数的参数是一个二元元组,
+      *元组的第一个元素是当前处理的分区的index,元组的第二个元素是当前处理的分区元素组成的Iterator
+      */
     val partitionSumsWithIndex = nums.mapPartitionsWithIndex {
       case(split, iter) => Iterator((split, iter.reduceLeft(_ + _)))
     }
