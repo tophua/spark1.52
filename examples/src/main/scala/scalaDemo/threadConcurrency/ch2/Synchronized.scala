@@ -166,7 +166,7 @@ object SynchronizedNoDeadlock extends App {
   log(s"a = ${a.money}, b = ${b.money}")
 }
 
-
+//同步重复
 object SynchronizedDuplicates extends App {
   import scala.collection._
   val duplicates = mutable.Set[Int]()
