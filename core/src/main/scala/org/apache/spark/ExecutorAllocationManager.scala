@@ -91,20 +91,23 @@ private[spark] class ExecutorAllocationManager(
 
   import ExecutorAllocationManager._
 
-  // Lower and upper bounds on the number of executors.
+  // Lower and upper bounds on the number of executors.执行数下限和上限
   private val minNumExecutors = conf.getInt("spark.dynamicAllocation.minExecutors", 0)
   private val maxNumExecutors = conf.getInt("spark.dynamicAllocation.maxExecutors",
     Integer.MAX_VALUE)
 
   // How long there must be backlogged tasks for before an addition is triggered (seconds)
+  //触发添加之前必须有多长时间的任务（秒）
   private val schedulerBacklogTimeoutS = conf.getTimeAsSeconds(
     "spark.dynamicAllocation.schedulerBacklogTimeout", "1s")
 
   // Same as above, but used only after `schedulerBacklogTimeoutS` is exceeded
+  //与上述相同，但仅在“schedulerBacklogTimeoutS”超出后才使用
   private val sustainedSchedulerBacklogTimeoutS = conf.getTimeAsSeconds(
     "spark.dynamicAllocation.sustainedSchedulerBacklogTimeout", s"${schedulerBacklogTimeoutS}s")
 
   // How long an executor must be idle for before it is removed (seconds)
+  //执行者在删除之前必须空闲多久（秒）
   private val executorIdleTimeoutS = conf.getTimeAsSeconds(
     "spark.dynamicAllocation.executorIdleTimeout", "60s")
 
@@ -112,6 +115,7 @@ private[spark] class ExecutorAllocationManager(
     "spark.dynamicAllocation.cachedExecutorIdleTimeout", s"${Integer.MAX_VALUE}s")
 
   // During testing, the methods to actually kill and add executors are mocked out
+  //在测试期间,实际上杀死和添加执行器的方法被
   private val testing = conf.getBoolean("spark.dynamicAllocation.testing", false)
 
   // TODO: The default value of 1 for spark.executor.cores works right now because dynamic
@@ -124,10 +128,12 @@ private[spark] class ExecutorAllocationManager(
   validateSettings()
 
   // Number of executors to add in the next round
+  //在下一轮增加的执行数
   private var numExecutorsToAdd = 1
 
   // The desired number of executors at this moment in time. If all our executors were to die, this
   // is the number of executors we would immediately want from the cluster manager.
+  //在此时刻所需的执行数,如果我们的所有执行者都要死,这个是我们将立即从集群管理器获得的执行者的数量。
   private var numExecutorsTarget =
     conf.getInt("spark.dynamicAllocation.initialExecutors", minNumExecutors)
 
@@ -141,6 +147,7 @@ private[spark] class ExecutorAllocationManager(
 
   // A timestamp of when an addition should be triggered, or NOT_SET if it is not set
   // This is set when pending tasks are added but not scheduled yet
+  //应该触发加法的时间戳，如果未设置则为NOT_SET,这是在添加但未安排的挂起任务时设置的
   private var addTime: Long = NOT_SET
 
   // A timestamp for each executor of when the executor should be removed, indexed by the ID
@@ -212,6 +219,7 @@ private[spark] class ExecutorAllocationManager(
     }
     // Require external shuffle service for dynamic allocation
     // Otherwise, we may lose shuffle files when killing executors
+    //需要外部随机服务进行动态分配 否则,我们可能在杀死执行者时丢失随机文件
     if (!conf.getBoolean("spark.shuffle.service.enabled", false) && !testing) {
       throw new SparkException("Dynamic allocation of executors requires the external " +
         "shuffle service. You may enable this through spark.shuffle.service.enabled.")
@@ -223,6 +231,7 @@ private[spark] class ExecutorAllocationManager(
 
   /**
    * Use a different clock for this allocation manager. This is mainly used for testing.
+    * 为此分配管理器使用不同的时钟
    */
   def setClock(newClock: Clock): Unit = {
     clock = newClock
@@ -254,7 +263,7 @@ private[spark] class ExecutorAllocationManager(
   }
 
   /**
-   * Stop the allocation manager.
+   * Stop the allocation manager. 停止分配manager
    */
   def stop(): Unit = {
     executor.shutdown()
@@ -314,16 +323,20 @@ private[spark] class ExecutorAllocationManager(
 
     if (initializing) {
       // Do not change our target while we are still initializing,
+      //当我们还在初始化时,不要改变我们的目标
       // Otherwise the first job may have to ramp up unnecessarily
+      //否则第一份工作可能不必要地增加
       0
     } else if (maxNeeded < numExecutorsTarget) {
       // The target number exceeds the number we actually need, so stop adding new
       // executors and inform the cluster manager to cancel the extra pending requests
+      //目标数量超过我们实际需要的数量,因此停止添加新的执行程序,并通知集群管理器取消额外的待处理请求
       val oldNumExecutorsTarget = numExecutorsTarget
       numExecutorsTarget = math.max(maxNeeded, minNumExecutors)
       numExecutorsToAdd = 1
 
       // If the new target has not changed, avoid sending a message to the cluster manager
+      //如果新目标未更改,请避免向群集管理器发送消息
       if (numExecutorsTarget < oldNumExecutorsTarget) {
         client.requestTotalExecutors(numExecutorsTarget, localityAwareTasks, hostToLocalTaskCount)
         logDebug(s"Lowering target number of executors to $numExecutorsTarget (previously " +
@@ -352,6 +365,7 @@ private[spark] class ExecutorAllocationManager(
    */
   private def addExecutors(maxNumExecutorsNeeded: Int): Int = {
     // Do not request more executors if it would put our target over the upper bound
+    //不要求更多的执行者,如果它将我们的目标超过上限
     if (numExecutorsTarget >= maxNumExecutors) {
       logDebug(s"Not adding executors because our current target total " +
         s"is already $numExecutorsTarget (limit $maxNumExecutors)")
@@ -362,18 +376,23 @@ private[spark] class ExecutorAllocationManager(
     val oldNumExecutorsTarget = numExecutorsTarget
     // There's no point in wasting time ramping up to the number of executors we already have, so
     // make sure our target is at least as much as our current allocation:
+    //确保我们的目标至少与我们目前的配置一样多：
     numExecutorsTarget = math.max(numExecutorsTarget, executorIds.size)
     // Boost our target with the number to add for this round:
+    //提高我们的目标,增加这一轮的数字：
     numExecutorsTarget += numExecutorsToAdd
     // Ensure that our target doesn't exceed what we need at the present moment:
+    //确保我们的目标不会超过我们现在需要的目标：
     numExecutorsTarget = math.min(numExecutorsTarget, maxNumExecutorsNeeded)
     // Ensure that our target fits within configured bounds:
+    //确保我们的目标适合配置的边界：
     numExecutorsTarget = math.max(math.min(numExecutorsTarget, maxNumExecutors), minNumExecutors)
 
     val delta = numExecutorsTarget - oldNumExecutorsTarget
 
     // If our target has not changed, do not send a message
     // to the cluster manager and reset our exponential growth
+    //如果我们的目标没有改变,不要发送消息到集群管理器并重置我们的指数增长
     if (delta == 0) {
       numExecutorsToAdd = 1
       return 0
@@ -401,15 +420,18 @@ private[spark] class ExecutorAllocationManager(
   /**
    * Request the cluster manager to remove the given executor.
    * Return whether the request is received.
+    * 请求集群管理器删除给定的执行器,返回是否收到请求。
    */
   private def removeExecutor(executorId: String): Boolean = synchronized {
     // Do not kill the executor if we are not aware of it (should never happen)
+    //如果我们不知道(不应该发生),不要杀死执行者
     if (!executorIds.contains(executorId)) {
       logWarning(s"Attempted to remove unknown executor $executorId!")
       return false
     }
 
     // Do not kill the executor again if it is already pending to be killed (should never happen)
+    //如果已经等待被杀死(不应该发生),不要再次杀死执行者
     if (executorsPendingToRemove.contains(executorId)) {
       logWarning(s"Attempted to remove executor $executorId " +
         s"when it is already pending to be removed!")
@@ -417,6 +439,7 @@ private[spark] class ExecutorAllocationManager(
     }
 
     // Do not kill the executor if we have already reached the lower bound
+    //如果我们已经达到了下限,不要杀死执行者
     val numExistingExecutors = executorIds.size - executorsPendingToRemove.size
     if (numExistingExecutors - 1 < minNumExecutors) {
       logDebug(s"Not removing idle executor $executorId because there are only " +
@@ -425,6 +448,7 @@ private[spark] class ExecutorAllocationManager(
     }
 
     // Send a request to the backend to kill this executor
+    //向后端发送请求以杀死这个执行者
     val removeRequestAcknowledged = testing || client.killExecutor(executorId)
     if (removeRequestAcknowledged) {
       logInfo(s"Removing executor $executorId because it has been idle for " +
@@ -439,6 +463,7 @@ private[spark] class ExecutorAllocationManager(
 
   /**
    * Callback invoked when the specified executor has been added.
+    * 调用指定的执行程序时调用回调函数
    */
   private def onExecutorAdded(executorId: String): Unit = synchronized {
     if (!executorIds.contains(executorId)) {

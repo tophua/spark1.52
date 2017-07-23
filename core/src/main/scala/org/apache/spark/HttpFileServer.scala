@@ -63,6 +63,7 @@ private[spark] class HttpFileServer(
 
     // If we only stop sc, but the driver process still run as a services then we need to delete
     // the tmp dir, if not, it will create too many tmp dirs
+    //如果我们只停止sc,但驱动程序进程仍然作为服务运行,那么我们需要删除tmp目录,如果没有,它将创建太多的tmp目录
     try {
       Utils.deleteRecursively(baseDir)
     } catch {
@@ -83,6 +84,7 @@ private[spark] class HttpFileServer(
 
   def addFileToDir(file: File, dir: File) : String = {
     // Check whether the file is a directory. If it is, throw a more meaningful exception.
+    //检查文件是否是目录,如果是,则抛出更有意义的异常。
     // If we don't catch this, Guava throws a very confusing error message:
     //   java.io.FileNotFoundException: [file] (No such file or directory)
     // even though the directory ([file]) exists.

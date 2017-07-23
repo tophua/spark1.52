@@ -110,6 +110,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
 
     // Messages sent and received locally
+    //消息在本地发送和接收
     case ExecutorRegistered(executorId) =>
       executorLastSeen(executorId) = clock.getTimeMillis()
       context.reply(true)
@@ -163,6 +164,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
 
   /**
    * Send ExecutorRegistered to the event loop to add a new executor. Only for test.
+    * 发送执行者注册到事件循环添加一个新的执行器,只用于测试
    *
    * @return if HeartbeatReceiver is stopped, return None. Otherwise, return a Some(Future) that
    *         indicate if this operation is successful.
@@ -174,6 +176,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
 
   /**
    * If the heartbeat receiver is not stopped, notify it of executor registrations.
+    * 如果心跳接收器未停止,请通知执行器注册。
    */
   override def onExecutorAdded(executorAdded: SparkListenerExecutorAdded): Unit = {
     addExecutor(executorAdded.executorId)
@@ -181,6 +184,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
 
   /**
    * Send ExecutorRemoved to the event loop to remove a executor. Only for test.
+    * 将执行程序发送到事件循环以删除执行程序,只用于测试
    *
    * @return if HeartbeatReceiver is stopped, return None. Otherwise, return a Some(Future) that
    *         indicate if this operation is successful.
@@ -191,7 +195,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
 
   /**
    * If the heartbeat receiver is not stopped, notify it of executor removals so it doesn't
-   * log superfluous errors.
+   * log superfluous errors.如果心跳接收器没有停止,请通知它的执行器删除,否则不会记录多余的错误
    *
    * Note that we must do this after the executor is actually removed to guard against the
    * following race condition: if we remove an executor's metadata from our data structure

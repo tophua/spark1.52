@@ -34,6 +34,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Exception type thrown by HttpServer when it is in the wrong state for an operation.
+  * HttpServer在操作错误状态时抛出的异常类型
  */
 private[spark] class ServerStateException(message: String) extends Exception(message)
 
@@ -67,6 +68,7 @@ private[spark] class HttpServer(
 
   /**
    * Actually start the HTTP server on the given port.
+    * 实际上启动给定端口上的HTTP服务器
    *
    * Note that this is only best effort in the sense that we may end up binding to a nearby port
    * in the event of port collision. Return the bound server and the actual port used.
@@ -95,6 +97,7 @@ private[spark] class HttpServer(
       logDebug("HttpServer is using security")
       val sh = setupSecurityHandler(securityManager)
       // make sure we go through security handler to get resources
+      //确保我们通过安全处理程序获取资源
       sh.setHandler(handlerList)
       server.setHandler(sh)
     } else {
@@ -154,6 +157,7 @@ private[spark] class HttpServer(
 
   /**
    * Get the URI of this HTTP server (http://host:port or https://host:port)
+    * 获取此HTTP服务器的URI(http：// host：port或https：// host：port)
    */
   def uri: String = {
     if (server == null) {

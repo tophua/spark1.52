@@ -115,6 +115,7 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
 
   /**
    * Stop the cleaning thread and wait until the thread has finished running its current task.
+    * 停止清里线程,等待线程完成当前任务的运行
    */
   def stop(): Unit = {
     stopped = true

@@ -44,18 +44,21 @@ private[spark] trait ExecutorAllocationClient {
 
   /**
    * Request an additional number of executors from the cluster manager.
+    * 从集群管理器请求另外数量的执行程序
    * @return whether the request is acknowledged by the cluster manager.
    */
   def requestExecutors(numAdditionalExecutors: Int): Boolean
 
   /**
    * Request that the cluster manager kill the specified executors.
+    * 请求群集管理器杀死指定的执行程序
    * @return whether the request is acknowledged by the cluster manager.
    */
   def killExecutors(executorIds: Seq[String]): Boolean
 
   /**
    * Request that the cluster manager kill the specified executor.
+    * 请求群集管理器杀死指定的执行程序
    * @return whether the request is acknowledged by the cluster manager.
    */
   def killExecutor(executorId: String): Boolean = killExecutors(Seq(executorId))

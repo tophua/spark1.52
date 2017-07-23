@@ -32,7 +32,9 @@ import org.apache.spark.storage._
   */
 private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
 
-  /** Keys of RDD partitions that are being computed/loaded. */
+  /** Keys of RDD partitions that are being computed/loaded.
+    * 正在计算/加载的RDD分区的密钥
+    * */
   private val loading = new mutable.HashSet[RDDBlockId]
 
   /** Gets or computes an RDD partition. Used by RDD.iterator() when an RDD is cached. 
@@ -47,7 +49,8 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
     val key = RDDBlockId(rdd.id, partition.index)//获取RDD的BlockID,RDDBlockId扩展BlockID类
     logDebug(s"Looking for partition $key")
     blockManager.get(key) match {//向BlockManager查询是否有缓存,如果有将它封装为InterruptibleIterator并返回
-      case Some(blockResult) =>//val blockResult: BlockResult
+      case Some(blockResult) =>
+        //val blockResult: BlockResult
         //缓存命中,更新统计信息,将缓存作为结果返回
         // Partition is already materialized, so just return its values
         val existingMetrics = context.taskMetrics
@@ -86,7 +89,8 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
             return computedValues
           }
 
-          // Otherwise, cache the values and keep track of any updates in block statuses          
+          // Otherwise, cache the values and keep track of any updates in block statuses
+          //否则,缓存值并跟踪块状态中的任何更新
           val updatedBlocks = new ArrayBuffer[(BlockId, BlockStatus)]
          //将数据结果写缓存到BlockManager
           val cachedValues = putInBlockManager(key, computedValues, storageLevel, updatedBlocks)
@@ -117,10 +121,12 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
     loading.synchronized {
       if (!loading.contains(id)) {
         // If the partition is free, acquire its lock to compute its value
+        //如果分区是空闲的,获取其锁来计算其值
         loading.add(id)
         None
       } else {
         // Otherwise, wait for another thread to finish and return its result
+        //否则,等待另一个线程完成并返回其结果
         logInfo(s"Another thread is loading $id, waiting for it to finish...")
         while (loading.contains(id)) {
           try {
@@ -136,6 +142,8 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
           /* The block is not guaranteed to exist even after the other thread has finished.
            * For instance, the block could be evicted after it was put, but before our get.
            * In this case, we still need to load the partition ourselves. */
+          /**即使在另一个线程完成之后，块也不能保证存在,例如，该块可以在被放置之后，但在我们得到之前被驱逐,
+          *在这种情况下，我们仍然需要自己加载分区。*/
           logInfo(s"Whoever was loading $id failed; we'll try it ourselves")
           loading.add(id)
         }

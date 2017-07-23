@@ -22,6 +22,7 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * :: DeveloperApi ::
  * An iterator that wraps around an existing iterator to provide task killing functionality.
+  * 迭代器,围绕现有的迭代器提供任务杀死功能。它通过检查TaskContext中的中断标志来工作
  * It works by checking the interrupted flag in [[TaskContext]].
  */
 @DeveloperApi
