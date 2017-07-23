@@ -43,10 +43,11 @@ class SamplingUtilsSuite extends SparkFunSuite {
     assert(count3 === 100)
     assert(sample3.length === 10)
   }
-
+  //计算分数
   test("computeFraction") {
     // test that the computed fraction guarantees enough data points
     // in the sample with a failure rate <= 0.0001
+    //测试计算的分数保证样品中足够的数据点，故障率<= 0.0001
     val n = 100000
 
     for (s <- 1 to 15) {

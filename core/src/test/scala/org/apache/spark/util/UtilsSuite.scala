@@ -614,6 +614,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     assert(targetDir.isDirectory())
 
     // Copy again to make sure it doesn't error if the dir already exists.
+    //如果目录已经存在，请再次复制以确保它不会出错
     Utils.fetchHcfsFile(path, targetDir, fs, new SparkConf(), conf, false)
 
     val destDir = new File(targetDir, sourceDir.getName())

@@ -86,6 +86,7 @@ class RandomSamplerSuite extends SparkFunSuite with Matchers {
   }
 
   // Returns the cumulative distribution from a histogram
+  //从直方图返回累积分布
   def cumulativeDist(hist: Array[Int]): Array[Double] = {
     val n = hist.sum.toDouble
     assert(n > 0.0)
@@ -93,6 +94,7 @@ class RandomSamplerSuite extends SparkFunSuite with Matchers {
   }
 
   // Returns aligned cumulative distributions from two arrays of data
+  //从两个数据数组中返回对齐的累积分布
   def cumulants(d1: Array[Int], d2: Array[Int],
       ss: Int = sampleSize): (Array[Double], Array[Double]) = {
     assert(math.min(d1.length, d2.length) > 0)
@@ -108,6 +110,7 @@ class RandomSamplerSuite extends SparkFunSuite with Matchers {
   }
 
   // Computes the Kolmogorov-Smirnov 'D' statistic from two cumulative distributions
+  //从两个累积分布计算Kolmogorov-Smirnov'D'统计量
   def KSD(cdf1: Array[Double], cdf2: Array[Double]): Double = {
     assert(cdf1.length == cdf2.length)
     val n = cdf1.length
@@ -118,6 +121,7 @@ class RandomSamplerSuite extends SparkFunSuite with Matchers {
   }
 
   // Returns the median KS 'D' statistic between two samples, over (m) sampling trials
+  //返回两个样本之间的中值KS'D'统计量，超过（m）个抽样试验
   def medianKSD(data1: => Iterator[Int], data2: => Iterator[Int], m: Int = 5): Double = {
     val t = Array.fill[Double](m) {
       val (c1, c2) = cumulants(data1.take(sampleSize).toArray,
@@ -125,9 +129,10 @@ class RandomSamplerSuite extends SparkFunSuite with Matchers {
       KSD(c1, c2)
     }.sorted
     // return the median KS statistic
+    // 返回中位数统计量
     t(m / 2)
   }
-
+  //公用
   test("utilities") {
     val s1 = Array(0, 1, 1, 0, 2)
     val s2 = Array(1, 0, 3, 2, 1)
@@ -138,11 +143,12 @@ class RandomSamplerSuite extends SparkFunSuite with Matchers {
     KSD(c2, c1) should be (KSD(c1, c2))
     gaps(List(0, 1, 1, 2, 4, 11).iterator).toArray should be (Array(1, 0, 1, 2, 7))
   }
-
+  //健康检查中值KSD反对参考
   test("sanity check medianKSD against references") {
     var d: Double = 0.0
 
     // should be statistically same, i.e. fail to reject null hypothesis strongly
+    //
     d = medianKSD(gaps(sample(Iterator.from(0), 0.5)), gaps(sample(Iterator.from(0), 0.5)))
     d should be < D
 

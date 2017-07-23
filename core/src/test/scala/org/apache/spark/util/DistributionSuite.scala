@@ -26,7 +26,7 @@ import org.apache.spark.SparkFunSuite
  */
 
 class DistributionSuite extends SparkFunSuite with Matchers {
-  test("summary") {
+  test("summary") {//概要
     val d = new Distribution((1 to 100).toArray.map{_.toDouble})
     val stats = d.statCounter
     stats.count should be (100)

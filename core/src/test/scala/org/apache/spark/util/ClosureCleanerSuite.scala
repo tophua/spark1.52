@@ -61,7 +61,7 @@ class ClosureCleanerSuite extends SparkFunSuite {
       TestObjectWithBogusReturns.run()
     }
   }
-
+  //来自命名函数的返回语句嵌套在闭包中不会引发异常
   test("return statements from named functions nested in closures don't raise exceptions") {
     val result = TestObjectWithNestedReturns.run()
     assert(result === 1)
@@ -265,7 +265,8 @@ class TestClassWithNesting(val y: Int) extends Serializable {
 
 /**
  * Test whether closures passed in through public APIs are actually cleaned.
- *
+ * 测试通过公共API传递的闭包是否被实际清理
+  *
  * We put a return statement in each of these closures as a mechanism to detect whether the
  * ClosureCleaner actually cleaned our closure. If it did, then it would throw an appropriate
  * exception explicitly complaining about the return statement. Otherwise, we know the
@@ -338,7 +339,7 @@ private object TestUserClosuresActuallyCleaned {
   def testMapValues(rdd: RDD[(Int, Int)]): Unit = { rdd.mapValues { _ => return; 1 } }
   def testFlatMapValues(rdd: RDD[(Int, Int)]): Unit = { rdd.flatMapValues { _ => return; Seq() } }
 
-  // Test async RDD actions
+  // Test async RDD actions 测试异步RDD操作
   def testForeachAsync(rdd: RDD[Int]): Unit = { rdd.foreachAsync { _ => return } }
   def testForeachPartitionAsync(rdd: RDD[Int]): Unit = { rdd.foreachPartitionAsync { _ => return } }
 

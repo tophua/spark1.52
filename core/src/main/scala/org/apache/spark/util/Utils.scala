@@ -104,7 +104,10 @@ private[spark] object Utils extends Logging {
     ois.readObject.asInstanceOf[T]
   }
 
-  /** Deserialize an object using Java serialization and the given ClassLoader */
+  /**
+    * Deserialize an object using Java serialization and the given ClassLoader
+    * 使用Java序列化和给定的ClassLoader对对象进行反序列化
+    * */
   def deserialize[T](bytes: Array[Byte], loader: ClassLoader): T = {
     val bis = new ByteArrayInputStream(bytes)
     val ois = new ObjectInputStream(bis) {
@@ -280,6 +283,7 @@ private[spark] object Utils extends Logging {
   /** 
    *  Copy all data from an InputStream to an OutputStream. NIO way of file stream to file stream
     * copying is disabled by default unless explicitly set transferToEnabled as true,
+    * 将InputStream中的所有数据复制到OutputStream。 NIO文件流到文件流默认情况下禁用复制,除非将transferToEnabled设置为true
     * the parameter transferToEnabled should be configured by spark.file.transferTo = [true|false].
     * 复制数据从InputStream输入流 到OutputStream输出流,
     */
@@ -293,18 +297,21 @@ private[spark] object Utils extends Logging {
       if (in.isInstanceOf[FileInputStream] && out.isInstanceOf[FileOutputStream]
         && transferToEnabled) {
         // When both streams are File stream, use transferTo to improve copy performance.
+        //当两个流都是文件流时,使用transferTo来提高复制性能
         val inChannel = in.asInstanceOf[FileInputStream].getChannel()
         val outChannel = out.asInstanceOf[FileOutputStream].getChannel()
         val initialPos = outChannel.position()
         val size = inChannel.size()
 
         // In case transferTo method transferred less data than we have required.
+        //如果transferTo方法传输的数据少于我们所需要的数据
         while (count < size) {
           count += inChannel.transferTo(count, size - count, outChannel)
         }
 
         // Check the position after transferTo loop to see if it is in the right position and
         // give user information if not.
+        //检查转移后的位置循环查看是否在正确的位置,如果没有,给予用户信息
         // Position will not be increased to the expected length after calling transferTo in
         // kernel version 2.6.32, this issue can be seen in
         // https://bugs.openjdk.java.net/browse/JDK-7052359

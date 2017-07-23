@@ -70,9 +70,9 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
     assert(map1.get("k1") === None)
     assert(map1.get("k2").isDefined)
   }
-
+  //按时间戳清除
   test("TimeStampedWeakValueHashMap - clearing by timestamp") {
-    // clearing by insertion time
+    // clearing by insertion time 通过插入时间清除
     val map = new TimeStampedWeakValueHashMap[String, String](updateTimeStampOnGet = false)
     map("k1") = "v1"
     assert(map("k1") === "v1")
@@ -83,7 +83,7 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
     map.clearOldValues(threshTime)
     assert(map.get("k1") === None)
 
-    // clearing by modification time
+    // clearing by modification time 按修改时间清除
     val map1 = new TimeStampedWeakValueHashMap[String, String](updateTimeStampOnGet = true)
     map1("k1") = "v1"
     map1("k2") = "v2"
@@ -91,6 +91,7 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
     Thread.sleep(10)
     val threshTime1 = System.currentTimeMillis
     Thread.sleep(10)
+    //访问k2将其访问时间更新为> threshTime
     assert(map1("k2") === "v2")     // access k2 to update its access time to > threshTime
     assert(map1.getTimestamp("k1").isDefined)
     assert(map1.getTimestamp("k1").get < threshTime1)
