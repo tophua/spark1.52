@@ -80,6 +80,7 @@ private[spark] class TaskContextImpl(
     completed = true //标记task完成
     val errorMsgs = new ArrayBuffer[String](2) //记录错误信息
     // Process complete callbacks in the reverse order of registration
+    //以相反的注册顺序处理完整的回调
     onCompleteCallbacks.reverse.foreach { listener =>
       try {
         listener.onTaskCompletion(this) //执行回调函数
@@ -128,6 +129,7 @@ private[spark] class TaskContextImpl(
   private[spark] override val internalMetricsToAccumulators: Map[String, Accumulator[Long]] = {
     // Explicitly register internal accumulators here because these are
     // not captured in the task closure and are already deserialized
+    //在这里明确地注册内部的累加器,因为它们没有被捕获在任务关闭中并且已被反序列化
     internalAccumulators.foreach(registerAccumulator)
     internalAccumulators.map { a => (a.name.get, a) }.toMap
   }

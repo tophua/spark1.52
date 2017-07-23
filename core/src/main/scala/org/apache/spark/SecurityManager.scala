@@ -193,6 +193,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   extends Logging with SecretKeyHolder {
 
   // key used to store the spark secret in the Hadoop UGI
+  //用于在Hadoop UGI中存spark机密的钥匙
   private val sparkSecretLookupKey = "sparkCookie"
 
   private val authOn = sparkConf.getBoolean(SecurityManager.SPARK_AUTH_CONF, false)
@@ -202,6 +203,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
     sparkConf.getBoolean("spark.acls.enable", sparkConf.getBoolean("spark.ui.acls.enable", false))
 
   // admin acls should be set before view or modify acls
+  //admin acls应该在查看或修改acls之前设置
   private var adminAcls: Set[String] =
     stringToSet(sparkConf.get("spark.admin.acls", ""))
 
@@ -212,6 +214,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   private var modifyAcls: Set[String] = _
 
   // always add the current user and SPARK_USER to the viewAcls
+  //始终将当前用户和SPARK_USER添加到viewAcl中
   private val defaultAclUsers = Set[String](System.getProperty("user.name", ""),
     Utils.getCurrentUserName())
 //以逗号分隔Spark webUI访问用户的列表。默认情况下只有启动Spark job的用户才有访问权限
@@ -245,6 +248,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   }
 
   // the default SSL configuration - it will be used by all communication layers unless overwritten
+  //默认的SSL配置 - 它将被所有通信层使用,除非被覆盖
   private val defaultSSLOptions = SSLOptions.parse(sparkConf, "spark.ssl", defaults = None)
 
   // SSL configuration for different communication layers - they can override the default
@@ -297,6 +301,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   /**
    * Split a comma separated String, filter out any empty items, and return a Set of strings
+    * 拆分逗号分隔的字符串,过滤出任何空项,并返回一组字符串
    */
   private def stringToSet(list: String): Set[String] = {
     list.split(',').map(_.trim).filter(!_.isEmpty).toSet
@@ -305,6 +310,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   /**
    * Admin acls should be set before the view or modify acls.  If you modify the admin
    * acls you should also set the view and modify acls again to pick up the changes.
+    * 管理员acls应该在视图之前设置或修改acls,如果修改管理员acls您还应该设置视图，并再次修改acls以接收更改。
    */
   def setViewAcls(defaultUsers: Set[String], allowedUsers: String) {
     viewAcls = (adminAcls ++ defaultUsers ++ stringToSet(allowedUsers))
@@ -320,6 +326,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   /**
    * Admin acls should be set before the view or modify acls.  If you modify the admin
    * acls you should also set the view and modify acls again to pick up the changes.
+    * 管理员acls应该在视图之前设置或修改acls,如果修改管理员acls您还应该设置视图，并再次修改acls以接收更改。
    */
   def setModifyAcls(defaultUsers: Set[String], allowedUsers: String) {
     modifyAcls = (adminAcls ++ defaultUsers ++ stringToSet(allowedUsers))
@@ -331,6 +338,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   /**
    * Admin acls should be set before the view or modify acls.  If you modify the admin
    * acls you should also set the view and modify acls again to pick up the changes.
+    * 管理员acls应该在视图之前设置或修改acls,如果修改管理员acls您还应该设置视图,并再次修改acls以接收更改。
    */
   def setAdminAcls(adminUsers: String) {
     adminAcls = stringToSet(adminUsers)
@@ -344,7 +352,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   /**
    * Generates or looks up the secret key.
-   *
+   * 生成或查找秘密密钥
    * The way the key is stored depends on the Spark deployment mode. Yarn
    * uses the Hadoop UGI.
    *
@@ -383,6 +391,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   /**
    * Check to see if Acls for the UI are enabled
+    * 检查是否启用UI的Acls
    * @return true if UI authentication is enabled, otherwise false
    */
   def aclsEnabled(): Boolean = aclsOn
@@ -407,7 +416,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
    * authorization to modify the application. If the UI acls are disabled
    * via spark.acls.enable, all users have modify access. If the user is null
    * it is assumed authentication isn't turned on and all users have access.
-   *
+   * 根据修改acl列表检查给定的用户,看看他们是否有权修改应用程序
    * @param user to see if is authorized
    * @return true is the user has permission, otherwise false
    */
@@ -420,12 +429,14 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   /**
    * Check to see if authentication for the Spark communication protocols is enabled
+    * 检查是否启用了Spark通信协议的身份验证
    * @return true if authentication is enabled, otherwise false
    */
   def isAuthenticationEnabled(): Boolean = authOn
 
   /**
    * Checks whether SASL encryption should be enabled.
+    * 检查是否应启用SASL加密
    * @return Whether to enable SASL encryption when connecting to services that support it.
    */
   def isSaslEncryptionEnabled(): Boolean = {
@@ -434,6 +445,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   /**
    * Gets the user used for authenticating HTTP connections.
+    * 获取用于验证HTTP连接的用户
    * For now use a single hardcoded user.
    * @return the HTTP user as a String
    */
@@ -441,13 +453,14 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   /**
    * Gets the user used for authenticating SASL connections.
+    * 获取用于验证SASL连接的用户
    * For now use a single hardcoded user.
    * @return the SASL user as a String
    */
   def getSaslUser(): String = "sparkSaslUser"
 
   /**
-   * Gets the secret key.
+   * Gets the secret key.获取密钥
    * @return the secret key as a String if authentication is enabled, otherwise returns null
    */
   def getSecretKey(): String = secretKey

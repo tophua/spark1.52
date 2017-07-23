@@ -19,6 +19,7 @@ package org.apache.spark
 
 /**
  * Low-level status reporting APIs for monitoring job and stage progress.
+  * 用于监控作业和阶段进度的低级状态报告API
  *
  * These APIs intentionally provide very weak consistency semantics(一致性语义); consumers of these APIs should
  * be prepared to handle empty / missing information.  For example, a job's stage ids may be known

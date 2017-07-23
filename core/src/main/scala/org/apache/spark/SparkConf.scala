@@ -49,7 +49,10 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
   import SparkConf._
 
-  /** Create a SparkConf that loads defaults from system properties and the classpath */
+  /**
+    * Create a SparkConf that loads defaults from system properties and the classpath
+    *创建一个SparkConf,它从系统属性和类路径加载默认值
+    * */
   def this() = this(true)
   
 /**
@@ -88,24 +91,31 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     set("spark.master", master)
   }
 
-  /** Set a name for your application. Shown in the Spark web UI. 应用程序名称*/
+  /** Set a name for your application. Shown in the Spark web UI. 应用程序名称,在Spark Web UI中显示*/
   def setAppName(name: String): SparkConf = {
     set("spark.app.name", name)
   }
 
-  /** Set JAR files to distribute to the cluster. */
+  /**
+    * Set JAR files to distribute to the cluster.
+    * 设置JAR文件以分发到群集
+    * */
   def setJars(jars: Seq[String]): SparkConf = {
     for (jar <- jars if (jar == null)) logWarning("null jar passed to SparkContext constructor")
     set("spark.jars", jars.filter(_ != null).mkString(","))
   }
 
-  /** Set JAR files to distribute to the cluster. (Java-friendly version.) */
+  /**
+    * Set JAR files to distribute to the cluster. (Java-friendly version.)
+    * 设置JAR文件以分发到群集
+    * */
   def setJars(jars: Array[String]): SparkConf = {
     setJars(jars.toSeq)
   }
 
   /**
    * Set an environment variable to be used when launching executors for this application.
+    * 设置在启动此应用程序的执行程序时使用的环境变量,这些变量存储为spark.executorEnv.VAR_NAME形式的属性
    * These variables are stored as properties of the form spark.executorEnv.VAR_NAME
    * (for example spark.executorEnv.PATH) but this method makes them easier to set.
    */
@@ -115,6 +125,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
   /**
    * Set multiple environment variables to be used when launching executors.
+    * 设置启动执行程序时要使用的多个环境变量
    * These variables are stored as properties of the form spark.executorEnv.VAR_NAME
    * (for example spark.executorEnv.PATH) but this method makes them easier to set.
    */
@@ -127,6 +138,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
   /**
    * Set multiple environment variables to be used when launching executors.
+    * 设置启动执行程序时要使用的多个环境变量
    * (Java-friendly version.)
    */
   def setExecutorEnv(variables: Array[(String, String)]): SparkConf = {
@@ -135,18 +147,25 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
   /**
    * Set the location where Spark is installed on worker nodes.
+    * 设置Spark在工作节点上的安装位置
    */
   def setSparkHome(home: String): SparkConf = {
     set("spark.home", home)
   }
 
-  /** Set multiple parameters together */
+  /**
+    * Set multiple parameters together
+    * 设置多个参数
+    * */
   def setAll(settings: Traversable[(String, String)]): SparkConf = {
     settings.foreach { case (k, v) => set(k, v) }
     this
   }
 
-  /** Set a parameter if it isn't already configured */
+  /**
+    * Set a parameter if it isn't already configured
+    * 如果尚未配置参数,请设置参数
+    * */
   def setIfMissing(key: String, value: String): SparkConf = {
     //putIfAbsent如果key-value已经存在,则返回那个value,如果调用时map
     //没有找到key的mapping,返回一个null值
@@ -159,6 +178,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Use Kryo serialization and register the given set of classes with Kryo.
    * If called multiple times, this will append the classes from all calls together.
+    * 如果多次调用,这将从所有调用中附加类
    */
   def registerKryoClasses(classes: Array[Class[_]]): SparkConf = {
     val allClassNames = new LinkedHashSet[String]()
@@ -183,25 +203,36 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     this
   }
 
-  /** Gets all the avro schemas in the configuration used in the generic Avro record serializer */
+  /** Gets all the avro schemas in the configuration used in the generic Avro record serializer
+    * 获取通用Avro记录序列化程序中使用的配置中的所有avro模式
+    *  */
   def getAvroSchema: Map[Long, String] = {
     getAll.filter { case (k, v) => k.startsWith(avroNamespace) }
       .map { case (k, v) => (k.substring(avroNamespace.length).toLong, v) }
       .toMap
   }
 
-  /** Remove a parameter from the configuration */
+  /**
+    * Remove a parameter from the configuration
+    * 从配置中删除参数
+    *  */
   def remove(key: String): SparkConf = {
     settings.remove(key)
     this
   }
 
-  /** Get a parameter; throws a NoSuchElementException if it's not set */
+  /**
+    * Get a parameter; throws a NoSuchElementException if it's not set
+    * 获取参数, 如果未设置,则抛出NoSuchElementException异常
+    *  */
   def get(key: String): String = {
     getOption(key).getOrElse(throw new NoSuchElementException(key))
   }
 
-  /** Get a parameter, falling back to a default if not set */
+  /**
+    * Get a parameter, falling back to a default if not set
+    * 获取参数,如果未设置,则返回默认值
+    * */
   def get(key: String, defaultValue: String): String = {
     getOption(key).getOrElse(defaultValue)
   }
@@ -209,6 +240,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a time parameter as seconds; throws a NoSuchElementException if it's not set. If no
    * suffix is provided then seconds are assumed.
+    * 以秒为单位获取时间参数,如果未设置,则抛出NoSuchElementException异常,如果不提供后缀,然后假定为秒。
    * @throws NoSuchElementException
    */
   def getTimeAsSeconds(key: String): Long = {
@@ -218,6 +250,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a time parameter as seconds, falling back to a default if not set. If no
    * suffix is provided then seconds are assumed.
+    * 以秒为单位获取时间参数,如果未设置则返回到默认值,如果不提供后缀然后假定为秒。
    */
   def getTimeAsSeconds(key: String, defaultValue: String): Long = {
     Utils.timeStringAsSeconds(get(key, defaultValue))
@@ -315,22 +348,34 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     Utils.byteStringAsGb(get(key, defaultValue))
   }
 
-  /** Get a parameter as an Option */
+  /**
+    * Get a parameter as an Option
+    * 获取参数作为选项
+    * */
   def getOption(key: String): Option[String] = {
     Option(settings.get(key)).orElse(getDeprecatedConfig(key, this))
   }
 
-  /** Get all parameters as a list of pairs */
+  /**
+    * Get all parameters as a list of pairs
+    * 获取所有参数作为对的列表
+    * */
   def getAll: Array[(String, String)] = {
     settings.entrySet().asScala.map(x => (x.getKey, x.getValue)).toArray
   }
 
-  /** Get a parameter as an integer, falling back to a default if not set */
+  /**
+    *  Get a parameter as an integer, falling back to a default if not set
+    *  获取参数作为整数,如果未设置则返回默认值
+    * */
   def getInt(key: String, defaultValue: Int): Int = {
     getOption(key).map(_.toInt).getOrElse(defaultValue)
   }
 
-  /** Get a parameter as a long, falling back to a default if not set */
+  /**
+    * Get a parameter as a long, falling back to a default if not set
+    * 获取参数长,如果未设置,则返回默认值
+    * */
   def getLong(key: String, defaultValue: Long): Long = {
     getOption(key).map(_.toLong).getOrElse(defaultValue)
   }
@@ -345,14 +390,19 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     getOption(key).map(_.toBoolean).getOrElse(defaultValue)
   }
 
-  /** Get all executor environment variables set on this SparkConf */
+  /**
+    * Get all executor environment variables set on this SparkConf
+    * 获取在此SparkConf上设置的所有执行程序环境变量
+    *  */
   def getExecutorEnv: Seq[(String, String)] = {
     val prefix = "spark.executorEnv."
     getAll.filter{case (k, v) => k.startsWith(prefix)}
           .map{case (k, v) => (k.substring(prefix.length), v)}
   }
 
-  /** Get all akka conf variables set on this SparkConf */
+  /** Get all akka conf variables set on this SparkConf
+    * 获取在此SparkConf上设置的所有akka conf变量
+    *  */
   def getAkkaConf: Seq[(String, String)] =
     /* This is currently undocumented. If we want to make this public we should consider
      * nesting options under the spark namespace to avoid conflicts with user akka options.
@@ -366,10 +416,14 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Returns the Spark application id, valid in the Driver after TaskScheduler registration and
    * from the start in the Executor.
+    * 返回Spark应用程序标识，在TaskScheduler注册后的驱动程序中有效从执行开始
    */
   def getAppId: String = get("spark.app.id")
 
-  /** Does the configuration contain a given parameter? */
+  /**
+    *  Does the configuration contain a given parameter?
+    *  配置是否包含给定的参数？
+    * */
   def contains(key: String): Boolean = settings.containsKey(key)
 
   /** Copy this object */
@@ -380,6 +434,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * By using this instead of System.getenv(), environment variables can be mocked
    * in unit tests.
+    * 通过使用它而不是System.getenv（），环境变量可以被单位测试
    */
   private[spark] def getenv(name: String): String = System.getenv(name)
 
@@ -404,6 +459,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     val sparkExecutorInstances = "spark.executor.instances"
 
     // Used by Yarn in 1.1 and before
+    //在1.1及以前由Yarn使用
     sys.props.get("spark.driver.libraryPath").foreach { value =>
       val warning =
         s"""
@@ -416,6 +472,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     }
 
     // Validate spark.executor.extraJavaOptions
+    //验证spark.executor.extraJavaOptions
     getOption(executorOptsKey).map { javaOpts =>
       if (javaOpts.contains("-Dspark")) {
         val msg = s"$executorOptsKey is not allowed to set Spark options (was '$javaOpts'). " +
@@ -430,6 +487,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     }
 
     // Validate memory fractions
+    //验证内存分数
     val memoryKeys = Seq(
       "spark.storage.memoryFraction",//Java堆用于cache的比例
       "spark.shuffle.memoryFraction",
@@ -444,6 +502,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     }
 
     // Check for legacy configs
+    //检查旧配置
     sys.env.get("SPARK_JAVA_OPTS").foreach { value =>
       val warning =
         s"""
@@ -513,6 +572,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Return a string listing all keys and values, one per line. This is useful to print the
    * configuration out for debugging.
+    * 返回一个列出所有键和值的字符串,每行一个。 这对打印配置进行调试非常有用
    */
   def toDebugString: String = {
     getAll.sorted.map{case (k, v) => k + "=" + v}.mkString("\n")
@@ -524,6 +584,7 @@ private[spark] object SparkConf extends Logging {
 
   /**
    * Maps deprecated config keys to information about the deprecation.
+    * 将不推荐使用的配置键映射到有关弃用的信息
    *
    * The extra information is logged as a warning when the config is present in the user's
    * configuration.
@@ -616,7 +677,7 @@ private[spark] object SparkConf extends Logging {
 
   /**
    * Return whether the given config should be passed to an executor on start-up.
-   *
+   * 返回给定的配置是否应在启动时传递给执行程序
    * Certain akka and authentication configs are required from the executor when it connects to
    * the scheduler, while the rest of the spark configs can be inherited from the driver later.
    */
@@ -638,6 +699,7 @@ private[spark] object SparkConf extends Logging {
   /**
    * Looks for available deprecated keys for the given config option, and return the first
    * value available.
+    * 查找给定配置选项的可用不推荐的key,然后返回第一个值可用。
    */
   def getDeprecatedConfig(key: String, conf: SparkConf): Option[String] = {
     configsWithAlternatives.get(key).flatMap { alts =>
@@ -650,6 +712,7 @@ private[spark] object SparkConf extends Logging {
 
   /**
    * Logs a warning message if the given config key is deprecated.
+    * 如果不适用给定的配置key,则会记录一条警告消息
    */
   def logDeprecationWarning(key: String): Unit = {
     //不赞成配制属性
@@ -668,6 +731,7 @@ private[spark] object SparkConf extends Logging {
 
   /**
    * Holds information about keys that have been deprecated and do not have a replacement.
+    * 保存有关已被弃用且没有替换键的信息
    *
    * @param key The deprecated key.
    * @param version Version of Spark where key was deprecated.
@@ -680,6 +744,7 @@ private[spark] object SparkConf extends Logging {
 
   /**
    * Information about an alternate configuration key that has been deprecated.
+    * 有关已弃用的备用配置key的信息
    *
    * @param key The deprecated config key.
    * @param version The Spark version in which the key was deprecated.

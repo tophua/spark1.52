@@ -133,6 +133,8 @@ abstract class TaskContext extends Serializable {
    * Adds a callback function to be executed on task completion. An example use
    * is for HadoopRDD to register a callback to close the input stream.
    * Will be called in any situation - success, failure, or cancellation.
+    * 添加在任务完成时执行的回调函数,一个例子使用,于HadoopRDD注册回调以关闭输入流。
+    * 将在任何情况下被呼叫 - 成功,失败或取消。
    *
    * @param f Callback function.
    */
@@ -195,18 +197,21 @@ abstract class TaskContext extends Serializable {
 
   /**
    * Return the local values of internal accumulators that belong to this task. The key of the Map
-   * is the accumulator id and the value of the Map is the latest accumulator local value.   
+   * is the accumulator id and the value of the Map is the latest accumulator local value.
+    * 返回属于此任务的内部累加器的本地值, Map的关键是累加器ID,Map的值是最新的累加器本地值
    */
   private[spark] def collectInternalAccumulators(): Map[Long, Any]
 
   /**
    * Return the local values of accumulators that belong to this task. The key of the Map is the
    * accumulator id and the value of the Map is the latest accumulator local value.
+    * 返回属于此任务的累加器的本地值,Map的关键是累加器ID,Map的值是最新的累加器本地值。
    */
   private[spark] def collectAccumulators(): Map[Long, Any]
 
   /**
    * Accumulators for tracking internal metrics indexed by the name.
+    * 用于跟踪由名称索引的内部度量的累加器
    */
   private[spark] val internalMetricsToAccumulators: Map[String, Accumulator[Long]]
 }
