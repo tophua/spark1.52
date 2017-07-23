@@ -36,6 +36,7 @@ import org.apache.spark.util.Utils
 /**
  * An RDD that pipes the contents of each parent partition through an external command
  * (printing them one per line) and returns the output as a collection of strings.
+  * 通过外部命令管理每个父分区的内容的RDD并返回输出作为字符串的集合
  */
 private[spark] class PipedRDD[T: ClassTag](
     prev: RDD[T],
@@ -63,6 +64,7 @@ private[spark] class PipedRDD[T: ClassTag](
 
   /**
    * A FilenameFilter that accepts anything that isn't equal to the name passed in.
+    * 一个FilenameFilter,它接受与传入的名称不相等的任何东西
    * @param filterName of file or directory to leave out
    */
   class NotEqualsFileNameFilter(filterName: String) extends FilenameFilter {
@@ -120,6 +122,7 @@ private[spark] class PipedRDD[T: ClassTag](
     val env = SparkEnv.get
 
     // Start a thread to print the process's stderr to ours
+    //开始一个线程打印过程的stderr
     new Thread("stderr reader for " + command) {
       override def run() {
         for (line <- Source.fromInputStream(proc.getErrorStream).getLines) {
@@ -131,6 +134,7 @@ private[spark] class PipedRDD[T: ClassTag](
     }.start()
 
     // Start a thread to feed the process input from our parent's iterator
+    //启动一个线程来从父代的迭代器提供进程输入
     new Thread("stdin writer for " + command) {
       override def run() {
         TaskContext.setTaskContext(context)
@@ -154,6 +158,7 @@ private[spark] class PipedRDD[T: ClassTag](
     }.start()
 
     // Return an iterator that read lines from the process's stdout
+    //返回一个从进程的标准输出读取行的迭代器
     val lines = Source.fromInputStream(proc.getInputStream).getLines()
     new Iterator[String] {
       def next(): String = lines.next()
@@ -167,6 +172,7 @@ private[spark] class PipedRDD[T: ClassTag](
           }
 
           // cleanup task working directory if used
+          //清理任务工作目录(如果使用)
           if (workInTaskDirectory) {
             scala.util.control.Exception.ignoring(classOf[IOException]) {
               Utils.deleteRecursively(new File(taskDirectory))
@@ -183,6 +189,7 @@ private[spark] class PipedRDD[T: ClassTag](
 
 private object PipedRDD {
   // Split a string into words using a standard StringTokenizer
+  //使用标准StringTokenizer将字符串拆分为单词
   def tokenize(command: String): Seq[String] = {
     val buf = new ArrayBuffer[String]
     val tok = new StringTokenizer(command)
