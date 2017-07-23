@@ -23,14 +23,14 @@ object TimedEvent {
         result.success(value)
       }
     }, secs * 1000)
-    // //Future 表示一个可能还没有实际完成的异步任务的结果，针对这个结果可以添加 Callback 以便在任务执行成功或失败后做出对应的操作
+    // //Future 表示一个可能还没有实际完成的异步任务的结果,针对这个结果可以添加 Callback 以便在任务执行成功或失败后做出对应的操作
     result.future
   }
 
   /** Return a Future which completes failing with an IllegalArgumentException after secs
     * seconds. */
   def delayedFailure(secs: Int, msg: String): Future[Int] = {
-    val result = Promise[Int]//Promise 交由任务执行者，任务执行者通过 Promise 可以标记任务完成或者失败
+    val result = Promise[Int]//Promise 交由任务执行者,任务执行者通过 Promise 可以标记任务完成或者失败
     timer.schedule(new TimerTask() {
       def run() = {
         result.failure(new IllegalArgumentException(msg))

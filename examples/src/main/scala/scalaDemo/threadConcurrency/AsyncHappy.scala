@@ -27,7 +27,7 @@ object AsyncHappy extends App {
   
   /** Run tasks with block waits. */
   /**
-   * 阻塞等待
+   * 阻塞等待运行任务
    * 在设定好操作环境之后，是时候来查看 Scala 如何处理事件的完成情况了,
    * 协调 4 个任务的执行的最简单的方法是使用阻塞等待：主要线程等待每个任务依次完成
    */
