@@ -8,7 +8,7 @@ import org.apache.spark.sql.hive.HiveContext
 /**
   * Created by liush on 17-7-21.
   */
-object SparkSQLGroup extends  App{
+object ExplodeAndCollect_list extends  App{
   val sparkConf = new SparkConf().setMaster("local").setAppName("RDDRelation")
   val sc = new SparkContext(sparkConf)
   val sqlContext = new SQLContext(sc)
