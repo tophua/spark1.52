@@ -32,9 +32,10 @@ import org.apache.spark.util.SerializableJobConf
 
 /**
  * Internal helper class that saves an RDD using a Hadoop OutputFormat.
- *
+ *使用Hadoop OutputFormat保存RDD的内部助手类
  * Saves the RDD using a JobConf, which should contain an output key class, an output value class,
  * a filename to write to, etc, exactly like in a Hadoop MapReduce job.
+  * 使用JobConf保存RDD,该应用程序应包含输出密钥类,输出值类,要写入的文件名等,就像在Hadoop MapReduce作业中一样。
  */
 private[spark]
 class SparkHadoopWriter(@transient jobConf: JobConf)
