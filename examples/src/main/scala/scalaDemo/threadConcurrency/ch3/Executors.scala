@@ -26,7 +26,7 @@ object ExecutorsCreate extends App {
   })
   //
    //Thread.sleep(500)
-  //不使用Thread.sleep,设置完成所有任务所需的最长等待时间
+  //不使用Thread.sleep,设置完成所有任务所需的最长等待时间,等待60SECONDS,主线程才结束
    executor.awaitTermination(60, TimeUnit.SECONDS)
 }
 /**

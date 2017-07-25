@@ -18,13 +18,18 @@ object CollectionsBad extends App {
   }
   /**
    * 这个例子不会输出含有20个不同数值元素的ArrayBuffer对象,而会在每次运行时输出不同的随机结果或者抛出异常
+    * ForkJoinPool-1-worker-5: buffer = ArrayBuffer(10, 11, 12, 13, 4, 5, 16, 7, 8, 9)
+      ForkJoinPool-1-worker-3: buffer = ArrayBuffer(10, 11, 12, 13, 4, 5, 16, 7, 8, 9)
+
+      ForkJoinPool-1-worker-3: buffer = ArrayBuffer(10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+      ForkJoinPool-1-worker-5: buffer = ArrayBuffer(10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
    */
   add(0 until 10)
   add(10 until 20)
   Thread.sleep(500)
 }
 /**
- * 同步集合
+ * 同步可变的集合
  */
 
 object CollectionsSynchronized extends App {
@@ -43,6 +48,10 @@ object CollectionsSynchronized extends App {
     buffer ++= (10 until 20)
     log(s"buffer = $buffer")
   }
+  /**
+  ForkJoinPool-1-worker-5: buffer = ArrayBuffer(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+  ForkJoinPool-1-worker-3: buffer = ArrayBuffer(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+    */
  Thread.sleep(500)
 }
 
@@ -112,7 +121,7 @@ object CollectionsIterators extends App {
 }
 
 /**
- * 
+ * ConcurrentHashMap操作,不堵塞线程
  */
 object CollectionsConcurrentMap extends App {
   import java.util.concurrent.ConcurrentHashMap

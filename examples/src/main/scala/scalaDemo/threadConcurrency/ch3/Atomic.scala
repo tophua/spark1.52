@@ -17,7 +17,10 @@ object AtomicUid extends App {
   execute {
     log(s"Got a unique id asynchronously: ${getUniqueId()}")
   }
-
+  /**
+    * ForkJoinPool-1-worker-5: Got a unique id asynchronously: 2
+      main: Got a unique id: 1
+    */
   log(s"Got a unique id: ${getUniqueId()}")
 }
 

@@ -35,6 +35,7 @@ object ProcessAsync extends App {
   val lsProcess = "ls -R /".run()
   Thread.sleep(1000)
   log("Timeout - killing ls!")
+  //立即终止
   lsProcess.destroy()
 }
 
