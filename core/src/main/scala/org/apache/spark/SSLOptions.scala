@@ -55,6 +55,7 @@ private[spark] case class SSLOptions(
 
   /**
    * Creates a Jetty SSL context factory according to the SSL settings represented by this object.
+    * 根据此对象表示的SSL设置创建Jetty SSL上下文工厂
    */
   def createJettySslContextFactory(): Option[SslContextFactory] = {
     if (enabled) {
@@ -77,6 +78,7 @@ private[spark] case class SSLOptions(
   /**
    * Creates an Akka configuration object which contains all the SSL settings represented by this
    * object. It can be used then to compose the ultimate Akka configuration.
+    * 创建一个包含由此对象表示的所有SSL设置的Akka配置对象,它可以用来构成最终的Akka配置。
    */
   def createAkkaConfig: Option[Config] = {
     import scala.collection.JavaConversions._
@@ -108,13 +110,16 @@ private[spark] case class SSLOptions(
   /*
    * The supportedAlgorithms set is a subset of the enabledAlgorithms that
    * are supported by the current Java security provider for this protocol.
+   * supportedAlgorithms集是由该协议的当前Java安全提供程序支持的enabledAlgorithms的一个子集
    */
   private val supportedAlgorithms: Set[String] = {
     var context: SSLContext = null
     try {
       context = SSLContext.getInstance(protocol.orNull)
       /* The set of supported algorithms does not depend upon the keys, trust, or
-         rng, although they will influence which algorithms are eventually used. */
+         rng, although they will influence which algorithms are eventually used.
+         支持的算法集不依赖于密钥,信任或尽管他们会影响最终使用哪种算法
+         */
       context.init(null, null, null)
     } catch {
       case npe: NullPointerException =>
@@ -128,6 +133,7 @@ private[spark] case class SSLOptions(
     val providerAlgorithms = context.getServerSocketFactory.getSupportedCipherSuites.toSet
 
     // Log which algorithms we are discarding
+    //记录我们丢弃哪些算法
     (enabledAlgorithms &~ providerAlgorithms).foreach { cipher =>
       logDebug(s"Discarding unsupported cipher $cipher")
     }
@@ -135,7 +141,8 @@ private[spark] case class SSLOptions(
     enabledAlgorithms & providerAlgorithms
   }
 
-  /** Returns a string representation of this SSLOptions with all the passwords masked. */
+  /** Returns a string representation of this SSLOptions with all the passwords masked.
+    * 返回此SSLOptions的字符串表示形式,并掩盖所有密码。*/
   override def toString: String = s"SSLOptions{enabled=$enabled, " +
       s"keyStore=$keyStore, keyStorePassword=${keyStorePassword.map(_ => "xxx")}, " +
       s"trustStore=$trustStore, trustStorePassword=${trustStorePassword.map(_ => "xxx")}, " +
@@ -146,7 +153,8 @@ private[spark] case class SSLOptions(
 private[spark] object SSLOptions extends Logging {
 
   /** Resolves SSLOptions settings from a given Spark configuration object at a given namespace.
-    *
+    * 在给定的命名空间中从给定的Spark配置对象中解析SSLOptions设置
+    * 允许以下设置：
     * The following settings are allowed:
     * $ - `[ns].enabled` - `true` or `false`, to enable or disable SSL respectively
     * $ - `[ns].keyStore` - a path to the key-store file; can be relative to the current directory
@@ -164,6 +172,7 @@ private[spark] object SSLOptions extends Logging {
     *
     * You can optionally specify the default configuration. If you do, for each setting which is
     * missing in SparkConf, the corresponding setting is used from the default configuration.
+    * 您可以选择指定默认配置。 如果你这样做,那就是每个设置在SparkConf中缺少,默认配置使用相应的设置。
     *
     * @param conf Spark configuration object where the settings are collected from
     * @param ns the namespace name
