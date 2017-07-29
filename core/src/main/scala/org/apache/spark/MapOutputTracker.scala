@@ -80,7 +80,8 @@ private[spark] class MapOutputTrackerMasterEndpoint(
  */
 private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging {
 
-  /** Set to the MapOutputTrackerMasterEndpoint living on the driver. */
+  /** Set to the MapOutputTrackerMasterEndpoint living on the driver.
+    * 设置在驱动程序上的MapOutputTrackerMasterEndpoint*/
   var trackerEndpoint: RpcEndpointRef = _
 
   /**

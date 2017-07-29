@@ -86,6 +86,8 @@ private[spark] object ThreadUtils {
 
   /**
    * Wrapper over newSingleThreadExecutor.
+    * 包装在newSingleThreadExecutor上
+    *ExecutorService提供了管理终止的方法，以及可为跟踪一个或多个异步任务执行状况而生成 Future 的方法。 可以关闭 ExecutorService，这将导致其停止接受新任务。关闭后，执行程序将最后终止，这时没有任务在执行，也没有任务在等待执行，并且无法提交新任务。
    */
   def newDaemonSingleThreadExecutor(threadName: String): ExecutorService = {
     val threadFactory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat(threadName).build()

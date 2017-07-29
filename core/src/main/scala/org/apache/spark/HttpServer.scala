@@ -42,6 +42,7 @@ private[spark] class ServerStateException(message: String) extends Exception(mes
  * An HTTP server for static content used to allow worker nodes to access JARs added to SparkContext
  * as well as classes created by the interpreter when the user types in code. This is just a wrapper
  * around a Jetty server.
+  * 用于静态内容的HTTP服务器,用于允许工作节点访问添加到SparkContext的JAR以及用户键入代码时由解释器创建的类,这只是Jetty服务器上的一个包装。
  */
 private[spark] class HttpServer(
     conf: SparkConf,
@@ -72,6 +73,7 @@ private[spark] class HttpServer(
    *
    * Note that this is only best effort in the sense that we may end up binding to a nearby port
    * in the event of port collision. Return the bound server and the actual port used.
+    * 请注意,这只是最大的努力，因为在端口冲突的情况下,我们可能会最终绑定到附近的端口,返回绑定的服务器和实际使用的端口
    */
   private def doStart(startPort: Int): (Server, Int) = {
     val server = new Server()
@@ -115,10 +117,12 @@ private[spark] class HttpServer(
    * Setup Jetty to the HashLoginService using a single user with our
    * shared secret. Configure it to use DIGEST-MD5 authentication so that the password
    * isn't passed in plaintext.
+    * 使用具有共享密钥的单个用户将Jetty设置为HashLoginService。 将其配置为使用DIGEST-MD5认证，以便密码不以明文形式传递。
    */
   private def setupSecurityHandler(securityMgr: SecurityManager): ConstraintSecurityHandler = {
     val constraint = new Constraint()
     // use DIGEST-MD5 as the authentication mechanism
+    //使用DIGEST-MD5作为认证机制
     constraint.setName(Constraint.__DIGEST_AUTH)
     constraint.setRoles(Array("user"))
     constraint.setAuthenticate(true)
@@ -132,6 +136,7 @@ private[spark] class HttpServer(
     // the hashLoginService lets us do a single user and
     // secret right now. This could be changed to use the
     // JAASLoginService for other options.
+    //hashLoginService使我们现在可以使用一个用户和密码,这可以更改为使用JAASLoginService进行其他选项。
     val hashLogin = new HashLoginService()
 
     val userCred = new Password(securityMgr.getSecretKey())
