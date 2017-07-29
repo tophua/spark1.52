@@ -211,6 +211,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
 
   // list of users who have permission to modify the application. This should
   // apply to both UI and CLI for things like killing the application.
+  //有权修改应用程序的用户列表。,这应该适用于UI和CLI两者,例如杀死应用程序。
   private var modifyAcls: Set[String] = _
 
   // always add the current user and SPARK_USER to the viewAcls
@@ -230,6 +231,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   // Set our own authenticator to properly negotiate user/password for HTTP connections.
   // This is needed by the HTTP client fetching from the HttpServer. Put here so its
   // only set once.
+  //设置我们自己的验证器以正确协商HTTP连接的用户/密码,HTTP客户端从HttpServer获取需要这一点,放在这里,所以只有一次
   //采用http连接设置口令认证
   if (authOn) {
     Authenticator.setDefault(
@@ -355,13 +357,15 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
    * 生成或查找秘密密钥
    * The way the key is stored depends on the Spark deployment mode. Yarn
    * uses the Hadoop UGI.
-   *
+   * 密钥的存储方式取决于Spark部署模式。 Yarn使用Hadoop UGI。
    * For non-Yarn deployments, If the config variable is not set
    * we throw an exception.
+    * 对于非Yarn部署,如果未设置配置变量,则抛出异常
    */
   private def generateSecretKey(): String = {
     if (!isAuthenticationEnabled) return null
     // first check to see if the secret is already set, else generate a new one if on yarn
+    //首先检查是否已经设置了秘密,否则在yarn上产生新的秘密
     val sCookie = if (SparkHadoopUtil.get.isYarnMode) {
       val secretKey = SparkHadoopUtil.get.getSecretKeyFromUserCredentials(sparkSecretLookupKey)
       if (secretKey != null) {
@@ -373,6 +377,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
       val cookie = akka.util.Crypt.generateSecureCookie
       // if we generated the secret then we must be the first so lets set it so t
       // gets used by everyone else
+      //如果我们产生了秘密那么我们必须是第一个，所以让它设置它所以被其他人使用
       SparkHadoopUtil.get.addSecretKeyToUserCredentials(sparkSecretLookupKey, cookie)
       logInfo("adding secret to credentials in yarn mode")
       cookie
@@ -466,6 +471,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   def getSecretKey(): String = secretKey
 
   // Default SecurityManager only has a single secret key, so ignore appId.
+  //默认SecurityManager只有一个密钥,所以忽略appId
   override def getSaslUser(appId: String): String = getSaslUser()
   override def getSecretKey(appId: String): String = getSecretKey()
 }
@@ -477,5 +483,6 @@ private[spark] object SecurityManager {
   val SPARK_AUTH_SECRET_CONF: String = "spark.authenticate.secret"
   // This is used to set auth secret to an executor's env variable. It should have the same
   // value as SPARK_AUTH_SECERET_CONF set in SparkConf
+  //这用于将auth秘密设置为执行者的env变量,它应该是一样的值在SparkConf中设置为SPARK_AUTH_SECERET_CONF
   val ENV_AUTH_SECRET = "_SPARK_AUTH_SECRET"
 }

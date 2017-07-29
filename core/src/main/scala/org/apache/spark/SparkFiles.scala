@@ -21,17 +21,20 @@ import java.io.File
 
 /**
  * Resolves paths to files added through `SparkContext.addFile()`.
+  * 解析通过SparkContext.addFile()添加的文件的路径。
  */
 object SparkFiles {
 
   /**
    * Get the absolute path of a file added through `SparkContext.addFile()`.
+    * 获取通过“SparkContext.addFile（）”添加的文件的绝对路径。
    */
   def get(filename: String): String =
     new File(getRootDirectory(), filename).getAbsolutePath()
 
   /**
    * Get the root directory that contains files added through `SparkContext.addFile()`.
+    * 获取包含通过SparkContext.addFile（）添加的文件的根目录。
    */
   def getRootDirectory(): String =
     SparkEnv.get.sparkFilesDir

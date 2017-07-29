@@ -38,6 +38,7 @@ trait SparkHadoopMapRedUtil {
       classOf[org.apache.hadoop.mapreduce.JobID])
     // In Hadoop 1.0.x, JobContext is an interface, and JobContextImpl is package private.
     // Make it accessible if it's not in order to access it.
+    //如果不能访问它,请使其可访问
     if (!Modifier.isPublic(ctor.getModifiers)) {
       ctor.setAccessible(true)
     }
@@ -80,7 +81,9 @@ object SparkHadoopMapRedUtil extends Logging {
    * task attempt might be racing to commit the same output partition. Therefore, coordinate with
    * the driver in order to determine whether this attempt can commit (please see SPARK-4879 for
    * details).
-   *
+   *  提交任务输出,在提交任务输出之前,我们需要知道是否有其他任务尝试可能会提交相同的输出分区,
+    * 因此,与driver协调，以确定此尝试是否可以提交（有关详细信息，请参阅SPARK-4879）。
+    * 只有当以下两个配置都设置为“true”时,才会联系输出提交协调器：
    * Output commit coordinator is only contacted when the following two configurations are both set
    * to `true`:
    *
@@ -96,6 +99,7 @@ object SparkHadoopMapRedUtil extends Logging {
     val mrTaskAttemptID = SparkHadoopUtil.get.getTaskAttemptIDFromTaskAttemptContext(mrTaskContext)
 
     // Called after we have decided to commit
+    //决定提交要求
     def performCommit(): Unit = {
       try {
         committer.commitTask(mrTaskContext)
@@ -109,6 +113,7 @@ object SparkHadoopMapRedUtil extends Logging {
     }
 
     // First, check whether the task's output has already been committed by some other attempt
+    //首先,检查任务的输出是否已经被其他尝试所提交
     if (committer.needsTaskCommit(mrTaskContext)) {
       val shouldCoordinateWithDriver: Boolean = {
         val sparkConf = SparkEnv.get.conf
@@ -118,6 +123,7 @@ object SparkHadoopMapRedUtil extends Logging {
 	      //对于Stage中拖后腿的Task在其他节点中重新启动,并将最先完成的Task的计算结果最为最终结果
         val speculationEnabled = sparkConf.getBoolean("spark.speculation", defaultValue = false)
         // This (undocumented) setting is an escape-hatch in case the commit code introduces bugs
+        //这个（无文档）设置是一个逃生舱,以防提交代码引入错误
         sparkConf.getBoolean("spark.hadoop.outputCommitCoordination.enabled", speculationEnabled)
       }
 
@@ -133,15 +139,18 @@ object SparkHadoopMapRedUtil extends Logging {
             s"$mrTaskAttemptID: Not committed because the driver did not authorize commit"
           logInfo(message)
           // We need to abort the task so that the driver can reschedule new attempts, if necessary
+          //我们需要中止任务，以便driver可以根据需要重新安排新的尝试
           committer.abortTask(mrTaskContext)
           throw new CommitDeniedException(message, jobId, splitId, taskAttemptNumber)
         }
       } else {
         // Speculation is disabled or a user has chosen to manually bypass the commit coordination
+        //推测被禁用或用户选择手动绕过提交协调
         performCommit()
       }
     } else {
       // Some other attempt committed the output, so we do nothing and signal success
+      //一些其他尝试承诺输出,所以我们什么都不做,并且表明成功
       logInfo(s"No need to commit output of task because needsTaskCommit=false: $mrTaskAttemptID")
     }
   }

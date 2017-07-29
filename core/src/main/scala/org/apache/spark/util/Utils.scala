@@ -227,6 +227,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * JDK equivalent of `chmod 700 file`.
+    * JDK相当于`chmod 700 file`
    *
    * @param file the file whose permissions will be modified
    * @return true if the permissions were successfully changed, false otherwise.
@@ -1078,8 +1079,9 @@ private[spark] object Utils extends Logging {
 
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m, 500g) to gibibytes for internal use.
-   *
+   *将传递的字节串（例如50b，100k，或250m，500g）转换为内部使用的gibibytes。
    * If no suffix is provided, the passed number is assumed to be in gibibytes.
+    * 如果没有后缀，则传递的数字假定为gibibytes
    */
   def byteStringAsGb(str: String): Long = {
     JavaUtils.byteStringAsGb(str)
@@ -1092,12 +1094,13 @@ private[spark] object Utils extends Logging {
   def memoryStringToMb(str: String): Int = {
     // Convert to bytes, rather than directly to MB, because when no units are specified the unit
     // is assumed to be bytes
+    //转换为字节,而不是直接转换为MB,因为当没有指定单位时,单位被假定为字节
     (JavaUtils.byteStringAsBytes(str) / 1024 / 1024).toInt
   }
 
   /**
    * Convert a quantity in bytes to a human-readable string such as "4.0 MB".
-   * 将一个字节转换可读的字符串
+   * 将一个字节转换可读的字符串,例如“4.0 MB”
    */
   def bytesToString(size: Long): String = {
     val TB = 1L << 40
@@ -1123,7 +1126,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Returns a human-readable string representing a duration such as "35ms"
-   * 返回可读持续时间的字符串
+   * 返回一个人类可读的字符串,表示一个持续时间，如“35ms”
    */
   def msDurationToString(ms: Long): String = {
     val second = 1000
@@ -1143,7 +1146,8 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * Convert a quantity in megabytes(兆字节) to a human-readable string such as "4.0 MB".
+   * Convert a quantity in megabytes to a human-readable string such as "4.0 MB".
+    * 将数量(以兆字节为单位)转换为人为可读的字符串，例如“4.0 MB”
    */
   def megabytesToString(megabytes: Long): String = {
     bytesToString(megabytes * 1024L * 1024L)
@@ -1151,7 +1155,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Execute a command and return the process running the command.
-   * 执行命令和返回过程中运行命令
+   * 执行命令并返回运行该命令的进程
    */
   def executeCommand(
       command: Seq[String],
@@ -1178,6 +1182,7 @@ private[spark] object Utils extends Logging {
    * 执行一条command命令,并且获取它的输出,调用stdoutThread的join方法,让当前线程等待stdoutThread执行完成
     * 如果产生非0的代码，则抛出异常。
    * Execute a command and get its output, throwing an exception if it yields a code other than 0.
+    * 执行命令并获取其输出,如果产生一个不是0的代码,则抛出异常。
    */
   def executeAndGetOutput(
       command: Seq[String],
@@ -1202,7 +1207,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return and start a daemon thread that processes the content of the input stream line by line.
-   * 返回并开始守护线程的处理输入流行的内容
+    * 返回并启动一行一行处理输入流内容的守护线程。
    */
   def processStreamByLine(
       threadName: String,
@@ -1288,6 +1293,9 @@ private[spark] object Utils extends Logging {
    * exceptions as IOException. This is used when implementing Externalizable and Serializable's
    * read and write methods, since Java's serializer will not report non-IOExceptions properly;
    * see SPARK-4080 for more context.
+    * 执行返回值的代码块,将任何非致命的未捕获的异常重新抛出为IOException。
+    * 这在实现Externalizable和Serializable的读写方法时使用,
+    * 因为Java的串行器不会正确地报告非IOExceptions;有关更多上下文,请参阅SPARK-4080。
    */
   def tryOrIOException[T](block: => T): T = {
     try {
@@ -1300,7 +1308,7 @@ private[spark] object Utils extends Logging {
 
   /** 
    *  Executes the given block. Log non-fatal errors if any, and only throw fatal errors 
-   *  执行给定的块,如果有任何错误,只抛出致命错误,日志非致命错误
+   *  执行给定的块,如果有任何错误,只抛出致命错误,记录非致命错误
    *  */
   def tryLogNonFatalError(block: => Unit) {
     try {
@@ -1314,7 +1322,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code, then a finally block, but if exceptions happen in
    * the finally block, do not suppress the original exception.
-   * 执行一个代码块,然后执行一个最后块,但如果在最后块中发生异常,抛出原始的异常
+   * 执行一个代码块,然后一个finally块,但是如果在finally块中发生异常,不要抑制原始异常。
    * This is primarily an issue with `finally { out.close() }` blocks, where
    * close needs to be called to clean up `out`, but if an exception happened
    * in `out.write`, it's likely `out` may be corrupted and `out.close` will
@@ -1351,10 +1359,14 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Default filtering function for finding call sites using `getCallSite`. */
+  /**
+    * Default filtering function for finding call sites using `getCallSite`.
+    * 使用“getCallSite”查找调用站点的默认过滤功能。
+    * */
   private def sparkInternalExclusionFunction(className: String): Boolean = {
     // A regular expression to match classes of the internal Spark API's
     // that we want to skip when finding the call site of a method.
+    //一种正则表达式,用于匹配当查找方法的调用站点时要跳过的内部Spark API的类
     val SPARK_CORE_CLASS_REGEX =
       """^org\.apache\.spark(\.api\.java)?(\.util)?(\.rdd)?(\.broadcast)?\.[A-Z]""".r
     val SPARK_SQL_CLASS_REGEX = """^org\.apache\.spark\.sql.*""".r
@@ -1363,6 +1375,7 @@ private[spark] object Utils extends Logging {
       SPARK_SQL_CLASS_REGEX.findFirstIn(className).isDefined
     val isScalaClass = className.startsWith(SCALA_CORE_CLASS_PREFIX)
     // If the class is a Spark internal class or a Scala class, then exclude.
+    //如果该类是Spark内部类或Scala类,则排除
     isSparkClass || isScalaClass
   }
 

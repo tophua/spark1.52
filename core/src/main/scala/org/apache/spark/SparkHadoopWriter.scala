@@ -79,6 +79,7 @@ class SparkHadoopWriter(@transient jobConf: JobConf)
     numfmt.setGroupingUsed(false)
 
     val outputName = "part-"  + numfmt.format(splitID)
+    //文件输出格式
     val path = FileOutputFormat.getOutputPath(conf.value)
     val fs: FileSystem = {
       if (path != null) {
@@ -162,16 +163,18 @@ object SparkHadoopWriter {
     val jobtrackerID = formatter.format(time)
     new JobID(jobtrackerID, id)
   }
-
+  //返回规范名称
   def createPathFromString(path: String, conf: JobConf): Path = {
     if (path == null) {
       throw new IllegalArgumentException("Output path is null")
     }
     val outputPath = new Path(path)
+    //FileSystem API来进行hadoop的文件读写
     val fs = outputPath.getFileSystem(conf)
     if (outputPath == null || fs == null) {
       throw new IllegalArgumentException("Incorrectly formatted output path")
     }
+    //返回规范名称
     outputPath.makeQualified(fs)
   }
 }

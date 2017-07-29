@@ -115,9 +115,10 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
   /**
    * Set an environment variable to be used when launching executors for this application.
-    * 设置在启动此应用程序的执行程序时使用的环境变量,这些变量存储为spark.executorEnv.VAR_NAME形式的属性
+    * 设置在启动此应用程序的执行程序时使用的环境变量。
    * These variables are stored as properties of the form spark.executorEnv.VAR_NAME
    * (for example spark.executorEnv.PATH) but this method makes them easier to set.
+    * 这些变量存储为spark.executorEnv.VAR_NAME形式的属性(例如spark.executorEnv.PATH),但这种方法使它们更容易设置。
    */
   def setExecutorEnv(variable: String, value: String): SparkConf = {
     set("spark.executorEnv." + variable, value)
@@ -128,6 +129,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     * 设置启动执行程序时要使用的多个环境变量
    * These variables are stored as properties of the form spark.executorEnv.VAR_NAME
    * (for example spark.executorEnv.PATH) but this method makes them easier to set.
+    * 这些变量存储为spark.executorEnv.VAR_NAME形式的属性(例如spark.executorEnv.PATH),但这种方法使它们更容易设置。
    */
   def setExecutorEnv(variables: Seq[(String, String)]): SparkConf = {
     for ((k, v) <- variables) {
@@ -259,6 +261,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a time parameter as milliseconds; throws a NoSuchElementException if it's not set. If no
    * suffix is provided then milliseconds are assumed.
+    * 获取时间参数为毫秒,如果未设置,则抛出NoSuchElementException异常。 如果没有提供后缀，则假定为毫秒。
    * @throws NoSuchElementException
    */
   def getTimeAsMs(key: String): Long = {
@@ -268,6 +271,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a time parameter as milliseconds, falling back to a default if not set. If no
    * suffix is provided then milliseconds are assumed.
+    * 获取时间参数为毫秒，如果未设置则返回到默认值。 如果没有提供后缀，则假定为毫秒。
    */
   def getTimeAsMs(key: String, defaultValue: String): Long = {
     Utils.timeStringAsMs(get(key, defaultValue))

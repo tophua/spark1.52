@@ -160,7 +160,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   * 使用构造函数允许直接设置公用Spark属性
+   * 允许直接设置公共Spark属性的替代构造函数
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI
    * 							你的应用程序的名称,在群集Web用户界面上显示
@@ -204,13 +204,13 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   }
 
   // NOTE: The below constructors could be consolidated using default arguments. Due to
-  //下面的构造函数可以使用默认参数合并
+  //下面的构造函数可以使用默认参数合并,但是，这会导致编译步骤在生成文档时失败,直到我们有一个很好的解决方法为该bug,构造函数仍然被破坏。
   // Scala bug SI-8479, however, this causes the compile step to fail when generating docs.
   // Until we have a good workaround for that bug the constructors remain broken out.
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
- 	 * 选择构造函数允许直接设置公用Spark属性   
+ 	 * 允许直接设置公共Spark属性的替代构造函数
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
    */

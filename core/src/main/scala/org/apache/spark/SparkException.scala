@@ -27,6 +27,7 @@ class SparkException(message: String, cause: Throwable)
  * Exception thrown when execution of some user code in the driver process fails, e.g.
  * accumulator update fails or failure in takeOrdered (user supplies an Ordering implementation
  * that can be misbehaving.
+  * 在驱动程序进程中执行某些用户代码失败时抛出的异常,例如累加器更新失败或失败（用户提供可能会行为不端的订购实现）
  */
 private[spark] class SparkDriverExecutionException(cause: Throwable)
   extends SparkException("Execution error", cause)
@@ -34,6 +35,7 @@ private[spark] class SparkDriverExecutionException(cause: Throwable)
 /**
  * Exception thrown when the main user code is run as a child process (e.g. pyspark) and we want
  * the parent SparkSubmit process to exit with the same exit code.
+  * 当主用户代码作为子进程(例如pyspark)运行,并且我们希望父SparkSubmit进程以相同的退出代码退出时抛出异常。
  */
 private[spark] case class SparkUserAppException(exitCode: Int)
   extends SparkException(s"User application exited with $exitCode")

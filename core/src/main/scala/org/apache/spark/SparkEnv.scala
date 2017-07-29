@@ -123,13 +123,15 @@ class SparkEnv(
       // down, but let's call it anyway in case it gets fixed in a later release
       // UPDATE: In Akka 2.1.x, this hangs if there are remote actors, so we can't call it.
       // actorSystem.awaitTermination()
-
+      //不幸的是,Akka的等待终止实际上并不等待Netty服务器关闭,但是无论如何,如果它在以后的版本中被修正
       // Note that blockTransferService is stopped by BlockManager since it is started by it.
-
+      //请注意,BlockTransferService由BlockManager停止，因为它由它启动。
       // If we only stop sc, but the driver process still run as a services then we need to delete
       // the tmp dir, if not, it will create too many tmp dirs.
+      //如果我们只停止sc,但驱动程序进程仍然作为服务运行,那么我们需要删除tmp目录,否则,它将创建太多tmp目录。
       // We only need to delete the tmp dir create by driver, because sparkFilesDir is point to the
       // current working dir in executor which we do not need to delete.
+      //我们只需要删除由驱动程序创建的tmp目录,因为sparkFilesDir指向执行器中的当前工作目录,我们不需要删除它
       driverTmpDirToDelete match {
         case Some(path) => { //如果有path值
           try {
@@ -140,7 +142,7 @@ class SparkEnv(
               logWarning(s"Exception while deleting Spark temp dir: $path", e)
           }
         }
-        //没有值
+        //没有值,我们只需要删除由驱动程序创建的tmp目录,所以在执行器上不执行任何操作
         case None => // We just need to delete tmp dir created by driver, so do nothing on executor
       }
     }
@@ -294,6 +296,7 @@ object SparkEnv extends Logging {
     val actorSystem = rpcEnv.asInstanceOf[AkkaRpcEnv].actorSystem //实例AkkaRpcEnv
 
     // Figure out which port Akka actually bound to in case the original port is 0 or occupied.
+    //找出在原始端口为0或占用情况下Akka实际绑定的端口
     if (isDriver) {
     //0随机 driver侦听的端口
       conf.set("spark.driver.port", rpcEnv.address.port.toString)
@@ -307,8 +310,10 @@ object SparkEnv extends Logging {
       val cls = Utils.classForName(className)
       // Look for a constructor taking a SparkConf and a boolean isDriver, then one taking just
       // SparkConf, then one taking no arguments
+      //寻找一个构造函数,使用一个SparkConf和一个布尔值为isDriver的代码,然后只需一个SparkConf那么一个没有参数
       //查找一个sparkconf构造函数,是否isDriver
       try {
+        //classOf类强制类型转换
         cls.getConstructor(classOf[SparkConf], java.lang.Boolean.TYPE)
           .newInstance(conf, new java.lang.Boolean(isDriver))
           .asInstanceOf[T]
@@ -325,6 +330,7 @@ object SparkEnv extends Logging {
 
     // Create an instance of the class named by the given SparkConf property, or defaultClassName
     // if the property is not set, possibly initializing it with our conf
+    //创建由给定的SparkConf属性或defaultClassName命名的类的实例如果属性未设置,可能会用我们的conf初始化...
     def instantiateClassFromConf[T](propertyName: String, defaultClassName: String): T = {
       instantiateClass[T](conf.get(propertyName, defaultClassName))
     }
@@ -360,6 +366,7 @@ object SparkEnv extends Logging {
 
     // Have to assign trackerActor after initialization as MapOutputTrackerActor
     // requires the MapOutputTracker itself
+    //在MapOutputTrackerActor需要MapOutputTracker本身之后,必须在初始化后分配trackerActor
     //将MapOutputTracker注册ActorSystem,mapOutputTracker的属性trackerEndpoint持有MapOutputTrackerMasterEndpoint的引用
     /**
      * 查找或者注册Actor
@@ -435,13 +442,15 @@ object SparkEnv extends Logging {
     //创建测量系统
     val metricsSystem = if (isDriver) {
       // Don't start metrics system right now for Driver.
+      //驱动程序现在不要启动指标系统,我们需要等待任务调度程序给我们一个应用程序ID。
       // We need to wait for the task scheduler to give us an app ID.
-      // Then we can start the metrics system.
+      // Then we can start the metrics system.然后我们可以启动指标体系。
       MetricsSystem.createMetricsSystem("driver", conf, securityManager)
     } else {
       // We need to set the executor ID before the MetricsSystem is created because sources and
       // sinks specified in the metrics configuration file will want to incorporate this executor's
       // ID into the metrics they report.
+      //我们需要在创建MetricsSystem之前设置执行者ID,因为在度量配置文件中指定的源和汇点将要将此执行者的ID并入其报告的指标中。
       conf.set("spark.executor.id", executorId)
       val ms = MetricsSystem.createMetricsSystem("executor", conf, securityManager)
       ms.start()
@@ -451,6 +460,7 @@ object SparkEnv extends Logging {
     // Set the sparkFiles directory, used when downloading dependencies.  In local mode,
     // this is a temporary directory; in distributed mode, this is the executor's current working
     // directory.
+    //设置sparkFiles目录,在下载依赖关系时使用。在本地模式下,这是一个临时目录;在分布式模式下,这是执行者目前的工作目录。
     val sparkFilesDir: String = if (isDriver) {
       Utils.createTempDir(Utils.getLocalDir(conf), "userFiles").getAbsolutePath
     } else {
@@ -497,6 +507,8 @@ object SparkEnv extends Logging {
     // Add a reference to tmp dir created by driver, we will delete this tmp dir when stop() is
     // called, and we only need to do it for driver. Because driver may run as a service, and if we
     // don't delete this tmp dir when sc is stopped, then will create too many tmp dirs.
+    //添加对驱动程序创建的tmp dir的引用,当stop()为止时,我们将删除该tmp目录,我们只需要为driver做因为驱动程序可以作为一个服务运行,如
+    // 果我们在sc停止时不删除这个tmp目录,那么将创建太多的tmp目录。
     if (isDriver) {
       envInstance.driverTmpDirToDelete = Some(sparkFilesDir)
     }
@@ -508,6 +520,8 @@ object SparkEnv extends Logging {
    * Return a map representation of jvm information, Spark properties, system properties, and
    * class paths. Map keys define the category, and map values represent the corresponding
    * attributes as a sequence of KV pairs. This is used mainly for SparkListenerEnvironmentUpdate.
+    * 返回jvm信息,Spark属性,系统属性和类路径的映射表示,Map键定义类别,映射值表示相应的属性作为KV对序列,
+    * 这主要用于SparkListenerEnvironmentUpdate。
    * 更新Spark环境
    */
   private[spark] def environmentDetails(
@@ -523,7 +537,8 @@ object SparkEnv extends Logging {
       ("Java Home", javaHome),
       ("Scala Version", versionString)).sorted
 
-    // Spark properties
+    // Spark properties Spark属性
+    //这包括调度模式是否配置(由SparkUI使用)
     // This includes the scheduling mode whether or not it is configured (used by SparkUI)
     //SparkContext对job进行调度所采用的模式
     val schedulerMode =
@@ -536,7 +551,7 @@ object SparkEnv extends Logging {
     val sparkProperties = (conf.getAll ++ schedulerMode).sorted
 
     // System properties that are not java classpaths
-    // 系统配置属性
+    //不是java类路径的系统属性
     val systemProperties = Utils.getSystemProperties.toSeq
     val otherProperties = systemProperties.filter {
       case (k, _) =>
@@ -544,7 +559,7 @@ object SparkEnv extends Logging {
     }.sorted
 
     // Class paths including all added jars and files
-    // classPah属性
+    // 类路径包括所有添加的jar和文件
     val classPathEntries = javaClassPath
       .split(File.pathSeparator)
       .filterNot(_.isEmpty)
