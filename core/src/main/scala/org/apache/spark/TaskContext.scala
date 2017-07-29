@@ -30,6 +30,7 @@ object TaskContext {
   /**
    * Return the currently active TaskContext. This can be called inside of
    * user functions to access contextual information about running tasks.
+    * 返回当前运行的TaskContext(上下文信息),这可以在用户函数内部调用
    * 返回当前运行任务的上下文信息
    */
   def get(): TaskContext = taskContext.get
@@ -37,7 +38,7 @@ object TaskContext {
   /**
    * Returns the partition id of currently active TaskContext. It will return 0
    * if there is no active TaskContext for cases like local execution.
-   * 返回当前活动的上下文信息的分区ID
+   * 返回当前活动的上下文信息的分区ID,如果本地执行的情况下没有活动的TaskContext,则返回0。
    */
   def getPartitionId(): Int = {
     val tc = taskContext.get()
@@ -54,19 +55,19 @@ object TaskContext {
   // showing up in JavaDoc.
   /**
    * Set the thread local TaskContext. Internal to Spark.
-   * 设置线程局部任务的上下文信息
+   * 设置本地线程TaskContext,(任务的上下文信息)
    */
   protected[spark] def setTaskContext(tc: TaskContext): Unit = taskContext.set(tc)
 
   /**
    * Unset the thread local TaskContext. Internal to Spark.
-   * 删除线程局部的任务上下文信息
+   * 删除本地线程的任务上下文信息
    */
   protected[spark] def unset(): Unit = taskContext.remove()
 
   /**
    * An empty task context that does not represent an actual task.
-   * 一个不代表实际任务的空任务上下文
+    * 一个空的任务上下文，不代表实际的任务。
    */
   private[spark] def empty(): TaskContextImpl = {
     new TaskContextImpl(0, 0, 0, 0, null, null, Seq.empty)
