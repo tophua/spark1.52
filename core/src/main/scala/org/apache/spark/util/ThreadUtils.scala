@@ -32,16 +32,16 @@ private[spark] object ThreadUtils {
 
   /**
    * An `ExecutionContextExecutor` that runs each task in the thread that invokes `execute/submit`.
-   * `ExecutionContextExecutor`在调用调用的线程中运行每个任务`execute/submit`
+   * 一个`ExecutionContextExecutor`，它运行线程中调用`execute / submit`的每个任务。
    * The caller should make sure the tasks running in this `ExecutionContextExecutor` are short and
    * never block.
-   * 调用应该确保任务在这` executioncontextexecutor `运行短而不会堵塞
+    * 调用者应该确保任务在这个“ExecutionContextExecutor”中运行的任务很短，从不堵塞。
    */
   def sameThread: ExecutionContextExecutor = sameThreadExecutionContext
 
   /**
    * Create a thread factory that names threads with a prefix and also sets the threads to daemon.
-   * 创建线程序名称,并设置守护线程
+   * 创建一个线程工厂,它使用前缀命名线程,并将线程设置为守护进程。
    */
   def namedThreadFactory(prefix: String): ThreadFactory = {
     new ThreadFactoryBuilder().setDaemon(true).setNameFormat(prefix + "-%d").build()
@@ -50,6 +50,7 @@ private[spark] object ThreadUtils {
   /**
    * Wrapper over newCachedThreadPool. Thread names are formatted as prefix-ID, where ID is a
    * unique, sequentially assigned integer.
+    * 在newcachedthreadpool包装,线程名被格式化为前缀ID,其中id是唯一的、按顺序分配的整数。
    */ 
   def newDaemonCachedThreadPool(prefix: String): ThreadPoolExecutor = {
     val threadFactory = namedThreadFactory(prefix)
@@ -59,6 +60,7 @@ private[spark] object ThreadUtils {
   /**
    * Create a cached thread pool whose max number of threads is `maxThreadNumber`. Thread names
    * are formatted as prefix-ID, where ID is a unique, sequentially assigned integer.
+    * 创建一个缓存的线程池的最大线程数是` maxthreadnumber `,线程名被格式化为前缀ID，其中id是唯一的、按顺序分配的整数。
    */
   def newDaemonCachedThreadPool(
       prefix: String, maxThreadNumber: Int, keepAliveSeconds: Int = 60): ThreadPoolExecutor = {
@@ -78,6 +80,7 @@ private[spark] object ThreadUtils {
   /**
    * Wrapper over newFixedThreadPool. Thread names are formatted as prefix-ID, where ID is a
    * unique, sequentially assigned integer.
+    * 包装在创建固定数目线程的线程池,线程名被格式化为前缀ID，其中id是唯一的、按顺序分配的整数,
    */
   def newDaemonFixedThreadPool(nThreads: Int, prefix: String): ThreadPoolExecutor = {
     val threadFactory = namedThreadFactory(prefix)
@@ -109,10 +112,12 @@ private[spark] object ThreadUtils {
    * Run a piece of code in a new thread and return the result. Exception in the new thread is
    * thrown in the caller thread with an adjusted stack trace that removes references to this
    * method for clarity. The exception stack traces will be like the following
-   **在新线程中运行一段代码并返回结果,新线程中的异常是调用线程中抛出一个调整的堆栈跟踪,删除对此的引用方法清晰。 异常堆栈跟踪将如下所示
+    * 在新线程中运行一段代码并返回结果。 新线程中的异常被调用调用者线程抛出,调整后的堆栈跟踪将清除对该方法的引用,异常堆栈跟踪将如下所示
    * SomeException: exception-message
+    * SomeException：异常消息
    *   at CallerClass.body-method (sourcefile.scala)
    *   at ... run in separate thread using org.apache.spark.util.ThreadUtils ... ()
+    *   在...运行在单独的线程使用org.apache.spark.util.ThreadUtils ...（）
    *   at CallerClass.caller-method (sourcefile.scala)
    *   ...
    */
@@ -141,21 +146,25 @@ private[spark] object ThreadUtils {
         // Remove the part of the stack that shows method calls into this helper method
         // This means drop everything from the top until the stack element
         // ThreadUtils.runInNewThread(), and then drop that as well (hence the `drop(1)`).
+        //将方法调用的部分删除到此帮助方法中这意味着将所有内容从顶部拖放到堆栈元素ThreadUtils.runInNewThread（）,然后删除它（因此“drop（1）”）
         val baseStackTrace = Thread.currentThread().getStackTrace().dropWhile(
           ! _.getClassName.contains(this.getClass.getSimpleName)).drop(1)
 
         // Remove the part of the new thread stack that shows methods call from this helper method
+        //删除新的线程堆栈的部分，显示从该帮助方法调用的方法
         val extraStackTrace = realException.getStackTrace.takeWhile(
           ! _.getClassName.contains(this.getClass.getSimpleName))
 
         // Combine the two stack traces, with a place holder just specifying that there
         // was a helper method used, without any further details of the helper
+        //结合两个堆栈跟踪,一个占位符只是指定使用了一个帮助方法,没有任何进一步的帮助细节
         val placeHolderStackElem = new StackTraceElement(
           s"... run in separate thread using ${ThreadUtils.getClass.getName.stripSuffix("$")} ..",
           " ", "", -1)
         val finalStackTrace = extraStackTrace ++ Seq(placeHolderStackElem) ++ baseStackTrace
 
         // Update the stack trace and rethrow the exception in the caller thread
+        //更新堆栈跟踪并在调用者线程中重新抛出异常
         realException.setStackTrace(finalStackTrace)
         throw realException
       case None =>
