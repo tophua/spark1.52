@@ -21,5 +21,6 @@ import org.apache.spark.annotation.DeveloperApi
 
 /**
  * Exception thrown when a task cannot be serialized.
+  * 当任务无法序列化时抛出异常
  */
 private[spark] class TaskNotSerializableException(error: Throwable) extends Exception(error)

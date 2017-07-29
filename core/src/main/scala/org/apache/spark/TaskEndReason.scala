@@ -41,6 +41,7 @@ sealed trait TaskEndReason
 /**
  * :: DeveloperApi ::
  * Task succeeded.
+  * 任务成功
  */
 @DeveloperApi
 case object Success extends TaskEndReason
@@ -95,6 +96,7 @@ case class FetchFailed(
  * :: DeveloperApi ::
  * Task failed due to a runtime exception. This is the most common failure case and also captures
  * user program exceptions.
+  * 任务由于运行时异常而失败,这是最常见的故障案例,并且捕获用户程序异常。
  *
  * `stackTrace` contains the stack trace of the exception itself. It still exists for backward
  * compatibility. It's better to use `this(e: Throwable, metrics: Option[TaskMetrics])` to
@@ -121,6 +123,7 @@ case class ExceptionFailure(
    * `preserveCause` is used to keep the exception itself so it is available to the
    * driver. This may be set to `false` in the event that the exception is not in fact
    * serializable.
+    * `preserveCause`用于保持异常本身,因此可用于驱动程序,如果异常实际上不是可序列化的,则可以将其设置为“false”。
    */
   private[spark] def this(e: Throwable, metrics: Option[TaskMetrics], preserveCause: Boolean) {
     this(e.getClass.getName, e.getMessage, e.getStackTrace, Utils.exceptionString(e), metrics,

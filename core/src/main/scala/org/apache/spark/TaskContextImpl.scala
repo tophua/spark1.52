@@ -39,10 +39,11 @@ private[spark] class TaskContextImpl(
     with Logging {
 
   // For backwards-compatibility; this method is now deprecated as of 1.3.0.
+  //为了向后兼容; 这个方法现在已经从1.3.0开始弃用了。
   override def attemptId(): Long = taskAttemptId
 
   // List of callback functions to execute when the task completes.
-  // 当任务完成时调用的回调函数列表。
+  // 当任务完成时调用的回调函数列表,ArrayBuffer可变数组
   @transient private val onCompleteCallbacks = new ArrayBuffer[TaskCompletionListener]
 
   // Whether the corresponding task has been killed.

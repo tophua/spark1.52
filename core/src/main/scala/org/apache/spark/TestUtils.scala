@@ -32,18 +32,21 @@ import org.apache.spark.util.Utils
 
 /**
  * Utilities for tests. Included in main codebase since it's used by multiple
- * projects.
+ * projects.实用测试,包含在主代码库中,因为它被多个项目使用
  *
  * TODO: See if we can move this to the test codebase by specifying
  * test dependencies between projects.
+  * TODO：看看我们是否可以通过指定项目之间的测试依赖关系将其移动到测试代码库。
  */
 private[spark] object TestUtils {
 
   /**
    * Create a jar that defines classes with the given names.
+    * 创建一个定义具有给定名称的类的jar,
    *
    * Note: if this is used during class loader tests, class names should be unique
    * in order to avoid interference between tests.
+    * 注意：如果这是在类加载器测试期间使用的,则类名应该是唯一的,以避免测试之间的干扰。
    */
   def createJarWithClasses(
       classNames: Seq[String],
@@ -64,6 +67,7 @@ private[spark] object TestUtils {
   /**
    * Create a jar file containing multiple files. The `files` map contains a mapping of
    * file names in the jar file to their contents.
+    * 创建一个包含多个文件的jar文件,`files`映射包含jar文件中的文件名与其内容的映射。
    */
   def createJarWithFiles(files: Map[String, String], dir: File = null): URL = {
     val tempDir = Option(dir).getOrElse(Utils.createTempDir())
@@ -81,6 +85,7 @@ private[spark] object TestUtils {
   /**
    * Create a jar file that contains this set of files. All files will be located in the specified
    * directory or at the root of the jar.
+    * 创建一个包含这组文件的jar文件,所有文件将位于指定的目录或jar的根目录下。
    */
   def createJar(files: Seq[File], jarFile: File, directoryPrefix: Option[String] = None): URL = {
     val jarFileStream = new FileOutputStream(jarFile)
@@ -101,6 +106,7 @@ private[spark] object TestUtils {
   }
 
   // Adapted from the JavaCompiler.java doc examples
+  //改编自JavaCompiler.java doc示例
   private val SOURCE = JavaFileObject.Kind.SOURCE
   private def createURI(name: String) = {
     URI.create(s"string:///${name.replace(".", "/")}${SOURCE.extension}")
@@ -111,7 +117,10 @@ private[spark] object TestUtils {
     override def getCharContent(ignoreEncodingErrors: Boolean): String = code
   }
 
-  /** Creates a compiled class with the source file. Class file will be placed in destDir. */
+  /**
+    * Creates a compiled class with the source file. Class file will be placed in destDir.
+    * 使用源文件创建一个编译的类,类文件将被放在destDir中
+    * */
   def createCompiledClass(
       className: String,
       destDir: File,
@@ -121,6 +130,7 @@ private[spark] object TestUtils {
 
     // Calling this outputs a class file in pwd. It's easier to just rename the files than
     // build a custom FileManager that controls the output location.
+    //调用它会输出pwd中的类文件, 只需重新命名文件,就可以建立一个控制输出位置的自定义FileManager,
     val options = if (classpathUrls.nonEmpty) {
       Seq("-classpath", classpathUrls.map { _.getFile }.mkString(File.pathSeparator))
     } else {
@@ -135,13 +145,16 @@ private[spark] object TestUtils {
 
     // renameTo cannot handle in and out files in different filesystems
     // use google's Files.move instead
+    //renameTo不能处理在不同的文件系统使用谷歌的files.move代替文件
     Files.move(result, out)
-
     assert(out.exists(), "Destination file not moved: " + out.getAbsolutePath())
     out
   }
 
-  /** Creates a compiled class with the given name. Class file will be placed in destDir. */
+  /**
+    * Creates a compiled class with the given name. Class file will be placed in destDir.
+    * 创建一个编译的类的名字,类文件将被放置在DestDir
+    * */
   def createCompiledClass(
       className: String,
       destDir: File,
