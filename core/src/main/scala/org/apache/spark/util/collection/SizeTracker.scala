@@ -68,6 +68,7 @@ private[spark] trait SizeTracker {
    * Reset samples collected so far.
    * 复位样本收集
    * This should be called after the collection undergoes a dramatic change in size.
+    * 收集后的大小会发生戏剧性变化
    */
   protected def resetSamples(): Unit = {
     numUpdates = 1 //采样编号

@@ -24,10 +24,11 @@ import scala.collection.immutable.IndexedSeq
 /**
  * Util for getting some stats from a small sample of numeric values, with some handy
  * summary functions.
- *
+ * 从一些小数值数值中获取一些统计数据,并提供一些方便的汇总功能。
  * Entirely in memory, not intended as a good way to compute stats over large data sets.
- *
+ * 完全在内存中，不是用来计算大型数据集统计的好方法
  * Assumes you are giving it a non-empty set of data
+  * 假设你给它一个非空的数据集
  */
 private[spark] class Distribution(val data: Array[Double], val startIdx: Int, val endIdx: Int) {
   require(startIdx < endIdx)
@@ -40,6 +41,7 @@ private[spark] class Distribution(val data: Array[Double], val startIdx: Int, va
   /**
    * Get the value of the distribution at the given probabilities.  Probabilities should be
    * given from 0 to 1
+    * 以给定的概率获取分布的值,概率应该从0到1
    * @param probabilities
    */
   def getQuantiles(probabilities: Traversable[Double] = defaultProbabilities)
@@ -63,6 +65,7 @@ private[spark] class Distribution(val data: Array[Double], val startIdx: Int, va
 
   /**
    * print a summary of this distribution to the given PrintStream.
+    * 将此分发的摘要打印到给定的PrintStream
    * @param out
    */
   def summary(out: PrintStream = System.out) {

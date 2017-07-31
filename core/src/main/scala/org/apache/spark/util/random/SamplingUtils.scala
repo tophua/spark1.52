@@ -24,6 +24,7 @@ private[spark] object SamplingUtils {
 
   /**
    * Reservoir sampling implementation that also returns the input size.
+    * 采样实现也返回输入大小
    *
    * @param input input size
    * @param k reservoir size
@@ -37,6 +38,7 @@ private[spark] object SamplingUtils {
     : (Array[T], Int) = {
     val reservoir = new Array[T](k)
     // Put the first k elements in the reservoir.
+    //把第一个k元素放在水库里
     var i = 0
     while (i < k && input.hasNext) {
       val item = input.next()
@@ -45,13 +47,16 @@ private[spark] object SamplingUtils {
     }
 
     // If we have consumed all the elements, return them. Otherwise do the replacement.
+    //如果我们已经消耗了所有的元素,返回它们。 否则做更换。
     if (i < k) {
       // If input size < k, trim the array to return only an array of input size.
+      //如果输入大小<k，则修整数组以仅返回输入大小的数组
       val trimReservoir = new Array[T](i)
       System.arraycopy(reservoir, 0, trimReservoir, 0, i)
       (trimReservoir, i)
     } else {
       // If input size > k, continue the sampling process.
+      //如果输入大小> k，继续采样过程。
       val rand = new XORShiftRandom(seed)
       while (input.hasNext) {
         val item = input.next()
@@ -68,7 +73,7 @@ private[spark] object SamplingUtils {
   /**
    * Returns a sampling rate that guarantees a sample of size >= sampleSizeLowerBound 99.99% of
    * the time.
-   *
+   * 返回采样率，保证样本的大小> = sampleSizeLowerBound 99.99％的时间。
    * How the sampling rate is determined:
    * Let p = num / total, where num is the sample size and total is the total number of
    * datapoints in the RDD. We're trying to compute q > p such that
@@ -103,11 +108,13 @@ private[spark] object SamplingUtils {
 /**
  * Utility functions that help us determine bounds on adjusted sampling rate to guarantee exact
  * sample sizes with high confidence when sampling with replacement.
+  * 实用功能帮助我们确定调整后的采样率的范围，以便在更换时进行采样时保证精确的样品量
  */
 private[spark] object PoissonBounds {
 
   /**
    * Returns a lambda such that Pr[X > s] is very small, where X ~ Pois(lambda).
+    * 返回一个lambda，使得Pr [X> s]非常小，其中X〜Pois（lambda）。
    */
   def getLowerBound(s: Double): Double = {
     math.max(s - numStd(s) * math.sqrt(s), 1e-15)
@@ -115,6 +122,7 @@ private[spark] object PoissonBounds {
 
   /**
    * Returns a lambda such that Pr[X < s] is very small, where X ~ Pois(lambda).
+    * 返回一个lambda，使得Pr [X <s]非常小，其中X〜Pois（lambda）。
    *
    * @param s sample size
    */
@@ -137,6 +145,7 @@ private[spark] object PoissonBounds {
 /**
  * Utility functions that help us determine bounds on adjusted sampling rate to guarantee exact
  * sample size with high confidence when sampling without replacement.
+  * 实用功能帮助我们确定调整后的采样率的范围，以便在没有更换的采样时以高可信度保证精确的样本大小。
  */
 private[spark] object BinomialBounds {
 
@@ -145,6 +154,7 @@ private[spark] object BinomialBounds {
   /**
    * Returns a threshold `p` such that if we conduct n Bernoulli trials with success rate = `p`,
    * it is very unlikely to have more than `fraction * n` successes.
+    * 返回一个阈值“p”，如果我们以成功率=`p`进行n个伯努利试验，不太可能有超过“分数* n”的成功。
    */
   def getLowerBound(delta: Double, n: Long, fraction: Double): Double = {
     val gamma = - math.log(delta) / n * (2.0 / 3.0)
@@ -154,6 +164,7 @@ private[spark] object BinomialBounds {
   /**
    * Returns a threshold `p` such that if we conduct n Bernoulli trials with success rate = `p`,
    * it is very unlikely to have less than `fraction * n` successes.
+    * 返回一个阈值“p”，如果我们以成功率=`p`进行n个伯努利试验，不太可能有少于“分数”的成功。
    */
   def getUpperBound(delta: Double, n: Long, fraction: Double): Double = {
     val gamma = - math.log(delta) / n

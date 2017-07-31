@@ -20,6 +20,7 @@ package org.apache.spark.util
 /**
  * An extractor object for parsing JVM memory strings, such as "10g", into an Int representing
  * the number of megabytes. Supports the same formats as Utils.memoryStringToMb.
+  * 一个提取器对象,用于解析JVM内存字符串,如“10g”,表示一个表示兆字节数的int,支持同一格式utils.memorystringtomb。
  */
 private[spark] object MemoryParam {
   def unapply(str: String): Option[Int] = {

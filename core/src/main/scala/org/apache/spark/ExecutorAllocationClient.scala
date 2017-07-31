@@ -20,12 +20,14 @@ package org.apache.spark
 /**
  * A client that communicates with the cluster manager to request or kill executors.
  * This is currently supported only in YARN mode.
+  *与集群管理器通信以请求或杀死执行程序的客户端,目前仅在YARN模式下支持。
  */
 private[spark] trait ExecutorAllocationClient {
 
   /**
    * Update the cluster manager on our scheduling needs. Three bits of information are included
    * to help it make decisions.
+    * 根据我们的调度需求更新集群管理器,包括三位信息以帮助其作出决定。
    * @param numExecutors The total number of executors we'd like to have. The cluster manager
    *                     shouldn't kill any running executor to reach this number, but,
    *                     if all existing executors were to die, this is the number of executors

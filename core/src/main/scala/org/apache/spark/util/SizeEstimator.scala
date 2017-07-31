@@ -45,12 +45,13 @@ object SizeEstimator extends Logging {
    * Estimate the number of bytes that the given object takes up on the JVM heap. The estimate
    * includes space taken up by objects referenced by the given object, their references, and so on
    * and so forth.
-   * 估计的字节数,给定的对象占用的JVM堆,该估计包括由给定对象引用的对象所占用的空间
+   * 估计给定对象在JVM堆上占用的字节数,估计包括由给定对象引用的对象所占据的空间,它们的引用等等。
    * This is useful for determining the amount of heap space a broadcast variable will occupy on
    * each executor or the amount of space each object will take when caching objects in
    * deserialized form. This is not the same as the serialized size of the object, which will
    * typically be much smaller.
-   * 估算内存大小,遍历对象及其属性
+   * 这对于确定广播变量在每个执行器上占用的堆空间量或每个对象以反序列化格式缓存对象时将占用的空间量很有用,
+    * 这与对象的序列化大小不同,这通常会小得多。
    */
   def estimate(obj: AnyRef): Long = estimate(obj, new IdentityHashMap[AnyRef, AnyRef])
 
@@ -99,6 +100,7 @@ object SizeEstimator extends Logging {
 
   // Sets object size, pointer size based on architecture and CompressedOops(压缩普通对象指针) settings
   // from the JVM.
+  //根据架构设置对象大小,指针大小以及来自JVM的CompressedOops设置。
   private def initialize() {
     val arch = System.getProperty("os.arch")
     is64bit = arch.contains("64") || arch.contains("s390x")
@@ -119,6 +121,7 @@ object SizeEstimator extends Logging {
   private def getIsCompressedOops: Boolean = {
     // This is only used by tests to override the detection of compressed oops. The test
     // actually uses a system property instead of a SparkConf, so we'll stick with that.
+    //这只是通过测试来覆盖压缩的oops的检测,测试实际上使用了一个系统属性而不是一个SparkConf,所以我们坚持下去。
     if (System.getProperty("spark.test.useCompressedOops") != null) {
       return System.getProperty("spark.test.useCompressedOops").toBoolean
     }
@@ -133,6 +136,7 @@ object SizeEstimator extends Logging {
       val server = ManagementFactory.getPlatformMBeanServer()
 
       // NOTE: This should throw an exception in non-Sun JVMs
+      //注意：这应该在非Sun JVM中引发异常
       // scalastyle:off classforname
       val hotSpotMBeanClass = Class.forName("com.sun.management.HotSpotDiagnosticMXBean")
       val getVMMethod = hotSpotMBeanClass.getDeclaredMethod("getVMOption",
@@ -146,6 +150,7 @@ object SizeEstimator extends Logging {
     } catch {
       case e: Exception => {
         // Guess whether they've enabled UseCompressedOops based on whether maxMemory < 32 GB
+        //猜测他们是否根据maxMemory <32 GB启用了UseCompressedOops
         val guess = Runtime.getRuntime.maxMemory < (32L*1024*1024*1024)
         val guessInWords = if (guess) "yes" else "not"
         logWarning("Failed to check whether UseCompressedOops is set; assuming " + guessInWords)
@@ -158,6 +163,7 @@ object SizeEstimator extends Logging {
    * The state of an ongoing size estimation. Contains a stack of objects to visit as well as an
    * IdentityHashMap of visited objects, and provides utility methods for enqueueing new objects
    * to visit.
+    * 正在进行尺寸估算的状态,包含要访问的一组对象以及被访问对象的IdentityHashMap,并提供用于排入新对象进行访问的实用程序方法。
    */
   private class SearchState(val visited: IdentityHashMap[AnyRef, AnyRef]) {
     val stack = new ArrayBuffer[AnyRef]
@@ -183,6 +189,8 @@ object SizeEstimator extends Logging {
    * Cached information about each class. We remember two things: the "shell size" of the class
    * (size of all non-static fields plus the java.lang.Object size), and any fields that are
    * pointers to objects.
+    * 关于每个类的缓存信息,我们记住两件事情：类的“shell大小”
+    * （所有非静态字段的大小加上java.lang.Object大小）以及任何指向对象的指针的字段。
    * 每个类的缓存信息,
    * shellSize:所有非静态字段的大小
    * pointerFields:指向对象的指针的任何字段
@@ -210,6 +218,8 @@ object SizeEstimator extends Logging {
       // Hadoop JobConfs created in the interpreter have a ClassLoader, which greatly confuses
       // the size estimator since it references the whole REPL. Do nothing in this case. In
       // general all ClassLoaders and Classes will be shared between objects anyway.
+      //在解释器中创建的Hadoop JobConfs有一个ClassLoader，这很大的混淆尺寸估计器，
+      // 因为它引用了整个REPL。 在这种情况下什么都不做 一般来说,所有的ClassLoaders和Classe都将在对象之间共享。
     } else {
       val classInfo = getClassInfo(cls)
       state.size += alignSize(classInfo.shellSize)
@@ -222,6 +232,7 @@ object SizeEstimator extends Logging {
   // Estimate the size of arrays larger than ARRAY_SIZE_FOR_SAMPLING by sampling.
   // 估计数组的大小比ARRAY_SIZE_FOR_SAMPLING
   private val ARRAY_SIZE_FOR_SAMPLING = 400
+  //应低于ARRAY_SIZE_FOR_SAMPLING
   private val ARRAY_SAMPLE_SIZE = 100 // should be lower than ARRAY_SIZE_FOR_SAMPLING
 
   private def visitArray(array: AnyRef, arrayClass: Class[_], state: SearchState) {
@@ -339,6 +350,7 @@ object SizeEstimator extends Logging {
     }
 
     // Based on the simulated field layout code in Aleksey Shipilev's report:
+    //根据Aleksey Shipilev的报告中的模拟现场布局代码：
     // http://cr.openjdk.java.net/~shade/papers/2013-shipilev-fieldlayout-latest.pdf
     // The code is in Figure 9.
     // The simplified idea of field layout consists of 4 parts (see more details in the report):
@@ -359,13 +371,14 @@ object SizeEstimator extends Logging {
     for (size <- fieldSizes if sizeCount(size) > 0) {
       val count = sizeCount(size).toLong
       // If there are internal gaps, smaller field can fit in.
+      //如果有内部间隙,较小的场可以适应。
       alignedSize = math.max(alignedSize, alignSizeUp(shellSize, size) + size * count)
       shellSize += size * count
     }
 
     // Should choose a larger size to be new shellSize and clearly alignedSize >= shellSize, and
     // round up the instance filed blocks
-    //应选择更大的尺寸,并建立了实例块
+    //应选择更大的尺寸,并建立了实例块,并且明确对齐大小> = shellSize,并将实例提交的块进行舍入
     shellSize = alignSizeUp(alignedSize, pointerSize)
 
     // Create and cache a new ClassInfo

@@ -23,12 +23,14 @@ import com.google.common.collect.{Ordering => GuavaOrdering}
 
 /**
  * Utility functions for collections.
+  * 集合的实用功能
  */
 private[spark] object Utils {
 
   /**
    * Returns the first K elements from the input as defined by the specified implicit Ordering[T]
    * and maintains the ordering.
+    * 从指定的隐含排序[T]定义的输入返回第一个K个元素，并维护排序
    */
   def takeOrdered[T](input: Iterator[T], num: Int)(implicit ord: Ordering[T]): Iterator[T] = {
     val ordering = new GuavaOrdering[T] {

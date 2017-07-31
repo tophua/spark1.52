@@ -166,7 +166,7 @@ private[spark] class ExternalSorter[K, V, C](
 
   private val useSerializedPairBuffer =
     ordering.isEmpty && //没有提供Ordering,即不需要对partition内部的kv再排序
-      conf.getBoolean("spark.shuffle.sort.serializeMapOutputs", true) &&//它默认即为true
+      conf.getBoolean("spark.shuffle.sort.serializeMapOutputs", true) &&  //它默认即为true
       //即在序列化输出流写了两个对象以后,把这两个对象对应的字节块交换位置,序列化输出流仍然能读出这两个对象
       ser.supportsRelocationOfSerializedObjects//支持relocate序列化以后的对象
   private val kvChunkSize = conf.getInt("spark.shuffle.sort.kvChunkSize", 1 << 22) // 4 MB
@@ -422,7 +422,7 @@ private[spark] class ExternalSorter[K, V, C](
   private def merge(spills: Seq[SpilledFile], inMemory: Iterator[((Int, K), C)]): Iterator[(Int, Iterator[Product2[K, C]])] = {
     val readers = spills.map(new SpillReader(_))//为每个spill出来的文件生成一个reader
     val inMemBuffered = inMemory.buffered//内存中的迭代器进行buffered,以方便查看其head的信息
-    (0 until numPartitions).iterator.map { p =>//对每一个partition
+    (0 until numPartitions).iterator.map { p => //对每一个partition
       //对内存中的数据获取这个partition对应的iterator
       val inMemIterator = new IteratorForPartition(p, inMemBuffered)
       //把文件数据的迭代器和内存数据的迭代器都放在一个seq里
@@ -609,7 +609,7 @@ private[spark] class ExternalSorter[K, V, C](
     def nextBatchStream(): DeserializationStream = {
       // Note that batchOffsets.length = numBatches + 1 since we did a scan above; check whether
       // we're still in a valid batch.
-      
+      //注意，我们上面做了一个扫描,batchOffsets.length = numBatches + 1,检查我们是否仍在有效的批次中。
       if (batchId < batchOffsets.length - 1) {
         if (deserializeStream != null) {
           deserializeStream.close()
@@ -705,6 +705,7 @@ private[spark] class ExternalSorter[K, V, C](
         assert(lastPartitionId >= myPartition)
         // Check that we're still in the right partition; note that readNextItem will have returned
         // null at EOF above so we would've returned false there
+        //检查我们是否仍然在正确的分区; 请注意，readNextItem将在上面的EOF返回null，所以我们会在那里返回false
         lastPartitionId == myPartition
       }
 
@@ -728,6 +729,8 @@ private[spark] class ExternalSorter[K, V, C](
       ds.close()
       // NOTE: We don't do file.delete() here because that is done in ExternalSorter.stop().
       // This should also be fixed in ExternalAppendOnlyMap.
+      //注意：在这里我们不做file.delete（），因为这是在ExternalSorter.stop（）中完成的。
+      //这也应该在ExternalAppendOnlyMap中修复。
     }
   }
 
@@ -845,6 +848,7 @@ private[spark] class ExternalSorter[K, V, C](
   /**
    * Given a stream of ((partition, key), combiner) pairs *assumed to be sorted by partition ID*,
    * group together the pairs for each partition into a sub-iterator.
+    * 给定（（分区，密钥），组合器）对*被假定为按分区ID *排序的流，将每个分区的对组合成一个子迭代器。
    * 主要用于destructiveSortedIterator生成的迭代器按照partition ID分组
    * @param data an iterator of elements, assumed to already be sorted by partition ID
    */
@@ -858,6 +862,7 @@ private[spark] class ExternalSorter[K, V, C](
    * An iterator that reads only the elements for a given partition ID from an underlying buffered
    * stream, assuming this partition is the next one to be read. Used to make it easier to return
    * partitioned iterators from our in-memory collection.
+    * 一个从底层缓冲流中只读取给定分区ID的元素的迭代器,假设该分区是下一个要读取的分区,用于使我们更容易从我们的内存集中返回分区迭代器
    */
   private[this] class IteratorForPartition(partitionId: Int, data: BufferedIterator[((Int, K), C)])
       extends Iterator[Product2[K, C]] {

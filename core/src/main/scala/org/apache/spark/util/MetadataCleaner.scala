@@ -23,7 +23,8 @@ import org.apache.spark.{Logging, SparkConf}
 
 /**
  * Runs a timer task to periodically clean up metadata (e.g. old files or hashtable entries)
- * MetadataCleaner运行定时任务周期性的清理元数据
+ * 运行一个定时器任务定期清理元数据（例如旧文件或哈希表的条目）
+  * MetadataCleaner运行定时任务周期性的清理元数据
  */
 private[spark] class MetadataCleaner(
     cleanerType: MetadataCleanerType.MetadataCleanerType,//清理的元数据类型
@@ -88,6 +89,7 @@ private[spark] object MetadataCleanerType extends Enumeration {
 
 // TODO: This mutates a Conf to set properties right now, which is kind of ugly when used in the
 // initialization of StreamingContext. It's okay for users trying to configure stuff themselves.
+//StreamingContext的初始化,用户可以自己配置文件也可以。
 private[spark] object MetadataCleaner {
   def getDelaySeconds(conf: SparkConf): Int = {
     //spark记录任何元数据的持续时间,设置清理时间  -1清理

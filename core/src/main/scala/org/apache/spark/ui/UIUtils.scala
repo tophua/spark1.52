@@ -27,13 +27,15 @@ import scala.xml.transform.{RewriteRule, RuleTransformer}
 import org.apache.spark.Logging
 import org.apache.spark.ui.scope.RDDOperationGraph
 
-/** Utility functions for generating XML pages with spark content. */
+/** Utility functions for generating XML pages with spark content.
+  * 用于生成具有Spark内容的XML页面的实用功能*/
 private[spark] object UIUtils extends Logging {
   val TABLE_CLASS_NOT_STRIPED = "table table-bordered table-condensed"
   val TABLE_CLASS_STRIPED = TABLE_CLASS_NOT_STRIPED + " table-striped"
   val TABLE_CLASS_STRIPED_SORTABLE = TABLE_CLASS_STRIPED + " sortable"
 
   // SimpleDateFormat is not thread-safe. Don't expose it to avoid improper use.
+  //SimpleDateFormat不是线程安全的,不要暴露它以避免不当使用。
   private val dateFormat = new ThreadLocal[SimpleDateFormat]() {
     override def initialValue(): SimpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
   }
@@ -63,7 +65,8 @@ private[spark] object UIUtils extends Logging {
     "%.1f h".format(hours)
   }
 
-  /** Generate a verbose human-readable string representing a duration such as "5 second 35 ms" */
+  /** Generate a verbose human-readable string representing a duration such as "5 second 35 ms"
+    * 生成一个冗长的可读字符串,表示持续时间，如“5秒35 ms” */
   def formatDurationVerbose(ms: Long): String = {
     try {
       val second = 1000L
@@ -101,20 +104,24 @@ private[spark] object UIUtils extends Logging {
       ).foreach { case (durationLimit, durationString) =>
         if (ms < durationLimit) {
           // if time is less than the limit (upto year)
+          //如果时间小于极限（最多一年）
           return durationString
         }
       }
       // if time is more than a year
+      //如果时间超过一年
       return s"$yearString $weekString $dayString"
     } catch {
       case e: Exception =>
         logError("Error converting time to string", e)
         // if there is some error, return blank string
+        //如果有一些错误，返回空白字符串
         return ""
     }
   }
 
-  /** Generate a human-readable string representing a number (e.g. 100 K) */
+  /** Generate a human-readable string representing a number (e.g. 100 K)
+    * 生成一个表示数字的可读字符串 */
   def formatNumber(records: Double): String = {
     val trillion = 1e12
     val billion = 1e9
@@ -142,6 +149,7 @@ private[spark] object UIUtils extends Logging {
   }
 
   // Yarn has to go through a proxy so the base uri is provided and has to be on all links
+  //Yarn必须通过代理,以便提供基本的uri,并且必须在所有链接上
   def uiRoot: String = {
     if (System.getenv("APPLICATION_WEB_PROXY_BASE") != null) {
       System.getenv("APPLICATION_WEB_PROXY_BASE")
@@ -181,7 +189,8 @@ private[spark] object UIUtils extends Logging {
     <script src={prependBaseUri("/static/spark-dag-viz.js")}></script>
   }
 
-  /** Returns a spark page with correctly formatted headers */
+  /** Returns a spark page with correctly formatted headers
+    * 返回具有正确格式的标题的spark页 */
   def headerSparkPage(
       title: String,
       content: => Seq[Node],
@@ -235,7 +244,8 @@ private[spark] object UIUtils extends Logging {
     </html>
   }
 
-  /** Returns a page with the spark css/js and a simple format. Used for scheduler UI. */
+  /** Returns a page with the spark css/js and a simple format. Used for scheduler UI.
+    * 返回带有spark css / js和简单格式的页面。 用于调度程序UI */
   def basicSparkPage(content: => Seq[Node], title: String): Seq[Node] = {
     <html>
       <head>
@@ -262,7 +272,8 @@ private[spark] object UIUtils extends Logging {
     </html>
   }
 
-  /** Returns an HTML table constructed by generating a row for each object in a sequence. */
+  /** Returns an HTML table constructed by generating a row for each object in a sequence.
+    * 返回通过为序列中的每个对象生成一行而构造的HTML表 */
   def listingTable[T](
       headers: Seq[String],
       generateDataRow: T => Seq[Node],
@@ -336,22 +347,26 @@ private[spark] object UIUtils extends Logging {
     </div>
   }
 
-  /** Return a "DAG visualization" DOM element that expands into a visualization for a stage. */
+  /** Return a "DAG visualization" DOM element that expands into a visualization for a stage.
+    * 返回一个扩展为DAG可视化的“DAG可视化”DOM元素 */
   def showDagVizForStage(stageId: Int, graph: Option[RDDOperationGraph]): Seq[Node] = {
     showDagViz(graph.toSeq, forJob = false)
   }
 
-  /** Return a "DAG visualization" DOM element that expands into a visualization for a job. */
+  /** Return a "DAG visualization" DOM element that expands into a visualization for a job.
+    * 返回“DAG可视化”DOM元素，将其扩展为作业的可视化 */
   def showDagVizForJob(jobId: Int, graphs: Seq[RDDOperationGraph]): Seq[Node] = {
     showDagViz(graphs, forJob = true)
   }
 
   /**
    * Return a "DAG visualization" DOM element that expands into a visualization on the UI.
+    * 返回在UI上展开为可视化的“DAG可视化”DOM元素。
    *
    * This populates metadata necessary for generating the visualization on the front-end in
    * a format that is expected by spark-dag-viz.js. Any changes in the format here must be
    * reflected there.
+    * 这样填充了前端生成可视化文件所需的元数据,其格式由spark-dag-viz.js预期,这里格式的任何变化都必须反映在那里。
    */
   private def showDagViz(graphs: Seq[RDDOperationGraph], forJob: Boolean): Seq[Node] = {
     <div>
@@ -391,7 +406,8 @@ private[spark] object UIUtils extends Logging {
     </sup>
   }
 
-  /** Return a script element that automatically expands the DAG visualization on page load. */
+  /** Return a script element that automatically expands the DAG visualization on page load.
+    * 返回一个在页面加载时自动扩展DAG可视化的脚本元素*/
   def expandDagVizOnLoad(forJob: Boolean): Seq[Node] = {
     <script type="text/javascript">
       {Unparsed("$(document).ready(function() { toggleDagViz(" + forJob + ") });")}
@@ -402,21 +418,25 @@ private[spark] object UIUtils extends Logging {
    * Returns HTML rendering of a job or stage description. It will try to parse the string as HTML
    * and make sure that it only contains anchors with root-relative links. Otherwise,
    * the whole string will rendered as a simple escaped text.
-   *
+   * 返回作业或阶段描述的HTML呈现,它将尝试将HTML解析为字符串,并确保它只包含具有根相关链接的锚点,否则,整个字符串将呈现为一个简单的转义文本。
    * Note: In terms of security, only anchor tags with root relative links are supported. So any
    * attempts to embed links outside Spark UI, or other tags like <script> will cause in the whole
    * description to be treated as plain text.
+    * 注意：在安全性方面，仅支持具有根相对链接的锚标签,所以在Spark UI之外嵌入链接的任何尝试,或其他标签（如<script>）将导致整个描述被视为纯文本。
    */
   def makeDescription(desc: String, basePathUri: String): NodeSeq = {
     import scala.language.postfixOps
 
     // If the description can be parsed as HTML and has only relative links, then render
     // as HTML, otherwise render as escaped string
+    //如果描述可以解析为HTML并且仅具有相对链接,则以HTML形式呈现,否则将其转换为转义字符串
     try {
       // Try to load the description as unescaped HTML
+      //尝试将描述加载为非转义的HTML
       val xml = XML.loadString(s"""<span class="description-input">$desc</span>""")
 
       // Verify that this has only anchors and span (we are wrapping in span)
+      //验证这只有锚和跨度（我们正在包装跨度）
       val allowedNodeLabels = Set("a", "span")
       val illegalNodes = xml \\ "_"  filterNot { case node: Node =>
         allowedNodeLabels.contains(node.label)
@@ -428,6 +448,7 @@ private[spark] object UIUtils extends Logging {
       }
 
       // Verify that all links are relative links starting with "/"
+      //验证所有链接是以“/”开始的相对链接
       val allLinks =
         xml \\ "a" flatMap { _.attributes } filter { _.key == "href" } map { _.value.toString }
       if (allLinks.exists { ! _.startsWith ("/") }) {
@@ -436,6 +457,7 @@ private[spark] object UIUtils extends Logging {
       }
 
       // Prepend the relative links with basePathUri
+      //预处理与basePathUri的相关链接
       val rule = new RewriteRule() {
         override def transform(n: Node): Seq[Node] = {
           n match {

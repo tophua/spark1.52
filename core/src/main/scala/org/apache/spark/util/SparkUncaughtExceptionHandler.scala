@@ -20,9 +20,11 @@ package org.apache.spark.util
 import org.apache.spark.Logging
 
 /**
- * The default uncaught(捕获) exception handler for Executors terminates the whole process, to avoid
+ * The default uncaught exception handler for Executors terminates the whole process, to avoid
  * getting into a bad state indefinitely. Since Executors are relatively lightweight, it's better
  * to fail fast when things go wrong.
+  * 默认未捕获的异常处理程序的执行终止的全过程,以避免陷入糟糕的状态下去,由于执行者相对轻量级,当事情出错时最好尽快失败。
+  * Spark未捕获的异常处理程序
  */
 private[spark] object SparkUncaughtExceptionHandler
   extends Thread.UncaughtExceptionHandler with Logging {
@@ -33,6 +35,8 @@ private[spark] object SparkUncaughtExceptionHandler
 
       // We may have been called from a shutdown hook. If so, we must not call System.exit().
       // (If we do, we will deadlock.)
+      //我们可能已经被关闭了一个挂机,如果是这样,我们不能调用System.exit()。
+      //（如果我们这样做,我们会死锁。）
       if (!ShutdownHookManager.inShutdown()) {
         if (exception.isInstanceOf[OutOfMemoryError]) {
           System.exit(SparkExitCode.OOM)

@@ -23,7 +23,8 @@ import scala.xml.Node
 import org.apache.spark.scheduler.{Schedulable, StageInfo}
 import org.apache.spark.ui.UIUtils
 
-/** Table showing list of pools */
+/** Table showing list of pools
+  * 表显示池列表*/
 private[ui] class PoolTable(pools: Seq[Schedulable], parent: StagesTab) {
   private val listener = parent.progressListener
 

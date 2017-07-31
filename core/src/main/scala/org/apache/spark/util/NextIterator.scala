@@ -42,6 +42,7 @@ private[spark] abstract class NextIterator[U] extends Iterator[U] {
   /**
    * Method for subclasses to implement when all elements have been successfully
    * iterated, and the iteration is done.
+    * 当所有元素都被成功迭代并且迭代完成时,子类实现的方法。
    *
    * <b>Note:</b> `NextIterator` cannot guarantee that `close` will be
    * called because it has no control over what happens when an exception
@@ -54,6 +55,7 @@ private[spark] abstract class NextIterator[U] extends Iterator[U] {
 
   /**
    * Calls the subclass-defined close method, but only once.
+    * 调用子类定义的close方法,但只调用一次
    *
    * Usually calling `close` multiple times should be fine, but historically
    * there have been issues with some InputFormats throwing exceptions.
@@ -62,6 +64,7 @@ private[spark] abstract class NextIterator[U] extends Iterator[U] {
     if (!closed) {
       // Note: it's important that we set closed = true before calling close(), since setting it
       // afterwards would permit us to call close() multiple times if close() threw an exception.
+      //注意：在调用close（）之前设置closed = true非常重要,因为如果close（）抛出一个异常,那么之后设置就可以多次调用close（）。
       closed = true
       close()
     }

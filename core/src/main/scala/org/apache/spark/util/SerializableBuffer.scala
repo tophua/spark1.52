@@ -24,6 +24,7 @@ import java.nio.channels.Channels
 /**
  * A wrapper around a java.nio.ByteBuffer that is serializable through Java serialization, to make
  * it easier to pass ByteBuffers in case class messages.
+  * java.nio.ByteBuffer上的一个包装器,可通过Java序列化序列化,以便在发送类消息的情况下更容易地传递ByteBuffers。
  */
 private[spark]
 class SerializableBuffer(@transient var buffer: ByteBuffer) extends Serializable {

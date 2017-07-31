@@ -27,6 +27,7 @@ import RollingFileAppender._
  * Continuously appends data from input stream into the given file, and rolls
  * over the file after the given interval. The rolled over files are named
  * based on the given pattern.
+  * 连续地将数据从输入流附加到给定文件中，并在给定间隔后滚动文件。 翻转的文件根据给定的模式命名
  *
  * @param inputStream             Input stream to read data from
  * @param activeFile              File to write data to
@@ -44,12 +45,16 @@ private[spark] class RollingFileAppender(
 
   private val maxRetainedFiles = conf.getInt(RETAINED_FILES_PROPERTY, -1)
 
-  /** Stop the appender */
+  /** Stop the appender
+    * 停止appender
+    *  */
   override def stop() {
     super.stop()
   }
 
-  /** Append bytes to file after rolling over is necessary */
+  /** Append bytes to file after rolling over is necessary
+    * 在翻转后将文件追加到文件是必要的
+    *  */
   override protected def appendToFile(bytes: Array[Byte], len: Int) {
     if (rollingPolicy.shouldRollover(len)) {
       rollover()
@@ -59,7 +64,9 @@ private[spark] class RollingFileAppender(
     rollingPolicy.bytesWritten(len)
   }
 
-  /** Rollover the file, by closing the output stream and moving it over */
+  /** Rollover the file, by closing the output stream and moving it over
+    * 通过关闭输出流并将其移动，翻转文件
+    * */
   private def rollover() {
     try {
       closeFile()
@@ -74,7 +81,9 @@ private[spark] class RollingFileAppender(
     }
   }
 
-  /** Move the active log file to a new rollover file */
+  /** Move the active log file to a new rollover file
+    * 将活动日志文件移动到新的翻转文件
+    * */
   private def moveFile() {
     val rolloverSuffix = rollingPolicy.generateRolledOverFileSuffix()
     val rolloverFile = new File(
@@ -90,6 +99,8 @@ private[spark] class RollingFileAppender(
           // The resultant file names are long and ugly, so this is used only
           // if there is a name collision. This can be avoided by the using
           // the right pattern such that name collisions do not occur.
+          //如果翻转文件名冲突,请创建一个唯一的文件名,结果文件名长而丑,
+          // 因此只有在名称冲突时才使用,这可以通过使用正确的模式来避免,从而不会发生名称冲突。
           var i = 0
           var altRolloverFile: File = null
           do {
@@ -108,7 +119,9 @@ private[spark] class RollingFileAppender(
     }
   }
 
-  /** Retain only last few files */
+  /** Retain only last few files
+    * 只保留最后几个文件
+    *  */
   private[util] def deleteOldFiles() {
     try {
       val rolledoverFiles = activeFile.getParentFile.listFiles(new FileFilter {
@@ -132,6 +145,7 @@ private[spark] class RollingFileAppender(
 /**
  * Companion object to [[org.apache.spark.util.logging.RollingFileAppender]]. Defines
  * names of configurations that configure rolling file appenders.
+  * Companion对象[[org.apache.spark.util.logging.RollingFileAppender]]）,定义配置滚动文件追加器的配置名称。
  */
 private[spark] object RollingFileAppender {
   val STRATEGY_PROPERTY = "spark.executor.logs.rolling.strategy"
@@ -155,6 +169,8 @@ private[spark] object RollingFileAppender {
    * over file names are prefixed with the `activeFileName`, and the active file
    * name has the latest logs. So it sorts all the rolled over logs (that are
    * prefixed with `activeFileName`) and appends the active file
+    * 获取已排序的文件列表,这假设所有翻转的文件名以“activeFileName”为前缀,活动文件名称具有最新的日志。
+    * 所以它排列所有滚动的日志（以“activeFileName”为前缀）并附加活动文件
    */
   def getSortedRolledOverFiles(directory: String, activeFileName: String): Seq[File] = {
     val rolledOverFiles = new File(directory).getAbsoluteFile.listFiles.filter { file =>

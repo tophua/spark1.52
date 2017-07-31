@@ -20,7 +20,8 @@ package org.apache.spark.ui.jobs
 import org.apache.spark.scheduler.SchedulingMode
 import org.apache.spark.ui.{SparkUI, SparkUITab}
 
-/** Web UI showing progress status of all jobs in the given SparkContext. */
+/** Web UI showing progress status of all jobs in the given SparkContext.
+  * Web UI显示给定SparkContext中所有作业的进度状态*/
 private[ui] class JobsTab(parent: SparkUI) extends SparkUITab(parent, "jobs") {
   val sc = parent.sc
   val killEnabled = parent.killEnabled

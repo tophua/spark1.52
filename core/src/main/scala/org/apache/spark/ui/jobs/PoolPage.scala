@@ -24,7 +24,8 @@ import scala.xml.Node
 import org.apache.spark.scheduler.StageInfo
 import org.apache.spark.ui.{WebUIPage, UIUtils}
 
-/** Page showing specific pool details */
+/** Page showing specific pool details
+  * 页面显示具体的池细节*/
 private[ui] class PoolPage(parent: StagesTab) extends WebUIPage("pool") {
   private val sc = parent.sc
   private val listener = parent.progressListener
@@ -44,6 +45,7 @@ private[ui] class PoolPage(parent: StagesTab) extends WebUIPage("pool") {
         killEnabled = parent.killEnabled)
 
       // For now, pool information is only accessible in live UIs
+      //现在，池信息只能在实时UI中访问
       val pools = sc.map(_.getPoolForName(poolName).get).toSeq
       val poolTable = new PoolTable(pools, parent)
 

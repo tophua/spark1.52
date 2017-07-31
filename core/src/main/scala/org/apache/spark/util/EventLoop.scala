@@ -78,6 +78,7 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
       throw new IllegalStateException(name + " has already been stopped")
     }
     // Call onStart before starting the event thread to make sure it happens before onReceive
+    //在启动事件线程之前调用onStart,以确保在onReceive之前发生
     onStart()
     eventThread.start()
   }
@@ -90,6 +91,7 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
       try {
         eventThread.join()
         // Call onStop after the event thread exits to make sure onReceive happens before onStop
+        //在事件线程退出后调用onStop,以确保onReceive在onStop之前发生
         onStopCalled = true
         onStop()
       } catch {
@@ -99,11 +101,13 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
           if (!onStopCalled) {
             // ie is thrown from `eventThread.join()`. Otherwise, we should not call `onStop` since
             // it's already called.
+            //即从`eventThread.join（）`抛出, 否则,我们不应该调用`onStop',因为它已经被调用了。
             onStop()
           }
       }
     } else {
       // Keep quiet to allow calling `stop` multiple times.
+      //保持安静,允许多次调用`stop`。
     }
   }
 
@@ -118,31 +122,38 @@ private[spark] abstract class EventLoop[E](name: String) extends Logging {
 
   /**
    * Return if the event thread has already been started but not yet stopped.
+    * 如果事件线程已经启动但尚未停止,则返回。
    */
   def isActive: Boolean = eventThread.isAlive
 
   /**
    * Invoked when `start()` is called but before the event thread starts.
+    * 当`start（）`被调用但事件线程启动之前调用
    */
   protected def onStart(): Unit = {}
 
   /**
    * Invoked when `stop()` is called and the event thread exits.
+    * 调用`stop（）`并且事件线程退出时调用
    */
   protected def onStop(): Unit = {}
 
   /**
    * Invoked in the event thread when polling events from the event queue.
+    * 在事件队列中轮询事件时调用事件线程
    *
    * Note: Should avoid calling blocking actions in `onReceive`, or the event thread will be blocked
    * and cannot process events in time. If you want to call some blocking actions, run them in
    * another thread.
+    * 注意：应避免在onReceive'中调用阻塞操作,否则事件线程将被阻塞,无法及时处理事件。
+    * 如果要调用某些阻止操作，请在另一个线程中运行它们。
    */
   protected def onReceive(event: E): Unit
 
   /**
    * Invoked if `onReceive` throws any non fatal error. Any non fatal error thrown from `onError`
    * will be ignored.
+    * 如果`onReceive`抛出任何非致命错误，则调用它。 从`onError`抛出的任何非致命错误将被忽略。
    */
   protected def onError(e: Throwable): Unit
 

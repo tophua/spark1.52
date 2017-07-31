@@ -41,6 +41,7 @@ private[ui] class ExecutorsTab(parent: SparkUI) extends SparkUITab(parent, "exec
 /**
  * :: DeveloperApi ::
  * A SparkListener that prepares information to be displayed on the ExecutorsTab
+  * 一个SparkListener，准备要显示在ExecutorsTab上的信息
  */
 @DeveloperApi
 class ExecutorsListener(storageStatusListener: StorageStatusListener) extends SparkListener {
@@ -108,7 +109,7 @@ class ExecutorsListener(storageStatusListener: StorageStatusListener) extends Sp
       executorToTasksActive(eid) = executorToTasksActive.getOrElse(eid, 1) - 1
       executorToDuration(eid) = executorToDuration.getOrElse(eid, 0L) + info.duration
 
-      // Update shuffle read/write
+      // Update shuffle read/write 更新随机读/写
       val metrics = taskEnd.taskMetrics
       if (metrics != null) {
         metrics.inputMetrics.foreach { inputMetrics =>

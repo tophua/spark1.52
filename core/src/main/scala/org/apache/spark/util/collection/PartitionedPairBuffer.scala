@@ -38,6 +38,7 @@ private[spark] class PartitionedPairBuffer[K, V](initialCapacity: Int = 64)
 
   // Basic growable array data structure. We use a single array of AnyRef to hold both the keys
   // and the values, so that we can sort them efficiently with KVArraySortDataFormat.
+  //基本可生长数组数据结构,我们使用AnyRef的单个数组来保存键和值,以便我们可以使用KVArraySortDataFormat有效地对它们进行排序。
   private var capacity = initialCapacity
   private var curSize = 0
   private var data = new Array[AnyRef](2 * initialCapacity)
@@ -77,7 +78,9 @@ private[spark] class PartitionedPairBuffer[K, V](initialCapacity: Int = 64)
     resetSamples()
   }
 
-  /** Iterate through the data in a given order. For this class this is not really destructive. */
+  /** Iterate through the data in a given order. For this class this is not really destructive.
+    * 按照给定的顺序迭代数据, 对于这个类,这不是真正的破坏性
+    * */
   override def partitionedDestructiveSortedIterator(keyComparator: Option[Comparator[K]])
     : Iterator[((Int, K), V)] = {
     val comparator = keyComparator.map(partitionKeyComparator).getOrElse(partitionComparator)

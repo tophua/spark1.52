@@ -26,16 +26,23 @@ import scala.reflect.ClassTag
  * elements in fields of the main object, and only allocates an Array[AnyRef] if there are more
  * entries than that. This makes it more efficient for operations like groupBy where we expect
  * some keys to have very few elements.
+  * 一个类似于ArrayBuffer的append-only缓冲区，但是对于小型缓冲区而言，内存效率更高.
+  * ArrayBuffer总是分配一个Object数组来存储数据，默认情况下有16个条目，所以它有大约80-100字节的开销。
+  * 相比之下，CompactBuffer可以在主对象的字段中保留两个元素，如果有更多的条目，则只能分配一个Array [AnyRef]。
+  * 这使得它对于像groupBy这样的操作更有效，我们期望一些键具有非常少的元素。
  */
 private[spark] class CompactBuffer[T: ClassTag] extends Seq[T] with Serializable {
   // First two elements
+  //前两个要素
   private var element0: T = _
   private var element1: T = _
 
   // Number of elements, including our two in the main object
+  //元素数量,包括我们两个在主要对象
   private var curSize = 0
 
   // Array for extra elements
+  //数组用于额外的元素
   private var otherElements: Array[T] = null
 
   def apply(position: Int): T = {
@@ -82,9 +89,11 @@ private[spark] class CompactBuffer[T: ClassTag] extends Seq[T] with Serializable
   def ++= (values: TraversableOnce[T]): CompactBuffer[T] = {
     values match {
       // Optimize merging of CompactBuffers, used in cogroup and groupByKey
+        //优化CompactBuffers的合并，用于cogroup和groupByKey
       case compactBuf: CompactBuffer[T] =>
         val oldSize = curSize
         // Copy the other buffer's size and elements to local variables in case it is equal to us
+        //将其他缓冲区大小和元素复制到局部变量,以防它等于我们
         val itsSize = compactBuf.curSize
         val itsElements = compactBuf.otherElements
         growToSize(curSize + itsSize)
@@ -99,6 +108,8 @@ private[spark] class CompactBuffer[T: ClassTag] extends Seq[T] with Serializable
           // At this point our size is also above 2, so just copy its array directly into ours.
           // Note that since we added two elements above, the index in this.otherElements that we
           // should copy to is oldSize.
+          //在这一点上，我们的大小也在2以上,所以只需将其阵列直接复制到我们的,
+          // 请注意，由于我们在上面添加了两个元素，所以我们应该复制的this.otherElements中的索引是oldSize。
           System.arraycopy(itsElements, 0, otherElements, oldSize, itsSize - 2)
         }
 
@@ -124,7 +135,9 @@ private[spark] class CompactBuffer[T: ClassTag] extends Seq[T] with Serializable
     }
   }
 
-  /** Increase our size to newSize and grow the backing array if needed. */
+  /** Increase our size to newSize and grow the backing array if needed.
+    * 将尺寸增加到newSize,如果需要,增加后备数组
+    *  */
   private def growToSize(newSize: Int): Unit = {
     if (newSize < 0) {
       throw new UnsupportedOperationException("Can't grow buffer past Int.MaxValue elements")
@@ -138,6 +151,8 @@ private[spark] class CompactBuffer[T: ClassTag] extends Seq[T] with Serializable
           // Prevent overflow if we double from 2^30 to 2^31, which will become Int.MinValue.
           // Note that we set the new array length to Int.MaxValue - 2 so that our capacity
           // calculation above still gives a positive integer.
+          //如果我们从2 ^ 30增加到2 ^ 31,则防止溢出,这将成为Int.MinValue。
+          // 请注意,我们将新的数组长度设置为Int.MaxValue - 2,以便上面的容量计算仍然给出一个正整数。
           newArrayLen = Int.MaxValue - 2
         }
       }

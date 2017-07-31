@@ -82,34 +82,40 @@ class Accumulable[R, T] private[spark] (
 
   /**
    * Add more data to this accumulator / accumulable
+    * 将更多数据添加到此累加器/可累加
    * @param term the data to add
    */
   def += (term: T) { value_ = param.addAccumulator(value_, term) }
 
   /**
    * Add more data to this accumulator / accumulable
+    * 将更多数据添加到此累加器/可累加
    * @param term the data to add
    */
   def add(term: T) { value_ = param.addAccumulator(value_, term) }
 
   /**
    * Merge two accumulable objects together
+    * 将两个可累积的对象合并在一起
    *
    * Normally, a user will not want to use this version, but will instead call `+=`.
+    * 通常，用户不想使用此版本，而是调用`+ =`。
    * @param term the other `R` that will get merged with this
    */
   def ++= (term: R) { value_ = param.addInPlace(value_, term)}
 
   /**
    * Merge two accumulable objects together
-   *
+   * 将两个可累积的对象合并在一起
    * Normally, a user will not want to use this version, but will instead call `add`.
+    * 通常，用户不想使用此版本，而是调用`add`。
    * @param term the other `R` that will get merged with this
    */
   def merge(term: R) { value_ = param.addInPlace(value_, term)}
 
   /**
    * Access the accumulator's current value; only allowed on master.
+    * 访问累加器的当前值; 只允许在master。
    */
   def value: R = {
     if (!deserialized) {
@@ -121,17 +127,19 @@ class Accumulable[R, T] private[spark] (
 
   /**
    * Get the current value of this accumulator from within a task.
-   *
+   *从任务中获取此累加器的当前值。
    * This is NOT the global value of the accumulator.  To get the global value after a
    * completed operation on the dataset, call `value`.
-   *
+   * 这不是累加器的全局值。 要在数据集完成操作后获取全局值，请调用`value`。
    * The typical use of this method is to directly mutate the local value, eg., to add
    * an element to a Set.
+    * 该方法的典型用途是直接突变本地值，例如，向元素添加元素。
    */
   def localValue: R = value_
 
   /**
    * Set the accumulator's value; only allowed on master.
+    * 设置累加器的值; 只允许在master。
    */
   def value_= (newValue: R) {
     if (!deserialized) {
@@ -143,21 +151,25 @@ class Accumulable[R, T] private[spark] (
 
   /**
    * Set the accumulator's value; only allowed on master
+    * 设置累加器的值; 只允许在master
    */
   def setValue(newValue: R) {
     this.value = newValue
   }
 
   // Called by Java when deserializing an object
+  //反序列化对象时由Java调用
   private def readObject(in: ObjectInputStream): Unit = Utils.tryOrIOException {
     in.defaultReadObject()
     value_ = zero
     deserialized = true
     // Automatically register the accumulator when it is deserialized with the task closure.
-    //
+    //当任务关闭反序列化时，自动对累加器进行注册。
     // Note internal accumulators sent with task are deserialized before the TaskContext is created
     // and are registered in the TaskContext constructor. Other internal accumulators, such SQL
     // metrics, still need to register here.
+    //在TaskContext创建之前,注意与任务一起发送的内部累加器是反序列化的,并在TaskContext构造函数中注册,
+    // 其他内部累加器,这样的SQL指标,仍然需要在这里注册。
     val taskContext = TaskContext.get()
     if (taskContext != null) {
       taskContext.registerAccumulator(this)
@@ -170,6 +182,7 @@ class Accumulable[R, T] private[spark] (
 /**
  * Helper object defining how to accumulate values of a particular type. An implicit
  * AccumulableParam needs to be available when you create [[Accumulable]]s of a specific type.
+  * 定义如何积累特定类型的值的帮助对象,当您创建特定类型的[可累积时，隐含的AccumulableParam需要可用。
  *
  * @tparam R the full accumulated data (result type)
  * @tparam T partial data that can be added in
@@ -222,8 +235,10 @@ GrowableAccumulableParam[R <% Growable[T] with TraversableOnce[T] with Serializa
   def zero(initialValue: R): R = {
     // We need to clone initialValue, but it's hard to specify that R should also be Cloneable.
     // Instead we'll serialize it to a buffer and load it back.
+    //我们需要克隆initialValue,但很难指定R也应该是可克隆的。相反,我们将其序列化到缓冲区并加载它。
     val ser = new JavaSerializer(new SparkConf(false)).newInstance()
     val copy = ser.deserialize[R](ser.serialize(initialValue))
+    ///如果它包含东西
     copy.clear()   // In case it contained stuff
     copy
   }
@@ -235,6 +250,8 @@ GrowableAccumulableParam[R <% Growable[T] with TraversableOnce[T] with Serializa
  * associative operation and can therefore be efficiently supported in parallel. They can be used
  * to implement counters (as in MapReduce) or sums. Spark natively supports accumulators of numeric
  * value types, and programmers can add support for new types.
+  * 累积结果类型的[累计的一个较简单的值是相同的作为要合并的元素的类型，即仅通过“添加”的变量相关操作，因此可以并行有效地支持。
+  * 它们可用于实现计数器（如MapReduce）或总和。 Spark本身支持数值类型的累加器，程序员可以添加对新类型的支持。
  *
  * An accumulator is created from an initial value `v` by calling [[SparkContext#accumulator]].
  * Tasks running on the cluster can then add to it using the [[Accumulable#+=]] operator.
@@ -242,6 +259,7 @@ GrowableAccumulableParam[R <% Growable[T] with TraversableOnce[T] with Serializa
  * using its value method.
  *
  * The interpreter session below shows an accumulator being used to add up the elements of an array:
+  * 下面的解释器会话显示一个累加器用于将数组的元素相加：
  *
  * {{{
  * scala> val accum = sc.accumulator(0)
@@ -279,6 +297,8 @@ class Accumulator[T] private[spark] (
  * A simpler version of [[org.apache.spark.AccumulableParam]] where the only data type you can add
  * in is the same type as the accumulated value. An implicit AccumulatorParam object needs to be
  * available when you create Accumulators of a specific type.
+  * 您可以添加的唯一数据类型的[[org.apache.spark.AccumulableParam]]的更简单版本与累积值相同,
+  * 在创建特定类型的累加器时,需要使用隐式的AccumulatorParam对象。
  *
  * @tparam T type of value to accumulate
  */
@@ -294,6 +314,8 @@ object AccumulatorParam {
   // `import SparkContext._` to enable them. Now we move them here to make the compiler find
   // them automatically. However, as there are duplicate codes in SparkContext for backward
   // compatibility, please update them accordingly if you modify the following implicit objects.
+  //下隐含对象在1.2之前的SparkContext中，用户必须使用`import SparkContext._`来启用它们。
+  //现在我们将它们移到这里,使编译器自动找到它们。 但是,由于向后兼容的SparkContext中有重复的代码,因此如果修改以下隐含对象,请相应更新它们。
 
   implicit object DoubleAccumulatorParam extends AccumulatorParam[Double] {
     def addInPlace(t1: Double, t2: Double): Double = t1 + t2
@@ -320,11 +342,14 @@ object AccumulatorParam {
 
 // TODO: The multi-thread support in accumulators is kind of lame; check
 // if there's a more intuitive way of doing it right
+//如果有一种更直观的方式做正确的事情
 private[spark] object Accumulators extends Logging {
   /**
    * This global map holds the original accumulator objects that are created on the driver.
    * It keeps weak references to these objects so that accumulators can be garbage-collected
    * once the RDDs and user-code that reference them are cleaned up.
+    * 此全局映射保存在驱动程序上创建的原始累加器对象,它对这些对象保持弱引用,
+    * 以便在清除引用它们的RDD和用户代码之后,可以对垃圾收集器进行垃圾收集。
    */
   val originals = mutable.Map[Long, WeakReference[Accumulable[_, _]]]()
 
@@ -346,11 +371,13 @@ private[spark] object Accumulators extends Logging {
   }
 
   // Add values to the original accumulators with some given IDs
+  //将值添加到具有某些给定ID的原始累加器
   def add(values: Map[Long, Any]): Unit = synchronized {
     for ((id, value) <- values) {
       if (originals.contains(id)) {
         // Since we are now storing weak references, we must check whether the underlying data
         // is valid.
+        //由于我们现在存储弱引用,所以我们必须检查底层数据是否有效。
         originals(id).get match {
           case Some(accum) => accum.asInstanceOf[Accumulable[Any, Any]] ++= value
           case None =>
@@ -368,8 +395,9 @@ private[spark] object InternalAccumulator {
   val PEAK_EXECUTION_MEMORY = "peakExecutionMemory"
   val TEST_ACCUMULATOR = "testAccumulator"
 
-  // For testing only.
+  // For testing only.仅用于测试
   // This needs to be a def since we don't want to reuse the same accumulator across stages.
+  //这需要是一个def,因为我们不想跨阶段重用同一个累加器。
   private def maybeTestAccumulator: Option[Accumulator[Long]] = {
     if (sys.props.contains("spark.testing")) {
       Some(new Accumulator(
@@ -381,10 +409,12 @@ private[spark] object InternalAccumulator {
 
   /**
    * Accumulators for tracking internal metrics.
-   *
+   * 追踪内部指标的累加器
    * These accumulators are created with the stage such that all tasks in the stage will
    * add to the same set of accumulators. We do this to report the distribution of accumulator
    * values across all tasks within each stage.
+    * 这些累加器是通过stage创建的,使得stage中的所有任务将添加到同一组累加器,
+    * 我们这样做来报告累加器值在每个阶段内的所有任务的分配。
    */
   def create(sc: SparkContext): Seq[Accumulator[Long]] = {
     val internalAccumulators = Seq(
@@ -392,7 +422,10 @@ private[spark] object InternalAccumulator {
         // during shuffles, aggregations and joins. The value of this accumulator should be
         // approximately the sum of the peak sizes across all such data structures created
         // in this task. For SQL jobs, this only tracks all unsafe operators and ExternalSort.
-        new Accumulator(
+         //执行存储器是指在混洗，聚合和连接期间创建的内部数据结构所使用的内存。
+        // 此累加器的值应大约是在此任务中创建的所有此类数据结构之间的峰值大小的总和。
+        // 对于SQL作业，这仅跟踪所有不安全的操作符和ExternalSort。
+         new Accumulator(
           0L, AccumulatorParam.LongAccumulatorParam, Some(PEAK_EXECUTION_MEMORY), internal = true)
       ) ++ maybeTestAccumulator.toSeq
     internalAccumulators.foreach { accumulator =>

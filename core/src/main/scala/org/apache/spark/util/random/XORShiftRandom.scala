@@ -43,6 +43,7 @@ private[spark] class XORShiftRandom(init: Long) extends JavaRandom(init) {
 
   // we need to just override next - this will be called by nextInt, nextDouble,
   // nextGaussian, nextLong, etc.
+  //我们需要覆盖下一个 - 这将被nextInt,nextDouble,nextGaussian,nextLong等调用。
   override protected def next(bits: Int): Int = {
     var nextSeed = seed ^ (seed << 21)
     nextSeed ^= (nextSeed >>> 35)
@@ -56,10 +57,15 @@ private[spark] class XORShiftRandom(init: Long) extends JavaRandom(init) {
   }
 }
 
-/** Contains benchmark method and main method to run benchmark of the RNG */
+/** Contains benchmark method and main method to run benchmark of the RNG
+  * 包含运行RNG基准的基准方法和主要方法
+  * */
 private[spark] object XORShiftRandom {
 
-  /** Hash seeds to have 0/1 bits throughout. */
+  /**
+    * Hash seeds to have 0/1 bits throughout.
+    * 哈希种子有0/1位
+    * */
   private def hashSeed(seed: Long): Long = {
     val bytes = ByteBuffer.allocate(java.lang.Long.SIZE).putLong(seed).array()
     MurmurHash3.bytesHash(bytes)
@@ -67,6 +73,7 @@ private[spark] object XORShiftRandom {
 
   /**
    * Main method for running benchmark
+    * 运行基准的主要方法,需要一个参数 - 生成的随机数的数量
    * @param args takes one argument - the number of random numbers to generate
    */
   def main(args: Array[String]): Unit = {
@@ -93,6 +100,7 @@ private[spark] object XORShiftRandom {
     val xorRand = new XORShiftRandom(seed)
 
     // this is just to warm up the JIT - we're not timing anything
+    //这只是为了热身JIT - 我们没有时间任何事情
     timeIt(million) {
       javaRand.nextInt()
       xorRand.nextInt()
@@ -100,6 +108,7 @@ private[spark] object XORShiftRandom {
 
     /* Return results as a map instead of just printing to screen
     in case the user wants to do something with them */
+    //返回结果作为地图而不是打印到屏幕,以防用户想要与他们做某事
     Map("javaTime" -> timeIt(numIters) { javaRand.nextInt() },
         "xorTime" -> timeIt(numIters) { xorRand.nextInt() })
   }

@@ -27,6 +27,7 @@ import org.apache.spark.ui.{ToolTips, UIUtils, WebUIPage}
 import org.apache.spark.util.Utils
 
 // This isn't even used anymore -- but we need to keep it b/c of a MiMa false positive
+//这甚至不再被使用 - 但是我们需要保持一个MiMa假阳性的b / c
 private[ui] case class ExecutorSummaryInfo(
     id: String,
     hostPort: String,
@@ -55,6 +56,7 @@ private[ui] class ExecutorsPage(
     val (storageStatusList, execInfo) = listener.synchronized {
       // The follow codes should be protected by `listener` to make sure no executors will be
       // removed before we query their status. See SPARK-12784.
+      //以下代码应由“监听器”保护,以确保在查询状态之前不会删除执行程序,参见SPARK-12784。
       val _storageStatusList = listener.storageStatusList
       val _execInfo = {
         for (statusId <- 0 until _storageStatusList.size)
@@ -86,7 +88,9 @@ private[ui] class ExecutorsPage(
           <th>
             <!-- Place the shuffle write tooltip on the left (rather than the default position
               of on top) because the shuffle write column is the last column on the right side and
-              the tooltip is wider than the column, so it doesn't fit on top. -->
+              the tooltip is wider than the column, so it doesn't fit on top.
+              将随机写入工具提示放在左侧（而不是顶部的默认位置）,因为随机写入列是右侧的最后一列，
+              并且工具提示宽于列，因此它不适合顶部。-->
             <span data-toggle="tooltip" data-placement="left" title={ToolTips.SHUFFLE_WRITE}>
               Shuffle Write
             </span>
@@ -119,7 +123,8 @@ private[ui] class ExecutorsPage(
     UIUtils.headerSparkPage("Executors (" + execInfo.size + ")", content, parent)
   }
 
-  /** Render an HTML row representing an executor */
+  /** Render an HTML row representing an executor
+    * 渲染表示执行器的HTML行*/
   private def execRow(info: ExecutorSummary, logsExist: Boolean): Seq[Node] = {
     val maximumMemory = info.maxMemory
     val memoryUsed = info.memoryUsed
@@ -182,7 +187,8 @@ private[ui] class ExecutorsPage(
 }
 
 private[spark] object ExecutorsPage {
-  /** Represent an executor's info as a map given a storage status index */
+  /** Represent an executor's info as a map given a storage status index
+    * 将执行者的信息表示为给定存储状态索引的映射 */
   def getExecInfo(listener: ExecutorsListener, statusId: Int): ExecutorSummary = {
     val status = listener.storageStatusList(statusId)
     val execId = status.blockManagerId.executorId

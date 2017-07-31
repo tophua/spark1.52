@@ -26,7 +26,8 @@ import org.apache.spark.status.api.v1.{AllRDDResource, RDDDataDistribution, RDDP
 import org.apache.spark.ui.{PagedDataSource, PagedTable, UIUtils, WebUIPage}
 import org.apache.spark.util.Utils
 
-/** Page showing storage details for a given RDD */
+/** Page showing storage details for a given RDD
+  * 页面显示给定RDD的存储细节 */
 private[ui] class RDDPage(parent: StorageTab) extends WebUIPage("rdd") {
   private val listener = parent.listener
 
@@ -48,6 +49,7 @@ private[ui] class RDDPage(parent: StorageTab) extends WebUIPage("rdd") {
     val rddStorageInfo = AllRDDResource.getRDDStorageInfo(rddId, listener, includeDetails = true)
       .getOrElse {
         // Rather than crashing, render an "RDD Not Found" page
+        //而不是崩溃，渲染“找不到RDD”页面
         return UIUtils.headerSparkPage("RDD Not Found", Seq[Node](), parent)
       }
 
@@ -55,7 +57,7 @@ private[ui] class RDDPage(parent: StorageTab) extends WebUIPage("rdd") {
     val workerTable = UIUtils.listingTable(workerHeader, workerRow,
       rddStorageInfo.dataDistribution.get, id = Some("rdd-storage-by-worker-table"))
 
-    // Block table
+    // Block table 块表
     val (blockTable, blockTableHTML) = try {
       val _blockTable = new BlockPagedTable(
         UIUtils.prependBaseUri(parent.basePath) + s"/storage/rdd/?id=${rddId}",
@@ -133,13 +135,15 @@ private[ui] class RDDPage(parent: StorageTab) extends WebUIPage("rdd") {
     UIUtils.headerSparkPage("RDD Storage Info for " + rddStorageInfo.name, content, parent)
   }
 
-  /** Header fields for the worker table */
+  /** Header fields for the worker table
+    * 工作表的标题字段 */
   private def workerHeader = Seq(
     "Host",
     "Memory Usage",
     "Disk Usage")
 
-  /** Render an HTML row representing a worker */
+  /** Render an HTML row representing a worker
+    * 渲染表示工作者的HTML行 */
   private def workerRow(worker: RDDDataDistribution): Seq[Node] = {
     <tr>
       <td>{worker.address}</td>
@@ -184,6 +188,7 @@ private[ui] class BlockDataSource(
 
   /**
    * Return Ordering according to sortColumn and desc
+    * 根据sortColumn和desc返回排序
    */
   private def ordering(sortColumn: String, desc: Boolean): Ordering[BlockTableRowData] = {
     val ordering = sortColumn match {

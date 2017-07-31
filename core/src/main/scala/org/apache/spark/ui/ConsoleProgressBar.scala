@@ -26,16 +26,20 @@ import org.apache.spark._
  * status of active stages from `sc.statusTracker` periodically, the progress bar will be showed
  * up after the stage has ran at least 500ms. If multiple stages run in the same time, the status
  * of them will be combined together, showed in one line.
+  * ConsoleProgressBar显示控制台下一行的阶段进度。 它定期从“sc.statusTracker”轮询活动阶段的状态,
+  * 进度条将在stages运行至少500ms后显示,如果多个阶段在同一时间运行,他们的状态将被组合在一起,显示在一行。
  */
 private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
   // Carrige return
   val CR = '\r'
   // Update period of progress bar, in milliseconds
+  //进度条的更新周期,以毫秒为单位
   val UPDATE_PERIOD = 200L
   // Delay to show up a progress bar, in milliseconds
+  //延迟显示一个进度条,以毫秒为单位
   val FIRST_DELAY = 500L
 
-  // The width of terminal
+  // The width of terminal 终端的宽度
   val TerminalWidth = if (!sys.env.getOrElse("COLUMNS", "").isEmpty) {
     sys.env.get("COLUMNS").get.toInt
   } else {
@@ -47,6 +51,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
   var lastProgressBar = ""
 
   // Schedule a refresh thread to run periodically
+  //安排刷新线程定期运行
   private val timer = new Timer("refresh progress", true)
   timer.schedule(new TimerTask{
     override def run() {
@@ -56,6 +61,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
 
   /**
    * Try to refresh the progress bar in every cycle
+    * 尝试在每个周期刷新进度条
    */
   private def refresh(): Unit = synchronized {
     val now = System.currentTimeMillis()
@@ -74,6 +80,8 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
    * Show progress bar in console. The progress bar is displayed in the next line
    * after your last output, keeps overwriting itself to hold in one line. The logging will follow
    * the progress bar, then progress bar will be showed in next line without overwrite logs.
+    * 在控制台中显示进度条,进度条显示在上一次输出后的下一行中,不断覆盖自己以保持一行,
+    * 日志记录将跟随进度条,则进度条将显示在下一行而不覆盖日志。
    */
   private def show(now: Long, stages: Seq[SparkStageInfo]) {
     val width = TerminalWidth / stages.size
@@ -95,6 +103,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
 
     // only refresh if it's changed of after 1 minute (or the ssh connection will be closed
     // after idle some time)
+    //只有在1分钟后更改（或者ssh连接将在空闲一段时间后关闭）才刷新
     if (bar != lastProgressBar || now - lastUpdateTime > 60 * 1000L) {
       System.err.print(CR + bar)
       lastUpdateTime = now
@@ -104,6 +113,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
 
   /**
    * Clear the progress bar if showed.
+    * 如果显示,清除进度条。
    */
   private def clear() {
     if (!lastProgressBar.isEmpty) {
@@ -115,6 +125,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
   /**
    * Mark all the stages as finished, clear the progress bar if showed, then the progress will not
    * interweave with output of jobs.
+    * 将所有阶段标记为已完成,清除进度条,如果显示,则进度不会与作业的输出交织
    */
   def finishAll(): Unit = synchronized {
     clear()
@@ -124,6 +135,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
   /**
    * Tear down the timer thread.  The timer thread is a GC root, and it retains the entire
    * SparkContext if it's not terminated.
+    * 拆除定时器线程,定时器线程是一个GC根,它保留了整个sparkcontext如果不是终止。
    */
   def stop(): Unit = timer.cancel()
 }

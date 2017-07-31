@@ -20,6 +20,7 @@ package org.apache.spark.util.collection
 /**
  * A simple, fixed-size bit set implementation. This implementation is fast because it avoids
  * safety/bound checking.
+  * 一个简单的，固定大小的位集实现。 这种实现是快速的，因为它避免了安全/限制检查。
  */
 class BitSet(numBits: Int) extends Serializable {
 
@@ -28,12 +29,13 @@ class BitSet(numBits: Int) extends Serializable {
 
   /**
    * Compute the capacity (number of bits) that can be represented
-   * by this bitset.
+   * by this bitset.计算该位集可以表示的容量（位数）
    */
   def capacity: Int = numWords * 64
 
   /**
    * Set all the bits up to a given index
+    * 将所有位设置为给定的索引
    */
   def setUntil(bitIndex: Int) {
     val wordIndex = bitIndex >> 6 // divide by 64
@@ -41,6 +43,7 @@ class BitSet(numBits: Int) extends Serializable {
     while(i < wordIndex) { words(i) = -1; i += 1 }
     if(wordIndex < words.length) {
       // Set the remaining bits (note that the mask could still be zero)
+      //设置剩余的位（注意，掩码仍然可以为零）
       val mask = ~(-1L << (bitIndex & 0x3f))
       words(wordIndex) |= mask
     }
@@ -49,6 +52,7 @@ class BitSet(numBits: Int) extends Serializable {
   /**
    * Compute the bit-wise AND of the two sets returning the
    * result.
+    * 计算返回结果的两组的逐位AND
    */
   def &(other: BitSet): BitSet = {
     val newBS = new BitSet(math.max(capacity, other.capacity))
@@ -66,6 +70,7 @@ class BitSet(numBits: Int) extends Serializable {
   /**
    * Compute the bit-wise OR of the two sets returning the
    * result.
+    * 计算返回结果的两组的逐位OR
    */
   def |(other: BitSet): BitSet = {
     val newBS = new BitSet(math.max(capacity, other.capacity))
@@ -91,6 +96,7 @@ class BitSet(numBits: Int) extends Serializable {
   /**
    * Compute the symmetric difference by performing bit-wise XOR of the two sets returning the
    * result.
+    * 通过执行返回结果的两组的逐位异或来计算对称差
    */
   def ^(other: BitSet): BitSet = {
     val newBS = new BitSet(math.max(capacity, other.capacity))
@@ -112,6 +118,7 @@ class BitSet(numBits: Int) extends Serializable {
   /**
    * Compute the difference of the two sets by performing bit-wise AND-NOT returning the
    * result.
+    * 通过逐位执行AND-NOT返回结果来计算两组的差异
    */
   def andNot(other: BitSet): BitSet = {
     val newBS = new BitSet(capacity)
@@ -129,6 +136,7 @@ class BitSet(numBits: Int) extends Serializable {
 
   /**
    * Sets the bit at the specified index to true.
+    * 将指定索引处的位设置为true
    * @param index the bit index
    */
   def set(index: Int) {
@@ -144,6 +152,7 @@ class BitSet(numBits: Int) extends Serializable {
   /**
    * Return the value of the bit with the specified index. The value is true if the bit with
    * the index is currently set in this BitSet; otherwise, the result is false.
+    *使用指定的索引返回位的值。 如果当前在该BitSet中设置了索引的位，则该值为真; 否则，结果是假的
    *
    * @param index the bit index
    * @return the value of the bit with the specified index
@@ -155,6 +164,7 @@ class BitSet(numBits: Int) extends Serializable {
 
   /**
    * Get an iterator over the set bits.
+    * 获取一组迭代器
    */
   def iterator: Iterator[Int] = new Iterator[Int] {
     var ind = nextSetBit(0)
@@ -167,7 +177,8 @@ class BitSet(numBits: Int) extends Serializable {
   }
 
 
-  /** Return the number of bits set to true in this BitSet. */
+  /** Return the number of bits set to true in this BitSet.
+    * 返回此BitSet中设置为true的位数 */
   def cardinality(): Int = {
     var sum = 0
     var i = 0
@@ -181,9 +192,9 @@ class BitSet(numBits: Int) extends Serializable {
   /**
    * Returns the index of the first bit that is set to true that occurs on or after the
    * specified starting index. If no such bit exists then -1 is returned.
-   *
+   * 返回在指定的起始索引上或之后设置为true的第一个位的索引。 如果不存在这样的位，则返回-1。
    * To iterate over the true bits in a BitSet, use the following loop:
-   *
+   * 要迭代BitSet中的真实位，请使用以下循环：
    *  for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
    *    // operate on index i here
    *  }
@@ -198,6 +209,7 @@ class BitSet(numBits: Int) extends Serializable {
     }
 
     // Try to find the next set bit in the current word
+    //尝试找到当前单词中的下一个位
     val subIndex = fromIndex & 0x3f
     var word = words(wordIndex) >> subIndex
     if (word != 0) {
@@ -205,6 +217,7 @@ class BitSet(numBits: Int) extends Serializable {
     }
 
     // Find the next set bit in the rest of the words
+    //找到其余单词中的下一个位
     wordIndex += 1
     while (wordIndex < numWords) {
       word = words(wordIndex)
@@ -217,6 +230,7 @@ class BitSet(numBits: Int) extends Serializable {
     -1
   }
 
-  /** Return the number of longs it would take to hold numBits. */
+  /** Return the number of longs it would take to hold numBits.
+    * 返回持有numBits所需的长度数 */
   private def bit2words(numBits: Int) = ((numBits - 1) >> 6) + 1
 }

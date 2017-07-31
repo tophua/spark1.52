@@ -22,7 +22,8 @@ import javax.servlet.http.HttpServletRequest
 import org.apache.spark.scheduler.SchedulingMode
 import org.apache.spark.ui.{SparkUI, SparkUITab}
 
-/** Web UI showing progress status of all stages in the given SparkContext. */
+/** Web UI showing progress status of all stages in the given SparkContext.
+  * Web UI显示给定SparkContext中所有阶段的进度状态 */
 private[ui] class StagesTab(parent: SparkUI) extends SparkUITab(parent, "stages") {
   val sc = parent.sc
   val conf = parent.conf
@@ -46,6 +47,8 @@ private[ui] class StagesTab(parent: SparkUI) extends SparkUITab(parent, "stages"
       // Do a quick pause here to give Spark time to kill the stage so it shows up as
       // killed after the refresh. Note that this will block the serving thread so the
       // time should be limited in duration.
+      //在这里快速暂停给Spark时间杀死stage，所以它在刷新后显示为被杀。
+      // 请注意，这将阻止服务线程，所以时间应该被限制在持续时间。
       Thread.sleep(100)
     }
   }

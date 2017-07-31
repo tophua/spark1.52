@@ -54,8 +54,9 @@ private[spark] object StratifiedSamplingUtils extends Logging {
 
   /**
    * Count the number of items instantly accepted and generate the waitlist for each stratum.
-   *
+   *计算立即接受的项目数，并生成每个层的等待列表
    * This is only invoked when exact sample size is required.
+    * 仅当需要确切的样品量时才调用此方法,
    */
   def getAcceptanceResults[K, V](rdd: RDD[(K, V)],
       withReplacement: Boolean,
@@ -75,6 +76,7 @@ private[spark] object StratifiedSamplingUtils extends Logging {
 
   /**
    * Returns the function used by aggregate to collect sampling statistics for each partition.
+    * 返回聚合使用的函数来收集每个分区的抽样统计信息
    */
   def getSeqOp[K, V](withReplacement: Boolean,
       fractions: Map[K, Double],
@@ -93,6 +95,7 @@ private[spark] object StratifiedSamplingUtils extends Logging {
       if (withReplacement) {
         // compute acceptBound and waitListBound only if they haven't been computed already
         // since they don't change from iteration to iteration.
+        //只有在尚未计算acceptBound和waitListBound时才会计算acceptBound和waitListBound，因为它们不会从迭代更改为迭代。
         // TODO change this to the streaming version
         if (acceptResult.areBoundsEmpty) {
           val n = counts.get(key)
@@ -115,6 +118,7 @@ private[spark] object StratifiedSamplingUtils extends Logging {
         // We use the streaming version of the algorithm for sampling without replacement to avoid
         // using an extra pass over the RDD for computing the count.
         // Hence, acceptBound and waitListBound change on every iteration.
+        //我们使用流版本的算法进行抽样，无需更换即可避免使用额外的RDD来计算计数, 因此，acceptBound和waitListBound在每次迭代时都会发生变化。
         acceptResult.acceptBound =
           BinomialBounds.getLowerBound(delta, acceptResult.numItems, fraction)
         acceptResult.waitListBound =
@@ -134,13 +138,16 @@ private[spark] object StratifiedSamplingUtils extends Logging {
 
   /**
    * Returns the function used combine results returned by seqOp from different partitions.
+    * 返回使用seqOp从不同分区返回的组合结果的函数。
    */
   def getCombOp[K]: (mutable.Map[K, AcceptanceResult], mutable.Map[K, AcceptanceResult])
     => mutable.Map[K, AcceptanceResult] = {
     (result1: mutable.Map[K, AcceptanceResult], result2: mutable.Map[K, AcceptanceResult]) => {
       // take union of both key sets in case one partition doesn't contain all keys
+      //如果一个分区不包含所有键，则将两个密钥集合的并集
       result1.keySet.union(result2.keySet).foreach { key =>
         // Use result2 to keep the combined result since r1 is usual empty
+        //使用result2保留组合结果，因为r1通常为空
         val entry1 = result1.get(key)
         if (result2.contains(key)) {
           result2(key).merge(entry1)
@@ -157,7 +164,7 @@ private[spark] object StratifiedSamplingUtils extends Logging {
   /**
    * Given the result returned by getCounts, determine the threshold for accepting items to
    * generate exact sample size.
-   *
+   *给定getCounts返回的结果,确定接受项目以生成精确样本大小的阈值。
    * To do so, we compute sampleSize = math.ceil(size * samplingRate) for each stratum and compare
    * it to the number of items that were accepted instantly and the number of items in the waitlist
    * for that stratum. Most of the time, numAccepted <= sampleSize <= (numAccepted + numWaitlisted),
@@ -190,11 +197,13 @@ private[spark] object StratifiedSamplingUtils extends Logging {
 
   /**
    * Return the per partition sampling function used for sampling without replacement.
-   *
+   *返回每个分区采样功能用于采样而不更换
    * When exact sample size is required, we make an additional pass over the RDD to determine the
    * exact sampling rate that guarantees sample size with high confidence.
+    * 当需要精确的样品量时,我们再对RDD进行额外的检测,以确定以高置信度保证样品量的确切采样率。
    *
    * The sampling function has a unique seed per partition.
+    * 采样函数每个分区具有唯一的种子
    */
   def getBernoulliSamplingFunction[K, V](rdd: RDD[(K, V)],
       fractions: Map[K, Double],
@@ -203,6 +212,7 @@ private[spark] object StratifiedSamplingUtils extends Logging {
     var samplingRateByKey = fractions
     if (exact) {
       // determine threshold for each stratum and resample
+      //确定每个层的阈值并重新采样
       val finalResult = getAcceptanceResults(rdd, false, fractions, None, seed)
       samplingRateByKey = computeThresholdByKey(finalResult, fractions)
     }
@@ -211,19 +221,23 @@ private[spark] object StratifiedSamplingUtils extends Logging {
       rng.reSeed(seed + idx)
       // Must use the same invoke pattern on the rng as in getSeqOp for without replacement
       // in order to generate the same sequence of random numbers when creating the sample
+      //必须在rn上使用与getSeqOp中相同的调用模式,无需替换,以便在创建样本时生成相同的随机数序列
       iter.filter(t => rng.nextUniform() < samplingRateByKey(t._1))
     }
   }
 
   /**
    * Return the per partition sampling function used for sampling with replacement.
+    * 返回用于取代的每个分区采样功能
    *
    * When exact sample size is required, we make two additional passed over the RDD to determine
    * the exact sampling rate that guarantees sample size with high confidence. The first pass
    * counts the number of items in each stratum (group of items with the same key) in the RDD, and
    * the second pass uses the counts to determine exact sampling rates.
-   *
+   *当需要精确的样本量时，我们再通过RDD传递两个以确定以高置信度保证样本大小的确切采样率。
+    * 第一次通过计算RDD中每个层（具有相同键的项目组）中的项目数，第二次通过计数确定精确的采样率。
    * The sampling function has a unique seed per partition.
+    * 采样函数每个分区具有唯一的种子
    */
   def getPoissonSamplingFunction[K: ClassTag, V: ClassTag](rdd: RDD[(K, V)],
       fractions: Map[K, Double],
@@ -242,6 +256,7 @@ private[spark] object StratifiedSamplingUtils extends Logging {
           val acceptBound = finalResult(key).acceptBound
           // Must use the same invoke pattern on the rng as in getSeqOp for with replacement
           // in order to generate the same sequence of random numbers when creating the sample
+          //必须在rn上使用与getSeqOp中相同的调用模式进行替换，以便在创建样本时生成相同的随机数序列
           val copiesAccepted = if (acceptBound == 0) 0L else rng.nextPoisson(acceptBound)
           val copiesWaitlisted = rng.nextPoisson(finalResult(key).waitListBound)
           val copiesInSample = copiesAccepted +
@@ -269,11 +284,14 @@ private[spark] object StratifiedSamplingUtils extends Logging {
     }
   }
 
-  /** A random data generator that generates both uniform values and Poisson values. */
+  /** A random data generator that generates both uniform values and Poisson values.
+    * 一个产生均匀值和泊松值的随机数据生成器
+    * */
   private class RandomDataGenerator {
     val uniform = new XORShiftRandom()
     // commons-math3 doesn't have a method to generate Poisson from an arbitrary mean;
     // maintain a cache of Poisson(m) distributions for various m
+    //commons-math3没有一种从任意平均值生成泊松的方法;保持各种m的Poisson（m）分布缓存
     val poissonCache = mutable.Map[Double, PoissonDistribution]()
     var poissonSeed = 0L
 
@@ -301,6 +319,7 @@ private[spark] object StratifiedSamplingUtils extends Logging {
 /**
  * Object used by seqOp to keep track of the number of items accepted and items waitlisted per
  * stratum, as well as the bounds for accepting and waitlisting items.
+  * seqOp使用的对象跟踪每层接受的项目数量和候补列表，以及接受和等待列表项目的边界
  *
  * `[random]` here is necessary since it's in the return type signature of seqOp defined above
  */

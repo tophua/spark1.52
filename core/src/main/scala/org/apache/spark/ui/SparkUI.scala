@@ -33,6 +33,7 @@ import org.apache.spark.ui.scope.RDDOperationGraphListener
 
 /**
  * Top level user interface for a Spark application.
+  * Spark应用程序的顶级用户界面
  */
 private[spark] class SparkUI private (
     val sc: Option[SparkContext],
@@ -56,7 +57,8 @@ private[spark] class SparkUI private (
 
   val stagesTab = new StagesTab(this)
 
-  /** Initialize all components of the server. */
+  /** Initialize all components of the server.
+    * 初始化服务器的所有组件*/
   def initialize() {
     attachTab(new JobsTab(this))
     attachTab(stagesTab)
@@ -69,6 +71,7 @@ private[spark] class SparkUI private (
     attachHandler(createRedirectHandler("/", "/jobs", basePath = basePath))
     attachHandler(ApiRootResource.getServletHandler(this))
     // This should be POST only, but, the YARN AM proxy won't proxy POSTs
+    //这应该是POST,但是,YARN AM代理将不会代理POST
     attachHandler(createRedirectHandler(
       "/stages/stage/kill", "/stages", stagesTab.handleKillRequest,
       httpMethods = Set("GET", "POST")))
@@ -77,12 +80,13 @@ private[spark] class SparkUI private (
 
   def getAppName: String = appName
 
-  /** Set the app name for this UI. */
+  /** Set the app name for this UI. 设置此UI的应用程序名称*/
   def setAppName(name: String) {
     appName = name
   }
 
-  /** Stop the server behind this web interface. Only valid after bind(). */
+  /** Stop the server behind this web interface. Only valid after bind().
+    * 停止此Web界面后面的服务器。 只有在bind（）之后才有效。 */
   override def stop() {
     super.stop()
     logInfo("Stopped Spark web UI at %s".format(appUIAddress))
@@ -90,6 +94,7 @@ private[spark] class SparkUI private (
 
   /**
    * Return the application UI host:port. This does not include the scheme (http://).
+    * 返回应用程序UI主机：端口。 这不包括方案（http：//)
    */
   private[spark] def appUIHostPort = publicHostName + ":" + boundPort
 
@@ -157,7 +162,7 @@ private[spark] object SparkUI {
 
   /**
    * Create a new Spark UI.
-   *
+   *创建一个新的Spark UI
    * @param sc optional SparkContext; this can be None when reconstituting a UI from event logs.
    * @param jobProgressListener if supplied, this JobProgressListener will be used; otherwise, the
    *                            web UI will create and register its own JobProgressListener.

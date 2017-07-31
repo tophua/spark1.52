@@ -35,14 +35,17 @@ private[spark] object AkkaUtils extends Logging {
 
   /**
    * 创建ActorSystem启动ActorSystem
-   * Creates an ActorSystem ready for remoting, with various(各种) Spark features. Returns both the
+   * Creates an ActorSystem ready for remoting, with various Spark features. Returns both the
    * ActorSystem itself and its port (which is hard to get from Akka).
+    * 创建一个可以远程处理的ActorSystem,具有各种Spark功能,返回ActorSystem本身及其端口(很难从Akka获取)
    *
    * Note: the `name` parameter is important(重要), as even if a client sends a message to right
    * host + port, if the system name is incorrect, Akka will drop the message.
+    * 注意：`name`参数很重要,即使客户端发送消息到正确的主机+端口,如果系统名称不正确,Akka将删除该消息。
    *
    * If indestructible is set to true, the Actor System will continue running in the event
    * of a fatal exception. This is used by [[org.apache.spark.executor.Executor]].
+    * 如果不可破坏设置为true,则在发生致命异常的情况下,Actor系统将继续运行,这由[[org.apache.spark.executor.Executor]]使用。
    */
   def createActorSystem(
       name: String,
@@ -154,6 +157,7 @@ private[spark] object AkkaUtils extends Logging {
   /**
    * Send a message to the given actor and get its result within a default timeout, or
    * throw a SparkException if this fails.
+    * 发送消息给给定的actor并在默认超时内获取结果,如果失败,则抛出SparkException。
    */
   def askWithReply[T](
       message: Any,

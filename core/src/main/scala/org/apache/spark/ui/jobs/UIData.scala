@@ -55,6 +55,8 @@ private[spark] object UIData {
     // This may be an underestimate because the job start event references all of the result
     // stages' transitive stage dependencies, but some of these stages might be skipped if their
     // output is available from earlier runs.
+    //`numTasks`是一个潜在的低估这个工作将运行的真正的任务数量。这可能是一个低估，
+    // 因为作业开始事件引用所有结果阶段的传递阶段依赖关系，但是如果其输出可以从较早的运行中获取，则可能会跳过其中一些阶段。
     // See https://github.com/apache/spark/pull/3009 for a more extensive discussion.
     var numTasks: Int = 0,
     var numActiveTasks: Int = 0,
@@ -64,6 +66,7 @@ private[spark] object UIData {
     /* Stages */
     var numActiveStages: Int = 0,
     // This needs to be a set instead of a simple count to prevent double-counting of rerun stages:
+    //这需要一个集合而不是一个简单的计数,以防止重新运行阶段的重复计数：
     var completedStageIndices: mutable.HashSet[Int] = new mutable.HashSet[Int](),
     var numSkippedStages: Int = 0,
     var numFailedStages: Int = 0
@@ -104,6 +107,7 @@ private[spark] object UIData {
 
   /**
    * These are kept mutable and reused throughout a task's lifetime to avoid excessive reallocation.
+    * 这些在整个任务的生命周期中保持可变和重复使用,以避免过度重新分配。
    */
   case class TaskUIData(
       var taskInfo: TaskInfo,

@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger
  * AtomicInteger. An example usage is in BlockManager, where each BlockManager
  * instance would start an RpcEndpoint and we use this utility to assign the RpcEndpoints'
  * unique names.
+  * 用于获取唯一生成ID的实用程序,这是Java的AtomicInteger的包装,BlockManager中的一个示例用法，
+  * 其中每个BlockManager实例将启动一个RpcEndpoint,我们使用此实用程序分配RpcEndpoints的唯一名称。
  */
 private[spark] class IdGenerator {
   private val id = new AtomicInteger

@@ -21,7 +21,7 @@ import scala.xml.{Node, Unparsed}
 
 /**
  * A data source that provides data for a page.
- *
+ * 提供页面数据的数据源
  * @param pageSize the number of rows in a page
  */
 private[ui] abstract class PagedDataSource[T](val pageSize: Int) {
@@ -32,16 +32,19 @@ private[ui] abstract class PagedDataSource[T](val pageSize: Int) {
 
   /**
    * Return the size of all data.
+    * 返回所有数据的大小
    */
   protected def dataSize: Int
 
   /**
    * Slice a range of data.
+    * 切片一系列数据
    */
   protected def sliceData(from: Int, to: Int): Seq[T]
 
   /**
    * Slice the data for this page
+    * 切片此页面的数据
    */
   def pageData(page: Int): PageData[T] = {
     val totalPages = (dataSize + pageSize - 1) / pageSize
@@ -59,11 +62,13 @@ private[ui] abstract class PagedDataSource[T](val pageSize: Int) {
 /**
  * The data returned by `PagedDataSource.pageData`, including the page number, the number of total
  * pages and the data in this page.
+  * 由PagedDataSource.pageData返回的数据,包括页码,页面总数和此页面中的数据。
  */
 private[ui] case class PageData[T](totalPage: Int, data: Seq[T])
 
 /**
  * A paged table that will generate a HTML table for a specified page and also the page navigation.
+  * 一个分页表,可以为特定页面生成HTML表格,也可以生成页面导航。
  */
 private[ui] trait PagedTable[T] {
 
@@ -101,16 +106,19 @@ private[ui] trait PagedTable[T] {
   }
 
   /**
-   * Return a page navigation.
+   * Return a page navigation. 返回页面导航
    * <ul>
-   *   <li>If the totalPages is 1, the page navigation will be empty</li>
+   *   <li>If the totalPages is 1, the page navigation will be empty
+    *   如果totalPages为1,页面导航将为空</li>
    *   <li>
    *     If the totalPages is more than 1, it will create a page navigation including a group of
    *     page numbers and a form to submit the page number.
+    *     如果totalPages超过1,它将创建一个页面导航,包括一组页码和一个表单提交页码。
    *   </li>
    * </ul>
    *
    * Here are some examples of the page navigation:
+    * 以下是页面导航的一些示例：
    * {{{
    * << < 11 12 13* 14 15 16 17 18 19 20 > >>
    *
@@ -118,6 +126,7 @@ private[ui] trait PagedTable[T] {
    * < 1 2* 3 4 5 6 7 8 9 10 > >>
    *
    * This is the first group and the first page, so "<<" and "<" are hidden.
+    * 这是第一组和第一页
    * 1* 2 3 4 5 6 7 8 9 10 > >>
    *
    * Assume totalPages is 19. This is the last group, so ">>" is hidden.
@@ -138,8 +147,11 @@ private[ui] trait PagedTable[T] {
       Nil
     } else {
       // A group includes all page numbers will be shown in the page navigation.
+      //一个组包括所有页码将显示在页面导航中
       // The size of group is 10 means there are 10 page numbers will be shown.
+      //组的大小为10表示将显示10个页码
       // The first group is 1 to 10, the second is 2 to 20, and so on
+      //第一组是1到10,第二组是2到20,依此类推
       val groupSize = 10
       val firstGroup = 0
       val lastGroup = (totalPages - 1) / groupSize
@@ -149,6 +161,7 @@ private[ui] trait PagedTable[T] {
       val pageTags = (startPage to endPage).map { p =>
         if (p == page) {
           // The current page should be disabled so that it cannot be clicked.
+          //应禁用当前页面,以使其无法单击。
           <li class="disabled"><a href="#">{p}</a></li>
         } else {
           <li><a href={pageLink(p)}>{p}</a></li>
@@ -235,6 +248,7 @@ private[ui] trait PagedTable[T] {
 
   /**
    * Return a link to jump to a page.
+    * 返回一个链接跳转到一个页面
    */
   def pageLink(page: Int): String
 

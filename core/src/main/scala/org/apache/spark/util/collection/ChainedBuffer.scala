@@ -26,6 +26,8 @@ import scala.collection.mutable.ArrayBuffer
  * advantage of this over a standard ArrayBuffer is that it can grow without claiming large amounts
  * of memory and needing to copy the full contents. The disadvantage is that the contents don't
  * occupy a contiguous segment of memory.
+  * 一个包含字节数组列表的逻辑字节缓冲区,所有的字节数组都具有相同的大小,与标准ArrayBuffer相比,
+  * 它的优点在于它可以增长而不需要大量内存,并且需要复制完整的内容,缺点是内容不占用连续的内存段。
  */
 private[spark] class ChainedBuffer(chunkSize: Int) {
 
@@ -38,7 +40,7 @@ private[spark] class ChainedBuffer(chunkSize: Int) {
 
   /**
    * Feed bytes from this buffer into a DiskBlockObjectWriter.
-   *
+   * 将这个缓冲区中的字节数据送入DiskBlockObjectWriter
    * @param pos Offset in the buffer to read from.
    * @param os OutputStream to read into.
    * @param len Number of bytes to read.
@@ -62,7 +64,7 @@ private[spark] class ChainedBuffer(chunkSize: Int) {
 
   /**
    * Read bytes from this buffer into a byte array.
-   *
+   * 将该缓冲区的字节读入字节数组
    * @param pos Offset in the buffer to read from.
    * @param bytes Byte array to read into.
    * @param offs Offset in the byte array to read to.
@@ -87,7 +89,7 @@ private[spark] class ChainedBuffer(chunkSize: Int) {
 
   /**
    * Write bytes from a byte array into this buffer.
-   *
+   * 将字节数组写入此缓冲区
    * @param pos Offset in the buffer to write to.
    * @param bytes Byte array to write from.
    * @param offs Offset in the byte array to write from.
@@ -120,17 +122,20 @@ private[spark] class ChainedBuffer(chunkSize: Int) {
 
   /**
    * Total size of buffer that can be written to without allocating additional memory.
+    * 可以写入而不分配额外内存的缓冲区的总大小
    */
   def capacity: Long = chunks.size.toLong * chunkSize
 
   /**
    * Size of the logical buffer.
+    * 逻辑缓冲区的大小
    */
   def size: Long = _size
 }
 
 /**
  * Output stream that writes to a ChainedBuffer.
+  * 写入ChainedBuffer的输出流
  */
 private[spark] class ChainedBufferOutputStream(chainedBuffer: ChainedBuffer) extends OutputStream {
   private var pos: Long = 0

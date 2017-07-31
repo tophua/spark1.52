@@ -31,11 +31,12 @@ import scala.util.{Failure, Try}
 /**
  * A future for the result of an action to support cancellation. This is an extension of the
  * Scala Future interface to support cancellation.
+  * future的行动结果支持取消。 这是Scala Future界面的扩展,以支持取消。
  */
 trait FutureAction[T] extends Future[T] {
   // Note that we redefine methods of the Future trait here explicitly so we can specify a different
   // documentation (with reference to the word "action").
-
+  //请注意,我们明确地重新定义了“Future”特征的方法,因此我们可以指定一个不同的文档（参考“action”一词）
   /**
    * Cancels the execution of this action. 取消执行此操作
    */
@@ -45,16 +46,20 @@ trait FutureAction[T] extends Future[T] {
    * Blocks until this action completes. 直到此操作完成为止
    * @param atMost maximum wait time, which may be negative (no waiting is done), Duration.Inf
    *               for unbounded waiting, or a finite positive duration
+    *               最大等待时间,可能为负数(无等待完成),持续时间。无限等待时间或持续时间有限,
    * @return this FutureAction
    */
   override def ready(atMost: Duration)(implicit permit: CanAwait): FutureAction.this.type
 
   /**
-   * Awaits and returns the result (of type T) of this action.等待并返回此操作的结果（类型T）
+   * Awaits and returns the result (of type T) of this action.
+    * 等待并返回此操作的结果（类型T）
    * @param atMost maximum wait time, which may be negative (no waiting is done), Duration.Inf
    *               for unbounded waiting, or a finite positive duration
-   * @throws Exception exception during action execution
+    *               最长等待时间，可能为负(不等待完成),Duration.Inf无限等待,或有限的正期
+   * @throws Exception exception during action execution 行动执行期间异常
    * @return the result value if the action is completed within the specific maximum wait time
+    *         如果操作在特定最大等待时间内完成,则结果值
    */
   @throws(classOf[Exception])
   override def result(atMost: Duration)(implicit permit: CanAwait): T
@@ -187,10 +192,12 @@ class SimpleFutureAction[T] private[spark](jobWaiter: JobWaiter[_], resultFunc: 
 class ComplexFutureAction[T] extends FutureAction[T] {
 
   // Pointer to the thread that is executing the action. It is set when the action is run.
+  //指向正在执行操作的线程的指针,运行动作时设置。
   @volatile private var thread: Thread = _
 
   // A flag indicating whether the future has been cancelled. This is used in case the future
   // is cancelled before the action was even run (and thus we have no thread to interrupt).
+  //指示未来是否被取消的标志,这是为了在将来被取消之前被使用,在动作被平均运行之前(因此我们没有线程中断)。
   @volatile private var _cancelled: Boolean = false
 
   @volatile private var jobs: Seq[Int] = Nil
@@ -304,6 +311,7 @@ class JavaFutureActionWrapper[S, T](futureAction: FutureAction[S], converter: S 
   override def isDone: Boolean = {
     // According to java.util.Future's Javadoc, this returns True if the task was completed,
     // whether that completion was due to successful execution, an exception, or a cancellation.
+    //根据java.util.Future的Javadoc,如果任务完成,则返回True,是否完成是由于执行成功，异常或取消。
     futureAction.isCancelled || futureAction.isCompleted
   }
 

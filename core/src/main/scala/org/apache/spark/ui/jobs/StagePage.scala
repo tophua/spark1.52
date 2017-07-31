@@ -33,7 +33,8 @@ import org.apache.spark.ui._
 import org.apache.spark.ui.jobs.UIData._
 import org.apache.spark.util.{Utils, Distribution}
 
-/** Page showing statistics and task list for a given stage */
+/** Page showing statistics and task list for a given stage
+  * 页面显示给定阶段的统计和任务列表*/
 private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
   import StagePage._
 
@@ -65,7 +66,7 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
   }
 
   // TODO: We should consider increasing the number of this parameter over time
-  // if we find that it's okay.
+  // if we find that it's okay. 如果我们发现没关系
   private val MAX_TIMELINE_TASKS = parent.conf.getInt("spark.ui.timeline.tasks.maximum", 1000)
 
   private val displayPeakExecutionMemory = parent.conf.getBoolean("spark.sql.unsafe.enabled", true)
@@ -89,6 +90,7 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
       val taskPageSize = Option(parameterTaskPageSize).map(_.toInt).getOrElse(100)
 
       // If this is set, expand the dag visualization by default
+      //如果这样设置，默认情况下展开dag可视化
       val expandDagVizParam = request.getParameter("expandDagViz")
       val expandDagViz = expandDagVizParam != null && expandDagVizParam.toBoolean
 
@@ -298,6 +300,7 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
         else taskTable.dataSource.slicedTaskIds
 
       // Excludes tasks which failed and have incomplete metrics
+      //排除失败的任务，并且不完整的指标
       val validTasks = tasks.filter(t => t.taskInfo.status == "SUCCESS" && t.taskMetrics.isDefined)
 
       val summaryTable: Option[Seq[Node]] =
@@ -384,6 +387,7 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
           // The scheduler delay includes the network delay to send the task to the worker
           // machine and to send back the result (but not the time to fetch the task result,
           // if it needed to be fetched from the block manager on the worker).
+          //调度器延迟包括将任务发送到工作机器并发送结果（但不是获取任务结果的时间，如果需要从工作人员的块管理器获取）的网络延迟。
           val schedulerDelays = validTasks.map { case TaskUIData(info, metrics, _) =>
             getSchedulerDelay(info, metrics.get, currentTime).toDouble
           }
@@ -522,6 +526,7 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
             "Median", "75th percentile", "Max")
           // The summary table does not use CSS to stripe rows, which doesn't work with hidden
           // rows (instead, JavaScript in table.js is used to stripe the non-hidden rows).
+          //汇总表不使用CSS来划分行，这对行隐藏不起作用（相反，table.js中的JavaScript用于对非隐藏行进行条带化）。
           Some(UIUtils.listingTable(
             quantileHeaders,
             identity[Seq[Node]],
@@ -543,6 +548,7 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
         showAdditionalMetrics ++
         makeTimeline(
           // Only show the tasks in the table
+          //只显示表中的任务
           stageData.taskData.values.toSeq.filter(t => taskIdsInPage.contains(t.taskInfo.taskId)),
           currentTime) ++
         <h4>Summary Metrics for {numCompleted} Completed Tasks</h4> ++
@@ -626,6 +632,7 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
         val svgTag =
           if (totalExecutionTime == 0) {
             // SPARK-8705: Avoid invalid attribute error in JavaScript if execution time is 0
+            //PARK-8705：如果执行时间为0，则避免JavaScript中的无效属性错误
             """<svg class="task-assignment-timeline-duration-bar"></svg>"""
           } else {
            s"""<svg class="task-assignment-timeline-duration-bar">
@@ -752,6 +759,7 @@ private[ui] object StagePage {
           getGettingResultTime(info, currentTime))
     } else {
       // The task is still running and the metrics like executorRunTime are not available.
+      //任务仍在运行，并且像executorRunTime这样的指标不可用。
       0L
     }
   }
@@ -784,6 +792,7 @@ private[ui] case class TaskTableRowBytesSpilledData(
 /**
  * Contains all data that needs for sorting and generating HTML. Using this one rather than
  * TaskUIData to avoid creating duplicate contents during sorting the data.
+  * 包含排序和生成HTML所需的所有数据。 使用这个而不是TaskUIData避免在排序数据期间创建重复的内容。
  */
 private[ui] class TaskTableRowData(
     val index: Int,
@@ -826,6 +835,7 @@ private[ui] class TaskDataSource(
 
   // Convert TaskUIData to TaskTableRowData which contains the final contents to show in the table
   // so that we can avoid creating duplicate contents during sorting the data
+  //将TaskUIData转换为TaskTableRowData，其中包含要在表中显示的最终内容，以避免在排序数据期间创建重复的内容
   private val data = tasks.map(taskRow).sorted(ordering(sortColumn, desc))
 
   private var _slicedTaskIds: Set[Long] = null
@@ -992,6 +1002,7 @@ private[ui] class TaskDataSource(
 
   /**
    * Return Ordering according to sortColumn and desc
+    * 根据sortColumn和desc返回排序
    */
   private def ordering(sortColumn: String, desc: Boolean): Ordering[TaskTableRowData] = {
     val ordering = sortColumn match {
@@ -1192,6 +1203,7 @@ private[ui] class TaskPagedTable(
     desc: Boolean) extends PagedTable[TaskTableRowData] {
 
   // We only track peak memory used for unsafe operators
+  //我们只追踪用于不安全操作员的高峰记忆
   private val displayPeakExecutionMemory = conf.getBoolean("spark.sql.unsafe.enabled", true)
 
   override def tableId: String = "task-table"
@@ -1363,7 +1375,7 @@ private[ui] class TaskPagedTable(
 
   private def errorMessageCell(error: String): Seq[Node] = {
     val isMultiline = error.indexOf('\n') >= 0
-    // Display the first line by default
+    // Display the first line by default 默认显示第一行
     val errorSummary = StringEscapeUtils.escapeHtml4(
       if (isMultiline) {
         error.substring(0, error.indexOf('\n'))

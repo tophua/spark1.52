@@ -38,7 +38,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
   private val loading = new mutable.HashSet[RDDBlockId]
 
   /** Gets or computes an RDD partition. Used by RDD.iterator() when an RDD is cached. 
-   *  获取或计算一个RDD的分区  
+   *  获取或计算一个RDD的分区  ,当RDD被缓存时由RDD.iterator（）使用。
    *  */
   def getOrCompute[T](
       rdd: RDD[T],
@@ -53,6 +53,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
         //val blockResult: BlockResult
         //缓存命中,更新统计信息,将缓存作为结果返回
         // Partition is already materialized, so just return its values
+        //分区已经被物化,所以才返回其值
         val existingMetrics = context.taskMetrics
           .getInputMetricsForReadMethod(blockResult.readMethod)
         existingMetrics.incBytesRead(blockResult.bytes)
@@ -77,6 +78,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
         }
 
         // Otherwise, we have to load the partition ourselves
+        //否则,我们必须自己加载分区
         //需要计算
         try {
           logInfo(s"Partition $key not found, computing it")
@@ -116,6 +118,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
                  如果没有线程在计算,那么storedvalue就是none,否则就是计算结果
    * If the lock is free, just acquire it and return None. Otherwise, another thread is already
    * loading the partition, so we wait for it to finish and return the values loaded by the thread.
+    * 如果锁是免费的,只需获取它并返回None。 否则,另一个线程已经加载分区,所以我们等待它完成并返回线程加载的值。
    */
   private def acquireLockForPartition[T](id: RDDBlockId): Option[Iterator[T]] = {
     loading.synchronized {
@@ -155,12 +158,13 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
   /**
    * Cache the values of a partition, keeping track of any updates in the storage statuses of
    * other blocks along the way.
-   * 缓存一个分区的值,保持跟踪在其他分区块存储状态更新
+   * 缓存分区的值,保持跟踪在其他分区块存储状态更新。
    * The effective storage level refers to the level that actually specifies BlockManager put
    * behavior, not the level originally specified by the user. This is mainly for forcing a
    * MEMORY_AND_DISK partition to disk if there is not enough room to unroll the partition,
    * while preserving the the original semantics of the RDD as specified by the application.
-   * 
+   * 有效的存储级别是指实际指定BlockManager放置行为的级别,而不是用户最初指定的级别。
+    * 如果没有足够的空间展开分区,同时保留应用程序指定的RDD的原始语义,则主要用于将MEMORY_AND_DISK分区强制到磁盘。
    */
   private def putInBlockManager[T](
       key: BlockId,
@@ -175,6 +179,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
       /*
        * This RDD is not to be cached in memory, so we can just pass the computed values as an
        * iterator directly to the BlockManager rather than first fully unrolling it in memory.
+       * 这盘是不被缓存在内存中,所以我们可以通过计算值为迭代器而不是直接向blockmanager第一完全展开它的记忆。
        */
       //数据直接写入磁盘
       updatedBlocks ++=
@@ -190,23 +195,28 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
        * This RDD is to be cached in memory. In this case we cannot pass the computed values
        * to the BlockManager as an iterator and expect to read it back later. This is because
        * we may end up dropping a partition from memory store before getting it back.
-       *
+       *这盘是被缓存在内存中,在这种情况下,我们无法通过计算值的blockmanager为迭代器和期待读回来以后。
+       * 这是因为在返回内存之前,我们可能会从内存存储区中删除一个分区。
        * In addition, we must be careful to not unroll the entire partition in memory at once.
        * Otherwise, we may cause an OOM exception if the JVM does not have enough space for this
        * single partition. Instead, we unroll the values cautiously, potentially aborting and
        * dropping the partition to disk if applicable.
+       * 此外,我们必须小心不要把整个分区内存在一次,否则,我们可能如果JVM没有该单分区有足够的空间导致OOM异常。
+       * 相反，我们把价值观谨慎，可能中止和下降分区磁盘如果适用。
        */
       //如果存储级别充许使用内存,那么首先尝试展开
       blockManager.memoryStore.unrollSafely(key, values, updatedBlocks) match {
         case Left(arr) =>
           //有足够内存可以存储数据
           // We have successfully unrolled the entire partition, so cache it in memory
+          //我们已经成功地把整个分区，所以缓存在内存中
           updatedBlocks ++=
             blockManager.putArray(key, arr, level, tellMaster = true, effectiveStorageLevel)
           arr.iterator.asInstanceOf[Iterator[T]]
         case Right(it) =>
           //如果展开数据失败,则将数据存入磁盘
           // There is not enough space to cache this partition in memory
+          //内存不足,无法将此分区缓存在内存中。
           val returnValues = it.asInstanceOf[Iterator[T]]
           if (putLevel.useDisk) {
             logWarning(s"Persisting partition $key to disk instead.")

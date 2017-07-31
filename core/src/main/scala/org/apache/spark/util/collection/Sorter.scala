@@ -21,9 +21,10 @@ import java.util.Comparator
 
 /**
  * A simple wrapper over the Java implementation [[TimSort]].
- *
+ * Java实现的简单包装
  * The Java implementation is package private, and hence it cannot be called outside package
  * org.apache.spark.util.collection. This is a simple wrapper of it that is available to spark.
+  * Java实现是包私有的，因此它不能被外部包org.apache.spark.util.collection调用。 这是一个可以点燃的简单包装。
  */
 private[spark]
 class Sorter[K, Buffer](private val s: SortDataFormat[K, Buffer]) {
@@ -32,6 +33,7 @@ class Sorter[K, Buffer](private val s: SortDataFormat[K, Buffer]) {
 
   /**
    * Sorts the input buffer within range [lo, hi).
+    * 在范围[lo，hi]内对输入缓冲区进行排序
    */
   def sort(a: Buffer, lo: Int, hi: Int, c: Comparator[_ >: K]): Unit = {
     timSort.sort(a, lo, hi, c)

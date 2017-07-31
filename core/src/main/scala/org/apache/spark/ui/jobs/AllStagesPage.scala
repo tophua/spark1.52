@@ -24,7 +24,8 @@ import scala.xml.{Node, NodeSeq}
 import org.apache.spark.scheduler.Schedulable
 import org.apache.spark.ui.{WebUIPage, UIUtils}
 
-/** Page showing list of all ongoing and recently finished stages and pools */
+/** Page showing list of all ongoing and recently finished stages and pools
+  * 页面显示所有正在进行的和最近完成的阶段和池的列表 */
 private[ui] class AllStagesPage(parent: StagesTab) extends WebUIPage("") {
   private val sc = parent.sc
   private val listener = parent.progressListener
@@ -56,6 +57,7 @@ private[ui] class AllStagesPage(parent: StagesTab) extends WebUIPage("") {
           parent.progressListener, isFairScheduler = parent.isFairScheduler)
 
       // For now, pool information is only accessible in live UIs
+      //现在，池信息只能在实时UI中访问
       val pools = sc.map(_.getAllPools).getOrElse(Seq.empty[Schedulable])
       val poolTable = new PoolTable(pools, parent)
 

@@ -26,7 +26,7 @@ import org.apache.spark.storage.StorageLevel
 
 /**
  * A representation of a generic cluster graph used for storing information on RDD operations.
- *
+ * 用于存储关于RDD操作的信息的通用集群图的表示
  * Each graph is defined with a set of edges and a root cluster, which may contain children
  * nodes and children clusters. Additionally, a graph may also have edges that enter or exit
  * the graph from nodes that belong to adjacent graphs.
@@ -78,28 +78,31 @@ private[ui] object RDDOperationGraph extends Logging {
 
   /**
    * Construct a RDDOperationGraph for a given stage.
-   *
+   * 为给定阶段构建一个RDDOperationGraph
    * The root cluster represents the stage, and all children clusters represent RDD operations.
    * Each node represents an RDD, and each edge represents a dependency between two RDDs pointing
    * from the parent to the child.
-   *
+   * 根集群代表阶段，所有子集群表示RDD操作。 每个节点表示一个RDD，每个边表示两个从父对象指向子节点的RDD之间的依赖关系。
    * This does not currently merge common operation scopes across stages. This may be worth
    * supporting in the future if we decide to group certain stages within the same job under
    * a common scope (e.g. part of a SQL query).
+    * 目前，这并不合并跨阶段的常用操作范围,如果我们决定在同一作业中将某些阶段分组在一个共同的范围内（例如SQL查询的一部分）,这可能值得支持
    */
   def makeOperationGraph(stage: StageInfo): RDDOperationGraph = {
     val edges = new ListBuffer[RDDOperationEdge]
     val nodes = new mutable.HashMap[Int, RDDOperationNode]
     val clusters = new mutable.HashMap[String, RDDOperationCluster] // indexed by cluster ID
 
-    // Root cluster is the stage cluster
+    // Root cluster is the stage cluster 根集群是阶段集群
     // Use a special prefix here to differentiate this cluster from other operation clusters
+    //在此处使用特殊的前缀来区分这个集群和其他操作集群
     val stageClusterId = STAGE_CLUSTER_PREFIX + stage.stageId
     val stageClusterName = s"Stage ${stage.stageId}" +
       { if (stage.attemptId == 0) "" else s" (attempt ${stage.attemptId})" }
     val rootCluster = new RDDOperationCluster(stageClusterId, stageClusterName)
 
     // Find nodes, edges, and operation scopes that belong to this stage
+    //查找属于此阶段的节点,边和操作范围
     stage.rddInfos.foreach { rdd =>
       edges ++= rdd.parentIds.map { parentId => RDDOperationEdge(parentId, rdd.id) }
 
@@ -110,10 +113,13 @@ private[ui] object RDDOperationGraph extends Logging {
       if (rdd.scope.isEmpty) {
         // This RDD has no encompassing scope, so we put it directly in the root cluster
         // This should happen only if an RDD is instantiated outside of a public RDD API
+        //这个RDD没有涵盖范围，所以我们将其直接放在根集群中这只有在RDD在公共RDD API之外实例化时才会发生
         rootCluster.attachChildNode(node)
       } else {
         // Otherwise, this RDD belongs to an inner cluster,
+        //否则，此RDD属于内部集群
         // which may be nested inside of other clusters
+        //其可以嵌套在其他集群内
         val rddScopes = rdd.scope.map { scope => scope.getAllScopes }.getOrElse(Seq.empty)
         val rddClusters = rddScopes.map { scope =>
           val clusterId = scope.id
@@ -121,6 +127,7 @@ private[ui] object RDDOperationGraph extends Logging {
           clusters.getOrElseUpdate(clusterId, new RDDOperationCluster(clusterId, clusterName))
         }
         // Build the cluster hierarchy for this RDD
+        //构建此RDD的集群层次结构
         rddClusters.sliding(2).foreach { pc =>
           if (pc.size == 2) {
             val parentCluster = pc(0)
@@ -129,6 +136,7 @@ private[ui] object RDDOperationGraph extends Logging {
           }
         }
         // Attach the outermost cluster to the root cluster, and the RDD to the innermost cluster
+        //将最外层的集群附加到根集群，将RDD连接到最内层集群
         rddClusters.headOption.foreach { cluster => rootCluster.attachChildCluster(cluster) }
         rddClusters.lastOption.foreach { cluster => cluster.attachChildNode(node) }
       }
@@ -136,6 +144,7 @@ private[ui] object RDDOperationGraph extends Logging {
 
     // Classify each edge as internal, outgoing or incoming
     // This information is needed to reason about how stages relate to each other
+    //将每个边缘分类为内部,外向或传入该信息需要说明阶段如何相互关联
     val internalEdges = new ListBuffer[RDDOperationEdge]
     val outgoingEdges = new ListBuffer[RDDOperationEdge]
     val incomingEdges = new ListBuffer[RDDOperationEdge]
@@ -147,6 +156,7 @@ private[ui] object RDDOperationGraph extends Logging {
         case (true, false) => outgoingEdges += e
         case (false, true) => incomingEdges += e
         // should never happen
+          //永远不会发生
         case _ => logWarning(s"Found an orphan edge in stage ${stage.stageId}: $e")
       }
     }
@@ -156,11 +166,14 @@ private[ui] object RDDOperationGraph extends Logging {
 
   /**
    * Generate the content of a dot file that describes the specified graph.
+    * 生成描述指定图形的点文件的内容
    *
    * Note that this only uses a minimal subset of features available to the DOT specification.
    * Part of the styling must be done here because the rendering library must take certain
    * attributes into account when arranging the graph elements. More style is added in the
    * visualization later through post-processing in JavaScript.
+    * 请注意，这仅使用DOT规范可用的功能的最小子集。必须在此处完成样式的部分，
+    * 因为在排列图形元素时，渲染库必须考虑某些属性。 后来通过JavaScript中的后期处理，可以在可视化中添加更多样式。
    *
    * For the complete DOT specification, see http://www.graphviz.org/Documentation/dotguide.pdf.
    */
@@ -175,12 +188,14 @@ private[ui] object RDDOperationGraph extends Logging {
     result
   }
 
-  /** Return the dot representation of a node in an RDDOperationGraph. */
+  /** Return the dot representation of a node in an RDDOperationGraph.
+    * 返回RDDOperationGraph中节点的点表示*/
   private def makeDotNode(node: RDDOperationNode): String = {
     s"""${node.id} [label="${node.name} [${node.id}]"]"""
   }
 
-  /** Return the dot representation of a subgraph in an RDDOperationGraph. */
+  /** Return the dot representation of a subgraph in an RDDOperationGraph.
+    * 在RDDOperationGraph中返回子图的点表示形式*/
   private def makeDotSubgraph(cluster: RDDOperationCluster, indent: String): String = {
     val subgraph = new StringBuilder
     subgraph.append(indent + s"subgraph cluster${cluster.id} {\n")

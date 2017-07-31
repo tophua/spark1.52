@@ -51,6 +51,7 @@ trait SparkHadoopMapReduceUtil {
     try {
       // First, attempt to use the old-style constructor that takes a boolean isMap
       // (not available in YARN)
+      //首先,尝试使用带有boolean isMap的旧式构造函数（在YARN中不可用）
       val ctor = klass.getDeclaredConstructor(classOf[String], classOf[Int], classOf[Boolean],
         classOf[Int], classOf[Int])
       ctor.newInstance(jtIdentifier, new JInteger(jobId), new JBoolean(isMap), new JInteger(taskId),
@@ -58,6 +59,7 @@ trait SparkHadoopMapReduceUtil {
     } catch {
       case exc: NoSuchMethodException => {
         // If that failed, look for the new constructor that takes a TaskType (not available in 1.x)
+        //如果失败，请查找采用TaskType的新构造函数（在1.x中不可用）
         val taskTypeClass = Utils.classForName("org.apache.hadoop.mapreduce.TaskType")
           .asInstanceOf[Class[Enum[_]]]
         val taskType = taskTypeClass.getMethod("valueOf", classOf[String]).invoke(

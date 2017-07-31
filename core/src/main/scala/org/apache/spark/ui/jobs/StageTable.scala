@@ -27,7 +27,8 @@ import org.apache.spark.scheduler.StageInfo
 import org.apache.spark.ui.{ToolTips, UIUtils}
 import org.apache.spark.util.Utils
 
-/** Page showing list of all ongoing and recently finished stages */
+/** Page showing list of all ongoing and recently finished stages
+  * 页面显示所有正在进行和最近完成的阶段的列表*/
 private[ui] class StageTableBase(
     stages: Seq[StageInfo],
     basePath: String,
@@ -48,7 +49,8 @@ private[ui] class StageTableBase(
     <th>
       <!-- Place the shuffle write tooltip on the left (rather than the default position
         of on top) because the shuffle write column is the last column on the right side and
-        the tooltip is wider than the column, so it doesn't fit on top. -->
+        the tooltip is wider than the column, so it doesn't fit on top.
+          将随机写入工具提示放在左侧（而不是顶部的默认位置）,因为随机写入列是右侧的最后一列,并且工具提示宽于列,因此它不适合顶部。-->
       <span data-toggle="tooltip" data-placement="left" title={ToolTips.SHUFFLE_WRITE}>
         Shuffle Write
       </span>
@@ -61,7 +63,8 @@ private[ui] class StageTableBase(
     }
   }
 
-  /** Special table that merges two header cells. */
+  /** Special table that merges two header cells.
+    * 合并两个标题单元格的特殊表*/
   protected def stageTable[T](makeRow: T => Seq[Node], rows: Seq[T]): Seq[Node] = {
     <table class="table table-bordered table-striped table-condensed sortable">
       <thead>{columns}</thead>
@@ -123,12 +126,14 @@ private[ui] class StageTableBase(
   protected def missingStageRow(stageId: Int): Seq[Node] = {
     <td>{stageId}</td> ++
     {if (isFairScheduler) {<td>-</td>} else Seq.empty} ++
-    <td>No data available for this stage</td> ++ // Description
-    <td></td> ++ // Submitted
-    <td></td> ++ // Duration
-    <td></td> ++ // Tasks: Succeeded/Total
-    <td></td> ++ // Input
-    <td></td> ++ // Output
+    <td>No data available for this stage</td> ++ // Description 描述
+    <td></td> ++ // Submitted 提交
+    <td></td> ++ // Duration 持续时间
+    <td></td> ++ // Tasks: Succeeded/Total任务：成功/总计
+    <td></td> ++ // Input 输入
+    <td></td> ++ // Output 输出
+
+
     <td></td> ++ // Shuffle Read
     <td></td> // Shuffle Write
   }
@@ -190,7 +195,8 @@ private[ui] class StageTableBase(
     <td sorttable_customkey={shuffleWrite.toString}>{shuffleWriteWithUnit}</td>
   }
 
-  /** Render an HTML row that represents a stage */
+  /** Render an HTML row that represents a stage
+    * 渲染表示stage的HTML行*/
   private def renderStageRow(s: StageInfo): Seq[Node] =
     <tr id={"stage-" + s.stageId + "-" + s.attemptId}>{stageRow(s)}</tr>
 }

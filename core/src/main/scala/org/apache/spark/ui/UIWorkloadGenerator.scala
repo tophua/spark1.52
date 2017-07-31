@@ -27,7 +27,7 @@ import org.apache.spark.scheduler.SchedulingMode
 // scalastyle:off
 /**
  * Continuously generates jobs that expose various features of the WebUI (internal testing tool).
- *
+ * 继续生成暴露WebUI（内部测试工具）各种功能的作业
  * Usage: ./bin/spark-class org.apache.spark.ui.UIWorkloadGenerator [master] [FIFO|FAIR] [#job set (4 jobs per set)]
  */
 // scalastyle:on

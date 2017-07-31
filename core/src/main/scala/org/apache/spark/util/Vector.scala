@@ -61,6 +61,7 @@ class Vector(val elements: Array[Double]) extends Serializable {
 
   /**
    * return (this + plus) dot other, but without creating any intermediate storage
+    * return(this + plus)点其他,但不创建任何中间存储
    * @param plus
    * @param other
    * @return

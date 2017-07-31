@@ -66,7 +66,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   private var data = new Array[AnyRef](2 * capacity)
 
   // Treat the null key differently so we can use nulls in "data" to represent empty items.
-  //数据是否有null值
+  //处理空键不同,以便我们可以使用“数据”中的空值来表示空项目。数据是否有null值
   private var haveNullValue = false
   private var nullValue: V = null.asInstanceOf[V]
 
@@ -124,6 +124,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
       if (curKey.eq(null)) {
         data(2 * pos) = k
         data(2 * pos + 1) = value.asInstanceOf[AnyRef]
+        //因为我们添加了一个新的key
         incrementSize() // Since we added a new key
         return
       } else if (k.eq(curKey) || k.equals(curKey)) {
@@ -140,8 +141,8 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   /**
    * Set the value for key to updateFunc(hadValue, oldValue), where oldValue will be the old value
    * for key, if any, or null otherwise. Returns the newly updated value.
-   * 返回新更新的值,
-   * kv是record的每条记录
+   * 将key的值设置为updateFunc(hadValue，oldValue),其中oldValue将为key的旧值（如果有）,否则为空, 返回新更新的值。
+    * 返回新更新的值,kv是record的每条记录
     */
   def changeValue(key: K, updateFunc: (Boolean, V) => V): V = {
     assert(!destroyed, destructionMessage)
@@ -186,7 +187,8 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
     null.asInstanceOf[V] // Never reached but needed to keep compiler happy
   }
 
-  /** Iterator method from Iterable */
+  /** Iterator method from Iterable
+    * 迭代器方法从Iterable*/
   override def iterator: Iterator[(K, V)] = {
     assert(!destroyed, destructionMessage)
     new Iterator[(K, V)] {

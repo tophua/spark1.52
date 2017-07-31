@@ -47,7 +47,10 @@ private[spark] class TimeStampedWeakValueHashMap[A, B](updateTimeStampOnGet: Boo
   private val internalMap = new TimeStampedHashMap[A, WeakReference[B]](updateTimeStampOnGet)
   private val insertCount = new AtomicInteger(0)
 
-  /** Return a map consisting only of entries whose values are still strongly reachable. */
+  /**
+    * Return a map consisting only of entries whose values are still strongly reachable.
+    * 返回一个仅包含其值仍然很强的条目的Map
+    *  */
   private def nonNullReferenceMap = internalMap.filter { case (_, ref) => ref.get != null }
 
   def get(key: A): Option[B] = internalMap.get(key)
@@ -98,10 +101,16 @@ private[spark] class TimeStampedWeakValueHashMap[A, B](updateTimeStampOnGet: Boo
 
   def toMap: Map[A, B] = iterator.toMap
 
-  /** Remove old key-value pairs with timestamps earlier than `threshTime`. */
+  /**
+    * Remove old key-value pairs with timestamps earlier than `threshTime`.
+    * 删除早于“threshTime”的时间戳的旧键值对
+    * */
   def clearOldValues(threshTime: Long): Unit = internalMap.clearOldValues(threshTime)
 
-  /** Remove entries with values that are no longer strongly reachable. */
+  /**
+    * Remove entries with values that are no longer strongly reachable.
+    * 删除不再强大可达的值的条目
+    * */
   def clearNullValues() {
     val it = internalMap.getEntrySet.iterator
     while (it.hasNext) {
@@ -126,13 +135,18 @@ private[spark] class TimeStampedWeakValueHashMap[A, B](updateTimeStampOnGet: Boo
 
 /**
  * Helper methods for converting to and from WeakReferences.
+  * 用于转换为和从WeakReferences转换的辅助方法
  */
 private object TimeStampedWeakValueHashMap {
 
   // Number of inserts after which entries with null references are removed
+  //删除带有空引用的条目的插入数
   val CLEAR_NULL_VALUES_INTERVAL = 100
 
-  /* Implicit conversion methods to WeakReferences. */
+  /*
+  Implicit conversion methods to WeakReferences.
+  隐式转换方法到WeakReferences
+  * */
 
   implicit def toWeakReference[V](v: V): WeakReference[V] = new WeakReference[V](v)
 
@@ -144,7 +158,10 @@ private object TimeStampedWeakValueHashMap {
     (kv: (K, WeakReference[V])) => p(kv)
   }
 
-  /* Implicit conversion methods from WeakReferences. */
+  /*
+  Implicit conversion methods from WeakReferences.
+  WeakReferences的隐式转换方法
+  */
 
   implicit def fromWeakReference[V](ref: WeakReference[V]): V = ref.get
 

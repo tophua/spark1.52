@@ -29,7 +29,8 @@ import org.apache.spark.scheduler.StageInfo
 import org.apache.spark.ui.{ToolTips, UIUtils, WebUIPage}
 import org.apache.spark.ui.jobs.UIData.ExecutorUIData
 
-/** Page showing statistics and stage list for a given job */
+/** Page showing statistics and stage list for a given job
+  * 页面显示给定工作的统计数据和阶段列表*/
 private[ui] class JobPage(parent: JobsTab) extends WebUIPage("job") {
 
   private val STAGES_LEGEND =
@@ -66,6 +67,7 @@ private[ui] class JobPage(parent: JobsTab) extends WebUIPage("job") {
 
       // The timeline library treats contents as HTML, so we have to escape them; for the
       // data-title attribute string we have to escape them twice since that's in a string.
+      //时间线库将内容视为HTML,所以我们必须逃避他们;对于数据标题属性字符串,我们必须将它们转义为两次，因为它在字符串中。
       val escapedName = Utility.escape(name)
       s"""
          |{
@@ -203,6 +205,7 @@ private[ui] class JobPage(parent: JobsTab) extends WebUIPage("job") {
       val stages = jobData.stageIds.map { stageId =>
         // This could be empty if the JobProgressListener hasn't received information about the
         // stage or if the stage information has been garbage collected
+        //如果JobProgressListener没有收到有关舞台的信息，或舞台信息是否已被垃圾回收，这可能为空
         listener.stageIdToInfo.getOrElse(stageId,
           new StageInfo(stageId, 0, "Unknown", 0, Seq.empty, Seq.empty, "Unknown"))
       }
@@ -210,6 +213,7 @@ private[ui] class JobPage(parent: JobsTab) extends WebUIPage("job") {
       val activeStages = Buffer[StageInfo]()
       val completedStages = Buffer[StageInfo]()
       // If the job is completed, then any pending stages are displayed as "skipped":
+      //如果作业完成，则任何待处理的阶段都将显示为“skipped”：
       val pendingOrSkippedStages = Buffer[StageInfo]()
       val failedStages = Buffer[StageInfo]()
       for (stage <- stages) {

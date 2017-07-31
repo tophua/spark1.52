@@ -20,6 +20,7 @@ package org.apache.spark.util
 /**
  * Wrapper around an iterator which calls a completion method after it successfully iterates
  * through all the elements.
+  * 在迭代器周围包装,它在成功遍历所有元素之后调用完成方法。
  */
 private[spark]
 // scalastyle:off

@@ -20,6 +20,7 @@ package org.apache.spark.util
 /**
  * Exception thrown when there is an exception in
  * executing the callback in TaskCompletionListener.
+  * 在TaskCompletionListener中执行回调时有异常抛出异常
  */
 private[spark]
 class TaskCompletionListenerException(errorMessages: Seq[String]) extends Exception {

@@ -121,6 +121,7 @@ private[spark] class ExecutorAllocationManager(
   // TODO: The default value of 1 for spark.executor.cores works right now because dynamic
   // allocation is only supported for YARN and the default number of cores per executor in YARN is
   // 1, but it might need to be attained differently for different cluster managers
+  //YARN仅支持分配，YARN中每个执行者的默认核心数量为1,但是对于不同的集群管理器,可能需要不同的方式实现
   //为每个任务分配的内核数
   private val tasksPerExecutor =
     conf.getInt("spark.executor.cores", 1) / conf.getInt("spark.task.cpus", 1)
@@ -147,11 +148,13 @@ private[spark] class ExecutorAllocationManager(
 
   // A timestamp of when an addition should be triggered, or NOT_SET if it is not set
   // This is set when pending tasks are added but not scheduled yet
+  //何时触发添加的时间戳，如果未设置，则为NOT_SET当待添加但尚未安排的任务已设置
   //应该触发加法的时间戳，如果未设置则为NOT_SET,这是在添加但未安排的挂起任务时设置的
   private var addTime: Long = NOT_SET
 
   // A timestamp for each executor of when the executor should be removed, indexed by the ID
   // This is set when an executor is no longer running a task, or when it first registers
+  //每个执行者的执行者应该被删除的时间戳,由ID进行索引当这个执行者不再运行任务时,或者当它首次注册时
   //时间戳的每个executor的执行时应删除
   private val removeTimes = new mutable.HashMap[String, Long]
 
@@ -173,13 +176,15 @@ private[spark] class ExecutorAllocationManager(
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("spark-dynamic-executor-allocation")
 
   // Metric source for ExecutorAllocationManager to expose internal status to MetricsSystem.
+  //ExecutorAllocationManager的Metric源显示MetricsSystem的内部状态。
   val executorAllocationManagerSource = new ExecutorAllocationManagerSource
 
   // Whether we are still waiting for the initial set of executors to be allocated.
+  //我们是否仍在等待初始执行者被分配。虽然这是真的,我们不会取消未完成的执行的要求, 在以下情况下设置为false
   // While this is true, we will not cancel outstanding executor requests. This is
   // set to false when:
-  //   (1) a stage is submitted, or
-  //   (2) an executor idle timeout has elapsed.
+  //   (1) a stage is submitted, or 提交一个stage,或
+  //   (2) an executor idle timeout has elapsed. 执行者空闲超时已过
   //是否仍在等待执行被分配的初始设置,
   @volatile private var initializing: Boolean = true
 
@@ -194,7 +199,7 @@ private[spark] class ExecutorAllocationManager(
   /**
    * Verify that the settings specified through the config are valid.
    * If not, throw an appropriate exception.
-   * 设置验证配置设置是否有效
+   *验证通过配置指定的设置是否有效,如果无有效,抛出适当的异常。
    */
   private def validateSettings(): Unit = {
     if (minNumExecutors < 0 || maxNumExecutors < 0) {
@@ -274,6 +279,7 @@ private[spark] class ExecutorAllocationManager(
    * 最大Executros数
    * The maximum number of executors we would need under the current load to satisfy all running
    * and pending tasks, rounded up.
+    * 在目前的负载下,我们需要的最大执行数达到所有正在运行的和待处理的任务的数量。
    */
   private def maxNumExecutorsNeeded(): Int = {
     val numRunningOrPendingTasks = listener.totalPendingTasks + listener.totalRunningTasks
@@ -286,8 +292,9 @@ private[spark] class ExecutorAllocationManager(
    * 这是在一个固定的时间间隔,调整未执行和运行executor数。
    * First, adjust our requested executors based on the add time and our current needs.
    * Then, if the remove time for an existing executor has expired, kill the executor.
-   *
+   * 首先,根据增加的时间和我们当前的需求调整我们要求的执行者,然后,如果现有执行程序的删除时间已过期,则将执行程序删除。
    * This is factored out into its own method for testing.
+    * 这是考虑到自己的测试方法
    * 
    */
   private def schedule(): Unit = synchronized {
@@ -312,10 +319,12 @@ private[spark] class ExecutorAllocationManager(
    * Check to see whether our existing allocation and the requests we've made previously exceed our
    * current needs. If so, truncate our target and let the cluster manager know so that it can
    * cancel pending requests that are unneeded.
+    * 检查我们现有的配置和我们以前提出的请求是否超出了我们当前的需求。
+    * 如果是这样,请截断我们的目标,让集群管理员知道,以便它可以取消不需要的待处理请求。
    *
    * If not, and the add time has expired, see if we can request new executors and refresh the add
    * time.
-   *
+   * 如果没有,并且添加时间已过,请查看我们是否可以请求新的执行者并刷新添加时间。
    * @return the delta in the target number of executors.
    */
   private def updateAndSyncNumExecutorsTarget(now: Long): Int = synchronized {
@@ -536,6 +545,7 @@ private[spark] class ExecutorAllocationManager(
         val timeout = {
           if (hasCachedBlocks) {
             // Use a different timeout if the executor has cached blocks.
+            //如果执行器具有缓存块,则使用不同的超时。
             now + cachedExecutorIdleTimeoutS * 1000
           } else {
             now + executorIdleTimeoutS * 1000
@@ -554,6 +564,7 @@ private[spark] class ExecutorAllocationManager(
   /**
    * Callback invoked when the specified executor is now running a task.
    * This resets all variables used for removing this executor.
+    * 当指定的执行程序正在运行任务时调用回调,这将重置用于删除此执行程序的所有变量。
    */
   private def onExecutorBusy(executorId: String): Unit = synchronized {
     logDebug(s"Clearing idle timer for $executorId because it is now running a task")
@@ -562,10 +573,11 @@ private[spark] class ExecutorAllocationManager(
 
   /**
    * A listener that notifies the given allocation manager of when to add and remove executors.
-   * 通过一个监听事件对动态添加,删除Executor.
+   * 通知给定分配管理器何时添加和删除执行程序的侦听器
    * This class is intentionally conservative in its assumptions about the relative ordering
    * and consistency of events returned by the listener. For simplicity, it does not account
    * for speculated tasks.
+    * 该类在其关于侦听器返回的事件的相对排序和一致性的假设中有意保守,为了简单起见,它不考虑推测的任务。
    * 
    */
   private class ExecutorAllocationListener extends SparkListener {
@@ -574,6 +586,7 @@ private[spark] class ExecutorAllocationManager(
     private val stageIdToTaskIndices = new mutable.HashMap[Int, mutable.HashSet[Int]]
     private val executorIdToTaskIds = new mutable.HashMap[String, mutable.HashSet[Long]]
     // Number of tasks currently running on the cluster.  Should be 0 when no stages are active.
+    //群集上当前运行的任务数,当没有阶段活跃时应为0。
     private var numRunningTasks: Int = _
 
     // stageId to tuple (the number of task with locality preferences, a map where each pair is a
@@ -591,6 +604,7 @@ private[spark] class ExecutorAllocationManager(
         allocationManager.onSchedulerBacklogged()
 
         // Compute the number of tasks requested by the stage on each host
+        //计算每个主机上stage请求的任务数
         var numTasksPending = 0
         val hostToLocalTaskCountPerStage = new mutable.HashMap[String, Int]()
         stageSubmitted.stageInfo.taskLocalityPreferences.foreach { locality =>
@@ -606,6 +620,7 @@ private[spark] class ExecutorAllocationManager(
           (numTasksPending, hostToLocalTaskCountPerStage.toMap))
 
         // Update the executor placement hints
+        //更新执行者放置提示
         updateExecutorPlacementHints()
       }
     }
@@ -618,10 +633,12 @@ private[spark] class ExecutorAllocationManager(
         stageIdToExecutorPlacementHints -= stageId
 
         // Update the executor placement hints
+        //更新执行者放置提示
         updateExecutorPlacementHints()
 
         // If this is the last stage with pending tasks, mark the scheduler queue as empty
         // This is needed in case the stage is aborted for any reason
+        //如果这是具有待处理任务的最后阶段,则将调度程序队列标记为空这是需要的,以防由于任何原因中止了该阶段
         if (stageIdToNumTasks.isEmpty) {
           allocationManager.onSchedulerQueueEmpty()
           if (numRunningTasks != 0) {
@@ -643,17 +660,21 @@ private[spark] class ExecutorAllocationManager(
         // This guards against the race condition in which the `SparkListenerTaskStart`
         // event is posted before the `SparkListenerBlockManagerAdded` event, which is
         // possible because these events are posted in different threads. (see SPARK-4951)
+        //这样可以防止在SparkListenerBaskManagerAdded事件之前发布“SparkListenerTaskStart”事件的竞争条件,
+        //这可能是因为这些事件发布在不同的线程中。 （见SPARK-4951）
         if (!allocationManager.executorIds.contains(executorId)) {
           allocationManager.onExecutorAdded(executorId)
         }
 
         // If this is the last pending task, mark the scheduler queue as empty
+        //如果这是最后待处理的任务,将调度程序队列标记为空
         stageIdToTaskIndices.getOrElseUpdate(stageId, new mutable.HashSet[Int]) += taskIndex
         if (totalPendingTasks() == 0) {
           allocationManager.onSchedulerQueueEmpty()
         }
 
         // Mark the executor on which this task is scheduled as busy
+        //标记这个任务被安排为忙的执行者
         executorIdToTaskIds.getOrElseUpdate(executorId, new mutable.HashSet[Long]) += taskId
         allocationManager.onExecutorBusy(executorId)
       }
@@ -667,6 +688,7 @@ private[spark] class ExecutorAllocationManager(
       allocationManager.synchronized {
         numRunningTasks -= 1
         // If the executor is no longer running any scheduled tasks, mark it as idle
+        //如果执行程序不再运行任何计划任务,请将其标记为空闲
         if (executorIdToTaskIds.contains(executorId)) {
           executorIdToTaskIds(executorId) -= taskId
           if (executorIdToTaskIds(executorId).isEmpty) {
@@ -678,6 +700,7 @@ private[spark] class ExecutorAllocationManager(
         // If the task failed, we expect it to be resubmitted later. To ensure we have
         // enough resources to run the resubmitted task, we need to mark the scheduler
         // as backlogged again if it's not already marked as such (SPARK-8366)
+        //如果任务失败,我们期望稍后重新提交, 为了确保我们有足够的资源来运行重新提交的任务,我们需要将调度程序再次标记为不再标记为（SPARK-8366）
         if (taskEnd.reason != Success) {
           if (totalPendingTasks() == 0) {
             allocationManager.onSchedulerBacklogged()
@@ -693,6 +716,8 @@ private[spark] class ExecutorAllocationManager(
         // This guards against the race condition in which the `SparkListenerTaskStart`
         // event is posted before the `SparkListenerBlockManagerAdded` event, which is
         // possible because these events are posted in different threads. (see SPARK-4951)
+        //这样可以防范“SparkListenerTaskStart”的比赛条件事件发布在“SparkListenerBlockManagerAdded”事件之前
+        //可能因为这些事件发布在不同的线程中。 （见SPARK-4951）
         if (!allocationManager.executorIds.contains(executorId)) {
           allocationManager.onExecutorAdded(executorId)
         }
@@ -706,8 +731,10 @@ private[spark] class ExecutorAllocationManager(
     /**
      * An estimate of the total number of pending tasks remaining for currently running stages. Does
      * not account for tasks which may have failed and been resubmitted.
+      * 对当前运行阶段剩余的待处理任务总数的估计,不考虑可能失败并重新提交的任务。
      *
      * Note: This is not thread-safe without the caller owning the `allocationManager` lock.
+      * 注意：如果调用者拥有“allocManager”锁，这不是线程安全的。
      */
     def totalPendingTasks(): Int = {
       stageIdToNumTasks.map { case (stageId, numTasks) =>
@@ -717,13 +744,15 @@ private[spark] class ExecutorAllocationManager(
 
     /**
      * The number of tasks currently running across all stages.
+      * 目前在所有阶段运行的任务数量
      */
     def totalRunningTasks(): Int = numRunningTasks
 
     /**
      * Return true if an executor is not currently running a task, and false otherwise.
-     *
+     * 如果执行者当前没有运行任务,返回true,否则返回false。
      * Note: This is not thread-safe without the caller owning the `allocationManager` lock.
+      * 注意：如果调用者拥有“allocManager”锁,这不是线程安全的。
      */
     def isExecutorIdle(executorId: String): Boolean = {
       !executorIdToTaskIds.contains(executorId)
@@ -733,9 +762,10 @@ private[spark] class ExecutorAllocationManager(
      * Update the Executor placement hints (the number of tasks with locality preferences,
      * a map where each pair is a node and the number of tasks that would like to be scheduled
      * on that node).
-     *
+     * 更新Executor位置提示(具有本地偏好设置的任务数,每对是一个节点的映射以及该节点上要安排的任务数)。
      * These hints are updated when stages arrive and complete, so are not up-to-date at task
      * granularity within stages.
+      * 这些提示在阶段到达和完成时更新,因此在阶段内的任务粒度不是最新的。
      */
     def updateExecutorPlacementHints(): Unit = {
       var localityAwareTasks = 0
@@ -756,9 +786,11 @@ private[spark] class ExecutorAllocationManager(
   /**
    * Metric source for ExecutorAllocationManager to expose its internal executor allocation
    * status to MetricsSystem.
+    * ExecutorAllocationManager的Metric源公开其内部执行器分配状态到MetricsSystem。
    * Note: These metrics heavily rely on the internal implementation of
    * ExecutorAllocationManager, metrics or value of metrics will be changed when internal
    * implementation is changed, so these metrics are not stable across Spark version.
+    * 注意：这些指标严重依赖于ExecutorAllocationManager的内部实现，度量或指标值将在内部更改实施更改,所以这些指标在Spark版本之间是不稳定的。
    */
   private[spark] class ExecutorAllocationManagerSource extends Source {
     val sourceName = "ExecutorAllocationManager"

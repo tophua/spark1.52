@@ -28,6 +28,7 @@ import org.apache.spark.Logging
 
 /**
  * Various utility methods used by Spark.
+  * Spark使用的各种实用方法
  */
 private[spark] object ShutdownHookManager extends Logging {
   val DEFAULT_SHUTDOWN_PRIORITY = 100
@@ -35,6 +36,7 @@ private[spark] object ShutdownHookManager extends Logging {
   /**
    * The shutdown priority of the SparkContext instance. This is lower than the default
    * priority, so that by default hooks are run before the context is shut down.
+    * SparkContext实例的关闭优先级,这低于默认优先级,因此默认情况下钩子在上下文关闭之前运行。
    */
   val SPARK_CONTEXT_SHUTDOWN_PRIORITY = 50
 
@@ -42,6 +44,7 @@ private[spark] object ShutdownHookManager extends Logging {
    * The shutdown priority of temp directory must be lower than the SparkContext shutdown
    * priority. Otherwise cleaning the temp directories while Spark jobs are running can
    * throw undesirable errors at the time of shutdown.
+    * 临时目录的关机优先级必须低于SparkContext关闭优先级,否则在Spark作业运行时清理临时目录可能会在关机时产生不良的错误。
    */
   val TEMP_DIR_SHUTDOWN_PRIORITY = 25
 
@@ -60,6 +63,7 @@ private[spark] object ShutdownHookManager extends Logging {
     logInfo("Shutdown hook called")
     // we need to materialize the paths to delete because deleteRecursively removes items from
     // shutdownDeletePaths as we are traversing through it.
+    //我们需要实现要删除的路径,因为deleteRecursively从shutdownDeletePath中删除项,因为我们正在遍历它。
     shutdownDeletePaths.toArray.foreach { dirPath =>
       try {
         logInfo("Deleting directory " + dirPath)
@@ -80,6 +84,7 @@ private[spark] object ShutdownHookManager extends Logging {
   }
 
   // Register the tachyon path to be deleted via shutdown hook
+  //注册通过shutdown hook删除的tachyon路径
   def registerShutdownDeleteDir(tachyonfile: TachyonFile) {
     val absolutePath = tachyonfile.getPath()
     shutdownDeleteTachyonPaths.synchronized {
@@ -97,6 +102,7 @@ private[spark] object ShutdownHookManager extends Logging {
   }
 
   // Remove the tachyon path to be deleted via shutdown hook
+  //通过关闭挂钩删除要删除的速度路径
   def removeShutdownDeleteDir(tachyonfile: TachyonFile) {
     val absolutePath = tachyonfile.getPath()
     shutdownDeleteTachyonPaths.synchronized {
@@ -105,6 +111,7 @@ private[spark] object ShutdownHookManager extends Logging {
   }
 
   // Is the path already registered to be deleted via a shutdown hook ?
+  //已注册的路径是否通过关闭挂钩进行删除？
   def hasShutdownDeleteDir(file: File): Boolean = {
     val absolutePath = file.getAbsolutePath()
     shutdownDeletePaths.synchronized {
@@ -113,6 +120,7 @@ private[spark] object ShutdownHookManager extends Logging {
   }
 
   // Is the path already registered to be deleted via a shutdown hook ?
+  //已注册的路径是否通过关闭挂钩进行删除？
   def hasShutdownDeleteTachyonDir(file: TachyonFile): Boolean = {
     val absolutePath = file.getPath()
     shutdownDeleteTachyonPaths.synchronized {
@@ -123,6 +131,8 @@ private[spark] object ShutdownHookManager extends Logging {
   // Note: if file is child of some registered path, while not equal to it, then return true;
   // else false. This is to ensure that two shutdown hooks do not try to delete each others
   // paths - resulting in IOException and incomplete cleanup.
+  //注意：如果文件是某个注册路径的子对象,而不等于它,则返回true;否则为false。
+  // 这是为了确保两个关机挂钩不会尝试删除彼此的路径 - 导致IOException和不完整的清理。
   //判断文件是否匹配关闭时要删除的文件及目录,
   //shutdownDeletePaths存储在进程关闭的文件及目录shutdownDeletePaths中移除此文件或目录
   def hasRootAsShutdownDeleteDir(file: File): Boolean = {
@@ -141,6 +151,8 @@ private[spark] object ShutdownHookManager extends Logging {
   // Note: if file is child of some registered path, while not equal to it, then return true;
   // else false. This is to ensure that two shutdown hooks do not try to delete each others
   // paths - resulting in Exception and incomplete cleanup.
+  //注意：如果文件是某个注册路径的子对象，而不等于它，则返回true;否则假。
+  // 这是为了确保两个关机挂钩不要尝试删除彼此的路径 - 导致异常和不完整的清除。
   def hasRootAsShutdownDeleteDir(file: TachyonFile): Boolean = {
     val absolutePath = file.getPath()
     val retval = shutdownDeleteTachyonPaths.synchronized {
@@ -158,9 +170,10 @@ private[spark] object ShutdownHookManager extends Logging {
    * Detect whether this thread might be executing a shutdown hook. Will always return true if
    * the current thread is a running a shutdown hook but may spuriously return true otherwise (e.g.
    * if System.exit was just called by a concurrent thread).
-   *
+   *检测此线程是否可能正在执行关闭挂接。 如果会永远返回true 当前的线程是运行一个关闭钩子,但是可能会虚假地返回true(例如,如果System.exit刚刚被并发线程调用)。
    * Currently, this detects whether the JVM is shutting down by Runtime#addShutdownHook throwing
    * an IllegalStateException.
+    * 目前,这检测JVM是否由Runtime＃addShutdownHook抛出IllegalStateException关闭。
    */
   def inShutdown(): Boolean = {
     try {
@@ -181,7 +194,7 @@ private[spark] object ShutdownHookManager extends Logging {
 
   /**
    * Adds a shutdown hook with default priority.
-   *
+   * 添加一个默认优先级的shutdown hook
    * @param hook The code to run during shutdown.
    * @return A handle that can be used to unregister the shutdown hook.
    */
@@ -192,7 +205,7 @@ private[spark] object ShutdownHookManager extends Logging {
   /**
    * Adds a shutdown hook with the given priority. Hooks with lower priority values run
    * first.
-   *
+   * 添加一个具有给定优先级的shutdown hook,具有较低优先级值的钩首先运行。
    * @param hook The code to run during shutdown.
    * @return A handle that can be used to unregister the shutdown hook.
    */
@@ -202,7 +215,7 @@ private[spark] object ShutdownHookManager extends Logging {
 
   /**
    * Remove a previously installed shutdown hook.
-   *
+   * 删除以前安装的关机挂钩
    * @param ref A handle returned by `addShutdownHook`.
    * @return Whether the hook was removed.
    */
@@ -221,6 +234,8 @@ private [util] class SparkShutdownHookManager {
    * Install a hook to run at shutdown and run all registered hooks in order. Hadoop 1.x does not
    * have `ShutdownHookManager`, so in that case we just use the JVM's `Runtime` object and hope for
    * the best.
+    *安装挂钩,在关机时运行,并按顺序运行所有注册的挂钩。
+    * Hadoop 1.x没有`ShutdownHookManager`,所以在这种情况下,我们只是使用JVM的`Runtime`对象，希望最好。
    */
   def install(): Unit = {
     val hookTask = new Runnable() {

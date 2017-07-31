@@ -23,14 +23,17 @@ import sun.misc.{Signal, SignalHandler}
 
 /**
  * Used to log signals received. This can be very useful in debugging crashes or kills.
- *
+ *用于记录收到的信号,这在调试崩溃或杀死时非常有用。
  * Inspired by Colin Patrick McCabe's similar class from Hadoop.
+  * 灵感来自于Colin Patrick McCabe与Hadoop的类似课程
  */
 private[spark] object SignalLogger {
 
   private var registered = false
 
-  /** Register a signal handler to log signals on UNIX-like systems. */
+  /** Register a signal handler to log signals on UNIX-like systems.
+    * 在类UNIX系统上注册信号处理程序来记录信号
+    * */
   def register(log: Logger): Unit = synchronized {
     if (SystemUtils.IS_OS_UNIX) {
       require(!registered, "Can't re-install the signal handlers")

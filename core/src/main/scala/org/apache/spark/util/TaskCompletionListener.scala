@@ -26,6 +26,7 @@ import org.apache.spark.annotation.DeveloperApi
  * :: DeveloperApi ::
  *
  * Listener providing a callback function to invoke when a task's execution completes.
+  * 侦听器提供一个回调函数来调用任务的执行完成
  */
 @DeveloperApi
 trait TaskCompletionListener extends EventListener {

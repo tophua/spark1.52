@@ -33,6 +33,9 @@ private[spark] case class TimeStampedValue[V](value: V, timestamp: Long)
  * updated every time it is accessed. Key-value pairs whose timestamp are older than a particular
  * threshold time can then be removed using the clearOldValues method. This is intended to
  * be a drop-in replacement of scala.collection.mutable.HashMap.
+  * 这是scala.collection.mutable.Map的自定义实现,它将插入时间戳与每个键值对一起存储,
+  * 如果指定,则每次访问时可以更新每个对的时间戳。
+  * 时间戳早于特定阈值时间的键值对可以使用clearOldValues方法来删除,这是为了替换scala.collection.mutable.HashMap。
  *
  * @param updateTimeStampOnGet Whether timestamp of a pair will be updated when it is accessed
  */
@@ -132,7 +135,9 @@ private[spark] class TimeStampedHashMap[A, B](updateTimeStampOnGet: Boolean = fa
     }
   }
 
-  /** Removes old key-value pairs that have timestamp earlier(早期,初期) than `threshTime`. */
+  /** Removes old key-value pairs that have timestamp earlier than `threshTime`.
+    * 删除早于“threshTime”的时间戳的旧键值对
+    * */
   def clearOldValues(threshTime: Long) {
     //删除旧Key-value
     clearOldValues(threshTime, (_, _) => ())

@@ -24,7 +24,8 @@ import org.apache.spark.ui._
 import org.apache.spark.scheduler._
 import org.apache.spark.storage._
 
-/** Web UI showing storage status of all RDD's in the given SparkContext. */
+/** Web UI showing storage status of all RDD's in the given SparkContext.
+  * Web UI显示给定SparkContext中所有RDD的存储状态 */
 private[ui] class StorageTab(parent: SparkUI) extends SparkUITab(parent, "storage") {
   val listener = parent.storageListener
 
@@ -35,8 +36,9 @@ private[ui] class StorageTab(parent: SparkUI) extends SparkUITab(parent, "storag
 /**
  * :: DeveloperApi ::
  * A SparkListener that prepares information to be displayed on the BlockManagerUI.
- *
+ * 一个SparkListener，准备要显示在BlockManagerUI上的信息。
  * This class is thread-safe (unlike JobProgressListener)
+  * 这个类是线程安全的（不同于JobProgressListener）
  */
 @DeveloperApi
 class StorageListener(storageStatusListener: StorageStatusListener) extends BlockStatusListener {
@@ -45,12 +47,14 @@ class StorageListener(storageStatusListener: StorageStatusListener) extends Bloc
 
   def storageStatusList: Seq[StorageStatus] = storageStatusListener.storageStatusList
 
-  /** Filter RDD info to include only those with cached partitions */
+  /** Filter RDD info to include only those with cached partitions
+    * 过滤RDD信息以仅包括具有缓存分区的信息*/
   def rddInfoList: Seq[RDDInfo] = synchronized {
     _rddInfoMap.values.filter(_.numCachedPartitions > 0).toSeq
   }
 
-  /** Update the storage info of the RDDs whose blocks are among the given updated blocks */
+  /** Update the storage info of the RDDs whose blocks are among the given updated blocks
+    * 更新RDD的存储信息，该RDD的块在给定的更新块中*/
   private def updateRDDInfo(updatedBlocks: Seq[(BlockId, BlockStatus)]): Unit = {
     val rddIdsToUpdate = updatedBlocks.flatMap { case (bid, _) => bid.asRDDId.map(_.rddId) }.toSet
     val rddInfosToUpdate = _rddInfoMap.values.toSeq.filter { s => rddIdsToUpdate.contains(s.id) }
@@ -60,6 +64,7 @@ class StorageListener(storageStatusListener: StorageStatusListener) extends Bloc
   /**
    * Assumes the storage status list is fully up-to-date. This implies the corresponding
    * StorageStatusSparkListener must process the SparkListenerTaskEnd event before this listener.
+    * 假设存储状态列表是完全更新的,这意味着相应的StorageStatusSparkListener必须在此侦听器之前处理SparkListenerTaskEnd事件。
    */
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = synchronized {
     val metrics = taskEnd.taskMetrics
@@ -75,6 +80,7 @@ class StorageListener(storageStatusListener: StorageStatusListener) extends Bloc
 
   override def onStageCompleted(stageCompleted: SparkListenerStageCompleted): Unit = synchronized {
     // Remove all partitions that are no longer cached in current completed stage
+    //删除在当前完成阶段不再缓存的所有分区
     val completedRddIds = stageCompleted.stageInfo.rddInfos.map(r => r.id).toSet
     _rddInfoMap.retain { case (id, info) =>
       !completedRddIds.contains(id) || info.numCachedPartitions > 0

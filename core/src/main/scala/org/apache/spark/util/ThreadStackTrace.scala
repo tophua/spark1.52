@@ -19,6 +19,7 @@ package org.apache.spark.util
 
 /**
  * Used for shipping per-thread stacktraces from the executors to driver.
+  * 用于从执行程序到驱动程序运送每个线程堆栈跟踪
  */
 private[spark] case class ThreadStackTrace(
   threadId: Long,

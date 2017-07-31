@@ -37,12 +37,13 @@ abstract class Dependency[T] extends Serializable {
  * :: DeveloperApi ::
  * Base class for dependencies where each partition of the child RDD depends on a small number
  * of partitions of the parent RDD. Narrow dependencies allow for pipelined execution(线性执行).
- * 窄依赖
+ * 依赖在每个分区的子RDD取决于少数的父RDD分区基类,窄的依赖关系允许流水线执行
  */
 @DeveloperApi
 abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
   /**
    * Get the parent partitions for a child partition.
+    * 获取子分区的父分区
    * @param partitionId a partition of the child RDD
    * @return the partitions of the parent RDD that the child partition depends upon
    */
@@ -56,6 +57,7 @@ abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
  * :: DeveloperApi ::
  * Represents a dependency on the output of a shuffle stage. Note that in the case of shuffle,
  * the RDD is transient since we don't need it on the executor side.
+  * 表示对洗牌阶段的输出的依赖,请注意,在洗牌的情况下,RDD是暂时性的,因为我们不需要它在执行者端。
  * 宽依赖,子RDD依赖于parent RDD的所有partition,Spark根据宽依赖将DAG划分不同的Stage
  * @param _rdd the parent RDD
  * @param partitioner partitioner used to partition the shuffle output
@@ -90,6 +92,7 @@ class ShuffleDependency[K, V, C](
 /**
  * :: DeveloperApi ::
  * Represents a one-to-one dependency between partitions of the parent and child RDDs.
+  * 表示父和子RDD的分区之间的一对一依赖关系。
  */
 @DeveloperApi
 class OneToOneDependency[T](rdd: RDD[T]) extends NarrowDependency[T](rdd) {
@@ -103,6 +106,7 @@ class OneToOneDependency[T](rdd: RDD[T]) extends NarrowDependency[T](rdd) {
  * 范围的依赖,它仅仅被UnionRDD使用把多个RDD合成一个RDD,这些RDD是被拼接而成,即每个parent RDD的partitions
  * 相对顺序不会变,只不过每个parent RDD在UnionRDD中的partitions的起始位置不同.
  * Represents a one-to-one dependency between ranges of partitions in the parent and child RDDs.
+  * 表示父子节点中的分区范围之间的一对一依赖关系
  * @param rdd the parent RDD
  * @param inStart the start of the range in the parent RDD,inStart是parent RDD中partitions起始位置
  * @param outStart the start of the range in the child RDD,outStart是在UnionRDD中的起始位置

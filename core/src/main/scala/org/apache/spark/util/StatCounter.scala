@@ -34,10 +34,15 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
 
   merge(values)
 
-  /** Initialize the StatCounter with no values. */
+  /** Initialize the StatCounter with no values.
+    * 初始化没有值的StatCounter
+    * */
   def this() = this(Nil)
 
-  /** Add a value into this StatCounter, updating the internal statistics. */
+  /**
+    * Add a value into this StatCounter, updating the internal statistics.
+    * 在此StatCounter中添加一个值,更新内部统计信息
+    * */
   def merge(value: Double): StatCounter = {
     val delta = value - mu
     n += 1
@@ -48,16 +53,23 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
     this
   }
 
-  /** Add multiple values into this StatCounter, updating the internal statistics. */
+  /**
+    * Add multiple values into this StatCounter, updating the internal statistics.
+    * 在此StatCounter中添加多个值,更新内部统计信息
+    * */
   def merge(values: TraversableOnce[Double]): StatCounter = {
     values.foreach(v => merge(v))
     this
   }
 
-  /** Merge another StatCounter into this one, adding up the internal statistics. */
+  /** Merge another StatCounter into this one, adding up the internal statistics.
+    * 将另一台StatCounter合并到该计算器中，将内部统计信息相加。
+    * */
   def merge(other: StatCounter): StatCounter = {
     if (other == this) {
-      merge(other.copy())  // Avoid overwriting fields in a weird order
+      merge(other.copy())
+      // Avoid overwriting fields in a weird order
+      //避免以奇怪的顺序覆盖字段
     } else {
       if (n == 0) {
         mu = other.mu
@@ -83,7 +95,9 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
     }
   }
 
-  /** Clone this StatCounter */
+  /** Clone this StatCounter
+    * 克隆这个StatCounter
+    * */
   def copy(): StatCounter = {
     val other = new StatCounter
     other.n = n
@@ -104,7 +118,8 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
 
   def min: Double = minValue
 
-  /** Return the variance(可变) of the values. */
+  /** Return the variance of the values.
+    * 返回值的方差*/
   def variance: Double = {
     if (n == 0) {
       Double.NaN
@@ -116,6 +131,7 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
   /**
    * Return the sample variance, which corrects for bias in estimating the variance by dividing
    * by N-1 instead of N.
+    * 返回样本方差,其通过用N-1而不是N来估计方差来校正偏差
    */
   def sampleVariance: Double = {
     if (n <= 1) {
@@ -125,12 +141,16 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
     }
   }
 
-  /** Return the standard deviation of the values. */
+  /**
+    * Return the standard deviation of the values.
+    * 返回值的标准偏差
+    *  */
   def stdev: Double = math.sqrt(variance)//绝对值
 
   /**
    * Return the sample standard deviation of the values, which corrects for bias in estimating the
    * variance by dividing by N-1 instead of N.
+    * 返回值的样本标准偏差,通过用N-1而不是N来估计方差来校正偏差。
    */
   def sampleStdev: Double = math.sqrt(sampleVariance)
 
@@ -140,9 +160,15 @@ class StatCounter(values: TraversableOnce[Double]) extends Serializable {
 }
 
 object StatCounter {
-  /** Build a StatCounter from a list of values. */
+  /**
+    * Build a StatCounter from a list of values.
+    * 从值列表构建StatCounter
+    *  */
   def apply(values: TraversableOnce[Double]): StatCounter = new StatCounter(values)
 
-  /** Build a StatCounter from a list of values passed as variable-length arguments. */
+  /**
+    * Build a StatCounter from a list of values passed as variable-length arguments.
+    * 从作为可变长度参数传递的值列表构建StatCounter
+    * */
   def apply(values: Double*): StatCounter = new StatCounter(values)
 }

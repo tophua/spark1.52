@@ -30,6 +30,7 @@ class PrimitiveVector[@specialized(Long, Int, Double) V: ClassTag](initialSize: 
 
   // NB: This must be separate from the declaration, otherwise the specialized parent class
   // will get its own array with the same initial size.
+  //注意：这必须与声明分开,否则专业的父类将获得具有相同初始大小的自己的数组。
   _array = new Array[V](initialSize)
 
   def apply(index: Int): V = {
@@ -64,10 +65,14 @@ class PrimitiveVector[@specialized(Long, Int, Double) V: ClassTag](initialSize: 
     }
   }
 
-  /** Gets the underlying array backing this vector. */
+  /** Gets the underlying array backing this vector.
+    * 获取支持此向量的底层数组
+    * */
   def array: Array[V] = _array
 
-  /** Trims this vector so that the capacity is equal to the size. */
+  /** Trims this vector so that the capacity is equal to the size.
+    * 修剪这个矢量，使容量等于大小
+    *  */
   def trim(): PrimitiveVector[V] = resize(size)
 
   /** 

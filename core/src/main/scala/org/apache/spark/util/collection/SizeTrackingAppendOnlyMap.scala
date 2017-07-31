@@ -19,6 +19,7 @@ package org.apache.spark.util.collection
 
 /**
  * An append-only map that keeps track of its estimated size in bytes.
+  * 追踪其估计大小（以字节为单位）的仅追加Map。
  */
 private[spark] class SizeTrackingAppendOnlyMap[K, V]
   extends AppendOnlyMap[K, V] with SizeTracker

@@ -36,11 +36,13 @@ import org.apache.spark.util.Utils
 
 /**
  * Utilities for launching a web server using Jetty's HTTP Server class
+  * 使用Jetty的HTTP Server类启动Web服务器的实用程序
  */
 private[spark] object JettyUtils extends Logging {
 
   // Base type for a function that returns something based on an HTTP request. Allows for
   // implicit conversion from many types of functions to jetty Handlers.
+  //用于返回基于HTTP请求的内容的函数的基类型,允许从许多类型的函数到码头处理程序的隐式转换。
   type Responder[T] = HttpServletRequest => T
 
   class ServletParams[T <% AnyRef](val responder: Responder[T],
@@ -48,6 +50,7 @@ private[spark] object JettyUtils extends Logging {
     val extractFn: T => String = (in: Any) => in.toString) {}
 
   // Conversions from various types of Responder's to appropriate servlet parameters
+  //从各种类型的Responder到适当的servlet参数的转换
   implicit def jsonResponderToServlet(responder: Responder[JValue]): ServletParams[JValue] =
     new ServletParams(responder, "text/json", (in: JValue) => pretty(render(in)))
 
@@ -92,7 +95,8 @@ private[spark] object JettyUtils extends Logging {
     }
   }
 
-  /** Create a context handler that responds to a request with the given path prefix */
+  /** Create a context handler that responds to a request with the given path prefix
+    * 创建一个使用给定路径前缀响应请求的上下文处理程序*/
   def createServletHandler[T <% AnyRef](
       path: String,
       servletParams: ServletParams[T],
@@ -101,7 +105,8 @@ private[spark] object JettyUtils extends Logging {
     createServletHandler(path, createServlet(servletParams, securityMgr), basePath)
   }
 
-  /** Create a context handler that responds to a request with the given path prefix */
+  /** Create a context handler that responds to a request with the given path prefix
+    * 创建一个使用给定路径前缀响应请求的上下文处理程序 */
   def createServletHandler(
       path: String,
       servlet: HttpServlet,
@@ -114,7 +119,8 @@ private[spark] object JettyUtils extends Logging {
     contextHandler
   }
 
-  /** Create a handler that always redirects the user to the given path */
+  /** Create a handler that always redirects the user to the given path
+    * 创建一个总是将用户重定向到给定路径的处理程序*/
   def createRedirectHandler(
       srcPath: String,
       destPath: String,
@@ -140,6 +146,7 @@ private[spark] object JettyUtils extends Logging {
       private def doRequest(request: HttpServletRequest, response: HttpServletResponse): Unit = {
         beforeRedirect(request)
         // Make sure we don't end up with "//" in the middle
+        //确保我们不会在中间结束“//”
         val newUrl = new URL(new URL(request.getRequestURL.toString), prefixedDestPath).toString
         response.sendRedirect(newUrl)
       }
@@ -151,7 +158,8 @@ private[spark] object JettyUtils extends Logging {
     createServletHandler(srcPath, servlet, basePath)
   }
 
-  /** Create a handler for serving files from a static directory */
+  /** Create a handler for serving files from a static directory
+    * 创建从静态目录提供文件的处理程序 */
   def createStaticHandler(resourceBase: String, path: String): ServletContextHandler = {
     val contextHandler = new ServletContextHandler
     contextHandler.setInitParameter("org.eclipse.jetty.servlet.Default.gzip", "false")
@@ -168,7 +176,8 @@ private[spark] object JettyUtils extends Logging {
     contextHandler
   }
 
-  /** Add filters, if any, to the given list of ServletContextHandlers */
+  /** Add filters, if any, to the given list of ServletContextHandlers
+    * 将过滤器（如果有）添加到给定的ServletContextHandler列表中*/
   def addFilters(handlers: Seq[ServletContextHandler], conf: SparkConf) {
     val filters: Array[String] = conf.get("spark.ui.filters", "").split(',').map(_.trim())
     filters.foreach {
@@ -201,9 +210,11 @@ private[spark] object JettyUtils extends Logging {
   /**
    * Attempt to start a Jetty server bound to the supplied hostName:port using the given
    * context handlers.
+    * 尝试使用给定的上下文处理程序启动绑定到提供的hostName：port的Jetty服务器。
    *
    * If the desired port number is contended, continues incrementing ports until a free port is
    * found. Return the jetty Server object, the chosen port, and a mutable collection of handlers.
+    * 如果希望的端口号被竞争,继续递增端口,直到找到一个空闲端口。 返回jetty Server对象,所选端口和可变的处理程序集合。
    */
   def startJettyServer(
       hostName: String,
@@ -223,6 +234,7 @@ private[spark] object JettyUtils extends Logging {
     collection.setHandlers(gzipHandlers.toArray)
 
     // Bind to the given port, or throw a java.net.BindException if the port is occupied
+    //绑定到给定端口，或者如果端口被占用，则抛出java.net.BindException
     def connect(currentPort: Int): (Server, Int) = {
       val server = new Server(new InetSocketAddress(hostName, currentPort))
       val pool = new QueuedThreadPool
@@ -247,7 +259,8 @@ private[spark] object JettyUtils extends Logging {
     ServerInfo(server, boundPort, collection)
   }
 
-  /** Attach a prefix to the given path, but avoid returning an empty path */
+  /** Attach a prefix to the given path, but avoid returning an empty path
+    * 在给定的路径上附加一个前缀，但是避免返回一个空的路径 */
   private def attachPrefix(basePath: String, relativePath: String): String = {
     if (basePath == "") relativePath else (basePath + relativePath).stripSuffix("/")
   }

@@ -22,7 +22,7 @@ import org.slf4j.Logger
 
 /**
  * A trait to enable logging all Akka actor messages. Here's an example of using this:
- *
+ * 启用记录所有Akka演员消息的特征,以下是使用此示例：
  * {{{
  *   class BlockManagerMasterActor extends Actor with ActorLogReceive with Logging {
  *     ...

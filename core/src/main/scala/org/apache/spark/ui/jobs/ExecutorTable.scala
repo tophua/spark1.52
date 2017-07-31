@@ -24,7 +24,8 @@ import org.apache.spark.ui.{ToolTips, UIUtils}
 import org.apache.spark.ui.jobs.UIData.StageUIData
 import org.apache.spark.util.Utils
 
-/** Stage summary grouped by executors. */
+/** Stage summary grouped by executors.
+  * 由执行分组的阶段摘要。 */
 private[ui] class ExecutorTable(stageId: Int, stageAttemptId: Int, parent: StagesTab) {
   private val listener = parent.progressListener
 
@@ -34,7 +35,8 @@ private[ui] class ExecutorTable(stageId: Int, stageAttemptId: Int, parent: Stage
     }
   }
 
-  /** Special table which merges two header cells. */
+  /** Special table which merges two header cells.
+    * 合并两个标题单元格的特殊表*/
   private def executorTable[T](): Seq[Node] = {
     val stageData = listener.stageIdToData.get((stageId, stageAttemptId))
     var hasInput = false
@@ -93,6 +95,7 @@ private[ui] class ExecutorTable(stageId: Int, stageAttemptId: Int, parent: Stage
 
   private def createExecutorTable() : Seq[Node] = {
     // Make an executor-id -> address map
+    //做一个执行者id - >地址Map
     val executorIdToAddress = mutable.HashMap[String, String]()
     listener.blockManagerIds.foreach { blockManagerId =>
       val address = blockManagerId.hostPort

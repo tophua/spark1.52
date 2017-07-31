@@ -146,7 +146,8 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
   }
 
   /** 
-   *  Register a ShuffleDependency for cleanup when it is garbage collected. 
+   *  Register a ShuffleDependency for cleanup when it is garbage collected.
+    * 注册一个shuffledependency清理时，垃圾收集。
    *  */
   def registerShuffleForCleanup(shuffleDependency: ShuffleDependency[_, _, _]): Unit = {
     registerForCleanup(shuffleDependency, CleanShuffle(shuffleDependency.shuffleId))
@@ -160,7 +161,10 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
     registerForCleanup(broadcast, CleanBroadcast(broadcast.id))
   }
 
-  /** Register a RDDCheckpointData for cleanup when it is garbage collected. */
+  /**
+    * Register a RDDCheckpointData for cleanup when it is garbage collected.
+    * 注册一个rddcheckpointdata清理时垃圾收集。
+    *  */
   def registerRDDCheckpointDataForCleanup[T](rdd: RDD[_], parentId: Int): Unit = {
     registerForCleanup(rdd, CleanCheckpoint(parentId))
   }

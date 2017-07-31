@@ -366,8 +366,8 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * 如果文件在本地有缓存,则从本地获取,否则通过HTTP,HTTPS,FTP等协议远程下载,最后对.tar,tar.gz等格式的文件压缩后
-   * 调用shell命令行的chmod命令给文件增加a+x的权限
+    *将文件或目录下载到目标目录,支持基于URL参数以各种方式获取文件,包括HTTP,Hadoop兼容文件系统和标准文件系统上的文件,
+    * 只能从Hadoop兼容的文件系统中获取获取目录。
    * Download a file or directory to target directory. Supports fetching the file in a variety of
    * ways, including HTTP, Hadoop-compatible filesystems, and files on a standard filesystem, based
    * on the URL parameter. Fetching directories is only supported from Hadoop-compatible
@@ -376,9 +376,12 @@ private[spark] object Utils extends Logging {
    * If `useCache` is true, first attempts to fetch the file to a local cache that's shared
    * across executors running the same application. `useCache` is used mainly for
    * the executors, and not in local mode.
+    * 如果useCache为true,则首先尝试将文件提取到在运行相同应用程序的执行程序之间共享的本地缓存,
+    * useCache主要用于执行程序,而不是在本地模式下使用。
    *
    * Throws SparkException if the target file already exists and has different contents than
    * the requested file.
+    * 如果目标文件已经存在并且具有与请求的文件不同的内容,则抛出SparkException。
    */
   def fetchFile(
       url: String,
@@ -401,6 +404,7 @@ private[spark] object Utils extends Logging {
       // Only one executor entry.
       // The FileLock is only used to control synchronization for executors download file,
       // it's always safe regardless of lock type (mandatory or advisory).
+      //只有一个执行者条目,FileLock仅用于控制执行程序下载文件的同步,无论锁定类型（强制或咨询）如何,它始终是安全的。
       val lock = lockFileChannel.lock()
       val cachedFile = new File(localDir, cachedFileName)
       try {
@@ -415,7 +419,7 @@ private[spark] object Utils extends Logging {
         url,
         cachedFile,
         targetFile,
-	//通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时,是否覆盖目标文件
+	    //通过 SparkContext.addFile() 添加的文件在目标中已经存在并且内容不匹配时,是否覆盖目标文件
         conf.getBoolean("spark.files.overwrite", false)
       )
     } else {
@@ -423,6 +427,7 @@ private[spark] object Utils extends Logging {
     }
 
     // Decompress the file if it's a .tar or .tar.gz
+    //解压文件,如果是.tar或.tar.gz
     if (fileName.endsWith(".tar.gz") || fileName.endsWith(".tgz")) {
       logInfo("Untarring " + fileName)
       //解压.tar.gz文件
@@ -449,9 +454,12 @@ private[spark] object Utils extends Logging {
    * Download in to tempFile, then move it to destFile.
    * 下载到 tempfile ,然后将它移到destfile
    * If destFile already exists:
+    * 如果destFile已经存在：
    *   - no-op if its contents equal those of sourceFile,
+    *     如果其内容与sourceFile的内容相同，那么no-op，
    *   - throw an exception if fileOverwrite is false,
-   *   - attempt to overwrite it otherwise.
+    *   如果fileOverwrite为false，则抛出异常，
+   *   - attempt to overwrite it otherwise.否则尝试覆盖它。
    *
    * @param url URL that sourceFile originated from, for logging purposes.
    * @param in InputStream to download.
@@ -475,6 +483,7 @@ private[spark] object Utils extends Logging {
     } finally {
       // Catch-all for the couple of cases where for some reason we didn't move `tempFile` to
       // `destFile`.
+      //抓住所有的情况,由于某些原因,我们没有将`tempFile'移动到`destFile'。
       if (tempFile.exists()) {
         tempFile.delete()
       }
@@ -485,9 +494,10 @@ private[spark] object Utils extends Logging {
    * Copy `sourceFile` to `destFile`.
    * 复制源文件到目录文件
    * If `destFile` already exists:
-   *   - no-op if its contents equal those of `sourceFile`,
-   *   - throw an exception if `fileOverwrite` is false,
-   *   - attempt to overwrite it otherwise.
+    * 如果`destFile`已经存在：
+   *   - no-op if its contents equal those of `sourceFile`,如果其内容等于`sourceFile`，
+   *   - throw an exception if `fileOverwrite` is false,如果fileOverwrite为false，则抛出异常，
+   *   - attempt to overwrite it otherwise.否则尝试覆盖它
    *
    * @param url URL that `sourceFile` originated from, for logging purposes.
    * @param sourceFile File path to copy/move from.
@@ -525,6 +535,7 @@ private[spark] object Utils extends Logging {
       } else {
         // Do nothing if the file contents are the same, i.e. this file has been copied
         // previously.
+        //如果文件内容相同,则不执行任何操作,即此文件以前已被复制。
         logInfo(
           "%s has been previously copied to %s".format(
             sourceFile.getAbsolutePath,
@@ -578,7 +589,8 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   *使用URLConnections通过HTTP,HTTPS,FTP等协议下载文件
+   * 将文件或目录下载到目标目录,支持基于URL参数以各种方式获取文件,
+    * 包括HTTP,Hadoop兼容文件系统和标准文件系统上的文件。只能从Hadoop兼容的文件系统中获取获取目录。
    * Download a file or directory to target directory. Supports fetching the file in a variety of
    * ways, including HTTP, Hadoop-compatible filesystems, and files on a standard filesystem, based
    * on the URL parameter. Fetching directories is only supported from Hadoop-compatible
@@ -586,6 +598,7 @@ private[spark] object Utils extends Logging {
    *
    * Throws SparkException if the target file already exists and has different contents than
    * the requested file.
+    * 如果目标文件已经存在并且具有与请求的文件不同的内容,则抛出SparkException。
    */
   private def doFetchFile(
       url: String,
@@ -669,40 +682,48 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * 查询Spark本地文件的一级目录,Spark的本地目录可以通过配置多重设置,它们具有以下优先级：
+   * 获取临时目录的路径, Spark的本地目录可以通过多个设置进行配置,这些设置具有以下优先级：
    * Get the path of a temporary directory.  Spark's local directories can be configured through
    * multiple settings, which are used with the following precedence:
    *
    *   - If called from inside of a YARN container, this will return a directory chosen by YARN.
+    *     如果从YARN容器内部调用,将返回YARN选择的目录。
    *   - If the SPARK_LOCAL_DIRS environment variable is set, this will return a directory from it.
+    *     如果设置了SPARK_LOCAL_DIRS环境变量,这将返回一个目录。
    *   - Otherwise, if the spark.local.dir is set, this will return a directory from it.
-   *   - Otherwise, this will return java.io.tmpdir.
+    *   否则,如果设置了spark.local.dir,它将从中返回一个目录。
+   *   - Otherwise, this will return java.io.tmpdir.否则,这将返回java.io.tmpdir。
    *
    * Some of these configuration options might be lists of multiple paths, but this method will
    * always return a single directory.
+    * 这些配置选项中的一些可能是多个路径的列表,但此方法将始终返回单个目录。
    */
   def getLocalDir(conf: SparkConf): String = {
     getOrCreateLocalRootDirs(conf)(0)
   }
 
   private[spark] def isRunningInYarnContainer(conf: SparkConf): Boolean = {
-    // These environment variables are set by YARN.
+    // These environment variables are set by YARN.这些环境变量由YARN设置
     // For Hadoop 0.23.X, we check for YARN_LOCAL_DIRS (we use this below in getYarnLocalDirs())
     // For Hadoop 2.X, we check for CONTAINER_ID.
+    //对于Hadoop 0.23.X，我们检查YARN_LOCAL_DIRS(我们在getYarnLocalDirs()中使用这个)
+    //对于Hadoop 2.X，我们检查CONTAINER_ID。
     conf.getenv("CONTAINER_ID") != null || conf.getenv("YARN_LOCAL_DIRS") != null
   }
 
   /**
    * 根据spark.local.dir的配置,作为本地文件的根目录,在创建一,二级目录之前要确保目录是存在的,然后调用
    * getOrCreateLocalRootDirsImpl创建一级目录
+    * 获取或创建spark.local.dir或SPARK_LOCAL_DIRS中列出的目录,并仅返回已存在/可以创建的目录。
    * Gets or creates the directories listed in spark.local.dir or SPARK_LOCAL_DIRS,
    * and returns only the directories that exist / could be created.
    *
    * If no directories could be created, this will return an empty list.
-   *
+   * 如果没有创建任何目录，这将返回一个空列表。
    * This method will cache the local directories for the application when it's first invoked.
    * So calling it multiple times with a different configuration will always return the same
    * set of directories.
+    * 此方法将在应用程序首次调用时缓存本地目录,所以使用不同的配置多次调用它将始终返回相同的目录集。
    */
   private[spark] def getOrCreateLocalRootDirs(conf: SparkConf): Array[String] = {
     if (localRootDirs == null) {
@@ -716,7 +737,7 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * 获取可写的本地Spark配置文件,该方法本身并不创建任何目录,只能根据部署模式封装查找本地目录的逻辑。
+   * 返回Spark可以写入文件的配置的本地目录,该方法本身并不创建任何目录,只能根据部署模式封装查找本地目录的逻辑。
    * Return the configured local directories where Spark can write files. This
    * method does not create any directories on its own, it only encapsulates the
    * logic of locating the local directories according to deployment mode.
@@ -727,6 +748,8 @@ private[spark] object Utils extends Logging {
       // to what Yarn on this system said was available. Note this assumes that Yarn has
       // created the directories already, and that they are secured so that only the
       // user has access to them.
+      //如果我们在yarn模式下，系统可以有不同的磁盘布局,所以我们必须将其设置为该系统上可用的yarn。
+      // 请注意，这假设yarn已经创建了目录，并且它们是安全的，以便只有用户可以访问它们。
       getYarnLocalDirs(conf).split(",")
     } else if (conf.getenv("SPARK_EXECUTOR_DIRS") != null) {
       conf.getenv("SPARK_EXECUTOR_DIRS").split(File.pathSeparator)
@@ -734,6 +757,8 @@ private[spark] object Utils extends Logging {
       // In non-Yarn mode (or for the driver in yarn-client mode), we cannot trust the user
       // configuration to point to a secure directory. So create a subdirectory with restricted
       // permissions under each listed directory.
+      //在非yarn模式(或yarn客户端模式下的驱动程序)中,我们无法相信用户配置指向安全目录。
+      // 因此,在每个列出的目录下创建一个具有受限权限的子目录。
       Option(conf.getenv("SPARK_LOCAL_DIRS"))
         .getOrElse(conf.get("spark.local.dir", System.getProperty("java.io.tmpdir")))
         .split(",")
@@ -789,7 +814,8 @@ private[spark] object Utils extends Logging {
    * Shuffle the elements of a collection into a random order, returning the
    * result in a new collection. Unlike scala.util.Random.shuffle, this method
    * uses a local random number generator, avoiding inter-thread contention.
-    * 将集合的元素随机排列为随机顺序，将结果返回到新集合中,该方法使用本地随机数发生器,避免线间争用
+    * 将集合的元素随机排列为随机顺序,将结果返回到新集合中, 与scala.util.Random.shuffle不同,
+    * 该方法使用本地随机数生成器,避免了线程间争用。
    */
   def randomize[T: ClassTag](seq: TraversableOnce[T]): Seq[T] = {
     randomizeInPlace(seq.toArray)
@@ -798,7 +824,7 @@ private[spark] object Utils extends Logging {
   /**
    * Shuffle the elements of an array into a random order, modifying the
    * original array. Returns the original array.
-    * 将数组的元素随机排列为随机顺序,修改原始数组,返回原始数组。
+    *将数组的元素随机排列为随机顺序,修改原始数组,返回原始数组。
    */
   def randomizeInPlace[T](arr: Array[T], rand: Random = new Random): Array[T] = {
     for (i <- (arr.length - 1) to 1 by -1) {
@@ -834,6 +860,8 @@ private[spark] object Utils extends Logging {
         // getNetworkInterfaces returns ifs in reverse order compared to ifconfig output order
         // on unix-like system. On windows, it returns in index order.
         // It's more proper to pick ip address following system output order.
+        //getNetworkInterfaces以相反的顺序返回ifs,与ifix类似系统上的ifconfig输出顺序相比。
+        // 在Windows上,它按索引顺序返回。 按照系统输出顺序选择IP地址更合适。
         val activeNetworkIFs = NetworkInterface.getNetworkInterfaces.toList
         val reOrderedNetworkIFs = if (isWindows) activeNetworkIFs else activeNetworkIFs.reverse
 
@@ -905,7 +933,7 @@ private[spark] object Utils extends Logging {
   private val hostPortParseResults = new ConcurrentHashMap[String, (String, Int)]()
 
   def parseHostPort(hostPort: String): (String, Int) = {
-    // Check cache first.
+    // Check cache first.先检查缓存
     val cached = hostPortParseResults.get(hostPort)
     if (cached != null) {
       return cached
@@ -1061,8 +1089,9 @@ private[spark] object Utils extends Logging {
 
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m) to kibibytes for internal use.
-   *
+   * 将传递的字节串（例如50b，100k或250m）转换为kibibytes以供内部使用。
    * If no suffix is provided, the passed number is assumed to be in kibibytes.
+    * 如果没有提供后缀，则传递的数字假定为kibibytes。
    */
   def byteStringAsKb(str: String): Long = {
     JavaUtils.byteStringAsKb(str)
@@ -1070,8 +1099,9 @@ private[spark] object Utils extends Logging {
 
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m) to mebibytes for internal use.
-   *
+   * 将传递的字节串（例如50b，100k或250m）转换为mebibytes以供内部使用。
    * If no suffix is provided, the passed number is assumed to be in mebibytes.
+    * 如果没有提供后缀，则传递的数字假定为mebibytes。
    */
   def byteStringAsMb(str: String): Long = {
     JavaUtils.byteStringAsMb(str)
@@ -1465,6 +1495,7 @@ private[spark] object Utils extends Logging {
    * Return a string containing data across a set of files. The `startIndex`
    * and `endIndex` is based on the cumulative size of all the files take in
    * the given order. See figure below for more details.
+    * 在一组文件中返回一个包含数据的字符串,`startIndex`和`endIndex`是基于给定顺序中所有文件的累积大小,有关详细信息，请参见下图。
    */
   def offsetBytes(files: Seq[File], start: Long, end: Long): String = {
     val fileLengths = files.map { _.length }
@@ -1494,15 +1525,18 @@ private[spark] object Utils extends Logging {
 
       if (startIndex <= startIndexOfFile  && endIndex >= endIndexOfFile) {
         // Case C: read the whole file
+        //情况C：读取整个文件
         stringBuffer.append(offsetBytes(file.getAbsolutePath, 0, fileToLength(file)))
       } else if (startIndex > startIndexOfFile && startIndex < endIndexOfFile) {
         // Case A and B: read from [start of required range] to [end of file / end of range]
+        //情况A和B：从[所需范围的开始]到[文件结束/范围结束]
         val effectiveStartIndex = startIndex - startIndexOfFile
         val effectiveEndIndex = math.min(endIndex - startIndexOfFile, fileToLength(file))
         stringBuffer.append(Utils.offsetBytes(
           file.getAbsolutePath, effectiveStartIndex, effectiveEndIndex))
       } else if (endIndex > startIndexOfFile && endIndex < endIndexOfFile) {
         // Case D: read from [start of file] to [end of require range]
+        //案例D：从[文件开始]读取到[要求范围的结束]
         val effectiveStartIndex = math.max(startIndex - startIndexOfFile, 0)
         val effectiveEndIndex = endIndex - startIndexOfFile
         stringBuffer.append(Utils.offsetBytes(
@@ -1516,6 +1550,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Clone an object using a Spark serializer.
+    * 使用Spark序列化程序克隆对象。
    */
   def clone[T: ClassTag](value: T, serializer: SerializerInstance): T = {
     serializer.deserialize[T](serializer.serialize(value))
@@ -1591,6 +1626,7 @@ private[spark] object Utils extends Logging {
  /* Calculates 'x' modulo 'mod', takes to consideration sign of x,
   * i.e. if 'x' is negative, than 'x' % 'mod' is negative too
   * so function return (x % mod) + mod in that case.
+  * 计算'x'模'mod',考虑到x的符号,即如果'x'为负,则'x'％'mod'为负,因此在这种情况下函数返回(x％mod)+ mod。
   */
   def nonNegativeMod(x: Int, mod: Int): Int = {
     val rawMod = x % mod
@@ -1608,6 +1644,7 @@ private[spark] object Utils extends Logging {
 
     val hash = obj.hashCode
     // math.abs fails for Int.MinValue
+    //对于Int.MinValue，math.abs失败
     val hashAbs = if (Int.MinValue != hash) math.abs(hash) else 0
 
     // Nothing else to guard against ?
@@ -1617,6 +1654,7 @@ private[spark] object Utils extends Logging {
   /**
    * NaN-safe version of [[java.lang.Double.compare()]] which allows NaN values to be compared
    * according to semantics where NaN == NaN and NaN > any non-NaN double.
+    * NaN安全版本的[[java.lang.Double.compare（）]],允许NaN值根据NaN == NaN和NaN>任何非NaN双的语义进行比较
    */
   def nanSafeCompareDoubles(x: Double, y: Double): Int = {
     val xIsNan: Boolean = java.lang.Double.isNaN(x)
@@ -1631,6 +1669,7 @@ private[spark] object Utils extends Logging {
   /**
    * NaN-safe version of [[java.lang.Float.compare()]] which allows NaN values to be compared
    * according to semantics where NaN == NaN and NaN > any non-NaN float.
+    * NaN安全版[[java.lang.Float.compare（）]]，它允许根据NaN == NaN和NaN>任何非NaN float的语义来比较NaN值。
    */
   def nanSafeCompareFloats(x: Float, y: Float): Int = {
     val xIsNan: Boolean = java.lang.Float.isNaN(x)
@@ -1643,7 +1682,8 @@ private[spark] object Utils extends Logging {
   }
 
   /** 
-   *  返回Spark系统属性配置文件
+   *  返回Spark系统属性配置文件,
+    *  返回线程安全到迭代器的系统属性映射。它获取已被明确设置的属性,以及仅定义了默认值的属性
    *  Returns the system properties map that is thread-safe to iterator over. It gets the
     * properties which have been set explicitly, as well as those for which only a default value
     * has been defined. */
@@ -1658,6 +1698,7 @@ private[spark] object Utils extends Logging {
    * Method executed for repeating a task for side effects.
    * 执行重复一个副作用的任务的方法
    * Unlike a for comprehension, it permits JVM JIT optimization
+    * 与理解不同,它允许JVM JIT优化
    */
   def times(numIters: Int)(f: => Unit): Unit = {
     var i = 0
@@ -1700,6 +1741,8 @@ private[spark] object Utils extends Logging {
    * Counts the number of elements of an iterator using a while loop rather than calling
    * [[scala.collection.Iterator#size]] because it uses a for loop, which is slightly slower
    * in the current version of Scala.
+    * 使用while循环计算迭代器的元素数,而不是调用[[scala.collection.Iterator＃size]],
+    * 因为它使用了一个for循环.这在当前版本的Scala中稍慢一些。
    */
   def getIteratorSize[T](iterator: Iterator[T]): Long = {
     var count = 0L
@@ -1713,6 +1756,8 @@ private[spark] object Utils extends Logging {
   /**
    * Creates a symlink. Note jdk1.7 has Files.createSymbolicLink but not used here
    * for jdk1.6 support.  Supports windows by doing copy, everything else uses "ln -sf".
+    * 创建符号链接,注意jdk1.7有Files.createSymbolicLink,但这里不支持jdk1.6。
+    * 通过复制来支持窗口，其他的都使用“ln -sf”。
    * @param src absolute path to the source
    * @param dst relative path for the destination
    */
@@ -1726,6 +1771,7 @@ private[spark] object Utils extends Logging {
     var cmdSuffix = ""
     val linkCmd = if (isWindows) {
       // refer to http://technet.microsoft.com/en-us/library/cc771254.aspx
+      //请参阅http://technet.microsoft.com/en-us/library/cc771254.aspx
       cmdSuffix = " /s /e /k /h /y /i"
       "cmd /c xcopy "
     } else {
@@ -1983,6 +2029,9 @@ private[spark] object Utils extends Logging {
    * use the common defaults file. This mutates state in the given SparkConf and
    * in this JVM's system properties if the config specified in the file is not
    * already set. Return the path of the properties file used.
+    * 从给定文件加载默认Spark属性,如果没有提供文件,请使用通用的默认文件。
+    * 如果文件中指定的配置尚未设置,则会在给定的SparkConf和该JVM的系统属性中突出显示状态。
+    * 返回所使用的属性文件的路径。
    */
   def loadDefaultSparkProperties(conf: SparkConf, filePath: String = null): String = {
     val path = Option(filePath).getOrElse(getDefaultPropertiesFile())
@@ -2056,6 +2105,7 @@ private[spark] object Utils extends Logging {
   def getThreadDump(): Array[ThreadStackTrace] = {
     // We need to filter out null values here because dumpAllThreads() may return null array
     // elements for threads that are dead / don't exist.
+    //我们需要在这里过滤出空值,因为dumpAllThreads()可能会返回null数组元素,因为死线程/不存在的线程。
     val threadInfos = ManagementFactory.getThreadMXBean.dumpAllThreads(true, true).filter(_ != null)
     threadInfos.sortBy(_.getThreadId).map { case threadInfo =>
       val stackTrace = threadInfo.getStackTrace.map(_.toString).mkString("\n")
@@ -2271,9 +2321,10 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return a pair of host and port extracted from the `sparkUrl`.
-   * sparkUrl根据提取主机及端口
+   * 返回一个从`sparkUrl`提取的主机和端口。
    * A spark url (`spark://host:port`) is a special URI that its scheme is `spark` and only contains
    * host and port.
+    * 一个spark网址（`spark：// host：port`）是一个特殊的URI,它的方案是“spark”,只包含主机和端口。
    *
    * @throws SparkException if `sparkUrl` is invalid.
    */
@@ -2285,6 +2336,7 @@ private[spark] object Utils extends Logging {
       if (uri.getScheme != "spark" ||
         host == null ||
         port < 0 ||
+        //uri.getPath返回“”而不是null
         (uri.getPath != null && !uri.getPath.isEmpty) || // uri.getPath returns "" instead of null
         uri.getFragment != null ||
         uri.getQuery != null ||

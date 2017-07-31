@@ -29,6 +29,7 @@ private[ui] class EnvironmentTab(parent: SparkUI) extends SparkUITab(parent, "en
 /**
  * :: DeveloperApi ::
  * A SparkListener that prepares information to be displayed on the EnvironmentTab
+  * 一个SparkListener，准备在EnvironmentTab上显示的信息
  */
 @DeveloperApi
 class EnvironmentListener extends SparkListener {
