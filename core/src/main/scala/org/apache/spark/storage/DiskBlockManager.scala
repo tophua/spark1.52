@@ -29,10 +29,12 @@ import org.apache.spark.util.{ShutdownHookManager, Utils}
  * locations. By default, one block is mapped to one file with a name given by its BlockId.
  * However, it is also possible to have a block map to only a segment of a file, by calling
  * mapBlockToFileSegment().
- *管理和维护了逻辑的Block和存储在Disk上的物理的Block的映射,一个逻辑的Block会根据它的BlockID生成的名字
- * 映射到一个物理上的文件
+  *
+  *创建和维护逻辑块和物理磁盘位置之间的逻辑映射,默认情况下,一个块被映射到一个文件,
+  * 其名称由其BlockId给出。但是,也可以通过调用mapBlockToFileSegment（）将块映射到文件的一个段。
  * Block files are hashed among the directories listed in spark.local.dir (or in
  * SPARK_LOCAL_DIRS, if it's set).
+  * 阻止文件在spark.local.dir中列出的目录中进行散列(或者在SPARK_LOCAL_DIRS中设置)
  */
 private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkConf)
   extends Logging {
@@ -43,7 +45,9 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
 
   /* Create one local directory for each path mentioned in spark.local.dir; then, inside this
    * directory, create multiple subdirectories that we will hash files into, in order to avoid
-   * having really large inodes at the top level. */
+   * having really large inodes at the top level.
+   * 为spark.local.dir中提到的每个路径创建一个本地目录,那么，在这个目录下,
+   * 创建我们将哈希文件的多个子目录,以避免在顶层有真正的大型inode。*/
   //存放Block对应的File的本地根目录
   private[spark] val localDirs: Array[File] = createLocalDirs(conf)
   if (localDirs.isEmpty) {
@@ -52,6 +56,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   }
   // The content of subDirs is immutable but the content of subDirs(i) is mutable. And the content
   // of subDirs(i) is protected by the lock of subDirs(i)
+  //subDirs的内容是不可变的,但是subDirs(i)的内容是可变的,subDirs(i)的内容受到subDirs(i)的锁定的保护
   //存放所有子目录的二维数组
   private val subDirs = Array.fill(localDirs.length)(new Array[File](subDirsPerLocalDir))
 
@@ -59,6 +64,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
 
   /** Looks up a file by hashing it into one of our local subdirectories. */
   // This method should be kept in sync with
+  //通过将文件散列成我们的本地子目录之一来查找文件,该方法应该保持同步
   // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getFile().
   /**
    * 从磁盘获取文件,根据文件名,取得文件,该方法先将filename哈希到相应的子目录,然后判断子目录是否存在,若不存在则生成
@@ -73,12 +79,14 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
    */
   def getFile(filename: String): File = {
     // Figure out which local directory it hashes to, and which subdirectory in that
+    //找出它所在的本地目录,以及哪个子目录
     val hash = Utils.nonNegativeHash(filename) //根据文件名称计算哈希值
     val dirId = hash % localDirs.length //根据哈希值与本地文件一级目录的总数余数,记为dirId
     val subDirId = (hash / localDirs.length) % subDirsPerLocalDir //根据哈希值与本地一级目录的总数求商数
     //此商数与二极目录的数目再求余数
 
     // Create the subdirectory if it doesn't already exist
+    //创建子目录(如果不存在)
     val subDir = subDirs(dirId).synchronized {
       val old = subDirs(dirId)(subDirId) //如果dirId/subDir目录存在,则获取dirId/subDir目录下的文件
       if (old != null) {
@@ -135,9 +143,9 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   }
 
   /** 
-   *  Produces a unique block id and File suitable for storing local intermediate results. 
+   *  Produces a unique block id and File suitable for storing local intermediate results.
+    *  产生一个独特的块id和适用于存储局部中间结果的File
    *  创建本地临时文件
-   *  
    * */
   
   def createTempLocalBlock(): (TempLocalBlockId, File) = {
@@ -166,7 +174,8 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
    * Create local directories for storing block data. These directories are
    * located inside configured local directories and won't
    * be deleted on JVM exit when using the external shuffle service.
-   * 
+   * 创建用于存储块数据的本地目录,这些目录位于配置的本地目录内,并且在使用外部shuffle服务时不会在JVM退出时被删除。
+    *
    * 创建本地文件目录,然后创建二维数组subDirs,用来缓存一级目录localDirs及二级目录
    * 其中二级目录的数量根据配置subDirsPerLocalDir获取,默认64.
    */
@@ -197,8 +206,9 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
    *  清理本地目录和发送停止shuffle信息。
    *  */
   private[spark] def stop() {
-    //删除关闭钩子,如果使用它会导致内存泄漏
+
     // Remove the shutdown hook.  It causes memory leaks if we leave it around.
+    //删除关机挂钩,如果我们离开它会导致内存泄漏,
     try {
       ShutdownHookManager.removeShutdownHook(shutdownHook)
     } catch {
@@ -211,6 +221,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   private def doStop(): Unit = {
     // Only perform cleanup if an external service is not serving our shuffle files.
     // Also blockManagerId could be null if block manager is not initialized properly.
+    //如果外部服务不提供我们的随机播放文件,则只执行清理,如果块管理器未正确初始化,那么blockManagerId也可以为null。
     if (!blockManager.externalShuffleServiceEnabled ||
       (blockManager.blockManagerId != null && blockManager.blockManagerId.isDriver)) {
       localDirs.foreach { localDir =>

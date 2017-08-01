@@ -31,6 +31,7 @@ private[spark] case class BlockUIData(
 
 /**
  * The aggregated status of stream blocks in an executor
+  * 执行器中流块的聚合状态
  */
 private[spark] case class ExecutorStreamBlockStatus(
     executorId: String,
@@ -56,6 +57,7 @@ private[spark] class BlockStatusListener extends SparkListener {
     val blockId = blockUpdated.blockUpdatedInfo.blockId
     if (!blockId.isInstanceOf[StreamBlockId]) {
       // Now we only monitor StreamBlocks
+      //现在我们只监控StreamBlocks
       return
     }
     val blockManagerId = blockUpdated.blockUpdatedInfo.blockManagerId
@@ -66,6 +68,7 @@ private[spark] class BlockStatusListener extends SparkListener {
 
     synchronized {
       // Drop the update info if the block manager is not registered
+      //如果块管理器未注册,请删除更新信息
       blockManagers.get(blockManagerId).foreach { blocksInBlockManager =>
         if (storageLevel.isValid) {
           blocksInBlockManager.put(blockId,
@@ -79,6 +82,7 @@ private[spark] class BlockStatusListener extends SparkListener {
           )
         } else {
           // If isValid is not true, it means we should drop the block.
+          //如果isValid不成立,这意味着我们应该删除该块。
           blocksInBlockManager -= blockId
         }
       }

@@ -26,15 +26,15 @@ import org.apache.spark.annotation.DeveloperApi
  * Identifies a particular Block of data, usually associated with a single file.
  * A Block can be uniquely identified by its filename, but each type of Block has a different
  * set of keys which produce its unique name.
- * 确定一个特定数据块,通常是一个单个文件,文件名是一个块的唯一标识,但每种类型的块有一个不同的,
- * 设置健产生其唯一的名称.
+ * 识别通常与单个文件相关联的特定数据块.A块可以通过其文件名唯一标识，但每种类型的块都具有不同的密钥集，产生其唯一的名称。
  *
  * If your BlockId should be serializable, be sure to add it to the BlockId.apply() method.
+  * 如果您的BlockId可以序列化，请确保将其添加到BlockId.apply（）方法中
  */
 @DeveloperApi
 sealed abstract class BlockId {
   /** A globally unique identifier for this Block. Can be used for ser/de. */
-  //此块的全局唯一标识符
+  //此块的全局唯一标识符,可用于ser / de。
   def name: String
 
   // convenience methods
@@ -57,6 +57,7 @@ case class RDDBlockId(rddId: Int, splitIndex: Int) extends BlockId {
 }
 
 // Format of the shuffle block ids (including data and index) should be kept in sync with
+//shuffle块的格式（包括数据和索引）应保持同步
 // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getBlockData().
 @DeveloperApi
 case class ShuffleBlockId(shuffleId: Int, mapId: Int, reduceId: Int) extends BlockId {
@@ -89,20 +90,21 @@ case class StreamBlockId(streamId: Int, uniqueId: Long) extends BlockId {
   override def name: String = "input-" + streamId + "-" + uniqueId
 }
 
-/** Id associated with temporary local data managed as blocks. Not serializable. */
+/** Id associated with temporary local data managed as blocks. Not serializable.
+  * 与作为块管理的临时本地数据相关联的Id。 不可序列化 */
 private[spark] case class TempLocalBlockId(id: UUID) extends BlockId {
   override def name: String = "temp_local_" + id
 }
 
 /** 
  *  Id associated with temporary shuffle data managed as blocks. Not serializable. 
- *  与临时shuffle数据管理的块相关
+ *  与作为块管理的临时随机数据相关联的Id。 不可序列化
  *  */
 private[spark] case class TempShuffleBlockId(id: UUID) extends BlockId {
   override def name: String = "temp_shuffle_" + id
 }
 
-// Intended only for testing purposes
+// Intended only for testing purposes 仅用于测试目的
 private[spark] case class TestBlockId(id: String) extends BlockId {
   override def name: String = "test_" + id
 }
@@ -120,7 +122,7 @@ object BlockId {
 
   /** 
    *  Converts a BlockId "name" String back into a BlockId.
-   *  根据Id转换BlockId对象
+    *  将BlockId“name”字符串转换回BlockId
    */
   def apply(id: String): BlockId = id match {
     case RDD(rddId, splitIndex) =>

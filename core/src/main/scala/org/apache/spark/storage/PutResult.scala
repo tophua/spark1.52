@@ -22,10 +22,12 @@ import java.nio.ByteBuffer
 /**
  * 将块添加一个块存储(BlockStore)
  * Result of adding a block into a BlockStore. This case class contains a few things:
- *   (1) The estimated size of the put,
+  * 将块添加到BlockStore中的结果,这个案例类包含几件事：
+ *   (1) The estimated size of the put,估计的大小，
  *   (2) The values put if the caller asked for them to be returned (e.g. for chaining
- *       replication), and
+ *       replication), and 如果调用者要求返回值(例如用于链接复制),则返回值
  *   (3) A list of blocks dropped as a result of this put. This is always empty for DiskStore.
+  *     作为这个结果的一个块的列表,DiskStore始终为空
  */
 private[spark] case class PutResult(
     size: Long,//估计的大小

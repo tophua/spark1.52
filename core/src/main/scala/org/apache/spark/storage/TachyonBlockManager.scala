@@ -38,6 +38,7 @@ import org.apache.spark.util.{ShutdownHookManager, Utils}
 /**
  * Creates and maintains the logical mapping between logical blocks and tachyon fs locations. By
  * default, one block is mapped to one file with a name given by its BlockId.
+  * 创建和维护逻辑块和tachyon fs位置之间的逻辑映射,默认情况下,一个块被映射到一个文件,其名称由其BlockId给出。
  *
  */
 private[spark] class TachyonBlockManager() extends ExternalBlockManager with Logging {
@@ -50,6 +51,8 @@ private[spark] class TachyonBlockManager() extends ExternalBlockManager with Log
   // Create one Tachyon directory for each path mentioned in spark.tachyonStore.folderName;
   // then, inside this directory, create multiple subdirectories that we will hash files into,
   // in order to avoid having really large inodes at the top level in Tachyon.
+  //为spark.tachyonStore.folderName中提到的每个路径创建一个Tachyon目录;
+  // 那么，在这个目录下，创建多个子目录，我们将哈希文件放入，以避免在Tachyon的顶层有非常大的inode。
   private var tachyonDirs: Array[TachyonFile] = _
   private var subDirs: Array[Array[tachyon.client.TachyonFile]] = _
 
@@ -67,6 +70,7 @@ private[spark] class TachyonBlockManager() extends ExternalBlockManager with Log
       null
     }
     // original implementation call System.exit, we change it to run without extblkstore support
+    //原来的实现调用System.exit，我们改变它运行没有extblkstore支持
     if (client == null) {
       logError("Failed to connect to the Tachyon as the master address is not configured")
       throw new IOException("Failed to connect to the Tachyon as the master " +
@@ -78,6 +82,8 @@ private[spark] class TachyonBlockManager() extends ExternalBlockManager with Log
     // Create one Tachyon directory for each path mentioned in spark.tachyonStore.folderName;
     // then, inside this directory, create multiple subdirectories that we will hash files into,
     // in order to avoid having really large inodes at the top level in Tachyon.
+    //为spark.tachyonStore.folderName中提到的每个路径创建一个Tachyon目录;然后,
+    // 在此目录中创建我们将哈希文件放入的多个子目录，以避免在Tachyon中顶层有真正的大型inode。
     tachyonDirs = createTachyonDirs()
     subDirs = Array.fill(tachyonDirs.length)(new Array[TachyonFile](subDirsPerTachyonDir))
     tachyonDirs.foreach(tachyonDir => ShutdownHookManager.registerShutdownDeleteDir(tachyonDir))
@@ -172,11 +178,13 @@ private[spark] class TachyonBlockManager() extends ExternalBlockManager with Log
 
   def getFile(filename: String): TachyonFile = {
     // Figure out which tachyon directory it hashes to, and which subdirectory in that
+    //找出它的哪个tachyon目录，以及哪个子目录
     val hash = Utils.nonNegativeHash(filename)
     val dirId = hash % tachyonDirs.length
     val subDirId = (hash / tachyonDirs.length) % subDirsPerTachyonDir
 
     // Create the subdirectory if it doesn't already exist
+    //如果它不存在，创建子目录
     var subDir = subDirs(dirId)(subDirId)
     if (subDir == null) {
       subDir = subDirs(dirId).synchronized {

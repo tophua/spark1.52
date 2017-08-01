@@ -27,8 +27,10 @@ import org.apache.spark.util.Utils
 
 /**
  * Stores BlockManager blocks on ExternalBlockStore.
+  * 在ExternalBlockStore上存储BlockManager块
  * We capture any potential exception from underlying implementation
  * and return with the expected failure value
+  * 我们从底层实现中捕获任何潜在的异常,并返回预期的失败值
  */
 private[spark] class ExternalBlockStore(blockManager: BlockManager, executorId: String)
   extends BlockStore(blockManager: BlockManager) with Logging {
@@ -73,6 +75,7 @@ private[spark] class ExternalBlockStore(blockManager: BlockManager, executorId: 
       returnValues: Boolean): PutResult = {
     logTrace(s"Attempting to put block $blockId into ExternalBlockStore")
     // we should never hit here if externalBlockManager is None. Handle it anyway for safety.
+    //如果externalBlockManager为None,我们不应该打到这里,无论如何处理安全。
     try {
       val startTime = System.currentTimeMillis
       if (externalBlockManager.isDefined) {
@@ -104,6 +107,7 @@ private[spark] class ExternalBlockStore(blockManager: BlockManager, executorId: 
       returnValues: Boolean): PutResult = {
     logTrace(s"Attempting to put block $blockId into ExternalBlockStore")
     // we should never hit here if externalBlockManager is None. Handle it anyway for safety.
+    //如果externalBlockManager为None,我们不应该打到这里,无论如何处理安全。
     try {
       val startTime = System.currentTimeMillis
       if (externalBlockManager.isDefined) {
@@ -132,6 +136,7 @@ private[spark] class ExternalBlockStore(blockManager: BlockManager, executorId: 
   }
 
   // We assume the block is removed even if exception thrown
+  //我们假设即使抛出异常也会删除该块
   override def remove(blockId: BlockId): Boolean = {
     try {
       externalBlockManager.map(_.removeBlock(blockId)).getOrElse(true)
@@ -188,6 +193,7 @@ private[spark] class ExternalBlockStore(blockManager: BlockManager, executorId: 
   }
 
   // Create concrete block manager and fall back to Tachyon by default for backward compatibility.
+  //创建具体的块管理器,默认退回到Tachyon以实现向后兼容
   private def createBlkManager(): Option[ExternalBlockManager] = {
     val clsName = blockManager.conf.getOption(ExternalBlockStore.BLOCK_MANAGER_NAME)
       .getOrElse(ExternalBlockStore.DEFAULT_BLOCK_MANAGER_NAME)

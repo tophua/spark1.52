@@ -29,7 +29,7 @@ import org.apache.spark.util.Utils
  * A class for writing JVM objects directly to a file on disk. This class allows data to be appended
  * to an existing block and can guarantee atomicity in the case of faults as it allows the caller to
  * revert partial writes.
- *
+ * 用于将JVM对象直接写入磁盘上的文件的类,该类允许将数据附加到现有块,并且可以在故障的情况下保证原子性,因为它允许调用者还原部分写入。
  * This class does not support concurrent writes. Also, once the writer has been opened it cannot be
  * reopened again.
  * 用于Spark任务的中间计算结果输入文件,直接向一个文件写入数据,如果文件已经存在,那么会以追加的方式写入.
@@ -43,11 +43,13 @@ private[spark] class DiskBlockObjectWriter(
   syncWrites: Boolean,
   // These write metrics concurrently shared with other active DiskBlockObjectWriters who
   // are themselves performing writes. All updates must be relative.
+  //这些写入度量值与其他正在执行写入的活动的DiskBlockObjectWrit同时共享,所有更新必须是相对的,
   writeMetrics: ShuffleWriteMetrics)
     extends OutputStream
     with Logging {
 
-  /** The file channel, used for repositioning / truncating the file. */
+  /** The file channel, used for repositioning / truncating the file.
+    * 文件通道,用于重新定位/截断文件。*/
   private var channel: FileChannel = null
   private var bs: OutputStream = null
   private var fos: FileOutputStream = null
@@ -64,6 +66,7 @@ private[spark] class DiskBlockObjectWriter(
 
   /**
    * Cursors used to represent positions in the file.
+    * 光标用于表示文件中的位置
    *
    * xxxxxxxx|--------|---       |
    *         ^        ^          ^
@@ -72,10 +75,15 @@ private[spark] class DiskBlockObjectWriter(
    *       initialPosition
    *
    * initialPosition: Offset in the file where we start writing. Immutable.
+    *                 在我们开始写作的文件中偏移,不可改变的
    * reportedPosition: Position at the time of the last update to the write metrics.
+    *                  上一次更新写入指标时的位置
+    * initialPosition：在我们开始写入的文件中的偏移量,Immutable.reportedPosition：上次更新写入指标时的位置。
    * finalPosition: Offset where we stopped writing. Set on closeAndCommit() then never changed.
-   * -----: Current writes to the underlying file.
-   * xxxxx: Existing contents of the file.
+    *               偏移我们停止写作,设置在closeAndCommit（）然后从未更改。
+    * finalPosition：我们停止写作的偏移,设置在closeAndCommit（）然后从未更改。
+   * -----: Current writes to the underlying file. 当前写入底层文件
+   * xxxxx: Existing contents of the file. 文件的现有内容
    */
   //Block在File中开始的位置,不变量,值为file.length(),即位File中已经被其他Block写入的数据量
   private val initialPosition = file.length()
@@ -87,6 +95,7 @@ private[spark] class DiskBlockObjectWriter(
   /**
    * Keep track of number of records written and also use this to periodically
    * output bytes written since the latter is expensive to do for each record.
+    * 跟踪写入的记录数,并且还使用它来定期输出写入的字节,因为后者对于每个记录来说都是昂贵的。
    */
   private var numRecordsWritten = 0
   /**
@@ -112,6 +121,7 @@ private[spark] class DiskBlockObjectWriter(
       Utils.tryWithSafeFinally {
         if (syncWrites) {
           // Force outstanding writes to disk and track how long it takes
+          //强制对磁盘的优秀写入,并跟踪它需要多长时间
           objOut.flush()
           val start = System.nanoTime()
           fos.getFD.sync() //
@@ -142,11 +152,13 @@ private[spark] class DiskBlockObjectWriter(
     if (initialized) {
       // NOTE: Because Kryo doesn't flush the underlying stream we explicitly flush both the
       //       serializer stream and the lower level stream.
+      //注意：由于Kryo不刷新底层流,我们显式刷新串行器流和较低级别的流
       objOut.flush()
       bs.flush()
       close()
       finalPosition = file.length()
       // In certain compression codecs, more bytes are written after close() is called
+      //在某些压缩编解码器中,在调用close（）之后会写入更多的字节
       writeMetrics.incShuffleBytesWritten(finalPosition - reportedPosition)
     } else {
       finalPosition = file.length()
@@ -158,11 +170,13 @@ private[spark] class DiskBlockObjectWriter(
    * Reverts writes that haven't been flushed yet. Callers should invoke this function
    * when there are runtime exceptions. This method will not throw, though it may be
    * unsuccessful in truncating written data.
+    *还原尚未刷新的写入,运行时异常时,调用者应调用此函数,这种方法不会抛出,尽管截断写入的数据可能不成功。
    * 撤销所有的写入操作,将文件中的内容恢复到写入数据之前。
    */
   def revertPartialWritesAndClose() {
     // Discard current writes. We do this by flushing the outstanding writes and then
     // truncating the file to its initial position.
+    //舍弃当前写入,我们通过刷新未完成的写入,然后将文件截断到其初始位置来执行此操作。
     try {
       if (initialized) {
         writeMetrics.decShuffleBytesWritten(reportedPosition - initialPosition)
@@ -237,9 +251,9 @@ private[spark] class DiskBlockObjectWriter(
   }
 
   /**
-   * Report the number of bytes written in this writer's shuffle write metrics.
-   * Note that this is only valid before the underlying streams are closed.
-   * 更新测量信息
+    * Report the number of bytes written in this writer's shuffle write metrics.
+    * Note that this is only valid before the underlying streams are closed.
+    * 报告写入该写入器的随机写入度量的字节数,请注意,这仅在底层流关闭之前才有效
    */
   private def updateBytesWritten() {
     val pos = channel.position()
@@ -247,7 +261,7 @@ private[spark] class DiskBlockObjectWriter(
     reportedPosition = pos
   }
 
-  // For testing
+  // For testing 用于测试
   private[spark] override def flush() {
     objOut.flush()
     bs.flush()

@@ -42,7 +42,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
    * 将BlockId对应的字节缓存存储到磁盘
    */
   override def putBytes(blockId: BlockId, _bytes: ByteBuffer, level: StorageLevel): PutResult = {
-    // So that we do not modify the input offsets !
+    // So that we do not modify the input offsets !所以我们不修改输入偏移！
     // duplicate does not copy buffer, so inexpensive
     val bytes = _bytes.duplicate()//复制一个可读可写的缓冲区
     logDebug(s"Attempting to put block $blockId")
@@ -88,7 +88,8 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
         //使用dataSerializeStream方法,将FileOutputStrem序列化并压缩
         blockManager.dataSerializeStream(blockId, outputStream, values)
       } {
-        // Close outputStream here because it should be closed before file is deleted.        
+        // Close outputStream here because it should be closed before file is deleted.
+        //关闭outputStream，因为它应该在文件被删除之前关闭
         outputStream.close()
       }
     } catch {
@@ -123,6 +124,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     val channel = new RandomAccessFile(file, "r").getChannel
     Utils.tryWithSafeFinally {
       // For small files, directly read rather than memory map
+      //对于小文件,直接读取而不是内存映射
       if (length < minMemoryMapBytes) {
         /**
          * 从FileChannel读取数据
@@ -166,11 +168,13 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
   /**
    * A version of getValues that allows a custom serializer. This is used as part of the
    * shuffle short-circuit code.
+    * 一个版本getValues允许自定义序列化程序,这是用作洗牌短路代码的一部分
    * 读取BlockId对应的内容,并根据自定义的Serializer反序列化为Iterator。
    */
   def getValues(blockId: BlockId, serializer: Serializer): Option[Iterator[Any]] = {
     // TODO: Should bypass getBytes and use a stream based implementation, so that
     // we won't use a lot of memory during e.g. external sort merge.
+    //在外部排序合并期间,我们不会占用大量内存
     getBytes(blockId).map(bytes => blockManager.dataDeserialize(blockId, bytes, serializer))
   }
   //删除存储的BlockId对应的Block。
@@ -179,6 +183,8 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     // If consolidation mode is used With HashShuffleMananger, the physical filename for the block
     // is different from blockId.name. So the file returns here will not be exist, thus we avoid to
     // delete the whole consolidated file by mistake.
+    //如果整理模式是用HashShuffleMananger,对块的物理文件名不同于blockid.name,
+    // 因此,这里返回的文件将不存在,因此我们避免错误地删除整个合并文件。
     if (file.exists()) {
       file.delete()
     } else {

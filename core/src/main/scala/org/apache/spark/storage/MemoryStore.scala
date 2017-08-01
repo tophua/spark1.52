@@ -48,6 +48,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   @volatile private var currentMemory = 0L
  
   // Ensure only one thread is putting, and if necessary, dropping blocks at any given time
+  //确保只有一个线程正在放置,如有必要,可以在任何给定的时间放置块
   //同步锁,保证只有一个线程在写和删除Block
   private val accountingLock = new Object
 
@@ -56,13 +57,15 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   //当前Dirver或者Executor中所有线程展开的Block都存入此Map中,key为Task的Id,value为线程展开的所有块的内存大小总和
   private val unrollMemoryMap = mutable.HashMap[Long, Long]()
   // Same as `unrollMemoryMap`, but for pending unroll memory as defined below.
+  //与“unrollMemoryMap”相同,但是如下所述等待展开内存,
   // Pending unroll memory refers to the intermediate memory occupied by a task
   // after the unroll but before the actual putting of the block in the cache.
+  //待处理的展开存储器是指在展开后但在实际将块放入高速缓存之前由任务占用的中间存储器。
   // This chunk of memory is expected to be released *as soon as* we finish
   // caching the corresponding block as opposed to until after the task finishes.
   // This is only used if a block is successfully unrolled in its entirety in
   // memory (SPARK-4777).
-  //
+  //一旦*完成缓存相应的块,直到任务完成后,这个内存块才会被释放*。 这仅在块在内存中成功展开（SPARK-4777）时才会使用。
   private val pendingUnrollMemoryMap = mutable.HashMap[Long, Long]()
 
   /**
@@ -78,6 +81,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   }
 
   // Initial memory to request before unrolling any block
+  //在展开任何块之前请求的初始内存
   /**
    *初始化展开前block内存,默认1G  
    */
@@ -173,12 +177,15 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    * 尝试将给定的块放在内存中
    * There may not be enough space to fully unroll the iterator in memory, in which case we
    * optionally drop the values to disk if
-   *   (1) the block's storage level specifies useDisk, and
-   *   (2) `allowPersistToDisk` is true.
+    * 可能没有足够的空间来完全展开内存中的迭代器,在这种情况下,我们可以将值放在磁盘上
+   *   (1) the block's storage level specifies useDisk, and 该块的存储级别指定useDisk，和
+   *   (2) `allowPersistToDisk` is true.   `allowPersistToDisk`是真的。
    *
    * One scenario in which `allowPersistToDisk` is false is when the BlockManager reads a block
    * back from disk and attempts to cache it in memory. In this case, we should not persist the
    * block back on disk again, as it is already in disk store.
+    * `allowPersistToDisk`为false的一种情况是当BlockManager从磁盘读取一个块并尝试将其缓存在内存中时。
+    * 在这种情况下，我们不应该再次将磁盘块重新保留在磁盘存储中。
    */
   private[storage] def putIterator(
       blockId: BlockId,
@@ -191,14 +198,16 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
     //如果返回数据类型Right,则说明内存不足并写入硬盘或者放弃
     val unrolledValues = unrollSafely(blockId, values, droppedBlocks)
     unrolledValues match {
-      case Left(arrayValues) =>//如果返回数据的类型匹配Left则说明内存足够,调用putArray方法写入内存
+      case Left(arrayValues) =>
+        //如果返回数据的类型匹配Left则说明内存足够,调用putArray方法写入内存
         // Values are fully unrolled in memory, so store them as an array
+        //值在内存中完全展开，因此将它们存储为数组
         val res = putArray(blockId, arrayValues, level, returnValues)
         droppedBlocks ++= res.droppedBlocks
         PutResult(res.size, res.data, droppedBlocks)
       case Right(iteratorValues) =>
         // Not enough space to unroll this block; drop to disk if applicable
-        //如果返回数据类型Right,则说明内存不足并写入硬盘
+        //没有足够的空间来展开这个块; 如果内存不足并写入硬盘
         if (level.useDisk && allowPersistToDisk) {
           logWarning(s"Persisting block $blockId to disk instead.")
           val res = blockManager.diskStore.putIterator(blockId, iteratorValues, level, returnValues)
@@ -224,6 +233,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       Some(blockManager.dataSerialize(blockId, entry.value.asInstanceOf[Array[Any]].iterator))
     } else {
       //不支持序列化,对MemoryEntny的value复制ByteBuffer后返回
+      //实际上并不复制数据
       Some(entry.value.asInstanceOf[ByteBuffer].duplicate()) // Doesn't actually copy the data
     }
   }
@@ -282,8 +292,12 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    * stopping immediately if not. This check is a safeguard against the scenario in which
    * there is not enough free memory to accommodate the entirety of a single block.
    *
+    *此操作的安全性是指避免由于一次性在内存中展开整个块而导致的潜在OOM异常。这是通过定期实现的
+    *检查展开块的内存限制是否仍然满足,如果不能立即停止,此检查是针对不足够的可用内存以容纳单个块的整体的情况的保护。
+
    * This method returns either an array with the contents of the entire block or an iterator
    * containing the values of the block (if the array would have exceeded available memory).
+    * 此方法返回具有整个块的内容的数组或包含块的值的迭代器(如果数组将超过可用内存)
    */
   def unrollSafely(
       blockId: BlockId,
@@ -307,6 +321,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
     //当前线程保留的用于特殊展开操作的内存值
     var memoryThreshold = initialMemoryThreshold
     // Memory to request as a multiple of current vector size
+    //存储器请求作为当前矢量大小的倍数
     //内存请求因子
     val memoryGrowthFactor = 1.5
     // Previous unroll memory held by this task, for releasing later (only at the very end)
@@ -326,6 +341,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
     }
 
     // Unroll this block safely, checking whether we have exceeded our threshold periodically
+    //安全地展开此块,检查我们是否定期超出阈值
     try {
       while (values.hasNext && keepUnrolling) {//values有元素并keepUnrolling足够的内存可用
         vector += values.next()//则vector添加values对象,
@@ -357,6 +373,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
               }
             }
             // New threshold is currentSize * memoryGrowthFactor
+            //新阈值为currentSize * memoryGrowthFactor
             //elementsUnrolled自增1
             memoryThreshold += amountToRequest
           }
@@ -366,9 +383,11 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       //根据是否将Block完整地放入内存,以数组或者迭代器形式返回 Vector的数据
       if (keepUnrolling) {
         // We successfully unrolled the entirety of this block
+        //我们成功地展开了这个块的整体
         Left(vector.toArray)
       } else {
         // We ran out of space while unrolling the values for this block
+        //在展开该块的值时，我们用完了空间
         logUnrollFailureMessage(blockId, vector.estimateSize())
         Right(vector.iterator ++ values)
       }
@@ -378,6 +397,8 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       // In this case, we should release the memory after we cache the block there.
       // Otherwise, if we return an iterator, we release the memory reserved here
       // later when the task finishes.
+      //如果我们返回一个数组，返回的值将被稍后缓存在`tryToPut`中,在这种情况下,我们应该在缓存块后释放内存。
+      // 否则,如果我们返回一个迭代器,我们会在任务完成后释放保留的内存。
       if (keepUnrolling) {
         //计算本次展开块实际占用的空间amountToRelease,并更新unrollMemoryMap中当前任务线程占用的内存大小
         accountingLock.synchronized {
@@ -391,7 +412,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
   /**
    * Return the RDD ID that a given block ID is from, or None if it is not an RDD block.
-   * 返回给定block Id返回 RDD ID
+   * 返回给定块ID的RDD ID,如果不是RDD块,则返回None。
    */
   private def getRddId(blockId: BlockId): Option[Int] = {
     blockId.asRDDId.map(_.rddId)
@@ -409,17 +430,22 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    * Try to put in a set of values, if we can free up enough space. The value should either be
    * an Array if deserialized is true or a ByteBuffer otherwise. Its (possibly estimated) size
    * must also be passed by the caller.
-   * 尝试写入内存值,如果能腾出足够的内存空间,将value(数组,如果deserialized为真,或字节缓存,如果deserialized为假)存储到内存
+    *
+   * 尝试放置一套值，如果我们可以释放足够的空间,如果反序列化为true,则该值应为数组,否则为ByteBuffer,它的(可能估计的)大小也必须由调用者传递。
+    *
    * `value` will be lazily created. If it cannot be put into MemoryStore or disk, `value` won't be
    * created to avoid OOM since it may be a big ByteBuffer.
-   *
+   *`value`将被懒惰创建。 如果它不能放入MemoryStore或磁盘，`value`将不会创建为避免OOM，因为它可能是一个大的ByteBuffer。
+    *
    * Synchronize on `accountingLock` to ensure that all the put requests and its associated block
    * dropping is done by only on thread at a time. Otherwise while one thread is dropping
    * blocks to free memory for one block, another thread may use up the freed space for
    * another block.
-   *
+   * 在“accountingLock”上进行同步，以确保所有的put请求及其关联的块丢弃都只能在线程上完成,
+    * 否则，当一个线程正在丢弃块以释放一个块的内存时，另一个线程可能会将释放的空间用于另一个块。
+    *
    * Return whether put was successful, along with the blocks dropped in the process.
-   * 
+   * 返回是否成功,以及在进程中删除的块。
    */
   private def tryToPut(
       blockId: BlockId,
@@ -431,7 +457,10 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
      * to be dropped. Once the to-be-dropped blocks have been selected, and lock on entries has
      * been released, it must be ensured that those to-be-dropped blocks are not double counted
      * for freeing up more space for another block that needs to be put. Only then the actually
-     * dropping of blocks (and writing to disk if necessary) can proceed in parallel. */
+     * dropping of blocks (and writing to disk if necessary) can proceed in parallel.
+      * 被丢弃一旦选择了要删除的块,并且已经释放了条目锁定,则必须确保那些被丢弃的块不会被重新计算,
+      * 以释放需要放置的另一个块的更多空间,只有这样,实际上丢弃块（如果需要,写入磁盘）可以并行进行。
+      * */
    //写入数据是否成功
     var putSuccess = false
     //移除块列表 Key->BlockId value->BlockStatus
@@ -461,6 +490,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       } else {//如果内存不充足
         // Tell the block manager that we couldn't put it in memory so that it can drop it to
         // disk if the block allows disk storage.
+        //告诉块管理器,我们无法将其放在内存中,以便如果块允许磁盘存储,它可以将其放到磁盘上。
         //如果此时内存不足,还要把blockId对应MemoryEntry对象迁移到磁盘或清除
         lazy val data = if (deserialized) {
           Left(value().asInstanceOf[Array[Any]])
@@ -472,6 +502,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
         droppedBlockStatus.foreach { status => droppedBlocks += ((blockId, status)) }
       }
       // Release the unroll memory used because we no longer need the underlying Array
+      //释放使用的展开内存,因为我们不再需要底层数组
       //释放展开的内存
       releasePendingUnrollMemoryForThisTask()
     }
@@ -483,11 +514,16 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    * either the block is bigger than our memory or it would require replacing another block
    * from the same RDD (which leads to a wasteful cyclic replacement pattern for RDDs that
    * don't fit into memory that we want to avoid).
+    *
+    * 尝试释放一定量的空间来存储特定的块,但是如果块大于我们的内存,则可能会失败,
+    * 否则将需要从相同的RDD替换另一个块(这导致RDD的浪费循环替换模式,不适合我们想避免的记忆)。
    *
    * Assume that `accountingLock` is held by the caller to ensure only one thread is dropping
    * blocks. Otherwise, the freed space may fill up before the caller puts in their new value.
+    * 假设`accountingLock`由调用者保存,以确保只有一个线程正在丢弃块,否则,释放的空间可能会在调用者提供新值之前填满。
    *
    * Return whether there is enough free space, along with the blocks dropped in the process.
+    * 返回是否有足够的可用空间,以及在进程中丢弃的块。
    * 确认是否有足够内存,如果不足,会释放MemoryEntry占用的内存
    */
   private def ensureFreeSpace(
@@ -505,6 +541,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
 
     // Take into account the amount of memory currently occupied by unrolling blocks
     // and minus the pending unroll memory for that block on current thread.
+    //考虑到展开块占用的内存量,并减去当前线程上该块的待处理展开内存。
    //获得当前任务Id
     val taskAttemptId = currentTaskAttemptId()
     //实际空闲的内存,
@@ -523,6 +560,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       // This is synchronized to ensure that the set of entries is not changed
       // (because of getValue or getBytes) while traversing the iterator, as that
       // can lead to exceptions.
+      //这是同步的,以确保在遍历迭代器时不会更改条目集(因为getValue或getBytes),因为这可能会导致异常。
       //用于存放Block,类型LinkedHashMap
       entries.synchronized {
         val iterator = entries.entrySet().iterator()
@@ -547,6 +585,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
           // This should never be null as only one task should be dropping
           // blocks and removing entries. However the check is still here for
           // future safety.
+          //这不应该是空的,因为只有一个任务应该是删除块和删除条目,但是,这项支票仍然在未来的安全
           if (entry != null) {
             //判断是否可以反序列化,
             val data = if (entry.deserialized) {

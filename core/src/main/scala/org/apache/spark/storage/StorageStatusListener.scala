@@ -25,19 +25,23 @@ import org.apache.spark.scheduler._
 /**
  * :: DeveloperApi ::
  * A SparkListener that maintains executor storage status.
+  * 维护执行程序存储状态的SparkListener
  *
  * This class is thread-safe (unlike JobProgressListener)
+  * 这个类是线程安全的（不同于JobProgressListener）
  */
 @DeveloperApi
 class StorageStatusListener extends SparkListener {
   // This maintains only blocks that are cached (i.e. storage level is not StorageLevel.NONE)
+  //这仅维护缓存的块（即，存储级别不是StorageLevel.NONE）
   private[storage] val executorIdToStorageStatus = mutable.Map[String, StorageStatus]()
 
   def storageStatusList: Seq[StorageStatus] = synchronized {
     executorIdToStorageStatus.values.toSeq
   }
 
-  /** Update storage status list to reflect updated block statuses */
+  /** Update storage status list to reflect updated block statuses
+    * 更新存储状态列表以反映更新的块状态 */
   private def updateStorageStatus(execId: String, updatedBlocks: Seq[(BlockId, BlockStatus)]) {
     executorIdToStorageStatus.get(execId).foreach { storageStatus =>
       updatedBlocks.foreach { case (blockId, updatedStatus) =>
@@ -50,7 +54,8 @@ class StorageStatusListener extends SparkListener {
     }
   }
 
-  /** Update storage status list to reflect the removal of an RDD from the cache */
+  /** Update storage status list to reflect the removal of an RDD from the cache
+    * 更新存储状态列表以反映从缓存中删除RDD */
   private def updateStorageStatus(unpersistedRDDId: Int) {
     storageStatusList.foreach { storageStatus =>
       storageStatus.rddBlocksById(unpersistedRDDId).foreach { case (blockId, _) =>

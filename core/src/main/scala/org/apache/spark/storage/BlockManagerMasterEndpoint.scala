@@ -138,9 +138,10 @@ private[spark] class BlockManagerMasterEndpoint(
   private def removeRdd(rddId: Int): Future[Seq[Int]] = {
     // First remove the metadata for the given RDD, and then asynchronously remove the blocks
     // from the slaves.
-
+    //首先删除给定RDD的元数据,然后从从站异步移除块。
     // Find all blocks for the given RDD, remove the block from both blockLocations and
     // the blockManagerInfo that is tracking the blocks.
+    //找到给定RDD的所有块,从两个blockLocations和正在跟踪块的blockManagerInfo中移除该块。
     //首先删除Master保存的RDD相关的元数据信息
     val blocks = blockLocations.keys.flatMap(_.asRDDId).filter(_.rddId == rddId)
     blocks.foreach { blockId =>
@@ -151,6 +152,7 @@ private[spark] class BlockManagerMasterEndpoint(
 
     // Ask the slaves to remove the RDD, and put the result in a sequence of Futures.
     // The dispatcher is used as an implicit argument into the Future sequence construction.
+    //请求slaves删除RDD,并将结果放入Futures序列中,调度程序用作未来序列构建的隐含参数。
     //其次删除Slave上的RDD的信息
     val removeMsg = RemoveRdd(rddId)
     Future.sequence(
@@ -162,6 +164,7 @@ private[spark] class BlockManagerMasterEndpoint(
 
   private def removeShuffle(shuffleId: Int): Future[Seq[Boolean]] = {
     // Nothing to do in the BlockManagerMasterEndpoint data structures
+    //在BlockManagerMasterEndpoint数据结构中无法做到
     val removeMsg = RemoveShuffle(shuffleId)
     Future.sequence(
       blockManagerInfo.values.map { bm =>
@@ -173,6 +176,8 @@ private[spark] class BlockManagerMasterEndpoint(
    * Delegate RemoveBroadcast messages to each BlockManager because the master may not notified
    * of all broadcast blocks. If removeFromDriver is false, broadcast blocks are only removed
    * from the executors, but not from the driver.
+    * 代理RemoveBroadcast消息到每个BlockManager,因为主节点可能没有通知所有广播块,如果removeFromDriver为false,
+    * 则广播块仅从执行程序中删除,但不能从驱动程序中删除。
    * 删除广播变量信息,通知所有广播块
    */
   private def removeBroadcast(broadcastId: Long, removeFromDriver: Boolean): Future[Seq[Int]] = {
@@ -192,9 +197,11 @@ private[spark] class BlockManagerMasterEndpoint(
     val info = blockManagerInfo(blockManagerId)
 
     // Remove the block manager from blockManagerIdByExecutor.
+    //从blockManagerIdByExecutor中删除块管理器
     blockManagerIdByExecutor -= blockManagerId.executorId
 
     // Remove it from blockManagerInfo and remove all the blocks.
+    //从blockManagerInfo中删除它并删除所有块
     blockManagerInfo.remove(blockManagerId)
     val iterator = info.blocks.keySet.iterator
     while (iterator.hasNext) {
@@ -217,6 +224,7 @@ private[spark] class BlockManagerMasterEndpoint(
   /**
    * Return true if the driver knows about the given block manager. Otherwise, return false,
    * indicating that the block manager should re-register.
+    * 如果driver已知给定的块管理器,则返回true。 否则返回false,表示块管理器应该重新注册。
    * 最终更新BlockManagerMaster对BlockManager的最后可见时间(即更新Block-ManagerId对应的BlockManagerInfo的_lastSeenMS)
    */
   private def heartbeatReceived(blockManagerId: BlockManagerId): Boolean = {
@@ -231,6 +239,7 @@ private[spark] class BlockManagerMasterEndpoint(
 
   // Remove a block from the slaves that have it. This can only be used to remove
   // blocks that the master knows about.
+  //从拥有它的节点中删除一个块,这只能用于删除master已知的块。
   private def removeBlockFromWorkers(blockId: BlockId) {
     val locations = blockLocations.get(blockId)
     if (locations != null) {
@@ -240,6 +249,8 @@ private[spark] class BlockManagerMasterEndpoint(
           // Remove the block from the slave's BlockManager.
           // Doesn't actually wait for a confirmation and the message might get lost.
           // If message loss becomes frequent, we should add retry logic here.
+          //从节点的BlockManager中删除该块。实际上并不等待确认,并且该消息可能会丢失。
+          // 如果消息丢失频繁，我们应该在此添加重试逻辑
           blockManager.get.slaveEndpoint.ask[Boolean](RemoveBlock(blockId))
         }
       }
@@ -265,10 +276,11 @@ private[spark] class BlockManagerMasterEndpoint(
   /**
    * Return the block's status for all block managers, if any. NOTE: This is a
    * potentially expensive operation and should only be used for testing.
-   * 返回所有块管理者的块的状态,这是一个耗时操作只用于测试,Master查询每一块管理的最新状态
+   * 返回所有块管理者的块的状态,这是一个耗时操作只用于测试,Master查询每一块管理的最新状态,只能用于测试
    * If askSlaves is true, the master queries each block manager for the most updated block
    * statuses. This is useful when the master is not informed of the given block by all block
    * managers.
+    * 如果askSlaves为true,则主服务器查询每个块管理器获取最新的块状态,当主服务器不被所有块管理员通知给定的块时这是有用的。
    */
   private def blockStatus(
     blockId: BlockId,
@@ -278,6 +290,8 @@ private[spark] class BlockManagerMasterEndpoint(
      * Rather than blocking on the block status query, master endpoint should simply return
      * Futures to avoid potential deadlocks. This can arise if there exists a block manager
      * that is also waiting for this master endpoint's response to a previous message.
+     * 阻塞状态查询阻塞,而不是主端点应该只是返回Futures以避免潜在的死锁,
+     * 如果存在还等待该主端点对先前消息的响应的块管理器,则可能会出现这种情况。
      */
     blockManagerInfo.values.map { info =>
       val blockStatusFuture =
@@ -297,6 +311,7 @@ private[spark] class BlockManagerMasterEndpoint(
    * If askSlaves is true, the master queries each block manager for the most updated block
    * statuses. This is useful when the master is not informed of the given block by all block
    * managers.
+    * 如果askSlaves为true,则主对每个块管理器查询最新的块状态,当Master不被所有块管理员通知给定的块时,这是有用的。
    */
   private def getMatchingBlockIds(
     filter: BlockId => Boolean,
@@ -323,6 +338,7 @@ private[spark] class BlockManagerMasterEndpoint(
       blockManagerIdByExecutor.get(id.executorId) match {
         case Some(oldId) =>
           // A block manager of the same executor already exists, so remove it (assumed dead)
+          //同一个执行者的块管理器已经存在,所以删除它（假死）
           logError("Got two different block manager registrations on same executor - "
             + s" will replace old one $oldId with new one $id")
           removeExecutor(id.executorId)
@@ -354,6 +370,7 @@ private[spark] class BlockManagerMasterEndpoint(
       if (blockManagerId.isDriver && !isLocal) {
         // We intentionally do not register the master (except in local mode),
         // so we should not indicate failure.
+        //我们故意不注册主(除了本地模式),所以我们不应该指出失败。
         return true
       } else {
         return false
@@ -464,7 +481,7 @@ private[spark] class BlockManagerInfo(
   private val _blocks = new JHashMap[BlockId, BlockStatus]
 
   // Cached blocks held by this BlockManager. This does not include broadcast blocks.
-  //块的缓存
+  //由BlockManager持有的缓存块,这不包括广播块。
   private val _cachedBlocks = new mutable.HashSet[BlockId]
 
   def getStatus(blockId: BlockId): Option[BlockStatus] = Option(_blocks.get(blockId))
@@ -500,7 +517,11 @@ private[spark] class BlockManagerInfo(
        * externalBlockStoreSize here indicates the data size in or dropped from externalBlockStore,
        * and the diskSize here indicates the data size in or dropped to disk.
        * They can be both larger than 0, when a block is dropped from memory to disk.
-       * Therefore, a safe way to set BlockStatus is to set its info in accurate modes. */
+       * Therefore, a safe way to set BlockStatus is to set its info in accurate modes.
+       * isValid意味着它是存储在内存中,在磁盘上或on-externalBlockStore,这里的memSize表示从内存中进入或从内存中删除的数据大小,
+       * 这里externalBlockStoreSize表示从externalBlockStore进入的数据大小,或者从externalBlockStore中删除的数据大小,
+       * 而diskSize这里表示数据的大小,或者放在磁盘上。它们可以大于0,当一个块 从内存到磁盘。
+       * 因此,设置BlockStatus的安全方法是将其信息设置为准确的模式。*/
       var blockStatus: BlockStatus = null
       if (storageLevel.useMemory) {
         blockStatus = BlockStatus(storageLevel, memSize, 0, 0)
@@ -527,6 +548,7 @@ private[spark] class BlockManagerInfo(
       }
     } else if (_blocks.containsKey(blockId)) {
       // If isValid is not true, drop the block.
+      //如果isValid不正确,则删除该块
       val blockStatus: BlockStatus = _blocks.get(blockId)
       _blocks.remove(blockId)
       _cachedBlocks -= blockId
@@ -562,6 +584,7 @@ private[spark] class BlockManagerInfo(
   def blocks: JHashMap[BlockId, BlockStatus] = _blocks
 
   // This does not include broadcast blocks.
+  //这不包括广播块
   def cachedBlocks: collection.Set[BlockId] = _cachedBlocks
 
   override def toString: String = "BlockManagerInfo " + timeMs + " " + _remainingMem

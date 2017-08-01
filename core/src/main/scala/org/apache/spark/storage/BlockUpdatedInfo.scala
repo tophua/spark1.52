@@ -23,6 +23,7 @@ import org.apache.spark.storage.BlockManagerMessages.UpdateBlockInfo
 /**
  * :: DeveloperApi ::
  * Stores information about a block status in a block manager.
+  * 在块管理器中存储有关块状态的信息
  */
 @DeveloperApi
 case class BlockUpdatedInfo(

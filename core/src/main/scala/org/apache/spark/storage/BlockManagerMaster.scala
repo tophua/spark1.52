@@ -95,7 +95,7 @@ private[spark] class BlockManagerMaster(
   /**
    * Check if block manager master has a block. Note that this can be used to check for only
    * those blocks that are reported to block manager master.
-   * 检查块管理器是否有一个块,
+    * 检查master 块管理器是否有块,请注意，这可以用于仅检查报告阻止管理器主机的那些块。
    */
   def contains(blockId: BlockId): Boolean = {
     !getLocations(blockId).isEmpty
@@ -116,7 +116,7 @@ private[spark] class BlockManagerMaster(
   /**
    * Remove a block from the slaves that have it. This can only be used to remove
    * blocks that the driver knows about.
-   * 根据blockId删除该Executor上的Block,只能用于删除驱动程序所知道的块
+   * 根据blockId删除slaves该Executor上的Block,只能用于删除驱动程序所知道的块
    */
   def removeBlock(blockId: BlockId) {
     driverEndpoint.askWithRetry[Boolean](RemoveBlock(blockId))
@@ -175,7 +175,7 @@ private[spark] class BlockManagerMaster(
    * the block manager's id to two long values. The first value is the maximum
    * amount of memory allocated for the block manager, while the second is the
    * amount of remaining memory.
-   * 获得所有Executor的内存使用状态,第一个值是使用的最大内存,第二个是剩余的内存大小.
+   * 从块管理器的id,获得所有块管理器的内存使用状态,第一个值是分配给块管理器的最大内存量,而第二个值是剩余内存量.
    */
   def getMemoryStatus: Map[BlockManagerId, (Long, Long)] = {
     driverEndpoint.askWithRetry[Map[BlockManagerId, (Long, Long)]](GetMemoryStatus)
@@ -204,6 +204,7 @@ private[spark] class BlockManagerMaster(
      * To avoid potential deadlocks, the use of Futures is necessary, because the master endpoint
      * should not block on waiting for a block manager, which can in turn be waiting for the
      * master endpoint for a response to a prior message.
+     * 为了避免潜在的死锁,使用Futures是必要的,因为主端点不应阻塞等待块管理器,这可能会等待主端点对先前消息的响应。
      */
     val response = driverEndpoint.
       askWithRetry[Map[BlockManagerId, Future[Option[BlockStatus]]]](msg)
@@ -225,10 +226,11 @@ private[spark] class BlockManagerMaster(
   /**
    * Return a list of ids of existing blocks such that the ids match the given filter. NOTE: This
    * is a potentially expensive operation and should only be used for testing.
-   * 与getBlockStatus类似,只不过这个是使用根据filter获取
+   * 返回现有块的id列表,以使id与给定的过滤器相匹配,注意：这是一个潜在的昂贵的操作，只能用于测试。
    * If askSlaves is true, this invokes the master to query each block manager for the most
    * updated block statuses. This is useful when the master is not informed of the given block
    * by all block managers.
+    * 如果askSlaves为真,则调用主节点查询每个块管理器以获取最新的块状态。 当主节点不被所有块管理员通知给定的块时，这是有用的。
    */
   def getMatchingBlockIds(
     filter: BlockId => Boolean,

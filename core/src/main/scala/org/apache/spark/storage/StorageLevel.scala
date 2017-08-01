@@ -30,7 +30,7 @@ import org.apache.spark.util.Utils
  * ExternalBlockStore, whether to keep the data in memory in a serialized format, and whether
  * to replicate the RDD partitions on multiple nodes.
  *
- * The [[org.apache.spark.storage.StorageLevel$]] singleton object contains some static constants
+ * The [org.apache.spark.storage.StorageLevel$]singleton object contains some static constants
  * for commonly useful storage levels. To create your own storage level object, use the
  * factory method of the singleton object (`StorageLevel(...)`).
  */
@@ -186,6 +186,7 @@ object StorageLevel {
   /**
    * :: DeveloperApi ::
    * Create a new StorageLevel object without setting useOffHeap.
+    * 创建一个新的StorageLevel对象而不设置useOffHeap
    */
   @DeveloperApi
   def apply(
@@ -201,6 +202,7 @@ object StorageLevel {
   /**
    * :: DeveloperApi ::
    * Create a new StorageLevel object.
+    * 创建一个新的StorageLevel对象
    */
   @DeveloperApi
   def apply(
@@ -214,6 +216,7 @@ object StorageLevel {
   /**
    * :: DeveloperApi ::
    * Create a new StorageLevel object from its integer representation.
+    * 从其整数表示形式创建新的StorageLevel对象
    */
   @DeveloperApi
   def apply(flags: Int, replication: Int): StorageLevel = {
@@ -223,6 +226,7 @@ object StorageLevel {
   /**
    * :: DeveloperApi ::
    * Read StorageLevel object from ObjectInput stream.
+    * 从ObjectInput流读取StorageLevel对象
    */
   @DeveloperApi
   def apply(in: ObjectInput): StorageLevel = {

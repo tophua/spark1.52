@@ -31,7 +31,7 @@ private[spark] object BlockManagerMessages {
 
   // Remove a block from the slaves that have it. This can only be used to remove
   // blocks that the master knows about.
-  // 从节点删除数据块
+  // 从节点删除数据块,这只能用于删除master知道的块
   case class RemoveBlock(blockId: BlockId) extends ToBlockManagerSlave
 
   // Remove all blocks belonging to a specific RDD.
@@ -71,7 +71,7 @@ private[spark] object BlockManagerMessages {
       var externalBlockStoreSize: Long)
     extends ToBlockManagerMaster
     with Externalizable {
-
+    //仅用于反序列化
     def this() = this(null, null, null, 0, 0, 0)  // For deserialization only
 
     override def writeExternal(out: ObjectOutput): Unit = Utils.tryOrIOException {
