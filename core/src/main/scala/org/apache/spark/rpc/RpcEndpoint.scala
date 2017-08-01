@@ -22,6 +22,7 @@ import org.apache.spark.SparkException
 /**
  * A factory class to create the [[RpcEnv]]. It must have an empty constructor so that it can be
  * created using Reflection.
+  * 一个工厂类创建[[RpcEnv]]它必须有一个空构造函数,以便可以使用Reflection创建它。
  */
 private[spark] trait RpcEnvFactory {
 
@@ -30,7 +31,7 @@ private[spark] trait RpcEnvFactory {
 
 /**
  * A trait that requires RpcEnv thread-safely sending messages to it.
- *
+ * 需要RpcEnv线程安全地向其发送消息的特征。
  * Thread-safety means processing of one message happens before processing of the next message by
  * the same [[ThreadSafeRpcEndpoint]]. In the other words, changes to internal fields of a
  * [[ThreadSafeRpcEndpoint]] are visible when processing the next message, and fields in the
@@ -114,9 +115,11 @@ private[spark] trait RpcEndpoint {
   /**
    * 当处理消息发生异常时
    * Invoked when any exception is thrown during handling messages.
+    * 在处理消息时抛出任何异常时调用。
    */
   def onError(cause: Throwable): Unit = {
     // By default, throw e and let RpcEnv handle it
+    //默认情况下,扔e并让RpcEnv处理它
     throw cause
   }
 
@@ -139,6 +142,7 @@ private[spark] trait RpcEndpoint {
   /**
    * 当远程地址连接到当前的节点地址时触发
    * Invoked when `remoteAddress` is connected to the current node.
+    * 当“remoteAddress”连接到当前节点时调用。
    */
   def onConnected(remoteAddress: RpcAddress): Unit = {
     // By default, do nothing.
@@ -147,18 +151,21 @@ private[spark] trait RpcEndpoint {
   /**
    * 当远程地址连接断开时触发
    * Invoked when `remoteAddress` is lost.
+    * remoteAddress 丢失时调用
    */
   def onDisconnected(remoteAddress: RpcAddress): Unit = {
     // By default, do nothing.
+    //默认情况下,什么也不做
   }
 
   /**
-   * 当远程地址和当前节点的连接发生网络异常时触发
    * Invoked when some network error happens in the connection between the current node and
    * `remoteAddress`.
+    * 当前节点和“remoteAddress”之间的连接发生某些网络错误时调用。
    */
   def onNetworkError(cause: Throwable, remoteAddress: RpcAddress): Unit = {
     // By default, do nothing.
+    //默认情况下,什么也不做
   }
 
   /**

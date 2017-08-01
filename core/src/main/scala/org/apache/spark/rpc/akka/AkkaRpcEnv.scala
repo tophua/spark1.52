@@ -36,9 +36,10 @@ import org.apache.spark.util.{ActorLogReceive, AkkaUtils, ThreadUtils}
 
 /**
  * A RpcEnv implementation based on Akka.
- *
+ *基于Akka的RpcEnv实现
  * TODO Once we remove all usages of Akka in other place, we can move this file to a new project and
  * remove Akka from the dependencies.
+  * 从依赖关系中删除Akka
  * actorSystem是Akka提供用于创建分布式消息通信系统的基础类
  * @param actorSystem
  * @param conf
@@ -51,7 +52,9 @@ private[spark] class AkkaRpcEnv private[akka] (
   private val defaultAddress: RpcAddress = {
     val address = actorSystem.asInstanceOf[ExtendedActorSystem].provider.getDefaultAddress
     // In some test case, ActorSystem doesn't bind to any address.
+    //在某些测试用例中,ActorSystem不绑定到任何地址。
     // So just use some default value since they are only some unit tests
+    //所以只要使用一些默认值,因为它们只是一些单元测试
     RpcAddress(address.host.getOrElse("localhost"), address.port.getOrElse(boundPort))
   }
 
@@ -66,7 +69,8 @@ private[spark] class AkkaRpcEnv private[akka] (
 
   /**
    * Need this map to remove `RpcEndpoint` from `endpointToRef` via a `RpcEndpointRef`
-   * 从Map删除RpcEndpoint
+   * 需要这个Map可以通过`RpcEndpointRef`从`endpointToRef`中删除`RpcEndpoint`
+    * 从Map删除RpcEndpoint
    */
   private val refToEndpoint = new ConcurrentHashMap[RpcEndpointRef, RpcEndpoint]()
 
@@ -100,6 +104,7 @@ private[spark] class AkkaRpcEnv private[akka] (
 
       override def preStart(): Unit = {
         // Listen for remote client network events
+        //收听远程客户端网络事件
         //首先向ActionSystem订阅事件
         context.system.eventStream.subscribe(self, classOf[AssociationEvent])
         safelyCall(endpoint) {
@@ -176,6 +181,7 @@ private[spark] class AkkaRpcEnv private[akka] (
           }
 
           // Some RpcEndpoints need to know the sender's address
+          //一些RpcEndpoints需要知道发件人的地址
           override val sender: RpcEndpointRef =
             new AkkaRpcEndpointRef(defaultAddress, _sender, conf)
         })
@@ -192,6 +198,7 @@ private[spark] class AkkaRpcEnv private[akka] (
         if (!needReply) {
           // If the sender does not require a reply, it may not handle the exception. So we rethrow
           // "e" to make sure it will be processed.
+          //如果发件人不需要回复,则可能无法处理该异常。 所以我们推翻“e”来确保它被处理。
           throw e
         }
     }
@@ -230,6 +237,7 @@ private[spark] class AkkaRpcEnv private[akka] (
       map(new AkkaRpcEndpointRef(defaultAddress, _, conf)).
       // this is just in case there is a timeout from creating the future in resolveOne, we want the
       // exception to indicate the conf that determines the timeout
+      //这是为了防止在resolveOne中创建未来的超时,我们希望异常指示确定超时的conf
       recover(defaultLookupTimeout.addMessageIfTimeout)
   }
 
