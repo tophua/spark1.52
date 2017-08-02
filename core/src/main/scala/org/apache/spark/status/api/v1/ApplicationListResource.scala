@@ -45,9 +45,11 @@ private[v1] class ApplicationListResource(uiRoot: UIRoot) {
     allApps.filter { app =>
       val anyRunning = app.attempts.exists(!_.completed)
       // if any attempt is still running, we consider the app to also still be running
+      //如果有任何尝试仍在运行，我们认为该应用仍然在运行
       val statusOk = (!anyRunning && includeCompleted) ||
         (anyRunning && includeRunning)
       // keep the app if *any* attempts fall in the right time window
+      //如果*任何*尝试落在正确的时间窗口，请保留应用程序
       val dateOk = app.attempts.exists { attempt =>
         attempt.startTime.getTime >= minDate.timestamp &&
           attempt.startTime.getTime <= maxDate.timestamp
@@ -78,6 +80,7 @@ private[spark] object ApplicationsListResource {
       internal: InternalApplicationInfo,
       completed: Boolean): ApplicationInfo = {
     // standalone application info always has just one attempt
+    //独立的应用信息总是只有一个尝试
     new ApplicationInfo(
       id = internal.id,
       name = internal.desc.name,

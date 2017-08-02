@@ -127,12 +127,13 @@ private[spark] class IndexShuffleBlockResolver(
    * Write an index file with the offsets of each block, plus a final offset at the end for the
    * end of the output file. This will be used by getBlockData to figure out where each block
    * begins and ends.
-   * 用于在Block索引文件中记录各个Partition的偏移量信息,便于下游Stage的任务读取
+   * 使用每个块的偏移量写入一个索引文件,再加上输出文件末尾的最后一个偏移量,这将被getBlockData用于计算每个块开始和结束的位置。
+    * 用于在Block索引文件中记录各个Partition的偏移量信息,便于下游Stage的任务读取
    * It will commit the data and index file as an atomic operation, use the existing ones, or
    * replace them with new ones.
-   *
+   * 它将提交数据和索引文件作为原子操作,使用现有操作,或将其替换为新操作。
    * Note: the `lengths` will be updated to match the existing index file if use the existing ones.
-   * 
+   * 注意：如果使用现有的索引文件，````长度将被更新为匹配现有的索引文件。
    *  */
   def writeIndexFileAndCommit(
       shuffleId: Int,
@@ -144,6 +145,7 @@ private[spark] class IndexShuffleBlockResolver(
     val out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(indexTmp)))
     Utils.tryWithSafeFinally {
       // We take in lengths of each block, need to convert it to offsets.
+      //我们占用每个块的长度，需要将其转换为偏移量。
       var offset = 0L
       out.writeLong(offset)
       for (length <- lengths) {
@@ -157,11 +159,14 @@ private[spark] class IndexShuffleBlockResolver(
     val dataFile = getDataFile(shuffleId, mapId)
     // There is only one IndexShuffleBlockResolver per executor, this synchronization make sure
     // the following check and rename are atomic.
+    //每个执行器只有一个IndexShuffleBlockResolver,这个同步确保以下检查和重命名是原子的。
     synchronized {
       val existingLengths = checkIndexAndDataFile(indexFile, dataFile, lengths.length)
       if (existingLengths != null) {
         // Another attempt for the same task has already written our map outputs successfully,
         // so just use the existing partition lengths and delete our temporary map outputs.
+        //相同任务的另一个尝试已经成功地写了我们的Map输出，
+        //所以只需使用现有的分区长度，并删除我们的临时Map输出。
         System.arraycopy(existingLengths, 0, lengths, 0, lengths.length)
         if (dataTmp != null && dataTmp.exists()) {
           dataTmp.delete()
@@ -170,6 +175,7 @@ private[spark] class IndexShuffleBlockResolver(
       } else {
         // This is the first successful attempt in writing the map outputs for this task,
         // so override any existing index and data files with the ones we wrote.
+        //这是为此任务编写Map输出的第一个成功尝试,因此我们用我们编写的代替任何现有的索引和数据文件。
         //这是第一次成功尝试编写此任务的Map输出
         if (indexFile.exists()) {
           indexFile.delete()
@@ -192,6 +198,7 @@ private[spark] class IndexShuffleBlockResolver(
   override def getBlockData(blockId: ShuffleBlockId): ManagedBuffer = {
     // The block is actually going to be a range of a single map output file for this map, so
     // find out the consolidated file, then the offset within that from our index
+    //该块实际上将是该地图的单个Map输出文件的范围,因此找出合并文件,然后从我们的索引中的偏移量
     //根据shuffleId,mapId获取索引文件
     val indexFile = getIndexFile(blockId.shuffleId, blockId.mapId)
 

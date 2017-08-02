@@ -24,8 +24,10 @@ import org.apache.spark.util.Utils
 /**
  * Failed to fetch a shuffle block. The executor catches this exception and propagates it
  * back to DAGScheduler (through TaskEndReason) so we'd resubmit the previous stage.
+  * 无法获取随机播放块,执行器捕获此异常并将其传播回DAGScheduler（通过TaskEndReason），以便我们重新提交上一个阶段。
  *
  * Note that bmAddress can be null.
+  * 请注意,bmAddress可以为null
  */
 private[spark] class FetchFailedException(
     bmAddress: BlockManagerId,
@@ -51,6 +53,7 @@ private[spark] class FetchFailedException(
 
 /**
  * Failed to get shuffle metadata from [[org.apache.spark.MapOutputTracker]].
+  * 无法从[[org.apache.spark.MapOutputTracker]]中获取随机元数据
  */
 private[spark] class MetadataFetchFailedException(
     shuffleId: Int,

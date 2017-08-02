@@ -30,12 +30,15 @@ import com.fasterxml.jackson.databind.{ObjectMapper, SerializationFeature}
 
 /**
  * This class converts the POJO metric responses into json, using jackson.
+  * 该类使用jackson将POJO度量响应转换为json。
  *
  * This doesn't follow the standard jersey-jackson plugin options, because we want to stick
  * with an old version of jersey (since we have it from yarn anyway) and don't want to pull in lots
  * of dependencies from a new plugin.
+  * 这不符合标准的jersey-jackson插件选项，因为我们想坚持下去使用旧版本的jersey（因为我们从纱线上获得）并且不想从一个新的插件中拉出很多依赖。
  *
  * Note that jersey automatically discovers this class based on its package and its annotations.
+  * 请注意，jersey根据包装及其注释自动发现此类。
  */
 @Provider
 @Produces(Array(MediaType.APPLICATION_JSON))

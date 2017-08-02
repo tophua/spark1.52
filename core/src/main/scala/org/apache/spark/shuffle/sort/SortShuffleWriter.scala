@@ -42,6 +42,8 @@ private[spark] class SortShuffleWriter[K, V, C](
   // Are we in the process of stopping? Because map tasks can call stop() with success = true
   // and then call stop() with success = false if they get an exception, we want to make sure
   // we don't try deleting files, etc twice.
+  //我们正在停止吗？ 因为map任务可以使用success = true调用stop（）
+  // 然后在success = false的情况下调用stop（）得到异常，我们想确保我们不尝试删除文件等两次。
   //我们在停止的过程中,因为map任务调用停止成功能为true,
   private var stopping = false
 

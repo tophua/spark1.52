@@ -154,7 +154,9 @@ private[v1] object AllStagesResource {
     // a result if the option is defined for any of the tasks.  MetricHelper is a little util
     // to make it a little easier to deal w/ all of the nested options.  Mostly it lets us just
     // implement one "build" method, which just builds the quantiles for each field.
-
+    //我们需要在这里做很多类似的嵌套指标,对于每一个,我们要(a)提取嵌套指标的值(b)为每个指标分配一个分布
+    //(c)将分配推送到我们的返回类型的正确字段中,(d)只有为任何任务定义了该选项时才返回结果。
+    // MetricHelper是一个有用的工具，使它更容易处理所有的嵌套选项,大多数情况下,我们只需实现一个“构建”方法，该方法只为每个字段构建分位数。
     val inputMetrics: Option[InputMetricDistributions] =
       new MetricHelper[InternalInputMetrics, InputMetricDistributions](rawMetrics, quantiles) {
         def getSubmetrics(raw: InternalTaskMetrics): Option[InternalInputMetrics] = {
@@ -283,6 +285,8 @@ private[v1] object AllStagesResource {
  * contained in options inside TaskMetrics (eg., ShuffleWriteMetrics). This makes it easy to handle
  * the options (returning None if the metrics are all empty), and extract the quantiles for each
  * metric.  After creating an instance, call metricOption to get the result type.
+  * 帮助从嵌套度量类型获取分发,我们需要的许多指标都包含在TaskMetrics中的选项中(例如，ShuffleWriteMetrics),
+  * 这使得它很容易处理选项(如果指标都为空,则返回None),并提取每个指标的分位数。 创建实例后,调用metricOption获取结果类型。
  */
 private[v1] abstract class MetricHelper[I, O](
     rawMetrics: Seq[InternalTaskMetrics],
@@ -294,7 +298,8 @@ private[v1] abstract class MetricHelper[I, O](
 
   val data: Seq[I] = rawMetrics.flatMap(getSubmetrics)
 
-  /** applies the given function to all input metrics, and returns the quantiles */
+  /** applies the given function to all input metrics, and returns the quantiles
+    * 将给定的函数应用于所有输入度量,并返回分位数*/
   def submetricQuantiles(f: I => Double): IndexedSeq[Double] = {
     Distribution(data.map { d => f(d) }).get.getQuantiles(quantiles)
   }

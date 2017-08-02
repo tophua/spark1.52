@@ -22,6 +22,7 @@ import org.apache.spark.serializer.Serializer
 
 /**
  * A basic ShuffleHandle implementation that just captures registerShuffle's parameters.
+  * 一个基本的ShuffleHandle实现,只捕获registerShuffle的参数。
  */
 private[spark] class BaseShuffleHandle[K, V, C](
     shuffleId: Int,

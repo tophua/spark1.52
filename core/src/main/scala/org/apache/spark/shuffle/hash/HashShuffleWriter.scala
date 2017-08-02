@@ -40,6 +40,8 @@ private[spark] class HashShuffleWriter[K, V](
   // Are we in the process of stopping? Because map tasks can call stop() with success = true
   // and then call stop() with success = false if they get an exception, we want to make sure
   // we don't try deleting files, etc twice.
+  //我们正在停止吗？ 因为map任务可以使用success = true调用stop()
+  // 然后在success = false的情况下调用stop()得到异常,我们想确保我们不尝试删除文件等两次。
   private var stopping = false
 
   private val writeMetrics = new ShuffleWriteMetrics()
@@ -81,7 +83,8 @@ private[spark] class HashShuffleWriter[K, V](
     }
   }
 
-  /** Close this writer, passing along whether the map completed */
+  /** Close this writer, passing along whether the map completed
+    * 关闭这位writer，传递map是否完成*/
   override def stop(initiallySuccess: Boolean): Option[MapStatus] = {
     var success = initiallySuccess
     try {
@@ -104,6 +107,7 @@ private[spark] class HashShuffleWriter[K, V](
       }
     } finally {
       // Release the writers back to the shuffle block manager.
+      //释放作者回到洗牌块管理器
       if (shuffle != null && shuffle.writers != null) {
         try {
           shuffle.releaseWriters(success)
@@ -116,6 +120,7 @@ private[spark] class HashShuffleWriter[K, V](
 
   private def commitWritesAndBuildStatus(): MapStatus = {
     // Commit the writes. Get the size of each bucket block (total block size).
+    //提交写,获取每个桶块的大小（总块大小）。
     val sizes: Array[Long] = shuffle.writers.map { writer: DiskBlockObjectWriter =>
       writer.commitAndClose()
       writer.fileSegment().length
@@ -123,16 +128,19 @@ private[spark] class HashShuffleWriter[K, V](
     if (!shuffleBlockResolver.consolidateShuffleFiles) {
       // rename all shuffle files to final paths
       // Note: there is only one ShuffleBlockResolver in executor
+      //将所有随机文件重命名为最终路径注意：执行器中只有一个ShuffleBlockResolver
       shuffleBlockResolver.synchronized {
         shuffle.writers.zipWithIndex.foreach { case (writer, i) =>
           val output = blockManager.diskBlockManager.getFile(writer.blockId)
           if (sizes(i) > 0) {
             if (output.exists()) {
               // Use length of existing file and delete our own temporary one
+              //使用现有文件的长度并删除我们自己的临时文件
               sizes(i) = output.length()
               writer.file.delete()
             } else {
               // Commit by renaming our temporary file to something the fetcher expects
+              //将我们的临时文件重命名为提交者期望的内容
               if (!writer.file.renameTo(output)) {
                 throw new IOException(s"fail to rename ${writer.file} to $output")
               }

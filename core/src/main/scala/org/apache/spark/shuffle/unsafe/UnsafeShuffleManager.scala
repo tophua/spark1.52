@@ -27,6 +27,7 @@ import org.apache.spark.shuffle.sort.SortShuffleManager
 
 /**
  * Subclass of [[BaseShuffleHandle]], used to identify when we've chosen to use the new shuffle.
+  * [[BaseShuffleHandle]]的子类，用于识别何时选择使用新的shuffle。
  */
 private[spark] class UnsafeShuffleHandle[K, V](
     shuffleId: Int,
@@ -39,12 +40,14 @@ private[spark] object UnsafeShuffleManager extends Logging {
 
   /**
    * The maximum number of shuffle output partitions that UnsafeShuffleManager supports.
+    * nsafeShuffleManager支持的shuffle输出分区的最大数量。
    */
   val MAX_SHUFFLE_OUTPUT_PARTITIONS = PackedRecordPointer.MAXIMUM_PARTITION_ID + 1
 
   /**
    * Helper method for determining whether a shuffle should use the optimized unsafe shuffle
    * path or whether it should fall back to the original sort-based shuffle.
+    * 用于确定shuffle应使用优化的不安全shuffle路径的辅助方法,或者是否应该回溯到原始的基于排序的shuffle。
    */
   def canUseUnsafeShuffle[K, V, C](dependency: ShuffleDependency[K, V, C]): Boolean = {
     val shufId = dependency.shuffleId
@@ -128,6 +131,7 @@ private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManage
 
   /**
    * Register a shuffle with the manager and obtain a handle for it to pass to tasks.
+    * 与manager注册一个洗牌，并获得一个句柄来传递给任务。
    */
   override def registerShuffle[K, V, C](
       shuffleId: Int,
@@ -144,6 +148,7 @@ private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManage
   /**
    * Get a reader for a range of reduce partitions (startPartition to endPartition-1, inclusive).
    * Called on executors by reduce tasks.
+    * 获取一系列减少分区的读者（startPartition到endPartition-1，包括）。通过减少任务指定执行程序。
    */
   override def getReader[K, C](
       handle: ShuffleHandle,
@@ -153,7 +158,8 @@ private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManage
     sortShuffleManager.getReader(handle, startPartition, endPartition, context)
   }
 
-  /** Get a writer for a given partition. Called on executors by map tasks. */
+  /** Get a writer for a given partition. Called on executors by map tasks.
+    * 获取给定分区的writer。 通过Map任务调用执行器。 */
   override def getWriter[K, V](
       handle: ShuffleHandle,
       mapId: Int,
@@ -177,7 +183,8 @@ private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManage
     }
   }
 
-  /** Remove a shuffle's metadata from the ShuffleManager. */
+  /** Remove a shuffle's metadata from the ShuffleManager.
+    * 从ShuffleManager中删除shuffle的元数据*/
   override def unregisterShuffle(shuffleId: Int): Boolean = {
     if (shufflesThatFellBackToSortShuffle.remove(shuffleId)) {
       sortShuffleManager.unregisterShuffle(shuffleId)
@@ -195,7 +202,8 @@ private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManage
     sortShuffleManager.shuffleBlockResolver
   }
 
-  /** Shut down this ShuffleManager. */
+  /** Shut down this ShuffleManager.
+    * 关闭这个ShuffleManager */
   override def stop(): Unit = {
     sortShuffleManager.stop()
   }

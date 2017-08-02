@@ -31,6 +31,7 @@ private[v1] class ExecutorListResource(ui: SparkUI) {
     listener.synchronized {
       // The follow codes should be protected by `listener` to make sure no executors will be
       // removed before we query their status. See SPARK-12784.
+      //以下代码应由“监听器”保护,以确保在查询状态之前不会删除执行程序,参见SPARK-12784。
       val storageStatusList = listener.storageStatusList
       (0 until storageStatusList.size).map { statusId =>
         ExecutorsPage.getExecInfo(listener, statusId)

@@ -24,12 +24,14 @@ import org.apache.spark.shuffle._
  * Hash Shuffle适合中小型规模的数据计算
  * A ShuffleManager using hashing, that creates one output file per reduce partition on each
  * mapper (possibly reusing these across waves of tasks).
+  * 一个ShuffleManager使用哈希,每个映射器上的每个减少分区创建一个输出文件(可能会重复使用这些跨越任务)
  */
 private[spark] class HashShuffleManager(conf: SparkConf) extends ShuffleManager {
 
   private val fileShuffleBlockResolver = new FileShuffleBlockResolver(conf)
 
-  /* Register a shuffle with the manager and obtain a handle for it to pass to tasks. */
+  /* Register a shuffle with the manager and obtain a handle for it to pass to tasks.
+  * 与manager注册一个洗牌,并获得一个句柄来传递给任务*/
   override def registerShuffle[K, V, C](
       shuffleId: Int,
       numMaps: Int,
@@ -40,6 +42,7 @@ private[spark] class HashShuffleManager(conf: SparkConf) extends ShuffleManager 
   /**
    * Get a reader for a range of reduce partitions (startPartition to endPartition-1, inclusive).
    * Called on executors by reduce tasks.
+    * 获取一系列读取减少分区（startPartition到endPartition-1，包括）通过减少任务指定执行程序。
    */
   override def getReader[K, C](
       handle: ShuffleHandle,
@@ -50,14 +53,16 @@ private[spark] class HashShuffleManager(conf: SparkConf) extends ShuffleManager 
       handle.asInstanceOf[BaseShuffleHandle[K, _, C]], startPartition, endPartition, context)
   }
 
-  /** Get a writer for a given partition. Called on executors by map tasks. */
+  /** Get a writer for a given partition. Called on executors by map tasks.
+    * 获取一个给定写的分区,通过Map任务调用执行器*/
   override def getWriter[K, V](handle: ShuffleHandle, mapId: Int, context: TaskContext)
       : ShuffleWriter[K, V] = {
     new HashShuffleWriter(
       shuffleBlockResolver, handle.asInstanceOf[BaseShuffleHandle[K, V, _]], mapId, context)
   }
 
-  /** Remove a shuffle's metadata from the ShuffleManager. */
+  /** Remove a shuffle's metadata from the ShuffleManager.
+    * 从ShuffleManager中删除shuffle的元数据 */
   override def unregisterShuffle(shuffleId: Int): Boolean = {
     shuffleBlockResolver.removeShuffle(shuffleId)
   }
@@ -66,7 +71,8 @@ private[spark] class HashShuffleManager(conf: SparkConf) extends ShuffleManager 
     fileShuffleBlockResolver
   }
 
-  /** Shut down this ShuffleManager. */
+  /** Shut down this ShuffleManager.
+    * 关闭这个ShuffleManager*/
   override def stop(): Unit = {
     shuffleBlockResolver.stop()
   }

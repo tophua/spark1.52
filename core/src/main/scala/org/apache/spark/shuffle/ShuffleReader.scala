@@ -24,7 +24,8 @@ package org.apache.spark.shuffle
  * 然后如果数据在本地那么调用org.apache.spark.storage.BlockManager的getBlockData读取本地数据
  */
 private[spark] trait ShuffleReader[K, C] {
-  /** Read the combined key-values for this reduce task */
+  /** Read the combined key-values for this reduce task
+    * 读取此减少任务的组合键值 */
   def read(): Iterator[Product2[K, C]]
 
   /**

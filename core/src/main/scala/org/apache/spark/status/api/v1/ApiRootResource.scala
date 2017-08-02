@@ -31,13 +31,20 @@ import org.apache.spark.ui.SparkUI
 
 /**
  * Main entry point for serving spark application metrics as json, using JAX-RS.
- *
+ * 使用JAX-RS为Spark应用指标提供json的主要入口点
+  *
  * Each resource should have endpoints that return **public** classes defined in api.scala.  Mima
  * binary compatibility checks ensure that we don't inadvertently make changes that break the api.
  * The returned objects are automatically converted to json by jackson with JacksonMessageWriter.
  * In addition, there are a number of tests in HistoryServerSuite that compare the json to "golden
  * files".  Any changes and additions should be reflected there as well -- see the notes in
  * HistoryServerSuite.
+  *
+  * 每个资源都应该有返回在api.scala中定义的** public **类的端点。
+  * Mima二进制兼容性检查确保我们不会无意中进行破坏api的更改。
+  * 返回的对象将被JacksonJessageWriter自动转换为json。
+  * 此外，在HistoryServerSuite中还有一些测试将json与“黄金文件”进行比较。
+  * 还应反映任何更改和添加内容-请参阅HistoryServerSuite中的注释。
  */
 @Path("/v1")
 private[v1] class ApiRootResource extends UIRootFromServletContext {
@@ -201,6 +208,7 @@ private[spark] object ApiRootResource {
  * This trait is shared by the all the root containers for application UI information --
  * the HistoryServer, the Master UI, and the application UI.  This provides the common
  * interface needed for them all to expose application info as json.
+  * 该特性由应用程序UI信息的所有根容器共享 - HistoryServer，主UI和应用程序UI,这提供了他们所有的公共接口，以将应用信息公开为json
  */
 private[spark] trait UIRoot {
   def getSparkUI(appKey: String): Option[SparkUI]
@@ -209,6 +217,7 @@ private[spark] trait UIRoot {
   /**
    * Write the event logs for the given app to the [[ZipOutputStream]] instance. If attemptId is
    * [[None]], event logs for all attempts of this application will be written out.
+    * 将给定应用程序的事件日志写入[[ZipOutputStream]]实例,如果attemptId为[[None]],则会写出此应用程序所有尝试的事件日志。
    */
   def writeEventLogs(appId: String, attemptId: Option[String], zipStream: ZipOutputStream): Unit = {
     Response.serverError()
@@ -220,6 +229,7 @@ private[spark] trait UIRoot {
   /**
    * Get the spark UI with the given appID, and apply a function
    * to it.  If there is no such app, throw an appropriate exception
+    * 使用给定的appID获取Spark UI,并对其应用一个函数,如果没有这样的应用程序,请抛出适当的异常
    */
   def withSparkUI[T](appId: String, attemptId: Option[String])(f: SparkUI => T): T = {
     val appKey = attemptId.map(appId + "/" + _).getOrElse(appId)
@@ -275,5 +285,6 @@ private[v1] class BadParameterException(msg: String) extends WebApplicationExcep
 /**
  * Signal to JacksonMessageWriter to not convert the message into json (which would result in an
  * extra set of quotes).
+  * 发信号给JacksonMessageWriter不将消息转换成json(这将导致额外的一组引号)
  */
 private[v1] case class ErrorWrapper(s: String)

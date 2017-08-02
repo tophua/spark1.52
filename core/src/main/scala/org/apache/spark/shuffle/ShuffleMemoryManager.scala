@@ -29,6 +29,8 @@ import org.apache.spark.{Logging, SparkException, SparkConf, TaskContext}
  * collection (ExternalAppendOnlyMap or ExternalSorter) used by these tasks can acquire memory
  * from this pool and release it as it spills data out. When a task ends, all its memory will be
  * released by the Executor.
+  * 将一个内存池分配给随机操作中使用的任务,这些任务使用的每个磁盘溢出集合（ExternalAppendOnlyMap或ExternalSorter）
+  * 可以从此池获取内存,并在数据溢出时释放它,当任务结束时,其所有内存将由执行者释放。
  *
  * This class tries to ensure that each task gets a reasonable share of memory, instead of some
  * task ramping up to a large amount first and then causing others to spill to disk repeatedly.
@@ -61,6 +63,7 @@ class ShuffleMemoryManager protected (
 
   private def currentTaskAttemptId(): Long = {
     // In case this is called on the driver, return an invalid task attempt id.
+    //如果这是在驱动程序上调用，返回一个无效的任务尝试ID
     Option(TaskContext.get()).map(_.taskAttemptId()).getOrElse(-1L)
   }
 
@@ -81,21 +84,26 @@ class ShuffleMemoryManager protected (
 
     // Add this task to the taskMemory map just so we can keep an accurate count of the number
     // of active tasks, to let other tasks ramp down their memory in calls to tryToAcquire
+    //将此任务添加到任务记忆库Map，以便我们可以准确计算活动任务的数量，让其他任务在调用TryToAcquire时降低内存
     if (!taskMemory.contains(taskAttemptId)) {
       taskMemory(taskAttemptId) = 0L
+      //稍后会导致等待任务唤醒并再次检查numThreads
       notifyAll()  // Will later cause waiting tasks to wake up and check numThreads again
     }
 
     // Keep looping until we're either sure that we don't want to grant this request (because this
     // task would have more than 1 / numActiveTasks of the memory) or we have enough free
     // memory to give it (we always let each task get at least 1 / (2 * numActiveTasks)).
+    //保持循环，直到我们确定我们不想授予此请求（因为此任务将具有超过1个/ numActiveTasks的内存）,
+    // 或者我们有足够的可用内存来给它（我们总是让每个任务得到 至少1 /（2 * numActiveTasks））。
     while (true) {
       val numActiveTasks = taskMemory.keys.size
       val curMem = taskMemory(taskAttemptId)
       val freeMemory = maxMemory - taskMemory.values.sum//当前可以内存
 
       // How much we can grant this task; don't let it grow to more than 1 / numActiveTasks;
-      // don't let it be negative
+      //我们可以授予这个任务多少钱 不要让它增长到超过1 / numActiveTasks;
+      // don't let it be negative 不要让它是负
       val maxToGrant = math.min(numBytes, math.max(0, (maxMemory / numActiveTasks) - curMem))
 
       if (curMem < maxMemory / (2 * numActiveTasks)) {
@@ -113,12 +121,13 @@ class ShuffleMemoryManager protected (
         }
       } else {
         // Only give it as much memory as is free, which might be none if it reached 1 / numThreads
+        //只给它一个空闲的内存，如果它达到1 / numThreads可能没有
         val toGrant = math.min(maxToGrant, freeMemory)
         taskMemory(taskAttemptId) += toGrant
         return toGrant
       }
     }
-    0L  // Never reached
+    0L  // Never reached 从来没有达到
   }
 
   /** 
@@ -133,16 +142,19 @@ class ShuffleMemoryManager protected (
         s"Internal error: release called on ${numBytes} bytes but task only has ${curMem}")
     }
     taskMemory(taskAttemptId) -= numBytes
+    //通知在waitToAcquire中释放内存的服务器
     notifyAll()  // Notify waiters who locked "this" in tryToAcquire that memory has been freed
   }
 
   /** 
-   *  Release all memory for the current task and mark it as inactive(不活动) (e.g. when a task ends). 
+   *  Release all memory for the current task and mark it as inactive (e.g. when a task ends).
+    *  释放当前任务的所有内存,并将其标记为非活动状态(例如任务结束时)
    *  释放当前线程使用的内存通过ShuffleMemoryManager获得的内存
    *  */
   def releaseMemoryForThisTask(): Unit = synchronized {
     val taskAttemptId = currentTaskAttemptId()
     taskMemory.remove(taskAttemptId)
+    //通知tryToAcquire中的“this”这个内存已被释放的服务员
     notifyAll()  // Notify waiters who locked "this" in tryToAcquire that memory has been freed
   }
 
@@ -177,10 +189,13 @@ private[spark] object ShuffleMemoryManager {
   }
 
   /**
-   * Figure out the shuffle memory limit from a SparkConf. We currently have both a fraction(部分)
+   * Figure out the shuffle memory limit from a SparkConf. We currently have both a fraction
    * of the memory pool and a safety factor since collections can sometimes grow bigger than
    * the size we target before we estimate their sizes again.
-   * 获取Shuffle所有线程占用的最大内存
+   *
+    * 从SparkConf中找出shuffle内存限制,我们目前拥有一部分内存池和一个安全因素,
+    * 因为收集有时会比我们目标的大小更大,然后我们再次估计它们的大小。
+    * 获取Shuffle所有线程占用的最大内存
    */
   private def getMaxMemory(conf: SparkConf): Long = {
     //Shuffle最大内存占比
@@ -193,10 +208,12 @@ private[spark] object ShuffleMemoryManager {
 
   /**
    * Sets the page size, in bytes.
+    * 设置页面大小(以字节为单位)
    *
    * If user didn't explicitly set "spark.buffer.pageSize", we figure out the default value
    * by looking at the number of cores available to the process, and the total amount of memory,
    * and then divide it by a factor of safety.
+    * 如果用户未明确设置“spark.buffer.pageSize”,我们通过查看可用于进程的内核数量和总内存量,然后将其除以安全系数来计算出默认值
    */
   private def getPageSize(conf: SparkConf, maxMemory: Long, numCores: Int): Long = {
     val minPageSize = 1L * 1024 * 1024   // 1MB
@@ -204,6 +221,7 @@ private[spark] object ShuffleMemoryManager {
     //获得当前可以cpu 核数
     val cores = if (numCores > 0) numCores else Runtime.getRuntime.availableProcessors()
     // Because of rounding to next power of 2, we may have safetyFactor as 8 in worst case
+    //由于四舍五入到2的下一个电源,我们可能在最坏的情况下安全反应器为8
     val safetyFactor = 16
     // TODO(davies): don't round to next power of 2
     val size = ByteArrayMethods.nextPowerOf2(maxMemory / cores / safetyFactor)

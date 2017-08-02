@@ -27,6 +27,7 @@ import org.apache.spark.{TaskContext, ShuffleDependency}
  * Executor中的ShuffleManager 则负责读和写Shuffle的数据
  * NOTE: this will be instantiated by SparkEnv so its constructor can take a SparkConf and
  * boolean isDriver as parameters.
+  * 注意：这将由SparkEnv实例化，因此其构造函数可以使用SparkConf和boolean isDriver作为参数。
  */
 private[spark] trait ShuffleManager {
   /**
@@ -56,18 +57,21 @@ private[spark] trait ShuffleManager {
       context: TaskContext): ShuffleReader[K, C]
 
   /**
-   * 删除本地的Shuffle的元数据
+   * 从ShuffleManager中删除shuffle的元数据
     * Remove a shuffle's metadata from the ShuffleManager.
     * @return true if the metadata removed successfully, otherwise false.
+    *         如果元数据成功移除,则为true,否则为false
     */
   def unregisterShuffle(shuffleId: Int): Boolean
 
   /**
    * Return a resolver capable of retrieving shuffle block data based on block coordinates.
+    * 返回能够根据块坐标检索shuffle块数据的解析器
    * 返回一个基于Shuffle数据块位置的解析器
    */
   def shuffleBlockResolver: ShuffleBlockResolver
 
-  /** Shut down this ShuffleManager. */
+  /** Shut down this ShuffleManager.
+    * 关闭这个ShuffleManager*/
   def stop(): Unit
 }

@@ -33,7 +33,8 @@ import org.apache.spark.util.collection.{PrimitiveKeyOpenHashMap, PrimitiveVecto
 import org.apache.spark.util.{MetadataCleaner, MetadataCleanerType, TimeStampedHashMap, Utils}
 import org.apache.spark.{Logging, SparkConf, SparkEnv}
 
-/** A group of writers for a ShuffleMapTask, one writer per reducer. */
+/** A group of writers for a ShuffleMapTask, one writer per reducer.
+  * 一组写的ShuffleMapTask，每个写的reducer*/
 private[spark] trait ShuffleWriterGroup {
   val writers: Array[DiskBlockObjectWriter]
 
@@ -85,6 +86,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
   /**
    * Contains all the state related to a particular shuffle. This includes a pool of unused
    * ShuffleFileGroups, as well as all ShuffleFileGroups that have been created for the shuffle.
+    * 包含与特定随机播放相关的所有状态,这包括一个未使用的ShuffleFileGroups池,以及为洗牌创建的所有ShuffleFileGroups。
    */
   private class ShuffleState(val numBuckets: Int) {
     val nextFileId = new AtomicInteger(0)
@@ -94,6 +96,8 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
     /**
      * The mapIds of all map tasks completed on this Executor for this shuffle.
      * NB: This is only populated if consolidateShuffleFiles is FALSE. We don't need it otherwise.
+      * 所有map任务的mapIds在此执行器上完成,用于此shuffle。
+        注意：只有在整合ShuffleFiles为FALSE时,此填充才会被填充,否则我们不需要它
      */
     val completedMapTasks = new ConcurrentLinkedQueue[Int]()
   }
@@ -107,6 +111,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
    * 
    * Get a ShuffleWriterGroup for the given map task, which will register it as complete
    * when the writers are closed successfully
+    * 为给定的地图任务获取一个ShuffleWriterGroup,当作者关闭成功时,它将注册为完整的
    * 
    */
   def forMapTask(shuffleId: Int, mapId: Int, numBuckets: Int, serializer: Serializer,
@@ -138,6 +143,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
       }
       // Creating the file to write to and creating a disk writer both involve interacting with
       // the disk, so should be included in the shuffle write time.
+      //创建要写入和创建磁盘刻录机的文件都涉及与磁盘交互,因此应该包含在shuffle写入的时间。
       writeMetrics.incShuffleWriteTime(System.nanoTime - openStartTime)
 
       override def releaseWriters(success: Boolean) {
@@ -199,16 +205,19 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
     }
   }
 
-  /** Remove all the blocks / files and metadata related to a particular shuffle. */
+  /** Remove all the blocks / files and metadata related to a particular shuffle.
+    * 删除与特定shuffle相关的所有块/文件和元数据。*/
   def removeShuffle(shuffleId: ShuffleId): Boolean = {
     // Do not change the ordering of this, if shuffleStates should be removed only
     // after the corresponding shuffle blocks have been removed
+    //不要改变这个的顺序,如果shuffleStates只有在相应的shuffle块被删除之后才被删除
     val cleaned = removeShuffleBlocks(shuffleId)
     shuffleStates.remove(shuffleId)
     cleaned
   }
 
-  /** Remove all the blocks / files related to a particular shuffle. */
+  /** Remove all the blocks / files related to a particular shuffle.
+    * 删除与特定shuffle相关的所有块/文件*/
   private def removeShuffleBlocks(shuffleId: ShuffleId): Boolean = {
     shuffleStates.get(shuffleId) match {
       case Some(state) =>
@@ -256,14 +265,17 @@ private[spark] object FileShuffleBlockResolver {
     /**
      * Stores the absolute index of each mapId in the files of this group. For instance,
      * if mapId 5 is the first block in each file, mapIdToIndex(5) = 0.
+      * 将每个mapId的绝对索引存储在此组的文件中,例如,如果mapId 5是每个文件中的第一个块,则mapIdToIndex（5）= 0
      */
     private val mapIdToIndex = new PrimitiveKeyOpenHashMap[Int, Int]()
 
     /**
      * Stores consecutive offsets and lengths of blocks into each reducer file, ordered by
      * position in the file.
+      * 将连续的偏移量和块长度存储到每个reducer文件中,按文件中的位置排序
      * Note: mapIdToIndex(mapId) returns the index of the mapper into the vector for every
      * reducer.
+      * 注意：mapIdToIndex(mapId)将映射器的索引返回给每个reducer的向量。
      */
     private val blockOffsetsByReducer = Array.fill[PrimitiveVector[Long]](files.length) {
       new PrimitiveVector[Long]()
@@ -284,7 +296,8 @@ private[spark] object FileShuffleBlockResolver {
       }
     }
 
-    /** Returns the FileSegment associated with the given map task, or None if no entry exists. */
+    /** Returns the FileSegment associated with the given map task, or None if no entry exists.
+      * 返回与给定地图任务关联的FileSegment,如果没有条目,则返回None。 */
     def getFileSegmentFor(mapId: Int, reducerId: Int): Option[FileSegment] = {
       val file = files(reducerId)
       val blockOffsets = blockOffsetsByReducer(reducerId)

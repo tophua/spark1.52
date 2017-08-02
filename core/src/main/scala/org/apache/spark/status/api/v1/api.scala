@@ -83,6 +83,7 @@ class JobData private[spark](
 
 // Q: should Tachyon size go in here as well?  currently the UI only shows it on the overall storage
 // page ... does anybody pay attention to it?
+//问：Tachyon的大小应该在这里吗？ 目前用户界面只显示在整个存储页面上？有人注意吗？
 class RDDStorageInfo private[spark](
     val id: Int,
     val name: String,
