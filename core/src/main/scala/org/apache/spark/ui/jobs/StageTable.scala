@@ -123,17 +123,15 @@ private[ui] class StageTableBase(
     <div>{stageDesc.getOrElse("")} {killLink} {nameLink} {details}</div>
   }
 
-  protected def missingStageRow(stageId: Int): Seq[Node] = {
+ protected def missingStageRow(stageId: Int): Seq[Node] = {
     <td>{stageId}</td> ++
     {if (isFairScheduler) {<td>-</td>} else Seq.empty} ++
     <td>No data available for this stage</td> ++ // Description 描述
-    <td></td> ++ // Submitted 提交
-    <td></td> ++ // Duration 持续时间
-    <td></td> ++ // Tasks: Succeeded/Total任务：成功/总计
-    <td></td> ++ // Input 输入
-    <td></td> ++ // Output 输出
-
-
+    <td></td> ++ //Submitted 提交
+    <td></td> ++ //Duration 持续时间
+    <td></td> ++ //Tasks:Succeeded/Total任务：成功/总计
+    <td></td> ++  //Input 输入
+    <td></td> ++  //Output 输出
     <td></td> ++ // Shuffle Read
     <td></td> // Shuffle Write
   }

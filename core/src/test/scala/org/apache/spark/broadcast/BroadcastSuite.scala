@@ -33,7 +33,7 @@ class DummyBroadcastClass(rdd: RDD[Int]) extends Serializable {
   @transient val list = List(1, 2, 3, 4)
   val broadcast = rdd.context.broadcast(list)
   val bid = broadcast.id
-
+  println("bid:"+bid)
   def doSomething(): Set[(Int, Boolean)] = {
     rdd.map { x =>
       val bm = SparkEnv.get.blockManager

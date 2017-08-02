@@ -325,18 +325,23 @@ private[spark] object RpcTimeout {
   }
 
   /**
-   * Lookup prioritized(优化) list of timeout properties in the configuration
+   * Lookup prioritized list of timeout properties in the configuration
    * and create a RpcTimeout with the first set property key in the
    * description.
+    * 查找配置中超时属性的优先级列表,并在描述中创建具有第一个集合属性键的RpcTimeout,
    * Uses the given default value if property is not set
-   * @param conf configuration properties containing the timeout
+    * 如果未设置属性，则使用给定的默认值
+   * @param conf configuration properties containing the timeout 包含超时的配置属性
    * @param timeoutPropList prioritized list of property keys for the timeout in seconds
+    *                         用于超时的属性keys的优先级列表（以秒为单位）
    * @param defaultValue default timeout value in seconds if no properties found
+    *                       默认超时值（以秒为单位），如果找不到属性
    */
   def apply(conf: SparkConf, timeoutPropList: Seq[String], defaultValue: String): RpcTimeout = {
     require(timeoutPropList.nonEmpty)
 
     // Find the first set property or use the default value with the first property
+    //找到第一个属性或使用第一个属性的默认值
     val itr = timeoutPropList.iterator
     var foundProp: Option[(String, String)] = None
     while (itr.hasNext && foundProp.isEmpty){

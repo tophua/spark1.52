@@ -64,7 +64,7 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
 
   /**
    * 发送一个消息给RpcEndpoint.receiveAndReply并返回一个Future在指定的时间内接受响应,
-   * Send a message to the corresponding(类似,相配) [[RpcEndpoint.receiveAndReply)]] and return a [[Future]] to
+   * Send a message to the corresponding [[RpcEndpoint.receiveAndReply)]] and return a [[Future]] to
    * receive the reply within the specified timeout.
    * 本方法值请求一次
    * This method only sends the message once and never retries.
