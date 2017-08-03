@@ -37,6 +37,7 @@ import static org.apache.spark.launcher.CommandBuilderUtils.*;
 
 /**
  * Abstract Spark command builder that defines common functionality.
+ * 抽象Spark命令构建器，定义常用功能
  */
 abstract class AbstractCommandBuilder {
 
@@ -66,7 +67,7 @@ abstract class AbstractCommandBuilder {
 
   /**
    * Builds the command to execute.
-   *
+   *构建要执行的命令
    * @param env A map containing environment variables for the child process. It may already contain
    *            entries defined by the user (such as SPARK_HOME, or those defined by the
    *            SparkLauncher constructor that takes an environment), and may be modified to
@@ -76,13 +77,16 @@ abstract class AbstractCommandBuilder {
 
   /**
    * Builds a list of arguments to run java.
-   *
+   *构建运行java的参数列表
    * This method finds the java executable to use and appends JVM-specific options for running a
    * class with Spark in the classpath. It also loads options from the "java-opts" file in the
    * configuration directory being used.
    *
+   * 此方法找到java可执行文件,以便在类路径中使用并追加用于运行Spark类的JVM特定选项,
+   * 它还从正在使用的配置目录中的“java-opts”文件加载选项。
+   *
    * Callers should still add at least the class to run, as well as any arguments to pass to the
-   * class.
+   * class.调用者至少应该添加运行的类,以及传递给类的任何参数。
    */
   List<String> buildJavaCommand(String extraClassPath) throws IOException {
     List<String> cmd = new ArrayList<String>();
@@ -97,6 +101,7 @@ abstract class AbstractCommandBuilder {
     }
 
     // Load extra JAVA_OPTS from conf/java-opts, if it exists.
+      //从conf / java-opts加载额外的JAVA_OPTS（如果存在）
     File javaOpts = new File(join(File.separator, getConfDir(), "java-opts"));
     if (javaOpts.isFile()) {
       BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -118,10 +123,11 @@ abstract class AbstractCommandBuilder {
 
   /**
    * Adds the default perm gen size option for Spark if the VM requires it and the user hasn't
-   * set it.
+   * set it. 如果VM要求它并且用户尚未设置，则为Spark添加默认的perm gen size选项。
    */
   void addPermGenSizeOpt(List<String> cmd) {
     // Don't set MaxPermSize for IBM Java, or Oracle Java 8 and later.
+      //不要为IBM Java或Oracle Java 8及更高版本设置MaxPermSize
     if (getJavaVendor() == JavaVendor.IBM) {
       return;
     }
