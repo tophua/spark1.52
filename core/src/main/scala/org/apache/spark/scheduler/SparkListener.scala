@@ -65,6 +65,7 @@ case class SparkListenerJobStart(
   extends SparkListenerEvent {
   // Note: this is here for backwards-compatibility with older versions of this event which
   // only stored stageIds and not StageInfos:
+  //注意：这是为了向后兼容此事件的旧版本,只存储stageIds而不是StageInfos：
   val stageIds: Seq[Int] = stageInfos.map(_.stageId)
 }
 
@@ -103,6 +104,7 @@ case class SparkListenerBlockUpdated(blockUpdatedInfo: BlockUpdatedInfo) extends
 
 /**
  * Periodic updates from executors.
+  * 执行executors的定期更新
  * @param execId executor id
  * @param taskMetrics sequence of (task id, stage id, stage attempt, metrics)
  */
@@ -127,6 +129,7 @@ case class SparkListenerApplicationEnd(time: Long) extends SparkListenerEvent
 /**
  * An internal class that describes the metadata of an event log.
  * This event is not meant to be posted to listeners downstream.
+  * 描述事件日志的元数据的内部类,此事件并不意味着发布到下游的监听器。
  */
 private[spark] case class SparkListenerLogStart(sparkVersion: String) extends SparkListenerEvent
 
@@ -134,6 +137,7 @@ private[spark] case class SparkListenerLogStart(sparkVersion: String) extends Sp
  * :: DeveloperApi ::
  * Interface for listening to events from the Spark scheduler. Note that this is an internal
  * interface which might change in different Spark releases. Java clients should extend
+  * 用于侦听Spark调度程序中的事件的接口,请注意,这是一个可能在不同Spark版本中更改的内部接口,Java客户端应该扩展
  * {@link JavaSparkListener}
  * Spark 调度程序的事件接口
  */
@@ -141,7 +145,7 @@ private[spark] case class SparkListenerLogStart(sparkVersion: String) extends Sp
 trait SparkListener {
   /**
    * Called when a stage completes successfully or fails, with information on the completed stage.
-   * 当调用一个阶段完成成功或失败时
+   * 当一个阶段完成或失败时，在完成阶段的信息中调用。
    */
   def onStageCompleted(stageCompleted: SparkListenerStageCompleted) { }
 
@@ -160,7 +164,7 @@ trait SparkListener {
   /**
    * Called when a task begins remotely fetching its result (will not be called for tasks that do
    * not need to fetch the result remotely).
-   * 当调用一个任务开始远程抓取结果时
+    * 当任务开始时远程调用它的结果(不会为不需要远程获取结果的任务调用)。
    */
   def onTaskGettingResult(taskGettingResult: SparkListenerTaskGettingResult) { }
 
@@ -202,6 +206,7 @@ trait SparkListener {
 
   /**
    * Called when an RDD is manually unpersisted by the application
+    * 当RDD由应用程序手动不分开时调用
    */
   def onUnpersistRDD(unpersistRDD: SparkListenerUnpersistRDD) { }
 
@@ -271,7 +276,7 @@ class StatsReportListener extends SparkListener with Logging {
     showBytesDistribution("shuffle bytes written:",
       (_, metric) => metric.shuffleWriteMetrics.map(_.shuffleBytesWritten), taskInfoMetrics)
 
-    // Fetch & I/O
+    // Fetch & I/O 获取和I / O
     showMillisDistribution("fetch wait time:",
       (_, metric) => metric.shuffleReadMetrics.map(_.fetchWaitTime), taskInfoMetrics)
     showBytesDistribution("remote bytes read:",
@@ -297,6 +302,7 @@ class StatsReportListener extends SparkListener with Logging {
 private[spark] object StatsReportListener extends Logging {
 
   // For profiling, the extremes are more interesting
+  //对于分析,极端更有趣
   val percentiles = Array[Int](0, 5, 10, 25, 50, 75, 90, 95, 100)
   val probabilities = percentiles.map(_ / 100.0)
   val percentilesHeader = "\t" + percentiles.mkString("%\t") + "%"
@@ -308,6 +314,7 @@ private[spark] object StatsReportListener extends Logging {
   }
 
   // Is there some way to setup the types that I can get rid of this completely?
+  //有没有办法设置我可以完全摆脱这些类型？
   def extractLongDistribution(
       taskInfoMetrics: Seq[(TaskInfo, TaskMetrics)],
       getMetric: (TaskInfo, TaskMetrics) => Option[Long]): Option[Distribution] = {

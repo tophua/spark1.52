@@ -90,6 +90,8 @@ private[spark] abstract class Stage(
    * This is called every time the stage is submitted, *except* when a subset of tasks
    * belonging to this stage has already finished. Otherwise, reinitializing the internal
    * accumulators here again will override partial values from the finished tasks.
+    * 每当提交阶段时，这被称为* *当属于此阶段的任务的子集已经完成时除外*。
+    * 否则，再次重新初始化内部累加器将覆盖完成的任务中的部分值。
    */
   def resetInternalAccumulators(): Unit = {
     _internalAccumulators = InternalAccumulator.create(rdd.sparkContext)
@@ -101,6 +103,8 @@ private[spark] abstract class Stage(
    * here, before any attempts have actually been created, because the DAGScheduler uses this
    * StageInfo to tell SparkListeners when a job starts (which happens before any stage attempts
    * have been created).
+    * 在这里，在实际创建任何尝试之前，因为DAGScheduler
+    * 使用此StageInfo来在作业启动时告知SparkListeners(在任何阶段尝试创建之前发生)
    * 因为dagscheduler使用本stageinfo告诉sparklisteners一个Job开始运行
    */
   
@@ -108,7 +112,7 @@ private[spark] abstract class Stage(
 
   /** 
    *  Creates a new attempt for this stage by creating a new StageInfo with a new attempt ID.
-   *  创建新StageInfo,尝试ID自增1
+   *  通过创建具有新尝试ID的新StageInfo，创建此阶段的新尝试ID自增1
    *  */
   def makeNewStageAttempt(
       numPartitionsToCompute: Int,

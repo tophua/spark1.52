@@ -42,6 +42,9 @@ private[hive] class SparkSQLSessionManager(hiveServer: HiveServer2, hiveContext:
     setSuperField(this, "hiveConf", hiveConf)
 
     val backgroundPoolSize = hiveConf.getIntVar(ConfVars.HIVE_SERVER2_ASYNC_EXEC_THREADS)
+    //用于保存等待执行的任务的阻塞队列,
+    //LinkedBlockingQueue：一个基于链表结构的阻塞队列，此队列按FIFO(先进先出)排序元素，吞吐量通常要高于ArrayBlockingQueue
+    //Executors.newFixedThreadPool()使用了这个队列
     setSuperField(this, "backgroundOperationPool", Executors.newFixedThreadPool(backgroundPoolSize))
     getAncestorField[Log](this, 3, "LOG").info(
       s"HiveServer2: Async execution pool size $backgroundPoolSize")

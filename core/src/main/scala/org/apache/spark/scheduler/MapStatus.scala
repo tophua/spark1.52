@@ -43,6 +43,7 @@ private[spark] sealed trait MapStatus {
    * 传给Reduce任务的Blok的估算大小
    * If a block is non-empty, then this method MUST return a non-zero size.  This invariant is
    * necessary for correctness, since block fetchers are allowed to skip zero-size blocks.
+    * 如果块不为空,则该方法务必返回非零大小,这种不变性对于正确性是必需的,因为块抓取器被允许跳过零大小的块。
    */
   def getSizeForBlock(reduceId: Int): Long
 }
@@ -181,12 +182,15 @@ private[spark] object HighlyCompressedMapStatus {
   def apply(loc: BlockManagerId, uncompressedSizes: Array[Long]): HighlyCompressedMapStatus = {
     // We must keep track of which blocks are empty so that we don't report a zero-sized
     // block as being non-empty (or vice-versa) when using the average block size.
+    //我们必须跟踪哪些块是空的,以便在使用平均块大小时,我们不会将零大小的块报告为非空（或反之亦然）
     var i = 0
     var numNonEmptyBlocks: Int = 0
     var totalSize: Long = 0
     // From a compression standpoint, it shouldn't matter whether we track empty or non-empty
     // blocks. From a performance standpoint, we benefit from tracking empty blocks because
     // we expect that there will be far fewer of them, so we will perform fewer bitmap insertions.
+    //从压缩的角度来看,跟踪空块或非空块也不重要,从性能的角度来看,
+    // 我们受益于跟踪空块,因为我们期望它们将少得多,因此我们将执行较少的位图插入。
     val emptyBlocks = new RoaringBitmap()
     val totalNumBlocks = uncompressedSizes.length
     while (i < totalNumBlocks) {

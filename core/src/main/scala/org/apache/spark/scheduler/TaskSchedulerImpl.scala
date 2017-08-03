@@ -65,7 +65,7 @@ private[spark] class TaskSchedulerImpl(
 
   val conf = sc.conf
 
-  // How often to check for speculative(推测) tasks
+  // How often to check for speculative tasks
   //Spark多长时间进行检查task运行状态用以推测,以毫秒为单位
   val SPECULATION_INTERVAL_MS = conf.getTimeAsMs("spark.speculation.interval", "100ms")
 
@@ -81,6 +81,7 @@ private[spark] class TaskSchedulerImpl(
 
   // TaskSetManagers are not thread safe, so any access to one should be synchronized
   // on this class.
+  //TaskSetManagers不是线程安全的,所以对这个类的任何访问都应该同步,
   //taskSetsByStageIdAndAttempt存储的是stageId->[taskSet.stageAttemptId->TaskSetManager]  
   private val taskSetsByStageIdAndAttempt = new HashMap[Int, HashMap[Int, TaskSetManager]]
 
@@ -92,7 +93,7 @@ private[spark] class TaskSchedulerImpl(
   @volatile private var hasLaunchedTask = false
   private val starvationTimer = new Timer(true)
 
-  // Incrementing task IDs
+  // Incrementing task IDs 递增任务ID
   val nextTaskId = new AtomicLong(0)
 
   // Which executor IDs we have executors on
@@ -101,6 +102,7 @@ private[spark] class TaskSchedulerImpl(
 
   // The set of executors we have on each host; this is used to compute hostsAlive, which
   // in turn is used to decide when we can attain data locality on a given host
+  //我们在每个主机上的一组执行器;这用于计算hostsAlive,这又用来决定何时可以在给定主机上获得数据本地化
   //执行设定每个主机还活着,key为 host,value 为该 host 上的 active executors
   protected val executorsByHost = new HashMap[String, HashSet[String]]
   //hostsByRack保存key为rack,value为该 rack上所有作为 taskSetManager优先位置的 hosts
@@ -109,6 +111,7 @@ private[spark] class TaskSchedulerImpl(
   protected val executorIdToHost = new HashMap[String, String]
 
   // Listener object to pass upcalls into
+  //侦听器对象传递upcalls
   var dagScheduler: DAGScheduler = null
 
   var backend: SchedulerBackend = null
@@ -233,6 +236,7 @@ private[spark] class TaskSchedulerImpl(
   }
 
   // Label as private[scheduler] to allow tests to swap in different task set managers if necessary
+  //标签为私有[scheduler],允许测试在不同的任务集管理器中进行交换,如果需要的话
   //创建任务集管理器
   private[scheduler] def createTaskSetManager(
     taskSet: TaskSet,
@@ -247,11 +251,14 @@ private[spark] class TaskSchedulerImpl(
       attempts.foreach {
         case (_, tsm) =>
           // There are two possible cases here:
+          //这里有两种可能的情况：
           // 1. The task set manager has been created and some tasks have been scheduled.
           //    In this case, send a kill signal to the executors to kill the task and then abort
           //    the stage.
+          //    已经创建了任务集管理器,并且已经安排了一些任务,在这种情况下,向执行者发送杀戮信号来杀死任务,然后中止stage。
           // 2. The task set manager has been created but no tasks has been scheduled. In this case,
           //    simply abort the stage.
+          //    任务集管理器已创建,但没有安排任务,在这种情况下,只需中止stage。
           tsm.runningTasksSet.foreach { tid =>
             val execId = taskIdToExecutorId(tid)
             backend.killTask(tid, execId, interruptThread)
@@ -266,6 +273,8 @@ private[spark] class TaskSchedulerImpl(
    * Called to indicate that all task attempts (including speculated tasks) associated with the
    * given TaskSetManager have completed, so state associated with the TaskSetManager should be
    * cleaned up.
+    *
+    * 被称为指示与所有任务尝试（包括推测的任务）相关联给TaskSetManager已经完成，所以与TaskSetManager关联的状态应该被清理。
    * tasksetmanager已经完成间接调用所有任务的尝试（包括猜测任务）,清理相关TaskSetManager状态
    */
   def taskSetFinished(manager: TaskSetManager): Unit = synchronized {
@@ -390,7 +399,9 @@ private[spark] class TaskSchedulerImpl(
 
     // Take each TaskSet in our scheduling order, and then offer it each node in increasing order
     // of locality levels so that it gets a chance to launch local tasks on all of them.
+    //以我们的调度顺序中的每个TaskSet,然后按照地点级别的增加顺序提供每个节点,以便它有机会在其上启动本地任务。
     // NOTE: the preferredLocality order: PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY
+    //注意：preferredLocality顺序：PROCESS_LOCAL，NODE_LOCAL，NO_PREF，RACK_LOCAL，ANY
     //标志位launchedTask初始化为false,用它来标记是否有task被成功分配或者launched
     var launchedTask = false
     //为从rootPool里获取TaskSetManager列表分配资源,按照位置本地性规则调度每个TaskSet,分配的原则是就近原则,  
@@ -453,6 +464,7 @@ private[spark] class TaskSchedulerImpl(
       }
     }
     // Update the DAGScheduler without holding a lock on this, since that can deadlock
+    //更新DAGScheduler而不用锁定,因为这可能会死锁
     if (failedExecutor.isDefined) {
       dagScheduler.executorLost(failedExecutor.get)
       backend.reviveOffers()
@@ -465,6 +477,7 @@ private[spark] class TaskSchedulerImpl(
    * Update metrics for in-progress tasks and let the master know that the BlockManager is still
    * alive. Return true if the driver knows about the given block manager. Otherwise, return false,
    * indicating that the block manager should re-register.
+    * 更新正在进行的任务的指标,让master知道BlockManager仍然存在,如果driver知道给定的块管理器,则返回true,否则返回false,表示块管理器应该重新注册。
    */
   override def executorHeartbeatReceived(
     execId: String,
@@ -513,6 +526,7 @@ private[spark] class TaskSchedulerImpl(
     if (!taskSetManager.isZombie && taskState != TaskState.KILLED) {
       // Need to revive offers again now that the task set manager state has been updated to
       // reflect failed tasks that need to be re-run.
+      //现在需要再次恢复提供,因为任务集管理器状态已更新,以反映需要重新运行的失败任务,
       backend.reviveOffers()
     }
   }
@@ -521,6 +535,7 @@ private[spark] class TaskSchedulerImpl(
     synchronized {
       if (taskSetsByStageIdAndAttempt.nonEmpty) {
         // Have each task set throw a SparkException with the error
+        //让每个任务集都抛出一个带有错误的SparkException
         for {
           attempts <- taskSetsByStageIdAndAttempt.values
           manager <- attempts.values
@@ -534,7 +549,9 @@ private[spark] class TaskSchedulerImpl(
       } else {
         // No task sets are active but we still got an error. Just exit since this
         // must mean the error is during registration.
+        //没有任务集是活动的,但我们仍然有错误,只是退出,因为这必须意味着错误是在注册期间,
         // It might be good to do something smarter here in the future.
+        //在将来做更聪明的事情可能会很好
         throw new SparkException(s"Exiting due to error from cluster scheduler: $message")
       }
     }
@@ -554,6 +571,7 @@ private[spark] class TaskSchedulerImpl(
   override def defaultParallelism(): Int = backend.defaultParallelism()
 
   // Check for speculatable tasks in all our active jobs.
+  //检查我们所有活动工作中的可推测任务
   /**
    * 所谓的推测执行,就是当所有task都开始运行之后,Job Tracker会统计所有任务的平均进度,
    * 如果某个task所在的task node机器配置比较低或者CPU load很高(原因很多),
@@ -586,10 +604,13 @@ private[spark] class TaskSchedulerImpl(
         // may be triggered by a dropped connection from the slave while another may be a report
         // of executor termination from Mesos. We produce log messages for both so we eventually
         // report the termination reason.
+        //我们可能会以不同的丢失原因获得多个执行者Lost（）调用,例如，可能由从服务器的丢弃连接触发,
+        // 而另一个可能是从Mesos终止执行器的报告, 我们生成日志消息，以便我们最终报告终止原因。
         logError("Lost an executor " + executorId + " (already removed): " + reason)
       }
     }
     // Call dagScheduler.executorLost without holding the lock on this to prevent deadlock
+    //调用dagScheduler.executorLost而不用锁定这个来防止死锁
     if (failedExecutor.isDefined) {
       dagScheduler.executorLost(failedExecutor.get)
       backend.reviveOffers() //重新资源分配
@@ -677,12 +698,15 @@ private[spark] class TaskSchedulerImpl(
 
 private[spark] object TaskSchedulerImpl {
   /**
-   * Used to balance containers across hosts.
+   * Used to balance containers across hosts.用于平衡主机间的容器
    *
    * Accepts a map of hosts to resource offers for that host, and returns a prioritized list of
    * resource offers representing the order in which the offers should be used.  The resource
    * offers are ordered such that we'll allocate one container on each host before allocating a
    * second container on any host, and so on, in order to reduce the damage if a host fails.
+    *
+    * 接受主机的Map,以提供该主机的资源优惠,并返回优先列出的资源提供,表示应使用优惠的顺序。
+    * 资源提供被排序,以便我们在每个主机上分配一个容器,然后在任何主机上分配第二个容器,依此类推,以减少主机发生故障时的损坏。
    *
    * For example, given <h1, [o1, o2, o3]>, <h2, [o4]>, <h1, [o5, o6]>, returns
    * [o1, o5, o4, 02, o6, o3]
@@ -692,6 +716,7 @@ private[spark] object TaskSchedulerImpl {
     _keyList ++= map.keys
 
     // order keyList based on population of value in map
+    //基于Map中的人口数量的顺序键列表
     val keyList = _keyList.sortWith(
       (left, right) => map(left).size > map(right).size)
 
@@ -705,6 +730,7 @@ private[spark] object TaskSchedulerImpl {
         val containerList: ArrayBuffer[T] = map.get(key).getOrElse(null)
         assert(containerList != null)
         // Get the index'th entry for this host - if present
+        //获取此主机的索引条目(如果存在)
         if (index < containerList.size) {
           retval += containerList.apply(index)
           found = true

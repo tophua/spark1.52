@@ -33,6 +33,8 @@ private[spark] object SerializationDebugger extends Logging {
    * Improve the given NotSerializableException with the serialization path leading from the given
    * object to the problematic object. This is turned off automatically if
    * `sun.io.serialization.extendedDebugInfo` flag is turned on for the JVM.
+    * 使用从给定对象引导到有问题的对象的序列化路径来改进给定的NotSerializableException,
+    * 如果为JVM启用了“sun.io.serialization.extendedDebugInfo”标志，这将自动关闭。
    */
   def improveException(obj: Any, e: NotSerializableException): NotSerializableException = {
     if (enableDebugging && reflect != null) {
@@ -53,6 +55,7 @@ private[spark] object SerializationDebugger extends Logging {
   /**
    * Find the path leading to a not serializable object. This method is modeled after OpenJDK's
    * serialization mechanism, and handles the following cases:
+    * 找到通向不可串行化对象的路径,该方法以OpenJDK的序列化机制为模型,并处理以下情况：
    * - primitives
    * - arrays of primitives
    * - arrays of non-primitive objects
@@ -61,6 +64,7 @@ private[spark] object SerializationDebugger extends Logging {
    * - writeReplace
    *
    * It does not yet handle writeObject override, but that shouldn't be too hard to do either.
+    * 它还没有处理writeObject覆盖,但是也不应该太难做到,
    */
   private[serializer] def find(obj: Any): List[String] = {
     new SerializationDebugger().visit(obj, List.empty)
@@ -73,12 +77,14 @@ private[spark] object SerializationDebugger extends Logging {
 
   private class SerializationDebugger {
 
-    /** A set to track the list of objects we have visited, to avoid cycles in the graph. */
+    /** A set to track the list of objects we have visited, to avoid cycles in the graph.
+      * 一组跟踪我们访问过的对象列表,以避免图中的循环 */
     private val visited = new mutable.HashSet[Any]
 
     /**
      * Visit the object and its fields and stop when we find an object that is not serializable.
      * Return the path as a list. If everything can be serialized, return an empty list.
+      * 访问对象及其字段,并在我们找到不可序列化的对象时停止,将路径作为列表返回,如果一切都可以序列化,返回一个空列表。
      */
     def visit(o: Any, stack: List[String]): List[String] = {
       if (o == null) {
@@ -89,11 +95,13 @@ private[spark] object SerializationDebugger extends Logging {
         visited += o
         o match {
           // Primitive value, string, and primitive arrays are always serializable
+            //原始值,字符串和原始数组始终是可序列化的
           case _ if o.getClass.isPrimitive => List.empty
           case _: String => List.empty
           case _ if o.getClass.isArray && o.getClass.getComponentType.isPrimitive => List.empty
 
           // Traverse non primitive array.
+            //遍历非原始数组
           case a: Array[_] if o.getClass.isArray && !o.getClass.getComponentType.isPrimitive =>
             val elem = s"array (class ${a.getClass.getName}, size ${a.length})"
             visitArray(o.asInstanceOf[Array[_]], elem :: stack)
@@ -108,6 +116,7 @@ private[spark] object SerializationDebugger extends Logging {
 
           case _ =>
             // Found an object that is not serializable!
+            //找到一个不可序列化的对象！
             s"object not serializable (class: ${o.getClass.getName}, value: $o)" :: stack
         }
       }
@@ -126,10 +135,12 @@ private[spark] object SerializationDebugger extends Logging {
     }
 
     /**
-     * Visit an externalizable object.
+     * Visit an externalizable object.访问外部化对象。
      * Since writeExternal() can choose to add arbitrary objects at the time of serialization,
      * the only way to capture all the objects it will serialize is by using a
      * dummy ObjectOutput that collects all the relevant objects for further testing.
+      * 由于writeExternal()可以选择在序列化时添加任意对象,捕获其将序列化的所有对象的唯一方法是
+      * 使用一个虚拟ObjectOutput来收集所有相关对象进行进一步测试。
      */
     private def visitExternalizable(o: java.io.Externalizable, stack: List[String]): List[String] =
     {
@@ -149,11 +160,15 @@ private[spark] object SerializationDebugger extends Logging {
 
     private def visitSerializable(o: Object, stack: List[String]): List[String] = {
       // An object contains multiple slots in serialization.
+      //一个对象在序列化中包含多个插槽
       // Get the slots and visit fields in all of them.
+      //获取所有这些插槽和访问字段
       val (finalObj, desc) = findObjectAndDescriptor(o)
 
       // If the object has been replaced using writeReplace(),
+      //如果使用writeReplace（）替换对象
       // then call visit() on it again to test its type again.
+      //然后再次调用visit（）来再次测试它的类型。
       if (!finalObj.eq(o)) {
         return visit(finalObj, s"writeReplace data (class: ${finalObj.getClass.getName})" :: stack)
       }
@@ -162,6 +177,8 @@ private[spark] object SerializationDebugger extends Logging {
       // classes of this class. These slots are used by the ObjectOutputStream
       // serialization code to recursively serialize the fields of an object and
       // its parent classes. For example, if there are the following classes.
+      //每个类与一个或多个“插槽”相关联，每个插槽指的是此类的父类,
+      // ObjectOutputStream序列化代码使用这些插槽来递归序列化对象及其父类的字段,例如,如果有以下类。
       //
       //     class ParentClass(parentField: Int)
       //     class ChildClass(childField: Int) extends ParentClass(1)
@@ -184,6 +201,8 @@ private[spark] object SerializationDebugger extends Logging {
           // If the class type corresponding to current slot has writeObject() defined,
           // then its not obvious which fields of the class will be serialized as the writeObject()
           // can choose arbitrary fields for serialization. This case is handled separately.
+          //如果与当前插槽对应的类型具有writeObject（）定义,
+          // 那么该类的哪些字段将被序列化为writeObject（）可以选择任意字段进行序列化。 这种情况分开处理。
           val elem = s"writeObject data (class: ${slotDesc.getName})"
           val childStack = visitSerializableWithWriteObjectMethod(finalObj, elem :: stack)
           if (childStack.nonEmpty) {
@@ -191,6 +210,7 @@ private[spark] object SerializationDebugger extends Logging {
           }
         } else {
           // Visit all the fields objects of the class corresponding to the current slot.
+          //访问与当前插槽对应的类的所有字段对象
           val fields: Array[ObjectStreamField] = slotDesc.getFields
           val objFieldValues: Array[Object] = new Array[Object](slotDesc.getNumObjFields)
           val numPrims = fields.length - objFieldValues.length
@@ -216,6 +236,7 @@ private[spark] object SerializationDebugger extends Logging {
 
     /**
      * Visit a serializable object which has the writeObject() defined.
+      * 访问已定义writeObject（）的可序列化对象。
      * Since writeObject() can choose to add arbitrary objects at the time of serialization,
      * the only way to capture all the objects it will serialize is by using a
      * dummy ObjectOutputStream that collects all the relevant fields for further testing.
@@ -233,8 +254,10 @@ private[spark] object SerializationDebugger extends Logging {
       }
 
       // If something was not serializable, then visit the captured objects.
+      //如果某些东西不可序列化，那么请访问捕获的对象。
       // Otherwise, all the captured objects are safely serializable, so no need to visit them.
       // As an optimization, just added them to the visited list.
+      //否则，所有捕获的对象都可以安全地序列化,所以不需要访问它们,作为优化,只需将它们添加到访问列表。
       if (notSerializableFound) {
         val innerObjects = innerObjectsCatcher.outputArray
         var k = 0
@@ -256,6 +279,8 @@ private[spark] object SerializationDebugger extends Logging {
    * Find the object to serialize and the associated [[ObjectStreamClass]]. This method handles
    * writeReplace in Serializable. It starts with the object itself, and keeps calling the
    * writeReplace method until there is no more.
+    * 查找要序列化的对象和关联的[[ObjectStreamClass]],此方法处理Serializable中的writeReplace,
+    * 它从对象本身开始，并继续调用writeReplace方法,直到没有更多。
    */
   @tailrec
   private def findObjectAndDescriptor(o: Object): (Object, ObjectStreamClass) = {
@@ -272,6 +297,7 @@ private[spark] object SerializationDebugger extends Logging {
   /**
    * A dummy [[ObjectOutput]] that simply saves the list of objects written by a writeExternal
    * call, and returns them through `outputArray`.
+    * 一个简单地保存由writeExternal写入的对象列表的哑[[ObjectOutput]]调用,并通过`outputArray`返回它们。
    */
   private class ListObjectOutput extends ObjectOutput {
     private val output = new mutable.ArrayBuffer[Any]
@@ -320,7 +346,8 @@ private[spark] object SerializationDebugger extends Logging {
     }
   }
 
-  /** An implicit class that allows us to call private methods of ObjectStreamClass. */
+  /** An implicit class that allows us to call private methods of ObjectStreamClass.
+    * 一个隐式类,允许我们调用ObjectStreamClass的私有方法 */
   implicit class ObjectStreamClassMethods(val desc: ObjectStreamClass) extends AnyVal {
     def getSlotDescs: Array[ObjectStreamClass] = {
       reflect.GetClassDataLayout.invoke(desc).asInstanceOf[Array[Object]].map {
@@ -352,6 +379,7 @@ private[spark] object SerializationDebugger extends Logging {
   /**
    * Object to hold all the reflection objects. If we run on a JVM that we cannot understand,
    * this field will be null and this the debug helper should be disabled.
+    * 对象来保存所有的反射对象,如果我们运行在我们无法理解的JVM上,此字段将为空,并且应该禁用调试助手。
    */
   private val reflect: ObjectStreamClassReflection = try {
     new ObjectStreamClassReflection

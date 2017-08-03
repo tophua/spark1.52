@@ -54,8 +54,10 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
    * 
    * Entries are added to the top-level map when stages start and are removed they finish
    * (either successfully or unsuccessfully).
+    * 当阶段开始并被删除时,条目将被添加到顶级地图(成功或不成功)
    *
    * Access to this map should be guarded by synchronizing on the OutputCommitCoordinator instance.
+    * 应该通过在OutputCommitCoordinator实例上进行同步来保护对这个Map的访问
    */
   private val authorizedCommittersByStage: CommittersByStageMap = mutable.Map()
   private type CommittersByStageMap =
@@ -76,7 +78,8 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
    * If a task attempt has been authorized to commit, then all other attempts to commit the same
    * task will be denied.  If the authorized task attempt fails (e.g. due to its executor being
    * lost), then a subsequent task attempt may be authorized to commit its output.
-    *
+    *如果任务尝试已被授权提交,则所有其他提交相同任务的尝试都将被拒绝,如果授权任务失败（例如由于其遗嘱执行人beinglost）,
+    * 那么后续任务的尝试可能被授权将其输出。
    *
    * @param stage the stage number
    * @param partition the partition number
@@ -102,6 +105,7 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
   // Called by DAGScheduler
   private[scheduler] def stageStart(stage: StageId): Unit = synchronized {
     // stages's id => partition id => task
+    //阶段的id =>分区id =>任务
     authorizedCommittersByStage(stage) = mutable.HashMap[PartitionId, TaskAttemptNumber]()
   }
 

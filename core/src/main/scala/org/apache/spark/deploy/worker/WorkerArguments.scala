@@ -24,6 +24,7 @@ import org.apache.spark.SparkConf
 
 /**
  * Command-line parser for the worker.
+  * worker的命令行解析器。
  */
 private[worker] class WorkerArguments(args: Array[String], conf: SparkConf) {
   var host = Utils.localHostName()
@@ -58,6 +59,7 @@ private[worker] class WorkerArguments(args: Array[String], conf: SparkConf) {
   parse(args.toList)
 
   // This mutates the SparkConf, so all accesses to it must be made after this line
+  //这会使SparkConf发生变化，所以对这一行的所有访问必须在此行之后进行
   propertiesFile = Utils.loadDefaultSparkProperties(conf, propertiesFile)
 
   if (conf.contains("spark.worker.ui.port")) {
@@ -122,6 +124,7 @@ private[worker] class WorkerArguments(args: Array[String], conf: SparkConf) {
 
   /**
    * Print usage and exit JVM with the given exit code.
+    * 打印使用并使用给定的退出代码退出JVM
    */
   def printUsageAndExit(exitCode: Int) {
     // scalastyle:off println

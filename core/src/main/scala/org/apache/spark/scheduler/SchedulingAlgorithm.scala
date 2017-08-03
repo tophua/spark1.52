@@ -21,6 +21,9 @@ package org.apache.spark.scheduler
  * An interface for sort algorithm
  * FIFO: FIFO algorithm between TaskSetManagers
  * FS: FS algorithm between Pools, and FIFO or FS within Pools
+  * 排序算法的界面
+  *FIFO：TaskSetManagers之间的FIFO算法
+  *FS：池之间的FS算法，以及池内的FIFO或FS
  */
 private[spark] trait SchedulingAlgorithm {
   def comparator(s1: Schedulable, s2: Schedulable): Boolean

@@ -42,12 +42,14 @@ private[spark] class JobWaiter[T](
 
   // If the job is finished, this will be its result. In the case of 0 task jobs (e.g. zero
   // partition RDDs), we set the jobResult directly to JobSucceeded.
+  //如果工作完成,这将是其结果,在0任务作业（例如零分区RDD）的情况下,我们将jobResult直接设置为JobSucceeded。
   private var jobResult: JobResult = if (jobFinished) JobSucceeded else null
 
   /**
    * Sends a signal to the DAGScheduler to cancel the job. The cancellation itself is handled
    * asynchronously. After the low level scheduler cancels all the tasks belonging to this job, it
    * will fail this job with a SparkException.
+    * 向DAGScheduler发送信号以取消作业,取消本身被处理异步,在低级调度程序取消所有属于此作业的任务后,将失败此作业与SparkException
    * 发送信号到dagscheduler取消Job,取消任务是异步处理
    */
   def cancel() {

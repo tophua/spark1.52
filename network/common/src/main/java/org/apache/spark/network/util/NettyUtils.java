@@ -117,6 +117,7 @@ public class NettyUtils {
       boolean allowCache,
       int numCores) {
     if (numCores == 0) {
+        //Runtime.getRuntime().availableProcessors()方法获得当前设备的CPU个数
       numCores = Runtime.getRuntime().availableProcessors();
     }
     return new PooledByteBufAllocator(

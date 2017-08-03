@@ -114,10 +114,13 @@ private[spark] class JavaSerializerInstance(
 /**
  * :: DeveloperApi ::
  * A Spark serializer that uses Java's built-in serialization.
- *
+ *一个使用Java内置序列化的Spark序列化程序
+  *
  * Note that this serializer is not guaranteed to be wire-compatible across different versions of
  * Spark. It is intended to be used to serialize/de-serialize data within a single
  * Spark application.
+  * 请注意,该序列化不能保证在不同版本的Spark之间进行线路兼容,
+  * 它旨在用于在单个Spark应用程序中对数据进行序列化/解串行化。
  */
 @DeveloperApi
 class JavaSerializer(conf: SparkConf) extends Serializer with Externalizable {

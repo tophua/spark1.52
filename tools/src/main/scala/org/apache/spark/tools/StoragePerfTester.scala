@@ -48,6 +48,9 @@ object StoragePerfTester {
 
     val writeKey = "1" * (recordLength / 2)
     val writeValue = "1" * (recordLength / 2)
+    //用于保存等待执行的任务的阻塞队列,
+    //LinkedBlockingQueue：一个基于链表结构的阻塞队列，此队列按FIFO(先进先出)排序元素，吞吐量通常要高于ArrayBlockingQueue
+    //Executors.newFixedThreadPool()使用了这个队列
     val executor = Executors.newFixedThreadPool(numMaps)
 
     val conf = new SparkConf()

@@ -29,6 +29,7 @@ import org.apache.spark.util.Utils
  * An interface to build Schedulable tree
  * buildPools: build the tree nodes(pools)
  * addTaskSetManager: build the leaf nodes(TaskSetManagers)
+  * 一个用于构建计划树buildPools的接口：构建树节点(pool)addTaskSetManager：构建叶节点（TaskSetManagers）
  */
 private[spark] trait SchedulableBuilder {
   def rootPool: Pool
@@ -83,6 +84,7 @@ private[spark] class FairSchedulableBuilder(val rootPool: Pool, conf: SparkConf)
     }
 
     // finally create "default" pool
+    //最后创建“默认”池
     buildDefaultPool()
   }
 

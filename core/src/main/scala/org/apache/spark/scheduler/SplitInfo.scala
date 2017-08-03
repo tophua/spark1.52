@@ -51,6 +51,7 @@ class SplitInfo(
   //这几乎是无用的,因为大多数的分裂实现的似乎不实现平等
   // So unless there is identity equality between underlyingSplits, it will always fail even if it
   // is pointing to same block.
+  //因此,除非在bottomSplits之间存在身份相等性,否则即使指向同一个程序块也会失败,
   override def equals(other: Any): Boolean = other match {
     case that: SplitInfo => {
       this.hostLocation == that.hostLocation &&
@@ -58,6 +59,7 @@ class SplitInfo(
         this.path == that.path &&
         this.length == that.length &&
         // other split specific checks (like start for FileSplit)
+      //其他分割特定检查(如FileSplit的启动)
         this.underlyingSplit == that.underlyingSplit
     }
     case _ => false

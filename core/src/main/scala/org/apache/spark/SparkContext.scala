@@ -2870,6 +2870,7 @@ object SparkContext extends Logging {
    */
   private[spark] def numDriverCores(master: String): Int = {
     def convertToInt(threads: String): Int = {
+      //Runtime.getRuntime().availableProcessors()方法获得当前设备的CPU个数
       if (threads == "*") Runtime.getRuntime.availableProcessors() else threads.toInt
     }
     master match {
@@ -2905,6 +2906,7 @@ object SparkContext extends Logging {
         (backend, scheduler)
 
       case LOCAL_N_REGEX(threads) =>
+        //Runtime.getRuntime().availableProcessors()方法获得当前设备的CPU个数
         def localCpuCount: Int = Runtime.getRuntime.availableProcessors()
         // local[*] estimates the number of cores on the machine; local[N] uses exactly N threads.
         //local[*]估计机器上的内核数量,local[N]使用正n个线程
@@ -2918,6 +2920,7 @@ object SparkContext extends Logging {
         (backend, scheduler)
 
       case LOCAL_N_FAILURES_REGEX(threads, maxFailures) =>
+        //Runtime.getRuntime().availableProcessors()方法获得当前设备的CPU个数
         def localCpuCount: Int = Runtime.getRuntime.availableProcessors()
         // local[*, M] means the number of cores on the computer with M failures
         // local[N, M] means exactly N threads with M failures

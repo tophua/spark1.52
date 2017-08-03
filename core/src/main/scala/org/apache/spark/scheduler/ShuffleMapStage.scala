@@ -67,7 +67,9 @@ private[spark] class ShuffleMapStage(
    * Removes all shuffle outputs associated with this executor. Note that this will also remove
    * outputs which are served by an external shuffle server (if one exists), as they are still
    * registered with this execId.
-   * 移除执行(executor)所有Shuffle输出
+    *
+    * 删除与执行(executor)相关联的所有Shuffle输出,
+    * 请注意,这也将被删除由外部随机服务器（如果存在）提供的输出,因为它们仍然注册到此execId。
    */
   def removeOutputsOnExecutor(execId: String): Unit = {
     var becameUnavailable = false

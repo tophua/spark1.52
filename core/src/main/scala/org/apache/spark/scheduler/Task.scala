@@ -60,7 +60,7 @@ private[spark] abstract class Task[T](
   type AccumulatorUpdates = Map[Long, Any]
 
   /**
-   * Called by [[Executor]] to run this task.
+   * Called by [Executor] to run this task.
    * 被Executor调用以执行Task,TaskRunner.run调用此方法
    * @param taskAttemptId an identifier for this task attempt that is unique within a SparkContext.
    * @param attemptNumber how many times this task has been attempted (0 for the first attempt)
@@ -157,7 +157,7 @@ private[spark] abstract class Task[T](
 
   /**
    * Returns the amount of time spent deserializing the RDD and function to be run.
-   * 返回返序列化运行时间
+   * 返回返序列化运行时间,返回用于反序列化RDD和要运行的函数的时间量
    */
   def executorDeserializeTime: Long = _executorDeserializeTime
 
@@ -165,8 +165,9 @@ private[spark] abstract class Task[T](
    * Kills a task by setting the interrupted flag to true. This relies on the upper level Spark
    * code and user code to properly handle the flag. This function should be idempotent so it can
    * be called multiple times.
-   * 通过设置中断的标志来杀死一个任务
+   * 通过将中断的标志设置为true来杀死任务,这依赖于上级Spark代码和用户代码来正确处理标志,这个函数应该是幂等的,所以它可以被多次调用。
    * If interruptThread is true, we will also call Thread.interrupt() on the Task's executor thread.
+    * 如果interruptThread为true，我们还将在Task的执行器线程上调用Thread.interrupt（）。
    */
   def kill(interruptThread: Boolean) {
     _killed = true
@@ -187,11 +188,15 @@ private[spark] abstract class Task[T](
  * worker nodes find out about it, but we can't make it part of the Task because the user's code in
  * the task might depend on one of the JARs. Thus we serialize each task as multiple objects, by
  * first writing out its dependencies.
- * 处理任务和它们的依赖关系的传输,
+  *
+  * 处理任务的传输及其依赖,因为这可能有点棘手,我们需要向每个任务发送添加到SparkContext的JAR和文件列表,以确保工作节点能够发现它,
+  * 但是我们不能将其作为Task的一部分,因为任务中的用户代码可能依赖于JARs。
+  * 因此,我们将每个任务序列化为多个对象，首先写出它的依赖关系。
  */
 private[spark] object Task {
   /**
    * Serialize a task and the current app dependencies (files and JARs added to the SparkContext)
+    * 序列化任务和当前应用程序依赖项(添加到SparkContext的文件和JAR)
    * Task序列化依赖文件或jar
    */
   def serializeWithDependencies(
@@ -212,7 +217,7 @@ private[spark] object Task {
       dataOut.writeLong(timestamp)//输出时间戳
     }
 
-    // Write currentJars
+    // Write currentJars 写currentJars
     dataOut.writeInt(currentJars.size)
     for ((name, timestamp) <- currentJars) {
       dataOut.writeUTF(name)
@@ -257,7 +262,9 @@ private[spark] object Task {
 
     // Create a sub-buffer for the rest of the data, which is the serialized Task object
     //为其余的数据创建一个子缓冲区,这是序列化的Task对象
-    val subBuffer = serializedTask.slice()  // ByteBufferInputStream will have read just up to task
+    val subBuffer = serializedTask.slice()
+    // ByteBufferInputStream will have read just up to task
+    //ByteBufferInputStream将直接读取任务
     (taskFiles, taskJars, subBuffer)
   }
 }

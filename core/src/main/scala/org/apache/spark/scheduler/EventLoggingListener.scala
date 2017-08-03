@@ -83,6 +83,7 @@ private[spark] class EventLoggingListener(
   // The Hadoop APIs have changed over time, so we use reflection to figure out
   // the correct method to use to flush a hadoop data stream. See SPARK-1518
   // for details.
+  //Hadoop API随着时间的推移而改变,所以我们使用反射来找出用于刷新hadoop数据流的正确方法,详见SPARK-1518。
   private val hadoopFlushMethod = {
     val cls = classOf[FSDataOutputStream]
     scala.util.Try(cls.getMethod("hflush")).getOrElse(cls.getMethod("sync"))
@@ -119,7 +120,8 @@ private[spark] class EventLoggingListener(
     }
 
     /* The Hadoop LocalFileSystem (r1.0.4) has known issues with syncing (HADOOP-7844).
-     * Therefore, for local files, use FileOutputStream instead. */
+     * Therefore, for local files, use FileOutputStream instead.
+     * Hadoop LocalFileSystem（r1.0.4）已知同步问题（HADOOP-7844,因此,对于本地文件,请改用FileOutputStream。*/
     val dstream =
       if ((isDefaultLocal && uri.getScheme == null) || uri.getScheme == "file") {
         new FileOutputStream(uri.getPath)
@@ -158,7 +160,7 @@ private[spark] class EventLoggingListener(
     }
   }
 
-  // Events that do not trigger a flush
+  // Events that do not trigger a flush 不触发flush的事件
   override def onStageSubmitted(event: SparkListenerStageSubmitted): Unit = logEvent(event)
 
   override def onTaskStart(event: SparkListenerTaskStart): Unit = logEvent(event)
@@ -169,7 +171,7 @@ private[spark] class EventLoggingListener(
 
   override def onEnvironmentUpdate(event: SparkListenerEnvironmentUpdate): Unit = logEvent(event)
 
-  // Events that trigger a flush
+  // Events that trigger a flush 触发flush的事件
   override def onStageCompleted(event: SparkListenerStageCompleted): Unit = {
     logEvent(event, flushLogger = true)
   }
@@ -205,15 +207,16 @@ private[spark] class EventLoggingListener(
     logEvent(event, flushLogger = true)
   }
 
-  // No-op because logging every update would be overkill
+  // No-op because logging every update would be overkill 无操作,因为记录每个更新将是过度的
   override def onBlockUpdated(event: SparkListenerBlockUpdated): Unit = {}
 
-  // No-op because logging every update would be overkill
+  // No-op because logging every update would be overkill 无操作,因为记录每个更新将是过度的
   override def onExecutorMetricsUpdate(event: SparkListenerExecutorMetricsUpdate): Unit = { }
 
   /**
    * Stop logging events. The event log file will be renamed so that it loses the
    * ".inprogress" suffix.
+    * 停止记录事件,事件日志文件将被重命名,以便丢失“.inprogress”后缀,
    */
   def stop(): Unit = {
     writer.foreach(_.close())
@@ -234,6 +237,7 @@ private[spark] class EventLoggingListener(
 
 private[spark] object EventLoggingListener extends Logging {
   // Suffix applied to the names of files still being written by applications.
+  //后缀应用于仍由应用程序编写的文件的名称
   //后缀的文件名称
   val IN_PROGRESS = ".inprogress"
   val DEFAULT_LOG_DIR = "/tmp/spark-events"
@@ -243,6 +247,7 @@ private[spark] object EventLoggingListener extends Logging {
   private val LOG_FILE_PERMISSIONS = new FsPermission(Integer.parseInt("770", 8).toShort)
 
   // A cache for compression codecs to avoid creating the same codec many times
+  //用于压缩编解码器的缓存,以避免创建相同的编解码器多次
   private val codecMap = new mutable.HashMap[String, CompressionCodec]
 
   /**
@@ -259,15 +264,21 @@ private[spark] object EventLoggingListener extends Logging {
 
   /**
    * Return a file-system-safe path to the log file for the given application.
-   *
+   * 将文件系统安全路径返回给给定应用程序的日志文件
+    *
    * Note that because we currently only create a single log file for each application,
    * we must encode all the information needed to parse this event log in the file name
    * instead of within the file itself. Otherwise, if the file is compressed, for instance,
    * we won't know which codec to use to decompress the metadata needed to open the file in
    * the first place.
+    *
+    * 请注意,因为我们目前只为每个应用程序创建一个单一的日志文件,所以我们必须对文件名中的所有信息进行编码,而不是在文件本身内解析此事件日志。
+    * 否则,如果文件被压缩,例如,我们将不知道使用哪个编解码器解压缩首先打开文件栈所需的元数据。
    *
    * The log file name will identify the compression codec used for the contents, if any.
    * For example, app_123 for an uncompressed log, app_123.lzf for an LZF-compressed log.
+    *
+    * 日志文件名称将标识用于内容的压缩编解码器(如果有的话)。 例如,对于未压缩日志的app_123,LZF压缩日志的app_123.lzf。
    *
    * @param logBaseDir Directory where the log file will be written.
    * @param appId A unique app ID.
@@ -302,6 +313,8 @@ private[spark] object EventLoggingListener extends Logging {
   def openEventLog(log: Path, fs: FileSystem): InputStream = {
     // It's not clear whether FileSystem.open() throws FileNotFoundException or just plain
     // IOException when a file does not exist, so try our best to throw a proper exception.
+    //FileSystem.open（）是否抛出FileNotFoundException或者是纯文本还不清楚
+    //IOException当一个文件不存在时，所以尽量扔一个正确的异常。
     if (!fs.exists(log)) {
       throw new FileNotFoundException(s"File $log does not exist.")
     }
@@ -310,6 +323,7 @@ private[spark] object EventLoggingListener extends Logging {
 
     // Compression codec is encoded as an extension, e.g. app_123.lzf
     // Since we sanitize the app ID to not include periods, it is safe to split on it
+    //压缩编解码器被编码为扩展, app_123.lzf由于我们将应用ID清理为不包含句点,因此可以安全地拆分它
     val logName = log.getName.stripSuffix(IN_PROGRESS)
     val codecName: Option[String] = logName.split("\\.").tail.lastOption
     val codec = codecName.map { c =>

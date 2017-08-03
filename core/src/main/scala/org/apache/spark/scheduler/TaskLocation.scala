@@ -54,6 +54,8 @@ private[spark] object TaskLocation {
   // We identify hosts on which the block is cached with this prefix.  Because this prefix contains
   // underscores, which are not legal characters in hostnames, there should be no potential for
   // confusion.  See  RFC 952 and RFC 1123 for information about the format of hostnames.
+  //我们使用此前缀标识缓存该块的主机,因为这个前缀包含下划线，哪些不是主机名中的合法字符,所以不应该有混淆的可能,
+  // 有关主机名格式的信息，请参阅RFC 952和RFC 1123。
   val inMemoryLocationTag = "hdfs_cache_"
 
   def apply(host: String, executorId: String): TaskLocation = {
@@ -65,6 +67,7 @@ private[spark] object TaskLocation {
     * 由getPreferredLocations返回的字符串创建一个TaskLocation。
    * These strings have the form [hostname] or hdfs_cache_[hostname], depending on whether the
    * location is cached.
+    * 这些字符串的格式为[hostname]或hdfs_cache_ [hostname],具体取决于位置是否被缓存
    */
   def apply(str: String): TaskLocation = {
     val hstr = str.stripPrefix(inMemoryLocationTag)

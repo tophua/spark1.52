@@ -53,18 +53,20 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
       override def run(): Unit = Utils.logUncaughtExceptions {
         try {
           val (result, size) = serializer.get().deserialize[TaskResult[_]](serializedData) match {
-            case directResult: DirectTaskResult[_] =>//结果是计算结果
+            case directResult: DirectTaskResult[_] => //结果是计算结果
               //确定大小符合要求
               if (!taskSetManager.canFetchMoreResults(serializedData.limit())) {
                 return
               }
               // deserialize "value" without holding any lock so that it won't block other threads.
+              //反序列化“值”，而不需要锁定任何锁定，因此它不会阻止其他线程。
               // We should call it here, so that when it's called again in
               // "TaskSetManager.handleSuccessfulTask", it does not need to deserialize the value.
+              //我们应该在这里调用它,这样当它在“TaskSetManager.handleSuccessfulTask”中再次被调用时,它不需要反序列化该值。
               directResult.value()
               (directResult, serializedData.limit())
               //Indirect 间结
-            case IndirectTaskResult(blockId, size) =>//需要向远程的Worker网络获取结果
+            case IndirectTaskResult(blockId, size) => //需要向远程的Worker网络获取结果
               //确定大小符合要求
               if (!taskSetManager.canFetchMoreResults(size)) {
                 // dropped by executor if size is larger than maxResultSize
@@ -129,6 +131,7 @@ private[spark] class TaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedul
             case cnd: ClassNotFoundException =>
               // Log an error but keep going here -- the task failed, so not catastrophic
               // if we can't deserialize the reason.
+              //记录一个错误,但继续在这里 - 任务失败,所以不是灾难性的,如果我们不能反序列化的原因。
               logError(
                 "Could not deserialize TaskEndReason: ClassNotFound with classloader " + loader)
             case ex: Exception => {}

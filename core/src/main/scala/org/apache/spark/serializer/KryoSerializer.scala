@@ -42,10 +42,12 @@ import org.apache.spark.util.collection.CompactBuffer
 
 /**
  * A Spark serializer that uses the [[https://code.google.com/p/kryo/ Kryo serialization library]].
+  * 使用[[https://code.google.com/p/kryo/ Kryo序列化库]]的Spark序列化程序
  *
  * Note that this serializer is not guaranteed to be wire-compatible across different versions of
  * Spark. It is intended to be used to serialize/de-serialize data within a single
  * Spark application.
+  * 请注意,该串行器不能保证在不同版本的Spark之间进行线路兼容,它旨在用于在单个Spark应用程序中对数据进行序列化/解串行化
  */
 class KryoSerializer(conf: SparkConf)
   extends org.apache.spark.serializer.Serializer
@@ -88,6 +90,7 @@ class KryoSerializer(conf: SparkConf)
 
     // Allow disabling Kryo reference tracking if user knows their object graphs don't have loops.
     // Do this before we invoke the user registrator so the user registrator can override this.
+    //如果用户知道他们的对象图没有循环,则允许禁用Kryo参考跟踪,在调用用户注册器之前,请先注册用户,以便用户注册器可以覆盖此,
     kryo.setReferences(referenceTracking)
 
     for (cls <- KryoSerializer.toRegister) {
@@ -95,9 +98,11 @@ class KryoSerializer(conf: SparkConf)
     }
 
     // For results returned by asJavaIterable. See JavaIterableWrapperSerializer.
+    //对于asJavaIterable返回的结果,请参阅JavaIterableWrapperSerializer。
     kryo.register(JavaIterableWrapperSerializer.wrapperClass, new JavaIterableWrapperSerializer)
 
     // Allow sending classes with custom Java serializers
+    //允许使用自定义Java序列化程序发送类
     kryo.register(classOf[SerializableWritable[_]], new KryoJavaSerializer())
     kryo.register(classOf[SerializableConfiguration], new KryoJavaSerializer())
     kryo.register(classOf[SerializableJobConf], new KryoJavaSerializer())
@@ -110,11 +115,13 @@ class KryoSerializer(conf: SparkConf)
     try {
       // scalastyle:off classforname
       // Use the default classloader when calling the user registrator.
+      //调用用户注册器时使用默认的类加载器
       Thread.currentThread.setContextClassLoader(classLoader)
       // Register classes given through spark.kryo.classesToRegister.
       classesToRegister
         .foreach { className => kryo.register(Class.forName(className, true, classLoader)) }
       // Allow the user to register their own classes by setting spark.kryo.registrator.
+      //允许用户通过设置spark.kryo.registrator注册自己的类
       userRegistrator
         .map(Class.forName(_, true, classLoader).newInstance().asInstanceOf[KryoRegistrator])
         .foreach { reg => reg.registerClasses(kryo) }
@@ -128,6 +135,7 @@ class KryoSerializer(conf: SparkConf)
 
     // Register Chill's classes; we do this after our ranges and the user's own classes to let
     // our code override the generic serializers in Chill for things like Seq
+    //注册辣椒课 我们在我们的范围和用户自己的类之后做到这一点,让我们的代码覆盖Chill中的类似Seq的泛型序列化程序
     new AllScalaRegistrar().apply(kryo)
 
     kryo.setClassLoader(classLoader)
@@ -192,6 +200,7 @@ class KryoDeserializationStream(
       kryo.readClassAndObject(input).asInstanceOf[T]
     } catch {
       // DeserializationStream uses the EOF exception to indicate stopping condition.
+      //DeserializationStream使用EOF异常来指示停止条件。
       case e: KryoException if e.getMessage.toLowerCase.contains("buffer underflow") =>
         throw new EOFException
     }
@@ -201,6 +210,7 @@ class KryoDeserializationStream(
     if (input != null) {
       try {
         // Kryo's Input automatically closes the input stream it is using.
+        //Kryo的输入自动关闭它正在使用的输入流
         input.close()
       } finally {
         serInstance.releaseKryo(kryo)
@@ -218,18 +228,24 @@ private[spark] class KryoSerializerInstance(ks: KryoSerializer) extends Serializ
    * their work, then release the instance by calling `releaseKryo()`. Logically, this is a caching
    * pool of size one. SerializerInstances are not thread-safe, hence accesses to this field are
    * not synchronized.
+    * 一个重用的[[Kryo]]实例。 方法通过调用`borrowKryo（）`来借这个实例，做他们的工作，
+    * 然后通过调用`releaseKryo（）`来释放实例。 在逻辑上，这是一个大小缓存池。
+    * SerializerInstances不是线程安全的，因此对该字段的访问不会同步。
    */
   @Nullable private[this] var cachedKryo: Kryo = borrowKryo()
 
   /**
    * Borrows a [[Kryo]] instance. If possible, this tries to re-use a cached Kryo instance;
    * otherwise, it allocates a new instance.
+    * 借用[[Kryo]]实例。如果可能,这会尝试重新使用缓存的Kryo实例;否则,它会分配一个新的实例。
    */
   private[serializer] def borrowKryo(): Kryo = {
     if (cachedKryo != null) {
       val kryo = cachedKryo
       // As a defensive measure, call reset() to clear any Kryo state that might have been modified
       // by the last operation to borrow this instance (see SPARK-7766 for discussion of this issue)
+      //作为防御措施，调用reset（）来清除可能已被修改的任何Kryo状态
+      //通过上次操作借用这个实例（参见SPARK-7766讨论这个问题）
       kryo.reset()
       cachedKryo = null
       kryo
@@ -242,6 +258,7 @@ private[spark] class KryoSerializerInstance(ks: KryoSerializer) extends Serializ
    * Release a borrowed [[Kryo]] instance. If this serializer instance already has a cached Kryo
    * instance, then the given Kryo instance is discarded; otherwise, the Kryo is stored for later
    * re-use.
+    * 释放一个借用的[[Kryo]]实例,如果此串行器实例已经具有缓存的Kryo实例,则给定的Kryo实例被丢弃, 否则,Kryo存储以备以后重新使用。
    */
   private[serializer] def releaseKryo(kryo: Kryo): Unit = {
     if (cachedKryo == null) {
@@ -250,6 +267,7 @@ private[spark] class KryoSerializerInstance(ks: KryoSerializer) extends Serializ
   }
 
   // Make these lazy vals to avoid creating a buffer unless we use them.
+  //使这些惰性值避免创建缓冲区，除非我们使用它们
   private lazy val output = ks.newKryoOutput()
   private lazy val input = new KryoInput()
 
@@ -302,6 +320,7 @@ private[spark] class KryoSerializerInstance(ks: KryoSerializer) extends Serializ
   /**
    * Returns true if auto-reset is on. The only reason this would be false is if the user-supplied
    * registrator explicitly turns auto-reset off.
+    * 如果自动复位打开,则返回true,唯一的原因是,如果用户提供的注册商明确地关闭自动复位。
    */
   def getAutoReset(): Boolean = {
     val field = classOf[Kryo].getDeclaredField("autoReset")
@@ -318,6 +337,7 @@ private[spark] class KryoSerializerInstance(ks: KryoSerializer) extends Serializ
 /**
  * Interface implemented by clients to register their classes with Kryo when using Kryo
  * serialization.
+  * 接口由客户端使用Kryo序列化时向Kryo注册他们的课程
  */
 trait KryoRegistrator {
   def registerClasses(kryo: Kryo)
@@ -351,9 +371,11 @@ private[serializer] object KryoSerializer {
 
 /**
  * A Kryo serializer for serializing results returned by asJavaIterable.
+  用于串行化由asJavaIterable返回的结果的Kryo serializer
  *
  * The underlying object is scala.collection.convert.Wrappers$IterableWrapper.
  * Kryo deserializes this into an AbstractCollection, which unfortunately doesn't work.
+  * 底层对象是scala.collection.convert.Wrappers $ IterableWrapper.Kryo将它反序列化为一个AbstractCollection,不幸的是它不起作用。
  */
 private class JavaIterableWrapperSerializer
   extends com.esotericsoftware.kryo.Serializer[java.lang.Iterable[_]] {
@@ -363,6 +385,7 @@ private class JavaIterableWrapperSerializer
   override def write(kryo: Kryo, out: KryoOutput, obj: java.lang.Iterable[_]): Unit = {
     // If the object is the wrapper, simply serialize the underlying Scala Iterable object.
     // Otherwise, serialize the object itself.
+    //如果对象是包装器,只需序列化底层的Scala Iterable对象即可,否则,序列化对象本身。
     if (obj.getClass == wrapperClass && underlyingMethodOpt.isDefined) {
       kryo.writeClassAndObject(out, underlyingMethodOpt.get.invoke(obj))
     } else {
@@ -383,10 +406,12 @@ private class JavaIterableWrapperSerializer
 
 private object JavaIterableWrapperSerializer extends Logging {
   // The class returned by asJavaIterable (scala.collection.convert.Wrappers$IterableWrapper).
+  //该类由asJavaIterable（scala.collection.convert.Wrappers $ IterableWrapper）返回
   val wrapperClass =
     scala.collection.convert.WrapAsJava.asJavaIterable(Seq(1)).getClass
 
   // Get the underlying method so we can use it to get the Scala collection for serialization.
+  //获取底层方法,以便我们可以使用它来获取Scala集合以进行序列化。
   private val underlyingMethodOpt = {
     try Some(wrapperClass.getDeclaredMethod("underlying")) catch {
       case e: Exception =>

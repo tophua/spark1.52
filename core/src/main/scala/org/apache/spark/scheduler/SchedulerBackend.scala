@@ -61,7 +61,7 @@ private[spark] trait SchedulerBackend {
   /**
    * Get the URLs for the driver logs. These URLs are used to display the links in the UI
    * Executors tab for the driver.
-   * 获取驱动程序日志的网址,这些URL是用来显示链接在UI执行标签驱动程序
+    * 获取驱动程序日志的URL,这些URL用于显示驱动程序的“UI执行程序”选项卡中的链接
    * @return Map containing the log names and their respective URLs
    */
   def getDriverLogUrls: Option[Map[String, String]] = None

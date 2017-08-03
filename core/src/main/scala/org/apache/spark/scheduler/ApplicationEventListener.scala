@@ -19,9 +19,11 @@ package org.apache.spark.scheduler
 
 /**
  * A simple listener for application events.
+  * 一个应用程序事件的简单监听器
  *
  * This listener expects to hear events from a single application only. If events
  * from multiple applications are seen, the behavior is unspecified.
+  * 这个听众只希望监听到来自单个应用程序的事件,如果看到来自多个应用程序的事件,则该行为是未指定的。
  */
 private[spark] class ApplicationEventListener extends SparkListener {
   var appName: Option[String] = None

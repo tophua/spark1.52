@@ -52,6 +52,7 @@ object BlockingSleepBad extends App {
   val endTime = System.nanoTime
 
   log(s"Total execution time of the program = ${(endTime - startTime) / 1000000} ms")
+  //Runtime.getRuntime().availableProcessors()方法获得当前设备的CPU个数
   log(s"Note: there are ${Runtime.getRuntime.availableProcessors} CPUs on this machine")
 
 }

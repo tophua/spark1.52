@@ -121,6 +121,9 @@ class SparkSinkSuite extends FunSuite {
 
   def testMultipleConsumers(failSome: Boolean): Unit = {
     implicit val executorContext = ExecutionContext
+      //用于保存等待执行的任务的阻塞队列,
+      //LinkedBlockingQueue：一个基于链表结构的阻塞队列，此队列按FIFO(先进先出)排序元素，吞吐量通常要高于ArrayBlockingQueue
+      //Executors.newFixedThreadPool()使用了这个队列
       .fromExecutorService(Executors.newFixedThreadPool(5))
     val (channel, sink, latch) = initializeChannelAndSink(Map.empty, 5)
     channel.start()
@@ -148,6 +151,7 @@ class SparkSinkSuite extends FunSuite {
           batchCounter.countDown()
         case Failure(t) =>
           // Don't re-throw the exception, causes a nasty unnecessary stack trace on stdout
+          //不要重新抛出异常,在stdout上导致一个讨厌的不必要的堆栈跟踪
           batchCounter.countDown()
       }
     })
@@ -199,6 +203,8 @@ class SparkSinkSuite extends FunSuite {
     count: Int): Seq[(NettyTransceiver, SparkFlumeProtocol.Callback)] = {
 
     (1 to count).map(_ => {
+      //SynchronousQueue：一个不存储元素的阻塞队列。每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，
+      //吞吐量通常要高于LinkedBlockingQueue，静态工厂方法Executors.newCachedThreadPool使用了这个队列。
       lazy val channelFactoryExecutor = Executors.newCachedThreadPool(
         new SparkSinkThreadFactory("Flume Receiver Channel Thread - %d"))
       lazy val channelFactory =

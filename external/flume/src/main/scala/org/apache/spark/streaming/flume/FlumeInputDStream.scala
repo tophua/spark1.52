@@ -149,6 +149,8 @@ class FlumeReceiver(
 
   private def initServer() = {
     if (enableDecompression) {
+      //SynchronousQueue：一个不存储元素的阻塞队列。每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，
+      //吞吐量通常要高于LinkedBlockingQueue，静态工厂方法Executors.newCachedThreadPool使用了这个队列。
       val channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
                                                              Executors.newCachedThreadPool())
       val channelPipelineFactory = new CompressionChannelPipelineFactory()

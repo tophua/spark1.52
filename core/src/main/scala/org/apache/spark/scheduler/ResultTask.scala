@@ -73,6 +73,7 @@ private[spark] class ResultTask[T, U](
   }
 
   // This is only callable on the driver side.
+  //这只能在driver使用
   override def preferredLocations: Seq[TaskLocation] = preferredLocs
 
   override def toString: String = "ResultTask(" + stageId + ", " + partitionId + ")"

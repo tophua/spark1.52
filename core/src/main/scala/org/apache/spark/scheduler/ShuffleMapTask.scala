@@ -51,7 +51,8 @@ private[spark] class ShuffleMapTask(
     extends Task[MapStatus](stageId, stageAttemptId, partition.index, internalAccumulators)
     with Logging {
 
-  /** A constructor used only in test suites. This does not require passing in an RDD. */
+  /** A constructor used only in test suites. This does not require passing in an RDD.
+    * 仅在测试套件中使用的构造函数,这不需要传递RDD*/
   def this(partitionId: Int) {
     this(0, 0, null, new Partition { override def index: Int = 0 }, null, null)
   }

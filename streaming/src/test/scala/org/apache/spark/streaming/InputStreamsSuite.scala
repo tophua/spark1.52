@@ -650,6 +650,9 @@ class TestServer(portToBind: Int = 0) extends Logging {
  *  */
 class MultiThreadTestReceiver(numThreads: Int, numRecordsPerThread: Int)
   extends Receiver[Int](StorageLevel.MEMORY_ONLY_SER) with Logging {
+  //用于保存等待执行的任务的阻塞队列,
+  //LinkedBlockingQueue：一个基于链表结构的阻塞队列，此队列按FIFO(先进先出)排序元素，吞吐量通常要高于ArrayBlockingQueue
+  //Executors.newFixedThreadPool()使用了这个队列
   lazy val executorPool = Executors.newFixedThreadPool(numThreads)//线程池数
   lazy val finishCount = new AtomicInteger(0)//AtomicInteger则通过一种线程安全的加减操作接口
 

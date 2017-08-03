@@ -57,9 +57,12 @@ class InputFormatInfo(val configuration: Configuration, val inputFormatClazz: Cl
 
   // Since we are not doing canonicalization of path, this can be wrong : like relative vs
   // absolute path .. which is fine, this is best case effort to remove duplicates - right ?
+  //既然我们没有做道路标准化，这可能是错误的：像亲戚vs
+  //绝对路径..这是很好的，这是最好的情况下努力删除重复 - 对吗？
   override def equals(other: Any): Boolean = other match {
     case that: InputFormatInfo => {
       // not checking config - that should be fine, right ?
+      //不检查配置 - 应该是好的，对吧？
       this.inputFormatClazz == that.inputFormatClazz &&
         this.path == that.path
     }
@@ -158,15 +161,15 @@ object InputFormatInfo {
 	     计算基于输入（S）的首选位置,并返回一个块映射的位置。典型方法的使用将遵循下列规则:
     a) For each host, count number of splits hosted on that host.,对于每个主机,计数分割每个主机上
     b) Decrement the currently allocated containers on that host.将当前主机上的已分配的容器减量
-    c) Compute rack info for each host and update rack -> count map based on (b).
-    d) Allocate nodes based on (c)
+    c) Compute rack info for each host and update rack -> count map based on (b). 根据（b）计算每个主机和更新机架的机架信息 - >计数图。
+    d) Allocate nodes based on (c) 基于（c）分配节点
     e) On the allocation result, ensure that we dont allocate "too many" jobs on a single node
        (even if data locality on that is very high) : this is to prevent fragility of job if a
        single (or small set of) hosts go down.
 
-    go to (a) until required nodes are allocated.
+    go to (a) until required nodes are allocated.转到（a），直到分配所需的节点。
 
-    If a node 'dies', follow same procedure.
+    If a node 'dies', follow same procedure.如果节点“死”，请遵循相同的过程。
 
     PS: I know the wording here is weird, hopefully it makes some sense !
   */

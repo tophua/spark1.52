@@ -33,11 +33,17 @@ import org.apache.spark.executor.TaskMetrics
  * for each Spark job, containing tasks start/stop and shuffle information. JobLogger is a subclass
  * of SparkListener, use addSparkListener to add JobLogger to a SparkContext after the SparkContext
  * is created. Note that each JobLogger only works for one SparkContext
+  *
+  * 用于记录Spark中作业的运行时信息的记录器类。 此类为每个Spark作业输出一个日志文件，其中包含任务开始/停止和随机播放信息。
+  * JobLogger是SparkListener的子类，在创建SparkContext之后，使用addSparkListener将JobLogger添加到SparkContext。
+  * 请注意，每个JobLogger仅适用于一个SparkContext
  *
  * NOTE: The functionality of this class is heavily stripped down to accommodate for a general
  * refactor of the SparkListener interface. In its place, the EventLoggingListener is introduced
  * to log application information as SparkListenerEvents. To enable this functionality, set
  * spark.eventLog.enabled to true.
+  * 注意：此类的功能被大量删除以适应SparkListener接口的一般重构,引用了EventLoggingListener来将应用程序信息记录为SparkListenerEvents,
+  * 要启用此功能，请将spark.eventLog.enabled设置为true。
  */
 @DeveloperApi
 @deprecated("Log application information by setting spark.eventLog.enabled.", "1.0.0")
@@ -64,7 +70,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
 
   /** 
    *  Create a folder for log files, the folder's name is the creation time of jobLogger 
-   *  创建日志文件的文件夹
+   *  创建日志文件的文件夹,文件夹的名称是jobLogger的创建时间,
    *  */
   protected def createLogDir() {
     val dir = new File(logDir + "/" + logDirName + "/")
@@ -73,6 +79,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
     }
     if (!dir.mkdirs()) {
       // JobLogger should throw a exception rather than continue to construct this object.
+      //JobLogger应该抛出一个异常，而不是继续构造这个对象
       throw new IOException("create log directory error:" + logDir + "/" + logDirName + "/")
     }
   }
@@ -125,6 +132,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * @param jobId ID of the job
    * @param info Info to be recorded
    * @param withTime Controls whether to record time stamp before the info, default is true
+    *                 控制是否在信息之前记录时间戳，默认为true
    */
   protected def jobLogInfo(jobId: Int, info: String, withTime: Boolean = true) {
     var writeInfo = info
@@ -143,6 +151,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * @param stageId ID of the stage
    * @param info Info to be recorded
    * @param withTime Controls whether to record time stamp before the info, default is true
+    *                 控制是否在信息之前记录时间戳，默认为true
    */
   protected def stageLogInfo(stageId: Int, info: String, withTime: Boolean = true) {
     stageIdToJobId.get(stageId).foreach(jobId => jobLogInfo(jobId, info, withTime))

@@ -43,6 +43,9 @@ import org.apache.flume.Channel
 
 private[flume] class SparkAvroCallbackHandler(val threads: Int, val channel: Channel,
   val transactionTimeout: Int, val backOffInterval: Int) extends SparkFlumeProtocol with Logging {
+  //用于保存等待执行的任务的阻塞队列,
+  //LinkedBlockingQueue：一个基于链表结构的阻塞队列，此队列按FIFO(先进先出)排序元素，吞吐量通常要高于ArrayBlockingQueue
+  //Executors.newFixedThreadPool()使用了这个队列
   val transactionExecutorOpt = Option(Executors.newFixedThreadPool(threads,
     new SparkSinkThreadFactory("Spark Sink Processor Thread - %d")))
   // Protected by `sequenceNumberToProcessor`

@@ -66,12 +66,16 @@ private[streaming] class FlumePollingReceiver(
   ) extends Receiver[SparkFlumeEvent](storageLevel) with Logging {
 
   lazy val channelFactoryExecutor =
+    //SynchronousQueue：一个不存储元素的阻塞队列。每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，
+    //吞吐量通常要高于LinkedBlockingQueue，静态工厂方法Executors.newCachedThreadPool使用了这个队列。
     Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).
       setNameFormat("Flume Receiver Channel Thread - %d").build())
 
   lazy val channelFactory =
     new NioClientSocketChannelFactory(channelFactoryExecutor, channelFactoryExecutor)
-
+  //用于保存等待执行的任务的阻塞队列,
+  //LinkedBlockingQueue：一个基于链表结构的阻塞队列，此队列按FIFO(先进先出)排序元素，吞吐量通常要高于ArrayBlockingQueue
+  //Executors.newFixedThreadPool()使用了这个队列
   lazy val receiverExecutor = Executors.newFixedThreadPool(parallelism,
     new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Flume Receiver Thread - %d").build())
 

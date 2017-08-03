@@ -46,7 +46,8 @@ private[scheduler] class DAGSchedulerSource(val dagScheduler: DAGScheduler)
     override def getValue: Int = dagScheduler.activeJobs.size
   })
 
-  /** Timer that tracks the time to process messages in the DAGScheduler's event loop */
+  /** Timer that tracks the time to process messages in the DAGScheduler's event loop
+    * 定时器跟踪在DAGScheduler的事件循环中处理消息的时间*/
   val messageProcessingTimer: Timer =
     metricRegistry.timer(MetricRegistry.name("messageProcessingTime"))
 }

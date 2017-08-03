@@ -38,9 +38,11 @@ class TaskInfo(
     val speculative: Boolean) {//speculative是否使用推理
 
   /**
-   * The time when the task started remotely getting the result.(任务远程正在获得结果) Will not be set if the
+   * The time when the task started remotely getting the result. Will not be set if the
    * task result was sent immediately when the task finished (as opposed to sending an
    * IndirectTaskResult and later fetching the result from the block manager).
+    *
+    * 任务开始远程获取结果的时间,如果任务完成后立即发送任务结果(而不是发送IndirectTaskResult并稍后从块管理器获取结果),则不会被设置
    */
   var gettingResultTime: Long = 0
 
@@ -48,6 +50,8 @@ class TaskInfo(
    * Intermediate updates to accumulables during this task. Note that it is valid for the same
    * accumulable to be updated multiple times in a single task or for two accumulables with the
    * same name but different IDs to exist in a task.
+    * 在此任务期间累积的中间更新,
+    * 请注意,对于同一个可以在单个任务中多次更新的同一个可累积值,或对于任务中存在相同名称但不同的ID的两个累加器是有效的。
    */
   val accumulables = ListBuffer[AccumulableInfo]()
 

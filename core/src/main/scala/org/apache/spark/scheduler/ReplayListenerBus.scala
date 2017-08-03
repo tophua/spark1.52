@@ -29,15 +29,18 @@ import org.apache.spark.util.JsonProtocol
 
 /**
  * A SparkListenerBus that can be used to replay events from serialized event data.
+  * SparkListenerBus可用于从序列化事件数据重播事件
  */
 private[spark] class ReplayListenerBus extends SparkListenerBus with Logging {
 
   /**
    * Replay each event in the order maintained in the given stream. The stream is expected to
    * contain one JSON-encoded SparkListenerEvent per line.
+    * 按照给定流中维护的顺序重播每个事件,该流预计每行包含一个JSON编码的SparkListenerEvent
    *
    * This method can be called multiple times, but the listener behavior is undefined after any
    * error is thrown by this method.
+    * 这个方法可以被多次调用,但是在这种方法抛出任何错误之后,监听器行为是未定义的,
    *
    * @param logData Stream containing event log data.
    * @param sourceName Filename (or other source identifier) from whence @logData is being read
@@ -59,6 +62,7 @@ private[spark] class ReplayListenerBus extends SparkListenerBus with Logging {
         } catch {
           case jpe: JsonParseException =>
             // We can only ignore exception from last line of the file that might be truncated
+            //我们只能忽略可能被截断的文件的最后一行的异常
             if (!maybeTruncated || lines.hasNext) {
               throw jpe
             } else {

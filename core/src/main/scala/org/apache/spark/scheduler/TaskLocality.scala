@@ -21,7 +21,8 @@ import org.apache.spark.annotation.DeveloperApi
 
 @DeveloperApi
 object TaskLocality extends Enumeration {
-  // Process local is expected to be used ONLY within TaskSetManager for now. 
+  // Process local is expected to be used ONLY within TaskSetManager for now.
+  //过程本地预计现在只能在TaskSetManager中使用
   val PROCESS_LOCAL, NODE_LOCAL, NO_PREF, RACK_LOCAL, ANY = Value
   //PROCESS_LOCAL: 数据在同一个 JVM 中,即同一个 executor 上。这是最佳数据 locality
   //NODE_LOCAL: 数据在同一个节点上。比如数据在同一个节点的另一个 executor上；

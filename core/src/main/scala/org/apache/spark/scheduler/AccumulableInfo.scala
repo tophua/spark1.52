@@ -22,11 +22,13 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * :: DeveloperApi ::
  * Information about an [[org.apache.spark.Accumulable]] modified during a task or stage.
+  * 有关在任务或阶段修改的[[org.apache.spark.Accumulable]]的信息
  */
 @DeveloperApi
 class AccumulableInfo private[spark] (
     val id: Long,
     val name: String,
+    //表示任务中的部分更新
     val update: Option[String], // represents a partial update within a task
     val value: String,
     val internal: Boolean) {
