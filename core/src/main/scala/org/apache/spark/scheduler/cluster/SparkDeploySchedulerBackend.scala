@@ -59,6 +59,7 @@ private[spark] class SparkDeploySchedulerBackend(
     super.start()
 
     // The endpoint for executors to talk to us
+    //执行者与我们对话的端点
     val driverUrl = rpcEnv.uriOf(SparkEnv.driverActorSystemName,
     //运行driver的主机名或 IP 地址
       RpcAddress(sc.conf.get("spark.driver.host"), sc.conf.get("spark.driver.port").toInt),
@@ -85,6 +86,8 @@ private[spark] class SparkDeploySchedulerBackend(
     // When testing, expose the parent class path to the child. This is processed by
     // compute-classpath.{cmd,sh} and makes all needed jars available to child processes
     // when the assembly is built with the "*-provided" profiles enabled.
+    //当测试时,将父类路径暴露给孩子,这是由compute-classpath {cmd，sh}处理的，并且在使用“*
+    // -provided”配置文件启用时构建程序集时，使所有需要的jar可用于子进程
     val testingClassPath =
       if (sys.props.contains("spark.testing")) {
         sys.props("java.class.path").split(java.io.File.pathSeparator).toSeq
@@ -93,6 +96,7 @@ private[spark] class SparkDeploySchedulerBackend(
       }
 
     // Start executors with a few necessary configs for registering with the scheduler
+    //启动执行程序与一些必要的配置注册调度程序
     val sparkJavaOpts = Utils.sparkJavaOpts(conf, SparkConf.isExecutorStartupConf)
     val javaOpts = sparkJavaOpts ++ extraJavaOpts
     val command = Command("org.apache.spark.executor.CoarseGrainedExecutorBackend",
@@ -143,6 +147,7 @@ private[spark] class SparkDeploySchedulerBackend(
         scheduler.error(reason)
       } finally {
         // Ensure the application terminates, as we can no longer run jobs.
+        //确保应用程序终止,因为我们无法再运行作业
         sc.stop()
       }
     }
@@ -176,6 +181,7 @@ private[spark] class SparkDeploySchedulerBackend(
   /**
    * Request executors from the Master by specifying the total number desired,
    * including existing pending and running executors.
+    * 通过指定所需的总数来请求Master执行器,包括现有的正在运行和正在运行的执行器
    *
    * @return whether the request is acknowledged.
    */
@@ -190,6 +196,7 @@ private[spark] class SparkDeploySchedulerBackend(
 
   /**
    * Kill the given list of executors through the Master.
+    * 通过Master杀死给定的执行者名单
    * @return whether the kill request is acknowledged.
    */
   protected override def doKillExecutors(executorIds: Seq[String]): Boolean = {

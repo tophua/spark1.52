@@ -31,6 +31,7 @@ import scala.util.control.NonFatal
 /**
  * Abstract Yarn scheduler backend that contains common logic
  * between the client and cluster Yarn scheduler backends.
+  * 抽象的线程调度器后端包含客户端和群集之间的公共逻辑
  */
 private[spark] abstract class YarnSchedulerBackend(
     scheduler: TaskSchedulerImpl,
@@ -51,6 +52,7 @@ private[spark] abstract class YarnSchedulerBackend(
   /**
    * Request executors from the ApplicationMaster by specifying the total number desired.
    * This includes executors already pending or running.
+    * 通过指定所需的总数来从ApplicationMaster请求执行程序,这包括已经在等待或正在运行的执行者。
    */
   override def doRequestTotalExecutors(requestedTotal: Int): Boolean = {
     yarnSchedulerEndpoint.askWithRetry[Boolean](
@@ -59,6 +61,7 @@ private[spark] abstract class YarnSchedulerBackend(
 
   /**
    * Request that the ApplicationMaster kill the specified executors.
+    * 请求ApplicationMaster杀死指定的执行程序
    */
   override def doKillExecutors(executorIds: Seq[String]): Boolean = {
     yarnSchedulerEndpoint.askWithRetry[Boolean](KillExecutors(executorIds))
@@ -70,6 +73,7 @@ private[spark] abstract class YarnSchedulerBackend(
 
   /**
    * Add filters to the SparkUI.
+    * 将过滤器添加到SparkUI
    */
   private def addWebUIFilter(
       filterName: String,
@@ -92,6 +96,7 @@ private[spark] abstract class YarnSchedulerBackend(
 
   /**
    * An [[RpcEndpoint]] that communicates with the ApplicationMaster.
+    * 与ApplicationMaster进行通信的[[RpcEndpoint]]
    */
   private class YarnSchedulerEndpoint(override val rpcEnv: RpcEnv)
     extends ThreadSafeRpcEndpoint with Logging {

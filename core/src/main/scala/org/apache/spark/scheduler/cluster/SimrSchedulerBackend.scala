@@ -53,6 +53,7 @@ private[spark] class SimrSchedulerBackend(
     logInfo("Writing Spark UI Address: " + appUIAddress)
 
     // Create temporary file to prevent race condition where executors get empty driverUrl file
+    //创建临时文件以防止执行程序获得空的驱动程序文件的竞争条件
     val temp = fs.create(tmpPath, true)
     temp.writeUTF(driverUrl)
     temp.writeInt(maxCores)

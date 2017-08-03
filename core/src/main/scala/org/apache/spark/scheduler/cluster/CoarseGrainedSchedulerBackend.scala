@@ -69,6 +69,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   private val executorDataMap = new HashMap[String, ExecutorData]
 
   // Number of executors requested from the cluster manager that have not registered yet
+  //从集群管理器请求的尚未注册的执行程序数
   //请求的执行器数,还没有注册群集管理器
   private var numPendingExecutors = 0
 

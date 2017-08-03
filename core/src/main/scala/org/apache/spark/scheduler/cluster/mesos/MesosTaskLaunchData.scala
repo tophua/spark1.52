@@ -25,6 +25,7 @@ import org.apache.spark.Logging
 
 /**
  * Wrapper for serializing the data sent when launching Mesos tasks.
+  * 用于序列化启动Mesos任务时发送的数据的包装器
  */
 private[spark] case class MesosTaskLaunchData(
   serializedTask: ByteBuffer,

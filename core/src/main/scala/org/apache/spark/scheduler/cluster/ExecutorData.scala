@@ -21,7 +21,7 @@ import org.apache.spark.rpc.{RpcEndpointRef, RpcAddress}
 
 /**
  * Grouping of data for an executor used by CoarseGrainedSchedulerBackend.
- *
+ * 为CoarseGrainedSchedulerBackend使用的执行程序分组数据
  * @param executorEndpoint The RpcEndpointRef representing this executor
  * @param executorAddress The network address of this executor
  * @param executorHost The hostname that this executor is running on

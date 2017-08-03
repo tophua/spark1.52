@@ -35,12 +35,15 @@ import org.apache.spark.util.Utils
 /**
  * Shared trait for implementing a Mesos Scheduler. This holds common state and helper
  * methods and Mesos scheduler will use.
+  * 实现一个目标程序的共同特征,这是常见的状态和辅助方法和使用调度程序将使用。
  */
 private[mesos] trait MesosSchedulerUtils extends Logging {
   // Lock used to wait for scheduler to be registered
+  //锁用于等待调度器注册
   private final val registerLatch = new CountDownLatch(1)
 
   // Driver for talking to Mesos
+  // Driver与Mesos交谈
   protected var mesosDriver: SchedulerDriver = null
 
   /**

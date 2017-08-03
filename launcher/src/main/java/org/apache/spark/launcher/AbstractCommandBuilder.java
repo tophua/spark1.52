@@ -157,6 +157,8 @@ abstract class AbstractCommandBuilder {
    * Builds the classpath for the application. Returns a list with one classpath entry per element;
    * each entry is formatted in the way expected by <i>java.net.URLClassLoader</i> (more
    * specifically, with trailing slashes for directories).
+   * 构建应用程序的类路径,返回每个元素具有一个类路径条目的列表;
+   * 每个条目按照java.net.URLClassLoader </ i>所期望的方式进行格式化（更具体地说，使用目录的尾部斜杠）。
    */
   List<String> buildClassPath(String appClassPath) throws IOException {
     String sparkHome = getSparkHome();
@@ -192,6 +194,7 @@ abstract class AbstractCommandBuilder {
 
       // Add this path to include jars that are shaded in the final deliverable created during
       // the maven build. These jars are copied to this directory during the build.
+        //添加此路径以包含在maven构建期间创建的最终可交付项中阴影的jar,在构建期间将这些jar复制到此目录。
       addToClassPath(cp, String.format("%s/core/target/jars/*", sparkHome));
     }
 
@@ -214,6 +217,8 @@ abstract class AbstractCommandBuilder {
     // Datanucleus jars must be included on the classpath. Datanucleus jars do not work if only
     // included in the uber jar as plugin.xml metadata is lost. Both sbt and maven will populate
     // "lib_managed/jars/" with the datanucleus jars when Spark is built with Hive
+      //Datanucleus jar必须包含在类路径中。 Datanucleus罐子不工作，如果只有包含在uber jar中，
+      // 因为plugin.xml元数据丢失。当Spark与Hive一起构建时，sbt和maven都将使用datanucleus jar来填充“lib_managed / jars /”
     File libdir;
     if (new File(sparkHome, "RELEASE").isFile()) {
       libdir = new File(sparkHome, "lib");
@@ -237,7 +242,7 @@ abstract class AbstractCommandBuilder {
 
   /**
    * Adds entries to the classpath.
-   *
+   * 将条目添加到类路径
    * @param cp List to which the new entries are appended.
    * @param entries New classpath entries (separated by File.pathSeparator).
    */
@@ -286,6 +291,7 @@ abstract class AbstractCommandBuilder {
    * Loads the configuration file for the application, if it exists. This is either the
    * user-specified properties file, or the spark-defaults.conf file under the Spark configuration
    * directory.
+   * 加载应用程序的配置文件(如果存在),这是用户指定的属性文件或Spark配置目录下的spark-defaults.conf文件。
    */
   Properties loadPropertiesFile() throws IOException {
     Properties props = new Properties();
