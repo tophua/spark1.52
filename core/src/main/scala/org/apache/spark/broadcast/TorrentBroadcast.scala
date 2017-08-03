@@ -38,18 +38,23 @@ import org.apache.spark.util.io.ByteArrayChunkOutputStream
  *
  * The driver divides the serialized object into small chunks and
  * stores those chunks in the BlockManager of the driver.
- * driver将序列化对象划分一个个小块,交给BlockManager处理存储,每一个执行器executor将首先尝试从BlockManager获取的对象
- * 如果没有找到,它然后使用远程从driver或者其他executor抓取数据块,一旦它得到的这个数据块,它会把块在自己的BlockManager,
- * 准备其他executors从获取
+ * driver将序列化对象划分一个个小块,交给BlockManager处理存储,
+ *
  * On each executor, the executor first attempts to fetch the object from its BlockManager. If
  * it does not exist, it then uses remote fetches to fetch the small chunks from the driver and/or
  * other executors if available. Once it gets the chunks, it puts the chunks in its own
  * BlockManager, ready for other executors to fetch from.
+  *
+  * 每一个执行器executor将首先尝试从BlockManager获取的对象,如果没有找到,然后使用远程从driver或者其他executor获取小数据块（如果可用）,
+  * 一旦它得到的这个数据块,它会把块在自己的BlockManager,可供其他executors获取。
  *
  * This prevents the driver from being the bottleneck in sending out multiple copies of the
  * broadcast data (one per executor) as done by the [[org.apache.spark.broadcast.HttpBroadcast]].
+  *
+  * 这样可以防止驱动程序像[[org.apache.spark.broadcast.HttpBroadcast]]完成的发送广播数据的多个副本（每个执行者一个）的瓶颈。
  *
  * When initialized, TorrentBroadcast objects read SparkEnv.get.conf.
+  * 当初始化时，TorrentBroadcast对象读取SparkEnv.get.conf。
  *
  * @param obj object to broadcast
  * @param id A unique identifier for the broadcast variable.
@@ -60,14 +65,18 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   /**
    * Value of the broadcast object on executors. This is reconstructed by [[readBroadcastBlock]],
    * which builds this value by reading blocks from the driver and/or other executors.
+    * 广播对象在执行器上的值,这由[[readBroadcastBlock]]重建,通过读取驱动程序和/或其他执行程序的块来构建此值
    *
    * On the driver, if the value is required, it is read lazily from the block manager.
+    * 在驱动程序上,如果需要该值,则会从块管理器中读取
    */
   @transient private lazy val _value: T = readBroadcastBlock()
 
-  /** The compression codec to use, or None if compression is disabled */
+  /** The compression codec to use, or None if compression is disabled
+    * 要使用的压缩编解码器，如果压缩被禁用，则为无 */
   @transient private var compressionCodec: Option[CompressionCodec] = _
-  /** Size of each block. Default value is 4MB.  This value is only read by the broadcaster. */
+  /** Size of each block. Default value is 4MB.  This value is only read by the broadcaster.
+    * 每个块的大小 默认值为4MB,该值仅由广播公司读取 */
   @transient private var blockSize: Int = _
   //设置广播配置信息,配置属性确认是否对广播消息进行压缩,并且生成CompressionCode对象
   private def setConf(conf: SparkConf) {
@@ -103,6 +112,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
   private def writeBlocks(value: T): Int = {
     // Store a copy of the broadcast variable in the driver so that tasks run on the driver
     // do not create a duplicate copy of the broadcast variable's value.
+    //将一个广播变量的副本存储在驱动程序中，以便在驱动程序上运行的任务不创建广播变量值的重复副本。
     //1)将要写入的对象在本地的存储体系中备份一份,以便于Task也可以在本地的Driver上运行
     SparkEnv.get.blockManager.putSingle(broadcastId, value, StorageLevel.MEMORY_AND_DISK,
       tellMaster = false)
@@ -120,7 +130,8 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
     blocks.length
   }
 
-  /** Fetch torrent blocks from the driver and/or other executors. */
+  /** Fetch torrent blocks from the driver and/or other executors.
+    * 从驱动程序和/或其他执行程序提取洪流块*/
   private def readBlocks(): Array[ByteBuffer] = {
     // Fetch chunks of data. Note that all these chunks are stored in the BlockManager and reported
     // to the driver, so other executors can pull these chunks from this executor as well.
@@ -185,10 +196,10 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
       setConf(SparkEnv.get.conf)
        //从本地的blockManager里读这个被broadcast的对象,根据broadcastId
       SparkEnv.get.blockManager.getLocal(broadcastId).map(_.data.next()) match {
-        case Some(x) =>//本地有
+        case Some(x) => //本地有
           x.asInstanceOf[T]
 
-        case None =>//本地无
+        case None => //本地无
           logInfo("Started reading broadcast variable " + id)
           val startTimeMs = System.currentTimeMillis()
           val blocks = readBlocks()//如果本地没有broadcastId对应的broadcast的block,就读
@@ -198,6 +209,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
             blocks, SparkEnv.get.serializer, compressionCodec)
           // Store the merged copy in BlockManager so other tasks on this executor don't
           // need to re-fetch it.
+          //将合并的副本存储在BlockManager中,以便此执行器上的其他任务不需要重新获取
           SparkEnv.get.blockManager.putSingle(//读了之后再放进BlockManager
             broadcastId, obj, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
           obj
@@ -244,6 +256,7 @@ private object TorrentBroadcast extends Logging {
   /**
    * Remove all persisted blocks associated with this torrent broadcast on the executors.
    * If removeFromDriver is true, also remove these persisted blocks on the driver.
+    * 删除与这个洪流播放相关的所有持久的块在执行器上,如果removeFromDriver为true，那么也可以删除驱动程序上的这些持久化块
    */
   def unpersist(id: Long, removeFromDriver: Boolean, blocking: Boolean): Unit = {
     logDebug(s"Unpersisting TorrentBroadcast $id")

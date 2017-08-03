@@ -328,18 +328,19 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
     }
 
     val prefPartActual = prefPart.get
-
-    if (minPowerOfTwo.size + slack <= prefPartActual.size) { // more imbalance than the slack allows
-      minPowerOfTwo  // prefer balance over locality
+    // more imbalance than the slack allows
+    //更多的不平衡比松弛允许
+    if (minPowerOfTwo.size + slack <= prefPartActual.size) {
+      minPowerOfTwo  // prefer balance over locality 喜欢平衡地方
     } else {
-      prefPartActual // prefer locality over balance
+      prefPartActual // prefer locality over balance 偏好地方平衡
     }
   }
 
   def throwBalls() {
     //父RDD中没有优先选择，无需随机化
     if (noLocality) {  // no preferredLocations in parent RDD, no randomization needed
-      if (maxPartitions > groupArr.size) { // just return prev.partitions
+      if (maxPartitions > groupArr.size) { // just return prev.partitions 只是返回prev.partitions
         for ((p, i) <- prev.partitions.zipWithIndex) {
           groupArr(i).arr += p
         }
@@ -363,12 +364,12 @@ private class PartitionCoalescer(maxPartitions: Int, prev: RDD[_], balanceSlack:
   /**
    * Runs the packing algorithm and returns an array of PartitionGroups that if possible are
    * load balanced and grouped by locality
-    * 运行打包算法并返回一个PartitionGroups数组,如果可能的话负载均衡,按地区分组
+    * 运行打包算法并返回一个PartitionGroups数组,如果可能的话,负载平衡并按地区分组
    * @return array of partition groups
    */
   def run(): Array[PartitionGroup] = {
     setupGroups(math.min(prev.partitions.length, maxPartitions))   // setup the groups (bins)
-    throwBalls() // assign partitions (balls) to each group (bins)
+    throwBalls() // assign partitions (balls) to each group (bins) 将分区（球）分配给每个组（bin）
     getPartitions
   }
 }

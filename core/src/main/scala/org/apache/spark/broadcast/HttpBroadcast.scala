@@ -49,6 +49,7 @@ private[spark] class HttpBroadcast[T: ClassTag](
   /*
    * Broadcasted data is also stored in the BlockManager of the driver. The BlockManagerMaster
    * does not need to be told about this block as not only need to know about this data block.
+   * 广播的数据也存储在驱动程序的BlockManager中,BlockManagerMaster不需要被告知关于这个块,不仅需要了解这个数据块,
    */
   HttpBroadcast.synchronized {
     SparkEnv.get.blockManager.putSingle(
@@ -61,6 +62,7 @@ private[spark] class HttpBroadcast[T: ClassTag](
 
   /**
    * Remove all persisted state associated with this HTTP broadcast on the executors.
+    * 在执行器上删除与此HTTP广播相关联的所有持久状态
    */
   override protected def doUnpersist(blocking: Boolean) {
     HttpBroadcast.unpersist(id, removeFromDriver = false, blocking)
@@ -68,6 +70,7 @@ private[spark] class HttpBroadcast[T: ClassTag](
 
   /**
    * Remove all persisted state associated with this HTTP broadcast on the executors and driver.
+    * 在执行程序和驱动程序上删除与此HTTP广播相关联的所有持久状态
    */
   override protected def doDestroy(blocking: Boolean) {
     HttpBroadcast.unpersist(id, removeFromDriver = true, blocking)
@@ -99,6 +102,8 @@ private[spark] class HttpBroadcast[T: ClassTag](
            * We cache broadcast data in the BlockManager so that subsequent tasks using it
            * do not need to re-fetch. This data is only used locally and no other node
            * needs to fetch this block, so we don't notify the master.
+           * 我们在BlockManager中缓存广播数据,以便使用它的后续任务不需要重新获取
+           * 该数据仅在本地使用,并且没有其他节点需要获取该块,因此我们不通知主机。
            */
           SparkEnv.get.blockManager.putSingle(
             blockId, value_, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
@@ -237,6 +242,7 @@ private[broadcast] object HttpBroadcast extends Logging {
    * 在executor删除所有持久化块相关HTTP广播
    * If removeFromDriver is true, also remove these persisted blocks on the driver
    * and delete the associated broadcast file.
+    * 如果removeFromDriver为true，那么也可以删除驱动程序上的这些持久化块并删除相关联的广播文件。
    */
   def unpersist(id: Long, removeFromDriver: Boolean, blocking: Boolean): Unit = synchronized {
     SparkEnv.get.blockManager.master.removeBroadcast(id, removeFromDriver, blocking)
@@ -248,7 +254,7 @@ private[broadcast] object HttpBroadcast extends Logging {
   }
 
   /**
-   * Periodically(定期) clean up old broadcasts by removing the associated map entries and
+   * Periodically clean up old broadcasts by removing the associated map entries and
    * deleting the associated files.
    * 定期清理旧的广播,通过删除相关的Map条目和删除相关的文件
    */

@@ -50,6 +50,7 @@ import org.apache.spark.storage.StorageLevel
 
 /**
  * A Spark split class that wraps around a Hadoop InputSplit.
+  * 一个包围Hadoop InputSplit的Spark拆分类
  */
 private[spark] class HadoopPartition(rddId: Int, idx: Int, @transient s: InputSplit)
   extends Partition {
@@ -62,13 +63,16 @@ private[spark] class HadoopPartition(rddId: Int, idx: Int, @transient s: InputSp
 
   /**
    * Get any environment variables that should be added to the users environment when running pipes
+    * 获取在运行管道时应该添加到用户环境的任何环境变量
    * @return a Map with the environment variables and corresponding values, it could be empty
+    *         一个带有环境变量和相应值的Map，它可以是空的
    */
   def getPipeEnvVars(): Map[String, String] = {
     val envVars: Map[String, String] = if (inputSplit.value.isInstanceOf[FileSplit]) {
       val is: FileSplit = inputSplit.value.asInstanceOf[FileSplit]
       // map_input_file is deprecated in favor of mapreduce_map_input_file but set both
       // since its not removed yet
+      //map_input_file已被弃用，赞成使用mapreduce_map_input_file，但由于尚未删除
       Map("map_input_file" -> is.getPath().toString(),
         "mapreduce_map_input_file" -> is.getPath().toString())
     } else {
@@ -137,6 +141,7 @@ class HadoopRDD[K, V](
   protected val inputFormatCacheKey = "rdd_%d_input_format".format(id)
 
   // used to build JobTracker ID
+  //用于构建JobTracker ID
   private val createTime = new Date()//创建一个Job跟踪ID
 
   private val shouldCloneJobConf = sc.conf.getBoolean("spark.hadoop.cloneConf", false)
@@ -154,6 +159,9 @@ class HadoopRDD[K, V](
       // clone can be very expensive.  To avoid unexpected performance regressions for workloads and
       // Hadoop versions that do not suffer from these thread-safety issues, this cloning is
       // disabled by default.
+      //Hadoop配置对象不是线程安全的，如果一个作业修改配置而另一个作业修改（SPARK-2546），则可能会导致各种问题。 这个问题很少发生，
+      // 因为大多数作业将配置视为不可变的。 这里实现的一个解决方案是克隆Configuration对象。
+      // 不幸的是，这个克隆可能非常昂贵。 为了避免不承担这些线程安全问题的工作负载和Hadoop版本的意外性能回归，默认情况下禁用此克隆。
       HadoopRDD.CONFIGURATION_INSTANTIATION_LOCK.synchronized {
         logDebug("Cloning Hadoop Configuration")
         val newJobConf = new JobConf(conf)
@@ -174,6 +182,9 @@ class HadoopRDD[K, V](
         // local process. The local cache is accessed through HadoopRDD.putCachedMetadata().
         // The caching helps minimize GC, since a JobConf can contain ~10KB of temporary objects.
         // Synchronize to prevent ConcurrentModificationException (SPARK-1097, HADOOP-10456).
+        //创建一个JobConf，将在本地进程中的RDD的getJobConf（）调用中缓存并使用,本地缓存通过HadoopRDD.putCachedMetadata（）访问,
+        // 缓存有助于最小化GC，因为JobConf可以包含〜10KB的临时对象,
+        // 同步以防止ConcurrentModificationException（SPARK-1097，HADOOP-10456）
         HadoopRDD.CONFIGURATION_INSTANTIATION_LOCK.synchronized {
           logDebug("Creating new JobConf and caching it for later re-use")
           val newJobConf = new JobConf(conf)
@@ -279,6 +290,9 @@ class HadoopRDD[K, V](
           // reader more than once, since that exposes us to MAPREDUCE-5918 when running against
           // Hadoop 1.x and older Hadoop 2.x releases. That bug can lead to non-deterministic
           // corruption issues when reading compressed input.
+          //关闭阅读器并释放它,注意：非常重要的是，我们不要多次关闭该游戏，因为当您对...运行时暴露于MAPREDUCE-5918
+          // Hadoop 1.x和更旧的Hadoop 2.x版本。 那个bug可能导致非确定性
+          //读取压缩输入时出现损坏问题
           try {
             reader.close()
           } catch {
@@ -354,8 +368,9 @@ class HadoopRDD[K, V](
 private[spark] object HadoopRDD extends Logging {
   /**
    * Configuration's constructor is not threadsafe (see SPARK-1097 and HADOOP-10456).
+    * 配置构造函数不是线程安全的（参见SPARK-1097和HADOOP-10456）。
    * Therefore, we synchronize on this lock before calling new JobConf() or new Configuration().
-   * 配置的构造函数不是线程安全的,因此,在调用new JobConf() or new Configuration()之前,我们在这个锁上进行同步
+   * 因此,在调用new JobConf() or new Configuration()之前,我们在这个锁上进行同步
    */
   val CONFIGURATION_INSTANTIATION_LOCK = new Object()
 

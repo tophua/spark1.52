@@ -42,7 +42,8 @@ object ExecutorExitCode {
    *  */
   val EXTERNAL_BLOCK_STORE_FAILED_TO_INITIALIZE = 54
 
-  /** ExternalBlockStore failed to create a local temporary directory after many attempts. */
+  /** ExternalBlockStore failed to create a local temporary directory after many attempts.
+    * 多次尝试后,ExternalBlockStore无法创建本地临时目录 */
   val EXTERNAL_BLOCK_STORE_FAILED_TO_CREATE_DIR = 55
 
   def explainExitCode(exitCode: Int): String = {

@@ -45,8 +45,10 @@ import org.apache.spark.util._
  * Spark executor, backed by a threadpool to run tasks.
  * 执行计算任务线程,主要负责任务的执行以及Worker,Driver App信息同步
  * This can be used with Mesos, YARN, and the standalone scheduler.
+  * 这可以与Mesos,YARN和独立的调度程序一起使用
  * An internal RPC interface (at the moment Akka) is used for communication with the driver,
  * except in the case of Mesos fine-grained mode.
+  * 内部RPC接口(目前为Akka)用于与驱动程序通信,除了Mesos细粒度模式
  */
 private[spark] class Executor(
     executorId: String,
@@ -60,6 +62,8 @@ private[spark] class Executor(
 
   // Application dependencies (added through SparkContext) that we've fetched so far on this node.
   // Each map holds the master's timestamp for the version of that file or JAR we got.
+  // 应用程序依赖关系（通过SparkContext添加）到目前为止,我们已经在此节点上获取,
+  // 每个映射都保存了该文件或JAR版本的主时间戳。
   // HashMap保存Master的文件或JAR,Key文件名,value=>文件修改的时间戳,记录每个文件版本
   private val currentFiles: HashMap[String, Long] = new HashMap[String, Long]()
   private val currentJars: HashMap[String, Long] = new HashMap[String, Long]()
@@ -68,18 +72,21 @@ private[spark] class Executor(
 
   private val conf = env.conf
 
-  // No ip or host:port - just hostname
+  // No ip or host:port - just hostname 没有ip或主机：port - 只是主机名
   Utils.checkHost(executorHostname, "Expected executed slave to be a hostname")
-  // must not have port specified.
+  // must not have port specified.不能指定端口
   assert (0 == Utils.parseHostPort(executorHostname)._2)//
 
   // Make sure the local hostname we report matches the cluster scheduler's name for this host
+  //确保我们报告的本地主机名与此主机的集群调度程序名称相匹配
   Utils.setCustomHostname(executorHostname)
 
   if (!isLocal) {
     // Setup an uncaught exception handler for non-local mode.
+    //为非本地模式设置未捕获的异常处理程序
     // Make any thread terminations due to uncaught exceptions kill the entire
     // executor process to avoid surprising stalls.
+    //由于未捕获的异常,使任何线程终止都会导致整个执行器进程死机,以避免令人惊讶的失速
     Thread.setDefaultUncaughtExceptionHandler(SparkUncaughtExceptionHandler)
   }
 
@@ -99,29 +106,34 @@ private[spark] class Executor(
   private val executorEndpoint = env.rpcEnv.setupEndpoint(
     ExecutorEndpoint.EXECUTOR_ENDPOINT_NAME, new ExecutorEndpoint(env.rpcEnv, executorId))
 
-  // Whether(可能的选择) to load classes in user jars before those in Spark jars
+  // Whether to load classes in user jars before those in Spark jars
+  //是否在Spark jar中的用户jar之前加载类
   private val userClassPathFirst = conf.getBoolean("spark.executor.userClassPathFirst", false)
 
   // Create our ClassLoader
   // do this after SparkEnv creation so can access the SecurityManager
+  //创建我们的ClassLoader后,在创建SparkEnv之后,可以访问SecurityManager
   //创建一个classloader
   private val urlClassLoader = createClassLoader()
   private val replClassLoader = addReplClassLoaderIfNeeded(urlClassLoader)
   
   // Set the classloader for serializer
+  //设置序列化器的类加载器
   env.serializer.setDefaultClassLoader(replClassLoader)
 
   // Akka's message frame size. If task result is bigger than this, we use the block manager
   // to send the result back.
+  //Akka的消息帧大小,如果任务结果大于此,我们使用块管理器将结果发送回来。
   //Akka发送消息的帧大小
   private val akkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)
-  //限制结果总大小的字节
+  //限制结果总大小的字节数(默认为1GB）
   // Limit of bytes for total size of results (default is 1GB)
   private val maxResultSize = Utils.getMaxResultSize(conf)
-  //运行Task列表
+
   // Maintains the list of running tasks.
+  //维护正在运行的任务列表
   private val runningTasks = new ConcurrentHashMap[Long, TaskRunner]
-  // Executor for the heartbeat task.
+  // Executor for the heartbeat task.执行者心跳任务
   //ScheduledExecutorService定时周期执行指定的任务,基于时间的延迟,不会由于系统时间的改变发生执行变化
   private val heartbeater = ThreadUtils.newDaemonSingleThreadScheduledExecutor("driver-heartbeater")
   //启动executor心跳线程,此线程用于向Driver发送心跳
@@ -191,7 +203,7 @@ private[spark] class Executor(
     /**
      * The task to run. This will be set in run() by deserializing the task binary coming
      * from the driver. Once it is set, it will never be changed.
-     * 运行Task
+      * 他的运行任务,这将通过反序列化来自驱动程序的任务二进制文件在run（）中设置,一旦设置,它将永远不会改变,
      */
     @volatile var task: Task[Any] = _
 
@@ -236,6 +248,8 @@ private[spark] class Executor(
           // causes a NonLocalReturnControl exception to be thrown. The NonLocalReturnControl
           // exception will be caught by the catch block, leading to an incorrect ExceptionFailure
           // for the task.
+          //抛出异常而不是返回,因为在try {}块中返回会导致抛出NonLocalReturnControl异常,
+          // 非局部返回控制异常将被catch块捕获,导致任务的异常失效。
           throw new TaskKilledException
         }
 
@@ -284,10 +298,12 @@ private[spark] class Executor(
         for (m <- task.metrics) {
           // Deserialization happens in two parts: first, we deserialize a Task object, which
           // includes the Partition. Second, Task.run() deserializes the RDD and function to be run.
+          //反序列化分为两部分：首先,我们对包含分区的Task对象进行反序列化, 其次,Task.run（）反序列化要运行的RDD和函数。
           //Executor反序列化消耗的时间
           m.setExecutorDeserializeTime(
             (taskStart - deserializeStartTime) + task.executorDeserializeTime)
           // We need to subtract Task.run()'s deserialization time to avoid double-counting
+          //我们需要减去Task.run（）的反序列化时间，以避免重复计算
           //实际执行任务消耗时间
           m.setExecutorRunTime((taskFinish - taskStart) - task.executorDeserializeTime)
           //执行垃圾回收消耗的时间
@@ -347,8 +363,10 @@ private[spark] class Executor(
 
         case t: Throwable =>
           // Attempt to exit cleanly by informing the driver of our failure.
+          //通过告知driver我们的失败，试图彻底退出。
           // If anything goes wrong (or this was a fatal exception), we will delegate to
           // the default uncaught exception handler, which will terminate the Executor.
+          //如果出现任何问题(或者这是一个致命的例外),我们将委托给默认的未捕获的异常处理程序,这将终止Executor。
           logError(s"Exception in $taskName (TID $taskId)", t)
           val metrics: Option[TaskMetrics] = Option(task).flatMap { task =>
             task.metrics.map { m =>
@@ -364,6 +382,7 @@ private[spark] class Executor(
             } catch {
               case _: NotSerializableException =>
                 // t is not serializable so just send the stacktrace
+                //t不可序列化，所以只需发送堆栈跟踪
                 ser.serialize(new ExceptionFailure(t, metrics, false))
             }
           }
@@ -371,6 +390,7 @@ private[spark] class Executor(
 
           // Don't forcibly exit unless the exception was inherently fatal, to avoid
           // stopping other tasks unnecessarily.
+          //不要强制退出,除非这个例外是固有的致命的,以避免不必要地停止其他任务。
           if (Utils.isFatalError(t)) {
             SparkUncaughtExceptionHandler.uncaughtException(t)
           }
@@ -414,6 +434,7 @@ private[spark] class Executor(
   /**
    * If the REPL is in use, add another ClassLoader that will read
    * new classes defined by the REPL as the user types code
+    * 如果REPL正在使用,则添加另一个ClassLoader,当用户键入代码时,将会读取由REPL定义的新类
    */
   private def addReplClassLoaderIfNeeded(parent: ClassLoader): ClassLoader = {
     val classUri = conf.get("spark.repl.class.uri", null)
@@ -440,7 +461,7 @@ private[spark] class Executor(
   /**
    * Download any missing dependencies if we receive a new set of files and JARs from the
    * SparkContext. Also adds any new JARs we fetched to the class loader.
-   * 获取依赖是利用Utils.fetchFile方法实现,下载jar文件还会添加到Executor自身类加载器的URL中
+    * 如果从SparkContext接收到一组新的文件和JAR,请下载任何缺少的依赖项,还添加了我们提取给类加载器的任何新的JAR
    */
   private def updateDependencies(newFiles: HashMap[String, Long], newJars: HashMap[String, Long]) {
     lazy val hadoopConf = SparkHadoopUtil.get.newConfiguration(conf)
@@ -463,10 +484,12 @@ private[spark] class Executor(
         if (currentTimeStamp < timestamp) {
           logInfo("Fetching " + name + " with timestamp " + timestamp)
           // Fetch file with useCache mode, close cache for local mode.
+          //使用useCache模式获取文件,关闭缓存以进行本地模式
           Utils.fetchFile(name, new File(SparkFiles.getRootDirectory()), conf,
             env.securityManager, hadoopConf, timestamp, useCache = !isLocal)
           currentJars(name) = timestamp
           // Add it to our class loader
+          //将它添加到我们的类加载器
           val url = new File(SparkFiles.getRootDirectory(), localName).toURI.toURL
           if (!urlClassLoader.getURLs().contains(url)) {
             logInfo("Adding " + url + " to class loader")
@@ -504,10 +527,13 @@ private[spark] class Executor(
             // JobProgressListener will hold an reference of it during
             // onExecutorMetricsUpdate(), then JobProgressListener can not see
             // the changes of metrics any more, so make a deep copy of it
+            //JobProgressListener将在onExecutorMetricsUpdate（）期间保存它的引用
+            // 然后JobProgressListener不能再看到指标的更改,因此请将其深入复制
             val copiedMetrics = Utils.deserialize[TaskMetrics](Utils.serialize(metrics))
             tasksMetrics += ((taskRunner.taskId, copiedMetrics))
           } else {
             // It will be copied by serialization
+            //它将被序列化复制
             tasksMetrics += ((taskRunner.taskId, metrics))
           }
         }

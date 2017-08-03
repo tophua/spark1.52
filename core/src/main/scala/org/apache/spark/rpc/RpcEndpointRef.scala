@@ -57,7 +57,7 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   def name: String
 
   /**
-   * 发送单方面的异步消息
+   * 单方异步发送的消息
    * Sends a one-way asynchronous message. Fire-and-forget semantics.
    */
   def send(message: Any): Unit
@@ -74,22 +74,32 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   /**
    * Send a message to the corresponding [[RpcEndpoint.receiveAndReply)]] and return a [[Future]] to
    * receive the reply within a default timeout.
+    *
+    * 发送消息到相应的[[RpcEndpoint.receiveAndReply]]]并返回一个[Future]以在默认超时内接收回复。
    *
-   * This method only sends the message once and never(不再从试) retries.
+   * This method only sends the message once and never retries.
+    * 此方法仅发送消息一次,不会重试。
    */
   def ask[T: ClassTag](message: Any): Future[T] = ask(message, defaultAskTimeout)
 
   /**
    * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果,否则抛出SparkException,
    * 注意,本方法是一个阻塞操作可能消耗时间,所以不要早消息循环中调用它
-   * Send a message to the corresponding(相当) [[RpcEndpoint]] and get its result within a default
+    *
+   * Send a message to the corresponding[[RpcEndpoint]] and get its result within a default
    * timeout, or throw a SparkException if this fails even after the default number of retries.
    * The default `timeout` will be used in every trial of calling `sendWithReply`. Because this
    * method retries, the message handling in the receiver side should be idempotent.
-   *注意,本方法是一个阻塞操作可能消耗时间,所以不要在消息循环中调用它
+    *
+    * 发送消息到相应的[[RpcEndpoint]]并在默认超时内获取其结果，或者抛出一个SparkException，
+    * 即使在默认的重试次数后仍然失败。默认的“timeout”将被用于调用“sendWithReply”。
+    * 因为该方法重,所以接收方的消息处理应该是幂等的。
+    *
    * Note: this is a blocking action which may cost a lot of time,  so don't call it in an message
    * loop of [[RpcEndpoint]].
-   *
+    *
+   * 注意：这是一个可能花费大量时间的阻塞操作,所以不要在[[RpcEndpoint]]的消息循环中调用它。
+    *
    * @param message the message to send
    * @tparam T type of the reply message
    * @return the reply message from the corresponding [[RpcEndpoint]]
@@ -102,10 +112,13 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
    * specified timeout, throw a SparkException if this fails even after the specified number of
    * retries. `timeout` will be used in every trial of calling `sendWithReply`. Because this method
    * retries, the message handling in the receiver side should be idempotent.
-   * 注意,本方法是一个阻塞操作可能消耗时间,所以不要在消息循环中调用它
+    *
+    *发送消息到相应的[[RpcEndpoint.receive]]并在其中得到结果指定的超时,如果即使在指定的数目后仍然失败,则抛出SparkException重试。
+    *`timeoutWithReply`用于每次调用`sendWithReply`的试验。 因为该方法重试，所以接收方的消息处理应该是幂等的。
+    *
    * Note: this is a blocking action which may cost a lot of time, so don't call it in an message
    * loop of [[RpcEndpoint]].
-   *
+   *注意：这是一个可能花费大量时间的阻塞操作,所以不要在[[RpcEndpoint]]的消息循环中调用它。
    * @param message the message to send
    * @param timeout the timeout duration
    * @tparam T type of the reply message

@@ -32,7 +32,9 @@ import org.apache.spark.serializer.Serializer
 /** The references to rdd and splitIndex are transient because redundant information is stored
   * in the CoGroupedRDD object.  Because CoGroupedRDD is serialized separately from
   * CoGroupPartition, if rdd and splitIndex aren't transient, they'll be included twice in the
-  * task closure. */
+  * task closure.
+  * 对rdd和splitIndex的引用是暂时的，因为冗余信息存储在CoGroupedRDD对象中,因为CoGroupedRDD与CoGroupPartition分开序列化,
+  * 如果rdd和splitIndex不是暂时的，那么它们将在任务闭包中包含两次*/
 private[spark] case class NarrowCoGroupSplitDep(
     @transient rdd: RDD[_],
     @transient splitIndex: Int,
@@ -42,6 +44,7 @@ private[spark] case class NarrowCoGroupSplitDep(
   @throws(classOf[IOException])
   private def writeObject(oos: ObjectOutputStream): Unit = Utils.tryOrIOException {
     // Update the reference to parent split at the time of task serialization
+    //在任务序列化时更新对父拆分的引用
     split = rdd.partitions(splitIndex)
     oos.defaultWriteObject()
   }
@@ -66,10 +69,11 @@ private[spark] class CoGroupPartition(
  * :: DeveloperApi ::
  * A RDD that cogroups its parents. For each key k in parent RDDs, the resulting RDD contains a
  * tuple with the list of values for that key.
+  * 一个共同组合其父母的RDD,对于父RDD中的每个密钥k,生成的RDD包含一个元组，该元组包含该key的值列表
  *
  * Note: This is an internal API. We recommend users use RDD.cogroup(...) instead of
  * instantiating this directly.
-
+   注意：这是一个内部API, 我们建议用户使用RDD.cogroup（...）,而不是直接实例化
  * @param rdds parent RDDs.
  * @param part partitioner used to partition the shuffle output
  */
@@ -81,12 +85,13 @@ class CoGroupedRDD[K](@transient var rdds: Seq[RDD[_ <: Product2[K, _]]], part: 
   // Each ArrayBuffer is represented as a CoGroup, and the resulting Array as a CoGroupCombiner.
   // CoGroupValue is the intermediate state of each value before being merged in compute.
   private type CoGroup = CompactBuffer[Any]
-  private type CoGroupValue = (Any, Int)  // Int is dependency number
+  private type CoGroupValue = (Any, Int)  // Int is dependency number Int是依赖数
   private type CoGroupCombiner = Array[CoGroup]
 
   private var serializer: Option[Serializer] = None
 
-  /** Set a serializer for this RDD's shuffle, or null to use the default (spark.serializer) */
+  /** Set a serializer for this RDD's shuffle, or null to use the default (spark.serializer)
+    * 为此RDD的shuffle设置一个串行化器,或者使用默认值（spark.serializer） */
   def setSerializer(serializer: Serializer): CoGroupedRDD[K] = {
     this.serializer = Option(serializer)
     this
@@ -109,8 +114,10 @@ class CoGroupedRDD[K](@transient var rdds: Seq[RDD[_ <: Product2[K, _]]], part: 
     val array = new Array[Partition](part.numPartitions)
     for (i <- 0 until array.length) {
       // Each CoGroupPartition will have a dependency per contributing RDD
+      //每个CoGroupPartition将有一个依赖性贡献RDD
       array(i) = new CoGroupPartition(i, rdds.zipWithIndex.map { case (rdd, j) =>
         // Assume each RDD contributed a single dependency, and get it
+        //假设每个RDD贡献了一个依赖关系,并得到它
         dependencies(j) match {
           case s: ShuffleDependency[_, _, _] =>
             None
@@ -132,6 +139,7 @@ class CoGroupedRDD[K](@transient var rdds: Seq[RDD[_ <: Product2[K, _]]], part: 
     val numRdds = dependencies.length
 
     // A list of (rdd iterator, dependency number) pairs
+    //（rdd迭代器，依赖关系号）对的列表
     val rddIterators = new ArrayBuffer[(Iterator[Product2[K, Any]], Int)]
     for ((dep, depNum) <- dependencies.zipWithIndex) dep match {
       case oneToOneDependency: OneToOneDependency[Product2[K, Any]] @unchecked =>
@@ -141,7 +149,7 @@ class CoGroupedRDD[K](@transient var rdds: Seq[RDD[_ <: Product2[K, _]]], part: 
         rddIterators += ((it, depNum))
 
       case shuffleDependency: ShuffleDependency[_, _, _] =>
-        // Read map outputs of shuffle
+        // Read map outputs of shuffle 读取shuffle的map输出
         val it = SparkEnv.get.shuffleManager
           .getReader(shuffleDependency.shuffleHandle, split.index, split.index + 1, context)
           .read()

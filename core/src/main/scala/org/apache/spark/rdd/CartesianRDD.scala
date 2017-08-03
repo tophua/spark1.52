@@ -59,7 +59,7 @@ class CartesianRDD[T: ClassTag, U: ClassTag](
   val numPartitionsInRdd2 = rdd2.partitions.length
 
   override def getPartitions: Array[Partition] = {
-    // create the cross product split
+    // create the cross product split 创建交叉产品拆分
     val array = new Array[Partition](rdd1.partitions.length * rdd2.partitions.length)
     for (s1 <- rdd1.partitions; s2 <- rdd2.partitions) {
       val idx = s1.index * numPartitionsInRdd2 + s2.index

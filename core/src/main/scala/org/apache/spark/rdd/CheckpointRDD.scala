@@ -35,12 +35,14 @@ private[spark] abstract class CheckpointRDD[T: ClassTag](@transient sc: SparkCon
   extends RDD[T](sc, Nil) {
 
   // CheckpointRDD should not be checkpointed again
+  //CheckpointRDD不应再次检查点
   override def doCheckpoint(): Unit = { }
   override def checkpoint(): Unit = { }
   override def localCheckpoint(): this.type = this
 
   // Note: There is a bug in MiMa that complains about `AbstractMethodProblem`s in the
   // base [[org.apache.spark.rdd.RDD]] class if we do not override the following methods.
+  //注意：如果我们不覆盖以下方法,那么MiMa中有一个Bug在基础[[org.apache.spark.rdd.RDD]]类中引用了`AbstractMethodProblem`s）
   // scalastyle:off
   protected override def getPartitions: Array[Partition] = ???
   override def compute(p: Partition, tc: TaskContext): Iterator[T] = ???

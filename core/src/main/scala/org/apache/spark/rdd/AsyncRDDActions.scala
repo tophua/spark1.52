@@ -74,21 +74,26 @@ class AsyncRDDActions[T: ClassTag](self: RDD[T]) extends Serializable with Loggi
     f.run {
       // This is a blocking action so we should use "AsyncRDDActions.futureExecutionContext" which
       // is a cached thread pool.
+      //这是一个阻塞操作,所以我们应该使用“AsyncRDDActions.futureExecutionContext”,它是一个缓存的线程池。
       val results = new ArrayBuffer[T](num)
       val totalParts = self.partitions.length
       var partsScanned = 0
       while (results.size < num && partsScanned < totalParts) {
         // The number of partitions to try in this iteration. It is ok for this number to be
         // greater than totalParts because we actually cap it at totalParts in runJob.
+        //在此迭代中尝试的分区数,这个数字可以大于totalParts,因为我们实际上将其限制在runJob中的totalParts上
         var numPartsToTry = 1
         if (partsScanned > 0) {
           // If we didn't find any rows after the previous iteration, quadruple and retry.
           // Otherwise, interpolate the number of partitions we need to try, but overestimate it
           // by 50%. We also cap the estimation in the end.
+          //如果在上一次迭代之后我们没有找到任何行,则重复四次并重试,
+          //否则,插值我们需要尝试的分区数,但高估了50％,我们也最终估计到底。
           if (results.size == 0) {
             numPartsToTry = partsScanned * 4
           } else {
             // the left side of max is >=1 whenever partsScanned >= 2
+            //当partsScanned> = 2时，max的左侧为> = 1
             numPartsToTry = Math.max(1,
               (1.5 * num * partsScanned / results.size).toInt - partsScanned)
             numPartsToTry = Math.min(numPartsToTry, partsScanned * 4)

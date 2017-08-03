@@ -25,6 +25,7 @@ import org.apache.spark.{Partition, Partitioner, TaskContext}
 /**
  * An RDD that applies a user provided function to every partition of the parent RDD, and
  * additionally allows the user to prepare each partition before computing the parent partition.
+  * 将用户提供的功能应用于父RDD的每个分区的RDD,并且还允许用户在计算父分区之前准备每个分区
  */
 private[spark] class MapPartitionsWithPreparationRDD[U: ClassTag, T: ClassTag, M: ClassTag](
     prev: RDD[T],
@@ -41,6 +42,8 @@ private[spark] class MapPartitionsWithPreparationRDD[U: ClassTag, T: ClassTag, M
 
   // In certain join operations, prepare can be called on the same partition multiple times.
   // In this case, we need to ensure that each call to compute gets a separate prepare argument.
+  //在某些连接操作中，准备可以在同一分区上多次调用。
+  //在这种情况下,我们需要确保每次对compute的调用都有一个单独的prepare参数。
   private[this] val preparedArguments: ArrayBuffer[M] = new ArrayBuffer[M]
 
   /**

@@ -44,27 +44,32 @@ class ExecutorSource(threadPool: ThreadPoolExecutor, executorId: String) extends
   override val sourceName = "executor"
 
   // Gauge for executor thread pool's actively executing task counts
+  //执行器线程池的积极执行任务计数
   metricRegistry.register(MetricRegistry.name("threadpool", "activeTasks"), new Gauge[Int] {
     override def getValue: Int = threadPool.getActiveCount()
   })
 
   // Gauge for executor thread pool's approximate total number of tasks that have been completed
+  //执行器线程池的大小总计已完成的任务总数
   metricRegistry.register(MetricRegistry.name("threadpool", "completeTasks"), new Gauge[Long] {
     override def getValue: Long = threadPool.getCompletedTaskCount()
   })
 
   // Gauge for executor thread pool's current number of threads
+  //执行器线程池的当前线程数
   metricRegistry.register(MetricRegistry.name("threadpool", "currentPool_size"), new Gauge[Int] {
     override def getValue: Int = threadPool.getPoolSize()
   })
 
   // Gauge got executor thread pool's largest number of threads that have ever simultaneously
   // been in th pool
+  //Gauge获得了执行者线程池最大数量的线程,这些线程同时处于第三个池中
   metricRegistry.register(MetricRegistry.name("threadpool", "maxPool_size"), new Gauge[Int] {
     override def getValue: Int = threadPool.getMaximumPoolSize()
   })
 
   // Gauge for file system stats of this executor
+  //此执行器的文件系统统计信息
   for (scheme <- Array("hdfs", "file")) {
     registerFileSystemStat(scheme, "read_bytes", _.getBytesRead(), 0L)
     registerFileSystemStat(scheme, "write_bytes", _.getBytesWritten(), 0L)

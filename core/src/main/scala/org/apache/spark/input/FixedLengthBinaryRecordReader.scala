@@ -30,8 +30,12 @@ import org.apache.spark.deploy.SparkHadoopUtil
  * FixedLengthBinaryRecordReader is returned by FixedLengthBinaryInputFormat.
  * It uses the record length set in FixedLengthBinaryInputFormat to
  * read one record at a time from the given InputSplit.
+  *
+  * FixedLengthBinaryRecordReader由FixedLengthBinaryInputFormat返回
+  * 它使用FixedLengthBinaryInputFormat中设置的记录长度从给定的InputSplit一次读取一个记录。
  *
  * Each call to nextKeyValue() updates the LongWritable key and BytesWritable value.
+  * 每次调用nextKeyValue（）将更新LongWritable键和BytesWritable值
  *
  * key = record index (Long)
  * value = the record itself (BytesWritable)

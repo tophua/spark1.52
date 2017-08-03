@@ -31,10 +31,12 @@ import org.apache.spark.util.Utils
  * :: DeveloperApi ::
  * CompressionCodec allows the customization of choosing different compression implementations
  * to be used in block storage.
+  * CompressionCodec允许定制在块存储中使用不同的压缩实现
  *
  * Note: The wire protocol for a codec is not guaranteed compatible across versions of Spark.
  *       This is intended for use as an internal compression utility within a single
  *       Spark application.
+  *       注意：编码解码器的有线协议在Spark版本之间不能保证兼容,此功能旨在用作单个Spark应用程序中的内部压缩实用程序
  */
 @DeveloperApi
 trait CompressionCodec {
@@ -79,6 +81,7 @@ private[spark] object CompressionCodec {
   /**
    * Return the short version of the given codec name.
    * If it is already a short name, just return it.
+    * 返回给定编解码器名称的短版本,如果它已经是一个简短的名字,只要返回,
    */
   def getShortName(codecName: String): String = {
     if (shortCompressionCodecNames.contains(codecName)) {
@@ -104,6 +107,7 @@ private[spark] object CompressionCodec {
  * Note: The wire protocol for this codec is not guaranteed to be compatible across versions
  *       of Spark. This is intended for use as an internal compression utility within a single Spark
  *       application.
+  *       注意：这种编解码器的有线协议不能保证在版本的Spark之间兼容。 这适用于单个Spark应用程序中的内部压缩实用程序。
  */
 @DeveloperApi
 class LZ4CompressionCodec(conf: SparkConf) extends CompressionCodec {
@@ -124,6 +128,7 @@ class LZ4CompressionCodec(conf: SparkConf) extends CompressionCodec {
  * Note: The wire protocol for this codec is not guaranteed to be compatible across versions
  *       of Spark. This is intended for use as an internal compression utility within a single Spark
  *       application.
+  *       注意：这种编解码器的有线协议不能保证在版本的Spark之间兼容,这适用于单个Spark应用程序中的内部压缩实用程序。
  */
 @DeveloperApi
 class LZFCompressionCodec(conf: SparkConf) extends CompressionCodec {
@@ -140,10 +145,12 @@ class LZFCompressionCodec(conf: SparkConf) extends CompressionCodec {
  * :: DeveloperApi ::
  * Snappy implementation of [[org.apache.spark.io.CompressionCodec]].
  * Block size can be configured by `spark.io.compression.snappy.blockSize`.
+  * [[org.apache.spark.io.CompressionCodec]]的Snappy实现]块大小可以由`spark.io.compression.snappy.blockSize`配置
  *
  * Note: The wire protocol for this codec is not guaranteed to be compatible across versions
  *       of Spark. This is intended for use as an internal compression utility within a single Spark
  *       application.
+  *       注意：这种编解码器的有线协议不能保证在版本的Spark之间兼容,这适用于单个Spark应用程序中的内部压缩实用程序,
  */
 @DeveloperApi
 class SnappyCompressionCodec(conf: SparkConf) extends CompressionCodec {

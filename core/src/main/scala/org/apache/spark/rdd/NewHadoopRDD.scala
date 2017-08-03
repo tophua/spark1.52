@@ -51,15 +51,18 @@ private[spark] class NewHadoopPartition(
  * :: DeveloperApi ::
  * An RDD that provides core functionality for reading data stored in Hadoop (e.g., files in HDFS,
  * sources in HBase, or S3), using the new MapReduce API (`org.apache.hadoop.mapreduce`).
+  *
+  * 使用新的MapReduce API（“org.apache.hadoop.mapreduce”）提供用于读取存储在Hadoop中的数据
+  * （例如，HDFS中的文件，HBase中的源或S3）的核心功能的RDD。
  *
  * Note: Instantiating this class directly is not recommended, please use
  * [[org.apache.spark.SparkContext.newAPIHadoopRDD()]]
  *
- * @param sc The SparkContext to associate the RDD with.
- * @param inputFormatClass Storage format of the data to be read.
- * @param keyClass Class of the key associated with the inputFormatClass.
- * @param valueClass Class of the value associated with the inputFormatClass.
- * @param conf The Hadoop configuration.
+ * @param sc The SparkContext to associate the RDD with. SparkContext将RDD关联
+ * @param inputFormatClass Storage format of the data to be read.要读取的数据的存储格式
+ * @param keyClass Class of the key associated with the inputFormatClass.与inputFormatClass关联的键的类
+ * @param valueClass Class of the value associated with the inputFormatClass.与inputFormatClass关联的值的类
+ * @param conf The Hadoop configuration.Hadoop配置
  */
 @DeveloperApi
 class NewHadoopRDD[K, V](
@@ -73,6 +76,7 @@ class NewHadoopRDD[K, V](
   with Logging {
 
   // A Hadoop Configuration can be about 10 KB, which is pretty big, so broadcast it
+  //Hadoop配置可以是大约10 KB,这是相当大的,所以广播它
   private val confBroadcast = sc.broadcast(new SerializableConfiguration(conf))
   // private val serializableConf = new SerializableWritable(conf)
 
@@ -96,6 +100,13 @@ class NewHadoopRDD[K, V](
       // Unfortunately, this clone can be very expensive.  To avoid unexpected performance
       // regressions for workloads and Hadoop versions that do not suffer from these thread-safety
       // issues, this cloning is disabled by default.
+      // Hadoop配置对象不是线程安全的，如果可能会导致各种问题
+      //一个作业修改一个配置，而另一个读取它（SPARK-2546，SPARK-10611）。 这个
+      //问题很少发生，因为大多数作业都像处理配置一样
+      // immutable。 这里实现的一个解决方案是克隆Configuration对象。
+      //不幸的是，这个克隆可能非常昂贵。 避免意外的表现
+      //对于不承担这些线程安全性的工作负载和Hadoop版本的回归
+      //问题，默认情况下禁用此克隆。
       NewHadoopRDD.CONFIGURATION_INSTANTIATION_LOCK.synchronized {
         logDebug("Cloning Hadoop Configuration")
         new Configuration(conf)
@@ -132,6 +143,8 @@ class NewHadoopRDD[K, V](
 
       // Find a function that will return the FileSystem bytes read by this thread. Do this before
       // creating RecordReader, because RecordReader's constructor might read some bytes
+      //找到一个将返回此线程读取的FileSystem字节的函数,
+      //在创建RecordReader之前执行此操作,因为RecordReader的构造函数可能会读取一些字节
       val bytesReadCallback = inputMetrics.bytesReadCallback.orElse {
         split.serializableHadoopSplit.value match {
           case _: FileSplit | _: CombineFileSplit =>
@@ -154,6 +167,7 @@ class NewHadoopRDD[K, V](
       reader.initialize(split.serializableHadoopSplit.value, hadoopAttemptContext)
 
       // Register an on-task-completion callback to close the input stream.
+      //注册任务完成回调以关闭输入流。
       context.addTaskCompletionListener(context => close())
       var havePair = false
       var finished = false
@@ -166,6 +180,7 @@ class NewHadoopRDD[K, V](
             // Close and release the reader here; close() will also be called when the task
             // completes, but for tasks that read from many files, it helps to release the
             // resources early.
+            //在这里关闭并释放读者,当任务完成时,close（）也将被调用,但对于从许多文件读取的任务,它有助于提早释放资源。
             close()
           }
           havePair = !finished
@@ -190,6 +205,10 @@ class NewHadoopRDD[K, V](
           // reader more than once, since that exposes us to MAPREDUCE-5918 when running against
           // Hadoop 1.x and older Hadoop 2.x releases. That bug can lead to non-deterministic
           // corruption issues when reading compressed input.
+          //关闭阅读器并释放它。 注意：非常重要的是我们不关闭
+          //读者不止一次，因为这样暴露给我们MAPREDUCE-5918当运行反对
+          // Hadoop 1.x和更旧的Hadoop 2.x版本。 那个bug可能导致非确定性
+          //读取压缩输入时出现损坏问题
           try {
             reader.close()
           } catch {
@@ -206,6 +225,7 @@ class NewHadoopRDD[K, V](
                      split.serializableHadoopSplit.value.isInstanceOf[CombineFileSplit]) {
             // If we can't get the bytes read from the FS stats, fall back to the split size,
             // which may be inaccurate.
+            //如果我们无法从FS统计信息读取字节,则返回到分割大小,这可能不准确。
             try {
               inputMetrics.incBytesRead(split.serializableHadoopSplit.value.getLength)
             } catch {
@@ -219,7 +239,8 @@ class NewHadoopRDD[K, V](
     new InterruptibleIterator(context, iter)
   }
 
-  /** Maps over a partition, providing the InputSplit that was used as the base of the partition. */
+  /** Maps over a partition, providing the InputSplit that was used as the base of the partition.
+    * 通过分区映射,提供用作分区基础的InputSplit。*/
   @DeveloperApi
   def mapPartitionsWithInputSplit[U: ClassTag](
       f: (InputSplit, Iterator[(K, V)]) => Iterator[U],
@@ -259,12 +280,17 @@ private[spark] object NewHadoopRDD {
   /**
    * Configuration's constructor is not threadsafe (see SPARK-1097 and HADOOP-10456).
    * Therefore, we synchronize on this lock before calling new Configuration().
+    * 配置构造函数不是线程安全的（请参阅SPARK-1097和HADOOP-10456）,
+    * 因此,在调用新的Configuration（）之前,我们将同步此锁。
    */
   val CONFIGURATION_INSTANTIATION_LOCK = new Object()
 
   /**
    * Analogous to [[org.apache.spark.rdd.MapPartitionsRDD]], but passes in an InputSplit to
    * the given function rather than the index of the partition.
+    *
+    * 类似于[[org.apache.spark.rdd.MapPartitionsRDD]]）
+    * 但是将InputSplit传递给给定的函数而不是分区的索引。
    */
   private[spark] class NewHadoopMapPartitionsWithSplitRDD[U: ClassTag, T: ClassTag](
       prev: RDD[T],

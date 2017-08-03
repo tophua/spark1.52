@@ -73,7 +73,7 @@ class BlockRDD[T: ClassTag](@transient sc: SparkContext, @transient val blockIds
   /**
    * Whether this BlockRDD is actually usable. This will be false if the data blocks have been
    * removed using `this.removeBlocks`.
-   * blockrdd实际上是否可用,如果数据块已经删除返回false
+    * 该BlockRDD是否实际可用,如果使用`this.removeBlocks`删除了数据块,返回false
    */
   private[spark] def isValid: Boolean = {
     _isValid

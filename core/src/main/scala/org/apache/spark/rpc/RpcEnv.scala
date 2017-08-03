@@ -175,6 +175,7 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
   /**
    * Create a URI used to create a [[RpcEndpointRef]]. Use this one to create the URI instead of
    * creating it manually because different [[RpcEnv]] may have different formats.
+    * 创建一个用于创建[[RpcEndpointRef]]的URI,使用这个来创建URI而不是手动创建它,因为不同的[[RpcEnv]]可能有不同的格式。
    * 
    */
   def uriOf(systemName: String, address: RpcAddress, endpointName: String): String
@@ -239,6 +240,7 @@ private[spark] object RpcAddress {
 
 /**
  * An exception thrown if RpcTimeout modifies a [[TimeoutException]].
+  * 如果RpcTimeout修改[[TimeoutException]]，抛出异常
  */
 private[rpc] class RpcTimeoutException(message: String, cause: TimeoutException)
   extends TimeoutException(message) { initCause(cause) }
@@ -247,29 +249,34 @@ private[rpc] class RpcTimeoutException(message: String, cause: TimeoutException)
 /**
  * Associates a timeout with a description so that a when a TimeoutException occurs, additional
  * context about the timeout can be amended to the exception message.
+  * 将超时与描述相关联,以便在发生TimeoutException时,有关超时的其他上下文可以修改为异常消息,
  * @param duration timeout duration in seconds
  * @param timeoutProp the configuration property that controls this timeout
  */
 private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: String)
   extends Serializable {
 
-  /** Amends the standard message of TimeoutException to include the description */
+  /** Amends the standard message of TimeoutException to include the description
+    * 修改TimeoutException的标准消息以包含描述 */
   private def createRpcTimeoutException(te: TimeoutException): RpcTimeoutException = {
     new RpcTimeoutException(te.getMessage() + ". This timeout is controlled by " + timeoutProp, te)
   }
 
   /**
    * PartialFunction to match a TimeoutException and add the timeout description to the message
-   * PartialFunction 匹配一个TimeoutException和添加超时的描述信息
+   * PartialFunction来匹配TimeoutException，并将超时描述添加到消息中
    * @note This can be used in the recover callback of a Future to add to a TimeoutException
+    *       这可以用于将来的恢复回调来添加到TimeoutException
    * Example:
    *    val timeout = new RpcTimeout(5 millis, "short timeout")
    *    Future(throw new TimeoutException).recover(timeout.addMessageIfTimeout)
    */
   def addMessageIfTimeout[T]: PartialFunction[Throwable, T] = {
     // The exception has already been converted to a RpcTimeoutException so just raise it
+    //异常已经被转换为RpcTimeoutException，所以只是提高它
     case rte: RpcTimeoutException => throw rte
     // Any other TimeoutException get converted to a RpcTimeoutException with modified message
+      //任何其他TimeoutException通过修改的消息转换为RpcTimeoutException
     case te: TimeoutException => throw createRpcTimeoutException(te)
   }
 
@@ -278,9 +285,12 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
    * future类继承于Awaitable类,
    * Wait for the completed result and return it. If the result is not available within this
    * timeout, throw a [[RpcTimeoutException]] to indicate which configuration controls the timeout.
-   * @param  awaitable  the `Awaitable` to be awaited(可等待)
+    *
+    *  在规定时间内等待完成的结果并返回,如果结果在此超时期间不可用,则抛出一个[[RpcTimeoutException]]来指示哪个配置控制超时
+    *
+   * @param  awaitable  the `Awaitable` to be awaited
    * @throws RpcTimeoutException if after waiting for the specified time `awaitable`
-   *         is still not ready
+   *         is still not ready  如果等待指定的时间“等待”仍然没有准备好
    */
   def awaitResult[T](awaitable: Awaitable[T]): T = {
     try {
@@ -301,7 +311,7 @@ private[spark] object RpcTimeout {
   /**
    * Lookup the timeout property in the configuration and create
    * a RpcTimeout with the property key in the description.
-   * 查找超时属性配置在配置文件中创建一个rpctimeout的描述
+   * 在配置中查找timeout属性,并在描述中使用属性键创建一个RpcTimeout。
    * @param conf configuration properties containing the timeout
    * @param timeoutProp property key for the timeout in seconds
    * @throws NoSuchElementException if property is not set
@@ -315,6 +325,10 @@ private[spark] object RpcTimeout {
    * Lookup the timeout property in the configuration and create
    * a RpcTimeout with the property key in the description.
    * Uses the given default value if property is not set
+    *
+    * 在配置中查找timeout属性,并在描述中使用属性键创建一个RpcTimeout,
+    * 如果属性未设置,则使用给定的默认值
+    *
    * @param conf configuration properties containing the timeout
    * @param timeoutProp property key for the timeout in seconds
    * @param defaultValue default timeout value in seconds if property not found

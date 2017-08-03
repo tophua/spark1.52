@@ -24,11 +24,15 @@ import org.apache.spark.storage.RDDBlockId
 
 /**
  * A dummy CheckpointRDD that exists to provide informative error messages during failures.
- *
+ *  一个虚拟的CheckpointRDD，用于在故障期间提供有用的错误消息。
+  *
  * This is simply a placeholder because the original checkpointed RDD is expected to be
  * fully cached. Only if an executor fails or if the user explicitly unpersists the original
  * RDD will Spark ever attempt to compute this CheckpointRDD. When this happens, however,
  * we must provide an informative error message.
+  *
+  * 这只是一个占位符，因为原始检查点的RDD有望成为完全缓存,只有当执行者失败或者用户明确地将原件分开时，
+  * RDD将Spark尝试计算此CheckpointRDD。 但是，如果发生这种情况，我们必须提供一个内容丰富的错误消息。
  *
  * @param sc the active SparkContext
  * @param rddId the ID of the checkpointed RDD
@@ -55,6 +59,9 @@ private[spark] class LocalCheckpointRDD[T: ClassTag](
    * executor is lost. Under normal circumstances, however, the original RDD (our child)
    * is expected to be fully cached and so all partitions should already be computed and
    * available in the block storage.
+    *
+    * 只有当原始RDD明确地不分开,或者执行者丢失时,才应该调用,
+    * 然而，在正常情况下，原始RDD（我们的小孩）预计将被完全缓存,因此所有分区应该已经被计算并且可以在块存储中使用。
    */
   override def compute(partition: Partition, context: TaskContext): Iterator[T] = {
     throw new SparkException(

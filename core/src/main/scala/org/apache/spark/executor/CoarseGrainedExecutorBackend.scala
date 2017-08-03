@@ -86,6 +86,7 @@ private[spark] class CoarseGrainedExecutorBackend(
 	  //onComplete,onSuccess,onFailure三个回调函数来异步执行Future任务
     }(ThreadUtils.sameThread).onComplete {
       // This is a very fast action so we can use "ThreadUtils.sameThread"
+      //这是一个很快的动作，所以我们可以使用“ThreadUtils.sameThread”
       case Success(msg) => Utils.tryLogNonFatalError {
         Option(self).foreach(_.send(msg)) // msg must be RegisteredExecutor
       }
@@ -202,6 +203,7 @@ private[spark] object CoarseGrainedExecutorBackend extends Logging {
       Utils.checkHost(hostname)
 
       // Bootstrap to fetch the driver's Spark properties.
+      //Bootstrap来获取驱动的Spark属性
       val executorConf = new SparkConf
       val port = executorConf.getInt("spark.executor.port", 0)
       val fetcher = RpcEnv.create(
@@ -218,9 +220,11 @@ private[spark] object CoarseGrainedExecutorBackend extends Logging {
       fetcher.shutdown()
 
       // Create SparkEnv using properties we fetched from the driver.
+      //使用从驱动程序获取的属性创建SparkEnv
       val driverConf = new SparkConf()
       for ((key, value) <- props) {
         // this is required for SSL in standalone mode
+        //这在独立模式下是必需的
         if (SparkConf.isExecutorStartupConf(key)) {
           driverConf.setIfMissing(key, value)
         } else {
@@ -242,6 +246,7 @@ private[spark] object CoarseGrainedExecutorBackend extends Logging {
       assert(boundPort != 0)
 
       // Start the CoarseGrainedExecutorBackend endpoint.
+      //启动CoarseGrainedExecutorBackend端点
       val sparkHostPort = hostname + ":" + boundPort
       env.rpcEnv.setupEndpoint("Executor", new CoarseGrainedExecutorBackend(
         env.rpcEnv, driverUrl, executorId, sparkHostPort, cores, userClassPath, env))
@@ -282,6 +287,7 @@ private[spark] object CoarseGrainedExecutorBackend extends Logging {
           argv = tail
         case ("--worker-url") :: value :: tail =>
           // Worker url is used in spark standalone mode to enforce fate-sharing with worker
+          //Worker URL用于spark独立模式,以强制与worker进行命运共享
           workerUrl = Some(value)
           argv = tail
         case ("--user-class-path") :: value :: tail =>

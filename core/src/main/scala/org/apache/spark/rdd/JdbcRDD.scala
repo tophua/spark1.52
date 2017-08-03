@@ -139,8 +139,9 @@ object JdbcRDD {
 
   /**
    * Create an RDD that executes an SQL query on a JDBC connection and reads results.
+    * 创建一个在JDBC连接上执行SQL查询并读取结果的RDD
    * For usage example, see test case JavaAPISuite.testJavaJdbcRDD.
-   *
+   * 有关使用示例,请参阅测试用例JavaAPISuite.testJavaJdbcRDD。
    * @param connectionFactory a factory that returns an open Connection.
    *   The RDD takes care of closing the connection.
    * @param sql the text of the query.
@@ -181,17 +182,23 @@ object JdbcRDD {
    * Create an RDD that executes an SQL query on a JDBC connection and reads results. Each row is
    * converted into a `Object` array. For usage example, see test case JavaAPISuite.testJavaJdbcRDD.
    *
+    * 创建一个在JDBC连接上执行SQL查询并读取结果的RDD, 每一行都转换成一个`Object`数组,
+    * 有关使用示例，请参阅测试用例JavaAPISuite.testJavaJdbcRDD。
+    *
    * @param connectionFactory a factory that returns an open Connection.
-   *   The RDD takes care of closing the connection.
-   * @param sql the text of the query.
+   *   The RDD takes care of closing the connection. 一个返回打开的连接的工厂, RDD负责关闭连接。
+   * @param sql the text of the query. 查询的文本
    *   The query must contain two ? placeholders for parameters used to partition the results.
    *   E.g. "select title, author from books where ? <= id and id <= ?"
-   * @param lowerBound the minimum value of the first placeholder
-   * @param upperBound the maximum value of the second placeholder
+    *           查询必须包含两个？ 用于分隔结果的参数的占位符。
+    *           例如 “select title，author from books where？<= id and id <=？”
+   * @param lowerBound the minimum value of the first placeholder 第一个占位符的最小值
+   * @param upperBound the maximum value of the second placeholder 第二个占位符的最大值下限和上限是包含值。
    *   The lower and upper bounds are inclusive.
    * @param numPartitions the number of partitions.
    *   Given a lowerBound of 1, an upperBound of 20, and a numPartitions of 2,
    *   the query would be executed twice, once with (1, 10) and once with (11, 20)
+    *   分区数,给定1的下限,上限为20,numPartition为2,查询将执行两次,一次（1,10）和一次（11,20）
    */
   def create(
       sc: JavaSparkContext,

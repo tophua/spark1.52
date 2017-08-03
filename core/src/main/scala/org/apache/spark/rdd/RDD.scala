@@ -398,6 +398,9 @@ abstract class RDD[T: ClassTag](
    *  RDD, and then flattening the results.
    *  类似于map,但是每一个输入元素,会被映射为0到多个输出元素
    *  （因此,func函数的返回值是一个Seq,而不是单一元素）
+    *flatMap函数则是两个操作的集合——正是“先映射后扁平化”：
+      1：同map函数一样：对每一条输入进行指定的操作,然后为每一条输入返回一个对象
+      2：最后将所有对象合并为一个对象
    */
   def flatMap[U: ClassTag](f: T => TraversableOnce[U]): RDD[U] = withScope {
     val cleanF = sc.clean(f)

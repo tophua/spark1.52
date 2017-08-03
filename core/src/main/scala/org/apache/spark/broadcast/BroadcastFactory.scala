@@ -29,6 +29,8 @@ import org.apache.spark.annotation.DeveloperApi
  * multiple broadcast implementations). SparkContext uses a user-specified
  * BroadcastFactory implementation to instantiate a particular broadcast for the
  * entire Spark job.
+  * 用于Spark中所有广播实现的接口(允许多个广播实现)
+  * SparkContext使用用户指定的BroadcastFactory实现来实例化整个Spark作业的特定广播。
  */
 @DeveloperApi
 trait BroadcastFactory {

@@ -39,6 +39,7 @@ class HttpBroadcastFactory extends BroadcastFactory {
 
   /**
    * Remove all persisted state associated with the HTTP broadcast with the given ID.
+    * 删除与给定ID的HTTP广播关联的所有持久状态
    * @param removeFromDriver Whether to remove state from the driver
    * @param blocking Whether to block until unbroadcasted
    */

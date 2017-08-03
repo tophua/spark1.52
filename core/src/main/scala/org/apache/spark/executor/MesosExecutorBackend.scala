@@ -55,6 +55,7 @@ private[spark] class MesosExecutorBackend
       slaveInfo: SlaveInfo) {
 
     // Get num cores for this task from ExecutorInfo, created in MesosSchedulerBackend.
+    //从MesosSchedulerBackend中创建的ExecutorInfo获取此任务的数字核心
     val cpusPerTask = executorInfo.getResourcesList
       .find(_.getName == "cpus")
       .map(_.getScalar.getValue.toInt)
@@ -118,6 +119,7 @@ private[spark] object MesosExecutorBackend extends Logging {
   def main(args: Array[String]) {
     SignalLogger.register(log)
     // Create a new Executor and start it running
+    //创建一个新的执行器并启动它
     val runner = new MesosExecutorBackend()
     new MesosExecutorDriver(runner).run()
   }

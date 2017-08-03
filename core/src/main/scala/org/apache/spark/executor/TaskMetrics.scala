@@ -177,6 +177,8 @@ class TaskMetrics extends Serializable {
    * issues from readers in different threads, in-progress tasks use a ShuffleReadMetrics for each
    * dependency, and merge these metrics before reporting them to the driver. This method returns
    * a ShuffleReadMetrics for a dependency and registers it for merging later.
+    * 任务可能有多个随机阅读器用于多个依赖关系,为避免来自不同线程的读者的同步问题,正在进行的任务对每个依赖关系使用ShuffleReadMetrics,
+    * 并将这些指标合并，然后将其报告给驱动程序,此方法返回一个依赖关系的ShuffleReadMetrics,并将其注册后进行合并。
    */
   private [spark] def createShuffleReadMetricsForDependency(): ShuffleReadMetrics = synchronized {
     val readMetrics = new ShuffleReadMetrics()
@@ -190,6 +192,8 @@ class TaskMetrics extends Serializable {
    * so the caller can accumulate bytes read. If the readMethod is different
    * than previously seen by this task, we return a new InputMetric but don't
    * record it.
+    * 返回任务应该使用的输入度量对象。 目前，如果存在具有相同readMethod的输入度量，
+    * 那么我们返回一个调用者可以累加读取的字节。如果readMethod与此任务以前看到的不同,则返回一个新的InputMetric，但不记录它。
    *
    * Once https://issues.apache.org/jira/browse/SPARK-5225 is addressed,
    * we can store all the different inputMetrics (one per readMethod).
@@ -238,6 +242,7 @@ class TaskMetrics extends Serializable {
     // Get the hostname from cached data, since hostname is the order of number of nodes in
     // cluster, so using cached hostname will decrease the object number and alleviate the GC
     // overhead.
+    //从缓存数据获取主机名，因为主机名是节点数量的顺序集群，因此使用缓存的主机名将减少对象编号并减轻GCoverhead。
     _hostname = TaskMetrics.getCachedHostName(_hostname)
   }
 
@@ -325,6 +330,7 @@ case class InputMetrics(readMethod: DataReadMethod.Value) {
 
   /**
    * Invoke the bytesReadCallback and mutate bytesRead.
+    * 调用bytesReadCallback和mutate bytesRead
    */
   def updateBytesRead() {
     bytesReadCallback.foreach { c =>
@@ -335,6 +341,7 @@ case class InputMetrics(readMethod: DataReadMethod.Value) {
  /**
   * Register a function that can be called to get up-to-date information on how many bytes the task
   * has read from an input source.
+   * 注册一个可以调用的函数来获取有关任务从输入源读取的字节数的最新信息
   */
   def setBytesReadCallback(f: Option[() => Long]) {
     bytesReadCallback = f

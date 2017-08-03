@@ -36,9 +36,14 @@ private[spark] trait RpcEnvFactory {
  * the same [[ThreadSafeRpcEndpoint]]. In the other words, changes to internal fields of a
  * [[ThreadSafeRpcEndpoint]] are visible when processing the next message, and fields in the
  * [[ThreadSafeRpcEndpoint]] need not be volatile or equivalent.
+  *
+  * 线程安全意味着一个消息的处理发生在使用相同[[ThreadSafeRpcEndpoint]]处理下一个消息之前,
+  * 换句话说，对[[ThreadSafeRpcEndpoint]]的内部字段的更改在处理下一条消息时是可见的'
+  * 而[[ThreadSafeRpcEndpoint]]中的字段不需要是volatile或等同的。
  *
  * However, there is no guarantee that the same thread will be executing the same
  * [[ThreadSafeRpcEndpoint]] for different messages.
+  * 但是,不能保证同一个线程将针对不同的消息执行相同的[[ThreadSafeRpcEndpoint]]
  * receive能并发操作,如果你想要receive是线程安全的,请使用ThreadSafeRpcEndpoint
  */
 private[spark] trait ThreadSafeRpcEndpoint extends RpcEndpoint
@@ -47,24 +52,28 @@ private[spark] trait ThreadSafeRpcEndpoint extends RpcEndpoint
 /**
  * 凡是继承RpcEndpoint,都是一个消息通讯体,能接收消息
  * 当一个消息到来时,方法调用顺序为  onStart, receive, onStop
-        它的生命周期为constructor -> onStart -> receive* -> onStop  .当然还有一些其他方法,都是间触发方法
-  RpcEndpoint定义了由消息触发的一些函数,`onStart`, `receive` and `onStop`的调用是顺序发生的。
-		 它的声明周期是constructor -> onStart -> receive* -> onStop。注意,`receive`能并发操作,
- 		 如果你想要`receive`是线程安全的,请使用ThreadSafeRpcEndpoint,如果RpcEndpoint抛出错误,
-  	 它的`onError`方法将会触发。它有51个实现子类,我们比较熟悉的是Master、Worker、ClientEndpoint等。
+      它的生命周期为constructor -> onStart -> receive* -> onStop  .当然还有一些其他方法,都是间触发方法
+      RpcEndpoint定义了由消息触发的一些函数,`onStart`, `receive` and `onStop`的调用是顺序发生的。
+		 它的声明周期是constructor -> onStart -> receive* -> onStop。
+
  * An end point for the RPC that defines what functions to trigger given a message.
+  * RPC的终点，定义在给定消息的情况下触发什么功能
  *
  * It is guaranteed that `onStart`, `receive` and `onStop` will be called in sequence.
- *
+ * 确保`onStart`，'receive`和`onStop`按顺序调用
  * The life-cycle of an endpoint is:
- *
+ * 终端的生命周期是：
  * constructor -> onStart -> receive* -> onStop
  *
  * Note: `receive` can be called concurrently. If you want `receive` to be thread-safe, please use
  * [[ThreadSafeRpcEndpoint]]
- *
- * If any error is thrown from one of [[RpcEndpoint]] methods except `onError`, `onError` will be
- * invoked with the cause. If `onError` throws an error, [[RpcEnv]] will ignore it.
+  *
+ * 注意：`receive`可以同时调用。 如果你想要“receive”是线程安全的，请使用[[ThreadSafeRpcEndpoint]]
+  *
+ * If any error is thrown from one of [[RpcEndpoint]] methods except onError, onError will be
+ * invoked with the cause. If onError throws an error, [[RpcEnv]] will ignore it.
+  *
+  * 如果任何错误从[[RpcEndpoint]]方法之一抛出,除了onError之外,onError将会被调用。 如果onError引发错误，[[RpcEnv]]将忽略它。
  */
 private[spark] trait RpcEndpoint {
 
@@ -85,9 +94,14 @@ private[spark] trait RpcEndpoint {
    * 定义self无参方法,返回RpcEndpointRef类型,
    * The [[RpcEndpointRef]] of this [[RpcEndpoint]]. `self` will become valid when `onStart` is
    * called. And `self` will become `null` when `onStop` is called.
+    *
+    * [[RpcEndpointRef]] [[RpcEndpoint]]]。 `onStart`是`self`将变得有效*叫
+    * 当`onStop'被调用时，`self`将变为`null`。
    *
    * Note: Because before `onStart`, [[RpcEndpoint]] has not yet been registered and there is not
    * valid [[RpcEndpointRef]] for it. So don't call `self` before `onStart` is called.
+    *
+    * 注意：因为在onStart之前，[[RpcEndpoint]]尚未注册,并且没有有效的[[RpcEndpointRef]]所以在onStart被调用之前不要调用self
    */
   final def self: RpcEndpointRef = {
     require(rpcEnv != null, "rpcEnv has not been initialized")
@@ -95,18 +109,20 @@ private[spark] trait RpcEndpoint {
   }
 
   /**
-   * 处理RpcEndpointRef.send或RpcCallContext.reply方法,如果收到不匹配的消息,将抛出SparkException
    * Process messages from [[RpcEndpointRef.send]] or [[RpcCallContext.reply)]]. If receiving a
    * unmatched message, [[SparkException]] will be thrown and sent to `onError`.
+    *
+    * 从[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]处理消息],
+    * 如果接收到不匹配的消息，[[SparkException]]将被抛出并发送到`onError`。
    */
   def receive: PartialFunction[Any, Unit] = {
     case _ => throw new SparkException(self + " does not implement 'receive'")
   }
 
   /**
-   * 处理RpcEndpointRef.ask方法,默认如果不匹配消息,将抛出SparkException
    * Process messages from [[RpcEndpointRef.ask]]. If receiving a unmatched message,
    * [[SparkException]] will be thrown and sent to `onError`.
+    * 从[[RpcEndpointRef.ask]]处理消息,如果接收到不匹配的消息,[[SparkException]]将被抛出并发送到onError
    */
   def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case _ => context.sendFailure(new SparkException(self + " won't reply anything"))
@@ -129,6 +145,7 @@ private[spark] trait RpcEndpoint {
    */
   def onStart(): Unit = {
     // By default, do nothing.
+    //默认情况下,什么也不做
   }
 
   /**
@@ -171,6 +188,7 @@ private[spark] trait RpcEndpoint {
   /**
    * 停止RpcEndpoint
    * A convenient method to stop [[RpcEndpoint]].
+    * 一个方便的方法来停止[[RpcEndpoint]]。
    */
   final def stop(): Unit = {
     val _self = self
