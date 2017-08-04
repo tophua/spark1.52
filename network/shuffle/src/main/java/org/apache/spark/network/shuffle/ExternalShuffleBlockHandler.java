@@ -38,10 +38,12 @@ import org.apache.spark.network.shuffle.protocol.StreamHandle;
 
 /**
  * RPC Handler for a server which can serve shuffle blocks from outside of an Executor process.
+ * 一个服务器的RPC处理程序,可以从执行程序进程外部提供洗牌
  *
  * Handles registering executors and opening shuffle blocks from them. Shuffle blocks are registered
  * with the "one-for-one" strategy, meaning each Transport-layer Chunk is equivalent to one Spark-
  * level shuffle block.
+ * 处理注册执行人员并打开他们的洗牌,Shuffle块使用“一对一”策略注册,这意味着每个传输层块相当于一个Spark级别的Shuffle块。
  */
 public class ExternalShuffleBlockHandler extends RpcHandler {
   private final Logger logger = LoggerFactory.getLogger(ExternalShuffleBlockHandler.class);
@@ -53,7 +55,8 @@ public class ExternalShuffleBlockHandler extends RpcHandler {
     this(new OneForOneStreamManager(), new ExternalShuffleBlockResolver(conf));
   }
 
-  /** Enables mocking out the StreamManager and BlockManager. */
+  /** Enables mocking out the StreamManager and BlockManager.
+   * 启用StreamManager和BlockManager*/
   @VisibleForTesting
   ExternalShuffleBlockHandler(
       OneForOneStreamManager streamManager,
@@ -101,6 +104,7 @@ public class ExternalShuffleBlockHandler extends RpcHandler {
   /**
    * Removes an application (once it has been terminated), and optionally will clean up any
    * local directories associated with the executors of that application in a separate thread.
+   * 删除应用程序(一旦终止),并且可以选择清理任何应用程序在单独的线程中与该应用程序的执行程序相关联的本地目录。
    */
   public void applicationRemoved(String appId, boolean cleanupLocalDirs) {
     blockManager.applicationRemoved(appId, cleanupLocalDirs);

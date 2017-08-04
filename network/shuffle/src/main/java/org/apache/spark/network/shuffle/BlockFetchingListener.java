@@ -26,11 +26,14 @@ public interface BlockFetchingListener extends EventListener {
    * Called once per successfully fetched block. After this call returns, data will be released
    * automatically. If the data will be passed to another thread, the receiver should retain()
    * and release() the buffer on their own, or copy the data to a new buffer.
+   * 被成功抓取一次,此通话返回后,数据将自动释放,如果数据将被传递给另一个线程，接收方应该保留retain()和释放release()缓冲区
+   * 或将数据复制到新的缓冲区。
    */
   void onBlockFetchSuccess(String blockId, ManagedBuffer data);
 
   /**
    * Called at least once per block upon failures.
+   * 失败后至少每隔一次调用一次
    */
   void onBlockFetchFailure(String blockId, Throwable exception);
 }

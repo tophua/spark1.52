@@ -53,9 +53,11 @@ public class ExternalShuffleBlockResolver {
   private static final Logger logger = LoggerFactory.getLogger(ExternalShuffleBlockResolver.class);
 
   // Map containing all registered executors' metadata.
+    //包含所有注册执行者元数据的Map
   private final ConcurrentMap<AppExecId, ExecutorShuffleInfo> executors;
 
   // Single-threaded Java executor used to perform expensive recursive directory deletion.
+    //单线程Java执行程序用于执行昂贵的递归目录删除
   private final Executor directoryCleaner;
 
   private final TransportConf conf;
@@ -63,10 +65,12 @@ public class ExternalShuffleBlockResolver {
   public ExternalShuffleBlockResolver(TransportConf conf) {
     this(conf, Executors.newSingleThreadExecutor(
         // Add `spark` prefix because it will run in NM in Yarn mode.
+            //添加`spark`前缀，因为它将以Yarn模式在NM中运行
         NettyUtils.createThreadFactory("spark-shuffle-directory-cleaner")));
   }
 
   // Allows tests to have more control over when directories are cleaned up.
+    //允许测试更好地控制清理目录的时间
   @VisibleForTesting
   ExternalShuffleBlockResolver(TransportConf conf, Executor directoryCleaner) {
     this.conf = conf;
@@ -74,7 +78,8 @@ public class ExternalShuffleBlockResolver {
     this.directoryCleaner = directoryCleaner;
   }
 
-  /** Registers a new Executor with all the configuration we need to find its shuffle files. */
+  /** Registers a new Executor with all the configuration we need to find its shuffle files.
+   * 注册一个新的执行程序，并提供我们需要查找其shuffle文件的所有配置 */
   public void registerExecutor(
       String appId,
       String execId,
@@ -88,6 +93,9 @@ public class ExternalShuffleBlockResolver {
    * Obtains a FileSegmentManagedBuffer from a shuffle block id. We expect the blockId has the
    * format "shuffle_ShuffleId_MapId_ReduceId" (from ShuffleBlockId), and additionally make
    * assumptions about how the hash and sort based shuffles store their data.
+   * 从shuffle块ID获取FileSegmentManagedBuffer。
+   * 我们预期blockId的格式为“shuffle_ShuffleId_MapId_ReduceId”（来自ShuffleBlockId），
+   * 另外假设有关哈希和排序的洗牌如何存储其数据。
    */
   public ManagedBuffer getBlockData(String appId, String execId, String blockId) {
     String[] blockIdParts = blockId.split("_");
@@ -122,8 +130,11 @@ public class ExternalShuffleBlockResolver {
    * also deletes the local directories associated with the executors of that application in a
    * separate thread.
    *
+   * 删除我们为给定应用程序注册的所有执行程序的元数据,并且还可以在单独的线程中删除与该应用程序的执行程序相关联的本地目录
+   *
    * It is not valid to call registerExecutor() for an executor with this appId after invoking
    * this method.
+   * 在调用此方法后,对此appId的执行程序调用registerExecutor()是无效的
    */
   public void applicationRemoved(String appId, boolean cleanupLocalDirs) {
     logger.info("Application {} removed, cleanupLocalDirs = {}", appId, cleanupLocalDirs);
@@ -134,6 +145,7 @@ public class ExternalShuffleBlockResolver {
       final ExecutorShuffleInfo executor = entry.getValue();
 
       // Only touch executors associated with the appId that was removed.
+        //只接触与删除的appId关联的执行者
       if (appId.equals(fullId.appId)) {
         it.remove();
 
@@ -141,6 +153,7 @@ public class ExternalShuffleBlockResolver {
           logger.info("Cleaning up executor {}'s {} local dirs", fullId, executor.localDirs.length);
 
           // Execute the actual deletion in a different thread, as it may take some time.
+            // 在不同的线程中执行实际删除,因为它可能需要一些时间,
           directoryCleaner.execute(new Runnable() {
             @Override
             public void run() {
@@ -154,7 +167,9 @@ public class ExternalShuffleBlockResolver {
 
   /**
    * Synchronously deletes each directory one at a time.
+   * 同时删除每个目录一个
    * Should be executed in its own thread, as this may take a long time.
+   * 应该在自己的线程中执行，因为这可能需要很长时间
    */
   private void deleteExecutorDirs(String[] dirs) {
     for (String localDir : dirs) {
@@ -169,7 +184,9 @@ public class ExternalShuffleBlockResolver {
 
   /**
    * Hash-based shuffle data is simply stored as one file per block.
+   * 基于哈希的shuffle数据被简单地存储为每个块一个文件
    * This logic is from FileShuffleBlockResolver.
+   * 这个逻辑来自FileShuffleBlockResolver
    */
   // TODO: Support consolidated hash shuffle files
   private ManagedBuffer getHashBasedShuffleBlockData(ExecutorShuffleInfo executor, String blockId) {
@@ -180,7 +197,10 @@ public class ExternalShuffleBlockResolver {
   /**
    * Sort-based shuffle data uses an index called "shuffle_ShuffleId_MapId_0.index" into a data file
    * called "shuffle_ShuffleId_MapId_0.data". This logic is from IndexShuffleBlockResolver,
+   * 基于排序的随机播放数据使用名为“shuffle_ShuffleId_MapId_0.index”的索引到名为“shuffle_ShuffleId_MapId_0.data”的数据文件中。
+   * 这个逻辑来自IndexShuffleBlockResolver，
    * and the block id format is from ShuffleDataBlockId and ShuffleIndexBlockId.
+   * 块id格式来自ShuffleDataBlockId和ShuffleIndexBlockId
    */
   private ManagedBuffer getSortBasedShuffleBlockData(
     ExecutorShuffleInfo executor, int shuffleId, int mapId, int reduceId) {
@@ -211,6 +231,7 @@ public class ExternalShuffleBlockResolver {
   /**
    * Hashes a filename into the corresponding local directory, in a manner consistent with
    * Spark's DiskBlockManager.getFile().
+   * 将文件名以相符的方式散列到相应的本地目录中Spark的DiskBlockManager.getFile()
    */
   @VisibleForTesting
   static File getFile(String[] localDirs, int subDirsPerLocalDir, String filename) {
@@ -220,7 +241,8 @@ public class ExternalShuffleBlockResolver {
     return new File(new File(localDir, String.format("%02x", subDirId)), filename);
   }
 
-  /** Simply encodes an executor's full ID, which is appId + execId. */
+  /** Simply encodes an executor's full ID, which is appId + execId.
+   * 只需编码一个执行者的完整ID，即appId + execId*/
   private static class AppExecId {
     final String appId;
     final String execId;

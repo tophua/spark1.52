@@ -56,6 +56,8 @@ public class ExternalShuffleClient extends ShuffleClient {
   /**
    * Creates an external shuffle client, with SASL optionally enabled. If SASL is not enabled,
    * then secretKeyHolder may be null.
+   *
+   * 创建一个外部shuffle客户端,SASL可选地启用,如果SASL未启用,then secretKeyHolder可能为null。
    */
   public ExternalShuffleClient(
       TransportConf conf,
@@ -110,6 +112,8 @@ public class ExternalShuffleClient extends ShuffleClient {
       if (maxRetries > 0) {
         // Note this Fetcher will correctly handle maxRetries == 0; we avoid it just in case there's
         // a bug in this code. We should remove the if statement once we're sure of the stability.
+          //注意这个Fetcher会正确处理maxRetries == 0; 我们避免它，以防万一有
+          //这个代码中的错误。 一旦我们确定稳定性，我们应该删除if语句。
         new RetryingBlockFetcher(conf, blockFetchStarter, blockIds, listener).start();
       } else {
         blockFetchStarter.createAndStart(blockIds, listener);
@@ -125,6 +129,7 @@ public class ExternalShuffleClient extends ShuffleClient {
   /**
    * Registers this executor with an external shuffle server. This registration is required to
    * inform the shuffle server about where and how we store our shuffle files.
+   * 将此执行器注册到外部随机服务器,此注册是必须通知洗牌服务器关于我们如何存储我们的随机播放文件,
    *
    * @param host Host of shuffle server.
    * @param port Port of shuffle server.
