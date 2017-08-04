@@ -41,6 +41,9 @@ import static org.apache.spark.network.sasl.SparkSaslServer.*;
  * A SASL Client for Spark which simply keeps track of the state of a single SASL session, from the
  * initial state to the "authenticated" state. This client initializes the protocol via a
  * firstToken, which is then followed by a set of challenges and responses.
+ *
+ * 一个用于Spark的SASL客户端,它简单地跟踪单个SASL会话的状态,从初始状态到“已认证”状态。
+ * 该客户端通过firstToken初始化协议，然后是一组挑战和响应。
  */
 public class SparkSaslClient implements SaslEncryptionBackend {
   private final Logger logger = LoggerFactory.getLogger(SparkSaslClient.class);
@@ -66,7 +69,8 @@ public class SparkSaslClient implements SaslEncryptionBackend {
     }
   }
 
-  /** Used to initiate SASL handshake with server. */
+  /** Used to initiate SASL handshake with server.
+   * 用于启动与服务器的SASL握手*/
   public synchronized byte[] firstToken() {
     if (saslClient != null && saslClient.hasInitialResponse()) {
       try {
@@ -79,18 +83,21 @@ public class SparkSaslClient implements SaslEncryptionBackend {
     }
   }
 
-  /** Determines whether the authentication exchange has completed. */
+  /** Determines whether the authentication exchange has completed.
+   * 确定认证交换是否已完成*/
   public synchronized boolean isComplete() {
     return saslClient != null && saslClient.isComplete();
   }
 
-  /** Returns the value of a negotiated property. */
+  /** Returns the value of a negotiated property.
+   * 返回协商议属性的值*/
   public Object getNegotiatedProperty(String name) {
     return saslClient.getNegotiatedProperty(name);
   }
 
   /**
    * Respond to server's SASL token.
+   * 响应服务器的SASL令牌
    * @param token contains server's SASL token
    * @return client's response SASL token
    */
@@ -105,6 +112,7 @@ public class SparkSaslClient implements SaslEncryptionBackend {
   /**
    * Disposes of any system resources or security-sensitive information the
    * SaslClient might be using.
+   * 处理SaslClient可能使用的任何系统资源或安全敏感信息
    */
   @Override
   public synchronized void dispose() {
@@ -122,6 +130,7 @@ public class SparkSaslClient implements SaslEncryptionBackend {
   /**
    * Implementation of javax.security.auth.callback.CallbackHandler
    * that works with share secrets.
+   * 实现与共享密钥一起使用的javax.security.auth.callback.CallbackHandler
    */
   private class ClientCallbackHandler implements CallbackHandler {
     @Override

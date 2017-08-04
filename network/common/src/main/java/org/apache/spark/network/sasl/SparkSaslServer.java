@@ -43,33 +43,41 @@ import org.slf4j.LoggerFactory;
  * A SASL Server for Spark which simply keeps track of the state of a single SASL session, from the
  * initial state to the "authenticated" state. (It is not a server in the sense of accepting
  * connections on some socket.)
+ * 用于Spark的SASL服务器简单地跟踪单个SASL会话的状态，从初始状态到“已认证”状态。
+ * (它不是在某个套接字上接受连接的服务器。)
  */
 public class SparkSaslServer implements SaslEncryptionBackend {
   private final Logger logger = LoggerFactory.getLogger(SparkSaslServer.class);
 
   /**
    * This is passed as the server name when creating the sasl client/server.
+   * 在创建sasl客户端/服务器时，将作为服务器名称传递
    * This could be changed to be configurable in the future.
+   * 这可以在将来更改为可配置
    */
   static final String DEFAULT_REALM = "default";
 
   /**
    * The authentication mechanism used here is DIGEST-MD5. This could be changed to be
    * configurable in the future.
+   * 这里使用的认证机制是DIGEST-MD5,这可以在将来更改为可配置
    */
   static final String DIGEST = "DIGEST-MD5";
 
   /**
    * Quality of protection value that includes encryption.
+   * 保护质量包括加密值
    */
   static final String QOP_AUTH_CONF = "auth-conf";
 
   /**
    * Quality of protection value that does not include encryption.
+   * 不包括加密的保护质量值
    */
   static final String QOP_AUTH = "auth";
 
-  /** Identifier for a certain secret key within the secretKeyHolder. */
+  /** Identifier for a certain secret key within the secretKeyHolder.
+   * secretKeyHolder内的某个秘密密钥的标识符*/
   private final String secretKeyId;
   private final SecretKeyHolder secretKeyHolder;
   private SaslServer saslServer;
@@ -84,6 +92,7 @@ public class SparkSaslServer implements SaslEncryptionBackend {
     // Sasl.QOP is a comma-separated list of supported values. The value that allows encryption
     // is listed first since it's preferred over the non-encrypted one (if the client also
     // lists both in the request).
+      //Sasl.QOP是以逗号分隔的支持值列表,首先列出允许加密的值,因为它优先于未加密的值（如果客户端也在请求中同时列出）。
     String qop = alwaysEncrypt ? QOP_AUTH_CONF : String.format("%s,%s", QOP_AUTH_CONF, QOP_AUTH);
     Map<String, String> saslProps = ImmutableMap.<String, String>builder()
       .put(Sasl.SERVER_AUTH, "true")
@@ -99,18 +108,21 @@ public class SparkSaslServer implements SaslEncryptionBackend {
 
   /**
    * Determines whether the authentication exchange has completed successfully.
+   * 确定认证交换是否已成功完成
    */
   public synchronized boolean isComplete() {
     return saslServer != null && saslServer.isComplete();
   }
 
-  /** Returns the value of a negotiated property. */
+  /** Returns the value of a negotiated property.
+   * 返回协商属性的值 */
   public Object getNegotiatedProperty(String name) {
     return saslServer.getNegotiatedProperty(name);
   }
 
   /**
    * Used to respond to server SASL tokens.
+   * 用于响应服务器SASL令牌
    * @param token Server's SASL token
    * @return response to send back to the server.
    */
@@ -125,6 +137,7 @@ public class SparkSaslServer implements SaslEncryptionBackend {
   /**
    * Disposes of any system resources or security-sensitive information the
    * SaslServer might be using.
+   * 处理SaslServer可能使用的任何系统资源或安全敏感信息
    */
   @Override
   public synchronized void dispose() {
@@ -151,6 +164,7 @@ public class SparkSaslServer implements SaslEncryptionBackend {
 
   /**
    * Implementation of javax.security.auth.callback.CallbackHandler for SASL DIGEST-MD5 mechanism.
+   * 实现用于SASL DIGEST-MD5机制的javax.security.auth.callback.CallbackHandler
    */
   private class DigestCallbackHandler implements CallbackHandler {
     @Override
@@ -184,14 +198,16 @@ public class SparkSaslServer implements SaslEncryptionBackend {
     }
   }
 
-  /* Encode a byte[] identifier as a Base64-encoded string. */
+  /* Encode a byte[] identifier as a Base64-encoded string.
+  * 将byte []标识符编码为Base64编码的字符串*/
   public static String encodeIdentifier(String identifier) {
     Preconditions.checkNotNull(identifier, "User cannot be null if SASL is enabled");
     return Base64.encode(Unpooled.wrappedBuffer(identifier.getBytes(Charsets.UTF_8)))
       .toString(Charsets.UTF_8);
   }
 
-  /** Encode a password as a base64-encoded char[] array. */
+  /** Encode a password as a base64-encoded char[] array.
+   * 将密码编码为base64编码的char []数组*/
   public static char[] encodePassword(String password) {
     Preconditions.checkNotNull(password, "Password cannot be null if SASL is enabled");
     return Base64.encode(Unpooled.wrappedBuffer(password.getBytes(Charsets.UTF_8)))

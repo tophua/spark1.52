@@ -33,6 +33,7 @@ import org.apache.spark.network.util.TransportConf;
 /**
  * Bootstraps a {@link TransportClient} by performing SASL authentication on the connection. The
  * server should be setup with a {@link SaslRpcHandler} with matching keys for the given appId.
+ * 通过在连接上执行SASL身份验证来引导{@link TransportClient},服务器应使用具有给定appId的匹配键的{@link SaslRpcHandler}进行设置。
  */
 public class SaslClientBootstrap implements TransportClientBootstrap {
   private final Logger logger = LoggerFactory.getLogger(SaslClientBootstrap.class);

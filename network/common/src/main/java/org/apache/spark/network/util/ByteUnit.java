@@ -29,12 +29,15 @@ public enum ByteUnit {
   }
 
   // Interpret the provided number (d) with suffix (u) as this unit type.
+    //解释提供的数字（d）和后缀（u）作为单位类型
   // E.g. KiB.interpret(1, MiB) interprets 1MiB as its KiB representation = 1024k
+    //例如KiB.interpret（1，MiB）将1MiB解释为其KiB表示= 1024k
   public long convertFrom(long d, ByteUnit u) {
     return u.convertTo(d, this);
   }
   
-  // Convert the provided number (d) interpreted as this unit type to unit type (u). 
+  // Convert the provided number (d) interpreted as this unit type to unit type (u).
+    //将提供的数字(d)转换为单位类型(u)
   public long convertTo(long d, ByteUnit u) {
     if (multiplier > u.multiplier) {
       long ratio = multiplier / u.multiplier;
@@ -46,6 +49,7 @@ public enum ByteUnit {
     } else {
       // Perform operations in this order to avoid potential overflow 
       // when computing d * multiplier
+        //以此顺序执行操作,以避免计算d *乘数时的潜在溢出
       return d / (u.multiplier / multiplier);
     }
   }

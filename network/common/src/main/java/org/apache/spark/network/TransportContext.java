@@ -79,6 +79,8 @@ public class TransportContext {
    * Initializes a ClientFactory which runs the given TransportClientBootstraps prior to returning
    * a new Client. Bootstraps will be executed synchronously, and must run successfully in order
    * to create a Client.
+   * 在返回新客户端之前初始化运行给定TransportClientBootstraps的ClientFactory,
+   * Bootstraps将同步执行,并且必须成功运行才能创建客户端。
    */
   public TransportClientFactory createClientFactory(List<TransportClientBootstrap> bootstraps) {
     return new TransportClientFactory(this, bootstraps);
@@ -88,12 +90,14 @@ public class TransportContext {
     return createClientFactory(Lists.<TransportClientBootstrap>newArrayList());
   }
 
-  /** Create a server which will attempt to bind to a specific port. */
+  /** Create a server which will attempt to bind to a specific port.
+   * 创建一个尝试绑定到特定端口的服务器*/
   public TransportServer createServer(int port, List<TransportServerBootstrap> bootstraps) {
     return new TransportServer(this, port, rpcHandler, bootstraps);
   }
 
-  /** Creates a new server, binding to any available ephemeral port. */
+  /** Creates a new server, binding to any available ephemeral port.
+   * 创建一个新的服务器，绑定到任何可用的临时端口*/
   public TransportServer createServer(List<TransportServerBootstrap> bootstraps) {
     return createServer(0, bootstraps);
   }
@@ -110,6 +114,9 @@ public class TransportContext {
    * Initializes a client or server Netty Channel Pipeline which encodes/decodes messages and
    * has a {@link org.apache.spark.network.server.TransportChannelHandler} to handle request or
    * response messages.
+   *
+   * 初始化客户端或服务器Netty Channel Pipeline,用于对消息进行编码/解码,
+   * 并具有{@link org.apache.spark.network.server.TransportChannelHandler}来处理请求或响应消
    *
    * @param channel The channel to initialize.
    * @param channelRpcHandler The RPC handler to use for the channel.
@@ -130,6 +137,7 @@ public class TransportContext {
         .addLast("idleStateHandler", new IdleStateHandler(0, 0, conf.connectionTimeoutMs() / 1000))
         // NOTE: Chunks are currently guaranteed to be returned in the order of request, but this
         // would require more logic to guarantee if this were not part of the same event loop.
+              //注意：块根据请求的顺序被保证被返回,但是这样做将需要更多的逻辑来保证这不是同一事件循环的一部分。
         .addLast("handler", channelHandler);
       return channelHandler;
     } catch (RuntimeException e) {
@@ -142,6 +150,9 @@ public class TransportContext {
    * Creates the server- and client-side handler which is used to handle both RequestMessages and
    * ResponseMessages. The channel is expected to have been successfully created, though certain
    * properties (such as the remoteAddress()) may not be available yet.
+   *
+   * 创建用于处理RequestMessages和ResponseMessages的服务器端和客户端处理程序,
+   * 尽管某些属性（如remoteAddress（））可能尚未可用,但预期该通道已成功创建,
    */
   private TransportChannelHandler createChannelHandler(Channel channel, RpcHandler rpcHandler) {
     TransportResponseHandler responseHandler = new TransportResponseHandler(channel);

@@ -43,9 +43,11 @@ import com.google.common.base.Preconditions;
 
 /**
  * Wraps a {@link InputStream}, limiting the number of bytes which can be read.
+ * 包装{@link InputStream},限制可读取的字节数
  *
  * This code is from Guava's 14.0 source code, because there is no compatible way to
  * use this functionality in both a Guava 11 environment and a Guava &gt;14 environment.
+ * 这段代码来自Guava的14.0源代码，因为没有兼容的方式在Guava 11环境和Guava＆gt; 14环境中使用此功能。
  */
 public final class LimitedInputStream extends FilterInputStream {
   private long left;
@@ -61,6 +63,7 @@ public final class LimitedInputStream extends FilterInputStream {
     return (int) Math.min(in.available(), left);
   }
   // it's okay to mark even if mark isn't supported, as reset won't work
+    //即使标记不受支持,也可以标记,因为重置不起作用
   @Override public synchronized void mark(int readLimit) {
     in.mark(readLimit);
     mark = left;

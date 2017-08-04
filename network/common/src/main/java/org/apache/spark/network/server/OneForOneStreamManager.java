@@ -52,10 +52,12 @@ public class OneForOneStreamManager extends StreamManager {
     final Iterator<ManagedBuffer> buffers;
 
     // The channel associated to the stream
+      //与流关联的通道
     Channel associatedChannel = null;
 
     // Used to keep track of the index of the buffer that the user has retrieved, just to ensure
     // that the caller only requests each chunk one at a time, in order.
+      //用于跟踪用户检索的缓冲区的索引,只是为了确保呼叫者按顺序一次请求每个块
     int curChunk = 0;
 
     StreamState(Iterator<ManagedBuffer> buffers) {
@@ -65,7 +67,9 @@ public class OneForOneStreamManager extends StreamManager {
 
   public OneForOneStreamManager() {
     // For debugging purposes, start with a random stream id to help identifying different streams.
+      //为了调试目的,请从随机流ID开始,以帮助识别不同的流
     // This does not need to be globally unique, only unique to this class.
+      //这不需要是全局唯一的,这只是这个类唯一的。
     nextStreamId = new AtomicLong((long) new Random().nextInt(Integer.MAX_VALUE) * 1000);
     streams = new ConcurrentHashMap<Long, StreamState>();
   }
@@ -101,12 +105,14 @@ public class OneForOneStreamManager extends StreamManager {
   @Override
   public void connectionTerminated(Channel channel) {
     // Close all streams which have been associated with the channel.
+      //关闭与通道关联的所有流
     for (Map.Entry<Long, StreamState> entry: streams.entrySet()) {
       StreamState state = entry.getValue();
       if (state.associatedChannel == channel) {
         streams.remove(entry.getKey());
 
         // Release all remaining buffers.
+          //释放所有剩余的缓冲区
         while (state.buffers.hasNext()) {
           state.buffers.next().release();
         }
@@ -119,6 +125,8 @@ public class OneForOneStreamManager extends StreamManager {
    * callers. Each ManagedBuffer will be release()'d after it is transferred on the wire. If a
    * client connection is closed before the iterator is fully drained, then the remaining buffers
    * will all be release()'d.
+   * 注册一个ManagedBuffers流，它们作为一个单独的块一次一个调用,每个ManagedBuffer在线路上传输后将被release(),
+   * 如果一个客户端连接在迭代器完全耗尽之前关闭，然后是剩余的缓冲区都将被release()'d。
    */
   public long registerStream(Iterator<ManagedBuffer> buffers) {
     long myStreamId = nextStreamId.getAndIncrement();

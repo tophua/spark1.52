@@ -56,7 +56,8 @@ public class TransportServer implements Closeable {
   private ChannelFuture channelFuture;
   private int port = -1;
 
-  /** Creates a TransportServer that binds to the given port, or to any available if 0. */
+  /** Creates a TransportServer that binds to the given port, or to any available if 0.
+   * 创建绑定到给定端口的TransportServer,如果为0则创建任何可用的 */
   public TransportServer(
       TransportContext context,
       int portToBind,
@@ -136,6 +137,7 @@ public class TransportServer implements Closeable {
   public void close() {
     if (channelFuture != null) {
       // close is a local operation and should finish within milliseconds; timeout just to be safe
+        //close是本地操作,应在毫秒内完成;超时只是为了安全
       channelFuture.channel().close().awaitUninterruptibly(10, TimeUnit.SECONDS);
       channelFuture = null;
     }

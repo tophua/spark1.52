@@ -35,22 +35,27 @@ import org.apache.spark.network.util.TransportConf;
  * The delegate will only receive messages if the given connection has been successfully
  * authenticated. A connection may be authenticated at most once.
  *
+ * rpc处理器执行SASL认证授权前对一个孩子的RPC处理程序,代表只会在给定的连接已成功验证接收消息,一个连接可以认证最多一次
+ *
  * Note that the authentication process consists of multiple challenge-response pairs, each of
  * which are individual RPCs.
+ * 请注意,认证过程由多个挑战 - 响应对组成,每个都是单个RPC,
  */
 class SaslRpcHandler extends RpcHandler {
   private static final Logger logger = LoggerFactory.getLogger(SaslRpcHandler.class);
 
-  /** Transport configuration. */
+  /** Transport configuration. 传输配置*/
   private final TransportConf conf;
 
-  /** The client channel. */
+  /** The client channel. 客户端channel*/
   private final Channel channel;
 
-  /** RpcHandler we will delegate to for authenticated connections. */
+  /** RpcHandler we will delegate to for authenticated connections.
+   * 我们将委托RpcHandler进行认证连接*/
   private final RpcHandler delegate;
 
-  /** Class which provides secret keys which are shared by server and client on a per-app basis. */
+  /** Class which provides secret keys which are shared by server and client on a per-app basis.
+   * 提供按照应用程序的服务器和客户端共享的秘密密钥的类*/
   private final SecretKeyHolder secretKeyHolder;
 
   private SparkSaslServer saslServer;
@@ -73,6 +78,7 @@ class SaslRpcHandler extends RpcHandler {
   public void receive(TransportClient client, byte[] message, RpcResponseCallback callback) {
     if (isComplete) {
       // Authentication complete, delegate to base handler.
+        //认证完成，委托给基础处理程序
       delegate.receive(client, message, callback);
       return;
     }
@@ -81,6 +87,7 @@ class SaslRpcHandler extends RpcHandler {
 
     if (saslServer == null) {
       // First message in the handshake, setup the necessary state.
+        //握手中的第一条消息,设置必要的状态
       saslServer = new SparkSaslServer(saslMessage.appId, secretKeyHolder,
         conf.saslServerAlwaysEncrypt());
     }
@@ -93,6 +100,8 @@ class SaslRpcHandler extends RpcHandler {
     // message, so the pipeline is busy and no new incoming messages will be fed to it before this
     // method returns. This assumes that the code ensures, through other means, that no outbound
     // messages are being written to the channel while negotiation is still going on.
+      //发送SASL响应后进行安装加密，否则客户端无法解析响应,因为我们正在处理一个传入的消息，所以改变通道管道就可以了,
+      // 所以在这个方法返回之前,流水线很忙,没有新的传入消息被提供给它,这假设代码通过其他方式确保在协商仍然进行时不会将外发消息写入通道。
     if (saslServer.isComplete()) {
       logger.debug("SASL authentication successful for channel {}", client);
       isComplete = true;

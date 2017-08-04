@@ -22,6 +22,7 @@ import java.nio.channels.WritableByteChannel;
 
 /**
  * A writable channel that stores the written data in a byte array in memory.
+ * 将写入的数据存储在存储器中的字节数组中的可写通道
  */
 public class ByteArrayWritableChannel implements WritableByteChannel {
 
@@ -40,13 +41,15 @@ public class ByteArrayWritableChannel implements WritableByteChannel {
     return offset;
   }
 
-  /** Resets the channel so that writing to it will overwrite the existing buffer. */
+  /** Resets the channel so that writing to it will overwrite the existing buffer.
+   * 重置通道,以便写入它将覆盖现有的缓冲区*/
   public void reset() {
     offset = 0;
   }
 
   /**
    * Reads from the given buffer into the internal byte array.
+   * 从给定的缓冲区读入内部字节数组
    */
   @Override
   public int write(ByteBuffer src) {

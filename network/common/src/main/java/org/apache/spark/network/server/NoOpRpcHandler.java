@@ -20,7 +20,8 @@ package org.apache.spark.network.server;
 import org.apache.spark.network.client.RpcResponseCallback;
 import org.apache.spark.network.client.TransportClient;
 
-/** An RpcHandler suitable for a client-only TransportContext, which cannot receive RPCs. */
+/** An RpcHandler suitable for a client-only TransportContext, which cannot receive RPCs.
+ * 一个RpcHandler适用于仅客户端的TransportContext，它不能接收RPC*/
 public class NoOpRpcHandler extends RpcHandler {
   private final StreamManager streamManager;
 

@@ -30,6 +30,7 @@ public abstract class RpcHandler {
    * the client in string form as a standard RPC failure.
    * 接收RPC消息,同时该方法抛出的任何异常将被发送回客户端的字符串形式作为一个标准的RPC失败
    * This method will not be called in parallel for a single TransportClient (i.e., channel).
+   * 对于单个TransportClient(即，通道),不会并行调用此方法
    *
    * @param client A channel client which enables the handler to make requests back to the sender
    *               of this RPC. This will always be the exact same object for a particular channel.
@@ -45,12 +46,14 @@ public abstract class RpcHandler {
   /**
    * Returns the StreamManager which contains the state about which streams are currently being
    * fetched by a TransportClient.
+   * 返回StreamManager,它包含当前正由TransportClient获取的流的状态
    */
   public abstract StreamManager getStreamManager();
 
   /**
    * Invoked when the connection associated with the given client has been invalidated.
    * No further requests will come from this client.
+   * 当与给定客户端关联的连接已被无效时调用,不再需要此客户端的请求
    */
   public void connectionTerminated(TransportClient client) { }
 }

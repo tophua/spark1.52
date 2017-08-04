@@ -27,6 +27,8 @@ import org.apache.spark.network.util.TransportConf;
  * A bootstrap which is executed on a TransportServer's client channel once a client connects
  * to the server. This allows customizing the client channel to allow for things such as SASL
  * authentication.
+ * 一个客户端连接到服务器后,在TransportServer客户端通道上执行的引导程序,
+ * 这允许自定义客户端通道以允许诸如SASL身份验证之类的东西
  */
 public class SaslServerBootstrap implements TransportServerBootstrap {
 
@@ -41,6 +43,7 @@ public class SaslServerBootstrap implements TransportServerBootstrap {
   /**
    * Wrap the given application handler in a SaslRpcHandler that will handle the initial SASL
    * negotiation.
+   * 将给定的应用程序处理程序包装在将处理初始SASL协商的SaslRpcHandler中
    */
   public RpcHandler doBootstrap(Channel channel, RpcHandler rpcHandler) {
     return new SaslRpcHandler(conf, channel, rpcHandler, secretKeyHolder);

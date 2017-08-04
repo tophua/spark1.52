@@ -41,6 +41,7 @@ import org.apache.spark.network.util.NettyUtils;
 /**
  * Provides SASL-based encription for transport channels. The single method exposed by this
  * class installs the needed channel handlers on a connected channel.
+ * 为运输渠道提供基于SASL的包装,此类暴露的单一方法在连接的通道上安装所需的通道处理程序
  */
 class SaslEncryption {
 
@@ -49,6 +50,7 @@ class SaslEncryption {
 
   /**
    * Adds channel handlers that perform encryption / decryption of data using SASL.
+   * 添加使用SASL执行数据加密/解密的通道处理程序
    *
    * @param channel The channel.
    * @param backend The SASL backend.
@@ -80,6 +82,8 @@ class SaslEncryption {
      * needed to guarantee ordering of the outgoing encrypted packets - they need to be decrypted in
      * the same order, and netty doesn't have an atomic ChannelHandlerContext.write() API, so it
      * does not guarantee any ordering.
+     * 将传入的消息包裹在将执行加密的实现中,这是为了保证输出的加密数据包的顺序 - 它们需要以相同的顺序进行解密,
+     * netty没有原子的ChannelHandlerContext.write（）API，因此它不保证任何排序。
      */
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
@@ -141,6 +145,7 @@ class SaslEncryption {
      * A channel used to buffer input data for encryption. The channel has an upper size bound
      * so that if the input is larger than the allowed buffer, it will be broken into multiple
      * chunks.
+     * 用于缓冲输入数据进行加密的通道,频道具有较大的边界所以如果输入大于允许的缓冲区,它将被分解成多个块。
      */
     private final ByteArrayWritableChannel byteChannel;
 
@@ -163,12 +168,16 @@ class SaslEncryption {
 
     /**
      * Returns the size of the original (unencrypted) message.
+     * 返回原始(未加密)消息的大小
      *
      * This makes assumptions about how netty treats FileRegion instances, because there's no way
      * to know beforehand what will be the size of the encrypted message. Namely, it assumes
      * that netty will try to transfer data from this message while
      * <code>transfered() < count()</code>. So these two methods return, technically, wrong data,
      * but netty doesn't know better.
+     * 这是假设netty对待FileRegion实例,因为没有办法事先知道加密消息的大小是多少,也就是说,它假定
+     * netty将尝试从此消息传输数据<code> transfered（）<count（）</ code>,所以这两种方法返回,在技术上,错误的数据,
+     *但netty不知道更好。
      */
     @Override
     public long count() {
@@ -182,6 +191,7 @@ class SaslEncryption {
 
     /**
      * Returns an approximation of the amount of data transferred. See {@link #count()}.
+     * 返回传输数据量的近似值,请参阅{@link #count（）}
      */
     @Override
     public long transfered() {
@@ -190,11 +200,14 @@ class SaslEncryption {
 
     /**
      * Transfers data from the original message to the channel, encrypting it in the process.
+     * 将数据从原始消息传输到通道,在此过程中进行加密,
      *
      * This method also breaks down the original message into smaller chunks when needed. This
      * is done to keep memory usage under control. This avoids having to copy the whole message
      * data into memory at once, and can avoid ballooning memory usage when transferring large
      * messages such as shuffle blocks.
+     * 当需要时,这种方法也会将原始消息分解成更小的块,这个完成对内存使用的控制,这避免了复制整个消息
+     * 数据一次进入内存,并可以避免在传输大量时出现内存使用膨胀消息如洗牌。
      *
      * The {@link #transfered()} counter also behaves a little funny, in that it won't go forward
      * until a whole chunk has been written. This is done because the code can't use the actual
@@ -221,6 +234,7 @@ class SaslEncryption {
           actuallyWritten += bytesWritten;
           if (currentHeader.readableBytes() > 0) {
             // Break out of loop if there are still header bytes left to write.
+              //如果还有头字节剩下要写入,则断开循环
             break;
           }
         }
@@ -229,6 +243,7 @@ class SaslEncryption {
         if (!currentChunk.hasRemaining()) {
           // Only update the count of written bytes once a full chunk has been written.
           // See method javadoc.
+            //一旦写入完整的块,只能更新写入的字节数,请参阅方法javadoc。
           long chunkBytesRemaining = unencryptedChunkSize - currentReportedBytes;
           reportedWritten += chunkBytesRemaining;
           transferred += chunkBytesRemaining;
@@ -244,6 +259,8 @@ class SaslEncryption {
       // we return 1 until we can (i.e. until the reported count would actually match the size
       // of the current chunk), at which point we resort to returning 0 so that the counts still
       // match, at the cost of some performance. That situation should be rare, though.
+        //返回0触发netty中的退避机制,这可能会损害性能。 相反,我们返回1直到我们可以(即,直到报告的计数实际上匹配大小
+        //当前的大块),在这个时候我们要返回0,所以这些计数仍然是匹配的,但是有一些表现是代价的。 但这种情况应该很少见。
       if (reportedWritten != 0L) {
         return reportedWritten;
       }

@@ -21,9 +21,11 @@ import java.util.NoSuchElementException;
 
 /**
  * Provides a mechanism for constructing a {@link TransportConf} using some sort of configuration.
+ * 提供使用某种配置构建{@link TransportConf}的机制
  */
 public abstract class ConfigProvider {
-  /** Obtains the value of the given config, throws NoSuchElementException if it doesn't exist. */
+  /** Obtains the value of the given config, throws NoSuchElementException if it doesn't exist.
+   * 获取给定配置的值,如果不存在,则抛出NoSuchElementException*/
   public abstract String get(String name);
 
   public String get(String name, String defaultValue) {

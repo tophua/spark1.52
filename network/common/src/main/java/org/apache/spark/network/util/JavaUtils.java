@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * General utilities available in the network package. Many of these are sourced from Spark's
  * own Utils, just accessible within this package.
+ * 网络包中提供的通用实用程序,其中许多来自Spark的自己的Utils,只需在此包中即可访问
  */
 public class JavaUtils {
   private static final Logger logger = LoggerFactory.getLogger(JavaUtils.class);
@@ -42,10 +43,13 @@ public class JavaUtils {
   /**
    * Define a default value for driver memory here since this value is referenced across the code
    * base and nearly all files already use Utils.scala
+   * 在这里定义驱动程序内存的默认值,因为这个值是跨代码引用的,几乎所有文件都已经使用了Utils.scala
    */
   public static final long DEFAULT_DRIVER_MEM_MB = 1024;
 
-  /** Closes the given object, ignoring IOExceptions. */
+  /** Closes the given object, ignoring IOExceptions.
+   * 关闭给定的对象,忽略IOExceptions
+   *  */
   public static void closeQuietly(Closeable closeable) {
     try {
       if (closeable != null) {
@@ -56,7 +60,8 @@ public class JavaUtils {
     }
   }
 
-  /** Returns a hash consistent with Spark's Utils.nonNegativeHash(). */
+  /** Returns a hash consistent with Spark's Utils.nonNegativeHash().
+   * 返回与Spark的Utils.nonNegativeHash()一致的哈希值*/
   public static int nonNegativeHash(Object obj) {
     if (obj == null) { return 0; }
     int hash = obj.hashCode();
@@ -83,7 +88,7 @@ public class JavaUtils {
 
   /*
    * Delete a file or directory and its contents recursively.
-   * 递归删除文件或目录及其内容。如果他们不按照目录的符号链接,如果删除失败,则引发异常。
+   * 递归删除文件或目录及其内容。如果符号链接不符合目录,如果删除失败,则引发异常。
    * Don't follow directories if they are symlinks.
    * Throws an exception if deletion is unsuccessful.
    */
@@ -97,6 +102,7 @@ public class JavaUtils {
           deleteRecursively(child);
         } catch (IOException e) {
           // In case of multiple exceptions, only last one will be thrown
+            //在多个异常的情况下,只会抛出最后一个异常
           savedIOException = e;
         }
       }
@@ -209,6 +215,7 @@ public class JavaUtils {
   /**
    * Convert a time parameter such as (50s, 100ms, or 250us) to seconds for internal use. If
    * no suffix is provided, the passed number is assumed to be in seconds.
+   * 将时间参数（50s，100ms或250us）转换为秒以供内部使用,如果没有提供后缀，传递的数字假定为秒。
    */
   public static long timeStringAsSec(String str) {
     return parseTimeString(str, TimeUnit.SECONDS);
@@ -218,6 +225,7 @@ public class JavaUtils {
    * Convert a passed byte string (e.g. 50b, 100kb, or 250mb) to a ByteUnit for
    * internal use. If no suffix is provided a direct conversion of the provided default is 
    * attempted.
+   * 将传递的字节串(例如50b，100kb或250mb)转换为ByteUnit以供内部使用,如果没有提供后缀,则尝试直接转换所提供的默认值。
    */
   private static long parseByteString(String str, ByteUnit unit) {
     String lower = str.toLowerCase().trim();
@@ -231,11 +239,13 @@ public class JavaUtils {
         String suffix = m.group(2);
 
         // Check for invalid suffixes
+          //检查无效的后缀
         if (suffix != null && !byteSuffixes.containsKey(suffix)) {
           throw new NumberFormatException("Invalid suffix: \"" + suffix + "\"");
         }
 
         // If suffix is valid use that, otherwise none was provided and use the default passed
+          //如果后缀有效使用,否则没有提供,并使用默认传递
         return unit.convertFrom(val, suffix != null ? byteSuffixes.get(suffix) : unit);  
       } else if (fractionMatcher.matches()) {
         throw new NumberFormatException("Fractional values are not supported. Input was: " 
@@ -256,8 +266,10 @@ public class JavaUtils {
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m) to bytes for
    * internal use.
+   * 将传递的字节串(例如50b，100k或250m)转换为字节以供内部使用
    * 
    * If no suffix is provided, the passed number is assumed to be in bytes.
+   * 如果没有提供后缀,则传递的数字假定为字节
    */
   public static long byteStringAsBytes(String str) {
     return parseByteString(str, ByteUnit.BYTE);
@@ -266,8 +278,10 @@ public class JavaUtils {
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m) to kibibytes for
    * internal use.
+   * 将传递的字节串(例如50b，100k或250m)转换为kibibytes以供内部使用
    *
    * If no suffix is provided, the passed number is assumed to be in kibibytes.
+   * 如果没有提供后缀,则传递的数字假定为kibibytes
    */
   public static long byteStringAsKb(String str) {
     return parseByteString(str, ByteUnit.KiB);
@@ -276,8 +290,10 @@ public class JavaUtils {
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m) to mebibytes for
    * internal use.
+   * 将传递的字节串(例如50b，100k或250m)转换为mebibytes以供内部使用
    *
    * If no suffix is provided, the passed number is assumed to be in mebibytes.
+   * 如果没有提供后缀,则传递的数字假定为mebibytes
    */
   public static long byteStringAsMb(String str) {
     return parseByteString(str, ByteUnit.MiB);
@@ -286,8 +302,10 @@ public class JavaUtils {
   /**
    * Convert a passed byte string (e.g. 50b, 100k, or 250m) to gibibytes for
    * internal use.
+   * 将传递的字节串(例如50b，100k或250m)转换为gibibytes以供内部使用
    *
    * If no suffix is provided, the passed number is assumed to be in gibibytes.
+   * 如果没有后缀,则传递的数字假定为gibibytes
    */
   public static long byteStringAsGb(String str) {
     return parseByteString(str, ByteUnit.GiB);

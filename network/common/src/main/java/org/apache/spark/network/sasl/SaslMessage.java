@@ -26,10 +26,13 @@ import org.apache.spark.network.protocol.Encoders;
  * Encodes a Sasl-related message which is attempting to authenticate using some credentials tagged
  * with the given appId. This appId allows a single SaslRpcHandler to multiplex different
  * applications which may be using different sets of credentials.
+ * 编码一个SASL相关消息这是试图验证使用一些凭据标记与给定的AppID,
+ * 这允许一个单一的saslrpchandler AppID多路不同的应用程序可以使用不同的凭据。
  */
 class SaslMessage implements Encodable {
 
-  /** Serialization tag used to catch incorrect payloads. */
+  /** Serialization tag used to catch incorrect payloads.
+   * 用于捕获不正确的有效载荷的序列化标签 */
   private static final byte TAG_BYTE = (byte) 0xEA;
 
   public final String appId;

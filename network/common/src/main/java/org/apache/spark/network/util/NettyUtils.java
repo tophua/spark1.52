@@ -37,9 +37,11 @@ import io.netty.util.internal.PlatformDependent;
 
 /**
  * Utilities for creating various Netty constructs based on whether we're using EPOLL or NIO.
+ * 基于我们是否使用EPOLL或NIO来创建各种Netty结构的实用工具
  */
 public class NettyUtils {
-  /** Creates a new ThreadFactory which prefixes each thread with the given name. */
+  /** Creates a new ThreadFactory which prefixes each thread with the given name.
+   * 创建一个新的ThreadFactory，它为每个具有给定名称的线程提供前缀*/
   public static ThreadFactory createThreadFactory(String threadPoolPrefix) {
     return new ThreadFactoryBuilder()
       .setDaemon(true)
@@ -47,7 +49,8 @@ public class NettyUtils {
       .build();
   }
 
-  /** Creates a Netty EventLoopGroup based on the IOMode. */
+  /** Creates a Netty EventLoopGroup based on the IOMode.
+   * 基于IOMode创建一个Netty EventLoopGroup*/
   public static EventLoopGroup createEventLoop(IOMode mode, int numThreads, String threadPrefix) {
     ThreadFactory threadFactory = createThreadFactory(threadPrefix);
 
@@ -61,7 +64,8 @@ public class NettyUtils {
     }
   }
 
-  /** Returns the correct (client) SocketChannel class based on IOMode. */
+  /** Returns the correct (client) SocketChannel class based on IOMode.
+   * 返回基于IOMode的正确（客户端）SocketChannel类 */
   public static Class<? extends Channel> getClientChannelClass(IOMode mode) {
     switch (mode) {
       case NIO:
@@ -73,7 +77,8 @@ public class NettyUtils {
     }
   }
 
-  /** Returns the correct ServerSocketChannel class based on IOMode. */
+  /** Returns the correct ServerSocketChannel class based on IOMode.
+   * 返回基于IOMode的正确的ServerSocketChannel类 */
   public static Class<? extends ServerChannel> getServerChannelClass(IOMode mode) {
     switch (mode) {
       case NIO:
@@ -88,6 +93,7 @@ public class NettyUtils {
   /**
    * Creates a LengthFieldBasedFrameDecoder where the first 8 bytes are the length of the frame.
    * This is used before all decoders.
+   * 创建一个LengthFieldBasedFrameDecoder,其中前8个字节是帧的长度,这是在所有解码器之前使用的
    */
   public static ByteToMessageDecoder createFrameDecoder() {
     // maxFrameLength = 2G
@@ -98,7 +104,8 @@ public class NettyUtils {
     return new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 8, -8, 8);
   }
 
-  /** Returns the remote address on the channel or "&lt;unknown remote&gt;" if none exists. */
+  /** Returns the remote address on the channel or "&lt;unknown remote&gt;" if none exists.
+   * 返回通道上的远程地址或“＆lt; unknown remote＆gt;” 如果不存 */
   public static String getRemoteAddress(Channel channel) {
     if (channel != null && channel.remoteAddress() != null) {
       return channel.remoteAddress().toString();
@@ -111,6 +118,10 @@ public class NettyUtils {
    * are disabled for TransportClients because the ByteBufs are allocated by the event loop thread,
    * but released by the executor thread rather than the event loop thread. Those thread-local
    * caches actually delay the recycling of buffers, leading to larger memory usage.
+   *
+   * 创建一个池的ByteBuf分配器,但禁用线程本地缓存, 由于ByteBufs由事件循环线程分配,
+   * 而是由执行程序线程而不是事件循环线程释放,因此传输客户端的线程本地缓存被禁用,
+   * 这些线程本地缓存实际上延迟了缓冲区的回收,导致更大的内存使用。
    */
   public static PooledByteBufAllocator createPooledByteBufAllocator(
       boolean allowDirectBufs,
@@ -132,7 +143,8 @@ public class NettyUtils {
     );
   }
 
-  /** Used to get defaults from Netty's private static fields. */
+  /** Used to get defaults from Netty's private static fields.
+   * 用于从Netty的私有静态字段获取默认值*/
   private static int getPrivateStaticField(String name) {
     try {
       Field f = PooledByteBufAllocator.DEFAULT.getClass().getDeclaredField(name);

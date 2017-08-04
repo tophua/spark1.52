@@ -30,10 +30,12 @@ public class TransportConf {
     this.conf = conf;
   }
 
-  /** IO mode: nio or epoll */
+  /** IO mode: nio or epoll
+   * IO模式：nio或epoll */
   public String ioMode() { return conf.get("spark.shuffle.io.mode", "NIO").toUpperCase(); }
 
-  /** If true, we will prefer allocating off-heap byte buffers within Netty. */
+  /** If true, we will prefer allocating off-heap byte buffers within Netty.
+   * 如果为true,我们更喜欢在Netty中分配堆栈内的字节缓冲区*/
   public boolean preferDirectBufs() {
     return conf.getBoolean("spark.shuffle.io.preferDirectBufs", true);
   }
@@ -70,7 +72,8 @@ public class TransportConf {
    * */
   public int serverThreads() { return conf.getInt("spark.shuffle.io.serverThreads", 0); }
 
-  /** Number of threads used in the client thread pool. Default to 0, which is 2x#cores. */
+  /** Number of threads used in the client thread pool. Default to 0, which is 2x#cores.
+   * 在客户端线程池中使用的线程数,默认为0,这是2x＃内核 */
   public int clientThreads() { return conf.getInt("spark.shuffle.io.clientThreads", 0); }
 
   /**
@@ -128,6 +131,7 @@ public class TransportConf {
   /**
    * Whether to initialize shuffle FileDescriptor lazily or not. If true, file descriptors are
    * created only when data is going to be transferred. This can reduce the number of open files.
+   * 是否轻松地初始化乱码FileDescriptor？ 如果为true,则只有在要传输数据时才会创建文件描述符,这可以减少打开文件的数量。
    */
   public boolean lazyFileDescriptor() {
     return conf.getBoolean("spark.shuffle.io.lazyFD", true);
@@ -143,6 +147,7 @@ public class TransportConf {
 
   /**
    * Maximum number of bytes to be encrypted at a time when SASL encryption is enabled.
+   * SASL加密启用时最大要加密的字节数
    */
   public int maxSaslEncryptedBlockSize() {
     return Ints.checkedCast(JavaUtils.byteStringAsBytes(
@@ -151,6 +156,7 @@ public class TransportConf {
 
   /**
    * Whether the server should enforce encryption on SASL-authenticated connections.
+   * 服务器是否应该对SASL认证的连接执行加密
    */
   public boolean saslServerAlwaysEncrypt() {
     return conf.getBoolean("spark.network.sasl.serverAlwaysEncrypt", false);

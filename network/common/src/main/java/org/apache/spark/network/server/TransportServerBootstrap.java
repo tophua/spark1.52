@@ -23,10 +23,13 @@ import io.netty.channel.Channel;
  * A bootstrap which is executed on a TransportServer's client channel once a client connects
  * to the server. This allows customizing the client channel to allow for things such as SASL
  * authentication.
+ * 一个客户端连接到服务器后,在TransportServer客户端通道上执行的引导程序,
+ * 这允许自定义客户端通道以允许诸如SASL身份验证之类的东西,
  */
 public interface TransportServerBootstrap {
   /**
    * Customizes the channel to include new features, if needed.
+   * 如果需要,定制通道以包含新功能
    *
    * @param channel The connected channel opened by the client.
    * @param rpcHandler The RPC handler for the server.

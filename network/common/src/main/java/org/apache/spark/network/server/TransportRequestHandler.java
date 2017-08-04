@@ -42,21 +42,29 @@ import org.apache.spark.network.util.NettyUtils;
  * attached to a single Netty channel, and keeps track of which streams have been fetched via this
  * channel, in order to clean them up if the channel is terminated (see #channelUnregistered).
  *
+ * 处理来自客户端的请求并将块数据写回的处理程序,每个处理程序都连接到一个Netty通道,并跟踪通过此通道获取的流,
+ * 以便在通道终止时清除它们（请参阅#channel注册）。
+ *
  * The messages should have been processed by the pipeline setup by {@link TransportServer}.
+ * 这些消息应该由{@link TransportServer}的流水线设置处理
  */
 public class TransportRequestHandler extends MessageHandler<RequestMessage> {
   private final Logger logger = LoggerFactory.getLogger(TransportRequestHandler.class);
 
-  /** The Netty channel that this handler is associated with. */
+  /** The Netty channel that this handler is associated with.
+   * 这个处理程序关联的Netty通道*/
   private final Channel channel;
 
-  /** Client on the same channel allowing us to talk back to the requester. */
+  /** Client on the same channel allowing us to talk back to the requester.
+   * 客户端在同一个通道上,让我们可以回复请求者*/
   private final TransportClient reverseClient;
 
-  /** Handles all RPC messages. */
+  /** Handles all RPC messages.
+   * 处理所有RPC消息*/
   private final RpcHandler rpcHandler;
 
-  /** Returns each chunk part of a stream. */
+  /** Returns each chunk part of a stream.
+   * 返回流的每个块部分*/
   private final StreamManager streamManager;
 
   public TransportRequestHandler(
@@ -130,7 +138,9 @@ public class TransportRequestHandler extends MessageHandler<RequestMessage> {
 
   /**
    * Responds to a single message with some Encodable object. If a failure occurs while sending,
+   * 使用一些可编码对象响应单个消息,发送时发生故障
    * it will be logged and the channel closed.
+   * 它将被记录并且通道关闭
    */
   private void respond(final Encodable result) {
     final String remoteAddress = channel.remoteAddress().toString();

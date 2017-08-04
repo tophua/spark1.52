@@ -35,13 +35,22 @@ import org.apache.spark.network.util.NettyUtils;
  * The single Transport-level Channel handler which is used for delegating requests to the
  * {@link TransportRequestHandler} and responses to the {@link TransportResponseHandler}.
  *
+ * 用于将请求委托给的单个传输级信道处理程序{@link TransportRequestHandler}和对{@link TransportResponseHandler}的响应。
+ *
  * All channels created in the transport layer are bidirectional. When the Client initiates a Netty
  * Channel with a RequestMessage (which gets handled by the Server's RequestHandler), the Server
  * will produce a ResponseMessage (handled by the Client's ResponseHandler). However, the Server
  * also gets a handle on the same Channel, so it may then begin to send RequestMessages to the
  * Client.
+ *
+ * 在传输层中创建的所有通道都是双向的,当客户启动Netty具有RequestMessage（由服务器的RequestHandler处理）的通道,
+ * 服务器将产生一个ResponseMessage(由客户端的ResponseHandler处理)。 但是,服务器也可以在同一个频道上获得一个句柄,
+ * 所以可以开始向其发送RequestMessages客户。
+ *
  * This means that the Client also needs a RequestHandler and the Server needs a ResponseHandler,
  * for the Client's responses to the Server's requests.
+ *
+ * 这意味着客户端还需要一个RequestHandler，并且服务器需要一个ResponseHandler用于客户对服务器请求的响应
  *
  * This class also handles timeouts from a {@link io.netty.handler.timeout.IdleStateHandler}.
  * We consider a connection timed out if there are outstanding fetch or RPC requests but no traffic
@@ -104,7 +113,8 @@ public class TransportChannelHandler extends SimpleChannelInboundHandler<Message
     }
   }
 
-  /** Triggered based on events from an {@link io.netty.handler.timeout.IdleStateHandler}. */
+  /** Triggered based on events from an {@link io.netty.handler.timeout.IdleStateHandler}.
+   * 根据{@link io.netty.handler.timeout.IdleStateHandler}的事件触发。*/
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
     if (evt instanceof IdleStateEvent) {
@@ -112,6 +122,8 @@ public class TransportChannelHandler extends SimpleChannelInboundHandler<Message
       // See class comment for timeout semantics. In addition to ensuring we only timeout while
       // there are outstanding requests, we also do a secondary consistency check to ensure
       // there's no race between the idle timeout and incrementing the numOutstandingRequests.
+        //查看超时语义的类注释。 除了确保我们只有超时的同时有未完成的请求,我们也做了二次一致性检查,以确保
+        //空闲超时和递增numOutstandingRequests之间没有竞争
       boolean hasInFlightRequests = responseHandler.numOutstandingRequests() > 0;
       boolean isActuallyOverdue =
         System.nanoTime() - responseHandler.getTimeOfLastRequestNs() > requestTimeoutNs;
