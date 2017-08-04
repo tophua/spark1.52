@@ -226,9 +226,8 @@ class SparkSubmitOptionParser {
    * Callback for remaining command line arguments after either {@link #handle(String, String)} or
    * {@link #handleUnknown(String)} return "false". This will be called at the end of parsing even
    * when there are no remaining arguments.
-   * 在{@link #handle（String，String）}之后的其他命令行参数回调
-   * {@link #handleUnknown（String）} return“false”。 这将在解析结束时被调用
-   *当没有剩余的参数时。
+   * 在{@link #handle（String，String）}之后的其他命令行参数回调{@link #handleUnknown（String）} return“false”。
+   * 这将在解析结束时被调用当没有剩余的参数时
    *
    * @param extra List of remaining arguments.
    */

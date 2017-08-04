@@ -67,7 +67,7 @@ abstract class AbstractCommandBuilder {
 
   /**
    * Builds the command to execute.
-   *构建要执行的命令
+   * 构建要执行的命令
    * @param env A map containing environment variables for the child process. It may already contain
    *            entries defined by the user (such as SPARK_HOME, or those defined by the
    *            SparkLauncher constructor that takes an environment), and may be modified to
@@ -77,7 +77,7 @@ abstract class AbstractCommandBuilder {
 
   /**
    * Builds a list of arguments to run java.
-   *构建运行java的参数列表
+   * 构建运行java的参数列表
    * This method finds the java executable to use and appends JVM-specific options for running a
    * class with Spark in the classpath. It also loads options from the "java-opts" file in the
    * configuration directory being used.
@@ -101,9 +101,10 @@ abstract class AbstractCommandBuilder {
     }
 
     // Load extra JAVA_OPTS from conf/java-opts, if it exists.
-      //从conf / java-opts加载额外的JAVA_OPTS（如果存在）
+      //从conf/java-opts加载额外的JAVA_OPTS（如果存在）
     File javaOpts = new File(join(File.separator, getConfDir(), "java-opts"));
     if (javaOpts.isFile()) {
+        //文件读取
       BufferedReader br = new BufferedReader(new InputStreamReader(
           new FileInputStream(javaOpts), "UTF-8"));
       try {

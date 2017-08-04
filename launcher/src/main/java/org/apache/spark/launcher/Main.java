@@ -56,8 +56,9 @@ class Main {
    */
   public static void main(String[] argsArray) throws Exception {
     checkArgument(argsArray.length > 0, "Not enough arguments: missing class name.");
-
+    //Arrays.asList将数组转List
     List<String> args = new ArrayList<String>(Arrays.asList(argsArray));
+
     String className = args.remove(0);
 
     boolean printLaunchCommand = !isEmpty(System.getenv("SPARK_PRINT_LAUNCH_COMMAND"));

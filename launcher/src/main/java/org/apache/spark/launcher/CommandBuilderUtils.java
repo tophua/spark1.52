@@ -46,7 +46,8 @@ class CommandBuilderUtils {
   }
 
   /** Joins a list of strings using the given separator.
-   * 使用给定的分隔符连接字符串列表*/
+   * 使用给定的分隔符连接字符串列表
+   * sep 分隔符*/
   static String join(String sep, String... elements) {
     StringBuilder sb = new StringBuilder();
     for (String e : elements) {

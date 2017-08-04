@@ -31,7 +31,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class SparkSubmitCommandBuilderSuite {
-
+    String spark_test_home="/software/spark152";
   private static File dummyPropsFile;
   private static SparkSubmitOptionParser parser;
 
@@ -71,12 +71,18 @@ public class SparkSubmitCommandBuilderSuite {
       "spark.randomOption=foo",
       parser.CONF,
       SparkLauncher.DRIVER_EXTRA_LIBRARY_PATH + "=/driverLibPath");
+
     Map<String, String> env = new HashMap<String, String>();
     List<String> cmd = buildCommand(sparkSubmitArgs, env);
-
+      for(String c:cmd){
+          System.out.println(c);
+      }
+      System.out.println("==="+CommandBuilderUtils.getLibPathEnvName());
     assertTrue(findInStringList(env.get(CommandBuilderUtils.getLibPathEnvName()),
         File.pathSeparator, "/driverLibPath"));
     assertTrue(findInStringList(findArgValue(cmd, "-cp"), File.pathSeparator, "/driverCp"));
+    //-Xmx3550m设置JVM最大可用内存为3550M。
+      //-Xms3550m：设置JVM促使内存为3550m。此值可以设置与-Xmx相同，以避免每次垃圾回收完成后JVM重新分配内存。
     assertTrue("Driver -Xms should be configured.", cmd.contains("-Xms42g"));
     assertTrue("Driver -Xmx should be configured.", cmd.contains("-Xmx42g"));
     assertTrue("Command should contain user-defined conf.",
@@ -84,6 +90,7 @@ public class SparkSubmitCommandBuilderSuite {
   }
 
   @Test
+  //测试外壳CLI解析器
   public void testShellCliParser() throws Exception {
     List<String> sparkSubmitArgs = Arrays.asList(
       parser.CLASS,
@@ -275,7 +282,8 @@ public class SparkSubmitCommandBuilderSuite {
 
   private SparkSubmitCommandBuilder newCommandBuilder(List<String> args) {
     SparkSubmitCommandBuilder builder = new SparkSubmitCommandBuilder(args);
-    builder.childEnv.put(CommandBuilderUtils.ENV_SPARK_HOME, System.getProperty("spark.test.home"));
+      System.getProperty("spark.test.home");
+    builder.childEnv.put(CommandBuilderUtils.ENV_SPARK_HOME,spark_test_home );
     builder.childEnv.put(CommandBuilderUtils.ENV_SPARK_ASSEMBLY, "dummy");
     return builder;
   }

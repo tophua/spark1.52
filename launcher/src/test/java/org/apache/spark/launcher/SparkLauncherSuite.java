@@ -36,11 +36,15 @@ import static org.junit.Assert.*;
 public class SparkLauncherSuite {
 
   private static final Logger LOG = LoggerFactory.getLogger(SparkLauncherSuite.class);
-
+    String spark_test_home="/software/spark152";
   @Test
+  //测试Spark 参数处理
   public void testSparkArgumentHandling() throws Exception {
+
+
+      System.out.println("========"+spark_test_home);
     SparkLauncher launcher = new SparkLauncher()
-      .setSparkHome(System.getProperty("spark.test.home"));
+      .setSparkHome(spark_test_home);
     SparkSubmitOptionParser opts = new SparkSubmitOptionParser();
 
     launcher.addSparkArg(opts.HELP);
@@ -64,7 +68,7 @@ public class SparkLauncherSuite {
 
     launcher.addSparkArg(opts.MASTER, "myMaster");
     assertEquals("myMaster", launcher.builder.master);
-
+    //添加没有效果
     launcher.addJar("foo");
     launcher.addSparkArg(opts.JARS, "bar");
     assertEquals(Arrays.asList("bar"), launcher.builder.jars);
@@ -83,13 +87,16 @@ public class SparkLauncherSuite {
   }
 
   @Test
+  //测试子进程启动程序
   public void testChildProcLauncher() throws Exception {
     SparkSubmitOptionParser opts = new SparkSubmitOptionParser();
-    Map<String, String> env = new HashMap<String, String>();
-    env.put("SPARK_PRINT_LAUNCH_COMMAND", "1");
 
+    Map<String, String> env = new HashMap<String, String>();
+    //设置环境变量
+    env.put("SPARK_PRINT_LAUNCH_COMMAND", "1");
+      //System.getProperty("spark.test.home")
     SparkLauncher launcher = new SparkLauncher(env)
-      .setSparkHome(System.getProperty("spark.test.home"))
+      .setSparkHome(spark_test_home)
       .setMaster("local")
       .setAppResource("spark-internal")
       .addSparkArg(opts.CONF,
@@ -100,10 +107,15 @@ public class SparkLauncherSuite {
       .addSparkArg(opts.CLASS, "ShouldBeOverriddenBelow")
       .setMainClass(SparkLauncherTestApp.class.getName())
       .addAppArgs("proc");
-//    final Process app = launcher.launch();
- //   new Redirector("stdout", app.getInputStream()).start();
- //   new Redirector("stderr", app.getErrorStream()).start();
- //   assertEquals(0, app.waitFor());
+      System.out.println("opts.CONF:"+opts.CONF);
+      System.out.println("extraJavaOptions:"+SparkLauncher.DRIVER_EXTRA_JAVA_OPTIONS);
+      System.out.println("DRIVER_EXTRA_JAVA_OPTIONS:"+SparkLauncher.DRIVER_EXTRA_JAVA_OPTIONS);
+      System.out.println("launcher:"+launcher.toString());
+
+    final Process app = launcher.launch();
+   new Redirector("stdout", app.getInputStream()).start();
+  new Redirector("stderr", app.getErrorStream()).start();
+  assertEquals(0, app.waitFor());
   }
 
   public static class SparkLauncherTestApp {
@@ -124,6 +136,7 @@ public class SparkLauncherSuite {
     Redirector(String name, InputStream in) {
       this.in = in;
       setName(name);
+      System.out.println(name);
       setDaemon(true);
     }
 
@@ -133,6 +146,7 @@ public class SparkLauncherSuite {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
         String line;
         while ((line = reader.readLine()) != null) {
+            System.out.println("==="+line);
           LOG.warn(line);
         }
       } catch (Exception e) {
