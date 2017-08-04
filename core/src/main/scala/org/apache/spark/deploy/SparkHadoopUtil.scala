@@ -100,6 +100,7 @@ class SparkHadoopUtil extends Logging {
         hadoopConf.set("fs.s3n.awsSecretAccessKey", System.getenv("AWS_SECRET_ACCESS_KEY"))
       }
       // Copy any "spark.hadoop.foo=bar" system properties into conf as "foo=bar"
+      //将任何“spark.hadoop.foo = bar”系统属性复制到conf中，作为“foo = bar”
       conf.getAll.foreach { case (key, value) =>
         if (key.startsWith("spark.hadoop.")) {
           hadoopConf.set(key.substring("spark.hadoop.".length), value)
@@ -115,6 +116,7 @@ class SparkHadoopUtil extends Logging {
   /**
    * Add any user credentials to the job conf which are necessary for running on a secure Hadoop
    * cluster.
+    * 将任何用户凭据添加到在安全的Hadoop集群上运行所必需的作业conf
    */
   def addCredentials(conf: JobConf) {}
 
@@ -138,6 +140,8 @@ class SparkHadoopUtil extends Logging {
    * return the bytes read on r since t.  Reflection is required because thread-level FileSystem
    * statistics are only available as of Hadoop 2.5 (see HADOOP-10688).
    * Returns None if the required method can't be found.
+    * 返回一个可以调用来查找Hadoop FileSystem字节的函数,如果getFSBytesReadOnThreadCallback在时间t从线程r调用，返回的回调函数将
+    *从t返回r读取的字节,线程级FileSystem需要反射统计数据仅供Hadoop 2.5使用（参见HADOOP-10688）。如果找不到所需的方法，则返回None。
    * 返回一个函数,查询Hadoop文件系统读取的字节数
    */
   private[spark] def getFSBytesReadOnThreadCallback(): Option[() => Long] = {
@@ -160,7 +164,11 @@ class SparkHadoopUtil extends Logging {
    * getFSBytesWrittenOnThreadCallback is called from thread r at time t, the returned callback will
    * return the bytes written on r since t.  Reflection is required because thread-level FileSystem
    * statistics are only available as of Hadoop 2.5 (see HADOOP-10688).
-   * Returns None if the required method can't be found. 
+   * Returns None if the required method can't be found.
+    *
+    * 返回一个函数可以调用来查找写入的Hadoop FileSystem字节。 如果getFSBytesWrittenOnThreadCallback在时间t从线程r调用，返回的回调将
+    *从t返回写入r的字节。 线程级FileSystem需要反射统计数据仅供Hadoop 2.5使用（参见HADOOP-10688）。
+    *如果找不到所需的方法，则返回None。
    */
   private[spark] def getFSBytesWrittenOnThreadCallback(): Option[() => Long] = {
     try {
@@ -193,6 +201,10 @@ class SparkHadoopUtil extends Logging {
    * call `JobContext/TaskAttemptContext.getConfiguration`, it will generate different byte codes
    * for Hadoop 1.+ and Hadoop 2.+ because JobContext/TaskAttemptContext is class in Hadoop 1.+
    * while it's interface in Hadoop 2.+.
+    * 使用反射从JobContext / TaskAttemptContext获取配置。
+    * 如果我们直接调用`JobContext / TaskAttemptContext.getConfiguration`，它将生成不同的字节码
+    *对于Hadoop 1. +和Hadoop 2. +因为JobContext / TaskAttemptContext是Hadoop中的类1. +
+    *在Hadoop 2. +的界面。
    */
   def getConfigurationFromJobContext(context: JobContext): Configuration = {
     val method = context.getClass.getMethod("getConfiguration")
@@ -204,6 +216,10 @@ class SparkHadoopUtil extends Logging {
    * call `TaskAttemptContext.getTaskAttemptID`, it will generate different byte codes
    * for Hadoop 1.+ and Hadoop 2.+ because TaskAttemptContext is class in Hadoop 1.+
    * while it's interface in Hadoop 2.+.
+    *
+    * 使用反射来从TaskAttemptContext调用`getTaskAttemptID`。 如果我们直接
+    *调用`TaskAttemptContext.getTaskAttemptID`，会产生不同的字节码对于Hadoop 1. +和Hadoop 2. +
+    * 因为TaskAttemptContext是Hadoop 1. +中的类在Hadoop 2. +的界面。
    */
   def getTaskAttemptIDFromTaskAttemptContext(
       context: MapReduceTaskAttemptContext): MapReduceTaskAttemptID = {
@@ -215,6 +231,8 @@ class SparkHadoopUtil extends Logging {
    * Get [[FileStatus]] objects for all leaf children (files) under the given base path. If the
    * given path points to a file, return a single-element collection containing [[FileStatus]] of
    * that file.
+    * 为给定基本路径下的所有叶子（文件）获取[[FileStatus]]对象。
+    * 如果给定路径指向一个文件，返回一个包含[[FileStatus]]的单元素集合该文件。
    */
   def listLeafStatuses(fs: FileSystem, basePath: Path): Seq[FileStatus] = {
     listLeafStatuses(fs, fs.getFileStatus(basePath))
@@ -224,6 +242,7 @@ class SparkHadoopUtil extends Logging {
    * Get [[FileStatus]] objects for all leaf children (files) under the given base path. If the
    * given path points to a file, return a single-element collection containing [[FileStatus]] of
    * that file.
+    * 为给定基本路径下的所有叶子（文件）获取[[FileStatus]]对象,如果给定的路径指向一个文件,则返回一个包含该文件[[FileStatus]]的单元素集合。
    */
   def listLeafStatuses(fs: FileSystem, baseStatus: FileStatus): Seq[FileStatus] = {
     def recurse(status: FileStatus): Seq[FileStatus] = {
@@ -268,6 +287,8 @@ class SparkHadoopUtil extends Logging {
    * Lists all the files in a directory with the specified prefix, and does not end with the
    * given suffix. The returned {{FileStatus}} instances are sorted by the modification times of
    * the respective files.
+    *
+    * 列出具有指定前缀的目录中的所有文件,不以给定的后缀结尾,返回的{{FileStatus}}实例按照相应文件的修改时间进行排序。
    * 指定的前缀文件名,列出目录中的所有文件,返回FileStatus实例按文件修改时间排序,
    */
   def listFilesSorted(
@@ -300,6 +321,8 @@ class SparkHadoopUtil extends Logging {
    * How much time is remaining (in millis) from now to (fraction * renewal time for the token that
    * is valid the latest)?
    * This will return -ve (or 0) value if the fraction of validity has already expired.
+    *
+    * 从现在开始剩余多少时间(以毫秒计)(最新的有效令牌的分数*更新时间)?如果有效性的分数已经过期，这将返回-ve（或0）值。
    */
   def getTimeFromNowToRenewal(
       sparkConf: SparkConf,
@@ -331,6 +354,7 @@ class SparkHadoopUtil extends Logging {
   /**
    * Substitute variables by looking them up in Hadoop configs. Only variables that match the
    * ${hadoopconf- .. } pattern are substituted.
+    * 通过在Hadoop配置中查找变量来代替变量,只有匹配的变量$ {hadoopconf- ..}模式被替代。
    */
   def substituteHadoopVariables(text: String, hadoopConf: Configuration): String = {
     text match {
@@ -344,9 +368,11 @@ class SparkHadoopUtil extends Logging {
           }
         if (eval.isEmpty) {
           // The variable was not found in Hadoop configs, so return text as is.
+          //在Hadoop配置中找不到该变量,因此返回文本。
           text
         } else {
           // Continue to substitute more variables.
+          //继续替代更多的变量
           substituteHadoopVariables(eval.get, hadoopConf)
         }
       }
@@ -360,17 +386,20 @@ class SparkHadoopUtil extends Logging {
   /**
    * Start a thread to periodically update the current user's credentials with new delegation
    * tokens so that writes to HDFS do not fail.
+    * 启动线程以使用新的委托令牌定期更新当前用户的凭据,以便写入HDFS不会失败
    */
   private[spark] def startExecutorDelegationTokenRenewer(conf: SparkConf) {}
 
   /**
    * Stop the thread that does the delegation token updates.
+    * 停止进行委托令更新的线程
    */
   private[spark] def stopExecutorDelegationTokenRenewer() {}
 
   /**
    * Return a fresh Hadoop configuration, bypassing the HDFS cache mechanism.
    * This is to prevent the DFSClient from using an old cached token to connect to the NameNode.
+    * 返回一个新的Hadoop配置,绕过HDFS缓存机制,这是为了防止DFSClient使用旧的缓存令牌连接到NameNode。
    */
   private[spark] def getConfBypassingFSCache(
       hadoopConf: Configuration,

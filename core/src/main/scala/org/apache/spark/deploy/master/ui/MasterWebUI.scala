@@ -57,13 +57,15 @@ class MasterWebUI(val master: Master, requestedPort: Int)
       "/driver/kill", "/", masterPage.handleDriverKillRequest, httpMethods = Set("POST")))
   }
 
-  /** Attach a reconstructed UI to this Master UI. Only valid after bind(). */
+  /** Attach a reconstructed UI to this Master UI. Only valid after bind().
+    * 将重建的UI附加到此主界面,只有在bind()之后才有效 */
   def attachSparkUI(ui: SparkUI) {
     assert(serverInfo.isDefined, "Master UI must be bound to a server before attaching SparkUIs")
     ui.getHandlers.foreach(attachHandler)
   }
 
-  /** Detach a reconstructed UI from this Master UI. Only valid after bind(). */
+  /** Detach a reconstructed UI from this Master UI. Only valid after bind().
+    * 从此主界面中分离重建的UI,只有在bind()之后才有效*/
   def detachSparkUI(ui: SparkUI) {
     assert(serverInfo.isDefined, "Master UI must be bound to a server before detaching SparkUIs")
     ui.getHandlers.foreach(detachHandler)

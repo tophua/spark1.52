@@ -35,16 +35,20 @@ private[spark] class WorkerWatcher(override val rpcEnv: RpcEnv, workerUrl: Strin
     }
   }
 
-  // Used to avoid shutting down JVM during tests
+  // Used to avoid shutting down JVM during tests 为了避免关闭JVM在测试
   // In the normal case, exitNonZero will call `System.exit(-1)` to shutdown the JVM. In the unit
   // test, the user should call `setTesting(true)` so that `exitNonZero` will set `isShutDown` to
   // true rather than calling `System.exit`. The user can check `isShutDown` to know if
   // `exitNonZero` is called.
+  //在正常情况下，exitNonZero将调用`System.exit（-1）`来关闭JVM。 在单位测试,用户应该调用`setTesting（true）`,
+  // 这样`exitNonZero`将会将`isShutDown`设置为true而不是调用`System.exit`,
+  // 用户可以检查`isShutDown`来知道是否`exitNonZero`被调用。
   private[deploy] var isShutDown = false
   private[deploy] def setTesting(testing: Boolean) = isTesting = testing
   private var isTesting = false
 
   // Lets filter events only from the worker's rpc system
+  //让我们只从worker的rpc系统中过滤事件
   private val expectedAddress = RpcAddress.fromURIString(workerUrl)
   private def isWorker(address: RpcAddress) = expectedAddress == address
 
@@ -71,7 +75,8 @@ private[spark] class WorkerWatcher(override val rpcEnv: RpcEnv, workerUrl: Strin
 
   override def onNetworkError(cause: Throwable, remoteAddress: RpcAddress): Unit = {
     if (isWorker(remoteAddress)) {
-      // These logs may not be seen if the worker (and associated pipe) has died      
+      // These logs may not be seen if the worker (and associated pipe) has died
+      //如果worker（和相关管道）已经死亡,则可能无法看到这些日志
       logError(s"Could not initialize connection to worker $workerUrl. Exiting.")
       logError(s"Error was: $cause")
       exitNonZero()

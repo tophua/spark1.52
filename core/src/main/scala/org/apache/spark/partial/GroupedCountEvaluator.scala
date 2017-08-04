@@ -30,6 +30,7 @@ import org.apache.spark.util.collection.OpenHashMap
 
 /**
  * An ApproximateEvaluator for counts by key. Returns a map of key to confidence interval.
+  * 按键计算的近似值,返回键到置信区间的映射
  */
 private[spark] class GroupedCountEvaluator[T : ClassTag](totalOutputs: Int, confidence: Double)
   extends ApproximateEvaluator[OpenHashMap[T, Long], Map[T, BoundedDouble]] {

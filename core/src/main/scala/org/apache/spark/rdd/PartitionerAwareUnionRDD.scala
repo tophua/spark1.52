@@ -27,6 +27,7 @@ import org.apache.spark.util.Utils
 /**
  * Class representing partitions of PartitionerAwareUnionRDD, which maintains the list of
  * corresponding partitions of parent RDDs.
+  * 表示PartitionerAwareUnionRDD的分区的类，它维护父RDD的对应分区列表。
  */
 private[spark]
 class PartitionerAwareUnionRDDPartition(
@@ -41,6 +42,7 @@ class PartitionerAwareUnionRDDPartition(
   @throws(classOf[IOException])
   private def writeObject(oos: ObjectOutputStream): Unit = Utils.tryOrIOException {
     // Update the reference to parent partition at the time of task serialization
+    //在任务序列化时更新对父分区的引用
     parents = rdds.map(_.partitions(index)).toArray
     oos.defaultWriteObject()
   }
@@ -53,6 +55,9 @@ class PartitionerAwareUnionRDDPartition(
  * location for each partition of the unified RDD will be the most common preferred location
  * of the corresponding partitions of the parent RDDs. For example, location of partition 0
  * of the unified RDD will be where most of partition 0 of the parent RDDs are located.
+  * 表示可以占用由同一分区器分区的多个RDD的RDD的类将它们统一为单个RDD，同时保留分区。 所以每个RD分区都有p个分区
+  *将统一到具有p分区和同一分区器的单个RDD。 首选统一RDD的每个分区的位置将是最常见的首选位置
+  *父列表的相应分区。 例如，分区0的位置统一RDD的*将是父RDD的大多数分区0所在的位置。
  */
 private[spark]
 class PartitionerAwareUnionRDD[T: ClassTag](
@@ -74,6 +79,7 @@ class PartitionerAwareUnionRDD[T: ClassTag](
   }
 
   // Get the location where most of the partitions of parent RDDs are located
+  //获取父RDD的大多数分区所在的位置
   override def getPreferredLocations(s: Partition): Seq[String] = {
     logDebug("Finding preferred location for " + this + ", partition " + s.index)
     val parentPartitions = s.asInstanceOf[PartitionerAwareUnionRDDPartition].parents
@@ -88,6 +94,7 @@ class PartitionerAwareUnionRDD[T: ClassTag](
       None
     } else {
       // Find the location that maximum number of parent partitions prefer
+      //找到最大数量的父分区偏好的位置
       Some(locations.groupBy(x => x).maxBy(_._2.length)._1)
     }
     logDebug("Selected location for " + this + ", partition " + s.index + " = " + location)
@@ -107,6 +114,7 @@ class PartitionerAwareUnionRDD[T: ClassTag](
   }
 
   // Get the *current* preferred locations from the DAGScheduler (as opposed to the static ones)
+  //从DAGScheduler获取* current *首选位置（而不是静态的）
   private def currPrefLocs(rdd: RDD[_], part: Partition): Seq[String] = {
     rdd.context.getPreferredLocs(rdd, part.index).map(tl => tl.host)
   }

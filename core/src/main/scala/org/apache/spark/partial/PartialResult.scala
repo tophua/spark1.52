@@ -32,6 +32,7 @@ class PartialResult[R](initialVal: R, isFinal: Boolean) {
 
   /**
    * Blocking method to wait for and return the final value.
+    * 阻止方法等待并返回最终值
    */
   def getFinalValue(): R = synchronized {
     while (finalValue.isEmpty && failure.isEmpty) {
@@ -47,6 +48,7 @@ class PartialResult[R](initialVal: R, isFinal: Boolean) {
   /**
    * Set a handler to be called when this PartialResult completes. Only one completion handler
    * is supported per PartialResult.
+    * 设置此PartialResult完成时调用的处理程序,每个PartialResult只支持一个完成处理程序
    */
   def onComplete(handler: R => Unit): PartialResult[R] = synchronized {
     if (completionHandler.isDefined) {
@@ -55,6 +57,7 @@ class PartialResult[R](initialVal: R, isFinal: Boolean) {
     completionHandler = Some(handler)
     if (finalValue.isDefined) {
       // We already have a final value, so let's call the handler
+      //我们已经有一个最终的值,所以我们来调用处理程序
       handler(finalValue.get)
     }
     return this
@@ -63,6 +66,7 @@ class PartialResult[R](initialVal: R, isFinal: Boolean) {
   /**
    * Set a handler to be called if this PartialResult's job fails. Only one failure handler
    * is supported per PartialResult.
+    * 如果此部分结果作业失败,请设置要调用的处理程序,每个部分结果只支持一个故障处理程序
    */
   def onFail(handler: Exception => Unit) {
     synchronized {
@@ -72,6 +76,7 @@ class PartialResult[R](initialVal: R, isFinal: Boolean) {
       failureHandler = Some(handler)
       if (failure.isDefined) {
         // We already have a failure, so let's call the handler
+        //我们已经失败了,所以让我们来调用处理程序
         handler(failure.get)
       }
     }
@@ -79,6 +84,7 @@ class PartialResult[R](initialVal: R, isFinal: Boolean) {
 
   /**
    * Transform this PartialResult into a PartialResult of type T.
+    * 将此部分结果转换为类型T的部分结果
    */
   def map[T](f: R => T) : PartialResult[T] = {
     new PartialResult[T](f(initialVal), isFinal) {
@@ -125,8 +131,10 @@ class PartialResult[R](initialVal: R, isFinal: Boolean) {
       }
       failure = Some(exception)
       // Call the failure handler if it was set
+      //调用失败处理程序(如果已设置)
       failureHandler.foreach(h => h(exception))
       // Notify any threads that may be calling getFinalValue()
+      //通知可能调用getFinalValue（）的任何线程
       this.notifyAll()
     }
   }

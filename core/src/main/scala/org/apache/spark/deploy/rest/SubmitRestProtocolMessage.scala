@@ -111,6 +111,7 @@ private[rest] abstract class SubmitRestProtocolMessage {
 
 /**
  * Helper methods to process serialized [[SubmitRestProtocolMessage]]s.
+  * 帮助程序处理序列化[[SubmitRestProtocolMessage]] s
  */
 private[spark] object SubmitRestProtocolMessage {
   private val packagePrefix = this.getClass.getPackage.getName

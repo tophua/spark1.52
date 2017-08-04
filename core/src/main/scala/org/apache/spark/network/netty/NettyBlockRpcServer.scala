@@ -68,6 +68,7 @@ class NettyBlockRpcServer(
         //提供上传Block文件的RPC服务
       case uploadBlock: UploadBlock =>
         // StorageLevel is serialized as bytes using our JavaSerializer.
+        //使用我们的JavaSerializer将StorageLevel序列化为字节
         //存储级别
         val level: StorageLevel =
           serializer.newInstance().deserialize(ByteBuffer.wrap(uploadBlock.metadata)) 

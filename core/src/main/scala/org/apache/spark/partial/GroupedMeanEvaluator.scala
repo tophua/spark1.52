@@ -27,6 +27,7 @@ import org.apache.spark.util.StatCounter
 
 /**
  * An ApproximateEvaluator for means by key. Returns a map of key to confidence interval.
+  * 一个近似值,用于表示按键,返回键到置信区间的映射
  */
 private[spark] class GroupedMeanEvaluator[T](totalOutputs: Int, confidence: Double)
   extends ApproximateEvaluator[JHashMap[T, StatCounter], Map[T, BoundedDouble]] {

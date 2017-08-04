@@ -28,9 +28,11 @@ import static org.apache.spark.launcher.CommandBuilderUtils.*;
 
 /**
  * Launcher for Spark applications.
+ * Spark应用程序的启动器
  * <p>
  * Use this class to start Spark applications programmatically. The class uses a builder pattern
  * to allow clients to configure the Spark application and launch it as a child process.
+ * 使用此类以编程方式启动Spark应用程序,该类使用构建器模式来允许客户端配置Spark应用程序并将其作为子进程启动
  * </p>
  */
 public class SparkLauncher {
@@ -38,27 +40,36 @@ public class SparkLauncher {
   /** The Spark master. */
   public static final String SPARK_MASTER = "spark.master";
 
-  /** Configuration key for the driver memory. */
+  /** Configuration key for the driver memory.
+   * 驱动程序内存的配置键*/
   public static final String DRIVER_MEMORY = "spark.driver.memory";
-  /** Configuration key for the driver class path. */
+  /** Configuration key for the driver class path.
+   * 驱动程序类路径的配置键*/
   public static final String DRIVER_EXTRA_CLASSPATH = "spark.driver.extraClassPath";
-  /** Configuration key for the driver VM options. */
+  /** Configuration key for the driver VM options.
+   * 驱动程序VM选项的配置键*/
   public static final String DRIVER_EXTRA_JAVA_OPTIONS = "spark.driver.extraJavaOptions";
-  /** Configuration key for the driver native library path. */
+  /** Configuration key for the driver native library path.
+   * 驱动程序本机库路径的配置键*/
   public static final String DRIVER_EXTRA_LIBRARY_PATH = "spark.driver.extraLibraryPath";
 
-  /** Configuration key for the executor memory. */
+  /** Configuration key for the executor memory.
+   * 执行器内存的配置键 */
   public static final String EXECUTOR_MEMORY = "spark.executor.memory";
-  /** Configuration key for the executor class path. */
+  /** Configuration key for the executor class path.
+   * 执行器类路径的配置键 */
   public static final String EXECUTOR_EXTRA_CLASSPATH = "spark.executor.extraClassPath";
-  /** Configuration key for the executor VM options. */
+  /** Configuration key for the executor VM options.
+   * 执行器VM选项的配置键*/
   public static final String EXECUTOR_EXTRA_JAVA_OPTIONS = "spark.executor.extraJavaOptions";
-  /** Configuration key for the executor native library path. */
+  /** Configuration key for the executor native library path.
+   * 执行器本机库路径的配置键。 */
   public static final String EXECUTOR_EXTRA_LIBRARY_PATH = "spark.executor.extraLibraryPath";
-  /** Configuration key for the number of executor CPU cores. */
+  /** Configuration key for the number of executor CPU cores.
+   * 执行器CPU核心数量的配置键*/
   public static final String EXECUTOR_CORES = "spark.executor.cores";
 
-  // Visible for testing.
+  // Visible for testing. 可见测试
   final SparkSubmitCommandBuilder builder;
 
   public SparkLauncher() {
@@ -67,6 +78,7 @@ public class SparkLauncher {
 
   /**
    * Creates a launcher that will set the given environment variables in the child.
+   * 创建一个启动器,它将在孩子中设置给定的环境变量
    *
    * @param env Environment variables to set.
    */
@@ -79,6 +91,7 @@ public class SparkLauncher {
 
   /**
    * Set a custom JAVA_HOME for launching the Spark application.
+   * 设置一个用于启动Spark应用程序的自定义JAVA_HOME
    *
    * @param javaHome Path to the JAVA_HOME to use.
    * @return This launcher.
@@ -91,6 +104,7 @@ public class SparkLauncher {
 
   /**
    * Set a custom Spark installation location for the application.
+   * 为应用程序设置自定义Spark安装位置
    *
    * @param sparkHome Path to the Spark installation to use.
    * @return This launcher.
@@ -103,6 +117,7 @@ public class SparkLauncher {
 
   /**
    * Set a custom properties file with Spark configuration for the application.
+   * 为应用程序设置Spark配置的自定义属性文件
    *
    * @param path Path to custom properties file to use.
    * @return This launcher.
@@ -115,6 +130,7 @@ public class SparkLauncher {
 
   /**
    * Set a single configuration value for the application.
+   * 为应用程序设置单个配置值
    *
    * @param key Configuration key.
    * @param value The value to use.
@@ -130,7 +146,7 @@ public class SparkLauncher {
 
   /**
    * Set the application name.
-   *
+   *设置应用程序名称
    * @param appName Application name.
    * @return This launcher.
    */
@@ -142,6 +158,7 @@ public class SparkLauncher {
 
   /**
    * Set the Spark master for the application.
+   * 设置应用程序的Spark master
    *
    * @param master Spark master.
    * @return This launcher.
@@ -154,7 +171,7 @@ public class SparkLauncher {
 
   /**
    * Set the deploy mode for the application.
-   *
+   * 设置应用程序的部署模式
    * @param mode Deploy mode.
    * @return This launcher.
    */
@@ -167,7 +184,7 @@ public class SparkLauncher {
   /**
    * Set the main application resource. This should be the location of a jar file for Scala/Java
    * applications, or a python script for PySpark applications.
-   *
+   * 设置主应用资源,这应该是Scala / Java应用程序的jar文件的位置，或PySpark应用程序的python脚本。
    * @param resource Path to the main application resource.
    * @return This launcher.
    */
@@ -179,7 +196,7 @@ public class SparkLauncher {
 
   /**
    * Sets the application class name for Java/Scala applications.
-   *
+   * 设置Java / Scala应用程序的应用程序类名称。
    * @param mainClass Application's main class.
    * @return This launcher.
    */
@@ -193,9 +210,12 @@ public class SparkLauncher {
    * Adds a no-value argument to the Spark invocation. If the argument is known, this method
    * validates whether the argument is indeed a no-value argument, and throws an exception
    * otherwise.
+   * 向Spark调用添加无值参数,如果参数已知,则此方法验证参数是否确实是无值参数,否则引发异常,
    * <p>
    * Use this method with caution. It is possible to create an invalid Spark command by passing
    * unknown arguments to this method, since those are allowed for forward compatibility.
+   *
+   * 请谨慎使用此方法,可以通过将未知参数传递给此方法来创建无效的Spark命令,因为这些参数被允许向前兼容
    *
    * @param arg Argument to add.
    * @return This launcher.
@@ -211,12 +231,14 @@ public class SparkLauncher {
    * Adds an argument with a value to the Spark invocation. If the argument name corresponds to
    * a known argument, the code validates that the argument actually expects a value, and throws
    * an exception otherwise.
+   * 向Spark调用添加一个带值的参数,如果参数名称对应于已知参数,则代码将验证参数实际预期值,否则抛出异常
    * <p>
    * It is safe to add arguments modified by other methods in this class (such as
    * {@link #setMaster(String)} - the last invocation will be the one to take effect.
    * <p>
    * Use this method with caution. It is possible to create an invalid Spark command by passing
    * unknown arguments to this method, since those are allowed for forward compatibility.
+   * 请谨慎使用此方法,可以通过将未知参数传递给此方法来创建无效的Spark命令,因为这些参数被允许向前兼容
    *
    * @param name Name of argument to add.
    * @param value Value of the argument.
@@ -258,6 +280,7 @@ public class SparkLauncher {
 
   /**
    * Adds command line arguments for the application.
+   * 为应用程序添加命令行参数
    *
    * @param args Arguments to pass to the application's main class.
    * @return This launcher.
@@ -272,6 +295,7 @@ public class SparkLauncher {
 
   /**
    * Adds a jar file to be submitted with the application.
+   * 添加一个应用程序提交的jar文件
    *
    * @param jar Path to the jar file.
    * @return This launcher.
@@ -284,6 +308,7 @@ public class SparkLauncher {
 
   /**
    * Adds a file to be submitted with the application.
+   * 添加要与应用程序一起提交的文件
    *
    * @param file Path to the file.
    * @return This launcher.
@@ -296,6 +321,7 @@ public class SparkLauncher {
 
   /**
    * Adds a python file / zip / egg to be submitted with the application.
+   * 添加与应用程序一起提交的python文件/ zip / egg
    *
    * @param file Path to the file.
    * @return This launcher.
@@ -308,6 +334,7 @@ public class SparkLauncher {
 
   /**
    * Enables verbose reporting for SparkSubmit.
+   * 启用SparkSubmit的详细报告
    *
    * @param verbose Whether to enable verbose output.
    * @return This launcher.
@@ -319,6 +346,7 @@ public class SparkLauncher {
 
   /**
    * Launches a sub-process that will start the configured Spark application.
+   * 启动一个子进程,启动配置的Spark应用程序
    *
    * @return A process handle for the Spark app.
    */
@@ -331,6 +359,7 @@ public class SparkLauncher {
     // Since the child process is a batch script, let's quote things so that special characters are
     // preserved, otherwise the batch interpreter will mess up the arguments. Batch scripts are
     // weird.
+      //由于子进程是一个批处理脚本,我们来引用一些特殊的字符保留,否则批量解释器会弄乱参数,批处理脚本很奇怪。
     if (isWindows()) {
       List<String> winCmd = new ArrayList<String>();
       for (String arg : cmd) {
@@ -365,6 +394,7 @@ public class SparkLauncher {
     @Override
     protected boolean handleUnknown(String opt) {
       // Do not fail on unknown arguments, to support future arguments added to SparkSubmit.
+        //不要在未知的参数上失败,以支持添加到SparkSubmit的未来参数
       return true;
     }
 

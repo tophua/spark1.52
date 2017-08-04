@@ -147,7 +147,7 @@ private[deploy] object DeployMessages {
   case class DriverStatusResponse(found: Boolean, state: Option[DriverState],
     workerId: Option[String], workerHostPort: Option[String], exception: Option[Exception])
 
-  // Internal message in AppClient
+  // Internal message in AppClient AppClient中的内部消息
 
   case object StopAppClient
 

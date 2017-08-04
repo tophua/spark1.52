@@ -531,6 +531,7 @@ private[deploy] class Master(
               // We just notify the worker to kill the driver here. The final bookkeeping occurs
               // on the return path when the worker submits a state change back to the master
               // to notify it that the driver was successfully killed.
+              //我们只是通知通知worker在这里杀死driver,当worker将状态更改提交给master以通知driver被成功杀死时,最终簿记发生在返回路径上。
               //通知worker kill driver id的driver。结果会由workder发消息给master ! DriverStateChanged
               d.worker.foreach { w =>
                 w.endpoint.send(KillDriver(driverId))
@@ -595,6 +596,7 @@ private[deploy] class Master(
  */
   override def onDisconnected(address: RpcAddress): Unit = {
     // The disconnected client could've been either a worker or an app; remove whichever it was
+    //断开连接的客户端可能是worker或应用程序; 删除它是哪个
     logInfo(s"$address got disassociated, removing it.")
     addressToWorker.get(address).foreach(removeWorker)
     addressToApp.get(address).foreach(finishApplication)
@@ -623,6 +625,7 @@ private[deploy] class Master(
     for (driver <- storedDrivers) {
       // Here we just read in the list of drivers. Any drivers associated with now-lost workers
       // will be re-launched when we detect that the worker is missing.
+      //在这里我们刚刚读取驱动程序列表,当我们检测到Worker失踪时,与现在失去Worker有关的任何driver将重新启动,
       //在Worker恢复后,Worker会主动上报运行其上的executors和drivers从而使得Master恢复executor和driver的信息。
       drivers += driver
     }
@@ -657,7 +660,7 @@ private[deploy] class Master(
     //对于未分配Woker的Driver client(有可能Worker已经死掉)
     //确定是否需要重新启动
     // Reschedule drivers which were not claimed by any workers
-    drivers.filter(_.worker.isEmpty).foreach { d =>//如果driver的worker为空,则relaunchDriver。
+    drivers.filter(_.worker.isEmpty).foreach { d => //如果driver的worker为空,则relaunchDriver。
       logWarning(s"Driver ${d.id} was not found after master recovery")
       if (d.desc.supervise) {//需要重新启动Driver Client
         logWarning(s"Re-launching ${d.id}")
@@ -937,7 +940,9 @@ private[deploy] class Master(
       val oldWorker = addressToWorker(workerAddress)
       if (oldWorker.state == WorkerState.UNKNOWN) {
         // A worker registering from UNKNOWN implies that the worker was restarted during recovery.
+        //从UNKNOWN注册的worker意味着工人在恢复期间重新启动
         // The old worker must thus be dead, so we will remove it and accept the new worker.
+        //因此,老worker必须死亡,所以我们会把它删除并接受新的worker。
         removeWorker(oldWorker)
       } else {
         logInfo("Attempted to re-register worker at same address: " + workerAddress)
@@ -1054,6 +1059,7 @@ private[deploy] class Master(
       waitingApps -= app
 
       // If application events are logged, use them to rebuild the UI
+      //如果应用程序事件被记录,请使用它们来重建UI
       rebuildSparkUI(app)
 
       for (exec <- app.executors.values) {
@@ -1068,6 +1074,7 @@ private[deploy] class Master(
       schedule()
 
       // Tell all workers that the application has finished, so they can clean up any app state.
+      //告诉所有workers的应用程序已经完成，所以他们可以清理任何应用程序状态
       workers.foreach { w =>
         w.endpoint.send(ApplicationFinished(app.id))
       }
@@ -1076,11 +1083,13 @@ private[deploy] class Master(
 
   /**
    * Handle a request to set the target number of executors for this application.
-   * 处理一请求设置应用的executors数
+   * 处理请求以设置此应用程序的执行程序的目标数量。处理一请求设置应用的executors数
    * If the executor limit is adjusted upwards, new executors will be launched provided
    * that there are workers with sufficient resources. If it is adjusted downwards, however,
    * we do not kill existing executors until we explicitly receive a kill request.
-   * 如果执行器限制向上调整
+    *
+    * 如果workers的限制向上调整,新的workers将被启动,只要有workers有足够的资源,
+    * 但是，如果它向下调整，我们不会杀死现有的执行者，直到我们明确接收到kill请求。
    * @return whether the application has previously registered with this Master.
    */
   private def handleRequestExecutors(appId: String, requestedTotal: Int): Boolean = {
@@ -1098,10 +1107,13 @@ private[deploy] class Master(
 
   /**
    * Handle a kill request from the given application.
-   * 向给定的应用程序杀死executor请求
+   * 处理给定应用程序的kill请求
    * This method assumes the executor limit has already been adjusted downwards through
    * a separate [[RequestExecutors]] message, such that we do not launch new executors
    * immediately after the old ones are removed.
+    *
+    * 该方法假定执行者限制已经通过单独的[[RequestExecutors]]消息向下调整,
+    * 这样我们不会在删除旧的执行器后立即启动新的执行程序
    *
    * @return whether the application has previously registered with this Master.
    */
@@ -1133,6 +1145,8 @@ private[deploy] class Master(
    * All executors IDs should be integers since we launched these executors. However,
    * the kill interface on the driver side accepts arbitrary strings, so we need to
    * handle non-integer executor IDs just to be safe.
+    * 自从我们启动这些执行者以来,所有的执行者ID都应该是整数。
+    * 然而,驱动程序端的kill接口接受任意字符串，所以我们需要处理非整数执行器ID才能安全。
    */
   private def formatExecutorIds(executorIds: Seq[String]): Seq[Int] = {
     executorIds.flatMap { executorId =>
@@ -1168,6 +1182,7 @@ private[deploy] class Master(
       val eventLogDir = app.desc.eventLogDir
         .getOrElse {
           // Event logging is not enabled for this application
+          //此应用程序未启用事件日志记录
           app.desc.appUiUrl = notFoundBasePath
           return None
         }
@@ -1180,6 +1195,7 @@ private[deploy] class Master(
 
       if (inProgressExists) {
         // Event logging is enabled for this application, but the application is still in progress
+        //为此应用程序启用事件日志记录,但应用程序仍在进行中
         logWarning(s"Application $appName is still in progress, it may be terminated abnormally.")
       }
 
@@ -1202,11 +1218,13 @@ private[deploy] class Master(
       appIdToUI(app.id) = ui
       webUi.attachSparkUI(ui)
       // Application UI is successfully rebuilt, so link the Master UI to it
+      //应用程序UI成功重建,因此将主UI连接到它
       app.desc.appUiUrl = ui.basePath
       Some(ui)
     } catch {
       case fnf: FileNotFoundException =>
         // Event logging is enabled for this application, but no event logs are found
+        //此应用程序启用了事件日志记录,但没有找到事件日志
         val title = s"Application history not found (${app.id})"
         var msg = s"No event logs found for application $appName in ${app.desc.eventLogDir.get}."
         logWarning(msg)
@@ -1216,6 +1234,7 @@ private[deploy] class Master(
         None
       case e: Exception =>
         // Relay exception message to application UI page
+        //中继异常消息到应用程序UI页面
         val title = s"Application history load error (${app.id})"
         val exception = URLEncoder.encode(Utils.exceptionString(e), "UTF-8")
         var msg = s"Exception in replaying log for application $appName!"
@@ -1345,6 +1364,7 @@ private[deploy] object Master extends Logging {
    * 它管理着整个RpcEndpoints的声明周期：(1)根据name或uri注册endpoints(2)管理各种消息的处理(3)停止endpoints。
    * RpcEnv必须通过工厂类RpcEnvFactory创建
    * Start the Master and return a three tuple of:
+    * 启动Master并返回三个元组：
    *   (1) The Master RpcEnv
    *   (2) The web UI bound port
    *   (3) The REST server bound port, if any

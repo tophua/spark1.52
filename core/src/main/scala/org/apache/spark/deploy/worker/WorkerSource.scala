@@ -29,22 +29,22 @@ private[worker] class WorkerSource(val worker: Worker) extends Source {
     override def getValue: Int = worker.executors.size
   })
 
-  // Gauge for cores used of this worker
+  // Gauge for cores used of this worker 这个worker使用的核数
   metricRegistry.register(MetricRegistry.name("coresUsed"), new Gauge[Int] {
     override def getValue: Int = worker.coresUsed
   })
 
-  // Gauge for memory used of this worker
+  // Gauge for memory used of this worker 用于此worker的内存数
   metricRegistry.register(MetricRegistry.name("memUsed_MB"), new Gauge[Int] {
     override def getValue: Int = worker.memoryUsed
   })
 
-  // Gauge for cores free of this worker
+  // Gauge for cores free of this worker 用于此worker的可用核数
   metricRegistry.register(MetricRegistry.name("coresFree"), new Gauge[Int] {
     override def getValue: Int = worker.coresFree
   })
 
-  // Gauge for memory free of this worker
+  // Gauge for memory free of this worker  用于此worker的可用内存数
   metricRegistry.register(MetricRegistry.name("memFree_MB"), new Gauge[Int] {
     override def getValue: Int = worker.memoryFree
   })

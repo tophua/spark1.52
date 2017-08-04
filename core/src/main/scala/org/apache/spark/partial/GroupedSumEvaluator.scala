@@ -27,6 +27,7 @@ import org.apache.spark.util.StatCounter
 
 /**
  * An ApproximateEvaluator for sums by key. Returns a map of key to confidence interval.
+  * 按键的总和的近似值,返回键到置信区间的映射
  */
 private[spark] class GroupedSumEvaluator[T](totalOutputs: Int, confidence: Double)
   extends ApproximateEvaluator[JHashMap[T, StatCounter], Map[T, BoundedDouble]] {

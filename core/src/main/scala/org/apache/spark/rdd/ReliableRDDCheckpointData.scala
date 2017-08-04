@@ -25,14 +25,17 @@ import org.apache.spark._
 import org.apache.spark.util.SerializableConfiguration
 
 /**
- * An implementation of checkpointing that writes the RDD data to reliable(可靠) storage.
+ * An implementation of checkpointing that writes the RDD data to reliable storage.
+  * 将RDD数据写入可靠存储的检查点的实现
  * This allows drivers to be restarted on failure with previously computed state.
+  * 这允许在以前计算的状态下,在故障时重新启动驱动程序
  */
 private[spark] class ReliableRDDCheckpointData[T: ClassTag](@transient rdd: RDD[T])
   extends RDDCheckpointData[T](rdd) with Logging {
 
   // The directory to which the associated RDD has been checkpointed to
   // This is assumed to be a non-local path that points to some reliable storage
+  //相关联的RDD已经被检查点的目录被假定为指向一些可靠存储的非本地路径
   private val cpDir: String =
     ReliableRDDCheckpointData.checkpointPath(rdd.context, rdd.id)
       .map(_.toString)
@@ -41,6 +44,7 @@ private[spark] class ReliableRDDCheckpointData[T: ClassTag](@transient rdd: RDD[
 
   /**  
    * Return the directory to which this RDD was checkpointed.
+    * 返回此RDD被检查点的目录,如果RDD尚未检查点,则返回None。
    * If the RDD is not checkpointed yet, return None.
    * 返回RDD检查点目录,
    */
@@ -56,6 +60,7 @@ private[spark] class ReliableRDDCheckpointData[T: ClassTag](@transient rdd: RDD[
    * 实现RDD内容写一个可靠的DFS(分布式文件系统),检查点的数据写入
    * Materialize this RDD and write its content to a reliable DFS.
    * This is called immediately after the first action invoked on this RDD has completed.
+    * 实现此RDD并将其内容写入可靠的DFS,在此RDD调用的第一个操作完成后立即调用。
    */
   protected override def doCheckpoint(): CheckpointRDD[T] = {
     // Create the output path for the checkpoint

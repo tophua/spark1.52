@@ -36,6 +36,8 @@ class PartitionwiseSampledRDDPartition(val prev: Partition, val seed: Long)
  * a user-specified [[org.apache.spark.util.random.RandomSampler]] instance is used to obtain
  * a random sample of the records in the partition. The random seeds assigned to the samplers
  * are guaranteed to have different values.
+  * 从其父RDD分区采样的RDD,对于父RDD的每个分区，用户指定的[[org.apache.spark.util.random.RandomSampler]]实例用于获取
+  *分区中记录的随机抽样,分配给采样器的随机种子保证有不同的值。
  *
  * @param prev RDD to be sampled
  * @param sampler a random sampler

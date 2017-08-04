@@ -49,6 +49,7 @@ private[ui] class ApplicationPage(parent: MasterWebUI) extends WebUIPage("app") 
     val executorHeaders = Seq("ExecutorID", "Worker", "Cores", "Memory", "State", "Logs")
     val allExecutors = (app.executors.values ++ app.removedExecutors).toSet.toSeq
     // This includes executors that are either still running or have exited cleanly
+    //这包括仍在运行或已经完全退出的执行者
     val executors = allExecutors.filter { exec =>
       !ExecutorState.isFinished(exec.state) || exec.state == ExecutorState.EXITED
     }

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Decoder used by the client side to encode server-to-client responses.
  * This encoder is stateless so it is safe to be shared by multiple threads.
+ * 客户端使用的解码器对服务器到客户端的响应进行编码,该编码器是无状态的,因此可以安全地由多个线程共享
  */
 @ChannelHandler.Sharable
 public final class MessageDecoder extends MessageToMessageDecoder<ByteBuf> {

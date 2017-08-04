@@ -23,6 +23,7 @@ import java.lang.annotation.*;
  * A lower-level, unstable API intended for developers.
  *
  * Developer API's might change or be removed in minor versions of Spark.
+ * 开发人员API可能会在次要版本的Spark中更改或删除
  *
  * NOTE: If there exists a Scaladoc comment that immediately precedes this annotation, the first
  * line of the comment must be ":: DeveloperApi ::" with no trailing blank line. This is because

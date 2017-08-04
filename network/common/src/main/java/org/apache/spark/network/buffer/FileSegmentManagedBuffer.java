@@ -35,6 +35,7 @@ import org.apache.spark.network.util.TransportConf;
 
 /**
  * A {@link ManagedBuffer} backed by a segment in a file.
+ * 文件中的段支持
  */
 public final class FileSegmentManagedBuffer extends ManagedBuffer {
   private final TransportConf conf;
@@ -60,6 +61,7 @@ public final class FileSegmentManagedBuffer extends ManagedBuffer {
     try {
       channel = new RandomAccessFile(file, "r").getChannel();
       // Just copy the buffer if it's sufficiently small, as memory mapping has a high overhead.
+        //只要复制缓冲区足够小,内存映射的开销就很高
       if (length < conf.memoryMapBytes()) {
         ByteBuffer buf = ByteBuffer.allocate((int) length);
         channel.position(offset);

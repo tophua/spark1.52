@@ -255,6 +255,7 @@ private[rest] abstract class StatusRequestServlet extends RestServlet {
   /**
    * If a submission ID is specified in the URL, request the status of the corresponding
    * driver from the Master and include it in the response. Otherwise, return error.
+    * 如果在URL中指定了提交ID,请从主服务器请求相应驱动程序的状态并将其包含在响应中,否则返回错误
    */
   protected override def doGet(
       request: HttpServletRequest,
@@ -272,15 +273,19 @@ private[rest] abstract class StatusRequestServlet extends RestServlet {
 
 /**
  * A servlet for handling submit requests passed to the [[RestSubmissionServer]].
+  * 用于处理传递给[[RestSubmissionServer]]的提交请求的servlet
  */
 private[rest] abstract class SubmitRequestServlet extends RestServlet {
 
   /**
    * Submit an application to the Master with parameters specified in the request.
+    * 使用请求中指定的参数向Master提交应用程序
    *
    * The request is assumed to be a [[SubmitRestProtocolRequest]] in the form of JSON.
    * If the request is successfully processed, return an appropriate response to the
    * client indicating so. Otherwise, return error instead.
+    * 该请求被假定为[[SubmitRestProtocolRequest]]形式的JSON。
+    * 如果请求成功处理，则返回适当的响应给客户机，这样做。 否则返回错误。
    */
   protected override def doPost(
       requestServlet: HttpServletRequest,
@@ -290,11 +295,14 @@ private[rest] abstract class SubmitRequestServlet extends RestServlet {
         val requestMessageJson = Source.fromInputStream(requestServlet.getInputStream).mkString
         val requestMessage = SubmitRestProtocolMessage.fromJson(requestMessageJson)
         // The response should have already been validated on the client.
+        //响应应该已经在客户端上验证了
         // In case this is not true, validate it ourselves to avoid potential NPEs.
+        //如果这不是真的,请自行验证以避免潜在的NPE。
         requestMessage.validate()
         handleSubmit(requestMessageJson, requestMessage, responseServlet)
       } catch {
         // The client failed to provide a valid JSON, so this is not our fault
+        //客户端无法提供有效的JSON,因此这不是我们的错误
         case e @ (_: JsonProcessingException | _: SubmitRestProtocolException) =>
           responseServlet.setStatus(HttpServletResponse.SC_BAD_REQUEST)
           handleError("Malformed request: " + formatException(e))
@@ -349,6 +357,7 @@ private class ErrorServlet extends RestServlet {
     // If there is a version mismatch, include the highest protocol version that
     //如果有版本不匹配,包括最高的协议版本,此服务器支持的情况下,客户端要重试与我们的版本一致
     // this server supports in case the client wants to retry with our version
+    //该服务器支持客户端想要重试我们的版本
     if (versionMismatch) {
       error.highestProtocolVersion = serverVersion
       response.setStatus(RestSubmissionServer.SC_UNKNOWN_PROTOCOL_VERSION)

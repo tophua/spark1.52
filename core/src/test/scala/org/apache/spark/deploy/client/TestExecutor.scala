@@ -15,24 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.spark.network
+package org.apache.spark.deploy.client
 
-import org.apache.spark.network.buffer.ManagedBuffer
-import org.apache.spark.storage.{BlockId, StorageLevel}
-
-private[spark]
-trait BlockDataManager {
-
-  /**
-   * Interface to get local block data. Throws an exception if the block cannot be found or
-   * cannot be read successfully.
-    * 根据blockId获得本地块数据,如果无法找到该块或无法读取成功,则抛出异常
-   */
-  def getBlockData(blockId: BlockId): ManagedBuffer
-
-  /**
-   * Put the block locally, using the given storage level.
-    * 将块放在本地,使用给定的存储级别
-   */
-  def putBlockData(blockId: BlockId, data: ManagedBuffer, level: StorageLevel): Unit
+private[spark] object TestExecutor {
+  def main(args: Array[String]) {
+    // scalastyle:off println
+    println("Hello world!")
+    // scalastyle:on println
+    while (true) {
+      Thread.sleep(1000)
+    }
+  }
 }

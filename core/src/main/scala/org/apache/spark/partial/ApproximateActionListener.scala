@@ -25,10 +25,14 @@ import org.apache.spark.scheduler.JobListener
  * A JobListener for an approximate single-result action, such as count() or non-parallel reduce().
  * This listener waits up to timeout milliseconds and will return a partial answer even if the
  * complete answer is not available by then.
+  * 一个JobListener，用于大致的单一结果操作,如count()或非并行的reduce(),
+  * 这个监听器等待超时毫秒，即使完整的答案不可用，也会返回部分答案
  *
  * This class assumes that the action is performed on an entire RDD[T] via a function that computes
  * a result of type U for each partition, and that the action returns a partial or complete result
  * of type R. Note that the type R must *include* any error bars on it (e.g. see BoundedInt).
+  * 该类假设通过计算每个分区的类型U的结果的函数在整个RDD [T]上执行操作，并且该操作返回类型R的部分或完整结果,
+  * 请注意类型R必须包括任何错误栏（例如参见BoundedInt）。
  */
 private[spark] class ApproximateActionListener[T, U, R](
     rdd: RDD[T],
@@ -49,8 +53,10 @@ private[spark] class ApproximateActionListener[T, U, R](
       finishedTasks += 1
       if (finishedTasks == totalTasks) {
         // If we had already returned a PartialResult, set its final value
+        //如果我们已经返回了一个PartialResult,设置它的最终值
         resultObject.foreach(r => r.setFinalValue(evaluator.currentResult()))
         // Notify any waiting thread that may have called awaitResult
+        //通知任何可能调用awaitResult的等待线程
         this.notifyAll()
       }
     }
@@ -66,6 +72,7 @@ private[spark] class ApproximateActionListener[T, U, R](
   /**
    * Waits for up to timeout milliseconds since the listener was created and then returns a
    * PartialResult with the result so far. This may be complete if the whole job is done.
+    * 等待监听器创建之后的超时毫秒数,然后返回一个具有结果的PartialResul,如果整个工作完成,这可能是完整的
    */
   def awaitResult(): PartialResult[R] = synchronized {
     val finishTime = startTime + timeout

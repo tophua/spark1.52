@@ -28,8 +28,10 @@ import io.netty.util.ReferenceCountUtil;
 
 /**
  * A wrapper message that holds two separate pieces (a header and a body).
+ * 一个包含两个单独的部分(一个标题和一个主体)的包装信息
  *
  * The header must be a ByteBuf, while the body can be a ByteBuf or a FileRegion.
+ * 标题必须是ByteBuf,而机身可以是ByteBuf或FileRegion
  */
 class MessageWithHeader extends AbstractReferenceCounted implements FileRegion {
 
@@ -66,6 +68,7 @@ class MessageWithHeader extends AbstractReferenceCounted implements FileRegion {
   /**
    * This code is more complicated than you would think because we might require multiple
    * transferTo invocations in order to transfer a single MessageWithHeader to avoid busy waiting.
+   * 这个代码比你想象的要复杂得多,因为我们可能需要多次传输才能调用一个单独的消息带头来避免忙碌等待。
    *
    * The contract is that the caller will ensure position is properly set to the total number
    * of bytes transferred so far (i.e. value returned by transfered()).
@@ -74,6 +77,7 @@ class MessageWithHeader extends AbstractReferenceCounted implements FileRegion {
   public long transferTo(final WritableByteChannel target, final long position) throws IOException {
     Preconditions.checkArgument(position == totalBytesTransferred, "Invalid position.");
     // Bytes written for header in this call.
+      //为此调用的标题写入的字节数
     long writtenHeader = 0;
     if (header.readableBytes() > 0) {
       writtenHeader = copyByteBuf(header, target);
@@ -84,6 +88,7 @@ class MessageWithHeader extends AbstractReferenceCounted implements FileRegion {
     }
 
     // Bytes written for body in this call.
+      //在本次调用中为body编写的字节数。
     long writtenBody = 0;
     if (body instanceof FileRegion) {
       writtenBody = ((FileRegion) body).transferTo(target, totalBytesTransferred - headerLength);

@@ -29,6 +29,9 @@ import org.apache.spark.annotation.DeveloperApi
  * in scope. Ordering objects already exist for all of the standard primitive types. Users can also
  * define their own orderings for custom types, or to override the default ordering. The implicit
  * ordering that is in the closest scope will be used.
+  *
+  * key可通过隐式转换排序的（key，值）对的RDD上的额外功能。 它们将使用范围内具有隐式“Ordering [K]”的任何键类型“K”。
+  * 已经存在所有标准原语类型的订购对象。 用户还可以为自定义类型定义自己的订单，或者覆盖默认排序。 将使用最接近的范围内的隐式排序。
  *
  * {{{
  *   import org.apache.spark.SparkContext._
@@ -76,6 +79,7 @@ class OrderedRDDFunctions[K : Ordering : ClassTag,
    *
    * This is more efficient than calling `repartition` and then sorting within each partition
    * because it can push the sorting down into the shuffle machinery.
+    * 这比调用“repartition”更有效,然后在每个分区中进行排序,因为它可以将排序推入洗牌机器
    */
   def repartitionAndSortWithinPartitions(partitioner: Partitioner): RDD[(K, V)] = self.withScope {
     new ShuffledRDD[K, V, V](self, partitioner).setKeyOrdering(ordering)
@@ -86,6 +90,9 @@ class OrderedRDDFunctions[K : Ordering : ClassTag,
    * If the RDD has been partitioned using a `RangePartitioner`, then this operation can be
    * performed efficiently by only scanning the partitions that might contain matching elements.
    * Otherwise, a standard `filter` is applied to all partitions.
+    *
+    * 返回一个只包含“lower”到“upper”范围内的元素的RDD,如果使用“RangePartitioner”对RDD进行了分区,
+    * 则只能扫描可能包含匹配元素的分区,才能有效地执行此操作,否则，将标准的“filter”应用于所有分区。
    */
   def filterByRange(lower: K, upper: K): RDD[P] = self.withScope {
 

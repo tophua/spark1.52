@@ -25,10 +25,12 @@ import static org.apache.spark.launcher.CommandBuilderUtils.*;
 
 /**
  * Special command builder for handling a CLI invocation of SparkSubmit.
+ * 用于处理SparkSubmit的CLI调用的特殊命令构建器
  * <p>
  * This builder adds command line parsing compatible with SparkSubmit. It handles setting
  * driver-side options and special parsing behavior needed for the special-casing certain internal
  * Spark applications.
+ * 此构建器添加与SparkSubmit兼容的命令行解析,它处理设置驱动程序选项和特殊解析行为需要特殊内置的某些内部Spark应用程序。
  * <p>
  * This class has also some special features to aid launching pyspark.
  */
@@ -37,6 +39,7 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
   /**
    * Name of the app resource used to identify the PySpark shell. The command line parser expects
    * the resource name to be the very first argument to spark-submit in this case.
+   * 用于标识PySpark shell的应用程序资源的名称。在这种情况下,命令行解析器期望资源名称是spark-submit的第一个参数
    *
    * NOTE: this cannot be "pyspark-shell" since that identifies the PySpark shell to SparkSubmit
    * (see java_gateway.py), and can cause this code to enter into an infinite loop.
@@ -45,20 +48,24 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
 
   /**
    * This is the actual resource name that identifies the PySpark shell to SparkSubmit.
+   * 这是标识SparkSubmit的PySpark shell的实际资源名称
    */
   static final String PYSPARK_SHELL_RESOURCE = "pyspark-shell";
 
   /**
    * Name of the app resource used to identify the SparkR shell. The command line parser expects
    * the resource name to be the very first argument to spark-submit in this case.
+   * 用于标识SparkR shell的应用程序资源的名称,在这种情况下,命令行解析器期望资源名称是spark-submit的第一个参数
    *
    * NOTE: this cannot be "sparkr-shell" since that identifies the SparkR shell to SparkSubmit
    * (see sparkR.R), and can cause this code to enter into an infinite loop.
+   * 注意：这不能是“sparkr-shell”,因为它将SparkR shell标识为SparkSubmit(参见sparkR.R),并且可能导致此代码进入无限循环
    */
   static final String SPARKR_SHELL = "sparkr-shell-main";
 
   /**
    * This is the actual resource name that identifies the SparkR shell to SparkSubmit.
+   * 这是标识SparkSubmit的SparkR shell的实际资源名称
    */
   static final String SPARKR_SHELL_RESOURCE = "sparkr-shell";
 
@@ -66,6 +73,8 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
    * This map must match the class names for available special classes, since this modifies the way
    * command line parsing works. This maps the class name to the resource to use when calling
    * spark-submit.
+   * 此映射必须与可用的特殊类的类名称相匹配,因为这将修改命令行解析的工作原理,
+   * 这会将类名映射到调用spark-submit时使用的资源。
    */
   private static final Map<String, String> specialClasses = new HashMap<String, String>();
   static {
@@ -83,6 +92,8 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
    * Controls whether mixing spark-submit arguments with app arguments is allowed. This is needed
    * to parse the command lines for things like bin/spark-shell, which allows users to mix and
    * match arguments (e.g. "bin/spark-shell SparkShellArg --master foo").
+   * 控制是否允许使用spark参数混合spark-submit参数,需要解析诸如bin / spark-shell之类的命令行,
+   * 这允许用户混合和匹配参数(例如“bin / spark-shell SparkShellArg --master foo”)
    */
   private boolean allowsMixedArguments;
 
@@ -188,6 +199,8 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
     // Load the properties file and check whether spark-submit will be running the app's driver
     // or just launching a cluster app. When running the driver, the JVM's argument will be
     // modified to cover the driver's configuration.
+      //加载属性文件/并检查spark-submit是否将运行应用程序的驱动程序
+      //或者只是启动一个集群应用程序/运行驱动程序时/JVM的参数将被修改以覆盖驱动程序的配置。
     Properties props = loadPropertiesFile();
     boolean isClientMode = isClientMode(props);
     String extraClassPath = isClientMode ?
@@ -195,6 +208,7 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
 
     List<String> cmd = buildJavaCommand(extraClassPath);
     // Take Thrift Server as daemon
+      //以Thrift Server为守护进程
     if (isThriftServer(mainClass)) {
       addOptionString(cmd, System.getenv("SPARK_DAEMON_JAVA_OPTS"));
     }
@@ -210,6 +224,14 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
       // - SPARK_MEM env variable
       // - default value (1g)
       // Take Thrift Server as daemon
+        //计算出内存值来自哪里是有点棘手，因为优先级。
+        //按照以下顺序观察优先级：
+        // - 显式配置（setConf（）），其中还包括--driver-memory cli参数。
+        // - 属性文件。
+        // - SPARK_DRIVER_MEMORY env变量
+        // - SPARK_MEM env变量
+        // - 默认值（1g）
+        //将Thrift Server作为守护进程
       String tsMemory =
         isThriftServer(mainClass) ? System.getenv("SPARK_DAEMON_MEMORY") : null;
       String memory = firstNonEmpty(tsMemory,
@@ -231,6 +253,7 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
   private List<String> buildPySparkShellCommand(Map<String, String> env) throws IOException {
     // For backwards compatibility, if a script is specified in
     // the pyspark command line, then run it using spark-submit.
+      //为了向后兼容,如果在pyspark命令行中指定了脚本,则使用spark-submit运行脚本
     if (!appArgs.isEmpty() && appArgs.get(0).endsWith(".py")) {
       System.err.println(
         "WARNING: Running python applications through 'pyspark' is deprecated as of Spark 1.0.\n" +
@@ -244,10 +267,12 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
 
     // When launching the pyspark shell, the spark-submit arguments should be stored in the
     // PYSPARK_SUBMIT_ARGS env variable.
+      //当启动pyspark shell时，spark-submit参数应该存储在PYSPARK_SUBMIT_ARGS env变量。
     constructEnvVarArgs(env, "PYSPARK_SUBMIT_ARGS");
 
     // The executable is the PYSPARK_DRIVER_PYTHON env variable set by the pyspark script,
     // followed by PYSPARK_DRIVER_PYTHON_OPTS.
+      //可执行文件是pyspark脚本设置的PYSPARK_DRIVER_PYTHON env变量,后跟PYSPARK_DRIVER_PYTHON_OPTS。
     List<String> pyargs = new ArrayList<String>();
     pyargs.add(firstNonEmpty(System.getenv("PYSPARK_DRIVER_PYTHON"), "python"));
     String pyOpts = System.getenv("PYSPARK_DRIVER_PYTHON_OPTS");
@@ -266,9 +291,11 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
     }
     // When launching the SparkR shell, store the spark-submit arguments in the SPARKR_SUBMIT_ARGS
     // env variable.
+      //启动SparkR shell时,将spark-submit参数存储在SPARKR_SUBMIT_ARGS env变量中。
     constructEnvVarArgs(env, "SPARKR_SUBMIT_ARGS");
 
     // Set shell.R as R_PROFILE_USER to load the SparkR package when the shell comes up.
+      //将shell.R设置为R_PROFILE_USER以在Shell启动时加载SparkR包
     String sparkHome = System.getenv("SPARK_HOME");
     env.put("R_PROFILE_USER",
             join(File.separator, sparkHome, "R", "lib", "SparkR", "profile", "shell.R"));
@@ -306,6 +333,7 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
 
   /**
    * Return whether the given main class represents a thrift server.
+   * 返回给定的主类是否代表thrift服务器。
    */
   private boolean isThriftServer(String mainClass) {
     return (mainClass != null &&
@@ -342,6 +370,10 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
         // mixing spark-submit arguments with arguments that should be propagated to the shell
         // itself. Note that for this to work, the "--class" argument must come before any
         // non-spark-submit arguments.
+          //特殊类需要一些特殊的命令行处理，因为它们允许
+          //将spark-submit参数与应该传播到shell的参数进行混合
+          //本身 注意，为了这个工作，“--class”参数必须在任何之前
+          //非spark-submit参数。
         mainClass = value;
         if (specialClasses.containsKey(value)) {
           allowsMixedArguments = true;
@@ -365,6 +397,10 @@ class SparkSubmitCommandBuilder extends AbstractCommandBuilder {
       // normal mode, any unrecognized parameter triggers the end of command line parsing, and the
       // parameter itself will be interpreted by SparkSubmit as the application resource. The
       // remaining params will be appended to the list of SparkSubmit arguments.
+        //混合参数时，将无法识别的参数直接添加到用户参数列表中。 在
+        //正常模式下，任何无法识别的参数都会触发命令行解析的结束
+        //参数本身将被SparkSubmit解释为应用程序资源。该
+        //剩余参数将附加到SparkSubmit参数列表中。
       if (allowsMixedArguments) {
         appArgs.add(opt);
         return true;

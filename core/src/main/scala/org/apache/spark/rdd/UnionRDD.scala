@@ -27,7 +27,7 @@ import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.util.Utils
 
 /**
- * Partition for UnionRDD.
+ * Partition for UnionRDD.UnionRDD分区
  *
  * @param idx index of the partition
  * @param rdd the parent RDD this partition refers to
@@ -51,6 +51,7 @@ private[spark] class UnionPartition[T: ClassTag](
   @throws(classOf[IOException])
   private def writeObject(oos: ObjectOutputStream): Unit = Utils.tryOrIOException {
     // Update the reference to parent split at the time of task serialization
+    //在任务序列化时更新对父拆分的引用
     parentPartition = rdd.partitions(parentRddPartitionIndex)
     oos.defaultWriteObject()
   }

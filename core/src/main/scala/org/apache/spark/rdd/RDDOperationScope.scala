@@ -53,6 +53,7 @@ private[spark] class RDDOperationScope(
   /**
    * Return a list of scopes that this scope is a part of, including this scope itself.
    * The result is ordered from the outermost scope (eldest ancestor) to this scope.
+    * 返回此范围是其范围的范围的列表,包括此范围本身,结果是从最外层的范围（最老的祖先）到这个范围,
    */
   @JsonIgnore
   def getAllScopes: Seq[RDDOperationScope] = {
@@ -73,6 +74,7 @@ private[spark] class RDDOperationScope(
 /**
  * A collection of utility methods to construct a hierarchical representation of RDD scopes.
  * An RDD scope tracks the series of operations that created a given RDD.
+  * 用于构建RDD范围的分层表示的实用方法的集合,RDD范围跟踪创建给定RDD的一系列操作,
  */
 private[spark] object RDDOperationScope extends Logging {
   private val jsonMapper = new ObjectMapper().registerModule(DefaultScalaModule)
@@ -92,8 +94,11 @@ private[spark] object RDDOperationScope extends Logging {
    * Execute the given body such that all RDDs created in this body will have the same scope.
    * The name of the scope will be the first method name in the stack trace that is not the
    * same as this method's.
+    * 执行给定的body，使得在本体中创建的所有RDD将具有相同的范围,作用域的名称将是堆栈跟踪中与此方法不同的第一个方法名称。
+    *
    * 柯里化函数
    * Note: Return statements are NOT allowed in body.
+    * 注意：返回语句不允许在body。
    */
   private[spark] def withScope[T](
       sc: SparkContext,
@@ -117,11 +122,16 @@ private[spark] object RDDOperationScope extends Logging {
    * 执行给定自身RDD的代码主休,创建自身相同的范围,如果允许嵌套
    * If nesting is allowed, any subsequent calls to this method in the given body will instantiate
    * child scopes that are nested within our scope. Otherwise, these calls will take no effect.
-   *
+    *
+   * 如果允许嵌套,则在给定正文中对此方法的任何后续调用将实例化嵌套在我们的范围内的子范围,否则,这些调用将不起作用。
+    *
    * Additionally, the caller of this method may optionally ignore the configurations and scopes
    * set by the higher level caller. In this case, this method will ignore the parent caller's
    * intention to disallow nesting, and the new scope instantiated will not have a parent. This
    * is useful for scoping physical operations in Spark SQL, for instance.
+    *
+    * 此外，该方法的调用者可以可选地忽略由较高级别的呼叫者设置的配置和范围,在这种情况下,此方法将忽略父调用者禁止嵌套的意图，
+    * 并且实例化的新范围将不具有父级,这对于例如Spark SQL中的物理操作来说很有用。
    *
    * Note: Return statements are NOT allowed in body.
    */
@@ -131,6 +141,7 @@ private[spark] object RDDOperationScope extends Logging {
       allowNesting: Boolean,
       ignoreParent: Boolean)(body: => T): T = {
     // Save the old scope to restore it later
+    //保存旧范围以后恢复
     val scopeKey = SparkContext.RDD_SCOPE_KEY
     val noOverrideKey = SparkContext.RDD_SCOPE_NO_OVERRIDE_KEY
     val oldScopeJson = sc.getLocalProperty(scopeKey)
@@ -139,18 +150,22 @@ private[spark] object RDDOperationScope extends Logging {
     try {
       if (ignoreParent) {
         // Ignore all parent settings and scopes and start afresh with our own root scope
+        //忽略所有父设置和范围，并使用您自己的根范围重新开始
         sc.setLocalProperty(scopeKey, new RDDOperationScope(name).toJson)
       } else if (sc.getLocalProperty(noOverrideKey) == null) {
         // Otherwise, set the scope only if the higher level caller allows us to do so
+        //否则，仅当较高级别的调用者允许我们这样做时才设置范围
         sc.setLocalProperty(scopeKey, new RDDOperationScope(name, oldScope).toJson)
       }
       // Optionally disallow the child body to override our scope
+      //可选择不允许子体覆盖我们的范围
       if (!allowNesting) {
         sc.setLocalProperty(noOverrideKey, "true")
       }
       body
     } finally {
       // Remember to restore any state that was modified before exiting
+      //记住要恢复在退出之前被修改的任何状态
       sc.setLocalProperty(scopeKey, oldScopeJson)
       sc.setLocalProperty(noOverrideKey, oldNoOverride)
     }

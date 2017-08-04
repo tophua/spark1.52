@@ -56,6 +56,7 @@ private[spark] class ParallelCollectionPartition[T: ClassTag](
 
     // Treat java serializer with default action rather than going thru serialization, to avoid a
     // separate serialization header.
+    //使用默认操作来处理java serializer，而不是通过序列化来避免单独的序列化头。
 
     sfactory match {
       case js: JavaSerializer => out.defaultWriteObject()
@@ -92,8 +93,9 @@ private[spark] class ParallelCollectionRDD[T: ClassTag](
     extends RDD[T](sc, Nil) {
   // TODO: Right now, each split sends along its full data, even if later down the RDD chain it gets
   // cached. It might be worthwhile to write the data to a file in the DFS and read it in the split
-  // instead.
+  // instead.缓存,将数据写入DFS中的文件可能是值得的。
   // UPDATE: A parallel collection can be checkpointed to HDFS, which achieves this goal.
+  //更新：可以将并行集合检查到HDFS，实现此目标。
 
   override def getPartitions: Array[Partition] = {
     val slices = ParallelCollectionRDD.slice(data, numSlices).toArray
@@ -115,6 +117,9 @@ private object ParallelCollectionRDD {
    * collections specially, encoding the slices as other Ranges to minimize memory cost. This makes
    * it efficient to run Spark over RDDs representing large sets of numbers. And if the collection
    * is an inclusive Range, we use inclusive range for the last slice.
+    *
+    * 将一个集合切成numSlices子集合,我们在这里做的另外一件事就是对待范围集合专门，将切片编码为其他范围，以最小化内存成本。
+    * 这使得对代表大量数字的RDD运行Spark有效,如果收藏是一个包容性范围，我们使用包含范围的最后一个切片。
    */
   def slice[T: ClassTag](seq: Seq[T], numSlices: Int): Seq[Seq[T]] = {
     if (numSlices < 1) {
@@ -122,6 +127,7 @@ private object ParallelCollectionRDD {
     }
     // Sequences need to be sliced at the same set of index positions for operations
     // like RDD.zip() to behave as expected
+    //需要在RDD.zip（）操作的相同索引位置集上对序列进行切片，以按预期的方式运行
     def positions(length: Long, numSlices: Int): Iterator[(Int, Int)] = {
       (0 until numSlices).iterator.map(i => {
         val start = ((i * length) / numSlices).toInt
@@ -133,6 +139,7 @@ private object ParallelCollectionRDD {
       case r: Range => {
         positions(r.length, numSlices).zipWithIndex.map({ case ((start, end), index) =>
           // If the range is inclusive, use inclusive range for the last slice
+          //如果范围是包容性的，请使用最后一个片段的包含范围
           if (r.isInclusive && index == numSlices - 1) {
             new Range.Inclusive(r.start + start * r.step, r.end, r.step)
           }
@@ -143,6 +150,7 @@ private object ParallelCollectionRDD {
       }
       case nr: NumericRange[_] => {
         // For ranges of Long, Double, BigInteger, etc
+        //适用于Long，Double，BigInteger等的范围
         val slices = new ArrayBuffer[Seq[T]](numSlices)
         var r = nr
         for ((start, end) <- positions(nr.length, numSlices)) {

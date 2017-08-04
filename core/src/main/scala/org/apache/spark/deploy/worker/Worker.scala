@@ -165,8 +165,10 @@ private[deploy] class Worker(
   // A thread pool for registering with masters. Because registering with a master is a blocking
   // action, this thread pool must be able to create "masterRpcAddresses.size" threads at the same
   // time so that we can register with all masters.
+  //用于向masters注册的线程池,因为与主机注册是一个阻塞操作,所以这个线程池必须能够同时创建“masterRpcAddresses.size”线程,以便我们可以向所有主机注册。
   private val registerMasterThreadPool = ThreadUtils.newDaemonCachedThreadPool(
     "worker-register-master-threadpool",
+    //确保我们可以同时向所有masters注册
     masterRpcAddresses.size // Make sure we can register with all masters at the same time
     )
 
@@ -181,6 +183,7 @@ private[deploy] class Worker(
     try {
       // This sporadically fails - not sure why ... !workDir.exists() && !workDir.mkdirs()
       // So attempting to create and then check if directory was created or not.
+      //这是偶然的失败 - 不知道为什么...！workDir.exists()&&！workDir.mkdirs()所以尝试创建,然后检查目录是否创建。
       workDir.mkdirs()
       if (!workDir.exists() || !workDir.isDirectory) {
         logError("Failed to create work directory " + workDir)
@@ -214,6 +217,7 @@ private[deploy] class Worker(
     metricsSystem.registerSource(workerSource)
     metricsSystem.start()
     // Attach the worker metrics servlet handler to the web ui after the metrics system is started.
+    //在指标系统启动后，将worker metrics servlet处理程序附加到web ui
     metricsSystem.getServletHandlers.foreach(webUi.attachHandler)
   }
   /**
@@ -221,11 +225,13 @@ private[deploy] class Worker(
    */
   private def changeMaster(masterRef: RpcEndpointRef, uiUrl: String) {
     // activeMasterUrl it's a valid Spark url since we receive it from master.
+    // activeMasterUrl它是一个有效的Spark网址,因为我们从主服务器接收它
     activeMasterUrl = masterRef.address.toSparkURL
     activeMasterWebUiUrl = uiUrl
     master = Some(masterRef)
     connected = true
     // Cancel any outstanding re-registration attempts because we found a new master
+    //取消任何未完成的重新注册尝试，因为我们找到一个新的master
     cancelLastRegistrationRetry()
   }
   /**
@@ -347,6 +353,7 @@ private[deploy] class Worker(
 
   /**
    * Cancel last registeration retry, or do nothing if no retry
+    * 取消lsat注册重试,如果不重试则不做任何操作
    * 
    */
   private def cancelLastRegistrationRetry(): Unit = {
@@ -361,6 +368,7 @@ private[deploy] class Worker(
   private def registerWithMaster() {
     // onDisconnected may be triggered multiple times, so don't attempt registration
     // if there are outstanding registration attempts scheduled.
+    //onDisconnected可能被多次触发,所以如果安排了未完成的注册尝试,不要尝试注册。
     registrationRetryTimer match {
       case None =>
         registered = false //标记未注册,为true代表注册成功
@@ -426,6 +434,7 @@ private[deploy] class Worker(
         appDirs.filter { dir =>
           // the directory is used by an application - check that the application is not running
           // when cleaning up
+          //目录被应用程序使用 - 检查应用程序在清理时是否运行
           val appIdFromDir = dir.getName
           val isAppStillRunning = appIds.contains(appIdFromDir)
           dir.isDirectory && !isAppStillRunning &&
@@ -495,6 +504,7 @@ private[deploy] class Worker(
           // Create local dirs for the executor. These are passed to the executor via the
           // SPARK_EXECUTOR_DIRS environment variable, and deleted by the Worker when the
           // application finishes.
+          //为执行者创建本地目录,这些通过SPARK_EXECUTOR_DIRS环境变量传递给执行程序,并在应用程序完成时被Worker删除。
           val appLocalDirs = appDirectories.get(appId).getOrElse {
             Utils.getOrCreateLocalRootDirs(conf).map { dir =>
               val appDir = Utils.createDirectory(dir, namePrefix = "executor")
@@ -687,6 +697,7 @@ private[deploy] class Worker(
   private def trimFinishedExecutorsIfNecessary(): Unit = {
     // do not need to protect with locks since both WorkerPage and Restful server get data through
     // thread-safe RpcEndPoint
+    //无需使用锁保护,因为WorkerPage和Restful服务器都通过线程安全的RpcEndPoint获取数据
     if (finishedExecutors.size > retainedExecutors) {
       finishedExecutors.take(math.max(finishedExecutors.size / 10, 1)).foreach {
         case (executorId, _) => finishedExecutors.remove(executorId)
@@ -697,6 +708,7 @@ private[deploy] class Worker(
   private def trimFinishedDriversIfNecessary(): Unit = {
     // do not need to protect with locks since both WorkerPage and Restful server get data through
     // thread-safe RpcEndPoint
+    //无需使用锁保护,因为WorkerPage和Restful服务器都通过线程安全的RpcEndPoint获取数据
     if (finishedDrivers.size > retainedDrivers) {
       finishedDrivers.take(math.max(finishedDrivers.size / 10, 1)).foreach {
         case (driverId, _) => finishedDrivers.remove(driverId)

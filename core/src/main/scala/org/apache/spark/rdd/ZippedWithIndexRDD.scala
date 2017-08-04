@@ -32,6 +32,9 @@ class ZippedWithIndexRDDPartition(val prev: Partition, val startIndex: Long)
  * Represents a RDD zipped with its element indices. The ordering is first based on the partition
  * index and then the ordering of items within each partition. So the first item in the first
  * partition gets index 0, and the last item in the last partition receives the largest index.
+  *
+  * 表示使用其元素索引压缩的RDD。 排序首先基于分区索引,然后根据每个分区中的项目顺序,
+  * 因此,第一个分区中的第一个项目获取索引0,最后一个分区中的最后一个项目将收到最大的索引。
  *
  * @param prev parent RDD
  * @tparam T parent RDD item type
@@ -39,7 +42,8 @@ class ZippedWithIndexRDDPartition(val prev: Partition, val startIndex: Long)
 private[spark]
 class ZippedWithIndexRDD[T: ClassTag](@transient prev: RDD[T]) extends RDD[(T, Long)](prev) {
 
-  /** The start index of each partition. */
+  /** The start index of each partition.
+    * 每个分区的开始索引*/
   @transient private val startIndices: Array[Long] = {
     val n = prev.partitions.length
     if (n == 0) {

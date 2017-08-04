@@ -51,14 +51,20 @@ private[spark] class SqlNewHadoopPartition(
  * An RDD that provides core functionality for reading data stored in Hadoop (e.g., files in HDFS,
  * sources in HBase, or S3), using the new MapReduce API (`org.apache.hadoop.mapreduce`).
  * It is based on [[org.apache.spark.rdd.NewHadoopRDD]]. It has three additions.
- * 1. A shared broadcast Hadoop Configuration.
+  * 提供用于读取存储在Hadoop中的数据的核心功能的RDD（例如，HDFS中的文件，
+  *来源在HBase或S3），使用新的MapReduce API（`org.apache.hadoop.mapreduce`）。
+  *它基于[[org.apache.spark.rdd.NewHadoopRDD]]。 它有三个补充。
+ * 1. A shared broadcast Hadoop Configuration. 共享广播Hadoop配置
  * 2. An optional closure `initDriverSideJobFuncOpt` that set configurations at the driver side
  *    to the shared Hadoop Configuration.
+  *    在驱动程序端设置配置的可选闭包`initDriverSideJobFuncOpt`到共享的Hadoop配置。
  * 3. An optional closure `initLocalJobFuncOpt` that set configurations at both the driver side
  *    and the executor side to the shared Hadoop Configuration.
+  *    一个可选的闭包`initLocalJobFuncOpt`,将驱动程序和执行器端的配置都设置为共享Hadoop配置。
  *
  * Note: This is RDD is basically a cloned version of [[org.apache.spark.rdd.NewHadoopRDD]] with
  * changes based on [[org.apache.spark.rdd.HadoopRDD]].
+  * 注意：这是RDD基本上是基于[[org.apache.spark.rdd.HadoopRDD]]的更改的[[org.apache.spark.rdd.NewHadoopRDD]]的克隆版本
  */
 private[spark] class SqlNewHadoopRDD[V: ClassTag](
     @transient sc : SparkContext,
@@ -76,6 +82,8 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
     // "new Job" will make a copy of the conf. Then, it is
     // safe to mutate conf properties with initLocalJobFuncOpt
     // and initDriverSideJobFuncOpt.
+    //新工作”将制作一个副本,然后,
+    // 使用initLocalJobFuncOpt和initDriverSideJobFuncOpt来更改conf属性是安全的。
     val newJob = new Job(conf)
     initLocalJobFuncOpt.map(f => f(newJob))
     newJob
@@ -126,6 +134,7 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
         .getInputMetricsForReadMethod(DataReadMethod.Hadoop)
 
       // Sets the thread local variable for the file's name
+      //设置文件名的线程局部变量
       split.serializableHadoopSplit.value match {
         case fs: FileSplit => SqlNewHadoopRDD.setInputFileName(fs.getPath.toString)
         case _ => SqlNewHadoopRDD.unsetInputFileName()
@@ -133,6 +142,8 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
 
       // Find a function that will return the FileSystem bytes read by this thread. Do this before
       // creating RecordReader, because RecordReader's constructor might read some bytes
+      //找到一个将返回此线程读取的FileSystem字节的函数,
+      // 在创建RecordReader之前执行此操作，因为RecordReader的构造函数可能会读取一些字节
       val bytesReadCallback = inputMetrics.bytesReadCallback.orElse {
         split.serializableHadoopSplit.value match {
           case _: FileSplit | _: CombineFileSplit =>
@@ -155,6 +166,7 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
       reader.initialize(split.serializableHadoopSplit.value, hadoopAttemptContext)
 
       // Register an on-task-completion callback to close the input stream.
+      //注册任务完成回调以关闭输入流
       context.addTaskCompletionListener(context => close())
 
       private[this] var havePair = false
@@ -170,6 +182,7 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
             // Close and release the reader here; close() will also be called when the task
             // completes, but for tasks that read from many files, it helps to release the
             // resources early.
+            //在这里关闭并释放读者,当任务完成时,close()也将被调用,但对于从许多文件读取的任务,它有助于提早释放资源。
             close()
           }
           havePair = !finished
@@ -195,6 +208,8 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
           // reader more than once, since that exposes us to MAPREDUCE-5918 when running against
           // Hadoop 1.x and older Hadoop 2.x releases. That bug can lead to non-deterministic
           // corruption issues when reading compressed input.
+          //关闭阅读器并释放它。 注意：非常重要的是，我们不要多次关闭读卡器，因为在运行Hadoop 1.x和更旧的Hadoop 2.x版本时，
+          // 我们将其暴露给MAPREDUCE-5918。 当读取压缩输入时，该错误可能导致非确定性的损坏问题。
           try {
             reader.close()
           } catch {
@@ -211,6 +226,7 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
                      split.serializableHadoopSplit.value.isInstanceOf[CombineFileSplit]) {
             // If we can't get the bytes read from the FS stats, fall back to the split size,
             // which may be inaccurate.
+            //如果我们无法从FS统计信息读取字节,则返回到分割大小,这可能不准确。
             try {
               inputMetrics.incBytesRead(split.serializableHadoopSplit.value.getLength)
             } catch {
@@ -256,6 +272,7 @@ private[spark] object SqlNewHadoopRDD {
   /**
    * The thread variable for the name of the current file being read. This is used by
    * the InputFileName function in Spark SQL.
+    * 正在读取的当前文件的名称的线程变量,这在Spark SQL中被InputFileName函数所使用,
    */
   private[this] val inputFileName: ThreadLocal[UTF8String] = new ThreadLocal[UTF8String] {
     override protected def initialValue(): UTF8String = UTF8String.fromString("")
@@ -270,6 +287,7 @@ private[spark] object SqlNewHadoopRDD {
   /**
    * Analogous to [[org.apache.spark.rdd.MapPartitionsRDD]], but passes in an InputSplit to
    * the given function rather than the index of the partition.
+    * 类似于[[org.apache.spark.rdd.MapPartitionsRDD]],但是将InputSplit传递给给定的函数,而不是分区的索引
    */
   private[spark] class NewHadoopMapPartitionsWithSplitRDD[U: ClassTag, T: ClassTag](
       prev: RDD[T],

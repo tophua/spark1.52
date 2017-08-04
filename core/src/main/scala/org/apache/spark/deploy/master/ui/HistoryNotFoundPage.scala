@@ -29,13 +29,16 @@ private[ui] class HistoryNotFoundPage(parent: MasterWebUI)
 
   /**
    * Render a page that conveys failure in loading application history.
+    * 渲染载入应用程序历史记录失败的页面
    *
    * This accepts 3 HTTP parameters:
+    * 这接受3个HTTP参数：
    *   msg = message to display to the user
    *   title = title of the page
    *   exception = detailed description of the exception in loading application history (if any)
    *
    * Parameters "msg" and "exception" are assumed to be UTF-8 encoded.
+    * 假设参数“msg”和“异常”是UTF-8编码的
    */
   def render(request: HttpServletRequest): Seq[Node] = {
     val titleParam = request.getParameter("title")
@@ -43,6 +46,7 @@ private[ui] class HistoryNotFoundPage(parent: MasterWebUI)
     val exceptionParam = request.getParameter("exception")
 
     // If no parameters are specified, assume the user did not enable event logging
+    //如果没有指定参数，假设用户未启用事件日志记录
     val defaultTitle = "Event logging is not enabled"
     val defaultContent =
       <div class="row-fluid">

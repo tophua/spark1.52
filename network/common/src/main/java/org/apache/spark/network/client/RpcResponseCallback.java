@@ -20,11 +20,14 @@ package org.apache.spark.network.client;
 /**
  * Callback for the result of a single RPC. This will be invoked once with either success or
  * failure.
+ * 回调为单个RPC的结果,这将被成功或失败一次调用
  */
 public interface RpcResponseCallback {
-  /** Successful serialized result from server. */
+  /** Successful serialized result from server.
+   * 服务器成功的序列化结果 */
   void onSuccess(byte[] response);
 
-  /** Exception either propagated from server or raised on client side. */
+  /** Exception either propagated from server or raised on client side.
+   * 异常从服务器传播或在客户端发起*/
   void onFailure(Throwable e);
 }

@@ -49,10 +49,12 @@ import org.apache.spark.network.util.TransportConf;
 
 /**
  * Factory for creating {@link TransportClient}s by using createClient.
+ * 通过使用createClient创建{@link TransportClient}的工厂
  *
  * The factory maintains a connection pool to other hosts and should return the same
  * TransportClient for the same remote host. It also shares a single worker thread pool for
  * all TransportClients.
+ * 工厂将维护与其他主机的连接池,并应为相同的远程主机返回相同的TransportClient,它还为所有TransportClients共享一个工作线程池
  *
  * TransportClients will be reused whenever possible. Prior to completing the creation of a new
  * TransportClient, all given {@link TransportClientBootstrap}s will be run.
@@ -122,24 +124,35 @@ public class TransportClientFactory implements Closeable {
 
   /**
    * Create a {@link TransportClient} connecting to the given remote host / port.
+   * 创建一个{@link TransportClient}连接到给定的远程主机/端口
    *
    * We maintains an array of clients (size determined by spark.shuffle.io.numConnectionsPerPeer)
    * and randomly picks one to use. If no client was previously created in the randomly selected
    * spot, this function creates a new client and places it there.
    *
+   * 我们维护一个客户端数组（大小由spark.shuffle.io.numConnectionsPerPeer确定）,
+   * 并随机选择一个使用,如果以前在随机选择的地点没有创建客户端,则此功能将创建一个新客户端并将其放置在该位置。
+   *
    * Prior to the creation of a new TransportClient, we will execute all
    * {@link TransportClientBootstrap}s that are registered with this factory.
    *
+   * 在创建新的TransportClient之前，我们将执行在此工厂注册的所有{@link TransportClientBootstrap}
+   *
    * This blocks until a connection is successfully established and fully bootstrapped.
+   * 直到连接成功建立并完全自引导为止
    *
    * Concurrency: This method is safe to call from multiple threads.
+   * 并发性：这种方法可以安全地从多个线程调用
    */
   public TransportClient createClient(String remoteHost, int remotePort) throws IOException {
     // Get connection from the connection pool first.
+      //首先从连接池获取连接
     // If it is not found or not active, create a new one.
+      //如果找不到或不活动,请创建一个新的
     final InetSocketAddress address = new InetSocketAddress(remoteHost, remotePort);
 
     // Create the ClientPool if we don't have it yet.
+      //如果还没有创建ClientPool
     ClientPool clientPool = connectionPool.get(address);
     if (clientPool == null) {
       connectionPool.putIfAbsent(address, new ClientPool(numConnectionsPerPeer));
@@ -156,6 +169,7 @@ public class TransportClientFactory implements Closeable {
 
     // If we reach here, we don't have an existing connection open. Let's create a new one.
     // Multiple threads might race here to create new connections. Keep only one of them active.
+      //如果我们到达这里,我们没有打开现有的连接,我们来创建一个新的,个线程可能会在这里竞争创建新的连接,只保留其中一个活动。
     synchronized (clientPool.locks[clientIndex]) {
       cachedClient = clientPool.clients[clientIndex];
 
@@ -172,7 +186,8 @@ public class TransportClientFactory implements Closeable {
     }
   }
 
-  /** Create a completely new {@link TransportClient} to the remote address. */
+  /** Create a completely new {@link TransportClient} to the remote address.
+   * 创建一个全新的{@link TransportClient}到远程地址*/
   private TransportClient createClient(InetSocketAddress address) throws IOException {
     logger.debug("Creating new connection to " + address);
 
@@ -180,6 +195,7 @@ public class TransportClientFactory implements Closeable {
     bootstrap.group(workerGroup)
       .channel(socketChannelClass)
       // Disable Nagle's Algorithm since we don't want packets to wait
+            // 禁用Nagle的算法，因为我们不希望数据包等待
       .option(ChannelOption.TCP_NODELAY, true)
       .option(ChannelOption.SO_KEEPALIVE, true)
       .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, conf.connectionTimeoutMs())
@@ -198,6 +214,7 @@ public class TransportClientFactory implements Closeable {
     });
 
     // Connect to the remote server
+      //连接到远程服务器
     long preConnect = System.nanoTime();
     ChannelFuture cf = bootstrap.connect(address);
     if (!cf.awaitUninterruptibly(conf.connectionTimeoutMs())) {
@@ -212,6 +229,7 @@ public class TransportClientFactory implements Closeable {
     assert client != null : "Channel future completed successfully with null client";
 
     // Execute any client bootstraps synchronously before marking the Client as successful.
+      //在将客户端标记为成功之前,同步执行任何客户端引导
     long preBootstrap = System.nanoTime();
     logger.debug("Connection to {} successful, running bootstraps...", address);
     try {
@@ -219,7 +237,8 @@ public class TransportClientFactory implements Closeable {
         clientBootstrap.doBootstrap(client, channel);
       }
     } catch (Exception e) { // catch non-RuntimeExceptions too as bootstrap may be written in Scala
-      long bootstrapTimeMs = (System.nanoTime() - preBootstrap) / 1000000;
+      //捕获非RuntimeExceptions也可以在Scala中写入引导
+        long bootstrapTimeMs = (System.nanoTime() - preBootstrap) / 1000000;
       logger.error("Exception while bootstrapping client after " + bootstrapTimeMs + " ms", e);
       client.close();
       throw Throwables.propagate(e);
@@ -239,6 +258,7 @@ public class TransportClientFactory implements Closeable {
   @Override
   public void close() {
     // Go through all clients and close them if they are active.
+      //通过所有的客户端,如果他们是活跃的关闭他们
     for (ClientPool clientPool : connectionPool.values()) {
       for (int i = 0; i < clientPool.clients.length; i++) {
         TransportClient client = clientPool.clients[i];

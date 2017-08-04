@@ -105,10 +105,13 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
       SparkSubmit.printErrorAndExit(e.getMessage())
   }
   // Populate `sparkProperties` map from properties file
+  //从属性文件填充`sparkProperties`映射
   mergeDefaultSparkProperties()
   // Remove keys that don't start with "spark." from `sparkProperties`.
+  //删除不以“spark”开头的键。 来自`sparkProperties`
   ignoreNonSparkProperties()
   // Use `sparkProperties` map along with env vars to fill in any missing parameters
+  //使用`sparkProperties'映射和env vars来填充任何缺少的参数
   loadEnvironmentArguments()
 
   validateArguments()
@@ -120,8 +123,10 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
    */
   private def mergeDefaultSparkProperties(): Unit = {
     // Use common defaults file, if not specified by user
+    //使用普通的默认文件,如果用户没有指定
     propertiesFile = Option(propertiesFile).getOrElse(Utils.getDefaultPropertiesFile(env))
     // Honor --conf before the defaults file
+    //荣誉--conf之前的默认文件
     defaultSparkProperties.foreach { case (k, v) =>
       if (!sparkProperties.contains(k)) {
         sparkProperties(k) = v
@@ -197,6 +202,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     principal = Option(principal).orElse(sparkProperties.get("spark.yarn.principal")).orNull
 
     // Try to set main class from JAR if no --class argument is given
+    //尝试从JAR设置主类，如果没有给出--class参数
     if (mainClass == null && !isPython && !isR && primaryResource != null) {
       val uri = new URI(primaryResource)
       val uriScheme = uri.getScheme()
@@ -206,6 +212,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
           try {
             val jar = new JarFile(uri.getPath)
             // Note that this might still return null if no main-class is set; we catch that later
+            //注意，如果没有设置main类,这可能仍然返回null;我们以后赶上
             mainClass = jar.getManifest.getMainAttributes.getValue("Main-Class")
           } catch {
             case e: Exception =>
@@ -219,20 +226,24 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     }
 
     // Global defaults. These should be keep to minimum to avoid confusing behavior.
+    //全局默认值,这些应该保持最小,以避免混乱的行为。
     master = Option(master).getOrElse("local[*]")
 
     // In YARN mode, app name can be set via SPARK_YARN_APP_NAME (see SPARK-5222)
+    //在YARN模式下,可以通过SPARK_YARN_APP_NAME设置应用名称（请参阅SPARK-5222）
     if (master.startsWith("yarn")) {
       name = Option(name).orElse(env.get("SPARK_YARN_APP_NAME")).orNull
     }
 
-    // Set name from main class if not given    
+    // Set name from main class if not given
+    //如果没有给出,从主类设置名称
     name = Option(name).orElse(Option(mainClass)).orNull
     if (name == null && primaryResource != null) {
       name = Utils.stripDirectory(primaryResource)
     }
 
     // Action should be SUBMIT unless otherwise specified
+    //除非另有规定,否则动作应为提交
     action = Option(action).getOrElse(SUBMIT)
   }
 
@@ -330,7 +341,8 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     """.stripMargin
   }
 
-  /** Fill in values by parsing user options. */
+  /** Fill in values by parsing user options.
+    * 通过解析用户选项来填充值 */
   override protected def handle(opt: String, value: String): Boolean = {
     opt match {
       case NAME =>
@@ -454,9 +466,10 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
 
   /**
    * Handle unrecognized command line options.
-   *
+   * 处理无法识别的命令行选项
    * The first unrecognized option is treated as the "primary resource". Everything else is
    * treated as application arguments.
+    * 第一个无法识别的选项被视为“主要资源”,一切都被视为应用程序参数
    */
   override protected def handleUnknown(opt: String): Boolean = {
     if (opt.startsWith("-")) {
@@ -580,9 +593,11 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   /**
    * Run the Spark SQL CLI main class with the "--help" option and catch its output. Then filter
    * the results to remove unwanted lines.
+    * 使用“--help”选项运行Spark SQL CLI主类并捕获其输出,然后过滤结果以删除不需要的行
    *
    * Since the CLI will call `System.exit()`, we install a security manager to prevent that call
    * from working, and restore the original one afterwards.
+    * 由于CLI将调用“System.exit（）”,所以我们安装一个安全管理器来阻止该调用工作,然后恢复原来的调用。
    */
   private def getSqlShellOptions(): String = {
     val currentOut = System.out
@@ -617,6 +632,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
       stream.flush()
 
       // Get the output and discard any unnecessary lines from it.
+      //获取输出并丢弃任何不必要的行
       Source.fromString(new String(out.toByteArray())).getLines
         .filter { line =>
           !line.startsWith("log4j") && !line.startsWith("usage")

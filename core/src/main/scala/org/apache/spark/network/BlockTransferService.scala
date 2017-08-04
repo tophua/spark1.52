@@ -42,32 +42,40 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
   /**
    * Initialize the transfer service by giving it the BlockDataManager that can be used to fetch
    * local blocks or put local blocks.
+    * 通过发送可以用于获取本地块或放置本地块的BlockDataManager来初始化传输服务
    */
 
   def init(blockDataManager: BlockDataManager)
 
   /**
    * Tear down the transfer service.
+    * 关闭转移服务
    */
   def close(): Unit
 
   /**
    * Port number the service is listening on, available only after [[init]] is invoked.
+    * 服务正在侦听的端口号，仅在[[init]]被调用后才可用
    */
   def port: Int
 
   /**
    * Host name the service is listening on, available only after [[init]] is invoked.
+    * 服务正在侦听的主机名，仅在调用[[init]]之后才可用
    */
   def hostName: String
 
   /**
    * Fetch a sequence of blocks from a remote node asynchronously,
    * available only after [[init]] is invoked.
+    * 从远程节点异步获取块序列，仅在调用[[init]]之后才可用。
    * 异步从一个远程节点获取一个数据块序列
    * Note that this API takes a sequence so the implementation can batch requests, and does not
    * return a future so the underlying implementation can invoke onBlockFetchSuccess as soon as
    * the data of a block is fetched, rather than waiting for all blocks to be fetched.
+    *
+    * 请注意，该API采用一个序列，因此实现可以批处理请求,而不是返回未来,所以底层实现可以尽快调用onBlockFetchSuccess
+    *获取块的数据，而不是等待获取所有块。
    */
   override def fetchBlocks(
       host: String,
@@ -78,7 +86,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
 
   /**
    * Upload a single block to a remote node, available only after [[init]] is invoked.
-   * 上传一个数据块到一个远程节点
+    * 将单个块上传到远程节点，仅在调用[[init]]之后才可用。
    */
   def uploadBlock(
       hostname: String,
@@ -90,7 +98,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
 
   /**
    * A special case of [[fetchBlocks]], as it fetches only one block and is blocking.
-   * 阻塞线程从一个远程节点获取一个数据块序列
+   *阻塞线程从一个远程节点获取一个数据块序列,它也仅在调用[[init]]后可用。
    * It is also only available after [[init]] is invoked.
    */
   def fetchBlockSync(host: String, port: Int, execId: String, blockId: String): ManagedBuffer = {

@@ -68,18 +68,26 @@ abstract class Connection(val channel: SocketChannel, val selector: Selector,
   // Now, we do have write registering for read too (temporarily), but this is to detect
   // channel close NOT to actually read/consume data on it !
   // How does this work if/when we move to SSL ?
+  //读通道通常不注册写和写不读现在，我们也有写入注册读（暂时），但这是检测
+  //通道关闭不实际读取/使用数据！ 如果/何时迁移到SSL，该如何工作？
 
   // What is the interest to register with selector for when we want this connection to be selected
+  //当我们希望选择此连接时,请注意选择器的兴趣
   def registerInterest()
 
   // What is the interest to register with selector for when we want this connection to
   // be de-selected
+  //当我们希望这个连接被取消选择时，请注意选择器的兴趣
   // Traditionally, 0 - but in our case, for example, for close-detection on SendingConnection hack,
   // it will be SelectionKey.OP_READ (until we fix it properly)
+  //传统上，0 - 但是在我们的例子中，例如对于SendingConnection hack进行近似检测,
+  // 它将是SelectionKey.OP_READ（直到我们正确地修复它）
   def unregisterInterest()
 
   // On receiving a read event, should we change the interest for this channel or not ?
+  //收到阅读活动后，我们是否应该改变这个频道的兴趣？
   // Will be true for ReceivingConnection, false for SendingConnection.
+  //对于ReceivingConnection，对于SendingConnection将为true。
   def changeInterestForRead(): Boolean
 
   private def disposeSasl() {
@@ -93,8 +101,11 @@ abstract class Connection(val channel: SocketChannel, val selector: Selector,
   }
 
   // On receiving a write event, should we change the interest for this channel or not ?
+  //在收到写入事件时，是否应该改变这个频道的兴趣？
   // Will be false for ReceivingConnection, true for SendingConnection.
+  //对于ReceivingConnection将为false，对于SendingConnection为true。
   // Actually, for now, should not get triggered for ReceivingConnection
+  //实际上,现在不应该为ReceivingConnection触发
   def changeInterestForWrite(): Boolean
 
   def getRemoteConnectionManagerId(): ConnectionManagerId = {
@@ -108,12 +119,14 @@ abstract class Connection(val channel: SocketChannel, val selector: Selector,
   }
 
   // Returns whether we have to register for further reads or not.
+  //返回是否需要注册进一步阅读
   def read(): Boolean = {
     throw new UnsupportedOperationException(
       "Cannot read on connection of type " + this.getClass.toString)
   }
 
   // Returns whether we have to register for further writes or not.
+  //返回是否需要注册进一步写入
   def write(): Boolean = {
     throw new UnsupportedOperationException(
       "Cannot write on connection of type " + this.getClass.toString)
@@ -227,6 +240,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
 
           val message = if (securityMgr.isAuthenticationEnabled() && !isSaslComplete()) {
             // only allow sending of security messages until sasl is complete
+            //只允许发送安全消息,直到sasl完成
             var pos = 0
             var securityMsg: Message = null
             while (pos < messages.size() && securityMsg == null) {
@@ -236,6 +250,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
               pos = pos + 1
             }
             // didn't find any security messages and auth isn't completed so return
+            //没有找到任何安全消息和auth没有完成，所以返回
             if (securityMsg == null) return None
             securityMsg
           } else {
@@ -268,13 +283,17 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
 
   // outbox is used as a lock - ensure that it is always used as a leaf (since methods which
   // lock it are invoked in context of other locks)
+  //发件箱用作锁 - 确保它始终用作叶子（因为锁定它的方法在其他锁的上下文中调用
   private val outbox = new Outbox()
   /*
     This is orthogonal to whether we have pending bytes to write or not - and satisfies a slightly
     different purpose. This flag is to see if we need to force reregister for write even when we
     do not have any pending bytes to write to socket.
+    这与我们是否有待写入的字节是正交的 - 并且稍微满足不同的目的 这个标志是看我们是否需要强制重新注册，即使我们
+     没有任何挂起的字节写入套接字。
     This can happen due to a race between adding pending buffers, and checking for existing of
     data as detailed in https://github.com/mesos/spark/pull/791
+    这可能由于添加挂起缓冲区之间的竞争而发生，
    */
   private var needForceReregister = false
 
@@ -288,7 +307,9 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
 
   override def registerInterest() {
     // Registering read too - does not really help in most cases, but for some
+    //注册阅读 - 在大多数情况下并不真正有帮助，但对某些人而言
     // it does - so let us keep it for now.
+    //它是 - 所以让我们现在保持它。
     changeConnectionKeyInterest(SelectionKey.OP_WRITE | DEFAULT_INTEREST)
   }
 
@@ -316,6 +337,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
   }
 
   // return previous value after resetting it.
+  //在重置之后返回上一个值
   def resetForceReregister(): Boolean = {
     outbox.synchronized {
       val result = needForceReregister
@@ -325,6 +347,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
   }
 
   // MUST be called within the selector loop
+  //必须在选择器循环中调用
   def connect() {
     try {
       channel.register(selector, SelectionKey.OP_CONNECT)
@@ -341,6 +364,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
     try {
       // Typically, this should finish immediately since it was triggered by a connect
       // selection - though need not necessarily always complete successfully.
+      //通常，这应该立即完成,因为它被连接选择触发 - 尽管不一定总是成功完成
       val connected = channel.finishConnect
       if (!force && !connected) {
         logInfo(
@@ -351,7 +375,9 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
       // Fallback to previous behavior - assume finishConnect completed
       // This will happen only when finishConnect failed for some repeated number of times
       // (10 or so)
+      //回退到以前的行为 - 假设finishConnect完成这将发生只有当finishConnect失败了一些重复的次数（10左右）
       // Is highly unlikely unless there was an unclean close of socket, etc
+      //非常不可能，除非有一个不洁的关闭插座等
       registerInterest()
       logInfo("Connected to [" + address + "], " + outbox.messages.size + " messages pending")
     } catch {
@@ -412,11 +438,15 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
   }
 
   // This is a hack to determine if remote socket was closed or not.
+  //这是一个黑客来确定远程套接字是否关闭。
   // SendingConnection DOES NOT expect to receive any data - if it does, it is an error
   // For a bunch of cases, read will return -1 in case remote socket is closed : hence we
   // register for reads to determine that.
+  //SendingConnection不希望收到任何数据 - 如果是,它是一个错误对于一些情况，读取将返回-1，
+  // 以防远程套接字关闭：因此我们注册读取来确定。
   override def read(): Boolean = {
     // We don't expect the other side to send anything; so, we just read to detect an error or EOF.
+    //我们不希望对方发送任何东西,所以我们只是读取来检测错误或EOF。
     try {
       val length = channel.read(ByteBuffer.allocate(1))
       if (length == -1) { // EOF
@@ -443,6 +473,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
 
 
 // Must be created within selector loop - else deadlock
+//必须在选择器循环中创建 - 否则是死锁
 private[spark] class ReceivingConnection(
     channel_ : SocketChannel,
     selector_ : Selector,
@@ -494,7 +525,9 @@ private[spark] class ReceivingConnection(
 
   // The receiver's remote address is the local socket on remote side : which is NOT
   // the connection manager id of the receiver.
+  //接收者的远程地址是远程端的本地套接字：不是接收方的连接管理员ID。
   // We infer that from the messages we receive on the receiver socket.
+  //我们从接收器插座上收到的消息推断出。
   private def processConnectionManagerId(header: MessageChunkHeader) {
     val currId = inferredRemoteManagerId
     if (header.address == null || currId != null) return
@@ -559,6 +592,7 @@ private[spark] class ReceivingConnection(
         val bytesRead = channel.read(currentChunk.buffer)
         if (bytesRead == 0) {
           // re-register for read event ...
+          //重新注册读事件...
           return true
         } else if (bytesRead == -1) {
           close()
@@ -592,6 +626,7 @@ private[spark] class ReceivingConnection(
       }
     }
     // should not happen - to keep scala compiler happy
+    //不应该发生 - 保持scala编译器的快乐
     true
   }
 
@@ -607,6 +642,7 @@ private[spark] class ReceivingConnection(
   override def registerInterest() {
     // Registering read too - does not really help in most cases, but for some
     // it does - so let us keep it for now.
+    //注册阅读 - 在大多数情况下并不真正有帮助,但对于某些情况而言,我们现在就保留这一点
     changeConnectionKeyInterest(SelectionKey.OP_READ)
   }
 
@@ -615,5 +651,6 @@ private[spark] class ReceivingConnection(
   }
 
   // For read conn, always false.
+  //对于读取conn，总是false。
   override def resetForceReregister(): Boolean = false
 }

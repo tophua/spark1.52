@@ -25,6 +25,7 @@ import org.apache.spark.util.StatCounter
  * An ApproximateEvaluator for sums. It estimates the mean and the count and multiplies them
  * together, then uses the formula for the variance of two independent random variables to get
  * a variance for the result and compute a confidence interval.
+  * 总和的近似估价值,它估计平均值和计数并将它们相乘,然后使用两个独立随机变量的方差的公式来获得结果的方差,并计算置信区间。
  */
 private[spark] class SumEvaluator(totalOutputs: Int, confidence: Double)
   extends ApproximateEvaluator[StatCounter, BoundedDouble] {

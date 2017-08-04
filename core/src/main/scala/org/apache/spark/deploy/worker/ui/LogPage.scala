@@ -125,7 +125,8 @@ private[ui] class LogPage(parent: WorkerWebUI) extends WebUIPage("logPage") with
     UIUtils.basicSparkPage(content, logType + " log page for " + pageName)
   }
 
-  /** Get the part of the log files given the offset and desired length of bytes */
+  /** Get the part of the log files given the offset and desired length of bytes
+    * 给出偏移和期望的字节长度的部分日志文件 */
   private def getLog(
       logDirectory: String,
       logType: String,
@@ -138,6 +139,7 @@ private[ui] class LogPage(parent: WorkerWebUI) extends WebUIPage("logPage") with
     }
 
     // Verify that the normalized path of the log directory is in the working directory
+    //验证日志目录的标准化路径是否在工作目录中
     val normalizedUri = new URI(logDirectory).normalize()
     val normalizedLogDir = new File(normalizedUri.getPath)
     if (!Utils.isInDirectory(workDir, normalizedLogDir)) {

@@ -39,7 +39,10 @@ import org.apache.spark.network.util.NettyUtils;
  * Handler that processes server responses, in response to requests issued from a
  * [[TransportClient]]. It works by tracking the list of outstanding requests (and their callbacks).
  *
+ * 处理服务器响应的处理程序,以响应从[[TransportClient]]发出的请求,通过跟踪未完成的请求（及其回调）的列表来工作。
+ *
  * Concurrency: thread safe and can be called from multiple threads.
+ * 并发：线程安全,可以从多个线程调用
  */
 public class TransportResponseHandler extends MessageHandler<ResponseMessage> {
   private final Logger logger = LoggerFactory.getLogger(TransportResponseHandler.class);
@@ -50,7 +53,8 @@ public class TransportResponseHandler extends MessageHandler<ResponseMessage> {
 
   private final Map<Long, RpcResponseCallback> outstandingRpcs;
 
-  /** Records the time (in system nanoseconds) that the last fetch or RPC request was sent. */
+  /** Records the time (in system nanoseconds) that the last fetch or RPC request was sent.
+   * 记录上次提取或RPC请求发送的时间（以系统纳秒为单位） */
   private final AtomicLong timeOfLastRequestNs;
 
   public TransportResponseHandler(Channel channel) {
@@ -81,6 +85,7 @@ public class TransportResponseHandler extends MessageHandler<ResponseMessage> {
   /**
    * Fire the failure callback for all outstanding requests. This is called when we have an
    * uncaught exception or pre-mature connection termination.
+   * 为所有未完成的请求触发失败回调,当我们有一个未捕获的异常或预成熟的连接终止时,这被称为
    */
   private void failOutstandingRequests(Throwable cause) {
     for (Map.Entry<StreamChunkId, ChunkReceivedCallback> entry : outstandingFetches.entrySet()) {
@@ -91,6 +96,7 @@ public class TransportResponseHandler extends MessageHandler<ResponseMessage> {
     }
 
     // It's OK if new fetches appear, as they will fail immediately.
+      //如果出现新的提取,则可以立即失败。
     outstandingFetches.clear();
     outstandingRpcs.clear();
   }
@@ -166,12 +172,14 @@ public class TransportResponseHandler extends MessageHandler<ResponseMessage> {
     }
   }
 
-  /** Returns total number of outstanding requests (fetch requests + rpcs) */
+  /** Returns total number of outstanding requests (fetch requests + rpcs)
+   * 返回未完成请求的总数（提取请求+ rpcs）*/
   public int numOutstandingRequests() {
     return outstandingFetches.size() + outstandingRpcs.size();
   }
 
-  /** Returns the time in nanoseconds of when the last request was sent out. */
+  /** Returns the time in nanoseconds of when the last request was sent out.
+   * 返回发送最后一个请求的时间(以纳秒为单位)*/
   public long getTimeOfLastRequestNs() {
     return timeOfLastRequestNs.get();
   }

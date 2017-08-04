@@ -43,6 +43,7 @@ private[spark] class ReliableCheckpointRDD[T: ClassTag](
   private val broadcastedConf = sc.broadcast(new SerializableConfiguration(hadoopConf))
 
   // Fail fast if checkpoint directory does not exist
+  //如果checkpoint目录不存在，则会快速失败
   require(fs.exists(cpath), s"Checkpoint directory does not exist: $checkpointPath")
 
   /**
@@ -58,6 +59,8 @@ private[spark] class ReliableCheckpointRDD[T: ClassTag](
    * Since the original RDD may belong to a prior application, there is no way to know a
    * priori the number of partitions to expect. This method assumes that the original set of
    * checkpoint files are fully preserved in a reliable storage across application lifespans.
+    * 由于原始RDD可能属于先前的应用程序,所以无法预先知道预期的分区数量,
+    * 该方法假定原始的检查点文件集完全保存在跨应用程序生命周期的可靠存储中。
    */
   protected override def getPartitions: Array[Partition] = {
     // listStatus can throw exception if path does not exist.
@@ -66,6 +69,7 @@ private[spark] class ReliableCheckpointRDD[T: ClassTag](
       .filter(_.getName.startsWith("part-"))
       .sortBy(_.toString)
     // Fail fast if input files are invalid
+    //如果输入文件无效,则快速失败
     inputFiles.zipWithIndex.foreach { case (path, i) =>
       if (!path.toString.endsWith(ReliableCheckpointRDD.checkpointFileName(i))) {
         throw new SparkException(s"Invalid checkpoint file: $path")
@@ -135,6 +139,7 @@ private[spark] object ReliableCheckpointRDD extends Logging {
       fs.create(tempOutputPath, false, bufferSize)
     } else {
       // This is mainly for testing purpose
+      //这主要是用于测试目的
       fs.create(tempOutputPath, false, bufferSize, fs.getDefaultReplication, blockSize)
     }
     val serializer = env.serializer.newInstance()
@@ -154,6 +159,7 @@ private[spark] object ReliableCheckpointRDD extends Logging {
           s"${ctx.attemptNumber()} and final output path does not exist: $finalOutputPath")
       } else {
         // Some other copy of this task must've finished before us and renamed it
+        //这项任务的其他副本必须在我们之前完成，并重新命名
         logInfo(s"Final output path $finalOutputPath already exists; not overwriting it")
         fs.delete(tempOutputPath, false)
       }

@@ -22,6 +22,7 @@ import org.apache.spark.util.{IntParam, Utils}
 
 /**
  * Command-line parser for the master.
+  * 主机的命令行解析器
  */
 private[master] class MasterArguments(args: Array[String], conf: SparkConf) {
   var host = Utils.localHostName()

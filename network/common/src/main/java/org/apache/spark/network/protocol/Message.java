@@ -19,12 +19,15 @@ package org.apache.spark.network.protocol;
 
 import io.netty.buffer.ByteBuf;
 
-/** An on-the-wire transmittable message. */
+/** An on-the-wire transmittable message.
+ * 在线传输消息 */
 public interface Message extends Encodable {
-  /** Used to identify this request type. */
+  /** Used to identify this request type.
+   * 用于识别此请求类型 */
   Type type();
 
-  /** Preceding every serialized Message is its type, which allows us to deserialize it. */
+  /** Preceding every serialized Message is its type, which allows us to deserialize it.
+   * 之前每个序列化的消息是它的类型,这允许我们反序列化它*/
   public static enum Type implements Encodable {
     ChunkFetchRequest(0), ChunkFetchSuccess(1), ChunkFetchFailure(2),
     RpcRequest(3), RpcResponse(4), RpcFailure(5);

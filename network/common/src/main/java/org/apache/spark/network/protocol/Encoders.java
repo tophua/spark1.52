@@ -21,10 +21,12 @@ package org.apache.spark.network.protocol;
 import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 
-/** Provides a canonical set of Encoders for simple types. */
+/** Provides a canonical set of Encoders for simple types.
+ * 为简单类型提供了一套规范的编码器*/
 public class Encoders {
 
-  /** Strings are encoded with their length followed by UTF-8 bytes. */
+  /** Strings are encoded with their length followed by UTF-8 bytes.
+   * 字符串以其长度编码，后跟UTF-8字节 */
   public static class Strings {
     public static int encodedLength(String s) {
       return 4 + s.getBytes(Charsets.UTF_8).length;
@@ -44,7 +46,8 @@ public class Encoders {
     }
   }
 
-  /** Byte arrays are encoded with their length followed by bytes. */
+  /** Byte arrays are encoded with their length followed by bytes.
+   * 字节数组以其长度后跟字节进行编码 */
   public static class ByteArrays {
     public static int encodedLength(byte[] arr) {
       return 4 + arr.length;
@@ -63,7 +66,8 @@ public class Encoders {
     }
   }
 
-  /** String arrays are encoded with the number of strings followed by per-String encoding. */
+  /** String arrays are encoded with the number of strings followed by per-String encoding.
+   * 字符串数组使用字符串数字编码,后跟每个字符串编码 */
   public static class StringArrays {
     public static int encodedLength(String[] strings) {
       int totalLength = 4;

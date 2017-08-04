@@ -96,6 +96,8 @@ class HistoryServer(
       // Since we may have applications with multiple attempts mixed with applications with a
       // single attempt, we need to try both. Try the single-attempt route first, and if an
       // error is raised, then try the multiple attempt route.
+      //由于我们可能会尝试与应用程序进行多次尝试混合,因此我们需要尝试两者。
+      // 尝试首先尝试尝试路由，如果发生错误，请尝试多尝试路由。
       if (!loadAppUi(appId, None) && (!attemptId.isDefined || !loadAppUi(appId, attemptId))) {
         val msg = <div class="row-fluid">Application {appId} not found.</div>
         res.setStatus(HttpServletResponse.SC_NOT_FOUND)
@@ -108,6 +110,8 @@ class HistoryServer(
       // Note we don't use the UI retrieved from the cache; the cache loader above will register
       // the app's UI, and all we need to do is redirect the user to the same URI that was
       // requested, and the proper data should be served at that point.
+      //注意我们不使用从缓存中检索的UI; 上面的缓存加载器将注册
+      //应用程序的UI,我们需要做的是将用户重定向到所请求的相同的URI，并且应该在该点提供适当的数据。
       res.sendRedirect(res.encodeRedirectURL(req.getRequestURI()))
     }
 

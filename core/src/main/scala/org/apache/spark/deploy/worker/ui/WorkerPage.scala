@@ -55,7 +55,9 @@ private[ui] class WorkerPage(parent: WorkerWebUI) extends WebUIPage("") {
     val finishedDriverTable = UIUtils.listingTable(driverHeaders, driverRow, finishedDrivers)
 
     // For now we only show driver information if the user has submitted drivers to the cluster.
+    //现在,如果用户已将驱动程序提交给群集,我们只会显示驱动程序信息
     // This is until we integrate the notion of drivers and applications in the UI.
+    //直到我们将驱动程序和应用程序的概念集成到UI中
 
     val content =
       <div class="row-fluid"> <!-- Worker Details -->

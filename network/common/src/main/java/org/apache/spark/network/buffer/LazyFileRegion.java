@@ -32,9 +32,11 @@ import org.apache.spark.network.util.JavaUtils;
 /**
  * A FileRegion implementation that only creates the file descriptor when the region is being
  * transferred. This cannot be used with Epoll because there is no native support for it.
+ * FileRegion实现，仅在传输区域时创建文件描述符,这不能与Epoll一起使用,因为它没有本机的支持
  * 
  * This is mostly copied from DefaultFileRegion implementation in Netty. In the future, we
  * should push this into Netty so the native Epoll transport can support this feature.
+ * 这主要是从Netty中的DefaultFileRegion实现中复制的。在未来,我们应该把它推入Netty，所以本机Epoll运输可以支持这个功能。
  */
 public final class LazyFileRegion extends AbstractReferenceCounted implements FileRegion {
 

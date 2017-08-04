@@ -24,11 +24,14 @@ import java.lang.annotation.*;
  *
  * Experimental API's might change or be removed in minor versions of Spark, or be adopted as
  * first-class Spark API's.
+ * 实验API可能会在次要版本的Spark中更改或删除，或被采用为一流Spark API
  *
  * NOTE: If there exists a Scaladoc comment that immediately precedes this annotation, the first
  * line of the comment must be ":: Experimental ::" with no trailing blank line. This is because
  * of the known issue that Scaladoc displays only either the annotation or the comment, whichever
  * comes first.
+ * 注意：如果存在紧接在此注释之前的Scaladoc注释，则注释的第一行必须为“:: Experimental ::”，不带尾随空白行,
+ * 这是因为Scaladoc仅显示注释或注释的已知问题（以先到者为准）。
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER,

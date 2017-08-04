@@ -81,6 +81,7 @@ private[spark] class MetricsSystem private (
   private var running: Boolean = false
 
   // Treat MetricsServlet as a special sink as it should be exposed to add handlers to web ui
+  //将MetricsServlet视为一个特殊的接收器,因为它应该暴露给web ui添加处理程序
   private var metricsServlet: Option[MetricsServlet] = None
 
   /**
@@ -117,8 +118,10 @@ private[spark] class MetricsSystem private (
 
   /**
    * Build a name that uniquely identifies each metric source.
+    * 构建唯一标识每个度量来源的名称
    * The name is structured as follows: <app ID>.<executor ID (or "driver")>.<source name>.
    * If either ID is not available, this defaults to just using <source name>.
+    * 名称的结构如下：<app ID>。<executor ID（或“driver”）>,<source name>,如果两个ID都不可用,则默认为使用<source name>
    *
    * @param source Metric source to be named by this method.
    * @return An unique metric name for each combination of

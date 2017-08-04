@@ -52,6 +52,7 @@ private[history] class HistoryPage(parent: HistoryServer) extends WebUIPage("") 
     val appTable =
       if (hasMultipleAttempts) {
         // Sorting is disable here as table sort on rowspan has issues.
+        //排序是禁用的，因为表排序在rowspan有问题
         // ref. SPARK-10172
         UIUtils.listingTable(appWithAttemptHeader, appWithAttemptRow,
           appsToShow, sortable = false)

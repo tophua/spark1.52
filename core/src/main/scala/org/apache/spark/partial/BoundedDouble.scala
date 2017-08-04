@@ -22,6 +22,7 @@ import org.apache.spark.annotation.Experimental
 /**
  * :: Experimental ::
  * A Double value with error bars and associated confidence.
+  * 带有误差条和相关置信度的双值
  */
 @Experimental
 class BoundedDouble(val mean: Double, val confidence: Double, val low: Double, val high: Double) {

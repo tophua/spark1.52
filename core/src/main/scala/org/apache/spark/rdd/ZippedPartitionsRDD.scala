@@ -37,6 +37,7 @@ private[spark] class ZippedPartitionsPartition(
   @throws(classOf[IOException])
   private def writeObject(oos: ObjectOutputStream): Unit = Utils.tryOrIOException {
     // Update the reference to parent split at the time of task serialization
+    //在任务序列化时更新对父拆分的引用
     partitionValues = rdds.map(rdd => rdd.partitions(idx))
     oos.defaultWriteObject()
   }
@@ -59,6 +60,7 @@ private[spark] abstract class ZippedPartitionsBaseRDD[V: ClassTag](
     Array.tabulate[Partition](numParts) { i =>
       val prefs = rdds.map(rdd => rdd.preferredLocations(rdd.partitions(i)))
       // Check whether there are any hosts that match all RDDs; otherwise return the union
+      //检查是否有任何与所有RDD匹配的主机,否则返回union
       val exactMatchLocations = prefs.reduce((x, y) => x.intersect(y))
       val locs = if (!exactMatchLocations.isEmpty) exactMatchLocations else prefs.flatten.distinct
       new ZippedPartitionsPartition(i, rdds, locs)
@@ -76,6 +78,7 @@ private[spark] abstract class ZippedPartitionsBaseRDD[V: ClassTag](
 
   /**
    * Call the prepare method of every parent that has one.
+    * 调用每个父项的准备方法,这是提前预约执行内存所需要的
    * This is needed for reserving execution memory in advance.
    */
   protected def tryPrepareParents(): Unit = {

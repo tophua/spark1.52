@@ -23,6 +23,7 @@ import org.apache.spark.annotation.DeveloperApi
  * :: DeveloperApi ::
  *
  * A LeaderElectionAgent tracks current master and is a common interface for all election Agents.
+  * LeaderElectionAgent跟踪当前主控，并且是所有选举代理的通用界面
  */
 @DeveloperApi
 trait LeaderElectionAgent {
@@ -36,7 +37,8 @@ trait LeaderElectable {
   def revokedLeadership()
 }
 
-/** Single-node implementation of LeaderElectionAgent -- we're initially and always the leader. */
+/** Single-node implementation of LeaderElectionAgent -- we're initially and always the leader.
+  * LeaderElectionAgent的单节点实现 - 我们最初始终是领导者 */
 private[spark] class MonarchyLeaderAgent(val masterInstance: LeaderElectable)
   extends LeaderElectionAgent {
   masterInstance.electedLeader()

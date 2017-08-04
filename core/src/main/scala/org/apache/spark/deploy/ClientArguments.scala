@@ -26,10 +26,11 @@ import org.apache.spark.util.{IntParam, MemoryParam, Utils}
 
 /**
  * Command-line parser for the driver client.
+  * 驱动程序客户机的命令行解析器
  */
 private[deploy] class ClientArguments(args: Array[String]) {
   import ClientArguments._
-
+  //“发射”或“杀死”
   var cmd: String = "" // 'launch' or 'kill'
   var logLevel = Level.WARN
 

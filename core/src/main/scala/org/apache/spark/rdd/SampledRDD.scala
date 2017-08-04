@@ -52,12 +52,14 @@ private[spark] class SampledRDD[T: ClassTag](
     if (withReplacement) {
       // For large datasets, the expected number of occurrences of each element in a sample with
       // replacement is Poisson(frac). We use that to get a count for each element.
+      //对于大型数据集,替换样本中每个元素的预期出现次数为泊松(压缩),我们使用它来获取每个元素的计数
       val poisson = new PoissonDistribution(frac)
       poisson.reseedRandomGenerator(split.seed)
 
       firstParent[T].iterator(split.prev, context).flatMap { element =>
         val count = poisson.sample()
         if (count == 0) {
+          //当我们返回0个项目时，避免对象分配，这是很经常的
           Iterator.empty  // Avoid object allocation when we return 0 items, which is quite often
         } else {
           Iterator.fill(count)(element)

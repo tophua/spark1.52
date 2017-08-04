@@ -25,10 +25,13 @@ import org.apache.spark.network.buffer.NettyManagedBuffer;
 
 /**
  * Response to {@link ChunkFetchRequest} when a chunk exists and has been successfully fetched.
+ * 响应{@link ChunkFetchRequest}当一个块存在并已成功提取时
  *
  * Note that the server-side encoding of this messages does NOT include the buffer itself, as this
  * may be written by Netty in a more efficient manner (i.e., zero-copy write).
  * Similarly, the client-side decoding will reuse the Netty ByteBuf as the buffer.
+ * 请注意,此消息的服务器端编码不包括缓冲区本身,因此可由Netty以更有效的方式(即零拷贝写入)写入。
+ * 类似地,客户端解码将重用Netty ByteBuf作为缓冲区。
  */
 public final class ChunkFetchSuccess implements ResponseMessage {
   public final StreamChunkId streamChunkId;
@@ -47,13 +50,15 @@ public final class ChunkFetchSuccess implements ResponseMessage {
     return streamChunkId.encodedLength();
   }
 
-  /** Encoding does NOT include 'buffer' itself. See {@link MessageEncoder}. */
+  /** Encoding does NOT include 'buffer' itself. See {@link MessageEncoder}.
+   * 编码不包括“缓冲区”本身。 请参阅{@link MessageEncoder}*/
   @Override
   public void encode(ByteBuf buf) {
     streamChunkId.encode(buf);
   }
 
-  /** Decoding uses the given ByteBuf as our data, and will retain() it. */
+  /** Decoding uses the given ByteBuf as our data, and will retain() it.
+   * 解码使用给定的ByteBuf作为我们的数据，并将retain()它*/
   public static ChunkFetchSuccess decode(ByteBuf buf) {
     StreamChunkId streamChunkId = StreamChunkId.decode(buf);
     buf.retain();

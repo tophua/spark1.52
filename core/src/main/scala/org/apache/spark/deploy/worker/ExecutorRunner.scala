@@ -66,6 +66,7 @@ private[deploy] class ExecutorRunner(
 
   // NOTE: This is now redundant with the automated shut-down enforced by the Executor. It might 
   // make sense to remove this in the future.
+  //注意：执行者执行的自动关闭现在已经是多余的,将来删除这个可能是有意义的
   private var shutdownHook: AnyRef = null
   /**
    * 启动ExecutorRunner的时候实际创建了线程workerThread和shutdownHook

@@ -178,6 +178,8 @@ object SparkSubmit {
             // Hadoop's AuthorizationException suppresses the exception's stack trace, which
             // makes the message printed to the output by the JVM not very helpful. Instead,
             // detect exceptions with empty stack traces here, and treat them differently.
+            // Hadoop的AuthorizationException抑制异常的堆栈跟踪,其中使消息打印到JVM的输出不是很有帮助,
+            // 代替在此处使用空堆栈跟踪检测异常，并对其进行不同的处理。
             if (e.getStackTrace().length == 0) {
               // scalastyle:off println
               printStream.println(s"ERROR: ${e.getClass().getName()}: ${e.getMessage()}")
@@ -210,13 +212,15 @@ object SparkSubmit {
         doRunMain()
       } catch {
         // Fail over to use the legacy submission gateway
+        //故障切换使用旧版提交网关
         case e: SubmitRestConnectionException =>
           printWarning(s"Master endpoint ${args.master} was not a REST server. " +
             "Falling back to legacy submission gateway instead.")
           args.useRest = false
           submit(args)
       }
-    // In all other modes, just run the main class as prepared  
+    // In all other modes, just run the main class as prepared
+      //在所有其他模式下,只需运行main类即可
     } else {
       doRunMain()
     }
@@ -318,6 +322,7 @@ object SparkSubmit {
 
     // install any R packages that may have been passed through --jars or --packages.
     // Spark Packages may contain R source code inside the jar.
+    //安装可能已经通过的任何R包--jars或--packages,Spark Packages可能包含R内的源代码
     if (args.isR && !StringUtils.isBlank(args.jars)) {
       RPackageUtils.checkAndBuildRPackage(args.jars, printStream, args.verbose)
     }
@@ -336,6 +341,7 @@ object SparkSubmit {
     }
 
     // Require all R files to be local
+    //要求所有的R文件都是本地的
     if (args.isR && !isYarnCluster) {
       if (Utils.nonLocalPaths(args.primaryResource).nonEmpty) {
         printErrorAndExit(s"Only local R files are supported: $args.primaryResource")
@@ -373,6 +379,8 @@ object SparkSubmit {
       } else {
         // If a python file is provided, add it to the child arguments and list of files to deploy.
         // Usage: PythonAppRunner <main python file> <extra python files> [app arguments]
+        //如果提供了一个python文件，请将其添加到子参数和要部署的文件列表中。
+        //用法：PythonAppRunner <main python file> <extra python files> [app arguments]
         args.mainClass = "org.apache.spark.deploy.PythonRunner"
         args.childArgs = ArrayBuffer(args.primaryResource, args.pyFiles) ++ args.childArgs
         if (clusterManager != YARN) {
@@ -394,6 +402,7 @@ object SparkSubmit {
     // In YARN mode for an R app, add the SparkR package archive and the R package
     // archive containing all of the built R libraries to archives so that they can
     // be distributed with the job
+    //在Y应用程序的YARN模式下，添加SparkR包归档和R包存档包含所有内置的R库到归档，以便它们可以与作业一起分发
     if (args.isR && clusterManager == YARN) {
       val sparkRPackagePath = RUtils.localSparkRPackagePath
       if (sparkRPackagePath.isEmpty) {
@@ -434,6 +443,7 @@ object SparkSubmit {
     }
 
     // If we're running a R app, set the main class to our specific R runner
+    //如果我们正在运行R应用程序，请将主要课程设置为我们特定的R跑步者
     if (args.isR && deployMode == CLIENT) {
       if (args.primaryResource == SPARKR_SHELL) {
         args.mainClass = "org.apache.spark.api.r.RBackend"
@@ -547,6 +557,8 @@ object SparkSubmit {
     // Add the application jar automatically so the user doesn't have to call sc.addJar
     // For YARN cluster mode, the jar is already distributed on each node as "app.jar"
     // For python and R files, the primary resource is already distributed as a regular file
+    //自动添加应用程序jar，以便用户不必调用sc.addJar
+    //对于YARN集群模式，jar已经以“app.jar”的形式分布在每个节点上对于python和R文件,主资源已经作为常规文件分发
     if (!isYarnCluster && !args.isPython && !args.isR) {
       var jars = sysProps.get("spark.jars").map(x => x.split(",").toSeq).getOrElse(Seq.empty)
       if (isUserJar(args.primaryResource)) {
@@ -564,6 +576,7 @@ object SparkSubmit {
         childArgs += (args.primaryResource, args.mainClass)
       } else {
         // In legacy standalone cluster mode, use Client as a wrapper around the user class
+        //在传统的独立集群模式下,使用Client作为用户类的包装器
         childMainClass = "org.apache.spark.deploy.Client"
         if (args.supervise) { childArgs += "--supervise" }
         Option(args.driverMemory).foreach { m => childArgs += ("--memory", m) }
@@ -662,6 +675,7 @@ object SparkSubmit {
     }
 
     // Resolve and format python file paths properly before adding them to the PYTHONPATH.
+    //在将它们添加到PYTHONPATH之前，正确解析和格式化python文件路径
     // The resolving part is redundant in the case of --py-files, but necessary if the user
     // explicitly sets `spark.submit.pyFiles` in his/her default properties file.
     sysProps.get("spark.submit.pyFiles").foreach { pyFiles =>
@@ -821,6 +835,7 @@ object SparkSubmit {
 
   /**
    * Return whether the given primary resource requires running R.
+    * 返回给定的主要资源是否需要运行R
    */
   private[deploy] def isR(res: String): Boolean = {
     res != null && res.endsWith(".R") || res == SPARKR_SHELL
@@ -907,11 +922,13 @@ private[spark] object SparkSubmitUtils {
    */
   def createRepoResolvers(remoteRepos: Option[String], ivySettings: IvySettings): ChainResolver = {
     // We need a chain resolver if we want to check multiple repositories
+    //如果我们要检查多个存储库,我们需要链式解析器
     val cr = new ChainResolver
     cr.setName("list")
 
     val repositoryList = remoteRepos.getOrElse("")
     // add any other remote repositories other than maven central
+    //添加除maven中心之外的任何其他远程存储库
     if (repositoryList.trim.nonEmpty) {
       repositoryList.split(",").zipWithIndex.foreach { case (repo, i) =>
         val brr: IBiblioResolver = new IBiblioResolver
@@ -977,7 +994,8 @@ private[spark] object SparkSubmitUtils {
     }.mkString(",")
   }
 
-  /** Adds the given maven coordinates to Ivy's module descriptor. */
+  /** Adds the given maven coordinates to Ivy's module descriptor.
+    * 将给定的maven坐标添加到Ivy的模块描述符中*/
   def addDependenciesToIvy(
       md: DefaultModuleDescriptor,
       artifacts: Seq[MavenCoordinate],

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Encoder used by the server side to encode server-to-client responses.
  * This encoder is stateless so it is safe to be shared by multiple threads.
+ * 服务器端使用的编码器对服务器到客户端的响应进行编码,该编码器是无状态的,因此可以安全地由多个线程共享
  */
 @ChannelHandler.Sharable
 public final class MessageEncoder extends MessageToMessageEncoder<Message> {
@@ -40,6 +41,8 @@ public final class MessageEncoder extends MessageToMessageEncoder<Message> {
    * ByteBuf to 'out' containing the total frame length, the message type, and the message itself.
    * In the case of a ChunkFetchSuccess, we will also add the ManagedBuffer corresponding to the
    * data to 'out', in order to enable zero-copy transfer.
+   * 通过调用其encode()方法来对消息进行编码,对于非数据消息,我们将添加一个ByteBuf到'out'包含总帧长度,消息类型和消息本身。
+   *在ChunkFetchSuccess的情况下，我们还会添加对应的ManagedBuffer数据到'出',以便启用零拷贝传输。
    */
   @Override
   public void encode(ChannelHandlerContext ctx, Message in, List<Object> out) {
@@ -47,7 +50,9 @@ public final class MessageEncoder extends MessageToMessageEncoder<Message> {
     long bodyLength = 0;
 
     // Only ChunkFetchSuccesses have data besides the header.
+      //只有ChunkFetchSuccess除头之外还有数据
     // The body is used in order to enable zero-copy transfer for the payload.
+      // body被用于为有效载荷启用零拷贝传输。
     if (in instanceof ChunkFetchSuccess) {
       ChunkFetchSuccess resp = (ChunkFetchSuccess) in;
       try {
@@ -55,6 +60,7 @@ public final class MessageEncoder extends MessageToMessageEncoder<Message> {
         body = resp.buffer.convertToNetty();
       } catch (Exception e) {
         // Re-encode this message as BlockFetchFailure.
+          //将此消息重新编码为BlockFetchFailure
         logger.error(String.format("Error opening block %s for client %s",
           resp.streamChunkId, ctx.channel().remoteAddress()), e);
         encode(ctx, new ChunkFetchFailure(resp.streamChunkId, e.getMessage()), out);
@@ -64,6 +70,7 @@ public final class MessageEncoder extends MessageToMessageEncoder<Message> {
 
     Message.Type msgType = in.type();
     // All messages have the frame length, message type, and message itself.
+      //所有消息都具有帧长度，消息类型和消息本身。
     int headerLength = 8 + msgType.encodedLength() + in.encodedLength();
     long frameLength = headerLength + bodyLength;
     ByteBuf header = ctx.alloc().heapBuffer(headerLength);

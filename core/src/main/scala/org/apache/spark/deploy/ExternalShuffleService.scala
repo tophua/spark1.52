@@ -34,6 +34,8 @@ import org.apache.spark.util.Utils
  * Provides a server from which Executors can read shuffle files (rather than reading directly from
  * each other), to provide uninterrupted access to the files in the face of executors being turned
  * off or killed.
+  * 提供一个服务器,Executors可从该服务器读取随机文件(而不是直接从彼此中读取数据)
+  * 以便在执行程序被关闭或被杀死时提供对文件的不间断访问。
  *
  * Optionally requires SASL authentication in order to read. See [[SecurityManager]].
  */
@@ -51,12 +53,14 @@ class ExternalShuffleService(sparkConf: SparkConf, securityManager: SecurityMana
 
   private var server: TransportServer = _
 
-  /** Create a new shuffle block handler. Factored out for subclasses to override. */
+  /** Create a new shuffle block handler. Factored out for subclasses to override.
+    * 创建一个新的shuffle块处理程序。 考虑到子类覆盖 */
   protected def newShuffleBlockHandler(conf: TransportConf): ExternalShuffleBlockHandler = {
     new ExternalShuffleBlockHandler(conf)
   }
 
-  /** Starts the external shuffle service if the user has configured us to. */
+  /** Starts the external shuffle service if the user has configured us to.
+    * 如果用户配置了我们,启动外部shuffle服务*/
   def startIfEnabled() {
     if (enabled) {
       start()
@@ -79,7 +83,8 @@ class ExternalShuffleService(sparkConf: SparkConf, securityManager: SecurityMana
     server = transportContext.createServer(port, bootstraps)
   }
 
-  /** Clean up all shuffle files associated with an application that has exited. */
+  /** Clean up all shuffle files associated with an application that has exited.
+    * 清理与已退出的应用程序相关联的所有随机文件 */
   def applicationRemoved(appId: String): Unit = {
     blockHandler.applicationRemoved(appId, true /* cleanupLocalDirs */)
   }
@@ -106,7 +111,8 @@ object ExternalShuffleService extends Logging {
     main(args, (conf: SparkConf, sm: SecurityManager) => new ExternalShuffleService(conf, sm))
   }
 
-  /** A helper main method that allows the caller to call this with a custom shuffle service. */
+  /** A helper main method that allows the caller to call this with a custom shuffle service.
+    * 一个帮助主方法，允许调用者使用自定义随机服务调用它 */
   private[spark] def main(
       args: Array[String],
       newShuffleService: (SparkConf, SecurityManager) => ExternalShuffleService): Unit = {
@@ -116,6 +122,7 @@ object ExternalShuffleService extends Logging {
 
     // we override this value since this service is started from the command line
     // and we assume the user really wants it to be running
+    //我们覆盖这个值,因为这个服务是从命令行启动的,我们假设用户真的希望它运行
     sparkConf.set("spark.shuffle.service.enabled", "true")
     server = newShuffleService(sparkConf, securityManager)
     server.start()
@@ -123,6 +130,7 @@ object ExternalShuffleService extends Logging {
     installShutdownHook()
 
     // keep running until the process is terminated
+    //继续运行,直到过程终止
     barrier.await()
   }
 

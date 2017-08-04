@@ -111,6 +111,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
       if (maxRetries > 0) {
         // Note this Fetcher will correctly handle maxRetries == 0; we avoid it just in case there's
         // a bug in this code. We should remove the if statement once we're sure of the stability.
+        //注意这个Fetcher会正确处理maxRetries == 0;我们避免它,以防万一有这个代码的错误,一旦我们确定稳定性,我们应该删除if语句
         new RetryingBlockFetcher(transportConf, blockFetchStarter, blockIds, listener).start()
       } else {
         blockFetchStarter.createAndStart(blockIds, listener)

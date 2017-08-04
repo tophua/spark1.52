@@ -86,13 +86,17 @@ public class TransportClient implements Closeable {
 
   /**
    * Requests a single chunk from the remote side, from the pre-negotiated streamId.
+   * 从预先协商的streamId请求远程端的单个块
    *
    * Chunk indices go from 0 onwards. It is valid to request the same chunk multiple times, though
    * some streams may not support this.
+   * 块指数从0开始,多次请求相同的块是有效的,尽管有些流可能不支持这一点
    *
    * Multiple fetchChunk requests may be outstanding simultaneously, and the chunks are guaranteed
    * to be returned in the same order that they were requested, assuming only a single
    * TransportClient is used to fetch the chunks.
+   *
+   * 多个fetchChunk请求可能同时出现,并且假定只使用单个TransportClient来获取块,则保证以与请求相同的顺序返回块
    *
    * @param streamId Identifier that refers to a stream in the remote StreamManager. This should
    *                 be agreed upon by client and server beforehand.
@@ -137,6 +141,7 @@ public class TransportClient implements Closeable {
   /**
    * Sends an opaque message to the RpcHandler on the server-side. The callback will be invoked
    * with the server's response or upon any failure.
+   * 在服务器端发送不透明的消息给RpcHandler,将使用服务器的响应或任何故障来调用回调
    */
   public void sendRpc(byte[] message, final RpcResponseCallback callback) {
     final String serverAddr = NettyUtils.getRemoteAddress(channel);
@@ -172,6 +177,7 @@ public class TransportClient implements Closeable {
   /**
    * Synchronously sends an opaque message to the RpcHandler on the server-side, waiting for up to
    * a specified timeout for a response.
+   * 在服务器端同步向RpcHandler发送不透明的消息,等待响应的指定超时
    */
   public byte[] sendRpcSync(byte[] message, long timeoutMs) {
     final SettableFuture<byte[]> result = SettableFuture.create();
@@ -200,6 +206,7 @@ public class TransportClient implements Closeable {
   @Override
   public void close() {
     // close is a local operation and should finish with milliseconds; timeout just to be safe
+      //关闭是一个本地操作,应该用毫秒来完成,超时只是为了安全
     channel.close().awaitUninterruptibly(10, TimeUnit.SECONDS);
   }
 

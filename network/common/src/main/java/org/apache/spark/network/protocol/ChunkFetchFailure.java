@@ -22,6 +22,7 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * Response to {@link ChunkFetchRequest} when there is an error fetching the chunk.
+ * 响应{@link ChunkFetchRequest},当抓取块时出错
  */
 public final class ChunkFetchFailure implements ResponseMessage {
   public final StreamChunkId streamChunkId;

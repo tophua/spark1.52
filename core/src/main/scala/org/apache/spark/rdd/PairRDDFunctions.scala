@@ -64,10 +64,16 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * functions. Turns an RDD[(K, V)] into a result of type RDD[(K, C)], for a "combined type" C
    * Note that V and C can be different -- for example, one might group an RDD of type
    * (Int, Int) into an RDD of type (Int, Seq[Int]). Users provide three functions:
+    *
+    * 使用一组自定义聚合函数来组合每个键的元素的通用功能。 将RDD [（K，V）]转换为类型RDD [（K，C）]的结果，
+    * 对于“组合类型”C注意，V和C可以不同
+    * - 例如，可以将RDD 类型（Int，Int）转换为类型（Int，Seq [Int]）的RDD。 用户提供三个功能：
    * combineByKey属于Key-Value型算子,做的是聚集操作,这种变换不会触发作业的提交
    * - `createCombiner`, which turns a V into a C (e.g., creates a one-element list)
+    *                   其将V变成C（例如，创建单元列表）
    * - `mergeValue`, to merge a V into a C (e.g., adds it to the end of a list)
-   * - `mergeCombiners`, to combine two C's into a single one.
+    *               将V合并成C（例如，将其添加到列表的末尾）
+   * - `mergeCombiners`, to combine two C's into a single one.将两个C组合成一个
    *
    * In addition, users can control the partitioning of the output RDD, and whether to perform
    * map-side aggregation (if a mapper can produce multiple items with the same key).
@@ -113,6 +119,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Simplified version of combineByKey that hash-partitions the output RDD.
+    * combineByKey的简化版本,用于散列分区输出RDD
    */
   def combineByKey[C](createCombiner: V => C,
       mergeValue: (C, V) => C,
@@ -129,10 +136,18 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * partition, and the latter is used for merging values between partitions. To avoid memory
    * allocation, both of these functions are allowed to modify and return their first argument
    * instead of creating a new U.
+    * 使用给定的组合函数和中性“零值”来聚合每个键的值。
+    *此函数可以返回与此RDD中的值类型不同的结果类型U，
+    *因此，我们需要一个操作来将V合并成一个U和一个操作来合并两个U，
+    *如在scala.TraversableOnce。 前一个操作用于合并一个值中的值
+    *分区，后者用于在分区之间合并值。 避免记忆
+    *分配，这两个函数都允许修改并返回其第一个参数
+    *而不是创建一个新的U.
    */
   def aggregateByKey[U: ClassTag](zeroValue: U, partitioner: Partitioner)(seqOp: (U, V) => U,
       combOp: (U, U) => U): RDD[(K, U)] = self.withScope {
     // Serialize the zero value to a byte array so that we can get a new clone of it on each key
+    //将零值序列化为字节数组，以便我们可以在每个键上获得一个新的克隆
     val zeroBuffer = SparkEnv.get.serializer.newInstance().serialize(zeroValue)
     val zeroArray = new Array[Byte](zeroBuffer.limit)
     zeroBuffer.get(zeroArray)
@@ -141,6 +156,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
     val createZero = () => cachedSerializer.deserialize[U](ByteBuffer.wrap(zeroArray))
 
     // We will clean the combiner closure later in `combineByKey`
+    //我们将在`combineByKey`中稍后清理组合器
     val cleanedSeqOp = self.context.clean(seqOp)
     combineByKey[U]((v: V) => cleanedSeqOp(createZero(), v), cleanedSeqOp, combOp, partitioner)
   }
@@ -153,6 +169,13 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * partition, and the latter is used for merging values between partitions. To avoid memory
    * allocation, both of these functions are allowed to modify and return their first argument
    * instead of creating a new U.
+    * 使用给定的组合函数和中性“零值”来聚合每个键的值。
+    *此函数可以返回与此RDD中的值类型不同的结果类型U，
+    *因此，我们需要一个操作来将V合并成一个U和一个操作来合并两个U，
+    *如在scala.TraversableOnce。 前一个操作用于合并一个值中的值
+    *分区，后者用于在分区之间合并值。 避免记忆
+    *分配，这两个函数都允许修改并返回其第一个参数
+    *而不是创建一个新的U.
    */
   def aggregateByKey[U: ClassTag](zeroValue: U, numPartitions: Int)(seqOp: (U, V) => U,
       combOp: (U, U) => U): RDD[(K, U)] = self.withScope {
@@ -167,6 +190,13 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * partition, and the latter is used for merging values between partitions. To avoid memory
    * allocation, both of these functions are allowed to modify and return their first argument
    * instead of creating a new U.
+    * 使用给定的组合函数和中性“零值”来聚合每个键的值。
+    *此函数可以返回与此RDD中的值类型不同的结果类型U，
+    *因此，我们需要一个操作来将V合并成一个U和一个操作来合并两个U，
+    *如在scala.TraversableOnce。 前一个操作用于合并一个值中的值
+    *分区，后者用于在分区之间合并值。 避免记忆
+    *分配，这两个函数都允许修改并返回其第一个参数
+    *而不是创建一个新的U.
    */
   def aggregateByKey[U: ClassTag](zeroValue: U)(seqOp: (U, V) => U,
       combOp: (U, U) => U): RDD[(K, U)] = self.withScope {
@@ -177,16 +207,19 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Merge the values for each key using an associative function and a neutral "zero value" which
    * may be added to the result an arbitrary number of times, and must not change the result
    * (e.g., Nil for list concatenation, 0 for addition, or 1 for multiplication.).
+    * 使用关联函数和中性“零值”合并每个键的值，可以将任意次数添加到结果中，并且不得更改结果（例如，列表连接为零，添加为0或为1 用于乘法）
    */
   def foldByKey(
       zeroValue: V,
       partitioner: Partitioner)(func: (V, V) => V): RDD[(K, V)] = self.withScope {
     // Serialize the zero value to a byte array so that we can get a new clone of it on each key
+    //将零值序列化为字节数组，以便我们可以在每个键上获得一个新的克隆
     val zeroBuffer = SparkEnv.get.serializer.newInstance().serialize(zeroValue)
     val zeroArray = new Array[Byte](zeroBuffer.limit)
     zeroBuffer.get(zeroArray)
 
     // When deserializing, use a lazy val to create just one instance of the serializer per task
+    //反序列化时,使用一个惰性值来创建每个任务的序列化程序的一个实例
     lazy val cachedSerializer = SparkEnv.get.serializer.newInstance()
     val createZero = () => cachedSerializer.deserialize[V](ByteBuffer.wrap(zeroArray))
 
@@ -198,6 +231,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Merge the values for each key using an associative function and a neutral "zero value" which
    * may be added to the result an arbitrary number of times, and must not change the result
    * (e.g., Nil for list concatenation, 0 for addition, or 1 for multiplication.).
+    * 使用关联函数和中性“零值”合并每个键的值，可以将任意次数添加到结果中，并且不得更改结果（例如，列表连接为零，添加为0或为1 用于乘法）。
    */
   def foldByKey(zeroValue: V, numPartitions: Int)(func: (V, V) => V): RDD[(K, V)] = self.withScope {
     foldByKey(zeroValue, new HashPartitioner(numPartitions))(func)
@@ -207,6 +241,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Merge the values for each key using an associative function and a neutral "zero value" which
    * may be added to the result an arbitrary number of times, and must not change the result
    * (e.g., Nil for list concatenation, 0 for addition, or 1 for multiplication.).
+    * 使用关联函数和中性“零值”合并每个键的值，可以将任意次数添加到结果中，并且不得更改结果（例如，列表连接为零，添加为0或为1 用于乘法）。
    */
   def foldByKey(zeroValue: V)(func: (V, V) => V): RDD[(K, V)] = self.withScope {
     foldByKey(zeroValue, defaultPartitioner(self))(func)
@@ -214,12 +249,17 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Return a subset of this RDD sampled by key (via stratified sampling).
+    * 返回通过键采样的该RDD的子集（通过分层采样）
    *
    * Create a sample of this RDD using variable sampling rates for different keys as specified by
    * `fractions`, a key to sampling rate map, via simple random sampling with one pass over the
    * RDD, to produce a sample of size that's approximately equal to the sum of
    * math.ceil(numItems * samplingRate) over all key values.
    *
+    * 使用如指定的不同键的可变采样率创建此RDD的样本
+    *“分数”，采样率图的关键，通过简单的随机抽样，一次通过
+    * RDD，以产生大约等于总和大小的样本
+    *所有键值上的math.ceil（numItems * samplingRate）。
    * @param withReplacement whether to sample with or without replacement
    * @param fractions map of specific keys to sampling rates
    * @param seed seed for the random number generator
@@ -243,12 +283,20 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * ::Experimental::
    * Return a subset of this RDD sampled by key (via stratified sampling) containing exactly
    * math.ceil(numItems * samplingRate) for each stratum (group of pairs with the same key).
+    * 通过键（通过分层采样）返回包含正确包含的RDD采样子集
+    *每个层的math.ceil（numItems * samplingRate）（具有相同键的成对组）。
    *
    * This method differs from [[sampleByKey]] in that we make additional passes over the RDD to
    * create a sample size that's exactly equal to the sum of math.ceil(numItems * samplingRate)
    * over all key values with a 99.99% confidence. When sampling without replacement, we need one
    * additional pass over the RDD to guarantee sample size; when sampling with replacement, we need
    * two additional passes.
+    *
+    * 该方法与[[sampleByKey]]不同，因为我们对RDD进行了额外的传递
+    *创建一个完全等于math.ceil（numItems * samplingRate）的总和的样本大小，
+    *所有关键值都有99.99％的置信度。 抽样时不需要更换，我们需要一个
+    *额外通过RDD以保证样本量; 当需要更换时，我们需要
+    *另外两次通行证。
    *
    * @param withReplacement whether to sample with or without replacement
    * @param fractions map of specific keys to sampling rates
@@ -275,6 +323,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Merge the values for each key using an associative reduce function. This will also perform
    * the merging locally on each mapper before sending results to a reducer, similarly to a
    * "combiner" in MapReduce.
+    * 使用关联缩减功能合并每个键的值。 在将映射结果发送给reducer之前，这也将在每个映射器上执行本地合并，类似于MapReduce中的“组合器”。
    * 
    * 该函数用于将RDD[K,V]中每个K对应的V值根据映射函数来运算
    * 参数numPartitions用于指定分区数
@@ -307,6 +356,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * the merging locally on each mapper before sending results to a reducer, similarly to a
    * "combiner" in MapReduce. Output will be hash-partitioned with the existing partitioner/
    * parallelism level.
+    * 使用关联缩减功能合并每个键的值。 在将映射结果发送给reducer之前，这也将在每个映射器上执行本地合并，
+    * 类似于MapReduce中的“组合器”。 输出将使用现有的分区/并行级别进行散列分区。
    */
   def reduceByKey(func: (V, V) => V): RDD[(K, V)] = self.withScope {
     reduceByKey(defaultPartitioner(self), func)
@@ -316,6 +367,10 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Merge the values for each key using an associative reduce function, but return the results
    * immediately to the master as a Map. This will also perform the merging locally on each mapper
    * before sending results to a reducer, similarly to a "combiner" in MapReduce.
+    *
+    * 使用关联缩减函数合并每个键的值，但将结果立即作为Map返回给主。 在将映射结果发送给reducer之前，
+    * 这也将在每个映射器上执行本地合并，类似于MapReduce中的“组合器”。
+    *
    * 该函数将RDD[K,V]中每个K对应的V值根据映射函数来运算,运算结果映射到一个Map[K,V]中,而不是RDD[K,V]
    * 例如:
    * scala> var rdd1 = sc.makeRDD(Array(("A",0),("A",2),("B",1),("B",2),("C",1)))
@@ -377,6 +432,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * :: Experimental ::
    * Approximate version of countByKey that can return a partial result if it does
    * not finish within a timeout.
+    * countByKey的近似版本，如果在超时时间内未完成，则可返回部分结果。
    */
   @Experimental
   def countByKeyApprox(timeout: Long, confidence: Double = 0.95)
@@ -388,6 +444,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * :: Experimental ::
    *
    * Return approximate number of distinct values for each key in this RDD.
+    * 返回此RDD中每个键的不同值的近似数
    *
    * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
    * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
@@ -430,7 +487,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Return approximate number of distinct values for each key in this RDD.
-   * 
+   *  返回此RDD中每个键的不同值的近似数
+    *
    * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
    * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
    * <a href="http://dx.doi.org/10.1145/2452376.2452456">here</a>.
@@ -450,7 +508,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Return approximate number of distinct values for each key in this RDD.
-   *
+   *  返回此RDD中每个键的不同值的近似数
    * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
    * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
    * <a href="http://dx.doi.org/10.1145/2452376.2452456">here</a>.
@@ -467,7 +525,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
 
   /**
    * Return approximate number of distinct values for each key in this RDD.
-   *
+   *返回此RDD中每个键的不同值的近似数
    * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
    * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
    * <a href="http://dx.doi.org/10.1145/2452376.2452456">here</a>.
@@ -516,6 +574,9 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Group the values for each key in the RDD into a single sequence. Hash-partitions the
    * resulting RDD with into `numPartitions` partitions. The ordering of elements within
    * each group is not guaranteed, and may even differ each time the resulting RDD is evaluated.
+    *
+    * 将RDD中每个键的值分组为单个序列,将生成的RDD哈希分区到“numPartitions”分区中,每个组中的元素的排序不能保证,并且每次得到的RDD被评估时甚至可能不同。
+    *
    * 该函数用于将RDD[K,V]中每个K对应的V值,返回一个（K,Seq[V])对的数据集
    * 参数numPartitions用于指定分区数
    * Note: This operation may be very expensive. If you are grouping in order to perform an
@@ -616,6 +677,7 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
   /**
    * Simplified version of combineByKey that hash-partitions the resulting RDD using the
    * existing partitioner/parallelism level.
+    * combineByKey的简化版，使用现有的分区/并行级别对生成的RDD进行散列分区
    */
   def combineByKey[C](createCombiner: V => C, mergeValue: (C, V) => C, mergeCombiners: (C, C) => C)
     : RDD[(K, C)] = self.withScope {
@@ -627,10 +689,15 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD with the existing partitioner/parallelism level. The ordering of elements
    * within each group is not guaranteed, and may even differ each time the resulting RDD is
    * evaluated.
+    *
+    * 将RDD中每个键的值分组为单个序列,使用现有的分区/并行级别对结果进行哈希分区,每个组中的元素的排序不能保证,并且每次得到的RDD被评估时甚至可能不同。
    *
    * Note: This operation may be very expensive. If you are grouping in order to perform an
    * aggregation (such as a sum or average) over each key, using [[PairRDDFunctions.aggregateByKey]]
    * or [[PairRDDFunctions.reduceByKey]] will provide much better performance.
+    *
+    * 注意：此操作可能非常昂贵。 如果您正在分组以执行使用[[PairRDDFunctions.aggregateByKey]]或
+    * [[PairRDDFunctions.reduceByKey]]在每个键上的聚合（如和或平均值）将提供更好的性能。
    */
   def groupByKey(): RDD[(K, Iterable[V])] = self.withScope {
     groupByKey(defaultPartitioner(self))
@@ -640,6 +707,9 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Return an RDD containing all pairs of elements with matching keys in `this` and `other`. Each
    * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
    * (k, v2) is in `other`. Performs a hash join across the cluster.
+    *
+    * 在“this”和“other”中返回一个包含所有匹配键元素的RDD。 每对元素将作为（k，（v1，v2））元组返回，
+    * 其中（k，v1）在“this”中，（k，v2）在“other”中。 在集群中执行散列连接。
    */
   def join[W](other: RDD[(K, W)]): RDD[(K, (V, W))] = self.withScope {
     join(other, defaultPartitioner(self, other))
@@ -649,6 +719,8 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * Return an RDD containing all pairs of elements with matching keys in `this` and `other`. Each
    * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
    * (k, v2) is in `other`. Performs a hash join across the cluster.
+    * 在“this”和“other”中返回一个包含所有匹配键元素的RDD。 每对元素将作为（k，（v1，v2））元组返回，
+    * 其中（k，v1）在“this”中，（k，v2）在“other”中。 在集群中执行散列连接。
    */
   def join[W](other: RDD[(K, W)], numPartitions: Int): RDD[(K, (V, W))] = self.withScope {
     join(other, new HashPartitioner(numPartitions))
@@ -659,6 +731,11 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in `other`, or the
    * pair (k, (v, None)) if no elements in `other` have key k. Hash-partitions the output
    * using the existing partitioner/parallelism level.
+    *
+    * 执行“this”和“other”的左外连接。 对于“this”中的每个元素（k，v）
+    *得到的RDD将包含“other”中的w的所有对（k，（v，Some（w））），或
+    * pair（k，（v，None））如果`other`中的元素没有键k。 散列分区输出
+    *使用现有的分区/并行级别。
    */
   def leftOuterJoin[W](other: RDD[(K, W)]): RDD[(K, (V, Option[W]))] = self.withScope {
     leftOuterJoin(other, defaultPartitioner(self, other))
@@ -669,6 +746,10 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in `other`, or the
    * pair (k, (v, None)) if no elements in `other` have key k. Hash-partitions the output
    * into `numPartitions` partitions.
+    * 执行“this”和“other”的左外连接。 对于“this”中的每个元素（k，v）
+    *得到的RDD将包含“other”中的w的所有对（k，（v，Some（w））），或
+    * pair（k，（v，None））如果`other`中的元素没有键k。 散列分区输出
+    *到`numPartition`分区。
    */
   def leftOuterJoin[W](
       other: RDD[(K, W)],
@@ -681,6 +762,10 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in `this`, or the
    * pair (k, (None, w)) if no elements in `this` have key k. Hash-partitions the resulting
    * RDD using the existing partitioner/parallelism level.
+    * 执行“this”和“other”的右外连接。 对于“other”中的每个元素（k，w）
+    *得到的RDD将包含“this”中的v的所有对（k，（Some（v），w）），或
+    * pair（k，（None，w））如果`this`中的元素没有键k。 哈希分割结果
+    * RDD使用现有的分区/并行级别。
    */
   def rightOuterJoin[W](other: RDD[(K, W)]): RDD[(K, (Option[V], W))] = self.withScope {
     rightOuterJoin(other, defaultPartitioner(self, other))
@@ -691,6 +776,10 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in `this`, or the
    * pair (k, (None, w)) if no elements in `this` have key k. Hash-partitions the resulting
    * RDD into the given number of partitions.
+    * 执行“this”和“other”的右外连接。 对于“other”中的每个元素（k，w）
+    *得到的RDD将包含“this”中的v的所有对（k，（Some（v），w）），或
+    * pair（k，（None，w））如果`this`中的元素没有键k。 哈希分割结果
+    * RDD到给定数量的分区。
    */
   def rightOuterJoin[W](
       other: RDD[(K, W)],
@@ -706,6 +795,13 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * (k, (Some(v), Some(w))) for v in `this`, or the pair (k, (None, Some(w))) if no elements
    * in `this` have key k. Hash-partitions the resulting RDD using the existing partitioner/
    * parallelism level.
+    * 执行“this”和“other”的完整外连接。 对于“this”中的每个元素（k，v）
+    *得到的RDD将包含“other”中的w的所有对（k，（Some（v），Some（w））），或
+    *对（k，（Some（v），None）））如果`other`中的元素没有键k。 同样，对于每一个
+    *元素（k，w）在`other`中，所得到的RDD将包含所有对
+    对于“this”中的v，或者对（k，（None，Some（w）））的*（k，（Some（v），Some（w）））
+    *在`这个`有关键k。 哈希使用现有的分区器/
+    *并行级别。
    */
   def fullOuterJoin[W](other: RDD[(K, W)]): RDD[(K, (Option[V], Option[W]))] = self.withScope {
     fullOuterJoin(other, defaultPartitioner(self, other))
@@ -801,6 +897,7 @@ preservesPartitioning = true)
   /**
    * For each key k in `this` or `other`, return a resulting RDD that contains a tuple with the
    * list of values for that key in `this` as well as `other`.
+    * 对于“this”或“other”中的每个键k，返回包含一个元组的结果RDD这个键的值列表'``以及`other`。
    */
   def cogroup[W](other: RDD[(K, W)], partitioner: Partitioner)
       : RDD[(K, (Iterable[V], Iterable[W]))] = self.withScope {
@@ -816,6 +913,7 @@ preservesPartitioning = true)
   /**
    * For each key k in `this` or `other1` or `other2`, return a resulting RDD that contains a
    * tuple with the list of values for that key in `this`, `other1` and `other2`.
+    * 对于“this”或“other1”或“other2”中的每个键k，返回包含a的结果RDD元组中的这个键的值列表在这个，other1和other2中。
    */
   def cogroup[W1, W2](other1: RDD[(K, W1)], other2: RDD[(K, W2)], partitioner: Partitioner)
       : RDD[(K, (Iterable[V], Iterable[W1], Iterable[W2]))] = self.withScope {
@@ -833,8 +931,10 @@ preservesPartitioning = true)
   /**
    * For each key k in `this` or `other1` or `other2` or `other3`,
    * return a resulting RDD that contains a tuple with the list of values
+    * 对于“this”或“other1”或“other2”或“other3”中的每个键k，返回包含元组列表的结果RDD
    * 返回一个包含RDD值列表元组
    * for that key in `this`, `other1`, `other2` and `other3`.
+    * 对于“this”，“other1”，“other2”和“other3”中的该键。
    */
   def cogroup[W1, W2, W3](other1: RDD[(K, W1)], other2: RDD[(K, W2)], other3: RDD[(K, W3)])
       : RDD[(K, (Iterable[V], Iterable[W1], Iterable[W2], Iterable[W3]))] = self.withScope {
@@ -844,6 +944,7 @@ preservesPartitioning = true)
   /**
    * For each key k in `this` or `other`, return a resulting RDD that contains a tuple with the
    * list of values for that key in `this` as well as `other`.
+    * 对于`this`或`other`中的每个键k，返回一个包含一个元组的结果RDD，其中该键的值列表为`this`以及`other`
    */
   def cogroup[W](other: RDD[(K, W)]): RDD[(K, (Iterable[V], Iterable[W]))] = self.withScope {
     cogroup(other, defaultPartitioner(self, other))
@@ -852,6 +953,7 @@ preservesPartitioning = true)
   /**
    * For each key k in `this` or `other1` or `other2`, return a resulting RDD that contains a
    * tuple with the list of values for that key in `this`, `other1` and `other2`.
+    * 对于“this”或“other1”或“other2”中的每个键k，返回包含a的结果RDD元组中的这个键的值列表在这个，other1和other2中。
    */
   def cogroup[W1, W2](other1: RDD[(K, W1)], other2: RDD[(K, W2)])
       : RDD[(K, (Iterable[V], Iterable[W1], Iterable[W2]))] = self.withScope {
@@ -861,6 +963,7 @@ preservesPartitioning = true)
   /**
    * For each key k in `this` or `other`, return a resulting RDD that contains a tuple with the
    * list of values for that key in `this` as well as `other`.
+    * 对于“this”或“other”中的每个键k，返回包含一个元组的结果RDD该键的值列表以及“其他”。
    */
   def cogroup[W](
       other: RDD[(K, W)],
@@ -871,6 +974,7 @@ preservesPartitioning = true)
   /**
    * For each key k in `this` or `other1` or `other2`, return a resulting RDD that contains a
    * tuple with the list of values for that key in `this`, `other1` and `other2`.
+    * 对于“this”或“other1”或“other2”中的每个键k，返回包含a的结果RDD元组中的这个键的值列表在这个，other1和other2中。
    */
   def cogroup[W1, W2](other1: RDD[(K, W1)], other2: RDD[(K, W2)], numPartitions: Int)
       : RDD[(K, (Iterable[V], Iterable[W1], Iterable[W2]))] = self.withScope {
@@ -881,6 +985,9 @@ preservesPartitioning = true)
    * For each key k in `this` or `other1` or `other2` or `other3`,
    * return a resulting RDD that contains a tuple with the list of values
    * for that key in `this`, `other1`, `other2` and `other3`.
+    *
+    * 对于“this”或“other1”或“other2”或“other3”中的每个键k，返回包含元组的结果RDD,
+    * 该元组的名称为“this”，“other1”，“other2”和other3
    */
   def cogroup[W1, W2, W3](other1: RDD[(K, W1)],
       other2: RDD[(K, W2)],
@@ -890,18 +997,18 @@ preservesPartitioning = true)
     cogroup(other1, other2, other3, new HashPartitioner(numPartitions))
   }
 
-  /** Alias for cogroup. */
+  /** Alias for cogroup. 别名为cogroup*/
   def groupWith[W](other: RDD[(K, W)]): RDD[(K, (Iterable[V], Iterable[W]))] = self.withScope {
     cogroup(other, defaultPartitioner(self, other))
   }
 
-  /** Alias for cogroup. */
+  /** Alias for cogroup. 别名为cogroup*/
   def groupWith[W1, W2](other1: RDD[(K, W1)], other2: RDD[(K, W2)])
       : RDD[(K, (Iterable[V], Iterable[W1], Iterable[W2]))] = self.withScope {
     cogroup(other1, other2, defaultPartitioner(self, other1, other2))
   }
 
-  /** Alias for cogroup. */
+  /** Alias for cogroup. 别名为cogroup*/
   def groupWith[W1, W2, W3](other1: RDD[(K, W1)], other2: RDD[(K, W2)], other3: RDD[(K, W3)])
       : RDD[(K, (Iterable[V], Iterable[W1], Iterable[W2], Iterable[W3]))] = self.withScope {
     cogroup(other1, other2, other3, defaultPartitioner(self, other1, other2, other3))
@@ -974,6 +1081,7 @@ preservesPartitioning = true)
   /**
    * Output the RDD to any Hadoop-supported file system, using a Hadoop `OutputFormat` class
    * supporting the key and value types K and V in this RDD.
+    * 使用支持该RDD中的键和值类型K和V的Hadoop`OutputFormat`类将RDD输出到任何Hadoop支持的文件系统。
    */
   def saveAsHadoopFile[F <: OutputFormat[K, V]](
       path: String)(implicit fm: ClassTag[F]): Unit = self.withScope {
@@ -984,6 +1092,7 @@ preservesPartitioning = true)
    * Output the RDD to any Hadoop-supported file system, using a Hadoop `OutputFormat` class
    * supporting the key and value types K and V in this RDD. Compress the result with the
    * supplied codec.
+    * 使用支持该RDD中的键和值类型K和V的Hadoop`OutputFormat`类将RDD输出到任何Hadoop支持的文件系统,使用提供的编解码器压缩结果
    */
   def saveAsHadoopFile[F <: OutputFormat[K, V]](
       path: String,
@@ -995,6 +1104,7 @@ preservesPartitioning = true)
   /**
    * Output the RDD to any Hadoop-supported file system, using a new Hadoop API `OutputFormat`
    * (mapreduce.OutputFormat) object supporting the key and value types K and V in this RDD.
+    * 使用新的Hadoop API“OutputFormat”(mapreduce.OutputFormat)对象支持该RDD中的键和值类型K和V,将RDD输出到任何Hadoop支持的文件系统。
    */
   def saveAsNewAPIHadoopFile[F <: NewOutputFormat[K, V]](
       path: String)(implicit fm: ClassTag[F]): Unit = self.withScope {
@@ -1004,6 +1114,8 @@ preservesPartitioning = true)
   /**
    * Output the RDD to any Hadoop-supported file system, using a new Hadoop API `OutputFormat`
    * (mapreduce.OutputFormat) object supporting the key and value types K and V in this RDD.
+    * 使用新的Hadoop API“OutputFormat”（mapreduce.OutputFormat）
+    * 对象支持该RDD中的键和值类型K和V，将RDD输出到任何Hadoop支持的文件系统。
    */
   def saveAsNewAPIHadoopFile(
       path: String,
@@ -1012,6 +1124,7 @@ preservesPartitioning = true)
       outputFormatClass: Class[_ <: NewOutputFormat[_, _]],
       conf: Configuration = self.context.hadoopConfiguration): Unit = self.withScope {
     // Rename this as hadoopConf internally to avoid shadowing (see SPARK-2038).
+    //将其重命名为hadoopConf以避免阴影（参见SPARK-2038）。
     val hadoopConf = conf
     val job = new NewAPIHadoopJob(hadoopConf)
     job.setOutputKeyClass(keyClass)
@@ -1024,6 +1137,7 @@ preservesPartitioning = true)
   /**
    * Output the RDD to any Hadoop-supported file system, using a Hadoop `OutputFormat` class
    * supporting the key and value types K and V in this RDD. Compress with the supplied codec.
+    * 使用支持该RDD中的键和值类型K和V的Hadoop`OutputFormat`类将RDD输出到任何Hadoop支持的文件系统。 使用提供的编解码器进行压缩
    */
   def saveAsHadoopFile(
       path: String,
@@ -1038,6 +1152,7 @@ preservesPartitioning = true)
   /**
    * Output the RDD to any Hadoop-supported file system, using a Hadoop `OutputFormat` class
    * supporting the key and value types K and V in this RDD.
+    * 使用Hadoop`OutputFormat`类将RDD输出到任何支持Hadoop的文件系统支持此RDD中的键和值类型K和V.
    */
   def saveAsHadoopFile(
       path: String,
@@ -1047,10 +1162,12 @@ preservesPartitioning = true)
       conf: JobConf = new JobConf(self.context.hadoopConfiguration),
       codec: Option[Class[_ <: CompressionCodec]] = None): Unit = self.withScope {
     // Rename this as hadoopConf internally to avoid shadowing (see SPARK-2038).
+    //将其重命名为hadoopConf以避免阴影（参见SPARK-2038）。
     val hadoopConf = conf
     hadoopConf.setOutputKeyClass(keyClass)
     hadoopConf.setOutputValueClass(valueClass)
     // Doesn't work in Scala 2.9 due to what may be a generics bug
+    //在Scala 2.9中不起作用，因为可能是泛型错误
     // TODO: Should we uncomment this for Scala 2.10?
     // conf.setOutputFormat(outputFormatClass)
     hadoopConf.set("mapred.output.format.class", outputFormatClass.getName)
@@ -1063,6 +1180,7 @@ preservesPartitioning = true)
     }
 
     // Use configured output committer if already set
+    //如果已设置,请使用配置的输出提交者
     if (conf.getOutputCommitter == null) {
       hadoopConf.setOutputCommitter(classOf[FileOutputCommitter])
     }
@@ -1077,9 +1195,14 @@ preservesPartitioning = true)
    * Configuration object for that storage system. The Conf should set an OutputFormat and any
    * output paths required (e.g. a table name to write to) in the same way as it would be
    * configured for a Hadoop MapReduce job.
+    * 使用Hadoop将RDD输出到具有新Hadoop API的任何Hadoop支持的存储系统
+    *该存储系统的配置对象。 Conf应该设置一个OutputFormat和任何
+    *所需的输出路径（例如要写入的表名称）的方式与之相同
+    *配置为Hadoop MapReduce作业。
    */
   def saveAsNewAPIHadoopDataset(conf: Configuration): Unit = self.withScope {
     // Rename this as hadoopConf internally to avoid shadowing (see SPARK-2038).
+    //将其重命名为hadoopConf以避免阴影（参见SPARK-2038）。
     val hadoopConf = conf
     val job = new NewAPIHadoopJob(hadoopConf)
     val formatter = new SimpleDateFormat("yyyyMMddHHmm")
@@ -1091,6 +1214,7 @@ preservesPartitioning = true)
 
     if (isOutputSpecValidationEnabled) {
       // FileOutputFormat ignores the filesystem parameter
+      //FileOutputFormat忽略文件系统参数
       jobFormat.checkOutputSpecs(job)
     }
 
@@ -1119,6 +1243,7 @@ preservesPartitioning = true)
           writer.write(pair._1, pair._2)
 
           // Update bytes written metric every few records
+          //每隔几个记录更新写入的字节数
           maybeUpdateOutputMetrics(bytesWrittenCallback, outputMetrics, recordsWritten)
           recordsWritten += 1
         }
@@ -1144,10 +1269,14 @@ preservesPartitioning = true)
    * that storage system. The JobConf should set an OutputFormat and any output paths required
    * (e.g. a table name to write to) in the same way as it would be configured for a Hadoop
    * MapReduce job.
-   * 输出RDD任何Hadoopf支持的存储系统,使用Hadoop JobConf对象存储系统.
+    *
+    * 使用Hadoop JobConf对象将RDD输出到任何Hadoop支持的存储系统那个存储系统。
+    * JobConf应设置一个OutputFormat和任何需要的输出路径（例如要写入的表名）以与为Hadoop配置的相同的方式
+    * MapReduce工作。输出RDD任何Hadoopf支持的存储系统,使用Hadoop JobConf对象存储系统.
    */
   def saveAsHadoopDataset(conf: JobConf): Unit = self.withScope {
     // Rename this as hadoopConf internally to avoid shadowing (see SPARK-2038).
+    //将其重命名为hadoopConf以避免阴影（参见SPARK-2038）。
     val hadoopConf = conf
     val wrappedConf = new SerializableConfiguration(hadoopConf)
     val outputFormatInstance = hadoopConf.getOutputFormat
@@ -1169,6 +1298,7 @@ preservesPartitioning = true)
 
     if (isOutputSpecValidationEnabled) {
       // FileOutputFormat ignores the filesystem parameter
+      //FileOutputFormat忽略文件系统参数
       val ignoredFs = FileSystem.get(hadoopConf)
       hadoopConf.getOutputFormat.checkOutputSpecs(ignoredFs, hadoopConf)
     }
@@ -1180,6 +1310,7 @@ preservesPartitioning = true)
       val config = wrappedConf.value
       // Hadoop wants a 32-bit task attempt ID, so if ours is bigger than Int.MaxValue, roll it
       // around by taking a mod. We expect that no task will be attempted 2 billion times.
+      //Hadoop想要一个32位的任务尝试ID,所以如果我们的大于Int.MaxValue,通过取一个mod来滚动它,我们期望没有任何任务将尝试20亿次。
       val taskAttemptId = (context.taskAttemptId % Int.MaxValue).toInt
 
       val (outputMetrics, bytesWrittenCallback) = initHadoopOutputMetrics(context)
@@ -1194,6 +1325,7 @@ preservesPartitioning = true)
           writer.write(record._1.asInstanceOf[AnyRef], record._2.asInstanceOf[AnyRef])
 
           // Update bytes written metric every few records
+          //每隔几个记录更新写入的字节数
           maybeUpdateOutputMetrics(bytesWrittenCallback, outputMetrics, recordsWritten)
           recordsWritten += 1
         }
@@ -1246,6 +1378,7 @@ preservesPartitioning = true)
 
   // Note: this needs to be a function instead of a 'val' so that the disableOutputSpecValidation
   // setting can take effect:
+  //注意：这需要一个函数而不是'val'，以便disableOutputSpecValidation设置可以生效
   private def isOutputSpecValidationEnabled: Boolean = {
     val validationDisabled = PairRDDFunctions.disableOutputSpecValidation.value
     val enabledInConf = self.conf.getBoolean("spark.hadoop.validateOutputSpecs", true)
@@ -1259,6 +1392,7 @@ private[spark] object PairRDDFunctions {
   /**
    * Allows for the `spark.hadoop.validateOutputSpecs` checks to be disabled on a case-by-case
    * basis; see SPARK-4835 for more details.
+    * 允许根据具体情况禁用“spark.hadoop.validateOutputSpecs”检查; 有关详细信息，请参阅SPARK-4835。
    */
   val disableOutputSpecValidation: DynamicVariable[Boolean] = new DynamicVariable[Boolean](false)
 }

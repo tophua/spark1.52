@@ -25,13 +25,16 @@ import io.netty.buffer.ByteBuf;
 /**
  * A generic RPC which is handled by a remote {@link org.apache.spark.network.server.RpcHandler}.
  * This will correspond to a single
+ * 一个由远程{@link org.apache.spark.network.server.RpcHandler}处理的通用RPC,这将对应一个单一的
  * {@link org.apache.spark.network.protocol.ResponseMessage} (either success or failure).
  */
 public final class RpcRequest implements RequestMessage {
-  /** Used to link an RPC request with its response. */
+  /** Used to link an RPC request with its response.
+   * 用于将RPC请求与其响应相关联*/
   public final long requestId;
 
-  /** Serialized message to send to remote RpcHandler. */
+  /** Serialized message to send to remote RpcHandler.
+   * 串行消息发送到远程RpcHandler */
   public final byte[] message;
 
   public RpcRequest(long requestId, byte[] message) {

@@ -34,19 +34,29 @@ import org.apache.spark.serializer.Serializer
 
 /**
  * An optimized version of cogroup for set difference/subtraction.
+  * 用于设置差分/减法的cogroup的优化版本
  *
  * It is possible to implement this operation with just `cogroup`, but
  * that is less efficient because all of the entries from `rdd2`, for
  * both matching and non-matching values in `rdd1`, are kept in the
  * JHashMap until the end.
+  *
+  * 可以使用`cogroup`来实现这个操作,但是效率不太高，
+  * 因为`rdd2`中的所有条目对于'rdd1'中的匹配值和非匹配值都保留在JHashMap中，直到结束
  *
  * With this implementation, only the entries from `rdd1` are kept in-memory,
  * and the entries from `rdd2` are essentially streamed, as we only need to
  * touch each once to decide if the value needs to be removed.
+  *
+  * 通过这种实现，只有`rdd1`的条目保存在内存中,“rdd2”中的条目基本上是流式传输的,
+  * 因为我们只需要触摸一次,以决定是否需要删除该值。
  *
  * This is particularly helpful when `rdd1` is much smaller than `rdd2`, as
  * you can use `rdd1`'s partitioner/partition size and not worry about running
  * out of memory because of the size of `rdd2`.
+  *
+  * 当`rdd1`比`rdd2`小得多时这是特别有用的,因为你可以使用rdd1的分区/分区大小,
+  * 而不用担心由于rdd2的大小而导致内存不足,
  */
 private[spark] class SubtractedRDD[K: ClassTag, V: ClassTag, W: ClassTag](
     @transient var rdd1: RDD[_ <: Product2[K, V]],
@@ -56,7 +66,8 @@ private[spark] class SubtractedRDD[K: ClassTag, V: ClassTag, W: ClassTag](
 
   private var serializer: Option[Serializer] = None
 
-  /** Set a serializer for this RDD's shuffle, or null to use the default (spark.serializer) */
+  /** Set a serializer for this RDD's shuffle, or null to use the default (spark.serializer)
+    * 为此RDD的随机播放器设置一个串行化器,或者使用默认值(spark.serializer)*/
   def setSerializer(serializer: Serializer): SubtractedRDD[K, V, W] = {
     this.serializer = Option(serializer)
     this
@@ -78,6 +89,7 @@ private[spark] class SubtractedRDD[K: ClassTag, V: ClassTag, W: ClassTag](
     val array = new Array[Partition](part.numPartitions)
     for (i <- 0 until array.length) {
       // Each CoGroupPartition will depend on rdd1 and rdd2
+      //每个CoGroupPartition将依赖于rdd1和rdd2
       array(i) = new CoGroupPartition(i, Seq(rdd1, rdd2).zipWithIndex.map { case (rdd, j) =>
         dependencies(j) match {
           case s: ShuffleDependency[_, _, _] =>
@@ -122,8 +134,10 @@ private[spark] class SubtractedRDD[K: ClassTag, V: ClassTag, W: ClassTag](
     }
 
     // the first dep is rdd1; add all values to the map
+    //第一个dep是rdd1; 将所有值添加到map
     integrate(0, t => getSeq(t._1) += t._2)
     // the second dep is rdd2; remove all of its keys
+    //第二个dep是rdd2; 删除所有的键
     integrate(1, t => map.remove(t._1))
     map.iterator.map { t => t._2.iterator.map { (t._1, _) } }.flatten
   }

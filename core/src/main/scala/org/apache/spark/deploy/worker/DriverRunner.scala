@@ -200,7 +200,7 @@ private[deploy] class DriverRunner(
     //时间在提交重试等待
     var waitSeconds = 1
     // A run of this many seconds resets the exponential back-off.
-    //
+    // 这么多秒钟的运行会重置指数回退
     val successfulRunDuration = 5
 
     var keepTrying = !killed

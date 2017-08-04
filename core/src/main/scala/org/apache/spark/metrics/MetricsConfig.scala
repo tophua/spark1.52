@@ -50,6 +50,7 @@ private[spark] class MetricsConfig(conf: SparkConf) extends Logging {
     loadPropertiesFromFile(conf.getOption("spark.metrics.conf"))
 
     // Also look for the properties in provided Spark configuration
+    //还要查找提供的Spark配置中的属性
     val prefix = "spark.metrics.conf."
     conf.getAll.foreach {
       case (k, v) if k.startsWith(prefix) =>

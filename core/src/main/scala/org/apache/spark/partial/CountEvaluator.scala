@@ -20,10 +20,11 @@ package org.apache.spark.partial
 import org.apache.commons.math3.distribution.NormalDistribution
 
 /**
- * An ApproximateEvaluator for counts.
+ * An ApproximateEvaluator for counts.计数的近似值
  *
  * TODO: There's currently a lot of shared code between this and GroupedCountEvaluator. It might
  * be best to make this a special case of GroupedCountEvaluator with one group.
+  * TODO：这个和GroupedCountEvaluator之间目前有很多共享代码, 最好将此作为GroupedCountEvaluator与一组的特殊情况
  */
 private[spark] class CountEvaluator(totalOutputs: Int, confidence: Double)
   extends ApproximateEvaluator[Long, BoundedDouble] {

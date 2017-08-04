@@ -412,8 +412,10 @@ private[nio] class ConnectionManager(
           } catch {
             // Explicitly only dealing with CancelledKeyException here since other exceptions
             // should be dealt with differently.
+            //显然只处理CancelledKeyException,因为其他异常应该被不同的处理。
             case e: CancelledKeyException =>
               // Some keys within the selectors list are invalid/closed. clear them.
+              //选择器列表中的某些键无效/关闭。 清除它们
               val allKeys = selector.keys().iterator()
 
               while (allKeys.hasNext) {
@@ -499,6 +501,7 @@ private[nio] class ConnectionManager(
     var newChannel = serverChannel.accept()
 
     // accept them all in a tight loop. non blocking accept with no processing, should be fine
+    //接受他们所有在一个紧张的循环,非阻塞接受不加工,应该罚款
     while (newChannel != null) {
       try {
         val newConnectionId = new ConnectionId(id, idCount.getAndIncrement.intValue)
@@ -752,6 +755,7 @@ private[nio] class ConnectionManager(
           val res = handleAuthentication(connection, bufferMessage)
           if (res) {
             // message was security negotiation so skip the rest
+            //消息是安全协商，所以跳过其余的
             logDebug("After handleAuth result was true, returning")
             return
           }
@@ -770,10 +774,12 @@ private[nio] class ConnectionManager(
                  * (1) Invalid ack sent due to buggy code.
                  *     无效的ACK发送由于错误的代码
                  * (2) Late-arriving ack for a SendMessageStatus
-		 *	迟到的ACK发送消息的状态,避免不愿意迟到的应答
+		                  *	迟到的ACK发送消息的状态,避免不愿意迟到的应答
                  *     To avoid unwilling late-arriving ack
                  *     caused by long pause like GC, you can set
                  *     larger value than default to spark.core.connection.ack.wait.timeout
+                  *     为了避免长时间停止像GC那样迟来的迟到,
+                  *     您可以设置比默认值更大的值spark.core.connection.ack.wait.timeout
                  */
                 logWarning(s"Could not find reference for received ack Message ${message.id}")
               }

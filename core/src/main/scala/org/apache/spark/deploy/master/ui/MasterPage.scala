@@ -67,7 +67,8 @@ private[ui] class MasterPage(parent: MasterWebUI) extends WebUIPage("") {
     }
   }
 
-  /** Index view listing applications and executors */
+  /** Index view listing applications and executors
+    * 索引视图列出应用程序和执行程序*/
   def render(request: HttpServletRequest): Seq[Node] = {
     val state = getMasterState
 
@@ -92,6 +93,8 @@ private[ui] class MasterPage(parent: MasterWebUI) extends WebUIPage("") {
 
     // For now we only show driver information if the user has submitted drivers to the cluster.
     // This is until we integrate the notion of drivers and applications in the UI.
+    //现在，如果用户已将驱动程序提交给群集，我们只会显示驱动程序信息。
+    //直到我们将驱动程序和应用程序的概念集成到UI中。
     def hasDrivers: Boolean = activeDrivers.length > 0 || completedDrivers.length > 0
 
     val content =

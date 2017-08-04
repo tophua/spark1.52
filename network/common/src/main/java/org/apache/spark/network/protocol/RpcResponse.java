@@ -22,7 +22,8 @@ import java.util.Arrays;
 import com.google.common.base.Objects;
 import io.netty.buffer.ByteBuf;
 
-/** Response to {@link RpcRequest} for a successful RPC. */
+/** Response to {@link RpcRequest} for a successful RPC.
+ * 响应{@link RpcRequest}获取成功的RPC*/
 public final class RpcResponse implements ResponseMessage {
   public final long requestId;
   public final byte[] response;

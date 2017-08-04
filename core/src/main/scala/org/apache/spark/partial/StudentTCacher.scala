@@ -23,9 +23,10 @@ import org.apache.commons.math3.distribution.{TDistribution, NormalDistribution}
  * A utility class for caching Student's T distribution values for a given confidence level
  * and various sample sizes. This is used by the MeanEvaluator to efficiently calculate
  * confidence intervals for many keys.
+  * 用于缓存给定置信水平和各种样本大小的Student's T分布值的实用程序类,MeanEvaluator使用它来有效地计算许多键的置信区间。
  */
 private[spark] class StudentTCacher(confidence: Double) {
-
+  //对于大于此的样本,使用高斯近似
   val NORMAL_APPROX_SAMPLE_SIZE = 100  // For samples bigger than this, use Gaussian approximation
 
   val normalApprox = new NormalDistribution().inverseCumulativeProbability(1 - (1 - confidence) / 2)

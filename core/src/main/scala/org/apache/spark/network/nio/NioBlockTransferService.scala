@@ -44,6 +44,7 @@ final class NioBlockTransferService(conf: SparkConf, securityManager: SecurityMa
 
   /**
    * Port number the service is listening on, available only after [[init]] is invoked.
+    * 服务正在侦听的端口号，仅在[[init]]被调用后才可用
    */
   override def port: Int = {
     checkInit()
@@ -52,6 +53,7 @@ final class NioBlockTransferService(conf: SparkConf, securityManager: SecurityMa
 
   /**
    * Host name the service is listening on, available only after [[init]] is invoked.
+    * 服务正在侦听的主机名，仅在调用[[init]]之后才可用
    */
   override def hostName: String = {
     checkInit()
@@ -61,6 +63,7 @@ final class NioBlockTransferService(conf: SparkConf, securityManager: SecurityMa
   /**
    * Initialize the transfer service by giving it the BlockDataManager that can be used to fetch
    * local blocks or put local blocks.
+    * 通过发送可以用于获取本地块或放置本地块的BlockDataManager来初始化传输服务
    */
   override def init(blockDataManager: BlockDataManager): Unit = {
     this.blockDataManager = blockDataManager
@@ -97,11 +100,13 @@ final class NioBlockTransferService(conf: SparkConf, securityManager: SecurityMa
     val future = cm.sendMessageReliably(cmId, blockMessageArray.toBufferMessage)
 
     // Register the listener on success/failure future callback.
+    //注册听众成功/失败未来回调。
     future.onSuccess { case message =>
       val bufferMessage = message.asInstanceOf[BufferMessage]
       val blockMessageArray = BlockMessageArray.fromBufferMessage(bufferMessage)
 
       // SPARK-4064: In some cases(eg. Remote block was removed) blockMessageArray may be empty.
+      //在某些情况下(例如，远程块被删除)blockMessageArray可能为空
       if (blockMessageArray.isEmpty) {
         blockIds.foreach { id =>
           listener.onBlockFetchFailure(id, new SparkException(s"Received empty message from $cmId"))
@@ -133,8 +138,10 @@ final class NioBlockTransferService(conf: SparkConf, securityManager: SecurityMa
 
   /**
    * Upload a single block to a remote node, available only after [[init]] is invoked.
+    * 将单个块上传到远程节点，仅在调用[[init]]之后才可用
    *
    * This call blocks until the upload completes, or throws an exception upon failures.
+    * 此调用将阻塞,直到上传完成,否则会在发生故障时抛出异常。
    */
   override def uploadBlock(
       hostname: String,

@@ -23,6 +23,7 @@ import org.apache.spark.util.Utils
 
 /**
  * An abstract request sent from the client in the REST application submission protocol.
+  * 在REST应用程序提交协议中从客户端发送的抽象请求
  */
 private[rest] abstract class SubmitRestProtocolRequest extends SubmitRestProtocolMessage {
   var clientSparkVersion: String = null

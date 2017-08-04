@@ -37,6 +37,8 @@ private[spark] object CheckpointState extends Enumeration {
  * class is associated with a RDD. It manages process of checkpointing of the associated RDD,
  * as well as, manages the post-checkpoint state by providing the updated partitions,
  * iterator and preferred locations of the checkpointed RDD.
+  * 此类包含与RDD检查点相关的所有信息,该类的每个实例都与RDD相关联,
+  * 它管理关联的RDD的检查点的过程,以及通过提供检查点RDD的更新的分区,迭代器和首选位置来管理后检查点状态。
  */
 private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD[T])
   extends Serializable {
@@ -63,10 +65,12 @@ private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD
    * 保存RDD内容持久化
    * Materialize this RDD and persist its content.
    * This is called immediately after the first action invoked on this RDD has completed.
+    * 在此RDD调用的第一个操作完成后立即调用
    */
   final def checkpoint(): Unit = {
     // Guard against multiple threads checkpointing the same RDD by
     // atomically flipping the state of this RDDCheckpointData
+    //防止多线程通过原子地翻转此RDDCheckpointData的状态来检查同一个RDD
     RDDCheckpointData.synchronized {
       if (cpState == Initialized) {
         cpState = CheckpointingInProgress //检查点处理中
@@ -78,6 +82,7 @@ private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD
     val newRDD = doCheckpoint()
 
     // Update our state and truncate the RDD lineage
+    //更新我们的状态并截断RDD谱系
     RDDCheckpointData.synchronized {
       cpRDD = Some(newRDD) //当回传Some的时候,代表这个函式成功地给了值
       cpState = Checkpointed//检查点保存完成
@@ -89,6 +94,7 @@ private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD
    * Materialize this RDD and persist its content.
    * RDD内容的检查点持久化
    * Subclasses should override this method to define custom checkpointing behavior.
+    * 子类应该覆盖此方法来定义自定义检查点行为
    * @return the checkpoint RDD created in the process.
    */
   protected def doCheckpoint(): CheckpointRDD[T]
@@ -97,6 +103,7 @@ private[spark] abstract class RDDCheckpointData[T: ClassTag](@transient rdd: RDD
    * 返回RDD包含的检查点数据
    * Return the RDD that contains our checkpointed data.
    * This is only defined if the checkpoint state is `Checkpointed`.
+    * 只有检查点状态为“Checkpointed”时才定义
    */
   def checkpointRDD: Option[CheckpointRDD[T]] = RDDCheckpointData.synchronized { cpRDD }
 

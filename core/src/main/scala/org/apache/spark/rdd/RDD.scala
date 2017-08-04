@@ -154,15 +154,16 @@ abstract class RDD[T: ClassTag](
   @transient val partitioner: Option[Partitioner] = None
 
   // =======================================================================
-  // Methods and fields available on all RDDs
+  // Methods and fields available on all RDDs 所有RDD上可用的方法和字段
   // =======================================================================
 
-  /** The SparkContext that created this RDD. */
+  /** The SparkContext that created this RDD.
+    * 创建此RDD的SparkContext */
   def sparkContext: SparkContext = sc
 
   /** 
    *  A unique ID for this RDD (within its SparkContext).
-   *  在Sparkcontext内RDD唯一ID
+    *  RDD的唯一ID（在SparkContext中）
    *  */
   val id: Int = sc.newRddId()
 
@@ -211,6 +212,8 @@ abstract class RDD[T: ClassTag](
    * Set this RDD's storage level to persist its values across operations after the first time
    * it is computed. This can only be used to assign a new storage level if the RDD does not
    * have a storage level set yet. Local checkpointing is an exception.
+    * 设置此RDD的存储级别，以便在第一次操作之后保持其值计算,如果RDD没有,这只能用于分配新的存储级别
+    *还有一个存储级别,本地检查点是一个例外。
    */
   def persist(newLevel: StorageLevel): this.type = {
     if (isLocallyCheckpointed) {
@@ -624,7 +627,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the union of this RDD and another one. Any identical elements will appear multiple
    * times (use `.distinct()` to eliminate them).
-   * 将两个RDD进行合并,不去重
+    * 返回这个RDD和另一个进行合并,不去重, 任何相同的元素将出现多次（使用.distinct（）来消除它们）。
    */
   def union(other: RDD[T]): RDD[T] = withScope {
     if (partitioner.isDefined && other.partitioner == partitioner) {
@@ -637,7 +640,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the union of this RDD and another one. Any identical elements will appear multiple
    * times (use `.distinct()` to eliminate them).
-    * 返回这个RDD的联合和另一个,任何相同的元素将出现多次(使用'.distinct（）'来消除它们)。
+    * 返回这个RDD和另一个进行合并,不去重, 任何相同的元素将出现多次（使用.distinct（）来消除它们）。
    */
   def ++(other: RDD[T]): RDD[T] = withScope {
     this.union(other)
@@ -680,8 +683,9 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the intersection of this RDD and another one. The output will not contain any duplicate
    * elements, even if the input RDDs did.
-   * 该函数返回两个RDD的交集,并且去重
+   * 该函数返回两个RDD的交集,并且去重,输出不会包含任何重复的元素。
    * Note that this method performs a shuffle internally.
+    * 请注意，此方法在内部执行shuffle
    */
   def intersection(other: RDD[T]): RDD[T] = withScope {
     this.map(v => (v, null)).cogroup(other.map(v => (v, null)))
@@ -692,7 +696,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the intersection of this RDD and another one. The output will not contain any duplicate
    * elements, even if the input RDDs did.
-   * 数据交集,返回一个新的数据集,包含两个数据集的交集数据
+   * 该函数返回两个RDD的交集,并且去重,输出不会包含任何重复的元素。
    * Note that this method performs a shuffle internally.
     * 请注意,此方法在内部执行shuffle
    *
@@ -709,7 +713,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Return the intersection of this RDD and another one. The output will not contain any duplicate
    * elements, even if the input RDDs did.  Performs a hash partition across the cluster
-   *
+   *该函数返回两个RDD的交集,并且去重,输出不会包含任何重复的元素。 在集群中执行散列分区
    * Note that this method performs a shuffle internally.
    * 请注意,此方法在内部执行shuffle
    * @param numPartitions How many partitions to use in the resulting RDD
@@ -737,6 +741,7 @@ abstract class RDD[T: ClassTag](
    * 笛卡尔积
    * Return the Cartesian product of this RDD and another one, that is, the RDD of all pairs of
    * elements (a, b) where a is in `this` and b is in `other`.
+    * 返回此RDD的笛卡尔乘积，另一个，即所有成对元素（a，b）的RDD，其中a为“this”，b为“other”。
    */
   def cartesian[U: ClassTag](other: RDD[U]): RDD[(T, U)] = withScope {
     new CartesianRDD(sc, this, other)
@@ -1303,6 +1308,7 @@ abstract class RDD[T: ClassTag](
    * :: Experimental ::
    * Approximate version of count() that returns a potentially incomplete result
    * within a timeout, even if not all tasks have finished.
+    * 即使没有完成所有任务，count（）的近似版本也会在超时时间内返回可能不完整的结果。
    */
   @Experimental
   def countApprox(
@@ -1322,11 +1328,13 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return the count of each unique value in this RDD as a local map of (value, count) pairs.
-   * 返回 各元素在RDD中出现次数
+   * 将此RDD中每个唯一值的计数作为（value，计数）,返回本地Map。 返回 各元素在RDD中出现次数
    * Note that this method should only be used if the resulting map is expected to be small, as
    * the whole thing is loaded into the driver's memory.
+    * 请注意，只有在生成的映射预期为小时才应使用此方法整个事情被加载到driver的内存中。
    * To handle very large results, consider using rdd.map(x =&gt; (x, 1L)).reduceByKey(_ + _), which
    * returns an RDD[T, Long] instead of a map.
+    * 要处理非常大的结果，请考虑使用rdd.map（x =＆gt;（x，1L））。reduceByKey（_ + _），其中返回RDD [T，Long]而不是Map。
    */
   def countByValue()(implicit ord: Ordering[T] = null): Map[T, Long] = withScope {
     map(value => (value, null)).countByKey()
@@ -1335,6 +1343,7 @@ abstract class RDD[T: ClassTag](
   /**
    * :: Experimental ::
    * Approximate version of countByValue().
+    * countByValue（）的近似版本
    */
   @Experimental
   def countByValueApprox(timeout: Long, confidence: Double = 0.95)(implicit ord: Ordering[T] = null): PartialResult[Map[T, BoundedDouble]] = withScope {
@@ -1355,8 +1364,10 @@ abstract class RDD[T: ClassTag](
   /**
    * :: Experimental ::
    * Return approximate number of distinct elements in the RDD.
+    * 返回RDD中不同元素的大致数量
    *
    * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
+    * 所使用的算法是基于streamlib实现的“HyperLogLog in Practice：
    * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
    * <a href="http://dx.doi.org/10.1145/2452376.2452456">here</a>.
    *
@@ -1406,14 +1417,21 @@ abstract class RDD[T: ClassTag](
    * Zips this RDD with its element indices. The ordering is first based on the partition index
    * and then the ordering of items within each partition. So the first item in the first
    * partition gets index 0, and the last item in the last partition receives the largest index.
+    *
+    * 使用其元素索引将此RDD压缩,排序首先基于分区索引,然后根据每个分区中的项目顺序,因此,第一个分区中的第一个项目获取索引0,
+    * 最后一个分区中的最后一个项目将收到最大的索引
    *
    * This is similar to Scala's zipWithIndex but it uses Long instead of Int as the index type.
    * This method needs to trigger a spark job when this RDD contains more than one partitions.
+    *
+    * 这与Scala的zipWithIndex类似,但它使用Long而不是Int作为索引类型,当此RDD包含多个分区时,此方法需要触发Spark作业。
    *
    * Note that some RDDs, such as those returned by groupBy(), do not guarantee order of
    * elements in a partition. The index assigned to each element is therefore not guaranteed,
    * and may even change if the RDD is reevaluated. If a fixed ordering is required to guarantee
    * the same index assignments, you should sort the RDD with sortByKey() or save it to a file.
+    * 请注意，某些RDD（例如由groupBy（）返回的RDD）不保证顺序分区中的元素 因此,分配给每个元素的索引不被保证,
+    * 如果RDD被重新评估,甚至可能会改变,如果需要固定的顺序来保证相同的索引分配,则应该使用sortByKey（）对RDD进行排序或将其保存到文件中。
    */
   def zipWithIndex(): RDD[(T, Long)] = withScope {
     new ZippedWithIndexRDD(this)
@@ -1423,8 +1441,10 @@ abstract class RDD[T: ClassTag](
    * Zips this RDD with generated unique Long ids. Items in the kth partition will get ids k, n+k,
    * 2*n+k, ..., where n is the number of partitions. So there may exist gaps, but this method
    * won't trigger a spark job, which is different from [[org.apache.spark.rdd.RDD#zipWithIndex]].
+    *
    * 拉链这RDD生成唯一的ID,第k个分区中的项目将获得ids k,n+k,2*n+k, ...,其中n是分区的数量,所以可能存在差距,
     * 但这种方法不会触发Spark job,
+    *
    * Note that some RDDs, such as those returned by groupBy(), do not guarantee order of
    * elements in a partition. The unique ID assigned to each element is therefore not guaranteed,
    * and may even change if the RDD is reevaluated. If a fixed ordering is required to guarantee
@@ -1450,6 +1470,7 @@ abstract class RDD[T: ClassTag](
    * Take the first num elements of the RDD. It works by first scanning one partition, and use the
    * results from that partition to estimate the number of additional partitions needed to satisfy
    * the limit.
+    * 取出RDD的第一个num元素,它首先扫描一个分区,并使用该分区的结果来估计满足限制所需的其他分区数。
    *
    * @note due to complications in the internal implementation, this method will raise
    * an exception if called on an RDD of `Nothing` or `Null`.
@@ -1464,11 +1485,14 @@ abstract class RDD[T: ClassTag](
       while (buf.size < num && partsScanned < totalParts) {
         // The number of partitions to try in this iteration. It is ok for this number to be
         // greater than totalParts because we actually cap it at totalParts in runJob.
+        //在此迭代中尝试的分区数,这个数字可以大于totalParts,因为我们实际上将其限制在runJob中的totalParts上。
         var numPartsToTry = 1
         if (partsScanned > 0) {
           // If we didn't find any rows after the previous iteration, quadruple and retry.
           // Otherwise, interpolate the number of partitions we need to try, but overestimate
           // it by 50%. We also cap the estimation in the end.
+          //如果在上一次迭代之后我们没有找到任何行，请重新进行四次重试,
+          // 否则,插入我们需要尝试的分区数，但高估50％。 我们也最终估计到底。
           if (buf.size == 0) {
             numPartsToTry = partsScanned * 4
           } else {
@@ -1544,6 +1568,7 @@ abstract class RDD[T: ClassTag](
     } else {
       val mapRDDs = mapPartitions { items =>
         // Priority keeps the largest elements, so let's reverse the ordering.
+        //优先级保持最大的元素，所以我们来扭转排序。
         val queue = new BoundedPriorityQueue[T](num)(ord.reverse)
         queue ++= util.collection.Utils.takeOrdered(items, num)(ord)
         Iterator.single(queue)
@@ -1676,11 +1701,16 @@ abstract class RDD[T: ClassTag](
    * RDDs will be removed. This function must be called before any job has been
    * executed on this RDD. It is strongly recommended that this RDD is persisted in
    * memory, otherwise saving it on a file will require recomputation.
+    *
+    * 将此RDD标记为检查点。 它将被保存到使用SparkContext＃setCheckpointDir'设置的检查点目录中的文件中，
+    * 并且对其父RDD的所有引用将被删除。
+    * 在此RDD上执行任何作业之前，必须调用此函数。 强烈建议将此RDD保留在内存中，否则将其保存在文件中将需要重新计算。
    */
   def checkpoint(): Unit = RDDCheckpointData.synchronized {
     // NOTE: we use a global lock here due to complexities downstream with ensuring
     // children RDD partitions point to the correct parent partitions. In the future
     // we should revisit this consideration.
+    //注意：由于下游的复杂性,我们使用全局锁定,确保子节点RDD分区指向正确的父分区,今后我们应该重新审视这个考虑。
     if (context.checkpointDir.isEmpty) {
       throw new SparkException("Checkpoint directory has not been set in the SparkContext")
     } else if (checkpointData.isEmpty) {
@@ -1694,17 +1724,26 @@ abstract class RDD[T: ClassTag](
    * This method is for users who wish to truncate RDD lineages while skipping the expensive
    * step of replicating the materialized data in a reliable distributed file system. This is
    * useful for RDDs with long lineages that need to be truncated periodically (e.g. GraphX).
+    *
+    * 此方法适用于希望截断RDD谱系的用户,同时跳过在可靠的分布式文件系统中复制实际数据的昂贵步骤,
+    * 这对于需要定期截断的长谱系的RDD（例如GraphX）很有用。
    *
    * Local checkpointing sacrifices fault-tolerance for performance. In particular, checkpointed
    * data is written to ephemeral local storage in the executors instead of to a reliable,
    * fault-tolerant storage. The effect is that if an executor fails during the computation,
    * the checkpointed data may no longer be accessible, causing an irrecoverable job failure.
+    *
+    * 本地检查点牺牲性能的容错性。 特别地，检查点数据被写入执行器中的临时本地存储器，而不是可靠的容错存储器。
+    * 效果是，如果执行程序在计算过程中失败，则可能无法访问检查点数据，导致无法恢复的作业失败。
    *
    * This is NOT safe to use with dynamic allocation, which removes executors along
    * with their cached blocks. If you must use both features, you are advised to set
    * `spark.dynamicAllocation.cachedExecutorIdleTimeout` to a high value.
+    * 使用动态分配是不安全的，它会删除执行程序与他们的缓存块。 如果您必须同时使用这两个功能，建议您设置
+    *`spark.dynamicAllocation.cachedExecutorIdleTimeout`为高值
    *
    * The checkpoint directory set through `SparkContext#setCheckpointDir` is not used.
+    * 通sparkContext＃setCheckpointDir设置的检查点目录不被使用。
    */
   def localCheckpoint(): this.type = RDDCheckpointData.synchronized {
     if (conf.getBoolean("spark.dynamicAllocation.enabled", false) &&
@@ -1719,10 +1758,15 @@ abstract class RDD[T: ClassTag](
     // Note: At this point we do not actually know whether the user will call persist() on
     // this RDD later, so we must explicitly call it here ourselves to ensure the cached
     // blocks are registered for cleanup later in the SparkContext.
+
+    //注意：在这一点上，我们实际上并不知道用户是否会在此RDD上调用persist()，
+    // 所以我们必须在这里自己明确地调用它，以确保缓存的块在SparkContext稍后被注册进行清理。
     //
     // If, however, the user has already called persist() on this RDD, then we must adapt
     // the storage level he/she specified to one that is appropriate for local checkpointing
     // (i.e. uses disk) to guarantee correctness.
+    //但是，如果用户已经在此RDD上调用了persist（），那么我们必须进行调整
+    //他/她指定的适用于本地检查点的存储级别（即使用磁盘）来保证正确性。
 
     if (storageLevel == StorageLevel.NONE) {
       persist(LocalRDDCheckpointData.DEFAULT_STORAGE_LEVEL)
@@ -1734,11 +1778,14 @@ abstract class RDD[T: ClassTag](
     // We must not override our `checkpointData` in this case because it is needed to recover
     // the checkpointed data. If it is overridden, next time materializing on this RDD will
     // cause error.
+    //如果这个RDD已经被检查点和物化了，那么它的谱系已被截断。
+    //在这种情况下，我们不能覆盖我们的'checkpointData'，因为它需要恢复检查点数据。 如果它被覆盖，下一次实现这个RDD将会导致错误。
     if (isCheckpointedAndMaterialized) {
       logWarning("Not marking RDD for local checkpoint because it was already " +
         "checkpointed and materialized")
     } else {
       // Lineage is not truncated yet, so just override any existing checkpoint data with ours
+      //谱系尚未截断，因此只需覆盖现有的检查点数据
       checkpointData match {
         case Some(_: ReliableRDDCheckpointData[_]) => logWarning(
           "RDD was already marked for reliable checkpointing: overriding with local checkpoint.")
@@ -1795,7 +1842,8 @@ abstract class RDD[T: ClassTag](
 
   private var storageLevel: StorageLevel = StorageLevel.NONE
 
-  /** User code that created this RDD (e.g. `textFile`, `parallelize`). */
+  /** User code that created this RDD (e.g. `textFile`, `parallelize`).
+    * 创建此RDD的用户代码（例如`textFile`，`parallelize` */
   @transient private[spark] val creationSite = sc.getCallSite()
 
   /**
@@ -1804,6 +1852,8 @@ abstract class RDD[T: ClassTag](
    * This is more flexible than the call site and can be defined hierarchically. For more
    * detail, see the documentation of {{RDDOperationScope}}. This scope is not defined if the
    * user instantiates this RDD himself without using any Spark operations.
+    * 这比呼叫站点更灵活，可以分层定义。 有关详细信息，请参阅{{RDDOperationScope}}的文档。
+    * 如果用户在不使用任何Spark操作的情况下自己实例化此RDD，则该范围未定义。
    */
   @transient private[spark] val scope: Option[RDDOperationScope] = {
     Option(sc.getLocalProperty(SparkContext.RDD_SCOPE_KEY)).map(RDDOperationScope.fromJson)
@@ -1825,17 +1875,20 @@ abstract class RDD[T: ClassTag](
   /** 
    *  Returns the jth parent RDD: e.g. rdd.parent[T](0) is equivalent to rdd.firstParent[T] 
    *  返回两父RDD
+    *  返回第j个父RDD：例如 rdd.parent [T]（0）相当于rdd.firstParent [T]
    *  */
   protected[spark] def parent[U: ClassTag](j: Int) = {
     dependencies(j).rdd.asInstanceOf[RDD[U]]
   }
 
-  /** The [[org.apache.spark.SparkContext]] that this RDD was created on. */
+  /** The [[org.apache.spark.SparkContext]] that this RDD was created on.
+    * 这个RDD创建的[[org.apache.spark.SparkContext]]*/
   def context: SparkContext = sc
 
   /**
    * Private API for changing an RDD's ClassTag.
    * Used for internal Java-Scala API compatibility.
+    * 专用API用于更改RDD的ClassTag,用于内部Java-Scala API兼容性。
    */
   private[spark] def retag(cls: Class[T]): RDD[T] = {
     val classTag: ClassTag[T] = ClassTag.apply(cls)
@@ -1844,6 +1897,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Private API for changing an RDD's ClassTag.
+    * 专用API用于更改RDD的ClassTag,用于内部Java-Scala API兼容性
    * Used for internal Java-Scala API compatibility.
    */
   private[spark] def retag(implicit classTag: ClassTag[T]): RDD[T] = {

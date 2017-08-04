@@ -61,6 +61,7 @@ public class SaslClientBootstrap implements TransportClientBootstrap {
    * Performs SASL authentication by sending a token, and then proceeding with the SASL
    * challenge-response tokens until we either successfully authenticate or throw an exception
    * due to mismatch.
+   * 通过发送令牌执行SASL身份验证,然后继续执行SASL质询 - 响应令牌,直到我们成功验证或由于不匹配引起异常,
    */
   @Override
   public void doBootstrap(TransportClient client, Channel channel) {
@@ -90,6 +91,7 @@ public class SaslClientBootstrap implements TransportClientBootstrap {
       if (saslClient != null) {
         try {
           // Once authentication is complete, the server will trust all remaining communication.
+            //验证完成后,服务器将信任所有剩余的通信
           saslClient.dispose();
         } catch (RuntimeException e) {
           logger.error("Error while disposing SASL client", e);

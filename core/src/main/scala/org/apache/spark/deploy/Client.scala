@@ -35,6 +35,7 @@ import org.apache.spark.util.{ThreadUtils, SparkExitCode, Utils}
  * 主要负责向Master注册当前的程序,是AppClient的内部成员
  * We currently don't support retry if submission fails. In HA mode, client will submit request to
  * all masters and see which one could handle it.
+  * 如果提交失败,我们目前不支持重试,在HA模式下,客户端将向所有主人提交请求,并查看哪一个可以处理,
  */
 private class ClientEndpoint(
     override val rpcEnv: RpcEnv,
@@ -48,6 +49,7 @@ private class ClientEndpoint(
   private val forwardMessageThread =
     ThreadUtils.newDaemonSingleThreadScheduledExecutor("client-forward-message")
   // Used to provide the implicit parameter of `Future` methods.
+  //用于提供“Future”方法的隐式参数
   private val forwardMessageExecutionContext =
     ExecutionContext.fromExecutor(forwardMessageThread,
       t => t match {
@@ -125,6 +127,7 @@ private class ClientEndpoint(
   def pollAndReportStatus(driverId: String) {
     // Since ClientEndpoint is the only RpcEndpoint in the process, blocking the event loop thread
     // is fine.
+    //由于ClientEndpoint是该进程中唯一的RpcEndpoint，因此阻塞事件循环线程是很好的
     logInfo("... waiting before polling master for driver state")
     Thread.sleep(5000)
     logInfo("... polling master for driver state")
@@ -181,6 +184,8 @@ private class ClientEndpoint(
       // Note that this heuristic does not account for the fact that a Master can recover within
       // the lifetime of this client. Thus, once a Master is lost it is lost to us forever. This
       // is not currently a concern, however, because this client does not retry submissions.
+      //请注意,此启发式功能并不能解释主人可以在此客户端的生命周期内恢复的事实,
+      // 因此,一旦大师失去了,它永远失去了我们。 然而,这不是一个问题,因为这个客户端没有重试提交。
       if (lostMasters.size >= masterEndpoints.size) {
         logError("No master is available, exiting.")
         System.exit(-1)
@@ -213,6 +218,7 @@ private class ClientEndpoint(
 
 /**
  * Executable utility for starting and terminating drivers inside of a standalone cluster.
+  * 在独立集群中启动和终止驱动程序的可执行实用程序
  * Client：负责提交作业到Master
  */
 object Client {

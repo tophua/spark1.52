@@ -202,12 +202,16 @@ abstract class AbstractCommandBuilder {
     // when running unit tests, or user code that embeds Spark and creates a SparkContext
     // with a local or local-cluster master, will cause this code to be called from an
     // environment where that env variable is not guaranteed to exist.
-    //
+      //
+    ///我们不能依赖ENV_SPARK_ASSEMBLY变量来设置,某些情况,
+      // 例如运行单元测试或嵌入Spark并使用本地或本地群集主机创建SparkContext的用户代码将导致从该env变量不能保证存在的环境中调用此代码。
     // For the testing case, we rely on the test code to set and propagate the test classpath
     // appropriately.
-    //
+    //对于测试用例，我们依靠测试代码来适当地设置和传播测试类路径。
+
     // For the user code case, we fall back to looking for the Spark assembly under SPARK_HOME.
     // That duplicates some of the code in the shell scripts that look for the assembly, though.
+      //对于用户代码的情况,我们回到在SPARK_HOME下查找Spark程序集。然而,它复制了寻找程序集的shell脚本中的一些代码
     String assembly = getenv(ENV_SPARK_ASSEMBLY);
     if (assembly == null && isEmpty(getenv("SPARK_TESTING"))) {
       assembly = findAssembly();

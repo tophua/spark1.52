@@ -31,6 +31,7 @@ private[spark] class PartitionPruningRDDPartition(idx: Int, val parentSplit: Par
 /**
  * Represents a dependency between the PartitionPruningRDD and its parent. In this
  * case, the child RDD contains a subset of partitions of the parents'.
+  * 表示PartitionPruningRDD与其父级之间的依赖关系,在这个的情况下，孩子RDD包含父母分区的子集。
  */
 private[spark] class PruneDependency[T](rdd: RDD[T], @transient partitionFilterFunc: Int => Boolean)
   extends NarrowDependency[T](rdd) {
@@ -52,6 +53,9 @@ private[spark] class PruneDependency[T](rdd: RDD[T], @transient partitionFilterF
  * all partitions. An example use case: If we know the RDD is partitioned by range,
  * and the execution DAG has a filter on the key, we can avoid launching tasks
  * on partitions that don't have the range covering the key.
+  *
+  * RDD用于修剪RDD分区/分区，所以我们可以避免在所有分区上启动任务。
+  * 示例用例：如果我们知道RDD由范围分区,并且执行DAG在密钥上具有过滤器,则可以避免在没有覆盖该密钥的范围上启动任务。
  */
 @DeveloperApi
 class PartitionPruningRDD[T: ClassTag](
@@ -75,6 +79,7 @@ object PartitionPruningRDD {
   /**
    * Create a PartitionPruningRDD. This function can be used to create the PartitionPruningRDD
    * when its type T is not known at compile time.
+    * 创建一个PartitionPruningRDD,当它的类型T在编译时不知道时,该函数可用于创建PartitionPruningRDD。
    */
   def create[T](rdd: RDD[T], partitionFilterFunc: Int => Boolean): PartitionPruningRDD[T] = {
     new PartitionPruningRDD[T](rdd, partitionFilterFunc)(rdd.elementClassTag)
