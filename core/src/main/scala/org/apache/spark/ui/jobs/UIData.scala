@@ -75,7 +75,7 @@ private[spark] object UIData {
   class StageUIData {
     var numActiveTasks: Int = _//活动任务数
     var numCompleteTasks: Int = _//完成任务数
-    var completedIndices = new OpenHashSet[Int]() //
+    var completedIndices = new OpenHashSet[Int]() //完成指数
     var numFailedTasks: Int = _ //失败任务数
 
     var executorRunTime: Long = _ //运行执行时间

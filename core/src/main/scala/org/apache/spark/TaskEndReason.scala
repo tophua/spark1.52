@@ -26,6 +26,7 @@ import org.apache.spark.util.Utils
 
 // ==============================================================================================
 // NOTE: new task end reasons MUST be accompanied with serialization logic in util.JsonProtocol!
+//       新任务结束的原因必须在util.JsonProtocol中附带序列化逻辑！
 // ==============================================================================================
 
 /**
@@ -33,9 +34,13 @@ import org.apache.spark.util.Utils
  * Various possible reasons why a task ended. The low-level TaskScheduler is supposed to retry
  * tasks several times for "ephemeral" failures, and only report back failures that require some
  * old stages to be resubmitted, such as shuffle map fetch failures.
+  * 任务结束各种可能的原因,低级TaskScheduler应该为“短暂ephemeral”失败多次重试任务,
+  * 只报告需要重新提交一些旧阶段的故障,例如shuffle map提取失败。
+  *
  * 任务结束的原因
  */
 @DeveloperApi
+//sealed trait 仅能被同一文件的的类继承
 sealed trait TaskEndReason
 
 /**
@@ -49,7 +54,7 @@ case object Success extends TaskEndReason
 /**
  * :: DeveloperApi ::
  * Various possible reasons why a task failed.
- * 一个任务失败的各种可能的原因
+ * 任务失败各种可能的原因
  */
 @DeveloperApi
 sealed trait TaskFailedReason extends TaskEndReason {
@@ -64,10 +69,12 @@ sealed trait TaskFailedReason extends TaskEndReason {
  * A [[org.apache.spark.scheduler.ShuffleMapTask]] that completed successfully earlier, but we
  * lost the executor before the stage completed. This means Spark needs to reschedule the task
  * to be re-executed on a different executor.
-  * 成功完成前,但我们在stage完成之前失去了执行者,这意味着Spark需要重新安排任务要重新执行一个不同的执行者
+  * 一个[[org.apache.spark.scheduler.ShuffleMapTask]]之前成功完成,
+  * 但在stage完成之前我们失去了执行者,这意味着Spark需要重新调度在不同的执行器上重新执行任务
  */
 @DeveloperApi
 case object Resubmitted extends TaskFailedReason {
+  //重新提交(因丢失执行而重新提交)
   override def toErrorString: String = "Resubmitted (resubmitted due to lost executor)"
 }
 
@@ -75,7 +82,7 @@ case object Resubmitted extends TaskFailedReason {
  * :: DeveloperApi ::
  * Task failed to fetch shuffle data from a remote node. Probably means we have lost the remote
  * executors the task is trying to fetch from, and thus need to rerun the previous stage.
-  * 任务无法从远程节点获取随机播放数据,可能意味着我们已经失去了遥控器,执行者的任务是试图从中获取，因此需要重新运行前一个阶段
+  * 任务无法从远程节点获取shuffle的数据,可能意味着我们丢失的任务要从获取的远程执行器(executors),因此需要重新运行前一个阶段
  */
 @DeveloperApi
 case class FetchFailed(
@@ -101,13 +108,21 @@ case class FetchFailed(
  * `stackTrace` contains the stack trace of the exception itself. It still exists for backward
  * compatibility. It's better to use `this(e: Throwable, metrics: Option[TaskMetrics])` to
  * create `ExceptionFailure` as it will handle the backward compatibility properly.
+  *
+  * `stackTrace`包含异常本身的堆栈跟踪,它仍然存在向后兼容性,
+  * 最好使用'this（e：Throwable，metrics：Option [TaskMetrics]）'创建“ExceptionFailure”，因为它会正确处理向后兼容性。
  *
  * `fullStackTrace` is a better representation of the stack trace because it contains the whole
  * stack trace including the exception and its causes
+  *
+  * `fullStackTrace`是对堆栈跟踪的更好的表示,因为它包含整个堆栈跟踪,包括异常及其原因
  *
  * `exception` is the actual exception that caused the task to fail. It may be `None` in
  * the case that the exception is not in fact serializable. If a task fails more than
  * once (due to retries), `exception` is that one that caused the last failure.
+  *
+  * `exception`是导致任务失败的实际异常,它可能是“无”该异常实际上不是可序列化的情况,
+  * 如果任务失败多次（由于重试），则“异常”是导致上次失败的异常。
  */
 @DeveloperApi
 case class ExceptionFailure(
@@ -188,10 +203,11 @@ private[spark] class ThrowableSerializationWrapper(var exception: Throwable) ext
  * :: DeveloperApi ::
  * The task finished successfully, but the result was lost from the executor's block manager before
  * it was fetched.
-  * 任务成功完成,但在执行者的块管理器获取之前,其结果已经丢失
+  * 任务成功完成,但在执行者获取的块管理器之前,其结果已经丢失
  */
 @DeveloperApi
 case object TaskResultLost extends TaskFailedReason {
+  //TaskResultLost(结果从块管理器丢失)
   override def toErrorString: String = "TaskResultLost (result lost from block manager)"
 }
 
@@ -208,13 +224,14 @@ case object TaskKilled extends TaskFailedReason {
 /**
  * :: DeveloperApi ::
  * Task requested the driver to commit, but was denied.
-  * 任务要求driver提交,但被拒绝
+  * 任务请求driver提交,但被拒绝
  */
 @DeveloperApi
 case class TaskCommitDenied(
     jobID: Int,
     partitionID: Int,
     attemptNumber: Int) extends TaskFailedReason {
+  //TaskCommitDenied(驱动程序拒绝任务提交)
   override def toErrorString: String = s"TaskCommitDenied (Driver denied task commit)" +
     s" for job: $jobID, partition: $partitionID, attemptNumber: $attemptNumber"
 }
@@ -223,7 +240,7 @@ case class TaskCommitDenied(
  * :: DeveloperApi ::
  * The task failed because the executor that it was running on was lost. This may happen because
  * the task crashed the JVM.
-  * 该任务失败，因为它正在运行的执行程序丢失。 这可能是因为任务崩溃了JVM
+  * 该任务失败,因为它正在运行的执行程序丢失,这可能是因为任务崩溃了JVM
  */
 @DeveloperApi
 case class ExecutorLostFailure(execId: String) extends TaskFailedReason {
@@ -234,7 +251,7 @@ case class ExecutorLostFailure(execId: String) extends TaskFailedReason {
  * :: DeveloperApi ::
  * We don't know why the task ended -- for example, because of a ClassNotFound exception when
  * deserializing the task result.
-  * 我们不知道为什么任务结束 - 例如因为ClassNotFound异常的时候反序列出任务结果。
+  * 我们不知道为什么任务结束 - 例如因为ClassNotFound异常的时候反序列出任务结果,
  */
 @DeveloperApi
 case object UnknownReason extends TaskFailedReason {

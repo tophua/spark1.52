@@ -29,19 +29,29 @@ import org.apache.spark.util.Utils
 
 /**
  * Configuration for a Spark application. Used to set various Spark parameters as key-value pairs.
+  * Spark应用程序的配置,用于将各种Spark参数设置为键值对
  *
  * Most of the time, you would create a SparkConf object with `new SparkConf()`, which will load
  * values from any `spark.*` Java system properties set in your application as well. In this case,
  * parameters you set directly on the `SparkConf` object take priority over system properties.
+  *
+  * 大多数情况下,您将使用`new SparkConf（）`创建一个SparkConf对象,它将从应用程序中设置的任何`spark. *`Java系统属性中加载值。
+  * 在这种情况下,直接在`SparkConf`对象上设置的参数优先于系统属性。
  *
  * For unit tests, you can also call `new SparkConf(false)` to skip loading external settings and
  * get the same configuration no matter what the system properties are.
+  *
+  * 对于单元测试,您也可以调用`new SparkConf（false）'来跳过加载外部设置,并获得相同的配置,无论系统属性如何,
  *
  * All setter methods in this class support chaining. For example, you can write
- * `new SparkConf().setMaster("local").setAppName("My app")`.
+ * `new SparkConf().setMaster("local").setAppName("My app").
+  *
+  * 此类中的所有setter方法都支持链接,例如,您可以编写new SparkConf（）。setMaster（“local”）。setAppName（“My app”）。
  *
  * Note that once a SparkConf object is passed to Spark, it is cloned and can no longer be modified
  * by the user. Spark does not support modifying the configuration at runtime.
+  *
+  * 请注意,一旦将SparkConf对象传递给Spark,它将被克隆,并且不能再被用户修改,Spark不支持在运行时修改配置
  *
  * @param loadDefaults whether to also load values from Java system properties
  */
@@ -197,6 +207,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Use Kryo serialization and register the given set of Avro schemas so that the generic
    * record serializer can decrease network IO
+    * 使用Kryo序列化并注册给定的Avro模式集,以便通用记录序列化程序可以减少网络IO
    */
   def registerAvroSchemas(schemas: Schema*): SparkConf = {
     for (schema <- schemas) {
@@ -280,6 +291,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a size parameter as bytes; throws a NoSuchElementException if it's not set. If no
    * suffix is provided then bytes are assumed.
+    * 获取一个size参数作为字节;如果未设置,则抛出NoSuchElementException异常。如果没有提供后缀,则假定字节
    * @throws NoSuchElementException
    */
   def getSizeAsBytes(key: String): Long = {
@@ -289,6 +301,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a size parameter as bytes, falling back to a default if not set. If no
    * suffix is provided then bytes are assumed.
+    * 获取大小参数作为字节,如果未设置则返回到默认值。如果没有提供后缀,则假定字节。
    */
   def getSizeAsBytes(key: String, defaultValue: String): Long = {
     Utils.byteStringAsBytes(get(key, defaultValue))
@@ -296,6 +309,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
   /**
    * Get a size parameter as bytes, falling back to a default if not set.
+    * 获取大小参数作为字节,如果未设置则返回到默认值。
    */
   def getSizeAsBytes(key: String, defaultValue: Long): Long = {
     Utils.byteStringAsBytes(get(key, defaultValue + "B"))
@@ -304,6 +318,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a size parameter as Kibibytes; throws a NoSuchElementException if it's not set. If no
    * suffix is provided then Kibibytes are assumed.
+    * 获取大小参数为Kibibytes; 如果未设置,则抛出NoSuchElementException异常,如果没有提供后缀,则假定Kibibytes。
    * @throws NoSuchElementException
    */
   def getSizeAsKb(key: String): Long = {
@@ -313,6 +328,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a size parameter as Kibibytes, falling back to a default if not set. If no
    * suffix is provided then Kibibytes are assumed.
+    * 获取大小参数为Kibibytes,如果未设置,则返回到默认值。如果没有提供后缀,则假定Kibibytes
    */
   def getSizeAsKb(key: String, defaultValue: String): Long = {
     Utils.byteStringAsKb(get(key, defaultValue))
@@ -321,6 +337,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a size parameter as Mebibytes; throws a NoSuchElementException if it's not set. If no
    * suffix is provided then Mebibytes are assumed.
+    * 获取大小参数为Mebibytes; 如果未设置,则抛出NoSuchElementException异常,如果没有提供后缀,则假定Mebibytes
    * @throws NoSuchElementException
    */
   def getSizeAsMb(key: String): Long = {
@@ -330,6 +347,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a size parameter as Mebibytes, falling back to a default if not set. If no
    * suffix is provided then Mebibytes are assumed.
+    * 获取大小参数为Mebibytes,如果未设置,则返回默认值,如果没有提供后缀,则假定Mebibytes。
    */
   def getSizeAsMb(key: String, defaultValue: String): Long = {
     Utils.byteStringAsMb(get(key, defaultValue))
@@ -338,6 +356,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a size parameter as Gibibytes; throws a NoSuchElementException if it's not set. If no
    * suffix is provided then Gibibytes are assumed.
+    * 获取大小参数为Gibibytes;如果未设置,则抛出NoSuchElementException异常,如果没有提供后缀,则假定Gibibytes,
    * @throws NoSuchElementException
    */
   def getSizeAsGb(key: String): Long = {
@@ -347,6 +366,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * Get a size parameter as Gibibytes, falling back to a default if not set. If no
    * suffix is provided then Gibibytes are assumed.
+    * 获取大小参数为Gibibytes,如果未设置则返回到默认值,如果没有提供后缀,则假定Gibibytes
    */
   def getSizeAsGb(key: String, defaultValue: String): Long = {
     Utils.byteStringAsGb(get(key, defaultValue))
@@ -378,18 +398,20 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
   /**
     * Get a parameter as a long, falling back to a default if not set
-    * 获取参数长,如果未设置,则返回默认值
+    * 获取参数long,如果未设置,则返回默认值
     * */
   def getLong(key: String, defaultValue: Long): Long = {
     getOption(key).map(_.toLong).getOrElse(defaultValue)
   }
 
-  /** Get a parameter as a double, falling back to a default if not set */
+  /** Get a parameter as a double, falling back to a default if not set
+    * 获取参数作为double,如果未设置,则返回到默认值 */
   def getDouble(key: String, defaultValue: Double): Double = {
     getOption(key).map(_.toDouble).getOrElse(defaultValue)
   }
 
-  /** Get a parameter as a boolean, falling back to a default if not set */
+  /** Get a parameter as a boolean, falling back to a default if not set
+    * 获取参数作为布尔值,如果未设置则返回默认值*/
   def getBoolean(key: String, defaultValue: Boolean): Boolean = {
     getOption(key).map(_.toBoolean).getOrElse(defaultValue)
   }
@@ -412,6 +434,9 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
      * nesting options under the spark namespace to avoid conflicts with user akka options.
      * Otherwise users configuring their own akka code via system properties could mess up
      * spark's akka options.
+     *
+     * 这是目前无证的,如果我们想让这个公开，我们应该考虑在spark命名空间下嵌套选项,以避免与用户akka选项冲突。
+     * 否则,通过系统属性配置自己的akka代码的用户可能会弄乱spark的akka选项
      *
      *   E.g. spark.akka.option.x.y.x = "value"
      */

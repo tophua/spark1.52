@@ -50,9 +50,15 @@ import org.apache.spark.util.{ RpcUtils, Utils }
  * including the serializer, Akka actor system, block manager, map output tracker, etc. Currently
  * Spark code finds the SparkEnv through a global variable, so all the threads can access the same
  * SparkEnv. It can be accessed by SparkEnv.get (e.g. after creating a SparkContext).
+  *
+  * 保存正在运行的Spark实例(每Mast节点或Worker节点)的所有运行时环境对象,包括序列化器,Akka actor系统,块管理器,映射输出跟踪器等。
+  * 目前Spark代码通过全局变量找到SparkEnv,因此所有线程可以访问相同的SparkEnv。SparkEnv.get可以访问它(例如,在创建SparkContext之后)
  *
  * NOTE: This is not intended for external use. This is exposed for Shark and may be made private
  *       in a future release.
+  *       注意：这不适合外部使用,这是暴露在Shark,可能会在未来的版本私有
+  *
+  *
  * SparkEnv是Spark的执行环境对象,其中包括众多与Executor执行相关的对象,由于在local模式下Driver模式下Driver会创建Executor
  * local-cluster部署模式或者Standalone部署模式下Worker另起的CoarseGrainedExecutorBackend进程中也会创建Executor,
  * 所以SparkEnv存在于Driver或CoarseGrainedExecutorBackend进程中,创建SparkEnv主要使用SparkEnv的CreateDriver
@@ -92,6 +98,7 @@ class SparkEnv(
   // TODO Remove actorSystem
   //actorSystem是Akka提供用于创建分布式消息通信系统的基础类
   @deprecated("Actor system is no longer supported as of 1.4.0", "1.4.0")
+  //asInstanceOf强制类型转换
   val actorSystem: ActorSystem = rpcEnv.asInstanceOf[AkkaRpcEnv].actorSystem
 
   private[spark] var isStopped = false
@@ -99,7 +106,7 @@ class SparkEnv(
 
   // A general, soft-reference map for metadata needed during HadoopRDD split computation
   // (e.g., HadoopFileRDD uses this to cache JobConfs and InputFormats).
-  //对于hadooprdd分割计算过程中所需的元数据弱引用,
+  //对于hadooprdd分割计算过程中所需的元数据弱引用,(例如,HadoopFileRDD使用它来缓存JobConfs和InputFormats)
   private[spark] val hadoopJobMetadata = new MapMaker().softValues().makeMap[String, Any]()
 
   private var driverTmpDirToDelete: Option[String] = None
@@ -254,6 +261,7 @@ object SparkEnv extends Logging {
 
   /**
    * Helper method to create a SparkEnv for a driver or an executor.
+    * 帮助程序为driver或executor创建SparkEnv
    * SparkEnv创建步骤如下:
    * 1)创建安全管理器SecurityManager
    * 2)创建基于Akka的分布式消息系统ActorSystem
@@ -293,7 +301,8 @@ object SparkEnv extends Logging {
     //创建Akka的ActorSystem获得端口并绑定他
     val actorSystemName = if (isDriver) driverActorSystemName else executorActorSystemName
     val rpcEnv = RpcEnv.create(actorSystemName, hostname, port, conf, securityManager)
-    val actorSystem = rpcEnv.asInstanceOf[AkkaRpcEnv].actorSystem //实例AkkaRpcEnv
+    //asInstanceOf强制类型转换
+    val actorSystem = rpcEnv.asInstanceOf[AkkaRpcEnv].actorSystem //实例AkkaRpcEnv Akka actorSystem
 
     // Figure out which port Akka actually bound to in case the original port is 0 or occupied.
     //找出在原始端口为0或占用情况下Akka实际绑定的端口
@@ -305,17 +314,18 @@ object SparkEnv extends Logging {
     }
 
     // Create an instance of the class with the given name, possibly initializing it with our conf
-    //给定名字创建class实例,可以我们需要初始它
+    //创建具有给定名称的类的实例,可能用我们的conf初始化它
     def instantiateClass[T](className: String): T = {
       val cls = Utils.classForName(className)
       // Look for a constructor taking a SparkConf and a boolean isDriver, then one taking just
       // SparkConf, then one taking no arguments
-      //寻找一个构造函数,使用一个SparkConf和一个布尔值为isDriver的代码,然后只需一个SparkConf那么一个没有参数
+      //寻找一个构造函数,使用一个SparkConf和一个布尔值为isDriver的代码,然后需要一个参数Boolean的SparkConf构造函数
       //查找一个sparkconf构造函数,是否isDriver
       try {
-        //classOf类强制类型转换
+        //classOf类强制类型转换SparkConf类,
         cls.getConstructor(classOf[SparkConf], java.lang.Boolean.TYPE)
           .newInstance(conf, new java.lang.Boolean(isDriver))
+          //asInstanceOf强制类型[T]
           .asInstanceOf[T]
       } catch {
         case _: NoSuchMethodException =>
@@ -330,7 +340,7 @@ object SparkEnv extends Logging {
 
     // Create an instance of the class named by the given SparkConf property, or defaultClassName
     // if the property is not set, possibly initializing it with our conf
-    //创建由给定的SparkConf属性或defaultClassName命名的类的实例如果属性未设置,可能会用我们的conf初始化...
+    //创建由给定的SparkConf属性或defaultClassName命名的类的实例如果属性未设置,可能会用我们的conf初始化
     def instantiateClassFromConf[T](propertyName: String, defaultClassName: String): T = {
       instantiateClass[T](conf.get(propertyName, defaultClassName))
     }
@@ -574,3 +584,4 @@ object SparkEnv extends Logging {
       "Classpath Entries" -> classPaths)
   }
 }
+

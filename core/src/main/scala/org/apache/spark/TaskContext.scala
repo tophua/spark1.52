@@ -30,8 +30,7 @@ object TaskContext {
   /**
    * Return the currently active TaskContext. This can be called inside of
    * user functions to access contextual information about running tasks.
-    * 返回当前运行的TaskContext(上下文信息),这可以在用户函数内部调用
-   * 返回当前运行任务的上下文信息
+    * 返回当前运行的TaskContext(任务的上下文信息),这可以在用户函数内部调用,以访问有关运行任务的上下文信息。
    */
   def get(): TaskContext = taskContext.get
 
@@ -48,6 +47,12 @@ object TaskContext {
       tc.partitionId()
     }
   }
+  /**
+    * ThreadLocal
+    * 1)每个线程都有一个独立于其他线程的上下文来保存这个变量,一个线程的本地变量对其他线程是不可见的
+    * 2)ThreadLocal可以给一个初始值,而每个线程都会获得这个初始化值的一个副本,这样才能保证不同的线程都有一份拷贝。
+    * 3)ThreadLocal不是用于解决共享变量的问题的,不是为了协调线程同步而存在,而是为了方便每个线程处理自己的状态而引入的一个机制
+    */
 
   private[this] val taskContext: ThreadLocal[TaskContext] = new ThreadLocal[TaskContext]
 
@@ -191,14 +196,14 @@ abstract class TaskContext extends Serializable {
 
   /**
    * Returns the manager for this task's managed memory.
-   * 返回任务内存的管理器
+   * 返回管理任务内存的管理器
    */
   private[spark] def taskMemoryManager(): TaskMemoryManager
 
   /**
    * Register an accumulator that belongs to this task. Accumulators must call this method when
    * deserializing in executors.
-   * 注册一个任务累加器,累加器执行方法执行反序列化
+   * 注册一个任务累加器,累加器必须执行调用执行器的反序列化方法
    */
   private[spark] def registerAccumulator(a: Accumulable[_, _]): Unit
 

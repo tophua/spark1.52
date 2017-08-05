@@ -29,9 +29,11 @@ import org.apache.spark.util.Utils
  * Utility trait for classes that want to log data. Creates a SLF4J logger for the class and allows
  * logging messages at different levels using methods that only evaluate parameters lazily if the
  * log level is enabled.
+  * 要记录数据的类的实用特性,为该类创建SLF4J记录器,并允许使用仅在启用日志级别的情况下,懒惰地评估参数的方法在不同级别记录消息。
  *
  * NOTE: DO NOT USE this class outside of Spark. It is intended as an internal utility.
  *       This will likely be changed or removed in future releases.
+  *       注意：请勿在Spark之外使用此类,它是作为一个内部实用程序,这在将来的版本中可能会被更改或删除。
  */
 @DeveloperApi
 trait Logging {

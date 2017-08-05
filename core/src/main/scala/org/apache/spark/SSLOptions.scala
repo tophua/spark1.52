@@ -27,10 +27,13 @@ import org.eclipse.jetty.util.ssl.SslContextFactory
 /**
  * SSLOptions class is a common container for SSL configuration options. It offers methods to
  * generate specific objects to configure SSL for different communication protocols.
+  * SSLOptions类是SSL配置选项的通用容器,它提供了生成特定对象以为不同通信协议配置SSL的方法
  *
  * SSLOptions is intended to provide the maximum common set of SSL settings, which are supported
  * by the protocol, which it can generate the configuration for. Since Akka doesn't support client
  * authentication with SSL, SSLOptions cannot support it either.
+  *
+  * SSLOptions旨在提供协议支持的最大通用SSL设置集,可以为其生成配置,由于Akka不支持使用SSL进行客户端身份验证,所以SSLOptions也不支持
  *
  * @param enabled             enables or disables SSL; if it is set to false, the rest of the
  *                            settings are disregarded

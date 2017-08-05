@@ -30,10 +30,14 @@ private case class AskPermissionToCommitOutput(stage: Int, partition: Int, attem
 /**
  * Authority that decides whether tasks can commit output to HDFS. Uses a "first committer wins"
  * policy.
- * 决定任务是否可以将输出提交到HDFS的权限
+ * 决定任务是否可以将输出提交到HDFS的权限,使用“第一提交者成功”策略
+  *
  * OutputCommitCoordinator is instantiated in both the drivers and executors. On executors, it is
  * configured with a reference to the driver's OutputCommitCoordinatorEndpoint, so requests to
  * commit output will be forwarded to the driver's OutputCommitCoordinator.
+  *
+  * OutputCommitCoordinator在驱动程序和执行程序中实例化,在执行程序上,它配置为引用驱动程序“OutputCommitCoordinatorEndpoint”,
+  * 因此提交输出的请求将转发给驱动程序的OutputCommitCoordinator。
  *
  * This class was introduced in SPARK-4879; see that JIRA issue (and the associated pull requests)
  * for an extensive design discussion.
@@ -41,6 +45,7 @@ private case class AskPermissionToCommitOutput(stage: Int, partition: Int, attem
 private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean) extends Logging {
 
   // Initialized by SparkEnv
+  //由SparkEnv初始化
   var coordinatorRef: Option[RpcEndpointRef] = None
 
   private type StageId = Int

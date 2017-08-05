@@ -24,6 +24,7 @@ import java.io.Serializable;
  *
  * This interface is not designed to be implemented outside of Spark.  We may add additional methods
  * which may break binary compatibility with outside implementations.
+ * 此接口不是设计为在Spark之外实现,我们可能会添加其他可能会破坏外部实现的二进制兼容性的方法
  */
 public interface SparkStageInfo extends Serializable {
   int stageId();

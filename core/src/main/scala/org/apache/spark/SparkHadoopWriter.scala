@@ -35,7 +35,7 @@ import org.apache.spark.util.SerializableJobConf
  * 使用Hadoop OutputFormat保存RDD的内部助手类
  * Saves the RDD using a JobConf, which should contain an output key class, an output value class,
  * a filename to write to, etc, exactly like in a Hadoop MapReduce job.
-  * 使用JobConf保存RDD,该应用程序应包含输出密钥类,输出值类,要写入的文件名等,就像在Hadoop MapReduce作业中一样。
+  * 使用JobConf保存RDD,该应用程序应包含输出Key类,输出value类,要写入的文件名等,就像在Hadoop MapReduce作业中一样。
  */
 private[spark]
 class SparkHadoopWriter(@transient jobConf: JobConf)
@@ -80,7 +80,7 @@ class SparkHadoopWriter(@transient jobConf: JobConf)
 
     val outputName = "part-"  + numfmt.format(splitID)
     //文件输出格式
-    val path = FileOutputFormat.getOutputPath(conf.value)
+    val path:Path = FileOutputFormat.getOutputPath(conf.value)
     val fs: FileSystem = {
       if (path != null) {
         path.getFileSystem(conf.value)
@@ -115,7 +115,7 @@ class SparkHadoopWriter(@transient jobConf: JobConf)
   }
 
   // ********* Private Functions *********
-
+  //OutputFormat 完成对输出数据的格式化
   private def getOutputFormat(): OutputFormat[AnyRef, AnyRef] = {
     if (format == null) {
       format = conf.value.getOutputFormat()
@@ -123,21 +123,22 @@ class SparkHadoopWriter(@transient jobConf: JobConf)
     }
     format
   }
-
+  //OutputCommitter用于控制Job的输出环境
   private def getOutputCommitter(): OutputCommitter = {
     if (committer == null) {
       committer = conf.value.getOutputCommitter
     }
     committer
   }
-
+  //JobContext提供了获取作业配置的功能,如作业ID,作业的Mapper类,Reducer类,输入格式,输出格式等等
+  //以及进度
   private def getJobContext(): JobContext = {
     if (jobContext == null) {
       jobContext = newJobContext(conf.value, jID.value)
     }
     jobContext
   }
-
+  //TaskAttemptContext 获得Task信息,如Task进度
   private def getTaskContext(): TaskAttemptContext = {
     if (taskContext == null) {
       taskContext = newTaskAttemptContext(conf.value, taID.value)

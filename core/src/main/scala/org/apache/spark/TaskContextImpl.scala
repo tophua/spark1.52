@@ -81,7 +81,7 @@ private[spark] class TaskContextImpl(
     completed = true //标记task完成
     val errorMsgs = new ArrayBuffer[String](2) //记录错误信息
     // Process complete callbacks in the reverse order of registration
-    //以相反的注册顺序处理完整的回调
+    //以相反的注册顺序处理完成回调
     onCompleteCallbacks.reverse.foreach { listener =>
       try {
         listener.onTaskCompletion(this) //执行回调函数
