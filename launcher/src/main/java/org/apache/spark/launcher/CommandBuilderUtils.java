@@ -124,7 +124,7 @@ class CommandBuilderUtils {
   }
 
   /** Returns an enum value indicating whose JVM is being used.
-   * 返回一个枚举值，指示正在使用哪个JVM*/
+   * 返回一个枚举值，指示正在使用哪个Java 运行时环境供应商JVM*/
   static JavaVendor getJavaVendor() {
     String vendorString = System.getProperty("java.vendor");
     if (vendorString.contains("Oracle")) {

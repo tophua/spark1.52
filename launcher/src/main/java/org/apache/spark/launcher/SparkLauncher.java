@@ -78,7 +78,7 @@ public class SparkLauncher {
 
   /**
    * Creates a launcher that will set the given environment variables in the child.
-   * 创建一个启动器,它将在孩子中设置给定的环境变量
+   * 创建一个启动器,它将在子中设置给定的环境变量
    *
    * @param env Environment variables to set.
    */
@@ -353,12 +353,12 @@ public class SparkLauncher {
   public Process launch() throws IOException {
     List<String> cmd = new ArrayList<String>();
     String script = isWindows() ? "spark-submit.cmd" : "spark-submit";
-      //System.out.println("==="+join(File.separator, builder.getSparkHome(), "bin", script));
+      System.out.println("==="+join(File.separator, builder.getSparkHome(), "bin", script));
       //software/spark152/bin/spark-submit
     cmd.add(join(File.separator, builder.getSparkHome(), "bin", script));
 
     cmd.addAll(builder.buildSparkSubmitArgs());
-     // System.out.println("==builder=="+builder.buildSparkSubmitArgs());
+     System.out.println("==builder=="+builder.buildSparkSubmitArgs());
     // Since the child process is a batch script, let's quote things so that special characters are
     // preserved, otherwise the batch interpreter will mess up the arguments. Batch scripts are
     // weird.
@@ -374,7 +374,7 @@ public class SparkLauncher {
     ProcessBuilder pb = new ProcessBuilder(cmd.toArray(new String[cmd.size()]));
     //环境变量
     for (Map.Entry<String, String> e : builder.childEnv.entrySet()) {
-        //System.out.println(e.getKey()+"==environment=="+e.getValue());
+        System.out.println(e.getKey()+"==environment=="+e.getValue());
       pb.environment().put(e.getKey(), e.getValue());
     }
     return pb.start();

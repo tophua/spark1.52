@@ -91,7 +91,7 @@ abstract class AbstractCommandBuilder {
   List<String> buildJavaCommand(String extraClassPath) throws IOException {
     List<String> cmd = new ArrayList<String>();
     String envJavaHome;
-
+    //追加JAVA_HOME及java 命令
     if (javaHome != null) {
       cmd.add(join(File.separator, javaHome, "bin", "java"));
     } else if ((envJavaHome = System.getenv("JAVA_HOME")) != null) {
@@ -116,7 +116,8 @@ abstract class AbstractCommandBuilder {
         br.close();
       }
     }
-
+    //  java -cp 指明了执行这个class文件所需要的所有类的包路径-即系统类加载器的路径（涉及到类加载机制）
+      // 路径在Linux中用：隔开  在windows中用；隔开
     cmd.add("-cp");
     cmd.add(join(File.pathSeparator, buildClassPath(extraClassPath)));
     return cmd;

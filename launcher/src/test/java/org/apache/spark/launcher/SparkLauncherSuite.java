@@ -99,11 +99,14 @@ public class SparkLauncherSuite {
       .setSparkHome(spark_test_home)
       .setMaster("local")
       .setAppResource("spark-internal")
+            //--conf, spark.driver.extraJavaOptions=-Dfoo=bar -Dtest.name=-testChildProcLauncher,
       .addSparkArg(opts.CONF,
         String.format("%s=-Dfoo=ShouldBeOverriddenBelow", SparkLauncher.DRIVER_EXTRA_JAVA_OPTIONS))
       .setConf(SparkLauncher.DRIVER_EXTRA_JAVA_OPTIONS,
         "-Dfoo=bar -Dtest.name=-testChildProcLauncher")
+            //java.class.path  Java 类路径
       .setConf(SparkLauncher.DRIVER_EXTRA_CLASSPATH, System.getProperty("java.class.path"))
+            //--class ShouldBeOverriddenBelow 好像没用效果,参数列表没有打印处来
       .addSparkArg(opts.CLASS, "ShouldBeOverriddenBelow")
       .setMainClass(SparkLauncherTestApp.class.getName())
       .addAppArgs("proc");
