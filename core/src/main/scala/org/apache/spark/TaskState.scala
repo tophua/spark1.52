@@ -20,7 +20,7 @@ package org.apache.spark
 import org.apache.mesos.Protos.{TaskState => MesosTaskState}
 
 private[spark] object TaskState extends Enumeration {
-
+  //LAUNCHING 启动,RUNNING 运行,FINISHED 完成,FAILED 失败 KILLED杀死 LOST 丢失
   val LAUNCHING, RUNNING, FINISHED, FAILED, KILLED, LOST = Value
 
   val FINISHED_STATES = Set(FINISHED, FAILED, KILLED, LOST)

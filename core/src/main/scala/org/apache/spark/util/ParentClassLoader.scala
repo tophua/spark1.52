@@ -22,7 +22,7 @@ package org.apache.spark.util
   * 在ClassLoader中使一些受保护方法可访问的类加载器.
  */
 private[spark] class ParentClassLoader(parent: ClassLoader) extends ClassLoader(parent) {
-
+  //重写java ClassLoader,扩展ClassLoader(parent)构造函数,findClass函数还回类型java泛型Class<?> scala Class[_],
   override def findClass(name: String): Class[_] = {
     super.findClass(name)
   }

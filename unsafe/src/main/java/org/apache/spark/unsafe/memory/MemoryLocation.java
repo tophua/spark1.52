@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 /**
  * A memory location. Tracked either by a memory address (with off-heap allocation),
  * or by an offset from a JVM object (in-heap allocation).
+ * 内存位置,通过内存地址(使用非堆分配)来跟踪,或通过与JVM对象的偏移(堆内分配)
  */
 public class MemoryLocation {
 

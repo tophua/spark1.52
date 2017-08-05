@@ -40,7 +40,7 @@ class ByteArrayChunkOutputStream(chunkSize: Int) extends OutputStream {
 
   /**
    * Next position to write in the last chunk.
-   *下一个位置写在最后一个块
+   * 下一个位置写在最后一个块
    * If this equals chunkSize, it means for next write we need to allocate a new chunk.
    * This can also never be 0.
     * 如果这等于chunkSize,则意味着对于下一次写入,我们需要分配一个新的块,这也不能是0
@@ -49,6 +49,7 @@ class ByteArrayChunkOutputStream(chunkSize: Int) extends OutputStream {
 
   override def write(b: Int): Unit = {
     allocateNewChunkIfNeeded()
+    //注意前套数组取值方式
     chunks(lastChunkIndex)(position) = b.toByte
     position += 1
   }

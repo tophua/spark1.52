@@ -34,11 +34,13 @@ public class ExecutorMemoryManager {
 
   /**
    * Allocator, exposed for enabling untracked allocations of temporary data structures.
+   * 分配器,用于启用临时数据结构的未跟踪分配
    */
   public final MemoryAllocator allocator;
 
   /**
    * Tracks whether memory will be allocated on the JVM heap or off-heap using sun.misc.Unsafe.
+   * 跟踪内存是否将使用sun.misc.Unsafe在JVM堆或非堆上分配
    */
   final boolean inHeap;
 
@@ -50,6 +52,7 @@ public class ExecutorMemoryManager {
 
   /**
    * Construct a new ExecutorMemoryManager.
+   * 构造一个新的ExecutorMemoryManager
    *
    * @param allocator the allocator that will be used
    */
@@ -61,17 +64,21 @@ public class ExecutorMemoryManager {
   /**
    * Returns true if allocations of the given size should go through the pooling mechanism and
    * false otherwise.
+   * 如果给定大小的分配应通过池化机制,则返回true,否则返回false
    */
   private boolean shouldPool(long size) {
     // Very small allocations are less likely to benefit from pooling.
+      //非常小的分配不太可能从池中获益
     // At some point, we should explore supporting pooling for off-heap memory, but for now we'll
     // ignore that case in the interest of simplicity.
+      //在某些时候,我们应该探索支持堆栈内存的方式,但是现在我们就为了简单起见而忽视这种情况
     return size >= POOLING_THRESHOLD_BYTES && allocator instanceof HeapMemoryAllocator;
   }
 
   /**
    * Allocates a contiguous block of memory. Note that the allocated memory is not guaranteed
    * to be zeroed out (call `zero()` on the result if this is necessary).
+   * 分配一个连续的内存块。请注意,分配的内存不能保证被清零(如果需要，则在结果上调用`zero()`)
    */
   MemoryBlock allocate(long size) throws OutOfMemoryError {
     if (shouldPool(size)) {

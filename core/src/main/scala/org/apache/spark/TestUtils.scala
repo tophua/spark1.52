@@ -67,15 +67,21 @@ private[spark] object TestUtils {
   /**
    * Create a jar file containing multiple files. The `files` map contains a mapping of
    * file names in the jar file to their contents.
-    * 创建一个包含多个文件的jar文件,`files`映射包含jar文件中的文件名与其内容的映射。
+    * 创建一个包含多个jar文件的文件,`files`映射包含jar文件中的文件名与其内容的映射。
    */
   def createJarWithFiles(files: Map[String, String], dir: File = null): URL = {
+    //注意Null和Option配合使用,File默认值
     val tempDir = Option(dir).getOrElse(Utils.createTempDir())
+
+    //创建testJar.jar,目录位置tempDir
     val jarFile = File.createTempFile("testJar", ".jar", tempDir)
+    //JarOutputStream文件输出
     val jarStream = new JarOutputStream(new FileOutputStream(jarFile))
     files.foreach { case (k, v) =>
       val entry = new JarEntry(k)
+      //将ZIP条目列表写入输出流
       jarStream.putNextEntry(entry)
+      //将输入流中的所有字节复制到输出流,不关闭流。
       ByteStreams.copy(new ByteArrayInputStream(v.getBytes(UTF_8)), jarStream)
     }
     jarStream.close()

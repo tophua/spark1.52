@@ -87,10 +87,12 @@ object TaskContext {
 abstract class TaskContext extends Serializable {
   // Note: TaskContext must NOT define a get method. Otherwise it will prevent the Scala compiler
   // from generating a static get method (based on the companion object's get method).
+  //注意：TaskContext不能定义get方法,否则会阻止Scala编译器,生成一个静态get方法(基于对象的get方法)
 
   // Note: Update JavaTaskContextCompileCheck when new methods are added to this class.
 
   // Note: getters in this class are defined with parentheses to maintain backward compatibility.
+  //注意：该类中的getter用括号定义,以保持向后兼容性。
 
   /**
    * Returns true if the task has completed.
@@ -118,15 +120,18 @@ abstract class TaskContext extends Serializable {
    * Adds a (Java friendly) listener to be executed on task completion.
    * This will be called in all situation - success, failure, or cancellation.
    * An example use is for HadoopRDD to register a callback to close the input stream.
-   * 添加一个完成任务的执行的侦听器,这记录任务的成功,失败,或者取消.
+   * 添加一个完成执行任务的侦听器,在任务完成时执行,这记录任务的成功,失败,或者取消.
+    * 例如HadoopRDD注册一个回调来关闭输入流
    */
   def addTaskCompletionListener(listener: TaskCompletionListener): TaskContext
 
   /**
-   * 添加一个完成任务的执行的侦听器,这记录任务的成功,失败,或者取消.
+   *
    * Adds a listener in the form of a Scala closure to be executed on task completion.
    * This will be called in all situations - success, failure, or cancellation.
    * An example use is for HadoopRDD to register a callback to close the input stream.
+    * 以Scala闭包的形式添加一个侦听器,以在任务完成时执行。
+    * 添加一个完成任务执行的侦听器,这记录任务的成功,失败,或者取消.
    */
   def addTaskCompletionListener(f: (TaskContext) => Unit): TaskContext
 
@@ -135,7 +140,7 @@ abstract class TaskContext extends Serializable {
    * is for HadoopRDD to register a callback to close the input stream.
    * Will be called in any situation - success, failure, or cancellation.
     * 添加在任务完成时执行的回调函数,一个例子使用,于HadoopRDD注册回调以关闭输入流。
-    * 将在任何情况下被呼叫 - 成功,失败或取消。
+    * 将在任何情况下被调用 - 成功,失败或取消。
    *
    * @param f Callback function.
    */
@@ -144,7 +149,7 @@ abstract class TaskContext extends Serializable {
 
   /**
    * The ID of the stage that this task belong to.
-   * 这个任务的Stage的标识
+   * 此任务所属阶段的ID
    */
   def stageId(): Int
 
@@ -157,7 +162,7 @@ abstract class TaskContext extends Serializable {
   /**
    * How many times this task has been attempted.  The first task attempt will be assigned
    * attemptNumber = 0, and subsequent attempts will have increasing attempt numbers.
-   * 任务已被尝试次数,第一次被分配为0,随后的尝试将有越来越多的尝试
+   * 任务已被尝试次数,第一次被分配为0,随后的尝试将增加尝试次数
    */
   def attemptNumber(): Int
 
@@ -167,7 +172,7 @@ abstract class TaskContext extends Serializable {
   /**
    * An ID that is unique to this task attempt (within the same SparkContext, no two task attempts
    * will share the same attempt ID).  This is roughly equivalent to Hadoop's TaskAttemptID.
-   * 此任务尝试唯一的标识,没有两个任务共享相同的标识,
+    * 此任务尝试唯一的ID(在相同的SparkContext中,没有两个任务尝试将共享相同的尝试ID),这大概相当于Hadoop的TaskAttemptID
    */
   def taskAttemptId(): Long
 
@@ -179,6 +184,7 @@ abstract class TaskContext extends Serializable {
    * ::DeveloperApi::
    * Returns all metrics sources with the given name which are associated with the instance
    * which runs the task. For more information see [[org.apache.spark.metrics.MetricsSystem!]].
+    * 返回与实例相关联的给定名称的所有度量来源运行任务,有关更多信息,请参阅[[org.apache.spark.metrics.MetricsSystem!]]。
    */
   @DeveloperApi
   def getMetricsSources(sourceName: String): Seq[Source]

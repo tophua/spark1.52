@@ -29,7 +29,7 @@ import org.apache.spark.deploy.Command
  * Java doesn't have a feature similar to `private[spark]`, and we don't want that class to be
  * public, needs to live in the same package as the rest of the library.
   * CommandUtils使用此类,它在SparkLauncher中使用一些包私有API,由于Java没有类似于“private [spark]”的功能,
-  * 我们不希望该类被公开,需要与其余的一样的生活在同一个包中 的图书馆。
+  * 我们不希望该类被公开,需要与其余的一样的生活在同一个包中的library。
  */
 private[spark] class WorkerCommandBuilder(sparkHome: String, memoryMb: Int, command: Command)
     extends AbstractCommandBuilder {
@@ -41,7 +41,8 @@ private[spark] class WorkerCommandBuilder(sparkHome: String, memoryMb: Int, comm
     val cmd = buildJavaCommand(command.classPathEntries.mkString(File.pathSeparator))
     cmd.add(s"-Xms${memoryMb}M")//初始堆大小
     cmd.add(s"-Xmx${memoryMb}M")//设置JVM最大可用内存为
-    command.javaOpts.foreach(cmd.add)//
+    //注意java和scala配合使用
+    command.javaOpts.foreach(cmd.add)//把每一个java参数添加到cmd列表中
     addPermGenSizeOpt(cmd)
     addOptionString(cmd, getenv("SPARK_JAVA_OPTS"))
     cmd

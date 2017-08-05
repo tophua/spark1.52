@@ -23,6 +23,7 @@ import org.apache.spark.unsafe.Platform;
 
 /**
  * A consecutive block of memory, starting at a {@link MemoryLocation} with a fixed size.
+ * 连续的内存块,从固定大小的{@link MemoryLocation}开始
  */
 public class MemoryBlock extends MemoryLocation {
 
@@ -31,6 +32,7 @@ public class MemoryBlock extends MemoryLocation {
   /**
    * Optional page number; used when this MemoryBlock represents a page allocated by a
    * MemoryManager. This is package-private and is modified by MemoryManager.
+   * 可选页码 当MemoryBlock表示由MemoryManager分配的页面时使用,这是包私有的,由MemoryManager修改
    */
   int pageNumber = -1;
 
@@ -41,6 +43,7 @@ public class MemoryBlock extends MemoryLocation {
 
   /**
    * Returns the size of the memory block.
+   * 返回内存块的大小
    */
   public long size() {
     return length;
@@ -48,6 +51,7 @@ public class MemoryBlock extends MemoryLocation {
 
   /**
    * Creates a memory block pointing to the memory used by the long array.
+   * 创建指向长阵列使用的内存的内存块
    */
   public static MemoryBlock fromLongArray(final long[] array) {
     return new MemoryBlock(array, Platform.LONG_ARRAY_OFFSET, array.length * 8);

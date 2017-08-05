@@ -23,9 +23,11 @@ public class ByteArrayMethods {
 
   private ByteArrayMethods() {
     // Private constructor, since this class only contains static methods.
+      //私有构造函数，因为这个类只包含静态方法
   }
 
-  /** Returns the next number greater or equal num that is power of 2. */
+  /** Returns the next number greater or equal num that is power of 2.
+   * 返回下一个大于或等于2的幂，即2的幂*/
   public static long nextPowerOf2(long num) {
     final long highBit = Long.highestOneBit(num);
     return (highBit == num) ? num : highBit << 1;
@@ -43,6 +45,7 @@ public class ByteArrayMethods {
   /**
    * Optimized byte array equality check for byte arrays.
    * @return true if the arrays are equal, false otherwise
+   * 优化的字节数组等式检查字节数组,如果数组相等,返回true,否则返回false
    */
   public static boolean arrayEquals(
       Object leftBase, long leftOffset, Object rightBase, long rightOffset, final long length) {

@@ -19,6 +19,7 @@ package org.apache.spark.unsafe.memory;
 
 /**
  * A simple {@link MemoryAllocator} that can allocate up to 16GB using a JVM long primitive array.
+ * 一个简单的{@link MemoryAllocator},可以使用JVM长基元数组最多分配16GB
  */
 public class HeapMemoryAllocator implements MemoryAllocator {
 

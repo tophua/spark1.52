@@ -21,6 +21,7 @@ import org.apache.spark.unsafe.Platform;
 
 /**
  * 32-bit Murmur3 hasher.  This is based on Guava's Murmur3_32HashFunction.
+ * 32位Murmur3哈希。 这是基于Guava的Murmur3_32HashFunction。
  */
 public final class Murmur3_x86_32 {
   private static final int C1 = 0xcc9e2d51;
@@ -88,6 +89,7 @@ public final class Murmur3_x86_32 {
   }
 
   // Finalization mix - force all bits of a hash block to avalanche
+    //最终化混合 - 将散列块的所有位强制为雪崩
   private static int fmix(int h1, int length) {
     h1 ^= length;
     h1 ^= h1 >>> 16;

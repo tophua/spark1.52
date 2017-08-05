@@ -30,6 +30,7 @@ import org.apache.spark.unsafe.memory.MemoryBlock;
 public final class LongArray {
 
   // This is a long so that we perform long multiplications when computing offsets.
+    //这是一个很长的时间，所以我们在计算偏移时执行长乘法运算
   private static final long WIDTH = 8;
 
   private final MemoryBlock memory;
@@ -53,6 +54,7 @@ public final class LongArray {
 
   /**
    * Returns the number of elements this array can hold.
+   * 返回数组可以容纳的元素数
    */
   public long size() {
     return length;
@@ -60,6 +62,7 @@ public final class LongArray {
 
   /**
    * Sets the value at position {@code index}.
+   * 设置位置{@code index}的值
    */
   public void set(int index, long value) {
     assert index >= 0 : "index (" + index + ") should >= 0";
@@ -69,6 +72,7 @@ public final class LongArray {
 
   /**
    * Returns the value at position {@code index}.
+   * 返回位置{@code index}处的值
    */
   public long get(int index) {
     assert index >= 0 : "index (" + index + ") should >= 0";

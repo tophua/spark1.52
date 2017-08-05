@@ -21,10 +21,13 @@ import org.apache.spark.unsafe.Platform;
 
 /**
  * Methods for working with fixed-size uncompressed bitsets.
+ * 使用固定大小的未压缩字符串的方法
  *
  * We assume that the bitset data is word-aligned (that is, a multiple of 8 bytes in length).
+ * 我们假设bitset数据是字对齐的(即长度为8个字节的倍数)
  *
  * Each bit occupies exactly one bit of storage.
+ * 每个位占用一个位的存储空间
  */
 public final class BitSetMethods {
 
@@ -32,10 +35,12 @@ public final class BitSetMethods {
 
   private BitSetMethods() {
     // Make the default constructor private, since this only holds static methods.
+    // 使默认构造函数为private,因为它只保存静态方法
   }
 
   /**
    * Sets the bit at the specified index to {@code true}.
+   * 将指定索引处的位设置为{@code true}
    */
   public static void set(Object baseObject, long baseOffset, int index) {
     assert index >= 0 : "index (" + index + ") should >= 0";
@@ -47,6 +52,7 @@ public final class BitSetMethods {
 
   /**
    * Sets the bit at the specified index to {@code false}.
+   * 将指定索引处的位设置为{@code false}
    */
   public static void unset(Object baseObject, long baseOffset, int index) {
     assert index >= 0 : "index (" + index + ") should >= 0";
@@ -58,6 +64,7 @@ public final class BitSetMethods {
 
   /**
    * Returns {@code true} if the bit is set at the specified index.
+   * 如果该位在指定的索引处设置,则返回{@code true}
    */
   public static boolean isSet(Object baseObject, long baseOffset, int index) {
     assert index >= 0 : "index (" + index + ") should >= 0";
@@ -69,6 +76,7 @@ public final class BitSetMethods {
 
   /**
    * Returns {@code true} if any bit is set.
+   * 如果任何位被设置,返回{@code true}
    */
   public static boolean anySet(Object baseObject, long baseOffset, long bitSetWidthInWords) {
     long addr = baseOffset;
@@ -83,8 +91,10 @@ public final class BitSetMethods {
   /**
    * Returns the index of the first bit that is set to true that occurs on or after the
    * specified starting index. If no such bit exists then {@code -1} is returned.
+   * 返回在该位置上或之后发生的设置为true的第一个位的索引指定起始索引,如果不存在这样的位,则返回{@code -1}
    * <p>
    * To iterate over the true bits in a BitSet, use the following loop:
+   * 要迭代BitSet中的真实位,请使用以下循环：
    * <pre>
    * <code>
    *  for (long i = bs.nextSetBit(0, sizeInWords); i &gt;= 0; i = bs.nextSetBit(i + 1, sizeInWords)) {
@@ -108,6 +118,7 @@ public final class BitSetMethods {
     }
 
     // Try to find the next set bit in the current word
+      //尝试找到当前单词中的下一个位
     final int subIndex = fromIndex & 0x3f;
     long word = Platform.getLong(baseObject, baseOffset + wi * WORD_SIZE) >> subIndex;
     if (word != 0) {
@@ -115,6 +126,7 @@ public final class BitSetMethods {
     }
 
     // Find the next set bit in the rest of the words
+      //找到其余单词中的下一个位
     wi += 1;
     while (wi < bitsetSizeInWords) {
       word = Platform.getLong(baseObject, baseOffset + wi * WORD_SIZE);

@@ -36,8 +36,10 @@ import static org.apache.spark.unsafe.Platform.*;
 
 /**
  * A UTF-8 String for internal Spark use.
+ * 用于内部Spark使用的UTF-8字符串
  * <p>
  * A String encoded in UTF-8 as an Array[Byte], which can be used for comparison,
+ * 以UTF-8编码的字符串作为Array [Byte]，可用于比较
  * search, see http://en.wikipedia.org/wiki/UTF-8 for details.
  * <p>
  * Note: This is not designed for general use cases, should not be used outside SQL.
@@ -45,6 +47,7 @@ import static org.apache.spark.unsafe.Platform.*;
 public final class UTF8String implements Comparable<UTF8String>, Externalizable, KryoSerializable {
 
   // These are only updated by readExternal() or read()
+    //这些仅由readExternal()或read()更新
   @Nonnull
   private Object base;
   private long offset;
@@ -67,6 +70,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Creates an UTF8String from byte array, which should be encoded in UTF-8.
+   * 从字节数组创建一个UTF8String,它应以UTF-8编码
    *
    * Note: `bytes` will be hold by returned UTF8String.
    */
@@ -80,6 +84,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Creates an UTF8String from byte array, which should be encoded in UTF-8.
+   * 从字节数组创建一个UTF8String,它应以UTF-8编码
    *
    * Note: `bytes` will be hold by returned UTF8String.
    */
@@ -93,6 +98,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Creates an UTF8String from given address (base and offset) and length.
+   * 从给定地址(基址和偏移量)和长度创建一个UTF8String
    */
   public static UTF8String fromAddress(Object base, long offset, int numBytes) {
     if (base != null) {
@@ -104,6 +110,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Creates an UTF8String from String.
+   * 从String创建一个UTF8String
    */
   public static UTF8String fromString(String str) {
     if (str == null) return null;
@@ -112,6 +119,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
     } catch (UnsupportedEncodingException e) {
       // Turn the exception into unchecked so we can find out about it at runtime, but
       // don't need to add lots of boilerplate code everywhere.
+        //将异常转换为未选中,以便我们可以在运行时找到它,但不需要在任何地方添加大量样板代码
       throwException(e);
       return null;
     }
@@ -119,6 +127,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Creates an UTF8String that contains `length` spaces.
+   * 创建一个包含`length`空格的UTF8String
    */
   public static UTF8String blankString(int length) {
     byte[] spaces = new byte[length];
@@ -132,7 +141,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
     this.numBytes = numBytes;
   }
 
-  // for serialization
+  // for serialization 用于序列化
   public UTF8String() {
     this(null, 0, 0);
   }
@@ -141,6 +150,8 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
    * Writes the content of this string into a memory address, identified by an object and an offset.
    * The target memory address must already been allocated, and have enough space to hold all the
    * bytes in this string.
+   * 将此字符串的内容写入由对象和偏移量标识的内存地址,目标内存地址必须已经被分配,
+   * 并且有足够的空间来容纳该字符串中的所有字节。
    */
   public void writeToMemory(Object target, long targetOffset) {
     Platform.copyMemory(base, offset, target, targetOffset, numBytes);
@@ -148,6 +159,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns the number of bytes for a code point with the first byte as `b`
+   * 返回第一个字节为“b”的代码点的字节数
    * @param b The first byte of a code point
    */
   private static int numBytesForFirstByte(final byte b) {
@@ -156,7 +168,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
   }
 
   /**
-   * Returns the number of bytes
+   * Returns the number of bytes 返回字节数
    */
   public int numBytes() {
     return numBytes;
@@ -164,6 +176,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns the number of code points in it.
+   * 返回其中的代码点数
    */
   public int numChars() {
     int len = 0;
@@ -175,14 +188,19 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns a 64-bit integer that can be used as the prefix used in sorting.
+   * 返回可用作排序使用的前缀的64位整数
    */
   public long getPrefix() {
     // Since JVMs are either 4-byte aligned or 8-byte aligned, we check the size of the string.
     // If size is 0, just return 0.
+      //由于JVM是4字节对齐或8字节对齐,我们检查字符串的大小,如果大小为0,则返回0
     // If size is between 0 and 4 (inclusive), assume data is 4-byte aligned under the hood and
     // use a getInt to fetch the prefix.
+      //如果大小在0和4（含）之间,假设数据在引擎盖下是4字节对齐,并使用getInt来获取前缀
     // If size is greater than 4, assume we have at least 8 bytes of data to fetch.
+      //如果size大于4,假设我们至少有8个字节的数据来获取。
     // After getting the data, we use a mask to mask out data that is not part of the string.
+      //获取数据后,我们使用掩码来屏蔽不属于字符串的数据
     long p;
     long mask = 0;
     if (isLittleEndian) {
@@ -218,6 +236,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns the underline bytes, will be a copy of it if it's part of another array.
+   * 返回下划线字节,如果它是另一个数组的一部分,它将是它的副本,
    */
   public byte[] getBytes() {
     // avoid copy if `base` is `byte[]`
@@ -233,6 +252,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns a substring of this.
+   * 返回一个子字符串
    * @param start the position of first code point
    * @param until the position after last code point, exclusive.
    */
@@ -278,6 +298,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns whether this contains `substring` or not.
+   * 返回是否包含“substring”
    */
   public boolean contains(final UTF8String substring) {
     if (substring.numBytes == 0) {
@@ -295,6 +316,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns the byte at position `i`.
+   * 返回位置“i”的字节
    */
   private byte getByte(int i) {
     return Platform.getByte(base, offset + i);
@@ -317,6 +339,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns the upper case of this string
+   * 返回此字符串的大写
    */
   public UTF8String toUpperCase() {
     if (numBytes == 0) {
@@ -347,6 +370,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns the lower case of this string
+   * 返回此字符串的小写
    */
   public UTF8String toLowerCase() {
     if (numBytes == 0) {
@@ -377,6 +401,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns the title case of this string, that could be used as title.
+   * 返回此字符串的标题大小写,可用作标题
    */
   public UTF8String toTitleCase() {
     if (numBytes == 0) {
@@ -421,6 +446,8 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
    * Returns the index of the string `match` in this String. This string has to be a comma separated
    * list. If `match` contains a comma 0 will be returned. If the `match` isn't part of this String,
    * 0 will be returned, else the index of match (1-based index)
+   * 返回此String中字符串“match”的索引,此字符串必须是逗号分隔列表,如果`match`包含一个逗号，则返回0,
+   * 如果`match`不是此String的一部分，则返回0，否则匹配索引（基于1的索引）
    */
   public int findInSet(UTF8String match) {
     if (match.contains(COMMA_UTF8)) {
@@ -449,6 +476,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Copy the bytes from the current UTF8String, and make a new UTF8String.
+   * 复制当前UTF8String的字节,并创建一个新的UTF8String
    * @param start the start position of the current UTF8String in bytes.
    * @param end the end position of the current UTF8String in bytes.
    * @return a new UTF8String in the position of [start, end] of current UTF8String bytes.
@@ -464,8 +492,10 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
     int s = 0;
     int e = this.numBytes - 1;
     // skip all of the space (0x20) in the left side
+      //跳过左侧的所有空格（0x20）
     while (s < this.numBytes && getByte(s) <= 0x20 && getByte(s) >= 0x00) s++;
     // skip all of the space (0x20) in the right side
+      //跳过右侧的所有空格（0x20）
     while (e >= 0 && getByte(e) <= 0x20 && getByte(e) >= 0x00) e--;
     if (s > e) {
       // empty string
@@ -478,6 +508,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
   public UTF8String trimLeft() {
     int s = 0;
     // skip all of the space (0x20) in the left side
+      //跳过左侧的所有空格（0x20）
     while (s < this.numBytes && getByte(s) <= 0x20 && getByte(s) >= 0x00) s++;
     if (s == this.numBytes) {
       // empty string
@@ -490,6 +521,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
   public UTF8String trimRight() {
     int e = numBytes - 1;
     // skip all of the space (0x20) in the right side
+      //跳过右侧的所有空格（0x20）
     while (e >= 0 && getByte(e) <= 0x20 && getByte(e) >= 0x00) e--;
 
     if (e < 0) {
@@ -536,7 +568,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
   /**
    * Returns the position of the first occurrence of substr in
    * current string from the specified position (0-based index).
-   *
+   * 返回第一次出现的substr的位置来自指定位置的当前字符串（基于0的索引）。
    * @param v the string to be searched
    * @param start the start position of the current string for searching
    * @return the position of the first occurrence of substr, if not found, -1 returned.
@@ -546,7 +578,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
       return 0;
     }
 
-    // locate to the start position.
+    // locate to the start position. 定位到起始位置
     int i = 0; // position in byte
     int c = 0; // position in character
     while (i < numBytes && c < start) {
@@ -569,7 +601,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
   }
 
   /**
-   * Find the `str` from left to right.
+   * Find the `str` from left to right. 从左到右找到“str”
    */
   private int find(UTF8String str, int start) {
     assert (str.numBytes > 0);
@@ -583,7 +615,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
   }
 
   /**
-   * Find the `str` from right to left.
+   * Find the `str` from right to left. 从右到左找到“str”
    */
   private int rfind(UTF8String str, int start) {
     assert (str.numBytes > 0);
@@ -598,9 +630,12 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns the substring from string str before count occurrences of the delimiter delim.
+   * 在分隔符分隔符的出现之前返回字符串str中的子字符串
    * If count is positive, everything the left of the final delimiter (counting from left) is
    * returned. If count is negative, every to the right of the final delimiter (counting from the
    * right) is returned. subStringIndex performs a case-sensitive match when searching for delim.
+   * 如果count为正数，则返回最终分隔符左边的所有内容(从左开始计数)
+   * 如果count为负，则返回最终分隔符的右侧(从右侧计数), subStringIndex在搜索delim时执行区分大小写匹配。
    */
   public UTF8String subStringIndex(UTF8String delim, int count) {
     if (delim.numBytes == 0 || count == 0) {
@@ -648,6 +683,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns str, right-padded with pad to a length of len
+   * 返回str,右衬垫长度为len
    * For example:
    *   ('hi', 5, '??') =&gt; 'hi???'
    *   ('hi', 1, '??') =&gt; 'h'
@@ -680,6 +716,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Returns str, left-padded with pad to a length of len.
+   * 返回str,用pad填充长度len
    * For example:
    *   ('hi', 5, '??') =&gt; '???hi'
    *   ('hi', 1, '??') =&gt; 'h'
@@ -714,6 +751,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Concatenates input strings together into a single string. Returns null if any input is null.
+   * 将输入字符串连接在一起成为一个字符串,如果任何输入为空,则返回null
    */
   public static UTF8String concat(UTF8String... inputs) {
     // Compute the total length of the result.
@@ -727,6 +765,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
     }
 
     // Allocate a new byte array, and copy the inputs one by one into it.
+      //分配一个新的字节数组,并将输入逐个复制到其中。
     final byte[] result = new byte[totalLength];
     int offset = 0;
     for (int i = 0; i < inputs.length; i++) {
@@ -742,6 +781,7 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
   /**
    * Concatenates input strings together into a single string using the separator.
+   * 使用分隔符将输入字符串连接到一个字符串中
    * A null input is skipped. For example, concat(",", "a", null, "c") would yield "a,c".
    */
   public static UTF8String concatWs(UTF8String separator, UTF8String... inputs) {
@@ -760,11 +800,14 @@ public final class UTF8String implements Comparable<UTF8String>, Externalizable,
 
     if (numInputs == 0) {
       // Return an empty string if there is no input, or all the inputs are null.
+        //如果没有输入,或者所有输入都为空,则返回一个空字符串
       return fromBytes(new byte[0]);
     }
 
     // Allocate a new byte array, and copy the inputs one by one into it.
+      //分配一个新的字节数组,并将输入逐个复制到其中
     // The size of the new array is the size of all inputs, plus the separators.
+      //新数组的大小是所有输入的大小,加上分隔符
     final byte[] result = new byte[numInputBytes + (numInputs - 1) * separator.numBytes];
     int offset = 0;
 

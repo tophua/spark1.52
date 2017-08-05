@@ -143,7 +143,7 @@ abstract class AbstractCommandBuilder {
         return;
       }
     }
-
+    //由XX:MaxPermSize设置最大非堆内存的大小，默认是物理内存的1/4
     cmd.add("-XX:MaxPermSize=256m");
   }
 
