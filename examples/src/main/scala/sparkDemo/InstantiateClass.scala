@@ -1,8 +1,10 @@
 package sparkDemo
 
 import org.apache.spark.{Logging, SparkConf}
-import org.apache.spark.SparkEnv.logDebug
+import org.apache.spark.SparkEnv.{logDebug, logInfo}
+import org.apache.spark.rpc.{RpcEndpoint, RpcEndpointRef}
 import org.apache.spark.serializer.Serializer
+import org.apache.spark.util.RpcUtils
 
 
 
@@ -24,16 +26,27 @@ object InstantiateClass extends App with Logging {
     try {
       //classOf类强制类型转换SparkConf类,classOf[T]`等同于Java中的类文字`T.class`。
       logInfo(s"classOf[SparkConf]: ${classOf[SparkConf]}")
+
+      val tset=cls.getConstructor(classOf[SparkConf], java.lang.Boolean.TYPE)
+        .newInstance(conf, new java.lang.Boolean(true))
+        //asInstanceOf强制类型[T]对象
+        .asInstanceOf[T]
+      logInfo(s"asInstanceOf[T]: ${tset.toString}")
       cls.getConstructor(classOf[SparkConf], java.lang.Boolean.TYPE)
         .newInstance(conf, new java.lang.Boolean(true))
-        //asInstanceOf强制类型[T]
+        //asInstanceOf强制类型[T]对象
         .asInstanceOf[T]
     } catch {
       case _: NoSuchMethodException =>
         try {
+          logInfo(s"asInstanceOf[T]: ${cls.getConstructor(classOf[SparkConf]).newInstance(conf).asInstanceOf[T]}")
           cls.getConstructor(classOf[SparkConf]).newInstance(conf).asInstanceOf[T]
+
         } catch {
           case _: NoSuchMethodException =>
+            logInfo(s"1111111 asInstanceOf[T]: ${cls.getConstructor().newInstance()}")
+            logInfo(s"asInstanceOf[T]: ${cls.getConstructor().newInstance().asInstanceOf[T]}")
+
             cls.getConstructor().newInstance().asInstanceOf[T]
         }
     }
@@ -64,4 +77,6 @@ object InstantiateClass extends App with Logging {
     "spark.serializer", "org.apache.spark.serializer.JavaSerializer")
   logInfo(s"Using serializer: ${serializer.getClass}")
   println("====="+serializer.getClass)
+
+
 }

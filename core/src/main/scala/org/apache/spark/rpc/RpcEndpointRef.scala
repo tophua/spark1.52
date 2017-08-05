@@ -27,7 +27,9 @@ import org.apache.spark.{SparkException, Logging, SparkConf}
  * 用于发送消息
  * RpcEndpointRef 一个远程RpcEndpoint的引用,通过它可以给远程RpcEndpoint发送消息,可以是同步可以是异步
  * A reference for a remote [[RpcEndpoint]]. [[RpcEndpointRef]] is thread-safe(线程安全).
- * 
+  *
+ * 引用远程[ [ rpcendpoint ] ],rpcendpointref ] [ [ ]是线程安全的
+  *
  * 1)处理RpcEndpointRef.send或RpcCallContext.reply方法,如果收到不匹配的消息,将抛出SparkException
  * 		def receive: PartialFunction[Any, Unit] = {
 					case _ => throw new SparkException(self + " does not implement 'receive'")}

@@ -351,15 +351,16 @@ object SparkEnv extends Logging {
     //闭包序列化类
     val closureSerializer = instantiateClassFromConf[Serializer](
       "spark.closure.serializer", "org.apache.spark.serializer.JavaSerializer")
-    //用于查找或者注册Actor的实现
+    //用于查找或者注册Actor的实现,endpointCreator命名方法,也可以传递类
     def registerOrLookupEndpoint(
       name: String, endpointCreator: => RpcEndpoint): RpcEndpointRef = {
       if (isDriver) {
         //如果当前节点是Driver则创建这个Actor
         logInfo("Registering " + name)
+        //根据name注册RpcEndpoint到RpcEnv中并返回它的一个引用RpcEndpointRef
         rpcEnv.setupEndpoint(name, endpointCreator)
       } else {
-        //否则建立到Driver的连接,取得BlockManagerMaster的Actor
+        //通过其名称检索位于driver驱动程序中的[RpcEndpointRef]
         RpcUtils.makeDriverRef(name, conf, rpcEnv)
       }
     }

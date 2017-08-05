@@ -106,9 +106,11 @@ private[spark] abstract class RpcEnv(conf: SparkConf) {
    * 
    * RpcEnv里面有setupEndpoint方法, RpcEndpoint和RpcEndpointRef向RpcEnv进行注册
    * 
-   * 根据name注册RpcEndpoint到RpcEnv中并返回它的一个引用RpcEndpointRef
+   *
    * Register a [[RpcEndpoint]] with a name and return its [[RpcEndpointRef]]. [[RpcEnv]] does not
    * guarantee thread-safety.
+    * 使用名称注册[[RpcEndpoint]]并返回其[[RpcEndpointRef]]。 [[RpcEnv]]不保证线程安全。
+    * 根据name注册RpcEndpoint到RpcEnv中并返回它的一个引用RpcEndpointRef, [[RpcEnv]]不保证线程安全。
    */
   def setupEndpoint(name: String, endpoint: RpcEndpoint): RpcEndpointRef
 
