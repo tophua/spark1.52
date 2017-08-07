@@ -727,12 +727,13 @@ class DAGScheduler(
         logInfo("Job %d failed: %s, took %f s".format
           (waiter.jobId, callSite.shortForm, (System.nanoTime - start) / 1e9))
         // SPARK-8644: Include user stack trace in exceptions coming from DAGScheduler.
+        //在来自DAGScheduler的异常中包含用户堆栈跟踪
         val callerStackTrace = Thread.currentThread().getStackTrace.tail
         exception.setStackTrace(exception.getStackTrace ++ callerStackTrace)
         throw exception
     }
   }
-//近似估计
+  //近似估计
   def runApproximateJob[T, U, R](
       rdd: RDD[T],//job运行的RDD
       func: (TaskContext, Iterator[T]) => U,//作用于RDD上的函数
@@ -1735,6 +1736,7 @@ class DAGScheduler(
     // If the partition has already been visited, no need to re-visit.
     //如果分区已经被访问，则无需重新访问
     // This avoids exponential path exploration.  SPARK-695
+    //这避免了指数级的路径探索,SPARK-695
     if (!visited.add((rdd, partition))) {
       // Nil has already been returned for previously visited partitions.
       //以前访问过的分区已经返回了Nil
@@ -1743,6 +1745,7 @@ class DAGScheduler(
     // If the partition is cached, return the cache locations
     //如果分区被缓存,返回缓存位置
     val cached = getCacheLocs(rdd)(partition)
+    //nonEmpty非空
     if (cached.nonEmpty) {
       return cached
     }

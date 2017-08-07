@@ -22,9 +22,9 @@ import collection.mutable.ArrayBuffer
 import org.apache.spark.annotation.DeveloperApi
 
 // information about a specific split instance : handles both split instances.
-// 关于一个特定的分割实例的信息:处理两个分裂实例
+// 有关特定拆分实例的信息：处理两个拆分实例
 // So that we do not need to worry about the differences.
-//因此,我们不需要担心的差异
+// 因此,我们不需要担心的差异
 @DeveloperApi
 class SplitInfo(
     val inputFormatClazz: Class[_],

@@ -31,7 +31,7 @@ private[spark] trait RpcEnvFactory {
 
 /**
  * A trait that requires RpcEnv thread-safely sending messages to it.
- * 需要RpcEnv线程安全地向其发送消息的特征。
+ * 需要线程安全RpcEnv特征向其发送消息
  * Thread-safety means processing of one message happens before processing of the next message by
  * the same [[ThreadSafeRpcEndpoint]]. In the other words, changes to internal fields of a
  * [[ThreadSafeRpcEndpoint]] are visible when processing the next message, and fields in the
@@ -59,16 +59,16 @@ private[spark] trait ThreadSafeRpcEndpoint extends RpcEndpoint
  * An end point for the RPC that defines what functions to trigger given a message.
   * RPC的终点，定义在给定消息的情况下触发什么功能
  *
- * It is guaranteed that `onStart`, `receive` and `onStop` will be called in sequence.
- * 确保`onStart`，'receive`和`onStop`按顺序调用
+ * It is guaranteed that onStart, receive and onStop will be called in sequence.
+ * 确保onStart，receive和onStop按顺序调用
  * The life-cycle of an endpoint is:
  * 终端的生命周期是：
  * constructor -> onStart -> receive* -> onStop
  *
- * Note: `receive` can be called concurrently. If you want `receive` to be thread-safe, please use
+ * Note: receive can be called concurrently. If you want receive to be thread-safe, please use
  * [[ThreadSafeRpcEndpoint]]
   *
- * 注意：`receive`可以同时调用。 如果你想要“receive”是线程安全的，请使用[[ThreadSafeRpcEndpoint]]
+ * 注意：receive可以同时调用。 如果你想要“receive”是线程安全的，请使用[[ThreadSafeRpcEndpoint]]
   *
  * If any error is thrown from one of [[RpcEndpoint]] methods except onError, onError will be
  * invoked with the cause. If onError throws an error, [[RpcEnv]] will ignore it.
@@ -90,18 +90,16 @@ private[spark] trait RpcEndpoint {
    */
   val rpcEnv: RpcEnv
 
-  /** 
-   * 定义self无参方法,返回RpcEndpointRef类型,
+  /**
    * The [[RpcEndpointRef]] of this [[RpcEndpoint]]. `self` will become valid when `onStart` is
    * called. And `self` will become `null` when `onStop` is called.
     *
-    * [[RpcEndpointRef]] [[RpcEndpoint]]]。 `onStart`是`self`将变得有效*叫
-    * 当`onStop'被调用时，`self`将变为`null`。
+    * [[RpcEndpointRef]] [[RpcEndpoint]]],onStart是self将变得有效调用,当onStop被调用时,self将变为null。
    *
-   * Note: Because before `onStart`, [[RpcEndpoint]] has not yet been registered and there is not
-   * valid [[RpcEndpointRef]] for it. So don't call `self` before `onStart` is called.
+   * Note: Because before onStart, [[RpcEndpoint]] has not yet been registered and there is not
+   * valid [[RpcEndpointRef]] for it. So don't call self before onStart is called.
     *
-    * 注意：因为在onStart之前，[[RpcEndpoint]]尚未注册,并且没有有效的[[RpcEndpointRef]]所以在onStart被调用之前不要调用self
+    * 注意：因为在onStart之前,[[RpcEndpoint]]尚未注册,并且没有有效的[[RpcEndpointRef]]所以在onStart被调用之前不要调用self
    */
   final def self: RpcEndpointRef = {
     require(rpcEnv != null, "rpcEnv has not been initialized")

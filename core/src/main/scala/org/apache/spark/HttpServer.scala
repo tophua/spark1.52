@@ -80,7 +80,7 @@ private[spark] class HttpServer(
 
     val connector = securityManager.fileServerSSLOptions.createJettySslContextFactory()
       .map(new SslSocketConnector(_)).getOrElse(new SocketConnector)
-
+    //最大空闲时间是一分钟啊
     connector.setMaxIdleTime(60 * 1000)
     connector.setSoLingerTime(-1)
     connector.setPort(startPort)

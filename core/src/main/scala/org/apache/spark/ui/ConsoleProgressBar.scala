@@ -26,7 +26,7 @@ import org.apache.spark._
  * status of active stages from `sc.statusTracker` periodically, the progress bar will be showed
  * up after the stage has ran at least 500ms. If multiple stages run in the same time, the status
  * of them will be combined together, showed in one line.
-  * ConsoleProgressBar显示控制台下一行的阶段进度。 它定期从“sc.statusTracker”轮询活动阶段的状态,
+  * ConsoleProgressBar显示控制台下一行的阶段进度,它定期从“sc.statusTracker”轮询活动阶段的状态,
   * 进度条将在stages运行至少500ms后显示,如果多个阶段在同一时间运行,他们的状态将被组合在一起,显示在一行。
  */
 private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
@@ -69,9 +69,13 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
       return
     }
     val stageIds = sc.statusTracker.getActiveStageIds()
+    //flatten可以把嵌套的结构展开.
+    //List(List(1,2),List(3,4)).flatten
+    //res0: List[Int] = List(1, 2, 3, 4)
     val stages = stageIds.map(sc.statusTracker.getStageInfo).flatten.filter(_.numTasks() > 1)
       .filter(now - _.submissionTime() > FIRST_DELAY).sortBy(_.stageId())
     if (stages.length > 0) {
+      //同时显示最多3个阶段
       show(now, stages.take(3))  // display at most 3 stages in same time
     }
   }
@@ -91,6 +95,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
       val tailer = s"(${s.numCompletedTasks()} + ${s.numActiveTasks()}) / $total]"
       val w = width - header.length - tailer.length
       val bar = if (w > 0) {
+        //进度百分数
         val percent = w * s.numCompletedTasks() / total
         (0 until w).map { i =>
           if (i < percent) "=" else if (i == percent) ">" else " "

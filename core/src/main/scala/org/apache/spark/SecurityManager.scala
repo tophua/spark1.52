@@ -452,6 +452,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
    * Gets the user used for authenticating HTTP connections.
     * 获取用于验证HTTP连接的用户
    * For now use a single hardcoded user.
+    * 现在使用单个硬编码的用户
    * @return the HTTP user as a String
    */
   def getHttpUser(): String = "sparkHttpUser"
@@ -467,6 +468,7 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
   /**
    * Gets the secret key.获取密钥
    * @return the secret key as a String if authentication is enabled, otherwise returns null
+    *         如果启用身份验证,那么秘密密钥为String,否则返回null
    */
   def getSecretKey(): String = secretKey
 

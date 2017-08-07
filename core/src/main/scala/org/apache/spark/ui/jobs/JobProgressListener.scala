@@ -579,7 +579,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
    * For testing only. Wait until at least `numExecutors` executors are up, or throw
    * `TimeoutException` if the waiting time elapsed before `numExecutors` executors up.
    * Exposed for testing.
-    * 仅用于测试。 等到至少`numExecutors`执行程序启动，
+    * 仅用于测试,等到至少`numExecutors`执行程序启动，
     * 或者在`numExecutors`执行程序之前等待时间过去的时候抛出'TimeoutException'。
    *
    * @param numExecutors the number of executors to wait at least 至少等待执行的数量

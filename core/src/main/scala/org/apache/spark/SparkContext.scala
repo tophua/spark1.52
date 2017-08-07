@@ -70,7 +70,7 @@ import org.apache.spark.util._
  * Main entry point for Spark functionality. A SparkContext represents the connection to a Spark
  * Spark功能的主要入口点,一个SparkContext代表连接Spark集群
  * cluster, and can be used to create RDDs, accumulators and broadcast variables on that cluster.
- * 可以用来创建RDDS,在集群可以累加器和广播变量
+ * 可以用来创建RDDS,在集群可以创建累加器和广播变量
  * Only one SparkContext may be active per JVM.  You must `stop()` the active SparkContext before
  * 每个JVM只有一个sparkcontext可能激活,创建一个新的SparkContext之前必须'stop()'.这种限制最终可能会被删除
  * creating a new one.  This limitation may eventually be removed; see SPARK-2243 for more details.
@@ -142,13 +142,15 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * :: DeveloperApi ::
    * Alternative constructor for setting preferred locations where Spark will create executors.
-   * 使用构造函数设置首选地点,创建Spark执行器
+   * 用于设置Spark将创建执行程序的首选位置的替代构造函数
    * @param config a [[org.apache.spark.SparkConf]] object specifying other Spark parameters
-   * 					指定其他Spark参数的对象
+   * 					    指定其他Spark参数的对象
    * @param preferredNodeLocationData used in YARN mode to select nodes to launch containers on.
    * 																	用于在YARN模式选择节点来启动容器	
    * Can be generated using [[org.apache.spark.scheduler.InputFormatInfo.computePreferredLocations]]
-   * from a list of input files or InputFormats for the application.从输入文件的列表或输入格式的应用程序
+   * from a list of input files or InputFormats for the application.
+    * 可以从应用程序的输入文件或InputFormat列表中使用
+    * [[org.apache.spark.scheduler.InputFormatInfo.computePreferredLocations]]生成
    */
   @deprecated("Passing in preferred locations has no effect at all, see SPARK-8949", "1.5.0")
   @DeveloperApi
@@ -172,21 +174,23 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   * 选择构造函数允许直接设置公用Spark属性   
+   * 允许直接设置公共Spark属性的替代构造函数
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
-   * 				你的应用程序的名称,在群集Web用户界面上显示
+   * 				         你的应用程序的名称,在群集Web用户界面上显示
    * @param sparkHome Location where Spark is installed on cluster nodes.
-   * 				安装在群集节点上的位置
+   * 				          Spark安装在群集节点上的位置
    * @param jars Collection of JARs to send to the cluster. These can be paths on the local file 			
    *             system or HDFS, HTTP, HTTPS, or FTP URLs.
-   *         jar的集合发送到集群,这些路径可以在本地文件系统或HDFS,HTTP,HTTPS,或FTP URL
+    *        jar的集合发送到集群,这些可以是本地文件系统或HDFS,HTTP,HTTPS或FTP URL的路径
    * @param environment Environment variables to set on worker nodes.
-   * 				设置在工作节点上的环境变量
+   * 				            在工作节点上设置的环境变量
    * @param preferredNodeLocationData used in YARN mode to select nodes to launch containers on.
-   * 				用于在YARN模式选择节点来启动容器
+   * 				                           用于在YARN模式选择节点来启动容器
    * Can be generated using [[org.apache.spark.scheduler.InputFormatInfo.computePreferredLocations]]
    * from a list of input files or InputFormats for the application.
+    *
+    * 可以从应用程序的输入文件或InputFormat列表中使用[[org.apache.spark.scheduler.InputFormatInfo.computePreferredLocations]]生成
    */
   def this(
       master: String,
@@ -197,14 +201,16 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       preferredNodeLocationData: Map[String, Set[SplitInfo]] = Map()) =
   {
     this(SparkContext.updatedConf(new SparkConf(), master, appName, sparkHome, jars, environment))
+    //nonEmpty 非空
     if (preferredNodeLocationData.nonEmpty) {
+      //在优先位置传递完全没有影响
       logWarning("Passing in preferred locations has no effect at all, see SPARK-8949")
     }
     this.preferredNodeLocationData = preferredNodeLocationData
   }
 
   // NOTE: The below constructors could be consolidated using default arguments. Due to
-  //下面的构造函数可以使用默认参数合并,但是，这会导致编译步骤在生成文档时失败,直到我们有一个很好的解决方法为该bug,构造函数仍然被破坏。
+  // 注意：下面的构造函数可以使用默认参数合并,但是,这会导致编译步骤在生成文档时失败,直到我们有一个很好的解决方法为该bug,构造函数仍然被破坏。
   // Scala bug SI-8479, however, this causes the compile step to fail when generating docs.
   // Until we have a good workaround for that bug the constructors remain broken out.
 
@@ -213,28 +219,30 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
  	 * 允许直接设置公共Spark属性的替代构造函数
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
+    *                应用程序的名称,以在集群Web UI上显示
    */
   private[spark] def this(master: String, appName: String) =
     this(master, appName, null, Nil, Map(), Map())
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   * 选择构造函数允许直接设置公用Spark属性   
+   * 允许直接设置公共Spark属性的替代构造函数
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
-   * @param sparkHome Location where Spark is installed on cluster nodes.安装在群集节点上的位置
+   * @param sparkHome Location where Spark is installed on cluster nodes.Spark安装在群集节点上的位置
    */
   private[spark] def this(master: String, appName: String, sparkHome: String) =
     this(master, appName, sparkHome, Nil, Map(), Map())
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
-   * 选择构造函数允许直接设置公用Spark属性   
+   * 允许直接设置公共Spark属性的替代构造函数
    * @param master Cluster URL to connect to (e.g. mesos://host:port, spark://host:port, local[4]).
    * @param appName A name for your application, to display on the cluster web UI.
-   * @param sparkHome Location where Spark is installed on cluster nodes.
+   * @param sparkHome Location where Spark is installed on cluster nodes.Spark安装在群集节点上的位置
    * @param jars Collection of JARs to send to the cluster. These can be paths on the local file
    *             system or HDFS, HTTP, HTTPS, or FTP URLs.
+    *             jar的集合发送到集群,这些可以是本地文件系统或HDFS,HTTP,HTTPS或FTP URL的路径
    */
   private[spark] def this(master: String, appName: String, sparkHome: String, jars: Seq[String]) =
     this(master, appName, sparkHome, jars, Map(), Map())
@@ -305,7 +313,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   // Generate the random name for a temp folder in external block store.
   // Add a timestamp as the suffix here to make it more safe
-  //随机生成外部块存储临时文件夹名称,添加一个时间戳作为后缀,在儿使它更安全
+  //为外部块存储中的临时文件夹生成随机名称,添加时间戳作为后缀,使其更安全
   val externalBlockStoreFolderName = "spark-" + randomUUID.toString()
   @deprecated("Use externalBlockStoreFolderName instead.", "1.4.0")
   val tachyonFolderName = externalBlockStoreFolderName
@@ -331,7 +339,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] def env: SparkEnv = _env
 
   // Used to store a URL for each static file/jar together with the file's local timestamp
-  //用于存储一个URL的每个静态文件/jar和文件的时间戳
+  //用于将每个静态文件/ jar的URL与文件的本地时间戳一起存储
   private[spark] val addedFiles = HashMap[String, Long]() 
   private[spark] val addedJars = HashMap[String, Long]()
 
@@ -340,20 +348,21 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] val persistentRdds = new TimeStampedWeakValueHashMap[Int, RDD[_]]
   //清除过期的持久化RDD
   private[spark] def metadataCleaner: MetadataCleaner = _metadataCleaner
+  //任务进度
   private[spark] def jobProgressListener: JobProgressListener = _jobProgressListener
-
+  //Spark状态跟踪
   def statusTracker: SparkStatusTracker = _statusTracker
-
+  //进度条
   private[spark] def progressBar: Option[ConsoleProgressBar] = _progressBar
 
   private[spark] def ui: Option[SparkUI] = _ui
 
   /**
    * A default Hadoop Configuration for the Hadoop code (e.g. file systems) that we reuse.
-   * 重新使用默认Hadoop默认文件
+   * 我们重用的Hadoop代码(例如文件系统)的默认Hadoop配置
    * '''Note:''' As it will be reused in all Hadoop RDDs, it's better not to modify it unless you
-   * 它将在所有的Hadoop RDDS重用,最好不要修改它
    * plan to set some global configurations for all Hadoop RDDs.
+    * 由于它将在所有Hadoop RDD中重复使用,最好不要修改它,除非您计划为所有Hadoop RDD设置一些全局配置
    */
   def hadoopConfiguration: Configuration = _hadoopConfiguration
 
@@ -364,7 +373,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] val executorEnvs = HashMap[String, String]()
 
   // Set SPARK_USER for user who is running SparkContext.
-  // 设置SPARK_USER,用户谁在运行SparkContext
+  // 返回当前用户名,这是当前登录的用户
   val sparkUser = Utils.getCurrentUserName()
 
   private[spark] def schedulerBackend: SchedulerBackend = _schedulerBackend
@@ -413,6 +422,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     override protected def childValue(parent: Properties): Properties = {
       // Note: make a clone such that changes in the parent properties aren't reflected in
       // the those of the children threads, which has confusing semantics (SPARK-10563).
+      //注意：使一个克隆,使得父属性中的更改不会反映在具有混淆语义(SPARK-10563)的子线程中
       if (conf.get("spark.localProperties.clone", "false").toBoolean) {
         SerializationUtils.clone(parent).asInstanceOf[Properties]
       } else {
@@ -425,8 +435,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /* ------------------------------------------------------------------------------------- *
    | Initialization. This code initializes the context in a manner that is exception-safe. |
    | All internal fields holding state are initialized here, and any error prompts the     |
-   | 初始化,此代码初始化上下文中的方式是异常安全,所有保持状态的内部字段都在这里初始化,
-   | stop() method to be called.任务错误提示将被调用stop方法                                                           |
+   | 初始化,此代码初始化上下文中的方式是异常安全,所有保持状态的内部字段都在这里初始化,                    |
+   | stop() method to be called.任务错误提示将被调用stop方法                                    |
    * ------------------------------------------------------------------------------------- */
 
   private def warnSparkMem(value: String): String = {
@@ -762,6 +772,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * 获取此线程中的本地属性,如果null,则缺失
    */
   def getLocalProperty(key: String): String =
+    //如果非空,则返回该选项的值,如果为空则返回“null”。
     Option(localProperties.get).map(_.getProperty(key)).orNull
 
   /** 
@@ -843,6 +854,12 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * modified collection. Pass a copy of the argument to avoid this.
    * @note avoid using `parallelize(Seq())` to create an empty `RDD`. Consider `emptyRDD` for an
    * RDD with no partitions, or `parallelize(Seq[T]())` for an RDD of `T` with empty partitions.
+    *
+    * 避免使用`parallelize（Seq（））`来创建一个空的`RDD`,
+    * 考虑一下`emptyRDD`RDD没有分区,或者`parallelize（Seq [T]（））`用于具有空分区的“T”的RDD。
+    *
+    * ClassTag 用于编译器在运行时也能获取泛型类型的信息,在JVM上,泛型参数类型T在运行时是被“擦拭”掉的,编译器把T当作Object来对待,
+    * 所以T的具体信息是无法得到的,为了使得在运行时得到T的信息,
    */
   def parallelize[T: ClassTag](
       seq: Seq[T],
@@ -1011,6 +1028,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     val job = new NewHadoopJob(hadoopConfiguration)
     // Use setInputPaths so that wholeTextFiles aligns with hadoopFile/textFile in taking
     // comma separated files as input. (see SPARK-7155)
+    //使用setInputPaths,以使整数文件与hadoopFile/textFile对齐,以逗号分隔的文件作为输入,(见SPARK-7155)
+    //FileInputFormat 任务划分
     NewFileInputFormat.setInputPaths(job, path)
     val updateConf = job.getConfiguration
     new WholeTextFileRDD(
@@ -1049,12 +1068,14 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * }}}
    *
    * @note Small files are preferred; very large files may cause bad performance.
+    *      小文件是首选的,非常大的文件可能会导致坏的性能
    * @note On some filesystems, `.../path/&#42;` can be a more efficient way to read all files
    *       in a directory rather than `.../path/` or `.../path`
    *
    * @param path Directory to the input data files, the path can be comma separated paths as the
-   *             list of inputs.
+   *             list of inputs.将目录输入到数据文件中,路径可以以逗号分隔的路径作为输入的列表。
    * @param minPartitions A suggestion value of the minimal splitting number for input data.
+    *                      输入数据最小分裂数的一个建议值
    */
   @Experimental
   def binaryFiles(
@@ -1064,6 +1085,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     val job = new NewHadoopJob(hadoopConfiguration)
     // Use setInputPaths so that binaryFiles aligns with hadoopFile/textFile in taking
     // comma separated files as input. (see SPARK-7155)
+    //使用setinputpaths这样binaryfiles与hadoopfile/文本文件以逗号分隔的文件作为输入
     NewFileInputFormat.setInputPaths(job, path)
     val updateConf = job.getConfiguration
     new BinaryFileRDD(
@@ -1156,11 +1178,12 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /** Get an RDD for a Hadoop file with an arbitrary InputFormat  
    *  任意一个InputFormat获得一个Hadoop文件的RDD,
    * '''Note:''' Because Hadoop's RecordReader class re-uses the same Writable object for each
-   * 为每个记录由于Hadoop的RecordReader类重新使用相同可写的对象
    * record, directly caching the returned RDD or directly passing it to an aggregation or shuffle
    * operation will create many references to the same object.
+    * 注：'因为Hadoop的RecordReader类重新使用相同的可写的对象为每个记录,直接缓存返回的RDD或直接传递到聚集或洗牌操作会产生很多引用相同的对象
    * If you plan to directly cache, sort, or aggregate Hadoop writable objects, you should first
    * copy them using a `map` function.
+    *如果您计划直接缓存排序或聚合Hadoop可写对象,应该首先使用“map”函数复制它们
    */
   def hadoopFile[K, V](
       path: String,
@@ -1201,6 +1224,9 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * operation will create many references to the same object.
    * If you plan to directly cache, sort, or aggregate Hadoop writable objects, you should first
    * copy them using a `map` function.
+    * 注：因为Hadoop的RecordReader类重新使用相同的可写的对象为每个记录,
+    * 直接缓存返回的RDD或直接传递到聚集或洗牌操作会产生很多引用相同的对象。
+    * 如果您计划直接缓存,排序或聚合Hadoop可写对象,应该首先使用“map”函数复制它们。
    */
   def hadoopFile[K, V, F <: InputFormat[K, V]]
       (path: String, minPartitions: Int)
@@ -1265,6 +1291,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     assertNotStopped()
     // The call to new NewHadoopJob automatically adds security credentials to conf,
     // so we don't need to explicitly add them ourselves
+    //调用新的newhadoopjob自动添加安全凭据来配置，所以我们不需要显式地添加他们自己
     val job = new NewHadoopJob(conf)
     // Use setInputPaths so that newAPIHadoopFile aligns with hadoopFile/textFile in taking
     // comma separated files as input. (see SPARK-7155)
@@ -1276,11 +1303,14 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Get an RDD for a given Hadoop file with an arbitrary new API InputFormat
    * and extra configuration options to pass to the input format.
+    * 在给定的任意新的API InputFormat和额外的配置选项传递给输入格式Hadoop文件RDD
    *
    * @param conf Configuration for setting up the dataset. Note: This will be put into a Broadcast.
    *             Therefore if you plan to reuse this conf to create multiple RDDs, you need to make
    *             sure you won't modify the conf. A safe approach is always creating a new conf for
    *             a new RDD.
+    *             设置数据源的配置,注意：这将被放入一个广播,因此,如果你打算使用这个配置创建多个RDDs,
+    *             你需要确保你不会修改设置一个安全的方法是创建一个新的RDD新配置。
    * @param fClass Class of the InputFormat
    * @param kClass Class of the keys
    * @param vClass Class of the values
@@ -1298,6 +1328,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       vClass: Class[V]): RDD[(K, V)] = withScope {
     assertNotStopped()
     // Add necessary security credentials to the JobConf. Required to access secure HDFS.
+    //增加必要的安全凭据的jobconf,需要安全访问HDFS
     val jconf = new JobConf(conf)
     SparkHadoopUtil.get.addCredentials(jconf)
     new NewHadoopRDD(this, fClass, kClass, vClass, jconf)
@@ -1341,6 +1372,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * Version of sequenceFile() for types implicitly convertible to Writables through a
    * WritableConverter. For example, to access a SequenceFile where the keys are Text and the
    * values are IntWritable, you could simply write
+    * 对于隐式转换为writables通过类型sequencefile()版WritableConverter,例如,访问通过按键位置的文本和值intwritable
    * {{{
    * sparkContext.sequenceFile[String, Int](path, ...)
    * }}}
@@ -1352,6 +1384,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * have a parameterized singleton object). We use functions instead to create a new converter
    * for the appropriate type. In addition, we pass the converter a ClassTag of its type to
    * allow it to figure out the Writable class to use in the subclass case.
+    *
+    * writableconverters是在一个有点奇怪的方式提供（由隐函数）来支持写和类型子类,我们定义了一个转换器(例如int intwritable),
+    * 最自然的事情是对转换器有隐式对象,但是对于每个可写的子类,我们不能有一个对象(不能有参数化的单例对象),
+    * 我们使用函数来创建一个新的合适的类型转换器,此外,我们通过转换器的classtag允许它出用在子类的情况下写的类类型。
    *
    * '''Note:''' Because Hadoop's RecordReader class re-uses the same Writable object for each
    * record, directly caching the returned RDD or directly passing it to an aggregation or shuffle
@@ -1512,6 +1548,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       // This is a warning instead of an exception in order to avoid breaking user programs that
       //这是一个警告而不是异常为了避免用户程序可能已经创建了RDD广播变量而不使用它们
       // might have created RDD broadcast variables but not used them:
+      //可能已经创建了RDD广播变量而不使用它们:
       logWarning("Can not directly broadcast RDDs; instead, call collect() and "
         + "broadcast the result (see SPARK-5063)")
     }
@@ -1552,6 +1589,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   def addFile(path: String, recursive: Boolean): Unit = {
     val uri = new URI(path)
     val schemeCorrectedPath = uri.getScheme match {
+        //D:\workspace\test\..\src\test1.txt getAbsolutePath 相对路径，返回当前目录的路径
+        //D:\workspace\src\test1.txt getCanonicalFile 不但是全路径,而且把..或者.这样的符号解析出来
       case null | "local" => new File(path).getCanonicalFile.toURI.toString
       case _ => path
     }
@@ -1605,7 +1644,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Update the cluster manager on our scheduling needs. Three bits of information are included
    * to help it make decisions.
-   * 更新我们的调度需求的集群管理器,三位参数信息被包括来帮助它作出决定
+   * 根据我们的调度需求更新集群管理器,三位参数信息被包括来帮助它作出决定
    * @param numExecutors The total number of executors we'd like to have. The cluster manager
    *                     shouldn't kill any running executor to reach this number, but,
    *                     我们需要总执行器数,集群管理器不应该杀死任何运行的执行器,以达到这个数字
@@ -1660,10 +1699,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * 请求集群管理器杀死执行器的列表
    * Note: This is an indication to the cluster manager that the application wishes to adjust
    * its resource usage downwards. If the application wishes to replace the executors it kills
-   * 这是一个向群集管理器的指示,应用程序希望调整它的资源使用量
    * through this method with new ones, it should follow up explicitly with a call to
-   * 如果应用程序希望替换的执行器,通过杀死这种方法用新的,它应该明确调用requestExecutors
    * {{SparkContext#requestExecutors}}.
+    * 注意：这表明应用程序希望向下调整其资源使用情况,如果应用程序想要替换执行器,
+    * 它会通过这种方法杀死新的执行程序,它应该通过调用明确跟踪requestExecutors
    *
    * @return whether the request is received. 是否收到请求
    */
@@ -1686,6 +1725,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * its resource usage downwards. If the application wishes to replace the executor it kills
    * through this method with a new one, it should follow up explicitly with a call to
    * {{SparkContext#requestExecutors}}.
+    * 注意：这表明应用程序希望向下调整其资源使用情况,如果应用程序想要替换执行器
+    * 它会通过这种方法杀死新的执行程序,它应该通过调用明确跟踪requestExecutors
    *
    * @return whether the request is received.
    */
@@ -1727,7 +1768,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Return a map from the slave to the max memory available for caching and the remaining
    * memory available for caching.
-   * 返回一个从slave可用的最大内存 
+   * 返回一个从slave可用于缓存的最大内存以及可用于缓存的剩余内存
    */
   def getExecutorMemoryStatus: Map[String, (Long, Long)] = {
     assertNotStopped()
@@ -1740,7 +1781,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * :: DeveloperApi ::
    * Return information about what RDDs are cached, if they are in mem or on disk, how much space
    * they take, etc.
-   * 返回关于RDDs缓存的信息,如果在内存或磁盘上需要多少空间
+    * 返回关于RDD被缓存的信息,如果它们在mem内存或磁盘上,它们占用多少空间等等。
    */
   @DeveloperApi
   def getRDDStorageInfo: Array[RDDInfo] = {
@@ -1804,7 +1845,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Clear the job's list of files added by `addFile` so that they do not get downloaded to
    * any new nodes.
-   * 
+    * 清除“addFile”添加的作业列表,以使它们不被下载到任何新节点
    */
   @deprecated("adding files no longer creates local copies that need to be deleted", "1.0.0")
   def clearFiles() {
@@ -1869,6 +1910,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
               // In order for this to work in yarn-cluster mode the user must specify the
               // --addJars option to the client to upload the file into the distributed cache
               // of the AM to make it show up in the current working directory.
+              //为了使其在yarn群集模式下工作,用户必须指定--addJars选项,
+              // 客户端将文件上传到AM的分布式缓存中,使其显示在当前工作目录中。
               val fileName = new Path(uri.getPath).getName()
               try {
                 env.httpFileServer.addJar(new File(fileName))
@@ -1877,6 +1920,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
                   // For now just log an error but allow to go through so spark examples work.
                   // The spark examples don't really need the jar distributed since its also
                   // the app jar.
+                  //现在只记录一个错误，但允许通过这样的Spark示例工作,Spark示例从它也不需要分发的jar
+                  //应用程序jar
                   logError("Error adding jar (" + e + "), was the --addJars option used?")
                   null
               }
@@ -1916,6 +1961,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Clear the job's list of JARs added by `addJar` so that they do not get downloaded to
    * any new nodes.
+    * 清除“addJar”添加的JAR作业列表,以便它们不被下载到任何新节点
    */
   @deprecated("adding jars no longer creates local copies that need to be deleted", "1.0.0")
   def clearJars() {
@@ -1991,6 +2037,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       SparkEnv.set(null)
     }
     // Unset YARN mode system env variable, to allow switching between cluster types.
+    //取消设置YARN模式系统env变量,以允许在集群类型之间切换
     System.clearProperty("SPARK_YARN_MODE")
     SparkContext.clearActiveContext()
     logInfo("Successfully stopped SparkContext")
@@ -2051,7 +2098,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Run a function on a given set of partitions in an RDD and pass the results to the given
    * handler function. This is the main entry point for all actions in Spark.
-   * 在指定RDD的分区上运行一个函数,将结果传递给给定的处理函数(resultHandler),这是Spark中所有动作的主要入口点   
+    * 在RDD中给定的一组分区上运行一个函数,并将结果传递给给定的处理函数(resultHandler),这是Spark中所有操作的主要入口点
    */
   def runJob[T, U: ClassTag](
       rdd: RDD[T],
@@ -2074,7 +2121,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Run a function on a given set of partitions in an RDD and return the results as an array.
-   * 在指定RDD的分区上运行一个函数,返回结果一个数组
+   * 在RDD中给定的一组分区上运行函数,并将结果作为数组返回。
    */
   def runJob[T, U: ClassTag](
       rdd: RDD[T],
@@ -2088,7 +2135,8 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Run a job on a given set of partitions of an RDD, but take a function of type
    * `Iterator[T] => U` instead of `(TaskContext, Iterator[T]) => U`.
-   * 在指定RDD的分区上运行一个新Job,但是一个函数类型的迭代器
+   *在RDD的一组给定的分区上运行作业Job,但是一个函数类型的迭代器Iterator [T] => U,而不是(TaskContext,Iterator [T])=> U的函数
+    * 在RDD的一组给定的分区上运行作业
    */
   def runJob[T, U: ClassTag](
       rdd: RDD[T],
@@ -2102,6 +2150,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   /**
    * Run a function on a given set of partitions in an RDD and pass the results to the given
    * handler function. This is the main entry point for all actions in Spark.
+    * 在RDD中给定的一组分区上运行一个函数,并将结果传递给给定的处理函数,这是Spark中所有操作的主要入口点
    *
    * The allowLocal flag is deprecated as of Spark 1.5.0+.
    */
@@ -2157,7 +2206,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Run a job on all partitions in an RDD and return the results in an array.
-   * 在指定RDD的分区上运行一个Job,返回结果在一个数组中
+    * 在RDD中的所有分区上运行作业Job,并将结果返回到数组中
    */
   def runJob[T, U: ClassTag](rdd: RDD[T], func: (TaskContext, Iterator[T]) => U): Array[U] = {
     runJob(rdd, func, 0 until rdd.partitions.length)
@@ -2165,7 +2214,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Run a job on all partitions in an RDD and return the results in an array.
-   * 在指定RDD的分区上运行一个Job,返回结果在一个数组中
+    * 在RDD中的所有分区上运行作业Job,并将结果返回到数组中
    */
   def runJob[T, U: ClassTag](rdd: RDD[T], func: Iterator[T] => U): Array[U] = {
     runJob(rdd, func, 0 until rdd.partitions.length)
@@ -2173,7 +2222,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Run a job on all partitions in an RDD and pass the results to a handler function.
-   * 在指定RDD的分区上运行一个Job,返回结果传递到一个处理函数
+    * 在RDD中的所有分区上运行作业Job,并将结果传递给处理函数
    */
   def runJob[T, U: ClassTag](
     rdd: RDD[T],
@@ -2185,7 +2234,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
 
   /**
    * Run a job on all partitions in an RDD and pass the results to a handler function.
-   * 在指定RDD的分区上运行一个Job,返回结果传递到一个处理函数
+   * 在RDD中的所有分区上运行作业Job,并将结果传递给处理函数
    */
   def runJob[T, U: ClassTag](
       rdd: RDD[T],
@@ -2322,6 +2371,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       val path = new Path(dir, UUID.randomUUID().toString)
       val fs = path.getFileSystem(hadoopConfiguration)
       fs.mkdirs(path)
+      //FileStatus对象封装了文件系统中文件和目录的元数据,包括文件的长度、块大小、备份数、修改时间、所有者以及权限等信息
       fs.getFileStatus(path).getPath.toString
     }
   }
@@ -2337,8 +2387,10 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     taskScheduler.defaultParallelism
   }
 
-  /** Default min number of partitions for Hadoop RDDs when not given by user */
+  /** Default min number of partitions for Hadoop RDDs when not given by user
+    * 用户未给出Hadoop RDD的默认分区数*/
   @deprecated("use defaultMinPartitions", "1.0.0")
+  //math.min返回指定的数字中带有最低值的数字
   def defaultMinSplits: Int = math.min(defaultParallelism, 2)
 
   /**
@@ -2347,6 +2399,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * Notice that we use math.min so the "defaultMinPartitions" cannot be higher than 2.
    * The reasons for this are discussed in https://github.com/mesos/spark/pull/718
    */
+  //math.min返回指定的数字中带有最低值的数字
   def defaultMinPartitions: Int = math.min(defaultParallelism, 2)
 
   private val nextShuffleId = new AtomicInteger(0)
@@ -2427,7 +2480,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private def postApplicationStart() {
     // Note: this code assumes that the task scheduler has been initialized and has contacted
     // the cluster manager to get an application ID (in case the cluster manager provides one).
-    //向listenerBus发送SparkListenerApplicationStart事件
+    //注意：此代码假定任务调度程序已初始化,并已触发集群管理器获取应用程序ID(如果集群管理器提供一个)
     listenerBus.post(SparkListenerApplicationStart(appName, Some(applicationId),
       startTime, sparkUser, applicationAttemptId, schedulerBackend.getDriverLogUrls))
   }
@@ -2457,7 +2510,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   }
 
   /** Called by MetadataCleaner to clean up the persistentRdds map periodically */
-  //
+  //由MetadataCleaner调用,定期清理persistentRdds映射
   private[spark] def cleanup(cleanupTime: Long) {
     //清除RDD过期内容
     persistentRdds.clearOldValues(cleanupTime)
@@ -2496,8 +2549,11 @@ object SparkContext extends Logging {
   /**
    * Points to a partially-constructed SparkContext if some thread is in the SparkContext
    * constructor, or `None` if no SparkContext is being constructed.
-   * 指向一个部分构造SprakContext在一些线程SparkContext构造函数,或`None` 非None,sparkcontext正在建设
+    *
    * Access to this field is guarded by SPARK_CONTEXT_CONSTRUCTOR_LOCK
+    *
+    *如果某些线程在SparkContext中,则指向部分构造的SparkContext构造函数,如果没有构造SparkContext,则为“None”。
+    *访问此字段由SPARK_CONTEXT_CONSTRUCTOR_LOCK保护
    */
   private var contextBeingConstructed: Option[SparkContext] = None
 
@@ -2508,16 +2564,20 @@ object SparkContext extends Logging {
    * constructing a SparkContext.  This warning is necessary because the current locking scheme
    * prevents us from reliably distinguishing between cases where another context is being
    * constructed and cases where another constructor threw an exception.
-   * 如果另一个线程正在构造则抛出异常,
+   *  如果检测到运行的上下文,则抛出异常,如果另一个线程正在构建SparkContext,则会发出警告,此警告是必要的,
+    * 因为当前的锁定方案阻止我们可靠地区分正在构建另一个上下文的情况和另一个构造函数抛出异常的情况。
+    * 如果另一个线程正在构造则抛出异常,
+    * assert没有其他上下文正在运行
    */
   private def assertNoOtherContextIsRunning(
       sc: SparkContext,
       allowMultipleContexts: Boolean): Unit = {
     SPARK_CONTEXT_CONSTRUCTOR_LOCK.synchronized {
       contextBeingConstructed.foreach { otherContext =>
-        if (otherContext ne sc) {  // checks for reference equality
+        if (otherContext ne sc) {  // checks for reference equality 检查引用相等
           // Since otherContext might point to a partially-constructed context, guard against
           // its creationSite field being null:
+          //由于otherContext可能指向部分构造的上下文,因此防范其creationSite字段为null：
           val otherContextCreationSite =
             Option(otherContext.creationSite).map(_.longForm).getOrElse("unknown location")
           val warnMsg = "Another SparkContext is being constructed (or threw an exception in its" +
@@ -2548,15 +2608,16 @@ object SparkContext extends Logging {
    * singleton object. Because we can only have one active SparkContext per JVM,
    * this is useful when applications may wish to share a SparkContext.
    *
-   * 这个函数用来获取或实例化单个sparkcontext,每个JVM只有一个SparkContext激活的,
-   * 使用的时候可能与应用程序共享SparkContext
+   * 这个函数用来获取或实例化单个sparkcontext,每个JVM只有一个SparkContext激活,使用的时候可能与应用程序共享SparkContext
+    *
    * Note: This function cannot be used to create multiple SparkContext instances
-   * 这个函数不能创建多个SparkContext实例,即使允许多个上下文.
    * even if multiple contexts are allowed.
+    *注意：即使允许多个上下文,此函数也不能用于创建多个SparkContext实例
    */
   def getOrCreate(config: SparkConf): SparkContext = {
     // Synchronize to ensure that multiple create requests don't trigger an exception
     // from assertNoOtherContextIsRunning within setActiveContext
+    //同步以确保多个创建请求不会从setActiveContext中的assertNoOtherContextIsRunning触发异常
     SPARK_CONTEXT_CONSTRUCTOR_LOCK.synchronized {
       if (activeContext.get() == null) {
         setActiveContext(new SparkContext(config), allowMultipleContexts = false)
@@ -2569,11 +2630,17 @@ object SparkContext extends Logging {
    * This function may be used to get or instantiate a SparkContext and register it as a
    * singleton object. Because we can only have one active SparkContext per JVM,
    * this is useful when applications may wish to share a SparkContext.
+    *
+    * 此函数可用于获取或实例化SparkContext并将其注册为单对象,因为我们每个JVM只能有一个活动的SparkContext
+    * 当应用程序可能希望共享一个SparkContext时,这很有用
    *
    * This method allows not passing a SparkConf (useful if just retrieving).
+    * 此方法允许不传递SparkConf(仅在检索时有用)
    *
    * Note: This function cannot be used to create multiple SparkContext instances
    * even if multiple contexts are allowed.
+    *
+    * 注意：即使允许多个上下文,此功能也不能用于创建多个SparkContext实例,
    */
   def getOrCreate(): SparkContext = {
     getOrCreate(new SparkConf())
@@ -2585,6 +2652,11 @@ object SparkContext extends Logging {
    * thread is constructing a SparkContext.  This warning is necessary because the current locking
    * scheme prevents us from reliably distinguishing between cases where another context is being
    * constructed and cases where another constructor threw an exception.
+    *
+    * 在SparkContext构造函数的开头调用,以确保没有SparkContext正在运行,如果检测到运行的上下文,则抛出异常,
+    * 如果另一个线程正在构建SparkContext,则会发出警告,此警告是必要的,
+    * 因为当前的锁定方案阻止我们可靠地区分正在构建另一个上下文的情况和另一个构造函数抛出异常的情况。
+    *
    * 确保实例的唯一性,并将当前SparkContext标记为正在构建中.
    */
   private[spark] def markPartiallyConstructed(
@@ -2617,9 +2689,12 @@ object SparkContext extends Logging {
 
   /**
    * Clears the active SparkContext metadata.  This is called by `SparkContext#stop()`.  It's
-   * 清除活动的sparkcontext元数据,这调用SparkContext#stop(),
    * also called in unit tests to prevent a flood of warnings from test suites that don't / can't
    * properly clean up their SparkContexts.
+    *
+    * 清除活动的SparkContext元数据,这由`SparkContext＃stop（）`调用,
+    * 它的也在单元测试中调用,以防止来自没有/不能正确清理SparkContexts的测试套件的大量警告
+    * 清除活动的sparkcontext元数据,这调用SparkContext#stop(),
    */
   private[spark] def clearActiveContext(): Unit = {
     SPARK_CONTEXT_CONSTRUCTOR_LOCK.synchronized {
@@ -2702,6 +2777,7 @@ object SparkContext extends Logging {
     val kf = implicitly[K => Writable]
     val vf = implicitly[V => Writable]
     // Set the Writable class to null and `SequenceFileRDDFunctions` will use Reflection to get it
+    //将Writable类设置为null,并且“SequenceFileRDDFunctions”将使用Reflection来获取它
     implicit val keyWritableFactory = new WritableFactory[K](_ => null, kf)
     implicit val valueWritableFactory = new WritableFactory[V](_ => null, vf)
     RDD.rddToSequenceFileRDDFunctions(rdd)
@@ -2765,6 +2841,8 @@ object SparkContext extends Logging {
   // The following deprecated functions have already been moved to `object WritableConverter` to
   // make the compiler find them automatically. They are still kept here for backward compatibility
   // and just call the corresponding functions in `object WritableConverter`.
+  // 以下已弃用的函数已被移动到`Object WritableConverter'，使编译器自动找到它们,
+  // 它们仍然保留在这里用于向后兼容，并且在“对象WritableConverter”中调用相应的函数,
 
   @deprecated("Replaced by implicit functions in WritableConverter. This is kept here only for " +
     "backward compatibility.", "1.3.0")
@@ -2809,7 +2887,7 @@ object SparkContext extends Logging {
   /**
    * Find the JAR from which a given class was loaded, to make it easy for users to pass
    * their JARs to SparkContext.
-   * 找到一个给定的类被加载的jar,
+   * 找到给定加载的类JAR名称,使用户可以轻松地将其JAR传递给SparkContext
    */
   def jarOfClass(cls: Class[_]): Option[String] = {
     val uri = cls.getResource("/" + cls.getName.replace('.', '/') + ".class")
@@ -2818,6 +2896,9 @@ object SparkContext extends Logging {
       if (uriStr.startsWith("jar:file:")) {
         // URI will be of the form "jar:file:/path/foo.jar!/package/cls.class",
         // so pull out the /path/foo.jar
+        //URI将是“jar：file：/path/foo.jar！/package/cls.class”的形式,所以取出/path/foo.jar
+        // println("==="+"jar:file:".length+"==="+uriStr.indexOf('!'))
+        //===9===22,/path/foo.jar
         Some(uriStr.substring("jar:file:".length, uriStr.indexOf('!')))
       } else {
         None
@@ -2831,17 +2912,18 @@ object SparkContext extends Logging {
    * Find the JAR that contains the class of a particular object, to make it easy for users
    * to pass their JARs to SparkContext. In most cases you can call jarOfObject(this) in
    * your driver program.
-   * 给定类加载查找Jar,让用户很容易把罐子sparkcontext。
+   * 找到包含特定对象类的JAR,以便用户可以将其JAR传递给SparkContext,在大多数情况下,您可以在驱动程序中调用jarOfObject(this)。
    */
   def jarOfObject(obj: AnyRef): Option[String] = jarOfClass(obj.getClass)
 
   /**
-   * Creates a modified version of a SparkConf with the parameters that can be passed separately
-   * 创建一个修改后的SparkConf,可以通过SparkContext参数设置
+    * 使用可以单独传递给SparkContext的参数,创建SparkConf的修改版本
+    * Creates a modified version of a SparkConf with the parameters that can be passed separately
    * to SparkContext, to make it easier to write SparkContext's constructors. This ignores
-   * 为了使它更容易写sparkcontext的构造函数,这忽略了作为空的默认值传递的参数,
+   * 以便更容易地编写SparkContext的构造函数,这忽略了作为空的默认值传递的参数,
    * parameters that are passed as the default value of null, instead of throwing an exception
    * like SparkConf would.
+    * 而不是像SparkConf那样抛出一个异常
    */
   private[spark] def updatedConf(
       conf: SparkConf,
@@ -2895,6 +2977,7 @@ object SparkContext extends Logging {
     import SparkMasterRegex._
 
     // When running locally, don't try to re-execute tasks on failure.
+    //在本地运行时,不要尝试在失败时重新执行任务。
     val MAX_LOCAL_TASK_FAILURES = 1
 
     master match {
@@ -2923,7 +3006,9 @@ object SparkContext extends Logging {
         //Runtime.getRuntime().availableProcessors()方法获得当前设备的CPU个数
         def localCpuCount: Int = Runtime.getRuntime.availableProcessors()
         // local[*, M] means the number of cores on the computer with M failures
+        //local [*，M]表示计算机上有M个故障的内核数
         // local[N, M] means exactly N threads with M failures
+        //本地[N,M]意味着具有M个故障的N个线程
         val threadCount = if (threads == "*") localCpuCount else threads.toInt
         val scheduler = new TaskSchedulerImpl(sc, maxFailures.toInt, isLocal = true)
         val backend = new LocalBackend(sc.getConf, scheduler, threadCount)
@@ -2942,6 +3027,7 @@ object SparkContext extends Logging {
       //memoryPerSlave必须大于executorMemory,因为Worker的内存大小包括executor占用的内存
       case LOCAL_CLUSTER_REGEX(numSlaves, coresPerSlave, memoryPerSlave) =>
         // Check to make sure memory requested <= memoryPerSlave. Otherwise Spark will just hang.
+        //检查以确保内存请求<= memoryPerSlave,否则Spark会挂起。
         val memoryPerSlaveInt = memoryPerSlave.toInt
         if (sc.executorMemory > memoryPerSlaveInt) {
           throw new SparkException(
@@ -2970,11 +3056,14 @@ object SparkContext extends Logging {
         }
         val scheduler = try {
           val clazz = Utils.classForName("org.apache.spark.scheduler.cluster.YarnClusterScheduler")
+          //getConstructor 获得构造函数,参数类型SparkContext
           val cons = clazz.getConstructor(classOf[SparkContext])
+          //asInstanceOf强制类型转换TaskSchedulerImpl对象
           cons.newInstance(sc).asInstanceOf[TaskSchedulerImpl]
         } catch {
           // TODO: Enumerate the exact reasons why it can fail
           // But irrespective of it, it means we cannot proceed !
+          //但无论如何,这意味着我们不能继续下去！
           case e: Exception => {
             throw new SparkException("YARN mode not available ?", e)
           }
@@ -3074,6 +3163,10 @@ private object SparkMasterRegex {
  * The getter for the writable class takes a ClassTag[T] in case this is a generic object
  * that doesn't know the type of T when it is created. This sounds strange but is necessary to
  * support converting subclasses of Writable to themselves (writableWritableConverter).
+  *
+  * 封装如何将某些类型T转换为可写的类,它存储对应于T的可写类(例如，Int Intrritable for Int)和用于进行转换的功能,
+  * 可写类的getter需要一个ClassTag [T],以防这是一个在创建时不知道T的类型的通用对象,
+  * 这听起来很奇怪,但是需要支持将Writable的子类转换为自己(writableWritableConverter)
  */
 private[spark] class WritableConverter[T](
     val writableClass: ClassTag[T] => Class[_ <: Writable],
@@ -3083,6 +3176,7 @@ private[spark] class WritableConverter[T](
 object WritableConverter {
 
   // Helper objects for converting common types to Writable
+  //帮助对象将常用类型转换为可写
   private[spark] def simpleWritableConverter[T, W <: Writable: ClassTag](convert: W => T)
   : WritableConverter[T] = {
     val wClass = classTag[W].runtimeClass.asInstanceOf[Class[W]]
@@ -3093,6 +3187,8 @@ object WritableConverter {
   // `import SparkContext._` to enable them. Now we move them here to make the compiler find
   // them automatically. However, we still keep the old functions in SparkContext for backward
   // compatibility and forward to the following functions directly.
+  //以下隐含函数在1.3之前的SparkContext中,用户必须“导入SparkContext._”以启用它们,
+  // 现在我们将它们移到这里，使编译器自动找到它们,但是,我们仍然保留SparkContext中的旧功能以实现向后兼容,并直接转发到以下功能
 
   implicit def intWritableConverter(): WritableConverter[Int] =
     simpleWritableConverter[Int, IntWritable](_.get)
@@ -3112,6 +3208,7 @@ object WritableConverter {
   implicit def bytesWritableConverter(): WritableConverter[Array[Byte]] = {
     simpleWritableConverter[Array[Byte], BytesWritable] { bw =>
       // getBytes method returns array which is longer then data to be returned
+      //getBytes方法返回的数据长于要返回的数据
       Arrays.copyOfRange(bw.getBytes, 0, bw.getLength)
     }
   }
@@ -3127,6 +3224,8 @@ object WritableConverter {
  * A class encapsulating how to convert some type T to Writable. It stores both the Writable class
  * corresponding to T (e.g. IntWritable for Int) and a function for doing the conversion.
  * The Writable class will be used in `SequenceFileRDDFunctions`.
+  * 封装如何将某些类型T转换为可写的类,它存储对应于T的可写类(例如，Int Intrritable for Int)
+  * 和用于进行转换的函数,可写类将用于“SequenceFileRDDFunctions”。
  */
 private[spark] class WritableFactory[T](
     val writableClass: ClassTag[T] => Class[_ <: Writable],

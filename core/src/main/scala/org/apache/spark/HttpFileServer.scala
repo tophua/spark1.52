@@ -88,8 +88,8 @@ private[spark] class HttpFileServer(
     // If we don't catch this, Guava throws a very confusing error message:
     //   java.io.FileNotFoundException: [file] (No such file or directory)
     // even though the directory ([file]) exists.
-    //如果我们没有抓到这个,Guava会抛出一个非常混乱的错误消息：
-    //即使目录（[file]）存在，java.io.FileNotFoundException：[file]（没有这样的文件或目录）。
+    //如果我们没有捕获这个异常,Guava会抛出一个非常混乱的错误消息：
+    //即使目录([file])存在,java.io.FileNotFoundException：[file](没有这样的文件或目录)
     if (file.isDirectory) {
       throw new IllegalArgumentException(s"$file cannot be a directory.")
     }

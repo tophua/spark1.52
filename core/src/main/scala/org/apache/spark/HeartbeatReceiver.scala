@@ -32,7 +32,7 @@ import org.apache.spark.util.{Clock, SystemClock, ThreadUtils, Utils}
  * A heartbeat from executors to the driver. This is a shared message used by several internal
  * components to convey liveness or execution information for in-progress tasks. It will also
  * expire the hosts that have not heartbeated for more than spark.network.timeout.
-  * 从执行者到driver的心跳, 这是几个内部组件使用的共享消息,用于传达正在进行的任务的活动或执行信息。
+  * 从执行者到driver的心跳,这是几个内部组件使用的共享消息,用于传达正在进行的任务的活动或执行信息。
   * 它也将使不超过spark.network.timeout的心跳的主机过期。
  */
 private[spark] case class Heartbeat(
@@ -46,13 +46,13 @@ private[spark] case class Heartbeat(
   * SparkContext用于通知HeartbeatReceiver SparkContext.taskScheduler的事件。
  */
 private[spark] case object TaskSchedulerIsSet
-
+//过期死亡主机
 private[spark] case object ExpireDeadHosts
 
 private case class ExecutorRegistered(executorId: String)
 
 private case class ExecutorRemoved(executorId: String)
-
+//心跳反应
 private[spark] case class HeartbeatResponse(reregisterBlockManager: Boolean)
 
 /**
@@ -77,15 +77,18 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   private val executorLastSeen = new mutable.HashMap[String, Long]
 
   // "spark.network.timeout" uses "seconds", while `spark.storage.blockManagerSlaveTimeoutMs` uses
-  // "milliseconds"从节点超时120秒 
+  // "milliseconds"从节点超时120秒
+  //“spark.network.timeout”使用“秒”,而`spark.storage.blockManagerSlaveTimeoutMs`使用“毫秒”
   private val slaveTimeoutMs =
     sc.conf.getTimeAsMs("spark.storage.blockManagerSlaveTimeoutMs", "120s")
-    //executor网络超时
+    //executor网络超时1200毫秒
   private val executorTimeoutMs =
     sc.conf.getTimeAsSeconds("spark.network.timeout", s"${slaveTimeoutMs}ms") * 1000
 
   // "spark.network.timeoutInterval" uses "seconds", while
   // "spark.storage.blockManagerTimeoutIntervalMs" uses "milliseconds"
+  // “spark.network.timeoutInterval”使用“秒”,
+  // 而“spark.storage.blockManagerTimeoutIntervalMs”使用“毫秒”
   //指定检查BlockManager超时时间间隔
   private val timeoutIntervalMs =
     sc.conf.getTimeAsMs("spark.storage.blockManagerTimeoutIntervalMs", "60s")
@@ -104,6 +107,8 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
   private val killExecutorThread = ThreadUtils.newDaemonSingleThreadExecutor("kill-executor-thread")
 
   override def onStart(): Unit = {
+    //schedule和scheduleAtFixedRate的区别在于,如果指定开始执行的时间在当前系统运行时间之前,
+    // scheduleAtFixedRate会把已经过去的时间也作为周期执行,而schedule不会把过去的时间算上。
     timeoutCheckingTask = eventLoopThread.scheduleAtFixedRate(new Runnable {
       override def run(): Unit = Utils.tryLogNonFatalError {
         //删除心跳超时的Executor,默认超进
@@ -139,6 +144,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
       if (scheduler != null) {
         if (executorLastSeen.contains(executorId)) {
           executorLastSeen(executorId) = clock.getTimeMillis()
+          //submit,则该call方法自动在一个线程上执行,并且会返回执行结果Future对象
           eventLoopThread.submit(new Runnable {
             override def run(): Unit = Utils.tryLogNonFatalError {
               //用于更新Stage的各种测量数据.

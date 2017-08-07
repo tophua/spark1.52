@@ -31,7 +31,7 @@ import scala.util.{Failure, Try}
 /**
  * A future for the result of an action to support cancellation. This is an extension of the
  * Scala Future interface to support cancellation.
-  * future的行动结果支持取消。 这是Scala Future界面的扩展,以支持取消。
+  * future的行动结果支持取消,这是Scala Future界面的扩展,以支持取消。
  */
 trait FutureAction[T] extends Future[T] {
   // Note that we redefine methods of the Future trait here explicitly so we can specify a different
@@ -67,6 +67,7 @@ trait FutureAction[T] extends Future[T] {
   /**
    * When this action is completed, either through an exception, or a value, applies the provided
    * function.当此操作完成时,通过异常或值来应用提供的功能。
+    * Try的子类Success或者Failure,如果计算成功,返回Success的实例,如果抛出异常,返回Failure并携带相关信息
    */
   def onComplete[U](func: (Try[T]) => U)(implicit executor: ExecutionContext)
 
@@ -93,7 +94,8 @@ trait FutureAction[T] extends Future[T] {
   override def value: Option[Try[T]]
 
   /**
-   * Blocks and returns the result of this job.\
+   * Blocks and returns the result of this job.
+    * 阻塞并返回此作业的结果。
    *Await.result会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
    */
   @throws(classOf[Exception])
@@ -115,7 +117,7 @@ trait FutureAction[T] extends Future[T] {
 /**
  * A [[FutureAction]] holding the result of an action that triggers a single job. Examples include
  * count, collect, reduce.
-  * 持有触发单个作业的操作的结果,示例包括计数,收集,减少
+  * FutureAction 持有触发单个作业的操作的结果,示例包括计数,收集,减少
  */
 class SimpleFutureAction[T] private[spark](jobWaiter: JobWaiter[_], resultFunc: => T)
   extends FutureAction[T] {
@@ -128,6 +130,7 @@ class SimpleFutureAction[T] private[spark](jobWaiter: JobWaiter[_], resultFunc: 
   }
 
   override def ready(atMost: Duration)(implicit permit: CanAwait): SimpleFutureAction.this.type = {
+    //isFinite此方法返回此持续时间是否有限
     if (!atMost.isFinite()) {
       awaitResult()
     } else jobWaiter.synchronized {
@@ -164,7 +167,10 @@ class SimpleFutureAction[T] private[spark](jobWaiter: JobWaiter[_], resultFunc: 
   override def isCompleted: Boolean = jobWaiter.jobFinished
 
   override def isCancelled: Boolean = _cancelled
-
+  /**
+    * Try的子类Success或者Failure,如果计算成功,返回Success的实例,如果抛出异常,返回Failure并携带相关信息
+    * @return
+    */
   override def value: Option[Try[T]] = {
     if (jobWaiter.jobFinished) {
       Some(awaitResult())
@@ -174,6 +180,7 @@ class SimpleFutureAction[T] private[spark](jobWaiter: JobWaiter[_], resultFunc: 
   }
 
   private def awaitResult(): Try[T] = {
+    //awaitResult 直到Job执行完成之后返回所得的结果
     jobWaiter.awaitResult() match {
       case JobSucceeded => scala.util.Success(resultFunc)
       case JobFailed(e: Exception) => scala.util.Failure(e)
@@ -188,6 +195,8 @@ class SimpleFutureAction[T] private[spark](jobWaiter: JobWaiter[_], resultFunc: 
  * A [[FutureAction]] for actions that could trigger multiple Spark jobs. Examples include take,
  * takeSample. Cancellation works by setting the cancelled flag to true and interrupting the
  * action thread if it is being blocked by a job.
+  * A [[FutureAction]]可以触发多个Spark作业的操作,示例包括take,takeSample,
+  * 通过将取消的标志设置为true并中断操作线程(如果被作业阻止),取消工作。
  */
 class ComplexFutureAction[T] extends FutureAction[T] {
 
@@ -316,12 +325,14 @@ class JavaFutureActionWrapper[S, T](futureAction: FutureAction[S], converter: S 
   }
 
   override def jobIds(): java.util.List[java.lang.Integer] = {
+    //unmodifiableList 将参数中的List返回一个不可修改的List.
     Collections.unmodifiableList(futureAction.jobIds.map(Integer.valueOf).asJava)
   }
 
   private def getImpl(timeout: Duration): T = {
     // This will throw TimeoutException on timeout:
     //这将在超时时抛出TimeoutException
+    //等待“completed”的awaitable状态
     Await.ready(futureAction, timeout)
     futureAction.value.get match {
       case scala.util.Success(value) => converter(value)

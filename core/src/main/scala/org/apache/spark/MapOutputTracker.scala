@@ -41,7 +41,8 @@ private[spark] class MapOutputTrackerMasterEndpoint(
     override val rpcEnv: RpcEnv, tracker: MapOutputTrackerMaster, conf: SparkConf)
   extends RpcEndpoint with Logging {
   val maxAkkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)//返回Akka消息最大值
- //定义偏函数是具有类型PartialFunction[-A,+B]的一种函数。A是其接受的函数类型,B是其返回的结果类型
+ //定义偏函数是具有类型PartialFunction[-A,+B]的一种函数,A是其接受的函数类型,B是其返回的结果类型
+  // receiveAndReply从[[RpcEndpointRef.ask]]处理消息,如果接收到不匹配的消息,[[SparkException]]将被抛出并发送到onError
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case GetMapOutputStatuses(shuffleId: Int) =>
       //sender返回发送消息信息
@@ -57,11 +58,13 @@ private[spark] class MapOutputTrackerMasterEndpoint(
           s"exceeds spark.akka.frameSize ($maxAkkaFrameSize bytes)."
 
         /* For SPARK-1244 we'll opt for just logging an error and then sending it to the sender.
-         * A bigger refactoring (SPARK-1239) will ultimately remove this entire code path. */
+         * A bigger refactoring (SPARK-1239) will ultimately remove this entire code path.
+         * 对于SPARK-1244,我们将选择仅记录错误,然后将其发送给发件人,更大的重构(SPARK-1239)将最终删除整个代码路径*/
         val exception = new SparkException(msg)
         logError(msg, exception)
         context.sendFailure(exception)
       } else {
+        //向发件人回复邮件
         context.reply(mapOutputStatuses)
       }
 
@@ -91,7 +94,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
    * On the driver, it serves as the source of map outputs recorded from ShuffleMapTasks.
    * On the executors, it simply serves as a cache, in which a miss triggers a fetch from the
    * driver's corresponding HashMap.
-   *  在驱动程序上,它作为从ShuffleMapTasks记录的地图输出的源。
+   *  在驱动程序上,它作为从ShuffleMapTasks记录的Map输出的源。
     * 在执行器上,它只是作为一个缓存,其中一个错误触发了从中获取驱动程序对应的HashMap
      * Note: because mapStatuses is accessed concurrently, subclasses should make sure it's a
      * thread-safe map.
@@ -152,10 +155,14 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
    *    Map任务输出中分配给当前reduce任务的Block大小
    * Called from executors to get the server URIs and output sizes for each shuffle block that
    * needs to be read from a given reduce task.
+    *
+    * 从执行程序调用来获取需要从给定的reduce任务中读取的每个shuffle块的服务器URI和输出大小,
    *
    * @return A sequence of 2-item tuples, where the first item in the tuple is a BlockManagerId,
    *         and the second item is a sequence of (shuffle block id, shuffle block size) tuples
    *         describing the shuffle blocks that are stored at that block manager.
+    *        2元组的序列,其中元组中的第一个项是BlockManagerId,
+    *        第二个项是描述存储在该块管理器中的随机块的(shuffle block id，shuffle block size)元组的序列,
    */
   def getMapSizesByExecutorId(shuffleId: Int, reduceId: Int)
   : Seq[(BlockManagerId, Seq[(BlockId, Long)])] = {
@@ -179,7 +186,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
 
         // Either while we waited the fetch happened successfully, or
         // someone fetched it in between the get and the fetching.synchronized.
-        //果获取列表中不存在要取的shuffleId,那么就将ShuffleId放入获取列表
+        //获取列表中不存在要取的shuffleId,那么就将ShuffleId放入获取列表
         fetchedStatuses = mapStatuses.get(shuffleId).orNull
         if (fetchedStatuses == null) {
           // We have to do the fetch, get others to wait for us.
@@ -229,7 +236,8 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
     }
   }
 
-  /** Called to get current epoch(时间上的一点) number. */
+  /** Called to get current epoch number.
+    * 被称为获取当前的时代号码*/
   def getEpoch: Long = {
     epochLock.synchronized {
       return epoch
@@ -361,6 +369,7 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
     *                         一个位置必须具有的总映射输出大小的分数被认为是大的
    *
    * This method is not thread-safe. 这种方法不是线程安全的
+    * 获得最大的输出位置
    */
   def getLocationsWithLargestOutputs(
       shuffleId: Int,
@@ -371,6 +380,7 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
 
     if (mapStatuses.contains(shuffleId)) {
       val statuses = mapStatuses(shuffleId)
+      //数组 nonEmpty非空判断
       if (statuses.nonEmpty) {
         // HashMap to add up sizes of all blocks at the same location
         //HashMap将相同位置的所有块的大小相加
@@ -469,12 +479,12 @@ private[spark] object MapOutputTracker extends Logging {
   // Serialize an array of map output locations into an efficient byte format so that we can send
   // it to reduce tasks. We do this by compressing the serialized bytes using GZIP. They will
   // generally be pretty compressible because many map outputs will be on the same hostname.
-  //将地图输出位置的数组序列化为高效的字节格式,以便我们可以将其发送以减少任务。
+  //将Map输出位置的数组序列化为高效的字节格式,以便我们可以将其发送以减少任务。
   //我们通过使用GZIP压缩序列化字节来实现。 它们通常是非常可压缩的,因为很多地图输出将在同一个主机名上。
   def serializeMapStatuses(statuses: Array[MapStatus]): Array[Byte] = {
     val out = new ByteArrayOutputStream
     val objOut = new ObjectOutputStream(new GZIPOutputStream(out))
-    //柯里化函数
+    //柯里化函数,第一个括号传递
     Utils.tryWithSafeFinally {
       // Since statuses can be modified in parallel, sync on it
       //同步并发修改数据

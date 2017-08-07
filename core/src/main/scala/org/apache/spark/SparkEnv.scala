@@ -390,6 +390,7 @@ object SparkEnv extends Logging {
         rpcEnv, mapOutputTracker.asInstanceOf[MapOutputTrackerMaster], conf))
 
     // Let the user specify short names for shuffle managers
+    //让用户为洗牌管理器指定短名称
     //shuffleManager 负责管理本地及远程的block数据的shuffle操作
     val shortShuffleMgrNames = Map(
       "hash" -> "org.apache.spark.shuffle.hash.HashShuffleManager",
@@ -428,6 +429,7 @@ object SparkEnv extends Logging {
       conf, isDriver)
 
     // NB: blockManager is not valid until initialize() is called later.
+    //注意：在稍后调用initialize()之前,blockManager无效。
     //创建块管理器BlockManager,负责对Block的管理,只有在BlockManager的初始化方法initialize调用后,它才有效.    
     val blockManager = new BlockManager(executorId, rpcEnv, blockManagerMaster,
       serializer, conf, mapOutputTracker, shuffleManager, blockTransferService, securityManager,
@@ -453,9 +455,9 @@ object SparkEnv extends Logging {
     //创建测量系统
     val metricsSystem = if (isDriver) {
       // Don't start metrics system right now for Driver.
-      //驱动程序现在不要启动指标系统,我们需要等待任务调度程序给我们一个应用程序ID。
       // We need to wait for the task scheduler to give us an app ID.
-      // Then we can start the metrics system.然后我们可以启动指标体系。
+      // Then we can start the metrics system.
+      // 驱动程序现在不要启动指标系统,我们需要等待任务调度程序给我们一个应用程序ID,然后我们可以启动指标体系。
       MetricsSystem.createMetricsSystem("driver", conf, securityManager)
     } else {
       // We need to set the executor ID before the MetricsSystem is created because sources and
@@ -471,7 +473,7 @@ object SparkEnv extends Logging {
     // Set the sparkFiles directory, used when downloading dependencies.  In local mode,
     // this is a temporary directory; in distributed mode, this is the executor's current working
     // directory.
-    //设置sparkFiles目录,在下载依赖关系时使用。在本地模式下,这是一个临时目录;在分布式模式下,这是执行者目前的工作目录。
+    //设置sparkFiles目录,在下载依赖关系时使用。在本地模式下,这是一个临时目录;在分布式模式下,这是执行者当前的工作目录。
     val sparkFilesDir: String = if (isDriver) {
       Utils.createTempDir(Utils.getLocalDir(conf), "userFiles").getAbsolutePath
     } else {
@@ -532,8 +534,7 @@ object SparkEnv extends Logging {
    * class paths. Map keys define the category, and map values represent the corresponding
    * attributes as a sequence of KV pairs. This is used mainly for SparkListenerEnvironmentUpdate.
     * 返回jvm信息,Spark属性,系统属性和类路径的映射表示,Map键定义类别,映射值表示相应的属性作为KV对序列,
-    * 这主要用于SparkListenerEnvironmentUpdate。
-   * 更新Spark环境
+    * 这主要用于SparkListenerEnvironmentUpdate,更新Spark环境
    */
   private[spark] def environmentDetails(
     conf: SparkConf,
@@ -562,7 +563,7 @@ object SparkEnv extends Logging {
     val sparkProperties = (conf.getAll ++ schedulerMode).sorted
 
     // System properties that are not java classpaths
-    //不是java类路径的系统属性
+    //不是java类路径的系统属性,getSystemProperties Map转换Seq(元组)
     val systemProperties = Utils.getSystemProperties.toSeq
     val otherProperties = systemProperties.filter {
       case (k, _) =>
@@ -570,7 +571,9 @@ object SparkEnv extends Logging {
     }.sorted
 
     // Class paths including all added jars and files
-    // 类路径包括所有添加的jar和文件
+    // 类路径包括所有添加的jar和文件,javaClassPath Java 类路径
+    //(/software/jdk1.8/jre/lib/charsets.jar,System Classpath)
+    //(/software/jdk1.8/jre/lib/deploy.jar,System Classpath)
     val classPathEntries = javaClassPath
       .split(File.pathSeparator)
       .filterNot(_.isEmpty)

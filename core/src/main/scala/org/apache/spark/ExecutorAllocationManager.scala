@@ -97,7 +97,7 @@ private[spark] class ExecutorAllocationManager(
     Integer.MAX_VALUE)
 
   // How long there must be backlogged tasks for before an addition is triggered (seconds)
-  //触发添加之前必须有多长时间的任务（秒）
+  //触发添加之前必须有多长时间的任务(秒)
   private val schedulerBacklogTimeoutS = conf.getTimeAsSeconds(
     "spark.dynamicAllocation.schedulerBacklogTimeout", "1s")
 
@@ -490,6 +490,7 @@ private[spark] class ExecutorAllocationManager(
 
   /**
    * Callback invoked when the specified executor has been removed.
+    * 当指定的执行程序已被删除时调用回调函数
    */
   private def onExecutorRemoved(executorId: String): Unit = synchronized {
     if (executorIds.contains(executorId)) {
@@ -522,6 +523,7 @@ private[spark] class ExecutorAllocationManager(
   /**
    * Callback invoked when the scheduler queue is drained.
    * This resets all variables used for adding executors.
+    * 调度器队列排出时调用回调函数,这将重置用于添加执行程序的所有变量。
    */
   private def onSchedulerQueueEmpty(): Unit = synchronized {
     logDebug("Clearing timer to add executors because there are no more pending tasks")

@@ -53,6 +53,7 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
 
   /**
    * return the address for the [[RpcEndpointRef]]
+    * 返回[[RpcEndpointRef]]的地址
    */
   def address: RpcAddress
 
@@ -85,9 +86,7 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
   def ask[T: ClassTag](message: Any): Future[T] = ask(message, defaultAskTimeout)
 
   /**
-   * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果,否则抛出SparkException,
-   * 注意,本方法是一个阻塞操作可能消耗时间,所以不要早消息循环中调用它
-    *
+   * 发送消息给RpcEndpoint.receive并在默认的超时内得到结果,否则抛出SparkException
    * Send a message to the corresponding[[RpcEndpoint]] and get its result within a default
    * timeout, or throw a SparkException if this fails even after the default number of retries.
    * The default `timeout` will be used in every trial of calling `sendWithReply`. Because this

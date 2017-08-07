@@ -33,7 +33,7 @@ import org.apache.spark.util.random.{XORShiftRandom, SamplingUtils}
  * An object that defines how the elements in a key-value pair RDD are partitioned by key.
  * 一个RDD对象中定义在一个键值对中查找分区元素
  * Maps each key to a partition ID, from 0 to `numPartitions - 1`.
- * 将每个键映射到分区标识,从0开始
+ * 将每个键映射到分区标识,从0开始到`numPartitions - 1`.
  */
 abstract class Partitioner extends Serializable {
   def numPartitions: Int
@@ -60,11 +60,15 @@ object Partitioner {
    * 1)将RDD转换为Seq,然后对Seq按照RDD的partitioner的size倒序排列
    * 2)创建HashPartitioner对象,如果配置parallelis属性,则使用属性值作为分区数量,否则使用Seq中所有RDD
    *   的partitions函数返回值的最大值作为分区数量
+    *   RDD[_]*函数传入可变长度参数列,others可以不传递值,[_]是泛型
    */
   def defaultPartitioner(rdd: RDD[_], others: RDD[_]*): Partitioner = {
   //1)将RDD转换为Seq,然后对Seq按照RDD的partitions的大小倒序排列
+    //将RDD转换为Seq才可以进行++操作
     val bySize = (Seq(rdd) ++ others).sortBy(_.partitions.size).reverse
+    //isDefined  如果该选项实例返回true,否则为false,
     for (r <- bySize if r.partitioner.isDefined && r.partitioner.get.numPartitions > 0) {
+      //还回最大分区数
       return r.partitioner.get
     }
     // 2)创建HashPartitioner对象,如果配置parallelis属性,则使用属性值作为分区数量,否则使用Seq中所有RDD
@@ -86,7 +90,8 @@ object Partitioner {
  * Java arrays have hashCodes that are based on the arrays' identities rather than their contents,
  * so attempting to partition an RDD[Array[_]] or RDD[(Array[_], _)] using a HashPartitioner will
  * produce an unexpected or incorrect result.
-  * Java数组具有基于数组身份而不是其内容的hashCodes,因此尝试使用HashPartitioner对RDD [Array [_]]
+  *
+  * java数组的哈希码是基于数组的身份而不是他们的内容,因此尝试使用HashPartitioner对RDD [Array [_]]
   * 或RDD [（Array [_]，_）]进行分区将导致意外或不正确结果
  */
 class HashPartitioner(partitions: Int) extends Partitioner {

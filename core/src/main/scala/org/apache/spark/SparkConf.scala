@@ -41,7 +41,7 @@ import org.apache.spark.util.Utils
  * For unit tests, you can also call `new SparkConf(false)` to skip loading external settings and
  * get the same configuration no matter what the system properties are.
   *
-  * 对于单元测试,您也可以调用`new SparkConf（false）'来跳过加载外部设置,并获得相同的配置,无论系统属性如何,
+  * 对于单元测试,你也可以调用`new SparkConf（false）'来跳过加载外部设置,并获得相同的配置,无论系统属性如何,
  *
  * All setter methods in this class support chaining. For example, you can write
  * `new SparkConf().setMaster("local").setAppName("My app").
@@ -181,6 +181,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   def setIfMissing(key: String, value: String): SparkConf = {
     //putIfAbsent如果key-value已经存在,则返回那个value,如果调用时map
     //没有找到key的mapping,返回一个null值
+    //如果没有放弃putIfAbsent
     if (settings.putIfAbsent(key, value) == null) {
       logDeprecationWarning(key)
     }
@@ -382,7 +383,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
   /**
     * Get all parameters as a list of pairs
-    * 获取所有参数作为对的列表
+    * 获取所有参数作为对(元组)的列表(list),Map转换list
     * */
   def getAll: Array[(String, String)] = {
     settings.entrySet().asScala.map(x => (x.getKey, x.getValue)).toArray

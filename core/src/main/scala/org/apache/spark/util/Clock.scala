@@ -19,6 +19,7 @@ package org.apache.spark.util
 
 /**
  * An interface to represent clocks, so that they can be mocked out in unit tests.
+  * 用于表示时钟的界面,以便在单元测试中可以模拟它们
  */
 private[spark] trait Clock {
   def getTimeMillis(): Long
@@ -27,6 +28,7 @@ private[spark] trait Clock {
 
 /**
  * A clock backed by the actual time from the OS as reported by the `System` API.
+  * 由System System API报告的实时时间由时钟支持的时钟
  */
 private[spark] class SystemClock extends Clock {
 
@@ -41,6 +43,7 @@ private[spark] class SystemClock extends Clock {
   /**
    * 等待时间
    * @param targetTime block until the current time is at least this value
+    *                   阻塞,直到当前时间至少为该值
    * @return current system time when wait has completed
    */
   def waitTillTime(targetTime: Long): Long = {

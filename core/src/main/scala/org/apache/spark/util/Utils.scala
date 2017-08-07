@@ -758,7 +758,7 @@ private[spark] object Utils extends Logging {
       // configuration to point to a secure directory. So create a subdirectory with restricted
       // permissions under each listed directory.
       //在非yarn模式(或yarn客户端模式下的驱动程序)中,我们无法相信用户配置指向安全目录。
-      // 因此,在每个列出的目录下创建一个具有受限权限的子目录。
+      // 因此,在每个列出的目录下创建一个具有受限权限的子目录
       Option(conf.getenv("SPARK_LOCAL_DIRS"))
         .getOrElse(conf.get("spark.local.dir", System.getProperty("java.io.tmpdir")))
         .split(",")
@@ -792,6 +792,8 @@ private[spark] object Utils extends Logging {
     // Hadoop 0.23 and 2.x have different Environment variable names for the
     // local dirs, so lets check both. We assume one of the 2 is set.
     // LOCAL_DIRS => 2.X, YARN_LOCAL_DIRS => 0.23.X
+    //Hadoop 0.23和2.x具有不同的环境变量名称为本地dirs,所以让我们检查两者,
+    // 我们假设2中的一个设置,LOCAL_DIRS => 2.X,YARN_LOCAL_DIRS => 0.23.X
     val localDirs = Option(conf.getenv("YARN_LOCAL_DIRS"))
       .getOrElse(Option(conf.getenv("LOCAL_DIRS"))
       .getOrElse(""))
@@ -1352,7 +1354,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code, then a finally block, but if exceptions happen in
    * the finally block, do not suppress the original exception.
-   * 执行一个代码块,然后一个finally块,但是如果在finally块中发生异常,不要抑制原始异常。
+   * 执行一个代码块,然后一个finally块,但是如果在finally块中发生异常,抛出原始异常。
    * This is primarily an issue with `finally { out.close() }` blocks, where
    * close needs to be called to clean up `out`, but if an exception happened
    * in `out.write`, it's likely `out` may be corrupted and `out.close` will
@@ -1682,11 +1684,12 @@ private[spark] object Utils extends Logging {
   }
 
   /** 
-   *  返回Spark系统属性配置文件,
-    *  返回线程安全到迭代器的系统属性映射。它获取已被明确设置的属性,以及仅定义了默认值的属性
+   *  返回Spark系统属性配置文件
    *  Returns the system properties map that is thread-safe to iterator over. It gets the
     * properties which have been set explicitly, as well as those for which only a default value
-    * has been defined. */
+    * has been defined.
+    *返回线程安全到迭代器的系统属性Map映射,它获取已被明确设置的属性,以及仅定义了默认值的属性
+    * */
   def getSystemProperties: Map[String, String] = {
     val sysProps = for (key <- System.getProperties.stringPropertyNames()) yield
       (key, System.getProperty(key))
@@ -2132,6 +2135,7 @@ private[spark] object Utils extends Logging {
     val maxRetries = conf.getOption("spark.port.maxRetries").map(_.toInt)
     if (conf.contains("spark.testing")) {
       // Set a higher number of retries for tests...
+      //设置更多的重试次数以进行测试...
       maxRetries.getOrElse(100)
     } else {
       maxRetries.getOrElse(16)
@@ -2142,13 +2146,15 @@ private[spark] object Utils extends Logging {
    * Scala跟其他脚本语言一样,函数可以传递,此方法正是通过回调StartService这个函数来启动服务,
    * 并最终返回startService返回的service地址及端口,如果启动过程有异常,还会多次重试,直到达 到maxRetries表示的最大次数
    * Attempt to start a service on the given port, or fail after a number of attempts.
+    * 尝试在给定端口上启动服务,或者经过多次尝试后失败
    * Each subsequent attempt uses 1 + the port used in the previous attempt (unless the port is 0).
-   *
-   * @param startPort The initial port to start the service on.
-   * @param startService Function to start service on a given port.
+   * 每次后续尝试使用1 +上次尝试中使用的端口(除非端口为0)。
+   * @param startPort The initial port to start the service on. 启动服务的初始端口
+   * @param startService Function to start service on a given port. 在给定端口上启动服务的功能
    *                     This is expected to throw java.net.BindException on port collision.
    * @param conf A SparkConf used to get the maximum number of retries when binding to a port.
-   * @param serviceName Name of the service.
+    *            用于在绑定到端口时获取最大重试次数的SparkConf
+   * @param serviceName Name of the service. 服务名称
    */
   def startServiceOnPort[T](
       startPort: Int,
@@ -2163,12 +2169,12 @@ private[spark] object Utils extends Logging {
     val maxRetries = portMaxRetries(conf)
     for (offset <- 0 to maxRetries) {
       // Do not increment port if startPort is 0, which is treated as a special port
-      // 如果startPort为0，则不要递增端口，这被视为特殊端口
+      // 如果startPort为0，则不要递增端口,这被视为特殊端口
       val tryPort = if (startPort == 0) {
         startPort
       } else {
         // If the new port wraps around, do not try a privilege port
-        // 如果新端口包围，请勿尝试特权端口
+        // 如果新端口包围,请勿尝试特权端口
         ((startPort + offset - 1024) % (65536 - 1024)) + 1024
       }
       try {
