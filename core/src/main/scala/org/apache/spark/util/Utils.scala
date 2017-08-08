@@ -1958,6 +1958,7 @@ private[spark] object Utils extends Logging {
         true
     }
   }
+  //解释器
 
   lazy val isInInterpreter: Boolean = {
     try {

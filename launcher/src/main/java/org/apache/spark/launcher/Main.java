@@ -55,6 +55,8 @@ class Main {
    * 在类Unix系统上，输出是由NULL分隔的命令参数列表字符,在Windows上，输出是适合从脚本直接执行的命令行。
    */
   public static void main(String[] argsArray) throws Exception {
+      //--class org.apache.spark.repl.Main --name "Spark shell"
+     // argsArray
     checkArgument(argsArray.length > 0, "Not enough arguments: missing class name.");
     //Arrays.asList将数组转List
     List<String> args = new ArrayList<String>(Arrays.asList(argsArray));

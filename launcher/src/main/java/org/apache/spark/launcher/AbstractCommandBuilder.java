@@ -347,7 +347,7 @@ abstract class AbstractCommandBuilder {
     } else {
       libdir = new File(sparkHome, String.format("assembly/target/scala-%s", getScalaVersion()));
     }
-
+    //匹配格式spark-assembly-1.5.2-hadoop2.6.0.jar
     final Pattern re = Pattern.compile("spark-assembly.*hadoop.*\\.jar");
     FileFilter filter = new FileFilter() {
       @Override
