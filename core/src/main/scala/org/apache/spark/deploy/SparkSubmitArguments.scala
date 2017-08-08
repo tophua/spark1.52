@@ -35,6 +35,7 @@ import org.apache.spark.util.Utils
  * Parses and encapsulates arguments from the spark-submit script.
  * 解析Spark-submit 脚本参数
  * The env argument is used for testing.
+  * sys.env 调用的System.getenv().asScala.toSeq
  */
 private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, String] = sys.env)
   extends SparkSubmitArgumentsParser {
@@ -43,39 +44,52 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   var executorMemory: String = null
   var executorCores: String = null
   var totalExecutorCores: String = null
+  //属性文件
   var propertiesFile: String = null
   var driverMemory: String = null
   var driverExtraClassPath: String = null
   var driverExtraLibraryPath: String = null
   var driverExtraJavaOptions: String = null
+  //队列
   var queue: String = null
   var numExecutors: String = null
   var files: String = null
+  //档案 zip,rar格式文件
+  //JAR（Java ARchive,Java 归档）是一种与平台无关的文件格式,可将多个文件合成一个文件。
+  //用户可将多个Java applet 及其所需组件(.class 文件、图像和声音)绑定到JAR文件中。
   var archives: String = null
+
   var mainClass: String = null
+  //主要资源
   var primaryResource: String = null
   var name: String = null
   var childArgs: ArrayBuffer[String] = new ArrayBuffer[String]()
   var jars: String = null
   var packages: String = null
+  //仓库
   var repositories: String = null
   var ivyRepoPath: String = null
   var packagesExclusions: String = null
+  //详细
   var verbose: Boolean = false
   var isPython: Boolean = false
   var pyFiles: String = null
   var isR: Boolean = false
   var action: SparkSubmitAction = null
+  //Spark 属性文件
   val sparkProperties: HashMap[String, String] = new HashMap[String, String]()
   var proxyUser: String = null
+  //主要
   var principal: String = null
   var keytab: String = null
 
   // Standalone cluster mode only
+  //监督
   var supervise: Boolean = false
   var driverCores: String = null
   var submissionToKill: String = null
   var submissionToRequestStatusFor: String = null
+  //内部使用
   var useRest: Boolean = true // used internally
 
   /** 
@@ -85,8 +99,10 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   lazy val defaultSparkProperties: HashMap[String, String] = {
     val defaultProperties = new HashMap[String, String]()
     // scalastyle:off println
+    //verbose详细
     if (verbose) SparkSubmit.printStream.println(s"Using properties file: $propertiesFile")
     Option(propertiesFile).foreach { filename =>
+      //加载给定文件中的属性
       Utils.getPropertiesFromFile(filename).foreach { case (k, v) =>
         defaultProperties(k) = v
         if (verbose) SparkSubmit.printStream.println(s"Adding default property: $k=$v")
@@ -124,6 +140,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   private def mergeDefaultSparkProperties(): Unit = {
     // Use common defaults file, if not specified by user
     //使用普通的默认文件,如果用户没有指定
+    //获得配置spark-defaults.conf路径
     propertiesFile = Option(propertiesFile).getOrElse(Utils.getDefaultPropertiesFile(env))
     // Honor --conf before the defaults file
     //荣誉--conf之前的默认文件
@@ -202,7 +219,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     principal = Option(principal).orElse(sparkProperties.get("spark.yarn.principal")).orNull
 
     // Try to set main class from JAR if no --class argument is given
-    //尝试从JAR设置主类，如果没有给出--class参数
+    //尝试从JAR设置主类,如果没有给出--class参数
     if (mainClass == null && !isPython && !isR && primaryResource != null) {
       val uri = new URI(primaryResource)
       val uriScheme = uri.getScheme()
@@ -212,7 +229,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
           try {
             val jar = new JarFile(uri.getPath)
             // Note that this might still return null if no main-class is set; we catch that later
-            //注意，如果没有设置main类,这可能仍然返回null;我们以后赶上
+            //注意,如果没有设置main类,这可能仍然返回null;
             mainClass = jar.getManifest.getMainAttributes.getValue("Main-Class")
           } catch {
             case e: Exception =>
@@ -267,6 +284,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
       SparkSubmit.printErrorAndExit("Must specify a primary resource (JAR or Python or R file)")
     }
     if (mainClass == null && SparkSubmit.isUserJar(primaryResource)) {
+      //在JAR中没有设置主类; 请用--class指定一个
       SparkSubmit.printErrorAndExit("No main class set in JAR; please specify one with --class")
     }
     if (pyFiles != null && !isPython) {
@@ -274,8 +292,10 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     }
 
     if (master.startsWith("yarn")) {
+      //
       val hasHadoopEnv = env.contains("HADOOP_CONF_DIR") || env.contains("YARN_CONF_DIR")
       if (!hasHadoopEnv && !Utils.isTesting) {
+        //当使用Master运行时,必须在环境中设置HADOOP_CONF_DIR或YARN_CONF_DIR
         throw new Exception(s"When running with master '$master' " +
           "either HADOOP_CONF_DIR or YARN_CONF_DIR must be set in the environment.")
       }
@@ -307,6 +327,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   }
 
   override def toString: String = {
+    //通过解析用户选项配置和从属性文件的填充值
     s"""Parsed arguments:
     |  master                  $master
     |  deployMode              $deployMode
@@ -473,6 +494,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
    */
   override protected def handleUnknown(opt: String): Boolean = {
     if (opt.startsWith("-")) {
+      //无法识别的选项
       SparkSubmit.printErrorAndExit(s"Unrecognized option '$opt'.")
     }
 
@@ -488,6 +510,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   }
 
   override protected def handleExtraArgs(extra: JList[String]): Unit = {
+    //ArrayBuffer++=
     childArgs ++= extra
   }
 
@@ -624,6 +647,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
       } catch {
         case e: InvocationTargetException =>
           // Ignore SecurityException, since we throw it above.
+          //忽略SecurityException,因为我们把它抛出来
           if (!e.getCause().isInstanceOf[SecurityException]) {
             throw e
           }

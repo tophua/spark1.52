@@ -29,11 +29,11 @@ import RollingFileAppender._
  * based on the given pattern.
   * 连续地将数据从输入流附加到给定文件中，并在给定间隔后滚动文件。 翻转的文件根据给定的模式命名
  *
- * @param inputStream             Input stream to read data from
- * @param activeFile              File to write data to
- * @param rollingPolicy           Policy based on which files will be rolled over.
- * @param conf                    SparkConf that is used to pass on extra configurations
- * @param bufferSize              Optional buffer size. Used mainly for testing.
+ * @param inputStream             Input stream to read data from 输入流从中读取数据
+ * @param activeFile              File to write data to 将数据写入的文件
+ * @param rollingPolicy           Policy based on which files will be rolled over. 基于哪些文件将被转动的策略
+ * @param conf                    SparkConf that is used to pass on extra configurations 用于传递额外配置的SparkConf
+ * @param bufferSize              Optional buffer size. Used mainly for testing. 可选缓冲区大小,主要用于测试。
  */
 private[spark] class RollingFileAppender(
     inputStream: InputStream,
@@ -92,6 +92,7 @@ private[spark] class RollingFileAppender(
       logDebug(s"Attempting to rollover file $activeFile to file $rolloverFile")
       if (activeFile.exists) {
         if (!rolloverFile.exists) {
+          //google.common.io
           Files.move(activeFile, rolloverFile)
           logInfo(s"Rolled over $activeFile to $rolloverFile")
         } else {

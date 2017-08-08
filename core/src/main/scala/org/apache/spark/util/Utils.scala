@@ -52,7 +52,7 @@ import org.apache.spark.serializer.{DeserializationStream, SerializationStream, 
 
 /**
   * CallSite represents a place in user code. It can have a short and a long form.
-  * CallSite代表用户代码中的一个位置,它可以有一个短而长的形式。
+  * CallSite代表用户代码中的一个位置,它可以有一个短而长的形式
   * */
 private[spark] case class CallSite(shortForm: String, longForm: String)
 
@@ -71,10 +71,10 @@ private[spark] object Utils extends Logging {
   /**
    * Define a default value for driver memory here since this value is referenced across the code
    * base and nearly all files already use Utils.scala
-   * 这里定义驱动程序内存的默认值，因为该值是跨代码引用的基础和几乎所有的文件已经使用Utils.scala
+   * 这里定义驱动程序内存的默认值,因为该值是跨代码引用的基础和几乎所有的文件已经使用Utils.scala
    */
   val DEFAULT_DRIVER_MEM_MB = JavaUtils.DEFAULT_DRIVER_MEM_MB.toInt
-  //最大目录创建次数
+  //创建最大目录次数
   private val MAX_DIR_CREATION_ATTEMPTS: Int = 10
   @volatile private var localRootDirs: Array[String] = null
 
@@ -208,7 +208,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Primitive often used when writing [[java.nio.ByteBuffer]] to [[java.io.DataOutput]]
-   * 使用原始写操作ByteBuffer到DataOutput
+   * 使用原始nio.ByteBuffer写到io.DataOutput操作
    */
   def writeByteBuffer(bb: ByteBuffer, out: ObjectOutput): Unit = {
     //来检查是否支持访问数组
@@ -219,6 +219,7 @@ private[spark] object Utils extends Logging {
       //array 返回支持此缓冲区的字节数组
       out.write(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining())
     } else {
+      //remaining 返回剩余的可用长度,此长度为实际读取的数据长度
       val bbval = new Array[Byte](bb.remaining())
       bb.get(bbval)
       out.write(bbval)
@@ -264,7 +265,7 @@ private[spark] object Utils extends Logging {
         }
       } catch { case e: SecurityException => dir = null; }
     }
-
+    //返回不带.号的绝对路径
     dir.getCanonicalFile
   }
 
@@ -1279,7 +1280,7 @@ private[spark] object Utils extends Logging {
   /**
    * Execute a block of code that evaluates to Unit, stop SparkContext is there is any uncaught
    * exception
-   * 执行一个计算单元的代码块,停止sparkcontext未捕获的异常
+   * 执行一个计算单元的代码块,未捕获的异常停止sparkcontext
    * NOTE: This method is to be called by the driver-side components to avoid stopping the
    * user-started JVM process completely; in contrast, tryOrExit is to be called in the
    * spark-started JVM process .
@@ -1983,6 +1984,7 @@ private[spark] object Utils extends Logging {
       // make sure to handle if the path has a fragment (applies to yarn
       // distributed cache)
       //确保处理路径有片段（适用于YAR分布式缓存）
+      //获取Uri中的Fragment部分,即harvic
       if (uri.getFragment() != null) {
         val absoluteURI = new File(uri.getPath()).getAbsoluteFile().toURI()
         return new URI(absoluteURI.getScheme(), absoluteURI.getHost(), absoluteURI.getPath(),
@@ -2051,7 +2053,7 @@ private[spark] object Utils extends Logging {
 
   /** 
    *  Load properties present in the given file. 
-   *  在给定文件中的加载属性
+   *  加载给定文件中的属性
    *  */
   def getPropertiesFromFile(filename: String): Map[String, String] = {
     val file = new File(filename)
@@ -2062,6 +2064,7 @@ private[spark] object Utils extends Logging {
     try {
       val properties = new Properties()
       properties.load(inReader)
+      //stringPropertyNames 返回此属性列表中的一组键,键对应的值是字符串,properties(k).trim取出的是值
       properties.stringPropertyNames().map(k => (k, properties(k).trim)).toMap
     } catch {
       case e: IOException =>

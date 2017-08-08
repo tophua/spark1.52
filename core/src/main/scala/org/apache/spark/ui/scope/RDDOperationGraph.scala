@@ -30,6 +30,7 @@ import org.apache.spark.storage.StorageLevel
  * Each graph is defined with a set of edges and a root cluster, which may contain children
  * nodes and children clusters. Additionally, a graph may also have edges that enter or exit
  * the graph from nodes that belong to adjacent graphs.
+  * 每个图都使用一组边和一个根集群来定义,它可以包含子节点和子集,此外,图形还可能具有从属于相邻图形的节点进入或退出图形的边
  */
 private[ui] case class RDDOperationGraph(
     edges: Seq[RDDOperationEdge],
@@ -37,20 +38,24 @@ private[ui] case class RDDOperationGraph(
     incomingEdges: Seq[RDDOperationEdge],
     rootCluster: RDDOperationCluster)
 
-/** A node in an RDDOperationGraph. This represents an RDD. */
+/** A node in an RDDOperationGraph. This represents an RDD.
+  * RDDOperationGraph中的一个节点,这代表RDD*/
 private[ui] case class RDDOperationNode(id: Int, name: String, cached: Boolean)
 
 /**
  * A directed edge connecting two nodes in an RDDOperationGraph.
  * This represents an RDD dependency.
+  * 连接RDDOperationGraph中的两个节点的有向边,这表示RDD相关性
  */
 private[ui] case class RDDOperationEdge(fromId: Int, toId: Int)
 
 /**
  * A cluster that groups nodes together in an RDDOperationGraph.
+  * 在RDDOperationGraph中将节点组合在一起的集群
  *
  * This represents any grouping of RDDs, including operation scopes (e.g. textFile, flatMap),
  * stages, jobs, or any higher level construct. A cluster may be nested inside of other clusters.
+  * 这表示任何分组的RDD,包括操作范围(例如textFile,flatMap),阶段,作业或任何更高级别的构造,集群可以嵌套在其他集群中,
  */
 private[ui] class RDDOperationCluster(val id: String, private var _name: String) {
   private val _childNodes = new ListBuffer[RDDOperationNode]
@@ -66,7 +71,7 @@ private[ui] class RDDOperationCluster(val id: String, private var _name: String)
     _childClusters += childCluster
   }
 
-  /** Return all the nodes which are cached. */
+  /** Return all the nodes which are cached.返回所有缓存的节点 */
   def getCachedNodes: Seq[RDDOperationNode] = {
     _childNodes.filter(_.cached) ++ _childClusters.flatMap(_.getCachedNodes)
   }

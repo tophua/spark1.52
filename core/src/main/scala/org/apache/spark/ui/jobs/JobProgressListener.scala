@@ -155,7 +155,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
   }
 
   /** If stages is too large, remove and garbage collect old stages
-    * 如果阶段太大，删除和垃圾收集旧阶段*/
+    * 如果阶段太大,删除和垃圾收集旧阶段*/
   private def trimStagesIfNecessary(stages: ListBuffer[StageInfo]) = synchronized {
     if (stages.size > retainedStages) {
       val toRemove = math.max(retainedStages / 10, 1)
@@ -168,7 +168,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
   }
 
   /** If jobs is too large, remove and garbage collect old jobs
-    * 如果作业太大，请移除垃圾收集旧作业*/
+    * 如果作业太大,请移除垃圾收集旧作业*/
   private def trimJobsIfNecessary(jobs: ListBuffer[JobUIData]) = synchronized {
     if (jobs.size > retainedJobs) {
       val toRemove = math.max(retainedJobs / 10, 1)

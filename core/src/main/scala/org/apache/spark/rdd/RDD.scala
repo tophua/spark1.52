@@ -81,6 +81,7 @@ import org.apache.spark.util.random.{
  * [[http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf Spark paper]] for more details
  * on RDD internals.
  * RDD主构造器
+  * 在泛型中，type T是被擦除的,ClassTag只包含实际运行时的类的类型,ClassTag会帮我们存储T的信息
  */
 abstract class RDD[T: ClassTag](
     //在所有有父子关系的RDD,共享的是同一个SparkContext

@@ -39,15 +39,23 @@ import org.apache.spark.storage._
  * and forwards-compatibility guarantees: any version of Spark should be able to read JSON output
  * written by any other version, including newer versions.
  *
+  * 将SparkListener事件序列化到/从JSON，该协议提供强大的向后兼容性和前向兼容性保证：
+  * 任何版本的Spark应该能够读取任何其他版本的JSON输出，包括较新版本
+  *
  * JsonProtocolSuite contains backwards-compatibility tests which check that the current version of
  * JsonProtocol is able to read output written by earlier versions.  We do not currently have tests
  * for reading newer JSON output with older Spark versions.
+  *
+  * JsonProtocolSuite包含向后兼容性测试，检查当前版本的JsonProtocol是否能够读取较早版本的输出，
+  * 我们目前没有使用旧的Spark版本读取较新的JSON输出的测试。
  *
  * To ensure that we provide these guarantees, follow these rules when modifying these methods:
- *
- *  - Never delete any JSON fields.
+ *　为确保我们提供这些保证，修改这些方法时请遵循以下规则：
+  *
+ *  - Never delete any JSON fields.　不要删除任何JSON字段
  *  - Any new JSON fields should be optional; use `Utils.jsonOption` when reading these fields
  *    in `*FromJson` methods.
+  *   任何新的JSON字段都应该是可选的; 在`* FromJson`方法中读取这些字段时使用`Utils.jsonOption`。
  */
 private[spark] object JsonProtocol {
   // TODO: Remove this file and put JSON serialization into each individual class.
@@ -429,6 +437,7 @@ private[spark] object JsonProtocol {
 
   /** ------------------------------ *
    * Util JSON serialization methods |
+    *Util JSON序列化方法　　　　　　　　　|
    * ------------------------------- */
 
   def mapToJson(m: Map[String, String]): JValue = {

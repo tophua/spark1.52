@@ -298,6 +298,8 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    * This method returns either an array with the contents of the entire block or an iterator
    * containing the values of the block (if the array would have exceeded available memory).
     * 此方法返回具有整个块的内容的数组或包含块的值的迭代器(如果数组将超过可用内存)
+    * Either 一个函数(或方法)在传入不同参数时会返回不同的值,返回值是两个不相关的类型
+    * 分别为：Left和Right,惯例中我们一般认为Left包含错误或无效值,Right包含正确或有效值
    */
   def unrollSafely(
       blockId: BlockId,

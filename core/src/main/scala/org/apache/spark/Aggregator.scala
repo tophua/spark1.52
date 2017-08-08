@@ -28,10 +28,11 @@ import org.apache.spark.util.collection.{AppendOnlyMap, ExternalAppendOnlyMap}
  * shuffle中的aggregate操作实际是把一个KV对的集合,变成一个KC对的map,C是指combiner,是V聚合成的结果.
  * Aggregator的三个类型参数K,V,C即代表Key的类型,Value的类型和Combiner的类型。
  * 
- * @param createCombiner function to create the initial value of the aggregation.
- * @param mergeValue function to merge a new value into the aggregation result.
- * @param mergeCombiners function to merge outputs from multiple mergeValue function.
+ * @param createCombiner function to create the initial value of the aggregation.函数创建聚合的初始值
+ * @param mergeValue function to merge a new value into the aggregation result.将新值合并到聚合结果中的功能
+ * @param mergeCombiners function to merge outputs from multiple mergeValue function.用于合并来自多个mergeValue函数的输出
  */
+
 @DeveloperApi
 case class Aggregator[K, V, C] (
     createCombiner: V => C,//描述了对于原KV对里由一个Value生成Combiner,以作为聚合的起始点

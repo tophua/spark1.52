@@ -95,7 +95,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
       val tailer = s"(${s.numCompletedTasks()} + ${s.numActiveTasks()}) / $total]"
       val w = width - header.length - tailer.length
       val bar = if (w > 0) {
-        //进度百分数
+        //进度百分数=w*完成任务数/总数
         val percent = w * s.numCompletedTasks() / total
         (0 until w).map { i =>
           if (i < percent) "=" else if (i == percent) ">" else " "

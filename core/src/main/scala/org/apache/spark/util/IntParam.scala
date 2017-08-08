@@ -22,6 +22,7 @@ package org.apache.spark.util
   * 用于将字符串解析为整数的提取器对象
  */
 private[spark] object IntParam {
+  //在一个类的半生对象中定义apply方法,在生成这个类的对象时,就省去了new关键字
   def unapply(str: String): Option[Int] = {
     try {
       Some(str.toInt)

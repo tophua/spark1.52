@@ -34,7 +34,7 @@ import org.apache.spark.util.collection.OpenHashSet
  * :: DeveloperApi ::
  * Estimates the sizes of Java objects (number of bytes of memory they occupy), for use in
  * memory-aware caches.
- * java对象的大小估计(内存占用的字节数),用于在内存中的缓存
+ * 估算java对象的大小(内存占用的字节数),用于在内存中的缓存
  * Based on the following JavaWorld article:
  * http://www.javaworld.com/javaworld/javaqa/2003-12/02-qa-1226-sizeof.html
  */
@@ -45,7 +45,7 @@ object SizeEstimator extends Logging {
    * Estimate the number of bytes that the given object takes up on the JVM heap. The estimate
    * includes space taken up by objects referenced by the given object, their references, and so on
    * and so forth.
-   * 估计给定对象在JVM堆上占用的字节数,估计包括由给定对象引用的对象所占据的空间,它们的引用等等。
+   * 预计给定对象在JVM堆上占用的字节数,预计包括由给定对象引用的对象所占据的空间,它们的引用等等。
    * This is useful for determining the amount of heap space a broadcast variable will occupy on
    * each executor or the amount of space each object will take when caching objects in
    * deserialized form. This is not the same as the serialized size of the object, which will
@@ -127,6 +127,7 @@ object SizeEstimator extends Logging {
     }
 
     // java.vm.info provides compressed ref info for IBM JDKs
+    //java.vm.info为IBM JDK提供压缩的ref信息
     if (System.getProperty("java.vendor").contains("IBM")) {
       return System.getProperty("java.vm.info").contains("Compressed Ref")
     }
@@ -138,6 +139,7 @@ object SizeEstimator extends Logging {
       // NOTE: This should throw an exception in non-Sun JVMs
       //注意：这应该在非Sun JVM中引发异常
       // scalastyle:off classforname
+      //HotSpotDiagnosticMXBean获得运行期间的堆的dump文件
       val hotSpotMBeanClass = Class.forName("com.sun.management.HotSpotDiagnosticMXBean")
       val getVMMethod = hotSpotMBeanClass.getDeclaredMethod("getVMOption",
           Class.forName("java.lang.String"))
@@ -146,6 +148,7 @@ object SizeEstimator extends Logging {
       val bean = ManagementFactory.newPlatformMXBeanProxy(server,
         hotSpotMBeanName, hotSpotMBeanClass)
       // TODO: We could use reflection on the VMOption returned ?
+      //压缩普通对象指针
       getVMMethod.invoke(bean, "UseCompressedOops").toString.contains("true")
     } catch {
       case e: Exception => {
@@ -198,9 +201,9 @@ object SizeEstimator extends Logging {
   private class ClassInfo(
     val shellSize: Long,
     val pointerFields: List[Field]) {}
-/**
- * AnyRef可以对应是java的Object类
- */
+  /**
+   * AnyRef可以对应是java的Object类
+   */
   private def estimate(obj: AnyRef, visited: IdentityHashMap[AnyRef, AnyRef]): Long = {
     val state = new SearchState(visited)
     state.enqueue(obj)

@@ -28,12 +28,15 @@ import org.apache.spark.{Logging, SparkEnv, SparkException}
 
 /**
  * A cleaner that renders closures serializable if they can be done so safely.
+  * 如果可以安全地完成闭包，那么可以将其封闭
  */
 private[spark] object ClosureCleaner extends Logging {
 
   // Get an ASM class reader for a given class from the JAR that loaded it
+  //从加载它的JAR获取给定类的ASM类读取器
   private[util] def getClassReader(cls: Class[_]): ClassReader = {
     // Copy data over, before delegating to ClassReader - else we can run out of open file handles.
+    //在将数据复制到ClassReader之前复制数据,否则我们可以用完开放的文件句柄
     val className = cls.getName.replaceFirst("^.*\\.", "") + ".class"
     val resourceStream = cls.getResourceAsStream(className)
     // todo: Fixme - continuing with earlier behavior ...
@@ -45,6 +48,7 @@ private[spark] object ClosureCleaner extends Logging {
   }
 
   // Check whether a class represents a Scala closure
+  //检查一个类是否代表Scala闭包
   private def isClosure(cls: Class[_]): Boolean = {
     cls.getName.contains("$anonfun$")
   }
@@ -73,6 +77,7 @@ private[spark] object ClosureCleaner extends Logging {
   }
   /**
    * Return a list of classes that represent closures enclosed in the given closure object.
+    * 返回表示封闭对象的类的列表
    */
   private def getInnerClosureClasses(obj: AnyRef): List[Class[_]] = {
     val seen = Set[Class[_]](obj.getClass)
@@ -107,9 +112,11 @@ private[spark] object ClosureCleaner extends Logging {
 
   /**
    * Clean the given closure in place.
+    * 清洁给定的闭合位置
    *
    * More specifically, this renders the given closure serializable as long as it does not
    * explicitly reference unserializable objects.
+    * 更具体地说,这使得给定的闭包可以串行化,只要它不明确地引用不可序列化的对象即可
    *
    * @param closure the closure to clean
    * @param checkSerializable whether to verify that the closure is serializable after cleaning

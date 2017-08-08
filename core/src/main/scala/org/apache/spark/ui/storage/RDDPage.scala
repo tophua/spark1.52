@@ -49,7 +49,7 @@ private[ui] class RDDPage(parent: StorageTab) extends WebUIPage("rdd") {
     val rddStorageInfo = AllRDDResource.getRDDStorageInfo(rddId, listener, includeDetails = true)
       .getOrElse {
         // Rather than crashing, render an "RDD Not Found" page
-        //而不是崩溃，渲染“找不到RDD”页面
+        //而不是崩溃,渲染“找不到RDD”页面
         return UIUtils.headerSparkPage("RDD Not Found", Seq[Node](), parent)
       }
 

@@ -119,9 +119,10 @@ private[spark] class ExecutorAllocationManager(
   private val testing = conf.getBoolean("spark.dynamicAllocation.testing", false)
 
   // TODO: The default value of 1 for spark.executor.cores works right now because dynamic
+  //spark.executor.cores的默认值为1,因为动态
   // allocation is only supported for YARN and the default number of cores per executor in YARN is
   // 1, but it might need to be attained differently for different cluster managers
-  //YARN仅支持分配，YARN中每个执行者的默认核心数量为1,但是对于不同的集群管理器,可能需要不同的方式实现
+  //YARN仅支持分配,YARN中每个执行者的默认核心数量为1,但是对于不同的集群管理器,可能需要不同的方式实现
   //为每个任务分配的内核数
   private val tasksPerExecutor =
     conf.getInt("spark.executor.cores", 1) / conf.getInt("spark.task.cpus", 1)
@@ -148,8 +149,8 @@ private[spark] class ExecutorAllocationManager(
 
   // A timestamp of when an addition should be triggered, or NOT_SET if it is not set
   // This is set when pending tasks are added but not scheduled yet
-  //何时触发添加的时间戳，如果未设置，则为NOT_SET当待添加但尚未安排的任务已设置
-  //应该触发加法的时间戳，如果未设置则为NOT_SET,这是在添加但未安排的挂起任务时设置的
+  //何时触发添加的时间戳,如果未设置,则为NOT_SET当待添加但尚未安排的任务已设置
+  //应该触发加法的时间戳,如果未设置则为NOT_SET,这是在添加但未安排的挂起任务时设置
   private var addTime: Long = NOT_SET
 
   // A timestamp for each executor of when the executor should be removed, indexed by the ID
@@ -246,7 +247,6 @@ private[spark] class ExecutorAllocationManager(
    * Register for scheduler callbacks to decide when to add and remove executors, and start
    * the scheduling task.
    * 启动调度任务,注册调度回调方法来决定添加和删除的Executor
-   * 
    */
   def start(): Unit = {
     //将ExecutorAllocationListener添加LiveListenerBus中    
@@ -279,7 +279,7 @@ private[spark] class ExecutorAllocationManager(
    * 最大Executros数
    * The maximum number of executors we would need under the current load to satisfy all running
    * and pending tasks, rounded up.
-    * 在目前的负载下,我们需要的最大执行数达到所有正在运行的和待处理的任务的数量。
+    *在目前的负载下,我们需要的最大执行数达到所有正在运行的和待处理的任务的数量。
    */
   private def maxNumExecutorsNeeded(): Int = {
     val numRunningOrPendingTasks = listener.totalPendingTasks + listener.totalRunningTasks

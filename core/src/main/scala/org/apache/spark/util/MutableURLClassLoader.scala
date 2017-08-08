@@ -26,6 +26,8 @@ import scala.collection.JavaConversions._
 /**
  * URL class loader that exposes the `addURL` and `getURLs` methods in URLClassLoader.
   *在URLClassLoader中显示“addURL”和“getURLs”方法的URL类加载器
+  * URLClassLoader是ClassLoader的子类,它用于从指向JAR文件和目录的URL的搜索路径加载类和资源
+  * 也就是说,通过URLClassLoader就可以加载指定jar中的class到内存中。
  */
 private[spark] class MutableURLClassLoader(urls: Array[URL], parent: ClassLoader)
   extends URLClassLoader(urls, parent) {

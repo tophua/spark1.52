@@ -48,7 +48,7 @@ import org.apache.spark.util.{ChildFirstURLClassLoader, MutableURLClassLoader, U
 /**
  * Whether to submit, kill, or request the status of an application.
  * The latter two operations are currently supported only for standalone cluster mode.
- * 是否提交，删除或请求应用程序的状态,后两个模式支持独立模式及集群模式
+ * 是否提交,删除或请求应用程序的状态,后两个操作目前仅支持独立集群模式.
  */
 private[deploy] object SparkSubmitAction extends Enumeration {
   type SparkSubmitAction = Value
@@ -80,11 +80,11 @@ object SparkSubmit {
 
   // A special jar name that indicates the class being run is inside of Spark itself, and therefore
   // no user jar is needed.
-  //一个特殊的jar名称,表示正在运行的类在Spark本身之内,因此不需要用户jar
+  //一个特殊的jar名称,表示正在运行的类在Spark自身之内,因此不需要用户jar
   private val SPARK_INTERNAL = "spark-internal"//
 
   // Special primary resource names that represent shells rather than application jars.
-  //代表shell而不是应用程序jar的特殊主要资源名称
+  //代表shell,而不是应用程序jar,特殊的主要资源名称
   private val SPARK_SHELL = "spark-shell"
   private val PYSPARK_SHELL = "pyspark-shell"
   private val SPARKR_SHELL = "sparkr-shell"
@@ -94,8 +94,12 @@ object SparkSubmit {
   private val CLASS_NOT_FOUND_EXIT_STATUS = 101
 
   // scalastyle:off println,关闭打印
-  // Exposed for testing,暴露测试  
+  // Exposed for testing,暴露测试
+  //System.exit(0)是正常退出程序是将你的整个虚拟机里的内容都停掉了,而System.exit(1)或者说非0表示非正常退出程序
   private[spark] var exitFn: Int => Unit = (exitCode: Int) => System.exit(exitCode)
+  //System.out在JVM和操作系统都具有缓存功能,就是你输出的东西不一定实时输出,有时候会积攒到一定数量才会输出,
+  //System.err会实时输出,单独使用的话可能感觉不到,如果两种方式混合使用就会发现了。
+  //err是运行期异常和错误反馈的输出流的方向或者system.out被重定向以后,需要立即让用户注意到的信息的输出
   private[spark] var printStream: PrintStream = System.err
   private[spark] def printWarning(str: String): Unit = printStream.println("Warning: " + str)
   private[spark] def printErrorAndExit(str: String): Unit = {
@@ -265,8 +269,8 @@ object SparkSubmit {
     // Because "yarn-cluster" and "yarn-client" encapsulate both the master
     // and deploy mode, we have some logic to infer the master and deploy mode
     // from each other if only one is specified, or exit early if they are at odds.
-    //因为“yarn集群”和“yarn客户端”都封装了主机和部署模式，所以我们有一些逻辑可以推断主机和部署模式，
-    //如果只有一个被指定，或者如果它们有差异
+    //因为“yarn集群”和“yarn客户端”都封装了主机和部署模式,所以我们有一些逻辑可以推断主机和部署模式,
+    //如果只有一个被指定,或者如果它们有差异
     if (clusterManager == YARN) {
       if (args.master == "yarn-standalone") {
         printWarning("\"yarn-standalone\" is deprecated. Use \"yarn-cluster\" instead.")
@@ -284,7 +288,7 @@ object SparkSubmit {
       }
 
       // Make sure YARN is included in our build if we're trying to use it
-      //如果我们试图使用它，请确保YARN已包含在我们的构建中
+      //如果我们试图使用它,请确保YARN已包含在我们的构建中
       if (!Utils.classIsLoadable("org.apache.spark.deploy.yarn.Client") && !Utils.isTesting) {
         printErrorAndExit(
           "Could not load YARN classes. " +
@@ -305,12 +309,14 @@ object SparkSubmit {
     // Resolve maven dependencies if there are any and add classpath to jars. Add them to py-files
     // too for packages that include Python code
     //解决maven依赖关系,如果有任何的,并添加classpath到jar.将它们添加到包含Python代码的包中的py文件中
+    //排除
     val exclusions: Seq[String] =
       if (!StringUtils.isBlank(args.packagesExclusions)) {
         args.packagesExclusions.split(",")
       } else {
         Nil
       }
+
     val resolvedMavenCoordinates = SparkSubmitUtils.resolveMavenCoordinates(args.packages,
       Option(args.repositories), Option(args.ivyRepoPath), exclusions = exclusions)
     if (!StringUtils.isBlank(resolvedMavenCoordinates)) {
@@ -468,6 +474,7 @@ object SparkSubmit {
 
     // A list of rules to map each argument to system properties or command-line options in
     // each deploy mode; we iterate through these below
+    //在每个部署模式下将每个参数映射到系统属性或命令行选项的规则列表,我们重复下面这些
     val options = List[OptionAssigner](
 
       // All cluster managers
@@ -613,7 +620,7 @@ object SparkSubmit {
     }
 
     // In yarn-cluster mode, use yarn.Client as a wrapper around the user class
-    //在yarn群集模式下，使用yarn客户端作为用户类的包装
+    //在yarn群集模式下,使用yarn客户端作为用户类的包装
     if (isYarnCluster) {
       childMainClass = "org.apache.spark.deploy.yarn.Client"
       if (args.isPython) {
@@ -865,14 +872,15 @@ object SparkSubmit {
  *  */
 private[spark] object SparkSubmitUtils {
 
-  // Exposed for testing
+  // Exposed for testing 暴露于测试
   var printStream = SparkSubmit.printStream
 
   /**
    * Represents a Maven Coordinate
-   * @param groupId the groupId of the coordinate
-   * @param artifactId the artifactId of the coordinate
-   * @param version the version of the coordinate
+    * 代表一个Maven坐标
+   * @param groupId the groupId of the coordinate 这个坐标的GroupID
+   * @param artifactId the artifactId of the coordinate 该坐标的artifactId
+   * @param version the version of the coordinate 该坐标的版本
    */
   private[deploy] case class MavenCoordinate(groupId: String, artifactId: String, version: String) {
     override def toString: String = s"$groupId:$artifactId:$version"
@@ -881,6 +889,7 @@ private[spark] object SparkSubmitUtils {
 /**
  * Extracts maven coordinates from a comma-delimited string. Coordinates should be provided
  * in the format `groupId:artifactId:version` or `groupId/artifactId:version`.
+  * 从逗号分隔的字符串中提取maven坐标,坐标应以“groupId：artifactId：version”或“groupId / artifactId：version”格式提供
  * @param coordinates Comma-delimited string of maven coordinates
  * @return Sequence of Maven coordinates
  */
@@ -1044,12 +1053,13 @@ private[spark] object SparkSubmitUtils {
   /**
    * Resolves any dependencies that were supplied through maven coordinates
     * 解决通过maven坐标提供的任何依赖关系
-   * @param coordinates Comma-delimited string of maven coordinates
-   * @param remoteRepos Comma-delimited string of remote repositories other than maven central
-   * @param ivyPath The path to the local ivy repository
-   * @param exclusions Exclusions to apply when resolving transitive dependencies
+   * @param coordinates Comma-delimited string of maven coordinates 逗号分隔的maven坐标字符串
+   * @param remoteRepos Comma-delimited string of remote repositories other than maven central 以逗号分隔的远程存储库字符串，而不是maven中心
+   * @param ivyPath The path to the local ivy repository 通往ivy仓库的路径
+   * @param exclusions Exclusions to apply when resolving transitive dependencies 解决传递依赖关系时应用的排除
    * @return The comma-delimited path to the jars of the given maven artifacts including their
    *         transitive dependencies
+    *         指定maven工件的jar的逗号分隔的路径,包括它们的传递依赖关系
    */
   def resolveMavenCoordinates(
       coordinates: String,
@@ -1063,6 +1073,7 @@ private[spark] object SparkSubmitUtils {
       val sysOut = System.out
       try {
         // To prevent ivy from logging to system out
+        //防止ivy进入系统
         System.setOut(printStream)
         val artifacts = extractMavenCoordinates(coordinates)
         // Default configuration name for ivy
@@ -1071,6 +1082,7 @@ private[spark] object SparkSubmitUtils {
         val ivySettings: IvySettings = new IvySettings
         // Directories for caching downloads through ivy and storing the jars when maven coordinates
         // are supplied to spark-submit
+        //用于通过ivy来缓存下载的目录,并且在提供maven坐标时将其存储在spark-submit中
         val alternateIvyCache = ivyPath.getOrElse("")
         val packagesDirectory: File =
           if (alternateIvyCache == null || alternateIvyCache.trim.isEmpty) {
@@ -1094,10 +1106,12 @@ private[spark] object SparkSubmitUtils {
 
         val ivy = Ivy.newInstance(ivySettings)
         // Set resolve options to download transitive dependencies as well
+        //设置解决方案来下载传递依赖关系
         val resolveOptions = new ResolveOptions
         resolveOptions.setTransitive(true)
         val retrieveOptions = new RetrieveOptions
         // Turn downloading and logging off for testing
+        //转载下载并关闭测试
         if (isTest) {
           resolveOptions.setDownload(false)
           resolveOptions.setLog(LogOptions.LOG_QUIET)
@@ -1107,6 +1121,7 @@ private[spark] object SparkSubmitUtils {
         }
 
         // A Module descriptor must be specified. Entries are dummy strings
+        //必须指定模块描述符,条目是虚拟字符串
         val md = getModuleDescriptor
         // clear ivy resolution from previous launches. The resolution file is usually at
         // ~/.ivy2/org.apache.spark-spark-submit-parent-default.xml. In between runs, this file
@@ -1120,18 +1135,22 @@ private[spark] object SparkSubmitUtils {
         md.setDefaultConf(ivyConfName)
 
         // Add exclusion rules for Spark and Scala Library
+        //添加Spark和Scala Library的排除规则
         addExclusionRules(ivySettings, ivyConfName, md)
         // add all supplied maven artifacts as dependencies
+        //将所有提供的maven工件添加为依赖关系
         addDependenciesToIvy(md, artifacts, ivyConfName)
         exclusions.foreach { e =>
           md.addExcludeRule(createExclusion(e + ":*", ivySettings, ivyConfName))
         }
         // resolve dependencies
+        //解决依赖关系
         val rr: ResolveReport = ivy.resolve(md, resolveOptions)
         if (rr.hasError) {
           throw new RuntimeException(rr.getAllProblemMessages.toString)
         }
         // retrieve all resolved dependencies
+        //检索所有已解析的依赖项
         ivy.retrieve(rr.getModuleDescriptor.getModuleRevisionId,
           packagesDirectory.getAbsolutePath + File.separator +
             "[organization]_[artifact]-[revision].[ext]",

@@ -37,15 +37,19 @@ import org.apache.spark.util.Utils
  * such as a counter, these might be the same operation. In that case, you can use the simpler
  * [[org.apache.spark.Accumulator]]. They won't always be the same, though -- e.g., imagine you are
  * accumulating a set. You will add items to the set, and you will union two sets together.
+  *
+  *必须定义如何添加数据,以及如何将其中的两个合并在一起,对于一些数据类型,如计数器,这些可能是相同的操作,
+  * 在这种情况下,您可以使用更简单的[[org.apache.spark.Accumulator]],尽管如此,他们并不总是相同的,
+  * 例如,想象你正在积累一套,您将添加项目到集合,将联合两个集合在一起
  *
- * @param initialValue initial value of accumulator
- * @param param helper object defining how to add elements of type `R` and `T`
- * @param name human-readable name for use in Spark's web UI
+ * @param initialValue initial value of accumulator 累加器的初始值
+ * @param param helper object defining how to add elements of type `R` and `T` 帮助对象定义如何添加类型“R”和“T”的元素
+ * @param name human-readable name for use in Spark's web UI 在Spark的Web UI中使用的可读名称
  * @param internal if this [[Accumulable]] is internal. Internal [[Accumulable]]s will be reported
  *                 to the driver via heartbeats. For internal [[Accumulable]]s, `R` must be
  *                 thread safe so that they can be reported correctly.
- * @tparam R the full accumulated data (result type)
- * @tparam T partial data that can be added in
+ * @tparam R the full accumulated data (result type) 全部累积数据(结果类型)
+ * @tparam T partial data that can be added in 可以添加的部分数据
  */
 class Accumulable[R, T] private[spark] (
     @transient initialValue: R,

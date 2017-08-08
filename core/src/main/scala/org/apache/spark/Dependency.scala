@@ -36,16 +36,17 @@ abstract class Dependency[T] extends Serializable {
 /**
  * :: DeveloperApi ::
  * Base class for dependencies where each partition of the child RDD depends on a small number
- * of partitions of the parent RDD. Narrow dependencies allow for pipelined execution(线性执行).
+ * of partitions of the parent RDD. Narrow dependencies allow for pipelined execution.
  * 依赖在每个分区的子RDD取决于少数的父RDD分区基类,窄的依赖关系允许流水线执行
  */
 @DeveloperApi
 abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
   /**
    * Get the parent partitions for a child partition.
-    * 获取子分区的父分区
-   * @param partitionId a partition of the child RDD
+    * 获取子分区所依赖的父RDD的分区
+   * @param partitionId a partition of the child RDD 子RDD的分区
    * @return the partitions of the parent RDD that the child partition depends upon
+    *         子分区所依赖的父RDD的分区
    */
   def getParents(partitionId: Int): Seq[Int]//返回子rdd的partitionId依赖的所有父Rdd的partitions
 
@@ -59,17 +60,20 @@ abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
  * the RDD is transient since we don't need it on the executor side.
   * 表示对洗牌阶段的输出的依赖,请注意,在洗牌的情况下,RDD是暂时性的,因为我们不需要它在执行者端。
  * 宽依赖,子RDD依赖于parent RDD的所有partition,Spark根据宽依赖将DAG划分不同的Stage
- * @param _rdd the parent RDD
- * @param partitioner partitioner used to partition the shuffle output
+ * @param _rdd the parent RDD 父RDD
+ * @param partitioner partitioner used to partition the shuffle output 分区器用于分区随机输出
  * @param serializer [[org.apache.spark.serializer.Serializer Serializer]] to use. If set to None,
  *                   the default serializer, as specified by `spark.serializer` config option, will
  *                   be used.
- * @param keyOrdering key ordering for RDD's shuffles
- * @param aggregator map/reduce-side aggregator for RDD's shuffle
+  *                   如果设置为None,将使用由`spark.serializer`配置选项指定的默认序列化程序
+ * @param keyOrdering key ordering for RDD's shuffles 关键排序RDD的洗牌
+ * @param aggregator map/reduce-side aggregator for RDD's shuffle, map / reduce-side聚合器用于RDD的洗牌
  * @param mapSideCombine whether to perform partial aggregation (also known as map-side combine)
+  *                       是否执行部分聚合(也称为映射侧组合)
  */
 @DeveloperApi
 class ShuffleDependency[K, V, C](
+    //scala <:中上界类型限定,是指他必须是Product2[K,_]的子类型
     @transient _rdd: RDD[_ <: Product2[K, V]],
     val partitioner: Partitioner,
     val serializer: Option[Serializer] = None,

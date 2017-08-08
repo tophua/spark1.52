@@ -27,7 +27,8 @@ import org.apache.spark.JobExecutionStatus
 import org.apache.spark.ui.jobs.UIData.{ExecutorUIData, JobUIData}
 import org.apache.spark.ui.{ToolTips, UIUtils, WebUIPage}
 
-/** Page showing list of all ongoing and recently finished jobs */
+/** Page showing list of all ongoing and recently finished jobs
+  * 页面显示所有正在进行和最近完成的工作的列表*/
 private[ui] class AllJobsPage(parent: JobsTab) extends WebUIPage("") {
   private val JOBS_LEGEND =
     <div class="legend-area"><svg width="150px" height="85px">

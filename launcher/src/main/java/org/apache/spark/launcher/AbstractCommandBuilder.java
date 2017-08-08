@@ -249,13 +249,15 @@ abstract class AbstractCommandBuilder {
   /**
    * Adds entries to the classpath.
    * 将条目添加到类路径
-   * @param cp List to which the new entries are appended.
+   * @param cp List to which the new entries are appended.添加新条目的列表
    * @param entries New classpath entries (separated by File.pathSeparator).
+   *                新的类路径条目(由File.pathSeparator分隔)
    */
   private void addToClassPath(List<String> cp, String entries) {
     if (isEmpty(entries)) {
       return;
     }
+    //使用quote()方法后,将”.*”转换为了它的字面量意思,也就是只能匹配”.*”字符串
     String[] split = entries.split(Pattern.quote(File.pathSeparator));
     for (String entry : split) {
       if (!isEmpty(entry)) {

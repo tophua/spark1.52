@@ -50,7 +50,7 @@ private[spark] abstract class WebUI(
   protected val pageToHandlers = new HashMap[WebUIPage, ArrayBuffer[ServletContextHandler]]
   protected var serverInfo: Option[ServerInfo] = None
   protected val localHostName = Utils.localHostNameForURI()
-   //Spark master和workers使用的公共DNS（默认空）
+   //Spark master和workers使用的公共DNS(默认空)
   protected val publicHostName = Option(conf.getenv("SPARK_PUBLIC_DNS")).getOrElse(localHostName)
   private val className = Utils.getFormattedClassName(this)
 

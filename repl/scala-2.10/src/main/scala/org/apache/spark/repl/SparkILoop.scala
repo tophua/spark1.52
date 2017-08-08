@@ -50,11 +50,14 @@ import org.apache.spark.util.Utils
 
 /** The Scala interactive shell.  It provides a read-eval-print loop
  *  around the Interpreter class.
+  *  Scala交互式shell,它提供围绕解释器类的读取评估打印循环
  *  After instantiation, clients should call the main() method.
+  *  实例化后,客户端应调用main()方法
  *
  *  If no in0 is specified, then input will come from the console, and
  *  the class will attempt to provide input editing feature such as
  *  input history.
+  *  如果未指定in0,则输入将来自控制台,该类将尝试提供输入历史记录等输入编辑功能
  *
  *  @author Moez A. Abdel-Gawad
  *  @author  Lex Spoon
@@ -69,10 +72,11 @@ class SparkILoop(
   def this(in0: BufferedReader, out: JPrintWriter, master: String) = this(Some(in0), out, Some(master))
   def this(in0: BufferedReader, out: JPrintWriter) = this(Some(in0), out, None)
   def this() = this(None, new JPrintWriter(Console.out, true), None)
-
+  //命令来自的输入流
   private var in: InteractiveReader = _   // the input stream from which commands come
 
   // NOTE: Exposed in package for testing
+  //注意：暴露在包装中进行测试
   private[repl] var settings: Settings = _
 
   private[repl] var intp: SparkIMain = _
@@ -83,6 +87,7 @@ class SparkILoop(
   /** Having inherited the difficult "var-ness" of the repl instance,
    *  I'm trying to work around it by moving operations into a class from
    *  which it will appear a stable prefix.
+    *  继承了repl实例的难点“varness”,我试图通过将操作移到一个类中,从而显示一个稳定的前缀,
    */
   private def onIntp[T](f: SparkIMain => T): T = f(intp)
 
@@ -116,9 +121,9 @@ class SparkILoop(
   implicit def stabilizeIMain(intp: SparkIMain) = new IMainOps[intp.type](intp)
 
   /** TODO -
-   *  -n normalize
-   *  -l label with case class parameter names
-   *  -c complete - leave nothing out
+   *  -n normalize 正常化
+   *  -l label with case class parameter names 标签带有case类参数名称
+   *  -c complete - leave nothing out 完整 - 没有任何东西
    */
   private def typeCommandInternal(expr: String, verbose: Boolean): Result = {
     onIntp { intp =>
@@ -142,19 +147,24 @@ class SparkILoop(
   // lazy val power = new Power(intp, new StdReplVals(this))(tagOfStdReplVals, classTag[StdReplVals])
   private def history = in.history
 
-  /** The context class loader at the time this object was created */
+  /** The context class loader at the time this object was created
+    * 创建此对象时的上下文类加载器 */
   protected val originalClassLoader = Utils.getContextOrSparkClassLoader
 
   // classpath entries added via :cp
+  //通过以下方式添加类路径条目：cp
   private var addedClasspath: String = ""
 
-  /** A reverse list of commands to replay if the user requests a :replay */
+  /** A reverse list of commands to replay if the user requests a :replay
+    * 如果用户请求：重播，重播的命令的反向列表*/
   private var replayCommandStack: List[String] = Nil
 
-  /** A list of commands to replay if the user requests a :replay */
+  /** A list of commands to replay if the user requests a :replay
+    * 如果用户请求：重播，重播命令的列表 */
   private def replayCommands = replayCommandStack.reverse
 
-  /** Record a command for replay should the user request a :replay */
+  /** Record a command for replay should the user request a :replay
+    * 如果用户请求：重播，记录重播命令*/
   private def addReplay(cmd: String) = replayCommandStack ::= cmd
 
   private def savingReplayStack[T](body: => T): T = {
@@ -175,7 +185,8 @@ class SparkILoop(
       command("sc.stop()")
     }
   }
-  /** Close the interpreter and set the var to null. */
+  /** Close the interpreter and set the var to null.
+    * 关闭解释器并将var设置为null */
   private def closeInterpreter() {
     if (intp ne null) {
       sparkCleanUp()
@@ -194,7 +205,7 @@ class SparkILoop(
   }
 
   /**
-   * Constructs a new interpreter.
+   * Constructs a new interpreter.构建新的解释器
    */
   protected def createInterpreter() {
     require(settings != null)
@@ -203,13 +214,16 @@ class SparkILoop(
     val addedJars =
       if (Utils.isWindows) {
         // Strip any URI scheme prefix so we can add the correct path to the classpath
+        //剥离任何URI方案前缀,以便我们可以向类路径添加正确的路径
         // e.g. file:/C:/my/path.jar -> C:/my/path.jar
         SparkILoop.getAddedJars.map { jar => new URI(jar).getPath.stripPrefix("/") }
       } else {
         // We need new URI(jar).getPath here for the case that `jar` includes encoded white space (%20).
+        //我们需要新的URI(jar).getPath这里的“jar”包含编码的空格（％20）的情况。
         SparkILoop.getAddedJars.map { jar => new URI(jar).getPath }
       }
     // work around for Scala bug
+    //为Scala bug工作
     val totalClassPath = addedJars.foldLeft(
       settings.classpath.value)((l, r) => ClassPath.join(l, r))
     this.settings.classpath.value = totalClassPath
@@ -217,7 +231,8 @@ class SparkILoop(
     intp = new SparkILoopInterpreter
   }
 
-  /** print a friendly help message */
+  /** print a friendly help message
+    * 打印友好的帮助信息*/
   private def helpCommand(line: String): Result = {
     if (line == "") helpSummary()
     else uniqueCommand(line) match {
@@ -247,9 +262,11 @@ class SparkILoop(
   private def matchingCommands(cmd: String) = commands filter (_.name startsWith cmd)
   private def uniqueCommand(cmd: String): Option[LoopCommand] = {
     // this lets us add commands willy-nilly and only requires enough command to disambiguate
+    //这让我们可以在willy-nilly中添加命令,只需要足够的命令来消除歧义
     matchingCommands(cmd) match {
       case List(x)  => Some(x)
       // exact match OK even if otherwise appears ambiguous
+        //完全匹配OK即使否则出现模糊
       case xs       => xs find (_.name == cmd)
     }
   }
@@ -268,7 +285,7 @@ class SparkILoop(
       """.stripMargin)
   }
 
-  /** Show the history */
+  /** Show the history 显示历史*/
   private lazy val historyCommand = new LoopCommand("history", "show the history (optional num is commands to show)") {
     override def usage = "[num]"
     def defaultLines = 20
@@ -290,6 +307,7 @@ class SparkILoop(
 
   // When you know you are most likely breaking into the middle
   // of a line being typed.  This softens the blow.
+  //当你知道你最有可能进入打字行的中间时,这软化了打击
   private[repl] def echoAndRefresh(msg: String) = {
     echo("\n" + msg)
     in.redrawLine()
@@ -303,7 +321,7 @@ class SparkILoop(
     out.flush()
   }
 
-  /** Search the history */
+  /** Search the history 搜索历史*/
   private def searchHistory(_cmdline: String) {
     val cmdline = _cmdline.toLowerCase
     val offset  = history.index - history.size + 1
@@ -316,6 +334,7 @@ class SparkILoop(
 
   /**
    * Sets the prompt string used by the REPL.
+    * 设置REPL使用的提示字符串
    *
    * @param prompt The new prompt string
    */
@@ -324,6 +343,7 @@ class SparkILoop(
 
   /**
    * Represents the current prompt string used by the REPL.
+    * 表示REPL使用的当前提示字符串
    *
    * @return The current prompt string
    */
@@ -332,7 +352,7 @@ class SparkILoop(
 
   import LoopCommand.{ cmd, nullary }
 
-  /** Standard commands */
+  /** Standard commands 标准命令*/
   private lazy val standardCommands = List(
     cmd("cp", "<path>", "add a jar or directory to the classpath", addClasspath),
     cmd("help", "[command]", "print this summary or command-specific help", helpCommand),
@@ -356,7 +376,7 @@ class SparkILoop(
     nullary("warnings", "show the suppressed warnings from the most recent line which had any", warningsCommand)
   )
 
-  /** Power user commands */
+  /** Power user commands 强制用户命令*/
   private lazy val powerCommands: List[LoopCommand] = List(
     // cmd("phase", "<phase>", "set the implicit phase for power commands", phaseCommand)
   )
@@ -409,6 +429,7 @@ class SparkILoop(
 
     // If an argument is given, only show a source with that
     // in its name somewhere.
+    //如果给出了一个参数,只能在其名称中显示一个源
     val args     = line split "\\s+"
     val filtered = intp.implicitSymbolsBySource filter {
       case (source, syms) =>
@@ -426,6 +447,7 @@ class SparkILoop(
         p("/* " + syms.size + " implicit members imported from " + source.fullName + " */")
 
         // This groups the members by where the symbol is defined
+        //这将按照定义符号的方式对成员进行分组
         val byOwner = syms groupBy (_.owner)
         val sortedOwners = byOwner.toList sortBy { case (owner, _) => afterTyper(source.info.baseClasses indexOf owner) }
 
@@ -435,6 +457,8 @@ class SparkILoop(
             // if there are more than a couple, and sort each cluster based on name.
             // This is really just trying to make the 100 or so implicits imported
             // by default into something readable.
+            //在每个所有者中,如果有多个对象,我们会根据最终结果类型对结果进行聚类,并根据名称对每个集群进行排序
+            //这实际上只是将默认情况下导入的100个或更多隐含的内容导入可读的内容中。
             val memberGroups: List[List[Symbol]] = {
               val groups = members groupBy (_.tpe.finalResultType) toList
               val (big, small) = groups partition (_._2.size > 3)
@@ -641,6 +665,7 @@ class SparkILoop(
   /** The main read-eval-print loop for the repl.  It calls
    *  command() for each line of input, and stops when
    *  command() returns false.
+    *  repl的主要read-eval-print循环,它为每行输入调用command(),并在command()返回false时停止
    */
   private def loop() {
     def readOneLine() = {
@@ -670,7 +695,8 @@ class SparkILoop(
     innerLoop()
   }
 
-  /** interpret all lines from a specified file */
+  /** interpret all lines from a specified file
+    * 解释指定文件中的所有行 */
   private def interpretAllFrom(file: File) {
     savingReader {
       savingReplayStack {
@@ -683,12 +709,14 @@ class SparkILoop(
     }
   }
 
-  /** create a new interpreter and replay the given commands */
+  /** create a new interpreter and replay the given commands
+    * 创建一个新的解释器并重播给定的命令 */
   private def replay() {
     reset()
     if (replayCommandStack.isEmpty)
       echo("Nothing to replay.")
     else for (cmd <- replayCommands) {
+      //因为也许cmd会有自己的输出
       echo("Replaying: " + cmd)  // flush because maybe cmd will have its own output
       command(cmd)
       echo("")
@@ -715,7 +743,7 @@ class SparkILoop(
     // unleashAndSetPhase()
   }
 
-  /** fork a shell and run a command */
+  /** fork a shell and run a command ork一个shell并运行一个命令*/
   private lazy val shCommand = new LoopCommand("sh", "run a shell command (result is implicitly => List[String])") {
     override def usage = "<command line>"
     def apply(line: String): Result = line match {
@@ -800,8 +828,10 @@ class SparkILoop(
   }
 
   /** Run one command submitted by the user.  Two values are returned:
+    * 运行用户提交的一个命令。返回两个值:
     * (1) whether to keep running, (2) the line to record for replay,
-    * if any. */
+    * if any.
+    * (1)是否继续运行,(2)行至(如果有)记录用于重放*/
   private[repl] def command(line: String): Result = {
     if (line startsWith ":") {
       val cmd = line.tail takeWhile (x => !x.isWhitespace)
@@ -974,6 +1004,7 @@ class SparkILoop(
     addThunk(initializeSpark())
 
     // it is broken on startup; go ahead and exit
+    //启动时坏了 继续退出
     if (intp.reporter.hasErrors)
       return false
 
@@ -984,6 +1015,7 @@ class SparkILoop(
     // message to an rpcEndpoint.
     if (isAsync) {
       intp initialize initializedCallback()
+      //监听信号以运行postInitialization
       createAsyncListener() // listens for signal to run postInitialization
     }
     else {
@@ -1047,7 +1079,8 @@ class SparkILoop(
     master
   }
 
-  /** process command-line arguments and do as they request */
+  /** process command-line arguments and do as they request
+    * 处理命令行参数,并按要求进行操作*/
   def process(args: Array[String]): Boolean = {
     val command = new SparkCommandLine(args.toList, msg => echo(msg))
     def neededHelp(): String =
@@ -1055,6 +1088,7 @@ class SparkILoop(
       (if (command.settings.Xhelp.value) command.xusageMsg + "\n" else "")
 
     // if they asked for no help and command is valid, we call the real main
+    //如果他们要求没有帮助和命令是有效的,我们称之为真正的主要
     neededHelp() match {
       case ""     => command.ok && process(command.settings)
       case help   => echoNoNL(help) ; true
@@ -1082,6 +1116,7 @@ object SparkILoop extends Logging {
   // Designed primarily for use by test code: take a String with a
   // bunch of code, and prints out a transcript of what it would look
   // like if you'd just typed it into the repl.
+  //主要用于测试代码使用：使用一串代码,并打印出如果您刚刚将其输入到副本中,它将会是什么样子的脚本
   private[repl] def runForTranscript(code: String, settings: Settings): String = {
     import java.io.{ BufferedReader, StringReader, OutputStreamWriter }
 
@@ -1089,9 +1124,9 @@ object SparkILoop extends Logging {
       Console.withOut(ostream) {
         val output = new JPrintWriter(new OutputStreamWriter(ostream), true) {
           override def write(str: String) = {
-            // completely skip continuation lines
+            // completely skip continuation lines 完全跳过连续线
             if (str forall (ch => ch.isWhitespace || ch == '|')) ()
-            // print a newline on empty scala prompts
+            // print a newline on empty scala prompts 在空的scala提示上打印换行符
             else if ((str contains '\n') && (str.trim == "scala> ")) super.write("\n")
             else super.write(str)
           }
@@ -1100,6 +1135,7 @@ object SparkILoop extends Logging {
           override def readLine(): String = {
             val s = super.readLine()
             // helping out by printing the line being interpreted.
+            //通过打印线来解释
             if (s != null)
               // scalastyle:off println
               output.println(s)
@@ -1121,6 +1157,7 @@ object SparkILoop extends Logging {
 
   /** Creates an interpreter loop with default settings and feeds
    *  the given code to it as input.
+    *  使用默认设置创建解释器循环,并将给定的代码作为输入
    */
   private[repl] def run(code: String, sets: Settings = new Settings): String = {
     import java.io.{ BufferedReader, StringReader, OutputStreamWriter }

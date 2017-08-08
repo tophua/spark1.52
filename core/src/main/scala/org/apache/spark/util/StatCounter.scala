@@ -22,6 +22,7 @@ package org.apache.spark.util
  * numerically robust way. Includes support for merging two StatCounters. Based on Welford
  * and Chan's [[http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance algorithms]]
  * for running variance.
+  * 用于跟踪一组数字（计数,均值和方差）的统计数据的类数字健壮的方式,包括支持合并两个StatCounters
  *
  * @constructor Initialize the StatCounter with the given values.
  */

@@ -30,6 +30,7 @@ import org.apache.spark.rpc.RpcTimeout
 
 /**
  * Various utility classes for working with Akka.
+  * 与Akka合作的各种实用工具类
  */
 private[spark] object AkkaUtils extends Logging {
 
@@ -37,15 +38,15 @@ private[spark] object AkkaUtils extends Logging {
    * 创建ActorSystem启动ActorSystem
    * Creates an ActorSystem ready for remoting, with various Spark features. Returns both the
    * ActorSystem itself and its port (which is hard to get from Akka).
-    * 创建一个可以远程处理的ActorSystem,具有各种Spark功能,返回ActorSystem本身及其端口(很难从Akka获取)
+    *创建一个可以远程处理的ActorSystem,具有各种Spark功能,返回ActorSystem本身及其端口(很难从Akka获取)
    *
    * Note: the `name` parameter is important(重要), as even if a client sends a message to right
    * host + port, if the system name is incorrect, Akka will drop the message.
-    * 注意：`name`参数很重要,即使客户端发送消息到正确的主机+端口,如果系统名称不正确,Akka将删除该消息。
+    * 注意：`name`参数很重要,即使客户端发送消息到正确的主机+端口,如果系统名称不正确,Akka将删除该消息
    *
    * If indestructible is set to true, the Actor System will continue running in the event
    * of a fatal exception. This is used by [[org.apache.spark.executor.Executor]].
-    * 如果不可破坏设置为true,则在发生致命异常的情况下,Actor系统将继续运行,这由[[org.apache.spark.executor.Executor]]使用。
+    * 如果不可破坏设置为true,则在发生致命异常的情况下,Actor系统将继续运行,这由[[org.apache.spark.executor.Executor]]使用
    */
   def createActorSystem(
       name: String,
@@ -167,9 +168,9 @@ private[spark] object AkkaUtils extends Logging {
   }
 
   /**
-   * 使用ActorSystem向ActorRef发送任何消息,发送每条消息的最大尝试次数maxAttempts,每次间隔时间毫秒etryInterval,请求超时时间timeout秒
    * Send a message to the given actor and get its result within a default timeout, or
    * throw a SparkException if this fails even after the specified number of retries.
+    * 向给定的actor发送消息,并在默认超时内获取其结果,如果即使在指定的重试次数后仍失败,则抛出SparkException
    * maxAttempts   发送每条消息的最大尝试次数
    * retryInterval 间隔为时间毫秒
    * timeout       请求超时时间
@@ -186,12 +187,15 @@ private[spark] object AkkaUtils extends Logging {
       throw new SparkException(s"Error sending message [message = $message]" +
         " as actor is null ")
     }
+    //尝试次数
     var attempts = 0
     var lastException: Exception = null
     while (attempts < maxAttempts) {
       attempts += 1
       try {
+        //向给定的actor发送消息,并在默认超时内获取其结果
         val future = actor.ask(message)(timeout.duration)
+        //堵塞线程
         val result = timeout.awaitResult(future)
         if (result == null) {
           //抛出异常退回

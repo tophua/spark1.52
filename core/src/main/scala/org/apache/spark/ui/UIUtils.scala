@@ -35,7 +35,7 @@ private[spark] object UIUtils extends Logging {
   val TABLE_CLASS_STRIPED_SORTABLE = TABLE_CLASS_STRIPED + " sortable"
 
   // SimpleDateFormat is not thread-safe. Don't expose it to avoid improper use.
-  //SimpleDateFormat不是线程安全的,不要暴露它以避免不当使用。
+  //SimpleDateFormat不是线程安全的,不要暴露它以避免不当使用
   private val dateFormat = new ThreadLocal[SimpleDateFormat]() {
     override def initialValue(): SimpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
   }

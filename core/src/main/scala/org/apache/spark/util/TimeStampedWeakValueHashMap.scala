@@ -27,15 +27,22 @@ import org.apache.spark.Logging
 
 /**
  * A wrapper of TimeStampedHashMap that ensures the values are weakly referenced and timestamped.
- *
+ * TimeStampedHashMap的包装器,可确保值被弱引用和时间戳
+  *
  * If the value is garbage collected and the weak reference is null, get() will return a
  * non-existent value. These entries are removed from the map periodically (every N inserts), as
  * their values are no longer strongly reachable. Further, key-value pairs whose timestamps are
  * older than a particular threshold can be removed using the clearOldValues method.
  *
+  * 如果值为垃圾回收,而弱引用为空,则get()将返回不存在的值。这些条目将从地图中定期删除（每N个插入）,因为它们的值不再强大可访问。
+  * 此外,可以使用clearOldValues方法来删除其时间戳早于特定阈值的键值对。
+  *
  * TimeStampedWeakValueHashMap exposes a scala.collection.mutable.Map interface, which allows it
  * to be a drop-in replacement for Scala HashMaps. Internally, it uses a Java ConcurrentHashMap,
  * so all operations on this HashMap are thread-safe.
+  *
+  * TimeStampedWeakValueHashMap公开了一个scala.collection.mutable.Map接口,它允许它作为Scala HashMaps的替换,
+  * 在内部,它使用Java ConcurrentHashMap,因此这个HashMap上的所有操作都是线程安全的
  *
  * @param updateTimeStampOnGet Whether timestamp of a pair will be updated when it is accessed.
  */

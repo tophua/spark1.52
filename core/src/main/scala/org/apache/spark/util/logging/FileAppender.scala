@@ -29,11 +29,13 @@ import org.apache.spark.util.{IntParam, Utils}
 private[spark] class FileAppender(inputStream: InputStream, file: File, bufferSize: Int = 8192)
   extends Logging {
   @volatile private var outputStream: FileOutputStream = null
+  //该appender被要求停止
   @volatile private var markedForStop = false     // has the appender been asked to stopped
+  //让appender停了
   @volatile private var stopped = false           // has the appender stopped
 
   // Thread that reads the input stream and writes to file
-  //读取输入流并写入文件的线程
+  //读取输入流并线程的写入文件
   private val writingThread = new Thread("File appending thread for " + file) {
     setDaemon(true)
     override def run() {
@@ -138,6 +140,7 @@ private[spark] object FileAppender extends Logging {
     val rollingInterval = conf.get(INTERVAL_PROPERTY, INTERVAL_DEFAULT)
 
     def createTimeBasedAppender(): FileAppender = {
+      //设置Executor日志回滚的时间间隔
       val validatedParams: Option[(Long, String)] = rollingInterval match {
         case "daily" =>
           logInfo(s"Rolling executor logs enabled for $file with daily rolling")

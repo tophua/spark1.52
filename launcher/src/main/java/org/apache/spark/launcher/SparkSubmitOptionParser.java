@@ -145,10 +145,11 @@ class SparkSubmitOptionParser {
    * 解析spark-submit命令行选项的列表
    * <p>
    * See SparkSubmitArguments.scala for a more formal description of available options.
-   * 有关可用选项的更正式说明，请参阅SparkSubmitArguments.scala。
-   * @throws IllegalArgumentException If an error is found during parsing.
+   * 有关可用选项的更正式说明,请参阅SparkSubmitArguments.scala
+   * @throws IllegalArgumentException If an error is found during parsing. 如果在解析期间发现错误
    */
   protected final void parse(List<String> args) {
+      //正测表达式--[^=] 以--开头不包含=
     Pattern eqSeparatedOpt = Pattern.compile("(--[^=]+)=(.+)");
 
     int idx = 0;

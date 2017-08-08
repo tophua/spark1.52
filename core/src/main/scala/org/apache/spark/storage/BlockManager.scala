@@ -1522,7 +1522,7 @@ private[spark] object BlockManager extends Logging {
    * might cause errors if one attempts to read from the unmapped buffer, but it's better than
    * waiting for the GC to find it because that could lead to huge numbers of open files. There's
    * unfortunately no standard API to do this.
-    * 尝试清理ByteBuffer（如果是内存映射）。 如果尝试从未映射的缓冲区中读取，
+    * 尝试清理ByteBuffer(如果是内存映射),如果尝试从未映射的缓冲区中读取
     * 则使用* unsafe * Sun API可能会导致错误，但是比等待GC找到它更好，因为这可能会导致大量的打开文件。
     * 不幸的是没有标准的API来做到这一点。
    * 试图清理ByteBuffer,可能试图从映射的缓冲区读取导致错误

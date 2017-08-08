@@ -28,7 +28,7 @@ object RpcUtils {
   /**
    * 根据名称获取RpcEndpointRef
    * Retrieve a [[RpcEndpointRef]] which is located in the driver via its name.
-    * 通过其名称检索位于驱动程序中的[[RpcEndpointRef]]
+    *通过其名称检索位于驱动程序中的[[RpcEndpointRef]]
    */
   def makeDriverRef(name: String, conf: SparkConf, rpcEnv: RpcEnv): RpcEndpointRef = {
     val driverActorSystemName = SparkEnv.driverActorSystemName
@@ -69,7 +69,7 @@ object RpcUtils {
 
   /** 
    *  Returns the default Spark timeout to use for RPC remote endpoint lookup.
-    *  返回用于RPC远程端点查找的默认Spark超时
+    *  返回用于RPC远程端点查找的默认Spark 120秒超时
    * */
   private[spark] def lookupRpcTimeout(conf: SparkConf): RpcTimeout = {
     RpcTimeout(conf, Seq("spark.rpc.lookupTimeout", "spark.network.timeout"), "120s")

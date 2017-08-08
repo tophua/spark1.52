@@ -123,6 +123,8 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
     // doing so. This guards against the race condition where a cleaning thread may
     // potentially clean similarly named variables created by a different SparkContext,
     // resulting in otherwise inexplicable block-not-found exceptions (SPARK-6132).
+    //中断清理线程,但等待当前任务完成之前,请执行此操作,
+    //这样可以防止一个清理线程可能会清除由不同的SparkContext创建的类似命名的变量,导致另外莫名其妙的块未找到的异常（SPARK-6132）
     synchronized {
       cleaningThread.interrupt()
     }

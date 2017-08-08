@@ -33,12 +33,12 @@ import org.apache.spark.storage._
 private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
 
   /** Keys of RDD partitions that are being computed/loaded.
-    * 正在计算/加载的RDD分区的密钥
+    * 正在计算/加载的RDD分区的Key
     * */
   private val loading = new mutable.HashSet[RDDBlockId]
 
   /** Gets or computes an RDD partition. Used by RDD.iterator() when an RDD is cached. 
-   *  获取或计算一个RDD的分区  ,当RDD被缓存时由RDD.iterator（）使用。
+   *  获取或计算一个RDD的分区,当RDD被缓存时由RDD.iterator()使用
    *  */
   def getOrCompute[T](
       rdd: RDD[T],
@@ -114,8 +114,8 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
 
   /**
    * Acquire a loading lock for the partition identified by the given block ID.
-   *  判断当前是否有线程在处理当前partition,如果有那么等待它结束后,直接从BlockManager中读取处理结果数据
-                 如果没有线程在计算,那么storedvalue就是none,否则就是计算结果
+   * 判断当前是否有线程在处理当前partition,如果有那么等待它结束后,直接从BlockManager中读取处理结果数据
+   * 如果没有线程在计算,那么storedvalue就是none,否则就是计算结果
    * If the lock is free, just acquire it and return None. Otherwise, another thread is already
    * loading the partition, so we wait for it to finish and return the values loaded by the thread.
     * 如果锁是免费的,只需获取它并返回None。 否则,另一个线程已经加载分区,所以我们等待它完成并返回线程加载的值。
@@ -133,6 +133,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
         logInfo(s"Another thread is loading $id, waiting for it to finish...")
         while (loading.contains(id)) {
           try {
+            //等待另一个线程完成并返回其结果,释放线程锁
             loading.wait()
           } catch {
             case e: Exception =>
@@ -181,8 +182,9 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
        * iterator directly to the BlockManager rather than first fully unrolling it in memory.
        * 这盘是不被缓存在内存中,所以我们可以通过计算值为迭代器而不是直接向blockmanager第一完全展开它的记忆。
        */
-      //数据直接写入磁盘
+      //ArrayBuffer 数组追加++=
       updatedBlocks ++=
+     //数据直接写入磁盘,还会Seq[(BlockId, BlockStatus)]
         blockManager.putIterator(key, values, level, tellMaster = true, effectiveStorageLevel)
       blockManager.get(key) match {
         case Some(v) => v.data.asInstanceOf[Iterator[T]]

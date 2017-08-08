@@ -117,7 +117,8 @@ private[spark] object ThreadUtils {
    * Run a piece of code in a new thread and return the result. Exception in the new thread is
    * thrown in the caller thread with an adjusted stack trace that removes references to this
    * method for clarity. The exception stack traces will be like the following
-    * 在新线程中运行一段代码并返回结果。 新线程中的异常被调用调用者线程抛出,调整后的堆栈跟踪将清除对该方法的引用,异常堆栈跟踪将如下所示
+    * 在新线程中运行一段代码并返回结果,新线程中的异常被调用调用者线程抛出,
+    * 调整后的堆栈跟踪将清除对该方法的引用,异常堆栈跟踪将如下所示
    * SomeException: exception-message
     * SomeException：异常消息
    *   at CallerClass.body-method (sourcefile.scala)
