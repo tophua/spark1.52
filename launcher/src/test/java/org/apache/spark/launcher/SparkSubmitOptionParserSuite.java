@@ -44,6 +44,7 @@ public class SparkSubmitOptionParserSuite {
       for (String optName : optNames) {
         String value = optName + "-value";
         parser.parse(Arrays.asList(optName, value));
+        System.out.println(value);
         count++;
         verify(parser).handle(eq(optNames[0]), eq(value));
         verify(parser, times(count)).handle(anyString(), anyString());
@@ -55,6 +56,7 @@ public class SparkSubmitOptionParserSuite {
       int switchCount = 0;
       for (String name : switchNames) {
         parser.parse(Arrays.asList(name));
+          System.out.println("switches=="+name);
         count++;
         switchCount++;
         verify(parser, times(switchCount)).handle(eq(switchNames[0]), same((String) null));

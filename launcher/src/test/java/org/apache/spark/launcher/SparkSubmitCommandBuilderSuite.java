@@ -77,6 +77,8 @@ public class SparkSubmitCommandBuilderSuite {
       for(String c:cmd){
           System.out.println(c);
       }
+      String os = System.getProperty("os.name");
+      System.out.println("=os=="+os);
       System.out.println("==="+CommandBuilderUtils.getLibPathEnvName());
     assertTrue(findInStringList(env.get(CommandBuilderUtils.getLibPathEnvName()),
         File.pathSeparator, "/driverLibPath"));
@@ -86,6 +88,7 @@ public class SparkSubmitCommandBuilderSuite {
     assertTrue("Driver -Xms should be configured.", cmd.contains("-Xms42g"));
     assertTrue("Driver -Xmx should be configured.", cmd.contains("-Xmx42g"));
     assertTrue("Command should contain user-defined conf.",
+      //返回指定源列表中最后一次出现指定目标列表的起始位置,即按从后到前的顺序返回子List在父List中的索引位置。
       Collections.indexOfSubList(cmd, Arrays.asList(parser.CONF, "spark.randomOption=foo")) > 0);
   }
 
@@ -106,6 +109,9 @@ public class SparkSubmitCommandBuilderSuite {
       "appName");
 
     List<String> args = newCommandBuilder(sparkSubmitArgs).buildSparkSubmitArgs();
+    for(String arg:args){
+        System.out.println("==="+arg);
+    }
     List<String> expected = Arrays.asList("spark-shell", "--app-arg", "bar", "--app-switch");
     assertEquals(expected, args.subList(args.size() - expected.size(), args.size()));
   }

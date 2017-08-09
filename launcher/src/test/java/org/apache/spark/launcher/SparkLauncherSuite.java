@@ -70,7 +70,10 @@ public class SparkLauncherSuite {
     assertEquals("myMaster", launcher.builder.master);
     //添加没有效果
     launcher.addJar("foo");
-    launcher.addSparkArg(opts.JARS, "bar");
+      System.out.println("addJar:"+launcher.builder.jars);
+    //覆盖
+      launcher.addSparkArg(opts.JARS, "bar");
+      System.out.println("addJar bar:"+launcher.builder.jars);
     assertEquals(Arrays.asList("bar"), launcher.builder.jars);
 
     launcher.addFile("foo");
