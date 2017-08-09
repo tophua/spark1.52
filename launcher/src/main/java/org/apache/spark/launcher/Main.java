@@ -61,6 +61,7 @@ class Main {
     //Arrays.asList将数组转List
     List<String> args = new ArrayList<String>(Arrays.asList(argsArray));
 
+    //取出参数值 org.apache.spark.deploy.SparkSubmit  --class org.apache.spark.repl.Main --name "Spark shell"
     String className = args.remove(0);
 
     boolean printLaunchCommand = !isEmpty(System.getenv("SPARK_PRINT_LAUNCH_COMMAND"));
@@ -107,6 +108,7 @@ class Main {
       List<String> bashCmd = prepareBashCommand(cmd, env);
       for (String c : bashCmd) {
         System.out.print(c);
+        //字符串结束符
         System.out.print('\0');
       }
     }

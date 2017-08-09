@@ -36,9 +36,10 @@ private[spark] object SamplingUtils {
       k: Int,
       seed: Long = Random.nextLong())
     : (Array[T], Int) = {
+    //创建临时数组
     val reservoir = new Array[T](k)
     // Put the first k elements in the reservoir.
-    //把第一个k元素放在水库里
+    // 取出前k个数，并把对应的rdd中的数据放入对应的序号的数组中
     var i = 0
     while (i < k && input.hasNext) {
       val item = input.next()
@@ -47,19 +48,23 @@ private[spark] object SamplingUtils {
     }
 
     // If we have consumed all the elements, return them. Otherwise do the replacement.
-    //如果我们已经消耗了所有的元素,返回它们。 否则做更换。
+    // 如果全部的元素，比要抽取的采样数少，那么直接返回
     if (i < k) {
       // If input size < k, trim the array to return only an array of input size.
       //如果输入大小<k，则修整数组以仅返回输入大小的数组
       val trimReservoir = new Array[T](i)
       System.arraycopy(reservoir, 0, trimReservoir, 0, i)
       (trimReservoir, i)
+      // 否则开始抽样替换
     } else {
       // If input size > k, continue the sampling process.
       //如果输入大小> k，继续采样过程。
+      // 从刚才的序号开始，继续遍历
+      // 随机数
       val rand = new XORShiftRandom(seed)
       while (input.hasNext) {
         val item = input.next()
+        // 随机一个数与当前的l相乘，如果小于采样数k，就替换。（越到后面，替换的概率越小...）
         val replacementIndex = rand.nextInt(i)
         if (replacementIndex < k) {
           reservoir(replacementIndex) = item
