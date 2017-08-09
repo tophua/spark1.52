@@ -62,4 +62,10 @@ object echo extends  App{
   def env: immutable.Map[String, String] = immutable.Map(System.getenv().asScala.toSeq: _*)
   env.map(println _)
 
+  println(System.getProperty("user.dir"))
+
+  println(sys.props)
+  //System.getProperties()获取系统参数
+  println( "=========="+System.getProperties())
+
 }

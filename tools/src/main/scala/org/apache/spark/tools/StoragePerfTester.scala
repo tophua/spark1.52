@@ -34,12 +34,21 @@ import org.apache.spark.util.Utils
 object StoragePerfTester {
   def main(args: Array[String]): Unit = {
     /** Total amount of data to generate. Distributed evenly amongst maps and reduce splits. */
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val dataSizeMb = Utils.memoryStringToMb(sys.env.getOrElse("OUTPUT_DATA", "1g"))
 
     /** Number of map tasks. All tasks execute concurrently. */
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val numMaps = sys.env.get("NUM_MAPS").map(_.toInt).getOrElse(8)
 
     /** Number of reduce splits for each map task. */
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val numOutputSplits = sys.env.get("NUM_REDUCERS").map(_.toInt).getOrElse(500)
 
     val recordLength = 1000 // ~1KB records

@@ -384,6 +384,9 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
     } else {
       // user must have set spark.authenticate.secret config
       // For Master/Worker, auth secret is in conf; for Executors, it is in env variable
+      //System.getenv()和System.getProperties()的区别
+      //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+      //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
       sys.env.get(SecurityManager.ENV_AUTH_SECRET)
         .orElse(sparkConf.getOption(SecurityManager.SPARK_AUTH_SECRET_CONF)) match {
         case Some(value) => value

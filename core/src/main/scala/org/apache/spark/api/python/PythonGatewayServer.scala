@@ -45,6 +45,9 @@ private[spark] object PythonGatewayServer extends Logging {
     }
 
     // Communicate the bound port back to the caller via the caller-specified callback port
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val callbackHost = sys.env("_PYSPARK_DRIVER_CALLBACK_HOST")
     val callbackPort = sys.env("_PYSPARK_DRIVER_CALLBACK_PORT").toInt
     logDebug(s"Communicating GatewayServer port to Python driver at $callbackHost:$callbackPort")

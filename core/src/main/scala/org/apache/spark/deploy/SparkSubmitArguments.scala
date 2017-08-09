@@ -36,6 +36,9 @@ import org.apache.spark.util.Utils
  * 解析Spark-submit 脚本参数
  * The env argument is used for testing.
   * sys.env 调用的System.getenv().asScala.toSeq
+  *  //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
  */
 private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, String] = sys.env)
   extends SparkSubmitArgumentsParser {
@@ -520,6 +523,9 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     if (unknownParam != null) {
       outStream.println("Unknown/unsupported param " + unknownParam)
     }
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val command = sys.env.get("_SPARK_CMD_USAGE").getOrElse(
       """Usage: spark-submit [options] <app jar | python file> [app arguments]
         |Usage: spark-submit --kill [submission ID] --master [spark://...]

@@ -149,6 +149,9 @@ class ExecutorRunnable(
     sys.props.get("spark.executor.extraJavaOptions").foreach { opts =>
       javaOpts ++= Utils.splitCommandString(opts).map(YarnSparkHadoopUtil.escapeForShell)
     }
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     sys.env.get("SPARK_JAVA_OPTS").foreach { opts =>
       javaOpts ++= Utils.splitCommandString(opts).map(YarnSparkHadoopUtil.escapeForShell)
     }
@@ -254,7 +257,9 @@ class ExecutorRunnable(
   private def prepareLocalResources: HashMap[String, LocalResource] = {
     logInfo("Preparing Local resources")
     val localResources = HashMap[String, LocalResource]()
-
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     if (System.getenv("SPARK_YARN_CACHE_FILES") != null) {
       val timeStamps = System.getenv("SPARK_YARN_CACHE_FILES_TIME_STAMPS").split(',')
       val fileSizes = System.getenv("SPARK_YARN_CACHE_FILES_FILE_SIZES").split(',')
@@ -265,7 +270,9 @@ class ExecutorRunnable(
           fileSizes(i), visibilities(i))
       }
     }
-
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     if (System.getenv("SPARK_YARN_CACHE_ARCHIVES") != null) {
       val timeStamps = System.getenv("SPARK_YARN_CACHE_ARCHIVES_TIME_STAMPS").split(',')
       val fileSizes = System.getenv("SPARK_YARN_CACHE_ARCHIVES_FILE_SIZES").split(',')
@@ -291,7 +298,9 @@ class ExecutorRunnable(
       // This is kept for backward compatibility and consistency with hadoop
       YarnSparkHadoopUtil.addPathToEnvironment(env, key, value)
     }
-
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     // Keep this for backwards compatibility but users should move to the config
     sys.env.get("SPARK_YARN_USER_ENV").foreach { userEnvs =>
       YarnSparkHadoopUtil.setEnvFromInputString(env, userEnvs)
@@ -305,6 +314,9 @@ class ExecutorRunnable(
     val httpScheme = if (yarnHttpPolicy == "HTTPS_ONLY") "https://" else "http://"
 
     // Add log urls
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     sys.env.get("SPARK_USER").foreach { user =>
       val containerId = ConverterUtils.toString(container.getId)
       val address = container.getNodeHttpAddress

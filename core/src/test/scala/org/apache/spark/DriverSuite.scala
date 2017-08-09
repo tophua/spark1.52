@@ -29,6 +29,9 @@ class DriverSuite extends SparkFunSuite with Timeouts {
 
   ignore("driver should exit after finishing without cleanup (SPARK-530)") {
     //driver退出后无需清理
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val sparkHome = sys.props.getOrElse("spark.test.home", fail("spark.test.home is not set!"))
    // val masters = Table("master", "local", "local-cluster[2,1,1024]")
    val masters = Table("master", "local", "local[*]")

@@ -183,6 +183,7 @@ private[spark] object Utils extends Logging {
    * 用于获取线程上下文的classloader,没有设置时获取加载Spark的classLoader
    * This should be used whenever passing a ClassLoader to Class.ForName or finding the currently
    * active loader when setting up ClassLoader delegation chains.
+    * 当将ClassLoader传递给Class.ForName或在设置ClassLoader委派链时查找当前活动的加载程序时,应使用这一点,
    */
   def getContextOrSparkClassLoader: ClassLoader =
     Option(Thread.currentThread().getContextClassLoader).getOrElse(getSparkClassLoader)
@@ -891,7 +892,9 @@ private[spark] object Utils extends Logging {
       address
     }
   }
-
+  //System.getenv()和System.getProperties()的区别
+  //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+  //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
   private var customHostname: Option[String] = sys.env.get("SPARK_LOCAL_HOSTNAME")
 
   /**
@@ -1861,6 +1864,9 @@ private[spark] object Utils extends Logging {
     *
    */
   def isTesting: Boolean = {
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     sys.env.contains("SPARK_TESTING") || sys.props.contains("spark.testing")
   }
 
@@ -1974,7 +1980,10 @@ private[spark] object Utils extends Logging {
    * 返回用户输入字符串描述的文件的格式良好的URI
    * If the supplied path does not contain a scheme, or is a relative path, it will be
    * converted into an absolute path with a file:// scheme.
-    * 如果提供的路径不包含方案,或者是相对路径,则将是使用file：//方案转换为绝对路径。
+    * 如果提供的路径不包含方案,或者是相对路径,则将是使用file：//方案转换为绝对路径
+    *spark.jar=====file:/spark.jar
+    * hdfs:///root/spark.jar#app.jar=====hdfs:/root/spark.jar#app.jar
+    * file:///C:/path/to/file.txt=====file:/C:/path/to/file.txt
    */
   def resolveURI(path: String): URI = {
     try {
@@ -2000,6 +2009,8 @@ private[spark] object Utils extends Logging {
   /** 
    *  Resolve a comma-separated list of paths. 
    *  解析一个逗号分隔的路径列表
+    *  jar1,jar2=====file:/jar1,file:/jar2
+    *  hdfs:/jar1,file:/jar2,jar3=====hdfs:/jar1,file:/jar2,file:/jar3
    *  */
   def resolveURIs(paths: String): String = {
     if (paths == null || paths.trim.isEmpty) {
@@ -2046,6 +2057,9 @@ private[spark] object Utils extends Logging {
         k.startsWith("spark.")
       }.foreach { case (k, v) =>
         conf.setIfMissing(k, v)
+        //System.getenv()和System.getProperties()的区别
+        //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+        //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
         sys.props.getOrElseUpdate(k, v)
       }
     }
@@ -2078,7 +2092,11 @@ private[spark] object Utils extends Logging {
   /** 
    *  Return the path of the default Spark properties file.
    *  返回默认的Spark属性文件的路径
+    *
    *   */
+  //System.getenv()和System.getProperties()的区别
+  //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+  //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
   def getDefaultPropertiesFile(env: Map[String, String] = sys.env): String = {
     env.get("SPARK_CONF_DIR")
       .orElse(env.get("SPARK_HOME").map { t => s"$t${File.separator}conf" })

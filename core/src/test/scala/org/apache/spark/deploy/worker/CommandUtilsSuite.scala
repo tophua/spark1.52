@@ -28,6 +28,9 @@ class CommandUtilsSuite extends SparkFunSuite with Matchers with PrivateMethodTe
     val appId = "12345-worker321-9876"
     //返回当前系统路径名,windows默认PATH
     val libraryPath = Utils.libraryPathEnvName
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     //sys.env("spark.testing.home").getOrElse("/software/spark2.1")
     val sparkHome = sys.props.getOrElse("spark.test.home", "/software/spark1.6")
      // val sparkHome = sys.props.getOrElse("spark.test.home", "test.home")

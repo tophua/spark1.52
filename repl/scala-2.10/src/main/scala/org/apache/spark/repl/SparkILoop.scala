@@ -971,7 +971,7 @@ class SparkILoop(
         def apply[U <: ApiUniverse with Singleton](m: Mirror[U]): U # Type =
           m.staticClass(classTag[T].runtimeClass.getName).toTypeConstructor.asInstanceOf[U # Type]
       })
-
+  //处理进程
   private def process(settings: Settings): Boolean = savingContextLoader {
     if (getMaster() == "yarn-client") System.setProperty("SPARK_YARN_MODE", "true")
 
@@ -979,6 +979,7 @@ class SparkILoop(
     createInterpreter()
 
     // sets in to some kind of reader depending on environmental cues
+    //根据环境线索设置某种读取器
     in = in0 match {
       case Some(reader) => SimpleReader(reader, out, true)
       case None         =>
@@ -991,6 +992,7 @@ class SparkILoop(
     lazy val tagOfSparkIMain = tagOfStaticClass[org.apache.spark.repl.SparkIMain]
     // Bind intp somewhere out of the regular namespace where
     // we can get at it in generated code.
+    //将intp绑定到常规命名空间之外,我们可以在生成的代码中获取它
     addThunk(intp.quietBind(NamedParam[SparkIMain]("$intp", intp)(tagOfSparkIMain, classTag[SparkIMain])))
     addThunk({
       import scala.tools.nsc.io._
@@ -1072,6 +1074,9 @@ class SparkILoop(
     val master = this.master match {
       case Some(m) => m
       case None =>
+        //System.getenv()和System.getProperties()的区别
+        //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+        //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
         val envMaster = sys.env.get("MASTER")
         val propMaster = sys.props.get("spark.master")
         propMaster.orElse(envMaster).getOrElse("local[*]")
@@ -1104,10 +1109,16 @@ object SparkILoop extends Logging {
   private def echo(msg: String) = Console println msg
 
   def getAddedJars: Array[String] = {
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val envJars = sys.env.get("ADD_JARS")
     if (envJars.isDefined) {
       logWarning("ADD_JARS environment variable is deprecated, use --jar spark submit argument instead")
     }
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val propJars = sys.props.get("spark.jars").flatMap { p => if (p == "") None else Some(p) }
     val jars = propJars.orElse(envJars).getOrElse("")
     Utils.resolveURIs(jars).split(",").filter(_.nonEmpty)
@@ -1146,8 +1157,11 @@ object SparkILoop extends Logging {
         val repl = new SparkILoop(input, output)
 
         if (settings.classpath.isDefault)
+        //System.getenv()和System.getProperties()的区别
+        //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+        //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
           settings.classpath.value = sys.props("java.class.path")
-
+        //设置settings.classpath
         getAddedJars.map(jar => new URI(jar).getPath).foreach(settings.classpath.append(_))
 
         repl process settings
@@ -1169,6 +1183,9 @@ object SparkILoop extends Logging {
         val repl     = new ILoop(input, output)
 
         if (sets.classpath.isDefault)
+        //System.getenv()和System.getProperties()的区别
+        //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+        //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
           sets.classpath.value = sys.props("java.class.path")
 
         repl process sets

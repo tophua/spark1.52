@@ -400,6 +400,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
       // Repeated invocations of resolveURI should yield the same result
       //重复调用ResolveUri应产生相同的结果
       def resolve(uri: String): String = Utils.resolveURI(uri).toString
+      println(before+"====="+resolve(after))
       assert(resolve(after) === after)
       assert(resolve(resolve(after)) === after)
       assert(resolve(resolve(resolve(after))) === after)
@@ -408,6 +409,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
       assert(new URI(Utils.resolveURIs(before)) === new URI(after))
       assert(new URI(Utils.resolveURIs(after)) === new URI(after))
     }
+    //System.getProperty("user.dir")是取得当前工作目录
     val rawCwd = System.getProperty("user.dir")
     val cwd = if (Utils.isWindows) s"/$rawCwd".replace("\\", "/") else rawCwd
     assertResolves("hdfs:/root/spark.jar", "hdfs:/root/spark.jar")
@@ -429,10 +431,13 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   test("resolveURIs with multiple paths") {//解析多个路径的URL
     def assertResolves(before: String, after: String): Unit = {
       assume(before.split(",").length > 1)
+      println(before+"====="+Utils.resolveURIs(before))
       assert(Utils.resolveURIs(before) === after)
       assert(Utils.resolveURIs(after) === after)
       // Repeated invocations of resolveURIs should yield the same result
+      //resolveURI的重复调用应该产生相同的结果
       def resolve(uri: String): String = Utils.resolveURIs(uri)
+      println(before+"====="+resolve(before))
       assert(resolve(after) === after)
       assert(resolve(resolve(after)) === after)
       assert(resolve(resolve(resolve(after))) === after)
@@ -572,6 +577,9 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
       val properties = Utils.getPropertiesFromFile(outFile.getAbsolutePath)
       properties
         .filter { case (k, v) => k.startsWith("spark.")}//操作配制文件
+        //System.getenv()和System.getProperties()的区别
+        //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+        //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
         .foreach { case (k, v) => sys.props.getOrElseUpdate(k, v)}
       val sparkConf = new SparkConf
       assert(sparkConf.getBoolean("spark.test.fileNameLoadA", false) === true)
@@ -656,6 +664,9 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   }
 
   test("isInDirectory") {//判断在目录
+  //System.getenv()和System.getProperties()的区别
+  //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+  //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val tmpDir = new File(sys.props("java.io.tmpdir"))
     val parentDir = new File(tmpDir, "parent-dir")
     val childDir1 = new File(parentDir, "child-dir-1")

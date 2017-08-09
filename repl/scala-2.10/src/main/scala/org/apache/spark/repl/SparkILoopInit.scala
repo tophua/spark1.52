@@ -18,6 +18,7 @@ import org.apache.spark.SPARK_VERSION
 
 /**
  *  Machinery for the asynchronous initialization of the repl.
+  *  机器用于异步初始化的repl
  */
 private[repl] trait SparkILoopInit {
   self: SparkILoop =>
@@ -55,6 +56,7 @@ private[repl] trait SparkILoopInit {
     finally initLock.unlock()
   }
   // a condition used to ensure serial access to the compiler.
+  //用于确保对编译器的串行访问的条件
   @volatile private var initIsComplete = false
   @volatile private var initError: String = null
   private def elapsed() = "%.3f".format((System.nanoTime - initStart).toDouble / 1000000000L)
@@ -75,7 +77,7 @@ private[repl] trait SparkILoopInit {
     }
   }
 
-  // called from main repl loop
+  // called from main repl loop 从主复制循环调用
   protected def awaitInitialized(): Boolean = {
     if (!initIsComplete)
       withLock { while (!initIsComplete) initLoopCondition.await() }
@@ -102,6 +104,7 @@ private[repl] trait SparkILoopInit {
   //   warningsThunks
   // )
   // called once after init condition is signalled
+  //在初始化条件发出信号后调用一次
   protected def postInitialization() {
     try {
       postInitThunks foreach (f => addThunk(f()))
@@ -122,6 +125,7 @@ private[repl] trait SparkILoopInit {
 
   def initializeSpark() {
     intp.beQuietDuring {
+      //输出字符串,当成命令执行
       command("""
          @transient val sc = {
            val _sc = org.apache.spark.repl.Main.interp.createSparkContext()

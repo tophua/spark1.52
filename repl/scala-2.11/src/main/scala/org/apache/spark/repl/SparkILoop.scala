@@ -28,6 +28,7 @@ import scala.tools.nsc.util.stringFromStream
 
 /**
  *  A Spark-specific interactive shell.
+  *  Spark特定的交互式shell
  */
 class SparkILoop(in0: Option[BufferedReader], out: JPrintWriter)
     extends ILoop(in0, out) {
@@ -57,7 +58,8 @@ class SparkILoop(in0: Option[BufferedReader], out: JPrintWriter)
     }
   }
 
-  /** Print a welcome message */
+  /** Print a welcome message
+    * 打印欢迎消息 */
   override def printWelcome() {
     import org.apache.spark.SPARK_VERSION
     echo("""Welcome to
@@ -67,6 +69,7 @@ class SparkILoop(in0: Option[BufferedReader], out: JPrintWriter)
    /___/ .__/\_,_/_/ /_/\_\   version %s
       /_/
          """.format(SPARK_VERSION))
+    //输出scala 版本,javaVmName(java.vm.name),javaVersion(java.vm.version)
     val welcomeMsg = "Using Scala %s (%s, Java %s)".format(
       versionString, javaVmName, javaVersion)
     echo(welcomeMsg)
@@ -78,17 +81,19 @@ class SparkILoop(in0: Option[BufferedReader], out: JPrintWriter)
 
   private val blockedCommands = Set("implicits", "javap", "power", "type", "kind")
 
-  /** Standard commands **/
+  /** Standard commands 标准命令**/
   lazy val sparkStandardCommands: List[SparkILoop.this.LoopCommand] =
     standardCommands.filter(cmd => !blockedCommands(cmd.name))
 
-  /** Available commands */
+  /** Available commands 可用命令*/
   override def commands: List[LoopCommand] = sparkStandardCommands
 
   /** 
    * We override `loadFiles` because we need to initialize Spark *before* the REPL
    * sees any files, so that the Spark context is visible in those files. This is a bit of a
    * hack, but there isn't another hook available to us at this point.
+    * 我们覆盖`loadFiles`，因为我们需要在* REPL看到任何文件之前初始化Spark *,
+    * 以便在这些文件中可以看到Spark上下文,这是一个黑客，但在这一点上我们还没有一个可用的钩子。
    */
   override def loadFiles(settings: Settings): Unit = {
     initializeSpark()
@@ -101,6 +106,7 @@ object SparkILoop {
   /** 
    * Creates an interpreter loop with default settings and feeds
    * the given code to it as input.
+    * 使用默认设置创建解释器循环,并将给定的代码作为输入
    */
   def run(code: String, sets: Settings = new Settings): String = {
     import java.io.{ BufferedReader, StringReader, OutputStreamWriter }
@@ -112,6 +118,9 @@ object SparkILoop {
         val repl = new SparkILoop(input, output)
 
         if (sets.classpath.isDefault)
+        //System.getenv()和System.getProperties()的区别
+        //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+        //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
           sets.classpath.value = sys.props("java.class.path")
 
         repl process sets

@@ -24,12 +24,13 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * Command class enabling Spark-specific command line options (provided by
  * <i>org.apache.spark.repl.SparkRunnerSettings</i>).
+  * 命令类启用Spark特定的命令行选项(由<i> org.apache.spark.repl.SparkRunnerSettings </ i>提供)
  *
- * @example new SparkCommandLine(Nil).settings
+ * @example new SparkCommandLine(Nil).settings 新的SparkCommandLine（Nil）.settings
  *
- * @param args The list of command line arguments
+ * @param args The list of command line arguments 命令行参数的列表
  * @param settings The underlying settings to associate with this set of
- *                 command-line options
+ *                 command-line options 这组命令行选项关联的底层设置
  */
 @DeveloperApi
 class SparkCommandLine(args: List[String], override val settings: Settings)

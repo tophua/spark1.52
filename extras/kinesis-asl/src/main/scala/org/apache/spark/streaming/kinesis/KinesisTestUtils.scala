@@ -184,6 +184,9 @@ private[kinesis] object KinesisTestUtils {
   val defaultEndpointUrl = "https://kinesis.us-west-2.amazonaws.com"
 
   lazy val shouldRunTests = {
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val isEnvSet = sys.env.get(envVarNameForEnablingTests) == Some("1")
     if (isEnvSet) {
       // scalastyle:off println
@@ -204,6 +207,9 @@ private[kinesis] object KinesisTestUtils {
   }
 
   lazy val endpointUrl = {
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     val url = sys.env.getOrElse(endVarNameForEndpoint, defaultEndpointUrl)
     // scalastyle:off println
     // Print this so that they are easily visible on the console and not hidden in the log4j logs.

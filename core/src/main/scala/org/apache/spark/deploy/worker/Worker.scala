@@ -124,9 +124,15 @@ private[deploy] class Worker(
   private val workerId = generateWorkerId()
   private val sparkHome =
     if (testing) {
+      //System.getenv()和System.getProperties()的区别
+      //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+      //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
       assert(sys.props.contains("spark.test.home"), "spark.test.home is not set!")
       new File(sys.props("spark.test.home"))
     } else {
+      //System.getenv()和System.getProperties()的区别
+      //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+      //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
       new File(sys.env.get("SPARK_HOME").getOrElse("."))
     }
 

@@ -490,6 +490,9 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
     // Used by Yarn in 1.1 and before
     //在1.1及以前由Yarn使用
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     sys.props.get("spark.driver.libraryPath").foreach { value =>
       val warning =
         s"""
@@ -533,6 +536,9 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
     // Check for legacy configs
     //检查旧配置
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     sys.env.get("SPARK_JAVA_OPTS").foreach { value =>
       val warning =
         s"""
@@ -556,7 +562,9 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
         }
       }
     }
-
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     sys.env.get("SPARK_CLASSPATH").foreach { value =>
       val warning =
         s"""
@@ -581,6 +589,9 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
 
     if (!contains(sparkExecutorInstances)) {
     //每个slave机器上启动的worker实例个数（默认：1）
+      //System.getenv()和System.getProperties()的区别
+      //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+      //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
       sys.env.get("SPARK_WORKER_INSTANCES").foreach { value =>
         val warning =
           s"""

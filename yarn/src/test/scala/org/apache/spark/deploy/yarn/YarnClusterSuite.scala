@@ -240,6 +240,9 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
 
     val childClasspath = logConfDir.getAbsolutePath() +
       File.pathSeparator +
+      //System.getenv()和System.getProperties()的区别
+      //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+      //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
       sys.props("java.class.path") +
       File.pathSeparator +
       extraClassPath.mkString(File.pathSeparator)
@@ -256,7 +259,9 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
     }
 
     }
-
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     sys.props.foreach { case (k, v) =>
       if (k.startsWith("spark.")) {
         props.setProperty(k, v)
@@ -277,12 +282,16 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
       } else {
         Seq("--class", klass, fakeSparkJar.getAbsolutePath())
       }
-
+    //System.getenv()和System.getProperties()的区别
+    //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+    //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
     sys.env.getOrElse("spark.test.home", "/software/spark2.1/")
     val argv =
       Seq(
         //设置环境变量SparkHome
-
+        //System.getenv()和System.getProperties()的区别
+        //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+        //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
         new File(sys.props("spark.test.home"), "/bin/spark-submit").getAbsolutePath(),
         "--master", master,
         "--num-executors", "1",
