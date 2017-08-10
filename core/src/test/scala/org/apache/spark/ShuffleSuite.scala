@@ -71,7 +71,7 @@ test("shuffle non-zero block size") {//非零块的大小
   c.setSerializer(new KryoSerializer(conf))
   //获取第一个父依赖shuffleId
   val shuffleId = c.dependencies.head.asInstanceOf[ShuffleDependency[_, _, _]].shuffleId
-
+  println("shuffleId:"+shuffleId)
   assert(c.count === 10)
 
   // All blocks must have non-zero size

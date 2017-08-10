@@ -28,9 +28,9 @@ import org.scalatest.Suite
  *  */
 trait LocalSparkContext extends BeforeAndAfterEach with BeforeAndAfterAll { 
   /**
-   * 特质可以要求混入它的类扩展自另一个类型,但是当使用自身类型（self type）的声明来定义特质时（this: ClassName =>）,
-   * 这样的特质只能被混入给定类型的子类当中,
-   */     
+   * 特质可以要求混入它的类扩展自另一个类型,但是当使用自身类型(self type)的声明来定义特质时(this: ClassName =>,
+   * 特质指定自身类型时,可以保证它只能混入该类的子类
+   */
   self: Suite =>
   //transient注解用于标记变量不被序列化
   @transient var sc: SparkContext = _
@@ -39,6 +39,7 @@ trait LocalSparkContext extends BeforeAndAfterEach with BeforeAndAfterAll {
     //内部工厂日志器
     InternalLoggerFactory.setDefaultFactory(new Slf4JLoggerFactory())
     super.beforeAll()
+
   }
 
   override def afterEach() {

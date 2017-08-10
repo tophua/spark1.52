@@ -86,7 +86,7 @@ class ExecutorAllocationManagerSuite
 
   test("starting state") {//启动状态
     sc = createSparkContext()
-    val manager = sc.executorAllocationManager.get
+    val manager:ExecutorAllocationManager = sc.executorAllocationManager.get
     assert(numExecutorsTarget(manager) === 1)
     assert(executorsPendingToRemove(manager).isEmpty)
     assert(executorIds(manager).isEmpty)

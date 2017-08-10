@@ -70,11 +70,13 @@ class HeartbeatReceiverSuite//接收心跳测试
    * 每次测试之前,设置sparkcontext和自定义HeartbeatReceiver使用手动时钟
    */
   override def beforeEach(): Unit = {
+
     val conf = new SparkConf()
       .setMaster("local[2]")
       .setAppName("test")
       .set("spark.dynamicAllocation.testing", "true")
     sc = spy(new SparkContext(conf))
+
     scheduler = mock(classOf[TaskSchedulerImpl])//模拟TaskSchedulerImpl
     when(sc.taskScheduler).thenReturn(scheduler)
     when(scheduler.sc).thenReturn(sc)
@@ -99,7 +101,8 @@ class HeartbeatReceiverSuite//接收心跳测试
   test("task scheduler is set correctly") {//设置任务调度程序正确
     assert(heartbeatReceiver.scheduler === null)
     //发送消息TaskSchedulerIsSet,HeartbeatReceiver类receiveAndReply方法接收消息设置TaskScheduler,并返回boolean类型    
-    val bll = heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) //返回值Boolean  
+    val bll = heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) //返回值Boolean
+    println("bll:"+bll)
     assert(heartbeatReceiver.scheduler !== null)
   }
 

@@ -37,6 +37,7 @@ class StatusTrackerSuite extends SparkFunSuite with Matchers with LocalSparkCont
     // 并且返回接受余下的参数且返回结果
     val jobId: Int = eventually(timeout(10 seconds)) {//简写匿名函数写法
       val jobIds = jobFuture.jobIds//
+  //    println("jobIds:"+jobIds)
       jobIds.size should be(1)
       jobIds.head//取出列表第一值
     }
@@ -44,22 +45,46 @@ class StatusTrackerSuite extends SparkFunSuite with Matchers with LocalSparkCont
     val jobInfo = eventually(timeout(10 seconds)) {//jobInfo:SparkJobInfo
       sc.statusTracker.getJobInfo(jobId).get
     }
+  //  println("status:"+jobInfo.status())
     jobInfo.status() should not be FAILED
     val stageIds = jobInfo.stageIds()//获得SageId
-    stageIds.size should be(2)
+    for(a<-stageIds){
+      println("stageId:"+a)
+    }
 
+    //println("stageIds:"+jobInfo.stageIds().mkString(","))
+    stageIds.size should be(2)
+  //取出map的stage
     val firstStageInfo = eventually(timeout(10 seconds)) {
       sc.statusTracker.getStageInfo(stageIds(0)).get
     }
+   // println("stageIds(0):"+firstStageInfo.stageId())
     firstStageInfo.stageId() should be(stageIds(0))
+  //  println("currentAttemptId:"+firstStageInfo.currentAttemptId())
     firstStageInfo.currentAttemptId() should be(0)
     firstStageInfo.numTasks() should be(2)//获得任务数
+   // println("irstStageInfo.numTasks:"+firstStageInfo.numTasks())
     eventually(timeout(10 seconds)) {
       val updatedFirstStageInfo = sc.statusTracker.getStageInfo(stageIds(0)).get
+      println("updatedFirstStageInfo.numTasks:"+updatedFirstStageInfo.numTasks())
+      println("updatedFirstStageInfo.numCompletedTasks:"+updatedFirstStageInfo.numCompletedTasks())
+      println("updatedFirstStageInfo.numActiveTasks:"+updatedFirstStageInfo.numActiveTasks())
+      println("updatedFirstStageInfo.numFailedTasks:"+updatedFirstStageInfo.numFailedTasks())
       updatedFirstStageInfo.numCompletedTasks() should be(2) //完成任务数
       updatedFirstStageInfo.numActiveTasks() should be(0)//任务活动数
       updatedFirstStageInfo.numFailedTasks() should be(0) //任务失败数
     }
+   eventually(timeout(10 seconds)) {
+      val updatedFirstStageInfo = sc.statusTracker.getStageInfo(stageIds(1)).get
+      println("groupBy.numTasks:"+updatedFirstStageInfo.numTasks())
+      println("groupBy.numCompletedTasks:"+updatedFirstStageInfo.numCompletedTasks())
+      println("groupBy.numActiveTasks:"+updatedFirstStageInfo.numActiveTasks())
+      println("groupBy.numFailedTasks:"+updatedFirstStageInfo.numFailedTasks())
+      updatedFirstStageInfo.numCompletedTasks() should be(2) //完成任务数
+      updatedFirstStageInfo.numActiveTasks() should be(0)//任务活动数
+      updatedFirstStageInfo.numFailedTasks() should be(0) //任务失败数
+    }
+
   }
 
   test("getJobIdsForGroup()") {

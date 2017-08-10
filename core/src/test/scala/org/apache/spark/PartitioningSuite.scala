@@ -172,7 +172,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
 
   test("partitioner preservation") {//保存分区
     val rdd = sc.parallelize(1 to 10, 4).map(x => (x, x))
-
+      //groupByKey(2)重新设置分区
     val grouped2 = rdd.groupByKey(2)
     val grouped4 = rdd.groupByKey(4)
     val reduced2 = rdd.reduceByKey(_ + _, 2)
@@ -191,23 +191,29 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
     assert(grouped4.groupByKey().partitioner  === grouped4.partitioner)
     assert(grouped4.groupByKey(3).partitioner !=  grouped4.partitioner)
     assert(grouped4.groupByKey(4).partitioner === grouped4.partitioner)
-
+    //partitioner(4)
     assert(grouped2.join(grouped4).partitioner === grouped4.partitioner)
+    //partitioner(4)
     assert(grouped2.leftOuterJoin(grouped4).partitioner === grouped4.partitioner)
     assert(grouped2.rightOuterJoin(grouped4).partitioner === grouped4.partitioner)
     assert(grouped2.fullOuterJoin(grouped4).partitioner === grouped4.partitioner)
+    //partitioner(4)
     assert(grouped2.cogroup(grouped4).partitioner === grouped4.partitioner)
 
+    //partitioner(2)
     assert(grouped2.join(reduced2).partitioner === grouped2.partitioner)
     assert(grouped2.leftOuterJoin(reduced2).partitioner === grouped2.partitioner)
     assert(grouped2.rightOuterJoin(reduced2).partitioner === grouped2.partitioner)
     assert(grouped2.fullOuterJoin(reduced2).partitioner === grouped2.partitioner)
     assert(grouped2.cogroup(reduced2).partitioner === grouped2.partitioner)
 
+    //map 不产生分区
     assert(grouped2.map(_ => 1).partitioner === None)
+    //mapValues 产生分区
     assert(grouped2.mapValues(_ => 1).partitioner === grouped2.partitioner)
     assert(grouped2.flatMapValues(_ => Seq(1)).partitioner === grouped2.partitioner)
     assert(grouped2.filter(_._1 > 4).partitioner === grouped2.partitioner)
+
   }
   //分区Java数组应该失败
   test("partitioning Java arrays should fail") {

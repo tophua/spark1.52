@@ -55,7 +55,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     pw.println("100")
     // scalastyle:on println
     pw.close()//存储FileServerSuite文件
-
+    println("textFile:"+textFile.getCanonicalFile)
     val jarFile = new File(testTempDir, "test.jar")
     val jarStream = new FileOutputStream(jarFile)
     //jar文件输出流
@@ -63,7 +63,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
 
     val jarEntry = new JarEntry(textFile.getName)
     jar.putNextEntry(jarEntry)
-
+    println("textFile:"+jarFile.getCanonicalFile)
     val in = new FileInputStream(textFile)
     ByteStreams.copy(in, jar)
 
@@ -83,12 +83,14 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
   test("Distributing files locally") {
     sc = new SparkContext("local[4]", "test", newConf)
     sc.addFile(tmpFile.toString)
+    println("locally:"+tmpFile.toString)
     val testData = Array((1, 1), (1, 1), (2, 1), (3, 5), (2, 2), (3, 0))
     val result = sc.parallelize(testData).reduceByKey {
       val path = SparkFiles.get("FileServerSuite.txt") //读取文件路径
       val in = new BufferedReader(new FileReader(path))
       val fileVal = in.readLine().toInt //读取数据100
       in.close()
+     //_ s代表分组的值
       _ * fileVal + _ * fileVal
     }.collect()
     assert(result.toSet === Set((1, 200), (2, 300), (3, 500)))
@@ -264,7 +266,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     if (sm != null) {
       Utils.setupSecureURLConnection(connection, sm)
     }
-
+    //下载文件
     val buf = ByteStreams.toByteArray(connection.getInputStream)
     assert(buf === randomContent)
   }

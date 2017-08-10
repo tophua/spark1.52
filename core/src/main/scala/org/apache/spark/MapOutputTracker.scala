@@ -162,7 +162,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
    *         and the second item is a sequence of (shuffle block id, shuffle block size) tuples
    *         describing the shuffle blocks that are stored at that block manager.
     *        2元组的序列,其中元组中的第一个项是BlockManagerId,
-    *        第二个项是描述存储在该块管理器中的随机块的(shuffle block id，shuffle block size)元组的序列,
+    *        第二个项是描述存储在该块管理器中的随机块的(shuffle block id，shuffle block size(洗牌块大小))元组的序列,
    */
   def getMapSizesByExecutorId(shuffleId: Int, reduceId: Int)
   : Seq[(BlockManagerId, Seq[(BlockId, Long)])] = {
@@ -175,7 +175,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
       var fetchedStatuses: Array[MapStatus] = null
       fetching.synchronized {
         // Someone else is fetching it; wait for them to be done
-        //如果获取列表中已经存在要获取的ShuffleId,那么就等待其他线程获取
+        //如果获取列表中已经存在要获取的ShuffleId,等待他们完成,那么就等待其他线程获取
         while (fetching.contains(shuffleId)) {
           try {
             fetching.wait()
@@ -246,9 +246,9 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
 
   /**
    * Called from executors to update the epoch number, potentially clearing old outputs
-   * 调用executors更新epoch数,可能获取失败清除旧outputs,每个执行任务调用在驱动程序创建时生成最新epoch
    * because of a fetch failure. Each executor task calls this with the latest epoch
    * number on the driver at the time it was created.
+    * 调用executors更新epoch数,可能会因为提取失败而清除旧的输出,每个执行器任务在创建的时候都会调用驱动程序上的最新epoch
    */
   def updateEpoch(newEpoch: Long) {
     epochLock.synchronized {
@@ -363,7 +363,7 @@ private[spark] class MapOutputTrackerMaster(conf: SparkConf)
    * 返回一个位置列表,每个位置都有大于指定阈值的Map输出。
    * @param shuffleId id of the shuffle
    * @param reducerId id of the reduce task
-   * @param numReducers total number of reducers in the shuffle
+   * @param numReducers total number of reducers in the shuffle 洗牌的reducers 总数
    * @param fractionThreshold fraction of total map output size that a location must have
    *                          for it to be considered large.
     *                         一个位置必须具有的总映射输出大小的分数被认为是大的

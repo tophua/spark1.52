@@ -69,17 +69,20 @@ class SizeEstimatorSuite
 
   override def beforeEach() {
     // Set the arch to 64-bit and compressedOops to true to get a deterministic test-case
+    //将arch设置为64位,并将compressionOops设置为true以获得确定性的测试用例
     super.beforeEach()
     System.setProperty("os.arch", "amd64")
     System.setProperty("spark.test.useCompressedOops", "true")
   }
 
   test("simple classes") {//简单的类
+    SizeEstimator.estimate(new DummyClass3)
+   SizeEstimator.estimate(new DummyClass1)
     assertResult(16)(SizeEstimator.estimate(new DummyClass1))
     assertResult(16)(SizeEstimator.estimate(new DummyClass2))
-    assertResult(24)(SizeEstimator.estimate(new DummyClass3))
-    assertResult(24)(SizeEstimator.estimate(new DummyClass4(null)))
-    assertResult(48)(SizeEstimator.estimate(new DummyClass4(new DummyClass3)))
+     assertResult(24)(SizeEstimator.estimate(new DummyClass3))
+     assertResult(24)(SizeEstimator.estimate(new DummyClass4(null)))
+     assertResult(48)(SizeEstimator.estimate(new DummyClass4(new DummyClass3)))
   }
 
   test("primitive wrapper objects") {//原始的包装对象

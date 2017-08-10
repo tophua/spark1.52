@@ -51,8 +51,10 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
     rdd = new RDD[Int](sc, Nil) {
       override def getPartitions: Array[Partition] = Array(split)
       override val getDependencies = List[Dependency[_]]()//获得依赖关系
-      override def compute(split: Partition, context: TaskContext): Iterator[Int] =
+      override def compute(split: Partition, context: TaskContext): Iterator[Int] ={
+        println(split.index+"=="+context.taskMetrics().hostname);
         Array(1, 2, 3, 4).iterator//计算
+      }
     }
     rdd2 = new RDD[Int](sc, List(new OneToOneDependency(rdd))) {//依赖RDD
       override def getPartitions: Array[Partition] = firstParent[Int].partitions
@@ -87,6 +89,10 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
     when(blockManager.get(RDDBlockId(0, 0))).thenReturn(Some(result))//然后返回
 
     val context = TaskContext.empty()
+
+    val getValue = blockManager.get(RDDBlockId(rdd.id, split.index))
+
+    println(split.index+"==rddId=="+rdd.id+"==="+getValue.get)
     val value = cacheManager.getOrCompute(rdd, split, context, StorageLevel.MEMORY_ONLY)
     assert(value.toList === List(5, 6, 7))
   }

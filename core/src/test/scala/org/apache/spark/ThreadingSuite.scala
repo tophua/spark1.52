@@ -50,6 +50,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     new Thread {
       override def run() {
         answer1 = nums.reduce(_ + _)
+        //这将在当前线程中运行“本地”
         answer2 = nums.first()    // This will run "locally" in the current thread
         sem.release()//释放一个许可
       }
@@ -74,6 +75,7 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
             printf("In thread %d: answer1 was %d\n", i, answer1)
             ok = false
           }
+          //这将在当前线程中运行“本地”
           val answer2 = nums.first()    // This will run "locally" in the current thread
           if (answer2 != 1) {
             printf("In thread %d: answer2 was %d\n", i, answer2)
@@ -243,7 +245,9 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
 
   /**
    * Improve the stack trace of an error thrown from within a thread.
+    *改进从线程中抛出的错误的堆栈跟踪
    * Otherwise it's difficult to tell which line in the test the error came from.
+    * 否则,很难确定测试中哪一行出现错误
    */
   private def improveStackTrace(t: Throwable): Throwable = {
     t.setStackTrace(t.getStackTrace ++ Thread.currentThread.getStackTrace)

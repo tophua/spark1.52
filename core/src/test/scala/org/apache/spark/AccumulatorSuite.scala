@@ -253,7 +253,7 @@ class AccumulatorSuite extends SparkFunSuite with Matchers with LocalSparkContex
         iter
       }//第二个Stage
       .repartition(numPartitions * 2)
-      .mapPartitions { iter =>//第三个Stage
+      .mapPartitions { iter => //第三个Stage
         TaskContext.get().internalMetricsToAccumulators(TEST_ACCUMULATOR) += 100
         iter
       }

@@ -26,13 +26,15 @@ class UnpersistSuite extends SparkFunSuite with LocalSparkContext {
     val rdd = sc.makeRDD(Array(1, 2, 3, 4), 2).cache()
     //激活后,系统持久化
     rdd.count
+    println("rddId:"+rdd.id+"==persistentRdds=="+sc.persistentRdds(rdd.id).collect().mkString(","))
     assert(sc.persistentRdds.isEmpty === false)
     rdd.unpersist()
     assert(sc.persistentRdds.isEmpty === true)
-
+    println("==getRDDStorageInfo=="+sc.getRDDStorageInfo.mkString(","))
     failAfter(Span(3000, Millis)) {
       try {
         while (! sc.getRDDStorageInfo.isEmpty) {
+
           Thread.sleep(200)
         }
       } catch {

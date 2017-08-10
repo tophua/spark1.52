@@ -89,6 +89,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     sc = new SparkContext(clusterUrl, "test", conf)
     // This data should be around 20 MB, so even with 4 mappers and 2 reducers, each map output
     // file should be about 2.5 MB
+    //这个数据应该是大约20MB,所以即使有4个mappers和2个reducer,每个映射输出文件应该是大约2.5 MB
     val pairs = sc.parallelize(1 to 2000, 4).map(x => (x % 16, new Array[Byte](10000)))
     val groups = pairs.groupByKey(2).map(x => (x._1, x._2.size)).collect()
     assert(groups.length === 16)
@@ -108,6 +109,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     sc = new SparkContext(clusterUrl, "test")
     val array = new Array[Int](100)
     val bv = sc.broadcast(array)
+    //更改阵列 - 这不应该在workers看到
     array(2) = 3     // Change the array -- this should not be seen on workers
     val rdd = sc.parallelize(1 to 10, 10)
     val sum = rdd.map(x => bv.value.sum).reduce(_ + _)
@@ -131,6 +133,8 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     // than hanging due to retrying the failed task infinitely many times (eventually the
     // standalone scheduler will remove the application, causing the job to hang waiting to
     // reconnect to the master).
+    //确保如果任务以某种方式崩溃JVM,则由于无限次重试失败的任务(最终独立的调度程序将删除应用程序,导致作业挂起等待重新连接到该主机),
+    //该作业最终会失败而不是挂起Master
     sc = new SparkContext(clusterUrl, "test")
     failAfter(Span(100000, Millis)) {
       val thrown = intercept[SparkException] {
@@ -198,18 +202,26 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
     assert(data.count() === 1000)
 
-    // Get all the locations of the first partition and try to fetch the partitions
-    //获取第一个分区的所有位置,并试图从这些位置取分区
-    // from those locations.
-    val blockIds = data.partitions.indices.map(index => RDDBlockId(data.id, index)).toArray
+    // Get all the locations of the first partition and try to fetch the partitions from those locations.
+    //获取第一个分区的所有位置,并尝试从这些位置获取分区
+    ///indices返回所有有效索引值
+
+    val blockIds = data.partitions.indices.map(index =>
+      {
+        //println("indices:"+index)
+        RDDBlockId(data.id, index)
+      }).toArray
     val blockId = blockIds(0)
     val blockManager = SparkEnv.get.blockManager
     val blockTransfer = SparkEnv.get.blockTransferService
     blockManager.master.getLocations(blockId).foreach { cmId =>
+      println(cmId.host+"=="+cmId.port+"=="+cmId.executorId+"=="+blockId.toString)
       val bytes = blockTransfer.fetchBlockSync(cmId.host, cmId.port, cmId.executorId,
         blockId.toString)
+      println("bytes="+bytes+"==="+bytes.nioByteBuffer()+"=="+blockId)
       val deserialized = blockManager.dataDeserialize(blockId, bytes.nioByteBuffer())
         .asInstanceOf[Iterator[Int]].toList
+      println("deserialized:"+deserialized.mkString(","))
       assert(deserialized === (1 to 100).toList)
     }
   }
@@ -218,6 +230,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     sc = new SparkContext(clusterUrl, "test")
     // data will be 4 million * 4 bytes = 16 MB in size, but our memoryFraction set the cache
     // to only 50 KB (0.0001 of 512 MB), so no partitions should fit in memory
+    //数据将是4百万*4字节=16MB的大小,但我们的memoryFraction将缓存设置为只有50 KB(512 MB的0.0001),所以没有分区应该适合内存
     val data = sc.parallelize(1 to 4000000, 2).persist(StorageLevel.MEMORY_ONLY_SER)
     assert(data.count() === 4000000)
     assert(data.count() === 4000000)
@@ -231,6 +244,8 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     // data will be 4 million * 4 bytes = 16 MB in size, but our memoryFraction set the cache
     // to only 5 MB (0.01 of 512 MB), so not all of it will fit in memory; we use 20 partitions
     // to make sure that *some* of them do fit though
+    //数据将是4百万*4字节=16MB的大小,但我们的memoryFraction设置缓存到只有5MB(0.01 MB的512 MB)
+    //所以并不是全部都适合内存;我们使用20个分区,以确保*一些*确实适合
     val data = sc.parallelize(1 to 4000000, 20).persist(StorageLevel.MEMORY_ONLY_SER)
     assert(data.count() === 4000000)
     assert(data.count() === 4000000)
@@ -275,6 +290,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
       assert(data.map(markNodeIfIdentity).collect.size === 2)
       // This relies on mergeCombiners being used to perform the actual reduce for this
       // test to actually be testing what it claims.
+      //这依赖于mergeCombiners用于执行此测试的实际减少,以实际测试其声明
       val grouped = data.map(x => x -> x).combineByKey(
                       x => x,
                       (x: Boolean, y: Boolean) => x,
@@ -329,6 +345,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
         case _: Throwable => { Thread.sleep(10) }
           // Do nothing. We might see exceptions because block manager
           // is racing this thread to remove entries from the driver.
+          //没做什么,我们可能会看到例外,因为block manager正在运行此线程以从驱动程序中删除条目
       }
     }
   }

@@ -130,6 +130,7 @@ private[spark] class HeartbeatReceiver(sc: SparkContext, clock: Clock)
     case TaskSchedulerIsSet =>
       scheduler = sc.taskScheduler
       //使用方法askWithRetry[Boolean]请求TaskSchedulerIsSet消息并要求返回Boolean值
+      //println("receiveAndReply:"+scheduler.applicationId()+"==="+scheduler.defaultParallelism())
       context.reply(true)
     case ExpireDeadHosts =>
       //删除心跳超时的executor

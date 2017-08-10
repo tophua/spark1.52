@@ -95,8 +95,9 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     sc2.stop()
   }
   //BytesWritable正确的隐式转换
-  test("BytesWritable implicit(隐式转换) conversion is correct") {
+  test("BytesWritable implicit conversion is correct") {
     // Regression test for SPARK-3121
+    //org.apache.hadoop.io.BytesWritable
     val bytesWritable = new BytesWritable()
     val inputArray = (1 to 10).map(_.toByte).toArray
     bytesWritable.set(inputArray, 0, 10)
@@ -110,7 +111,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     val byteArray2 = converter.convert(bytesWritable)
     assert(byteArray2.length === 0)
   }
-  //添加文件工作
+  //添加文件到工作
   test("addFile works") {
     val dir = Utils.createTempDir()
 
@@ -125,6 +126,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     val absolutePath2 = file2.getAbsolutePath
 
     try {
+      //com.google.common.io.Files
       Files.write("somewords1", file1, UTF_8)
       Files.write("somewords2", file2, UTF_8)
       val length1 = file1.length()
@@ -132,6 +134,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
 
       sc = new SparkContext(new SparkConf().setAppName("test").setMaster("local"))
       sc.addFile(file1.getAbsolutePath)
+      //相对路径 自动转换 绝对路径
       sc.addFile(relativePath)
       sc.parallelize(Array(1), 1).map(x => {
         //SparkFiles获得Spark文件
@@ -154,7 +157,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
             s"file has different length $length2 than added file ${gotten2.length()} : " +
               absolutePath2)
         }
-
+        println("==gotten1=="+gotten1.getAbsolutePath+"==gotten2=="+gotten2.getAbsolutePath)
         if (absolutePath1 == gotten1.getAbsolutePath) {
           throw new SparkException("file should have been copied :" + absolutePath1)
         }

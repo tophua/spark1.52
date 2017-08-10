@@ -34,7 +34,7 @@ import org.apache.spark.annotation.DeveloperApi
 @DeveloperApi
 sealed abstract class BlockId {
   /** A globally unique identifier for this Block. Can be used for ser/de. */
-  //此块的全局唯一标识符,可用于ser / de。
+  //此块的全局唯一标识符,可用于ser/de
   def name: String
 
   // convenience methods

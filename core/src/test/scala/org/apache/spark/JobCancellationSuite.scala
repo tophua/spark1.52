@@ -30,10 +30,10 @@ import org.scalatest.Matchers
 import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskStart}
 
 /**
- * Test suite for cancelling(取消) running jobs. We run the cancellation(取消) tasks for single job action
- * 取消运行作业,我们执行单作业操作的取消任务,以及多工作行动,我们测试的本地和集群调度程序FIFO和公平调度模式
+ * Test suite for cancelling running jobs. We run the cancellation tasks for single job action
  * (e.g. count) as well as multi-job action (e.g. take). We test the local and cluster schedulers
  * in both FIFO and fair scheduling modes.
+  * 取消运行作业,我们执行单作业操作的取消任务(例如计数),以及多工作行动(例如,获取take),我们测试的本地和集群调度程序FIFO和公平调度模式
  */
 class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAfter
   with LocalSparkContext {
@@ -287,6 +287,9 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
       val sem = new Semaphore(0)
       sc.addSparkListener(new SparkListener {
         override def onTaskStart(taskStart: SparkListenerTaskStart) {
+          println("testCount:"+taskStart.stageId+"==="+taskStart.taskInfo.id+"==executorId=="+taskStart.taskInfo.executorId+"=="
+            +taskStart.taskInfo.host+"=="+taskStart.taskInfo.taskLocality+"==="+taskStart.taskInfo.status+"=="+
+            taskStart.taskInfo.gettingResult+"=="+taskStart.taskInfo.successful+"=="+taskStart.taskInfo.launchTime)
           sem.release()
         }
       })
@@ -320,6 +323,7 @@ class JobCancellationSuite extends SparkFunSuite with Matchers with BeforeAndAft
       val sem = new Semaphore(0)
       sc.addSparkListener(new SparkListener {
         override def onTaskStart(taskStart: SparkListenerTaskStart) {
+          println("testTake:"+taskStart.stageId+"===="+taskStart.taskInfo)
           sem.release()
         }
       })

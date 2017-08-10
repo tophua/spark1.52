@@ -93,7 +93,7 @@ object SizeEstimator extends Logging {
   private var pointerSize = 4
 
   // Minimum size of a java.lang.Object
-  //最小对象
+  //java.lang.Object的最小大小
   private var objectSize = 8
 
   initialize()
@@ -171,7 +171,7 @@ object SizeEstimator extends Logging {
   private class SearchState(val visited: IdentityHashMap[AnyRef, AnyRef]) {
     val stack = new ArrayBuffer[AnyRef]
     var size = 0L
-
+    //排队
     def enqueue(obj: AnyRef) {
       if (obj != null && !visited.containsKey(obj)) {
         visited.put(obj, null)
@@ -225,6 +225,8 @@ object SizeEstimator extends Logging {
       // 因为它引用了整个REPL。 在这种情况下什么都不做 一般来说,所有的ClassLoaders和Classe都将在对象之间共享。
     } else {
       val classInfo = getClassInfo(cls)
+      val b=alignSize(classInfo.shellSize);
+    //  println(state.size+"=="+b)
       state.size += alignSize(classInfo.shellSize)
       for (field <- classInfo.pointerFields) {
         state.enqueue(field.get(obj))
@@ -358,17 +360,22 @@ object SizeEstimator extends Logging {
     // The code is in Figure 9.
     // The simplified idea of field layout consists of 4 parts (see more details in the report):
     //
-    // 1. field alignment: HotSpot lays out the fields aligned by their size.
-    // 2. object alignment: HotSpot rounds instance size up to 8 bytes
+    // 1. field alignment: HotSpot lays out the fields aligned by their size.HotSpot将它们的大小对齐
+    // 2. object alignment: HotSpot rounds instance size up to 8 bytesHotSpot将实例大小最多为8个字节
     // 3. consistent fields layouts throughout the hierarchy: This means we should layout
     // superclass first. And we can use superclass's shellSize as a starting point to layout the
     // other fields in this class.
+    // 整个层次结构中一致的字段布局,这意味着我们应该首先布局超类,
+    // 并且我们可以使用超类的shellSize作为起始点来布局此类中的其他字段。
     // 4. class alignment: HotSpot rounds field blocks up to to HeapOopSize not 4 bytes, confirmed
     // with Aleksey. see https://bugs.openjdk.java.net/browse/CODETOOLS-7901322
+    //   类对齐：HotSpot将字段块最多舍入到HeapOopSize不是4个字节，由Aleksey确认
     //
     // The real world field layout is much more complicated. There are three kinds of fields
     // order in Java 8. And we don't consider the @contended annotation introduced by Java 8.
     // see the HotSpot classloader code, layout_fields method for more details.
+    // 现实世界的现场布局要复杂得多,Java 8中有三种字段顺序。我们不考虑Java 8引入的@contended注释,
+    // 有关更多详细信息,请参阅HotSpot类加载器代码layout_fields方法。
     // hg.openjdk.java.net/jdk8/jdk8/hotspot/file/tip/src/share/vm/classfile/classFileParser.cpp
     var alignedSize = shellSize
     for (size <- fieldSizes if sizeCount(size) > 0) {
@@ -399,8 +406,11 @@ object SizeEstimator extends Logging {
    * will only have n trailing 1s(0b00...001..1). ~(alignSize - 1) will be 0b11..110..0. Hence,
    * (size + alignSize - 1) & ~(alignSize - 1) will set the last n bits to zeros, which leads to
    * multiple of alignSize.
+    * 将最后的n位设置为零,这导致alignSize的倍数
    * 比较算法大小,这个算法大小必须是2^,否则结果将是错误的
    */
-  private def alignSizeUp(size: Long, alignSize: Int): Long =
+  private def alignSizeUp(size: Long, alignSize: Int): Long ={
+    //& 按位与运算符,~ 按位取反运算符
     (size + alignSize - 1) & ~(alignSize - 1)
+  }
 }

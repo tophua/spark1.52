@@ -1695,6 +1695,7 @@ private[spark] object Utils extends Logging {
     *返回线程安全到迭代器的系统属性Map映射,它获取已被明确设置的属性,以及仅定义了默认值的属性
     * */
   def getSystemProperties: Map[String, String] = {
+    //System.getProperties()可以确定当前的系统属性,返回值是一个Properties;
     val sysProps = for (key <- System.getProperties.stringPropertyNames()) yield
       (key, System.getProperty(key))
 

@@ -45,8 +45,12 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     //保存Shuffle Map Task 输出的位置信息
     val tracker = new MapOutputTrackerMaster(conf)
     //设置输出的位置信息
+    //AkkaRpcEndpointRef(Actor[akka://test/user/MapOutputTracker#1105853817])
     tracker.trackerEndpoint = rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME,
       new MapOutputTrackerMasterEndpoint(rpcEnv, tracker, conf))
+   // println("Epoch:"+tracker.getEpoch)
+    //trackerEndpoint:AkkaRpcEndpointRef(Actor[akka://test/user/MapOutputTracker#508791595])===localhost:44953
+   // println("trackerEndpoint:"+tracker.trackerEndpoint+"==="+tracker.trackerEndpoint.address)
     tracker.stop()
     rpcEnv.shutdown()
   }
@@ -54,8 +58,10 @@ class MapOutputTrackerSuite extends SparkFunSuite {
   test("master register shuffle and fetch") {//主节点注册shuffle和获取
     val rpcEnv = createRpcEnv("test")
     val tracker = new MapOutputTrackerMaster(conf)
+    println("tracker:"+tracker.trackerEndpoint)
     tracker.trackerEndpoint = rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME,
       new MapOutputTrackerMasterEndpoint(rpcEnv, tracker, conf))
+    println("tracker:"+tracker.trackerEndpoint+"===="+tracker.trackerEndpoint.address)
       //shuffleId:10,2数组存储[MapStatus]
     tracker.registerShuffle(10, 2)
     assert(tracker.containsShuffle(10))
@@ -68,6 +74,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
         Array(10000L, 1000L)))
     val statuses = tracker.getMapSizesByExecutorId(10, 0)
     assert(statuses.toSet ===
+      //ShuffleBlockId(shuffleId: Int, mapId: Int, reduceId: Int)
       Seq((BlockManagerId("a", "hostA", 1000), ArrayBuffer((ShuffleBlockId(10, 0, 0), size1000))),
           (BlockManagerId("b", "hostB", 1000), ArrayBuffer((ShuffleBlockId(10, 1, 0), size10000))))
         .toSet)
@@ -117,6 +124,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
     // The remaining reduce task might try to grab the output despite the shuffle failure;    
     // this should cause it to fail, and the scheduler will ignore the failure due to the
     // stage already being aborted.
+    //剩下的减少任务可能尝试抓住输出,尽管洗牌失败; 这应该导致它失败,并且由于舞台已经被中止,调度程序将忽略该故障。
     intercept[FetchFailedException] { tracker.getMapSizesByExecutorId(10, 1) }
 
     tracker.stop()
@@ -126,19 +134,28 @@ class MapOutputTrackerSuite extends SparkFunSuite {
   test("remote fetch") {//远程读取
     val hostname = "localhost"
     val rpcEnv = createRpcEnv("spark", hostname, 0, new SecurityManager(conf))
-
+    //rpcEnv:localhost:45916===AkkaRpcEnv(akka://spark)
+    println("rpcEnv:"+rpcEnv.address+"==="+rpcEnv)
     val masterTracker = new MapOutputTrackerMaster(conf)
     masterTracker.trackerEndpoint = rpcEnv.setupEndpoint(MapOutputTracker.ENDPOINT_NAME,
       new MapOutputTrackerMasterEndpoint(rpcEnv, masterTracker, conf))
-
+    //spark:AkkaRpcEndpointRef(Actor[akka://spark/user/MapOutputTracker#-1702102346])==localhost:45916
+    println("spark:"+masterTracker.trackerEndpoint+"=="+masterTracker.trackerEndpoint.address )
     val slaveRpcEnv = createRpcEnv("spark-slave", hostname, 0, new SecurityManager(conf))
     val slaveTracker = new MapOutputTrackerWorker(conf)
-    slaveTracker.trackerEndpoint =
-      slaveRpcEnv.setupEndpointRef("spark", rpcEnv.address, MapOutputTracker.ENDPOINT_NAME)
 
+    slaveTracker.trackerEndpoint =
+      //根据systemName、address、endpointName获取RpcEndpointRef
+      slaveRpcEnv.setupEndpointRef("spark", rpcEnv.address, MapOutputTracker.ENDPOINT_NAME)
+    //spark-slave:localhost:39527==AkkaRpcEnv(akka://spark-slave)===AkkaRpcEndpointRef(Actor[akka.tcp://spark@localhost:45916/user/MapOutputTracker#-1702102346])===localhost:45916
+
+    println("spark-slave:"+slaveRpcEnv.address+"=="+slaveRpcEnv+"==="+slaveTracker.trackerEndpoint+"==="+slaveTracker.trackerEndpoint.address)
     masterTracker.registerShuffle(10, 1)
+    println("masterTracker.getEpoch-0:"+masterTracker.getEpoch)
     masterTracker.incrementEpoch()
+    println("masterTracker.getEpoch-1:"+masterTracker.getEpoch)
     slaveTracker.updateEpoch(masterTracker.getEpoch)
+    println("masterTracker.getEpoch-2:"+masterTracker.getEpoch+"==slaveTracker=="+slaveTracker.getEpoch)
     intercept[FetchFailedException] { slaveTracker.getMapSizesByExecutorId(10, 0) }
 
     val size1000 = MapStatus.decompressSize(MapStatus.compressSize(1000L))
@@ -146,7 +163,9 @@ class MapOutputTrackerSuite extends SparkFunSuite {
       BlockManagerId("a", "hostA", 1000), Array(1000L)))
     masterTracker.incrementEpoch()
     slaveTracker.updateEpoch(masterTracker.getEpoch)
+    println("masterTracker.getEpoch-3:"+masterTracker.getEpoch+"==slaveTracker=="+slaveTracker.getEpoch)
     assert(slaveTracker.getMapSizesByExecutorId(10, 0) ===
+      //BlockManagerId:ID of the executor,块管理器的主机名,块管理器的端口
       Seq((BlockManagerId("a", "hostA", 1000), ArrayBuffer((ShuffleBlockId(10, 0, 0), size1000)))))
 
     masterTracker.unregisterMapOutput(10, 0, BlockManagerId("a", "hostA", 1000))
@@ -181,6 +200,7 @@ class MapOutputTrackerSuite extends SparkFunSuite {
       BlockManagerId("88", "mph", 1000), Array.fill[Long](10)(0)))
     val sender = mock(classOf[RpcEndpointRef])
     when(sender.address).thenReturn(RpcAddress("localhost", 12345))
+    println("sender:"+masterTracker.getEpoch+"==slaveTracker=="+sender.address)
     val rpcCallContext = mock(classOf[RpcCallContext])
     when(rpcCallContext.sender).thenReturn(sender)
     masterEndpoint.receiveAndReply(rpcCallContext)(GetMapOutputStatuses(10))

@@ -44,18 +44,20 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
 
   override def afterEach() {
     super.afterEach()
-    Utils.deleteRecursively(tempDir)
+      Utils.deleteRecursively(tempDir)
   }
 
   test("text files") {//文本文件
     sc = new SparkContext("local", "test")
     val outputDir = new File(tempDir, "output").getAbsolutePath//返回抽象路径名的绝对路径名字符串
+    println("==="+outputDir);
     val nums = sc.makeRDD(1 to 4)
     nums.saveAsTextFile(outputDir)//保存文件1,2,3,4
     // Read the plain text file and check it's OK
     //读简单的文本文件,并检查它的正确
     val outputFile = new File(outputDir, "part-00000")//父目录,子目录
     val content = Source.fromFile(outputFile).mkString
+    println("content:"+content);
     assert(content === "1\n2\n3\n4\n")
     // Also try reading it in as a text file RDD
     //也试着读它为文本文件RDD
@@ -272,7 +274,10 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     val bbuf = java.nio.ByteBuffer.wrap(testOutput)
     // write data to file 写入数据到文件
     val file = new java.io.FileOutputStream(outFile)
+    //FileChannel是一个连接到文件的通道，可以通过文件通道读写文件。它无法设置为非阻塞模式，总是运行在阻塞模式下
     val channel = file.getChannel
+    //channel.lock()
+    //channel.lock()
     channel.write(bbuf)
     channel.close()
     file.close()
@@ -434,6 +439,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     out.write("Goodbye\n")
     out.close()
     val rdd = sc.textFile(tempDir + "/input").cache()
+    rdd.foreach(println _)
     assert(rdd.count() === 3)
     assert(rdd.count() === 3)
     assert(rdd.count() === 3)

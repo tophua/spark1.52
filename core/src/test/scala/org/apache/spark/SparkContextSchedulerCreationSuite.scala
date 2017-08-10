@@ -68,7 +68,9 @@ class SparkContextSchedulerCreationSuite
     //返回TaskSchedulerImpl
     sched.backend match {
       //availableProcessors 返回到Java虚拟机的可用的处理器数量
-      case s: LocalBackend => assert(s.totalCores === Runtime.getRuntime.availableProcessors())
+      case s: LocalBackend =>
+        println(s.totalCores +"==" +Runtime.getRuntime.availableProcessors())
+        assert(s.totalCores === Runtime.getRuntime.availableProcessors())
       case _ => fail()
     }
   }

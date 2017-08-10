@@ -363,7 +363,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     val iterator = Iterator.range(0, 5)
     assert(Utils.getIteratorSize(iterator) === 5L)
   }
-
+  //目录包含新文件的文件
   test("doesDirectoryContainFilesNewerThan") {
     // create some temporary directories and files
     //创建一些临时目录和文件
@@ -378,6 +378,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     child1.setLastModified(System.currentTimeMillis() - (1000 * 30))
 
     // although child1 is old, child2 is still new so return true
+    //虽然child1是老的,child2仍然是新的,所以返回true
     assert(Utils.doesDirectoryContainAnyNewFiles(parent, 5))
 
     child2.setLastModified(System.currentTimeMillis - (1000 * 30))
@@ -575,11 +576,11 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
         "spark.test.fileNameLoadB 1\n", outFile, UTF_8)
       //加一个properties文件
       val properties = Utils.getPropertiesFromFile(outFile.getAbsolutePath)
+      //System.getenv()和System.getProperties()的区别
+      //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+      //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
       properties
         .filter { case (k, v) => k.startsWith("spark.")}//操作配制文件
-        //System.getenv()和System.getProperties()的区别
-        //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
-        //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
         .foreach { case (k, v) => sys.props.getOrElseUpdate(k, v)}
       val sparkConf = new SparkConf
       assert(sparkConf.getBoolean("spark.test.fileNameLoadA", false) === true)
@@ -600,7 +601,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     require(time < 500, "preparation time should not count")
   }
 
-  test("fetch hcfs dir") {//获取hcfs目录
+  test("fetch hcfs dir") {//获取hdfs目录
     val tempDir = Utils.createTempDir()
     val sourceDir = new File(tempDir, "source-dir")
     val innerSourceDir = Utils.createTempDir(root = sourceDir.getPath)

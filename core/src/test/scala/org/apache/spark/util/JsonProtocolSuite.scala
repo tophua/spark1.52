@@ -345,6 +345,7 @@ class JsonProtocolSuite extends SparkFunSuite {
       .removeField({ _._1 == "Parent IDs"})
       .removeField({ _._1 == "Scope"})
     val expectedRddInfo = new RDDInfo(1, "one", 100, StorageLevel.NONE, Seq.empty, scope = None)
+    println("=="+JsonProtocol.rddInfoFromJson(oldRddInfoJson))
     assertEquals(expectedRddInfo, JsonProtocol.rddInfoFromJson(oldRddInfoJson))
   }
 

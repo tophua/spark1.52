@@ -69,12 +69,14 @@ class BlockManagerId private (
   }
 
   override def writeExternal(out: ObjectOutput): Unit = Utils.tryOrIOException {
+    //writeUTF java专用的字符序列格式,格式：2个字节的记录长度n字节数 跟着n长度的utf8字节。
     out.writeUTF(executorId_)
     out.writeUTF(host_)
     out.writeInt(port_)
   }
 
   override def readExternal(in: ObjectInput): Unit = Utils.tryOrIOException {
+
     executorId_ = in.readUTF()
     host_ = in.readUTF()
     port_ = in.readInt()
@@ -102,8 +104,8 @@ private[spark] object BlockManagerId {
    * Returns a [[org.apache.spark.storage.BlockManagerId]] for the given configuration.
    *  包括标识Slave的ExecutorId,块管理器的主机名称和端口及节点的最大可用内存数
    * @param execId ID of the executor.
-   * @param host Host name of the block manager.
-   * @param port Port of the block manager.
+   * @param host Host name of the block manager.块管理器的主机名
+   * @param port Port of the block manager. 块管理器的端口
    * @return A new [[org.apache.spark.storage.BlockManagerId]].
    */
   def apply(execId: String, host: String, port: Int): BlockManagerId =

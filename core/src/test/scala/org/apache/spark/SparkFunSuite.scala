@@ -22,16 +22,20 @@ import org.scalatest.{FunSuite, Outcome}
 
 /**
  * Base abstract class for all unit tests in Spark for handling common functionality.
+  * Spark中用于处理常用功能的所有单元测试的基本抽象类
  */
 private[spark] abstract class SparkFunSuite extends FunSuite with Logging {
 // scalastyle:on
 
   /**
-   * Log the suite(套件) name and the test name before and after each test.
+   * Log the suite name and the test name before and after each test.
+    * 在每个测试之前和之后记录套件名称和测试名称
    *
    * Subclasses should never override this method. If they wish to run
    * custom code before and after each test, they should mix in the
-   * {{org.scalatest.BeforeAndAfter}} trait instead(替代).
+   * {{org.scalatest.BeforeAndAfter}} trait instead
+    * 子类不应该覆盖此方法,如果他们希望在每个测试之前和之后运行自定义代码,
+    * 那么它们应该混合在{{org.scalatest.BeforeAndAfter}} trait中
    */
   final protected override def withFixture(test: NoArgTest): Outcome = {
     val testName = test.text

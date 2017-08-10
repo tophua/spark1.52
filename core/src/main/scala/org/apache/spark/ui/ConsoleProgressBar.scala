@@ -54,8 +54,9 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
   var lastProgressBar = ""
 
   // Schedule a refresh thread to run periodically
-  //安排刷新线程定期运行
+  //创建一个新计时器,其相关的线程具有指定的名称,并且可以指定作为守护程序运行
   private val timer = new Timer("refresh progress", true)
+  //FIRST_DELAY延迟执行的毫秒数,即在delay毫秒之后第一次执行,重复执行的时间间隔
   timer.schedule(new TimerTask{
     override def run() {
       refresh()
@@ -68,15 +69,18 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
    */
   private def refresh(): Unit = synchronized {
     val now = System.currentTimeMillis()
+    //println(now+"==="+lastFinishTime+"==="+FIRST_DELAY)
     if (now - lastFinishTime < FIRST_DELAY) {
       return
     }
     val stageIds = sc.statusTracker.getActiveStageIds()
+    //println("==stageIds=="+stageIds.mkString(","));
     //flatten可以把嵌套的结构展开.
     //List(List(1,2),List(3,4)).flatten
     //res0: List[Int] = List(1, 2, 3, 4)
     val stages = stageIds.map(sc.statusTracker.getStageInfo).flatten.filter(_.numTasks() > 1)
       .filter(now - _.submissionTime() > FIRST_DELAY).sortBy(_.stageId())
+   // println("==stages=="+stageIds.mkString(",")+"=="+stages.length);
     if (stages.length > 0) {
       //同时显示最多3个阶段
       show(now, stages.take(3))  // display at most 3 stages in same time
@@ -91,17 +95,25 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
     * 日志记录将跟随进度条,则进度条将显示在下一行而不覆盖日志。
    */
   private def show(now: Long, stages: Seq[SparkStageInfo]) {
+
     val width = TerminalWidth / stages.size
+   // println(TerminalWidth+"==="+stages.size+"==="+width)
     val bar = stages.map { s =>
       val total = s.numTasks()
+      //header字符串的长度9 ==[Stage 0:>
       val header = s"[Stage ${s.stageId()}:"
+      //tailer字符串的长度12,==(0 + 0) / 2]
       val tailer = s"(${s.numCompletedTasks()} + ${s.numActiveTasks()}) / $total]"
       val w = width - header.length - tailer.length
+      //println(width+"==="+header.length+"==="+tailer.length+"==="+w)
       val bar = if (w > 0) {
         //进度百分数=w*完成任务数/总数
         val percent = w * s.numCompletedTasks() / total
+
+
         (0 until w).map { i =>
-          if (i < percent) "=" else if (i == percent) ">" else " "
+         val a= if (i < percent) "=" else if (i == percent) ">" else " "
+         if (i < percent) "=" else if (i == percent) ">" else " "
         }.mkString("")
       } else {
         ""
@@ -109,6 +121,7 @@ private[spark] class ConsoleProgressBar(sc: SparkContext) extends Logging {
       header + bar + tailer
     }.mkString("")
 
+   // println("===="+bar+"===")
     // only refresh if it's changed of after 1 minute (or the ssh connection will be closed
     // after idle some time)
     //只有在1分钟后更改（或者ssh连接将在空闲一段时间后关闭）才刷新

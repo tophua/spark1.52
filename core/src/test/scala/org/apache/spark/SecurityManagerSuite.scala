@@ -52,6 +52,7 @@ class SecurityManagerSuite extends SparkFunSuite {
     assert(securityManager.aclsEnabled() === false)
 
     // acls are off so doesn't matter what view acls set to
+    //acls是关闭的,所以没关系什么视图acls设置
     assert(securityManager.checkUIViewPermissions("user4") === true)
 
     securityManager.setAcls(true)
@@ -155,6 +156,7 @@ class SecurityManagerSuite extends SparkFunSuite {
     assert(securityManager.hostnameVerifier.isDefined === true)
 
     assert(securityManager.fileServerSSLOptions.trustStore.isDefined === true)
+    //信任
     assert(securityManager.fileServerSSLOptions.trustStore.get.getName === "truststore")
     assert(securityManager.fileServerSSLOptions.keyStore.isDefined === true)
     assert(securityManager.fileServerSSLOptions.keyStore.get.getName === "keystore")
