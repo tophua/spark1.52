@@ -38,6 +38,15 @@ import org.apache.spark.{Logging, SparkContext}
  * 操作范围可以嵌套在其他作用域中,例如,SQL查询可以用公共RDD API使用的相关范围
  * There is no particular relationship between an operation scope and a stage or a job.
  * A scope may live inside one stage (e.g. map) or span across multiple jobs (e.g. take).
+
+  JsonInclude(Include.NON_NULL)
+  属性为NULL 不序列化
+  将该标记放在属性上，如果该属性为NULL则不参与序列化
+  如果放在类上边,那对这个类的全部属性起作用
+  Include.Include.ALWAYS 默认
+  Include.NON_DEFAULT 属性为默认值不序列化
+  Include.NON_EMPTY 属性为 空（“”） 或者为 NULL 都不序列化
+  Include.NON_NULL 属性为NULL 不序列化
  */
 @JsonInclude(Include.NON_NULL)
 @JsonPropertyOrder(Array("id", "name", "parent"))
@@ -47,6 +56,7 @@ private[spark] class RDDOperationScope(
     val id: String = RDDOperationScope.nextScopeId().toString) {
 
   def toJson: String = {
+    //将对象转换成json字符串
     RDDOperationScope.jsonMapper.writeValueAsString(this)
   }
 
@@ -79,7 +89,7 @@ private[spark] class RDDOperationScope(
 private[spark] object RDDOperationScope extends Logging {
   private val jsonMapper = new ObjectMapper().registerModule(DefaultScalaModule)
   private val scopeCounter = new AtomicInteger(0)
-
+  //readValue将json字符串转换成java对象
   def fromJson(s: String): RDDOperationScope = {
     jsonMapper.readValue(s, classOf[RDDOperationScope])
   }

@@ -44,9 +44,12 @@ class JsonProtocolSuite extends SparkFunSuite {
     val stageSubmitted =
       SparkListenerStageSubmitted(makeStageInfo(100, 200, 300, 400L, 500L), properties)
     val stageCompleted = SparkListenerStageCompleted(makeStageInfo(101, 201, 301, 401L, 501L))
+    //stageId, stageAttemptId,taskInfo
     val taskStart = SparkListenerTaskStart(111, 0, makeTaskInfo(222L, 333, 1, 444L, false))
+    //taskInfo
     val taskGettingResult =
       SparkListenerTaskGettingResult(makeTaskInfo(1000L, 2000, 5, 3000L, true))
+    //   stageId,stageAttemptId,taskType,reason: TaskEndReason,taskInfo: TaskInfo,taskMetrics: TaskMetrics
     val taskEnd = SparkListenerTaskEnd(1, 0, "ShuffleMapTask", Success,
       makeTaskInfo(123L, 234, 67, 345L, false),
       makeTaskMetrics(300L, 400L, 500L, 600L, 700, 800, hasHadoopInput = false, hasOutput = false))
@@ -56,12 +59,16 @@ class JsonProtocolSuite extends SparkFunSuite {
     val taskEndWithOutput = SparkListenerTaskEnd(1, 0, "ResultTask", Success,
       makeTaskInfo(123L, 234, 67, 345L, false),
       makeTaskMetrics(300L, 400L, 500L, 600L, 700, 800, hasHadoopInput = true, hasOutput = true))
+    /**
+      * 一个job多个stage
+      */
     val jobStart = {
       val stageIds = Seq[Int](1, 2, 3, 4)
       val stageInfos = stageIds.map(x =>
         makeStageInfo(x, x * 200, x * 300, x * 400L, x * 500L))
       SparkListenerJobStart(10, jobSubmissionTime, stageInfos, properties)
     }
+    //job id,
     val jobEnd = SparkListenerJobEnd(20, jobCompletionTime, JobSucceeded)
     val environmentUpdate = SparkListenerEnvironmentUpdate(Map[String, Seq[(String, String)]](
       "JVM Information" -> Seq(("GC speed", "9999 objects/s"), ("Java home", "Land of coffee")),
@@ -69,20 +76,26 @@ class JsonProtocolSuite extends SparkFunSuite {
       "System Properties" -> Seq(("Username", "guest"), ("Password", "guest")),
       "Classpath Entries" -> Seq(("Super library", "/tmp/super_library"))
     ))
+    //time,BlockManagerId,maxMem
     val blockManagerAdded = SparkListenerBlockManagerAdded(1L,
       BlockManagerId("Stars", "In your multitude...", 300), 500)
     val blockManagerRemoved = SparkListenerBlockManagerRemoved(2L,
       BlockManagerId("Scarce", "to be counted...", 100))
     val unpersistRdd = SparkListenerUnpersistRDD(12345)
     val logUrlMap = Map("stderr" -> "mystderr", "stdout" -> "mystdout").toMap
+    //
     val applicationStart = SparkListenerApplicationStart("The winner of all", Some("appId"),
       42L, "Garfield", Some("appAttempt"))
     val applicationStartWithLogs = SparkListenerApplicationStart("The winner of all", Some("appId"),
       42L, "Garfield", Some("appAttempt"), Some(logUrlMap))
+
     val applicationEnd = SparkListenerApplicationEnd(42L)
+    //SparkListener执行器已添加
     val executorAdded = SparkListenerExecutorAdded(executorAddedTime, "exec1",
       new ExecutorInfo("Hostee.awesome.com", 11, logUrlMap))
+    //Spark Listener 执行器已删除
     val executorRemoved = SparkListenerExecutorRemoved(executorRemovedTime, "exec2", "test reason")
+    //Spark Listener执行者指标更新
     val executorMetricsUpdate = SparkListenerExecutorMetricsUpdate("exec3", Seq(
       (1L, 2, 3, makeTaskMetrics(300L, 400L, 500L, 600L, 700, 800,
         hasHadoopInput = true, hasOutput = true))))
@@ -382,14 +395,23 @@ class JsonProtocolSuite extends SparkFunSuite {
    * --------------------------- */
 
   private def testEvent(event: SparkListenerEvent, jsonString: String) {
+    //org.json4s.jackson.JsonMethods 压紧
+    //把对象转换成json
     val actualJsonString = compact(render(JsonProtocol.sparkEventToJson(event)))
+    //把json转换成对象
     val newEvent = JsonProtocol.sparkEventFromJson(parse(actualJsonString))
+    //json字符串的比较
     assertJsonStringEquals(jsonString, actualJsonString)
+    //原始对象与json转换成对象比较
     assertEquals(event, newEvent)
   }
 
   private def testRDDInfo(info: RDDInfo) {
-    val newInfo = JsonProtocol.rddInfoFromJson(JsonProtocol.rddInfoToJson(info))
+    //把对象转换成json,需要调用compact转换成字符串
+    //parse把字符串转换对象
+    val infordd=JsonProtocol.rddInfoToJson(info)
+    //把json转换成对象
+    val newInfo = JsonProtocol.rddInfoFromJson(infordd)
     assertEquals(info, newInfo)
   }
 
@@ -440,6 +462,7 @@ class JsonProtocolSuite extends SparkFunSuite {
 
   /** -------------------------------- *
    | Util methods for comparing events |
+   | 用于比较事件的Util方法               |
    * --------------------------------- */
 
   private def assertEquals(event1: SparkListenerEvent, event2: SparkListenerEvent) {
@@ -659,6 +682,7 @@ class JsonProtocolSuite extends SparkFunSuite {
 
   /**
    * Use different names for methods we pass in to assertSeqEquals or assertOptionEquals
+    * 对我们传递给assertSeqEquals或assertOptionEquals的方法使用不同的名称
    */
 
   private def assertShuffleReadEquals(r1: ShuffleReadMetrics, r2: ShuffleReadMetrics) {
@@ -694,6 +718,7 @@ class JsonProtocolSuite extends SparkFunSuite {
 
   /** ----------------------------------- *
    | Util methods for constructing events |
+   | 用于构建事件的方法                       |
    * ------------------------------------ */
 
   private val properties = {
@@ -720,9 +745,20 @@ class JsonProtocolSuite extends SparkFunSuite {
     r.diskSize = e
     r
   }
-
+  /**
+    * 一个Stage包括多个RDD
+    * @param a
+    * @param b
+    * @param c
+    * @param d
+    * @param e
+    * @return
+    */
   private def makeStageInfo(a: Int, b: Int, c: Int, d: Long, e: Long) = {
-    val rddInfos = (0 until a % 5).map { i => makeRddInfo(a + i, b + i, c + i, d + i, e + i) }
+    val rddInfos = (0 until a % 5).map { i =>
+      //println(a + i+"==="+b + i+"==="+c + i+"==="+d + i+"==="+e + i)
+      makeRddInfo(a + i, b + i, c + i, d + i, e + i)
+    }
     val stageInfo = new StageInfo(a, 0, "greetings", b, rddInfos, Seq(100, 200, 300), "details")
     val (acc1, acc2) = (makeAccumulableInfo(1), makeAccumulableInfo(2))
     stageInfo.accumulables(acc1.id) = acc1
@@ -731,6 +767,9 @@ class JsonProtocolSuite extends SparkFunSuite {
   }
 
   private def makeTaskInfo(a: Long, b: Int, c: Int, d: Long, speculative: Boolean) = {
+    /**
+      * taskId,index,attemptNumber,launchTime,executorId,host,taskLocality,speculative
+      */
     val taskInfo = new TaskInfo(a, b, c, d, "executor", "your kind sir", TaskLocality.NODE_LOCAL,
       speculative)
     val (acc1, acc2, acc3) =
@@ -747,6 +786,7 @@ class JsonProtocolSuite extends SparkFunSuite {
   /**
    * Creates a TaskMetrics object describing a task that read data from Hadoop (if hasHadoopInput is
    * set to true) or read data from a shuffle otherwise.
+    * 创建一个TaskMetrics对象,描述从Hadoop读取数据的任务(如果hasHadoopInput设置为true)或者从shuffle读取数据
    */
   private def makeTaskMetrics(
       a: Long,
@@ -794,7 +834,7 @@ class JsonProtocolSuite extends SparkFunSuite {
       sw.setShuffleRecordsWritten(if (hasRecords) (a + b + c) / 100 else -1)
       t.shuffleWriteMetrics = Some(sw)
     }
-    // Make at most 6 blocks
+    // Make at most 6 blocks 最多6块
     t.updatedBlocks = Some((1 to (e % 5 + 1)).map { i =>
       (RDDBlockId(e % i, f % i), BlockStatus(StorageLevel.MEMORY_AND_DISK_SER_2, a % i, b % i, c%i))
     }.toSeq)
@@ -804,6 +844,7 @@ class JsonProtocolSuite extends SparkFunSuite {
 
   /** --------------------------------------- *
    | JSON string representation of each event |
+   | 每个事件的JSON字符串表示形式                  |
    * ---------------------------------------- */
 
   private val stageSubmittedJsonString =

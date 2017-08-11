@@ -54,7 +54,7 @@ class StageInfo(
   var failureReason: Option[String] = None
   /** 
    *  Terminal values of accumulables updated during this stage. 
-   *  在这一阶段的累积数据更新值。
+   *  在这一阶段的累加数据更新值
    *  */
   val accumulables = HashMap[Long, AccumulableInfo]()
 

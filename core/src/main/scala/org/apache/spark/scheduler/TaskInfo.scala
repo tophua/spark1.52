@@ -23,8 +23,8 @@ import org.apache.spark.annotation.DeveloperApi
 
 /**
  * :: DeveloperApi ::
- * Information about a running task attempt inside(内部) a TaskSet.
- * 任务集内一个正在运行任务的信息
+ * Information about a running task attempt inside a TaskSet.
+ * 任务集内一个正在运行任务尝试的信息
  */
 @DeveloperApi
 class TaskInfo(
@@ -32,8 +32,8 @@ class TaskInfo(
     val index: Int,
     val attemptNumber: Int,//尝试数
     val launchTime: Long,//开始时间
-    val executorId: String,
-    val host: String,//主要
+    val executorId: String,//
+    val host: String,//主机
     val taskLocality: TaskLocality.TaskLocality,//任务位置策略 
     val speculative: Boolean) {//speculative是否使用推理
 
