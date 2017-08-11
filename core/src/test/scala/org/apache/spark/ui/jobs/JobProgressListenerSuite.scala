@@ -78,6 +78,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
 
   private def assertActiveJobsStateIsEmpty(listener: JobProgressListener) {
     listener.getSizesOfActiveStateTrackingCollections.foreach { case (fieldName, size) =>
+      //println(fieldName+"==="+size)
       assert(size === 0, s"$fieldName was not empty")
     }
   }
@@ -111,6 +112,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     for (stageId <- stageIds) {
       listener.onStageSubmitted(createStageStartEvent(stageId))
     }
+    println(listener.stageIdToActiveJobIds.size)
     listener.stageIdToActiveJobIds.size should be > 0
 
     // Complete the stages and job
@@ -151,7 +153,7 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
 
     // Run a bunch of jobs to get the listener into a state where we've exceeded both the
     // job and stage retention limits:
-    //运行一堆工作，让听众进入一个我们已经超过这两个的状态工作和阶段保留限制：
+    //运行一堆工作，让监听进入一个我们已经超过这两个的状态工作和阶段保留限制：
     for (jobId <- 1 to 10) {
       runJob(listener, jobId, shouldFail = false)
     }
@@ -163,6 +165,14 @@ class JobProgressListenerSuite extends SparkFunSuite with LocalSparkContext with
     //Snapshot各种软和硬尺寸限制收藏的大小：
     val softLimitSizes = listener.getSizesOfSoftSizeLimitedCollections
     val hardLimitSizes = listener.getSizesOfHardSizeLimitedCollections
+    listener.getSizesOfSoftSizeLimitedCollections.foreach { case (fieldName, size) =>
+      println(fieldName+"==="+size)
+      //assert(size === 0, s"$fieldName was not empty")
+    }
+    listener.getSizesOfHardSizeLimitedCollections.foreach { case (fieldName, size) =>
+      println(fieldName+"==="+size)
+      //assert(size === 0, s"$fieldName was not empty")
+    }
     // Run some more jobs:
     //再运行一些工作：
     for (jobId <- 11 to 50) {

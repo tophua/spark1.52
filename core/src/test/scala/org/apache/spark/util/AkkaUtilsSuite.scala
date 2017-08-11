@@ -47,6 +47,7 @@ class AkkaUtilsSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     val securityManager = new SecurityManager(conf)
     val hostname = "localhost"
     val rpcEnv = RpcEnv.create("spark", hostname, 0, conf, securityManager)
+    println("hostPort:"+rpcEnv.address.hostPort)
     System.setProperty("spark.hostPort", rpcEnv.address.hostPort)
     assert(securityManager.isAuthenticationEnabled() === true)
 

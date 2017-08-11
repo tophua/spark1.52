@@ -95,7 +95,8 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * The master URL to connect to, such as "local" to run locally with one thread, "local[4]" to
    * run locally with 4 cores, or "spark://master:7077" to run on a Spark standalone cluster.
-   * 要连接的Spark集群Master的URL
+    *
+   * 要连接的主节点的URL,例如“本地”以一个线程本地运行,“local [4]”以4个核心运行,或者“spark：// master：7077”在Spark独立群集上运行
    */
   def setMaster(master: String): SparkConf = {
     set("spark.master", master)
@@ -456,7 +457,8 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     * */
   def contains(key: String): Boolean = settings.containsKey(key)
 
-  /** Copy this object */
+  /** Copy this object
+    * 复制此对象 */
   override def clone: SparkConf = {
     new SparkConf(false).setAll(getAll)
   }
@@ -464,12 +466,13 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   /**
    * By using this instead of System.getenv(), environment variables can be mocked
    * in unit tests.
-    * 通过使用它而不是System.getenv（），环境变量可以被单位测试
+    * 通过使用它而不是System.getenv(),环境变量可以被单位测试
    */
   private[spark] def getenv(name: String): String = System.getenv(name)
 
   /** Checks for illegal or deprecated config settings. Throws an exception for the former. Not
-    * idempotent - may mutate this conf object to convert deprecated settings to supported ones. 
+    * idempotent - may mutate this conf object to convert deprecated settings to supported ones.
+    * 检查非法或不建议使用的配置设置,抛出前者的异常,不是幂等的-可能会突变此con对象,将不建议使用的设置转换为支持的设置,
     * 对Spark各种信息进行校验
     * */
   private[spark] def validateSettings() {
@@ -629,6 +632,7 @@ private[spark] object SparkConf extends Logging {
    *
    * The extra information is logged as a warning when the config is present in the user's
    * configuration.
+    * 当配置存在于用户配置中时,额外的信息将被记录为警告
    */
   private val deprecatedConfigs: Map[String, DeprecatedConfig] = {
     val configs = Seq(
@@ -647,10 +651,12 @@ private[spark] object SparkConf extends Logging {
   }
 
   /**
-   * Maps a current config key to alternate(交替,替换) keys that were used in previous version of Spark.
+   * Maps a current config key to alternate keys that were used in previous version of Spark.
+    * 将当前配置密钥映射到先前版本的Spark中使用的备用密钥
    *
    * The alternates are used in the order defined in this map. If deprecated configs are
    * present in the user's configuration, a warning is logged.
+    * 替代品按照该Map中定义的顺序使用,如果用户配置中存在不建议使用的配置,则会记录一个警告。
    */
   private val configsWithAlternatives = Map[String, Seq[AlternateConfig]](
   //executor在加载类的时候是否优先使用用户自定义的JAR包,而不是Spark带有的JAR包,目前,该属性只是一项试验功能
@@ -668,6 +674,7 @@ private[spark] object SparkConf extends Logging {
     "spark.yarn.am.waitTime" -> Seq(
       AlternateConfig("spark.yarn.applicationMaster.waitTries", "1.3",
         // Translate old value to a duration, with 10s wait time per try.
+        //将旧值转换为持续时间,每次尝试10秒等待时间
         translation = s => s"${s.toLong * 10}s")),
     "spark.reducer.maxSizeInFlight" -> Seq(   
     //在Shuffle的时候,每个Reducer任务获取缓存数据指定大小(以兆字节为单位)  
@@ -701,8 +708,10 @@ private[spark] object SparkConf extends Logging {
   /**
    * A view of `configsWithAlternatives` that makes it more efficient to look up deprecated
    * config keys.
+    * “configsWithAlternatives”的视图,可以更有效地查找已弃用的配置密钥
    *
    * Maps the deprecated config name to a 2-tuple (new config name, alternate config info).
+    * 将不推荐的配置名称映射到2元组(新配置名称,备用配置信息)
    */
   private val allAlternatives: Map[String, (String, AlternateConfig)] = {
     configsWithAlternatives.keys.flatMap { key =>
@@ -712,7 +721,9 @@ private[spark] object SparkConf extends Logging {
 
   /**
    * Return whether the given config is an akka config (e.g. akka.actor.provider).
+    * 返回给定的配置是否是akka配置(例如akka.actor.provider)
    * Note that this does not include spark-specific akka configs (e.g. spark.akka.timeout).
+    * 请注意,这不包括Spark特定的akka配置(例如spark.akka.timeout)
    */
   def isAkkaConf(name: String): Boolean = name.startsWith("akka.")
 
@@ -721,6 +732,7 @@ private[spark] object SparkConf extends Logging {
    * 返回给定的配置是否应在启动时传递给执行程序
    * Certain akka and authentication configs are required from the executor when it connects to
    * the scheduler, while the rest of the spark configs can be inherited from the driver later.
+    * 当执行器连接到调度程序时,需要某些akka和身份验证配置,而稍后可以从驱动程序继承其余的spark配置
    */
   def isExecutorStartupConf(name: String): Boolean = {
     isAkkaConf(name) ||
@@ -732,6 +744,7 @@ private[spark] object SparkConf extends Logging {
 
   /**
    * Return true if the given config matches either `spark.*.port` or `spark.port.*`.
+    * 如果给定的配置匹配`spark。*。port`或`spark.port。*`,则返回true
    */
   def isSparkPortConf(name: String): Boolean = {
     (name.startsWith("spark.") && name.endsWith(".port")) || name.startsWith("spark.port.")
@@ -740,7 +753,7 @@ private[spark] object SparkConf extends Logging {
   /**
    * Looks for available deprecated keys for the given config option, and return the first
    * value available.
-    * 查找给定配置选项的可用不推荐的key,然后返回第一个值可用。
+    * 查找给定配置选项的可用不推荐的key,然后返回第一个值可用
    */
   def getDeprecatedConfig(key: String, conf: SparkConf): Option[String] = {
     configsWithAlternatives.get(key).flatMap { alts =>
@@ -774,8 +787,8 @@ private[spark] object SparkConf extends Logging {
    * Holds information about keys that have been deprecated and do not have a replacement.
     * 保存有关已被弃用且没有替换键的信息
    *
-   * @param key The deprecated key.
-   * @param version Version of Spark where key was deprecated.
+   * @param key The deprecated key. 已弃用的密钥
+   * @param version Version of Spark where key was deprecated. 已禁用密钥的Spark版本
    * @param deprecationMessage Message to include in the deprecation warning.
    */
   private case class DeprecatedConfig(

@@ -28,12 +28,15 @@ import org.apache.spark.serializer.SerializerInstance
 
 /**
  * Another test suite for the closure cleaner that is finer-grained.
+  * 封闭清理的另一个测试套件更细腻
  * For tests involving end-to-end Spark jobs, see {{ClosureCleanerSuite}}.
+  * 对于涉及端到端Spark作业的测试,请参阅{{ClosureCleanerSuite}}
  */
 class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with PrivateMethodTester {
 
   // Start a SparkContext so that the closure serializer is accessible
   // We do not actually use this explicitly otherwise
+  //启动一个SparkContext,以便封装序列化程序可以访问我们实际上并没有明确使用它
   private var sc: SparkContext = null
   private var closureSerializer: SerializerInstance = null
 
@@ -49,12 +52,14 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
   }
 
   // Some fields and methods to reference in inner closures later
+  //稍后在内部关闭中引用的一些字段和方法
   private val someSerializableValue = 1
   private val someNonSerializableValue = new NonSerializable
   private def someSerializableMethod() = 1
   private def someNonSerializableMethod() = new NonSerializable
 
-  /** Assert that the given closure is serializable (or not). */
+  /** Assert that the given closure is serializable (or not).
+    * 断言给定的闭包是可序列化的(或不是)*/
   private def assertSerializable(closure: AnyRef, serializable: Boolean): Unit = {
     if (serializable) {
       closureSerializer.serialize(closure)
@@ -67,13 +72,17 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
 
   /**
    * Helper method for testing whether closure cleaning works as expected.
+    * 帮助者测试关闭清理是否按预期工作
    * This cleans the given closure twice, with and without transitive cleaning.
+    * 这样可以清洗两次给定的封盖,并进行和不进行过滤清洁
    *
-   * @param closure closure to test cleaning with
+   * @param closure closure to test cleaning with 关闭以测试清理
    * @param serializableBefore if true, verify that the closure is serializable
    *                           before cleaning, otherwise assert that it is not
+    *                           如果是,请在清理之前验证封闭是否可序列化,否则声明不是
    * @param serializableAfter if true, assert that the closure is serializable
    *                          after cleaning otherwise assert that it is not
+    *                          如果为真,则断言闭包可以在清除之后进行序列化,否则声明它不是
    */
   private def verifyCleaning(
       closure: AnyRef,
@@ -83,7 +92,8 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     verifyCleaning(closure, serializableBefore, serializableAfter, transitive = false)
   }
 
-  /** Helper method for testing whether closure cleaning works as expected. */
+  /** Helper method for testing whether closure cleaning works as expected.
+    * 帮助者测试关闭清洁是否按预期工作*/
   private def verifyCleaning(
       closure: AnyRef,
       serializableBefore: Boolean,
@@ -92,6 +102,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     assertSerializable(closure, serializableBefore)
     // If the resulting closure is not serializable even after
     // cleaning, we expect ClosureCleaner to throw a SparkException
+    //如果生成的闭包即使在清理后也不是可序列化的,我们期望ClosureCleaner抛出一个SparkException
     if (serializableAfter) {
       ClosureCleaner.clean(closure, checkSerializable = true, transitive)
     } else {
@@ -104,7 +115,9 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
 
   /**
    * Return the fields accessed by the given closure by class.
+    * 通过类返回由给定闭包访问的字段
    * This also optionally finds the fields transitively referenced through methods invocations.
+    * 这也可以通过方法调用来过渡地引用字段
    */
   private def findAccessedFields(
       closure: AnyRef,
@@ -117,7 +130,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     fields.mapValues(_.toSet).toMap
   }
 
-  // Accessors for private methods
+  // Accessors for private methods 私人方式的访问者
   private val _isClosure = PrivateMethod[Boolean]('isClosure)
   private val _getInnerClosureClasses = PrivateMethod[List[Class[_]]]('getInnerClosureClasses)
   private val _getOuterClassesAndObjects =
@@ -211,6 +224,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
       assert(outerClasses1.size === outerObjects1.size)
       assert(outerClasses2.size === outerObjects2.size)
       // These inner closures only reference local variables, and so do not have $outer pointers
+      //这些内部闭包仅引用局部变量，因此没有$外部指针
       assert(outerClasses1.isEmpty)
       assert(outerClasses2.isEmpty)
     }
@@ -231,15 +245,19 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
       assert(outerClasses1.isEmpty)
       // This closure references the "test2" scope because it needs to find the method `y`
       // Scope hierarchy: "test2" < "FunSuite#test" < ClosureCleanerSuite2
+      //这个闭包引用“test2”范围，因为它需要找到方法`y`范围层级：“test2”<“FunSuite＃test”<ClosureCleanerSuite2
       assert(outerClasses2.size === 3)
       // This closure references the "test2" scope because it needs to find the `localValue`
       // defined outside of this scope
+      //此闭包引用“test2”范围,因为它需要找到在此范围之外定义的“localValue”
       assert(outerClasses3.size === 3)
       assert(isClosure(outerClasses2(0)))
       assert(isClosure(outerClasses3(0)))
       assert(isClosure(outerClasses2(1)))
       assert(isClosure(outerClasses3(1)))
+      //部分相同的“test2”范围
       assert(outerClasses2(0) === outerClasses3(0)) // part of the same "test2" scope
+      //部分相同的“FunSuite＃test”范围
       assert(outerClasses2(1) === outerClasses3(1)) // part of the same "FunSuite#test" scope
       assert(outerClasses2(2) === this.getClass)
       assert(outerClasses3(2) === this.getClass)
@@ -268,6 +286,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     assert(fields3.size === 2)
     // This corresponds to the "FunSuite#test" closure. This is empty because the
     // `someSerializableValue` belongs to its parent (i.e. ClosureCleanerSuite2).
+    //这对应于“FunSuite＃test”关闭。这是空的,因为`someSerializableValue`属于它的父(即ClosureCleanerSuite2)
     assert(fields3(outerClasses3(0)).isEmpty)
     // This corresponds to the ClosureCleanerSuite2. This is also empty, however,
     // because accessing a `ClosureCleanerSuite2#someSerializableValue` actually involves a
@@ -283,6 +302,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
     assert(fields3t.size === 2)
     // Because we find fields transitively now, we are able to detect that we need the
     // $outer pointer to get the field from the ClosureCleanerSuite2
+    //因为现在我们发现了现场,我们可以检测到我们需要$ outer指针来从ClosureCleanerSuite2
     assert(fields3t(outerClasses3(0)).size === 1)
     assert(fields3t(outerClasses3(0)).head === "$outer")
     assert(fields3t(outerClasses3(1)).size === 1)
@@ -304,6 +324,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
       val (outerClasses4, _) = getOuterClassesAndObjects(closure4)
 
       // First, find only fields accessed directly, not transitively, by these closures
+      //首先,只能通过这些关闭直接访问字段,而不是传递性地访问
       val fields1 = findAccessedFields(closure1, outerClasses1, findTransitively = false)
       val fields2 = findAccessedFields(closure2, outerClasses2, findTransitively = false)
       val fields3 = findAccessedFields(closure3, outerClasses3, findTransitively = false)
@@ -311,14 +332,19 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
       assert(fields1.isEmpty)
       // Note that the size here represents the number of outer classes, not the number of fields
       // "test1" < parameter of "FunSuite#test" < ClosureCleanerSuite2
+      //请注意，此处的大小表示外部类的数量，而不是字段数“test1”<“FunSuite＃test”的参数<ClosureCleanerSuite2
       assert(fields2.size === 3)
       // Since we do not find fields transitively here, we do not look into what `def a` references
+      //既然我们在这里没有找到领域，所以我们不去研究什么`def a`参考
+      //这对应于“test1”范围
       assert(fields2(outerClasses2(0)).isEmpty) // This corresponds to the "test1" scope
       assert(fields2(outerClasses2(1)).isEmpty) // This corresponds to the "FunSuite#test" scope
       assert(fields2(outerClasses2(2)).isEmpty) // This corresponds to the ClosureCleanerSuite2
       assert(fields3.size === 3)
       // Note that `localValue` is a field of the "test1" scope because `def a` references it,
+      //请注意,`localValue`是“test1”范围的一个字段，因为`def a`引用它，
       // but NOT a field of the "FunSuite#test" scope because it is only a local variable there
+      //但不是“FunSuite＃test”范围的一个字段,因为它只是一个局部变量
       assert(fields3(outerClasses3(0)).size === 1)
       assert(fields3(outerClasses3(0)).head.contains("localValue"))
       assert(fields3(outerClasses3(1)).isEmpty)
@@ -333,6 +359,7 @@ class ClosureCleanerSuite2 extends SparkFunSuite with BeforeAndAfterAll with Pri
       assert(fields4(outerClasses4(2)).isEmpty)
 
       // Now do the same, but find fields that the closures transitively reference
+      //现在做同样的事情，但找到关闭的领域过渡性地参考
       val fields1t = findAccessedFields(closure1, outerClasses1, findTransitively = true)
       val fields2t = findAccessedFields(closure2, outerClasses2, findTransitively = true)
       val fields3t = findAccessedFields(closure3, outerClasses3, findTransitively = true)

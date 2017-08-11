@@ -22,18 +22,18 @@ import org.scalatest.Matchers
 import org.apache.spark.SparkFunSuite
 
 /**
- *
- */
+ * 概率布局*/
 
 class DistributionSuite extends SparkFunSuite with Matchers {
-  test("summary") {//概要
+  test("summary") {//概率
     val d = new Distribution((1 to 100).toArray.map{_.toDouble})
     val stats = d.statCounter
     stats.count should be (100)
     stats.mean should be (50.5)
     stats.sum should be (50 * 101)
-
+    //概率应该从0到1
     val quantiles = d.getQuantiles()
+    //println(quantiles(5))
     quantiles(0) should be (1)
     quantiles(1) should be (26)
     quantiles(2) should be (51)

@@ -21,29 +21,33 @@ import java.io._
 
 import scala.collection.mutable.HashSet
 import scala.reflect._
-
 import org.scalatest.BeforeAndAfter
-
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.Files
-
+import org.apache.spark.util.Utils.createDirectory
 import org.apache.spark.{Logging, SparkConf, SparkFunSuite}
-import org.apache.spark.util.logging.{RollingFileAppender, SizeBasedRollingPolicy, TimeBasedRollingPolicy, FileAppender}
+import org.apache.spark.util.logging.{FileAppender, RollingFileAppender, SizeBasedRollingPolicy, TimeBasedRollingPolicy}
 
 class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
 
-  val testFile = new File(Utils.createTempDir(), "FileAppenderSuite-test").getAbsoluteFile
-
+  val testFile = new File(createTempDir(), "FileAppenderSuite-test").getAbsoluteFile
+  def createTempDir(
+                     root: String = System.getProperty("java.io.tmpdir"),//根据目录目录默认tmpdir
+                     namePrefix: String = "spark"): File = {
+    val dir = createDirectory(root, namePrefix)
+    dir
+  }
   before {
     cleanup()
   }
 
   after {
-    cleanup()
+   cleanup()
   }
 
   test("basic file appender") {//基本文件追加
     val testString = (1 to 1000).mkString(", ")
+    println(testFile+"===="+testString)
     val inputStream = new ByteArrayInputStream(testString.getBytes(UTF_8))
     val appender = new FileAppender(inputStream, testFile)
     inputStream.close()
@@ -54,7 +58,9 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
   test("rolling file appender - time-based rolling") {//滚动文件追加-时间滚动
     // setup input stream and appender
     //设置输入流和追加
+    //PipedOutputStream,PipedInputStream是管道输出流和管道输入流,配合使用可以实现线程间通信。
     val testOutputStream = new PipedOutputStream()
+    //可以从管道中读取字节流数据
     val testInputStream = new PipedInputStream(testOutputStream, 100 * 1000)
     val rolloverIntervalMillis = 100
     val durationMillis = 1000
@@ -242,7 +248,9 @@ class FileAppenderSuite extends SparkFunSuite with BeforeAndAfter with Logging {
    *  删除所有生成的rolledover文件
    *  */
   def cleanup() {
+    //文件删除
     testFile.getParentFile.listFiles.filter { file =>
+     // println(file.getName+"==="+file.getCanonicalPath)
       file.getName.startsWith(testFile.getName)
     }.foreach { _.delete() }
   }

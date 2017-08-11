@@ -76,6 +76,7 @@ private[spark] class FileAppender(inputStream: InputStream, file: File, bufferSi
       val buf = new Array[Byte](bufferSize)
       var n = 0
       while (!markedForStop && n != -1) {
+        //如果因为流位于文件末尾而没有可用的字节,则返回值 -1；否则,至少读取一个字节并将其存储在 b 中
         n = inputStream.read(buf)
         if (n != -1) {
           appendToFile(buf, n)

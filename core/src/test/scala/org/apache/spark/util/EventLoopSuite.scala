@@ -35,13 +35,16 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     val eventLoop = new EventLoop[Int]("test") {
 
       override def onReceive(event: Int): Unit = {
+        //println("event=="+event)
         buffer += event
       }
 
       override def onError(e: Throwable): Unit = {}
     }
+    //启动线程
     eventLoop.start()
     (1 to 100).foreach(eventLoop.post)
+
     eventually(timeout(5 seconds), interval(5 millis)) {
       assert((1 to 100) === buffer.toSeq)
     }
@@ -68,10 +71,12 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
     val eventLoop = new EventLoop[Int]("test") {
 
       override def onReceive(event: Int): Unit = {
+        println("==="+event )
         throw e
       }
 
       override def onError(e: Throwable): Unit = {
+        println("==e=="+e )
         receivedError = e
       }
     }
@@ -94,6 +99,7 @@ class EventLoopSuite extends SparkFunSuite with Timeouts {
 
       override def onError(e: Throwable): Unit = {
         receivedError = e
+        println("==e=="+e )
         throw new RuntimeException("Oops")
       }
     }

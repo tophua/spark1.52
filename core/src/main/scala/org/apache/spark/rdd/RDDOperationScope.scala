@@ -49,7 +49,7 @@ import org.apache.spark.{Logging, SparkContext}
   Include.NON_NULL 属性为NULL 不序列化
  */
 @JsonInclude(Include.NON_NULL)
-@JsonPropertyOrder(Array("id", "name", "parent"))
+@JsonPropertyOrder(Array("id", "name", "parent")) //属性排序
 private[spark] class RDDOperationScope(
     val name: String,
     val parent: Option[RDDOperationScope] = None,

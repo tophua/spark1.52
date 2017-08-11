@@ -35,7 +35,7 @@ private[spark] class Distribution(val data: Array[Double], val startIdx: Int, va
   def this(data: Traversable[Double]) = this(data.toArray, 0, data.size)
   java.util.Arrays.sort(data, startIdx, endIdx)
   val length = endIdx - startIdx
-
+  //默认概率
   val defaultProbabilities = Array(0, 0.25, 0.5, 0.75, 1.0)
 
   /**
