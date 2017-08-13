@@ -31,12 +31,13 @@ private[spark] sealed trait TaskLocation {
  * 包括主机和executor主机上的位置
  */
 private [spark]
+/* 代表数据存储在 executor 的内存中,也就是这个partition被cache到内存了**/
 case class ExecutorCacheTaskLocation(override val host: String, executorId: String)
   extends TaskLocation
 
 /**
  * A location on a host.
- * 包括一个主机上
+ * 代表数据存储在 host 这个节点的磁盘上
  */
 private [spark] case class HostTaskLocation(override val host: String) extends TaskLocation {
   override def toString: String = host
@@ -44,7 +45,7 @@ private [spark] case class HostTaskLocation(override val host: String) extends T
 
 /**
  * A location on a host that is cached by HDFS.
- * 一个主机位置缓存在HDFS
+ * 代表数据存储在hdfs上
  */
 private [spark] case class HDFSCacheTaskLocation(override val host: String) extends TaskLocation {
   override def toString: String = TaskLocation.inMemoryLocationTag + host
