@@ -41,7 +41,8 @@ case class Aggregator[K, V, C] (
 
   // When spilling is enabled sorting will happen externally, but not necessarily with an
   // ExternalSorter.
-  //如果为true,在shuffle期间通过溢出数据保存到磁盘来降低了内存使用总量,溢出值是spark.shuffle.memoryFraction指定
+  //spark.shuffle.spill用于指定Shuffle过程中如果内存中的数据超过阈值(参考spark.shuffle.memoryFraction的设置),
+  //那么是否需要将部分数据临时写入外部存储。如果设置为false，那么这个过程就会一直使用内,最后再合并到最终的Shuffle输出文件中去。
   private val isSpillEnabled = SparkEnv.get.conf.getBoolean("spark.shuffle.spill", true)
 
   @deprecated("use combineValuesByKey with TaskContext argument", "0.9.0")
@@ -52,7 +53,8 @@ case class Aggregator[K, V, C] (
  **/
   def combineValuesByKey(iter: Iterator[_ <: Product2[K, V]],
                          context: TaskContext): Iterator[(K, C)] = {
-    // 是否使用外部排序,是由参数spark.shuffle.spill,默认是true
+    //spark.shuffle.spill用于指定Shuffle过程中如果内存中的数据超过阈值(参考spark.shuffle.memoryFraction的设置),
+    //那么是否需要将部分数据临时写入外部存储。如果设置为false，那么这个过程就会一直使用内,最后再合并到最终的Shuffle输出文件中去。
     if (!isSpillEnabled) {//如果为false
       val combiners = new AppendOnlyMap[K, C]
       var kv: Product2[K, V] = null

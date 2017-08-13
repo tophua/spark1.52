@@ -68,6 +68,7 @@ private[spark] class SparkUICssErrorHandler extends DefaultCssErrorHandler {
 
 /**
  * Selenium tests for the Spark Web UI.
+  * Selenium测试Spark Web UI
  */
 class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with BeforeAndAfterAll {
 
@@ -212,6 +213,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
   test("jobs page should not display job group name unless some job was submitted in a job group") {
     withSpark(newSparkContext()) { sc =>
       // If no job has been run in a job group, then "(Job Group)" should not appear in the header
+      //如果作业组中没有运行作业，则“（作业组）”不应出现在标题中
       sc.parallelize(Seq(1, 2, 3)).count()
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(sc, "/jobs")
@@ -219,6 +221,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
         tableHeaders should not contain "Job Id (Job Group)"
       }
       // Once at least one job has been run in a job group, then we should display the group name:
+      //至少有一个作业在作业组中运行，那么我们应该显示组名：
       sc.setJobGroup("my-job-group", "my-job-group-description")
       sc.parallelize(Seq(1, 2, 3)).count()
       eventually(timeout(5 seconds), interval(50 milliseconds)) {

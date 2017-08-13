@@ -28,6 +28,7 @@ import org.apache.spark.serializer.{JavaSerializer, KryoSerializer, Serializer}
 /**
  * Tests for the fallback logic in UnsafeShuffleManager. Actual tests of shuffling data are
  * performed in other suites.
+  * 测试UnsafeShuffleManager中的回退逻辑,洗牌数据的实际测试在其他套件中执行,
  */
 class UnsafeShuffleManagerSuite extends SparkFunSuite with Matchers {
 

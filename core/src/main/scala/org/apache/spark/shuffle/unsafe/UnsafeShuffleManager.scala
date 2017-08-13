@@ -117,7 +117,8 @@ private[spark] object UnsafeShuffleManager extends Logging {
  * For more details on UnsafeShuffleManager's design, see SPARK-7081.
  */
 private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManager with Logging {
- //如果为true,在shuffle期间通过溢出数据到磁盘来降低了内存使用总量,溢出阈值是由spark.shuffle.memoryFraction指定的
+  //spark.shuffle.spill用于指定Shuffle过程中如果内存中的数据超过阈值(参考spark.shuffle.memoryFraction的设置),
+  //那么是否需要将部分数据临时写入外部存储。如果设置为false，那么这个过程就会一直使用内,最后再合并到最终的Shuffle输出文件中去
   if (!conf.getBoolean("spark.shuffle.spill", true)) {
     logWarning(
       "spark.shuffle.spill was set to false, but this is ignored by the tungsten-sort shuffle " +

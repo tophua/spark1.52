@@ -76,6 +76,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    * This space is not reserved in advance, but allocated dynamically by dropping existing blocks.
    */
   private val maxUnrollMemory: Long = {
+    //Unroll内存：spark允许数据以序列化或非序列化的形式存储,序列化的数据不能拿过来直接使用,所以就需要先反序列化,即unroll
     val unrollFraction = conf.getDouble("spark.storage.unrollFraction", 0.2)
     (maxMemory * unrollFraction).toLong
   }

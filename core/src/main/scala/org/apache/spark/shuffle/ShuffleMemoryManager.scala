@@ -199,10 +199,14 @@ private[spark] object ShuffleMemoryManager {
    */
   private def getMaxMemory(conf: SparkConf): Long = {
     //Shuffle最大内存占比
+    //memoryFraction Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
+    //取Execution区域(即运行区域,为shuffle使用)在总内存中所占比重,由参数spark.shuffle.memoryFraction确定，默认为0.2
     val memoryFraction = conf.getDouble("spark.shuffle.memoryFraction", 0.2)
     //shuffle的安全内存占比
+    // 取Execution区域(即运行区域,为shuffle使用)在系统为其可分配最大内存的安全系数,主要为了防止OOM,取参数spark.shuffle.safetyFraction，默认为0.8
     val safetyFraction = conf.getDouble("spark.shuffle.safetyFraction", 0.8)
     //java运行最大内存*Spark的Shuffle最大内存占比*Spark的安全内存占比
+    //返回为Execution区域(即运行区域，为shuffle使用)分配的可用内存总大小,计算公式：系统可用最大内存 * 在系统可用最大内存中所占比重 * 安全系数
     (Runtime.getRuntime.maxMemory * memoryFraction * safetyFraction).toLong
   }
 

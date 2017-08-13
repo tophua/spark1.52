@@ -31,12 +31,12 @@ import org.apache.spark.util.{ RpcUtils, ThreadUtils, Utils }
 
 /**
  * Interface allowing applications to speak with a Spark deploy cluster. Takes a master URL,
- * 允许应用程序与Spark部署集群会话的接口,需要一个主URL
+ * 允许应用程序与Spark部署集群会话的接口,需要一个主节点URL
  * an app description, and a listener for cluster events, and calls back the listener when various
  * 一个应用程序描述,和一个集群事件的侦听器,当各种各样的事件发生时,回调监听器
  * events occur.
  * 启动与调度
- * @param masterUrls Each url should look like spark://host:port. 
+ * param masterUrls Each url should look like spark://host:port.
  * 每个URL都应该看起来像Spark:/主机:端口
  */
 
@@ -208,8 +208,10 @@ private[spark] class AppClient(
         // FIXME How to handle the following cases? 如何处理以下情况？
         // 1. A master receives multiple registrations and sends back multiple
         // RegisteredApplications due to an unstable network.
+        //  由于不稳定的网络,主机接收多个注册并发回多个注册应用程序
         // 2. Receive multiple RegisteredApplication from different masters because the master is
         // changing.
+        //由于Master主节点正在更改,从不同的Master接收多个RegisteredApplication
         appId = appId_
         registered = true
         master = Some(masterRef) //

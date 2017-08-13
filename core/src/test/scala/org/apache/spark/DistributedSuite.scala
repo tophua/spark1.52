@@ -238,7 +238,8 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
   }
 
   test("compute when only some partitions fit in memory") {
-    //Spark用于缓存的内存大小所占用的Java堆的比率
+    //Spark将数据存在内存中用于缓存的内存所占用的占安全堆内存（90%）的60%
+    //取storage区域(即存储区域)在总内存中所占比重,由参数spark.storage.memoryFraction确定,默认为0.6
     val conf = new SparkConf().set("spark.storage.memoryFraction", "0.01")
     sc = new SparkContext(clusterUrl, "test", conf)
     // data will be 4 million * 4 bytes = 16 MB in size, but our memoryFraction set the cache

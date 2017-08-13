@@ -105,7 +105,9 @@ class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
     Utils.tryWithSafeFinally {
       val conf = new SparkConf()
         .set("spark.shuffle.spill.initialMemoryThreshold", "1024")
+        //用于设置在Reducer的partition数目少于多少的时候,Sort Based Shuffle内部不使用Merge Sort的方式处理数据,而是直接将每个partition写入单独的文件
         .set("spark.shuffle.sort.bypassMergeThreshold", "0")
+        //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
         .set("spark.shuffle.memoryFraction", "0.0001")
 
       sc = new SparkContext("local", "test", conf)

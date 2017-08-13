@@ -525,10 +525,17 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     // Validate memory fractions
     //验证内存分数
     val memoryKeys = Seq(
+      //Spark将数据存在内存中用于缓存的内存所占用的占安全堆内存（90%）的60%
+      //取storage区域(即存储区域)在总内存中所占比重,由参数spark.storage.memoryFraction确定,默认为0.6
       "spark.storage.memoryFraction",//Java堆用于cache的比例
+      //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
       "spark.shuffle.memoryFraction",
+      //取Execution区域(即运行区域,为shuffle使用)在系统为其可分配最大内存的安全系数,主要为了防止OOM,取参数spark.shuffle.safetyFraction，默认为0.8
       "spark.shuffle.safetyFraction",
+      //存储 spark允许数据以序列化或非序列化的形式存储,序列化的数据不能拿过来直接使用,所以就需要先反序列化,即unroll
       "spark.storage.unrollFraction",
+      //Spark允许使用90%的的堆内存
+      //取storage区域(即存储区域)在系统为其可分配最大内存的安全系数,主要为了防止OOM,取参数spark.storage.safetyFraction,默认为0.9
       "spark.storage.safetyFraction")
     for (key <- memoryKeys) {
       val value = getDouble(key, 0.5)
@@ -677,7 +684,9 @@ private[spark] object SparkConf extends Logging {
         //将旧值转换为持续时间,每次尝试10秒等待时间
         translation = s => s"${s.toLong * 10}s")),
     "spark.reducer.maxSizeInFlight" -> Seq(   
-    //在Shuffle的时候,每个Reducer任务获取缓存数据指定大小(以兆字节为单位)  
+    //在Shuffle的时候,每个Reducer任务获取缓存数据指定大小(以兆字节为单位)
+      //这个参数用于限制一个ReducerTask向其他的Executor请求Shuffle数据时所占用的最大内存数,
+      // 尤其是如果网卡是千兆和千兆以下的网卡时,默认值是48MB,设置这个值需要中和考虑网卡带宽和内存。
       AlternateConfig("spark.reducer.maxMbInFlight", "1.4")),
     "spark.kryoserializer.buffer" ->
         Seq(AlternateConfig("spark.kryoserializer.buffer.mb", "1.4",

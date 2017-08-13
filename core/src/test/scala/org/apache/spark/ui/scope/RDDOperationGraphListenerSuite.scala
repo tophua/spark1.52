@@ -54,11 +54,12 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     (1 to 3).foreach { numStages => startJob(numStages, listener) } // start 3 jobs and 6 stages 开始3个工作和6个阶段
     (0 to 5).foreach { i => endStage(startingStageId + i, listener) } // finish all 6 stages 完成所有6个阶段
     (0 to 2).foreach { i => endJob(startingJobId + i, listener) } // finish all 3 jobs 完成所有3个工作
-
-    assert(listener.jobIdToStageIds.size === 3)
+    listener.getOperationGraphForJob(startingJobId).foreach(a =>println(a+"==OperationGraphForJob=="+a.edges+"=="+a.incomingEdges+"=="+a.outgoingEdges+"=="+a.rootCluster))
+   assert(listener.jobIdToStageIds.size === 3)
     assert(listener.jobIdToStageIds(startingJobId).size === 1)
     assert(listener.jobIdToStageIds(startingJobId + 1).size === 2)
     assert(listener.jobIdToStageIds(startingJobId + 2).size === 3)
+    listener.jobIdToSkippedStageIds.map(println _)
     assert(listener.jobIdToSkippedStageIds.size === 3)
     assert(listener.jobIdToSkippedStageIds.values.forall(_.isEmpty)) // no skipped stages
     assert(listener.stageIdToJobId.size === 6)
@@ -71,7 +72,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     assert(listener.stageIdToGraph.size === 6)
     assert(listener.completedStageIds.size === 6)
     assert(listener.jobIds.size === 3)
-    assert(listener.stageIds.size === 6)
+    assert(listener.stageIds.size === 6) /**/
   }
 
   test("run jobs with skipped stages") {//跳过阶段的运行作业
@@ -88,11 +89,12 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     (0 to 2).foreach { i => endJob(startingJobId + i, listener) } // finish all 3 jobs 完成所有3个工作
 
     assert(listener.jobIdToSkippedStageIds.size === 3)
+    listener.jobIdToSkippedStageIds.map(println _)
     assert(listener.jobIdToSkippedStageIds(startingJobId).size === 1)
     assert(listener.jobIdToSkippedStageIds(startingJobId + 1).size === 2)
     assert(listener.jobIdToSkippedStageIds(startingJobId + 2).size === 1) // 2 stages not skipped
     assert(listener.completedStageIds.size === 2)
-
+    listener.completedStageIds.map(println _)
     // The rest should be the same as before
     //剩余应该和以前一样
     assert(listener.jobIdToStageIds.size === 3)
@@ -125,6 +127,7 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
       val jobId = startJob(numStages, listener)
       // End some, but not all, stages that belong to this job
       // This is to ensure that we have both completed and skipped stages
+      //结束属于这项工作的一些但不是全部的阶段,这是为了确保我们完成和跳过阶段
       (startingStageIdForJob until stageIdCounter)
         .filter { i => i % 2 == 0 }
         .foreach { i => endStage(i, listener) }
@@ -211,7 +214,8 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
    *   */
   private def startJob(numStages: Int, listener: RDDOperationGraphListener): Int = {
     assert(numStages > 0, "I will not run a job with 0 stages for you.")
-    val stageInfos = (0 until numStages).map { _ =>
+    val stageInfos = (0 until numStages).map { a =>
+      //println( a)
       val stageInfo = new StageInfo(stageIdCounter, 0, "s", 0, Seq.empty, Seq.empty, "d")
       stageIdCounter += 1
       stageInfo
@@ -219,7 +223,11 @@ class RDDOperationGraphListenerSuite extends SparkFunSuite {
     val jobId = jobIdCounter
     listener.onJobStart(new SparkListenerJobStart(jobId, 0, stageInfos))
     // Also start all stages that belong to this job
-    stageInfos.map(_.stageId).foreach { sid => startStage(sid, listener) }
+    //也开始属于这项Job的所有阶段
+    stageInfos.map(_.stageId).foreach { sid =>
+      //println("sid:"+sid)
+      startStage(sid, listener)
+    }
     jobIdCounter += 1
     jobId
   }

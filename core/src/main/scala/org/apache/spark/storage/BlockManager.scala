@@ -1509,11 +1509,17 @@ private[spark] object BlockManager extends Logging {
   /** Return the total amount of storage memory available.
     * 返回可用存储空间的总量 */
   private def getMaxMemory(conf: SparkConf): Long = {
-    //Spark用于缓存的内存大小所占用的Java堆的比率
+    //Spark将数据存在内存中用于缓存的内存所占用的占安全堆内存（90%）的60%
+    //取storage区域(即存储区域)在总内存中所占比重，由参数spark.storage.memoryFraction确定，默认为0.6
     val memoryFraction = conf.getDouble("spark.storage.memoryFraction", 0.6)
+    //Spark允许使用90%的的堆内存
+    //取storage区域(即存储区域)在系统为其可分配最大内存的安全系数,主要为了防止OOM,取参数spark.storage.safetyFraction,默认为0.9
     val safetyFraction = conf.getDouble("spark.storage.safetyFraction", 0.9)
     //execution内存最多仅占JVM heap的0.6*0.9=54%,对于无需cache数据的应用,大部分heap内存都被浪费了
     //而（shuffle等）中间数据却被频繁spill到磁盘并读取
+    //Spark中可以缓存多少数据,你可以通过对所有executor的堆大小求和，然后乘以safetyFraction和storage.memoryFraction即可,
+    //默认情况下是0.9 * 0.6 = 0.54,即总的堆内存的54%可供Spark使用
+    //返回storage区域(即存储区域)分配的可用内存总大小,计算公式：系统可用最大内存 * 在系统可用最大内存中所占比重 * 安全系数
     (Runtime.getRuntime.maxMemory * memoryFraction * safetyFraction).toLong
   }
 

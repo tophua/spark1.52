@@ -204,6 +204,7 @@ class ReceivedBlockHandlerSuite
     val sparkConf = new SparkConf()
     sparkConf.set("spark.storage.unrollMemoryThreshold", "512")
     // spark.storage.unrollFraction set to 0.4 for BlockManager
+    //Unroll内存：spark允许数据以序列化或非序列化的形式存储,序列化的数据不能拿过来直接使用,所以就需要先反序列化,即unroll
     sparkConf.set("spark.storage.unrollFraction", "0.4")
     // Block Manager with 12000 * 0.4 = 4800 bytes of free space for unroll
     //块管理12000 * 0.4 = 4800字节的自由空间展开

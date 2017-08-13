@@ -50,6 +50,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def emptyDataStream(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -91,6 +92,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def fewElementsPerPartition(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -141,6 +143,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def emptyPartitionsWithSpilling(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.spill.initialMemoryThreshold", "512")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
@@ -177,6 +180,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def testSpillingInLocalCluster(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
@@ -256,6 +260,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def spillingInLocalClusterWithManyReduceTasks(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
@@ -329,6 +334,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
   test("cleanup of intermediate files in sorter") {
     val conf = createSparkConf(true, false)  // Load defaults, otherwise SPARK_HOME is not found
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -354,6 +360,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   //如果有错误,在分类的中间文件清理
   test("cleanup of intermediate files in sorter if there are errors") {
     val conf = createSparkConf(true, false)  // Load defaults, otherwise SPARK_HOME is not found
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -378,6 +385,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   //在shuffle中清除中间文件
   test("cleanup of intermediate files in shuffle") {
     val conf = createSparkConf(false, false)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -394,6 +402,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
   test("cleanup of intermediate files in shuffle with errors") {//在shuffle中清除中间文件的错误
     val conf = createSparkConf(false, false)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -424,6 +433,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def noPartialAggregationOrSorting(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -446,6 +456,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def partialAggregationWithoutSpill(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -469,6 +480,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def partialAggregationWIthSpillNoOrdering(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -493,6 +505,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def partialAggregationWithSpillWithOrdering(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -520,6 +533,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def sortingWithoutAggregationNoSpill(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -544,6 +558,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   def sortingWithoutAggregationWithSpill(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
@@ -561,6 +576,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   //溢出哈希冲突
   test("spilling with hash collisions") {
     val conf = createSparkConf(true, false)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
 
@@ -618,6 +634,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   //多散列碰撞溢出
   test("spilling with many hash collisions") {
     val conf = createSparkConf(true, false)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.0001")
     sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
 
@@ -641,6 +658,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   //使用哈希冲突溢出
   test("spilling with hash collisions using the Int.MaxValue key") {
     val conf = createSparkConf(true, false)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
 
@@ -665,6 +683,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
   test("spilling with null keys and values") {
     val conf = createSparkConf(true, false)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
 
@@ -701,6 +720,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
   }
 
   private def sortWithoutBreakingSortingContracts(conf: SparkConf) {
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.01")
     conf.set("spark.shuffle.manager", "sort")
     sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)

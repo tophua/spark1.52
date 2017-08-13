@@ -56,6 +56,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
   val shuffleManager = new HashShuffleManager(conf)
 
   // Reuse a serializer across tests to avoid creating a new thread-local buffer on each test
+  //跨测试重用序列化,以避免在每个测试中创建一个新的线程本地缓冲区
   conf.set("spark.kryoserializer.buffer", "1m")
   val serializer = new KryoSerializer(conf)
 
@@ -78,11 +79,14 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     rpcEnv = RpcEnv.create("test", "localhost", 0, conf, securityMgr)
 
     // Set the arch to 64-bit and compressedOops to true to get a deterministic test-case
+    //将arch设置为64位,并将compressionOops设置为true以获得确定性的测试用例
     System.setProperty("os.arch", "amd64")
     conf.set("os.arch", "amd64")
     conf.set("spark.test.useCompressedOops", "true")
     //0随机 driver侦听的端口
     conf.set("spark.driver.port", rpcEnv.address.port.toString)
+    //Unroll内存：
+    //spark允许数据以序列化或非序列化的形式存储，序列化的数据不能拿过来直接使用，所以就需要先反序列化，即unroll。
     conf.set("spark.storage.unrollFraction", "0.4")
     conf.set("spark.storage.unrollMemoryThreshold", "512")
 

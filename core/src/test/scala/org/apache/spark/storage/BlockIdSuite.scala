@@ -35,7 +35,7 @@ class BlockIdSuite extends SparkFunSuite {
   test("test-bad-deserialization") {//测试坏的反序列化
     try {
       // Try to deserialize an invalid block id.
-      //尝试反序列化无效块的ID
+      // 尝试反序列化无效块的ID
       BlockId("myblock")
       fail()
     } catch {
@@ -52,6 +52,7 @@ class BlockIdSuite extends SparkFunSuite {
     assert(id.asRDDId.get.rddId === 1)
     assert(id.asRDDId.get.splitIndex === 2)
     assert(id.isRDD)
+    println("==="+id.toString)
     assertSame(id, BlockId(id.toString))
   }
 
@@ -65,6 +66,7 @@ class BlockIdSuite extends SparkFunSuite {
     assert(id.mapId === 2)
     assert(id.reduceId === 3)
     assert(id.isShuffle)
+    println("==="+id.toString)
     assertSame(id, BlockId(id.toString))
   }
 
@@ -91,6 +93,7 @@ class BlockIdSuite extends SparkFunSuite {
   }
 
   test("stream") {//流
+    //1:streamId,100,唯一身份
     val id = StreamBlockId(1, 100)
     assertSame(id, StreamBlockId(1, 100))
     assertDifferent(id, StreamBlockId(2, 101))

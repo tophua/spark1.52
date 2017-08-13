@@ -38,6 +38,8 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     // for a bug we had with bytes written past the last object in a batch (SPARK-2792)
     conf.set("spark.serializer.objectStreamReset", "1")
     conf.set("spark.serializer", "org.apache.spark.serializer.JavaSerializer")
+    //spark.shuffle.spill用于指定Shuffle过程中如果内存中的数据超过阈值(参考spark.shuffle.memoryFraction的设置),
+    //那么是否需要将部分数据临时写入外部存储。如果设置为false，那么这个过程就会一直使用内存
     conf.set("spark.shuffle.spill.compress", codec.isDefined.toString)
     conf.set("spark.shuffle.compress", codec.isDefined.toString)
     ////用于压缩内部数据如 RDD分区和shuffle输出的编码解码器
@@ -249,6 +251,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
    */
   private def testSimpleSpilling(codec: Option[String] = None): Unit = {
     val conf = createSparkConf(loadDefaults = true, codec)  // Load defaults for Spark home
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     //sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
     sc = new SparkContext("local[*]", "test", conf)
@@ -298,6 +301,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
 
   test("spilling with hash collisions") {
     val conf = createSparkConf(loadDefaults = true)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
  //   sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
     sc = new SparkContext("local[*]", "test", conf)
@@ -348,6 +352,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
 
   test("spilling with many hash collisions") {
     val conf = createSparkConf(loadDefaults = true)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.0001")
     //sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
     sc = new SparkContext("local[*]", "test", conf)
@@ -374,6 +379,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
 
   test("spilling with hash collisions using the Int.MaxValue key") {
     val conf = createSparkConf(loadDefaults = true)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     //sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
     sc = new SparkContext("local[*]", "test", conf)
@@ -392,6 +398,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
 
   test("spilling with null keys and values") {//溢出空键和值
     val conf = createSparkConf(loadDefaults = true)
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.001")
     //sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
     sc = new SparkContext("local[*]", "test", conf)
@@ -412,6 +419,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
 
   test("external aggregation updates peak execution memory") {//外部聚合更新执行内存值
     val conf = createSparkConf(loadDefaults = false)
+      //memoryFraction Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
       .set("spark.shuffle.memoryFraction", "0.001")
       .set("spark.shuffle.manager", "hash") // make sure we're not also using ExternalSorter
     sc = new SparkContext("local", "test", conf)

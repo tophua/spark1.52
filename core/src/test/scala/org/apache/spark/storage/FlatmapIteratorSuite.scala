@@ -26,10 +26,18 @@ class FlatmapIteratorSuite extends SparkFunSuite with LocalSparkContext {
    * for caching, however in the case that the use defines DISK_ONLY persistance,
    * the iterator will be fed directly to the serializer and written to disk.
    *
+   * 测试Spark处理来自flatMap调用的用户提供的迭代器的能力,这可能会生成更多的数据,然后可用的内存。
+   *
+   * 在任何基于内存的持久性中,Spark将将迭代器展开为ArrayBuffer用于缓存,但是在使用定义DISK_ONLY持久性的情况下,
+   * 迭代器将直接馈送到序列化器并写入磁盘。
+   *
    * This also tests the ObjectOutputStream reset rate. When serializing using the
    * Java serialization system, the serializer caches objects to prevent writing redundant
    * data, however that stops GC of those objects. By calling 'reset' you flush that
    * info from the serializer, and allow old objects to be GC'd
+   *
+   * 他还测试ObjectOutputStream重置率,当使用Java序列化系统进行序列化时,串行器缓存对象以防止写入冗余数据,
+   * 但是会停止这些对象的GC。通过调用“重置”,您可以从序列化程序中清除该信息,并允许旧对象为GC
    */
   test("Flatmap Iterator to Disk") {//迭到硬盘
     val sconf = new SparkConf().setMaster("local").setAppName("iterator_to_disk_test")

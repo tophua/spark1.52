@@ -79,7 +79,10 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
     conf.set("spark.authenticate", "false")
     //0随机 driver侦听的端口
     conf.set("spark.driver.port", rpcEnv.address.port.toString)
-    conf.set("spark.storage.unrollFraction", "0.4") 
+    //Spark块展开的内存占用比例。如果没有足够的内存来完整展开新的块，那么老的块将被抛弃。
+    //Unroll内存：spark允许数据以序列化或非序列化的形式存储,序列化的数据不能拿过来直接使用,所以就需要先反序列化,即unroll
+    conf.set("spark.storage.unrollFraction", "0.4")
+    //每个线程用来展开Block的初始内存阈值
     conf.set("spark.storage.unrollMemoryThreshold", "512")//展开内存线程
 
     // to make a replication attempt to inactive store fail fast
@@ -142,6 +145,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
     assert(!master.getPeers(newStore.blockManagerId).contains(storeIdToRemove))
 
     // Test whether asking for peers of a unregistered block manager id returns empty list
+    //测试是否请求未注册的块管理器id的对等体返回空列表
     assert(master.getPeers(stores(0).blockManagerId).isEmpty)
     assert(master.getPeers(BlockManagerId("", "", 1)).isEmpty)
   }
@@ -238,6 +242,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
     )
 
     // Test if 3x replication of two different blocks gives two different sets of locations
+    //测试两个不同块的3x复制是否提供两组不同的位置
     val a3Locs3x = putBlockAndGetLocations("a3", storageLevel3x)
     assert(a3Locs3x !== a2Locs3x, "Two blocks gave same locations with 3x replication")
   }

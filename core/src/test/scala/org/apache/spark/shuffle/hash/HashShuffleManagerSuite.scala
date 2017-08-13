@@ -45,6 +45,8 @@ class HashShuffleManagerSuite extends SparkFunSuite with LocalSparkContext {
     // reset after EACH object write. This is to ensure that there are bytes appended after
     // an object is written. So if the codepaths assume writeObject is end of data, this should
     // flush those bugs out. This was common bug in ExternalAppendOnlyMap, etc.
+    //EACH对象写入后复位,这是为了确保在写入对象后附加字节,所以如果codepaths认为writeObject是数据的结尾,那么应该将这些bug清除掉,
+    // 这在ExternalAppendOnlyMap等中是常见的错误。
     conf.set("spark.serializer.objectStreamReset", "1")
     //如果为true,在shuffle时就合并中间文件,对于有大量Reduce任务的shuffle来说,合并文件可 以提高文件系统性能,
     //如果使用的是ext4 或 xfs 文件系统,建议设置为true；对于ext3,由于文件系统的限制,设置为true反而会使内核>8的机器降低性能

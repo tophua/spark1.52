@@ -26,6 +26,7 @@ import org.apache.spark.ui.JettyUtils._
 
 /**
  * Web UI server for the standalone master.
+  * 独立主机的Web UI服务器
  */
 private[master]
 class MasterWebUI(val master: Master, requestedPort: Int)

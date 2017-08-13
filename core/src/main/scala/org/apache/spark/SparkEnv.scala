@@ -407,6 +407,7 @@ object SparkEnv extends Logging {
     val shuffleMemoryManager = ShuffleMemoryManager.create(conf, numUsableCores)
     //创建块传输服务
     val blockTransferService =
+    //主要是用于在各个Executor之间传输Shuffle数据
       conf.get("spark.shuffle.blockTransferService", "netty").toLowerCase match {
         case "netty" =>
           //netty提供的异步事件驱动的网络应用框架,提供web服务及客户端,获取远程节点上Block的集合

@@ -33,22 +33,25 @@ import org.apache.spark.util.Utils
 class UnsafeShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
 
   // This test suite should run all tests in ShuffleSuite with unsafe-based shuffle.
+  //这个测试套件应该在ShuffleSuite中运行所有的测试,并且基于不安全的洗牌
 
   override def beforeAll() {
     conf.set("spark.shuffle.manager", "tungsten-sort")
     // UnsafeShuffleManager requires at least 128 MB of memory per task in order to be able to sort
     // shuffle records.
-    //需要至少128 MB内存每任务能够排序shuffle记录
+    //需要至少128 MB内存每任务能够排序shuffle记录,内存部分
+    //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
     conf.set("spark.shuffle.memoryFraction", "0.5")
   } 
   //正确清理将使用新的shuffle路径文件
- /* test("UnsafeShuffleManager properly cleans up files for shuffles that use the new shuffle path") {
+ test("UnsafeShuffleManager properly cleans up files for shuffles that use the new shuffle path") {
     val tmpDir = Utils.createTempDir()
     try {
       val myConf = conf.clone()
         .set("spark.local.dir", tmpDir.getAbsolutePath)
       sc = new SparkContext("local", "test", myConf)
       // Create a shuffled RDD and verify that it will actually use the new UnsafeShuffle path
+      //创建一个混洗的RDD并验证它将实际使用新的UnsafeShuffle路径
       val rdd = sc.parallelize(1 to 10, 1).map(x => (x, x))
       val shuffledRdd = new ShuffledRDD[Int, Int, Int](rdd, new HashPartitioner(4))
         .setSerializer(new KryoSerializer(myConf))
@@ -109,5 +112,5 @@ class UnsafeShuffleSuite extends ShuffleSuite with BeforeAndAfterAll {
     } finally {
       Utils.deleteRecursively(tmpDir)
     }
-  }*/
+  }
 }

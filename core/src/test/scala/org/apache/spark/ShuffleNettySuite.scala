@@ -25,6 +25,7 @@ class ShuffleNettySuite extends ShuffleSuite with BeforeAndAfterAll {
   //这个测试套件运行在Shuffle模式所有测试
 
   override def beforeAll() {
+    //主要是用于在各个Executor之间传输Shuffle数据
     conf.set("spark.shuffle.blockTransferService", "netty")
   }
 }
