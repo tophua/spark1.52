@@ -44,6 +44,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     })
 
     val size = 10 * 1024 * 1024
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
 
@@ -80,6 +81,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
 
     val size = 10 * 1024 * 1024
     val count = 10
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
 
@@ -122,6 +124,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     })
 
     val size = 10 * 1024 * 1024
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
     val bufferMessage = Message.createBufferMessage(buffer.duplicate)
@@ -167,6 +170,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     })
 
     val size = 10 * 1024 * 1024
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
     val bufferMessage = Message.createBufferMessage(buffer.duplicate)
@@ -218,6 +222,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     })
 
     val size = 10 * 1024 * 1024
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
     val bufferMessage = Message.createBufferMessage(buffer.duplicate)
@@ -252,6 +257,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     })
 
     val size = 10 * 1024 * 1024
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
     val bufferMessage = Message.createBufferMessage(buffer)
@@ -288,6 +294,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     })
 
     val size = 10 * 1024 * 1024
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
     val bufferMessage = Message.createBufferMessage(buffer.duplicate)

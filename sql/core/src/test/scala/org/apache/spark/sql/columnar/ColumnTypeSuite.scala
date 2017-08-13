@@ -138,6 +138,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
     })
 
   test("GENERIC") {//通用
+  //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(512)
     val obj = Map(1 -> "spark", 2 -> "sql")
     val serializedObj = SparkSqlSerializer.serialize(obj)
@@ -167,7 +168,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
     val conf = new SparkConf()
     conf.set("spark.kryo.registrator", "org.apache.spark.sql.columnar.Registrator")
     val serializer = new SparkSqlSerializer(conf).newInstance()
-
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(512)
     val obj = CustomClass(Int.MaxValue, Long.MaxValue)
     val serializedObj = serializer.serialize(obj).array()
@@ -210,7 +211,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
       columnType: ColumnType[JvmType],
       putter: (ByteBuffer, JvmType) => Unit,
       getter: (ByteBuffer) => JvmType): Unit = {
-
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
     val seq = (0 until 4).map(_ => makeRandomValue(columnType))
 

@@ -68,6 +68,7 @@ public class ChunkFetchIntegrationSuite {
   @BeforeClass
   public static void setUp() throws Exception {
     int bufSize = 100000;
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     final ByteBuffer buf = ByteBuffer.allocate(bufSize);
     for (int i = 0; i < bufSize; i ++) {
       buf.put((byte) i);

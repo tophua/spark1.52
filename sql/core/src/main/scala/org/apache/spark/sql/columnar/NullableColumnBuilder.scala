@@ -44,7 +44,7 @@ private[sql] trait NullableColumnBuilder extends ColumnBuilder {
       initialSize: Int,
       columnName: String,
       useCompression: Boolean): Unit = {
-
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     nulls = ByteBuffer.allocate(1024)
     nulls.order(ByteOrder.nativeOrder())
     pos = 0

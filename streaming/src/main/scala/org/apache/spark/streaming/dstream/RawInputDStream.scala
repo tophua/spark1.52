@@ -82,13 +82,14 @@ class RawNetworkReceiver(host: String, port: Int, storageLevel: StorageLevel)
       }
     }
     blockPushingThread.start()
-
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val lengthBuffer = ByteBuffer.allocate(4)
     while (true) {
       lengthBuffer.clear()
       readFully(channel, lengthBuffer)
       lengthBuffer.flip()
       val length = lengthBuffer.getInt()
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       val dataBuffer = ByteBuffer.allocate(length)
       readFully(channel, dataBuffer)
       dataBuffer.flip()

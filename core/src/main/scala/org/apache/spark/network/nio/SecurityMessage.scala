@@ -127,6 +127,7 @@ private[nio] class SecurityMessage extends Logging {
     // 4 bytes for the length of token
     //connectionId的类型为char，所以多个长度乘以2，获取字节数为4个字节的令牌长度
     // token is a byte buffer so just take the length 令牌是一个字节缓冲区，所以只需要长度
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     var buffer = ByteBuffer.allocate(4 + connectionId.length() * 2 + 4 + token.length)
     buffer.putInt(connectionId.length())
     connectionId.foreach((x: Char) => buffer.putChar(x))

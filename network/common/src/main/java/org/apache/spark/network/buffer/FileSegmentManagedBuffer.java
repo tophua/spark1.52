@@ -63,6 +63,7 @@ public final class FileSegmentManagedBuffer extends ManagedBuffer {
       // Just copy the buffer if it's sufficiently small, as memory mapping has a high overhead.
         //只要复制缓冲区足够小,内存映射的开销就很高
       if (length < conf.memoryMapBytes()) {
+          //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
         ByteBuffer buf = ByteBuffer.allocate((int) length);
         channel.position(offset);
         while (buf.remaining() != 0) {

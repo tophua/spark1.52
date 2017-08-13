@@ -33,6 +33,7 @@ class CoarseGrainedSchedulerBackendSuite extends SparkFunSuite with LocalSparkCo
     //获得Akka传递值大小
     val frameSize = AkkaUtils.maxFrameSizeBytes(sc.conf)
    //创建一个序列化缓存
+   //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
    val buffer = new SerializableBuffer(java.nio.ByteBuffer.allocate(2 * frameSize))
    val larger = sc.parallelize(Seq(buffer))
  /* val thrown = intercept[SparkException] {

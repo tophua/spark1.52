@@ -66,7 +66,7 @@ private[spark] class DiskBlockObjectWriter(
 
   /**
    * Cursors used to represent positions in the file.
-    * 光标用于表示文件中的位置
+    *光标用于表示文件中的位置
    *
    * xxxxxxxx|--------|---       |
    *         ^        ^          ^
@@ -76,12 +76,12 @@ private[spark] class DiskBlockObjectWriter(
    *
    * initialPosition: Offset in the file where we start writing. Immutable.
     *                 在我们开始写作的文件中偏移,不可改变的
-   * reportedPosition: Position at the time of the last update to the write metrics.
-    *                  上一次更新写入指标时的位置
-    * initialPosition：在我们开始写入的文件中的偏移量,Immutable.reportedPosition：上次更新写入指标时的位置。
+   * reportedPosition:Position at the time of the last update to the write metrics.
+    *                 上一次更新写入指标时的位置
+    * initialPosition：在我们开始写入的文件中的偏移量,Immutable.reportedPosition：上次更新写入指标时的位置
    * finalPosition: Offset where we stopped writing. Set on closeAndCommit() then never changed.
-    *               偏移我们停止写作,设置在closeAndCommit（）然后从未更改。
-    * finalPosition：我们停止写作的偏移,设置在closeAndCommit（）然后从未更改。
+    *               偏移我们停止写作,设置在closeAndCommit()然后从未更改
+    * finalPosition：我们停止写作的偏移,设置在closeAndCommit（）然后从未更改,
    * -----: Current writes to the underlying file. 当前写入底层文件
    * xxxxx: Existing contents of the file. 文件的现有内容
    */
@@ -122,9 +122,14 @@ private[spark] class DiskBlockObjectWriter(
         if (syncWrites) {
           // Force outstanding writes to disk and track how long it takes
           //强制对磁盘的优秀写入,并跟踪它需要多长时间
+          //flush方法是强制将缓冲区中的内容写入到文件中,防止因缓冲区不满而带来的问题
+          //1.close()时会自动flush
+          //2.在不调用close()的情况下,缓冲区不满,又需要把缓冲区的内容写入到文件或通过网络发送到别的机器时,才需要调用flush
           objOut.flush()
           val start = System.nanoTime()
-          fos.getFD.sync() //
+          //FileInputStream.getFD()返回FileDescriptor的标识连接到正在使用此文件输入流文件系统的实际文件的对象。
+          //sync方法强制所有系统缓冲区与基础设备同步
+          fos.getFD.sync() //并跟踪它需要多长时间
           writeMetrics.incShuffleWriteTime(System.nanoTime() - start)
         }
       } {
@@ -188,6 +193,8 @@ private[spark] class DiskBlockObjectWriter(
 
       val truncateStream = new FileOutputStream(file, true)
       try {
+        //truncate方法截取一个文件,截取文件时,文件将中指定长度后面的部分将被删除
+        //channel.truncate(1024);这个例子截取文件的前1024个字节
         truncateStream.getChannel.truncate(initialPosition)
       } finally {
         truncateStream.close()

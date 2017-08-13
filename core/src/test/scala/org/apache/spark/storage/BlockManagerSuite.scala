@@ -94,6 +94,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
       new BlockManagerMasterEndpoint(rpcEnv, true, conf, new LiveListenerBus)), conf, true)
 
     val initialize = PrivateMethod[Unit]('initialize)
+    //调用SizeEstimator的initialize方法
     SizeEstimator invokePrivate initialize()
   }
 
@@ -124,6 +125,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(level2.eq(level1), "level2 is not the same object as level1")
     assert(level3 != level1, "level3 is same as level1")
     val bytes1 = Utils.serialize(level1)
+    //反序列化StorageLevel,注意强制类型转化
     val level1_ = Utils.deserialize[StorageLevel](bytes1)
     val bytes2 = Utils.serialize(level2)
     val level2_ = Utils.deserialize[StorageLevel](bytes2)
@@ -134,8 +136,9 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
   }
 
   test("BlockManagerId object caching") {//块管理器标识对象缓存
+    //BlockManagerId(execId: String, host: String, port: Int)
     val id1 = BlockManagerId("e1", "XXX", 1)
-    //这应该是1返回相同的对象
+    //这应该是id1返回相同的对象,以为BlockManagerId存放到ConcurrentHashMap
     val id2 = BlockManagerId("e1", "XXX", 1) // this should return the same object as id1
     //这应该返回一个不同的对象
     val id3 = BlockManagerId("e1", "XXX", 2) // this should return a different object
@@ -151,7 +154,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(id2_ === id2, "Deserialized id2 is not same as original id2")
     assert(id2_.eq(id1), "Deserialized id2 is not the same object as original id1")
   }
-
+  //isDriver与遗留驱动程序ID的向后兼容性
   test("BlockManagerId.isDriver() backwards-compatibility with legacy driver ids (SPARK-6716)") {
     assert(BlockManagerId(SparkContext.DRIVER_IDENTIFIER, "XXX", 1).isDriver)
     assert(BlockManagerId(SparkContext.LEGACY_DRIVER_IDENTIFIER, "XXX", 1).isDriver)
@@ -167,7 +170,10 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // Putting a1, a2  and a3 in memory and telling master only about a1 and a2
     //把A1,A2和A3在内存中告诉主节点只有A1和A2
     store.putSingle("a1", a1, StorageLevel.MEMORY_ONLY)
+    //使用隐式转化
+    //implicit def StringToBlockId(value: String): BlockId = new TestBlockId(value)
     store.putSingle("a2", a2, StorageLevel.MEMORY_ONLY)
+    //告诉Master
     store.putSingle("a3", a3, StorageLevel.MEMORY_ONLY, tellMaster = false)
 
     // Checking whether blocks are in memory
@@ -176,6 +182,11 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
     assert(store.getSingle("a3").isDefined, "a3 was not in store")
 
+    //BlockManagerId(driver, 192.168.100.227, 36499)
+    master.getLocations("a1").foreach(println _)
+    //BlockManagerId(driver, 192.168.100.227, 36499)
+    master.getLocations("a2").foreach(println _)
+    master.getLocations("a3").foreach(println _)
     // Checking whether master knows about the blocks or not
     //检查是否主节点知道
     assert(master.getLocations("a1").size > 0, "master was not told about a1")
@@ -195,7 +206,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
   test("master + 2 managers interaction") {//主节点+ 2管理合作
     store = makeBlockManager(2000, "exec1")
     store2 = makeBlockManager(2000, "exec2")
-
+    //获得同等BlockManagerId
     val peers = master.getPeers(store.blockManagerId)
     assert(peers.size === 1, "master did not return the other manager as a peer")
     assert(peers.head === store2.blockManagerId, "peer returned by master is not the other manager")
@@ -204,6 +215,8 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val a2 = new Array[Byte](400)
     store.putSingle("a1", a1, StorageLevel.MEMORY_ONLY_2)
     store2.putSingle("a2", a2, StorageLevel.MEMORY_ONLY_2)
+    master.getLocations("a1").map(a=> println(a))
+    master.getLocations("a2").foreach(println _)
     assert(master.getLocations("a1").size === 2, "master did not report 2 locations for a1")
     assert(master.getLocations("a2").size === 2, "master did not report 2 locations for a2")
   }
@@ -223,6 +236,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // Checking whether blocks are in memory and memory size
     //检查块是否在内存大小
     val memStatus = master.getMemoryStatus.head._2
+    //第一个值是分配给块管理器的最大内存量,而第二个值是剩余内存量.
     assert(memStatus._1 == 20000L, "total memory " + memStatus._1 + " should equal 20000")
     assert(memStatus._2 <= 12000L, "remaining memory " + memStatus._2 + " should <= 12000")
     assert(store.getSingle("a1-to-remove").isDefined, "a1 was not in store")
@@ -230,6 +244,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a3-to-remove").isDefined, "a3 was not in store")
 
     // Checking whether master knows about the blocks or not
+    //检查主Master是否知道块
     assert(master.getLocations("a1-to-remove").size > 0, "master was not told about a1")
     assert(master.getLocations("a2-to-remove").size > 0, "master was not told about a2")
     assert(master.getLocations("a3-to-remove").size === 0, "master was told about a3")
@@ -505,6 +520,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.getSingle("a1") === None, "a1 was in store")
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
     // At this point a2 was gotten last, so LRU will getSingle rid of a3
+    //在这一点上,a2得到了最后,所以LRU将得到一个摆脱a3
     store.putSingle("a1", a1, StorageLevel.MEMORY_ONLY_SER)
     assert(store.getSingle("a1").isDefined, "a1 was not in store")
     assert(store.getSingle("a2").isDefined, "a2 was not in store")
@@ -1335,6 +1351,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val blockId = BlockId("rdd_3_10")
     var bytes: ByteBuffer = null
     val result = memoryStore.putBytes(blockId, 10000, () => {
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 llocate()来分配缓冲区
       bytes = ByteBuffer.allocate(10000)
       bytes
     })

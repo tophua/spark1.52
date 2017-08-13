@@ -72,6 +72,7 @@ private[nio] class BlockMessage() {
       level = StorageLevel(booleanInt, replication)
 
       val dataLength = buffer.getInt()
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       data = ByteBuffer.allocate(dataLength)
       if (dataLength != buffer.remaining) {
         throw new Exception("Error parsing buffer")
@@ -81,6 +82,7 @@ private[nio] class BlockMessage() {
     } else if (typ == BlockMessage.TYPE_GOT_BLOCK) {
 
       val dataLength = buffer.getInt()
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       data = ByteBuffer.allocate(dataLength)
       if (dataLength != buffer.remaining) {
         throw new Exception("Error parsing buffer")
@@ -104,6 +106,7 @@ private[nio] class BlockMessage() {
 
   def toBufferMessage: BufferMessage = {
     val buffers = new ArrayBuffer[ByteBuffer]()
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     var buffer = ByteBuffer.allocate(4 + 4 + id.name.length * 2)
     buffer.putInt(typ).putInt(id.name.length)
     id.name.foreach((x: Char) => buffer.putChar(x))
@@ -111,16 +114,18 @@ private[nio] class BlockMessage() {
     buffers += buffer
 
     if (typ == BlockMessage.TYPE_PUT_BLOCK) {
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       buffer = ByteBuffer.allocate(8).putInt(level.toInt).putInt(level.replication)
       buffer.flip()
       buffers += buffer
-
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       buffer = ByteBuffer.allocate(4).putInt(data.remaining)
       buffer.flip()
       buffers += buffer
 
       buffers += data
     } else if (typ == BlockMessage.TYPE_GOT_BLOCK) {
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       buffer = ByteBuffer.allocate(4).putInt(data.remaining)
       buffer.flip()
       buffers += buffer

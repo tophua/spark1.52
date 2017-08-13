@@ -643,6 +643,7 @@ private[spark] class BlockManager(
                 // If the file size is bigger than the free memory, OOM will happen. So if we cannot
                 // put it into MemoryStore, copyForMemory should not be created. That's why this
                 // action is put into a `() => ByteBuffer` and created lazily.
+                //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
                 val copyForMemory = ByteBuffer.allocate(bytes.limit) //Buffer对象首先要进行分配
                 copyForMemory.put(bytes)
               })
@@ -813,10 +814,13 @@ private[spark] class BlockManager(
   /**
    * Put the given block according to the given level in one of the block stores, replicating
    * the values if necessary.
-   * 给定的块储级别存储数据,如果有必要进行分布式存储
+    *将给定的块按照给定的级别放在其中一个块存储中,如果有必要进行分布式存储
    * The effective storage level refers to the level according to which the block will actually be
    * handled. This allows the caller to specify an alternate behavior of doPut while preserving
    * the original level specified by the user.
+    *
+    * 有效存储级别是指根据块级别实际处理的级别,这允许调用者在保留由用户指定的原始级别的同时指定doPut的替代行为
+    *
    * 真正数据写入流程
    * 1)获取putBlockInfo,如果BlockInfo中已经缓存了BlockInfo,则使用缓存的BlockInfo,否则使用新建的BlockInfo
    * 2)获取块最终使用的存储级别PutLevel,根据putLevel判断块写入的BlockStore,优先使用MemoryStore,其他TechyonStone和DiskStore
@@ -840,16 +844,15 @@ private[spark] class BlockManager(
       require(level != null && level.isValid, "Effective StorageLevel is null or invalid")
     }
 
-    // Return value
+    // Return value 返回值
     val updatedBlocks = new ArrayBuffer[(BlockId, BlockStatus)]
 
     /* Remember the block's storage level so that we can correctly drop it to disk if it needs
      * to be dropped right after it got put into memory. Note, however, that other threads will
-     * not be able to get() this block until we call markReady on its BlockInfo. */
-    /**
-     * 获取putBlockInfo,如果blockInfo(TimeStampedHashMap)中已经缓存了BlockInfo,
-     * 则使用缓存的BlockInfo,否则使用新建的BlockInfo
-     */
+     * not be able to get() this block until we call markReady on its BlockInfo.
+      * 记住块的存储级别,以便在需要将其放入内存后才能将其正确放置到磁盘上。
+      * 但是请注意,其他线程将无法获取get()此块,直到我们在其BlockInfo上调用markReady。
+      * */
     val putBlockInfo = {
       val tinfo = new BlockInfo(level, tellMaster)
       // Do atomically !
@@ -879,9 +882,8 @@ private[spark] class BlockManager(
      * but because our put will read the whole iterator, there will be no values left. For the
      * case where the put serializes data, we'll remember the bytes, above; but for the case where
      * it doesn't, such as deserialized storage, let's rely on the put returning an Iterator.
-     * 如果我们正在存储值，我们需要复制数据，我们将需要访问值，
-      *但是因为我们的put将读取整个迭代器，所以没有任何值。 为了放置序列化数据的情况下，我们会记住上面的字节;
-      * 但是对于这种情况它没有，如反序列化存储，让我们依靠放置返回一个迭代器。*/
+     * 如果我们正在存储值,我们需要复制数据,我们将需要访问值,但是因为我们的put将读取整个迭代器,所以没有任何值.
+      *为了放置序列化数据的情况下,我们会记住上面的字节;但是对于这种情况它没有,如反序列化存储,让我们依靠放置返回一个迭代器。*/
     //如果存储值需要复制数据,读取整个迭代器访问值,
     var valuesAfterPut: Iterator[Any] = null
 

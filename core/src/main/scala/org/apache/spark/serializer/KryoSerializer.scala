@@ -346,6 +346,7 @@ trait KryoRegistrator {
 private[serializer] object KryoSerializer {
   // Commonly used classes.
   private val toRegister: Seq[Class[_]] = Seq(
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     ByteBuffer.allocate(1).getClass,
     classOf[StorageLevel],
     classOf[PutBlock],

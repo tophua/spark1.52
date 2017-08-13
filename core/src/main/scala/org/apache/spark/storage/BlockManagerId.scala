@@ -113,7 +113,7 @@ private[spark] object BlockManagerId {
 
   def apply(in: ObjectInput): BlockManagerId = {
     val obj = new BlockManagerId()
-    obj.readExternal(in)//读取ObjectInput对象host和port_
+    obj.readExternal(in)//读取ObjectInput对象host和port_,executorId_
     getCachedBlockManagerId(obj)//获取BlockManagerId
   }
 

@@ -76,6 +76,7 @@ private[nio] object Message {
 
   def createBufferMessage(dataBuffer: ByteBuffer, ackId: Int): BufferMessage = {
     if (dataBuffer == null) {
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       createBufferMessage(Array(ByteBuffer.allocate(0)), ackId)
     } else {
       createBufferMessage(Array(dataBuffer), ackId)
@@ -105,6 +106,7 @@ private[nio] object Message {
   def create(header: MessageChunkHeader): Message = {
     val newMessage: Message = header.typ match {
       case BUFFER_MESSAGE => new BufferMessage(header.id,
+        //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
         ArrayBuffer(ByteBuffer.allocate(header.totalSize)), header.other)
     }
     newMessage.hasError = header.hasError

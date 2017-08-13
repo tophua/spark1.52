@@ -32,6 +32,7 @@ class SerializableBuffer(@transient var buffer: ByteBuffer) extends Serializable
 
   private def readObject(in: ObjectInputStream): Unit = Utils.tryOrIOException {
     val length = in.readInt()
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     buffer = ByteBuffer.allocate(length)
     var amountRead = 0
     val channel = Channels.newChannel(in)

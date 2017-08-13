@@ -32,7 +32,7 @@ import scala.concurrent.Future
 /**
  * A [[BlockTransferService]] implementation based on [[ConnectionManager]], a custom
  * implementation using Java NIO.
- * 
+ * 基于[[ConnectionManager]]的[[BlockTransferService]]实现,使用Java NIO的自定义实现
  * 
  */
 final class NioBlockTransferService(conf: SparkConf, securityManager: SecurityManager)
@@ -77,6 +77,7 @@ final class NioBlockTransferService(conf: SparkConf, securityManager: SecurityMa
 
   /**
    * Tear down the transfer service.
+    * 拆除移交服务。
    */
   override def close(): Unit = {
     if (cm != null) {

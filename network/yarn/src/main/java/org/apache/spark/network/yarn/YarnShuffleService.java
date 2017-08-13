@@ -186,6 +186,7 @@ public class YarnShuffleService extends AuxiliaryService {
   // Not currently used
   @Override
   public ByteBuffer getMetaData() {
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     return ByteBuffer.allocate(0);
   }
 

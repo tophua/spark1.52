@@ -110,6 +110,7 @@ class ExecutorRunnable(
           JavaUtils.stringToBytes(secretString)
         } else {
           // Authentication is not enabled, so just provide dummy metadata
+          //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
           ByteBuffer.allocate(0)
         }
       ctx.setServiceData(Map[String, ByteBuffer]("spark_shuffle" -> secretBytes))

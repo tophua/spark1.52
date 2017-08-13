@@ -92,6 +92,7 @@ class ReceiverSuite extends TestSuiteBase with Timeouts with Serializable {
 
     // Verify whether the data stored by the receiver was sent to the executor
     //验证由接收器存储的数据是否被发送到执行器
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val byteBuffer = ByteBuffer.allocate(100)
     val arrayBuffer = new ArrayBuffer[Int]()
     val iterator = arrayBuffer.iterator

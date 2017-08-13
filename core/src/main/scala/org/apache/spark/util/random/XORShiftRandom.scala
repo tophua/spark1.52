@@ -67,6 +67,7 @@ private[spark] object XORShiftRandom {
     * 哈希种子有0/1位
     * */
   private def hashSeed(seed: Long): Long = {
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val bytes = ByteBuffer.allocate(java.lang.Long.SIZE).putLong(seed).array()
     MurmurHash3.bytesHash(bytes)
   }

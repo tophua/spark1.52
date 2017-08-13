@@ -1087,7 +1087,7 @@ private[spark] object ConnectionManager {
     println("--------------------------")
     val size = 10 * 1024 * 1024
     val count = 10
-
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
 
@@ -1106,7 +1106,7 @@ private[spark] object ConnectionManager {
     println("--------------------------")
     val size = 10 * 1024 * 1024
     val count = 10
-
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
 
@@ -1142,6 +1142,7 @@ private[spark] object ConnectionManager {
     val buffers = Array.tabulate(count) { i =>
       val bufferLen = size * (i + 1)
       val bufferContent = Array.tabulate[Byte](bufferLen)(x => x.toByte)
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       ByteBuffer.allocate(bufferLen).put(bufferContent)
     }
     buffers.foreach(_.flip)
@@ -1174,7 +1175,7 @@ private[spark] object ConnectionManager {
     println("--------------------------")
     val size = 10 * 1024 * 1024
     val count = 10
-
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
 

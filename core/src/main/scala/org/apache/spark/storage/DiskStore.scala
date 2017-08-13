@@ -132,6 +132,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
          * 2)调用FileChannel.read()方法。该方法将数据从FileChannel读取到Buffer中。
          *   read()方法返回的int值表示了有多少字节被读到了Buffer中。如果返回-1,表示到了文件末尾。
          */
+        //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
         val buf = ByteBuffer.allocate(length.toInt) //分配块缓冲区
         channel.position(offset)//位置
         while (buf.remaining() != 0) {//剩余

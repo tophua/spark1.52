@@ -41,9 +41,10 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
   test("verify write metrics") {//验证写度量
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
+    //注意os => os 匿名方法传递os方法名称
     val writer = new DiskBlockObjectWriter(new TestBlockId("0"), file,
       new JavaSerializer(new SparkConf()).newInstance(), 1024, os => os, true, writeMetrics)
-
+    //Long.box将值类型转换为包装引用类型
     writer.write(Long.box(20), Long.box(30))
     // Record metrics update on every write
     //记录每一个写的度量更新
@@ -55,6 +56,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     //32写后,指标应该更新
     for (i <- 0 until 32) {
       writer.flush()
+      //Long.box将值类型转换为包装引用类型
       writer.write(Long.box(i), Long.box(i))
     }
     assert(writeMetrics.shuffleBytesWritten > 0)
@@ -89,7 +91,7 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(writeMetrics.shuffleRecordsWritten == 0)
   }
 
-  test("Reopening a closed block writer") {//重开一个关闭的写的块
+  test("Reopening a closed block writer") {//重开一个关闭写的块
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
     val writer = new DiskBlockObjectWriter(new TestBlockId("0"), file,

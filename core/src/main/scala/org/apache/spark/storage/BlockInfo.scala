@@ -41,7 +41,7 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
    * 等待block完成写入
    * Wait for this BlockInfo to be marked as ready (i.e. block is finished writing).
    * Return true if the block is available, false otherwise.
-   *等待该BlockInfo被标记为就绪（即块写完）。 如果块可用，返回true，否则返回false。
+   *等待该BlockInfo被标记为就绪(即块写完),如果块可用,返回true,否则返回false。
    */
   def waitForReady(): Boolean = {
     if (pending && initThread != Thread.currentThread()) {

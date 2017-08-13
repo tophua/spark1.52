@@ -68,6 +68,7 @@ class BlockMessageArray(var blockMessages: Seq[BlockMessage])
       val bufferMessage = blockMessage.toBufferMessage
       logDebug("Adding " + blockMessage)
       //分发分派
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       val sizeBuffer = ByteBuffer.allocate(4).putInt(bufferMessage.size)
       sizeBuffer.flip
       buffers += sizeBuffer
@@ -93,6 +94,7 @@ private[nio] object BlockMessageArray extends Logging {
     val blockMessages =
       (0 until 10).map { i =>
         if (i % 2 == 0) {
+          //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
           val buffer = ByteBuffer.allocate(100)
           buffer.clear()
           BlockMessage.fromPutBlock(PutBlock(TestBlockId(i.toString), buffer,
@@ -108,6 +110,7 @@ private[nio] object BlockMessageArray extends Logging {
     logDebug("Converted to buffer message")
 
     val totalSize = bufferMessage.size
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val newBuffer = ByteBuffer.allocate(totalSize)
     newBuffer.clear()
     bufferMessage.buffers.foreach(buffer => {

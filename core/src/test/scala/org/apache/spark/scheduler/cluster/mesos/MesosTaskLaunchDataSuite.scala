@@ -23,6 +23,7 @@ import org.apache.spark.SparkFunSuite
 
 class MesosTaskLaunchDataSuite extends SparkFunSuite {
   test("serialize and deserialize data must be same") {//序列化和反序列化的数据必须相同
+  //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val serializedTask = ByteBuffer.allocate(40)
     (Range(100, 110).map(serializedTask.putInt(_)))
     serializedTask.rewind

@@ -59,7 +59,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
   val serializer = new KryoSerializer(conf)
 
   // Implicitly convert strings to BlockIds for test clarity.
-  //隐式转换为字符串测试清晰度blockids。
+  //隐式转换为字符串测试清晰度blockids
   implicit def StringToBlockId(value: String): BlockId = new TestBlockId(value)
 
   private def makeBlockManager(
@@ -79,12 +79,12 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
     conf.set("spark.authenticate", "false")
     //0随机 driver侦听的端口
     conf.set("spark.driver.port", rpcEnv.address.port.toString)
-    //Spark块展开的内存占用比例。如果没有足够的内存来完整展开新的块，那么老的块将被抛弃。
     //Unroll内存：spark允许数据以序列化或非序列化的形式存储,序列化的数据不能拿过来直接使用,所以就需要先反序列化,即unroll
     conf.set("spark.storage.unrollFraction", "0.4")
     //每个线程用来展开Block的初始内存阈值
+    //展开Iterator时每个线程初始分配的内存大小,当内存不够时会以1.5倍的大小申请内存,
+    //若没有足够的内存并且没有达到maxUnrollMemory,将存储在内存中的可以存储到磁盘中的Block存储到磁盘,以释放内存
     conf.set("spark.storage.unrollMemoryThreshold", "512")//展开内存线程
-
     // to make a replication attempt to inactive store fail fast
     //使复制尝试不活跃的存储失败快速
     conf.set("spark.core.connection.ack.wait.timeout", "1s")

@@ -349,6 +349,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
 
   test("deserialize long value") {//反序列化长值
     val testval : Long = 9730889947L
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val bbuf = ByteBuffer.allocate(8)
     assert(bbuf.hasArray)
     bbuf.order(ByteOrder.BIG_ENDIAN)

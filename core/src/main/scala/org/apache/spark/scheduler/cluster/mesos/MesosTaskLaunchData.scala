@@ -32,6 +32,7 @@ private[spark] case class MesosTaskLaunchData(
   attemptNumber: Int) extends Logging {
 
   def toByteString: ByteString = {
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val dataBuffer = ByteBuffer.allocate(4 + serializedTask.limit)
     dataBuffer.putInt(attemptNumber)
     dataBuffer.put(serializedTask)

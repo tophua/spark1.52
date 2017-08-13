@@ -448,6 +448,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
     // We don't expect the other side to send anything; so, we just read to detect an error or EOF.
     //我们不希望对方发送任何东西,所以我们只是读取来检测错误或EOF。
     try {
+      //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
       val length = channel.read(ByteBuffer.allocate(1))
       if (length == -1) { // EOF
         close()
@@ -541,6 +542,7 @@ private[spark] class ReceivingConnection(
 
 
   val inbox = new Inbox()
+  //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
   val headerBuffer: ByteBuffer = ByteBuffer.allocate(MessageChunkHeader.HEADER_SIZE)
   var onReceiveCallback: (Connection, Message) => Unit = null
   var currentChunk: MessageChunk = null

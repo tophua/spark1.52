@@ -64,6 +64,7 @@ private[sql] class BasicColumnBuilder[JvmType](
     this.columnName = columnName
 
     // Reserves 4 bytes for column type ID
+    //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     buffer = ByteBuffer.allocate(4 + size * columnType.defaultSize)
     buffer.order(ByteOrder.nativeOrder()).putInt(columnType.typeId)
   }
