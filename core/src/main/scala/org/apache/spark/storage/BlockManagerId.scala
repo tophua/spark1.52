@@ -82,7 +82,7 @@ class BlockManagerId private (
     port_ = in.readInt()
   }
 
-  @throws(classOf[IOException])
+  @throws(classOf[IOException]) //注意抛出异常注释处理
   private def readResolve(): Object = BlockManagerId.getCachedBlockManagerId(this)
 
   override def toString: String = s"BlockManagerId($executorId, $host, $port)"

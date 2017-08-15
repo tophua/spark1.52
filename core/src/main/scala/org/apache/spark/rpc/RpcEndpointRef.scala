@@ -24,6 +24,9 @@ import org.apache.spark.util.RpcUtils
 import org.apache.spark.{SparkException, Logging, SparkConf}
 
 /**
+  * Spark基于这个思想在上述的Network的基础上实现一套自己的RPC Actor模型,从而取代Akka,
+  * 其中RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
+  *
  * 用于发送消息
  * RpcEndpointRef 一个远程RpcEndpoint的引用,通过它可以给远程RpcEndpoint发送消息,可以是同步可以是异步
  * A reference for a remote [[RpcEndpoint]]. [[RpcEndpointRef]] is thread-safe(线程安全).
@@ -92,18 +95,19 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
    * The default `timeout` will be used in every trial of calling `sendWithReply`. Because this
    * method retries, the message handling in the receiver side should be idempotent.
     *
-    * 发送消息到相应的[[RpcEndpoint]]并在默认超时内获取其结果，或者抛出一个SparkException，
-    * 即使在默认的重试次数后仍然失败。默认的“timeout”将被用于调用“sendWithReply”。
+    * 发送消息到相应的[[RpcEndpoint]]并在默认超时内获取其结果,或者抛出一个SparkException,
+    * 即使在默认的重试次数后仍然失败,默认的“timeout”将被用于调用“sendWithReply”。
     * 因为该方法重,所以接收方的消息处理应该是幂等的。
     *
    * Note: this is a blocking action which may cost a lot of time,  so don't call it in an message
    * loop of [[RpcEndpoint]].
     *
-   * 注意：这是一个可能花费大量时间的阻塞操作,所以不要在[[RpcEndpoint]]的消息循环中调用它。
+   * 注意：这是一个可能花费大量时间的阻塞操作,所以不要在[[RpcEndpoint]]的消息循环中调用它
     *
-   * @param message the message to send
-   * @tparam T type of the reply message
+   * @param message the message to send 要发送的消息
+   * @tparam T type of the reply message 回复信息的类型
    * @return the reply message from the corresponding [[RpcEndpoint]]
+    *        来自相应[[RpcEndpoint]]的回复消息
    */
   def askWithRetry[T: ClassTag](message: Any): T = askWithRetry(message, defaultAskTimeout)
 
@@ -120,10 +124,10 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
    * Note: this is a blocking action which may cost a lot of time, so don't call it in an message
    * loop of [[RpcEndpoint]].
    *注意：这是一个可能花费大量时间的阻塞操作,所以不要在[[RpcEndpoint]]的消息循环中调用它。
-   * @param message the message to send
-   * @param timeout the timeout duration
-   * @tparam T type of the reply message
-   * @return the reply message from the corresponding [[RpcEndpoint]]
+   * @param message the message to send 要发送的消息
+   * @param timeout the timeout duration 超时时间
+   * @tparam T type of the reply message 回复信息的类型
+   * @return the reply message from the corresponding [[RpcEndpoint]] 来自相应[[RpcEndpoint]]的回复消息
    */
   def askWithRetry[T: ClassTag](message: Any, timeout: RpcTimeout): T = {
     // TODO: Consider removing multiple attempts

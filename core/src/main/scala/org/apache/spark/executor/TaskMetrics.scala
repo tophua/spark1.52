@@ -309,6 +309,7 @@ case class InputMetrics(readMethod: DataReadMethod.Value) {
   /**
    * This is volatile so that it is visible to the updater thread.
    * 这是不稳定的,它是更新线程可见
+    * 读字节回调
    */
   @volatile @transient var bytesReadCallback: Option[() => Long] = None
 

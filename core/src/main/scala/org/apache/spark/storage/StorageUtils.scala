@@ -195,7 +195,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
 
   /** 
    *  Return the memory remaining in this block manager.
-   *  返回块管理器剩余内存 
+   *  返回块管理器中剩余的内存
    *  */
   def memRemaining: Long = maxMem - memUsed
 

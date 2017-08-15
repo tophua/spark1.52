@@ -30,6 +30,9 @@ private[spark] trait RpcEnvFactory {
 }
 
 /**
+  * Spark基于这个思想在上述的Network的基础上实现一套自己的RPC Actor模型,从而取代Akka,
+  * 其中RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
+  *
  * A trait that requires RpcEnv thread-safely sending messages to it.
  * 需要线程安全RpcEnv特征向其发送消息
  * Thread-safety means processing of one message happens before processing of the next message by
@@ -74,6 +77,10 @@ private[spark] trait ThreadSafeRpcEndpoint extends RpcEndpoint
  * invoked with the cause. If onError throws an error, [[RpcEnv]] will ignore it.
   *
   * 如果任何错误从[[RpcEndpoint]]方法之一抛出,除了onError之外,onError将会被调用。 如果onError引发错误，[[RpcEnv]]将忽略它。
+  * RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
+  *
+  * Spark基于这个思想在上述的Network的基础上实现一套自己的RPC Actor模型,从而取代Akka,
+  * 其中RpcEndpoint对应Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
  */
 private[spark] trait RpcEndpoint {
 

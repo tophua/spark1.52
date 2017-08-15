@@ -46,7 +46,8 @@ private[spark] case class ByteBufferValues(buffer: ByteBuffer) extends BlockValu
 private[spark] case class IteratorValues(iterator: Iterator[Any]) extends BlockValues
 private[spark] case class ArrayValues(buffer: Array[Any]) extends BlockValues
 
-/* Class for returning a fetched(取得) block and associated metrics. */
+/* Class for returning a fetched block and associated metrics.
+* 用于返回获取的块和相关度量的类*/
 //类用来表示返回的匹配的block
 private[spark] class BlockResult(
   val data: Iterator[Any],
@@ -155,7 +156,7 @@ private[spark] class BlockManager(
   // Whether to compress shuffle output temporarily spilled to disk
   //是否压缩在shuffle期间溢出的数据,如果压缩将使用spark.io.compression.codec。
   private val compressShuffleSpill = conf.getBoolean("spark.shuffle.spill.compress", true)
-  //向查找或注册BlockManagerSlaveEndpoint
+  //根据name注册BlockManagerSlaveEndpoint到RpcEnv中并返回它的一个引用RpcEndpointRef
   private val slaveEndpoint = rpcEnv.setupEndpoint(
     "BlockManagerEndpoint" + BlockManager.ID_GENERATOR.next,
     new BlockManagerSlaveEndpoint(rpcEnv, this, mapOutputTracker))
@@ -396,7 +397,7 @@ private[spark] class BlockManager(
    * Get the ids of existing blocks that match the given filter. Note that this will
    * query the blocks stored in the disk block manager (that the block manager
    * may not know of).
-    * 获取与给定过滤器匹配的现有块的ID,请注意,这将查询存储在磁盘块管理器中的块(块管理器可能不知道)。
+    *获取与给定过滤器匹配的现有块的ID,请注意,这将查询存储在磁盘块管理器中的块(块管理器可能不知道)。
    * 指定过滤器对所有的blocks进行过滤
    */
   def getMatchingBlockIds(filter: BlockId => Boolean): Seq[BlockId] = {
@@ -526,7 +527,7 @@ private[spark] class BlockManager(
     logDebug(s"Getting local block $blockId as bytes")
     // As an optimization for map output fetches, if the block is for a shuffle, return it
     // without acquiring a lock; the disk store never deletes (recent) items so this should work
-    //作为Map出提取的优化,如果块用于shuffle，则返回它而不获取锁定; 磁盘存储从不删除（最近）的项目，所以这应该工作
+    //作为Map出提取的优化,如果块用于shuffle,则返回它而不获取锁定;磁盘存储从不删除(最近)的项目,所以这应该工作
     if (blockId.isShuffle) {
       val shuffleBlockResolver = shuffleManager.shuffleBlockResolver
       // TODO: This should gracefully handle case where local block is not available. Currently
@@ -541,6 +542,7 @@ private[spark] class BlockManager(
   /**   
    * 获取本地shuffle数据
    * 当reduce任务与map任务处于同一个节点,不需要远程拉取,只需要doGetLocal方法从本地获得中间处理结果
+    * asBlockResult 是否转化BlockResult
    */
   private def doGetLocal(blockId: BlockId, asBlockResult: Boolean): Option[Any] = {
     val info = blockInfo.get(blockId).orNull //如果选项包含有值返回选项值,否则返回 null

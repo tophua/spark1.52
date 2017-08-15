@@ -25,6 +25,7 @@ import org.apache.spark.Logging
 
 /**
  * Abstract class to store blocks.
+  * 抽象类存储块
  */
 private[spark] abstract class BlockStore(val blockManager: BlockManager) extends Logging {
 
@@ -33,9 +34,11 @@ private[spark] abstract class BlockStore(val blockManager: BlockManager) extends
   /**
    * Put in a block and, possibly, also return its content as either bytes or another Iterator.
    * This is used to efficiently write the values to multiple locations (e.g. for replication).
-   *将values写入系统,如果returnValue=true 需要将结果写入PutResult
+   * 将values写入系统,如果returnValue=true 需要将结果写入PutResult
+    *放入一个块,并且也可能返回其内容作为字节或另一个迭代器,这用于有效地将值写入多个位置(例如用于复制)
    * @return a PutResult that contains the size of the data, as well as the values put if
    *         returnValues is true (if not, the result's data field can be null)
+    *        包含数据大小的PutResult以及如果returnValues为true,则返回的值(如果不是,则结果的数据字段可以为空)
    */
   def putIterator(
     blockId: BlockId,

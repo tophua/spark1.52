@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolean) {
   // To save space, 'pending' and 'failed' are encoded as special sizes:
-  //为了节省空间，“挂起”和“失败”被编码为特殊尺寸：
+  //为了节省空间,“挂起”和“失败”被编码为特殊尺寸
   @volatile var size: Long = BlockInfo.BLOCK_PENDING
   private def pending: Boolean = size == BlockInfo.BLOCK_PENDING
   private def failed: Boolean = size == BlockInfo.BLOCK_FAILED
@@ -33,7 +33,7 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
     /* Set current thread as init thread - waitForReady will not block this thread
      * (in case there is non trivial initialization which ends up calling waitForReady
      * as part of initialization itself)
-     * 将当前线程设置为init线程 - waitForReady不会阻止此线程（如果有非平凡的初始化，最终调用waitForReady作为初始化本身的一部分）*/
+     * 将当前线程设置为init线程 - waitForReady不会阻止此线程(如果有非平凡的初始化,最终调用waitForReady作为初始化本身的一部分)*/
     BlockInfo.blockInfoInitThreads.put(this, Thread.currentThread())//
   }
 
@@ -41,7 +41,7 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
    * 等待block完成写入
    * Wait for this BlockInfo to be marked as ready (i.e. block is finished writing).
    * Return true if the block is available, false otherwise.
-   *等待该BlockInfo被标记为就绪(即块写完),如果块可用,返回true,否则返回false。
+   * 等待该BlockInfo被标记为就绪(即块写完),如果块可用,返回true,否则返回false
    */
   def waitForReady(): Boolean = {
     if (pending && initThread != Thread.currentThread()) {

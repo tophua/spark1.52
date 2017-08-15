@@ -77,6 +77,7 @@ class DictionaryEncodingSuite extends SparkFunSuite {
 
         // Skips column header
         // 跳过的列标题
+        //调用position()方法可以获取FileChannel的当前位置,调用position(long pos)方法设置FileChannel的当前位置
         buffer.position(headerSize)
         assertResult(DictionaryEncoding.typeId, "Wrong compression scheme ID")(buffer.getInt())
 
@@ -98,6 +99,7 @@ class DictionaryEncodingSuite extends SparkFunSuite {
 
         // Rewinds, skips column header and 4 more bytes for compression scheme ID
         //Rewinds,压缩方案ID列头和4字节的跳转
+        //调用position()方法可以获取FileChannel的当前位置,调用position(long pos)方法设置FileChannel的当前位置
         buffer.rewind().position(headerSize + 4)
 
         val decoder = DictionaryEncoding.decoder(buffer, columnType)

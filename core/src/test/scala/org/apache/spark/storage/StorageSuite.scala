@@ -21,6 +21,7 @@ import org.apache.spark.SparkFunSuite
 
 /**
  * Test various functionalities in StorageUtils and StorageStatus.
+  * 在storageutils和storagestatus测试各种功能
  */
 class StorageSuite extends SparkFunSuite {
   private val memAndDisk = StorageLevel.MEMORY_AND_DISK
@@ -28,13 +29,17 @@ class StorageSuite extends SparkFunSuite {
   // For testing add, update, and remove (for non-RDD blocks)
   //用于测试添加,更新和删除
   private def storageStatus1: StorageStatus = {
+    //BlockManagerId,maxMem
     val status = new StorageStatus(BlockManagerId("big", "dog", 1), 1000L)
     assert(status.blocks.isEmpty)
     assert(status.rddBlocks.isEmpty)
     assert(status.memUsed === 0L)
+    //返回块管理器中剩余的内存
     assert(status.memRemaining === 1000L)
     assert(status.diskUsed === 0L)
+    //堆外内存
     assert(status.offHeapUsed === 0L)
+
     status.addBlock(TestBlockId("foo"), BlockStatus(memAndDisk, 10L, 20L, 1L))
     status.addBlock(TestBlockId("fee"), BlockStatus(memAndDisk, 10L, 20L, 1L))
     status.addBlock(TestBlockId("faa"), BlockStatus(memAndDisk, 10L, 20L, 1L))
@@ -48,9 +53,13 @@ class StorageSuite extends SparkFunSuite {
     assert(status.blocks.contains(TestBlockId("fee")))
     assert(status.blocks.contains(TestBlockId("faa")))
     assert(status.rddBlocks.isEmpty)
+    //使用的内存大小
     assert(status.memUsed === 30L)
+    //返回块管理器中剩余的内存
     assert(status.memRemaining === 970L)
+    //返回硬盘空间使用大小
     assert(status.diskUsed === 60L)
+    //扩展存储块的大小
     assert(status.offHeapUsed === 3L)
   }
 

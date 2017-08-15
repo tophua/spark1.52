@@ -21,6 +21,9 @@ package org.apache.spark.rpc
  * A callback that [[RpcEndpoint]] can use it to send back a message or failure. It's thread-safe
  * and can be called in any thread.
   * [[RpcEndpoint]]可以使用它来发回消息或失败的回调,它是线程安全的,可以在任何线程中调用,
+  *
+  * Spark基于这个思想在上述的Network的基础上实现一套自己的RPC Actor模型,从而取代Akka,
+  * 其中RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
  */
 private[spark] trait RpcCallContext {
 

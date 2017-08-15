@@ -54,6 +54,7 @@ private[spark] class BlockManagerMasterEndpoint(
   //保存Block是在那些BlockManager上的HashMap,由于Block可能在多个Slave上都有备份,因此注意Value是一个
   //不可变HashSet,通过查询blockLocations就可以查询到某个Block所在的物理位置
   // Mapping from block id to the set of block managers that have the block.
+  //从块ID映射到具有块管理器的集合
   private val blockLocations = new JHashMap[BlockId, mutable.HashSet[BlockManagerId]]
   //线程池
   private val askThreadPool = ThreadUtils.newDaemonCachedThreadPool("block-manager-ask-thread-pool")
@@ -177,8 +178,7 @@ private[spark] class BlockManagerMasterEndpoint(
    * of all broadcast blocks. If removeFromDriver is false, broadcast blocks are only removed
    * from the executors, but not from the driver.
     * 代理RemoveBroadcast消息到每个BlockManager,因为主节点可能没有通知所有广播块,如果removeFromDriver为false,
-    * 则广播块仅从执行程序中删除,但不能从驱动程序中删除。
-   * 删除广播变量信息,通知所有广播块
+    * 则广播块仅从执行程序中删除,但不能从驱动程序中删除,删除广播变量信息,通知所有广播块
    */
   private def removeBroadcast(broadcastId: Long, removeFromDriver: Boolean): Future[Seq[Int]] = {
     val removeMsg = RemoveBroadcast(broadcastId, removeFromDriver)

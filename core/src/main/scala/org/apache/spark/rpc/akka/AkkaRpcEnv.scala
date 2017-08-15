@@ -35,11 +35,14 @@ import org.apache.spark.rpc._
 import org.apache.spark.util.{ActorLogReceive, AkkaUtils, ThreadUtils}
 
 /**
+  * Spark基于这个思想在上述的Network的基础上实现一套自己的RPC Actor模型,从而取代Akka,
+  * 其中RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
+  *
  * A RpcEnv implementation based on Akka.
  *基于Akka的RpcEnv实现
  * TODO Once we remove all usages of Akka in other place, we can move this file to a new project and
  * remove Akka from the dependencies.
-  * 从依赖关系中删除Akka
+  * 一旦我们在其他地方删除了Akka的所有用途,我们可以将该文件移动到一个新项目,并从依赖关系中删除Akka
  * actorSystem是Akka提供用于创建分布式消息通信系统的基础类
  * @param actorSystem
  * @param conf
@@ -294,6 +297,8 @@ private[akka] class ErrorMonitor extends Actor with ActorLogReceive with Logging
   }
 }
 
+// Spark基于这个思想在上述的Network的基础上实现一套自己的RPC Actor模型,从而取代Akka,
+// 其中RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
 private[akka] class AkkaRpcEndpointRef(
     @transient defaultAddress: RpcAddress,
     @transient _actorRef: => ActorRef,
@@ -341,6 +346,10 @@ private[akka] class AkkaRpcEndpointRef(
       case AkkaFailure(e) =>
         Future.failed(e)
     }(ThreadUtils.sameThread).mapTo[T].
+    //recover能够创建一个新future对象，它接受一个偏函数，并返回另一个Future。
+      //如果recover是在Success实例上调用的,那么就直接返回这个实例,否则就调用偏函数。
+      //如果偏函数为给定的Failure定义了处理动作,recover会返回Success,里面包含偏函数运行得出的结果,
+      //否则最终产生结果的future也会失败并返回同样的Throwable
     recover(timeout.addMessageIfTimeout)(ThreadUtils.sameThread)
   }
 
@@ -359,6 +368,7 @@ private[akka] class AkkaRpcEndpointRef(
  * "消息"的一个包装器,接收发送方答复已知消息
  * @param message
  * @param needReply if the sender expects a reply message 否是接收发送回复的消息
+  *                 如果发件人期望回复消息
  */
 private[akka] case class AkkaMessage(message: Any, needReply: Boolean)
 

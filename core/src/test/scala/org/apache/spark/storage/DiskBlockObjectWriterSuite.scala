@@ -18,8 +18,8 @@ package org.apache.spark.storage
 
 import java.io.File
 
+import org.apache.commons.io.{FileUtils, LineIterator}
 import org.scalatest.BeforeAndAfterEach
-
 import org.apache.spark.SparkConf
 import org.apache.spark.{SparkConf, SparkFunSuite}
 import org.apache.spark.executor.ShuffleWriteMetrics
@@ -167,15 +167,29 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     intercept[IllegalStateException] {
       writer.fileSegment()
     }
-    writer.close()
+    //注意获取段信息需要调用commitAndClose方法,close方法不能获取段信息
+    //writer.close()
+    writer.commitAndClose()
+    val  fileSegment=writer.fileSegment().file.getCanonicalPath
+
+    val exampleFile = FileUtils.getFile(fileSegment)
+    val iter = FileUtils.lineIterator(exampleFile)
+
+   // System.out.println("Contents of exampleTxt...")
+    //迭代每行内容
+    while(iter.hasNext)  {
+      println("\t" + iter.next)
+    }
+    iter.close()
   }
 
-  test("commitAndClose() without ever opening or writing") {//没有开或写
+  test("commitAndClose() without ever opening or writing") {//没有打开或写
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
     val writer = new DiskBlockObjectWriter(new TestBlockId("0"), file,
       new JavaSerializer(new SparkConf()).newInstance(), 1024, os => os, true, writeMetrics)
     writer.commitAndClose()
+    //段的长度为0
     assert(writer.fileSegment().length === 0)
   }
 }

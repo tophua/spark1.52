@@ -38,6 +38,7 @@ sealed abstract class BlockId {
   def name: String
 
   // convenience methods
+  //asInstanceOf强制类型转换
   def asRDDId: Option[RDDBlockId] = if (isRDD) Some(asInstanceOf[RDDBlockId]) else None
   def isRDD: Boolean = isInstanceOf[RDDBlockId]//判断对象是否为RDDBlockId类型的实例
   def isShuffle: Boolean = isInstanceOf[ShuffleBlockId]//判断一个对象实例是否是某种类型

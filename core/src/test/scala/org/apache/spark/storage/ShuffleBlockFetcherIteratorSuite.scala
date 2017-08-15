@@ -39,7 +39,7 @@ import org.apache.spark.shuffle.FetchFailedException
 class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodTester {
   // Some of the tests are quite tricky because we are testing the cleanup behavior
   // in the presence of faults.
-  //一些测试非常棘手，因为我们正在测试存在故障的清理行为
+  //有些测试非常棘手,因为我们测试了存在故障时的清除行为
   /** Creates a mock [[BlockTransferService]] that returns data from the given map. */
   private def createMockTransfer(data: Map[BlockId, ManagedBuffer]): BlockTransferService = {
     val transfer = mock(classOf[BlockTransferService])

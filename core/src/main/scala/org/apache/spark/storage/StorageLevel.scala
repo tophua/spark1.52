@@ -29,10 +29,15 @@ import org.apache.spark.util.Utils
  * or ExternalBlockStore, whether to drop the RDD to disk if it falls out of memory or
  * ExternalBlockStore, whether to keep the data in memory in a serialized format, and whether
  * to replicate the RDD partitions on multiple nodes.
+  *
+  * 用于控制RDD存储的标志,每个StorageLevel记录是否使用内存或ExternalBlockStore,如果它脱离内存或ExternalBlockStore,
+  * 是否将RDD丢弃到磁盘,是否将数据保存在内存中的序列化格式,以及是否复制多个节点上的RDD分区
  *
  * The [org.apache.spark.storage.StorageLevel$]singleton object contains some static constants
  * for commonly useful storage levels. To create your own storage level object, use the
  * factory method of the singleton object (`StorageLevel(...)`).
+  * [org.apache.spark.storage.StorageLevel $] singleton对象包含一些常用的存储级别的静态常量,
+  * 要创建自己的存储级别对象,请使用单例对象（`StorageLevel（...）`）的工厂方法
  */
 @DeveloperApi
 class StorageLevel private(
@@ -165,6 +170,7 @@ object StorageLevel {
   /**
    * :: DeveloperApi ::
    * Return the StorageLevel object with the specified name.
+    * 返回具有指定名称的StorageLevel对象
    */
   @DeveloperApi
   def fromString(s: String): StorageLevel = s match {

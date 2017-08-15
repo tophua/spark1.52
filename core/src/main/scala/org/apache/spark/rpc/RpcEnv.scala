@@ -29,6 +29,9 @@ import org.apache.spark.util.{RpcUtils, Utils}
 
 
 /**
+  * Spark基于这个思想在上述的Network的基础上实现一套自己的RPC Actor模型,从而取代Akka,
+  * 其中RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
+  *
  * A RpcEnv implementation must have a [[RpcEnvFactory]] implementation with an empty constructor
  * so that it can be created via Reflection.
  *  RpcEnv是一个RpcEndpoints用于处理消息的环境,管理着整个RpcEndpoint的生命周期
@@ -207,7 +210,7 @@ private[spark] case class RpcEnvConfig(
  */
 private[spark] case class RpcAddress(host: String, port: Int) {
   // TODO do we need to add the type of RpcEnv in the address?
-
+  //TODO是否需要在地址中添加RpcEnv的类型？
   val hostPort: String = host + ":" + port
 
   override val toString: String = hostPort
@@ -228,6 +231,7 @@ private[spark] object RpcAddress {
 
   /**
    * Return the [[RpcAddress]] represented by `uri`.
+    * 返回由`uri`表示的[[RpcAddress]]
    */
   def fromURIString(uri: String): RpcAddress = {
     fromURI(new java.net.URI(uri))
@@ -247,6 +251,7 @@ private[spark] object RpcAddress {
   * 如果RpcTimeout修改[[TimeoutException]]，抛出异常
  */
 private[rpc] class RpcTimeoutException(message: String, cause: TimeoutException)
+  //initCause()这个方法就是对异常来进行包装的,目的就是为了出了问题的时候能够追根究底
   extends TimeoutException(message) { initCause(cause) }
 
 
@@ -268,12 +273,13 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
 
   /**
    * PartialFunction to match a TimeoutException and add the timeout description to the message
-   * PartialFunction来匹配TimeoutException，并将超时描述添加到消息中
+   * PartialFunction来匹配TimeoutException,并将超时描述添加到消息中
    * @note This can be used in the recover callback of a Future to add to a TimeoutException
     *       这可以用于将来的恢复回调来添加到TimeoutException
    * Example:
    *    val timeout = new RpcTimeout(5 millis, "short timeout")
    *    Future(throw new TimeoutException).recover(timeout.addMessageIfTimeout)
+    *    PartialFunction偏函数是个特质其的类型为PartialFunction[A,B],其中接收一个类型为A的参数，返回一个类型为B的结果
    */
   def addMessageIfTimeout[T]: PartialFunction[Throwable, T] = {
     // The exception has already been converted to a RpcTimeoutException so just raise it
@@ -290,7 +296,7 @@ private[spark] class RpcTimeout(val duration: FiniteDuration, val timeoutProp: S
    * Wait for the completed result and return it. If the result is not available within this
    * timeout, throw a [[RpcTimeoutException]] to indicate which configuration controls the timeout.
     *
-    *  在规定时间内等待完成的结果并返回,如果结果在此超时期间不可用,则抛出一个[[RpcTimeoutException]]来指示哪个配置控制超时
+    *在规定时间内等待完成的结果并返回,如果结果在此超时期间不可用,则抛出一个[[RpcTimeoutException]]来指示哪个配置控制超时
     *
    * @param  awaitable  the `Awaitable` to be awaited
    * @throws RpcTimeoutException if after waiting for the specified time `awaitable`
