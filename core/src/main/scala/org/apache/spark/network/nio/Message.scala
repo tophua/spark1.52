@@ -94,6 +94,7 @@ private[nio] object Message {
    * Create a "negative acknowledgment" to notify a sender that an error occurred
    * while processing its message.  The exception's stacktrace will be formatted
    * as a string, serialized into a byte array, and sent as the message payload.
+    * 创建一个“否定确认”来通知发件人在处理其消息时发生错误,异常的堆栈跟踪将被格式化为字符串,序列化为字节数组,并作为消息有效载荷发送。
    */
   def createErrorMessage(exception: Exception, ackId: Int): BufferMessage = {
     val exceptionString = Utils.exceptionString(exception)

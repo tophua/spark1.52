@@ -140,6 +140,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
 
     // StorageLevel is serialized as bytes using our JavaSerializer. Everything else is encoded
     // using our binary protocol.
+    //使用我们的JavaSerializer将StorageLevel序列化为字节,一切都使用我们的二进制协议进行编码
     //将Block的存储级别StorageLevel序列化
     val levelBytes = serializer.newInstance().serialize(level).array()
 

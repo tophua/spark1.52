@@ -46,7 +46,6 @@ private[spark] class HashShuffleReader[K, C](
      * 1)从远程节点或者本地读取中间计算结果
      * 2)对InterruptibleIterator执行聚合
      * 3)对InterruptibleIterator排序,由于使用ExternalSorter的inertAll
-     * 
      */
     val blockFetcherItr = new ShuffleBlockFetcherIterator(
       context,

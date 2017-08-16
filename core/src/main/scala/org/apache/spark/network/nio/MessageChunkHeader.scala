@@ -31,6 +31,7 @@ private[nio] class MessageChunkHeader(
     val address: InetSocketAddress) {
   lazy val buffer = {
     // No need to change this, at 'use' time, we do a reverse lookup of the hostname.
+    //不需要改变这个,在'use使用'的时候,我们对主机名做反向查询
     // Refer to network.Connection
     val ip = address.getAddress.getAddress()
     val port = address.getPort()

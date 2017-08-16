@@ -50,10 +50,10 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
    * As with the block maps, we store the storage information separately for RDD blocks and
    * non-RDD blocks for the same reason. In particular, RDD storage information is stored
    * in a map indexed by the RDD ID to the following 4-tuple:
-   *  与块映射一样，由于相同的原因，我们将RDD块和非RDD块分别存储存储信息。
-    *  特别地，RDD存储信息存储在由RDD ID索引的映射到以下4元组中：
+   *  与块映射一样,由于相同的原因,我们将RDD块和非RDD块分别存储存储信息
+    *  特别地,RDD存储信息存储在由RDD ID索引的映射到以下4元组中：
    *   (memory size, disk size, off-heap size, storage level)
-   *   （内存大小，磁盘大小，堆内大小，存储级别）
+   *   （内存大小,磁盘大小,堆内大小,存储级别）
    * We assume that all the blocks that belong to the same RDD have the same storage level.
    * This field is not relevant to non-RDD blocks, however, so the storage information for
    * non-RDD blocks contains only the first 3 fields (in the same order).

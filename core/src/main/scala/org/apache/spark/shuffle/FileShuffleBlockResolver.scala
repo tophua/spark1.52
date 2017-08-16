@@ -34,17 +34,19 @@ import org.apache.spark.util.{MetadataCleaner, MetadataCleanerType, TimeStampedH
 import org.apache.spark.{Logging, SparkConf, SparkEnv}
 
 /** A group of writers for a ShuffleMapTask, one writer per reducer.
-  * 一组写的ShuffleMapTask，每个写的reducer*/
+  * 一组写的ShuffleMapTask,每个写的reducer*/
 private[spark] trait ShuffleWriterGroup {
   val writers: Array[DiskBlockObjectWriter]
 
-  /** @param success Indicates all writes were successful. If false, no blocks will be recorded. */
+  /** @param success Indicates all writes were successful. If false, no blocks will be recorded.
+    * 表示所有写入都成功,如果为false,则不会记录任何块*/
   def releaseWriters(success: Boolean)
 }
 
 /**
  * Manages assigning disk-based block writers to shuffle tasks. Each shuffle task gets one file
  * per reducer (this set of files is called a ShuffleFileGroup).
+  * 管理分配基于磁盘的块写入器来随机播放任务,每个shuffle任务每个reducer获取一个文件(这组文件称为ShuffleFileGroup)
  *
  * As an optimization to reduce the number of physical shuffle files produced, multiple shuffle
  * blocks are aggregated into the same file. There is one "combined shuffle file" per reducer

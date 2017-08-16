@@ -308,6 +308,7 @@ private[nio] class ConnectionManager(
           // fallback to previous behavior : we should not really come here since this method was
           // triggered since channel became connectable : but at times, the first finishConnect need
           // not succeed : hence the loop to retry a few 'times'.
+          //回到以前的行为：我们不应该真的来这里,因为这个方法被触发,因为通道可以连接：但有时,第一个finishConnect不需要成功：因此循环重试几次。
           conn.finishConnect(true)
         } catch {
           case NonFatal(e) => {
@@ -697,7 +698,7 @@ private[nio] class ConnectionManager(
           logError("Error in server auth negotiation: " + e)
           // It would probably be better to send an error message telling other side auth failed
           // but for now just close
- 	  //这很可能是更好的发送错误消息告诉对方认证失败但现在关闭
+ 	        //这很可能是更好的发送错误消息告诉对方认证失败但现在关闭
           connection.close()
         }
       }
@@ -719,13 +720,13 @@ private[nio] class ConnectionManager(
       connectionsAwaitingSasl.get(connectionId) match {
         case Some(waitingConn) => {
           // Client - this must be in response to us doing Send
-	  //客户端-这必须是响应于我们做发送
+	        //客户端-这必须是响应于我们做发送
           logDebug("Client handleAuth for id: " +  waitingConn.connectionId)
           handleClientAuthentication(waitingConn, securityMsg, connectionId)
         }
         case None => {
           // Server - someone sent us something and we haven't authenticated yet
-	  //服务器-有人给我们发送的东西,我们还没有身份验证
+	        //服务器-有人给我们发送的东西,我们还没有身份验证
           logDebug("Server handleAuth for id: " + connectionId)
           handleServerAuthentication(conn, securityMsg, connectionId)
         }
@@ -735,7 +736,7 @@ private[nio] class ConnectionManager(
       if (!conn.isSaslComplete()) {
         // We could handle this better and tell the client we need to do authentication
         // negotiation, but for now just ignore them.
-	//我们可以更好地处理这个问题,并告诉客户端我们需要做身份验证协商,但现在只是忽略它们
+	      //我们可以更好地处理这个问题,并告诉客户端我们需要做身份验证协商,但现在只是忽略它们
         logError("message sent that is not security negotiation message on connection " +
                  "not authenticated yet, ignoring it!!")
         return true

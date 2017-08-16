@@ -32,7 +32,7 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
 
   /**
    * Register a shuffle with the manager and obtain a handle for it to pass to tasks.
-    * 注册一个manager洗牌，并获得一个句柄来传递给任务。
+    * 注册一个manager洗牌,并获得一个句柄来传递给任务
    */
   override def registerShuffle[K, V, C](
       shuffleId: Int,
@@ -44,7 +44,7 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
   /**
    * Get a reader for a range of reduce partitions (startPartition to endPartition-1, inclusive).
    * Called on executors by reduce tasks.
-    * 获取一系列减少分区的reader（startPartition到endPartition-1，包括端点）。通过减少任务调用执行器。
+    * 获取一系列减少分区的reader(startPartition到endPartition-1，包括端点）。通过减少任务调用执行器。
    */
   override def getReader[K, C](
       handle: ShuffleHandle,

@@ -33,7 +33,7 @@ import org.apache.spark.scheduler._
 @DeveloperApi
 class StorageStatusListener extends SparkListener {
   // This maintains only blocks that are cached (i.e. storage level is not StorageLevel.NONE)
-  //这仅维护缓存的块（即，存储级别不是StorageLevel.NONE）
+  //这仅维护缓存的块(即,存储级别不是StorageLevel.NONE)
   private[storage] val executorIdToStorageStatus = mutable.Map[String, StorageStatus]()
 
   def storageStatusList: Seq[StorageStatus] = synchronized {

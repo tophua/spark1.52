@@ -35,8 +35,8 @@ object SparkTransportConf {
    * that we use will have an initial overhead of roughly 32 MB of off-heap memory, which comes
    * at a premium.
     *
-   *指定Spark默认情况下需要的Netty线程数上限,实际上,只需要2-4个核心来传输大约10 Gb / s和每个核心
-   * 我们使用的将具有大约32 MB的堆内存的初始开销，这是非常重要的。
+   *指定Spark默认情况下需要的Netty线程数上限,实际上,只需要2-4个核心来传输大约10 Gb/s和每个核心
+   * 我们使用的将具有大约32 MB的堆内存的初始开销,这是非常重要的
     *
    * Thus, this value should still retain maximum throughput and reduce wasted off-heap memory
    * allocation. It can be overridden by setting the number of serverThreads and clientThreads
@@ -49,9 +49,12 @@ object SparkTransportConf {
 
   /**
    * Utility for creating a [[TransportConf]] from a [[SparkConf]].
+    * 从[[SparkConf]]创建[[TransportConf]]的实用程序
    * @param numUsableCores if nonzero, this will restrict the server and client threads to only
    *                       use the given number of cores, rather than all of the machine's cores.
    *                       This restriction will only occur if these properties are not already set.
+    *                      如果非零,这将限制服务器和客户端线程仅使用给定数量的内核,而不是所有机器的内核,
+    *                      只有这些属性尚未设置,才会发生此限制。
    */
   def fromSparkConf(_conf: SparkConf, numUsableCores: Int = 0): TransportConf = {
     val conf = _conf.clone

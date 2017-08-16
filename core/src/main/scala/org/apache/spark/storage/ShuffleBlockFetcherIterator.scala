@@ -44,14 +44,16 @@ import org.apache.spark.util.Utils
  * using too much memory.
  *	实现节流远程提取,它们不超过maxBytesInFlight,以避免使用太多的内存。
   *
- * @param context [[TaskContext]], used for metrics update
- * @param shuffleClient [[ShuffleClient]] for fetching remote blocks
- * @param blockManager [[BlockManager]] for reading local blocks
+ * @param context [[TaskContext]], used for metrics update 用于度量更新
+ * @param shuffleClient [[ShuffleClient]] for fetching remote blocks [[ShuffleClient]]用于获取远程块
+ * @param blockManager [[BlockManager]] for reading local blocks [[BlockManager]]读取本地块
  * @param blocksByAddress list of blocks to fetch grouped by the [[BlockManagerId]].
+  *                        通过[[BlockManagerId]]分组获取的块列表
  *                        For each block we also require the size (in bytes as a long field) in
  *                        order to throttle the memory usage.
- *                        获取的远程块的最大值,以字节为单位
+  *                        对于每个块,我们还需要大小(以字节为长字段),以节省内存使用
  * @param maxBytesInFlight max size (in bytes) of remote blocks to fetch at any given point.
+  *                        在任何给定点获取的远程块的最大大小(以字节为单位)
  */
 private[spark]
 final class ShuffleBlockFetcherIterator(
@@ -114,7 +116,7 @@ final class ShuffleBlockFetcherIterator(
   /**
    * Queue of fetch requests to issue; we'll pull requests off this gradually to make sure that
    * the number of bytes in flight is limited to maxBytesInFlight.
-   * 读取请求的队列,发送请求队列; 我们会逐渐拉出请求，以确保飞行中的字节数限制为maxBytesInFlight。
+   * 读取请求的队列,发送请求队列;我们会逐渐拉出请求,以确保飞行中的字节数限制为maxBytesInFlight,
    */
   private[this] val fetchRequests = new Queue[FetchRequest]
 
@@ -129,7 +131,7 @@ final class ShuffleBlockFetcherIterator(
   /**
    * Whether the iterator is still active. If isZombie is true, the callback interface will no
    * longer place fetched blocks into [[results]].
-   * 迭代器是否仍然活动,如果isZombie为true，回调接口将不再将获取的块放入[[results]]中。
+   * 迭代器是否仍然活动,如果isZombie为true,回调接口将不再将获取的块放入[[results]]中
    * 迭代器是否活动,如果true,回调接口将不再获取的块
    */
   @volatile private[this] var isZombie = false
@@ -292,7 +294,7 @@ final class ShuffleBlockFetcherIterator(
    * [[ManagedBuffer]]'s memory is allocated lazily when we create the input stream, so all we
    * track in-memory are the ManagedBuffer references themselves.
    * 用于对本地中间计算结果的获取,
-    * 在获取远程块时获取本地块,这是可以的,因为当我们创建输入流时，[[ManagedBuffer]]的内存被懒惰地分配,
+    * 在获取远程块时获取本地块,这是可以的,因为当我们创建输入流时,[[ManagedBuffer]]的内存被懒惰地分配,
     * 所以我们在内存中跟踪的是ManagedBuffer引用本身。
    */
   private[this] def fetchLocalBlocks() {
@@ -464,7 +466,9 @@ object ShuffleBlockFetcherIterator {
    * @param address remote BlockManager to fetch from.远程的BlockManager地址
    * 元组块序列,其中第一个元素是块标识,第二个元素是估计的大小,用于计算bytesinflight
    * @param blocks Sequence of tuple, where the first element is the block id,
+    *              元组的序列,其中第一个元素是块id,
    *               and the second element is the estimated size, used to calculate bytesInFlight.
+    *              而第二个元素是估计的大小,用来计算bytesInFlight
    */
   case class FetchRequest(address: BlockManagerId, blocks: Seq[(BlockId, Long)]) {
     val size = blocks.map(_._2).sum
@@ -481,13 +485,13 @@ object ShuffleBlockFetcherIterator {
 
   /**
    * Result of a fetch from a remote block successfully.
-   * 成功从远程块提取的结果。
+   * 成功从远程块提取的结果
    * @param blockId block id
    * @param address BlockManager that the block was fetched from.块管理器块被从中获取。
    * @param size estimated size of the block, used to calculate bytesInFlight.
    *             Note that this is NOT the exact bytes.
     *             估计块的大小,用于计算bytesInFlight.Note,这不是确切的字节。
-   * @param buf [[ManagedBuffer]] for the content.
+   * @param buf [[ManagedBuffer]] for the content. [[ManagedBuffer]]的内容
    */
   private[storage] case class SuccessFetchResult(
       blockId: BlockId,
