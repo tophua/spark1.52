@@ -44,6 +44,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
   override def putBytes(blockId: BlockId, _bytes: ByteBuffer, level: StorageLevel): PutResult = {
     // So that we do not modify the input offsets !所以我们不修改输入偏移！
     // duplicate does not copy buffer, so inexpensive
+    //duplicate()返回一个新的字节的缓冲区共享老缓冲区的内容
     val bytes = _bytes.duplicate()//复制一个可读可写的缓冲区
     logDebug(s"Attempting to put block $blockId")
     val startTime = System.currentTimeMillis//文件写入开始时间
@@ -61,6 +62,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     val finishTime = System.currentTimeMillis//文件写入完成时间
     logDebug("Block %s stored as %s file on disk in %d ms".format(
       file.getName, Utils.bytesToString(bytes.limit), finishTime - startTime))
+    //duplicate()返回一个新的字节的缓冲区共享老缓冲区的内容
     PutResult(bytes.limit(), Right(bytes.duplicate()))//复制一个可读可写的缓冲区
   }
 //将BlockId对应的Array数据存储到磁盘,该方法先将Array序列化,然后存储到相应的文件。

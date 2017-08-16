@@ -227,6 +227,7 @@ class ColumnTypeSuite extends SparkFunSuite with Logging {
           expected === extracted,
           "Extracted value didn't equal to the original one. " +
             hexDump(expected) + " != " + hexDump(extracted) +
+            //duplicate()返回一个新的字节的缓冲区共享老缓冲区的内容
             ", buffer = " + dumpBuffer(buffer.duplicate().rewind().asInstanceOf[ByteBuffer]))
       }
     }

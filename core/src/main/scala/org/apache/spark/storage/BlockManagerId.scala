@@ -37,7 +37,7 @@ import org.apache.spark.util.Utils
  * 包括标识Slave的ExecutorId,块管理器的主机名称和端口
  */
 @DeveloperApi
-class BlockManagerId private (
+class BlockManagerId private ( //executor计算的中间结果实际数据所在位置
     private var executorId_ : String,//executorId
     private var host_ : String,//块管理器的主机名称
     private var port_ : Int)//端口

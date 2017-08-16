@@ -110,6 +110,8 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
  */
   override def putBytes(blockId: BlockId, _bytes: ByteBuffer, level: StorageLevel): PutResult = {
     // Work on a duplicate - since the original input might be used elsewhere.
+    // 在一个重复的工作 - 由于原始的输入可能在其他地方使用,
+    //duplicate()返回一个新的字节的缓冲区共享老缓冲区的内容
     val bytes = _bytes.duplicate()//创建共享此缓冲区的新的字节缓存区
     bytes.rewind()//重新分配缓存
     if (level.deserialized) {
@@ -117,6 +119,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       putIterator(blockId, values, level, returnValues = true)
     } else {
       val putAttempt = tryToPut(blockId, bytes, bytes.limit, deserialized = false)
+      //duplicate()返回一个新的字节的缓冲区共享老缓冲区的内容
       PutResult(bytes.limit(), Right(bytes.duplicate()), putAttempt.droppedBlocks)
     }
   }
@@ -130,20 +133,23 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
    */
   def putBytes(blockId: BlockId, size: Long, _bytes: () => ByteBuffer): PutResult = {
     // Work on a duplicate - since the original input might be used elsewhere.
+    //在一个重复的工作 - 由于原始的输入可能在其他地方使用
+    //duplicate()返回一个新的字节的缓冲区共享老缓冲区的内容
     lazy val bytes = _bytes().duplicate().rewind().asInstanceOf[ByteBuffer]
     val putAttempt = tryToPut(blockId, () => bytes, size, deserialized = false)
     val data =
       if (putAttempt.success) {
         assert(bytes.limit == size)
+        //duplicate()返回一个新的字节的缓冲区共享老缓冲区的内容
         Right(bytes.duplicate())
       } else {
         null
       }
     PutResult(size, data, putAttempt.droppedBlocks)
   }
-/**
- * 内存写入
- */
+  /**
+   * 内存写入
+   */
   override def putArray(
       blockId: BlockId,
       values: Array[Any],
@@ -161,6 +167,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
       val bytes = blockManager.dataSerialize(blockId, values.iterator)
       //尝试写入内存,如果unrollsafely返回的数据匹配Left,整个block是可以一次性放入内存的
       val putAttempt = tryToPut(blockId, bytes, bytes.limit, deserialized = false)
+      //duplicate返回一个新的字节的缓冲区共享老缓冲区的内
       PutResult(bytes.limit(), Right(bytes.duplicate()), putAttempt.droppedBlocks)
     }
   }
@@ -235,6 +242,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
     } else {
       //不支持序列化,对MemoryEntny的value复制ByteBuffer后返回
       //实际上并不复制数据
+      //duplicate()返回一个新的字节的缓冲区共享老缓冲区的内容
       Some(entry.value.asInstanceOf[ByteBuffer].duplicate()) // Doesn't actually copy the data
     }
   }

@@ -30,6 +30,7 @@ import org.apache.spark.annotation.DeveloperApi
  *
  * If your BlockId should be serializable, be sure to add it to the BlockId.apply() method.
   * 如果您的BlockId可以序列化，请确保将其添加到BlockId.apply（）方法中
+  * 一个数据块即对应一个分区
  */
 @DeveloperApi
 sealed abstract class BlockId {
@@ -99,7 +100,7 @@ private[spark] case class TempLocalBlockId(id: UUID) extends BlockId {
 
 /** 
  *  Id associated with temporary shuffle data managed as blocks. Not serializable. 
- *  与作为块管理的临时随机数据相关联的Id。 不可序列化
+ *  与作为块管理的临时随机数据相关联的Id,不可序列化
  *  */
 private[spark] case class TempShuffleBlockId(id: UUID) extends BlockId {
   override def name: String = "temp_shuffle_" + id

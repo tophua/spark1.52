@@ -103,6 +103,7 @@ abstract class BlockTransferService extends ShuffleClient with Closeable with Lo
    */
   def fetchBlockSync(host: String, port: Int, execId: String, blockId: String): ManagedBuffer = {
     // A monitor for the thread to wait on.
+    //线程等待的监视器
     val result = Promise[ManagedBuffer]()
     fetchBlocks(host, port, execId, Array(blockId),
       new BlockFetchingListener {

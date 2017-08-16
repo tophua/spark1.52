@@ -49,7 +49,7 @@ private[spark] class DiskBlockObjectWriter(
     with Logging {
 
   /** The file channel, used for repositioning / truncating the file.
-    * 文件通道,用于重新定位/截断文件。*/
+    * 文件通道,用于重新定位/截断文件*/
   private var channel: FileChannel = null
   private var bs: OutputStream = null
   private var fos: FileOutputStream = null

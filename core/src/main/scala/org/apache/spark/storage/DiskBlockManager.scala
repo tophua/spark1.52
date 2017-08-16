@@ -46,8 +46,8 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
   /* Create one local directory for each path mentioned in spark.local.dir; then, inside this
    * directory, create multiple subdirectories that we will hash files into, in order to avoid
    * having really large inodes at the top level.
-   * 为spark.local.dir中提到的每个路径创建一个本地目录,那么，在这个目录下,
-   * 创建我们将哈希文件的多个子目录,以避免在顶层有真正的大型inode。*/
+   * 为spark.local.dir中提到的每个路径创建一个本地目录,那么,在这个目录下,
+   * 创建我们将哈希文件的多个子目录,以避免在顶层有真正的大型inode*/
   //存放Block对应的File的本地根目录
   private[spark] val localDirs: Array[File] = createLocalDirs(conf)
   if (localDirs.isEmpty) {
@@ -125,7 +125,7 @@ private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkCon
     subDirs.flatMap { dir =>
       dir.synchronized {
         // Copy the content of dir because it may be modified in other threads
-        //复制数组目录的内容因为它可能在其他线程修改
+        //复制目录的内容,因为它可能在其他线程中被修改
         dir.clone()
       }
     }.filter(_ != null).flatMap { dir =>

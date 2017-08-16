@@ -220,7 +220,7 @@ private[spark] class BlockManager(
    * This method initializes the BlockTransferService and ShuffleClient, registers with the
    * BlockManagerMaster, starts the BlockManagerWorker endpoint, and registers with a local shuffle
    * service if configured.
-    * 此方法初始化BlockTransferService和ShuffleClient，向BlockManagerMaster注册，启动BlockManagerWorker端点，并配置本地随机服务注册。
+    * 此方法初始化BlockTransferService和ShuffleClient，向BlockManagerMaster注册,启动BlockManagerWorker端点，并配置本地随机服务注册。
    */
   def initialize(appId: String): Unit = {
     //blockTransferService 初始化
@@ -264,7 +264,7 @@ private[spark] class BlockManager(
     for (i <- 1 to MAX_ATTEMPTS) {
       try {
         // Synchronous and will throw an exception if we cannot connect.
-        //同步并将抛出异常，如果我们无法连接。
+        //同步并将抛出异常,如果我们无法连接
         shuffleClient.asInstanceOf[ExternalShuffleClient].registerWithShuffleServer(
           shuffleServerId.host, shuffleServerId.port, shuffleServerId.executorId, shuffleConfig)
         return
@@ -389,6 +389,7 @@ private[spark] class BlockManager(
       val memSize = if (memoryStore.contains(blockId)) memoryStore.getSize(blockId) else 0L
       val diskSize = if (diskStore.contains(blockId)) diskStore.getSize(blockId) else 0L
       // Assume that block is not in external block store
+      //假设块不在外部块存储中
       BlockStatus(info.level, memSize, diskSize, 0L)
     }
   }
@@ -532,7 +533,7 @@ private[spark] class BlockManager(
       val shuffleBlockResolver = shuffleManager.shuffleBlockResolver
       // TODO: This should gracefully handle case where local block is not available. Currently
       // downstream code will throw an exception.
-      //下游代码将抛出异常。
+      //下游代码将抛出异常
       Option(
         shuffleBlockResolver.getBlockData(blockId.asInstanceOf[ShuffleBlockId]).nioByteBuffer())
     } else {
@@ -639,7 +640,9 @@ private[spark] class BlockManager(
             if (!level.deserialized || !asBlockResult) {
               /* We'll store the bytes in memory if the block's storage level includes
                * "memory serialized", or if it should be cached as objects in memory
-               * but we only requested its serialized bytes. */
+               * but we only requested its serialized bytes.
+               * 如果块的存储级别包括“内存序列化”,或者如果它应该被缓存为内存中的对象,
+               * 但是我们只请求其序列化字节,我们将把这些字节存储在内存中。*/
               memoryStore.putBytes(blockId, bytes.limit, () => {
                 // https://issues.apache.org/jira/browse/SPARK-6076
                 // If the file size is bigger than the free memory, OOM will happen. So if we cannot
@@ -1215,7 +1218,9 @@ private[spark] class BlockManager(
    */
   def dropFromMemory(
     blockId: BlockId,
+    //Either: 解决返回值不确定(返回两个值的其中一个)问题
     data: Either[Array[Any], ByteBuffer]): Option[BlockStatus] = {
+    //匿名方法
     dropFromMemory(blockId, () => data)
   }
 
@@ -1324,6 +1329,7 @@ private[spark] class BlockManager(
   def removeBroadcast(broadcastId: Long, tellMaster: Boolean): Int = {
     logDebug(s"Removing broadcast $broadcastId")
     val blocksToRemove = blockInfo.keys.collect {
+      //实例化BroadcastBlockId,属性broadcastId值
       case bid @ BroadcastBlockId(`broadcastId`, _) => bid
     }
     blocksToRemove.foreach { blockId => removeBlock(blockId, tellMaster) }
@@ -1379,6 +1385,7 @@ private[spark] class BlockManager(
    * 删除一个Block,并向BlockManagerMaster发送消息,同时删除其他Slave节点
    */
   private def dropOldBlocks(cleanupTime: Long, shouldDrop: (BlockId => Boolean)): Unit = {
+    //获得HashMap的迭代器
     val iterator = blockInfo.getEntrySet.iterator
     //遍历blockInfo
     while (iterator.hasNext) {
