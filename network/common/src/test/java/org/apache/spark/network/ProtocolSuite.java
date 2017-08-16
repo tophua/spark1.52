@@ -98,6 +98,8 @@ public class ProtocolSuite {
    * Handler to transform a FileRegion into a byte buffer. EmbeddedChannel doesn't actually transfer
    * bytes, but messages, so this is needed so that the frame decoder on the receiving side can
    * understand what MessageWithHeader actually contains.
+   * 处理程序将FileRegion转换为字节缓冲区,EmbeddedChannel实际上并不传输字节,而是消息,所以这是需要的,
+   * 以便接收方的帧解码器可以理解MessageWithHeader实际包含的内容
    */
   private static class FileRegionEncoder extends MessageToMessageEncoder<FileRegion> {
 

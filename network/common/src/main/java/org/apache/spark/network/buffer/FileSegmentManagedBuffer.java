@@ -66,6 +66,7 @@ public final class FileSegmentManagedBuffer extends ManagedBuffer {
           //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
         ByteBuffer buf = ByteBuffer.allocate((int) length);
         channel.position(offset);
+        //返回limit和position之间相对位置差
         while (buf.remaining() != 0) {
           if (channel.read(buf) == -1) {
             throw new IOException(String.format("Reached EOF before filling buffer\n" +
@@ -73,6 +74,7 @@ public final class FileSegmentManagedBuffer extends ManagedBuffer {
               offset, file.getAbsoluteFile(), buf.remaining()));
           }
         }
+        //flip读写指针指到缓存头部,并且设置了最多只能读出之前写入的数据长度(而不是整个缓存的容量大小)。
         buf.flip();
         return buf;
       } else {

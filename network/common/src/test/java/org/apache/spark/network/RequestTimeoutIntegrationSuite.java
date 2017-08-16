@@ -55,6 +55,7 @@ public class RequestTimeoutIntegrationSuite {
   private TransportConf conf;
 
   // A large timeout that "shouldn't happen", for the sake of faulty tests not hanging forever.
+    //“不应该发生”的大超时,为了错误的测试,永远不会挂起
   private final int FOREVER = 60 * 1000;
 
   @Before
@@ -246,6 +247,7 @@ public class RequestTimeoutIntegrationSuite {
   /**
    * Callback which sets 'success' or 'failure' on completion.
    * Additionally notifies all waiters on this callback when invoked.
+   * 回调在完成时设置“成功”或“失败”,另外在调用时通知所有这个回调的服务器
    */
   class TestCallback implements RpcResponseCallback, ChunkReceivedCallback {
 

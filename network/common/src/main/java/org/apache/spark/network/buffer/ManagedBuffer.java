@@ -36,6 +36,10 @@ import java.nio.ByteBuffer;
  * should be called.
  * 具体的缓冲区实现可能在JVM垃圾收集器外部进行管理,例如，在{@link NettyManagedBuffer}的情况下,缓冲区被引用计数,
  * 在这种情况下,如果要将缓冲区传递给不同的线程,则应该调用保留/释放。
+ *
+ * 对于Network通信,不管传输的是序列化后的对象还是文件,在网络上表现的都是字节流。
+ * 在传统IO中,字节流表示为Stream;在NIO中,字节流表示为ByteBuffer;
+ * 在Netty中字节流表示为ByteBuff或FileRegion;在Spark中,针对Byte也做了一层包装,支持对Byte和文件流进行处理,即ManagedBuffer
  */
 public abstract class ManagedBuffer {
 
@@ -57,6 +61,7 @@ public abstract class ManagedBuffer {
    * necessarily check for the length of bytes read, so the caller is responsible for making sure
    * it does not go over the limit.
    * 将此缓冲区的数据显示为InputStream,底层实现不一定要检查读取的字节长度,所以调用者负责确保它不超过限制。
+   * createInputStream来对Buffer进行“类型转换”stream
    */
   public abstract InputStream createInputStream() throws IOException;
 

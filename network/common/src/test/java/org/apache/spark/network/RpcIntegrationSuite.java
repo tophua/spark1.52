@@ -42,6 +42,9 @@ import org.apache.spark.network.server.TransportServer;
 import org.apache.spark.network.util.SystemPropertyConfigProvider;
 import org.apache.spark.network.util.TransportConf;
 
+/**
+ * RPC集成测试
+ */
 public class RpcIntegrationSuite {
   static TransportServer server;
   static TransportClientFactory clientFactory;

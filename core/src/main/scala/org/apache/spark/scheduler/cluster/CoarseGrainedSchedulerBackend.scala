@@ -245,7 +245,6 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
      * 1)将executorDataMap中ExecutorData都转为WorkerOffer
      * 2)调用TaskSchedulerImpl的resourceOffers方法给当前任务分配Executor
      * 3)然后调用launchTasks
-     * 
      */
     private def makeOffers() {
       //Filter out executors under killing
