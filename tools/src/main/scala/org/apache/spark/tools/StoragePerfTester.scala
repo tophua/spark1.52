@@ -72,6 +72,7 @@ object StoragePerfTester {
     val hashShuffleManager = sc.env.shuffleManager.asInstanceOf[HashShuffleManager]
 
     def writeOutputBytes(mapId: Int, total: AtomicLong): Unit = {
+      //mapId对应RDD的partionsID
       val shuffle = hashShuffleManager.shuffleBlockResolver.forMapTask(1, mapId, numOutputSplits,
         new KryoSerializer(sc.conf), new ShuffleWriteMetrics())
       val writers = shuffle.writers

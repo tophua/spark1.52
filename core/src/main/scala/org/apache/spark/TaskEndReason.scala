@@ -88,7 +88,7 @@ case object Resubmitted extends TaskFailedReason {
 case class FetchFailed(
     bmAddress: BlockManagerId,  // Note that bmAddress can be null
     shuffleId: Int,
-    mapId: Int,
+    mapId: Int,//mapId对应RDD的partionsID
     reduceId: Int,
     message: String)
   extends TaskFailedReason {

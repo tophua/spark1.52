@@ -115,6 +115,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
     //将一个广播变量的副本存储在驱动程序中，以便在驱动程序上运行的任务不创建广播变量值的重复副本。
     //1)将要写入的对象在本地的存储体系中备份一份,以便于Task也可以在本地的Driver上运行
     SparkEnv.get.blockManager.putSingle(broadcastId, value, StorageLevel.MEMORY_AND_DISK,
+      //tellMaster 是否将状态汇报到Master
       tellMaster = false)
   //2)给ByteArrayChunkOutputStream指定压缩算法,并且将对象以序列化方式写入ByteChunkOutputStream后转换为Array
     val blocks =
@@ -211,6 +212,7 @@ private[spark] class TorrentBroadcast[T: ClassTag](obj: T, id: Long)
           // need to re-fetch it.
           //将合并的副本存储在BlockManager中,以便此执行器上的其他任务不需要重新获取
           SparkEnv.get.blockManager.putSingle(//读了之后再放进BlockManager
+            //tellMaster 是否将状态汇报到Master
             broadcastId, obj, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
           obj
       }

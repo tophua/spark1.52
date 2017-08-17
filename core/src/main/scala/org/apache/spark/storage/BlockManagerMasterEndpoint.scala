@@ -80,7 +80,7 @@ private[spark] class BlockManagerMasterEndpoint(
     //一次获取多个Block的位置信息
     case GetLocationsMultipleBlockIds(blockIds) =>
       context.reply(getLocationsMultipleBlockIds(blockIds))
-    //获得其他BlockManager的id
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     case GetPeers(blockManagerId) =>
       context.reply(getPeers(blockManagerId))
     //根据executorId获取Executor的Thread Dump,获得了Executor的hostname和port后,会通过AkkA向Executor发送请求信息
@@ -423,6 +423,7 @@ private[spark] class BlockManagerMasterEndpoint(
    *  Get the list of the peers of the given block manager 
    *  请求获得其他BlockManager的id
    * */
+  //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
   private def getPeers(blockManagerId: BlockManagerId): Seq[BlockManagerId] = {
     val blockManagerIds = blockManagerInfo.keySet
     if (blockManagerIds.contains(blockManagerId)) {

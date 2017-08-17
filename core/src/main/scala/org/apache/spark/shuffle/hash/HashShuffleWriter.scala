@@ -29,7 +29,7 @@ import org.apache.spark.storage.DiskBlockObjectWriter
 private[spark] class HashShuffleWriter[K, V](
     shuffleBlockResolver: FileShuffleBlockResolver,
     handle: BaseShuffleHandle[K, V, _],
-    mapId: Int,
+    mapId: Int, //对应RDD的partionsID
     context: TaskContext)
   extends ShuffleWriter[K, V] with Logging {
 
@@ -49,7 +49,7 @@ private[spark] class HashShuffleWriter[K, V](
 
   private val blockManager = SparkEnv.get.blockManager
   private val ser = Serializer.getSerializer(dep.serializer.getOrElse(null))
-  //
+  //mapId对应RDD的partionsID
   private val shuffle = shuffleBlockResolver.forMapTask(dep.shuffleId, mapId, numOutputSplits, ser,
     writeMetrics)
 

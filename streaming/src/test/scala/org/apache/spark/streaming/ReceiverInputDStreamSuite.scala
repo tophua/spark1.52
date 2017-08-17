@@ -183,7 +183,7 @@ class ReceiverInputDStreamSuite extends TestSuiteBase with BeforeAndAfterAll {
       createBlock: Boolean = true): ReceivedBlockInfo = {
     val blockId = new StreamBlockId(0, Random.nextLong())
     if (createBlock) {//判断是否创建块
-      //存储块,是否调用master
+      //tellMaster 是否将状态汇报到Master
       SparkEnv.get.blockManager.putSingle(blockId, 1, StorageLevel.MEMORY_ONLY, tellMaster = true)
       //判断master是否包含blockId
       require(SparkEnv.get.blockManager.master.contains(blockId))

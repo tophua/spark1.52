@@ -96,7 +96,7 @@ private[spark] object BlockManagerMessages {
   case class GetLocations(blockId: BlockId) extends ToBlockManagerMaster
 
   case class GetLocationsMultipleBlockIds(blockIds: Array[BlockId]) extends ToBlockManagerMaster
-
+  //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
   case class GetPeers(blockManagerId: BlockManagerId) extends ToBlockManagerMaster
 
   case class GetRpcHostPortForExecutor(executorId: String) extends ToBlockManagerMaster

@@ -54,10 +54,10 @@ private[spark] class HashShuffleManager(conf: SparkConf) extends ShuffleManager 
   }
 
   /** Get a writer for a given partition. Called on executors by map tasks.
-    * 获取一个给定写的分区,通过Map任务调用执行器*/
+    * 获取一个给定写的分区,通过Map任务调用执行器,mapId对应RDD的partionsID*/
   override def getWriter[K, V](handle: ShuffleHandle, mapId: Int, context: TaskContext)
       : ShuffleWriter[K, V] = {
-    new HashShuffleWriter(
+    new HashShuffleWriter(//mapId对应RDD的partionsID
       shuffleBlockResolver, handle.asInstanceOf[BaseShuffleHandle[K, V, _]], mapId, context)
   }
 

@@ -262,6 +262,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
           val mapId = 0
           val reduceId = taskContext.partitionId()
           val message = "Simulated fetch failure"
+          //mapId对应RDD的partionsID
           throw new FetchFailedException(bmAddress, shuffleId, mapId, reduceId, message)
         } else {
           x

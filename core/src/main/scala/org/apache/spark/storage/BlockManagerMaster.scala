@@ -103,9 +103,10 @@ private[spark] class BlockManagerMaster(
 
   /**
    *  Get ids of other nodes in the cluster from the driver
-   *  获得其他的BlockManager Id,这个在做Block的分布式存储副本时会用到
+   *  获得其他的BlockManagerId,这个在做Block的分布式存储副本时会用到
    */  
   def getPeers(blockManagerId: BlockManagerId): Seq[BlockManagerId] = {
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     driverEndpoint.askWithRetry[Seq[BlockManagerId]](GetPeers(blockManagerId))
   }
   /**根据executorId获得Executor的host和port**/

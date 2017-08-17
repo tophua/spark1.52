@@ -758,9 +758,10 @@ private[spark] class BlockManager(
     blockId: BlockId,
     values: Iterator[Any],
     level: StorageLevel,
-    tellMaster: Boolean = true,
+    tellMaster: Boolean = true,//tellMaster 是否将状态汇报到Master
     effectiveStorageLevel: Option[StorageLevel] = None): Seq[(BlockId, BlockStatus)] = {
     require(values != null, "Values is null")
+    //tellMaster 是否将状态汇报到Master
     doPut(blockId, IteratorValues(values), level, tellMaster, effectiveStorageLevel)
   }
 
@@ -794,9 +795,10 @@ private[spark] class BlockManager(
     blockId: BlockId,
     values: Array[Any],
     level: StorageLevel,
-    tellMaster: Boolean = true,
+    tellMaster: Boolean = true,//tellMaster 是否将状态汇报到Master
     effectiveStorageLevel: Option[StorageLevel] = None): Seq[(BlockId, BlockStatus)] = {
     require(values != null, "Values is null")
+    //tellMaster 是否将状态汇报到Master
     doPut(blockId, ArrayValues(values), level, tellMaster, effectiveStorageLevel)
   }
 
@@ -810,9 +812,10 @@ private[spark] class BlockManager(
     blockId: BlockId,
     bytes: ByteBuffer,
     level: StorageLevel,
-    tellMaster: Boolean = true,
+    tellMaster: Boolean = true,//tellMaster 是否将状态汇报到Master
     effectiveStorageLevel: Option[StorageLevel] = None): Seq[(BlockId, BlockStatus)] = {
     require(bytes != null, "Bytes is null")
+    //tellMaster 是否将状态汇报到Master
     doPut(blockId, ByteBufferValues(bytes), level, tellMaster, effectiveStorageLevel)
   }
 
@@ -840,7 +843,7 @@ private[spark] class BlockManager(
     blockId: BlockId,
     data: BlockValues,
     level: StorageLevel,
-    tellMaster: Boolean = true,
+    tellMaster: Boolean = true,//tellMaster 是否将状态汇报到Master
     effectiveStorageLevel: Option[StorageLevel] = None): Seq[(BlockId, BlockStatus)] = {
 
     require(blockId != null, "BlockId is null")
@@ -859,6 +862,7 @@ private[spark] class BlockManager(
       * 但是请注意,其他线程将无法获取get()此块,直到我们在其BlockInfo上调用markReady。
       * */
     val putBlockInfo = {
+      //tellMaster 是否将状态汇报到Master
       val tinfo = new BlockInfo(level, tellMaster)
       // Do atomically !
       /**
@@ -984,6 +988,7 @@ private[spark] class BlockManager(
           marked = true
           //将putBlockStatus设置为允许其他线程读取
           putBlockInfo.markReady(size)
+          //tellMaster 是否将状态汇报到Master
           if (tellMaster) {
             //是否上报Master,将当前Block的信息更新到BlockManagerMasterEndpiont,            
             reportBlockStatus(blockId, putBlockInfo, putBlockStatus)
@@ -1052,6 +1057,7 @@ private[spark] class BlockManager(
    * Get peer block managers in the system.
    * 获取其他所有BlockManagerId
    */
+  //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
   private def getPeers(forceFetch: Boolean): Seq[BlockManagerId] = {
     peerFetchLock.synchronized {
       //cachedPeers缓存的超时间,默认60秒,可以修改cachedPeersTtl属性改变大小
@@ -1063,6 +1069,7 @@ private[spark] class BlockManager(
       if (cachedPeers == null || forceFetch || timeout) {
         //当cachedPeers为空或者forceFetch为true或者当前时间超时
         //从BlockManagerMasterEndpoint获取最新BlockManagerID
+        //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
         cachedPeers = master.getPeers(blockManagerId).sortBy(_.hashCode)
         lastPeerFetchTime = System.currentTimeMillis
         logDebug("Fetched peers from master: " + cachedPeers.mkString("[", ",", "]"))
@@ -1102,6 +1109,7 @@ private[spark] class BlockManager(
 
     // Get cached list of peers 获取缓存的对等列表
     //peersForReplication缓存不是当前的BlockManagerId,获得其他所有BlockManagerId
+    //getPeers获得其他相同的BlockManagerId
     peersForReplication ++= getPeers(forceFetch = false)
 
     // Get a random peer. Note that this selection of a peer is deterministic on the block id.
@@ -1120,6 +1128,7 @@ private[spark] class BlockManager(
       if (replicationFailed) { //判断是否复制失败    
         peersForReplication.clear()//清除缓存
         //当复制失败并且再次尝试时,会强制从BlockManagerMasterEndpoint获取最新BlockManagerID
+        //getPeers获得其他相同的BlockManagerId
         peersForReplication ++= getPeers(forceFetch = true)  
         //删除已经备份复制BlockManager的BlockManagerId
         peersForReplication --= peersReplicatedTo
@@ -1210,7 +1219,9 @@ private[spark] class BlockManager(
     blockId: BlockId,
     value: Any,
     level: StorageLevel,
+    //tellMaster 是否将状态汇报到Master
     tellMaster: Boolean = true): Seq[(BlockId, BlockStatus)] = {
+    //tellMaster 是否将状态汇报到Master
     putIterator(blockId, Iterator(value), level, tellMaster)
   }
   /**  
@@ -1291,7 +1302,8 @@ private[spark] class BlockManager(
         }
         //获取Block的最新状态
         val status = getCurrentBlockStatus(blockId, info)
-        if (info.tellMaster) {//是否调用Master
+        //tellMaster 是否将状态汇报到Master
+        if (info.tellMaster) {
           //reportBlockStatus给BlockManagerMasterActor报告状态
           reportBlockStatus(blockId, info, status, droppedMemorySize)
         }
@@ -1317,6 +1329,7 @@ private[spark] class BlockManager(
     // TODO: Avoid a linear scan by creating another mapping of RDD.id to blocks.
     logInfo(s"Removing RDD $rddId")
     val blocksToRemove = blockInfo.keys.flatMap(_.asRDDId).filter(_.rddId == rddId)
+    //tellMaster 是否将状态汇报到Master
     blocksToRemove.foreach { blockId => removeBlock(blockId, tellMaster = false) }
     blocksToRemove.size
   }
@@ -1332,6 +1345,7 @@ private[spark] class BlockManager(
       //实例化BroadcastBlockId,属性broadcastId值
       case bid @ BroadcastBlockId(`broadcastId`, _) => bid
     }
+    //tellMaster 是否将状态汇报到Master
     blocksToRemove.foreach { blockId => removeBlock(blockId, tellMaster) }
     blocksToRemove.size
   }
@@ -1339,6 +1353,7 @@ private[spark] class BlockManager(
   /**
    * Remove a block from both memory and disk.
    * 移除内存和磁盘中的指定block,同时需要告知master并更新block信息reportBlockStatuses
+    * tellMaster 是否将状态汇报到Master
    */
   def removeBlock(blockId: BlockId, tellMaster: Boolean = true): Unit = {
     logDebug(s"Removing block $blockId")
@@ -1356,6 +1371,7 @@ private[spark] class BlockManager(
             "the disk, memory, or external block store")
         }
         blockInfo.remove(blockId)
+        //tellMaster 是否将状态汇报到Master
         if (tellMaster && info.tellMaster) {
           val status = getCurrentBlockStatus(blockId, info)
           reportBlockStatus(blockId, info, status)

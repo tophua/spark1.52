@@ -70,6 +70,7 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
     
     //创建SortShuffleWriter对象,shuffleBlockResolver：index文件
     new SortShuffleWriter(
+      //mapId对应RDD的partionsID
       shuffleBlockResolver, baseShuffleHandle, mapId, context)
   }
 
@@ -78,6 +79,7 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
   override def unregisterShuffle(shuffleId: Int): Boolean = {
     if (shuffleMapNumber.containsKey(shuffleId)) {
       val numMaps = shuffleMapNumber.remove(shuffleId)
+      //mapId对应RDD的partionsID
       (0 until numMaps).map{ mapId =>
         shuffleBlockResolver.removeDataByMap(shuffleId, mapId)
       }

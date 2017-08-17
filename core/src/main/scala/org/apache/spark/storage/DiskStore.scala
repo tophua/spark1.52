@@ -160,6 +160,7 @@ private[spark] class DiskStore(blockManager: BlockManager, diskManager: DiskBloc
     getBytes(file, 0, file.length)
   }
   //根据FileSegment读取内容,其中 FileSegment存放文件和要读取数据的偏移和大小
+  //根据FileSegment文件句柄,开始的offset和要读取的长度读取文件
   def getBytes(segment: FileSegment): Option[ByteBuffer] = {
     getBytes(segment.file, segment.offset, segment.length)
   }

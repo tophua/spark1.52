@@ -111,10 +111,13 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
     val numStores = 4
     val stores = (1 to numStores - 1).map { i => makeBlockManager(1000, s"store$i") }
     val storeIds = stores.map { _.blockManagerId }.toSet
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(stores(0).blockManagerId).toSet ===
       storeIds.filterNot { _ == stores(0).blockManagerId })
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(stores(1).blockManagerId).toSet ===
       storeIds.filterNot { _ == stores(1).blockManagerId })
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(stores(2).blockManagerId).toSet ===
       storeIds.filterNot { _ == stores(2).blockManagerId })
 
@@ -122,6 +125,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
      //添加驱动程序存储并测试是否被过滤掉
     val driverStore = makeBlockManager(1000, SparkContext.DRIVER_IDENTIFIER)
     assert(master.getPeers(stores(0).blockManagerId).forall(!_.isDriver))
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(stores(1).blockManagerId).forall(!_.isDriver))
     assert(master.getPeers(stores(2).blockManagerId).forall(!_.isDriver))
 
@@ -132,8 +136,10 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
       storeIds.filterNot { _ == stores(0).blockManagerId } + newStore.blockManagerId)
     assert(master.getPeers(stores(1).blockManagerId).toSet ===
       storeIds.filterNot { _ == stores(1).blockManagerId } + newStore.blockManagerId)
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(stores(2).blockManagerId).toSet ===
       storeIds.filterNot { _ == stores(2).blockManagerId } + newStore.blockManagerId)
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(newStore.blockManagerId).toSet === storeIds)
 
     // Remove a store and test whether get peers returns it
@@ -146,7 +152,9 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
 
     // Test whether asking for peers of a unregistered block manager id returns empty list
     //测试是否请求未注册的块管理器id的对等体返回空列表
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(stores(0).blockManagerId).isEmpty)
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(BlockManagerId("", "", 1)).isEmpty)
   }
 
@@ -290,6 +298,7 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
       10000, conf, mapOutputTracker, shuffleManager, failableTransfer, securityMgr, 0)
     failableStore.initialize("app-id")
     allStores += failableStore // so that this gets stopped after test 这会被停止后测试
+    //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
     assert(master.getPeers(store.blockManagerId).toSet === Set(failableStore.blockManagerId))
 
     // Test that 2x replication fails by creating only one copy of the block

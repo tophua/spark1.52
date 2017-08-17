@@ -53,6 +53,7 @@ private[spark] class HttpBroadcast[T: ClassTag](
    */
   HttpBroadcast.synchronized {
     SparkEnv.get.blockManager.putSingle(
+      //tellMaster 是否将状态汇报到Master
       blockId, value_, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
   }
 
@@ -106,6 +107,7 @@ private[spark] class HttpBroadcast[T: ClassTag](
            * 该数据仅在本地使用,并且没有其他节点需要获取该块,因此我们不通知主机。
            */
           SparkEnv.get.blockManager.putSingle(
+            //tellMaster 是否将状态汇报到Master
             blockId, value_, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
           val time = (System.nanoTime - start) / 1e9
           logInfo("Reading broadcast variable " + id + " took " + time + " s")

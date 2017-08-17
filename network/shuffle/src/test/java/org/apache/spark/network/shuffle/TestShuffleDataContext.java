@@ -62,6 +62,7 @@ public class TestShuffleDataContext {
    *  创建一个基于排序的数据格式在本地目录减速块
    *  */
   public void insertSortShuffleData(int shuffleId, int mapId, byte[][] blocks) throws IOException {
+      //mapId对应RDD的partionsID
     String blockId = "shuffle_" + shuffleId + "_" + mapId + "_0";
 
     OutputStream dataStream = new FileOutputStream(
@@ -87,6 +88,7 @@ public class TestShuffleDataContext {
    *  */
   public void insertHashShuffleData(int shuffleId, int mapId, byte[][] blocks) throws IOException {
     for (int i = 0; i < blocks.length; i ++) {
+        //mapId对应RDD的partionsID
       String blockId = "shuffle_" + shuffleId + "_" + mapId + "_" + i;
       Files.write(blocks[i],
         ExternalShuffleBlockResolver.getFile(localDirs, subDirsPerLocalDir, blockId));

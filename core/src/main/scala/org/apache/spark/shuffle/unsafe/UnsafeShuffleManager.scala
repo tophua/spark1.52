@@ -163,7 +163,7 @@ private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManage
     * 获取给定分区的writer。 通过Map任务调用执行器。 */
   override def getWriter[K, V](
       handle: ShuffleHandle,
-      mapId: Int,
+      mapId: Int,//mapId对应RDD的partionsID
       context: TaskContext): ShuffleWriter[K, V] = {
     handle match {
       case unsafeShuffleHandle: UnsafeShuffleHandle[K, V] =>
@@ -175,11 +175,12 @@ private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManage
           context.taskMemoryManager(),
           env.shuffleMemoryManager,
           unsafeShuffleHandle,
-          mapId,
+          mapId,//mapId对应RDD的partionsID
           context,
           env.conf)
       case other =>
         shufflesThatFellBackToSortShuffle.add(handle.shuffleId)
+        //mapId对应RDD的partionsID
         sortShuffleManager.getWriter(handle, mapId, context)
     }
   }
@@ -191,7 +192,7 @@ private[spark] class UnsafeShuffleManager(conf: SparkConf) extends ShuffleManage
       sortShuffleManager.unregisterShuffle(shuffleId)
     } else {
       Option(numMapsForShufflesThatUsedNewPath.remove(shuffleId)).foreach { numMaps =>
-        (0 until numMaps).foreach { mapId =>
+        (0 until numMaps).foreach { mapId => //mapId对应RDD的partionsID
           shuffleBlockResolver.removeDataByMap(shuffleId, mapId)
         }
       }

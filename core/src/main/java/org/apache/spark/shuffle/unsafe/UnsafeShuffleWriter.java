@@ -75,7 +75,7 @@ public class UnsafeShuffleWriter<K, V> extends ShuffleWriter<K, V> {
   private final Partitioner partitioner;
   private final ShuffleWriteMetrics writeMetrics;
   private final int shuffleId;
-  private final int mapId;
+  private final int mapId;//mapId对应RDD的partionsID
   private final TaskContext taskContext;
   private final SparkConf sparkConf;
   private final boolean transferToEnabled;
@@ -106,7 +106,7 @@ public class UnsafeShuffleWriter<K, V> extends ShuffleWriter<K, V> {
       TaskMemoryManager memoryManager,
       ShuffleMemoryManager shuffleMemoryManager,
       UnsafeShuffleHandle<K, V> handle,
-      int mapId,
+      int mapId,//mapId对应RDD的partionsID
       TaskContext taskContext,
       SparkConf sparkConf) throws IOException {
     final int numPartitions = handle.dependency().partitioner().numPartitions();
@@ -119,7 +119,7 @@ public class UnsafeShuffleWriter<K, V> extends ShuffleWriter<K, V> {
     this.shuffleBlockResolver = shuffleBlockResolver;
     this.memoryManager = memoryManager;
     this.shuffleMemoryManager = shuffleMemoryManager;
-    this.mapId = mapId;
+    this.mapId = mapId;//mapId对应RDD的partionsID
     final ShuffleDependency<K, V, V> dep = handle.dependency();
     this.shuffleId = dep.shuffleId();
     this.serializer = Serializer.getSerializer(dep.serializer()).newInstance();
@@ -218,6 +218,7 @@ public class UnsafeShuffleWriter<K, V> extends ShuffleWriter<K, V> {
     final SpillInfo[] spills = sorter.closeAndGetSpills();
     sorter = null;
     final long[] partitionLengths;
+      //mapId对应RDD的partionsID
     final File output = shuffleBlockResolver.getDataFile(shuffleId, mapId);
     final File tmp = Utils.tempFileWith(output);
     try {
@@ -229,6 +230,7 @@ public class UnsafeShuffleWriter<K, V> extends ShuffleWriter<K, V> {
         }
       }
     }
+      //mapId对应RDD的partionsID
     shuffleBlockResolver.writeIndexFileAndCommit(shuffleId, mapId, partitionLengths, tmp);
     mapStatus = MapStatus$.MODULE$.apply(blockManager.shuffleServerId(), partitionLengths);
   }
@@ -476,6 +478,7 @@ public class UnsafeShuffleWriter<K, V> extends ShuffleWriter<K, V> {
           return Option.apply(mapStatus);
         } else {
           // The map task failed, so delete our output data.
+            //mapId对应RDD的partionsID
           shuffleBlockResolver.removeDataByMap(shuffleId, mapId);
           return Option.apply(null);
         }

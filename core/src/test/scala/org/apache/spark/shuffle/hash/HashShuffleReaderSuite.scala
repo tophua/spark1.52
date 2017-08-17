@@ -103,6 +103,7 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
     //设置模拟BlockManager返回RecordingManagedBuffers
     val localBlockManagerId = BlockManagerId("test-client", "test-client", 1)
     when(blockManager.blockManagerId).thenReturn(localBlockManagerId)
+    //mapId对应RDD的partionsID
     val buffers = (0 until numMaps).map { mapId =>
       // Create a ManagedBuffer with the shuffle data.
       //创建一个managedbuffer的shuffle 数据
@@ -111,7 +112,7 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
 
       // Setup the blockManager mock so the buffer gets returned when the shuffle code tries to
       // fetch shuffle data.
-      //设置blockManager模拟,以便shuffle代码尝试时返回缓冲区获取shuffle数据。
+      //设置blockManager模拟,以便shuffle代码尝试时返回缓冲区获取shuffle数据,mapId对应RDD的partionsID
       val shuffleBlockId = ShuffleBlockId(shuffleId, mapId, reduceId)
       when(blockManager.getBlockData(shuffleBlockId)).thenReturn(managedBuffer)
       when(blockManager.wrapForCompression(meq(shuffleBlockId), isA(classOf[InputStream])))
@@ -128,7 +129,9 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
       // Test a scenario where all data is local, to avoid creating a bunch of additional mocks
       // for the code to read data over the network.
       //测试的情况下,所有的数据都是局部的,以避免创建一组额外的模拟用于在网络上读取数据的代码。
+      //mapId对应RDD的partionsID
       val shuffleBlockIdsAndSizes = (0 until numMaps).map { mapId =>
+        //mapId对应RDD的partionsID
         val shuffleBlockId = ShuffleBlockId(shuffleId, mapId, reduceId)
         (shuffleBlockId, byteOutputStream.size().toLong)
       }

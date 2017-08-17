@@ -413,6 +413,7 @@ final class ShuffleBlockFetcherIterator(
 
   private def throwFetchFailedException(blockId: BlockId, address: BlockManagerId, e: Throwable) = {
     blockId match {
+      //对应RDD的partionsID
       case ShuffleBlockId(shufId, mapId, reduceId) =>
         throw new FetchFailedException(address, shufId.toInt, mapId.toInt, reduceId, e)
       case _ =>

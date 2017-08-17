@@ -32,7 +32,7 @@ import org.apache.spark.util.Utils
 private[spark] class FetchFailedException(
     bmAddress: BlockManagerId,
     shuffleId: Int,
-    mapId: Int,
+    mapId: Int,//mapId对应RDD的partionsID
     reduceId: Int,
     message: String,
     cause: Throwable = null)
@@ -41,12 +41,13 @@ private[spark] class FetchFailedException(
   def this(
       bmAddress: BlockManagerId,
       shuffleId: Int,
-      mapId: Int,
+      mapId: Int,//mapId对应RDD的partionsID
       reduceId: Int,
       cause: Throwable) {
+    //mapId对应RDD的partionsID
     this(bmAddress, shuffleId, mapId, reduceId, cause.getMessage, cause)
   }
-
+  //mapId对应RDD的partionsID
   def toTaskEndReason: TaskEndReason = FetchFailed(bmAddress, shuffleId, mapId, reduceId,
     Utils.exceptionString(this))
 }

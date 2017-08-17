@@ -18,7 +18,7 @@
 package org.apache.spark.storage
 
 import java.util.concurrent.ConcurrentHashMap
-
+//tellMaster 是否将状态汇报到Master
 private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolean) {
   // To save space, 'pending' and 'failed' are encoded as special sizes:
   //为了节省空间,“挂起”和“失败”被编码为特殊尺寸

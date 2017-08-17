@@ -254,6 +254,7 @@ private[spark] class DiskBlockObjectWriter(
       throw new IllegalStateException(
         "fileSegment() is only valid after commitAndClose() has been called")
     }
+    //根据文件句柄,开始的offset和要读取的长度读取文件
     new FileSegment(file, initialPosition, finalPosition - initialPosition)
   }
 

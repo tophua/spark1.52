@@ -66,6 +66,7 @@ private[storage] class BlockManagerSlaveEndpoint(
     //根据broadcastId删除该Executor上和该广播变量相关的所有Block
     case RemoveBroadcast(broadcastId, _) =>
       doAsync[Int]("removing broadcast " + broadcastId, context) {
+        //tellMaster 是否将状态汇报到Master
         blockManager.removeBroadcast(broadcastId, tellMaster = true)
       }
     //根据blockId和askSlaves向Master返回该Block的blockStatus

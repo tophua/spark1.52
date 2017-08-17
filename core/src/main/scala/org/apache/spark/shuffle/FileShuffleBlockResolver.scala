@@ -114,6 +114,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
    * Get a ShuffleWriterGroup for the given map task, which will register it as complete
    * when the writers are closed successfully
     * 为给定的地图任务获取一个ShuffleWriterGroup,当作者关闭成功时,它将注册为完整的
+    * //mapId对应RDD的partionsID
    * 
    */
   def forMapTask(shuffleId: Int, mapId: Int, numBuckets: Int, serializer: Serializer,
@@ -129,12 +130,14 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
       val writers: Array[DiskBlockObjectWriter] = if (consolidateShuffleFiles) {
         fileGroup = getUnusedFileGroup()//获取没有使用的FileGroup
         Array.tabulate[DiskBlockObjectWriter](numBuckets) { bucketId =>
+          //mapId对应RDD的partionsID
           val blockId = ShuffleBlockId(shuffleId, mapId, bucketId)
           blockManager.getDiskWriter(blockId, fileGroup(bucketId), serializerInstance, bufferSize,
             writeMetrics)
         }
       } else {
         Array.tabulate[DiskBlockObjectWriter](numBuckets) { bucketId =>
+          //mapId对应RDD的partionsID
           val blockId = ShuffleBlockId(shuffleId, mapId, bucketId)
           //如果blockFile已经存在,那么删除它并打印日志
           val blockFile = blockManager.diskBlockManager.getFile(blockId)           
@@ -153,10 +156,12 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
           if (success) {
             val offsets = writers.map(_.fileSegment().offset)
             val lengths = writers.map(_.fileSegment().length)
+            //mapId对应RDD的partionsID
             fileGroup.recordMapOutput(mapId, offsets, lengths)
           }
           recycleFileGroup(fileGroup)
         } else {
+          //mapId对应RDD的partionsID
           shuffleState.completedMapTasks.add(mapId)
         }
       }
@@ -192,6 +197,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
       val iter = shuffleState.allFileGroups.iterator
       while (iter.hasNext) {
       //根据Map ID和Reduce ID获取File Segment的信息
+      //mapId对应RDD的partionsID
         val segmentOpt = iter.next.getFileSegmentFor(blockId.mapId, blockId.reduceId)
         if (segmentOpt.isDefined) {
           val segment = segmentOpt.get
@@ -228,6 +234,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
             file.delete()
           }
         } else {
+          //mapId对应RDD的partionsID
           for (mapId <- state.completedMapTasks; reduceId <- 0 until state.numBuckets) {
             val blockId = new ShuffleBlockId(shuffleId, mapId, reduceId)
             blockManager.diskBlockManager.getFile(blockId).delete()
@@ -290,6 +297,7 @@ private[spark] object FileShuffleBlockResolver {
 
     def recordMapOutput(mapId: Int, offsets: Array[Long], lengths: Array[Long]) {
       assert(offsets.length == lengths.length)
+      //mapId对应RDD的partionsID
       mapIdToIndex(mapId) = numBlocks
       numBlocks += 1
       for (i <- 0 until offsets.length) {
@@ -299,11 +307,12 @@ private[spark] object FileShuffleBlockResolver {
     }
 
     /** Returns the FileSegment associated with the given map task, or None if no entry exists.
-      * 返回与给定地图任务关联的FileSegment,如果没有条目,则返回None。 */
+      * 返回与给定地图任务关联的FileSegment,如果没有条目,则返回None,mapId对应RDD的partionsID */
     def getFileSegmentFor(mapId: Int, reducerId: Int): Option[FileSegment] = {
       val file = files(reducerId)
       val blockOffsets = blockOffsetsByReducer(reducerId)
       val blockLengths = blockLengthsByReducer(reducerId)
+      //mapId对应RDD的partionsID
       val index = mapIdToIndex.getOrElse(mapId, -1)
       if (index >= 0) {
         val offset = blockOffsets(index)

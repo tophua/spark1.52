@@ -184,7 +184,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
        */
       //ArrayBuffer 数组追加++=
       updatedBlocks ++=
-     //数据直接写入磁盘,还会Seq[(BlockId, BlockStatus)]
+     //数据直接写入磁盘,还会Seq[(BlockId, BlockStatus)] //tellMaster 是否将状态汇报到Master
         blockManager.putIterator(key, values, level, tellMaster = true, effectiveStorageLevel)
       blockManager.get(key) match {
         case Some(v) => v.data.asInstanceOf[Iterator[T]]
@@ -213,6 +213,7 @@ private[spark] class CacheManager(blockManager: BlockManager) extends Logging {
           // We have successfully unrolled the entire partition, so cache it in memory
           //我们已经成功地把整个分区，所以缓存在内存中
           updatedBlocks ++=
+            //tellMaster 是否将状态汇报到Master
             blockManager.putArray(key, arr, level, tellMaster = true, effectiveStorageLevel)
           arr.iterator.asInstanceOf[Iterator[T]]
         case Right(it) =>

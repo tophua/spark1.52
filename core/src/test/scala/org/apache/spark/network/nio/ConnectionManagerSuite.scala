@@ -42,7 +42,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
       receivedMessage = true
       None
     })
-
+    //10485760字节是10MB
     val size = 10 * 1024 * 1024
     //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
@@ -78,7 +78,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
       numReceivedServerMessages += 1
       None
     })
-
+    //10485760字节是10MB
     val size = 10 * 1024 * 1024
     val count = 10
     //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
@@ -122,13 +122,14 @@ class ConnectionManagerSuite extends SparkFunSuite {
       numReceivedServerMessages += 1
       None
     })
-
+    //10485760字节是10MB
     val size = 10 * 1024 * 1024
     //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
     buffer.flip
     val bufferMessage = Message.createBufferMessage(buffer.duplicate)
     // Expect managerServer to close connection, which we'll report as an error:
+    //预期managerServer关闭连接,我们将作为一个错误报告：
     intercept[IOException] {
     //Await.result或者Await.ready会导致当前线程被阻塞,并等待actor通过它的应答来完成Future
       Await.result(manager.sendMessageReliably(managerServer.id, bufferMessage), 10 seconds)
@@ -168,7 +169,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
       numReceivedServerMessages += 1
       None
     })
-
+    //10485760字节是10MB
     val size = 10 * 1024 * 1024
     //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
@@ -186,6 +187,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
           assert(true)
         case e: TimeoutException => {
           // we should timeout here since the client can't do the negotiation
+          //我们应该在这里暂停,因为客户端无法进行协商
           assert(true)
         }
       }
@@ -220,7 +222,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
       numReceivedServerMessages += 1
       None
     })
-
+    //10485760字节是10MB
     val size = 10 * 1024 * 1024
     //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
@@ -255,7 +257,7 @@ class ConnectionManagerSuite extends SparkFunSuite {
     managerServer.onReceiveMessage((msg: Message, id: ConnectionManagerId) => {
       throw new Exception("Custom exception text")
     })
-
+    //10485760字节是10MB
     val size = 10 * 1024 * 1024
     //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
@@ -289,10 +291,11 @@ class ConnectionManagerSuite extends SparkFunSuite {
     val managerServer = new ConnectionManager(0, serverConf, serverSecurityManager)
     managerServer.onReceiveMessage((msg: Message, id: ConnectionManagerId) => {
       // sleep 60 sec > ack timeout for simulating server slow down or hang up
+      //睡眠60秒> ack超时模拟服务器减慢或挂断
       Thread.sleep(ackTimeoutS * 3 * 1000)
       None
     })
-
+    //10485760字节是10MB
     val size = 10 * 1024 * 1024
     //ByteBuffer.allocate在能够读和写之前,必须有一个缓冲区,用静态方法 allocate() 来分配缓冲区
     val buffer = ByteBuffer.allocate(size).put(Array.tabulate[Byte](size)(x => x.toByte))
@@ -304,6 +307,8 @@ class ConnectionManagerSuite extends SparkFunSuite {
     // Future should throw IOException in 30 sec.
     // Otherwise TimeoutExcepton is thrown from Await.result.
     // We expect TimeoutException is not thrown.
+    //Future应该在30秒内抛出IOException,否则TimeoutExcepton将从Await.result抛出,
+    // 我们预计不会抛出TimeoutException。
     intercept[IOException] {
       Await.result(future, (ackTimeoutS * 2) second)
     }

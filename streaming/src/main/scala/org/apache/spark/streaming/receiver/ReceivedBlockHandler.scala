@@ -91,14 +91,16 @@ private[streaming] class BlockManagerBasedBlockHandler(
       case ArrayBufferBlock(arrayBuffer) =>
         numRecords = Some(arrayBuffer.size.toLong)
         blockManager.putIterator(blockId, arrayBuffer.iterator, storageLevel,
-          tellMaster = true)
+          tellMaster = true)//tellMaster 是否将状态汇报到Master
       case IteratorBlock(iterator) =>
         val countIterator = new CountingIterator(iterator)
         val putResult = blockManager.putIterator(blockId, countIterator, storageLevel,
+          //tellMaster 是否将状态汇报到Master
           tellMaster = true)
         numRecords = countIterator.count
         putResult
       case ByteBufferBlock(byteBuffer) =>
+        //tellMaster 是否将状态汇报到Master
         blockManager.putBytes(blockId, byteBuffer, storageLevel, tellMaster = true)
       case o =>
         throw new SparkException(
@@ -208,6 +210,7 @@ private[streaming] class WriteAheadLogBasedBlockHandler(
     // 存储块在块管理器中
     val storeInBlockManagerFuture = Future {
       val putResult =
+      //tellMaster 是否将状态汇报到Master
         blockManager.putBytes(blockId, serializedBlock, effectiveStorageLevel, tellMaster = true)
       if (!putResult.map { _._1 }.contains(blockId)) {
         throw new SparkException(

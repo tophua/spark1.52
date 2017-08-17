@@ -457,6 +457,10 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
     *
    * Return whether put was successful, along with the blocks dropped in the process.
    * 返回是否成功,以及在进程中删除的块。
+    *
+    * 主要内容会检查当前的内存是否可以容下当前的请求,如果可以,侧放入这个HashMap,期间可能会淘汰老的缓存,如果内存
+    * 超过了当前的最大内存,那么就会还回调用者,如果存储级别还有Disk,那么会将当前的数据通过DiskStore写入Disk,否则缓存将不会被持久化,下次用
+    * 的话重新计算.
    */
   private def tryToPut(
       blockId: BlockId,

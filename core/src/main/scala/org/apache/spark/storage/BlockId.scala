@@ -63,16 +63,18 @@ case class RDDBlockId(rddId: Int, splitIndex: Int) extends BlockId {
 // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getBlockData().
 @DeveloperApi
 case class ShuffleBlockId(shuffleId: Int, mapId: Int, reduceId: Int) extends BlockId {
-  //ShuffleBlockId的格式如下
+  //ShuffleBlockId的格式如下,//mapId对应RDD的partionsID
   override def name: String = "shuffle_" + shuffleId + "_" + mapId + "_" + reduceId
 }
 
 @DeveloperApi
+//mapId对应RDD的partionsID
 case class ShuffleDataBlockId(shuffleId: Int, mapId: Int, reduceId: Int) extends BlockId {
   override def name: String = "shuffle_" + shuffleId + "_" + mapId + "_" + reduceId + ".data"
 }
 
 @DeveloperApi
+//mapId对应RDD的partionsID
 case class ShuffleIndexBlockId(shuffleId: Int, mapId: Int, reduceId: Int) extends BlockId {
   override def name: String = "shuffle_" + shuffleId + "_" + mapId + "_" + reduceId + ".index"
 }
@@ -129,10 +131,15 @@ object BlockId {
   def apply(id: String): BlockId = id match {
     case RDD(rddId, splitIndex) =>
       RDDBlockId(rddId.toInt, splitIndex.toInt)
+    //mapId对应RDD的partionsID
     case SHUFFLE(shuffleId, mapId, reduceId) =>
+      //mapId对应RDD的partionsID
       ShuffleBlockId(shuffleId.toInt, mapId.toInt, reduceId.toInt)
+    //mapId对应RDD的partionsID
     case SHUFFLE_DATA(shuffleId, mapId, reduceId) =>
+      //mapId对应RDD的partionsID
       ShuffleDataBlockId(shuffleId.toInt, mapId.toInt, reduceId.toInt)
+    //mapId对应RDD的partionsID
     case SHUFFLE_INDEX(shuffleId, mapId, reduceId) =>
       ShuffleIndexBlockId(shuffleId.toInt, mapId.toInt, reduceId.toInt)
     case BROADCAST(broadcastId, field) =>

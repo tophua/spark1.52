@@ -173,7 +173,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     //使用隐式转化
     //implicit def StringToBlockId(value: String): BlockId = new TestBlockId(value)
     store.putSingle("a2", a2, StorageLevel.MEMORY_ONLY)
-    //告诉Master
+    //tellMaster 是否将状态汇报到Master
     store.putSingle("a3", a3, StorageLevel.MEMORY_ONLY, tellMaster = false)
 
     // Checking whether blocks are in memory
@@ -206,7 +206,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
   test("master + 2 managers interaction") {//主节点+ 2管理合作
     store = makeBlockManager(2000, "exec1")
     store2 = makeBlockManager(2000, "exec2")
-    //获得同等BlockManagerId
+    //获得其他相同的BlockManagerId
     val peers = master.getPeers(store.blockManagerId)
     assert(peers.size === 1, "master did not return the other manager as a peer")
     assert(peers.head === store2.blockManagerId, "peer returned by master is not the other manager")
@@ -231,6 +231,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     //把A1,A2和A3存储内存中,只有A1和A2告诉master
     store.putSingle("a1-to-remove", a1, StorageLevel.MEMORY_ONLY)
     store.putSingle("a2-to-remove", a2, StorageLevel.MEMORY_ONLY)
+    //tellMaster 是否将状态汇报到Master
     store.putSingle("a3-to-remove", a3, StorageLevel.MEMORY_ONLY, tellMaster = false)
 
     // Checking whether blocks are in memory and memory size
@@ -432,6 +433,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
       master.removeExecutor(store.blockManagerId.executorId)
       val t1 = new Thread {
         override def run() {
+          //tellMaster 是否将状态汇报到Master
           store.putIterator("a2", a2.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
         }
       }
@@ -465,8 +467,11 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val list2 = List(new Array[Byte](500), new Array[Byte](1000), new Array[Byte](1500))
     val list1SizeEstimate = SizeEstimator.estimate(list1.iterator.toArray)
     val list2SizeEstimate = SizeEstimator.estimate(list2.iterator.toArray)
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list1", list1.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list2memory", list2.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list2disk", list2.iterator, StorageLevel.DISK_ONLY, tellMaster = true)
     val list1Get = store.get("list1")
     assert(list1Get.isDefined, "list1 expected to be in store")
@@ -699,6 +704,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val list1 = List(new Array[Byte](2000), new Array[Byte](2000))
     val list2 = List(new Array[Byte](2000), new Array[Byte](2000))
     val list3 = List(new Array[Byte](2000), new Array[Byte](2000))
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list1", list1.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     store.putIterator("list2", list2.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     store.putIterator("list3", list3.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
@@ -710,6 +716,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.get("list2").isDefined, "list2 was not in store")
     assert(store.get("list2").get.data.size === 2)
     // At this point list2 was gotten last, so LRU will getSingle rid of list3
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list1", list1.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(store.get("list1").isDefined, "list1 was not in store")
     assert(store.get("list1").get.data.size === 2)
@@ -726,8 +733,10 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     val list4 = List(new Array[Byte](2000), new Array[Byte](2000))
     // First store list1 and list2, both in memory, and list3, on disk only
     //第一个存储列表1和列表2,都在内存中,list3只在磁盘上
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list1", list1.iterator, StorageLevel.MEMORY_ONLY_SER, tellMaster = true)
     store.putIterator("list2", list2.iterator, StorageLevel.MEMORY_ONLY_SER, tellMaster = true)
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list3", list3.iterator, StorageLevel.DISK_ONLY, tellMaster = true)
     val listForSizeEstimate = new ArrayBuffer[Any]
     listForSizeEstimate ++= list1.iterator
@@ -748,6 +757,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     assert(store.get("list3").get.data.size === 2)
     // Now let's add in list4, which uses both disk and memory; list1 should drop out
     //现在让我们添加在list4,它使用磁盘和内存,list1应该退出
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list4", list4.iterator, StorageLevel.MEMORY_AND_DISK_SER, tellMaster = true)
     assert(store.get("list1") === None, "list1 was in store")
     assert(store.get("list2").isDefined, "list2 was not in store")
@@ -922,6 +932,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // 1 updated block (i.e. list1)
     //1 更新块(i.e. list1)
     val updatedBlocks1 =
+    //tellMaster 是否将状态汇报到Master
       store.putIterator("list1", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(updatedBlocks1.size === 1)
     assert(updatedBlocks1.head._1 === TestBlockId("list1"))
@@ -930,6 +941,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // 1 updated block (i.e. list2)
     //1 更新块(i.e. list2)
     val updatedBlocks2 =
+    //tellMaster 是否将状态汇报到Master
       store.putIterator("list2", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     assert(updatedBlocks2.size === 1)
     assert(updatedBlocks2.head._1 === TestBlockId("list2"))
@@ -938,6 +950,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // 2 updated blocks - list1 is kicked out of memory while list3 is added
     //2 更新块- list1踢出内存而list3添加
     val updatedBlocks3 =
+    //tellMaster 是否将状态汇报到Master
       store.putIterator("list3", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(updatedBlocks3.size === 2)
     updatedBlocks3.foreach { case (id, status) =>
@@ -952,6 +965,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // 2 updated blocks - list2 is kicked out of memory (but put on disk) while list4 is added
     //2 更新块-ist2踢出内存(但放在磁盘上)而list4添加
     val updatedBlocks4 =
+    //tellMaster 是否将状态汇报到Master
       store.putIterator("list4", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(updatedBlocks4.size === 2)
     updatedBlocks4.foreach { case (id, status) =>
@@ -967,6 +981,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // No updated blocks - list5 is too big to fit in store and nothing is kicked out
     //没有更新的块-列表5太大,适合在存储并没有踢出
     val updatedBlocks5 =
+    //tellMaster 是否将状态汇报到Master
       store.putIterator("list5", bigList.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     assert(updatedBlocks5.size === 0)
 
@@ -994,6 +1009,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // Tell master. By LRU, only list2 and list3 remains.
     //告诉主人,通过LRU,只有清单和目录3仍然。
     store.putIterator("list1", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list2", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     store.putIterator("list3", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
 
@@ -1011,6 +1027,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
 
     // This time don't tell master and see what happens. By LRU, only list5 and list6 remains.
     //这一次不要调用主节点,看看会发生什么,通过LRU,只有列表6和list6仍然保留
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list4", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = false)
     store.putIterator("list5", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
     store.putIterator("list6", list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = false)
@@ -1037,6 +1054,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
 
     // insert some blocks
     //插入块
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("list1", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     store.putIterator("list2", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
     store.putIterator("list3", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
@@ -1051,6 +1069,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
     // insert some more blocks
       //插入一些块
     store.putIterator("newlist1", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = true)
+    //tellMaster 是否将状态汇报到Master
     store.putIterator("newlist2", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
     store.putIterator("newlist3", list.iterator, StorageLevel.MEMORY_AND_DISK, tellMaster = false)
 
@@ -1063,6 +1082,7 @@ class BlockManagerSuite extends SparkFunSuite with Matchers with BeforeAndAfterE
 
     val blockIds = Seq(RDDBlockId(1, 0), RDDBlockId(1, 1), RDDBlockId(2, 0))
     blockIds.foreach { blockId =>
+      //tellMaster 是否将状态汇报到Master
       store.putIterator(blockId, list.iterator, StorageLevel.MEMORY_ONLY, tellMaster = true)
     }
     val matchedBlockIds = store.master.getMatchingBlockIds(_ match {

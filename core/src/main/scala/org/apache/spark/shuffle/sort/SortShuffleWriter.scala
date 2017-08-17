@@ -29,7 +29,7 @@ import org.apache.spark.util.collection.ExternalSorter
 private[spark] class SortShuffleWriter[K, V, C](
     shuffleBlockResolver: IndexShuffleBlockResolver,
     handle: BaseShuffleHandle[K, V, C],
-    mapId: Int,
+    mapId: Int,//对应RDD的partionsID
     context: TaskContext)
   extends ShuffleWriter[K, V] with Logging {
 
@@ -100,11 +100,13 @@ private[spark] class SortShuffleWriter[K, V, C](
     val output = shuffleBlockResolver.getDataFile(dep.shuffleId, mapId)
     //获取或创建临时数据文件
     val tmp = Utils.tempFileWith(output)    
-    //blockId和outputFile的文件名生成算法一样,传入的参数也一样,所以blockId和outputFile的文件名相同 
+    //blockId和outputFile的文件名生成算法一样,传入的参数也一样,所以blockId和outputFile的文件名相同
+    //mapId对应RDD的partionsID
     val blockId = ShuffleBlockId(dep.shuffleId, mapId, IndexShuffleBlockResolver.NOOP_REDUCE_ID)
     //将中间结果持久化,返回中间结果存储的长度
     val partitionLengths = sorter.writePartitionedFile(blockId, context, tmp)
-    //将Shuffle map后Stage2每个partition在outputFile的起始地址记录到index索引文件中 
+    //将Shuffle map后Stage2每个partition在outputFile的起始地址记录到index索引文件中
+    //mapId对应RDD的partionsID
     shuffleBlockResolver.writeIndexFileAndCommit(dep.shuffleId, mapId, partitionLengths, tmp)
     //mapStatus是ShuffleMapTask的返回值 
     mapStatus = MapStatus(blockManager.shuffleServerId, partitionLengths)
@@ -125,6 +127,7 @@ private[spark] class SortShuffleWriter[K, V, C](
       } else {
         // The map task failed, so delete our output data.
         //map任务失败,删除输出文件
+        //mapId对应RDD的partionsID
         shuffleBlockResolver.removeDataByMap(dep.shuffleId, mapId)
         return None
       }
