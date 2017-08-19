@@ -25,13 +25,17 @@ import io.netty.buffer.ByteBuf;
 import org.apache.spark.network.protocol.Encodable;
 import org.apache.spark.network.protocol.Encoders;
 
-/** Contains all configuration necessary for locating the shuffle files of an executor. */
+/** Contains all configuration necessary for locating the shuffle files of an executor.
+ * 包含定位执行器的随机文件所需的所有配置*/
 public class ExecutorShuffleInfo implements Encodable {
-  /** The base set of local directories that the executor stores its shuffle files in. */
+  /** The base set of local directories that the executor stores its shuffle files in.
+   * 执行器存储其随机播放文件的本地目录的基本集*/
   public final String[] localDirs;
-  /** Number of subdirectories created within each localDir. */
+  /** Number of subdirectories created within each localDir.
+   * 每个localDir中创建的子目录数*/
   public final int subDirsPerLocalDir;
-  /** Shuffle manager (SortShuffleManager or HashShuffleManager) that the executor is using. */
+  /** Shuffle manager (SortShuffleManager or HashShuffleManager) that the executor is using.
+   *Shuffle管理器(SortShuffleManager或HashShuffleManager),执行器正在使用它*/
   public final String shuffleManager;
 
   public ExecutorShuffleInfo(String[] localDirs, int subDirsPerLocalDir, String shuffleManager) {

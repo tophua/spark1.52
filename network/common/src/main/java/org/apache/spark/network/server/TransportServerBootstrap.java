@@ -31,9 +31,9 @@ public interface TransportServerBootstrap {
    * Customizes the channel to include new features, if needed.
    * 如果需要,定制通道以包含新功能
    *
-   * @param channel The connected channel opened by the client.
-   * @param rpcHandler The RPC handler for the server.
-   * @return The RPC handler to use for the channel.
+   * @param channel The connected channel opened by the client.打开客户端的连接通道
+   * @param rpcHandler The RPC handler for the server.服务器的RPC处理程序
+   * @return The RPC handler to use for the channel.用于通道的RPC处理程序
    */
   RpcHandler doBootstrap(Channel channel, RpcHandler rpcHandler);
 }

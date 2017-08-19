@@ -26,6 +26,8 @@ import static org.apache.spark.network.shuffle.protocol.BlockTransferMessage.Typ
 /**
  * Identifier for a fixed number of chunks to read from a stream created by an "open blocks"
  * message. This is used by {@link org.apache.spark.network.shuffle.OneForOneBlockFetcher}.
+ * 用于从通过“开放块”消息创建的流读取固定数量的块的标识符,
+ * 这被{@link org.apache.spark.network.shuffle.OneForOneBlockFetcher}使用
  */
 public class StreamHandle extends BlockTransferMessage {
   public final long streamId;

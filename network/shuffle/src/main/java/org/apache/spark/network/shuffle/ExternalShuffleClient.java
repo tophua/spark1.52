@@ -131,10 +131,11 @@ public class ExternalShuffleClient extends ShuffleClient {
    * inform the shuffle server about where and how we store our shuffle files.
    * 将此执行器注册到外部随机服务器,此注册是必须通知洗牌服务器关于我们如何存储我们的随机播放文件,
    *
-   * @param host Host of shuffle server.
+   * @param host Host of shuffle server.主机的洗牌服务器
    * @param port Port of shuffle server.
-   * @param execId This Executor's id.
+   * @param execId This Executor's id.这个执行者的id
    * @param executorInfo Contains all info necessary for the service to find our shuffle files.
+   *                     包含服务所需的所有信息,以查找我们的随机shuffle文件
    */
   public void registerWithShuffleServer(
       String host,

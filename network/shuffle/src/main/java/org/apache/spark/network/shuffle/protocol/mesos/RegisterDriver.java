@@ -28,6 +28,7 @@ import static org.apache.spark.network.shuffle.protocol.BlockTransferMessage.Typ
 
 /**
  * A message sent from the driver to register with the MesosExternalShuffleService.
+ * 从驱动程序发送的消息到MesosExternalShuffleService注册
  */
 public class RegisterDriver extends BlockTransferMessage {
   private final String appId;

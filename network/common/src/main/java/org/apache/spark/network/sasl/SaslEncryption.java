@@ -56,6 +56,7 @@ class SaslEncryption {
    * @param backend The SASL backend.
    * @param maxOutboundBlockSize Max size in bytes of outgoing encrypted blocks, to control
    *                             memory usage.
+   *                             输出加密块的最大大小(以字节为单位),以控制内存使用
    */
   static void addToChannel(
       Channel channel,

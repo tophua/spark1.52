@@ -28,19 +28,21 @@ import org.apache.spark.network.protocol.Encoders;
 import static org.apache.spark.network.shuffle.protocol.BlockTransferMessage.Type;
 
 
-/** Request to upload a block with a certain StorageLevel. Returns nothing (empty byte array). */
+/** Request to upload a block with a certain StorageLevel. Returns nothing (empty byte array).
+ * 请求上传具有某个StorageLevel的块,不返回(空字节数组)*/
 public class UploadBlock extends BlockTransferMessage {
   public final String appId;
   public final String execId;
   public final String blockId;
   // TODO: StorageLevel is serialized separately in here because StorageLevel is not available in
   // this package. We should avoid this hack.
+    //TODO：StorageLevel在这里是单独序列化的,因为StorageLevel在此包中不可用,我们应该避免这个黑客,
   public final byte[] metadata;
   public final byte[] blockData;
 
   /**
-   * @param metadata Meta-information about block, typically StorageLevel.
-   * @param blockData The actual block's bytes.
+   * @param metadata Meta-information about block, typically StorageLevel.关于块的元信息,通常是StorageLevel。
+   * @param blockData The actual block's bytes.实际块的字节
    */
   public UploadBlock(
       String appId,

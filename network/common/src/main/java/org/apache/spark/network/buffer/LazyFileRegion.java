@@ -49,9 +49,9 @@ public final class LazyFileRegion extends AbstractReferenceCounted implements Fi
   private long numBytesTransferred = 0L;
 
   /**
-   * @param file file to transfer.
-   * @param position start position for the transfer.
-   * @param count number of bytes to transfer starting from position.
+   * @param file file to transfer.文件传输
+   * @param position start position for the transfer.开始转移的位置
+   * @param count number of bytes to transfer starting from position.从位置开始传输的字节数
    */
   public LazyFileRegion(File file, long position, long count) {
     this.file = file;

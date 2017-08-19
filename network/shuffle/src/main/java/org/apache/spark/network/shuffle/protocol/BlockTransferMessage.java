@@ -51,6 +51,7 @@ public abstract class BlockTransferMessage implements Encodable {
   }
 
   // NB: Java does not support static methods in interfaces, so we must put this in a static class.
+    //注意：Java不支持接口中的静态方法,所以我们必须把它放在一个静态类中
   public static class Decoder {
     /** 
      * Deserializes the 'type' byte followed by the message itself. 
@@ -70,9 +71,11 @@ public abstract class BlockTransferMessage implements Encodable {
     }
   }
 
-  /** Serializes the 'type' byte followed by the message itself. */
+  /** Serializes the 'type' byte followed by the message itself.
+   * 序列化“类型”字节,后跟消息本身*/
   public byte[] toByteArray() {
     // Allow room for encoded message, plus the type byte
+      //允许编码消息的空间,加上类型字节
     ByteBuf buf = Unpooled.buffer(encodedLength() + 1);
     buf.writeByte(type().id);
     encode(buf);

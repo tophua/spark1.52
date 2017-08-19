@@ -26,6 +26,7 @@ public interface SecretKeyHolder {
    * Gets an appropriate SASL User for the given appId.
    * 为给定的appId获取适当的SASL用户
    * @throws IllegalArgumentException if the given appId is not associated with a SASL user.
+   * 如果给定的appId不与SASL用户相关联
    */
   String getSaslUser(String appId);
 
@@ -33,6 +34,7 @@ public interface SecretKeyHolder {
    * Gets an appropriate SASL secret key for the given appId.
    * 为给定的appId获取适当的SASL密钥
    * @throws IllegalArgumentException if the given appId is not associated with a SASL secret key.
+   * 如果给定的appId不与SASL密钥相关联
    */
   String getSecretKey(String appId);
 }
