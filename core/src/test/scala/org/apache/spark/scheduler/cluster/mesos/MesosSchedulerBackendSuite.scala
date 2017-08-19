@@ -41,7 +41,7 @@ import org.apache.spark.scheduler.{LiveListenerBus, SparkListenerExecutorAdded,
 import org.apache.spark.{LocalSparkContext, SparkConf, SparkContext, SparkFunSuite}
 
 class MesosSchedulerBackendSuite extends SparkFunSuite with LocalSparkContext with MockitoSugar {
-
+  //对ExecutorInfo使用配置的mesosExecutor.cores
   test("Use configured mesosExecutor.cores for ExecutorInfo") {
     val mesosExecutorCores = 3
     val conf = new SparkConf
@@ -73,7 +73,7 @@ class MesosSchedulerBackendSuite extends SparkFunSuite with LocalSparkContext wi
 
     assert(cpus === mesosExecutorCores)
   }
-
+  //正确检查spark-class位置
   test("check spark-class location correctly") {
     val conf = new SparkConf
     conf.set("spark.mesos.executor.home" , "/mesos-home")
@@ -108,7 +108,7 @@ class MesosSchedulerBackendSuite extends SparkFunSuite with LocalSparkContext wi
    // assert(executorInfo1.getCommand.getValue ===
     //  s"cd test-app-1*;  ./bin/spark-class ${classOf[MesosExecutorBackend].getName}")
   }
-
+  //Spark docker属性正确填充DockerInfo消息
   test("spark docker properties correctly populate the DockerInfo message") {
     val taskScheduler = mock[TaskSchedulerImpl]
 
@@ -241,6 +241,7 @@ class MesosSchedulerBackendSuite extends SparkFunSuite with LocalSparkContext wi
     assert(taskInfo.getSlaveId.getValue.equals("s1"))
 
     // Unwanted resources offered on an existing node. Make sure they are declined
+    //现有节点上提供的不需要的资源,确保他们被拒绝
     val mesosOffers2 = new java.util.ArrayList[Offer]
     mesosOffers2.add(createOffer(1, minMem, minCpu))
     reset(taskScheduler)
@@ -252,7 +253,7 @@ class MesosSchedulerBackendSuite extends SparkFunSuite with LocalSparkContext wi
     backend.resourceOffers(driver, mesosOffers2)
     verify(driver, times(1)).declineOffer(mesosOffers2.get(0).getId)
   }
-
+  //可以处理多个角色
   test("can handle multiple roles") {
     val driver = mock[SchedulerDriver]
     val taskScheduler = mock[TaskSchedulerImpl]

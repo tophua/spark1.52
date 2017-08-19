@@ -166,6 +166,7 @@ class CoarseMesosSchedulerBackendSuite extends SparkFunSuite
       anyObject[Filters])
 
     // Simulate task killed, executor no longer running
+    //模拟任务被杀死,执行者不再运行
     val status = TaskStatus.newBuilder()
       .setTaskId(TaskID.newBuilder().setValue("0").build())
       .setSlaveId(SlaveID.newBuilder().setValue("s1").build())

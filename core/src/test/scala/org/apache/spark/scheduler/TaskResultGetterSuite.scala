@@ -38,6 +38,7 @@ import org.apache.spark.util.{MutableURLClassLoader, Utils}
  * 从BlockManager删除TaskResult,删除之前给一个正常的taskresultgetter
  * Used to test the case where a BlockManager evicts the task result (or dies) before the
  * TaskResult is retrieved.
+  * 用于测试BlockManager在检索到TaskResult之前排除任务结果(或死机)的情况
  */
 class ResultDeletingTaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedulerImpl)
   extends TaskResultGetter(sparkEnv, scheduler) {
@@ -55,6 +56,7 @@ class ResultDeletingTaskResultGetter(sparkEnv: SparkEnv, scheduler: TaskSchedule
         case IndirectTaskResult(blockId, size) =>
           sparkEnv.blockManager.master.removeBlock(blockId)
           // removeBlock is asynchronous. Need to wait it's removed successfully
+          //removeBlock是异步的,需要等待它成功删除
           try {
             eventually(timeout(3 seconds), interval(200 milliseconds)) {
               assert(!sparkEnv.blockManager.master.contains(blockId))
@@ -137,9 +139,12 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
    * This test compiles a jar containing an exception and tests that when it is thrown on the
    * executor, enqueueFailedTask can correctly deserialize the failure and identify the thrown
    * exception as the cause.
-	 * 这个测试编译包含一个异常和测试,当它执行器被抛出异常
+    *
+    * 此测试编译包含异常的jar,并测试在执行器上抛出的值时,enqueueFailedTask可以正确地反序列化失败,并将引发的异常识别为原因
+	 *
    * Before this fix, enqueueFailedTask would throw a ClassNotFoundException when deserializing
-   * the exception, resulting in an UnknownReason for the TaskEndResult.   
+   * the exception, resulting in an UnknownReason for the TaskEndResult.
+    * 在此修复之前,enqueueFailedTask在反序列化异常时会抛出ClassNotFoundException,从而导致TaskEndResult的UnknownReason
    */
   //反序列化的类加载器正确失败任务
   test("failed task deserialized with the correct classloader (SPARK-11195)") {

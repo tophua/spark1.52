@@ -110,9 +110,10 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
   /**
    * This checks the situation where we have interleaved reads from
    * different sources. Currently, we only accumulate fron the first
-   * 这检查的情况下,我们有交叉读取不同来源
    * read method we find in the task. This test uses cartesian to create
    * the interleaved reads.
+    * 这检查了我们从不同来源交错读取的情况,目前,我们只积累了我们在任务中找到的第一个读取方法,
+    * 此测试使用笛卡尔创建交错读取
    *
    * Once https://issues.apache.org/jira/browse/SPARK-5225 is fixed
    * this test should break.
@@ -270,6 +271,7 @@ class InputOutputMetricsSuite extends SparkFunSuite with SharedSparkContext
     // Computing the amount of bytes read for a cartesian operation is a little involved.
     //计算一个笛卡尔运算所读取的字节数
     // Cartesian interleaves reads between two partitions eg. p1 and p2.
+    //笛卡尔交织在两个分区之间读取,例如: p1和p2
     // Here are the steps:
     //  1) First it creates an iterator for p1 首先创建一个迭代器P1
     //  2) Creates an iterator for p2 创建一个迭代器为P2
@@ -423,6 +425,7 @@ class OldCombineTextRecordReaderWrapper(
 
 /**
  * Hadoop 2 has a version of this, but we can't use it for backwards compatibility
+  *Hadoop 2有一个版本,但是我们不能使用它来向后兼容
  */
 class NewCombineTextInputFormat extends NewCombineFileInputFormat[LongWritable, Text] {
   def createRecordReader(split: NewInputSplit, context: TaskAttemptContext)

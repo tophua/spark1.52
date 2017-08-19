@@ -313,7 +313,7 @@ class DAGSchedulerSuite
     assert(sparkListener.stageByOrderOfExecution.length === 2)
     assert(sparkListener.stageByOrderOfExecution(0) < sparkListener.stageByOrderOfExecution(1))
   }
-/*
+
   test("zero split job") {//RDD零分隔的Job
     var numResults = 0
     val fakeListener = new JobListener() {//Job监听
@@ -323,7 +323,7 @@ class DAGSchedulerSuite
     val jobId = submit(new MyRDD(sc, 0, Nil), Array(), listener = fakeListener)
     assert(numResults === 0)
     cancel(jobId)
-  }*/
+  }
 
   test("run trivial job") {//运行无价值的工作
     submit(new MyRDD(sc, 1, Nil), Array(0))
@@ -374,7 +374,7 @@ class DAGSchedulerSuite
   /**
    * This test ensures that if a particular RDD is cached, RDDs earlier in the dependency chain   
    * are not computed. It constructs the following chain of dependencies:
-   * 这个测试以确保如果某RDD缓存,较早的RDD在依赖链中没有计算,它构建了下面的依赖链：
+   * 此测试确保如果缓存特定RDD,则不会计算依赖关系链中较早的RDD,它构建了以下依赖链：
    * +---+ shuffle +---+    +---+    +---+
    * | A |<--------| B |<---| C |<---| D |
    * +---+         +---+    +---+    +---+
@@ -384,8 +384,13 @@ class DAGSchedulerSuite
    * reads the shuffled data from RDD A. This test ensures that if C is cached, the scheduler
    * doesn't perform a shuffle, and instead computes the result using a single ResultStage
    * that reads C's cached data.
+    *
+    * 这里,B通过执行随机播放从A派生,C对B有一对一的依赖性,D类似地对C有一对一的依赖性,
+    * 如果没有RDD被缓存,则该组RDD将导致两个阶段的工作：
+    * 一个ShuffleMapStage和一个从RDD A读取混洗数据的ResultStage,此测试确保如果C被缓存,则调度程序不执行shuffled,
+    * 而是使用单个ResultStage来计算结果它读取C的缓存数据。
    */
-  //应该考虑所有父RDDS”缓存状态
+  //getMissingParentStages应该考虑所有祖先RDD的缓存状态
   test("getMissingParentStages should consider all ancestor RDDs' cache statuses") {
     val rddA = new MyRDD(sc, 1, Nil)
     val rddB = new MyRDD(sc, 1, List(new ShuffleDependency(rddA, null)))
@@ -661,6 +666,8 @@ class DAGSchedulerSuite
     // NOTE: the actual ResubmitFailedStages may get called at any time during this, but it
     // shouldn't effect anything -- our calling it just makes *SURE* it gets called between the
     // desired event and our check.
+    //注意：实际的ResubmitFailedStages可能会在此期间的任何时间被调用,
+    //但它不应该影响任何东西 - 我们调用它只是使*SURE *它在所需的事件和我们的支票之间调用。
     runEvent(ResubmitFailedStages)
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(countSubmittedMapStageAttempts() === 2)
@@ -908,6 +915,8 @@ class DAGSchedulerSuite
     // even though we have cancelled that job and are now running it because of job2, we haven't
     // updated the TaskSet's properties.  Changing the properties to "job2" is likely the more
     // correct behavior.
+    //注意：下一个断言不一定是“期望”的行为; 只是记录当前的行为,我们已经根据job1提交了第0阶段的TaskSet,但是
+    //即使我们已经取消了该作业,并且由于job2而正在运行它,我们还没有更新TaskSet的属性,将属性更改为“job2”可能是更正确的行为。
     //taskset优先运行阶段,以“job1”为activejob
     val job1Id = 0  // TaskSet priority for Stages run with "job1" as the ActiveJob
     checkJobPropertiesAndPriority(taskSets(0), "job1", job1Id)
@@ -928,6 +937,7 @@ class DAGSchedulerSuite
     // The next check is the key for SPARK-6880.  For the stage which was shared by both job1 and
     // job2 but never had any tasks submitted for job1, the properties of job2 are now used to run
     // the stage.
+    //下一个检查是SPARK-6880的关键,对于job1和job2共享的阶段,但没有为job1提交任何任务,job2的属性现在用于运行阶段
     checkJobPropertiesAndPriority(taskSets(1), "job2", 1)
 
     complete(taskSets(1), Seq((Success, makeMapStatus("hostA", 1))))
@@ -943,17 +953,18 @@ class DAGSchedulerSuite
    * Makes sure that tasks for a stage used by multiple jobs are submitted with the properties of a
    * later, active job if they were previously run under a job that is no longer active, even when
    * there are fetch failures
+    * 确保多个作业使用的阶段的任务如果先前运行在不再处于活动状态的作业下,即使提交失败,也会将后续活动作业的属性提交
    */
   //两个工作阶段使用的阶段,一些获取失败,第一个Job不再活跃
   test("stage used by two jobs, some fetch failures, and the first job no longer active " +
     "(SPARK-6880)") {
     val shuffleDep1 = launchJobsThatShareStageAndCancelFirst()
-    //askset优先运行阶段,以"job2"为activejob
+    //使用“job2”作为ActiveJob运行的阶段的TaskSet优先级
     val job2Id = 1  // TaskSet priority for Stages run with "job2" as the ActiveJob
 
     // lets say there is a fetch failure in this task set, which makes us go back and   
     // run stage 0, attempt 1
-    //可以说在这个任务集里有一个获取失败的,这使我们回到和运行阶段0,尝试1
+    //让我们说这个任务集中有一个提取失败,这使我们回到运行阶段0,尝试1
     complete(taskSets(1), Seq(
       (FetchFailed(makeBlockManagerId("hostA"), shuffleDep1.shuffleId, 0, 0, "ignored"), null)))
     scheduler.resubmitFailedStages()
@@ -989,6 +1000,7 @@ class DAGSchedulerSuite
     runEvent(ExecutorLost("exec-hostA"))
     // DAGScheduler will immediately resubmit the stage after it appears to have no pending tasks
     // rather than marking it is as failed and waiting.
+    //DAGScheduler将立即重新提交阶段,因为它似乎没有挂起的任务,而不是标记为失败并等待
     complete(taskSets(0), Seq(
         (Success, makeMapStatus("hostA", 1)),
        (Success, makeMapStatus("hostB", 1))))
@@ -1230,6 +1242,7 @@ class DAGSchedulerSuite
       HashSet(makeBlockManagerId("hostA")))
 
     // Reducer should run where RDD 2 has preferences, even though though it also has a shuffle dep
+    //Reducer应运行RDD 2具有偏好,即使它也有一个洗牌
     val reduceTaskSet = taskSets(1)
     assertLocations(reduceTaskSet, Seq(Seq("hostB")))
     complete(reduceTaskSet, Seq((Success, 42)))
@@ -1298,8 +1311,10 @@ class DAGSchedulerSuite
 
   // Nothing in this test should break if the task info's fields are null, but
   // OutputCommitCoordinator requires the task info itself to not be null.
+  //如果任务信息的字段为空,则此测试中的任何内容都不会中断,但OutputCommitCoordinator要求任务信息本身不为空
   private def createFakeTaskInfo(): TaskInfo = {
     val info = new TaskInfo(0, 0, 0, 0L, "", "", TaskLocality.ANY, false)
+    ////以防止JobProgressListener中的虚假错误
     info.finishTime = 1  // to prevent spurious errors in JobProgressListener
     info
   }

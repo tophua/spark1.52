@@ -33,16 +33,21 @@ import org.apache.spark.ui.SparkUI
 
 /**
  * A collection of tests against the historyserver, including comparing responses from the json
- * 对历史服务器的测试的集合,如果添加了新的端点/参数,应添加到这个测试套件
  * metrics api to a set of known "golden files".  If new endpoints / parameters are added,
  * cases should be added to this test suite.  The expected outcomes can be genered by running
  * the HistoryServerSuite.main.  Note that this will blindly generate new expectation files matching
  * the current behavior -- the developer must verify that behavior is correct.
+  *
+  * 针对历史服务器的一系列测试,包括将来自json metrics api的响应与一组已知的“黄金文件”进行比较。
+  * 如果添加了新的端点/参数.则应将案例添加到此测试套件中.可以通过运行HistoryServerSuite.main来预测结果,
+  * 请注意,这将盲目生成与当前行为匹配的新期望文件 - 开发人员必须验证该行为是否正确。
  *
  * Similarly, if the behavior is changed, HistoryServerSuite.main can be run to update the
  * 同样地,如果行为发生了改变,可以运行historyserversuite.main更新的期望值,然而,在一般来说,这应该是极端谨慎
  * expectations.  However, in general this should be done with extreme caution, as the metrics
  * are considered part of Spark's public api.
+  * 同样,如果行为发生变化,可以运行HistoryServerSuite.main来更新期望,然而,一般来说,这应该非常小心,
+  * 因为这些指标被认为是Spark公共api的一部分
  */
 class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers with MockitoSugar
   with JsonTestUtils {
@@ -238,6 +243,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
     val badStageId2 = getContentAndCode("applications/local-1422981780767/stages/flimflam")
     badStageId2._1 should be (HttpServletResponse.SC_NOT_FOUND)//HTTP 状态码 404:Not Found
     // will take some mucking w/ jersey to get a better error msg in this case
+    //在这种情况下,会采取一些捣蛋汗来获得更好的错误
 
     val badQuantiles = getContentAndCode(
       "applications/local-1430917381534/stages/0/0/taskSummary?quantiles=foo,0.1")
@@ -297,8 +303,8 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
 object HistoryServerSuite {
   def main(args: Array[String]): Unit = {
     // generate the "expected" results for the characterization tests.  Just blindly assume the
-    //测试生成描述的“预期”结果,
     // current behavior is correct, and write out the returned json to the test/resource files
+    //测试生成描述的“预期”结果,只是盲目地假定当前行为是正确的,并将返回的json写入测试/资源文件
 
     val suite = new HistoryServerSuite
     FileUtils.deleteDirectory(suite.expRoot)//递归删除日志文件

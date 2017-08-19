@@ -241,6 +241,7 @@ class SparkSubmitSuite
    * Test whether the launch environment is correctly set up in standalone cluster mode.
    * 测试在独立的集群模式中是否正确设置启动环境
    * @param useRest whether to use the REST submission gateway introduced in Spark 1.3
+    *                是否使用在Spark 1.3中引入的REST提交网关
    */
   private def testStandaloneCluster(useRest: Boolean): Unit = {
     val clArgs = Seq(

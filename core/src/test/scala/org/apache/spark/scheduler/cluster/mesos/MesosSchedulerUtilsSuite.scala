@@ -56,7 +56,7 @@ class MesosSchedulerUtilsSuite extends SparkFunSuite with Matchers with MockitoS
     f.sparkConf.set("spark.mesos.executor.memoryOverhead", "512")
     utils.calculateTotalMemory(f.sc) shouldBe 1536
   }
-
+  //正确解析非空约束字符串
   test("parse a non-empty constraint string correctly") {
     val expectedMap = Map(
       "tachyon" -> Set("true"),
@@ -104,7 +104,7 @@ class MesosSchedulerUtilsSuite extends SparkFunSuite with Matchers with MockitoS
 
     utils.matchesAttributeRequirements(parsedConstraints, supersetConstraint) shouldBe true
   }
-
+  //对标量属性执行小于等于匹配
   test("less than equal match is performed on scalar attributes") {
     val offerAttribs = Map("gpus" -> Value.Scalar.newBuilder().setValue(3).build())
 

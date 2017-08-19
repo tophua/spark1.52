@@ -69,7 +69,7 @@ private[spark] class DiskBlockObjectWriter(
     *光标用于表示文件中的位置
    *
    * xxxxxxxx|--------|---       |
-   *         ^        ^          ^
+   *         ^        ^
    *         |        |        finalPosition
    *         |      reportedPosition
    *       initialPosition

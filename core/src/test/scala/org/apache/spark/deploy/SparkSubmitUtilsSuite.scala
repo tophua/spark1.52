@@ -157,6 +157,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
       assert(jarPath.indexOf("mydep") >= 0, "should find dependency")
     }
     // Local ivy repository with modified home
+    //本地ivy仓库与修改后的home
     val dummyIvyLocal = new File(tempIvyPath, "local" + File.separator)
     settings.setDefaultIvyUserDir(new File(tempIvyPath))
     IvyTestUtils.withRepository(main, Some(dep), Some(dummyIvyLocal), useIvyLayout = true,

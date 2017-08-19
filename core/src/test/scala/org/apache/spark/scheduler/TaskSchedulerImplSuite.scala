@@ -122,6 +122,7 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
     val taskScheduler = new TaskSchedulerImpl(sc)
     taskScheduler.initialize(new FakeSchedulerBackend)
     // Need to initialize a DAGScheduler for the taskScheduler to use for callbacks.
+    //需要初始化DAGScheduler以使taskScheduler用于回调
     val dagScheduler = new DAGScheduler(sc, taskScheduler) {
       override def taskStarted(task: Task[_], taskInfo: TaskInfo) {}
       override def executorAdded(execId: String, host: String) {}
@@ -181,6 +182,7 @@ class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with L
     val taskScheduler = new TaskSchedulerImpl(sc)
     taskScheduler.initialize(new FakeSchedulerBackend)
     // Need to initialize a DAGScheduler for the taskScheduler to use for callbacks.
+    //需要初始化DAGScheduler以使taskScheduler用于回调
     new DAGScheduler(sc, taskScheduler) {
       override def taskStarted(task: Task[_], taskInfo: TaskInfo) {}
       override def executorAdded(execId: String, host: String) {}

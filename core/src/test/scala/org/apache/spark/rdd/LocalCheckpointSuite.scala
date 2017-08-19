@@ -24,7 +24,9 @@ import org.apache.spark.storage.{RDDBlockId, StorageLevel}
 
 /**
  * Fine-grained tests for local checkpointing.
+  * 用于本地检查点的细粒度测试
  * For end-to-end tests, see CheckpointSuite.
+  * 对于端到端测试,请参阅CheckpointSuite
  */
 class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
 
@@ -47,6 +49,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
     assert(transform(StorageLevel.MEMORY_AND_DISK_2) === StorageLevel.MEMORY_AND_DISK_2)
     assert(transform(StorageLevel.MEMORY_AND_DISK_SER_2) === StorageLevel.MEMORY_AND_DISK_SER_2)
     // Off-heap is not supported and Spark should fail fast
+    //不支持堆外存储,并且Spark应该快速失败
     intercept[SparkException] {
       transform(StorageLevel.OFF_HEAP)
     }
@@ -211,6 +214,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
    * Helper method to test basic lineage truncation with caching.
    * 用缓存方法测试基本谱系截断。
    * @param rdd an RDD that is both marked for caching and local checkpointing
+    *            RDD既有缓存和本地检查点
    */
   private def testBasicLineageTruncationWithCaching[T](
       rdd: RDD[T],
@@ -276,12 +280,14 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * Helper method to test checkpointing without fully draining the iterator.
-   * 辅助方法来测试检查点没有充分引流的迭代器。
+   * 在不完全排空迭代器的情况下测试检查点的辅助方法。
    * Not all RDD actions fully consume the iterator. As a result, a subset of the partitions
    * may not be cached. However, since we want to truncate the lineage safely, we explicitly
    * ensure that *all* partitions are fully cached. This method asserts this behavior.
+    * 不是所有的行动完全消耗RDD迭代器,因此,分区的一个子集可能不被缓存。
+    * 但是,由于我们希望安全地截断血统,所以我们明确地保证所有*分区都是完全缓存的,该方法认为这种行为,
    *
-   * @param rdd a locally checkpointed RDD
+   * @param rdd a locally checkpointed RDD RDD局部检查点
    */
   private def testWithoutDrainingIterator[T](
       rdd: RDD[T],
@@ -317,6 +323,7 @@ class LocalCheckpointSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * Helper method to test whether the checkpoint blocks are found in the cache.
+    * 帮助方法检查缓存中是否发现检查点块
    *
    * @param rdd a locally checkpointed RDD
    */

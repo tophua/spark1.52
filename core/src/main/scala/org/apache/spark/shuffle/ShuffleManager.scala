@@ -23,16 +23,23 @@ import org.apache.spark.{TaskContext, ShuffleDependency}
  * Pluggable interface for shuffle systems. A ShuffleManager is created in SparkEnv on the driver
  * and on each executor, based on the spark.shuffle.manager setting. The driver registers shuffles
  * with it, and executors (or tasks running locally in the driver) can ask to read and write data.
- * Driver中的ShuffleManager负责注册Shuffle的元数据,比如Shuffle ID,map task的数量等。
- * Executor中的ShuffleManager 则负责读和写Shuffle的数据
+  *
+  * 用于洗牌系统的可插拔接口,基于spark.shuffle.manager设置,在Driver端和每个Executor上SparkEnv中创建一个ShuffleManager
+  * Driver端负责注册Shuffle的元数据,比如Shuffle ID,map task的数量,
+  * Executor端负责(或驱动程序中本地运行的任务)则负责读和写Shuffle的数据
+  *
  * NOTE: this will be instantiated by SparkEnv so its constructor can take a SparkConf and
  * boolean isDriver as parameters.
-  * 注意：这将由SparkEnv实例化，因此其构造函数可以使用SparkConf和boolean isDriver作为参数。
+  * 注意：这将由SparkEnv实例化，因此其构造函数可以使用SparkConf和boolean isDriver作为参数
+  *
+  * Driver端负责注册元数据信息,Driver中的------负责注册Shuffle的元数据
+  * Executor中的ShuffleManager 则负责读和写Shuffle的数据
  */
 private[spark] trait ShuffleManager {
   /**
    * Register a shuffle with the manager and obtain a handle for it to pass to tasks.
-   *  由Driver注册元数据信息,Driver中的------负责注册Shuffle的元数据 
+   *  由Driver注册元数据信息,Driver中的------负责注册Shuffle的元数据
+    * 向Master即(Driver)人员注册一个shuffle洗牌,并获取一个句柄让它传递给任务,
    */
   def registerShuffle[K, V, C](
       shuffleId: Int,

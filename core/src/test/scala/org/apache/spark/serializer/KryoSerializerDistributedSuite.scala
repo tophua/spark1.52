@@ -47,6 +47,7 @@ class KryoSerializerDistributedSuite extends SparkFunSuite {
 
     // Randomly mix the keys so that the join below will require a shuffle with each partition
     // sending data to multiple other partitions.
+    //随机混合键,以便下面的连接将需要与每个分区进行shuffle将数据发送到多个其他分区。
     val shuffledRDD = cachedRDD.map { case (i, o) => (i * i * i - 10 * i * i, o)}
 
     // Join the two RDDs, and force evaluation

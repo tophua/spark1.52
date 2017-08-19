@@ -36,27 +36,33 @@ import org.apache.spark.deploy.master.RecoveryState
 import org.apache.spark.util.Utils
 
 /**
- * This suite tests the fault tolerance(容错) of the Spark standalone scheduler, mainly the Master.
+ * This suite tests the fault tolerance of the Spark standalone scheduler, mainly the Master.
  * In order to mimic a real distributed cluster more closely, Docker is used.
- * 为了模拟一个真正的分布式集群,使用下列方式
- * Execute using
+ * 该套件测试了Spark独立调度程序(主要是Master)的容错能力,为了更逼真地模仿真正的分布式集群,使用Docker
+ * Execute using 执行使用
  * ./bin/spark-class org.apache.spark.deploy.FaultToleranceTest
- * 请确保环境包括以下属性
+ *
  * Make sure that that the environment includes the following properties in SPARK_DAEMON_JAVA_OPTS
  * *and* SPARK_JAVA_OPTS:
+  * 确保环境在SPARK_DAEMON_JAVA_OPTS *和* SPARK_JAVA_OPTS中包含以下属性：
+  *
  *   - spark.deploy.recoveryMode=ZOOKEEPER
  *   - spark.deploy.zookeeper.url=172.17.42.1:2181
  * Note that 172.17.42.1 is the default docker ip for the host and 2181 is the default ZK port.
- *
+ * 请注意,172.17.42.1是主机的默认docker ip,2181是默认的ZK端口
  * In case of failure, make sure to kill off prior docker containers before restarting:
  * 在失败的情况下,一定要杀死前docker容器之前重新启动
  *   docker kill $(docker ps -q)
  *
- * Unfortunately(不幸), due to the Docker dependency this suite cannot be run automatically without a
+ * Unfortunately, due to the Docker dependency this suite cannot be run automatically without a
  * working installation of Docker. In addition to having Docker, the following are assumed:
+  * 不幸的是,由于Docker依赖,如果没有Docker的工作安装,该套件将无法自动运行,除了Docker之外,还假定：
  *   - Docker can run without sudo (see http://docs.docker.io/en/latest/use/basics/)
+  *   Docker可以运行没有sudo（请参阅http://docs.docker.io/en/latest/use/basics/）
  *   - The docker images tagged spark-test-master and spark-test-worker are built from the
  *     docker/ directory. Run 'docker/spark-test/build' to generate these.
+  *     docker/图像标记了spark-test-master和spark-test-worker是从docker /目录构建的。
+  *     运行'docker / spark-test / build'来生成这些。
  */
 private object FaultToleranceTest extends App with Logging {
 
@@ -279,7 +285,7 @@ private object FaultToleranceTest extends App with Logging {
   /**
    * Asserts that the cluster is usable and that the expected masters and workers
    * are all alive in a proper configuration (e.g., only one leader).
-   * 断言预期集群是Mast和Workers可用一个适当的配置
+    * 断言群集是可用的,并且预期的masters和workers都在适当的配置中生存(例如,只有一个领导者)
    */
   private def assertValidClusterState() = {
     logInfo(">>>>> ASSERT VALID CLUSTER STATE <<<<<")
@@ -367,6 +373,7 @@ private class TestMasterInfo(val ip: String, val dockerId: DockerId, val logFile
       val liveWorkers = workers.children.filter(w => (w \ "state").extract[String] == "ALIVE")
       // Extract the worker IP from "webuiaddress" (rather than "host") because the host name
       // on containers is a weird hash instead of the actual IP address.
+      //因为容器上的主机名是一个奇怪的哈希而不是实际的IP地址,因此从“webuiaddress”(而不是“主机”)提取worker IP
       liveWorkerIPs = liveWorkers.map {
         w => (w \ "webuiaddress").extract[String].stripPrefix("http://").stripSuffix(":8081")
       }

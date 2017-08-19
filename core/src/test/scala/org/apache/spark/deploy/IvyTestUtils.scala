@@ -38,6 +38,7 @@ private[deploy] object IvyTestUtils {
   /**
    * Create the path for the jar and pom from the maven coordinate. Extension should be `jar`
    * or `pom`.
+    * 从maven坐标创建jar和pom的路径,扩展应该是`jar`或`pom`
    */
   private[deploy] def pathFromCoordinate(
       artifact: MavenCoordinate,
@@ -144,7 +145,9 @@ private[deploy] object IvyTestUtils {
     Seq(("R/pkg/R/mylib.R", source), ("R/pkg/DESCRIPTION", descFile), ("R/pkg/NAMESPACE", nameFile))
   }
 
-  /** Create a simple testable Class. */
+  /** Create a simple testable Class.
+    * 创建一个简单的可测试类
+    * */
   private def createJavaClass(dir: File, className: String, packageName: String): File = {
     val contents =
       s"""package $packageName;
@@ -178,7 +181,10 @@ private[deploy] object IvyTestUtils {
     }
   }
 
-  /** Helper method to write artifact information in the pom. */
+  /**
+    * Helper method to write artifact information in the pom.
+    * 帮助者在pom中编写工件信息
+    * */
   private def pomArtifactWriter(artifact: MavenCoordinate, tabCount: Int = 1): String = {
     var result = "\n" + "  " * tabCount + s"<groupId>${artifact.groupId}</groupId>"
     result += "\n" + "  " * tabCount + s"<artifactId>${artifact.artifactId}</artifactId>"
@@ -186,7 +192,10 @@ private[deploy] object IvyTestUtils {
     result
   }
 
-  /** Create a pom file for this artifact. */
+  /**
+    * Create a pom file for this artifact.
+    * 为此工件创建一个pom文件
+    * */
   private def createPom(
       dir: File,
       artifact: MavenCoordinate,
@@ -210,14 +219,16 @@ private[deploy] object IvyTestUtils {
     writeFile(dir, artifactName(artifact, false, ".pom"), content.trim)
   }
 
-  /** Helper method to write artifact information in the ivy.xml. */
+  /** Helper method to write artifact information in the ivy.xml.
+    * 帮助程序在ivy.xml中编写工件信息*/
   private def ivyArtifactWriter(artifact: MavenCoordinate): String = {
     s"""<dependency org="${artifact.groupId}" name="${artifact.artifactId}"
        |            rev="${artifact.version}" force="true"
        |            conf="compile->compile(*),master(*);runtime->runtime(*)"/>""".stripMargin
   }
 
-  /** Create a pom file for this artifact. */
+  /** Create a pom file for this artifact.
+    * 为此工件创建一个pom文件*/
   private def createIvyDescriptor(
       dir: File,
       artifact: MavenCoordinate,
@@ -410,7 +421,8 @@ private[deploy] object IvyTestUtils {
     }
   }
 
-  /** Deletes the test packages from the ivy cache */
+  /** Deletes the test packages from the ivy cache
+    * 从ivy缓存中删除测试包 */
   private def purgeLocalIvyCache(
       artifact: MavenCoordinate,
       dependencies: Option[Seq[MavenCoordinate]],

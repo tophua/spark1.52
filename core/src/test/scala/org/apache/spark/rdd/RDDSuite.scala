@@ -467,6 +467,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
   // Test for SPARK-2412 -- ensure that the second pass of the algorithm does not throw an exception
   //确保算法的第二遍不抛出一个异常
+  //合并RDD与局部性,首次失败
   test("coalesced RDDs with locality, fail first pass") {
     val initialPartitions = 1000
     val targetLen = 50
@@ -985,9 +986,11 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
 
   /**
    * This tests for the pathological condition in which the RDD dependency graph is cyclical.
+    * 这测试RDD依赖图是周期性的病理状况
    *
    * Since RDD is part of the public API, applications may actually implement RDDs that allow
    * such graphs to be constructed. In such cases, getNarrowAncestor should not simply hang.
+    * 由于RDD是公共API的一部分,应用程序实际上可以实现允许构建图形的RDD,在这种情况下getNarrowAncestor不应该简单地挂起
    */
   test("getNarrowAncestors with cycles") {//循环窄依赖
     val rdd1 = new CyclicalDependencyRDD[Int]

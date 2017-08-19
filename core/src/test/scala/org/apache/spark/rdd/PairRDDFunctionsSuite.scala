@@ -128,7 +128,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
       StratifiedAuxiliary.testSample(stratifiedData, samplingRate, defaultSeed, n)
     }
 
-    // vary fractionPositive
+    // vary fractionPositive 变化分数阳性
     for (fractionPositive <- List(0.1, 0.3, 0.5, 0.7, 0.9)) {
       val n = 100
       val data = sc.parallelize(1 to n, 2)
@@ -157,7 +157,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     }
   }
 
-  test("sampleByKeyExact") {
+  test("sampleByKeyExact") {//按关键字提取样本
     val defaultSeed = 1L
     //spark对于分层抽样支持两个版本sampleByKey和sampleByKeyExact。
     //它是一个根据RDD的Key-Value来抽样的功能,可以为每个key设置其被选中的概率
@@ -186,13 +186,13 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     val data = sc.parallelize(1 to n, 2)
     val stratifiedData = data.keyBy(StratifiedAuxiliary.stratifier(fractionPositive))
 
-    // vary seed
+    // vary seed 种子变化
     for (seed <- defaultSeed to defaultSeed + 5L) {
       val samplingRate = 0.1
       StratifiedAuxiliary.testSampleExact(stratifiedData, samplingRate, seed, n)
     }
 
-    // vary sampling rate
+    // vary sampling rate 不同的采样率
     for (samplingRate <- List(0.01, 0.05, 0.1, 0.5)) {
       StratifiedAuxiliary.testSampleExact(stratifiedData, samplingRate, defaultSeed, n)
     }
@@ -214,7 +214,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(sums(2) === 1)
   }
 
-  test("reduceByKey with many(许多) output partitons") { //输出多个分区
+  test("reduceByKey with many output partitons") { //输出多个分区
     val pairs = sc.parallelize(Array((1, 1), (1, 2), (1, 3), (1, 1), (2, 1)))
     val sums = pairs.reduceByKey(_ + _, 10).collect()
     assert(sums.toSet === Set((1, 7), (2, 1)))
@@ -327,7 +327,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
   }
 
   // See SPARK-9326
-  test("cogroup with empty RDD") {
+  test("cogroup with empty RDD") {//与空RDD共同组合
     import scala.reflect.classTag
     val intPairCT = classTag[(Int, Int)]
     //做集合性操作的基础api,包括各种join、求交等
@@ -339,7 +339,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
   }
 
   // See SPARK-9326
-  test("cogroup with groupByed RDD having 0 partitions") {
+  test("cogroup with groupByed RDD having 0 partitions") {//与GroupByed RDD共享具有0个分区
     import scala.reflect.classTag
     val intCT = classTag[Int]
 
@@ -349,7 +349,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(joined.size > 0)
   }
 
-  test("rightOuterJoin") {
+  test("rightOuterJoin") {//右外连接
     val rdd1 = sc.parallelize(Array((1, 1), (1, 2), (2, 1), (3, 1)))
     val rdd2 = sc.parallelize(Array((1, 'x'), (2, 'y'), (2, 'z'), (4, 'w')))
     val joined = rdd1.rightOuterJoin(rdd2).collect()
@@ -755,6 +755,9 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
   the test method, because otherwise Scala won't generate no-args constructors
   and the test will therefore throw InstantiationException when saveAsNewAPIHadoopFile
   tries to instantiate them with Class.newInstance.
+
+  不幸的是,它们必须是顶级类,并且没有在测试方法中定义,因为否则Scala将不会生成no-args构造函数,
+  并且当saveAsNewAPIHadoopFile尝试使用Class.newInstance实例化它时,测试将抛出InstantiationException
  */
 
 /*

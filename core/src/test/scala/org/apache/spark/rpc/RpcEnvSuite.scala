@@ -189,6 +189,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
       }
       // The SparkException cause should be a RpcTimeoutException with message indicating the
       // controlling timeout property
+      //SparkException原因应该是一个RpcTimeoutException,其消息指示控制超时属性
       assert(e.getCause.isInstanceOf[RpcTimeoutException])
       assert(e.getCause.getMessage.contains(shortProp))//指示控制超时属性的消息
     } finally {
@@ -313,7 +314,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
     eventually(timeout(5 seconds), interval(10 millis)) {
       // Calling `self` in `onStart` is fine
-      //
+      //在`onStart`中调用`self`是不错的
       assert(callSelfSuccessfully === true)
     }
   }
@@ -336,6 +337,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
     eventually(timeout(5 seconds), interval(10 millis)) {
       // Calling `self` in `receive` is fine
+      //在`receive`中调用`self`是不错的
       assert(callSelfSuccessfully === true)
     }
   }
@@ -658,7 +660,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
     // Allow future to complete with failure using plain Await.result, this will return
     // once the future is complete to verify addMessageIfTimeout was invoked
-    //允许future的完成失败使用await.result,
+    //允许将来使用简单的Await.result完成失败,一旦未来完成,将返回验证addMessageIfTimeout是否被调用
     val reply3 =
       intercept[RpcTimeoutException] {
         Await.result(fut3, 200 millis)
@@ -666,16 +668,19 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
     // When the future timed out, the recover callback should have used
     // RpcTimeout.addMessageIfTimeout to add the property to the TimeoutException message
+    //当未来超时时,恢复回调应该使用RpcTimeout.addMessageIfTimeout将属性添加到TimeoutException消息
     assert(reply3.contains(shortTimeout.timeoutProp))
 
     // Use RpcTimeout.awaitResult to process Future, since it has already failed with
     // RpcTimeoutException, the same RpcTimeoutException should be thrown
+    //使用RpcTimeout.awaitResult来处理Future,因为它已经失败了RpcTimeoutException，应该抛出相同的RpcTimeoutException
     val reply4 =
       intercept[RpcTimeoutException] {
         shortTimeout.awaitResult(fut3)
       }.getMessage
 
     // Ensure description is not in message twice after addMessageIfTimeout and awaitResult
+    //在addMessageIfTimeout和awaitResult之后,请确保描述不在消息中两次
     assert(shortTimeout.timeoutProp.r.findAllIn(reply4).length === 1)
   }
 

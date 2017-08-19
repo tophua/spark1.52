@@ -314,6 +314,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     val json1 = compact(render(parse(trimmedJson1)))
     val json2 = compact(render(parse(trimmedJson2)))
     // Put this on a separate line to avoid printing comparison twice when test fails
+    //将其放在单独的行上,以避免在测试失败时打印比较两次
     val equals = json1 == json2
     assert(equals, "\"[%s]\" did not equal \"[%s]\"".format(trimmedJson1, trimmedJson2))
   }

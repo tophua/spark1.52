@@ -271,6 +271,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
 
     // Offer host2, exec3 again, at NODE_LOCAL level: we should get noPref task
     // after failing to find a node_Local task
+    //再次提供host2，exec3，在NODE_LOCAL级别：在找不到node_Local任务后，我们应该得到noPref任务
     assert(manager.resourceOffer("exec2", "host2", NODE_LOCAL) == None)
     clock.advance(LOCALITY_WAIT_MS)
     assert(manager.resourceOffer("exec2", "host2", NO_PREF).get.index == 3)

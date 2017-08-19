@@ -590,10 +590,14 @@ private class DummyMaster(
  * A mock standalone Master that keeps track of drivers that have been submitted.
  * 模拟已提交的驱动程序的模拟独立主机
  * If a driver is submitted, its state is immediately set to RUNNING.
+  * 如果提交了一个驱动程序,它的状态立即设置为RUNNING
  * If an existing driver is killed, its state is immediately set to KILLED.
+  * 如果现有的驱动程序被杀死,则其状态立即设置为KILLED
  * If an existing driver's status is requested, its state is returned in the response.
+  * 如果请求现有driver的状态,则在响应中返回其状态
  * Submits are always successful while kills and status requests are successful only
  * if the driver was submitted in the past.
+  * 提交总是成功的,只有当过去提交驱动程序时,杀死和状态请求才能成功
  */
 private class SmarterMaster(override val rpcEnv: RpcEnv) extends ThreadSafeRpcEndpoint {
   private var counter: Int = 0
@@ -624,9 +628,13 @@ private class SmarterMaster(override val rpcEnv: RpcEnv) extends ThreadSafeRpcEn
  * A [[StandaloneRestServer]] that is faulty in many ways.
  *
  * When handling a submit request, the server returns a malformed JSON.
+  * 处理提交请求时,服务器返回格式错误的JSON
  * When handling a kill request, the server returns an invalid JSON.
+  * 处理kill请求时,服务器返回无效的JSON
  * When handling a status request, the server throws an internal exception.
+  * 处理状态请求时,服务器会引发内部异常
  * The purpose of this class is to test that client handles these cases gracefully.
+  * 这个类的目的是测试客户端优雅地处理这些情况
  */
 private class FaultyStandaloneRestServer(
     host: String,

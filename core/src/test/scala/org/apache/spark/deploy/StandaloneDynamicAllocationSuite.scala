@@ -165,7 +165,8 @@ class StandaloneDynamicAllocationSuite
     // This highlights a limitation of using dynamic allocation with max cores WITHOUT
     // setting cores per executor: once an application scales down and then scales back
     // up, its executors may not be spread out anymore!
-    //要求1以上,这一个不会去通过,因为我们已经在最大的核心
+    //请求1更多; 这个不会经历,因为我们已经在最大内核了。
+    // 这突出显示了使用最大内核使用动态分配的限制,无需为每个执行者设置核心：一旦应用程序缩小,然后缩放,其执行程序可能不会再扩展！
     assert(sc.requestExecutors(1))
     apps = getApplications()
     assert(apps.head.executors.size === 1)

@@ -191,6 +191,7 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
   private def testApplicationEventLogging(compressionCodec: Option[String] = None) {
     // Set defaultFS to something that would cause an exception, to make sure we don't run
     // into SPARK-6688.
+    //将默认设置为会导致异常的东西,以确保我们不会遇到SPARK-6688
     val conf = getLoggingConf(testDirPath, compressionCodec)
       .set("spark.hadoop.fs.defaultFS", "unsupported://example.com")
     //val sc = new SparkContext("local-cluster[2,2,1024]", "test", conf)
@@ -255,6 +256,7 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
   /**
    * A listener that asserts certain events are logged by the given EventLoggingListener.
    * This is necessary because events are posted asynchronously in a different thread.
+    * 给定EventLoggingListener记录一个声明某些事件的侦听器,这是必要的,因为事件以不同的线程异步发布。
    */
   private class EventExistenceListener(eventLogger: EventLoggingListener) extends SparkListener {
     var jobStarted = false

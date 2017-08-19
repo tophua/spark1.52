@@ -103,7 +103,7 @@ class HashPartitioner(partitions: Int) extends Partitioner {
 
   def getPartition(key: Any): Int = key match {
     case null => 0
-    // 通过key计算其HashCode,并根据分区数取模。如果结果小于0,直接加上分区数。
+    // 通过key计算其HashCode,并根据分区数取模,如果结果小于0,直接加上分区数。
     case _ => Utils.nonNegativeMod(key.hashCode, numPartitions)
   }
     //对比两个分区器是否相同，直接对比其分区个数就行

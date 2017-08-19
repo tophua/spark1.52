@@ -1,5 +1,5 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
+* Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
@@ -23,8 +23,9 @@ import org.apache.spark.util.Utils
 class PythonRunnerSuite extends SparkFunSuite {
 
   // Test formatting a single path to be added to the PYTHONPATH
-  test("format path") {
-    assert(PythonRunner.formatPath("spark.py") === "spark.py")
+  //测试格式化要添加到PYTHONPATH的单个路径
+    test("format path") {
+      assert(PythonRunner.formatPath("spark.py") === "spark.py")
     assert(PythonRunner.formatPath("file:/spark.py") === "/spark.py")
     assert(PythonRunner.formatPath("file:///spark.py") === "/spark.py")
     assert(PythonRunner.formatPath("local:/spark.py") === "/spark.py")

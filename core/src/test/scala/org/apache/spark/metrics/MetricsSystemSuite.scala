@@ -181,6 +181,7 @@ class MetricsSystemSuite extends SparkFunSuite with BeforeAndAfter with PrivateM
     val metricName = driverMetricsSystem.buildRegistryName(source)
 
     // Even if spark.app.id and spark.executor.id are set, they are not used for the metric name.
+    //即使设置spark.app.id和spark.executor.id,它们也不用于度量名称
     assert(metricName != s"$appId.$executorId.${source.sourceName}")
     assert(metricName === source.sourceName)
   }

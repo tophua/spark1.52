@@ -29,6 +29,7 @@ import org.apache.spark.serializer.KryoTest.RegistratorWithoutAutoReset
 /**
  * Tests to ensure that [[Serializer]] implementations obey the API contracts for methods that
  * describe properties of the serialized stream, such as
+  * 测试以确保[[Serializer]]实现遵守描述序列化流的属性的方法的API合同,例如
  * [[Serializer.supportsRelocationOfSerializedObjects]].
  */
 class SerializerPropertiesSuite extends SparkFunSuite {
@@ -39,6 +40,8 @@ class SerializerPropertiesSuite extends SparkFunSuite {
     // Per a comment on the SPARK-4550 JIRA ticket, Java serialization appears to write out the
     // full class name the first time an object is written to an output stream, but subsequent
     // references to the class write a more compact identifier; this prevents relocation.
+    //根据对SPARK-4550 JIRA机票的评论,Java序列化似乎在第一次将对象写入输出流时写出完整的类名,
+    // 但后续的对该类的引用写入一个更紧凑的标识符; 这样可以防止重定位
     val ser = new JavaSerializer(new SparkConf())
     testSupportsRelocationOfSerializedObjects(ser, generateRandomItem)
   }

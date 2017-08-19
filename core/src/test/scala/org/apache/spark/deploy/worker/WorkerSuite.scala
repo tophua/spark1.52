@@ -164,6 +164,7 @@ class WorkerSuite extends SparkFunSuite with Matchers {
       worker.drivers += driverId -> createDriverRunner(driverId)
     }
     // initialize DriverStateChanged Message
+    //初始化DriverStateChanged消息
     worker.handleDriverStateChanged(DriverStateChanged("driverId-0", DriverState.FINISHED, None))
     assert(worker.finishedDrivers.size === 1)
     assert(worker.drivers.size === 49)

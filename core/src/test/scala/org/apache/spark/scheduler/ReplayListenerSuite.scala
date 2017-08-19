@@ -75,11 +75,13 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
   }
 
   // This assumes the correctness of EventLoggingListener
+  //这假定EventLoggingListener的正确性
   test("End-to-end replay") {//端到端重试
     testApplicationReplay()
   }
 
   // This assumes the correctness of EventLoggingListener
+  //这假定EventLoggingListener的正确性
   test("End-to-end replay with compression") {//端到端与压缩的重试
     CompressionCodec.ALL_COMPRESSION_CODECS.foreach { codec =>
       testApplicationReplay(Some(codec))
@@ -154,6 +156,9 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
    * a fair comparison between the original events and the replayed events, both functionalities
    * must be implemented within one listener (i.e. the EventLoggingListener).
    *
+    * 这是因为以下竞争条件：事件可能会在被一个侦听器处理并被另一个侦听器处理之间突变,因此,为了在原始事件和重播事件之间建立公正的比较,
+    * 这两个功能必须在一个监听器（即EventLoggingListener）内实现。
+    *
    * This child listener inherits only the event buffering functionality, but does not actually
    * log the events.
    * 此子侦听器只继承事件缓冲功能,但实际上并没有记录事件

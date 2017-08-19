@@ -63,7 +63,7 @@ class CompressionCodecSuite extends SparkFunSuite {
     assert(codec.getClass === classOf[LZ4CompressionCodec])
     testCodec(codec)
   }
-
+  //lz4不支持串行化流的连接
   test("lz4 does not support concatenation of serialized streams") {
     val codec = CompressionCodec.createCodec(conf, classOf[LZ4CompressionCodec].getName)
     assert(codec.getClass === classOf[LZ4CompressionCodec])
@@ -78,30 +78,30 @@ class CompressionCodecSuite extends SparkFunSuite {
     testCodec(codec)
   }
 
-  test("lzf compression codec short form") {
+  test("lzf compression codec short form") {//lzf压缩编解码器短格式
     val codec = CompressionCodec.createCodec(conf, "lzf")
     assert(codec.getClass === classOf[LZFCompressionCodec])
     testCodec(codec)
   }
-
+  //lzf支持串行化流的连接
   test("lzf supports concatenation of serialized streams") {
     val codec = CompressionCodec.createCodec(conf, classOf[LZFCompressionCodec].getName)
     assert(codec.getClass === classOf[LZFCompressionCodec])
     testConcatenationOfSerializedStreams(codec)
   }
-
+  //snappy压缩编解码器
   test("snappy compression codec") {
     val codec = CompressionCodec.createCodec(conf, classOf[SnappyCompressionCodec].getName)
     assert(codec.getClass === classOf[SnappyCompressionCodec])
     testCodec(codec)
   }
-
+  //snappy压缩编解码器短格式
   test("snappy compression codec short form") {
     val codec = CompressionCodec.createCodec(conf, "snappy")
     assert(codec.getClass === classOf[SnappyCompressionCodec])
     testCodec(codec)
   }
-
+  //snappy不支持串行化流的连接
   test("snappy does not support concatenation of serialized streams") {
     val codec = CompressionCodec.createCodec(conf, classOf[SnappyCompressionCodec].getName)
     assert(codec.getClass === classOf[SnappyCompressionCodec])
@@ -109,13 +109,13 @@ class CompressionCodecSuite extends SparkFunSuite {
       testConcatenationOfSerializedStreams(codec)
     }
   }
-
+  //坏的压缩编解码器
   test("bad compression codec") {
     intercept[IllegalArgumentException] {
       CompressionCodec.createCodec(conf, "foobar")
     }
   }
-
+  //测试序列化流的连接
   private def testConcatenationOfSerializedStreams(codec: CompressionCodec): Unit = {
     val bytes1: Array[Byte] = {
       val baos = new ByteArrayOutputStream()

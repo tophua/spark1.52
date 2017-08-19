@@ -465,6 +465,7 @@ class SparkListenerSuite extends SparkFunSuite with LocalSparkContext with Match
 
 // These classes can't be declared inside of the SparkListenerSuite class because we don't want
 // their constructors to contain references to SparkListenerSuite:
+//这些类不能在SparkListenerSuite类中声明,因为我们不希望其构造函数包含对SparkListenerSuite的引用：
 
 /**
  * A simple listener that counts the number of jobs observed.

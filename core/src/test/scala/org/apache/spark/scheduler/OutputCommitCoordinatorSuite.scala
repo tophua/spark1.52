@@ -43,13 +43,20 @@ import scala.language.postfixOps
  * attempt to commit, where committing is emulated by creating a
  * directory. If both tasks create directories then the end result is
  * a failure.
- * 单元测试使原来的任务和推测的任务试图提交,通过创建一个目录进行被模拟的地方
+  *
+ * 单元测试使原始任务和推测任务都尝试提交,其中通过创建目录来模拟提交,
+  * 如果两个任务都创建目录,那么最终的结果就是失败。
+  *
  * Note that there are some aspects of this test that are less than ideal.
  * In particular, the test mocks the speculation-dequeuing logic to always
  * dequeue a task and consider it as speculated. Immediately after initially
  * submitting the tasks and calling reviveOffers(), reviveOffers() is invoked
  * again to pick up the speculated task. This may be hacking the original
  * behavior in too much of an unrealistic fashion.
+  *
+  * 请注意，该测试的一些方面不太理想,特别地,测试模拟推测出队逻辑以总是出现任务,并将其视为推测,
+  * 在最初提交任务并调用reviveOffers（）之后,立即调用reviveOffers（）来接收推测的任务,
+  * 这可能是以太多的不切实际的方式来侵蚀原来的行为
  *
  * Also, the validation is done by checking the number of files in a directory.
  * Ideally, an accumulator would be used for this, where we could increment
@@ -57,13 +64,20 @@ import scala.language.postfixOps
  * commitTask() was called twice erroneously then the test would ideally fail because
  * the accumulator would be incremented twice.
  *
+  * 此外,通过检查目录中的文件数量来完成验证。对于此,将使用累加器,我们可以在输出提交者的commitTask()调用中增加累加器,
+  * 如果对commitTask()的调用被错误地调用两次,那么测试将理想地失败,因为累加器将增加两次,
+  *
  * The problem with this test implementation is that when both a speculated task and
  * its original counterpart complete, only one of the accumulator's increments is
  * captured. This results in a paradox where if the OutputCommitCoordinator logic
  * was not in SparkHadoopWriter, the tests would still pass because only one of the
  * increments would be captured even though the commit in both tasks was executed
  * erroneously.
- *
+  *
+  * 此测试实现的问题是,当推测的任务和其原始对应完成时,仅捕获累加器的一个增量,
+  * 这导致一个悖论,如果OutputCommitCoordinator逻辑不在SparkHadoopWriter中,则测试仍然会通过,
+  * 因为即使两个任务中的提交都被错误地执行,也只能捕获一个增量。
+  *
  * See also: [[OutputCommitCoordinatorIntegrationSuite]] for integration tests that do
  * not use mocks.
  */
@@ -87,6 +101,7 @@ class OutputCommitCoordinatorSuite extends SparkFunSuite with BeforeAndAfter {
         outputCommitCoordinator = spy(new OutputCommitCoordinator(conf, isDriver = true))
         // Use Mockito.spy() to maintain the default infrastructure everywhere else.
         // This mocking allows us to control the coordinator responses in test cases.
+        //使用Mockito.spy()来维护其他地方的默认基础设施,这个嘲弄允许我们在测试用例中控制协调器响应
         SparkEnv.createDriverEnv(conf, isLocal, listenerBus,
           SparkContext.numDriverCores(master), Some(outputCommitCoordinator))
       }
