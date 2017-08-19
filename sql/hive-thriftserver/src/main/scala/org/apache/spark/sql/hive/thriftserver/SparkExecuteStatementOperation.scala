@@ -59,6 +59,7 @@ private[hive] class SparkExecuteStatementOperation(
 
   def close(): Unit = {
     // RDDs will be cleaned automatically upon garbage collection.
+    //垃圾收集后,RDD将自动清理
     hiveContext.sparkContext.clearJobGroup()
     logDebug(s"CLOSING $statementId")
     cleanup(OperationState.CLOSED)
@@ -103,6 +104,7 @@ private[hive] class SparkExecuteStatementOperation(
       resultRowSet
     } else {
       // maxRowsL here typically maps to java.sql.Statement.getFetchSize, which is an int
+      //这里的maxRowsL通常映射到java.sql.Statement.getFetchSize,它是一个int
       val maxRows = maxRowsL.toInt
       var curRow = 0
       while (curRow < maxRows && iter.hasNext) {
@@ -151,6 +153,7 @@ private[hive] class SparkExecuteStatementOperation(
 
       // Runnable impl to call runInternal asynchronously,
       // from a different thread
+      //Runnable从不同的线程异步调用runInternal
       val backgroundOperation = new Runnable() {
 
         override def run(): Unit = {
@@ -158,8 +161,10 @@ private[hive] class SparkExecuteStatementOperation(
             override def run(): Object = {
 
               // User information is part of the metastore client member in Hive
+              //用户信息是Hive的转移客户端成员的一部分
               hiveContext.setSession(currentSqlSession)
               // Always use the latest class loader provided by executionHive's state.
+              //始终使用executionHive的状态提供的最新的类加载器
               val executionHiveClassLoader =
                 hiveContext.executionHive.state.getConf.getClassLoader
               sessionHive.getConf.setClassLoader(executionHiveClassLoader)
@@ -190,6 +195,7 @@ private[hive] class SparkExecuteStatementOperation(
       }
       try {
         // This submit blocks if no background threads are available to run this operation
+        //如果没有后台线程可用来运行此操作,则此提交阻止
         val backgroundHandle =
           getParentSession().getSessionManager().submitBackgroundOperation(backgroundOperation)
         setBackgroundHandle(backgroundHandle)
@@ -250,6 +256,7 @@ private[hive] class SparkExecuteStatementOperation(
         }
       // Actually do need to catch Throwable as some failures don't inherit from Exception and
       // HiveServer will silently swallow them.
+        //实际上确实需要捕获Throwable,因为一些失败不会从Exception继承HiveServer将默默地吞下他们
       case e: Throwable =>
         val currentState = getStatus().getState()
         logError(s"Error executing query, currentState $currentState, ", e)
@@ -283,11 +290,14 @@ private[hive] class SparkExecuteStatementOperation(
   /**
    * If there are query specific settings to overlay, then create a copy of config
    * There are two cases we need to clone the session config that's being passed to hive driver
+    * 如果有查询特定的设置来重叠,那么创建一个配置副本有两种情况我们需要克隆正在传递给hive驱动程序的会话配置
    * 1. Async query -
    *    If the client changes a config setting, that shouldn't reflect in the execution
    *    already underway
+    *    异步查询 - 如果客户端更改了配置设置，那么在执行过程中不应该反映出来
    * 2. confOverlay -
    *    The query specific settings should only be applied to the query config and not session
+    *    查询特定设置只能应用于查询配置而不是会话
    * @return new configuration
    * @throws HiveSQLException
    */
@@ -295,9 +305,11 @@ private[hive] class SparkExecuteStatementOperation(
     var sqlOperationConf = getParentSession().getHiveConf()
     if (!getConfOverlay().isEmpty() || runInBackground) {
       // clone the partent session config for this query
+      //克隆该查询的父会话配置
       sqlOperationConf = new HiveConf(sqlOperationConf)
 
       // apply overlay query specific settings, if any
+      //应用覆盖查询特定设置(如果有)
       getConfOverlay().foreach { case (k, v) =>
         try {
           sqlOperationConf.verifyAndSet(k, v)

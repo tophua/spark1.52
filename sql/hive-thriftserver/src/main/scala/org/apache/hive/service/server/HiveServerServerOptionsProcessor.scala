@@ -29,9 +29,11 @@ private[apache] class HiveServerServerOptionsProcessor(serverName: String)
 
   def process(args: Array[String]): Boolean = {
     // A parse failure automatically triggers a system exit
+    //解析失败会自动触发系统退出
     val response = super.parse(args)
     val executor = response.getServerOptionsExecutor()
     // return true if the parsed option was to start the service
+    //如果解析的选项是启动服务,则返回true
     executor.isInstanceOf[StartOptionExecutor]
   }
 }

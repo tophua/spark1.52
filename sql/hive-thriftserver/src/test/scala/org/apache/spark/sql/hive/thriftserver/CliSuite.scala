@@ -35,6 +35,7 @@ import org.apache.spark.{Logging, SparkFunSuite}
 /**
  * A test suite for the `spark-sql` CLI tool.  Note that all test cases share the same temporary
  * Hive metastore and warehouse.
+  * 用于“spark-sql”CLI工具的测试套件,请注意,所有测试用例共享相同的临时表Hive转移和仓库。
  */
 class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
   val warehousePath = Utils.createTempDir()
@@ -55,12 +56,15 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
 
   /**
    * Run a CLI operation and expect all the queries and expected answers to be returned.
-   * @param timeout maximum time for the commands to complete
-   * @param extraArgs any extra arguments
+    * 运行CLI操作,并期望返回所有查询和预期答案
+   * @param timeout maximum time for the commands to complete命令完成的最长时间
+   * @param extraArgs any extra arguments 任何额外的参数
    * @param errorResponses a sequence of strings whose presence in the stdout of the forked process
    *                       is taken as an immediate error condition. That is: if a line containing
    *                       with one of these strings is found, fail the test immediately.
    *                       The default value is `Seq("Error:")`
+    *                      在分叉进程的标准中存在的字符串序列被视为立即错误条件,
+    *                      也就是说：如果找到包含这些字符串之一的行，则立即失败。默认值为“Seq（”Error：“）
    *
    * @param queriesAndExpectedAnswers one or more tupes of query + answer
    */
@@ -72,6 +76,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
 
     val (queries, expectedAnswers) = queriesAndExpectedAnswers.unzip
     // Explicitly adds ENTER for each statement to make sure they are actually entered into the CLI.
+    //明确地为每个语句添加ENTER，以确保它们实际输入到CLI中。
     val queriesString = queries.map(_ + "\n").mkString
 
     val command = {
@@ -93,12 +98,15 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     def captureOutput(source: String)(line: String): Unit = lock.synchronized {
       // This test suite sometimes gets extremely slow out of unknown reason on Jenkins.  Here we
       // add a timestamp to provide more diagnosis information.
+      //这个测试套件有时会因为杰金斯的不明原因而变得非常慢,这里我们添加一个时间戳来提供更多的诊断信息
       buffer += s"${new Timestamp(new Date().getTime)} - $source> $line"
 
       // If we haven't found all expected answers and another expected answer comes up...
+      //如果我们没有找到所有预期的答案，另一个预期的答案出现...
       if (next < expectedAnswers.size && line.startsWith(expectedAnswers(next))) {
         next += 1
         // If all expected answers have been found...
+        //如果已经找到所有预期的答案...
         if (next == expectedAnswers.size) {
           foundAllExpectedAnswers.trySuccess(())
         }
@@ -146,7 +154,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
       process.destroy()
     }
   }
-
+  //简单的命令
   test("Simple commands") {
     val dataFilePath =
       Thread.currentThread().getContextClassLoader.getResource("data/files/small_kv.txt")
@@ -166,11 +174,11 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
         -> "OK"
     )
   }
-
+  //单命令与-e
   test("Single command with -e") {
     runCliWithin(2.minute, Seq("-e", "SHOW DATABASES;"))("" -> "OK")
   }
-
+  //单一命令 - 数据库
   test("Single command with --database") {
     runCliWithin(2.minute)(
       "CREATE DATABASE hive_test_db;"
@@ -190,7 +198,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
         -> "hive_test"
     )
   }
-
+  //使用-jars中提供的SerDe的命令
   test("Commands using SerDe provided in --jars") {
     val jarFile =
       "../hive/src/test/resources/hive-hcatalog-core-0.13.1.jar"
@@ -219,7 +227,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
         -> "OK"
     )
   }
-
+  //分析错误报告
   test("SPARK-11188 Analysis error reporting") {
     runCliWithin(timeout = 2.minute,
       errorResponses = Seq("AnalysisException"))(

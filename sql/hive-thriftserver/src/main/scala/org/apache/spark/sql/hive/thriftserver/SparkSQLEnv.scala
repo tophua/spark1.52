@@ -26,7 +26,8 @@ import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{Logging, SparkConf, SparkContext}
 import org.apache.spark.util.Utils
 
-/** A singleton object for the master program. The slaves should not access this. */
+/** A singleton object for the master program. The slaves should not access this.
+  * 主程序的单例对象,slaves不应该访问这个*/
 private[hive] object SparkSQLEnv extends Logging {
   logDebug("Initializing SparkSQLEnv")
 
@@ -40,6 +41,7 @@ private[hive] object SparkSQLEnv extends Logging {
       val maybeKryoReferenceTracking = sparkConf.getOption("spark.kryo.referenceTracking")
       // If user doesn't specify the appName, we want to get [SparkSQL::localHostName] instead of
       // the default appName [SparkSQLCLIDriver] in cli or beeline.
+      //如果用户没有指定appName,我们希望得到[SparkSQL :: localHostName],而不是cli或beeline中的默认appName [SparkSQLCLIDriver]
       val maybeAppName = sparkConf
         .getOption("spark.app.name")
         .filterNot(_ == classOf[SparkSQLCLIDriver].getName)
@@ -71,7 +73,8 @@ private[hive] object SparkSQLEnv extends Logging {
     }
   }
 
-  /** Cleans up and shuts down the Spark SQL environments. */
+  /** Cleans up and shuts down the Spark SQL environments.
+    * 清理并关闭Spark SQL环境 */
   def stop() {
     logDebug("Shutting down Spark SQL Environment")
     // Stop the SparkContext

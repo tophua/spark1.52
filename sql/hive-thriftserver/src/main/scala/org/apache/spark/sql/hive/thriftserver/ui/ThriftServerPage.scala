@@ -29,16 +29,18 @@ import org.apache.spark.ui.UIUtils._
 import org.apache.spark.ui._
 
 
-/** Page for Spark Web UI that shows statistics of a thrift server */
+/** Page for Spark Web UI that shows statistics of a thrift server
+  * Spark Web UI的页面,显示节俭服务器的统计信息*/
 private[ui] class ThriftServerPage(parent: ThriftServerTab) extends WebUIPage("") with Logging {
 
   private val listener = parent.listener
   private val startTime = Calendar.getInstance().getTime()
   private val emptyCell = "-"
 
-  /** Render the page */
+  /** Render the page 渲染页面 */
   def render(request: HttpServletRequest): Seq[Node] = {
     val content =
+      //确保本页中的所有部分都是一致的
       listener.synchronized { // make sure all parts in this page are consistent
         generateBasicStats() ++
         <br/> ++
@@ -65,7 +67,8 @@ private[ui] class ThriftServerPage(parent: ThriftServerTab) extends WebUIPage(""
     </ul>
   }
 
-  /** Generate stats of batch statements of the thrift server program */
+  /** Generate stats of batch statements of the thrift server program
+    * 生成节俭服务器程序的批量语句的统计信息*/
   private def generateSQLStatsTable(): Seq[Node] = {
     val numStatement = listener.getExecutionList.size
     val table = if (numStatement > 0) {
@@ -176,12 +179,14 @@ private[ui] class ThriftServerPage(parent: ThriftServerTab) extends WebUIPage(""
 
   /**
    * Returns a human-readable string representing a duration such as "5 second 35 ms"
+    * 返回表示持续时间的人类可读字符串,例如“5秒35 ms”
    */
   private def formatDurationOption(msOption: Option[Long]): String = {
     msOption.map(formatDurationVerbose).getOrElse(emptyCell)
   }
 
-  /** Generate HTML table from string data */
+  /** Generate HTML table from string data
+    * 从字符串数据生成HTML表 */
   private def listingTable(headers: Seq[String], data: Seq[Seq[String]]) = {
     def generateDataRow(data: Seq[String]): Seq[Node] = {
       <tr> {data.map(d => <td>{d}</td>)} </tr>

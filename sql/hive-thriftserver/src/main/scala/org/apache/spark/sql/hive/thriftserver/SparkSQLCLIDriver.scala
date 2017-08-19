@@ -44,6 +44,7 @@ import org.apache.spark.util.ShutdownHookManager
 /**
  * This code doesn't support remote connections in Hive 1.2+, as the underlying CliDriver
  * has dropped its support.
+  * 此代码不支持Hive 1.2+中的远程连接,作为底层的CliDriver已经放弃了支持。
  */
 private[hive] object SparkSQLCLIDriver extends Logging {
   private var prompt = "spark-sql"
@@ -66,6 +67,7 @@ private[hive] object SparkSQLCLIDriver extends Logging {
         } else {
           if (transport != null) {
             // Force closing of TCP connection upon session termination
+            //在会话终止时强制关闭TCP连接
             transport.getSocket.close()
           }
         }
@@ -81,6 +83,7 @@ private[hive] object SparkSQLCLIDriver extends Logging {
 
     val cliConf = new HiveConf(classOf[SessionState])
     // Override the location of the metastore since this is only used for local execution.
+    //覆盖转移位置,因为它仅用于本地执行
     HiveContext.newTemporaryConfiguration().foreach {
       case (key, value) => cliConf.set(key, value)
     }
@@ -100,11 +103,13 @@ private[hive] object SparkSQLCLIDriver extends Logging {
     }
 
     // Set all properties specified via command line.
+    //设置通过命令行指定的所有属性
     val conf: HiveConf = sessionState.getConf
     sessionState.cmdProperties.entrySet().foreach { item =>
       val key = item.getKey.asInstanceOf[String]
       val value = item.getValue.asInstanceOf[String]
       // We do not propagate metastore options to the execution copy of hive.
+      //我们不会将转移选项传播到hive的执行副本
       if (key != "javax.jdo.option.ConnectionURL") {
         conf.set(key, value)
         sessionState.getOverriddenConfigurations.put(key, value)
@@ -113,11 +118,12 @@ private[hive] object SparkSQLCLIDriver extends Logging {
 
     SessionState.start(sessionState)
 
-    // Clean up after we exit
+    // Clean up after we exit 清理后我们退出
     ShutdownHookManager.addShutdownHook { () => SparkSQLEnv.stop() }
 
     val remoteMode = isRemoteMode(sessionState)
     // "-h" option has been passed, so connect to Hive thrift server.
+    //“-h”选项已经通过,所以连接到Hive thrift服务器
     if (!remoteMode) {
       // Hadoop-20 and above - we need to augment classpath using hiveconf
       // components.
@@ -261,6 +267,7 @@ private[hive] class SparkSQLCLIDriver extends CliDriver with Logging {
 
   // Force initializing SparkSQLEnv. This is put here but not object SparkSQLCliDriver
   // because the Hive unit tests do not go through the main() code path.
+  //强制初始化SparkSQLEnv这是放在这里,但不是对象SparkSQLCliDriver,因为Hive单元测试不通过main()代码路径
   if (!isRemoteMode) {
     SparkSQLEnv.init()
   } else {
@@ -310,6 +317,7 @@ private[hive] class SparkSQLCLIDriver extends CliDriver with Logging {
           ret = rc.getResponseCode
           if (ret != 0) {
             // For analysis exception, only the error is printed out to the console.
+            //对于分析异常,仅将错误打印到控制台
             rc.getException() match {
               case e: AnalysisException =>
                 err.println(s"""Error in query: ${e.getMessage}""")
@@ -322,7 +330,7 @@ private[hive] class SparkSQLCLIDriver extends CliDriver with Logging {
           val res = new JArrayList[String]()
 
           if (HiveConf.getBoolVar(conf, HiveConf.ConfVars.HIVE_CLI_PRINT_HEADER)) {
-            // Print the column names.
+            // Print the column names.打印列名
             Option(driver.getSchema.getFieldSchemas).map { fields =>
               out.println(fields.map(_.getName).mkString("\t"))
             }

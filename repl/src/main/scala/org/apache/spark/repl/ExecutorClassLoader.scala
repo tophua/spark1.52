@@ -36,6 +36,8 @@ import com.esotericsoftware.reflectasm.shaded.org.objectweb.asm.Opcodes._
  * A ClassLoader that reads classes from a Hadoop FileSystem or HTTP URI,
  * used to load classes defined by the interpreter when the REPL is used.
  * Allows the user to specify if user class path should be first
+  * 一个ClassLoader,它从Hadoop FileSystem或HTTP URI中读取类,
+  * 用于在使用REPL时加载由解释器定义的类,允许用户指定用户类路径是否应该是第一个
  */
 class ExecutorClassLoader(conf: SparkConf, classUri: String, parent: ClassLoader,
     userClassPathFirst: Boolean) extends ClassLoader with Logging {
@@ -45,9 +47,11 @@ class ExecutorClassLoader(conf: SparkConf, classUri: String, parent: ClassLoader
   val parentLoader = new ParentClassLoader(parent)
 
   // Allows HTTP connect and read timeouts to be controlled for testing / debugging purposes
+  //允许HTTP连接和读取超时被控制用于测试/调试目的
   private[repl] var httpUrlConnectionTimeoutMillis: Int = -1
 
   // Hadoop FileSystem object for our URI, if it isn't using HTTP
+  //我们的URI的Hadoop FileSystem对象，如果它不使用HTTP
   var fileSystem: FileSystem = {
     if (Set("http", "https", "ftp").contains(uri.getScheme)) {
       null
@@ -94,6 +98,7 @@ class ExecutorClassLoader(conf: SparkConf, classUri: String, parent: ClassLoader
     try {
       if (connection.getResponseCode != 200) {
         // Close the error stream so that the connection is eligible for re-use
+        //关闭错误流，使连接符合资格重新使用
         try {
           connection.getErrorStream.close()
         } catch {
@@ -140,6 +145,7 @@ class ExecutorClassLoader(conf: SparkConf, classUri: String, parent: ClassLoader
         None
       case e: Exception =>
         // Something bad happened while checking if the class exists
+        //检查类是否存在时发生了什么
         logError(s"Failed to check existence of class $name on REPL class server at $uri", e)
         None
     } finally {
@@ -160,6 +166,8 @@ class ExecutorClassLoader(conf: SparkConf, classUri: String, parent: ClassLoader
       // Replace its constructor with a dummy one that does not run the
       // initialization code placed there by the REPL. The val or var will
       // be initialized later through reflection when it is used in a task.
+      //类似乎是一个解释器“包装”对象,存储一个val或者var.Replace它的构造函数与一个虚拟的,
+      // 不运行由它放置在这里的初始化代码,当val或var在任务中使用时,稍后将通过反射进行初始化
       val cr = new ClassReader(in)
       val cw = new ClassWriter(
         ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS)
@@ -168,6 +176,7 @@ class ExecutorClassLoader(conf: SparkConf, classUri: String, parent: ClassLoader
       return cw.toByteArray
     } else {
       // Pass the class through unmodified
+      //通过未经修改的课程
       val bos = new ByteArrayOutputStream
       val bytes = new Array[Byte](4096)
       var done = false
@@ -185,6 +194,7 @@ class ExecutorClassLoader(conf: SparkConf, classUri: String, parent: ClassLoader
 
   /**
    * URL-encode a string, preserving only slashes
+    * URL编码一个字符串,只保留斜杠
    */
   def urlEncode(str: String): String = {
     str.split('/').map(part => URLEncoder.encode(part, "UTF-8")).mkString("/")
@@ -200,6 +210,8 @@ extends ClassVisitor(ASM4, cv) {
       // This is the constructor, time to clean it; just output some new
       // instructions to mv that create the object and set the static MODULE$
       // field in the class to point to it, but do nothing otherwise.
+      //这是构造函数，清理它的时间; 只需向mv输出一些新的指令,创建该对象,
+      //并将类中的静态MODULE $字段设置为指向它,否则不做任何操作,
       mv.visitCode()
       mv.visitVarInsn(ALOAD, 0) // load this
       mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V")
@@ -207,6 +219,7 @@ extends ClassVisitor(ASM4, cv) {
       // val classType = className.replace('.', '/')
       // mv.visitFieldInsn(PUTSTATIC, classType, "MODULE$", "L" + classType + ";")
       mv.visitInsn(RETURN)
+      //堆栈大小和局部变量将被自动计算
       mv.visitMaxs(-1, -1) // stack size and local vars will be auto-computed
       mv.visitEnd()
       return null

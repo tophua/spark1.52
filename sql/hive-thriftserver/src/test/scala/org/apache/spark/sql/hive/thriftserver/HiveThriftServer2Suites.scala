@@ -59,6 +59,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
 
   private def withCLIServiceClient(f: ThriftCLIServiceClient => Unit): Unit = {
     // Transport creation logic below mimics HiveConnection.createBinaryTransport
+    //传输创建逻辑以下模仿HiveConnection.createBinaryTransport
     val rawTransport = new TSocket("localhost", serverPort)
     val user = System.getProperty("user.name")
     val transport = PlainSaslHelper.getPlainTransport(user, "anonymous", rawTransport)
@@ -89,7 +90,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       }
     }
   }
-
+  //JDBC查询执行
   test("JDBC query execution") {
     withJdbcStatement { statement =>
       val queries = Seq(
@@ -108,7 +109,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       }
     }
   }
-
+  //检查Hive版本
   test("Checks Hive version") {
     withJdbcStatement { statement =>
       val resultSet = statement.executeQuery("SET spark.sql.hive.version")
@@ -117,7 +118,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       assert(resultSet.getString(2) === HiveContext.hiveExecutionVersion)
     }
   }
-
+  //结果集包含NULL
   test("SPARK-3004 regression: result set containing NULL") {
     withJdbcStatement { statement =>
       val queries = Seq(
@@ -138,7 +139,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       assert(!resultSet.next())
     }
   }
-
+  //结果集迭代器问题
   test("SPARK-4292 regression: result set iterator issue") {
     withJdbcStatement { statement =>
       val queries = Seq(
@@ -158,7 +159,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       statement.executeQuery("DROP TABLE IF EXISTS test_4292")
     }
   }
-
+  //日期类型支持
   test("SPARK-4309 regression: Date type support") {
     withJdbcStatement { statement =>
       val queries = Seq(
@@ -176,7 +177,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       }
     }
   }
-
+  //复杂类型支持
   test("SPARK-4407 regression: Complex type support") {
     withJdbcStatement { statement =>
       val queries = Seq(
@@ -200,7 +201,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       }
     }
   }
-
+  //测试多个会话
   test("test multiple session") {
     import org.apache.spark.sql.SQLConf
     var defaultV1: String = null
@@ -236,6 +237,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       },
 
       // first session, we get the default value of the session status
+      //第一个会话,我们得到会话状态的默认值
       { statement =>
 
         val rs1 = statement.executeQuery(s"SET ${SQLConf.SHUFFLE_PARTITIONS.key}")
@@ -253,6 +255,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       },
 
       // second session, we update the session status
+      //我们更新会话状态
       { statement =>
 
         val queries = Seq(
@@ -276,6 +279,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
 
       // third session, we get the latest session status, supposed to be the
       // default value
+      //第三节,我们得到最新的会话状态,应该是默认值
       { statement =>
 
         val rs1 = statement.executeQuery(s"SET ${SQLConf.SHUFFLE_PARTITIONS.key}")
@@ -290,6 +294,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       },
 
       // accessing the cached data in another session
+      //访问另一个会话中的缓存数据
       { statement =>
 
         val rs1 = statement.executeQuery("SELECT key FROM test_table ORDER BY KEY DESC")
@@ -321,6 +326,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       },
 
       // accessing the uncached table
+      //访问未缓存的表
       { statement =>
 
         // TODO need to figure out how to determine if the data loaded from cache
@@ -344,7 +350,10 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
   }
 
   // This test often hangs and then times out, leaving the hanging processes.
+  //这个测试经常挂起来,然后再次出现,留下挂起的过程,
   // Let's ignore it and improve the test.
+  //我们忽略它并改进测试
+  //测试jdbc取消
   ignore("test jdbc cancel") {
     withJdbcStatement { statement =>
       val queries = Seq(
@@ -380,7 +389,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       rs2.close()
     }
   }
-
+  //测试添加jar
   test("test add jar") {
     withMultipleConnectionJdbcStatement(
       {
@@ -434,7 +443,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       }
     )
   }
-
+  //通过SET -v检查Hive版本
   test("Checks Hive version via SET -v") {
     withJdbcStatement { statement =>
       val resultSet = statement.executeQuery("SET -v")
@@ -447,7 +456,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       assert(conf.get("spark.sql.hive.version") === Some("1.2.1"))
     }
   }
-
+  //通过SET检查Hive版本
   test("Checks Hive version via SET") {
     withJdbcStatement { statement =>
       val resultSet = statement.executeQuery("SET")
@@ -460,7 +469,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
       assert(conf.get("spark.sql.hive.version") === Some("1.2.1"))
     }
   }
-
+  //具有输入路径的ADD JAR具有URL方案
   test("SPARK-11595 ADD JAR with input path having URL scheme") {
     withJdbcStatement { statement =>
       statement.executeQuery("SET spark.sql.hive.thriftServer.async=true")
@@ -511,7 +520,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
 
 class HiveThriftHttpServerSuite extends HiveThriftJdbcTest {
   override def mode: ServerMode.Value = ServerMode.http
-
+  //JDBC查询执行
   test("JDBC query execution") {
     withJdbcStatement { statement =>
       val queries = Seq(
@@ -530,7 +539,7 @@ class HiveThriftHttpServerSuite extends HiveThriftJdbcTest {
       }
     }
   }
-
+  //检查Hive版本
   test("Checks Hive version") {
     withJdbcStatement { statement =>
       val resultSet = statement.executeQuery("SET spark.sql.hive.version")
@@ -609,6 +618,7 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
     val driverClassPath = {
       // Writes a temporary log4j.properties and prepend it to driver classpath, so that it
       // overrides all other potential log4j configurations contained in other dependency jar files.
+      //写入一个临时log4j.properties并将其添加到驱动程序类路径中,以便它覆盖其他依赖项jar文件中包含的所有其他潜在的log4j配置
       val tempLog4jConf = Utils.createTempDir().getCanonicalPath
 
       Files.write(
@@ -640,12 +650,14 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
   /**
    * String to scan for when looking for the the thrift binary endpoint running.
    * This can change across Hive versions.
+    * 查找节俭二进制端点运行时要扫描的字符串,这可以改变Hive版本
    */
   val THRIFT_BINARY_SERVICE_LIVE = "Starting ThriftBinaryCLIService on port"
 
   /**
    * String to scan for when looking for the the thrift HTTP endpoint running.
    * This can change across Hive versions.
+    * 字符串在查找节俭HTTP端点运行时进行扫描,这可以通过Hive版本进行更改
    */
   val THRIFT_HTTP_SERVICE_LIVE = "Started ThriftHttpCLIService in http"
 
@@ -676,9 +688,11 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
         command = command,
         extraEnvironment = Map(
           // Disables SPARK_TESTING to exclude log4j.properties in test directories.
+          //禁用SPARK_TESTING以排除测试目录中的log4j.properties
           "SPARK_TESTING" -> "0",
           // Points SPARK_PID_DIR to SPARK_HOME, otherwise only 1 Thrift server instance can be
           // started at a time, which is not Jenkins friendly.
+          //点SPARK_PID_DIR到SPARK_HOME,否则一次只能启动1个Thrift服务器实例,这不是Jenkins友好的
           "SPARK_PID_DIR" -> pidDir.getCanonicalPath),
         redirectStderr = true)
 
@@ -692,12 +706,14 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
     val serverStarted = Promise[Unit]()
 
     // Ensures that the following "tail" command won't fail.
+    //确保以下“尾”命令不会失败
     logPath.createNewFile()
     val successLines = Seq(THRIFT_BINARY_SERVICE_LIVE, THRIFT_HTTP_SERVICE_LIVE)
 
     logTailingProcess = {
       val command = s"/usr/bin/env tail -n +0 -f ${logPath.getCanonicalPath}".split(" ")
       // Using "-n +0" to make sure all lines in the log file are checked.
+      //使用“-n +0”来确保日志文件中的所有行被检查
       val builder = new ProcessBuilder(command: _*)
       val captureOutput = (line: String) => diagnosisBuffer.synchronized {
         diagnosisBuffer += line
@@ -721,6 +737,7 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
 
   private def stopThriftServer(): Unit = {
     // The `spark-daemon.sh' script uses kill, which is not synchronous, have to wait for a while.
+    //`spark-daemon.sh'脚本使用kill,而不是同步的,不得不等待一段时间
     Utils.executeAndGetOutput(
       command = Seq(stopScript),
       extraEnvironment = Map("SPARK_PID_DIR" -> pidDir.getCanonicalPath))
@@ -758,6 +775,7 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
     diagnosisBuffer.clear()
 
     // Retries up to 3 times with different port numbers if the server fails to start
+    //如果服务器无法启动,请重试最多3次不同的端口号
     (1 to 3).foldLeft(Try(startThriftServer(listeningPort, 0))) { case (started, attempt) =>
       started.orElse {
         listeningPort += 1

@@ -72,7 +72,7 @@ class UISeleniumSuite
         |  --conf spark.ui.port=$uiPort
      """.stripMargin.split("\\s+").toSeq
   }
-
+  //节俭服务器ui测试
   ignore("thrift server ui test") {
     withJdbcStatement { statement =>
       val baseURL = s"http://localhost:$uiPort"
@@ -94,6 +94,7 @@ class UISeleniumSuite
         find(id("sqlstat")) should not be None
 
         // check whether statements exists
+        //检查是否存在语句
         queries.foreach { line =>
           findAll(cssSelector("""ul table tbody tr td""")).map(_.text).toList should contain (line)
         }

@@ -42,6 +42,7 @@ import org.apache.spark.{Logging, SparkContext}
 /**
  * The main entry point for the Spark SQL port of HiveServer2.  Starts up a `SparkSQLContext` and a
  * `HiveThriftServer2` thrift server.
+  * HiveServer2的Spark SQL端口的主要入口点,启动“SparkSQLContext”和“HiveThriftServer2”节俭服务器
  */
 object HiveThriftServer2 extends Logging {
   var LOG = LogFactory.getLog(classOf[HiveServer2])
@@ -51,6 +52,7 @@ object HiveThriftServer2 extends Logging {
   /**
    * :: DeveloperApi ::
    * Starts a new thrift server with the given context.
+    * 使用给定的上下文启动一个新的节俭服务器
    */
   @DeveloperApi
   def startWithContext(sqlContext: HiveContext): Unit = {
@@ -94,6 +96,8 @@ object HiveThriftServer2 extends Logging {
       }
       // If application was killed before HiveThriftServer2 start successfully then SparkSubmit
       // process can not exit, so check whether if SparkContext was stopped.
+      //如果应用程序在HiveThriftServer2启动成功之前被终止,那么SparkSubmit
+      //进程无法退出,因此请检查SparkContext是否停止.
       if (SparkSQLEnv.sparkContext.stopped.get()) {
         logError("SparkContext has stopped even if HiveServer2 has started, so exit")
         System.exit(-1)
@@ -149,6 +153,7 @@ object HiveThriftServer2 extends Logging {
 
   /**
    * A inner sparkListener called in sc.stop to clean up the HiveThriftServer2
+    * 在sc.stop中调用的内部sparkListener来清理HiveThriftServer2
    */
   private[thriftserver] class HiveThriftServer2Listener(
       val server: HiveServer2,
@@ -265,6 +270,7 @@ private[hive] class HiveThriftServer2(hiveContext: HiveContext)
   with ReflectedCompositeService {
   // state is tracked internally so that the server only attempts to shut down if it successfully
   // started, and then once only.
+  //状态在内部进行跟踪，以便服务器只有在成功的情况下才尝试关闭开始,然后一次
   private val started = new AtomicBoolean(false)
 
   override def init(hiveConf: HiveConf) {

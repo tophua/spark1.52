@@ -25,6 +25,7 @@ import org.apache.spark.{SparkContext, Logging, SparkException}
 /**
  * Spark Web UI tab that shows statistics of a streaming job.
  * This assumes the given SparkContext has enabled its SparkUI.
+  * Spark Web UI选项卡,显示流作业的统计信息,这假定给定的SparkContext启用了其SparkUI
  */
 private[thriftserver] class ThriftServerTab(sparkContext: SparkContext)
   extends SparkUITab(getSparkUI(sparkContext), "sqlserver") with Logging {
