@@ -32,11 +32,11 @@ import org.apache.spark.storage.BlockManagerMessages._
 import org.apache.spark.util.{ ThreadUtils, Utils }
 
 /**
- * 在Master跟踪所有Slave节点的Block的信息
  * BlockManagerMasterEndpoint is an [[ThreadSafeRpcEndpoint]] on the master node to track statuses
  * of all slaves' block managers.
- * Executor从ActorSystem获取BlockManagerMasterEndpoint的引用,然后给BlockManagerMasterEndpoint发送消息,
- * 实现和Driver交互.
+  * BlockManagerMasterEndpoint是主节点上的[[ThreadSafeRpcEndpoint]]来跟踪状态所有Slave节点的块管理
+  *
+  * 在Driver节点上的Actor,负责跟踪所有Slave节点的Block的信息
  */
 private[spark] class BlockManagerMasterEndpoint(
   override val rpcEnv: RpcEnv,

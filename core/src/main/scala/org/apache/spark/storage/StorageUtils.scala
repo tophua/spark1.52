@@ -25,7 +25,7 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * :: DeveloperApi ::
  * Storage information for each BlockManager.
- *每个BlockManager的存储信息
+ * 每个BlockManager存储的状态信息,
   *
  * This class assumes BlockId and BlockStatus are immutable, such that the consumers of this
  * class cannot mutate the source of the information. Accesses are not thread-safe.
@@ -143,7 +143,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
    * Return whether the given block is stored in this block manager in O(1) time.
     * 在O（1）时间内返回给定的块是否存储在该块管理器中。
    * Note that this is much faster than `this.blocks.contains`, which is O(blocks) time.
-    * 请注意，这比“this.blocks.contains”快得多，这是O（块）时间。
+    * 请注意，这比“this.blocks.contains”快得多,这是O(块)时间。
    */
   def containsBlock(blockId: BlockId): Boolean = {
     blockId match {
@@ -158,7 +158,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
    * Return the given block stored in this block manager in O(1) time.
     * 在O（1）时间内返回存储在此块管理器中的给定块
    * Note that this is much faster than `this.blocks.get`, which is O(blocks) time.
-    * 请注意，这比“this.blocks.get”快得多，这是O（块）时间。
+    * 请注意，这比“this.blocks.get”快得多,这是O(块)时间。
    */
   def getBlock(blockId: BlockId): Option[BlockStatus] = {
     blockId match {

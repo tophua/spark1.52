@@ -40,6 +40,7 @@ import org.apache.spark.util.{Clock, SystemClock, ThreadUtils, Utils}
  * 一个从存储在文件系统中的事件日志提供应用程序历史的类
  * This provider checks for new finished applications in the background periodically and
  * renders the history application UI by parsing the associated event logs.
+  * 该提供者定期检查后台新的已完成的应用程序,并通过解析关联的事件日志呈现历史记录应用程序UI
  */
 private[history] class FsHistoryProvider(conf: SparkConf, clock: Clock)
   extends ApplicationHistoryProvider with Logging {

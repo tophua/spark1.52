@@ -27,8 +27,11 @@ import org.apache.spark.storage.BlockManagerMessages._
 /**
  * An RpcEndpoint to take commands from the master to execute options. For example,
  * this is used to remove blocks from the slave's BlockManager.
- * 运行在所有Slave节点 上,接收BlockManagerMasterEndpoint的命令,例如:删除某个RDD的数据,删除某个Block
+  *一个RpcEndpoint从主机获取命令来执行选项,例如,这用于Slave节点的BlockManager中删除块
+  *
+ * 运行在所有Slave节点上,接收BlockManagerMasterEndpoint的命令,例如:删除某个RDD的数据,删除某个Block
  * 删除某个Shuffle数据,返回某些Block的状态
+  *
  * Block对应RDD中提到Partition,每个Partition对应一个Block,
  * 每个Block由唯一的BlockId标示格式"rdd_"+rddId+"_"+PartitionId
  */

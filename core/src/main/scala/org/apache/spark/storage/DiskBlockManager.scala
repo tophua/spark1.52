@@ -35,6 +35,8 @@ import org.apache.spark.util.{ShutdownHookManager, Utils}
  * Block files are hashed among the directories listed in spark.local.dir (or in
  * SPARK_LOCAL_DIRS, if it's set).
   * 阻止文件在spark.local.dir中列出的目录中进行散列(或者在SPARK_LOCAL_DIRS中设置)
+  *
+  * 管理和维护了逻辑上的Block和存储在Disk上的物理的Block的映射,一个逻辑的Block会根据它的BlockId生成的名字映射到一个物理上的文件
  */
 private[spark] class DiskBlockManager(blockManager: BlockManager, conf: SparkConf)
   extends Logging {

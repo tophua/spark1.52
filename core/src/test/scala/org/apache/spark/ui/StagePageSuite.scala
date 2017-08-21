@@ -35,6 +35,7 @@ class StagePageSuite extends SparkFunSuite with LocalSparkContext {
     val unsafeConf = "spark.sql.unsafe.enabled"
     val conf = new SparkConf(false).set(unsafeConf, "true")
     val html = renderStagePage(conf).toString().toLowerCase
+    println("===="+html)
     val targetString = "peak execution memory"
     assert(html.contains(targetString))
     // Disable unsafe and make sure it's not there

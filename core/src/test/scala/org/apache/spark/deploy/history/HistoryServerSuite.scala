@@ -289,7 +289,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
   def generateURL(path: String): URL = {
     new URL(s"http://localhost:$port/api/v1/$path")
   }
-
+  //产生期望
   def generateExpectation(name: String, path: String): Unit = {
     val json = getUrl(path)
     val file = new File(expRoot, HistoryServerSuite.sanitizePath(name) + "_expectation.json")
@@ -312,6 +312,7 @@ object HistoryServerSuite {
     try {
       suite.init()
       suite.cases.foreach { case (name, path) =>
+        println(name+"==="+path)
         suite.generateExpectation(name, path)
       }
     } finally {
@@ -355,7 +356,7 @@ object HistoryServerSuite {
     // 例如stage task summary w shuffle read == stage_task_summary_w_shuffle_read
     path.replaceAll("\\W", "_")
   }
-
+  //根据URL获得内容
   def getUrl(path: URL): String = {
     val (code, resultOpt, error) = getContentAndCode(path)
     if (code == 200) {

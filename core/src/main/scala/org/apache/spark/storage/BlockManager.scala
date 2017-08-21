@@ -61,6 +61,9 @@ private[spark] class BlockResult(
  * BlockManager创建的时候会持有一个BlockManagerMaster,
  * master BlockManagerMaster会把请求转发给BlockManagerMasterEndpoint来完成元数据的管理和维护.
  * Note that #initialize() must be called before the BlockManager is usable.
+  *
+  * BlockManager会运行在Driver和每个Executor上,而运行在Driver上的BlockManger负责整个Job的Block的管理工作,
+  * 运行在Executor上的BlockManger负责管理该Executor上的Block,并且向Driver的BlockManager汇报Block的信息和接收来自它的命令
  */
 private[spark] class BlockManager(
   executorId: String,

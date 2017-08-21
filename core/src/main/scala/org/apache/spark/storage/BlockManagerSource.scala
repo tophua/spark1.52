@@ -21,6 +21,10 @@ import com.codahale.metrics.{Gauge, MetricRegistry}
 
 import org.apache.spark.metrics.source.Source
 
+/**
+  * BlockManagerSource负责搜集Storage模块的Metric信息,包括最大的内存数,剩余的内存数,使用的内存数和使用的Disk大小
+  * @param blockManager
+  */
 private[spark] class BlockManagerSource(val blockManager: BlockManager)
     extends Source {
   override val metricRegistry = new MetricRegistry()

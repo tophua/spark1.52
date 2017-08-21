@@ -34,7 +34,7 @@ import org.apache.spark.util.Utils
  * manager. For remote blocks, it fetches them using the provided BlockTransferService.
   *
  *  获取多个块的迭代器,对于本地块,它从本地块管理器获取,对于远程块,它使用提供的BlockTransferService获取它们。
-  *
+  * 实现了取Shuffle的Blocks的逻辑,包括读取本地的和发起网络请求读取其他节点上
  * This creates an iterator of (BlockID, InputStream) tuples so the caller can handle blocks
  * in a pipelined fashion as they are received.
   *
