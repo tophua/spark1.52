@@ -36,6 +36,7 @@ class AppendOnlyMapSuite extends SparkFunSuite {
     val goodMap3 = new AppendOnlyMap[Int, Int](256)
     assert(goodMap3.size === 0)
     intercept[IllegalArgumentException] {
+      //无效的Map大小：大于2 ^ 29
       new AppendOnlyMap[Int, Int](1 << 30) // Invalid map size: bigger than 2^29
     }
     intercept[IllegalArgumentException] {

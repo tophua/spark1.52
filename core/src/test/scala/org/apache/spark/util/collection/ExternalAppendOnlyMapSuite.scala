@@ -36,6 +36,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     val conf = new SparkConf(loadDefaults)
     // Make the Java serializer write a reset instruction (TC_RESET) after each object to test
     // for a bug we had with bytes written past the last object in a batch (SPARK-2792)
+    //使Java序列化程序在每个对象之后写入一个复位指令(TC_RESET),以测试一个错误,我们用一个批次中写入了最后一个对象的字节(SPARK-2792)
     conf.set("spark.serializer.objectStreamReset", "1")
     conf.set("spark.serializer", "org.apache.spark.serializer.JavaSerializer")
     //spark.shuffle.spill用于指定Shuffle过程中如果内存中的数据超过阈值(参考spark.shuffle.memoryFraction的设置),
@@ -45,6 +46,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     ////用于压缩内部数据如 RDD分区和shuffle输出的编码解码器
     codec.foreach { c => conf.set("spark.io.compression.codec", c) }
     // Ensure that we actually have multiple batches per spill file
+    //确保每个溢出文件实际上有多个批次
     conf.set("spark.shuffle.spill.batchSize", "10")
     conf
   }
@@ -247,7 +249,9 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
 
   /**
    * Test spilling through simple aggregations and cogroups.
+    * 通过简单的聚合和共同组合测试溢出
    * If a compression codec is provided, use it. Otherwise, do not compress spills.
+    * 如果提供压缩编解码器,请使用它。否则,不要压缩泄漏
    */
   private def testSimpleSpilling(codec: Option[String] = None): Unit = {
     val conf = createSparkConf(loadDefaults = true, codec)  // Load defaults for Spark home
@@ -337,6 +341,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     val collisionPairsMap = (collisionPairs ++ collisionPairs.map(_.swap)).toMap
 
     // Avoid map.size or map.iterator.length because this destructively sorts the underlying map
+    //避免使用map.size或map.iterator.length,因为这是破坏性排序底层的地图
     var count = 0
 
     val it = map.iterator
@@ -349,7 +354,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     assert(count === 100000 + collisionPairs.size * 2)
     sc.stop()
   }
-
+  //溢出许多哈希冲突
   test("spilling with many hash collisions") {
     val conf = createSparkConf(loadDefaults = true)
     //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
@@ -360,6 +365,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
 
     // Insert 10 copies each of lots of objects whose hash codes are either 0 or 1. This causes
     // problems if the map fails to group together the objects with the same code (SPARK-2043).
+    //插入10个副本,每个对象的散列代码为0或1,这导致如果Map无法使用相同代码将对象分组在一起(SPARK-2043)的问题。
     for (i <- 1 to 10) {
       for (j <- 1 to 10000) {
         map.insert(FixedHashObject(j, j % 2), 1)
@@ -376,7 +382,7 @@ class ExternalAppendOnlyMapSuite extends SparkFunSuite with LocalSparkContext {
     assert(count === 10000)
     sc.stop()
   }
-
+  //使用Int.MaxValue键溢出哈希冲突
   test("spilling with hash collisions using the Int.MaxValue key") {
     val conf = createSparkConf(loadDefaults = true)
     //Shuffle过程中使用的内存达到总内存多少比例的时候开始Spill(临时写入外部存储或一直使用内存)
