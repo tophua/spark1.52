@@ -72,6 +72,7 @@ object JavaAPICompletenessChecker {
       // Base types might begin with "class" or "interface", so we have to strip that off:
       BaseType(typeStr.trim.split(" ").last)
     } else if (typeStr.endsWith("[]")) {
+      //stripSuffix去掉<string>字串中结尾的字符
       ParameterizedType("Array", Seq(parseType(typeStr.stripSuffix("[]"))))
     } else {
       val parts = typeStr.split("<", 2)

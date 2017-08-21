@@ -49,6 +49,7 @@ private[spark] object TestClient {
     
     val conf = new SparkConf
     val rpcEnv = RpcEnv.create("spark", Utils.localHostName(), 0, conf, new SecurityManager(conf))
+    //stripSuffix去掉<string>字串中结尾的字符
     val executorClassname = TestExecutor.getClass.getCanonicalName.stripSuffix("$")
     println("====executorClassname======"+executorClassname)
     val desc = new ApplicationDescription("TestClient", Some(1), 512,

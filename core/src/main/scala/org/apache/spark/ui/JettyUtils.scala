@@ -262,6 +262,7 @@ private[spark] object JettyUtils extends Logging {
   /** Attach a prefix to the given path, but avoid returning an empty path
     * 在给定的路径上附加一个前缀，但是避免返回一个空的路径 */
   private def attachPrefix(basePath: String, relativePath: String): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     if (basePath == "") relativePath else (basePath + relativePath).stripSuffix("/")
   }
 }

@@ -56,10 +56,13 @@ class SparkHadoopUtil extends Logging {
   /**
    * Runs the given function with a Hadoop UserGroupInformation as a thread local variable
    * (distributed to child threads), used for authenticating HDFS and YARN calls.
+    * 使用Hadoop UserGroupInformation作为线程局部变量(分布到子线程)运行给定函数,用于验证HDFS和YARN调用
    *
    * IMPORTANT NOTE: If this function is going to be called repeated in the same process
    * you need to look https://issues.apache.org/jira/browse/HDFS-3545 and possibly
    * do a FileSystem.closeAllForUGI in order to avoid leaking Filesystems
+    * 重要提示：如果此功能将在同一进程中重复使用,则需要查看https://issues.apache.org/jira/browse/HDFS-3545,
+    * 并且可能会执行FileSystem.closeAllForUGI以避免文件系统泄漏
    */
   def runAsSparkUser(func: () => Unit) {
     val user = Utils.getCurrentUserName()
@@ -83,15 +86,17 @@ class SparkHadoopUtil extends Logging {
   /**
    * Return an appropriate (subclass) of Configuration. Creating config can initializes some Hadoop
    * subsystems.
-   * 返回一个适合的配置文件
+   * 返回一个适当的(子类)的配置,创建配置可以初始化一些Hadoop子系统
    */
   def newConfiguration(conf: SparkConf): Configuration = {
     val hadoopConf = new Configuration()
 
     // Note: this null check is around more than just access to the "conf" object to maintain
     // the behavior of the old implementation of this code, for backwards compatibility.
+    //注意：这个空检查不仅仅是访问“conf”对象,以维护该代码的旧实现的行为,以便向后兼容。
     if (conf != null) {
       // Explicitly check for S3 environment variables
+      //明确检查S3环境变量
       if (System.getenv("AWS_ACCESS_KEY_ID") != null &&
           System.getenv("AWS_SECRET_ACCESS_KEY") != null) {
         hadoopConf.set("fs.s3.awsAccessKeyId", System.getenv("AWS_ACCESS_KEY_ID"))

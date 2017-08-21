@@ -100,6 +100,8 @@ class ShuffledRDD[K, V, C](
   }
   /**
    * 读取ShuffleMapTask计算结果的触发点
+    * ShuffledRDD 中的compute()只负责将属于每个partition的数据 fetch 过来,
+    * 之后使用 mapPartitions() 操作进行aggregate,生成MapPartitionsRDD
    */
   override def compute(split: Partition, context: TaskContext): Iterator[(K, C)] = {
     val dep = dependencies.head.asInstanceOf[ShuffleDependency[K, V, C]]

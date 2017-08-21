@@ -355,6 +355,7 @@ class SparkSubmitSuite
   test("launch simple application with spark-submit") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
+      //stripSuffix去掉<string>字串中结尾的字符
       "--class", SimpleApplicationTest.getClass.getName.stripSuffix("$"),
       "--name", "testApp",
       "--master", "local",
@@ -370,6 +371,7 @@ class SparkSubmitSuite
     val jar2 = TestUtils.createJarWithClasses(Seq("SparkSubmitClassB"))
     val jarsString = Seq(jar1, jar2).map(j => j.toString).mkString(",")
     val args = Seq(
+      //stripSuffix去掉<string>字串中结尾的字符
       "--class", JarCreationTest.getClass.getName.stripSuffix("$"),
       "--name", "testApp",
       "--master", "local-cluster[2,1,1024]",
@@ -387,6 +389,7 @@ class SparkSubmitSuite
     val dep = MavenCoordinate("my.great.dep", "mylib", "0.1")
     IvyTestUtils.withRepository(main, Some(dep.toString), None) { repo =>
       val args = Seq(
+        //stripSuffix去掉<string>字串中结尾的字符
         "--class", JarCreationTest.getClass.getName.stripSuffix("$"),
         "--name", "testApp",
        // "--master", "local-cluster[2,1,1024]",
@@ -539,6 +542,7 @@ class SparkSubmitSuite
     val systemJar = TestUtils.createJarWithFiles(Map("test.resource" -> "SYSTEM"))
     val userJar = TestUtils.createJarWithFiles(Map("test.resource" -> "USER"))
     val args = Seq(
+      //stripSuffix去掉<string>字串中结尾的字符
       "--class", UserClasspathFirstTest.getClass.getName.stripSuffix("$"),
       "--name", "testApp",
       "--master", "local",
@@ -557,6 +561,7 @@ class SparkSubmitSuite
       println("===="+path)
       val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
       val args = Seq(
+        //stripSuffix去掉<string>字串中结尾的字符
         "--class", SimpleApplicationTest.getClass.getName.stripSuffix("$"),
         "--name", "testApp",
         "--master", "local",

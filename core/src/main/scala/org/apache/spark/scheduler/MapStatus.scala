@@ -44,6 +44,7 @@ private[spark] sealed trait MapStatus {
    * If a block is non-empty, then this method MUST return a non-zero size.  This invariant is
    * necessary for correctness, since block fetchers are allowed to skip zero-size blocks.
     * 如果块不为空,则该方法务必返回非零大小,这种不变性对于正确性是必需的,因为块抓取器被允许跳过零大小的块。
+    *  task 输出的每个 FileSegment 大小
    */
   def getSizeForBlock(reduceId: Int): Long
 }

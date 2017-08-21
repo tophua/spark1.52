@@ -45,10 +45,13 @@ private[spark] object TestClient {
   }
 
   def main(args: Array[String]) {
-    val url = if(args.isEmpty) "172.0.0.1" else args(0)
+    val url = if(args.isEmpty) "127.0.0.1" else args(0)
     
     val conf = new SparkConf
     val rpcEnv = RpcEnv.create("spark", Utils.localHostName(), 0, conf, new SecurityManager(conf))
+    val executorClassnamea = TestExecutor.getClass.getCanonicalName
+    println("====executorClassname======"+executorClassnamea)
+    //stripSuffix返回这个字符串,给定的`suffix`剥离。 如果这个字符串不以`suffix'结尾,那么它不会被返回
     val executorClassname = TestExecutor.getClass.getCanonicalName.stripSuffix("$")
     println("====executorClassname======"+executorClassname)
     val desc = new ApplicationDescription("TestClient", Some(1), 512,

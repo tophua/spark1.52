@@ -527,6 +527,7 @@ class SparkILoop(
         // we have to drop the $ to find object Foo, then tack it back onto
         // the end of the flattened name.
         def className  = intp flatName path
+        //stripSuffix去掉<string>字串中结尾的字符
         def moduleName = (intp flatName path.stripSuffix(MODULE_SUFFIX_STRING)) + MODULE_SUFFIX_STRING
 
         val bytes = super.tryClass(className)

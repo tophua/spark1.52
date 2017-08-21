@@ -63,6 +63,7 @@ class HiveSparkSubmitSuite
     val jar4 = TestHive.getHiveFile("hive-hcatalog-core-0.13.1.jar").getCanonicalPath
     val jarsString = Seq(jar1, jar2, jar3, jar4).map(j => j.toString).mkString(",")
     val args = Seq(
+      //stripSuffix去掉<string>字串中结尾的字符
       "--class", SparkSubmitClassLoaderTest.getClass.getName.stripSuffix("$"),
       "--name", "SparkSubmitClassLoaderTest",
       "--master", "local-cluster[2,1,1024]",
@@ -76,6 +77,7 @@ class HiveSparkSubmitSuite
   ignore("SPARK-8020: set sql conf in spark conf") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
+      //stripSuffix去掉<string>字串中结尾的字符
       "--class", SparkSQLConfTest.getClass.getName.stripSuffix("$"),
       "--name", "SparkSQLConfTest",
       "--master", "local-cluster[2,1,1024]",
@@ -103,6 +105,7 @@ class HiveSparkSubmitSuite
   ignore("SPARK-9757 Persist Parquet relation with decimal column") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
+      //stripSuffix去掉<string>字串中结尾的字符
       "--class", SPARK_9757.getClass.getName.stripSuffix("$"),
       "--name", "SparkSQLConfTest",
       "--master", "local-cluster[2,1,1024]",
@@ -113,6 +116,7 @@ class HiveSparkSubmitSuite
   ignore("SPARK-11009 fix wrong result of Window function in cluster mode") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
+      //stripSuffix去掉<string>字串中结尾的字符
       "--class", SPARK_11009.getClass.getName.stripSuffix("$"),
       "--name", "SparkSQLConfTest",
       "--master", "local-cluster[2,1,1024]",

@@ -179,6 +179,7 @@ object GenerateMIMAIgnore {
     val classes = mutable.HashSet[Class[_]]()
     for (entry <- enums if entry.endsWith(".class")) {
       try {
+        //stripSuffix去掉<string>字串中结尾的字符
         classes += Class.forName(entry.replace('/', '.').stripSuffix(".class"), false, classLoader)
       } catch {
         // scalastyle:off println

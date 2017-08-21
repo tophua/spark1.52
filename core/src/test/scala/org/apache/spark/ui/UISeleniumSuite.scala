@@ -69,6 +69,7 @@ private[spark] class SparkUICssErrorHandler extends DefaultCssErrorHandler {
 /**
  * Selenium tests for the Spark Web UI.
   * Selenium测试Spark Web UI
+  * Selenium测试工具
  */
 class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with BeforeAndAfterAll {
 
@@ -105,25 +106,35 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
     assert(sc.ui.isDefined)
     sc
   }
-  //应该反映unpersist()/ persist()的效果
+  //应该体现unpersist()/ persist()的效果
   test("effects of unpersist() / persist() should be reflected") {
     // Regression test for SPARK-2527
+    //
     withSpark(newSparkContext()) { sc =>
       val ui = sc.ui.get
       val rdd = sc.parallelize(Seq(1, 2, 3))
       rdd.persist(StorageLevels.DISK_ONLY).count()
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(ui, "/storage")
+        //ParallelCollectionRDD Disk Serialized 1x Replicated 1 100% 0.0 B 0.0 B 101.0 B
         val tableRowText = findAll(cssSelector("#storage-by-rdd-table td")).map(_.text).toSeq
+        println(tableRowText.mkString(" "))
+        //Disk Serialized 1x Replicated
+        println(StorageLevels.DISK_ONLY.description)
+        //tableRowText.foreach(println _)
         tableRowText should contain (StorageLevels.DISK_ONLY.description)
       }
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(ui, "/storage/rdd/?id=0")
+        //rdd_0_0 Disk Serialized 1x Replicated 0.0 B 101.0 B localhost:39446
         val tableRowText = findAll(cssSelector("#rdd-storage-by-block-table td")).map(_.text).toSeq
+        println(tableRowText.mkString(" "))
+        //Disk Serialized 1x Replicated
         tableRowText should contain (StorageLevels.DISK_ONLY.description)
       }
 
       val storageJson = getJson(ui, "storage/rdd")
+      println(storageJson.toOption.mkString(" "))
       storageJson.children.length should be (1)
       (storageJson \ "storageLevel").extract[String] should be (StorageLevels.DISK_ONLY.description)
       val rddJson = getJson(ui, "storage/rdd/0")
@@ -134,19 +145,24 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(ui, "/storage")
         val tableRowText = findAll(cssSelector("#storage-by-rdd-table td")).map(_.text).toSeq
+        println(tableRowText.mkString(" "))
         tableRowText should contain (StorageLevels.MEMORY_ONLY.description)
       }
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(ui, "/storage/rdd/?id=0")
         val tableRowText = findAll(cssSelector("#rdd-storage-by-block-table td")).map(_.text).toSeq
+        println(tableRowText.mkString(" "))
         tableRowText should contain (StorageLevels.MEMORY_ONLY.description)
       }
 
       val updatedStorageJson = getJson(ui, "storage/rdd")
+      println(updatedStorageJson.toOption.mkString(" "))
       updatedStorageJson.children.length should be (1)
+
       (updatedStorageJson \ "storageLevel").extract[String] should be (
         StorageLevels.MEMORY_ONLY.description)
       val updatedRddJson = getJson(ui, "storage/rdd/0")
+      println(updatedRddJson.toOption.mkString(" "))
       (updatedRddJson  \ "storageLevel").extract[String] should be (
         StorageLevels.MEMORY_ONLY.description)
     }
@@ -160,6 +176,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       }
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(sc, "/stages")
+        //因为我们隐藏空表
         find(id("active")) should be(None)  // Since we hide empty tables
         find(id("failed")).get.text should be("Failed Stages (1)")
       }
@@ -175,20 +192,28 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       }
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(sc, "/stages")
+        //因为我们隐藏空表
         find(id("active")) should be(None)  // Since we hide empty tables
         // The failure occurs before the stage becomes active, hence we should still show only one
         // failed stage, not two:
-        //失败发生在舞台活动之前，因此我们仍然只显示一个失败的阶段,而不是两个
+        //失败发生在阶段活动之前，因此我们仍然只显示一个失败的阶段,而不是两个
         find(id("failed")).get.text should be("Failed Stages (1)")
       }
-
+      //===List(Map(name -> collect at UISeleniumSuite.scala:175, schedulingPool -> default, stageId -> 0,
+      // outputBytes -> 0, outputRecords -> 0, diskBytesSpilled -> 0, numCompleteTasks -> 0, shuffleWriteBytes -> 0,
+      // shuffleReadBytes -> 0, attemptId -> 0, numActiveTasks -> 0, status -> FAILED, inputBytes -> 0,
+      // memoryBytesSpilled -> 0, inputRecords -> 0, details -> org.apache.spark.rdd.RDD.collect(RDD.scala:1056)
       val updatedStageJson = getJson(sc.ui.get, "stages")
+      println("==="+updatedStageJson.values)
       updatedStageJson should be (stageJson)
     }
   }
   //允许在webUI将stage和相应的job杀死
   test("spark.ui.killEnabled should properly control kill button display") {
+    //调用时计算
     def hasKillLink: Boolean = find(className("kill-link")).isDefined
+    //false
+    println(hasKillLink)
     def runSlowJob(sc: SparkContext) {
       sc.parallelize(1 to 10).map{x => Thread.sleep(10000); x}.countAsync()
     }
@@ -197,6 +222,8 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       runSlowJob(sc)
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(sc, "/stages")
+        //true 调用时计算hasKillLink
+        println(hasKillLink)
         assert(hasKillLink)
       }
     }
@@ -209,7 +236,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       }
     }
   }
-  
+  //作业页面不应显示作业组名称,除非在作业组中提交了一些作业
   test("jobs page should not display job group name unless some job was submitted in a job group") {
     withSpark(newSparkContext()) { sc =>
       // If no job has been run in a job group, then "(Job Group)" should not appear in the header
@@ -218,6 +245,8 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(sc, "/jobs")
         val tableHeaders = findAll(cssSelector("th")).map(_.text).toSeq
+        //Job Id Description Submitted Duration Stages: Succeeded/Total Tasks (for all stages): Succeeded/Total
+        println(tableHeaders.mkString(" "))
         tableHeaders should not contain "Job Id (Job Group)"
       }
       // Once at least one job has been run in a job group, then we should display the group name:
@@ -227,6 +256,8 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
         goToUi(sc, "/jobs")
         val tableHeaders = findAll(cssSelector("th")).map(_.text).toSeq
+        //Job Id (Job Group) Description Submitted Duration Stages: Succeeded/Total Tasks (for all stages): Succeeded/Total
+        println(tableHeaders.mkString(" "))
         tableHeaders should contain ("Job Id (Job Group)")
       }
 
@@ -243,21 +274,24 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
       }
     }
   }
-
-  test("job progress bars should handle stage / task failures") {//工作进度条应处理阶段/任务失败
+  //工作进度条应处理阶段/任务失败
+  test("job progress bars should handle stage / task failures") {
     withSpark(newSparkContext()) { sc =>
       val data = sc.parallelize(Seq(1, 2, 3), 1).map(identity).groupBy(identity)
+      //
       val shuffleHandle =
         data.dependencies.head.asInstanceOf[ShuffleDependency[_, _, _]].shuffleHandle
       // Simulate fetch failures:
       //模拟提取故障：
       val mappedData = data.map { x =>
+        //获得TaskContext
         val taskContext = TaskContext.get
         if (taskContext.taskAttemptId() == 1) {
           // Cause the post-shuffle stage to fail on its first attempt with a single task failure
-          //导致洗牌阶段在第一次尝试中失败，并导致单个任务失败
+          //导致洗牌阶段在第一次尝试中失败,并导致单个任务失败
           val env = SparkEnv.get
           val bmAddress = env.blockManager.blockManagerId
+
           val shuffleId = shuffleHandle.shuffleId
           val mapId = 0
           val reduceId = taskContext.partitionId()
@@ -470,6 +504,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
   }
   //杀死阶段POST / GET响应是正确的
   test("kill stage POST/GET response is correct") {
+    //获得响应代码
     def getResponseCode(url: URL, method: String): Int = {
       val connection = url.openConnection().asInstanceOf[HttpURLConnection]
       connection.setRequestMethod(method)
@@ -482,10 +517,16 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
     withSpark(newSparkContext(killEnabled = true)) { sc =>
       sc.parallelize(1 to 10).map{x => Thread.sleep(10000); x}.countAsync()
       eventually(timeout(5 seconds), interval(50 milliseconds)) {
+        //http://192.168.100.227:43336===http://192.168.100.227:43336
+        //去掉<string>字串中结尾的字符
+       println(sc.ui.get.appUIAddress+"==="+sc.ui.get.appUIAddress.stripSuffix("/"))
+        //http://192.168.100.227:43336/stages/stage/kill/?id=0&terminate=true
         val url = new URL(
+          //stripSuffix去掉<string>字串中结尾的字符
           sc.ui.get.appUIAddress.stripSuffix("/") + "/stages/stage/kill/?id=0&terminate=true")
         // SPARK-6846: should be POST only but YARN AM doesn't proxy POST
         //SPARK-6846：应该是POST，但是YARN AM不代理POST
+        println("==="+url)
         getResponseCode(url, "GET") should be (200)
         getResponseCode(url, "POST") should be (200)
       }
@@ -642,6 +683,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
   }
 
   def goToUi(ui: SparkUI, path: String): Unit = {
+    //stripSuffix去掉<string>字串中结尾的字符
     go to (ui.appUIAddress.stripSuffix("/") + path)
   }
 

@@ -334,6 +334,7 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
         masterUrl = master.stripPrefix(prefix)
       }
     }
+    //stripSuffix去掉<string>字串中结尾的字符
     masterUrl = masterUrl.stripSuffix("/")
     s"http://$masterUrl/$PROTOCOL_VERSION/submissions"
   }

@@ -34,7 +34,7 @@ class RunLengthEncodingSuite extends SparkFunSuite {
   def testRunLengthEncoding[T <: AtomicType](
       columnStats: ColumnStats,
       columnType: NativeColumnType[T]) {
-
+    //stripSuffix去掉<string>字串中结尾的字符
     val typeName = columnType.getClass.getSimpleName.stripSuffix("$")
 
     def skeleton(uniqueValueCount: Int, inputRuns: Seq[(Int, Int)]) {

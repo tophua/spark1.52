@@ -121,6 +121,7 @@ case class Hour(child: Expression) extends UnaryExpression with ImplicitCastInpu
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, c => s"$dtu.getHours($c)")
   }
@@ -137,6 +138,7 @@ case class Minute(child: Expression) extends UnaryExpression with ImplicitCastIn
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, c => s"$dtu.getMinutes($c)")
   }
@@ -153,6 +155,7 @@ case class Second(child: Expression) extends UnaryExpression with ImplicitCastIn
   }
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, c => s"$dtu.getSeconds($c)")
   }
@@ -169,6 +172,7 @@ case class DayOfYear(child: Expression) extends UnaryExpression with ImplicitCas
   }
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, c => s"$dtu.getDayInYear($c)")
   }
@@ -186,6 +190,7 @@ case class Year(child: Expression) extends UnaryExpression with ImplicitCastInpu
   }
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, c => s"$dtu.getYear($c)")
   }
@@ -202,6 +207,7 @@ case class Quarter(child: Expression) extends UnaryExpression with ImplicitCastI
   }
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, c => s"$dtu.getQuarter($c)")
   }
@@ -218,6 +224,7 @@ case class Month(child: Expression) extends UnaryExpression with ImplicitCastInp
   }
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, c => s"$dtu.getMonth($c)")
   }
@@ -234,6 +241,7 @@ case class DayOfMonth(child: Expression) extends UnaryExpression with ImplicitCa
   }
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, c => s"$dtu.getDayOfMonth($c)")
   }
@@ -410,6 +418,7 @@ case class UnixTimestamp(timeExp: Expression, format: Expression)
           }
         """
       case DateType =>
+        //stripSuffix去掉<string>字串中结尾的字符
         val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
         val eval1 = left.gen(ctx)
         s"""
@@ -524,6 +533,7 @@ case class LastDay(startDate: Expression) extends UnaryExpression with ImplicitC
   }
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, sd => s"$dtu.getLastDayOfMonth($sd)")
   }
@@ -560,6 +570,7 @@ case class NextDay(startDate: Expression, dayOfWeek: Expression)
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
     nullSafeCodeGen(ctx, ev, (sd, dowS) => {
+      //stripSuffix去掉<string>字串中结尾的字符
       val dateTimeUtilClass = DateTimeUtils.getClass.getName.stripSuffix("$")
       val dayOfWeekTerm = ctx.freshName("dayOfWeek")
       if (dayOfWeek.foldable) {
@@ -611,6 +622,7 @@ case class TimeAdd(start: Expression, interval: Expression)
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, (sd, i) => {
       s"""$dtu.timestampAddInterval($sd, $i.months, $i.microseconds)"""
@@ -634,6 +646,7 @@ case class FromUTCTimestamp(left: Expression, right: Expression)
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     if (right.foldable) {
       val tz = right.eval()
@@ -686,6 +699,7 @@ case class TimeSub(start: Expression, interval: Expression)
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, (sd, i) => {
       s"""$dtu.timestampAddInterval($sd, 0 - $i.months, 0 - $i.microseconds)"""
@@ -711,6 +725,7 @@ case class AddMonths(startDate: Expression, numMonths: Expression)
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, (sd, m) => {
       s"""$dtu.dateAddMonths($sd, $m)"""
@@ -736,6 +751,7 @@ case class MonthsBetween(date1: Expression, date2: Expression)
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     defineCodeGen(ctx, ev, (l, r) => {
       s"""$dtu.monthsBetween($l, $r)"""
@@ -759,6 +775,7 @@ case class ToUTCTimestamp(left: Expression, right: Expression)
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
     if (right.foldable) {
       val tz = right.eval()
@@ -843,6 +860,7 @@ case class TruncDate(date: Expression, format: Expression)
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val dtu = DateTimeUtils.getClass.getName.stripSuffix("$")
 
     if (format.foldable) {

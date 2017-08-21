@@ -201,7 +201,10 @@ private[spark] object Utils extends Logging {
   }
 
   // scalastyle:off classforname
-  /** Preferred alternative(优先选择) to Class.forName(className) */
+  /**
+    * Preferred alternative to Class.forName(className)
+    * Class.forName(className)的首选替代方法
+    *  */
   def classForName(className: String): Class[_] = {
     Class.forName(className, true, getContextOrSparkClassLoader)
     // scalastyle:on classforname
@@ -231,8 +234,9 @@ private[spark] object Utils extends Logging {
    * JDK equivalent of `chmod 700 file`.
     * JDK相当于`chmod 700 file`
    *
-   * @param file the file whose permissions will be modified
+   * @param file the file whose permissions will be modified 该文件的权限将被修改
    * @return true if the permissions were successfully changed, false otherwise.
+    *         如果权限成功更改,则为true,否则为false,
    */
   def chmod700(file: File): Boolean = {
     file.setReadable(false, false) &&
@@ -355,9 +359,12 @@ private[spark] object Utils extends Logging {
    * 构建一个用于身份验证的URI的集装箱信息,
    * This also sets the default authenticator to properly negotiation the
    * user/password based on the URI.
-   *
+    *
+   * 这还设置默认验证器,以根据URI正确协商用户/密码
+    *
    * Note this relies on the Authenticator.setDefault being set properly to decode
    * the user name and password. This is currently set in the SecurityManager.
+    * 请注意,这取决于Authenticator.setDefault正确设置以解码用户名和密码,这是当前在SecurityManager中设置的
    */
   def constructURIForAuthentication(uri: URI, securityMgr: SecurityManager): URI = {
     val userCred = securityMgr.getSecretKey()
@@ -463,11 +470,13 @@ private[spark] object Utils extends Logging {
     *   如果fileOverwrite为false，则抛出异常，
    *   - attempt to overwrite it otherwise.否则尝试覆盖它。
    *
-   * @param url URL that sourceFile originated from, for logging purposes.
-   * @param in InputStream to download.
-   * @param destFile File path to move tempFile to.
+   * @param url URL that sourceFile originated from, for logging purposes.s
+    *            ourceFile源自的URL,用于记录目的
+   * @param in InputStream to download. InputStream下载
+   * @param destFile File path to move tempFile to.将tempFile移动到的文件路径
    * @param fileOverwrite Whether to delete/overwrite an existing destFile that does not match
    *                      sourceFile
+    *                      是否删除/覆盖与sourceFile不匹配的现有destFile
    */
   private def downloadFile(
       url: String,
@@ -502,12 +511,14 @@ private[spark] object Utils extends Logging {
    *   - attempt to overwrite it otherwise.否则尝试覆盖它
    *
    * @param url URL that `sourceFile` originated from, for logging purposes.
-   * @param sourceFile File path to copy/move from.
-   * @param destFile File path to copy/move to.
+    *            “sourceFile”源自的URL，用于记录目的
+   * @param sourceFile File path to copy/move from.复制/移动的文件路径
+   * @param destFile File path to copy/move to.复制/移动到的文件路径
    * @param fileOverwrite Whether to delete/overwrite an existing `destFile` that does not match
-   *                      `sourceFile`
+   *                      `sourceFile`是否删除/覆盖与`sourceFile`不匹配的现有`destFile`
    * @param removeSourceFile Whether to remove `sourceFile` after / as part of moving/copying it to
    *                         `destFile`.
+    *                         是否删除`sourceFile`之后/作为移动/复制到`destFile`的一部分
    */
   private def copyFile(
       url: String,
@@ -1466,7 +1477,7 @@ private[spark] object Utils extends Logging {
     val shortForm =
       if (firstUserFile == "HiveSessionImpl.java") {
         // To be more user friendly, show a nicer string for queries submitted from the JDBC
-        // server.
+        // server.为了更加用户友好，为从JDBC服务器提交的查询显示更好的字符串。
         "Spark JDBC Server Query"
       } else {
         s"$lastSparkMethod at $firstUserFile:$firstUserLine"
@@ -1723,11 +1734,14 @@ private[spark] object Utils extends Logging {
   /**
    * Timing method based on iterations that permit JVM JIT optimization.
    * 基于迭代允许JVM的JIT优化配时方法
-   * @param numIters number of iterations
+   * @param numIters number of iterations 迭代次数
    * @param f function to be executed. If prepare is not None, the running time of each call to f
    *          must be an order of magnitude longer than one millisecond for accurate timing.
+    *          功能执行,如果准备不是无,每次调用f的运行时间必须比准确的时间长一个数量级以上,
    * @param prepare function to be executed before each call to f. Its running time doesn't count.
+    *                在每次调用f之前执行的功能,它的运行时间不算,
    * @return the total time across all iterations (not couting preparation time)
+    *         所有迭代的总时间（不计算准备时间）
    */
   def timeIt(numIters: Int)(f: => Unit, prepare: Option[() => Unit] = None): Long = {
     if (prepare.isEmpty) {

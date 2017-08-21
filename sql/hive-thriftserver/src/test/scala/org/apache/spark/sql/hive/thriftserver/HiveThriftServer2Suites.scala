@@ -587,7 +587,7 @@ abstract class HiveThriftJdbcTest extends HiveThriftServer2Test {
 
 abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAll with Logging {
   def mode: ServerMode.Value
-
+  //stripSuffix去掉<string>字串中结尾的字符
   private val CLASS_NAME = HiveThriftServer2.getClass.getCanonicalName.stripSuffix("$")
   private val LOG_FILE_MARK = s"starting $CLASS_NAME, logging to "
 

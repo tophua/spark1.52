@@ -26,7 +26,7 @@ import org.apache.spark.status.api.v1.TaskSorting._
 import org.apache.spark.ui.SparkUI
 import org.apache.spark.ui.jobs.JobProgressListener
 import org.apache.spark.ui.jobs.UIData.StageUIData
-
+//注解@Produces用于定义方法的响应实体的数据类型,可以定义一个或多个
 @Produces(Array(MediaType.APPLICATION_JSON))
 private[v1] class OneStageResource(ui: SparkUI) {
 

@@ -375,6 +375,7 @@ private class TestMasterInfo(val ip: String, val dockerId: DockerId, val logFile
       // on containers is a weird hash instead of the actual IP address.
       //因为容器上的主机名是一个奇怪的哈希而不是实际的IP地址,因此从“webuiaddress”(而不是“主机”)提取worker IP
       liveWorkerIPs = liveWorkers.map {
+        //stripSuffix去掉<string>字串中结尾的字符
         w => (w \ "webuiaddress").extract[String].stripPrefix("http://").stripSuffix(":8081")
       }
 

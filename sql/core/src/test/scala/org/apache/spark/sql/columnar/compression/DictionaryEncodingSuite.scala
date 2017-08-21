@@ -33,7 +33,7 @@ class DictionaryEncodingSuite extends SparkFunSuite {
   def testDictionaryEncoding[T <: AtomicType](
       columnStats: ColumnStats,
       columnType: NativeColumnType[T]) {
-
+    //stripSuffix去掉<string>字串中结尾的字符
     val typeName = columnType.getClass.getSimpleName.stripSuffix("$")
 
     def buildDictionary(buffer: ByteBuffer) = {

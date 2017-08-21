@@ -51,6 +51,7 @@ abstract class DataType extends AbstractDataType {
   def defaultSize: Int
 
   /** Name of the type used in JSON serialization. */
+  //stripSuffix去掉<string>字串中结尾的字符
   def typeName: String = this.getClass.getSimpleName.stripSuffix("$").dropRight(4).toLowerCase
 
   private[sql] def jsonValue: JValue = typeName

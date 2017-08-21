@@ -82,6 +82,7 @@ private[spark] abstract class WebUI(
     val pagePath = "/" + page.prefix
     val renderHandler = createServletHandler(pagePath,
       (request: HttpServletRequest) => page.render(request), securityManager, basePath)
+    //stripSuffix去掉<string>字串中结尾的字符
     val renderJsonHandler = createServletHandler(pagePath.stripSuffix("/") + "/json",
       (request: HttpServletRequest) => page.renderJson(request), securityManager, basePath)
     attachHandler(renderHandler)
@@ -177,6 +178,7 @@ private[spark] abstract class WebUITab(parent: WebUI, val prefix: String) {
   /** Attach a page to this tab. This prepends the page's prefix with the tab's own prefix.
     * 将页面附加到此选项卡,这是使用标签自己的前缀添加页面的前缀 */
   def attachPage(page: WebUIPage) {
+    //stripSuffix去掉<string>字串中结尾的字符
     page.prefix = (prefix + "/" + page.prefix).stripSuffix("/")
     pages += page
   }

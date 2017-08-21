@@ -101,7 +101,7 @@ private[ui] class WorkerPage(parent: WorkerWebUI) extends WebUIPage("") {
     UIUtils.basicSparkPage(content, "Spark Worker at %s:%s".format(
       workerState.host, workerState.port))
   }
-
+  //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
   def executorRow(executor: ExecutorRunner): Seq[Node] = {
     <tr>
       <td>{executor.execId}</td>

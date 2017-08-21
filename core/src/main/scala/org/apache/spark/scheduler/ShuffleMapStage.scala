@@ -23,8 +23,9 @@ import org.apache.spark.storage.BlockManagerId
 import org.apache.spark.util.CallSite
 
 /**
- * The ShuffleMapStage represents the intermediate(中间) stages in a job.
- * 表示作业中间阶段(Stage),
+ * The ShuffleMapStage represents the intermediate stages in a job.
+ * ShuffleMapStage表示作业中的中间阶段(Stage)
+  * ShuffleMapStage(ShuffleMapTask 所在的 stage)
  */
 private[spark] class ShuffleMapStage(
     id: Int,

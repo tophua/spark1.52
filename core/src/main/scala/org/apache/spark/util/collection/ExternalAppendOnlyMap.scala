@@ -66,6 +66,9 @@ import org.apache.spark.executor.ShuffleWriteMetrics
  *   `spark.shuffle.safetyFraction` specifies an additional margin of safety as a fraction of
  *   this threshold, in case map size estimation is not sufficiently accurate.
   *   `spark.shuffle.safetyFraction`指定额外的安全边际,作为该阈值的一小部分,以防map尺寸估计不够准确。
+  *
+  *   内存＋磁盘使用的是ExternalAppendOnlyMap,如果内存空间不足时,ExternalAppendOnlyMap可以将 \ records 进行 sort 后 spill 到磁盘上,
+  *   等到需要它们的时候再进行归并
  */
 @DeveloperApi
 class ExternalAppendOnlyMap[K, V, C](

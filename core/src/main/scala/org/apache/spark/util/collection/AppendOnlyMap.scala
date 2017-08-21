@@ -39,7 +39,9 @@ import org.apache.spark.annotation.DeveloperApi
  * 该Mpa支持高达375809638(0.7 * 2 * 29)的元素。
  *
  * 缓存集合算法
- *
+  *
+ * 处理后的数据,内存使用的是AppendOnlyMap
+  * 如果spark.shuffle.spill = false就只用内存,内存使用的是AppendOnlyMap
  * TODO: Cache the hash values of each key? java.util.HashMap does that.
  */
 @DeveloperApi

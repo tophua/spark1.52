@@ -101,7 +101,7 @@ private[sql] sealed abstract class ColumnType[JvmType] {
    * Creates a duplicated copy of the value.
    */
   def clone(v: JvmType): JvmType = v
-
+  //stripSuffix去掉<string>字串中结尾的字符
   override def toString: String = getClass.getSimpleName.stripSuffix("$")
 }
 

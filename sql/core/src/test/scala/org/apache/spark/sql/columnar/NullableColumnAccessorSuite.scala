@@ -50,7 +50,7 @@ class NullableColumnAccessorSuite extends SparkFunSuite {
   //试验可为空的列的访问
   def testNullableColumnAccessor[JvmType](
       columnType: ColumnType[JvmType]): Unit = {
-
+    //stripSuffix去掉<string>字串中结尾的字符
     val typeName = columnType.getClass.getSimpleName.stripSuffix("$")
     val nullRow = makeNullRow(1)
     //空值

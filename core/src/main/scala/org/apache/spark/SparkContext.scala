@@ -501,6 +501,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     _eventLogDir =
       if (isEventLogEnabled) {
         val unresolvedDir = conf.get("spark.eventLog.dir", EventLoggingListener.DEFAULT_LOG_DIR)
+          //stripSuffix去掉<string>字串中结尾的字符
           .stripSuffix("/")
         Some(Utils.resolveURI(unresolvedDir))
       } else {

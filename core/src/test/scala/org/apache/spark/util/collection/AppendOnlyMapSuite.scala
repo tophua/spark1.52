@@ -22,7 +22,11 @@ import java.util.Comparator
 import scala.collection.mutable.HashSet
 
 import org.apache.spark.SparkFunSuite
-
+//迭代 AppendOnlyMap 中的元素的时候，从前到后扫描输出。
+//如果 Array 的利用率达到 70%，那么就扩张一倍，并对所有 key 进行 rehash 后，重新排列每个 key 的位置。
+//AppendOnlyMap 还有一个 destructiveSortedIterator(): Iterator[(K, V)] 方法，可以返回 Array 中排序后的 (K, V) pairs。
+// 实现方法很简单：先将所有 (K, V) pairs compact 到 Array 的前端，并使得每个 (K, V) 占一个位置（原来占两个），
+// 之后直接调用 Array.sort() 排序，不过这样做会破坏数组（key 的位置变化了）。
 class AppendOnlyMapSuite extends SparkFunSuite {
   test("initialization") {//初始化
     val goodMap1 = new AppendOnlyMap[Int, Int](1)

@@ -42,9 +42,10 @@ private[v1] class EventLogDownloadResource(
           case None => s"eventLogs-$appId.zip"
         }
       }
-
+      //实现StreamingOutput接口
       val stream = new StreamingOutput {
         override def write(output: OutputStream): Unit = {
+          //ZipOutputStream实现打包
           val zipStream = new ZipOutputStream(output)
           try {
             uIRoot.writeEventLogs(appId, attemptId, zipStream)

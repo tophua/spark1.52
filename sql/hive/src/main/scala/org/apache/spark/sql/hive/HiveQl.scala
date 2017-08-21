@@ -1539,6 +1539,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
           v = Literal.create(ast.getText.substring(0, ast.getText.length() - 1).toByte, ByteType)
         } else if (ast.getText.endsWith("BD") || ast.getText.endsWith("D")) {
           // Literal decimal
+          //stripSuffix去掉<string>字串中结尾的字符
           val strVal = ast.getText.stripSuffix("D").stripSuffix("B")
           v = Literal(Decimal(strVal))
         } else {

@@ -31,6 +31,8 @@ object TaskContext {
    * Return the currently active TaskContext. This can be called inside of
    * user functions to access contextual information about running tasks.
     * 返回当前运行的TaskContext(任务的上下文信息),这可以在用户函数内部调用,以访问有关运行任务的上下文信息。
+    *
+    * 返回此线程局部变量的当前线程副本中的值，如果这是线程第一次调用该方法，则创建并初始化此副本
    */
   def get(): TaskContext = taskContext.get
 
@@ -52,6 +54,13 @@ object TaskContext {
     * 1)每个线程都有一个独立于其他线程的上下文来保存这个变量,一个线程的本地变量对其他线程是不可见的
     * 2)ThreadLocal可以给一个初始值,而每个线程都会获得这个初始化值的一个副本,这样才能保证不同的线程都有一份拷贝。
     * 3)ThreadLocal不是用于解决共享变量的问题的,不是为了协调线程同步而存在,而是为了方便每个线程处理自己的状态而引入的一个机制
+    *
+    *ThreadLocal为每个线程的中并发访问的数据提供一个副本
+    *
+    *Synchronized用于线程间的数据共享,而ThreadLocal则用于线程间的数据隔离。
+    *synchronized是利用锁的机制,使变量或代码块在某一时该只能被一个线程访问。
+    * 而ThreadLocal为每一个线程都提供了变量的副本,使得每个线程在某一时间访问到的并不是同一个对象,这样就隔离了多个线程对数据的数据共享。
+    scala[]泛型
     */
 
   private[this] val taskContext: ThreadLocal[TaskContext] = new ThreadLocal[TaskContext]
@@ -60,7 +69,7 @@ object TaskContext {
   // showing up in JavaDoc.
   /**
    * Set the thread local TaskContext. Internal to Spark.
-   * 设置本地线程TaskContext,(任务的上下文信息)
+   * 设置线程局部变量的当前线程副本中的值TaskContext,(任务的上下文信息)
    */
   protected[spark] def setTaskContext(tc: TaskContext): Unit = taskContext.set(tc)
 

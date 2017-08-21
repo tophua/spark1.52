@@ -35,6 +35,7 @@ private[v1] class ApplicationListResource(uiRoot: UIRoot) {
     val allApps = uiRoot.getApplicationInfoList
     val adjStatus = {
       if (status.isEmpty) {
+        //可变参数时不能直接传入Range或集合或数组对象,需要使用:_*转换才可传入
         Arrays.asList(ApplicationStatus.values(): _*)
       } else {
         status

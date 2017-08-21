@@ -76,6 +76,7 @@ case class Like(left: Expression, right: Expression)
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
     val patternClass = classOf[Pattern].getName
+    //stripSuffix去掉<string>字串中结尾的字符
     val escapeFunc = StringUtils.getClass.getName.stripSuffix("$") + ".escapeLikeRegex"
     val pattern = ctx.freshName("pattern")
 

@@ -117,6 +117,7 @@ class DataSourceWithHiveMetastoreCatalogSuite extends DataSourceTest with SQLTes
           assert(hiveTable.serde === Some(serde))
 
           assert(hiveTable.tableType === ExternalTable)
+          //stripSuffix去掉<string>字串中结尾的字符
           assert(hiveTable.location.get === path.toURI.toString.stripSuffix(File.separator))
 
           val columns = hiveTable.schema

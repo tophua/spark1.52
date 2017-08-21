@@ -179,6 +179,7 @@ case class Conv(numExpr: Expression, fromBaseExpr: Expression, toBaseExpr: Expre
   }
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     val numconv = NumberConverter.getClass.getName.stripSuffix("$")
     nullSafeCodeGen(ctx, ev, (num, from, to) =>
       s"""
@@ -413,6 +414,7 @@ case class Hex(child: Expression) extends UnaryExpression with ImplicitCastInput
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
     nullSafeCodeGen(ctx, ev, (c) => {
+      //stripSuffix去掉<string>字串中结尾的字符
       val hex = Hex.getClass.getName.stripSuffix("$")
       s"${ev.primitive} = " + (child.dataType match {
         case StringType => s"""$hex.hex($c.getBytes());"""
@@ -438,6 +440,7 @@ case class Unhex(child: Expression) extends UnaryExpression with ImplicitCastInp
 
   override protected def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
     nullSafeCodeGen(ctx, ev, (c) => {
+      //stripSuffix去掉<string>字串中结尾的字符
       val hex = Hex.getClass.getName.stripSuffix("$")
       s"""
         ${ev.primitive} = $hex.unhex($c.getBytes());

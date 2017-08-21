@@ -30,16 +30,21 @@ import org.apache.spark.shuffle.ShuffleWriter
  *
  * A ShuffleMapTask divides the elements of an RDD into multiple buckets (based on a partitioner
  * specified in the ShuffleDependency).
- * Spark的ShuffleMapTask和ResultTask被划分到不同Stage,ShuffleMapTask执行完毕将中间结果输出到本地磁盘系统(如HDFS)
+  *
+  * ShuffleMapTask将RDD的元素分为多个桶(基于ShuffleDependency中指定的分区)
+ *
+  * Spark的ShuffleMapTask和ResultTask被划分到不同Stage,ShuffleMapTask执行完毕将中间结果输出到本地磁盘系统(如HDFS)
  * 然后下一个Stage中的ResultTask通过ShuffleClient下载ShuffleMapTask的输出到本地磁盘
  *
  * 将map处理的结果,传输到reduce上的过程叫Shuffle
+  * ShuffleMapTask是因为其计算结果需要shuffle到下一个stage,本质上相当于MapReduce中的 mapper
  * See [[org.apache.spark.scheduler.Task]] for more information.
- * @param stageId id of the stage this task belongs to
+ * @param stageId id of the stage this task belongs to 该任务所属的阶段的ID
  * @param taskBinary broadcast version of the RDD and the ShuffleDependency. Once deserialized,
  *                   the type should be (RDD[_], ShuffleDependency[_, _, _]).
- * @param partition partition of the RDD this task is associated with
- * @param locs preferred task execution locations for locality scheduling
+  *                  广播版本的RDD和ShuffleDependency,一旦反序列化,类型应该是(RDD [_],ShuffleDependency [_,_,_])
+ * @param partition partition of the RDD this task is associated with 该任务与RDD的分区
+ * @param locs preferred task execution locations for locality scheduling 用于地点调度的首选任务执行位置
  */
 private[spark] class ShuffleMapTask(
   stageId: Int,//stageId

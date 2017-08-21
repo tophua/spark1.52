@@ -20,7 +20,7 @@ import javax.ws.rs.{PathParam, GET, Produces}
 import javax.ws.rs.core.MediaType
 
 import org.apache.spark.ui.SparkUI
-
+//注解@Produces用于定义方法的响应实体的数据类型,可以定义一个或多个
 @Produces(Array(MediaType.APPLICATION_JSON))
 private[v1] class OneRDDResource(ui: SparkUI) {
 

@@ -46,7 +46,7 @@ class NullableColumnBuilderSuite extends SparkFunSuite {
 
   def testNullableColumnBuilder[JvmType](
       columnType: ColumnType[JvmType]): Unit = {
-
+    //stripSuffix去掉<string>字串中结尾的字符
     val typeName = columnType.getClass.getSimpleName.stripSuffix("$")
 
     test(s"$typeName column builder: empty column") {//空列

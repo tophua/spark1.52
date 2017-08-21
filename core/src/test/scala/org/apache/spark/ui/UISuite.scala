@@ -47,13 +47,14 @@ class UISuite extends SparkFunSuite {
     sc
   }
 
-  ignore("basic ui visibility") {//基本可见
+  test("basic ui visibility") {//基本可见
     //柯里化方法
     withSpark(newSparkContext()) { sc =>
       // test if the ui is visible, and all the expected tabs are visible
       //测试ui是否可见,并且所有预期的选项卡都可见
       eventually(timeout(10 seconds), interval(50 milliseconds)) {
         val html = Source.fromURL(sc.ui.get.appUIAddress).mkString
+        println("===="+html)
         assert(!html.contains("random data that should not be present"))
         assert(html.toLowerCase.contains("stages"))
         assert(html.toLowerCase.contains("storage"))
@@ -63,12 +64,13 @@ class UISuite extends SparkFunSuite {
     }
   }
 
-  ignore("visibility at localhost:4040") {//可见性
+  test("visibility at localhost:4040") {//可见性
     withSpark(newSparkContext()) { sc =>
       // test if visible from http://localhost:4040
-      //测试是否可以从http：// localhost：4040查看
+      //可以访问http://localhost:4040,本地启动spark-shell
       eventually(timeout(10 seconds), interval(50 milliseconds)) {
         val html = Source.fromURL("http://localhost:4040").mkString
+        println("===="+html)
         assert(html.toLowerCase.contains("stages"))
       }
     }
@@ -105,12 +107,15 @@ class UISuite extends SparkFunSuite {
       case Failure(e) =>
     }
   }
-  //验证appUIAddress包含该方案
+  //验证appUIAddress包含该http方案
   test("verify appUIAddress contains the scheme") {
     withSpark(newSparkContext()) { sc =>
       val ui = sc.ui.get
       val uiAddress = ui.appUIAddress
+
       val uiHostPort = ui.appUIHostPort
+      //http://192.168.100.227:4042===192.168.100.227:4042
+      println(uiAddress+"==="+uiHostPort)
       assert(uiAddress.equals("http://" + uiHostPort))
     }
   }
@@ -118,8 +123,10 @@ class UISuite extends SparkFunSuite {
   test("verify appUIAddress contains the port") {
     withSpark(newSparkContext()) { sc =>
       val ui = sc.ui.get
+      //http://192.168.100.227:4042
       val splitUIAddress = ui.appUIAddress.split(':')
       val boundPort = ui.boundPort
+      println(splitUIAddress.toList.mkString(",")+"==="+boundPort)
       assert(splitUIAddress(2).toInt == boundPort)
     }
   }

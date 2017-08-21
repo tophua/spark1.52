@@ -140,6 +140,7 @@ private[deploy] class Worker(
   //完成运行Executor
   val finishedExecutors = new LinkedHashMap[String, ExecutorRunner]
   val drivers = new HashMap[String, DriverRunner]
+  //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
   val executors = new HashMap[String, ExecutorRunner]
   val finishedDrivers = new LinkedHashMap[String, DriverRunner]
   val appDirectories = new HashMap[String, Seq[String]]
@@ -519,6 +520,7 @@ private[deploy] class Worker(
             }.toSeq
           }
           appDirectories(appId) = appLocalDirs
+          //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
           val manager = new ExecutorRunner(
             appId,
             execId,

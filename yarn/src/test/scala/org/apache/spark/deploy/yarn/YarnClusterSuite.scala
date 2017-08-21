@@ -321,6 +321,7 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
   }
 
   private def mainClassName(klass: Class[_]): String = {
+    //stripSuffix去掉<string>字串中结尾的字符
     klass.getName().stripSuffix("$")
   }
 

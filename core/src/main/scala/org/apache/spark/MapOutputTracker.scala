@@ -99,6 +99,10 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
      * Note: because mapStatuses is accessed concurrently, subclasses should make sure it's a
      * thread-safe map.
     * 注意：由于mapStatuses被并发访问,子类应该确保它是线程安全的映射
+    *
+    * ShuffleMapTask 完成时已经送到了 driver 的 mapOutputTrackerMaster,并存放到了 mapStatuses: HashMap 里面
+    * 给定 stageId,可以获取该 stage 中 ShuffleMapTasks 生成的 FileSegments 信息 Array[MapStatus],
+    * 通过 Array(taskId) 就可以得到某个 task 输出的 FileSegments 位置（blockManagerId）及每个 FileSegment 大小
    */
   protected val mapStatuses: Map[Int, Array[MapStatus]]
 

@@ -47,6 +47,7 @@ trait Logging {
   protected def logName = {
     // Ignore trailing $'s in the class names for Scala objects
     //忽略后面的$在Scala对象类的名称
+    //stripSuffix去掉<string>字串中结尾的字符
     this.getClass.getName.stripSuffix("$")
   }
 

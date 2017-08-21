@@ -463,6 +463,7 @@ private[spark] object UIUtils extends Logging {
           n match {
             case e: Elem if e \ "@href" nonEmpty =>
               val relativePath = e.attribute("href").get.toString
+              //stripSuffix去掉<string>字串中结尾的字符
               val fullUri = s"${basePathUri.stripSuffix("/")}/${relativePath.stripPrefix("/")}"
               e % Attribute(null, "href", fullUri, Null)
             case _ => n

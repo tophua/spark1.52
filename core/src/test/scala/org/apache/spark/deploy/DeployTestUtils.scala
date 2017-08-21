@@ -53,8 +53,9 @@ private[deploy] object DeployTestUtils {
     workerInfo.lastHeartbeat = JsonConstants.currTimeInMillis
     workerInfo
   }
-
+  //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
   def createExecutorRunner(execId: Int): ExecutorRunner = {
+    //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
     new ExecutorRunner(
       "appId",
       execId,

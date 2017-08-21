@@ -36,7 +36,8 @@ object GroupByTest {
     var numReducers = if (args.length > 3) args(3).toInt else numMappers
 
     val sc = new SparkContext(sparkConf)
-
+    //parallelize() 产生最初的 ParrallelCollectionRDD，每个 partition 包含一个整数 i
+    //执行 RDD 上的 transformation 操作（这里是 flatMap）以后，生成 FlatMappedRDD，其中每个 partition 包含一个 Array[(Int, Array[Byte])]。
     val pairs1 = sc.parallelize(0 until numMappers, numMappers).flatMap { p =>
       val ranGen = new Random
       var arr1 = new Array[(Int, Array[Byte])](numKVPairs)
@@ -47,11 +48,16 @@ object GroupByTest {
         arr1(i) = (ranGen.nextInt(Int.MaxValue), byteArr)
       }
       arr1
+      //由于 FlatMappedRDD 被 cache 到内存
     }.cache()
     // Enforce that everything has been calculated and in cache
     //执行所有的计算和缓存
+    //第一个 count() 执行时，先在每个 partition 上执行 count，然后执行结果被发送到 driver，最后在 driver 端进行 sum
+    //产生了两个 job，第一个 job 由第一个 action（也就是 pairs1.count）触发产生
     pairs1.count()
+    //groupByKey 产生了后面两个 RDD
     //在一个由(K,V)对组成的数据集上调用,返回一个(K,Seq[V])对的数据集
+    //第二个 job 由 pairs1.groupByKey(numReducers).count 触发产生
     println(pairs1.groupByKey(numReducers).count())
 
     sc.stop()

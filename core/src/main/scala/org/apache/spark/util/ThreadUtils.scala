@@ -165,6 +165,7 @@ private[spark] object ThreadUtils {
         // was a helper method used, without any further details of the helper
         //结合两个堆栈跟踪,一个占位符只是指定使用了一个帮助方法,没有任何进一步的帮助细节
         val placeHolderStackElem = new StackTraceElement(
+          //stripSuffix去掉<string>字串中结尾的字符
           s"... run in separate thread using ${ThreadUtils.getClass.getName.stripSuffix("$")} ..",
           " ", "", -1)
         val finalStackTrace = extraStackTrace ++ Seq(placeHolderStackElem) ++ baseStackTrace

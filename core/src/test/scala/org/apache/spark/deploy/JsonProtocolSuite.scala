@@ -49,8 +49,9 @@ class JsonProtocolSuite extends SparkFunSuite with JsonTestUtils {
     assertValidJson(output)
     assertValidDataInJson(output, JsonMethods.parse(JsonConstants.appDescJsonStr))
   }
-
+  //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
   test("writeExecutorRunner") {//写运行的执行者
+  //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
     val output = JsonProtocol.writeExecutorRunner(createExecutorRunner(123))
     assertValidJson(output)
     assertValidDataInJson(output, JsonMethods.parse(JsonConstants.executorRunnerJsonStr))
@@ -77,7 +78,9 @@ class JsonProtocolSuite extends SparkFunSuite with JsonTestUtils {
   }
 
   test("writeWorkerState") {//写工作节点状态
+  //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
     val executors = List[ExecutorRunner]()
+    //Worker 通过持有 ExecutorRunner 对象来控制 CoarseGrainedExecutorBackend 的启停
     val finishedExecutors = List[ExecutorRunner](createExecutorRunner(123),
       createExecutorRunner(123))
     val drivers = List(createDriverRunner("driverId"))

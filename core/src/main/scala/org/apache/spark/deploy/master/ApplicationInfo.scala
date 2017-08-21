@@ -46,6 +46,7 @@ private[spark] class ApplicationInfo(
   //执行者的数量这个应用程序可以在任何给定的时间
   // By default, this is infinite. Only after the first allocation request is issued by the
   // application will this be set to a finite value. This is used for dynamic allocation.
+  //默认情况下,这是无限的,只有在应用程序发出第一个分配请求之后,这将被设置为有限的值,这用于动态分配
   @transient private[master] var executorLimit: Int = _
 
   @transient private var nextExecutorId: Int = _

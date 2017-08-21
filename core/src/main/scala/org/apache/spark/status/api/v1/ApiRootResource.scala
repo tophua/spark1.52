@@ -208,7 +208,7 @@ private[spark] object ApiRootResource {
  * This trait is shared by the all the root containers for application UI information --
  * the HistoryServer, the Master UI, and the application UI.  This provides the common
  * interface needed for them all to expose application info as json.
-  * 该特性由应用程序UI信息的所有根容器共享 - HistoryServer，主UI和应用程序UI,这提供了他们所有的公共接口，以将应用信息公开为json
+  * 该特性由应用程序UI信息的所有根容器共享 - HistoryServer,主UI和应用程序UI,这提供了他们所有的公共接口,以将应用信息公开为json
  */
 private[spark] trait UIRoot {
   def getSparkUI(appKey: String): Option[SparkUI]
