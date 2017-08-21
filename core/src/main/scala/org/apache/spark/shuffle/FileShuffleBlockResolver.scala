@@ -52,18 +52,29 @@ private[spark] trait ShuffleWriterGroup {
  * blocks are aggregated into the same file. There is one "combined shuffle file" per reducer
  * per concurrently executing shuffle task. As soon as a task finishes writing to its shuffle
  * files, it releases them for another task.
+  *
+  * 作为减少生成的物理随机播放文件数量的优化,多个shuffle块被聚合到同一个文件中,每个并发执行随机播放任务,每个reducer有一个“组合shuffle文件”
+  * 一旦任务完成对其随机播放文件的写入,它将释放它们用于另一个任务。
+  *
  * Regarding the implementation of this feature, shuffle files are identified by a 3-tuple:
- *   - shuffleId: The unique id given to the entire shuffle stage.
- *   - bucketId: The id of the output partition (i.e., reducer id)
+  * 关于此功能的实现,随机播放文件由3元组标识：
+ *   - shuffleId: The unique id given to the entire shuffle stage.给予整个洗牌阶段的唯一身份
+ *   - bucketId: The id of the output partition (i.e., reducer id)输出分区的id（即reducer id）
  *   - fileId: The unique id identifying a group of "combined shuffle files." Only one task at a
  *       time owns a particular fileId, and this id is returned to a pool when the task finishes.
+  *      识别一组“组合的shuffle文件”的唯一ID,一次只有一个任务拥有一个特定的fileId,当任务完成时,这个id返回给一个池
  * Each shuffle file is then mapped to a FileSegment, which is a 3-tuple (file, offset, length)
  * that specifies where in a given file the actual block data is located.
+  * 然后将每个随机shuffle文件映射到FileSegment,FileSegment是一个3元组(文件,偏移量,长度),用于指定给定文件中实际块数据所在的位置
  *
  * Shuffle file metadata is stored in a space-efficient manner. Rather than simply mapping
  * ShuffleBlockIds directly to FileSegments, each ShuffleFileGroup maintains a list of offsets for
  * each block stored in each file. In order to find the location of a shuffle block, we search the
  * files within a ShuffleFileGroups associated with the block's reducer.
+  *
+  *Shuffle文件元数据以节省空间的方式存储,而不是简单的映射ShuffleBlock直接转到FileSegments,
+  * 每个ShuffleFileGroup为每个文件中存储的每个块维护一个偏移量列表,为了找到混洗块的位置,
+  * 我们搜索与块的reducer相关联的ShuffleFileGroup中的文件。
  */
 // Note: Changes to the format in this file should be kept in sync with
 // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getHashBasedShuffleBlockData().
@@ -75,6 +86,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
   private lazy val blockManager = SparkEnv.get.blockManager
 
   // Turning off shuffle file consolidation causes all shuffle Blocks to get their own file.
+  //关闭随机文件整合将导致所有shuffle块获取自己的文件
   // TODO: Remove this once the shuffle file consolidation feature is stable.
   //如果为true,在shuffle时就合并中间文件,对于有大量Reduce任务的shuffle来说,合并文件可 以提高文件系统性能,
   //如果使用的是ext4 或 xfs 文件系统,建议设置为true；对于ext3,由于文件系统的限制,设置为true反而会使内核>8的机器降低性能
@@ -114,7 +126,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
    * Get a ShuffleWriterGroup for the given map task, which will register it as complete
    * when the writers are closed successfully
     * 为给定的地图任务获取一个ShuffleWriterGroup,当作者关闭成功时,它将注册为完整的
-    * //mapId对应RDD的partionsID
+    * mapId对应RDD的partionsID
    * 
    */
   def forMapTask(shuffleId: Int, mapId: Int, numBuckets: Int, serializer: Serializer,
