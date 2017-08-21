@@ -35,7 +35,7 @@ import org.apache.spark.network.buffer.ManagedBuffer
 import org.apache.spark.network.shuffle.BlockFetchingListener
 import org.apache.spark.shuffle.FetchFailedException
 
-
+//ShuffleBlockFetcherIterator实现了取Shuffle的Blocks的逻辑，包括读取本地的和发起网络请求读取其他节点上
 class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodTester {
   // Some of the tests are quite tricky because we are testing the cleanup behavior
   // in the presence of faults.

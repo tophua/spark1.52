@@ -25,7 +25,9 @@ import org.apache.spark.{SparkConf, SparkFunSuite}
 import org.apache.spark.executor.ShuffleWriteMetrics
 import org.apache.spark.serializer.JavaSerializer
 import org.apache.spark.util.Utils
-
+//用于将JVM对象直接写入磁盘上的文件的类
+//支持直接写入一个文件到Disk,并且还支持文件的append,实际上它是org.apache.spark.storage.BlockObjectWriter的一个实现。
+// 现在下面的类在需要Spill数据到Disk时,就是通过它来完成的
 class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   var tempDir: File = _

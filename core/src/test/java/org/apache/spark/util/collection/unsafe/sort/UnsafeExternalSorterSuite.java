@@ -83,6 +83,11 @@ public class UnsafeExternalSorterSuite {
   SparkConf sparkConf;
   File tempDir;
   ShuffleMemoryManager shuffleMemoryManager;
+    /**
+     * BlockManager会运行在Driver和每个Executor上,
+     * 而运行在Driver上的BlockManger负责整个Job的Block的管理工作；
+     * 运行在Executor上的BlockManger负责管理该Executor上的Block,并且向Driver的BlockManager汇报Block的信息和接收来自它的命令
+     */
   @Mock(answer = RETURNS_SMART_NULLS) BlockManager blockManager;
   @Mock(answer = RETURNS_SMART_NULLS) DiskBlockManager diskBlockManager;
   @Mock(answer = RETURNS_SMART_NULLS) TaskContext taskContext;
@@ -116,6 +121,11 @@ public class UnsafeExternalSorterSuite {
         return Tuple2$.MODULE$.apply(blockId, file);
       }
     });
+      /**
+       * BlockManager会运行在Driver和每个Executor上,
+       * 而运行在Driver上的BlockManger负责整个Job的Block的管理工作；
+       * 运行在Executor上的BlockManger负责管理该Executor上的Block,并且向Driver的BlockManager汇报Block的信息和接收来自它的命令
+       */
     when(blockManager.getDiskWriter(
       any(BlockId.class),
       any(File.class),
@@ -137,6 +147,11 @@ public class UnsafeExternalSorterSuite {
         );
       }
     });
+      /**
+       * BlockManager会运行在Driver和每个Executor上,
+       * 而运行在Driver上的BlockManger负责整个Job的Block的管理工作；
+       * 运行在Executor上的BlockManger负责管理该Executor上的Block,并且向Driver的BlockManager汇报Block的信息和接收来自它的命令
+       */
     when(blockManager.wrapForCompression(any(BlockId.class), any(InputStream.class)))
       .then(returnsSecondArg());
   }

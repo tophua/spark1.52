@@ -26,7 +26,8 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 
 import org.apache.spark.{SparkConf, SparkFunSuite}
 import org.apache.spark.util.Utils
-
+//DiskBlockManager管理和维护了逻辑上的Block和存储在Disk上的物理的Block的映射。
+//一般来说,一个逻辑的Block会根据它的BlockId生成的名字映射到一个物理上的文件
 class DiskBlockManagerSuite extends SparkFunSuite with BeforeAndAfterEach with BeforeAndAfterAll {
   private val testConf = new SparkConf(false)
   private var rootDir0: File = _

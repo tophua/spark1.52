@@ -50,7 +50,12 @@ private[spark] abstract class ExternalBlockManager {
    *
    * @throws java.io.IOException if there is any file system failure during the initialization.
     *                             如果在初始化期间有任何文件系统故障
-   */
+    *
+    * BlockManager会运行在Driver和每个Executor上,
+    * 而运行在Driver上的BlockManger负责整个Job的Block的管理工作；
+    * 运行在Executor上的BlockManger负责管理该Executor上的Block,并且向Driver的BlockManager汇报Block的信息和接收来自它的命令
+    */
+
   def init(blockManager: BlockManager, executorId: String): Unit = {
     this.blockManager = blockManager
   }
