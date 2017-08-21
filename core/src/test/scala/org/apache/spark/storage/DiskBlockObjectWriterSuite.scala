@@ -44,15 +44,17 @@ class DiskBlockObjectWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
     val file = new File(tempDir, "somefile")
     val writeMetrics = new ShuffleWriteMetrics()
     //注意os => os 匿名方法传递os方法名称
+    //用于将JVM对象直接写入磁盘上的文件的类,该类允许将数据附加到现有块,
     val writer = new DiskBlockObjectWriter(new TestBlockId("0"), file,
       new JavaSerializer(new SparkConf()).newInstance(), 1024, os => os, true, writeMetrics)
     //Long.box将值类型转换为包装引用类型
+    //key value对
     writer.write(Long.box(20), Long.box(30))
     // Record metrics update on every write
     //记录每一个写的度量更新
     assert(writeMetrics.shuffleRecordsWritten === 1)
     // Metrics don't update on every write
-    //度量不更新在每一个写
+    //每次写入时,指标都不会更新
     assert(writeMetrics.shuffleBytesWritten == 0)
     // After 32 writes, metrics should update
     //32写后,指标应该更新

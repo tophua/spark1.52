@@ -24,7 +24,7 @@ import org.apache.spark.shuffle._
  * Hash Shuffle适合中小型规模的数据计算
  * A ShuffleManager using hashing, that creates one output file per reduce partition on each
  * mapper (possibly reusing these across waves of tasks).
-  * 一个ShuffleManager使用哈希,每个映射器上的每个减少分区创建一个输出文件(可能会重复使用这些跨越任务)
+  * 一个ShuffleManager使用哈希,每个mapper上的reduce分区创建一个输出文件(可能会重复使用这些跨越任务)
  */
 private[spark] class HashShuffleManager(conf: SparkConf) extends ShuffleManager {
 

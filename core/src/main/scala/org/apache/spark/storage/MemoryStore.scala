@@ -640,6 +640,7 @@ private[spark] class MemoryStore(blockManager: BlockManager, maxMemory: Long)
   /**
    * Reserve additional memory for unrolling blocks used by this task.
    * Return whether the request is granted.
+    *申请为此任务使用的展开块的内存,返回是否准予请求
    * 申请到的内存大小会先保存到unrollMemoryMap集合中Key->taskid,value->memory
    */
   def reserveUnrollMemoryForThisTask(memory: Long): Boolean = {

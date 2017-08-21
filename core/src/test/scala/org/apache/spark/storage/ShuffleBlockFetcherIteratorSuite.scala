@@ -96,12 +96,14 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
       (localBmId, localBlocks.keys.map(blockId => (blockId, 1.asInstanceOf[Long])).toSeq),
       (remoteBmId, remoteBlocks.keys.map(blockId => (blockId, 1.asInstanceOf[Long])).toSeq)
     )
-
+    //ShuffleBlockFetcherIterator实现了取Shuffle的Blocks的逻辑,包括读取本地的和发起网络请求读取其他节点上
     val iterator = new ShuffleBlockFetcherIterator(
       TaskContext.empty(),
-      transfer,
-      blockManager,
-      blocksByAddress,
+      transfer,//用于获取远程块
+      blockManager,//读取本地块
+      blocksByAddress,//通过[[BlockManagerId]]分组获取的块列表
+      //给定获取的远程块的最大(以字节为单位)
+      //48M
       48 * 1024 * 1024)
 
     // 3 local blocks fetched in initialization
@@ -116,6 +118,7 @@ class ShuffleBlockFetcherIteratorSuite extends SparkFunSuite with PrivateMethodT
       //确保当一个包装的输入流被关闭时,我们释放缓冲区。
       val mockBuf = localBlocks.getOrElse(blockId, remoteBlocks(blockId))
       // Note: ShuffleBlockFetcherIterator wraps input streams in a BufferReleasingInputStream
+      //注意：ShuffleBlockFetcherIterator将输入流包装在BufferReleasingInputStream中
       val wrappedInputStream = inputStream.asInstanceOf[BufferReleasingInputStream]
       verify(mockBuf, times(0)).release()
       val delegateAccess = PrivateMethod[InputStream]('delegate)

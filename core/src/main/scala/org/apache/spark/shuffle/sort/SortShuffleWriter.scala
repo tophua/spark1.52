@@ -87,6 +87,7 @@ private[spark] class SortShuffleWriter[K, V, C](
       // In this case we pass neither an aggregator nor an ordering to the sorter, because we don't
       // care whether the keys get sorted in each partition; that will be done on the reduce side
       // if the operation being run is sortByKey.
+      //在这种情况下,我们既不将聚合器也不传递给分拣机,因为我们不关心每个分区中的键是否被排序,如果正在运行的操作是sortByKey,那么这将在reduce方面完成
       new ExternalSorter[K, V, V](
         aggregator = None, Some(dep.partitioner), ordering = None, dep.serializer)
     }

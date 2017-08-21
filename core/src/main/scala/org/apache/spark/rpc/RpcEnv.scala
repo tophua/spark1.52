@@ -66,6 +66,7 @@ private[spark] object RpcEnv {
       conf: SparkConf,
       securityManager: SecurityManager): RpcEnv = {
     // Using Reflection to create the RpcEnv to avoid to depend on Akka directly
+    //使用Reflection创建RpcEnv以避免直接依赖于Akka
     val config = RpcEnvConfig(conf, name, host, port, securityManager)
     getRpcEnvFactory(conf).create(config)
   }

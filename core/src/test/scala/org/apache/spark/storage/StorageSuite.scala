@@ -28,6 +28,7 @@ class StorageSuite extends SparkFunSuite {
 
   // For testing add, update, and remove (for non-RDD blocks)
   //用于测试添加,更新和删除
+  //StorageStatus用于每个BlockManager存储的状态信息
   private def storageStatus1: StorageStatus = {
     //BlockManagerId,maxMem
     val status = new StorageStatus(BlockManagerId("big", "dog", 1), 1000L)
@@ -39,14 +40,14 @@ class StorageSuite extends SparkFunSuite {
     assert(status.diskUsed === 0L)
     //堆外内存
     assert(status.offHeapUsed === 0L)
-
+    //BlockStatus块标识其状态
     status.addBlock(TestBlockId("foo"), BlockStatus(memAndDisk, 10L, 20L, 1L))
     status.addBlock(TestBlockId("fee"), BlockStatus(memAndDisk, 10L, 20L, 1L))
     status.addBlock(TestBlockId("faa"), BlockStatus(memAndDisk, 10L, 20L, 1L))
     status
   }
 
-  test("storage status add non-RDD blocks") {//添加非RDD块存储状态
+  test("storage status add non-RDD blocks") {//存储状态添加非RDD块
     val status = storageStatus1
     assert(status.blocks.size === 3)
     assert(status.blocks.contains(TestBlockId("foo")))
@@ -163,6 +164,7 @@ class StorageSuite extends SparkFunSuite {
 
   test("storage status remove RDD blocks") {//删除RDD块存储状态
     val status = storageStatus2
+    //删除RDD块存储
     status.removeBlock(TestBlockId("man"))
     status.removeBlock(RDDBlockId(1, 1))
     status.removeBlock(RDDBlockId(2, 2))
@@ -220,8 +222,8 @@ class StorageSuite extends SparkFunSuite {
     assert(status.blocks.get(TestBlockId("fan")) === status.getBlock(TestBlockId("fan")))
     assert(status.blocks.get(RDDBlockId(100, 0)) === status.getBlock(RDDBlockId(100, 0)))
   }
-
-  test("storage status num[Rdd]Blocks") {//
+  //存储状态num [Rdd]块
+  test("storage status num[Rdd]Blocks") {
     val status = storageStatus2
     assert(status.blocks.size === status.numBlocks)
     assert(status.rddBlocks.size === status.numRddBlocks)
@@ -326,9 +328,10 @@ class StorageSuite extends SparkFunSuite {
     assert(rddInfos(1).diskSize === 6L)
     assert(rddInfos(1).externalBlockStoreSize === 0L)
   }
-
+  // getRddBlockLocations从rddId ID返回到属于给定RDD的每个块的位置的映射
   test("StorageUtils.getRddBlockLocations") {
     val storageStatuses = stockStorageStatuses
+    // getRddBlockLocations从rddId ID返回到属于给定RDD的每个块的位置的映射
     val blockLocations0 = StorageUtils.getRddBlockLocations(0, storageStatuses)
     val blockLocations1 = StorageUtils.getRddBlockLocations(1, storageStatuses)
     assert(blockLocations0.size === 5)
@@ -350,12 +353,14 @@ class StorageSuite extends SparkFunSuite {
     assert(blockLocations1(RDDBlockId(1, 1)) === Seq("duck:2"))
     assert(blockLocations1(RDDBlockId(1, 2)) === Seq("cat:3"))
   }
-
+  //StorageUtils.getRddBlockLocation与多个位置
   test("StorageUtils.getRddBlockLocations with multiple locations") {
     val storageStatuses = stockStorageStatuses
     storageStatuses(0).addBlock(RDDBlockId(1, 0), BlockStatus(memAndDisk, 1L, 2L, 0L))
     storageStatuses(0).addBlock(RDDBlockId(0, 4), BlockStatus(memAndDisk, 1L, 2L, 0L))
     storageStatuses(2).addBlock(RDDBlockId(0, 0), BlockStatus(memAndDisk, 1L, 2L, 0L))
+   //println("==="+storageStatuses.mkString(","))
+
     val blockLocations0 = StorageUtils.getRddBlockLocations(0, storageStatuses)
     val blockLocations1 = StorageUtils.getRddBlockLocations(1, storageStatuses)
     assert(blockLocations0.size === 5)

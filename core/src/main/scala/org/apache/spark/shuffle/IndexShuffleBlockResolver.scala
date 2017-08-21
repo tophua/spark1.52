@@ -81,6 +81,7 @@ private[spark] class IndexShuffleBlockResolver(
    */
   private def checkIndexAndDataFile(index: File, data: File, blocks: Int): Array[Long] = {
     // the index file should have `block + 1` longs as offset.
+    //索引文件应该具有“block + 1”longs作为偏移量
     if (index.length() != (blocks + 1) * 8) {
       return null
     }
@@ -222,8 +223,10 @@ private[spark] class IndexShuffleBlockResolver(
 
 private[spark] object IndexShuffleBlockResolver {
   // No-op reduce ID used in interactions with disk store and DiskBlockObjectWriter.
+  //No-op减少与磁盘存储和DiskBlockObjectWriter交互中使用的ID
   // The disk store currently expects puts to relate to a (map, reduce) pair, but in the sort
   // shuffle outputs for several reduces are glommed into a single file.
+  //磁盘存储目前期望放置与(Map,reduce)对相关联,但是在多个缩放的排序随机输出中被包含在单个文件中
   // TODO: Avoid this entirely by having the DiskBlockObjectWriter not require a BlockId.
   val NOOP_REDUCE_ID = 0
 }

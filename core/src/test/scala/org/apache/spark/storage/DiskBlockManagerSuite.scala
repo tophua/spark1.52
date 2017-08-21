@@ -36,6 +36,7 @@ class DiskBlockManagerSuite extends SparkFunSuite with BeforeAndAfterEach with B
 
   val blockManager = mock(classOf[BlockManager])
   when(blockManager.conf).thenReturn(testConf)
+  //DiskBlockManager创建和维护逻辑块和物理磁盘位置之间的逻辑映射,默认情况下,一个块被映射到一个文件,其名称由其BlockId给出
   var diskBlockManager: DiskBlockManager = _
 
   override def beforeAll() {
@@ -63,6 +64,7 @@ class DiskBlockManagerSuite extends SparkFunSuite with BeforeAndAfterEach with B
 
   test("basic block creation") {//基本块的创建
     val blockId = new TestBlockId("test")
+    //DiskBlockManager创建和维护逻辑块和物理磁盘位置之间的逻辑映射,默认情况下,一个块被映射到一个文件,其名称由其BlockId给出
     val newFile = diskBlockManager.getFile(blockId)
     writeToFile(newFile, 10)
     assert(diskBlockManager.containsBlock(blockId))

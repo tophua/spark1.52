@@ -119,7 +119,7 @@ private[spark] class BlockManager(
       + " shuffle files in hash-based shuffle. Please disable spark.shuffle.consolidateFiles or "
       + " switch to sort-based shuffle.")
   }
-
+  //BlockManagerId表示executor计算的中间结果实际数据在那个位置
   var blockManagerId: BlockManagerId = _
 
   // Address of the server that serves this executor's shuffle files. This is either an external

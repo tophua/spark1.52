@@ -43,14 +43,23 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
 
   private val conf = new SparkConf(false)
   var rpcEnv: RpcEnv = null
+  /**
+    * Driver上的BlockManagerMaster对存在于Executor上的BlockManager统一管理,
+    * 比如Executor需要向Driver发送注册BlockManager,更新Executor上Block的最新信息,
+    * 询问所需要Block目前所在位置以及当前Executor运行结束需要将此Executor移除等,
+    * 而BlockManager只是负责管理所在Executor上的Block
+    */
   var master: BlockManagerMaster = null
   val securityMgr = new SecurityManager(conf)
+  //主要用于跟踪Map阶段任务的输出状态,此状态便于Reduce阶段任务获取地址及中间输出结果
+  // 每个Partition处理完(即ShuffleMapTask执行完),需要告知MapOutputTrackerMaster它产出的数据存放在那里,以供Reducer消费。
   val mapOutputTracker = new MapOutputTrackerMaster(conf)
+  //一个ShuffleManager使用哈希,每个mapper上的reduce分区创建一个输出文件
   val shuffleManager = new HashShuffleManager(conf)
 
   // List of block manager created during an unit test, so that all of the them can be stopped
   //单元测试过程中创建的块管理器列表,单元测试后停止
-  // after the unit test.
+  // after the unit test.单元测试后
   val allStores = new ArrayBuffer[BlockManager]
 
   // Reuse a serializer across tests to avoid creating a new thread-local buffer on each test
@@ -65,7 +74,10 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
   private def makeBlockManager(
       maxMem: Long,
       name: String = SparkContext.DRIVER_IDENTIFIER): BlockManager = {
+    //提供shuufle文件上传到其他Executor或者下载到本地的客户端
     val transfer = new NioBlockTransferService(conf, securityMgr)
+    // BlockManager会运行在Driver和每个Executor上,而运行在Driver上的BlockManger负责整个Job的Block的管理工作,
+    // 运行在Executor上的BlockManger负责管理该Executor上的Block,并且向Driver的BlockManager汇报Block的信息和接收来自它的命令
     val store = new BlockManager(name, rpcEnv, master, serializer, maxMem, conf,
       mapOutputTracker, shuffleManager, transfer, securityMgr, 0)
     store.initialize("app-id")
@@ -110,8 +122,26 @@ class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with Befo
   test("get peers with addition and removal of block managers") {
     val numStores = 4
     val stores = (1 to numStores - 1).map { i => makeBlockManager(1000, s"store$i") }
+    /**
+    0 = {BlockManagerId@5210} "BlockManagerId(store1, 192.168.100.227, 38751)"
+    1 = {BlockManagerId@5211} "BlockManagerId(store2, 192.168.100.227, 37636)"
+    2 = {BlockManagerId@5212} "BlockManagerId(store3, 192.168.100.227, 37944)"
+      */
     val storeIds = stores.map { _.blockManagerId }.toSet
     //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
+    ////BlockManagerId表示executor计算的中间结果实际数据在那个位置
+    /**
+      0 = {BlockManagerId@5212} "BlockManagerId(store3, 192.168.100.227, 37944)"
+      1 = {BlockManagerId@5211} "BlockManagerId(store2, 192.168.100.227, 37636)"
+      */
+    val test=master.getPeers(stores(0).blockManagerId).toSet
+    /**
+      0 = {BlockManagerId@5211} "BlockManagerId(store2, 192.168.100.227, 37636)"
+      1 = {BlockManagerId@5212} "BlockManagerId(store3, 192.168.100.227, 37944)"
+      */
+
+    val filterNot= storeIds.filterNot { _ == stores(0).blockManagerId }
+
     assert(master.getPeers(stores(0).blockManagerId).toSet ===
       storeIds.filterNot { _ == stores(0).blockManagerId })
     //getPeers获得其他相同的BlockManagerId,做Block的分布式存储副本时会用到
