@@ -139,8 +139,8 @@ class DAGScheduler(
   // every task. When we detect a node failing, we note the current epoch number and failed
   // executor, increment it for new tasks, and use this to ignore stray ShuffleMapTask results.
 
-  // 对于跟踪失败的节点，我们使用MapOutputTracker的每个任务发送的时代号。
-  // 当我们检测到一个节点出现故障时,我们注意到当前的时代号和执行失败的执行者,为新任务增加它,并使用它来忽略杂散ShuffleMapTask结果。
+  // 对于跟踪失败的节点，我们使用MapOutputTracker的每个任务发送的时代号
+  // 当我们检测到一个节点出现故障时,我们注意到当前的时代号和执行失败的执行者为新任务增加它,并使用它来忽略杂散ShuffleMapTask结果
   // TODO: Garbage collect information about failure epochs when we know there are no more
   //       stray messages to detect.
  //failedEpoch存储的是系统探测到的失效节点的集合,存储的是execId->失败次数对应关系
@@ -648,6 +648,7 @@ class DAGScheduler(
             }
 
             jobSet -= job.jobId
+            //没有其他工作需要这个阶段
             if (jobSet.isEmpty) { // no other job needs this stage
               removeStage(stageId)
             }
