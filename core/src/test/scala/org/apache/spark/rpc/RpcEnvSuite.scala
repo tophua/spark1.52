@@ -56,7 +56,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     //setupEndpoint 根据name注册RpcEndpoint到RpcEnv中并返回它的一个引用RpcEndpointRef
     val rpcEndpointRef = env.setupEndpoint("send-locally", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive = {
         //收到发送的消息,赋值message
         case msg: String => message = msg
@@ -64,18 +64,20 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     })
     //RpcEndpointRef 一个远程RpcEndpoint的引用,通过它可以给远程RpcEndpoint发送消息
     rpcEndpointRef.send("hello")
+
     eventually(timeout(5 seconds), interval(10 millis)) {
+      println(message)
       assert("hello" === message)
     }
   }
-
+  //RpcEndpoint对应Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
   test("send a message remotely") {//远程发送消息
     @volatile var message: String = null
     // Set up a RpcEndpoint using env
     //向RpcEnv注册一个名称:send-remotely的RpcEndpoint
     env.setupEndpoint("send-remotely", new RpcEndpoint {
       override val rpcEnv = env
-
+    //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive: PartialFunction[Any, Unit] = {
         //收到发送的消息,赋值message
         case msg: String => message = msg
@@ -85,13 +87,14 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     val anotherEnv = createRpcEnv(new SparkConf(), "remote", 0)
     // Use anotherEnv to find out the RpcEndpointRef
     //使用anotherEnv找到RpcEndpointRef
-    //参数名称:ActorSystem:local,在启动的时候已经创建,远程地址:env.address,远程名称:send-remotely,
+    //参数名称:ActorSystem:local,在启动的时候已经创建,远程地址:env.address,远程action名称:send-remotely,
     //akka.tcp://local@localhost:51174/user/send-remotely
     val rpcEndpointRef = anotherEnv.setupEndpointRef("local", env.address, "send-remotely")
     try {
-      //向远程发送消息
+      //向远程发送消息,没有返回值
       rpcEndpointRef.send("hello")
       eventually(timeout(5 seconds), interval(10 millis)) {
+        println(message)
         assert("hello" === message)
       }
     } finally {
@@ -99,14 +102,14 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
       anotherEnv.awaitTermination()
     }
   }
-
+  //RpcEndpoint对应Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
   test("send a RpcEndpointRef") {//发送一个RPC终结点引用
     val endpoint = new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.ask]]的消息
       override def receiveAndReply(context: RpcCallContext) = {
-        case "Hello" => context.reply(self)//响应
-        case "Echo" => context.reply("Echo")//响应
+        case "Hello" => context.reply(self)//响应ActorRef引用
+        case "Echo" => context.reply("Echo")//响应字符串
       }
     }
     //向RpcEnv注册Actor名称send-ref的RpcEndpoint
@@ -122,32 +125,32 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     //向RpcEnv注册一个名称:ask-locally的RpcEndpoint
     val rpcEndpointRef = env.setupEndpoint("ask-locally", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.ask]]的消息
       override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
         case msg: String => {
-          context.reply(msg)//响应
+          context.reply(msg)//响应字符串
         }
       }
     })
     val reply = rpcEndpointRef.askWithRetry[String]("hello")
     assert("hello" === reply)
   }
-
+  //RpcEndpoint对应Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
   test("ask a message remotely") {//远程询问消息
     //向RpcEnv注册一个名称:ask-locally的RpcEndpoint
     env.setupEndpoint("ask-remotely", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.ask]]的消息
       override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
         case msg: String => {
-          context.reply(msg)//给发件人回复一个消息
+          context.reply(msg)//给发件人回复一个字符串消息
         }
       }
     })
     //remote是ActorSystem,0是端口
     val anotherEnv = createRpcEnv(new SparkConf(), "remote", 0)
     // Use anotherEnv to find out the RpcEndpointRef
-    //参数名称:ActorSystem:local,在启动的时候已经创建,远程地址:env.address,远程名称:send-remotely,
+    //参数名称local:ActorSystem,在启动的时候已经创建,远程地址:env.address,远程Actor的名称:send-remotely,
     //akka.tcp://local@localhost:51174/user/ask-remotely
     val rpcEndpointRef = anotherEnv.setupEndpointRef("local", env.address, "ask-remotely")
     try {
@@ -159,11 +162,11 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
       anotherEnv.awaitTermination()
     }
   }
-
+  //RpcEndpoint对应Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
   test("ask a message timeout") {//询问消息超时
     env.setupEndpoint("ask-timeout", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.ask]]的消息
       override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
         case msg: String => {
           Thread.sleep(100)
@@ -179,12 +182,14 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     val anotherEnv = createRpcEnv(conf, "remote", 0)
     // Use anotherEnv to find out the RpcEndpointRef
     //用anotherEnv找到RpcEndpointRef(RPC终结点引用)
+    //参数名称local:ActorSystem,在启动的时候已经创建,远程地址:env.address,远程Actor的名称:ask-timeout,
     val rpcEndpointRef = anotherEnv.setupEndpointRef("local", env.address, "ask-timeout")
     try {
       // Any exception thrown in askWithRetry is wrapped with a SparkException and set as the cause
       //设置的原因askwithretry抛出任何异常sparkexception
       val e = intercept[SparkException] {
         //RpcTimeout 控制超时的配置属性
+        //处理[[RpcEndpointRef.ask]]的消息
         rpcEndpointRef.askWithRetry[String]("hello", new RpcTimeout(1 millis, shortProp))
       }
       // The SparkException cause should be a RpcTimeoutException with message indicating the
@@ -197,7 +202,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
       anotherEnv.awaitTermination()
     }
   }
-
+  //RpcEndpoint对应Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
   test("onStart and onStop") {//开始和暂停
     //CountDownLatch这个类能够使一个线程等待其他线程完成各自的工作后再执行
     val stopLatch = new CountDownLatch(1)
@@ -208,6 +213,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
       override val rpcEnv = env
 
       override def onStart(): Unit = {
+        println( "start")
         calledMethods += "start"
       }
 
@@ -216,6 +222,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
       }
 
       override def onStop(): Unit = {
+        println( "stop")
         calledMethods += "stop"
         stopLatch.countDown()
       }
@@ -235,7 +242,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
       override def onStart(): Unit = {
         throw new RuntimeException("Oops!")
       }
-
+      //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive: PartialFunction[Any, Unit] = {
         case m =>
       }
@@ -254,7 +261,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     @volatile var e: Throwable = null
     val endpointRef = env.setupEndpoint("onError-onStop", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive: PartialFunction[Any, Unit] = {
         case m =>
       }
@@ -279,7 +286,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     @volatile var e: Throwable = null
     val endpointRef = env.setupEndpoint("onError-receive", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive: PartialFunction[Any, Unit] = {
         case m => throw new RuntimeException("Oops!")
       }
@@ -306,7 +313,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
         self
         callSelfSuccessfully = true
       }
-
+      //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive: PartialFunction[Any, Unit] = {
         case m =>
       }
@@ -324,7 +331,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
     val endpointRef = env.setupEndpoint("self-receive", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive: PartialFunction[Any, Unit] = {
         case m => {
           self
@@ -347,7 +354,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
     val endpointRef = env.setupEndpoint("self-onStop", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive: PartialFunction[Any, Unit] = {
         case m =>
       }
@@ -376,7 +383,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
       @volatile var result = 0
       val endpointRef = env.setupEndpoint(s"receive-in-sequence-$i", new ThreadSafeRpcEndpoint {
         override val rpcEnv = env
-
+        //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
         override def receive: PartialFunction[Any, Unit] = {
           case m => result += 1
         }
@@ -405,7 +412,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
     @volatile var onStopCount = 0
     val endpointRef = env.setupEndpoint("stop-reentrant", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息]
       override def receive: PartialFunction[Any, Unit] = {
         case m =>
       }
@@ -430,7 +437,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
   test("sendWithReply") {
     val endpointRef = env.setupEndpoint("sendWithReply", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.ask]]的消息
       override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
         case m => context.reply("ack")
       }
@@ -447,7 +454,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
   test("sendWithReply: remotely") {//发送和回复 远程
     env.setupEndpoint("sendWithReply-remotely", new RpcEndpoint {
       override val rpcEnv = env
-
+      //处理[[RpcEndpointRef.ask]]的消息
       override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
         case m => context.reply("ack")
       }
@@ -564,7 +571,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
   test("sendWithReply: unserializable error") {//接收和回复抛出未序列化错误
     env.setupEndpoint("sendWithReply-unserializable-error", new RpcEndpoint {
       override val rpcEnv = env
-      //接收和回复
+      //接收和回复,处理[[RpcEndpointRef.ask]]的消息
       override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
         case msg: String => context.sendFailure(new UnserializableException)
       }
@@ -626,7 +633,7 @@ abstract class RpcEnvSuite extends SparkFunSuite with BeforeAndAfterAll {
 
     val rpcEndpointRef = env.setupEndpoint("ask-future", new RpcEndpoint {
       override val rpcEnv = env
-
+      //接收和回复,处理[[RpcEndpointRef.ask]]的消息
       override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
         case msg: String => context.reply(msg)
         case _: NeverReply =>

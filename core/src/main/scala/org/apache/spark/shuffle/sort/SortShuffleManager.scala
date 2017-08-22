@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 import org.apache.spark.{SparkConf, TaskContext, ShuffleDependency}
 import org.apache.spark.shuffle._
 import org.apache.spark.shuffle.hash.HashShuffleReader
+
 /**
  * sorted Shuffle就会极大的节省内存和磁盘的访问,所以更有利于更大规模的计算
  */
@@ -44,7 +45,7 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
   /**
    * Get a reader for a range of reduce partitions (startPartition to endPartition-1, inclusive).
    * Called on executors by reduce tasks.
-    * 获取一系列减少分区的reader(startPartition到endPartition-1，包括端点）。通过减少任务调用执行器。
+    * 获取一系列减少分区的reader(startPartition到endPartition-1包括端点),通过减少任务调用执行器。
    */
   override def getReader[K, C](
       handle: ShuffleHandle,

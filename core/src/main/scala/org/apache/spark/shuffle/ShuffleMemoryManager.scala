@@ -29,9 +29,12 @@ import org.apache.spark.{Logging, SparkException, SparkConf, TaskContext}
  * collection (ExternalAppendOnlyMap or ExternalSorter) used by these tasks can acquire memory
  * from this pool and release it as it spills data out. When a task ends, all its memory will be
  * released by the Executor.
-  * 将一个内存池分配给shuffle操作中使用的任务,这些任务使用的每个磁盘溢出集合(ExternalAppendOnlyMap或ExternalSorter)
-  * 可以从此池获取内存,并在数据溢出时释放它,当任务结束时,其所有内存将由Executor释放。
- *
+
+   ShuffleMemoryManager 用于为执行Shuffle操作的线程分配内存池,每种磁盘溢出集合都能从内存池获得内存
+  * 当溢出集合的数据已经输出到存储系统,获得的内存会释放,当线程执行的任务结束,整个内存池都会被Executor释放
+  * ShuffleMemoryManager 会保证每个线程都能合理地共享内存,而不会使得一些线程获得了很大的内存,导致其他线程不得
+  * 将溢出的数据写入磁盘.
+  *
  * This class tries to ensure that each task gets a reasonable share of memory, instead of some
  * task ramping up to a large amount first and then causing others to spill to disk repeatedly.
  * If there are N tasks, it ensures that each tasks can acquire at least 1 / 2N of the memory
@@ -40,23 +43,24 @@ import org.apache.spark.{Logging, SparkException, SparkConf, TaskContext}
  * this set changes. This is all done by synchronizing access on "this" to mutate state and using
  * wait() and notifyAll() to signal changes.
   *
-  * 该类尝试确保每个任务获得合理的内存份额,而不是首先升级到大量任务,然后使其他任务重复溢出到磁盘。
-  * 如果有N个任务，则它确保每个任务在必须溢出之前至少获得1/2N的内存,并且最多为1 / N,由于N动态变化,
-  * 我们会跟踪一组活动任务并重做 当这个设置发生变化时,等待任务中的1/2N和1/N的计算。
-  * 这通过将“this”的访问同步到mutate状态,并使用wait()和notifyAll()来表示更改来完成。
+  * 该类尝试确保每个任务获得合理的内存份额,而不是首先升级到大量任务,然后使其他任务重复溢出到磁盘,
+  * 如果有N个任务，则它确保每个任务在必须溢出之前至少获得1/2N的内存,并且最多为1/N,由于N动态变化,
+  * 我们会跟踪一组活动任务并重做当这个设置发生变化时,等待任务中的1/2N和1/N的计算.
+  * 这通过将“this”的访问同步到mutate状态,并使用wait()和notifyAll()来表示更改来完成,
   *
  *
  * Use `ShuffleMemoryManager.create()` factory method to create a new instance.
- *  负责管理Shuffle线程占有内存的分配与释放,
+  *
+ * 负责管理Shuffle线程占有内存的分配与释放
+  *
  * @param maxMemory total amount of memory available for execution, in bytes.
   *                  可用于执行的总内存量(以字节为单位)
  * @param pageSizeBytes number of bytes for each page, by default.默认情况下,每个页面的字节数
  * 
- * 负责全局计数和内存调度(policy enforcement)。它是核心仲裁者,根据task当前内存用量决定如何进行分配。
- * 一个JVM里仅有一个实例
+
  * ShuffleMemoryManager 用于为执行Shuffle操作的线程分配内存池,每种磁盘溢出集合都能从内存池获得内存
  * 当溢出集合的数据已经输出到存储系统,获得的内存会释放,当线程执行的任务结束,整个内存池都会被Executor释放
- * ShuffleMemoryManager 会保证每个线程都能合理地共享内存,而不会使得一些线程获得了很大的内存,导致其他线程不得
+ * ShuffleMemoryManager会保证每个线程都能合理地共享内存,而不会使得一些线程获得了很大的内存,导致其他线程不得
  * 将溢出的数据写入磁盘.
  * 
  */
@@ -70,7 +74,7 @@ class ShuffleMemoryManager protected (
 
   private def currentTaskAttemptId(): Long = {
     // In case this is called on the driver, return an invalid task attempt id.
-    //如果这是在驱动程序上调用，返回一个无效的任务尝试ID
+    //如果这是在驱动程序上调用,返回一个无效的任务尝试ID
     Option(TaskContext.get()).map(_.taskAttemptId()).getOrElse(-1L)
   }
 
@@ -81,7 +85,7 @@ class ShuffleMemoryManager protected (
    * total memory pool (where N is the # of active tasks) before it is forced to spill. This can
    * happen if the number of tasks increases but an older task had a lot of memory already.\
     *
-   * 尝试获取当前任务的numBytes内存,并返回获得的字节数,如果没有可以分配,则返回0。 这种调用可能会阻塞,直到在某些情况下有足够的可用内存,
+   * 尝试获取当前任务的numBytes内存,并返回获得的字节数,如果没有可以分配,则返回0,这种调用可能会阻塞,直到在某些情况下有足够的可用内存,
     * 以确保每个任务有可能在强制执行之前将其升格到总内存池(其中N是活动任务的数量)的至少1/2N溢。
     * 如果任务数量增加,但是较旧的任务已经有很多内存,可能会发生这种情况。
    * 
@@ -196,7 +200,9 @@ private[spark] object ShuffleMemoryManager {
   }
 
   @VisibleForTesting
+  //可见测试
   def createForTesting(maxMemory: Long): ShuffleMemoryManager = {
+    //4M
     new ShuffleMemoryManager(maxMemory, 4 * 1024 * 1024)
   }
 

@@ -2355,7 +2355,8 @@ private[spark] object Utils extends Logging {
    * Return the value of a config either through the SparkConf or the Hadoop configuration
    * if this is Yarn mode. In the latter case, this defaults to the value set through SparkConf
    * if the key is not set in the Hadoop configuration.
-    * 如果是Yarn模式，则通过SparkConf或Hadoop配置返回配置值,在后一种情况下,如果在Hadoop配置中未设置密钥,则此值将默认为通过SparkConf设置的值。
+    * 如果是Yarn模式,则通过SparkConf或Hadoop配置返回配置值,在后一种情况下,
+    * 如果在Hadoop配置中未设置Key,则此值将默认为通过SparkConf设置的值。
    */
   def getSparkOrYarnConfig(conf: SparkConf, key: String, default: String): String = {
     val sparkValue = conf.get(key, default)

@@ -32,8 +32,10 @@ import org.apache.spark.{Logging, SparkConf, SparkEnv}
  * Create and maintain the shuffle blocks' mapping between logic block and physical file location.
  * Data of shuffle blocks from the same map task are stored in a single consolidated data file.
  * The offsets of the data blocks in the data file are stored in a separate index file.
+  *
  * 创建和维护Shuffle块文件和物理文件之间映射,一个shuffle数据块映射到单个文件
  * 块索引Shuffle管理器,通常用于获取Block索引文件,并根据索引文件读取Block文件,
+  *
  * We use the name of the shuffle data's shuffleBlockId with reduce ID set to 0 and add ".data"
  * as the filename postfix for data file, and ".index" as the filename postfix for index file.
  *
@@ -78,7 +80,7 @@ private[spark] class IndexShuffleBlockResolver(
   /**
    * Check whether the given index and data files match each other.
    * If so, return the partition lengths in the data file. Otherwise return null.
-   * 检查给定的索引文件和数据文件是否相互匹配,如果是的话,返回数据文件中的分区长度,否则返回空。
+   * 检查给定的索引文件和数据文件是否相互匹配,如果是的话,返回数据文件中的分区长度,否则返回空
    */
   private def checkIndexAndDataFile(index: File, data: File, blocks: Int): Array[Long] = {
     // the index file should have `block + 1` longs as offset.
@@ -90,6 +92,7 @@ private[spark] class IndexShuffleBlockResolver(
     // Read the lengths of blocks
     // 读取块的长度
     val in = try {
+      //BufferedInputStream是带缓冲区的输入流,默认缓冲区大小是8M,能够减少访问磁盘的次数,提高文件读取性能;
       new DataInputStream(new BufferedInputStream(new FileInputStream(index)))
     } catch {
       case e: IOException =>
@@ -144,6 +147,7 @@ private[spark] class IndexShuffleBlockResolver(
       dataTmp: File): Unit = {
     val indexFile = getIndexFile(shuffleId, mapId)
     val indexTmp = Utils.tempFileWith(indexFile)
+    //BufferedOutputStream是带缓冲区的输出流,默认缓冲区大小是8M,能够减少访问磁盘的次数,提高文件读取性能;
     val out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(indexTmp)))
     Utils.tryWithSafeFinally {
       // We take in lengths of each block, need to convert it to offsets.
@@ -167,8 +171,8 @@ private[spark] class IndexShuffleBlockResolver(
       if (existingLengths != null) {
         // Another attempt for the same task has already written our map outputs successfully,
         // so just use the existing partition lengths and delete our temporary map outputs.
-        //相同任务的另一个尝试已经成功地写了我们的Map输出，
-        //所以只需使用现有的分区长度，并删除我们的临时Map输出。
+        //相同任务的另一个尝试已经成功地写了我们的Map输出,
+        //所以只需使用现有的分区长度,并删除我们的临时Map输出。
         System.arraycopy(existingLengths, 0, lengths, 0, lengths.length)
         if (dataTmp != null && dataTmp.exists()) {
           dataTmp.delete()

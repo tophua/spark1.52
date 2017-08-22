@@ -36,6 +36,7 @@ import org.apache.spark.storage.{BlockManager, BlockManagerId, ShuffleBlockId}
  * 包装管理的缓冲区,保持跟踪多少次保留和释放被调用
  * We need to define this class ourselves instead of using a spy because the NioManagedBuffer class
  * is final (final classes cannot be spied on).
+  * 我们需要自己定义这个类,而不是使用间谍,因为NioManagedBuffer类是final(最终的类不能被窥视)
  */
 class RecordingManagedBuffer(underlyingBuffer: NioManagedBuffer) extends ManagedBuffer {
   var callsToRetain = 0
@@ -83,7 +84,7 @@ class HashShuffleReaderSuite extends SparkFunSuite with LocalSparkContext {
 
     // Create a return function to use for the mocked wrapForCompression method that just returns
     // the original input stream.
-    //创建一个用于模拟wrapforcompression方法只是返回原来的输入流返回功能。
+    //创建一个用于模拟wrapforcompression方法只是返回原来的输入流返回功能
     val dummyCompressionFunction = new Answer[InputStream] {
       override def answer(invocation: InvocationOnMock): InputStream =
         invocation.getArguments()(1).asInstanceOf[InputStream]

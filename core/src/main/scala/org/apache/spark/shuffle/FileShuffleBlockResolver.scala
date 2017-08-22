@@ -100,7 +100,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
   /**
    * Contains all the state related to a particular shuffle. This includes a pool of unused
    * ShuffleFileGroups, as well as all ShuffleFileGroups that have been created for the shuffle.
-    * 包含与特定随机播放相关的所有状态,这包括一个未使用的ShuffleFileGroups池,以及为洗牌创建的所有ShuffleFileGroups。
+    * 包含与特定随机播放相关的所有状态,这包括一个未使用的ShuffleFileGroups池,以及为洗牌创建的所有ShuffleFileGroups
    */
   private class ShuffleState(val numBuckets: Int) {
     val nextFileId = new AtomicInteger(0)
@@ -125,7 +125,7 @@ private[spark] class FileShuffleBlockResolver(conf: SparkConf)
    * 
    * Get a ShuffleWriterGroup for the given map task, which will register it as complete
    * when the writers are closed successfully
-    * 为给定的地图任务获取一个ShuffleWriterGroup,当作者关闭成功时,它将注册为完整的
+    * 为给定的Map任务获取一个ShuffleWriterGroup,当写关闭成功时,它将注册为完整的
     * mapId对应RDD的partionsID
    * 
    */

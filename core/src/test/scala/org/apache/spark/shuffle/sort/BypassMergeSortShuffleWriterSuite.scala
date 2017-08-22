@@ -48,6 +48,7 @@ class BypassMergeSortShuffleWriterSuite extends SparkFunSuite with BeforeAndAfte
   private var tempDir: File = _
   private var outputFile: File = _
   private val conf: SparkConf = new SparkConf(loadDefaults = false)
+  //泛型[File]
   private val temporaryFilesCreated: mutable.Buffer[File] = new ArrayBuffer[File]()
   private val blockIdToFileMap: mutable.Map[BlockId, File] = new mutable.HashMap[BlockId, File]
   private val shuffleBlockId: ShuffleBlockId = new ShuffleBlockId(0, 0, 0)
@@ -115,6 +116,7 @@ class BypassMergeSortShuffleWriterSuite extends SparkFunSuite with BeforeAndAfte
       serializer
     )
     writer.insertAll(Iterator.empty)
+    //
     val partitionLengths = writer.writePartitionedFile(shuffleBlockId, taskContext, outputFile)
     assert(partitionLengths.sum === 0)
     assert(outputFile.exists())

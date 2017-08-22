@@ -57,13 +57,18 @@ private[spark] class BlockResult(
 /**
  * Manager running on every node (driver and executors) which provides interfaces for putting and
  * retrieving blocks both locally and remotely into various stores (memory, disk, and off-heap).
- * 提供Storage模块与其他其他模块的交互接口
- * BlockManager创建的时候会持有一个BlockManagerMaster,
- * master BlockManagerMaster会把请求转发给BlockManagerMasterEndpoint来完成元数据的管理和维护.
- * Note that #initialize() must be called before the BlockManager is usable.
+  *
+  * 运行在每个节点(driver和executors)上的管理器,它提供用于将本地和远程的块放入和取回到各种存储(内存,磁盘和堆外)的接口
+  *
+  * Note that #initialize() must be called before the BlockManager is usable.
   *
   * BlockManager会运行在Driver和每个Executor上,而运行在Driver上的BlockManger负责整个Job的Block的管理工作,
   * 运行在Executor上的BlockManger负责管理该Executor上的Block,并且向Driver的BlockManager汇报Block的信息和接收来自它的命令
+  *
+  *  Driver上的BlockManagerMaster对存在于Executor上的BlockManager统一管理,比如Executor需要向Driver发送注册
+  * BlockManager,更新Executor上Block的最新信息,询问所需要Block目前所在位置以及
+  * 当前Executor运行结束需要将此Executor移除等
+  *
  */
 private[spark] class BlockManager(
   executorId: String,
@@ -103,7 +108,7 @@ private[spark] class BlockManager(
 
   // Port used by the external shuffle service. In Yarn mode, this may be already be
   // set through the Hadoop configuration as the server is launched in the Yarn NM.
-  //外部随机服务使用的端口,在Yarn模式下,这可能已经通过Hadoop配置设置,因为服务器是在纱线NM中启动的。
+  //外部随机服务使用的端口,在Yarn模式下,这可能已经通过Hadoop配置设置,因为服务器是在纱线NM中启动的
   //使用扩展Shuffle service端口
   private val externalShuffleServicePort =
     Utils.getSparkOrYarnConfig(conf, "spark.shuffle.service.port", "7337").toInt
@@ -130,7 +135,7 @@ private[spark] class BlockManager(
 
   // Client to read other executors' shuffle files. This is either an external service, or just the
   // standard BlockTransferService to directly connect to other Executors.
-  //客户端读取其他执行者的随机文件。 这是一个外部服务，或只是标准的BlockTransferService直接连接到其他执行程序。
+  //客户端读取其他执行者的shuffle文件,这是一个外部服务,或只是标准的BlockTransferService直接连接到其他Executors
   //shuffleClient客户端,是否有外ShuffleService可用
   /**
    * 为什么网络服务组织存储体系里面?
@@ -157,9 +162,10 @@ private[spark] class BlockManager(
   //是否压缩RDD分区
   private val compressRdds = conf.getBoolean("spark.rdd.compress", false)
   // Whether to compress shuffle output temporarily spilled to disk
-  //是否压缩在shuffle期间溢出的数据,如果压缩将使用spark.io.compression.codec。
+  //是否压缩在shuffle期间溢出的数据,如果压缩将使用spark.io.compression.codec
   private val compressShuffleSpill = conf.getBoolean("spark.shuffle.spill.compress", true)
   //根据name注册BlockManagerSlaveEndpoint到RpcEnv中并返回它的一个引用RpcEndpointRef
+  //RpcEndpoint对应Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
   private val slaveEndpoint = rpcEnv.setupEndpoint(
     "BlockManagerEndpoint" + BlockManager.ID_GENERATOR.next,
     new BlockManagerSlaveEndpoint(rpcEnv, this, mapOutputTracker))
@@ -187,9 +193,9 @@ private[spark] class BlockManager(
    * program could be using a user-defined codec in a third party jar, which is loaded in
    * Executor.updateDependencies. When the BlockManager is initialized, user level jars hasn't been
    * loaded yet.
-   * 压缩编解码器使用,请注意，“懒惰”值是必需的，因为我们希望延迟压缩编解码器的初始化,直到它被首次使用为止,
-   * 原因是Spark程序可能在第三方jar中使用用户定义的编解码器,该编解码器加载在Executor.updateDependencies中。
-   * 当BlockManager初始化时，尚未加载用户级别的jar。
+   * 压缩编解码器使用,请注意,“懒惰”值是必需的,因为我们希望延迟压缩编解码器的初始化,直到它被首次使用为止,
+   * 原因是Spark程序可能在第三方jar中使用用户定义的编解码器,该编解码器加载在Executor.updateDependencies中.
+   * 当BlockManager初始化时,尚未加载用户级别的jar
    * 压缩包解码器,lazy表示在调用它时才实例化一个解码器,主要是针对用户自定义的jar包
    * */
   private lazy val compressionCodec: CompressionCodec = CompressionCodec.createCodec(conf)
@@ -217,13 +223,14 @@ private[spark] class BlockManager(
    * Initializes the BlockManager with the given appId. This is not performed in the constructor as
    * the appId may not be known at BlockManager instantiation time (in particular for the driver,
    * where it is only learned after registration with the TaskScheduler).
-    * 使用给定的appId初始化BlockManager,这不是在构造函数中执行
-    * 因为appId可能在BlockManager实例化时间（特别是对于仅在注册到TaskScheduler之后才学习的驱动程序）中不知道。
-   * 给定appId初始化BlockManager,
+    *使用给定的appId初始化BlockManager,这不是在构造函数中执行
+    *因为appId可能在BlockManager实例化时间(特别是对于驱动程序,只有在与TaskScheduler注册后才能学习)中不知道,
+   *
    * This method initializes the BlockTransferService and ShuffleClient, registers with the
    * BlockManagerMaster, starts the BlockManagerWorker endpoint, and registers with a local shuffle
    * service if configured.
-    * 此方法初始化BlockTransferService和ShuffleClient，向BlockManagerMaster注册,启动BlockManagerWorker端点，并配置本地随机服务注册。
+    * 此方法初始化BlockTransferService和ShuffleClient,向BlockManagerMaster注册,
+    * 启动BlockManagerWorker端点,并配置本地随机服务注册,
    */
   def initialize(appId: String): Unit = {
     //blockTransferService 初始化
@@ -284,13 +291,15 @@ private[spark] class BlockManager(
    * Report all blocks to the BlockManager again. This may be necessary if we are dropped
    * by the BlockManager and come back or if we become capable of recovering blocks on disk after
    * an executor crash.
-   * 再次将所有的blocks汇报给BlockManager,这个方法强调所有的blocks必须都能在BlockManager的管理下,
-   * 因为可能会出现各种因素,如slave需要重新注册、进程冲突导致block变化等,让blocks产生变化
-   * This function deliberately(故意) fails silently if the master returns false (indicating that
+    *
+   * 再次向BlockManager报告所有块,如果我们被BlockManager删除并返回,或者在执行程序崩溃后我们能够恢复磁盘上的块,这可能是必要的。
+    *
+   * This function deliberately  fails silently if the master returns false (indicating that
    * the slave needs to re-register). The error condition will be detected again by the next
    * heart beat attempt or new block registration and another try to re-register all blocks
    * will be made then.
-   * 错误状态将尝试再次检测到下一个心跳或重新块注册
+   * 如果主机返回false(指示从节点需要重新注册),则此功能会静默地失败,
+    *将通过下一次心跳尝试或新块注册再次检测到错误状况,然后再尝试重新注册所有块
    */
   private def reportAllBlocks(): Unit = {
     logInfo(s"Reporting ${blockInfo.size} blocks to the master.")
@@ -383,7 +392,7 @@ private[spark] class BlockManager(
 
   /**
    * Get the BlockStatus for the block identified by the given ID, if it exists.
-   * 获取由给定ID标识的块（如果存在）的BlockStatus,根据blockId获取block的信息
+   * 获取由给定ID标识的块(如果存在)的BlockStatus,根据blockId获取block的信息
    * NOTE: This is mainly for testing, and it doesn't fetch information from external block store.
     * 注意：这主要用于测试，它不会从外部块存储中获取信息。
    */
@@ -413,6 +422,7 @@ private[spark] class BlockManager(
    * Tell the master about the current storage status of a block. This will send a block update
    * message reflecting the current status, *not* the desired storage level in its block info.
    * For example, a block with MEMORY_AND_DISK set might have fallen out to be only on disk.
+    *
    * 告诉master一个块的当前存储状态,这将发送一个反映当前状态的块更新消息，*不会在其信息块中存储所需的存储级别。
     * 例如，具有MEMORY_AND_DISK集的块可能已经被丢弃为仅在磁盘上。
     *
@@ -451,8 +461,8 @@ private[spark] class BlockManager(
    * Actually send a UpdateBlockInfo message. Returns the master's response,
    * which will be true if the block was successfully recorded and false if
    * the slave needs to re-register.
-   * 实际上发送一个UpdateBlockInfo消息,返回主站的响应，如果块成功记录，则返回true，
-    * 如果从站需要重新注册，则返回false。
+   * 实际上发送一个UpdateBlockInfo消息,返回主站的响应,如果块成功记录,则返回true
+    * 如果从站需要重新注册,则返回false
     * 向BlockManagerMasterActor发送updateblockinfo消息,返回Master响应成功或失败
    */
   private def tryToReportBlockStatus(

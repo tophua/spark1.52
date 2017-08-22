@@ -46,10 +46,17 @@ import org.apache.spark.util.Utils;
  * Records are not buffered in memory. This is essentially identical to
  * {@link org.apache.spark.shuffle.hash.HashShuffleWriter}, except that it writes output in a format
  * that can be served / consumed via {@link org.apache.spark.shuffle.IndexShuffleBlockResolver}.
+ *
+ * 这个类实现了基于排序的shuffle的哈希式shuffle回退路径,此写入路径将传入记录写入单独的文件,每个减少分区一个文件,
+ * 然后连接这些每个分区文件以形成单个输出文件,其中的区域用于reducer。记录没有缓存在内存中。
+ * 这与{@link org.apache.spark.shuffle.hash.HashShuffleWriter}基本相同,
+ * 只不过它以可以通过{@link org.apache.spark.shuffle.IndexShuffleBlockResolver}提供/使用的格式写入输出。
  * <p>
  * This write path is inefficient for shuffles with large numbers of reduce partitions because it
  * simultaneously opens separate serializers and file streams for all partitions. As a result,
  * {@link SortShuffleManager} only selects this write path when
+ * 这种写入路径对于具有大量减少分区的混洗是无效的,因为它同时为所有分区打开单独的序列化程序和文件流,
+ * 因此{@ link SortShuffleManager}只能选择此写入路径
  * <ul>
  *    <li>no Ordering is specified,</li>
  *    <li>no Aggregator is specific, and</li>
@@ -74,7 +81,8 @@ final class BypassMergeSortShuffleWriter<K, V> implements SortShuffleFileWriter<
   private final ShuffleWriteMetrics writeMetrics;
   private final Serializer serializer;
 
-  /** Array of file writers, one for each partition */
+  /** Array of file writers, one for each partition
+   * 文件写入器数组,每个分区一个 */
   private DiskBlockObjectWriter[] partitionWriters;
 
   public BypassMergeSortShuffleWriter(
@@ -83,7 +91,8 @@ final class BypassMergeSortShuffleWriter<K, V> implements SortShuffleFileWriter<
       Partitioner partitioner,
       ShuffleWriteMetrics writeMetrics,
       Serializer serializer) {
-    // Use getSizeAsKb (not bytes) to maintain backwards compatibility if no units are provided
+      // Use getSizeAsKb (not bytes) to maintain backwards compatibility if no units are provided
+      // 如果没有提供单位,请使用getSizeAsKb(而不是字节)来保持向后兼容性
     this.fileBufferSize = (int) conf.getSizeAsKb("spark.shuffle.file.buffer", "32k") * 1024;
     this.transferToEnabled = conf.getBoolean("spark.file.transferTo", true);
     this.numPartitions = partitioner.numPartitions();
@@ -113,6 +122,7 @@ final class BypassMergeSortShuffleWriter<K, V> implements SortShuffleFileWriter<
     // Creating the file to write to and creating a disk writer both involve interacting with
     // the disk, and can take a long time in aggregate when we open many files, so should be
     // included in the shuffle write time.
+      //创建写入和创建磁盘刻录机的文件都涉及与磁盘交互,并且在打开多个文件时可能需要很长时间,因此应该包含在随机写入时间内
     writeMetrics.incShuffleWriteTime(System.nanoTime() - openStartTime);
 
     while (records.hasNext()) {
@@ -132,9 +142,11 @@ final class BypassMergeSortShuffleWriter<K, V> implements SortShuffleFileWriter<
       TaskContext context,
       File outputFile) throws IOException {
     // Track location of the partition starts in the output file
+      //分区的跟踪位置从输出文件中开始
     final long[] lengths = new long[numPartitions];
     if (partitionWriters == null) {
       // We were passed an empty iterator
+        //我们被传递了一个空的迭代器
       return lengths;
     }
 

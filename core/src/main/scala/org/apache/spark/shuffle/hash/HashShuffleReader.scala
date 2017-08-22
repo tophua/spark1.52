@@ -39,7 +39,7 @@ private[spark] class HashShuffleReader[K, C](
   private val dep = handle.dependency
 
   /** Read the combined key-values for this reduce task
-    * 读取此减少任务的组合键值*/
+    * 读取此reduce任务的组合键值*/
   override def read(): Iterator[Product2[K, C]] = {
     /**
      * 处理步骤如下:
@@ -93,6 +93,7 @@ private[spark] class HashShuffleReader[K, C](
     val aggregatedIter: Iterator[Product2[K, C]] = if (dep.aggregator.isDefined) {
       if (dep.mapSideCombine) {//是否需要在worker端进行combine操作聚合
         // We are reading values that are already combined
+        //我们正在读取已经组合的值
         val combinedKeyValuesIterator = interruptibleIter.asInstanceOf[Iterator[(K, C)]]
         dep.aggregator.get.combineCombinersByKey(combinedKeyValuesIterator, context)
       } else {//只需要Reducer端的聚合

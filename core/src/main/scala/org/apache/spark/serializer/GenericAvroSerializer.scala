@@ -44,13 +44,13 @@ import org.apache.spark.io.CompressionCodec
  * @param schemas a map where the keys are unique IDs for Avro schemas and the values are the
  *                string representation of the Avro schema, used to decrease the amount of data
  *                that needs to be serialized.
-  *                密钥是Avro模式的唯一ID的映射,值是Avro模式的字符串表示形式,用于减少需要序列化的数据量
+  *               Keys是Avro模式的唯一ID的映射,值是Avro模式的字符串表示形式,用于减少需要序列化的数据量
  */
 private[serializer] class GenericAvroSerializer(schemas: Map[Long, String])
   extends KSerializer[GenericRecord] {
 
   /** Used to reduce the amount of effort to compress the schema
-    * 用于减少压缩模式的工作量 */
+    * 用于reduce压缩模式的工作量 */
   private val compressCache = new mutable.HashMap[Schema, Array[Byte]]()
   private val decompressCache = new mutable.HashMap[ByteBuffer, Schema]()
 

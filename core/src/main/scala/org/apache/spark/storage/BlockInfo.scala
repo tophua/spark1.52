@@ -33,7 +33,9 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
     /* Set current thread as init thread - waitForReady will not block this thread
      * (in case there is non trivial initialization which ends up calling waitForReady
      * as part of initialization itself)
-     * 将当前线程设置为init线程 - waitForReady不会阻止此线程(如果有非平凡的初始化,最终调用waitForReady作为初始化本身的一部分)*/
+     * 将当前线程设置为init线程 - waitForReady不会阻止此线程
+     * (如果有非平凡的初始化,最终调用waitForReady作为初始化本身的一部分)*/
+    //Thread.currentThread()可以获取当前线程的引用
     BlockInfo.blockInfoInitThreads.put(this, Thread.currentThread())//
   }
 
@@ -44,6 +46,7 @@ private[storage] class BlockInfo(val level: StorageLevel, val tellMaster: Boolea
    * 等待该BlockInfo被标记为就绪(即块写完),如果块可用,返回true,否则返回false
    */
   def waitForReady(): Boolean = {
+    //Thread.currentThread()可以获取当前线程的引用
     if (pending && initThread != Thread.currentThread()) {
       synchronized {
         while (pending) {

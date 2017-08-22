@@ -31,7 +31,7 @@ private[spark] class HashShuffleManager(conf: SparkConf) extends ShuffleManager 
   private val fileShuffleBlockResolver = new FileShuffleBlockResolver(conf)
 
   /* Register a shuffle with the manager and obtain a handle for it to pass to tasks.
-  * 与manager注册一个洗牌,并获得一个句柄来传递给任务*/
+  * 与manager注册一个shuffle,并获得一个句柄来传递给任务*/
   override def registerShuffle[K, V, C](
       shuffleId: Int,
       numMaps: Int,
@@ -42,7 +42,7 @@ private[spark] class HashShuffleManager(conf: SparkConf) extends ShuffleManager 
   /**
    * Get a reader for a range of reduce partitions (startPartition to endPartition-1, inclusive).
    * Called on executors by reduce tasks.
-    * 获取一系列读取减少分区（startPartition到endPartition-1，包括）通过减少任务指定执行程序。
+    * 获取一系列读取减少分区(startPartition到endPartition-1包括)通过reduce任务指定执行程序
    */
   override def getReader[K, C](
       handle: ShuffleHandle,

@@ -25,7 +25,7 @@ import org.apache.spark.network.util.{TransportConf, ConfigProvider}
  * Driver, or a standalone shuffle service) into a TransportConf with details on our environment
  * like the number of cores that are allocated to this JVM.
   *
-  * 提供了一个实用程序,用于从Spark JVM内部的SparkConf进行转换（例如，Executor，驱动程序或独立的随机播放服务）
+  * 提供了一个实用程序,用于从Spark JVM内部的SparkConf进行转换(例如,Executor,Driver或独立的shuffle服务)
   * 转移到TransportConf中,其中包含有关我们环境的详细信息,例如分配给此JVM的内核数
  */
 object SparkTransportConf {
@@ -62,12 +62,13 @@ object SparkTransportConf {
     // Specify thread configuration based on our JVM's allocation of cores (rather than necessarily
     // assuming we have all the machine's cores).
     // NB: Only set if serverThreads/clientThreads not already set.
-    //根据我们的JVM分配核心指定线程配置（而不是一定假定我们拥有所有机器的核心）.
-    // NB：只有在serverThreads / clientThreads尚未设置的情况下才设置。
+    //根据我们的JVM分配核心指定线程配置(而不是一定假定我们拥有所有机器的核心)
+    // NB：只有在serverThreads / clientThreads尚未设置的情况下才设置
     //服务端线程数量
     val numThreads = defaultNumThreads(numUsableCores)
     conf.set("spark.shuffle.io.serverThreads",
       conf.get("spark.shuffle.io.serverThreads", numThreads.toString))
+    //客户端线程数量
     conf.set("spark.shuffle.io.clientThreads",
       conf.get("spark.shuffle.io.clientThreads", numThreads.toString))
 

@@ -25,7 +25,7 @@ import org.scalatest.concurrent.Timeouts
 import org.scalatest.time.SpanSugar._
 
 import org.apache.spark.{SparkConf, SparkFunSuite, TaskContext}
-
+//ShuffleMemoryManager负责管理Shuffle线程占有内存的分配与释放
 class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
 
   val nextTaskAttemptId = new AtomicInteger()
@@ -51,21 +51,21 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
     thread.start()
     thread
   }
-
+  //ShuffleMemoryManager负责管理Shuffle线程占有内存的分配与释放
   test("single task requesting memory") {//单任务请求存储器
     val manager = ShuffleMemoryManager.createForTesting(maxMemory = 1000L)
-
+    //尝试获取当前任务的numBytes内存,并返回获得的字节数,如果没有可以分配,则返回0
     assert(manager.tryToAcquire(100L) === 100L)
     assert(manager.tryToAcquire(400L) === 400L)
     assert(manager.tryToAcquire(400L) === 400L)
     assert(manager.tryToAcquire(200L) === 100L)
     assert(manager.tryToAcquire(100L) === 0L)
     assert(manager.tryToAcquire(100L) === 0L)
-
+    //释放部分内存
     manager.release(500L)
     assert(manager.tryToAcquire(300L) === 300L)
     assert(manager.tryToAcquire(300L) === 200L)
-
+    //释放当前任务的所有内存,并将其标记任务结束
     manager.releaseMemoryForThisTask()
     assert(manager.tryToAcquire(1000L) === 1000L)
     assert(manager.tryToAcquire(100L) === 0L)
@@ -87,27 +87,44 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
 
     val t1 = startThread("t1") {
       val r1 = manager.tryToAcquire(500L)
+      println("==r1=tryToAcquire="+r1)
       state.synchronized {
+        println("==t1==");
         state.t1Result1 = r1
+        //notifyAll唤醒obj对象而阻塞的所有线程,并允许它们有获得对象所的权力
         state.notifyAll()
+
         while (state.t2Result1 === -1L) {
+          //A线程执行obj.wait()方法后,它将释放其所占有的对象锁,A线程进入阻塞状态,等待呗唤醒
+          //同时A也就不具有了获得obj对象所的权力,这样其它线程就可以拿到这把锁了
+          println("===11==")
           state.wait()
+          println("===22==")
         }
       }
       val r2 = manager.tryToAcquire(500L)
+      println("==r1=="+r2)
       state.synchronized { state.t1Result2 = r2 }
     }
 
     val t2 = startThread("t2") {
       val r1 = manager.tryToAcquire(500L)
+      println("=r2=tryToAcquire="+r1)
       state.synchronized {
         state.t2Result1 = r1
+        println("==t2==");
+        //notifyAll唤醒因obj对象而阻塞的所有线程,并允许它们有获得对象所的权力
         state.notifyAll()
         while (state.t1Result1 === -1L) {
+          //A线程执行obj.wait()方法后,它将释放其所占有的对象锁,A线程进入阻塞状态,等待呗唤醒
+          //同时A也就不具有了获得obj对象所的权力,这样其它线程就可以拿到这把锁了
+          println("===33==")
           state.wait()
+          println("===44==")
         }
       }
       val r2 = manager.tryToAcquire(500L)
+      println("==r2=="+r2)
       state.synchronized { state.t2Result2 = r2 }
     }
 
@@ -141,8 +158,11 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       val r1 = manager.tryToAcquire(250L)
       state.synchronized {
         state.t1Result1 = r1
+        //notifyAll唤醒因obj对象而阻塞的所有线程,并允许它们有获得对象所的权力
         state.notifyAll()
         while (state.t2Result1 === -1L) {
+          //A线程执行obj.wait()方法后,它将释放其所占有的对象锁,A线程进入阻塞状态,等待呗唤醒
+          //同时A也就不具有了获得obj对象所的权力,这样其它线程就可以拿到这把锁了
           state.wait()
         }
       }
@@ -154,8 +174,11 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       val r1 = manager.tryToAcquire(250L)
       state.synchronized {
         state.t2Result1 = r1
+        //notifyAll唤醒因obj对象而阻塞的所有线程,并允许它们有获得对象所的权力
         state.notifyAll()
         while (state.t1Result1 === -1L) {
+          //A线程执行obj.wait()方法后,它将释放其所占有的对象锁,A线程进入阻塞状态,等待呗唤醒
+          //同时A也就不具有了获得obj对象所的权力,这样其它线程就可以拿到这把锁了
           state.wait()
         }
       }
@@ -196,8 +219,11 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       state.synchronized {
         state.t1Result = manager.tryToAcquire(1000L)
         state.t1Requested = true
+        //notifyAll唤醒因obj对象而阻塞的所有线程,并允许它们有获得对象所的权力
         state.notifyAll()
         while (!state.t2Requested) {
+          //A线程执行obj.wait()方法后,它将释放其所占有的对象锁,A线程进入阻塞状态,等待呗唤醒
+          //同时A也就不具有了获得obj对象所的权力,这样其它线程就可以拿到这把锁了
           state.wait()
         }
       }
@@ -211,9 +237,12 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
     val t2 = startThread("t2") {
       state.synchronized {
         while (!state.t1Requested) {
+          //A线程执行obj.wait()方法后,它将释放其所占有的对象锁,A线程进入阻塞状态,等待呗唤醒
+          //同时A也就不具有了获得obj对象所的权力,这样其它线程就可以拿到这把锁了
           state.wait()
         }
         state.t2Requested = true
+        //notifyAll唤醒因obj对象而阻塞的所有线程,并允许它们有获得对象所的权力
         state.notifyAll()
       }
       val startTime = System.currentTimeMillis()
@@ -265,8 +294,11 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       state.synchronized {
         state.t1Result = manager.tryToAcquire(1000L)
         state.t1Requested = true
+        //notifyAll唤醒obj对象而阻塞的所有线程,并允许它们有获得对象所的权力
         state.notifyAll()
         while (!state.t2Requested) {
+          //A线程执行obj.wait()方法后,它将释放其所占有的对象锁,A线程进入阻塞状态,
+          //同时A也就不具有了获得obj对象所的权力,这样其它线程就可以拿到这把锁了
           state.wait()
         }
       }
@@ -280,9 +312,12 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
     val t2 = startThread("t2") {
       state.synchronized {
         while (!state.t1Requested) {
+          //A线程执行obj.wait()方法后,它将释放其所占有的对象锁,A线程进入阻塞状态,等待呗唤醒
+          //同时A也就不具有了获得obj对象所的权力,这样其它线程就可以拿到这把锁了
           state.wait()
         }
         state.t2Requested = true
+        //notifyAll唤醒因obj对象而阻塞的所有线程,并允许它们有获得对象所的权力
         state.notifyAll()
       }
       val startTime = System.currentTimeMillis()
@@ -314,7 +349,7 @@ class ShuffleMemoryManagerSuite extends SparkFunSuite with Timeouts {
       assert(state.t2WaitTime > 200, s"t2 waited less than 200 ms (${state.t2WaitTime})")
     }
   }
-
+  //不应该被授予负的大小
   test("tasks should not be granted a negative size") {
     val manager = ShuffleMemoryManager.createForTesting(maxMemory = 1000L)
     manager.tryToAcquire(700L)

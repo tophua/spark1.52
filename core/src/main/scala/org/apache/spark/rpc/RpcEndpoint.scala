@@ -117,8 +117,8 @@ private[spark] trait RpcEndpoint {
    * Process messages from [[RpcEndpointRef.send]] or [[RpcCallContext.reply)]]. If receiving a
    * unmatched message, [[SparkException]] will be thrown and sent to `onError`.
     *
-    * 从[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]处理消息],
-    * 如果接收到不匹配的消息，[[SparkException]]将被抛出并发送到`onError`。
+    * 处理[[RpcEndpointRef.send]]或[[RpcCallContext.reply]]的消息],
+    * 如果接收到不匹配的消息,[[SparkException]]将被抛出并发送到`onError`
    */
   def receive: PartialFunction[Any, Unit] = {
     case _ => throw new SparkException(self + " does not implement 'receive'")
@@ -127,7 +127,7 @@ private[spark] trait RpcEndpoint {
   /**
    * Process messages from [[RpcEndpointRef.ask]]. If receiving a unmatched message,
    * [[SparkException]] will be thrown and sent to `onError`.
-    * 从[[RpcEndpointRef.ask]]处理消息,如果接收到不匹配的消息,[[SparkException]]将被抛出并发送到onError
+    * 处理[[RpcEndpointRef.ask]]的消息,如果接收到不匹配的消息,[[SparkException]]将被抛出并发送到onError
    */
   def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     case _ => context.sendFailure(new SparkException(self + " won't reply anything"))
@@ -140,7 +140,7 @@ private[spark] trait RpcEndpoint {
    */
   def onError(cause: Throwable): Unit = {
     // By default, throw e and let RpcEnv handle it
-    //默认情况下,扔e并让RpcEnv处理它
+    //默认情况下,抛出e并让RpcEnv处理它
     throw cause
   }
 

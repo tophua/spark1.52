@@ -26,10 +26,9 @@ import org.apache.spark.annotation.DeveloperApi
  * Identifies a particular Block of data, usually associated with a single file.
  * A Block can be uniquely identified by its filename, but each type of Block has a different
  * set of keys which produce its unique name.
- * 识别通常与单个文件相关联的特定数据块.A块可以通过其文件名唯一标识，但每种类型的块都具有不同的密钥集，产生其唯一的名称。
- *
+ * 一个数据块可以通过其文件名的唯一标识,但每一种类型的块设置有不同的Key集合,产生其唯一的名称
  * If your BlockId should be serializable, be sure to add it to the BlockId.apply() method.
-  * 如果您的BlockId可以序列化，请确保将其添加到BlockId.apply（）方法中
+  * 如果你的BlockId可以序列化,请确保将其添加到BlockId.apply()方法中
   * 一个数据块即对应一个分区
  */
 @DeveloperApi
@@ -41,6 +40,8 @@ sealed abstract class BlockId {
   // convenience methods
   //asInstanceOf强制类型转换
   def asRDDId: Option[RDDBlockId] = if (isRDD) Some(asInstanceOf[RDDBlockId]) else None
+  //isInstanceOf和asInstanceOf 由scala.Any类定义,Scala类层级的根类,
+  // 所有对象都自动拥有isInstanceOf和asInstanceOf
   def isRDD: Boolean = isInstanceOf[RDDBlockId]//判断对象是否为RDDBlockId类型的实例
   def isShuffle: Boolean = isInstanceOf[ShuffleBlockId]//判断一个对象实例是否是某种类型
   def isBroadcast: Boolean = isInstanceOf[BroadcastBlockId]
@@ -59,7 +60,7 @@ case class RDDBlockId(rddId: Int, splitIndex: Int) extends BlockId {
 }
 
 // Format of the shuffle block ids (including data and index) should be kept in sync with
-//shuffle块的格式（包括数据和索引）应保持同步
+// 格式shuffle 块ids(包括数据和索引)应保持同步
 // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getBlockData().
 @DeveloperApi
 case class ShuffleBlockId(shuffleId: Int, mapId: Int, reduceId: Int) extends BlockId {
@@ -102,7 +103,7 @@ private[spark] case class TempLocalBlockId(id: UUID) extends BlockId {
 
 /** 
  *  Id associated with temporary shuffle data managed as blocks. Not serializable. 
- *  与作为块管理的临时随机数据相关联的Id,不可序列化
+ *  与作为块管理的临时shuffle数据相关联的Id,不可序列化
  *  */
 private[spark] case class TempShuffleBlockId(id: UUID) extends BlockId {
   override def name: String = "temp_shuffle_" + id

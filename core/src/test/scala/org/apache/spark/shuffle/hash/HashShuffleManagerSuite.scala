@@ -33,6 +33,7 @@ class HashShuffleManagerSuite extends SparkFunSuite with LocalSparkContext {
 
   private def checkSegments(expected: FileSegment, buffer: ManagedBuffer) {
     assert(buffer.isInstanceOf[FileSegmentManagedBuffer])
+    //asInstanceOf强制类型转换
     val segment = buffer.asInstanceOf[FileSegmentManagedBuffer]
     assert(expected.file.getCanonicalPath === segment.getFile.getCanonicalPath)
     assert(expected.offset === segment.getOffset)

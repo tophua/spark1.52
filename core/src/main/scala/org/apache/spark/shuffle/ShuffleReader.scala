@@ -19,13 +19,15 @@ package org.apache.spark.shuffle
 
 /**
  * Obtained inside a reduce task to read combined records from the mappers.
+  *在reduce任务中读取mappers组合记录
+  *
  * ShuffleReader实现了下游的Task如何读取上游的ShuffleMapTask的Shuffle输出的逻辑
  * 这个逻辑比较复杂,简单来说就是通过org.apache.spark.MapOutputTracker获得数据的位置信息,
  * 然后如果数据在本地那么调用org.apache.spark.storage.BlockManager的getBlockData读取本地数据
  */
 private[spark] trait ShuffleReader[K, C] {
   /** Read the combined key-values for this reduce task
-    * 读取此减少任务的组合键值 */
+    * 读取此reduce任务的组合键值 */
   def read(): Iterator[Product2[K, C]]
 
   /**

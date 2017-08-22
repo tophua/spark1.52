@@ -29,8 +29,8 @@ private[spark]
  * identifier (i.e. map, reduce, and shuffle). Implementations may use files or file segments to
  * encapsulate shuffle data. This is used by the BlockStore to abstract over different shuffle
  * implementations when shuffle data is retrieved.
-  * 此特征的实现者了解如何检索逻辑随机播放块的块数据标识符(即映射,缩小和随机播放),
-  * 实现可以使用文件或文件段来封装shuffle数据,这被BlockStore用于在检索shuffle数据时对不同的shuffle实现进行抽象,
+  * 此特征的实现者了,如何检索逻辑shuffle块的数据标识符(即map,reduce和shuffle)
+  * 实现可以使用文件或文件段来封装shuffle数据,这被BlockStore用于在检索shuffle数据时对不同的shuffle实现进行抽象
  * Resolver(解析器)
  */
 trait ShuffleBlockResolver {
