@@ -106,7 +106,7 @@ private[deploy] class Worker(
   //是否定期清理worker的应用程序工作目录
   private val CLEANUP_ENABLED = conf.getBoolean("spark.worker.cleanup.enabled", false)
   // How often worker will clean up old app folders
-  //清理worker本地过期的应用程序工作目录的时间间隔（秒）
+  //清理worker本地过期的应用程序工作目录的时间间隔(秒)
   private val CLEANUP_INTERVAL_MILLIS =
     conf.getLong("spark.worker.cleanup.interval", 60 * 30) * 1000
     //worker保留应用程序工作目录的有效时间。
@@ -294,7 +294,7 @@ private[deploy] class Worker(
          * race condition may arise and cause a "duplicate worker" error detailed in SPARK-4592:
          *
          *   (1) Master A fails and Worker attempts to reconnect to all masters
-         *   (2) Master B takes over(接管) and notifies Worker
+         *   (2) Master B takes over and notifies Worker
          *   (3) Worker responds(响应) by registering with Master B
          *   (4) Meanwhile(同时), Worker's previous reconnection attempt reaches Master B,
          *       causing the same Worker to register with Master B twice(导致Worker注册两次Master B)
