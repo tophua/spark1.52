@@ -39,12 +39,13 @@ import org.apache.spark.util.Utils
  * 包括标识Slave的ExecutorId,块管理器的主机名称和端口
  */
 @DeveloperApi
-class BlockManagerId private ( //executor计算的中间结果实际数据所在位置
+//executor计算的中间结果实际数据所在位置
+class BlockManagerId private (
     private var executorId_ : String,//executorId
     private var host_ : String,//块管理器的主机名称
     private var port_ : Int)//端口
   extends Externalizable {
-
+  //仅用于反序列化
   private def this() = this(null, null, 0)  // For deserialization only
 
   def executorId: String = executorId_
@@ -71,7 +72,7 @@ class BlockManagerId private ( //executor计算的中间结果实际数据所在
   }
 
   override def writeExternal(out: ObjectOutput): Unit = Utils.tryOrIOException {
-    //writeUTF java专用的字符序列格式,格式：2个字节的记录长度n字节数 跟着n长度的utf8字节。
+    //writeUTF java专用的字符序列格式,格式：2个字节的记录长度n字节数 跟着n长度的utf8字节
     out.writeUTF(executorId_)
     out.writeUTF(host_)
     out.writeInt(port_)

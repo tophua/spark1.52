@@ -28,15 +28,18 @@ public abstract class RpcHandler {
   /**
    * Receive a single RPC message. Any exception thrown while in this method will be sent back to
    * the client in string form as a standard RPC failure.
-   * 接收RPC消息,同时该方法抛出的任何异常将被发送回客户端的字符串形式作为一个标准的RPC失败
+   *
+   * 接收单个RPC消息,在此方法中抛出的任何异常将作为标准RPC故障以字符串形式发送回客户端
+   *
    * This method will not be called in parallel for a single TransportClient (i.e., channel).
-   * 对于单个TransportClient(即，通道),不会并行调用此方法
+   * 对于单个TransportClient(即,通道),不会并行调用此方法
    *
    * @param client A channel client which enables the handler to make requests back to the sender
    *               of this RPC. This will always be the exact same object for a particular channel.
-   * @param message The serialized bytes of the RPC.
+   *               一个通道客户端,使客户机能够将请求发送回此RPC的发件人,这将永远是特定通道完全相同的对象
+   * @param message The serialized bytes of the RPC.RPC的序列化字节
    * @param callback Callback which should be invoked exactly once upon success or failure of the
-   *                 RPC.
+   *                 RPC.回调在RPC成功或失败后应该被调用一次
    */
   public abstract void receive(
       TransportClient client,

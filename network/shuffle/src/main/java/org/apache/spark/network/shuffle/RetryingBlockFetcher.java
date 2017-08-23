@@ -109,8 +109,8 @@ public class RetryingBlockFetcher {
    * A retry involves requesting every outstanding block. Note that since this is a LinkedHashSet,
    * input ordering is preserved, so we always request blocks in the same order the user provided.
    *
-   * 设置所有未成功获取的块ID或非IO异常。重试涉及请求每个未完成的块。
-   * 请注意，由于这是一个LinkedHashSet，所以输入顺序被保留，所以我们总是按照用户提供的顺序请求块。
+   * 设置所有未成功获取的块ID或非IO异常,重试涉及请求每个未完成的块,
+   * 请注意,由于这是一个LinkedHashSet,所以输入顺序被保留,所以我们总是按照用户提供的顺序请求块
    */
   private final LinkedHashSet<String> outstandingBlocksIds;
 

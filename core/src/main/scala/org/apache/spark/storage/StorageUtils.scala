@@ -39,7 +39,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
    * 内部表示存储在块管理器中的块,存储RDD块充许快速检索RDD块
    * We store RDD blocks and non-RDD blocks separately to allow quick retrievals of RDD blocks.
    * These collections should only be mutated through the add/update/removeBlock methods.
-    * 我们分别存储RDD块和非RDD块,以便快速检索RDD块,这些集合只能通过add / update / removeBlock方法进行突变。
+    * 我们分别存储RDD块和非RDD块,以便快速检索RDD块,这些集合只能通过add/update/removeBlock方法进行突变
    */
   private val _rddBlocks = new mutable.HashMap[Int, mutable.Map[BlockId, BlockStatus]]
   private val _nonRddBlocks = new mutable.HashMap[BlockId, BlockStatus]
@@ -75,7 +75,7 @@ class StorageStatus(val blockManagerId: BlockManagerId, val maxMem: Long) {
    * Note that this is somewhat expensive, as it involves cloning the underlying maps and then
    * concatenating them together. Much faster alternatives exist for common operations such as
    * contains, get, and size.
-    * 请注意，这有点贵，因为它涉及克隆底层Map,然后将它们连接在一起,对于常用操作(如contains，get和size),存在更快的替代方案。
+    * 请注意,这有点贵,因为它涉及克隆底层Map,然后将它们连接在一起,对于常用操作(如contains，get和size),存在更快的替代方案
    */
   def blocks: Map[BlockId, BlockStatus] = _nonRddBlocks ++ rddBlocks
 

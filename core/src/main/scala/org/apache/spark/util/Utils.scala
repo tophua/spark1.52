@@ -973,7 +973,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return the string to tell how long has passed in milliseconds.
-   * 返回字符串,以告诉传输多长时间以毫秒为单位。
+    * 返回字符串,告诉过了多久时间以毫秒为单位
    */
   def getUsedTimeMs(startTimeMs: Long): String = {
     " " + (System.currentTimeMillis - startTimeMs) + " ms"
@@ -1325,6 +1325,7 @@ private[spark] object Utils extends Logging {
    * see SPARK-4080 for more context.
    * 执行一个计算单元的代码块,抛出任何非致命的未捕获的异常作为IOException
     *这是在实现Externalizable和序列化的读写方法,因为java的序列化程序将不报告不正确ioexceptions
+    * 参数名的调用
    */
   def tryOrIOException(block: => Unit) {
     try {

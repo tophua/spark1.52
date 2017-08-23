@@ -35,14 +35,16 @@ import org.apache.spark.util.Utils
   *
  *  获取多个块的迭代器,对于本地块,它从本地块管理器获取,对于远程块,它使用提供的BlockTransferService获取它们。
   * 实现了取Shuffle的Blocks的逻辑,包括读取本地的和发起网络请求读取其他节点上
+  *
  * This creates an iterator of (BlockID, InputStream) tuples so the caller can handle blocks
  * in a pipelined fashion as they are received.
   *
-  * 这创建了一个(BlockID,InputStream)元组的迭代器,因此调用者可以在流水线方式处理块,因为它们被接收,
+  * 这创建了一个(BlockID,InputStream)元组的迭代器,因此调用者可以在流水线方式处理块,因为它们被接收
  *
  * The implementation throttles the remote fetches to they don't exceed maxBytesInFlight to avoid
  * using too much memory.
- *	实现节流远程提取,它们不超过maxBytesInFlight,以避免使用太多的内存。
+  *
+ *	实现节流远程提取,它们不超过maxBytesInFlight,以避免使用太多的内存
   *
  * @param context [[TaskContext]], used for metrics update 用于度量更新
  * @param shuffleClient [[ShuffleClient]] for fetching remote blocks [[ShuffleClient]]用于获取远程块

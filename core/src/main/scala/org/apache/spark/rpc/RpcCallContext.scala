@@ -30,7 +30,7 @@ private[spark] trait RpcCallContext {
   /**
    * Reply a message to the sender. If the sender is [[RpcEndpoint]], its [[RpcEndpoint.receive]]
    * will be called.
-    * 向发件人回复邮件,如果发件人是[[RpcEndpoint]],它的[[RpcEndpoint.receive]]将被调用
+    *向发件人回复邮件,如果发件人是[[RpcEndpoint]],它的[[RpcEndpoint.receive]]将被调用
    * 给发件人回复一个消息
    */
   def reply(response: Any): Unit

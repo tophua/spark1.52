@@ -110,6 +110,8 @@ class ThreadUtilsSuite extends SparkFunSuite {
 
   test("sameThread") {//同一个线程
     val callerThreadName = Thread.currentThread().getName()
+    //ScalaTest-run-running-ThreadUtilsSuite
+    println("sameThread:"+callerThreadName)
     val f = Future {
       Thread.currentThread().getName()
     }(ThreadUtils.sameThread)
@@ -120,6 +122,8 @@ class ThreadUtilsSuite extends SparkFunSuite {
 
   test("runInNewThread") {//运行新的线程
     import ThreadUtils._
+    val test=runInNewThread("thread-name") { Thread.currentThread().getName  }
+    println("runInNewThrea:"+test+"==="+Thread.currentThread().getName )
     assert(runInNewThread("thread-name") { Thread.currentThread().getName } === "thread-name")
     assert(runInNewThread("thread-name") { Thread.currentThread().isDaemon } === true)//是否守护线程
     assert(

@@ -35,13 +35,13 @@ private[spark] object ThreadUtils {
    * 一个`ExecutionContextExecutor`，它运行线程中调用`execute / submit`的每个任务。
    * The caller should make sure the tasks running in this `ExecutionContextExecutor` are short and
    * never block.
-    * 调用者应该确保任务在这个“ExecutionContextExecutor”中运行的任务很短，从不堵塞。
+    * 调用者应该确保在这个“ExecutionContextExecutor”中运行的任务很短,从不堵塞
    */
   def sameThread: ExecutionContextExecutor = sameThreadExecutionContext
 
   /**
    * Create a thread factory that names threads with a prefix and also sets the threads to daemon.
-   * 创建一个线程工厂,它使用前缀命名线程,并将线程设置为守护进程。
+   * 创建一个线程工厂,它使用前缀命名线程,并将线程设置为守护进程
    */
   def namedThreadFactory(prefix: String): ThreadFactory = {
     new ThreadFactoryBuilder().setDaemon(true).setNameFormat(prefix + "-%d").build()
@@ -50,12 +50,12 @@ private[spark] object ThreadUtils {
   /**
    * Wrapper over newCachedThreadPool. Thread names are formatted as prefix-ID, where ID is a
    * unique, sequentially assigned integer.
-    * 在newcachedthreadpool包装,线程名被格式化为前缀ID,其中id是唯一的、按顺序分配的整数。
+    * 在newcachedthreadpool包装,线程名被格式化为前缀ID,其中id是唯一的、按顺序分配的整数
    */ 
   def newDaemonCachedThreadPool(prefix: String): ThreadPoolExecutor = {
     val threadFactory = namedThreadFactory(prefix)
-    //SynchronousQueue：一个不存储元素的阻塞队列。每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，
-    //吞吐量通常要高于LinkedBlockingQueue，静态工厂方法Executors.newCachedThreadPool使用了这个队列。
+    //SynchronousQueue：一个不存储元素的阻塞队列,每个插入操作必须等到另一个线程调用移除操作,否则插入操作一直处于阻塞状态
+    //吞吐量通常要高于LinkedBlockingQueue,静态工厂方法Executors.newCachedThreadPool使用了这个队列
     Executors.newCachedThreadPool(threadFactory).asInstanceOf[ThreadPoolExecutor]
   }
 
@@ -117,8 +117,8 @@ private[spark] object ThreadUtils {
    * Run a piece of code in a new thread and return the result. Exception in the new thread is
    * thrown in the caller thread with an adjusted stack trace that removes references to this
    * method for clarity. The exception stack traces will be like the following
-    * 在新线程中运行一段代码并返回结果,新线程中的异常被调用调用者线程抛出,
-    * 调整后的堆栈跟踪将清除对该方法的引用,异常堆栈跟踪将如下所示
+    * 在新线程中运行一段代码并返回结果,新线程中的异常被调用者线程抛出,调整后的堆栈跟踪将清除对该方法的引用
+    * 异常堆栈跟踪将如下所示:
    * SomeException: exception-message
     * SomeException：异常消息
    *   at CallerClass.body-method (sourcefile.scala)
@@ -145,6 +145,7 @@ private[spark] object ThreadUtils {
     }
     thread.setDaemon(isDaemon)
     thread.start()
+    //join:等待该线程终止,就认为主线程应该把执行权让给thread,直到thread执行结束,主线程才能在执行
     thread.join()
 
     exception match {
@@ -152,12 +153,12 @@ private[spark] object ThreadUtils {
         // Remove the part of the stack that shows method calls into this helper method
         // This means drop everything from the top until the stack element
         // ThreadUtils.runInNewThread(), and then drop that as well (hence the `drop(1)`).
-        //将方法调用的部分删除到此帮助方法中这意味着将所有内容从顶部拖放到堆栈元素ThreadUtils.runInNewThread（）,然后删除它（因此“drop（1）”）
+        //将方法调用的部分删除到此帮助方法中这意味着将所有内容从顶部拖放到堆栈元素ThreadUtils.runInNewThread(),然后删除它(因此“drop(1)”)
         val baseStackTrace = Thread.currentThread().getStackTrace().dropWhile(
           ! _.getClassName.contains(this.getClass.getSimpleName)).drop(1)
 
         // Remove the part of the new thread stack that shows methods call from this helper method
-        //删除新的线程堆栈的部分，显示从该帮助方法调用的方法
+        //删除新的线程堆栈的部分,显示从该帮助方法调用的方法
         val extraStackTrace = realException.getStackTrace.takeWhile(
           ! _.getClassName.contains(this.getClass.getSimpleName))
 

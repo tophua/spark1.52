@@ -34,8 +34,12 @@ import org.apache.spark.storage.{BlockId, StorageLevel}
  * Serves requests to open blocks by simply registering one chunk per block requested.
  * Handles opening and uploading arbitrary BlockManager blocks.
  *
+  * 请求服务可以通过简单地注册每个块所需打开块的要求,打开和上传任意BlockManager块
+  *
  * Opened blocks are registered with the "one-for-one" strategy, meaning each Transport-layer Chunk
  * is equivalent to one Spark-level shuffle block.
+  *
+  *打开的块通过“一对一”策略进行注册,这意味着每个传输层块相当于一个Spark级别的shuffle洗牌块
  * 
  * 当map任务与Reduce任务处于不同节点时,reduce任务需要从远端节点下载map任务的中间结果输出,
  * 因此NettyBlockRpcServer提供下载Block文件的功能,一般为了容错需要将block的数据备份到其他节点

@@ -34,6 +34,9 @@ import org.apache.spark.util.Utils
 
 /**
  * A BlockTransferService that uses Netty to fetch a set of blocks at at time.
+  *
+  *BlockTransferService使用Netty块传输服务
+  *
  * 块传输服务,使用Netty可以异步事件驱动的网络应用框架,提供Web服务及客户端,获取远程节点上Block的集合
  * 为什么提供Shuffle服务与客户端
  * Spark是分布式部署的,每个task最终都运行在不同的机器节点上,map任务的输出结果直接存储到map任务所在机器的存储体系中
@@ -46,6 +49,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
     extends BlockTransferService {
 
   // TODO: Don't use Java serialization, use a more cross-version compatible serialization format.
+  //TODO：不要使用Java序列化,使用更多的跨版本兼容序列化格式
   private val serializer = new JavaSerializer(conf)
   private val authEnabled = securityManager.isAuthenticationEnabled()
   private val transportConf = SparkTransportConf.fromSparkConf(conf, numCores)
@@ -54,6 +58,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
   private[this] var server: TransportServer = _
   private[this] var clientFactory: TransportClientFactory = _
   private[this] var appId: String = _
+
   /**
    * BlockTransferService只有在其init方法被调用,即初始化后才提供服务
    */
@@ -89,6 +94,7 @@ class NettyBlockTransferService(conf: SparkConf, securityManager: SecurityManage
     }
 
     val portToTry = conf.getInt("spark.blockManager.port", 0)
+    //_1 取的值startService方法返回值(TransportServer, Int)
     Utils.startServiceOnPort(portToTry, startService, conf, getClass.getName)._1
   }
   //方法用于获取远程shuffle文件,实际是利用NettyBlockTransferService中创建服务

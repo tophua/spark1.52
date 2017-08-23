@@ -27,10 +27,12 @@ import org.apache.spark.storage.BlockManagerMessages._
 /**
  * An RpcEndpoint to take commands from the master to execute options. For example,
  * this is used to remove blocks from the slave's BlockManager.
-  *一个RpcEndpoint从主机获取命令来执行选项,例如,这用于Slave节点的BlockManager中删除块
+  *
+  * RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
   *
  * 运行在所有Slave节点上,接收BlockManagerMasterEndpoint的命令,例如:删除某个RDD的数据,删除某个Block
  * 删除某个Shuffle数据,返回某些Block的状态
+  *
   *
  * Block对应RDD中提到Partition,每个Partition对应一个Block,
  * 每个Block由唯一的BlockId标示格式"rdd_"+rddId+"_"+PartitionId
@@ -46,6 +48,7 @@ private[storage] class BlockManagerSlaveEndpoint(
   private implicit val asyncExecutionContext = ExecutionContext.fromExecutorService(asyncThreadPool)
 
   // Operations that involve removing blocks may be slow and should be done asynchronously
+  //涉及删除块的操作可能很慢,应该是异步完成
   override def receiveAndReply(context: RpcCallContext): PartialFunction[Any, Unit] = {
     //根据BlockId删除该Executor上所有和该Shuffle相关的Block
     case RemoveBlock(blockId) =>

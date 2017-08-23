@@ -39,8 +39,7 @@ public abstract class StreamManager {
    * client. A single stream will be associated with a single TCP connection, so this method
    * will not be called in parallel for a particular stream.
    *
-   * 调用响应fetchChunk()请求,返回的缓冲区将按原样传递给客户端,
-   * 单个流将与单个TCP连接相关联,因此对于特定流不会并行调用此方法,
+   * 调用响应fetchChunk()请求,返回的缓冲区将按原样传递给客户端,单个流将与单个TCP连接相关联,因此对于特定流不会并行调用此方法,
    *
    * Chunks may be requested in any order, and requests may be repeated, but it is not required
    * that implementations support this behavior.
