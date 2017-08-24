@@ -30,7 +30,9 @@ import org.apache.spark.util.Utils
  * spark.deploy.master.Master and spark.deploy.worker.Workers in the same JVMs). Executors launched
  * by the Workers still run in separate JVMs. This can be used to test distributed operation and
  * fault recovery without spinning up a lot of processes.
- * 启动集群
+  *
+ * 在集群中创建Spark独立进程的测试类(即,在同一个JVM中运行spark.deploy.master.Master和spark.deploy.worker.Workers),
+  * Executors发起的执行者仍然运行在单独的JVM中。这可以用于测试分布式操作和故障恢复,而不会产生大量流程。
  */
 private[spark]
 class LocalSparkCluster(
@@ -85,7 +87,8 @@ class LocalSparkCluster(
     //将Master的Akka地址注册到缓存masters
     val masters = Array(masterUrl)
 
-    /* Start the Workers */
+    /* Start the Workers
+    * 启动Worker*/
     for (workerNum <- 1 to numWorkers) {
       //coresPerWorker 每个Worker占用的CPU核数
       //memoryPerWorker 每个Worker占用的内存大小
@@ -104,6 +107,7 @@ class LocalSparkCluster(
      */
     logInfo("Shutting down local Spark cluster.")
     // Stop the workers before the master so they don't get upset that it disconnected
+    //在workers面前停止工作,不要因为断开连接而感到烦恼
     workerRpcEnvs.foreach(_.shutdown())
     masterRpcEnvs.foreach(_.shutdown())
     masterRpcEnvs.clear()

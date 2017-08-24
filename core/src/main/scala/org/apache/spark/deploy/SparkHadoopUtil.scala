@@ -172,8 +172,8 @@ class SparkHadoopUtil extends Logging {
    * Returns None if the required method can't be found.
     *
     * 返回一个函数可以调用来查找写入的Hadoop FileSystem字节。 如果getFSBytesWrittenOnThreadCallback在时间t从线程r调用，返回的回调将
-    *从t返回写入r的字节。 线程级FileSystem需要反射统计数据仅供Hadoop 2.5使用（参见HADOOP-10688）。
-    *如果找不到所需的方法，则返回None。
+    *从t返回写入r的字节,线程级FileSystem需要反射统计数据仅供Hadoop 2.5使用（参见HADOOP-10688）,
+    *如果找不到所需的方法,则返回None
    */
   private[spark] def getFSBytesWrittenOnThreadCallback(): Option[() => Long] = {
     try {
@@ -247,7 +247,7 @@ class SparkHadoopUtil extends Logging {
    * Get [[FileStatus]] objects for all leaf children (files) under the given base path. If the
    * given path points to a file, return a single-element collection containing [[FileStatus]] of
    * that file.
-    * 为给定基本路径下的所有叶子（文件）获取[[FileStatus]]对象,如果给定的路径指向一个文件,则返回一个包含该文件[[FileStatus]]的单元素集合。
+    * 为给定基本路径下的所有叶子(文件)获取[[FileStatus]]对象,如果给定的路径指向一个文件,则返回一个包含该文件[[FileStatus]]的单元素集合,
    */
   def listLeafStatuses(fs: FileSystem, baseStatus: FileStatus): Seq[FileStatus] = {
     def recurse(status: FileStatus): Seq[FileStatus] = {
@@ -327,7 +327,7 @@ class SparkHadoopUtil extends Logging {
    * is valid the latest)?
    * This will return -ve (or 0) value if the fraction of validity has already expired.
     *
-    * 从现在开始剩余多少时间(以毫秒计)(最新的有效令牌的分数*更新时间)?如果有效性的分数已经过期，这将返回-ve（或0）值。
+    * 从现在开始剩余多少时间(以毫秒计)(最新的有效令牌的分数*更新时间)?如果有效性的分数已经过期,这将返回-ve(或0)值
    */
   def getTimeFromNowToRenewal(
       sparkConf: SparkConf,

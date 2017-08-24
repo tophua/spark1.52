@@ -76,8 +76,7 @@ class HistoryServer(
       override def onRemoval(rm: RemovalNotification[String, SparkUI]): Unit = {
         detachSparkUI(rm.getValue())
       }
-    })
-    .build(appLoader)
+    }).build(appLoader)
 
   private val loaderServlet = new HttpServlet {
     protected override def doGet(req: HttpServletRequest, res: HttpServletResponse): Unit = {

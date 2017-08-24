@@ -68,8 +68,8 @@ abstract class Connection(val channel: SocketChannel, val selector: Selector,
   // Now, we do have write registering for read too (temporarily), but this is to detect
   // channel close NOT to actually read/consume data on it !
   // How does this work if/when we move to SSL ?
-  //读通道通常不注册写和写不读现在，我们也有写入注册读（暂时），但这是检测
-  //通道关闭不实际读取/使用数据！ 如果/何时迁移到SSL，该如何工作？
+  //读通道通常不注册写和写不读现在，我们也有写入注册读(暂时),但这是检测
+  //通道关闭不实际读取/使用数据!如果/何时迁移到SSL,该如何工作?
 
   // What is the interest to register with selector for when we want this connection to be selected
   //当我们希望选择此连接时,请注意选择器的兴趣
@@ -187,7 +187,7 @@ abstract class Connection(val channel: SocketChannel, val selector: Selector,
       throw new Exception("OnKeyInterestChangeCallback not registered")
     }
   }
-
+  //打印剩余的缓冲区
   def printRemainingBuffer(buffer: ByteBuffer) {
     val bytes = new Array[Byte](buffer.remaining)
     val curPosition = buffer.position
@@ -196,7 +196,7 @@ abstract class Connection(val channel: SocketChannel, val selector: Selector,
     buffer.position(curPosition)
     print(" (" + bytes.length + ")")
   }
-
+  //打印缓冲区
   def printBuffer(buffer: ByteBuffer, position: Int, length: Int) {
     val bytes = new Array[Byte](length)
     val curPosition = buffer.position
@@ -375,7 +375,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
       // Fallback to previous behavior - assume finishConnect completed
       // This will happen only when finishConnect failed for some repeated number of times
       // (10 or so)
-      //回退到以前的行为 - 假设finishConnect完成这将发生只有当finishConnect失败了一些重复的次数（10左右）
+      //回退到以前的行为 - 假设finishConnect完成这将发生只有当finishConnect失败了一些重复的次数(10左右)
       // Is highly unlikely unless there was an unclean close of socket, etc
       //非常不可能，除非有一个不洁的关闭插座等
       registerInterest()
@@ -399,6 +399,7 @@ class SendingConnection(val address: InetSocketAddress, selector_ : Selector,
                 val buffers = chunk.buffers
                 // If we have 'seen' pending messages, then reset flag - since we handle that as
                 // normal registering of event (below)
+                //如果我们看到'等待的消息,那么重置标志 - 因为我们处理这个事件的正常注册(下面)
                 if (needForceReregister && buffers.exists(_.remaining() > 0)) resetForceReregister()
 
                 currentBuffers ++= buffers
@@ -635,6 +636,7 @@ private[spark] class ReceivingConnection(
   def onReceive(callback: (Connection, Message) => Unit) {onReceiveCallback = callback}
 
   // override def changeInterestForRead(): Boolean = ! isClosed
+  //覆盖def changeInterestForRead()：Boolean =!关闭
   override def changeInterestForRead(): Boolean = true
 
   override def changeInterestForWrite(): Boolean = {

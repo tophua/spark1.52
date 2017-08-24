@@ -465,6 +465,7 @@ private[history] class FsHistoryProvider(conf: SparkConf, clock: Clock)
    *
    * Normally applications should have a single running attempt; but failure to call sc.stop()
    * may cause multiple running attempts to show up.
+    * 通常应用程序应该运行一次,但是无法调用sc.stop()可能会导致多次运行尝试显示
    *
    * @return Whether `a1` should precede `a2`.
    */
@@ -584,6 +585,7 @@ private[history] class FsHistoryProvider(conf: SparkConf, clock: Clock)
 
   /**
    * Return true when the application has completed.
+    * 应用程序完成后返回true
    */
   private def isApplicationCompleted(entry: FileStatus): Boolean = {
     if (isLegacyLogDirectory(entry)) {

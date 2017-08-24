@@ -33,8 +33,8 @@ import org.apache.spark.util.{ RpcUtils, ThreadUtils, Utils }
  * Interface allowing applications to speak with a Spark deploy cluster. Takes a master URL,
  * 允许应用程序与Spark部署集群会话的接口,需要一个主节点URL
  * an app description, and a listener for cluster events, and calls back the listener when various
- * 一个应用程序描述,和一个集群事件的侦听器,当各种各样的事件发生时,回调监听器
- * events occur.
+  * events occur.
+ * 一个应用程序描述和一个集群事件的监听器,并在发生各种事件时回调监听器
  * 启动与调度
  * param masterUrls Each url should look like spark://host:port.
  * 每个URL都应该看起来像Spark:/主机:端口
@@ -127,7 +127,10 @@ private[spark] class AppClient(
      *  向所有的Master注册当前Apllcation其中Master依然使用rpcEnv.setupEndpointRef方式获得
      */
     private def tryRegisterAllMasters(): Array[JFuture[_]] = {
-      for (masterAddress <- masterRpcAddresses) yield { //yield 会把当前的元素记下来,保存在集合中,循环结束后将返回该集合
+      //yield 会把当前的元素记下来,保存在集合中,循环结束后将返回该集合
+      //submit 返回Java Future[_]
+      for (masterAddress <- masterRpcAddresses) yield {
+        //submit有返回值
         registerMasterThreadPool.submit(new Runnable {
           override def run(): Unit = try {
             if (registered) {
@@ -144,6 +147,7 @@ private[spark] class AppClient(
           }
         })
       }
+
     }
 
     /**
@@ -159,6 +163,8 @@ private[spark] class AppClient(
     private def registerWithMaster(nthRetry: Int) {
       //向所有的Master注册当前Apllcation其中Master依然使用rpcEnv.setupEndpointRef方式获得
       registerMasterFutures = tryRegisterAllMasters()
+      //schedule和scheduleAtFixedRate的区别在于,如果指定开始执行的时间在当前系统运行时间之前,
+      // scheduleAtFixedRate会把已经过去的时间也作为周期执行,而schedule不会把过去的时间算上
       registrationRetryTimer = registrationRetryThread.scheduleAtFixedRate(new Runnable {
         override def run(): Unit = {
           Utils.tryOrExit {

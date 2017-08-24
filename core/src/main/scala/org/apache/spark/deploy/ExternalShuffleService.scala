@@ -54,7 +54,7 @@ class ExternalShuffleService(sparkConf: SparkConf, securityManager: SecurityMana
   private var server: TransportServer = _
 
   /** Create a new shuffle block handler. Factored out for subclasses to override.
-    * 创建一个新的shuffle块处理程序。 考虑到子类覆盖 */
+    * 创建一个新的shuffle块处理程序,考虑到子类覆盖 */
   protected def newShuffleBlockHandler(conf: TransportConf): ExternalShuffleBlockHandler = {
     new ExternalShuffleBlockHandler(conf)
   }

@@ -233,7 +233,7 @@ object SparkSubmit {
   /**
    * Prepare the environment for submitting an application.
    * 准备提交应用程序的环境
-   * This returns a 4-tuple:
+   * This returns a 4-tuple:这返回一个4元组
    *   (1) the arguments for the child process, 子进程的参数
    *   (2) a list of classpath entries for the child,子进程的类路径条目列表
    *   (3) a map of system properties, and 系统属性的映射
@@ -385,7 +385,7 @@ object SparkSubmit {
       } else {
         // If a python file is provided, add it to the child arguments and list of files to deploy.
         // Usage: PythonAppRunner <main python file> <extra python files> [app arguments]
-        //如果提供了一个python文件，请将其添加到子参数和要部署的文件列表中。
+        //如果提供了一个python文件,请将其添加到子参数和要部署的文件列表中。
         //用法：PythonAppRunner <main python file> <extra python files> [app arguments]
         args.mainClass = "org.apache.spark.deploy.PythonRunner"
         args.childArgs = ArrayBuffer(args.primaryResource, args.pyFiles) ++ args.childArgs
@@ -449,7 +449,7 @@ object SparkSubmit {
     }
 
     // If we're running a R app, set the main class to our specific R runner
-    //如果我们正在运行R应用程序，请将主要课程设置为我们特定的R跑步者
+    //如果我们正在运行R应用程序,请将主要课程设置为我们特定的R跑步者
     if (args.isR && deployMode == CLIENT) {
       if (args.primaryResource == SPARKR_SHELL) {
         args.mainClass = "org.apache.spark.api.r.RBackend"

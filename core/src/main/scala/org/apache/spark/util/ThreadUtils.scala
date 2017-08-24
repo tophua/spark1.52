@@ -44,6 +44,7 @@ private[spark] object ThreadUtils {
    * 创建一个线程工厂,它使用前缀命名线程,并将线程设置为守护进程
    */
   def namedThreadFactory(prefix: String): ThreadFactory = {
+    //ThreadFactoryBuilder：ThreadFactory的生成器,提供以下特性：可设置线程的命名格式,可设置是否为后台线程,可设置线程的优先级,可设置未捕获异常的处理器
     new ThreadFactoryBuilder().setDaemon(true).setNameFormat(prefix + "-%d").build()
   }
 
@@ -66,6 +67,7 @@ private[spark] object ThreadUtils {
    */
   def newDaemonCachedThreadPool(
       prefix: String, maxThreadNumber: Int, keepAliveSeconds: Int = 60): ThreadPoolExecutor = {
+    //创建一个线程工厂,它使用前缀命名线程,并将线程设置为守护进程
     val threadFactory = namedThreadFactory(prefix)    
     val threadPool = new ThreadPoolExecutor(
       maxThreadNumber, // corePoolSize: 核心线程数,会一直存活,即使没有任务,线程池也会维护线程的最少数量
@@ -75,6 +77,7 @@ private[spark] object ThreadUtils {
       TimeUnit.SECONDS,//线程池维护线程所允许的空闲时间的单位
       new LinkedBlockingQueue[Runnable],//线程池所使用的缓冲队列
       threadFactory)//执行程序创建新线程时使用的工厂
+    //抛出java.util.concurrent.RejectedExecutionException异常
     threadPool.allowCoreThreadTimeOut(true)//允许超时自动关闭
     threadPool
   }

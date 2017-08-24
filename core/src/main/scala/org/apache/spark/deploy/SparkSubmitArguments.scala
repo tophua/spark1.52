@@ -39,6 +39,8 @@ import org.apache.spark.util.Utils
   *  //System.getenv()和System.getProperties()的区别
     //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
     //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
+
+  def env: immutable.Map[String, String] = immutable.Map(System.getenv().asScala.toSeq: _*)
  */
 private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, String] = sys.env)
   extends SparkSubmitArgumentsParser {

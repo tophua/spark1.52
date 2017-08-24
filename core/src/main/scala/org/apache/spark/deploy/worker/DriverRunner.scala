@@ -238,7 +238,7 @@ private[deploy] trait Sleeper {
 }
 
 // Needed because ProcessBuilder is a final class and cannot be mocked
-//需要因为ProcessBuilder是一个最终的类，不能被模拟
+//需要因为ProcessBuilder是一个最终的类,不能被模拟
 private[deploy] trait ProcessBuilderLike {
   def start(): Process
   def command: Seq[String]

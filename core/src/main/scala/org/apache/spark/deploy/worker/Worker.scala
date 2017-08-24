@@ -79,7 +79,7 @@ private[deploy] class Worker(
   // For worker and executor IDs
   private def createDateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
   // Send a heartbeat every (heartbeat timeout) / 4 milliseconds
-  //HEARTBEAT_MILLIS （默认是15秒（15000毫秒）
+  //HEARTBEAT_MILLIS (默认是15秒15000毫秒)
   //System.getProperty("spark.worker.timeout", "60").toLong * 1000 / 4）为时间间隔,定期向master发送心跳, 
   private val HEARTBEAT_MILLIS = conf.getLong("spark.worker.timeout", 60) * 1000 / 4
 
