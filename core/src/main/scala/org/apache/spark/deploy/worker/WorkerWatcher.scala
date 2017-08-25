@@ -76,7 +76,7 @@ private[spark] class WorkerWatcher(override val rpcEnv: RpcEnv, workerUrl: Strin
   override def onNetworkError(cause: Throwable, remoteAddress: RpcAddress): Unit = {
     if (isWorker(remoteAddress)) {
       // These logs may not be seen if the worker (and associated pipe) has died
-      //如果worker（和相关管道）已经死亡,则可能无法看到这些日志
+      //如果worker(和相关管道)已经死亡,则可能无法看到这些日志
       logError(s"Could not initialize connection to worker $workerUrl. Exiting.")
       logError(s"Error was: $cause")
       exitNonZero()

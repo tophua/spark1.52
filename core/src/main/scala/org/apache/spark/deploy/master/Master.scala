@@ -104,6 +104,7 @@ private[deploy] class Master(
   private val masterSource = new MasterSource(this)
 
   // After onStart, webUi will be set
+  //在onStart之后,将会设置webUi
   private var webUi: MasterWebUI = null
 
   private val masterPublicAddress = {
@@ -1091,6 +1092,7 @@ private[deploy] class Master(
     * 如果workers的限制向上调整,新的workers将被启动,只要有workers有足够的资源,
     * 但是，如果它向下调整，我们不会杀死现有的执行者，直到我们明确接收到kill请求。
    * @return whether the application has previously registered with this Master.
+    *         该应用程序是否以前已向该主服务器注册
    */
   private def handleRequestExecutors(appId: String, requestedTotal: Int): Boolean = {
     idToApp.get(appId) match {
@@ -1116,6 +1118,7 @@ private[deploy] class Master(
     * 这样我们不会在删除旧的执行器后立即启动新的执行程序
    *
    * @return whether the application has previously registered with this Master.
+    *         该应用程序是否以前已向该主服务器注册
    */
   private def handleKillExecutors(appId: String, executorIds: Seq[Int]): Boolean = {
     idToApp.get(appId) match {

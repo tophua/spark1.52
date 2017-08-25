@@ -29,7 +29,7 @@ import org.apache.spark.annotation.DeveloperApi
  * 一个数据块可以通过其文件名的唯一标识,但每一种类型的块设置有不同的Key集合,产生其唯一的名称
  * If your BlockId should be serializable, be sure to add it to the BlockId.apply() method.
   * 如果你的BlockId可以序列化,请确保将其添加到BlockId.apply()方法中
-  * 一个数据块即对应一个分区
+  * RDD的每个partition分区对应Storage模块的一个Block数据块,只不过Block是Partition经过处理后的数据
  */
 @DeveloperApi
 sealed abstract class BlockId {

@@ -87,6 +87,7 @@ private[deploy] class ExecutorRunner(
    * Kill executor process, wait for exit and notify worker to update resource status.
    * 停止executor进行,将停止的结果反馈给worker本身
    * @param message the exception message which caused the executor's death
+    *                导致executor死亡的异常消息
    */
   private def killProcess(message: Option[String]) {
     var exitCode: Option[Int] = None

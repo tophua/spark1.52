@@ -117,7 +117,7 @@ object CommandUtils extends Logging {
       //已捕获环境变量中的库路径
       Seq[String](), // library path already captured in environment variable
       // filter out auth secret from java options
-      //过虑器从java认证的加密选项
+      //已经在环境变量中捕获的库路径从java选项过滤掉auth secret
       command.javaOpts.filterNot(_.startsWith("-D" + SecurityManager.SPARK_AUTH_SECRET_CONF)))
   }
 

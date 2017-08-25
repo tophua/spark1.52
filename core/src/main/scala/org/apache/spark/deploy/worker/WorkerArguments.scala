@@ -107,6 +107,7 @@ private[worker] class WorkerArguments(args: Array[String], conf: SparkConf) {
       printUsageAndExit(0)
 
     case value :: tail =>
+      ////给出了两个位置参数
       if (masters != null) {  // Two positional arguments were given
         printUsageAndExit(1)
       }
@@ -114,6 +115,7 @@ private[worker] class WorkerArguments(args: Array[String], conf: SparkConf) {
       parse(tail)
 
     case Nil =>
+      //没有给出位置参数
       if (masters == null) {  // No positional argument was given
         printUsageAndExit(1)
       }

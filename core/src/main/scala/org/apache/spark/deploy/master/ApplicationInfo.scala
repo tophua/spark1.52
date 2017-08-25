@@ -34,7 +34,7 @@ private[spark] class ApplicationInfo(
   val driver: RpcEndpointRef,
   defaultCores: Int)
     extends Serializable {
-
+  //枚举类型盛名
   @transient var state: ApplicationState.Value = _
   @transient var executors: mutable.HashMap[Int, ExecutorDesc] = _
   @transient var removedExecutors: ArrayBuffer[ExecutorDesc] = _
@@ -61,6 +61,7 @@ private[spark] class ApplicationInfo(
    * 创建ApplicationSource,声明了executors用于缓存分配Application的executor
    */
   private def init() {
+    //枚举类型赋值
     state = ApplicationState.WAITING //等待
     executors = new mutable.HashMap[Int, ExecutorDesc]
     coresGranted = 0 //
@@ -100,8 +101,11 @@ private[spark] class ApplicationInfo(
   //删除Executor
   private[master] def removeExecutor(exec: ExecutorDesc) {
     if (executors.contains(exec.id)) {
+      //ArrayBuffer操作
       removedExecutors += executors(exec.id)
+      //HashMap操作
       executors -= exec.id
+      //Int 操作
       coresGranted -= exec.cores
     }
   }

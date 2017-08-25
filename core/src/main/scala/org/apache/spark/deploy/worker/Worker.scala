@@ -293,11 +293,12 @@ private[deploy] class Worker(
          * if the worker unconditionally(无条件) attempts to re-register with all masters, the following
          * race condition may arise and cause a "duplicate worker" error detailed in SPARK-4592:
          *
-         *   (1) Master A fails and Worker attempts to reconnect to all masters
-         *   (2) Master B takes over and notifies Worker
-         *   (3) Worker responds(响应) by registering with Master B
-         *   (4) Meanwhile(同时), Worker's previous reconnection attempt reaches Master B,
-         *       causing the same Worker to register with Master B twice(导致Worker注册两次Master B)
+         *   (1) Master A fails and Worker attempts to reconnect to all masters Master A失败,Worker尝试重新连接所有masters
+         *   (2) Master B takes over and notifies Worker   mastersB接管并通知Worker
+         *   (3) Worker responds by registering with Master B  Worker通过向Master B注册进行回复
+         *   (4) Meanwhile, Worker's previous reconnection attempt reaches Master B,
+         *       causing the same Worker to register with Master B twice
+          *       同时,Worker以前的重新连接尝试达到Master B,导致同一名工作人员向主人B注册两次
          *
          * Instead(相反), if we only register with the known active master(如果注册一个未知活动Master), we can assume that the
          * old master must have died because another master has taken over(旧的Master必须已经死状态,因为别一个Master接管). Note that this is
@@ -431,7 +432,9 @@ private[deploy] class Worker(
     case WorkDirCleanup =>
       // Spin up a separate thread (in a future) to do the dir cleanup; don't tie up worker
       // rpcEndpoint.
+      //旋转一个单独的线程(future)来执行目录清理;不要绑定worker rpcEndpoint,
       // Copy ids so that it can be used in the cleanup thread.
+      //复制ID,以便它可以在清理线程中使用
       val appIds = executors.values.map(_.appId).toSet
       val cleanupFuture = concurrent.future {
         val appDirs = workDir.listFiles()
@@ -456,12 +459,12 @@ private[deploy] class Worker(
         case e: Throwable =>
           logError("App dir cleanup failed: " + e.getMessage, e)
       }(cleanupThreadExecutor)
-/**
- * 恢复Worker的步骤:
- * 1)重新注册Worker（实际上是更新Master本地维护的数据结构）,置状态为UNKNOWN
- * 2)向Worker发送Master Changed的消息
- * 3)Worker收到消息后,向Master回复WorkerSchedulerStateResponse消息,并通过该消息上报executor和driver的信息
- */
+    /**
+     * 恢复Worker的步骤:
+     * 1)重新注册Worker（实际上是更新Master本地维护的数据结构）,置状态为UNKNOWN
+     * 2)向Worker发送Master Changed的消息
+     * 3)Worker收到消息后,向Master回复WorkerSchedulerStateResponse消息,并通过该消息上报executor和driver的信息
+     */
     case MasterChanged(masterRef, masterWebUiUrl) =>
       logInfo("Master has changed, new master is at " + masterRef.address.toSparkURL)
       changeMaster(masterRef, masterWebUiUrl)

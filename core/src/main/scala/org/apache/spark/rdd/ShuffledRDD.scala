@@ -29,7 +29,8 @@ private[spark] class ShuffledRDDPartition(val idx: Int) extends Partition {
 /**
  * :: DeveloperApi ::
  * The resulting RDD from a shuffle (e.g. repartitioning of data).
-  * 来自洗牌的RDD(例如重新分配数据)
+  * 来自洗牌的RDD(例如重新分配数据),他从上一个RDD(MapPartitionRDD)的输出读取数据,作为reducer的开始
+  * 最后生成一个MapPartitionRDD起到reducer端reducer的作用
  * 
  * @param prev the parent RDD.父RDD
  * @param part the partitioner used to partition the RDD 使用那个分区

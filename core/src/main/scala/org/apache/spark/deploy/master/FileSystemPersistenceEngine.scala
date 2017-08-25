@@ -29,7 +29,8 @@ import org.apache.spark.util.Utils
  * Files are deleted when applications and workers are removed.
  * 将数据存储在一个单一的磁盘目录上,每一个应用程序和work的一个文件,当应用程序和Workers被删除时,文件被删除
  * @param dir Directory to store files. Created if non-existent (but not recursively).
- * @param serializer Used to serialize our objects.
+  *            存储文件的目录,创建不存在(但不是递归)
+ * @param serializer Used to serialize our objects.用于序列化我们的对象
  */
 private[master] class FileSystemPersistenceEngine(
     val dir: String,
