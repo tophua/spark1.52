@@ -76,7 +76,7 @@ private[spark] trait TaskScheduler {
    * indicating that the block manager should re-register.
     *
     * 更新正在进行的任务的指标,让master知道BlockManager仍然存在,如果driver知道给定的块管理器,则返回true。
-    * 否则返回false，表示块管理器应该重新注册。
+    * 否则返回false,表示块管理器应该重新注册,
     *
    * 周期性的接收executor的心跳,更新运行中tasks的元信息,并让master知晓BlockManager仍然存活
    */

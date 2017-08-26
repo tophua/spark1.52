@@ -41,12 +41,11 @@ import org.apache.spark.util.{Clock, SystemClock, Utils}
  * to it are resourceOffer, which asks the TaskSet whether it wants to run a task on one node,
  * and statusUpdate, which tells it that one of its tasks changed state (e.g. finished).
   *
-  *
-  * 在TaskSchedulerImpl中的单个TaskSet中调度任务,该类跟踪每个任务，如果任务失败(最多有限次数),则重试任务,
+  * 在TaskSchedulerImpl中的单个TaskSet中调度任务,该类跟踪每个任务,如果任务失败(最多有限次数),则重试任务,
   * 并通过延迟调度来处理此TaskSet的本地化感知调度,它的主要接口是resourceOffer,它要求TaskSet是否要在一个节点上运行一个任务,
   * 而statusUpdate告诉它其中一个任务改变了状态(如完成)。
- * TaskSetManager 会根据数据的就近原则为Task分配计算资源,监控Task的执行状态并采取必要的措施,如:
- * 失败重试,慢任务的推测性执行.
+  *
+ * TaskSetManager 会根据数据的就近原则为Task分配计算资源,监控Task的执行状态并采取必要的措施,如:失败重试,慢任务的推测性执行.
  * 
  * THREADING: This class is designed to only be called from code with a lock on the
  * TaskScheduler (e.g. its event handlers). It should not be called from other threads.

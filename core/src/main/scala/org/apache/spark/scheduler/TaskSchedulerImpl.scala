@@ -38,18 +38,30 @@ import org.apache.spark.storage.BlockManagerId
 
 /**
  * Schedules tasks for multiple types of clusters by acting through a SchedulerBackend.
+  *
+  * 通过执行SchedulerBackend来调度多种类型的集群的任务
+  *
  * It can also work with a local setup by using a LocalBackend and setting isLocal to true.
+  * 它也可以通过使用LocalBackend并将isLocal设置为true来设置本地设置
  * It handles common logic, like determining a scheduling order across jobs, waking up to launch
  * speculative tasks, etc.
- *
+  *
+ *它处理常见的逻辑,例如确定作业之间的调度顺序,唤醒启动投机任务等
+  *
  * Clients should first call initialize() and start(), then submit task sets through the
  * runTasks method.
+  *
+  * 客户端应首先调用initialize()和start(),然后通过runTasks方法提交任务集
  *
  * THREADING: SchedulerBackends and task-submitting clients can call this class from multiple
  * threads, so it needs locks in public API methods to maintain its state. In addition, some
  * SchedulerBackends synchronize on themselves when they want to send events here, and then
  * acquire a lock on us, so we need to make sure that we don't try to lock the backend while
  * we are holding a lock on ourselves.
+  *
+  * THREADING：SchedulerBackends和任务提交客户端可以从多个线程调用此类,因此它需要使用公共API方法的锁来维护其状态,
+  * 另外,一些SchedulerBackends当他们想在这里发送事件时自己进行同步,然后在我们上获取一个锁,所以我们需要确保在我们自己锁定时不要锁定后端。
+  *
  * TaskSchedulerImpl 构造过程如下:
  * 1)从SparkConf中读取配置信息,包括每个任务分配的CPU数,调度模式(调度模式有FAIR和FIFO两种,默认FIFO,可以修改Spark.scheduler.mode参数改变),
  * 2)创建TaskResult,它的作用是通过线程池(Executors.newFixedThreadPool创建,默认4个线程,线程名字以task-result-getter开头,线程工厂默认是
@@ -154,6 +166,7 @@ private[spark] class TaskSchedulerImpl(
 
     this.backend = backend
     // temporarily set rootPool name to empty
+    //临时将rootPool名称设置为空
     rootPool = new Pool("", schedulingMode, 0, 0)
     schedulableBuilder = {
       schedulingMode match {
@@ -341,6 +354,8 @@ private[spark] class TaskSchedulerImpl(
    * Called by cluster manager to offer resources on slaves. We respond by asking our active task
    * sets for tasks in order of priority. We fill each node with tasks in a round-robin manner so
    * that tasks are balanced across the cluster.
+    * 由群集管理员调用slaves方面提供资源,我们通过以优先级的顺序询问我们的活动任务集来应对任务,
+    * 我们以循环方式填充每个节点的任务,使得任务在集群中平衡,
    */
 
   /**

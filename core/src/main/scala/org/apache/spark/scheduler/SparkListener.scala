@@ -107,6 +107,7 @@ case class SparkListenerBlockUpdated(blockUpdatedInfo: BlockUpdatedInfo) extends
   * 执行executors的定期更新
  * @param execId executor id
  * @param taskMetrics sequence of (task id, stage id, stage attempt, metrics)
+  *                    序列（任务ID,阶段ID,阶段尝试,度量）
  */
 @DeveloperApi
 case class SparkListenerExecutorMetricsUpdate(

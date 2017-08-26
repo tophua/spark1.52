@@ -63,8 +63,10 @@ private[spark] abstract class Task[T](
    * Called by [Executor] to run this task.
    * 被Executor调用以执行Task,TaskRunner.run调用此方法
    * @param taskAttemptId an identifier for this task attempt that is unique within a SparkContext.
+    *                      此任务尝试的标识符在SparkContext中是唯一的
    * @param attemptNumber how many times this task has been attempted (0 for the first attempt)
-   * @return the result of the task along with updates of Accumulators.
+    *                      这个任务已经尝试了多少次(第一次尝试为0)
+   * @return the result of the task along with updates of Accumulators.任务的结果以及蓄能器的更新
    */
   
   final def run(

@@ -23,6 +23,9 @@ package org.apache.spark.scheduler
  * machines become available and can launch tasks on them.
   * 实现用于与底层资源调度系统交互（如mesos/YARN）,配合TaskScheduler实现具体任务执行所需的资源分配,
   * 核心接口是receiveOffers
+  *
+  * SchedulerBackend作用是分配当前可用的资源,具体就是向当前等待分配资源的Task分配Executor,并且在分配Exector上启动Task,
+  * 完成计算的调度过程.他使用receiveOffers完成上述的任务调度
  */
 private[spark] trait SchedulerBackend {
   private val appId = "spark-application-" + System.currentTimeMillis

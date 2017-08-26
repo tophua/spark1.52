@@ -59,7 +59,7 @@ class SplitInfo(
         this.path == that.path &&
         this.length == that.length &&
         // other split specific checks (like start for FileSplit)
-      //其他分割特定检查(如FileSplit的启动)
+        //其他分割特定检查(如FileSplit的启动)
         this.underlyingSplit == that.underlyingSplit
     }
     case _ => false
