@@ -186,7 +186,7 @@ private[spark] class SparkDeploySchedulerBackend(
    * including existing pending and running executors.
     * 通过指定所需的总数来请求Master执行器,包括现有的正在运行和正在运行的执行器
    *
-   * @return whether the request is acknowledged.
+   * @return whether the request is acknowledged.请求是否被确认
    */
   protected override def doRequestTotalExecutors(requestedTotal: Int): Boolean = {
     Option(client) match {
@@ -200,7 +200,7 @@ private[spark] class SparkDeploySchedulerBackend(
   /**
    * Kill the given list of executors through the Master.
     * 通过Master杀死给定的执行者名单
-   * @return whether the kill request is acknowledged.
+   * @return whether the kill request is acknowledged.是否确认杀死请求
    */
   protected override def doKillExecutors(executorIds: Seq[String]): Boolean = {
     Option(client) match {

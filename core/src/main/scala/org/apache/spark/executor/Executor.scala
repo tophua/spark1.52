@@ -564,6 +564,7 @@ private[spark] class Executor(
     val intervalMs = conf.getTimeAsMs("spark.executor.heartbeatInterval", "10s")
     //心跳不能发送时的随机间隔,每次随机时间10---20秒
     // Wait a random interval so the heartbeats don't end up in sync
+    //等待随机间隔,使心跳不会最终同步
     val initialDelay = intervalMs + (math.random * intervalMs).asInstanceOf[Int]
 
     val heartbeatTask = new Runnable() {

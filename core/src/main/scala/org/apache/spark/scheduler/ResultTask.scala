@@ -31,14 +31,17 @@ import org.apache.spark.rdd.RDD
  * 然后ResultTask会将计算的结果汇报到Driver端
  * See [[Task]] for more information.
  *
- * @param stageId id of the stage this task belongs to
+ * @param stageId id of the stage this task belongs to 该任务所属的阶段的ID
  * @param taskBinary broadcasted version of the serialized RDD and the function to apply on each
  *                   partition of the given RDD. Once deserialized, the type should be
  *                   (RDD[T], (TaskContext, Iterator[T]) => U).
- * @param partition partition of the RDD this task is associated with
- * @param locs preferred task execution locations for locality scheduling
+  *                   播放版本的序列化RDD以及应用于给定RDD的每个分区的功能,
+  *                   反序列化后,类型应为(RDD [T],(TaskContext，Iterator [T]）=> U)
+ * @param partition partition of the RDD this task is associated with 该任务与RDD的分区
+ * @param locs preferred task execution locations for locality scheduling 用于地点调度的首选任务执行位置
  * @param outputId index of the task in this job (a job can launch tasks on only a subset of the
  *                 input RDD's partitions).
+  *                 此作业中任务的索引(作业只能在输入RDD的分区的子集上启动任务)
  */
 private[spark] class ResultTask[T, U](
     stageId: Int,

@@ -628,7 +628,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
    *
    * Since the CLI will call `System.exit()`, we install a security manager to prevent that call
    * from working, and restore the original one afterwards.
-    * 由于CLI将调用“System.exit（）”,所以我们安装一个安全管理器来阻止该调用工作,然后恢复原来的调用。
+    * 由于CLI将调用“System.exit()”,所以我们安装一个安全管理器来阻止该调用工作,然后恢复原来的调用
    */
   private def getSqlShellOptions(): String = {
     val currentOut = System.out

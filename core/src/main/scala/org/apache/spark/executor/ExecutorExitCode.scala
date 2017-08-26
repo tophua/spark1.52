@@ -26,6 +26,10 @@ import org.apache.spark.util.SparkExitCode._
  * with "natural" exit statuses that may be caused by the JVM or user code. In particular,
  * exit codes 128+ arise on some Unix-likes as a result of signals, and it appears that the
  * OpenJDK JVM may use exit code 1 in some of its own "last chance" code.
+  *
+  * 这些是退出代码,执行者应该使用它来向主机提供关于执行器故障的信息,
+  * 假设集群管理框架可以捕获退出代码（但可能不是日志文件）,这里的退出代码常量被选择为不太可能与由JVM或用户代码引起的“自然”退出状态相冲突,
+  * 特别地,退出代码128+由于信号而在某些Unix喜好上出现,并且似乎OpenJDK JVM可能在其自己的“最后机会”代码中使用退出代码1。
  */
 private[spark]
 object ExecutorExitCode {

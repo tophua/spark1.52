@@ -151,7 +151,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * @param stageId ID of the stage
    * @param info Info to be recorded
    * @param withTime Controls whether to record time stamp before the info, default is true
-    *                 控制是否在信息之前记录时间戳，默认为true
+    *                 控制是否在信息之前记录时间戳,默认为true
    */
   protected def stageLogInfo(stageId: Int, info: String, withTime: Boolean = true) {
     stageIdToJobId.get(stageId).foreach(jobId => jobLogInfo(jobId, info, withTime))
@@ -160,10 +160,10 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
   /**
    * Record task metrics into job log files, including execution info and shuffle metrics
    * 将任务度量记录到工作日志文件中,包括执行(execution)信息和shuffle度量
-   * @param stageId Stage ID of the task
-   * @param status Status info of the task
-   * @param taskInfo Task description info
-   * @param taskMetrics Task running metrics
+   * @param stageId Stage ID of the task 任务的阶段ID
+   * @param status Status info of the task 任务的状态信息
+   * @param taskInfo Task description info 任务说明信息
+   * @param taskMetrics Task running metrics 任务运行指标
    */
   protected def recordTaskMetrics(stageId: Int, status: String,
                                 taskInfo: TaskInfo, taskMetrics: TaskMetrics) {
@@ -278,7 +278,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * Record job properties into job log file
    * 将作业属性保存到作业日志文件中
    * @param jobId ID of the job
-   * @param properties Properties of the job
+   * @param properties Properties of the job 工作的属性
    */
   protected def recordJobProperties(jobId: Int, properties: Properties) {
     if (properties != null) {

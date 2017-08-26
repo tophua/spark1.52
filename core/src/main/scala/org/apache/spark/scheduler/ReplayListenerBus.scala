@@ -42,10 +42,12 @@ private[spark] class ReplayListenerBus extends SparkListenerBus with Logging {
    * error is thrown by this method.
     * 这个方法可以被多次调用,但是在这种方法抛出任何错误之后,监听器行为是未定义的,
    *
-   * @param logData Stream containing event log data.
+   * @param logData Stream containing event log data.流包含事件日志数据
    * @param sourceName Filename (or other source identifier) from whence @logData is being read
+    *                   从读取@logData的文件名(或其他源标识符)
    * @param maybeTruncated Indicate whether log file might be truncated (some abnormal situations
    *        encountered, log file might not finished writing) or not
+    *        指示日志文件是否可能被截断(遇到某些异常情况,日志文件可能无法完成写入)
    */
   def replay(
       logData: InputStream,

@@ -35,9 +35,13 @@ import org.apache.spark.util.Utils
  * both the task thread and the heartbeat thread write to the TaskMetrics. The heartbeat thread
  * reads it to send in-progress metrics, and the task thread reads it to send metrics along with
  * the completed task.
+  * 此类用于存储正在进行和已完成任务的度量,在执行程序中,任务线程和心跳线程都会写入TaskMetrics。
+  * 心跳线程读取它以发送进行中的度量,并且任务线程读取它以发送指标以及完成的任务。
  *
  * So, when adding new fields, take into consideration that the whole object can be serialized for
  * shipping off at any time to consumers of the SparkListener interface.
+  *
+  * 所以,当添加新的字段时,考虑到整个对象可以被序列化,随时发送给SparkListener接口的消费者
  */
 @DeveloperApi
 class TaskMetrics extends Serializable {

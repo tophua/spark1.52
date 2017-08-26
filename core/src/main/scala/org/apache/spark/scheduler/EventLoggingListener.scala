@@ -39,11 +39,12 @@ import org.apache.spark.util.{JsonProtocol, Utils}
  * A SparkListener that logs events to persistent storage.
  * 一个Spark监听器事件将日志存储
  * Event logging is specified by the following configurable parameters:
- *   spark.eventLog.enabled - Whether event logging is enabled.
- *   spark.eventLog.compress - Whether to compress logged events
- *   spark.eventLog.overwrite - Whether to overwrite any existing files.
- *   spark.eventLog.dir - Path to the directory in which events are logged.
- *   spark.eventLog.buffer.kb - Buffer size to use when writing to output streams
+  * 事件记录由以下可配置参数指定：
+ *   spark.eventLog.enabled - Whether event logging is enabled.是否启用事件日志记录
+ *   spark.eventLog.compress - Whether to compress logged events 是否压缩记录的事件
+ *   spark.eventLog.overwrite - Whether to overwrite any existing files.是否覆盖任何现有的文件
+ *   spark.eventLog.dir - Path to the directory in which events are logged.记录事件的目录的路径
+ *   spark.eventLog.buffer.kb - Buffer size to use when writing to output streams写入输出流时使用的缓冲区大小
  */
 private[spark] class EventLoggingListener(
     appId: String,
@@ -121,7 +122,7 @@ private[spark] class EventLoggingListener(
 
     /* The Hadoop LocalFileSystem (r1.0.4) has known issues with syncing (HADOOP-7844).
      * Therefore, for local files, use FileOutputStream instead.
-     * Hadoop LocalFileSystem（r1.0.4）已知同步问题（HADOOP-7844,因此,对于本地文件,请改用FileOutputStream。*/
+     * Hadoop LocalFileSystem(r1.0.4)已知同步问题（HADOOP-7844,因此,对于本地文件,请改用FileOutputStream。*/
     val dstream =
       if ((isDefaultLocal && uri.getScheme == null) || uri.getScheme == "file") {
         new FileOutputStream(uri.getPath)
@@ -145,7 +146,8 @@ private[spark] class EventLoggingListener(
     }
   }
 
-  /** Log the event as JSON. */
+  /** Log the event as JSON.
+    * 将事件记录为JSON*/
   private def logEvent(event: SparkListenerEvent, flushLogger: Boolean = false) {
     val eventJson = JsonProtocol.sparkEventToJson(event)
     // scalastyle:off println
@@ -280,12 +282,13 @@ private[spark] object EventLoggingListener extends Logging {
     *
     * 日志文件名称将标识用于内容的压缩编解码器(如果有的话)。 例如,对于未压缩日志的app_123,LZF压缩日志的app_123.lzf。
    *
-   * @param logBaseDir Directory where the log file will be written.
-   * @param appId A unique app ID.
-   * @param appAttemptId A unique attempt id of appId. May be the empty string.
+   * @param logBaseDir Directory where the log file will be written.要写入日志文件的目录
+   * @param appId A unique app ID.独特的应用程式编号
+   * @param appAttemptId A unique attempt id of appId. May be the empty string.appId的唯一尝试ID,可能是空字符串
    * @param compressionCodecName Name to identify the codec used to compress the contents
    *                             of the log, or None if compression is not enabled.
-   * @return A path which consists of file-system-safe characters.
+    *                             用于标识用于压缩日志内容的编解码器的名称,如果未启用压缩，则为“无”
+   * @return A path which consists of file-system-safe characters.由文件系统安全字符组成的路径
    */
   def getLogPath(
       logBaseDir: URI,

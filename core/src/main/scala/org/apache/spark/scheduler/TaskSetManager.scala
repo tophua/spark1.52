@@ -52,10 +52,11 @@ import org.apache.spark.util.{Clock, SystemClock, Utils}
  * TaskScheduler (e.g. its event handlers). It should not be called from other threads.
   * THREADING：此类被设计为仅在TaskScheduler(例如其事件处理程序)上具有锁定的代码中调用该类,不应该从其他线程调用
  *
- * @param sched           the TaskSchedulerImpl associated with the TaskSetManager
- * @param taskSet         the TaskSet to manage scheduling for
+ * @param sched           the TaskSchedulerImpl associated with the TaskSetManager TaskSchedulerImpl与TaskSetManager关联
+ * @param taskSet         the TaskSet to manage scheduling for TaskSet管理调度
  * @param maxTaskFailures if any particular task fails this number of times, the entire
  *                        task set will be aborted
+  *                        如果任何特定任务失败了这个次数,整个任务集将被中止
  */
 private[spark] class TaskSetManager(//任务集管理器
     sched: TaskSchedulerImpl,
@@ -506,9 +507,9 @@ private[spark] class TaskSetManager(//任务集管理器
    * NO_PREF locality which will be not modified
     * 这个函数是一个maxlocality将延迟调度算法或将有一个特殊的no_pref局部将不进行修改调整
    *  为taskSet分配资源,校验是否满足的逻辑
-   * @param execId the executor Id of the offered resource
-   * @param host  the host Id of the offered resource
-   * @param maxLocality the maximum locality we want to schedule the tasks at
+   * @param execId the executor Id of the offered resource 提供的资源的执行者Id
+   * @param host  the host Id of the offered resource 所提供资源的主机ID
+   * @param maxLocality the maximum locality we want to schedule the tasks at 我们要计划任务的最大地点
    */
   @throws[TaskNotSerializableException]
   def resourceOffer(
@@ -899,8 +900,9 @@ private[spark] class TaskSetManager(//任务集管理器
 
   /** 
    *  If the given task ID is not in the set of running tasks, adds it.
-   *  如果给定的task ID不在运行任务的集合中,则添加它,用于跟踪运行任务的数量,执行调度策略
+   *  如果给定的task ID不在运行任务的集合中,则添加它
    * Used to keep track of the number of running tasks, for enforcing scheduling policies.
+    * 用于跟踪运行任务的数量,用于执行调度策略
    */
   def addRunningTask(tid: Long) {
     if (runningTasksSet.add(tid) && parent != null) {
@@ -942,7 +944,7 @@ private[spark] class TaskSetManager(//任务集管理器
     // Re-enqueue pending tasks for this host based on the status of the cluster. Note
     // that it's okay if we add a task to the same queue twice (if it had multiple preferred
     // locations), because dequeueTaskFromList will skip already-running tasks.
-    //根据集群的状态重新排队此主机的挂起任务。 注意如果我们将任务添加到同一个队列中两次（如果它有多个首选项），那就行了
+    //根据集群的状态重新排队此主机的挂起任务,注意如果我们将任务添加到同一个队列中两次(如果它有多个首选项),那就行了
     //位置），因为dequeueTaskFromList将跳过已经运行的任务。
     for (index <- getPendingTasksForExecutor(execId)) {
       addPendingTask(index, readding = true)

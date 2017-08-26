@@ -22,11 +22,11 @@ import org.apache.spark.rpc.{RpcEndpointRef, RpcAddress}
 /**
  * Grouping of data for an executor used by CoarseGrainedSchedulerBackend.
  * 为CoarseGrainedSchedulerBackend使用的执行程序分组数据
- * @param executorEndpoint The RpcEndpointRef representing this executor
- * @param executorAddress The network address of this executor
- * @param executorHost The hostname that this executor is running on
- * @param freeCores  The current number of cores available for work on the executor
- * @param totalCores The total number of cores available to the executor
+ * @param executorEndpoint The RpcEndpointRef representing this executor RpcEndpointRef表示这个执行器
+ * @param executorAddress The network address of this executor 这个执行者的网络地址
+ * @param executorHost The hostname that this executor is running on 此执行程序正在运行的主机名
+ * @param freeCores  The current number of cores available for work on the executor 当前可用于执行程序的核心数量
+ * @param totalCores The total number of cores available to the executor 可执行程序可用的核心总数
  */
 private[cluster] class ExecutorData(
    val executorEndpoint: RpcEndpointRef,//RPC终端的引用,用于数据通信

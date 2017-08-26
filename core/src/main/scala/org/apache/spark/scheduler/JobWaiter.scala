@@ -80,7 +80,7 @@ private[spark] class JobWaiter[T](
       this.notifyAll()
     }
   }
-// 作业失败  
+  // 作业失败
   override def jobFailed(exception: Exception): Unit = synchronized {
      // 设置标志位_jobFinished为ture 
     _jobFinished = true

@@ -96,14 +96,14 @@ private[spark] object MapStatus {
  * A [[MapStatus]] implementation that tracks the size of each block. Size for each block is
  * represented using a single byte.
  * 跟踪每个块的大小的实现,每个块的大小用单个字节表示
- * @param loc location where the task is being executed.
- * @param compressedSizes size of the blocks, indexed by reduce partition id.
+ * @param loc location where the task is being executed.执行任务的位置
+ * @param compressedSizes size of the blocks, indexed by reduce partition id.块的大小,通过减少分区ID进行索引
  */
 private[spark] class CompressedMapStatus(
     private[this] var loc: BlockManagerId,
     private[this] var compressedSizes: Array[Byte])
   extends MapStatus with Externalizable {
-
+  //仅用于反序列化
   protected def this() = this(null, null.asInstanceOf[Array[Byte]])  // For deserialization only
 
   def this(loc: BlockManagerId, uncompressedSizes: Array[Long]) {
@@ -136,10 +136,10 @@ private[spark] class CompressedMapStatus(
  * is compressed.
   * 仅存储非空块的平均大小的实现,以及跟踪哪些块为空的位图。在序列化期间,该位图被压缩。
  *
- * @param loc location where the task is being executed
- * @param numNonEmptyBlocks the number of non-empty blocks
- * @param emptyBlocks a bitmap tracking which blocks are empty
- * @param avgSize average size of the non-empty blocks
+ * @param loc location where the task is being executed执行任务的位置
+ * @param numNonEmptyBlocks the number of non-empty blocks非空块的数量
+ * @param emptyBlocks a bitmap tracking which blocks are empty一个位图跟踪哪些块是空的
+ * @param avgSize average size of the non-empty blocks 非空块的平均大小
  */
 private[spark] class HighlyCompressedMapStatus private (
     private[this] var loc: BlockManagerId,

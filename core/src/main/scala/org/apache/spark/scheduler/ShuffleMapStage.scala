@@ -70,7 +70,7 @@ private[spark] class ShuffleMapStage(
    * registered with this execId.
     *
     * 删除与执行(executor)相关联的所有Shuffle输出,
-    * 请注意,这也将被删除由外部随机服务器（如果存在）提供的输出,因为它们仍然注册到此execId。
+    * 请注意,这也将被删除由外部随机服务器(如果存在)提供的输出,因为它们仍然注册到此execId。
    */
   def removeOutputsOnExecutor(execId: String): Unit = {
     var becameUnavailable = false

@@ -33,7 +33,7 @@ import org.apache.spark.deploy.SparkHadoopUtil
 /**
  * :: DeveloperApi ::
  * Parses and holds information about inputFormat (and files) specified as a parameter.
- * 解析和信息保存关于InputFormat（和文件）指定为一个参数
+ * 解析和信息保存关于InputFormat(和文件)指定为一个参数
  */
 @DeveloperApi
 class InputFormatInfo(val configuration: Configuration, val inputFormatClazz: Class[_],
@@ -167,7 +167,7 @@ object InputFormatInfo {
        (even if data locality on that is very high) : this is to prevent fragility of job if a
        single (or small set of) hosts go down.
 
-    go to (a) until required nodes are allocated.转到（a），直到分配所需的节点。
+    go to (a) until required nodes are allocated.转到(a),直到分配所需的节点。
 
     If a node 'dies', follow same procedure.如果节点“死”，请遵循相同的过程。
 

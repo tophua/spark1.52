@@ -43,8 +43,8 @@ import org.apache.spark.util.Utils
  * and divides the task output to multiple buckets (based on the task's partitioner).
  * 一个Spark Job是由一个或多个Stage组成,一个resulttask执行任务,将任务发送输出到Driver端,
  * 一个shufflemaptask执行任务,将任务的输出到多个任务的分配
- * @param stageId id of the stage this task belongs to
- * @param partitionId index of the number in the RDD
+ * @param stageId id of the stage this task belongs to 该任务所属的阶段的ID
+ * @param partitionId index of the number in the RDD RDD中的数字索引
  */
 private[spark] abstract class Task[T](
     val stageId: Int,

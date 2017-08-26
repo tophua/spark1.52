@@ -509,6 +509,9 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
    * of requesting a delta of executors risks double counting new executors when there are
    * insufficient resources to satisfy the first request. We make the assumption here that the
    * cluster manager will eventually fulfill all requests when resources free up.
+    *
+    * 因为稍后的请求会覆盖任何先前请求的值,当资源不足以满足第一个请求时,
+    * 请求执行程序的三角形的另一个接口可能会重新计算新的执行者,我们在这里做出假设,当资源释放时,集群管理器将最终完成所有请求。
    *
    * @return whether the request is acknowledged.
    */

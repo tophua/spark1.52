@@ -35,8 +35,10 @@ import org.apache.spark.util.CallSite
  * another stage, or a result stage, in which case its tasks directly compute the action that
  * initiated a job (e.g. count(), save(), etc). For shuffle map stages, we also track the nodes
  * that each output partition is on.
+  *
  * 每个Stage都可以是一个Shuffle stage,在这种情况下,它的任务的结果是另一个Stage的输入,或结果阶段,
  * 在这种情况下,它的任务直接计算发起了一个作业的动作,
+  *
  * Each Stage also has a firstJobId, identifying the job that first submitted the stage.  When FIFO
  * scheduling is used, this allows Stages from earlier jobs to be computed first or recovered
  * faster on failure.
@@ -44,6 +46,9 @@ import org.apache.spark.util.CallSite
  * The callSite provides a location in user code which relates to the stage. For a shuffle map
  * stage, the callSite gives the user code that created the RDD being shuffled. For a result
  * stage, the callSite gives the user code that executes the associated action (e.g. count()).
+  *
+  * callSite提供与舞台相关的用户代码中的位置,对于一个随机映射阶段,callSite给出创建RDD的用户代码被洗牌,对于结果阶段,
+  * callSite给出执行相关操作的用户代码(例如count())
  *
  * A single stage can consist of multiple attempts. In that case, the latestInfo field will
  * be updated for each attempt.

@@ -75,7 +75,7 @@ private[deploy] class DriverRunner(
 
   /** 
    *  Starts a thread to run and manage the driver. 
-   *  启动一个线程来运行管理驱动程序。
+   *  启动一个线程来运行管理驱动程序
    *  */
   private[worker] def start() = {
     new Thread("DriverRunner for " + driverId) {

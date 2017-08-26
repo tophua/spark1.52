@@ -310,6 +310,8 @@ private[deploy] class Worker(
             // registered == false && master != None means we lost the connection to master, so
             // masterRef cannot be used and we need to recreate it again. Note: we must not set
             // master to None due to the above comments.
+            //注册== false && master！=无意味着我们失去了与master的连接,所以
+            //masterRef无法使用,我们需要重新创建它,注意：由于上述意见,我们不能将主设置为无
             if (registerMasterFutures != null) {
               registerMasterFutures.foreach(_.cancel(true))
             }

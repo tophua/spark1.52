@@ -161,7 +161,7 @@ object SparkSubmit {
    * running the child main class based on the cluster manager and the deploy mode.
    * Second, we use this launch environment to invoke the main method of the child
    * main class.
-    *  这有两个步骤, 首先,我们通过设置适当的类路径,系统属性和应用程序参数来准备启动环境,
+    *  这有两个步骤,首先,我们通过设置适当的类路径,系统属性和应用程序参数来准备启动环境,
     *  以便基于群集管理器和部署模式运行子主类,其次,我们使用这个启动环境来调用子主类的main方法。
    */
   private def submit(args: SparkSubmitArguments): Unit = {
@@ -420,8 +420,9 @@ object SparkSubmit {
       }
       val sparkRPackageURI = Utils.resolveURI(sparkRPackageFile.getAbsolutePath).toString
 
-      // Distribute the SparkR package.
+      // Distribute the SparkR package.分发SparkR包
       // Assigns a symbol link name "sparkr" to the shipped package.
+      //在运送的包中分配符号链接名称“sparkr”
       args.archives = mergeFileLists(args.archives, sparkRPackageURI + "#sparkr")
 
       // Distribute the R package archive containing all the built R packages.
@@ -434,6 +435,7 @@ object SparkSubmit {
 
         val rPackageURI = Utils.resolveURI(rPackageFile.getAbsolutePath).toString
         // Assigns a symbol link name "rpkg" to the shipped package.
+        //为运送的包分配符号链接名称“rpkg
         args.archives = mergeFileLists(args.archives, rPackageURI + "#rpkg")
       }
     }
@@ -465,6 +467,7 @@ object SparkSubmit {
     if (isYarnCluster && args.isR) {
       // In yarn-cluster mode for a R app, add primary resource to files
       // that can be distributed with the job
+      //在R应用程序的纱线集群模式下,将主要资源添加到可以随作业分发的文件中
       args.files = mergeFileLists(args.files, args.primaryResource)
     }
 
@@ -890,8 +893,8 @@ private[spark] object SparkSubmitUtils {
  * Extracts maven coordinates from a comma-delimited string. Coordinates should be provided
  * in the format `groupId:artifactId:version` or `groupId/artifactId:version`.
   * 从逗号分隔的字符串中提取maven坐标,坐标应以“groupId：artifactId：version”或“groupId / artifactId：version”格式提供
- * @param coordinates Comma-delimited string of maven coordinates
- * @return Sequence of Maven coordinates
+ * @param coordinates Comma-delimited string of maven coordinates 逗号分隔的maven坐标字符串
+ * @return Sequence of Maven coordinates Maven坐标序列
  */
   def extractMavenCoordinates(coordinates: String): Seq[MavenCoordinate] = {
     coordinates.split(",").map { p =>
@@ -925,9 +928,10 @@ private[spark] object SparkSubmitUtils {
   /**
    * Extracts maven coordinates from a comma-delimited string
    * 用逗号分隔的字符串中提取Maven字符串
-   * @param remoteRepos Comma-delimited string of remote repositories
+   * @param remoteRepos Comma-delimited string of remote repositories 以逗号分隔的远程存储库字符串
    * @param ivySettings The Ivy settings for this session
    * @return A ChainResolver used by Ivy to search for and resolve dependencies.
+    *         常春藤用于搜索和解决依赖关系的ChainResolver
    */
   def createRepoResolvers(remoteRepos: Option[String], ivySettings: IvySettings): ChainResolver = {
     // We need a chain resolver if we want to check multiple repositories
@@ -970,6 +974,7 @@ private[spark] object SparkSubmitUtils {
     cr.add(localIvy)
 
     // the biblio resolver resolves POM declared dependencies
+    //参考书目解析器解析了POM声明的依赖关系
     val br: IBiblioResolver = new IBiblioResolver
     br.setM2compatible(true)
     br.setUsepoms(true)
@@ -989,9 +994,9 @@ private[spark] object SparkSubmitUtils {
    * Output a comma-delimited list of paths for the downloaded jars to be added to the classpath
    * 输出一个逗号分隔的jar列表,下载添加到classpath路径
    * (will append to jars in SparkSubmit).
-   * @param artifacts Sequence of dependencies that were resolved and retrieved
-   * @param cacheDirectory directory where jars are cached
-   * @return a comma-delimited list of paths for the dependencies
+   * @param artifacts Sequence of dependencies that were resolved and retrieved 已解决和检索的依赖关系的顺序
+   * @param cacheDirectory directory where jars are cached 缓存jar的目录
+   * @return a comma-delimited list of paths for the dependencies 用于依赖关系的以逗号分隔的路径列表
    */
   def resolveDependencyPaths(
       artifacts: Array[AnyRef],

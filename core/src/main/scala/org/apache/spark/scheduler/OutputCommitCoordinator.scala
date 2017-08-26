@@ -86,11 +86,12 @@ private[spark] class OutputCommitCoordinator(conf: SparkConf, isDriver: Boolean)
     *如果任务尝试已被授权提交,则所有其他提交相同任务的尝试都将被拒绝,如果授权任务失败（例如由于其遗嘱执行人beinglost）,
     * 那么后续任务的尝试可能被授权将其输出。
    *
-   * @param stage the stage number
-   * @param partition the partition number
-   * @param attemptNumber how many times this task has been attempted
+   * @param stage the stage number stage号码
+   * @param partition the partition number 分区号
+   * @param attemptNumber how many times this task has been attempted这个任务已经尝试了多少次
    *                      (see [[TaskContext.attemptNumber()]])
    * @return true if this task is authorized to commit, false otherwise
+    *         如果此任务有权提交,则为true,否则为false
    */
   def canCommit(
       stage: StageId,
