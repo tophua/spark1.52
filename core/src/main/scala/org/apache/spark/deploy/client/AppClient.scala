@@ -137,6 +137,8 @@ private[spark] class AppClient(
               return
             }
             logInfo("Connecting to master " + masterAddress.toSparkURL + "...")
+            //RpcEndpoint对于Actor,RpcEndpointRef对应ActorRef,RpcEnv即对应了ActorSystem
+            //根据systemName、address、endpointName获取RpcEndpointRef
             val masterRef =
               rpcEnv.setupEndpointRef(Master.SYSTEM_NAME, masterAddress, Master.ENDPOINT_NAME)
             //向Master发送RegisterApplication消息,注册Application

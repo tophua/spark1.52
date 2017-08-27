@@ -81,6 +81,7 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
 
   private def keyValueOutput: Seq[Attribute] = {
     val schema = StructType(
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       StructField("key", StringType, false) ::
         StructField("value", StringType, false) :: Nil)
     schema.toAttributes
@@ -130,6 +131,7 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
         }
       }
       val schema = StructType(
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         StructField("key", StringType, false) ::
           StructField("default", StringType, false) ::
           StructField("meaning", StringType, false) :: Nil)
@@ -317,6 +319,7 @@ case class ShowTablesCommand(databaseName: Option[String]) extends RunnableComma
 case class ShowFunctions(db: Option[String], pattern: Option[String]) extends RunnableCommand {
   override val output: Seq[Attribute] = {
     val schema = StructType(
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       StructField("function", StringType, nullable = false) :: Nil)
 
     schema.toAttributes
@@ -350,6 +353,7 @@ case class DescribeFunction(
 
   override val output: Seq[Attribute] = {
     val schema = StructType(
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       StructField("function_desc", StringType, nullable = false) :: Nil)
 
     schema.toAttributes
@@ -369,6 +373,7 @@ case class DescribeFunction(
         val result =
           Row(s"Function: ${info.getName}") ::
           Row(s"Class: ${info.getClassName}") ::
+            //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
           Row(s"Usage: ${replaceFunctionName(info.getUsage(), info.getName)}") :: Nil
 
         if (isExtended) {

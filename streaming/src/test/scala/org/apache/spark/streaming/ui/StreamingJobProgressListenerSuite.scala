@@ -68,6 +68,7 @@ class StreamingJobProgressListenerSuite extends TestSuiteBase with Matchers {
     val batchInfoSubmitted = BatchInfo(Time(1000), streamIdToInputInfo, 1000, None, None)
     listener.onBatchSubmitted(StreamingListenerBatchSubmitted(batchInfoSubmitted))
     listener.waitingBatches should be (List(BatchUIData(batchInfoSubmitted)))
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     listener.runningBatches should be (Nil)
     listener.retainedCompletedBatches should be (Nil)
     listener.lastCompletedBatch should be (None)
@@ -79,9 +80,12 @@ class StreamingJobProgressListenerSuite extends TestSuiteBase with Matchers {
     // onBatchStarted 批处理开始
     val batchInfoStarted = BatchInfo(Time(1000), streamIdToInputInfo, 1000, Some(2000), None)
     listener.onBatchStarted(StreamingListenerBatchStarted(batchInfoStarted))
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     listener.waitingBatches should be (Nil)
     listener.runningBatches should be (List(BatchUIData(batchInfoStarted)))
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     listener.retainedCompletedBatches should be (Nil)
+    //None是一个object,是Option的子类型
     listener.lastCompletedBatch should be (None)
     listener.numUnprocessedBatches should be (1)
     listener.numTotalCompletedBatches should be (0)
@@ -120,6 +124,7 @@ class StreamingJobProgressListenerSuite extends TestSuiteBase with Matchers {
     // onBatchCompleted 批处理完成
     val batchInfoCompleted = BatchInfo(Time(1000), streamIdToInputInfo, 1000, Some(2000), None)
     listener.onBatchCompleted(StreamingListenerBatchCompleted(batchInfoCompleted))
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     listener.waitingBatches should be (Nil)
     listener.runningBatches should be (Nil)
     listener.retainedCompletedBatches should be (List(BatchUIData(batchInfoCompleted)))

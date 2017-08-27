@@ -53,13 +53,16 @@ case class SortBasedAggregate(
 
   override def requiredChildDistribution: List[Distribution] = {
     requiredChildDistributionExpressions match {
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       case Some(exprs) if exprs.length == 0 => AllTuples :: Nil
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       case Some(exprs) if exprs.length > 0 => ClusteredDistribution(exprs) :: Nil
       case None => UnspecifiedDistribution :: Nil
     }
   }
 
   override def requiredChildOrdering: Seq[Seq[SortOrder]] = {
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     groupingExpressions.map(SortOrder(_, Ascending)) :: Nil
   }
 

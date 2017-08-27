@@ -30,6 +30,7 @@ case class ScalaUDF(
     function: AnyRef,
     dataType: DataType,
     children: Seq[Expression],
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     inputTypes: Seq[DataType] = Nil)
   extends Expression with ImplicitCastInputTypes with CodegenFallback {
 

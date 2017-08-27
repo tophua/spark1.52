@@ -78,9 +78,11 @@ private[spark] class SparkDeploySchedulerBackend(
       .map(Utils.splitCommandString).getOrElse(Seq.empty)
       //追加到executor类路径中的附加类路径,兼容旧版本的Spark
     val classPathEntries = sc.conf.getOption("spark.executor.extraClassPath")
+    //Nil是一个空的List
       .map(_.split(java.io.File.pathSeparator).toSeq).getOrElse(Nil)
       //启动executor JVM 时要用到的特殊库路径
     val libraryPathEntries = sc.conf.getOption("spark.executor.extraLibraryPath")
+      //Nil是一个空的List
       .map(_.split(java.io.File.pathSeparator).toSeq).getOrElse(Nil)
 
     // When testing, expose the parent class path to the child. This is processed by

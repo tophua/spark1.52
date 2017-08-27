@@ -33,14 +33,16 @@ case class FastOperator(output: Seq[Attribute]) extends SparkPlan {
     val row = new GenericInternalRow(Array[Any](str))
     sparkContext.parallelize(Seq(row))
   }
-
+  //Nil是一个空的List
   override def children: Seq[SparkPlan] = Nil
 }
 //测试策略
 object TestStrategy extends Strategy {
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case Project(Seq(attr), _) if attr.name == "a" =>
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       FastOperator(attr.toAttribute :: Nil) :: Nil
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     case _ => Nil
   }
 }
@@ -50,6 +52,7 @@ class ExtraStrategiesSuite extends QueryTest with SharedSQLContext {
 
   test("insert an extraStrategy") {//插入一个额外的策略
     try {
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       sqlContext.experimental.extraStrategies = TestStrategy :: Nil
 
       val df = sqlContext.sparkContext.parallelize(Seq(("so slow", 1))).toDF("a", "b")
@@ -61,6 +64,7 @@ class ExtraStrategiesSuite extends QueryTest with SharedSQLContext {
         df.select("a", "b"),
         Row("so slow", 1))
     } finally {
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       sqlContext.experimental.extraStrategies = Nil
     }
   }

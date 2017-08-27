@@ -99,7 +99,7 @@ case class UserDefinedGenerator(
  * Given an input array produces a sequence of rows for each value in the array.
  */
 case class Explode(child: Expression) extends UnaryExpression with Generator with CodegenFallback {
-
+  //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
   override def children: Seq[Expression] = child :: Nil
 
   override def checkInputDataTypes(): TypeCheckResult = {
@@ -112,7 +112,9 @@ case class Explode(child: Expression) extends UnaryExpression with Generator wit
   }
 
   override def elementTypes: Seq[(DataType, Boolean)] = child.dataType match {
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     case ArrayType(et, containsNull) => (et, containsNull) :: Nil
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     case MapType(kt, vt, valueContainsNull) => (kt, false) :: (vt, valueContainsNull) :: Nil
   }
 

@@ -45,7 +45,7 @@ private[history] class HistoryServerArguments(conf: SparkConf, args: Array[Strin
       case ("--properties-file") :: value :: tail =>
         propertiesFile = value
         parse(tail)
-
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       case Nil =>
 
       case _ =>

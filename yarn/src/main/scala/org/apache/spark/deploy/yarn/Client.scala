@@ -642,6 +642,7 @@ private[spark] class Client(
       if (sparkConf.getBoolean("spark.yarn.isPython", false)) {
         findPySparkArchives()
       } else {
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         Nil
       }
     val launchEnv = setupLaunchEnv(appStagingDir, pySparkArchives)
@@ -736,6 +737,7 @@ private[spark] class Client(
       if (isClusterMode) {
         Seq("--class", YarnSparkHadoopUtil.escapeForShell(args.userClass))
       } else {
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         Nil
       }
     val userJar =
@@ -748,6 +750,7 @@ private[spark] class Client(
       if (isClusterMode && args.primaryPyFile != null) {
         Seq("--primary-py-file", new Path(args.primaryPyFile).getName())
       } else {
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         Nil
       }
     val primaryRFile =

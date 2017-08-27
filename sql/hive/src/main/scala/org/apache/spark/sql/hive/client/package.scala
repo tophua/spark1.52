@@ -21,6 +21,7 @@ package org.apache.spark.sql.hive
 package object client {
   private[client] abstract class HiveVersion(
       val fullVersion: String,
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       val extraDeps: Seq[String] = Nil,
       val exclusions: Seq[String] = Nil)
 

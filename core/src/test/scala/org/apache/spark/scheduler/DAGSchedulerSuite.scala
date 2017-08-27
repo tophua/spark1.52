@@ -40,7 +40,8 @@ class DAGSchedulerEventProcessLoopTester(dagScheduler: DAGScheduler)
   override def post(event: DAGSchedulerEvent): Unit = {
     try {
       // Forward event to `onReceive` directly to avoid processing event asynchronously.
-      //直接跳转onReceive事件,避免异步进程事件
+      //调用父类DAGSchedulerEventProcessLoop 直接跳转onReceive事件,避免异步进程事件
+
       onReceive(event)
     } catch {
       case NonFatal(e) => onError(e)
@@ -59,6 +60,7 @@ class MyRDD(
     sc: SparkContext,
     numPartitions: Int,
     dependencies: List[Dependency[_]],//依赖
+    //Nil是一个空的List
     locations: Seq[Seq[String]] = Nil) extends RDD[(Int, Int)](sc, dependencies) with Serializable {
   override def compute(split: Partition, context: TaskContext): Iterator[(Int, Int)] =
     throw new RuntimeException("should not be reached")
@@ -66,6 +68,7 @@ class MyRDD(
     override def index: Int = i
   }).toArray
   override def getPreferredLocations(split: Partition): Seq[String] =
+  //Nil是一个空的List
     if (locations.isDefinedAt(split.index)) locations(split.index) else Nil
   override def toString: String = "DAGSchedulerSuiteRDD " + id
 }

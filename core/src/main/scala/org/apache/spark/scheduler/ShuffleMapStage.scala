@@ -45,10 +45,12 @@ private[spark] class ShuffleMapStage(
   //如果map stage已就绪的话返回true,即所有分区均有shuffle输出。这个将会和outputLocs.contains保持一致。 
   def isAvailable: Boolean = numAvailableOutputs == numPartitions
    //如果Map任务记录每个Parttion的MapStatus(包括执行的Task的BlankManager地址和要传给reduce任务的Block的估算大小)
+   //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
   val outputLocs = Array.fill[List[MapStatus]](numPartitions)(Nil)
   //MapStatus包括执行Task的BlockManager的地址和要传给reduce任务的Block的估算大小
   def addOutputLoc(partition: Int, status: MapStatus): Unit = {
     val prevList = outputLocs(partition)
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     outputLocs(partition) = status :: prevList //元素合并进List用::
     if (prevList == Nil) {//Nil表示空列表
       numAvailableOutputs += 1//输出任务自增1
@@ -78,6 +80,7 @@ private[spark] class ShuffleMapStage(
       val prevList = outputLocs(partition)
       val newList = prevList.filterNot(_.location.executorId == execId)
       outputLocs(partition) = newList
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       if (prevList != Nil && newList == Nil) {
         becameUnavailable = true
         numAvailableOutputs -= 1

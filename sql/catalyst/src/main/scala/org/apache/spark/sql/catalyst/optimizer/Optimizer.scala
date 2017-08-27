@@ -64,6 +64,7 @@ object DefaultOptimizer extends Optimizer {
     Batch("Decimal Optimizations", FixedPoint(100),
       DecimalAggregates) ::
     Batch("LocalRelation", FixedPoint(100),
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       ConvertToLocalRelation) :: Nil
 }
 
@@ -395,13 +396,17 @@ object NullPropagation extends Rule[LogicalPlan] {
       case e @ BinaryComparison(_, Literal(null, _)) => Literal.create(null, e.dataType)
 
       case e: StringRegexExpression => e.children match {
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         case Literal(null, _) :: right :: Nil => Literal.create(null, e.dataType)
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         case left :: Literal(null, _) :: Nil => Literal.create(null, e.dataType)
         case _ => e
       }
 
       case e: StringPredicate => e.children match {
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         case Literal(null, _) :: right :: Nil => Literal.create(null, e.dataType)
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         case left :: Literal(null, _) :: Nil => Literal.create(null, e.dataType)
         case _ => e
       }

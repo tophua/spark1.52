@@ -63,6 +63,7 @@ private[spark] class ShuffleMapTask(
   }
 
   @transient private val preferredLocs: Seq[TaskLocation] = {
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     if (locs == null) Nil else locs.toSet.toSeq
   }
   /**

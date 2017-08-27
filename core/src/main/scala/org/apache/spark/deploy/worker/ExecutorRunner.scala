@@ -34,10 +34,13 @@ import org.apache.spark.util.logging.FileAppender
 /**
  * Worker进程中ExcetorRuner具体负责executor的启动和停止,每一个executor进程对应于一个ExecutorRunner
  * ExecutorRunner担任监工角色
- * 
- * Manages the execution of one executor process.
+ *
+  *  Worker接到Master的LaunchExecutor消息后,ExecutorRunner启动一个新的进程
+ *
+  * Manages the execution of one executor process.
  * This is currently only used in standalone mode.
  * 管理一个执行的executor进程,只使用standalone模式
+  *
  */
 private[deploy] class ExecutorRunner(
     val appId: String,
@@ -143,7 +146,7 @@ private[deploy] class ExecutorRunner(
   private def fetchAndRunExecutor() {
     try {
       // Launch the process
-      //构造ProcessBuilder
+      //构造ProcessBuilder,
       val builder = CommandUtils.buildProcessBuilder(appDesc.command, new SecurityManager(conf),
         memory, sparkHome.getAbsolutePath, substituteVariables)
       val command = builder.command()

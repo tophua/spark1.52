@@ -128,6 +128,7 @@ private[hive] class SparkExecuteStatementOperation(
 
   def getResultSetSchema: TableSchema = {
     if (result == null || result.queryExecution.analyzed.output.size == 0) {
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       new TableSchema(new FieldSchema("Result", "string", "") :: Nil)
     } else {
       logInfo(s"Result Schema: ${result.queryExecution.analyzed.output}")

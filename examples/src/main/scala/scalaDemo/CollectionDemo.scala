@@ -63,6 +63,7 @@ object CollectionDemo extends  App {
 
   def sum(lst: List[Int]): Int =
   //List判度
+  //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     if (lst == Nil) 0 else lst.head + sum(lst.tail)
   println("sum:"+sum(List(9, 4, 2))+"==sum:"+List(9, 4, 2).sum)
 

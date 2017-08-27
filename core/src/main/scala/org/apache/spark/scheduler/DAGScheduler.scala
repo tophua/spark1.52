@@ -271,6 +271,7 @@ class DAGScheduler(
       // Note: if the storage level is NONE, we don't need to get locations from block manager.
       //注意：如果没有设置存储级别,不需要从块管理器获得到的位置
       val locs: IndexedSeq[Seq[TaskLocation]] = if (rdd.getStorageLevel == StorageLevel.NONE) {
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         IndexedSeq.fill(rdd.partitions.length)(Nil)
       } else {
         val blockIds =
@@ -548,7 +549,8 @@ class DAGScheduler(
     val waitingForVisit = new Stack[RDD[_]]//后进先出"(LIFO) 的数据结构
     def visit(rdd: RDD[_]) { // 定义函数visit  
       if (!visited(rdd)) { // 通过visited判断rdd是否已处理  
-        visited += rdd  // 添加到visited,下次不会再处理  
+        visited += rdd  // 添加到visited,下次不会再处理
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         val rddHasUncachedPartitions = getCacheLocs(rdd).contains(Nil)
         if (rddHasUncachedPartitions) {
           for (dep <- rdd.dependencies) {  // 循环rdd的dependencies  

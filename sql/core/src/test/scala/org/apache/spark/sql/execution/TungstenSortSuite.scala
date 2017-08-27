@@ -47,13 +47,16 @@ class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
   test("sort followed by limit") {//排序下列限制
     checkThatPlansAgree(
       (1 to 100).map(v => Tuple1(v)).toDF("a"),
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       (child: SparkPlan) => Limit(10, TungstenSort('a.asc :: Nil, true, child)),
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       (child: SparkPlan) => Limit(10, Sort('a.asc :: Nil, global = true, child)),
       sortAnswers = false
     )
   }
 
   test("sorting does not crash for large inputs") {//大输入的排序不崩溃
+  //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     val sortOrder = 'a.asc :: Nil
     val stringLength = 1024 * 1024 * 2
     checkThatPlansAgree(
@@ -69,7 +72,9 @@ class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
     AccumulatorSuite.verifyPeakExecutionMemorySet(sc, "unsafe external sort") {
       checkThatPlansAgree(
         (1 to 100).map(v => Tuple1(v)).toDF("a"),
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         (child: SparkPlan) => TungstenSort('a.asc :: Nil, true, child),
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         (child: SparkPlan) => Sort('a.asc :: Nil, global = true, child),
         sortAnswers = false)
     }
@@ -80,6 +85,7 @@ class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
   for (
     dataType <- DataTypeTestUtils.atomicTypes ++ Set(NullType);
     nullable <- Seq(true, false);
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     sortOrder <- Seq('a.asc :: Nil, 'a.desc :: Nil);
     randomDataGenerator <- RandomDataGenerator.forType(dataType, nullable)
   ) {
@@ -87,6 +93,7 @@ class TungstenSortSuite extends SparkPlanTest with SharedSQLContext {
       val inputData = Seq.fill(1000)(randomDataGenerator())
       val inputDf = ctx.createDataFrame(
         ctx.sparkContext.parallelize(Random.shuffle(inputData).map(v => Row(v))),
+        //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
         StructType(StructField("a", dataType, nullable = true) :: Nil)
       )
       assert(TungstenSort.supportsSchema(inputDf.schema))

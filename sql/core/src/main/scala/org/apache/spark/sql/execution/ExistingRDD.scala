@@ -75,7 +75,7 @@ private[sql] case class LogicalRDD(
     output: Seq[Attribute],
     rdd: RDD[InternalRow])(sqlContext: SQLContext)
   extends LogicalPlan with MultiInstanceRelation {
-
+  //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
   override def children: Seq[LogicalPlan] = Nil
 
   override def newInstance(): LogicalRDD.this.type =

@@ -685,6 +685,7 @@ class DataFrame private[sql](
       case Column(expr: NamedExpression) => expr
       // Leave an unaliased explode with an empty list of names since the analyzer will generate the
       // correct defaults after the nested expression's type has been resolved.
+      //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       case Column(explode: Explode) => MultiAlias(explode, Nil)
       case Column(expr: Expression) => Alias(expr, expr.prettyString)()
     }
@@ -1115,6 +1116,7 @@ class DataFrame private[sql](
   def explode[A, B : TypeTag](inputColumn: String, outputColumn: String)(f: A => TraversableOnce[B])
     : DataFrame = {
     val dataType = ScalaReflection.schemaFor[B].dataType
+    //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
     val attributes = AttributeReference(outputColumn, dataType)() :: Nil
     // TODO handle the metadata?
     val elementTypes = attributes.map { attr => (attr.dataType, attr.nullable) }
