@@ -37,6 +37,7 @@ class EdgePartitionSuite extends SparkFunSuite {
   test("reverse") {//反向
     val edges = List(Edge(0, 1, 0), Edge(1, 2, 0), Edge(2, 0, 0))
     val reversedEdges = List(Edge(0, 2, 0), Edge(1, 0, 0), Edge(2, 1, 0))
+    //Nothing没有对象
     val builder = new EdgePartitionBuilder[Int, Nothing]
     for (e <- edges) {
       builder.add(e.srcId, e.dstId, e.attr)
@@ -48,6 +49,7 @@ class EdgePartitionSuite extends SparkFunSuite {
 
   test("map") {
     val edges = List(Edge(0, 1, 0), Edge(1, 2, 0), Edge(2, 0, 0))
+    //Nothing没有对象
     val builder = new EdgePartitionBuilder[Int, Nothing]
     for (e <- edges) {
       builder.add(e.srcId, e.dstId, e.attr)
@@ -72,6 +74,7 @@ class EdgePartitionSuite extends SparkFunSuite {
     val edges = List(
       Edge(0, 1, 1), Edge(1, 2, 2), Edge(2, 0, 4), Edge(0, 1, 8), Edge(1, 2, 16), Edge(2, 0, 32))
     val groupedEdges = List(Edge(0, 1, 9), Edge(1, 2, 18), Edge(2, 0, 36))
+    //Nothing没有对象
     val builder = new EdgePartitionBuilder[Int, Nothing]
     for (e <- edges) {
       builder.add(e.srcId, e.dstId, e.attr)
@@ -91,6 +94,7 @@ class EdgePartitionSuite extends SparkFunSuite {
   }
 
   test("isActive, numActives, replaceActives") {
+    //Nothing没有对象
     val ep = new EdgePartitionBuilder[Nothing, Nothing].toEdgePartition
       .withActiveSet(Iterator(0L, 2L, 0L))
     assert(ep.isActive(0))

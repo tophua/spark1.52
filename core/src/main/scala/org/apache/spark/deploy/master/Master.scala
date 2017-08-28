@@ -387,6 +387,7 @@ private[deploy] class Master(
             }
           }
         }
+          //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         case None =>
           logWarning(s"Got status update for unknown executor $appId/$execId")
       }
@@ -408,6 +409,7 @@ private[deploy] class Master(
         case Some(workerInfo) =>
           //更新workerInfo.lastHeartbeat,即最后一次接收到心跳的时间戳
           workerInfo.lastHeartbeat = System.currentTimeMillis()
+          //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         case None =>
           if (workers.map(_.id).contains(workerId)) {
             //如果worker的id与Worker的映射关系(idToWorker)中找不到匹配的Worker
@@ -432,6 +434,7 @@ private[deploy] class Master(
           logInfo("Application has been re-registered: " + appId)
           //Master收到后通过appId后将Application的状态置为WAITING
           app.state = ApplicationState.WAITING
+        //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         case None =>
           logWarning("Master change ack from unknown app: " + appId)
       }
@@ -467,6 +470,7 @@ private[deploy] class Master(
               worker.drivers(driverId) = driver
             }
           }
+        //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         case None =>
           logWarning("Scheduler state from unknown worker: " + workerId)
       }
@@ -491,6 +495,7 @@ private[deploy] class Master(
         //如果master不是active,返回错误
         val msg = s"${Utils.BACKUP_STANDALONE_MASTER_PREFIX}: $state. " +
           "Can only accept driver submissions in ALIVE state."
+        //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         context.reply(SubmitDriverResponse(self, false, None, msg))
       } else {
         //否则创建driver,返回成功的消息
@@ -527,6 +532,7 @@ private[deploy] class Master(
             if (waitingDrivers.contains(d)) {
               //如果driver仍然在等待队列,从等待队列删除并且更新driver状态为KILLED
               waitingDrivers -= d
+              //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
               self.send(DriverStateChanged(driverId, DriverState.KILLED, None))
             } else {
               // We just notify the worker to kill the driver here. The final bookkeeping occurs
@@ -543,6 +549,7 @@ private[deploy] class Master(
             val msg = s"Kill request for $driverId submitted"
             logInfo(msg)
             context.reply(KillDriverResponse(self, driverId, success = true, msg))
+          //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
           case None =>
             // driver已经被kill,直接返回结果
             val msg = s"Driver $driverId has already finished or does not exist"
@@ -557,6 +564,7 @@ private[deploy] class Master(
         val msg = s"${Utils.BACKUP_STANDALONE_MASTER_PREFIX}: $state. " +
           "Can only request driver status in ALIVE state."
         context.reply(
+          //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
           DriverStatusResponse(found = false, None, None, None, Some(new Exception(msg))))
       } else {
         // 查找请求的driver,如果找到则返回driver的状态
@@ -564,6 +572,7 @@ private[deploy] class Master(
           case Some(driver) =>
             context.reply(DriverStatusResponse(found = true, Some(driver.state),
               driver.worker.map(_.id), driver.worker.map(_.hostPort), driver.exception))
+          //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
           case None =>
             context.reply(DriverStatusResponse(found = false, None, None, None, None))
         }
@@ -667,6 +676,7 @@ private[deploy] class Master(
         logWarning(s"Re-launching ${d.id}")
         relaunchDriver(d)
       } else {//将没有设置重启的Driver Client删除
+        //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         removeDriver(d.id, DriverState.ERROR, None)
         logWarning(s"Did not re-launch ${d.id} because it was not supervised")
       }
@@ -977,6 +987,7 @@ private[deploy] class Master(
       logInfo("Telling app of lost executor: " + exec.id)
       exec.application.driver.send(ExecutorUpdated(
       //ExecutorState.LOST标记丢失,即Worker异常退出
+        //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         exec.id, ExecutorState.LOST, Some("worker lost"), None))
       exec.application.removeExecutor(exec)
     }
@@ -989,6 +1000,7 @@ private[deploy] class Master(
       } else {
         logInfo(s"Not re-launching ${driver.id} because it was not supervised")
         //removeDriver重新调度之前调度给此Worker的Driver
+        //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         removeDriver(driver.id, DriverState.ERROR, None)
       }
     }
@@ -996,6 +1008,7 @@ private[deploy] class Master(
   }
 
   private def relaunchDriver(driver: DriverInfo) {
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     driver.worker = None
     driver.state = DriverState.RELAUNCHING
     waitingDrivers += driver
@@ -1101,6 +1114,7 @@ private[deploy] class Master(
         appInfo.executorLimit = requestedTotal
         schedule()
         true
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       case None =>
         logWarning(s"Unknown application $appId requested $requestedTotal total executors.")
         false
@@ -1136,6 +1150,7 @@ private[deploy] class Master(
         }
         schedule()
         true
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       case None =>
         logWarning(s"Unregistered application $appId requested us to kill executors!")
         false
@@ -1158,6 +1173,7 @@ private[deploy] class Master(
       } catch {
         case e: NumberFormatException =>
           logError(s"Encountered executor with a non-integer ID: $executorId. Ignoring")
+          //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
           None
       }
     }
@@ -1187,6 +1203,7 @@ private[deploy] class Master(
           // Event logging is not enabled for this application
           //此应用程序未启用事件日志记录
           app.desc.appUiUrl = notFoundBasePath
+          //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
           return None
         }
 

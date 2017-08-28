@@ -18,6 +18,7 @@ object RegexpPattern extends App {
 
   val anchoredPattern = "^[0-9]+$".r
   val str = " 123"
+  //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
   if (anchoredPattern.findFirstIn(str) == None) println("Not a number")
   if (str.matches("[0-9]+")) println("A number")
 
@@ -26,6 +27,7 @@ object RegexpPattern extends App {
   numPattern.replaceAllIn("99 bottles, 98 bottles", "XX")
 
   numPattern.replaceSomeIn("99 bottles, 98 bottles",
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     m => if (m.matched.toInt % 2 == 0) Some("XX") else None)
 
   val varPattern = """\$[0-9]+""".r

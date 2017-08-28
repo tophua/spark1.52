@@ -31,12 +31,14 @@ import org.apache.spark.util.random.{XORShiftRandom, SamplingUtils}
 
 /**
  * An object that defines how the elements in a key-value pair RDD are partitioned by key.
- * 一个RDD对象中定义在一个键值对中查找分区元素
+ * 定义键值对RDD中的元素如何用键分隔的对象
  * Maps each key to a partition ID, from 0 to `numPartitions - 1`.
  * 将每个键映射到分区标识,从0开始到`numPartitions - 1`.
  */
 abstract class Partitioner extends Serializable {
+  //返回创建分区的个数
   def numPartitions: Int
+  //这个函数需要对输入的key做计算,然后返回该key的分区ID,范围一定是0到numPartitions-1
   def getPartition(key: Any): Int
 }
 

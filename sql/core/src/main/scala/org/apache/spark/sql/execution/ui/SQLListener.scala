@@ -185,6 +185,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
                 // If a task is finished, we should not override with accumulator updates from
                 // heartbeat reports
               }
+            //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
             case None =>
               // TODO Now just set attemptId to 0. Should fix here when we can get the attempt
               // id from SparkListenerExecutorMetricsUpdate
@@ -192,6 +193,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
                   attemptId = 0, finished = finishTask, metrics.accumulatorUpdates())
           }
         }
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       case None =>
       // This execution and its stage have been dropped
     }
@@ -276,6 +278,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
         mergeAccumulatorUpdates(accumulatorUpdates, accumulatorId =>
           executionUIData.accumulatorMetrics(accumulatorId).metricParam).
           mapValues(_.asInstanceOf[SQLMetricValue[_]].value)
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       case None =>
         // This execution has been dropped
         Map.empty
@@ -305,6 +308,7 @@ private[ui] class SQLExecutionUIData(
     val physicalPlanGraph: SparkPlanGraph,
     val accumulatorMetrics: Map[Long, SQLPlanMetric],
     val submissionTime: Long,
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     var completionTime: Option[Long] = None,
     val jobs: mutable.HashMap[Long, JobExecutionStatus] = mutable.HashMap.empty,
     val stages: mutable.ArrayBuffer[Int] = mutable.ArrayBuffer()) {

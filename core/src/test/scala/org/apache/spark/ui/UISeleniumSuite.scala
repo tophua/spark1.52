@@ -268,6 +268,7 @@ class UISeleniumSuite extends SparkFunSuite with WebBrowser with Matchers with B
         jobGroup = job \ "jobGroup"
       } {
         jobId.toInt match {
+          //Nothing没有对象
           case 0 => jobGroup should be (JNothing)
           case 1 => jobGroup should be (JString("my-job-group"))
         }

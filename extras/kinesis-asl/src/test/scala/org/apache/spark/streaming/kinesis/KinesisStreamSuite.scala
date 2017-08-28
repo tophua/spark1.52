@@ -123,12 +123,14 @@ class KinesisStreamSuite extends KinesisFunSuite
       SequenceNumberRange("fakeStream", "fakeShardId", "xxx", "yyy"))
     val blockId1 = StreamBlockId(kinesisStream.id, 123)
     val blockInfo1 = ReceivedBlockInfo(
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       0, None, Some(seqNumRanges1), new BlockManagerBasedStoreResult(blockId1, None))
 
     val seqNumRanges2 = SequenceNumberRanges(
       SequenceNumberRange("fakeStream", "fakeShardId", "aaa", "bbb"))
     val blockId2 = StreamBlockId(kinesisStream.id, 345)
     val blockInfo2 = ReceivedBlockInfo(
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       0, None, Some(seqNumRanges2), new BlockManagerBasedStoreResult(blockId2, None))
 
     // Verify that the generated KinesisBackedBlockRDD has the all the right information

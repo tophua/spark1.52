@@ -36,6 +36,7 @@ private[streaming] class FileBasedWriteAheadLogReader(path: String, conf: Config
 
   private val instream = HdfsUtils.getInputStream(path, conf)
   private var closed = false
+  //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
   private var nextItem: Option[ByteBuffer] = None
 
   override def hasNext: Boolean = synchronized {
@@ -75,6 +76,7 @@ private[streaming] class FileBasedWriteAheadLogReader(path: String, conf: Config
         "next called without calling hasNext or after hasNext returned false")
     }
     //确保下一个调用hasNext加载新的数据
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     nextItem = None // Ensure the next hasNext call loads new data.
     data
   }

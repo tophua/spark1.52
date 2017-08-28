@@ -57,6 +57,7 @@ case class SortBasedAggregate(
       case Some(exprs) if exprs.length == 0 => AllTuples :: Nil
       //Nil是一个空的List,::向队列的头部追加数据,创造新的列表
       case Some(exprs) if exprs.length > 0 => ClusteredDistribution(exprs) :: Nil
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       case None => UnspecifiedDistribution :: Nil
     }
   }

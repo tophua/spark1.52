@@ -129,7 +129,7 @@ abstract class RDD[T: ClassTag](
   def compute(split: Partition, context: TaskContext): Iterator[T]
 
   /**
-   * 返回RDD分区,通过子类在RDD返回分区的设置,此方法只调用一次，因此在其中实现耗时的计算是安全的.
+   * 返回此RDD中的一组分区,通过子类在RDD返回分区的设置,此方法只调用一次,因此在其中实现耗时的计算是安全的.
    * Implemented by subclasses to return the set of partitions in this RDD. This method will only
    * be called once, so it is safe to implement a time-consuming computation in it.
    */

@@ -312,7 +312,9 @@ private[deploy] object IvyTestUtils {
    */
   private def createLocalRepository(
       artifact: MavenCoordinate,
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       dependencies: Option[Seq[MavenCoordinate]] = None,
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       tempDir: Option[File] = None,
       useIvyLayout: Boolean = false,
       withPython: Boolean = false,
@@ -375,6 +377,7 @@ private[deploy] object IvyTestUtils {
     val deps = dependencies.map(SparkSubmitUtils.extractMavenCoordinates)
     val mainRepo = createLocalRepository(artifact, deps, rootDir, useIvyLayout, withPython, withR)
     deps.foreach { seq => seq.foreach { dep =>
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       createLocalRepository(dep, None, Some(mainRepo), useIvyLayout, withPython = false)
     }}
     mainRepo

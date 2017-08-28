@@ -122,6 +122,7 @@ case class SparkListenerApplicationStart(
     time: Long,
     sparkUser: String,
     appAttemptId: Option[String],
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     driverLogs: Option[Map[String, String]] = None) extends SparkListenerEvent
 
 @DeveloperApi

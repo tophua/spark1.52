@@ -32,7 +32,7 @@ class ForEachDStream[T: ClassTag] (
   override def dependencies: List[DStream[_]] = List(parent)
   //持续时间
   override def slideDuration: Duration = parent.slideDuration
-
+  //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
   override def compute(validTime: Time): Option[RDD[Unit]] = None
 
   override def generateJob(time: Time): Option[Job] = {
@@ -43,6 +43,7 @@ class ForEachDStream[T: ClassTag] (
           foreachFunc(rdd, time)
         }
         Some(new Job(time, jobFunc))
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       case None => None
     }
   }

@@ -64,11 +64,12 @@ class MyRDD(
     locations: Seq[Seq[String]] = Nil) extends RDD[(Int, Int)](sc, dependencies) with Serializable {
   override def compute(split: Partition, context: TaskContext): Iterator[(Int, Int)] =
     throw new RuntimeException("should not be reached")
+  //返回此RDD中的一组分区
   override def getPartitions: Array[Partition] = (0 until numPartitions).map(i => new Partition {
     override def index: Int = i
   }).toArray
   override def getPreferredLocations(split: Partition): Seq[String] =
-  //Nil是一个空的List
+  //Nil是一个空的List,isDefinedAt是判断传入来的参数是否在这的范围内
     if (locations.isDefinedAt(split.index)) locations(split.index) else Nil
   override def toString: String = "DAGSchedulerSuiteRDD " + id
 }
@@ -90,8 +91,8 @@ class DAGSchedulerSuite
   /** 
    *  Set of TaskSets the DAGScheduler has requested executed.
    *  请求执行器设置DAGScheduler的TaskSets
-   *   
    *  */
+    //Buffer提供了一组创建缓冲区值的操作
   val taskSets = scala.collection.mutable.Buffer[TaskSet]()
 
   /** Stages for which the DAGScheduler has called TaskScheduler.cancelTasks(). */
@@ -109,6 +110,7 @@ class DAGSchedulerSuite
       // normally done by TaskSetManager
       // TaskSetManager正常完成
       taskSet.tasks.foreach(_.epoch = mapOutputTracker.getEpoch)
+      //
       taskSets += taskSet
     }
     //取消任务
@@ -150,7 +152,7 @@ class DAGSchedulerSuite
       }
     }
   }
-
+  //主要用于跟踪Map阶段任务的输出状态,此状态便于Reduce阶段任务获取地址及中间输出结果
   var mapOutputTracker: MapOutputTrackerMaster = null
   var scheduler: DAGScheduler = null
   var dagEventProcessLoopTester: DAGSchedulerEventProcessLoop = null

@@ -32,7 +32,7 @@ trait CheckAnalysis {
    * These rules will be evaluated after our built-in check rules.
    */
   val extendedCheckRules: Seq[LogicalPlan => Unit] = Nil
-
+  //Nothing没有对象
   protected def failAnalysis(msg: String): Nothing = {
     throw new AnalysisException(msg)
   }

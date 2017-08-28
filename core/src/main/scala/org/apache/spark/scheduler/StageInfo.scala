@@ -40,16 +40,19 @@ class StageInfo(
   /** 
    *  When this stage was submitted from the DAGScheduler to a TaskScheduler. 
    *  当阶段的所有任务提交的时间
+    *  None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
    *  */
   var submissionTime: Option[Long] = None
   /** 
    *  Time when all tasks in the stage completed or when the stage was cancelled.
    *  当阶段的所有任务完成或取消阶段时的时间
+    *  None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
    *   */
   var completionTime: Option[Long] = None
   /** 
    *  If the stage failed, the reason why. 
    *  如果阶段失败了,原因为什么
+    *  None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
    *  */
   var failureReason: Option[String] = None
   /** 
@@ -89,6 +92,7 @@ private[spark] object StageInfo {
   def fromStage(
       stage: Stage,
       attemptId: Int,
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       numTasks: Option[Int] = None,
       taskLocalityPreferences: Seq[Seq[TaskLocation]] = Seq.empty
     ): StageInfo = {

@@ -65,7 +65,7 @@ private[streaming] class FileBasedWriteAheadLog(
   implicit private val executionContext = ExecutionContext.fromExecutorService(
     ThreadUtils.newDaemonSingleThreadExecutor(threadpoolName))
   override protected val logName = s"WriteAheadLogManager $callerNameTag"
-
+  //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
   private var currentLogPath: Option[String] = None
   //一个 LogWriter对应一个 log file,而且 log文件本身是 rolling的,那么前一个log文件写完成后,
   //对应的 writer就可以 close()了,而由新的 writer 负责写新的文件
@@ -268,6 +268,7 @@ private[streaming] object FileBasedWriteAheadLog {
           val startTime = startTimeStr.toLong
           val stopTime = stopTimeStr.toLong
           Some(LogInfo(startTime, stopTime, file.toString))
+        //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
         case None =>
           None
       }

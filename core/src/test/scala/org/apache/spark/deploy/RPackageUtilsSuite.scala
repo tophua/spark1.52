@@ -71,6 +71,7 @@ class RPackageUtilsSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   test("pick which jars to unpack using the manifest") {
     val deps = Seq(dep1, dep2).mkString(",")
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     IvyTestUtils.withRepository(main, Some(deps), None, withR = true) { repo =>
       val jars = Seq(main, dep1, dep2).map(c => new JarFile(getJarPath(c, new File(new URI(repo)))))
       assert(RPackageUtils.checkManifestForR(jars(0)), "should have R code")
@@ -82,6 +83,7 @@ class RPackageUtilsSuite extends SparkFunSuite with BeforeAndAfterEach {
   test("build an R package from a jar end to end") {
     assume(RUtils.isRInstalled, "R isn't installed on this machine.")
     val deps = Seq(dep1, dep2).mkString(",")
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     IvyTestUtils.withRepository(main, Some(deps), None, withR = true) { repo =>
       val jars = Seq(main, dep1, dep2).map { c =>
         getJarPath(c, new File(new URI(repo)))
@@ -99,6 +101,7 @@ class RPackageUtilsSuite extends SparkFunSuite with BeforeAndAfterEach {
   test("jars that don't exist are skipped and print warning") {
     assume(RUtils.isRInstalled, "R isn't installed on this machine.")
     val deps = Seq(dep1, dep2).mkString(",")
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     IvyTestUtils.withRepository(main, Some(deps), None, withR = true) { repo =>
       val jars = Seq(main, dep1, dep2).map { c =>
         getJarPath(c, new File(new URI(repo))) + "dummy"
@@ -114,6 +117,7 @@ class RPackageUtilsSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   test("faulty R package shows documentation") {
     assume(RUtils.isRInstalled, "R isn't installed on this machine.")
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     IvyTestUtils.withRepository(main, None, None) { repo =>
       val manifest = new Manifest
       val attr = manifest.getMainAttributes

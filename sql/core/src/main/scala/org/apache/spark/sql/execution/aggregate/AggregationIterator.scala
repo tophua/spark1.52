@@ -160,6 +160,7 @@ abstract class AggregationIterator(
     val aggregationBufferSchema = allAggregateFunctions.flatMap(_.bufferAttributes)
     aggregationMode match {
       // Partial-only
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       case (Some(Partial), None) =>
         val updateExpressions = nonCompleteAggregateFunctions.flatMap {
           case ae: AlgebraicAggregate => ae.updateExpressions

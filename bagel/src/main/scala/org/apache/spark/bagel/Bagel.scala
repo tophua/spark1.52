@@ -129,6 +129,7 @@ object Bagel extends Logging {
   )(
     compute: (V, Option[C], Int) => (V, Array[M])
   ): RDD[(K, V)] = {
+    //Nothing没有对象
     run[K, V, M, C, Nothing](
       sc, vertices, messages, combiner, None, partitioner, numPartitions, storageLevel)(
       addAggregatorArg[K, V, M, C](compute))
@@ -164,6 +165,7 @@ object Bagel extends Logging {
     compute: (V, Option[C], Int) => (V, Array[M])
   ): RDD[(K, V)] = {
     val part = new HashPartitioner(numPartitions)
+    //Nothing没有对象
     run[K, V, M, C, Nothing](
       sc, vertices, messages, combiner, None, part, numPartitions, storageLevel)(
       addAggregatorArg[K, V, M, C](compute))
@@ -198,6 +200,7 @@ object Bagel extends Logging {
     compute: (V, Option[Array[M]], Int) => (V, Array[M])
    ): RDD[(K, V)] = {
     val part = new HashPartitioner(numPartitions)
+    //Nothing没有对象
     run[K, V, M, Array[M], Nothing](
       sc, vertices, messages, new DefaultCombiner(), None, part, numPartitions, storageLevel)(
       addAggregatorArg[K, V, M, Array[M]](compute))
@@ -264,7 +267,9 @@ object Bagel extends Logging {
    */
   private def addAggregatorArg[K: Manifest, V <: Vertex : Manifest, M <: Message[K] : Manifest, C](
     compute: (V, Option[C], Int) => (V, Array[M])
+    //Nothing没有对象
   ): (V, Option[C], Option[Nothing], Int) => (V, Array[M]) = {
+    //Nothing没有对象
     (vert: V, msgs: Option[C], aggregated: Option[Nothing], superstep: Int) =>
       compute(vert, msgs, superstep)
   }

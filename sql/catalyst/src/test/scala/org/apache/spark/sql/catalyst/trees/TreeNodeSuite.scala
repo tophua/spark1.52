@@ -170,6 +170,7 @@ class TreeNodeSuite extends SparkFunSuite {
     assert(expected === actual)
 
     // Find nothing.
+    //Nothing没有对象
     actual = expression.find {
       case Literal(100, IntegerType) => true
       case other => false
@@ -219,6 +220,7 @@ class TreeNodeSuite extends SparkFunSuite {
     }
 
     // Collect nothing.
+    //Nothing没有对象
     {
       val actual = expression.collectFirst {
         case l @ Literal(100, IntegerType) => l

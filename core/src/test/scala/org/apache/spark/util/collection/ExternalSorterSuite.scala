@@ -60,24 +60,28 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
     // Both aggregator and ordering 两者的聚合和排序
     val sorter = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       Some(agg), Some(new HashPartitioner(3)), Some(ord), None)
     assert(sorter.iterator.toSeq === Seq())
     sorter.stop()
 
     // Only aggregator 只有聚合
     val sorter2 = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       Some(agg), Some(new HashPartitioner(3)), None, None)
     assert(sorter2.iterator.toSeq === Seq())
     sorter2.stop()
 
     // Only ordering 只有排序
     val sorter3 = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(3)), Some(ord), None)
     assert(sorter3.iterator.toSeq === Seq())
     sorter3.stop()
 
     // Neither aggregator nor ordering 无论是聚合和排序
     val sorter4 = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(3)), None, None)
     assert(sorter4.iterator.toSeq === Seq())
     sorter4.stop()
@@ -107,6 +111,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     // Both aggregator and ordering
     //两者的聚合和排序
     val sorter = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       Some(agg), Some(new HashPartitioner(7)), Some(ord), None)
     sorter.insertAll(elements.iterator)
     assert(sorter.partitionedIterator.map(p => (p._1, p._2.toSet)).toSet === expected)
@@ -114,6 +119,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
     // Only aggregator 只有聚合
     val sorter2 = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       Some(agg), Some(new HashPartitioner(7)), None, None)
     sorter2.insertAll(elements.iterator)
     assert(sorter2.partitionedIterator.map(p => (p._1, p._2.toSet)).toSet === expected)
@@ -121,6 +127,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
     // Only ordering 只有排序
     val sorter3 = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(7)), Some(ord), None)
     sorter3.insertAll(elements.iterator)
     assert(sorter3.partitionedIterator.map(p => (p._1, p._2.toSet)).toSet === expected)
@@ -128,6 +135,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
     // Neither aggregator nor ordering 无论是聚合和排序
     val sorter4 = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(7)), None, None)
     sorter4.insertAll(elements.iterator)
     assert(sorter4.partitionedIterator.map(p => (p._1, p._2.toSet)).toSet === expected)
@@ -153,6 +161,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     val elements = Iterator((1, 1), (5, 5)) ++ (0 until 100000).iterator.map(x => (2, 2))
 
     val sorter = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(7)), Some(ord), None)
     sorter.insertAll(elements)
     assert(sc.env.blockManager.diskBlockManager.getAllFiles().length > 0) // Make sure it spilled
@@ -343,6 +352,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     val ord = implicitly[Ordering[Int]]
 
     val sorter = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(3)), Some(ord), None)
     sorter.insertAll((0 until 120000).iterator.map(i => (i, i)))
     assert(diskBlockManager.getAllFiles().length > 0)
@@ -350,6 +360,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     assert(diskBlockManager.getAllBlocks().length === 0)
 
     val sorter2 = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(3)), Some(ord), None)
     sorter2.insertAll((0 until 120000).iterator.map(i => (i, i)))
     assert(diskBlockManager.getAllFiles().length > 0)
@@ -369,6 +380,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     val ord = implicitly[Ordering[Int]]
 
     val sorter = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(3)), Some(ord), None)
     intercept[SparkException] {
       sorter.insertAll((0 until 120000).iterator.map(i => {
@@ -437,7 +449,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     conf.set("spark.shuffle.memoryFraction", "0.001")
     conf.set("spark.shuffle.manager", "org.apache.spark.shuffle.sort.SortShuffleManager")
     sc = new SparkContext("local", "test", conf)
-
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     val sorter = new ExternalSorter[Int, Int, Int](None, Some(new HashPartitioner(3)), None, None)
     sorter.insertAll((0 until 100000).iterator.map(i => (i / 4, i)))
     val results = sorter.partitionedIterator.map{case (p, vs) => (p, vs.toSet)}.toSet
@@ -462,6 +474,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     sc = new SparkContext("local", "test", conf)
 
     val agg = new Aggregator[Int, Int, Int](i => i, (i, j) => i + j, (i, j) => i + j)
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     val sorter = new ExternalSorter(Some(agg), Some(new HashPartitioner(3)), None, None)
     sorter.insertAll((0 until 100).iterator.map(i => (i / 2, i)))
     val results = sorter.partitionedIterator.map{case (p, vs) => (p, vs.toSet)}.toSet
@@ -486,6 +499,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     sc = new SparkContext("local", "test", conf)
 
     val agg = new Aggregator[Int, Int, Int](i => i, (i, j) => i + j, (i, j) => i + j)
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     val sorter = new ExternalSorter(Some(agg), Some(new HashPartitioner(3)), None, None)
     sorter.insertAll((0 until 100000).iterator.map(i => (i / 2, i)))
     val results = sorter.partitionedIterator.map{case (p, vs) => (p, vs.toSet)}.toSet
@@ -512,6 +526,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
     val agg = new Aggregator[Int, Int, Int](i => i, (i, j) => i + j, (i, j) => i + j)
     val ord = implicitly[Ordering[Int]]
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     val sorter = new ExternalSorter(Some(agg), Some(new HashPartitioner(3)), Some(ord), None)
 
     // avoid combine before spill 避免溢出前的结合
@@ -540,6 +555,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
     val ord = implicitly[Ordering[Int]]
     val sorter = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(3)), Some(ord), None)
     sorter.insertAll((0 until 100).iterator.map(i => (i, i)))
     val results = sorter.partitionedIterator.map{case (p, vs) => (p, vs.toSeq)}.toSeq
@@ -565,6 +581,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
 
     val ord = implicitly[Ordering[Int]]
     val sorter = new ExternalSorter[Int, Int, Int](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, Some(new HashPartitioner(3)), Some(ord), None)
     sorter.insertAll((0 until 100000).iterator.map(i => (i, i)))
     val results = sorter.partitionedIterator.map{case (p, vs) => (p, vs.toSeq)}.toSeq
@@ -589,6 +606,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
       createCombiner _, mergeValue _, mergeCombiners _)
 
     val sorter = new ExternalSorter[String, String, ArrayBuffer[String]](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       Some(agg), None, None, None)
 
     val collisionPairs = Seq(
@@ -639,6 +657,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     sc = new SparkContext("local-cluster[1,1,1024]", "test", conf)
 
     val agg = new Aggregator[FixedHashObject, Int, Int](_ => 1, _ + _, _ + _)
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     val sorter = new ExternalSorter[FixedHashObject, Int, Int](Some(agg), None, None, None)
 
     // Insert 10 copies each of lots of objects whose hash codes are either 0 or 1. This causes
@@ -669,6 +688,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     }
 
     val agg = new Aggregator[Int, Int, ArrayBuffer[Int]](createCombiner, mergeValue, mergeCombiners)
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     val sorter = new ExternalSorter[Int, Int, ArrayBuffer[Int]](Some(agg), None, None, None)
 
     sorter.insertAll(
@@ -696,6 +716,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
       createCombiner, mergeValue, mergeCombiners)
 
     val sorter = new ExternalSorter[String, String, ArrayBuffer[String]](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       Some(agg), None, None, None)
 
     sorter.insertAll((1 to 100000).iterator.map(i => (i.toString, i.toString)) ++ Iterator(
@@ -738,6 +759,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
     val testData = Array.tabulate(100000) { _ => rand.nextInt().toString }
 
     val sorter1 = new ExternalSorter[String, String, String](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       None, None, Some(wrongOrdering), None)
     val thrown = intercept[IllegalArgumentException] {
       sorter1.insertAll(testData.iterator.map(i => (i, i)))
@@ -759,6 +781,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
       createCombiner, mergeValue, mergeCombiners)
 
     val sorter2 = new ExternalSorter[String, String, ArrayBuffer[String]](
+      //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
       Some(agg), None, None, None)
     sorter2.insertAll(testData.iterator.map(i => (i, i)))
 
