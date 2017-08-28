@@ -166,12 +166,14 @@ object InputFormatInfo {
     e) On the allocation result, ensure that we dont allocate "too many" jobs on a single node
        (even if data locality on that is very high) : this is to prevent fragility of job if a
        single (or small set of) hosts go down.
-
+    在分配结果中,确保我们不会在单个节点上分配“太多”作业(即使数据位置非常高)：
+    这是为了防止单个(或一小组)主机掉线的工作的脆弱性。
     go to (a) until required nodes are allocated.转到(a),直到分配所需的节点。
 
     If a node 'dies', follow same procedure.如果节点“死”，请遵循相同的过程。
 
     PS: I know the wording here is weird, hopefully it makes some sense !
+    PS：我知道这里的措辞是奇怪的,希望它有一定的意义！
   */
   def computePreferredLocations(formats: Seq[InputFormatInfo]): Map[String, Set[SplitInfo]] = {
 

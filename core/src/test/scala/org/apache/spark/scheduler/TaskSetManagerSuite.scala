@@ -146,7 +146,7 @@ class FakeTaskScheduler(sc: SparkContext, liveExecutors: (String, String)* /* ex
 
 /**
  * A Task implementation that results in a large serialized task.
- * 一个任务的执行,结果在一个大的系列任务
+ * 导致大型序列化任务的任务实现
  */
 class LargeTask(stageId: Int) extends Task[Array[Byte]](stageId, 0, 0, Seq.empty) {
   val randomBuffer = new Array[Byte](TaskSetManager.TASK_SIZE_TO_WARN_KB * 1024)
@@ -236,7 +236,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     val manager = new TaskSetManager(sched, taskSet, MAX_TASK_FAILURES, clock)
 
     // An executor that is not NODE_LOCAL should be rejected.
-    //一个执行人,不应该拒绝node_local
+    //一个不是NODE_LOCAL的执行者应该被拒绝
     assert(manager.resourceOffer("execC", "host2", ANY) === None)
 
     // Because there are no alive PROCESS_LOCAL executors, the base locality level should be
@@ -495,10 +495,12 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
       assert(offerResult.get.executorId === "exec2")
 
       // Cause exec2 to fail : failure 3
+      //导致exec2失败：失败3
       manager.handleFailedTask(offerResult.get.taskId, TaskState.FINISHED, TaskResultLost)
       assert(!sched.taskSetsFailed.contains(taskSet.id))
 
       // Ensure scheduling on exec2 fails after failure 3 due to blacklist
+      //由于黑名单,确保在故障3之后exec2的调度失败
       assert(manager.resourceOffer("exec2", "host2", ANY).isEmpty)
     }
 
@@ -590,11 +592,12 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     clock.advance(LOCALITY_WAIT_MS * 3)
     // Offer host3 提供主机3
     // No task is scheduled if we restrict locality to RACK_LOCAL
+    //如果我们将本地化限制为RACK_LOCAL，则不会安排任务
     assert(manager.resourceOffer("execC", "host3", RACK_LOCAL) === None)
-    // Task 0 can be scheduled with ANY 任务0可以与任何计划
+    // Task 0 can be scheduled with ANY 任务0可以任意安排
     assert(manager.resourceOffer("execC", "host3", ANY).get.index === 0)
-    // Offer host2
-    // Task 1 can be scheduled with RACK_LOCAL
+    // Offer host2 提供host2
+    // Task 1 can be scheduled with RACK_LOCAL 任务1可以使用RACK_LOCAL进行安排
     assert(manager.resourceOffer("execB", "host2", RACK_LOCAL).get.index === 1)
   }
 
@@ -785,7 +788,8 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     sched.addExecutor("execB.2", "host2")
     manager.executorAdded()
     assert(manager.pendingTasksWithNoPrefs.size === 0)
-    // Valid locality should contain PROCESS_LOCAL, NODE_LOCAL and ANY 有效的地方应包含
+    // Valid locality should contain PROCESS_LOCAL, NODE_LOCAL and ANY
+    //有效位置应包含PROCESS_LOCAL,NODE_LOCAL和ANY
     assert(manager.myLocalityLevels.sameElements(Array(PROCESS_LOCAL, NODE_LOCAL, ANY)))
     assert(manager.resourceOffer("execA", "host1", ANY) !== None)
     clock.advance(LOCALITY_WAIT_MS * 4)
@@ -798,7 +802,7 @@ class TaskSetManagerSuite extends SparkFunSuite with LocalSparkContext with Logg
     sched.addExecutor("execC", "host3")
     manager.executorAdded()
     // Prior to the fix, this line resulted in an ArrayIndexOutOfBoundsException:
-    //为解决之前,这导致了一个对象的大小时抛出
+    //在修复之前,这一行导致了一个ArrayIndexOutOfBoundsException：
     assert(manager.resourceOffer("execC", "host3", ANY) !== None)
   }
  //测试使用HDFSCacheTaskLocation的位置被视为PROCESS_LOCAL

@@ -88,7 +88,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * Create a log file for one job
    * 创建一个Job日志文件
    * @param jobId ID of the job
-   * @throws FileNotFoundException Fail to create log file
+   * @throws FileNotFoundException Fail to create log file 无法创建日志文件
    */
   protected def createLogWriter(jobId: Int) {
     try {
@@ -119,7 +119,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * Build up the maps that represent stage-job relationships
    * 构建stage-job依赖关系
    * @param jobId ID of the job
-   * @param stageIds IDs of the associated stages
+   * @param stageIds IDs of the associated stages 相关阶段的ID
    */
   protected def buildJobStageDependencies(jobId: Int, stageIds: Seq[Int]) = {
     jobIdToStageIds(jobId) = stageIds
@@ -132,7 +132,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * @param jobId ID of the job
    * @param info Info to be recorded
    * @param withTime Controls whether to record time stamp before the info, default is true
-    *                 控制是否在信息之前记录时间戳，默认为true
+    *                 控制是否在信息之前记录时间戳,默认为true
    */
   protected def jobLogInfo(jobId: Int, info: String, withTime: Boolean = true) {
     var writeInfo = info

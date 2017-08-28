@@ -280,7 +280,7 @@ private[spark] object EventLoggingListener extends Logging {
    * The log file name will identify the compression codec used for the contents, if any.
    * For example, app_123 for an uncompressed log, app_123.lzf for an LZF-compressed log.
     *
-    * 日志文件名称将标识用于内容的压缩编解码器(如果有的话)。 例如,对于未压缩日志的app_123,LZF压缩日志的app_123.lzf。
+    * 日志文件名称将标识用于内容的压缩编解码器(如果有的话),例如,对于未压缩日志的app_123,LZF压缩日志的app_123.lzf。
    *
    * @param logBaseDir Directory where the log file will be written.要写入日志文件的目录
    * @param appId A unique app ID.独特的应用程式编号
