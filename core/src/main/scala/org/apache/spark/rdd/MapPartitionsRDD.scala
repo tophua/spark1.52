@@ -36,8 +36,6 @@ private[spark] class MapPartitionsRDD[U: ClassTag, T: ClassTag](
   override val partitioner = if (preservesPartitioning) firstParent[T].partitioner else None
   //firstParent用于返回依赖的第一个父RDD,
   override def getPartitions: Array[Partition] = firstParent[T].partitions
-
-  override def compute(split: Partition, context: TaskContext): Iterator[U] =
-    //首先调用firstParent找到父RDD
-f(context, split.index, firstParent[T].iterator(split, context))
+  //首先调用firstParent找到父RDD
+  override def compute(split: Partition, context: TaskContext): Iterator[U] = f(context, split.index, firstParent[T].iterator(split, context))
 }

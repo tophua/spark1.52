@@ -100,7 +100,8 @@ class ShuffleDependency[K, V, C](
  */
 @DeveloperApi
 class OneToOneDependency[T](rdd: RDD[T]) extends NarrowDependency[T](rdd) {
-  //Rdd仅仅依赖于parent RDD相同ID的partition
+  //Rdd仅仅依赖于parent RDD相同ID的partition,
+  // List(partitionId)构造List列表只有一个元素
   override def getParents(partitionId: Int): List[Int] = List(partitionId)
 }
 
@@ -119,7 +120,7 @@ class OneToOneDependency[T](rdd: RDD[T]) extends NarrowDependency[T](rdd) {
 @DeveloperApi
 class RangeDependency[T](rdd: RDD[T], inStart: Int, outStart: Int, length: Int)
   extends NarrowDependency[T](rdd) {
-//
+  // List(partitionId)构造List列表只有一个元素
   override def getParents(partitionId: Int): List[Int] = {
     if (partitionId >= outStart && partitionId < outStart + length) {
       List(partitionId - outStart + inStart)

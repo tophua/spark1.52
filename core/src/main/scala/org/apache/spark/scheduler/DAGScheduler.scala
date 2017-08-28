@@ -275,6 +275,7 @@ class DAGScheduler(
         IndexedSeq.fill(rdd.partitions.length)(Nil)
       } else {
         val blockIds =
+          //indices返回所有有效索引值
           rdd.partitions.indices.map(index => RDDBlockId(rdd.id, index)).toArray[BlockId]
         //根据块id从blockManagerMaster获得Task位置
         blockManagerMaster.getLocations(blockIds).map { bms =>

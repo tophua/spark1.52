@@ -110,7 +110,6 @@ class DAGSchedulerSuite
       // normally done by TaskSetManager
       // TaskSetManager正常完成
       taskSet.tasks.foreach(_.epoch = mapOutputTracker.getEpoch)
-      //
       taskSets += taskSet
     }
     //取消任务
@@ -120,6 +119,7 @@ class DAGSchedulerSuite
     override def setDAGScheduler(dagScheduler: DAGScheduler) = {}
     override def defaultParallelism() = 2 //默认并发数
     override def executorLost(executorId: String, reason: ExecutorLossReason): Unit = {}
+    //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     override def applicationAttemptId(): Option[String] = None
   }
 
@@ -143,6 +143,10 @@ class DAGSchedulerSuite
       val stageInfo = stageCompleted.stageInfo
       //阶段排序的执行器
       stageByOrderOfExecution += stageInfo.stageId
+      println("==stageInfo=="+stageInfo.stageId+"==name=="+stageInfo.name+"==attemptId=="+stageInfo.attemptId+"=numTasks="+stageInfo.numTasks
+        +"==rddInfos=="+stageInfo.rddInfos.size+"==parentIds=="+stageInfo.parentIds)
+      stageInfo.rddInfos.foreach(a=> println("rddInfo:"+a.id+"==name=="+a.name+"=numPartitions="+a.numPartitions+"==isCached=="+a.isCached))
+
       if (stageInfo.failureReason.isEmpty) {
         //完成的Stage
         successfulStages += stageInfo.stageId
@@ -172,6 +176,7 @@ class DAGSchedulerSuite
       var test=null
         blockIds.map {
           _.asRDDId.map(id =>
+
             (id.rddId -> id.splitIndex)          
             ).flatMap(key => cacheLocations.get(key)).
             getOrElse(Seq())
@@ -261,7 +266,9 @@ class DAGSchedulerSuite
    *  */
   private def complete(taskSet: TaskSet, results: Seq[(TaskEndReason, Any)]) {
     assert(taskSet.tasks.size >= results.size)
+
     for ((result, i) <- results.zipWithIndex) {
+       println(result+"===="+i)
       if (i < taskSet.tasks.size) {
         runEvent(CompletionEvent(//result._1返馈,._2结果
           taskSet.tasks(i), result._1, result._2, null, createFakeTaskInfo(), null))
@@ -310,12 +317,14 @@ class DAGSchedulerSuite
   private def cancel(jobId: Int) {
     runEvent(JobCancelled(jobId))
   }
-  //父阶段应该有较低的阶段标识
+  //父阶段应该有较低的阶段id标识
   test("[SPARK-3353] parent stage should have lower stage id") {
     sparkListener.stageByOrderOfExecution.clear()
+    //划分二个stage,一个是Map,一个是shuffle
     sc.parallelize(1 to 10).map(x => (x, x)).reduceByKey(_ + _, 4).count()
     sc.listenerBus.waitUntilEmpty(WAIT_TIMEOUT_MILLIS)
     assert(sparkListener.stageByOrderOfExecution.length === 2)
+    //println(sparkListener.stageByOrderOfExecution(0)+"===="+sparkListener.stageByOrderOfExecution(1))
     assert(sparkListener.stageByOrderOfExecution(0) < sparkListener.stageByOrderOfExecution(1))
   }
 
@@ -326,6 +335,7 @@ class DAGSchedulerSuite
       override def jobFailed(exception: Exception) = throw exception
     }
     val jobId = submit(new MyRDD(sc, 0, Nil), Array(), listener = fakeListener)
+    println("jobId:"+jobId)
     assert(numResults === 0)
     cancel(jobId)
   }
@@ -343,6 +353,7 @@ class DAGSchedulerSuite
     val baseRdd = new MyRDD(sc, 1, Nil)
     val finalRdd = new MyRDD(sc, 1, List(new OneToOneDependency(baseRdd)))
     submit(finalRdd, Array(0))
+    //
     complete(taskSets(0), Seq((Success, 42)))
     assert(results === Map(0 -> 42))
     //清空数据结构
@@ -363,8 +374,9 @@ class DAGSchedulerSuite
     assertDataStructuresEmpty()
   }
 
-  test("regression test for getCacheLocs") {//对于getcachelocs回归测试
+  test("regression test for getCacheLocs") {//对于获得缓存的位置getCacheLocs回归测试
     val rdd = new MyRDD(sc, 3, Nil).cache()//三个分区
+    //rdd.id -> 0  分区Id
     cacheLocations(rdd.id -> 0) = //赋值
       Seq(makeBlockManagerId("hostA"), makeBlockManagerId("hostB"))
     cacheLocations(rdd.id -> 1) =
@@ -390,9 +402,9 @@ class DAGSchedulerSuite
    * doesn't perform a shuffle, and instead computes the result using a single ResultStage
    * that reads C's cached data.
     *
-    * 这里,B通过执行随机播放从A派生,C对B有一对一的依赖性,D类似地对C有一对一的依赖性,
+    * 这里,B通过执shuffleA派生,C对B有一对一的依赖性,D类似地对C有一对一的依赖性,
     * 如果没有RDD被缓存,则该组RDD将导致两个阶段的工作：
-    * 一个ShuffleMapStage和一个从RDD A读取混洗数据的ResultStage,此测试确保如果C被缓存,则调度程序不执行shuffled,
+    * 一个ShuffleMapStage和一个从RDD A读取shuffle数据的ResultStage,此测试确保如果C被缓存,则调度程序不执行shuffled,
     * 而是使用单个ResultStage来计算结果它读取C的缓存数据。
    */
   //getMissingParentStages应该考虑所有祖先RDD的缓存状态
@@ -518,11 +530,16 @@ class DAGSchedulerSuite
     val shuffleMapRdd = new MyRDD(sc, 2, Nil)
     val shuffleDep = new ShuffleDependency(shuffleMapRdd, null)
     val shuffleId = shuffleDep.shuffleId
+    println("shuffleId:"+shuffleId)
     val reduceRdd = new MyRDD(sc, 1, List(shuffleDep))
     submit(reduceRdd, Array(0))
     complete(taskSets(0), Seq(
         (Success, makeMapStatus("hostA", 1)),
         (Success, makeMapStatus("hostB", 1))))
+    mapOutputTracker.getMapSizesByExecutorId(shuffleId, 0).map(a=>{
+      println(a._1+"==="+a._2)
+    }
+    )
     assert(mapOutputTracker.getMapSizesByExecutorId(shuffleId, 0).map(_._1).toSet ===
       HashSet(makeBlockManagerId("hostA"), makeBlockManagerId("hostB")))
     complete(taskSets(1), Seq((Success, 42)))
@@ -682,7 +699,7 @@ class DAGSchedulerSuite
   /**
     * This tests the case where a late FetchFailed comes in after the map stage has finished getting
     * retried and a new reduce stage starts running.
-    * 这个测试的情况下,后期fetchfailed进来之后的Map阶段完成复审和一个新的阶段开始减少
+    * 这个测试的情况下,后期fetchfailed进来之后的Map阶段完成复审和一个新的阶段开始reduce
     */
   test("extremely late fetch failures don't cause multiple concurrent attempts for " +
       "the same stage") {

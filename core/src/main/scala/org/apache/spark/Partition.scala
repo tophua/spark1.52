@@ -25,6 +25,7 @@ trait Partition extends Serializable {
   /**
    * Get the partition's index within its parent RDD
     * 在其父RDD中获取分区的索引
+    * 返回分区索引的 index 方法,
    */
   def index: Int
 

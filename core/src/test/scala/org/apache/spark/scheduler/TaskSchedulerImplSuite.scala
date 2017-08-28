@@ -33,7 +33,7 @@ class FakeSchedulerBackend extends SchedulerBackend {
  * */
 
 class TaskSchedulerImplSuite extends SparkFunSuite with LocalSparkContext with Logging {
-  //调度程序并不总是安排同一个工作人员的任务
+  //调度程序并不总是安排同一个workers的任务
   test("Scheduler does not always schedule tasks on the same workers") {
     sc = new SparkContext("local", "TaskSchedulerImplSuite")
     val taskScheduler = new TaskSchedulerImpl(sc)

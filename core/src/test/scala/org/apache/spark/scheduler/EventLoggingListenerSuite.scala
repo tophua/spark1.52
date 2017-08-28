@@ -100,8 +100,10 @@ class EventLoggingListenerSuite extends SparkFunSuite with LocalSparkContext wit
   }
 
   test("Log overwriting") {//日志覆盖
+    println("testDir.toURI:"+testDir.toURI)
     val logUri = EventLoggingListener.getLogPath(testDir.toURI, "test", None)
     val logPath = new URI(logUri).getPath
+    println("logPath.toURI:"+logPath)
     // Create file before writing the event log
     // 在写入事件日志之前创建文件
     new FileOutputStream(new File(logPath)).close()

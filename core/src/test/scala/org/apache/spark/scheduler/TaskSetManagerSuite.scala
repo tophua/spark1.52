@@ -82,6 +82,7 @@ object FakeRackUtil {
  * to work, and these are required for locality in TaskSetManager.
  * 注意:这是重要的初始化这一系列的“活”的执行器和他们的isexecutoralive和hasexecutorsaliveonhost工作主机名
  * 这是本地的tasksetmanager请求
+  * 注意:(String, String)*  可以传地多个元组的值
  */
 class FakeTaskScheduler(sc: SparkContext, liveExecutors: (String, String)* /* execId, host */ )
     extends TaskSchedulerImpl(sc) {
@@ -128,8 +129,12 @@ class FakeTaskScheduler(sc: SparkContext, liveExecutors: (String, String)* /* ex
 
   def addExecutor(execId: String, host: String) {
     executors.put(execId, host)
+    //判断executorsByHost里面是否有key为host的元素,没有的话则添加（“aaa”，20）到executorsByHost中
+    //如果存在Key不更新value值,还回HashSet值
     val executorsOnHost = executorsByHost.getOrElseUpdate(host, new mutable.HashSet[String])
+    //HashSet追加值
     executorsOnHost += execId
+    //HashMap 追加值
     executorIdToHost += execId -> host
     for (rack <- getRackForHost(host)) {
       hostsByRack.getOrElseUpdate(rack, new mutable.HashSet[String]()) += host

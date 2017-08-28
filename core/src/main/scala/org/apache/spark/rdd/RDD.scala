@@ -293,6 +293,7 @@ abstract class RDD[T: ClassTag](
     * 获取这个RDD的分区数组,考虑到是否RDD是否被检查点
    */
   final def partitions: Array[Partition] = {
+    //检查点RDD
     checkpointRDD.map(_.partitions).getOrElse {
       if (partitions_ == null) {
         partitions_ = getPartitions

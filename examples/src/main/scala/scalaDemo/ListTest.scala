@@ -57,8 +57,9 @@ object ListTest {
    //按字母递增排序
     println("按字母递增排序:"+l2.sortWith(_.compareTo(_) < 0) )  /**/
 
-
-
+    println("list(1):"+List(1))
+    //indices返回所有有效索引值
+    List("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday").indices.map(index =>println(index))
   }
 
 }
