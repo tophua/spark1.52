@@ -859,9 +859,10 @@ private[deploy] class Master(
    * 由于在逻辑分配的时候已经确定了每个Worker分配给Application的核数,并且这些Worker也都满足Application的内存需要
    * 所以可以放心地进行物理分配 了.
    * Allocate a worker's resources to one or more executors.
-   * @param app the info of the application which the executors belong to
-   * @param assignedCores number of cores on this worker for this application
-   * @param coresPerExecutor number of cores per executor
+    * 将一名worker的资源分配给一名或多名executors
+   * @param app the info of the application which the executors belong to 执行者所属的应用程序的信息
+   * @param assignedCores number of cores on this worker for this application 此应用程序的此worker的核心数
+   * @param coresPerExecutor number of cores per executor 每个执行者的核心数
    * @param worker the worker info
    * 
    */
@@ -873,6 +874,8 @@ private[deploy] class Master(
     // If the number of cores per executor is specified, we divide the cores assigned
     // to this worker evenly among the executors with no remainder.
     // Otherwise, we launch a single executor that grabs all the assignedCores on this worker.
+    //如果指定了每个executor的核心数量,我们将分配给此worker的核心在没有余数的执行程序中均匀分配,
+    //否则,我们启动一个executor,抓取这个worker的所有被分配的CORE
     val numExecutors = coresPerExecutor.map { assignedCores / _ }.getOrElse(1)
     val coresToAssign = coresPerExecutor.getOrElse(assignedCores)
     for (i <- 1 to numExecutors) {    

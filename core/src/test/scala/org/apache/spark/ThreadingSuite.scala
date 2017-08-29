@@ -250,6 +250,8 @@ class ThreadingSuite extends SparkFunSuite with LocalSparkContext with Logging {
     * 否则,很难确定测试中哪一行出现错误
    */
   private def improveStackTrace(t: Throwable): Throwable = {
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
+    //getStackTrace()返回一个表示该线程堆栈转储的堆栈跟踪元素数组
     t.setStackTrace(t.getStackTrace ++ Thread.currentThread.getStackTrace)
     t
   }

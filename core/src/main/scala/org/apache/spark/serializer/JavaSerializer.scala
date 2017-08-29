@@ -130,6 +130,7 @@ class JavaSerializer(conf: SparkConf) extends Serializer with Externalizable {
   protected def this() = this(new SparkConf())  // For deserialization only
 
   override def newInstance(): SerializerInstance = {
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val classLoader = defaultClassLoader.getOrElse(Thread.currentThread.getContextClassLoader)
     new JavaSerializerInstance(counterReset, extraDebugInfo, classLoader)
   }

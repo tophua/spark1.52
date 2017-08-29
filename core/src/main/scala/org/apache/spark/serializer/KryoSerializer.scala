@@ -84,7 +84,7 @@ class KryoSerializer(conf: SparkConf)
     val instantiator = new EmptyScalaKryoInstantiator
     val kryo = instantiator.newKryo()
     kryo.setRegistrationRequired(registrationRequired)
-
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val oldClassLoader = Thread.currentThread.getContextClassLoader
     val classLoader = defaultClassLoader.getOrElse(Thread.currentThread.getContextClassLoader)
 
@@ -116,6 +116,7 @@ class KryoSerializer(conf: SparkConf)
       // scalastyle:off classforname
       // Use the default classloader when calling the user registrator.
       //调用用户注册器时使用默认的类加载器
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread.setContextClassLoader(classLoader)
       // Register classes given through spark.kryo.classesToRegister.
       classesToRegister
@@ -130,6 +131,7 @@ class KryoSerializer(conf: SparkConf)
       case e: Exception =>
         throw new SparkException(s"Failed to register classes with Kryo", e)
     } finally {
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread.setContextClassLoader(oldClassLoader)
     }
 

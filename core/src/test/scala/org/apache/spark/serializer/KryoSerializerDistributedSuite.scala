@@ -39,6 +39,7 @@ class KryoSerializerDistributedSuite extends SparkFunSuite {
    // val sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
 
     val sc = new SparkContext("local[*]", "test", conf)
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val original = Thread.currentThread.getContextClassLoader
     val loader = new java.net.URLClassLoader(Array(jar), Utils.getContextOrSparkClassLoader)
     SparkEnv.get.serializer.setDefaultClassLoader(loader)
@@ -63,6 +64,7 @@ object KryoDistributedTest {
 
   class AppJarRegistrator extends KryoRegistrator {
     override def registerClasses(k: Kryo) {
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       val classLoader = Thread.currentThread.getContextClassLoader
       // scalastyle:off classforname
       k.register(Class.forName(AppJarRegistrator.customClassName, true, classLoader))

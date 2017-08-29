@@ -191,14 +191,17 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
 
   test("object files of classes from a JAR") {//从一个Jar中的类对象文件
     // scalastyle:off classforname
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val original = Thread.currentThread().getContextClassLoader
     val className = "FileSuiteObjectFileTest"
     val jar = TestUtils.createJarWithClasses(Seq(className))
     val loader = new java.net.URLClassLoader(Array(jar), Utils.getContextOrSparkClassLoader)
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     Thread.currentThread().setContextClassLoader(loader)
     try {
       sc = new SparkContext("local", "test")
       val objs = sc.makeRDD(1 to 3).map { x =>
+        //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
         val loader = Thread.currentThread().getContextClassLoader
         Class.forName(className, true, loader).newInstance()
       }
@@ -211,6 +214,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
       assert(output.collect().head.getClass.getName === className)
     }
     finally {
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread().setContextClassLoader(original)
     }
     // scalastyle:on classforname

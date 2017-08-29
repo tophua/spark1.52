@@ -21,9 +21,11 @@ class TaskWithResultCoallbleImple implements Callable<String> {
      * @throws Exception
      */
     public String call() throws Exception {
+        //Thread.currentThread()可以获取当前线程的引用
         System.out.println("call()方法被自动调用,干活！！！ " + Thread.currentThread().getName());
         //一个模拟耗时的操作
         for (int i = 999999; i > 0; i--) ;
+        //Thread.currentThread()可以获取当前线程的引用
         return"call()方法被自动调用，任务的结果是：" + id + "    " + Thread.currentThread().getName();
     }
 }

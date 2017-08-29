@@ -563,6 +563,7 @@ private class BoxingFinder(
         } else {
           // scalastyle:off classforname
           val classOfMethodOwner = Class.forName(owner.replace('/', '.'), false,
+            //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
             Thread.currentThread.getContextClassLoader)
           // scalastyle:on classforname
           val m = MethodIdentifier(classOfMethodOwner, name, desc)

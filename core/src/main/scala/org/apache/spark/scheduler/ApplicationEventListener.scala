@@ -26,6 +26,7 @@ package org.apache.spark.scheduler
   * 这个听众只希望监听到来自单个应用程序的事件,如果看到来自多个应用程序的事件,则该行为是未指定的。
  */
 private[spark] class ApplicationEventListener extends SparkListener {
+  //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
   var appName: Option[String] = None
   var appId: Option[String] = None
   var appAttemptId: Option[String] = None

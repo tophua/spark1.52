@@ -62,12 +62,14 @@ private[spark] class CoarseGrainedExecutorBackend(
 
   // If this CoarseGrainedExecutorBackend is changed to support multiple threads, then this may need
   // to be changed so that we don't share the serializer instance across threads
+  //如果这个CoarseGrainedExecutorBackend更改为支持多个线程,那么这可能需要更改,这样我们不会跨线程共享序列化器实例
   private[this] val ser: SerializerInstance = env.closureSerializer.newInstance()
 
   override def onStart() {
     logInfo("Connecting to driver: " + driverUrl)
     rpcEnv.asyncSetupEndpointRefByURI(driverUrl).flatMap { ref =>
       // This is a very fast action so we can use "ThreadUtils.sameThread"
+      //这是一个很快的动作,所以我们可以使用“ThreadUtils.sameThread”
       driver = Some(ref)
       /**
        * 主要向DriverAction发送RegisterExecutor消息,DriverActor接到RegisterExecutor消息后处理步骤:

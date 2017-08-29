@@ -26,6 +26,7 @@ class ParquetProtobufCompatibilitySuite extends ParquetCompatibilityTest with Sh
   //读Parquet protobuf文件
   private def readParquetProtobufFile(name: String): DataFrame = {
     //println("========="+name)
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val url = Thread.currentThread().getContextClassLoader.getResource(name)    
     //println("===="+url)
     sqlContext.read.parquet(url.toString)

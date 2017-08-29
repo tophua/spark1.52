@@ -35,6 +35,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
     @volatile var threadName = ""
     executor.submit(new Runnable {
       override def run(): Unit = {
+        //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
         threadName = Thread.currentThread().getName()
       }
     })
@@ -52,6 +53,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
       @volatile var threadName = ""
       executor.schedule(new Runnable {
         override def run(): Unit = {
+          //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
           threadName = Thread.currentThread().getName()
           latch.countDown()
         }
@@ -109,6 +111,7 @@ class ThreadUtilsSuite extends SparkFunSuite {
   }
 
   test("sameThread") {//同一个线程
+  //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val callerThreadName = Thread.currentThread().getName()
     //ScalaTest-run-running-ThreadUtilsSuite
     println("sameThread:"+callerThreadName)
@@ -122,11 +125,14 @@ class ThreadUtilsSuite extends SparkFunSuite {
 
   test("runInNewThread") {//运行新的线程
     import ThreadUtils._
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val test=runInNewThread("thread-name") { Thread.currentThread().getName  }
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     println("runInNewThrea:"+test+"==="+Thread.currentThread().getName )
     assert(runInNewThread("thread-name") { Thread.currentThread().getName } === "thread-name")
     assert(runInNewThread("thread-name") { Thread.currentThread().isDaemon } === true)//是否守护线程
     assert(
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       runInNewThread("thread-name", isDaemon = false) { Thread.currentThread().isDaemon } === false
     )
     val uniqueExceptionMessage = "test" + Random.nextInt()

@@ -123,7 +123,7 @@ private[spark] class Executor(
 
   // Akka's message frame size. If task result is bigger than this, we use the block manager
   // to send the result back.
-  //Akka的消息帧大小,如果任务结果大于此,我们使用块管理器将结果发送回来。
+  //Akka的消息帧大小,如果任务结果大于此,我们使用块管理器将结果发送回来
   //Akka发送消息的帧大小
   private val akkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)
   //限制结果总大小的字节数(默认为1GB）
@@ -203,7 +203,7 @@ private[spark] class Executor(
     /**
      * The task to run. This will be set in run() by deserializing the task binary coming
      * from the driver. Once it is set, it will never be changed.
-      * 他的运行任务,这将通过反序列化来自驱动程序的任务二进制文件在run（）中设置,一旦设置,它将永远不会改变,
+      * 他的运行任务,这将通过反序列化来自驱动程序的任务二进制文件在run()中设置,一旦设置,它将永远不会改变,
      */
     @volatile var task: Task[Any] = _
 
@@ -220,7 +220,8 @@ private[spark] class Executor(
       val taskMemoryManager = new TaskMemoryManager(env.executorMemoryManager)
       //记录反序列化时间  
       val deserializeStartTime = System.currentTimeMillis()
-      //加载具体类时需要用到ClassLoader  
+      //加载具体类时需要用到ClassLoader
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread.setContextClassLoader(replClassLoader)
       //创建序列化器  
       val ser = env.closureSerializer.newInstance()
@@ -237,6 +238,7 @@ private[spark] class Executor(
         //下载Task运行缺少的依赖
         updateDependencies(taskFiles, taskJars)
         //反序列化为Task实例
+        //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
         task = ser.deserialize[Task[Any]](taskBytes, Thread.currentThread.getContextClassLoader)
         //设置Task运行时的MemoryManager  
         task.setTaskMemoryManager(taskMemoryManager)
@@ -506,13 +508,13 @@ private[spark] class Executor(
 
   /** 
    *  Reports heartbeat and metrics for active tasks to the driver. 
-   *  报告心跳和测量活动任务到Driver。
+   *  报告心跳和测量活动任务到Driver
    **/
   private def reportHeartBeat(): Unit = {
     // list of (task id, metrics) to send back to the driver
-    //发送任务列表
+    //(任务ID,指标)列表发送回驱动程序
     val tasksMetrics = new ArrayBuffer[(Long, TaskMetrics)]()
-    val curGCTime = computeTotalGcTime()//
+    val curGCTime = computeTotalGcTime()
     
     for (taskRunner <- runningTasks.values()) {
       if (taskRunner.task != null) {

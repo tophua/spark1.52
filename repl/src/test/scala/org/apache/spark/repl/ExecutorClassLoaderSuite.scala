@@ -143,6 +143,7 @@ class ExecutorClassLoaderSuite
       // in order to expose thread or connection leaks
       //这里的尝试次数应该远大于Jetty的线程/连接限制,以暴露线程或连接泄漏
       for (i <- 1 to 1000) {
+        //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
         if (Thread.currentThread().isInterrupted) {
           throw new InterruptedException()
         }

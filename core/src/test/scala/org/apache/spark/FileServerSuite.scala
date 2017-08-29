@@ -137,6 +137,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     sc.addJar(tmpJarUrl)
     val testData = Array((1, 1))
     sc.parallelize(testData).foreach { x =>
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       if (Thread.currentThread.getContextClassLoader.getResource("FileServerSuite.txt") == null) {
         throw new SparkException("jar not added")
       }
@@ -164,6 +165,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     sc.addJar(tmpJarUrl)
     val testData = Array((1, 1))
     sc.parallelize(testData).foreach { x =>
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       if (Thread.currentThread.getContextClassLoader.getResource("FileServerSuite.txt") == null) {
         throw new SparkException("jar not added")
       }
@@ -177,6 +179,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     sc.addJar(tmpJarUrl.replace("file", "local"))
     val testData = Array((1, 1))
     sc.parallelize(testData).foreach { x =>
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       if (Thread.currentThread.getContextClassLoader.getResource("FileServerSuite.txt") == null) {
         throw new SparkException("jar not added")
       }

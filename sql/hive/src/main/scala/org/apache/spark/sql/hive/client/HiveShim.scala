@@ -190,6 +190,7 @@ private[client] class Shim_v0_12 extends Shim with Logging {
     // the conf of the SessionState. So, for this Hive 0.12 shim, we add the same
     // behavior and make shim.setCurrentSessionState of all Hive versions have the
     // consistent behavior.
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     Thread.currentThread().setContextClassLoader(state.getConf.getClassLoader)
     startMethod.invoke(null, state)
   }

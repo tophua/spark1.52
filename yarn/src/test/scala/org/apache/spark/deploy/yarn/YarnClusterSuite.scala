@@ -441,6 +441,7 @@ private object YarnClasspathTest extends Logging {
   private def readResource(resultPath: String): Unit = {
     var result = "failure"
     try {
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       val ccl = Thread.currentThread().getContextClassLoader()
       val resource = ccl.getResourceAsStream("test.resource")
       val bytes = ByteStreams.toByteArray(resource)

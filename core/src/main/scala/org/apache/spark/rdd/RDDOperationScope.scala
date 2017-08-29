@@ -114,6 +114,8 @@ private[spark] object RDDOperationScope extends Logging {
       sc: SparkContext,
       allowNesting: Boolean = false)(body: => T): T = {
     val ourMethodName = "withScope"
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
+    //getStackTrace()返回一个表示该线程堆栈转储的堆栈跟踪元素数组
     val callerMethodName = Thread.currentThread.getStackTrace()
       .dropWhile(_.getMethodName != ourMethodName)//从左向右丢弃元素,直到条件p不成立
       .find(_.getMethodName != ourMethodName)

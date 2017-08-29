@@ -732,6 +732,7 @@ class DAGScheduler(
           (waiter.jobId, callSite.shortForm, (System.nanoTime - start) / 1e9))
         // SPARK-8644: Include user stack trace in exceptions coming from DAGScheduler.
         //在来自DAGScheduler的异常中包含用户堆栈跟踪
+        //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
         val callerStackTrace = Thread.currentThread().getStackTrace.tail
         exception.setStackTrace(exception.getStackTrace ++ callerStackTrace)
         throw exception

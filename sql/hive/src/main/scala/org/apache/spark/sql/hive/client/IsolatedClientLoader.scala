@@ -116,6 +116,7 @@ private[hive] class IsolatedClientLoader(
     val config: Map[String, String] = Map.empty,
     val isolationOn: Boolean = true,
     val rootClassLoader: ClassLoader = ClassLoader.getSystemClassLoader.getParent.getParent,
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val baseClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader,
     val sharedPrefixes: Seq[String] = Seq.empty,
     val barrierPrefixes: Seq[String] = Seq.empty)
@@ -173,6 +174,7 @@ private[hive] class IsolatedClientLoader(
 
   // Pre-reflective instantiation setup.
   logDebug("Initializing the logger to avoid disaster...")
+  //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
   Thread.currentThread.setContextClassLoader(classLoader)
 
   /** The isolated client interface to Hive. */
@@ -194,6 +196,7 @@ private[hive] class IsolatedClientLoader(
         throw e
       }
   } finally {
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     Thread.currentThread.setContextClassLoader(baseClassLoader)
   }
 }

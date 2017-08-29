@@ -157,6 +157,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
   //简单的命令
   test("Simple commands") {
     val dataFilePath =
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread().getContextClassLoader.getResource("data/files/small_kv.txt")
 
     runCliWithin(3.minute)(
@@ -206,6 +207,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
         .mkString(File.separator)
 
     val dataFilePath =
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread().getContextClassLoader.getResource("data/files/small_kv.txt")
 
     runCliWithin(3.minute, Seq("--jars", s"$jarFile"))(

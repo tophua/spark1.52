@@ -266,6 +266,7 @@ final class UnsafeShuffleExternalSorter {
   @VisibleForTesting
   void spill() throws IOException {
     logger.info("Thread {} spilling sort data of {} to disk ({} {} so far)",
+            //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread().getId(),
       Utils.bytesToString(getMemoryUsage()),
       spills.size(),

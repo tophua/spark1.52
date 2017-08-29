@@ -724,11 +724,14 @@ object SparkSubmit {
     val loader =
       if (sysProps.getOrElse("spark.driver.userClassPathFirst", "false").toBoolean) {
         new ChildFirstURLClassLoader(new Array[URL](0),
+          //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
           Thread.currentThread.getContextClassLoader)
       } else {
         new MutableURLClassLoader(new Array[URL](0),
+          //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
           Thread.currentThread.getContextClassLoader)
       }
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     Thread.currentThread.setContextClassLoader(loader)
 
     for (jar <- childClasspath) {

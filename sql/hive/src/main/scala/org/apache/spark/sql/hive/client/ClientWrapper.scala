@@ -147,8 +147,10 @@ private[hive] class ClientWrapper(
 
   // Create an internal session state for this ClientWrapper.
   val state = {
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val original = Thread.currentThread().getContextClassLoader
     // Switch to the initClassLoader.
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     Thread.currentThread().setContextClassLoader(initClassLoader)
 
     // Set up kerberos credentials for UserGroupInformation.loginUser within
@@ -198,6 +200,7 @@ private[hive] class ClientWrapper(
         oldState
       }
     } finally {
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread().setContextClassLoader(original)
     }
     ret
@@ -268,6 +271,7 @@ private[hive] class ClientWrapper(
    * Runs `f` with ThreadLocal session state and classloaders configured for this version of hive.
    */
   def withHiveState[A](f: => A): A = retryLocked {
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val original = Thread.currentThread().getContextClassLoader
     // Set the thread local metastore client to the client associated with this ClientWrapper.
     Hive.set(client)
@@ -276,6 +280,7 @@ private[hive] class ClientWrapper(
     // thread.
     shim.setCurrentSessionState(state)
     val ret = try f finally {
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread().setContextClassLoader(original)
     }
     ret

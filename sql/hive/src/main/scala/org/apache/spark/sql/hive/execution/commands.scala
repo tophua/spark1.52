@@ -105,6 +105,7 @@ case class AddJar(path: String) extends RunnableCommand {
     }
 
     val newClassLoader = new java.net.URLClassLoader(Array(jarURL), currentClassLoader)
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     Thread.currentThread.setContextClassLoader(newClassLoader)
     // We need to explicitly set the class loader associated with the conf in executionHive's
     // state because this class loader will be used as the context class loader of the current

@@ -44,7 +44,7 @@ object DriverWrapper {
         val rpcEnv = RpcEnv.create("Driver",
           Utils.localHostName(), 0, conf, new SecurityManager(conf))
         rpcEnv.setupEndpoint("workerWatcher", new WorkerWatcher(rpcEnv, workerUrl))
-
+        //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
         val currentLoader = Thread.currentThread.getContextClassLoader
         val userJarUrl = new File(userJar).toURI().toURL()
         val loader =
@@ -53,6 +53,7 @@ object DriverWrapper {
           } else {
             new MutableURLClassLoader(Array(userJarUrl), currentLoader)
           }
+        //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
         Thread.currentThread.setContextClassLoader(loader)
 
         // Delegate to supplied main class

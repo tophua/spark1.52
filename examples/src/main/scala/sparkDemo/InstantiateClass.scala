@@ -60,9 +60,11 @@ object InstantiateClass extends App with Logging {
     // scalastyle:on classforname
   }
   def getContextOrSparkClassLoader: ClassLoader = {
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val ContextClassLoader=Thread.currentThread().getContextClassLoader
 
     logInfo(s"ContextClassLoader: ${ContextClassLoader}")
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
   Option(Thread.currentThread().getContextClassLoader).getOrElse(getSparkClassLoader)
 }
   def getSparkClassLoader: ClassLoader ={

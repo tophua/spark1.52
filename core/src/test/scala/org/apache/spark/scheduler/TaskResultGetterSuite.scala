@@ -165,12 +165,14 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
 
     // ensure we reset the classloader after the test completes
     //确保我们的类加载器测试完成后复位
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val originalClassLoader = Thread.currentThread.getContextClassLoader
     try {
       // load the exception from the jar
       //加载jar抛出异常
       val loader = new MutableURLClassLoader(new Array[URL](0), originalClassLoader)
       loader.addURL(jarFile.toURI.toURL)
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread().setContextClassLoader(loader)
       val excClass: Class[_] = Utils.classForName("repro.MyException")
 
@@ -196,6 +198,7 @@ class TaskResultGetterSuite extends SparkFunSuite with BeforeAndAfter with Local
       assert(expectedFailure.findFirstMatchIn(exceptionMessage).isDefined)
       assert(unknownFailure.findFirstMatchIn(exceptionMessage).isEmpty)
     } finally {
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread.setContextClassLoader(originalClassLoader)
     }
   }

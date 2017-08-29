@@ -66,6 +66,7 @@ private[spark] class MesosSchedulerBackend(
   @volatile var appId: String = _
 
   override def start() {
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     classLoader = Thread.currentThread.getContextClassLoader
     val driver = createSchedulerDriver(
       master, MesosSchedulerBackend.this, sc.sparkUser, sc.appName, sc.conf)
@@ -179,11 +180,13 @@ private[spark] class MesosSchedulerBackend(
   }
 
   private def inClassLoader()(fun: => Unit) = {
+    //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val oldClassLoader = Thread.currentThread.getContextClassLoader
     Thread.currentThread.setContextClassLoader(classLoader)
     try {
       fun
     } finally {
+      //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
       Thread.currentThread.setContextClassLoader(oldClassLoader)
     }
   }

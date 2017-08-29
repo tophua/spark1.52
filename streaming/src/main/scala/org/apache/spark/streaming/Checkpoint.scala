@@ -167,6 +167,7 @@ object Checkpoint extends Logging {
       //这是一个众所周知的java的问题,已经出现在其他地方
       val zis = compressionCodec.compressedInputStream(inputStream)
       ois = new ObjectInputStreamWithLoader(zis,
+        //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
         Thread.currentThread().getContextClassLoader)
       val cp = ois.readObject.asInstanceOf[Checkpoint]
       cp.validate()
