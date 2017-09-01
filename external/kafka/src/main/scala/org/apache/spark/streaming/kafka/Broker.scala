@@ -21,7 +21,9 @@ import org.apache.spark.annotation.Experimental
 
 /**
  * Represents the host and port info for a Kafka broker.
+  * 代表Kafka broker的主机和端口信息
  * Differs from the Kafka project's internal kafka.cluster.Broker, which contains a server ID.
+  * 不同于Kafka项目的内部kafka.cluster.Broker,其中包含服务器ID
  */
 final class Broker private(
     /** Broker's hostname */
@@ -47,6 +49,7 @@ final class Broker private(
 /**
  * :: Experimental ::
  * Companion object that provides methods to create instances of [[Broker]].
+  * Companion对象提供了创建[[Broker]]实例的方法
  */
 @Experimental
 object Broker {

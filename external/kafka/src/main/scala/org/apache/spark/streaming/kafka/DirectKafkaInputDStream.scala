@@ -72,6 +72,7 @@ class DirectKafkaInputDStream[
     "spark.streaming.kafka.maxRetries", 1)
 
   // Keep this consistent with how other streams are named (e.g. "Flume polling stream [2]")
+  //保持与其他流被命名的一致(例如“Flume polling stream [2]”)
   private[streaming] override def name: String = s"Kafka direct stream [$id]"
 
   protected[streaming] override val checkpointData =
@@ -80,6 +81,7 @@ class DirectKafkaInputDStream[
 
   /**
    * Asynchronously maintains & sends new rate limits to the receiver through the receiver tracker.
+    * 通过接收器跟踪器异步维护并向接收器发送新的速率限制
    */
   override protected[streaming] val rateController: Option[RateController] = {
     if (RateController.isBackPressureEnabled(ssc.conf)) {
@@ -122,6 +124,7 @@ class DirectKafkaInputDStream[
   protected final def latestLeaderOffsets(retries: Int): Map[TopicAndPartition, LeaderOffset] = {
     val o = kc.getLatestLeaderOffsets(currentOffsets.keySet)
     // Either.fold would confuse @tailrec, do it manually
+    //Either.fold会混淆@tailrec,手动执行
     if (o.isLeft) {
       val err = o.left.get.toString
       if (retries <= 0) {
@@ -137,6 +140,7 @@ class DirectKafkaInputDStream[
   }
 
   // limits the maximum number of messages per partition
+  //限制每个分区的最大消息数
   protected def clamp(
     leaderOffsets: Map[TopicAndPartition, LeaderOffset]): Map[TopicAndPartition, LeaderOffset] = {
     maxMessagesPerPartition.map { mmp =>
@@ -152,18 +156,21 @@ class DirectKafkaInputDStream[
       context.sparkContext, kafkaParams, currentOffsets, untilOffsets, messageHandler)
 
     // Report the record number and metadata of this batch interval to InputInfoTracker.
+    //将此批次间隔的记录编号和元数据报告给InputInfoTracker
     val offsetRanges = currentOffsets.map { case (tp, fo) =>
       val uo = untilOffsets(tp)
       OffsetRange(tp.topic, tp.partition, fo, uo.offset)
     }
     val description = offsetRanges.filter { offsetRange =>
       // Don't display empty ranges.
+      //不要显示空范围
       offsetRange.fromOffset != offsetRange.untilOffset
     }.map { offsetRange =>
       s"topic: ${offsetRange.topic}\tpartition: ${offsetRange.partition}\t" +
         s"offsets: ${offsetRange.fromOffset} to ${offsetRange.untilOffset}"
     }.mkString("\n")
     // Copy offsetRanges to immutable.List to prevent from being modified by the user
+    //将offsetRanges复制到immutable.List以防止被用户修改
     val metadata = Map(
       "offsets" -> offsetRanges.toList,
       StreamInputInfo.METADATA_KEY_DESCRIPTION -> description)
@@ -198,6 +205,7 @@ class DirectKafkaInputDStream[
 
     override def restore() {
       // this is assuming that the topics don't change during execution, which is true currently
+      //这是假设主题在执行期间没有改变,这是正确的
       val topics = fromOffsets.keySet
       val leaders = KafkaCluster.checkErrors(kc.findLeaders(topics))
 
@@ -211,6 +219,7 @@ class DirectKafkaInputDStream[
 
   /**
    * A RateController to retrieve the rate from RateEstimator.
+    * RateController从RateEstimator检索速率
    */
   private[streaming] class DirectKafkaRateController(id: Int, estimator: RateEstimator)
     extends RateController(id, estimator) {

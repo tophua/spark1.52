@@ -37,10 +37,11 @@ trait HasOffsetRanges {
 /**
  * Represents a range of offsets from a single Kafka TopicAndPartition. Instances of this class
  * can be created with `OffsetRange.create()`.
- * @param topic Kafka topic name
- * @param partition Kafka partition id
- * @param fromOffset Inclusive starting offset
- * @param untilOffset Exclusive ending offset
+  * 代表单个Kafka TopicAndPartition的一系列偏移量,这个类的实例可以用“OffsetRange.create()创建
+ * @param topic Kafka topic name 卡夫卡主题名称
+ * @param partition Kafka partition id Kafka分区ID
+ * @param fromOffset Inclusive starting offset 包含起始偏移
+ * @param untilOffset Exclusive ending offset 不包含结束偏移
  */
 final class OffsetRange private(
     val topic: String,
@@ -49,10 +50,12 @@ final class OffsetRange private(
     val untilOffset: Long) extends Serializable {
   import OffsetRange.OffsetRangeTuple
 
-  /** Kafka TopicAndPartition object, for convenience */
+  /** Kafka TopicAndPartition object, for convenience
+    * Kafka TopicAndPartition对象,方便*/
   def topicAndPartition(): TopicAndPartition = TopicAndPartition(topic, partition)
 
-  /** Number of messages this OffsetRange refers to */
+  /** Number of messages this OffsetRange refers to
+    * OffsetRange引用的消息数 */
   def count(): Long = untilOffset - fromOffset
 
   override def equals(obj: Any): Boolean = obj match {
@@ -72,13 +75,15 @@ final class OffsetRange private(
     s"OffsetRange(topic: '$topic', partition: $partition, range: [$fromOffset -> $untilOffset])"
   }
 
-  /** this is to avoid ClassNotFoundException during checkpoint restore */
+  /** this is to avoid ClassNotFoundException during checkpoint restore
+    * 这是在检查点恢复期间避免ClassNotFoundException*/
   private[streaming]
   def toTuple: OffsetRangeTuple = (topic, partition, fromOffset, untilOffset)
 }
 
 /**
  * Companion object the provides methods to create instances of [[OffsetRange]].
+  * Companion对象提供的方法来创建[[OffsetRange]]的实例
  */
 object OffsetRange {
   def create(topic: String, partition: Int, fromOffset: Long, untilOffset: Long): OffsetRange =
@@ -99,7 +104,8 @@ object OffsetRange {
       untilOffset: Long): OffsetRange =
     new OffsetRange(topicAndPartition.topic, topicAndPartition.partition, fromOffset, untilOffset)
 
-  /** this is to avoid ClassNotFoundException during checkpoint restore */
+  /** this is to avoid ClassNotFoundException during checkpoint restore
+    * 这是在检查点恢复期间避免ClassNotFoundException*/
   private[kafka]
   type OffsetRangeTuple = (String, Int, Long, Long)
 

@@ -360,7 +360,8 @@ private[spark]
 object KafkaCluster {
   type Err = ArrayBuffer[Throwable]
 
-  /** If the result is right, return it, otherwise throw SparkException */
+  /** If the result is right, return it, otherwise throw SparkException
+    * 如果结果正确,返回它,否则抛出SparkException*/
   def checkErrors[T](result: Either[Err, T]): T = {
     result.fold(
       errs => throw new SparkException(errs.mkString("\n")),
@@ -393,9 +394,11 @@ object KafkaCluster {
     /**
      * Make a consumer config without requiring group.id or zookeeper.connect,
      * since communicating with brokers also needs common settings such as timeout
+      * 做一个消费者配置,而不需要group.id或zookeeper.connect,因为与brokers的沟通也需要常见的设置,如超时
      */
     def apply(kafkaParams: Map[String, String]): SimpleConsumerConfig = {
       // These keys are from other pre-existing kafka configs for specifying brokers, accept either
+      //这些密钥来自其他预先存在的kafka配置,用于指定brokers,也可以接受
       val brokers = kafkaParams.get("metadata.broker.list")
         .orElse(kafkaParams.get("bootstrap.servers"))
         .getOrElse(throw new SparkException(
@@ -404,6 +407,7 @@ object KafkaCluster {
       val props = new Properties()
       kafkaParams.foreach { case (key, value) =>
         // prevent warnings on parameters ConsumerConfig doesn't know about
+        //防止对ConsumerConfig不了解的参数的警告
         if (key != "metadata.broker.list" && key != "bootstrap.servers") {
           props.put(key, value)
         }

@@ -34,13 +34,17 @@ import kafka.utils.VerifiableProperties
 
 /**
  * A batch-oriented interface for consuming from Kafka.
+  * 一个面向批次的接口,用于从卡夫卡消费
  * Starting and ending offsets are specified in advance,
  * so that you can control exactly-once semantics.
+  * 提前指定开始和结束偏移,以便您可以精确地控制一次语义
  * @param kafkaParams Kafka <a href="http://kafka.apache.org/documentation.html#configuration">
  * configuration parameters</a>. Requires "metadata.broker.list" or "bootstrap.servers" to be set
  * with Kafka broker(s) specified in host1:port1,host2:port2 form.
  * @param offsetRanges offset ranges that define the Kafka data belonging to this RDD
+  *                     偏移距离定义属于此RDD的卡夫卡数据
  * @param messageHandler function for translating each message into the desired type
+  *                       将每个消息翻译成所需类型的功能
  */
 private[kafka]
 class KafkaRDD[
@@ -84,6 +88,7 @@ class KafkaRDD[
     }
 
     // Determine in advance how many messages need to be taken from each partition
+    //提前确定每个分区需要采取多少个消息
     val parts = nonEmptyPartitions.foldLeft(Map[Int, Int]()) { (result, part) =>
       val remain = num - result.values.sum
       if (remain > 0) {
@@ -158,6 +163,7 @@ class KafkaRDD[
 
     // The idea is to use the provided preferred host, except on task retry atttempts,
     // to minimize number of kafka metadata requests
+    //这个想法是使用提供的首选主机,除了任务重试尝试,以最小化卡夫卡元数据请求的数量
     private def connectLeader: SimpleConsumer = {
       if (context.attemptNumber > 0) {
         kc.connectLeader(part.topic, part.partition).fold(
@@ -181,6 +187,7 @@ class KafkaRDD[
           Thread.sleep(kc.config.refreshLeaderBackoffMs)
         }
         // Let normal rdd retry sort out reconnect attempts
+        //让正常的rdd重试排序重新连接尝试
         throw ErrorMapping.exceptionFor(err)
       }
     }
@@ -192,6 +199,7 @@ class KafkaRDD[
       val resp = consumer.fetch(req)
       handleFetchErr(resp)
       // kafka may return a batch that starts before the requested offset
+      //kafka可能会返回在请求的偏移量之前启动的批次
       resp.messageSet(part.topic, part.partition)
         .iterator
         .dropWhile(_.offset < requestOffset)
@@ -236,11 +244,14 @@ object KafkaRDD {
    * configuration parameters</a>.
    *   Requires "metadata.broker.list" or "bootstrap.servers" to be set with Kafka broker(s),
    *   NOT zookeeper servers, specified in host1:port1,host2:port2 form.
+    *  需要使用Kafka代理设置“metadata.broker.list”或“bootstrap.servers”
+    *   在主机1中指定的不是zookeeper服务器：port1，host2：port2表单。
    * @param fromOffsets per-topic/partition Kafka offsets defining the (inclusive)
-   *  starting point of the batch
+   *  starting point of the batch 每个主题/分区Kafka偏移定义批处理的（包含）起始点
    * @param untilOffsets per-topic/partition Kafka offsets defining the (exclusive)
-   *  ending point of the batch
+   *  ending point of the batch 每个主题/分区Kafka偏移定义批次的（排他）终点
    * @param messageHandler function for translating each message into the desired type
+    *                       将每个消息翻译成所需类型的功能
    */
   def apply[
     K: ClassTag,

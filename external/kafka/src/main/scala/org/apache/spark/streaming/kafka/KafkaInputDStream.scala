@@ -35,12 +35,13 @@ import org.apache.spark.util.ThreadUtils
 
 /**
  * Input stream that pulls messages from a Kafka Broker.
+  * 输入流从卡夫卡Broker提取消息
  *
- * @param kafkaParams Map of kafka configuration parameters.
+ * @param kafkaParams Map of kafka configuration parameters. kafka配置参数映射
  *                    See: http://kafka.apache.org/configuration.html
  * @param topics Map of (topic_name -> numPartitions) to consume. Each partition is consumed
- * in its own thread.
- * @param storageLevel RDD storage level.
+ * in its own thread.(topic_name - > numPartitions)的映射消费,每个分区都在自己的线程中使用
+ * @param storageLevel RDD storage level. RDD存储级别
  */
 private[streaming]
 class KafkaInputDStream[
@@ -75,7 +76,7 @@ class KafkaReceiver[
     storageLevel: StorageLevel
   ) extends Receiver[(K, V)](storageLevel) with Logging {
 
-  // Connection to Kafka
+  // Connection to Kafka 连接到卡夫卡
   var consumerConnector: ConsumerConnector = null
 
   def onStop() {
@@ -90,11 +91,13 @@ class KafkaReceiver[
     logInfo("Starting Kafka Consumer Stream with group: " + kafkaParams("group.id"))
 
     // Kafka connection properties
+    //卡夫卡连接属性
     val props = new Properties()
     kafkaParams.foreach(param => props.put(param._1, param._2))
 
     val zkConnect = kafkaParams("zookeeper.connect")
     // Create the connection to the cluster
+    //创建与集群的连接
     logInfo("Connecting to Zookeeper: " + zkConnect)
     val consumerConfig = new ConsumerConfig(props)
     consumerConnector = Consumer.create(consumerConfig)
@@ -108,6 +111,7 @@ class KafkaReceiver[
       .asInstanceOf[Decoder[V]]
 
     // Create threads for each topic/message Stream we are listening
+    //为每个主题/消息创建线程我们正在监听
     val topicMessageStreams = consumerConnector.createMessageStreams(
       topics, keyDecoder, valueDecoder)
 
@@ -115,15 +119,18 @@ class KafkaReceiver[
       ThreadUtils.newDaemonFixedThreadPool(topics.values.sum, "KafkaMessageHandler")
     try {
       // Start the messages handler for each partition
+      //启动每个分区的消息处理程序
       topicMessageStreams.values.foreach { streams =>
         streams.foreach { stream => executorPool.submit(new MessageHandler(stream)) }
       }
     } finally {
+      //在工作完成后，只需让线程终止
       executorPool.shutdown() // Just causes threads to terminate after work is done
     }
   }
 
   // Handles Kafka messages
+  //处理卡夫卡消息
   private class MessageHandler(stream: KafkaStream[K, V])
     extends Runnable {
     def run() {

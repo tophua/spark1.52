@@ -40,13 +40,15 @@ import org.apache.spark.{SparkContext, SparkException}
 object KafkaUtils {
   /**
    * Create an input stream that pulls messages from Kafka Brokers.
-   * @param ssc       StreamingContext object
-   * @param zkQuorum  Zookeeper quorum (hostname:port,hostname:port,..)
-   * @param groupId   The group id for this consumer
+    * 创建一个从卡夫卡Brokers提取消息的输入流
+   * @param ssc       StreamingContext object StreamingContext对象
+   * @param zkQuorum  Zookeeper quorum (hostname:port,hostname:port,..)Zookeeper quorum（主机名：port，hostname：port，..）
+   * @param groupId   The group id for this consumer 该消费者的组ID
    * @param topics    Map of (topic_name -> numPartitions) to consume. Each partition is consumed
-   *                  in its own thread
+   *                  in its own thread (topic_name - > numPartitions)的映射消费,每个分区都在自己的线程中使用
    * @param storageLevel  Storage level to use for storing the received objects
    *                      (default: StorageLevel.MEMORY_AND_DISK_SER_2)
+    *                     用于存储接收到的对象的存储级别(默认值：StorageLevel.MEMORY_AND_DISK_SER_2)
    */
   def createStream(
       ssc: StreamingContext,
@@ -64,12 +66,15 @@ object KafkaUtils {
 
   /**
    * Create an input stream that pulls messages from Kafka Brokers.
-   * @param ssc         StreamingContext object
-   * @param kafkaParams Map of kafka configuration parameters,
+    * 创建一个从卡夫卡经Brokers提取消息的输入流
+   * @param ssc         StreamingContext object StreamingContext对象
+   * @param kafkaParams Map of kafka configuration parameters,kafka配置参数
    *                    see http://kafka.apache.org/08/configuration.html
    * @param topics      Map of (topic_name -> numPartitions) to consume. Each partition is consumed
    *                    in its own thread.
+    *                   (topic_name - > numPartitions)的映射消费,每个分区都在自己的线程中使用
    * @param storageLevel Storage level to use for storing the received objects
+    *                     用于存储接收到的对象的存储级别
    */
   def createStream[K: ClassTag, V: ClassTag, U <: Decoder[_]: ClassTag, T <: Decoder[_]: ClassTag](
       ssc: StreamingContext,
@@ -84,11 +89,12 @@ object KafkaUtils {
   /**
    * Create an input stream that pulls messages from Kafka Brokers.
    * Storage level of the data will be the default StorageLevel.MEMORY_AND_DISK_SER_2.
-   * @param jssc      JavaStreamingContext object
-   * @param zkQuorum  Zookeeper quorum (hostname:port,hostname:port,..)
-   * @param groupId   The group id for this consumer
+    * 创建从Kafka Brokers提取消息的输入流,数据的存储级别将是默认的StorageLevel.MEMORY_AND_DISK_SER_2
+   * @param jssc      JavaStreamingContext object JavaStreamingContext对象
+   * @param zkQuorum  Zookeeper quorum (hostname:port,hostname:port,..)Zookeeper quorum（主机名：port，hostname：port，..）
+   * @param groupId   The group id for this consumer 该消费者的组ID
    * @param topics    Map of (topic_name -> numPartitions) to consume. Each partition is consumed
-   *                  in its own thread
+   *                  in its own thread,(topic_name - > numPartitions)的映射消费,每个分区都被消耗在自己的线程
    */
   def createStream(
       jssc: JavaStreamingContext,
@@ -101,12 +107,13 @@ object KafkaUtils {
 
   /**
    * Create an input stream that pulls messages from Kafka Brokers.
-   * @param jssc      JavaStreamingContext object
-   * @param zkQuorum  Zookeeper quorum (hostname:port,hostname:port,..).
-   * @param groupId   The group id for this consumer.
+    * 创建一个从卡夫卡Brokers提取消息的输入流
+   * @param jssc      JavaStreamingContext object JavaStreamingContext对象
+   * @param zkQuorum  Zookeeper quorum (hostname:port,hostname:port,..).（主机名：port，hostname：port，..）
+   * @param groupId   The group id for this consumer.该消费者的组ID
    * @param topics    Map of (topic_name -> numPartitions) to consume. Each partition is consumed
-   *                  in its own thread.
-   * @param storageLevel RDD storage level.
+   *                  in its own thread.的映射消费,每个分区都被消耗在自己的线程
+   * @param storageLevel RDD storage level.RDD存储级别
    */
   def createStream(
       jssc: JavaStreamingContext,
@@ -152,7 +159,8 @@ object KafkaUtils {
       jssc.ssc, kafkaParams.toMap, Map(topics.mapValues(_.intValue()).toSeq: _*), storageLevel)
   }
 
-  /** get leaders for the given offset ranges, or throw an exception */
+  /** get leaders for the given offset ranges, or throw an exception
+    * 获得给定偏移范围的领导者,或抛出异常 */
   private def leadersForRanges(
       kc: KafkaCluster,
       offsetRanges: Array[OffsetRange]): Map[TopicAndPartition, (String, Int)] = {
@@ -161,7 +169,8 @@ object KafkaUtils {
     KafkaCluster.checkErrors(leaders)
   }
 
-  /** Make sure offsets are available in kafka, or throw an exception */
+  /** Make sure offsets are available in kafka, or throw an exception
+    * 确保kafka中的偏移量可用,或者抛出异常*/
   private def checkOffsets(
       kc: KafkaCluster,
       offsetRanges: Array[OffsetRange]): Unit = {
@@ -183,14 +192,18 @@ object KafkaUtils {
 
   /**
    * Create a RDD from Kafka using offset ranges for each topic and partition.
+    * 使用每个主题和分区的偏移范围从卡夫卡创建一个RDD
    *
    * @param sc SparkContext object
    * @param kafkaParams Kafka <a href="http://kafka.apache.org/documentation.html#configuration">
    *    configuration parameters</a>. Requires "metadata.broker.list" or "bootstrap.servers"
    *    to be set with Kafka broker(s) (NOT zookeeper servers) specified in
    *    host1:port1,host2:port2 form.
+    *    Kafka配置参数,需要使用host1中指定的Kafka代理(非zookeeper服务器)设置“metadata.broker.list”
+    *    或“bootstrap.servers”：port1，host2：port2表单
    * @param offsetRanges Each OffsetRange in the batch corresponds to a
    *   range of offsets for a given Kafka topic/partition
+    *   批次中的每个OffsetRange对应于给定Kafka主题/分区的一系列偏移量
    */
   def createRDD[
     K: ClassTag,
@@ -212,6 +225,7 @@ object KafkaUtils {
    * Create a RDD from Kafka using offset ranges for each topic and partition. This allows you
    * specify the Kafka leader to connect to (to optimize fetching) and access the message as well
    * as the metadata.
+    * 使用每个主题和分区的偏移范围从卡夫卡创建一个RDD,这允许您指定连接到(以优化提取)和访问消息以及元数据的Kafka领导者
    *
    * @param sc SparkContext object
    * @param kafkaParams Kafka <a href="http://kafka.apache.org/documentation.html#configuration">
@@ -220,9 +234,11 @@ object KafkaUtils {
    *    host1:port1,host2:port2 form.
    * @param offsetRanges Each OffsetRange in the batch corresponds to a
    *   range of offsets for a given Kafka topic/partition
+    *   批次中的每个OffsetRange对应于给定Kafka主题/分区的一系列偏移量
    * @param leaders Kafka brokers for each TopicAndPartition in offsetRanges.  May be an empty map,
    *   in which case leaders will be looked up on the driver.
    * @param messageHandler Function for translating each message and metadata into the desired type
+    *                       将每个消息和元数据转换为所需类型的功能
    */
   def createRDD[
     K: ClassTag,
@@ -241,6 +257,7 @@ object KafkaUtils {
       leadersForRanges(kc, offsetRanges)
     } else {
       // This could be avoided by refactoring KafkaRDD.leaders and KafkaCluster to use Broker
+      //这可以通过重构KafkaRDD.leaders和KafkaCluster来使用Broker来避免
       leaders.map {
         case (tp: TopicAndPartition, Broker(host, port)) => (tp, (host, port))
       }.toMap
@@ -252,6 +269,7 @@ object KafkaUtils {
 
   /**
    * Create a RDD from Kafka using offset ranges for each topic and partition.
+    * 使用每个主题和分区的偏移范围从卡夫卡创建一个RDD
    *
    * @param jsc JavaSparkContext object
    * @param kafkaParams Kafka <a href="http://kafka.apache.org/documentation.html#configuration">
