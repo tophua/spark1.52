@@ -365,6 +365,7 @@ class DirectKafkaStreamSuite
         "didn't get expected number of messages, messages:\n" + allReceived.mkString("\n"))
 
       // Calculate all the record number collected in the StreamingListener.
+      //计算StreamingListener收集的所有记录号
       assert(collector.numRecordsSubmitted.get() === totalSent)
       assert(collector.numRecordsStarted.get() === totalSent)
       assert(collector.numRecordsCompleted.get() === totalSent)
@@ -443,6 +444,7 @@ class DirectKafkaStreamSuite
       eventually(timeout(5.seconds), interval(batchIntervalMilliseconds.milliseconds)) {
         // Assert that rate estimator values are used to determine maxMessagesPerPartition.
         // Funky "-" in message makes the complete assertion message read better.
+        //断言率估计值来确定maxmessagesperpartition,时髦的“-”的消息使完整的断言消息读得更好
         assert(collectedData.exists(_.size == expectedSize),
           s" - No arrays of size $expectedSize for rate $rate found in $dataToString")
       }
