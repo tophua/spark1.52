@@ -153,8 +153,7 @@ private[spark] object SortShuffleWriter {
       numPartitions: Int,
       aggregator: Option[Aggregator[_, _, _]],
       keyOrdering: Option[Ordering[_]]): Boolean = {
-      //用于设置在Reducer的partition数目少于多少的时候,Sort Based Shuffle内部不使用Merge Sort的方式处理数据,
-      //而是直接将每个partition写入单独的文件,这个配置的默认值是200
+    //如果partition数目少于bypassMergeThreshold的值,不需要在Executor执行聚合和排序操作,直接将每个partition写入单独的文件,最后在reduce端再做串联
     val bypassMergeThreshold: Int = conf.getInt("spark.shuffle.sort.bypassMergeThreshold", 200)
     //如果numPartitions小于bypassMergeThreshold,并且没有聚合和排序函数,则不需要在Executor执行聚合和排序操作
     //只需要将各个Partition直接写到Executor的存储文件,最后在reduce端再做串联

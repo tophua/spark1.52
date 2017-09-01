@@ -122,21 +122,21 @@ abstract class RDD[T: ClassTag](
   /**
    * :: DeveloperApi ::
    * Implemented by subclasses to compute a given partition.
-   * 计算给定的分区
+   *  根据提供的任务上下文,计算给定分区的元素
     * RDD里compute()方法,负责接收来自上一个RDD或者数据源的input records
    */
   @DeveloperApi
   def compute(split: Partition, context: TaskContext): Iterator[T]
 
   /**
-   * 返回此RDD中的一组分区,通过子类在RDD返回分区的设置,此方法只调用一次,因此在其中实现耗时的计算是安全的.
+   * 返回RDD中的分区列表,此方法只调用一次,因此在其中实现耗时的计算是安全的.
    * Implemented by subclasses to return the set of partitions in this RDD. This method will only
    * be called once, so it is safe to implement a time-consuming computation in it.
    */
   protected def getPartitions: Array[Partition]
 
   /**
-   * 只计算一次,计算RDD对父RDD的依赖
+   * 只计算一次,返回RDDD的依赖列表
     * 由子类实现,以返回此RDD如何依赖父RDD,这种方法只会被调用一次,所以可以安全地执行耗时的计算。
    * Implemented by subclasses to return how this RDD depends on parent RDDs. This method will only
    * be called once, so it is safe to implement a time-consuming computation in it.
@@ -144,7 +144,7 @@ abstract class RDD[T: ClassTag](
   protected def getDependencies: Seq[Dependency[_]] = deps
 
   /**
-   * 指定优先位置,输入参数是split分片,输出结果是一组优先的节点位置
+   * 给定一个分区,返回该分区的首先位置列表
    * Optionally overridden by subclasses to specify placement preferences.
    */
   protected def getPreferredLocations(split: Partition): Seq[String] = Nil
@@ -152,6 +152,7 @@ abstract class RDD[T: ClassTag](
   /** 
    *  Optionally overridden by subclasses to specify how they are partitioned. 
    *  key-value型的RDD是根据哈希来分区的,控制key分到哪个reduce
+    *  决定RDD如何分区的值,这个值一般为hash或者范围分区
    *  */ 
   @transient val partitioner: Option[Partitioner] = None
 

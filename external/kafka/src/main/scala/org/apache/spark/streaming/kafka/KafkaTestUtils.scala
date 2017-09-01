@@ -43,12 +43,16 @@ import org.apache.spark.{Logging, SparkConf}
 /**
  * This is a helper class for Kafka test suites. This has the functionality to set up
  * and tear down local Kafka servers, and to push data using Kafka producers.
+  *
+  * 这是Kafka测试套件的助手课程,这具有设置和拆除本地Kafka服务器的功能,并使用Kafka生产者推送数据
  *
  * The reason to put Kafka test utility class in src is to test Python related Kafka APIs.
+  * 将Kafka测试实用程序类放在src中的原因是测试Python相关的Kafka API
  */
 private[kafka] class KafkaTestUtils extends Logging {
 
   // Zookeeper related configurations
+  //Zookeeper相关配置
   private val zkHost = "localhost"
   private var zkPort: Int = 0
   private val zkConnectionTimeout = 6000
@@ -59,17 +63,21 @@ private[kafka] class KafkaTestUtils extends Logging {
   private var zkClient: ZkClient = _
 
   // Kafka broker related configurations
+  //卡夫卡经纪相关配置
   private val brokerHost = "localhost"
   private var brokerPort = 9092
   private var brokerConf: KafkaConfig = _
 
   // Kafka broker server
+  //卡夫卡broker服务器
   private var server: KafkaServer = _
 
   // Kafka producer
+  //卡夫卡生产者
   private var producer: Producer[String, String] = _
 
   // Flag to test whether the system is correctly started
+  //标志以测试系统是否正确启动
   private var zkReady = false
   private var brokerReady = false
 
@@ -90,10 +98,12 @@ private[kafka] class KafkaTestUtils extends Logging {
   }
 
   // Set up the Embedded Zookeeper server and get the proper Zookeeper port
+  //设置嵌入式Zookeeper服务器并获得正确的Zookeeper端口
   private def setupEmbeddedZookeeper(): Unit = {
     // Zookeeper server startup
     zookeeper = new EmbeddedZookeeper(s"$zkHost:$zkPort")
     // Get the actual zookeeper binding port
+    //获取实际的zookeeper绑定端口
     zkPort = zookeeper.actualPort
     zkClient = new ZkClient(s"$zkHost:$zkPort", zkSessionTimeout, zkConnectionTimeout,
       ZKStringSerializer)
@@ -105,6 +115,7 @@ private[kafka] class KafkaTestUtils extends Logging {
     assert(zkReady, "Zookeeper should be set up beforehand")
 
     // Kafka broker startup
+    //卡夫卡broker启动
     Utils.startServiceOnPort(brokerPort, port => {
       brokerPort = port
       brokerConf = new KafkaConfig(brokerConfiguration)
@@ -116,13 +127,15 @@ private[kafka] class KafkaTestUtils extends Logging {
     brokerReady = true
   }
 
-  /** setup the whole embedded servers, including Zookeeper and Kafka brokers */
+  /** setup the whole embedded servers, including Zookeeper and Kafka brokers
+    * 设置整个嵌入式服务器，包括Zookeeper和Kafka经纪人 */
   def setup(): Unit = {
     setupEmbeddedZookeeper()
     setupEmbeddedKafkaServer()
   }
 
-  /** Teardown the whole servers, including Kafka broker and Zookeeper */
+  /** Teardown the whole servers, including Kafka broker and Zookeeper
+    * 整个服务器,包括Kafka broker和Zookeeper*/
   def teardown(): Unit = {
     brokerReady = false
     zkReady = false
@@ -150,26 +163,31 @@ private[kafka] class KafkaTestUtils extends Logging {
     }
   }
 
-  /** Create a Kafka topic and wait until it propagated to the whole cluster */
+  /** Create a Kafka topic and wait until it propagated to the whole cluster
+    * 创建一个Kafka主题,等待它传播到整个集群*/
   def createTopic(topic: String): Unit = {
     AdminUtils.createTopic(zkClient, topic, 1, 1)
     // wait until metadata is propagated
+    //等到元数据传播
     waitUntilMetadataIsPropagated(topic, 0)
   }
 
-  /** Java-friendly function for sending messages to the Kafka broker */
+  /** Java-friendly function for sending messages to the Kafka broker
+    * 用于向Kafka代理发送消息的Java友好函数 */
   def sendMessages(topic: String, messageToFreq: JMap[String, JInt]): Unit = {
     import scala.collection.JavaConversions._
     sendMessages(topic, Map(messageToFreq.mapValues(_.intValue()).toSeq: _*))
   }
 
-  /** Send the messages to the Kafka broker */
+  /** Send the messages to the Kafka broker
+    * 发送消息到Kafka broker*/
   def sendMessages(topic: String, messageToFreq: Map[String, Int]): Unit = {
     val messages = messageToFreq.flatMap { case (s, freq) => Seq.fill(freq)(s) }.toArray
     sendMessages(topic, messages)
   }
 
-  /** Send the array of messages to the Kafka broker */
+  /** Send the array of messages to the Kafka broker
+    * 将消息数组发送到Kafka代理*/
   def sendMessages(topic: String, messages: Array[String]): Unit = {
     producer = new Producer[String, String](new ProducerConfig(producerConfiguration))
     producer.send(messages.map { new KeyedMessage[String, String](topic, _ ) }: _*)
@@ -200,6 +218,7 @@ private[kafka] class KafkaTestUtils extends Logging {
 
   // A simplified version of scalatest eventually, rewritten here to avoid adding extra test
   // dependency
+  //最终在这里重写了一个简化版本的scalatest,以避免增加额外的测试依赖性
   def eventually[T](timeout: Time, interval: Time)(func: => T): T = {
     def makeAttempt(): Either[Throwable, T] = {
       try {

@@ -36,7 +36,7 @@ import org.apache.spark.executor.{TaskMetrics, ShuffleWriteMetrics}
 import org.apache.spark.serializer.{SerializerInstance, Serializer, JavaSerializer}
 import org.apache.spark.storage._
 import org.apache.spark.util.Utils
-
+//标记是否传递到reduce端载做合并和排序,即是否直接将各个partition直接写到Executor的存储文件
 class BypassMergeSortShuffleWriterSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   @Mock(answer = RETURNS_SMART_NULLS) private var blockManager: BlockManager = _

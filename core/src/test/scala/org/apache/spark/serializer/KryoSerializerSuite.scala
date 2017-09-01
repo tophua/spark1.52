@@ -378,7 +378,7 @@ class KryoSerializerAutoResetDisabledSuite extends SparkFunSuite with SharedSpar
   conf.set("spark.kryo.registrator", classOf[RegistratorWithoutAutoReset].getName)
   conf.set("spark.kryo.referenceTracking", "true")
   conf.set("spark.shuffle.manager", "sort")
-  //用于设置在Reducer的partition数目少于多少的时候,Sort Based Shuffle内部不使用Merge Sort的方式处理数据,而是直接将每个partition写入单独的文件
+  //如果partition数目少于bypassMergeThreshold的值,不需要在Executor执行聚合和排序操作,直接将每个partition写入单独的文件,最后在reduce端再做串联
   conf.set("spark.shuffle.sort.bypassMergeThreshold", "200")
 
   test("sort-shuffle with bypassMergeSort (SPARK-7873)") {

@@ -35,6 +35,7 @@ class ExternalSorterSuite extends SparkFunSuite with LocalSparkContext {
       conf.set("spark.serializer.objectStreamReset", "1")
       conf.set("spark.serializer", classOf[JavaSerializer].getName)
     }
+    //如果partition数目少于bypassMergeThreshold的值,不需要在Executor执行聚合和排序操作,直接将每个partition写入单独的文件,最后在reduce端再做串联
     conf.set("spark.shuffle.sort.bypassMergeThreshold", "0")
     // Ensure that we actually have multiple batches per spill file
     conf.set("spark.shuffle.spill.batchSize", "10")
