@@ -212,6 +212,7 @@ private[kafka] class KafkaTestUtils extends Logging {
     props.put("metadata.broker.list", brokerAddress)
     props.put("serializer.class", classOf[StringEncoder].getName)
     // wait for all in-sync replicas to ack sends
+    //等待所有同步副本到ACK发送
     props.put("request.required.acks", "-1")
     props
   }
