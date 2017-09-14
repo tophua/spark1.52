@@ -87,7 +87,7 @@ object RecoverableNetworkWordCount {
     //将网络数据中的单词计数统计结果添加到一个文件中
     val outputFile = new File(outputPath)
     if (outputFile.exists()) outputFile.delete()
-    val sparkConf = new SparkConf().setAppName("RecoverableNetworkWordCount")
+    val sparkConf = new SparkConf().setAppName("RecoverableNetworkWordCount").setMaster("local")
     // Create the context with a 1 second batch size
     //创建上下文一个1秒批量大小
     val ssc = new StreamingContext(sparkConf, Seconds(1))
@@ -111,7 +111,7 @@ object RecoverableNetworkWordCount {
   }
 
   def main(args: Array[String]) {
-    if (args.length != 4) {
+/*    if (args.length != 4) {
       System.err.println("You arguments were " + args.mkString("[", ", ", "]"))
       System.err.println(
         """
@@ -126,8 +126,8 @@ object RecoverableNetworkWordCount {
         """.stripMargin
       )
       System.exit(1)
-    }
-    val Array(ip, IntParam(port), checkpointDirectory, outputPath) = args
+    }*/
+    val Array(ip, IntParam(port), checkpointDirectory, outputPath) = Array("localhost","9999","~/checkpoint/","~/out")//args
     /**
      * 如果 checkpointDirectory 目录存在,则context对象会从检查点数据重新构建出来,如果该目录不存在(如:首次运行),
      * 则 functionToCreateContext函数会被调用,创建一个新的StreamingContext对象并定义好DStream数据流
