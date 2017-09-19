@@ -27,6 +27,7 @@ import org.apache.spark.SparkFunSuite
 class KafkaClusterSuite extends SparkFunSuite with BeforeAndAfterAll {
   private val topic = "kcsuitetopic" + Random.nextInt(10000)
   private val topicAndPartition = TopicAndPartition(topic, 0)
+  //
   private var kc: KafkaCluster = null
 
   private var kafkaTestUtils: KafkaTestUtils = _

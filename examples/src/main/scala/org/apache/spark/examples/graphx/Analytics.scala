@@ -32,7 +32,7 @@ import org.apache.spark.graphx.PartitionStrategy._
 object Analytics extends Logging {
 
   def main(args: Array[String]): Unit = {
-    if (args.length < 2) {
+   /* if (args.length >=2) {
       System.err.println(
         "Usage: Analytics <taskType> <file> --numEPart=<num_edge_partitions> [other options]")
       System.err.println("Supported 'taskType' as follows:")
@@ -40,10 +40,10 @@ object Analytics extends Logging {
       System.err.println("  cc          Compute the connected components of vertices")
       System.err.println("  triangles   Count the number of triangles")
       System.exit(1)
-    }
+    }*/
 
-    val taskType = args(0)
-    val fname = args(1)
+    val taskType = "pagerank"///args(0)
+    val fname = "/Users/apple/Documents/idea/workspace/spark1.52/graphx/data/followers.txt"//args(1)
     val optionsList = args.drop(2).map { arg =>
       arg.dropWhile(_ == '-').split('=') match {
         case Array(opt, v) => (opt -> v)
@@ -52,12 +52,12 @@ object Analytics extends Logging {
     }
     val options = mutable.Map(optionsList: _*)
 
-    val conf = new SparkConf()
+    val conf = new SparkConf()//.setMaster("local")
     GraphXUtils.registerKryoClasses(conf)
 
-    val numEPart = options.remove("numEPart").map(_.toInt).getOrElse {
-      println("Set the number of edge partitions using --numEPart.")
-      sys.exit(1)
+    val numEPart = options.remove("numEPart").map(_.toInt).getOrElse {30
+     // println("Set the number of edge partitions using --numEPart.")
+      //sys.exit(1)
     }
     val partitionStrategy: Option[PartitionStrategy] = options.remove("partStrategy")
       .map(PartitionStrategy.fromString(_))
@@ -146,11 +146,11 @@ object Analytics extends Logging {
         println("Triangles: " + triangles.vertices.map {
           case (vid, data) => data.toLong
         }.reduce(_ + _) / 3)
-        sc.stop()
-
+      // sc.stop()
       case _ =>
         println("Invalid task type.")
     }
+
   }
 }
 // scalastyle:on println

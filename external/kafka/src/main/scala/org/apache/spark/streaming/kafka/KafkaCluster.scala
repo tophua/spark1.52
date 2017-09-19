@@ -17,28 +17,33 @@
 
 package org.apache.spark.streaming.kafka
 
-import scala.util.control.NonFatal
-import scala.util.Random
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.JavaConverters._
 import java.util.Properties
+
 import kafka.api._
 import kafka.common.{ErrorMapping, OffsetAndMetadata, OffsetMetadataAndError, TopicAndPartition}
 import kafka.consumer.{ConsumerConfig, SimpleConsumer}
 import org.apache.spark.SparkException
 
+import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
+import scala.util.control.NonFatal
+
 /**
  * Convenience methods for interacting with a Kafka cluster.
+  * 与Kafka集群交互的便利方法
  * @param kafkaParams Kafka <a href="http://kafka.apache.org/documentation.html#configuration">
  * configuration parameters</a>.
  *   Requires "metadata.broker.list" or "bootstrap.servers" to be set with Kafka broker(s),
  *   NOT zookeeper servers, specified in host1:port1,host2:port2 form
+  *   需要使用Kafka代理设置“metadata.broker.list”或“bootstrap.servers”,
+  *   而不是在host1中指定的zookeeper服务器：port1，host2：port2表单
  */
 private[spark]
 class KafkaCluster(val kafkaParams: Map[String, String]) extends Serializable {
   import KafkaCluster.{Err, LeaderOffset, SimpleConsumerConfig}
 
   // ConsumerConfig isn't serializable
+  //ConsumerConfig不可序列化
   @transient private var _config: SimpleConsumerConfig = null
 
   def config: SimpleConsumerConfig = this.synchronized {
@@ -161,6 +166,7 @@ class KafkaCluster(val kafkaParams: Map[String, String]) extends Serializable {
     getLeaderOffsets(topicAndPartitions, before, 1).right.map { r =>
       r.map { kv =>
         // mapValues isnt serializable, see SI-7005
+        //mapValues不可序列化,请参见SI-7005
         kv._1 -> kv._2.head
       }
     }
@@ -222,6 +228,7 @@ class KafkaCluster(val kafkaParams: Map[String, String]) extends Serializable {
   // scalastyle:on
 
   // this 0 here indicates api version, in this case the original ZK backed api.
+  //这个0这里表示api版本,在这种情况下是原来的ZK支持的api。
   private def defaultConsumerApiVersion: Short = 0
 
   /** Requires Kafka >= 0.8.1.1 */
@@ -337,6 +344,7 @@ class KafkaCluster(val kafkaParams: Map[String, String]) extends Serializable {
   }
 
   // Try a call against potentially multiple brokers, accumulating errors
+  //尝试对潜在的多个代理进行调用,累积错误
   private def withBrokers(brokers: Iterable[(String, Int)], errs: Err)
     (fn: SimpleConsumer => Any): Unit = {
     brokers.foreach { hp =>
@@ -376,6 +384,9 @@ object KafkaCluster {
    * High-level kafka consumers connect to ZK.  ConsumerConfig assumes this use case.
    * Simple consumers connect directly to brokers, but need many of the same configs.
    * This subclass won't warn about missing ZK params, or presence of broker params.
+    * 高级kafka消费者连接到ZK,ConsumerConfig假定这个用例,
+    * 简单的消费者直接连接到经纪人，但需要许多相同的配置。
+    * 这个子类不会对缺少ZK参数或者代理参数的存在提出警告。
    */
   private[spark]
   class SimpleConsumerConfig private(brokers: String, originalProps: Properties)
