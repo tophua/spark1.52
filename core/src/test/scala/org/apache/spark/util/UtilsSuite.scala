@@ -790,4 +790,8 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
       conf.set("spark.executor.instances", "0")) === true)
   }
 
+  test("findLocalInetAddress"){
+
+    println("===="+Utils.localHostName)
+  }
 }
