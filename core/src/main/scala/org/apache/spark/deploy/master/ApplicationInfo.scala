@@ -34,7 +34,7 @@ private[spark] class ApplicationInfo(
   val driver: RpcEndpointRef,
   defaultCores: Int)
     extends Serializable {
-  //枚举类型盛名
+  //枚举类型赋值
   @transient var state: ApplicationState.Value = _
   @transient var executors: mutable.HashMap[Int, ExecutorDesc] = _
   @transient var removedExecutors: ArrayBuffer[ExecutorDesc] = _
