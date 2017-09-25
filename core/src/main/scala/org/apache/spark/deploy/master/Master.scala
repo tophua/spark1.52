@@ -141,6 +141,7 @@ private[deploy] class Master(
     throw new SparkException("spark.deploy.defaultCores must be positive")
   }
   // Alternative application submission gateway that is stable across Spark versions
+  //替代应用程序提交rest是稳定的Spark版本
   private val restServerEnabled = conf.getBoolean("spark.master.rest.enabled", true)
   private var restServer: Option[StandaloneRestServer] = None
   private var restServerBoundPort: Option[Int] = None
@@ -347,7 +348,6 @@ private[deploy] class Master(
        * 1)找到占有Executor的Application的ApplicationInfo,以及Executor对应的ExecutorInfo
        * 2)将ExecutorInfo的状态改为Exited
        * 3)Exited也是属于Executor完成状态,所以重新调用schedule给Application进行资源调度
-       * 
        */
       val execOption = idToApp.get(appId).flatMap(app => app.executors.get(execId))
       execOption match {
@@ -608,6 +608,7 @@ private[deploy] class Master(
     // The disconnected client could've been either a worker or an app; remove whichever it was
     //断开连接的客户端可能是worker或应用程序; 删除它是哪个
     logInfo(s"$address got disassociated, removing it.")
+    //注意传递removeWorker方法,不需WorkerInfo参数
     addressToWorker.get(address).foreach(removeWorker)
     addressToApp.get(address).foreach(finishApplication)
     if (state == RecoveryState.RECOVERING && canCompleteRecovery) { completeRecovery() }
@@ -660,6 +661,7 @@ private[deploy] class Master(
  */
   private def completeRecovery() {
     // Ensure "only-once" recovery semantics using a short synchronization period.
+    //使用短同步期确保只“一次”恢复语义
     if (state != RecoveryState.RECOVERING) { return }
     state = RecoveryState.COMPLETING_RECOVERY
     //将所有未响应的Worker和Application删除
@@ -760,7 +762,7 @@ private[deploy] class Master(
         keepScheduling && enoughCores && enoughMemory && underLimit
       } else {
         // We're adding cores to an existing executor, so no need
-	//我们正在向一个存在的执行者添加内核,所以不需要检查内存和执行器限制
+	      //我们正在向一个存在的执行者添加内核,所以不需要检查内存和执行器限制
         // to check memory and executor limits
         //如果Worker上的executor已经存在,可用直接往executor上增加cores
         keepScheduling && enoughCores
@@ -782,9 +784,9 @@ private[deploy] class Master(
           coresToAssign -= minCoresPerExecutor
           assignedCores(pos) += minCoresPerExecutor
            // If we are launching one executor per worker, then every iteration assigns 1 core
-	  //如果是每个Worker下面只能够为当前的应用程序分配一个Executor的话,每次迭代执行者只分配一个内核
+	        //如果是每个Worker下面只能够为当前的应用程序分配一个Executor的话,每次迭代执行者只分配一个内核
           // to the executor. Otherwise, every iteration assigns cores to a new executor.
-	  //否则,每一次迭代将内核分配给一个新的执行者
+	        //否则,每一次迭代将内核分配给一个新的执行者
           if (oneExecutorPerWorker) {
             assignedExecutors(pos) = 1
           } else {

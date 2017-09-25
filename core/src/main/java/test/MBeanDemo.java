@@ -49,10 +49,12 @@ public class MBeanDemo {
         ///
         RuntimeMXBean mxbean = ManagementFactory.getRuntimeMXBean();
         String vendor = mxbean.getVmVendor();
+        System.out.println("====Java 虚拟机的运行时系统====");
         System.out.println("jvm name:" + mxbean.getVmName());
         System.out.println("jvm version:" + mxbean.getVmVersion());
         System.out.println("jvm bootClassPath:" + mxbean.getBootClassPath());
         System.out.println("jvm start time:" + mxbean.getStartTime());
+        System.out.println("jvm LibraryPath:" + mxbean.getLibraryPath());
     }
 
     /**
@@ -61,6 +63,7 @@ public class MBeanDemo {
     public static void showMemoryInfo() {
         MemoryMXBean mem = ManagementFactory.getMemoryMXBean();
         MemoryUsage heap = mem.getHeapMemoryUsage();
+        System.out.println("====Java 虚拟机的内存系统====");
         System.out.println("Heap committed:" + heap.getCommitted() + " init:" + heap.getInit() + " max:"
                 + heap.getMax() + " used:" + heap.getUsed());
     }
@@ -70,6 +73,7 @@ public class MBeanDemo {
      */
     public static void showSystem() {
         OperatingSystemMXBean op = ManagementFactory.getOperatingSystemMXBean();
+        System.out.println("====Java 虚拟机在其上运行的操作系统====");
         System.out.println("Architecture: " + op.getArch());
         System.out.println("Processors: " + op.getAvailableProcessors());
         System.out.println("System name: " + op.getName());
@@ -82,8 +86,9 @@ public class MBeanDemo {
      */
     public static void showClassLoading(){
         ClassLoadingMXBean cl = ManagementFactory.getClassLoadingMXBean();
+        System.out.println("====Java 虚拟机的类加载系统====");
         System.out.println("TotalLoadedClassCount: " + cl.getTotalLoadedClassCount());
-        System.out.println("LoadedClassCount" + cl.getLoadedClassCount());
+        System.out.println("LoadedClassCount:" + cl.getLoadedClassCount());
         System.out.println("UnloadedClassCount:" + cl.getUnloadedClassCount());
     }
 
@@ -92,6 +97,7 @@ public class MBeanDemo {
      */
     public static void showCompilation(){
         CompilationMXBean com = ManagementFactory.getCompilationMXBean();
+        System.out.println("====Java 虚拟机的编译系统====");
         System.out.println("TotalCompilationTime:" + com.getTotalCompilationTime());
         System.out.println("name:" + com.getName());
     }
@@ -101,6 +107,7 @@ public class MBeanDemo {
      */
     public static void showThread(){
         ThreadMXBean thread = ManagementFactory.getThreadMXBean();
+        System.out.println("====Java 虚拟机的线程系统====");
         System.out.println("ThreadCount" + thread.getThreadCount());
         System.out.println("AllThreadIds:" + thread.getAllThreadIds());
         System.out.println("CurrentThreadUserTime" + thread.getCurrentThreadUserTime());
@@ -112,6 +119,7 @@ public class MBeanDemo {
      */
     public static void showGarbageCollector(){
         List<GarbageCollectorMXBean> gc = ManagementFactory.getGarbageCollectorMXBeans();
+        System.out.println("====Java 虚拟机中的垃圾回收器====");
         for(GarbageCollectorMXBean GarbageCollectorMXBean : gc){
             System.out.println("name:" + GarbageCollectorMXBean.getName());
             System.out.println("CollectionCount:" + GarbageCollectorMXBean.getCollectionCount());
@@ -124,6 +132,7 @@ public class MBeanDemo {
      */
     public static void showMemoryManager(){
         List<MemoryManagerMXBean> mm = ManagementFactory.getMemoryManagerMXBeans();
+        System.out.println("====Java 虚拟机中的内存管理器====");
         for(MemoryManagerMXBean eachmm: mm){
             System.out.println("name:" + eachmm.getName());
             System.out.println("MemoryPoolNames:" + eachmm.getMemoryPoolNames().toString());
@@ -135,6 +144,7 @@ public class MBeanDemo {
      */
     public static void showMemoryPool(){
         List<MemoryPoolMXBean> mps = ManagementFactory.getMemoryPoolMXBeans();
+        System.out.println("====Java 虚拟机中的内存池====");
         for(MemoryPoolMXBean mp : mps){
             System.out.println("name:" + mp.getName());
             System.out.println("CollectionUsage:" + mp.getCollectionUsage());

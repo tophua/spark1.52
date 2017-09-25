@@ -275,7 +275,8 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * 在Spark一级目录下创建临时目录,并将目录注册到shutdownDeletePaths = new scala.collection.mutable.HashSet[String]()中   * 
+   * 在Spark一级目录下创建临时目录,并将目录注册到shutdownDeletePaths = new scala.collection.mutable.HashSet[String]()中,
+    * 当VM关闭时,该目录将被自动删除*
    * Create a temporary directory inside the given parent directory. The directory will be
    * automatically deleted when the VM shuts down.
    */
@@ -750,7 +751,7 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * 返回Spark可以写入文件的配置的本地目录,该方法本身并不创建任何目录,只能根据部署模式封装查找本地目录的逻辑。
+   * 返回Spark可以写入文件的配置的本地目录,该方法本身并不创建任何目录,只能根据部署模式封装查找本地目录的逻辑,
    * Return the configured local directories where Spark can write files. This
    * method does not create any directories on its own, it only encapsulates the
    * logic of locating the local directories according to deployment mode.
@@ -829,7 +830,7 @@ private[spark] object Utils extends Logging {
    * Shuffle the elements of a collection into a random order, returning the
    * result in a new collection. Unlike scala.util.Random.shuffle, this method
    * uses a local random number generator, avoiding inter-thread contention.
-    * 将集合的元素随机排列为随机顺序,将结果返回到新集合中, 与scala.util.Random.shuffle不同,
+    * 将集合的元素随机排列为随机顺序,将结果返回到新集合中,与scala.util.Random.shuffle不同,
     * 该方法使用本地随机数生成器,避免了线程间争用。
    */
   def randomize[T: ClassTag](seq: TraversableOnce[T]): Seq[T] = {
@@ -856,6 +857,11 @@ private[spark] object Utils extends Logging {
     * 以虚拟四格格式获取本地主机的IP地址
    * Note, this is typically not used from within core spark.
     * 注意,这通常不在核心Spark中使用
+    * InetAddress类确定特殊IP地址,
+    * isLoopbackAddress方法,当IP地址是loopback地址时返回true，否则返回false.loopback地址就是代表本机的IP地址
+    * isLinkLocalAddress方法 当IP地址是本地连接地址(LinkLocalAddress)时返回true,
+    *   否则返回false.IPv4的本地连接地址的范围是 169.254.0.0 ~ 169.254.255.255.
+    *
     *
    */
   private lazy val localIpAddress: InetAddress = findLocalInetAddress()
@@ -868,6 +874,7 @@ private[spark] object Utils extends Logging {
       InetAddress.getByName(defaultIpOverride)
     } else {
       val address = InetAddress.getLocalHost
+      //当IP地址是loopback地址时返回true，否则返回false.loopback地址就是代表本机的IP地址。IPv4的loopback地址的范围是127.0.0.0 ~ 127.255.255.255，也就是说,只要第一个字节是127
       if (address.isLoopbackAddress) {
         // Address resolves to something like 127.0.1.1, which happens on Debian; try to find
         // a better address using the local network interfaces
@@ -882,12 +889,16 @@ private[spark] object Utils extends Logging {
 
         for (ni <- reOrderedNetworkIFs) {
           val addresses = ni.getInetAddresses.toList
+            //isLinkLocalAddress方法 当IP地址是本地连接地址(LinkLocalAddress)时返回true,
+            //isLoopbackAddress方法,当IP地址是loopback地址时返回true，否则返回false.loopback地址就是代表本机的IP地址
             .filterNot(addr => addr.isLinkLocalAddress || addr.isLoopbackAddress)
-          if (addresses.nonEmpty) {
+          if (addresses.nonEmpty) {//非空
             val addr = addresses.find(_.isInstanceOf[Inet4Address]).getOrElse(addresses.head)
             // because of Inet6Address.toHostName may add interface at the end if it knows about it
+            //因为Inet6Address.toHostName可能会在最后添加接口,如果它知道它
             val strippedAddress = InetAddress.getByAddress(addr.getAddress)
             // We've found an address that looks reasonable!
+            //我们发现一个看起来很合理的地址
             logWarning("Your hostname, " + InetAddress.getLocalHost.getHostName + " resolves to" +
               " a loopback address: " + address.getHostAddress + "; using " +
               strippedAddress.getHostAddress + " instead (on interface " + ni.getName + ")")
@@ -958,8 +969,11 @@ private[spark] object Utils extends Logging {
 
     val indx: Int = hostPort.lastIndexOf(':')
     // This is potentially broken - when dealing with ipv6 addresses for example, sigh ...
+    //这是潜在的破坏 - 当处理ipv6地址，例如叹息...
     // but then hadoop does not support ipv6 right now.
+    //但是现在hadoop不支持ipv6
     // For now, we assume that if port exists, then it is valid - not check if it is an int > 0
+    //现在，我们假设如果端口存在,那么它是有效的 - 不检查它是否是一个int> 0
     if (-1 == indx) {
       val retval = (hostPort, 0)
       hostPortParseResults.put(hostPort, retval)
@@ -967,6 +981,7 @@ private[spark] object Utils extends Logging {
     }
 
     val retval = (hostPort.substring(0, indx).trim(), hostPort.substring(indx + 1).trim().toInt)
+    //如果key存在的情况下,在putIfAbsent下不会修改,而put下则会修改成新的值
     hostPortParseResults.putIfAbsent(hostPort, retval)
     hostPortParseResults.get(hostPort)
   }
@@ -978,7 +993,7 @@ private[spark] object Utils extends Logging {
   def getUsedTimeMs(startTimeMs: Long): String = {
     " " + (System.currentTimeMillis - startTimeMs) + " ms"
   }
-
+  //安全的列出文件
   private def listFilesSafely(file: File): Seq[File] = {
     if (file.exists()) {
       val files = file.listFiles()
@@ -992,12 +1007,12 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * 用于删除文件或删除目录及子目录,子文件,并且从
+   * 用于删除文件或删除目录及子目录,子文件
    * Delete a file or directory and its contents recursively(递归).
    * Don't follow directories if they are symlinks.
    * Throws an exception if deletion is unsuccessful.
-    * 如果他们不按照目录的符号链接
-    *如果删除失败，则引发异常
+    *如果符号链接不符合目录
+    *如果删除失败,则引发异常
    */
   def deleteRecursively(file: File) {
     if (file != null) {
@@ -1080,7 +1095,7 @@ private[spark] object Utils extends Logging {
   /**
    * Convert a time parameter such as (50s, 100ms, or 250us) to microseconds for internal use. If
    * no suffix is provided, the passed number is assumed to be in ms.
-   * 将一个时间参数如（50s,100ms,或250us）以微秒,如果没有任务后缀默认为毫秒
+   * 将一个时间参数如(50s,100ms,或250us)以微秒,如果没有任务后缀默认为毫秒
    */
   def timeStringAsMs(str: String): Long = {
     JavaUtils.timeStringAsMs(str)
@@ -1208,6 +1223,7 @@ private[spark] object Utils extends Logging {
       command: Seq[String],
       workingDir: File = new File("."),
       extraEnvironment: Map[String, String] = Map.empty,
+      //重新导向Stderr
       redirectStderr: Boolean = true): Process = {
     //包含程序及其参数的字符串数组,注意Seq数组的传递方式
     val builder = new ProcessBuilder(command: _*).directory(workingDir)
@@ -1376,6 +1392,9 @@ private[spark] object Utils extends Logging {
    * in `out.write`, it's likely `out` may be corrupted and `out.close` will
    * fail as well. This would then suppress the original/likely more meaningful
    * exception from the original `out.write` call.
+    *
+    * 这主要是`finally {out.close()}`的一个问题,其中close需要被调用来清理`out`,但是如果`out.write`发生异常,
+    * 那么可能`out`可能是损坏，“out.close”也将失败。这将阻止原始的/ out.write调用的原始/可能更有意义的异常。
    */
   def tryWithSafeFinally[T](block: => T)(finallyBlock: => Unit): T = {
     // It would be nice to find a method on Try that did this
@@ -1657,7 +1676,7 @@ private[spark] object Utils extends Logging {
 
   // Handles idiosyncracies with hash (add more as required)
   // This method should be kept in sync with
-  /// /处理的个性与哈希（添加更多的要求）此方法应与
+  // 处理的个性与哈希（添加更多的要求）此方法应与
   // org.apache.spark.network.util.JavaUtils#nonNegativeHash().
   def nonNegativeHash(obj: AnyRef): Int = {
 
@@ -1708,13 +1727,12 @@ private[spark] object Utils extends Logging {
    *  Returns the system properties map that is thread-safe to iterator over. It gets the
     * properties which have been set explicitly, as well as those for which only a default value
     * has been defined.
-    *返回线程安全到迭代器的系统属性Map映射,它获取已被明确设置的属性,以及仅定义了默认值的属性
+    * 返回线程安全到迭代器的系统属性Map映射,它获取已被明确设置的属性,以及仅定义了默认值的属性
     * */
   def getSystemProperties: Map[String, String] = {
     //System.getProperties()可以确定当前的系统属性,返回值是一个Properties;
     val sysProps = for (key <- System.getProperties.stringPropertyNames()) yield
       (key, System.getProperty(key))
-
     sysProps.toMap
   }
 
@@ -1837,7 +1855,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Return a Hadoop FileSystem with the scheme encoded in the given path.
-    * 用给定路径编码的scheme返回Hadoop文件系统。
+    * 用给定路径编码的scheme返回Hadoop文件系统
    */
   def getHadoopFileSystem(path: URI, conf: Configuration): FileSystem = {
     FileSystem.get(path, conf)
@@ -1881,7 +1899,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Indicates whether Spark is currently running unit tests.
-    *
+    * 指示Spark当前是否正在运行单元测试
    */
   def isTesting: Boolean = {
     //System.getenv()和System.getProperties()的区别
@@ -1895,6 +1913,7 @@ private[spark] object Utils extends Logging {
     * 从路径名中剥离目录
    */
   def stripDirectory(path: String): String = {
+    //取得文件名称
     new File(path).getName
   }
 
@@ -1904,6 +1923,7 @@ private[spark] object Utils extends Logging {
     * 等待进程终止至多指定的持续时间,返回进程是否在给定超时后终止。
    */
   def waitForProcess(process: Process, timeoutMs: Long): Boolean = {
+    //终止
     var terminated = false
     val startTime = System.currentTimeMillis
     while (!terminated) {
@@ -1941,7 +1961,7 @@ private[spark] object Utils extends Logging {
    * Execute the given block, logging and re-throwing any uncaught exception. 
    * This is particularly useful for wrapping code that runs in a thread, to ensure
    * that exceptions are printed, and to avoid having to catch Throwable.
-    * 执行给定的块,记录并重新抛出任何未捕获的异常。这对于包装在线程中运行的代码特别有用，以确保打印出异常，并避免不得不捕获Throwable。
+    * 执行给定的块,记录并重新抛出任何未捕获的异常。这对于包装在线程中运行的代码特别有用,以确保打印出异常,并避免不得不捕获Throwable。
    */
   def logUncaughtExceptions[T](f: => T): T = {
     try {
@@ -1984,8 +2004,8 @@ private[spark] object Utils extends Logging {
         true
     }
   }
-  //解释器
 
+  //解释器
   lazy val isInInterpreter: Boolean = {
     try {
       val interpClass = classForName("org.apache.spark.repl.Main")
@@ -2099,7 +2119,7 @@ private[spark] object Utils extends Logging {
     try {
       val properties = new Properties()
       properties.load(inReader)
-      //stringPropertyNames 返回此属性列表中的一组键,键对应的值是字符串,properties(k).trim取出的是值
+      //stringPropertyNames 返回此属性列表中一组的键,键对应的值是字符串,properties(k).trim取出的是值
       properties.stringPropertyNames().map(k => (k, properties(k).trim)).toMap
     } catch {
       case e: IOException =>
@@ -2112,10 +2132,9 @@ private[spark] object Utils extends Logging {
   /** 
    *  Return the path of the default Spark properties file.
    *  返回默认的Spark属性文件的路径
-    *
-   *   */
+   *  */
   //System.getenv()和System.getProperties()的区别
-  //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
+  //System.getenv()返回系统环境变量值,设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
   //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
   def getDefaultPropertiesFile(env: Map[String, String] = sys.env): String = {
     env.get("SPARK_CONF_DIR")
@@ -2129,7 +2148,7 @@ private[spark] object Utils extends Logging {
   /**
    * Return a nice string representation of the exception. It will call "printStackTrace" to
    * recursively generate the stack trace including the exception and its causes.
-   * 返回异常的一个很好的字符串表示形式。 它会调用“printStackTrace”递归生成堆栈跟踪，包括异常及其原因。
+   * 返回异常的一个很好的字符串表示形式,它会调用“printStackTrace”递归生成堆栈跟踪，包括异常及其原因。
    */
   def exceptionString(e: Throwable): String = {
     if (e == null) {
@@ -2151,6 +2170,8 @@ private[spark] object Utils extends Logging {
     // We need to filter out null values here because dumpAllThreads() may return null array
     // elements for threads that are dead / don't exist.
     //我们需要在这里过滤出空值,因为dumpAllThreads()可能会返回null数组元素,因为死线程/不存在的线程。
+    //java使用java.lang.management监视和管理 Java 虚拟机
+    //ThreadMXBean Java 虚拟机线程系统的管理接口
     val threadInfos = ManagementFactory.getThreadMXBean.dumpAllThreads(true, true).filter(_ != null)
     threadInfos.sortBy(_.getThreadId).map { case threadInfo =>
       val stackTrace = threadInfo.getStackTrace.map(_.toString).mkString("\n")
@@ -2203,11 +2224,12 @@ private[spark] object Utils extends Logging {
       startService: Int => (T, Int),
       conf: SparkConf,
       serviceName: String = ""): (T, Int) = {
-
+    //startPort应在1024到65535之间(包括在内),对于随机空闲端口应为0。
     require(startPort == 0 || (1024 <= startPort && startPort < 65536),
       "startPort should be between 1024 and 65535 (inclusive), or 0 for a random free port.")
 
     val serviceString = if (serviceName.isEmpty) "" else s" '$serviceName'"
+    //重试次数
     val maxRetries = portMaxRetries(conf)
     for (offset <- 0 to maxRetries) {
       // Do not increment port if startPort is 0, which is treated as a special port
@@ -2310,7 +2332,7 @@ private[spark] object Utils extends Logging {
 
   // Limit of bytes for total size of results (default is 1GB)
   //如果结果的大小大于1GB,那么直接丢弃,
-   // 可以在spark.driver.maxResultSize设置
+  // 可以在spark.driver.maxResultSize设置
   def getMaxResultSize(conf: SparkConf): Long = {
     memoryStringToMb(conf.get("spark.driver.maxResultSize", "1g")).toLong << 20
   }
@@ -2411,7 +2433,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Split the comma delimited string of master URLs into a list.
-   * 将Master目录以逗号分隔成一个字符串列表。
+   * 将Master目录以逗号分隔成一个字符串列表。解析独立模式主节点URL
    * For instance, "spark://abc,def" becomes [spark://abc, spark://def].
    */
   def parseStandaloneMasterUrls(masterUrls: String): Array[String] = {

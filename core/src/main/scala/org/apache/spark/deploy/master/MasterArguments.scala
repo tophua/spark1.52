@@ -31,7 +31,7 @@ private[master] class MasterArguments(args: Array[String], conf: SparkConf) {
   var propertiesFile: String = null
 
   // Check for settings in environment variables
-  //检查环境变量中的设置
+  // 检查环境变量中的设置
   if (System.getenv("SPARK_MASTER_HOST") != null) {
     host = System.getenv("SPARK_MASTER_HOST")//Master监听地址
   }

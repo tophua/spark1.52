@@ -94,6 +94,7 @@ private[spark] abstract class RestSubmissionServer(
    */
   private def doStart(startPort: Int): (Server, Int) = {
     val server = new Server(new InetSocketAddress(host, startPort))
+    //
     val threadPool = new QueuedThreadPool
     threadPool.setDaemon(true)
     server.setThreadPool(threadPool)
@@ -141,7 +142,7 @@ private[rest] abstract class RestServlet extends HttpServlet with Logging {
 
   /**
    * Return any fields in the client request message that the server does not know about.
-   * 返回服务器不知道的客户端请求消息中的任何字段
+   * 返回服务器未知的客户端请求消息中的任何字段
    *
    * The mechanism for this is to reconstruct the JSON on the server side and compare the
    * 这个机制是重建在服务器端的JSON和比较JSON和一个在客户端生成之间的差异
@@ -193,6 +194,8 @@ private[rest] abstract class RestServlet extends HttpServlet with Logging {
     if (path == null || path.isEmpty) {
       None
     } else {
+      //Seq(1,2,3).headOption
+      //res0: Option[Int] = Some(1)
       path.stripPrefix("/").split("/").headOption.filter(_.nonEmpty)
     }
   }

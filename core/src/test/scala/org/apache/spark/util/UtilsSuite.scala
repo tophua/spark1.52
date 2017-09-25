@@ -17,7 +17,7 @@
 
 package org.apache.spark.util
 
-import java.io.{File, ByteArrayOutputStream, ByteArrayInputStream, FileOutputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, FileOutputStream}
 import java.lang.{Double => JDouble, Float => JFloat}
 import java.net.{BindException, ServerSocket, URI}
 import java.nio.{ByteBuffer, ByteOrder}
@@ -27,13 +27,11 @@ import java.util.Locale
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
-
 import com.google.common.base.Charsets.UTF_8
 import com.google.common.io.Files
-
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-
+import org.apache.hadoop.security.UserGroupInformation
 import org.apache.spark.network.util.ByteUnit
 import org.apache.spark.{Logging, SparkFunSuite}
 import org.apache.spark.SparkConf
@@ -791,7 +789,9 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
   }
 
   test("findLocalInetAddress"){
-
-    println("===="+Utils.localHostName)
+    println("==="+UserGroupInformation.getCurrentUser().getShortUserName())
+    //println("==="+UserGroupInformation.getCurrentUser.getCredentials)
+    println("==="+UserGroupInformation.getCurrentUser.getUserName)
+      println("===="+Utils.localHostName)
   }
 }

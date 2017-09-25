@@ -39,11 +39,11 @@ import org.apache.spark.util.Utils
  * 这[action]可以一个创建,杀死,或者状态,每种类型的请求的HTTP消息发送到下列前缀代表
  * an HTTP message sent to the following prefixes: 	
  *   (1) submit - POST to /submissions/create
- *       提交---POST到/提交/创建
+ *       提交---POST  /submissions/create
  *   (2) kill - POST /submissions/kill/[submissionId]
- *   		 杀死--POST/提交/杀死/
+ *   		 杀死--POST  /submissions/kill/[submissionId]
  *   (3) status - GET /submissions/status/[submissionId]
- *       状态--GET/提交/杀死/
+ *       状态--GET /submissions/status/[submissionId]
  *
  * In the case of (1), parameters are posted in the HTTP body in the form of JSON fields.
  * 情况1,在HTTP以JSON字段的形式参数提交,否则,客户端以网址形式指定参数
@@ -75,7 +75,7 @@ private[spark] class RestSubmissionClient(master: String) extends Logging {
   }
 
   // Set of masters that lost contact with us, used to keep track of
-  //失去了与我们的联系的主人,用于跟踪通讯主节点是否还活着
+  //失去了与我们的联系的masters,用于跟踪通讯主节点是否还活着
   // whether there are masters still alive for us to communicate with
   private val lostMasters = new mutable.HashSet[String]
 
