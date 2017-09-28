@@ -58,7 +58,7 @@ private[spark] class TaskContextImpl(
     onCompleteCallbacks += listener
     this
   }
-
+  //this.type表示当前对象（this)的类型,this指代当前的对象。
   override def addTaskCompletionListener(f: TaskContext => Unit): this.type = {
     onCompleteCallbacks += new TaskCompletionListener {
       override def onTaskCompletion(context: TaskContext): Unit = f(context)

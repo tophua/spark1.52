@@ -396,6 +396,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     def assertResolves(before: String, after: String): Unit = {
       // This should test only single paths
       //测试单一路径
+      //assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验，不成功则抛出 AssertionError 异常
       assume(before.split(",").length === 1)
       // Repeated invocations of resolveURI should yield the same result
       //重复调用ResolveUri应产生相同的结果
@@ -430,6 +431,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
 
   test("resolveURIs with multiple paths") {//解析多个路径的URL
     def assertResolves(before: String, after: String): Unit = {
+      //assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验，不成功则抛出 AssertionError 异常
       assume(before.split(",").length > 1)
       println(before+"====="+Utils.resolveURIs(before))
       assert(Utils.resolveURIs(before) === after)

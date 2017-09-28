@@ -25,6 +25,7 @@ import org.apache.spark.unsafe.memory.MemoryBlock;
 public class BitSetSuite {
 
   private static BitSet createBitSet(int capacity) {
+    //Scala 的参数断言 assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验,不成功则抛出 AssertionError 异常
     assert capacity % 64 == 0;
     return new BitSet(MemoryBlock.fromLongArray(new long[capacity / 64]));
   }
@@ -32,13 +33,16 @@ public class BitSetSuite {
   @Test
   public void basicOps() {
     BitSet bs = createBitSet(64);
+    //Scala 的参数断言 assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验,不成功则抛出 AssertionError 异常
     Assert.assertEquals(64, bs.capacity());
 
     // Make sure the bit set starts empty.
     for (int i = 0; i < bs.capacity(); i++) {
+      //Scala 的参数断言 assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验,不成功则抛出 AssertionError 异常
       Assert.assertFalse(bs.isSet(i));
     }
     // another form of asserting that the bit set is empty
+    //cala 的参数断言 assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验,不成功则抛出 AssertionError 异常
     Assert.assertFalse(bs.anySet());
 
     // Set every bit and check it.

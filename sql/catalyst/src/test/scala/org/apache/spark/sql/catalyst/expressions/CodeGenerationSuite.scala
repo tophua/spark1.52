@@ -62,6 +62,7 @@ class CodeGenerationSuite extends SparkFunSuite with ExpressionEvalHelper {
         StructField("a", dataType, nullable = true) ::
           StructField("b", dataType, nullable = true) :: Nil)
       val maybeDataGenerator = RandomDataGenerator.forType(rowType, nullable = false)
+      //assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验，不成功则抛出 AssertionError 异常
       assume(maybeDataGenerator.isDefined)
       val randGenerator = maybeDataGenerator.get
       val toCatalyst = CatalystTypeConverters.createToCatalystConverter(rowType)

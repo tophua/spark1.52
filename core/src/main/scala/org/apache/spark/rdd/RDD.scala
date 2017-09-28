@@ -1390,6 +1390,7 @@ abstract class RDD[T: ClassTag](
    */
   @Experimental
   def countApproxDistinct(p: Int, sp: Int): Long = withScope {
+    //require() 方法用在对参数的检验上,不通过则抛出 IllegalArgumentException
     require(p >= 4, s"p ($p) must be >= 4")
     require(sp <= 32, s"sp ($sp) must be <= 32")
     require(sp == 0 || p <= sp, s"p ($p) cannot be greater than sp ($sp)")

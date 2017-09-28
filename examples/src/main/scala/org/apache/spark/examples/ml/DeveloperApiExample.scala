@@ -83,6 +83,7 @@ object DeveloperApiExample {
       .map { case Row(features: Vector, label: Double, prediction: Double) =>
         prediction
       }.sum
+    //Scala 的参数断言 assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验,不成功则抛出 AssertionError 异常
     assert(sumPredictions == 0.0,
       "MyLogisticRegression predicted something other than 0, even though all weights are 0!")
 

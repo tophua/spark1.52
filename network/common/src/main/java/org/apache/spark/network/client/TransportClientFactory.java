@@ -226,6 +226,7 @@ public class TransportClientFactory implements Closeable {
 
     TransportClient client = clientRef.get();
     Channel channel = channelRef.get();
+    //Scala 的参数断言 assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验,不成功则抛出 AssertionError 异常
     assert client != null : "Channel future completed successfully with null client";
 
     // Execute any client bootstraps synchronously before marking the Client as successful.

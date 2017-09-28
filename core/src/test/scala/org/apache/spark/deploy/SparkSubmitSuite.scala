@@ -407,6 +407,7 @@ class SparkSubmitSuite
   // TODO(SPARK-9603): Building a package is flaky on Jenkins Maven builds.
   // See https://gist.github.com/shivaram/3a2fecce60768a603dac for a error log
   ignore("correctly builds R packages included in a jar with --packages") {
+    //assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验，不成功则抛出 AssertionError 异常
     assume(RUtils.isRInstalled, "R isn't installed on this machine.")
     val main = MavenCoordinate("my.great.lib", "mylib", "0.1")
     //System.getenv()和System.getProperties()的区别

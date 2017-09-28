@@ -74,6 +74,7 @@ public class ExternalShuffleClient extends ShuffleClient {
   }
 
   protected void checkInit() {
+    //Scala 的参数断言 assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验,不成功则抛出 AssertionError 异常
     assert appId != null : "Called before init()";
   }
 

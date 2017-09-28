@@ -18,6 +18,12 @@ object ThisTypeDemo extends App {
   //食物没有setgrow()这个方法
   rice.setName("zhejiangdami").setAge(4).setgrow()
   println("Rice : " + rice)
+
+  var sumPredictions = 111
+  //===断言、检查
+  assert(sumPredictions == 0.0,
+    "MyLogisticRegression predicted something other than 0, even though all weights are 0!")
+
 }
 
 /**

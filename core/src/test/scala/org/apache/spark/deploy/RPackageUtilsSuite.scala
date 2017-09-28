@@ -81,6 +81,7 @@ class RPackageUtilsSuite extends SparkFunSuite with BeforeAndAfterEach {
   }
 
   test("build an R package from a jar end to end") {
+    //assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验，不成功则抛出 AssertionError 异常
     assume(RUtils.isRInstalled, "R isn't installed on this machine.")
     val deps = Seq(dep1, dep2).mkString(",")
     //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
@@ -99,6 +100,7 @@ class RPackageUtilsSuite extends SparkFunSuite with BeforeAndAfterEach {
   }
 
   test("jars that don't exist are skipped and print warning") {
+    //assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验，不成功则抛出 AssertionError 异常
     assume(RUtils.isRInstalled, "R isn't installed on this machine.")
     val deps = Seq(dep1, dep2).mkString(",")
     //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
@@ -116,6 +118,7 @@ class RPackageUtilsSuite extends SparkFunSuite with BeforeAndAfterEach {
   }
 
   test("faulty R package shows documentation") {
+    //assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验，不成功则抛出 AssertionError 异常
     assume(RUtils.isRInstalled, "R isn't installed on this machine.")
     //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
     IvyTestUtils.withRepository(main, None, None) { repo =>
