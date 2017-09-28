@@ -36,7 +36,7 @@ import org.apache.spark.util.Utils
  *
  * TODO: See if we can move this to the test codebase by specifying
  * test dependencies between projects.
-  * TODO：看看我们是否可以通过指定项目之间的测试依赖关系将其移动到测试代码库。
+  * TODO：看看我们是否可以通过指定项目之间的测试依赖关系将其移动到测试代码库
  */
 private[spark] object TestUtils {
 

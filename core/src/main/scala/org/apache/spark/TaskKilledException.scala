@@ -22,7 +22,7 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * :: DeveloperApi ::
  * Exception thrown when a task is explicitly killed (i.e., task failure is expected).
-  * 任务被明确地杀死时抛出异常(即预期任务失败)
+  * 任务被明确地杀死时抛出异常(即任务失败异常)
  */
 @DeveloperApi
 class TaskKilledException extends RuntimeException
