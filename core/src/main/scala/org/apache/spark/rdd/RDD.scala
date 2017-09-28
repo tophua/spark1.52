@@ -176,7 +176,7 @@ abstract class RDD[T: ClassTag](
    *   */
   @transient var name: String = null
 /**
- * this.type表示当前对象（this)的类型。this指代当前的对象。
+ * this.type表示当前对象(this)的类型,this指代当前的对象。
  * this.type被用于变量,函数参数和函数返回值的类型声明
  */
   /** Assign a name to this RDD */
@@ -217,6 +217,7 @@ abstract class RDD[T: ClassTag](
    * have a storage level set yet. Local checkpointing is an exception.
     * 设置此RDD的存储级别，以便在第一次操作之后保持其值计算,如果RDD没有,这只能用于分配新的存储级别
     *还有一个存储级别,本地检查点是一个例外。
+    * this.type表示当前对象(this)的类型,this指代当前的对象
    */
   def persist(newLevel: StorageLevel): this.type = {
     if (isLocallyCheckpointed) {
@@ -233,12 +234,14 @@ abstract class RDD[T: ClassTag](
   /** 
    *  Persist this RDD with the default storage level (`MEMORY_ONLY`). 
    *  持久化RDD,默认存储级别MEMORY_ONLY,内存存储
+    *  this.type表示当前对象(this)的类型,this指代当前的对象
    *  */
   def persist(): this.type = persist(StorageLevel.MEMORY_ONLY)
 
   /** 
    *  Persist this RDD with the default storage level (`MEMORY_ONLY`). 
    *  持久化RDD使用默认存储级别(内存存储)
+    *  this.type表示当前对象(this)的类型,this指代当前的对象
    *  */
   def cache(): this.type = persist()
 
@@ -247,6 +250,7 @@ abstract class RDD[T: ClassTag](
    * 删除持久化RDD,同时删除内存和硬盘
    * @param blocking Whether to block until all blocks are deleted.
    * @return This RDD.
+    * this.type表示当前对象(this)的类型,this指代当前的对象
    */
   def unpersist(blocking: Boolean = true): this.type = {
     logInfo("Removing RDD " + id + " from persistence list")
@@ -1747,7 +1751,8 @@ abstract class RDD[T: ClassTag](
     *`spark.dynamicAllocation.cachedExecutorIdleTimeout`为高值
    *
    * The checkpoint directory set through `SparkContext#setCheckpointDir` is not used.
-    * 通sparkContext＃setCheckpointDir设置的检查点目录不被使用。
+    * 通sparkContext＃setCheckpointDir设置的检查点目录不被使用
+    * this.type表示当前对象(this)的类型,this指代当前的对象
    */
   def localCheckpoint(): this.type = RDDCheckpointData.synchronized {
     if (conf.getBoolean("spark.dynamicAllocation.enabled", false) &&

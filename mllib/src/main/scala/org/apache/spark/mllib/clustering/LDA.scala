@@ -75,6 +75,7 @@ class LDA private (
    * (default = 10)
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setK(k: Int): this.type = {
     require(k > 0, s"LDA k (number of clusters) must be > 0, but was set to $k")
     this.k = k
@@ -133,6 +134,7 @@ class LDA private (
    *       [[https://github.com/Blei-Lab/onlineldavb]].
    */
   @Since("1.5.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setDocConcentration(docConcentration: Vector): this.type = {
     require(docConcentration.size > 0, "docConcentration must have > 0 elements")
     this.docConcentration = docConcentration
@@ -143,6 +145,7 @@ class LDA private (
    * Replicates a [[Double]] docConcentration to create a symmetric prior.
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setDocConcentration(docConcentration: Double): this.type = {
     this.docConcentration = Vectors.dense(docConcentration)
     this
@@ -164,12 +167,14 @@ class LDA private (
    * Alias for [[setDocConcentration()]]
    */
   @Since("1.5.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setAlpha(alpha: Vector): this.type = setDocConcentration(alpha)
 
   /**
    * Alias for [[setDocConcentration()]]
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setAlpha(alpha: Double): this.type = setDocConcentration(alpha)
 
   /**
@@ -207,6 +212,7 @@ class LDA private (
    *       [[https://github.com/Blei-Lab/onlineldavb]].
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setTopicConcentration(topicConcentration: Double): this.type = {
     this.topicConcentration = topicConcentration
     this
@@ -222,6 +228,7 @@ class LDA private (
    * Alias for [[setTopicConcentration()]]
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setBeta(beta: Double): this.type = setTopicConcentration(beta)
 
   /**
@@ -235,6 +242,7 @@ class LDA private (
    * (default = 20)
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setMaxIterations(maxIterations: Int): this.type = {
     this.maxIterations = maxIterations
     this
@@ -250,6 +258,7 @@ class LDA private (
    * Random seed
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setSeed(seed: Long): this.type = {
     this.seed = seed
     this
@@ -270,6 +279,7 @@ class LDA private (
    * @see [[org.apache.spark.SparkContext#setCheckpointDir]]
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setCheckpointInterval(checkpointInterval: Int): this.type = {
     this.checkpointInterval = checkpointInterval
     this
@@ -292,6 +302,7 @@ class LDA private (
    */
   @Since("1.4.0")
   @DeveloperApi
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setOptimizer(optimizer: LDAOptimizer): this.type = {
     this.ldaOptimizer = optimizer
     this
@@ -302,6 +313,7 @@ class LDA private (
    * Currently "em", "online" are supported.
    */
   @Since("1.4.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setOptimizer(optimizerName: String): this.type = {
     this.ldaOptimizer =
       optimizerName.toLowerCase match {

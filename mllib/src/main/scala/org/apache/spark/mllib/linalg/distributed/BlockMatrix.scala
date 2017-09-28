@@ -237,6 +237,7 @@ class BlockMatrix @Since("1.3.0") (
 
   /** Caches the underlying RDD. */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def cache(): this.type = {
     blocks.cache()
     this
@@ -244,6 +245,7 @@ class BlockMatrix @Since("1.3.0") (
 
   /** Persists the underlying RDD with the specified storage level. */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def persist(storageLevel: StorageLevel): this.type = {
     blocks.persist(storageLevel)
     this

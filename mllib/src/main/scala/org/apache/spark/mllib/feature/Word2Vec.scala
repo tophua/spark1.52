@@ -85,6 +85,7 @@ class Word2Vec extends Serializable with Logging {
    * Sets vector size (default: 100).
    */
   @Since("1.1.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setVectorSize(vectorSize: Int): this.type = {
     this.vectorSize = vectorSize
     this
@@ -94,6 +95,7 @@ class Word2Vec extends Serializable with Logging {
    * Sets initial learning rate (default: 0.025).
    */
   @Since("1.1.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setLearningRate(learningRate: Double): this.type = {
     this.learningRate = learningRate
     this
@@ -103,6 +105,7 @@ class Word2Vec extends Serializable with Logging {
    * Sets number of partitions (default: 1). Use a small number for accuracy.
    */
   @Since("1.1.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setNumPartitions(numPartitions: Int): this.type = {
     require(numPartitions > 0, s"numPartitions must be greater than 0 but got $numPartitions")
     this.numPartitions = numPartitions
@@ -114,6 +117,7 @@ class Word2Vec extends Serializable with Logging {
    * partitions.
    */
   @Since("1.1.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setNumIterations(numIterations: Int): this.type = {
     this.numIterations = numIterations
     this
@@ -123,6 +127,7 @@ class Word2Vec extends Serializable with Logging {
    * Sets random seed (default: a random long integer).
    */
   @Since("1.1.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setSeed(seed: Long): this.type = {
     this.seed = seed
     this
@@ -133,6 +138,7 @@ class Word2Vec extends Serializable with Logging {
    * model's vocabulary (default: 5).
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setMinCount(minCount: Int): this.type = {
     this.minCount = minCount
     this

@@ -47,12 +47,12 @@ private[spark] class TimeStampedHashSet[A] extends Set[A] {
     newSet -= elem
     newSet
   }
-
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   override def += (key: A): this.type = {
     internalMap.put(key, currentTime)
     this
   }
-
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   override def -= (key: A): this.type = {
     internalMap.remove(key)
     this

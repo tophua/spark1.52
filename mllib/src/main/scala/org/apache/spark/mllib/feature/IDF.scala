@@ -84,6 +84,7 @@ private object IDF {
     def this() = this(0)
 
     /** Adds a new document. */
+    //this.type表示当前对象(this)的类型,this指代当前的对象
     def add(doc: Vector): this.type = {
       if (isEmpty) {
         df = BDV.zeros(doc.size)
@@ -116,6 +117,7 @@ private object IDF {
     }
 
     /** Merges another. */
+    //this.type表示当前对象(this)的类型,this指代当前的对象
     def merge(other: DocumentFrequencyAggregator): this.type = {
       if (!other.isEmpty) {
         m += other.m

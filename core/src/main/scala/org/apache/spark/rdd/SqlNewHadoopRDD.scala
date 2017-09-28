@@ -256,7 +256,7 @@ private[spark] class SqlNewHadoopRDD[V: ClassTag](
     }
     locs.getOrElse(split.getLocations.filter(_ != "localhost"))
   }
-
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   override def persist(storageLevel: StorageLevel): this.type = {
     if (storageLevel.deserialized) {
       logWarning("Caching NewHadoopRDDs as deserialized objects usually leads to undesired" +

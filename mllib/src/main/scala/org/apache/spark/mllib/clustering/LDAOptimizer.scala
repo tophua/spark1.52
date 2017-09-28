@@ -286,6 +286,7 @@ final class OnlineLDAOptimizer extends LDAOptimizer {
    * Default: 1024, following the original Online LDA paper.
    */
   @Since("1.4.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setTau0(tau0: Double): this.type = {
     require(tau0 > 0, s"LDA tau0 must be positive, but was set to $tau0")
     this.tau0 = tau0
@@ -304,6 +305,7 @@ final class OnlineLDAOptimizer extends LDAOptimizer {
    * Default: 0.51, based on the original Online LDA paper.
    */
   @Since("1.4.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setKappa(kappa: Double): this.type = {
     require(kappa >= 0, s"Online LDA kappa must be nonnegative, but was set to $kappa")
     this.kappa = kappa
@@ -327,6 +329,7 @@ final class OnlineLDAOptimizer extends LDAOptimizer {
    * Default: 0.05, i.e., 5% of total documents.
    */
   @Since("1.4.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setMiniBatchFraction(miniBatchFraction: Double): this.type = {
     require(miniBatchFraction > 0.0 && miniBatchFraction <= 1.0,
       s"Online LDA miniBatchFraction must be in range (0,1], but was set to $miniBatchFraction")
@@ -347,6 +350,7 @@ final class OnlineLDAOptimizer extends LDAOptimizer {
    * Default: false
    */
   @Since("1.5.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setOptimizeDocConcentration(optimizeDocConcentration: Boolean): this.type = {
     this.optimizeDocConcentration = optimizeDocConcentration
     this
@@ -355,6 +359,7 @@ final class OnlineLDAOptimizer extends LDAOptimizer {
   /**
    * Set the Dirichlet parameter for the posterior over topics.
    * This is only used for testing now. In the future, it can help support training stop/resume.
+    * this.type表示当前对象(this)的类型,this指代当前的对象
    */
   private[clustering] def setLambda(lambda: BDM[Double]): this.type = {
     this.lambda = lambda
@@ -365,6 +370,7 @@ final class OnlineLDAOptimizer extends LDAOptimizer {
    * Used for random initialization of the variational parameters.
    * Larger value produces values closer to 1.0.
    * This is only used for testing currently.
+    * this.type表示当前对象(this)的类型,this指代当前的对象
    */
   private[clustering] def setGammaShape(shape: Double): this.type = {
     this.gammaShape = shape
@@ -374,6 +380,7 @@ final class OnlineLDAOptimizer extends LDAOptimizer {
   /**
    * Sets whether to sample mini-batches with or without replacement. (default = true)
    * This is only used for testing currently.
+    *this.type表示当前对象(this)的类型,this指代当前的对象
    */
   private[clustering] def setSampleWithReplacement(replace: Boolean): this.type = {
     this.sampleWithReplacement = replace

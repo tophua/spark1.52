@@ -98,6 +98,7 @@ class StandardScalerModel @Since("1.3.0") (
 
   @Since("1.3.0")
   @DeveloperApi
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setWithMean(withMean: Boolean): this.type = {
     require(!(withMean && this.mean == null), "cannot set withMean to true while mean is null")
     this.withMean = withMean
@@ -106,6 +107,7 @@ class StandardScalerModel @Since("1.3.0") (
 
   @Since("1.3.0")
   @DeveloperApi
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setWithStd(withStd: Boolean): this.type = {
     require(!(withStd && this.std == null),
       "cannot set withStd to true while std is null")

@@ -37,10 +37,10 @@ class HashingTF(override val uid: String) extends Transformer with HasInputCol w
 
   def this() = this(Identifiable.randomUID("hashingTF"))
 
-  /** @group setParam */
+  /** @group setParam  this.type还回自身类型*/
   def setInputCol(value: String): this.type = set(inputCol, value)
 
-  /** @group setParam */
+  /** @group setParam this.type还回自身类型*/
   def setOutputCol(value: String): this.type = set(outputCol, value)
 
   /**

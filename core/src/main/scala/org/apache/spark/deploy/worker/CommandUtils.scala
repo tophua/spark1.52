@@ -40,6 +40,7 @@ object CommandUtils extends Logging {
    * 基于给定的参数创建ProcessBuilder
    * Build a ProcessBuilder based on the given parameters.
    * The `env` argument is exposed for testing.
+    * `env`参数暴露出来进行测试
    */
   def buildProcessBuilder(
       command: Command,
@@ -129,6 +130,7 @@ object CommandUtils extends Logging {
     val out = new FileOutputStream(file, true)
     // TODO: It would be nice to add a shutdown hook here that explains why the output is
     //       terminating. Otherwise if the worker dies the executor logs will silently stop.
+    //在这里添加一个关闭挂钩是很好的,它解释了为什么输出结束。否则如果工作节点死亡,执行者日志将静默停止。
     new Thread("redirect output to " + file) {
       override def run() {
         try {

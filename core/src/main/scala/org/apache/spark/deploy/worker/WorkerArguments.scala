@@ -40,6 +40,7 @@ private[worker] class WorkerArguments(args: Array[String], conf: SparkConf) {
   var propertiesFile: String = null
 
   // Check for settings in environment variables
+  //检查环境变量中的设置
   if (System.getenv("SPARK_WORKER_PORT") != null) {
     port = System.getenv("SPARK_WORKER_PORT").toInt//Worker监听端口
   }

@@ -80,6 +80,7 @@ class GaussianMixture private (
    * (model.k == this.k) must be met; failure will result in an IllegalArgumentException
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setInitialModel(model: GaussianMixtureModel): this.type = {
     if (model.k == k) {
       initialModel = Some(model)
@@ -99,6 +100,7 @@ class GaussianMixture private (
    * Set the number of Gaussians in the mixture model.  Default: 2
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setK(k: Int): this.type = {
     this.k = k
     this
@@ -114,6 +116,7 @@ class GaussianMixture private (
    * Set the maximum number of iterations to run. Default: 100
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setMaxIterations(maxIterations: Int): this.type = {
     this.maxIterations = maxIterations
     this
@@ -130,6 +133,7 @@ class GaussianMixture private (
    * considered to have occurred.
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setConvergenceTol(convergenceTol: Double): this.type = {
     this.convergenceTol = convergenceTol
     this
@@ -146,6 +150,7 @@ class GaussianMixture private (
    * Set the random seed
    */
   @Since("1.3.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def setSeed(seed: Long): this.type = {
     this.seed = seed
     this

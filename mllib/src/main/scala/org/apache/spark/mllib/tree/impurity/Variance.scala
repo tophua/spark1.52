@@ -62,6 +62,7 @@ object Variance extends Impurity {
    * This is useful for passing impurity parameters to a Strategy in Java.
    */
   @Since("1.0.0")
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   def instance: this.type = this
 
 }

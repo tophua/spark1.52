@@ -111,6 +111,7 @@ private[deploy] class Worker(
     conf.getLong("spark.worker.cleanup.interval", 60 * 30) * 1000
     //worker保留应用程序工作目录的有效时间。
   // TTL for app folders/data;  after TTL expires it will be cleaned up
+  //应用文件夹/数据的TTL; TTL过期后,将被清理
   private val APP_DATA_RETENTION_SECONDS =
     conf.getLong("spark.worker.cleanup.appDataTtl", 7 * 24 * 3600)
 
@@ -815,6 +816,7 @@ private[deploy] object Worker extends Logging {
     conf: SparkConf = new SparkConf): RpcEnv = {
 
     // The LocalSparkCluster runs multiple local sparkWorkerX RPC Environments
+    //LocalSparkCluster运行多个本地sparkWorkerX RPC环境
     val systemName = SYSTEM_NAME + workerNumber.map(_.toString).getOrElse("")
     val securityMgr = new SecurityManager(conf)
     val rpcEnv = RpcEnv.create(systemName, host, port, conf, securityMgr)

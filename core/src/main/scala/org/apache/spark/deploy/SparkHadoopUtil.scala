@@ -171,8 +171,8 @@ class SparkHadoopUtil extends Logging {
    * statistics are only available as of Hadoop 2.5 (see HADOOP-10688).
    * Returns None if the required method can't be found.
     *
-    * 返回一个函数可以调用来查找写入的Hadoop FileSystem字节。 如果getFSBytesWrittenOnThreadCallback在时间t从线程r调用，返回的回调将
-    *从t返回写入r的字节,线程级FileSystem需要反射统计数据仅供Hadoop 2.5使用（参见HADOOP-10688）,
+    * 返回一个函数可以调用来查找写入的Hadoop FileSystem字节,如果getFSBytesWrittenOnThreadCallback在时间t从线程r调用，
+    * 返回的回调将从t返回写入r的字节,线程级FileSystem需要反射统计数据仅供Hadoop 2.5使用（参见HADOOP-10688）,
     *如果找不到所需的方法,则返回None
    */
   private[spark] def getFSBytesWrittenOnThreadCallback(): Option[() => Long] = {

@@ -73,6 +73,7 @@ class LocalSparkCluster(
     logInfo("Starting a local Spark cluster with " + numWorkers + " workers.")
 
     // Disable REST server on Master in this mode unless otherwise specified
+    //除非另有说明,禁用此模式下的主服务器上的REST服务器
     val _conf = conf.clone()
       .setIfMissing("spark.master.rest.enabled", "false")
       .set("spark.shuffle.service.enabled", "false")

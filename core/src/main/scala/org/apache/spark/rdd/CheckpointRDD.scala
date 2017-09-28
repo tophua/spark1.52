@@ -38,6 +38,7 @@ private[spark] abstract class CheckpointRDD[T: ClassTag](@transient sc: SparkCon
   //CheckpointRDD不应再次检查点
   override def doCheckpoint(): Unit = { }
   override def checkpoint(): Unit = { }
+  //this.type表示当前对象(this)的类型,this指代当前的对象
   override def localCheckpoint(): this.type = this
 
   // Note: There is a bug in MiMa that complains about `AbstractMethodProblem`s in the

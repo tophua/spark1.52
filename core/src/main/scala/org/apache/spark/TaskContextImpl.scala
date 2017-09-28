@@ -53,7 +53,7 @@ private[spark] class TaskContextImpl(
   // Whether the task has completed.
   //是否任务已经完成。
   @volatile private var completed: Boolean = false
-  //添加一个完成任务的执行的侦听器,这记录任务的成功,失败,或者取消. 
+  //添加一个完成任务的执行的侦听器,这记录任务的成功,失败,或者取消. this.type还回自身类型,
   override def addTaskCompletionListener(listener: TaskCompletionListener): this.type = {
     onCompleteCallbacks += listener
     this
