@@ -31,6 +31,7 @@ import org.apache.spark.SparkFunSuite
 class EventLoopSuite extends SparkFunSuite with Timeouts {
 
   test("EventLoop") {//事件循环
+    //同步
     val buffer = new mutable.ArrayBuffer[Int] with mutable.SynchronizedBuffer[Int]
     val eventLoop = new EventLoop[Int]("test") {
 

@@ -37,7 +37,7 @@ import org.apache.spark.storage.StorageLevel._
 
 /** 
  *  Testsuite that tests block replication in BlockManager 
- *  测试套件,在blockmanager试验块复制
+ *  测试套件,blockmanager块复制的测试
  *  */
 class BlockManagerReplicationSuite extends SparkFunSuite with Matchers with BeforeAndAfter {
 
