@@ -118,13 +118,13 @@ class HeartbeatReceiverSuite//接收心跳测试
     assert(trackedExecutors.contains(executorId2))
   }
 
-  test("reregister if scheduler is not ready yet") {//注册如果调度器是还没有准备好
+  test("reregister if scheduler is not ready yet") {//如果调度器是还没有准备好,从新注册
     addExecutorAndVerify(executorId1)
     // Task scheduler is not set yet in HeartbeatReceiver, so executors should reregister
     //任务调度是不在HeartbeatReceiver,所以执行者应该重新注册
     triggerHeartbeat(executorId1, executorShouldReregister = true)
   }
-  //如果未注册的执行者的心跳
+  //如果未注册的执行者的心跳,则重新注册
   test("reregister if heartbeat from unregistered executor") {
     heartbeatReceiverRef.askWithRetry[Boolean](TaskSchedulerIsSet) 
     // Received heartbeat from unknown executor, so we ask it to re-register

@@ -55,7 +55,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     nums.saveAsTextFile(outputDir)//保存文件1,2,3,4
     // Read the plain text file and check it's OK
     //读简单的文本文件,并检查它的正确
-    val outputFile = new File(outputDir, "part-00000")//父目录,子目录
+    val outputFile = new File(outputDir, "part-00000")//父目录,part-00000文件名
     val content = Source.fromFile(outputFile).mkString
     println("content:"+content);
     assert(content === "1\n2\n3\n4\n")
@@ -125,6 +125,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     val nums = sc.makeRDD(1 to 3).map(x => (new IntWritable(x), "a" * x))
     nums.saveAsSequenceFile(outputDir)
     // Try reading the output back as a SequenceFile
+    //尝试读取输出到作为一个SequenceFile
     val output = sc.sequenceFile[IntWritable, Text](outputDir)
     assert(output.map(_.toString).collect().toList === List("(1,a)", "(2,aa)", "(3,aaa)"))
   }
@@ -145,6 +146,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     val nums = sc.makeRDD(1 to 3).map(x => (new IntWritable(x), new Text("a" * x)))
     nums.saveAsSequenceFile(outputDir)
     // Try reading the output back as a SequenceFile
+    //注意目录文件
     val output = sc.sequenceFile[IntWritable, Text](outputDir)
     assert(output.map(_.toString).collect().toList === List("(1,a)", "(2,aa)", "(3,aaa)"))
   }
@@ -189,7 +191,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     assert(output.collect().toList === List((1, "a"), (2, "aa"), (3, "aaa")))
   }
 
-  test("object files of classes from a JAR") {//从一个Jar中的类对象文件
+  test("object files of classes from a JAR") {//来自一个Jar中的类对象文件
     // scalastyle:off classforname
     //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val original = Thread.currentThread().getContextClassLoader
@@ -302,7 +304,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
 
     assert(indata.toArray === testOutput)
   }
-  //持久化磁盘存储
+  //便携式数据流持久化到磁盘存储
   test("portabledatastream persist disk storage") {
     sc = new SparkContext("local", "test")
     val outFile = new File(tempDir, "record-bytestream-00000.bin")
@@ -313,6 +315,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
     val bbuf = java.nio.ByteBuffer.wrap(testOutput)
     // write data to file 写入数据到文件
     val file = new java.io.FileOutputStream(outFile)
+    //getChannel方法返回与此文件输出流关联的唯一文件通道对象
     val channel = file.getChannel
     channel.write(bbuf)
     channel.close()
@@ -437,6 +440,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
 
   test("file caching") {//文件缓存
     sc = new SparkContext("local", "test")
+    //FileWriter是用来写入字符文件的便捷类
     val out = new FileWriter(tempDir + "/input")
     out.write("Hello world!\n")
     out.write("What's up?\n")
@@ -466,7 +470,7 @@ class FileSuite extends SparkFunSuite with LocalSparkContext {
       randomRDD.saveAsTextFile(tempDir.getPath + "/output")
     }
   }
- //允许用户禁用输出目录存在检查
+ //允许用户禁用输出存在的目录检查
   test ("allow user to disable the output directory existence checking (old Hadoop API") {
     val sf = new SparkConf()
     sf.setAppName("test").setMaster("local").set("spark.hadoop.validateOutputSpecs", "false")

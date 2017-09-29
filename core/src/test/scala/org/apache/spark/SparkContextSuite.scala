@@ -190,6 +190,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
         if (!new File(SparkFiles.get(neptune.getName + sep + alien1.getName)).exists()) {
           throw new SparkException("can't access file under root added directory")
         }
+        //获得SparkFiles文件
         if (!new File(SparkFiles.get(neptune.getName + sep + saturn.getName + sep + alien2.getName))
             .exists()) {
           throw new SparkException("can't access file in nested directory")

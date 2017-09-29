@@ -27,7 +27,11 @@ class UnpersistSuite extends SparkFunSuite with LocalSparkContext {
     //激活后,系统持久化
     rdd.count
     println("rddId:"+rdd.id+"==persistentRdds=="+sc.persistentRdds(rdd.id).collect().mkString(","))
+    println("==getRDDStorageInfo=="+sc.getRDDStorageInfo.length)
+    //assert(sc.persistentRdds.isEmpty === true)
+    println("size:"+sc.persistentRdds.size)
     assert(sc.persistentRdds.isEmpty === false)
+    sc.persistentRdds.foreach(println)
     rdd.unpersist()
     assert(sc.persistentRdds.isEmpty === true)
     println("==getRDDStorageInfo=="+sc.getRDDStorageInfo.mkString(","))

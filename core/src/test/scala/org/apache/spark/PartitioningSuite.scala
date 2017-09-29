@@ -102,7 +102,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
     val partitioner = new RangePartitioner(1500, rdd)
     partitioner.getPartition(Item(100))
   }
-
+  //草图
   test("RangPartitioner.sketch") {
     val rdd = sc.makeRDD(0 until 20, 20).flatMap { i =>
       val random = new java.util.Random(i)
@@ -170,7 +170,7 @@ class PartitioningSuite extends SparkFunSuite with SharedSparkContext with Priva
     assert(rangeP2 != hashP2)
   }
 
-  test("partitioner preservation") {//保存分区
+  test("partitioner preservation") {//保留分区
     val rdd = sc.parallelize(1 to 10, 4).map(x => (x, x))
       //groupByKey(2)重新设置分区
     val grouped2 = rdd.groupByKey(2)

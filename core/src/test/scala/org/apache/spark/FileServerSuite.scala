@@ -50,6 +50,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     testTempDir.mkdir()
 
     val textFile = new File(testTempDir, "FileServerSuite.txt")
+    //向文本输出流打印对象的格式化表示形式
     val pw = new PrintWriter(textFile)
     // scalastyle:off println
     pw.println("100")
@@ -65,6 +66,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
     jar.putNextEntry(jarEntry)
     println("textFile:"+jarFile.getCanonicalFile)
     val in = new FileInputStream(textFile)
+    //com.google.common.io
     ByteStreams.copy(in, jar)
 
     in.close()
@@ -90,7 +92,7 @@ class FileServerSuite extends SparkFunSuite with LocalSparkContext {
       val in = new BufferedReader(new FileReader(path))
       val fileVal = in.readLine().toInt //读取数据100
       in.close()
-     //_ s代表分组的值
+     //_ 代表分组的value值
       _ * fileVal + _ * fileVal
     }.collect()
     assert(result.toSet === Set((1, 200), (2, 300), (3, 500)))

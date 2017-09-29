@@ -75,7 +75,10 @@ class SparkContextInfoSuite extends SparkFunSuite with LocalSparkContext {
   }
 }
 
-/** Call site must be outside of usual org.apache.spark packages (see Utils#SPARK_CLASS_REGEX). */
+/**
+  * Call site must be outside of usual org.apache.spark packages (see Utils#SPARK_CLASS_REGEX).
+  * 调用站点必须在通常的org.apache.spark包之外(参见Utils＃SPARK_CLASS_REGEX)
+  * */
 package object testPackage extends Assertions {
   private val CALL_SITE_REGEX = "(.+) at (.+):([0-9]+)".r
 
@@ -83,6 +86,7 @@ package object testPackage extends Assertions {
     val rdd = sc.makeRDD(Array(1, 2, 3, 4), 2)
     val rddCreationSite = rdd.getCreationSite
     println("===="+rddCreationSite)
+    //注意：2行后定义“rdd”
     val curCallSite = sc.getCallSite().shortForm // note: 2 lines after definition of "rdd"
 
     val rddCreationLine = rddCreationSite match {

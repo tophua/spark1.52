@@ -36,14 +36,19 @@ import org.apache.spark.util.{ThreadUtils, Clock, SystemClock, Utils}
  * spark.dynamicAllocation.initialExecutors每个Executor可以运行的Task数量等配置信息
  * 代理动态分配和删除executors
  * An agent that dynamically allocates and removes executors based on the workload.
+  * 基于工作负载动态分配和删除执行程序的代理
  *
  * The ExecutorAllocationManager maintains a moving target number of executors which is periodically
  * synced to the cluster manager. The target starts at a configured initial value and changes with
  * the number of pending and running tasks.
  *
+  * ExecutorAllocationManager维护定期同步到集群管理器的执行器的移出目标数,目标从配置的初始值开始,并随着待处理和正在运行的任务数量而变化。
+  *
  * Decreasing the target number of executors happens when the current target is more than needed to
  * handle the current load. The target number of executors is always truncated to the number of
  * executors that could run all current running and pending tasks at once.
+  *
+  *如果当前目标超出了处理当前负载所需的目标数量,则会减少执行器的目标数量,执行器的目标数量总是被截断为可以一次运行所有当前运行和挂起的任务的执行程序数。
  *
  * Increasing the target number of executors happens in response to backlogged tasks waiting to be
  * scheduled. If the scheduler queue is not drained in N seconds, then new executors are added. If
@@ -51,6 +56,10 @@ import org.apache.spark.util.{ThreadUtils, Clock, SystemClock, Utils}
  * added in each round increases exponentially from the previous round until an upper bound has been
  * reached. The upper bound is based both on a configured property and on the current number of
  * running and pending tasks, as described above.
+  *
+  *响应等待排定的积压任务,增加目标执行人数,如果调度程序队列在N秒内没有耗尽,则会添加新的执行程序。
+  * 如果队列持续另外M秒,则会添加更多的执行者等等,每轮增加的数字从上一轮呈指数增长,直到达到上限。
+  * 上限基于配置的属性和当前的数量运行和挂起的任务，如上所述。
  *
  * The rationale for the exponential increase is twofold: (1) Executors should be added slowly
  * in the beginning in case the number of extra executors needed turns out to be small. Otherwise,
@@ -58,14 +67,23 @@ import org.apache.spark.util.{ThreadUtils, Clock, SystemClock, Utils}
  * quickly over time in case the maximum number of executors is very high. Otherwise, it will take
  * a long time to ramp up under heavy workloads.
  *
+  *指数增长的理由有两个方面：
+  * （1）如果需要的额外执行人员数量较少,执行人员应该开始缓慢增加。 否则,我们可能会添加更多的执行者,而不是稍后删除它们。
+  * （2）如果执行人数最多,执行人员应随时随地加快。 否则,在繁重的工作量下需要很长时间。
+  *
  * The remove policy is simpler: If an executor has been idle for K seconds, meaning it has not
  * been scheduled to run any tasks, then it is removed.
+  *
+  * 删除策略更简单：如果执行程序已经空闲K秒,意味着它没有被计划运行任何任务,那么它将被删除。
  *
  * There is no retry logic in either case because we make the assumption that the cluster manager
  * will eventually fulfill all requests it receives asynchronously.
+  *
+  * 在这两种情况下都没有重试逻辑,因为我们假设集群管理器将最终完成异步收到的所有请求。
  *
  * The relevant Spark properties include the following:
- *
+ * 相关的Spark属性包括：
+  *
  *   spark.dynamicAllocation.enabled - Whether this feature is enabled
  *   spark.dynamicAllocation.minExecutors - Lower bound on the number of executors
  *   spark.dynamicAllocation.maxExecutors - Upper bound on the number of executors
@@ -73,13 +91,16 @@ import org.apache.spark.util.{ThreadUtils, Clock, SystemClock, Utils}
  *
  *   spark.dynamicAllocation.schedulerBacklogTimeout (M) -
  *     If there are backlogged tasks for this duration, add new executors
- *
+ *     如果在这段时间内有积压的任务,请添加新的执行者
  *   spark.dynamicAllocation.sustainedSchedulerBacklogTimeout (N) -
  *     If the backlog is sustained for this duration, add more executors
  *     This is used only after the initial backlog timeout is exceeded
  *
+  *    如果在此期间持续积压，请添加更多的执行者仅在超出初始的积压超时时才使用
+  *
  *   spark.dynamicAllocation.executorIdleTimeout (K) -
  *     If an executor has been idle for this duration, remove it
+  *    如果执行者在此期间空闲,请将其删除
  */
 private[spark] class ExecutorAllocationManager(
     client: ExecutorAllocationClient,

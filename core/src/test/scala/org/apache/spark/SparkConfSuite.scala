@@ -60,10 +60,9 @@ class SparkConfSuite extends SparkFunSuite with LocalSparkContext with ResetSyst
     assert(!conf.contains("spark.test.testProperty"))
   }
 
-  test("named set methods") {//
+  test("named set methods") {
     //设置配置文件属性
     val conf = new SparkConf(false)
-
     conf.setMaster("local[3]")
     conf.setAppName("My app")
     conf.setSparkHome("/path")

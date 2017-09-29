@@ -127,14 +127,14 @@ class SparkContextSchedulerCreationSuite
       case _ => fail()
     }
   }
-//val SIMR_REGEX = """simr://(.*)""".r
+  //val SIMR_REGEX = """simr://(.*)""".r
   test("simr") {
     createTaskScheduler("simr://uri").backend match {
       case s: SimrSchedulerBackend => // OK
       case _ => fail()
     }
   }
-//val LOCAL_CLUSTER_REGEX = """local-cluster\[\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*]""".r
+  //val LOCAL_CLUSTER_REGEX = """local-cluster\[\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*]""".r
   test("local-cluster") {
     createTaskScheduler("local-cluster[3, 14, 1024]").backend match {
       case s: SparkDeploySchedulerBackend => // OK
@@ -153,7 +153,7 @@ class SparkContextSchedulerCreationSuite
       case e: Throwable => fail(e)
     }
   }
-//
+
   test("yarn-cluster") {
     testYarn("yarn-cluster", "org.apache.spark.scheduler.cluster.YarnClusterScheduler")
   }
