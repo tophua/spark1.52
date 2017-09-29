@@ -26,7 +26,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.storage._
 
 // TODO: Test the CacheManager's thread-safety aspects(测试线程安全方面)
-//
 class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with BeforeAndAfter
   with MockitoSugar {
 
@@ -52,7 +51,7 @@ class CacheManagerSuite extends SparkFunSuite with LocalSparkContext with Before
       override def getPartitions: Array[Partition] = Array(split)
       override val getDependencies = List[Dependency[_]]()//获得依赖关系
       override def compute(split: Partition, context: TaskContext): Iterator[Int] ={
-        println(split.index+"=="+context.taskMetrics().hostname);
+        //println(split.index+"=="+context.taskMetrics().hostname);
         Array(1, 2, 3, 4).iterator//计算
       }
     }

@@ -33,8 +33,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.spark.network.util.ByteUnit
-import org.apache.spark.{Logging, SparkFunSuite}
-import org.apache.spark.SparkConf
+import org.apache.spark.{Logging, SparkConf, SparkFunSuite, TaskContext}
 
 class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
 
@@ -396,7 +395,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     def assertResolves(before: String, after: String): Unit = {
       // This should test only single paths
       //测试单一路径
-      //assert() 或 assume() 方法在对中间结果或私有方法的参数进行检验，不成功则抛出 AssertionError 异常
+      //assert()或assume()方法在对中间结果或私有方法的参数进行检验,不成功则抛出AssertionError异常
       assume(before.split(",").length === 1)
       // Repeated invocations of resolveURI should yield the same result
       //重复调用ResolveUri应产生相同的结果
@@ -573,6 +572,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     val outFile = File.createTempFile("test-load-spark-properties", "test", tmpDir)
     try {
       System.setProperty("spark.test.fileNameLoadB", "2")
+      //向文件写入值
       Files.write("spark.test.fileNameLoadA true\n" +
         "spark.test.fileNameLoadB 1\n", outFile, UTF_8)
       //加一个properties文件
@@ -796,4 +796,50 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
     println("==="+UserGroupInformation.getCurrentUser.getUserName)
       println("===="+Utils.localHostName)
   }
+
+  test("tryWithSafeFinally") {
+    var e = new Error("Block0")
+    val finallyBlockError = new Error("Finally Block")
+    var isErrorOccurred = false
+    // if the try and finally blocks throw different exception instances
+    //如果try和finally块抛出不同的异常实例
+    try {
+      Utils.tryWithSafeFinally { throw e }(finallyBlock = { throw finallyBlockError })
+    } catch {
+      case t: Error =>
+        assert(t.getSuppressed.head == finallyBlockError)
+        isErrorOccurred = true
+    }
+    assert(isErrorOccurred)
+    // if the try and finally blocks throw the same exception instance then it should not
+    // try to add to suppressed and get IllegalArgumentException
+    //如果try和finally块抛出相同的异常实例，那么它不应该
+    //尝试添加到suppress并获取IllegalArgumentException
+    e = new Error("Block1")
+    isErrorOccurred = false
+    try {
+      Utils.tryWithSafeFinally { throw e }(finallyBlock = { throw e })
+    } catch {
+      case t: Error =>
+        assert(t.getSuppressed.length == 0)
+        isErrorOccurred = true
+    }
+    assert(isErrorOccurred)
+    // if the try throws the exception and finally doesn't throw exception
+    //如果try抛出异常,最后不会抛出异常
+    e = new Error("Block2")
+    isErrorOccurred = false
+    try {
+      Utils.tryWithSafeFinally { throw e }(finallyBlock = {})
+    } catch {
+      case t: Error =>
+        assert(t.getSuppressed.length == 0)
+        isErrorOccurred = true
+    }
+    assert(isErrorOccurred)
+    // if the try and finally block don't throw exception
+    //如果try和finally块不抛出异常
+    Utils.tryWithSafeFinally {}(finallyBlock = {})
+  }
+
 }

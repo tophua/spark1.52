@@ -866,7 +866,7 @@ private[spark] object Utils extends Logging {
    */
   private lazy val localIpAddress: InetAddress = findLocalInetAddress()
 /**
- * 查找本地址
+ * 查找网络目标地址
  */
   private def findLocalInetAddress(): InetAddress = {
     val defaultIpOverride = System.getenv("SPARK_LOCAL_IP")
@@ -1302,6 +1302,7 @@ private[spark] object Utils extends Logging {
     try {
       block
     } catch {
+      //throw 表达式有特殊类型Nothing
       case e: ControlThrowable => throw e
       case t: Throwable => SparkUncaughtExceptionHandler.uncaughtException(t)
     }
@@ -1920,7 +1921,7 @@ private[spark] object Utils extends Logging {
   /**
    * Wait for a process to terminate for at most the specified duration.
    * Return whether the process actually terminated after the given timeout.
-    * 等待进程终止至多指定的持续时间,返回进程是否在给定超时后终止。
+    * 等待进程终止最多的持续时间,返回进程是否在给定超时后终止。
    */
   def waitForProcess(process: Process, timeoutMs: Long): Boolean = {
     //终止

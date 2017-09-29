@@ -91,7 +91,7 @@ abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[Ha
   }
 
   protected def randomRdd() = {
-    val rdd: RDD[_] = Random.nextInt(3) match {//不包含3的随机数
+    val rdd: RDD[_] = Random.nextInt(3) match {//包含3的随机数
       case 0 => newRDD()
       case 1 => newShuffleRDD()
       case 2 => newPairRDD.join(newPairRDD())
@@ -110,7 +110,7 @@ abstract class ContextCleanerSuiteBase(val shuffleManager: Class[_] = classOf[Ha
     //WeakReference 弱引用,在内存不足时,垃圾回收器会回收此对象,所以在每次使用此对象时,要检查其是否被回收
     val weakRef = new WeakReference(new Object())
     val startTime = System.currentTimeMillis//(毫秒时间)
-    System.gc() // 尽最大努力运行垃圾收集  Make a best effort to run the garbage collection. It *usually* runs GC.
+    System.gc() // 运行垃圾收集,通常*运行GC  Make a best effort to run the garbage collection. It *usually* runs GC.
     // Wait until a weak reference object has been GCed
     //等到一个弱引用对象已垃圾回收,10000毫秒==10秒
     while (System.currentTimeMillis - startTime < 10000 && weakRef.get != null) {
@@ -134,6 +134,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     val tester = new CleanerTester(sc, rddIds = Seq(rdd.id))
 
     // Explicit cleanup 显示清理
+    //参数blocking是否堵塞
     cleaner.doCleanupRDD(rdd.id, blocking = true)
     tester.assertCleanup()
 

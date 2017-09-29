@@ -41,12 +41,14 @@ class TimeStampedHashMapSuite extends SparkFunSuite {
 
   test("TimeStampedHashMap - clearing by timestamp") {//清理的时间
     // clearing by insertion time 清除插入时间
+    //更新时间戳获取
     val map = new TimeStampedHashMap[String, String](updateTimeStampOnGet = false)
     map("k1") = "v1"
     assert(map("k1") === "v1")
     Thread.sleep(10)
     val threshTime = System.currentTimeMillis
     assert(map.getTimestamp("k1").isDefined)
+    println(map.getTimestamp("k1").get +"====="+threshTime)
     assert(map.getTimestamp("k1").get < threshTime)
     map.clearOldValues(threshTime)//清除旧的值
     assert(map.get("k1") === None)

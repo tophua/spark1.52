@@ -26,9 +26,8 @@ import org.scalatest.time.SpanSugar._
 import org.apache.spark.util.Utils
 
 class DriverSuite extends SparkFunSuite with Timeouts {
-
+  //driver退出后无需清理
   test("driver should exit after finishing without cleanup (SPARK-530)") {
-    //driver退出后无需清理
     //System.getenv()和System.getProperties()的区别
     //System.getenv() 返回系统环境变量值 设置系统环境变量：当前登录用户主目录下的".bashrc"文件中可以设置系统环境变量
     //System.getProperties() 返回Java进程变量值 通过命令行参数的"-D"选项
@@ -45,6 +44,7 @@ class DriverSuite extends SparkFunSuite with Timeouts {
       failAfter(60 seconds) { process.waitFor() }
       // Ensure we still kill the process in case it timed out
       //它超时,确保我们仍然杀死过程
+      //杀死子进程,Process对象表示的子进程被强行终止
       process.destroy()
     }
   }
@@ -53,7 +53,7 @@ class DriverSuite extends SparkFunSuite with Timeouts {
 /**
  * Program that creates a Spark driver but doesn't call SparkContext#stop() or
  * sys.exit() after finishing.
-  * 创建Spark驱动程序但不调用SparkContext＃stop（）或的程序sys.exit（）完成后。
+  *创建Spark驱动程序但不调用SparkContext＃stop()或的程序sys.exit()完成后。
  */
 object DriverWithoutCleanup {
   def main(args: Array[String]) {

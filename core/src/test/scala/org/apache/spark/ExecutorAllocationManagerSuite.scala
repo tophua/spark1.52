@@ -102,35 +102,48 @@ class ExecutorAllocationManagerSuite
 
     // Keep adding until the limit is reached
     //继续添加,直到达到极限为止
+    //所需的执行数 initialExecutors
     assert(numExecutorsTarget(manager) === 1)
+    //增加的执行数
     assert(numExecutorsToAdd(manager) === 1)
+    //从集群管理器请求的执行者
     assert(addExecutors(manager) === 1)//添加执行者数
+    //所需的执行数
     assert(numExecutorsTarget(manager) === 2)
+    //增加的执行数
     assert(numExecutorsToAdd(manager) === 2)
     assert(addExecutors(manager) === 2)//添加执行者数
+    //所需的执行数
     assert(numExecutorsTarget(manager) === 4)
+    //增加的执行数
     assert(numExecutorsToAdd(manager) === 4)
     assert(addExecutors(manager) === 4)//添加执行者数
     assert(numExecutorsTarget(manager) === 8)
     assert(numExecutorsToAdd(manager) === 8)
+    //从集群管理器请求的执行者
     assert(addExecutors(manager) === 2) // reached the limit of 10 达到了10的极限
     assert(numExecutorsTarget(manager) === 10)
     assert(numExecutorsToAdd(manager) === 1)
-    assert(addExecutors(manager) === 0)//
+    //从集群管理器请求的执行者
+    assert(addExecutors(manager) === 0)
+    //所需的执行数
     assert(numExecutorsTarget(manager) === 10)
     assert(numExecutorsToAdd(manager) === 1)
 
     // Register previously requested executors
     //注册之前的执行者
     onExecutorAdded(manager, "first")
+    //所需的执行数
     assert(numExecutorsTarget(manager) === 10)
     onExecutorAdded(manager, "second")
     onExecutorAdded(manager, "third")
     onExecutorAdded(manager, "fourth")
+    //所需的执行数
     assert(numExecutorsTarget(manager) === 10)
     //重复不应计数
     onExecutorAdded(manager, "first") // duplicates should not count
     onExecutorAdded(manager, "second")
+    //所需的执行数
     assert(numExecutorsTarget(manager) === 10)
 
     // Try adding again 试着再添加
@@ -193,7 +206,7 @@ class ExecutorAllocationManagerSuite
     assert(numExecutorsToAdd(manager) === 1)
 
     // Verify that running a task once we're at our limit doesn't blow things up
-    //确认运行一个任务的极限,
+    //验证一旦处于极限状态,运行任务就不会造成任何影响
     sc.listenerBus.postToAll(SparkListenerTaskStart(2, 0, createTaskInfo(0, 1, "executor-1")))
     assert(addExecutors(manager) === 0)
     assert(numExecutorsTarget(manager) === 10)
@@ -634,11 +647,13 @@ class ExecutorAllocationManagerSuite
     sc.listenerBus.postToAll(SparkListenerTaskEnd(
       0, 0, "task-type", Success, createTaskInfo(2, 2, "executor-2"), new TaskMetrics))
     assert(removeTimes(manager).size === 4)
+    //未完成
     assert(!removeTimes(manager).contains("executor-1")) // executor-1 has not finished yet
     assert(removeTimes(manager).contains("executor-2"))
     sc.listenerBus.postToAll(SparkListenerTaskEnd(
       0, 0, "task-type", Success, createTaskInfo(1, 1, "executor-1"), new TaskMetrics))
     assert(removeTimes(manager).size === 5)
+    //未完成
     assert(removeTimes(manager).contains("executor-1")) // executor-1 has now finished
   }
   //添加和删除executor触发监听器
