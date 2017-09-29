@@ -925,31 +925,32 @@ private object ExecutorAllocationManagerSuite extends PrivateMethodTester {
   private val _localityAwareTasks = PrivateMethod[Int]('localityAwareTasks)
   private val _hostToLocalTaskCount = PrivateMethod[Map[String, Int]]('hostToLocalTaskCount)
 
+  //增加的执行数
   private def numExecutorsToAdd(manager: ExecutorAllocationManager): Int = {
     manager invokePrivate _numExecutorsToAdd()
   }
-
+  //在此时刻所需的执行数,如果我们的所有执行者都要死亡,我们立即从集群管理器获得的执行数
   private def numExecutorsTarget(manager: ExecutorAllocationManager): Int = {
     manager invokePrivate _numExecutorsTarget()
   }
-
+  //如果已经等待被杀死,不要再次杀死执行者
   private def executorsPendingToRemove(
       manager: ExecutorAllocationManager): collection.Set[String] = {
     manager invokePrivate _executorsPendingToRemove()
   }
-
+  //所有已知executors
   private def executorIds(manager: ExecutorAllocationManager): collection.Set[String] = {
     manager invokePrivate _executorIds()
   }
-
+  //添加时间
   private def addTime(manager: ExecutorAllocationManager): Long = {
     manager invokePrivate _addTime()
   }
-
+  //移除时间
   private def removeTimes(manager: ExecutorAllocationManager): collection.Map[String, Long] = {
     manager invokePrivate _removeTimes()
   }
-
+  //
   private def schedule(manager: ExecutorAllocationManager): Unit = {
     manager invokePrivate _schedule()
   }
@@ -957,7 +958,7 @@ private object ExecutorAllocationManagerSuite extends PrivateMethodTester {
   private def maxNumExecutorsNeeded(manager: ExecutorAllocationManager): Int = {
     manager invokePrivate _maxNumExecutorsNeeded()
   }
-
+  //
   private def addExecutors(manager: ExecutorAllocationManager): Int = {
     val maxNumExecutorsNeeded = manager invokePrivate _maxNumExecutorsNeeded()
     manager invokePrivate _addExecutors(maxNumExecutorsNeeded)

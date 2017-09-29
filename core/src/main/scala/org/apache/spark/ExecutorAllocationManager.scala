@@ -128,7 +128,7 @@ private[spark] class ExecutorAllocationManager(
     "spark.dynamicAllocation.sustainedSchedulerBacklogTimeout", s"${schedulerBacklogTimeoutS}s")
 
   // How long an executor must be idle for before it is removed (seconds)
-  //执行者在删除之前必须空闲多久（秒）
+  //执行者在删除之前必须空闲多久(秒)
   private val executorIdleTimeoutS = conf.getTimeAsSeconds(
     "spark.dynamicAllocation.executorIdleTimeout", "60s")
 
@@ -136,27 +136,26 @@ private[spark] class ExecutorAllocationManager(
     "spark.dynamicAllocation.cachedExecutorIdleTimeout", s"${Integer.MAX_VALUE}s")
 
   // During testing, the methods to actually kill and add executors are mocked out
-  //在测试期间,实际上杀死和添加执行器的方法被
+  //在测试期间,实际上杀死和添加执行器的方法
   private val testing = conf.getBoolean("spark.dynamicAllocation.testing", false)
 
   // TODO: The default value of 1 for spark.executor.cores works right now because dynamic
-  //spark.executor.cores的默认值为1,因为动态
   // allocation is only supported for YARN and the default number of cores per executor in YARN is
   // 1, but it might need to be attained differently for different cluster managers
-  //YARN仅支持分配,YARN中每个执行者的默认核心数量为1,但是对于不同的集群管理器,可能需要不同的方式实现
-  //为每个任务分配的内核数
-  private val tasksPerExecutor =
+  //对于spark.executor.cores 默认值为1,因为YARN只支持动态分配,YARN is1中的每个执行者的默认核心数,
+  // 但是对于不同的集群管理器可能需要不同的方式实现
+  private val tasksPerExecutor =   //每个执行者的任务
     conf.getInt("spark.executor.cores", 1) / conf.getInt("spark.task.cpus", 1)
 
   validateSettings()
 
   // Number of executors to add in the next round
-  //在下一轮增加的执行数
+  //增加的执行数
   private var numExecutorsToAdd = 1
 
   // The desired number of executors at this moment in time. If all our executors were to die, this
   // is the number of executors we would immediately want from the cluster manager.
-  //在此时刻所需的执行数,如果我们的所有执行者都要死,这个是我们将立即从集群管理器获得的执行者的数量。
+  //在此时刻所需的执行数,如果我们的所有执行者都要死亡,我们立即从集群管理器获得的执行数。
   private var numExecutorsTarget =
     conf.getInt("spark.dynamicAllocation.initialExecutors", minNumExecutors)
 
@@ -391,7 +390,8 @@ private[spark] class ExecutorAllocationManager(
    * 从集群管理器请求的执行者,如果在执行者的数量达到上限,放弃执行数复位而不是继续添加下一轮双
    * @param maxNumExecutorsNeeded the maximum number of executors all currently running or pending
    *                              tasks could fill
-   * @return the number of additional executors actually requested.
+    *                             所有当前正在运行的或未完成的任务的执行的最大数量
+   * @return the number of additional executors actually requested. 执行者的实际数量
    */
   private def addExecutors(maxNumExecutorsNeeded: Int): Int = {
     // Do not request more executors if it would put our target over the upper bound
@@ -493,7 +493,7 @@ private[spark] class ExecutorAllocationManager(
 
   /**
    * Callback invoked when the specified executor has been added.
-    * 调用指定的执行程序时调用回调函数
+    * 调用指定的执行时调用回调函数
    */
   private def onExecutorAdded(executorId: String): Unit = synchronized {
     if (!executorIds.contains(executorId)) {
@@ -502,6 +502,8 @@ private[spark] class ExecutorAllocationManager(
       // has been reached, it will no longer be marked as idle. When new executors join,
       // however, we are no longer at the lower bound, and so we must mark executor X
       // as idle again so as not to forget that it is a candidate for removal. (see SPARK-4951)
+      //如果执行者（调用此执行者X）因为下限已达到而未被删除,则不再标记为空闲。
+      // 然而,当新的执行者加入时,我们已经不再处于下限了,所以我们必须把执行者X标记为空闲,以免忘记它是候选人,(见SPARK-4951）
       executorIds.filter(listener.isExecutorIdle).foreach(onExecutorIdle)
       logInfo(s"New executor $executorId has registered (new total is ${executorIds.size})")
     } else {
@@ -532,6 +534,8 @@ private[spark] class ExecutorAllocationManager(
    * Callback invoked when the scheduler receives new pending tasks.
    * This sets a time in the future that decides when executors should be added
    * if it is not already set.
+    *
+    * 调度程序接收新的挂起任务时调用回调,这将在未来确定何时添加执行,如果还没有设置
    */
   private def onSchedulerBacklogged(): Unit = synchronized {
     if (addTime == NOT_SET) {
@@ -554,8 +558,10 @@ private[spark] class ExecutorAllocationManager(
 
   /**
    * Callback invoked when the specified executor is no longer running any tasks.
+    * 当指定的执行程序不再运行任何任务时调用回调函数
    * This sets a time in the future that decides when this executor should be removed if
    * the executor is not already marked as idle.
+    * 这将设定未来的时间,如果执行者尚未被标记为空闲,则决定何时应该删除这个执行者
    */
   private def onExecutorIdle(executorId: String): Unit = synchronized {
     if (executorIds.contains(executorId)) {
@@ -563,6 +569,7 @@ private[spark] class ExecutorAllocationManager(
         // Note that it is not necessary to query the executors since all the cached
         // blocks we are concerned with are reported to the driver. Note that this
         // does not include broadcast blocks.
+        //请注意,无需查询执行者,因为我们关心的所有缓存的块都会向驱动程序报告,请注意,这不包括广播块
         val hasCachedBlocks = SparkEnv.get.blockManager.master.hasCachedBlocks(executorId)
         val now = clock.getTimeMillis()
         val timeout = {
@@ -614,8 +621,10 @@ private[spark] class ExecutorAllocationManager(
 
     // stageId to tuple (the number of task with locality preferences, a map where each pair is a
     // node and the number of tasks that would like to be scheduled on that node) map,
+    //tageId到元组(具有地区偏好的任务数量,每对是一个节点的Map和要在该节点上安排的任务数量)Map,
     // maintain the executor placement hints for each stage Id used by resource framework to better
     // place the executors.
+    //维护资源框架使用的每个阶段Id的执行者位置提示,以更好地放置执行者。
     private val stageIdToExecutorPlacementHints = new mutable.HashMap[Int, (Int, Map[String, Int])]
 
     override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted): Unit = {
