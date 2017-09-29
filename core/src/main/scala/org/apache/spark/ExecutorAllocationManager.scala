@@ -387,7 +387,7 @@ private[spark] class ExecutorAllocationManager(
    * Request a number of executors from the cluster manager.
    * If the cap on the number of executors is reached, give up and reset the
    * number of executors to add next round instead of continuing to double it.
-   * 从集群管理器请求的执行者,如果在执行者的数量达到上限,放弃执行数复位而不是继续添加下一轮双
+   * 从集群管理器请求的执行者,如果在执行者的数量达到上限,放弃执行数复位而不是继续添加下一轮
    * @param maxNumExecutorsNeeded the maximum number of executors all currently running or pending
    *                              tasks could fill
     *                             所有当前正在运行的或未完成的任务的执行的最大数量

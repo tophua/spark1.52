@@ -879,6 +879,7 @@ class ExecutorAllocationManagerSuite
 /**
  * Helper methods for testing ExecutorAllocationManager.
  * This includes methods to access private methods and fields in ExecutorAllocationManager.
+  * 这包括访问ExecutorAllocationManager中的私有方法和字段的方法
  */
 private object ExecutorAllocationManagerSuite extends PrivateMethodTester {
   private val schedulerBacklogTimeout = 1L
@@ -954,52 +955,53 @@ private object ExecutorAllocationManagerSuite extends PrivateMethodTester {
   private def schedule(manager: ExecutorAllocationManager): Unit = {
     manager invokePrivate _schedule()
   }
-
+  //最大Executros数
   private def maxNumExecutorsNeeded(manager: ExecutorAllocationManager): Int = {
     manager invokePrivate _maxNumExecutorsNeeded()
   }
-  //
+  //从集群管理器请求的执行者,如果在执行者的数量达到上限,放弃执行数复位而不是继续添加下一轮,
+  //还回执行者的实际数量
   private def addExecutors(manager: ExecutorAllocationManager): Int = {
     val maxNumExecutorsNeeded = manager invokePrivate _maxNumExecutorsNeeded()
     manager invokePrivate _addExecutors(maxNumExecutorsNeeded)
   }
-
+//同步更新集群管理器执行目标数
   private def adjustRequestedExecutors(manager: ExecutorAllocationManager): Int = {
     manager invokePrivate _updateAndSyncNumExecutorsTarget(0L)
   }
-
+  //请求集群管理器删除给定的执行器,返回是否收到请求。
   private def removeExecutor(manager: ExecutorAllocationManager, id: String): Boolean = {
     manager invokePrivate _removeExecutor(id)
   }
-
+  //调用指定的执行时调用回调函数
   private def onExecutorAdded(manager: ExecutorAllocationManager, id: String): Unit = {
     manager invokePrivate _onExecutorAdded(id)
   }
-
+  //当指定的执行程序已被删除时调用回调函数
   private def onExecutorRemoved(manager: ExecutorAllocationManager, id: String): Unit = {
     manager invokePrivate _onExecutorRemoved(id)
   }
-
+  //调度程序接收新的挂起任务时调用回调,这将在未来确定何时添加执行,如果还没有设置
   private def onSchedulerBacklogged(manager: ExecutorAllocationManager): Unit = {
     manager invokePrivate _onSchedulerBacklogged()
   }
-
+  //调度器队列排出时调用回调函数,这将重置用于添加执行程序的所有变量。
   private def onSchedulerQueueEmpty(manager: ExecutorAllocationManager): Unit = {
     manager invokePrivate _onSchedulerQueueEmpty()
   }
-
+  //当指定的执行程序不再运行任何任务时调用回调函数
   private def onExecutorIdle(manager: ExecutorAllocationManager, id: String): Unit = {
     manager invokePrivate _onExecutorIdle(id)
   }
-
+  //当指定的执行程序正在运行任务时调用回调,这将重置用于删除此执行程序的所有变量。
   private def onExecutorBusy(manager: ExecutorAllocationManager, id: String): Unit = {
     manager invokePrivate _onExecutorBusy(id)
   }
-
+  //更新Executor位置提示(具有本地偏好设置的任务数,每对是一个节点的映射以及该节点上要安排的任务数)。
   private def localityAwareTasks(manager: ExecutorAllocationManager): Int = {
     manager invokePrivate _localityAwareTasks()
   }
-
+  //运行主机上的任务
   private def hostToLocalTaskCount(manager: ExecutorAllocationManager): Map[String, Int] = {
     manager invokePrivate _hostToLocalTaskCount()
   }
