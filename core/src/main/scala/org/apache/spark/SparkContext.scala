@@ -196,7 +196,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       master: String,
       appName: String,
       sparkHome: String = null,
-      jars: Seq[String] = Nil,
+      jars: Seq[String] = Nil,//列表结尾为Nil
       environment: Map[String, String] = Map(),
       preferredNodeLocationData: Map[String, Set[SplitInfo]] = Map()) =
   {
@@ -222,7 +222,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     *                应用程序的名称,以在集群Web UI上显示
    */
   private[spark] def this(master: String, appName: String) =
-    this(master, appName, null, Nil, Map(), Map())
+    this(master, appName, null, Nil, Map(), Map())//列表结尾为Nil
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
@@ -232,7 +232,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * @param sparkHome Location where Spark is installed on cluster nodes.Spark安装在群集节点上的位置
    */
   private[spark] def this(master: String, appName: String, sparkHome: String) =
-    this(master, appName, sparkHome, Nil, Map(), Map())
+    this(master, appName, sparkHome, Nil, Map(), Map())//列表结尾为Nil
 
   /**
    * Alternative constructor that allows setting common Spark properties directly
@@ -2931,7 +2931,7 @@ object SparkContext extends Logging {
       master: String,
       appName: String,
       sparkHome: String = null,
-      jars: Seq[String] = Nil,
+      jars: Seq[String] = Nil,//列表结尾为Nil
       environment: Map[String, String] = Map()): SparkConf =
   {
     val res = conf.clone()

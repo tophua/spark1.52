@@ -69,7 +69,7 @@ class DataTypeSuite extends SparkFunSuite {
       StructField("a", IntegerType, true) ::
       StructField("b", LongType, false) ::
       StructField("c", StringType, true) ::
-      StructField("d", FloatType, true) :: Nil)
+      StructField("d", FloatType, true) :: Nil)//列表结尾为Nil
 
     assert(StructField("b", LongType, false) === struct("b"))
 
@@ -79,7 +79,7 @@ class DataTypeSuite extends SparkFunSuite {
 
     val expectedStruct = StructType(
       StructField("b", LongType, false) ::
-      StructField("d", FloatType, true) :: Nil)
+      StructField("d", FloatType, true) :: Nil)//列表结尾为Nil
 
     assert(expectedStruct === struct(Set("b", "d")))
     intercept[IllegalArgumentException] {
@@ -90,7 +90,7 @@ class DataTypeSuite extends SparkFunSuite {
   test("extract field index from a StructType") {
     val struct = StructType(
       StructField("a", LongType) ::
-      StructField("b", FloatType) :: Nil)
+      StructField("b", FloatType) :: Nil)//列表结尾为Nil
 
     assert(struct.fieldIndex("a") === 0)
     assert(struct.fieldIndex("b") === 1)
@@ -103,7 +103,7 @@ class DataTypeSuite extends SparkFunSuite {
   test("fieldsMap returns map of name to StructField") {
     val struct = StructType(
       StructField("a", LongType) ::
-      StructField("b", FloatType) :: Nil)
+      StructField("b", FloatType) :: Nil)//列表结尾为Nil
 
     val mapped = StructType.fieldsMap(struct.fields)
 
@@ -117,7 +117,7 @@ class DataTypeSuite extends SparkFunSuite {
   test("merge where right is empty") {
     val left = StructType(
       StructField("a", LongType) ::
-      StructField("b", FloatType) :: Nil)
+      StructField("b", FloatType) :: Nil)//列表结尾为Nil
 
     val right = StructType(List())
     val merged = left.merge(right)
@@ -131,7 +131,7 @@ class DataTypeSuite extends SparkFunSuite {
 
     val right = StructType(
       StructField("a", LongType) ::
-      StructField("b", FloatType) :: Nil)
+      StructField("b", FloatType) :: Nil)//列表结尾为Nil
 
     val merged = left.merge(right)
 
@@ -142,15 +142,15 @@ class DataTypeSuite extends SparkFunSuite {
   test("merge where both are non-empty") {
     val left = StructType(
       StructField("a", LongType) ::
-      StructField("b", FloatType) :: Nil)
+      StructField("b", FloatType) :: Nil)//列表结尾为Nil
 
-    val right = StructType(
+    val right = StructType(//列表结尾为Nil
       StructField("c", LongType) :: Nil)
 
     val expected = StructType(
       StructField("a", LongType) ::
       StructField("b", FloatType) ::
-      StructField("c", LongType) :: Nil)
+      StructField("c", LongType) :: Nil)//列表结尾为Nil
 
     val merged = left.merge(right)
 
@@ -160,10 +160,10 @@ class DataTypeSuite extends SparkFunSuite {
   test("merge where right contains type conflict") {
     val left = StructType(
       StructField("a", LongType) ::
-      StructField("b", FloatType) :: Nil)
+      StructField("b", FloatType) :: Nil)//列表结尾为Nil
 
     val right = StructType(
-      StructField("b", LongType) :: Nil)
+      StructField("b", LongType) :: Nil)//列表结尾为Nil
 
     intercept[SparkException] {
       left.merge(right)
@@ -312,27 +312,27 @@ class DataTypeSuite extends SparkFunSuite {
     expected = true)
 
 
-  checkEqualsIgnoreCompatibleNullability(
+  checkEqualsIgnoreCompatibleNullability(//列表结尾为Nil
     from = StructType(StructField("a", StringType, nullable = true) :: Nil),
     to = StructType(StructField("a", StringType, nullable = true) :: Nil),
     expected = true)
-  checkEqualsIgnoreCompatibleNullability(
+  checkEqualsIgnoreCompatibleNullability(//列表结尾为Nil
     from = StructType(StructField("a", StringType, nullable = false) :: Nil),
     to = StructType(StructField("a", StringType, nullable = false) :: Nil),
     expected = true)
-  checkEqualsIgnoreCompatibleNullability(
+  checkEqualsIgnoreCompatibleNullability(//列表结尾为Nil
     from = StructType(StructField("a", StringType, nullable = false) :: Nil),
     to = StructType(StructField("a", StringType, nullable = true) :: Nil),
     expected = true)
-  checkEqualsIgnoreCompatibleNullability(
+  checkEqualsIgnoreCompatibleNullability(//列表结尾为Nil
     from = StructType(StructField("a", StringType, nullable = true) :: Nil),
     to = StructType(StructField("a", StringType, nullable = false) :: Nil),
     expected = false)
   checkEqualsIgnoreCompatibleNullability(
-    from = StructType(
+    from = StructType(//列表结尾为Nil
       StructField("a", StringType, nullable = false) ::
       StructField("b", StringType, nullable = true) :: Nil),
-    to = StructType(
+    to = StructType(//列表结尾为Nil
       StructField("a", StringType, nullable = false) ::
       StructField("b", StringType, nullable = false) :: Nil),
     expected = false)

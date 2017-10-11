@@ -245,7 +245,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
   test("caching with failures") {//缓存失败
     val onlySplit = new Partition { override def index: Int = 0 }
     var shouldFail = true
-    val rdd = new RDD[Int](sc, Nil) {
+    val rdd = new RDD[Int](sc, Nil) {//列表结尾为Nil
       override def getPartitions: Array[Partition] = Array(onlySplit)
       override val getDependencies = List[Dependency[_]]()
       override def compute(split: Partition, context: TaskContext): Iterator[Int] = {
@@ -1067,7 +1067,7 @@ class RDDSuite extends SparkFunSuite with SharedSparkContext {
    *  A contrived RDD that allows the manual addition of dependencies after creation. 
    * 创建后可以手动添加依赖关系的RDD。
    *  */
-  private class CyclicalDependencyRDD[T: ClassTag] extends RDD[T](sc, Nil) {
+  private class CyclicalDependencyRDD[T: ClassTag] extends RDD[T](sc, Nil) {//列表结尾为Nil
     private val mutableDependencies: ArrayBuffer[Dependency[_]] = ArrayBuffer.empty
     override def compute(p: Partition, c: TaskContext): Iterator[T] = Iterator.empty
     override def getPartitions: Array[Partition] = Array.empty

@@ -48,7 +48,7 @@ private[repl] trait SparkExprTyper extends Logging {
     reporter.withIncompleteHandler((_, _) => isIncomplete = true) {
       val trees = codeParser.stmts(line)
       if (reporter.hasErrors) {
-        Some(Nil)
+        Some(Nil)//列表结尾为Nil
       } else if (isIncomplete) {
         None
       } else {
@@ -85,7 +85,7 @@ private[repl] trait SparkExprTyper extends Logging {
         case IR.Success =>
           repl.definedSymbolList filterNot old match {
             case Nil        => NoSymbol
-            case sym :: Nil => sym
+            case sym :: Nil => sym //列表结尾为Nil
             case syms       => NoSymbol.newOverloaded(NoPrefix, syms)
           }
         case _ => NoSymbol

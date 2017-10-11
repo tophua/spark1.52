@@ -23,7 +23,7 @@ class PartitionPruningRDDSuite extends SparkFunSuite with SharedSparkContext {
 
   test("Pruned Partitions inherit locality prefs correctly") {//修剪的分区设置的正确性
 
-    val rdd = new RDD[Int](sc, Nil) {
+    val rdd = new RDD[Int](sc, Nil) {//列表结尾为Nil
       override protected def getPartitions = {
         Array[Partition](
           new TestPartition(0, 1),
@@ -44,7 +44,7 @@ class PartitionPruningRDDSuite extends SparkFunSuite with SharedSparkContext {
 
 
   test("Pruned Partitions can be unioned ") {//修剪分区可以联合
-
+  //列表结尾为Nil
     val rdd = new RDD[Int](sc, Nil) {
       override protected def getPartitions = {
         Array[Partition](

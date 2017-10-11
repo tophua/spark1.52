@@ -108,6 +108,7 @@ class ParquetFilterSuite extends QueryTest with ParquetTest with SharedSQLContex
   }
   //过滤下推-布尔
   test("filter pushdown - boolean") {
+    //列表结尾为Nil
     withParquetDataFrame((true :: false :: Nil).map(b => Tuple1.apply(Option(b)))) { implicit df =>
       checkFilterPredicate('_1.isNull, classOf[Eq[_]], Seq.empty[Row])
       checkFilterPredicate('_1.isNotNull, classOf[NotEq[_]], Seq(Row(true), Row(false)))

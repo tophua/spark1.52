@@ -695,7 +695,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   def range(start: Long, end: Long): DataFrame = {
     createDataFrame(
       sparkContext.range(start, end).map(Row(_)),
-      StructType(StructField("id", LongType, nullable = false) :: Nil))
+      StructType(StructField("id", LongType, nullable = false) :: Nil)) //列表结尾为Nil
   }
 
   /**

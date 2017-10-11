@@ -90,7 +90,7 @@ private[fpm] class FPTree[T] extends Serializable {
         (item :: t, c)
       }
     } ++ {
-      if (count > 0) {
+      if (count > 0) {//列表结尾为Nil
         Iterator.single((Nil, count))
       } else {
         Iterator.empty

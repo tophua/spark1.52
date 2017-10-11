@@ -149,6 +149,7 @@ class MathFunctionsSuite extends SparkFunSuite with ExpressionEvalHelper {
   private def checkNaNWithOptimization(
     expression: Expression,
     inputRow: InternalRow = EmptyRow): Unit = {
+    //列表结尾为Nil
     val plan = Project(Alias(expression, s"Optimized($expression)")() :: Nil, OneRowRelation)
     val optimizedPlan = DefaultOptimizer.execute(plan)
     checkNaNWithoutCodegen(optimizedPlan.expressions.head, inputRow)

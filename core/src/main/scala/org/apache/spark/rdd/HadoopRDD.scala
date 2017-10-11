@@ -112,6 +112,7 @@ class HadoopRDD[K, V](
     valueClass: Class[V],
     minPartitions: Int)//生成最小分区数
     //deps是一个空的Nil list,原因是它是从外部文件生成的,没有父rdd
+    //列表结尾为Nil
   extends RDD[(K, V)](sc, Nil) with Logging {
 
   if (initLocalJobConfFuncOpt.isDefined) {

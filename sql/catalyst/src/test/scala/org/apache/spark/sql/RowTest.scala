@@ -27,7 +27,7 @@ class RowTest extends FunSpec with Matchers {
   val schema = StructType(
     StructField("col1", StringType) ::
     StructField("col2", StringType) ::
-    StructField("col3", IntegerType) :: Nil)
+    StructField("col3", IntegerType) :: Nil)//列表结尾为Nil
   val values = Array("value1", "value2", 1)
 
   val sampleRow: Row = new GenericRowWithSchema(values, schema)

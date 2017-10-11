@@ -52,12 +52,12 @@ case class Aggregate(
 
   override def requiredChildDistribution: List[Distribution] = {
     if (partial) {
-      UnspecifiedDistribution :: Nil
-    } else {
+      UnspecifiedDistribution :: Nil//列表结尾为Nil
+    } else {//列表结尾为Nil
       if (groupingExpressions == Nil) {
-        AllTuples :: Nil
-      } else {
-        ClusteredDistribution(groupingExpressions) :: Nil
+        AllTuples :: Nil//列表结尾为Nil
+      } else {//列表结尾为Nil
+        ClusteredDistribution(groupingExpressions) :: Nil//列表结尾为Nil
       }
     }
   }

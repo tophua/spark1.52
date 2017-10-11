@@ -136,7 +136,7 @@ private[repl] trait SparkImports {
         }
 
         reqs match {
-          case Nil                                    => Nil
+          case Nil                                    => Nil //列表结尾为Nil
           case rh :: rest if !keepHandler(rh.handler) => select(rest, wanted)
           case rh :: rest                             =>
             import rh.handler._

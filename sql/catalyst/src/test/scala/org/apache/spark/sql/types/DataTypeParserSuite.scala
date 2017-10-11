@@ -55,12 +55,13 @@ class DataTypeParserSuite extends SparkFunSuite {
   checkDataType("Array<map<int, tinYint>>", ArrayType(MapType(IntegerType, ByteType, true), true))
   checkDataType(
     "array<struct<tinYint:tinyint>>",
+    //列表结尾为Nil
     ArrayType(StructType(StructField("tinYint", ByteType, true) :: Nil), true)
   )
   checkDataType("MAP<int, STRING>", MapType(IntegerType, StringType, true))
   checkDataType("MAp<int, ARRAY<double>>", MapType(IntegerType, ArrayType(DoubleType), true))
   checkDataType(
-    "MAP<int, struct<varchar:string>>",
+    "MAP<int, struct<varchar:string>>",//列表结尾为Nil
     MapType(IntegerType, StructType(StructField("varchar", StringType, true) :: Nil), true)
   )
 
@@ -68,13 +69,13 @@ class DataTypeParserSuite extends SparkFunSuite {
     "struct<intType: int, ts:timestamp>",
     StructType(
       StructField("intType", IntegerType, true) ::
-      StructField("ts", TimestampType, true) :: Nil)
+      StructField("ts", TimestampType, true) :: Nil)//列表结尾为Nil
   )
   // It is fine to use the data type string as the column name.
   checkDataType(
     "Struct<int: int, timestamp:timestamp>",
     StructType(
-      StructField("int", IntegerType, true) ::
+      StructField("int", IntegerType, true) :://列表结尾为Nil
       StructField("timestamp", TimestampType, true) :: Nil)
   )
   checkDataType(
@@ -88,15 +89,17 @@ class DataTypeParserSuite extends SparkFunSuite {
       StructField("struct",
         StructType(
           StructField("deciMal", DecimalType.USER_DEFAULT, true) ::
+            //列表结尾为Nil
           StructField("anotherDecimal", DecimalType(5, 2), true) :: Nil), true) ::
       StructField("MAP", MapType(TimestampType, StringType), true) ::
-      StructField("arrAy", ArrayType(DoubleType, true), true) :: Nil)
+      StructField("arrAy", ArrayType(DoubleType, true), true) :: Nil)//列表结尾为Nil
   )
   // A column name can be a reserved word in our DDL parser and SqlParser.
   checkDataType(
     "Struct<TABLE: string, CASE:boolean>",
     StructType(
       StructField("TABLE", StringType, true) ::
+        //列表结尾为Nil
       StructField("CASE", BooleanType, true) :: Nil)
   )
   // Use backticks to quote column names having special characters.
@@ -105,10 +108,10 @@ class DataTypeParserSuite extends SparkFunSuite {
     StructType(
       StructField("x+y", IntegerType, true) ::
       StructField("!@#$%^&*()", StringType, true) ::
-      StructField("1_2.345<>:\"", StringType, true) :: Nil)
+      StructField("1_2.345<>:\"", StringType, true) :: Nil)//列表结尾为Nil
   )
   // Empty struct.
-  checkDataType("strUCt<>", StructType(Nil))
+  checkDataType("strUCt<>", StructType(Nil))//列表结尾为Nil
 
   unsupported("it is not a data type")
   unsupported("struct<x+y: int, 1.1:timestamp>")

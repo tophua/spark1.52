@@ -305,6 +305,23 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("string locate function") {//字符串查找匹配定位函数
     val df = Seq(("aaads", "aa", "zz", 1)).toDF("a", "b", "c", "d")
+    /**
+       +-----+---+---+---+
+      |    a|  b|  c|  d|
+      +-----+---+---+---+
+      |aaads| aa| zz|  1|
+      +-----+---+---+---+
+      */
+    df.show()
+    df.select(locate("aa", $"a"), locate("aa", $"a", 1)).show()
+    /**
+       +--------------+--------------+
+      |locate(aa,a,0)|locate(aa,a,1)|
+      +--------------+--------------+
+      |             1|             2|
+      +--------------+--------------+
+      */
+
     checkAnswer(
       //locate 确定…的位置
       df.select(locate("aa", $"a"), locate("aa", $"a", 1)),
@@ -417,9 +434,19 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
           "f", // long    5L
           "g", // double  6.48173d
           "h") // decimal 7.128381
+    df.show()
+    /**
+        +---+---+---+-------+---+---+-------+--------------------+
+        |  a|  b|  c|      d|  e|  f|      g|                   h|
+        +---+---+---+-------+---+---+-------+--------------------+
+        | aa|  1|  2|3.13223|  4|  5|6.48173|7.128381000000000000|
+        +---+---+---+-------+---+---+-------+--------------------+
+      */
 
     checkAnswer(
        //数字格式4个零
+      // 格式数值列x一个格式的'## # #,# # #',四舍五入,返回字符串列的结果,
+      //如果d为0,则结果没有小数点或小数部分,如果d < 0,结果将为null
       df.select(format_number($"f", 4)),
       Row("5.0000"))
 
@@ -432,7 +459,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       df.selectExpr("format_number(c, e)"), // convert the 1st argument to integer
       Row("2.0000"))
 
-    checkAnswer(//将第一个参数转换为double类型
+    checkAnswer(//将第一个参数转换为double类型,注意3是四舍五入
       df.selectExpr("format_number(d, e)"), // convert the 1st argument to double
       Row("3.1322"))
 
@@ -444,16 +471,16 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
       df.selectExpr("format_number(f, e)"), // not convert anything
       Row("5.0000"))
 
-    checkAnswer(//不转换任何东西
+    checkAnswer(//不转换任何东西,注意3是四舍五入
       df.selectExpr("format_number(g, e)"), // not convert anything
       Row("6.4817"))
 
-    checkAnswer(//不转换任何东西
+    checkAnswer(//不转换任何东西,注意8是四舍五入
       df.selectExpr("format_number(h, e)"), // not convert anything
       Row("7.1284"))
 
     intercept[AnalysisException] {
-      checkAnswer(
+      checkAnswer(//转换异常
         df.selectExpr("format_number(a, e)"), // string type of the 1st argument is unacceptable
         Row("5.0000"))
     }
@@ -471,8 +498,21 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     // hence we add a filter operator.
     // See the optimizer rule `ConvertToLocalRelation`
     val df2 = Seq((5L, 4), (4L, 3), (4L, 3), (4L, 3), (3L, 2)).toDF("a", "b")
+    /**
+      +---+---+
+      |  a|  b|
+      +---+---+
+      |  5|  4|
+      |  4|  3|
+      |  4|  3|
+      |  4|  3|
+      |  3|  2|
+      +---+---+
+      */
+    df2.show()
     checkAnswer(
       df2.filter("b>0").selectExpr("format_number(a, b)"),
+      //
       Row("5.0000") :: Row("4.000") :: Row("4.000") :: Row("4.000") :: Row("3.00") :: Nil)
   }
 }

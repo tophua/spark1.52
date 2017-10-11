@@ -304,7 +304,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
       null.asInstanceOf[java.lang.Long],
       null.asInstanceOf[java.lang.Float],
       null.asInstanceOf[java.lang.Double])
-
+    //列表结尾为Nil
     withParquetDataFrame(allNulls :: Nil) { df =>
       val rows = df.collect()
       assert(rows.length === 1)
@@ -317,7 +317,7 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
       None.asInstanceOf[Option[Int]],
       None.asInstanceOf[Option[Long]],
       None.asInstanceOf[Option[String]])
-
+    //列表结尾为Nil
     withParquetDataFrame(allNones :: Nil) { df =>
       val rows = df.collect()
       assert(rows.length === 1)
@@ -538,13 +538,14 @@ class ParquetIOSuite extends QueryTest with ParquetTest with SharedSQLContext {
       ParquetFileWriter.writeMetadataFile(
         sqlContext.sparkContext.hadoopConfiguration,
         path,
+        //列表结尾为Nil
         new Footer(path, new ParquetMetadata(fileMetadata, Nil)) :: Nil)
 
       assertResult(sqlContext.read.parquet(path.toString).schema) {
         StructType(
           StructField("a", BooleanType, nullable = false) ::
           StructField("b", IntegerType, nullable = false) ::
-          Nil)
+          Nil)//列表结尾为Nil
       }
     }
   }

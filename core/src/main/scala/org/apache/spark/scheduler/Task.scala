@@ -127,7 +127,7 @@ private[spark] abstract class Task[T](
   }
 
   def runTask(context: TaskContext): T
-  //task最佳位置
+  //task最佳位置,//列表结尾为Nil
   def preferredLocations: Seq[TaskLocation] = Nil
 
   // Map output tracker epoch. Will be set by TaskScheduler.

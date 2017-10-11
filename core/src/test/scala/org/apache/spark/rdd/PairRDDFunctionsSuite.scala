@@ -457,7 +457,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     try {
       val file = sc.textFile(emptyDir.getAbsolutePath)
       assert(file.partitions.isEmpty)
-      assert(file.collect().toList === Nil)
+      assert(file.collect().toList === Nil)//列表结尾为Nil
       // Test that a shuffle on the file works, because this used to be a bug
       //在文件上进行Shuffle的测试,因为这曾经是一个错误
       assert(file.map(line => (line, 1)).reduceByKey(_ + _).collect().toList === Nil)

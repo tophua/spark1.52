@@ -42,6 +42,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
 
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
+    //非ASCII字符的代码不允许，所以我们禁用scalastyle这里
     testConcat("数据", null, "砖头")
     // scalastyle:on
   }
@@ -102,6 +103,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     val s = 'a.string.at(0)
 
     // substring from zero position with less-than-full length
+    //从小于全长的零位置的子串
     checkEvaluation(
       Substring(s, Literal.create(0, IntegerType), Literal.create(2, IntegerType)), "ex", row)
     checkEvaluation(
