@@ -138,6 +138,7 @@ object DateTimeUtils {
 
   /**
    * Returns the number of days since epoch from from java.sql.Date.
+    * 从java.sql.Date返回从epoch开始的天数
    */
   def fromJavaDate(date: Date): SQLDate = {
     millisToDays(date.getTime)

@@ -93,6 +93,7 @@ class UDFSuite extends QueryTest with SharedSQLContext {
     val df = Seq((1, "Tearing down the walls that divide us")).toDF("id", "saying")
     //注册一个临时表
     df.registerTempTable("tmp_table")
+    //获得Spark分区ID
     sql("select spark_partition_id() from tmp_table").toDF().show()
    /** 	+---+
         |_c0|

@@ -64,6 +64,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
   }
 
   test("string Levenshtein distance") {//字符串莱文斯坦距离
+    //莱文斯坦距离 用于衡量两个字符串之间的相似度
     val df = Seq(("kitten", "sitting"), ("frog", "fog")).toDF("l", "r")
     
     checkAnswer(df.select(levenshtein($"l", $"r")), Seq(Row(3), Row(1)))
@@ -172,6 +173,14 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
     //非ASCII字符的代码不允许,所以我们禁用scalastyle这里
     //使用substring截取字符串
     val df = Seq(("1世3", Array[Byte](1, 2, 3, 4))).toDF("a", "b")
+    /**
+        +---+------------+
+        |  a|           b|
+        +---+------------+
+        |1世3|[1, 2, 3, 4]|
+        +---+------------+
+      */
+    df.show
     //substring列名,从第几个开始,截取几位
     checkAnswer(df.select(substring($"a", 1, 2)), Row("1世"))
     checkAnswer(df.select(substring($"b", 2, 2)), Row(Array[Byte](2,3)))
@@ -412,6 +421,7 @@ class StringFunctionsSuite extends QueryTest with SharedSQLContext {
 
   test("initcap function") {//首字母大写函数
     val df = Seq(("ab", "a B")).toDF("l", "r")
+    //注意区别引用列的方式
     checkAnswer(
       df.select(initcap($"l"), initcap($"r")), Row("Ab", "A B"))
 

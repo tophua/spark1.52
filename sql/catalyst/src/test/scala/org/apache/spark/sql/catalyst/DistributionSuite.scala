@@ -41,9 +41,10 @@ class DistributionSuite extends SparkFunSuite {
         """.stripMargin)
     }
   }
-
+  //HashPartitioning(nullSafe = true)是输出分区
   test("HashPartitioning (with nullSafe = true) is the output partitioning") {
     // Cases which do not need an exchange between two data properties.
+    //不需要两个数据属性之间交换的情况
     checkSatisfied(
       HashPartitioning(Seq('a, 'b, 'c), 10),
       UnspecifiedDistribution,
@@ -70,6 +71,7 @@ class DistributionSuite extends SparkFunSuite {
       true)
 
     // Cases which need an exchange between two data properties.
+    //需要两个数据属性交换的情况
     checkSatisfied(
       HashPartitioning(Seq('a, 'b, 'c), 10),
       ClusteredDistribution(Seq('b, 'c)),
@@ -103,9 +105,10 @@ class DistributionSuite extends SparkFunSuite {
       true)
     */
   }
-
+  //RangePartitioning是输出分区
   test("RangePartitioning is the output partitioning") {
     // Cases which do not need an exchange between two data properties.
+    //不需要两个数据属性之间交换的情况
     checkSatisfied(
       RangePartitioning(Seq('a.asc, 'b.asc, 'c.asc), 10),
       UnspecifiedDistribution,
@@ -142,6 +145,7 @@ class DistributionSuite extends SparkFunSuite {
       true)
 
     // Cases which need an exchange between two data properties.
+    //需要两个数据属性交换的情况
     // TODO: We can have an optimization to first sort the dataset
     // by a.asc and then sort b, and c in a partition. This optimization
     // should tradeoff the benefit of a less number of Exchange operators
