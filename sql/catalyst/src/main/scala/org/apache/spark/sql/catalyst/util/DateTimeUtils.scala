@@ -33,11 +33,13 @@ import org.apache.spark.unsafe.types.UTF8String
 object DateTimeUtils {
 
   // we use Int and Long internally to represent [[DateType]] and [[TimestampType]]
+  //我们在内部使用Int和Long来表示[[DateType]]和[[TimestampType]]
   type SQLDate = Int
   type SQLTimestamp = Long
 
   // see http://stackoverflow.com/questions/466321/convert-unix-timestamp-to-julian
   // it's 2440587.5, rounding up to compatible with Hive
+  //julian date的偏移量,2440588相当于1970/1/1
   final val JULIAN_DAY_OF_EPOCH = 2440588
   final val SECONDS_PER_DAY = 60 * 60 * 24L
   final val MICROS_PER_SECOND = 1000L * 1000L
@@ -58,7 +60,9 @@ object DateTimeUtils {
   @transient lazy val defaultTimeZone = TimeZone.getDefault
 
   // Java TimeZone has no mention of thread safety. Use thread local instance to be safe.
+  //java时区没有线程安全,使用线程本地实例是安全
   private val threadLocalLocalTimeZone = new ThreadLocal[TimeZone] {
+    //当把父类中方法修饰符public改为protected时会出现此错误,这里要明确override的含义
     override protected def initialValue: TimeZone = {
       Calendar.getInstance.getTimeZone
     }
@@ -79,9 +83,11 @@ object DateTimeUtils {
   }
 
   // we should use the exact day as Int, for example, (year, month, day) -> day
+  //我们应该用准确的一天,Int,例如,（年，月，日）->天
   def millisToDays(millisUtc: Long): SQLDate = {
     // SPARK-6785: use Math.floor so negative number of days (dates before 1970)
     // will correctly work as input for function toJavaDate(Int)
+    //将正确的工作tojavadate输入函数(int)
     val millisLocal = millisUtc + threadLocalLocalTimeZone.get().getOffset(millisUtc)
     Math.floor(millisLocal.toDouble / MILLIS_PER_DAY).toInt
   }
@@ -96,6 +102,7 @@ object DateTimeUtils {
     threadLocalDateFormat.get.format(toJavaDate(days))
 
   // Converts Timestamp to string according to Hive TimestampWritable convention.
+  //将时间戳字符串按照Hive的timestampwritable转换
   def timestampToString(us: SQLTimestamp): String = {
     val ts = toJavaTimestamp(us)
     val timestampString = ts.toString
@@ -146,6 +153,7 @@ object DateTimeUtils {
 
   /**
    * Returns a java.sql.Date from number of days since epoch.
+    * 返回从天以来数量java.sql.date时代
    */
   def toJavaDate(daysSinceEpoch: SQLDate): Date = {
     new Date(daysToMillis(daysSinceEpoch))
@@ -153,6 +161,7 @@ object DateTimeUtils {
 
   /**
    * Returns a java.sql.Timestamp from number of micros since epoch.
+    * 返回从一些微一java.sql.timestamp纪元以来
    */
   def toJavaTimestamp(us: SQLTimestamp): Timestamp = {
     // setNanos() will overwrite the millisecond part, so the milliseconds should be
@@ -171,6 +180,7 @@ object DateTimeUtils {
 
   /**
    * Returns the number of micros since epoch from java.sql.Timestamp.
+    * 返回数字时代以来从java.sql.timestamp Micros
    */
   def fromJavaTimestamp(t: Timestamp): SQLTimestamp = {
     if (t != null) {
@@ -183,9 +193,11 @@ object DateTimeUtils {
   /**
    * Returns the number of microseconds since epoch from Julian day
    * and nanoseconds in a day
+    * 返回自闰年以来的微秒数和一天的纳秒
    */
   def fromJulianDay(day: Int, nanoseconds: Long): SQLTimestamp = {
     // use Long to avoid rounding errors
+    //JULIAN_DAY_OF_EPOCH julian date的偏移量，2440588相当于1970/1/1
     val seconds = (day - JULIAN_DAY_OF_EPOCH).toLong * SECONDS_PER_DAY
     seconds * MICROS_PER_SECOND + nanoseconds / 1000L
   }
@@ -196,6 +208,7 @@ object DateTimeUtils {
    * Note: support timestamp since 4717 BC (without negative nanoseconds, compatible with Hive).
    */
   def toJulianDay(us: SQLTimestamp): (Int, Long) = {
+    //julian date的偏移量,2440588相当于1970/1/1
     val julian_us = us + JULIAN_DAY_OF_EPOCH * MICROS_PER_DAY
     val day = julian_us / MICROS_PER_DAY
     val micros = julian_us % MICROS_PER_DAY
@@ -204,8 +217,10 @@ object DateTimeUtils {
 
   /**
    * Parses a given UTF8 date string to the corresponding a corresponding [[Long]] value.
+    * 分析一个给定的UTF8日期字符串到相应的相应的[Long]值
    * The return type is [[Option]] in order to distinguish between 0L and null. The following
    * formats are allowed:
+    * 返回类型是[Option]为了区分0L和空,允许下列格式：
    *
    * `yyyy`
    * `yyyy-[m]m`
@@ -407,6 +422,7 @@ object DateTimeUtils {
 
   /**
    * Returns the microseconds since year zero (-17999) from microseconds since epoch.
+    * 返回微秒自零年(17999)从微秒纪元以来
    */
   private def absoluteMicroSecond(microsec: SQLTimestamp): SQLTimestamp = {
     microsec + toYearZero * MICROS_PER_DAY
@@ -418,6 +434,7 @@ object DateTimeUtils {
 
   /**
    * Returns the hour value of a given timestamp value. The timestamp is expressed in microseconds.
+    * 返回一个给定的时间戳值小时值,时间戳以微秒表示,
    */
   def getHours(microsec: SQLTimestamp): Int = {
     ((localTimestamp(microsec) / MICROS_PER_SECOND / 3600) % 24).toInt
@@ -426,6 +443,7 @@ object DateTimeUtils {
   /**
    * Returns the minute value of a given timestamp value. The timestamp is expressed in
    * microseconds.
+    *返回一个给定的时间戳值的分钟值,时间戳以微秒表示
    */
   def getMinutes(microsec: SQLTimestamp): Int = {
     ((localTimestamp(microsec) / MICROS_PER_SECOND / 60) % 60).toInt
@@ -434,6 +452,7 @@ object DateTimeUtils {
   /**
    * Returns the second value of a given timestamp value. The timestamp is expressed in
    * microseconds.
+    * 返回一个给定的时间戳值,时间戳以微秒表示
    */
   def getSeconds(microsec: SQLTimestamp): Int = {
     ((localTimestamp(microsec) / MICROS_PER_SECOND) % 60).toInt
@@ -446,6 +465,7 @@ object DateTimeUtils {
   /**
    * Return the number of days since the start of 400 year period.
    * The second year of a 400 year period (year 1) starts on day 365.
+    * 返回从400年开始的天数,400年期间的第二年(1年)开始的365天
    */
   private[this] def yearBoundary(year: Int): Int = {
     year * 365 + ((year / 4 ) - (year / 100) + (year / 400))
@@ -482,6 +502,7 @@ object DateTimeUtils {
 
   /**
    * Returns the 'day in year' value for the given date. The date is expressed in days
+    * 返回的一年值为给定的日期,日期以天表示
    * since 1.1.1970.
    */
   def getDayInYear(date: SQLDate): Int = {
@@ -490,6 +511,7 @@ object DateTimeUtils {
 
   /**
    * Returns the year value for the given date. The date is expressed in days
+    * 返回给定日期的年值,日期以天表示,
    * since 1.1.1970.
    */
   def getYear(date: SQLDate): Int = {
@@ -498,6 +520,7 @@ object DateTimeUtils {
 
   /**
    * Returns the quarter for the given date. The date is expressed in days
+    * 返回给定日期的季度,日期以天表示
    * since 1.1.1970.
    */
   def getQuarter(date: SQLDate): Int = {
@@ -519,6 +542,7 @@ object DateTimeUtils {
   /**
    * Split date (expressed in days since 1.1.1970) into four fields:
    * year, month (Jan is Month 1), dayInMonth, daysToMonthEnd (0 if it's last day of month).
+    * 年,月(1个月是1表示),dayinmonth,daystomonthend(0如果是本月的最后一天)
    */
   def splitDate(date: SQLDate): (Int, Int, Int, Int) = {
     var (year, dayInYear) = getYearAndDayInYear(date)
@@ -562,6 +586,7 @@ object DateTimeUtils {
 
   /**
    * Returns the month value for the given date. The date is expressed in days
+    * 返回给定日期的月份值,日期以天表示
    * since 1.1.1970. January is month 1.
    */
   def getMonth(date: SQLDate): Int = {
@@ -603,6 +628,7 @@ object DateTimeUtils {
 
   /**
    * Returns the 'day of month' value for the given date. The date is expressed in days
+    * 返回给定日期的月一天的值,日期以天表示,
    * since 1.1.1970.
    */
   def getDayOfMonth(date: SQLDate): Int = {
@@ -644,12 +670,15 @@ object DateTimeUtils {
 
   /**
    * The number of days for each month (not leap year)
+    * 每个月的天数(不是闰年)
    */
   private val monthDays = Array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 
   /**
    * Returns the date value for the first day of the given month.
+    * 返回给定的月份的第一天的日期值
    * The month is expressed in months since year zero (17999 BC), starting from 0.
+    * 月自年零月表示(公元前17999年),从0开始
    */
   private def firstDayOfMonth(absoluteMonth: Int): SQLDate = {
     val absoluteYear = absoluteMonth / 12
@@ -743,6 +772,7 @@ object DateTimeUtils {
 
   /*
    * Returns day of week from String. Starting from Thursday, marked as 0.
+   * 从字符串返回星期天,从星期四开始,标记为0
    * (Because 1970-01-01 is Thursday).
    */
   def getDayOfWeekFromString(string: UTF8String): Int = {
@@ -761,6 +791,7 @@ object DateTimeUtils {
 
   /**
    * Returns the first date which is later than startDate and is of the given dayOfWeek.
+    * 返回第一个日期晚于开始日期是给定的一周
    * dayOfWeek is an integer ranges in [0, 6], and 0 is Thu, 1 is Fri, etc,.
    */
   def getNextDateForDayOfWeek(startDate: SQLDate, dayOfWeek: Int): SQLDate = {
@@ -769,6 +800,7 @@ object DateTimeUtils {
 
   /**
    * Returns last day of the month for the given date. The date is expressed in days
+    * 返回给定日期为该月的最后一天,日期以天表示
    * since 1.1.1970.
    */
   def getLastDayOfMonth(date: SQLDate): SQLDate = {
@@ -782,6 +814,7 @@ object DateTimeUtils {
 
   /**
    * Returns the trunc date from original date and trunc level.
+    * 返回日期从原来的日期和trunc TRUNC水平
    * Trunc level should be generated using `parseTruncLevel()`, should only be 1 or 2.
    */
   def truncDate(d: SQLDate, level: Int): SQLDate = {
@@ -814,6 +847,7 @@ object DateTimeUtils {
   /**
    * Returns a timestamp of given timezone from utc timestamp, with the same string
    * representation in their timezone.
+    * 返回一个时间戳从给定的UTC时间戳的时区,时区与他们相同的字符串表示形式。
    */
   def fromUTCTime(time: SQLTimestamp, timeZone: String): SQLTimestamp = {
     val tz = TimeZone.getTimeZone(timeZone)
@@ -824,6 +858,7 @@ object DateTimeUtils {
   /**
    * Returns a utc timestamp from a given timestamp from a given timezone, with the same
    * string representation in their timezone.
+    * 返回一个UTC时间戳从一个给定的时间从一个给定的时区,时区与他们相同的字符串表示形式
    */
   def toUTCTime(time: SQLTimestamp, timeZone: String): SQLTimestamp = {
     val tz = TimeZone.getTimeZone(timeZone)

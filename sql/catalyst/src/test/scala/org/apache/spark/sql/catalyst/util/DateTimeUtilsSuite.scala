@@ -25,6 +25,9 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.sql.catalyst.util.DateTimeUtils._
 
+/**
+  * 日期时间工具测试套件
+  */
 class DateTimeUtilsSuite extends SparkFunSuite {
 
   private[this] def getInUTCDays(timestamp: Long): Int = {
@@ -48,6 +51,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
 
   test("us and julian day") {
     val (d, ns) = toJulianDay(0)
+    //julian date的偏移量，2440588相当于1970/1/1
     assert(d === JULIAN_DAY_OF_EPOCH)
     assert(ns === 0)
     assert(fromJulianDay(d, ns) == 0L)
