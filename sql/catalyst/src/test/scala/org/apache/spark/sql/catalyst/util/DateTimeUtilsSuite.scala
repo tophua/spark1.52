@@ -65,7 +65,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
       assert(t.equals(t1))
     }
   }
-
+  //java日期转换前后
   test("SPARK-6785: java date conversion before and after epoch") {
     def checkFromToJavaDate(d1: Date): Unit = {
       val d2 = toJavaDate(fromJavaDate(d1))
@@ -102,7 +102,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     checkFromToJavaDate(new Date(df1.parse("1776-07-04 10:30:00").getTime))
     checkFromToJavaDate(new Date(df2.parse("1776-07-04 18:30:00 UTC").getTime))
   }
-
+  //字符串转换日期
   test("string to date") {
 
     var c = Calendar.getInstance()
@@ -141,7 +141,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     assert(stringToDate(UTF8String.fromString("20150318")).isEmpty)
     assert(stringToDate(UTF8String.fromString("2015-031-8")).isEmpty)
   }
-
+//字符串转换成timestamp
   test("string to timestamp") {
     var c = Calendar.getInstance()
     c.set(1969, 11, 31, 16, 0, 0)
@@ -315,7 +315,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
       UTF8String.fromString("2015-03-18T12:03:17.123456789+0:00")).get ===
         c.getTimeInMillis * 1000 + 123456)
   }
-
+//小时
   test("hours") {
     val c = Calendar.getInstance()
     c.set(2015, 2, 18, 13, 2, 11)
@@ -323,7 +323,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     c.set(2015, 12, 8, 2, 7, 9)
     assert(getHours(c.getTimeInMillis * 1000) === 2)
   }
-
+//分
   test("minutes") {
     val c = Calendar.getInstance()
     c.set(2015, 2, 18, 13, 2, 11)
@@ -331,7 +331,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     c.set(2015, 2, 8, 2, 7, 9)
     assert(getMinutes(c.getTimeInMillis * 1000) === 7)
   }
-
+//秒
   test("seconds") {
     val c = Calendar.getInstance()
     c.set(2015, 2, 18, 13, 2, 11)
@@ -339,7 +339,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     c.set(2015, 2, 8, 2, 7, 9)
     assert(getSeconds(c.getTimeInMillis * 1000) === 9)
   }
-
+//小时/分/秒
   test("hours / minutes / seconds") {
     Seq(Timestamp.valueOf("2015-06-11 10:12:35.789"),
       Timestamp.valueOf("2015-06-11 20:13:40.789"),
@@ -352,7 +352,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
       assert(getSeconds(us) === t.getSeconds)
     }
   }
-
+  //获得一年的多少天
   test("get day in year") {
     val c = Calendar.getInstance()
     c.set(2015, 2, 18, 0, 0, 0)
@@ -360,7 +360,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     c.set(2012, 2, 18, 0, 0, 0)
     assert(getDayInYear(getInUTCDays(c.getTimeInMillis)) === 78)
   }
-
+  //得到年
   test("get year") {
     val c = Calendar.getInstance()
     c.set(2015, 2, 18, 0, 0, 0)
@@ -393,7 +393,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     assert(getDayOfMonth(getInUTCDays(c.getTimeInMillis)) === 24)
   }
 
-  test("date add months") {
+  test("date add months") {//日期的增加
     val c1 = Calendar.getInstance()
     c1.set(1997, 1, 28, 10, 30, 0)
     val days1 = millisToDays(c1.getTimeInMillis)
@@ -403,7 +403,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     c2.set(1996, 0, 31)
     assert(dateAddMonths(days1, -13) === millisToDays(c2.getTimeInMillis))
   }
-
+  //时间戳添加个月
   test("timestamp add months") {
     val c1 = Calendar.getInstance()
     c1.set(1997, 1, 28, 10, 30, 0)
@@ -430,7 +430,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     assert(monthsBetween(c1.getTimeInMillis * 1000L, c2.getTimeInMillis * 1000L) === 11)
   }
 
-  test("from UTC timestamp") {
+  test("from UTC timestamp") {//UTC世界标准时间
     def test(utc: String, tz: String, expected: String): Unit = {
       assert(toJavaTimestamp(fromUTCTime(fromJavaTimestamp(Timestamp.valueOf(utc)), tz)).toString
         === expected)
@@ -452,7 +452,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     test("2011-12-25 18:00:00.123456", "JST", "2011-12-25 09:00:00.123456")
     //PST -08:00 太平洋标准时间
     test("2011-12-25 01:00:00.123456", "PST", "2011-12-25 09:00:00.123456")
-    //
+    //上海
     test("2011-12-25 17:00:00.123456", "Asia/Shanghai", "2011-12-25 09:00:00.123456")
   }
 }

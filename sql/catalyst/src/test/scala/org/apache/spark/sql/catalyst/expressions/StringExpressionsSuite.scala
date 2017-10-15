@@ -21,9 +21,11 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.catalyst.dsl.expressions._
 import org.apache.spark.sql.types._
 
-
+/**
+  * 字符串表达式测试套件
+  */
 class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
-
+//CONCAT函数用于将两个字符串连接起来,形成一个单一的字符串
   test("concat") {
     def testConcat(inputs: String*): Unit = {
       val expected = if (inputs.contains(null)) null else inputs.mkString
@@ -46,7 +48,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     testConcat("数据", null, "砖头")
     // scalastyle:on
   }
-
+  //concat_ws函数在执行的时候,不会因为NULL值而返回NULL
   test("concat_ws") {
     def testConcatWs(expected: String, sep: String, inputs: Any*): Unit = {
       val inputExprs = inputs.map {
@@ -60,6 +62,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
 
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
+    //非ASCII字符的代码不允许,所以我们禁用scalastyle这里
     testConcatWs(null, null)
     testConcatWs(null, null, "a", "b")
     testConcatWs("", "")
@@ -75,7 +78,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     testConcatWs("a哈哈b哈哈c", "哈哈", Seq("a", null, "b"), null, "c", Seq[String](null))
     // scalastyle:on
   }
-
+  //字符串比较
   test("StringComparison") {
     val row = create_row("abc", null)
     val c1 = 'a.string.at(0)
@@ -96,7 +99,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(c2 endsWith "b", null, row)
     checkEvaluation(c1 endsWith Literal.create(null, StringType), null, row)
   }
-
+  //Substring用来截取当前字符串的子串
   test("Substring") {
     val row = create_row("example", "example".toArray.map(_.toByte))
 
@@ -110,34 +113,41 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
       Substring(s, Literal.create(1, IntegerType), Literal.create(2, IntegerType)), "ex", row)
 
     // substring from zero position with full length
+    //子字符串从全长零位
     checkEvaluation(
       Substring(s, Literal.create(0, IntegerType), Literal.create(7, IntegerType)), "example", row)
     checkEvaluation(
       Substring(s, Literal.create(1, IntegerType), Literal.create(7, IntegerType)), "example", row)
 
     // substring from zero position with greater-than-full length
+    //子字符串从零位置大于全长
     checkEvaluation(Substring(s, Literal.create(0, IntegerType), Literal.create(100, IntegerType)),
       "example", row)
     checkEvaluation(Substring(s, Literal.create(1, IntegerType), Literal.create(100, IntegerType)),
       "example", row)
 
     // substring from nonzero position with less-than-full length
+    //子字符串从非零位置小于全长
     checkEvaluation(Substring(s, Literal.create(2, IntegerType), Literal.create(2, IntegerType)),
       "xa", row)
 
     // substring from nonzero position with full length
+    //子字符串从全长非零位置
     checkEvaluation(Substring(s, Literal.create(2, IntegerType), Literal.create(6, IntegerType)),
       "xample", row)
 
     // substring from nonzero position with greater-than-full length
+    //子字符串从非零位置大于全长
     checkEvaluation(Substring(s, Literal.create(2, IntegerType), Literal.create(100, IntegerType)),
       "xample", row)
 
     // zero-length substring (within string bounds)
+    //零长度字符串(字符串内的范围)
     checkEvaluation(Substring(s, Literal.create(0, IntegerType), Literal.create(0, IntegerType)),
       "", row)
 
     // zero-length substring (beyond string bounds)
+    //零长度字符串(字符串以外的范围)
     checkEvaluation(Substring(s, Literal.create(100, IntegerType), Literal.create(4, IntegerType)),
       "", row)
 
@@ -156,6 +166,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
       row)
 
     // 2-arg substring from zero position
+    //从零位置的2-arg子串
     checkEvaluation(
       Substring(s, Literal.create(0, IntegerType), Literal.create(Integer.MAX_VALUE, IntegerType)),
       "example",
@@ -202,7 +213,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(Substring(bytes, -5, 2), Array[Byte](1))
     checkEvaluation(Substring(bytes, -8, 2), Array[Byte]())
   }
-
+  //string substring_index函数
   test("string substring_index function") {
     checkEvaluation(
       SubstringIndex(Literal("www.apache.org"), Literal("."), Literal(3)), "www.apache.org")
@@ -232,7 +243,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(
       SubstringIndex(Literal("www||apache||org"), Literal( "||"), Literal(2)), "www||apache")
   }
-
+  //LIKE文字正则表达式
   test("LIKE literal Regular Expression") {
     checkEvaluation(Literal.create(null, StringType).like("a"), null)
     checkEvaluation(Literal.create("a", StringType).like(Literal.create(null, StringType)), null)
@@ -261,7 +272,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation("ab" like "a%b", true)
     checkEvaluation("a\nb" like "a%b", true)
   }
-
+  //LIKE非文字正则表达式
   test("LIKE Non-literal Regular Expression") {
     val regEx = 'a.string.at(0)
     checkEvaluation("abcd" like regEx, null, create_row(null))
@@ -282,7 +293,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
 
     checkEvaluation(Literal.create(null, StringType) like regEx, null, create_row("bc%"))
   }
-
+  //RLIKE字面正则表达式
   test("RLIKE literal Regular Expression") {
     checkEvaluation(Literal.create(null, StringType) rlike "abdef", null)
     checkEvaluation("abdef" rlike Literal.create(null, StringType), null)
@@ -315,7 +326,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
       evaluate("abbbbc" rlike "**")
     }
   }
-
+  //RLIKE非正则表达式
   test("RLIKE Non-literal Regular Expression") {
     val regEx = 'a.string.at(0)
     checkEvaluation("abdef" rlike regEx, true, create_row("abdef"))
@@ -328,7 +339,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
       evaluate("abbbbc" rlike regEx, create_row("**"))
     }
   }
-
+  //字符串ascii
   test("ascii for string") {
     val a = 'a.string.at(0)
     checkEvaluation(Ascii(Literal("efg")), 101, create_row("abdef"))
@@ -337,7 +348,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(Ascii(a), null, create_row(null))
     checkEvaluation(Ascii(Literal.create(null, StringType)), null, create_row("abdef"))
   }
-
+  //
   test("base64/unbase64 for string") {
     val a = 'a.string.at(0)
     val b = 'b.binary.at(0)
@@ -357,12 +368,13 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(UnBase64(a), null, create_row(null))
     checkEvaluation(UnBase64(Literal.create(null, StringType)), null, create_row("abdef"))
   }
-
+  //字符串的编码/解码
   test("encode/decode for string") {
     val a = 'a.string.at(0)
     val b = 'b.binary.at(0)
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
+    //代码中不允许使用非ASCII字符,所以我们在这里禁用标尺
     checkEvaluation(
       Decode(Encode(Literal("大千世界"), Literal("UTF-16LE")), Literal("UTF-16LE")), "大千世界")
     checkEvaluation(
@@ -378,7 +390,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(Decode(Literal.create(null, BinaryType), Literal("utf-8")), null)
     checkEvaluation(Decode(b, Literal.create(null, StringType)), null, create_row(null))
   }
-
+  //INITCAP()是将每个单词的第一个字母大写,其它字母变为小写返回.
   test("initcap unit test") {
     checkEvaluation(InitCap(Literal.create(null, StringType)), null)
     checkEvaluation(InitCap(Literal("a b")), "A B")
@@ -390,7 +402,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     // scalastyle:on
   }
 
-
+  //编辑距离Levenshtein是指两个字串之间,由一个转成另一个所需的最少编辑操作次数
   test("Levenshtein distance") {
     checkEvaluation(Levenshtein(Literal.create(null, StringType), Literal("")), null)
     checkEvaluation(Levenshtein(Literal(""), Literal.create(null, StringType)), null)
@@ -400,6 +412,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(Levenshtein(Literal("frog"), Literal("fog")), 1)
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
+    //非ASCII字符的代码不允许,所以我们禁用scalastyle这里
     checkEvaluation(Levenshtein(Literal("千世"), Literal("fog")), 3)
     checkEvaluation(Levenshtein(Literal("世界千世"), Literal("大a界b")), 4)
     // scalastyle:on
@@ -413,6 +426,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
 
     // scalastyle:off
     // non ascii characters are not allowed in the code, so we disable the scalastyle here.
+    //非ASCII字符的代码不允许,所以我们禁用scalastyle这里
     checkEvaluation(SoundEx(Literal("测试")), "测试")
     checkEvaluation(SoundEx(Literal("Tschüss")), "T220")
     // scalastyle:on
@@ -432,7 +446,9 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(SoundEx(Literal("relyheewsgeessg")), "R422")
     checkEvaluation(SoundEx(Literal("!!")), "!!")
   }
-
+  //TRANSLATE(char, from, to)用法：返回将出现在from中的每个字符替换为to中的相应字符以后的字符串。
+  //若from比to字符串长，那么在from中比to中多出的字符将会被删除。
+  //三个参数中有一个是空，返回值也将是空值。
   test("translate") {
     checkEvaluation(
       StringTranslate(Literal("translate"), Literal("rnlt"), Literal("123")), "1a2s3ae")
@@ -503,7 +519,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(StringInstr(s1, s2), 0, create_row("花花世界", "小"))
     // scalastyle:on
   }
-
+  //LOCATE函数在ARG2中查找ARG1第一次出现的位置,如果指定POS,则从ARG2的POS处开始查找ARG1第一次出现的位置
   test("LOCATE") {
     val s1 = 'a.string.at(0)
     val s2 = 'b.string.at(1)
@@ -555,7 +571,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(StringRPad(s1, s2, s3), null, row4)
     checkEvaluation(StringRPad(s1, s2, s3), null, row5)
   }
-
+  //repeat()函数，用来复制字符串,如下'ab'表示要复制的字符串，2表示复制的份数
   test("REPEAT") {
     val s1 = 'a.string.at(0)
     val s2 = 'b.int.at(1)
@@ -567,7 +583,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(StringRepeat(s1, s2), "hihi", row1)
     checkEvaluation(StringRepeat(s1, s2), null, row2)
   }
-
+  //返回字符串str的字符颠倒顺序
   test("REVERSE") {
     val s = 'a.string.at(0)
     val row1 = create_row("abccc")
@@ -575,7 +591,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(StringReverse(s), "cccba", row1)
     checkEvaluation(StringReverse(Literal.create(null, StringType)), null, row1)
   }
-
+  //space函数,返回由指定数目空格组成的字符
   test("SPACE") {
     val s1 = 'b.int.at(0)
     val row1 = create_row(2)
@@ -587,7 +603,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(StringSpace(s1), "  ", row1)
     checkEvaluation(StringSpace(s1), null, row2)
   }
-
+  //RegexReplace用指定的替换字符串替换由正则表达式定义的字符模式的所有匹配项
   test("RegexReplace") {
     val row1 = create_row("100-200", "(\\d+)", "num")
     val row2 = create_row("100-200", "(\\d+)", "###")
@@ -608,7 +624,12 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(expr, null, row5)
     checkEvaluation(expr, null, row6)
   }
-
+  /**RegexExtract字符串正则表达式解析函数
+  str是被解析的字符串
+  regexp 是正则表达式
+    idx是返回结果 取表达式的哪一部分  默认值为1。
+    0表示把整个正则表达式对应的结果全部返回
+    1表示返回正则表达式中第一个() 对应的结果 以此类推**/
   test("RegexExtract") {
     val row1 = create_row("100-200", "(\\d+)-(\\d+)", 1)
     val row2 = create_row("100-200", "(\\d+)-(\\d+)", 2)
@@ -634,7 +655,8 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     val expr1 = new RegExpExtract(s, p)
     checkEvaluation(expr1, "100", row1)
   }
-
+  //split() 方法用于把一个字符串分割成字符串数组
+  //支持正则表达式方式分割
   test("SPLIT") {
     val s1 = 'a.string.at(0)
     val s2 = 'b.string.at(1)
@@ -649,7 +671,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(StringSplit(s1, s2), null, row2)
     checkEvaluation(StringSplit(s1, s2), null, row3)
   }
-
+  //length函数返回文本字段中值的长度
   test("length for string / binary") {
     val a = 'a.string.at(0)
     val b = 'b.binary.at(0)
@@ -674,7 +696,7 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(Length(Literal.create(null, StringType)), null, create_row(string))
     checkEvaluation(Length(Literal.create(null, BinaryType)), null, create_row(bytes))
   }
-
+  //返回一个数字格式的表达式
   test("format_number / FormatNumber") {
     checkEvaluation(FormatNumber(Literal(4.asInstanceOf[Byte]), Literal(3)), "4.000")
     checkEvaluation(FormatNumber(Literal(4.asInstanceOf[Short]), Literal(3)), "4.000")
@@ -691,7 +713,8 @@ class StringExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(FormatNumber(Literal.create(null, IntegerType), Literal(3)), null)
     checkEvaluation(FormatNumber(Literal.create(null, NullType), Literal(3)), null)
   }
-
+  //FIND_IN_SET(str,strlist)
+  //如果字符串str是在的strlist组成的N子串的字符串列表，返回值的范围为1到N。
   test("find in set") {
     checkEvaluation(
       FindInSet(Literal.create(null, StringType), Literal.create(null, StringType)), null)

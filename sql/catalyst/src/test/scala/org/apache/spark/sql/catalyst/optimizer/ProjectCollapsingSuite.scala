@@ -34,7 +34,7 @@ class ProjectCollapsingSuite extends PlanTest {
   }
 
   val testRelation = LocalRelation('a.int, 'b.int)
-
+  //
   test("collapse two deterministic, independent projects into one") {
     val query = testRelation
       .select(('a + 1).as('a_plus_1), 'b)

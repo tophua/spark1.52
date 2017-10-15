@@ -25,6 +25,7 @@ import org.apache.spark.sql.types._
 /**
  * A literal value that is not foldable. Used in expression codegen testing to test code path
  * that behave differently based on foldable values.
+  * 不可折叠的字面值,用于表达式代码测试,以测试基于可折叠值的行为不同的代码路径
  */
 case class NonFoldableLiteral(value: Any, dataType: DataType)
   extends LeafExpression with CodegenFallback {

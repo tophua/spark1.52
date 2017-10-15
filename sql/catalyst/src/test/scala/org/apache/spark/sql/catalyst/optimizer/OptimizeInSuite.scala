@@ -42,7 +42,7 @@ class OptimizeInSuite extends PlanTest {
   }
 
   val testRelation = LocalRelation('a.int, 'b.int, 'c.int)
-
+  //OptimizedIn测试：当子项未优化为InSet时少于10项
   test("OptimizedIn test: In clause not optimized to InSet when less than 10 items") {
     val originalQuery =
       testRelation
@@ -52,7 +52,7 @@ class OptimizeInSuite extends PlanTest {
     val optimized = Optimize.execute(originalQuery.analyze)
     comparePlans(optimized, originalQuery)
   }
-
+  //优化测试：在优化到InSert的子句中,超过10项
   test("OptimizedIn test: In clause optimized to InSet when more than 10 items") {
     val originalQuery =
       testRelation
@@ -67,7 +67,7 @@ class OptimizeInSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //OptimizedIn测试：在子句未优化的情况下,过滤器具有属性
   test("OptimizedIn test: In clause not optimized in case filter has attributes") {
     val originalQuery =
       testRelation

@@ -24,13 +24,16 @@ import org.scalatest.PrivateMethodTester
 import scala.language.postfixOps
 
 class DecimalSuite extends SparkFunSuite with PrivateMethodTester {
-  /** Check that a Decimal has the given string representation, precision and scale */
+  /**
+    * Check that a Decimal has the given string representation, precision and scale
+    * 检查十进制是否有给定的字符串表示、精度和刻度
+    * */
   private def checkDecimal(d: Decimal, string: String, precision: Int, scale: Int): Unit = {
     assert(d.toString === string)
     assert(d.precision === precision)
     assert(d.scale === scale)
   }
-
+  //创建小数
   test("creating decimals") {
     checkDecimal(new Decimal(), "0", 1, 0)
     checkDecimal(Decimal(BigDecimal("10.030")), "10.030", 5, 3)
@@ -53,7 +56,7 @@ class DecimalSuite extends SparkFunSuite with PrivateMethodTester {
     intercept[IllegalArgumentException](Decimal(BigDecimal("-9.95"), 2, 1))
     intercept[IllegalArgumentException](Decimal(1e17.toLong, 17, 0))
   }
-
+  //创建负数小数
   test("creating decimals with negative scale") {
     checkDecimal(Decimal(BigDecimal("98765"), 5, -3), "9.9E+4", 5, -3)
     checkDecimal(Decimal(BigDecimal("314.159"), 6, -2), "3E+2", 6, -2)
@@ -62,9 +65,10 @@ class DecimalSuite extends SparkFunSuite with PrivateMethodTester {
     checkDecimal(Decimal(103050709L, 9, -10), "1.03050709E+18", 9, -10)
     checkDecimal(Decimal(1e8.toLong, 10, -10), "1.00000000E+18", 10, -10)
   }
-
+//
   test("double and long values") {
-    /** Check that a Decimal converts to the given double and long values */
+    /** Check that a Decimal converts to the given double and long values
+      * 检查十进制转换为给定的double和long值 */
     def checkValues(d: Decimal, doubleValue: Double, longValue: Long): Unit = {
       assert(d.toDouble === doubleValue)
       assert(d.toLong === longValue)
@@ -90,9 +94,11 @@ class DecimalSuite extends SparkFunSuite with PrivateMethodTester {
   }
 
   // Accessor for the BigDecimal value of a Decimal, which will be null if it's using Longs
+  //Decimal的BigDecimal值的访问器,如果使用Longs，它将为null
   private val decimalVal = PrivateMethod[BigDecimal]('decimalVal)
 
-  /** Check whether a decimal is represented compactly (passing whether we expect it to be) */
+  /** Check whether a decimal is represented compactly (passing whether we expect it to be)
+    * 检查小数是否紧凑地表示(通过我们是否期望它)*/
   private def checkCompact(d: Decimal, expected: Boolean): Unit = {
     val isCompact = d.invokePrivate(decimalVal()).eq(null)
     assert(isCompact == expected, s"$d ${if (expected) "was not" else "was"} compact")
@@ -134,6 +140,7 @@ class DecimalSuite extends SparkFunSuite with PrivateMethodTester {
 
   test("equals") {
     // The decimals on the left are stored compactly, while the ones on the right aren't
+    //左边的小数存放紧凑,而右边的不是
     checkCompact(Decimal(123), true)
     checkCompact(Decimal(BigDecimal(123)), false)
     checkCompact(Decimal("123"), false)
@@ -142,7 +149,7 @@ class DecimalSuite extends SparkFunSuite with PrivateMethodTester {
     assert(Decimal(-123) === Decimal(BigDecimal(-123)))
     assert(Decimal(-123) === Decimal(BigDecimal("-123.00")))
   }
-
+//是零
   test("isZero") {
     assert(Decimal(0).isZero)
     assert(Decimal(0, 4, 2).isZero)
@@ -153,7 +160,7 @@ class DecimalSuite extends SparkFunSuite with PrivateMethodTester {
     assert(!Decimal("1").isZero)
     assert(!Decimal("0.001").isZero)
   }
-
+  //算术
   test("arithmetic") {
     assert(Decimal(100) + Decimal(-100) === Decimal(0))
     assert(Decimal(100) + Decimal(-100) === Decimal(0))
@@ -168,19 +175,23 @@ class DecimalSuite extends SparkFunSuite with PrivateMethodTester {
   }
 
   // regression test for SPARK-8359
+  //乘法精度精确
   test("accurate precision after multiplication") {
     val decimal = (Decimal(Long.MaxValue, 38, 0) * Decimal(Long.MaxValue, 38, 0)).toJavaBigDecimal
     assert(decimal.unscaledValue.toString === "85070591730234615847396907784232501249")
   }
 
   // regression test for SPARK-8677
+  //修复非终止十进制扩展问题
   test("fix non-terminating decimal expansion problem") {
     val decimal = Decimal(1.0, 10, 3) / Decimal(3.0, 10, 3)
     // The difference between decimal should not be more than 0.001.
+    //小数之间的差值不应大于0.001
     assert(decimal.toDouble - 0.333 < 0.001)
   }
 
   // regression test for SPARK-8800
+  //在进行分割操作时修复精度/刻度的损失
   test("fix loss of precision/scale when doing division operation") {
     val a = Decimal(2) / Decimal(3)
     assert(a.toDouble < 1.0 && a.toDouble > 0.6)

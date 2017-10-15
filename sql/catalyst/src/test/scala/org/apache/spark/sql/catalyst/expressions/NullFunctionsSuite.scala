@@ -20,6 +20,9 @@ package org.apache.spark.sql.catalyst.expressions
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.types._
 
+/**
+  * 空功能套件
+  */
 class NullFunctionsSuite extends SparkFunSuite with ExpressionEvalHelper {
 
   def testAllTypes(testFunc: (Any, DataType) => Unit): Unit = {
@@ -54,7 +57,7 @@ class NullFunctionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(IsNaN(Literal(Float.MaxValue)), false)
     checkEvaluation(IsNaN(Literal(5.5f)), false)
   }
-
+  //NANVL(n1,n2) 如果n1是数字就返回n1,否则返回n2
   test("nanvl") {
     checkEvaluation(NaNvl(Literal(5.0), Literal.create(null, DoubleType)), 5.0)
     checkEvaluation(NaNvl(Literal.create(null, DoubleType), Literal(5.0)), null)
@@ -64,7 +67,10 @@ class NullFunctionsSuite extends SparkFunSuite with ExpressionEvalHelper {
     assert(NaNvl(Literal(Double.NaN), Literal(Double.NaN)).
       eval(EmptyRow).asInstanceOf[Double].isNaN)
   }
-
+  /**
+    * COALESCE是一个函数(expression_1, expression_2, ...,expression_n)依次参考各参数表达式,遇到非null值即停止并返回该值。
+    * 如果所有的表达式都是空值，最终将返回一个空值。
+    */
   test("coalesce") {
     testAllTypes { (value: Any, tpe: DataType) =>
       val lit = Literal.create(value, tpe)

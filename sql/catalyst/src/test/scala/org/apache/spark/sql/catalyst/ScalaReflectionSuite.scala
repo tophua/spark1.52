@@ -72,10 +72,10 @@ case class GenericData[A](
 case class MultipleConstructorsData(a: Int, b: String, c: Double) {
   def this(b: String, a: Int) = this(a, b, c = 1.0)
 }
-
+//Scala反射套件
 class ScalaReflectionSuite extends SparkFunSuite {
   import org.apache.spark.sql.catalyst.ScalaReflection._
-
+  //原始数据
   test("primitive data") {
     val schema = schemaFor[PrimitiveData]
     assert(schema === Schema(
@@ -89,7 +89,7 @@ class ScalaReflectionSuite extends SparkFunSuite {
         StructField("booleanField", BooleanType, nullable = false))),
       nullable = true))
   }
-
+  //可空数据
   test("nullable data") {
     val schema = schemaFor[NullableData]
     assert(schema === Schema(
@@ -108,7 +108,7 @@ class ScalaReflectionSuite extends SparkFunSuite {
         StructField("binaryField", BinaryType, nullable = true))),
       nullable = true))
   }
-
+  //可选的数据
   test("optional data") {
     val schema = schemaFor[OptionalData]
     assert(schema === Schema(
@@ -123,7 +123,7 @@ class ScalaReflectionSuite extends SparkFunSuite {
         StructField("structField", schemaFor[PrimitiveData].dataType, nullable = true))),
       nullable = true))
   }
-
+  //复杂的数据
   test("complex data") {
     val schema = schemaFor[ComplexData]
     assert(schema === Schema(
@@ -168,7 +168,7 @@ class ScalaReflectionSuite extends SparkFunSuite {
           ArrayType(ArrayType(IntegerType, containsNull = false), containsNull = true)))),
       nullable = true))
   }
-
+  //通用数据
   test("generic data") {
     val schema = schemaFor[GenericData[Int]]
     assert(schema === Schema(
@@ -176,7 +176,7 @@ class ScalaReflectionSuite extends SparkFunSuite {
         StructField("genericField", IntegerType, nullable = false))),
       nullable = true))
   }
-
+  //元组数据
   test("tuple data") {
     val schema = schemaFor[(Int, String)]
     assert(schema === Schema(
@@ -185,7 +185,7 @@ class ScalaReflectionSuite extends SparkFunSuite {
         StructField("_2", StringType, nullable = true))),
       nullable = true))
   }
-
+  //获取值的数据类型
   test("get data type of a value") {
     // BooleanType
     assert(BooleanType === typeOfObject(true))
@@ -253,14 +253,14 @@ class ScalaReflectionSuite extends SparkFunSuite {
     assert(ArrayType(IntegerType) === typeOfObject3(Seq(1, 2, 3)))
     assert(ArrayType(ArrayType(IntegerType)) === typeOfObject3(Seq(Seq(1, 2, 3))))
   }
-
+  //将原始数据转换为catalyst
   test("convert PrimitiveData to catalyst") {
     val data = PrimitiveData(1, 1, 1, 1, 1, 1, true)
     val convertedData = InternalRow(1, 1.toLong, 1.toDouble, 1.toFloat, 1.toShort, 1.toByte, true)
     val dataType = schemaFor[PrimitiveData].dataType
     assert(CatalystTypeConverters.createToCatalystConverter(dataType)(data) === convertedData)
   }
-
+  //将Option[Product]转换为catalyst
   test("convert Option[Product] to catalyst") {
     val primitiveData = PrimitiveData(1, 1, 1, 1, 1, 1, true)
     val data = OptionalData(Some(2), Some(2), Some(2), Some(2), Some(2), Some(2), Some(true),
@@ -270,7 +270,7 @@ class ScalaReflectionSuite extends SparkFunSuite {
       InternalRow(1, 1, 1, 1, 1, 1, true))
     assert(CatalystTypeConverters.createToCatalystConverter(dataType)(data) === convertedData)
   }
-
+  //用多个构造函数从case类推断模式
   test("infer schema from case class with multiple constructors") {
     val dataType = schemaFor[MultipleConstructorsData].dataType
     dataType match {

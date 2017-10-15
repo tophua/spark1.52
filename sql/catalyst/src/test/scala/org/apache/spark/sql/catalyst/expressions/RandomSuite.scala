@@ -20,14 +20,14 @@ package org.apache.spark.sql.catalyst.expressions
 import org.scalatest.Matchers._
 
 import org.apache.spark.SparkFunSuite
-
+//随机测试套件
 class RandomSuite extends SparkFunSuite with ExpressionEvalHelper {
 
   test("random") {
     checkDoubleEvaluation(Rand(30), 0.7363714192755834 +- 0.001)
     checkDoubleEvaluation(Randn(30), 0.5181478766595276 +- 0.001)
   }
-
+  //代码生成长种子
   test("SPARK-9127 codegen with long seed") {
     checkDoubleEvaluation(Rand(5419823303878592871L), 0.4061913198963727 +- 0.001)
     checkDoubleEvaluation(Randn(5419823303878592871L), -0.24417152005343168 +- 0.001)

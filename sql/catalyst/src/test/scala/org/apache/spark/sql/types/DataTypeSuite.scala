@@ -20,19 +20,19 @@ package org.apache.spark.sql.types
 import org.apache.spark.{SparkException, SparkFunSuite}
 
 class DataTypeSuite extends SparkFunSuite {
-
+  //构造一个ArrayType
   test("construct an ArrayType") {
     val array = ArrayType(StringType)
 
     assert(ArrayType(StringType, true) === array)
   }
-
+  //构造一个MapType
   test("construct an MapType") {
     val map = MapType(StringType, IntegerType)
 
     assert(MapType(StringType, IntegerType, true) === map)
   }
-
+  //用加法构造
   test("construct with add") {
     val struct = (new StructType)
       .add("a", IntegerType, true)
@@ -41,7 +41,7 @@ class DataTypeSuite extends SparkFunSuite {
 
     assert(StructField("b", LongType, false) === struct("b"))
   }
-
+  //
   test("construct with add from StructField") {
     // Test creation from StructField type
     val struct = (new StructType)

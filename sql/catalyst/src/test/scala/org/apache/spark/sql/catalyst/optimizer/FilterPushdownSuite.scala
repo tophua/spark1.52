@@ -49,6 +49,7 @@ class FilterPushdownSuite extends PlanTest {
   val testRelation1 = LocalRelation('d.int)
 
   // This test already passes.
+  //这个测试已经过去了
   test("eliminate subqueries") {
     val originalQuery =
       testRelation
@@ -113,6 +114,7 @@ class FilterPushdownSuite extends PlanTest {
   }
 
   // After this line is unimplemented.
+  //该行未被实现
   test("simple push down") {
     val originalQuery =
       testRelation
@@ -188,7 +190,7 @@ class FilterPushdownSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //过滤器：组合过滤器
   test("filters: combines filters") {
     val originalQuery = testRelation
       .select('a)

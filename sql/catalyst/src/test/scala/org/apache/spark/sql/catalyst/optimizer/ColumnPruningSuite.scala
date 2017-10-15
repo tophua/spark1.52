@@ -44,7 +44,7 @@ class ColumnPruningSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //生成Generate.join = true时的列修剪
   test("Column pruning for Generate when Generate.join = true") {
     val input = LocalRelation('a.int, 'b.int, 'c.array(StringType))
 
@@ -62,7 +62,7 @@ class ColumnPruningSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //如果可能,将Generate.join转换为false
   test("Turn Generate.join to false if possible") {
     val input = LocalRelation('b.array(StringType))
 

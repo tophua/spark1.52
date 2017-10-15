@@ -38,7 +38,7 @@ class CombiningLimitsSuite extends PlanTest {
   }
 
   val testRelation = LocalRelation('a.int, 'b.int, 'c.int)
-
+  //限制：组合两个限制
   test("limits: combines two limits") {
     val originalQuery =
       testRelation
@@ -54,7 +54,7 @@ class CombiningLimitsSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //限制：组合三个限制
   test("limits: combines three limits") {
     val originalQuery =
       testRelation
@@ -71,7 +71,7 @@ class CombiningLimitsSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //限制：在ColumnPruning之后结合两个限制
   test("limits: combines two limits after ColumnPruning") {
     val originalQuery =
       testRelation

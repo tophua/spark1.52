@@ -21,13 +21,16 @@ import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.catalyst.util.NumberConverter.convert
 import org.apache.spark.unsafe.types.UTF8String
 
+/**
+  * 数值转换测试套件
+  */
 class NumberConverterSuite extends SparkFunSuite {
 
   private[this] def checkConv(n: String, fromBase: Int, toBase: Int, expected: String): Unit = {
     assert(convert(UTF8String.fromString(n).getBytes, fromBase, toBase) ===
       UTF8String.fromString(expected))
   }
-
+  //转换
   test("convert") {
     checkConv("3", 10, 2, "11")
     checkConv("-15", 10, -16, "-F")

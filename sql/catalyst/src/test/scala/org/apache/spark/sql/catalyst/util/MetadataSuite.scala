@@ -56,7 +56,7 @@ class MetadataSuite extends SparkFunSuite {
     .putBooleanArray("boolean[]", Array(true, false))
     .putMetadataArray("features", Array(age, gender))
     .build()
-
+  //元数据构建器和getter
   test("metadata builder and getters") {
     assert(age.contains("summary") === false)
     assert(age.contains("index") === true)
@@ -84,7 +84,7 @@ class MetadataSuite extends SparkFunSuite {
     assert(metadata.contains("features") === true)
     assert(metadata.getMetadataArray("features").toSeq === Seq(age, gender))
   }
-
+  //元数据的JSON转换
   test("metadata json conversion") {
     val json = metadata.json
     withClue("toJson must produce a valid JSON string") {

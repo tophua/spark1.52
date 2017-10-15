@@ -41,7 +41,7 @@ class ConstantFoldingSuite extends PlanTest {
   }
 
   val testRelation = LocalRelation('a.int, 'b.int, 'c.int)
-
+  //消除子查询
   test("eliminate subqueries") {
     val originalQuery =
       testRelation
@@ -59,6 +59,8 @@ class ConstantFoldingSuite extends PlanTest {
 
   /**
    * Unit tests for constant folding in expressions.
+    * 表达式中常量折叠的单元测试
+    * 常量折叠测试:表达式只有文字
    */
   test("Constant folding test: expressions only have literals") {
     val originalQuery =
@@ -89,7 +91,7 @@ class ConstantFoldingSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+//
   test("Constant folding test: expressions have attribute references and literals in " +
     "arithmetic operations") {
     val originalQuery =
@@ -137,7 +139,7 @@ class ConstantFoldingSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //恒定折叠测试：表达式具有折叠功能
   test("Constant folding test: expressions have foldable functions") {
     val originalQuery =
       testRelation
@@ -156,7 +158,7 @@ class ConstantFoldingSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //常量折叠测试：表达式具有不可折叠的功能
   test("Constant folding test: expressions have nonfoldable functions") {
     val originalQuery =
       testRelation
@@ -175,7 +177,7 @@ class ConstantFoldingSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //常量折叠测试：表达式有空文字
   test("Constant folding test: expressions have null literals") {
     val originalQuery = testRelation.select(
       IsNull(Literal(null)) as 'c1,
@@ -248,7 +250,7 @@ class ConstantFoldingSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //恒定折叠测试：将In（v，list）设为true或false
   test("Constant folding test: Fold In(v, list) into true or false") {
     val originalQuery =
       testRelation

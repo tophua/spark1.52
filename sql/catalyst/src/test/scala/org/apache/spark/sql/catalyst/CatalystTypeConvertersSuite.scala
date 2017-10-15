@@ -35,7 +35,7 @@ class CatalystTypeConvertersSuite extends SparkFunSuite {
     DoubleType,
     DecimalType.SYSTEM_DEFAULT,
     DecimalType.USER_DEFAULT)
-
+  //行空处理
   test("null handling in rows") {
     val schema = StructType(simpleTypes.map(t => StructField(t.getClass.getName, t)))
     val convertToCatalyst = CatalystTypeConverters.createToCatalystConverter(schema)
@@ -44,7 +44,7 @@ class CatalystTypeConvertersSuite extends SparkFunSuite {
     val scalaRow = Row.fromSeq(Seq.fill(simpleTypes.length)(null))
     assert(convertToScala(convertToCatalyst(scalaRow)) === scalaRow)
   }
-
+  //个别值的空处理
   test("null handling for individual values") {
     for (dataType <- simpleTypes) {
       assert(CatalystTypeConverters.createToScalaConverter(dataType)(null) === null)

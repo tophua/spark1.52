@@ -32,7 +32,7 @@ import org.apache.spark.unsafe.types.UTF8String
 class UnsafeRowConverterSuite extends SparkFunSuite with Matchers {
 
   private def roundedSize(size: Int) = ByteArrayMethods.roundNumberOfBytesToNearestWord(size)
-
+  //只有原始类型的基本转换
   test("basic conversion with only primitive types") {
     val fieldTypes: Array[DataType] = Array(LongType, LongType, IntegerType)
     val converter = UnsafeProjection.create(fieldTypes)
@@ -63,7 +63,7 @@ class UnsafeRowConverterSuite extends SparkFunSuite with Matchers {
     assert(unsafeRowCopy.getLong(1) === 1)
     assert(unsafeRowCopy.getInt(2) === 2)
   }
-
+  //基元、字符串和二进制类型的基本转换
   test("basic conversion with primitive, string and binary types") {
     val fieldTypes: Array[DataType] = Array(LongType, StringType, BinaryType)
     val converter = UnsafeProjection.create(fieldTypes)
@@ -82,7 +82,7 @@ class UnsafeRowConverterSuite extends SparkFunSuite with Matchers {
     assert(unsafeRow.getString(1) === "Hello")
     assert(unsafeRow.getBinary(2) === "World".getBytes)
   }
-
+  //使用原始、字符串、日期和时间戳类型的基本转换
   test("basic conversion with primitive, string, date and timestamp types") {
     val fieldTypes: Array[DataType] = Array(LongType, StringType, DateType, TimestampType)
     val converter = UnsafeProjection.create(fieldTypes)
@@ -110,7 +110,7 @@ class UnsafeRowConverterSuite extends SparkFunSuite with Matchers {
     DateTimeUtils.toJavaTimestamp(unsafeRow.getLong(3)) should be
     (Timestamp.valueOf("2015-06-22 08:10:25"))
   }
-
+  //空值处理
   test("null handling") {
     val fieldTypes: Array[DataType] = Array(
       NullType,
@@ -235,7 +235,7 @@ class UnsafeRowConverterSuite extends SparkFunSuite with Matchers {
       rowWithNoNullColumns.getDecimal(11, 38, 18))
     // assert(setToNullAfterCreation.get(11) === rowWithNoNullColumns.get(11))
   }
-
+  //NaN的规范化
   test("NaN canonicalization") {
     val fieldTypes: Array[DataType] = Array(FloatType, DoubleType)
 
@@ -250,7 +250,7 @@ class UnsafeRowConverterSuite extends SparkFunSuite with Matchers {
     val converter = UnsafeProjection.create(fieldTypes)
     assert(converter.apply(row1).getBytes === converter.apply(row2).getBytes)
   }
-
+  //数组类型的基本转换
   test("basic conversion with array type") {
     val fieldTypes: Array[DataType] = Array(
       ArrayType(LongType),
@@ -288,7 +288,7 @@ class UnsafeRowConverterSuite extends SparkFunSuite with Matchers {
     val array2Size = roundedSize(4 + unsafeArray2.getSizeInBytes)
     assert(unsafeRow.getSizeInBytes == 8 + 8 * 2 + array1Size + array2Size)
   }
-
+  //map类型的基本转换
   test("basic conversion with map type") {
     def createArray(values: Any*): ArrayData = new GenericArrayData(values.toArray)
 

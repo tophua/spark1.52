@@ -31,7 +31,7 @@ class AggregateOptimizeSuite extends PlanTest {
       ReplaceDistinctWithAggregate,
       RemoveLiteralFromGroupExpressions) :: Nil
   }
-
+  //用聚合代替distinct
   test("replace distinct with aggregate") {
     val input = LocalRelation('a.int, 'b.int)
 
@@ -42,7 +42,7 @@ class AggregateOptimizeSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //在表达式分组中移除文字
   test("remove literals in grouping expression") {
     val input = LocalRelation('a.int, 'b.int)
 

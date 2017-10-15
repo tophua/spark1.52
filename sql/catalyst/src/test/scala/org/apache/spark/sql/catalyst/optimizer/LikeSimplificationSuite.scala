@@ -35,7 +35,7 @@ class LikeSimplificationSuite extends PlanTest {
   }
 
   val testRelation = LocalRelation('a.string)
-
+  //简化为StartsWith
   test("simplify Like into StartsWith") {
     val originalQuery =
       testRelation
@@ -48,7 +48,7 @@ class LikeSimplificationSuite extends PlanTest {
 
     comparePlans(optimized, correctAnswer)
   }
-
+  //简化为EndsWith
   test("simplify Like into EndsWith") {
     val originalQuery =
       testRelation

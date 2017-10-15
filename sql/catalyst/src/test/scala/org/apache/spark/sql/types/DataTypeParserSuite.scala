@@ -18,7 +18,7 @@
 package org.apache.spark.sql.types
 
 import org.apache.spark.SparkFunSuite
-
+//数据类型解析器套件
 class DataTypeParserSuite extends SparkFunSuite {
 
   def checkDataType(dataTypeString: String, expectedDataType: DataType): Unit = {
@@ -75,7 +75,7 @@ class DataTypeParserSuite extends SparkFunSuite {
   checkDataType(
     "Struct<int: int, timestamp:timestamp>",
     StructType(
-      StructField("int", IntegerType, true) :://列表结尾为Nil
+      StructField("int", IntegerType, true) :: //列表结尾为Nil
       StructField("timestamp", TimestampType, true) :: Nil)
   )
   checkDataType(
