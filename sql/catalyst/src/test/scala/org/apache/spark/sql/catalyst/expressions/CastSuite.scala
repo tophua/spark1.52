@@ -29,6 +29,7 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * Test suite for data type casting expression [[Cast]].
+  * 数据类型转换表达式[[Cast]]的测试套件
  */
 class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
 
@@ -40,6 +41,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
   }
 
   // expected cannot be null
+  //预期不能为空
   private def checkCast(v: Any, expected: Any): Unit = {
     checkEvaluation(cast(v, Literal(expected).dataType), expected)
   }
@@ -53,6 +55,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
 
     // follow [[org.apache.spark.sql.catalyst.expressions.Cast.canCast]] logic
     // to ensure we test every possible cast situation here
+    //遵循[[org.apache.spark.sql.catalyst.expressions.Cast.canCast]]逻辑,以确保我们测试每一个可能的情况在这里
     atomicTypes.zip(atomicTypes).foreach { case (from, to) =>
       checkNullCast(from, to)
     }
@@ -79,7 +82,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
     numericTypes.foreach(dt => checkNullCast(TimestampType, dt))
     for (from <- numericTypes; to <- numericTypes) checkNullCast(from, to)
   }
-
+  //将字符串转换为日期
   test("cast string to date") {
     var c = Calendar.getInstance()
     c.set(2015, 0, 1, 0, 0, 0)
@@ -104,7 +107,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(Cast(Literal("20150318"), DateType), null)
     checkEvaluation(Cast(Literal("2015-031-8"), DateType), null)
   }
-
+  //将字符串转换为时间戳
   test("cast string to timestamp") {
     checkEvaluation(Cast(Literal("123"), TimestampType), null)
 
@@ -293,7 +296,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(cast(cast(1.toDouble, TimestampType), DoubleType), 1.toDouble)
     checkEvaluation(cast(cast(1.toDouble, TimestampType), DoubleType), 1.toDouble)
   }
-
+  //字符串转换
   test("cast from string") {
     assert(cast("abcdef", StringType).nullable === false)
     assert(cast("abcdef", BinaryType).nullable === false)
@@ -308,7 +311,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
     assert(cast("abcdef", DoubleType).nullable === true)
     assert(cast("abcdef", FloatType).nullable === true)
   }
-
+  //日期类型转换
   test("data type casting") {
     val sd = "1970-01-01"
     val d = Date.valueOf(sd)
@@ -337,6 +340,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(cast(cast(ts, StringType), TimestampType), DateTimeUtils.fromJavaTimestamp(ts))
 
     // all convert to string type to check
+    //全部转换为字符串类型进行检查
     checkEvaluation(cast(cast(cast(nts, TimestampType), DateType), StringType), sd)
     checkEvaluation(cast(cast(cast(ts, DateType), TimestampType), StringType), zts)
 
@@ -391,7 +395,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkCast(Decimal(1.5), 1.5)
     checkCast(Decimal(1.5), "1.5")
   }
-
+  //转换固定精度小数
   test("casting to fixed-precision decimals") {
     // Overflow and rounding for casting to fixed-precision decimals:
     // - Values should round with HALF_UP mode by default when you lower scale
@@ -758,7 +762,7 @@ class CastSuite extends SparkFunSuite with ExpressionEvalHelper {
       Map("a" -> true, "b" -> true, "c" -> false),
       Row(0L)))
   }
-
+  //字符串与间隔的情况
   test("case between string and interval") {
     import org.apache.spark.unsafe.types.CalendarInterval
 

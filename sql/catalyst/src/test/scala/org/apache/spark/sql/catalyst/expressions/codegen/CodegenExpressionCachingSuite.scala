@@ -24,11 +24,13 @@ import org.apache.spark.sql.types.{BooleanType, DataType}
 
 /**
  * A test suite that makes sure code generation handles expression internally states correctly.
+  * 一个测试套件可以确保内部的代码生成句柄表达正确
  */
 class CodegenExpressionCachingSuite extends SparkFunSuite {
 
   test("GenerateUnsafeProjection should initialize expressions") {
     // Use an Add to wrap two of them together in case we only initialize the top level expressions.
+    //如果我们只初始化顶级表达式,请使用Add来包装其中的两个
     val expr = And(NondeterministicExpression(), NondeterministicExpression())
     val instance = UnsafeProjection.create(Seq(expr))
     assert(instance.apply(null).getBoolean(0) === false)
@@ -104,6 +106,7 @@ class CodegenExpressionCachingSuite extends SparkFunSuite {
 
 /**
  * An expression that's non-deterministic and doesn't support codegen.
+  * 一个表达式是非确定性的,不支持codegen
  */
 case class NondeterministicExpression()
   extends LeafExpression with Nondeterministic with CodegenFallback {
@@ -116,6 +119,7 @@ case class NondeterministicExpression()
 
 /**
  * An expression with mutable state so we can change it freely in our test suite.
+  * 一个表达式具有可变状态,所以我们可以在我们的测试套件中自由地改变它
  */
 case class MutableExpression() extends LeafExpression with CodegenFallback {
   var mutableState: Boolean = false

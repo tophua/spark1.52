@@ -99,7 +99,7 @@ class HiveTypeCoercionSuite extends PlanTest {
       TypeCollection(ArrayType(StringType), StringType),
       ArrayType(StringType, true))
   }
-
+  //不合格的隐式类型转换
   test("ineligible implicit type cast") {
     def shouldNotCast(from: DataType, to: AbstractDataType): Unit = {
       val got = HiveTypeCoercion.ImplicitTypeCasts.implicitCast(Literal.create(null, from), to)
@@ -122,6 +122,7 @@ class HiveTypeCoercionSuite extends PlanTest {
     shouldNotCast(CalendarIntervalType, StringType)
 
     // Don't implicitly cast complex types to string.
+    //不要将复杂类型隐式地转换为字符串
     shouldNotCast(ArrayType(StringType), StringType)
     shouldNotCast(MapType(StringType, StringType), StringType)
     shouldNotCast(new StructType().add("a1", StringType), StringType)
@@ -230,7 +231,7 @@ class HiveTypeCoercionSuite extends PlanTest {
       NumericTypeBinaryOperator(Literal.create(null, DoubleType), Literal.create(null, DoubleType)))
   }
 
-  test("coalesce casts") {
+  test("coalesce casts") {//合并
     ruleTest(HiveTypeCoercion.FunctionArgumentConversion,
       Coalesce(Literal(1.0)
         :: Literal(1)
@@ -262,7 +263,7 @@ class HiveTypeCoercionSuite extends PlanTest {
       NaNvl(Literal.create(1.0, DoubleType), Literal.create(1.0, DoubleType)),
       NaNvl(Literal.create(1.0, DoubleType), Literal.create(1.0, DoubleType)))
   }
-
+  //类型强制为If
   test("type coercion for If") {
     val rule = HiveTypeCoercion.IfCoercion
     ruleTest(rule,
@@ -275,7 +276,7 @@ class HiveTypeCoercionSuite extends PlanTest {
       If(Literal.create(null, BooleanType), Literal(1), Literal(1))
     )
   }
-
+  //CaseKeyWhen型强制
   test("type coercion for CaseKeyWhen") {
     ruleTest(HiveTypeCoercion.CaseWhenCoercion,
       CaseKeyWhen(Literal(1.toShort), Seq(Literal(1), Literal("a"))),
@@ -297,7 +298,7 @@ class HiveTypeCoercionSuite extends PlanTest {
         Cast(Literal.create(1, DecimalType(7, 2)), DecimalType(22, 2))))
     )
   }
-
+  //类型强制简化等于
   test("type coercion simplification for equal to") {
     val be = HiveTypeCoercion.BooleanEquality
 
@@ -371,7 +372,7 @@ class HiveTypeCoercionSuite extends PlanTest {
     checkOutput(r3.left, expectedTypes)
     checkOutput(r3.right, expectedTypes)
   }
-
+  //转换十进制精度/标度为联合除外和相交
   test("Transform Decimal precision/scale for union except and intersect") {
     def checkOutput(logical: LogicalPlan, expectTypes: Seq[DataType]): Unit = {
       logical.output.zip(expectTypes).foreach { case (attr, dt) =>
@@ -425,7 +426,7 @@ class HiveTypeCoercionSuite extends PlanTest {
       checkOutput(r6.left, Seq(expectedType))
     }
   }
-
+  //日期/时间戳操作的规则
   test("rule for date/timestamp operations") {
     val dateTimeOperations = HiveTypeCoercion.DateTimeOperations
     val date = Literal(new java.sql.Date(0L))
@@ -448,6 +449,7 @@ class HiveTypeCoercionSuite extends PlanTest {
     ruleTest(dateTimeOperations, Subtract(str, interval), Cast(TimeSub(str, interval), StringType))
 
     // interval operations should not be effected
+    //间隔操作不应受影响
     ruleTest(dateTimeOperations, Add(interval, interval), Add(interval, interval))
     ruleTest(dateTimeOperations, Subtract(interval, interval), Subtract(interval, interval))
   }
@@ -455,9 +457,11 @@ class HiveTypeCoercionSuite extends PlanTest {
 
   /**
    * There are rules that need to not fire before child expressions get resolved.
+    * 在子表达式解决之前,有一些规则不需要触发
    * We use this test to make sure those rules do not fire early.
+    * 我们使用这个测试来确保这些规则不能及早启动
    */
-  test("make sure rules do not fire early") {
+  test("make sure rules do not fire early") {//确保规则不能及早启动
     // InConversion
     val inConversion = HiveTypeCoercion.InConversion
     ruleTest(inConversion,

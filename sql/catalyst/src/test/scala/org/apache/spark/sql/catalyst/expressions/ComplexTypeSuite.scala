@@ -29,7 +29,7 @@ class ComplexTypeSuite extends SparkFunSuite with ExpressionEvalHelper {
 
   /**
    * Runs through the testFunc for all integral data types.
-   *
+   * 运行所有整数数据类型的testFunc
    * @param testFunc a test function that accepts a conversion function to convert an integer
    *                 into another data type.
    */

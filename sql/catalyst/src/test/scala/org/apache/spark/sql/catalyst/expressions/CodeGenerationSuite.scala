@@ -29,9 +29,10 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * Additional tests for code generation.
+  * 代码生成的附加测试
  */
 class CodeGenerationSuite extends SparkFunSuite with ExpressionEvalHelper {
-
+  //多线程计算
   test("multithreaded eval") {
     import scala.concurrent._
     import ExecutionContext.Implicits.global
@@ -83,7 +84,7 @@ class CodeGenerationSuite extends SparkFunSuite with ExpressionEvalHelper {
       }
     }
   }
-
+  //由于JVM代码大小限制将范围广泛的预测分割成块
   test("SPARK-8443: split wide projections into blocks due to JVM code size limit") {
     val length = 5000
     val expressions = List.fill(length)(EqualTo(Literal(1), Literal(1)))
@@ -95,7 +96,7 @@ class CodeGenerationSuite extends SparkFunSuite with ExpressionEvalHelper {
       fail(s"Incorrect Evaluation: expressions: $expressions, actual: $actual, expected: $expected")
     }
   }
-
+  //测试生成的安全和不安全的投影
   test("test generated safe and unsafe projection") {
     val schema = new StructType(Array(
       StructField("a", StringType, true),

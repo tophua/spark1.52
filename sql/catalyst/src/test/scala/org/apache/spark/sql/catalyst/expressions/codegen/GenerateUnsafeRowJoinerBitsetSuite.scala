@@ -26,6 +26,7 @@ import org.apache.spark.unsafe.Platform
 
 /**
  * A test suite for the bitset portion of the row concatenation.
+  * 用于行级联的bitset部分的测试套件
  */
 class GenerateUnsafeRowJoinerBitsetSuite extends SparkFunSuite {
 

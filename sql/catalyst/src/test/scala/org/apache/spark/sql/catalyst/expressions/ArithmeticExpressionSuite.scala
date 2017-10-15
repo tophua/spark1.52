@@ -27,6 +27,7 @@ class ArithmeticExpressionSuite extends SparkFunSuite with ExpressionEvalHelper 
 
   /**
    * Runs through the testFunc for all numeric data types.
+    * 运行所有数字数据类型的testFunc
    *
    * @param testFunc a test function that accepts a conversion function to convert an integer
    *                 into another data type.

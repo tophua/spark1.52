@@ -51,15 +51,16 @@ class ExpressionTypeCheckingSuite extends SparkFunSuite {
     assertError(expr,
       s"differing types in '${expr.prettyString}'")
   }
-
+  //检查一元算术的类型
   test("check types for unary arithmetic") {
     assertError(UnaryMinus('stringField), "(numeric or calendarinterval) type")
     assertError(Abs('stringField), "requires numeric type")
     assertError(BitwiseNot('stringField), "requires integral type")
   }
-
+  //检查二进制算术的类型
   test("check types for binary arithmetic") {
     // We will cast String to Double for binary arithmetic
+    //我们将把String转换为Double进行二进制运算
     assertSuccess(Add('intField, 'stringField))
     assertSuccess(Subtract('intField, 'stringField))
     assertSuccess(Multiply('intField, 'stringField))
@@ -94,9 +95,10 @@ class ExpressionTypeCheckingSuite extends SparkFunSuite {
     assertError(MinOf('complexField, 'complexField),
       s"requires ${TypeCollection.Ordered.simpleString} type")
   }
-
+  //检查谓词的类型
   test("check types for predicates") {
     // We will cast String to Double for binary comparison
+    //我们将把String转换为Double进行二进制比较
     assertSuccess(EqualTo('intField, 'stringField))
     assertSuccess(EqualNullSafe('intField, 'stringField))
     assertSuccess(LessThan('intField, 'stringField))
@@ -105,6 +107,7 @@ class ExpressionTypeCheckingSuite extends SparkFunSuite {
     assertSuccess(GreaterThanOrEqual('intField, 'stringField))
 
     // We will transform EqualTo with numeric and boolean types to CaseKeyWhen
+    //我们将使用数字和布尔类型将EqualTo转换为CaseKeyWhen
     assertSuccess(EqualTo('intField, 'booleanField))
     assertSuccess(EqualNullSafe('intField, 'booleanField))
 
@@ -138,9 +141,10 @@ class ExpressionTypeCheckingSuite extends SparkFunSuite {
       CaseWhen(Seq('booleanField, 'intField, 'intField, 'intField)),
       "WHEN expressions in CaseWhen should all be boolean type")
   }
-
+  //检查聚合的类型
   test("check types for aggregates") {
     // We will cast String to Double for sum and average
+    //我们将把字符串转换为Double和sum和average
     assertSuccess(Sum('stringField))
     assertSuccess(SumDistinct('stringField))
     assertSuccess(Average('stringField))
@@ -152,7 +156,7 @@ class ExpressionTypeCheckingSuite extends SparkFunSuite {
     assertError(Average('booleanField), "function average requires numeric type")
   }
 
-  test("check types for others") {
+  test("check types for others") {//检查其他人的类型
     assertError(CreateArray(Seq('intField, 'booleanField)),
       "input to function array should all be the same type")
     assertError(Coalesce(Seq('intField, 'booleanField)),
@@ -161,7 +165,7 @@ class ExpressionTypeCheckingSuite extends SparkFunSuite {
     assertError(Explode('intField),
       "input to function explode should be array or map type")
   }
-
+  //检查CreateNamedStruct类型
   test("check types for CreateNamedStruct") {
     assertError(
       CreateNamedStruct(Seq("a", "b", 2.0)), "even number of arguments")
@@ -175,7 +179,7 @@ class ExpressionTypeCheckingSuite extends SparkFunSuite {
       CreateNamedStruct(Seq(Literal.create(null, StringType), "a")),
         "Field name should not be null")
   }
-
+  //检查ROUND的类型
   test("check types for ROUND") {
     assertSuccess(Round(Literal(null), Literal(null)))
     assertSuccess(Round('intField, Literal(1)))

@@ -24,7 +24,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.dsl.expressions._
 import org.apache.spark.sql.types._
 
-
+//条件表达式测试
 class ConditionalExpressionSuite extends SparkFunSuite with ExpressionEvalHelper {
 
   test("if") {
@@ -39,6 +39,7 @@ class ConditionalExpressionSuite extends SparkFunSuite with ExpressionEvalHelper
     )
 
     // dataType must match T.
+    //
     def testIf(convert: (Integer => Any), dataType: DataType): Unit = {
       for ((predicate, trueValue, falseValue, expected) <- testcases) {
         val trueValueConverted = if (trueValue == null) null else convert(trueValue)
@@ -71,7 +72,7 @@ class ConditionalExpressionSuite extends SparkFunSuite with ExpressionEvalHelper
       checkConsistencyBetweenInterpretedAndCodegen(If, BooleanType, dt, dt)
     }
   }
-
+  //在的情况下
   test("case when") {
     val row = create_row(null, false, true, "a", "b", "c")
     val c1 = 'a.boolean.at(0)
@@ -140,7 +141,7 @@ class ConditionalExpressionSuite extends SparkFunSuite with ExpressionEvalHelper
     checkEvaluation(CaseKeyWhen(c6, Seq(c5, c2, c4, c3)), null, row)
     checkEvaluation(CaseKeyWhen(literalNull, Seq(c2, c5, c1, c6)), null, row)
   }
-
+  //最小
   test("function least") {
     val row = create_row(1, 2, "a", "b", "c")
     val c1 = 'a.int.at(0)
@@ -185,7 +186,7 @@ class ConditionalExpressionSuite extends SparkFunSuite with ExpressionEvalHelper
       checkConsistencyBetweenInterpretedAndCodegen(Least, dt, 2)
     }
   }
-
+  //最大
   test("function greatest") {
     val row = create_row(1, 2, "a", "b", "c")
     val c1 = 'a.int.at(0)

@@ -108,8 +108,10 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     var c = Calendar.getInstance()
     c.set(2015, 0, 28, 0, 0, 0)
     c.set(Calendar.MILLISECOND, 0)
-    assert(stringToDate(UTF8String.fromString("2015-01-28")).get ===
-      millisToDays(c.getTimeInMillis))
+    val tm=c.getTimeInMillis
+    val sd=stringToDate(UTF8String.fromString("2015-01-28")).get
+    assert(sd ===
+      millisToDays(tm))
     c.set(2015, 0, 1, 0, 0, 0)
     c.set(Calendar.MILLISECOND, 0)
     assert(stringToDate(UTF8String.fromString("2015")).get ===
@@ -367,7 +369,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     assert(getYear(getInUTCDays(c.getTimeInMillis)) === 2012)
   }
 
-  test("get quarter") {
+  test("get quarter") {//季度
     val c = Calendar.getInstance()
     c.set(2015, 2, 18, 0, 0, 0)
     assert(getQuarter(getInUTCDays(c.getTimeInMillis)) === 1)
@@ -375,7 +377,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     assert(getQuarter(getInUTCDays(c.getTimeInMillis)) === 4)
   }
 
-  test("get month") {
+  test("get month") {//月
     val c = Calendar.getInstance()
     c.set(2015, 2, 18, 0, 0, 0)
     assert(getMonth(getInUTCDays(c.getTimeInMillis)) === 3)
@@ -383,7 +385,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     assert(getMonth(getInUTCDays(c.getTimeInMillis)) === 12)
   }
 
-  test("get day of month") {
+  test("get day of month") {//得到一个月的天
     val c = Calendar.getInstance()
     c.set(2015, 2, 18, 0, 0, 0)
     assert(getDayOfMonth(getInUTCDays(c.getTimeInMillis)) === 18)

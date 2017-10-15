@@ -35,7 +35,7 @@ class GenerateUnsafeRowJoinerSuite extends SparkFunSuite {
 
   private val fixed = Seq(IntegerType)
   private val variable = Seq(IntegerType, StringType)
-
+  //简单的固定宽度类型
   test("simple fixed width types") {
     testConcat(0, 0, fixed)
     testConcat(0, 1, fixed)
@@ -44,13 +44,13 @@ class GenerateUnsafeRowJoinerSuite extends SparkFunSuite {
     testConcat(0, 64, fixed)
     testConcat(64, 64, fixed)
   }
-
+  //随机化的固定宽度类型
   test("randomized fix width types") {
     for (i <- 0 until 20) {
       testConcatOnce(Random.nextInt(100), Random.nextInt(100), fixed)
     }
   }
-
+  //简单变量宽度类型
   test("simple variable width types") {
     testConcat(0, 0, variable)
     testConcat(0, 1, variable)
@@ -59,7 +59,7 @@ class GenerateUnsafeRowJoinerSuite extends SparkFunSuite {
     testConcat(0, 64, variable)
     testConcat(64, 64, variable)
   }
-
+  //随机变量宽度类型
   test("randomized variable width types") {
     for (i <- 0 until 10) {
       testConcatOnce(Random.nextInt(100), Random.nextInt(100), variable)
@@ -78,12 +78,14 @@ class GenerateUnsafeRowJoinerSuite extends SparkFunSuite {
     val schema2 = RandomDataGenerator.randomSchema(numFields2, candidateTypes)
 
     // Create the converters needed to convert from external row to internal row and to UnsafeRows.
+    //创建从外部行转换为内部行和UnsafeRows所需的转换器
     val internalConverter1 = CatalystTypeConverters.createToCatalystConverter(schema1)
     val internalConverter2 = CatalystTypeConverters.createToCatalystConverter(schema2)
     val converter1 = UnsafeProjection.create(schema1)
     val converter2 = UnsafeProjection.create(schema2)
 
     // Create the input rows, convert them into UnsafeRows.
+    //创建输入行,将它们转换成UnsafeRows
     val extRow1 = RandomDataGenerator.forType(schema1, nullable = false).get.apply()
     val extRow2 = RandomDataGenerator.forType(schema2, nullable = false).get.apply()
     val row1 = converter1.apply(internalConverter1.apply(extRow1).asInstanceOf[InternalRow])

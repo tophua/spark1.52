@@ -25,9 +25,10 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * A test suite for generated projections
+  * 用于生成投影的测试套件
  */
 class GeneratedProjectionSuite extends SparkFunSuite {
-
+  //在更宽的桌子上产生预测
   test("generated projections on wider table") {
     val N = 1000
     val wideRow1 = new GenericInternalRow((1 to N).toArray[Any])
