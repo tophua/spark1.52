@@ -33,11 +33,13 @@ class ContainerPlacementStrategySuite extends SparkFunSuite with Matchers with B
   override def afterEach() {
     yarnAllocatorSuite.afterEach()
   }
-
+  //分配具有足够资源的本地偏好容器,并且没有匹配的存储容器
   test("allocate locality preferred containers with enough resource and no matched existed " +
     "containers") {
     // 1. All the locations of current containers cannot satisfy the new requirements
+    // 1.当前容器的所有位置都不能满足新的要求
     // 2. Current requested container number can fully satisfy the pending tasks.
+    // 2.当前请求的容器号可以完全满足挂起的任务
 
     val handler = createAllocator(2)
     handler.updateResourceRequests()
@@ -51,7 +53,7 @@ class ContainerPlacementStrategySuite extends SparkFunSuite with Matchers with B
       Array("host3", "host4", "host5"),
       Array("host3", "host4")))
   }
-
+  //分配具有足够资源和部分匹配的容器的地方首选容器
   test("allocate locality preferred containers with enough resource and partially matched " +
     "containers") {
     // 1. Parts of current containers' locations can satisfy the new requirements

@@ -47,15 +47,15 @@ class ClientSuite extends SparkFunSuite with Matchers with BeforeAndAfterAll {
   override def afterAll(): Unit = {
     System.clearProperty("SPARK_YARN_MODE")
   }
-
+  //默认的Yarn应用程序类路径
   test("default Yarn application classpath") {
     Client.getDefaultYarnApplicationClasspath should be(Some(Fixtures.knownDefYarnAppCP))
   }
-
+  //默认的MR应用程序类路径
   test("default MR application classpath") {
     Client.getDefaultMRApplicationClasspath should be(Some(Fixtures.knownDefMRAppCP))
   }
-
+  //用于为YARN定义类路径的应用程序的最终类路径
   test("resultant classpath for an application that defines a classpath for YARN") {
     withAppConf(Fixtures.mapYARNAppConf) { conf =>
       val env = newEnv
@@ -64,7 +64,7 @@ class ClientSuite extends SparkFunSuite with Matchers with BeforeAndAfterAll {
         flatten(Fixtures.knownYARNAppCP, Client.getDefaultMRApplicationClasspath))
     }
   }
-
+  //为定义MR的类路径的应用程序的最终类路径
   test("resultant classpath for an application that defines a classpath for MR") {
     withAppConf(Fixtures.mapMRAppConf) { conf =>
       val env = newEnv
@@ -73,7 +73,7 @@ class ClientSuite extends SparkFunSuite with Matchers with BeforeAndAfterAll {
         flatten(Client.getDefaultYarnApplicationClasspath, Fixtures.knownMRAppCP))
     }
   }
-
+  //用于定义两个类路径(YARN和MR)的应用程序的最终类路径
   test("resultant classpath for an application that defines both classpaths, YARN and MR") {
     withAppConf(Fixtures.mapAppConf) { conf =>
       val env = newEnv
@@ -85,7 +85,7 @@ class ClientSuite extends SparkFunSuite with Matchers with BeforeAndAfterAll {
   private val SPARK = "local:/sparkJar"
   private val USER = "local:/userJar"
   private val ADDED = "local:/addJar1,local:/addJar2,/addJar3"
-
+  //本地jar URI
   test("Local jar URIs") {
     val conf = new Configuration()
     val sparkConf = new SparkConf().set(Client.CONF_SPARK_JAR, SPARK)
@@ -117,7 +117,7 @@ class ClientSuite extends SparkFunSuite with Matchers with BeforeAndAfterAll {
     cp should not contain (Client.SPARK_JAR)
     cp should not contain (Client.APP_JAR)
   }
-
+  //Jar路径通过SparkConf传播
   test("Jar path propagation through SparkConf") {
     val conf = new Configuration()
     val sparkConf = new SparkConf().set(Client.CONF_SPARK_JAR, SPARK)
@@ -150,7 +150,7 @@ class ClientSuite extends SparkFunSuite with Matchers with BeforeAndAfterAll {
       Utils.deleteRecursively(tempDir)
     }
   }
-
+//集群路径转换
   test("Cluster path translation") {
     val conf = new Configuration()
     val sparkConf = new SparkConf()
