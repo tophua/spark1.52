@@ -19,6 +19,9 @@ package org.apache.spark.sql.catalyst.expressions
 
 import org.apache.spark.SparkFunSuite
 
+/**
+  * Json表达式测试套件
+  */
 class JsonExpressionsSuite extends SparkFunSuite with ExpressionEvalHelper {
   val json =
     """

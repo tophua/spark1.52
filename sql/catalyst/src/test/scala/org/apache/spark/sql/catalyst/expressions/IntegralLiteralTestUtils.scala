@@ -19,6 +19,7 @@ package org.apache.spark.sql.catalyst.expressions
 
 /**
  * Utilities to make sure we pass the proper numeric ranges
+  * 实用程序,以确保我们通过正确的数字范围
  */
 object IntegralLiteralTestUtils {
 

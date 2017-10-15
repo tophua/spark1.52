@@ -33,6 +33,7 @@ class MathFunctionsSuite extends SparkFunSuite with ExpressionEvalHelper {
 
   /**
    * Used for testing leaf math expressions.
+    * 用于测试叶数学表达式
    *
    * @param e expression
    * @param c The constants in scala.math
@@ -47,6 +48,7 @@ class MathFunctionsSuite extends SparkFunSuite with ExpressionEvalHelper {
 
   /**
    * Used for testing unary math expressions.
+    * 用于测试一元数学表达式
    *
    * @param c expression
    * @param f The functions in scala.math or elsewhere used to generate expected results
@@ -81,6 +83,7 @@ class MathFunctionsSuite extends SparkFunSuite with ExpressionEvalHelper {
 
   /**
    * Used for testing binary math expressions.
+    * 用于测试二进制数学表达式
    *
    * @param c The DataFrame function
    * @param f The functions in scala.math

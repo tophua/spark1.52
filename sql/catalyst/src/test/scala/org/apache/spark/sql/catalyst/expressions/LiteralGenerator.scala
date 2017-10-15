@@ -28,13 +28,18 @@ import org.apache.spark.unsafe.types.CalendarInterval
 
 /**
  * Property is a high-level specification of behavior that should hold for a range of data points.
+  * 属性是应用于一系列数据点的高级行为规范
  *
  * For example, while we are evaluating a deterministic expression for some input, we should always
  * hold the property that the result never changes, regardless of how we get the result,
  * via interpreted or codegen.
+  *
+  * 例如,当我们正在评估一些输入的确定性表达式时,我们应该始终保持结果永远不会改变的属性,而不管我们如何通过解释或代码生成结果
  *
  * In ScalaTest, properties are specified as functions and the data points used to check properties
  * can be supplied by either tables or generators.
+  *
+  * 在ScalaTest中,属性被指定为函数,用于检查属性的数据点可以由表或生成器提供
  *
  * Generator-driven property checks are performed via integration with ScalaCheck.
  *

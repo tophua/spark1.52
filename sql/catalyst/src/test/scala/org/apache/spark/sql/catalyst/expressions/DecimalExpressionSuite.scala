@@ -22,7 +22,7 @@ import org.apache.spark.sql.types.{LongType, DecimalType, Decimal}
 
 
 class DecimalExpressionSuite extends SparkFunSuite with ExpressionEvalHelper {
-
+  //非标准的值
   test("UnscaledValue") {
     val d1 = Decimal("10.1")
     checkEvaluation(UnscaledValue(Literal(d1)), 101L)
@@ -30,12 +30,12 @@ class DecimalExpressionSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(UnscaledValue(Literal(d2)), 101L)
     checkEvaluation(UnscaledValue(Literal.create(null, DecimalType(2, 1))), null)
   }
-
+  //十进制
   test("MakeDecimal") {
     checkEvaluation(MakeDecimal(Literal(101L), 3, 1), Decimal("10.1"))
     checkEvaluation(MakeDecimal(Literal.create(null, LongType), 3, 1), null)
   }
-
+  //提高精度
   test("PromotePrecision") {
     val d1 = Decimal("10.1")
     checkEvaluation(PromotePrecision(Literal(d1)), d1)
@@ -43,7 +43,7 @@ class DecimalExpressionSuite extends SparkFunSuite with ExpressionEvalHelper {
     checkEvaluation(PromotePrecision(Literal(d2)), d2)
     checkEvaluation(PromotePrecision(Literal.create(null, DecimalType(2, 1))), null)
   }
-
+  //检查溢出
   test("CheckOverflow") {
     val d1 = Decimal("10.1")
     checkEvaluation(CheckOverflow(Literal(d1), DecimalType(4, 0)), Decimal("10"))

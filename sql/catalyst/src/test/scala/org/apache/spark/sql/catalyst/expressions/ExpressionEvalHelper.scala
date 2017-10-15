@@ -30,6 +30,7 @@ import org.apache.spark.sql.types.DataType
 
 /**
  * A few helper functions for expression evaluation testing. Mixin this trait to use them.
+  * 用于表达式求值测试的几个辅助函数,混合这个特质来使用它们
  */
 trait ExpressionEvalHelper extends GeneratorDrivenPropertyChecks {
   self: SparkFunSuite =>
