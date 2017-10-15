@@ -108,7 +108,7 @@ class JoinSuite extends QueryTest with SharedSQLContext {
       ).foreach { case (query, joinClass) => assertJoin(query, joinClass) }
     }
   }
-//
+//不应该使用不可排序的列
   test("SortMergeJoin shouldn't work on unsortable columns") {
     withSQLConf(SQLConf.SORTMERGE_JOIN.key -> "true") {
       Seq(
