@@ -32,8 +32,9 @@ class RowTest extends FunSpec with Matchers {
 
   val sampleRow: Row = new GenericRowWithSchema(values, schema)
   val noSchemaRow: Row = new GenericRow(values)
-
+  //行(无模式)
   describe("Row (without schema)") {
+    //通过fieldName访问时会抛出异常
     it("throws an exception when accessing by fieldName") {
       intercept[UnsupportedOperationException] {
         noSchemaRow.fieldIndex("col1")
@@ -43,24 +44,25 @@ class RowTest extends FunSpec with Matchers {
       }
     }
   }
-
+  //行(带模式)
   describe("Row (with schema)") {
+    //fieldIndex（name）返回字段索引
     it("fieldIndex(name) returns field index") {
       sampleRow.fieldIndex("col1") shouldBe 0
       sampleRow.fieldIndex("col3") shouldBe 2
     }
-
+    //getAs [T]通过字段名检索值
     it("getAs[T] retrieves a value by fieldname") {
       sampleRow.getAs[String]("col1") shouldBe "value1"
       sampleRow.getAs[Int]("col3") shouldBe 1
     }
-
+    //访问不存在的字段会引发异常
     it("Accessing non existent field throws an exception") {
       intercept[IllegalArgumentException] {
         sampleRow.getAs[String]("non_existent")
       }
     }
-
+    //getValuesMap()检索多个字段的值作为Map(field -> value)
     it("getValuesMap() retrieves values of multiple fields as a Map(field -> value)") {
       val expected = Map(
         "col1" -> "value1",
@@ -69,17 +71,17 @@ class RowTest extends FunSpec with Matchers {
       sampleRow.getValuesMap(List("col1", "col2")) shouldBe expected
     }
   }
-
+  //行等于
   describe("row equals") {
     val externalRow = Row(1, 2)
     val externalRow2 = Row(1, 2)
     val internalRow = InternalRow(1, 2)
     val internalRow2 = InternalRow(1, 2)
-
+    //外部行的等式检查
     it("equality check for external rows") {
       externalRow shouldEqual externalRow2
     }
-
+    //相等检查内部行
     it("equality check for internal rows") {
       internalRow shouldEqual internalRow2
     }

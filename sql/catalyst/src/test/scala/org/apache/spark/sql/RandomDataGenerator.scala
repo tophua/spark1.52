@@ -32,17 +32,21 @@ import org.apache.spark.unsafe.types.CalendarInterval
  * Random data generators for Spark SQL DataTypes. These generators do not generate uniformly random
  * values; instead, they're biased to return "interesting" values (such as maximum / minimum values)
  * with higher probability.
+  * Spark SQL DataTypes的随机数据生成器,这些发生器不产生均匀的随机值;
+  * 相反,他们偏向于以更高的概率返回“有趣的”值（如最大值/最小值）
  */
 object RandomDataGenerator {
 
   /**
    * The conditional probability of a non-null value being drawn from a set of "interesting" values
    * instead of being chosen uniformly at random.
+    * 非空值的条件概率是从一组“有趣”值中抽取，而不是随机均匀地选择
    */
   private val PROBABILITY_OF_INTERESTING_VALUE: Float = 0.5f
 
   /**
    * The probability of the generated value being null
+    * 生成值的概率为零
    */
   private val PROBABILITY_OF_NULL: Float = 0.1f
 

@@ -41,7 +41,7 @@ class DataTypeSuite extends SparkFunSuite {
 
     assert(StructField("b", LongType, false) === struct("b"))
   }
-  //
+  //从StructField添加构造
   test("construct with add from StructField") {
     // Test creation from StructField type
     val struct = (new StructType)
@@ -51,7 +51,7 @@ class DataTypeSuite extends SparkFunSuite {
 
     assert(StructField("b", LongType, false) === struct("b"))
   }
-
+  //使用String DataType构造
   test("construct with String DataType") {
     // Test creation with DataType as String
     val struct = (new StructType)
@@ -63,7 +63,7 @@ class DataTypeSuite extends SparkFunSuite {
     assert(StructField("b", LongType, false) === struct("b"))
     assert(StructField("c", StringType, true) === struct("c"))
   }
-
+  //从StructType中提取字段
   test("extract fields from a StructType") {
     val struct = StructType(
       StructField("a", IntegerType, true) ::
@@ -86,7 +86,7 @@ class DataTypeSuite extends SparkFunSuite {
       struct(Set("b", "d", "e", "f"))
     }
   }
-
+  //从StructType提取字段索引
   test("extract field index from a StructType") {
     val struct = StructType(
       StructField("a", LongType) ::
@@ -99,7 +99,7 @@ class DataTypeSuite extends SparkFunSuite {
       struct.fieldIndex("non_existent")
     }
   }
-
+  //fieldsMap将名称的映射返回给StructField
   test("fieldsMap returns map of name to StructField") {
     val struct = StructType(
       StructField("a", LongType) ::
@@ -113,7 +113,7 @@ class DataTypeSuite extends SparkFunSuite {
 
     assert(mapped === expected)
   }
-
+  //合并的权利是空的
   test("merge where right is empty") {
     val left = StructType(
       StructField("a", LongType) ::
@@ -124,7 +124,7 @@ class DataTypeSuite extends SparkFunSuite {
 
     assert(merged === left)
   }
-
+  //合并左边是空的
   test("merge where left is empty") {
 
     val left = StructType(List())
@@ -138,7 +138,7 @@ class DataTypeSuite extends SparkFunSuite {
     assert(right === merged)
 
   }
-
+  //合并两者都不为空
   test("merge where both are non-empty") {
     val left = StructType(
       StructField("a", LongType) ::
@@ -156,7 +156,7 @@ class DataTypeSuite extends SparkFunSuite {
 
     assert(merged === expected)
   }
-
+  //合并的权利包含类型冲突
   test("merge where right contains type conflict") {
     val left = StructType(
       StructField("a", LongType) ::

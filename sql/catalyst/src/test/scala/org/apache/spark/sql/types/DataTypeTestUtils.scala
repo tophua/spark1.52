@@ -19,6 +19,7 @@ package org.apache.spark.sql.types
 
 /**
  * Utility functions for working with DataTypes in tests.
+  * 在测试中使用数据类型的实用功能
  */
 object DataTypeTestUtils {
 
@@ -32,6 +33,7 @@ object DataTypeTestUtils {
   /**
    * Instances of all [[FractionalType]]s, including both fixed- and unlimited-precision
    * decimal types.
+    * 所有[[FractionalType]]的实例,包括固定和无限精度的十进制类型
    */
   val fractionalTypes: Set[FractionalType] = Set(
     DecimalType.USER_DEFAULT,
@@ -51,17 +53,20 @@ object DataTypeTestUtils {
 
   /**
    * Instances of all [[NumericType]]s and [[CalendarIntervalType]]
+    * 所有[[NumericType]]和[[CalendarIntervalType]]的实例
    */
   val numericAndInterval: Set[DataType] = numericTypeWithoutDecimal + CalendarIntervalType
 
   /**
    * All the types that support ordering
+    * 支持订购的所有类型
    */
   val ordered: Set[DataType] =
     numericTypeWithoutDecimal + BooleanType + TimestampType + DateType + StringType + BinaryType
 
   /**
    * All the types that we can use in a property check
+    * 我们可以在属性检查中使用的所有类型
    */
   val propertyCheckSupported: Set[DataType] = ordered
 
@@ -78,6 +83,7 @@ object DataTypeTestUtils {
 
   /**
    * Instances of [[ArrayType]] for all [[AtomicType]]s. Arrays of these types may contain null.
+    * [[ArrayType]]的所有[[AtomicType]]的实例,这些类型的数组可能包含null
    */
   val atomicArrayTypes: Set[ArrayType] = atomicTypes.map(ArrayType(_, containsNull = true))
 }
