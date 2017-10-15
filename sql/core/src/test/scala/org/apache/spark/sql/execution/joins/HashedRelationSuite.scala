@@ -27,7 +27,7 @@ import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
 import org.apache.spark.util.collection.CompactBuffer
 
-
+//哈希关系测试套件
 class HashedRelationSuite extends SparkFunSuite with SharedSQLContext {
 
   // Key is simply the record itself
@@ -111,6 +111,7 @@ class HashedRelationSuite extends SparkFunSuite with SharedSQLContext {
     out2.flush()
     // This depends on that the order of items in BytesToBytesMap.iterator() is exactly the same
     // as they are inserted
+    //这取决于BytesToBytesMap.iterator（）中的项目顺序与插入的顺序完全相同
     assert(java.util.Arrays.equals(os2.toByteArray, os.toByteArray))
   }
 

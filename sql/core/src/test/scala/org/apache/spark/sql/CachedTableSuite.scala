@@ -86,7 +86,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     assertCached(sql("SELECT COUNT(*) FROM tempTable"))
     ctx.uncacheTable("tempTable")
   }
-
+  //unpersist未缓存表将不会引发异常
   test("unpersist an uncached table will not raise exception") {
     assert(None == ctx.cacheManager.lookupCachedData(testData))
     testData.unpersist(blocking = true)

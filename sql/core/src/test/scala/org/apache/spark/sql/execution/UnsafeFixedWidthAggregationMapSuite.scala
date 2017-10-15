@@ -381,8 +381,8 @@ class UnsafeFixedWidthAggregationMapSuite
     // Convert the map into a sorter. This used to fail before the fix for SPARK-10474
     // because we would try to acquire space for the in-memory sorter pointer array before
     // actually releasing the pages despite having spilled all of them.
-    //将map转换成sorter。 这在SPARK-10474的修复之前曾经失败因为我们将尝试为内存分配器指针数组获取空间
-    //实际上释放页面，尽管已经溢出了所有这些页面
+    //将map转换成sorter,这在SPARK-10474的修复之前曾经失败因为我们将尝试为内存分配器指针数组获取空间
+    //实际上释放页面,尽管已经溢出了所有这些页面
     var sorter: UnsafeKVExternalSorter = null
     try {
       sorter = map.destructAndCreateExternalSorter()

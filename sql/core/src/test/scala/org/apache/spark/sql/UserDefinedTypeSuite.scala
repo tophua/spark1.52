@@ -180,7 +180,7 @@ class UserDefinedTypeSuite extends QueryTest with SharedSQLContext {
         Nil
     )
   }
-
+  //用于UDT的Catalyst类型转换器空处理
   test("Catalyst type converter null handling for UDTs") {
     val udt = new MyDenseVectorUDT()
     val toScalaConverter = CatalystTypeConverters.createToScalaConverter(udt)

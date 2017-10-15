@@ -53,7 +53,7 @@ class ColumnStatsSuite extends SparkFunSuite {
       }
     }
 
-    test(s"$columnStatsName: non-empty") {
+    test(s"$columnStatsName: non-empty") {//非空
       import org.apache.spark.sql.columnar.ColumnarTestUtils._
 
       val columnStats = columnStatsClass.newInstance()
@@ -89,7 +89,7 @@ class ColumnStatsSuite extends SparkFunSuite {
       }
     }
 
-    test(s"$columnStatsName: non-empty") {
+    test(s"$columnStatsName: non-empty") {//非空
       import org.apache.spark.sql.columnar.ColumnarTestUtils._
 
       val columnStats = new FixedDecimalColumnStats(15, 10)

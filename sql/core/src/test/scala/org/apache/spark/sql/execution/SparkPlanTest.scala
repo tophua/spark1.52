@@ -72,9 +72,11 @@ private[sql] abstract class SparkPlanTest extends SparkFunSuite {
    * @param right the right input data to be used.使用的右输入数据
    * @param planFunction a function which accepts the input SparkPlan and uses it to instantiate
    *                     the physical operator that's being tested.
+    *                     该函数接受输入的SparkPlan并使用它来实例化正在测试的物理操作符
    * @param expectedAnswer the expected result in a [[Seq]] of [[Row]]s.
    * @param sortAnswers if true, the answers will be sorted by their toString representations prior
    *                    to being compared.
+    *                    如果是真的，答案将在被比较之前按照他们的toString表示进行排序。
    */
   protected def checkAnswer2(
       left: DataFrame,

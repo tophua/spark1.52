@@ -175,6 +175,7 @@ class PlannerSuite extends SparkFunSuite with SharedSQLContext {
     {
       // We need to make sure TakeOrderedAndProject's output is correct when we push a project
       // into it.
+      //当我们将项目推入它时,我们需要确保TakeOrderedAndProject的输出是正确的
       val query =
         testData.select('key, 'value).sort('key).select('value, 'key).limit(2).logicalPlan
       val planned = ctx.planner.TakeOrderedAndProject(query)
