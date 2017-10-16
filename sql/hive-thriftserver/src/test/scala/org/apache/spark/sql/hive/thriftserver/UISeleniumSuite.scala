@@ -72,7 +72,7 @@ class UISeleniumSuite
         |  --conf spark.ui.port=$uiPort
      """.stripMargin.split("\\s+").toSeq
   }
-  //节俭服务器ui测试
+  //thrift服务器ui测试
   ignore("thrift server ui test") {
     withJdbcStatement { statement =>
       val baseURL = s"http://localhost:$uiPort"
