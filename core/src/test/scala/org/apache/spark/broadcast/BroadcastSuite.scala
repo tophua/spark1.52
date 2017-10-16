@@ -145,31 +145,31 @@ class BroadcastSuite extends SparkFunSuite with LocalSparkContext {
   test("Unpersisting HttpBroadcast on executors only in local mode") {
     testUnpersistHttpBroadcast(distributed = false, removeFromDriver = false)
   }
-
+  //在本地模式下,对执行程序和驱动程序进行HANDP广播
   test("Unpersisting HttpBroadcast on executors and driver in local mode") {
     testUnpersistHttpBroadcast(distributed = false, removeFromDriver = true)
   }
-
+  //在分布式模式下,仅对执行程序执行HttpBroadcast
   test("Unpersisting HttpBroadcast on executors only in distributed mode") {
    // testUnpersistHttpBroadcast(distributed = true, removeFromDriver = false)
   }
-
+  //在分布式模式下对执行程序和驱动程序进行HipppBroadcast的分散化
   test("Unpersisting HttpBroadcast on executors and driver in distributed mode") {
    // testUnpersistHttpBroadcast(distributed = true, removeFromDriver = true)
   }
-
+  //在本地模式下,仅对执行者进行TorrentBroadcast的Unpersisting
   test("Unpersisting TorrentBroadcast on executors only in local mode") {
    // testUnpersistTorrentBroadcast(distributed = false, removeFromDriver = false)
   }
-
+  //在本地模式下对执行程序和驱动程序进行TorrentBroadcast的Unpersisting
   test("Unpersisting TorrentBroadcast on executors and driver in local mode") {
    //testUnpersistTorrentBroadcast(distributed = false, removeFromDriver = true)
   }
-
+  //TorrentBroadcast仅在分布式模式下执行
   test("Unpersisting TorrentBroadcast on executors only in distributed mode") {
    //testUnpersistTorrentBroadcast(distributed = true, removeFromDriver = false)
   }
-
+  //在分布式模式下对执行程序和驱动程序进行漫游
   test("Unpersisting TorrentBroadcast on executors and driver in distributed mode") {
    // testUnpersistTorrentBroadcast(distributed = true, removeFromDriver = true)
   }
