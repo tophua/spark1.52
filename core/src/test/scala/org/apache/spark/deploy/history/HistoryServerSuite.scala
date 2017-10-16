@@ -97,6 +97,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
     "one app multi-attempt json" -> "applications/local-1426533911241",
     "job list json" -> "applications/local-1422981780767/jobs",
     "job list from multi-attempt app json(1)" -> "applications/local-1426533911241/1/jobs",
+    //多次尝试应用程序json的工作列表
     "job list from multi-attempt app json(2)" -> "applications/local-1426533911241/2/jobs",
     "one job json" -> "applications/local-1422981780767/jobs/0",
     "succeeded job list json" -> "applications/local-1422981780767/jobs?status=succeeded",
@@ -104,36 +105,44 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
       "applications/local-1422981780767/jobs?status=succeeded&status=failed",
     "executor list json" -> "applications/local-1422981780767/executors",
     "stage list json" -> "applications/local-1422981780767/stages",
+    //完成阶段列表json
     "complete stage list json" -> "applications/local-1422981780767/stages?status=complete",
+    //失败的阶段列表json
     "failed stage list json" -> "applications/local-1422981780767/stages?status=failed",
     "one stage json" -> "applications/local-1422981780767/stages/1",
+    //一次阶段尝试JSON
     "one stage attempt json" -> "applications/local-1422981780767/stages/1/0",
-
+    //阶段任务总结w shuffle写
     "stage task summary w shuffle write"
       -> "applications/local-1430917381534/stages/0/0/taskSummary",
     "stage task summary w shuffle read"
       -> "applications/local-1430917381534/stages/1/0/taskSummary",
     "stage task summary w/ custom quantiles" ->
       "applications/local-1430917381534/stages/0/0/taskSummary?quantiles=0.01,0.5,0.99",
-
+    //阶段任务列表
     "stage task list" -> "applications/local-1430917381534/stages/0/0/taskList",
+    //阶段任务列表具有偏移量和长度
     "stage task list w/ offset & length" ->
       "applications/local-1430917381534/stages/0/0/taskList?offset=10&length=50",
     "stage task list w/ sortBy" ->
       "applications/local-1430917381534/stages/0/0/taskList?sortBy=DECREASING_RUNTIME",
+    //阶段任务列表w / sortBy短名称
     "stage task list w/ sortBy short names: -runtime" ->
       "applications/local-1430917381534/stages/0/0/taskList?sortBy=-runtime",
     "stage task list w/ sortBy short names: runtime" ->
       "applications/local-1430917381534/stages/0/0/taskList?sortBy=runtime",
-
+    //阶段列表和累加器
     "stage list with accumulable json" -> "applications/local-1426533911241/1/stages",
+    //阶段和累加器
     "stage with accumulable json" -> "applications/local-1426533911241/1/stages/0/0",
     "stage task list from multi-attempt app json(1)" ->
       "applications/local-1426533911241/1/stages/0/0/taskList",
+    //多尝试应用程序json的阶段任务列表
     "stage task list from multi-attempt app json(2)" ->
       "applications/local-1426533911241/2/stages/0/0/taskList",
-
+    //rdd列表存储json
     "rdd list storage json" -> "applications/local-1422981780767/storage/rdd",
+    //一个rdd存储json
     "one rdd storage json" -> "applications/local-1422981780767/storage/rdd/0"
   )
 
@@ -292,6 +301,7 @@ class HistoryServerSuite extends SparkFunSuite with BeforeAndAfter with Matchers
   //产生期望
   def generateExpectation(name: String, path: String): Unit = {
     val json = getUrl(path)
+    //获得Seq列表name的json文件
     val file = new File(expRoot, HistoryServerSuite.sanitizePath(name) + "_expectation.json")
     //FileWriter类从OutputStreamReader类继承而来。该类按字符向流中写入数据
     val out = new FileWriter(file)
