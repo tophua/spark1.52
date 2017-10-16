@@ -46,7 +46,7 @@ class ClientDistributedCacheManagerSuite extends SparkFunSuite with MockitoSugar
       LocalResourceVisibility.PRIVATE
     }
   }
-
+  //测试getFileStatus为空
   test("test getFileStatus empty") {
     val distMgr = new ClientDistributedCacheManager()
     val fs = mock[FileSystem]
@@ -56,7 +56,7 @@ class ClientDistributedCacheManagerSuite extends SparkFunSuite with MockitoSugar
     val stat = distMgr.getFileStatus(fs, uri, statCache)
     assert(stat.getPath() === null)
   }
-
+  //测试getFileStatus缓存
   test("test getFileStatus cached") {
     val distMgr = new ClientDistributedCacheManager()
     val fs = mock[FileSystem]
@@ -68,7 +68,7 @@ class ClientDistributedCacheManagerSuite extends SparkFunSuite with MockitoSugar
     val stat = distMgr.getFileStatus(fs, uri, statCache)
     assert(stat.getPath().toString() === "/tmp/testing")
   }
-
+  //测试addResource
   test("test addResource") {
     val distMgr = new MockClientDistributedCacheManager()
     val fs = mock[FileSystem]
@@ -101,6 +101,7 @@ class ClientDistributedCacheManagerSuite extends SparkFunSuite with MockitoSugar
     assert(env.get("SPARK_YARN_CACHE_ARCHIVES_VISIBILITIES") === None)
 
     // add another one and verify both there and order correct
+    //添加另一个并验证这两个命令
     val realFileStatus = new FileStatus(20, false, 1, 1024, 10, 30, null, "testOwner",
       null, new Path("/tmp/testing2"))
     val destPath2 = new Path("file:///foo.invalid.com:8080/tmp/testing2")
@@ -130,7 +131,7 @@ class ClientDistributedCacheManagerSuite extends SparkFunSuite with MockitoSugar
     assert(sizes(1)  === "20")
     assert(visibilities(1) === LocalResourceVisibility.PRIVATE.name())
   }
-
+  //测试addResource链接null
   test("test addResource link null") {
     val distMgr = new MockClientDistributedCacheManager()
     val fs = mock[FileSystem]
@@ -147,7 +148,7 @@ class ClientDistributedCacheManagerSuite extends SparkFunSuite with MockitoSugar
     assert(localResources.get("link") === None)
     assert(localResources.size === 0)
   }
-
+  //仅测试addResource appmaster
   test("test addResource appmaster only") {
     val distMgr = new MockClientDistributedCacheManager()
     val fs = mock[FileSystem]
@@ -181,7 +182,7 @@ class ClientDistributedCacheManagerSuite extends SparkFunSuite with MockitoSugar
     assert(env.get("SPARK_YARN_CACHE_ARCHIVES_FILE_SIZES") === None)
     assert(env.get("SPARK_YARN_CACHE_ARCHIVES_VISIBILITIES") === None)
   }
-
+  //测试addResource归档
   test("test addResource archive") {
     val distMgr = new MockClientDistributedCacheManager()
     val fs = mock[FileSystem]

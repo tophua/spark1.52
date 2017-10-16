@@ -42,11 +42,13 @@ import org.apache.spark.util.Utils
  * Integration tests for YARN; these tests use a mini Yarn cluster to run Spark-on-YARN
  * applications, and require the Spark assembly to be built before they can be successfully
  * run.
+  * YARN集成测试;这些测试使用迷你Yarn群集来运行Spark-on-YARN应用程序,并且要求Spark程序集可以在其成功运行之前被构建。
  */
 class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matchers with Logging {
 
   // log4j configuration for the YARN containers, so that their output is collected
   // by YARN instead of trying to overwrite unit-tests.log.
+  //log4j配置为YARN容器,以便它们的输出由YARN收集,而不是尝试覆盖unit-tests.log
   private val LOG4J_CONF = """
     |log4j.rootCategory=DEBUG, console
     |log4j.appender.console=org.apache.log4j.ConsoleAppender
@@ -157,7 +159,7 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
       fail("Spark application should have failed.")
     }
   }
-
+  //以yarn客户端模式运行Python应用程序
   ignore("run Python application in yarn-client mode") {
     testPySpark(true)
   }
@@ -165,11 +167,11 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
   ignore("run Python application in yarn-cluster mode") {
     testPySpark(false)
   }
-
+  //用户类路径首先在客户端模式
   ignore("user class path first in client mode") {
     testUseClassPathFirst(true)
   }
-
+  //用户类路径首先在群集模式
   ignore("user class path first in cluster mode") {
     testUseClassPathFirst(false)
   }
@@ -310,6 +312,8 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
    * any sort of error when the job process finishes successfully, but the job itself fails. So
    * the tests enforce that something is written to a file after everything is ok to indicate
    * that the job succeeded.
+    * 这是针对yarn群集模式出现问题的解决方法：当作业进程成功完成时,Client类不会提供任何类型的错误,
+    * 但作业本身失败,所以这些测试在一切都可以指示工作成功之后,强制将某些东西写入文件。
    */
   private def checkResult(result: File): Unit = {
     checkResult(result, "success")
@@ -386,6 +390,7 @@ private object YarnClusterDriver extends Logging with Matchers {
 
     // If we are running in yarn-cluster mode, verify that driver logs links and present and are
     // in the expected format.
+    //如果我们在yarn群集模式下运行,请验证驱动程序是否记录链接并显示并且处于预期的格式。
     if (conf.get("spark.master") == "yarn-cluster") {
       assert(listener.driverLogs.nonEmpty)
       val driverLogs = listener.driverLogs.get
@@ -394,6 +399,7 @@ private object YarnClusterDriver extends Logging with Matchers {
       assert(driverLogs.containsKey("stdout"))
       val urlStr = driverLogs("stderr")
       // Ensure that this is a valid URL, else this will throw an exception
+      //保这是一个有效的URL,否则这将抛出异常
       new URL(urlStr)
       val containerId = YarnSparkHadoopUtil.get.getContainerId
       val user = Utils.getCurrentUserName()

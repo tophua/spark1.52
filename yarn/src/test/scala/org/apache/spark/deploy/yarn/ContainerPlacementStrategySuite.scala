@@ -73,7 +73,7 @@ class ContainerPlacementStrategySuite extends SparkFunSuite with Matchers with B
     assert(localities.map(_.nodes) ===
       Array(null, Array("host2", "host3"), Array("host2", "host3")))
   }
-
+  //分配有限资源和部分匹配的容器的地方首选容器
   test("allocate locality preferred containers with limited resource and partially matched " +
     "containers") {
     // 1. Parts of current containers' locations can satisfy the new requirements
@@ -92,10 +92,10 @@ class ContainerPlacementStrategySuite extends SparkFunSuite with Matchers with B
 
     assert(localities.map(_.nodes) === Array(Array("host2", "host3")))
   }
-
+  //分配具有完全匹配的容器的地方首选容器
   test("allocate locality preferred containers with fully matched containers") {
     // Current containers' locations can fully satisfy the new requirements
-
+    //当前集装箱的位置可以完全满足新的要求
     val handler = createAllocator(5)
     handler.updateResourceRequests()
     handler.handleAllocatedContainers(Array(
@@ -111,10 +111,10 @@ class ContainerPlacementStrategySuite extends SparkFunSuite with Matchers with B
 
     assert(localities.map(_.nodes) === Array(null, null, null))
   }
-
+  //分配没有本地偏好的容器
   test("allocate containers with no locality preference") {
     // Request new container without locality preference
-
+    //请求没有本地偏好的新容器
     val handler = createAllocator(2)
     handler.updateResourceRequests()
     handler.handleAllocatedContainers(Array(createContainer("host1"), createContainer("host2")))

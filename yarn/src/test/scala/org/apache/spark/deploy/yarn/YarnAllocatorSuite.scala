@@ -110,9 +110,10 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     val nodeId = NodeId.newInstance(host, 1000)
     Container.newInstance(containerId, nodeId, "", containerResource, RM_REQUEST_PRIORITY, null)
   }
-
+  //单个容器分配
   test("single container allocated") {
     // request a single container and receive it
+    // 请求一个容器并接收它
     val handler = createAllocator(1)
     handler.updateResourceRequests()
     handler.getNumExecutorsRunning should be (0)
@@ -128,9 +129,10 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     val size = rmClient.getMatchingRequests(container.getPriority, "host1", containerResource).size
     size should be (0)
   }
-
+  //一些容器分配
   test("some containers allocated") {
     // request a few containers and receive some of them
+    // 请求几个容器并收到其中一些容器
     val handler = createAllocator(4)
     handler.updateResourceRequests()
     handler.getNumExecutorsRunning should be (0)
@@ -149,7 +151,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.allocatedHostToContainersMap.get("host1").get should contain (container2.getId)
     handler.allocatedHostToContainersMap.get("host2").get should contain (container3.getId)
   }
-
+  //收到比要求更多的容器
   test("receive more containers than requested") {
     val handler = createAllocator(2)
     handler.updateResourceRequests()
@@ -169,7 +171,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.allocatedHostToContainersMap.get("host2").get should contain (container2.getId)
     handler.allocatedHostToContainersMap.contains("host4") should be (false)
   }
-
+  //减少总请求的执行人
   test("decrease total requested executors") {
     val handler = createAllocator(4)
     handler.updateResourceRequests()
@@ -191,7 +193,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.updateResourceRequests()
     handler.getNumPendingAllocate should be (1)
   }
-
+  //将所请求的执行人总数减少到目前不足
   test("decrease total requested executors to less than currently running") {
     val handler = createAllocator(4)
     handler.updateResourceRequests()
@@ -213,7 +215,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.getNumPendingAllocate should be (0)
     handler.getNumExecutorsRunning should be (2)
   }
-
+  //杀死执行
   test("kill executors") {
     val handler = createAllocator(4)
     handler.updateResourceRequests()
@@ -235,7 +237,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.getNumExecutorsRunning should be (0)
     handler.getNumPendingAllocate should be (1)
   }
-
+  //遗失执行人从后端移除
   test("lost executor removed from backend") {
     val handler = createAllocator(4)
     handler.updateResourceRequests()
@@ -259,7 +261,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.getNumExecutorsFailed should be (2)
     handler.getNumUnexpectedContainerRelease should be (2)
   }
-
+  //内存超出诊断正则表达式
   test("memory exceeded diagnostic regexes") {
     val diagnostics =
       "Container [pid=12465,containerID=container_1412887393566_0003_01_000002] is running " +

@@ -86,7 +86,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     yarnConf.get(key) should not be default.get(key)
   }
 
-  //
+  //测试getApplicationAclsForYarn acls
   test("test getApplicationAclsForYarn acls on") {
 
     // spark acls on, just pick up default user
@@ -119,10 +119,11 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
       }
     }
   }
-
+  //测试getApplicationAclsForYarn acls并指定用户
   test("test getApplicationAclsForYarn acls on and specify users") {
 
     // default spark acls are on and specify acls
+    //默认spark acls已打开并指定acls
     val sparkConf = new SparkConf()
     sparkConf.set("spark.acls.enable", "true")
     sparkConf.set("spark.ui.view.acls", "user1,user2")
@@ -158,7 +159,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     }
 
   }
-
+//测试扩展环境结果
   test("test expandEnvironment result") {
     val target = Environment.PWD
     if (classOf[Environment].getMethods().exists(_.getName == "$$")) {
@@ -170,7 +171,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     }
 
   }
-
+  //测试getClassPathSeparator结果
   test("test getClassPathSeparator result") {
     if (classOf[ApplicationConstants].getFields().exists(_.getName == "CLASS_PATH_SEPARATOR")) {
       YarnSparkHadoopUtil.getClassPathSeparator() should be ("<CPS>")
@@ -188,14 +189,14 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     val nns = util.getNameNodesToAccess(sparkConf)
     nns should be(Set())
   }
-
+  //检查访问未设置
   test("check access nns unset") {
     val sparkConf = new SparkConf()
     val util = new YarnSparkHadoopUtil
     val nns = util.getNameNodesToAccess(sparkConf)
     nns should be(Set())
   }
-
+  //检查访问权限
   test("check access nns") {
     val sparkConf = new SparkConf()
     sparkConf.set("spark.yarn.access.namenodes", "hdfs://nn1:8032")
@@ -203,7 +204,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     val nns = util.getNameNodesToAccess(sparkConf)
     nns should be(Set(new Path("hdfs://nn1:8032")))
   }
-
+  //检查访问nns空间
   test("check access nns space") {
     val sparkConf = new SparkConf()
     sparkConf.set("spark.yarn.access.namenodes", "hdfs://nn1:8032, ")
@@ -211,7 +212,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     val nns = util.getNameNodesToAccess(sparkConf)
     nns should be(Set(new Path("hdfs://nn1:8032")))
   }
-
+  //检查访问两个nns
   test("check access two nns") {
     val sparkConf = new SparkConf()
     sparkConf.set("spark.yarn.access.namenodes", "hdfs://nn1:8032,hdfs://nn2:8032")
@@ -219,7 +220,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     val nns = util.getNameNodesToAccess(sparkConf)
     nns should be(Set(new Path("hdfs://nn1:8032"), new Path("hdfs://nn2:8032")))
   }
-
+  //检查令牌更新器
   test("check token renewer") {
     val hadoopConf = new Configuration()
     hadoopConf.set("yarn.resourcemanager.address", "myrm:8033")
@@ -228,7 +229,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     val renewer = util.getTokenRenewer(hadoopConf)
     renewer should be ("yarn/myrm:8032@SPARKTEST.COM")
   }
-
+  //检查令牌更新默认
   test("check token renewer default") {
     val hadoopConf = new Configuration()
     val util = new YarnSparkHadoopUtil
@@ -238,7 +239,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
       }
     assert(caught.getMessage === "Can't get Master Kerberos principal for use as renewer")
   }
-
+  //根据env变量检查不同的hadoop utils
   test("check different hadoop utils based on env variable") {
     try {
       System.setProperty("SPARK_YARN_MODE", "true")
@@ -249,7 +250,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
       System.clearProperty("SPARK_YARN_MODE")
     }
   }
-
+  //
   test("Obtain tokens For HiveMetastore") {
     val hadoopConf = new Configuration()
     hadoopConf.set("hive.metastore.kerberos.principal", "bob")
