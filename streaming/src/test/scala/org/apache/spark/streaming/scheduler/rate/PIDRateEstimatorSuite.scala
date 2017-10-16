@@ -102,6 +102,8 @@ class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
     // prepare a series of batch updates, one every 20ms, 0 processed elements, 2ms of processing
     // this might point the estimator to try and decrease the bound, but we test it never
     // goes below the min rate, which would be nonsensical.
+    //准备一系列批量更新,每20ms处理一个，0个处理元素,2ms处理可能会使估计器尝试减少边界,
+    // 但是我们测试它不会低于最低速率,这将是无意义的。
     val times = List.tabulate(50)(x => x * 20) // every 20ms
     val elements = List.fill(50)(1) // no processing
     val proc = List.fill(50)(20) // 20ms of processing
@@ -110,7 +112,7 @@ class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
     res.head should equal(None)
     res.tail should equal(List.fill(49)(Some(minRate)))
   }
-
+  //没有累积或积极的错误,| I | > 0，按照处理速度
   test("with no accumulated or positive error, |I| > 0, follow the processing speed") {
     val p = new PIDRateEstimator(20, 1D, 1D, 0D, 10)
     // prepare a series of batch updates, one every 20ms with an increasing number of processed
@@ -124,7 +126,7 @@ class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
     res.head should equal(None)
     res.tail should equal(List.tabulate(50)(x => Some((x + 1) * 1000D)).tail)
   }
-
+  //没有累积但有一些积极的错误,| I | > 0,按照处理速度
   test("with no accumulated but some positive error, |I| > 0, follow the processing speed") {
     val p = new PIDRateEstimator(20, 1D, 1D, 0D, 10)
     // prepare a series of batch updates, one every 20ms with an decreasing number of processed
@@ -139,7 +141,7 @@ class PIDRateEstimatorSuite extends SparkFunSuite with Matchers {
     res.head should equal(None)
     res.tail should equal(List.tabulate(50)(x => Some((50 - x) * 1000D)).tail)
   }
-
+  //有一些累积和一些积极的错误,| I | > 0,保持低于处理速度
   test("with some accumulated and some positive error, |I| > 0, stay below the processing speed") {
     val minRate = 10D
     val p = new PIDRateEstimator(20, 1D, .01D, 0D, minRate)

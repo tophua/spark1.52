@@ -81,6 +81,9 @@ class RecurringTimerSuite extends SparkFunSuite with PrivateMethodTester {
     // When RecurringTimer is awake from clock.waitTillTime, it will call `callback` once.
     // Then it will find `stopped` is true and exit the loop, but it should call `callback` again
     // before exiting its internal thread.
+    //当RecurringTimer从clock.waitTillTime唤醒时，它会调用`callback`一次。
+    //那么它会发现`stopped`是true并且退出循环，但是它应该再次调用`callback`
+    // 在退出内部线程之前。
     thread.join()
     assert(results === Seq(0L, 100L, 200L))
     assert(lastTime === 200L)
