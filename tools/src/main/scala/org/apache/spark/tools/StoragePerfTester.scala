@@ -28,8 +28,10 @@ import org.apache.spark.util.Utils
 
 /**
  * Internal utility for micro-benchmarking shuffle write performance.
+  * 内部实用程序用于微型基准化shuffle写入性能
  *
  * Writes simulated shuffle output from several threads and records the observed throughput.
+  *从多个线程写入模拟随机播放输出并记录观察到的吞吐量
  */
 object StoragePerfTester {
   def main(args: Array[String]): Unit = {
@@ -68,6 +70,7 @@ object StoragePerfTester {
       .set("spark.shuffle.manager", "org.apache.spark.shuffle.hash.HashShuffleManager")
 
     // This is only used to instantiate a BlockManager. All thread scheduling is done manually.
+    //这仅用于实例化BlockManager,所有线程调度都是手动完成的
     val sc = new SparkContext("local[4]", "Write Tester", conf)
     val hashShuffleManager = sc.env.shuffleManager.asInstanceOf[HashShuffleManager]
 

@@ -60,16 +60,20 @@ case class SparkMethod(name: String, returnType: SparkType, parameters: Seq[Spar
 
 /**
  * A tool for identifying methods that need to be ported from Scala to the Java API.
+  * 用于识别需要从Scala移植到Java API的方法的工具
  *
  * It uses reflection to find methods in the Scala API and rewrites those methods' signatures
  * into appropriate Java equivalents.  If those equivalent methods have not been implemented in
  * the Java API, they are printed.
+  * 它使用反射来查找Scala API中的方法,并将这些方法的签名重写为适当的Java等价物,
+  * 如果Java API中尚未实现这些等效方法,则会打印它们。
  */
 object JavaAPICompletenessChecker {
 
   private def parseType(typeStr: String): SparkType = {
     if (!typeStr.contains("<")) {
       // Base types might begin with "class" or "interface", so we have to strip that off:
+      //基类型可能以“class”或“interface”开头,所以我们必须剥离它：
       BaseType(typeStr.trim.split(" ").last)
     } else if (typeStr.endsWith("[]")) {
       //stripSuffix去掉<string>字串中结尾的字符
@@ -332,34 +336,35 @@ object JavaAPICompletenessChecker {
 
   def main(args: Array[String]) {
     // scalastyle:off println
+    //缺少RDD方法
     println("Missing RDD methods")
     printMissingMethods(classOf[RDD[_]], classOf[JavaRDD[_]])
     println()
-
+    //缺少PairRDD方法
     println("Missing PairRDD methods")
     printMissingMethods(classOf[PairRDDFunctions[_, _]], classOf[JavaPairRDD[_, _]])
     println()
-
+    //缺少DoubleRDD方法
     println("Missing DoubleRDD methods")
     printMissingMethods(classOf[DoubleRDDFunctions], classOf[JavaDoubleRDD])
     println()
-
+    //缺少OrderedRDD方法
     println("Missing OrderedRDD methods")
     printMissingMethods(classOf[OrderedRDDFunctions[_, _, _]], classOf[JavaPairRDD[_, _]])
     println()
-
+    //缺少SparkContext方法
     println("Missing SparkContext methods")
     printMissingMethods(classOf[SparkContext], classOf[JavaSparkContext])
     println()
-
+    //缺少StreamingContext方法
     println("Missing StreamingContext methods")
     printMissingMethods(classOf[StreamingContext], classOf[JavaStreamingContext])
     println()
-
+    // 缺少DStream方法
     println("Missing DStream methods")
     printMissingMethods(classOf[DStream[_]], classOf[JavaDStream[_]])
     println()
-
+    //缺少PairDStream方法
     println("Missing PairDStream methods")
     printMissingMethods(classOf[PairDStreamFunctions[_, _]], classOf[JavaPairDStream[_, _]])
     println()
