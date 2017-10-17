@@ -47,6 +47,7 @@ object SimpleSkewedGroupByTest {
         val offset = ranGen.nextInt(1000) * numReducers
         if (ranGen.nextDouble < ratio / (numReducers + ratio - 1)) {
           // give ratio times higher chance of generating key 0 (for reducer 0)
+          //给出比例乘以更多的机会产生密钥0（对于reducer 0）
           result(i) = (offset, byteArr)
         } else {
           // generate a key for one of the other reducers

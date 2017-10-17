@@ -165,7 +165,7 @@ import org.apache.spark.annotation.DeveloperApi
     // NOTE: Exposed to repl package since accessed indirectly from SparkIMain
     private[repl] def settings = currentSettings
     private def mostRecentLine = prevRequestList match {
-      case Nil      => "" ∫
+      case Nil      => ""
       case req :: _ => req.originalLine
     }
     // Run the code body with the given boolean settings flipped to true.
