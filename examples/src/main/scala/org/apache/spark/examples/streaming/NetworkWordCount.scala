@@ -38,17 +38,24 @@ import org.apache.spark.storage.StorageLevel
  */
 object NetworkWordCount {
   def main(args: Array[String]) {
-
+    var local:String=null
+    var port:String=null
     if (args.length < 2) {
-      System.err.println("Usage: NetworkWordCount <hostname> <port>")
-      System.exit(1)
+      //System.err.println("Usage: NetworkWordCount <hostname> <port>")
+     // System.exit(1)
+      local="localhost"
+      port="9087"
+    }else{
+      local=args(0)
+      port=args(1)
     }
+
 
     StreamingExamples.setStreamingLogLevels()
 
     // Create the context with a 1 second batch size
     //创建上下文1秒大小批次
-    val sparkConf = new SparkConf().setAppName("NetworkWordCount")
+    val sparkConf = new SparkConf().setAppName("NetworkWordCount").setMaster("local")
     //批次间隔
     val ssc = new StreamingContext(sparkConf, Seconds(1))
 
@@ -58,7 +65,7 @@ object NetworkWordCount {
     // Note that no duplication in storage level only for running locally.
     //仅在本地运行的存储级别中没有重复,分布式容错中必要的复制
     // Replication necessary in distributed scenario for fault tolerance.
-    val lines = ssc.socketTextStream(args(0), args(1).toInt, StorageLevel.MEMORY_AND_DISK_SER)
+    val lines = ssc.socketTextStream(local,port.toInt, StorageLevel.MEMORY_AND_DISK_SER)
     val words = lines.flatMap(_.split(" "))
     println("================"+words)
     val wordCounts = words.map(x => (x, 1)).reduceByKey(_ + _)
