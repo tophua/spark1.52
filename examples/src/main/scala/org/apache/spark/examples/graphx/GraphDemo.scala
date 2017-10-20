@@ -38,14 +38,18 @@ object GraphDemo extends  App{
   // graph.vertices 和 graph.edges 成员将图形解构成相应的顶点和边缘视图
   //graph.vertices 返回一个 VertexRDD[(String, String)] 扩展 RDD[(VertexId, (String, String))] ，所以我们使用 scala case 表达式来解构元组
   //看一下 occupation(职业) 为 pst.doc.的顶点数目
+  //graph.vertices顶点的视图,graph.vertices返回 VertexRDD[(String, String)],所以我们使用Scala的case表达来解构元组
   val count=graph.vertices.filter { case (id, (name, pos)) => pos == "prof" }.count
   println("count:"+count)
 
   // Count all the edges where src > dst
   //graph.edges 返回一个EdgeRDD对象包含,源顶点 ID、目标顶点 ID 和边的属性等三部分构成
+
+  //graph.edges得到图到边的视图
  val edgescount= graph.edges.filter(e => e.srcId > e.dstId).foreach(println )
   println("edgescount:"+edgescount)
   //我们也可以使用 case 类型构造函数,要计算一下生成的 graph 中源顶点 ID 大于目标顶点 ID 的数量
+  //graph.edges返回 EdgeRDD包含 Edge[String]对象,我们可以也使用的如下的类型的构造器
   val edgescountd=graph.edges.filter { case Edge(src, dst, prop) => src > dst }.count
   println("edgescountd:"+edgescountd)
   //创建Edge对象方式

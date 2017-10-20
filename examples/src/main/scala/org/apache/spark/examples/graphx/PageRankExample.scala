@@ -48,6 +48,9 @@ object PageRankExample {
     /**
       * PageRank 测量在图中每个顶点的重要性，假设从边缘 u 到 v 表示的认可 v 通过的重要性 u ,
       * 例如,如果 Twitter 用户遵循许多其他用户,则用户将被高度排名。
+      *
+      * pageRank 方法的时候需要传入一个参数,传入的这个参数的值越小PageRank计算的值就越精确,
+      * 如果数据量特别大而传入的参数值又特别小的情况下就会导致巨大的计算任务和计算时间。
       */
     val ranks = graph.pageRank(0.0001).vertices
     // Join the ranks with the usernames
