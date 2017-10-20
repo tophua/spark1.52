@@ -63,7 +63,7 @@ class VertexRDDSuite extends SparkFunSuite with LocalSparkContext {
       assert(vertexC.map(_._1).collect().toSet === (0 until 25).toSet)
     }
   }
-
+  //减去与不相等数量的分区
   test("minus with non-equal number of partitions") {
     withSpark { sc =>
       val vertexA = VertexRDD(sc.parallelize(0 until 75, 5).map(i => (i.toLong, 0)))
@@ -94,10 +94,11 @@ class VertexRDDSuite extends SparkFunSuite with LocalSparkContext {
         sc.parallelize(0L to 100L)
           .map(id => if (id % 2 == 0) (id, -id.toInt) else (id, id.toInt)).cache()
       // diff should keep only the changed vertices
+      //diff应该只保留改变的顶点
       assert(verts.diff(flipEvens).map(_._2).collect().toSet === (2 to n by 2).map(-_).toSet)
     }
   }
-
+  //具有不等数分区的diff顶点
   test("diff vertices with non-equal number of partitions") {
     withSpark { sc =>
       val vertexA = VertexRDD(sc.parallelize(0 until 24, 3).map(i => (i.toLong, 0)))
@@ -149,7 +150,7 @@ class VertexRDDSuite extends SparkFunSuite with LocalSparkContext {
       assert(verts.innerJoin(evensRDD) { (id, a, b) => a - b }.collect().toSet ===
         (0 to n by 2).map(x => (x.toLong, 0)).toSet)    }
   }
-
+  //内部加入具有不相等分区数的顶点
   test("innerJoin vertices with the non-equal number of partitions") {
     withSpark { sc =>
       val vertexA = VertexRDD(sc.parallelize(0 until 100, 2).map(i => (i.toLong, 1)))
@@ -189,6 +190,7 @@ class VertexRDDSuite extends SparkFunSuite with LocalSparkContext {
 
   test("cache, getStorageLevel") {
     // test to see if getStorageLevel returns correct value after caching
+    //检查缓存后getStorageLevel是否返回正确的值
     withSpark { sc =>
       val verts = sc.parallelize(List((0L, 0), (1L, 1), (1L, 2), (2L, 3), (2L, 3), (2L, 3)))
       val edges = EdgeRDD.fromEdges(sc.parallelize(List.empty[Edge[Int]]))
