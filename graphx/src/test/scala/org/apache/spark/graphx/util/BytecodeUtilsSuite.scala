@@ -24,7 +24,7 @@ import org.apache.spark.SparkFunSuite
 class BytecodeUtilsSuite extends SparkFunSuite {
 
   import BytecodeUtilsSuite.TestClass
-
+  //关闭调用一个方法
   test("closure invokes a method") {
     val c1 = {e: TestClass => println(e.foo); println(e.bar); println(e.baz); }
     assert(BytecodeUtils.invokedMethod(c1, classOf[TestClass], "foo"))
@@ -41,7 +41,7 @@ class BytecodeUtilsSuite extends SparkFunSuite {
     assert(!BytecodeUtils.invokedMethod(c3, classOf[TestClass], "bar"))
     assert(!BytecodeUtils.invokedMethod(c3, classOf[TestClass], "baz"))
   }
-
+  //
   test("closure inside a closure invokes a method") {
     val c1 = {e: TestClass => println(e.foo); println(e.bar); println(e.baz); }
     val c2 = {e: TestClass => c1(e); println(e.foo); }

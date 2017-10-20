@@ -20,7 +20,7 @@ package org.apache.spark.graphx
 import org.apache.spark.SparkFunSuite
 
 class EdgeSuite extends SparkFunSuite {
-  test ("compare") {
+  test ("compare") {//比较
     // decending order
     val testEdges: Array[Edge[Int]] = Array(
       Edge(0x7FEDCBA987654321L, -0x7FEDCBA987654321L, 1),//边数据
@@ -30,6 +30,7 @@ class EdgeSuite extends SparkFunSuite {
       Edge(-0x7FEDCBA987654321L, 0x7FEDCBA987654321L, 1)
     )
     // to ascending order
+    //升序
     val sortedEdges = testEdges.sorted(Edge.lexicographicOrdering[Int])
 
     for (i <- 0 until testEdges.length) {

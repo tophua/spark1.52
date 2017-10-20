@@ -93,10 +93,12 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       val sameSrcEdges = List((0L, 1L), (0L, 2L))
 
       // The two edges start out in different partitions
+      //两个边缘从不同的分区开始
       for (edges <- List(identicalEdges, canonicalEdges, sameSrcEdges)) {
         assert(nonemptyParts(mkGraph(edges)).count === 2)
       }
       // partitionBy(RandomVertexCut) puts identical edges in the same partition
+      //partitionBy（RandomVertexCut）在相同的分区中放置相同的边
       assert(nonemptyParts(mkGraph(identicalEdges).partitionBy(RandomVertexCut)).count === 1)
       // partitionBy(EdgePartition1D) puts same-source edges in the same partition
       assert(nonemptyParts(mkGraph(sameSrcEdges).partitionBy(EdgePartition1D)).count === 1)
@@ -119,6 +121,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       assert(graph.edges.partitions.length === p)
       val bound = 2 * math.sqrt(p)
       // Each vertex should be replicated to at most 2 * sqrt(p) partitions
+      //每个顶点应该复制到最多2 * sqrt(p)个分区
       val partitionSets = partitionedGraph.edges.partitionsRDD.mapPartitions { iter =>
         val part = iter.next()._2
         Iterator((part.iterator.flatMap(e => Iterator(e.srcId, e.dstId))).toSet)
@@ -131,6 +134,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
           numFailures, n, failure, partitionSets.count(_.contains(failure)), bound))
       }
       // This should not be true for the default hash partitioning
+      //对于默认哈希分区,这不应该是正确的
       val partitionSetsUnpartitioned = graph.edges.partitionsRDD.mapPartitions { iter =>
         val part = iter.next()._2
         Iterator((part.iterator.flatMap(e => Iterator(e.srcId, e.dstId))).toSet)
@@ -176,12 +180,15 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       ))
       val graph0 = Graph(vertices, edges)
       // Trigger initial vertex replication
+      //触发初始顶点复制
       graph0.triplets.foreach(x => {})
       // Change type of replicated vertices, but preserve erased type
+      //改变复制顶点的类型,但保留删除类型
       val graph1 = graph0.mapVertices { case (vid, integerOpt) =>
         integerOpt.map((x: java.lang.Integer) => x.toDouble: java.lang.Double)
       }
       // Access replicated vertices, exposing the erased type
+      //访问复制的顶点,将擦除型
       val graph2 = graph1.mapTriplets(t => t.srcAttr.get)
       assert(graph2.edges.map(_.attr).collect().toSet === Set[java.lang.Double](1.0, 2.0, 3.0))
     }
@@ -229,15 +236,18 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
   test("subgraph") {
     withSpark { sc =>
       // Create a star graph of 10 veritces.
+      //创建10个顶点的星图
       val n = 10
       val star = starGraph(sc, n)
       // Take only vertices whose vids are even
+      //只取直径为均匀的顶点
       val subgraph = star.subgraph(vpred = (vid, attr) => vid % 2 == 0)
 
       // We should have 5 vertices.
+      //我们应该有5个顶点
       assert(subgraph.vertices.collect().toSet === (0 to n by 2).map(x => (x, "v")).toSet)
 
-      // And 4 edges.
+      // And 4 edges. 和4边
       assert(subgraph.edges.map(_.copy()).collect().toSet ===
         (2 to n by 2).map(x => Edge(0, x, 1)).toSet)
     }
@@ -261,6 +271,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       assert(v === Set((0, 0), (1, 1), (2, 2), (4, 4), (5, 5)))
 
       // the map is necessary because of object-reuse in the edge iterator
+      //由于边缘迭代器中的对象重用,该Map是必需的
       val e = projectedGraph.edges.map(e => Edge(e.srcId, e.dstId, e.attr)).collect().toSet
       assert(e === Set(Edge(0, 1, 1), Edge(0, 2, 2), Edge(0, 5, 5)))
 
@@ -298,6 +309,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       val active = vids.vertices.filter { case (vid, attr) => attr % 2 == 0 }
       val numEvenNeighbors = vids.mapReduceTriplets(et => {
         // Map function should only run on edges with destination in the active set
+        //Map函数只能在目标位于活动集中的边上运行
         if (et.dstId % 2 != 0) {
           throw new Exception("map ran on edge with dst vid %d, which is odd".format(et.dstId))
         }
@@ -314,6 +326,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       }
       val numOddNeighbors = changedGraph.mapReduceTriplets(et => {
         // Map function should only run on edges with source in the active set
+        //Map函数只能在有源集合的源边缘运行
         if (et.srcId % 2 != 1) {
           throw new Exception("map ran on edge with src vid %d, which is even".format(et.dstId))
         }
@@ -359,7 +372,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
         (0 to n).map(x => "v%d".format(x)).toSet)
     }
   }
-
+  //比顶点分区更多的边缘分区
   test("more edge partitions than vertex partitions") {
     withSpark { sc =>
       val verts = sc.parallelize(List((1: VertexId, "a"), (2: VertexId, "b")), 1)
@@ -371,7 +384,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
         Set((1: VertexId, 2: VertexId, "a", "b"), (2: VertexId, 1: VertexId, "b", "a")))
     }
   }
-
+  //
   test("checkpoint") {
     val checkpointDir = Utils.createTempDir()
     withSpark { sc =>
@@ -396,6 +409,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
 
   test("cache, getStorageLevel") {
     // test to see if getStorageLevel returns correct value
+    //测试看看getStorageLevel是否返回正确的值
     withSpark { sc =>
       val verts = sc.parallelize(List((1: VertexId, "a"), (2: VertexId, "b")), 1)
       val edges = sc.parallelize(List(Edge(1, 2, 0), Edge(2, 1, 0)), 2)
@@ -407,7 +421,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       assert(graph.edges.getStorageLevel == StorageLevel.MEMORY_ONLY)
     }
   }
-
+  //非默认边缘分区数
   test("non-default number of edge partitions") {
     val n = 10
     val defaultParallelism = 3

@@ -22,7 +22,7 @@ import org.apache.spark.graphx._
 
 
 class SVDPlusPlusSuite extends SparkFunSuite with LocalSparkContext {
-
+  //在训练集上测试SVD ++的均方误差
   test("Test SVD++ with mean square error on training set") {
     withSpark { sc =>
       val svdppErr = 8.0

@@ -23,6 +23,9 @@ import org.apache.spark.serializer.KryoSerializer
 
 import org.apache.spark.graphx._
 
+/**
+  * 顶点分区
+  */
 class VertexPartitionSuite extends SparkFunSuite {
 
   test("isDefined, filter") {
@@ -63,10 +66,10 @@ class VertexPartitionSuite extends SparkFunSuite {
     val vp = VertexPartition(Iterator((0L, 1), (1L, 1), (2L, 1)))
     val vp2a = vp.filter { (vid, attr) => vid <= 1 }.map { (vid, attr) => 2 }
     val vp2b = VertexPartition(vp2a.iterator)
-    // leftJoin with same index
+    // leftJoin with same index 左边加入同样的索引
     val join1 = vp.leftJoin(vp2a) { (vid, a, bOpt) => bOpt.getOrElse(a) }
     assert(join1.iterator.toSet === Set((0L, 2), (1L, 2), (2L, 1)))
-    // leftJoin with different indexes
+    // leftJoin with different indexes 不同样的索引
     val join2 = vp.leftJoin(vp2b) { (vid, a, bOpt) => bOpt.getOrElse(a) }
     assert(join2.iterator.toSet === Set((0L, 2), (1L, 2), (2L, 1)))
     // leftJoin an iterator

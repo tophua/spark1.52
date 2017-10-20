@@ -26,6 +26,9 @@ import org.apache.spark.serializer.KryoSerializer
 
 import org.apache.spark.graphx._
 
+/**
+  * 边分区
+  */
 class EdgePartitionSuite extends SparkFunSuite {
 
   def makeEdgePartition[A: ClassTag](xs: Iterable[(Int, Int, A)]): EdgePartition[A, Int] = {
@@ -92,7 +95,7 @@ class EdgePartitionSuite extends SparkFunSuite {
     assert(a.innerJoin(b) { (src, dst, a, b) => a }.iterator.map(_.copy()).toList ===
       List(Edge(0, 1, 0), Edge(1, 0, 0), Edge(5, 5, 0)))
   }
-
+  //是否活跃,
   test("isActive, numActives, replaceActives") {
     //Nothing没有对象
     val ep = new EdgePartitionBuilder[Nothing, Nothing].toEdgePartition
@@ -103,7 +106,7 @@ class EdgePartitionSuite extends SparkFunSuite {
     assert(!ep.isActive(-1))
     assert(ep.numActives == Some(2))
   }
-
+  //三元组迭代器
   test("tripletIterator") {
     val builder = new EdgePartitionBuilder[Int, Int]
     builder.add(1, 2, 0)
@@ -113,7 +116,7 @@ class EdgePartitionSuite extends SparkFunSuite {
     val result = ep.tripletIterator().toList.map(et => (et.srcId, et.dstId))
     assert(result === Seq((1, 2), (1, 3), (1, 4)))
   }
-
+  //序列化
   test("serialization") {
     val aList = List((0, 1, 1), (1, 0, 2), (1, 2, 3), (5, 4, 4), (5, 5, 5))
     val a: EdgePartition[Int, Int] = makeEdgePartition(aList)

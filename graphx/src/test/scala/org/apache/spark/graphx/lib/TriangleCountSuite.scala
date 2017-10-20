@@ -51,7 +51,7 @@ class TriangleCountSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
   }
-
+  //计数具有双向边缘的两个三角形
   test("Count two triangles with bi-directed edges") {
     withSpark { sc =>
       val triangles =
@@ -71,7 +71,7 @@ class TriangleCountSuite extends SparkFunSuite with LocalSparkContext {
       }
     }
   }
-
+  //计算具有重复边缘的单个三角形
   test("Count a single triangle with duplicate edges") {
     withSpark { sc =>
       val rawEdges = sc.parallelize(Array(0L -> 1L, 1L -> 2L, 2L -> 0L) ++

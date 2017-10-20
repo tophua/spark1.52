@@ -23,7 +23,7 @@ import org.apache.spark.graphx.impl.EdgePartition
 import org.apache.spark.rdd._
 
 class GraphOpsSuite extends SparkFunSuite with LocalSparkContext {
-
+  //连接顶点
   test("joinVertices") {
     withSpark { sc =>
       val vertices =
@@ -38,7 +38,7 @@ class GraphOpsSuite extends SparkFunSuite with LocalSparkContext {
       assert(v === Set((1, "one10"), (2, "two20"), (3, "three")))
     }
   }
-
+  //收集相邻点
   test("collectNeighborIds") {
     withSpark { sc =>
       val graph = getCycleGraph(sc, 100)

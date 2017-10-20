@@ -23,9 +23,13 @@ import org.apache.spark.SparkContext
 /**
  * Provides a method to run tests against a {@link SparkContext} variable that is correctly stopped
  * after each test.
+  * 提供一种针对每次测试后正确停止的{@link SparkContext}变量运行测试的方法
 */
 trait LocalSparkContext {
-  /** Runs `f` on a new SparkContext and ensures that it is stopped afterwards. */
+  /**
+    * Runs `f` on a new SparkContext and ensures that it is stopped afterwards.
+    * 在新的SparkContext上运行`f`,并确保它后来被停止
+    * */
   def withSpark[T](f: SparkContext => T): T = {
     val conf = new SparkConf()
     GraphXUtils.registerKryoClasses(conf)
