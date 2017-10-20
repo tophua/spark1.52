@@ -33,7 +33,15 @@ object GraphDemo extends  App{
   //生成的图形
   //GraphX每个元素有源顶点 ID、 目标顶点 ID 和边的属性等三部分构成;
   val graph = Graph(users, relationships, defaultUser)
-
+  println("==============")
+  /**
+    ((2,(istoica,prof)),(5,(franklin,prof)),colleague)
+    ((3,(rxin,student)),(7,(jgonzal,postdoc)),collab)
+    ((5,(franklin,prof)),(3,(rxin,student)),advisor)
+    ((5,(franklin,prof)),(7,(jgonzal,postdoc)),pi)
+    */
+  graph.triplets.foreach(println)
+  println("==============")
   // Count all users which are postdocs
   // graph.vertices 和 graph.edges 成员将图形解构成相应的顶点和边缘视图
   //graph.vertices 返回一个 VertexRDD[(String, String)] 扩展 RDD[(VertexId, (String, String))] ，所以我们使用 scala case 表达式来解构元组
@@ -61,6 +69,7 @@ object GraphDemo extends  App{
   println("======triplets.map======")
   val facts: RDD[String] =
   //EdgeTriplet第一个元素是顶点属性类型,在我们的例子中就是(name, occupation) 的元组,第二个元素是边属性类型
+    //该 EdgeTriplet类继承了 Edge并加入了类属性: srcAttr和 dstAttr,用于包含了源和目标属性
   /**
     istoica is the colleague of franklin
     rxin is the collab of jgonzal
