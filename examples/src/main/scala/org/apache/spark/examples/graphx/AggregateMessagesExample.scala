@@ -52,6 +52,13 @@ object AggregateMessagesExample {
     // mapVertices 用来保存索引
       GraphGenerators.logNormalGraph(sc, numVertices = 100).mapVertices( (id, _) => id.toDouble )
     println("=================")
+    /**
+
+      ((0,0.0),(4,4.0),1)
+      ((0,0.0),(4,4.0),1)
+      ((0,0.0),(5,5.0),1)
+      ((0,0.0),(9,9.0),1)
+      */
     graph.triplets.foreach(println)
     println("=================")
     // Compute the number of older followers and their total age
@@ -70,10 +77,10 @@ object AggregateMessagesExample {
       },
       // Add counter and age
       //添加counter和年龄
-      //在 map-reduce 中,将sendMsg作为map函数。用户定义的 mergeMsg 函数需要两个发往同一顶点的消息,并产生一条消息
+      //在 map-reduce中,将sendMsg作为map函数,用户定义的mergeMsg 函数需要两个发往同一顶点的消息,并产生一条消息
       (a, b) => (a._1 + b._1, a._2 + b._2) // Reduce Function
-      //aggregateMessages 采用一个可选的tripletsFields,它们指示在EdgeContext中访问哪些数据（即源顶点属性，而不是目标顶点属性）。
-      //例如，如果我们计算每个用户的追随者的平均年龄，我们只需要源字段，因此我们将用于 TripletFields.Src 表示我们只需要源字段。
+      //aggregateMessages 采用一个可选的tripletsFields,它们指示在EdgeContext中访问哪些数据(即源顶点属性,而不是目标顶点属性)。
+      //例如,如果我们计算每个用户的追随者的平均年龄,我们只需要源字段,因此我们将用于TripletFields.Src表示我们只需要源字段。
      //   TripletFields.Src
     )
     // Divide total age by number of older followers to get average age of older followers
