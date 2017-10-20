@@ -19,10 +19,9 @@
 package org.apache.spark.examples.graphx
 
 // $example on$
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.graphx.GraphLoader
+import org.apache.spark.{SparkConf, SparkContext}
 // $example off$
-import org.apache.spark.sql.SparkSession
 
 /**
  * Suppose I want to build a graph from some text files, restrict the graph
@@ -36,7 +35,11 @@ import org.apache.spark.sql.SparkSession
  * }}}
  */
 object ComprehensiveExample {
+  /**
+    * 假设我想从一些文本文件中构建图形，将图形限制为重要的关系和用户，在 sub-graph 上运行 page-rank ,
+    * 然后返回与顶级用户关联的属性。我可以用 GraphX 在几行内完成所有这些：
 
+    */
   def main(args: Array[String]): Unit = {
     // Creates a SparkSession.
     val conf = new SparkConf()
