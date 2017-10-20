@@ -60,7 +60,8 @@ object ScalaSparkGraphx {
     //打印与学科==数学有关的学生和教师
     println("Students and Teachers associated with Math....")
     //EdgeTriplet represents an edge along with the vertex attributes of its neighboring vertices.triplets
-    //EdgeTriplet表示一条连接顶点属性和其邻居vertices.triplets的边
+    //Edges 具有原定点ID、目标顶点ID和自己的属性
+    //EdgeTriplet继承自Edge[ED],同时EdgeTriplet有srcAttr来表示源顶点的属性和dstAttr来表示目标顶点的属性
     graph.triplets.filter(f=>f.dstAttr.equalsIgnoreCase("Math")).collect().foreach(println)
     
     sparkCtx.stop()
