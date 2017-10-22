@@ -41,7 +41,40 @@ object GraphDemo extends  App{
     ((5,(franklin,prof)),(7,(jgonzal,postdoc)),pi)
     */
   graph.triplets.foreach(println)
-  println("==============")
+  println("====bengin==========")
+  /**
+    ((2,0.15),(5,0.27749999999999997),1.0)
+    ((3,0.2679375),(7,0.49568437499999995),1.0)
+    ((5,0.27749999999999997),(3,0.2679375),0.5)
+    ((5,0.27749999999999997),(7,0.49568437499999995),0.5)
+    */
+  graph.pageRank(0.0001).triplets.foreach(println)
+  println("====bengin====vertices======")
+  /**
+    *获得顶点权重
+    (3,0.2679375)
+    (7,0.49568437499999995)
+    (5,0.27749999999999997)
+    (2,0.15)
+    */
+  graph.pageRank(0.0001).vertices.foreach(println)
+  println("=======end=======")
+  /**
+    * connectedComponents连接的组件算法将图中每个连接的组件与其最低编号顶点的ID进行标记
+    ((2,2),(5,2),colleague)
+    ((3,2),(7,2),collab)
+    ((5,2),(3,2),advisor)
+    ((5,2),(7,2),pi)
+    */
+  graph.connectedComponents().triplets.foreach(println)
+  println("====connectedComponents==========")
+  /**
+      (3,2)
+      (7,2)
+      (5,2)
+      (2,2)
+    */
+  graph.connectedComponents().vertices.foreach(println)
   // Count all users which are postdocs
   // graph.vertices 和 graph.edges 成员将图形解构成相应的顶点和边缘视图
   //graph.vertices 返回一个 VertexRDD[(String, String)] 扩展 RDD[(VertexId, (String, String))] ，所以我们使用 scala case 表达式来解构元组
@@ -52,11 +85,10 @@ object GraphDemo extends  App{
 
   // Count all the edges where src > dst
   //graph.edges 返回一个EdgeRDD对象包含,源顶点 ID、目标顶点 ID 和边的属性等三部分构成
-
   //graph.edges得到图到边的视图
  val edgescount= graph.edges.filter(e => e.srcId > e.dstId).foreach(println )
   println("edgescount:"+edgescount)
-  //我们也可以使用 case 类型构造函数,要计算一下生成的 graph 中源顶点 ID 大于目标顶点 ID 的数量
+  //我们也可以使用case类型构造函数,要计算一下生成的graph中源顶点ID大于目标顶点ID的数量
   //graph.edges返回 EdgeRDD包含 Edge[String]对象,我们可以也使用的如下的类型的构造器
   val edgescountd=graph.edges.filter { case Edge(src, dst, prop) => src > dst }.count
   println("edgescountd:"+edgescountd)
