@@ -26,8 +26,10 @@ class GraphOpsSuite extends SparkFunSuite with LocalSparkContext {
   //连接顶点
   test("joinVertices") {
     withSpark { sc =>
+      //顶点
       val vertices =
         sc.parallelize(Seq[(VertexId, String)]((1, "one"), (2, "two"), (3, "three")), 2)
+      //边
       val edges = sc.parallelize((Seq(Edge(1, 2, "onetwo"))))
       val g: Graph[String, String] = Graph(vertices, edges)
 
@@ -73,6 +75,7 @@ class GraphOpsSuite extends SparkFunSuite with LocalSparkContext {
       assert(v === Set((0, 0)))
 
       // the map is necessary because of object-reuse in the edge iterator
+      //由于边界迭代器中的对象重用,Map是必需的。
       val e = filteredGraph.edges.map(e => Edge(e.srcId, e.dstId, e.attr)).collect().toSet
       assert(e.isEmpty)
     }

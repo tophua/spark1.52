@@ -29,6 +29,7 @@ class ConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
   test("Grid Connected Components") {//网络连接的组件
     withSpark { sc =>
       val gridGraph = GraphGenerators.gridGraph(sc, 10, 10)
+
       val ccGraph = gridGraph.connectedComponents()
       val maxCCid = ccGraph.vertices.map { case (vid, ccId) => ccId }.sum()
       assert(maxCCid === 0)

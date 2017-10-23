@@ -39,6 +39,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       assert(graph.edges.collect().forall(e => e.attr == 1))
 
       // uniqueEdges option should uniquify edges and store duplicate count in edge attributes
+      //uniqueedges选项应该Uniquify的边缘和边缘属性存储重复计数
       val uniqueGraph = Graph.fromEdgeTuples(sc.parallelize(doubleRing), 1, Some(RandomVertexCut))
       assert(uniqueGraph.edges.count() === ring.size)
       assert(uniqueGraph.edges.collect().forall(e => e.attr == 2))
@@ -61,6 +62,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       val graph = Graph(vertices, edges, false)
       assert( graph.edges.count() === rawEdges.size )
       // Vertices not explicitly provided but referenced by edges should be created automatically
+      //不显式提供但由边缘引用的顶点应该自动创建
       assert( graph.vertices.count() === 100)
       graph.triplets.collect().map { et =>
         assert((et.srcId < 10 && et.srcAttr) || (et.srcId >= 10 && !et.srcAttr))
@@ -142,6 +144,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       assert(verts.exists(id => partitionSetsUnpartitioned.count(_.contains(id)) > bound))
 
       // Forming triplets view
+      //形成三视图
       val g = Graph(
         sc.parallelize(List((0L, "a"), (1L, "b"), (2L, "c"))),
         sc.parallelize(List(Edge(0L, 1L, 1), Edge(0L, 2L, 1)), 2))
