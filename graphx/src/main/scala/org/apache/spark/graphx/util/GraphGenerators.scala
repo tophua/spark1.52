@@ -269,6 +269,7 @@ object GraphGenerators extends Logging {
    */
   def starGraph(sc: SparkContext, nverts: Int): Graph[Int, Int] = {
     val edges: RDD[(VertexId, VertexId)] = sc.parallelize(1 until nverts).map(vid => (vid, 0))
+    //根据边的两个顶点数据构建
     Graph.fromEdgeTuples(edges, 1)
   } // end of starGraph
 

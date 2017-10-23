@@ -28,6 +28,7 @@ class LabelPropagationSuite extends SparkFunSuite with LocalSparkContext {
       val clique1 = for (u <- 0L until n; v <- 0L until n) yield Edge(u, v, 1)
       val clique2 = for (u <- 0L to n; v <- 0L to n) yield Edge(u + n, v + n, 1)
       val twoCliques = sc.parallelize(clique1 ++ clique2 :+ Edge(0L, n, 1))
+      //根据边构建图
       val graph = Graph.fromEdges(twoCliques, 1)
       // Run label propagation
       val labels = LabelPropagation.run(graph, n * 4).cache()

@@ -55,6 +55,7 @@ object ComprehensiveExample {
 
     // Parse the edge data which is already in userId -> userId format
     //解析边缘数据已经是userId>userId格式
+    //利用GraphLoader.edgeListFile函数从边List文件中建立图的基本结构（所有“顶点”+“边”），且顶点和边的属性都默认为1
     val followerGraph = GraphLoader.edgeListFile(sc, "data/graphx/followers.txt")
 
     // Attach the user attributes

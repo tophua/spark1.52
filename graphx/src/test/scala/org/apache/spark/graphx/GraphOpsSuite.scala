@@ -24,6 +24,7 @@ import org.apache.spark.rdd._
 
 class GraphOpsSuite extends SparkFunSuite with LocalSparkContext {
   //连接顶点
+  //joinVertices操作join输入RDD和顶点,返回一个新的带有顶点特征的图
   test("joinVertices") {
     withSpark { sc =>
       //顶点
@@ -34,6 +35,7 @@ class GraphOpsSuite extends SparkFunSuite with LocalSparkContext {
       val g: Graph[String, String] = Graph(vertices, edges)
 
       val tbl = sc.parallelize(Seq[(VertexId, Int)]((1, 10), (2, 20)))
+      //joinVertices操作join输入RDD和顶点,返回一个新的带有顶点特征的图
       val g1 = g.joinVertices(tbl) { (vid: VertexId, attr: String, u: Int) => attr + u }
 
       val v = g1.vertices.collect().toSet
@@ -214,6 +216,7 @@ class GraphOpsSuite extends SparkFunSuite with LocalSparkContext {
 
   private def getGraphFromSeq(sc: SparkContext, seq: IndexedSeq[(Int, Int)]): Graph[Double, Int] = {
     val rawEdges = sc.parallelize(seq, 3).map { case (s, d) => (s.toLong, d.toLong) }
+    //根据边的两个顶点数据构建
     Graph.fromEdgeTuples(rawEdges, 1.0).cache()
   }
 }

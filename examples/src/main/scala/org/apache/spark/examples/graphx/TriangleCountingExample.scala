@@ -56,6 +56,7 @@ object TriangleCountingExample {
     /**
       * 例如说在微博上你关注的人也互相关注,大家的关注关系中就会有很多三角形，这说 明社区很强很稳定，大家的联系都比较紧密;如果说只是你一个人关注很多人，这说明你的 社交群体是非常小的。
       */
+    //利用GraphLoader.edgeListFile函数从边List文件中建立图的基本结构（所有“顶点”+“边”），且顶点和边的属性都默认为1
     val graph = GraphLoader.edgeListFile(sc, "data/graphx/followers.txt", true)
       .partitionBy(PartitionStrategy.RandomVertexCut)
     // Find the triangle count for each vertex

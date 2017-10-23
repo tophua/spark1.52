@@ -97,6 +97,7 @@ private object PeriodicGraphCheckpointerSuite {
     Edge[Double](3, 4, 0))
 
   def createGraph(sc: SparkContext): Graph[Double, Double] = {
+    //根据边构建图
     Graph.fromEdges[Double, Double](sc.parallelize(edges), 0)
   }
 

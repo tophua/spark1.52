@@ -81,7 +81,7 @@ object Analytics extends Logging {
         println("======================================")
 
         val sc = new SparkContext(conf.setAppName("PageRank(" + fname + ")"))
-
+        //利用GraphLoader.edgeListFile函数从边List文件中建立图的基本结构（所有“顶点”+“边”），且顶点和边的属性都默认为1
         val unpartitionedGraph = GraphLoader.edgeListFile(sc, fname,
           numEdgePartitions = numEPart,
           edgeStorageLevel = edgeStorageLevel,
@@ -115,6 +115,7 @@ object Analytics extends Logging {
         println("======================================")
 
         val sc = new SparkContext(conf.setAppName("ConnectedComponents(" + fname + ")"))
+        //利用GraphLoader.edgeListFile函数从边List文件中建立图的基本结构（所有“顶点”+“边”），且顶点和边的属性都默认为1
         val unpartitionedGraph = GraphLoader.edgeListFile(sc, fname,
           numEdgePartitions = numEPart,
           edgeStorageLevel = edgeStorageLevel,
@@ -135,6 +136,7 @@ object Analytics extends Logging {
         println("======================================")
 
         val sc = new SparkContext(conf.setAppName("TriangleCount(" + fname + ")"))
+        //利用GraphLoader.edgeListFile函数从边List文件中建立图的基本结构（所有“顶点”+“边”），且顶点和边的属性都默认为1
         val graph = GraphLoader.edgeListFile(sc, fname,
           canonicalOrientation = true,
           numEdgePartitions = numEPart,

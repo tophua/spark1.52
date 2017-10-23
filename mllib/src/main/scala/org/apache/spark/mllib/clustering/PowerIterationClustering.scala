@@ -293,6 +293,7 @@ object PowerIterationClustering extends Logging {
         None
       }
     }
+    //根据边构建图
     val gA = Graph.fromEdges(edges, 0.0)
     val vD = gA.aggregateMessages[Double](
       sendMsg = ctx => {

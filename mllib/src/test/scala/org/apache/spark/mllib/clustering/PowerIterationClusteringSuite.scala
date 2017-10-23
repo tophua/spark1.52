@@ -97,6 +97,7 @@ class PowerIterationClusteringSuite extends SparkFunSuite with MLlibTestSparkCon
         None
       }
     }
+    //根据边构建图
     val graph = Graph.fromEdges(sc.parallelize(edges, 2), 0.0)
 
     val model = new PowerIterationClustering()

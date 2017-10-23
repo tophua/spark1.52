@@ -26,6 +26,7 @@ class PregelSuite extends SparkFunSuite with LocalSparkContext {
     withSpark { sc =>
       val n = 5
       val starEdges = (1 to n).map(x => (0: VertexId, x: VertexId))
+      //根据边的两个顶点数据构建
       val star = Graph.fromEdgeTuples(sc.parallelize(starEdges, 3), "v").cache()
       val result = Pregel(star, 0)(
         (vid, attr, msg) => attr,
@@ -38,6 +39,7 @@ class PregelSuite extends SparkFunSuite with LocalSparkContext {
   test("chain propagation") {
     withSpark { sc =>
       val n = 5
+      //根据边的两个顶点数据构建
       val chain = Graph.fromEdgeTuples(
         sc.parallelize((1 until n).map(x => (x: VertexId, x + 1: VertexId)), 3),
         0).cache()

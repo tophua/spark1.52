@@ -81,6 +81,7 @@ object SVDPlusPlus {
     val u = rs / rc
 
     // construct graph
+    //根据边构建图
     var g = Graph.fromEdges(edges, defaultF(conf.rank)).cache()
     materialize(g)
     edges.unpersist()

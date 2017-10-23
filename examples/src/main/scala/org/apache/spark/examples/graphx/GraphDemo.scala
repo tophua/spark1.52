@@ -15,26 +15,33 @@ object GraphDemo extends  App{
 
   // Create an RDD for the vertices
   //顶点属性可能包含用户名和职业
+  //顶点RDD[顶点的id,顶点的属性值]
   val users: RDD[(VertexId, (String, String))] =
   //对于 users 这个 RDD 而言，其每一个元素包含一个 ID 和属性，属性是由 name 和 occupation 构成的元组
     sparkCtx.parallelize(Array((3L, ("rxin", "student")), (7L, ("jgonzal", "postdoc")),
       (5L, ("franklin", "prof")), (2L, ("istoica", "prof"))))
   // Create an RDD for edges
   //定义描述协作者之间关系之间的边(关系)
+  // 边RDD[起始点id,终点id，边的属性（边的标注,边的权重等）]
   val relationships: RDD[Edge[String]] =
   //Edge case 类,边缘具有 srcId 和 dstId 对应于源和目标顶点标识符,此外,Edge 该类有一个 attr 存储边缘属性的成员
-    sparkCtx.parallelize(Array(Edge(3L, 7L, "collab"),    Edge(5L, 3L, "advisor"),
-      Edge(2L, 5L, "colleague"), Edge(5L, 7L, "pi")))
+    sparkCtx.parallelize(Array(Edge(3L, 7L, "collab"),
+                               Edge(5L, 3L, "advisor"),
+                               Edge(2L, 5L, "colleague"),
+                               Edge(5L, 7L, "pi")))
   // Define a default user in case there are relationship with missing user
   //defaultUser其主要作用就在于当如果想描述一种关系中不存在的目标顶点的时候就会使用这个defaultUser，
   // 例如 5 到 0 这个 ralationship 是不存在的，那就会默认指向 defaultUser，
+  // 默认（缺失）用户
   val defaultUser = ("John Doe", "Missing")
   // Build the initial Graph
   //生成的图形
   //GraphX每个元素有源顶点 ID、 目标顶点 ID 和边的属性等三部分构成;
+  //使用RDDs建立一个Graph（有许多建立Graph的数据来源和方法，后面会详细介绍）
   val graph = Graph(users, relationships, defaultUser)
   println("==============")
   /**
+    * triplets边三元组是边的扩展，它在边的基础上提供了边的源顶点数据、目的顶点数据
     ((2,(istoica,prof)),(5,(franklin,prof)),colleague)
     ((3,(rxin,student)),(7,(jgonzal,postdoc)),collab)
     ((5,(franklin,prof)),(3,(rxin,student)),advisor)
@@ -43,7 +50,7 @@ object GraphDemo extends  App{
   graph.triplets.foreach(println)
   println("======inDegrees========")
   /**
-    入度,表示3的顶点入度1个连接数
+    入度,表示3的源顶点数
     (3,1)
      入度,表示7的顶点入度2个连接数
     (7,2)
@@ -53,7 +60,7 @@ object GraphDemo extends  App{
   graph.inDegrees.foreach(println)
   println("======outDegrees========")
   /**
-    出度,表示3的顶点出度1个连接数
+    出度,表示3目的顶点数
     (3,1)
     (5,2)
     (2,1)
@@ -61,7 +68,7 @@ object GraphDemo extends  App{
   graph.outDegrees.foreach(println)
   println("======degrees========")
   /**
-    度,表示3节点有二个连接数
+    度,表示3节点源顶点数+目的顶点数
   (3,2)
   (7,2)
   (5,3)

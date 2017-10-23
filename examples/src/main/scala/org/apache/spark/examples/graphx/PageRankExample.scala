@@ -54,6 +54,7 @@ object PageRankExample {
       6 7
       3 7
       */
+    //利用GraphLoader.edgeListFile函数从边List文件中建立图的基本结构（所有“顶点”+“边”），且顶点和边的属性都默认为1
     val graph = GraphLoader.edgeListFile(sparkCtx, "data/graphx/followers.txt")
     // Run PageRank
     /**

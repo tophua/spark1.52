@@ -180,6 +180,7 @@ class VertexRDDSuite extends SparkFunSuite with LocalSparkContext {
     //测试看看mergefunc工作正常
     withSpark { sc =>
       val verts = sc.parallelize(List((0L, 0), (1L, 1), (1L, 2), (2L, 3), (2L, 3), (2L, 3)))
+      //根据边构建图
       val edges = EdgeRDD.fromEdges(sc.parallelize(List.empty[Edge[Int]]))
       val rdd = VertexRDD(verts, edges, 0, (a: Int, b: Int) => a + b)
       // test merge function
@@ -193,6 +194,7 @@ class VertexRDDSuite extends SparkFunSuite with LocalSparkContext {
     //检查缓存后getStorageLevel是否返回正确的值
     withSpark { sc =>
       val verts = sc.parallelize(List((0L, 0), (1L, 1), (1L, 2), (2L, 3), (2L, 3), (2L, 3)))
+      //根据边构建图
       val edges = EdgeRDD.fromEdges(sc.parallelize(List.empty[Edge[Int]]))
       val rdd = VertexRDD(verts, edges, 0, (a: Int, b: Int) => a + b)
       assert(rdd.getStorageLevel == StorageLevel.NONE)

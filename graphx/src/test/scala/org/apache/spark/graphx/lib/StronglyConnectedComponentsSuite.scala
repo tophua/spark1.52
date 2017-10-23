@@ -41,6 +41,7 @@ class StronglyConnectedComponentsSuite extends SparkFunSuite with LocalSparkCont
   test("Cycle Strongly Connected Components") {//循环强连接组件
     withSpark { sc =>
       val rawEdges = sc.parallelize((0L to 6L).map(x => (x, (x + 1) % 7)))
+      //根据边的两个顶点数据构建
       val graph = Graph.fromEdgeTuples(rawEdges, -1)
       val sccGraph = graph.stronglyConnectedComponents(20)
       for ((id, scc) <- sccGraph.vertices.collect()) {
@@ -56,6 +57,7 @@ class StronglyConnectedComponentsSuite extends SparkFunSuite with LocalSparkCont
         Array(3L -> 4L, 4L -> 5L, 5L -> 3L) ++
         Array(6L -> 0L, 5L -> 7L)
       val rawEdges = sc.parallelize(edges)
+      //根据边的两个顶点数据构建
       val graph = Graph.fromEdgeTuples(rawEdges, -1)
       val sccGraph = graph.stronglyConnectedComponents(20)
       for ((id, scc) <- sccGraph.vertices.collect()) {

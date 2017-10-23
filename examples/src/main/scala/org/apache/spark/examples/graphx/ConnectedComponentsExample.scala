@@ -48,6 +48,7 @@ object ConnectedComponentsExample {
 
     // $example on$
     // Load the graph as in the PageRank example
+    //利用GraphLoader.edgeListFile函数从边List文件中建立图的基本结构（所有“顶点”+“边”），且顶点和边的属性都默认为1
     val graph = GraphLoader.edgeListFile(sc, "data/graphx/followers.txt")
 
     // Find the connected components

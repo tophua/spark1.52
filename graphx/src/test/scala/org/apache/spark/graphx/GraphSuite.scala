@@ -27,6 +27,7 @@ import org.apache.spark.util.Utils
 class GraphSuite extends SparkFunSuite with LocalSparkContext {
 
   def starGraph(sc: SparkContext, n: Int): Graph[String, Int] = {
+    //根据边的两个顶点数据构建
     Graph.fromEdgeTuples(sc.parallelize((1 to n).map(x => (0: VertexId, x: VertexId)), 3), "v")
   }
 
@@ -34,18 +35,20 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
     withSpark { sc =>
       val ring = (0L to 100L).zip((1L to 99L) :+ 0L)
       val doubleRing = ring ++ ring
+      //根据边的两个顶点数据构建
       val graph = Graph.fromEdgeTuples(sc.parallelize(doubleRing), 1)
       assert(graph.edges.count() === doubleRing.size)
       assert(graph.edges.collect().forall(e => e.attr == 1))
 
       // uniqueEdges option should uniquify edges and store duplicate count in edge attributes
       //uniqueedges选项应该Uniquify的边缘和边缘属性存储重复计数
+      //根据边的两个顶点数据构建
       val uniqueGraph = Graph.fromEdgeTuples(sc.parallelize(doubleRing), 1, Some(RandomVertexCut))
       assert(uniqueGraph.edges.count() === ring.size)
       assert(uniqueGraph.edges.collect().forall(e => e.attr == 2))
     }
   }
-
+  //根据边构建图
   test("Graph.fromEdges") {
     withSpark { sc =>
       val ring = (0L to 100L).zip((1L to 99L) :+ 0L).map { case (a, b) => Edge(a, b, 1) }
@@ -83,6 +86,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
   test("partitionBy") {
     withSpark { sc =>
       def mkGraph(edges: List[(Long, Long)]): Graph[Int, Int] = {
+        //根据边的两个顶点数据构建
         Graph.fromEdgeTuples(sc.parallelize(edges, 2), 0)
       }
       def nonemptyParts(graph: Graph[Int, Int]): RDD[List[Edge[Int]]] = {
@@ -116,6 +120,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       val n = 100
       val p = 100
       val verts = 1 to n
+      //根据边的两个顶点数据构建
       val graph = Graph.fromEdgeTuples(sc.parallelize(verts.flatMap(x =>
         verts.withFilter(y => y % x == 0).map(y => (x: VertexId, y: VertexId))), p), 0)
       assert(graph.edges.partitions.length === p)
@@ -217,7 +222,8 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
         (1L to n).map(x => Edge(0, x, "vv")).toSet)
     }
   }
-
+  //reverse操作返回一个新的图,这个图的边的方向都是反转
+  //反转操作没有修改顶点或者边的属性或者改变边的数量
   test("reverse") {
     withSpark { sc =>
       val n = 5
@@ -230,12 +236,13 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
     withSpark { sc =>
       val vertices: RDD[(VertexId, Int)] = sc.parallelize(Array((1L, 1), (2L, 2)))
       val edges: RDD[Edge[Int]] = sc.parallelize(Array(Edge(1L, 2L, 0)))
+      //reverse操作返回一个新的图,这个图的边的方向都是反转
       val graph = Graph(vertices, edges).reverse
       val result = graph.mapReduceTriplets[Int](et => Iterator((et.dstId, et.srcAttr)), _ + _)
       assert(result.collect().toSet === Set((1L, 2)))
     }
   }
-
+  //subgraph操作利用顶点和边的判断式(predicates),返回的图仅仅包含满足顶点判断式的顶点、满足边判断式的边以及满足顶点判断式的triple
   test("subgraph") {
     withSpark { sc =>
       // Create a star graph of 10 veritces.
@@ -255,7 +262,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
         (2 to n by 2).map(x => Edge(0, x, 1)).toSet)
     }
   }
-
+//mask操作构造一个子图,这个子图包含输入图中包含的顶点和边。它的实现很简单，顶点和边均做inner join操作即可
   test("mask") {
     withSpark { sc =>
       val n = 5
@@ -267,7 +274,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
         e => e.dstId != 4L,
         (vid, vdata) => vid != 3L
       ).mapVertices((vid, vdata) => -1).mapEdges(e => -1)
-
+      //mask操作构造一个子图,这个子图包含输入图中包含的顶点和边。它的实现很简单，顶点和边均做inner join操作即可
       val projectedGraph = graph.mask(subgraph)
 
       val v = projectedGraph.vertices.collect().toSet
@@ -280,11 +287,13 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
 
     }
   }
-
+  //groupEdges操作合并多重图中的并行边(如顶点对之间重复的边)
+  // 在大量的应用程序中，并行的边可以合并（它们的权重合并）为一条边从而降低图的大小。
   test("groupEdges") {
     withSpark { sc =>
       val n = 5
       val star = starGraph(sc, n)
+      //根据边的两个顶点数据构建
       val doubleStar = Graph.fromEdgeTuples(
         sc.parallelize((1 to n).flatMap(x =>
           List((0: VertexId, x: VertexId), (0: VertexId, x: VertexId))), 1), "v")
@@ -307,6 +316,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
 
       // activeSetOpt
       val allPairs = for (x <- 1 to n; y <- 1 to n) yield (x: VertexId, y: VertexId)
+      //根据边的两个顶点数据构建
       val complete = Graph.fromEdgeTuples(sc.parallelize(allPairs, 3), 0)
       val vids = complete.mapVertices((vid, attr) => vid).cache()
       val active = vids.vertices.filter { case (vid, attr) => attr % 2 == 0 }
@@ -322,6 +332,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
 
       // outerJoinVertices followed by mapReduceTriplets(activeSetOpt)
       val ringEdges = sc.parallelize((0 until n).map(x => (x: VertexId, (x + 1) % n: VertexId)), 3)
+      //根据边的两个顶点数据构建
       val ring = Graph.fromEdgeTuples(ringEdges, 0) .mapVertices((vid, attr) => vid).cache()
       val changed = ring.vertices.filter { case (vid, attr) => attr % 2 == 1 }.mapValues(-_).cache()
       val changedGraph = ring.outerJoinVertices(changed) { (vid, old, newOpt) =>
@@ -339,7 +350,8 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
 
     }
   }
-
+  //它主要功能是向邻边发消息，合并邻边收到的消息，返回messageRDD
+  // 该接口有三个参数，分别为发消息函数，合并消息函数以及发消息的方向。
   test("aggregateMessages") {
     withSpark { sc =>
       val n = 5
@@ -358,6 +370,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
   test("outerJoinVertices") {
     withSpark { sc =>
       val n = 5
+      //reverse操作返回一个新的图,这个图的边的方向都是反转
       val reverseStar = starGraph(sc, n).reverse.cache()
       // outerJoinVertices changing type
       val reverseStarDegrees = reverseStar.outerJoinVertices(reverseStar.outDegrees) {
@@ -394,6 +407,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
       sc.setCheckpointDir(checkpointDir.getAbsolutePath)
       val ring = (0L to 100L).zip((1L to 99L) :+ 0L).map { case (a, b) => Edge(a, b, 1)}
       val rdd = sc.parallelize(ring)
+      //根据边构建图
       val graph = Graph.fromEdges(rdd, 1.0F)
       assert(!graph.isCheckpointed)
       assert(graph.getCheckpointFiles.size === 0)
@@ -436,6 +450,7 @@ class GraphSuite extends SparkFunSuite with LocalSparkContext {
     try {
       val edges = sc.parallelize((1 to n).map(x => (x: VertexId, 0: VertexId)),
         numEdgePartitions)
+      //根据边的两个顶点数据构建
       val graph = Graph.fromEdgeTuples(edges, 1)
       val neighborAttrSums = graph.mapReduceTriplets[Int](
         et => Iterator((et.dstId, et.srcAttr)), _ + _)

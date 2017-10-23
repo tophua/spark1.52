@@ -52,6 +52,7 @@ class ConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
       val chain1 = (0 until 9).map(x => (x, x + 1))
       val chain2 = (10 until 20).map(x => (x, x + 1))
       val rawEdges = sc.parallelize(chain1 ++ chain2, 3).map { case (s, d) => (s.toLong, d.toLong) }
+      //根据边的两个顶点数据构建
       val twoChains = Graph.fromEdgeTuples(rawEdges, 1.0)
       val ccGraph = twoChains.connectedComponents()
       val vertices = ccGraph.vertices.collect()
@@ -78,6 +79,7 @@ class ConnectedComponentsSuite extends SparkFunSuite with LocalSparkContext {
       val chain1 = (0 until 9).map(x => (x, x + 1))
       val chain2 = (10 until 20).map(x => (x, x + 1))
       val rawEdges = sc.parallelize(chain1 ++ chain2, 3).map { case (s, d) => (s.toLong, d.toLong) }
+      //根据边的两个顶点数据构建
       val twoChains = Graph.fromEdgeTuples(rawEdges, true).reverse
       val ccGraph = twoChains.connectedComponents()
       val vertices = ccGraph.vertices.collect()
