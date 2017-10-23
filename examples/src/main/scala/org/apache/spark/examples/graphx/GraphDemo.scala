@@ -39,6 +39,41 @@ object GraphDemo extends  App{
   //GraphX每个元素有源顶点 ID、 目标顶点 ID 和边的属性等三部分构成;
   //使用RDDs建立一个Graph（有许多建立Graph的数据来源和方法，后面会详细介绍）
   val graph = Graph(users, relationships, defaultUser)
+
+  //用case匹配可以很方便访问顶点和边的属性及id
+  graph.vertices.map{
+    case (id,(name,age))=> //利用case进行匹配
+      (age,name) //可以在这里加上自己想要的任何转换
+  }
+
+  graph.edges.map{
+    case Edge(srcid,dstid,weight)=> //利用case进行匹配
+      (dstid,weight+0.01) //可以在这里加上自己想要的任何转换
+  }
+  //也可以通过下标访问
+  graph.vertices.map{
+    v=>(v._1,v._2._1,v._2._2)//v._1,v._2._1,v._2._2分别对应Id，name，age
+  }
+
+  graph.edges.map {
+    e=>(e.attr,e.srcId,e.dstId)
+  }
+
+  graph.triplets.map{
+    triplet=>(triplet.srcAttr._1,triplet.dstAttr._2,triplet.srcId,triplet.dstId)
+  }
+  //可以不用graph.vertices先提取顶点再map的方法，也可以通过graph.mapVertices直接对顶点进行map，返回是相同结构的另一个Graph，访问属性的方法和上述方法是一模一样的。如下：
+
+  graph.mapVertices{
+    case (id,(name,age))=> //利用case进行匹配
+      (age,name) //可以在这里加上自己想要的任何转换
+  }
+
+  graph.mapEdges(e=>(e.attr,e.srcId,e.dstId))
+
+  graph.mapTriplets(triplet=>(triplet.srcAttr._1))
+
+
   println("==============")
   /**
     * triplets边三元组是边的扩展，它在边的基础上提供了边的源顶点数据、目的顶点数据

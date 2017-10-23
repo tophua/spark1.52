@@ -66,8 +66,11 @@ object AggregateMessagesExample {
     //聚合消息(aggregateMessages),该运算符将用户定义的sendMsg函数应用于图中的每个边缘三元组,然后使用该mergeMsg函数在其目标顶点聚合这些消息。
     // aggregateMessages 运算符返回一个 VertexRDD[Msg] ,其中包含去往每个顶点的聚合消息（Msg类型）
     //计算年龄大于自己的关注者的总人数和总年龄
+    //aggregateMessages它主要功能是向邻边发消息,合并邻边收到的消息,返回messageRDD。
+    //aggregateMessages方法分为Map和Reduce两个阶段
     val olderFollowers: VertexRDD[(Int, Double)] = graph.aggregateMessages[(Int, Double)](
       //triplet用户定义的sendMsg函数接受一个EdgeContext,它将源和目标属性以及edge属性和函数(sendToSrc和sendToDst)一起发送到源和目标属性
+      // 发消息函数
       triplet => { // Map Function
         if (triplet.srcAttr > triplet.dstAttr) {
           // Send message to destination vertex containing counter and age
@@ -78,10 +81,13 @@ object AggregateMessagesExample {
       // Add counter and age
       //添加counter和年龄
       //在 map-reduce中,将sendMsg作为map函数,用户定义的mergeMsg 函数需要两个发往同一顶点的消息,并产生一条消息
+      //该函数用于在Map阶段每个edge分区中每个点收到的消息合并,并且它还用于reduce阶段,合并不同分区的消息,合并vertexId相同的消息。
+      //合并消息函数
       (a, b) => (a._1 + b._1, a._2 + b._2) // Reduce Function
       //aggregateMessages 采用一个可选的tripletsFields,它们指示在EdgeContext中访问哪些数据(即源顶点属性,而不是目标顶点属性)。
       //例如,如果我们计算每个用户的追随者的平均年龄,我们只需要源字段,因此我们将用于TripletFields.Src表示我们只需要源字段。
-     //   TripletFields.Src
+      //tripletFields：定义发消息的方向
+      //   TripletFields.Src
     )
     // Divide total age by number of older followers to get average age of older followers
     //计算年龄大于自己的关注者的平均年龄
