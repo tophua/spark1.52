@@ -49,26 +49,32 @@ object ComprehensiveExample {
 
     // $example on$
     // Load my user data and parse into tuples of user id and attribute list
+    //加载我的用户数据并解析成用户ID和属性列表的元组
     val users = (sc.textFile("data/graphx/users.txt")
       .map(line => line.split(",")).map( parts => (parts.head.toLong, parts.tail) ))
 
     // Parse the edge data which is already in userId -> userId format
+    //解析边缘数据已经是userId>userId格式
     val followerGraph = GraphLoader.edgeListFile(sc, "data/graphx/followers.txt")
 
     // Attach the user attributes
+    //附加用户属性
     val graph = followerGraph.outerJoinVertices(users) {
       case (uid, deg, Some(attrList)) => attrList
       // Some users may not have attributes so we set them as empty
+        //有些用户可能没有属性，所以我们将它们设为空。
       case (uid, deg, None) => Array.empty[String]
     }
 
     // Restrict the graph to users with usernames and names
+    //限制图与用户名和用户名称
     val subgraph = graph.subgraph(vpred = (vid, attr) => attr.size == 2)
 
     // Compute the PageRank
     val pagerankGraph = subgraph.pageRank(0.001)
 
     // Get the attributes of the top pagerank users
+    //获取顶点PageRank用户的属性
     val userInfoWithPageRank = subgraph.outerJoinVertices(pagerankGraph.vertices) {
       case (uid, attrList, Some(pr)) => (pr, attrList.toList)
       case (uid, attrList, None) => (0.0, attrList.toList)

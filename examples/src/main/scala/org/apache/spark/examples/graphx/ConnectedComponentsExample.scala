@@ -49,6 +49,7 @@ object ConnectedComponentsExample {
     // $example on$
     // Load the graph as in the PageRank example
     val graph = GraphLoader.edgeListFile(sc, "data/graphx/followers.txt")
+
     // Find the connected components
     //连接的组件算法将图中每个连接的组件与其最低编号顶点的ID进行标记
     val cc = graph.connectedComponents().vertices
@@ -62,6 +63,7 @@ object ConnectedComponentsExample {
     (2,1)**/
     cc.foreach(println)
     // Join the connected components with the usernames
+    //加入连接组件与用户名
     val users = sc.textFile("data/graphx/users.txt").map { line =>
       val fields = line.split(",")
       (fields(0).toLong, fields(1))
