@@ -59,6 +59,16 @@ object GraphDemo extends  App{
     (2,1)
     */
   graph.outDegrees.foreach(println)
+  println("======degrees========")
+  /**
+    度,表示3节点有二个连接数
+  (3,2)
+  (7,2)
+  (5,3)
+  (2,1)
+    */
+  graph.degrees.foreach(println)
+
   println("====bengin==========")
   /**
     ((2,0.15),(5,0.27749999999999997),1.0)
