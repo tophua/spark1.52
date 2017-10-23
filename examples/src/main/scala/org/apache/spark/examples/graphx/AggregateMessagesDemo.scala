@@ -58,8 +58,9 @@ object AggregateMessagesDemo extends App{
     ((6,(Fran,40)),(4,(David,18)),3)
     */
   //定义一个相邻聚合,统计比自己年纪大的粉丝数(count)及其平均年龄（totalAge/count)
+  //方括号内的元组(Int,Int)是函数返回值的类型，也就是Reduce函数（mergeMsg )右侧得到的值（count，totalAge）
   val olderFollowers=graph.aggregateMessages[(Int,Int)](
-    //方括号内的元组(Int,Int)是函数返回值的类型，也就是Reduce函数（mergeMsg )右侧得到的值（count，totalAge）
+    //(1)--函数左侧是边三元组，也就是对边三元组进行操作，有两种发送方式sendToSrc和 sendToDst
     triplet=> {
       /**
       =attr=7==srcAttr_1==Bob==srcAttr._2==70==dstId==1
@@ -76,16 +77,25 @@ object AggregateMessagesDemo extends App{
         */
       println("=attr="+triplet.attr+"==srcAttr_1=="+triplet.srcAttr._1+"==srcAttr._2=="+triplet.srcAttr._2+"==dstId=="+triplet.dstId)
       if(triplet.srcAttr._2>triplet.dstAttr._2){
+        println("==="+(1,triplet.srcAttr._2))
+        /**
+          * ===(1,70)
+          * ===(1,70)
+          * ===(1,55)
+          * ===(1,40)
+          * ===(1,40)
+          */
         triplet.sendToDst((1,triplet.srcAttr._2))
       }
-    },//(1)--函数左侧是边三元组，也就是对边三元组进行操作，有两种发送方式sendToSrc和 sendToDst
+    },
+    //(2)相当于Reduce函数a，b各代表一个元组（count，Age）
     (a,b)=>{
       println("=a._1="+a._1+"==b._1=="+b._1+"==a._2=="+a._2+"==b._2=="+b._2)
       //=a._1=1==b._1==1==a._2==70==b._2==40
       //=a._1=1==b._1==1==a._2==70==b._2==40
+      //对count和Age不断相加（reduce），最终得到总的count和totalAge
       (a._1+b._1,a._2+b._2)
-    },//(2)相当于Reduce函数，a，b各代表一个元组（count，Age）
-    //对count和Age不断相加（reduce），最终得到总的count和totalAge
+    },
     TripletFields.All)//(3)可选项,TripletFields.All/Src/Dst
   /**
   //顶点Id=4的用户,有2个年龄比自己大的粉丝,同年龄是110岁
