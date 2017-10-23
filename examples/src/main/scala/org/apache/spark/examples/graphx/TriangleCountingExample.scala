@@ -61,6 +61,14 @@ object TriangleCountingExample {
       .partitionBy(PartitionStrategy.RandomVertexCut)
     // Find the triangle count for each vertex
     val triCounts = graph.triangleCount().vertices
+    /*输出结果
+    * (1,1)//顶点1有1个三角形
+    * (3,2)//顶点3有2个三角形
+    * (5,2)
+    * (4,1)
+    * (6,1)
+    * (2,2)
+    */
     // Join the triangle counts with the usernames
     val users = sc.textFile("data/graphx/users.txt").map { line =>
       val fields = line.split(",")

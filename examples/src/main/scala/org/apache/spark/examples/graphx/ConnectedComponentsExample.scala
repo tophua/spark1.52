@@ -22,7 +22,7 @@ package org.apache.spark.examples.graphx
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.graphx.GraphLoader
 // $example off$
-
+import org.apache.log4j.{Level, Logger}
 
 /**
  * A connected components algorithm example.
@@ -45,12 +45,17 @@ object ConnectedComponentsExample {
     conf.setAppName("My First Spark Graphx").setMaster("local")
     // Define Spark Context which we will use to initialize our SQL Context
     val sc = new SparkContext(conf)
-
+    //屏蔽日志
+    Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
+    Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF)
     // $example on$
     // Load the graph as in the PageRank example
     //利用GraphLoader.edgeListFile函数从边List文件中建立图的基本结构（所有“顶点”+“边”），且顶点和边的属性都默认为1
     val graph = GraphLoader.edgeListFile(sc, "data/graphx/followers.txt")
-
+    /**
+      * ((1,1),(2,1),1)((2,1),(1,1),1)((3,1),(7,1),1)((4,1),(1,1),1)((6,1),(3,1),1)((6,1),(7,1),1)((7,1),(3,1),1)((7,1),(6,1),1)
+      */
+    graph.triplets.foreach(print)
     // Find the connected components
     //连接的组件算法将图中每个连接的组件与其最低编号顶点的ID进行标记
     val cc = graph.connectedComponents().vertices
