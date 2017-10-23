@@ -41,6 +41,24 @@ object GraphDemo extends  App{
     ((5,(franklin,prof)),(7,(jgonzal,postdoc)),pi)
     */
   graph.triplets.foreach(println)
+  println("======inDegrees========")
+  /**
+    入度,表示3的顶点入度1个连接数
+    (3,1)
+     入度,表示7的顶点入度2个连接数
+    (7,2)
+    (5,1)
+
+    */
+  graph.inDegrees.foreach(println)
+  println("======outDegrees========")
+  /**
+    出度,表示3的顶点出度1个连接数
+    (3,1)
+    (5,2)
+    (2,1)
+    */
+  graph.outDegrees.foreach(println)
   println("====bengin==========")
   /**
     ((2,0.15),(5,0.27749999999999997),1.0)
