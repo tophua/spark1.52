@@ -137,7 +137,7 @@ object AggregateMessagesDemo extends App{
 
   //输出结果如下(id,weight)：
   //(4,2)(1,4)(6,4)(3,2)(5,0)(2,4)
-//上面例子可以用下面的语句获得同样的结果：
+  //上面例子可以用下面的语句获得同样的结果：
 
   val weightsb=graphba.vertices.map{
     attr=>(attr._1,attr._2._2.getOrElse(0))
