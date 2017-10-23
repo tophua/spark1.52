@@ -1,7 +1,6 @@
 package org.apache.spark.examples.graphx
 
 
-import org.apache.spark.examples.graphx.SubGraphDemo.conf
 import org.apache.spark.graphx.{Edge, Graph, TripletFields, VertexId}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
@@ -75,7 +74,7 @@ object AggregateMessagesDemo extends App{
       =attr=8==srcAttr_1==Fran==srcAttr._2==40==dstId==2
       =attr=3==srcAttr_1==Fran==srcAttr._2==40==dstId==4
         */
-      println("=attr="+triplet.attr+"==srcAttr_1=="+triplet.srcAttr._1+"==srcAttr._2=="+triplet.srcAttr._2+"==dstId=="+triplet.dstId)
+      println(triplet.dstId+"==srcAttr_1=="+triplet.srcAttr._1+"==srcAttr._2=="+triplet.srcAttr._2+"=attr="+triplet.attr)
       if(triplet.srcAttr._2>triplet.dstAttr._2){
         println("==="+(1,triplet.srcAttr._2))
         /**
@@ -111,4 +110,41 @@ object AggregateMessagesDemo extends App{
   //输出结果：
   //(1,(2,55))(4,(2,55))(6,(1,55))//Id=1的用户,有2个粉丝,平均年龄是55岁
   averageOfOlderFollowers.foreach(print)
+
+  //Spark中,经常使用在map中使用case语句进行匹配None和Some
+  //假设graph.Vertice:(id，（name，weight））如下：
+
+  val usersab: RDD[(Long, (String,Option[Int]))]=
+  //对于 users 这个 RDD 而言，其每一个元素包含一个 ID 和属性，属性是由 name 和 occupation 构成的元组
+  //(4,(David,18))(1,(Alice,28))(6,(Fran,40))(3,(Charlie,30))(2,(Bob,70))(5,Ed,55))
+    sparkCtx.parallelize(Array(
+      (4L,("David",Some(2))),
+      (3L,("Charlie",Some(2))),
+      (6L,("Fran",Some(4))),
+      (2L,("Bob",Some(4))),
+      (1L,("Alice",Some(4))),
+      (5L,("Ed",None))
+      ))
+  val graphba = Graph(usersab, relationships)
+  //
+  val weights=graphba.vertices.map{
+    case (id,(name,Some(weight)))=>(id,weight)
+    //id=5时,weight=None，其他的为Some
+    case (id,(name,None))=>(id,0)
+  }
+  weights.foreach(print)
+  println
+
+  //输出结果如下(id,weight)：
+  //(4,2)(1,4)(6,4)(3,2)(5,0)(2,4)
+//上面例子可以用下面的语句获得同样的结果：
+
+  val weightsb=graphba.vertices.map{
+    attr=>(attr._1,attr._2._2.getOrElse(0))
+    //如果attr._2._2！=None，返回attr._2._2（weight）的值，
+    //否则（即attr._2._2==None），返回自己设置的函数参数（0）
+  }
+  weightsb.foreach(print)
+  println
+
 }
