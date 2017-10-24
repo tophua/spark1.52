@@ -58,7 +58,13 @@ object GraphDemo extends  App{
   graph.edges.map {
     e=>(e.attr,e.srcId,e.dstId)
   }
-
+  /**
+    * attr 边的属性数据
+    * srcId 边的源顶点的Id
+    * srcAttr 边的源顶点的属性数据
+    * dstId 边的目标顶点的Id
+    * dstAttr 边的目标顶点的属性数据
+    */
   graph.triplets.map{
     triplet=>(triplet.srcAttr._1,triplet.dstAttr._2,triplet.srcId,triplet.dstId)
   }
