@@ -25,6 +25,13 @@ object GraphAPIDemo extends App{
   val defaultUser = ("John Doe", "Missing")
   // Build the initial Graph
   val graph = Graph(users, relationships, defaultUser)
+  val a=graph.inDegrees.reduce((a,b) => if (a._2 > b._2) a else b)
+  //顶点Id:9711200==引入数=2414
+  println("顶点Id:"+a._1+"==引入数="+a._2)
+  val v = graph.pageRank(0.001).vertices
+  val pageRank=v.reduce((a,b) => if (a._2 > b._2) a else b)
+  //顶点Id:9207016===85.27317386053808
+  println("顶点Id:"+pageRank._1+"==权值=="+pageRank._2)
   // Notice that there is a user 0 (for which we have no information) connected to users
   // 4 (peter) and 5 (franklin).
   /**
