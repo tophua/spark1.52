@@ -37,6 +37,7 @@ class DataFrameTungstenSuite extends QueryTest with SharedSQLContext {
   test("test simple types") {//测试的简单类型
     withSQLConf(SQLConf.UNSAFE_ENABLED.key -> "true") {
       val df = sqlContext.sparkContext.parallelize(Seq((1, 2))).toDF("a", "b")
+
       assert(df.select(struct("a", "b")).first().getStruct(0) === Row(1, 2))
     }
   }
@@ -56,6 +57,21 @@ class DataFrameTungstenSuite extends QueryTest with SharedSQLContext {
             .add("b4", DoubleType))
 
       val df = sqlContext.createDataFrame(data, schema)
+      /**
+       +---+-------------+
+      |a  |b            |
+      +---+-------------+
+      |1  |[1,2,3.0,3.0]|
+      +---+-------------+*/
+      df.show(false)
+      /**
+        +-------------+
+        |b            |
+        +-------------+
+        |[1,2,3.0,3.0]|
+        +-------------+
+        */
+      df.select("b").show(false)
       assert(df.select("b").first() === Row(struct))
     }
   }
@@ -78,8 +94,23 @@ class DataFrameTungstenSuite extends QueryTest with SharedSQLContext {
             .add("b5a", IntegerType)
             .add("b5b", StringType))
             .add("b6", StringType))
-
       val df = sqlContext.createDataFrame(data, schema)
+      /**
+         +---+--------------------------+
+        |a  |b                         |
+        +---+--------------------------+
+        |1  |[1,2,3.0,3.0,[1,abcd],efg]|
+        +---+--------------------------+
+        */
+      df.show(false)
+      /**
+         +--------------------------+
+         |b                         |
+        +--------------------------+
+        |[1,2,3.0,3.0,[1,abcd],efg]|
+        +--------------------------+
+        */
+      df.select("b").show(false)
       assert(df.select("b").first() === Row(outerStruct))
     }
   }
