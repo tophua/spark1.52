@@ -35,14 +35,15 @@ class DataFrameTungstenSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
   test("test simple types") {//测试的简单类型
+    //只需要修改这一个参数就可以配置是否开启tungsten优化
     withSQLConf(SQLConf.UNSAFE_ENABLED.key -> "true") {
       val df = sqlContext.sparkContext.parallelize(Seq((1, 2))).toDF("a", "b")
-
+      df.show(false)
       assert(df.select(struct("a", "b")).first().getStruct(0) === Row(1, 2))
     }
   }
 
-  test("test struct type") {//测试的结构类型
+  test("test struct type") {//测试嵌套的结构类型
     withSQLConf(SQLConf.UNSAFE_ENABLED.key -> "true") {
       val struct = Row(1, 2L, 3.0F, 3.0)
       val data = sqlContext.sparkContext.parallelize(Seq(Row(1, struct)))
@@ -76,7 +77,7 @@ class DataFrameTungstenSuite extends QueryTest with SharedSQLContext {
     }
   }
 
-  test("test nested struct type") {//测试套的结构类型
+  test("test nested struct type") {//测试嵌套的结构类型
     withSQLConf(SQLConf.UNSAFE_ENABLED.key -> "true") {
       val innerStruct = Row(1, "abcd")
       val outerStruct = Row(1, 2L, 3.0F, 3.0, innerStruct, "efg")
