@@ -47,12 +47,15 @@ class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
       |  2|     3|
       |  3|     3|
       +---+------+
-     */   
+     */
+    //分组求和
     testData2.groupBy("a").agg(sum($"b")).show()
     checkAnswer(
       testData2.groupBy("a").agg(sum($"b")),//df.agg() 求聚合用的相关函数
       Seq(Row(1, 3), Row(2, 3), Row(3, 3))
     )
+
+    testData2.groupBy("a").agg(sum($"b").as("totB")).agg(sum('totB)).show()
     checkAnswer(
       testData2.groupBy("a").agg(sum($"b").as("totB")).agg(sum('totB)),
       Row(9)
@@ -72,7 +75,25 @@ class DataFrameAggregateSuite extends QueryTest with SharedSQLContext {
 
     val df1 = Seq(("a", 1, 0, "b"), ("b", 2, 4, "c"), ("a", 2, 3, "d"))
       .toDF("key", "value1", "value2", "rest")
-
+    /**
+      +---+------+------+----+
+      |key|value1|value2|rest|
+      +---+------+------+----+
+      |a  |1     |0     |b   |
+      |b  |2     |4     |c   |
+      |a  |2     |3     |d   |
+      +---+------+------+----+
+      */
+    df1.show(false)
+    /**
+      +---+-----------+-----------+
+      |key|min(value1)|min(value2)|
+      +---+-----------+-----------+
+      |a  |1          |0          |
+      |b  |2          |4          |
+      +---+-----------+-----------+
+      */
+    df1.groupBy("key").min().show(false)
     checkAnswer(
       df1.groupBy("key").min(),
       df1.groupBy("key").min("value1", "value2").collect()
