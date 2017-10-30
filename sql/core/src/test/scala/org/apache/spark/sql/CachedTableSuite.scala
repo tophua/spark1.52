@@ -311,10 +311,11 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     testData.select('key).registerTempTable("t1")
     testData.select('key).registerTempTable("t2")
     ctx.cacheTable("t1")
-
+    //判断是否缓存表t1
     assert(ctx.isCached("t1"))
+    //注意如果表t1被缓存,t2自动被缓存
     assert(ctx.isCached("t2"))
-
+    //t2自动删除缓存
     ctx.dropTempTable("t1")
     assert(intercept[RuntimeException](ctx.table("t1")).getMessage.startsWith("Table Not Found"))
     assert(!ctx.isCached("t2"))
@@ -325,6 +326,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     sql("SELECT key FROM testData LIMIT 5").registerTempTable("t2")
     ctx.cacheTable("t1")
     ctx.cacheTable("t2")
+    //使用函数清除缓存
     ctx.clearCache()
     assert(ctx.cacheManager.isEmpty)
 
@@ -332,6 +334,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
     sql("SELECT key FROM testData LIMIT 5").registerTempTable("t2")
     ctx.cacheTable("t1")
     ctx.cacheTable("t2")
+    //执行Sql清除缓存
     sql("Clear CACHE")
     assert(ctx.cacheManager.isEmpty)
   }
@@ -350,6 +353,7 @@ class CachedTableSuite extends QueryTest with SharedSQLContext {
 
     Accumulators.synchronized {
       val accsSize = Accumulators.originals.size
+      //清除缓存,防止内存泄漏
       ctx.uncacheTable("t1")
       ctx.uncacheTable("t2")
       assert((accsSize - 2) == Accumulators.originals.size)
