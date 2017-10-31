@@ -70,7 +70,9 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
      * +---+
      */
     sql("select case when true then 1.0 else '1' end from src ").show()
+
     val queryCaseWhen = sql("select case when true then 1.0 else '1' end from src ")
+
     //coalesce函数可以接受一系列的值,如果第一个为null,使用第二个值,如果第二个值为null,使用第三个值,以此类推
     val queryCoalesce = sql("select coalesce(null, 1, '1') from src ")
     /**

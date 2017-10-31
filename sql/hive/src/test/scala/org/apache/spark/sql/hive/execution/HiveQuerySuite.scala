@@ -943,7 +943,7 @@ b    NULL       42          73          0       1
         .collect()
     }
   }
-  //插入地图<K，V>值
+  //插入Map<K，V>值
   test("SPARK-2263: Insert Map<K, V> values") {
     sql("CREATE TABLE m(value MAP<INT, STRING>)")
     sql("INSERT OVERWRITE TABLE m SELECT MAP(key, value) FROM src LIMIT 10")

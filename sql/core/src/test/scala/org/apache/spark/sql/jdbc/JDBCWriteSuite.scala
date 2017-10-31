@@ -38,10 +38,12 @@ class JDBCWriteSuite extends SparkFunSuite with BeforeAndAfter with SharedSQLCon
   properties.setProperty("user", "testUser")
   properties.setProperty("password", "testPass")
   properties.setProperty("rowId", "false")
-
+  properties.setProperty("user", "testUser")
+  properties.setProperty("password", "testPass")
+  properties.setProperty("rowId", "false")
   before {
     Utils.classForName("org.h2.Driver")
-    
+
     //Utils.classForName("org.postgresql.Driver")
     
     conn = DriverManager.getConnection(url)    
