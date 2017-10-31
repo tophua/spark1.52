@@ -61,6 +61,7 @@ object SparkLR {
         |org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGS是逆秩2拟牛顿法)
         |for more conventional use.
       """.stripMargin)
+    //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
   }
 
   def main(args: Array[String]) {

@@ -1083,6 +1083,7 @@ b    NULL       42          73          0       1
     sql("SET hive.exec.dynamic.partition.mode=strict")
 
     // Should throw when using strict dynamic partition mode without any static partition
+    //使用严格的动态分区模式时,应该抛出任何静态分区
     intercept[SparkException] {
       sql(
         """INSERT INTO TABLE dp_test PARTITION(dp)

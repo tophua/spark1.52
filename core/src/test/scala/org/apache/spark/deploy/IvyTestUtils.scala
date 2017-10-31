@@ -222,6 +222,7 @@ private[deploy] object IvyTestUtils {
   /** Helper method to write artifact information in the ivy.xml.
     * 帮助程序在ivy.xml中编写工件信息*/
   private def ivyArtifactWriter(artifact: MavenCoordinate): String = {
+    //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
     s"""<dependency org="${artifact.groupId}" name="${artifact.artifactId}"
        |            rev="${artifact.version}" force="true"
        |            conf="compile->compile(*),master(*);runtime->runtime(*)"/>""".stripMargin

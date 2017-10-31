@@ -159,6 +159,7 @@ trait CheckAnalysis {
             failAnalysis(
               s"""Only a single table generating function is allowed in a SELECT clause, found:
                  | ${exprs.map(_.prettyString).mkString(",")}""".stripMargin)
+          //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
           // Special handling for cases when self-join introduce duplicate expression ids.
           case j @ Join(left, right, _, _) if left.outputSet.intersect(right.outputSet).nonEmpty =>
@@ -169,6 +170,7 @@ trait CheckAnalysis {
                  |$plan
                  |Conflicting attributes: ${conflictingAttributes.mkString(",")}
                  |""".stripMargin)
+          //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
           case o if !o.resolved =>
             failAnalysis(
@@ -181,6 +183,7 @@ trait CheckAnalysis {
                  | ${o.expressions.map(_.prettyString).mkString(",")}
                  |in operator ${operator.simpleString}
              """.stripMargin)
+          //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
           case _ => // Analysis successful!
         }

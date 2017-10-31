@@ -980,6 +980,7 @@ class JsonProtocolSuite extends SparkFunSuite {
       |  }
       |}
     """.stripMargin
+  //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
   private val taskGettingResultJsonString =
     """
@@ -1023,6 +1024,7 @@ class JsonProtocolSuite extends SparkFunSuite {
       |  }
       |}
     """.stripMargin
+  //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
   private val taskEndJsonString =
     """
@@ -1112,6 +1114,7 @@ class JsonProtocolSuite extends SparkFunSuite {
       |  }
       |}
     """.stripMargin
+  //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
   private val taskEndWithHadoopInputJsonString =
     """
@@ -1763,4 +1766,5 @@ class JsonProtocolSuite extends SparkFunSuite {
      |  }]
      |}
    """.stripMargin
+  //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 }

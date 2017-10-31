@@ -72,6 +72,7 @@ object LocalKMeans {
         |Please use the KMeans method found in org.apache.spark.mllib.clustering
         |for more conventional use.
       """.stripMargin)
+    //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
   }
 
   def main(args: Array[String]) {

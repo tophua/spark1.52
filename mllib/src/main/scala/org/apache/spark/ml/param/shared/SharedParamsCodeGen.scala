@@ -135,6 +135,7 @@ private[shared] object SharedParamsCodeGen {
       s"""
          |  setDefault($name, $v)
          |""".stripMargin
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
     }.getOrElse("")
     val isValid = if (param.isValid != "") {
       ", " + param.isValid
@@ -163,6 +164,7 @@ private[shared] object SharedParamsCodeGen {
       |  $methodStr get$Name: $T = $$($name)
       |}
       |""".stripMargin
+    //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
   }
 
   /** Generates Scala source code for the input params with header. */
@@ -193,6 +195,7 @@ private[shared] object SharedParamsCodeGen {
         |
         |// scalastyle:off
         |""".stripMargin
+    //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
     val footer = "// scalastyle:on\n"
 

@@ -87,7 +87,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
          |  --hiveconf ${ConfVars.METASTORECONNECTURLKEY}=$jdbcUrl
          |  --hiveconf ${ConfVars.METASTOREWAREHOUSE}=$warehousePath
          |  --hiveconf ${ConfVars.SCRATCHDIR}=$scratchDirPath
-       """.stripMargin.split("\\s+").toSeq ++ extraArgs
+       """.stripMargin.split("\\s+").toSeq ++ extraArgs  //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
     }
 
     var next = 0
@@ -147,7 +147,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
            |===========================
            |End CliSuite failure output
            |===========================
-         """.stripMargin
+         """.stripMargin //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       logError(message, cause)
       fail(message, cause)
     } finally {
@@ -213,7 +213,7 @@ class CliSuite extends SparkFunSuite with BeforeAndAfter with Logging {
     runCliWithin(3.minute, Seq("--jars", s"$jarFile"))(
       """CREATE TABLE t1(key string, val string)
         |ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe';
-      """.stripMargin
+      """.stripMargin //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
         -> "OK",
       "CREATE TABLE sourceTable (key INT, val STRING);"
         -> "OK",

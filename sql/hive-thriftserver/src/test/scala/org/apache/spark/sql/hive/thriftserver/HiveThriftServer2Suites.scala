@@ -411,14 +411,14 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
             "DROP TABLE IF EXISTS addJar",
             """CREATE TABLE addJar(key string)
               |ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
-            """.stripMargin)
+            """.stripMargin) //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
           queries.foreach(statement.execute)
 
           statement.executeQuery(
             """
               |INSERT INTO TABLE addJar SELECT 'k1' as key FROM smallKV limit 1
-            """.stripMargin)
+            """.stripMargin)//String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
           val actualResult =
             statement.executeQuery("SELECT key FROM addJar")
@@ -481,7 +481,7 @@ class HiveThriftBinaryServerSuite extends HiveThriftJdbcTest {
         s"ADD JAR $jarURL",
         s"""CREATE TEMPORARY FUNCTION udtf_count2
             |AS 'org.apache.spark.sql.hive.execution.GenericUDTFCount2'
-         """.stripMargin
+         """.stripMargin //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       ).foreach(statement.execute)
 
       val rs1 = statement.executeQuery("DESCRIBE FUNCTION udtf_count2")
@@ -562,7 +562,7 @@ abstract class HiveThriftJdbcTest extends HiveThriftServer2Test {
        |default?
        |hive.server2.transport.mode=http;
        |hive.server2.thrift.http.path=cliservice
-     """.stripMargin.split("\n").mkString.trim
+     """.stripMargin.split("\n").mkString.trim //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
   } else {
     s"jdbc:hive2://localhost:$serverPort/"
   }
@@ -627,7 +627,7 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
           |log4j.appender.console.target=System.err
           |log4j.appender.console.layout=org.apache.log4j.PatternLayout
           |log4j.appender.console.layout.ConversionPattern=%d{yy/MM/dd HH:mm:ss} %p %c{1}: %m%n
-        """.stripMargin,
+        """.stripMargin,//String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
         new File(s"$tempLog4jConf/log4j.properties"),
         UTF_8)
 
@@ -645,6 +645,7 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
        |  --driver-java-options -Dlog4j.debug
        |  --conf spark.ui.enabled=false
      """.stripMargin.split("\\s+").toSeq
+    //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
   }
 
   /**
@@ -680,6 +681,7 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
          |Listening port: $port
          |System user: $user
        """.stripMargin.split("\n")
+    //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
 
     logInfo(s"Trying to start HiveThriftServer2: port=$port, mode=$mode, attempt=$attempt")
 
@@ -767,6 +769,7 @@ abstract class HiveThriftServer2Test extends SparkFunSuite with BeforeAndAfterAl
          |End HiveThriftServer2Suite failure output
          |=========================================
        """.stripMargin)
+    //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
   }
 
   override protected def beforeAll(): Unit = {

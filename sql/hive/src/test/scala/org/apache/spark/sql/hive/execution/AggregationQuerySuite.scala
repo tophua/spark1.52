@@ -144,6 +144,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |  SUM(key)
           |FROM emptyTable
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(null, 0, 0, 0, null, null, null, null, null) :: Nil)
 
     checkAnswer(
@@ -162,6 +163,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |  COUNT(DISTINCT value)
           |FROM emptyTable
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(null, 0, 0, 0, null, null, null, null, null, 0) :: Nil)
 
     // If there is a GROUP BY clause and the table is empty, there is no output.
@@ -182,6 +184,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM emptyTable
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Nil)
   }
   //null 文字
@@ -198,6 +201,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |  MIN(null),
           |  SUM(null)
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(null, 0, null, null, null, null, null) :: Nil)
   }
   //只做分组
@@ -209,6 +213,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(1) :: Row(2) :: Row(3) :: Row(null) :: Nil)
 
     checkAnswer(
@@ -217,6 +222,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |SELECT DISTINCT value1, key
           |FROM agg2
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(10, 1) ::
         Row(-60, null) ::
         Row(30, 1) ::
@@ -235,6 +241,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg2
           |GROUP BY key, value1
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(10, 1) ::
         Row(-60, null) ::
         Row(30, 1) ::
@@ -255,6 +262,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY Key - 100
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(20.0, -99) :: Row(-0.5, -98) :: Row(null, -97) :: Row(10.0, null) :: Nil)
 
     checkAnswer(
@@ -264,6 +272,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg2
           |GROUP BY Key - 100
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(40, -99, 2) :: Row(0, -98, 2) :: Row(null, -97, 0) :: Row(30, null, 3) :: Nil)
 
     checkAnswer(
@@ -273,6 +282,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY vAlue * keY - 100
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(-90) ::
         Row(-80) ::
         Row(-70) ::
@@ -289,6 +299,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(-0.5) :: Row(20.0) :: Row(null) :: Row(10.0) :: Nil)
   }
   //测试平均值
@@ -300,6 +311,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(1, 20.0) :: Row(2, -0.5) :: Row(3, null) :: Row(null, 10.0) :: Nil)
 
     checkAnswer(
@@ -309,6 +321,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(20.0, 1) :: Row(-0.5, 2) :: Row(null, 3) :: Row(10.0, null) :: Nil)
 
     checkAnswer(
@@ -318,6 +331,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key + 10
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(21.5, 11) :: Row(1.0, 12) :: Row(null, 13) :: Row(11.5, null) :: Nil)
 
     checkAnswer(
@@ -325,6 +339,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         """
           |SELECT avg(value) FROM agg1
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(11.125) :: Nil)
   }
 
@@ -342,6 +357,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(1, 64.5, 120.0, 19.0, 55.5, 20.0) ::
         Row(2, 5.0, 99.5, -2.5, -7.0, -0.5) ::
         Row(3, null, null, null, null, null) ::
@@ -356,6 +372,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(60.0, 1) :: Row(-1.0, 2) :: Row(null, 3) :: Row(30.0, null) :: Nil)
 
     checkAnswer(
@@ -363,6 +380,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         """
           |SELECT mydoublesum(value) FROM agg1
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(89.0) :: Nil)
 
     checkAnswer(
@@ -370,6 +388,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         """
           |SELECT mydoublesum(null)
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(null) :: Nil)
   }
 
@@ -381,6 +400,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(60.0, 1, 20.0) ::
         Row(-1.0, 2, -0.5) ::
         Row(null, 3, null) ::
@@ -398,6 +418,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg1
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(64.5, 19.0, 1, 55.5, 20.0) ::
         Row(5.0, -2.5, 2, -7.0, -0.5) ::
         Row(null, null, 3, null, null) ::
@@ -418,6 +439,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |  max(distinct value1)
           |FROM agg2
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(-60, 70.0, 101.0/9.0, 5.6, 100))
 
     checkAnswer(
@@ -434,6 +456,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg2
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(120.0, 70.0/3.0, -10.0/3.0, 1, 67.0/3.0 + 100.0, 12.0, 20.0) ::
         Row(100.0, 1.0/3.0, 1.0, 2, -2.0/3.0 + 100.0, 10.0, 2.0) ::
         Row(null, null, 3.0, 3, null, null, null) ::
@@ -452,6 +475,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg2
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(1, 120.0, -10.0, 40.0, 120.0, 70.0/3.0 + 100.0) ::
         Row(2, 100.0, 3.0, 0.0, 100.0, 1.0/3.0 + 100.0) ::
         Row(3, null, 3.0, null, null, null) ::
@@ -469,6 +493,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg2
           |GROUP BY key
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(3, 3, 3, 2, 1) ::
         Row(3, 4, 4, 2, 2) ::
         Row(0, 2, 2, 0, 3) ::
@@ -488,6 +513,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg2
           |GROUP BY key, value1
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(1, 10, 1, 1, 1) ::
         Row(1, -60, 1, 1, null) ::
         Row(2, 30, 2, 2, 1) ::
@@ -512,6 +538,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
           |FROM agg2
           |GROUP BY key, value1
         """.stripMargin),
+      //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(1, 10, 1, 1, 1, 1) ::
         Row(1, -60, 1, 1, null, 1) ::
         Row(2, 30, 2, 2, 1, 1) ::
@@ -552,6 +579,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
             |FROM agg1
             |GROUP BY key
           """.stripMargin).collect()
+        //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       }.getMessage
       assert(errorMessage.contains("implemented based on the new Aggregate Function interface"))
     }
@@ -569,6 +597,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
             |FROM agg1
             |GROUP BY key
           """.stripMargin).collect()
+        //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       }.getMessage
       assert(errorMessage.contains("implemented based on the new Aggregate Function interface"))
 
