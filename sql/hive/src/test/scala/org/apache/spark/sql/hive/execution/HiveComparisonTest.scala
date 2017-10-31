@@ -34,12 +34,13 @@ import org.apache.spark.sql.hive.test.TestHive
 /**
  * Allows the creations of tests that execute the same query against both hive
  * and catalyst, comparing the results.
- *
+  * 允许创建对hive和catalyst执行相同查询的测试,比较结果。
  * The "golden" results from Hive are cached in an retrieved both from the classpath and
  * [answerCache] to speed up testing.
- *
+ * Hive的“golden”结果被缓存在从类路径和[answerCache]中检索出来,以加速测试
  * See the documentation of public vals in this class for information on how test execution can be
  * configured using system properties.
+  * 有关如何使用系统属性配置测试执行的信息,请参阅此类中的公共文档的文档
   * 看到这类公共vals类信息如何测试执行可以配置使用系统属性
  */
 abstract class HiveComparisonTest
@@ -50,13 +51,18 @@ abstract class HiveComparisonTest
    * harness or hive have been updated thus requiring new golden answers to be computed for some
    * tests. Also prevents the classpath being used when looking for golden answers as these are
    * usually stale.
+    *
+    *设置时,导致测试失败的任何缓存文件都将被删除,当测试线束或蜂巢已更新时使用,
+    * 因此需要为某些测试计算新的golden答案,同时防止在寻找golden答案时使用类路径,因为这些通常是陈旧的。
    */
   val recomputeCache = System.getProperty("spark.hive.recomputeCache") != null
   //testshard=0:4
   protected val shardRegEx = "(\\d+):(\\d+)".r
   /**
    * Allows multiple JVMs to be run in parallel, each responsible for portion of all test cases.
+    * 允许并行运行多个JVM,每个JVM负责所有测试用例的一部分
    * Format `shardId:numShards`. Shard ids should be zero indexed.  E.g. -Dspark.hive.testshard=0:4.
+    * 格式为`shardId：numShards`,碎片应该被零索引,例如-Dspark.hive.testshard=0:4
    */
   val shardInfo = Option(System.getProperty("spark.hive.shard")).map {
     case shardRegEx(id, total) => (id.toInt, total.toInt)
@@ -67,9 +73,12 @@ abstract class HiveComparisonTest
   /**
    * When set, this comma separated list is defines directories that contain the names of test cases
    * that should be skipped.
+    * 设置时,此逗号分隔列表定义包含应该跳过的测试用例名称的目录
    *
    * For example when `-Dspark.hive.skiptests=passed,hiveFailed` is specified and test cases listed
    * in [[passedDirectory]] or [[hiveFailedDirectory]] will be skipped.
+    * 例如`-Dspark.hive.skip tests = passed，hive Failed`被指定,
+    * 并且将跳过[[passedDirectory]]或[[hiveFailedDirectory]]中列出的测试用例。
    */
   val skipDirectories =
     Option(System.getProperty("spark.hive.skiptests"))
@@ -83,14 +92,16 @@ abstract class HiveComparisonTest
       .flatMap(_.split(","))
       .map(name => new File(targetDir, s"$suiteName.$name"))
 
-  /** The local directory with cached golden answer will be stored. */
+  /** The local directory with cached golden answer will be stored.
+    * 具有缓存的golden答案的本地目录将被存储。*/
   protected val answerCache = new File("src" + File.separator + "test" +
     File.separator + "resources" + File.separator + "golden")
   if (!answerCache.exists) {
     answerCache.mkdir()
   }
 
-  /** The [[ClassLoader]] that contains test dependencies.  Used to look for golden answers. */
+  /** The [[ClassLoader]] that contains test dependencies.  Used to look for golden answers.
+    * 包含测试依赖关系的[[ClassLoader]],用来寻找golden答案。*/
   protected val testClassLoader = this.getClass.getClassLoader
 
   /**
@@ -117,7 +128,8 @@ abstract class HiveComparisonTest
     wrongDirectory.mkdir() // Not atomic!
   }
 
-  /** Directory containing output of tests where we fail to generate golden output with Hive. */
+  /** Directory containing output of tests where we fail to generate golden output with Hive.
+    * 包含测试输出的目录,我们无法使用Hive生成golden输出。*/
   val hiveFailedDirectory = new File(targetDir, s"$suiteName.hiveFailed")
   if (!hiveFailedDirectory.exists()) {
     hiveFailedDirectory.mkdir() // Not atomic!
@@ -153,8 +165,10 @@ abstract class HiveComparisonTest
 
     val orderedAnswer = hiveQuery.analyzed match {
       // Clean out non-deterministic time schema info.
+      //清除非确定性时间模式信息
       // Hack: Hive simply prints the result of a SET command to screen,
       // and does not return it as a query answer.
+        //Hack：Hive只需将SET命令的结果打印到屏幕上,而不会将其作为查询答案返回。
       case _: SetCommand => Seq("0")
       case HiveNativeCommand(c) if c.toLowerCase.contains("desc") =>
         answer
@@ -168,7 +182,9 @@ abstract class HiveComparisonTest
       case _: DescribeCommand =>
         // Filter out non-deterministic lines and lines which do not have actual results but
         // can introduce problems because of the way Hive formats these lines.
+        //滤除不具有实际结果的非确定性行和行,但由于Hive格式化这些行的方式,可能会引入问题。
         // Then, remove empty lines. Do not sort the results.
+        //然后,删除空行,不排序结果。
         answer
           .filterNot(r => nonDeterministicLine(r) || ignoredLine(r))
           .map(_.replaceAll("from deserializer", ""))
@@ -191,6 +207,7 @@ abstract class HiveComparisonTest
     "Owner:",
     "COLUMN_STATS_ACCURATE",
     // The following are hive specific schema parameters which we do not need to match exactly.
+    //以下是hive特定的模式参数,我们不需要完全匹配。
     "numFiles",
     "numRows",
     "rawDataSize",
@@ -224,6 +241,7 @@ abstract class HiveComparisonTest
   val installHooksCommand = "(?i)SET.*hooks".r
   def createQueryTest(testCaseName: String, sql: String, reset: Boolean = true) {
     // testCaseName must not contain ':', which is not allowed to appear in a filename of Windows
+    //testCaseName不能包含'：'，它不允许出现在Windows的文件名中
     assert(!testCaseName.contains(":"))
 
     // If test sharding is enable, skip tests that are not in the correct shard.
@@ -271,6 +289,8 @@ abstract class HiveComparisonTest
           // In hive, setting the hive.outerjoin.supports.filters flag to "false" essentially tells
           // the system to return the wrong answer.  Since we have no intention of mirroring their
           // previously broken behavior we simply filter out changes to this setting.
+          //在hive中,将hive.outerjoin.supports.filters标志设置为“false”基本上告诉系统返回错误的答案。
+          // 由于我们无意反映以前破坏的行为,所以我们只需将此更改过滤掉。
           .filterNot(_ contains "hive.outerjoin.supports.filters")
           .filterNot(_ contains "hive.exec.post.hooks")
 
@@ -321,27 +341,33 @@ abstract class HiveComparisonTest
             // Make sure we can at least parse everything before attempting hive execution.
             // Note this must only look at the logical plan as we might not be able to analyze if
             // other DDL has not been executed yet.
+            //确保我们至少可以在尝试配置单元执行之前解析所有内容
+            //请注意,只能查看逻辑计划,因为我们可能无法分析其他DDL尚未执行
             hiveQueries.foreach(_.logical)
             val computedResults = (queryList.zipWithIndex, hiveQueries, hiveCacheFiles).zipped.map {
               case ((queryString, i), hiveQuery, cachedAnswerFile) =>
                 try {
                   // Hooks often break the harness and don't really affect our test anyway, don't
                   // even try running them.
+                  //钩子经常打破线束,不要真的影响我们的测试,甚至不要尝试运行它们
                   if (installHooksCommand.findAllMatchIn(queryString).nonEmpty) {
                     sys.error("hive exec hooks not supported for tests.")
                   }
 
                   logWarning(s"Running query ${i + 1}/${queryList.size} with hive.")
                   // Analyze the query with catalyst to ensure test tables are loaded.
+                  //使用catalyst分析查询,以确保加载测试表。
                   val answer = hiveQuery.analyzed match {
                     case _: ExplainCommand =>
                       // No need to execute EXPLAIN queries as we don't check the output.
+                      //不需要执行EXPLAIN查询,因为我们不检查输出
                       Nil
                     case _ => TestHive.runSqlHive(queryString)
                   }
 
                   // We need to add a new line to non-empty answers so we can differentiate Seq()
                   // from Seq("").
+                  //我们需要在非空答案中添加一行,所以我们可以区分Seq（）和Seq（“”）
                   stringToFile(
                     cachedAnswerFile, answer.mkString("\n") + (if (answer.nonEmpty) "\n" else ""))
                   answer
@@ -387,9 +413,11 @@ abstract class HiveComparisonTest
         (queryList, hiveResults, catalystResults).zipped.foreach {
           case (query, hive, (hiveQuery, catalyst)) =>
             // Check that the results match unless its an EXPLAIN query.
+            //检查结果是否匹配,除非它的EXPLAIN查询。
             val preparedHive = prepareAnswer(hiveQuery, hive)
 
             // We will ignore the ExplainCommand, ShowFunctions, DescribeFunction
+            //我们将忽略ExplainCommand，ShowFunctions，DescribeFunction
             if ((!hiveQuery.logical.isInstanceOf[ExplainCommand]) &&
                 (!hiveQuery.logical.isInstanceOf[ShowFunctions]) &&
                 (!hiveQuery.logical.isInstanceOf[DescribeFunction]) &&
@@ -407,6 +435,7 @@ abstract class HiveComparisonTest
 
               // If this query is reading other tables that were created during this test run
               // also print out the query plans and results for those.
+              //如果此查询正在读取在此测试运行期间创建的其他表,还会打印出查询计划和结果。
               val computedTablesMessages: String = try {
                 val tablesRead = new TestHive.QueryExecution(query).executedPlan.collect {
                   case ts: HiveTableScan => ts.relation.tableName
@@ -460,6 +489,8 @@ abstract class HiveComparisonTest
             // When we encounter an error we check to see if the environment is still
             // okay by running a simple query. If this fails then we halt testing since
             // something must have gone seriously wrong.
+            //当我们遇到错误时,我们通过运行一个简单的查询来检查环境是否还行。
+            // 如果这样做失败了,那么我们停止测试,因为某些事情肯定是错误的。
             try {
               new TestHive.QueryExecution("SELECT key FROM src").stringResult()
               TestHive.runSqlHive("SELECT key FROM src")
@@ -469,12 +500,14 @@ abstract class HiveComparisonTest
                   "testing environment has likely been corrupted.")
                 // The testing setup traps exits so wait here for a long time so the developer
                 // can see when things started to go wrong.
+                //测试设置陷阱退出,等待这里很长一段时间,所以开发人员可以看到什么时候出现错误
                 Thread.sleep(1000000)
             }
           }
 
           // If the canary query didn't fail then the environment is still okay,
           // so just throw the original exception.
+          //如果canary查询没有失败,那么环境还是可以的,所以只是抛出原来的异常。
           throw originalException
       }
     }

@@ -25,6 +25,7 @@ import org.apache.spark.sql.hive.test.TestHive._
   *  一组验证命令的测试也可以像表一样被查询
  */
 class HiveOperatorQueryableSuite extends QueryTest {
+  //描述命令的查询结果
   test("SPARK-5324 query result of describe command") {
     loadTestTable("src")
 
