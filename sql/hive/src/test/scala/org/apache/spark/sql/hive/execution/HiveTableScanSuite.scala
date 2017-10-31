@@ -50,6 +50,8 @@ class HiveTableScanSuite extends HiveComparisonTest {
   // In unit test, kv1.txt is a small file and will be loaded as table src
   // Since the small file will be considered as a single split, we assume
   // Hive / SparkSQL HQL has the same output even for SORT BY
+  //在单元测试中,kv1.txt是一个小文件,将作为表src加载由于小文件将被视为单个拆分,
+  //我们假设Hive / SparkSQL HQL即使对于SORT BY也具有相同的输出
   createQueryTest("file_split_for_small_table",
     """
       |SELECT key, value FROM src SORT BY key, value

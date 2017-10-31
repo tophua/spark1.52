@@ -746,7 +746,9 @@ class TungstenAggregationQueryWithControlledFallbackSuite extends AggregationQue
         fallbackStartsAt.toString)
 
       // Create a new df to make sure its physical operator picks up
+      //创建一个新的df以确保其物理操作符拾取
       // spark.sql.TungstenAggregate.testFallbackStartsAt.
+
       val newActual = DataFrame(sqlContext, actual.logicalPlan)
 
       QueryTest.checkAnswer(newActual, expectedAnswer) match {

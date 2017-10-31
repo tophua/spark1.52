@@ -458,6 +458,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     }
 
     // use the Hive SerDe for parquet tables
+    //使用Hive SerDe进行parquet表
     withSQLConf(HiveContext.CONVERT_METASTORE_PARQUET.key -> "false") {
       checkAnswer(
         sql("SELECT key, value FROM ctas5 ORDER BY key, value"),
@@ -1256,7 +1257,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         """.stripMargin),
       (0 until 5).map(i => Row(i + "#")))
   }
-
+  //脚本转换使用LazySimpleSerDe
   test("SPARK-10310: script transformation using LazySimpleSerDe") {
     sqlContext
       .range(5)
@@ -1276,7 +1277,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
 
     checkAnswer(df, (0 until 5).map(i => Row(i + "#", i + "#")))
   }
-
+  //使用parquet进行排序
   test("SPARK-10741: Sort on Aggregate using parquet") {
     withTable("test10741") {
       withTempTable("src") {
