@@ -1122,7 +1122,7 @@ b    NULL       42          73          0       1
     //应该成功分析
     sql("SELECT * FROM boom").queryExecution.analyzed
   }
-
+  //插入前静态分区支持
   ignore("SPARK-3810: PreInsertionCasts static partitioning support") {
     val analyzedPlan = {
       loadTestTable("srcpart")
@@ -1138,7 +1138,7 @@ b    NULL       42          73          0       1
       }.size
     }
   }
-
+//插入前动态分区支持
   ignore("SPARK-3810: PreInsertionCasts dynamic partitioning support") {
     val analyzedPlan = {
       loadTestTable("srcpart")
