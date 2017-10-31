@@ -41,8 +41,14 @@ class HiveDataFrameAnalyticsSuite extends QueryTest with BeforeAndAfterAll {
     TestHive.dropTempTable("mytable")
   }
 
+  /**
+    * group by 后带 rollup 子句的功能可以理解为：先按一定的规则产生多种分组，然后按各种分组统计数据
+    * (至于统计出的数据是求和还是最大值还是平均值等这就取决于SELECT后的聚合函数)
+    * group by 后带 rollup 子句所返回的结果集,可以理解为各个分组所产生的结果集的并集且没有去掉重复数据
+    */
   test("rollup") {
     checkAnswer(
+      //DataFrame.rollup
       testData.rollup($"a" + $"b", $"b").agg(sum($"a" - $"b")),
       sql("select a + b, b, sum(a - b) from mytable group by a + b, b with rollup").collect()
     )
@@ -52,7 +58,10 @@ class HiveDataFrameAnalyticsSuite extends QueryTest with BeforeAndAfterAll {
       sql("select a, b, sum(b) from mytable group by a, b with rollup").collect()
     )
   }
-
+  /**
+    * CUBE 运算符在 SELECT 语句的 GROUP BY 子句中指定。该语句的选择列表包含维度列和聚合函数表达式。
+    * GROUP BY 指定了维度列和关键字 WITH CUBE,结果集包含维度列中各值的所有可能组合,以及与这些维度值组合相匹配的基础行中的聚合值。
+    */
   test("cube") {
     checkAnswer(
       testData.cube($"a" + $"b", $"b").agg(sum($"a" - $"b")),
