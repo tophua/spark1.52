@@ -171,8 +171,9 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
         """.stripMargin),
       (1 to 6).map(_ => Row("CA", 20151)))
   }
-  //显示功能
+  //显示函数
   test("show functions") {
+    sql("SHOW functions").show(2000,false)
     val allFunctions =
       (FunctionRegistry.builtin.listFunction().toSet[String] ++
         org.apache.hadoop.hive.ql.exec.FunctionRegistry.getFunctionNames).toList.sorted
@@ -703,11 +704,15 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
   //如果它包含聚合或生成器，则不应该解决它
   test("logical.Project should not be resolved if it contains aggregates or generators") {
     // This test is used to test the fix of SPARK-5875.
+    //该测试用于测试SPARK-5875的修复
     // The original issue was that Project's resolved will be true when it contains
     // AggregateExpressions or Generators. However, in this case, the Project
     // is not in a valid state (cannot be executed). Because of this bug, the analysis rule of
     // PreInsertionCasts will actually start to work before ImplicitGenerate and then
     // generates an invalid query plan.
+    //原来的问题是,当它包含AggregateExpressions或Generator时,项目的解决将成立,
+    // 但是,在这种情况下,项目不在有效状态(无法执行),由于这个错误,
+    // PreInsertionCasts的分析规则实际上将在ImplicitGenerate之前开始工作,然后生成无效的查询计划。
     val rdd = sparkContext.makeRDD((1 to 5).map(i => s"""{"a":[$i, ${i + 1}]}"""))
     read.json(rdd).registerTempTable("data")
     val originalConf = convertCTAS

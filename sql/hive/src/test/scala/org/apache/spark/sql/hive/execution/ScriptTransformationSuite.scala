@@ -28,7 +28,7 @@ import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference}
 import org.apache.spark.sql.execution.{UnaryNode, SparkPlan, SparkPlanTest}
 import org.apache.spark.sql.hive.test.TestHive
 import org.apache.spark.sql.types.StringType
-
+//脚本转换套件
 class ScriptTransformationSuite extends SparkPlanTest {
 
   override def _sqlContext: SQLContext = TestHive
@@ -50,8 +50,8 @@ class ScriptTransformationSuite extends SparkPlanTest {
     inputSerdeClass = Some(classOf[LazySimpleSerDe].getCanonicalName),
     outputSerdeClass = Some(classOf[LazySimpleSerDe].getCanonicalName)
   )
-
-  test("cat without SerDe") {
+  //
+    test("cat without SerDe") {
     val rowsDf = Seq("a", "b", "c").map(Tuple1.apply).toDF("a")
     checkAnswer(
       rowsDf,
@@ -117,6 +117,7 @@ class ScriptTransformationSuite extends SparkPlanTest {
 private case class ExceptionInjectingOperator(child: SparkPlan) extends UnaryNode {
   override protected def doExecute(): RDD[InternalRow] = {
     child.execute().map { x =>
+      //确保定义了TaskContext
       assert(TaskContext.get() != null) // Make sure that TaskContext is defined.
       //这个睡眠给外部处理开始的时间
       Thread.sleep(1000) // This sleep gives the external process time to start.

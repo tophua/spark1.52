@@ -46,13 +46,13 @@ class HiveTypeCoercionSuite extends HiveComparisonTest {
     val q = "select cast(cast(key=0 as boolean) as boolean) from src"
     val project = TestHive.sql(q).queryExecution.executedPlan.collect { case e: Project => e }.head
 
-    // No cast expression introduced
+    // No cast expression introduced 没有引入表达式
     project.transformAllExpressions { case c: Cast =>
       fail(s"unexpected cast $c")
       c
     }
 
-    // Only one equality check
+    // Only one equality check  只有一个平等检查
     var numEquals = 0
     project.transformAllExpressions { case e: EqualTo =>
       numEquals += 1

@@ -25,6 +25,9 @@ import org.apache.spark.sql.hive.test.TestHive.implicits._
 
 import org.apache.spark.util.Utils
 
+/**
+  * Hive表扫描测试
+  */
 class HiveTableScanSuite extends HiveComparisonTest {
 
   createQueryTest("partition_based_table_scan_with_different_serde",
@@ -81,7 +84,7 @@ class HiveTableScanSuite extends HiveComparisonTest {
       === Array(Row(java.sql.Timestamp.valueOf("2014-12-11 00:00:00")), Row(null)))
     TestHive.sql("DROP TABLE timestamp_query_null")
   }
-  //使用投影中的选择查询时，属性区分大小写
+  //当使用从投影中选择查询时,属性是区分大小写的
   test("Spark-4959 Attributes are case sensitive when using a select query from a projection") {
     sql("create table spark_4959 (col1 string)")
     sql("""insert into table spark_4959 select "hi" from src limit 1""")

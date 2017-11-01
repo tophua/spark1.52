@@ -70,7 +70,7 @@ class HiveUDFSuite extends QueryTest {
       Row(8)
     )
   }
-
+  //
   test("hive struct udf") {
     sql(
       """
@@ -93,7 +93,7 @@ class HiveUDFSuite extends QueryTest {
     sql("SELECT testUDF(pair) FROM hiveUDFTestTable")
     sql("DROP TEMPORARY FUNCTION IF EXISTS testUDF")
   }
-
+  //最大/最小对named_struct
   test("Max/Min on named_struct") {
     def testOrderInStruct(): Unit = {
       checkAnswer(sql(
@@ -109,7 +109,7 @@ class HiveUDFSuite extends QueryTest {
           |           "value", value)).value FROM src
         """.stripMargin), Seq(Row("val_0")))
 
-      // nested struct cases
+      // nested struct cases 嵌套的结构情况
       checkAnswer(sql(
         """
           |SELECT max(named_struct(
@@ -151,7 +151,7 @@ class HiveUDFSuite extends QueryTest {
     checkAnswer(sql("SELECT percentile(key, array(1, 1)) FROM src LIMIT 1"),
       sql("SELECT array(max(key), max(key)) FROM src").collect().toSeq)
   }
-
+  //通用udaf聚集
   test("Generic UDAF aggregates") {
     checkAnswer(sql("SELECT ceiling(percentile_approx(key, 0.99999)) FROM src LIMIT 1"),
       sql("SELECT max(key) FROM src LIMIT 1").collect().toSeq)
@@ -159,7 +159,7 @@ class HiveUDFSuite extends QueryTest {
     checkAnswer(sql("SELECT percentile_approx(100.0, array(0.9, 0.9)) FROM src LIMIT 1"),
       sql("SELECT array(100, 100) FROM src LIMIT 1").collect().toSeq)
    }
-
+  //自定义函数Integer 转化成字符串
   test("UDFIntegerToString") {
     val testData = TestHive.sparkContext.parallelize(
       IntegerCaseClass(1) :: IntegerCaseClass(2) :: Nil).toDF()
