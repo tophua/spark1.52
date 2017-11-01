@@ -26,7 +26,7 @@ import org.apache.spark.sql.hive.test.TestHive
 class HivePlanTest extends QueryTest {
   import TestHive._
   import TestHive.implicits._
-
+  //自定义函数常量折叠
   test("udf constant folding") {
     Seq.empty[Tuple1[Int]].toDF("a").registerTempTable("t")
     val optimized = sql("SELECT cos(null) FROM t").queryExecution.optimizedPlan

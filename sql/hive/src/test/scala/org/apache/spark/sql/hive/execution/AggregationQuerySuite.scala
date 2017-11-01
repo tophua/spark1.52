@@ -254,7 +254,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(null, 3) ::
         Row(null, null) :: Nil)
   }
-  //大小写敏感度解析
+  //大小写敏感的解析
   ignore("case in-sensitive resolution") {
     checkAnswer(
       sqlContext.sql(
@@ -343,7 +343,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(11.125) :: Nil)
   }
-
+  //自定义函数
   ignore("udaf") {
     checkAnswer(
       sqlContext.sql(
@@ -364,7 +364,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(3, null, null, null, null, null) ::
         Row(null, null, 110.0, null, null, 10.0) :: Nil)
   }
-
+  //非代数聚合函数
   ignore("non-AlgebraicAggregate aggreguate function") {
     checkAnswer(
       sqlContext.sql(
@@ -392,7 +392,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
       Row(null) :: Nil)
   }
-
+  //非代数聚合和代数聚合函数
   ignore("non-AlgebraicAggregate and AlgebraicAggregate aggreguate function") {
     checkAnswer(
       sqlContext.sql(
@@ -500,7 +500,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(0, 2, 2, 0, 3) ::
         Row(3, 4, 4, 3, null) :: Nil)
   }
-
+  //测试计数
   ignore("test count") {
     checkAnswer(
       sqlContext.sql(
@@ -551,7 +551,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
         Row(1, null, 2, 2, 3, 1) ::
         Row(0, null, 1, 1, null, 0) :: Nil)
   }
-
+  //test最后基于AggregateExpression1实现
   test("test Last implemented based on AggregateExpression1") {
     // TODO: Remove this test once we remove AggregateExpression1.
     import org.apache.spark.sql.functions._
@@ -566,7 +566,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       )
     }
   }
-
+  //错误处理
   test("error handling") {
     withSQLConf("spark.sql.useAggregate2" -> "false") {
       val errorMessage = intercept[AnalysisException] {
@@ -587,6 +587,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
 
     // TODO: once we support Hive UDAF in the new interface,
     // we can remove the following two tests.
+    //我们可以删除以下两个测试
     withSQLConf("spark.sql.useAggregate2" -> "true") {
       val errorMessage = intercept[AnalysisException] {
         sqlContext.sql(
@@ -603,6 +604,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       assert(errorMessage.contains("implemented based on the new Aggregate Function interface"))
 
       // This will fall back to the old aggregate
+      //这将回到旧的总计
       val newAggregateOperators = sqlContext.sql(
         """
           |SELECT
@@ -621,7 +623,7 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       assert(newAggregateOperators.isEmpty, message)
     }
   }
-
+  //自定义函数所有数据类型
   test("udaf with all data types") {
     val struct =
       StructType(
@@ -633,10 +635,13 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       DateType, TimestampType,
       ArrayType(IntegerType), MapType(StringType, LongType), struct,
       new MyDenseVectorUDT())
+    //现在我们将使用SortBasedAggregate来处理UDAF
     // Right now, we will use SortBasedAggregate to handle UDAFs.
     // UnsafeRow.mutableFieldTypes.asScala.toSeq will trigger SortBasedAggregate to use
     // UnsafeRow as the aggregation buffer. While, dataTypes will trigger
     // SortBasedAggregate to use a safe row as the aggregation buffer.
+    //UnsafeRow.mutableFieldTypes.asScala.toSeq将触发SortBasedAggregate以使用UnsafeRow作为聚合缓冲区。
+    //而dataTypes将触发SortBasedAggregate使用安全行作为聚合缓冲区。
     Seq(dataTypes, UnsafeRow.mutableFieldTypes.asScala.toSeq).foreach { dataTypes =>
       val fields = dataTypes.zipWithIndex.map { case (dataType, index) =>
         StructField(s"col$index", dataType, nullable = true)

@@ -81,6 +81,7 @@ class BigDataBenchmarkSuite extends HiveComparisonTest {
 
   if (!testDataDirectory.exists()) {
     // TODO: Auto download the files on demand.
+    //没有找到BigDataBenchmark测试的数据文件
     ignore("No data files found for BigDataBenchmark tests.") {}
   } else {
     createQueryTest("query1",

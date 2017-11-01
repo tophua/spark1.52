@@ -51,36 +51,37 @@ class HiveResolutionSuite extends HiveComparisonTest {
     }
     assert(exception.getMessage.contains("Ambiguous reference to fields"))
   }
-
+  //表属性
   createQueryTest("table.attr",
     "SELECT src.key FROM src ORDER BY key LIMIT 1")
 
   createQueryTest("database.table",
     "SELECT key FROM default.src ORDER BY key LIMIT 1")
-
+  //数据库表,表属性
   createQueryTest("database.table table.attr",
     "SELECT src.key FROM default.src ORDER BY key LIMIT 1")
   //database.table table.attr不区分大小写
   createQueryTest("database.table table.attr case insensitive",
     "SELECT SRC.Key FROM Default.Src ORDER BY key LIMIT 1")
-
+  //别名属性
   createQueryTest("alias.attr",
     "SELECT a.key FROM src a ORDER BY key LIMIT 1")
-
+  //子查询别名属性
   createQueryTest("subquery-alias.attr",
     "SELECT a.key FROM (SELECT * FROM src ORDER BY key LIMIT 1) a")
-
+  //引用alias.attr
   createQueryTest("quoted alias.attr",
     "SELECT `a`.`key` FROM src a ORDER BY key LIMIT 1")
-
+  //属性
   createQueryTest("attr",
     "SELECT key FROM src a ORDER BY key LIMIT 1")
-
+  //别名属性
   createQueryTest("alias.star",
     "SELECT a.* FROM src a ORDER BY key LIMIT 1")
   //与scala反射的情况不敏感
   test("case insensitivity with scala reflection") {
     // Test resolution with Scala Reflection
+    //测试分辨率与Scala反射
     sparkContext.parallelize(Data(1, 2, Nested(1, 2), Seq(Nested(1, 2))) :: Nil)
       .toDF().registerTempTable("caseSensitivityTest")
 

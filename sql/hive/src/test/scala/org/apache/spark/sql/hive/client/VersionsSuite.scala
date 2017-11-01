@@ -31,11 +31,14 @@ import org.apache.spark.util.Utils
  * of hive from maven central.  These tests are simple in that they are mostly just testing to make
  * sure that reflective calls are not throwing NoSuchMethod error, but the actually functionality
  * is not fully tested.
+  * 一套简单的测试,称为hive 群clientinterface方法,从Maven中央蜂巢加载不同的版本,
+  * 这些测试是简单的,他们大多只是测试确保反射调用不扔nosuchmethod误差,但实际功能不完全测试。
  */
 class VersionsSuite extends SparkFunSuite with Logging {
 
   // Do not use a temp path here to speed up subsequent executions of the unit test during
   // development.
+  //不要在这里使用临时路径来加快开发过程中单元测试的后续执行
   private val ivyPath = Some(
     new File(sys.props("java.io.tmpdir"), "hive-ivy-cache").getAbsolutePath())
 
@@ -77,7 +80,10 @@ class VersionsSuite extends SparkFunSuite with Logging {
   // Its actually pretty easy to mess things up and have all of your tests "pass" by accidentally
   // connecting to an auto-populated, in-process metastore.  Let's make sure we are getting the
   // versions right by forcing a known compatibility failure.
+  //它实际上很容易把事情搞砸了,你的所有的测试的“通行证”的意外连接到自动填充,中间元数据。
+  // 让我们确保通过强迫已知的兼容性失败来获得正确的版本。
   // TODO: currently only works on mysql where we manually create the schema...
+  //破坏性检查
   ignore("failure sanity check") {
     val e = intercept[Throwable] {
       val badClient = quietly {
@@ -95,6 +101,7 @@ class VersionsSuite extends SparkFunSuite with Logging {
     //创建客户端
     test(s"$version: create client") {
       client = null
+      //Hack为了避免一些JVM版本segv。
       System.gc() // Hack to avoid SEGV on some JVM versions.
       client = IsolatedClientLoader.forVersion(version, buildConf(), ivyPath).client
     }
@@ -182,7 +189,7 @@ class VersionsSuite extends SparkFunSuite with Logging {
         false,
         false)
     }
-
+    //加载动态分区
     test(s"$version: loadDynamicPartitions") {
       client.loadDynamicPartitions(
         emptyDir,

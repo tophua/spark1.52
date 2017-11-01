@@ -463,7 +463,7 @@ b    NULL       42          73          0       1
       hasCast
     }
   }
-//
+  //转换
   createQueryTest("transform",
     "SELECT TRANSFORM (key) USING 'cat' AS (tKey) FROM src")
   //无模式的变换
@@ -621,28 +621,28 @@ b    NULL       42          73          0       1
     val res = sql("SELECT CAST(CAST(1 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1").collect().head
     assert(0.001 == res.getDouble(0))
   }
-
+  //时间戳强制类型转换
   createQueryTest("timestamp cast #2",
     "SELECT CAST(CAST(1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
-
+  //时间戳强制类型转换
   createQueryTest("timestamp cast #3",
     "SELECT CAST(CAST(1200 AS TIMESTAMP) AS INT) FROM src LIMIT 1")
-
+  //时间戳强制类型转换
   createQueryTest("timestamp cast #4",
     "SELECT CAST(CAST(1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
-
+  //时间戳强制类型转换
   createQueryTest("timestamp cast #5",
     "SELECT CAST(CAST(-1 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
-
+  //时间戳强制类型转换
   createQueryTest("timestamp cast #6",
     "SELECT CAST(CAST(-1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
-
+  //时间戳强制类型转换
   createQueryTest("timestamp cast #7",
     "SELECT CAST(CAST(-1200 AS TIMESTAMP) AS INT) FROM src LIMIT 1")
-
+  //时间戳强制类型转换
   createQueryTest("timestamp cast #8",
     "SELECT CAST(CAST(-1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
-
+  //时间戳强制类型转换
   createQueryTest("select null from table",
     "SELECT null FROM src LIMIT 1")
 
@@ -663,7 +663,7 @@ b    NULL       42          73          0       1
 
   // test get_json_object again Hive, because the HiveCompatabilitySuite cannot handle result
   // with newline in it.
-  //
+  //再次测试get_json_object Hive,因为HiveCompatabilitySuite无法处理带有换行符的结果
   createQueryTest("get_json_object #1",
     "SELECT get_json_object(src_json.json, '$') FROM src_json")
 
@@ -712,7 +712,7 @@ b    NULL       42          73          0       1
 
   createQueryTest("get_json_object #10",
     "SELECT get_json_object(src_json.json, '$.fb:testid') FROM src_json")
-
+  //谓词包含一个空的AttributeSet()引用
   test("predicates contains an empty AttributeSet() references") {
     sql(
       """
@@ -721,7 +721,7 @@ b    NULL       42          73          0       1
         |WHERE abs(20141202) is not null
       """.stripMargin).collect()
   }
-
+  //使用case语句实现唯一函数
   test("implement identity function using case statement") {
     val actual = sql("SELECT (CASE key WHEN key THEN key END) FROM src")
       .map { case Row(i: Int) => i }
@@ -1197,6 +1197,7 @@ b    NULL       42          73          0       1
     assertResult(expectedConfs)(collectResults(sql("SET -v")))
 
     // "SET" itself returns all config variables currently specified in SQLConf.
+    //“SET”本身返回SQLConf中当前指定的所有配置变量
     // TODO: Should we be listing the default here always? probably...
     assert(sql("SET").collect().size == 0)
 
@@ -1230,6 +1231,7 @@ b    NULL       42          73          0       1
 
   // Put tests that depend on specific Hive settings before these last two test,
   // since they modify /clear stuff.
+  //在最后两次测试之前进行依赖于具体Hive设置的测试,因为他们修改/清除东西
 }
 
 // for SPARK-2180 test
