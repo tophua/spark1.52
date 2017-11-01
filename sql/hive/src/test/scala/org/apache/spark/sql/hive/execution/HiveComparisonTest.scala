@@ -42,6 +42,7 @@ import org.apache.spark.sql.hive.test.TestHive
  * configured using system properties.
   * 有关如何使用系统属性配置测试执行的信息,请参阅此类中的公共文档的文档
   * 看到这类公共vals类信息如何测试执行可以配置使用系统属性
+  * Hive比较测试
  */
 abstract class HiveComparisonTest
   extends SparkFunSuite with BeforeAndAfterAll with GivenWhenThen with Logging {

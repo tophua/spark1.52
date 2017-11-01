@@ -27,6 +27,7 @@ case class Data(a: Int, B: Int, n: Nested, nestedArray: Seq[Nested])
 /**
  * A set of test cases expressed in Hive QL that are not covered by the tests
  * included in the hive distribution.
+  * Hive QL中表示的一组测试用例,不包括在hive分布中的测试中。
   * HIVE解析测试套件
   */
 class HiveResolutionSuite extends HiveComparisonTest {

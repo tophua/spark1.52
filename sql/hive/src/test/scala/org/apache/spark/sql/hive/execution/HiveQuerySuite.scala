@@ -50,7 +50,7 @@ class HiveQuerySuite extends HiveComparisonTest with BeforeAndAfter {
   override def beforeAll() {
     TestHive.cacheTables = true
     //Timezone is fixed to America/Los_Angeles for those timezone sensitive tests (timestamp_*)
-    //时区是固定到美国/洛杉矶  那些时区敏感试验（timestamp_ *）
+    //时区是固定到美国/洛杉矶,那些时区敏感试验（timestamp_ *）
     TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
      // Add Locale setting
     //添加区域设置
@@ -291,8 +291,8 @@ b    NULL       42          73          0       1
 
   createQueryTest("case else null",
     """SELECT case when 1 = 2 then 1 when 2 = 2 then 3 else null end FROM src LIMIT 1""")
-/*  createQueryTest("having no references",
-    "SELECT key FROM src GROUP BY key HAVING COUNT(*) > 1")*/
+  /*  createQueryTest("having no references",
+      "SELECT key FROM src GROUP BY key HAVING COUNT(*) > 1")*/
   //没有from 条件
   createQueryTest("no from clause",
     "SELECT 1, +1, -1")
@@ -358,6 +358,7 @@ b    NULL       42          73          0       1
     """.stripMargin)
   //日期比较测试1
   createQueryTest("Date comparison test 1",
+    //CAST 强制类型转换
     """
       | SELECT
       | CAST(CAST('1970-01-01 22:00:00' AS timestamp) AS date) ==
@@ -382,6 +383,7 @@ b    NULL       42          73          0       1
   //忽略解释
   createQueryTest("IgnoreExplain",
     """EXPLAIN SELECT key FROM src""")
+
   //简单加入where子句
   createQueryTest("trivial join where clause",
     "SELECT * FROM src a JOIN src b WHERE a.key = b.key")
