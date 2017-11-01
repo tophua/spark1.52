@@ -29,36 +29,58 @@ import org.apache.spark.sql.test.SQLTestUtils
 class HiveExplainSuite extends QueryTest with SQLTestUtils {
   override def _sqlContext: SQLContext = TestHive
   private val sqlContext = _sqlContext
-  //解释扩展命令
+  //解释命令扩展命令 explain
   test("explain extended command") {
     checkExistence(sql(" explain   select * from src where key=123 "), true,
+                    //物理计划
                    "== Physical Plan ==")
     checkExistence(sql(" explain   select * from src where key=123 "), false,
+                    //解析逻辑计划
                    "== Parsed Logical Plan ==",
+                    //分析逻辑计划
                    "== Analyzed Logical Plan ==",
+                    //优化逻辑计划
                    "== Optimized Logical Plan ==")
+    println("===explain begin===")
+    sql(" explain   extended select * from src where key=123 ").show(false)
+    println("===explain end===")
     checkExistence(sql(" explain   extended select * from src where key=123 "), true,
+                    //解析逻辑计划
                    "== Parsed Logical Plan ==",
+                    //分析逻辑计划
                    "== Analyzed Logical Plan ==",
+                    //优化逻辑计划
                    "== Optimized Logical Plan ==",
+                  //优化逻辑计划
                    "== Physical Plan ==",
+                  //代码生成
                    "Code Generation")
   }
   //解释create table命令
   test("explain create table command") {
     checkExistence(sql("explain create table temp__b as select * from src limit 2"), true,
+                  //物理计划
                    "== Physical Plan ==",
+                    //插入Hive表
                    "InsertIntoHiveTable",
+                    //
                    "Limit",
                    "src")
 
     checkExistence(sql("explain extended create table temp__b as select * from src limit 2"), true,
+      //物理计划
       "== Parsed Logical Plan ==",
+      //分析逻辑计划
       "== Analyzed Logical Plan ==",
+      //优化逻辑计划
       "== Optimized Logical Plan ==",
+      //物理计划
       "== Physical Plan ==",
+      //创建表select
       "CreateTableAsSelect",
+      //插入hive表
       "InsertIntoHiveTable",
+      //
       "Limit",
       "src")
 
@@ -71,10 +93,15 @@ class HiveExplainSuite extends QueryTest with SQLTestUtils {
         | TBLPROPERTIES("tbl_p1"="p11", "tbl_p2"="p22")
         | AS SELECT * FROM src LIMIT 2
       """.stripMargin), true,
+      //解析逻辑计划
       "== Parsed Logical Plan ==",
+      //分析逻辑计划
       "== Analyzed Logical Plan ==",
+      //优化逻辑计划
       "== Optimized Logical Plan ==",
+      //物理计划
       "== Physical Plan ==",
+      //创建表select
       "CreateTableAsSelect",
       "InsertIntoHiveTable",
       "Limit",

@@ -205,7 +205,8 @@ abstract class AggregationQuerySuite extends QueryTest with SQLTestUtils with Be
       Row(null, 0, null, null, null, null, null) :: Nil)
   }
   //只做分组
-  ignore("only do grouping") {
+  test("only do grouping") {
+
     checkAnswer(
       sqlContext.sql(
         """

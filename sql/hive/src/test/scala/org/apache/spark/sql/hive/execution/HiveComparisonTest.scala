@@ -197,6 +197,7 @@ abstract class HiveComparisonTest
   }
 
   // TODO: Instead of filtering we should clean to avoid accidentally ignoring actual results.
+  //非确定性线指标
   lazy val nonDeterministicLineIndicators = Seq(
     "CreateTime",
     "transient_lastDdlTime",
