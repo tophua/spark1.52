@@ -41,7 +41,7 @@ class HiveParquetSuite extends QueryTest with ParquetTest {
       checkAnswer(sql("SELECT * FROM t"), data.map(Row.fromTuple))
     }
   }
-
+//简单的柱投影+filter在Parquet表
   test("Simple column projection + filter on Parquet table") {
     withParquetTable((1 to 4).map(i => (i % 2 == 0, i, s"val_$i")), "t") {
       checkAnswer(
@@ -49,7 +49,7 @@ class HiveParquetSuite extends QueryTest with ParquetTest {
         Seq(Row(true, "val_2"), Row(true, "val_4")))
     }
   }
-
+//
   test("Converting Hive to Parquet Table via saveAsParquetFile") {
     withTempPath { dir =>
       sql("SELECT * FROM src").write.parquet(dir.getCanonicalPath)
@@ -61,7 +61,7 @@ class HiveParquetSuite extends QueryTest with ParquetTest {
       }
     }
   }
-
+//插入覆盖表Parquet表
   test("INSERT OVERWRITE TABLE Parquet table") {
     withParquetTable((1 to 10).map(i => (i, s"val_$i")), "t") {
       withTempPath { file =>
@@ -69,6 +69,7 @@ class HiveParquetSuite extends QueryTest with ParquetTest {
         ctx.read.parquet(file.getCanonicalPath).registerTempTable("p")
         withTempTable("p") {
           // let's do three overwrites for good measure
+          //让我们做良好的措施三覆盖
           sql("INSERT OVERWRITE TABLE p SELECT * FROM t")
           sql("INSERT OVERWRITE TABLE p SELECT * FROM t")
           sql("INSERT OVERWRITE TABLE p SELECT * FROM t")

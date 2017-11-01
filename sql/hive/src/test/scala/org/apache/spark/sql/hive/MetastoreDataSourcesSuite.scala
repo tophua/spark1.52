@@ -188,7 +188,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
 
         // Schema is cached so the new column does not show. The updated values in existing columns
         // will show.
-        //缓存模式，因此新列不显示,将显示现有列中的更新值。
+        //缓存模式,因此新列不显示,将显示现有列中的更新值。
         checkAnswer(
           sql("SELECT * FROM jsonTable"),
           Row("a1", "b1"))

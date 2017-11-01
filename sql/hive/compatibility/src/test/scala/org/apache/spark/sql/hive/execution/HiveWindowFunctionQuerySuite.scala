@@ -166,6 +166,8 @@ class HiveWindowFunctionQuerySuite extends HiveComparisonTest with BeforeAndAfte
   // Results of the original query file are not deterministic.
   // Also, the original query of
   // select i, lead(s) over (partition by bin order by d,i desc) from over1k ;
+  //Lag和Lead分析函数可以在同一次查询中取出同一字段的前N行的数据(Lag)和后N行的数据(Lead)作为独立的列。
+  //这种操作可以代替表的自联接，并且LAG和LEAD有更高的效率。
   /////////////////////////////////////////////////////////////////////////////
   createQueryTest("windowing_navfn.q (deterministic)",
     s"""

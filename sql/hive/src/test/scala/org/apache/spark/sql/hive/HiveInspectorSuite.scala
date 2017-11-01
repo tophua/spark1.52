@@ -68,8 +68,10 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
   }
 
   // Timezone is fixed to America/Los_Angeles for those timezone sensitive tests (timestamp_*)
+  //时区是固定到美国/ los_angeles那些时区敏感试验（timestamp_ *）
   TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
   // Add Locale setting
+  //添加区域设置
   Locale.setDefault(Locale.US)
 
   val data =
