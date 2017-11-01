@@ -93,6 +93,9 @@ class HiveSparkSubmitSuite
     // Before the fix in SPARK-8470, this results in a MissingRequirementError because
     // the HiveContext code mistakenly overrides the class loader that contains user classes.
     // For more detail, see sql/hive/src/test/resources/regression-test-SPARK-8489/*scala.
+    //本试验采用预建的jar测试spark-8489,简而言之,这个测试创建了一个hivecontext和使用它来创建使用反射RDD数据帧
+    //在spark-8470固定,这样的结果是因为MissingRequirementError hivecontext代码错误的重写，包含用户类的类装载器。
+    //更多的细节,请参阅SQL/hive/src/test/resources/regression-test-spark-8489/*Scala
     val testJar = "sql/hive/src/test/resources/regression-test-SPARK-8489/test.jar"
     val args = Seq(
       "--conf", "spark.ui.enabled=false",
@@ -126,7 +129,7 @@ class HiveSparkSubmitSuite
 
   // NOTE: This is an expensive operation in terms of time (10 seconds+). Use sparingly.
   // This is copied from org.apache.spark.deploy.SparkSubmitSuite
-  ////注意：这是一个昂贵的操作时间（10秒+）。 谨慎使用
+  ////注意:这是一个昂贵的操作时间（10秒+）,谨慎使用
   //这是从org.apache.spark.deploy.SparkSubmitSuite复制
   private def runSparkSubmit(args: Seq[String]): Unit = {
 
