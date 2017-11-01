@@ -24,7 +24,7 @@ import org.apache.spark.sql.hive.test.TestHive._
 import org.apache.spark.sql.hive.test.TestHive.implicits._
 
 class HiveDataFrameWindowSuite extends QueryTest {
-  //利用窗口partitionby
+  //重用窗口partitionby
   test("reuse window partitionBy") {
     val df = Seq((1, "1"), (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
     val w = Window.partitionBy("key").orderBy("value")
@@ -35,7 +35,7 @@ class HiveDataFrameWindowSuite extends QueryTest {
         lead("value", 1).over(w)),
       Row(1, "1") :: Row(2, "2") :: Row(null, null) :: Row(null, null) :: Nil)
   }
-  //利用窗口进行排序
+  //重用窗口进行排序
   test("reuse window orderBy") {
     val df = Seq((1, "1"), (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
     val w = Window.orderBy("value").partitionBy("key")
@@ -46,11 +46,43 @@ class HiveDataFrameWindowSuite extends QueryTest {
         lead("value", 1).over(w)),
       Row(1, "1") :: Row(2, "2") :: Row(null, null) :: Row(null, null) :: Nil)
   }
-
+  /**
+      lag 和lead 可以 获取结果集中，按一定排序所排列的当前行的上下相邻若干offset 的某个行的某个列(不用结果集的自关联）；
+      lag ，lead 分别是向前，向后；
+      lag 和lead 有三个参数，第一个参数是列名，第二个参数是偏移的offset，第三个参数是 超出记录窗口时的默认值）
+    */
+  //Lag和Lead分析函数可以在同一次查询中取出同一字段的前N行的数据(Lag)和后N行的数据(Lead)作为独立的列。
+  //这种操作可以代替表的自联接，并且LAG和LEAD有更高的效率。
   test("lead") {
     val df = Seq((1, "1"), (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
     df.registerTempTable("window_table")
-
+    /**
+      +---+-----+
+      |key|value|
+      +---+-----+
+      |1  |1    |
+      |2  |2    |
+      |1  |1    |
+      |2  |2    |
+      +---+-----+
+      **/
+    sql(
+      """SELECT
+        | *
+        | FROM window_table""".stripMargin).show(false)
+    /**
+      +----+
+      |_c0 |
+      +----+
+      |1   |
+      |null|
+      |2   |
+      |null|
+      +----+ */
+    sql(
+      """SELECT
+        | lead(value) OVER (PARTITION BY key ORDER BY value)
+        | FROM window_table""".stripMargin).show(false)
     checkAnswer(
       df.select(
         lead("value", 1).over(Window.partitionBy($"key").orderBy($"value"))),

@@ -181,7 +181,7 @@ class CreateTableAsSelectSuite extends DataSourceTest with SharedSQLContext with
       message.contains("a CREATE TEMPORARY TABLE statement does not allow IF NOT EXISTS clause."),
       "CREATE TEMPORARY TABLE IF NOT EXISTS should not be allowed.")
   }
-  //一个列定义CTAS语句是不允许的
+  //一个列定义CTAS语句是不允许的,create table as select （CTAS）
   test("a CTAS statement with column definitions is not allowed") {
     intercept[DDLException]{
       sql(

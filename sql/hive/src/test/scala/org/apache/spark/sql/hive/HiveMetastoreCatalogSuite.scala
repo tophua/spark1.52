@@ -37,7 +37,7 @@ class HiveMetastoreCatalogSuite extends SparkFunSuite with Logging {
     val dateType = HiveMetastoreTypes.toDataType(hiveTypeStr)
     assert(dateType.isInstanceOf[StructType])
   }
-
+  //UDT的元数据类型转换
   test("udt to metastore type conversion") {
     val udt = new ExamplePointUDT
     assertResult(HiveMetastoreTypes.toMetastoreType(udt.sqlType)) {
@@ -98,7 +98,7 @@ class DataSourceWithHiveMetastoreCatalogSuite extends DataSourceTest with SQLTes
         assert(runSqlHive("SELECT * FROM t") === Seq("1.1\t1", "2.1\t2"))
       }
     }
-
+    //持久化非分区的提供关系到元数据外部表
     test(s"Persist non-partitioned $provider relation into metastore as external table") {
       withTempPath { dir =>
         withTable("t") {
@@ -129,7 +129,7 @@ class DataSourceWithHiveMetastoreCatalogSuite extends DataSourceTest with SQLTes
         }
       }
     }
-
+    //持久化非分区的提供关系的元数据表使用CTA
     test(s"Persist non-partitioned $provider relation into metastore as managed table using CTAS") {
       withTempPath { dir =>
         withTable("t") {

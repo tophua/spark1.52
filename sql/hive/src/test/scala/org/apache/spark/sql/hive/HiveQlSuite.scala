@@ -38,7 +38,7 @@ class HiveQlSuite extends SparkFunSuite with BeforeAndAfterAll {
       case CreateTableAsSelect(desc, child, allowExisting) => (desc, allowExisting)
     }.head
   }
-
+  //create table as select （CTAS）
   test("Test CTAS #1") {
     val s1 =
       """CREATE EXTERNAL TABLE IF NOT EXISTS mydb.page_view
@@ -80,7 +80,7 @@ class HiveQlSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(desc.serde == Option("org.apache.hadoop.hive.serde2.columnar.LazyBinaryColumnarSerDe"))
     assert(desc.properties == Map(("p1", "v1"), ("p2", "v2")))
   }
-
+  //create table as select （CTAS）
   test("Test CTAS #2") {
     val s2 =
       """CREATE EXTERNAL TABLE IF NOT EXISTS mydb.page_view
@@ -124,7 +124,7 @@ class HiveQlSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(desc.serde == Option("parquet.hive.serde.ParquetHiveSerDe"))
     assert(desc.properties == Map(("p1", "v1"), ("p2", "v2")))
   }
-
+  //create table as select （CTAS）
   test("Test CTAS #3") {
     val s3 = """CREATE TABLE page_view AS SELECT * FROM src"""
     val (desc, exists) = extractTableDesc(s3)
@@ -141,7 +141,7 @@ class HiveQlSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(desc.serde.isEmpty)
     assert(desc.properties == Map())
   }
-
+  //create table as select （CTAS）
   test("Test CTAS #4") {
     val s4 =
       """CREATE TABLE page_view
@@ -150,7 +150,7 @@ class HiveQlSuite extends SparkFunSuite with BeforeAndAfterAll {
       extractTableDesc(s4)
     }
   }
-
+//create table as select （CTAS）
   test("Test CTAS #5") {
     val s5 = """CREATE TABLE ctas2
                | ROW FORMAT SERDE "org.apache.hadoop.hive.serde2.columnar.ColumnarSerDe"

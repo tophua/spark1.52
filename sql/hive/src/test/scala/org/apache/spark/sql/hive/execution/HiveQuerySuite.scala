@@ -162,7 +162,7 @@ b    NULL       42          73          0       1
   以及
   NULL NULL        75          128         1       1
 **/
-
+  //CUBE错误的结果
  createQueryTest("SPARK-8976 Wrong Result for CUBE #1",
     """
       SELECT count(*) AS cnt, key % 5,GROUPING__ID FROM src group by key%5 WITH CUBE
@@ -178,7 +178,7 @@ b    NULL       42          73          0       1
       FROM (SELECT key, key%2, key - 5 FROM src) t group by key%5, key-5
       WITH CUBE ORDER BY cnt, k1, k2, k3 LIMIT 10
     """.stripMargin)
-//grouping sets就是由多个group by联合起来,
+//grouping sets就是由多个group by联合起来,GroupingSet错误的结果
   createQueryTest("SPARK-8976 Wrong Result for GroupingSet",
     """
       SELECT

@@ -273,7 +273,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
       }
     }
   }
-
+  //create table as select （CTAS）
   test("CTAS") {
     withTempPath { tempPath =>
       withTable("jsonTable", "ctasJsonTable") {
@@ -302,7 +302,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
       }
     }
   }
-  //如果不存在
+  //如果不存在,create table as select （CTAS）
   test("CTAS with IF NOT EXISTS") {
     withTempPath { path =>
       val tempPath = path.getCanonicalPath
@@ -369,7 +369,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
       }
     }
   }
-  //CTAS管理表
+  //CTAS管理表 (create table .. as select)
   test("CTAS a managed table") {
     withTable("jsonTable", "ctasJsonTable", "loadedTable") {
       sql(
