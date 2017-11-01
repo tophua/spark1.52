@@ -658,7 +658,7 @@ class ParquetSourceSuite extends ParquetPartitioningTest {
       }
     }
   }
-  //存储在parquet中的数组和地图中的值总是为空
+  //存储在parquet中的数组和Map中的值总是为空
   test("values in arrays and maps stored in parquet are always nullable") {
     val df = createDataFrame(Tuple2(Map(2 -> 3), Seq(4, 5, 6)) :: Nil).toDF("m", "a")
     val mapType1 = MapType(IntegerType, IntegerType, valueContainsNull = false)
@@ -790,7 +790,7 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
     "partitioned_parquet_with_key",
     "partitioned_parquet_with_complextypes",
     "partitioned_parquet_with_key_and_complextypes").foreach { table =>
-
+    //分区列表的排序
     test(s"ordering of the partitioning columns $table") {
       checkAnswer(
         sql(s"SELECT p, stringField FROM $table WHERE p = 1"),
@@ -802,7 +802,7 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
         Seq.fill(10)(Row("part-1", 1))
       )
     }
-
+    //项目分区列表
     ignore(s"project the partitioning column $table") {
       checkAnswer(
         sql(s"SELECT p, count(*) FROM $table group by p"),
@@ -818,7 +818,7 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
           Row(10, 10) :: Nil
       )
     }
-
+    //项目分区和非分区列表
     ignore(s"project partitioning and non-partitioning columns $table") {
       checkAnswer(
         sql(s"SELECT stringField, p, count(intField) FROM $table GROUP BY p, stringField"),
@@ -834,37 +834,37 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
           Row("part-10", 10, 10) :: Nil
       )
     }
-
+  //简单的计数表
     test(s"simple count $table") {
       checkAnswer(
         sql(s"SELECT COUNT(*) FROM $table"),
         Row(100))
     }
-
+  //修剪计数表
     test(s"pruned count $table") {
       checkAnswer(
         sql(s"SELECT COUNT(*) FROM $table WHERE p = 1"),
         Row(10))
     }
-
+    //不存在的分区表
     test(s"non-existent partition $table") {
       checkAnswer(
         sql(s"SELECT COUNT(*) FROM $table WHERE p = 1000"),
         Row(0))
     }
-
+    //多分区剪枝计数表
     test(s"multi-partition pruned count $table") {
       checkAnswer(
         sql(s"SELECT COUNT(*) FROM $table WHERE p IN (1,2,3)"),
         Row(30))
     }
-
+    //非分区谓词表
     test(s"non-partition predicates $table") {
       checkAnswer(
         sql(s"SELECT COUNT(*) FROM $table WHERE intField IN (1,2,3)"),
         Row(30))
     }
-
+    //求和表
     test(s"sum $table") {
       checkAnswer(
         sql(s"SELECT SUM(intField) FROM $table WHERE intField IN (1,2,3) AND p = 1"),
@@ -883,7 +883,7 @@ abstract class ParquetPartitioningTest extends QueryTest with SQLTestUtils with 
   Seq(
     "partitioned_parquet_with_key_and_complextypes",
     "partitioned_parquet_with_complextypes").foreach { table =>
-
+    //从表中读取结构
     test(s"SPARK-5775 read struct from $table") {
       checkAnswer(
         sql(

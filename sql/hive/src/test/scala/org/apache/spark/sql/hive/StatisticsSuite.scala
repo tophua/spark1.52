@@ -221,12 +221,13 @@ test("auto converts to broadcast left semi join, by size estimate of a relation"
 
     // Using `sparkPlan` because for relevant patterns in HashJoin to be
     // matched, other strategies need to be applied.
+    //使用sparkplan因为有关HashJoin图案相配合,需要运用其他策略
     var bhj = df.queryExecution.sparkPlan.collect {
       case j: BroadcastLeftSemiJoinHash => j
     }
     assert(bhj.size === 1,
       s"actual query plans do not contain broadcast join: ${df.queryExecution}")
-
+    //检查输出的正确性
     checkAnswer(df, answer) // check correctness of output
 
     ctx.conf.settings.synchronized {
@@ -237,11 +238,13 @@ test("auto converts to broadcast left semi join, by size estimate of a relation"
       bhj = df.queryExecution.sparkPlan.collect {
         case j: BroadcastLeftSemiJoinHash => j
       }
+      //broadcasthashjoin仍计划即使是关闭
       assert(bhj.isEmpty, "BroadcastHashJoin still planned even though it is switched off")
 
       val shj = df.queryExecution.sparkPlan.collect {
         case j: LeftSemiJoinHash => j
       }
+      //leftsemijoinhash应计划当BroadcastHashJoin关闭
       assert(shj.size === 1,
         "LeftSemiJoinHash should be planned when BroadcastHashJoin is turned off")
 

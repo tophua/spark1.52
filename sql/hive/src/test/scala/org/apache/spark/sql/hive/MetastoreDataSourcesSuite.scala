@@ -202,7 +202,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
       }
     }
   }
-  //删除，改变，再创建
+  //删除,改变,再创建
   test("drop, change, recreate") {
     withTempPath { tempDir =>
       (("a", "b") :: Nil).toDF().toJSON.saveAsTextFile(tempDir.getCanonicalPath)
@@ -414,7 +414,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
       assert(!fs.exists(filesystemPath), s"$expectedPath should not exist after we drop the table.")
     }
   }
-
+  //在使用数据源API时未能删除无效表
   test("SPARK-5286 Fail to drop an invalid table when using the data source API") {
     withTable("jsonTable") {
       sql(
