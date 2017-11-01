@@ -277,12 +277,18 @@ object SparkSQLConfTest extends Logging {
     Utils.configTestLog4j("INFO")
     // We override the SparkConf to add spark.sql.hive.metastore.version and
     // spark.sql.hive.metastore.jars to the beginning of the conf entry array.
+    //我们覆盖sparkconf添加spark.sql.hive.metastore.version和spark.sql.hive.metastore.jars到conf进入数组的开始
     // So, if metadataHive get initialized after we set spark.sql.hive.metastore.version but
     // before spark.sql.hive.metastore.jars get set, we will see the following exception:
+    //所以，如果metadatahive得到初始化后我们spark.sql.hive.metastore.version
+    // 但在spark.sql.hive.metastore.jars准备，我们将看到以下例外：
     // Exception in thread "main" java.lang.IllegalArgumentException: Builtin jars can only
     // be used when hive execution version == hive metastore version.
     // Execution: 0.13.1 != Metastore: 0.12. Specify a valid path to the correct hive jars
     // using $HIVE_METASTORE_JARS or change spark.sql.hive.metastore.version to 0.13.1.
+    //在线程的“主”java.lang.illegalargumentexception例外：内置罐只能用于当执行版本= =hive元数据版本,
+    //执行：0.13.1！=元数据仓：0.12。指定一个有效路径的正确使用hive_metastore_jars
+    // $hive jars或改变spark.sql.hive.metastore.version到0.13.1。
     val conf = new SparkConf() {
       override def getAll: Array[(String, String)] = {
         def isMetastoreSetting(conf: String): Boolean = {
