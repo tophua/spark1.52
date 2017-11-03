@@ -22,15 +22,17 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.test.TestHive._
 import org.apache.spark.sql.hive.test.TestHive.implicits._
-
+  //开窗函数
 class HiveDataFrameWindowSuite extends QueryTest {
   //重用窗口partitionby
   test("reuse window partitionBy") {
     val df = Seq((1, "1"), (2, "2"), (1, "1"), (2, "2")).toDF("key", "value")
+    df.show(false)
     val w = Window.partitionBy("key").orderBy("value")
 
     checkAnswer(
       df.select(
+        //over分析函数用于计算基于组的某种聚合值,它和聚合函数的不同之处是：对于每个组返回多行，而聚合函数对于每个组只返回一行。
         lead("key", 1).over(w),
         lead("value", 1).over(w)),
       Row(1, "1") :: Row(2, "2") :: Row(null, null) :: Row(null, null) :: Nil)

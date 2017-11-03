@@ -70,7 +70,7 @@ class HiveUDFSuite extends QueryTest {
       Row(8)
     )
   }
-  //
+  //hive结构自定义函数
   test("hive struct udf") {
     sql(
       """
@@ -134,7 +134,7 @@ class HiveUDFSuite extends QueryTest {
     testOrderInStruct()
     TestHive.setConf(SQLConf.CODEGEN_ENABLED, codegenDefault)
   }
-
+  //自定义函数平均测试
   test("SPARK-6409 UDAFAverage test") {
     sql(s"CREATE TEMPORARY FUNCTION test_avg AS '${classOf[GenericUDAFAverage].getName}'")
     checkAnswer(
@@ -143,7 +143,7 @@ class HiveUDFSuite extends QueryTest {
     sql("DROP TEMPORARY FUNCTION IF EXISTS test_avg")
     TestHive.reset()
   }
-
+//自定义函数聚合测试
   test("SPARK-2693 udaf aggregates test") {
     checkAnswer(sql("SELECT percentile(key, 1) FROM src LIMIT 1"),
       sql("SELECT max(key) FROM src").collect().toSeq)
@@ -174,7 +174,7 @@ class HiveUDFSuite extends QueryTest {
 
     TestHive.reset()
   }
-
+  //自定义函数列表转换字符串
   test("UDFToListString") {
     val testData = TestHive.sparkContext.parallelize(StringCaseClass("") :: Nil).toDF()
     testData.registerTempTable("inputTable")
@@ -189,7 +189,7 @@ class HiveUDFSuite extends QueryTest {
     sql("DROP TEMPORARY FUNCTION IF EXISTS testUDFToListString")
     TestHive.reset()
   }
-
+  //自定义函数列表转换Int
   test("UDFToListInt") {
     val testData = TestHive.sparkContext.parallelize(StringCaseClass("") :: Nil).toDF()
     testData.registerTempTable("inputTable")
@@ -204,7 +204,7 @@ class HiveUDFSuite extends QueryTest {
     sql("DROP TEMPORARY FUNCTION IF EXISTS testUDFToListInt")
     TestHive.reset()
   }
-
+  //自定义函数列表转换Int
   test("UDFToStringIntMap") {
     val testData = TestHive.sparkContext.parallelize(StringCaseClass("") :: Nil).toDF()
     testData.registerTempTable("inputTable")

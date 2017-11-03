@@ -870,6 +870,8 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     sparkContext.parallelize(data).toDF().registerTempTable("windowData")
 
     checkAnswer(
+      //rank  会对相同数值，输出相同的序号，而且下一个序号不间断；
+      //
       sql(
         """
           |select area, rank() over (partition by area order by tmp.month) + tmp.tmp1 as c1
