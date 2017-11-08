@@ -43,9 +43,9 @@ import org.apache.spark.util.{ResetSystemProperties, Utils}
 class HiveSparkSubmitSuite
   extends SparkFunSuite
   with Matchers
-  // This test suite sometimes gets extremely slow out of unknown reason on Jenkins.  Here we
-  // add a timestamp to provide more diagnosis information.
-    // 这个测试套件有时会因为杰金斯的不明原因而变得非常慢,在这里,我们添加时间戳以提供更多的诊断信息。
+    // This test suite sometimes gets extremely slow out of unknown reason on Jenkins.  Here we
+    // add a timestamp to provide more diagnosis information.
+    // 这个测试套件有时会因为Jenkins的不明原因而变得非常慢,在这里,我们添加时间戳以提供更多的诊断信息。
   with ResetSystemProperties
   with Timeouts {
 
@@ -129,7 +129,7 @@ class HiveSparkSubmitSuite
 
   // NOTE: This is an expensive operation in terms of time (10 seconds+). Use sparingly.
   // This is copied from org.apache.spark.deploy.SparkSubmitSuite
-  ////注意:这是一个昂贵的操作时间（10秒+）,谨慎使用
+  ////注意:这是一个昂贵的操作时间(10秒+),谨慎使用
   //这是从org.apache.spark.deploy.SparkSubmitSuite复制
   private def runSparkSubmit(args: Seq[String]): Unit = {
 

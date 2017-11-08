@@ -78,7 +78,10 @@ private[hive] case class CreateTableAsSelect(
     childrenResolved
 }
 
-/** Provides a mapping from HiveQL statements to catalyst logical plans and expression trees. */
+/**
+  * Provides a mapping from HiveQL statements to catalyst logical plans and expression trees.
+  * 提供从HiveQL报表映射到逻辑图和表达式树的catalyst
+  * */
 private[hive] object HiveQl extends Logging {
   protected val nativeCommands = Seq(
     "TOK_ALTERDATABASE_OWNER",
