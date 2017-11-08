@@ -1,4 +1,4 @@
-/*
+ /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -149,10 +149,13 @@ object MovieLensALS {
     val test = if (params.implicitPrefs) {
       /*
        * 0 means "don't know" and positive values mean "confident that the prediction should be 1".
+       * 0表示“不知道”,正值表示“有信心预测应该是1”
        * Negative values means "confident that the prediction should be 0".
+       * 负值意味着“确信预测应该是0”
        * We have in this case used some kind of weighted RMSE. The weight is the absolute value of
        * the confidence. The error is the difference between prediction and either 1 or 0,
        * depending on whether r is positive or negative.
+       * 在这种情况下,我们使用了某种权重的RMSE,权重是信心的绝对值,误差是预测与1或0之间的差异,取决于r是正数还是负数
        */
       splits(1).map(x => Rating(x.user, x.product, if (x.rating > 0) 1.0 else 0.0))
     } else {
