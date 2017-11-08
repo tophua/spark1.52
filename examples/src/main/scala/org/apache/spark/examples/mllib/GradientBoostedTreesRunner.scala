@@ -40,6 +40,8 @@ import org.apache.spark.util.Utils
  *
  * Note: This script treats all features as real-valued (not categorical).
  *       To include categorical features, modify categoricalFeaturesInfo.
+  *       注意：此脚本将所有功能视为实值(而不是分类)
+  *       要包含分类特征,请修改categoricalFeaturesInfo
  */
 object GradientBoostedTreesRunner {
 

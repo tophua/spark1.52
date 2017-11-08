@@ -25,7 +25,7 @@ object BasicStatistics {
     /***提供列间相关性**/
     val sc: SparkContext = null
     val seriesX: RDD[Double] = null // a series 一系列
-    //必须有相同数量的分区和基数的外型
+    //必须与seriesX具有相同数量的分区和基数
     val seriesY: RDD[Double] = null // must have the same number of partitions and cardinality as seriesX
 
     // compute the correlation using Pearson's method. Enter "spearman" for Spearman's method. If a 

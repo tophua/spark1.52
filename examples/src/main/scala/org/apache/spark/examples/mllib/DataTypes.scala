@@ -43,6 +43,7 @@ object DataTypes {
     /**含标签点**/
 
     // Create a labeled point with a positive label and a dense feature vector.
+    //创建带有正标签和稠密特征向量的标记点
     val pos = LabeledPoint(1.0, Vectors.dense(1.0, 0.0, 3.0))
 
     // Create a labeled point with a negative label and a sparse feature vector.

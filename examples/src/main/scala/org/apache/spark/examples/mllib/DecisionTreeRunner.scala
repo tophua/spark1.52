@@ -180,6 +180,7 @@ object DecisionTreeRunner {
    * @param testInput  Path to test dataset.
    * @param algo  Classification or Regression 分类或回归
    * @param fracTest  Fraction of input data to hold out for testing.  Ignored if testInput given.
+    *                  用于测试的输入数据的一部分,如果testinput给忽略了
    * @return  (training dataset, test dataset, number of classes),
    *          where the number of classes is inferred from data (and set to 0 for Regression)
    */

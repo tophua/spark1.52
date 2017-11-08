@@ -232,6 +232,7 @@ object DatasetExample {
       (summary, feat) => summary.add(feat),
       (sum1, sum2) => sum1.merge(sum2))
     //Selected features column with average values:
+    //具有平均值的选定要素列：
     println(s"Selected features column with average values:\n ${newFeaturesSummary.mean.toString}")
 
     sc.stop()

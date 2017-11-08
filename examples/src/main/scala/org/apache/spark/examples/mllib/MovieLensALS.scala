@@ -36,7 +36,9 @@ import org.apache.spark.rdd.RDD
  * bin/run-example org.apache.spark.examples.mllib.MovieLensALS
  * }}}
  * A synthetic dataset in MovieLens format can be found at `data/mllib/sample_movielens_data.txt`.
+  * MovieLens格式的合成数据集可以在data/mllib/sample_movielens_data.txt中找到
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
+  * 如果您使用它作为模板来创建您自己的应用程序,请使用`spark-submit`提交您的应用程序
  */
 object MovieLensALS {
   case class Params(
@@ -114,15 +116,19 @@ object MovieLensALS {
       if (implicitPrefs) {
         /*
          * MovieLens ratings are on a scale of 1-5:
-         * 5: Must see
-         * 4: Will enjoy
-         * 3: It's okay
-         * 2: Fairly bad
-         * 1: Awful
+         * MovieLens的评分是1-5：
+         * 5: Must see 必看
+         * 4: Will enjoy 喜欢
+         * 3: It's okay 认可
+         * 2: Fairly bad 相当糟
+         * 1: Awful 非常糟糕的
          * So we should not recommend a movie if the predicted rating is less than 3.
+         * 因此,如果预测等级低于3,我们不应该推荐电影
          * To map ratings to confidence scores, we use
+         * 为了将评级映射到信心得分，我们使用
          * 5 -> 2.5, 4 -> 1.5, 3 -> 0.5, 2 -> -0.5, 1 -> -1.5. This mappings means unobserved
          * entries are generally between It's okay and Fairly bad.
+         * 这个mappings意味着未观察到的条目通常介于正常和相当差之间
          * The semantics of 0 in this expanded world of non-positive weights
          * are "the same as never having interacted at all".
          */

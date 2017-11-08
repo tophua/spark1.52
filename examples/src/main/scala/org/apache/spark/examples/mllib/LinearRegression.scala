@@ -33,6 +33,7 @@ import org.apache.spark.mllib.optimization.{SimpleUpdater, SquaredL2Updater, L1U
  * bin/run-example org.apache.spark.examples.mllib.LinearRegression
  * }}}
  * A synthetic dataset can be found at `data/mllib/sample_linear_regression_data.txt`.
+  * 合成数据集可以在data/mllib/sample_linear_regression_data.txt中找到
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
  */
 object LinearRegression {

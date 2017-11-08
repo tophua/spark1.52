@@ -29,6 +29,7 @@ import org.apache.spark.mllib.linalg.Vectors
  * ./bin/run-example mllib.DenseGaussianMixture <input> <k> <convergenceTol>
  * }}}
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
+  * 如果你用它作为模板来创建你自己的应用程序,请使用“spark-submit”提交你的应用程序
  */
 object DenseGaussianMixture {
   def main(args: Array[String]): Unit = {
