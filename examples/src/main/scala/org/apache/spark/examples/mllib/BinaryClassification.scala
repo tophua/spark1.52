@@ -153,7 +153,7 @@ object BinaryClassification {
           .setUpdater(updater)//
           .setRegParam(params.regParam)//正则化
         algorithm.run(training).clearThreshold()
-      case SVM =>//(SGD随机梯度下降)
+      case SVM => //(SGD随机梯度下降)
         val algorithm = new SVMWithSGD()
         algorithm.optimizer
           .setNumIterations(params.numIterations)//迭代次数
