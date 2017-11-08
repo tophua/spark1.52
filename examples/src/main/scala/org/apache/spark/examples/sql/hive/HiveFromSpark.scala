@@ -25,6 +25,11 @@ object HiveFromSpark {
     // using HiveQL. Users who do not have an existing Hive deployment can still create a
     // HiveContext. When not configured by the hive-site.xml, the context automatically
     // creates metastore_db and warehouse in the current directory.
+    /**
+      * 配置单元上下文增加了在MetaStore中查找表以及使用HiveQL编写查询的支持,
+      * 没有Hive部署的用户仍然可以创建一个HiveContext,
+      * 当未由hive-site.xml配置时,上下文自动在当前目录中创建metastore_db和仓库
+      */
     val hiveContext = new HiveContext(sc)
     import hiveContext.implicits._
     import hiveContext.sql
