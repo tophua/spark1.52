@@ -35,6 +35,9 @@ case class TestData(key: Int, value: String)
 
 case class ThreeCloumntable(key: Int, value: String, key1: String)
 
+/**
+  * 插入数据到Hive表
+  */
 class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
   import org.apache.spark.sql.hive.test.TestHive.implicits._
 
@@ -88,7 +91,7 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
       testData.collect().toSeq
     )
   }
-  //当allowExisting = false时，双重创建失败
+  //当allowExisting = false时,创建表二次失败
   test("Double create fails when allowExisting = false") {
     sql("CREATE TABLE doubleCreateAndInsertTest (key int, value string)")
 
@@ -96,7 +99,7 @@ class InsertIntoHiveTableSuite extends QueryTest with BeforeAndAfter {
       sql("CREATE TABLE doubleCreateAndInsertTest (key int, value string)")
     }
   }
-  //当allowExisting = true时，双重创建不会失败
+  //当allowExisting = true时,创建二次不会失败
   test("Double create does not fail when allowExisting = true") {
     sql("CREATE TABLE doubleCreateAndInsertTest (key int, value string)")
     sql("CREATE TABLE IF NOT EXISTS doubleCreateAndInsertTest (key int, value string)")

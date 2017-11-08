@@ -201,7 +201,7 @@ class HiveSparkSubmitSuite
 
 // This object is used for testing SPARK-8368: https://issues.apache.org/jira/browse/SPARK-8368.
 // We test if we can load user jars in both driver and executors when HiveContext is used.
-//我们测试当使用HiveContext时是否可以在驱动程序和执行程序中加载用户jar。
+// 我们测试当使用HiveContext时是否可以在驱动程序和执行程序中加载用户jar,
 object SparkSubmitClassLoaderTest extends Logging {
   def main(args: Array[String]) {
     Utils.configTestLog4j("INFO")
