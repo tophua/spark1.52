@@ -29,7 +29,7 @@ import org.apache.spark.util.Utils
   * Hive表扫描测试
   */
 class HiveTableScanSuite extends HiveComparisonTest {
-
+  //基于分区的表扫描与不同的serde
   createQueryTest("partition_based_table_scan_with_different_serde",
     """
       |CREATE TABLE part_scan_test (key STRING, value STRING) PARTITIONED BY (ds STRING)
@@ -55,6 +55,7 @@ class HiveTableScanSuite extends HiveComparisonTest {
   // Hive / SparkSQL HQL has the same output even for SORT BY
   //在单元测试中,kv1.txt是一个小文件,将作为表src加载由于小文件将被视为单个拆分,
   //我们假设Hive / SparkSQL HQL即使对于SORT BY也具有相同的输出
+  //文件拆分为小表
   createQueryTest("file_split_for_small_table",
     """
       |SELECT key, value FROM src SORT BY key, value
