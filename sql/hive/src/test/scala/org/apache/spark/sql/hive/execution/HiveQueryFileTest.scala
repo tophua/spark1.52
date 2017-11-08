@@ -27,6 +27,8 @@ import org.apache.spark.sql.catalyst.util._
  * TestSuites that derive from this class must provide a map of testCaseName -> testCaseFiles
  * that should be included. Additionally, there is support for whitelisting and blacklisting
  * tests as development progresses.
+  * 从这个类派生的TestSuites必须提供一个testCaseName - > testCaseFiles的映射应该包括在内,
+  * 此外,随着开发的进行,还支持白名单和黑名单测试。
  */
 abstract class HiveQueryFileTest extends HiveComparisonTest {
   /**

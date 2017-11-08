@@ -167,7 +167,7 @@ class StatisticsSuite extends QueryTest with BeforeAndAfterAll {
       var bhj = df.queryExecution.sparkPlan.collect { case j: BroadcastHashJoin => j }
       assert(bhj.size === 1,
         s"actual query plans do not contain broadcast join: ${df.queryExecution}")
-    //检查输出的正确性
+      //检查输出的正确性
       checkAnswer(df, expectedAnswer) // check correctness of output
 
       ctx.conf.settings.synchronized {

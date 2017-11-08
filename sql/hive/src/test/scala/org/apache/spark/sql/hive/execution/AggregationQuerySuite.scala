@@ -29,7 +29,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.test.SQLTestUtils
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.hive.aggregate.{MyDoubleAvg, MyDoubleSum}
-
+//合计函数
 class ScalaAggregateFunction(schema: StructType) extends UserDefinedAggregateFunction {
 
   def inputSchema: StructType = schema
