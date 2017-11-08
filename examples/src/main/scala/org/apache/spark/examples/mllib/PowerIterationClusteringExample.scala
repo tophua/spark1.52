@@ -56,6 +56,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  *
  *
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
+  * 如果您使用它作为模板来创建您自己的应用程序,请使用`spark-submit`提交您的应用程序
  */
 object PowerIterationClusteringExample {
 
@@ -152,6 +153,7 @@ object PowerIterationClusteringExample {
 
   /**
    * Gaussian Similarity:  http://en.wikipedia.org/wiki/Radial_basis_function_kernel
+    * 高斯相似度：http://en.wikipedia.org/wiki/Radial_basis_function_kernel
    */
   def gaussianSimilarity(p1: (Double, Double), p2: (Double, Double), sigma: Double): Double = {
     val coeff = 1.0 / (math.sqrt(2.0 * math.Pi) * sigma)
