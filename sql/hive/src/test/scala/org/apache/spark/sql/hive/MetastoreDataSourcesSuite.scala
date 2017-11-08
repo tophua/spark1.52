@@ -260,6 +260,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
           sql("SELECT `c_!@(3)` FROM expectedJsonTable").collect().toSeq)
 
         // Discard the cached relation.
+        //放弃缓存的关系
         invalidateTable("jsonTable")
 
         checkAnswer(
@@ -345,7 +346,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
         // The following statement should be fine if it has IF NOT EXISTS.
         // It tries to create a table ctasJsonTable with a new schema.
         // The actual table's schema and data should not be changed.
-        //如果有不存在的话，以下声明应该很好。它试图用一种新的模式创建一个表ctasjsontable。
+        //如果有不存在的话,以下声明应该很好,它试图用一种新的模式创建一个表ctasjsontable。
         //实际表的架构和数据不应更改。
         sql(
           s"""CREATE TABLE IF NOT EXISTS ctasJsonTable
@@ -469,7 +470,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
 
         withSQLConf(SQLConf.DEFAULT_DATA_SOURCE_NAME.key -> "json") {
           // Save the df as a managed table (by not specifying the path).
-          //将df保存为托管表（不指定路径）。
+          //将df保存为托管表(不指定路径)
           df.write.saveAsTable("savedJsonTable")
 
           checkAnswer(sql("SELECT * FROM savedJsonTable"), df)
@@ -480,7 +481,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
           checkAnswer(sql("SELECT * FROM savedJsonTable"), df)
 
           // When the save mode is Ignore, we will do nothing when the table already exists.
-          //当保存模式为Ignore时，当表已存在时，我们将不执行任何操作。
+          //当保存模式为Ignore时,当表已存在时,我们将不执行任何操作。
           df.select("b").write.mode(SaveMode.Ignore).saveAsTable("savedJsonTable")
           // TODO in ResolvedDataSource, will convert the schema into nullable = true
           // hence the df.schema is not exactly the same as table("savedJsonTable").schema
@@ -489,7 +490,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
           checkAnswer(sql("SELECT * FROM savedJsonTable"), df)
 
           // Drop table will also delete the data.
-          //删除表也将删除数据
+          // 删除表也将删除数据
           sql("DROP TABLE savedJsonTable")
           intercept[IOException] {
             read.json(catalog.hiveDefaultTableFilePath("savedJsonTable"))
@@ -504,7 +505,6 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
             .mode(SaveMode.Append)
             .option("path", tempPath.toString)
             .saveAsTable("savedJsonTable")
-
           checkAnswer(sql("SELECT * FROM savedJsonTable"), df)
         }
 
@@ -642,6 +642,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
       (Tuple1(Seq(4, 5)) :: Nil).toDF("a")
         .write
         .mode(SaveMode.Append)
+        //这个内部调用df2.insertInto
         .saveAsTable("arrayInParquet") // This one internally calls df2.insertInto.
 
       (Tuple1(Seq(Int.box(6), null: Integer)) :: Nil).toDF("a")
@@ -659,7 +660,7 @@ class MetastoreDataSourcesSuite extends QueryTest with SQLTestUtils with BeforeA
           Row(ArrayBuffer(6, null)) :: Nil)
     }
   }
-  //预插入可空性检查（MapType）
+  //预插入可空性检查(MapType)
   test("Pre insert nullability check (MapType)") {
     withTable("mapInParquet") {
       {

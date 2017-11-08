@@ -31,10 +31,9 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
     // val hiveContext = sqlContext.asInstanceOf[HiveContext]
     val metastoreTable = sqlContext.catalog.client.getTable(dbName, tableName)
     val expectedPath = sqlContext.catalog.client.getDatabase(dbName).location + "/" + tableName
-
     assert(metastoreTable.serdeProperties("path") === expectedPath)
   }
-  //saveAsTable（）到非默认数据库 - 使用USE - 覆盖
+  //saveAsTable()到非默认数据库 - 使用USE - 覆盖
   test(s"saveAsTable() to non-default database - with USE - Overwrite") {
     withTempDatabase { db =>
       activateDatabase(db) {
@@ -42,20 +41,17 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
         assert(sqlContext.tableNames().contains("t"))
         checkAnswer(sqlContext.table("t"), df)
       }
-
       assert(sqlContext.tableNames(db).contains("t"))
       checkAnswer(sqlContext.table(s"$db.t"), df)
-
       checkTablePath(db, "t")
     }
   }
-  //saveAsTable（）到非默认数据库 - 不使用 - 覆盖
+  //saveAsTable()到非默认数据库--不使用--覆盖
   test(s"saveAsTable() to non-default database - without USE - Overwrite") {
     withTempDatabase { db =>
       df.write.mode(SaveMode.Overwrite).saveAsTable(s"$db.t")
       assert(sqlContext.tableNames(db).contains("t"))
       checkAnswer(sqlContext.table(s"$db.t"), df)
-
       checkTablePath(db, "t")
     }
   }
@@ -66,11 +62,9 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
         withTempPath { dir =>
           val path = dir.getCanonicalPath
           df.write.format("parquet").mode(SaveMode.Overwrite).save(path)
-
           sqlContext.createExternalTable("t", path, "parquet")
           assert(sqlContext.tableNames(db).contains("t"))
           checkAnswer(sqlContext.table("t"), df)
-
           sql(
             s"""
               |CREATE TABLE t1
@@ -85,17 +79,15 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       }
     }
   }
-  //createExternalTable（）到非默认数据库 - 不使用
+  //createExternalTable()到非默认数据库 - 不使用
   test(s"createExternalTable() to non-default database - without USE") {
     withTempDatabase { db =>
       withTempPath { dir =>
         val path = dir.getCanonicalPath
         df.write.format("parquet").mode(SaveMode.Overwrite).save(path)
         sqlContext.createExternalTable(s"$db.t", path, "parquet")
-
         assert(sqlContext.tableNames(db).contains("t"))
         checkAnswer(sqlContext.table(s"$db.t"), df)
-
         sql(
           s"""
               |CREATE TABLE $db.t1
@@ -109,7 +101,7 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       }
     }
   }
-  //saveAsTable（）到非默认数据库 - 使用USE - 追加
+  //saveAsTable()到非默认数据库 - 使用USE - 追加
   test(s"saveAsTable() to non-default database - with USE - Append") {
     withTempDatabase { db =>
       activateDatabase(db) {
@@ -121,7 +113,6 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
 
       assert(sqlContext.tableNames(db).contains("t"))
       checkAnswer(sqlContext.table(s"$db.t"), df.unionAll(df))
-
       checkTablePath(db, "t")
     }
   }
@@ -132,17 +123,15 @@ class MultiDatabaseSuite extends QueryTest with SQLTestUtils {
       df.write.mode(SaveMode.Append).saveAsTable(s"$db.t")
       assert(sqlContext.tableNames(db).contains("t"))
       checkAnswer(sqlContext.table(s"$db.t"), df.unionAll(df))
-
       checkTablePath(db, "t")
     }
   }
-  //insertInto（）非默认数据库 - 使用USE
+  //insertInto()非默认数据库 - 使用USE
   test(s"insertInto() non-default database - with USE") {
     withTempDatabase { db =>
       activateDatabase(db) {
         df.write.mode(SaveMode.Overwrite).saveAsTable("t")
         assert(sqlContext.tableNames().contains("t"))
-
         df.write.insertInto(s"$db.t")
         checkAnswer(sqlContext.table(s"$db.t"), df.unionAll(df))
       }

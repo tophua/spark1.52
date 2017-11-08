@@ -70,7 +70,6 @@ class ParquetHiveCompatibilitySuite extends ParquetCompatibilityTest with Before
         // Hive columns are always nullable, so here we append a all-null row.
         //Hive列总是可空的，所以这里我们附加一个全空的行
         val rows = row :: Row(Seq.fill(row.length)(null): _*) :: Nil
-
         // Don't convert Hive metastore Parquet tables to let Hive write those Parquet files.
         //不要转换Hive转移的Parquet表,让Hive写这些Parquet文件
         withSQLConf(HiveContext.CONVERT_METASTORE_PARQUET.key -> "false") {

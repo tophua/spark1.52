@@ -23,7 +23,7 @@ import org.apache.spark.sql.test.SQLTestUtils
 import org.apache.spark.sql.{QueryTest, _}
 import org.apache.spark.util.Utils
 
-
+//查询分区套件
 class QueryPartitionSuite extends QueryTest with SQLTestUtils {
 
   private lazy val ctx = org.apache.spark.sql.hive.test.TestHive

@@ -24,6 +24,9 @@ import org.apache.spark.sql.hive.test.TestHive._
 import org.apache.spark.sql.QueryTest
 import org.apache.spark.sql.Row
 
+/**
+  * 列出表
+  */
 class ListTablesSuite extends QueryTest with BeforeAndAfterAll {
 
   import org.apache.spark.sql.hive.test.TestHive.implicits._
@@ -51,6 +54,7 @@ class ListTablesSuite extends QueryTest with BeforeAndAfterAll {
     Seq(tables(), sql("SHOW TABLes")).foreach {
       case allTables =>
         // We are using default DB.
+        //我们正在使用默认数据库
         checkAnswer(
           allTables.filter("tableName = 'listtablessuitetable'"),
           Row("listtablessuitetable", true))

@@ -490,12 +490,12 @@ class ParquetMetastoreSuite extends ParquetPartitioningTest {
       sql("select * from test_insert_parquet"),
       sql("select a, b from jt").collect())
     // Invalidate the cache.
-    //无效缓存
+    // 无效缓存
     invalidateTable("test_insert_parquet")
     assert(catalog.cachedDataSourceTables.getIfPresent(tableIdentifier) === null)
 
     // Create a partitioned table.
-    //创建分区表
+    // 创建分区表
     sql(
       """
         |create table test_parquet_partitioned_cache_test
@@ -619,7 +619,7 @@ class ParquetSourceSuite extends ParquetPartitioningTest {
     )
 
     // Create a DataFrame with four partitions. So, the created table will have four parquet files.
-    //用四个分区创建一个DataFrame。 所以，创建的表将有四个parquet文件。
+    //用四个分区创建一个DataFrame,所以,创建的表将有四个parquet文件。
     val df2 = read.json(sparkContext.parallelize((1 to 10).map(i => s"""{"b":$i}"""), 4))
     df2.write.mode(SaveMode.Overwrite).format("parquet").saveAsTable("spark_6016_fix")
     // For the bug of SPARK-6016, we are caching two outdated footers for df1. Then,
