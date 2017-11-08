@@ -30,7 +30,7 @@ class QueryPartitionSuite extends QueryTest with SQLTestUtils {
   import ctx.implicits._
 
   protected def _sqlContext = ctx
-  //当路径不存在时查询数据
+  //查询数据当路径不存在时
   test("SPARK-5068: query data when path doesn't exist"){
     withSQLConf((SQLConf.HIVE_VERIFY_PARTITION_PATH.key, "true")) {
       val testData = ctx.sparkContext.parallelize(
