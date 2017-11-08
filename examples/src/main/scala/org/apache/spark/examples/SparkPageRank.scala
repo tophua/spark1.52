@@ -23,14 +23,17 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * Computes the PageRank of URLs from an input file. Input file should
+  *从输入文件计算URL的PageRank,输入文件应该
  * be in format of:
  * URL         neighbor URL
  * URL         neighbor URL
  * URL         neighbor URL
  * ...
  * where URL and their neighbors are separated by space(s).
+  * URL和它们的邻居由空格分隔
  *
  * This is an example implementation for learning how to use Spark. For more conventional use,
+  * 这是学习如何使用Spark的示例实现,对于更传统的使用
  * please refer to org.apache.spark.graphx.lib.PageRank
  */
 object SparkPageRank {

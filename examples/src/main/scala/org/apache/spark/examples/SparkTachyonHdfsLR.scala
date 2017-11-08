@@ -31,10 +31,11 @@ import org.apache.spark.storage.StorageLevel
 
 
 /**
-  * Logistic regression based classification.
-  * This example uses Tachyon to persist rdds during computation.
+  * Logistic regression based classification.基于Logistic回归的分类
+  * This example uses Tachyon to persist rdds during computation.这个例子使用Tachyon在计算过程中保存rdds
   *
   * This is an example implementation for learning how to use Spark. For more conventional use,
+  * 这是学习如何使用Spark的示例实现,对于更传统的使用
   * please refer to either org.apache.spark.mllib.classification.LogisticRegressionWithSGD(SGD随机梯度下降) or
   * org.apache.spark.mllib.classification.LogisticRegressionWithLBFGS(BFGS是逆秩2拟牛顿法) based on your needs.
   */
@@ -79,7 +80,7 @@ object SparkTachyonHdfsLR {
     val points = lines.map(parsePoint _).persist(StorageLevel.OFF_HEAP)
     val ITERATIONS = args(1).toInt
 
-    // Initialize w to a random value
+    // Initialize w to a random value 将w初始化为一个随机值
     var w = DenseVector.fill(D){2 * rand.nextDouble - 1}
     println("Initial w: " + w)
 

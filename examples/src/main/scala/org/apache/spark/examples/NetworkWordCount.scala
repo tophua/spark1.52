@@ -27,7 +27,7 @@ import org.apache.spark.storage.StorageLevel
   * 单词统计UTF8编码,每一秒从网络中接收到的分隔的文本
   * Usage: NetworkWordCount <hostname> <port>
   * <hostname> and <port> describe the TCP server that Spark Streaming would connect to receive data.
-  * 描述:火花流将接收数据的TCP服务器
+  * 描述:Spark流将接收数据的TCP服务器
   *
   * To run this on your local machine, you need to first run a Netcat server
   * 运行在本地机器上,你需要先运行一个netcat服务器

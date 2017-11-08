@@ -26,6 +26,7 @@ import org.apache.spark._
   * Alternating least squares matrix factorization.
   * 交替最小二乘矩阵分解
   * This is an example implementation for learning how to use Spark. For more conventional use,
+  * 这是学习如何使用Spark的示例实现,对于更传统的使用,
   * please refer to org.apache.spark.mllib.recommendation.ALS
   */
 object SparkALS {
@@ -70,6 +71,7 @@ object SparkALS {
       // Add u * u^t to XtX
       XtX = XtX.add(u.outerProduct(u))
       // Add u * rating to Xty
+      //添加U *评级XTY
       Xty = Xty.add(u.mapMultiply(R.getEntry(i, j)))
     }
     // Add regularization coefs to diagonal terms
@@ -78,6 +80,7 @@ object SparkALS {
       XtX.addToEntry(d, d, LAMBDA * U)
     }
     // Solve it with Cholesky
+    //Cholesky解决它
     new CholeskyDecomposition(XtX).getSolver.solve(Xty)
   }
 

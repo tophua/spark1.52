@@ -49,8 +49,8 @@ object HiveFromSpark {
 
     // The results of SQL queries are themselves RDDs and support all normal RDD functions.  The
     // items in the RDD are of type Row, which allows you to access each column by ordinal.
-    //SQL查询的结果本身就是RDD，并支持所有正常的RDD功能,
-    //RDD中的项目的类型为Row，它允许您按顺序访问每个列。
+    //SQL查询的结果本身就是RDD,并支持所有正常的RDD功能,
+    //RDD中的项目的类型为Row,它允许您按顺序访问每个列。
     val rddFromSql = sql("SELECT key, value FROM src WHERE key < 10 ORDER BY key")
 
     println("Result of RDD.map:")
@@ -59,7 +59,7 @@ object HiveFromSpark {
     }
 
     // You can also register RDDs as temporary tables within a HiveContext.
-    //您还可以将RDD注册为HiveContext中的临时表。
+    //您还可以将RDD注册为HiveContext中的临时表
     val rdd = sc.parallelize((1 to 100).map(i => Record(i, s"val_$i")))
     rdd.toDF().registerTempTable("records")
 

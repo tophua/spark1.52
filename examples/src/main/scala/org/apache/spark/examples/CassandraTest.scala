@@ -21,6 +21,7 @@ object CassandraTest {
     val sc = new SparkContext(sparkConf)
 
     // Build the job configuration with ConfigHelper provided by Cassandra
+    //使用Cassandra提供的ConfigHelper构建作业配置
     val job = new Job()
     job.setInputFormatClass(classOf[ColumnFamilyInputFormat])
 
@@ -52,13 +53,14 @@ object CassandraTest {
       classOf[SortedMap[ByteBuffer, IColumn]])
 
     // Let us first get all the paragraphs from the retrieved rows
+    //让我们先从获取的行中获取所有段落
     val paraRdd = casRdd.map {
       case (key, value) => {
         ByteBufferUtil.string(value.get(ByteBufferUtil.bytes("para")).value())
       }
     }
 
-    // Lets get the word count in paras
+    // Lets get the word count in paras 让我们来看一下这个字数
     val counts = paraRdd.flatMap(p => p.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
 
     counts.collect().foreach {

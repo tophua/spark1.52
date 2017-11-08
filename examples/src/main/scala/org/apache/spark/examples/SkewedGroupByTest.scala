@@ -25,7 +25,6 @@ import org.apache.spark.SparkContext._
 
 /**
   * Usage: GroupByTest [numMappers] [numKVPairs] [KeySize] [numReducers]
-  *
   */
 object SkewedGroupByTest {
   def main(args: Array[String]) {

@@ -74,6 +74,7 @@ object SparkLR {
     val points = sc.parallelize(generateData, numSlices).cache()
 
     // Initialize w to a random value
+    //将w初始化为一个随机值
     var w = DenseVector.fill(D){2 * rand.nextDouble - 1}
     println("Initial w: " + w)
 

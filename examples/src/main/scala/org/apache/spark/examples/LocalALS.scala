@@ -142,6 +142,7 @@ object LocalALS {
       Xty = Xty.add(m.mapMultiply(R.getEntry(i, j)))
     }
     // Add regularization coefficients to diagonal terms
+    //将正则化系数添加到对角项
     for (d <- 0 until F) {
       XtX.addToEntry(d, d, LAMBDA * M)
     }

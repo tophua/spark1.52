@@ -60,7 +60,7 @@ object LocalFileLR {
     val ITERATIONS = args(1).toInt
 
     // Initialize w to a random value
-    //初始化W到一个随机值,可数组
+    //初始化W到一个随机值数组
     var w = DenseVector.fill(D){2 * rand.nextDouble - 1}
     println("Initial w: " + w)
 

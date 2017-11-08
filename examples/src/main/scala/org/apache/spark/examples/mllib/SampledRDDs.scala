@@ -31,6 +31,7 @@ import org.apache.spark.SparkContext._
  * bin/run-example org.apache.spark.examples.mllib.SampledRDDs
  * }}}
  * If you use it as a template to create your own app, please use `spark-submit` to submit your app.
+  * 如果您使用它作为模板来创建您自己的应用程序,请使用`spark-submit`提交您的应用程序
  */
 object SampledRDDs {
 /**

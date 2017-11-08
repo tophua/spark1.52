@@ -24,8 +24,9 @@ import org.apache.spark._
 import org.apache.spark.storage.StorageLevel
 
 /**
- *  Computes an approximation to pi
+ *  Computes an approximation to pi 计算pi的近似值
  *  This example uses Tachyon to persist rdds during computation.
+  *  这个例子使用Tachyon在计算过程中保存rdds
  */
 object SparkTachyonPi {
   def main(args: Array[String]) {

@@ -52,8 +52,8 @@ object GroupByTest {
     }.cache()
     // Enforce that everything has been calculated and in cache
     //执行所有的计算和缓存
-    //第一个 count() 执行时，先在每个 partition 上执行 count，然后执行结果被发送到 driver，最后在 driver 端进行 sum
-    //产生了两个 job，第一个 job 由第一个 action（也就是 pairs1.count）触发产生
+    //第一个count()执行时,先在每个partition上执行count,然后执行结果被发送到driver,最后在driver端进行sum
+    //产生了两个 job,第一个job由第一个action(也就是pairs1.count)触发产生
     pairs1.count()
     //groupByKey 产生了后面两个 RDD
     //在一个由(K,V)对组成的数据集上调用,返回一个(K,Seq[V])对的数据集
