@@ -28,9 +28,11 @@ import org.apache.spark.sql.hive.test.TestHive
 
 /**
  * Runs the test cases that are included in the hive distribution.
+  *运行包含在hive分发中的测试用例
  */
 class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
   // TODO: bundle in jar files... get from classpath
+  //在JAR文件中捆绑…从类路径
   private lazy val hiveQueryDir = TestHive.getHiveFile(
     "ql/src/test/queries/clientpositive".split("/").mkString(File.separator))
 
@@ -44,12 +46,16 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
   override def beforeAll() {
     TestHive.cacheTables = true
     // Timezone is fixed to America/Los_Angeles for those timezone sensitive tests (timestamp_*)
+    //时区固定到美国/洛杉矶那些时区敏感试验（timestamp_ *）
     TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
     // Add Locale setting
+    //添加区域设置
     Locale.setDefault(Locale.US)
     // Set a relatively small column batch size for testing purposes
+    //设置一个比较小的列批量测试的目的
     TestHive.setConf(SQLConf.COLUMN_BATCH_SIZE, 5)
     // Enable in-memory partition pruning for testing purposes
+    //用于测试目的的内存分区剪枝
     TestHive.setConf(SQLConf.IN_MEMORY_PARTITION_PRUNING, true)
     RuleExecutor.resetTime()
   }
@@ -62,12 +68,17 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
     TestHive.setConf(SQLConf.IN_MEMORY_PARTITION_PRUNING, originalInMemoryPartitionPruning)
 
     // For debugging dump some statistics about how much time was spent in various optimizer rules.
+    //用于调试转储一些关于在各种优化器规则中花费多少时间的统计信息
     logWarning(RuleExecutor.dumpTimeSpent())
   }
 
-  /** A list of tests deemed out of scope currently and thus completely disregarded. */
+  /**
+    *
+    * A list of tests deemed out of scope currently and thus completely disregarded.
+    * 目前被视为超出范围的测试列表，因此完全被忽视*/
   override def blackList = Seq(
     // These tests use hooks that are not on the classpath and thus break all subsequent execution.
+    //这些测试使用不在类路径上的钩子,从而中断所有后续的执行
     "hook_order",
     "hook_context_cs",
     "mapjoin_hook",
@@ -86,10 +97,13 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
 
     // Setting a default property does not seem to get reset and thus changes the answer for many
     // subsequent tests.
-    "create_default_prop",
+    //设置一个默认属性似乎不会被重置,从而改变了很多的答案
+    //后续的测试
+  "create_default_prop",
 
     // User/machine specific test answers, breaks the caching mechanism.
-    "authorization_3",
+    //用户/机器特定的测试答案,打破了缓存机制
+  "authorization_3",
     "authorization_5",
     "keyword_1",
     "misc_json",
@@ -114,21 +128,29 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
     "symlink_text_input_format",
 
     // Weird DDL differences result in failures on jenkins.
-    "create_like2",
+    //奇怪的DDL差异导致jenkins失败
+  "create_like2",
     "partitions_json",
 
     // This test is totally fine except that it includes wrong queries and expects errors, but error
     // message format in Hive and Spark SQL differ. Should workaround this later.
+    //这个测试是完全正确的,只是它包含错误的查询并期望错误,但Hive和Spark SQL中的错误消息格式不同
+  //应该稍后解决这个问题。
     "udf_to_unix_timestamp",
     // we can cast dates likes '2015-03-18' to a timestamp and extract the seconds.
-    // Hive returns null for second('2015-03-18')
-    "udf_second",
+  //我们可以将日期喜欢'2015-03-18'转换为时间戳,并提取秒,
+  // Hive returns null for second('2015-03-18')
+  //Hive返回null（'2015-03-18'）
+  "udf_second",
     // we can cast dates likes '2015-03-18' to a timestamp and extract the minutes.
-    // Hive returns null for minute('2015-03-18')
-    "udf_minute",
+  //我们可以将日期如“2015-03-18”转换为时间戳并提取分钟
+  // Hive returns null for minute('2015-03-18')
+  //Hive会返回null分（'2015-03-18'）
+  "udf_minute",
 
 
     // Cant run without local map/reduce.
+  //无法运行本地Map/reduce
     "index_auto_update",
     "index_auto_self_join",
     "index_stale.*",
@@ -158,11 +180,13 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
     "ops_comparison",
 
     // Tests that seems to never complete on hive...
-    "skewjoin",
+    //测试似乎永远不会在hive上完成...
+  "skewjoin",
     "database",
 
     // These tests fail and and exit the JVM.
-    "auto_join18_multi_distinct",
+    //这些测试失败并退出JVM
+  "auto_join18_multi_distinct",
     "join18_multi_distinct",
     "input44",
     "input42",
@@ -171,79 +195,103 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
     "repair",
 
     // Uses a serde that isn't on the classpath... breaks other tests.
-    "bucketizedhiveinputformat",
+  //使用不在类路径上的serde ...打破其他测试
+  "bucketizedhiveinputformat",
 
     // Avro tests seem to change the output format permanently thus breaking the answer cache, until
+  //Avro测试似乎永久地改变输出格式，从而打破答案缓存，直到
     // we figure out why this is the case let just ignore all of avro related tests.
     ".*avro.*",
 
     // Unique joins are weird and will require a lot of hacks (see comments in hive parser).
+  //独特的连接是奇怪的,将需要大量的黑客(请参阅配置单元解析器中的注释)
     "uniquejoin",
 
     // Hive seems to get the wrong answer on some outer joins.  MySQL agrees with catalyst.
+  //配置单元似乎得到了一些外部连接的错误答案,MySQL同意催化剂
     "auto_join29",
 
     // No support for multi-alias i.e. udf as (e1, e2, e3).
-    "allcolref_in_udf",
+  //不支持多别名,即udf as(e1,e2,e3)
+  "allcolref_in_udf",
 
     // No support for TestSerDe (not published afaik)
-    "alter1",
+    //不支持TestSerDe(未发布afaik)
+  "alter1",
     "input16",
 
     // No support for unpublished test udfs.
-    "autogen_colalias",
+    //不支持未发布的测试udfs
+  "autogen_colalias",
 
     // Hive does not support buckets.
+    //Hive不支持桶
     ".*bucket.*",
 
     // We have our own tests based on these query files.
-    ".*window.*",
+    //我们有我们自己的测试基于这些查询文件
+  ".*window.*",
 
     // Fails in hive with authorization errors.
+    //配置失败,授权错误
     "alter_rename_partition_authorization",
     "authorization.*",
 
     // Hadoop version specific tests
-    "archive_corrupt",
+    //Hadoop版本特定的测试
+  "archive_corrupt",
 
     // No support for case sensitivity is resolution using hive properties atm.
-    "case_sensitivity",
+    // 区分大小写不支持使用配置单元属性atm
+  "case_sensitivity",
 
-    // Flaky test, Hive sometimes returns different set of 10 rows.
-    "lateral_view_outer",
+    //  Flaky test, Hive sometimes returns different set of 10 rows.
+    //片状测试,Hive有时会返回不同的10行
+  "lateral_view_outer",
 
     // After stop taking the `stringOrError` route, exceptions are thrown from these cases.
+    //停止使用`stringOrError`路由后,会从这些情况中抛出异常
     // See SPARK-2129 for details.
     "join_view",
     "mergejoins_mixed",
 
     // Returning the result of a describe state as a JSON object is not supported.
-    "describe_table_json",
+    //不支持将描述状态的结果作为JSON对象返回
+  "describe_table_json",
     "describe_database_json",
     "describe_formatted_view_partitioned_json",
 
     // Hive returns the results of describe as plain text. Comments with multiple lines
+    //
     // introduce extra lines in the Hive results, which make the result comparison fail.
+  //Hive将描述的结果作为纯文本返回,多行注释会在Hive结果中引入额外的行,导致比较失败,
     "describe_comment_indent",
 
     // Limit clause without a ordering, which causes failure.
-    "orc_predicate_pushdown",
+    //限制条款没有排序,导致失败
+  "orc_predicate_pushdown",
 
     // Requires precision decimal support:
-    "udf_when",
+    //需要精确的小数支持
+  "udf_when",
     "udf_case",
 
     // the table src(key INT, value STRING) is not the same as HIVE unittest. In Hive
     // is src(key STRING, value STRING), and in the reflect.q, it failed in
     // Integer.valueOf, which expect the first argument passed as STRING type not INT.
-    "udf_reflect",
+  //表src(Key INT,value STRING）与HIVE单元测试不同,在hive
+  //是src(key STRING,value STRING),并在reflect.q中失败
+  //Integer.valueOf,期望作为STRING类型传递的第一个参数不是INT。
+  "udf_reflect",
 
     // Sort with Limit clause causes failure.
+    //排序限制条款导致失败
     "ctas",
     "ctas_hadoop20",
 
     // timestamp in array, the output format of Hive contains double quotes, while
     // Spark SQL doesn't
+    //数组中的时间戳,Hive的输出格式包含双引号,而Spark SQL不包含
     "udf_sort_array",
 
     // It has a bug and it has been fixed by
@@ -251,33 +299,42 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
     "input46",
 
     // These tests were broken by the hive client isolation PR.
-    "part_inherit_tbl_props",
+    //这些测试被配置单元客户端隔离PR
+  "part_inherit_tbl_props",
     "part_inherit_tbl_props_with_star",
 
     "nullformatCTAS", // SPARK-7411: need to finish CTAS parser
 
     // The isolated classloader seemed to make some of our test reset mechanisms less robust.
+    //孤立的类加载器似乎使我们的一些测试重置机制不够健壮
     "combine1", // This test changes compression settings in a way that breaks all subsequent tests.
+    //这个测试以一种破坏所有后续测试的方式来改变压缩设置。
     "load_dyn_part14.*", // These work alone but fail when run with other tests...
-
+    //这些工作单独,但与其他测试运行时失败...
     // the answer is sensitive for jdk version
+    //答案是敏感的jdk版本
     "udf_java_method",
 
     // Spark SQL use Long for TimestampType, lose the precision under 1us
+    //Spark SQL使用Long作为TimestampType,失去1us以下的精度
     "timestamp_1",
     "timestamp_2",
     "timestamp_udf",
 
     // Hive returns string from UTC formatted timestamp, spark returns timestamp type
+    //Hive从UTC格式的时间戳返回字符串,spark返回时间戳类型
     "date_udf",
 
     // Can't compare the result that have newline in it
+    //无法比较其中有换行符的结果
     "udf_get_json_object",
 
     // Unlike Hive, we do support log base in (0, 1.0], therefore disable this
+    //与Hive不同的是,我们支持(0,1.0)中的日志基础,因此禁用它
     "udf7",
 
     // Trivial changes to DDL output
+    //DDL输出的微小变化
     "compute_stats_empty_table",
     "compute_stats_long",
     "create_view_translate",
@@ -285,22 +342,27 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
     "show_tblproperties",
 
     // Odd changes to output
+    //输出奇怪的变化
     "merge4",
 
     // Thift is broken...
     "inputddl8",
 
     // Hive changed ordering of ddl:
+    //Hive改变了ddl的排序
     "varchar_union1",
 
     // Parser changes in Hive 1.2
+    //解析器在Hive 1.2中进行了更改
     "input25",
     "input26",
 
     // Uses invalid table name
+    //使用无效的表名
     "innerjoin",
 
     // classpath problems
+    //类路径问题
     "compute_stats.*",
     "udf_bitmap_.*"
   )
@@ -308,6 +370,7 @@ class HiveCompatibilitySuite extends HiveQueryFileTest with BeforeAndAfter {
   /**
    * The set of tests that are believed to be working in catalyst. Tests not on whiteList or
    * blacklist are implicitly marked as ignored.
+    * 被认为是在催化剂工作的一套测试,不在whiteList或黑名单上的测试被隐式标记为忽略
    */
   override def whiteList = Seq(
     "add_part_exist",

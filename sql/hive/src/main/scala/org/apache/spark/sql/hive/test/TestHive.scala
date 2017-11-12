@@ -117,7 +117,7 @@ class TestHiveContext(sc: SparkContext) extends HiveContext(sc) {
     * 编译的配置单元的位置*/
   lazy val hiveHome = envVarToFile("HIVE_HOME")
   /** The location of the hive source code.
-    * hive源代码的位置。*/
+    * hive源代码的位置*/
   lazy val hiveDevHome = envVarToFile("HIVE_DEV_HOME")
 
   // Override so we can intercept relative paths and rewrite them to point at hive.
@@ -139,7 +139,7 @@ class TestHiveContext(sc: SparkContext) extends HiveContext(sc) {
       override def numShufflePartitions: Int = getConf(SQLConf.SHUFFLE_PARTITIONS, 5)
       // TODO as in unit test, conf.clear() probably be called, all of the value will be cleared.
       // The super.getConf(SQLConf.DIALECT) is "sql" by default, we need to set it as "hiveql"
-      //默认情况下，super.getConf（SQLConf.DIALECT）是“sql”,我们需要将其设置为“hiveql”
+      //默认情况下,super.getConf(SQLConf.DIALECT)是“sql”,我们需要将其设置为“hiveql”
       override def dialect: String = super.getConf(SQLConf.DIALECT, "hiveql")
       //区分大小写
       override def caseSensitiveAnalysis: Boolean = getConf(SQLConf.CASE_SENSITIVE, false)
@@ -182,6 +182,7 @@ class TestHiveContext(sc: SparkContext) extends HiveContext(sc) {
   }
 
   def getHiveFile(path: String): File = {
+    //
     val stripped = path.replaceAll("""\.\.\/""", "").replace('/', File.separatorChar)
     hiveDevHome
       .map(new File(_, stripped))
@@ -220,7 +221,7 @@ class TestHiveContext(sc: SparkContext) extends HiveContext(sc) {
   }
 
   case class TestTable(name: String, commands: (() => Unit)*)
-
+  //隐式转化
   protected[hive] implicit class SqlCmd(sql: String) {
     def cmd: () => Unit = {
       () => new QueryExecution(sql).stringResult(): Unit

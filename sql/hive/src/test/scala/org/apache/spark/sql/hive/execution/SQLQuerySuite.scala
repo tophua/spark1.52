@@ -67,7 +67,8 @@ class MyDialect extends DefaultParserDialect
  * A collection of hive query tests where we generate the answers ourselves instead of depending on
  * Hive to generate them (in contrast to HiveQuerySuite).  Often this is because the query is
  * valid, but Hive currently cannot execute it.
-  * 通常这是因为查询是有效,但Hive目前无法执行。
+  * Hive查询测试的集合,我们自己生成答案,而不是依赖Hive来生成答案(与HiveQuerySuite相比),
+  * 通常这是因为查询是有效的,但Hive目前不能执行它。
  */
 class SQLQuerySuite extends QueryTest with SQLTestUtils {
   override def _sqlContext: SQLContext = TestHive
@@ -376,7 +377,7 @@ class SQLQuerySuite extends QueryTest with SQLTestUtils {
     //测试方言是否回到HiveQLDialect
     assert(getSQLDialect().getClass === classOf[HiveQLDialect])
   }
-
+  //CTAS与serde
   test("CTAS with serde") {
     sql("CREATE TABLE ctas1 AS SELECT key k, value FROM src ORDER BY k, value").collect()
     sql(
