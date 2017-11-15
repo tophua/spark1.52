@@ -32,8 +32,9 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Literal
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.Row
-
+//Hive 检查 Suite
 class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
+  //测试包装结构检查器对象
   test("Test wrap SettableStructObjectInspector") {
     val udaf = new UDAFPercentile.PercentileLongEvaluator()
     udaf.init()
@@ -145,11 +146,13 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
     (v1, v2) match {
       case (r1: Decimal, r2: Decimal) =>
         // Ignore the Decimal precision
+        //忽略十进制精度
         assert(r1.compare(r2) === 0)
       case (r1: Array[Byte], r2: Array[Byte])
         if r1 != null && r2 != null && r1.length == r2.length =>
         r1.zip(r2).foreach { case (b1, b2) => assert(b1 === b2) }
       // We don't support equality & ordering for map type, so skip it.
+        //我们不支持Map类型的平等和排序,所以请跳过它
       case (r1: MapData, r2: MapData) =>
       case (r1, r2) => assert(r1 === r2)
     }
@@ -161,7 +164,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
     checkDataType(ois.map(inspectorToDataType), dataTypes)
     checkDataType(dataTypes.map(toWritableInspector).map(inspectorToDataType), dataTypes)
   }
-  //包装/拆零，零和writables常数
+  //包装/解包装null,常量null和可写
   test("wrap / unwrap null, constant null and writables") {
     val writableOIs = dataTypes.map(toWritableInspector)
     val nullRow = data.map(d => null)
@@ -192,7 +195,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
       case ((d, oi), dt) => unwrap(wrap(d, oi, dt), oi)
     })
   }
-  //包/解包原始写检查对象
+  //包装/解包装原始写检查器对象
   test("wrap / unwrap primitive writable object inspector") {
     val writableOIs = dataTypes.map(toWritableInspector)
 
@@ -200,7 +203,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
       case ((data, oi), dt) => unwrap(wrap(data, oi, dt), oi)
     })
   }
-  //包/解包原始java对象督察
+  //包装/包装原始java对象检查器
   test("wrap / unwrap primitive java object inspector") {
     val ois = dataTypes.map(toInspector)
 
@@ -208,7 +211,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
       case ((data, oi), dt) => unwrap(wrap(data, oi, dt), oi)
     })
   }
-
+  //包装/解包装结构类型
   test("wrap / unwrap Struct Type") {
     val dt = StructType(dataTypes.zipWithIndex.map {
       case (t, idx) => StructField(s"c_$idx", t)
@@ -220,7 +223,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
       dt)
     checkValue(null, unwrap(wrap(null, toInspector(dt), dt), toInspector(dt)))
   }
-
+  //包装/解包装数组类型
   test("wrap / unwrap Array Type") {
     val dt = ArrayType(dataTypes(0))
 
@@ -233,7 +236,7 @@ class HiveInspectorSuite extends SparkFunSuite with HiveInspectors {
       unwrap(wrap(null, toInspector(Literal.create(d, dt)), dt),
         toInspector(Literal.create(d, dt))))
   }
-
+  //包装/解包装Map类型
   test("wrap / unwrap Map Type") {
     val dt = MapType(dataTypes(0), dataTypes(1))
 
