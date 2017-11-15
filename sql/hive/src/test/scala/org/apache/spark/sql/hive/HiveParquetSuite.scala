@@ -34,7 +34,7 @@ class HiveParquetSuite extends QueryTest with ParquetTest {
       checkAnswer(sql("SELECT LOWER FROM cases"), expected)
     }
   }
-  //
+  //select 在Parquet表查询
   test("SELECT on Parquet table") {
     val data = (1 to 4).map(i => (i, s"val_$i"))
     withParquetTable(data, "t") {
@@ -49,7 +49,7 @@ class HiveParquetSuite extends QueryTest with ParquetTest {
         Seq(Row(true, "val_2"), Row(true, "val_4")))
     }
   }
-//
+//通过saveAsParquetFile将Hive转换为Parquet Table
   test("Converting Hive to Parquet Table via saveAsParquetFile") {
     withTempPath { dir =>
       sql("SELECT * FROM src").write.parquet(dir.getCanonicalPath)
