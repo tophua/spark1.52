@@ -210,7 +210,7 @@ object DecisionTreeExample {
     //进行分类,因为我们将索引他们以后,将标签转换为字符串
     def labelsToStrings(data: DataFrame): DataFrame = {
       algo.toLowerCase match {
-        case "classification" =>//如果算法分类,则添加列字段
+        case "classification" => //如果算法分类,则添加列字段
           //withColumn函数就能实现对dataframe中列的添加,data列取字段"label"数据,强制转换字符号串类型
           data.withColumn("labelString", data("label").cast(StringType))
         case "regression" =>
@@ -284,7 +284,7 @@ object DecisionTreeExample {
     stages += featuresIndexer
     // (3) Learn Decision Tree 学习决策树
     val dt = algo match {
-      case "classification" =>//分类
+      case "classification" => //分类
         new DecisionTreeClassifier()
 	 //训练数据集DataFrame中存储特征数据的列名
           .setFeaturesCol("indexedFeatures")//特征列
@@ -295,7 +295,7 @@ object DecisionTreeExample {
           .setMinInfoGain(params.minInfoGain)//分裂节点时所需最小信息增益
           .setCacheNodeIds(params.cacheNodeIds)//
           .setCheckpointInterval(params.checkpointInterval)//设置检查点间隔(>=1)
-      case "regression" =>//回归
+      case "regression" => //回归
         new DecisionTreeRegressor()
           .setFeaturesCol("indexedFeatures")//特征列
           .setLabelCol(labelColName)//标签列
@@ -325,7 +325,7 @@ object DecisionTreeExample {
     // Get the trained Decision Tree from the fitted PipelineModel
     //从拟合的管道模型中得到训练的决策树
     algo match {
-      case "classification" =>//分类
+      case "classification" => //分类
         //获得管道中训练的最后模型决策树
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeClassificationModel]
         if (treeModel.numNodes < 20) {//节点数
@@ -333,7 +333,7 @@ object DecisionTreeExample {
         } else {
           println(treeModel) // Print model summary. 打印模型综述
         }
-      case "regression" =>//回归
+      case "regression" => //回归
         //获得管道模型中训练的决策树
         val treeModel = pipelineModel.stages.last.asInstanceOf[DecisionTreeRegressionModel]
         if (treeModel.numNodes < 20) {
@@ -346,12 +346,12 @@ object DecisionTreeExample {
 
     // Evaluate model on training, test data 训练评估模型,测试数据
     algo match {
-      case "classification" =>//分类
+      case "classification" => //分类
         println("Training data results:")
         evaluateClassificationModel(pipelineModel, training, labelColName)
         println("Test data results:")
         evaluateClassificationModel(pipelineModel, test, labelColName)
-      case "regression" =>//回归
+      case "regression" => //回归
         println("Training data results:")
         evaluateRegressionModel(pipelineModel, training, labelColName)
         println("Test data results:")
