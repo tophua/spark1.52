@@ -61,8 +61,7 @@ class LogUrlsStandaloneSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
  //Spark master和workers使用的公共DNS（默认空）
-
-  test("verify that log urls reflect SPARK_PUBLIC_DNS (SPARK-6175)") {
+  ignore("verify that log urls reflect SPARK_PUBLIC_DNS (SPARK-6175)") {
     val SPARK_PUBLIC_DNS = "public_dns"
     class MySparkConf extends SparkConf(false) {
       override def getenv(name: String): String = {

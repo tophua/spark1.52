@@ -54,7 +54,7 @@ test("groupByKey without compression") { //没有压缩
   assert(valuesFor2.toList.sorted === List(1))
 }
 
-test("shuffle non-zero block size") {//非零块的大小
+ignore("shuffle non-zero block size") {//非零块的大小
   sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
   val NUM_BLOCKS = 3
 
@@ -82,7 +82,7 @@ test("shuffle non-zero block size") {//非零块的大小
   }
 }
 
-test("shuffle serializer") {//shuffle 序列化
+ignore("shuffle serializer") {//shuffle 序列化
   // Use a local cluster with 2 processes to make sure there are both local and remote blocks
   //使用本地群集2个进程,以确保有两个本地和远程块
   sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
@@ -100,7 +100,7 @@ test("shuffle serializer") {//shuffle 序列化
   assert(c.count === 10)
 }
 
-test("zero sized blocks") {//零大小的块
+ignore("zero sized blocks") {//零大小的块
   // Use a local cluster with 2 processes to make sure there are both local and remote blocks
   //使用本地群集2个进程,以确保有两个本地和远程块
   sc = new SparkContext("local-cluster[2,1,1024]", "test", conf)
@@ -232,7 +232,7 @@ test("subtract mutable pairs") {//返回在RDD中出现,并且不在otherRDD中�
   results(0) should be ((3, 33))
 }
 
-test("sort with Java non serializable class - Kryo") {//用java非序列化类排序
+ignore("sort with Java non serializable class - Kryo") {//用java非序列化类排序
   // Use a local cluster with 2 processes to make sure there are both local and remote blocks
   //使用本地群集与2个进程,以确保有两个本地和远程块
   val myConf = conf.clone().set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")

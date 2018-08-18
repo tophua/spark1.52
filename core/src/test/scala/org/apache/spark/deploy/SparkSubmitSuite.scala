@@ -352,7 +352,7 @@ class SparkSubmitSuite
     mainClass should be ("org.apache.spark.deploy.yarn.Client")
   }
   //启动简单的应用程序与Spark提交
-  test("launch simple application with spark-submit") {
+  ignore("launch simple application with spark-submit") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val args = Seq(
       //stripSuffix去掉<string>字串中结尾的字符
@@ -365,7 +365,7 @@ class SparkSubmitSuite
     runSparkSubmit(args)
   }
   //通过包括Jar
-  test("includes jars passed in through --jars") {
+  ignore("includes jars passed in through --jars") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val jar1 = TestUtils.createJarWithClasses(Seq("SparkSubmitClassA"))
     val jar2 = TestUtils.createJarWithClasses(Seq("SparkSubmitClassB"))
@@ -383,7 +383,7 @@ class SparkSubmitSuite
   }
 
   // SPARK-7287
-  test("includes jars passed in through --packages") {
+  ignore("includes jars passed in through --packages") {
     val unusedJar = TestUtils.createJarWithClasses(Seq.empty)
     val main = MavenCoordinate("my.great.lib", "mylib", "0.1")
     val dep = MavenCoordinate("my.great.dep", "mylib", "0.1")
@@ -539,7 +539,7 @@ class SparkSubmitSuite
       PythonRunner.formatPaths(Utils.resolveURIs(pyFiles)).mkString(","))
   }
   //用户类路径的第一驱动
-  test("user classpath first in driver") {
+  ignore("user classpath first in driver") {
     val systemJar = TestUtils.createJarWithFiles(Map("test.resource" -> "SYSTEM"))
     val userJar = TestUtils.createJarWithFiles(Map("test.resource" -> "USER"))
     val args = Seq(

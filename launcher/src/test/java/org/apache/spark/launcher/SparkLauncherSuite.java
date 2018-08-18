@@ -89,7 +89,7 @@ public class SparkLauncherSuite {
     assertEquals("bar", launcher.builder.conf.get("spark.foo"));
   }
 
-  @Test
+  //@Test
   //测试子进程启动程序
   public void testChildProcLauncher() throws Exception {
     SparkSubmitOptionParser opts = new SparkSubmitOptionParser();

@@ -32,7 +32,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
   //val clusterUrl = "local-cluster[2,1,1024]"
 
   val clusterUrl = "local"
-  test("task throws not serializable exception") {//task任务抛出不能序列化异常
+  ignore("task throws not serializable exception") {//task任务抛出不能序列化异常
     // Ensures that executors do not crash when an exn is not serializable. If executors crash,
     // this test will hang. Correct behavior is that executors don't crash but fail tasks
     // and the scheduler throws a SparkException.
@@ -104,7 +104,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(accum.value === 55)
   }
 
-  test("broadcast variables") {
+  ignore("broadcast variables") {
     //共享变量 ,广播共享变量在每个节点上保持一份read-only的变量
     sc = new SparkContext(clusterUrl, "test")
     val array = new Array[Int](100)
@@ -116,7 +116,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(sum === 0)
   }
 
-  test("repeatedly failing task") {//多次失败的任务
+  ignore("repeatedly failing task") {//多次失败的任务
     sc = new SparkContext(clusterUrl, "test")
     val accum = sc.accumulator(0)
     val thrown = intercept[SparkException] {
@@ -128,7 +128,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(thrown.getMessage.contains("failed 4 times"))
   }
 
-  test("repeatedly failing task that crashes JVM") {//多次失败的任务
+  ignore("repeatedly failing task that crashes JVM") {//多次失败的任务
     // Ensures that if a task fails in a way that crashes the JVM, the job eventually fails rather
     // than hanging due to retrying the failed task infinitely many times (eventually the
     // standalone scheduler will remove the application, causing the job to hang waiting to
@@ -146,7 +146,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
 
-  test("caching") {//缓存
+  ignore("caching") {//缓存
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).cache()
     assert(data.count() === 1000)
@@ -154,7 +154,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
   }
 
-  test("caching on disk") {//缓存到磁盘
+  ignore("caching on disk") {//缓存到磁盘
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.DISK_ONLY)
     assert(data.count() === 1000)
@@ -162,7 +162,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
   }
 
-  test("caching in memory, replicated") {//在内存中缓存,复制
+  ignore("caching in memory, replicated") {//在内存中缓存,复制
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_ONLY_2)
     assert(data.count() === 1000)
@@ -170,7 +170,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
   }
 
-  test("caching in memory, serialized, replicated") {//缓存在内存中,序列化,复制
+  ignore("caching in memory, serialized, replicated") {//缓存在内存中,序列化,复制
  sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_ONLY_SER_2)
     assert(data.count() === 1000)
@@ -178,7 +178,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
   }
 
-  test("caching on disk, replicated") {//复制磁盘上的缓存
+  ignore("caching on disk, replicated") {//复制磁盘上的缓存
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.DISK_ONLY_2)
     assert(data.count() === 1000)
@@ -186,7 +186,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
   }
 
-  test("caching in memory and disk, replicated") {//在内存和磁盘中缓存,复制
+  ignore("caching in memory and disk, replicated") {//在内存和磁盘中缓存,复制
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_AND_DISK_2)
     assert(data.count() === 1000)
@@ -194,7 +194,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 1000)
   }
 
-  test("caching in memory and disk, serialized, replicated") {//在内存和磁盘,缓存序列化,复制
+  ignore("caching in memory and disk, serialized, replicated") {//在内存和磁盘,缓存序列化,复制
     sc = new SparkContext(clusterUrl, "test")
     val data = sc.parallelize(1 to 1000, 10).persist(StorageLevel.MEMORY_AND_DISK_SER_2)
 
@@ -226,7 +226,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
    //没有内存时没有分区的计算而不缓存
-  test("compute without caching when no partitions fit in memory") {
+  ignore("compute without caching when no partitions fit in memory") {
     sc = new SparkContext(clusterUrl, "test")
     // data will be 4 million * 4 bytes = 16 MB in size, but our memoryFraction set the cache
     // to only 50 KB (0.0001 of 512 MB), so no partitions should fit in memory
@@ -237,7 +237,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 4000000)
   }
 
-  test("compute when only some partitions fit in memory") {
+  ignore("compute when only some partitions fit in memory") {
     //Spark将数据存在内存中用于缓存的内存所占用的占安全堆内存（90%）的60%
     //取storage区域(即存储区域)在总内存中所占比重,由参数spark.storage.memoryFraction确定,默认为0.6
     val conf = new SparkConf().set("spark.storage.memoryFraction", "0.01")
@@ -253,13 +253,13 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.count() === 4000000)
   }
   //将环境变量传递给集群
-  test("passing environment variables to cluster") {
+  ignore("passing environment variables to cluster") {
     sc = new SparkContext(clusterUrl, "test", null, Nil, Map("TEST_VAR" -> "TEST_VALUE"))
     val values = sc.parallelize(1 to 2, 2).map(x => System.getenv("TEST_VAR")).collect()
     assert(values.toSeq === Seq("TEST_VALUE", "TEST_VALUE"))
   }
 
-  test("recover from node failures") {//从节点故障恢复
+  ignore("recover from node failures") {//从节点故障恢复
     import DistributedSuite.{markNodeIfIdentity, failOnMarkedIdentity}
     DistributedSuite.amMaster = true
     sc = new SparkContext(clusterUrl, "test")
@@ -269,7 +269,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     assert(data.map(failOnMarkedIdentity).collect.size === 2)
   }
   //在shuffle-map中从重复节点故障恢复
-  test("recover from repeated node failures during shuffle-map") {
+  ignore("recover from repeated node failures during shuffle-map") {
     import DistributedSuite.{markNodeIfIdentity, failOnMarkedIdentity}
     DistributedSuite.amMaster = true
     sc = new SparkContext(clusterUrl, "test")
@@ -281,7 +281,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
   //在shuffle-reduce中从重复节点故障恢复
-  test("recover from repeated node failures during shuffle-reduce") {
+  ignore("recover from repeated node failures during shuffle-reduce") {
     import DistributedSuite.{markNodeIfIdentity, failOnMarkedIdentity}
     DistributedSuite.amMaster = true
     sc = new SparkContext(clusterUrl, "test")
@@ -301,7 +301,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
 //从复制节点故障恢复
-  test("recover from node failures with replication") {
+  ignore("recover from node failures with replication") {
     import DistributedSuite.{markNodeIfIdentity, failOnMarkedIdentity}
     DistributedSuite.amMaster = true
     // Using more than two nodes so we don't have a symmetric communication pattern and might
@@ -326,7 +326,7 @@ class DistributedSuite extends SparkFunSuite with Matchers with LocalSparkContex
     }
   }
 
-  test("unpersist RDDs") {//未持久化RDD
+  ignore("unpersist RDDs") {//未持久化RDD
     DistributedSuite.amMaster = true
     //sc = new SparkContext("local-cluster[3,1,1024]", "test")
     sc = new SparkContext("local[*]", "test")

@@ -797,7 +797,7 @@ class UtilsSuite extends SparkFunSuite with ResetSystemProperties with Logging {
       println("===="+Utils.localHostName)
   }
 
-  test("tryWithSafeFinally") {
+  ignore("tryWithSafeFinally") {
     var e = new Error("Block0")
     val finallyBlockError = new Error("Finally Block")
     var isErrorOccurred = false

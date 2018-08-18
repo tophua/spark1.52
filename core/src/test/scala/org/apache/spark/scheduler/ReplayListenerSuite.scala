@@ -82,7 +82,7 @@ class ReplayListenerSuite extends SparkFunSuite with BeforeAndAfter {
 
   // This assumes the correctness of EventLoggingListener
   //这假定EventLoggingListener的正确性
-  test("End-to-end replay with compression") {//端到端与压缩的重试
+  ignore("End-to-end replay with compression") {//端到端与压缩的重试
     CompressionCodec.ALL_COMPRESSION_CODECS.foreach { codec =>
       testApplicationReplay(Some(codec))
     }
