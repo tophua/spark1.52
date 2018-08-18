@@ -19,13 +19,13 @@ package org.apache.spark.streaming.kafka
 
 import org.apache.spark.Partition
 
-/** @param topic kafka topic name 卡夫卡主题名称
+/** @param topic kafka topic name kafka主题名称
   * @param partition kafka partition id kafka分区id
   * @param fromOffset inclusive starting offset 包括起始偏移量
   * @param untilOffset exclusive ending offset 独占结束偏移
   * @param host preferred kafka host, i.e. the leader at the time the rdd was created
-  *              首选的卡夫卡主机,即在创建rdd时的领导者
-  * @param port preferred kafka host's port 首选卡夫卡主机的端口
+  *              首选的kafka主机,即在创建rdd时的领导者
+  * @param port preferred kafka host's port 首选kafka主机的端口
   */
 private[kafka]
 class KafkaRDDPartition(

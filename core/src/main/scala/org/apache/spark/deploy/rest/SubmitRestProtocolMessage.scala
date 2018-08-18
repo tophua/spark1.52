@@ -160,6 +160,7 @@ private[spark] object SubmitRestProtocolMessage {
    * represents custom user-defined messages
     * 该方法从提供的类确定消息的类型,而不是从操作字段推断消息的类型。 这对反序列化表示自定义用户定义消息的JSON非常有用。
    */
+  //<:泛型类型限定符,表示只限定SubmitRestProtocolMessage子类
   def fromJson[T <: SubmitRestProtocolMessage](json: String, clazz: Class[T]): T = {
     mapper.readValue(json, clazz)
   }

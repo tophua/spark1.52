@@ -35,6 +35,7 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
 
   /**
    * Calculate the sample covariance of two numerical columns of a DataFrame.
+    * 计算DataFrame的两个数字列的样本协方差
    * @param col1 the name of the first column
    * @param col2 the name of the second column
    * @return the covariance of the two columns.
@@ -56,7 +57,8 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
    * Calculates the correlation of two columns of a DataFrame. Currently only supports the Pearson
    * Correlation Coefficient. For Spearman Correlation, consider using RDD methods found in
    * MLlib's Statistics.
-   *
+   * 计算DataFrame的两列的相关性,目前只支持Pearson Correlation Coefficient,
+    * 对于Spearman相关性,请考虑使用MLlib统计信息中的RDD方法
    * @param col1 the name of the column
    * @param col2 the name of the column to calculate the correlation against
    * @return The Pearson Correlation Coefficient as a Double.
@@ -78,7 +80,7 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
 
   /**
    * Calculates the Pearson Correlation Coefficient of two columns of a DataFrame.
-   *
+   * 计算DataFrame的两列的Pearson相关系数
    * @param col1 the name of the column
    * @param col2 the name of the column to calculate the correlation against
    * @return The Pearson Correlation Coefficient as a Double.
@@ -100,12 +102,14 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
    * Computes a pair-wise frequency table of the given columns. Also known as a contingency table.
    * The number of distinct values for each column should be less than 1e4. At most 1e6 non-zero
    * pair frequencies will be returned.
+    * 计算给定列的成对频率表,也称为应急表,每列的不同值的数量应小于1e4,最多1e6非零对频率将被返回。
    * The first column of each row will be the distinct values of `col1` and the column names will
    * be the distinct values of `col2`. The name of the first column will be `$col1_$col2`. Counts
    * will be returned as `Long`s. Pairs that have no occurrences will have zero as their counts.
    * Null elements will be replaced by "null", and back ticks will be dropped from elements if they
    * exist.
-   *
+   *  每行的第一列将是“col1”的不同值,而列名将是“col2”的不同值,第一列的名字是`$ col1_ $ col2`,计数将被返回为“长”。
+    * 没有出现的对将有零作为他们的计数。空元素将被替换为“空”，并且后退滴答将从元素中删除，如果它们存在。
    *
    * @param col1 The name of the first column. Distinct items will make the first item of
    *             each row.
@@ -138,10 +142,12 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
    * frequent element count algorithm described in
    * [[http://dx.doi.org/10.1145/762471.762473, proposed by Karp, Schenker, and Papadimitriou]].
    * The `support` should be greater than 1e-4.
-   *
+   * 找到列的频繁项目,可能有误报,在'support'中描述的使用频繁元素计数算法应该大于1e-4,
+    *
    * This function is meant for exploratory data analysis, as we make no guarantee about the
    * backward compatibility of the schema of the resulting [[DataFrame]].
-   *
+   *这个函数是用于探索性的数据分析,因为我们不保证所得[[DataFrame]]模式的向后兼容性
+    *
    * @param cols the names of the columns to search frequent items in.
    * @param support The minimum frequency for an item to be considered `frequent`. Should be greater
    *                than 1e-4.
@@ -248,6 +254,7 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
    *
    * This function is meant for exploratory data analysis, as we make no guarantee about the
    * backward compatibility of the schema of the resulting [[DataFrame]].
+    * 这个函数是用于探索性的数据分析,因为我们不保证所得[[DataFrame]]模式的向后兼容性,
    *
    * @param cols the names of the columns to search frequent items in.
    * @return A Local DataFrame with the Array of frequent items for each column.
@@ -260,10 +267,12 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
 
   /**
    * Returns a stratified sample without replacement based on the fraction given on each stratum.
-   * @param col column that defines strata
+    * 根据每层上给出的分数返回一个没有更换的分层样本
+   * @param col column that defines strata 定义层的列
    * @param fractions sampling fraction for each stratum. If a stratum is not specified, we treat
    *                  its fraction as zero.
-   * @param seed random seed
+    *                  每个阶层的抽样比例,如果没有规定阶层,我们将其分数视为零
+   * @param seed random seed 随机种子
    * @tparam T stratum type
    * @return a new [[DataFrame]] that represents the stratified sample
    *
@@ -297,9 +306,11 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
 
   /**
    * Returns a stratified sample without replacement based on the fraction given on each stratum.
+    * 根据每层上给出的分数返回一个没有更换的分层样本
    * @param col column that defines strata
    * @param fractions sampling fraction for each stratum. If a stratum is not specified, we treat
    *                  its fraction as zero.
+    *                  每个阶层的抽样比例,如果没有规定阶层,我们将其分数视为零,
    * @param seed random seed
    * @tparam T stratum type
    * @return a new [[DataFrame]] that represents the stratified sample

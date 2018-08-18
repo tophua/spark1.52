@@ -37,7 +37,7 @@ import scala.collection.mutable.Map
 
 import org.apache.spark.SparkFunSuite
 
-
+//客户端分布式缓存管理器套件
 class ClientDistributedCacheManagerSuite extends SparkFunSuite with MockitoSugar {
 
   class MockClientDistributedCacheManager extends ClientDistributedCacheManager {

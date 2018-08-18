@@ -39,6 +39,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Handles registering and unregistering the application with the YARN ResourceManager.
+  * 处理使用YARN ResourceManager注册和取消注册应用程序
  */
 private[spark] class YarnRMClient(args: ApplicationMasterArguments) extends Logging {
 
@@ -48,12 +49,13 @@ private[spark] class YarnRMClient(args: ApplicationMasterArguments) extends Logg
 
   /**
    * Registers the application master with the RM.
-   *
+   * 使用RM注册应用程序主服务器
    * @param conf The Yarn configuration.
    * @param sparkConf The Spark configuration.
    * @param preferredNodeLocations Map with hints about where to allocate containers.
-   * @param uiAddress Address of the SparkUI.
-   * @param uiHistoryAddress Address of the application on the History Server.
+    *                               映射有关分配容器的位置的提示
+   * @param uiAddress Address of the SparkUI.SparkUI的地址
+   * @param uiHistoryAddress Address of the application on the History Server.历史记录服务器上的应用程序的地址
    */
   def register(
       driverUrl: String,
@@ -81,9 +83,10 @@ private[spark] class YarnRMClient(args: ApplicationMasterArguments) extends Logg
 
   /**
    * Unregister the AM. Guaranteed to only be called once.
-   *
-   * @param status The final status of the AM.
+   * 取消注册AM,保证只被调用一次。
+   * @param status The final status of the AM.AM的最终状态
    * @param diagnostics Diagnostics message to include in the final status.
+    *                    诊断消息包含在最终状态中
    */
   def unregister(status: FinalApplicationStatus, diagnostics: String = ""): Unit = synchronized {
     if (registered) {
@@ -91,19 +94,22 @@ private[spark] class YarnRMClient(args: ApplicationMasterArguments) extends Logg
     }
   }
 
-  /** Returns the attempt ID. */
+  /** Returns the attempt ID. 返回尝试ID*/
   def getAttemptId(): ApplicationAttemptId = {
     YarnSparkHadoopUtil.get.getContainerId.getApplicationAttemptId()
   }
 
-  /** Returns the configuration for the AmIpFilter to add to the Spark UI. */
+  /** Returns the configuration for the AmIpFilter to add to the Spark UI.
+    * 返回要添加到Spark UI的AmIpFilter的配置*/
   def getAmIpFilterParams(conf: YarnConfiguration, proxyBase: String): Map[String, String] = {
     // Figure out which scheme Yarn is using. Note the method seems to have been added after 2.2,
     // so not all stable releases have it.
+    //找出Yarn使用的方案,请注意,该方法似乎是在2.2之后添加的,因此并非所有稳定版本都具有该方法。
     val prefix = Try(classOf[WebAppUtils].getMethod("getHttpSchemePrefix", classOf[Configuration])
       .invoke(null, conf).asInstanceOf[String]).getOrElse("http://")
 
     // If running a new enough Yarn, use the HA-aware API for retrieving the RM addresses.
+    //如果运行足够新的Yarn,请使用支持HA的API来检索RM地址
     try {
       val method = classOf[WebAppUtils].getMethod("getProxyHostsAndPortsForAmFilter",
         classOf[Configuration])
@@ -120,7 +126,8 @@ private[spark] class YarnRMClient(args: ApplicationMasterArguments) extends Logg
     }
   }
 
-  /** Returns the maximum number of attempts to register the AM. */
+  /** Returns the maximum number of attempts to register the AM.
+    * 返回注册AM的最大尝试次数*/
   def getMaxRegAttempts(sparkConf: SparkConf, yarnConf: YarnConfiguration): Int = {
     val sparkMaxAttempts = sparkConf.getOption("spark.yarn.maxAppAttempts").map(_.toInt)
     val yarnMaxAttempts = yarnConf.getInt(

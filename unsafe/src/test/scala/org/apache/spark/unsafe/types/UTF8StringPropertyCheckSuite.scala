@@ -28,6 +28,7 @@ import org.apache.spark.unsafe.types.UTF8String.{fromString => toUTF8}
 
 /**
  * This TestSuite utilize ScalaCheck to generate randomized inputs for UTF8String testing.
+  * 此TestSuite利用ScalaCheck为UTF8String测试生成随机输入
  */
 class UTF8StringPropertyCheckSuite extends FunSuite with GeneratorDrivenPropertyChecks with Matchers {
 // scalastyle:on

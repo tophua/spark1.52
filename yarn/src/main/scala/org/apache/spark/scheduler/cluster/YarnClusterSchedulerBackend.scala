@@ -38,6 +38,7 @@ private[spark] class YarnClusterSchedulerBackend(
   override def applicationId(): String =
     // In YARN Cluster mode, the application ID is expected to be set, so log an error if it's
     // not found.
+  //在YARN群集模式下,应该设置应用程序ID,因此如果找不到则记录错误
     sc.getConf.getOption("spark.yarn.app.id").getOrElse {
       logError("Application ID is not set.")
       super.applicationId

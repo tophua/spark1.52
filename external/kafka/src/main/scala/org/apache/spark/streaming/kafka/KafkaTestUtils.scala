@@ -63,17 +63,17 @@ private[kafka] class KafkaTestUtils extends Logging {
   private var zkClient: ZkClient = _
 
   // Kafka broker related configurations
-  //卡夫卡经纪相关配置
+  //kafka broker相关配置
   private val brokerHost = "localhost"
   private var brokerPort = 9092
   private var brokerConf: KafkaConfig = _
 
   // Kafka broker server
-  //卡夫卡broker服务器
+  //Kafka broker服务器
   private var server: KafkaServer = _
 
   // Kafka producer
-  //卡夫卡生产者
+  //Kafka生产者
   private var producer: Producer[String, String] = _
 
   // Flag to test whether the system is correctly started
@@ -111,11 +111,12 @@ private[kafka] class KafkaTestUtils extends Logging {
   }
 
   // Set up the Embedded Kafka server
+  //设置嵌入式Kafka服务器
   private def setupEmbeddedKafkaServer(): Unit = {
     assert(zkReady, "Zookeeper should be set up beforehand")
 
     // Kafka broker startup
-    //卡夫卡broker启动
+    //Kafka broker启动
     Utils.startServiceOnPort(brokerPort, port => {
       brokerPort = port
       brokerConf = new KafkaConfig(brokerConfiguration)

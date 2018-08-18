@@ -45,6 +45,7 @@ import org.apache.spark.util.Utils
 
 /**
  * Contains util methods to interact with Hadoop from spark.
+  * 包含与spark中的Hadoop交互的util方法
  */
 class YarnSparkHadoopUtil extends SparkHadoopUtil {
 
@@ -56,15 +57,19 @@ class YarnSparkHadoopUtil extends SparkHadoopUtil {
 
   // Note that all params which start with SPARK are propagated all the way through, so if in yarn
   // mode, this MUST be set to true.
+  //请注意,所有以SPARK开头的参数都会一直传播,因此如果处于yarn模式,则必须将其设置为true。
   override def isYarnMode(): Boolean = { true }
 
   // Return an appropriate (subclass) of Configuration. Creating a config initializes some Hadoop
   // subsystems. Always create a new config, dont reuse yarnConf.
+  //返回一个适当的(子类)Configuration,创建配置会初始化一些Hadoop子系统,
+  //始终创建一个新配置,不要重复使用yarnConf。
   override def newConfiguration(conf: SparkConf): Configuration =
     new YarnConfiguration(super.newConfiguration(conf))
 
   // Add any user credentials to the job conf which are necessary for running on a secure Hadoop
   // cluster
+  //将任何用户凭据添加到作业conf中,这是在安全的Hadoop集群上运行所必需的
   override def addCredentials(conf: JobConf) {
     val jobCreds = conf.getCredentials()
     jobCreds.mergeAll(UserGroupInformation.getCurrentUser().getCredentials())
@@ -91,6 +96,7 @@ class YarnSparkHadoopUtil extends SparkHadoopUtil {
 
   /**
    * Get the list of namenodes the user may access.
+    * 获取用户可以访问的名称节点列表
    */
   def getNameNodesToAccess(sparkConf: SparkConf): Set[Path] = {
     sparkConf.get("spark.yarn.access.namenodes", "")
@@ -114,6 +120,7 @@ class YarnSparkHadoopUtil extends SparkHadoopUtil {
 
   /**
    * Obtains tokens for the namenodes passed in and adds them to the credentials.
+    * 获取传入的名称节点的标记并将其添加到凭据
    */
   def obtainTokensForNamenodes(
     paths: Set[Path],
@@ -148,7 +155,9 @@ class YarnSparkHadoopUtil extends SparkHadoopUtil {
   /**
    * Obtains token for the Hive metastore, using the current user as the principal.
    * Some exceptions are caught and downgraded to a log message.
+    * 获取Hive Metastore的令牌,使用当前用户作为principal,捕获一些异常并将其降级为日志消息。
    * @param conf hadoop configuration; the Hive configuration will be based on this
+    *             hadoop配置, Hive配置将基于此
    * @return a token, or `None` if there's no need for a token (no metastore URI or principal
    *         in the config), or if a binding exception was caught and downgraded.
    */
@@ -165,7 +174,9 @@ class YarnSparkHadoopUtil extends SparkHadoopUtil {
 
   /**
    * Inner routine to obtains token for the Hive metastore; exceptions are raised on any problem.
+    * 获取Hive Metastore的令牌的内部例程; 任何问题都会引发异常
    * @param conf hadoop configuration; the Hive configuration will be based on this.
+    *             hadoop配置; Hive配置将基于此
    * @param username the username of the principal requesting the delegating token.
    * @return a delegation token
    */
@@ -175,15 +186,16 @@ class YarnSparkHadoopUtil extends SparkHadoopUtil {
 
     // the hive configuration class is a subclass of Hadoop Configuration, so can be cast down
     // to a Configuration and used without reflection
+    //hive配置类是Hadoop配置的子类,因此可以转换为配置并在没有反射的情况下使用
     val hiveConfClass = mirror.classLoader.loadClass("org.apache.hadoop.hive.conf.HiveConf")
     // using the (Configuration, Class) constructor allows the current configuratin to be included
-    // in the hive config.
+    // in the hive config. 在配置单元配置中
     val ctor = hiveConfClass.getDeclaredConstructor(classOf[Configuration],
       classOf[Object].getClass)
     val hiveConf = ctor.newInstance(conf, hiveConfClass).asInstanceOf[Configuration]
     val metastoreUri = hiveConf.getTrimmed("hive.metastore.uris", "")
 
-    // Check for local metastore
+    // Check for local metastore 检查当地的Metastore
     if (metastoreUri.nonEmpty) {
       require(username.nonEmpty, "Username undefined")
       val principalKey = "hive.metastore.kerberos.principal"
@@ -194,6 +206,7 @@ class YarnSparkHadoopUtil extends SparkHadoopUtil {
       val closeCurrent = hiveClass.getMethod("closeCurrent")
       try {
         // get all the instance methods before invoking any
+        //在调用any之前获取所有实例方法
         val getDelegationToken = hiveClass.getMethod("getDelegationToken",
           classOf[String], classOf[String])
         val getHive = hiveClass.getMethod("get", hiveConfClass)
@@ -217,9 +230,10 @@ class YarnSparkHadoopUtil extends SparkHadoopUtil {
 }
 
 object YarnSparkHadoopUtil {
-  // Additional memory overhead
+  // Additional memory overhead 额外的内存开销
   // 10% was arrived at experimentally. In the interest of minimizing memory waste while covering
   // the common cases. Memory overhead tends to grow with container size.
+  //10％是通过实验得出的,为了最大限度地减少内存浪费,同时涵盖常见案例,内存开销随容器大小而增加。
 
   val MEMORY_OVERHEAD_FACTOR = 0.10
   val MEMORY_OVERHEAD_MIN = 384
@@ -242,7 +256,9 @@ object YarnSparkHadoopUtil {
   }
   /**
    * Add a path variable to the given environment map.
+    * 将路径变量添加到给定的环境映射
    * If the map already contains this key, append the value to the existing value instead.
+    * 如果Map已包含此键,请将值附加到现有值。
    */
   def addPathToEnvironment(env: HashMap[String, String], key: String, value: String): Unit = {
     val newValue = if (env.contains(key)) { env(key) + getClassPathSeparator  + value } else value
@@ -251,6 +267,7 @@ object YarnSparkHadoopUtil {
 
   /**
    * Set zero or more environment variables specified by the given input string.
+    * 设置由给定输入字符串指定的零个或多个环境变量
    * The input string is expected to take the form "KEY1=VAL1,KEY2=VAL2,KEY3=VAL3".
    */
   def setEnvFromInputString(env: HashMap[String, String], inputString: String): Unit = {
@@ -268,9 +285,11 @@ object YarnSparkHadoopUtil {
             replace = env.get(variable).get
           } else {
             // if this key is not configured for the child .. get it from the env
+            //如果没有为孩子配置此密钥..从env获取它
             replace = System.getenv(variable)
             if (replace == null) {
             // the env key is note present anywhere .. simply set it
+              //env键是注释出现在任何地方..只需设置它
               replace = ""
             }
           }
@@ -296,7 +315,10 @@ object YarnSparkHadoopUtil {
    * Escapes a string for inclusion in a command line executed by Yarn. Yarn executes commands
    * using `bash -c "command arg1 arg2"` and that means plain quoting doesn't really work. The
    * argument is enclosed in single quotes and some key characters are escaped.
-   *
+    *
+   *转义字符串以包含在Yarn执行的命令行中,Yarn使用`bash -c“命令arg1 arg2”`执行命令,
+    * 这意味着简单引用不起作用,参数用单引号括起来,一些关键字符被转义。
+    *
    * @param arg A single argument.
    * @return Argument quoted for execution via Yarn's generated shell script.
    */
@@ -327,6 +349,7 @@ object YarnSparkHadoopUtil {
 
   /**
    * Expand environment variable using Yarn API.
+    * 使用Yarn API扩展环境变量
    * If environment.$$() is implemented, return the result of it.
    * Otherwise, return the result of environment.$()
    * Note: $$() is added in Hadoop 2.4.
@@ -340,6 +363,7 @@ object YarnSparkHadoopUtil {
 
   /**
    * Get class path separator using Yarn API.
+    * 使用Yarn API获取类路径分隔符
    * If ApplicationConstants.CLASS_PATH_SEPARATOR is implemented, return it.
    * Otherwise, return File.pathSeparator
    * Note: CLASS_PATH_SEPARATOR is added in Hadoop 2.4.
@@ -354,8 +378,9 @@ object YarnSparkHadoopUtil {
 
   /**
    * Getting the initial target number of executors depends on whether dynamic allocation is
-   * enabled.
+   * enabled.获取执行程序的初始目标数取决于是否启用了动态分配。
    * If not using dynamic allocation it gets the number of executors reqeusted by the user.
+    * 如果不使用动态分配,则获取用户需要的执行程序数,
    */
   def getInitialTargetExecutorNumber(
       conf: SparkConf,

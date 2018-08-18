@@ -34,7 +34,7 @@ import kafka.utils.VerifiableProperties
 
 /**
  * A batch-oriented interface for consuming from Kafka.
-  * 一个面向批次的接口,用于从卡夫卡消费
+  * 一个面向批次的接口,用于从Kafka消费
  * Starting and ending offsets are specified in advance,
  * so that you can control exactly-once semantics.
   * 提前指定开始和结束偏移,以便您可以精确地控制一次语义

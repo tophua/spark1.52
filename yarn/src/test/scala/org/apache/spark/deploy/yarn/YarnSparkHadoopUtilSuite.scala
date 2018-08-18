@@ -54,7 +54,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
 
   def bashTest(name: String)(fn: => Unit): Unit =
     if (hasBash) test(name)(fn) else ignore(name)(fn)
-
+  //shell脚本转义
   bashTest("shell script escaping") {
     val scriptFile = File.createTempFile("script.", ".sh", Utils.createTempDir())
     val args = Array("arg1", "${arg.2}", "\"arg3\"", "'arg4'", "$arg5", "\\arg6")
@@ -90,7 +90,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
   test("test getApplicationAclsForYarn acls on") {
 
     // spark acls on, just pick up default user
-    //spark acls，只是拿起默认用户
+    //spark acls，只默认用户
     val sparkConf = new SparkConf()
     sparkConf.set("spark.acls.enable", "true")
 
@@ -255,12 +255,14 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     val hadoopConf = new Configuration()
     hadoopConf.set("hive.metastore.kerberos.principal", "bob")
     // thrift picks up on port 0 and bails out, without trying to talk to endpoint
+    //thrift在端口0上接收并退出,而不尝试与端点通信
     hadoopConf.set("hive.metastore.uris", "http://localhost:0")
     val util = new YarnSparkHadoopUtil
     assertNestedHiveException(intercept[InvocationTargetException] {
       util.obtainTokenForHiveMetastoreInner(hadoopConf, "alice")
     })
     // expect exception trapping code to unwind this hive-side exception
+    //期待异常捕获代码来解除此hive端异常
     assertNestedHiveException(intercept[InvocationTargetException] {
       util.obtainTokenForHiveMetastore(hadoopConf)
     })

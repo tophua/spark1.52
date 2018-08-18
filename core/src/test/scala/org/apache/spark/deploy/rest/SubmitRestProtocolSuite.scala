@@ -77,6 +77,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     response.success = true
     val json = response.toJson
     assertJsonEquals(json, dummyResponseJson)
+    //JSON to CreateSubmissionRequest
     val newResponse = SubmitRestProtocolMessage.fromJson(json, classOf[DummyResponse])
     assert(newResponse.serverSparkVersion === "3.3.4")
     assert(newResponse.serverSparkVersion === "3.3.4")
@@ -125,6 +126,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     // test JSON
     val json = message.toJson
     assertJsonEquals(json, submitDriverRequestJson)
+    //JSON to CreateSubmissionRequest
     val newMessage = SubmitRestProtocolMessage.fromJson(json, classOf[CreateSubmissionRequest])
     assert(newMessage.clientSparkVersion === "1.2.3")
     assert(newMessage.appResource === "honey-walnut-cherry.jar")
@@ -214,7 +216,7 @@ class SubmitRestProtocolSuite extends SparkFunSuite {
     assert(newMessage.serverSparkVersion === "1.2.3")
     assert(newMessage.message === "Field not found in submit request: X")
   }
-
+  //stripMargin默认是“|”作为出来连接符,在多行换行的行头前面加一个“|”符号即可,创建多行字符串三个双引号包围多行字符串
   private val dummyRequestJson =
     """
       |{

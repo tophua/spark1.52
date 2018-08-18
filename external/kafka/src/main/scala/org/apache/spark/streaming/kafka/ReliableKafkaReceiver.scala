@@ -70,7 +70,7 @@ class ReliableKafkaReceiver[
   private def conf = SparkEnv.get.conf
 
   /** High level consumer to connect to Kafka.
-    * 高级消费者连接到卡夫卡 */
+    * 高级消费者连接到Kafka */
   private var consumerConnector: ConsumerConnector = null
 
   /** zkClient to connect to Zookeeper to commit the offsets.

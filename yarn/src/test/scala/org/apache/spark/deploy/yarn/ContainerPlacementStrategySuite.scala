@@ -20,7 +20,7 @@ package org.apache.spark.deploy.yarn
 import org.scalatest.{BeforeAndAfterEach, Matchers}
 
 import org.apache.spark.SparkFunSuite
-
+//容器布局策略测试
 class ContainerPlacementStrategySuite extends SparkFunSuite with Matchers with BeforeAndAfterEach {
 
   private val yarnAllocatorSuite = new YarnAllocatorSuite
@@ -57,8 +57,9 @@ class ContainerPlacementStrategySuite extends SparkFunSuite with Matchers with B
   test("allocate locality preferred containers with enough resource and partially matched " +
     "containers") {
     // 1. Parts of current containers' locations can satisfy the new requirements
+    //1. 当前容器的部分位置可以满足新的要求
     // 2. Current requested container number can fully satisfy the pending tasks.
-
+    //2.当前请求的容器编号可以完全满足待处理的任务
     val handler = createAllocator(3)
     handler.updateResourceRequests()
     handler.handleAllocatedContainers(Array(

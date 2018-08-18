@@ -31,8 +31,8 @@ import org.apache.spark.util.ThreadUtils
 
 /*
  * The following methods are primarily meant to make sure long-running apps like Spark
- * Streaming apps can run without interruption while writing to secure HDFS. The
- * scheduleLoginFromKeytab method is called on the driver when the
+ * Streaming apps can run without interruption while writing to secure HDFS.
+ * 以下方法主要是为了确保长时间运行的应用程序（如Spark Streaming应用程序）在写入安全HDFS时可以不间断地运行 The scheduleLoginFromKeytab method is called on the driver when the
  * CoarseGrainedScheduledBackend starts up. This method wakes up a thread that logs into the KDC
  * once 75% of the renewal interval of the original delegation tokens used for the container
  * has elapsed. It then creates new delegation tokens and writes them to HDFS in a
@@ -82,6 +82,7 @@ private[yarn] class AMDelegationTokenRenewer(
     /**
      * Schedule re-login and creation of new tokens. If tokens have already expired, this method
      * will synchronously create new ones.
+      * 安排重新登录和创建新令牌,如果令牌已经过期,则此方法将同步创建新的令牌
      */
     def scheduleRenewal(runnable: Runnable): Unit = {
       val credentials = UserGroupInformation.getCurrentUser.getCredentials
@@ -97,6 +98,7 @@ private[yarn] class AMDelegationTokenRenewer(
     }
 
     // This thread periodically runs on the driver to update the delegation tokens on HDFS.
+    //该线程定期在驱动程序上运行,以更新HDFS上的委托令牌
     val driverTokenRenewerRunnable =
       new Runnable {
         override def run(): Unit = {
@@ -106,6 +108,7 @@ private[yarn] class AMDelegationTokenRenewer(
           } catch {
             case e: Exception =>
               // Log the error and try to write new tokens back in an hour
+              //记录错误并尝试在一小时内写回新的令牌
               logWarning("Failed to write out new credentials to HDFS, will try again in an " +
                 "hour! If this happens too often tasks will fail.", e)
               delegationTokenRenewer.schedule(this, 1, TimeUnit.HOURS)
@@ -117,11 +120,13 @@ private[yarn] class AMDelegationTokenRenewer(
     // Schedule update of credentials. This handles the case of updating the tokens right now
     // as well, since the renenwal interval will be 0, and the thread will get scheduled
     // immediately.
+    //安排更新凭证,这也处理了现在更新令牌的情况,因为renenwal间隔将为0,并且线程将立即被调度。
     scheduleRenewal(driverTokenRenewerRunnable)
   }
 
   // Keeps only files that are newer than daysToKeepFiles days, and deletes everything else. At
   // least numFilesToKeep files are kept for safety
+  //仅保留比daysToKeepFiles天更新的文件,并删除其他所有文件,为了安全起见,至少保留numFilesToKeep文件
   private def cleanupOldFiles(): Unit = {
     import scala.concurrent.duration._
     try {
@@ -136,6 +141,7 @@ private[yarn] class AMDelegationTokenRenewer(
         .foreach(x => remoteFs.delete(x.getPath, true))
     } catch {
       // Such errors are not fatal, so don't throw. Make sure they are logged though
+      //这样的错误不是致命的,所以不要扔掉,确保他们已登录
       case e: Exception =>
         logWarning("Error while attempting to cleanup old tokens. If you are seeing many such " +
           "warnings there may be an issue with your HDFS cluster.", e)
@@ -176,11 +182,13 @@ private[yarn] class AMDelegationTokenRenewer(
       }
     })
     // Add the temp credentials back to the original ones.
+    //将临时凭证添加回原始凭证
     UserGroupInformation.getCurrentUser.addCredentials(tempCreds)
     val remoteFs = FileSystem.get(freshHadoopConf)
     // If lastCredentialsFileSuffix is 0, then the AM is either started or restarted. If the AM
     // was restarted, then the lastCredentialsFileSuffix might be > 0, so find the newest file
     // and update the lastCredentialsFileSuffix.
+    //如果lastCredentialsFileSuffix为0，则启动或重新启动AM,如果重新启动AM，则lastCredentialsFileSuffix可能> 0,因此找到最新文件并更新lastCredentialsFileSuffix。
     if (lastCredentialsFileSuffix == 0) {
       hadoopUtil.listFilesSorted(
         remoteFs, credentialsPath.getParent,

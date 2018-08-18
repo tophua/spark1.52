@@ -350,6 +350,15 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
           | select nested.attribute, count(*) as cnt
           |  from rows
           |  group by nested.attribute""".stripMargin).show()
+    sql(
+      """
+        |select attribute, sum(cnt)
+        |from (
+        |  select nested.attribute, count(*) as cnt
+        |  from rows
+        |  group by nested.attribute) a
+        |group by attribute
+      """.stripMargin).show()
     checkAnswer(
         //分组嵌套
       sql(
@@ -799,7 +808,7 @@ class SQLQuerySuite extends QueryTest with SharedSQLContext {
       literalInAggTest()
     }
   }
-
+  //聚合操作
   test("aggregates with nulls") {
     /**
      *+----+

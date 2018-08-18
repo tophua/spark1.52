@@ -129,9 +129,9 @@ class AttributeSuite extends SparkFunSuite {
     val metadataWithoutType = Metadata.fromJson(
       """{"name":"size","idx":1,"vals":["small","medium","large"]}""")
     val attr: NominalAttribute = NominalAttribute.defaultAttr
-      .withName(name)
-      .withIndex(index)
-      .withValues(values)
+      .withName(name) //设置列的名称
+      .withIndex(index) //索引
+      .withValues(values) //设置值
     assert(attr.attrType === AttributeType.Nominal)
     assert(!attr.isNumeric)
     assert(attr.isNominal)

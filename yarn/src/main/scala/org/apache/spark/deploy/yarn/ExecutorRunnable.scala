@@ -102,11 +102,14 @@ class ExecutorRunnable(
     // If external shuffle service is enabled, register with the Yarn shuffle service already
     // started on the NodeManager and, if authentication is enabled, provide it with our secret
     // key for fetching shuffle files later
+    //如果启用了外部shuffle服务,请注册已在NodeManager上启动的Yarn shuffle服务,
+    //如果启用了身份验证,则为其提供我们的密钥以便稍后获取随机文件
     if (sparkConf.getBoolean("spark.shuffle.service.enabled", false)) {
       val secretString = securityMgr.getSecretKey()
       val secretBytes =
         if (secretString != null) {
           // This conversion must match how the YarnShuffleService decodes our secret
+          //此转换必须与YarnShuffleService解密我们的秘密的方式相匹配
           JavaUtils.stringToBytes(secretString)
         } else {
           // Authentication is not enabled, so just provide dummy metadata
@@ -117,6 +120,7 @@ class ExecutorRunnable(
     }
 
     // Send the start request to the ContainerManager
+    //将开始请求发送到ContainerManager
     try {
       nmClient.startContainer(container, ctx)
     } catch {
@@ -135,18 +139,21 @@ class ExecutorRunnable(
       appId: String,
       localResources: HashMap[String, LocalResource]): List[String] = {
     // Extra options for the JVM
+    //JVM的额外选项
     val javaOpts = ListBuffer[String]()
 
     // Set the environment variable through a command prefix
     // to append to the existing value of the variable
+    //通过命令前缀设置环境变量以附加到变量的现有值
     var prefixEnv: Option[String] = None
 
-    // Set the JVM memory
+    // Set the JVM memory 设置JVM内存
     val executorMemoryString = executorMemory + "m"
     javaOpts += "-Xms" + executorMemoryString
     javaOpts += "-Xmx" + executorMemoryString
 
     // Set extra Java options for the executor, if defined
+    //如果已定义,请为执行程序设置额外的Java选项
     sys.props.get("spark.executor.extraJavaOptions").foreach { opts =>
       javaOpts ++= Utils.splitCommandString(opts).map(YarnSparkHadoopUtil.escapeForShell)
     }
@@ -170,6 +177,8 @@ class ExecutorRunnable(
     // registers with the Scheduler and transfers the spark configs. Since the Executor backend
     // uses Akka to connect to the scheduler, the akka settings are needed as well as the
     // authentication settings.
+    //某些配置需要在这里传递,因为在Executor向Scheduler注册并传输spark配置之前需要它们,
+    //由于Executor后端使用Akka连接到调度程序,因此需要akka设置以及身份验证设置。
     sparkConf.getAll
       .filter { case (k, v) => SparkConf.isExecutorStartupConf(k) }
       .foreach { case (k, v) => javaOpts += YarnSparkHadoopUtil.escapeForShell(s"-D$k=$v") }
@@ -177,11 +186,15 @@ class ExecutorRunnable(
     // Commenting it out for now - so that people can refer to the properties if required. Remove
     // it once cpuset version is pushed out.
     // The context is, default gc for server class machines end up using all cores to do gc - hence
+    //暂时评论它 - 以便人们可以在需要时参考这些属性,一旦cpuset版本被推出就删除它,上下文是,
+    //服务器类机器的默认gc最终使用所有核心来执行gc - 因此
     // if there are multiple containers in same node, spark gc effects all other containers
     // performance (which can also be other spark containers)
+    //如果同一节点中有多个容器,spark gc会影响所有其他容器的性能（也可能是其他spark容器）
     // Instead of using this, rely on cpusets by YARN to enforce spark behaves 'properly' in
     // multi-tenant environments. Not sure how default java gc behaves if it is limited to subset
     // of cores on a node.
+    //而不是使用它，依靠YARN的cpusets在多租户环境中“正确”强制执行spark行为,如果java gc仅限于节点上的核心子集,则不确定它的默认行为。
     /*
         else {
           // If no java_opts specified, default to using -XX:+CMSIncrementalMode
@@ -217,8 +230,10 @@ class ExecutorRunnable(
       YarnSparkHadoopUtil.expandEnvironment(Environment.JAVA_HOME) + "/bin/java",
       "-server",
       // Kill if OOM is raised - leverage yarn's failure handling to cause rescheduling.
+      //如果OOM被提升则杀死 - 利用yarn的故障处理来重新安排。
       // Not killing the task leaves various aspects of the executor and (to some extent) the jvm in
       // an inconsistent state.
+      //不杀死任务会使执行程序的各个方面和(在某种程度上)jvm处于不一致状态
       // TODO: If the OOM is not recoverable by rescheduling it on different node, then do
       // 'something' to fail job ... akin to blacklisting trackers in mapred ?
       "-XX:OnOutOfMemoryError='kill %p'") ++

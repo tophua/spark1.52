@@ -29,7 +29,7 @@ import org.apache.spark.util.Utils
  * Utility trait for classes that want to log data. Creates a SLF4J logger for the class and allows
  * logging messages at different levels using methods that only evaluate parameters lazily if the
  * log level is enabled.
-  * 要记录数据的类的实用特性,为该类创建SLF4J记录器,并允许使用仅在启用日志级别的情况下,懒惰地评估参数的方法在不同级别记录消息。
+  * 要记录数据类的实用特性,为该类创建SLF4J记录器,并允许使用仅在启用日志级别的情况下,懒惰地评估参数的方法在不同级别记录消息。
  *
  * NOTE: DO NOT USE this class outside of Spark. It is intended as an internal utility.
  *       This will likely be changed or removed in future releases.
@@ -171,6 +171,7 @@ private object Logging {
   try {
     // We use reflection here to handle the case where users remove the
     // slf4j-to-jul bridge order to route their logs to JUL.
+    //我们在这里使用反射来处理用户删除slf4j-to-jul桥接顺序以将其日志路由到JUL的情况
     val bridgeClass = Utils.classForName("org.slf4j.bridge.SLF4JBridgeHandler")
     bridgeClass.getMethod("removeHandlersForRootLogger").invoke(null)
     val installed = bridgeClass.getMethod("isInstalled").invoke(null).asInstanceOf[Boolean]

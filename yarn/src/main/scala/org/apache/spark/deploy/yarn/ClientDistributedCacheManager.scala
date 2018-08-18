@@ -29,10 +29,12 @@ import org.apache.hadoop.yarn.util.{Records, ConverterUtils}
 
 import org.apache.spark.Logging
 
-/** Client side methods to setup the Hadoop distributed cache */
+/** Client side methods to setup the Hadoop distributed cache
+  * 客户端方法来设置Hadoop分布式缓存*/
 private[spark] class ClientDistributedCacheManager() extends Logging {
 
   // Mappings from remote URI to (file status, modification time, visibility)
+  //从远程URI到(文件状态,修改时间,可见性)的映射
   private val distCacheFiles: Map[String, (String, String, String)] =
     LinkedHashMap[String, (String, String, String)]()
   private val distCacheArchives: Map[String, (String, String, String)] =
@@ -45,6 +47,9 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
    * be downloaded into the Hadoop distributed cache for use by this application.
    * Adds the LocalResource to the localResources HashMap passed in and saves
    * the stats of the resources to they can be sent to the executors and verified.
+    * 将资源添加到分布式缓存资源列表中,此列表可以发送到ApplicationMaster以及可能的执行程序,
+    * 以便可以将其下载到Hadoop分布式缓存中以供此应用程序使用,
+    * 将LocalResource添加到传入的localResources HashMap并将资源的统计信息保存到它们可以发送 执行人并经过核实。
    *
    * @param fs FileSystem
    * @param conf Configuration
@@ -90,6 +95,7 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
 
   /**
    * Adds the necessary cache file env variables to the env passed in
+    * 将必要的缓存文件env变量添加到传入的env中
    */
   def setDistFilesEnv(env: Map[String, String]): Unit = {
     val (keys, tupleValues) = distCacheFiles.unzip
@@ -107,6 +113,7 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
 
   /**
    * Adds the necessary cache archive env variables to the env passed in
+    * 将必要的缓存存档env变量添加到传入的env中
    */
   def setDistArchivesEnv(env: Map[String, String]): Unit = {
     val (keys, tupleValues) = distCacheArchives.unzip
@@ -124,6 +131,7 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
 
   /**
    * Returns the local resource visibility depending on the cache file permissions
+    * 根据缓存文件权限返回本地资源可见性
    * @return LocalResourceVisibility
    */
   def getVisibility(
@@ -139,12 +147,15 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
 
   /**
    * Returns a boolean to denote whether a cache file is visible to all (public)
+    * 返回一个布尔值，表示缓存文件是否对所有人(公共)可见
    * @return true if the path in the uri is visible to all, false otherwise
+    *         如果uri中的路径对所有人都可见,则为true,否则为false
    */
   def isPublic(conf: Configuration, uri: URI, statCache: Map[URI, FileStatus]): Boolean = {
     val fs = FileSystem.get(uri, conf)
     val current = new Path(uri.getPath())
     // the leaf level file should be readable by others
+    //叶级文件应该是其他人可读的
     if (!checkPermissionOfOther(fs, current, FsAction.READ, statCache)) {
       return false
     }
@@ -155,7 +166,12 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
    * Returns true if all ancestors of the specified path have the 'execute'
    * permission set for all users (i.e. that other users can traverse
    * the directory hierarchy to the given path)
+    *
+    * 如果指定路径的所有祖先都为所有用户设置了“执行”权限(即其他用户可以遍历目录层次结构到给定路径),
+    * 则返回true
+    *
    * @return true if all ancestors have the 'execute' permission set for all users
+    *         如果所有祖先都为所有用户设置了“执行”权限,则为true
    */
   def ancestorsHaveExecutePermissions(
       fs: FileSystem,
@@ -164,6 +180,7 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
     var current = path
     while (current != null) {
       // the subdirs in the path should have execute permissions for others
+      //路径中的子目录应具有其他人的执行权限
       if (!checkPermissionOfOther(fs, current, FsAction.EXECUTE, statCache)) {
         return false
       }
@@ -175,7 +192,9 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
   /**
    * Checks for a given path whether the Other permissions on it
    * imply the permission in the passed FsAction
+    * 检查给定路径是否对其具有其他权限意味着传递的FsAction中的权限
    * @return true if the path in the uri is visible to all, false otherwise
+    *         如果uri中的路径对所有人都可见,则为true,否则为false
    */
   def checkPermissionOfOther(
       fs: FileSystem,
@@ -192,6 +211,8 @@ private[spark] class ClientDistributedCacheManager() extends Logging {
    * Checks to see if the given uri exists in the cache, if it does it
    * returns the existing FileStatus, otherwise it stats the uri, stores
    * it in the cache, and returns the FileStatus.
+    * 检查缓存中是否存在给定的uri,如果存在则返回现有的FileStatus,
+    * 否则它将统计uri,将其存储在缓存中,并返回FileStatus。
    * @return FileStatus
    */
   def getFileStatus(fs: FileSystem, uri: URI, statCache: Map[URI, FileStatus]): FileStatus = {

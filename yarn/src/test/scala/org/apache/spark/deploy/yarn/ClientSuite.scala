@@ -134,6 +134,7 @@ class ClientSuite extends SparkFunSuite with Matchers with BeforeAndAfterAll {
 
       // The non-local path should be propagated by name only, since it will end up in the app's
       // staging dir.
+      //非本地路径应该仅按名称传播,因为它最终会在应用程序的暂存目录中传播
       val expected = ADDED.split(",")
         .map(p => {
           val uri = new URI(p)

@@ -44,6 +44,7 @@ private[spark] class ExecutorDelegationTokenUpdater(
       ThreadUtils.namedThreadFactory("Delegation Token Refresh Thread"))
 
   // On the executor, this thread wakes up and picks up new tokens from HDFS, if any.
+  //在执行程序中,该线程唤醒并从HDFS中获取新令牌(如果有的话)
   private val executorUpdaterRunnable =
     new Runnable {
       override def run(): Unit = Utils.logUncaughtExceptions(updateCredentialsIfRequired())

@@ -19,5 +19,6 @@ package org.apache.spark.streaming
 
 /**
  * Kafka receiver for spark streaming,
+  * 用于Spark流的Kafka接收器
  */
 package object kafka

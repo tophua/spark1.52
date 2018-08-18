@@ -48,7 +48,7 @@ class MockResolver extends DNSToSwitchMapping {
 
   def reloadCachedMappings(names: JList[String]) {}
 }
-
+//Yarn分配器测试套件
 class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfterEach {
   val conf = new Configuration()
   conf.setClass(
@@ -65,6 +65,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
 
   // Resource returned by YARN.  YARN can give larger containers than requested, so give 6 cores
   // instead of the 5 requested and 3 GB instead of the 2 requested.
+  //YARN返回的资源,YARN可以提供比请求更大的容器,因此提供6个内核而不是5个请求,3GB而不是2个请求。
   val containerResource = Resource.newInstance(3072, 6)
 
   var rmClient: AMRMClient[ContainerRequest] = _
@@ -171,7 +172,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.allocatedHostToContainersMap.get("host2").get should contain (container2.getId)
     handler.allocatedHostToContainersMap.contains("host4") should be (false)
   }
-  //减少总请求的执行人
+  //减少请求的执行者总数
   test("decrease total requested executors") {
     val handler = createAllocator(4)
     handler.updateResourceRequests()
@@ -193,7 +194,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.updateResourceRequests()
     handler.getNumPendingAllocate should be (1)
   }
-  //将所请求的执行人总数减少到目前不足
+  //将请求的执行程序总数减少到低于当前运行的数量
   test("decrease total requested executors to less than currently running") {
     val handler = createAllocator(4)
     handler.updateResourceRequests()
@@ -237,7 +238,7 @@ class YarnAllocatorSuite extends SparkFunSuite with Matchers with BeforeAndAfter
     handler.getNumExecutorsRunning should be (0)
     handler.getNumPendingAllocate should be (1)
   }
-  //遗失执行人从后端移除
+  //从后端删除遗失的执行器
   test("lost executor removed from backend") {
     val handler = createAllocator(4)
     handler.updateResourceRequests()

@@ -23,6 +23,7 @@ import org.apache.spark.deploy.yarn.ApplicationMaster
 /**
  * This is a simple extension to ClusterScheduler - to ensure that appropriate initialization of
  * ApplicationMaster, etc is done
+  * 这是ClusterScheduler的简单扩展 - 确保完成ApplicationMaster的适当初始化等
  */
 private[spark] class YarnClusterScheduler(sc: SparkContext) extends YarnScheduler(sc) {
 

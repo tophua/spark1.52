@@ -72,7 +72,7 @@ private[spark] class HadoopPartition(rddId: Int, idx: Int, @transient s: InputSp
       val is: FileSplit = inputSplit.value.asInstanceOf[FileSplit]
       // map_input_file is deprecated in favor of mapreduce_map_input_file but set both
       // since its not removed yet
-      //map_input_file已被弃用，赞成使用mapreduce_map_input_file，但由于尚未删除
+      //map_input_file已被弃用,赞成使用mapreduce_map_input_file,但由于尚未删除
       Map("map_input_file" -> is.getPath().toString(),
         "mapreduce_map_input_file" -> is.getPath().toString())
     } else {

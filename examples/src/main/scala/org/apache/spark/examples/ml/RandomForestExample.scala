@@ -257,12 +257,12 @@ object RandomForestExample {
     // Evaluate model on training, test data
     //训练评估模型,测试数据
     algo match {
-      case "classification" =>//分类
+      case "classification" => //分类
         println("Training data results:")
         DecisionTreeExample.evaluateClassificationModel(pipelineModel, training, labelColName)
         println("Test data results:")
         DecisionTreeExample.evaluateClassificationModel(pipelineModel, test, labelColName)
-      case "regression" =>//回归
+      case "regression" => //回归
         println("Training data results:")
         DecisionTreeExample.evaluateRegressionModel(pipelineModel, training, labelColName)
         println("Test data results:")

@@ -97,8 +97,9 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
     logConfDir = new File(tempDir, "log4j")
     logConfDir.mkdir()
     System.setProperty("SPARK_YARN_MODE", "true")
-
+    //文件目录位置
     val logConfFile = new File(logConfDir, "log4j.properties")
+    //写文件,LOG4J_CONF文件内容
     Files.write(LOG4J_CONF, logConfFile, UTF_8)
 
     yarnCluster = new MiniYARNCluster(getClass().getName(), 1, 1, 1)
@@ -119,6 +120,7 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
     //
     // This hack loops for a bit waiting for the port to change, and fails the test if it hasn't
     // done so in a timely manner (defined to be 10 seconds).
+    //这个hack循环等待端口改变,如果没有及时(定义为10秒),则测试失败。
     val config = yarnCluster.getConfig()
     val deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10)
     while (config.get(YarnConfiguration.RM_ADDRESS).split(":")(1) == "0") {

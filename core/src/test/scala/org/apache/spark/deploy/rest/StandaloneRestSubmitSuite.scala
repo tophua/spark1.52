@@ -148,7 +148,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(killResponse.submissionId === submissionId)
   }
 
-  test("create then request status") {//创建然后请求状态
+  test("create then request status") {//创建后请求状态
     val masterUrl = startSmartServer()
     val request = constructSubmitRequest(masterUrl)
     val client = new RestSubmissionClient(masterUrl)
@@ -166,7 +166,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     assert(statusResponse.driverState === RUNNING.toString)
   }
 
-  test("create then kill then request status") {//创建然后杀死然后请求状态
+  test("create then kill then request status") {//创建后杀死请求状态
     val masterUrl = startSmartServer()
     val request = constructSubmitRequest(masterUrl)
     val client = new RestSubmissionClient(masterUrl)
@@ -259,6 +259,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     val killRequestPath = s"$httpUrl/$v/submissions/kill"
     val statusRequestPath = s"$httpUrl/$v/submissions/status"
     val goodJson = constructSubmitRequest(masterUrl).toJson
+    println("toJson:"+goodJson)
     val badJson1 = goodJson.replaceAll("action", "fraction") // invalid JSON
     val badJson2 = goodJson.substring(goodJson.size / 2) // malformed JSON
     val notJson = "\"hello, world\""
@@ -536,7 +537,7 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
     conn.setRequestMethod(method)
     //非空
     if (body.nonEmpty) {
-      //URL 连接可用于输入和/或输出。如果打算使用 URL 连接进行输出，则将 DoOutput 标志设置为 true；如果不打算使用，则设置为 false。默认值为 false。
+      //URL连接可用于输入和/或输出,如果打算使用URL连接进行输出,则将DoOutput标志设置为true；如果不打算使用，则设置为 false。默认值为 false。
       conn.setDoOutput(true)
       //数据输出流
       val out = new DataOutputStream(conn.getOutputStream)
@@ -548,9 +549,9 @@ class StandaloneRestSubmitSuite extends SparkFunSuite with BeforeAndAfterEach {
 
   /**
    * Send an HTTP request to the given URL using the method and the body specified.
-   * 发送HTTP请求到指定的URL的使用方法和机构规定
+   * 使用指定的方法和正文将HTTP请求发送到给定的URL
    * Return a 2-tuple of the response message from the server and the response code.
-   * 返回一个元组从服务器响应代码响应消息。
+   * 返回一个元组从服务器响应代码响应消息
    */
   private def sendHttpRequestWithResponse(
       url: String,

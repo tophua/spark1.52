@@ -40,7 +40,7 @@ import org.apache.spark.{SparkContext, SparkException}
 object KafkaUtils {
   /**
    * Create an input stream that pulls messages from Kafka Brokers.
-    * 创建一个从卡夫卡Brokers提取消息的输入流
+    * 创建一个从Kafka Brokers提取消息的输入流
    * @param ssc       StreamingContext object StreamingContext对象
    * @param zkQuorum  Zookeeper quorum (hostname:port,hostname:port,..)Zookeeper quorum（主机名：port，hostname：port，..）
    * @param groupId   The group id for this consumer 该消费者的组ID
@@ -107,7 +107,7 @@ object KafkaUtils {
 
   /**
    * Create an input stream that pulls messages from Kafka Brokers.
-    * 创建一个从卡夫卡Brokers提取消息的输入流
+    * 创建一个从Kafka Brokers提取消息的输入流
    * @param jssc      JavaStreamingContext object JavaStreamingContext对象
    * @param zkQuorum  Zookeeper quorum (hostname:port,hostname:port,..).（主机名：port，hostname：port，..）
    * @param groupId   The group id for this consumer.该消费者的组ID
@@ -128,6 +128,7 @@ object KafkaUtils {
 
   /**
    * Create an input stream that pulls messages from Kafka Brokers.
+    * 创建一个从Kafka Brokers提取消息的输入流
    * @param jssc      JavaStreamingContext object
    * @param keyTypeClass Key type of DStream
    * @param valueTypeClass value type of Dstream

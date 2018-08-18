@@ -60,6 +60,7 @@ private[spark] class ClientArguments(args: Array[String], sparkConf: SparkConf) 
   validateArgs()
 
   // Additional memory to allocate to containers
+  //分配给容器的附加内存
   val amMemoryOverheadConf = if (isClusterMode) driverMemOverheadKey else amMemOverheadKey
   val amMemoryOverhead = sparkConf.getInt(amMemoryOverheadConf,
     math.max((MEMORY_OVERHEAD_FACTOR * amMemory).toInt, MEMORY_OVERHEAD_MIN))
@@ -67,7 +68,8 @@ private[spark] class ClientArguments(args: Array[String], sparkConf: SparkConf) 
   val executorMemoryOverhead = sparkConf.getInt("spark.yarn.executor.memoryOverhead",
     math.max((MEMORY_OVERHEAD_FACTOR * executorMemory).toInt, MEMORY_OVERHEAD_MIN))
 
-  /** Load any default arguments provided through environment variables and Spark properties. */
+  /** Load any default arguments provided through environment variables and Spark properties.
+    * 加载通过环境变量和spark属性提供的任何默认参数*/
   private def loadEnvironmentArgs(): Unit = {
     // For backward compatibility, SPARK_YARN_DIST_{ARCHIVES/FILES} should be resolved to hdfs://,
     // while spark.yarn.dist.{archives/files} should be resolved to file:// (SPARK-2051).
@@ -83,7 +85,9 @@ private[spark] class ClientArguments(args: Array[String], sparkConf: SparkConf) 
       .orElse(sys.env.get("SPARK_YARN_DIST_ARCHIVES"))
       .orNull
     // If dynamic allocation is enabled, start at the configured initial number of executors.
+    //如果启用了动态分配,则从配置的初始执行数开始,
     // Default to minExecutors if no initialExecutors is set.
+    //如果未设置初始化执行器,则默认为MyExcExtuutor
     numExecutors = YarnSparkHadoopUtil.getInitialTargetExecutorNumber(sparkConf, numExecutors)
     principal = Option(principal)
       .orElse(sparkConf.getOption("spark.yarn.principal"))
@@ -95,7 +99,9 @@ private[spark] class ClientArguments(args: Array[String], sparkConf: SparkConf) 
 
   /**
    * Fail fast if any arguments provided are invalid.
+    * 如果提供的任何参数无效,则失败快
    * This is intended to be called only after the provided arguments have been parsed.
+    * 这仅在已提供的参数被解析之后才被调用
    */
   private def validateArgs(): Unit = {
     if (numExecutors < 0 || (!isDynamicAllocationEnabled && numExecutors == 0)) {
