@@ -35,7 +35,7 @@ class PipelineSuite extends SparkFunSuite {
 
   abstract class MyModel extends Model[MyModel]
 
-  test("pipeline") {//管道
+  ignore("pipeline") {//管道
     val estimator0 = mock[Estimator[MyModel]]
     val model0 = mock[MyModel]
     val transformer1 = mock[Transformer]
@@ -85,7 +85,7 @@ class PipelineSuite extends SparkFunSuite {
     assert(output.eq(dataset4))
   }
 
-  test("pipeline with duplicate stages") {//重复阶段管道
+  ignore("pipeline with duplicate stages") {//重复阶段管道
     val estimator = mock[Estimator[MyModel]]
      //PipeLine:将多个DataFrame和Estimator算法串成一个特定的ML Wolkflow
      //一个 Pipeline在结构上会包含一个或多个 PipelineStage,每一个 PipelineStage 都会完成一个任务

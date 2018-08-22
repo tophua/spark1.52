@@ -19,6 +19,7 @@ package org.apache.spark.ml.attribute
 
 /**
  * Keys used to store attributes.
+  * 用于存储属性的键
  */
 private[attribute] object AttributeKeys {
   val ML_ATTR: String = "ml_attr"

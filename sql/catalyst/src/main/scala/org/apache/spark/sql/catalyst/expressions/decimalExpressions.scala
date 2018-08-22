@@ -23,6 +23,7 @@ import org.apache.spark.sql.types._
 
 /**
  * Return the unscaled Long value of a Decimal, assuming it fits in a Long.
+  * 返回十进制的未缩放Long值,假设它适合Long
  * Note: this expression is internal and created only by the optimizer,
  * we don't need to do type check for it.
  */
@@ -41,6 +42,7 @@ case class UnscaledValue(child: Expression) extends UnaryExpression {
 
 /**
  * Create a Decimal from an unscaled Long value.
+  * 从未缩放的Long值创建一个Decimal
  * Note: this expression is internal and created only by the optimizer,
  * we don't need to do type check for it.
  */
@@ -65,6 +67,7 @@ case class MakeDecimal(child: Expression, precision: Int, scale: Int) extends Un
 /**
  * An expression used to wrap the children when promote the precision of DecimalType to avoid
  * promote multiple times.
+  * 用于在提升DecimalType的精度时包装子项以避免多次提升的表达式
  */
 case class PromotePrecision(child: Expression) extends UnaryExpression {
   override def dataType: DataType = child.dataType
@@ -77,6 +80,7 @@ case class PromotePrecision(child: Expression) extends UnaryExpression {
 /**
  * Rounds the decimal to given scale and check whether the decimal can fit in provided precision
  * or not, returns null if not.
+  * 将小数舍入到给定的比例并检查小数是否适合提供的精度,否则返回null。
  */
 case class CheckOverflow(child: Expression, dataType: DecimalType) extends UnaryExpression {
 

@@ -80,6 +80,7 @@ private[spark] object MetadataUtils {
   /**
    * Takes a Vector column and a list of feature names, and returns the corresponding list of
    * feature indices in the column, in order.
+    * 获取向量列和要素名称列表,并按顺序返回列中相应的要素索引列表
    * @param col  Vector column which must have feature names specified via attributes
    * @param names  List of feature names
    */

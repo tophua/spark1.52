@@ -19,6 +19,7 @@ package org.apache.spark.sql.catalyst
 
 /**
  * Identifies a `table` in `database`.  If `database` is not defined, the current database is used.
+  * 在`database`中标识`table`。 如果未定义`database`,则使用当前数据库
  */
 private[sql] case class TableIdentifier(table: String, database: Option[String] = None) {
   def withDatabase(database: String): TableIdentifier = this.copy(database = Some(database))

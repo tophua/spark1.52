@@ -25,6 +25,7 @@ import org.apache.spark.sql.sources.InsertableRelation
 
 /**
  * Inserts the results of `query` in to a relation that extends [[InsertableRelation]].
+  * 将`query`的结果插入到扩展[[InsertableRelation]]的关系中
  */
 private[sql] case class InsertIntoDataSource(
     logicalRelation: LogicalRelation,
@@ -36,10 +37,12 @@ private[sql] case class InsertIntoDataSource(
     val relation = logicalRelation.relation.asInstanceOf[InsertableRelation]
     val data = DataFrame(sqlContext, query)
     // Apply the schema of the existing table to the new data.
+    //将现有表的架构应用于新数据
     val df = sqlContext.internalCreateDataFrame(data.queryExecution.toRdd, logicalRelation.schema)
     relation.insert(df, overwrite)
 
     // Invalidate the cache.
+    //使缓存无效
     sqlContext.cacheManager.invalidateCache(logicalRelation)
 
     Seq.empty[Row]

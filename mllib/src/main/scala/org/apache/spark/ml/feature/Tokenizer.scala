@@ -26,6 +26,7 @@ import org.apache.spark.sql.types.{ArrayType, DataType, StringType}
 /**
  * :: Experimental ::
  * A tokenizer that converts the input string to lowercase and then splits it by white spaces.
+  * 一个标记生成器,它将输入字符串转换为小写,然后用空格分隔它
  *
  * @see [[RegexTokenizer]]
  */
@@ -53,6 +54,8 @@ class Tokenizer(override val uid: String) extends UnaryTransformer[String, Seq[S
  * the text (default) or repeatedly matching the regex (if `gaps` is false).
  * Optional parameters also allow filtering tokens using a minimal length.
  * It returns an array of strings that can be empty.
+  * 基于正则表达式的标记生成器,通过使用提供的正则表达式模式来分割文本（默认）
+  * 或重复匹配正则表达式(如果“gap”为假),则提取标记,可选参数还允许使用最小长度过滤令牌,它返回可以为空的字符串数组
  */
 @Experimental
 class RegexTokenizer(override val uid: String)
@@ -76,6 +79,7 @@ class RegexTokenizer(override val uid: String)
 
   /**
    * Indicates whether regex splits on gaps (true) or matches tokens (false).
+    * 指示正则表达式是否在间隙上拆分(true)或匹配令牌(false)
    * Default: true
    * @group param
    */
@@ -89,6 +93,7 @@ class RegexTokenizer(override val uid: String)
 
   /**
    * Regex pattern used to match delimiters if [[gaps]] is true or tokens if [[gaps]] is false.
+    * 如果[gap]为真,则用于匹配分隔符的正则表达式模式或如果[gap]为假则用于匹配分号
    * Default: `"\\s+"`
    * @group param
    */

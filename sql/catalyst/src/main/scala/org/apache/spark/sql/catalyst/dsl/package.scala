@@ -29,7 +29,7 @@ import org.apache.spark.sql.types._
 
 /**
  * A collection of implicit conversions that create a DSL for constructing catalyst data structures.
- *
+ * 隐式转换的集合,用于创建用于构造催化剂数据结构的DSL
  * {{{
  *  scala> import org.apache.spark.sql.catalyst.dsl.expressions._
  *
@@ -172,59 +172,75 @@ package object dsl {
       def expr: UnresolvedAttribute = attr
       def attr: UnresolvedAttribute = analysis.UnresolvedAttribute(s)
 
-      /** Creates a new AttributeReference of type boolean */
+      /** Creates a new AttributeReference of type boolean
+        * 创建一个类型为boolean的新AttributeReference*/
       def boolean: AttributeReference = AttributeReference(s, BooleanType, nullable = true)()
 
-      /** Creates a new AttributeReference of type byte */
+      /** Creates a new AttributeReference of type byte
+        * 创建一个byte类型的新AttributeReference*/
       def byte: AttributeReference = AttributeReference(s, ByteType, nullable = true)()
 
-      /** Creates a new AttributeReference of type short */
+      /** Creates a new AttributeReference of type short
+        * 创建一个类型为short的新AttributeReference*/
       def short: AttributeReference = AttributeReference(s, ShortType, nullable = true)()
 
-      /** Creates a new AttributeReference of type int */
+      /** Creates a new AttributeReference of type int
+        * 创建一个int类型的新AttributeReference */
       def int: AttributeReference = AttributeReference(s, IntegerType, nullable = true)()
 
-      /** Creates a new AttributeReference of type long */
+      /** Creates a new AttributeReference of type long
+        * 创建long类型的新AttributeReference*/
       def long: AttributeReference = AttributeReference(s, LongType, nullable = true)()
 
-      /** Creates a new AttributeReference of type float */
+      /** Creates a new AttributeReference of type float
+        * 创建一个float类型的新AttributeReference*/
       def float: AttributeReference = AttributeReference(s, FloatType, nullable = true)()
 
-      /** Creates a new AttributeReference of type double */
+      /** Creates a new AttributeReference of type double
+        * 创建一个double类型的新AttributeReference*/
       def double: AttributeReference = AttributeReference(s, DoubleType, nullable = true)()
 
-      /** Creates a new AttributeReference of type string */
+      /** Creates a new AttributeReference of type string
+        * 创建一个类型为string的新AttributeReference */
       def string: AttributeReference = AttributeReference(s, StringType, nullable = true)()
 
-      /** Creates a new AttributeReference of type date */
+      /** Creates a new AttributeReference of type date
+        * 创建一个类型为date的新AttributeReference*/
       def date: AttributeReference = AttributeReference(s, DateType, nullable = true)()
 
-      /** Creates a new AttributeReference of type decimal */
+      /** Creates a new AttributeReference of type decimal
+        * 创建一个十进制类型的新AttributeReference */
       def decimal: AttributeReference =
         AttributeReference(s, DecimalType.SYSTEM_DEFAULT, nullable = true)()
 
-      /** Creates a new AttributeReference of type decimal */
+      /** Creates a new AttributeReference of type decimal
+        * 创建一个十进制类型的新AttributeReference*/
       def decimal(precision: Int, scale: Int): AttributeReference =
         AttributeReference(s, DecimalType(precision, scale), nullable = true)()
 
-      /** Creates a new AttributeReference of type timestamp */
+      /** Creates a new AttributeReference of type timestamp
+        * 创建一个类型为timestamp的新AttributeReference*/
       def timestamp: AttributeReference = AttributeReference(s, TimestampType, nullable = true)()
 
-      /** Creates a new AttributeReference of type binary */
+      /** Creates a new AttributeReference of type binary
+        * 创建一个二进制类型的新AttributeReference*/
       def binary: AttributeReference = AttributeReference(s, BinaryType, nullable = true)()
 
-      /** Creates a new AttributeReference of type array */
+      /** Creates a new AttributeReference of type array
+        * 创建一个类型为array的新AttributeReference*/
       def array(dataType: DataType): AttributeReference =
         AttributeReference(s, ArrayType(dataType), nullable = true)()
 
-      /** Creates a new AttributeReference of type map */
+      /** Creates a new AttributeReference of type map
+        * 创建一个类型为map的新AttributeReference*/
       def map(keyType: DataType, valueType: DataType): AttributeReference =
         map(MapType(keyType, valueType))
 
       def map(mapType: MapType): AttributeReference =
         AttributeReference(s, mapType, nullable = true)()
 
-      /** Creates a new AttributeReference of type struct */
+      /** Creates a new AttributeReference of type struct
+        * 创建一个struct类型的新AttributeReference*/
       def struct(fields: StructField*): AttributeReference = struct(StructType(fields))
       def struct(structType: StructType): AttributeReference =
         AttributeReference(s, structType, nullable = true)()

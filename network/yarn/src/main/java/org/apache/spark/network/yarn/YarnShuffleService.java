@@ -94,8 +94,10 @@ public class YarnShuffleService extends AuxiliaryService {
 
   /**
    * Return whether authentication is enabled as specified by the configuration.
+   * 返回是否按配置指定启用身份验证
    * If so, fetch requests will fail unless the appropriate authentication secret
    * for the application is provided.
+   * 如果是这样,除非提供了应用程序的相应身份验证机密,否则获取请求将失败
    */
   private boolean isAuthenticationEnabled() {
     return secretManager != null;

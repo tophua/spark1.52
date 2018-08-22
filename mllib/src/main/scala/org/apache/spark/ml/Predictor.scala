@@ -30,12 +30,14 @@ import org.apache.spark.sql.{DataFrame, Row}
 
 /**
  * (private[ml])  Trait for parameters for prediction (regression and classification).
+  * 私有[ml]预测参数的特征（回归和分类）
  */
 private[ml] trait PredictorParams extends Params
   with HasLabelCol with HasFeaturesCol with HasPredictionCol {
 
   /**
    * Validates and transforms the input schema with the provided param map.
+    * 使用提供的参数映射验证和转换输入模式
    * @param schema input schema
    * @param fitting whether this is in fitting
    * @param featuresDataType  SQL DataType for FeaturesType.
@@ -59,6 +61,7 @@ private[ml] trait PredictorParams extends Params
 /**
  * :: DeveloperApi ::
  * Abstraction for prediction problems (regression and classification).
+  * 预测问题的抽象（回归和分类）
  *
  * @tparam FeaturesType  Type of features.
  *                       E.g., [[org.apache.spark.mllib.linalg.VectorUDT]] for vector features.
@@ -94,8 +97,10 @@ abstract class Predictor[
 
   /**
    * Train a model using the given dataset and parameters.
+    * 使用给定的数据集和参数训练模型
    * Developers can implement this instead of [[fit()]] to avoid dealing with schema validation
    * and copying parameters into the model.
+    * 开发人员可以实现此而不是[[fit()]]来避免处理模式验证并将参数复制到模型中
    *
    * @param dataset  Training dataset
    * @return  Fitted model
@@ -104,11 +109,13 @@ abstract class Predictor[
 
   /**
    * Returns the SQL DataType corresponding to the FeaturesType type parameter.
-   *
+   * 返回与Feature Type类型参数对应的SQL数据类型
    * This is used by [[validateAndTransformSchema()]].
    * This workaround is needed since SQL has different APIs for Scala and Java.
+    * 由于SQL具有针对Scala和Java的不同API,因此需要此解决方法
    *
    * The default value is VectorUDT, but it may be overridden if FeaturesType is not Vector.
+    * 默认值为VectorUDT,但如果FeaturesType不是Vector,则可以覆盖它
    */
   private[ml] def featuresDataType: DataType = new VectorUDT
 
@@ -119,6 +126,7 @@ abstract class Predictor[
   /**
    * Extract [[labelCol]] and [[featuresCol]] from the given dataset,
    * and put it in an RDD with strong types.
+    * 从给定数据集中提取[[labelCol]]和[[featuresCol]],并将其放在具有强类型的RDD中
    */
   protected def extractLabeledPoints(dataset: DataFrame): RDD[LabeledPoint] = {
     dataset.select($(labelCol), $(featuresCol))
@@ -129,7 +137,7 @@ abstract class Predictor[
 /**
  * :: DeveloperApi ::
  * Abstraction for a model for prediction tasks (regression and classification).
- *
+ * 用于预测任务的模型的抽象(回归和分类)
  * @tparam FeaturesType  Type of features.
  *                       E.g., [[org.apache.spark.mllib.linalg.VectorUDT]] for vector features.
  * @tparam M  Specialization of [[PredictionModel]].  If you subclass this type, use this type
@@ -147,10 +155,10 @@ abstract class PredictionModel[FeaturesType, M <: PredictionModel[FeaturesType, 
 
   /**
    * Returns the SQL DataType corresponding to the FeaturesType type parameter.
-   *
+   * 返回与Feature Type类型参数对应的SQL数据类型
    * This is used by [[validateAndTransformSchema()]].
    * This workaround is needed since SQL has different APIs for Scala and Java.
-   *
+   * 由于SQL具有针对Scala和Java的不同API，因此需要此解决方法
    * The default value is VectorUDT, but it may be overridden if FeaturesType is not Vector.
    */
   protected def featuresDataType: DataType = new VectorUDT
@@ -162,7 +170,7 @@ abstract class PredictionModel[FeaturesType, M <: PredictionModel[FeaturesType, 
   /**
    * Transforms dataset by reading from [[featuresCol]], calling [[predict()]], and storing
    * the predictions as a new column [[predictionCol]].
-   *
+   * 通过读取[[featuresCol]],调用[[predict()]]并将预测存储为新列[[predictionCol]]来转换数据集
    * @param dataset input dataset
    * @return transformed dataset with [[predictionCol]] of type [[Double]]
    */

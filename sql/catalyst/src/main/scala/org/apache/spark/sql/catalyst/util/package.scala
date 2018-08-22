@@ -23,7 +23,8 @@ import org.apache.spark.util.Utils
 
 package object util {
 
-  /** Silences output to stderr or stdout for the duration of f */
+  /** Silences output to stderr or stdout for the duration of f
+    * 在f的持续时间内,输出到stderr或stdout*/
   def quietly[A](f: => A): A = {
     val origErr = System.err
     val origOut = System.out

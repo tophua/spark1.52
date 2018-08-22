@@ -25,10 +25,13 @@ import org.apache.spark.sql.hive.execution.{AddJar, AddFile, HiveNativeCommand}
 
 /**
  * A parser that recognizes all HiveQL constructs together with Spark SQL specific extensions.
+  * 一种解析器,可识别所有HiveQL构造以及Spark SQL特定扩展
  */
 private[hive] class ExtendedHiveQlParser extends AbstractSparkSQLParser {
   // Keyword is a convention with AbstractSparkSQLParser, which will scan all of the `Keyword`
+  //关键字是AbstractSparkSQLParser的约定,它将扫描所有的“关键字”
   // properties via reflection the class in runtime for constructing the SqlLexical object
+  //属性通过反射运行时用于构造SqlLexical对象的类
   protected val ADD = Keyword("ADD")
   protected val DFS = Keyword("DFS")
   protected val FILE = Keyword("FILE")

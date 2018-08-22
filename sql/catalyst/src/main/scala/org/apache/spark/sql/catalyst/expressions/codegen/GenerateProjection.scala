@@ -23,6 +23,7 @@ import org.apache.spark.sql.types._
 
 /**
  * Java can not access Projection (in package object)
+  * Java无法访问Projection（在包对象中
  */
 abstract class BaseProjection extends Projection {}
 

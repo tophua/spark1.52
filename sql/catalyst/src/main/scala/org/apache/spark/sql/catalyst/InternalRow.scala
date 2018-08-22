@@ -23,26 +23,31 @@ import org.apache.spark.sql.types.{DataType, StructType}
 /**
  * An abstract class for row used internal in Spark SQL, which only contain the columns as
  * internal types.
+  * Spark SQL中内部使用的行的抽象类,仅包含列作为内部类型
  */
 abstract class InternalRow extends SpecializedGetters with Serializable {
 
   def numFields: Int
 
   // This is only use for test and will throw a null pointer exception if the position is null.
+  //这仅用于测试，如果位置为null,则抛出空指针异常
   def getString(ordinal: Int): String = getUTF8String(ordinal).toString
 
   /**
    * Make a copy of the current [[InternalRow]] object.
+    * 制作当前[[InternalRow]]对象的副本
    */
   def copy(): InternalRow
 
-  /** Returns true if there are any NULL values in this row. */
+  /** Returns true if there are any NULL values in this row.
+    * 如果此行中有任何NULL值,则返回true*/
   def anyNull: Boolean
 
   /* ---------------------- utility methods for Scala ---------------------- */
 
   /**
    * Return a Scala Seq representing the row. Elements are placed in the same order in the Seq.
+    * 返回表示行的Scala Seq,元素在Seq中以相同的顺序放置
    */
   def toSeq(fieldTypes: Seq[DataType]): Seq[Any] = {
     val len = numFields
@@ -63,11 +68,13 @@ abstract class InternalRow extends SpecializedGetters with Serializable {
 object InternalRow {
   /**
    * This method can be used to construct a [[InternalRow]] with the given values.
+    * 此方法可用于构造具有给定值的[[InternalRow]]
    */
   def apply(values: Any*): InternalRow = new GenericInternalRow(values.toArray)
 
   /**
    * This method can be used to construct a [[InternalRow]] from a [[Seq]] of values.
+    * 该方法可用于从[[Seq]]值构造[[InternalRow]]
    */
   def fromSeq(values: Seq[Any]): InternalRow = new GenericInternalRow(values.toArray)
 

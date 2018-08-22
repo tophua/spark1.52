@@ -31,6 +31,7 @@ private[ml] trait ValidatorParams extends Params {
 
   /**
    * param for the estimator to be validated
+    * 验证估算器的参数
    * @group param
    */
   val estimator: Param[Estimator[_]] = new Param(this, "estimator", "estimator for selection")
@@ -40,6 +41,7 @@ private[ml] trait ValidatorParams extends Params {
 
   /**
    * param for estimator param maps
+    * 估算器参数映射的参数
    * @group param
    */
   val estimatorParamMaps: Param[Array[ParamMap]] =
@@ -50,6 +52,7 @@ private[ml] trait ValidatorParams extends Params {
 
   /**
    * param for the evaluator used to select hyper-parameters that maximize the validated metric
+    * 用于评估器的参数用于选择最大化经验证的度量的超参数
    * @group param
    */
   val evaluator: Param[Evaluator] = new Param(this, "evaluator",

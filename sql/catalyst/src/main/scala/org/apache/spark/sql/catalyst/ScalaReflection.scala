@@ -25,12 +25,15 @@ import org.apache.spark.sql.types._
 
 /**
  * A default version of ScalaReflection that uses the runtime universe.
+  * 使用运行时Universe的ScalaReflection的默认版本
  */
 object ScalaReflection extends ScalaReflection {
   val universe: scala.reflect.runtime.universe.type = scala.reflect.runtime.universe
   // Since we are creating a runtime mirror usign the class loader of current thread,
   // we need to use def at here. So, every time we call mirror, it is using the
   // class loader of the current thread.
+  //由于我们使用当前线程的类加载器创建运行时镜像,因此我们需要在此处使用def。
+  // 所以,每次调用mirror时,它都使用当前线程的类加载器。
   override def mirror: universe.Mirror =
   //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     universe.runtimeMirror(Thread.currentThread().getContextClassLoader)
@@ -38,12 +41,14 @@ object ScalaReflection extends ScalaReflection {
 
 /**
  * Support for generating catalyst schemas for scala objects.
+  * 支持为scala对象生成催化剂模式
  */
 trait ScalaReflection {
   /** The universe we work in (runtime or macro) */
   val universe: scala.reflect.api.Universe
 
-  /** The mirror used to access types in the universe */
+  /** The mirror used to access types in the universe
+    * 镜像用于访问Universe中的类型 */
   def mirror: universe.Mirror
 
   import universe._
@@ -54,29 +59,35 @@ trait ScalaReflection {
 
   case class Schema(dataType: DataType, nullable: Boolean)
 
-  /** Returns a Sequence of attributes for the given case class type. */
+  /** Returns a Sequence of attributes for the given case class type.
+    * 返回给定案例类类型的属性序列 */
   def attributesFor[T: TypeTag]: Seq[Attribute] = schemaFor[T] match {
     case Schema(s: StructType, _) =>
       s.toAttributes
   }
 
-  /** Returns a catalyst DataType and its nullability for the given Scala Type using reflection. */
+  /** Returns a catalyst DataType and its nullability for the given Scala Type using reflection.
+    * 使用反射返回给定Scala类型的催化剂DataType及其可为空性*/
   def schemaFor[T: TypeTag]: Schema =
     ScalaReflectionLock.synchronized { schemaFor(localTypeOf[T]) }
 
   /**
    * Return the Scala Type for `T` in the current classloader mirror.
+    * 在当前类加载器镜像中返回“T”的Scala类型
    *
    * Use this method instead of the convenience method `universe.typeOf`, which
    * assumes that all types can be found in the classloader that loaded scala-reflect classes.
    * That's not necessarily the case when running using Eclipse launchers or even
    * Sbt console or test (without `fork := true`).
+    * 使用此方法代替方便方法`universe.typeOf`,它假定所有类型都可以在加载了scala-reflect类的类加载器中找到,
+    * 使用Eclipse启动程序甚至Sbt控制台或测试（没有`fork：= true`）运行时不一定是这种情况。
    *
    * @see SPARK-5281
    */
   private def localTypeOf[T: TypeTag]: `Type` = typeTag[T].in(mirror).tpe
 
-  /** Returns a catalyst DataType and its nullability for the given Scala Type using reflection. */
+  /** Returns a catalyst DataType and its nullability for the given Scala Type using reflection.
+    * 使用反射返回给定Scala类型的催化剂DataType及其可为空性 */
   def schemaFor(tpe: `Type`): Schema = ScalaReflectionLock.synchronized {
     val className: String = tpe.erasure.typeSymbol.asClass.fullName
     tpe match {
@@ -157,6 +168,7 @@ trait ScalaReflection {
 
   def typeOfObject: PartialFunction[Any, DataType] = {
     // The data type can be determined without ambiguity.
+    //可以毫不含糊地确定数据类型
     case obj: Boolean => BooleanType
     case obj: Array[Byte] => BinaryType
     case obj: String => StringType
@@ -183,6 +195,7 @@ trait ScalaReflection {
     /**
      * Implicitly added to Sequences of case class objects.  Returns a catalyst logical relation
      * for the the data in the sequence.
+      * 隐式添加到案例类对象的序列中,返回序列中数据的催化剂逻辑关系
      */
     def asRelation: LocalRelation = {
       val output = attributesFor[A]

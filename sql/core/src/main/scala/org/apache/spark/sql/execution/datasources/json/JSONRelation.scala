@@ -66,7 +66,8 @@ private[sql] class JSONRelation(
     override val paths: Array[String] = Array.empty[String])(@transient val sqlContext: SQLContext)
   extends HadoopFsRelation(maybePartitionSpec) {
 
-  /** Constraints to be imposed on schema to be stored. */
+  /** Constraints to be imposed on schema to be stored.
+    * 对要存储的模式施加约束*/
   private def checkConstraints(schema: StructType): Unit = {
     if (schema.fieldNames.length != schema.fieldNames.distinct.length) {
       val duplicateColumns = schema.fieldNames.groupBy(identity).collect {

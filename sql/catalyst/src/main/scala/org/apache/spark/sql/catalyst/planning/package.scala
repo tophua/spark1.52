@@ -19,5 +19,6 @@ package org.apache.spark.sql.catalyst
 
 /**
  * Contains classes for enumerating possible physical plans for a given logical query plan.
+  * 包含用于枚举给定逻辑查询计划的可能物理计划的类
  */
 package object planning

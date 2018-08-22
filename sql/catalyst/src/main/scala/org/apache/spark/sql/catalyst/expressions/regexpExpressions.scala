@@ -36,7 +36,7 @@ trait StringRegexExpression extends ImplicitCastInputTypes {
   override def dataType: DataType = BooleanType
   override def inputTypes: Seq[DataType] = Seq(StringType, StringType)
 
-  // try cache the pattern for Literal
+  // try cache the pattern for Literal 尝试缓存Literal的模式
   private lazy val cache: Pattern = right match {
     case x @ Literal(value: String, StringType) => compile(value)
     case _ => null
@@ -46,6 +46,7 @@ trait StringRegexExpression extends ImplicitCastInputTypes {
     null
   } else {
     // Let it raise exception if couldn't compile the regex string
+    //如果无法编译正则表达式字符串,请引发异常
     Pattern.compile(escape(str))
   }
 
@@ -64,6 +65,7 @@ trait StringRegexExpression extends ImplicitCastInputTypes {
 
 /**
  * Simple RegEx pattern matching function
+  * 简单的RegEx模式匹配功能
  */
 case class Like(left: Expression, right: Expression)
   extends BinaryExpression with StringRegexExpression with CodegenFallback {
@@ -167,6 +169,7 @@ case class RLike(left: Expression, right: Expression)
 
 /**
  * Splits str around pat (pattern is a regular expression).
+  * plits str around pat(pattern是一个正则表达式)
  */
 case class StringSplit(str: Expression, pattern: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -194,6 +197,7 @@ case class StringSplit(str: Expression, pattern: Expression)
 
 /**
  * Replace all substrings of str that match regexp with rep.
+  * 将与regexp匹配的str的所有子字符串替换为rep
  *
  * NOTE: this expression is not THREAD-SAFE, as it has some internal mutable status.
  */
@@ -201,10 +205,13 @@ case class RegExpReplace(subject: Expression, regexp: Expression, rep: Expressio
   extends TernaryExpression with ImplicitCastInputTypes {
 
   // last regex in string, we will update the pattern iff regexp value changed.
+  //在字符串的最后一个正则表达式中,我们将更新正则表达式的模式更改
   @transient private var lastRegex: UTF8String = _
   // last regex pattern, we cache it for performance concern
+  //最后一个正则表达式模式,我们缓存它以解决性能问题
   @transient private var pattern: Pattern = _
   // last replacement string, we don't want to convert a UTF8String => java.langString every time.
+  //最后一个替换字符串,我们不希望每次都转换UTF8String => java.langString
   @transient private var lastReplacement: String = _
   @transient private var lastReplacementInUTF8: UTF8String = _
   // result buffer write by Matcher
@@ -285,6 +292,7 @@ case class RegExpReplace(subject: Expression, regexp: Expression, rep: Expressio
 
 /**
  * Extract a specific(idx) group identified by a Java regex.
+  * 提取由Java正则表达式标识的特定(idx)组
  *
  * NOTE: this expression is not THREAD-SAFE, as it has some internal mutable status.
  */
@@ -293,8 +301,10 @@ case class RegExpExtract(subject: Expression, regexp: Expression, idx: Expressio
   def this(s: Expression, r: Expression) = this(s, r, Literal(1))
 
   // last regex in string, we will update the pattern iff regexp value changed.
+  //在字符串的最后一个正则表达式中,我们将更新正则表达式的模式更改
   @transient private var lastRegex: UTF8String = _
   // last regex pattern, we cache it for performance concern
+  //最后一个正则表达式模式,我们缓存它以解决性能问题
   @transient private var pattern: Pattern = _
 
   override def nullSafeEval(s: Any, p: Any, r: Any): Any = {

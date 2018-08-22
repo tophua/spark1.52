@@ -51,6 +51,7 @@ object RDDConversions {
 
   /**
    * Convert the objects inside Row into the types Catalyst expected.
+    * 将Row内的对象转换为预期的Catalyst类型
    */
   def rowToRowRdd(data: RDD[Row], outputTypes: Seq[DataType]): RDD[InternalRow] = {
     data.mapPartitions { iterator =>
@@ -70,7 +71,8 @@ object RDDConversions {
   }
 }
 
-/** Logical plan node for scanning data from an RDD. */
+/** Logical plan node for scanning data from an RDD.
+  * 用于扫描RDD数据的逻辑计划节点*/
 private[sql] case class LogicalRDD(
     output: Seq[Attribute],
     rdd: RDD[InternalRow])(sqlContext: SQLContext)
@@ -93,7 +95,8 @@ private[sql] case class LogicalRDD(
   )
 }
 
-/** Physical plan node for scanning data from an RDD. */
+/** Physical plan node for scanning data from an RDD.
+  * 用于扫描来自RDD的数据的物理计划节点 */
 private[sql] case class PhysicalRDD(
     output: Seq[Attribute],
     rdd: RDD[InternalRow],
@@ -113,7 +116,8 @@ private[sql] object PhysicalRDD {
   }
 }
 
-/** Logical plan node for scanning data from a local collection. */
+/** Logical plan node for scanning data from a local collection.
+  * 用于扫描本地集合中的数据的逻辑计划节点*/
 private[sql]
 case class LogicalLocalTable(output: Seq[Attribute], rows: Seq[InternalRow])(sqlContext: SQLContext)
    extends LogicalPlan with MultiInstanceRelation {

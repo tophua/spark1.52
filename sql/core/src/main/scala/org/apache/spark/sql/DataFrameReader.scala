@@ -36,6 +36,8 @@ import org.apache.spark.{Logging, Partition}
  * :: Experimental ::
  * Interface used to load a [[DataFrame]] from external storage systems (e.g. file systems,
  * key-value stores, etc). Use [[SQLContext.read]] to access this.
+  *
+  * 用于从外部存储系统(例如文件系统,键值存储等)加载[[DataFrame]]的接口, 使用[[SQLContext.read]]访问它。
  *
  * @since 1.4.0
  */
@@ -44,6 +46,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
 
   /**
    * Specifies the input data source format.
+    * 指定输入数据源格式
    *
    * @since 1.4.0
    */
@@ -56,6 +59,9 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
    * Specifies the input schema. Some data sources (e.g. JSON) can infer the input schema
    * automatically from data. By specifying the schema here, the underlying data source can
    * skip the schema inference step, and thus speed up data loading.
+    *
+    * 指定输入架构,某些数据源(例如JSON)可以根据数据自动推断输入模式,
+    * 通过在此处指定模式,基础数据源可以跳过模式推断步骤,从而加速数据加载
    *
    * @since 1.4.0
    */
@@ -66,6 +72,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
 
   /**
    * Adds an input option for the underlying data source.
+    * 为基础数据源添加输入选项
    *
    * @since 1.4.0
    */
@@ -76,6 +83,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
 
   /**
    * (Scala-specific) Adds input options for the underlying data source.
+    * （特定于Scala）为基础数据源添加输入选项
    *
    * @since 1.4.0
    */
@@ -86,6 +94,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
 
   /**
    * Adds input options for the underlying data source.
+    * 添加基础数据源的输入选项
    *
    * @since 1.4.0
    */
@@ -97,6 +106,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
   /**
    * Loads input in as a [[DataFrame]], for data sources that require a path (e.g. data backed by
    * a local or distributed file system).
+    * 加载作为[[DataFrame]]的输入,用于需要路径的数据源(例如,由本地或分布式文件系统支持的数据)
    *
    * @since 1.4.0
    */
@@ -107,6 +117,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
   /**
    * Loads input in as a [[DataFrame]], for data sources that don't require a path (e.g. external
    * key-value stores).
+    * 对于不需要路径的数据源(例如外部键值存储),将输入加载为[[DataFrame]]。
    *
    * @since 1.4.0
    */
@@ -123,6 +134,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
   /**
    * Construct a [[DataFrame]] representing the database table accessible via JDBC URL
    * url named table and connection properties.
+    * 构造一个[[DataFrame]],表示可通过名为table和connection属性的JDBC URL url访问的数据库表。
    *
    * @since 1.4.0
    */
@@ -135,6 +147,9 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
    * url named table. Partitions of the table will be retrieved in parallel based on the parameters
    * passed to this function.
    *
+    * 构造一个[[DataFrame]]，表示可通过名为table的JDBC URL url访问的数据库表,
+    * 将根据传递给此函数的参数并行检索表的分区。
+    *
    * Don't create too many partitions in parallel on a large cluster; otherwise Spark might crash
    * your external database systems.
    *
@@ -169,6 +184,10 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
    * url named table using connection properties. The `predicates` parameter gives a list
    * expressions suitable for inclusion in WHERE clauses; each one defines one partition
    * of the [[DataFrame]].
+    *
+    * 构造一个[[DataFrame]],表示可以使用连接属性通过名为table的JDBC URL url访问的数据库表。
+    * `predicates`参数给出了一个适合包含在WHERE子句中的列表表达式;
+    * 每一个都定义了[[DataFrame]]的一个分区。
    *
    * Don't create too many partitions in parallel on a large cluster; otherwise Spark might crash
    * your external database systems.
@@ -209,9 +228,12 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
 
   /**
    * Loads a JSON file (one object per line) and returns the result as a [[DataFrame]].
+    * 加载JSON文件（每行一个对象）并将结果作为[[DataFrame]]返回
    *
    * This function goes through the input once to determine the input schema. If you know the
    * schema in advance, use the version that specifies the schema to avoid the extra scan.
+    *
+    * 此函数通过输入一次以确定输入模式,如果您事先知道架构,请使用指定架构的版本以避免额外扫描
    *
    * @param path input path
    * @since 1.4.0
@@ -221,9 +243,12 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
   /**
    * Loads an `JavaRDD[String]` storing JSON objects (one object per record) and
    * returns the result as a [[DataFrame]].
+    * 加载一个`JavaRDD [String]`存储JSON对象(每个记录一个对象)并将结果作为[[DataFrame]]返回
    *
    * Unless the schema is specified using [[schema]] function, this function goes through the
    * input once to determine the input schema.
+    *
+    * 除非使用[[schema]]函数指定模式，否则此函数将通过输入一次以确定输入模式
    *
    * @param jsonRDD input RDD with one JSON object per record
    * @since 1.4.0
@@ -233,6 +258,8 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
   /**
    * Loads an `RDD[String]` storing JSON objects (one object per record) and
    * returns the result as a [[DataFrame]].
+    *
+    * 加载一个`RDD [String]`存储JSON对象(每个记录一个对象)并将结果作为[[DataFrame]]返回。
    *
    * Unless the schema is specified using [[schema]] function, this function goes through the
    * input once to determine the input schema.
@@ -249,6 +276,8 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
   /**
    * Loads a Parquet file, returning the result as a [[DataFrame]]. This function returns an empty
    * [[DataFrame]] if no paths are passed in.
+    *
+    * 加载Parquet文件,将结果作为[[DataFrame]]返回,如果没有传入路径,则此函数返回空[[DataFrame]]
    *
    * @since 1.4.0
    */
@@ -272,6 +301,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
 
   /**
    * Loads an ORC file and returns the result as a [[DataFrame]].
+    * 加载ORC文件并将结果作为[[DataFrame]]返回
    *
    * @param path input path
    * @since 1.5.0
@@ -289,7 +319,7 @@ class DataFrameReader private[sql](sqlContext: SQLContext) extends Logging {
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
-  // Builder pattern config options
+  // Builder pattern config options Builder模式配置选项
   ///////////////////////////////////////////////////////////////////////////////////////
 
   private var source: String = sqlContext.conf.defaultDataSourceName

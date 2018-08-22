@@ -37,8 +37,10 @@ private[feature] trait StandardScalerParams extends Params with HasInputCol with
 
   /**
    * Centers the data with mean before scaling.
+    * 在缩放之前使用均值将数据居中
    * It will build a dense output, so this does not work on sparse input
    * and will raise an exception.
+    * 它将构建一个密集的输出,因此这不适用于稀疏输入并将引发异常
    * Default: false
    * @group param
    */
@@ -46,6 +48,7 @@ private[feature] trait StandardScalerParams extends Params with HasInputCol with
 
   /**
    * Scales the data to unit standard deviation.
+    * 将数据缩放到单位标准偏差
    * Default: true
    * @group param
    */
@@ -56,6 +59,7 @@ private[feature] trait StandardScalerParams extends Params with HasInputCol with
  * :: Experimental ::
  * Standardizes features by removing the mean and scaling to unit variance using column summary
  * statistics on the samples in the training set.
+  * 使用训练集中样本的列摘要统计信息,通过删除均值和缩放到单位方差来标准化功能
  */
 @Experimental
 class StandardScaler(override val uid: String) extends Estimator[StandardScalerModel]
@@ -108,7 +112,8 @@ class StandardScalerModel private[ml] (
     scaler: feature.StandardScalerModel)
   extends Model[StandardScalerModel] with StandardScalerParams {
 
-  /** Standard deviation of the StandardScalerModel */
+  /** Standard deviation of the StandardScalerModel
+    * StandardScalerModel的标准偏差*/
   val std: Vector = scaler.std
 
   /** Mean of the StandardScalerModel */

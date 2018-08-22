@@ -27,6 +27,7 @@ import org.apache.spark.sql.catalyst.ScalaReflectionLock
 /**
  * :: DeveloperApi ::
  * The data type representing `java.sql.Timestamp` values.
+  * 表示`java.sql.Timestamp`值的数据类型
  * Please use the singleton [[DataTypes.TimestampType]].
  */
 @DeveloperApi
@@ -42,6 +43,7 @@ class TimestampType private() extends AtomicType {
 
   /**
    * The default size of a value of the TimestampType is 8 bytes.
+    * TimestampType的默认值大小为8个字节
    */
   override def defaultSize: Int = 8
 

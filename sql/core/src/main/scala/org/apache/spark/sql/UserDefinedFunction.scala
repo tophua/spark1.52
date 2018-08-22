@@ -29,6 +29,7 @@ import org.apache.spark.sql.types.DataType
 
 /**
  * A user-defined function. To create one, use the `udf` functions in [[functions]].
+  * 用户定义的函数。 要创建一个，请使用[[functions]]中的`udf`函数。
  * As an example:
  * {{{
  *   // Defined a UDF that returns true or false based on some numeric score.
@@ -53,6 +54,7 @@ case class UserDefinedFunction protected[sql] (
 
 /**
  * A user-defined Python function. To create one, use the `pythonUDF` functions in [[functions]].
+  * 用户定义的Python函数。 要创建一个，请使用[[functions]]中的`pythonUDF`函数。
  * This is used by Python API.
  */
 private[sql] case class UserDefinedPythonFunction(

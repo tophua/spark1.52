@@ -35,6 +35,7 @@ import org.apache.spark.sql.types.StructType
 private[ml] trait CrossValidatorParams extends ValidatorParams {
   /**
    * Param for number of folds for cross validation.  Must be >= 2.
+    * Param用于交叉验证的折叠数。 必须> = 2
    * Default: 3
    * @group param
    */

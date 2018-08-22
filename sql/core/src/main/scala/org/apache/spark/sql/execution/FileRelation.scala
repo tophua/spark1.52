@@ -21,8 +21,10 @@ package org.apache.spark.sql.execution
  * An interface for relations that are backed by files.  When a class implements this interface,
  * the list of paths that it returns will be returned to a user who calls `inputPaths` on any
  * DataFrame that queries this relation.
+  * 由文件支持的关系的接口,当类实现此接口时,它返回的路径列表将返回给在查询此关系的任何DataFrame上调用`inputPaths`的用户
  */
 private[sql] trait FileRelation {
-  /** Returns the list of files that will be read when scanning this relation. */
+  /** Returns the list of files that will be read when scanning this relation.
+    * 返回扫描此关系时将读取的文件列表*/
   def inputFiles: Array[String]
 }

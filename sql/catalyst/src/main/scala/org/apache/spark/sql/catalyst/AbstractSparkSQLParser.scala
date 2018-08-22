@@ -36,7 +36,8 @@ private[sql] abstract class AbstractSparkSQLParser
       case failureOrError => sys.error(failureOrError.toString)
     }
   }
-  /* One time initialization of lexical.This avoid reinitialization of  lexical in parse method */
+  /* One time initialization of lexical.This avoid reinitialization of  lexical in parse method
+  * 一次初始化词汇,这避免了在解析方法中重新初始化词法*/
   protected lazy val initLexical: Unit = lexical.initialize(reservedWords)
 
   protected case class Keyword(str: String) {
@@ -47,6 +48,7 @@ private[sql] abstract class AbstractSparkSQLParser
   protected implicit def asParser(k: Keyword): Parser[String] = k.parser
 
   // By default, use Reflection to find the reserved words defined in the sub class.
+  //默认情况下,使用Reflection查找子类中定义的保留字
   // NOTICE, Since the Keyword properties defined by sub class, we couldn't call this
   // method during the parent class instantiation, because the sub class instance
   // isn't created yet.
@@ -58,17 +60,20 @@ private[sql] abstract class AbstractSparkSQLParser
       .map(_.invoke(this).asInstanceOf[Keyword].normalize)
 
   // Set the keywords as empty by default, will change that later.
+  //默认情况下将关键字设置为空,稍后会更改
   override val lexical = new SqlLexical
 
   protected def start: Parser[LogicalPlan]
 
   // Returns the whole input string
+  //返回整个输入字符串
   protected lazy val wholeInput: Parser[String] = new Parser[String] {
     def apply(in: Input): ParseResult[String] =
       Success(in.source.toString, in.drop(in.source.length()))
   }
 
   // Returns the rest of the input string that are not parsed yet
+  //返回尚未解析的输入字符串的其余部分
   protected lazy val restInput: Parser[String] = new Parser[String] {
     def apply(in: Input): ParseResult[String] =
       Success(
@@ -82,7 +87,8 @@ class SqlLexical extends StdLexical {
     override def toString: String = chars
   }
 
-  /* This is a work around to support the lazy setting */
+  /* This is a work around to support the lazy setting
+  * 这是一个支持懒惰设置的工作*/
   def initialize(keywords: Seq[String]): Unit = {
     reserved.clear()
     reserved ++= keywords

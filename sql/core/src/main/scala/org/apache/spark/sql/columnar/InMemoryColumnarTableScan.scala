@@ -104,6 +104,7 @@ private[sql] case class InMemoryRelation(
 
   // If the cached column buffers were not passed in, we calculate them in the constructor.
   // As in Spark, the actual work of caching is lazy.
+  //如果没有传入缓存的列缓冲区,我们在构造函数中计算它们.在Spark中,缓存的实际工作是懒惰的
   if (_cachedColumnBuffers == null) {
     buildBuffers()
   }
@@ -205,6 +206,7 @@ private[sql] case class InMemoryColumnarTableScan(
 
   // Returned filter predicate should return false iff it is impossible for the input expression
   // to evaluate to `true' based on statistics collected about this partition batch.
+  //如果根据收集的有关此分区批次的统计信息,输入表达式无法评估为“true”,则返回的过滤谓词应返回false
   val buildFilter: PartialFunction[Expression, Expression] = {
     case And(lhs: Expression, rhs: Expression)
       if buildFilter.isDefinedAt(lhs) || buildFilter.isDefinedAt(rhs) =>
@@ -249,6 +251,7 @@ private[sql] case class InMemoryColumnarTableScan(
         filter.foreach(f => logInfo(s"Predicate $p generates partition filter: $f")))
 
       // If the filter can't be resolved then we are missing required statistics.
+      //如果无法解析过滤器,则我们缺少必需的统计信息
       boundFilter.filter(_.resolved)
     }
   }
@@ -324,6 +327,7 @@ private[sql] case class InMemoryColumnarTableScan(
       }
 
       // Do partition batch pruning if enabled
+      //如果启用,则执行分区批量修剪
       val cachedBatchesToScan =
         if (inMemoryPartitionPruningEnabled) {
           cachedBatchIterator.filter { cachedBatch =>

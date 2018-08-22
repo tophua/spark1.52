@@ -34,12 +34,15 @@ import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.util.collection.OpenHashSet
 
-/** Private trait for params for VectorIndexer and VectorIndexerModel */
+/** Private trait for params for VectorIndexer and VectorIndexerModel
+  * VectorIndexer和VectorIndexerModel的参数的私有特征*/
 private[ml] trait VectorIndexerParams extends Params with HasInputCol with HasOutputCol {
 
   /**
    * Threshold for the number of values a categorical feature can take.
+    * 分类特征可以采用的值的阈值
    * If a feature is found to have > maxCategories values, then it is declared continuous.
+    * 如果发现某个要素具有> maxCategories值,则会将其声明为连续
    * Must be >= 2.
    *
    * (default = 20)
@@ -140,7 +143,7 @@ private object VectorIndexer {
 
   /**
    * Helper class for tracking unique values for each feature.
-   *
+   * 帮助程序类,用于跟踪每个要素的唯一值
    * TODO: Track which features are known to be continuous already; do not update counts for them.
    *
    * @param numFeatures  This class fails if it encounters a Vector whose length is not numFeatures.

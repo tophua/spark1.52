@@ -24,6 +24,7 @@ import org.apache.spark.sql.catalyst.expressions._
 /**
  * :: Experimental ::
  * Utility functions for defining window in DataFrames.
+  * 用于在DataFrames中定义窗口的实用程序函数
  *
  * {{{
  *   // PARTITION BY country ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
@@ -40,6 +41,7 @@ object Window {
 
   /**
    * Creates a [[WindowSpec]] with the partitioning defined.
+    * 使用定义的分区创建[[WindowSpec]]
    * @since 1.4.0
    */
   @scala.annotation.varargs
@@ -49,6 +51,7 @@ object Window {
 
   /**
    * Creates a [[WindowSpec]] with the partitioning defined.
+    * 使用定义的分区创建[[WindowSpec]]
    * @since 1.4.0
    */
   @scala.annotation.varargs
@@ -58,6 +61,7 @@ object Window {
 
   /**
    * Creates a [[WindowSpec]] with the ordering defined.
+    * 使用定义的顺序创建[[WindowSpec]]
    * @since 1.4.0
    */
   @scala.annotation.varargs
@@ -67,6 +71,7 @@ object Window {
 
   /**
    * Creates a [[WindowSpec]] with the ordering defined.
+    * 使用定义的顺序创建[[WindowSpec]]
    * @since 1.4.0
    */
   @scala.annotation.varargs
@@ -83,6 +88,7 @@ object Window {
 /**
  * :: Experimental ::
  * Utility functions for defining window in DataFrames.
+  * 用于在DataFrames中定义窗口的实用程序函数
  *
  * {{{
  *   // PARTITION BY country ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW

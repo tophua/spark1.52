@@ -19,7 +19,9 @@ package org.apache.spark.sql.catalyst.analysis
 
 /**
  * Represents the result of `Expression.checkInputDataTypes`.
+  * 表示`Expression.checkInputDataTypes`的结果
  * We will throw `AnalysisException` in `CheckAnalysis` if `isFailure` is true.
+  * 如果`isFailure`为真，我们将在`CheckAnalysis`中抛出`AnalysisException`
  */
 trait TypeCheckResult {
   def isFailure: Boolean = !isSuccess
@@ -30,6 +32,7 @@ object TypeCheckResult {
 
   /**
    * Represents the successful result of `Expression.checkInputDataTypes`.
+    * 表示`Expression.checkInputDataTypes`的成功结果
    */
   object TypeCheckSuccess extends TypeCheckResult {
     def isSuccess: Boolean = true
@@ -38,6 +41,7 @@ object TypeCheckResult {
   /**
    * Represents the failing result of `Expression.checkInputDataTypes`,
    * with a error message to show the reason of failure.
+    * 表示`Expression.checkInputDataTypes`的失败结果,并显示错误消息以显示失败原因
    */
   case class TypeCheckFailure(message: String) extends TypeCheckResult {
     def isSuccess: Boolean = false

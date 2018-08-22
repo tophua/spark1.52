@@ -23,13 +23,13 @@ import org.apache.spark.graphx._
 import org.apache.spark.graphx.util.collection.GraphXPrimitiveKeyOpenHashMap
 import org.apache.spark.util.collection.{SortDataFormat, Sorter, PrimitiveVector}
 
-/** Constructs an EdgePartition from scratch. */
+/** Constructs an EdgePartition from scratch. 从头开始构造EdgePartition*/
 private[graphx]
 class EdgePartitionBuilder[@specialized(Long, Int, Double) ED: ClassTag, VD: ClassTag](
     size: Int = 64) {
   private[this] val edges = new PrimitiveVector[Edge[ED]](size)
 
-  /** Add a new edge to the partition. */
+  /** Add a new edge to the partition. 向分区添加新边*/
   def add(src: VertexId, dst: VertexId, d: ED) {
     edges += Edge(src, dst, d)
   }
@@ -78,6 +78,8 @@ class EdgePartitionBuilder[@specialized(Long, Int, Double) ED: ClassTag, VD: Cla
 /**
  * Constructs an EdgePartition from an existing EdgePartition with the same vertex set. This enables
  * reuse of the local vertex ids. Intended for internal use in EdgePartition only.
+  * 从具有相同顶点集的现有EdgePartition构造EdgePartition,
+  * 这使得能够重用本地顶点id,仅供EdgePartition内部使用
  */
 private[impl]
 class ExistingEdgePartitionBuilder[
@@ -89,7 +91,7 @@ class ExistingEdgePartitionBuilder[
     size: Int = 64) {
   private[this] val edges = new PrimitiveVector[EdgeWithLocalIds[ED]](size)
 
-  /** Add a new edge to the partition. */
+  /** Add a new edge to the partition. 向分区添加新边*/
   def add(src: VertexId, dst: VertexId, localSrc: Int, localDst: Int, d: ED) {
     edges += EdgeWithLocalIds(src, dst, localSrc, localDst, d)
   }

@@ -29,6 +29,8 @@ import org.apache.spark.sql.catalyst.plans.logical._
  * A pattern that matches any number of filter operations on top of another relational operator.
  * Adjacent filter operators are collected and their conditions are broken up and returned as a
  * sequence of conjunctive predicates.
+  * 在另一个关系运算符之上匹配任意数量的过滤操作的模式,
+  * 收集相邻的过滤器运算符,并将它们的条件分解并作为一系列联合谓词返回。
  *
  * @return A tuple containing a sequence of conjunctive predicates that should be used to filter the
  *         output and a relational operator.
@@ -52,6 +54,8 @@ object FilteredOperation extends PredicateHelper {
  * together with the top project operator.
  * [[org.apache.spark.sql.catalyst.expressions.Alias Aliases]] are in-lined/substituted if
  * necessary.
+  * 在另一个关系运算符之上匹配任意数量的项目或过滤器操作的模式,
+  * 收集所有过滤器操作员并将其条件分解并与顶级项目操作员一起返回
  */
 object PhysicalOperation extends PredicateHelper {
   type ReturnType = (Seq[NamedExpression], Seq[Expression], LogicalPlan)
@@ -110,10 +114,14 @@ object PhysicalOperation extends PredicateHelper {
  * Matches a logical aggregation that can be performed on distributed data in two steps.  The first
  * operates on the data in each partition performing partial aggregation for each group.  The second
  * occurs after the shuffle and completes the aggregation.
+  * 匹配可以分两步执行分布式数据的逻辑聚合,第一个操作对每个分区中的数据进行操作,
+  * 为每个组执行部分聚合,第二个发生在shuffle之后并完成聚合。
  *
  * This pattern will only match if all aggregate expressions can be computed partially and will
  * return the rewritten aggregation expressions for both phases.
- *
+  *
+ * 如果可以部分计算所有聚合表达式并且将返回两个阶段的重写聚合表达式,则此模式将仅匹配
+  *
  * The returned values for this match are as follows:
  *  - Grouping attributes for the final aggregation.
  *  - Aggregates for the final aggregation.
@@ -128,21 +136,27 @@ object PartialAggregation {
   def unapply(plan: LogicalPlan): Option[ReturnType] = plan match {
     case logical.Aggregate(groupingExpressions, aggregateExpressions, child) =>
       // Collect all aggregate expressions.
+      //收集所有聚合表达式
       val allAggregates =
         aggregateExpressions.flatMap(_ collect { case a: AggregateExpression1 => a})
       // Collect all aggregate expressions that can be computed partially.
+      //收集可以部分计算的所有聚合表达式
       val partialAggregates =
         aggregateExpressions.flatMap(_ collect { case p: PartialAggregate1 => p})
 
       // Only do partial aggregation if supported by all aggregate expressions.
+      //如果所有聚合表达式都支持,则仅进行部分聚合
       if (allAggregates.size == partialAggregates.size) {
         // Create a map of expressions to their partial evaluations for all aggregate expressions.
+        //为所有聚合表达式的部分求值创建表达式映射
         val partialEvaluations: Map[TreeNodeRef, SplitEvaluation] =
           partialAggregates.map(a => (new TreeNodeRef(a), a.asPartial)).toMap
 
         // We need to pass all grouping expressions though so the grouping can happen a second
         // time. However some of them might be unnamed so we alias them allowing them to be
         // referenced in the second aggregation.
+        //我们需要传递所有分组表达式,因此分组可以第二次发生,
+        //但是其中一些可能是未命名的,所以我们将它们别名,允许它们在第二个聚合中被引用。
         val namedGroupingExpressions: Seq[(Expression, NamedExpression)] =
           groupingExpressions.map {
             case n: NamedExpression => (n, n)
@@ -151,6 +165,7 @@ object PartialAggregation {
 
         // Replace aggregations with a new expression that computes the result from the already
         // computed partial evaluations and grouping values.
+        //使用新表达式替换聚合,该表达式计算已计算的部分计算和分组值的结果
         val rewrittenAggregateExpressions = aggregateExpressions.map(_.transformDown {
           case e: Expression if partialEvaluations.contains(new TreeNodeRef(e)) =>
             partialEvaluations(new TreeNodeRef(e)).finalEvaluation
@@ -182,6 +197,7 @@ object PartialAggregation {
 
 /**
  * A pattern that finds joins with equality conditions that can be evaluated using equi-join.
+  * 找到具有可使用等连接求值的相等条件的连接的模式
  */
 object ExtractEquiJoinKeys extends Logging with PredicateHelper {
   /** (joinType, leftKeys, rightKeys, condition, leftChild, rightChild) */
@@ -219,6 +235,7 @@ object ExtractEquiJoinKeys extends Logging with PredicateHelper {
 
 /**
  * A pattern that collects all adjacent unions and returns their children as a Seq.
+  * 一种模式,收集所有相邻的联合并将其子项作为Seq返回
  */
 object Unions {
   def unapply(plan: LogicalPlan): Option[Seq[LogicalPlan]] = plan match {

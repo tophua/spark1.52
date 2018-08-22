@@ -36,6 +36,7 @@ abstract class Model[M <: Model[M]] extends Transformer {
 
   /**
    * Sets the parent of this model (Java API).
+    * 设置此模型的父级(Java API)
    */
   def setParent(parent: Estimator[M]): M = {
     this.parent = parent

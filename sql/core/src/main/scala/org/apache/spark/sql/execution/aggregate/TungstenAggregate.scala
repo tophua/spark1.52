@@ -59,6 +59,7 @@ case class TungstenAggregate(
 
   // This is for testing. We force TungstenAggregationIterator to fall back to sort-based
   // aggregation once it has processed a given number of input rows.
+  //这是为了测试,我们强制TungstenAggregationIterator在处理了给定数量的输入行后回退到基于排序的聚合
   private val testFallbackStartsAt: Option[Int] = {
     sqlContext.getConf("spark.sql.TungstenAggregate.testFallbackStartsAt", null) match {
       case null | "" => None
@@ -73,6 +74,7 @@ case class TungstenAggregate(
     /**
      * Set up the underlying unsafe data structures used before computing the parent partition.
      * This makes sure our iterator is not starved by other operators in the same task.
+      * 设置在计算父分区之前使用的基础不安全数据结构,这可以确保我们的迭代器不会被同一任务中的其他运算符所匮乏
      */
     def preparePartition(): TungstenAggregationIterator = {
       new TungstenAggregationIterator(
@@ -88,7 +90,8 @@ case class TungstenAggregate(
         numOutputRows)
     }
 
-    /** Compute a partition using the iterator already set up previously. */
+    /** Compute a partition using the iterator already set up previously.
+      * 使用先前已设置的迭代器计算分区*/
     def executePartition(
         context: TaskContext,
         partitionIndex: Int,
@@ -97,12 +100,14 @@ case class TungstenAggregate(
       val hasInput = parentIterator.hasNext
       if (!hasInput) {
         // We're not using the underlying map, so we just can free it here
+        //我们没有使用底层Map,所以我们可以在这里释放它
         aggregationIterator.free()
         if (groupingExpressions.isEmpty) {
           numOutputRows += 1
           Iterator.single[UnsafeRow](aggregationIterator.outputForEmptyGroupingKeyWithoutInput())
         } else {
           // This is a grouped aggregate and the input iterator is empty,
+          //这是一个分组聚合,输入迭代器是空的
           // so return an empty iterator.
           Iterator.empty
         }

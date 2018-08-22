@@ -30,6 +30,7 @@ import org.apache.spark.sql.types.{DoubleType, StructType}
 /**
  * :: Experimental ::
  * Binarize a column of continuous features given a threshold.
+  * 在给定阈值的情况下将一列连续特征二值化
  */
 @Experimental
 final class Binarizer(override val uid: String)
@@ -39,8 +40,11 @@ final class Binarizer(override val uid: String)
 
   /**
    * Param for threshold used to binarize continuous features.
+    * 用于对连续特征进行二值化的阈值的参数
    * The features greater than the threshold, will be binarized to 1.0.
+    * 大于阈值的特征将被二进制化为1.0
    * The features equal to or less than the threshold, will be binarized to 0.0.
+    * 等于或小于阈值的特征将被二值化为0.0
    * Default: 0.0
    * @group param
    */

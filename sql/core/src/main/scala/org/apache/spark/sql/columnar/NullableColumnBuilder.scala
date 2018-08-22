@@ -24,6 +24,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 /**
  * A stackable trait used for building byte buffer for a column containing null values.  Memory
  * layout of the final byte buffer is:
+  * 可堆叠特征,用于为包含空值的列构建字节缓冲区,最终字节缓冲区的内存布局是：
  * {{{
  *    .----------------------- Column type ID (4 bytes)
  *    |   .------------------- Null count N (4 bytes)

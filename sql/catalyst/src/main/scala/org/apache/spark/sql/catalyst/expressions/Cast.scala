@@ -31,6 +31,7 @@ object Cast {
 
   /**
    * Returns true iff we can cast `from` type to `to` type.
+    * 如果我们可以将`from`类型转换为`to`类型，则返回true
    */
   def canCast(from: DataType, to: DataType): Boolean = (from, to) match {
     case (fromType, toType) if fromType == toType => true
@@ -103,7 +104,8 @@ object Cast {
   }
 }
 
-/** Cast the child expression to the target data type. */
+/** Cast the child expression to the target data type.
+  * 将子表达式转换为目标数据类型*/
 case class Cast(child: Expression, dataType: DataType)
   extends UnaryExpression with CodegenFallback {
 
@@ -121,6 +123,7 @@ case class Cast(child: Expression, dataType: DataType)
   override def nullable: Boolean = Cast.forceNullable(child.dataType, dataType) || child.nullable
 
   // [[func]] assumes the input is no longer null because eval already does the null check.
+  //[[func]]假设输入不再为null，因为eval已经进行了空检查
   @inline private[this] def buildCast[T](a: Any, func: T => Any): Any = func(a.asInstanceOf[T])
 
   // UDFToString
@@ -145,6 +148,7 @@ case class Cast(child: Expression, dataType: DataType)
       buildCast[Long](_, t => t != 0)
     case DateType =>
       // Hive would return null when cast from date to boolean
+      //从date转换为boolean时,Hive将返回null
       buildCast[Int](_, d => null)
     case LongType =>
       buildCast[Long](_, _ != 0)
@@ -197,10 +201,13 @@ case class Cast(child: Expression, dataType: DataType)
   }
 
   // converting milliseconds to us
+  //将毫秒转换为我们
   private[this] def longToTimestamp(t: Long): Long = t * 1000L
   // converting us to seconds
+  //把我们变成秒
   private[this] def timestampToLong(ts: Long): Long = math.floor(ts.toDouble / 1000000L).toLong
   // converting us to seconds in double
+  //将我们转换成秒数
   private[this] def timestampToDouble(ts: Long): Double = {
     ts / 1000000.0
   }
@@ -212,11 +219,14 @@ case class Cast(child: Expression, dataType: DataType)
     case TimestampType =>
       // throw valid precision more than seconds, according to Hive.
       // Timestamp.nanos is in 0 to 999,999,999, no more than a second.
+      //根据Hive的说法,抛出有效精度超过秒,Timestamp.nanos在0到999,999,999之间,不超过一秒。
       buildCast[Long](_, t => DateTimeUtils.millisToDays(t / 1000L))
     // Hive throws this exception as a Semantic Exception
     // It is never possible to compare result when hive return with exception,
     // so we can return null
+      //Hive抛出此异常作为语义异常当hive返回异常时,永远不可能比较结果,因此我们可以返回null
     // NULL is more reasonable here, since the query itself obeys the grammar.
+      //NULL在这里更合理,因为查询本身服从语法
     case _ => _ => null
   }
 
@@ -294,8 +304,10 @@ case class Cast(child: Expression, dataType: DataType)
   /**
    * Change the precision / scale in a given decimal to those set in `decimalType` (if any),
    * returning null if it overflows or modifying `value` in-place and returning it if successful.
-   *
+   * 将给定十进制中的精度/比例更改为`decimalType`（如果有）中设置的精度/比例,
+    * 如果溢出或在原地修改`value`并在成功时返回它,则返回null,
    * NOTE: this modifies `value` in-place, so don't call it on external data.
+    * 注意：这会就地修改`value`，所以不要在外部数据上调用它
    */
   private[this] def changePrecision(value: Decimal, decimalType: DecimalType): Decimal = {
     if (value.changePrecision(decimalType.precision, decimalType.scale)) value else null

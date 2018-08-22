@@ -40,6 +40,7 @@ private[sql] object Column {
 /**
  * :: Experimental ::
  * A column in a [[DataFrame]].
+  * [[DataFrame]]中的一列
  *
  * @groupname java_expr_ops Java-specific expression operators
  * @groupname expr_ops Expression operators
@@ -57,7 +58,8 @@ class Column(protected[sql] val expr: Expression) extends Logging {
     case _ => UnresolvedAttribute.quotedString(name)
   })
 
-  /** Creates a column based on the given expression. */
+  /** Creates a column based on the given expression.
+    * 根据给定的表达式创建列*/
   implicit private def exprToColumn(newExpr: Expression): Column = new Column(newExpr)
 
   override def toString: String = expr.prettyString
@@ -73,11 +75,16 @@ class Column(protected[sql] val expr: Expression) extends Logging {
    * Extracts a value or values from a complex type.
    * 从一个复杂类型中提取一个值或者多个值
    * The following types of extraction are supported:
+    * 支持以下类型的提取:
    * - Given an Array, an integer ordinal can be used to retrieve a single value.
+    * -给定一个数组,可以使用整数序数来检索单个值
    * - Given a Map, a key of the correct type can be used to retrieve an individual value.
+    * -给定Map,可以使用正确类型的键来检索单个值
    * - Given a Struct, a string fieldName can be used to extract that field.
+    * -给定Struct,可以使用字符串fieldName来提取该字段
    * - Given an Array of Structs, a string fieldName can be used to extract filed
    *   of every struct in that array, and return an Array of fields
+    *  -给定一个Structs数组,可以使用字符串fieldName提取该数组中每个结构的字段,并返回一个字段数组
    *
    * @group expr_ops
    * @since 1.4.0
@@ -145,6 +152,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Equality test.
+    * 相等测试
    * {{{
    *   // Scala:
    *   df.filter( df("colA") === df("colB") )
@@ -161,6 +169,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Inequality test.
+    * 不等测试
    * {{{
    *   // Scala:
    *   df.select( df("colA") !== df("colB") )
@@ -178,6 +187,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Inequality test.
+    * 不等测试
    * {{{
    *   // Scala:
    *   df.select( df("colA") !== df("colB") )
@@ -211,7 +221,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
   def > (other: Any): Column = GreaterThan(expr, lit(other).expr)
 
   /**
-   * Greater than.
+   * Greater than.大于
    * {{{
    *   // Scala: The following selects people older than 21.
    *   people.select( people("age") > lit(21) )
@@ -243,7 +253,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
   def < (other: Any): Column = LessThan(expr, lit(other).expr)
 
   /**
-   * Less than.
+   * Less than.小于
    * {{{
    *   // Scala: The following selects people younger than 21.
    *   people.select( people("age") < 21 )
@@ -665,7 +675,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * SQL like expression.
-   *
+   *类似SQL的表达式
    * @group expr_ops
    * @since 1.3.0
    */
@@ -691,7 +701,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * An expression that gets a field by name in a [[StructType]].
-   *
+   * 在[[StructType]]中按名称获取字段的表达式
    * @group expr_ops
    * @since 1.3.0
    */
@@ -753,7 +763,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * String ends with another string literal.
-   *
+   * 字符串以另一个字符串文字结尾
    * @group expr_ops
    * @since 1.3.0
    */
@@ -807,6 +817,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Assigns the given aliases to the results of a table generating function.
+    * 将给定别名赋给表生成函数的结果
    * {{{
    *   // Renames colA to colB in select output.
    *   df.select(explode($"myMap").as("key" :: "value" :: Nil))
@@ -950,6 +961,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Compute bitwise AND of this expression with another expression.
+    * 使用另一个表达式计算此表达式的按位AND
    * {{{
    *   df.select($"colA".bitwiseAND($"colB"))
    * }}}
@@ -961,6 +973,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Compute bitwise XOR of this expression with another expression.
+    * 使用另一个表达式计算此表达式的按位XOR
    * {{{
    *   df.select($"colA".bitwiseXOR($"colB"))
    * }}}
@@ -972,7 +985,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 
   /**
    * Define a windowing column.
-   *
+   * 定义窗口列
    * {{{
    *   val w = Window.partitionBy("name").orderBy("id")
    *   df.select(
@@ -992,7 +1005,7 @@ class Column(protected[sql] val expr: Expression) extends Logging {
 /**
  * :: Experimental ::
  * A convenient class used for constructing schema.
- *
+ * 用于构造模式的方便类
  * @since 1.3.0
  */
 @Experimental
@@ -1000,66 +1013,77 @@ class ColumnName(name: String) extends Column(name) {
 
   /**
    * Creates a new [[StructField]] of type boolean.
+    * 创建布尔型的[StuttFiel]
    * @since 1.3.0
    */
   def boolean: StructField = StructField(name, BooleanType)
 
   /**
    * Creates a new [[StructField]] of type byte.
+    * 创建一个byte类型的新[[StructField]]
    * @since 1.3.0
    */
   def byte: StructField = StructField(name, ByteType)
 
   /**
    * Creates a new [[StructField]] of type short.
+    * 创建short类型的新[[StructField]]
    * @since 1.3.0
    */
   def short: StructField = StructField(name, ShortType)
 
   /**
    * Creates a new [[StructField]] of type int.
+    * 创建int类型的新[[StructField]]
    * @since 1.3.0
    */
   def int: StructField = StructField(name, IntegerType)
 
   /**
    * Creates a new [[StructField]] of type long.
+    * 创建long类型的新[StructField]
    * @since 1.3.0
    */
   def long: StructField = StructField(name, LongType)
 
   /**
    * Creates a new [[StructField]] of type float.
+    * 创建一个float类型的新[StructField]
    * @since 1.3.0
    */
   def float: StructField = StructField(name, FloatType)
 
   /**
    * Creates a new [[StructField]] of type double.
+    * 创建double类型的新[[StructField]]
    * @since 1.3.0
    */
   def double: StructField = StructField(name, DoubleType)
 
   /**
    * Creates a new [[StructField]] of type string.
+    * 创建一个string类型的新[[StructField]]
    * @since 1.3.0
    */
   def string: StructField = StructField(name, StringType)
 
   /**
    * Creates a new [[StructField]] of type date.
+    * 创建date类型的新[[StructField]]
    * @since 1.3.0
    */
   def date: StructField = StructField(name, DateType)
 
   /**
    * Creates a new [[StructField]] of type decimal.
+    * 创建十进制类型的新[[StructField]]
    * @since 1.3.0
    */
   def decimal: StructField = StructField(name, DecimalType.USER_DEFAULT)
 
   /**
    * Creates a new [[StructField]] of type decimal.
+    * 创建十进制类型的新[StructField]
    * @since 1.3.0
    */
   def decimal(precision: Int, scale: Int): StructField =
@@ -1067,24 +1091,28 @@ class ColumnName(name: String) extends Column(name) {
 
   /**
    * Creates a new [[StructField]] of type timestamp.
+    * 创建一个timestamp类型的新[[StructField]]
    * @since 1.3.0
    */
   def timestamp: StructField = StructField(name, TimestampType)
 
   /**
    * Creates a new [[StructField]] of type binary.
+    * 创建二进制类型的新[[StructField]]
    * @since 1.3.0
    */
   def binary: StructField = StructField(name, BinaryType)
 
   /**
    * Creates a new [[StructField]] of type array.
+    * 创建一个类型为array的新[[StructField]]
    * @since 1.3.0
    */
   def array(dataType: DataType): StructField = StructField(name, ArrayType(dataType))
 
   /**
    * Creates a new [[StructField]] of type map.
+    * 创建一个类型为map的新[[StructField]]
    * @since 1.3.0
    */
   def map(keyType: DataType, valueType: DataType): StructField =
@@ -1094,12 +1122,14 @@ class ColumnName(name: String) extends Column(name) {
 
   /**
    * Creates a new [[StructField]] of type struct.
+    * 创建类型结构的新[StuttFiel]
    * @since 1.3.0
    */
   def struct(fields: StructField*): StructField = struct(StructType(fields))
 
   /**
    * Creates a new [[StructField]] of type struct.
+    * 创建struct类型的新[[StructField]]
    * @since 1.3.0
    */
   def struct(structType: StructType): StructField = StructField(name, structType)

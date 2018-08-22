@@ -30,12 +30,14 @@ import org.apache.spark.sql.types._
 /**
  * :: DeveloperApi ::
  * Abstract class for transformers that transform one dataset into another.
+  * 变换器的抽象类,用于将一个数据集转换为另一个数据集
  */
 @DeveloperApi
 abstract class Transformer extends PipelineStage {
 
   /**
    * Transforms the dataset with optional parameters
+    * 使用可选参数转换数据集
    * @param dataset input dataset
    * @param firstParamPair the first param pair, overwrite embedded params
    * @param otherParamPairs other param pairs, overwrite embedded params
@@ -54,6 +56,7 @@ abstract class Transformer extends PipelineStage {
 
   /**
    * Transforms the dataset with provided parameter map as additional parameters.
+    * 使用提供的参数映射将数据集转换为附加参数
    * @param dataset input dataset
    * @param paramMap additional parameters, overwrite embedded params
    * @return transformed dataset
@@ -64,6 +67,7 @@ abstract class Transformer extends PipelineStage {
 
   /**
    * Transforms the input dataset.
+    * 转换输入数据集
    */
   def transform(dataset: DataFrame): DataFrame
 
@@ -74,6 +78,7 @@ abstract class Transformer extends PipelineStage {
  * :: DeveloperApi ::
  * Abstract class for transformers that take one input column, apply transformation, and output the
  * result as a new column.
+  * 变换器的抽象类,它接受一个输入列,应用转换,并将结果输出为新列
  */
 @DeveloperApi
 abstract class UnaryTransformer[IN, OUT, T <: UnaryTransformer[IN, OUT, T]]
@@ -89,16 +94,19 @@ abstract class UnaryTransformer[IN, OUT, T <: UnaryTransformer[IN, OUT, T]]
    * Creates the transform function using the given param map. The input param map already takes
    * account of the embedded param map. So the param values should be determined solely by the input
    * param map.
+    * 使用给定的param映射创建转换函数,输入参数映射已经考虑了嵌入的参数映射, 因此,参数值应仅由输入参数图确定
    */
   protected def createTransformFunc: IN => OUT
 
   /**
    * Returns the data type of the output column.
+    * 返回输出列的数据类型
    */
   protected def outputDataType: DataType
 
   /**
    * Validates the input type. Throw an exception if it is invalid.
+    * 验证输入类型,如果无效则抛出异常
    */
   protected def validateInputType(inputType: DataType): Unit = {}
 

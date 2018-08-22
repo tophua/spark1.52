@@ -28,6 +28,7 @@ import org.apache.spark.util.BoundedPriorityQueue
 object GraphXUtils {
   /**
    * Registers classes that GraphX uses with Kryo.
+    * 注册GraphX与Kryo一起使用的类
    */
   def registerKryoClasses(conf: SparkConf) {
     conf.registerKryoClasses(Array(

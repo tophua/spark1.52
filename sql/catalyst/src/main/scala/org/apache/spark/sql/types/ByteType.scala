@@ -41,6 +41,7 @@ class ByteType private() extends IntegralType {
 
   /**
    * The default size of a value of the ByteType is 1 byte.
+    * ByteType的默认值大小为1个字节
    */
   override def defaultSize: Int = 1
 

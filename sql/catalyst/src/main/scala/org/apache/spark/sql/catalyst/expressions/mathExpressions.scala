@@ -29,8 +29,10 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * A leaf expression specifically for math constants. Math constants expect no input.
+  * 专门用于数学常量的叶子表达式,数学常数期望没有输入
  *
  * There is no code generation because they should get constant folded by the optimizer.
+  * 没有代码生成,因为它们应该由优化器保持不变
  *
  * @param c The math constant.
  * @param name The short name of the function
@@ -49,6 +51,7 @@ abstract class LeafMathExpression(c: Double, name: String)
 /**
  * A unary expression specifically for math functions. Math Functions expect a specific type of
  * input format, therefore these functions extend `ExpectsInputTypes`.
+  * 一个专门用于数学函数的一元表达式,Math Functions期望一种特定类型的输入格式,因此这些函数扩展了“ExpectsInputTypes”。
  * @param f The math function.
  * @param name The short name of the function
  */
@@ -65,6 +68,7 @@ abstract class UnaryMathExpression(f: Double => Double, name: String)
   }
 
   // name of function in java.lang.Math
+  //java.lang.Math中的函数名称
   def funcName: String = name.toLowerCase
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
@@ -76,6 +80,7 @@ abstract class UnaryLogExpression(f: Double => Double, name: String)
     extends UnaryMathExpression(f, name) {
 
   // values less than or equal to yAsymptote eval to null in Hive, instead of NaN or -Infinity
+  //值小于或等于y在yive中yAsymptote eval为null，而不是NaN或-Infinity
   protected val yAsymptote: Double = 0.0
 
   protected override def nullSafeEval(input: Any): Any = {
@@ -99,6 +104,7 @@ abstract class UnaryLogExpression(f: Double => Double, name: String)
 /**
  * A binary expression specifically for math functions that take two `Double`s as input and returns
  * a `Double`.
+  * 一个专门用于数学函数的二进制表达式,它将两个`Double`s作为输入并返回一个`Double`
  * @param f The math function.
  * @param name The short name of the function
  */
@@ -129,6 +135,7 @@ abstract class BinaryMathExpression(f: (Double, Double) => Double, name: String)
 /**
  * Euler's number. Note that there is no code generation because this is only
  * evaluated by the optimizer during constant folding.
+  * 欧拉的号码,请注意,没有代码生成,因为这只是在常量折叠期间由优化程序评估
  */
 case class EulerNumber() extends LeafMathExpression(math.E, "E")
 
@@ -140,7 +147,7 @@ case class Pi() extends LeafMathExpression(math.Pi, "PI")
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Unary math functions
+// Unary math functions 一元数学函数
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -159,7 +166,7 @@ case class Cos(child: Expression) extends UnaryMathExpression(math.cos, "COS")
 case class Cosh(child: Expression) extends UnaryMathExpression(math.cosh, "COSH")
 
 /**
- * Convert a num from one base to another
+ * Convert a num from one base to another 将数字从一个基数转换为另一个基数
  * @param numExpr the number to be converted
  * @param fromBaseExpr from which base
  * @param toBaseExpr to which base
@@ -236,6 +243,7 @@ case class Factorial(child: Expression) extends UnaryExpression with ImplicitCas
   override def dataType: DataType = LongType
 
   // If the value not in the range of [0, 20], it still will be null, so set it to be true here.
+  //如果值不在[0,20]范围内,它仍然为null,所以在此设置为true。
   override def nullable: Boolean = true
 
   protected override def nullSafeEval(input: Any): Any = {
@@ -351,6 +359,7 @@ object Hex {
 
   def hex(num: Long): UTF8String = {
     // Extract the hex digits of num into value[] from right to left
+    //从右到左将num的十六进制数字提取到值[]
     val value = new Array[Byte](16)
     var numBuf = num
     var len = 0
@@ -398,6 +407,8 @@ object Hex {
  * If the argument is an INT or binary, hex returns the number as a STRING in hexadecimal format.
  * Otherwise if the number is a STRING, it converts each character into its hex representation
  * and returns the resulting STRING. Negative numbers would be treated as two's complement.
+  * 如果参数是INT或二进制,则十六进制将数字作为十六进制格式的STRING返回,否则,如果数字是STRING,
+  * 它会将每个字符转换为十六进制表示形式并返回结果STRING,负数将被视为两个补码
  */
 case class Hex(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 
@@ -425,8 +436,8 @@ case class Hex(child: Expression) extends UnaryExpression with ImplicitCastInput
 }
 
 /**
- * Performs the inverse operation of HEX.
- * Resulting characters are returned as a byte array.
+ * Performs the inverse operation of HEX.执行HEX的逆操作。
+ * Resulting characters are returned as a byte array.结果字符作为字节数组返回
  */
 case class Unhex(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 
@@ -453,7 +464,7 @@ case class Unhex(child: Expression) extends UnaryExpression with ImplicitCastInp
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Binary math functions
+// Binary math functions 二进制数学函数
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -480,7 +491,7 @@ case class Pow(left: Expression, right: Expression)
 
 
 /**
- * Bitwise unsigned left shift.
+ * Bitwise unsigned left shift. 按位无符号左移
  * @param left the base number to shift.
  * @param right number of bits to left shift.
  */
@@ -506,7 +517,7 @@ case class ShiftLeft(left: Expression, right: Expression)
 
 
 /**
- * Bitwise unsigned left shift.
+ * Bitwise unsigned left shift.按位无符号左移
  * @param left the base number to shift.
  * @param right number of bits to left shift.
  */
@@ -533,6 +544,7 @@ case class ShiftRight(left: Expression, right: Expression)
 
 /**
  * Bitwise unsigned right shift, for integer and long data type.
+  * 对于整数和长数据类型,按位无符号右移
  * @param left the base number.
  * @param right the number of bits to right shift.
  */
@@ -563,6 +575,7 @@ case class Hypot(left: Expression, right: Expression)
 
 /**
  * Computes the logarithm of a number.
+  * 计算数字的对数
  * @param left the logarithm base, default to e.
  * @param right the number to compute the logarithm of.
  */
@@ -571,6 +584,7 @@ case class Logarithm(left: Expression, right: Expression)
 
   /**
    * Natural log, i.e. using e as the base.
+    * 自然对数,即以e为基础。
    */
   def this(child: Expression) = {
     this(EulerNumber(), child)
@@ -609,6 +623,9 @@ case class Logarithm(left: Expression, right: Expression)
 /**
  * Round the `child`'s result to `scale` decimal place when `scale` >= 0
  * or round at integral part when `scale` < 0.
+  *
+  * 当`scale`> = 0时，将`child`的结果舍入到'scale`小数位,
+  * 或者当'scale` <0时将'child`的结果舍入到整数部分。
  * For example, round(31.415, 2) = 31.42 and round(31.415, -1) = 30.
  *
  * Child of IntegralType would round to itself when `scale` >= 0.
@@ -631,6 +648,7 @@ case class Round(child: Expression, scale: Expression)
   override def right: Expression = scale
 
   // round of Decimal would eval to null if it fails to `changePrecision`
+  //如果它不能“changePrecision”，那么Decimal将舍入到null
   override def nullable: Boolean = true
 
   override def foldable: Boolean = child.foldable
@@ -638,6 +656,7 @@ case class Round(child: Expression, scale: Expression)
   override lazy val dataType: DataType = child.dataType match {
     // if the new scale is bigger which means we are scaling up,
     // keep the original scale as `Decimal` does
+      //如果新的比例更大,这意味着我们正在扩大规模,保持原始比例为“十进制”
     case DecimalType.Fixed(p, s) => DecimalType(p, if (_scale > s) s else _scale)
     case t => t
   }
@@ -676,6 +695,7 @@ case class Round(child: Expression, scale: Expression)
   }
 
   // not overriding since _scale is a constant int at runtime
+  //因为_scale是运行时的常量int，所以不会覆盖
   def nullSafeEval(input1: Any): Any = {
     child.dataType match {
       case _: DecimalType =>

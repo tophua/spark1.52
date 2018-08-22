@@ -181,6 +181,7 @@ trait HashOuterJoin {
     if (!key.anyNull) {
       // Store the positions of records in right, if one of its associated row satisfy
       // the join condition.
+      //如果其关联行之一满足连接条件,则将记录的位置存储在右侧
       val rightMatchedSet = scala.collection.mutable.Set[Int]()
       leftIter.iterator.flatMap[InternalRow] { l =>
         joinedRow.withLeft(l)
@@ -188,16 +189,19 @@ trait HashOuterJoin {
         rightIter.zipWithIndex.collect {
           // 1. For those matched (satisfy the join condition) records with both sides filled,
           //    append them directly
+          //对于那些匹配(满足连接条件)记录并填充两边的记录,直接附加它们
 
           case (r, idx) if boundCondition(joinedRow.withRight(r)) =>
             numOutputRows += 1
             matched = true
             // if the row satisfy the join condition, add its index into the matched set
+            //如果行满足连接条件,则将其索引添加到匹配的集合中
             rightMatchedSet.add(idx)
             joinedRow.copy()
 
         } ++ DUMMY_LIST.filter(_ => !matched).map( _ => {
           // 2. For those unmatched records in left, append additional records with empty right.
+          //对于左边那些不匹配的记录,添加空白右边的附加记录
 
           // DUMMY_LIST.filter(_ => !matched) is a tricky way to add additional row,
           // as we don't know whether we need to append it until finish iterating all
@@ -208,6 +212,7 @@ trait HashOuterJoin {
         })
       } ++ rightIter.zipWithIndex.collect {
         // 3. For those unmatched records in right, append additional records with empty left.
+        //对于右边那些不匹配的记录,附加空左边的附加记录。
 
         // Re-visiting the records in right, and append additional row with empty left, if its not
         // in the matched set.
@@ -227,6 +232,7 @@ trait HashOuterJoin {
   }
 
   // This is only used by FullOuter
+  //这仅供FullOuter使用
   protected[this] def buildHashTable(
       iter: Iterator[InternalRow],
       numIterRows: LongSQLMetric,

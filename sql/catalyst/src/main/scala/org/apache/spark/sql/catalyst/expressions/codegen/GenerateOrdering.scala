@@ -24,6 +24,7 @@ import org.apache.spark.sql.types.StructType
 
 /**
  * Inherits some default implementation for Java from `Ordering[Row]`
+  * 从`Ordering [Row]`继承Java的一些默认实现
  */
 class BaseOrdering extends Ordering[InternalRow] {
   def compare(a: InternalRow, b: InternalRow): Int = {
@@ -33,6 +34,7 @@ class BaseOrdering extends Ordering[InternalRow] {
 
 /**
  * Generates bytecode for an [[Ordering]] of rows for a given set of expressions.
+  * 为给定的一组表达式生成行的[[Ordering]]的字节码
  */
 object GenerateOrdering extends CodeGenerator[Seq[SortOrder], Ordering[InternalRow]] with Logging {
 
@@ -44,6 +46,7 @@ object GenerateOrdering extends CodeGenerator[Seq[SortOrder], Ordering[InternalR
 
   /**
    * Creates a code gen ordering for sorting this schema, in ascending order.
+    * 创建用于按升序对此模式进行排序的代码生成顺序
    */
   def create(schema: StructType): BaseOrdering = {
     create(schema.zipWithIndex.map { case (field, ordinal) =>
@@ -53,6 +56,7 @@ object GenerateOrdering extends CodeGenerator[Seq[SortOrder], Ordering[InternalR
 
   /**
    * Generates the code for comparing a struct type according to its natural ordering
+    * 生成用于根据结构类型的自然顺序比较结构类型的代码
    * (i.e. ascending order by field 1, then field 2, ..., then field n.
    */
   def genComparisons(ctx: CodeGenContext, schema: StructType): String = {
@@ -64,6 +68,7 @@ object GenerateOrdering extends CodeGenerator[Seq[SortOrder], Ordering[InternalR
 
   /**
    * Generates the code for ordering based on the given order.
+    * 根据给定的顺序生成用于排序的代码
    */
   def genComparisons(ctx: CodeGenContext, ordering: Seq[SortOrder]): String = {
     val comparisons = ordering.map { order =>

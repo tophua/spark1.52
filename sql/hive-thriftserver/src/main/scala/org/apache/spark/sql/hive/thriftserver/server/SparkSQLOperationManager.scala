@@ -29,6 +29,7 @@ import org.apache.spark.sql.hive.thriftserver.{SparkExecuteStatementOperation, R
 
 /**
  * Executes queries using Spark SQL, and maintains a list of handles to active queries.
+  * 使用Spark SQL执行查询,并维护活动查询的句柄列表
  */
 private[thriftserver] class SparkSQLOperationManager(hiveContext: HiveContext)
   extends OperationManager with Logging {

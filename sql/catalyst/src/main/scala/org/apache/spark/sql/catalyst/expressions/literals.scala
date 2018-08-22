@@ -56,6 +56,7 @@ object Literal {
 
 /**
  * An extractor that matches non-null literal values
+  * 一个匹配非null文字值的提取器
  */
 object NonNullLiteral {
   def unapply(literal: Literal): Option[(Any, DataType)] = {
@@ -65,6 +66,7 @@ object NonNullLiteral {
 
 /**
  * Extractor for retrieving Int literals.
+  * 用于检索Int文字的提取器
  */
 object IntegerLiteral {
   def unapply(a: Any): Option[Int] = a match {
@@ -75,6 +77,7 @@ object IntegerLiteral {
 
 /**
  * In order to do type checking, use Literal.create() instead of constructor
+  * 要进行类型检查，请使用Literal.create()而不是构造函数
  */
 case class Literal protected (value: Any, dataType: DataType)
   extends LeafExpression with CodegenFallback {
@@ -95,6 +98,7 @@ case class Literal protected (value: Any, dataType: DataType)
 
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
     // change the isNull and primitive to consts, to inline them
+    //将isNull和primitive更改为consts,以内联它们
     if (value == null) {
       ev.isNull = "true"
       s"final ${ctx.javaType(dataType)} ${ev.primitive} = ${ctx.defaultValue(dataType)};"

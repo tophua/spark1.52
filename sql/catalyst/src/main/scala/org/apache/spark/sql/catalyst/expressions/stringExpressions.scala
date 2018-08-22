@@ -28,13 +28,14 @@ import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// This file defines expressions for string operations.
+// This file defines expressions for string operations.此文件定义字符串操作的表达式
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 /**
  * An expression that concatenates multiple input strings into a single string.
- * If any input is null, concat returns null.
+  * 将多个输入字符串连接成单个字符串的表达式
+ * If any input is null, concat returns null.如果任何输入为null,则concat返回null
  */
 case class Concat(children: Seq[Expression]) extends Expression with ImplicitCastInputTypes {
 
@@ -68,8 +69,10 @@ case class Concat(children: Seq[Expression]) extends Expression with ImplicitCas
 /**
  * An expression that concatenates multiple input strings or array of strings into a single string,
  * using a given separator (the first child).
+  * 使用给定分隔符(第一个子级)将多个输入字符串或字符串数组连接成单个字符串的表达式。
  *
  * Returns null if the separator is null. Otherwise, concat_ws skips all null values.
+  * 如果分隔符为null,则返回null,否则,concat_ws会跳过所有空值
  */
 case class ConcatWs(children: Seq[Expression])
   extends Expression with ImplicitCastInputTypes with CodegenFallback {
@@ -78,7 +81,8 @@ case class ConcatWs(children: Seq[Expression])
 
   override def prettyName: String = "concat_ws"
 
-  /** The 1st child (separator) is str, and rest are either str or array of str. */
+  /** The 1st child (separator) is str, and rest are either str or array of str.
+    * 第一个子（分隔符）是str，其余是str或str的数组*/
   override def inputTypes: Seq[AbstractDataType] = {
     val arrayOrStr = TypeCollection(ArrayType(StringType), StringType)
     StringType +: Seq.fill(children.size - 1)(arrayOrStr)
@@ -134,6 +138,7 @@ trait String2StringExpression extends ImplicitCastInputTypes {
 
 /**
  * A function that converts the characters of a string to uppercase.
+  * 将字符串的字符转换为大写的函数
  */
 @ExpressionDescription(
   usage = "_FUNC_(str) - Returns str with all characters changed to uppercase",
@@ -150,6 +155,7 @@ case class Upper(child: Expression)
 
 /**
  * A function that converts the characters of a string to lowercase.
+  * 将字符串的字符转换为小写的函数
  */
 @ExpressionDescription(
   usage = "_FUNC_(str) - Returns str with all characters changed to lowercase",
@@ -163,7 +169,8 @@ case class Lower(child: Expression) extends UnaryExpression with String2StringEx
   }
 }
 
-/** A base trait for functions that compare two strings, returning a boolean. */
+/** A base trait for functions that compare two strings, returning a boolean.
+  * 比较两个字符串的函数的基本特征,返回一个布尔值*/
 trait StringPredicate extends Predicate with ImplicitCastInputTypes {
   self: BinaryExpression =>
 
@@ -179,6 +186,7 @@ trait StringPredicate extends Predicate with ImplicitCastInputTypes {
 
 /**
  * A function that returns true if the string `left` contains the string `right`.
+  * 如果字符串“left”包含字符串“right”,则返回true的函数
  */
 case class Contains(left: Expression, right: Expression)
     extends BinaryExpression with StringPredicate {
@@ -190,6 +198,7 @@ case class Contains(left: Expression, right: Expression)
 
 /**
  * A function that returns true if the string `left` starts with the string `right`.
+  * 如果字符串“left”以字符串“right”开头,则返回true的函数
  */
 case class StartsWith(left: Expression, right: Expression)
     extends BinaryExpression with StringPredicate {
@@ -201,6 +210,7 @@ case class StartsWith(left: Expression, right: Expression)
 
 /**
  * A function that returns true if the string `left` ends with the string `right`.
+  * 如果字符串“left”以字符串“right”结尾,则返回true的函数
  */
 case class EndsWith(left: Expression, right: Expression)
     extends BinaryExpression with StringPredicate {
@@ -234,6 +244,9 @@ object StringTranslate {
  * The characters in `replaceExpr` is corresponding to the characters in `matchingExpr`.
  * The translate will happen when any character in the string matching with the character
  * in the `matchingExpr`.
+  * 函数用`replaceExpr`中的字符翻译`srcExpr`中的任何字符,
+  * `replaceExpr`中的字符对应于`matchingExpr`中的字符,
+  * 当字符串中的任何字符与`matchingExpr`中的字符匹配时,将发生翻译。
  */
 case class StringTranslate(srcExpr: Expression, matchingExpr: Expression, replaceExpr: Expression)
   extends TernaryExpression with ImplicitCastInputTypes {
@@ -289,6 +302,8 @@ case class StringTranslate(srcExpr: Expression, matchingExpr: Expression, replac
  * A function that returns the index (1-based) of the given string (left) in the comma-
  * delimited list (right). Returns 0, if the string wasn't found or if the given
  * string (left) contains a comma.
+  * 一个函数,用于返回逗号分隔列表(右)中给定字符串(左)的索引(从1开始),
+  * 如果未找到字符串或给定字符串(左)包含逗号,则返回0。
  */
 case class FindInSet(left: Expression, right: Expression) extends BinaryExpression
     with ImplicitCastInputTypes {
@@ -309,6 +324,7 @@ case class FindInSet(left: Expression, right: Expression) extends BinaryExpressi
 
 /**
  * A function that trim the spaces from both ends for the specified string.
+  * 一个函数,用于修剪指定字符串两端的空格
  */
 case class StringTrim(child: Expression)
   extends UnaryExpression with String2StringExpression {
@@ -324,6 +340,7 @@ case class StringTrim(child: Expression)
 
 /**
  * A function that trim the spaces from left end for given string.
+  * 对于给定字符串,从左端修剪空格的函数
  */
 case class StringTrimLeft(child: Expression)
   extends UnaryExpression with String2StringExpression {
@@ -339,6 +356,7 @@ case class StringTrimLeft(child: Expression)
 
 /**
  * A function that trim the spaces from right end for given string.
+  * 一个函数,用于修剪给定字符串的右端空格
  */
 case class StringTrimRight(child: Expression)
   extends UnaryExpression with String2StringExpression {
@@ -356,8 +374,11 @@ case class StringTrimRight(child: Expression)
  * A function that returns the position of the first occurrence of substr in the given string.
  * Returns null if either of the arguments are null and
  * returns 0 if substr could not be found in str.
+  *
+  * 一个函数,返回给定字符串中第一次出现substr的位置,如果任一参数为null,则返回null;如果在str中找不到substr,则返回0
  *
  * NOTE: that this is not zero based, but 1-based index. The first character in str has index 1.
+  * 注意：这不是基于零的,而是基于1的索引, str中的第一个字符具有索引1。
  */
 case class StringInstr(str: Expression, substr: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -381,9 +402,12 @@ case class StringInstr(str: Expression, substr: Expression)
 
 /**
  * Returns the substring from string str before count occurrences of the delimiter delim.
+  * 在分隔符delim的计数出现之前,从字符串str返回子字符串
  * If count is positive, everything the left of the final delimiter (counting from left) is
  * returned. If count is negative, every to the right of the final delimiter (counting from the
  * right) is returned. substring_index performs a case-sensitive match when searching for delim.
+  * 如果count为正数,则返回最终分隔符左边的所有内容(从左边开始计算),
+  * 如果count为负数,则返回最终分隔符(从右侧开始)的右侧,substring_index在搜索delim时执行区分大小写的匹配。
  */
 case class SubstringIndex(strExpr: Expression, delimExpr: Expression, countExpr: Expression)
  extends TernaryExpression with ImplicitCastInputTypes {
@@ -407,6 +431,7 @@ case class SubstringIndex(strExpr: Expression, delimExpr: Expression, countExpr:
 /**
  * A function that returns the position of the first occurrence of substr
  * in given string after position pos.
+  * 一个函数,它返回位置pos之后给定字符串中第一次出现substr的位置
  */
 case class StringLocate(substr: Expression, str: Expression, start: Expression)
   extends TernaryExpression with ImplicitCastInputTypes with CodegenFallback {
@@ -423,6 +448,7 @@ case class StringLocate(substr: Expression, str: Expression, start: Expression)
     val s = start.eval(input)
     if (s == null) {
       // if the start position is null, we need to return 0, (conform to Hive)
+      //如果起始位置为null,我们需要返回0(符合Hive)
       0
     } else {
       val r = substr.eval(input)
@@ -446,6 +472,7 @@ case class StringLocate(substr: Expression, str: Expression, start: Expression)
 
 /**
  * Returns str, left-padded with pad to a length of len.
+  * 返回str,左边填充pad,长度为len,
  */
 case class StringLPad(str: Expression, len: Expression, pad: Expression)
   extends TernaryExpression with ImplicitCastInputTypes {
@@ -467,6 +494,7 @@ case class StringLPad(str: Expression, len: Expression, pad: Expression)
 
 /**
  * Returns str, right-padded with pad to a length of len.
+  * 返回str,右边填充pad,长度为len
  */
 case class StringRPad(str: Expression, len: Expression, pad: Expression)
   extends TernaryExpression with ImplicitCastInputTypes {
@@ -488,6 +516,7 @@ case class StringRPad(str: Expression, len: Expression, pad: Expression)
 
 /**
  * Returns the input formatted according do printf-style format strings
+  * 返回根据do printf样式格式字符串格式化的输入
  */
 case class FormatString(children: Expression*) extends Expression with ImplicitCastInputTypes {
 
@@ -556,6 +585,7 @@ case class FormatString(children: Expression*) extends Expression with ImplicitC
 
 /**
  * Returns string, with the first letter of each word in uppercase.
+  * 返回字符串,每个单词的第一个字母为大写,单词由空格分隔
  * Words are delimited by whitespace.
  */
 case class InitCap(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
@@ -573,6 +603,7 @@ case class InitCap(child: Expression) extends UnaryExpression with ImplicitCastI
 
 /**
  * Returns the string which repeat the given string value n times.
+  * 返回重复给定字符串值n次的字符串
  */
 case class StringRepeat(str: Expression, times: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -595,6 +626,7 @@ case class StringRepeat(str: Expression, times: Expression)
 
 /**
  * Returns the reversed given string.
+  * 返回反转的给定字符串
  */
 case class StringReverse(child: Expression) extends UnaryExpression with String2StringExpression {
   override def convert(v: UTF8String): UTF8String = v.reverse()
@@ -608,6 +640,7 @@ case class StringReverse(child: Expression) extends UnaryExpression with String2
 
 /**
  * Returns a n spaces string.
+  * 返回n个空格字符串
  */
 case class StringSpace(child: Expression)
   extends UnaryExpression with ImplicitCastInputTypes {
@@ -659,6 +692,7 @@ object Substring {
 /**
  * A function that takes a substring of its first argument starting at a given position.
  * Defined for String and Binary types.
+  * 一个函数,它接受从给定位置开始的第一个参数的子字符串,为String和Binary类型定义
  */
 case class Substring(str: Expression, pos: Expression, len: Expression)
   extends TernaryExpression with ImplicitCastInputTypes {
@@ -697,6 +731,7 @@ case class Substring(str: Expression, pos: Expression, len: Expression)
 
 /**
  * A function that return the length of the given string or binary expression.
+  * 返回给定字符串或二进制表达式长度的函数
  */
 case class Length(child: Expression) extends UnaryExpression with ExpectsInputTypes {
   override def dataType: DataType = IntegerType
@@ -717,6 +752,7 @@ case class Length(child: Expression) extends UnaryExpression with ExpectsInputTy
 
 /**
  * A function that return the Levenshtein distance between the two given strings.
+  * 返回两个给定字符串之间的Levenshtein距离的函数
  */
 case class Levenshtein(left: Expression, right: Expression) extends BinaryExpression
     with ImplicitCastInputTypes {
@@ -735,6 +771,7 @@ case class Levenshtein(left: Expression, right: Expression) extends BinaryExpres
 
 /**
  * A function that return soundex code of the given string expression.
+  * 返回给定字符串表达式的soundex代码的函数
  */
 case class SoundEx(child: Expression) extends UnaryExpression with ExpectsInputTypes {
 
@@ -751,6 +788,7 @@ case class SoundEx(child: Expression) extends UnaryExpression with ExpectsInputT
 
 /**
  * Returns the numeric value of the first character of str.
+  * 返回str的第一个字符的数值
  */
 case class Ascii(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 
@@ -782,6 +820,7 @@ case class Ascii(child: Expression) extends UnaryExpression with ImplicitCastInp
 
 /**
  * Converts the argument from binary to a base 64 string.
+  * 将参数从二进制转换为基本64字符串
  */
 case class Base64(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 
@@ -805,6 +844,7 @@ case class Base64(child: Expression) extends UnaryExpression with ImplicitCastIn
 
 /**
  * Converts the argument from a base 64 string to BINARY.
+  * 将参数从base 64字符串转换为BINARY
  */
 case class UnBase64(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 
@@ -826,6 +866,8 @@ case class UnBase64(child: Expression) extends UnaryExpression with ImplicitCast
  * Decodes the first argument into a String using the provided character set
  * (one of 'US-ASCII', 'ISO-8859-1', 'UTF-8', 'UTF-16BE', 'UTF-16LE', 'UTF-16').
  * If either argument is null, the result will also be null.
+  * 使用提供的字符集('US-ASCII'，'ISO-8859-1'，'UTF-8'，'UTF-16BE'，'UTF-16LE'，'UTF-)
+  * 将第一个参数解码为String 16'),如果任一参数为null，结果也将为null。
  */
 case class Decode(bin: Expression, charset: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -885,6 +927,8 @@ case class Encode(value: Expression, charset: Expression)
  * Formats the number X to a format like '#,###,###.##', rounded to D decimal places,
  * and returns the result as a string. If D is 0, the result has no decimal point or
  * fractional part.
+  * 将数字X格式化为'＃，###，###。##'等格式,舍入到D小数位,并将结果作为字符串返回,
+  * 如果D为0,则结果没有小数点或小数部分。
  */
 case class FormatNumber(x: Expression, d: Expression)
   extends BinaryExpression with ExpectsInputTypes {
@@ -896,11 +940,13 @@ case class FormatNumber(x: Expression, d: Expression)
 
   // Associated with the pattern, for the last d value, and we will update the
   // pattern (DecimalFormat) once the new coming d value differ with the last one.
+  //与模式相关联,对于最后一个d值,一旦新的d值与最后一个值不同,我们将更新模式(DecimalFormat)
   @transient
   private var lastDValue: Int = -100
 
   // A cached DecimalFormat, for performance concern, we will change it
   // only if the d value changed.
+  //缓存的DecimalFormat,出于性能考虑,我们只有在d值发生变化时才会更改它
   @transient
   private val pattern: StringBuffer = new StringBuffer()
 
@@ -915,6 +961,7 @@ case class FormatNumber(x: Expression, d: Expression)
 
     if (dValue != lastDValue) {
       // construct a new DecimalFormat only if a new dValue
+      //只有在新的dValue时才构造一个新的DecimalFormat
       pattern.delete(0, pattern.length)
       pattern.append("#,###,###,###,###,###,##0")
 

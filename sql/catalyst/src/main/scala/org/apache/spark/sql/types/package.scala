@@ -20,5 +20,6 @@ package org.apache.spark.sql
 /**
  * Contains a type system for attributes produced by relations, including complex types like
  * structs, arrays and maps.
+  * 包含由关系生成的属性的类型系统,包括结构,数组和映射等复杂类型
  */
 package object types

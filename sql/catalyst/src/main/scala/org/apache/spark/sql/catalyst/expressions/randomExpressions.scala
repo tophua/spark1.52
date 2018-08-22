@@ -27,10 +27,12 @@ import org.apache.spark.util.random.XORShiftRandom
 
 /**
  * A Random distribution generating expression.
+  * 随机分布生成表达式
  * TODO: This can be made generic to generate any type of random distribution, or any type of
  * StructType.
  *
  * Since this expression is stateful, it cannot be a case object.
+  * 由于此表达式是有状态的,因此不能是大小写对象
  */
 abstract class RDG extends LeafExpression with Nondeterministic {
 
@@ -39,6 +41,7 @@ abstract class RDG extends LeafExpression with Nondeterministic {
   /**
    * Record ID within each partition. By being transient, the Random Number Generator is
    * reset every time we serialize and deserialize and initialize it.
+    * 每个分区中的记录ID,通过瞬态,每次我们序列化和反序列化并初始化时,都会重置随机数生成器
    */
   @transient protected var rng: XORShiftRandom = _
 
@@ -51,7 +54,8 @@ abstract class RDG extends LeafExpression with Nondeterministic {
   override def dataType: DataType = DoubleType
 }
 
-/** Generate a random column with i.i.d. uniformly distributed values in [0, 1). */
+/** Generate a random column with i.i.d. uniformly distributed values in [0, 1).
+  * 使用i.i.d生成随机列,均匀分布的值在[0,1]中*/
 case class Rand(seed: Long) extends RDG {
   override protected def evalInternal(input: InternalRow): Double = rng.nextDouble()
 
@@ -74,7 +78,8 @@ case class Rand(seed: Long) extends RDG {
   }
 }
 
-/** Generate a random column with i.i.d. gaussian random distribution. */
+/** Generate a random column with i.i.d. gaussian random distribution.
+  * 使用i.i.d生成随机列,高斯随机分布*/
 case class Randn(seed: Long) extends RDG {
   override protected def evalInternal(input: InternalRow): Double = rng.nextGaussian()
 

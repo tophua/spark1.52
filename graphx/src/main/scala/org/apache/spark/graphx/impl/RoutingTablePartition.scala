@@ -35,6 +35,8 @@ object RoutingTablePartition {
    * A message from an edge partition to a vertex specifying the position in which the edge
    * partition references the vertex (src, dst, or both). The edge partition is encoded in the lower
    * 30 bytes of the Int, and the position is encoded in the upper 2 bytes of the Int.
+    *
+    * 从边分区到顶点的消息,指定边分区引用顶点（src，dst或两者）的位置,边缘分区在Int的低30字节中编码,并且位置在Int的高2字节中编码。
    */
   type RoutingTableMessage = (VertexId, Int)
 
@@ -50,11 +52,13 @@ object RoutingTablePartition {
 
   val empty: RoutingTablePartition = new RoutingTablePartition(Array.empty)
 
-  /** Generate a `RoutingTableMessage` for each vertex referenced in `edgePartition`. */
+  /** Generate a `RoutingTableMessage` for each vertex referenced in `edgePartition`.
+    * 为`edgePartition`中引用的每个顶点生成一个`RoutingTableMessage`*/
   def edgePartitionToMsgs(pid: PartitionID, edgePartition: EdgePartition[_, _])
     : Iterator[RoutingTableMessage] = {
     // Determine which positions each vertex id appears in using a map where the low 2 bits
     // represent src and dst
+    //使用低2位代表src和dst的映射确定每个顶点id出现在哪个位置
     val map = new GraphXPrimitiveKeyOpenHashMap[VertexId, Byte]
     edgePartition.iterator.foreach { e =>
       map.changeValue(e.srcId, 0x1, (b: Byte) => (b | 0x1).toByte)
@@ -67,7 +71,8 @@ object RoutingTablePartition {
     }
   }
 
-  /** Build a `RoutingTablePartition` from `RoutingTableMessage`s. */
+  /** Build a `RoutingTablePartition` from `RoutingTableMessage`s.
+    * 从`RoutingTableMessage`s构建`RoutingTablePartition`*/
   def fromMsgs(numEdgePartitions: Int, iter: Iterator[RoutingTableMessage])
     : RoutingTablePartition = {
     val pid2vid = Array.fill(numEdgePartitions)(new PrimitiveVector[VertexId])
@@ -87,7 +92,8 @@ object RoutingTablePartition {
     })
   }
 
-  /** Compact the given vector of Booleans into a BitSet. */
+  /** Compact the given vector of Booleans into a BitSet.
+    * 将给定的布尔矢量压缩为BitSet*/
   private def toBitSet(flags: PrimitiveVector[Boolean]): BitSet = {
     val bitset = new BitSet(flags.size)
     var i = 0
@@ -105,20 +111,25 @@ object RoutingTablePartition {
  * Stores the locations of edge-partition join sites for each vertex attribute in a particular
  * vertex partition. This provides routing information for shipping vertex attributes to edge
  * partitions.
+  * 存储特定顶点分区中每个顶点属性的边缘分区连接站点的位置,这提供了将顶点属性发送到边缘分区的路由信息
  */
 private[graphx]
 class RoutingTablePartition(
     private val routingTable: Array[(Array[VertexId], BitSet, BitSet)]) extends Serializable {
-  /** The maximum number of edge partitions this `RoutingTablePartition` is built to join with. */
+  /** The maximum number of edge partitions this `RoutingTablePartition` is built to join with.
+    * 这个`RoutingTablePartition`的最大边数分区数是为了加入而构建的*/
   val numEdgePartitions: Int = routingTable.size
 
-  /** Returns the number of vertices that will be sent to the specified edge partition. */
+  /** Returns the number of vertices that will be sent to the specified edge partition.
+    * 返回将发送到指定边分区的顶点数*/
   def partitionSize(pid: PartitionID): Int = routingTable(pid)._1.size
 
-  /** Returns an iterator over all vertex ids stored in this `RoutingTablePartition`. */
+  /** Returns an iterator over all vertex ids stored in this `RoutingTablePartition`.
+    * 返回存储在此RoutingTablePartition中的所有顶点id的迭代器*/
   def iterator: Iterator[VertexId] = routingTable.iterator.flatMap(_._1.iterator)
 
-  /** Returns a new RoutingTablePartition reflecting a reversal of all edge directions. */
+  /** Returns a new RoutingTablePartition reflecting a reversal of all edge directions.
+    * 返回一个新的RoutingTablePartition，反映所有边缘方向的反转*/
   def reverse: RoutingTablePartition = {
     new RoutingTablePartition(routingTable.map {
       case (vids, srcVids, dstVids) => (vids, dstVids, srcVids)
@@ -128,6 +139,8 @@ class RoutingTablePartition(
   /**
    * Runs `f` on each vertex id to be sent to the specified edge partition. Vertex ids can be
    * filtered by the position they have in the edge partition.
+    *
+    * 在每个顶点id上运行`f`以发送到指定的边缘分区,顶点ID可以按边缘分区中的位置进行过滤
    */
   def foreachWithinEdgePartition
       (pid: PartitionID, includeSrc: Boolean, includeDst: Boolean)

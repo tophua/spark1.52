@@ -29,6 +29,7 @@ import org.apache.spark.sql.types.{DataType, StructType}
 
 /**
  * (private[spark]) Params for classification.
+  * 私有[Spark]参数分类
  */
 private[spark] trait ClassifierParams
   extends PredictorParams with HasRawPredictionCol {
@@ -46,6 +47,7 @@ private[spark] trait ClassifierParams
  * :: DeveloperApi ::
  *
  * Single-label binary or multiclass classification.
+  * 单标签二进制或多类分类
  * Classes are indexed {0, 1, ..., numClasses - 1}.
  *
  * @tparam FeaturesType  Type of input features.  E.g., [[Vector]]
@@ -69,6 +71,7 @@ abstract class Classifier[
  * :: DeveloperApi ::
  *
  * Model produced by a [[Classifier]].
+  * 由[[Classifier]]生成的模型
  * Classes are indexed {0, 1, ..., numClasses - 1}.
  *
  * @tparam FeaturesType  Type of input features.  E.g., [[Vector]]
@@ -100,8 +103,9 @@ abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[Featur
   override def transform(dataset: DataFrame): DataFrame = {
     transformSchema(dataset.schema, logging = true)
 
-    // Output selected columns only.
+    // Output selected columns only.仅输出所选列
     // This is a bit complicated since it tries to avoid repeated computation.
+    //这有点复杂,因为它试图避免重复计算
     var outputData = dataset
     var numColsOutput = 0
     if (getRawPredictionCol != "") {
@@ -134,6 +138,7 @@ abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[Featur
   /**
    * Predict label for the given features.
    * This internal method is used to implement [[transform()]] and output [[predictionCol]].
+    * 此内部方法用于实现[[transform()]]和输出[[predictionCol]]
    *
    * This default implementation for classification predicts the index of the maximum value
    * from [[predictRaw()]].
@@ -144,8 +149,10 @@ abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[Featur
 
   /**
    * Raw prediction for each possible label.
+    * 每个可能标签的原始预测
    * The meaning of a "raw" prediction may vary between algorithms, but it intuitively gives
    * a measure of confidence in each possible label (where larger = more confident).
+    * “原始”预测的含义可能因算法而异,但它直观地给出了每个可能标签的置信度(更大=更自信)
    * This internal method is used to implement [[transform()]] and output [[rawPredictionCol]].
    *
    * @return  vector where element i is the raw prediction for label i.
@@ -156,7 +163,9 @@ abstract class ClassificationModel[FeaturesType, M <: ClassificationModel[Featur
 
   /**
    * Given a vector of raw predictions, select the predicted label.
+    * 给定原始预测的矢量,选择预测标签
    * This may be overridden to support thresholds which favor particular labels.
+    * 这可能会被覆盖以支持有利于特定标签的阈值
    * @return  predicted label
    */
   protected def raw2prediction(rawPrediction: Vector): Double = rawPrediction.argmax

@@ -30,25 +30,25 @@ sealed abstract class AttributeType(val name: String)
 @DeveloperApi
 object AttributeType {
 
-  /** Numeric type. */
+  /** Numeric type. 数字类型*/
   val Numeric: AttributeType = {
     case object Numeric extends AttributeType("numeric")
     Numeric
   }
 
-  /** Nominal type. */
+  /** Nominal type. 标准类型*/
   val Nominal: AttributeType = {
     case object Nominal extends AttributeType("nominal")
     Nominal
   }
 
-  /** Binary type. */
+  /** Binary type. 二进制类型*/
   val Binary: AttributeType = {
     case object Binary extends AttributeType("binary")
     Binary
   }
 
-  /** Unresolved type. */
+  /** Unresolved type. 未解决的类型*/
   val Unresolved: AttributeType = {
     case object Unresolved extends AttributeType("unresolved")
     Unresolved
@@ -56,6 +56,7 @@ object AttributeType {
 
   /**
    * Gets the [[AttributeType]] object from its name.
+    * 从其名称获取[属性tType]对象
    * @param name attribute type name: "numeric", "nominal", or "binary"
    */
   def fromName(name: String): AttributeType = {

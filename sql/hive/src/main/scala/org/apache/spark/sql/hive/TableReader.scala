@@ -40,6 +40,7 @@ import org.apache.spark.util.{SerializableConfiguration, Utils}
 
 /**
  * A trait for subclasses that handle table scans.
+  * 处理表扫描的子类的特征
  */
 private[hive] sealed trait TableReader {
   def makeRDDForTable(hiveTable: HiveTable): RDD[InternalRow]
@@ -51,6 +52,7 @@ private[hive] sealed trait TableReader {
 /**
  * Helper class for scanning tables stored in Hadoop - e.g., to read Hive tables that reside in the
  * data warehouse directory.
+  * 用于扫描存储在Hadoop中的表的助手类 - 例如,用于读取驻留在数据仓库目录中的Hive表
  */
 private[hive]
 class HadoopTableReader(
@@ -64,6 +66,7 @@ class HadoopTableReader(
   // https://hadoop.apache.org/docs/r1.0.4/mapred-default.html
   //
   // In order keep consistency with Hive, we will let it be 0 in local mode also.
+  //为了与Hive保持一致,我们也将在本地模式下为0。
   private val _minSplitsPerRDD = if (sc.sparkContext.isLocal) {
     0 // will splitted based on block by default.
   } else {
@@ -84,9 +87,11 @@ class HadoopTableReader(
   /**
    * Creates a Hadoop RDD to read data from the target table's data directory. Returns a transformed
    * RDD that contains deserialized rows.
+    * 创建Hadoop RDD以从目标表的数据目录中读取数据,返回包含反序列化行的已转换RDD
    *
-   * @param hiveTable Hive metadata for the table being scanned.
+   * @param hiveTable Hive metadata for the table being scanned.正在扫描的表的Hive元数据
    * @param deserializerClass Class of the SerDe used to deserialize Writables read from Hadoop.
+    *                          用于反序列化从Hadoop读取的Writable的SerDe类
    * @param filterOpt If defined, then the filter is used to reject files contained in the data
    *                  directory being read. If None, then all files are accepted.
    */
@@ -100,6 +105,7 @@ class HadoopTableReader(
 
     // Create local references to member variables, so that the entire `this` object won't be
     // serialized in the closure below.
+    //创建对成员变量的本地引用,以便在下面的闭包中不会序列化整个`this`对象。
     val tableDesc = relation.tableDesc
     val broadcastedHiveConf = _broadcastedHiveConf
 
@@ -134,6 +140,8 @@ class HadoopTableReader(
    * Create a HadoopRDD for every partition key specified in the query. Note that for on-disk Hive
    * tables, a data directory is created for each partition corresponding to keys specified using
    * 'PARTITION BY'.
+    * 为查询中指定的每个分区键创建HadoopRDD,请注意,对于磁盘上的Hive表,
+    * 将为与使用“PARTITION BY”指定的键对应的每个分区创建一个数据目录
    *
    * @param partitionToDeserializer Mapping from a Hive Partition metadata object to the SerDe
    *     class to use to deserialize input Writables from the corresponding partition.
@@ -190,11 +198,13 @@ class HadoopTableReader(
       val ifc = partDesc.getInputFileFormatClass
         .asInstanceOf[java.lang.Class[InputFormat[Writable, Writable]]]
       // Get partition field info
+        //获取分区字段信息
       val partSpec = partDesc.getPartSpec
       val partProps = partDesc.getProperties
 
       val partColsDelimited: String = partProps.getProperty(META_TABLE_PARTITION_COLUMNS)
       // Partitioning columns are delimited by "/"
+        //分区列由分隔符分隔
       val partCols = partColsDelimited.trim().split("/").toSeq
       // 'partValues[i]' contains the value for the partitioning column at 'partCols[i]'.
       val partValues = if (partSpec == null) {
@@ -204,6 +214,7 @@ class HadoopTableReader(
       }
 
       // Create local references so that the outer object isn't serialized.
+        //创建本地引用,以便不对序列化外部对象。
       val tableDesc = relation.tableDesc
       val broadcastedHiveConf = _broadcastedHiveConf
       val localDeserializer = partDeserializer
@@ -224,6 +235,7 @@ class HadoopTableReader(
       }
 
       // Fill all partition keys to the given MutableRow object
+        //将所有分区键填充到给定的MutableRow对象
       fillPartitionKeys(partValues, mutableRow)
 
       createHadoopRdd(tableDesc, inputPathStr, ifc).mapPartitions { iter =>
@@ -241,6 +253,7 @@ class HadoopTableReader(
     }.toSeq
 
     // Even if we don't use any partitions, we still need an empty RDD
+    //即使我们不使用任何分区,我们仍然需要一个空的RDD
     if (hivePartitionRDDs.size == 0) {
       new EmptyRDD[InternalRow](sc.sparkContext)
     } else {
@@ -251,6 +264,7 @@ class HadoopTableReader(
   /**
    * If `filterOpt` is defined, then it will be used to filter files from `path`. These files are
    * returned in a single, comma-separated string.
+    * 如果定义了`filterOpt`,那么它将用于从`path`过滤文件,这些文件以逗号分隔的单个字符串返回。
    */
   private def applyFilterIfNeeded(path: Path, filterOpt: Option[PathFilter]): String = {
     filterOpt match {
@@ -265,6 +279,7 @@ class HadoopTableReader(
   /**
    * Creates a HadoopRDD based on the broadcasted HiveConf and other job properties that will be
    * applied locally on each slave.
+    * 基于广播的HiveConf和将在本地应用于每个从属的其他作业属性创建HadoopRDD
    */
   private def createHadoopRdd(
     tableDesc: TableDesc,
@@ -291,6 +306,7 @@ private[hive] object HadoopTableReader extends HiveInspectors with Logging {
   /**
    * Curried. After given an argument for 'path', the resulting JobConf => Unit closure is used to
    * instantiate a HadoopRDD.
+    *  在给出'path'的参数后，生成的JobConf => Unit闭包用于实例化HadoopRDD。
    */
   def initializeLocalJobConfFunc(path: String, tableDesc: TableDesc)(jobConf: JobConf) {
     FileInputFormat.setInputPaths(jobConf, Seq[Path](new Path(path)): _*)
@@ -304,7 +320,7 @@ private[hive] object HadoopTableReader extends HiveInspectors with Logging {
 
   /**
    * Transform all given raw `Writable`s into `Row`s.
-   *
+   * 将所有给定的原始`Writable`s转换为`Row`s
    * @param iterator Iterator of all `Writable`s to be transformed
    * @param rawDeser The `Deserializer` associated with the input `Writable`
    * @param nonPartitionKeyAttrs Attributes that should be filled together with their corresponding
@@ -337,6 +353,7 @@ private[hive] object HadoopTableReader extends HiveInspectors with Logging {
     /**
      * Builds specific unwrappers ahead of time according to object inspector
      * types to avoid pattern matching and branching costs per row.
+      * 根据对象检查器类型提前构建特定的unwrappers,以避免模式匹配和每行的分支成本
      */
     val unwrappers: Seq[(Any, MutableRow, Int) => Unit] = fieldRefs.map {
       _.getFieldObjectInspector match {

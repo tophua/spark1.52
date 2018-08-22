@@ -37,9 +37,10 @@ import org.apache.spark.util.Utils
 /**
  * Analyzes the given table in the current database to generate statistics, which will be
  * used in query optimizations.
- *
+ * 分析当前数据库中的给定表以生成统计信息,该统计信息将用于查询优化。
  * Right now, it only supports Hive tables and it only updates the size of a Hive table
  * in the Hive metastore.
+  * 现在,它只支持Hive表,它只更新Hive Metastore中Hive表的大小
  */
 private[hive]
 case class AnalyzeTable(tableName: String) extends RunnableCommand {
@@ -52,6 +53,7 @@ case class AnalyzeTable(tableName: String) extends RunnableCommand {
 
 /**
  * Drops a table from the metastore and removes it if it is cached.
+  * 从Metastore中删除一个表,如果它被缓存则将其删除
  */
 private[hive]
 case class DropTable(
@@ -65,6 +67,7 @@ case class DropTable(
       hiveContext.cacheManager.tryUncacheQuery(hiveContext.table(tableName))
     } catch {
       // This table's metadata is not in Hive metastore (e.g. the table does not exist).
+      //此表的元数据不在Hive Metastore中(例如,该表不存在)
       case _: org.apache.hadoop.hive.ql.metadata.InvalidTableException =>
       case _: org.apache.spark.sql.catalyst.analysis.NoSuchTableException =>
       // Other Throwables can be caused by users providing wrong parameters in OPTIONS
@@ -93,13 +96,16 @@ case class AddJar(path: String) extends RunnableCommand {
     val currentClassLoader = Utils.getContextOrSparkClassLoader
 
     // Add jar to current context
+    //将jar添加到当前上下文
     val jarURL = {
       val uri = new Path(path).toUri
       if (uri.getScheme == null) {
         // `path` is a local file path without a URL scheme
+        //`path`是没有URL方案的本地文件路径
         new File(path).toURI.toURL
       } else {
         // `path` is a URL with a scheme
+        //`path`是带有方案的URL
         uri.toURL
       }
     }
@@ -110,15 +116,22 @@ case class AddJar(path: String) extends RunnableCommand {
     // We need to explicitly set the class loader associated with the conf in executionHive's
     // state because this class loader will be used as the context class loader of the current
     // thread to execute any Hive command.
+    //我们需要在executionHive的状态中显式设置与conf相关联的类加载器,
+    //因为这个类加载器将用作当前线程的上下文类加载器来执行任何Hive命令
     // We cannot use `org.apache.hadoop.hive.ql.metadata.Hive.get().getConf()` because Hive.get()
     // returns the value of a thread local variable and its HiveConf may not be the HiveConf
     // associated with `executionHive.state` (for example, HiveContext is created in one thread
     // and then add jar is called from another thread).
+    //我们不能使用`org.apache.hadoop.hive.ql.metadata.Hive.get（）,
+    // getConf()`因为Hive.get()返回一个线程局部变量的值,而它的HiveConf可能不是HiveConf返回的线程局部变量的值
+    // 及其HiveConf可能不是HiveConf,然后从另一个线程调用add jar
     hiveContext.executionHive.state.getConf.setClassLoader(newClassLoader)
     // Add jar to isolated hive (metadataHive) class loader.
+    //将jar添加到隔离的hive（metadataHive）类加载器
     hiveContext.runSqlHive(s"ADD JAR $path")
 
     // Add jar to executors
+    //将jar添加到执行程序
     hiveContext.sparkContext.addJar(path)
 
     Seq(Row(0))
@@ -151,6 +164,8 @@ case class CreateMetastoreDataSource(
     // the table name and database name we have for this query. MetaStoreUtils.validateName
     // is the method used by Hive to check if a table name or a database name is valid for
     // the metastore.
+    //由于我们将元数据保存到Metastore,我们需要检查Metastore是否支持我们为此查询提供的表名和数据库名。
+    // MetaStoreUtils.validateName是Hive用于检查表名称或数据库名称是否对Metastore有效的方法。
     if (!MetaStoreUtils.validateName(tableIdent.table)) {
       throw new AnalysisException(s"Table name ${tableIdent.table} is not a valid name for " +
         s"metastore. Metastore only accepts table name containing characters, numbers and _.")
@@ -208,6 +223,8 @@ case class CreateMetastoreDataSourceAsSelect(
     // the table name and database name we have for this query. MetaStoreUtils.validateName
     // is the method used by Hive to check if a table name or a database name is valid for
     // the metastore.
+    //由于我们将元数据保存到Metastore,我们需要检查Metastore是否支持我们为此查询提供的表名和数据库名,
+    // MetaStoreUtils.validateName是Hive用于检查表名称或数据库名称是否对Metastore有效的方法。
     if (!MetaStoreUtils.validateName(tableIdent.table)) {
       throw new AnalysisException(s"Table name ${tableIdent.table} is not a valid name for " +
         s"metastore. Metastore only accepts table name containing characters, numbers and _.")
@@ -233,6 +250,7 @@ case class CreateMetastoreDataSourceAsSelect(
     var existingSchema = None: Option[StructType]
     if (sqlContext.catalog.tableExists(tableIdent.toSeq)) {
       // Check if we need to throw an exception or just return.
+      //检查我们是否需要抛出异常或返回
       mode match {
         case SaveMode.ErrorIfExists =>
           throw new AnalysisException(s"Table $tableName already exists. " +
@@ -242,9 +260,11 @@ case class CreateMetastoreDataSourceAsSelect(
             s"Or, if you are using SQL CREATE TABLE, you need to drop $tableName first.")
         case SaveMode.Ignore =>
           // Since the table already exists and the save mode is Ignore, we will just return.
+          //由于表已经存在且保存模式为Ignore,我们将返回
           return Seq.empty[Row]
         case SaveMode.Append =>
           // Check if the specified data source match the data source of the existing table.
+          //检查指定的数据源是否与现有表的数据源匹配
           val resolved = ResolvedDataSource(
             sqlContext, Some(query.schema.asNullable), partitionColumns, provider, optionsWithPath)
           val createdRelation = LogicalRelation(resolved.relation)
@@ -278,17 +298,20 @@ case class CreateMetastoreDataSourceAsSelect(
       }
     } else {
       // The table does not exist. We need to create it in metastore.
+      //该表不存在,我们需要在Metastore中创建它
       createMetastoreTable = true
     }
 
     val data = DataFrame(hiveContext, query)
     val df = existingSchema match {
       // If we are inserting into an existing table, just use the existing schema.
+        //如果我们要插入现有表,只需使用现有模式
       case Some(schema) => sqlContext.internalCreateDataFrame(data.queryExecution.toRdd, schema)
       case None => data
     }
 
     // Create the relation based on the data of df.
+    //根据df的数据创建关系
     val resolved =
       ResolvedDataSource(sqlContext, provider, partitionColumns, mode, optionsWithPath, df)
 
@@ -296,6 +319,8 @@ case class CreateMetastoreDataSourceAsSelect(
       // We will use the schema of resolved.relation as the schema of the table (instead of
       // the schema of df). It is important since the nullability may be changed by the relation
       // provider (for example, see org.apache.spark.sql.parquet.DefaultSource).
+      //我们将使用resolved.relation的模式作为表的模式(而不是df的模式),这很重要,
+      // 因为关系提供程序可以更改可为空性(例如.请参阅org.apache.spark.sql.parquet.DefaultSource)
       hiveContext.catalog.createDataSourceTable(
         tableIdent,
         Some(resolved.relation.schema),
@@ -306,6 +331,7 @@ case class CreateMetastoreDataSourceAsSelect(
     }
 
     // Refresh the cache of the table in the catalog.
+    //刷新目录中表的缓存
     hiveContext.catalog.refreshTable(tableIdent)
     Seq.empty[Row]
   }

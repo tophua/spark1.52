@@ -35,6 +35,7 @@ import org.apache.spark.util.{SerializableConfiguration, Utils}
 
 /**
  * A Strategy for planning scans over data sources defined using the sources API.
+  * 用于规划扫描使用源API定义的数据源的策略
  */
 private[sql] object DataSourceStrategy extends Strategy with Logging {
   def apply(plan: LogicalPlan): Seq[execution.SparkPlan] = plan match {
@@ -60,19 +61,23 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
         (a, _) => toCatalystRDD(l, a, t.buildScan(a.map(_.name).toArray))) :: Nil
 
     // Scanning partitioned HadoopFsRelation
+      //扫描已分区的HadoopFsRelation
     case PhysicalOperation(projects, filters, l @ LogicalRelation(t: HadoopFsRelation, _))
         if t.partitionSpec.partitionColumns.nonEmpty =>
       // We divide the filter expressions into 3 parts
+      //我们将滤波器表达式分为3部分
       val partitionColumns = AttributeSet(
         t.partitionColumns.map(c => l.output.find(_.name == c.name).get))
 
-      // Only pruning the partition keys
+      // Only pruning the partition keys 仅修剪分区键
       val partitionFilters = filters.filter(_.references.subsetOf(partitionColumns))
 
       // Only pushes down predicates that do not reference partition keys.
+      //仅推送不引用分区键的谓词
       val pushedFilters = filters.filter(_.references.intersect(partitionColumns).isEmpty)
 
       // Predicates with both partition keys and attributes
+      //使用分区键和属性进行谓词化
       val combineFilters = filters.toSet -- partitionFilters.toSet -- pushedFilters.toSet
 
       val selectedPartitions = prunePartitions(partitionFilters, t.partitionSpec).toArray
@@ -96,9 +101,11 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
         .map(execution.Filter(_, scan)).getOrElse(scan) :: Nil
 
     // Scanning non-partitioned HadoopFsRelation
+      //扫描未分区的HadoopFsRelation
     case PhysicalOperation(projects, filters, l @ LogicalRelation(t: HadoopFsRelation, _)) =>
       // See buildPartitionedTableScan for the reason that we need to create a shard
       // broadcast HadoopConf.
+      //请参阅buildPartitionedTableScan,因为我们需要创建一个分片广播HadoopConf
       val sharedHadoopConf = SparkHadoopUtil.get.conf
       val confBroadcast =
         t.sqlContext.sparkContext.broadcast(new SerializableConfiguration(sharedHadoopConf))
@@ -135,26 +142,31 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
 
     // Because we are creating one RDD per partition, we need to have a shared HadoopConf.
     // Otherwise, the cost of broadcasting HadoopConf in every RDD will be high.
+    //因为我们每个分区创建一个RDD,所以我们需要一个共享的HadoopConf,否则,在每个RDD中广播HadoopConf的成本都会很高
     val sharedHadoopConf = SparkHadoopUtil.get.conf
     val confBroadcast =
       relation.sqlContext.sparkContext.broadcast(new SerializableConfiguration(sharedHadoopConf))
 
     // Now, we create a scan builder, which will be used by pruneFilterProject. This scan builder
     // will union all partitions and attach partition values if needed.
+    //现在,我们创建一个扫描构建器,它将由pruneFilterProject使用,如果需要,此扫描构建器将联合所有分区并附加分区值。
     val scanBuilder = {
       (columns: Seq[Attribute], filters: Array[Filter]) => {
         // Builds RDD[Row]s for each selected partition.
+        //为每个选定的分区构建RDD [Row]
         val perPartitionRows = partitions.map { case Partition(partitionValues, dir) =>
           val partitionColNames = partitionColumns.fieldNames
 
           // Don't scan any partition columns to save I/O.  Here we are being optimistic and
           // assuming partition columns data stored in data files are always consistent with those
           // partition values encoded in partition directory paths.
+          //不扫描任何分区列以保存I/O. 在这里,我们乐观并假设分区列数据存储在数据文件中始终与分区目录路径中编码的分区值一致。
           val needed = columns.filterNot(a => partitionColNames.contains(a.name))
           val dataRows =
             relation.buildScan(needed.map(_.name).toArray, filters, Array(dir), confBroadcast)
 
           // Merges data values with partition values.
+          //将数据值与分区值合并
           mergeWithPartitionValues(
             relation.schema,
             columns.map(_.name).toArray,
@@ -175,8 +187,10 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
     }
 
     // Create the scan operator. If needed, add Filter and/or Project on top of the scan.
+    //创建扫描运算符,如果需要,请在扫描结束时添加过滤器和/或项目
     // The added Filter/Project is on top of the unioned RDD. We do not want to create
     // one Filter/Project for every partition.
+    //添加的过滤器/项目位于联合RDD之上,我们不想为每个分区创建一个过滤器/项目
     val sparkPlan = pruneFilterProject(
       logicalRelation,
       projections,
@@ -188,6 +202,7 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
 
   // TODO: refactor this thing. It is very complicated because it does projection internally.
   // We should just put a project on top of this.
+  //我们应该把项目置于此之上
   private def mergeWithPartitionValues(
       schema: StructType,
       requiredColumns: Array[String],
@@ -198,18 +213,22 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
 
     // If output columns contain any partition column(s), we need to merge scanned data
     // columns and requested partition columns to form the final result.
+    //如果输出列包含任何分区列,我们需要合并扫描数据列和请求的分区列以形成最终结果
     if (!requiredColumns.sameElements(nonPartitionColumns)) {
       val mergers = requiredColumns.zipWithIndex.map { case (name, index) =>
         // To see whether the `index`-th column is a partition column...
+        //要查看`index`-column列是否是分区列...
         val i = partitionColumns.indexOf(name)
         if (i != -1) {
           val dt = schema(partitionColumns(i)).dataType
           // If yes, gets column value from partition values.
+              //如果是,则从分区值获取列值
           (mutableRow: MutableRow, dataRow: InternalRow, ordinal: Int) => {
             mutableRow(ordinal) = partitionValues.get(i, dt)
           }
         } else {
           // Otherwise, inherits the value from scanned data.
+          //否则,从扫描数据继承值
           val i = nonPartitionColumns.indexOf(name)
           val dt = schema(nonPartitionColumns(i)).dataType
           (mutableRow: MutableRow, dataRow: InternalRow, ordinal: Int) => {
@@ -221,6 +240,7 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
       // Since we know for sure that this closure is serializable, we can avoid the overhead
       // of cleaning a closure for each RDD by creating our own MapPartitionsRDD. Functionally
       // this is equivalent to calling `dataRows.mapPartitions(mapPartitionsFunc)` (SPARK-7718).
+      //由于我们确信这个闭包是可序列化的,因此我们可以通过创建自己的MapPartitionsRDD来避免为每个RDD清理闭包的开销
       val mapPartitionsFunc = (_: TaskContext, _: Int, iterator: Iterator[InternalRow]) => {
         val dataTypes = requiredColumns.map(schema(_).dataType)
         val mutableRow = new SpecificMutableRow(dataTypes)
@@ -237,6 +257,8 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
       // This is an internal RDD whose call site the user should not be concerned with
       // Since we create many of these (one per partition), the time spent on computing
       // the call site may add up.
+      //这是一个内部RDD,其用户不应关注其呼叫站点由于我们创建了许多这些(每个分区一个),
+      //因此计算呼叫站点所花费的时间可能会增加
       Utils.withDummyCallSite(dataRows.sparkContext) {
         new MapPartitionsRDD(dataRows, mapPartitionsFunc, preservesPartitioning = false)
       }
@@ -274,6 +296,7 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
   }
 
   // Based on Public API.
+  //基于Public API
   protected def pruneFilterProject(
       relation: LogicalRelation,
       projects: Seq[NamedExpression],
@@ -289,6 +312,7 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
   }
 
   // Based on Catalyst expressions.
+  //基于Catalyst表达式
   protected def pruneFilterProjectRaw(
       relation: LogicalRelation,
       projects: Seq[NamedExpression],
@@ -309,6 +333,8 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
       // When it is possible to just use column pruning to get the right projection and
       // when the columns of this projection are enough to evaluate all filter conditions,
       // just do a scan followed by a filter, with no extra project.
+      //如果可以仅使用列修剪来获得正确的投影,并且当此投影的列足以评估所有过滤条件时,
+      //只需执行扫描,然后执行过滤,无需额外项目。
       val requestedColumns =
         projects.asInstanceOf[Seq[Attribute]] // Safe due to if above.
           .map(relation.attributeMap)            // Match original case of attributes.
@@ -331,6 +357,7 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
 
   /**
    * Convert RDD of Row into RDD of InternalRow with objects in catalyst types
+    * 使用催化剂类型中的对象将Row的RDD转换为InternalRow的RDD
    */
   private[this] def toCatalystRDD(
       relation: LogicalRelation,
@@ -345,6 +372,7 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
 
   /**
    * Convert RDD of Row into RDD of InternalRow with objects in catalyst types
+    * 使用催化剂类型中的对象将Row的RDD转换为InternalRow的RDD
    */
   private[this] def toCatalystRDD(relation: LogicalRelation, rdd: RDD[Row]): RDD[InternalRow] = {
     toCatalystRDD(relation, relation.output, rdd)
@@ -353,6 +381,7 @@ private[sql] object DataSourceStrategy extends Strategy with Logging {
   /**
    * Selects Catalyst predicate [[Expression]]s which are convertible into data source [[Filter]]s,
    * and convert them.
+    * 选择可转换为数据源[[Filter]] s的Catalyst谓词[[Expression]],然后转换它们
    */
   protected[sql] def selectFilters(filters: Seq[Expression]) = {
     def translate(predicate: Expression): Option[Filter] = predicate match {

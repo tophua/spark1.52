@@ -24,6 +24,7 @@ import org.json4s.JsonDSL._
 /**
  * :: DeveloperApi ::
  * The data type for Maps. Keys in a map are not allowed to have `null` values.
+  * Map的数据类型,Map中的键不允许具有“null”值。
  *
  * Please use [[DataTypes.createMapType()]] to create a specific instance.
  *
@@ -36,7 +37,7 @@ case class MapType(
   valueType: DataType,
   valueContainsNull: Boolean) extends DataType {
 
-  /** No-arg constructor for kryo. */
+  /** No-arg constructor for kryo. kryo的no-arg构造函数*/
   def this() = this(null, null, false)
 
   private[sql] def buildFormattedString(prefix: String, builder: StringBuilder): Unit = {
@@ -57,6 +58,7 @@ case class MapType(
    * The default size of a value of the MapType is
    * 100 * (the default size of the key type + the default size of the value type).
    * (We assume that there are 100 elements).
+    * MapType值的默认大小为100 *(键类型的默认大小+值类型的默认大小),我们假设有100个元素
    */
   override def defaultSize: Int = 100 * (keyType.defaultSize + valueType.defaultSize)
 

@@ -25,6 +25,7 @@ import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
 /**
  * A mutable wrapper that makes two rows appear as a single concatenated row.  Designed to
  * be instantiated once per thread and reused.
+  * 一个可变包装器,它使两行显示为单个连接行,设计为每个线程实例化一次并重用
  */
 class JoinedRow extends InternalRow {
   private[this] var row1: InternalRow = _
@@ -36,20 +37,23 @@ class JoinedRow extends InternalRow {
     row2 = right
   }
 
-  /** Updates this JoinedRow to used point at two new base rows.  Returns itself. */
+  /** Updates this JoinedRow to used point at two new base rows.  Returns itself.
+    * 将此JoinedRow更新为两个新基行的已用点*/
   def apply(r1: InternalRow, r2: InternalRow): JoinedRow = {
     row1 = r1
     row2 = r2
     this
   }
 
-  /** Updates this JoinedRow by updating its left base row.  Returns itself. */
+  /** Updates this JoinedRow by updating its left base row.  Returns itself.
+    * 通过更新其左基行来更新此JoinedRow*/
   def withLeft(newLeft: InternalRow): JoinedRow = {
     row1 = newLeft
     this
   }
 
-  /** Updates this JoinedRow by updating its right base row.  Returns itself. */
+  /** Updates this JoinedRow by updating its right base row.  Returns itself.
+    * 通过更新其右基行来更新此JoinedRow*/
   def withRight(newRight: InternalRow): JoinedRow = {
     row2 = newRight
     this

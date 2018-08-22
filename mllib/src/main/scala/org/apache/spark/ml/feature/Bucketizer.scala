@@ -33,6 +33,7 @@ import org.apache.spark.sql.types.{DoubleType, StructField, StructType}
 /**
  * :: Experimental ::
  * `Bucketizer` maps a column of continuous features to a column of feature buckets.
+  * `Bucketizer`将一列连续特征映射到一列特征桶
  */
 @Experimental
 final class Bucketizer(override val uid: String)
@@ -42,10 +43,15 @@ final class Bucketizer(override val uid: String)
 
   /**
    * Parameter for mapping continuous features into buckets. With n+1 splits, there are n buckets.
+    * 用于将连续要素映射到存储桶的参数,对于n + 1个分裂,有n个桶
+    *
    * A bucket defined by splits x,y holds values in the range [x,y) except the last bucket, which
    * also includes y. Splits should be strictly increasing.
+    * 由拆分x，y定义的存储区包含除最后一个存储区之外的[x，y]范围内的值,
+    * 由拆分x，y定义的存储区保存除最后一个存储区之外的[x，y]范围内的值，
    * Values at -inf, inf must be explicitly provided to cover all Double values;
    * otherwise, values outside the splits specified will be treated as errors.
+    * 必须显式提供-inf，inf处的值以涵盖所有Double值;否则，指定的拆分之外的值将被视为错误。
    * @group param
    */
   val splits: DoubleArrayParam = new DoubleArrayParam(this, "splits",
@@ -96,7 +102,9 @@ final class Bucketizer(override val uid: String)
 }
 
 private[feature] object Bucketizer {
-  /** We require splits to be of length >= 3 and to be in strictly increasing order. */
+  /** We require splits to be of length >= 3 and to be in strictly increasing order.
+    * 我们要求拆分长度> = 3并且严格按顺序递增
+    * */
   def checkSplits(splits: Array[Double]): Boolean = {
     if (splits.length < 3) {
       false
@@ -113,6 +121,7 @@ private[feature] object Bucketizer {
 
   /**
    * Binary searching in several buckets to place each data point.
+    * 在几个桶中进行二进制搜索以放置每个数据点
    * @throws SparkException if a feature is < splits.head or > splits.last
    */
   def binarySearchForBuckets(splits: Array[Double], feature: Double): Double = {

@@ -24,6 +24,7 @@ import org.apache.spark.sql.DataFrame
 /**
  * :: DeveloperApi ::
  * Abstract class for evaluators that compute metrics from predictions.
+  * 评估的抽象类,用于根据预测计算度量
  */
 @DeveloperApi
 abstract class Evaluator extends Params {
@@ -42,6 +43,7 @@ abstract class Evaluator extends Params {
   /**
    * Evaluates the output.评估输出
    * @param dataset a dataset that contains labels/observations and predictions.
+    *                包含标签/观察和预测的数据集
    * @return metric
    */
   def evaluate(dataset: DataFrame): Double
@@ -50,6 +52,9 @@ abstract class Evaluator extends Params {
    * Indicates whether the metric returned by [[evaluate()]] should be maximized (true, default)
    * or minimized (false).
    * A given evaluator may support multiple metrics which may be maximized or minimized.
+    *
+    * 指示[[evaluate()]]返回的度量标准是最大化(true,default)还是最小化(false)
+    * 给定的求值程序可以支持可以最大化或最小化的多个度量标准。
    */
   def isLargerBetter: Boolean = true
 

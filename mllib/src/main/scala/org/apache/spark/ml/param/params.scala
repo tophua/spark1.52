@@ -31,7 +31,7 @@ import org.apache.spark.ml.util.Identifiable
  * :: DeveloperApi ::
  * A param with self-contained documentation and optionally default value. Primitive-typed param
  * should use the specialized versions, which are more friendly to Java users.
- *
+ * 一个包含自包含文档和可选默认值的参数,原始类型的param应该使用专用版本,这些版本对Java用户更友好
  * @param parent parent object
  * @param name param name
  * @param doc documentation
@@ -53,6 +53,7 @@ class Param[T](val parent: String, val name: String, val doc: String, val isVali
 
   /**
    * Assert that the given value is valid for this parameter.
+    * 断言给定值对此参数有效
    *
    * Note: Parameter checks involving interactions between multiple parameters should be
    *       implemented in [[Params.validateParams()]].  Checks for input/output columns should be
@@ -225,7 +226,7 @@ class DoubleParam(parent: String, name: String, doc: String, isValid: Double => 
 
   def this(parent: Identifiable, name: String, doc: String) = this(parent.uid, name, doc)
 
-  /** Creates a param pair with the given value (for Java). */
+  /** Creates a param pair with the given value (for Java). 创建具有给定值的param对（对于Java）*/
   override def w(value: Double): ParamPair[Double] = super.w(value)
 }
 
@@ -245,7 +246,8 @@ class IntParam(parent: String, name: String, doc: String, isValid: Int => Boolea
 
   def this(parent: Identifiable, name: String, doc: String) = this(parent.uid, name, doc)
 
-  /** Creates a param pair with the given value (for Java). */
+  /** Creates a param pair with the given value (for Java).
+    * 创建具有给定值的param对（对于Java）*/
   override def w(value: Int): ParamPair[Int] = super.w(value)
 }
 
@@ -265,7 +267,7 @@ class FloatParam(parent: String, name: String, doc: String, isValid: Float => Bo
 
   def this(parent: Identifiable, name: String, doc: String) = this(parent.uid, name, doc)
 
-  /** Creates a param pair with the given value (for Java). */
+  /** Creates a param pair with the given value (for Java). 创建具有给定值的param对（对于Java）*/
   override def w(value: Float): ParamPair[Float] = super.w(value)
 }
 
@@ -365,6 +367,7 @@ case class ParamPair[T](param: Param[T], value: T) {
  * :: DeveloperApi ::
  * Trait for components that take parameters. This also provides an internal param map to store
  * parameter values attached to the instance.
+  * 具有参数的组件的特征,这还提供了一个内部参数映射,用于存储附加到实例的参数值
  */
 @DeveloperApi
 trait Params extends Identifiable with Serializable {
@@ -372,6 +375,8 @@ trait Params extends Identifiable with Serializable {
   /**
    * Returns all params sorted by their names. The default implementation uses Java reflection to
    * list all public methods that have no arguments and return [[Param]].
+    *
+    * 返回按名称排序的所有参数,默认实现使用Java反射列出所有没有参数的公共方法并返回[[Param]]
    *
    * Note: Developer should not use this method in constructor because we cannot guarantee that
    * this variable gets initialized before other params.
@@ -388,19 +393,23 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Validates parameter values stored internally.
+    * 验证内部存储的参数值
    * Raise an exception if any parameter value is invalid.
+    * 如果任何参数值无效,则引发异常
    *
    * This only needs to check for interactions between parameters.
+    * 这只需要检查参数之间的交互
    * Parameter value checks which do not depend on other parameters are handled by
    * [[Param.validate()]].  This method does not handle input/output column parameters;
    * those are checked during schema validation.
    */
   def validateParams(): Unit = {
     // Do nothing by default.  Override to handle Param interactions.
+    //默认情况下不做任何事 覆盖以处理Param交互
   }
 
   /**
-   * Explains a param.
+   * Explains a param.解释一个参数
    * @param param input param, must belong to this instance.
    * @return a string that contains the input param name, doc, and optionally its default value and
    *         the user-supplied value
@@ -419,30 +428,34 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Explains all params of this instance.
+    * 解释这个实例的所有参数
    * @see [[explainParam()]]
    */
   def explainParams(): String = {
     params.map(explainParam).mkString("\n")
   }
 
-  /** Checks whether a param is explicitly set. */
+  /** Checks whether a param is explicitly set.
+    * 检查是否明确设置了参数 */
   final def isSet(param: Param[_]): Boolean = {
     shouldOwn(param)
     paramMap.contains(param)
   }
 
-  /** Checks whether a param is explicitly set or has a default value. */
+  /** Checks whether a param is explicitly set or has a default value.
+    * 检查param是显式设置还是具有默认值*/
   final def isDefined(param: Param[_]): Boolean = {
     shouldOwn(param)
     defaultParamMap.contains(param) || paramMap.contains(param)
   }
 
-  /** Tests whether this instance contains a param with a given name. */
+  /** Tests whether this instance contains a param with a given name.
+    * 测试此实例是否包含具有给定名称的参数*/
   def hasParam(paramName: String): Boolean = {
     params.exists(_.name == paramName)
   }
 
-  /** Gets a param by its name. */
+  /** Gets a param by its name. 按名称获取一个参数*/
   def getParam(paramName: String): Param[Any] = {
     params.find(_.name == paramName).getOrElse {
       throw new NoSuchElementException(s"Param $paramName does not exist.")
@@ -451,6 +464,7 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Sets a parameter in the embedded param map.
+    * 在嵌入的参数映射中设置参数
    */
   protected final def set[T](param: Param[T], value: T): this.type = {
     set(param -> value)
@@ -458,6 +472,7 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Sets a parameter (by name) in the embedded param map.
+    * 在嵌入的参数映射中设置参数(按名称)
    */
   protected final def set(param: String, value: Any): this.type = {
     set(getParam(param), value)
@@ -465,6 +480,7 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Sets a parameter in the embedded param map.
+    * 在嵌入的参数映射中设置参数
    */
   protected final def set(paramPair: ParamPair[_]): this.type = {
     shouldOwn(paramPair.param)
@@ -474,6 +490,7 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Optionally returns the user-supplied value of a param.
+    * (可选)返回用户提供的参数值
    */
   final def get[T](param: Param[T]): Option[T] = {
     shouldOwn(param)
@@ -482,6 +499,7 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Clears the user-supplied value for the input param.
+    * 清除输入参数的用户提供的值
    */
   protected final def clear(param: Param[_]): this.type = {
     shouldOwn(param)
@@ -492,6 +510,7 @@ trait Params extends Identifiable with Serializable {
   /**
    * Gets the value of a param in the embedded param map or its default value. Throws an exception
    * if neither is set.
+    * 获取嵌入的参数映射中的参数值或其默认值,如果两者都未设置,则抛出异常
    */
   final def getOrDefault[T](param: Param[T]): T = {
     shouldOwn(param)
@@ -502,9 +521,10 @@ trait Params extends Identifiable with Serializable {
   protected final def $[T](param: Param[T]): T = getOrDefault(param)
 
   /**
-   * Sets a default value for a param.
+   * Sets a default value for a param.设置参数的默认值
    * @param param  param to set the default value. Make sure that this param is initialized before
    *               this method gets called.
+    *               param设置默认值,确保在调用此方法之前初始化此参数
    * @param value  the default value
    */
   protected final def setDefault[T](param: Param[T], value: T): this.type = {
@@ -514,7 +534,7 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Sets default values for a list of params.
-   *
+   * 设置参数列表的默认值
    * Note: Java developers should use the single-parameter [[setDefault()]].
    *       Annotating this with varargs can cause compilation failures due to a Scala compiler bug.
    *       See SPARK-9268.
@@ -532,6 +552,7 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Gets the default value of a parameter.
+    * 获取参数的默认值
    */
   final def getDefault[T](param: Param[T]): Option[T] = {
     shouldOwn(param)
@@ -540,6 +561,7 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Tests whether the input param has a default value set.
+    * 测试输入参数是否具有默认值集
    */
   final def hasDefault[T](param: Param[T]): Boolean = {
     shouldOwn(param)
@@ -549,6 +571,8 @@ trait Params extends Identifiable with Serializable {
   /**
    * Creates a copy of this instance with the same UID and some extra params.
    * Subclasses should implement this method and set the return type properly.
+    *
+    * 使用相同的UID和一些额外的参数创建此实例的副本,子类应该实现此方法并正确设置返回类型
    *
    * @see [[defaultCopy()]]
    */
@@ -556,8 +580,11 @@ trait Params extends Identifiable with Serializable {
 
   /**
    * Default implementation of copy with extra params.
+    * 带有额外参数的副本的默认实现
    * It tries to create a new instance with the same UID.
+    * 它尝试使用相同的UID创建新实例
    * Then it copies the embedded and extra parameters over and returns the new instance.
+    * 然后它复制嵌入的和额外的参数并返回新实例
    */
   protected final def defaultCopy[T <: Params](extra: ParamMap): T = {
     val that = this.getClass.getConstructor(classOf[String]).newInstance(uid)
@@ -568,6 +595,8 @@ trait Params extends Identifiable with Serializable {
    * Extracts the embedded default param values and user-supplied values, and then merges them with
    * extra values from input into a flat param map, where the latter value is used if there exist
    * conflicts, i.e., with ordering: default param values < user-supplied values < extra.
+    * 提取嵌入的默认参数值和用户提供的值,然后将它们与输入中的额外值合并到一个平面参数映射中,
+    * 如果存在冲突,则使用后一个值,即使用排序:默认参数值<用户提供 值<额外。
    */
   final def extractParamMap(extra: ParamMap): ParamMap = {
     defaultParamMap ++ paramMap ++ extra
@@ -580,21 +609,26 @@ trait Params extends Identifiable with Serializable {
     extractParamMap(ParamMap.empty)
   }
 
-  /** Internal param map for user-supplied values. */
+  /** Internal param map for user-supplied values.
+    * 用户提供的值的内部参数映射*/
   private val paramMap: ParamMap = ParamMap.empty
 
-  /** Internal param map for default values. */
+  /** Internal param map for default values.
+    * 内部参数映射表示默认值*/
   private val defaultParamMap: ParamMap = ParamMap.empty
 
-  /** Validates that the input param belongs to this instance. */
+  /** Validates that the input param belongs to this instance.
+    * 验证输入参数是否属于此实例 */
   private def shouldOwn(param: Param[_]): Unit = {
     require(param.parent == uid && hasParam(param.name), s"Param $param does not belong to $this.")
   }
 
   /**
    * Copies param values from this instance to another instance for params shared by them.
+    * 将此实例的参数值复制到另一个实例,用于它们共享的参数
    *
    * This handles default Params and explicitly set Params separately.
+    * 这将处理默认的Params并单独显式设置Params
    * Default Params are copied from and to [[defaultParamMap]], and explicitly set Params are
    * copied from and to [[paramMap]].
    * Warning: This implicitly assumes that this [[Params]] instance and the target instance
@@ -647,11 +681,13 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Creates an empty param map.
+    * 创建一个空的参数映射
    */
   def this() = this(mutable.Map.empty)
 
   /**
    * Puts a (param, value) pair (overwrites if the input param exists).
+    * 放入（param，value）对（如果输入param存在则覆盖）
    */
   def put[T](param: Param[T], value: T): this.type = put(param -> value)
 
@@ -668,6 +704,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Optionally returns the value associated with a param.
+    * （可选）返回与param关联的值
    */
   def get[T](param: Param[T]): Option[T] = {
     map.get(param.asInstanceOf[Param[Any]]).asInstanceOf[Option[T]]
@@ -675,6 +712,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Returns the value associated with a param or a default value.
+    * 返回与param或默认值关联的值
    */
   def getOrElse[T](param: Param[T], default: T): T = {
     get(param).getOrElse(default)
@@ -682,6 +720,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Gets the value of the input param or its default value if it does not exist.
+    * 获取输入参数的值或其默认值（如果它不存在）
    * Raises a NoSuchElementException if there is no value associated with the input param.
    */
   def apply[T](param: Param[T]): T = {
@@ -692,6 +731,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Checks whether a parameter is explicitly specified.
+    * 检查是否明确指定了参数
    */
   def contains(param: Param[_]): Boolean = {
     map.contains(param.asInstanceOf[Param[Any]])
@@ -699,6 +739,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Removes a key from this map and returns its value associated previously as an option.
+    * 从此映射中删除键并返回其先前关联的值作为选项
    */
   def remove[T](param: Param[T]): Option[T] = {
     map.remove(param.asInstanceOf[Param[Any]]).asInstanceOf[Option[T]]
@@ -706,6 +747,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Filters this param map for the given parent.
+    * 过滤此给定父级的参数映射
    */
   def filter(parent: Params): ParamMap = {
     val filtered = map.filterKeys(_.parent == parent)
@@ -714,6 +756,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Creates a copy of this param map.
+    * 创建此param映射的副本
    */
   def copy: ParamMap = new ParamMap(map.clone())
 
@@ -726,6 +769,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
   /**
    * Returns a new param map that contains parameters in this map and the given map,
    * where the latter overwrites this if there exist conflicts.
+    * 返回一个新的param映射,其中包含此映射中的参数和给定的映射,如果存在冲突,后者将覆盖此映射。
    */
   def ++(other: ParamMap): ParamMap = {
     // TODO: Provide a better method name for Java users.
@@ -734,6 +778,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Adds all parameters from the input param map into this param map.
+    * 将输入参数映射中的所有参数添加到此参数映射中
    */
   def ++=(other: ParamMap): this.type = {
     // TODO: Provide a better method name for Java users.
@@ -743,6 +788,7 @@ final class ParamMap private[ml] (private val map: mutable.Map[Param[Any], Any])
 
   /**
    * Converts this param map to a sequence of param pairs.
+    * 将此参数映射到一系列素数对
    */
   def toSeq: Seq[ParamPair[_]] = {
     map.toSeq.map { case (param, value) =>
@@ -761,11 +807,13 @@ object ParamMap {
 
   /**
    * Returns an empty param map.
+    * 返回一个空的param映射
    */
   def empty: ParamMap = new ParamMap()
 
   /**
    * Constructs a param map by specifying its entries.
+    * 通过指定其条目构造一个param映射
    */
   @varargs
   def apply(paramPairs: ParamPair[_]*): ParamMap = {

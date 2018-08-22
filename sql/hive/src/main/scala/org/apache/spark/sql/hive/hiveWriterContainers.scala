@@ -42,6 +42,7 @@ import org.apache.spark.util.SerializableJobConf
 
 /**
  * Internal helper class that saves an RDD using a Hive OutputFormat.
+  * 使用Hive OutputFormat保存RDD的内部帮助程序类
  * It is based on [[SparkHadoopWriter]].
  */
 private[hive] class SparkHiveWriterContainer(
@@ -55,6 +56,7 @@ private[hive] class SparkHiveWriterContainer(
   private val tableDesc: TableDesc = fileSinkConf.getTableInfo
   // Add table properties from storage handler to jobConf, so any custom storage
   // handler settings can be set to jobConf
+  //将存储处理程序中的表属性添加到jobConf,因此可以将任何自定义存储处理程序设置设置为jobConf
   if (tableDesc != null) {
     PlanUtils.configureOutputJobPropertiesForStorageHandler(tableDesc)
     Utilities.copyTableJobPropertiesToConf(tableDesc, jobConf)

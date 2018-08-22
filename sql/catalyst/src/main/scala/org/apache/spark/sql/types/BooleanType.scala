@@ -39,6 +39,7 @@ class BooleanType private() extends AtomicType {
 
   /**
    * The default size of a value of the BooleanType is 1 byte.
+    * BooleanType值的默认大小为1个字节
    */
   override def defaultSize: Int = 1
 

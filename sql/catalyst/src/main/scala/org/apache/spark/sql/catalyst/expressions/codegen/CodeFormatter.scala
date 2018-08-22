@@ -19,8 +19,9 @@ package org.apache.spark.sql.catalyst.expressions.codegen
 
 /**
  * An utility class that indents a block of code based on the curly braces and parentheses.
+  * 一个实用程序类,它根据花括号和括号缩进代码块
  * This is used to prettify generated code when in debug mode (or exceptions).
- *
+ * 这用于在调试模式(或异常)时对生成的代码进行美化。
  * Written by Matei Zaharia.
  */
 object CodeFormatter {

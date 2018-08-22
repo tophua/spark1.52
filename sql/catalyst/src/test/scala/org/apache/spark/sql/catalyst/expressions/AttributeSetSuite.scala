@@ -37,7 +37,7 @@ class AttributeSetSuite extends SparkFunSuite {
     assert(aUpper != aLower)
     assert(bUpper != bLower)
   }
-
+  //按ID检查而不是名称
   test("checks by id not name") {
     assert(aSet.contains(aUpper) === true)
     assert(aSet.contains(aLower) === true)

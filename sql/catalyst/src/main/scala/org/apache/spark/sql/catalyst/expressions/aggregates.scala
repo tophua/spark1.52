@@ -33,19 +33,21 @@ trait AggregateExpression1 extends AggregateExpression {
 
   /**
    * Aggregate expressions should not be foldable.
+    * 聚合表达式不应该是可折叠的
    */
   override def foldable: Boolean = false
 
   /**
    * Creates a new instance that can be used to compute this aggregate expression for a group
    * of input rows/
+    * 创建一个可用于为一组输入行计算此聚合表达式的新实例
    */
   def newInstance(): AggregateFunction1
 }
 
 /**
  * Represents an aggregation that has been rewritten to be performed in two steps.
- *
+ * 表示已重写为分两步执行的聚合
  * @param finalEvaluation an aggregate expression that evaluates to same final result as the
  *                        original aggregation.
  * @param partialEvaluations A sequence of [[NamedExpression]]s that can be computed on partial
@@ -57,12 +59,15 @@ case class SplitEvaluation(
 
 /**
  * An [[AggregateExpression1]] that can be partially computed without seeing all relevant tuples.
+  * [[AggregateExpression1]],可以在不查看所有相关元组的情况下进行部分计算
  * These partial evaluations can then be combined to compute the actual answer.
+  * 然后可以组合这些部分评估以计算实际答案
  */
 trait PartialAggregate1 extends AggregateExpression1 {
 
   /**
    * Returns a [[SplitEvaluation]] that computes this aggregation using partial aggregation.
+    * 返回使用部分聚合计算此聚合的[[SplitEvaluation]]
    */
   def asPartial: SplitEvaluation
 }
@@ -70,10 +75,12 @@ trait PartialAggregate1 extends AggregateExpression1 {
 /**
  * A specific implementation of an aggregate function. Used to wrap a generic
  * [[AggregateExpression1]] with an algorithm that will be used to compute one specific result.
+  * 聚合函数的特定实现,用于使用将用于计算一个特定结果的算法包装泛型[[AggregateExpression1]]。
  */
 abstract class AggregateFunction1 extends LeafExpression with Serializable {
 
-  /** Base should return the generic aggregate expression that this function is computing */
+  /** Base should return the generic aggregate expression that this function is computing
+    * Base应该返回此函数正在计算的泛型聚合表达式*/
   val base: AggregateExpression1
 
   override def nullable: Boolean = base.nullable
@@ -288,17 +295,20 @@ case class CombineSetsAndCountFunction(
   override def eval(input: InternalRow): Any = seen.size.toLong
 }
 
-/** The data type of ApproxCountDistinctPartition since its output is a HyperLogLog object. */
+/** The data type of ApproxCountDistinctPartition since its output is a HyperLogLog object.
+  * ApproxCountDistinctPartition的数据类型,因为它的输出是HyperLogLog对象*/
 private[sql] case object HyperLogLogUDT extends UserDefinedType[HyperLogLog] {
 
   override def sqlType: DataType = BinaryType
 
-  /** Since we are using HyperLogLog internally, usually it will not be called. */
+  /** Since we are using HyperLogLog internally, usually it will not be called.
+    * 由于我们在内部使用HyperLogLog,通常不会调用它 */
   override def serialize(obj: Any): Array[Byte] =
     obj.asInstanceOf[HyperLogLog].getBytes
 
 
-  /** Since we are using HyperLogLog internally, usually it will not be called. */
+  /** Since we are using HyperLogLog internally, usually it will not be called.
+    * 由于我们在内部使用HyperLogLog,通常不会调用它*/
   override def deserialize(datum: Any): HyperLogLog =
     HyperLogLog.Builder.build(datum.asInstanceOf[Array[Byte]])
 
@@ -351,6 +361,7 @@ case class ApproxCountDistinctMergeFunction(
     base: AggregateExpression1,
     relativeSD: Double)
   extends AggregateFunction1 {
+  //序列化必需
   def this() = this(null, null, 0) // Required for serialization.
 
   private val hyperLogLog = new HyperLogLog(relativeSD)
@@ -391,6 +402,7 @@ case class Average(child: Expression) extends UnaryExpression with PartialAggreg
   override def dataType: DataType = child.dataType match {
     case DecimalType.Fixed(precision, scale) =>
       // Add 4 digits after decimal point, like Hive
+      //在小数点后添加4位数,如Hive
       DecimalType.bounded(precision + 4, scale + 4)
     case _ =>
       DoubleType

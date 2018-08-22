@@ -26,6 +26,8 @@ import org.apache.spark.util.collection.BitSet
 /**
  * A collection of edges, along with referenced vertex attributes and an optional active vertex set
  * for filtering computation on the edges.
+  *
+  * 边集合,以及引用的顶点属性和可选的活动顶点集,用于过滤边缘上的计算
  *
  * The edges are stored in columnar format in `localSrcIds`, `localDstIds`, and `data`. All
  * referenced global vertex ids are mapped to a compact set of local vertex ids according to the
@@ -64,16 +66,17 @@ class EdgePartition[
     activeSet: Option[VertexSet])
   extends Serializable {
 
-  /** No-arg constructor for serialization. */
+  /** No-arg constructor for serialization. 用于序列化的无参数构造函数*/
   private def this() = this(null, null, null, null, null, null, null, null)
 
-  /** Return a new `EdgePartition` with the specified edge data. */
+  /** Return a new `EdgePartition` with the specified edge data. 返回带有指定边数据的新`EdgePartition`*/
   def withData[ED2: ClassTag](data: Array[ED2]): EdgePartition[ED2, VD] = {
     new EdgePartition(
       localSrcIds, localDstIds, data, index, global2local, local2global, vertexAttrs, activeSet)
   }
 
-  /** Return a new `EdgePartition` with the specified active set, provided as an iterator. */
+  /** Return a new `EdgePartition` with the specified active set, provided as an iterator.
+    * 返回一个带有指定活动集的新`EdgePartition`,作为迭代器提供*/
   def withActiveSet(iter: Iterator[VertexId]): EdgePartition[ED, VD] = {
     val activeSet = new VertexSet
     while (iter.hasNext) { activeSet.add(iter.next()) }
@@ -82,7 +85,8 @@ class EdgePartition[
       Some(activeSet))
   }
 
-  /** Return a new `EdgePartition` with updates to vertex attributes specified in `iter`. */
+  /** Return a new `EdgePartition` with updates to vertex attributes specified in `iter`.
+    * 返回一个新的`EdgePartition`，其中包含对`iter`中指定的顶点属性的更新*/
   def updateVertices(iter: Iterator[(VertexId, VD)]): EdgePartition[ED, VD] = {
     val newVertexAttrs = new Array[VD](vertexAttrs.length)
     System.arraycopy(vertexAttrs, 0, newVertexAttrs, 0, vertexAttrs.length)
@@ -95,7 +99,8 @@ class EdgePartition[
       activeSet)
   }
 
-  /** Return a new `EdgePartition` without any locally cached vertex attributes. */
+  /** Return a new `EdgePartition` without any locally cached vertex attributes.
+    * 返回一个没有任何本地缓存顶点属性的新`EdgePartition` */
   def withoutVertexAttributes[VD2: ClassTag](): EdgePartition[ED, VD2] = {
     val newVertexAttrs = new Array[VD2](vertexAttrs.length)
     new EdgePartition(
@@ -109,16 +114,19 @@ class EdgePartition[
 
   @inline private def attrs(pos: Int): ED = data(pos)
 
-  /** Look up vid in activeSet, throwing an exception if it is None. */
+  /** Look up vid in activeSet, throwing an exception if it is None.
+    * 在activeSet中查找vid，如果为None则抛出异常*/
   def isActive(vid: VertexId): Boolean = {
     activeSet.get.contains(vid)
   }
 
-  /** The number of active vertices, if any exist. */
+  /** The number of active vertices, if any exist.
+    * 活动顶点的数量(如果存在)*/
   def numActives: Option[Int] = activeSet.map(_.size)
 
   /**
    * Reverse all the edges in this partition.
+    * 反转此分区中的所有边
    *
    * @return a new edge partition with all edges reversed.
    */
@@ -141,9 +149,13 @@ class EdgePartition[
   /**
    * Construct a new edge partition by applying the function f to all
    * edges in this partition.
+    * 通过将函数f应用于此分区中的所有边来构造新的边分区
    *
    * Be careful not to keep references to the objects passed to `f`.
    * To improve GC performance the same object is re-used for each call.
+    *
+    * 注意不要保留对传递给`f`的对象的引用,
+    * 为了提高GC性能,每次调用都会重复使用相同的对象
    *
    * @param f a function from an edge to a new attribute
    * @tparam ED2 the type of the new attribute
@@ -168,7 +180,7 @@ class EdgePartition[
   /**
    * Construct a new edge partition by using the edge attributes
    * contained in the iterator.
-   *
+   * 使用迭代器中包含的边缘属性构造新的边缘分区
    * @note The input iterator should return edge attributes in the
    * order of the edges returned by `EdgePartition.iterator` and
    * should return attributes equal to the number of edges.
@@ -192,6 +204,8 @@ class EdgePartition[
   /**
    * Construct a new edge partition containing only the edges matching `epred` and where both
    * vertices match `vpred`.
+    *
+    * 构造一个新的边分区,其中只包含与`epred`匹配的边,并且两个顶点都匹配`vpred`
    */
   def filter(
       epred: EdgeTriplet[VD, ED] => Boolean,
@@ -201,6 +215,7 @@ class EdgePartition[
     var i = 0
     while (i < size) {
       // The user sees the EdgeTriplet, so we can't reuse it and must create one per edge.
+      //用户看到EdgeTriplet,因此我们无法重复使用它,并且必须为每个边创建一个
       val localSrcId = localSrcIds(i)
       val localDstId = localDstIds(i)
       val et = new EdgeTriplet[VD, ED]
@@ -219,6 +234,7 @@ class EdgePartition[
 
   /**
    * Apply the function f to all edges in this partition.
+    * 将函数f应用于此分区中的所有边
    *
    * @param f an external state mutating user defined function.
    */
@@ -229,6 +245,7 @@ class EdgePartition[
   /**
    * Merge all the edges with the same src and dest id into a single
    * edge using the `merge` function
+    * 使用`merge`函数将具有相同src和dest id的所有边合并为单个边
    *
    * @param merge a commutative associative merge operation
    * @return a new edge partition without duplicate edges
@@ -243,18 +260,23 @@ class EdgePartition[
     var currAttr: ED = null.asInstanceOf[ED]
     // Iterate through the edges, accumulating runs of identical edges using the curr* variables and
     // releasing them to the builder when we see the beginning of the next run
+    //通过边缘迭代,使用curr *变量累积相同边的运行,并在我们看到下一次运行的开始时将它们释放到构建器
     var i = 0
     while (i < size) {
       if (i > 0 && currSrcId == srcIds(i) && currDstId == dstIds(i)) {
         // This edge should be accumulated into the existing run
+        //此边缘应累积到现有运行中
         currAttr = merge(currAttr, data(i))
       } else {
         // This edge starts a new run of edges
+        //此边缘开始新的边缘运行
         if (i > 0) {
           // First release the existing run to the builder
+          //首先将现有运行发布到构建器
           builder.add(currSrcId, currDstId, currLocalSrcId, currLocalDstId, currAttr)
         }
         // Then start accumulating for a new run
+        //然后开始累积新的运行
         currSrcId = srcIds(i)
         currDstId = dstIds(i)
         currLocalSrcId = localSrcIds(i)
@@ -264,6 +286,7 @@ class EdgePartition[
       i += 1
     }
     // Finally, release the last accumulated run
+    //最后,释放最后累积的运行
     if (size > 0) {
       builder.add(currSrcId, currDstId, currLocalSrcId, currLocalDstId, currAttr)
     }
@@ -273,9 +296,12 @@ class EdgePartition[
   /**
    * Apply `f` to all edges present in both `this` and `other` and return a new `EdgePartition`
    * containing the resulting edges.
+    * 将`f`应用于'this`和`other`中的所有边，并返回一个包含结果边的新`EdgePartition`
    *
    * If there are multiple edges with the same src and dst in `this`, `f` will be invoked once for
    * each edge, but each time it may be invoked on any corresponding edge in `other`.
+    *
+    * 如果在`this`中有多个具有相同src和dst的边,则每个边将调用一次`f`,但每次可以在`other`中的任何相应边上调用它
    *
    * If there are multiple edges with the same src and dst in `other`, `f` will only be invoked
    * once.
@@ -308,18 +334,20 @@ class EdgePartition[
 
   /**
    * The number of edges in this partition
-   *
+   * 此分区中的边数
    * @return size of the partition
    */
   val size: Int = localSrcIds.size
 
-  /** The number of unique source vertices in the partition. */
+  /** The number of unique source vertices in the partition.
+    * 分区中唯一源顶点的数量*/
   def indexSize: Int = index.size
 
   /**
    * Get an iterator over the edges in this partition.
-   *
+   * 获取此分区边缘的迭代器
    * Be careful not to keep references to the objects from this iterator.
+    * 注意不要在此迭代器中保留对象的引用
    * To improve GC performance the same object is re-used in `next()`.
    *
    * @return an iterator over edges in the partition
@@ -341,8 +369,10 @@ class EdgePartition[
 
   /**
    * Get an iterator over the edge triplets in this partition.
+    * 获取此分区中边缘三元组的迭代器
    *
    * It is safe to keep references to the objects from this iterator.
+    * 从这个迭代器继续引用对象是安全的
    */
   def tripletIterator(
       includeSrc: Boolean = true, includeDst: Boolean = true)
@@ -372,6 +402,8 @@ class EdgePartition[
   /**
    * Send messages along edges and aggregate them at the receiving vertices. Implemented by scanning
    * all edges sequentially.
+    *
+    * 沿边发送消息并在接收顶点聚合它们,通过顺序扫描所有边缘来实现
    *
    * @param sendMsg generates messages to neighboring vertices of an edge
    * @param mergeMsg the combiner applied to messages destined to the same vertex
@@ -417,6 +449,7 @@ class EdgePartition[
   /**
    * Send messages along edges and aggregate them at the receiving vertices. Implemented by
    * filtering the source vertex index, then scanning each edge cluster.
+    * 沿边发送消息并在接收顶点聚合它们,通过过滤源顶点索引实现,然后扫描每个边缘集群
    *
    * @param sendMsg generates messages to neighboring vertices of an edge
    * @param mergeMsg the combiner applied to messages destined to the same vertex

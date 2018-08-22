@@ -49,6 +49,9 @@ case class LocalRelation(output: Seq[Attribute], data: Seq[InternalRow] = Nil)
    * Returns an identical copy of this relation with new exprIds for all attributes.  Different
    * attributes are required when a relation is going to be included multiple times in the same
    * query.
+    *
+    * 返回此关系的相同副本,其中包含所有属性的新exprIds,
+    * 当要在同一查询中多次包含关系时,需要不同的属性。
    */
   override final def newInstance(): this.type = {
     LocalRelation(output.map(_.newInstance()), data).asInstanceOf[this.type]

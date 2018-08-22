@@ -32,9 +32,11 @@ import org.apache.spark.sql.{AnalysisException, SQLConf}
 /**
  * This converter class is used to convert Parquet [[MessageType]] to Spark SQL [[StructType]] and
  * vice versa.
+  * 此转换器类用于将Parquet [[MessageType]]转换为Spark SQL [[StructType]],反之亦然。
  *
  * Parquet format backwards-compatibility rules are respected when converting Parquet
  * [[MessageType]] schemas.
+  * 转换Parquet [[MessageType]]模式时,会遵循Parquet格式向后兼容性规则
  *
  * @see https://github.com/apache/parquet-format/blob/master/LogicalTypes.md
  *
@@ -72,6 +74,7 @@ private[parquet] class CatalystSchemaConverter(
 
   /**
    * Converts Parquet [[MessageType]] `parquetSchema` to a Spark SQL [[StructType]].
+    * 将Parquet [[MessageType]]`parquetSchema`转换为Spark SQL [[StructType]]
    */
   def convert(parquetSchema: MessageType): StructType = convert(parquetSchema.asGroupType())
 
@@ -98,6 +101,7 @@ private[parquet] class CatalystSchemaConverter(
 
   /**
    * Converts a Parquet [[Type]] to a Spark SQL [[DataType]].
+    * 将Parquet [[Type]]转换为Spark SQL [[DataType]]
    */
   def convertField(parquetType: Type): DataType = parquetType match {
     case t: PrimitiveType => convertPrimitiveField(t)
@@ -120,6 +124,8 @@ private[parquet] class CatalystSchemaConverter(
     // When maxPrecision = -1, we skip precision range check, and always respect the precision
     // specified in field.getDecimalMetadata.  This is useful when interpreting decimal types stored
     // as binaries with variable lengths.
+    //当maxPrecision = -1时,我们跳过精确范围检查,并始终遵守field.getDecimalMetadata中指定的精度,
+    //这在解释存储为具有可变长度的二进制文件的十进制类型时很有用。
     def makeDecimalType(maxPrecision: Int = -1): DecimalType = {
       val precision = field.getDecimalMetadata.getPrecision
       val scale = field.getDecimalMetadata.getScale
@@ -300,6 +306,7 @@ private[parquet] class CatalystSchemaConverter(
 
   /**
    * Converts a Spark SQL [[StructType]] to a Parquet [[MessageType]].
+    * 将Spark SQL [[StructType]]转换为Parquet [[MessageType]]
    */
   def convert(catalystSchema: StructType): MessageType = {
     Types.buildMessage().addFields(catalystSchema.map(convertField): _*).named("root")
@@ -307,6 +314,7 @@ private[parquet] class CatalystSchemaConverter(
 
   /**
    * Converts a Spark SQL [[StructField]] to a Parquet [[Type]].
+    * 将Spark SQL [[StructField]]转换为Parquet [[Type]]
    */
   def convertField(field: StructField): Type = {
     convertField(field, if (field.nullable) OPTIONAL else REQUIRED)
@@ -317,7 +325,7 @@ private[parquet] class CatalystSchemaConverter(
 
     field.dataType match {
       // ===================
-      // Simple atomic types
+      // Simple atomic types 简单的原子类型
       // ===================
 
       case BooleanType =>
@@ -348,7 +356,7 @@ private[parquet] class CatalystSchemaConverter(
         Types.primitive(INT32, repetition).as(DATE).named(field.name)
 
       // NOTE: Spark SQL TimestampType is NOT a well defined type in Parquet format spec.
-      //
+      // Spark SQL TimestampType不是Parquet格式规范中定义良好的类型
       // As stated in PARQUET-323, Parquet `INT96` was originally introduced to represent nanosecond
       // timestamp in Impala for some historical reasons, it's not recommended to be used for any
       // other types and will probably be deprecated in future Parquet format spec.  That's the
@@ -389,10 +397,11 @@ private[parquet] class CatalystSchemaConverter(
           .named(field.name)
 
       // =====================================
-      // Decimals (follow Parquet format spec)
+      // Decimals (follow Parquet format spec) 小数（遵循Parquet格式规范）
       // =====================================
 
       // Uses INT32 for 1 <= precision <= 9
+        //使用INT32 1 <=精度<= 9
       case DecimalType.Fixed(precision, scale)
           if precision <= MAX_PRECISION_FOR_INT32 && followParquetFormatSpec =>
         Types
@@ -424,6 +433,7 @@ private[parquet] class CatalystSchemaConverter(
 
       // ===================================================
       // ArrayType and MapType (for Spark versions <= 1.4.x)
+        //ArrayType和MapType（适用于Spark版本<= 1.4.x）
       // ===================================================
 
       // Spark 1.4.x and prior versions convert `ArrayType` with nullable elements into a 3-level
@@ -442,6 +452,7 @@ private[parquet] class CatalystSchemaConverter(
           Types
             .buildGroup(REPEATED)
             // "array_element" is the name chosen by parquet-hive (1.7.0 and prior version)
+            //“array_element”是parquet-hive（1.7.0及之前版本）选择的名称
             .addField(convertField(StructField("array", elementType, nullable)))
             .named("bag"))
 
@@ -475,6 +486,7 @@ private[parquet] class CatalystSchemaConverter(
 
       // ==================================================
       // ArrayType and MapType (follow Parquet format spec)
+        //ArrayType和MapType（遵循Parquet格式规范）
       // ==================================================
 
       case ArrayType(elementType, containsNull) if followParquetFormatSpec =>
@@ -559,6 +571,7 @@ private[parquet] object CatalystSchemaConverter {
   private val MIN_BYTES_FOR_PRECISION = Array.tabulate[Int](39)(computeMinBytesForPrecision)
 
   // Returns the minimum number of bytes needed to store a decimal with a given `precision`.
+  //返回使用给定的“precision”存储小数所需的最小字节数
   def minBytesForPrecision(precision : Int) : Int = {
     if (precision < MIN_BYTES_FOR_PRECISION.length) {
       MIN_BYTES_FOR_PRECISION(precision)
@@ -572,6 +585,7 @@ private[parquet] object CatalystSchemaConverter {
   val MAX_PRECISION_FOR_INT64 = maxPrecisionForBytes(8)
 
   // Max precision of a decimal value stored in `numBytes` bytes
+  //存储在`numBytes`个字节中的十进制值的最大精度
   def maxPrecisionForBytes(numBytes: Int): Int = {
     Math.round(                               // convert double to long
       Math.floor(Math.log10(                  // number of base-10 digits

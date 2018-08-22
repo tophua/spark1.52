@@ -21,6 +21,7 @@ import org.apache.spark.sql.catalyst.trees.TreeNode
 
 /**
  * Functions for attaching and retrieving trees that are associated with errors.
+  * 用于附加和检索与错误关联的树的函数
  */
 package object errors {
 

@@ -29,6 +29,7 @@ import org.apache.spark.sql.execution.metric.{LongSQLMetric, SQLMetrics}
 /**
  * :: DeveloperApi ::
  * Performs an sort merge outer join of two child relations.
+  * 执行两个子关系的排序合并外连接
  *
  * Note: this does not support full outer join yet; see SPARK-9730 for progress on this.
  */
@@ -60,6 +61,7 @@ case class SortMergeOuterJoin(
 
   override def outputPartitioning: Partitioning = joinType match {
     // For left and right outer joins, the output is partitioned by the streamed input's join keys.
+      //对于左外连接和右外连接,输出由流输入的连接键分区
     case LeftOuter => left.outputPartitioning
     case RightOuter => right.outputPartitioning
     case x =>
@@ -69,6 +71,7 @@ case class SortMergeOuterJoin(
 
   override def outputOrdering: Seq[SortOrder] = joinType match {
     // For left and right outer joins, the output is ordered by the streamed input's join keys.
+      //对于左外连接和右外连接,输出按流输入的连接键排序
     case LeftOuter => requiredOrders(leftKeys)
     case RightOuter => requiredOrders(rightKeys)
     case x => throw new IllegalArgumentException(
@@ -83,6 +86,7 @@ case class SortMergeOuterJoin(
 
   private def requiredOrders(keys: Seq[Expression]): Seq[SortOrder] = {
     // This must be ascending in order to agree with the `keyOrdering` defined in `doExecute()`.
+    //这必须是升序才能与`doExecute（）`中定义的`keyOrdering`一致
     keys.map(SortOrder(_, Ascending))
   }
 
@@ -120,6 +124,7 @@ case class SortMergeOuterJoin(
 
     left.execute().zipPartitions(right.execute()) { (leftIter, rightIter) =>
       // An ordering that can be used to compare keys from both sides.
+      //可用于比较双方密钥的排序
       val keyOrdering = newNaturalAscendingOrdering(leftKeys.map(_.dataType))
       val boundCondition: (InternalRow) => Boolean = {
         condition.map { cond =>
@@ -191,9 +196,11 @@ private class LeftOuterIterator(
       joinedRow.withLeft(smjScanner.getStreamedRow)
       if (smjScanner.getBufferedMatches.isEmpty) {
         // There are no matching right rows, so return nulls for the right row
+        //没有匹配的右行,因此返回右行的空值
         joinedRow.withRight(rightNullRow)
       } else {
         // Find the next row from the right input that satisfied the bound condition
+        //找到满足绑定条件的右输入的下一行
         if (!advanceRightUntilBoundConditionSatisfied()) {
           joinedRow.withRight(rightNullRow)
         }
@@ -240,9 +247,11 @@ private class RightOuterIterator(
       joinedRow.withRight(smjScanner.getStreamedRow)
       if (smjScanner.getBufferedMatches.isEmpty) {
         // There are no matching left rows, so return nulls for the left row
+        //左行没有匹配,因此返回左行的空值
         joinedRow.withLeft(leftNullRow)
       } else {
         // Find the next row from the left input that satisfied the bound condition
+        //找到满足绑定条件的左输入的下一行
         if (!advanceLeftUntilBoundConditionSatisfied()) {
           joinedRow.withLeft(leftNullRow)
         }

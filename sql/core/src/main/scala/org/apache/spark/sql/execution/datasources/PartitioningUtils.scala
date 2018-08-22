@@ -42,6 +42,7 @@ private[sql] object PartitionSpec {
 private[sql] object PartitioningUtils {
   // This duplicates default value of Hive `ConfVars.DEFAULTPARTITIONNAME`, since sql/core doesn't
   // depend on Hive.
+  //这复制了Hive`ConfVars.DEFAULTPARTITIONNAME`的默认值,因为sql/core不依赖于Hive
   private[sql] val DEFAULT_PARTITION_NAME = "__HIVE_DEFAULT_PARTITION__"
 
   private[sql] case class PartitionValues(columnNames: Seq[String], literals: Seq[Literal]) {
@@ -77,6 +78,7 @@ private[sql] object PartitioningUtils {
       defaultPartitionName: String,
       typeInference: Boolean): PartitionSpec = {
     // First, we need to parse every partition's path and see if we can find partition values.
+    //首先,我们需要解析每个分区的路径,看看我们是否可以找到分区值
     val pathsWithPartitionValues = paths.flatMap { path =>
       parsePartition(path, defaultPartitionName, typeInference).map(path -> _)
     }
@@ -88,19 +90,23 @@ private[sql] object PartitioningUtils {
     } else {
       // This dataset is partitioned. We need to check whether all partitions have the same
       // partition columns and resolve potential type conflicts.
+      //此数据集已分区,我们需要检查所有分区是否具有相同的分区列并解决潜在的类型冲突
       val resolvedPartitionValues = resolvePartitions(pathsWithPartitionValues)
 
       // Creates the StructType which represents the partition columns.
+      //创建表示分区列的StructType
       val fields = {
         val PartitionValues(columnNames, literals) = resolvedPartitionValues.head
         columnNames.zip(literals).map { case (name, Literal(_, dataType)) =>
           // We always assume partition columns are nullable since we've no idea whether null values
           // will be appended in the future.
+          //我们总是假设分区列是可空的,因为我们不知道将来是否会附加空值
           StructField(name, dataType, nullable = true)
         }
       }
 
       // Finally, we create `Partition`s based on paths and resolved partition values.
+      //最后,我们根据路径和已解析的分区值创建`Partition`s。
       val partitions = resolvedPartitionValues.zip(pathsWithPartitionValues).map {
         case (PartitionValues(_, literals), (path, _)) =>
           Partition(InternalRow.fromSeq(literals.map(_.value)), path.toString)
@@ -113,6 +119,7 @@ private[sql] object PartitioningUtils {
   /**
    * Parses a single partition, returns column names and values of each partition column.  For
    * example, given:
+    * 解析单个分区,返回每个分区列的列名和值,例如,给定：
    * {{{
    *   path = hdfs://<host>:<port>/path/to/partition/a=42/b=hello/c=3.14
    * }}}
@@ -132,6 +139,7 @@ private[sql] object PartitioningUtils {
       typeInference: Boolean): Option[PartitionValues] = {
     val columns = ArrayBuffer.empty[(String, Literal)]
     // Old Hadoop versions don't have `Path.isRoot`
+    //旧的Hadoop版本没有`Path.isRoot
     var finished = path.getParent == null
     var chopped = path
 
@@ -195,6 +203,7 @@ private[sql] object PartitioningUtils {
         listConflictingPartitionColumns(pathsWithPartitionValues))
 
       // Resolves possible type conflicts for each column
+      //解决每列的可能类型冲突
       val values = pathsWithPartitionValues.map(_._2)
       val columnCount = values.head.columnNames.size
       val resolvedValues = (0 until columnCount).map { i =>
@@ -202,6 +211,7 @@ private[sql] object PartitioningUtils {
       }
 
       // Fills resolved literals back to each partition
+      //将已解析的文字填充回每个分区
       values.zipWithIndex.map { case (d, index) =>
         d.copy(literals = resolvedValues.map(_(index)))
       }
@@ -225,6 +235,7 @@ private[sql] object PartitioningUtils {
     }
 
     // Lists out those non-leaf partition directories that also contain files
+    //列出那些也包含文件的非叶子分区目录
     val suspiciousPaths = distinctPartColNames.sortBy(_.length).flatMap(partColNamesToPaths)
 
     s"Conflicting partition column names detected:\n" +
@@ -246,13 +257,13 @@ private[sql] object PartitioningUtils {
       defaultPartitionName: String,
       typeInference: Boolean): Literal = {
     if (typeInference) {
-      // First tries integral types
+      // First tries integral types 首先尝试整数类型
       Try(Literal.create(Integer.parseInt(raw), IntegerType))
         .orElse(Try(Literal.create(JLong.parseLong(raw), LongType)))
-        // Then falls back to fractional types
+        // Then falls back to fractional types 然后回到分数类型
         .orElse(Try(Literal.create(JDouble.parseDouble(raw), DoubleType)))
         .orElse(Try(Literal(new JBigDecimal(raw))))
-        // Then falls back to string
+        // Then falls back to string 然后回到字符串
         .getOrElse {
           if (raw == defaultPartitionName) {
             Literal.create(null, NullType)
@@ -275,11 +286,13 @@ private[sql] object PartitioningUtils {
   /**
    * Given a collection of [[Literal]]s, resolves possible type conflicts by up-casting "lower"
    * types.
+    * 给定[[Literal]]的集合，通过向上转换“较低”类型来解决可能的类型冲突
    */
   private def resolveTypeConflicts(literals: Seq[Literal]): Seq[Literal] = {
     val desiredType = {
       val topType = literals.map(_.dataType).maxBy(upCastingOrder.indexOf(_))
       // Falls back to string if all values of this column are null or empty string
+      //如果此列的所有值都为null或空字符串,则回退到字符串
       if (topType == NullType) StringType else topType
     }
 

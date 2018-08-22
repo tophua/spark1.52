@@ -26,7 +26,7 @@ import org.apache.spark.annotation.DeveloperApi
  * :: DeveloperApi ::
  *
  * Trait for an object with an immutable unique ID that identifies itself and its derivatives.
- *
+ * 具有不可变唯一ID的对象的特征,该ID标识自身及其衍生物
  * WARNING: There have not yet been final discussions on this API, so it may be broken in future
  *          releases.
  */
@@ -35,6 +35,7 @@ trait Identifiable {
 
   /**
    * An immutable unique ID for the object and its derivatives.
+    * 对象及其派生的不可变唯一ID
    */
   val uid: String
 
@@ -49,6 +50,7 @@ object Identifiable {
 
   /**
    * Returns a random UID that concatenates the given prefix, "_", and 12 random hex chars.
+    * 返回连接给定前缀“_”和12个随机十六进制字符的随机UID
    */
   def randomUID(prefix: String): String = {
     prefix + "_" + UUID.randomUUID().toString.takeRight(12)

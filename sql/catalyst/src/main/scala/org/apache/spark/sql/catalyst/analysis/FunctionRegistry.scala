@@ -27,7 +27,8 @@ import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.StringKeyHashMap
 
 
-/** A catalog for looking up user defined functions, used by an [[Analyzer]]. */
+/** A catalog for looking up user defined functions, used by an [[Analyzer]].
+  * 用于查找用户定义函数的目录,由[[Analyzer]]使用 */
 trait FunctionRegistry {
 
   final def registerFunction(name: String, builder: FunctionBuilder): Unit = {
@@ -39,10 +40,10 @@ trait FunctionRegistry {
   @throws[AnalysisException]("If function does not exist")
   def lookupFunction(name: String, children: Seq[Expression]): Expression
 
-  /* List all of the registered function names. */
+  /* List all of the registered function names. 列出所有已注册的函数名称*/
   def listFunction(): Seq[String]
 
-  /* Get the class of the registered function by specified name. */
+  /* Get the class of the registered function by specified name. 按指定名称获取已注册函数的类*/
   def lookupFunction(name: String): Option[ExpressionInfo]
 }
 
@@ -73,6 +74,7 @@ class SimpleFunctionRegistry extends FunctionRegistry {
 /**
  * A trivial catalog that returns an error when a function is requested. Used for testing when all
  * functions are already filled in and the analyzer needs only to resolve attribute references.
+  * 一个简单的目录,在请求函数时返回错误,用于测试所有功能是否已填写且分析仪仅需要解析属性引用
  */
 object EmptyFunctionRegistry extends FunctionRegistry {
   override def registerFunction(name: String, info: ExpressionInfo, builder: FunctionBuilder)
@@ -265,16 +267,19 @@ object FunctionRegistry {
       (implicit tag: ClassTag[T]): (String, (ExpressionInfo, FunctionBuilder)) = {
 
     // See if we can find a constructor that accepts Seq[Expression]
+    //看看我们是否能找到一个接受Seq [Expression]的构造函数
     val varargCtor = Try(tag.runtimeClass.getDeclaredConstructor(classOf[Seq[_]])).toOption
     val builder = (expressions: Seq[Expression]) => {
       if (varargCtor.isDefined) {
         // If there is an apply method that accepts Seq[Expression], use that one.
+        //如果有一个接受Seq [Expression]的apply方法,请使用该方法。
         Try(varargCtor.get.newInstance(expressions).asInstanceOf[Expression]) match {
           case Success(e) => e
           case Failure(e) => throw new AnalysisException(e.getMessage)
         }
       } else {
         // Otherwise, find an ctor method that matches the number of arguments, and use that.
+        //否则,找到与参数数量匹配的ctor方法,并使用它
         val params = Seq.fill(expressions.size)(classOf[Expression])
         val f = Try(tag.runtimeClass.getDeclaredConstructor(params : _*)) match {
           case Success(e) =>

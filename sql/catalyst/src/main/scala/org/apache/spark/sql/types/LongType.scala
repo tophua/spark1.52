@@ -40,6 +40,7 @@ class LongType private() extends IntegralType {
 
   /**
    * The default size of a value of the LongType is 8 bytes.
+    * LongType值的默认大小为8个字节
    */
   override def defaultSize: Int = 8
 

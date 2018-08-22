@@ -26,6 +26,8 @@ object ConnectedComponents {
   /**
    * Compute the connected component membership of each vertex and return a graph with the vertex
    * value containing the lowest vertex id in the connected component containing that vertex.
+    *
+    * 计算每个顶点的连通组件成员资格,并返回包含顶点值的图形,该顶点值包含包含该顶点的连接组件中的最低顶点id
    *
    * @tparam VD the vertex attribute type (discarded in the computation)
    * @tparam ED the edge attribute type (preserved in the computation)

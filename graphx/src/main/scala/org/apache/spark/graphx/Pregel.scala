@@ -28,6 +28,9 @@ import org.apache.spark.Logging
  * edges, enables the message sending computation to read both vertex attributes, and constrains
  * messages to the graph structure.  These changes allow for substantially more efficient
  * distributed execution while also exposing greater flexibility for graph-based computation.
+  *
+  * 与原始的Pregel API不同,GraphX Pregel API会对sendMessage计算边缘进行计算,使消息发送计算能够读取两个顶点属性,
+  * 并将消息约束到图形结构,这些更改允许实质上更有效的分布式执行,同时还为基于图形的计算提供了更大的灵活性。
  *
  * @example We can use the Pregel abstraction to implement PageRank:
  * {{{
@@ -64,7 +67,9 @@ object Pregel extends Logging {
    * destination vertex. The `mergeMsg` function is a commutative
    * associative function used to combine messages destined to the
    * same vertex.
-   *
+   * 执行类似Pregel的迭代顶点并行抽象,用户定义的顶点程序“vprog”在接收任何入站消息的每个顶点上并行执行,
+    * 并计算顶点的新值,然后在所有外边缘调用`sendMsg`函数,
+    * 并用于计算到目标顶点的可选消息,`mergeMsg`函数是一个可交换的关联函数,用于组合指向同一顶点的消息。
    * On the first iteration all vertices receive the `initialMsg` and
    * on subsequent iterations if a vertex does not receive a message
    * then the vertex-program is not invoked.

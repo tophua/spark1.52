@@ -136,10 +136,10 @@ abstract class AggregateFunction2
     inputBufferOffset = newInputBufferOffset
   }
 
-  /** The schema of the aggregation buffer. */
+  /** The schema of the aggregation buffer. 聚合缓冲区的模式*/
   def bufferSchema: StructType
 
-  /** Attributes of fields in bufferSchema. */
+  /** Attributes of fields in bufferSchema. bufferSchema中字段的属性*/
   def bufferAttributes: Seq[AttributeReference]
 
   /** Clones bufferAttributes. */
@@ -147,8 +147,10 @@ abstract class AggregateFunction2
 
   /**
    * Initializes its aggregation buffer located in `buffer`.
+    * 初始化位于`buffer`的聚合缓冲区
    * It will use bufferOffset to find the starting point of
    * its buffer in the given `buffer` shared with other functions.
+    * 它将使用bufferOffset在与其他函数共享的给定`buffer`中查找其缓冲区的起始点
    */
   def initialize(buffer: MutableRow): Unit
 
@@ -156,14 +158,18 @@ abstract class AggregateFunction2
    * Updates its aggregation buffer located in `buffer` based on the given `input`.
    * It will use bufferOffset to find the starting point of its buffer in the given `buffer`
    * shared with other functions.
+    * 根据给定的`input`更新位于`buffer`的聚合缓冲区,
+    * 它将使用bufferOffset在与其他函数共享的给定`buffer`中查找其缓冲区的起始点
    */
   def update(buffer: MutableRow, input: InternalRow): Unit
 
   /**
    * Updates its aggregation buffer located in `buffer1` by combining intermediate results
    * in the current buffer and intermediate results from another buffer `buffer2`.
+    * 通过组合当前缓冲区中的中间结果和来自另一个缓冲区`buffer2`的中间结果,更新位于`buffer1`中的聚合缓冲区。
    * It will use bufferOffset to find the starting point of its buffer in the given `buffer1`
    * and `buffer2`.
+    * 它将使用bufferOffset在给定的`buffer1`和`buffer2`中找到其缓冲区的起始点
    */
   def merge(buffer1: MutableRow, buffer2: InternalRow): Unit
 
@@ -173,6 +179,7 @@ abstract class AggregateFunction2
 
 /**
  * A helper class for aggregate functions that can be implemented in terms of catalyst expressions.
+  * 聚合函数的辅助类,可以根据催化剂表达式实现
  */
 abstract class AlgebraicAggregate extends AggregateFunction2 with Serializable with Unevaluable {
 
@@ -192,10 +199,12 @@ abstract class AlgebraicAggregate extends AggregateFunction2 with Serializable w
    * @param a
    */
   implicit class RichAttribute(a: AttributeReference) {
-    /** Represents this attribute at the mutable buffer side. */
+    /** Represents this attribute at the mutable buffer side.
+      * 在可变缓冲区侧表示此属性*/
     def left: AttributeReference = a
 
-    /** Represents this attribute at the input buffer side (the data value is read-only). */
+    /** Represents this attribute at the input buffer side (the data value is read-only).
+      * 在输入缓冲区表示此属性（数据值是只读的）*/
     def right: AttributeReference = cloneBufferAttributes(bufferAttributes.indexOf(a))
   }
 

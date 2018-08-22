@@ -20,6 +20,7 @@ package org.apache.spark.sql.catalyst.util
 /**
  * Build a map with String type of key, and it also supports either key case
  * sensitive or insensitive.
+  * 使用String类型的键构建映射,它还支持键区分大小写或不区分大小写
  */
 object StringKeyHashMap {
   def apply[T](caseSensitive: Boolean): StringKeyHashMap[T] = caseSensitive match {

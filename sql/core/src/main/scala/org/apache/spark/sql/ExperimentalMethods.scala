@@ -35,7 +35,9 @@ class ExperimentalMethods protected[sql](sqlContext: SQLContext) {
 
   /**
    * Allows extra strategies to be injected into the query planner at runtime.  Note this API
-   * should be consider experimental and is not intended to be stable across releases.
+   * should be consider experimental and is not intended to be stable across releases.]
+    *
+    * 允许在运行时将额外策略注入查询计划程序,请注意,此API应视为实验性的,并不打算在各个版本中保持稳定
    *
    * @since 1.3.0
    */

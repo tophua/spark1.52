@@ -25,6 +25,7 @@ class ArrayBasedMapData(val keyArray: ArrayData, val valueArray: ArrayData) exte
   override def copy(): MapData = new ArrayBasedMapData(keyArray.copy(), valueArray.copy())
 
   // We need to check equality of map type in tests.
+  //我们需要在测试中检查地图类型的相等性
   override def equals(o: Any): Boolean = {
     if (!o.isInstanceOf[ArrayBasedMapData]) {
       return false

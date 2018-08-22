@@ -28,6 +28,7 @@ import org.apache.spark.util.Utils
 /**
  * :: DeveloperApi ::
  * The data type representing `Float` values. Please use the singleton [[DataTypes.FloatType]].
+  * 表示“Float”值的数据类型,请使用singleton [[DataTypes.FloatType]]
  */
 @DeveloperApi
 class FloatType private() extends FractionalType {
@@ -45,6 +46,7 @@ class FloatType private() extends FractionalType {
 
   /**
    * The default size of a value of the FloatType is 4 bytes.
+    * FloatType的默认值大小为4个字节
    */
   override def defaultSize: Int = 4
 

@@ -24,13 +24,16 @@ import org.apache.spark.sql.types.{DataType, NumericType}
 /**
  * The trait of the Window Specification (specified in the OVER clause or WINDOW clause) for
  * Window Functions.
+  * 窗口函数的窗口规范的特征(在OVER子句或WINDOW子句中指定)
  */
 sealed trait WindowSpec
 
 /**
- * The specification for a window function.
+ * The specification for a window function.窗口函数的规范
  * @param partitionSpec It defines the way that input rows are partitioned.
+  *                      它定义了输入行的分区方式
  * @param orderSpec It defines the ordering of rows in a partition.
+  *                  它定义了分区中行的顺序
  * @param frameSpecification It defines the window frame in a partition.
  */
 case class WindowSpecDefinition(
@@ -82,11 +85,13 @@ case class WindowSpecDefinition(
 /**
  * A Window specification reference that refers to the [[WindowSpecDefinition]] defined
  * under the name `name`.
+  * 一个Window规范引用,引用名称为`name`定义的[[WindowSpecDefinition]]
  */
 case class WindowSpecReference(name: String) extends WindowSpec
 
 /**
  * The trait used to represent the type of a Window Frame.
+  * 该特征用于表示窗口框架的类型
  */
 sealed trait FrameType
 
@@ -94,6 +99,8 @@ sealed trait FrameType
  * RowFrame treats rows in a partition individually. When a [[ValuePreceding]]
  * or a [[ValueFollowing]] is used as its [[FrameBoundary]], the value is considered
  * as a physical offset.
+  * RowFrame单独处理分区中的行,当[[ValuePreceding]]或[[ValueFollowing]]用作[[FrameBoundary]]时,
+  * 该值被视为物理偏移量。
  * For example, `ROW BETWEEN 1 PRECEDING AND 1 FOLLOWING` represents a 3-row frame,
  * from the row precedes the current row to the row follows the current row.
  */
@@ -104,6 +111,10 @@ case object RowFrame extends FrameType
  * All rows having the same `ORDER BY` ordering are considered as peers.
  * When a [[ValuePreceding]] or a [[ValueFollowing]] is used as its [[FrameBoundary]],
  * the value is considered as a logical offset.
+  *
+  * RangeFrame将分区中的行视为对等组,具有相同“ORDER BY”排序的所有行都被视为对等,
+  * 当[[ValuePreceding]]或[[ValueFollowing]]用作其[[FrameBoundary]]时,该值被视为逻辑偏移量。
+  *
  * For example, assuming the value of the current row's `ORDER BY` expression `expr` is `v`,
  * `RANGE BETWEEN 1 PRECEDING AND 1 FOLLOWING` represents a frame containing rows whose values
  * `expr` are in the range of [v-1, v+1].
@@ -115,6 +126,7 @@ case object RangeFrame extends FrameType
 
 /**
  * The trait used to represent the type of a Window Frame Boundary.
+  * 该特征用于表示窗口框架边界的类型
  */
 sealed trait FrameBoundary {
   def notFollows(other: FrameBoundary): Boolean
@@ -146,7 +158,7 @@ case class ValuePreceding(value: Int) extends FrameBoundary {
   override def toString: String = s"$value PRECEDING"
 }
 
-/** CURRENT ROW boundary. */
+/** CURRENT ROW boundary. CURRENT ROW边界*/
 case object CurrentRow extends FrameBoundary {
   def notFollows(other: FrameBoundary): Boolean = other match {
     case UnboundedPreceding => false
@@ -172,7 +184,7 @@ case class ValueFollowing(value: Int) extends FrameBoundary {
   override def toString: String = s"$value FOLLOWING"
 }
 
-/** UNBOUNDED FOLLOWING boundary. */
+/** UNBOUNDED FOLLOWING boundary. 无限制的边界*/
 case object UnboundedFollowing extends FrameBoundary {
   def notFollows(other: FrameBoundary): Boolean = other match {
     case UnboundedPreceding => false
@@ -187,19 +199,23 @@ case object UnboundedFollowing extends FrameBoundary {
 
 /**
  * The trait used to represent the a Window Frame.
+  * 用于表示窗口框架的特征
  */
 sealed trait WindowFrame
 
-/** Used as a place holder when a frame specification is not defined.  */
+/** Used as a place holder when a frame specification is not defined.
+  * 未定义框架规格时用作占位符 */
 case object UnspecifiedFrame extends WindowFrame
 
-/** A specified Window Frame. */
+/** A specified Window Frame.
+  * 指定的窗口框架 */
 case class SpecifiedWindowFrame(
     frameType: FrameType,
     frameStart: FrameBoundary,
     frameEnd: FrameBoundary) extends WindowFrame {
 
-  /** If this WindowFrame is valid or not. */
+  /** If this WindowFrame is valid or not.
+    * 如果此WindowFrame有效或无效*/
   def validate: Option[String] = (frameType, frameStart, frameEnd) match {
     case (_, UnboundedFollowing, _) =>
       Some(s"$UnboundedFollowing is not allowed as the start of a Window Frame.")
@@ -248,8 +264,10 @@ object SpecifiedWindowFrame {
 
 /**
  * Every window function needs to maintain a output buffer for its output.
+  * 每个窗口函数都需要为其输出维护一个输出缓冲区
  * It should expect that for a n-row window frame, it will be called n times
  * to retrieve value corresponding with these n rows.
+  * 它应该期望对于n行窗口帧,它将被调用n次以检索与这n行相对应的值
  */
 trait WindowFunction extends Expression {
   def init(): Unit
@@ -319,6 +337,7 @@ case class WindowExpression(
 
 /**
  * Extractor for making working with frame boundaries easier.
+  * 用于使框架边界更容易处理的提取器
  */
 object FrameBoundaryExtractor {
   def unapply(boundary: FrameBoundary): Option[Int] = boundary match {

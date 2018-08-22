@@ -29,6 +29,7 @@ import org.apache.spark.sql.execution.metric.SQLMetrics
  * :: DeveloperApi ::
  * Build the right table's join keys into a HashSet, and iteratively go through the left
  * table, to find the if join keys are in the Hash set.
+  * 将正确的表的连接键构建到HashSet中,并迭代地遍历左表,以查找是否在Hash集中的连接键
  */
 @DeveloperApi
 case class BroadcastLeftSemiJoinHash(

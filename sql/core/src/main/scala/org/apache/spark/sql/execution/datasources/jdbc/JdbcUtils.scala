@@ -29,11 +29,13 @@ import org.apache.spark.sql.{DataFrame, Row}
 
 /**
  * Util functions for JDBC tables.
+  * DBC表的Util函数
  */
 object JdbcUtils extends Logging {
 
   /**
    * Establishes a JDBC connection.
+    * 建立JDBC连接
    */
   def createConnection(url: String, connectionProperties: Properties): Connection = {
     JDBCRDD.getConnector(connectionProperties.getProperty("driver"), url, connectionProperties)()
@@ -41,15 +43,18 @@ object JdbcUtils extends Logging {
 
   /**
    * Returns true if the table already exists in the JDBC database.
+    * 如果JDBC数据库中已存在该表,则返回true
    */
   def tableExists(conn: Connection, table: String): Boolean = {
     // Somewhat hacky, but there isn't a good way to identify whether a table exists for all
     // SQL database systems, considering "table" could also include the database name.
+    //有点hacky,但没有一种很好的方法来确定是否存在所有SQL数据库系统的表,考虑到“table”也可以包括数据库名称。
     Try(conn.prepareStatement(s"SELECT 1 FROM $table LIMIT 1").executeQuery().next()).isSuccess
   }
 
   /**
    * Drops a table from the JDBC database.
+    * 从JDBC数据库中删除表
    */
   def dropTable(conn: Connection, table: String): Unit = {
     conn.prepareStatement(s"DROP TABLE $table").executeUpdate()
@@ -57,6 +62,7 @@ object JdbcUtils extends Logging {
 
   /**
    * Returns a PreparedStatement that inserts a row into table via conn.
+    * 返回一个PreparedStatement,它通过conn将一行插入表中
    */
   def insertStatement(conn: Connection, table: String, rddSchema: StructType): PreparedStatement = {
     val sql = new StringBuilder(s"INSERT INTO $table VALUES (")
@@ -73,15 +79,22 @@ object JdbcUtils extends Logging {
    * Saves a partition of a DataFrame to the JDBC database.  This is done in
    * a single database transaction in order to avoid repeatedly inserting
    * data as much as possible.
+    *
+    * 将DataFrame的分区保存到JDBC数据库,这是在单个数据库事务中完成的,以避免尽可能多地重复插入数据
    *
    * It is still theoretically possible for rows in a DataFrame to be
    * inserted into the database more than once if a stage somehow fails after
    * the commit occurs but before the stage can return successfully.
+    *
+    * 理论上,如果某个阶段在提交发生后但在阶段成功返回之前某个阶段失败,那么DataFrame中的行可能会多次插入到数据库中
    *
    * This is not a closure inside saveTable() because apparently cosmetic
    * implementation changes elsewhere might easily render such a closure
    * non-Serializable.  Instead, we explicitly close over all variables that
    * are used.
+    *
+    * 这不是saveTable()中的闭包,因为在其他地方显然化妆实现更改可能很容易使得这样的闭包不可序列化,
+    * 相反,我们明确地关闭所有使用的变量。
    */
   def savePartition(
       getConnection: () => Connection,
@@ -150,6 +163,7 @@ object JdbcUtils extends Logging {
 
   /**
    * Compute the schema string for this RDD.
+    * 计算此RDD的模式字符串
    */
   def schemaString(df: DataFrame, url: String): String = {
     val sb = new StringBuilder()
@@ -181,6 +195,7 @@ object JdbcUtils extends Logging {
 
   /**
    * Saves the RDD to the database in a single transaction.
+    * 在单个事务中将RDD保存到数据库
    */
   def saveTable(
       df: DataFrame,

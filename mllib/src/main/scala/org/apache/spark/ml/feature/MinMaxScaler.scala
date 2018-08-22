@@ -35,6 +35,7 @@ private[feature] trait MinMaxScalerParams extends Params with HasInputCol with H
 
   /**
    * lower bound after transformation, shared by all features
+    * 转换后的下限,由所有功能共享
    * Default: 0.0
    * @group param
    */
@@ -46,6 +47,7 @@ private[feature] trait MinMaxScalerParams extends Params with HasInputCol with H
 
   /**
    * upper bound after transformation, shared by all features
+    * 转换后的上限,由所有功能共享
    * Default: 1.0
    * @group param
    */
@@ -55,7 +57,7 @@ private[feature] trait MinMaxScalerParams extends Params with HasInputCol with H
   /** @group getParam */
   def getMax: Double = $(max)
 
-  /** Validates and transforms the input schema. */
+  /** Validates and transforms the input schema. 验证并转换输入架构*/
   protected def validateAndTransformSchema(schema: StructType): StructType = {
     val inputType = schema($(inputCol)).dataType
     require(inputType.isInstanceOf[VectorUDT],
@@ -76,7 +78,8 @@ private[feature] trait MinMaxScalerParams extends Params with HasInputCol with H
  * Rescale each feature individually to a common range [min, max] linearly using column summary
  * statistics, which is also known as min-max normalization or Rescaling. The rescaled value for
  * feature E is calculated as,
- *
+ * 使用列摘要将每个特征分别重新调整为公共范围[min，max],
+  * 使用列汇总功能E将每个特征分别重新缩放到公共范围[min，max],计算为，
  * Rescaled(e_i) = \frac{e_i - E_{min}}{E_{max} - E_{min}} * (max - min) + min
  *
  * For the case E_{max} == E_{min}, Rescaled(e_i) = 0.5 * (max + min)

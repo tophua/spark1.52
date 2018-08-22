@@ -33,8 +33,11 @@ private[orc] object OrcFileOperator extends Logging {
    * Retrieves a ORC file reader from a given path.  The path can point to either a directory or a
    * single ORC file.  If it points to an directory, it picks any non-empty ORC file within that
    * directory.
+    * 从给定路径检索ORC文件读取器,该路径可以指向目录或单个ORC文件,
+    * 如果它指向一个目录,它将选择该目录中的任何非空ORC文件。
    *
    * The reader returned by this method is mainly used for two purposes:
+    * 此方法返回的阅读器主要用于两个目的：
    *
    * 1. Retrieving file metadata (schema and compression codecs, etc.)
    * 2. Read the actual file content (in this case, the given path should point to the target file)

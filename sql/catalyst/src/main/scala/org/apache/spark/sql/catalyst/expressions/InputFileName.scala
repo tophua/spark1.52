@@ -25,6 +25,7 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * Expression that returns the name of the current file being read in using [[SqlNewHadoopRDD]]
+  * 使用[[SqlNewHadoopRDD]]返回正在读取的当前文件的名称的表达式
  */
 case class InputFileName() extends LeafExpression with Nondeterministic {
 

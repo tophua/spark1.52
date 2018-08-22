@@ -24,10 +24,14 @@ import org.apache.spark.graphx._
 object LabelPropagation {
   /**
    * Run static Label Propagation for detecting communities in networks.
+    * 运行静态标签传播以检测网络中的社区
    *
    * Each node in the network is initially assigned to its own community. At every superstep, nodes
    * send their community affiliation to all neighbors and update their state to the mode community
    * affiliation of incoming messages.
+    *
+    * 网络中的每个节点最初都分配给自己的社区,在每个超级步骤,
+    * 节点将其社区从属关系发送给所有邻居,并将其状态更新为传入消息的模式社区从属关系。
    *
    * LPA is a standard community detection algorithm for graphs. It is very inexpensive
    * computationally, although (1) convergence is not guaranteed and (2) one can end up with

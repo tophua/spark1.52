@@ -29,6 +29,7 @@ import org.apache.spark.sql.execution.metric.SQLMetrics
  * :: DeveloperApi ::
  * Using BroadcastNestedLoopJoin to calculate left semi join result when there's no join keys
  * for hash join.
+  * 当没有用于散列连接的连接键时,使用BroadcastNestedLoopJoin计算左半连接结果
  */
 @DeveloperApi
 case class LeftSemiJoinBNL(
@@ -48,10 +49,10 @@ case class LeftSemiJoinBNL(
   override def outputsUnsafeRows: Boolean = streamed.outputsUnsafeRows
   override def canProcessUnsafeRows: Boolean = true
 
-  /** The Streamed Relation */
+  /** The Streamed Relation 流媒体关系*/
   override def left: SparkPlan = streamed
 
-  /** The Broadcast relation */
+  /** The Broadcast relation 广播关系*/
   override def right: SparkPlan = broadcast
 
   @transient private lazy val boundCondition =

@@ -104,7 +104,7 @@ final class DecisionTreeRegressionModel private[ml] (
     "DecisionTreeClassificationModel given null rootNode, but it requires a non-null rootNode.")
 
   /**
-   * Construct a decision tree regression model.
+   * Construct a decision tree regression model.构建决策树回归模型
    * @param rootNode  Root node of tree, with other nodes attached.
    */
   private[ml] def this(rootNode: Node) = this(Identifiable.randomUID("dtr"), rootNode)

@@ -27,21 +27,25 @@ import org.apache.spark.sql.types._
 private[sql] trait ColumnBuilder {
   /**
    * Initializes with an approximate lower bound on the expected number of elements in this column.
+    * 使用此列中预期元素数的近似下限进行初始化
    */
   def initialize(initialSize: Int, columnName: String = "", useCompression: Boolean = false)
 
   /**
    * Appends `row(ordinal)` to the column builder.
+    * 将`row（ordinal）`追加到列构建器
    */
   def appendFrom(row: InternalRow, ordinal: Int)
 
   /**
    * Column statistics information
+    * 列统计信息
    */
   def columnStats: ColumnStats
 
   /**
    * Returns the final columnar byte buffer.
+    * 返回最后的柱状字节缓冲区
    */
   def build(): ByteBuffer
 }
@@ -135,6 +139,7 @@ private[sql] object ColumnBuilder {
       orig
     } else {
       // grow in steps of initial size
+      //以初始大小的步长增长
       val capacity = orig.capacity()
       val newSize = capacity + size.max(capacity / 8 + 1)
       val pos = orig.position()

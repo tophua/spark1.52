@@ -24,22 +24,28 @@ import org.apache.spark.sql.types.{DataType, IntegerType}
  * Specifies how tuples that share common expressions will be distributed when a query is executed
  * in parallel on many machines.  Distribution can be used to refer to two distinct physical
  * properties:
+  * 指定在许多计算机上并行执行查询时如何分配共享公用表达式的元组,分布可用于指代两种不同的物理属性：
  *  - Inter-node partitioning of data: In this case the distribution describes how tuples are
  *    partitioned across physical machines in a cluster.  Knowing this property allows some
  *    operators (e.g., Aggregate) to perform partition local operations instead of global ones.
+  *    节点间数据分区：在这种情况下,分发描述了如何在群集中的物理机器之间对元组进行分区,
+  *    知道该属性允许一些运营商(例如,聚合)执行分区本地操作而不是全局操作。
  *  - Intra-partition ordering of data: In this case the distribution describes guarantees made
  *    about how tuples are distributed within a single partition.
+  *   数据的分区内排序：在这种情况下,分发描述了有关如何在单个分区内分布元组的保证
  */
 sealed trait Distribution
 
 /**
  * Represents a distribution where no promises are made about co-location of data.
+  * 表示没有关于数据共址的承诺
  */
 case object UnspecifiedDistribution extends Distribution
 
 /**
  * Represents a distribution that only has a single partition and all tuples of the dataset
  * are co-located.
+  * 表示仅具有单个分区且数据集的所有元组位于同一位置的分布
  */
 case object AllTuples extends Distribution
 
@@ -48,6 +54,9 @@ case object AllTuples extends Distribution
  * [[Expression Expressions]] will be co-located. Based on the context, this
  * can mean such tuples are either co-located in the same partition or they will be contiguous
  * within a single partition.
+  * 表示与`clustering` [[Expression Expressions]]共享相同值的元组将共存的数据,
+  * 根据上下文,这可能意味着这些元组要么位于同一个分区中,要么在单个分区中是连续的。
+  *
  */
 case class ClusteredDistribution(clustering: Seq[Expression]) extends Distribution {
   require(
@@ -59,10 +68,14 @@ case class ClusteredDistribution(clustering: Seq[Expression]) extends Distributi
 
 /**
  * Represents data where tuples have been ordered according to the `ordering`
+  * 表示根据`ordering`排序元组的数据
  * [[Expression Expressions]].  This is a strictly stronger guarantee than
  * [[ClusteredDistribution]] as an ordering will ensure that tuples that share the
  * same value for the ordering expressions are contiguous and will never be split across
  * partitions.
+  * 这是[[ClusteredDistribution]]的严格保证,因为排序将确保为排序表达式共享相同值的元组是连续的,
+  * 并且永远不会在分区之间拆分
+  *
  */
 case class OrderedDistribution(ordering: Seq[SortOrder]) extends Distribution {
   require(
@@ -77,6 +90,7 @@ case class OrderedDistribution(ordering: Seq[SortOrder]) extends Distribution {
 
 /**
  * Describes how an operator's output is split across partitions. The `compatibleWith`,
+  * 描述如何跨分区拆分运算符的输出, `compatibleWith`，
  * `guarantees`, and `satisfies` methods describe relationships between child partitionings,
  * target partitionings, and [[Distribution]]s. These relations are described more precisely in
  * their individual method docs, but at a high level:
@@ -107,12 +121,14 @@ case class OrderedDistribution(ordering: Seq[SortOrder]) extends Distribution {
  *
  */
 sealed trait Partitioning {
-  /** Returns the number of partitions that the data is split across */
+  /** Returns the number of partitions that the data is split across
+    * 返回数据拆分的分区数*/
   val numPartitions: Int
 
   /**
    * Returns true iff the guarantees made by this [[Partitioning]] are sufficient
    * to satisfy the partitioning scheme mandated by the `required` [[Distribution]],
+    * 如果此[[Partitioning]]所做的保证足以满足`required` [[Distribution]]规定的分区方案,则返回true
    * i.e. the current dataset does not need to be re-partitioned for the `required`
    * Distribution (it is possible that tuples within a partition need to be reorganized).
    */
@@ -121,17 +137,25 @@ sealed trait Partitioning {
   /**
    * Returns true iff we can say that the partitioning scheme of this [[Partitioning]]
    * guarantees the same partitioning scheme described by `other`.
+    *
+    * 如果我们可以说这[[Partitioning]]的分区方案保证了`other`描述的相同分区方案,则返回true。
    *
    * Compatibility of partitionings is only checked for operators that have multiple children
    * and that require a specific child output [[Distribution]], such as joins.
+    *
+    * 仅对具有多个子级并且需要特定子输出[[Distribution]]的运算符(例如连接)检查分区的兼容性。
    *
    * Intuitively, partitionings are compatible if they route the same partitioning key to the same
    * partition. For instance, two hash partitionings are only compatible if they produce the same
    * number of output partitionings and hash records according to the same hash function and
    * same partitioning key schema.
+    *
+    * 直观地说,如果分区将相同的分区键路由到同一分区,则分区是兼容的,例如,
+    * 如果两个散列分区根据相同的散列函数和相同的分区键模式产生相同数量的输出分区和散列记录,则它们只是兼容的
    *
    * Put another way, two partitionings are compatible with each other if they satisfy all of the
    * same distribution guarantees.
+    * 换句话说,如果两个分区满足所有相同的分配保证,则它们彼此兼容
    */
   def compatibleWith(other: Partitioning): Boolean
 
@@ -208,6 +232,7 @@ case object SinglePartition extends Partitioning {
  * Represents a partitioning where rows are split up across partitions based on the hash
  * of `expressions`.  All rows where `expressions` evaluate to the same values are guaranteed to be
  * in the same partition.
+  * 表示一个分区,其中行根据`expressions`的散列在分区之间拆分,“表达式”评估为相同值的所有行都保证在同一个分区中
  */
 case class HashPartitioning(expressions: Seq[Expression], numPartitions: Int)
   extends Expression with Partitioning with Unevaluable {
@@ -239,6 +264,7 @@ case class HashPartitioning(expressions: Seq[Expression], numPartitions: Int)
  * Represents a partitioning where rows are split across partitions based on some total ordering of
  * the expressions specified in `ordering`.  When data is partitioned in this manner the following
  * two conditions are guaranteed to hold:
+  * 表示一个分区,其中行根据`ordering`中指定的表达式的某些总排序在分区之间拆分,以这种方式对数据进行分区时,保证满足以下两个条件：
  *  - All row where the expressions in `ordering` evaluate to the same values will be in the same
  *    partition.
  *  - Each partition will have a `min` and `max` row, relative to the given ordering.  All rows
@@ -307,6 +333,7 @@ case class PartitioningCollection(partitionings: Seq[Partitioning])
 
   /**
    * Returns true if any `partitioning` of this collection satisfies the given
+    * 如果此collection的任何`partitioning`满足给定的值,则返回true
    * [[Distribution]].
    */
   override def satisfies(required: Distribution): Boolean =
@@ -315,6 +342,7 @@ case class PartitioningCollection(partitionings: Seq[Partitioning])
   /**
    * Returns true if any `partitioning` of this collection is compatible with
    * the given [[Partitioning]].
+    * 如果此集合的任何“partitioning”与给定的[[Partitioning]]兼容,则返回true。
    */
   override def compatibleWith(other: Partitioning): Boolean =
     partitionings.exists(_.compatibleWith(other))
@@ -322,6 +350,7 @@ case class PartitioningCollection(partitionings: Seq[Partitioning])
   /**
    * Returns true if any `partitioning` of this collection guarantees
    * the given [[Partitioning]].
+    * 如果此collection的任何`partitioning`保证给定的[[Partitioning]],则返回true。
    */
   override def guarantees(other: Partitioning): Boolean =
     partitionings.exists(_.guarantees(other))

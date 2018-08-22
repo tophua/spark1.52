@@ -28,18 +28,20 @@ import org.apache.spark.sql.types.DataType
 /**
  * Thrown when an invalid attempt is made to access a property of a tree that has yet to be fully
  * resolved.
+  * 当无效尝试访问尚未完全解析的树的属性时抛出
  */
 class UnresolvedException[TreeType <: TreeNode[_]](tree: TreeType, function: String) extends
   errors.TreeNodeException(tree, s"Invalid call to $function on unresolved object", null)
 
 /**
  * Holds the name of a relation that has yet to be looked up in a [[Catalog]].
+  * 保存尚未在[[Catalog]]中查找的关系的名称
  */
 case class UnresolvedRelation(
     tableIdentifier: Seq[String],
     alias: Option[String] = None) extends LeafNode {
 
-  /** Returns a `.` separated name for this relation. */
+  /** Returns a `.` separated name for this relation. 返回此关系的`.`分隔名称*/
   def tableName: String = tableIdentifier.mkString(".")
 
   override def output: Seq[Attribute] = Nil
@@ -49,6 +51,7 @@ case class UnresolvedRelation(
 
 /**
  * Holds the name of an attribute that has yet to be resolved.
+  * 保存尚未解析的属性的名称
  */
 case class UnresolvedAttribute(nameParts: Seq[String]) extends Attribute with Unevaluable {
 
@@ -72,12 +75,15 @@ case class UnresolvedAttribute(nameParts: Seq[String]) extends Attribute with Un
 object UnresolvedAttribute {
   /**
    * Creates an [[UnresolvedAttribute]], parsing segments separated by dots ('.').
+    * 创建[[UnresolvedAttribute]],解析以点（'.'）分隔的段
    */
   def apply(name: String): UnresolvedAttribute = new UnresolvedAttribute(name.split("\\."))
 
   /**
    * Creates an [[UnresolvedAttribute]], from a single quoted string (for example using backticks in
    * HiveQL.  Since the string is consider quoted, no processing is done on the name.
+    * 从单引号字符串创建[[UnresolvedAttribute]]
+    * 例如在HiveQL中使用反引号,由于字符串被引用,因此不对名称进行处理
    */
   def quoted(name: String): UnresolvedAttribute = new UnresolvedAttribute(Seq(name))
 
@@ -90,10 +96,12 @@ object UnresolvedAttribute {
     new UnresolvedAttribute(parseAttributeName(name))
 
   /**
-   * Used to split attribute name by dot with backticks rule.
+   * Used to split attribute name by dot with backticks rule.用于通过带反引号规则的点分割属性名称
    * Backticks must appear in pairs, and the quoted string must be a complete name part,
    * which means `ab..c`e.f is not allowed.
    * Escape character is not supported now, so we can't use backtick inside name part.
+    * 反引号必须成对出现,引用的字符串必须是完整的名称部分,
+    * 这意味着不允许使用`ab..c`e.f,这意味着不允许使用`ab..c`e.f
    */
   def parseAttributeName(name: String): Seq[String] = {
     def e = new AnalysisException(s"syntax error in attribute name: $name")
@@ -164,6 +172,7 @@ abstract class Star extends LeafExpression with NamedExpression {
 
 /**
  * Represents all of the input attributes to a given relational operator, for example in
+  * 表示给定关系运算符的所有输入属性,例如
  * "SELECT * FROM ...".
  *
  * @param table an optional table that should be the target of the expansion.  If omitted all
@@ -190,10 +199,11 @@ case class UnresolvedStar(table: Option[String]) extends Star with Unevaluable {
 
 /**
  * Used to assign new names to Generator's output, such as hive udtf.
+  * 用于为Generator的输出分配新名称,例如hive udtf
  * For example the SQL expression "stack(2, key, value, key, value) as (a, b)" could be represented
  * as follows:
  *  MultiAlias(stack_function, Seq(a, b))
-
+ * 例如,SQL表达式“stack（2，key，value，key，value）as（a，b）”可以表示如下：MultiAlias（stack_function，Seq（a，b））
  * @param child the computation being performed
  * @param names the names to be associated with each output of computing [[child]].
  */
@@ -250,6 +260,7 @@ case class UnresolvedExtractValue(child: Expression, extraction: Expression)
 
 /**
  * Holds the expression that has yet to be aliased.
+  * 保存尚未别名的表达式
  */
 case class UnresolvedAlias(child: Expression)
   extends UnaryExpression with NamedExpression with Unevaluable {

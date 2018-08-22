@@ -29,20 +29,23 @@ import org.apache.spark.graphx.lib._
 /**
  * Contains additional functionality for [[Graph]]. All operations are expressed in terms of the
  * efficient GraphX API. This class is implicitly constructed for each Graph object.
+  *
+  * 包含[[Graph]]的附加功能,所有操作都以高效的GraphX API表示,为每个Graph对象隐式构造此类
  *
  * @tparam VD the vertex attribute type
  * @tparam ED the edge attribute type
  */
 class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Serializable {
 
-  /** The number of edges in the graph. */
+  /** The number of edges in the graph. 图中的边数*/
   @transient lazy val numEdges: Long = graph.edges.count()
 
-  /** The number of vertices in the graph. */
+  /** The number of vertices in the graph. 图中的顶点数*/
   @transient lazy val numVertices: Long = graph.vertices.count()
 
   /**
    * The in-degree of each vertex in the graph.
+    * 图中每个顶点的入度
    * @note Vertices with no in-edges are not returned in the resulting RDD.
    */
   @transient lazy val inDegrees: VertexRDD[Int] =
@@ -50,6 +53,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * The out-degree of each vertex in the graph.
+    * 图中每个顶点的出度
    * @note Vertices with no out-edges are not returned in the resulting RDD.
    */
   @transient lazy val outDegrees: VertexRDD[Int] =
@@ -57,6 +61,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * The degree of each vertex in the graph.
+    * 图中每个顶点的度数
    * @note Vertices with no edges are not returned in the resulting RDD.
    */
   @transient lazy val degrees: VertexRDD[Int] =
@@ -64,7 +69,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Computes the neighboring vertex degrees.
-   *
+   * 计算相邻的顶点度数
    * @param edgeDirection the direction along which to collect neighboring vertex attributes
    */
   private def degreesRDD(edgeDirection: EdgeDirection): VertexRDD[Int] = {
@@ -80,7 +85,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Collect the neighbor vertex ids for each vertex.
-   *
+   *  收集每个顶点的邻居顶点id
    * @param edgeDirection the direction along which to collect
    * neighboring vertices
    *
@@ -111,7 +116,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Collect the neighbor vertex attributes for each vertex.
-   *
+   * 收集每个顶点的邻居顶点属性
    * @note This function could be highly inefficient on power-law
    * graphs where high degree vertices may force a large amount of
    * information to be collected to a single location.
@@ -149,6 +154,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Returns an RDD that contains for each vertex v its local edges,
+    * 返回一个RDD，其中包含每个顶点v的本地边
    * i.e., the edges that are incident on v, in the user-specified direction.
    * Warning: note that singleton vertices, those with no edges in the given
    * direction will not be part of the return value.
@@ -190,6 +196,9 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
    * vertex and RDD entry to a new vertex value.  The input table
    * should contain at most one entry for each vertex.  If no entry is
    * provided the map function is skipped and the old value is used.
+    *
+    * 使用RDD连接顶点,然后将顶点和RDD条目中的函数应用于新的顶点值,
+    * 输入表最多应包含每个顶点的一个条目,如果未提供任何条目,则跳过映射函数并使用旧值
    *
    * @tparam U the type of entry in the table of updates
    * @param table the table to join with the vertices in the graph.
@@ -225,7 +234,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Filter the graph by computing some values to filter on, and applying the predicates.
-   *
+   * 通过计算要过滤的某些值并应用谓词来过滤图形
    * @param preprocess a function to compute new vertex and edge data before filtering
    * @param epred edge pred to filter on after preprocess, see more details under
    *  [[org.apache.spark.graphx.Graph#subgraph]]
@@ -259,6 +268,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Picks a random vertex from the graph and returns its ID.
+    * 从图中挑选一个随机顶点并返回其ID
    */
   def pickRandomVertex(): VertexId = {
     val probability = 50.0 / graph.numVertices
@@ -280,6 +290,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Convert bi-directional edges into uni-directional ones.
+    * 将双向边缘转换为单向边缘
    * Some graph algorithms (e.g., TriangleCount) assume that an input graph
    * has its edges in canonical direction.
    * This function rewrites the vertex ids of edges so that srcIds are smaller
@@ -376,6 +387,8 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
   /**
    * Run personalized PageRank for a given vertex, such that all random walks
    * are started relative to the source node.
+    *
+    * 为给定顶点运行个性化PageRank,以便相对于源节点启动所有随机游走
    *
    * @see [[org.apache.spark.graphx.lib.PageRank$#runUntilConvergenceWithOptions]]
    */
@@ -389,6 +402,9 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
    * with all iterations originating at the source node
    * returning a graph with vertex attributes
    * containing the PageRank and edge attributes the normalized edge weight.
+    *
+    * 运行Personalized PageRank进行固定数量的迭代,其中所有迭代都源自源节点,返回一个图形,
+    * 其顶点属性包含PageRank，边缘属性为标准化边缘权重。
    *
    * @see [[org.apache.spark.graphx.lib.PageRank$#runWithOptions]]
    */
@@ -400,6 +416,8 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
   /**
    * Run PageRank for a fixed number of iterations returning a graph with vertex attributes
    * containing the PageRank and edge attributes the normalized edge weight.
+    *
+    * 运行PageRank一定数量的迭代,返回一个包含顶点属性的图形,其中包含PageRank和边缘属性的标准化边缘权重。
    *
    * @see [[org.apache.spark.graphx.lib.PageRank$#run]]
    */
@@ -410,6 +428,8 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
   /**
    * Compute the connected component membership of each vertex and return a graph with the vertex
    * value containing the lowest vertex id in the connected component containing that vertex.
+    *
+    * 计算每个顶点的连通组件成员资格,并返回包含顶点值的图形,该顶点值包含包含该顶点的连接组件中的最低顶点id
    *
    * @see [[org.apache.spark.graphx.lib.ConnectedComponents$#run]]
    */
@@ -419,6 +439,7 @@ class GraphOps[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]) extends Seriali
 
   /**
    * Compute the number of triangles passing through each vertex.
+    * 计算通过每个顶点的三角形数量
    *
    * @see [[org.apache.spark.graphx.lib.TriangleCount$#run]]
    */

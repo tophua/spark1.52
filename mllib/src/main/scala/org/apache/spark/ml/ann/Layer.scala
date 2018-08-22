@@ -28,12 +28,14 @@ import org.apache.spark.util.random.XORShiftRandom
 
 /**
  * Trait that holds Layer properties, that are needed to instantiate it.
+  * 包含实例化所需的图层属性的特征
  * Implements Layer instantiation.
  *
  */
 private[ann] trait Layer extends Serializable {
   /**
    * Returns the instance of the layer based on weights provided
+    * 根据提供的权重返回图层的实例
    * @param weights vector with layer weights
    * @param position position of weights in the vector
    * @return the layer model
@@ -42,6 +44,7 @@ private[ann] trait Layer extends Serializable {
 
   /**
    * Returns the instance of the layer with random generated weights
+    * 返回具有随机生成权重的图层实例
    * @param seed seed
    * @return the layer model
    */
@@ -50,8 +53,10 @@ private[ann] trait Layer extends Serializable {
 
 /**
  * Trait that holds Layer weights (or parameters).
+  * 保持图层权重（或参数）的特征。
  * Implements functions needed for forward propagation, computing delta and gradient.
  * Can return weights in Vector format.
+  * 实现前向传播,计算增量和梯度所需的功能,可以以Vector格式返回权重。
  */
 private[ann] trait LayerModel extends Serializable {
   /**
@@ -61,6 +66,7 @@ private[ann] trait LayerModel extends Serializable {
 
   /**
    * Evaluates the data (process the data through the layer)
+    * 评估数据(通过图层处理数据)
    * @param data data
    * @return processed data
    */
@@ -68,6 +74,7 @@ private[ann] trait LayerModel extends Serializable {
 
   /**
    * Computes the delta for back propagation
+    * 计算反向传播的增量
    * @param nextDelta delta of the next layer
    * @param input input data
    * @return delta
@@ -75,7 +82,7 @@ private[ann] trait LayerModel extends Serializable {
   def prevDelta(nextDelta: BDM[Double], input: BDM[Double]): BDM[Double]
 
   /**
-   * Computes the gradient
+   * Computes the gradient计算渐变
    * @param delta delta for this layer
    * @param input input data
    * @return gradient
@@ -84,6 +91,7 @@ private[ann] trait LayerModel extends Serializable {
 
   /**
    * Returns weights for the layer in a single vector
+    * 返回单个向量中图层的权重
    * @return layer weights
    */
   def weights(): Vector
@@ -91,6 +99,7 @@ private[ann] trait LayerModel extends Serializable {
 
 /**
  * Layer properties of affine transformations, that is y=A*x+b
+  * 仿射变换的层属性，即y = A * x + b
  * @param numIn number of inputs
  * @param numOut number of outputs
  */
@@ -149,6 +158,7 @@ private[ann] object AffineLayerModel {
 
   /**
    * Creates a model of Affine layer
+    * 创建仿射层模型
    * @param layer layer properties
    * @param weights vector with weights
    * @param position position of weights in the vector
@@ -161,6 +171,7 @@ private[ann] object AffineLayerModel {
 
   /**
    * Creates a model of Affine layer
+    * 创建仿射层模型
    * @param layer layer properties
    * @param seed seed
    * @return model of Affine layer
@@ -172,6 +183,7 @@ private[ann] object AffineLayerModel {
 
   /**
    * Unrolls the weights from the vector
+    * 从矢量中展开权重
    * @param weights vector with weights
    * @param position position of weights for this layer
    * @param numIn number of layer inputs

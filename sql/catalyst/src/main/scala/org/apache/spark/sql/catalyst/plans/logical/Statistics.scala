@@ -21,6 +21,9 @@ package org.apache.spark.sql.catalyst.plans.logical
  * Estimates of various statistics.  The default estimation logic simply lazily multiplies the
  * corresponding statistic produced by the children.  To override this behavior, override
  * `statistics` and assign it an overridden version of `Statistics`.
+  *
+  * 各种统计数据的估计,默认的估计逻辑只是懒洋洋地乘以孩子们产生的相应统计量,要覆盖此行为,
+  * 请覆盖`statistics`并为其分配一个重写的`Statistics`版本
  *
  * '''NOTE''': concrete and/or overridden versions of statistics fields should pay attention to the
  * performance of the implementations.  The reason is that estimations might get triggered in

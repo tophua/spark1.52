@@ -22,6 +22,7 @@ import org.apache.spark.sql.catalyst.expressions._
 
 /**
  * Interface for generated predicate
+  * 生成谓词的接口
  */
 abstract class Predicate {
   def eval(r: InternalRow): Boolean
@@ -29,6 +30,7 @@ abstract class Predicate {
 
 /**
  * Generates bytecode that evaluates a boolean [[Expression]] on a given input [[InternalRow]].
+  * 生成用于评估给定输入[[InternalRow]]上的布尔[[Expression]]的字节码
  */
 object GeneratePredicate extends CodeGenerator[Expression, (InternalRow) => Boolean] {
 

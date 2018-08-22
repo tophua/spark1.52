@@ -25,6 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.Attribute
 
 /**
  * Physical plan node for scanning data from a local collection.
+  * 物理计划节点,用于扫描本地集合中的数据
  */
 private[sql] case class LocalTableScan(
     output: Seq[Attribute],

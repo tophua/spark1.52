@@ -26,6 +26,7 @@ import org.apache.spark.sql.types._
 
 /**
  * Returns an Array containing the evaluation of all children expressions.
+  * 返回一个包含所有子表达式求值的数组
  */
 case class CreateArray(children: Seq[Expression]) extends Expression {
 
@@ -70,6 +71,7 @@ case class CreateArray(children: Seq[Expression]) extends Expression {
 
 /**
  * Returns a Row containing the evaluation of all children expressions.
+  * 返回包含所有子表达式求值的Row
  */
 case class CreateStruct(children: Seq[Expression]) extends Expression {
 
@@ -117,7 +119,7 @@ case class CreateStruct(children: Seq[Expression]) extends Expression {
 
 /**
  * Creates a struct with the given field names and values
- *
+ * 使用给定的字段名称和值创建结构
  * @param children Seq(name1, val1, name2, val2, ...)
  */
 case class CreateNamedStruct(children: Seq[Expression]) extends Expression {
@@ -185,6 +187,8 @@ case class CreateNamedStruct(children: Seq[Expression]) extends Expression {
  * Returns a Row containing the evaluation of all children expressions. This is a variant that
  * returns UnsafeRow directly. The unsafe projection operator replaces [[CreateStruct]] with
  * this expression automatically at runtime.
+  * 返回包含所有子表达式求值的Row,这是一个直接返回UnsafeRow的变体,
+  * 不安全的投影操作符在运行时自动将[[CreateStruct]]替换为此表达式
  */
 case class CreateStructUnsafe(children: Seq[Expression]) extends Expression {
 
@@ -225,6 +229,8 @@ case class CreateStructUnsafe(children: Seq[Expression]) extends Expression {
  * Creates a struct with the given field names and values. This is a variant that returns
  * UnsafeRow directly. The unsafe projection operator replaces [[CreateStruct]] with
  * this expression automatically at runtime.
+  * 使用给定的字段名称和值创建结构,这是一个直接返回UnsafeRow的变体,
+  * 不安全的投影操作符在运行时自动将[[CreateStruct]]替换为此表达式。
  *
  * @param children Seq(name1, val1, name2, val2, ...)
  */

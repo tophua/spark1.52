@@ -41,6 +41,7 @@ private[sql] object JacksonParser {
 
   /**
    * Parse the current token (and related children) according to a desired schema
+    * 根据所需的模式解析当前令牌(和相关的子节点)
    */
   private[sql] def convertField(
       factory: JsonFactory,
@@ -69,9 +70,11 @@ private[sql] object JacksonParser {
         val stringValue = parser.getText
         if (stringValue.contains("-")) {
           // The format of this string will probably be "yyyy-mm-dd".
+          //这个字符串的格式可能是“yyyy-mm-dd”
           DateTimeUtils.millisToDays(DateTimeUtils.stringToTime(parser.getText).getTime)
         } else {
           // In Spark 1.5.0, we store the data as number of days since epoch in string.
+          //在Spark 1.5.0中,我们将数据存储为字符串中的纪元以来的天数
           // So, we just convert it to Int.
           stringValue.toInt
         }
@@ -96,6 +99,7 @@ private[sql] object JacksonParser {
 
       case (VALUE_STRING, FloatType) =>
         // Special case handling for NaN and Infinity.
+        //NaN和Infinity的特殊情况处理
         val value = parser.getText
         val lowerCaseValue = value.toLowerCase()
         if (lowerCaseValue.equals("nan") ||
@@ -113,6 +117,7 @@ private[sql] object JacksonParser {
 
       case (VALUE_STRING, DoubleType) =>
         // Special case handling for NaN and Infinity.
+        //NaN和Infinity的特殊情况处理
         val value = parser.getText
         val lowerCaseValue = value.toLowerCase()
         if (lowerCaseValue.equals("nan") ||
@@ -175,8 +180,10 @@ private[sql] object JacksonParser {
 
   /**
    * Parse an object from the token stream into a new Row representing the schema.
+    * 将对象从令牌流解析为表示架构的新行
    *
    * Fields in the json that are not defined in the requested schema will be dropped.
+    * 将删除未在请求的架构中定义的json中的字段
    */
   private def convertObject(
       factory: JsonFactory,
@@ -198,6 +205,7 @@ private[sql] object JacksonParser {
 
   /**
    * Parse an object as a Map, preserving all fields
+    * 将对象解析为Map,保留所有字段
    */
   private def convertMap(
       factory: JsonFactory,
@@ -231,6 +239,7 @@ private[sql] object JacksonParser {
 
     def failedRecord(record: String): Seq[InternalRow] = {
       // create a row even if no corrupt record column is present
+      //即使没有损坏的记录列,也要创建一行
       val row = new GenericMutableRow(schema.length)
       for (corruptIndex <- schema.getFieldIndex(columnNameOfCorruptRecords)) {
         require(schema(corruptIndex).dataType == StringType)

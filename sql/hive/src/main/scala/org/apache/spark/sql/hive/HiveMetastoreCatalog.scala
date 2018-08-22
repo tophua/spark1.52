@@ -53,7 +53,7 @@ private[hive] case class HiveSerDe(
 private[hive] object HiveSerDe {
   /**
    * Get the Hive SerDe information from the data source abbreviation string or classname.
-   *
+   * 从数据源缩写字符串或类名获取Hive SerDe信息
    * @param source Currently the source abbreviation can be one of the following:
    *               SequenceFile, RCFile, ORC, PARQUET, and case insensitive.
    * @param hiveConf Hive Conf
@@ -99,16 +99,18 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
 
   val conf = hive.conf
 
-  /** Usages should lock on `this`. */
+  /** Usages should lock on `this`. 用法应该锁定`this`*/
   protected[hive] lazy val hiveWarehouse = new Warehouse(hive.hiveconf)
 
   // TODO: Use this everywhere instead of tuples or databaseName, tableName,.
-  /** A fully qualified identifier for a table (i.e., database.tableName) */
+  /** A fully qualified identifier for a table (i.e., database.tableName)
+    * 表的完全限定标识符（即database.tableName）*/
   case class QualifiedTableName(database: String, name: String) {
     def toLowerCase: QualifiedTableName = QualifiedTableName(database.toLowerCase, name.toLowerCase)
   }
 
-  /** A cache of Spark SQL data source tables that have been accessed. */
+  /** A cache of Spark SQL data source tables that have been accessed.
+    * 已访问的Spark SQL数据源表的缓存 */
   protected[hive] val cachedDataSourceTables: LoadingCache[QualifiedTableName, LogicalPlan] = {
     val cacheLoader = new CacheLoader[QualifiedTableName, LogicalPlan]() {
       override def load(in: QualifiedTableName): LogicalPlan = {
@@ -128,13 +130,16 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
               part
             }
             // Stick all parts back to a single schema string.
+            //将所有部分粘贴回单个模式字符串
             parts.mkString
           }
         }
 
         // Originally, we used spark.sql.sources.schema to store the schema of a data source table.
+        //最初,我们使用spark.sql.sources.schema来存储数据源表的模式
         // After SPARK-6024, we removed this flag.
         // Although we are not using spark.sql.sources.schema any more, we need to still support.
+        //虽然我们不再使用spark.sql.sources.schema,但我们还需要支持。
         val schemaString =
           table.properties.get("spark.sql.sources.schema").orElse(schemaStringFromParts)
 
@@ -144,10 +149,13 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
         // We only need names at here since userSpecifiedSchema we loaded from the metastore
         // contains partition columns. We can always get datatypes of partitioning columns
         // from userSpecifiedSchema.
+        //我们在这里只需要名称,因为我们从Metastore加载的userSpecifiedSchema包含分区列,
+        // 我们总是可以从userSpecifiedSchema获取分区列的数据类型。
         val partitionColumns = table.partitionColumns.map(_.name)
 
         // It does not appear that the ql client for the metastore has a way to enumerate all the
         // SerDe properties directly...
+        //看来,Metastore的ql客户端没有办法直接枚举所有SerDe属性......
         val options = table.serdeProperties
 
         val resolvedRelation =
@@ -167,10 +175,15 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
 
   override def refreshTable(tableIdent: TableIdentifier): Unit = {
     // refreshTable does not eagerly reload the cache. It just invalidate the cache.
+    //refreshTable不会急切地重新加载缓存,它只是使缓存无效。
     // Next time when we use the table, it will be populated in the cache.
+    //下次我们使用该表时,它将填充在缓存中
     // Since we also cache ParquetRelations converted from Hive Parquet tables and
     // adding converted ParquetRelations into the cache is not defined in the load function
     // of the cache (instead, we add the cache entry in convertToParquetRelation),
+    //由于我们还缓存了从Hive Parquet表转换的ParquetRelations,
+    // 并且在缓存的加载函数中没有定义将转换后的ParquetRelations添加到缓存中
+    // （相反，我们在convertToParquetRelation中添加缓存条目）,这里最好使缓存无效以避免 令人困惑的日志记录
     // it is better at here to invalidate the cache to avoid confusing waring logs from the
     // cache loader (e.g. cannot find data source provider, which is only defined for
     // data source table.).
@@ -188,7 +201,9 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
 
   /**
    * Creates a data source table (a table created with USING clause) in Hive's metastore.
+    * 在Hive的Metastore中创建一个数据源表（使用USING子句创建的表）
    * Returns true when the table has been created. Otherwise, false.
+    * 创建表时返回true。 否则,false
    */
   // TODO: Remove this in SPARK-10104.
   def createDataSourceTable(
@@ -225,6 +240,8 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
     // Saves optional user specified schema.  Serialized JSON schema string may be too long to be
     // stored into a single metastore SerDe property.  In this case, we split the JSON string and
     // store each part as a separate SerDe property.
+    //保存可选的用户指定架构,序列化的JSON模式字符串可能太长而无法保存可选的用户指定模式,
+    //序列化的JSON模式字符串可能太长,无法将每个部分存储为单独的SerDe属性。
     userSpecifiedSchema.foreach { schema =>
       val threshold = conf.schemaStringLengthThreshold
       val schemaJsonString = schema.json
@@ -250,6 +267,8 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
         // when we load the table. So, we are not expecting partition columns and we will discover
         // partitions when we load the table. However, if there are specified partition columns,
         // we simply ignore them and provide a warning message.
+        //该表没有指定的模式,这意味着将推断该模式该表没有指定的模式,
+        //这意味着在加载表时模式将是推断的分区, 但是,如果有指定的分区列,我们只需忽略它们并提供警告消息
         logWarning(
           s"The schema and partitions of table $tableIdent will be inferred when it is loaded. " +
             s"Specified partition columns (${partitionColumns.mkString(",")}) will be ignored.")
@@ -351,7 +370,9 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
     (hiveCompitiableTable, logMessage) match {
       case (Some(table), message) =>
         // We first try to save the metadata of the table in a Hive compatiable way.
+        //我们首先尝试以Hive兼容的方式保存表的元数据
         // If Hive throws an error, we fall back to save its metadata in the Spark SQL
+        //如果Hive抛出错误,我们会回退以将其元数据保存在Spark SQL中
         // specific way.
         try {
           logInfo(message)
@@ -409,7 +430,9 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
       val dataSourceTable =
         cachedDataSourceTables(QualifiedTableName(databaseName, tblName).toLowerCase)
       // Then, if alias is specified, wrap the table with a Subquery using the alias.
+      //然后,如果指定了别名,则使用别名使用子查询包装表。
       // Otherwise, wrap the table with a Subquery using the table name.
+      //否则,使用表名用子查询包装表
       val withAlias =
         alias.map(a => Subquery(a, dataSourceTable)).getOrElse(
           Subquery(tableIdent.last, dataSourceTable))
@@ -419,7 +442,9 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
       val viewText = table.viewText.getOrElse(sys.error("Invalid view without text."))
       alias match {
         // because hive use things like `_c0` to build the expanded text
+          //因为hive使用像`_c0`之类的东西来构建扩展文本
         // currently we cannot support view from "create view v1(c1) as ..."
+          //目前我们无法支持“create view v1(c1) as ...”
         case None => Subquery(table.name, HiveQl.createPlan(viewText))
         case Some(aliasText) => Subquery(aliasText, HiveQl.createPlan(viewText))
       }
@@ -450,7 +475,9 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
         case null => None // Cache miss
         case logical @ LogicalRelation(parquetRelation: ParquetRelation, _) =>
           // If we have the same paths, same schema, and same partition spec,
+          //如果我们有相同的路径，相同的架构和相同的分区规范，
           // we will use the cached Parquet Relation.
+          //我们将使用缓存的Parquet关系
           val useCached =
             parquetRelation.paths.toSet == pathsInMetastore.toSet &&
             logical.schema.sameType(metastoreSchema) &&
@@ -462,6 +489,7 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
             Some(logical)
           } else {
             // If the cached relation is not updated, we invalidate it right away.
+            //如果未更新缓存的关系,我们会立即使其无效
             cachedDataSourceTables.invalidate(tableIdentifier)
             None
           }
@@ -480,6 +508,7 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
       val partitionColumnDataTypes = partitionSchema.map(_.dataType)
       // We're converting the entire table into ParquetRelation, so predicates to Hive metastore
       // are empty.
+      //我们将整个表转换为ParquetRelation,因此Hive Metastore的谓词是空的
       val partitions = metastoreRelation.getHiveQlPartitions().map { p =>
         val location = p.getLocation
         val values = InternalRow.fromSeq(p.getValues.zip(partitionColumnDataTypes).map {
@@ -557,6 +586,7 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
         // Write path
         case InsertIntoTable(r: MetastoreRelation, partition, child, overwrite, ifNotExists)
           // Inserting into partitioned table is not supported in Parquet data source (yet).
+          //Parquet数据源(尚未)支持插入分区表
           if !r.hiveQlTable.isPartitioned && hive.convertMetastoreParquet &&
             r.tableDesc.getSerdeClassName.toLowerCase.contains("parquet") =>
           val parquetRelation = convertToParquetRelation(r)
@@ -565,6 +595,7 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
         // Write path
         case InsertIntoHiveTable(r: MetastoreRelation, partition, child, overwrite, ifNotExists)
           // Inserting into partitioned table is not supported in Parquet data source (yet).
+          //Parquet数据源(尚未)支持插入分区表
           if !r.hiveQlTable.isPartitioned && hive.convertMetastoreParquet &&
             r.tableDesc.getSerdeClassName.toLowerCase.contains("parquet") =>
           val parquetRelation = convertToParquetRelation(r)
@@ -581,6 +612,7 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
 
   /**
    * Creates any tables required for query execution.
+    * 创建查询执行所需的任何表
    * For example, because of a CREATE TABLE X AS statement.
    */
   object CreateTables extends Rule[LogicalPlan] {
@@ -646,6 +678,7 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
   /**
    * Casts input data to correct data types according to table definition before inserting into
    * that table.
+    * 在插入到该表之前,根据表定义将输入数据转换为正确的数据类型
    */
   object PreInsertionCasts extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan.transform {
@@ -688,6 +721,8 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
   /**
    * UNIMPLEMENTED: It needs to be decided how we will persist in-memory tables to the metastore.
    * For now, if this functionality is desired mix in the in-memory [[OverrideCatalog]].
+    * UNIMPLEMENTED：需要决定如何将内存表保存到Metastore中,
+    * 目前,如果需要此功能，请在内存中[[OverrideCatalog]]混合
    */
   override def registerTable(tableIdentifier: Seq[String], plan: LogicalPlan): Unit = {
     throw new UnsupportedOperationException
@@ -706,8 +741,11 @@ private[hive] class HiveMetastoreCatalog(val client: ClientInterface, hive: Hive
 
 /**
  * A logical plan representing insertion into Hive table.
+  * 表示插入Hive表的逻辑计划
  * This plan ignores nullability of ArrayType, MapType, StructType unlike InsertIntoTable
  * because Hive table doesn't have nullability for ARRAY, MAP, STRUCT types.
+  * 与InsertIntoTable不同,此计划忽略了ArrayType,MapType,StructType的可为空性,
+  * 因为Hive表没有ARRAY,MAP,STRUCT类型的可空性。
  */
 private[hive] case class InsertIntoHiveTable(
     table: MetastoreRelation,
@@ -724,6 +762,7 @@ private[hive] case class InsertIntoHiveTable(
 
   // This is the expected schema of the table prepared to be inserted into,
   // including dynamic partition columns.
+  //这是准备插入的表的预期模式,包括动态分区列
   val tableOutput = table.attributes ++ table.partitionKeys.takeRight(numDynamicPartitions)
 
   override lazy val resolved: Boolean = childrenResolved && child.output.zip(tableOutput).forall {
@@ -842,7 +881,7 @@ private[hive] case class MetastoreRelation
     }
   }
 
-  /** Only compare database and tablename, not alias. */
+  /** Only compare database and tablename, not alias. 仅比较数据库和表名,而不是别名。*/
   override def sameResult(plan: LogicalPlan): Boolean = {
     plan match {
       case mr: MetastoreRelation =>
@@ -866,11 +905,12 @@ private[hive] case class MetastoreRelation
       f.name,
       HiveMetastoreTypes.toDataType(f.hiveType),
       // Since data can be dumped in randomly with no validation, everything is nullable.
+      //由于数据可以随机转储而无需验证,因此一切都可以为空
       nullable = true
     )(qualifiers = Seq(alias.getOrElse(tableName)))
   }
 
-  /** PartitionKey attributes */
+  /** PartitionKey attributes PartitionKey属性*/
   val partitionKeys = table.partitionColumns.map(_.toAttribute)
 
   /** Non-partitionKey attributes */
@@ -878,10 +918,12 @@ private[hive] case class MetastoreRelation
 
   val output = attributes ++ partitionKeys
 
-  /** An attribute map that can be used to lookup original attributes based on expression id. */
+  /** An attribute map that can be used to lookup original attributes based on expression id.
+    * 一个属性映射，可用于根据表达式id查找原始属性*/
   val attributeMap = AttributeMap(output.map(o => (o, o)))
 
-  /** An attribute map for determining the ordinal for non-partition columns. */
+  /** An attribute map for determining the ordinal for non-partition columns.
+    * 用于确定非分区列的序数的属性映射*/
   val columnOrdinals = AttributeMap(attributes.zipWithIndex)
 
   override def inputFiles: Array[String] = {

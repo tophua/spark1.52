@@ -29,6 +29,7 @@ import org.apache.spark.unsafe.types.UTF8String
 /**
  * A function that calculates an MD5 128-bit checksum and returns it as a hex string
  * For input of type [[BinaryType]]
+  * 计算MD5 128位校验和并将其作为十六进制字符串返回的函数对于[BinaryType]类型的输入
  */
 case class Md5(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 
@@ -52,6 +53,9 @@ case class Md5(child: Expression) extends UnaryExpression with ImplicitCastInput
  * 256, 384, 512, or 0 (which is equivalent to 256). SHA-224 is supported starting from Java 8. If
  * asking for an unsupported SHA function, the return value is NULL. If either argument is NULL or
  * the hash length is not one of the permitted values, the return value is NULL.
+  * 一种计算SHA-2系列函数（SHA-224，SHA-256，SHA-384和SHA-512）并将其作为十六进制字符串返回的函数,
+  * 第一个参数是要进行哈希处理的字符串或二进制文件,第二个参数表示结果的所需位长度,其值必须为224,256,384,512或0(相当于256),
+  * 从Java 8开始支持SHA-224,如果要求不支持的SHA函数,则返回值为NULL,如果任一参数为NULL或散列长度不是允许值之一,则返回值为NULL。
  */
 case class Sha2(left: Expression, right: Expression)
   extends BinaryExpression with Serializable with ImplicitCastInputTypes {
@@ -116,6 +120,7 @@ case class Sha2(left: Expression, right: Expression)
 /**
  * A function that calculates a sha1 hash value and returns it as a hex string
  * For input of type [[BinaryType]] or [[StringType]]
+  * 计算sha1哈希值并将其作为十六进制字符串返回的函数用于输入[[BinaryType]]或[[StringType]]类型的输入
  */
 case class Sha1(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 
@@ -136,6 +141,7 @@ case class Sha1(child: Expression) extends UnaryExpression with ImplicitCastInpu
 /**
  * A function that computes a cyclic redundancy check value and returns it as a bigint
  * For input of type [[BinaryType]]
+  * 计算循环冗余校验值并将其作为bigint返回的函数对于[BinaryType]类型的输入
  */
 case class Crc32(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 

@@ -33,6 +33,7 @@ import org.apache.spark.sql.{DataFrame, Row, SQLConf, SQLContext}
 /**
  * A logical command that is executed for its side-effects.  `RunnableCommand`s are
  * wrapped in `ExecutedCommand` during execution.
+  * 为其副作用执行的逻辑命令,执行期间,`RunnableCommand'被包装在`ExecutedCommand`中。
  */
 private[sql] trait RunnableCommand extends LogicalPlan with logical.Command {
   override def output: Seq[Attribute] = Seq.empty
@@ -43,6 +44,7 @@ private[sql] trait RunnableCommand extends LogicalPlan with logical.Command {
 /**
  * A physical operator that executes the run method of a `RunnableCommand` and
  * saves the result to prevent multiple executions.
+  * 一个物理运算符,它执行`RunnableCommand`的run方法并保存结果以防止多次执行
  */
 private[sql] case class ExecutedCommand(cmd: RunnableCommand) extends SparkPlan {
   /**
@@ -50,6 +52,8 @@ private[sql] case class ExecutedCommand(cmd: RunnableCommand) extends SparkPlan 
    * command or any other computation that should be evaluated exactly once. The value of this field
    * can be used as the contents of the corresponding RDD generated from the physical plan of this
    * command.
+    * 具体命令应该覆盖此惰性字段,以包装由命令或任何其他应该仅计算一次的计算引起的任何副作用,
+    * 此字段的值可用作从此命令的物理计划生成的相应RDD的内容。
    *
    * The `execute()` method of all the physical command classes should reference `sideEffectResult`
    * so that the command can be executed eagerly right after the command query is created.
@@ -89,6 +93,7 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
 
   private val (_output, runFunc): (Seq[Attribute], SQLContext => Seq[Row]) = kv match {
     // Configures the deprecated "mapred.reduce.tasks" property.
+      //配置已弃用的“mapred.reduce.tasks”属性
     case Some((SQLConf.Deprecated.MAPRED_REDUCE_TASKS, Some(value))) =>
       val runFunc = (sqlContext: SQLContext) => {
         logWarning(
@@ -107,6 +112,7 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
       (keyValueOutput, runFunc)
 
     // Configures a single property.
+      //配置单个属性
     case Some((key, Some(value))) =>
       val runFunc = (sqlContext: SQLContext) => {
         sqlContext.setConf(key, value)
@@ -115,7 +121,9 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
       (keyValueOutput, runFunc)
 
     // (In Hive, "SET" returns all changed properties while "SET -v" returns all properties.)
+      //在Hive中，“SET”返回所有已更改的属性，而“SET -v”返回所有属性)
     // Queries all key-value pairs that are set in the SQLConf of the sqlContext.
+      //查询在sqlContext的SQLConf中设置的所有键值对
     case None =>
       val runFunc = (sqlContext: SQLContext) => {
         sqlContext.getAllConfs.map { case (k, v) => Row(k, v) }.toSeq
@@ -124,6 +132,7 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
 
     // Queries all properties along with their default values and docs that are defined in the
     // SQLConf of the sqlContext.
+      //查询所有属性及其在sqlContext的SQLConf中定义的默认值和文档
     case Some(("-v", None)) =>
       val runFunc = (sqlContext: SQLContext) => {
         sqlContext.conf.getAllDefinedConfs.map { case (key, defaultValue, doc) =>
@@ -138,6 +147,7 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
       (schema.toAttributes, runFunc)
 
     // Queries the deprecated "mapred.reduce.tasks" property.
+      //查询已弃用的“mapred.reduce.tasks”属性
     case Some((SQLConf.Deprecated.MAPRED_REDUCE_TASKS, None)) =>
       val runFunc = (sqlContext: SQLContext) => {
         logWarning(
@@ -147,7 +157,7 @@ case class SetCommand(kv: Option[(String, Option[String])]) extends RunnableComm
       }
       (keyValueOutput, runFunc)
 
-    // Queries a single property.
+    // Queries a single property.查询单个属性
     case Some((key, None)) =>
       val runFunc = (sqlContext: SQLContext) => {
         val value =
@@ -185,6 +195,7 @@ case class ExplainCommand(
   extends RunnableCommand {
 
   // Run through the optimizer to generate the physical plan.
+  //运行优化程序以生成物理计划
   override def run(sqlContext: SQLContext): Seq[Row] = try {
     // TODO in Hive, the "extended" ExplainCommand prints the AST as well, and detailed properties.
     val queryExecution = sqlContext.executePlan(logicalPlan)
@@ -213,7 +224,7 @@ case class CacheTableCommand(
     sqlContext.cacheTable(tableName)
 
     if (!isLazy) {
-      // Performs eager caching
+      // Performs eager caching 执行急切缓存
       sqlContext.table(tableName).count()
     }
 
@@ -288,6 +299,7 @@ case class DescribeCommand(
 case class ShowTablesCommand(databaseName: Option[String]) extends RunnableCommand {
 
   // The result of SHOW TABLES has two columns, tableName and isTemporary.
+  //SHOW TABLES的结果有两列,tableName和isTemporary
   override val output: Seq[Attribute] = {
     val schema = StructType(
       StructField("tableName", StringType, false) ::
@@ -299,6 +311,7 @@ case class ShowTablesCommand(databaseName: Option[String]) extends RunnableComma
   override def run(sqlContext: SQLContext): Seq[Row] = {
     // Since we need to return a Seq of rows, we will call getTables directly
     // instead of calling tables in sqlContext.
+    //由于我们需要返回一行Seq,我们将直接调用getTables而不是在sqlContext中调用表
     val rows = sqlContext.catalog.getTables(databaseName).map {
       case (tableName, isTemporary) => Row(tableName, isTemporary)
     }
@@ -332,6 +345,7 @@ case class ShowFunctions(db: Option[String], pattern: Option[String]) extends Ru
         sqlContext.functionRegistry.listFunction().filter(regex.matcher(_).matches()).map(Row(_))
       } catch {
         // probably will failed in the regex that user provided, then returns empty row.
+        //可能会在用户提供的正则表达式中失败,然后返回空行
         case _: Throwable => Seq.empty[Row]
       }
     case None =>

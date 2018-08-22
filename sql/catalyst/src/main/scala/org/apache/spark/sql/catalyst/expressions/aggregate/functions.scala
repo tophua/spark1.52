@@ -73,9 +73,11 @@ case class Average(child: Expression) extends AlgebraicAggregate {
   )
 
   // If all input are nulls, currentCount will be 0 and we will get null after the division.
+  //如果所有输入都为空,则currentCount将为0,并且我们将在除法后得到null
   override val evaluateExpression = child.dataType match {
     case DecimalType.Fixed(p, s) =>
       // increase the precision and scale to prevent precision loss
+      //提高精度和规模，防止精度损失
       val dt = DecimalType.bounded(p + 14, s + 4)
       Cast(Cast(currentSum, dt) / Cast(currentCount, dt), resultType)
     case _ =>
@@ -120,6 +122,7 @@ case class First(child: Expression) extends AlgebraicAggregate {
   override def nullable: Boolean = true
 
   // First is not a deterministic function.
+  //首先不是确定性功能
   override def deterministic: Boolean = false
 
   // Return data type.
@@ -154,6 +157,7 @@ case class Last(child: Expression) extends AlgebraicAggregate {
   override def nullable: Boolean = true
 
   // Last is not a deterministic function.
+  //最后不是确定性函数
   override def deterministic: Boolean = false
 
   // Return data type.

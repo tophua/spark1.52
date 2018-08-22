@@ -34,10 +34,12 @@ import org.apache.spark.util.Utils
 import org.apache.spark.sql.catalyst.util.quietly
 import org.apache.spark.sql.hive.HiveContext
 
-/** Factory for `IsolatedClientLoader` with specific versions of hive. */
+/** Factory for `IsolatedClientLoader` with specific versions of hive.
+  * 具有特定版本的配置单元的`IsolatedClientLoader`的工厂 */
 private[hive] object IsolatedClientLoader {
   /**
    * Creates isolated Hive client loaders by downloading the requested version from maven.
+    * 通过从maven下载所请求的版本来创建隔离的Hive客户端加载器
    */
   def forVersion(
       version: String,
@@ -92,6 +94,7 @@ private[hive] object IsolatedClientLoader {
 
 /**
  * Creates a Hive `ClientInterface` using a classloader that works according to the following rules:
+  * 使用根据以下规则工作的类加载器创建Hive`ClientInterface`：
  *  - Shared classes: Java, Scala, logging, and Spark classes are delegated to `baseClassLoader`
  *    allowing the results of calls to the `ClientInterface` to be visible externally.
  *  - Hive classes: new instances are loaded from `execJars`.  These classes are not
@@ -123,9 +126,11 @@ private[hive] class IsolatedClientLoader(
   extends Logging {
 
   // Check to make sure that the root classloader does not know about Hive.
+  //检查以确保根类加载器不知道Hive
   assert(Try(rootClassLoader.loadClass("org.apache.hadoop.hive.conf.HiveConf")).isFailure)
 
-  /** All jars used by the hive specific classloader. */
+  /** All jars used by the hive specific classloader.
+    * hive特定类加载器使用的所有jar*/
   protected def allJars = execJars.toArray
 
   protected def isSharedClass(name: String): Boolean =
@@ -138,7 +143,8 @@ private[hive] class IsolatedClientLoader(
     name.startsWith("java.net") ||
     sharedPrefixes.exists(name.startsWith)
 
-  /** True if `name` refers to a spark class that must see specific version of Hive. */
+  /** True if `name` refers to a spark class that must see specific version of Hive.
+    * 如果`name`指的是必须看到特定版本的Hive的spark类，则为True*/
   protected def isBarrierClass(name: String): Boolean =
     name.startsWith(classOf[ClientWrapper].getName) ||
     name.startsWith(classOf[Shim].getName) ||
@@ -147,7 +153,8 @@ private[hive] class IsolatedClientLoader(
   protected def classToPath(name: String): String =
     name.replaceAll("\\.", "/") + ".class"
 
-  /** The classloader that is used to load an isolated version of Hive. */
+  /** The classloader that is used to load an isolated version of Hive.
+    * 用于加载Hive的隔离版本的类加载器*/
   protected val classLoader: ClassLoader = new URLClassLoader(allJars, rootClassLoader) {
     override def loadClass(name: String, resolve: Boolean): Class[_] = {
       val loaded = findLoadedClass(name)
@@ -158,6 +165,7 @@ private[hive] class IsolatedClientLoader(
       val classFileName = name.replaceAll("\\.", "/") + ".class"
       if (isBarrierClass(name) && isolationOn) {
         // For barrier classes, we construct a new copy of the class.
+        //对于障碍类,我们构造了该类的新副本
         val bytes = IOUtils.toByteArray(baseClassLoader.getResourceAsStream(classFileName))
         logDebug(s"custom defining: $name - ${util.Arrays.hashCode(bytes)}")
         defineClass(name, bytes, 0, bytes.length)
@@ -177,7 +185,8 @@ private[hive] class IsolatedClientLoader(
   //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
   Thread.currentThread.setContextClassLoader(classLoader)
 
-  /** The isolated client interface to Hive. */
+  /** The isolated client interface to Hive.
+    * Hive的隔离客户端界面*/
   val client: ClientInterface = try {
     classLoader
       .loadClass(classOf[ClientWrapper].getName)

@@ -25,6 +25,7 @@ import org.apache.spark.ml.param._
 
 /**
  * Trait for shared param regParam.
+  * 共享param regParam的特征
  */
 private[ml] trait HasRegParam extends Params {
 
@@ -41,6 +42,7 @@ private[ml] trait HasRegParam extends Params {
 
 /**
  * Trait for shared param maxIter.
+  * 共享param maxIter的特征
  */
 private[ml] trait HasMaxIter extends Params {
 
@@ -57,6 +59,7 @@ private[ml] trait HasMaxIter extends Params {
 
 /**
  * Trait for shared param featuresCol (default: "features").
+  * 共享param featuresCol的特性(默认值：“features”)
  */
 private[ml] trait HasFeaturesCol extends Params {
 
@@ -188,6 +191,7 @@ private[ml] trait HasThresholds extends Params {
 
 /**
  * Trait for shared param inputCol.
+  * 共享param inputCol的特征
  */
 private[ml] trait HasInputCol extends Params {
 
@@ -204,6 +208,7 @@ private[ml] trait HasInputCol extends Params {
 
 /**
  * Trait for shared param inputCols.
+  * 共享param inputCols的特征
  */
 private[ml] trait HasInputCols extends Params {
 
@@ -220,6 +225,7 @@ private[ml] trait HasInputCols extends Params {
 
 /**
  * Trait for shared param outputCol (default: uid + "__output").
+  * 共享param outputCol的特性（默认值：uid +“__ output”）
  */
 private[ml] trait HasOutputCol extends Params {
 
@@ -238,6 +244,7 @@ private[ml] trait HasOutputCol extends Params {
 
 /**
  * Trait for shared param checkpointInterval.
+  * 共享param checkpointInterval的特征
  */
 private[ml] trait HasCheckpointInterval extends Params {
 
@@ -272,6 +279,7 @@ private[ml] trait HasFitIntercept extends Params {
 
 /**
  * Trait for shared param standardization (default: true).
+  * 共享参数标准化的特征(默认值：true)
  */
 private[ml] trait HasStandardization extends Params {
 
@@ -290,6 +298,7 @@ private[ml] trait HasStandardization extends Params {
 
 /**
  * Trait for shared param seed (default: this.getClass.getName.hashCode.toLong).
+  * 共享param种子的特征（默认值：this.getClass.getName.hashCode.toLong）
  */
 private[ml] trait HasSeed extends Params {
 
@@ -356,6 +365,7 @@ private[ml] trait HasStepSize extends Params {
 
 /**
  * Trait for shared param weightCol.
+  * 共享param weightCol的特征
  */
 private[ml] trait HasWeightCol extends Params {
 

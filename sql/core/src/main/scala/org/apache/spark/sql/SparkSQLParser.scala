@@ -29,12 +29,16 @@ import org.apache.spark.sql.types.StringType
 /**
  * The top level Spark SQL parser. This parser recognizes syntaxes that are available for all SQL
  * dialects supported by Spark SQL, and delegates all the other syntaxes to the `fallback` parser.
+  *
+  * Spark SQL解析器,此解析器识别可用于Spark SQL支持的所有SQL方言的语法,并将所有其他语法委托给`fallback`解析器
  *
  * @param fallback A function that parses an input string to a logical plan
+  *                 将输入字符串解析为逻辑计划的函数
  */
 private[sql] class SparkSQLParser(fallback: String => LogicalPlan) extends AbstractSparkSQLParser {
 
   // A parser for the key-value part of the "SET [key = [value ]]" syntax
+  //用于“SET [key = [value]]”语法的键值部分的解析器
   private object SetCommandParser extends RegexParsers {
     private val key: Parser[String] = "(?m)[^=]+".r
 

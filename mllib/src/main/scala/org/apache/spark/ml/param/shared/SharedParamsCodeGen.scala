@@ -77,7 +77,7 @@ private[shared] object SharedParamsCodeGen {
     writer.close()
   }
 
-  /** Description of a param. */
+  /** Description of a param. 参数的描述*/
   private case class ParamDesc[T: ClassTag](
       name: String,
       doc: String,
@@ -120,7 +120,7 @@ private[shared] object SharedParamsCodeGen {
     }
   }
 
-  /** Generates the HasParam trait code for the input param. */
+  /** Generates the HasParam trait code for the input param. 为输入参数生成HasParam特征代码*/
   private def genHasParamTrait(param: ParamDesc[_]): String = {
     val name = param.name
     val Name = name(0).toUpper +: name.substring(1)
@@ -167,7 +167,7 @@ private[shared] object SharedParamsCodeGen {
     //String.stripMargin 移除每行字符串开头的空格和第一个遇到的垂直分割符|
   }
 
-  /** Generates Scala source code for the input params with header. */
+  /** Generates Scala source code for the input params with header. 使用标头为输入参数生成Scala源代码*/
   private def genSharedParams(params: Seq[ParamDesc[_]]): String = {
     val header =
       """/*

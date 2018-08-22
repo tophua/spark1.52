@@ -42,6 +42,7 @@ object InterpretedPredicate {
 
 /**
  * An [[Expression]] that returns a boolean value.
+  * 返回布尔值的[[Expression]]
  */
 trait Predicate extends Expression {
   override def dataType: DataType = BooleanType
@@ -69,6 +70,7 @@ trait PredicateHelper {
    * Returns true if `expr` can be evaluated using only the output of `plan`.  This method
    * can be used to determine when is is acceptable to move expression evaluation within a query
    * plan.
+    * 如果只使用`plan`的输出可以计算`expr`,则返回true,此方法可用于确定何时可以在查询计划中移动表达式评估
    *
    * For example consider a join between two relations R(a, b) and S(c, d).
    *
@@ -97,6 +99,7 @@ case class Not(child: Expression)
 
 /**
  * Evaluates to `true` if `list` contains `value`.
+  * 如果`list`包含`value`,则求值为`true`
  */
 case class In(value: Expression, list: Seq[Expression]) extends Predicate
     with ImplicitCastInputTypes {
@@ -172,6 +175,7 @@ case class In(value: Expression, list: Seq[Expression]) extends Predicate
 /**
  * Optimized version of In clause, when all filter values of In clause are
  * static.
+  * In子句的所有过滤器值都是静态的In子句的优化版本
  */
 case class InSet(child: Expression, hset: Set[Any]) extends UnaryExpression with Predicate {
 
@@ -248,6 +252,7 @@ case class And(left: Expression, right: Expression) extends BinaryOperator with 
     val eval2 = right.gen(ctx)
 
     // The result should be `false`, if any of them is `false` whenever the other is null or not.
+    //结果应为“false”，如果其中任何一个为“false”,则只要另一个为null或者为null
     s"""
       ${eval1.code}
       boolean ${ev.isNull} = false;
@@ -297,6 +302,7 @@ case class Or(left: Expression, right: Expression) extends BinaryOperator with P
     val eval2 = right.gen(ctx)
 
     // The result should be `true`, if any of them is `true` whenever the other is null or not.
+    //结果应为“true”，如果其中任何一个为“true”,则只要另一个为null或不为null
     s"""
       ${eval1.code}
       boolean ${ev.isNull} = false;
@@ -338,7 +344,8 @@ private[sql] object BinaryComparison {
 }
 
 
-/** An extractor that matches both standard 3VL equality and null-safe equality. */
+/** An extractor that matches both standard 3VL equality and null-safe equality.
+  * 一个匹配标准3VL相等和空安全相等的提取器*/
 private[sql] object Equality {
   def unapply(e: BinaryComparison): Option[(Expression, Expression)] = e match {
     case EqualTo(l, r) => Some((l, r))

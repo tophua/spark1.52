@@ -26,6 +26,7 @@ import org.apache.spark.sql.types._
 
 /**
  * An expression that is evaluated to the first non-null input.
+  * 计算到第一个非空输入的表达式
  *
  * {{{
  *   coalesce(1, 2) => 1
@@ -36,7 +37,8 @@ import org.apache.spark.sql.types._
  */
 case class Coalesce(children: Seq[Expression]) extends Expression {
 
-  /** Coalesce is nullable if all of its children are nullable, or if it has no children. */
+  /** Coalesce is nullable if all of its children are nullable, or if it has no children.
+    * 如果Coalesce的所有子节点都可以为空,或者它没有子节点,则它可以为空*/
   override def nullable: Boolean = children.forall(_.nullable)
 
   // Coalesce is foldable if all children are foldable.
@@ -84,6 +86,7 @@ case class Coalesce(children: Seq[Expression]) extends Expression {
 
 /**
  * Evaluates to `true` iff it's NaN.
+  * 如果它是NaN,则评估为“true”
  */
 case class IsNaN(child: Expression) extends UnaryExpression
   with Predicate with ImplicitCastInputTypes {
@@ -121,6 +124,7 @@ case class IsNaN(child: Expression) extends UnaryExpression
 /**
  * An Expression evaluates to `left` iff it's not NaN, or evaluates to `right` otherwise.
  * This Expression is useful for mapping NaN values to null.
+  * 如果表达式不是NaN,则表达式求值为“left”,否则求值为“right”,此表达式对于将NaN值映射为null非常有用
  */
 case class NaNvl(left: Expression, right: Expression)
     extends BinaryExpression with ImplicitCastInputTypes {
@@ -175,6 +179,7 @@ case class NaNvl(left: Expression, right: Expression)
 
 /**
  * An expression that is evaluated to true if the input is null.
+  * 如果输入为null,则计算为true的表达式
  */
 case class IsNull(child: Expression) extends UnaryExpression with Predicate {
   override def nullable: Boolean = false
@@ -194,6 +199,7 @@ case class IsNull(child: Expression) extends UnaryExpression with Predicate {
 
 /**
  * An expression that is evaluated to true if the input is not null.
+  * 如果输入不为null,则计算为true的表达式
  */
 case class IsNotNull(child: Expression) extends UnaryExpression with Predicate {
   override def nullable: Boolean = false
@@ -213,6 +219,7 @@ case class IsNotNull(child: Expression) extends UnaryExpression with Predicate {
 
 /**
  * A predicate that is evaluated to be true if there are at least `n` non-null and non-NaN values.
+  * 如果至少存在“n”非空和非NaN值,则判断为谓词的谓词
  */
 case class AtLeastNNonNulls(n: Int, children: Seq[Expression]) extends Predicate {
   override def nullable: Boolean = false

@@ -57,6 +57,7 @@ import scala.collection.mutable.ArrayBuffer
  * Used when we need to start parsing the AST before deciding that we are going to pass the command
  * back for Hive to execute natively.  Will be replaced with a native command that contains the
  * cmd string.
+  * 在我们需要开始解析AST之前使用,然后再决定我们要将命令传回给Hive本地执行,将替换为包含cmd字符串的本机命令。
  */
 private[hive] case object NativePlaceholder extends LogicalPlan {
   override def children: Seq[LogicalPlan] = Seq.empty
@@ -165,6 +166,7 @@ private[hive] object HiveQl extends Logging {
   )
 
   // Commands that we do not need to explain.
+  //我们不需要解释的命令
   protected val noExplainCommands = Seq(
     "TOK_DESCTABLE",
     "TOK_SHOWTABLES",
@@ -176,7 +178,7 @@ private[hive] object HiveQl extends Logging {
   /**
    * A set of implicit transformations that allow Hive ASTNodes to be rewritten by transformations
    * similar to [[catalyst.trees.TreeNode]].
-   *
+   *一组隐式转换,允许通过类似于[[catalyst.trees.TreeNode]]的转换重写Hive ASTNode
    * Note that this should be considered very experimental and is not indented as a replacement
    * for TreeNode.  Primarily it should be noted ASTNodes are not immutable and do not appear to
    * have clean copy semantics.  Therefore, users of this class should take care when
@@ -186,6 +188,9 @@ private[hive] object HiveQl extends Logging {
     /**
      * Returns a copy of this node where `rule` has been recursively applied to it and all of its
      * children.  When `rule` does not apply to a given node it is left unchanged.
+      *
+      * 返回此节点的副本,其中`rule`已递归地应用于它及其所有子节点,当`rule`不适用于给定节点时,它保持不变。
+      *
      * @param rule the function use to transform this nodes children
      */
     def transform(rule: PartialFunction[ASTNode, ASTNode]): ASTNode = {
@@ -204,12 +209,14 @@ private[hive] object HiveQl extends Logging {
 
     /**
      * Returns a scala.Seq equivalent to [s] or Nil if [s] is null.
+      * 如果[s]为null,则返回等效于[s]的scala.Seq或Nil
      */
     private def nilIfEmpty[A](s: java.util.List[A]): Seq[A] =
       Option(s).map(_.toSeq).getOrElse(Nil)
 
     /**
      * Returns this ASTNode with the text changed to `newText`.
+      * 返回此ASTNode,文本更改为`newText`
      */
     def withText(newText: String): ASTNode = {
       n.token.asInstanceOf[org.antlr.runtime.CommonToken].setText(newText)
@@ -218,6 +225,7 @@ private[hive] object HiveQl extends Logging {
 
     /**
      * Returns this ASTNode with the children changed to `newChildren`.
+      * 返回此ASTNode,将子项更改为`newChildren`
      */
     def withChildren(newChildren: Seq[ASTNode]): ASTNode = {
       (1 to n.getChildCount).foreach(_ => n.deleteChild(0))
@@ -227,9 +235,11 @@ private[hive] object HiveQl extends Logging {
 
     /**
      * Throws an error if this is not equal to other.
+      * 如果这不等于其他错误,则会引发错误
      *
      * Right now this function only checks the name, type, text and children of the node
      * for equality.
+      * 现在，此函数仅检查节点的名称,类型,文本和子项是否相等
      */
     def checkEquals(other: ASTNode): Unit = {
       def check(field: String, f: ASTNode => Any): Unit = if (f(n) != f(other)) {
@@ -251,6 +261,7 @@ private[hive] object HiveQl extends Logging {
 
   /**
    * Returns the AST for the given SQL string.
+    * 返回给定SQL字符串的AST
    */
   def getAst(sql: String): ASTNode = {
     /*
@@ -266,6 +277,7 @@ private[hive] object HiveQl extends Logging {
 
   /**
    * Returns the HiveConf
+    * 返回HiveConf
    */
   private[this] def hiveConf: HiveConf = {
     val ss = SessionState.get() // SessionState is lazy initialization, it can be null here
@@ -276,12 +288,14 @@ private[hive] object HiveQl extends Logging {
     }
   }
 
-  /** Returns a LogicalPlan for a given HiveQL string. */
+  /** Returns a LogicalPlan for a given HiveQL string.
+    * 返回给定HiveQL字符串的LogicalPlan*/
   def parseSql(sql: String): LogicalPlan = hqlParser.parse(sql)
 
   val errorRegEx = "line (\\d+):(\\d+) (.*)".r
 
-  /** Creates LogicalPlan for a given HiveQL string. */
+  /** Creates LogicalPlan for a given HiveQL string.
+    * 为给定的HiveQL字符串创建LogicalPlan */
   def createPlan(sql: String): LogicalPlan = {
     try {
       val tree = getAst(sql)
@@ -334,7 +348,8 @@ private[hive] object HiveQl extends Logging {
     colList.map(nodeToAttribute)
   }
 
-  /** Extractor for matching Hive's AST Tokens. */
+  /** Extractor for matching Hive's AST Tokens.
+    * 用于匹配Hive的AST令牌的提取器*/
   object Token {
     /** @return matches of the form (tokenName, children). */
     def unapply(t: Any): Option[(String, Seq[ASTNode])] = t match {
@@ -491,6 +506,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
 
   protected def nodeToPlan(node: Node): LogicalPlan = node match {
     // Special drop table that also uncaches.
+      //特殊的丢弃表也可以解除
     case Token("TOK_DROPTABLE",
            Token("TOK_TABNAME", tableNameParts) ::
            ifExists) =>
@@ -513,6 +529,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
         AnalyzeTable(tableName)
       }
     // Just fake explain for any of the native commands.
+      //只是虚假解释任何本机命令
     case Token("TOK_EXPLAIN", explainArgs)
       if noExplainCommands.contains(explainArgs.head.getText) =>
       ExplainCommand(OneRowRelation)
@@ -611,6 +628,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
         viewText = None)
 
       // default storage type abbreviation (e.g. RCFile, ORC, PARQUET etc.)
+      //默认存储类型缩写（例如RCFile，ORC，PARQUET等）
       val defaultStorageType = hiveConf.getVar(HiveConf.ConfVars.HIVEDEFAULTFILEFORMAT)
       // handle the default format for the storage type abbreviation
       val hiveSerDe = HiveSerDe.sourceToSerDe(defaultStorageType, hiveConf).getOrElse {
@@ -776,6 +794,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
       CreateTableAsSelect(tableDesc, nodeToPlan(query), allowExisting != None)
 
     // If its not a "CTAS" like above then take it as a native command
+      //如果它不是像上面那样的“CTAS”那么就把它当作本机命令
     case Token("TOK_CREATETABLE", _) => NativePlaceholder
 
     // Support "TRUNCATE TABLE table_name [PARTITION partition_spec]"
@@ -1077,6 +1096,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
       }
 
       // If there are multiple INSERTS just UNION them together into on query.
+      //如果有多个INSERTS只是UNION它们一起进入查询
       val query = queries.reduceLeft(Union)
 
       // return With plan if there is CTE
@@ -1111,9 +1131,11 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
           attributes.map(UnresolvedAttribute(_)),
           nodeToRelation(relationClause))
 
-    /* All relations, possibly with aliases or sampling clauses. */
+    /* All relations, possibly with aliases or sampling clauses.
+     * 所有关系,可能带有别名或抽样条款。 */
     case Token("TOK_TABREF", clauses) =>
       // If the last clause is not a token then it's the alias of the table.
+      //如果最后一个子句不是令牌,那么它就是表的别名。
       val (nonAliasClauses, aliasClause) =
         if (clauses.last.getText.startsWith("TOK")) {
           (clauses, None)
@@ -1348,7 +1370,8 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
     HiveParser.BigintLiteral,
     HiveParser.DecimalLiteral)
 
-  /* Case insensitive matches */
+  /* Case insensitive matches
+   * 不区分大小写的匹配项 */
   val COUNT = "(?i)COUNT".r
   val SUM = "(?i)SUM".r
   val AND = "(?i)AND".r
@@ -1366,7 +1389,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
   val CASE = "(?i)CASE".r
 
   protected def nodeToExpr(node: Node): Expression = node match {
-    /* Attribute References */
+    /* Attribute References 属性引用*/
     case Token("TOK_TABLE_OR_COL",
            Token(name, Nil) :: Nil) =>
       UnresolvedAttribute.quoted(cleanIdentifier(name))
@@ -1380,11 +1403,12 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
     /* Stars (*) */
     case Token("TOK_ALLCOLREF", Nil) => UnresolvedStar(None)
     // The format of dbName.tableName.* cannot be parsed by HiveParser. TOK_TABNAME will only
+      //HiveParser无法解析dbName.tableName。*的格式。 TOK_TABNAME只会
     // has a single child which is tableName.
     case Token("TOK_ALLCOLREF", Token("TOK_TABNAME", Token(name, Nil) :: Nil) :: Nil) =>
       UnresolvedStar(Some(name))
 
-    /* Aggregate Functions */
+    /* Aggregate Functions  聚合函数*/
     case Token("TOK_FUNCTIONSTAR", Token(COUNT(), Nil) :: Nil) => Count(Literal(1))
     case Token("TOK_FUNCTIONDI", Token(COUNT(), Nil) :: args) => CountDistinct(args.map(nodeToExpr))
     case Token("TOK_FUNCTIONDI", Token(SUM(), Nil) :: arg :: Nil) => SumDistinct(nodeToExpr(arg))
@@ -1423,7 +1447,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
     case Token("TOK_FUNCTION", Token("TOK_DATE", Nil) :: arg :: Nil) =>
       Cast(nodeToExpr(arg), DateType)
 
-    /* Arithmetic */
+    /* Arithmetic 算术*/
     case Token("+", child :: Nil) => nodeToExpr(child)
     case Token("-", child :: Nil) => UnaryMinus(nodeToExpr(child))
     case Token("~", child :: Nil) => BitwiseNot(nodeToExpr(child))
@@ -1438,7 +1462,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
     case Token("|", left :: right:: Nil) => BitwiseOr(nodeToExpr(left), nodeToExpr(right))
     case Token("^", left :: right:: Nil) => BitwiseXor(nodeToExpr(left), nodeToExpr(right))
 
-    /* Comparisons */
+    /* Comparisons 比较*/
     case Token("=", left :: right:: Nil) => EqualTo(nodeToExpr(left), nodeToExpr(right))
     case Token("==", left :: right:: Nil) => EqualTo(nodeToExpr(left), nodeToExpr(right))
     case Token("<=>", left :: right:: Nil) => EqualNullSafe(nodeToExpr(left), nodeToExpr(right))
@@ -1491,7 +1515,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
     case Token("[", child :: ordinal :: Nil) =>
       UnresolvedExtractValue(nodeToExpr(child), nodeToExpr(ordinal))
 
-    /* Window Functions */
+    /* Window Functions 窗口函数*/
     case Token("TOK_FUNCTION", Token(name, Nil) +: args :+ Token("TOK_WINDOWSPEC", spec)) =>
       val function = UnresolvedWindowFunction(name, args.map(nodeToExpr))
       nodesToWindowSpecification(spec) match {
@@ -1510,10 +1534,12 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
           WindowExpression(function, definition)
       }
 
-    /* UDFs - Must be last otherwise will preempt built in functions */
+    /* UDFs - Must be last otherwise will preempt built in functions
+    * UDF - 必须是最后一个否则将抢占内置函数*/
     case Token("TOK_FUNCTION", Token(name, Nil) :: args) =>
       UnresolvedFunction(name, args.map(nodeToExpr), isDistinct = false)
     // Aggregate function with DISTINCT keyword.
+      //使用DISTINCT关键字的聚合函数
     case Token("TOK_FUNCTIONDI", Token(name, Nil) :: args) =>
       UnresolvedFunction(name, args.map(nodeToExpr), isDistinct = true)
     case Token("TOK_FUNCTIONSTAR", Token(name, Nil) :: args) =>
@@ -1526,7 +1552,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
     case Token("TOK_STRINGLITERALSEQUENCE", strings) =>
       Literal(strings.map(s => BaseSemanticAnalyzer.unescapeSQLString(s.getText)).mkString)
 
-    // This code is adapted from
+    // This code is adapted from 此代码改编自
     // /ql/src/java/org/apache/hadoop/hive/ql/parse/TypeCheckProcFactory.java#L223
     case ast: ASTNode if numericAstTypes contains ast.getType =>
       var v: Literal = null
@@ -1600,13 +1626,15 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
          """.stripMargin)
   }
 
-  /* Case insensitive matches for Window Specification */
+  /* Case insensitive matches for Window Specification
+   * 窗口规范的不区分大小写的匹配项 */
   val PRECEDING = "(?i)preceding".r
   val FOLLOWING = "(?i)following".r
   val CURRENT = "(?i)current".r
   def nodesToWindowSpecification(nodes: Seq[ASTNode]): WindowSpec = nodes match {
     case Token(windowName, Nil) :: Nil =>
       // Refer to a window spec defined in the window clause.
+      //请参阅window子句中定义的窗口规范
       WindowSpecReference(windowName)
     case Nil =>
       // OVER()
@@ -1624,6 +1652,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
           spec)
 
       // Handle Partition By and Order By.
+      //处理分区依据和排序依据
       val (partitionSpec, orderSpec) = partitionClause.map { partitionAndOrdering =>
         val (partitionByClause :: orderByClause :: sortByClause :: clusterByClause :: Nil) =
           getClauses(
@@ -1651,6 +1680,7 @@ https://cwiki.apache.org/confluence/display/Hive/Enhanced+Aggregation%2C+Cube%2C
       }
 
       // Handle Window Frame
+      //处理窗框
       val windowFrame =
         if (rowFrame.isEmpty && rangeFrame.isEmpty) {
           UnspecifiedFrame

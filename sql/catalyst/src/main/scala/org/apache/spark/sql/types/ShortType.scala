@@ -26,6 +26,7 @@ import org.apache.spark.sql.catalyst.ScalaReflectionLock
 /**
  * :: DeveloperApi ::
  * The data type representing `Short` values. Please use the singleton [[DataTypes.ShortType]].
+  * 表示“Short”值的数据类型,请使用singleton [[DataTypes.ShortType]]
  */
 @DeveloperApi
 class ShortType private() extends IntegralType {
@@ -40,6 +41,7 @@ class ShortType private() extends IntegralType {
 
   /**
    * The default size of a value of the ShortType is 2 bytes.
+    * ShortType值的默认大小为2个字节
    */
   override def defaultSize: Int = 2
 

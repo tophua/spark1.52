@@ -30,11 +30,13 @@ import org.apache.spark.sql.DataFrame
 
 /**
  * Params for Naive Bayes Classifiers.
+  * 朴素贝叶斯分类器的参数
  */
 private[ml] trait NaiveBayesParams extends PredictorParams {
 
   /**
    * The smoothing parameter.
+    * 平滑参数
    * (default = 1.0).
    * @group param
    */
@@ -46,6 +48,7 @@ private[ml] trait NaiveBayesParams extends PredictorParams {
 
   /**
    * The model type which is a string (case-sensitive).
+    * 模型类型是字符串（区分大小写)
    * Supported options: "multinomial" and "bernoulli".
    * (default = multinomial)
    * @group param
@@ -60,8 +63,8 @@ private[ml] trait NaiveBayesParams extends PredictorParams {
 
 /**
  * :: Experimental ::
- * Naive Bayes Classifiers.
- * It supports both Multinomial NB
+ * Naive Bayes Classifiers.朴素贝叶斯分类器
+ * It supports both Multinomial NB 它支持Multinomial NB
  * ([[http://nlp.stanford.edu/IR-book/html/htmledition/naive-bayes-text-classification-1.html]])
  * which can handle finitely supported discrete data. For example, by converting documents into
  * TF-IDF vectors, it can be used for document classification. By making every vector a
@@ -77,7 +80,7 @@ class NaiveBayes(override val uid: String)
   def this() = this(Identifiable.randomUID("nb"))
 
   /**
-   * Set the smoothing parameter.
+   * Set the smoothing parameter.设置平滑参数
    * Default is 1.0.
    * @group setParam
    */
@@ -86,6 +89,7 @@ class NaiveBayes(override val uid: String)
 
   /**
    * Set the model type using a string (case-sensitive).
+    * 使用字符串设置模型类型(区分大小写)
    * Supported options: "multinomial" and "bernoulli".
    * Default is "multinomial"
    * @group setParam
@@ -104,7 +108,7 @@ class NaiveBayes(override val uid: String)
 
 /**
  * :: Experimental ::
- * Model produced by [[NaiveBayes]]
+ * Model produced by [[NaiveBayes]]由[[NaiveBayes]]制作的模型
  * @param pi log of class priors, whose dimension is C (number of classes)
  * @param theta log of class conditional probabilities, whose dimension is C (number of classes)
  *              by D (number of features)
@@ -120,6 +124,7 @@ class NaiveBayesModel private[ml] (
 
   /**
    * Bernoulli scoring requires log(condprob) if 1, log(1-condprob) if 0.
+    * 伯努利评分需要log（condprob）如果为1，则log（1-condprob）为0
    * This precomputes log(1.0 - exp(theta)) and its sum which are used for the linear algebra
    * application of this condition (in predict function).
    */
@@ -205,7 +210,7 @@ class NaiveBayesModel private[ml] (
 
 private[ml] object NaiveBayesModel {
 
-  /** Convert a model from the old API */
+  /** Convert a model from the old API 从旧API转换模型*/
   def fromOld(
       oldModel: OldNaiveBayesModel,
       parent: NaiveBayes): NaiveBayesModel = {

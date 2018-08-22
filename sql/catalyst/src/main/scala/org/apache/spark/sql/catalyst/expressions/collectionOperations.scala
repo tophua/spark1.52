@@ -24,6 +24,7 @@ import org.apache.spark.sql.types._
 
 /**
  * Given an array or map, returns its size.
+  * 给定数组或映射,返回其大小
  */
 case class Size(child: Expression) extends UnaryExpression with ExpectsInputTypes {
   override def dataType: DataType = IntegerType
@@ -42,6 +43,7 @@ case class Size(child: Expression) extends UnaryExpression with ExpectsInputType
 /**
  * Sorts the input array in ascending / descending order according to the natural ordering of
  * the array elements and returns it.
+  * 根据数组元素的自然顺序以升序/降序对输入数组进行排序并返回它。
  */
 case class SortArray(base: Expression, ascendingOrder: Expression)
   extends BinaryExpression with ExpectsInputTypes with CodegenFallback {
@@ -117,6 +119,7 @@ case class SortArray(base: Expression, ascendingOrder: Expression)
 
 /**
  * Checks if the array (left) has the element (right)
+  * 检查数组(左)是否有元素(右)
  */
 case class ArrayContains(left: Expression, right: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {

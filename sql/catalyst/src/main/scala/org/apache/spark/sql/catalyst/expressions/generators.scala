@@ -25,9 +25,11 @@ import org.apache.spark.sql.types._
 
 /**
  * An expression that produces zero or more rows given a single input row.
+  * 在给定单个输入行的情况下生成零行或多行的表达式
  *
  * Generators produce multiple output rows instead of a single value like other expressions,
  * and thus they must have a schema to associate with the rows that are output.
+  * 生成器像其他表达式一样生成多个输出行而不是单个值,因此它们必须具有与输出的行关联的模式。
  *
  * However, unlike row producing relational operators, which are either leaves or determine their
  * output schema functionally from their input, generators can contain other expressions that
@@ -37,6 +39,8 @@ import org.apache.spark.sql.types._
  * instead define a function `makeOutput` which is called only once when the schema is first
  * requested.  The attributes produced by this function will be automatically copied anytime rules
  * result in changes to the Generator or its children.
+  * 但是,与生成关系运算符的行不同,生成器关系运算符要么离开,要么从输入中确定其输出模式,
+  * 生成器可以包含其他可能导致其按规则修改的表达式
  */
 trait Generator extends Expression {
 
@@ -50,22 +54,26 @@ trait Generator extends Expression {
 
   /**
    * The output element data types in structure of Seq[(DataType, Nullable)]
+    * Seq [（DataType，Nullable）]结构中的输出元素数据类型
    * TODO we probably need to add more information like metadata etc.
    */
   def elementTypes: Seq[(DataType, Boolean)]
 
-  /** Should be implemented by child classes to perform specific Generators. */
+  /** Should be implemented by child classes to perform specific Generators.
+    * 应由子类实现以执行特定的生成器 */
   override def eval(input: InternalRow): TraversableOnce[InternalRow]
 
   /**
    * Notifies that there are no more rows to process, clean up code, and additional
    * rows can be made here.
+    * 通知没有更多行要处理,清理代码,并且可以在此处创建其他行
    */
   def terminate(): TraversableOnce[InternalRow] = Nil
 }
 
 /**
  * A generator that produces its output using the provided lambda function.
+  * 使用提供的lambda函数生成其输出的生成器。
  */
 case class UserDefinedGenerator(
     elementTypes: Seq[(DataType, Boolean)],
@@ -89,6 +97,7 @@ case class UserDefinedGenerator(
       initializeConverters()
     }
     // Convert the objects into Scala Type before calling function, we need schema to support UDT
+     //在调用函数之前将对象转换为Scala Type，我们需要schema来支持UDT
     function(convertToScala(inputRow(input)))
   }
 
@@ -97,6 +106,7 @@ case class UserDefinedGenerator(
 
 /**
  * Given an input array produces a sequence of rows for each value in the array.
+  * 给定输入数组为数组中的每个值生成一系列行
  */
 case class Explode(child: Expression) extends UnaryExpression with Generator with CodegenFallback {
   //Nil是一个空的List,::向队列的头部追加数据,创造新的列表

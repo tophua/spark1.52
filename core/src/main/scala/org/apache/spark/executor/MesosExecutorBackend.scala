@@ -114,6 +114,7 @@ private[spark] class MesosExecutorBackend
 
 /**
  * Entry point for Mesos executor.
+  * Mesos执行者的切入点
  */
 private[spark] object MesosExecutorBackend extends Logging {
   def main(args: Array[String]) {

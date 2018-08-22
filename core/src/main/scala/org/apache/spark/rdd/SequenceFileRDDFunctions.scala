@@ -86,6 +86,10 @@ class SequenceFileRDDFunctions[K <% Writable: ClassTag, V <% Writable : ClassTag
    * otherwise we map primitive types such as Int and Double to IntWritable, DoubleWritable, etc,
    * byte arrays to BytesWritable, and Strings to Text. The `path` can be on any Hadoop-supported
    * file system.
+    * 使用我们从RDD的键和值类型推断出的Writable类型将RDD输出为Hadoop SequenceFile,
+    * 如果键或值是可写的,那么我们直接使用它们的类;
+    * 否则我们将原始类型（如Int和Double）映射到IntWritable,DoubleWritable等,将字节数组映射到BytesWritable,
+    * 将字符串映射到Text。 `path`可以在任何支持Hadoop的文件系统上。
    */
   def saveAsSequenceFile(
       path: String,

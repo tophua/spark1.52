@@ -25,6 +25,7 @@ import org.apache.spark.sql.catalyst.expressions._
 /**
  * For lazy computing, be sure the generator.terminate() called in the very last
  * TODO reusing the CompletionIterator?
+  * 对于延迟计算,请确保在最后一个TODO中调用的generator.terminate()重用CompletionIterator？
  */
 private[execution] sealed case class LazyIterator(func: () => TraversableOnce[InternalRow])
   extends Iterator[InternalRow] {
@@ -40,6 +41,9 @@ private[execution] sealed case class LazyIterator(func: () => TraversableOnce[In
  * output of each into a new stream of rows.  This operation is similar to a `flatMap` in functional
  * programming with one important additional feature, which allows the input rows to be joined with
  * their output.
+  * 将[[Generator]]应用于输入行流,将每个输出行的输出组合成新的行流。
+  * 此操作类似于函数式编程中的“flatMap”,具有一个重要的附加功能,允许输入行与其输出连接。
+  *
  * @param generator the generator expression
  * @param join  when true, each output row is implicitly joined with the input tuple that produced
  *              it.
@@ -61,6 +65,7 @@ case class Generate(
 
   protected override def doExecute(): RDD[InternalRow] = {
     // boundGenerator.terminate() should be triggered after all of the rows in the partition
+    //应该在分区中的所有行之后触发boundGenerator.terminate()
     if (join) {
       child.execute().mapPartitions { iter =>
         val generatorNullRow = InternalRow.fromSeq(Seq.fill[Any](generator.elementTypes.size)(null))
@@ -68,6 +73,7 @@ case class Generate(
 
         iter.flatMap { row =>
           // we should always set the left (child output)
+          //我们应该总是设置左(子输出)
           joinedRow.withLeft(row)
           val outputRows = boundGenerator.eval(row)
           if (outer && outputRows.isEmpty) {

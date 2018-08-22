@@ -26,6 +26,7 @@ import org.apache.spark.ml.param._
 /**
  * :: Experimental ::
  * Builder for a param grid used in grid search-based model selection.
+  * 用于基于网格搜索的模型选择的参数网格的构建器
  */
 @Experimental
 class ParamGridBuilder {
@@ -34,6 +35,7 @@ class ParamGridBuilder {
 
   /**
    * Sets the given parameters in this grid to fixed values.
+    * 将此网格中的给定参数设置为固定值
    */
   def baseOn(paramMap: ParamMap): this.type = {
     baseOn(paramMap.toSeq: _*)
@@ -42,6 +44,7 @@ class ParamGridBuilder {
 
   /**
    * Sets the given parameters in this grid to fixed values.
+    * 将此网格中的给定参数设置为固定值
    */
   @varargs
   def baseOn(paramPairs: ParamPair[_]*): this.type = {
@@ -53,6 +56,7 @@ class ParamGridBuilder {
 
   /**
    * Adds a param with multiple values (overwrites if the input param exists).
+    * 添加具有多个值的参数(如果存在输入参数,则覆盖)
    */
   def addGrid[T](param: Param[T], values: Iterable[T]): this.type = {
     paramGrid.put(param, values)
@@ -63,6 +67,7 @@ class ParamGridBuilder {
 
   /**
    * Adds a double param with multiple values.
+    * 添加具有多个值的双参数
    */
   def addGrid(param: DoubleParam, values: Array[Double]): this.type = {
     addGrid[Double](param, values)
@@ -70,6 +75,7 @@ class ParamGridBuilder {
 
   /**
    * Adds a int param with multiple values.
+    * 添加具有多个值的int参数
    */
   def addGrid(param: IntParam, values: Array[Int]): this.type = {
     addGrid[Int](param, values)
@@ -77,6 +83,7 @@ class ParamGridBuilder {
 
   /**
    * Adds a float param with multiple values.
+    * 添加具有多个值的浮点参数
    */
   def addGrid(param: FloatParam, values: Array[Float]): this.type = {
     addGrid[Float](param, values)
@@ -84,6 +91,7 @@ class ParamGridBuilder {
 
   /**
    * Adds a long param with multiple values.
+    * 添加具有多个值的长参数
    */
   def addGrid(param: LongParam, values: Array[Long]): this.type = {
     addGrid[Long](param, values)
@@ -91,6 +99,7 @@ class ParamGridBuilder {
 
   /**
    * Adds a boolean param with true and false.
+    * 添加一个带有true和false的布尔参数
    */
   def addGrid(param: BooleanParam): this.type = {
     addGrid[Boolean](param, Array(true, false))
@@ -98,6 +107,7 @@ class ParamGridBuilder {
 
   /**
    * Builds and returns all combinations of parameters specified by the param grid.
+    * 构建并返回参数网格指定的所有参数组合
    */
   def build(): Array[ParamMap] = {
     var paramMaps = Array(new ParamMap)

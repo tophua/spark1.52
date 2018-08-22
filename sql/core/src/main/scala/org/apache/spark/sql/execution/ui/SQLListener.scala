@@ -37,11 +37,13 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
 
   // Old data in the following fields must be removed in "trimExecutionsIfNecessary".
   // If adding new fields, make sure "trimExecutionsIfNecessary" can clean up old data
+  //在“TimeExchange必须”中删除以下字段中的旧数据,如果添加新字段,请确保“TimeExchange必须”可以清除旧数据。
   private val _executionIdToData = mutable.HashMap[Long, SQLExecutionUIData]()
 
   /**
    * Maintain the relation between job id and execution id so that we can get the execution id in
    * the "onJobEnd" method.
+    * 维护作业ID和执行ID之间的关系,这样我们就可以在“OnJOPEND”方法中获得执行ID
    */
   private val _jobIdToExecutionId = mutable.HashMap[Long, Long]()
 
@@ -130,11 +132,14 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
     val stageId = stageSubmitted.stageInfo.stageId
     val stageAttemptId = stageSubmitted.stageInfo.attemptId
     // Always override metrics for old stage attempt
+    //总是忽略旧阶段尝试的度量
     if (_stageIdToStageMetrics.contains(stageId)) {
       _stageIdToStageMetrics(stageId) = new SQLStageMetrics(stageAttemptId)
     } else {
       // If a stage belongs to some SQL execution, its stageId will be put in "onJobStart".
+      //如果一个阶段属于某个SQL执行，它的StaseID将被放入“OnJOBSTART”。
       // Since "_stageIdToStageMetrics" doesn't contain it, it must not belong to any SQL execution.
+      //因为“SytEdIdtoStisteMealTimes”不包含它,它不应该属于任何SQL执行
       // So we can ignore it. Otherwise, this may lead to memory leaks (SPARK-11126).
     }
   }
@@ -151,6 +156,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
   /**
    * Update the accumulator values of a task with the latest metrics for this task. This is called
    * every time we receive an executor heartbeat or when a task finishes.
+    * 用这个任务的最新度量来更新任务的累加器值,每当我们收到执行者心跳或任务完成时,都会调用它。
    */
   private def updateTaskAccumulatorValues(
       taskId: Long,
@@ -166,6 +172,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
       case Some(stageMetrics) =>
         if (stageAttemptID < stageMetrics.stageAttemptId) {
           // A task of an old stage attempt. Because a new stage is submitted, we can ignore it.
+          //旧阶段尝试的任务,因为提交了一个新阶段,我们可以忽略它
         } else if (stageAttemptID > stageMetrics.stageAttemptId) {
           logWarning(s"A task should not have a higher stageAttemptID ($stageAttemptID) then " +
             s"what we have seen (${stageMetrics.stageAttemptId})")
@@ -174,6 +181,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
           // accumulator updates. However, if there are two same task are running, such as
           // speculation, the accumulator updates will be overriding by different task attempts,
           // the results will be weird.
+          //累加器更新,但是,如果有两个相同的任务正在运行,例如推测,累加器更新将被不同的任务尝试覆盖,结果将是奇怪的。
           stageMetrics.taskIdToMetricUpdates.get(taskId) match {
             case Some(taskMetrics) =>
               if (finishTask) {
@@ -184,6 +192,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
               } else {
                 // If a task is finished, we should not override with accumulator updates from
                 // heartbeat reports
+                //如果任务完成,我们不应该使用心跳报告中的累加器更新来覆盖
               }
             //None被声明为一个对象,而不是一个类,在没有值的时候,使用None,如果有值可以引用,就使用Some来包含这个值,都是Option的子类
             case None =>
@@ -224,11 +233,14 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
       if (!executionUIData.hasRunningJobs) {
         // onExecutionEnd happens after all "onJobEnd"s
         // So we should update the execution lists.
+        //所有“onJobEnd”之后都会发生onExecutionEnd所以我们应该更新执行列表
         markExecutionFinished(executionId)
       } else {
         // There are some running jobs, onExecutionEnd happens before some "onJobEnd"s.
+        //有一些正在运行的工作,onExecutionEnd发生在一些“onJobEnd”之前
         // Then we don't if the execution is successful, so let the last onJobEnd updates the
         // execution lists.
+        //如果执行成功,我们就不会这样做,所以让最后一个onJobEnd更新执行列表
       }
     }
   }
@@ -263,6 +275,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
 
   /**
    * Get all accumulator updates from all tasks which belong to this execution and merge them.
+    * 从属于此执行的所有任务中获取所有累加器更新并合并它们
    */
   def getExecutionMetrics(executionId: Long): Map[Long, Any] = synchronized {
     _executionIdToData.get(executionId) match {
@@ -299,6 +312,7 @@ private[sql] class SQLListener(sqlContext: SQLContext) extends SparkListener wit
 
 /**
  * Represent all necessary data for an execution that will be used in Web UI.
+  * 表示将在Web UI中使用的执行所需的所有数据
  */
 private[ui] class SQLExecutionUIData(
     val executionId: Long,
@@ -315,11 +329,13 @@ private[ui] class SQLExecutionUIData(
 
   /**
    * Return whether there are running jobs in this execution.
+    * 返回此执行中是否有正在运行的作业
    */
   def hasRunningJobs: Boolean = jobs.values.exists(_ == JobExecutionStatus.RUNNING)
 
   /**
    * Return whether there are any failed jobs in this execution.
+    * 返回此执行中是否有任何失败的作业
    */
   def isFailed: Boolean = jobs.values.exists(_ == JobExecutionStatus.FAILED)
 
@@ -340,6 +356,9 @@ private[ui] class SQLExecutionUIData(
  * updates for each task. So that if a task is retried, we can simply override the old updates with
  * the new updates of the new attempt task. Since we cannot add them to accumulator, we need to use
  * "AccumulatorParam" to get the aggregation value.
+  * 因为我们无法恢复“累加器”的更改,所以我们需要为每个任务维护累加器更新,
+  * 因此,如果重试任务,我们可以使用新尝试任务的新更新覆盖旧更新,
+  * 由于我们无法将它们添加到累加器,我们需要使用“AccumulatorParam”来获取聚合值
  */
 private[ui] case class SQLPlanMetric(
     name: String,
@@ -348,6 +367,7 @@ private[ui] case class SQLPlanMetric(
 
 /**
  * Store all accumulatorUpdates for all tasks in a Spark stage.
+  * 存储Spark阶段中所有任务的所有accumulatorUpdates。
  */
 private[ui] class SQLStageMetrics(
     val stageAttemptId: Long,
@@ -355,6 +375,7 @@ private[ui] class SQLStageMetrics(
 
 /**
  * Store all accumulatorUpdates for a Spark task.
+  * 存储Spark任务的所有accumulatorUpdates
  */
 private[ui] class SQLTaskMetrics(
     val attemptId: Long, // TODO not used yet

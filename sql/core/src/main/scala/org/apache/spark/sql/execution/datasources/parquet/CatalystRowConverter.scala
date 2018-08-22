@@ -44,10 +44,12 @@ import org.apache.spark.unsafe.types.UTF8String
  * values to an [[ArrayBuffer]].
  */
 private[parquet] trait ParentContainerUpdater {
-  /** Called before a record field is being converted */
+  /** Called before a record field is being converted
+    * 在转换记录字段之前调用*/
   def start(): Unit = ()
 
-  /** Called after a record field is being converted */
+  /** Called after a record field is being converted
+    * 在转换记录字段后调用*/
   def end(): Unit = ()
 
   def set(value: Any): Unit = ()
@@ -60,7 +62,8 @@ private[parquet] trait ParentContainerUpdater {
   def setDouble(value: Double): Unit = set(value)
 }
 
-/** A no-op updater used for root converter (who doesn't have a parent). */
+/** A no-op updater used for root converter (who doesn't have a parent).
+  * 用于根转换器的无操作更新程序(没有父级)*/
 private[parquet] object NoopUpdater extends ParentContainerUpdater
 
 private[parquet] trait HasParentContainerUpdater {
@@ -69,6 +72,7 @@ private[parquet] trait HasParentContainerUpdater {
 
 /**
  * A convenient converter class for Parquet group types with an [[HasParentContainerUpdater]].
+  * 具有[[HasParentContainerUpdater]]的Parquet组类型的便捷转换器类
  */
 private[parquet] abstract class CatalystGroupConverter(val updater: ParentContainerUpdater)
   extends GroupConverter with HasParentContainerUpdater
@@ -77,6 +81,8 @@ private[parquet] abstract class CatalystGroupConverter(val updater: ParentContai
  * Parquet converter for Parquet primitive types.  Note that not all Spark SQL atomic types
  * are handled by this converter.  Parquet primitive types are only a subset of those of Spark
  * SQL.  For example, BYTE, SHORT, and INT in Spark SQL are all covered by INT32 in Parquet.
+  * Parquet原始类型的镶木地板转换器,请注意,并非所有Spark SQL原子类型都由此转换器处理,
+  * Parquet原始类型只是Spark SQL的子集,例如,Spark SQL中的BYTE，SHORT和INT都由Parquet中的INT32覆盖。
  */
 private[parquet] class CatalystPrimitiveConverter(val updater: ParentContainerUpdater)
   extends PrimitiveConverter with HasParentContainerUpdater {
@@ -93,6 +99,8 @@ private[parquet] class CatalystPrimitiveConverter(val updater: ParentContainerUp
  * A [[CatalystRowConverter]] is used to convert Parquet records into Catalyst [[InternalRow]]s.
  * Since Catalyst `StructType` is also a Parquet record, this converter can be used as root
  * converter.  Take the following Parquet type as an example:
+  * [[CatalystRowConverter]]用于将Parquet记录转换为Catalyst [[InternalRow]]。
+  * 由于Catalyst`StructType`也是Parquet记录,因此该转换器可用作根转换器,以下面的Parquet类型为例：
  * {{{
  *   message root {
  *     required int32 f1;
@@ -145,6 +153,7 @@ private[parquet] class CatalystRowConverter(
   /**
    * Updater used together with field converters within a [[CatalystRowConverter]].  It propagates
    * converted filed values to the `ordinal`-th cell in `currentRow`.
+    * 更新程序与[[CatalystRowConverter]]中的字段转换器一起使用,它将转换后的字段值传播到`currentRow`中的“序数”单元格
    */
   private final class RowUpdater(row: MutableRow, ordinal: Int) extends ParentContainerUpdater {
     override def set(value: Any): Unit = row(ordinal) = value
@@ -159,14 +168,17 @@ private[parquet] class CatalystRowConverter(
 
   /**
    * Represents the converted row object once an entire Parquet record is converted.
+    * 转换整个Parquet记录后表示转换的行对象
    */
   val currentRow = new SpecificMutableRow(catalystType.map(_.dataType))
 
   // Converters for each field.
+  //每个字段的转换器
   private val fieldConverters: Array[Converter with HasParentContainerUpdater] = {
     parquetType.getFields.asScala.zip(catalystType).zipWithIndex.map {
       case ((parquetFieldType, catalystField), ordinal) =>
         // Converted field value should be set to the `ordinal`-th cell of `currentRow`
+        //转换后的字段值应设置为`currentRow`的“序数”单元格
         newConverter(parquetFieldType, catalystField.dataType, new RowUpdater(currentRow, ordinal))
     }.toArray
   }
@@ -194,6 +206,8 @@ private[parquet] class CatalystRowConverter(
   /**
    * Creates a converter for the given Parquet type `parquetType` and Spark SQL data type
    * `catalystType`. Converted values are handled by `updater`.
+    * 为给定的Parquet类型`parquetType`和Spark SQL数据类型`catalystType`创建转换器,
+    * 转换后的值由`updater`处理。
    */
   private def newConverter(
       parquetType: Type,
@@ -250,6 +264,8 @@ private[parquet] class CatalystRowConverter(
       // A repeated field that is neither contained by a `LIST`- or `MAP`-annotated group nor
       // annotated by `LIST` or `MAP` should be interpreted as a required list of required
       // elements where the element type is the type of the field.
+        //既不包含在“LIST”或“MAP”注释组中也不由“LIST”或“MAP”注释的重复字段应解释为必需元素的必需列表,
+      // 其中元素类型是字段的类型。
       case t: ArrayType if parquetType.getOriginalType != LIST =>
         if (parquetType.isPrimitive) {
           new RepeatedPrimitiveConverter(parquetType, t.elementType, updater)
@@ -283,6 +299,7 @@ private[parquet] class CatalystRowConverter(
 
   /**
    * Parquet converter for strings. A dictionary is used to minimize string decoding cost.
+    * 用于Parquet转换器,字典用于最小化字符串解码成本。
    */
   private final class CatalystStringConverter(updater: ParentContainerUpdater)
     extends CatalystPrimitiveConverter(updater) {
@@ -308,6 +325,7 @@ private[parquet] class CatalystRowConverter(
 
   /**
    * Parquet converter for fixed-precision decimals.
+    * 用于固定精度小数的Parquet换器。
    */
   private final class CatalystDecimalConverter(
       decimalType: DecimalType,
@@ -315,16 +333,19 @@ private[parquet] class CatalystRowConverter(
     extends CatalystPrimitiveConverter(updater) {
 
     // Converts decimals stored as INT32
+    //转换存储为INT32的小数
     override def addInt(value: Int): Unit = {
       addLong(value: Long)
     }
 
     // Converts decimals stored as INT64
+    //转换存储为INT64的小数
     override def addLong(value: Long): Unit = {
       updater.set(Decimal(value, decimalType.precision, decimalType.scale))
     }
 
     // Converts decimals stored as either FIXED_LENGTH_BYTE_ARRAY or BINARY
+    //Converts decimals stored as either FIXED_LENGTH_BYTE_ARRAY or BINARY
     override def addBinary(value: Binary): Unit = {
       updater.set(toDecimal(value))
     }
@@ -336,6 +357,7 @@ private[parquet] class CatalystRowConverter(
 
       if (precision <= CatalystSchemaConverter.MAX_PRECISION_FOR_INT64) {
         // Constructs a `Decimal` with an unscaled `Long` value if possible.
+        //如果可能的话,用一个未缩放的`Long`值构造一个`Decimal`
         var unscaled = 0L
         var i = 0
 
@@ -349,6 +371,7 @@ private[parquet] class CatalystRowConverter(
         Decimal(unscaled, precision, scale)
       } else {
         // Otherwise, resorts to an unscaled `BigInteger` instead.
+        //否则,转而使用未缩放的`BigInteger`。
         Decimal(new BigDecimal(new BigInteger(bytes), scale), precision, scale)
       }
     }
@@ -357,6 +380,7 @@ private[parquet] class CatalystRowConverter(
   /**
    * Parquet converter for arrays.  Spark SQL arrays are represented as Parquet lists.  Standard
    * Parquet lists are represented as a 3-level group annotated by `LIST`:
+    * 数组Parquet转换器,Spark SQL数组表示为Parquet列表,标准Parquet列表表示为由“LIST”注释的3级组：
    * {{{
    *   <list-repetition> group <name> (LIST) {            <-- parquetSchema points here
    *     repeated group list {
@@ -484,7 +508,8 @@ private[parquet] class CatalystRowConverter(
       currentValues = ArrayBuffer.empty[Any]
     }
 
-    /** Parquet converter for key-value pairs within the map. */
+    /** Parquet converter for key-value pairs within the map.
+      * 用于map内键值对的镶木地板转换器。*/
     private final class KeyValueConverter(
         parquetKeyType: Type,
         parquetValueType: Type,
@@ -534,6 +559,7 @@ private[parquet] class CatalystRowConverter(
   /**
    * A primitive converter for converting unannotated repeated primitive values to required arrays
    * of required primitives values.
+    * 一种原始转换器,用于将未注释的重复原始值转换为所需的原始值所需的数组
    */
   private final class RepeatedPrimitiveConverter(
       parquetType: Type,
@@ -561,6 +587,7 @@ private[parquet] class CatalystRowConverter(
   /**
    * A group converter for converting unannotated repeated group values to required arrays of
    * required struct values.
+    * 用于将未注释的重复组值转换为所需结构值所需数组的组转换器
    */
   private final class RepeatedGroupConverter(
       parquetType: Type,

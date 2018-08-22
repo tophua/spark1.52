@@ -63,6 +63,7 @@ case class Project(projectList: Seq[NamedExpression], child: SparkPlan) extends 
 
 /**
  * A variant of [[Project]] that returns [[UnsafeRow]]s.
+  * [[Project]]的变体,返回[[UnsafeRow]] s
  */
 case class TungstenProject(projectList: Seq[NamedExpression], child: SparkPlan) extends UnaryNode {
 
@@ -75,7 +76,8 @@ case class TungstenProject(projectList: Seq[NamedExpression], child: SparkPlan) 
 
   override def output: Seq[Attribute] = projectList.map(_.toAttribute)
 
-  /** Rewrite the project list to use unsafe expressions as needed. */
+  /** Rewrite the project list to use unsafe expressions as needed.
+    * 根据需要重写项目列表以使用不安全的表达式*/
   protected val unsafeProjectList = projectList.map(_ transform {
     case CreateStruct(children) => CreateStructUnsafe(children)
     case CreateNamedStruct(children) => CreateNamedStructUnsafe(children)
@@ -159,6 +161,7 @@ case class Sample(
     if (withReplacement) {
       // Disable gap sampling since the gap sampling method buffers two rows internally,
       // requiring us to copy the row, which is more expensive than the random number generator.
+      //因为GAP采样方法在内部缓冲两行,所以我们需要复制间隙采样,这需要我们复制行,这比随机数生成器更昂贵
       new PartitionwiseSampledRDD[InternalRow, InternalRow](
         child.execute(),
         new PoissonSampler[InternalRow](upperBound - lowerBound, useGapSamplingIfPossible = false),
@@ -191,14 +194,19 @@ case class Union(children: Seq[SparkPlan]) extends SparkPlan {
  * this operator uses something similar to Spark's take method on the Spark driver. If it is not
  * terminal or is invoked using execute, we first take the limit on each partition, and then
  * repartition all the data to a single partition to compute the global limit.
+  * 取第一个限制元素,请注意,取决于这是否是终端操作符,实现是不同的,如果它是终端,并使用ExtUcCuEclipse调用,
+  * 则该操作符使用与Spice驱动程序SpksPACE方法类似的内容。如果不是终端或使用Exc++调用,
+  * 我们首先对每个分区进行限制,然后使用Exchange调用终端或调用,我们首先对每个分区进行限制
  */
 @DeveloperApi
 case class Limit(limit: Int, child: SparkPlan)
   extends UnaryNode {
   // TODO: Implement a partition local limit, and use a strategy to generate the proper limit plan:
   // partition local limit -> exchange into one partition -> partition local limit again
+  //分区局部限制>交换为一个分区->分区局部限制
 
-  /** We must copy rows when sort based shuffle is on */
+  /** We must copy rows when sort based shuffle is on
+    * 当基于排序的洗牌时,我们必须复制行*/
   private def sortBasedShuffleOn = SparkEnv.get.shuffleManager.isInstanceOf[SortShuffleManager]
 
   override def output: Seq[Attribute] = child.output
@@ -248,6 +256,7 @@ case class TakeOrderedAndProject(
 
   // We need to use an interpreted ordering here because generated orderings cannot be serialized
   // and this ordering needs to be created on the driver in order to be passed into Spark core code.
+  //我们需要在这里使用解释的排序,因为生成的顺序不能被序列化,并且需要在驱动程序上创建这个排序,以便传递到SCAPER内核代码
   private val ord: InterpretedOrdering = new InterpretedOrdering(sortOrder, child.output)
 
   // TODO: remove @transient after figure out how to clean closure at InsertIntoHiveTable.
@@ -280,6 +289,7 @@ case class TakeOrderedAndProject(
 /**
  * :: DeveloperApi ::
  * Return a new RDD that has exactly `numPartitions` partitions.
+  * 返回一个新的RDD,它具有精确的“Nuffice分区”
  */
 @DeveloperApi
 case class Repartition(numPartitions: Int, shuffle: Boolean, child: SparkPlan)
@@ -301,6 +311,7 @@ case class Repartition(numPartitions: Int, shuffle: Boolean, child: SparkPlan)
  * :: DeveloperApi ::
  * Returns a table with the elements from left that are not in right using
  * the built-in spark subtract function.
+  * 使用内置的Spark 减去函数返回带有左侧元素的表,这些元素不是正确的
  */
 @DeveloperApi
 case class Except(left: SparkPlan, right: SparkPlan) extends BinaryNode {
@@ -315,6 +326,7 @@ case class Except(left: SparkPlan, right: SparkPlan) extends BinaryNode {
  * :: DeveloperApi ::
  * Returns the rows in left that also appear in right using the built in spark
  * intersection function.
+  * 使用内置的Spar 交汇函数返回右边出现的行
  */
 @DeveloperApi
 case class Intersect(left: SparkPlan, right: SparkPlan) extends BinaryNode {
@@ -330,6 +342,7 @@ case class Intersect(left: SparkPlan, right: SparkPlan) extends BinaryNode {
  * A plan node that does nothing but lie about the output of its child.  Used to spice a
  * (hopefully structurally equivalent) tree from a different optimization sequence into an already
  * resolved tree.
+  * 一个计划节点,除了对它的子输出说谎之外什么也不做,用于从一个不同的优化序列中调出一个(希望结构等价的)树到已经解决的树中
  */
 @DeveloperApi
 case class OutputFaker(output: Seq[Attribute], child: SparkPlan) extends SparkPlan {

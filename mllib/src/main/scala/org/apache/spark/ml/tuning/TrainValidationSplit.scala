@@ -32,6 +32,7 @@ import org.apache.spark.sql.types.StructType
 private[ml] trait TrainValidationSplitParams extends ValidatorParams {
   /**
    * Param for ratio between train and validation data. Must be between 0 and 1.
+    * 列车与验证数据之间的比率,必须介于0和1之间
    * Default: 0.75
    * @group param
    */
@@ -46,7 +47,7 @@ private[ml] trait TrainValidationSplitParams extends ValidatorParams {
 
 /**
  * :: Experimental ::
- * Validation for hyper-parameter tuning.
+ * Validation for hyper-parameter tuning.验证超参数调整
  * Randomly splits the input dataset into train and validation sets,
  * and uses evaluation metric on the validation set to select the best model.
  * Similar to [[CrossValidator]], but only splits the set once.
@@ -84,7 +85,7 @@ class TrainValidationSplit(override val uid: String) extends Estimator[TrainVali
     val trainingDataset = sqlCtx.createDataFrame(training, schema).cache()
     val validationDataset = sqlCtx.createDataFrame(validation, schema).cache()
 
-    // multi-model training
+    // multi-model training 多模式训练
     logDebug(s"Train split with multiple sets of parameters.")
     val models = est.fit(trainingDataset, epm).asInstanceOf[Seq[Model[_]]]
     trainingDataset.unpersist()

@@ -30,6 +30,7 @@ import org.apache.spark.sql.types._
 /**
  * :: Experimental ::
  * Functionality for working with missing data in [[DataFrame]]s.
+  * 在[[DataFrame]]中处理缺失数据的功能
  *
  * @since 1.3.1
  */
@@ -38,6 +39,7 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
 
   /**
    * Returns a new [[DataFrame]] that drops rows containing any null or NaN values.
+    * 返回一个新的[[DataFrame]],它删除包含任何null或NaN值的行
    *
    * @since 1.3.1
    */
@@ -45,10 +47,12 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
 
   /**
    * Returns a new [[DataFrame]] that drops rows containing null or NaN values.
+    * 返回一个新的[[DataFrame]],它删除包含null或NaN值的行
    *
    * If `how` is "any", then drop rows containing any null or NaN values.
    * If `how` is "all", then drop rows only if every column is null or NaN for that row.
-   *
+   * 如果`how`是“any”，则删除包含任何null或NaN值的行。
+    * 如果`how`是“all”，则仅当每列为null或该行的NaN时才删除行。
    * @since 1.3.1
    */
   def drop(how: String): DataFrame = drop(how, df.columns)
@@ -56,6 +60,7 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * Returns a new [[DataFrame]] that drops rows containing any null or NaN values
    * in the specified columns.
+    * 返回一个新的[[DataFrame]],它删除包含指定列中任何null或NaN值的行
    *
    * @since 1.3.1
    */
@@ -64,6 +69,7 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * (Scala-specific) Returns a new [[DataFrame]] that drops rows containing any null or NaN values
    * in the specified columns.
+    * （特定于Scala）返回一个新的[[DataFrame]],它删除包含指定列中任何null或NaN值的行
    *
    * @since 1.3.1
    */
@@ -72,9 +78,12 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * Returns a new [[DataFrame]] that drops rows containing null or NaN values
    * in the specified columns.
+    * 返回一个新的[[DataFrame]],它删除指定列中包含null或NaN值的行
    *
    * If `how` is "any", then drop rows containing any null or NaN values in the specified columns.
+    * 如果`how`是“any”，则删除包含指定列中任何null或NaN值的行
    * If `how` is "all", then drop rows only if every specified column is null or NaN for that row.
+    * 如果`how`是“all”，则仅当每个指定的列为null或该行的NaN时才删除行
    *
    * @since 1.3.1
    */
@@ -84,8 +93,12 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
    * (Scala-specific) Returns a new [[DataFrame]] that drops rows containing null or NaN values
    * in the specified columns.
    *
+    * （特定于Scala）返回一个新的[[DataFrame]]，它删除指定列中包含null或NaN值的行
+    *
    * If `how` is "any", then drop rows containing any null or NaN values in the specified columns.
+    * 如果`how`是“any”，则删除包含指定列中任何null或NaN值的行
    * If `how` is "all", then drop rows only if every specified column is null or NaN for that row.
+    * 如果`how`是“all”，则仅当每个指定的列为null或该行的NaN时才删除行
    *
    * @since 1.3.1
    */
@@ -100,6 +113,7 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * Returns a new [[DataFrame]] that drops rows containing
    * less than `minNonNulls` non-null and non-NaN values.
+    * 返回一个新的[[DataFrame]],它删除包含少于“minNonNulls”非空和非NaN值的行
    *
    * @since 1.3.1
    */
@@ -108,6 +122,8 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * Returns a new [[DataFrame]] that drops rows containing
    * less than `minNonNulls` non-null and non-NaN values in the specified columns.
+    *
+    * 返回一个新的[[DataFrame]],它删除指定列中包含小于“minNonNulls”非空和非NaN值的行。
    *
    * @since 1.3.1
    */
@@ -116,6 +132,7 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * (Scala-specific) Returns a new [[DataFrame]] that drops rows containing less than
    * `minNonNulls` non-null and non-NaN values in the specified columns.
+    * （特定于Scala）返回一个新的[[DataFrame]],它删除指定列中包含小于“minNonNulls”非空和非NaN值的行。
    *
    * @since 1.3.1
    */
@@ -128,6 +145,7 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
 
   /**
    * Returns a new [[DataFrame]] that replaces null or NaN values in numeric columns with `value`.
+    * 返回一个新的[[DataFrame]],用`value`替换数字列中的null或NaN值
    *
    * @since 1.3.1
    */
@@ -135,6 +153,7 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
 
   /**
    * Returns a new [[DataFrame]] that replaces null values in string columns with `value`.
+    * 返回一个新的[[DataFrame]],用`value`替换字符串列中的空值
    *
    * @since 1.3.1
    */
@@ -143,6 +162,8 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * Returns a new [[DataFrame]] that replaces null or NaN values in specified numeric columns.
    * If a specified column is not a numeric column, it is ignored.
+    *
+    * 返回一个新的[[DataFrame]],它替换指定数字列中的null或NaN值,如果指定的列不是数字列,则忽略它。
    *
    * @since 1.3.1
    */
@@ -151,6 +172,9 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * (Scala-specific) Returns a new [[DataFrame]] that replaces null or NaN values in specified
    * numeric columns. If a specified column is not a numeric column, it is ignored.
+    *
+    * （特定于Scala）返回一个新的[[DataFrame]],它替换指定数字列中的null或NaN值,
+    * 如果指定的列不是数字列,则忽略该列。
    *
    * @since 1.3.1
    */
@@ -170,6 +194,8 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * Returns a new [[DataFrame]] that replaces null values in specified string columns.
    * If a specified column is not a string column, it is ignored.
+    * 返回一个新的[[DataFrame]],它替换指定字符串列中的空值。
+    * 如果指定的列不是字符串列,则忽略该列。
    *
    * @since 1.3.1
    */
@@ -178,6 +204,9 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * (Scala-specific) Returns a new [[DataFrame]] that replaces null values in
    * specified string columns. If a specified column is not a string column, it is ignored.
+    *
+    * （特定于Scala）返回替换指定字符串列中的空值的新[[DataFrame]],
+    * 如果指定的列不是字符串列，则忽略该列。
    *
    * @since 1.3.1
    */
@@ -196,8 +225,10 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
 
   /**
    * Returns a new [[DataFrame]] that replaces null values.
+    * 返回替换空值的新[[DataFrame]]
    *
    * The key of the map is the column name, and the value of the map is the replacement value.
+    * Map的关键是列名称,Map的值是替换值。
    * The value must be of the following type: `Integer`, `Long`, `Float`, `Double`, `String`.
    *
    * For example, the following replaces null values in column "A" with string "unknown", and
@@ -213,6 +244,7 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
 
   /**
    * (Scala-specific) Returns a new [[DataFrame]] that replaces null values.
+    * (特定于Scala）返回替换空值的新[[DataFrame]]
    *
    * The key of the map is the column name, and the value of the map is the replacement value.
    * The value must be of the following type: `Int`, `Long`, `Float`, `Double`, `String`.
@@ -234,6 +266,9 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
    * Replaces values matching keys in `replacement` map with the corresponding values.
    * Key and value of `replacement` map must have the same type, and can only be doubles or strings.
    * If `col` is "*", then the replacement is applied on all string columns or numeric columns.
+    * 将“replacement”映射中匹配键的值替换为相应的值。
+    * “replacement”映射的键和值必须具有相同的类型,并且只能是双精度或字符串。
+    * 如果`col`是“*”，则替换应用 在所有字符串列或数字列上。
    *
    * {{{
    *   import com.google.common.collect.ImmutableMap;
@@ -260,7 +295,8 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * Replaces values matching keys in `replacement` map with the corresponding values.
    * Key and value of `replacement` map must have the same type, and can only be doubles or strings.
-   *
+   * 将“replacement”映射中匹配键的值替换为相应的值,
+    * “replacement”映射的键和值必须具有相同的类型,并且只能是双精度或字符串
    * {{{
    *   import com.google.common.collect.ImmutableMap;
    *
@@ -284,7 +320,9 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
    * (Scala-specific) Replaces values matching keys in `replacement` map.
    * Key and value of `replacement` map must have the same type, and can only be doubles or strings.
    * If `col` is "*", then the replacement is applied on all string columns or numeric columns.
-   *
+    *
+   * （Scala特定的）替换`replacement` map中的键匹配值.Key和'replacement`映射的值必须具有相同的类型，
+    * 并且只能是双精度或字符串。如果`col`是“*”，那么替换是 应用于所有字符串列或数字列。
    * {{{
    *   // Replaces all occurrences of 1.0 with 2.0 in column "height".
    *   df.replace("height", Map(1.0 -> 2.0))
@@ -312,7 +350,10 @@ final class DataFrameNaFunctions private[sql](df: DataFrame) {
   /**
    * (Scala-specific) Replaces values matching keys in `replacement` map.
    * Key and value of `replacement` map must have the same type, and can only be doubles or strings.
-   *
+    *
+   * （Scala特定的）替换`replacement` map中的匹配键的值.Key和`replacement` map的值必须具有相同的类型,
+    * 并且只能是双精度或字符串。
+    *
    * {{{
    *   // Replaces all occurrences of 1.0 with 2.0 in column "height" and "weight".
    *   df.replace("height" :: "weight" :: Nil, Map(1.0 -> 2.0));

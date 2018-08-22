@@ -50,19 +50,25 @@ private[sql] abstract class BaseWriterContainer(
   protected val serializableConf = new SerializableConfiguration(job.getConfiguration)
 
   // This UUID is used to avoid output file name collision between different appending write jobs.
+  //此UUID用于避免不同的附加写入作业之间的输出文件名冲突
   // These jobs may belong to different SparkContext instances. Concrete data source implementations
   // may use this UUID to generate unique file names (e.g., `part-r-<task-id>-<job-uuid>.parquet`).
+  //这些作业可能属于不同的SparkContext实例,具体的数据源实现可以使用该UUID来生成唯一的文件名
+  //(例如，`part-r- <task-id> - <job-uuid> .parquet`)
   //  The reason why this ID is used to identify a job rather than a single task output file is
   // that, speculative tasks must generate the same output file name as the original task.
+  //此ID用于标识作业而不是单个任务输出文件的原因是,推测任务必须生成与原始任务相同的输出文件名
   private val uniqueWriteJobId = UUID.randomUUID()
 
   // This is only used on driver side.
+  //这仅用于driver
   @transient private val jobContext: JobContext = job
 
   private val speculationEnabled: Boolean =
     relation.sqlContext.sparkContext.conf.getBoolean("spark.speculation", defaultValue = false)
 
   // The following fields are initialized and used on both driver and executor side.
+  //初始化以下字段并在驱动程序和执行程序端使用
   @transient protected var outputCommitter: OutputCommitter = _
   @transient private var jobId: JobID = _
   @transient private var taskId: TaskID = _
@@ -89,15 +95,21 @@ private[sql] abstract class BaseWriterContainer(
     // This UUID is sent to executor side together with the serialized `Configuration` object within
     // the `Job` instance.  `OutputWriters` on the executor side should use this UUID to generate
     // unique task output files.
+    //此UUID与`Job`实例中的序列化`Configuration`对象一起发送到执行程序端,
+    //执行程序端的`OutputWriters`应使用此UUID生成唯一的任务输出文件。
     job.getConfiguration.set("spark.sql.sources.writeJobUUID", uniqueWriteJobId.toString)
 
     // Order of the following two lines is important.  For Hadoop 1, TaskAttemptContext constructor
     // clones the Configuration object passed in.  If we initialize the TaskAttemptContext first,
     // configurations made in prepareJobForWrite(job) are not populated into the TaskAttemptContext.
+    //以下两行的顺序很重要,对于Hadoop 1,TaskAttemptContext构造函数克隆传入的Configuration对象。
+    //如果我们首先初始化TaskAttemptContext,则prepareAobForWrite(job)中的配置不会填充到TaskAttemptContext中
     //
     // Also, the `prepareJobForWrite` call must happen before initializing output format and output
     // committer, since their initialization involve the job configuration, which can be potentially
     // decorated in `prepareJobForWrite`.
+    //此外,`prepareJobForWrite`调用必须在初始化输出格式和输出提交者之前进行,
+    //因为它们的初始化涉及作业配置,可以在`prepareJobForWrite`中进行装饰。
     outputWriterFactory = relation.prepareJobForWrite(job)
     taskAttemptContext = newTaskAttemptContext(serializableConf.value, taskAttemptId)
 
@@ -117,6 +129,7 @@ private[sql] abstract class BaseWriterContainer(
   protected def getWorkPath: String = {
     outputCommitter match {
       // FileOutputCommitter writes to a temporary location returned by `getWorkPath`.
+        //FileOutputCommitter写入`getWorkPath`返回的临时位置
       case f: MapReduceFileOutputCommitter => f.getWorkPath.toString
       case _ => outputPath
     }
@@ -148,6 +161,9 @@ private[sql] abstract class BaseWriterContainer(
       // associated with the file output format since it is not safe to use a custom
       // committer for appending. For example, in S3, direct parquet output committer may
       // leave partial data in the destination dir when the the appending job fails.
+      //如果我们将数据附加到现有目录,我们将仅使用与文件输出格式关联的输出提交者,
+      //因为使用自定义提交者进行追加是不安全的,
+      // 例如,在S3中,当附加作业失败时，直接镶木地板输出提交者可能会在目标目录中留下部分数据。
       //
       // See SPARK-8578 for more details
       logInfo(
@@ -157,7 +173,7 @@ private[sql] abstract class BaseWriterContainer(
     } else if (speculationEnabled) {
       // When speculation is enabled, it's not safe to use customized output committer classes,
       // especially direct output committers (e.g. `DirectParquetOutputCommitter`).
-      //
+      //当启用推测时,使用自定义输出提交者类是不安全的,尤其是直接输出提交者（例如`DirectParquetOutputCommitter`）。
       // See SPARK-9899 for more details.
       logInfo(
         s"Using default output committer ${defaultOutputCommitter.getClass.getCanonicalName} " +
@@ -190,6 +206,7 @@ private[sql] abstract class BaseWriterContainer(
       }.getOrElse {
         // If output committer class is not set, we will use the one associated with the
         // file output format.
+        //如果未设置输出提交者类,我们将使用与文件输出格式关联的那个
         logInfo(
           s"Using output committer class ${defaultOutputCommitter.getClass.getCanonicalName}")
         defaultOutputCommitter
@@ -237,6 +254,7 @@ private[sql] abstract class BaseWriterContainer(
 
 /**
  * A writer that writes all of the rows in a partition to a single file.
+  * 将分区中的所有行写入单个文件的编写器
  */
 private[sql] class DefaultWriterContainer(
     @transient relation: HadoopFsRelation,
@@ -254,6 +272,7 @@ private[sql] class DefaultWriterContainer(
     var writerClosed = false
 
     // If anything below fails, we should abort the task.
+    //如果下面的任何内容失败,我们应该中止任务
     try {
       while (iterator.hasNext) {
         val internalRow = iterator.next()
@@ -280,6 +299,7 @@ private[sql] class DefaultWriterContainer(
         case cause: Throwable =>
           // This exception will be handled in `InsertIntoHadoopFsRelation.insert$writeRows`, and
           // will cause `abortTask()` to be invoked.
+          //此异常将在`InsertIntoHadoopFsRelation.insert $ writeRows`中处理,并将导致调用`abortTask()`。
           throw new RuntimeException("Failed to commit task", cause)
       }
     }
@@ -301,6 +321,9 @@ private[sql] class DefaultWriterContainer(
  * A writer that dynamically opens files based on the given partition columns.  Internally this is
  * done by maintaining a HashMap of open files until `maxFiles` is reached.  If this occurs, the
  * writer externally sorts the remaining rows and then writes out them out one file at a time.
+  *
+  * 一个基于给定分区列动态打开文件的编写器,在内部,这是通过维护打开文件的HashMap直到达到“maxFiles”来完成的。
+  * 如果发生这种情况,编写器会对剩余的行进行外部排序,然后一次将它们写出一个文件。
  */
 private[sql] class DynamicPartitionWriterContainer(
     @transient relation: HadoopFsRelation,
@@ -320,8 +343,10 @@ private[sql] class DynamicPartitionWriterContainer(
     var outputWritersCleared = false
 
     // Returns the partition key given an input row
+    //返回给定输入行的分区键
     val getPartitionKey = UnsafeProjection.create(partitionColumns, inputSchema)
     // Returns the data columns to be written given an input row
+    //给定输入行返回要写入的数据列
     val getOutputRow = UnsafeProjection.create(dataColumns, inputSchema)
 
     // Expressions that given a partition key build a string like: col1=val/col2=val/...
@@ -335,12 +360,15 @@ private[sql] class DynamicPartitionWriterContainer(
     }
 
     // Returns the partition path given a partition key.
+    //返回给定分区键的分区路径
     val getPartitionString =
       UnsafeProjection.create(Concat(partitionStringExpression) :: Nil, partitionColumns)
 
     // If anything below fails, we should abort the task.
+    //如果下面的任何内容失败,我们应该中止任务
     try {
       // This will be filled in if we have to fall back on sorting.
+      //如果我们不得不依靠排序,这将被填写
       var sorter: UnsafeKVExternalSorter = null
       while (iterator.hasNext && sorter == null) {
         val inputRow = iterator.next()
@@ -369,6 +397,7 @@ private[sql] class DynamicPartitionWriterContainer(
 
       // If the sorter is not null that means that we reached the maxFiles above and need to finish
       // using external sort.
+      //如果分拣机不为空,则意味着我们达到了上面的maxFiles并且需要完成使用外部排序
       if (sorter != null) {
         while (iterator.hasNext) {
           val currentRow = iterator.next()
@@ -390,6 +419,7 @@ private[sql] class DynamicPartitionWriterContainer(
               logDebug(s"Writing partition: $currentKey")
 
               // Either use an existing file from before, or open a new one.
+              //使用之前的现有文件,或打开一个新文件
               currentWriter = outputWriters.remove(currentKey)
               if (currentWriter == null) {
                 currentWriter = newOutputWriter(currentKey)
@@ -411,7 +441,8 @@ private[sql] class DynamicPartitionWriterContainer(
         throw new SparkException("Task failed while writing rows.", cause)
     }
 
-    /** Open and returns a new OutputWriter given a partition key. */
+    /** Open and returns a new OutputWriter given a partition key.
+      * 给定分区键,打开并返回一个新的OutputWrite*/
     def newOutputWriter(key: InternalRow): OutputWriter = {
       val partitionPath = getPartitionString(key).getString(0)
       val path = new Path(getWorkPath, partitionPath)

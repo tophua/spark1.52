@@ -27,6 +27,7 @@ import org.apache.spark.sql.catalyst.ScalaReflectionLock
 /**
  * :: DeveloperApi ::
  * The data type representing `Int` values. Please use the singleton [[DataTypes.IntegerType]].
+  * 表示“Int”值的数据类型,请使用singleton [[DataTypes.IntegerType]]
  */
 @DeveloperApi
 class IntegerType private() extends IntegralType {
@@ -41,6 +42,7 @@ class IntegerType private() extends IntegralType {
 
   /**
    * The default size of a value of the IntegerType is 4 bytes.
+    * IntegerType的默认值为4个字节
    */
   override def defaultSize: Int = 4
 

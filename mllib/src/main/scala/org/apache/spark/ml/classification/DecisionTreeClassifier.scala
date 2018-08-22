@@ -44,6 +44,7 @@ final class DecisionTreeClassifier(override val uid: String)
   def this() = this(Identifiable.randomUID("dtc"))
 
   // Override parameter setters from parent trait for Java API compatibility.
+  //从父特征覆盖参数设置器以获得Java API兼容性
 
   override def setMaxDepth(value: Int): this.type = super.setMaxDepth(value)
 
@@ -118,6 +119,7 @@ final class DecisionTreeClassificationModel private[ml] (
 
   /**
    * Construct a decision tree classification model.
+    * 构建决策树分类模型
    * @param rootNode  Root node of tree, with other nodes attached.
    */
   private[ml] def this(rootNode: Node, numClasses: Int) =
@@ -151,7 +153,8 @@ final class DecisionTreeClassificationModel private[ml] (
     s"DecisionTreeClassificationModel of depth $depth with $numNodes nodes"
   }
 
-  /** (private[ml]) Convert to a model in the old API */
+  /** (private[ml]) Convert to a model in the old API
+    * (private [ml])转换为旧API中的模型 */
   private[ml] def toOld: OldDecisionTreeModel = {
     new OldDecisionTreeModel(rootNode.toOld(1), OldAlgo.Classification)
   }

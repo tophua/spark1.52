@@ -24,6 +24,7 @@ import org.apache.spark.ml.attribute.{Attribute, AttributeGroup}
  * ==ML attributes==
  *
  * The ML pipeline API uses [[DataFrame]]s as ML datasets.
+  * ML管道API使用[[DataFrame]] s作为ML数据集
  * Each dataset consists of typed columns, e.g., string, double, vector, etc.
  * However, knowing only the column type may not be sufficient to handle the data properly.
  * For instance, a double column with values 0.0, 1.0, 2.0, ... may represent some label indices,
@@ -34,11 +35,15 @@ import org.apache.spark.ml.attribute.{Attribute, AttributeGroup}
  * ===ML columns===
  *
  * A column with ML attributes attached is called an ML column.
+  * 附加了ML属性的列称为ML列
  * The data in ML columns are stored as double values, i.e., an ML column is either a scalar column
  * of double values or a vector column.
+  * ML列中的数据存储为双值,即ML列是双值的标量列或矢量列
  * Columns of other types must be encoded into ML columns using transformers.
+  * 必须使用变换器将其他类型的列编码为ML列
  * We use [[Attribute]] to describe a scalar ML column, and [[AttributeGroup]] to describe a vector
  * ML column.
  * ML attributes are stored in the metadata field of the column schema.
+  * ML属性存储在列模式的元数据字段中
  */
 package object attribute

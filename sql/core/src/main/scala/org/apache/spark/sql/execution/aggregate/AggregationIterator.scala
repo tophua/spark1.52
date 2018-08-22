@@ -27,8 +27,10 @@ import scala.collection.mutable.ArrayBuffer
 
 /**
  * The base class of [[SortBasedAggregationIterator]] and [[UnsafeHybridAggregationIterator]].
- * It mainly contains two parts:
- * 1. It initializes aggregate functions.
+  * [[SortBasedAggregationIterator]]和[[UnsafeHybridAggregationIterator]]的基类。
+ * It mainly contains two parts:它主要包含两部分：
+  *
+ * 1. It initializes aggregate functions.它初始化聚合函数
  * 2. It creates two functions, `processRow` and `generateOutput` based on [[AggregateMode]] of
  *    its aggregate functions. `processRow` is the function to handle an input. `generateOutput`
  *    is used to generate result.
@@ -47,12 +49,13 @@ abstract class AggregationIterator(
   extends Iterator[InternalRow] with Logging {
 
   ///////////////////////////////////////////////////////////////////////////
-  // Initializing functions.
+  // Initializing functions. 初始化功能
   ///////////////////////////////////////////////////////////////////////////
 
-  // An Seq of all AggregateExpressions.
+  // An Seq of all AggregateExpressions. 所有AggregateExpressions的Seq。
   // It is important that all AggregateExpressions with the mode Partial, PartialMerge or Final
   // are at the beginning of the allAggregateExpressions.
+  //重要的是所有具有Partial，PartialMerge或Final模式的AggregateExpress都位于allAggregateExpressions的开头
   protected val allAggregateExpressions =
     nonCompleteAggregateExpressions ++ completeAggregateExpressions
 
@@ -62,7 +65,9 @@ abstract class AggregationIterator(
 
   /**
    * The distinct modes of AggregateExpressions. Right now, we can handle the following mode:
+    * AggregateExpressions的独特模式。现在,我们可以处理以下模式：
    *  - Partial-only: all AggregateExpressions have the mode of Partial;
+    *  仅部分：所有AggregateExpressions都具有Partial模式
    *  - PartialMerge-only: all AggregateExpressions have the mode of PartialMerge);
    *  - Final-only: all AggregateExpressions have the mode of Final;
    *  - Final-Complete: some AggregateExpressions have the mode of Final and
@@ -77,6 +82,7 @@ abstract class AggregationIterator(
 
   // Initialize all AggregateFunctions by binding references if necessary,
   // and set inputBufferOffset and mutableBufferOffset.
+  //如有必要,通过绑定引用初始化所有AggregateFunctions.并设置inputBufferOffset和mutableBufferOffset。
   protected val allAggregateFunctions: Array[AggregateFunction2] = {
     var mutableBufferOffset = 0
     var inputBufferOffset: Int = initialInputBufferOffset
@@ -111,6 +117,7 @@ abstract class AggregationIterator(
   }
 
   // Positions of those non-algebraic aggregate functions in allAggregateFunctions.
+  //这些非代数聚合函数在allAggregateFunctions中的位置
   // For example, we have func1, func2, func3, func4 in aggregateFunctions, and
   // func2 and func3 are non-algebraic aggregate functions.
   // nonAlgebraicAggregateFunctionPositions will be [1, 2].
@@ -128,16 +135,19 @@ abstract class AggregationIterator(
   }
 
   // All AggregateFunctions functions with mode Partial, PartialMerge, or Final.
+  //所有AggregateFunction都以Partial，PartialMerge或Final模式运行
   private[this] val nonCompleteAggregateFunctions: Array[AggregateFunction2] =
     allAggregateFunctions.take(nonCompleteAggregateExpressions.length)
 
   // All non-algebraic aggregate functions with mode Partial, PartialMerge, or Final.
+  //所有非代数聚合函数都具有Partial，PartialMerge或Final模式
   private[this] val nonCompleteNonAlgebraicAggregateFunctions: Array[AggregateFunction2] =
     nonCompleteAggregateFunctions.collect {
       case func: AggregateFunction2 if !func.isInstanceOf[AlgebraicAggregate] => func
     }
 
   // The projection used to initialize buffer values for all AlgebraicAggregates.
+  //该投影用于初始化所有AlgebraicAggregates的缓冲区值
   private[this] val algebraicInitialProjection = {
     val initExpressions = allAggregateFunctions.flatMap {
       case ae: AlgebraicAggregate => ae.initialValues
@@ -155,6 +165,7 @@ abstract class AggregationIterator(
   ///////////////////////////////////////////////////////////////////////////
 
   // Initializing functions used to process a row.
+  //初始化用于处理行的函数
   protected val processRow: (MutableRow, InternalRow) => Unit = {
     val rowToBeProcessed = new JoinedRow
     val aggregationBufferSchema = allAggregateFunctions.flatMap(_.bufferAttributes)
@@ -182,10 +193,12 @@ abstract class AggregationIterator(
         }
 
       // PartialMerge-only or Final-only
+        //PartialMerge-only或Final-only
       case (Some(PartialMerge), None) | (Some(Final), None) =>
         val inputAggregationBufferSchema = if (initialInputBufferOffset == 0) {
           // If initialInputBufferOffset, the input value does not contain
           // grouping keys.
+          //如果是initialInputBufferOffset,则输入值不包含分组键
           // This part is pretty hacky.
           allAggregateFunctions.flatMap(_.cloneBufferAttributes).toSeq
         } else {

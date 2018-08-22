@@ -25,6 +25,7 @@ object NumberConverter {
 
   /**
    * Divide x by m as if x is an unsigned 64-bit integer. Examples:
+    * 将x除以m,就像x是无符号的64位整数一样,例子：
    * unsignedLongDiv(-1, 2) == Long.MAX_VALUE unsignedLongDiv(6, 3) == 2
    * unsignedLongDiv(0, 5) == 0
    *
@@ -45,7 +46,7 @@ object NumberConverter {
 
   /**
    * Decode v into value[].
-   *
+   * 将v解码为值[]
    * @param v is treated as an unsigned 64-bit integer
    * @param radix must be between MIN_RADIX and MAX_RADIX
    */
@@ -64,7 +65,7 @@ object NumberConverter {
   /**
    * Convert value[] into a long. On overflow, return -1 (as mySQL does). If a
    * negative digit is found, ignore the suffix starting there.
-   *
+   * 将value[]转换为long,在溢出时,返回-1（正如mySQL所做的那样,如果找到负数,请忽略从那里开始的后缀。
    * @param radix  must be between MIN_RADIX and MAX_RADIX
    * @param fromPos is the first element that should be conisdered
    * @return the result should be treated as an unsigned 64-bit integer.
@@ -90,7 +91,7 @@ object NumberConverter {
 
   /**
    * Convert the bytes in value[] to the corresponding chars.
-   *
+   * 将value []中的字节转换为相应的字符
    * @param radix must be between MIN_RADIX and MAX_RADIX
    * @param fromPos is the first nonzero element
    */
@@ -105,7 +106,7 @@ object NumberConverter {
   /**
    * Convert the chars in value[] to the corresponding integers. Convert invalid
    * characters to -1.
-   *
+   * 将value []中的chars转换为相应的整数,将无效字符转换为-1。
    * @param radix must be between MIN_RADIX and MAX_RADIX
    * @param fromPos is the first nonzero element
    */
@@ -120,6 +121,7 @@ object NumberConverter {
   /**
    * Convert numbers between different number bases. If toBase>0 the result is
    * unsigned, otherwise it is signed.
+    * 转换不同数字基数之间的数字,如果toBase> 0,则结果为无符号,否则为有符号
    * NB: This logic is borrowed from org.apache.hadoop.hive.ql.ud.UDFConv
    */
   def convert(n: Array[Byte] , fromBase: Int, toBase: Int ): UTF8String = {
@@ -136,6 +138,7 @@ object NumberConverter {
     var (negative, first) = if (n(0) == '-') (true, 1) else (false, 0)
 
     // Copy the digits in the right side of the array
+    //复制数组右侧的数字
     var i = 1
     while (i <= n.length - first) {
       value(value.length - i) = n(n.length - i)
@@ -144,6 +147,7 @@ object NumberConverter {
     char2byte(fromBase, value.length - n.length + first)
 
     // Do the conversion by going through a 64 bit integer
+    //通过64位整数进行转换
     var v = encode(fromBase, value.length - n.length + first)
     if (negative && toBase > 0) {
       if (v < 0) {
@@ -159,6 +163,7 @@ object NumberConverter {
     decode(v, Math.abs(toBase))
 
     // Find the first non-zero digit or the last digits if all are zero.
+    //如果全部为零,则查找第一个非零数字或最后一个数字
     val firstNonZeroPos = {
       val firstNonZero = value.indexWhere( _ != 0)
       if (firstNonZero != -1) firstNonZero else value.length - 1

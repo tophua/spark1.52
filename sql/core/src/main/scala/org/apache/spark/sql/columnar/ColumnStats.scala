@@ -41,6 +41,7 @@ private[sql] class PartitionStatistics(tableSchema: Seq[Attribute]) extends Seri
 
 /**
  * Used to collect statistical information when building in-memory columns.
+  * 用于在构建内存列时收集统计信息
  *
  * NOTE: we intentionally avoid using `Ordering[T]` to compare values here because `Ordering[T]`
  * brings significant performance penalty.
@@ -52,6 +53,7 @@ private[sql] sealed trait ColumnStats extends Serializable {
 
   /**
    * Gathers statistics information from `row(ordinal)`.
+    * 从`row（ordinal）`收集统计信息
    */
   def gatherStats(row: InternalRow, ordinal: Int): Unit = {
     if (row.isNullAt(ordinal)) {
@@ -65,12 +67,14 @@ private[sql] sealed trait ColumnStats extends Serializable {
   /**
    * Column statistics represented as a single row, currently including closed lower bound, closed
    * upper bound and null count.
+    * 列统计信息表示为单行,当前包括闭合下限,闭合上限和空计数
    */
   def collectedStatistics: GenericInternalRow
 }
 
 /**
  * A no-op ColumnStats only used for testing purposes.
+  * 无操作ColumnStats仅用于测试目的
  */
 private[sql] class NoopColumnStats extends ColumnStats {
   override def gatherStats(row: InternalRow, ordinal: Int): Unit = super.gatherStats(row, ordinal)

@@ -44,6 +44,7 @@ private[parquet] object ParquetTypesConverter extends Logging {
 
   /**
    * Compute the FIXED_LEN_BYTE_ARRAY length needed to represent a given DECIMAL precision.
+    * 计算表示给定DECIMAL精度所需的FIXED_LEN_BYTE_ARRAY长度
    */
   private[parquet] val BYTES_FOR_PRECISION = Array.tabulate[Int](38) { precision =>
     var length = 1
@@ -114,6 +115,8 @@ private[parquet] object ParquetTypesConverter extends Logging {
    * Try to read Parquet metadata at the given Path. We first see if there is a summary file
    * in the parent directory. If so, this is used. Else we read the actual footer at the given
    * location.
+    * 尝试在给定路径中读取Parquet元数据,我们首先看看父目录中是否有摘要文件,
+    * 如果是这样,则使用它,另外,我们在给定位置读取实际的页脚。
    * @param origPath The path at which we expect one (or more) Parquet files.
    * @param configuration The Hadoop configuration to use.
    * @return The `ParquetMetadata` containing among other things the schema.

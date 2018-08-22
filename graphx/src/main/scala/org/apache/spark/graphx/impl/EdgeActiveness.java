@@ -19,16 +19,18 @@ package org.apache.spark.graphx.impl;
 
 /**
  * Criteria for filtering edges based on activeness. For internal use only.
+ * 基于活动性的边缘过滤准则,仅供内部使用
  */
 public enum EdgeActiveness {
-  /** Neither the source vertex nor the destination vertex need be active. */
+  /** Neither the source vertex nor the destination vertex need be active.
+   * 源顶点和目标顶点都不需要处于活动状态*/
   Neither,
-  /** The source vertex must be active. */
+  /** The source vertex must be active. 源顶点必须是活动的*/
   SrcOnly,
-  /** The destination vertex must be active. */
+  /** The destination vertex must be active. 目标顶点必须处于活动状态*/
   DstOnly,
-  /** Both vertices must be active. */
+  /** Both vertices must be active. 两个顶点必须是活动的*/
   Both,
-  /** At least one vertex must be active. */
+  /** At least one vertex must be active. 至少有一个顶点必须是活动*/
   Either
 }

@@ -69,6 +69,7 @@ case class ArrayType(elementType: DataType, containsNull: Boolean) extends DataT
 
   /**
    * The default size of a value of the ArrayType is 100 * the default size of the element type.
+    * ArrayType值的默认大小是100 *元素类型的默认大小
    * (We assume that there are 100 elements).
    */
   override def defaultSize: Int = 100 * elementType.defaultSize

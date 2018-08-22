@@ -23,8 +23,9 @@ import org.apache.spark.annotation.DeveloperApi
 
 /**
  * A mutable implementation of BigDecimal that can hold a Long if values are small enough.
- *
+ * BigDecimal的可变实现,如果值足够小,可以保存Long
  * The semantics of the fields are as follows:
+  * 字段的语义如下：
  * - _precision and _scale represent the SQL precision and scale we are looking for
  * - If decimalVal is set, it represents the whole decimal value
  * - Otherwise, the decimal value is longVal / (10 ** _scale)
@@ -42,6 +43,7 @@ final class Decimal extends Ordered[Decimal] with Serializable {
 
   /**
    * Set this Decimal to the given Long. Will have precision 20 and scale 0.
+    * 将此Decimal设置为给定的Long,将具有精度20和比例0
    */
   def set(longVal: Long): Decimal = {
     if (longVal <= -POW_10(MAX_LONG_DIGITS) || longVal >= POW_10(MAX_LONG_DIGITS)) {
@@ -59,6 +61,7 @@ final class Decimal extends Ordered[Decimal] with Serializable {
 
   /**
    * Set this Decimal to the given Int. Will have precision 10 and scale 0.
+    * 将此Decimal设置为给定的Int,精度为10,刻度为0
    */
   def set(intVal: Int): Decimal = {
     this.decimalVal = null
@@ -70,6 +73,7 @@ final class Decimal extends Ordered[Decimal] with Serializable {
 
   /**
    * Set this Decimal to the given unscaled Long, with a given precision and scale.
+    * 将此Decimal设置为给定的未缩放Long,具有给定的精度和比例
    */
   def set(unscaled: Long, precision: Int, scale: Int): Decimal = {
     if (setOrNull(unscaled, precision, scale) == null) {
@@ -81,6 +85,7 @@ final class Decimal extends Ordered[Decimal] with Serializable {
   /**
    * Set this Decimal to the given unscaled Long, with a given precision and scale,
    * and return it, or return null if it cannot be set due to overflow.
+    * 将此Decimal设置为给定的未缩放Long,具有给定的精度和小数,并返回它,如果由于溢出而无法设置,则返回null
    */
   def setOrNull(unscaled: Long, precision: Int, scale: Int): Decimal = {
     if (unscaled <= -POW_10(MAX_LONG_DIGITS) || unscaled >= POW_10(MAX_LONG_DIGITS)) {
@@ -105,6 +110,7 @@ final class Decimal extends Ordered[Decimal] with Serializable {
 
   /**
    * Set this Decimal to the given BigDecimal value, with a given precision and scale.
+    * 将此Decimal设置为给定的BigDecimal值,具有给定的精度和比例
    */
   def set(decimal: BigDecimal, precision: Int, scale: Int): Decimal = {
     this.decimalVal = decimal.setScale(scale, ROUNDING_MODE)
@@ -117,6 +123,7 @@ final class Decimal extends Ordered[Decimal] with Serializable {
 
   /**
    * Set this Decimal to the given BigDecimal value, inheriting its precision and scale.
+    * 将此Decimal设置为给定的BigDecimal值,继承其精度和比例
    */
   def set(decimal: BigDecimal): Decimal = {
     this.decimalVal = decimal
@@ -128,6 +135,7 @@ final class Decimal extends Ordered[Decimal] with Serializable {
 
   /**
    * Set this Decimal to the given Decimal value.
+    * 将此Decimal设置为给定的Decimal值
    */
   def set(decimal: Decimal): Decimal = {
     this.decimalVal = decimal.decimalVal
@@ -186,18 +194,21 @@ final class Decimal extends Ordered[Decimal] with Serializable {
 
   /**
    * Update precision and scale while keeping our value the same, and return true if successful.
+    * 更新精度和比例,同时保持我们的值相同,如果成功则返回true
    *
    * @return true if successful, false if overflow would occur
    */
   def changePrecision(precision: Int, scale: Int): Boolean = {
-    // fast path for UnsafeProjection
+    // fast path for UnsafeProjection UnsafeProjection的快速路径
     if (precision == this.precision && scale == this.scale) {
       return true
     }
     // First, update our longVal if we can, or transfer over to using a BigDecimal
+    //首先,如果我们可以更新我们的longVal.或者转移到使用BigDecimal
     if (decimalVal.eq(null)) {
       if (scale < _scale) {
         // Easier case: we just need to divide our scale down
+        //更容易的情况：我们只需要缩小我们的规模
         val diff = _scale - scale
         val droppedDigits = longVal % POW_10(diff)
         longVal /= POW_10(diff)
@@ -207,22 +218,28 @@ final class Decimal extends Ordered[Decimal] with Serializable {
       } else if (scale > _scale) {
         // We might be able to multiply longVal by a power of 10 and not overflow, but if not,
         // switch to using a BigDecimal
+        //我们或许可以将longVal乘以10的幂并且不会溢出,但如果没有,则切换到使用BigDecimal
         val diff = scale - _scale
         val p = POW_10(math.max(MAX_LONG_DIGITS - diff, 0))
         if (diff <= MAX_LONG_DIGITS && longVal > -p && longVal < p) {
           // Multiplying longVal by POW_10(diff) will still keep it below MAX_LONG_DIGITS
+          //将longVal乘以POW_10（差异）仍然会使其低于MAX_LONG_DIGITS
           longVal *= POW_10(diff)
         } else {
           // Give up on using Longs; switch to BigDecimal, which we'll modify below
+          //放弃使用Longs; 切换到BigDecimal，我们将在下面修改
           decimalVal = BigDecimal(longVal, _scale)
         }
       }
       // In both cases, we will check whether our precision is okay below
+      //在这两种情况下,我们将检查我们的精度是否正常
     }
 
     if (decimalVal.ne(null)) {
       // We get here if either we started with a BigDecimal, or we switched to one because we would
       // have overflowed our Long; in either case we must rescale decimalVal to the new scale.
+      //如果我们以BigDecimal开始,或者我们切换到一个,因为我们会溢出Long;
+      //在任何一种情况下,我们必须将decimalVal重新调整为新的比例。
       val newVal = decimalVal.setScale(scale, ROUNDING_MODE)
       if (newVal.precision > precision) {
         return false
@@ -230,9 +247,11 @@ final class Decimal extends Ordered[Decimal] with Serializable {
       decimalVal = newVal
     } else {
       // We're still using Longs, but we should check whether we match the new precision
+      //我们仍在使用Longs，但我们应该检查是否匹配新的精度
       val p = POW_10(math.min(precision, MAX_LONG_DIGITS))
       if (longVal <= -p || longVal >= p) {
         // Note that we shouldn't have been able to fix this by switching to BigDecimal
+        //请注意,我们不应该通过切换到BigDecimal来解决这个问题
         return false
       }
     }
@@ -280,6 +299,7 @@ final class Decimal extends Ordered[Decimal] with Serializable {
   }
 
   // HiveTypeCoercion will take care of the precision, scale of result
+  //HiveTypeCoercion将处理结果的精度和规模
   def * (that: Decimal): Decimal =
     Decimal(toJavaBigDecimal.multiply(that.toJavaBigDecimal, MATH_CONTEXT))
 
@@ -306,7 +326,8 @@ final class Decimal extends Ordered[Decimal] with Serializable {
 object Decimal {
   private val ROUNDING_MODE = BigDecimal.RoundingMode.HALF_UP
 
-  /** Maximum number of decimal digits a Long can represent */
+  /** Maximum number of decimal digits a Long can represent
+    * Long可以表示的最大小数位数*/
   val MAX_LONG_DIGITS = 18
 
   private val POW_10 = Array.tabulate[Long](MAX_LONG_DIGITS + 1)(i => math.pow(10, i).toLong)

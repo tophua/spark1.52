@@ -74,7 +74,7 @@ object RandomDataGenerator {
 
   /**
    * Returns a randomly generated schema, based on the given accepted types.
-   *
+   *根据给定的可接受类型返回随机生成的模式
    * @param numFields the number of fields in this schema
    * @param acceptedTypes types to draw from.
    */

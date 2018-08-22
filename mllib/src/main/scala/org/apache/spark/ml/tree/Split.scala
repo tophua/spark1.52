@@ -27,27 +27,30 @@ import org.apache.spark.mllib.tree.model.{Split => OldSplit}
  * :: DeveloperApi ::
  * Interface for a "Split," which specifies a test made at a decision tree node
  * to choose the left or right path.
+  * “拆分”的接口,指定在决策树节点上进行的选择左路径或右路径的测试
  */
 @DeveloperApi
 sealed trait Split extends Serializable {
 
-  /** Index of feature which this split tests */
+  /** Index of feature which this split tests 此拆分测试的功能索引*/
   def featureIndex: Int
 
   /**
    * Return true (split to left) or false (split to right).
+    * 返回true(拆分为左)或false(拆分为右)
    * @param features  Vector of features (original values, not binned).
    */
   private[ml] def shouldGoLeft(features: Vector): Boolean
 
   /**
    * Return true (split to left) or false (split to right).
+    * 返回true(拆分为左)或false(拆分为右)
    * @param binnedFeature Binned feature value.
    * @param splits All splits for the given feature.
    */
   private[tree] def shouldGoLeft(binnedFeature: Int, splits: Array[Split]): Boolean
 
-  /** Convert to old Split format */
+  /** Convert to old Split format 转换为旧的拆分格式*/
   private[tree] def toOld: OldSplit
 }
 
@@ -66,7 +69,7 @@ private[tree] object Split {
 
 /**
  * :: DeveloperApi ::
- * Split which tests a categorical feature.
+ * Split which tests a categorical feature.拆分测试分类功能
  * @param featureIndex  Index of the feature to test
  * @param _leftCategories  If the feature value is in this set of categories, then the split goes
  *                         left. Otherwise, it goes right.
@@ -84,6 +87,7 @@ final class CategoricalSplit private[ml] (
 
   /**
    * If true, then "categories" is the set of categories for splitting to the left, and vice versa.
+    * 如果为true,则“categories”是用于向左分割的类别集,反之亦然
    */
   private val isLeft: Boolean = _leftCategories.length <= numCategories / 2
 
@@ -129,13 +133,13 @@ final class CategoricalSplit private[ml] (
     OldSplit(featureIndex, threshold = 0.0, OldFeatureType.Categorical, oldCats.toList)
   }
 
-  /** Get sorted categories which split to the left */
+  /** Get sorted categories which split to the left 获取分割到左侧的排序类别*/
   def leftCategories: Array[Double] = {
     val cats = if (isLeft) categories else setComplement(categories)
     cats.toArray.sorted
   }
 
-  /** Get sorted categories which split to the right */
+  /** Get sorted categories which split to the right 获取分类到右侧的排序类别*/
   def rightCategories: Array[Double] = {
     val cats = if (isLeft) setComplement(categories) else categories
     cats.toArray.sorted
@@ -149,7 +153,7 @@ final class CategoricalSplit private[ml] (
 
 /**
  * :: DeveloperApi ::
- * Split which tests a continuous feature.
+ * Split which tests a continuous feature. 拆分测试连续功能
  * @param featureIndex  Index of the feature to test
  * @param threshold  If the feature value is <= this threshold, then the split goes left.
  *                    Otherwise, it goes right.

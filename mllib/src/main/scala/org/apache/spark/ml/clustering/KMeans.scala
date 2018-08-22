@@ -31,12 +31,14 @@ import org.apache.spark.sql.{DataFrame, Row}
 
 /**
  * Common params for KMeans and KMeansModel
+  * KMeans和KMeansModel的常用参数
  */
 private[clustering] trait KMeansParams extends Params with HasMaxIter with HasFeaturesCol
   with HasSeed with HasPredictionCol with HasTol {
 
   /**
    * Set the number of clusters to create (k). Must be > 1. Default: 2.
+    * 设置要创建的簇数（k）必须> 1.默认值：2。
    * @group param
    */
   final val k = new IntParam(this, "k", "number of clusters to create", (x: Int) => x > 1)
@@ -47,6 +49,7 @@ private[clustering] trait KMeansParams extends Params with HasMaxIter with HasFe
   /**
    * Param for the initialization algorithm. This can be either "random" to choose random points as
    * initial cluster centers, or "k-means||" to use a parallel variant of k-means++
+    * Param用于初始化算法,这可以是“随机”选择随机点作为初始聚类中心，或“k-means ||” 使用k-means ++的并行变体
    * (Bahmani et al., Scalable K-Means++, VLDB 2012). Default: k-means||.
    * @group expertParam
    */
@@ -59,6 +62,7 @@ private[clustering] trait KMeansParams extends Params with HasMaxIter with HasFe
   /**
    * Param for the number of steps for the k-means|| initialization mode. This is an advanced
    * setting -- the default of 5 is almost always enough. Must be > 0. Default: 5.
+    * 关于k-means ||的步数的参数 初始化模式,这是一个高级设置 - 默认值为5几乎总是足够的, 必须> 0.默认值：5。
    * @group expertParam
    */
   final val initSteps = new IntParam(this, "initSteps", "number of steps for k-means||",
@@ -69,6 +73,7 @@ private[clustering] trait KMeansParams extends Params with HasMaxIter with HasFe
 
   /**
    * Validates and transforms the input schema.
+    * 验证并转换输入架构
    * @param schema input schema
    * @return output schema
    */
@@ -81,7 +86,7 @@ private[clustering] trait KMeansParams extends Params with HasMaxIter with HasFe
 /**
  * :: Experimental ::
  * Model fitted by KMeans.
- *
+ *  由KMeans安装的模型
  * @param parentModel a model trained by spark.mllib.clustering.KMeans.
  */
 @Experimental
@@ -111,7 +116,7 @@ class KMeansModel private[ml] (
 /**
  * :: Experimental ::
  * K-means clustering with support for k-means|| initialization proposed by Bahmani et al.
- *
+ * K均值聚类,支持k-means || Bahmani等人提出的初始化。
  * @see [[http://dx.doi.org/10.14778/2180912.2180915 Bahmani et al., Scalable k-means++.]]
  */
 @Experimental

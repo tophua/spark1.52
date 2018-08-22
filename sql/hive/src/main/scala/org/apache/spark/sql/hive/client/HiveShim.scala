@@ -41,6 +41,9 @@ import org.apache.spark.sql.types.{StringType, IntegralType}
  * A shim that defines the interface between ClientWrapper and the underlying Hive library used to
  * talk to the metastore. Each Hive version has its own implementation of this class, defining
  * version-specific version of needed functions.
+  *
+  * 一个垫片,用于定义ClientWrapper与用于与Metastore对话的底层Hive库之间的接口,
+  * 每个Hive版本都有自己的类实现,定义了所需函数的特定于版本的版本
  *
  * The guideline for writing shims is:
  * - always extend from the previous version unless really not possible
@@ -52,12 +55,15 @@ private[client] sealed abstract class Shim {
   /**
    * Set the current SessionState to the given SessionState. Also, set the context classloader of
    * the current thread to the one set in the HiveConf of this given `state`.
+    * 将当前SessionState设置为给定的SessionState,另外,
+    * 将当前线程的上下文类加载器设置为此给定`state`的HiveConf中设置的上下文类加载器。
    * @param state
    */
   def setCurrentSessionState(state: SessionState): Unit
 
   /**
    * This shim is necessary because the return type is different on different versions of Hive.
+    * 这个垫片是必要的，因为不同版本的Hive的返回类型是不同的
    * All parameters are the same, though.
    */
   def getDataLocation(table: Table): Option[String]
@@ -186,6 +192,7 @@ private[client] class Shim_v0_12 extends Shim with Logging {
 
   override def setCurrentSessionState(state: SessionState): Unit = {
     // Starting from Hive 0.13, setCurrentSessionState will internally override
+    //从Hive 0.13开始，setCurrentSessionState将在内部覆盖
     // the context class loader of the current thread by the class loader set in
     // the conf of the SessionState. So, for this Hive 0.12 shim, we add the same
     // behavior and make shim.setCurrentSessionState of all Hive versions have the
@@ -316,11 +323,13 @@ private[client] class Shim_v0_13 extends Shim_v0_12 {
   /**
    * Converts catalyst expression to the format that Hive's getPartitionsByFilter() expects, i.e.
    * a string that represents partition predicates like "str_key=\"value\" and int_key=1 ...".
-   *
+   * 将催化剂表达式转换为Hive的getPartitionsByFilter（）所期望的格式,
+    * 即表示分区谓词的字符串，如“str_key = \”value \“和int_key = 1 ...”。
    * Unsupported predicates are skipped.
    */
   def convertFilters(table: Table, filters: Seq[Expression]): String = {
     // hive varchar is treated as catalyst string, but hive varchar can't be pushed down.
+    //hive varchar被视为催化剂字符串,但hive varchar不能被推下
     val varcharKeys = table.getPartitionKeys
       .filter(col => col.getType.startsWith(serdeConstants.VARCHAR_TYPE_NAME))
       .map(col => col.getName).toSet
@@ -346,6 +355,8 @@ private[client] class Shim_v0_13 extends Shim_v0_12 {
 
     // Hive getPartitionsByFilter() takes a string that represents partition
     // predicates like "str_key=\"value\" and int_key=1 ..."
+    //Hive getPartitionsByFilter（）接受一个表示分区谓词的字符串,
+    // 如“str_key = \”value \“和int_key = 1 ......”
     val filter = convertFilters(table, predicates)
     val partitions =
       if (filter.isEmpty) {

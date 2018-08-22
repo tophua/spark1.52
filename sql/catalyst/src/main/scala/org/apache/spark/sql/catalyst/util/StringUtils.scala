@@ -23,6 +23,7 @@ object StringUtils {
 
   // replace the _ with .{1} exactly match 1 time of any character
   // replace the % with .*, match 0 or more times with any character
+  //将_替换为,{1}完全匹配任何字符的1次将％替换为.*,与任何字符匹配0次或更多次
   def escapeLikeRegex(v: String): String = {
     if (!v.isEmpty) {
       "(?s)" + (' ' +: v.init).zip(v).flatMap {

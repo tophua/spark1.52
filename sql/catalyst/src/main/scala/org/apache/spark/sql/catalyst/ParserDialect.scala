@@ -24,19 +24,23 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
  * Root class of SQL Parser Dialect, and we don't guarantee the binary
  * compatibility for the future release, let's keep it as the internal
  * interface for advanced user.
+  * SQL Parser Dialect的根类,我们不保证将来版本的二进制兼容性,让我们把它作为高级用户的内部接口
  *
  */
 @DeveloperApi
 abstract class ParserDialect {
   // this is the main function that will be implemented by sql parser.
+  //这是sql解析器将实现的主要功能
   def parse(sqlText: String): LogicalPlan
 }
 
 /**
  * Currently we support the default dialect named "sql", associated with the class
+  * 目前,我们支持与该类关联的名为“sql”的默认方言
  * [[DefaultParserDialect]]
  *
  * And we can also provide custom SQL Dialect, for example in Spark SQL CLI:
+  * 我们还可以提供自定义SQL Dialect,例如在Spark SQL CLI中
  * {{{
  *-- switch to "hiveql" dialect
  *   spark-sql>SET spark.sql.dialect=hiveql;

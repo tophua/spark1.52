@@ -42,7 +42,7 @@ import org.apache.spark.util.random.{SamplingUtils, XORShiftRandom}
 private[ml] object RandomForest extends Logging {
 
   /**
-   * Train a random forest.
+   * Train a random forest.训练一个随机森林
    * @param input Training data: RDD of [[org.apache.spark.mllib.regression.LabeledPoint]]
    * @return an unweighted set of trees
    */
@@ -73,6 +73,7 @@ private[ml] object RandomForest extends Logging {
 
     // Find the splits and the corresponding bins (interval between the splits) using a sample
     // of the input data.
+    //使用输入数据样本查找拆分和相应的箱(拆分之间的间隔)
     timer.start("findSplitsBins")
     val splits = findSplits(retaggedInput, metadata)
     timer.stop("findSplitsBins")
@@ -82,7 +83,9 @@ private[ml] object RandomForest extends Logging {
     }.mkString("\n"))
 
     // Bin feature values (TreePoint representation).
+    //Bin特征值(TreePoint表示)
     // Cache input RDD for speedup during multiple passes.
+    //缓存输入RDD以在多次传递期间加速
     val treeInput = TreePoint.convertToTreeRDD(retaggedInput, splits, metadata)
 
     val withReplacement = numTrees > 1
@@ -92,6 +95,7 @@ private[ml] object RandomForest extends Logging {
       .persist(StorageLevel.MEMORY_AND_DISK)
 
     // depth of the decision tree
+    //决策树的深度
     val maxDepth = strategy.maxDepth
     require(maxDepth <= 30,
       s"DecisionTree currently only supports maxDepth <= 30, but was given maxDepth = $maxDepth.")
@@ -122,10 +126,14 @@ private[ml] object RandomForest extends Logging {
      * reducing the passes over the data from (# nodes) to (# nodes / maxNumberOfNodesPerGroup).
      * Each data sample is handled by a particular node (or it reaches a leaf and is not used
      * in lower levels).
+     * 这里的主要思想是对决策树节点进行分组训练,从而减少从（＃nodes）到（＃nodes / maxNumberOfNodesPerGroup）的数据传递。
+      * 每个数据样本由特定节点处理（或者它到达叶子并且不在较低级别使用）。
      */
 
     // Create an RDD of node Id cache.
+    //创建节点Id缓存的RDD。
     // At first, all the rows belong to the root nodes (node Id == 1).
+    //首先，所有行都属于根节点(节点Id == 1)
     val nodeIdCache = if (strategy.useNodeIdCache) {
       Some(NodeIdCache.init(
         data = baggedInput,
@@ -137,18 +145,22 @@ private[ml] object RandomForest extends Logging {
     }
 
     // FIFO queue of nodes to train: (treeIndex, node)
+    //要训练的节点的FIFO队列：（treeIndex，node）
     val nodeQueue = new mutable.Queue[(Int, LearningNode)]()
 
     val rng = new Random()
     rng.setSeed(seed)
 
     // Allocate and queue root nodes.
+    //分配和排队根节点
     val topNodes = Array.fill[LearningNode](numTrees)(LearningNode.emptyNode(nodeIndex = 1))
     Range(0, numTrees).foreach(treeIndex => nodeQueue.enqueue((treeIndex, topNodes(treeIndex))))
 
     while (nodeQueue.nonEmpty) {
       // Collect some nodes to split, and choose features for each node (if subsampling).
       // Each group of nodes may come from one or multiple trees, and at multiple levels.
+      //收集一些节点进行拆分,并为每个节点选择要素(如果是二次取样),
+      //每组节点可能来自一个或多个树,并且处于多个级别。
       val (nodesForGroup, treeToNodeToIndexInfo) =
         RandomForest.selectNodesToSplit(nodeQueue, maxMemoryUsage, metadata, rng)
       // Sanity check (should never occur):
@@ -156,6 +168,7 @@ private[ml] object RandomForest extends Logging {
         s"RandomForest selected empty nodesForGroup.  Error for unknown reason.")
 
       // Choose node splits, and enqueue new nodes as needed.
+      //选择节点拆分,并根据需要将新节点排入队列
       timer.start("findBestSplits")
       RandomForest.findBestSplits(baggedInput, metadata, topNodes, nodesForGroup,
         treeToNodeToIndexInfo, splits, nodeQueue, timer, nodeIdCache)
@@ -170,6 +183,7 @@ private[ml] object RandomForest extends Logging {
     logInfo(s"$timer")
 
     // Delete any remaining checkpoints used for node Id cache.
+    //删除用于节点Id缓存的任何剩余检查点
     if (nodeIdCache.nonEmpty) {
       try {
         nodeIdCache.get.deleteAllCheckpoints()
@@ -200,9 +214,11 @@ private[ml] object RandomForest extends Logging {
   }
 
   /**
-   * Get the node index corresponding to this data point.
+   * Get the node index corresponding to this data point.获取与此数据点对应的节点索引
    * This function mimics prediction, passing an example from the root node down to a leaf
    * or unsplit node; that node's index is returned.
+    *
+    * 此函数模拟预测,将示例从根节点传递到叶子或非分裂节点; 返回该节点的索引
    *
    * @param node  Node in tree from which to classify the given data point.
    * @param binnedFeatures  Binned feature vector for data point.
@@ -242,10 +258,13 @@ private[ml] object RandomForest extends Logging {
 
   /**
    * Helper for binSeqOp, for data which can contain a mix of ordered and unordered features.
+    * binSeqOp的助手,用于包含有序和无序特征混合的数据
    *
    * For ordered features, a single bin is updated.
+    * 对于有序特征,将更新单个bin
    * For unordered features, bins correspond to subsets of categories; either the left or right bin
    * for each subset is updated.
+    * 对于无序特征,容器对应于类别的子集,更新每个子集的左或右bin
    *
    * @param agg  Array storing aggregate calculation, with a set of sufficient statistics for
    *             each (feature, bin).
@@ -304,8 +323,10 @@ private[ml] object RandomForest extends Logging {
 
   /**
    * Helper for binSeqOp, for regression and for classification with only ordered features.
+    * 用于BIN SEQOP的帮助器,用于回归和仅具有有序特征的分类
    *
    * For each feature, the sufficient statistics of one bin are updated.
+    *对于每个特征,更新一个bin的足够的统计量
    *
    * @param agg  Array storing aggregate calculation, with a set of sufficient statistics for
    *             each (feature, bin).
@@ -342,6 +363,7 @@ private[ml] object RandomForest extends Logging {
 
   /**
    * Given a group of nodes, this finds the best split for each node.
+    * 给定一组节点,这为每个节点找到最佳分割
    *
    * @param input Training data: RDD of [[org.apache.spark.mllib.tree.impl.TreePoint]]
    * @param metadata Learning and dataset metadata
@@ -372,7 +394,7 @@ private[ml] object RandomForest extends Logging {
 
     /*
      * The high-level descriptions of the best split optimizations are noted here.
-     *
+     * 这里描述了最佳分割优化的高级描述
      * *Group-wise training*
      * We perform bin calculations for groups of nodes to reduce the number of
      * passes over the data.  Each iteration requires more computation and storage,
@@ -434,7 +456,7 @@ private[ml] object RandomForest extends Logging {
 
     /**
      * Performs a sequential aggregation over a partition.
-     *
+     * 在分区上执行顺序聚合
      * Each data point contributes to one node. For each feature,
      * the aggregate sufficient statistics are updated for the relevant bins.
      *
@@ -456,6 +478,7 @@ private[ml] object RandomForest extends Logging {
 
     /**
      * Do the same thing as binSeqOp, but with nodeIdCache.
+      * 做与BiSEQOP相同的事情，但是使用NoDIDCHIPSE
      */
     def binSeqOpWithNodeIdCache(
         agg: Array[DTStatsAggregator],
@@ -472,7 +495,9 @@ private[ml] object RandomForest extends Logging {
 
     /**
      * Get node index in group --> features indices map,
+      * 获取组中的节点索引->特征索引映射
      * which is a short cut to find feature indices for a node given node index in group.
+      * 这是对给定节点索引的节点寻找特征索引的捷径
      */
     def getNodeToFeatures(
         treeToNodeToIndexInfo: Map[Int, Map[Int, NodeIndexInfo]]): Option[Map[Int, Array[Int]]] = {
@@ -491,6 +516,7 @@ private[ml] object RandomForest extends Logging {
     }
 
     // array of nodes to train indexed by node index in group
+    //群节点索引索引训练节点的数组
     val nodes = new Array[LearningNode](numNodes)
     nodesForGroup.foreach { case (treeIndex, nodesForTree) =>
       nodesForTree.foreach { node =>
@@ -499,6 +525,7 @@ private[ml] object RandomForest extends Logging {
     }
 
     // Calculate best splits for all nodes in the group
+    //计算组中所有节点的最佳拆分
     timer.start("chooseSplits")
 
     // In each partition, iterate all instances and compute aggregate stats for each node,
@@ -522,6 +549,7 @@ private[ml] object RandomForest extends Logging {
         }
 
         // iterator all instances in current partition and update aggregate stats
+        //当前分区中的迭代器所有实例,并更新聚合统计数据
         points.foreach(binSeqOpWithNodeIdCache(nodeStatsAggregators, _))
 
         // transform nodeStatsAggregators array to (nodeIndex, nodeAggregateStats) pairs,
@@ -569,6 +597,7 @@ private[ml] object RandomForest extends Logging {
       null
     }
     // Iterate over all nodes in this group.
+    //迭代这个组中的所有节点
     nodesForGroup.foreach { case (treeIndex, nodesForTree) =>
       nodesForTree.foreach { node =>
         val nodeIndex = node.id
@@ -579,6 +608,7 @@ private[ml] object RandomForest extends Logging {
         logDebug("best split = " + split)
 
         // Extract info for this node.  Create children if not leaf.
+        //提取此节点的信息,如果不是叶子
         val isLeaf =
           (stats.gain <= 0) || (LearningNode.indexToLevel(nodeIndex) == metadata.maxDepth)
         node.isLeaf = isLeaf

@@ -33,6 +33,7 @@ import org.apache.spark.util.Utils
 /**
  * :: DeveloperApi ::
  * The base type of all Spark SQL data types.
+  * 所有Spark SQL数据类型的基本类型
  */
 @DeveloperApi
 abstract class DataType extends AbstractDataType {
@@ -47,6 +48,7 @@ abstract class DataType extends AbstractDataType {
 
   /**
    * The default size of a value of this data type, used internally for size estimation.
+    * 此数据类型的值的默认大小,在内部用于大小估计
    */
   def defaultSize: Int
 
@@ -56,17 +58,21 @@ abstract class DataType extends AbstractDataType {
 
   private[sql] def jsonValue: JValue = typeName
 
-  /** The compact JSON representation of this data type. */
+  /** The compact JSON representation of this data type.
+    * 此数据类型的紧凑JSON表示形式*/
   def json: String = compact(render(jsonValue))
 
-  /** The pretty (i.e. indented) JSON representation of this data type. */
+  /** The pretty (i.e. indented) JSON representation of this data type.
+    * 此数据类型的漂亮（即缩进）JSON表示*/
   def prettyJson: String = pretty(render(jsonValue))
 
-  /** Readable string representation for the type. */
+  /** Readable string representation for the type.
+    * 该类型的可读字符串表示形式*/
   def simpleString: String = typeName
 
   /**
    * Check if `this` and `other` are the same data type when ignoring nullability
+    * 忽略可空性时，检查`this`和`other`是否是相同的数据类型
    * (`StructField.nullable`, `ArrayType.containsNull`, and `MapType.valueContainsNull`).
    */
   private[spark] def sameType(other: DataType): Boolean =
@@ -74,12 +80,14 @@ abstract class DataType extends AbstractDataType {
 
   /**
    * Returns the same data type but set all nullability fields are true
+    * 返回相同的数据类型,但设置所有可为空性字段为true
    * (`StructField.nullable`, `ArrayType.containsNull`, and `MapType.valueContainsNull`).
    */
   private[spark] def asNullable: DataType
 
   /**
    * Returns true if any `DataType` of this DataType tree satisfies the given function `f`.
+    * 如果此DataType树的任何`DataType`满足给定函数`f`,则返回true
    */
   private[spark] def existsRecursively(f: (DataType) => Boolean): Boolean = f(this)
 
@@ -108,7 +116,8 @@ object DataType {
       .map(t => t.typeName -> t).toMap
   }
 
-  /** Given the string representation of a type, return its DataType */
+  /** Given the string representation of a type, return its DataType
+    * 给定类型的字符串表示形式,返回其DataType*/
   private def nameToType(name: String): DataType = {
     val FIXED_DECIMAL = """decimal\(\s*(\d+)\s*,\s*(\d+)\s*\)""".r
     name match {
@@ -237,6 +246,7 @@ object DataType {
 
     /**
      * Parses a string representation of a DataType.
+      * 解析DataType的字符串表示形式
      *
      * TODO: Generate parser as pickler...
      */
@@ -264,6 +274,7 @@ object DataType {
 
   /**
    * Compares two types, ignoring nullability of ArrayType, MapType, StructType.
+    * 比较两种类型,忽略ArrayType,MapType,StructType的可为空性
    */
   private[types] def equalsIgnoreNullability(left: DataType, right: DataType): Boolean = {
     (left, right) match {
@@ -283,7 +294,7 @@ object DataType {
 
   /**
    * Compares two types, ignoring compatible nullability of ArrayType, MapType, StructType.
-   *
+   * 比较两种类型,忽略ArrayType,MapType,StructType的兼容可为空性
    * Compatible nullability is defined as follows:
    *   - If `from` and `to` are ArrayTypes, `from` has a compatible nullability with `to`
    *   if and only if `to.containsNull` is true, or both of `from.containsNull` and

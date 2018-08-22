@@ -27,8 +27,11 @@ import org.apache.spark.util.Utils
 /**
  * java.sql.DriverManager is always loaded by bootstrap classloader,
  * so it can't load JDBC drivers accessible by Spark ClassLoader.
+  * java.sql.DriverManager始终由引导程序类加载器加载,
+  * 因此无法加载Spark ClassLoader可访问的JDBC驱动程序
  *
  * To solve the problem, drivers from user-supplied jars are wrapped into thin wrapper.
+  * 为了解决这个问题,来自用户提供的罐子的驱动程序被包装成薄包装
  */
 object DriverRegistry extends Logging {
 

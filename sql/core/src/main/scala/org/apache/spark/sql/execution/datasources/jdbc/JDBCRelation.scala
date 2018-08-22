@@ -29,6 +29,7 @@ import org.apache.spark.sql.{DataFrame, Row, SQLContext, SaveMode}
 
 /**
  * Instructions on how to partition the table among workers.
+  * 有关如何在工作程序中对表进行分区的说明
  */
 private[sql] case class JDBCPartitioningInfo(
     column: String,
@@ -44,6 +45,9 @@ private[sql] object JDBCRelation {
    * exactly once.  The parameters minValue and maxValue are advisory in that
    * incorrect values may cause the partitioning to be poor, but no data
    * will fail to be represented.
+    * 给定一个分区原理图(一个整数类型的列,一个给定的分区原理图(一个整数类型的列,每个分区的一些WHERE子句,使得表中的每一行只出现一次。
+    * 参数minValue和maxValue是 建议不正确的值可能导致分区不佳,但不会无法表示数据
+    *
    */
   def columnPartition(partitioning: JDBCPartitioningInfo): Array[Partition] = {
     if (partitioning == null) return Array[Partition](JDBCPartition(null, 0))

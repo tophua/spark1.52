@@ -29,6 +29,7 @@ import org.apache.spark.sql.types.DataType
 /**
  * :: Experimental ::
  * Perform feature expansion in a polynomial space. As said in wikipedia of Polynomial Expansion,
+  * 在多项式空间中执行特征扩展,如在多项式扩展的维基百科中所述
  * which is available at [[http://en.wikipedia.org/wiki/Polynomial_expansion]], "In mathematics, an
  * expansion of a product of sums expresses it as a sum of products by using the fact that
  * multiplication distributes over addition". Take a 2-variable feature vector as an example:
@@ -42,6 +43,7 @@ class PolynomialExpansion(override val uid: String)
 
   /**
    * The polynomial degree to expand, which should be >= 1.  A value of 1 means no expansion.
+    * 要扩展的多项式度,应该> = 1.值为1表示不扩展
    * Default: 2
    * @group param
    */
@@ -69,6 +71,8 @@ class PolynomialExpansion(override val uid: String)
  * The expansion is done via recursion. Given n features and degree d, the size after expansion is
  * (n + d choose d) (including 1 and first-order values). For example, let f([a, b, c], 3) be the
  * function that expands [a, b, c] to their monomials of degree 3. We have the following recursion:
+  * 扩展是通过递归完成的,给定n个特征和度数d,扩展后的大小为(n + d选择d)(包括1和1阶值)。
+  * 例如,设f([a，b，c]，3）是将[a，b，c]扩展为3阶单项式的函数。我们有以下递归：
  *
  * {{{
  * f([a, b, c], 3) = f([a, b], 3) ++ f([a, b], 2) * c ++ f([a, b], 1) * c^2 ++ [c^3]

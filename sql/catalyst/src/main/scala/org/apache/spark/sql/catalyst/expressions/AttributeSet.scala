@@ -33,7 +33,8 @@ protected class AttributeEquals(val a: Attribute) {
 object AttributeSet {
   def apply(a: Attribute): AttributeSet = new AttributeSet(Set(new AttributeEquals(a)))
 
-  /** Constructs a new [[AttributeSet]] given a sequence of [[Expression Expressions]]. */
+  /** Constructs a new [[AttributeSet]] given a sequence of [[Expression Expressions]].
+    * 给定一系列[[Expression Expressions]]构造一个新的[[AttributeSet]]*/
   def apply(baseSet: Iterable[Expression]): AttributeSet = {
     new AttributeSet(
       baseSet
@@ -56,37 +57,44 @@ object AttributeSet {
 class AttributeSet private (val baseSet: Set[AttributeEquals])
   extends Traversable[Attribute] with Serializable {
 
-  /** Returns true if the members of this AttributeSet and other are the same. */
+  /** Returns true if the members of this AttributeSet and other are the same.
+    * 如果此AttributeSet的成员和其他成员相同,则返回true*/
   override def equals(other: Any): Boolean = other match {
     case otherSet: AttributeSet =>
       otherSet.size == baseSet.size && baseSet.map(_.a).forall(otherSet.contains)
     case _ => false
   }
 
-  /** Returns true if this set contains an Attribute with the same expression id as `elem` */
+  /** Returns true if this set contains an Attribute with the same expression id as `elem`
+    * 如果此set包含具有与“elem”相同的表达式id的Attribute,则返回true */
   def contains(elem: NamedExpression): Boolean =
     baseSet.contains(new AttributeEquals(elem.toAttribute))
 
-  /** Returns a new [[AttributeSet]] that contains `elem` in addition to the current elements. */
+  /** Returns a new [[AttributeSet]] that contains `elem` in addition to the current elements.
+    * 除了当前元素之外,返回包含`element`的新[[Attribute Set]]*/
   def +(elem: Attribute): AttributeSet =  // scalastyle:ignore
     new AttributeSet(baseSet + new AttributeEquals(elem))
 
-  /** Returns a new [[AttributeSet]] that does not contain `elem`. */
+  /** Returns a new [[AttributeSet]] that does not contain `elem`.
+    * 返回不包含`elem`的新[[AttributeSet]]*/
   def -(elem: Attribute): AttributeSet =
     new AttributeSet(baseSet - new AttributeEquals(elem))
 
-  /** Returns an iterator containing all of the attributes in the set. */
+  /** Returns an iterator containing all of the attributes in the set.
+    * 返回包含集合中所有属性的迭代器 */
   def iterator: Iterator[Attribute] = baseSet.map(_.a).iterator
 
   /**
    * Returns true if the [[Attribute Attributes]] in this set are a subset of the Attributes in
    * `other`.
+    * 如果此set中的[[Attribute Attributes]]是`other`中Attributes的子集,则返回true。
    */
   def subsetOf(other: AttributeSet): Boolean = baseSet.subsetOf(other.baseSet)
 
   /**
    * Returns a new [[AttributeSet]] that does not contain any of the [[Attribute Attributes]] found
    * in `other`.
+    * 返回一个新的[[AttributeSet]],它不包含在`other`中找到的任何[[Attribute Attributes]]
    */
   def --(other: Traversable[NamedExpression]): AttributeSet =
     new AttributeSet(baseSet -- other.map(a => new AttributeEquals(a.toAttribute)))
@@ -94,12 +102,14 @@ class AttributeSet private (val baseSet: Set[AttributeEquals])
   /**
    * Returns a new [[AttributeSet]] that contains all of the [[Attribute Attributes]] found
    * in `other`.
+    * 返回一个新的[[AttributeSet]],它包含在`other`中找到的所有[[Attribute Attributes]]
    */
   def ++(other: AttributeSet): AttributeSet = new AttributeSet(baseSet ++ other.baseSet)
 
   /**
    * Returns a new [[AttributeSet]] contain only the [[Attribute Attributes]] where `f` evaluates to
    * true.
+    * 返回一个新的[[AttributeSet]]只包含[[Attribute Attributes]],其中`f`的计算结果为true。
    */
   override def filter(f: Attribute => Boolean): AttributeSet =
     new AttributeSet(baseSet.filter(ae => f(ae.a)))
@@ -107,6 +117,7 @@ class AttributeSet private (val baseSet: Set[AttributeEquals])
   /**
    * Returns a new [[AttributeSet]] that only contains [[Attribute Attributes]] that are found in
    * `this` and `other`.
+    * 返回一个新的[[AttributeSet]],它只包含在`this`和`other`中找到的[[Attribute Attributes]]
    */
   def intersect(other: AttributeSet): AttributeSet =
     new AttributeSet(baseSet.intersect(other.baseSet))
@@ -115,6 +126,7 @@ class AttributeSet private (val baseSet: Set[AttributeEquals])
 
   // We must force toSeq to not be strict otherwise we end up with a [[Stream]] that captures all
   // sorts of things in its closure.
+  //我们必须强制toSeq不严格,否则我们最终得到一个[[Stream]]来捕获其闭包中的各种事物
   override def toSeq: Seq[Attribute] = baseSet.map(_.a).toArray.toSeq
 
   override def toString: String = "{" + baseSet.map(_.a).mkString(", ") + "}"

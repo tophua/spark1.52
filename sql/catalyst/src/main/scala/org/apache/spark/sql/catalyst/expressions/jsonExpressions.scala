@@ -53,6 +53,7 @@ private[this] object JsonPathParser extends RegexParsers {
   }
 
   // parse `[*]` and `[123]` subscripts
+  //解析`[*]`和`[123]`下标
   def subscript: Parser[List[PathInstruction]] =
     for {
       operand <- '[' ~> ('*' ^^^ Wildcard | long ^^ Index) <~ ']'
@@ -61,6 +62,7 @@ private[this] object JsonPathParser extends RegexParsers {
     }
 
   // parse `.name` or `['name']` child expressions
+  //解析`.name`或`['name']`子表达式
   def named: Parser[List[PathInstruction]] =
     for {
       name <- '.' ~> "[^\\.\\[]+".r | "[\\'" ~> "[^\\'\\?]+" <~ "\\']"
@@ -96,12 +98,15 @@ private[this] object GetJsonObject {
   private val jsonFactory = new JsonFactory()
 
   // Enabled for Hive compatibility
+  //启用了Hive兼容性
   jsonFactory.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS)
 }
 
 /**
  * Extracts json object from a json string based on json path specified, and returns json string
  * of the extracted json object. It will return null if the input json string is invalid.
+  * 基于指定的json路径从json字符串中提取json对象,并返回提取的json对象的json字符串,
+  * 如果输入json字符串无效,它将返回null。
  */
 case class GetJsonObject(json: Expression, path: Expression)
   extends BinaryExpression with ExpectsInputTypes with CodegenFallback {
@@ -161,6 +166,7 @@ case class GetJsonObject(json: Expression, path: Expression)
   }
 
   // advance to the desired array index, assumes to start at the START_ARRAY token
+  //前进到所需的数组索引,假定从START_ARRAY标记开始
   private def arrayIndex(p: JsonParser, f: () => Boolean): Long => Boolean = {
     case _ if p.getCurrentToken == END_ARRAY =>
       // terminate, nothing has been written
@@ -168,10 +174,12 @@ case class GetJsonObject(json: Expression, path: Expression)
 
     case 0 =>
       // we've reached the desired index
+      //我们达到了预期的指数
       val dirty = f()
 
       while (p.nextToken() != END_ARRAY) {
         // advance the token stream to the end of the array
+        //将令牌流推进到数组的末尾
         p.skipChildren()
       }
 
@@ -187,6 +195,7 @@ case class GetJsonObject(json: Expression, path: Expression)
   /**
    * Evaluate a list of JsonPath instructions, returning a bool that indicates if any leaf nodes
    * have been written to the generator
+    * 评估JsonPath指令列表,返回一个bool,指示是否有任何叶节点已写入生成器
    */
   private def evaluatePath(
       p: JsonParser,
@@ -196,6 +205,7 @@ case class GetJsonObject(json: Expression, path: Expression)
     (p.getCurrentToken, path) match {
       case (VALUE_STRING, Nil) if style == RawStyle =>
         // there is no array wildcard or slice parent, emit this string without quotes
+        //没有数组通配符或切片父级,不带引号发出此字符串
         if (p.hasTextCharacters) {
           g.writeRaw(p.getTextCharacters, p.getTextOffset, p.getTextLength)
         } else {
@@ -213,6 +223,7 @@ case class GetJsonObject(json: Expression, path: Expression)
 
       case (_, Nil) =>
         // general case: just copy the child tree verbatim
+        //一般情况：只需逐字复制子树
         g.copyCurrentStructure(p)
         true
 
@@ -221,6 +232,7 @@ case class GetJsonObject(json: Expression, path: Expression)
         while (p.nextToken() != END_OBJECT) {
           if (dirty) {
             // once a match has been found we can skip other fields
+            //一旦找到匹配,我们可以跳过其他字段
             p.skipChildren()
           } else {
             dirty = evaluatePath(p, g, style, xs)
@@ -230,6 +242,7 @@ case class GetJsonObject(json: Expression, path: Expression)
 
       case (START_ARRAY, Subscript :: Wildcard :: Subscript :: Wildcard :: xs) =>
         // special handling for the non-structure preserving double wildcard behavior in Hive
+        //对Hive中非结构保留双通配符行为的特殊处理
         var dirty = false
         g.writeStartArray()
         while (p.nextToken() != END_ARRAY) {
@@ -240,6 +253,7 @@ case class GetJsonObject(json: Expression, path: Expression)
 
       case (START_ARRAY, Subscript :: Wildcard :: xs) if style != QuotedStyle =>
         // retain Flatten, otherwise use Quoted... cannot use Raw within an array
+        //保留Flatten，否则使用Quoted ...不能在数组中使用Raw
         val nextStyle = style match {
           case RawStyle => QuotedStyle
           case FlattenStyle => FlattenStyle
@@ -248,6 +262,7 @@ case class GetJsonObject(json: Expression, path: Expression)
 
         // temporarily buffer child matches, the emitted json will need to be
         // modified slightly if there is only a single element written
+        //暂时缓冲子匹配,如果只写入一个元素,则需要稍微修改发出的json
         val buffer = new StringWriter()
         val flattenGenerator = jsonFactory.createGenerator(buffer)
         flattenGenerator.writeStartArray()
@@ -256,6 +271,7 @@ case class GetJsonObject(json: Expression, path: Expression)
         while (p.nextToken() != END_ARRAY) {
           // track the number of array elements and only emit an outer array if
           // we've written more than one element, this matches Hive's behavior
+          //跟踪数组元素的数量,如果我们编写了多个元素,则只发出一个外部数组,这与Hive的行为相匹配
           dirty += (if (evaluatePath(p, flattenGenerator, nextStyle, xs)) 1 else 0)
         }
         flattenGenerator.writeEndArray()
@@ -276,6 +292,7 @@ case class GetJsonObject(json: Expression, path: Expression)
         g.writeStartArray()
         while (p.nextToken() != END_ARRAY) {
           // wildcards can have multiple matches, continually update the dirty count
+          //通配符可以有多个匹配,不断更新脏计数
           dirty |= evaluatePath(p, g, QuotedStyle, xs)
         }
         g.writeEndArray()
@@ -285,6 +302,7 @@ case class GetJsonObject(json: Expression, path: Expression)
       case (START_ARRAY, Subscript :: Index(idx) :: (xs@Subscript :: Wildcard :: _)) =>
         p.nextToken()
         // we're going to have 1 or more results, switch to QuotedStyle
+        //我们将有一个或多个结果,切换到QuotedStyle
         arrayIndex(p, () => evaluatePath(p, g, QuotedStyle, xs))(idx)
 
       case (START_ARRAY, Subscript :: Index(idx) :: xs) =>

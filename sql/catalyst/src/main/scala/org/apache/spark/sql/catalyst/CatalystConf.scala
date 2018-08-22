@@ -24,6 +24,7 @@ private[spark] trait CatalystConf {
 /**
  * A trivial conf that is empty.  Used for testing when all
  * relations are already filled in and the analyser needs only to resolve attribute references.
+  * 一个空洞的琐碎的骗局,用于在已填写所有关系并且分析器仅需要解析属性引用时进行测试
  */
 object EmptyConf extends CatalystConf {
   override def caseSensitiveAnalysis: Boolean = {
@@ -31,5 +32,6 @@ object EmptyConf extends CatalystConf {
   }
 }
 
-/** A CatalystConf that can be used for local testing. */
+/** A CatalystConf that can be used for local testing.
+  * 可用于本地测试的CatalystConf*/
 case class SimpleCatalystConf(caseSensitiveAnalysis: Boolean) extends CatalystConf

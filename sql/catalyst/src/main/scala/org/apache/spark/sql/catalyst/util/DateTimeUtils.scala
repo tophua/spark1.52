@@ -25,10 +25,13 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * Helper functions for converting between internal and external date and time representations.
+  * 辅助函数用于在内部和外部日期和时间表示之间进行转换
  * Dates are exposed externally as java.sql.Date and are represented internally as the number of
  * dates since the Unix epoch (1970-01-01). Timestamps are exposed externally as java.sql.Timestamp
  * and are stored internally as longs, which are capable of storing timestamps with 100 nanosecond
  * precision.
+  * 日期在外部公开为java.sql.Date,并在内部表示为自Unix纪元(1970-01-01)以来的日期数,
+  * 时间戳作为java.sql.Timestamp在外部公开,并在内部存储为long,它能够存储100纳秒精度的时间戳。
  */
 object DateTimeUtils {
 
@@ -374,9 +377,10 @@ object DateTimeUtils {
 
   /**
    * Parses a given UTF8 date string to the corresponding a corresponding [[Int]] value.
+    * 将给定的UTF8日期字符串解析为对应的[[Int]]值
    * The return type is [[Option]] in order to distinguish between 0 and null. The following
    * formats are allowed:
-   *
+   * 返回类型为[[Option]],以区分0和null,允许以下格式：
    * `yyyy`,
    * `yyyy-[m]m`
    * `yyyy-[m]m-[d]d`
@@ -486,12 +490,15 @@ object DateTimeUtils {
   /**
    * Calculates the year and and the number of the day in the year for the given
    * number of days. The given days is the number of days since 1.1.1970.
-   *
+   * 计算给定天数的年份和一年中的天数,给定天数是自1970年1月1日以来的天数。
    * The calculation uses the fact that the period 1.1.2001 until 31.12.2400 is
    * equals to the period 1.1.1601 until 31.12.2000.
+    *
+    * 计算使用的事实是，1.1.2001至2003年12月31日的期间等于直至2000年12月31日的1.1.1601期间。
    */
   private[this] def getYearAndDayInYear(daysSince1970: SQLDate): (Int, Int) = {
     // add the difference (in days) between 1.1.1970 and the artificial year 0 (-17999)
+    //添加1.1.1970和人工年0（-17999）之间的差异（以天为单位）
     val daysNormalized = daysSince1970 + toYearZero
     val numOfQuarterCenturies = daysNormalized / daysIn400Years
     val daysInThis400 = daysNormalized % daysIn400Years + 1
@@ -696,7 +703,9 @@ object DateTimeUtils {
 
   /**
    * Returns the date value for January 1 of the given year.
+    * 返回给定年份的1月1日期的日期值
    * The year is expressed in years since year zero (17999 BC), starting from 0.
+    * 年份从零年(公元前17999年)开始,从0开始
    */
   private def getDateFromYear(absoluteYear: Int): SQLDate = {
     val absoluteDays = (absoluteYear * 365 + absoluteYear / 400 - absoluteYear / 100
@@ -706,7 +715,9 @@ object DateTimeUtils {
 
   /**
    * Add date and year-month interval.
+    * 添加日期和年月间隔
    * Returns a date value, expressed in days since 1.1.1970.
+    * 返回日期值,以自1970年1月1日以来的天数表示
    */
   def dateAddMonths(days: SQLDate, months: Int): SQLDate = {
     val (year, monthInYear, dayOfMonth, daysToMonthEnd) = splitDate(days)
@@ -729,7 +740,9 @@ object DateTimeUtils {
 
   /**
    * Add timestamp and full interval.
+    * 添加时间戳和完整时间间隔
    * Returns a timestamp value, expressed in microseconds since 1.1.1970 00:00:00.
+    * 返回时间戳值,以1.1.1970 00:00:00以来的微秒表示
    */
   def timestampAddInterval(start: SQLTimestamp, months: Int, microseconds: Long): SQLTimestamp = {
     val days = millisToDays(start / 1000L)
@@ -740,12 +753,16 @@ object DateTimeUtils {
   /**
    * Returns number of months between time1 and time2. time1 and time2 are expressed in
    * microseconds since 1.1.1970.
-   *
+   *返回time1和time2之间的月数,time1和time2以自1970年1月1日以来的微秒表示
+    *
    * If time1 and time2 having the same day of month, or both are the last day of month,
    * it returns an integer (time under a day will be ignored).
+    *
+    * 如果time1和time2具有相同的月份日期,或者两者都是月份的最后一天,则返回一个整数(一天中的时间将被忽略)
    *
    * Otherwise, the difference is calculated based on 31 days per month, and rounding to
    * 8 digits.
+    * 否则,差异将根据每月31天计算，并舍入为8位数
    */
   def monthsBetween(time1: SQLTimestamp, time2: SQLTimestamp): Double = {
     val millis1 = time1 / 1000L
@@ -762,6 +779,7 @@ object DateTimeUtils {
       return (months1 - months2).toDouble
     }
     // milliseconds is enough for 8 digits precision on the right side
+    //毫秒足以在右侧获得8位精度
     val timeInDay1 = millis1 - daysToMillis(date1)
     val timeInDay2 = millis2 - daysToMillis(date2)
     val timesBetween = (timeInDay1 - timeInDay2).toDouble / MILLIS_PER_DAY
@@ -824,6 +842,7 @@ object DateTimeUtils {
       d - DateTimeUtils.getDayOfMonth(d) + 1
     } else {
       // caller make sure that this should never be reached
+      //调用者确保永远不会达到此目的
       sys.error(s"Invalid trunc level: $level")
     }
   }

@@ -48,6 +48,7 @@ import org.apache.spark.util.random.XORShiftRandom
 
 /**
  * Common params for ALS and ALSModel.
+  * ALS和ALSModel的常见参数
  */
 private[recommendation] trait ALSModelParams extends Params with HasPredictionCol {
   /**
@@ -205,6 +206,7 @@ class ALSModel private[ml] (
   override def transform(dataset: DataFrame): DataFrame = {
     // Register a UDF for DataFrame, and then
     // create a new column named map(predictionCol) by running the predict UDF.
+    //通过运行预测UDF创建一个名为map（predictionCol）的新列
     val predict = udf { (userFeatures: Seq[Float], itemFeatures: Seq[Float]) =>
       if (userFeatures != null && itemFeatures != null) {
         blas.sdot(rank, userFeatures.toArray, 1, itemFeatures.toArray, 1)
@@ -371,18 +373,20 @@ object ALS extends Logging {
    *  应用于正态方程的最小二乘解算器的特征
    *   */
   private[recommendation] trait LeastSquaresNESolver extends Serializable {
-    /** Solves a least squares problem with regularization (possibly with other constraints). */
+    /** Solves a least squares problem with regularization (possibly with other constraints).
+      * 通过正则化（可能具有其他约束）解决最小二乘问题*/
     def solve(ne: NormalEquation, lambda: Double): Array[Float]
   }
 
-  /** Cholesky solver for least square problems. */
+  /** Cholesky solver for least square problems.
+    * Cholesky求解器最小二乘问题 */
   private[recommendation] class CholeskySolver extends LeastSquaresNESolver {
 
     private val upper = "U"
 
     /**
      * Solves a least squares problem with L2 regularization:
-     *
+     * 用L2正则化解决最小二乘问题：
      *   min norm(A x - b)^2^ + lambda * norm(x)^2^
      *
      * @param ne a [[NormalEquation]] instance that contains AtA, Atb, and n (number of instances)
@@ -434,7 +438,7 @@ object ALS extends Logging {
 
     /**
      * Solves a nonnegative least squares problem with L2 regularizatin:
-     *
+     * 用L2正则化解决非负最小二乘问题：
      *   min_x_  norm(A x - b)^2^ + lambda * n * norm(x)^2^
      *   subject to x >= 0
      */
@@ -450,6 +454,7 @@ object ALS extends Logging {
     /**
      * Given a triangular matrix in the order of fillXtX above, compute the full symmetric square
      * matrix that it represents, storing it into destMatrix.
+      * 给定上面fillXtX顺序的三角矩阵,计算它所代表的完整对称方阵,将其存储到destMatrix中。
      */
     private def fillAtA(triAtA: Array[Double], lambda: Double) {
       var i = 0
@@ -472,6 +477,7 @@ object ALS extends Logging {
 
   /**
    * Representing a normal equation to solve the following weighted least squares problem:
+    * 表示求解以下加权最小二乘问题的正规方程：
    *
    * minimize \sum,,i,, c,,i,, (a,,i,,^T^ x - b,,i,,)^2^ + lambda * x^T^ x.
    *
@@ -511,7 +517,7 @@ object ALS extends Logging {
       this
     }
 
-    /** Merges another normal equation object. */
+    /** Merges another normal equation object.合并另一个正规方程对象 */
     def merge(other: NormalEquation): this.type = {
       require(other.k == k)
       blas.daxpy(ata.length, 1.0, other.ata, 1, ata, 1)
@@ -519,7 +525,8 @@ object ALS extends Logging {
       this
     }
 
-    /** Resets everything to zero, which should be called after each solve. */
+    /** Resets everything to zero, which should be called after each solve.
+      * 将所有内容重置为零,应在每次解决后调用。*/
     def reset(): Unit = {
       ju.Arrays.fill(ata, 0.0)
       ju.Arrays.fill(atb, 0.0)
@@ -655,6 +662,7 @@ object ALS extends Logging {
 
   /**
    * Factor block that stores factors (Array[Float]) in an Array.
+    * 因子块.用于存储Array中的因子（Array [Float]）
    */
   private type FactorBlock = Array[Array[Float]]
 
@@ -701,6 +709,7 @@ object ALS extends Logging {
 
   /**
    * Initializes factors randomly given the in-link blocks.
+    * 在给定链接块的情况下随机初始化因子
    *
    * @param inBlocks in-link blocks
    * @param rank rank
@@ -729,6 +738,7 @@ object ALS extends Logging {
 
   /**
    * A rating block that contains src IDs, dst IDs, and ratings, stored in primitive arrays.
+    * 包含src ID，dst ID和评级的评级块,存储在基本数组中
    */
   private[recommendation] case class RatingBlock[@specialized(Int, Long) ID: ClassTag](
       srcIds: Array[ID],
@@ -777,7 +787,7 @@ object ALS extends Logging {
 
   /**
    * Partitions raw ratings into blocks.
-   *
+   * 将原始评级划分为块
    * @param ratings raw ratings
    * @param srcPart partitioner for src IDs
    * @param dstPart partitioner for dst IDs
@@ -830,6 +840,7 @@ object ALS extends Logging {
 
   /**
    * Builder for uncompressed in-blocks of (srcId, dstEncodedIndex, rating) tuples.
+    * 用于(srcId，dstEncodedIndex，rating)元组的未压缩块内的构建器
    * @param encoder encoder for dst indices
    */
   private[recommendation] class UncompressedInBlockBuilder[@specialized(Int, Long) ID: ClassTag](
@@ -842,7 +853,7 @@ object ALS extends Logging {
 
     /**
      * Adds a dst block of (srcId, dstLocalIndex, rating) tuples.
-     *
+     * 添加（srcId，dstLocalIndex，rating）元组的dst块
      * @param dstBlockId dst block ID
      * @param srcIds original src IDs
      * @param dstLocalIndices dst local indices
@@ -874,6 +885,7 @@ object ALS extends Logging {
 
   /**
    * A block of (srcId, dstEncodedIndex, rating) tuples stored in primitive arrays.
+    * 存储在基本数组中的块(srcId，dstEncodedIndex，rating)元组
    */
   private[recommendation] class UncompressedInBlock[@specialized(Int, Long) ID: ClassTag](
       val srcIds: Array[ID],
@@ -1108,7 +1120,7 @@ object ALS extends Logging {
 
   /**
    * Compute dst factors by constructing and solving least square problems.
-   *
+   * 通过构造和解决最小二乘问题来计算dst因子
    * @param srcFactorBlocks src factors
    * @param srcOutBlocks src out-blocks
    * @param dstInBlocks dst in-blocks
@@ -1216,20 +1228,21 @@ object ALS extends Logging {
       math.min(java.lang.Integer.numberOfLeadingZeros(numBlocks - 1), 31)
     private[this] final val localIndexMask = (1 << numLocalIndexBits) - 1
 
-    /** Encodes a (blockId, localIndex) into a single integer. */
+    /** Encodes a (blockId, localIndex) into a single integer.
+      * 将（blockId，localIndex）编码为单个整数 */
     def encode(blockId: Int, localIndex: Int): Int = {
       require(blockId < numBlocks)
       require((localIndex & ~localIndexMask) == 0)
       (blockId << numLocalIndexBits) | localIndex
     }
 
-    /** Gets the block id from an encoded index. */
+    /** Gets the block id from an encoded index. 从编码索引中获取块ID*/
     @inline
     def blockId(encoded: Int): Int = {
       encoded >>> numLocalIndexBits
     }
 
-    /** Gets the local index from an encoded index. */
+    /** Gets the local index from an encoded index. 从编码索引中获取本地索引*/
     @inline
     def localIndex(encoded: Int): Int = {
       encoded & localIndexMask

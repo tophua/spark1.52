@@ -40,10 +40,12 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
         joins.BroadcastLeftSemiJoinHash(
           leftKeys, rightKeys, planLater(left), planLater(right), condition) :: Nil
       // Find left semi joins where at least some predicates can be evaluated by matching join keys
+        //查找左半连接,其中至少可以通过匹配连接键来评估一些谓词
       case ExtractEquiJoinKeys(LeftSemi, leftKeys, rightKeys, condition, left, right) =>
         joins.LeftSemiJoinHash(
           leftKeys, rightKeys, planLater(left), planLater(right), condition) :: Nil
       // no predicate can be evaluated by matching hash keys
+        //可以通过匹配哈希键来评估谓词
       case logical.Join(left, right, LeftSemi, condition) =>
         joins.LeftSemiJoinBNL(planLater(left), planLater(right), condition) :: Nil
       case _ => Nil
@@ -52,6 +54,7 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
 
   /**
    * Matches a plan whose output should be small enough to be used in broadcast join.
+    * 匹配一个计划,其输出应该足够小,以便在广播连接中使用
    */
   object CanBroadcast {
     def unapply(plan: LogicalPlan): Option[LogicalPlan] = plan match {
@@ -65,8 +68,10 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
   /**
    * Uses the [[ExtractEquiJoinKeys]] pattern to find joins where at least some of the predicates
    * can be evaluated by matching join keys.
+    * 使用[ExpTyQueCopyKe]模式查找连接,其中可以通过匹配连接键来评估至少一些谓词
    *
    * Join implementations are chosen with the following precedence:
+    * 选择以下几个优先级：
    *
    * - Broadcast: if one side of the join has an estimated physical size that is smaller than the
    *     user-configurable [[org.apache.spark.sql.SQLConf.AUTO_BROADCASTJOIN_THRESHOLD]] threshold
@@ -155,6 +160,7 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
   object HashAggregation extends Strategy {
     def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
       // Aggregations that can be performed in two phases, before and after the shuffle.
+        //在洗牌前后可以在两个阶段执行的聚合
       case PartialAggregation(
              namedGroupingAttributes,
              rewrittenAggregateExpressions,
@@ -191,6 +197,7 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
 
   /**
    * Used to plan the aggregate operator for expressions based on the AggregateFunction2 interface.
+    * 用于基于聚合函数2接口计算表达式的聚合运算符
    */
   object Aggregation extends Strategy {
     def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
@@ -199,8 +206,10 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
         val converted = p.newAggregation
         converted match {
           case None => Nil // Cannot convert to new aggregation code path.
+            //无法转换为新的聚合代码路径
           case Some(logical.Aggregate(groupingExpressions, resultExpressions, child)) =>
             // Extracts all distinct aggregate expressions from the resultExpressions.
+            //从结果文本中提取所有不同的聚合表达式
             val aggregateExpressions = resultExpressions.flatMap { expr =>
               expr.collect {
                 case agg: AggregateExpression2 => agg
@@ -208,6 +217,7 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
             }.toSet.toSeq
             // For those distinct aggregate expressions, we create a map from the
             // aggregate function to the corresponding attribute of the function.
+            //对于这些不同的聚合表达式,我们从聚合函数创建映射到函数的相应属性
             val aggregateFunctionMap = aggregateExpressions.map { agg =>
               val aggregateFunction = agg.aggregateFunction
               val attribtue = Alias(aggregateFunction, aggregateFunction.toString)().toAttribute
@@ -220,6 +230,7 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
             if (functionsWithDistinct.map(_.aggregateFunction.children).distinct.length > 1) {
               // This is a sanity check. We should not reach here when we have multiple distinct
               // column sets (aggregate.NewAggregation will not match).
+              //这是一个完整性检查,当我们有多个不同的列集(aggregate.NewAggregation将不匹配)时,我们不应该到达此处
               sys.error(
                 "Multiple distinct column sets are not supported by the new aggregation" +
                   "code path.")
@@ -304,6 +315,7 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
   }
 
   // Can we automate these 'pass through' operations?
+  //我们可以自动化这些“通过”操作吗？
   object BasicOperators extends Strategy {
     def numPartitions: Int = self.numPartitions
 
@@ -335,12 +347,14 @@ private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
       case logical.SortPartitions(sortExprs, child) =>
         // This sort only sorts tuples within a partition. Its requiredDistribution will be
         // an UnspecifiedDistribution.
+        //这种排序只能对分区中的元组进行排序,其requiredDistribution将是UnspecifiedDistribution
         getSortOperator(sortExprs, global = false, planLater(child)) :: Nil
       case logical.Sort(sortExprs, global, child) =>
         getSortOperator(sortExprs, global, planLater(child)):: Nil
       case logical.Project(projectList, child) =>
         // If unsafe mode is enabled and we support these data types in Unsafe, use the
         // Tungsten project. Otherwise, use the normal project.
+        //如果启用了不安全模式并且我们在Unsafe中支持这些数据类型,请使用Tungsten项目,否则,请使用正常项目
         if (sqlContext.conf.unsafeEnabled &&
           UnsafeProjection.canSupport(projectList) && UnsafeProjection.canSupport(child.schema)) {
           execution.TungstenProject(projectList, planLater(child)) :: Nil

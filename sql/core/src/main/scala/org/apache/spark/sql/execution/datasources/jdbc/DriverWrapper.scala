@@ -25,6 +25,7 @@ import java.util.Properties
  *
  * The problem is in `java.sql.DriverManager` class that can't access drivers loaded by
  * Spark ClassLoader.
+  * 问题出在`java.sql.DriverManager`类,它无法访问Spark ClassLoader加载的驱动程序
  */
 class DriverWrapper(val wrapped: Driver) extends Driver {
   override def acceptsURL(url: String): Boolean = wrapped.acceptsURL(url)

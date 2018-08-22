@@ -28,6 +28,7 @@ import org.apache.spark.sql.types.DoubleType
 /**
  * :: Experimental ::
  * Evaluator for regression, which expects two input columns: prediction and label.
+  * 回归评估,它需要两个输入列：预测和标签
  */
 @Experimental
 final class RegressionEvaluator(override val uid: String)

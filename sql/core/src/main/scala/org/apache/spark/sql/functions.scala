@@ -480,7 +480,7 @@ object functions {
    * Window function: returns the value that is `offset` rows after the current row, and
    * `defaultValue` if there is less than `offset` rows after the current row. For example,
    * an `offset` of one will return the next row at any given point in the window partition.
-   *
+   * Window函数：返回当前行之后为“offset”行的值，如果当前行之后的行数小于“offset”，则返回“defaultValue”。
    * This is equivalent to the LEAD function in SQL.
    * 这是在SQL的Lead函数相等
    * @group window_funcs
@@ -506,7 +506,7 @@ object functions {
 
   /**
    * Window function: returns the relative rank (i.e. percentile) of rows within a window partition.
-   *
+   * 窗口函数：返回窗口分区内行的相对等级（即百分位数）。
    * This is computed by:
    * {{{
    *   (rank of row in its partition - 1) / (number of rows in the partition - 1)
@@ -523,6 +523,7 @@ object functions {
 
   /**
    * Window function: returns the rank of rows within a window partition.
+    * 窗口函数：返回窗口分区中行的等级
    *
    * The difference between rank and denseRank is that denseRank leaves no gaps in ranking
    * sequence when there are ties. That is, if you were ranking a competition using denseRank
@@ -2290,7 +2291,9 @@ object functions {
   */
   /**
    * Defines a user-defined function of 0 arguments as user-defined function (UDF).
+    * 将用户定义的0参数函数定义为用户定义函数（UDF）
    * The data types are automatically inferred based on the function's signature.
+    * 根据函数的签名自动推断数据类型
    *
    * @group udf_funcs
    * @since 1.3.0
@@ -2302,7 +2305,9 @@ object functions {
 
   /**
    * Defines a user-defined function of 1 arguments as user-defined function (UDF).
+    * 将用户定义的1个参数的函数定义为用户定义的函数（UDF）。
    * The data types are automatically inferred based on the function's signature.
+    * 根据函数的签名自动推断数据类型
    *
    * @group udf_funcs
    * @since 1.3.0
@@ -2314,7 +2319,9 @@ object functions {
 
   /**
    * Defines a user-defined function of 2 arguments as user-defined function (UDF).
+    * 将用户定义的2个参数的函数定义为用户定义的函数（UDF）。
    * The data types are automatically inferred based on the function's signature.
+    * 根据函数的签名自动推断数据类型。
    *
    * @group udf_funcs
    * @since 1.3.0
@@ -2327,7 +2334,8 @@ object functions {
   /**
    * Defines a user-defined function of 3 arguments as user-defined function (UDF).
    * The data types are automatically inferred based on the function's signature.
-   *
+   * 将用户定义的3个参数的函数定义为用户定义的函数（UDF）。
+  *  根据函数的签名自动推断数据类型。
    * @group udf_funcs
    * @since 1.3.0
    */

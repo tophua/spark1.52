@@ -23,10 +23,12 @@ import org.apache.spark.sql.sources.BaseRelation
 
 /**
  * Used to link a [[BaseRelation]] in to a logical query plan.
+  * 用于将[[BaseRelation]]链接到逻辑查询计划
  *
  * Note that sometimes we need to use `LogicalRelation` to replace an existing leaf node without
  * changing the output attributes' IDs.  The `expectedOutputAttributes` parameter is used for
  * this purpose.  See https://issues.apache.org/jira/browse/SPARK-10741 for more details.
+  * 请注意,有时我们需要使用`LogicalRelation`来替换现有的叶节点而不更改输出属性的ID,`expectedOutputAttributes`参数用于此目的。
  */
 private[sql] case class LogicalRelation(
     relation: BaseRelation,
@@ -48,6 +50,7 @@ private[sql] case class LogicalRelation(
   }
 
   // Logical Relations are distinct if they have different output for the sake of transformations.
+  //如果逻辑关系为了转换而具有不同的输出,则它们是不同的
   override def equals(other: Any): Boolean = other match {
     case l @ LogicalRelation(otherRelation, _) => relation == otherRelation && output == l.output
     case _ => false
@@ -65,13 +68,15 @@ private[sql] case class LogicalRelation(
   // When comparing two LogicalRelations from within LogicalPlan.sameResult, we only need
   // LogicalRelation.cleanArgs to return Seq(relation), since expectedOutputAttribute's
   // expId can be different but the relation is still the same.
+  //当比较LogicalPlan.sameResult中的两个LogicalRelations时,
+  //我们只需要LogicalRelation.cleanArgs来返回Seq(关系),因为expectedOutputAttribute的expId可以不同但关系仍然相同
   override lazy val cleanArgs: Seq[Any] = Seq(relation)
 
   @transient override lazy val statistics: Statistics = Statistics(
     sizeInBytes = BigInt(relation.sizeInBytes)
   )
 
-  /** Used to lookup original attribute capitalization */
+  /** Used to lookup original attribute capitalization 用于查找原始属性大小写*/
   val attributeMap: AttributeMap[AttributeReference] = AttributeMap(output.map(o => (o, o)))
 
   def newInstance(): this.type = LogicalRelation(relation).asInstanceOf[this.type]

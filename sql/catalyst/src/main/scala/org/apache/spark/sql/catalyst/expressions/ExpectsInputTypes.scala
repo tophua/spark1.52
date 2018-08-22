@@ -23,9 +23,11 @@ import org.apache.spark.sql.catalyst.analysis.HiveTypeCoercion.ImplicitTypeCasts
 
 /**
  * An trait that gets mixin to define the expected input types of an expression.
+  * 获取mixin以定义表达式的预期输入类型的特征
  *
  * This trait is typically used by operator expressions (e.g. [[Add]], [[Subtract]]) to define
  * expected input types without any implicit casting.
+  * 此特征通常由运算符表达式（例如[[Add]]，[[Subtract]]）使用,以定义预期的输入类型,而无需任何隐式转换
  *
  * Most function expressions (e.g. [[Substring]] should extends [[ImplicitCastInputTypes]]) instead.
  */
@@ -34,9 +36,11 @@ trait ExpectsInputTypes extends Expression {
   /**
    * Expected input types from child expressions. The i-th position in the returned seq indicates
    * the type requirement for the i-th child.
+    * 子表达式中的预期输入类型,返回的seq中的第i个位置表示第i个孩子的类型要求。
    *
    * The possible values at each position are:
-   * 1. a specific data type, e.g. LongType, StringType.
+    * 每个位置的可能值为：
+   * 1. a specific data type, e.g. LongType, StringType.特定数据类型，例如 LongType，StringType。
    * 2. a non-leaf abstract data type, e.g. NumericType, IntegralType, FractionalType.
    */
   def inputTypes: Seq[AbstractDataType]

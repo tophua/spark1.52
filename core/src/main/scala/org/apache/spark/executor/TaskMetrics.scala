@@ -158,7 +158,7 @@ class TaskMetrics extends Serializable {
 
   /**
    * ShuffleReadMetrics per dependency for collecting independently while task is in progress.
-   * shufflereadmetrics依赖
+   * 每个依赖项的ShuffleReadMetrics,用于在任务正在进行时独立收集。
    */
   @transient private lazy val depsShuffleReadMetrics: ArrayBuffer[ShuffleReadMetrics] =
     new ArrayBuffer[ShuffleReadMetrics]()

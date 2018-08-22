@@ -78,7 +78,9 @@ class ContainerPlacementStrategySuite extends SparkFunSuite with Matchers with B
   test("allocate locality preferred containers with limited resource and partially matched " +
     "containers") {
     // 1. Parts of current containers' locations can satisfy the new requirements
+    //当前集装箱的部分位置可以满足新的要求
     // 2. Current requested container number cannot fully satisfy the pending tasks.
+    //当前请求的容器编号不能完全满足待处理的任务。
 
     val handler = createAllocator(3)
     handler.updateResourceRequests()

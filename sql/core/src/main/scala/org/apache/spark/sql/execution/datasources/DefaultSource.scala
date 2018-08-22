@@ -28,7 +28,8 @@ class DefaultSource extends RelationProvider with DataSourceRegister {
 
   override def shortName(): String = "jdbc"
 
-  /** Returns a new base relation with the given parameters. */
+  /** Returns a new base relation with the given parameters.
+    * 返回具有给定参数的新基本关系*/
   override def createRelation(
       sqlContext: SQLContext,
       parameters: Map[String, String]): BaseRelation = {
@@ -57,6 +58,7 @@ class DefaultSource extends RelationProvider with DataSourceRegister {
         numPartitions.toInt)
     }
     val parts = JDBCRelation.columnPartition(partitionInfo)
+    //我们将传递给getConnection的其他属性
     val properties = new Properties() // Additional properties that we will pass to getConnection
     parameters.foreach(kv => properties.setProperty(kv._1, kv._2))
     JDBCRelation(url, table, parts, properties)(sqlContext)

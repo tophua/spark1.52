@@ -31,17 +31,20 @@ import com.esotericsoftware.reflectasm.shaded.org.objectweb.asm.Opcodes._
 /**
  * Includes an utility function to test whether a function accesses a specific attribute
  * of an object.
+  * 包含一个实用程序函数,用于测试函数是否访问对象的特定属性
  */
 private[graphx] object BytecodeUtils {
 
   /**
    * Test whether the given closure invokes the specified method in the specified class.
+    * 测试给定的闭包是否在指定的类中调用指定的方法
    */
   def invokedMethod(closure: AnyRef, targetClass: Class[_], targetMethod: String): Boolean = {
     if (_invokedMethod(closure.getClass, "apply", targetClass, targetMethod)) {
       true
     } else {
       // look at closures enclosed in this closure
+      //看看封闭在这个封闭物中的封闭物
       for (f <- closure.getClass.getDeclaredFields
            if f.getType.getName.startsWith("scala.Function")) {
         f.setAccessible(true)
@@ -78,9 +81,11 @@ private[graphx] object BytecodeUtils {
 
   /**
    * Get an ASM class reader for a given class from the JAR that loaded it.
+    * 从加载它的JAR获取给定类的ASM类阅读器
    */
   private def getClassReader(cls: Class[_]): ClassReader = {
     // Copy data over, before delegating to ClassReader - else we can run out of open file handles.
+    //在委托给ClassReader之前复制数据 - 否则我们可能会用完打开的文件句柄
     val className = cls.getName.replaceFirst("^.*\\.", "") + ".class"
     val resourceStream = cls.getResourceAsStream(className)
     // todo: Fixme - continuing with earlier behavior ...
@@ -95,6 +100,9 @@ private[graphx] object BytecodeUtils {
    * Given the class name, return whether we should look into the class or not. This is used to
    * skip examing a large quantity of Java or Scala classes that we know for sure wouldn't access
    * the closures. Note that the class name is expected in ASM style (i.e. use "/" instead of ".").
+    *
+    * 给出类名,返回是否应该查看类,这用于跳过检查我们知道肯定不会访问闭包的大量Java或Scala类,
+    * 请注意,类名称应采用ASM样式（即使用“/”而不是“。”）。
    */
   private def skipClass(className: String): Boolean = {
     val c = className

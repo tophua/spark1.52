@@ -31,9 +31,12 @@ import scala.util.Try
 
 /**
  * Returns the current date at the start of query evaluation.
+  * 返回查询评估开始时的当前日期
  * All calls of current_date within the same query return the same value.
+  * 同一查询中current_date的所有调用都返回相同的值
  *
  * There is no code generation since this expression should get constant folded by the optimizer.
+  * 没有代码生成,因为这个表达式应该由优化器保持不变
  */
 case class CurrentDate() extends LeafExpression with CodegenFallback {
   override def foldable: Boolean = true
@@ -48,9 +51,11 @@ case class CurrentDate() extends LeafExpression with CodegenFallback {
 
 /**
  * Returns the current timestamp at the start of query evaluation.
+  * 返回查询评估开始时的当前时间戳
  * All calls of current_timestamp within the same query return the same value.
- *
+ * 同一查询中的current_timestamp的所有调用都返回相同的值
  * There is no code generation since this expression should get constant folded by the optimizer.
+  * 没有代码生成,因为这个表达式应该由优化器保持不变
  */
 case class CurrentTimestamp() extends LeafExpression with CodegenFallback {
   override def foldable: Boolean = true
@@ -65,6 +70,7 @@ case class CurrentTimestamp() extends LeafExpression with CodegenFallback {
 
 /**
  * Adds a number of days to startdate.
+  * 添加一些天来开始
  */
 case class DateAdd(startDate: Expression, days: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -89,6 +95,7 @@ case class DateAdd(startDate: Expression, days: Expression)
 
 /**
  * Subtracts a number of days to startdate.
+  * 减去开始日期的天数
  */
 case class DateSub(startDate: Expression, days: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -308,6 +315,7 @@ case class DateFormatClass(left: Expression, right: Expression) extends BinaryEx
 
 /**
  * Converts time string with given pattern
+  * 将给定模式的时间字符串转换为Unix时间戳(以秒为单位),如果失败则返回null。
  * (see [http://docs.oracle.com/javase/tutorial/i18n/format/simpleDateFormat.html])
  * to Unix time stamp (in seconds), returns null if fail.
  * Note that hive Language Manual says it returns 0 if fail, but in fact it returns null.
@@ -438,6 +446,9 @@ case class UnixTimestamp(timeExp: Expression, format: Expression)
  * representing the timestamp of that moment in the current system time zone in the given
  * format. If the format is missing, using format like "1970-01-01 00:00:00".
  * Note that hive Language Manual says it returns 0 if fail, but in fact it returns null.
+  *
+  * 将unix epoch（1970-01-01 00:00:00 UTC）的秒数转换为表示给定格式的当前系统时区中该时刻的时间戳的字符串,
+  * 如果缺少格式,请使用“1970-01-01 00:00:00”之类的格式,请注意,hive语言手册表示如果失败则返回0,但实际上它返回null。
  */
 case class FromUnixTime(sec: Expression, format: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -520,6 +531,7 @@ case class FromUnixTime(sec: Expression, format: Expression)
 
 /**
  * Returns the last day of the month which the date belongs to.
+  * 返回日期所属月份的最后一天
  */
 case class LastDay(startDate: Expression) extends UnaryExpression with ImplicitCastInputTypes {
   override def child: Expression = startDate
@@ -543,8 +555,10 @@ case class LastDay(startDate: Expression) extends UnaryExpression with ImplicitC
 
 /**
  * Returns the first date which is later than startDate and named as dayOfWeek.
+  * 返回晚于startDate并命名为dayOfWeek的第一个日期
  * For example, NextDay(2015-07-27, Sunday) would return 2015-08-02, which is the first
  * Sunday later than 2015-07-27.
+  * 例如，NextDay(2015-07-27,周日)将返回2015-08-02,这是2015-07-27之后的第一个周日。
  *
  * Allowed "dayOfWeek" is defined in [[DateTimeUtils.getDayOfWeekFromString]].
  */
@@ -602,7 +616,7 @@ case class NextDay(startDate: Expression, dayOfWeek: Expression)
 }
 
 /**
- * Adds an interval to timestamp.
+ * Adds an interval to timestamp.添加时间戳的时间间隔
  */
 case class TimeAdd(start: Expression, interval: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -632,6 +646,7 @@ case class TimeAdd(start: Expression, interval: Expression)
 
 /**
  * Assumes given timestamp is UTC and converts to given timezone.
+  * 假设给定的时间戳是UTC并转换为给定的时区
  */
 case class FromUTCTimestamp(left: Expression, right: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -680,6 +695,7 @@ case class FromUTCTimestamp(left: Expression, right: Expression)
 
 /**
  * Subtracts an interval from timestamp.
+  * 从时间戳中减去间隔
  */
 case class TimeSub(start: Expression, interval: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -709,6 +725,7 @@ case class TimeSub(start: Expression, interval: Expression)
 
 /**
  * Returns the date that is num_months after start_date.
+  * 返回start_date之后的num_months日期
  */
 case class AddMonths(startDate: Expression, numMonths: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -735,6 +752,7 @@ case class AddMonths(startDate: Expression, numMonths: Expression)
 
 /**
  * Returns number of months between dates date1 and date2.
+  * 返回date1和date2之间的月数
  */
 case class MonthsBetween(date1: Expression, date2: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -761,6 +779,7 @@ case class MonthsBetween(date1: Expression, date2: Expression)
 
 /**
  * Assumes given timestamp is in given timezone and converts to UTC.
+  * 假设给定时间戳在给定时区内并转换为UTC
  */
 case class ToUTCTimestamp(left: Expression, right: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -809,11 +828,13 @@ case class ToUTCTimestamp(left: Expression, right: Expression)
 
 /**
  * Returns the date part of a timestamp or string.
+  * 返回时间戳或字符串的日期部分
  */
 case class ToDate(child: Expression) extends UnaryExpression with ImplicitCastInputTypes {
 
   // Implicit casting of spark will accept string in both date and timestamp format, as
   // well as TimestampType.
+  //隐式转换spark将接受日期和时间戳格式的字符串,以及TimestampType
   override def inputTypes: Seq[AbstractDataType] = Seq(DateType)
 
   override def dataType: DataType = DateType
@@ -827,6 +848,7 @@ case class ToDate(child: Expression) extends UnaryExpression with ImplicitCastIn
 
 /**
  * Returns date truncated to the unit specified by the format.
+  * 返回截断为格式指定单位的日期
  */
 case class TruncDate(date: Expression, format: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {
@@ -898,6 +920,7 @@ case class TruncDate(date: Expression, format: Expression)
 
 /**
  * Returns the number of days from startDate to endDate.
+  * 返回从startDate到endDate的天数
  */
 case class DateDiff(endDate: Expression, startDate: Expression)
   extends BinaryExpression with ImplicitCastInputTypes {

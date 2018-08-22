@@ -29,6 +29,7 @@ import org.apache.spark.sql.execution.metric.SQLMetrics
  * :: DeveloperApi ::
  * Performs an inner hash join of two child relations by first shuffling the data using the join
  * keys.
+  * 通过首先使用连接键对数据进行混洗来执行两个子关系的内部哈希联接
  */
 @DeveloperApi
 case class ShuffledHashJoin(

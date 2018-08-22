@@ -22,18 +22,21 @@ import org.apache.spark.sql.catalyst.expressions.codegen._
 import org.apache.spark.sql.types._
 import org.apache.spark.util.collection.OpenHashSet
 
-/** The data type for expressions returning an OpenHashSet as the result. */
+/** The data type for expressions returning an OpenHashSet as the result.
+  * 表达式的数据类型返回OpenHashSet作为结果*/
 private[sql] class OpenHashSetUDT(
     val elementType: DataType) extends UserDefinedType[OpenHashSet[Any]] {
 
   override def sqlType: DataType = ArrayType(elementType)
 
-  /** Since we are using OpenHashSet internally, usually it will not be called. */
+  /** Since we are using OpenHashSet internally, usually it will not be called.
+    * 由于我们在内部使用OpenHashSet,通常不会调用它*/
   override def serialize(obj: Any): Seq[Any] = {
     obj.asInstanceOf[OpenHashSet[Any]].iterator.toSeq
   }
 
-  /** Since we are using OpenHashSet internally, usually it will not be called. */
+  /** Since we are using OpenHashSet internally, usually it will not be called.
+    * 由于我们在内部使用OpenHashSet,通常不会调用它*/
   override def deserialize(datum: Any): OpenHashSet[Any] = {
     val iterator = datum.asInstanceOf[Seq[Any]].iterator
     val set = new OpenHashSet[Any]
@@ -51,6 +54,7 @@ private[sql] class OpenHashSetUDT(
 
 /**
  * Creates a new set of the specified type
+  * 创建指定类型的新集合
  */
 case class NewSet(elementType: DataType) extends LeafExpression with CodegenFallback {
 
@@ -130,7 +134,7 @@ case class AddItemToSet(item: Expression, set: Expression)
 }
 
 /**
- * Combines the elements of two sets.
+ * Combines the elements of two sets.结合两组元素
  * For performance, this expression mutates its left input set during evaluation.
  * Note: this expression is internal and created only by the GeneratedAggregate,
  * we don't need to do type check for it.
@@ -179,7 +183,7 @@ case class CombineSets(left: Expression, right: Expression)
 }
 
 /**
- * Returns the number of elements in the input set.
+ * Returns the number of elements in the input set.返回输入集中的元素数
  * Note: this expression is internal and created only by the GeneratedAggregate,
  * we don't need to do type check for it.
  */

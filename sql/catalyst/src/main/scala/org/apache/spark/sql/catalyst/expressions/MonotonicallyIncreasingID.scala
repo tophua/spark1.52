@@ -24,11 +24,14 @@ import org.apache.spark.sql.types.{LongType, DataType}
 
 /**
  * Returns monotonically increasing 64-bit integers.
+  * 返回单调递增的64位整数
  *
  * The generated ID is guaranteed to be monotonically increasing and unique, but not consecutive.
  * The current implementation puts the partition ID in the upper 31 bits, and the lower 33 bits
  * represent the record number within each partition. The assumption is that the data frame has
  * less than 1 billion partitions, and each partition has less than 8 billion records.
+  * 生成的ID保证单调递增且唯一,但不是连续的,当前实现将分区ID置于高31位,低33位表示每个分区内的记录号,
+  * 假设数据框的分区少于10亿,每个分区的记录少于80亿
  *
  * Since this expression is stateful, it cannot be a case object.
  */
@@ -37,6 +40,7 @@ private[sql] case class MonotonicallyIncreasingID() extends LeafExpression with 
   /**
    * Record ID within each partition. By being transient, count's value is reset to 0 every time
    * we serialize and deserialize and initialize it.
+    * 每个分区中的记录ID,通过瞬态,每次序列化和反序列化并初始化时,count的值都会重置为0
    */
   @transient private[this] var count: Long = _
 

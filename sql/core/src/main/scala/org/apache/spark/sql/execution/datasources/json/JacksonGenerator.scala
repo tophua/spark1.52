@@ -29,7 +29,7 @@ import org.apache.spark.sql.types._
 
 private[sql] object JacksonGenerator {
   /** Transforms a single Row to JSON using Jackson
-    *
+    * 使用Jackson将单行转换为JSON
     * @param rowSchema the schema object used for conversion
     * @param gen a JsonGenerator object
     * @param row The row to convert
@@ -75,6 +75,7 @@ private[sql] object JacksonGenerator {
         gen.writeEndObject()
 
       // For UDT, udt.serialize will produce SQL types. So, we need the following three cases.
+        //对于UDT,udt.serialize将生成SQL类型,所以,我们需要以下三种情况
       case (ArrayType(ty, _), v: ArrayData) =>
         gen.writeStartArray()
         v.foreach(ty, (_, value) => valWriter(ty, value))
@@ -111,7 +112,7 @@ private[sql] object JacksonGenerator {
   }
 
   /** Transforms a single InternalRow to JSON using Jackson
-   *
+   * 使用Jackson将单个InternalRow转换为JSON
    * TODO: make the code shared with the other apply method.
    *
    * @param rowSchema the schema object used for conversion
@@ -134,7 +135,9 @@ private[sql] object JacksonGenerator {
       case (BooleanType, v: Boolean) => gen.writeBoolean(v)
       case (DateType, v: Int) => gen.writeString(DateTimeUtils.toJavaDate(v).toString)
       // For UDT values, they should be in the SQL type's corresponding value type.
+        //对于UDT值,它们应该是SQL类型的相应值类型
       // We should not see values in the user-defined class at here.
+        //我们不应该在这里看到用户定义的类中的值
       // For example, VectorUDT's SQL type is an array of double. So, we should expect that v is
       // an ArrayData at here, instead of a Vector.
       case (udt: UserDefinedType[_], v) => valWriter(udt.sqlType, v)

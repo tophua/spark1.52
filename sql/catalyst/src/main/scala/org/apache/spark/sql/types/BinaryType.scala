@@ -28,6 +28,7 @@ import org.apache.spark.sql.catalyst.util.TypeUtils
 /**
  * :: DeveloperApi ::
  * The data type representing `Array[Byte]` values.
+  * 表示“Array [Byte]”值的数据类型
  * Please use the singleton [[DataTypes.BinaryType]].
  */
 @DeveloperApi
@@ -48,6 +49,7 @@ class BinaryType private() extends AtomicType {
 
   /**
    * The default size of a value of the BinaryType is 4096 bytes.
+    * BinaryType的默认值为4096字节
    */
   override def defaultSize: Int = 4096
 

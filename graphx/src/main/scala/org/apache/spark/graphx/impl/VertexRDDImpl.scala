@@ -54,6 +54,7 @@ class VertexRDDImpl[VD] private[graphx] (
   /**
    * Persists the vertex partitions at the specified storage level, ignoring any existing target
    * storage level.
+    * 将顶点分区保留在指定的存储级别,忽略任何现有的目标存储级别
    */
   override def persist(newLevel: StorageLevel): this.type = {
     partitionsRDD.persist(newLevel)
@@ -65,7 +66,8 @@ class VertexRDDImpl[VD] private[graphx] (
     this
   }
 
-  /** Persists the vertex partitions at `targetStorageLevel`, which defaults to MEMORY_ONLY. */
+  /** Persists the vertex partitions at `targetStorageLevel`, which defaults to MEMORY_ONLY.
+    * 将顶点分区保留在`targetStorageLevel`,默认为MEMORY_ONLY */
   override def cache(): this.type = {
     partitionsRDD.persist(targetStorageLevel)
     this
@@ -85,7 +87,7 @@ class VertexRDDImpl[VD] private[graphx] (
     partitionsRDD.getCheckpointFile
   }
 
-  /** The number of vertices in the RDD. */
+  /** The number of vertices in the RDD. RDD中的顶点数*/
   override def count(): Long = {
     partitionsRDD.map(_.size.toLong).reduce(_ + _)
   }

@@ -54,6 +54,7 @@ object SortPrefixUtils {
 
   /**
    * Creates the prefix comparator for the first field in the given schema, in ascending order.
+    * 以升序创建给定模式中第一个字段的前缀比较器
    */
   def getPrefixComparator(schema: StructType): PrefixComparator = {
     if (schema.nonEmpty) {
@@ -68,6 +69,7 @@ object SortPrefixUtils {
 
   /**
    * Creates the prefix computer for the first field in the given schema, in ascending order.
+    * 按升序为给定模式中的第一个字段创建前缀计算机
    */
   def createPrefixGenerator(schema: StructType): UnsafeExternalRowSorter.PrefixComputer = {
     if (schema.nonEmpty) {

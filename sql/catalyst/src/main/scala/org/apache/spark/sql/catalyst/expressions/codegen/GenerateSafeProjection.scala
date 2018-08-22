@@ -25,6 +25,7 @@ import org.apache.spark.sql.types._
 /**
  * Generates byte code that produces a [[MutableRow]] object that can update itself based on a new
  * input [[InternalRow]] for a fixed set of [[Expression Expressions]].
+  * 生成生成[[MutableRow]]对象的字节代码,该对象可以根据一组固定的[[Expression Expressions]]的新输入[InternalRow]更新自身。
  */
 object GenerateSafeProjection extends CodeGenerator[Seq[Expression], Projection] {
 

@@ -30,6 +30,9 @@ import org.apache.parquet.hadoop.{ParquetFileReader, ParquetFileWriter, ParquetO
  * like what [[ParquetOutputCommitter]] does, this output committer writes data directly to the
  * destination folder.  This can be useful for data stored in S3, where directory operations are
  * relatively expensive.
+  *
+  * 用于编写Parquet文件的输出提交程序,而不是像[[ParquetOutputCommitter]]那样写入`_temporary`文件夹,
+  * 这个输出提交者将数据直接写入目标文件夹,这对存储在S3中的数据很有用,其中目录操作相对昂贵
  *
  * To enable this output committer, users may set the "spark.sql.parquet.output.committer.class"
  * property via Hadoop [[Configuration]].  Not that this property overrides

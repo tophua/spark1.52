@@ -44,6 +44,8 @@ class EdgeRDDImpl[ED: ClassTag, VD: ClassTag] private[graphx] (
    * If `partitionsRDD` already has a partitioner, use it. Otherwise assume that the
    * [[PartitionID]]s in `partitionsRDD` correspond to the actual partitions and create a new
    * partitioner that allows co-partitioning with `partitionsRDD`.
+    * 如果`partitionsRDD`已经有分区,请使用它,否则假设`partitionsRDD`中的[[PartitionID]]对应于实际分区,
+    * 并创建一个允许与`partitionsRDD`共同分区的新分区器
    */
   override val partitioner =
     partitionsRDD.partitioner.orElse(Some(new HashPartitioner(partitions.size)))
@@ -53,6 +55,7 @@ class EdgeRDDImpl[ED: ClassTag, VD: ClassTag] private[graphx] (
   /**
    * Persists the edge partitions at the specified storage level, ignoring any existing target
    * storage level.
+    * 在指定的存储级别保留边缘分区,忽略任何现有的目标存储级别
    */
   override def persist(newLevel: StorageLevel): this.type = {
     partitionsRDD.persist(newLevel)
@@ -64,7 +67,8 @@ class EdgeRDDImpl[ED: ClassTag, VD: ClassTag] private[graphx] (
     this
   }
 
-  /** Persists the edge partitions using `targetStorageLevel`, which defaults to MEMORY_ONLY. */
+  /** Persists the edge partitions using `targetStorageLevel`, which defaults to MEMORY_ONLY.
+    * 使用`targetStorageLevel`保留边缘分区,默认为MEMORY_ONLY */
   override def cache(): this.type = {
     partitionsRDD.persist(targetStorageLevel)
     this
@@ -84,7 +88,7 @@ class EdgeRDDImpl[ED: ClassTag, VD: ClassTag] private[graphx] (
     partitionsRDD.getCheckpointFile
   }
 
-  /** The number of edges in the RDD. */
+  /** The number of edges in the RDD.RDD中的边数 */
   override def count(): Long = {
     partitionsRDD.map(_._2.size.toLong).reduce(_ + _)
   }

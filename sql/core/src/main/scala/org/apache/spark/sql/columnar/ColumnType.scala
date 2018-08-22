@@ -30,29 +30,35 @@ import org.apache.spark.unsafe.types.UTF8String
 /**
  * An abstract class that represents type of a column. Used to append/extract Java objects into/from
  * the underlying [[ByteBuffer]] of a column.
+  * 表示列类型的抽象类,用于在列的基础[[ByteBuffer]]中追加/提取Java对象
  *
  * @tparam JvmType Underlying Java type to represent the elements.
  */
 private[sql] sealed abstract class ColumnType[JvmType] {
 
   // The catalyst data type of this column.
+  //此列的catalyst数据类型。
   def dataType: DataType
 
   // A unique ID representing the type.
+  //表示类型的唯一ID
   def typeId: Int
 
   // Default size in bytes for one element of type T (e.g. 4 for `Int`).
+  //类型T的一个元素的默认大小（以字节为单位）（例如，对于“Int”为4）
   def defaultSize: Int
 
   /**
    * Extracts a value out of the buffer at the buffer's current position.
+    * 从缓冲区当前位置的缓冲区中提取一个值
    */
   def extract(buffer: ByteBuffer): JvmType
 
   /**
    * Extracts a value out of the buffer at the buffer's current position and stores in
    * `row(ordinal)`. Subclasses should override this method to avoid boxing/unboxing costs whenever
-   * possible.
+   * possible.]
+    * 从缓冲区当前位置的缓冲区中提取一个值,并存储在`row（ordinal）`中,子类应该覆盖此方法,以尽可能避免装箱/拆箱成本。
    */
   def extract(buffer: ByteBuffer, row: MutableRow, ordinal: Int): Unit = {
     setField(row, ordinal, extract(buffer))
@@ -60,12 +66,14 @@ private[sql] sealed abstract class ColumnType[JvmType] {
 
   /**
    * Appends the given value v of type T into the given ByteBuffer.
+    * 将类型T的给定值v追加到给定的ByteBuffer中
    */
   def append(v: JvmType, buffer: ByteBuffer): Unit
 
   /**
    * Appends `row(ordinal)` of type T into the given ByteBuffer. Subclasses should override this
    * method to avoid boxing/unboxing costs whenever possible.
+    * 将类型为T的row（ordinal）附加到给定的ByteBuffer中,子类应该覆盖此方法,以尽可能避免装箱/拆箱成本。
    */
   def append(row: InternalRow, ordinal: Int, buffer: ByteBuffer): Unit = {
     append(getField(row, ordinal), buffer)
@@ -74,24 +82,28 @@ private[sql] sealed abstract class ColumnType[JvmType] {
   /**
    * Returns the size of the value `row(ordinal)`. This is used to calculate the size of variable
    * length types such as byte arrays and strings.
+    * 返回值`row（ordinal）`的大小,这用于计算可变长度类型的大小,例如字节数组和字符串
    */
   def actualSize(row: InternalRow, ordinal: Int): Int = defaultSize
 
   /**
    * Returns `row(ordinal)`. Subclasses should override this method to avoid boxing/unboxing costs
    * whenever possible.
+    * 返回`row（ordinal）`,子类应该覆盖此方法,以尽可能避免装箱/拆箱成本
    */
   def getField(row: InternalRow, ordinal: Int): JvmType
 
   /**
    * Sets `row(ordinal)` to `field`. Subclasses should override this method to avoid boxing/unboxing
    * costs whenever possible.
+    * 将`row（ordinal）`设置为`field`,子类应该覆盖此方法,以尽可能避免装箱/拆箱成本
    */
   def setField(row: MutableRow, ordinal: Int, value: JvmType): Unit
 
   /**
    * Copies `from(fromOrdinal)` to `to(toOrdinal)`. Subclasses should override this method to avoid
    * boxing/unboxing costs whenever possible.
+    * 将from（fromOrdinal）复制到to toOrdinal,子类应该覆盖此方法,以尽可能避免装箱/拆箱成本。
    */
   def copyField(from: InternalRow, fromOrdinal: Int, to: MutableRow, toOrdinal: Int): Unit = {
     to.update(toOrdinal, from.get(fromOrdinal, dataType))
@@ -99,6 +111,7 @@ private[sql] sealed abstract class ColumnType[JvmType] {
 
   /**
    * Creates a duplicated copy of the value.
+    * 创建值的重复副本
    */
   def clone(v: JvmType): JvmType = v
   //stripSuffix去掉<string>字串中结尾的字符
@@ -113,6 +126,7 @@ private[sql] abstract class NativeColumnType[T <: AtomicType](
 
   /**
    * Scala TypeTag. Can be used to create primitive arrays and hash tables.
+    * Scala TypeTag,可用于创建原始数组和哈希表
    */
   def scalaTag: TypeTag[dataType.InternalType] = dataType.tag
 }

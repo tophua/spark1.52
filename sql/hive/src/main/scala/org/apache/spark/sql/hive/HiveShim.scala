@@ -45,12 +45,14 @@ import org.apache.spark.util.Utils
 
 private[hive] object HiveShim {
   // Precision and scale to pass for unlimited decimals; these are the same as the precision and
+  //精度和比例传递无限小数; 这些与精度相同
   // scale Hive 0.13 infers for BigDecimals from sources that don't specify them (e.g. UDFs)
   val UNLIMITED_DECIMAL_PRECISION = 38
   val UNLIMITED_DECIMAL_SCALE = 18
 
   /*
    * This function in hive-0.13 become private, but we have to do this to walkaround hive bug
+   * hive-0.13中的这个功能变得私有,但我们必须这样做才能解决hive bug
    */
   private def appendReadColumnNames(conf: Configuration, cols: Seq[String]) {
     val old: String = conf.get(ColumnProjectionUtils.READ_COLUMN_NAMES_CONF_STR, "")
@@ -70,6 +72,7 @@ private[hive] object HiveShim {
 
   /*
    * Cannot use ColumnProjectionUtils.appendReadColumns directly, if ids is null or empty
+   * 如果ids为null或为空，则无法直接使用ColumnProjectionUtils.appendReadColumns
    */
   def appendReadColumns(conf: Configuration, ids: Seq[Integer], names: Seq[String]) {
     if (ids != null && ids.nonEmpty) {
@@ -114,6 +117,7 @@ private[hive] object HiveShim {
   /**
    * This class provides the UDF creation and also the UDF instance serialization and
    * de-serialization cross process boundary.
+    * 此类提供UDF创建以及UDF实例序列化和反序列化跨进程边界。
    *
    * Detail discussion can be found at https://github.com/apache/spark/pull/3640
    *
@@ -159,13 +163,17 @@ private[hive] object HiveShim {
 
     def writeExternal(out: java.io.ObjectOutput) {
       // output the function name
+      //输出函数名称
       out.writeUTF(functionClassName)
 
       // Write a flag if instance is null or not
+      //如果实例为null，则写一个标志
       out.writeBoolean(instance != null)
       if (instance != null) {
         // Some of the UDF are serializable, but some others are not
+        //一些UDF是可序列化的,但有些则不是
         // Hive Utilities can handle both cases
+        //Hive Utilities可以处理这两种情况
         val baos = new java.io.ByteArrayOutputStream()
         serializePlan(instance, baos)
         val functionInBytes = baos.toByteArray
@@ -178,6 +186,7 @@ private[hive] object HiveShim {
 
     def readExternal(in: java.io.ObjectInput) {
       // read the function name
+      //读取函数名称
       functionClassName = in.readUTF()
 
       if (in.readBoolean()) {
@@ -188,6 +197,7 @@ private[hive] object HiveShim {
         in.read(functionInBytes, 0, functionInBytesLength)
 
         // deserialize the function object via Hive Utilities
+        //通过Hive Utilities反序列化函数对象
         instance = deserializePlan[AnyRef](new java.io.ByteArrayInputStream(functionInBytes),
           Utils.getContextOrSparkClassLoader.loadClass(functionClassName))
       }
@@ -211,6 +221,7 @@ private[hive] object HiveShim {
 
   /*
    * Bug introduced in hive-0.13. FileSinkDesc is serializable, but its member path is not.
+   * 在hive-0.13中引入了Bug,FileSinkDesc是可序列化的,但其成员路径不是
    * Fix it through wrapper.
    */
   implicit def wrapperToFileSinkDesc(w: ShimFileSinkDesc): FileSinkDesc = {

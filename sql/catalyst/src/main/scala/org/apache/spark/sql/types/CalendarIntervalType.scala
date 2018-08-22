@@ -24,7 +24,7 @@ import org.apache.spark.annotation.DeveloperApi
  * :: DeveloperApi ::
  * The data type representing calendar time intervals. The calendar time interval is stored
  * internally in two components: number of months the number of microseconds.
- *
+ * 表示日历时间间隔的数据类型,日历时间间隔内部存储在两个组件中：月数微秒数
  * Note that calendar intervals are not comparable.
  *
  * Please use the singleton [[DataTypes.CalendarIntervalType]].

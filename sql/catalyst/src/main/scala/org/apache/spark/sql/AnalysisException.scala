@@ -22,6 +22,7 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * :: DeveloperApi ::
  * Thrown when a query fails to analyze, usually because the query itself is invalid.
+  * 在查询无法分析时抛出,通常是因为查询本身无效
  */
 @DeveloperApi
 class AnalysisException protected[sql] (

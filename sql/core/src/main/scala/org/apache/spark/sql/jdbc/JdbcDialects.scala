@@ -37,6 +37,7 @@ case class JdbcType(databaseTypeDefinition : String, jdbcNullType : Int)
  * :: DeveloperApi ::
  * Encapsulates everything (extensions, workarounds, quirks) to handle the
  * SQL dialect of a certain database or jdbc driver.
+  * 封装所有内容(扩展,变通方法,怪癖)来处理某个数据库或jdbc驱动程序的SQL方言。
  * Lots of databases define types that aren't explicitly supported
  * by the JDBC spec.  Some JDBC drivers also report inaccurate
  * information---for instance, BIT(n>1) being reported as a BIT type is quite
@@ -44,6 +45,10 @@ case class JdbcType(databaseTypeDefinition : String, jdbcNullType : Int)
  * does not appear to be a standard name for an unbounded string or binary
  * type; we use BLOB and CLOB by default but override with database-specific
  * alternatives when these are absent or do not behave correctly.
+  * 许多数据库定义了JDBC规范未明确支持的类型,一些JDBC驱动程序也报告不准确的信息---
+  * 例如,BIT（n> 1）被报告为BIT类型是很常见的，即使JDBC中的BIT用于单比特值,
+  * 此外,似乎没有无界字符串或二进制类型的标准名称;
+  * 我们默认使用BLOB和CLOB,但是当这些替代品不存在或行为不正确时覆盖它们。
  *
  * Currently, the only thing done by the dialect is type mapping.
  * `getCatalystType` is used when reading from a JDBC table and `getJDBCType`
@@ -56,6 +61,7 @@ case class JdbcType(databaseTypeDefinition : String, jdbcNullType : Int)
 abstract class JdbcDialect {
   /**
    * Check if this dialect instance can handle a certain jdbc url.
+    * 检查此方言实例是否可以处理某个jdbc url
    * @param url the jdbc url.
    * @return True if the dialect can be applied on the given jdbc url.
    * @throws NullPointerException if the url is null.
@@ -64,6 +70,7 @@ abstract class JdbcDialect {
 
   /**
    * Get the custom datatype mapping for the given jdbc meta information.
+    * 获取给定jdbc元信息的自定义数据类型映射
    * @param sqlType The sql type (see java.sql.Types)
    * @param typeName The sql type name (e.g. "BIGINT UNSIGNED")
    * @param size The size of the type.
@@ -76,6 +83,7 @@ abstract class JdbcDialect {
 
   /**
    * Retrieve the jdbc / sql type for a given datatype.
+    * 检索给定数据类型的jdbc/sql类型
    * @param dt The datatype (e.g. [[org.apache.spark.sql.types.StringType]])
    * @return The new JdbcType if there is an override for this DataType
    */
@@ -84,6 +92,8 @@ abstract class JdbcDialect {
   /**
    * Quotes the identifier. This is used to put quotes around the identifier in case the column
    * name is a reserved keyword, or in case it contains characters that require quotes (e.g. space).
+    *
+    * 引用标识符,这用于在标识符引用标识符的情况下在标识符周围加上引号,这用于在列的情况下在标识符周围加上引号
    */
   def quoteIdentifier(colName: String): String = {
     s""""$colName""""
@@ -93,10 +103,13 @@ abstract class JdbcDialect {
 /**
  * :: DeveloperApi ::
  * Registry of dialects that apply to every new jdbc [[org.apache.spark.sql.DataFrame]].
+  * 适用于每个新jdbc [[org.apache.spark.sql.DataFrame]]的方言注册表
  *
  * If multiple matching dialects are registered then all matching ones will be
  * tried in reverse order. A user-added dialect will thus be applied first,
  * overwriting the defaults.
+  * 如果注册了多个匹配的方言,则将以相反的顺序尝试所有匹配的方言,
+  * 因此,将首先应用用户添加的方言,覆盖默认值。
  *
  * Note that all new dialects are applied to new jdbc DataFrames only. Make
  * sure to register your dialects first.
@@ -109,6 +122,7 @@ object JdbcDialects {
   /**
    * Register a dialect for use on all new matching jdbc [[org.apache.spark.sql.DataFrame]].
    * Readding an existing dialect will cause a move-to-front.
+    * 注册方言以用于所有新匹配的jdbc [[org.apache.spark.sql.DataFrame]],读取现有的方言将导致前进
    * @param dialect The new dialect.
    */
   def registerDialect(dialect: JdbcDialect) : Unit = {
@@ -117,6 +131,7 @@ object JdbcDialects {
 
   /**
    * Unregister a dialect. Does nothing if the dialect is not registered.
+    * 取消注册方言,如果没有注册方言,什么都不做
    * @param dialect The jdbc dialect.
    */
   def unregisterDialect(dialect : JdbcDialect) : Unit = {
@@ -129,6 +144,7 @@ object JdbcDialects {
 
   /**
    * Fetch the JdbcDialect class corresponding to a given database url.
+    * 获取与给定数据库URL对应的JdbcDialect类
    */
   private[sql] def get(url: String): JdbcDialect = {
     val matchingDialects = dialects.filter(_.canHandle(url))
@@ -143,8 +159,10 @@ object JdbcDialects {
 /**
  * :: DeveloperApi ::
  * AggregatedDialect can unify multiple dialects into one virtual Dialect.
+  * AggregatedDialect可以将多个方言统一为一个虚拟方言
  * Dialects are tried in order, and the first dialect that does not return a
  * neutral element will will.
+  * 方言是按顺序尝试的,第一种不返回中性元素的方言将会
  * @param dialects List of dialects.
  */
 @DeveloperApi
@@ -177,6 +195,7 @@ case object NoopDialect extends JdbcDialect {
 /**
  * :: DeveloperApi ::
  * Default postgres dialect, mapping bit/cidr/inet on read and string/binary/boolean on write.
+  * 默认的postgres方言，在读取时映射bit / cidr / inet，在写入时映射string / binary / boolean
  */
 @DeveloperApi
 case object PostgresDialect extends JdbcDialect {
@@ -227,6 +246,7 @@ case object MySQLDialect extends JdbcDialect {
 /**
  * :: DeveloperApi ::
  * Default Oracle dialect, mapping a nonspecific numeric type to a general decimal type.
+  * 默认Oracle方言，将非特定数字类型映射到一般十进制类型
  */
 @DeveloperApi
 case object OracleDialect extends JdbcDialect {

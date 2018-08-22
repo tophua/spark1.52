@@ -30,6 +30,7 @@ import org.apache.spark.sql.types._
 
 /**
  * A parser for foreign DDL commands.
+  * 外部DDL命令的解析器
  */
 class DDLParser(parseQuery: String => LogicalPlan)
   extends AbstractSparkSQLParser with DataTypeParser with Logging {
@@ -46,6 +47,7 @@ class DDLParser(parseQuery: String => LogicalPlan)
 
   // Keyword is a convention with AbstractSparkSQLParser, which will scan all of the `Keyword`
   // properties via reflection the class in runtime for constructing the SqlLexical object
+  //关键字是AbstractSparkSQLParser的约定,它将通过在运行时反射类来构建SqlLexical对象来扫描所有`Keyword`属性
   protected val CREATE = Keyword("CREATE")
   protected val TEMPORARY = Keyword("TEMPORARY")
   protected val TABLE = Keyword("TABLE")
@@ -126,6 +128,7 @@ class DDLParser(parseQuery: String => LogicalPlan)
   }
 
   // This is the same as tableIdentifier in SqlParser.
+  //这与SqlParser中的tableIdentifier相同
   protected lazy val tableIdentifier: Parser[TableIdentifier] =
     (ident <~ ".").? ~ ident ^^ {
       case maybeDbName ~ tableName => TableIdentifier(tableName, maybeDbName)

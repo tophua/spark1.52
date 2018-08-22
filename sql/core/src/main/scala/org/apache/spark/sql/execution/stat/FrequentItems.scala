@@ -26,12 +26,14 @@ import org.apache.spark.sql.{Row, Column, DataFrame}
 
 private[sql] object FrequentItems extends Logging {
 
-  /** A helper class wrapping `MutableMap[Any, Long]` for simplicity. */
+  /** A helper class wrapping `MutableMap[Any, Long]` for simplicity.
+    * 为简单起见，包装`MutableMap [Any，Long]`的辅助类*/
   private class FreqItemCounter(size: Int) extends Serializable {
     val baseMap: MutableMap[Any, Long] = MutableMap.empty[Any, Long]
     /**
      * Add a new example to the counts if it exists, otherwise deduct the count
      * from existing items.
+      * 如果存在,则向计数添加新示例,否则从现有项目中扣除计数
      */
     def add(key: Any, count: Long): this.type = {
       if (baseMap.contains(key))  {
@@ -55,7 +57,7 @@ private[sql] object FrequentItems extends Logging {
     }
 
     /**
-     * Merge two maps of counts.
+     * Merge two maps of counts.合并两个计数图
      * @param other The map containing the counts for that partition
      */
     def merge(other: FreqItemCounter): this.type = {
@@ -69,6 +71,7 @@ private[sql] object FrequentItems extends Logging {
   /**
    * Finding frequent items for columns, possibly with false positives. Using the
    * frequent element count algorithm described in
+    * 查找列的频繁项目,可能包含误报,使用中描述的频繁元素计数算法
    * [[http://dx.doi.org/10.1145/762471.762473, proposed by Karp, Schenker, and Papadimitriou]].
    * The `support` should be greater than 1e-4.
    * For Internal use only.
@@ -117,6 +120,7 @@ private[sql] object FrequentItems extends Logging {
     val justItems = freqItems.map(m => m.baseMap.keys.toArray)
     val resultRow = Row(justItems : _*)
     // append frequent Items to the column name for easy debugging
+    //将频繁的项附加到列名称以便于调试
     val outputCols = colInfo.map { v =>
       StructField(v._1 + "_freqItems", ArrayType(v._2, false))
     }

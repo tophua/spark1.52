@@ -20,19 +20,24 @@ package org.apache.spark.graphx
 /**
  * Represents the way edges are assigned to edge partitions based on their source and destination
  * vertex IDs.
+  * 表示根据边源分区的源和目标顶点ID将边分配给边分区的方式
  */
 trait PartitionStrategy extends Serializable {
-  /** Returns the partition number for a given edge. */
+  /** Returns the partition number for a given edge.
+    * 返回给定边的分区号*/
   def getPartition(src: VertexId, dst: VertexId, numParts: PartitionID): PartitionID
 }
 
 /**
  * Collection of built-in [[PartitionStrategy]] implementations.
+  * 内置[[PartitionStrategy]]实现的集合
  */
 object PartitionStrategy {
   /**
    * Assigns edges to partitions using a 2D partitioning of the sparse edge adjacency matrix,
    * guaranteeing a `2 * sqrt(numParts)` bound on vertex replication.
+    *
+    * 使用稀疏边缘邻接矩阵的2D分区将边分配给分区,保证在顶点复制上绑定“2 * sqrt（numParts）”
    *
    * Suppose we have a graph with 12 vertices that we want to partition
    * over 9 machines.  We can use the following sparse matrix representation:
@@ -97,6 +102,7 @@ object PartitionStrategy {
   /**
    * Assigns edges to partitions using only the source vertex ID, colocating edges with the same
    * source.
+    * 仅使用源顶点ID将边分配给分区,使用相同的源共置边
    */
   case object EdgePartition1D extends PartitionStrategy {
     override def getPartition(src: VertexId, dst: VertexId, numParts: PartitionID): PartitionID = {
@@ -109,6 +115,8 @@ object PartitionStrategy {
   /**
    * Assigns edges to partitions by hashing the source and destination vertex IDs, resulting in a
    * random vertex cut that colocates all same-direction edges between two vertices.
+    *
+    * 通过散列源顶点ID和目标顶点ID将边分配给分区,从而产生随机顶点切割,以便在两个顶点之间放置所有相同方向的边。
    */
   case object RandomVertexCut extends PartitionStrategy {
     override def getPartition(src: VertexId, dst: VertexId, numParts: PartitionID): PartitionID = {
@@ -121,6 +129,8 @@ object PartitionStrategy {
    * Assigns edges to partitions by hashing the source and destination vertex IDs in a canonical
    * direction, resulting in a random vertex cut that colocates all edges between two vertices,
    * regardless of direction.
+    * 通过在规范方向上对源和目标顶点ID进行散列,将边分配给分区,从而产生随机顶点切割,
+    * 无论方向如何,都会在两个顶点之间放置所有边。
    */
   case object CanonicalRandomVertexCut extends PartitionStrategy {
     override def getPartition(src: VertexId, dst: VertexId, numParts: PartitionID): PartitionID = {
@@ -132,7 +142,8 @@ object PartitionStrategy {
     }
   }
 
-  /** Returns the PartitionStrategy with the specified name. */
+  /** Returns the PartitionStrategy with the specified name.
+    * 返回具有指定名称的PartitionStrategy*/
   def fromString(s: String): PartitionStrategy = s match {
     case "RandomVertexCut" => RandomVertexCut
     case "EdgePartition1D" => EdgePartition1D

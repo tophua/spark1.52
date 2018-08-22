@@ -66,6 +66,7 @@ abstract class VertexRDD[VD](
 
   /**
    * Provides the `RDD[(VertexId, VD)]` equivalent output.
+    * 提供RDD [（VertexId，VD）]等效输出
    */
   override def compute(part: Partition, context: TaskContext): Iterator[(VertexId, VD)] = {
     firstParent[ShippableVertexPartition[VD]].iterator(part, context).next().iterator
@@ -75,11 +76,13 @@ abstract class VertexRDD[VD](
    * Construct a new VertexRDD that is indexed by only the visible vertices. The resulting
    * VertexRDD will be based on a different index and can no longer be quickly joined with this
    * RDD.
+    * 构造一个仅由可见顶点索引的新VertexRDD,生成的VertexRDD将基于不同的索引,并且无法再与此RDD快速连接
    */
   def reindex(): VertexRDD[VD]
 
   /**
    * Applies a function to each `VertexPartition` of this RDD and returns a new VertexRDD.
+    * 将函数应用于此RDD的每个“VertexPartition”并返回一个新的VertexRDD
    */
   private[graphx] def mapVertexPartitions[VD2: ClassTag](
       f: ShippableVertexPartition[VD] => ShippableVertexPartition[VD2])
@@ -89,6 +92,8 @@ abstract class VertexRDD[VD](
    * Restricts the vertex set to the set of vertices satisfying the given predicate. This operation
    * preserves the index for efficient joins with the original RDD, and it sets bits in the bitmask
    * rather than allocating new memory.
+    *
+    * 将顶点集限制为满足给定谓词的顶点集,此操作保留索引以与原始RDD进行有效连接,并在位掩码中设置位而不是分配新内存
    *
    * It is declared and defined here to allow refining the return type from `RDD[(VertexId, VD)]` to
    * `VertexRDD[VD]`.
@@ -101,6 +106,7 @@ abstract class VertexRDD[VD](
 
   /**
    * Maps each vertex attribute, preserving the index.
+    * 映射每个顶点属性,保留索引
    *
    * @tparam VD2 the type returned by the map function
    *
@@ -112,6 +118,7 @@ abstract class VertexRDD[VD](
 
   /**
    * Maps each vertex attribute, additionally supplying the vertex ID.
+    * 映射每个顶点属性,另外提供顶点ID
    *
    * @tparam VD2 the type returned by the map function
    *
@@ -124,6 +131,9 @@ abstract class VertexRDD[VD](
   /**
    * For each VertexId present in both `this` and `other`, minus will act as a set difference
    * operation returning only those unique VertexId's present in `this`.
+    *
+    * 对于“this”和“other”中存在的每个VertexId,
+    * minus将作为一个集合差异操作,仅返回“this”中存在的唯一VertexId
    *
    * @param other an RDD to run the set operation against
    */
@@ -132,6 +142,9 @@ abstract class VertexRDD[VD](
   /**
    * For each VertexId present in both `this` and `other`, minus will act as a set difference
    * operation returning only those unique VertexId's present in `this`.
+    *
+    * 对于“this”和“other”中存在的每个VertexId,minus将作为一个集合差异操作,
+    * 仅返回“this”中存在的唯一VertexId。
    *
    * @param other a VertexRDD to run the set operation against
    */
@@ -141,6 +154,9 @@ abstract class VertexRDD[VD](
    * For each vertex present in both `this` and `other`, `diff` returns only those vertices with
    * differing values; for values that are different, keeps the values from `other`. This is
    * only guaranteed to work if the VertexRDDs share a common ancestor.
+    *
+    * 对于'this`和`other`中存在的每个顶点，`diff`仅返回具有不同值的顶点;
+    * 对于不同的值,保持“其他”的值,只有VertexRDD共享一个共同的祖先,才能保证这一点
    *
    * @param other the other RDD[(VertexId, VD)] with which to diff against.
    */
@@ -150,6 +166,9 @@ abstract class VertexRDD[VD](
    * For each vertex present in both `this` and `other`, `diff` returns only those vertices with
    * differing values; for values that are different, keeps the values from `other`. This is
    * only guaranteed to work if the VertexRDDs share a common ancestor.
+    *
+    * 对于'this`和`other`中存在的每个顶点,`diff`仅返回具有不同值的顶点; 对于不同的值,保持“其他”的值,
+    * 只有VertexRDD共享一个共同的祖先,才能保证这一点
    *
    * @param other the other VertexRDD with which to diff against.
    */
@@ -160,6 +179,9 @@ abstract class VertexRDD[VD](
    * both VertexRDDs do not share the same index. The resulting vertex set contains an entry for
    * each vertex in `this`.
    * If `other` is missing any vertex in this VertexRDD, `f` is passed `None`.
+    *
+    * Left将此RDD与另一个具有相同索引的VertexRDD连接起来,如果两个VertexRDD不共享相同的索引,
+    * 则此函数将失败, 生成的顶点集包含“this”中每个顶点的条目,如果`other`缺少此VertexRDD中的任何顶点,则`f`传递给'None`
    *
    * @tparam VD2 the attribute type of the other VertexRDD
    * @tparam VD3 the attribute type of the resulting VertexRDD

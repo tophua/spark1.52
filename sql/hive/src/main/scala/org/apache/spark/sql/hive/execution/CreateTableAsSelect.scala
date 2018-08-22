@@ -25,10 +25,13 @@ import org.apache.spark.sql.{AnalysisException, Row, SQLContext}
 
 /**
  * Create table and insert the query result into it.
+  * 创建表并将查询结果插入其中
  * @param tableDesc the Table Describe, which may contains serde, storage handler etc.
- * @param query the query whose result will be insert into the new relation
+  *                  表描述,可能包含serde,存储处理程序等
+ * @param query the query whose result will be insert into the new relation查询的结果将插入到新关系中
  * @param allowExisting allow continue working if it's already exists, otherwise
  *                      raise exception
+  *                      如果已经存在则允许继续工作,否则引发异常
  */
 private[hive]
 case class CreateTableAsSelect(
@@ -62,6 +65,7 @@ case class CreateTableAsSelect(
       val withSchema = if (withFormat.schema.isEmpty) {
         // Hive doesn't support specifying the column list for target table in CTAS
         // However we don't think SparkSQL should follow that.
+        //Hive不支持在CTAS中指定目标表的列列表但是我们认为SparkSQL不应该遵循这一点。
         tableDesc.copy(schema =
         query.output.map(c =>
           HiveColumn(c.name, HiveMetastoreTypes.toMetastoreType(c.dataType), null)))
@@ -72,6 +76,7 @@ case class CreateTableAsSelect(
       hiveContext.catalog.client.createTable(withSchema)
 
       // Get the Metastore Relation
+      //获取Metastore关系
       hiveContext.catalog.lookupRelation(Seq(database, tableName), None) match {
         case r: MetastoreRelation => r
       }
@@ -79,9 +84,11 @@ case class CreateTableAsSelect(
     // TODO ideally, we should get the output data ready first and then
     // add the relation into catalog, just in case of failure occurs while data
     // processing.
+    //将关系添加到目录中,以防数据处理时发生故障
     if (hiveContext.catalog.tableExists(Seq(database, tableName))) {
       if (allowExisting) {
         // table already exists, will do nothing, to keep consistent with Hive
+        //表已经存在,将无所事事,与Hive保持一致
       } else {
         throw new AnalysisException(s"$database.$tableName already exists.")
       }

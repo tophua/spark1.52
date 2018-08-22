@@ -32,6 +32,7 @@ import org.apache.spark.sql.types.{DoubleType, StructType}
  * :: Experimental ::
  * A one-hot encoder that maps a column of category indices to a column of binary vectors, with
  * at most a single one-value per row that indicates the input category index.
+  * 一种单热编码器,它将一列类别索引映射到一列二进制向量,每行最多一个单值,表示输入类别索引。
  * For example with 5 categories, an input value of 2.0 would map to an output vector of
  * `[0.0, 0.0, 1.0, 0.0]`.
  * The last category is not included by default (configurable via [[OneHotEncoder!.dropLast]]
@@ -50,6 +51,7 @@ class OneHotEncoder(override val uid: String) extends Transformer
 
   /**
    * Whether to drop the last category in the encoded vector (default: true)
+    * 是否删除编码向量中的最后一个类别(默认值：true)
    * @group param
    */
   final val dropLast: BooleanParam =
@@ -148,7 +150,7 @@ class OneHotEncoder(override val uid: String) extends Transformer
     }
     val metadata = outputAttrGroup.toMetadata()
 
-    // data transformation
+    // data transformation 数据转换
     val size = outputAttrGroup.size
     val oneValue = Array(1.0)
     val emptyValues = Array[Double]()

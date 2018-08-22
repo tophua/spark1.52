@@ -26,6 +26,7 @@ import org.apache.spark.sql.types.StructType
 
 /**
  * Utility functions used by the query planner to convert our plan to new aggregation code path.
+  * 查询计划程序用于将计划转换为新聚合代码路径的实用程序函数
  */
 object Utils {
   def supportsTungstenAggregate(

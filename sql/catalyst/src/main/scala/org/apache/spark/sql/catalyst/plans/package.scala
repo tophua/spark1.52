@@ -20,5 +20,6 @@ package org.apache.spark.sql.catalyst
 /**
  * A a collection of common abstractions for query plans as well as
  * a base logical plan representation.
+  * 查询计划的常见抽象集合以及基本逻辑计划表示
  */
 package object plans

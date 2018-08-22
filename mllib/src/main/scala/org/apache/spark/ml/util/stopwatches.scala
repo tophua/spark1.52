@@ -31,12 +31,14 @@ private[spark] abstract class Stopwatch extends Serializable {
 
   /**
    * Name of the stopwatch.
+    * 秒表的名称
    */
   val name: String
 
   /**
    * Starts the stopwatch.
    * Throws an exception if the stopwatch is already running.
+    * 如果秒表已在运行,则会引发异常
    */
   def start(): Unit = {
     assume(!running, "start() called but the stopwatch is already running.")
@@ -46,6 +48,7 @@ private[spark] abstract class Stopwatch extends Serializable {
 
   /**
    * Stops the stopwatch and returns the duration of the last session in milliseconds.
+    * 停止秒表并以毫秒为单位返回上一个会话的持续时间
    * Throws an exception if the stopwatch is not running.
    */
   def stop(): Long = {
@@ -64,6 +67,7 @@ private[spark] abstract class Stopwatch extends Serializable {
   /**
    * Returns total elapsed time in milliseconds, not counting the current session if the stopwatch
    * is running.
+    * 返回总耗用时间(以毫秒为单位),如果秒表正在运行,则不计算当前会话
    */
   def elapsed(): Long
 
@@ -71,11 +75,13 @@ private[spark] abstract class Stopwatch extends Serializable {
 
   /**
    * Gets the current time in milliseconds.
+    * 获取当前时间(以毫秒为单位)
    */
   protected def now: Long = System.currentTimeMillis()
 
   /**
    * Adds input duration to total elapsed time.
+    * 将输入持续时间添加到总耗用时间
    */
   protected def add(duration: Long): Unit
 }
@@ -96,6 +102,7 @@ private[spark] class LocalStopwatch(override val name: String) extends Stopwatch
 
 /**
  * A distributed [[Stopwatch]] using Spark accumulator.
+  * 使用Spark累加器的分布式[[秒表]]
  * @param sc SparkContext
  */
 private[spark] class DistributedStopwatch(
@@ -113,6 +120,7 @@ private[spark] class DistributedStopwatch(
 
 /**
  * A multiple stopwatch that contains local and distributed stopwatches.
+  * 一个包含本地和分布式秒表的多秒表
  * @param sc SparkContext
  */
 private[spark] class MultiStopwatch(@transient private val sc: SparkContext) extends Serializable {

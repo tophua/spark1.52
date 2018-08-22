@@ -26,12 +26,14 @@ import org.apache.spark.sql.DataFrame
 /**
  * :: DeveloperApi ::
  * Abstract class for estimators that fit models to data.
+  * 适用于数据模型的估算器的抽象类
  */
 @DeveloperApi
 abstract class Estimator[M <: Model[M]] extends PipelineStage {
 
   /**
    * Fits a single model to the input data with optional parameters.
+    * 使用可选参数使单个模型适合输入数据
    *
    * @param dataset input dataset
    * @param firstParamPair the first param pair, overrides embedded params
@@ -49,6 +51,7 @@ abstract class Estimator[M <: Model[M]] extends PipelineStage {
 
   /**
    * Fits a single model to the input data with provided parameter map.
+    * 使用提供的参数映射使单个模型适合输入数据
    *
    * @param dataset input dataset
    * @param paramMap Parameter map.
@@ -61,14 +64,17 @@ abstract class Estimator[M <: Model[M]] extends PipelineStage {
 
   /**
    * Fits a model to the input data.
+    * 使模型适合输入数据
    */
   def fit(dataset: DataFrame): M
 
   /**
    * Fits multiple models to the input data with multiple sets of parameters.
+    * 使用多组参数使多个模型适合输入数据
    * The default implementation uses a for loop on each parameter map.
+    * 默认实现在每个参数映射上使用for循环
    * Subclasses could override this to optimize multi-model training.
-   *
+   *子类可以覆盖它以优化多模型训练
    * @param dataset input dataset
    * @param paramMaps An array of parameter maps.
    *                  These values override any specified in this Estimator's embedded ParamMap.

@@ -23,8 +23,9 @@ import org.apache.spark.sql.types._
 
 /**
  * A function that calculates bitwise and(&) of two numbers.
- *
+ * 一种计算两个数字的按位和(＆)的函数
  * Code generation inherited from BinaryArithmetic.
+  * 代码生成继承自二进制算术
  */
 case class BitwiseAnd(left: Expression, right: Expression) extends BinaryArithmetic {
 
@@ -48,8 +49,9 @@ case class BitwiseAnd(left: Expression, right: Expression) extends BinaryArithme
 
 /**
  * A function that calculates bitwise or(|) of two numbers.
- *
+ * 一个计算两个数字的按位或(|)的函数
  * Code generation inherited from BinaryArithmetic.
+  * 代码生成继承自二进制算术
  */
 case class BitwiseOr(left: Expression, right: Expression) extends BinaryArithmetic {
 
@@ -73,7 +75,7 @@ case class BitwiseOr(left: Expression, right: Expression) extends BinaryArithmet
 
 /**
  * A function that calculates bitwise xor of two numbers.
- *
+ * 一个计算两个数字的按位xor的函数
  * Code generation inherited from BinaryArithmetic.
  */
 case class BitwiseXor(left: Expression, right: Expression) extends BinaryArithmetic {
@@ -98,6 +100,7 @@ case class BitwiseXor(left: Expression, right: Expression) extends BinaryArithme
 
 /**
  * A function that calculates bitwise not(~) of a number.
+  * 一种计算按位数而不是（〜）数字的函数
  */
 case class BitwiseNot(child: Expression) extends UnaryExpression with ExpectsInputTypes {
 

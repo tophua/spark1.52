@@ -20,6 +20,7 @@ package org.apache.spark.sql
 /**
  * Support for running Spark SQL queries using functionality from Apache Hive (does not require an
  * existing Hive installation).  Supported Hive features include:
+  * 支持使用Apache Hive的功能运行Spark SQL查询(不需要现有的Hive安装),支持的Hive功能包括：
  *  - Using HiveQL to express queries.
  *  - Reading metadata from the Hive Metastore using HiveSerDes.
  *  - Hive UDFs, UDAs, UDTs

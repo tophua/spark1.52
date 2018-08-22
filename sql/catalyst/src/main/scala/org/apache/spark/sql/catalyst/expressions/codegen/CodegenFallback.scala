@@ -21,6 +21,7 @@ import org.apache.spark.sql.catalyst.expressions.{Nondeterministic, Expression}
 
 /**
  * A trait that can be used to provide a fallback mode for expression code generation.
+  * 可用于为表达式代码生成提供回退模式的特征
  */
 trait CodegenFallback extends Expression {
 

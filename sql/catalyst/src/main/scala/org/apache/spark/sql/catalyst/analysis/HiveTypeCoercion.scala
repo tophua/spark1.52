@@ -30,6 +30,9 @@ import org.apache.spark.sql.types._
  * participate in operations into compatible ones.  Most of these rules are based on Hive semantics,
  * but they do not introduce any dependencies on the hive codebase.  For this reason they remain in
  * Catalyst until we have a more standard set of coercions.
+  * [规则规则]的集合,可用于将参与操作的不同类型强制转换为兼容的类型,
+  * 这些规则中的大多数都基于Hive语义,但它们不会对hive代码库引入任何依赖性,
+  * 出于这个原因,他们会留在Catalyst中,直到我们有更多标准的强制措施。
  */
 object HiveTypeCoercion {
 
@@ -52,6 +55,7 @@ object HiveTypeCoercion {
 
   // See https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Types.
   // The conversion for integral and floating point types have a linear widening hierarchy:
+  //积分和浮点类型的转换具有线性扩展层次结构
   private val numericPrecedence =
     IndexedSeq(
       ByteType,
@@ -63,9 +67,12 @@ object HiveTypeCoercion {
 
   /**
    * Find the tightest common type of two types that might be used in a binary expression.
+    * 找到可能在二进制表达式中使用的两种类型的最紧密的常见类型
    * This handles all numeric types except fixed-precision decimals interacting with each other or
    * with primitive types, because in that case the precision and scale of the result depends on
    * the operation. Those rules are implemented in [[HiveTypeCoercion.DecimalPrecision]].
+    * 这将处理除固定精度小数彼此交互或与基本类型交互的所有数字类型,因为在这种情况下,
+    * 结果的精度和比例取决于操作,这些规则在[[HiveTypeCoercion.DecimalPrecision]]中实现
    */
   val findTightestCommonTypeOfTwo: (DataType, DataType) => Option[DataType] = {
     case (t1, t2) if t1 == t2 => Some(t1)
@@ -78,6 +85,7 @@ object HiveTypeCoercion {
       Some(t1)
 
     // Promote numeric types to the highest of the two
+      //将数字类型提升到两者中的最高者
     case (t1, t2) if Seq(t1, t2).forall(numericPrecedence.contains) =>
       val index = numericPrecedence.lastIndexWhere(t => t == t1 || t == t2)
       Some(numericPrecedence(index))
@@ -85,7 +93,8 @@ object HiveTypeCoercion {
     case _ => None
   }
 
-  /** Similar to [[findTightestCommonType]], but can promote all the way to StringType. */
+  /** Similar to [[findTightestCommonType]], but can promote all the way to StringType.
+    * 与[[findTightestCommonType]]类似,但可以一直提升为StringType*/
   private def findTightestCommonTypeToString(left: DataType, right: DataType): Option[DataType] = {
     findTightestCommonTypeOfTwo(left, right).orElse((left, right) match {
       case (StringType, t2: AtomicType) if t2 != BinaryType && t2 != BooleanType => Some(StringType)
@@ -97,6 +106,8 @@ object HiveTypeCoercion {
   /**
    * Similar to [[findTightestCommonType]], if can not find the TightestCommonType, try to use
    * [[findTightestCommonTypeToString]] to find the TightestCommonType.
+    * 与[[findTightestCommonType]]类似,如果找不到TightestCommonType,
+    * 请尝试使用[[findTightestCommonTypeToString]]查找TightestCommonType
    */
   private def findTightestCommonTypeAndPromoteToString(types: Seq[DataType]): Option[DataType] = {
     types.foldLeft[Option[DataType]](Some(NullType))((r, c) => r match {
@@ -109,6 +120,7 @@ object HiveTypeCoercion {
   /**
    * Find the tightest common type of a set of types by continuously applying
    * `findTightestCommonTypeOfTwo` on these types.
+    * 通过在这些类型上不断应用`findTightestCommonTypeOfTwo`,找到一组类型中最紧凑的常见类型。
    */
   private def findTightestCommonType(types: Seq[DataType]): Option[DataType] = {
     types.foldLeft[Option[DataType]](Some(NullType))((r, c) => r match {
@@ -142,14 +154,17 @@ object HiveTypeCoercion {
   /**
    * Applies any changes to [[AttributeReference]] data types that are made by other rules to
    * instances higher in the query tree.
+    * 将其他规则对[[AttributeReference]]数据类型的任何更改应用于查询树中较高的实例
    */
   object PropagateTypes extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveOperators {
 
       // No propagation required for leaf nodes.
+      //叶节点不需要传播
       case q: LogicalPlan if q.children.isEmpty => q
 
       // Don't propagate types from unresolved children.
+        //不要从未解决的孩子传播类型
       case q: LogicalPlan if !q.childrenResolved => q
 
       case q: LogicalPlan =>
@@ -173,23 +188,36 @@ object HiveTypeCoercion {
 
   /**
    * Widens numeric types and converts strings to numbers when appropriate.
+    * 扩展数字类型并在适当时将字符串转换为数字
    *
    * Loosely based on rules from "Hadoop: The Definitive Guide" 2nd edition, by Tom White
-   *
+   *松散地基于汤姆怀特的“Hadoop：The Definitive Guide”第2版的规则
+    *
    * The implicit conversion rules can be summarized as follows:
+    * 隐式转换规则可归纳如下：
    *   - Any integral numeric type can be implicitly converted to a wider type.
+    *   任何整数数字类型都可以隐式转换为更宽的类型
    *   - All the integral numeric types, FLOAT, and (perhaps surprisingly) STRING can be implicitly
    *     converted to DOUBLE.
+    *     所有整数数字类型FLOAT和(可能令人惊讶的)STRING都可以隐式转换为DOUBLE。
    *   - TINYINT, SMALLINT, and INT can all be converted to FLOAT.
+    *   TINYINT，SMALLINT和INT都可以转换为FLOAT。
    *   - BOOLEAN types cannot be converted to any other type.
+    *   BOOLEAN类型无法转换为任何其他类型
    *   - Any integral numeric type can be implicitly converted to decimal type.
+    *   任何整数数字类型都可以隐式转换为十进制类型
    *   - two different decimal types will be converted into a wider decimal type for both of them.
+    *   两种不同的十进制类型将被转换为更宽的十进制类型
    *   - decimal type will be converted into double if there float or double together with it.
+    *   如果有浮点数或双精度数,则十进制类型将转换为double
    *
    * Additionally, all types when UNION-ed with strings will be promoted to strings.
+    * 此外,使用字符串UNION编辑时的所有类型都将提升为字符串
    * Other string conversions are handled by PromoteStrings.
+    * 其他字符串转换由PromoteStrings处理
    *
    * Widening types might result in loss of precision in the following cases:
+    * 在以下情况下,加宽类型可能会导致精度损失
    * - IntegerType to FloatType
    * - LongType to FloatType
    * - LongType to DoubleType
@@ -239,10 +267,12 @@ object HiveTypeCoercion {
 
   /**
    * Promotes strings that appear in arithmetic expressions.
+    * 提升出现在算术表达式中的字符串
    */
   object PromoteStrings extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveExpressions {
       // Skip nodes who's children have not been resolved yet.
+      //跳过那些孩子尚未解决的节点
       case e if !e.childrenResolved => e
 
       case a @ BinaryArithmetic(left @ StringType(), right @ DecimalType.Expression(_, _)) =>
@@ -257,6 +287,7 @@ object HiveTypeCoercion {
 
       // For equality between string and timestamp we cast the string to a timestamp
       // so that things like rounding of subsecond precision does not affect the comparison.
+        //对于字符串和时间戳之间的相等,我们将字符串转换为时间戳,以便像亚秒精度的舍入之类的事情不会影响比较
       case p @ Equality(left @ StringType(), right @ TimestampType()) =>
         p.makeCopy(Array(Cast(left, TimestampType), right))
       case p @ Equality(left @ TimestampType(), right @ StringType()) =>
@@ -274,7 +305,7 @@ object HiveTypeCoercion {
       case p @ BinaryComparison(left @ TimestampType(), right @ StringType()) =>
         p.makeCopy(Array(Cast(left, StringType), right))
 
-      // Comparisons between dates and timestamps.
+      // Comparisons between dates and timestamps. 日期和时间戳之间的比较
       case p @ BinaryComparison(left @ TimestampType(), right @ DateType()) =>
         p.makeCopy(Array(Cast(left, StringType), Cast(right, StringType)))
       case p @ BinaryComparison(left @ DateType(), right @ TimestampType()) =>
@@ -302,6 +333,7 @@ object HiveTypeCoercion {
 
   /**
    * Convert all expressions in in() list to the left operator type
+    * 将in()列表中的所有表达式转换为左侧运算符类型
    */
   object InConversion extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveExpressions {
@@ -317,6 +349,7 @@ object HiveTypeCoercion {
   /**
    * Calculates and propagates precision for fixed-precision decimals. Hive has a number of
    * rules for this based on the SQL standard and MS SQL:
+    * 计算并传播固定精度小数的精度,Hive有许多基于SQL标准和MS SQL的规则：
    * https://cwiki.apache.org/confluence/download/attachments/27362075/Hive_Decimal_Precision_Scale_Support.pdf
    * https://msdn.microsoft.com/en-us/library/ms190476.aspx
    *
@@ -357,6 +390,7 @@ object HiveTypeCoercion {
     private def isFloat(t: DataType): Boolean = t == FloatType || t == DoubleType
 
     // Returns the wider decimal type that's wider than both of them
+    //返回比两者都宽的更宽的十进制类型
     def widerDecimalType(d1: DecimalType, d2: DecimalType): DecimalType = {
       widerDecimalType(d1.precision, d1.scale, d2.precision, d2.scale)
     }
@@ -374,11 +408,14 @@ object HiveTypeCoercion {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveOperators {
 
       // fix decimal precision for expressions
+      //修复表达式的小数精度
       case q => q.transformExpressions {
         // Skip nodes whose children have not been resolved yet
+        //跳过其子级尚未解析的节点
         case e if !e.childrenResolved => e
 
         // Skip nodes who is already promoted
+          //跳过已升级的节点
         case e: BinaryArithmetic if e.left.isInstanceOf[PromotePrecision] => e
 
         case Add(e1 @ DecimalType.Expression(p1, s1), e2 @ DecimalType.Expression(p2, s2)) =>
@@ -411,6 +448,7 @@ object HiveTypeCoercion {
         case Remainder(e1 @ DecimalType.Expression(p1, s1), e2 @ DecimalType.Expression(p2, s2)) =>
           val resultType = DecimalType.bounded(min(p1 - s1, p2 - s2) + max(s1, s2), max(s1, s2))
           // resultType may have lower precision, so we cast them into wider type first.
+          //resultType可能具有较低的精度,因此我们首先将它们转换为更宽的类型。
           val widerType = widerDecimalType(p1, s1, p2, s2)
           CheckOverflow(Remainder(promotePrecision(e1, widerType), promotePrecision(e2, widerType)),
             resultType)
@@ -418,6 +456,7 @@ object HiveTypeCoercion {
         case Pmod(e1 @ DecimalType.Expression(p1, s1), e2 @ DecimalType.Expression(p2, s2)) =>
           val resultType = DecimalType.bounded(min(p1 - s1, p2 - s2) + max(s1, s2), max(s1, s2))
           // resultType may have lower precision, so we cast them into wider type first.
+          //resultType可能具有较低的精度,因此我们首先将它们转换为更宽的类型
           val widerType = widerDecimalType(p1, s1, p2, s2)
           CheckOverflow(Pmod(promotePrecision(e1, widerType), promotePrecision(e2, widerType)),
             resultType)
@@ -428,7 +467,9 @@ object HiveTypeCoercion {
           b.makeCopy(Array(Cast(e1, resultType), Cast(e2, resultType)))
 
         // Promote integers inside a binary expression with fixed-precision decimals to decimals,
+          //将二进制表达式中的整数提升为十进制的固定精度小数
         // and fixed-precision decimals in an expression with floats / doubles to doubles
+          //表达式中的固定精度小数和浮点数/双精度数加倍
         case b @ BinaryOperator(left, right) if left.dataType != right.dataType =>
           (left.dataType, right.dataType) match {
             case (t: IntegralType, DecimalType.Fixed(p, s)) =>
@@ -452,6 +493,7 @@ object HiveTypeCoercion {
 
   /**
    * Changes numeric values to booleans so that expressions like true = 1 can be evaluated.
+    * 将数值更改为布尔值,以便可以计算类似true = 1的表达式
    */
   object BooleanEquality extends Rule[LogicalPlan] {
     private val trueValues = Seq(1.toByte, 1.toShort, 1, 1L, Decimal.ONE)
@@ -480,12 +522,14 @@ object HiveTypeCoercion {
 
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveExpressions {
       // Skip nodes who's children have not been resolved yet.
+      //跳过那些子尚未解决的节点。
       case e if !e.childrenResolved => e
 
       // Hive treats (true = 1) as true and (false = 0) as true,
       // all other cases are considered as false.
 
       // We may simplify the expression if one side is literal numeric values
+        //如果一边是文字数值,我们可以简化表达式
       case EqualTo(bool @ BooleanType(), Literal(value, _: NumericType))
         if trueValues.contains(value) => bool
       case EqualTo(bool @ BooleanType(), Literal(value, _: NumericType))
@@ -531,6 +575,7 @@ object HiveTypeCoercion {
 
   /**
    * This ensure that the types for various functions are as expected.
+    * 这可确保各种功能的类型符合预期
    */
   object FunctionArgumentConversion extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveExpressions {
@@ -545,6 +590,7 @@ object HiveTypeCoercion {
         }
 
       // Promote SUM, SUM DISTINCT and AVERAGE to largest types to prevent overflows.
+        //将SUM,SUM DISTINCT和AVERAGE提升为最大类型以防止溢出
       case s @ Sum(e @ DecimalType()) => s // Decimal is already the biggest.
       case Sum(e @ IntegralType()) if e.dataType != LongType => Sum(Cast(e, LongType))
       case Sum(e @ FractionalType()) if e.dataType != DoubleType => Sum(Cast(e, DoubleType))
@@ -562,12 +608,14 @@ object HiveTypeCoercion {
         Average(Cast(e, DoubleType))
 
       // Hive lets you do aggregation of timestamps... for some reason
+        //Hive允许您汇总时间戳...出于某种原因
       case Sum(e @ TimestampType()) => Sum(Cast(e, DoubleType))
       case Average(e @ TimestampType()) => Average(Cast(e, DoubleType))
 
       // Coalesce should return the first non-null value, which could be any column
       // from the list. So we need to make sure the return type is deterministic and
       // compatible with every child column.
+        //Coalesce应返回第一个非null值,该值可以是列表中的任何列,因此,我们需要确保返回类型是确定性的并且与每个子列兼容。
       case c @ Coalesce(es) if es.map(_.dataType).distinct.size > 1 =>
         val types = es.map(_.dataType)
         findWiderCommonType(types) match {
@@ -585,6 +633,7 @@ object HiveTypeCoercion {
   /**
    * Hive only performs integral division with the DIV operator. The arguments to / are always
    * converted to fractional types.
+    * Hive仅与DIV运算符执行整数除法,参数总是转换为小数类型
    */
   object Division extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveExpressions {
@@ -593,6 +642,7 @@ object HiveTypeCoercion {
       case e if !e.resolved => e
 
       // Decimal and Double remain the same
+        //十进制和双数保持不变
       case d: Divide if d.dataType == DoubleType => d
       case d: Divide if d.dataType.isInstanceOf[DecimalType] => d
 
@@ -602,6 +652,7 @@ object HiveTypeCoercion {
 
   /**
    * Coerces the type of different branches of a CASE WHEN statement to a common type.
+    * 将CASE WHEN语句的不同分支的类型强制转换为公共类型
    */
   object CaseWhenCoercion extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveExpressions {
@@ -638,6 +689,7 @@ object HiveTypeCoercion {
 
   /**
    * Coerces the type of different branches of If statement to a common type.
+    * 将If语句的不同分支的类型强制转换为公共类型
    */
   object IfCoercion extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveExpressions {
@@ -680,28 +732,34 @@ object HiveTypeCoercion {
 
   /**
    * Casts types according to the expected input types for [[Expression]]s.
+    * 根据[[Expression]]的预期输入类型转换类型
    */
   object ImplicitTypeCasts extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveExpressions {
       // Skip nodes who's children have not been resolved yet.
+      //跳过那些子尚未解决的节点
       case e if !e.childrenResolved => e
 
       case b @ BinaryOperator(left, right) if left.dataType != right.dataType =>
         findTightestCommonTypeOfTwo(left.dataType, right.dataType).map { commonType =>
           if (b.inputType.acceptsType(commonType)) {
             // If the expression accepts the tightest common type, cast to that.
+            //如果表达式接受最紧密的常见类型,则转换为该类型
             val newLeft = if (left.dataType == commonType) left else Cast(left, commonType)
             val newRight = if (right.dataType == commonType) right else Cast(right, commonType)
             b.withNewChildren(Seq(newLeft, newRight))
           } else {
             // Otherwise, don't do anything with the expression.
+            //否则,不要对表达式执行任何操作
             b
           }
+          //如果没有适用的转换,请保持表达式不变
         }.getOrElse(b)  // If there is no applicable conversion, leave expression unchanged.
 
       case e: ImplicitCastInputTypes if e.inputTypes.nonEmpty =>
         val children: Seq[Expression] = e.children.zip(e.inputTypes).map { case (in, expected) =>
           // If we cannot do the implicit cast, just use the original input.
+          //如果我们不能进行隐式转换,只需使用原始输入
           implicitCast(in, expected).getOrElse(in)
         }
         e.withNewChildren(children)
@@ -709,6 +767,7 @@ object HiveTypeCoercion {
       case e: ExpectsInputTypes if e.inputTypes.nonEmpty =>
         // Convert NullType into some specific target type for ExpectsInputTypes that don't do
         // general implicit casting.
+        //将NullType转换为不执行常规隐式转换的ExpectsInputTypes的某个特定目标类型
         val children: Seq[Expression] = e.children.zip(e.inputTypes).map { case (in, expected) =>
           if (in.dataType == NullType && !expected.acceptsType(NullType)) {
             Literal.create(null, expected.defaultConcreteType)
@@ -721,9 +780,12 @@ object HiveTypeCoercion {
 
     /**
      * Given an expected data type, try to cast the expression and return the cast expression.
+      * 给定预期的数据类型,尝试转换表达式并返回强制转换表达式
      *
      * If the expression already fits the input type, we simply return the expression itself.
+      * 如果表达式已经适合输入类型,我们只返回表达式本身
      * If the expression has an incompatible type that cannot be implicitly cast, return None.
+      * 如果表达式具有无法隐式转换的不兼容类型,则返回None
      */
     def implicitCast(e: Expression, expectedType: AbstractDataType): Option[Expression] = {
       val inType = e.dataType
@@ -733,41 +795,48 @@ object HiveTypeCoercion {
       @Nullable val ret: Expression = (inType, expectedType) match {
 
         // If the expected type is already a parent of the input type, no need to cast.
+          //如果期望的类型已经是输入类型的父类,则无需强制转换
         case _ if expectedType.acceptsType(inType) => e
 
         // Cast null type (usually from null literals) into target types
+          //将null类型（通常从null文字）转换为目标类型
         case (NullType, target) => Cast(e, target.defaultConcreteType)
 
         // If the function accepts any numeric type and the input is a string, we follow the hive
         // convention and cast that input into a double
+          //如果函数接受任何数字类型并且输入是字符串,我们遵循hive约定并将该输入转换为double
         case (StringType, NumericType) => Cast(e, NumericType.defaultConcreteType)
 
         // Implicit cast among numeric types. When we reach here, input type is not acceptable.
-
+        //数字类型之间的隐式转换,当我们到达这里时,输入类型是不可接受的
         // If input is a numeric type but not decimal, and we expect a decimal type,
         // cast the input to decimal.
+          //如果输入是数字类型但不是十进制,并且我们期望十进制类型,则将输入转换为十进制
         case (d: NumericType, DecimalType) => Cast(e, DecimalType.forType(d))
         // For any other numeric types, implicitly cast to each other, e.g. long -> int, int -> long
+          //对于任何其他数字类型,隐式地相互投射,例如, long - > int,int - > long
         case (_: NumericType, target: NumericType) => Cast(e, target)
 
-        // Implicit cast between date time types
+        // Implicit cast between date time types 日期时间类型之间的隐式转换
         case (DateType, TimestampType) => Cast(e, TimestampType)
         case (TimestampType, DateType) => Cast(e, DateType)
 
-        // Implicit cast from/to string
+        // Implicit cast from/to string 从/到字符串的隐式强制转换
         case (StringType, DecimalType) => Cast(e, DecimalType.SYSTEM_DEFAULT)
         case (StringType, target: NumericType) => Cast(e, target)
         case (StringType, DateType) => Cast(e, DateType)
         case (StringType, TimestampType) => Cast(e, TimestampType)
         case (StringType, BinaryType) => Cast(e, BinaryType)
-        // Cast any atomic type to string.
+        // Cast any atomic type to string. 将任何原子类型转换为字符串。
         case (any: AtomicType, StringType) if any != StringType => Cast(e, StringType)
 
         // When we reach here, input type is not acceptable for any types in this type collection,
         // try to find the first one we can implicitly cast.
+          //当我们到达这里时,输入类型对于此类型集合中的任何类型都是不可接受的,尝试找到我们可以隐式转换的第一个类型
         case (_, TypeCollection(types)) => types.flatMap(implicitCast(e, _)).headOption.orNull
 
         // Else, just return the same input expression
+          //否则,只返回相同的输入表达式
         case _ => null
       }
       Option(ret)

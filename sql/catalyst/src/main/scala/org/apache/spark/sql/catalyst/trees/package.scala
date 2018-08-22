@@ -35,6 +35,7 @@ import org.apache.spark.Logging
  */
 package object trees extends Logging {
   // Since we want tree nodes to be lightweight, we create one logger for all treenode instances.
+  //由于我们希望树节点是轻量级的,因此我们为所有treenode实例创建一个记录器
   protected override def logName = "catalyst.trees"
 
   /**

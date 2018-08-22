@@ -47,6 +47,7 @@ private[feature] trait PCAParams extends Params with HasInputCol with HasOutputC
 /**
  * :: Experimental ::
  * PCA trains a model to project vectors to a low-dimensional space using PCA.
+  * PCA使用PCA训练模型以将向量投影到低维空间
  */
 @Experimental
 class PCA (override val uid: String) extends Estimator[PCAModel] with PCAParams {

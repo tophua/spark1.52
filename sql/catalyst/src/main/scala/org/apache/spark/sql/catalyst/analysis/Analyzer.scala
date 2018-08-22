@@ -40,6 +40,8 @@ object SimpleAnalyzer
  * Provides a logical query plan analyzer, which translates [[UnresolvedAttribute]]s and
  * [[UnresolvedRelation]]s into fully typed objects using information in a schema [[Catalog]] and
  * a [[FunctionRegistry]].
+  * 提供逻辑查询计划分析器,使用模式[[Catalog]]和[[FunctionRegistry]]中的信息将[[UnresolvedAttribute]]
+  * 和[[UnresolvedRelation]]转换为完全类型的对象。
  */
 class Analyzer(
     catalog: Catalog,
@@ -60,6 +62,7 @@ class Analyzer(
 
   /**
    * Override to provide additional rules for the "Resolution" batch.
+    * 覆盖以提供“解决方案”批次的其他规则
    */
   val extendedResolutionRules: Seq[Rule[LogicalPlan]] = Nil
 
@@ -89,6 +92,7 @@ class Analyzer(
 
   /**
    * Substitute child plan with cte definitions
+    * 用cte定义替换子计划
    */
   object CTESubstitution extends Rule[LogicalPlan] {
     // TODO allow subquery to define CTE
@@ -116,6 +120,7 @@ class Analyzer(
 
   /**
    * Substitute child plan with WindowSpecDefinitions.
+    * 使用WindowSpecDefinitions替换子计划
    */
   object WindowsSubstitution extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveOperators {
@@ -138,6 +143,7 @@ class Analyzer(
 
   /**
    * Replaces [[UnresolvedAlias]]s with concrete aliases.
+    * 用具体别名替换[[UnresolvedAlias]] s
    */
   object ResolveAliases extends Rule[LogicalPlan] {
     private def assignAliases(exprs: Seq[NamedExpression]) = {
@@ -226,11 +232,13 @@ class Analyzer(
         })
 
         // substitute the non-attribute expressions for aggregations.
+        //将非属性表达式替换为聚合
         val aggregation = x.aggregations.map(expr => expr.transformDown {
           case e => groupByExprPairs.find(_._1.semanticEquals(e)).map(_._2).getOrElse(e)
         }.asInstanceOf[NamedExpression])
 
         // substitute the group by expressions.
+        //用表达式替换组
         val newGroupByExprs = groupByExprPairs.map(_._2)
 
         val child = if (nonAttributeGroupByExpressions.length > 0) {
@@ -250,6 +258,7 @@ class Analyzer(
 
   /**
    * Replaces [[UnresolvedRelation]]s with concrete relations from the catalog.
+    * 用目录中的具体关系替换[[UnresolvedRelation]]
    */
   object ResolveRelations extends Rule[LogicalPlan] {
     def getTable(u: UnresolvedRelation): LogicalPlan = {
@@ -272,12 +281,14 @@ class Analyzer(
   /**
    * Replaces [[UnresolvedAttribute]]s with concrete [[AttributeReference]]s from
    * a logical plan node's children.
+    * 用来自逻辑计划节点的子节点的具体[[AttributeReference]]替换[[UnresolvedAttribute]]
    */
   object ResolveReferences extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveOperators {
       case p: LogicalPlan if !p.childrenResolved => p
 
       // If the projection list contains Stars, expand it.
+        //如果投影列表包含星号,请展开它
       case p @ Project(projectList, child) if containsStar(projectList) =>
         Project(
           projectList.flatMap {
@@ -312,6 +323,7 @@ class Analyzer(
         )
 
       // If the aggregate function argument contains Stars, expand it.
+        //如果aggregate函数参数包含Stars,请展开它。
       case a: Aggregate if containsStar(a.aggregateExpressions) =>
         a.copy(
           aggregateExpressions = a.aggregateExpressions.flatMap {
@@ -321,18 +333,21 @@ class Analyzer(
         )
 
       // Special handling for cases when self-join introduce duplicate expression ids.
+        //自联接引入重复表达式ID的情况下的特殊处理
       case j @ Join(left, right, _, _) if !j.selfJoinResolved =>
         val conflictingAttributes = left.outputSet.intersect(right.outputSet)
         logDebug(s"Conflicting attributes ${conflictingAttributes.mkString(",")} in $j")
 
         right.collect {
           // Handle base relations that might appear more than once.
+          //处理可能出现多次的基本关系
           case oldVersion: MultiInstanceRelation
               if oldVersion.outputSet.intersect(conflictingAttributes).nonEmpty =>
             val newVersion = oldVersion.newInstance()
             (oldVersion, newVersion)
 
           // Handle projects that create conflicting aliases.
+            //处理创建冲突别名的项目
           case oldVersion @ Project(projectList, _)
               if findAliases(projectList).intersect(conflictingAttributes).nonEmpty =>
             (oldVersion, oldVersion.copy(projectList = newAliases(projectList)))
@@ -352,6 +367,7 @@ class Analyzer(
             (oldVersion, oldVersion.copy(windowExpressions = newAliases(windowExpressions)))
         }
         // Only handle first case, others will be fixed on the next pass.
+          //只处理第一种情况,其他将在下一次传递时修复
         .headOption match {
           case None =>
             /*
@@ -374,6 +390,7 @@ class Analyzer(
 
       // When resolve `SortOrder`s in Sort based on child, don't report errors as
       // we still have chance to resolve it based on grandchild
+        //在基于子的Sort中解决`SortOrder'时,不要报告错误,因为我们仍然有机会根据孙子来解决它
       case s @ Sort(ordering, global, child) if child.resolved && !s.resolved =>
         val newOrdering = resolveSortOrders(ordering, child, throws = false)
         Sort(newOrdering, global, child)
@@ -399,6 +416,7 @@ class Analyzer(
         q transformExpressionsUp  {
           case u @ UnresolvedAttribute(nameParts) =>
             // Leave unchanged if resolution fails.  Hopefully will be resolved next round.
+            //如果分辨率失败则保持不变 希望下一轮能够得到解决
             val result =
               withPosition(u) { q.resolveChildren(nameParts, resolver).getOrElse(u) }
             logDebug(s"Resolving $u to $result")
@@ -451,6 +469,8 @@ class Analyzer(
    * clause.  This rule detects such queries and adds the required attributes to the original
    * projection, so that they will be available during sorting. Another projection is added to
    * remove these attributes after sorting.
+    * 在SQL的许多方言中,按SELECT子句中不存在的属性进行排序是有效的,此规则检测此类查询并将所需属性添加到原始投影,
+    * 以便在排序期间它们可用,添加了另一个投影以在排序后删除这些属性。
    */
   object ResolveSortReferences extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveOperators {
@@ -459,8 +479,10 @@ class Analyzer(
         val (newOrdering, missing) = resolveAndFindMissing(ordering, p, child)
 
         // If this rule was not a no-op, return the transformed plan, otherwise return the original.
+        //如果此规则不是无操作,则返回已转换的计划,否则返回原始规则
         if (missing.nonEmpty) {
           // Add missing attributes and then project them away after the sort.
+          //添加缺少的属性,然后在排序后将它们投射出去
           Project(p.output,
             Sort(newOrdering, global,
               Project(projectList ++ missing, child)))
@@ -474,6 +496,7 @@ class Analyzer(
      * Given a child and a grandchild that are present beneath a sort operator, try to resolve
      * the sort ordering and returns it with a list of attributes that are missing from the
      * child but are present in the grandchild.
+      * 给定排序运算符下面的子项和孙项,尝试解析排序顺序并返回一个属性列表,这些属性从子项中丢失但存在于孙子中
      */
     def resolveAndFindMissing(
         ordering: Seq[SortOrder],
@@ -482,9 +505,11 @@ class Analyzer(
       val newOrdering = resolveSortOrders(ordering, grandchild, throws = true)
       // Construct a set that contains all of the attributes that we need to evaluate the
       // ordering.
+      //构造一个包含评估排序所需的所有属性的集合
       val requiredAttributes = AttributeSet(newOrdering).filter(_.resolved)
       // Figure out which ones are missing from the projection, so that we can add them and
       // remove them after the sort.
+      //找出投影中缺少哪些,以便我们可以添加它们并在排序后删除它们
       val missingInProject = requiredAttributes -- child.output
       // It is important to return the new SortOrders here, instead of waiting for the standard
       // resolving process as adding attributes to the project below can actually introduce
@@ -506,6 +531,7 @@ class Analyzer(
               registry.lookupFunction(name, children) match {
                 // We get an aggregate function built based on AggregateFunction2 interface.
                 // So, we wrap it in AggregateExpression2.
+                  //我们得到一个基于AggregateFunction2接口构建的聚合函数,所以,我们将它包装在AggregateExpression2中。
                 case agg2: AggregateFunction2 => AggregateExpression2(agg2, Complete, isDistinct)
                 // Currently, our old aggregate function interface supports SUM(DISTINCT ...)
                 // and COUTN(DISTINCT ...).
@@ -516,9 +542,11 @@ class Analyzer(
                 case min: Min if isDistinct => min
                 // For other aggregate functions, DISTINCT keyword is not supported for now.
                 // Once we converted to the new code path, we will allow using DISTINCT keyword.
+                  //对于其他聚合函数,目前不支持DISTINCT关键字,一旦我们转换为新的代码路径,我们将允许使用DISTINCT关键字。
                 case other: AggregateExpression1 if isDistinct =>
                   failAnalysis(s"$name does not support DISTINCT keyword.")
                 // If it does not have DISTINCT keyword, we will return it as is.
+                  //如果它没有DISTINCT关键字,我们将按原样返回
                 case other => other
               }
             }
@@ -528,6 +556,7 @@ class Analyzer(
 
   /**
    * Turns projections that contain aggregate expressions into aggregations.
+    * 将包含聚合表达式的投影转换为聚合
    */
   object GlobalAggregates extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveOperators {
@@ -548,6 +577,9 @@ class Analyzer(
    * This rule finds aggregate expressions that are not in an aggregate operator.  For example,
    * those in a HAVING clause or ORDER BY clause.  These expressions are pushed down to the
    * underlying aggregate operator and then projected away after the original operator.
+    *
+    * 此规则查找不在聚合运算符中的聚合表达式, 例如,HAVING子句或ORDER BY子句中的那些,
+    * 这些表达式被下推到底层聚合运算符,然后在原始运算符之后被投射出去
    */
   object ResolveAggregateFunctions extends Rule[LogicalPlan] {
     def apply(plan: LogicalPlan): LogicalPlan = plan resolveOperators {
@@ -556,6 +588,7 @@ class Analyzer(
           if aggregate.resolved =>
 
         // Try resolving the condition of the filter as though it is in the aggregate clause
+        //尝试解析过滤器的条件,就好像它在aggregate子句中一样
         val aggregatedCondition =
           Aggregate(grouping, Alias(havingCondition, "havingCondition")() :: Nil, child)
         val resolvedOperator = execute(aggregatedCondition)
@@ -566,6 +599,7 @@ class Analyzer(
 
         // If resolution was successful and we see the filter has an aggregate in it, add it to
         // the original aggregate operator.
+        //如果解决方案成功并且我们看到过滤器中包含聚合,请将其添加到原始聚合运算符。
         if (resolvedOperator.resolved && containsAggregate(resolvedAggregateFilter)) {
           val aggExprsWithHaving = resolvedAggregateFilter +: originalAggExprs
 
@@ -580,6 +614,7 @@ class Analyzer(
         if aggregate.resolved && !sort.resolved =>
 
         // Try resolving the ordering as though it is in the aggregate clause.
+        //尝试解决排序,就好像它在aggregate子句中一样
         try {
           val aliasedOrdering = sortOrder.map(o => Alias(o.child, "aggOrder")())
           val aggregatedOrdering = aggregate.copy(aggregateExpressions = aliasedOrdering)
@@ -590,6 +625,7 @@ class Analyzer(
           // If we pass the analysis check, then the ordering expressions should only reference to
           // aggregate expressions or grouping expressions, and it's safe to push them down to
           // Aggregate.
+          //如果我们通过分析检查,那么排序表达式应该只引用聚合表达式或分组表达式,并且可以将它们推送到Aggregate
           checkAnalysis(resolvedAggregate)
 
           val originalAggExprs = aggregate.aggregateExpressions.map(
@@ -598,6 +634,7 @@ class Analyzer(
           // If the ordering expression is same with original aggregate expression, we don't need
           // to push down this ordering expression and can reference the original aggregate
           // expression instead.
+          //如果排序表达式与原始聚合表达式相同,则我们不需要按下此排序表达式,而是可以引用原始聚合表达式
           val needsPushDown = ArrayBuffer.empty[NamedExpression]
           val evaluatedOrderings = resolvedAliasedOrdering.zip(sortOrder).map {
             case (evaluated, order) =>
@@ -632,7 +669,8 @@ class Analyzer(
   /**
    * Rewrites table generating expressions that either need one or more of the following in order
    * to be resolved:
-   *  - concrete attribute references for their output.
+    * 重写生成表达式的表,这些表达式需要以下一个或多个才能被解析：
+   *  - concrete attribute references for their output.具体的输出属性引用
    *  - to be relocated from a SELECT clause (i.e. from  a [[Project]]) into a [[Generate]]).
    *
    * Names for the output [[Attribute]]s are extracted from [[Alias]] or [[MultiAlias]] expressions
@@ -649,6 +687,7 @@ class Analyzer(
 
       case p @ Project(projectList, child) =>
         // Holds the resolved generator, if one exists in the project list.
+        //如果项目列表中存在已解析的生成器,则保留该生成器
         var resolvedGenerator: Generate = null
 
         val newProjectList = projectList.flatMap {
@@ -679,11 +718,13 @@ class Analyzer(
         }
     }
 
-    /** Extracts a [[Generator]] expression and any names assigned by aliases to their output. */
+    /** Extracts a [[Generator]] expression and any names assigned by aliases to their output.
+      * 将[[Generator]]表达式和别名指定的任何名称提取到其输出中 */
     private object AliasedGenerator {
       def unapply(e: Expression): Option[(Generator, Seq[String])] = e match {
         case Alias(g: Generator, name) if g.resolved && g.elementTypes.size > 1 =>
           // If not given the default names, and the TGF with multiple output columns
+          //如果没有给出默认名称,并且TGF具有多个输出列
           failAnalysis(
             s"""Expect multiple names given for ${g.getClass.getName},
                |but only single name '${name}' specified""".stripMargin)
@@ -696,6 +737,8 @@ class Analyzer(
     /**
      * Construct the output attributes for a [[Generator]], given a list of names.  If the list of
      * names is empty names are assigned by ordinal (i.e., _c0, _c1, ...) to match Hive's defaults.
+      *
+      * 给定名称列表，构造[[Generator]]的输出属性,如果名称列表为空名称由序数(即_c0，_c1，...)分配,以匹配Hive的默认值
      */
     private def makeGeneratorOutput(
         generator: Generator,
@@ -710,6 +753,7 @@ class Analyzer(
       } else if (names.isEmpty) {
         elementTypes.zipWithIndex.map {
           // keep the default column names as Hive does _c0, _c1, _cN
+          //保留默认列名称为Hive执行_c0，_c1，_cN
           case ((t, nullable), i) => AttributeReference(s"_c$i", t, nullable)()
         }
       } else {
@@ -725,6 +769,9 @@ class Analyzer(
    * Extracts [[WindowExpression]]s from the projectList of a [[Project]] operator and
    * aggregateExpressions of an [[Aggregate]] operator and creates individual [[Window]]
    * operators for every distinct [[WindowSpecDefinition]].
+    *
+    * 从[[Project]]运算符的projectList和[[Aggregate]]运算符的aggregateExpressions中提取[[WindowExpression]],
+    * 并为每个不同的[[WindowSpecDefinition]]创建单独的[[Window]]运算符
    *
    * This rule handles three cases:
    *  - A [[Project]] having [[WindowExpression]]s in its projectList;
@@ -763,6 +810,12 @@ class Analyzer(
      * the window expression as attribute references. So, the first returned value will be
      * `[Sum(_w0) OVER (PARTITION BY _w1 ORDER BY _w2)]` and the second returned value will be
      * [col1, col2 + col3 as _w0, col4 as _w1, col5 as _w2].
+      *
+      * 从[[NamedExpression]]的Seq中,提取包含窗口表达式的表达式和不包含任何窗口表达式的其他正则表达式,
+      * 例如,对于不包含任何窗口表达式的其他正则表达式,例如，对于`col1`，`col2 + col3`，`col4`和`col5` out,
+      * 将它们在窗口表达式中的外观替换为属性引用,
+      * 因此，第一个返回值为`[Sum（_w0）OVER（PARTITION BY _w1 ORDER BY _w2）]`
+      * 第二个返回值为[col1，col2 + col3为_w0，col4为_w1，col5为_w2]。
      *
      * @return (seq of expressions containing at lease one window expressions,
      *          seq of non-window expressions)
@@ -770,20 +823,28 @@ class Analyzer(
     private def extract(
         expressions: Seq[NamedExpression]): (Seq[NamedExpression], Seq[NamedExpression]) = {
       // First, we partition the input expressions to two part. For the first part,
+      //首先,我们将输入表达式分为两部分,第一部分，
       // every expression in it contain at least one WindowExpression.
+      //其中的每个表达式都包含至少一个WindowExpression
       // Expressions in the second part do not have any WindowExpression.
+      //第二部分中的表达式没有任何WindowExpression
       val (expressionsWithWindowFunctions, regularExpressions) =
         expressions.partition(hasWindowFunction)
 
       // Then, we need to extract those regular expressions used in the WindowExpression.
+      //然后,我们需要提取WindowExpression中使用的那些正则表达式
       // For example, when we have col1 - Sum(col2 + col3) OVER (PARTITION BY col4 ORDER BY col5),
+      //例如，当我们有col1 - Sum(col2 + col3)OVER（PARTITION BY col4 ORDER BY col5)时
       // we need to make sure that col1 to col5 are all projected from the child of the Window
       // operator.
+      //我们需要确保col1到col5都是从Window运算符的子节点投射出来的
       val extractedExprBuffer = new ArrayBuffer[NamedExpression]()
       def extractExpr(expr: Expression): Expression = expr match {
         case ne: NamedExpression =>
           // If a named expression is not in regularExpressions, add it to
           // extractedExprBuffer and replace it with an AttributeReference.
+          //如果命名表达式不在regularExpressions中,
+          // 请将其添加到extractedExprBuffer并将其替换为AttributeReference。
           val missingExpr =
             AttributeSet(Seq(expr)) -- (regularExpressions ++ extractedExprBuffer)
           if (missingExpr.nonEmpty) {
@@ -792,9 +853,11 @@ class Analyzer(
           ne.toAttribute
         case e: Expression if e.foldable =>
           e // No need to create an attribute reference if it will be evaluated as a Literal.
+          //如果它将被评估为Literal，则无需创建属性引用
         case e: Expression =>
           // For other expressions, we extract it and replace it with an AttributeReference (with
           // an interal column name, e.g. "_w0").
+          //对于其他表达式,我们提取它并用AttributeReference(带有内部列名,例如“_w0”)替换它。
           val withName = Alias(e, s"_w${extractedExprBuffer.length}")()
           extractedExprBuffer += withName
           withName.toAttribute
@@ -837,6 +900,7 @@ class Analyzer(
 
     /**
      * Adds operators for Window Expressions. Every Window operator handles a single Window Spec.
+      * 为Window Expressions添加运算符,每个Window操作符都处理一个Window Spec
      */
     private def addWindow(
         expressionsWithWindowFunctions: Seq[NamedExpression],
@@ -870,6 +934,7 @@ class Analyzer(
       }
 
       // Second, we group extractedWindowExprBuffer based on their Partition and Order Specs.
+      //其次,我们根据分区和订单规范对提取的WindowExprBuffer进行分组
       val groupedWindowExpressions = extractedWindowExprBuffer.groupBy { expr =>
         val distinctWindowSpec = expr.collect {
           case window: WindowExpression => window.windowSpec
@@ -877,6 +942,7 @@ class Analyzer(
 
         // We do a final check and see if we only have a single Window Spec defined in an
         // expressions.
+        //我们做最后检查,看看我们是否只在表达式中定义了一个Window Spec
         if (distinctWindowSpec.length == 0 ) {
           failAnalysis(s"$expr does not have any WindowExpression.")
         } else if (distinctWindowSpec.length > 1) {
@@ -892,6 +958,7 @@ class Analyzer(
 
       // Third, for every Window Spec, we add a Window operator and set currentChild as the
       // child of it.
+      //第三,对于每个Window Spec,我们添加一个Window运算符并将currentChild设置为它的子节点
       var currentChild = child
       var i = 0
       while (i < groupedWindowExpressions.size) {
@@ -916,53 +983,64 @@ class Analyzer(
 
     // We have to use transformDown at here to make sure the rule of
     // "Aggregate with Having clause" will be triggered.
+    //我们必须在这里使用transformDown来确保将触发带有“子句”的Aggregate规则
     def apply(plan: LogicalPlan): LogicalPlan = plan transformDown {
 
       // Aggregate with Having clause. This rule works with an unresolved Aggregate because
       // a resolved Aggregate will not have Window Functions.
+      //与Having子句聚合,此规则适用于未解析的聚合,因为已解析的聚合将不具有窗口函数
       case f @ Filter(condition, a @ Aggregate(groupingExprs, aggregateExprs, child))
         if child.resolved &&
            hasWindowFunction(aggregateExprs) &&
            a.expressions.forall(_.resolved) =>
         val (windowExpressions, aggregateExpressions) = extract(aggregateExprs)
         // Create an Aggregate operator to evaluate aggregation functions.
+        //创建Aggregate运算符以评估聚合函数
         val withAggregate = Aggregate(groupingExprs, aggregateExpressions, child)
         // Add a Filter operator for conditions in the Having clause.
+        //为Having子句中的条件添加Filter运算符
         val withFilter = Filter(condition, withAggregate)
         val withWindow = addWindow(windowExpressions, withFilter)
 
         // Finally, generate output columns according to the original projectList.
+        //最后,根据原始projectList生成输出列
         val finalProjectList = aggregateExprs.map (_.toAttribute)
         Project(finalProjectList, withWindow)
 
       case p: LogicalPlan if !p.childrenResolved => p
 
       // Aggregate without Having clause.
+        //没有Having子句的Aggregate
       case a @ Aggregate(groupingExprs, aggregateExprs, child)
         if hasWindowFunction(aggregateExprs) &&
            a.expressions.forall(_.resolved) =>
         val (windowExpressions, aggregateExpressions) = extract(aggregateExprs)
         // Create an Aggregate operator to evaluate aggregation functions.
+        //创建Aggregate运算符以评估聚合函数
         val withAggregate = Aggregate(groupingExprs, aggregateExpressions, child)
-        // Add Window operators.
+        // Add Window operators. 添加Window运算符
         val withWindow = addWindow(windowExpressions, withAggregate)
 
         // Finally, generate output columns according to the original projectList.
+        //最后,根据原始projectList生成输出列
         val finalProjectList = aggregateExprs.map (_.toAttribute)
         Project(finalProjectList, withWindow)
 
       // We only extract Window Expressions after all expressions of the Project
       // have been resolved.
+        //我们只在项目的所有表达式都已解决后才提取窗口表达式
       case p @ Project(projectList, child)
         if hasWindowFunction(projectList) && !p.expressions.exists(!_.resolved) =>
         val (windowExpressions, regularExpressions) = extract(projectList)
         // We add a project to get all needed expressions for window expressions from the child
         // of the original Project operator.
+        //我们添加一个项目来从原始Project运算符的子代中获取窗口表达式的所有需要表达式
         val withProject = Project(regularExpressions, child)
-        // Add Window operators.
+        // Add Window operators.添加Window运算符
         val withWindow = addWindow(windowExpressions, withProject)
 
         // Finally, generate output columns according to the original projectList.
+        //最后,根据原始projectList生成输出列
         val finalProjectList = projectList.map (_.toAttribute)
         Project(finalProjectList, withWindow)
     }
@@ -971,6 +1049,7 @@ class Analyzer(
   /**
    * Pulls out nondeterministic expressions from LogicalPlan which is not Project or Filter,
    * put them into an inner Project and finally project them away at the outer Project.
+    * 从LogicalPlan中取出非确定性表达式,它不是Project或Filter,将它们放入内部Project中,最后将它们放在外部Project中。
    */
   object PullOutNondeterministic extends Rule[LogicalPlan] {
     override def apply(plan: LogicalPlan): LogicalPlan = plan resolveOperators {
@@ -981,6 +1060,7 @@ class Analyzer(
       // todo: It's hard to write a general rule to pull out nondeterministic expressions
       // from LogicalPlan, currently we only do it for UnaryNode which has same output
       // schema with its child.
+        //从LogicalPlan,目前我们只为UnaryNode做它,它的子输出模式相同。
       case p: UnaryNode if p.output == p.child.output && p.expressions.exists(!_.deterministic) =>
         val nondeterministicExprs = p.expressions.filterNot(_.deterministic).flatMap { expr =>
           val leafNondeterministic = expr.collect {
@@ -1006,6 +1086,7 @@ class Analyzer(
 /**
  * Removes [[Subquery]] operators from the plan. Subqueries are only required to provide
  * scoping information for attributes and can be removed once analysis is complete.
+  * 从计划中删除[[Subquery]]运算符,子查询仅需要提供属性的作用域信息,并且可在分析完成后删除
  */
 object EliminateSubQueries extends Rule[LogicalPlan] {
   def apply(plan: LogicalPlan): LogicalPlan = plan transform {
@@ -1017,6 +1098,7 @@ object EliminateSubQueries extends Rule[LogicalPlan] {
  * Cleans up unnecessary Aliases inside the plan. Basically we only need Alias as a top level
  * expression in Project(project list) or Aggregate(aggregate expressions) or
  * Window(window expressions).
+  * 清除计划中不必要的别名,基本上我们只需要Alias作为Project(项目列表)或Aggregate(聚合表达式)或Window(窗口表达式)中的顶级表达式。
  */
 object CleanupAliases extends Rule[LogicalPlan] {
   private def trimAliases(e: Expression): Expression = {
@@ -1025,6 +1107,8 @@ object CleanupAliases extends Rule[LogicalPlan] {
       // CreateStruct is a special case, we need to retain its top level Aliases as they decide the
       // name of StructField. We also need to stop transform down this expression, or the Aliases
       // under CreateStruct will be mistakenly trimmed.
+      //CreateStruct是一个特殊情况,我们需要保留其顶级别名,因为它们决定了StructField的名称,
+      // 我们还需要停止转换此表达式,否则将错误地修剪CreateStruct下的别名。
       case c: CreateStruct if !stop =>
         stop = true
         c.copy(children = c.children.map(trimNonTopLevelAliases))

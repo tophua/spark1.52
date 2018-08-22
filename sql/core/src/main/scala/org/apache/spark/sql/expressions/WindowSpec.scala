@@ -25,6 +25,7 @@ import org.apache.spark.sql.catalyst.expressions._
 /**
  * :: Experimental ::
  * A window specification that defines the partitioning, ordering, and frame boundaries.
+  * 一种窗口规范,用于定义分区,排序和框架边界
  *
  * Use the static methods in [[Window]] to create a [[WindowSpec]].
  *
@@ -38,6 +39,7 @@ class WindowSpec private[sql](
 
   /**
    * Defines the partitioning columns in a [[WindowSpec]].
+    * 定义[[WindowSpec]]中的分区列
    * @since 1.4.0
    */
   @scala.annotation.varargs
@@ -47,6 +49,7 @@ class WindowSpec private[sql](
 
   /**
    * Defines the partitioning columns in a [[WindowSpec]].
+    * 定义[[WindowSpec]]中的分区列
    * @since 1.4.0
    */
   @scala.annotation.varargs
@@ -56,6 +59,7 @@ class WindowSpec private[sql](
 
   /**
    * Defines the ordering columns in a [[WindowSpec]].
+    * 定义[[WindowSpec]]中的排序列
    * @since 1.4.0
    */
   @scala.annotation.varargs
@@ -65,6 +69,7 @@ class WindowSpec private[sql](
 
   /**
    * Defines the ordering columns in a [[WindowSpec]].
+    * 定义[[WindowSpec]]中的排序列
    * @since 1.4.0
    */
   @scala.annotation.varargs
@@ -82,10 +87,14 @@ class WindowSpec private[sql](
 
   /**
    * Defines the frame boundaries, from `start` (inclusive) to `end` (inclusive).
+    * 定义框架边界，从“开始”（包括）到“结束”(包括)
    *
    * Both `start` and `end` are relative positions from the current row. For example, "0" means
    * "current row", while "-1" means the row before the current row, and "5" means the fifth row
    * after the current row.
+    *
+    * `start`和`end`都是当前行的相对位置,
+    * 例如:“0”表示“当前行”,而“-1”表示当前行之前的行,“5”表示当前行之后的第五行。
    *
    * @param start boundary start, inclusive.
    *              The frame is unbounded if this is the minimum long value.
@@ -99,10 +108,14 @@ class WindowSpec private[sql](
 
   /**
    * Defines the frame boundaries, from `start` (inclusive) to `end` (inclusive).
+    * 定义框架边界,从“开始”（(包括)到“结束”(包括)
    *
    * Both `start` and `end` are relative from the current row. For example, "0" means "current row",
    * while "-1" means one off before the current row, and "5" means the five off after the
    * current row.
+    *
+    * `start`和`end`都是当前行的相对值,
+    * 例如:“0”表示“当前行”,而“-1”表示当前行之前的一个关闭,“5”表示当前行之后的五个关闭
    *
    * @param start boundary start, inclusive.
    *              The frame is unbounded if this is the minimum long value.
@@ -137,6 +150,7 @@ class WindowSpec private[sql](
 
   /**
    * Converts this [[WindowSpec]] into a [[Column]] with an aggregate expression.
+    * 将此[[WindowSpec]]转换为具有聚合表达式的[[Column]]
    */
   private[sql] def withAggregate(aggregate: Column): Column = {
     val windowExpr = aggregate.expr match {

@@ -29,13 +29,16 @@ import org.apache.spark.unsafe.types.CalendarInterval
 
 /**
  * A very simple SQL parser.  Based loosely on:
+  * 一个非常简单的SQL解析器,松散地基于：
  * https://github.com/stephentu/scala-sql-parser/blob/master/src/main/scala/parser.scala
  *
  * Limitations:
- *  - Only supports a very limited subset of SQL.
+  * 限制：
+ *  - Only supports a very limited subset of SQL.仅支持非常有限的SQL子集
  *
  * This is currently included mostly for illustrative purposes.  Users wanting more complete support
  * for a SQL like language should checkout the HiveQL support in the sql/hive sub-project.
+  * 目前,这主要用于说明目的,希望更完整地支持SQL语言的用户应该检查sql / hive子项目中的HiveQL支持。
  */
 object SqlParser extends AbstractSparkSQLParser with DataTypeParser {
 
@@ -59,6 +62,7 @@ object SqlParser extends AbstractSparkSQLParser with DataTypeParser {
 
   // Keyword is a convention with AbstractSparkSQLParser, which will scan all of the `Keyword`
   // properties via reflection the class in runtime for constructing the SqlLexical object
+  //关键字是AbstractSparkSQLParser的约定,它将通过在运行时反射类来构建SqlLexical对象来扫描所有`Keyword`属性
   protected val ALL = Keyword("ALL")
   protected val AND = Keyword("AND")
   protected val APPROXIMATE = Keyword("APPROXIMATE")
@@ -159,6 +163,7 @@ object SqlParser extends AbstractSparkSQLParser with DataTypeParser {
     }
 
   // Based very loosely on the MySQL Grammar.
+  //基于松散的MySQL语法
   // http://dev.mysql.com/doc/refman/5.0/en/join.html
   protected lazy val relations: Parser[LogicalPlan] =
     ( relation ~ rep1("," ~> relation) ^^ {

@@ -123,6 +123,7 @@ final class RandomForestRegressionModel private[ml] (
 
   /**
    * Construct a random forest regression model, with all trees weighted equally.
+    * 构建随机森林回归模型,所有树木均等加权
    * @param trees  Component trees
    */
   private[ml] def this(trees: Array[DecisionTreeRegressionModel], numFeatures: Int) =
@@ -160,6 +161,7 @@ final class RandomForestRegressionModel private[ml] (
 
   /**
    * Estimate of the importance of each feature.
+    * 估计每个功能的重要性
    *
    * This generalizes the idea of "Gini" importance to other losses,
    * following the explanation of Gini importance from "Random Forests" documentation

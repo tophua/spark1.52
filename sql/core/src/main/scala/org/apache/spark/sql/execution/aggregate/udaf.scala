@@ -203,6 +203,7 @@ sealed trait BufferSetterGetterUtils {
 
 /**
  * A Mutable [[Row]] representing an mutable aggregation buffer.
+  * Mutable [[Row]]表示可变聚合缓冲区
  */
 private[sql] class MutableAggregationBufferImpl (
     schema: StructType,
@@ -249,6 +250,8 @@ private[sql] class MutableAggregationBufferImpl (
   // Because get method call specialized getter based on the schema, we cannot use the
   // default implementation of the isNullAt (which is get(i) == null).
   // We have to override it to call isNullAt of the underlyingBuffer.
+  //因为get方法调用基于模式的专用getter,所以我们不能使用isNullAt的默认实现(即get(i)== null)
+  //我们必须覆盖它来调用底层缓冲区的isNullAt。
   override def isNullAt(i: Int): Boolean = {
     underlyingBuffer.isNullAt(offsets(i))
   }
@@ -265,6 +268,7 @@ private[sql] class MutableAggregationBufferImpl (
 
 /**
  * A [[Row]] representing an immutable aggregation buffer.
+  * 一个[[Row]]表示一个不可变的聚合缓冲区
  */
 private[sql] class InputAggregationBuffer private[sql] (
     schema: StructType,
@@ -386,17 +390,21 @@ private[sql] case class ScalaUDAF(
   }
 
   // This buffer is only used at executor side.
+  //此缓冲区仅用于执行程序端
   private[this] var inputAggregateBuffer: InputAggregationBuffer = null
 
   // This buffer is only used at executor side.
+  //此缓冲区仅用于执行程序端
   private[this] var mutableAggregateBuffer: MutableAggregationBufferImpl = null
 
   // This buffer is only used at executor side.
+  //此缓冲区仅用于执行程序端
   private[this] var evalAggregateBuffer: InputAggregationBuffer = null
 
   /**
    * Sets the inputBufferOffset to newInputBufferOffset and then create a new instance of
    * `inputAggregateBuffer` based on this new inputBufferOffset.
+    * 将inputBufferOffset设置为newInputBufferOffset,然后基于此新inputBufferOffset创建`inputAggregateBuffer`的新实例
    */
   override def withNewInputBufferOffset(newInputBufferOffset: Int): Unit = {
     super.withNewInputBufferOffset(newInputBufferOffset)

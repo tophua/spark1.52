@@ -56,6 +56,7 @@ import org.apache.spark.util.Utils
 
 /**
  * This is the HiveQL Dialect, this dialect is strongly bind with HiveContext
+  * 这是HiveQL方言,这种方言与HiveContext强烈绑定
  */
 private[hive] class HiveQLDialect(sqlContext: HiveContext) extends ParserDialect {
   override def parse(sqlText: String): LogicalPlan = {
@@ -68,6 +69,8 @@ private[hive] class HiveQLDialect(sqlContext: HiveContext) extends ParserDialect
 /**
  * An instance of the Spark SQL execution engine that integrates with data stored in Hive.
  * Configuration for Hive is read from hive-site.xml on the classpath.
+  *
+  * Spark SQL执行引擎的一个实例,它与存储在Hive中的数据集成在一起,从类路径上的hive-site.xml读取Hive的配置
  *
  * @since 1.0.0
  */
@@ -82,12 +85,15 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
    * When true, enables an experimental feature where metastore tables that use the parquet SerDe
    * are automatically converted to use the Spark SQL parquet table scan, instead of the Hive
    * SerDe.
+    * 如果为true,则启用实验性功能,其中使用镶木地板SerDe的Metastore表
+    * 会自动转换为使用Spark SQL parquet表扫描,而不是Hive SerDe。
    */
   protected[sql] def convertMetastoreParquet: Boolean = getConf(CONVERT_METASTORE_PARQUET)
 
   /**
    * When true, also tries to merge possibly different but compatible Parquet schemas in different
    * Parquet data files.
+    * 当为true时,还尝试在不同的Parquet数据文件中合并可能不同但兼容的Parquet模式
    *
    * This configuration is only effective when "spark.sql.hive.convertMetastoreParquet" is true.
    */
@@ -112,12 +118,14 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
    * The version of the hive client that will be used to communicate with the metastore.  Note that
    * this does not necessarily need to be the same version of Hive that is used internally by
    * Spark SQL for execution.
+    * 将用于与Metastore通信的hive客户端的版本,请注意,这不一定需要是Spark SQL内部用于执行的相同版本的Hive
    */
   protected[hive] def hiveMetastoreVersion: String = getConf(HIVE_METASTORE_VERSION)
 
   /**
    * The location of the jars that should be used to instantiate the HiveMetastoreClient.  This
    * property can be one of three options:
+    * 应该用于实例化HiveMetastoreClient的jar的位置,此属性可以是以下三个选项之一：
    *  - a classpath in the standard format for both hive and hadoop.
    *  - builtin - attempt to discover the jars that were used to load Spark SQL and use those. This
    *              option is only valid when using the execution version of Hive.
@@ -131,6 +139,9 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
    * be shared is JDBC drivers that are needed to talk to the metastore. Other classes that need
    * to be shared are those that interact with classes that are already shared.  For example,
    * custom appenders that are used by log4j.
+    * 以逗号分隔的类前缀列表,应使用在Spark SQL和特定版本的Hive之间共享的类加载器加载,
+    * 应该共享的类的示例是与Metastore进行通信所需的JDBC驱动程序,需要共享的其他类是与已共享的类交互的类,
+    * 例如，log4j使用的自定义appender
    */
   protected[hive] def hiveMetastoreSharedPrefixes: Seq[String] =
     getConf(HIVE_METASTORE_SHARED_PREFIXES).filterNot(_ == "")
@@ -139,12 +150,15 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
    * A comma separated list of class prefixes that should explicitly be reloaded for each version
    * of Hive that Spark SQL is communicating with.  For example, Hive UDFs that are declared in a
    * prefix that typically would be shared (i.e. org.apache.spark.*)
+    * 以逗号分隔的类前缀列表,应为Spark SQL正在与之通信的每个Hive版本显式重新加载,
+    * 例如,在通常将被共享的前缀中声明的Hive UDF（即org.apache.spark.*）
    */
   protected[hive] def hiveMetastoreBarrierPrefixes: Seq[String] =
     getConf(HIVE_METASTORE_BARRIER_PREFIXES).filterNot(_ == "")
 
   /*
    * hive thrift server use background spark sql thread pool to execute sql queries
+   * hive thrift服务器使用后台spark sql线程池来执行sql查询
    */
   protected[hive] def hiveThriftServerAsync: Boolean = getConf(HIVE_THRIFT_SERVER_ASYNC)
 
@@ -157,6 +171,10 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
    * client is used for execution related tasks like registering temporary functions or ensuring
    * that the ThreadLocal SessionState is correctly populated.  This copy of Hive is *not* used
    * for storing persistent metadata, and only point to a dummy metastore in a temporary directory.
+    *
+    * 用于执行的hive客户端的副本,目前,这必须始终是用于执行的hive客户端的副本。
+    * 目前,必须始终将客户端用于执行相关任务,例如注册临时函数或确保正确填充ThreadLocal SessionState,
+    * 此Hive副本不用于存储持久性元数据,仅指向临时目录中的虚拟Metastore
    */
   @transient
   protected[hive] lazy val executionHive: ClientWrapper = {
@@ -171,6 +189,7 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
   /**
    * Overrides default Hive configurations to avoid breaking changes to Spark SQL users.
    *  - allow SQL11 keywords to be used as identifiers
+    *  覆盖默认的Hive配置,以避免中断对Spark SQL用户的更改, - 允许SQL11关键字用作标识符
    */
   private[sql] def defaultOverrides() = {
     setConf(ConfVars.HIVE_SUPPORT_SQL11_RESERVED_KEYWORDS.varname, "false")
@@ -182,6 +201,8 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
    * The copy of the Hive client that is used to retrieve metadata from the Hive MetaStore.
    * The version of the Hive client that is used here must match the metastore that is configured
    * in the hive-site.xml file.
+    * Hive客户端的副本,用于从Hive MetaStore检索元数据。
+    * 此处使用的Hive客户端版本必须与hive-site.xml文件中配置的Metastore相匹配
    */
   @transient
   protected[hive] lazy val metadataHive: ClientInterface = {
@@ -189,12 +210,14 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
 
     // We instantiate a HiveConf here to read in the hive-site.xml file and then pass the options
     // into the isolated client loader
+    //我们在这里实例化一个HiveConf来读取hive-site.xml文件,然后将选项传递给隔离的客户端加载器
     val metadataConf = new HiveConf()
 
     val defaultWarehouseLocation = metadataConf.get("hive.metastore.warehouse.dir")
     logInfo("default warehouse location is " + defaultWarehouseLocation)
 
     // `configure` goes second to override other settings.
+    //`configure`排在第二位以覆盖其他设置
     val allConfig = metadataConf.iterator.map(e => e.getKey -> e.getValue).toMap ++ configure
 
     val isolatedLoader = if (hiveMetastoreJars == "builtin") {
@@ -208,6 +231,7 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
 
       // We recursively find all jars in the class loader chain,
       // starting from the given classLoader.
+      //我们递归地查找类加载器链中的所有jar,从给定的classLoader开始。
       def allJars(classLoader: ClassLoader): Array[URL] = classLoader match {
         case null => Array.empty[URL]
         case urlClassLoader: URLClassLoader =>
@@ -243,6 +267,7 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
         sharedPrefixes = hiveMetastoreSharedPrefixes)
     } else {
       // Convert to files and expand any directories.
+      //转换为文件并展开任何目录
       val jars =
         hiveMetastoreJars
           .split(File.pathSeparator)
@@ -289,6 +314,8 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
    * Spark SQL or the external data source library it uses might cache certain metadata about a
    * table, such as the location of blocks. When those change outside of Spark SQL, users should
    * call this function to invalidate the cache.
+    * 使所有缓存的给定表的元数据无效并刷新,出于性能原因,Spark SQL或其使用的外部数据源库可能会缓存有关表的某些元数据,
+    * 例如块的位置,当这些更改在Spark SQL之外时,用户应调用此函数以使缓存无效
    *
    * @since 1.3.0
    */
@@ -305,9 +332,10 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
   /**
    * Analyzes the given table in the current database to generate statistics, which will be
    * used in query optimizations.
-   *
+   * 分析当前数据库中的给定表以生成统计信息,该统计信息将用于查询优化。
    * Right now, it only supports Hive tables and it only updates the size of a Hive table
    * in the Hive metastore.
+    * 现在,它只支持Hive表,它只更新Hive Metastore中Hive表的大小
    *
    * @since 1.2.0
    */
@@ -404,17 +432,20 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
     setConf(entry.key, entry.stringConverter(value))
   }
 
-    /* A catalyst metadata catalog that points to the Hive Metastore. */
+    /* A catalyst metadata catalog that points to the Hive Metastore.
+    * 指向Hive Metastore的催化剂元数据目录*/
   @transient
   override protected[sql] lazy val catalog =
     new HiveMetastoreCatalog(metadataHive, this) with OverrideCatalog
 
   // Note that HiveUDFs will be overridden by functions registered in this context.
+  //请注意，HiveUDF将被在此上下文中注册的函数覆盖
   @transient
   override protected[sql] lazy val functionRegistry: FunctionRegistry =
     new HiveFunctionRegistry(FunctionRegistry.builtin, this.executionHive)
 
-  /* An analyzer that uses the Hive metastore. */
+  /* An analyzer that uses the Hive metastore.
+  * 使用Hive Metastore的分析仪*/
   @transient
   override protected[sql] lazy val analyzer: Analyzer =
     new Analyzer(catalog, functionRegistry, conf) {
@@ -436,7 +467,8 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
     new this.SQLSession()
   }
 
-  /** Overridden by child classes that need to set configuration before the client init. */
+  /** Overridden by child classes that need to set configuration before the client init.
+    * 由需要在客户端init之前设置配置的子类重写*/
   protected def configure(): Map[String, String] = {
     // Hive 0.14.0 introduces timeout operations in HiveConf, and changes default values of a bunch
     // of time `ConfVar`s by adding time suffixes (`s`, `ms`, and `d` etc.).  This breaks backwards-
@@ -498,11 +530,14 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
 
     /**
      * SQLConf and HiveConf contracts:
+      * SQLConf和HiveConf合同：
      *
-     * 1. reuse existing started SessionState if any
+     * 1. reuse existing started SessionState if any 如果有的话，重用现有的SessionState
      * 2. when the Hive session is first initialized, params in HiveConf will get picked up by the
      *    SQLConf.  Additionally, any properties set by set() or a SET command inside sql() will be
      *    set in the SQLConf *as well as* in the HiveConf.
+      *    当Hive会话首次初始化时,HiveConf中的params将被SQLConf拾取,此外，set()或sql()中的
+      *    SET命令设置的任何属性都将在SQLConf *中设置，并在HiveConf中设置*。
      */
     protected[hive] lazy val sessionState: SessionState = {
       var state = SessionState.get()
@@ -565,18 +600,21 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
   @transient
   override protected[sql] val planner = hivePlanner
 
-  /** Extends QueryExecution with hive specific features. */
+  /** Extends QueryExecution with hive specific features.
+    * 使用hive特定功能扩展QueryExecution*/
   protected[sql] class QueryExecution(logicalPlan: LogicalPlan)
     extends super.QueryExecution(logicalPlan) {
 
     /**
      * Returns the result as a hive compatible sequence of strings.  For native commands, the
      * execution is simply passed back to Hive.
+      * 将结果作为hive兼容的字符串序列返回,对于本机命令,执行只是传递回Hive
      */
     def stringResult(): Seq[String] = executedPlan match {
       case ExecutedCommand(desc: DescribeHiveTableCommand) =>
         // If it is a describe command for a Hive table, we want to have the output format
         // be similar with Hive.
+        //如果它是Hive表的describe命令,我们希望输出格式与Hive类似
         desc.run(self).map {
           case Row(name: String, dataType: String, comment) =>
             Seq(name, dataType,
@@ -590,6 +628,7 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
       case other =>
         val result: Seq[Seq[Any]] = other.executeCollect().map(_.toSeq).toSeq
         // We need the types so we can output struct field names
+        //我们需要类型，因此我们可以输出结构字段名称
         val types = analyzed.output.map(_.dataType)
         // Reformat to match hive tab delimited output.
         result.map(_.zip(types).map(HiveContext.toHiveString)).map(_.mkString("\t")).toSeq
@@ -606,7 +645,8 @@ class HiveContext(sc: SparkContext) extends SQLContext(sc) with Logging {
 
 
 private[hive] object HiveContext {
-  /** The version of hive used internally by Spark SQL. */
+  /** The version of hive used internally by Spark SQL.
+    * Spark SQL内部使用的hive版本*/
   val hiveExecutionVersion: String = "1.2.1"
 
   val HIVE_METASTORE_VERSION = stringConf("spark.sql.hive.metastore.version",
@@ -668,13 +708,15 @@ private[hive] object HiveContext {
     defaultValue = Some(true),
     doc = "TODO")
 
-  /** Constructs a configuration for hive, where the metastore is located in a temp directory. */
+  /** Constructs a configuration for hive, where the metastore is located in a temp directory.
+    * 为hive构造配置，其中Metastore位于temp目录中*/
   def newTemporaryConfiguration(): Map[String, String] = {
     val tempDir = Utils.createTempDir()
     val localMetastore = new File(tempDir, "metastore")
     val propMap: HashMap[String, String] = HashMap()
     // We have to mask all properties in hive-site.xml that relates to metastore data source
     // as we used a local metastore here.
+    //我们必须屏蔽hive-site.xml中与Metastore数据源相关的所有属性,因为我们在这里使用了本地Metastore。
     HiveConf.ConfVars.values().foreach { confvar =>
       if (confvar.varname.contains("datanucleus") || confvar.varname.contains("jdo")) {
         propMap.put(confvar.varname, confvar.getDefaultExpr())
@@ -710,11 +752,13 @@ private[hive] object HiveContext {
     case (bin: Array[Byte], BinaryType) => new String(bin, "UTF-8")
     case (decimal: java.math.BigDecimal, DecimalType()) =>
       // Hive strips trailing zeros so use its toString
+      //Hive剥离尾随零,因此使用其toString
       HiveDecimal.create(decimal).toString
     case (other, tpe) if primitiveTypes contains tpe => other.toString
   }
 
-  /** Hive outputs fields of structs slightly differently than top level attributes. */
+  /** Hive outputs fields of structs slightly differently than top level attributes.
+    * Hive输出结构的字段与顶级属性略有不同*/
   protected def toHiveStructString(a: (Any, DataType)): String = a match {
     case (struct: Row, StructType(fields)) =>
       struct.toSeq.zip(fields).map {

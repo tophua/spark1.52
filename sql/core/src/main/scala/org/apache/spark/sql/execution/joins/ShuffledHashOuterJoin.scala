@@ -32,6 +32,7 @@ import org.apache.spark.sql.execution.metric.SQLMetrics
  * :: DeveloperApi ::
  * Performs a hash based outer join for two child relations by shuffling the data using
  * the join keys. This operator requires loading the associated partition in both side into memory.
+  * 通过使用连接键对数据进行混洗,为两个子关系执行基于哈希的外连接,此运算符需要将两侧的关联分区加载到内存中
  */
 @DeveloperApi
 case class ShuffledHashOuterJoin(

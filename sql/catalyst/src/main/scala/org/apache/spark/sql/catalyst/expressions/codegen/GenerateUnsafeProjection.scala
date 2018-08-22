@@ -26,6 +26,9 @@ import org.apache.spark.sql.types._
  * It generates the code for all the expressions, compute the total length for all the columns
  * (can be accessed via variables), and then copy the data into a scratch buffer space in the
  * form of UnsafeRow (the scratch buffer will grow as needed).
+  *
+  * 它为所有表达式生成代码,计算所有列的总长度(可以通过变量访问),
+  * 然后以UnsafeRow的形式将数据复制到临时缓冲区空间(临时缓冲区将根据需要增长)
  *
  * Note: The returned UnsafeRow will be pointed to a scratch buffer inside the projection.
  */
@@ -40,7 +43,8 @@ object GenerateUnsafeProjection extends CodeGenerator[Seq[Expression], UnsafePro
   private val ArrayWriter = classOf[UnsafeRowWriters.ArrayWriter].getName
   private val MapWriter = classOf[UnsafeRowWriters.MapWriter].getName
 
-  /** Returns true iff we support this data type. */
+  /** Returns true iff we support this data type.
+    * 如果我们支持此数据类型,则返回true*/
   def canSupport(dataType: DataType): Boolean = dataType match {
     case NullType => true
     case t: AtomicType => true
@@ -115,7 +119,7 @@ object GenerateUnsafeProjection extends CodeGenerator[Seq[Expression], UnsafePro
 
   /**
    * Generates the Java code to convert a struct (backed by InternalRow) to UnsafeRow.
-   *
+   * 生成Java代码以将结构（由InternalRow支持）转换为UnsafeRow。
    * @param ctx code generation context
    * @param inputs could be the codes for expressions or input struct fields.
    * @param inputTypes types of the inputs
@@ -385,6 +389,7 @@ object GenerateUnsafeProjection extends CodeGenerator[Seq[Expression], UnsafePro
 
   /**
    * Generates the java code to convert a data to its unsafe version.
+    * 生成java代码以将数据转换为其不安全的版本
    */
   private def createConvertCode(
       ctx: CodeGenContext,

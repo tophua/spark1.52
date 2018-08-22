@@ -31,6 +31,7 @@ import org.apache.spark.util.{RedirectThread, Utils}
 /**
  * A main class used to launch Python applications. It executes python as a
  * subprocess and then has it connect back to the JVM to access system properties, etc.
+  * 用于启动Python应用程序的主类,它将python作为子进程执行,然后将其连接回JVM以访问系统属性等
  */
 object PythonRunner {
   def main(args: Array[String]) {
@@ -49,6 +50,7 @@ object PythonRunner {
 
     // Launch a Py4J gateway server for the process to connect to; this will let it see our
     // Java system properties and such
+    //启动Py4J网关服务器以进行连接; 这将让它看到我们的Java系统属性等
     val gatewayServer = new py4j.GatewayServer(null, 0)
     val thread = new Thread(new Runnable() {
       override def run(): Unit = Utils.logUncaughtExceptions {
@@ -60,6 +62,7 @@ object PythonRunner {
     thread.start()
 
     // Wait until the gateway server has started, so that we know which port is it bound to.
+    //等到网关服务器启动,以便我们知道它绑定到哪个端口
     // `gatewayServer.start()` will start a new thread and run the server code there, after
     // initializing the socket, so the thread started above will end as soon as the server is
     // ready to serve connections.
@@ -97,6 +100,7 @@ object PythonRunner {
 
   /**
    * Format the python file path so that it can be added to the PYTHONPATH correctly.
+    * 格式化python文件路径,以便可以正确添加到PYTHONPATH
    *
    * Python does not understand URI schemes in paths. Before adding python files to the
    * PYTHONPATH, we need to extract the path from the URI. This is safe to do because we
@@ -131,6 +135,7 @@ object PythonRunner {
   /**
    * Format each python file path in the comma-delimited list of paths, so it can be
    * added to the PYTHONPATH correctly.
+    * 在逗号分隔的路径列表中格式化每个python文件路径,以便可以正确地将其添加到PYTHONPATH
    */
   def formatPaths(paths: String, testWindows: Boolean = false): Array[String] = {
     Option(paths).getOrElse("")

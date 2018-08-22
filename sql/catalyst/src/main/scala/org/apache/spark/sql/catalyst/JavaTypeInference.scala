@@ -28,6 +28,7 @@ import org.apache.spark.sql.types._
 
 /**
  * Type-inference utilities for POJOs and Java collections.
+  * POJO和Java集合的类型推断实用程序
  */
 private [sql] object JavaTypeInference {
 
@@ -40,6 +41,7 @@ private [sql] object JavaTypeInference {
 
   /**
    * Infers the corresponding SQL data type of a JavaClean class.
+    * 推断JavaClean类的相应SQL数据类型
    * @param beanClass Java type
    * @return (SQL data type, nullable)
    */
@@ -49,6 +51,7 @@ private [sql] object JavaTypeInference {
 
   /**
    * Infers the corresponding SQL data type of a Java type.
+    * 推断Java类型的相应SQL数据类型
    * @param typeToken Java type
    * @return (SQL data type, nullable)
    */

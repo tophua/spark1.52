@@ -27,8 +27,10 @@ import org.apache.spark.sql.catalyst.plans.physical.{Partitioning, UnknownPartit
 /**
  * Apply the all of the GroupExpressions to every input row, hence we will get
  * multiple output rows for a input row.
+  * 将所有GroupExpressions应用于每个输入行,因此我们将为输入行获取多个输出行
  * @param projections The group of expressions, all of the group expressions should
  *                    output the same schema specified bye the parameter `output`
+  *                    表达式组,所有组表达式都应输出由参数`output`指定的相同模式
  * @param output      The output Schema
  * @param child       Child operator
  */
@@ -49,6 +51,7 @@ case class Expand(
       // workers via closure. However we can't assume the Projection
       // is serializable because of the code gen, so we have to
       // create the projections within each of the partition processing.
+      //工人通过关闭,但是我们不能假设Projection因代码生成而可序列化,因此我们必须在每个分区处理中创建投影。
       val groups = projections.map(ee => newProjection(ee, child.output)).toArray
 
       new Iterator[InternalRow] {
@@ -61,6 +64,7 @@ case class Expand(
         override final def next(): InternalRow = {
           if (idx <= 0) {
             // in the initial (-1) or beginning(0) of a new input row, fetch the next input tuple
+            //在新输入行的初始（-1）或开始（0）中,获取下一个输入元组
             input = iter.next()
             idx = 0
           }

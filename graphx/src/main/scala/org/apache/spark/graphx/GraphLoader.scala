@@ -23,12 +23,15 @@ import org.apache.spark.graphx.impl.{EdgePartitionBuilder, GraphImpl}
 
 /**
  * Provides utilities for loading [[Graph]]s from files.
+  * 提供从文件加载[[Graph]]的实用程序
  */
 object GraphLoader extends Logging {
 
   /**
    * Loads a graph from an edge list formatted file where each line contains two integers: a source
    * id and a target id. Skips lines that begin with `#`.
+    *
+    * 从边列表格式化文件加载图形,其中每行包含两个整数：源ID和目标ID,跳过以`＃`开头的行。
    *
    * If desired the edges can be automatically oriented in the positive
    * direction (source Id < target Id) by setting `canonicalOrientation` to
@@ -65,6 +68,7 @@ object GraphLoader extends Logging {
     val startTime = System.currentTimeMillis
 
     // Parse the edge data table directly into edge partitions
+    //将边数据表直接解析为边分区
     val lines =
       if (numEdgePartitions > 0) {
         sc.textFile(path, numEdgePartitions).coalesce(numEdgePartitions)

@@ -26,6 +26,7 @@ import org.apache.spark.mllib.tree.model.{InformationGainStats => OldInformation
 /**
  * :: DeveloperApi ::
  * Decision tree node interface.
+  * 决策树节点接口
  */
 @DeveloperApi
 sealed abstract class Node extends Serializable {
@@ -33,48 +34,55 @@ sealed abstract class Node extends Serializable {
   // TODO: Add aggregate stats (once available).  This will happen after we move the DecisionTree
   //       code into the new API and deprecate the old API.  SPARK-3727
 
-  /** Prediction a leaf node makes, or which an internal node would make if it were a leaf node */
+  /** Prediction a leaf node makes, or which an internal node would make if it were a leaf node
+    * 如果叶节点是叶节点,则预测叶节点,或者内部节点将进行预测 */
   def prediction: Double
 
-  /** Impurity measure at this node (for training data) */
+  /** Impurity measure at this node (for training data)
+    * 此节点的杂质度量(用于训练数据)*/
   def impurity: Double
 
   /**
    * Statistics aggregated from training data at this node, used to compute prediction, impurity,
    * and probabilities.
+    * 从该节点的训练数据汇总的统计数据,用于计算预测,杂质和概率
    * For classification, the array of class counts must be normalized to a probability distribution.
+    * 对于分类,必须将类计数数组标准化为概率分布
    */
   private[ml] def impurityStats: ImpurityCalculator
 
-  /** Recursive prediction helper method */
+  /** Recursive prediction helper method 递归预测辅助方法*/
   private[ml] def predictImpl(features: Vector): LeafNode
 
   /**
    * Get the number of nodes in tree below this node, including leaf nodes.
+    * 获取此节点下方树中的节点数,包括叶节点
    * E.g., if this is a leaf, returns 0.  If both children are leaves, returns 2.
    */
   private[tree] def numDescendants: Int
 
   /**
-   * Recursive print function.
+   * Recursive print function.递归打印功能
    * @param indentFactor  The number of spaces to add to each level of indentation.
    */
   private[tree] def subtreeToString(indentFactor: Int = 0): String
 
   /**
-   * Get depth of tree from this node.
+   * Get depth of tree from this node.从此节点获取树的深度
    * E.g.: Depth 0 means this is a leaf node.  Depth 1 means 1 internal and 2 leaf nodes.
    */
   private[tree] def subtreeDepth: Int
 
   /**
    * Create a copy of this node in the old Node format, recursively creating child nodes as needed.
+    * 以旧节点格式创建此节点的副本,根据需要递归创建子节点
    * @param id  Node ID using old format IDs
    */
   private[ml] def toOld(id: Int): OldNode
 
   /**
    * Trace down the tree, and return the largest feature index used in any split.
+    * 跟踪树,并返回任何拆分中使用的最大特征索引
    * @return  Max feature index used in a split, or -1 if there are no splits (single leaf node).
    */
   private[ml] def maxSplitFeatureIndex(): Int
@@ -84,6 +92,7 @@ private[ml] object Node {
 
   /**
    * Create a new Node from the old Node format, recursively creating child nodes as needed.
+    * 从旧节点格式创建新节点,根据需要递归创建子节点
    */
   def fromOld(oldNode: OldNode, categoricalFeatures: Map[Int, Int]): Node = {
     if (oldNode.isLeaf) {
@@ -107,7 +116,7 @@ private[ml] object Node {
 
 /**
  * :: DeveloperApi ::
- * Decision tree leaf node.
+ * Decision tree leaf node.决策树叶节点
  * @param prediction  Prediction this node makes
  * @param impurity  Impurity measure at this node (for training data)
  */
@@ -141,7 +150,7 @@ final class LeafNode private[ml] (
 
 /**
  * :: DeveloperApi ::
- * Internal Decision Tree node.
+ * Internal Decision Tree node.内部决策树节点
  * @param prediction  Prediction this node would make if it were a leaf node
  * @param impurity  Impurity measure at this node (for training data)
  * @param gain Information gain value.
@@ -236,7 +245,8 @@ private object InternalNode {
 /**
  * Version of a node used in learning.  This uses vars so that we can modify nodes as we split the
  * tree by adding children, etc.
- *
+ * 学习中使用的节点版本,这使用变量,以便我们可以在通过添加子项等分割树时修改节点
+  *
  * For now, we use node IDs.  These will be kept internal since we hope to remove node IDs
  * in the future, or at least change the indexing (so that we can support much deeper trees).
  *
@@ -260,6 +270,7 @@ private[tree] class LearningNode(
 
   /**
    * Convert this [[LearningNode]] to a regular [[Node]], and recurse on any children.
+    * 将此[[LearningNode]]转换为常规[[Node]],并递归任何子项
    */
   def toNode: Node = {
     if (leftChild.nonEmpty) {
@@ -283,7 +294,8 @@ private[tree] class LearningNode(
 
 private[tree] object LearningNode {
 
-  /** Create a node with some of its fields set. */
+  /** Create a node with some of its fields set.
+    * 创建一个设置了一些字段的节点*/
   def apply(
       id: Int,
       isLeaf: Boolean,
@@ -291,7 +303,8 @@ private[tree] object LearningNode {
     new LearningNode(id, None, None, None, false, stats)
   }
 
-  /** Create an empty node with the given node index.  Values must be set later on. */
+  /** Create an empty node with the given node index.  Values must be set later on.
+    * 使用给定的节点索引创建一个空节点,必须稍后设置值 */
   def emptyNode(nodeIndex: Int): LearningNode = {
     new LearningNode(nodeIndex, None, None, None, false, null)
   }
@@ -300,21 +313,25 @@ private[tree] object LearningNode {
 
   /**
    * Return the index of the left child of this node.
+    * 返回此节点的左子节点的索引
    */
   def leftChildIndex(nodeIndex: Int): Int = nodeIndex << 1
 
   /**
    * Return the index of the right child of this node.
+    * 返回此节点的右子节点的索引
    */
   def rightChildIndex(nodeIndex: Int): Int = (nodeIndex << 1) + 1
 
   /**
    * Get the parent index of the given node, or 0 if it is the root.
+    * 获取给定节点的父索引,如果是根,则获取0
    */
   def parentIndex(nodeIndex: Int): Int = nodeIndex >> 1
 
   /**
    * Return the level of a tree which the given node is in.
+    * 返回给定节点所在的树的级别
    */
   def indexToLevel(nodeIndex: Int): Int = if (nodeIndex == 0) {
     throw new IllegalArgumentException(s"0 is not a valid node index.")
@@ -324,24 +341,28 @@ private[tree] object LearningNode {
 
   /**
    * Returns true if this is a left child.
+    * 如果这是一个左子,则返回true
    * Note: Returns false for the root.
    */
   def isLeftChild(nodeIndex: Int): Boolean = nodeIndex > 1 && nodeIndex % 2 == 0
 
   /**
    * Return the maximum number of nodes which can be in the given level of the tree.
+    * 返回可以在树的给定级别中的最大节点数
    * @param level  Level of tree (0 = root).
    */
   def maxNodesInLevel(level: Int): Int = 1 << level
 
   /**
    * Return the index of the first node in the given level.
+    * 返回给定级别中第一个节点的索引
    * @param level  Level of tree (0 = root).
    */
   def startIndexInLevel(level: Int): Int = 1 << level
 
   /**
    * Traces down from a root node to get the node with the given node index.
+    * 从根节点跟踪以获取具有给定节点索引的节点
    * This assumes the node exists.
    */
   def getNode(nodeIndex: Int, rootNode: LearningNode): LearningNode = {

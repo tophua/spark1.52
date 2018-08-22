@@ -34,6 +34,7 @@ import org.apache.spark.{Logging, Partition, SparkContext, TaskContext}
 
 /**
  * Data corresponding to one partition of a JDBCRDD.
+  * 对应于JDBCRDD的一个分区的数据
  */
 private[sql] case class JDBCPartition(whereClause: String, idx: Int) extends Partition {
   override def index: Int = idx
@@ -45,6 +46,8 @@ private[sql] object JDBCRDD extends Logging {
   /**
    * Maps a JDBC type to a Catalyst type.  This function is called only when
    * the JdbcDialect class corresponding to your database driver returns null.
+    *
+    * 将JDBC类型映射到Catalyst类型,仅当与数据库驱动程序对应的JdbcDialect类返回null时,才会调用此函数。
    *
    * @param sqlType - A field of java.sql.Types
    * @return The Catalyst type corresponding to sqlType.
@@ -107,12 +110,15 @@ private[sql] object JDBCRDD extends Logging {
   /**
    * Takes a (schema, table) specification and returns the table's Catalyst
    * schema.
+    * 采用(模式,表)规范并返回表的Catalyst模式
    *
-   * @param url - The JDBC url to fetch information from.
+   * @param url - The JDBC url to fetch information from.用于从中获取信息的JDBC URL
    * @param table - The table name of the desired table.  This may also be a
    *   SQL query wrapped in parentheses.
+    *   所需表的表名,这也可能是括在括号中的SQL查询
    *
    * @return A StructType giving the table's Catalyst schema.
+    *         给出表的Catalyst模式的StructType
    * @throws SQLException if the table specification is garbage.
    * @throws SQLException if the table contains an unsupported type.
    */
@@ -154,9 +160,11 @@ private[sql] object JDBCRDD extends Logging {
 
   /**
    * Prune all but the specified columns from the specified Catalyst schema.
+    * 修剪除指定的Catalyst模式中的指定列以外的所有列
    *
    * @param schema - The Catalyst schema of the master table
-   * @param columns - The list of desired columns
+    *               主表的Catalyst模式
+   * @param columns - The list of desired columns 所需列的列表
    *
    * @return A Catalyst schema corresponding to columns in the given order.
    */
@@ -168,14 +176,17 @@ private[sql] object JDBCRDD extends Logging {
   /**
    * Given a driver string and an url, return a function that loads the
    * specified driver string then returns a connection to the JDBC url.
+    * 给定一个驱动程序字符串和一个url,返回一个加载指定驱动程序字符串的函数,然后返回与JDBC url的连接
    * getConnector is run on the driver code, while the function it returns
    * is run on the executor.
-   *
+   * getConnector在驱动程序代码上运行,而它返回的函数在执行程序上运行
    * @param driver - The class name of the JDBC driver for the given url, or null if the class name
    *                 is not necessary.
-   * @param url - The JDBC url to connect to.
+    *                 给定URL的JDBC驱动程序的类名,如果不需要类名,则为null
+   * @param url - The JDBC url to connect to.连接的JDBC URL
    *
    * @return A function that loads the driver and connects to the url.
+    *         一个加载驱动程序并连接到url的函数
    */
   def getConnector(driver: String, url: String, properties: Properties): () => Connection = {
     () => {
@@ -191,14 +202,19 @@ private[sql] object JDBCRDD extends Logging {
 
   /**
    * Build and return JDBCRDD from the given information.
+    * 从给定信息构建并返回JDBCRDD
    *
    * @param sc - Your SparkContext.
    * @param schema - The Catalyst schema of the underlying database table.
+    *               底层数据库表的Catalyst模式
    * @param driver - The class name of the JDBC driver for the given url.
-   * @param url - The JDBC url to connect to.
+    *               给定URL的JDBC驱动程序的类名
+   * @param url - The JDBC url to connect to.连接的JDBC URL
    * @param fqTable - The fully-qualified table name (or paren'd SQL query) to use.
-   * @param requiredColumns - The names of the columns to SELECT.
+    *                要使用的完全限定的表名(或paren'd SQL查询)
+   * @param requiredColumns - The names of the columns to SELECT.SELECT列的名称
    * @param filters - The filters to include in all WHERE clauses.
+    *                要包含在所有WHERE子句中的过滤器
    * @param parts - An array of JDBCPartitions specifying partition ids and
    *    per-partition WHERE clauses.
    *
@@ -232,6 +248,8 @@ private[sql] object JDBCRDD extends Logging {
  * An RDD representing a table in a database accessed via JDBC.  Both the
  * driver code and the workers must be able to access the database; the driver
  * needs to fetch the schema while the workers need to fetch the data.
+  * 表示通过JDBC访问的数据库中的表的RDD,驱动程序代码和工作者都必须能够访问数据库;
+  * 当工作节点需要获取数据时,驱动程序需要获取模式。
  */
 private[sql] class JDBCRDD(
     sc: SparkContext,
@@ -246,11 +264,13 @@ private[sql] class JDBCRDD(
 
   /**
    * Retrieve the list of partitions corresponding to this RDD.
+    * 检索与此RDD对应的分区列表
    */
   override def getPartitions: Array[Partition] = partitions
 
   /**
    * `columns`, but as a String suitable for injection into a SQL query.
+    * `columns`，但作为一个适合注入SQL查询的String
    */
   private val columnList: String = {
     val sb = new StringBuilder()
@@ -260,6 +280,7 @@ private[sql] class JDBCRDD(
 
   /**
    * Converts value to SQL expression.
+    * 将值转换为SQL表达式
    */
   private def compileValue(value: Any): Any = value match {
     case stringValue: String => s"'${escapeSql(stringValue)}'"
@@ -274,6 +295,7 @@ private[sql] class JDBCRDD(
   /**
    * Turns a single Filter into a String representing a SQL expression.
    * Returns null for an unhandled filter.
+    * 将单个Filter转换为表示SQL表达式的String,对于未处理的过滤器,返回null
    */
   private def compileFilter(f: Filter): String = f match {
     case EqualTo(attr, value) => s"$attr = ${compileValue(value)}"
@@ -286,6 +308,7 @@ private[sql] class JDBCRDD(
 
   /**
    * `filters`, but as a WHERE clause suitable for injection into a SQL query.
+    * `filters`,但作为适合注入SQL查询的WHERE子句
    */
   private val filterWhereClause: String = {
     val filterStrings = filters map compileFilter filter (_ != null)
@@ -298,6 +321,7 @@ private[sql] class JDBCRDD(
 
   /**
    * A WHERE clause representing both `filters`, if any, and the current partition.
+    * 一个WHERE子句,表示“过滤器”(如果有)和当前分区
    */
   private def getWhereClause(part: JDBCPartition): String = {
     if (part.whereClause != null && filterWhereClause.length > 0) {
@@ -312,6 +336,7 @@ private[sql] class JDBCRDD(
   // Each JDBC-to-Catalyst conversion corresponds to a tag defined here so that
   // we don't have to potentially poke around in the Metadata once for every
   // row.
+  //每个JDBC-to-Catalyst转换对应于此处定义的标记,这样我们就不必每次都在元数据中找到一次
   // Is there a better way to do this?  I'd rather be using a type that
   // contains only the tags I define.
   abstract class JDBCConversion
@@ -329,6 +354,7 @@ private[sql] class JDBCRDD(
 
   /**
    * Maps a StructType to a type tag list.
+    * 将StructType映射到类型标记列表
    */
   def getConversions(schema: StructType): Array[JDBCConversion] = {
     schema.fields.map(sf => sf.dataType match {
@@ -349,6 +375,7 @@ private[sql] class JDBCRDD(
 
   /**
    * Runs the SQL query against the JDBC driver.
+    * 针对JDBC驱动程序运行SQL查询
    *
    */
   override def compute(thePart: Partition, context: TaskContext): Iterator[InternalRow] =

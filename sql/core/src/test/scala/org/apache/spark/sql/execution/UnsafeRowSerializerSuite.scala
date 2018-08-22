@@ -149,7 +149,7 @@ class UnsafeRowSerializerSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
   //安全与不安全的Shuffle行序列化
-  test("SPARK-10403: unsafe row serializer with UnsafeShuffleManager") {
+  ignore("SPARK-10403: unsafe row serializer with UnsafeShuffleManager") {
     val conf = new SparkConf()
       .set("spark.shuffle.manager", "tungsten-sort")
     sc = new SparkContext("local", "test", conf)

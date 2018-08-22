@@ -80,6 +80,7 @@ trait CaseWhenLike extends Expression {
 
   // Note that `branches` are considered in consecutive pairs (cond, val), and the optional last
   // element is the value for the default catch-all case (if provided).
+  //请注意,`branches`被认为是连续的对(cond，val),可选的last元素是默认的catch-all case（如果提供）的值。
   // Hence, `branches` consists of at least two elements, and can have an odd or even length.
   def branches: Seq[Expression]
 
@@ -90,6 +91,7 @@ trait CaseWhenLike extends Expression {
   val elseValue = if (branches.length % 2 == 0) None else Option(branches.last)
 
   // both then and else expressions should be considered.
+  //那么两个表达都应该考虑
   def valueTypes: Seq[DataType] = (thenList ++ elseValue).map(_.dataType)
   def valueTypesEqual: Boolean = valueTypes.distinct.size == 1
 
@@ -108,6 +110,7 @@ trait CaseWhenLike extends Expression {
 
   override def nullable: Boolean = {
     // If no value is nullable and no elseValue is provided, the whole statement defaults to null.
+    //如果没有值可以为空并且没有提供elseValue,则整个语句默认为null
     thenList.exists(_.nullable) || (elseValue.map(_.nullable).getOrElse(true))
   }
 }
@@ -137,12 +140,13 @@ case class CaseWhen(branches: Seq[Expression]) extends CaseWhenLike {
     }
   }
 
-  /** Written in imperative fashion for performance considerations. */
+  /** Written in imperative fashion for performance considerations. 出于性能考虑,以强制性方式编写。*/
   override def eval(input: InternalRow): Any = {
     val len = branchesArr.length
     var i = 0
     // If all branches fail and an elseVal is not provided, the whole statement
     // defaults to null, according to Hive's semantics.
+    //根据Hive的语义,如果所有分支都失败并且未提供elseVal,则整个语句默认为null
     while (i < len - 1) {
       if (branchesArr(i).eval(input) == true) {
         return branchesArr(i + 1).eval(input)
@@ -237,12 +241,15 @@ case class CaseKeyWhen(key: Expression, branches: Seq[Expression]) extends CaseW
     }
   }
 
-  /** Written in imperative fashion for performance considerations. */
+  /** Written in imperative fashion for performance considerations.
+    * 出于性能考虑,以强制性方式编写 */
   override def eval(input: InternalRow): Any = {
     val evaluatedKey = key.eval(input)
     // If key is null, we can just return the else part or null if there is no else.
+    //如果key为null,我们可以返回else部分,如果没有其他部分,则返回null
     // If key is not null but doesn't match any when part, we need to return
     // the else part or null if there is no else, according to Hive's semantics.
+    //如果key不是null但是在part时不匹配,我们需要返回else部分,如果没有其他部分则返回null,根据Hive的语义
     if (evaluatedKey != null) {
       val len = branchesArr.length
       var i = 0
@@ -312,7 +319,9 @@ case class CaseKeyWhen(key: Expression, branches: Seq[Expression]) extends CaseW
 
 /**
  * A function that returns the least value of all parameters, skipping null values.
+  * 一个函数,它返回所有参数的最小值,跳过空值。
  * It takes at least 2 parameters, and returns null iff all parameters are null.
+  * 它至少需要2个参数,如果所有参数都为null,则返回null
  */
 case class Least(children: Seq[Expression]) extends Expression {
 
@@ -367,7 +376,9 @@ case class Least(children: Seq[Expression]) extends Expression {
 
 /**
  * A function that returns the greatest value of all parameters, skipping null values.
+  * 一个函数,它返回所有参数的最大值,跳过空值。
  * It takes at least 2 parameters, and returns null iff all parameters are null.
+  * 它至少需要2个参数,如果所有参数都为null,则返回null。
  */
 case class Greatest(children: Seq[Expression]) extends Expression {
 

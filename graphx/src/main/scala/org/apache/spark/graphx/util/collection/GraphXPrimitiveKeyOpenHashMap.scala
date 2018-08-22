@@ -25,6 +25,9 @@ import scala.reflect._
  * A fast hash map implementation for primitive, non-null keys. This hash map supports
  * insertions and updates, but not deletions. This map is about an order of magnitude
  * faster than java.util.HashMap, while using much less space overhead.
+  *
+  * 用于原始非空键的快速哈希映射实现,此哈希映射支持插入和更新,但不支持删除,
+  * 此映射比java.util.HashMap快一个数量级,同时使用更少的空间开销
  *
  * Under the hood, it uses our OpenHashSet implementation.
  */
@@ -37,6 +40,7 @@ class GraphXPrimitiveKeyOpenHashMap[@specialized(Long, Int) K: ClassTag,
 
   /**
    * Allocate an OpenHashMap with a fixed initial capacity
+    * 使用固定的初始容量分配OpenHashMap
    */
   def this(initialCapacity: Int) =
     this(new OpenHashSet[K](initialCapacity), new Array[V](initialCapacity))
@@ -44,11 +48,13 @@ class GraphXPrimitiveKeyOpenHashMap[@specialized(Long, Int) K: ClassTag,
   /**
    * Allocate an OpenHashMap with a default initial capacity, providing a true
    * no-argument constructor.
+    * 使用默认初始容量分配OpenHashMap,提供真正的无参数构造函数
    */
   def this() = this(64)
 
   /**
    * Allocate an OpenHashMap with a fixed initial capacity
+    * 使用固定的初始容量分配OpenHashMap
    */
   def this(keySet: OpenHashSet[K]) = this(keySet, new Array[V](keySet.capacity))
 
@@ -58,19 +64,20 @@ class GraphXPrimitiveKeyOpenHashMap[@specialized(Long, Int) K: ClassTag,
 
   override def size: Int = keySet.size
 
-  /** Get the value for a given key */
+  /** Get the value for a given key 获取给定密钥的值*/
   def apply(k: K): V = {
     val pos = keySet.getPos(k)
     _values(pos)
   }
 
-  /** Get the value for a given key, or returns elseValue if it doesn't exist. */
+  /** Get the value for a given key, or returns elseValue if it doesn't exist.
+    * 获取给定键的值,如果不存在则返回elseValue*/
   def getOrElse(k: K, elseValue: V): V = {
     val pos = keySet.getPos(k)
     if (pos >= 0) _values(pos) else elseValue
   }
 
-  /** Set the value for a key */
+  /** Set the value for a key 设置key的值*/
   def update(k: K, v: V) {
     val pos = keySet.addWithoutResize(k) & OpenHashSet.POSITION_MASK
     _values(pos) = v
@@ -79,7 +86,7 @@ class GraphXPrimitiveKeyOpenHashMap[@specialized(Long, Int) K: ClassTag,
   }
 
 
-  /** Set the value for a key */
+  /** Set the value for a key 设置key的值*/
   def setMerge(k: K, v: V, mergeF: (V, V) => V) {
     val pos = keySet.addWithoutResize(k)
     val ind = pos & OpenHashSet.POSITION_MASK
@@ -96,6 +103,8 @@ class GraphXPrimitiveKeyOpenHashMap[@specialized(Long, Int) K: ClassTag,
   /**
    * If the key doesn't exist yet in the hash map, set its value to defaultValue; otherwise,
    * set its value to mergeValue(oldValue).
+    *
+    * 如果哈希映射中的密钥尚不存在,请将其值设置为defaultValue; 否则，将其值设置为mergeValue（oldValue）。
    *
    * @return the newly updated value.
    */
@@ -116,7 +125,8 @@ class GraphXPrimitiveKeyOpenHashMap[@specialized(Long, Int) K: ClassTag,
     var pos = 0
     var nextPair: (K, V) = computeNextPair()
 
-    /** Get the next value we should return from next(), or null if we're finished iterating */
+    /** Get the next value we should return from next(), or null if we're finished iterating
+      * 获取我们应该从next()返回的下一个值,如果我们完成迭代,则返回null*/
     def computeNextPair(): (K, V) = {
       pos = keySet.nextPos(pos)
       if (pos >= 0) {

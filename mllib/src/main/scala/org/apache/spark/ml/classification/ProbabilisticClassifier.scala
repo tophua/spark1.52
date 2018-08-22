@@ -27,6 +27,7 @@ import org.apache.spark.sql.types.{DataType, StructType}
 
 /**
  * (private[classification])  Params for probabilistic classification.
+  * (私有[分类])概率分类的参数
  */
 private[classification] trait ProbabilisticClassifierParams
   extends ClassifierParams with HasProbabilityCol with HasThresholds {
@@ -44,6 +45,7 @@ private[classification] trait ProbabilisticClassifierParams
  * :: DeveloperApi ::
  *
  * Single-label binary or multiclass classifier which can output class conditional probabilities.
+  * 可以输出类条件概率的单标签二进制或多类分类器
  *
  * @tparam FeaturesType  Type of input features.  E.g., [[Vector]]
  * @tparam E  Concrete Estimator type
@@ -69,7 +71,7 @@ abstract class ProbabilisticClassifier[
  *
  * Model produced by a [[ProbabilisticClassifier]].
  * Classes are indexed {0, 1, ..., numClasses - 1}.
- *
+ * 类被编入索引{0,1，...，numClasses - 1}。
  * @tparam FeaturesType  Type of input features.  E.g., [[Vector]]
  * @tparam M  Concrete Model type
  */
@@ -88,6 +90,7 @@ abstract class ProbabilisticClassificationModel[
   /**
    * Transforms dataset by reading from [[featuresCol]], and appending new columns as specified by
    * parameters:
+    * 通过从[[featuresCol]]读取来转换数据集,并追加参数指定的新列
    *  - predicted labels as [[predictionCol]] of type [[Double]]
    *  - raw predictions (confidences) as [[rawPredictionCol]] of type [[Vector]]
    *  - probability of each class as [[probabilityCol]] of type [[Vector]].
@@ -103,8 +106,9 @@ abstract class ProbabilisticClassificationModel[
         s" numClasses=$numClasses, but thresholds has length ${$(thresholds).length}")
     }
 
-    // Output selected columns only.
+    // Output selected columns only.仅输出所选列
     // This is a bit complicated since it tries to avoid repeated computation.
+    //这有点复杂,因为它试图避免重复计算。
     var outputData = dataset
     var numColsOutput = 0
     if ($(rawPredictionCol).nonEmpty) {
@@ -150,9 +154,10 @@ abstract class ProbabilisticClassificationModel[
 
   /**
    * Estimate the probability of each class given the raw prediction,
+    * 给出原始预测,估计每个类的概率
    * doing the computation in-place.
    * These predictions are also called class conditional probabilities.
-   *
+   * 在原地进行计算,这些预测也称为类条件概率。
    * This internal method is used to implement [[transform()]] and output [[probabilityCol]].
    *
    * @return Estimated class conditional probabilities (modified input vector)
@@ -175,7 +180,9 @@ abstract class ProbabilisticClassificationModel[
 
   /**
    * Predict the probability of each class given the features.
+    * 预测给定特征的每个类的概率
    * These predictions are also called class conditional probabilities.
+    * 这些预测也称为类条件概率
    *
    * This internal method is used to implement [[transform()]] and output [[probabilityCol]].
    *
@@ -188,7 +195,9 @@ abstract class ProbabilisticClassificationModel[
 
   /**
    * Given a vector of class conditional probabilities, select the predicted label.
+    * 给定类条件概率的向量,选择预测标签
    * This supports thresholds which favor particular labels.
+    * 这支持有利于特定标签的阈值
    * @return  predicted label
    */
   protected def probability2prediction(probability: Vector): Double = {
@@ -209,11 +218,12 @@ private[ml] object ProbabilisticClassificationModel {
 
   /**
    * Normalize a vector of raw predictions to be a multinomial probability vector, in place.
-   *
+   * 将原始预测的矢量归一化为多项式概率向量
    * The input raw predictions should be >= 0.
+    * 输入原始预测应> = 0
    * The output vector sums to 1, unless the input vector is all-0 (in which case the output is
    * all-0 too).
-   *
+   *输出向量总和为1,除非输入向量为全0(在这种情况下输出也全为0)。
    * NOTE: This is NOT applicable to all models, only ones which effectively use class
    *       instance counts for raw predictions.
    */

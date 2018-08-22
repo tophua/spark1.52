@@ -46,8 +46,9 @@ final class RandomForestClassifier(override val uid: String)
   def this() = this(Identifiable.randomUID("rfc"))
 
   // Override parameter setters from parent trait for Java API compatibility.
-
+  //从父特征覆盖参数设置器以获得Java API兼容性
   // Parameters from TreeClassifierParams:
+  //TreeClassifierParams中的参数
 
   override def setMaxDepth(value: Int): this.type = super.setMaxDepth(value)
 
@@ -67,7 +68,7 @@ final class RandomForestClassifier(override val uid: String)
   override def setImpurity(value: String): this.type = super.setImpurity(value)
 
   // Parameters from TreeEnsembleParams:
-
+  //TreeEnsembleParams中的参数
   override def setSubsamplingRate(value: Double): this.type = super.setSubsamplingRate(value)
 
   override def setSeed(value: Long): this.type = super.setSeed(value)
@@ -104,10 +105,12 @@ final class RandomForestClassifier(override val uid: String)
 
 @Experimental
 object RandomForestClassifier {
-  /** Accessor for supported impurity settings: entropy, gini */
+  /** Accessor for supported impurity settings: entropy, gini
+    * 支持杂质设置的访问器：熵,基尼*/
   final val supportedImpurities: Array[String] = TreeClassifierParams.supportedImpurities
 
-  /** Accessor for supported featureSubsetStrategy settings: auto, all, onethird, sqrt, log2 */
+  /** Accessor for supported featureSubsetStrategy settings: auto, all, onethird, sqrt, log2
+    * 支持的featureSubsetStrategy设置的访问器：auto,all,onethird,sqrt,log2*/
   final val supportedFeatureSubsetStrategies: Array[String] =
     RandomForestParams.supportedFeatureSubsetStrategies
 }
@@ -117,6 +120,7 @@ object RandomForestClassifier {
  * [[http://en.wikipedia.org/wiki/Random_forest  Random Forest]] model for classification.
  * It supports both binary and multiclass labels, as well as both continuous and categorical
  * features.
+  * 它支持二进制和多类标签,以及连续和分类功能
  * @param _trees  Decision trees in the ensemble.
  *               Warning: These have null parents.
  * @param numFeatures  Number of features used by this model
@@ -134,6 +138,7 @@ final class RandomForestClassificationModel private[ml] (
 
   /**
    * Construct a random forest classification model, with all trees weighted equally.
+    * 构建随机森林分类模型,所有树木均等加权
    * @param trees  Component trees
    */
   private[ml] def this(
@@ -198,13 +203,17 @@ final class RandomForestClassificationModel private[ml] (
 
   /**
    * Estimate of the importance of each feature.
-   *
+   * 估计每个功能的重要性
    * This generalizes the idea of "Gini" importance to other losses,
    * following the explanation of Gini importance from "Random Forests" documentation
    * by Leo Breiman and Adele Cutler, and following the implementation from scikit-learn.
-   *
+    *
+   * 根据Leo Breiman和Adele Cutler的“随机森林”文献对Gini重要性的解释,
+    * 以及scikit-learn的实施,这概括了“基尼”对其他损失的重要性
+    *
    * This feature importance is calculated as follows:
-   *  - Average over trees:
+    * 此功能的重要性计算如下：
+   *  - Average over trees:平均树
    *     - importance(feature j) = sum (over nodes which split on feature j) of the gain,
    *       where gain is scaled by the number of instances passing through node
    *     - Normalize importances for tree based on total number of training instances used
@@ -213,7 +222,7 @@ final class RandomForestClassificationModel private[ml] (
    */
   lazy val featureImportances: Vector = RandomForest.featureImportances(trees, numFeatures)
 
-  /** (private[ml]) Convert to a model in the old API */
+  /** (private[ml]) Convert to a model in the old API （private [ml]）转换为旧API中的模型*/
   private[ml] def toOld: OldRandomForestModel = {
     new OldRandomForestModel(OldAlgo.Classification, _trees.map(_.toOld))
   }
@@ -221,7 +230,7 @@ final class RandomForestClassificationModel private[ml] (
 
 private[ml] object RandomForestClassificationModel {
 
-  /** (private[ml]) Convert a model from the old API */
+  /** (private[ml]) Convert a model from the old API （private [ml]）转换为旧API中的模型*/
   def fromOld(
       oldModel: OldRandomForestModel,
       parent: RandomForestClassifier,
@@ -231,6 +240,7 @@ private[ml] object RandomForestClassificationModel {
       s" with algo=${oldModel.algo} (old API) to RandomForestClassificationModel (new API).")
     val newTrees = oldModel.trees.map { tree =>
       // parent for each tree is null since there is no good way to set this.
+      //每个树的父级都为null，因为没有好的方法来设置它
       DecisionTreeClassificationModel.fromOld(tree, null, categoricalFeatures)
     }
     val uid = if (parent != null) parent.uid else Identifiable.randomUID("rfc")

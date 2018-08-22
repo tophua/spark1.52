@@ -61,18 +61,23 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
   /**
    * Set this RDD's storage level to persist its values across operations after the first time
    * it is computed. Can only be called once on each RDD.
+    *
+    * 设置此RDD的存储级别,以便在第一次计算后将其值保持在操作之间,每个RDD只能调用一次
    */
   def persist(newLevel: StorageLevel): JavaPairRDD[K, V] =
     new JavaPairRDD[K, V](rdd.persist(newLevel))
 
   /**
    * Mark the RDD as non-persistent, and remove all blocks for it from memory and disk.
+    * 将RDD标记为非持久性,并从内存和磁盘中删除它的所有块
    * This method blocks until all blocks are deleted.
+    * 此方法将阻塞,直到删除所有块
    */
   def unpersist(): JavaPairRDD[K, V] = wrapRDD(rdd.unpersist())
 
   /**
    * Mark the RDD as non-persistent, and remove all blocks for it from memory and disk.
+    * 将RDD标记为非持久性,并从内存和磁盘中删除它的所有块
    *
    * @param blocking Whether to block until all blocks are deleted.
    */
@@ -82,62 +87,78 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
 
   /**
    * Return a new RDD containing the distinct elements in this RDD.
+    * 返回包含此RDD中不同元素的新RDD
    */
   def distinct(): JavaPairRDD[K, V] = new JavaPairRDD[K, V](rdd.distinct())
 
   /**
    * Return a new RDD containing the distinct elements in this RDD.
+    * 返回包含此RDD中不同元素的新RDD
    */
   def distinct(numPartitions: Int): JavaPairRDD[K, V] =
       new JavaPairRDD[K, V](rdd.distinct(numPartitions))
 
   /**
    * Return a new RDD containing only the elements that satisfy a predicate.
+    * 返回仅包含满足谓词的元素的新RDD
    */
   def filter(f: JFunction[(K, V), java.lang.Boolean]): JavaPairRDD[K, V] =
     new JavaPairRDD[K, V](rdd.filter(x => f.call(x).booleanValue()))
 
   /**
    * Return a new RDD that is reduced into `numPartitions` partitions.
+    * 返回一个新的RDD，它被缩减为`numPartitions`分区
    */
   def coalesce(numPartitions: Int): JavaPairRDD[K, V] = fromRDD(rdd.coalesce(numPartitions))
 
   /**
    * Return a new RDD that is reduced into `numPartitions` partitions.
+    * 返回一个新的RDD,它被缩减为`numPartitions`分区
    */
   def coalesce(numPartitions: Int, shuffle: Boolean): JavaPairRDD[K, V] =
     fromRDD(rdd.coalesce(numPartitions, shuffle))
 
   /**
    * Return a new RDD that has exactly numPartitions partitions.
+    * 返回一个具有正确numPartitions分区的新RDD
    *
    * Can increase or decrease the level of parallelism in this RDD. Internally, this uses
    * a shuffle to redistribute data.
-   *
+    *
+   * 可以增加或减少此RDD中的并行度,在内部,它使用shuffle重新分配数据
+    *
    * If you are decreasing the number of partitions in this RDD, consider using `coalesce`,
    * which can avoid performing a shuffle.
+    * 如果要减少此RDD中的分区数,请考虑使用`coalesce`,这可以避免执行shuffle
    */
   def repartition(numPartitions: Int): JavaPairRDD[K, V] = fromRDD(rdd.repartition(numPartitions))
 
   /**
    * Return a sampled subset of this RDD.
+    * 返回此RDD的采样子集
    */
   def sample(withReplacement: Boolean, fraction: Double): JavaPairRDD[K, V] =
     sample(withReplacement, fraction, Utils.random.nextLong)
 
   /**
    * Return a sampled subset of this RDD.
+    * 返回此RDD的采样子集
    */
   def sample(withReplacement: Boolean, fraction: Double, seed: Long): JavaPairRDD[K, V] =
     new JavaPairRDD[K, V](rdd.sample(withReplacement, fraction, seed))
 
   /**
    * Return a subset of this RDD sampled by key (via stratified sampling).
+    * 返回通过密钥采样的此RDD的子集(通过分层采样)
    *
    * Create a sample of this RDD using variable sampling rates for different keys as specified by
    * `fractions`, a key to sampling rate map, via simple random sampling with one pass over the
    * RDD, to produce a sample of size that's approximately equal to the sum of
    * math.ceil(numItems * samplingRate) over all key values.
+    *
+    * 使用由“fractions”指定的不同键的可变采样率创建此RDD的样本,这是采样率图的关键,
+    * 通过在RDD上一次通过的简单随机采样,生成大约等于总和的大小的样本 math.ceil(numItems * samplingRate)
+    * 对所有键值的影响。
    */
   def sampleByKey(withReplacement: Boolean,
       fractions: JMap[K, Double],
@@ -146,6 +167,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
 
   /**
    * Return a subset of this RDD sampled by key (via stratified sampling).
+    * 返回通过密钥采样的此RDD的子集(通过分层采样)
    *
    * Create a sample of this RDD using variable sampling rates for different keys as specified by
    * `fractions`, a key to sampling rate map, via simple random sampling with one pass over the
@@ -179,6 +201,8 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * ::Experimental::
    * Return a subset of this RDD sampled by key (via stratified sampling) containing exactly
    * math.ceil(numItems * samplingRate) for each stratum (group of pairs with the same key).
+    * 返回通过键（通过分层采样）采样的此RDD的子集
+    * 其中包含每个层（具有相同键的对的组）的math.ceil（numItems * samplingRate）。
    *
    * This method differs from [[sampleByKey]] in that we make additional passes over the RDD to
    * create a sample size that's exactly equal to the sum of math.ceil(numItems * samplingRate)
@@ -195,6 +219,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
   /**
    * Return the union of this RDD and another one. Any identical elements will appear multiple
    * times (use `.distinct()` to eliminate them).
+    * 返回此RDD与另一个RDD的并集,任何相同的元素都会出现多次(使用`.distinct()`来消除它们)
    */
   def union(other: JavaPairRDD[K, V]): JavaPairRDD[K, V] =
     new JavaPairRDD[K, V](rdd.union(other.rdd))
@@ -202,6 +227,8 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
   /**
    * Return the intersection of this RDD and another one. The output will not contain any duplicate
    * elements, even if the input RDDs did.
+    *
+    * 返回此RDD和另一个RDD的交集,即使输入RDD确实如此,输出也不会包含任何重复元素
    *
    * Note that this method performs a shuffle internally.
    */
@@ -255,6 +282,10 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * "combined type" C * Note that V and C can be different -- for example, one might group an
    * RDD of type (Int, Int) into an RDD of type (Int, List[Int]). Users provide three
    * functions:
+    *
+    * 使用一组自定义聚合函数组合每个键的元素的通用函数,将JavaPairRDD [（K，V）]
+    * 转换为JavaPairRDD [（K，C）]类型的结果,用于“组合类型”C *注意V和C可以不同 -
+    * 例如,可以将RDD分组 类型（Int，Int）的类型为（Int，List [Int]）的RDD,用户提供三种功能：
    *
    * - `createCombiner`, which turns a V into a C (e.g., creates a one-element list)
    * - `mergeValue`, to merge a V into a C (e.g., adds it to the end of a list)
@@ -273,6 +304,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
   /**
    * Simplified version of combineByKey that hash-partitions the output RDD and uses map-side
    * aggregation.
+    * combineByKey的简化版本,它对输出RDD进行散列分区并使用映射端聚合
    */
   def combineByKey[C](createCombiner: JFunction[V, C],
       mergeValue: JFunction2[C, V, C],
@@ -284,6 +316,8 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * Merge the values for each key using an associative reduce function. This will also perform
    * the merging locally on each mapper before sending results to a reducer, similarly to a
    * "combiner" in MapReduce.
+    * 使用关联reduce函数合并每个键的值,这也将在将结果发送到reducer之前在每个映射器上本地执行合并,
+    * 类似于MapReduce中的组合器。
    */
   def reduceByKey(partitioner: Partitioner, func: JFunction2[V, V, V]): JavaPairRDD[K, V] =
     fromRDD(rdd.reduceByKey(partitioner, func))
@@ -292,17 +326,21 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * Merge the values for each key using an associative reduce function, but return the results
    * immediately to the master as a Map. This will also perform the merging locally on each mapper
    * before sending results to a reducer, similarly to a "combiner" in MapReduce.
+    * 使用关联reduce函数合并每个键的值,但将结果立即作为Map返回到master,
+    * 在将结果发送到reducer之前,这也将在每个映射器上本地执行合并,类似于MapReduce中的“组合器”
    */
   def reduceByKeyLocally(func: JFunction2[V, V, V]): java.util.Map[K, V] =
     mapAsSerializableJavaMap(rdd.reduceByKeyLocally(func))
 
-  /** Count the number of elements for each key, and return the result to the master as a Map. */
+  /** Count the number of elements for each key, and return the result to the master as a Map.
+    * 计算每个键的元素数,并将结果作为Map返回到主数据库*/
   def countByKey(): java.util.Map[K, Long] = mapAsSerializableJavaMap(rdd.countByKey())
 
   /**
    * :: Experimental ::
    * Approximate version of countByKey that can return a partial result if it does
    * not finish within a timeout.
+    * countByKey的近似版本,如果在超时内未完成,则可返回部分结果
    */
   @Experimental
   def countByKeyApprox(timeout: Long): PartialResult[java.util.Map[K, BoundedDouble]] =
@@ -312,6 +350,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * :: Experimental ::
    * Approximate version of countByKey that can return a partial result if it does
    * not finish within a timeout.
+    * countByKey的近似版本,如果在超时内未完成,则可返回部分结果
    */
   @Experimental
   def countByKeyApprox(timeout: Long, confidence: Double = 0.95)
@@ -397,6 +436,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
   /**
    * Group the values for each key in the RDD into a single sequence. Allows controlling the
    * partitioning of the resulting key-value pair RDD by passing a Partitioner.
+    * 将RDD中每个键的值分组为单个序列,允许通过传递分区程序来控制生成的键值对RDD的分区
    *
    * Note: If you are grouping in order to perform an aggregation (such as a sum or average) over
    * each key, using [[JavaPairRDD.reduceByKey]] or [[JavaPairRDD.combineByKey]]
@@ -408,6 +448,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
   /**
    * Group the values for each key in the RDD into a single sequence. Hash-partitions the
    * resulting RDD with into `numPartitions` partitions.
+    * 将RDD中每个键的值分组为单个序列,散列将生成的RDD分区为`numPartitions`分区
    *
    * Note: If you are grouping in order to perform an aggregation (such as a sum or average) over
    * each key, using [[JavaPairRDD.reduceByKey]] or [[JavaPairRDD.combineByKey]]
@@ -418,6 +459,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
+    * 返回带有`this`中不在`other`中的元素的RDD
    *
    * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
    * RDD will be &lt;= us.
@@ -427,18 +469,21 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
+    * 返回带有`this`中不在`other`中的元素的RDD
    */
   def subtract(other: JavaPairRDD[K, V], numPartitions: Int): JavaPairRDD[K, V] =
     fromRDD(rdd.subtract(other, numPartitions))
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
+    * 返回带有`this`中不在`other`中的元素的RDD
    */
   def subtract(other: JavaPairRDD[K, V], p: Partitioner): JavaPairRDD[K, V] =
     fromRDD(rdd.subtract(other, p))
 
   /**
    * Return an RDD with the pairs from `this` whose keys are not in `other`.
+    * 返回一个RDD与来自`this`的对，其键不在`other`中
    *
    * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
    * RDD will be &lt;= us.
@@ -448,13 +493,15 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
     fromRDD(rdd.subtractByKey(other))
   }
 
-  /** Return an RDD with the pairs from `this` whose keys are not in `other`. */
+  /** Return an RDD with the pairs from `this` whose keys are not in `other`.
+    * 返回一个RDD与来自`this`的对，其键不在`other`中*/
   def subtractByKey[W](other: JavaPairRDD[K, W], numPartitions: Int): JavaPairRDD[K, V] = {
     implicit val ctag: ClassTag[W] = fakeClassTag
     fromRDD(rdd.subtractByKey(other, numPartitions))
   }
 
-  /** Return an RDD with the pairs from `this` whose keys are not in `other`. */
+  /** Return an RDD with the pairs from `this` whose keys are not in `other`.
+    * 返回一个RDD与来自`this`的对，其键不在`other`中*/
   def subtractByKey[W](other: JavaPairRDD[K, W], p: Partitioner): JavaPairRDD[K, V] = {
     implicit val ctag: ClassTag[W] = fakeClassTag
     fromRDD(rdd.subtractByKey(other, p))
@@ -462,6 +509,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
 
   /**
    * Return a copy of the RDD partitioned using the specified partitioner.
+    * 返回使用指定分区程序分区的RDD副本
    */
   def partitionBy(partitioner: Partitioner): JavaPairRDD[K, V] =
     fromRDD(rdd.partitionBy(partitioner))
@@ -470,6 +518,8 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * Merge the values for each key using an associative reduce function. This will also perform
    * the merging locally on each mapper before sending results to a reducer, similarly to a
    * "combiner" in MapReduce.
+    * 使用关联reduce函数合并每个键的值,这也将在将结果发送到reducer之前在每个映射器上本地执行合并,
+    * 类似于MapReduce中的组合器。
    */
   def join[W](other: JavaPairRDD[K, W], partitioner: Partitioner): JavaPairRDD[K, (V, W)] =
     fromRDD(rdd.join(other, partitioner))
@@ -517,6 +567,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
   /**
    * Simplified version of combineByKey that hash-partitions the resulting RDD using the existing
    * partitioner/parallelism level and using map-side aggregation.
+    * combineByKey的简化版本,使用现有的分区程序/并行级别并使用映射端聚合对生成的RDD进行散列分区
    */
   def combineByKey[C](createCombiner: JFunction[V, C],
     mergeValue: JFunction2[C, V, C],
@@ -530,6 +581,8 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * the merging locally on each mapper before sending results to a reducer, similarly to a
    * "combiner" in MapReduce. Output will be hash-partitioned with the existing partitioner/
    * parallelism level.
+    * 使用关联reduce函数合并每个键的值,这也将在将结果发送到reducer之前在每个映射器上本地执行合并,
+    * 类似于MapReduce中的组合器,输出将使用现有的分区器/并行级别进行散列分区。
    */
   def reduceByKey(func: JFunction2[V, V, V]): JavaPairRDD[K, V] = {
     fromRDD(reduceByKey(defaultPartitioner(rdd), func))
@@ -538,6 +591,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
   /**
    * Group the values for each key in the RDD into a single sequence. Hash-partitions the
    * resulting RDD with the existing partitioner/parallelism level.
+    * 将RDD中每个键的值分组为单个序列,使用现有的分区程序/并行级别对生成的RDD进行散列分区
    *
    * Note: If you are grouping in order to perform an aggregation (such as a sum or average) over
    * each key, using [[JavaPairRDD.reduceByKey]] or [[JavaPairRDD.combineByKey]]
@@ -550,6 +604,8 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * Return an RDD containing all pairs of elements with matching keys in `this` and `other`. Each
    * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
    * (k, v2) is in `other`. Performs a hash join across the cluster.
+    *
+    * 返回包含所有元素对的RDD，其中包含“this”和“other”中的匹配键, 每对元素将作为（k，（v1，v2））元组返回，其中（k，v1）在“this”中，而（k，v2）在“other”中。 在整个群集中执行散列连接。
    */
   def join[W](other: JavaPairRDD[K, W]): JavaPairRDD[K, (V, W)] =
     fromRDD(rdd.join(other))

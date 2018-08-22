@@ -30,8 +30,10 @@ import org.apache.spark.sql.types.DataType
  * :: Experimental ::
  * A feature transformer that takes the 1D discrete cosine transform of a real vector. No zero
  * padding is performed on the input vector.
+  * 一个特征变换器,它采用实矢量的一维离散余弦变换,在输入向量上不执行零填充
  * It returns a real vector of the same length representing the DCT. The return vector is scaled
  * such that the transform matrix is unitary (aka scaled DCT-II).
+  * 它返回表示DCT的相同长度的实数向量,缩放返回向量,使得变换矩阵是单一的（也称为缩放的DCT-II）
  *
  * More information on [[https://en.wikipedia.org/wiki/Discrete_cosine_transform#DCT-II Wikipedia]].
  */
@@ -43,6 +45,7 @@ class DCT(override val uid: String)
 
   /**
    * Indicates whether to perform the inverse DCT (true) or forward DCT (false).
+    * 指示是执行逆DCT(true)还是转发DCT(false)
    * Default: false
    * @group param
    */

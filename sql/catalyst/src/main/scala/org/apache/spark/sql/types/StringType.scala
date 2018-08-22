@@ -39,6 +39,7 @@ class StringType private() extends AtomicType {
 
   /**
    * The default size of a value of the StringType is 4096 bytes.
+    * StringType值的默认大小为4096字节
    */
   override def defaultSize: Int = 4096
 

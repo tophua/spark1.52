@@ -22,6 +22,7 @@ import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression, SortOrd
 /**
  * Performs a physical redistribution of the data.  Used when the consumer of the query
  * result have expectations about the distribution and ordering of partitioned input data.
+  * 执行数据的物理重新分配,当查询结果的使用者对分区输入数据的分布和排序有期望时使用
  */
 abstract class RedistributeData extends UnaryNode {
   override def output: Seq[Attribute] = child.output

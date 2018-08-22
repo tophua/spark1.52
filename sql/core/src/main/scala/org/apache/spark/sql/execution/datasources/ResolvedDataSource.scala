@@ -38,7 +38,8 @@ case class ResolvedDataSource(provider: Class[_], relation: BaseRelation)
 
 object ResolvedDataSource extends Logging {
 
-  /** A map to maintain backward compatibility in case we move data sources around. */
+  /** A map to maintain backward compatibility in case we move data sources around.
+    * 我们移动数据源时保持向后兼容性的映射*/
   private val backwardCompatibilityMap = Map(
     "org.apache.spark.sql.jdbc" -> classOf[jdbc.DefaultSource].getCanonicalName,
     "org.apache.spark.sql.jdbc.DefaultSource" -> classOf[jdbc.DefaultSource].getCanonicalName,
@@ -48,7 +49,8 @@ object ResolvedDataSource extends Logging {
     "org.apache.spark.sql.parquet.DefaultSource" -> classOf[parquet.DefaultSource].getCanonicalName
   )
 
-  /** Given a provider name, look up the data source class definition. */
+  /** Given a provider name, look up the data source class definition.
+    * 给定提供程序名称,查找数据源类定义*/
   def lookupDataSource(provider0: String): Class[_] = {
     val provider = backwardCompatibilityMap.getOrElse(provider0, provider0)
     val provider2 = s"$provider.DefaultSource"
@@ -56,7 +58,8 @@ object ResolvedDataSource extends Logging {
     val serviceLoader = ServiceLoader.load(classOf[DataSourceRegister], loader)
 
     serviceLoader.iterator().filter(_.shortName().equalsIgnoreCase(provider)).toList match {
-      /** the provider format did not match any given registered aliases */
+      /** the provider format did not match any given registered aliases
+        * 提供程序格式与任何给定的已注册别名不匹配*/
       case Nil => Try(loader.loadClass(provider)).orElse(Try(loader.loadClass(provider2))) match {
         case Success(dataSource) => dataSource
         case Failure(error) =>
@@ -68,16 +71,19 @@ object ResolvedDataSource extends Logging {
               s"Failed to load class for data source: $provider.", error)
           }
       }
-      /** there is exactly one registered alias */
+      /** there is exactly one registered alias
+        * 只有一个注册别名*/
       case head :: Nil => head.getClass
-      /** There are multiple registered aliases for the input */
+      /** There are multiple registered aliases for the input
+        * 输入有多个注册别名*/
       case sources => sys.error(s"Multiple sources found for $provider, " +
         s"(${sources.map(_.getClass.getName).mkString(", ")}), " +
         "please specify the fully qualified class name.")
     }
   }
 
-  /** Create a [[ResolvedDataSource]] for reading data in. */
+  /** Create a [[ResolvedDataSource]] for reading data in.
+    * 创建[[ResolvedDataSource]]以读取数据*/
   def apply(
       sqlContext: SQLContext,
       userSpecifiedSchema: Option[StructType],
@@ -153,7 +159,8 @@ object ResolvedDataSource extends Logging {
     }).asNullable
   }
 
-  /** Create a [[ResolvedDataSource]] for saving the content of the given DataFrame. */
+  /** Create a [[ResolvedDataSource]] for saving the content of the given DataFrame.
+    * 创建[[ResolvedDataSource]]以保存给定DataFrame的内容*/
   def apply(
       sqlContext: SQLContext,
       provider: String,
@@ -170,9 +177,13 @@ object ResolvedDataSource extends Logging {
         dataSource.createRelation(sqlContext, mode, options, data)
       case dataSource: HadoopFsRelationProvider =>
         // Don't glob path for the write path.  The contracts here are:
+        //不要写入路径的glob路径,这里的合同是：
         //  1. Only one output path can be specified on the write path;
+        //      在写路径上只能指定一个输出路径;
         //  2. Output path must be a legal HDFS style file system path;
+        //    输出路径必须是合法的HDFS样式文件系统路径;
         //  3. It's OK that the output path doesn't exist yet;
+        //    输出路径尚不存在是可以的;
         val caseInsensitiveOptions = new CaseInsensitiveMap(options)
         val outputPath = {
           val path = new Path(caseInsensitiveOptions("path"))
@@ -190,6 +201,8 @@ object ResolvedDataSource extends Logging {
         // For partitioned relation r, r.schema's column ordering can be different from the column
         // ordering of data.logicalPlan (partition columns are all moved after data column).  This
         // will be adjusted within InsertIntoHadoopFsRelation.
+        //对于分区关系r,r.schema的列排序可能与data.logicalPlan的列排序不同(分区列都在数据列之后移动),
+        //这将在InsertIntoHadoopFsRelation中调整
         sqlContext.executePlan(
           InsertIntoHadoopFsRelation(
             r,

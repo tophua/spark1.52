@@ -29,13 +29,17 @@ import org.apache.spark.sql.sources._
  * It may be optimized by push down partial filters. But we are conservative here.
  * Because if some filters fail to be parsed, the tree may be corrupted,
  * and cannot be used anymore.
+  * 可以通过下推部分过滤器来优化它,但是我们在这里是保守的,
+  * 因为如果某些过滤器无法解析,树可能会被破坏,并且不能再使用了。
  */
 private[orc] object OrcFilters extends Logging {
   def createFilter(filters: Array[Filter]): Option[SearchArgument] = {
     for {
       // Combines all filters with `And`s to produce a single conjunction predicate
+      //将所有过滤器与`和`结合使用以生成单个连词谓词
       conjunction <- filters.reduceOption(And)
       // Then tries to build a single ORC `SearchArgument` for the conjunction predicate
+    //然后尝试为连接谓词构建单个ORC`SearchArgument`
       builder <- buildSearchArgument(conjunction, SearchArgumentFactory.newBuilder())
     } yield builder.build()
   }
@@ -45,6 +49,7 @@ private[orc] object OrcFilters extends Logging {
 
     def isSearchableLiteral(value: Any): Boolean = value match {
       // These are types recognized by the `SearchArgumentImpl.BuilderImpl.boxLiteral()` method.
+        //些是`SearchArgumentImpl.BuilderImpl.boxLiteral()`方法识别的类型
       case _: String | _: Long | _: Double | _: Byte | _: Short | _: Integer | _: Float => true
       case _: DateWritable | _: HiveDecimal | _: HiveChar | _: HiveVarchar => true
       case _ => false
@@ -76,6 +81,7 @@ private[orc] object OrcFilters extends Logging {
       case And(left, right) =>
         // At here, it is not safe to just convert one side if we do not understand the
         // other side. Here is an example used to explain the reason.
+        //在这里，如果我们不了解另一方,那么转换一方是不安全的,这是一个用来解释原因的例子
         // Let's say we have NOT(a = 2 AND b in ('1')) and we do not understand how to
         // convert b in ('1'). If we only convert a = 2, we will end up with a filter
         // NOT(a = 2), which will generate wrong results.

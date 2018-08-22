@@ -26,11 +26,13 @@ import org.apache.spark.sql.catalyst.SqlLexical
 /**
  * This is a data type parser that can be used to parse string representations of data types
  * provided in SQL queries. This parser is mixed in with DDLParser and SqlParser.
+  * 这是一种数据类型解析器,可用于解析SQL查询中提供的数据类型的字符串表示形式,此解析器与DDLParser和SqlParser混合使用。
  */
 private[sql] trait DataTypeParser extends StandardTokenParsers {
 
   // This is used to create a parser from a regex. We are using regexes for data type strings
   // since these strings can be also used as column names or field names.
+  //这用于从正则表达式创建解析器,我们正在将regex用于数据类型字符串,因为这些字符串也可以用作列名或字段名
   import lexical.Identifier
   implicit def regexToParser(regex: Regex): Parser[String] = acceptMatch(
     s"identifier matching regex ${regex}",

@@ -46,24 +46,29 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
 
   import JavaDoubleRDD.fromRDD
 
-  /** Persist this RDD with the default storage level (`MEMORY_ONLY`). */
+  /** Persist this RDD with the default storage level (`MEMORY_ONLY`).
+    * 用默认存储级别（'MEMORY_ONLY）保存此RDD。*/
   def cache(): JavaDoubleRDD = fromRDD(srdd.cache())
 
   /**
    * Set this RDD's storage level to persist its values across operations after the first time
    * it is computed. Can only be called once on each RDD.
+    *设置此RDD的存储级别,以便在第一次操作之后将其值保持在操作中
+    *它被计算出来。只能在每个RDD上调用一次。
    */
   def persist(newLevel: StorageLevel): JavaDoubleRDD = fromRDD(srdd.persist(newLevel))
 
   /**
    * Mark the RDD as non-persistent, and remove all blocks for it from memory and disk.
+    * 将RDD标记为非持久性,并从内存和磁盘中删除它的所有块
    * This method blocks until all blocks are deleted.
+    * 此方法阻止所有块被删除
    */
   def unpersist(): JavaDoubleRDD = fromRDD(srdd.unpersist())
 
   /**
    * Mark the RDD as non-persistent, and remove all blocks for it from memory and disk.
-   *
+   *将RDD标记为非持久性,并从内存和磁盘中删除它的所有块
    * @param blocking Whether to block until all blocks are deleted.
    */
   def unpersist(blocking: Boolean): JavaDoubleRDD = fromRDD(srdd.unpersist(blocking))
@@ -75,37 +80,45 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
 
   /**
    * Return a new RDD containing the distinct elements in this RDD.
+    * 在这个RDD中返回包含不同元素的新RDD
    */
   def distinct(): JavaDoubleRDD = fromRDD(srdd.distinct())
 
   /**
    * Return a new RDD containing the distinct elements in this RDD.
+    * 在这个RDD中返回包含不同元素的新RDD
    */
   def distinct(numPartitions: Int): JavaDoubleRDD = fromRDD(srdd.distinct(numPartitions))
 
   /**
    * Return a new RDD containing only the elements that satisfy a predicate.
+    * 返回一个只包含满足谓词的元素的新RDD
    */
   def filter(f: JFunction[JDouble, java.lang.Boolean]): JavaDoubleRDD =
     fromRDD(srdd.filter(x => f.call(x).booleanValue()))
 
   /**
    * Return a new RDD that is reduced into `numPartitions` partitions.
+    * 返回一个新的RDD，将其简化为“Nuffice分区”
    */
   def coalesce(numPartitions: Int): JavaDoubleRDD = fromRDD(srdd.coalesce(numPartitions))
 
   /**
    * Return a new RDD that is reduced into `numPartitions` partitions.
+    * 返回一个新的RDD,它被缩减为`numPartitions`分区
    */
   def coalesce(numPartitions: Int, shuffle: Boolean): JavaDoubleRDD =
     fromRDD(srdd.coalesce(numPartitions, shuffle))
 
   /**
    * Return a new RDD that has exactly numPartitions partitions.
-   *
+   * 回一个具有正确numPartitions分区的新RDD。
+    *
    * Can increase or decrease the level of parallelism in this RDD. Internally, this uses
    * a shuffle to redistribute data.
-   *
+    *
+   * 可以增加或减少此RDD中的并行度,在内部,它使用shuffle重新分配数据
+    *
    * If you are decreasing the number of partitions in this RDD, consider using `coalesce`,
    * which can avoid performing a shuffle.
    */
@@ -113,6 +126,7 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
+    * 返回带有`this`中不在`other`中的元素的RDD
    *
    * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
    * RDD will be &lt;= us.
@@ -122,12 +136,14 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
+    * 返回带有`this`中不在`other`中的元素的RDD
    */
   def subtract(other: JavaDoubleRDD, numPartitions: Int): JavaDoubleRDD =
     fromRDD(srdd.subtract(other, numPartitions))
 
   /**
    * Return an RDD with the elements from `this` that are not in `other`.
+    * 返回带有`this`中不在`other`中的元素的RDD。
    */
   def subtract(other: JavaDoubleRDD, p: Partitioner): JavaDoubleRDD =
     fromRDD(srdd.subtract(other, p))
@@ -140,6 +156,7 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
 
   /**
    * Return a sampled subset of this RDD.
+    * 返回此RDD的采样子集。
    */
   def sample(withReplacement: Boolean, fraction: JDouble, seed: Long): JavaDoubleRDD =
     fromRDD(srdd.sample(withReplacement, fraction, seed))
@@ -153,6 +170,8 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
   /**
    * Return the intersection of this RDD and another one. The output will not contain any duplicate
    * elements, even if the input RDDs did.
+    *
+    * 返回此RDD和另一个RDD的交集,即使输入RDD确实如此,输出也不会包含任何重复元素。
    *
    * Note that this method performs a shuffle internally.
    */
@@ -160,12 +179,14 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
 
   // Double RDD functions
 
-  /** Add up the elements in this RDD. */
+  /** Add up the elements in this RDD.
+    * 添加此RDD中的元素 */
   def sum(): JDouble = srdd.sum()
 
   /**
    * Returns the minimum element from this RDD as defined by
    * the default comparator natural order.
+    * 返回此RDD中由默认比较器自然顺序定义的最小元素
    * @return the minimum of the RDD
    */
   def min(): JDouble = min(com.google.common.collect.Ordering.natural())
@@ -173,6 +194,7 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
   /**
    * Returns the maximum element from this RDD as defined by
    * the default comparator natural order.
+    * 返回此RDD中的最大元素,由默认比较器自然顺序定义
    * @return the maximum of the RDD
    */
   def max(): JDouble = max(com.google.common.collect.Ordering.natural())
@@ -183,34 +205,41 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
    */
   def stats(): StatCounter = srdd.stats()
 
-  /** Compute the mean of this RDD's elements. */
+  /** Compute the mean of this RDD's elements.
+    * 计算此RDD元素的平均值*/
   def mean(): JDouble = srdd.mean()
 
-  /** Compute the variance of this RDD's elements. */
+  /** Compute the variance of this RDD's elements.
+    * 计算此RDD元素的方差*/
   def variance(): JDouble = srdd.variance()
 
-  /** Compute the standard deviation of this RDD's elements. */
+  /** Compute the standard deviation of this RDD's elements.
+    * 计算此RDD元素的标准偏差*/
   def stdev(): JDouble = srdd.stdev()
 
   /**
    * Compute the sample standard deviation of this RDD's elements (which corrects for bias in
    * estimating the standard deviation by dividing by N-1 instead of N).
+    * 计算此RDD元素的样本标准偏差（通过除以N-1而不是N来校正估计标准偏差的偏差）
    */
   def sampleStdev(): JDouble = srdd.sampleStdev()
 
   /**
    * Compute the sample variance of this RDD's elements (which corrects for bias in
    * estimating the standard variance by dividing by N-1 instead of N).
+    * 计算此RDD元素的样本方差(通过除以N-1而不是N来校正估计标准方差的偏差)
    */
   def sampleVariance(): JDouble = srdd.sampleVariance()
 
-  /** Return the approximate mean of the elements in this RDD. */
+  /** Return the approximate mean of the elements in this RDD.
+    * 返回此RDD中元素的近似平均值*/
   def meanApprox(timeout: Long, confidence: JDouble): PartialResult[BoundedDouble] =
     srdd.meanApprox(timeout, confidence)
 
   /**
    * :: Experimental ::
    * Approximate operation to return the mean within a timeout.
+    * 在超时内返回平均值的近似操作
    */
   @Experimental
   def meanApprox(timeout: Long): PartialResult[BoundedDouble] = srdd.meanApprox(timeout)
@@ -226,6 +255,7 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
   /**
    * :: Experimental ::
    * Approximate operation to return the sum within a timeout.
+    * 在超时内返回总和的近似操作
    */
   @Experimental
   def sumApprox(timeout: Long): PartialResult[BoundedDouble] = srdd.sumApprox(timeout)

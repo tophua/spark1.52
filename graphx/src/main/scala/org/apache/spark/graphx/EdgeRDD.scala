@@ -58,6 +58,7 @@ abstract class EdgeRDD[ED](
 
   /**
    * Map the values in an edge partitioning preserving the structure but changing the values.
+    * 在边缘分区中映射值,保留结构但更改值
    *
    * @tparam ED2 the new edge value type
    * @param f the function from an edge to a new edge value
@@ -67,6 +68,7 @@ abstract class EdgeRDD[ED](
 
   /**
    * Reverse all the edges in this RDD.
+    * 反转此RDD中的所有边
    *
    * @return a new EdgeRDD containing all the edges reversed
    */
@@ -75,6 +77,8 @@ abstract class EdgeRDD[ED](
   /**
    * Inner joins this EdgeRDD with another EdgeRDD, assuming both are partitioned using the same
    * [[PartitionStrategy]].
+    *
+    * Inner将此EdgeRDD与另一个EdgeRDD连接起来,假设两个都使用相同的[[PartitionStrategy]]进行分区
    *
    * @param other the EdgeRDD to join with
    * @param f the join function applied to corresponding values of `this` and `other`
@@ -88,6 +92,8 @@ abstract class EdgeRDD[ED](
   /**
    * Changes the target storage level while preserving all other properties of the
    * EdgeRDD. Operations on the returned EdgeRDD will preserve this storage level.
+    *
+    * 更改目标存储级别,同时保留EdgeRDD的所有其他属性,返回的EdgeRDD上的操作将保留此存储级别。
    *
    * This does not actually trigger a cache; to do this, call
    * [[org.apache.spark.graphx.EdgeRDD#cache]] on the returned EdgeRDD.
@@ -98,7 +104,7 @@ abstract class EdgeRDD[ED](
 object EdgeRDD {
   /**
    * Creates an EdgeRDD from a set of edges.
-   *
+   * 从一组边创建EdgeRDD
    * @tparam ED the edge attribute type
    * @tparam VD the type of the vertex attributes that may be joined with the returned EdgeRDD
    */
@@ -115,7 +121,7 @@ object EdgeRDD {
 
   /**
    * Creates an EdgeRDD from already-constructed edge partitions.
-   *
+   * 从已构建的边缘分区创建EdgeRDD
    * @tparam ED the edge attribute type
    * @tparam VD the type of the vertex attributes that may be joined with the returned EdgeRDD
    */

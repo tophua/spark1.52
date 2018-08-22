@@ -25,7 +25,8 @@ import org.apache.spark.sql.catalyst.ScalaReflectionLock
 import org.apache.spark.sql.catalyst.expressions.Expression
 
 
-/** Precision parameters for a Decimal */
+/** Precision parameters for a Decimal
+  * 十进制的精度参数*/
 @deprecated("Use DecimalType(precision, scale) directly", "1.5")
 case class PrecisionInfo(precision: Int, scale: Int) {
   if (scale > precision) {
@@ -42,8 +43,10 @@ case class PrecisionInfo(precision: Int, scale: Int) {
 /**
  * :: DeveloperApi ::
  * The data type representing `java.math.BigDecimal` values.
+  * 表示`java.math.BigDecimal`值的数据类型
  * A Decimal that must have fixed precision (the maximum number of digits) and scale (the number
  * of digits on right side of dot).
+  * 必须具有固定精度(最大位数)和比例(点数右侧的位数)的十进制数
  *
  * The precision can be up to 38, scale can also be up to 38 (less or equal to precision).
  *
@@ -81,6 +84,7 @@ case class DecimalType(precision: Int, scale: Int) extends FractionalType {
   /**
    * Returns whether this DecimalType is wider than `other`. If yes, it means `other`
    * can be casted into `this` safely without losing any precision or range.
+    * 返回此DecimalType是否宽于`other`,如果是的话,它意味着`other`可以安全地输入`this`而不会丢失任何精度或范围。
    */
   private[sql] def isWiderThan(other: DataType): Boolean = other match {
     case dt: DecimalType =>
@@ -92,6 +96,7 @@ case class DecimalType(precision: Int, scale: Int) extends FractionalType {
 
   /**
    * The default size of a value of the DecimalType is 4096 bytes.
+    * DecimalType的默认值大小为4096字节
    */
   override def defaultSize: Int = 4096
 
@@ -101,7 +106,8 @@ case class DecimalType(precision: Int, scale: Int) extends FractionalType {
 }
 
 
-/** Extra factory methods and pattern matchers for Decimals */
+/** Extra factory methods and pattern matchers for Decimals
+  * 十进制的额外工厂方法和模式匹配器*/
 object DecimalType extends AbstractDataType {
   import scala.math.min
 
@@ -114,6 +120,7 @@ object DecimalType extends AbstractDataType {
   val Unlimited: DecimalType = SYSTEM_DEFAULT
 
   // The decimal types compatible with other numeric types
+  //小数类型与其他数字类型兼容
   private[sql] val ByteDecimal = DecimalType(3, 0)
   private[sql] val ShortDecimal = DecimalType(5, 0)
   private[sql] val IntDecimal = DecimalType(10, 0)

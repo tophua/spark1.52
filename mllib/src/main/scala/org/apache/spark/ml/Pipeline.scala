@@ -40,6 +40,7 @@ abstract class PipelineStage extends Params with Logging {
    * :: DeveloperApi ::
    *
    * Derives the output schema from the input schema.
+    * 从输入模式派生输出模式
    */
   @DeveloperApi
   def transformSchema(schema: StructType): StructType
@@ -48,9 +49,11 @@ abstract class PipelineStage extends Params with Logging {
    * :: DeveloperApi ::
    *
    * Derives the output schema from the input schema and parameters, optionally with logging.
+    * 从输入模式和参数派生输出模式,可选择使用日志记录
    *
    * This should be optimistic.  If it is unclear whether the schema will be valid, then it should
    * be assumed valid until proven otherwise.
+    * 这应该是乐观的,如果不清楚架构是否有效,则应该假设它有效,直到另有证明为止
    */
   @DeveloperApi
   protected def transformSchema(
@@ -88,6 +91,7 @@ class Pipeline(override val uid: String) extends Estimator[PipelineModel] {
 
   /**
    * param for pipeline stages
+    * 管道阶段的参数
    * @group param
    */
   val stages: Param[Array[PipelineStage]] = new Param(this, "stages", "stages of the pipeline")
@@ -97,6 +101,7 @@ class Pipeline(override val uid: String) extends Estimator[PipelineModel] {
 
   // Below, we clone stages so that modifications to the list of stages will not change
   // the Param value in the Pipeline.
+  //下面，我们克隆阶段，以便修改阶段列表不会更改管道中的Param值
   /** @group getParam */
   def getStages: Array[PipelineStage] = $(stages).clone()
 
@@ -113,6 +118,11 @@ class Pipeline(override val uid: String) extends Estimator[PipelineModel] {
    * called to produce the dataset for the next stage. The fitted model from a [[Pipeline]] is an
    * [[PipelineModel]], which consists of fitted models and transformers, corresponding to the
    * pipeline stages. If there are no stages, the output model acts as an identity transformer.
+    *
+    * 使用其他参数使管道适合输入数据集,如果舞台是[[Estimator]],则会在输入数据集上调用其[[Estimator＃fit]]方法以适合模型。
+    * 然后,模型（变换器）将用于将数据集转换为下一阶段的输入,如果阶段是[[Transformer]],
+    * 则将调用其[[Transformer＃transform]]方法以生成下一阶段的数据集,来自[[Pipeline]]的拟合模型是[[PipelineModel]],
+    * 它由适合的模型和变换器组成,对应于管道阶段。 如果没有阶段,则输出模型充当身份变换器
    *
    * @param dataset input dataset
    * @return fitted pipeline
@@ -171,6 +181,7 @@ class Pipeline(override val uid: String) extends Estimator[PipelineModel] {
 /**
  * :: Experimental ::
  * Represents a fitted pipeline.
+  * 表示适合的管道
  */
 @Experimental
 class PipelineModel private[ml] (
@@ -178,7 +189,8 @@ class PipelineModel private[ml] (
     val stages: Array[Transformer])
   extends Model[PipelineModel] with Logging {
 
-  /** A Java/Python-friendly auxiliary constructor. */
+  /** A Java/Python-friendly auxiliary constructor.
+    * 一个Java / Python友好的辅助构造函数*/
   private[ml] def this(uid: String, stages: ju.List[Transformer]) = {
     this(uid, stages.asScala.toArray)
   }

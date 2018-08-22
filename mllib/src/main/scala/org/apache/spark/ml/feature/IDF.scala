@@ -30,11 +30,13 @@ import org.apache.spark.sql.types.StructType
 
 /**
  * Params for [[IDF]] and [[IDFModel]].
+  * [IDF]和[IDFMODE]的参数
  */
 private[feature] trait IDFBase extends Params with HasInputCol with HasOutputCol {
 
   /**
    * The minimum of documents in which a term should appear.
+    * 一个术语应出现的最低限度的文件
    * Default: 0
    * @group param
    */
@@ -48,6 +50,7 @@ private[feature] trait IDFBase extends Params with HasInputCol with HasOutputCol
 
   /**
    * Validate and transform the input schema.
+    * 验证和转换输入模式
    */
   protected def validateAndTransformSchema(schema: StructType): StructType = {
     SchemaUtils.checkColumnType(schema, $(inputCol), new VectorUDT)
@@ -58,6 +61,7 @@ private[feature] trait IDFBase extends Params with HasInputCol with HasOutputCol
 /**
  * :: Experimental ::
  * Compute the Inverse Document Frequency (IDF) given a collection of documents.
+  * 在给定文档集合的情况下计算逆文档频率(IDF)
  */
 @Experimental
 final class IDF(override val uid: String) extends Estimator[IDFModel] with IDFBase {

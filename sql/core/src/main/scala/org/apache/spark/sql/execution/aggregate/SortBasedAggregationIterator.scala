@@ -26,6 +26,7 @@ import org.apache.spark.unsafe.KVIterator
 /**
  * An iterator used to evaluate [[AggregateFunction2]]. It assumes the input rows have been
  * sorted by values of [[groupingKeyAttributes]].
+  * 用于评估[[AggregateFunction2]]的迭代器,它假定输入行已按[[groupingKeyAttributes]]的值排序
  */
 class SortBasedAggregationIterator(
     groupingKeyAttributes: Seq[Attribute],
@@ -72,35 +73,45 @@ class SortBasedAggregationIterator(
   }
 
   ///////////////////////////////////////////////////////////////////////////
-  // Mutable states for sort based aggregation.
+  // Mutable states for sort based aggregation.基于排序的聚合的可变状态
   ///////////////////////////////////////////////////////////////////////////
 
   // The partition key of the current partition.
+  //当前分区的分区键
   private[this] var currentGroupingKey: InternalRow = _
 
   // The partition key of next partition.
+  //下一个分区的分区键
   private[this] var nextGroupingKey: InternalRow = _
 
   // The first row of next partition.
+  //下一个分区的第一行
   private[this] var firstRowInNextGroup: InternalRow = _
 
   // Indicates if we has new group of rows from the sorted input iterator
+  //指示我们是否从排序的输入迭代器中新建了一组行
   private[this] var sortedInputHasNewGroup: Boolean = false
 
   // The aggregation buffer used by the sort-based aggregation.
+  //基于排序的聚合使用的聚合缓冲区
   private[this] val sortBasedAggregationBuffer: MutableRow = newBuffer
 
-  /** Processes rows in the current group. It will stop when it find a new group. */
+  /** Processes rows in the current group. It will stop when it find a new group.
+    * 处理当前组中的行,它会在找到新组时停止*/
   protected def processCurrentSortedGroup(): Unit = {
     currentGroupingKey = nextGroupingKey
     // Now, we will start to find all rows belonging to this group.
+    //现在,我们将开始查找属于该组的所有行
     // We create a variable to track if we see the next group.
+    //我们创建一个变量来跟踪我们是否看到下一组
     var findNextPartition = false
     // firstRowInNextGroup is the first row of this group. We first process it.
+    //firstRowInNextGroup是该组的第一行,我们先处理它
     processRow(sortBasedAggregationBuffer, firstRowInNextGroup)
 
     // The search will stop when we see the next group or there is no
     // input row left in the iter.
+    //当我们看到下一组或者iter中没有剩下输入行时,搜索将停止
     var hasNext = inputKVIterator.next()
     while (!findNextPartition && hasNext) {
       // Get the grouping key.
@@ -109,6 +120,7 @@ class SortBasedAggregationIterator(
       numInputRows += 1
 
       // Check if the current row belongs the current input row.
+      //检查当前行是否属于当前输入行
       if (currentGroupingKey == groupingKey) {
         processRow(sortBasedAggregationBuffer, currentRow)
 
@@ -128,7 +140,7 @@ class SortBasedAggregationIterator(
   }
 
   ///////////////////////////////////////////////////////////////////////////
-  // Iterator's public methods
+  // Iterator's public methods迭代器的公共方法
   ///////////////////////////////////////////////////////////////////////////
 
   override final def hasNext: Boolean = sortedInputHasNewGroup
@@ -136,10 +148,13 @@ class SortBasedAggregationIterator(
   override final def next(): InternalRow = {
     if (hasNext) {
       // Process the current group.
+      //处理当前组
       processCurrentSortedGroup()
       // Generate output row for the current group.
+      //生成当前组的输出行
       val outputRow = generateOutput(currentGroupingKey, sortBasedAggregationBuffer)
       // Initialize buffer values for the next group.
+      //初始化下一组的缓冲区值
       initializeBuffer(sortBasedAggregationBuffer)
       numOutputRows += 1
       outputRow

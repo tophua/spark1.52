@@ -19,5 +19,6 @@ package org.apache.spark.graphx
 
 /**
  * Collections of utilities used by graphx.
+  * graphx使用的实用程序集合
  */
 package object util

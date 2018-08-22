@@ -23,9 +23,11 @@ import scala.reflect.ClassTag
 /**
  * Computes shortest paths to the given set of landmark vertices, returning a graph where each
  * vertex attribute is a map containing the shortest-path distance to each reachable landmark.
+  * 计算到给定地标顶点集的最短路径,返回图表,其中每个顶点属性是包含到每个可到达地标的最短路径距离的地图。
  */
 object ShortestPaths {
-  /** Stores a map from the vertex id of a landmark to the distance to that landmark. */
+  /** Stores a map from the vertex id of a landmark to the distance to that landmark.
+    * 存储从地标的顶点id到到该地标的距离的地图*/
   type SPMap = Map[VertexId, Int]
 
   private def makeMap(x: (VertexId, Int)*) = Map(x: _*)
@@ -39,15 +41,18 @@ object ShortestPaths {
 
   /**
    * Computes shortest paths to the given set of landmark vertices.
+    * 计算到给定地标顶点集的最短路径
    *
    * @tparam ED the edge attribute type (not used in the computation)
+    *           边缘属性类型(未在计算中使用)
    *
-   * @param graph the graph for which to compute the shortest paths
+   * @param graph the graph for which to compute the shortest paths 用于计算最短路径的图表
    * @param landmarks the list of landmark vertex ids. Shortest paths will be computed to each
-   * landmark.
+   * landmark. 标志性顶点id的列表,将为每个地标计算最短路径。
    *
    * @return a graph where each vertex attribute is a map containing the shortest-path distance to
    * each reachable landmark vertex.
+    *       图表,其中每个顶点属性是包含到每个可到达的地标顶点的最短路径距离的地图
    */
   def run[VD, ED: ClassTag](graph: Graph[VD, ED], landmarks: Seq[VertexId]): Graph[SPMap, ED] = {
     val spGraph = graph.mapVertices { (vid, attr) =>

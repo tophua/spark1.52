@@ -22,6 +22,7 @@ import org.apache.spark.annotation.DeveloperApi
 /**
  * :: DeveloperApi ::
  * Physical execution operators for join operations.
+  * 连接操作的物理执行操作符
  */
 package object joins {
 

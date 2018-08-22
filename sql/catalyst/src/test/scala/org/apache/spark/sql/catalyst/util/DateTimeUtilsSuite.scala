@@ -34,7 +34,7 @@ class DateTimeUtilsSuite extends SparkFunSuite {
     val tz = TimeZone.getDefault
     ((timestamp + tz.getOffset(timestamp)) / MILLIS_PER_DAY).toInt
   }
-
+  //时间戳和我们
   test("timestamp and us") {
     val now = new Timestamp(System.currentTimeMillis())
     now.setNanos(1000)

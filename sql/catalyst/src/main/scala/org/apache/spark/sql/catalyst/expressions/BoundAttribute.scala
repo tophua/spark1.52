@@ -27,6 +27,8 @@ import org.apache.spark.sql.types._
  * A bound reference points to a specific slot in the input tuple, allowing the actual value
  * to be retrieved more efficiently.  However, since operations like column pruning can change
  * the layout of intermediate tuples, BindReferences should be run after all such transformations.
+  * 绑定引用指向输入元组中的特定槽,允许更有效地检索实际值,
+  * 但是,由于列修剪等操作可以更改中间元组的布局,因此应在所有此类转换后运行BindReferences
  */
 case class BoundReference(ordinal: Int, dataType: DataType, nullable: Boolean)
   extends LeafExpression with NamedExpression {
@@ -34,6 +36,7 @@ case class BoundReference(ordinal: Int, dataType: DataType, nullable: Boolean)
   override def toString: String = s"input[$ordinal, $dataType]"
 
   // Use special getter for primitive types (for UnsafeRow)
+  //对原始类型使用特殊的getter(对于UnsafeRow)
   override def eval(input: InternalRow): Any = {
     if (input.isNullAt(ordinal)) {
       null

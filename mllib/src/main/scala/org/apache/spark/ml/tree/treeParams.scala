@@ -27,7 +27,7 @@ import org.apache.spark.mllib.tree.loss.{Loss => OldLoss}
 
 /**
  * Parameters for Decision Tree-based algorithms.
- *
+ * 基于决策树的算法的参数
  * Note: Marked as private and DeveloperApi since this may be made public in the future.
  */
 private[ml] trait DecisionTreeParams extends PredictorParams {
@@ -47,6 +47,8 @@ private[ml] trait DecisionTreeParams extends PredictorParams {
    * Maximum number of bins used for discretizing continuous features and for choosing how to split
    * on features at each node.  More bins give higher granularity.
    * Must be >= 2 and >= number of categories in any categorical feature.
+    * 用于离散连续要素以及选择如何拆分每个节点上的要素的最大容器数,
+    * 更多的箱子提供更高的粒度。 必须> = 2且> =任何分类要素中的类别数
    * (default = 32)
    * @group param
    */
@@ -56,7 +58,9 @@ private[ml] trait DecisionTreeParams extends PredictorParams {
 
   /**
    * Minimum number of instances each child must have after split.
+    * 分割后每个孩子必须具有的最小实例数
    * If a split causes the left or right child to have fewer than minInstancesPerNode,
+    * 如果拆分导致左或右子进程少于minInstancesPerNode
    * the split will be discarded as invalid.
    * Should be >= 1.
    * (default = 1)
@@ -69,6 +73,7 @@ private[ml] trait DecisionTreeParams extends PredictorParams {
 
   /**
    * Minimum information gain for a split to be considered at a tree node.
+    * 在树节点处考虑拆分的最小信息增益
    * (default = 0.0)
    * @group param
    */
@@ -77,6 +82,7 @@ private[ml] trait DecisionTreeParams extends PredictorParams {
 
   /**
    * Maximum memory in MB allocated to histogram aggregation.
+    * 分配给直方图聚合的最大内存(MB)
    * (default = 256 MB)
    * @group expertParam
    */
@@ -86,6 +92,7 @@ private[ml] trait DecisionTreeParams extends PredictorParams {
 
   /**
    * If false, the algorithm will pass trees to executors to match instances with nodes.
+    * 如果为false,则算法将树传递给执行程序以匹配具有节点的实例
    * If true, the algorithm will cache node IDs for each instance.
    * Caching can speed up training of deeper trees.
    * (default = false)
@@ -98,6 +105,7 @@ private[ml] trait DecisionTreeParams extends PredictorParams {
 
   /**
    * Specifies how often to checkpoint the cached node IDs.
+    * 指定检查缓存节点ID的频率
    * E.g. 10 means that the cache will get checkpointed every 10 iterations.
    * This is only used if cacheNodeIds is true and if the checkpoint directory is set in
    * [[org.apache.spark.SparkContext]].
@@ -183,6 +191,7 @@ private[ml] trait DecisionTreeParams extends PredictorParams {
 
 /**
  * Parameters for Decision Tree-based classification algorithms.
+  * 基于决策树的分类算法的参数
  */
 private[ml] trait TreeClassifierParams extends Params {
 
@@ -228,6 +237,7 @@ private[ml] object TreeClassifierParams {
 
 /**
  * Parameters for Decision Tree-based regression algorithms.
+  * 基于决策树的回归算法的参数
  */
 private[ml] trait TreeRegressorParams extends Params {
 
@@ -269,6 +279,7 @@ private[ml] object TreeRegressorParams {
 
 /**
  * Parameters for Decision Tree-based ensemble algorithms.
+  * 基于决策树的集成算法的参数
  *
  * Note: Marked as private and DeveloperApi since this may be made public in the future.
  */
@@ -276,6 +287,7 @@ private[ml] trait TreeEnsembleParams extends DecisionTreeParams with HasSeed {
 
   /**
    * Fraction of the training data used for learning each decision tree, in range (0, 1].
+    * 用于学习每个决策树的训练数据的分数,范围（0,1）
    * (default = 1.0)
    * @group param
    */
@@ -296,6 +308,7 @@ private[ml] trait TreeEnsembleParams extends DecisionTreeParams with HasSeed {
 
   /**
    * Create a Strategy instance to use with the old API.
+    * 创建要与旧API一起使用的策略实例
    * NOTE: The caller should set impurity and seed.
    */
   private[ml] def getOldStrategy(
@@ -309,7 +322,7 @@ private[ml] trait TreeEnsembleParams extends DecisionTreeParams with HasSeed {
 
 /**
  * Parameters for Random Forest algorithms.
- *
+ * 随机森林算法的参数
  * Note: Marked as private and DeveloperApi since this may be made public in the future.
  */
 private[ml] trait RandomForestParams extends TreeEnsembleParams {
@@ -377,7 +390,7 @@ private[ml] object RandomForestParams {
 
 /**
  * Parameters for Gradient-Boosted Tree algorithms.
- *
+ * Gradient-Boosted Tree算法的参数
  * Note: Marked as private and DeveloperApi since this may be made public in the future.
  */
 private[ml] trait GBTParams extends TreeEnsembleParams with HasMaxIter {

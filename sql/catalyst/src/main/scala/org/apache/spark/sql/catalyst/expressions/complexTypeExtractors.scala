@@ -25,7 +25,9 @@ import org.apache.spark.sql.types._
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // This file defines all the expressions to extract values out of complex types.
+//此文件定义了从复杂类型中提取值的所有表达式
 // For example, getting a field out of an array, map, or struct.
+//例如,从数组,映射或结构中获取字段
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -76,6 +78,7 @@ object ExtractValue {
   /**
    * Find the ordinal of StructField, report error if no desired field or over one
    * desired fields are found.
+    * 找到StructField的序数,如果找不到所需的字段或超过一个所需字段,则报告错误
    */
   private def findField(fields: Array[StructField], fieldName: String, resolver: Resolver): Int = {
     val checkField = (f: StructField) => resolver(f.name, fieldName)
@@ -94,8 +97,9 @@ object ExtractValue {
 
 /**
  * Returns the value of fields in the Struct `child`.
- *
+ * 返回Struct“child”中的字段值
  * No need to do type checking since it is handled by [[ExtractValue]].
+  * 需进行类型检查，因为它由[[ExtractValue]]处理
  */
 case class GetStructField(child: Expression, field: StructField, ordinal: Int)
   extends UnaryExpression {
@@ -122,8 +126,9 @@ case class GetStructField(child: Expression, field: StructField, ordinal: Int)
 
 /**
  * Returns the array of value of fields in the Array of Struct `child`.
- *
+ * 返回Struct“child”数组中字段值的数组
  * No need to do type checking since it is handled by [[ExtractValue]].
+  * 无需进行类型检查,因为它由[[ExtractValue]]处理
  */
 case class GetArrayStructFields(
     child: Expression,
@@ -183,13 +188,15 @@ case class GetArrayStructFields(
 
 /**
  * Returns the field at `ordinal` in the Array `child`.
- *
+ * 返回数组`child`中`ordinal`的字段
  * We need to do type checking here as `ordinal` expression maybe unresolved.
+  * 我们需要在这里进行类型检查，因为`ordinal`表达式可能尚未解析
  */
 case class GetArrayItem(child: Expression, ordinal: Expression)
   extends BinaryExpression with ExpectsInputTypes {
 
   // We have done type checking for child in `ExtractValue`, so only need to check the `ordinal`.
+  //我们在`ExtractValue`中对子进行了类型检查，因此只需要检查`ordinal`
   override def inputTypes: Seq[AbstractDataType] = Seq(AnyDataType, IntegralType)
 
   override def toString: String = s"$child[$ordinal]"
@@ -197,7 +204,8 @@ case class GetArrayItem(child: Expression, ordinal: Expression)
   override def left: Expression = child
   override def right: Expression = ordinal
 
-  /** `Null` is returned for invalid ordinals. */
+  /** `Null` is returned for invalid ordinals.
+    * 对于无效的序数,返回“Null”*/
   override def nullable: Boolean = true
 
   override def dataType: DataType = child.dataType.asInstanceOf[ArrayType].elementType
@@ -230,6 +238,7 @@ case class GetArrayItem(child: Expression, ordinal: Expression)
  * Returns the value of key `key` in Map `child`.
  *
  * We need to do type checking here as `key` expression maybe unresolved.
+  * 我们需要在这里进行类型检查,因为`key`表达式可能尚未解析
  */
 case class GetMapValue(child: Expression, key: Expression)
   extends BinaryExpression with ExpectsInputTypes {
@@ -237,6 +246,7 @@ case class GetMapValue(child: Expression, key: Expression)
   private def keyType = child.dataType.asInstanceOf[MapType].keyType
 
   // We have done type checking for child in `ExtractValue`, so only need to check the `key`.
+  //我们在`ExtractValue`中对子进行了类型检查,所以只需要检查`key`
   override def inputTypes: Seq[AbstractDataType] = Seq(AnyDataType, keyType)
 
   override def toString: String = s"$child[$key]"
@@ -244,7 +254,7 @@ case class GetMapValue(child: Expression, key: Expression)
   override def left: Expression = child
   override def right: Expression = key
 
-  /** `Null` is returned for invalid ordinals. */
+  /** `Null` is returned for invalid ordinals. 对于无效的序数,返回“Null”。*/
   override def nullable: Boolean = true
 
   override def dataType: DataType = child.dataType.asInstanceOf[MapType].valueType

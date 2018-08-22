@@ -270,7 +270,7 @@ private[hive] class HiveThriftServer2(hiveContext: HiveContext)
   with ReflectedCompositeService {
   // state is tracked internally so that the server only attempts to shut down if it successfully
   // started, and then once only.
-  //状态在内部进行跟踪，以便服务器只有在成功的情况下才尝试关闭开始,然后一次
+  //状态在内部进行跟踪,以便服务器只有在成功的情况下才尝试关闭开始,然后一次
   private val started = new AtomicBoolean(false)
 
   override def init(hiveConf: HiveConf) {

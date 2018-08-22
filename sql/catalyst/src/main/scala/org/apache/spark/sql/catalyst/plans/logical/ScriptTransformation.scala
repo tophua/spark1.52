@@ -21,11 +21,14 @@ import org.apache.spark.sql.catalyst.expressions.{AttributeSet, Attribute, Expre
 
 /**
  * Transforms the input by forking and running the specified script.
+  * 通过分叉和运行指定的脚本来转换输入
  *
  * @param input the set of expression that should be passed to the script.
- * @param script the command that should be executed.
- * @param output the attributes that are produced by the script.
+  *              应该传递给脚本的表达式集
+ * @param script the command that should be executed.应该执行的命令
+ * @param output the attributes that are produced by the script.脚本生成的属性
  * @param ioschema the input and output schema applied in the execution of the script.
+  *                 在执行脚本时应用的输入和输出模式
  */
 case class ScriptTransformation(
     input: Seq[Expression],
@@ -39,5 +42,7 @@ case class ScriptTransformation(
 /**
  * A placeholder for implementation specific input and output properties when passing data
  * to a script. For example, in Hive this would specify which SerDes to use.
+  * 将数据传递给脚本时实现特定输入和输出属性的占位符,
+  * 例如,在Hive中,这将指定要使用的SerDes。
  */
 trait ScriptInputOutputSchema

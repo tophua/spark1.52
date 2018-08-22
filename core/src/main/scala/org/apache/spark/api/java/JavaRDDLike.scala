@@ -61,19 +61,23 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   @deprecated("Use partitions() instead.", "1.1.0")
   def splits: JList[Partition] = new java.util.ArrayList(rdd.partitions.toSeq)
 
-  /** Set of partitions in this RDD. */
+  /** Set of partitions in this RDD.
+    * 此RDD中的分区集*/
   def partitions: JList[Partition] = new java.util.ArrayList(rdd.partitions.toSeq)
 
-  /** The partitioner of this RDD. */
+  /** The partitioner of this RDD.
+    * 这个RDD的分区*/
   def partitioner: Optional[Partitioner] = JavaUtils.optionToOptional(rdd.partitioner)
 
   /** The [[org.apache.spark.SparkContext]] that this RDD was created on. */
   def context: SparkContext = rdd.context
 
-  /** A unique ID for this RDD (within its SparkContext). */
+  /** A unique ID for this RDD (within its SparkContext).
+    * 此RDD的唯一ID（在其SparkContext中） */
   def id: Int = rdd.id
 
-  /** Get the RDD's current storage level, or StorageLevel.NONE if none is set. */
+  /** Get the RDD's current storage level, or StorageLevel.NONE if none is set.
+    * 获取RDD的当前存储级别,如果没有设置,则获取StorageLevel.NONE*/
   def getStorageLevel: StorageLevel = rdd.getStorageLevel
 
   /**
@@ -88,6 +92,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to all elements of this RDD.
+    * 通过将函数应用于此RDD的所有元素来返回新的RDD
    */
   def map[R](f: JFunction[T, R]): JavaRDD[R] =
     new JavaRDD(rdd.map(f)(fakeClassTag))(fakeClassTag)
@@ -95,6 +100,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Return a new RDD by applying a function to each partition of this RDD, while tracking the index
    * of the original partition.
+    * 通过将函数应用于此RDD的每个分区来返回新的RDD,同时跟踪原始分区的索引
    */
   def mapPartitionsWithIndex[R](
       f: JFunction2[jl.Integer, java.util.Iterator[T], java.util.Iterator[R]],
@@ -104,6 +110,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to all elements of this RDD.
+    * 通过将函数应用于此RDD的所有元素来返回新的RDD
    */
   def mapToDouble[R](f: DoubleFunction[T]): JavaDoubleRDD = {
     new JavaDoubleRDD(rdd.map(x => f.call(x).doubleValue()))
@@ -111,6 +118,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to all elements of this RDD.
+    * 通过将函数应用于此RDD的所有元素来返回新的RDD
    */
   def mapToPair[K2, V2](f: PairFunction[T, K2, V2]): JavaPairRDD[K2, V2] = {
     def cm: ClassTag[(K2, V2)] = implicitly[ClassTag[(K2, V2)]]
@@ -120,6 +128,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    *  Return a new RDD by first applying a function to all elements of this
    *  RDD, and then flattening the results.
+    *  通过首先将函数应用于此RDD的所有元素,然后展平结果,返回新的RDD
    */
   def flatMap[U](f: FlatMapFunction[T, U]): JavaRDD[U] = {
     import scala.collection.JavaConverters._
@@ -130,6 +139,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    *  Return a new RDD by first applying a function to all elements of this
    *  RDD, and then flattening the results.
+    *  通过首先将函数应用于此RDD的所有元素,然后展平结果,返回新的RDD。
    */
   def flatMapToDouble(f: DoubleFlatMapFunction[T]): JavaDoubleRDD = {
     import scala.collection.JavaConverters._
@@ -140,6 +150,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    *  Return a new RDD by first applying a function to all elements of this
    *  RDD, and then flattening the results.
+    *  通过首先将函数应用于此RDD的所有元素,然后展平结果,返回新的RDD
    */
   def flatMapToPair[K2, V2](f: PairFlatMapFunction[T, K2, V2]): JavaPairRDD[K2, V2] = {
     import scala.collection.JavaConverters._
@@ -150,6 +161,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to each partition of this RDD.
+    * 通过将函数应用于此RDD的每个分区来返回新的RDD
    */
   def mapPartitions[U](f: FlatMapFunction[java.util.Iterator[T], U]): JavaRDD[U] = {
     def fn: (Iterator[T]) => Iterator[U] = {
@@ -160,6 +172,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to each partition of this RDD.
+    * 通过将函数应用于此RDD的每个分区来返回新的RDD
    */
   def mapPartitions[U](f: FlatMapFunction[java.util.Iterator[T], U],
       preservesPartitioning: Boolean): JavaRDD[U] = {
@@ -172,6 +185,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to each partition of this RDD.
+    * 通过将函数应用于此RDD的每个分区来返回新的RDD
    */
   def mapPartitionsToDouble(f: DoubleFlatMapFunction[java.util.Iterator[T]]): JavaDoubleRDD = {
     def fn: (Iterator[T]) => Iterator[jl.Double] = {
@@ -182,6 +196,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to each partition of this RDD.
+    * 通过将函数应用于此RDD的每个分区来返回新的RDD
    */
   def mapPartitionsToPair[K2, V2](f: PairFlatMapFunction[java.util.Iterator[T], K2, V2]):
   JavaPairRDD[K2, V2] = {
@@ -193,6 +208,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to each partition of this RDD.
+    * 通过将函数应用于此RDD的每个分区来返回新的RDD
    */
   def mapPartitionsToDouble(f: DoubleFlatMapFunction[java.util.Iterator[T]],
       preservesPartitioning: Boolean): JavaDoubleRDD = {
@@ -205,6 +221,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return a new RDD by applying a function to each partition of this RDD.
+    * 通过将函数应用于此RDD的每个分区来返回新的RDD
    */
   def mapPartitionsToPair[K2, V2](f: PairFlatMapFunction[java.util.Iterator[T], K2, V2],
       preservesPartitioning: Boolean): JavaPairRDD[K2, V2] = {
@@ -217,6 +234,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Applies a function f to each partition of this RDD.
+    * 将函数f应用于此RDD的每个分区
    */
   def foreachPartition(f: VoidFunction[java.util.Iterator[T]]) {
     rdd.foreachPartition((x => f.call(asJavaIterator(x))))
@@ -224,6 +242,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return an RDD created by coalescing all elements within each partition into an array.
+    * 返回通过将每个分区中的所有元素合并为数组而创建的RDD
    */
   def glom(): JavaRDD[JList[T]] =
     new JavaRDD(rdd.glom().map(x => new java.util.ArrayList[T](x.toSeq)))
@@ -231,6 +250,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Return the Cartesian product of this RDD and another one, that is, the RDD of all pairs of
    * elements (a, b) where a is in `this` and b is in `other`.
+    * 返回此RDD的笛卡尔乘积和另一个,即所有元素对(a,b)的RDD,其中a在“this”中,b在“other”中
    */
   def cartesian[U](other: JavaRDDLike[U, _]): JavaPairRDD[T, U] =
     JavaPairRDD.fromRDD(rdd.cartesian(other.rdd)(other.classTag))(classTag, other.classTag)
@@ -238,6 +258,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Return an RDD of grouped elements. Each group consists of a key and a sequence of elements
    * mapping to that key.
+    * 返回分组元素的RDD,每个组由一个键和一系列映射到该键的元素组成
    */
   def groupBy[U](f: JFunction[T, U]): JavaPairRDD[U, JIterable[T]] = {
     // The type parameter is U instead of K in order to work around a compiler bug; see SPARK-4459
@@ -249,6 +270,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Return an RDD of grouped elements. Each group consists of a key and a sequence of elements
    * mapping to that key.
+    * 返回分组元素的RDD,每个组由一个键和一系列映射到该键的元素组成。
    */
   def groupBy[U](f: JFunction[T, U], numPartitions: Int): JavaPairRDD[U, JIterable[T]] = {
     // The type parameter is U instead of K in order to work around a compiler bug; see SPARK-4459
@@ -259,26 +281,32 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return an RDD created by piping elements to a forked external process.
+    * 将由管道元素创建的RDD返回到分叉的外部进程
    */
   def pipe(command: String): JavaRDD[String] = rdd.pipe(command)
 
   /**
    * Return an RDD created by piping elements to a forked external process.
+    * 将由管道元素创建的RDD返回到分叉的外部进程
    */
   def pipe(command: JList[String]): JavaRDD[String] =
     rdd.pipe(asScalaBuffer(command))
 
   /**
    * Return an RDD created by piping elements to a forked external process.
+    * 将由管道元素创建的RDD返回到分叉的外部进程
    */
   def pipe(command: JList[String], env: java.util.Map[String, String]): JavaRDD[String] =
     rdd.pipe(asScalaBuffer(command), mapAsScalaMap(env))
 
   /**
    * Zips this RDD with another one, returning key-value pairs with the first element in each RDD,
+    * 将此RDD与另一个RDD一起使用,返回每个RDD中第一个元素的键值对
    * second element in each RDD, etc. Assumes that the two RDDs have the *same number of
    * partitions* and the *same number of elements in each partition* (e.g. one was made through
    * a map on the other).
+    * 用另一个RDD压缩此RDD,返回键值对,每个RDD中的第一个元素,每个RDD中的第二个元素等等。
+    * 假设两个RDD具有*相同数量的分区*和每个RDD中相同数量的元素分区*(例如,一个是通过*另一个地图制作的)。
    */
   def zip[U](other: JavaRDDLike[U, _]): JavaPairRDD[T, U] = {
     JavaPairRDD.fromRDD(rdd.zip(other.rdd)(other.classTag))(classTag, other.classTag)
@@ -289,6 +317,10 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
    * applying a function to the zipped partitions. Assumes that all the RDDs have the
    * *same number of partitions*, but does *not* require them to have the same number
    * of elements in each partition.
+    *
+    * 使用一个(或多个)RDD将此RDD的分区压缩,并通过将函数应用于压缩分区来返回新的RDD,
+    * 假设所有RDD具有*相同数量的分区*,但*不要求它们在每个分区中具有相同数量的元素。
+    *
    */
   def zipPartitions[U, V](
       other: JavaRDDLike[U, _],
@@ -325,6 +357,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Applies a function f to all elements of this RDD.
+    * 将函数f应用于此RDD的所有元素
    */
   def foreach(f: VoidFunction[T]) {
     rdd.foreach(x => f.call(x))
@@ -332,6 +365,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return an array that contains all of the elements in this RDD.
+    * 返回包含此RDD中所有元素的数组
    */
   def collect(): JList[T] = {
     import scala.collection.JavaConversions._
@@ -341,8 +375,10 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return an iterator that contains all of the elements in this RDD.
-   *
-   * The iterator will consume as much memory as the largest partition in this RDD.
+   * 返回包含此RDD中所有元素的迭代器
+   * The iterator will consume as much memory as t
+    * he largest partition in this RDD.
+    * 迭代器将消耗与此RDD中最大分区一样多的内存
    */
   def toLocalIterator(): JIterator[T] = {
      import scala.collection.JavaConversions._
@@ -352,6 +388,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return an array that contains all of the elements in this RDD.
+    * 返回包含此RDD中所有元素的数组
    * @deprecated As of Spark 1.0.0, toArray() is deprecated, use {@link #collect()} instead
    */
   @deprecated("use collect()", "1.0.0")
@@ -359,6 +396,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return an array that contains all of the elements in a specific partition of this RDD.
+    * 返回一个数组，其中包含此RDD的特定分区中的所有元素
    */
   def collectPartitions(partitionIds: Array[Int]): Array[JList[T]] = {
     // This is useful for implementing `take` from other language frontends
@@ -371,11 +409,13 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Reduces the elements of this RDD using the specified commutative and associative binary
    * operator.
+    * 使用指定的可交换和关联二元运算符减少此RDD的元素
    */
   def reduce(f: JFunction2[T, T, T]): T = rdd.reduce(f)
 
   /**
    * Reduces the elements of this RDD in a multi-level tree pattern.
+    * 在多级树模式中减少此RDD的元素
    *
    * @param depth suggested depth of the tree
    * @see [[org.apache.spark.api.java.JavaRDDLike#reduce]]
@@ -417,7 +457,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Aggregates the elements of this RDD in a multi-level tree pattern.
-   *
+   * 以多级树模式聚合此RDD的元素
    * @param depth suggested depth of the tree
    * @see [[org.apache.spark.api.java.JavaRDDLike#aggregate]]
    */
@@ -441,6 +481,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return the number of elements in the RDD.
+    * 返回RDD中的元素数
    */
   def count(): Long = rdd.count()
 
@@ -465,6 +506,8 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Return the count of each unique value in this RDD as a map of (value, count) pairs. The final
    * combine step happens locally on the master, equivalent to running a single reduce task.
+    * 返回此RDD中每个唯一值的计数作为(值，计数)对的映射,
+    * 最终组合步骤在主服务器上本地发生,相当于运行单个reduce任务。
    */
   def countByValue(): java.util.Map[T, jl.Long] =
     mapAsSerializableJavaMap(rdd.countByValue().map((x => (x._1, new jl.Long(x._2)))))
@@ -506,6 +549,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return the first element in this RDD.
+    * 返回此RDD中的第一个元素
    */
   def first(): T = rdd.first()
 
@@ -517,6 +561,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Save this RDD as a text file, using string representations of elements.
+    * 使用元素的字符串表示将此RDD保存为文本文件
    */
   def saveAsTextFile(path: String): Unit = {
     rdd.saveAsTextFile(path)
@@ -525,6 +570,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Save this RDD as a compressed text file, using string representations of elements.
+    * 使用元素的字符串表示将此RDD保存为压缩文本文件
    */
   def saveAsTextFile(path: String, codec: Class[_ <: CompressionCodec]): Unit = {
     rdd.saveAsTextFile(path, codec)
@@ -532,6 +578,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Save this RDD as a SequenceFile of serialized objects.
+    * 将此RDD保存为序列化对象的SequenceFile
    */
   def saveAsObjectFile(path: String): Unit = {
     rdd.saveAsObjectFile(path)
@@ -539,6 +586,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Creates tuples of the elements in this RDD by applying `f`.
+    * 通过应用`f`创建此RDD中元素的元组
    */
   def keyBy[U](f: JFunction[T, U]): JavaPairRDD[U, T] = {
     // The type parameter is U instead of K in order to work around a compiler bug; see SPARK-4459
@@ -559,17 +607,20 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return whether this RDD has been checkpointed or not
+    * 返回此RDD是否已经过检查点
    */
   def isCheckpointed: Boolean = rdd.isCheckpointed
 
   /**
    * Gets the name of the file to which this RDD was checkpointed
+    * 获取此RDD检查点的文件的名称
    */
   def getCheckpointFile(): Optional[String] = {
     JavaUtils.optionToOptional(rdd.getCheckpointFile)
   }
 
-  /** A description of this RDD and its recursive dependencies for debugging. */
+  /** A description of this RDD and its recursive dependencies for debugging.
+    * 此RDD的描述及其调试的递归依赖性*/
   def toDebugString(): String = {
     rdd.toDebugString
   }
@@ -591,6 +642,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Returns the top k (largest) elements from this RDD using the
    * natural ordering for T.
+    * 使用T的自然顺序返回此RDD中的前k个(最大)元素。
    * @param num k, the number of top elements to return
    * @return an array of top elements
    */
@@ -616,6 +668,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Returns the maximum element from this RDD as defined by the specified
    * Comparator[T].
+    * 返回指定Comparator [T]定义的RDD中的最大元素
    * @param comp the comparator that defines ordering
    * @return the maximum of the RDD
    * */
@@ -626,6 +679,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * Returns the minimum element from this RDD as defined by the specified
    * Comparator[T].
+    * 返回指定Comparator [T]定义的RDD中的最小元素
    * @param comp the comparator that defines ordering
    * @return the minimum of the RDD
    * */
@@ -646,7 +700,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
 
   /**
    * Return approximate number of distinct elements in the RDD.
-   *
+   * 返回RDD中不同元素的近似数量
    * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
    * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
    * <a href="http://dx.doi.org/10.1145/2452376.2452456">here</a>.
@@ -661,6 +715,7 @@ trait JavaRDDLike[T, This <: JavaRDDLike[T, This]] extends Serializable {
   /**
    * The asynchronous version of `count`, which returns a
    * future for counting the number of elements in this RDD.
+    * `count`的异步版本,它返回一个异步版本`count`,它返回一个
    */
   def countAsync(): JavaFutureAction[JLong] = {
     new JavaFutureActionWrapper[Long, JLong](rdd.countAsync(), JLong.valueOf)

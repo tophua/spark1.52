@@ -35,6 +35,7 @@ import org.apache.spark.sql.types.{BooleanType, DataType}
 
 /**
  * The Hive table scan operator.  Column and partition pruning are both handled.
+  * Hive表扫描操作符,处理列和分区修剪
  *
  * @param requestedAttributes Attributes to be fetched from the Hive table.
  * @param relation The Hive table be be scanned.
@@ -52,10 +53,12 @@ case class HiveTableScan(
     "Partition pruning predicates only supported for partitioned tables.")
 
   // Retrieve the original attributes based on expression ID so that capitalization matches.
+  //根据表达式ID检索原始属性,以便大小写匹配
   val attributes = requestedAttributes.map(relation.attributeMap)
 
   // Bind all partition key attribute references in the partition pruning predicate for later
   // evaluation.
+  //绑定分区修剪谓词中的所有分区键属性引用以供稍后使用评价
   private[this] val boundPruningPred = partitionPruningPred.reduceLeftOption(And).map { pred =>
     require(
       pred.dataType == BooleanType,
@@ -66,10 +69,12 @@ case class HiveTableScan(
 
   // Create a local copy of hiveconf,so that scan specific modifications should not impact
   // other queries
+  //创建hiveconf的本地副本,以便扫描特定的修改不会影响其他查询
   @transient
   private[this] val hiveExtraConf = new HiveConf(context.hiveconf)
 
   // append columns ids and names before broadcast
+  //在广播之前附加列ID和名称
   addColumnMetadataToConf(hiveExtraConf)
 
   @transient
@@ -82,6 +87,7 @@ case class HiveTableScan(
 
   private def addColumnMetadataToConf(hiveConf: HiveConf) {
     // Specifies needed column IDs for those non-partitioning columns.
+    //为这些非分区列指定所需的列ID
     val neededColumnIDs = attributes.flatMap(relation.columnOrdinals.get).map(o => o: Integer)
 
     HiveShim.appendReadColumns(hiveConf, neededColumnIDs, attributes.map(_.name))
@@ -91,6 +97,7 @@ case class HiveTableScan(
     deserializer.initialize(hiveConf, tableDesc.getProperties)
 
     // Specifies types and object inspectors of columns to be scanned.
+    //指定要扫描的列的类型和对象检查器
     val structOI = ObjectInspectorUtils
       .getStandardObjectInspector(
         deserializer.getObjectInspector,
@@ -109,7 +116,7 @@ case class HiveTableScan(
 
   /**
    * Prunes partitions not involve the query plan.
-   *
+   * Prunes分区不涉及查询计划
    * @param partitions All partitions of the relation.
    * @return Partitions that are involved in the query plan.
    */
@@ -124,6 +131,7 @@ case class HiveTableScan(
 
         // Only partitioned values are needed here, since the predicate has already been bound to
         // partition key attribute references.
+        //此处仅需要分区值,因为谓词已经绑定到分区键属性引用
         val row = InternalRow.fromSeq(castedValues)
         shouldKeep.eval(row).asInstanceOf[Boolean]
       }

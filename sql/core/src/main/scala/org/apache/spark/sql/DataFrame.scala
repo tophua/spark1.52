@@ -55,9 +55,11 @@ private[sql] object DataFrame {
 /**
  * :: Experimental ::
  * A distributed collection of data organized into named columns.
+  * 分布在命名列中的分布式数据集合
  *
  * A [[DataFrame]] is equivalent to a relational table in Spark SQL. The following example creates
  * a [[DataFrame]] by pointing Spark SQL to a Parquet data set.
+  * [[DataFrame]]等效于Spark SQL中的关系表,以下示例通过将Spark SQL指向Parquet数据集来创建[[DataFrame]]
  * {{{
  *   val people = sqlContext.read.parquet("...")  // in Scala
  *   DataFrame people = sqlContext.read().parquet("...")  // in Java
@@ -65,6 +67,9 @@ private[sql] object DataFrame {
  *
  * Once created, it can be manipulated using the various domain-specific-language (DSL) functions
  * defined in: [[DataFrame]] (this class), [[Column]], and [[functions]].
+  *
+  * 一旦创建,就可以使用在[[DataFrame]]（此类）,
+  * [[Column]]和[[functions]]中定义的各种特定于域的语言（DSL）函数来操作它。
  *
  * To select a column from the data frame, use `apply` method in Scala and `col` in Java.
  * {{{
@@ -118,10 +123,11 @@ class DataFrame private[sql](
 
   // Note for Spark contributors: if adding or updating any action in `DataFrame`, please make sure
   // you wrap it with `withNewExecutionId` if this actions doesn't call other action.
-
+  //Spark贡献者的注意事项：如果在`DataFrame`中添加或更新任何操作,
+  //请确保使用`withNewExecutionId`包装它,如果此操作不调用其他操作。
   /**
    * A constructor that automatically analyzes the logical plan.
-   *
+   * 一个自动分析逻辑计划的构造函数
    * This reports error eagerly as the [[DataFrame]] is constructed, unless
    * [[SQLConf.dataFrameEagerAnalysis]] is turned off.
    */
@@ -138,6 +144,7 @@ class DataFrame private[sql](
   @transient protected[sql] val logicalPlan: LogicalPlan = queryExecution.logical match {
     // For various commands (like DDL) and queries with side effects, we force query optimization to
     // happen right away to let these side effects take place eagerly.
+    //对于各种命令（如DDL）和带副作用的查询,我们立即强制进行查询优化,以便让这些副作用急切发生。
     case _: Command |
          _: InsertIntoTable |
          _: CreateTableUsingAsSelect =>
@@ -149,6 +156,7 @@ class DataFrame private[sql](
   /**
    * An implicit conversion function internal to this class for us to avoid doing
    * "new DataFrame(...)" everywhere.
+    * 这个类内部的隐式转换函数,以避免在任何地方执行“new DataFrame（...）”
    */
   @inline private implicit def logicalPlanToDataFrame(logicalPlan: LogicalPlan): DataFrame = {
     new DataFrame(sqlContext, logicalPlan)
@@ -169,6 +177,7 @@ class DataFrame private[sql](
 
   /**
    * Compose the string representing rows for output
+    * 编写表示输出行的字符串
    * @param _numRows Number of rows to show
    * @param truncate Whether truncate long strings and align cells right
    */
@@ -182,6 +191,7 @@ class DataFrame private[sql](
 
     // For array values, replace Seq and Array with square brackets
     // For cells that are beyond 20 characters, replace it with the first 17 and "..."
+    //对于数组值,使用方括号替换Seq和Array对于超过20个字符的单元格,将其替换为前17个和“...”
     val rows: Seq[Seq[String]] = schema.fieldNames.toSeq +: data.map { row =>
       row.toSeq.map { cell =>
         val str = cell match {
@@ -195,19 +205,21 @@ class DataFrame private[sql](
     }
 
     // Initialise the width of each column to a minimum value of '3'
+    //将每列的宽度初始化为最小值“3”
     val colWidths = Array.fill(numCols)(3)
 
     // Compute the width of each column
+    //计算每列的宽度
     for (row <- rows) {
       for ((cell, i) <- row.zipWithIndex) {
         colWidths(i) = math.max(colWidths(i), cell.length)
       }
     }
 
-    // Create SeparateLine
+    // Create SeparateLine 创建SeparateLine
     val sep: String = colWidths.map("-" * _).addString(sb, "+", "+", "+\n").toString()
 
-    // column names
+    // column names 列名
     rows.head.zipWithIndex.map { case (cell, i) =>
       if (truncate) {
         StringUtils.leftPad(cell, colWidths(i))
@@ -232,6 +244,7 @@ class DataFrame private[sql](
     sb.append(sep)
 
     // For Data that has more than "numRows" records
+    //对于具有多于“numRows”记录的数据
     if (hasMoreData) {
       val rowsString = if (numRows == 1) "row" else "rows"
       sb.append(s"only showing top $numRows ${rowsString}\n")
@@ -250,17 +263,19 @@ class DataFrame private[sql](
   }
 
   /**
-   * Returns the object itself.
+   * Returns the object itself.返回对象本身
    * @group basic
    * @since 1.3.0
    */
   // This is declared with parentheses to prevent the Scala compiler from treating
   // `rdd.toDF("1")` as invoking this toDF and then apply on the returned DataFrame.
+  //这是用括号声明的,以防止Scala编译器将`rdd.toDF（“1”）`视为调用此toDF,然后应用于返回的DataFrame。
   def toDF(): DataFrame = this
 
   /**
    * Returns a new [[DataFrame]] with columns renamed. This can be quite convenient in conversion
    * from a RDD of tuples into a [[DataFrame]] with meaningful names. For example:
+    * 返回重命名列的新[[DataFrame]],从元组的RDD转换为具有有意义名称的[[DataFrame]]可以非常方便, 例如：
    * {{{
    *   val rdd: RDD[(Int, String)] = ...
    *   rdd.toDF()  // this implicit conversion creates a DataFrame with column name _1 and _2
@@ -284,6 +299,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the schema of this [[DataFrame]].
+    * 返回此[[DataFrame]]的架构
    * @group basic
    * @since 1.3.0
    */
@@ -291,6 +307,7 @@ class DataFrame private[sql](
 
   /**
    * Returns all column names and their data types as an array.
+    * 将所有列名称及其数据类型作为数组返回
    * @group basic
    * @since 1.3.0
    */
@@ -300,6 +317,7 @@ class DataFrame private[sql](
 
   /**
    * Returns all column names as an array.
+    * 将所有列名称作为数组返回
    * @group basic
    * @since 1.3.0
    */
@@ -307,6 +325,7 @@ class DataFrame private[sql](
 
   /**
    * Prints the schema to the console in a nice tree format.
+    * 以良好的树格式将模式打印到控制台
    * @group basic
    * @since 1.3.0
    */
@@ -316,6 +335,7 @@ class DataFrame private[sql](
 
   /**
    * Prints the plans (logical and physical) to the console for debugging purposes.
+    * 将计划（逻辑和物理）打印到控制台以进行调试
    * @group basic
    * @since 1.3.0
    */
@@ -330,6 +350,7 @@ class DataFrame private[sql](
 
   /**
    * Only prints the physical plan to the console for debugging purposes.
+    * 仅将物理计划打印到控制台以进行调试
    * @group basic
    * @since 1.3.0
    */
@@ -337,6 +358,7 @@ class DataFrame private[sql](
 
   /**
    * Returns true if the `collect` and `take` methods can be run locally
+    * 如果`collect`和`take`方法可以在本地运行,则返回true
    * (without any Spark executors).
    * @group basic
    * @since 1.3.0
@@ -346,6 +368,7 @@ class DataFrame private[sql](
   /**
    * Displays the [[DataFrame]] in a tabular form. Strings more than 20 characters will be
    * truncated, and all cells will be aligned right. For example:
+    * 以表格形式显示[[DataFrame]],超过20个字符的字符串将被截断,并且所有单元格将对齐。 例如：
    * {{{
    *   year  month AVG('Adj Close) MAX('Adj Close)
    *   1980  12    0.503218        0.595103
@@ -364,6 +387,7 @@ class DataFrame private[sql](
   /**
    * Displays the top 20 rows of [[DataFrame]] in a tabular form. Strings more than 20 characters
    * will be truncated, and all cells will be aligned right.
+    * 以表格形式显示[[DataFrame]]的前20行,超过20个字符的字符串将被截断,并且所有单元格将对齐。
    * @group action
    * @since 1.3.0
    */
@@ -371,6 +395,7 @@ class DataFrame private[sql](
 
   /**
    * Displays the top 20 rows of [[DataFrame]] in a tabular form.
+    * 以表格形式显示[[DataFrame]]的前20行
    *
    * @param truncate Whether truncate long strings. If true, strings more than 20 characters will
    *              be truncated and all cells will be aligned right
@@ -382,6 +407,7 @@ class DataFrame private[sql](
 
   /**
    * Displays the [[DataFrame]] in a tabular form. For example:
+    * 以表格形式显示[[DataFrame]]。 例如
    * {{{
    *   year  month AVG('Adj Close) MAX('Adj Close)
    *   1980  12    0.503218        0.595103
@@ -403,6 +429,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a [[DataFrameNaFunctions]] for working with missing data.
+    * 返回用于处理缺失数据的[[DataFrameNaFunctions]]
    * {{{
    *   // Dropping rows containing any null values.
    *   df.na.drop()
@@ -415,6 +442,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a [[DataFrameStatFunctions]] for working statistic functions support.
+    * 返回工作统计函数支持的[[DataFrameStatFunctions]]
    * {{{
    *   // Finding frequent items in column with name 'a'.
    *   df.stat.freqItems(Seq("a"))
@@ -427,6 +455,7 @@ class DataFrame private[sql](
 
   /**
    * Cartesian join with another [[DataFrame]].
+    * 笛卡尔与另一个[[DataFrame]]连接
    *
    * Note that cartesian joins are very expensive without an extra filter that can be pushed down.
    *
@@ -440,6 +469,7 @@ class DataFrame private[sql](
 
   /**
    * Inner equi-join with another [[DataFrame]] using the given column.
+    * 使用给定列与另一个[[DataFrame]]进行内部等连接
    *
    * Different from other join functions, the join column will only appear once in the output,
    * i.e. similar to SQL's `JOIN USING` syntax.
@@ -464,6 +494,7 @@ class DataFrame private[sql](
 
   /**
    * Inner equi-join with another [[DataFrame]] using the given columns.
+    * 使用给定列与另一个[[DataFrame]]进行内部等连接
    *
    * Different from other join functions, the join columns will only appear once in the output,
    * i.e. similar to SQL's `JOIN USING` syntax.
@@ -508,6 +539,7 @@ class DataFrame private[sql](
 
   /**
    * Inner join with another [[DataFrame]], using the given join expression.
+    * 使用给定的连接表达式与另一个[[DataFrame]]进行内连接
    *
    * {{{
    *   // The following two are equivalent:
@@ -522,6 +554,7 @@ class DataFrame private[sql](
   /**
    * Join with another [[DataFrame]], using the given join expression. The following performs
    * a full outer join between `df1` and `df2`.
+    * 使用给定的连接表达式加入另一个[[DataFrame]],以下内容在`df1`和`df2`之间执行完全外连接。
    *
    * {{{
    *   // Scala:
@@ -554,11 +587,13 @@ class DataFrame private[sql](
       .queryExecution.analyzed.asInstanceOf[Join]
 
     // If auto self join alias is disabled, return the plan.
+    //如果禁用了自动加入别名,则返回计划
     if (!sqlContext.conf.dataFrameSelfJoinAutoResolveAmbiguity) {
       return plan
     }
 
     // If left/right have no output set intersection, return the plan.
+    //如果左/右没有输出设置交集,则返回计划
     val lanalyzed = this.logicalPlan.queryExecution.analyzed
     val ranalyzed = right.logicalPlan.queryExecution.analyzed
     if (lanalyzed.outputSet.intersect(ranalyzed.outputSet).isEmpty) {
@@ -578,6 +613,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] sorted by the specified column, all in ascending order.
+    * 返回按指定列排序的新[[DataFrame]],全部按升序排列
    * {{{
    *   // The following 3 are equivalent
    *   df.sort("sortcol")
@@ -594,6 +630,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] sorted by the given expressions. For example:
+    * 返回按给定表达式排序的新[[DataFrame]]。 例如：
    * {{{
    *   df.sort($"col1", $"col2".desc)
    * }}}
@@ -615,6 +652,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] sorted by the given expressions.
+    * 返回按给定表达式排序的新[[DataFrame]]
    * This is an alias of the `sort` function.
    * @group dfops
    * @since 1.3.0
@@ -624,6 +662,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] sorted by the given expressions.
+    * 返回按给定表达式排序的新[[DataFrame]]
    * This is an alias of the `sort` function.
    * @group dfops
    * @since 1.3.0
@@ -633,6 +672,7 @@ class DataFrame private[sql](
 
   /**
    * Selects column based on the column name and return it as a [[Column]].
+    * 根据列名选择列并将其作为[[Column]]返回
    * Note that the column name can also reference to a nested column like `a.b`.
    * @group dfops
    * @since 1.3.0
@@ -641,6 +681,7 @@ class DataFrame private[sql](
 
   /**
    * Selects column based on the column name and return it as a [[Column]].
+    * 根据列名选择列并将其作为[[Column]]返回
    * Note that the column name can also reference to a nested column like `a.b`.
    * @group dfops
    * @since 1.3.0
@@ -655,6 +696,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] with an alias set.
+    * 返回带有别名集的新[[DataFrame]]
    * @group dfops
    * @since 1.3.0
    */
@@ -669,6 +711,7 @@ class DataFrame private[sql](
 
   /**
    * Selects a set of column based expressions.
+    * 选择一组基于列的表达式
    * {{{
    *   df.select($"colA", $"colB" + 1)
    * }}}
@@ -695,6 +738,7 @@ class DataFrame private[sql](
   /**
    * Selects a set of columns. This is a variant of `select` that can only select
    * existing columns using column names (i.e. cannot construct expressions).
+    * 选择一组列,这是`select`的变体,只能使用列名选择现有列（即不能构造表达式）。
    *
    * {{{
    *   // The following two are equivalent:
@@ -709,6 +753,7 @@ class DataFrame private[sql](
 
   /**
    * Selects a set of SQL expressions. This is a variant of `select` that accepts
+    * 选择一组SQL表达式,这是接受的`select`的变体
    * SQL expressions.
    *
    * {{{
@@ -726,6 +771,7 @@ class DataFrame private[sql](
 
   /**
    * Filters rows using the given condition.
+    * 使用给定条件过滤行
    * {{{
    *   // The following are equivalent:
    *   peopleDf.filter($"age" > 15)
@@ -738,6 +784,7 @@ class DataFrame private[sql](
 
   /**
    * Filters rows using the given SQL expression.
+    * 使用给定的SQL表达式过滤行
    * {{{
    *   peopleDf.filter("age > 15")
    * }}}
@@ -750,6 +797,7 @@ class DataFrame private[sql](
 
   /**
    * Filters rows using the given condition. This is an alias for `filter`.
+    * 使用给定条件过滤行,这是`filter`的别名
    * {{{
    *   // The following are equivalent:
    *   peopleDf.filter($"age" > 15)
@@ -762,6 +810,7 @@ class DataFrame private[sql](
 
   /**
    * Filters rows using the given SQL expression.
+    * 使用给定的SQL表达式过滤行
    * {{{
    *   peopleDf.where("age > 15")
    * }}}
@@ -774,6 +823,7 @@ class DataFrame private[sql](
 
   /**
    * Groups the [[DataFrame]] using the specified columns, so we can run aggregation on them.
+    * 使用指定的列对[[DataFrame]]进行分组，因此我们可以对它们进行聚合
    * See [[GroupedData]] for all the available aggregate functions.
    *
    * {{{
@@ -796,6 +846,7 @@ class DataFrame private[sql](
 
   /**
    * Create a multi-dimensional rollup for the current [[DataFrame]] using the specified columns,
+    * 使用指定的列为当前[[DataFrame]]创建多维汇总
    * so we can run aggregation on them.
    * See [[GroupedData]] for all the available aggregate functions.
    *
@@ -819,6 +870,7 @@ class DataFrame private[sql](
 
   /**
    * Create a multi-dimensional cube for the current [[DataFrame]] using the specified columns,
+    * 使用指定的列为当前[[DataFrame]]创建多维立方体
    * so we can run aggregation on them.
    * See [[GroupedData]] for all the available aggregate functions.
    *
@@ -840,6 +892,7 @@ class DataFrame private[sql](
 
   /**
    * Groups the [[DataFrame]] using the specified columns, so we can run aggregation on them.
+    * 使用指定的列对[[DataFrame]]进行分组，因此我们可以对它们进行聚合
    * See [[GroupedData]] for all the available aggregate functions.
    *
    * This is a variant of groupBy that can only group by existing columns using column names
@@ -866,6 +919,7 @@ class DataFrame private[sql](
 
   /**
    * Create a multi-dimensional rollup for the current [[DataFrame]] using the specified columns,
+    * 使用指定的列为当前[[DataFrame]]创建多维汇总
    * so we can run aggregation on them.
    * See [[GroupedData]] for all the available aggregate functions.
    *
@@ -893,10 +947,12 @@ class DataFrame private[sql](
 
   /**
    * Create a multi-dimensional cube for the current [[DataFrame]] using the specified columns,
+    * 使用指定的列为当前[[DataFrame]]创建多维立方体
    * so we can run aggregation on them.
    * See [[GroupedData]] for all the available aggregate functions.
    *
    * This is a variant of cube that can only group by existing columns using column names
+    * 这是多维数据集的变体,只能使用列名称按现有列进行分组
    * (i.e. cannot construct expressions).
    *
    * {{{
@@ -920,6 +976,7 @@ class DataFrame private[sql](
 
   /**
    * (Scala-specific) Aggregates on the entire [[DataFrame]] without groups.
+    * （特定于Scala）在没有组的整个[[DataFrame]]上聚合
    * {{{
    *   // df.agg(...) is a shorthand for df.groupBy().agg(...)
    *   df.agg("age" -> "max", "salary" -> "avg")
@@ -934,6 +991,7 @@ class DataFrame private[sql](
 
   /**
    * (Scala-specific) Aggregates on the entire [[DataFrame]] without groups.
+    * （特定于Scala）在没有组的整个[[DataFrame]]上聚合
    * {{{
    *   // df.agg(...) is a shorthand for df.groupBy().agg(...)
    *   df.agg(Map("age" -> "max", "salary" -> "avg"))
@@ -958,6 +1016,7 @@ class DataFrame private[sql](
 
   /**
    * Aggregates on the entire [[DataFrame]] without groups.
+    * 在没有组的情况下聚合整个[[DataFrame]]
    * {{{
    *   // df.agg(...) is a shorthand for df.groupBy().agg(...)
    *   df.agg(max($"age"), avg($"salary"))
@@ -972,6 +1031,8 @@ class DataFrame private[sql](
   /**
    * Returns a new [[DataFrame]] by taking the first `n` rows. The difference between this function
    * and `head` is that `head` returns an array while `limit` returns a new [[DataFrame]].
+    * 通过获取第一个“n”行返回一个新的[[DataFrame]],
+    * 这个函数和`head`之间的区别在于`head`返回一个数组,而`limit`返回一个新的[[DataFrame]]
    * @group dfops
    * @since 1.3.0
    */
@@ -979,6 +1040,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] containing union of rows in this frame and another frame.
+    * 返回包含此帧和另一帧中行的并集的新[[DataFrame]]
    * This is equivalent to `UNION ALL` in SQL.
    * @group dfops
    * @since 1.3.0
@@ -987,6 +1049,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] containing rows only in both this frame and another frame.
+    * 返回仅在此frame和另一frame中包含行的新[[DataFrame]]
    * This is equivalent to `INTERSECT` in SQL.
    * @group dfops
    * @since 1.3.0
@@ -1004,6 +1067,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] by sampling a fraction of rows.
+    * 通过对一小部分行进行采样来返回一个新的[[DataFrame]]
    *
    * @param withReplacement Sample with replacement or not.
    * @param fraction Fraction of rows to generate.
@@ -1017,6 +1081,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] by sampling a fraction of rows, using a random seed.
+    * 通过使用随机种子对一小部分行进行采样,返回一个新的[[DataFrame]]
    *
    * @param withReplacement Sample with replacement or not.
    * @param fraction Fraction of rows to generate.
@@ -1029,6 +1094,7 @@ class DataFrame private[sql](
 
   /**
    * Randomly splits this [[DataFrame]] with the provided weights.
+    * 使用提供的权重随机分割此[[DataFrame]]
    *
    * @param weights weights for splits, will be normalized if they don't sum to 1.
    * @param seed Seed for sampling.
@@ -1045,6 +1111,7 @@ class DataFrame private[sql](
 
   /**
    * Randomly splits this [[DataFrame]] with the provided weights.
+    * 使用提供的权重随机分割此[[DataFrame]]
    *
    * @param weights weights for splits, will be normalized if they don't sum to 1.
    * @group dfops
@@ -1056,6 +1123,7 @@ class DataFrame private[sql](
 
   /**
    * Randomly splits this [[DataFrame]] with the provided weights. Provided for the Python Api.
+    * 使用提供的权重随机分割此[[DataFrame]]为Python Api提供
    *
    * @param weights weights for splits, will be normalized if they don't sum to 1.
    * @param seed Seed for sampling.
@@ -1069,6 +1137,8 @@ class DataFrame private[sql](
    * (Scala-specific) Returns a new [[DataFrame]] where each row has been expanded to zero or more
    * rows by the provided function.  This is similar to a `LATERAL VIEW` in HiveQL. The columns of
    * the input row are implicitly joined with each row that is output by the function.
+    * 特定于Scala）返回一个新的[[DataFrame]],其中每行已被提供的函数扩展为零或更多行,
+    * 这类似于HiveQL中的“LATERAL VIEW”,输入行的列与函数输出的每一行隐式连接。
    *
    * The following example uses this function to count the number of books which contain
    * a given word:
@@ -1137,6 +1207,7 @@ class DataFrame private[sql](
   /**
    * Returns a new [[DataFrame]] by adding a column or replacing the existing column that has
    * the same name.
+    * 通过添加列或替换具有相同名称的现有列来返回新的[[DataFrame]]
    * @group dfops
    * @since 1.3.0
    */
@@ -1157,6 +1228,8 @@ class DataFrame private[sql](
   /**
    * Returns a new [[DataFrame]] with a column renamed.
    * This is a no-op if schema doesn't contain existingName.
+    * 返回重命名列的新[[DataFrame]],
+    * 如果架构不包含existingName,则这是一个无操作。
    * @group dfops
    * @since 1.3.0
    */
@@ -1176,6 +1249,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] with a column dropped.
+    * 返回删除了列的新[[DataFrame]]
    * This is a no-op if schema doesn't contain column name.
    * @group dfops
    * @since 1.4.0
@@ -1196,6 +1270,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] with a column dropped.
+    * 返回删除了列的新[[DataFrame]]
    * This version of drop accepts a Column rather than a name.
    * This is a no-op if the DataFrame doesn't have a column
    * with an equivalent expression.
@@ -1212,6 +1287,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] that contains only the unique rows from this [[DataFrame]].
+    * 返回一个新的[[DataFrame]],它只包含此[[DataFrame]]中的唯一行
    * This is an alias for `distinct`.
    * @group dfops
    * @since 1.4.0
@@ -1221,6 +1297,7 @@ class DataFrame private[sql](
   /**
    * (Scala-specific) Returns a new [[DataFrame]] with duplicate rows removed, considering only
    * the subset of columns.
+    * （特定于Scala）返回删除了重复行的新[[DataFrame]],仅考虑列的子集。
    *
    * @group dfops
    * @since 1.4.0
@@ -1241,6 +1318,7 @@ class DataFrame private[sql](
   /**
    * Returns a new [[DataFrame]] with duplicate rows removed, considering only
    * the subset of columns.
+    * 返回删除了重复行的新[[DataFrame]],仅考虑列的子集
    *
    * @group dfops
    * @since 1.4.0
@@ -1250,7 +1328,10 @@ class DataFrame private[sql](
   /**
    * Computes statistics for numeric columns, including count, mean, stddev, min, and max.
    * If no columns are given, this function computes statistics for all numerical columns.
-   *
+    *
+   * 计算数字列的统计信息，包括count，mean，stddev，min和max.Computes统计数字列，
+    * 包括count，mean，stddev，min和max。
+    *
    * This function is meant for exploratory data analysis, as we make no guarantee about the
    * backward compatibility of the schema of the resulting [[DataFrame]]. If you want to
    * programmatically compute summary statistics, use the `agg` function instead.
@@ -1278,6 +1359,7 @@ class DataFrame private[sql](
       Sqrt(Subtract(Average(Multiply(expr, expr)), Multiply(Average(expr), Average(expr))))
 
     // The list of summary statistics to compute, in the form of expressions.
+    //要以表达式的形式计算的摘要统计信息列表
     val statistics = List[(String, Expression => Expression)](
       "count" -> Count,
       "mean" -> Average,
@@ -1295,11 +1377,13 @@ class DataFrame private[sql](
       val row = agg(aggExprs.head, aggExprs.tail: _*).head().toSeq
 
       // Pivot the data so each summary is one row
+      //透视数据,使每个摘要都是一行
       row.grouped(outputCols.size).toSeq.zip(statistics).map { case (aggregation, (statistic, _)) =>
         Row(statistic :: aggregation.toList: _*)
       }
     } else {
       // If there are no output columns, just output a single column that contains the stats.
+      //如果没有输出列,则只输出包含统计信息的单个列
       statistics.map { case (name, _) => Row(name) }
     }
 
@@ -1311,6 +1395,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the first `n` rows.
+    * 返回第一行`n`行。
    * @group action
    * @since 1.3.0
    */
@@ -1318,6 +1403,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the first row.
+    * 返回第一行
    * @group action
    * @since 1.3.0
    */
@@ -1325,6 +1411,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the first row. Alias for head().
+    * 返回第一行,head()的别名
    * @group action
    * @since 1.3.0
    */
@@ -1332,6 +1419,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new RDD by applying a function to all rows of this DataFrame.
+    * 通过将函数应用于此DataFrame的所有行来返回新的RDD
    * @group rdd
    * @since 1.3.0
    */
@@ -1340,6 +1428,7 @@ class DataFrame private[sql](
   /**
    * Returns a new RDD by first applying a function to all rows of this [[DataFrame]],
    * and then flattening the results.
+    * 通过首先将函数应用于此[[DataFrame]]的所有行,然后展平结果,返回新的RDD。
    * @group rdd
    * @since 1.3.0
    */
@@ -1347,6 +1436,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new RDD by applying a function to each partition of this DataFrame.
+    * 通过将函数应用于此DataFrame的每个分区来返回新的RDD
    * @group rdd
    * @since 1.3.0
    */
@@ -1356,6 +1446,7 @@ class DataFrame private[sql](
 
   /**
    * Applies a function `f` to all rows.
+    * 对所有行应用函数`f`
    * @group rdd
    * @since 1.3.0
    */
@@ -1365,6 +1456,7 @@ class DataFrame private[sql](
 
   /**
    * Applies a function f to each partition of this [[DataFrame]].
+    * 将函数f应用于此[[DataFrame]]的每个分区
    * @group rdd
    * @since 1.3.0
    */
@@ -1374,6 +1466,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the first `n` rows in the [[DataFrame]].
+    * 返回[[DataFrame]]中的第一个`n`行
    * @group action
    * @since 1.3.0
    */
@@ -1381,6 +1474,7 @@ class DataFrame private[sql](
 
   /**
    * Returns an array that contains all of [[Row]]s in this [[DataFrame]].
+    * 返回一个包含此[[DataFrame]]中所有[[Row]]的数组
    * @group action
    * @since 1.3.0
    */
@@ -1390,6 +1484,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a Java list that contains all of [[Row]]s in this [[DataFrame]].
+    * 返回包含此[[DataFrame]]中所有[[Row]]的Java列表
    * @group action
    * @since 1.3.0
    */
@@ -1399,6 +1494,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the number of rows in the [[DataFrame]].
+    * 返回[[DataFrame]]中的行数
    * @group action
    * @since 1.3.0
    */
@@ -1406,6 +1502,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] that has exactly `numPartitions` partitions.
+    * 返回一个具有完全`numPartitions`分区的新[[DataFrame]]
    * @group rdd
    * @since 1.3.0
    */
@@ -1415,9 +1512,12 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] that has exactly `numPartitions` partitions.
+    * 返回一个具有完全`numPartitions`分区的新[[DataFrame]]
    * Similar to coalesce defined on an [[RDD]], this operation results in a narrow dependency, e.g.
    * if you go from 1000 partitions to 100 partitions, there will not be a shuffle, instead each of
    * the 100 new partitions will claim 10 of the current partitions.
+    * 类似于在[[RDD]]上定义的coalesce，此操作会导致较窄的依赖性,
+    * 例如,如果从1000个分区到100个分区,则不会进行随机播放,而是100个新分区中的每个分区将声明10个当前分区。
    * @group rdd
    * @since 1.4.0
    */
@@ -1427,6 +1527,7 @@ class DataFrame private[sql](
 
   /**
    * Returns a new [[DataFrame]] that contains only the unique rows from this [[DataFrame]].
+    * 返回一个新的[[DataFrame]]，它只包含此[[DataFrame]]中的唯一行
    * This is an alias for `dropDuplicates`.
    * @group dfops
    * @since 1.3.0
@@ -1485,6 +1586,7 @@ class DataFrame private[sql](
    */
   lazy val rdd: RDD[Row] = {
     // use a local variable to make sure the map closure doesn't capture the whole DataFrame
+    //使用局部变量来确保映射闭包不捕获整个DataFrame
     val schema = this.schema
     queryExecution.toRdd.mapPartitions { rows =>
       val converter = CatalystTypeConverters.createToScalaConverter(schema)
@@ -1494,6 +1596,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the content of the [[DataFrame]] as a [[JavaRDD]] of [[Row]]s.
+    * 将[[DataFrame]]的内容作为[[Row]]的[[JavaRDD]]返回
    * @group rdd
    * @since 1.3.0
    */
@@ -1501,6 +1604,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the content of the [[DataFrame]] as a [[JavaRDD]] of [[Row]]s.
+    * 将[[DataFrame]]的内容作为[[Row]]的[[JavaRDD]]返回
    * @group rdd
    * @since 1.3.0
    */
@@ -1509,6 +1613,9 @@ class DataFrame private[sql](
   /**
    * Registers this [[DataFrame]] as a temporary table using the given name.  The lifetime of this
    * temporary table is tied to the [[SQLContext]] that was used to create this DataFrame.
+    *
+    * 使用给定名称将此[[DataFrame]]注册为临时表,
+    * 此临时表的生命周期与用于创建此DataFrame的[[SQLContext]]相关联。
    *
    * @group basic
    * @since 1.3.0
@@ -1520,6 +1627,7 @@ class DataFrame private[sql](
   /**
    * :: Experimental ::
    * Interface for saving the content of the [[DataFrame]] out into external storage.
+    * 用于将[[DataFrame]]的内容保存到外部存储器的接口
    *
    * @group output
    * @since 1.4.0
@@ -1529,6 +1637,7 @@ class DataFrame private[sql](
 
   /**
    * Returns the content of the [[DataFrame]] as a RDD of JSON strings.
+    * 返回[[DataFrame]]的内容作为JSON字符串的RDD
    * @group rdd
    * @since 1.3.0
    */
@@ -1579,6 +1688,7 @@ class DataFrame private[sql](
 
   /**
    * Converts a JavaRDD to a PythonRDD.
+    * 将JavaRDD转换为PythonRDD
    */
   protected[sql] def javaToPython: JavaRDD[Array[Byte]] = {
     val structType = schema  // capture it for closure

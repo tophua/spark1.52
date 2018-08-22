@@ -27,8 +27,10 @@ import org.apache.spark.sql.types.{ArrayType, DataType, StringType}
  * :: Experimental ::
  * A feature transformer that converts the input array of strings into an array of n-grams. Null
  * values in the input array are ignored.
+  * 一种功能转换器,用于将输入的字符串数组转换为n-gram数组,输入数组中的空值将被忽略,
  * It returns an array of n-grams where each n-gram is represented by a space-separated string of
  * words.
+  * 它返回一个n-gram数组,其中每个n-gram由一个以空格分隔的单词串表示
  *
  * When the input is empty, an empty array is returned.
  * When the input array length is less than n (number of elements per n-gram), no n-grams are
@@ -42,6 +44,7 @@ class NGram(override val uid: String)
 
   /**
    * Minimum n-gram length, >= 1.
+    * 最小n-gram长度> = 1
    * Default: 2, bigram features
    * @group param
    */

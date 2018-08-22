@@ -69,7 +69,7 @@ final class GBTRegressor(override val uid: String)
   override def setCheckpointInterval(value: Int): this.type = super.setCheckpointInterval(value)
 
   /**
-   * The impurity setting is ignored for GBT models.
+   * The impurity setting is ignored for GBT models.GBT模型忽略杂质设置
    * Individual trees are built using impurity "Variance."
    */
   override def setImpurity(value: String): this.type = {

@@ -461,7 +461,8 @@ private[spark] object SQLConf {
 private[sql] class SQLConf extends Serializable with CatalystConf {
   import SQLConf._
 
-  /** Only low degree of contention is expected for conf, thus NOT using ConcurrentHashMap. */
+  /** Only low degree of contention is expected for conf, thus NOT using ConcurrentHashMap.
+    * 预计conf的争用程度较低,因此不使用ConcurrentHashMap*/
   @transient protected[spark] val settings = java.util.Collections.synchronizedMap(
     new java.util.HashMap[String, String]())
 

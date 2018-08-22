@@ -28,17 +28,21 @@ abstract class QueryPlan[PlanType <: TreeNode[PlanType]] extends TreeNode[PlanTy
 
   /**
    * Returns the set of attributes that are output by this node.
+    * 返回此节点输出的属性集
    */
   def outputSet: AttributeSet = AttributeSet(output)
 
   /**
    * All Attributes that appear in expressions from this operator.  Note that this set does not
    * include attributes that are implicitly referenced by being passed through to the output tuple.
+    *
+    * 此运算符的表达式中显示的所有属性,请注意,此集合不包含通过传递给输出元组而隐式引用的属性。
    */
   def references: AttributeSet = AttributeSet(expressions.flatMap(_.references))
 
   /**
    * The set of all attributes that are input to this operator by its children.
+    * 由其子项输入到此运算符的所有属性的集合
    */
   def inputSet: AttributeSet =
     AttributeSet(children.flatMap(_.asInstanceOf[QueryPlan[PlanType]].output))
@@ -47,6 +51,9 @@ abstract class QueryPlan[PlanType <: TreeNode[PlanType]] extends TreeNode[PlanTy
    * Attributes that are referenced by expressions but not provided by this nodes children.
    * Subclasses should override this method if they produce attributes internally as it is used by
    * assertions designed to prevent the construction of invalid plans.
+    *
+    * 由表达式引用但未由此节点子节点提供的属性,子类应该覆盖此方法,
+    * 如果它们在内部生成属性,因为它被用于防止构造无效计划的断言使用。
    *
    * Note that virtual columns should be excluded. Currently, we only support the grouping ID
    * virtual column.
@@ -58,6 +65,8 @@ abstract class QueryPlan[PlanType <: TreeNode[PlanType]] extends TreeNode[PlanTy
    * Runs [[transform]] with `rule` on all expressions present in this query operator.
    * Users should not expect a specific directionality. If a specific directionality is needed,
    * transformExpressionsDown or transformExpressionsUp should be used.
+    * 对此查询运算符中存在的所有表达式运行[[transform]]和`rule`。用户不应期望具体的方向性,
+    * 如果需要特定的方向性,则应使用transformExpressionsDown或transformExpressionsUp。
    * @param rule the rule to be applied to every expression in this operator.
    */
   def transformExpressions(rule: PartialFunction[Expression, Expression]): this.type = {
@@ -66,6 +75,7 @@ abstract class QueryPlan[PlanType <: TreeNode[PlanType]] extends TreeNode[PlanTy
 
   /**
    * Runs [[transformDown]] with `rule` on all expressions present in this query operator.
+    * 对此查询运算符中存在的所有表达式运行[[transformDown]]和`rule`
    * @param rule the rule to be applied to every expression in this operator.
    */
   def transformExpressionsDown(rule: PartialFunction[Expression, Expression]): this.type = {
@@ -97,6 +107,7 @@ abstract class QueryPlan[PlanType <: TreeNode[PlanType]] extends TreeNode[PlanTy
 
   /**
    * Runs [[transformUp]] with `rule` on all expressions present in this query operator.
+    * 对此查询运算符中存在的所有表达式运行[[transformUp]]和`rule`
    * @param rule the rule to be applied to every expression in this operator.
    * @return
    */
@@ -128,14 +139,16 @@ abstract class QueryPlan[PlanType <: TreeNode[PlanType]] extends TreeNode[PlanTy
   }
 
   /** Returns the result of running [[transformExpressions]] on this node
-    * and all its children. */
+    * and all its children.
+    * 返回在此节点及其所有子节点上运行[[transformExpressions]]的结果*/
   def transformAllExpressions(rule: PartialFunction[Expression, Expression]): this.type = {
     transform {
       case q: QueryPlan[_] => q.transformExpressions(rule).asInstanceOf[PlanType]
     }.asInstanceOf[this.type]
   }
 
-  /** Returns all of the expressions present in this query plan operator. */
+  /** Returns all of the expressions present in this query plan operator.
+    * 返回此查询计划运算符中存在的所有表达式*/
   def expressions: Seq[Expression] = {
     productIterator.flatMap {
       case e: Expression => e :: Nil
@@ -150,17 +163,19 @@ abstract class QueryPlan[PlanType <: TreeNode[PlanType]] extends TreeNode[PlanTy
 
   lazy val schema: StructType = StructType.fromAttributes(output)
 
-  /** Returns the output schema in the tree format. */
+  /** Returns the output schema in the tree format.
+    * 以树格式返回输出模式 */
   def schemaString: String = schema.treeString
 
-  /** Prints out the schema in the tree format */
+  /** Prints out the schema in the tree format
+    * 以树格式打印出架构*/
   // scalastyle:off println
   def printSchema(): Unit = println(schemaString)
   // scalastyle:on println
 
   /**
    * A prefix string used when printing the plan.
-   *
+   * 打印计划时使用的前缀字符串
    * We use "!" to indicate an invalid plan, and "'" to indicate an unresolved plan.
    */
   protected def statePrefix = if (missingInput.nonEmpty && children.nonEmpty) "!" else ""

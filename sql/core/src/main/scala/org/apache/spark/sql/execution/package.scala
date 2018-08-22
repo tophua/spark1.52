@@ -19,5 +19,6 @@ package org.apache.spark.sql
 
 /**
  * The physical execution component of Spark SQL. Note that this is a private package.
+  * Spark SQL的物理执行组件,请注意,这是一个私有包
  */
 package object execution

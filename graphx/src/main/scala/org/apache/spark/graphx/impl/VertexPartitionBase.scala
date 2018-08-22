@@ -29,6 +29,7 @@ private[graphx] object VertexPartitionBase {
   /**
    * Construct the constituents of a VertexPartitionBase from the given vertices, merging duplicate
    * entries arbitrarily.
+    * 从给定顶点构造VertexPartitionBase的组成部分,任意合并重复的条目
    */
   def initFrom[VD: ClassTag](iter: Iterator[(VertexId, VD)])
     : (VertexIdToIndexMap, Array[VD], BitSet) = {
@@ -42,6 +43,7 @@ private[graphx] object VertexPartitionBase {
   /**
    * Construct the constituents of a VertexPartitionBase from the given vertices, merging duplicate
    * entries using `mergeFunc`.
+    * 从给定顶点构造VertexPartitionBase的组成部分,使用`mergeFunc`合并重复条目
    */
   def initFrom[VD: ClassTag](iter: Iterator[(VertexId, VD)], mergeFunc: (VD, VD) => VD)
     : (VertexIdToIndexMap, Array[VD], BitSet) = {
@@ -71,7 +73,7 @@ private[graphx] abstract class VertexPartitionBase[@specialized(Long, Int, Doubl
 
   def size: Int = mask.cardinality()
 
-  /** Return the vertex attribute for the given vertex ID. */
+  /** Return the vertex attribute for the given vertex ID. 返回给定顶点ID的顶点属性*/
   def apply(vid: VertexId): VD = values(index.getPos(vid))
 
   def isDefined(vid: VertexId): Boolean = {
@@ -86,6 +88,7 @@ private[graphx] abstract class VertexPartitionBase[@specialized(Long, Int, Doubl
 /**
  * A typeclass for subclasses of `VertexPartitionBase` representing the ability to wrap them in a
  * `VertexPartitionBaseOps`.
+  * “VertexPartitionBase”子类的类型类,表示将它们包装在“VertexPartitionBaseOps”中的能力
  */
 private[graphx] trait VertexPartitionBaseOpsConstructor[T[X] <: VertexPartitionBase[X]] {
   def toOps[VD: ClassTag](partition: T[VD]): VertexPartitionBaseOps[VD, T]

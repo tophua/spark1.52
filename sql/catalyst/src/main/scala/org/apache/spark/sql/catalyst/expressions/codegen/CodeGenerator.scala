@@ -33,6 +33,7 @@ import org.apache.spark.unsafe.types._
 
 
 // These classes are here to avoid issues with serialization and integration with quasiquotes.
+//这些类用于避免序列化和与quasiquotes集成的问题
 class IntegerHashSet extends org.apache.spark.util.collection.OpenHashSet[Int]
 class LongHashSet extends org.apache.spark.util.collection.OpenHashSet[Long]
 
@@ -56,12 +57,14 @@ class CodeGenContext {
 
   /**
    * Holding all the expressions those do not support codegen, will be evaluated directly.
+    * 保留所有不支持codegen的表达式,将直接进行评估
    */
   val references: mutable.ArrayBuffer[Expression] = new mutable.ArrayBuffer[Expression]()
 
   /**
    * Holding expressions' mutable states like `MonotonicallyIncreasingID.count` as a
    * 3-tuple: java type, variable name, code to init it.
+    * 将表达式的可变状态保存为“MonotonicallyIncreasingID.count”作为3元组：java类型,变量名,用于初始化的代码。
    * As an example, ("int", "count", "count = 0;") will produce code:
    * {{{
    *   private int count;
@@ -73,6 +76,7 @@ class CodeGenContext {
    * to the constructor.
    *
    * They will be kept as member variables in generated classes like `SpecificProjection`.
+    * 它们将作为成员变量保存在生成的类中,如`SpecificProjection`
    */
   val mutableStates: mutable.ArrayBuffer[(String, String, String)] =
     mutable.ArrayBuffer.empty[(String, String, String)]
@@ -83,6 +87,7 @@ class CodeGenContext {
 
   /**
    * Holding all the functions those will be added into generated class.
+    * 保留所有将添加到生成的类中的函数
    */
   val addedFuntions: mutable.Map[String, String] =
     mutable.Map.empty[String, String]
@@ -103,7 +108,7 @@ class CodeGenContext {
 
   /**
    * Returns a term name that is unique within this instance of a `CodeGenerator`.
-   *
+   * 返回在`CodeGenerator`的此实例中唯一的术语名称
    * (Since we aren't in a macro context we do not seem to have access to the built in `freshName`
    * function.)
    */
@@ -113,6 +118,7 @@ class CodeGenContext {
 
   /**
    * Returns the code to access a value in `SpecializedGetters` for a given DataType.
+    * 返回用于访问给定DataType的`SpecializedGetters`中的值的代码
    */
   def getValue(getter: String, dataType: DataType, ordinal: String): String = {
     val jt = javaType(dataType)
@@ -132,6 +138,7 @@ class CodeGenContext {
 
   /**
    * Returns the code to update a column in Row for a given DataType.
+    * 返回用于更新给定DataType的Row中的列的代码
    */
   def setColumn(row: String, dataType: DataType, ordinal: Int, value: String): String = {
     val jt = javaType(dataType)
@@ -146,6 +153,7 @@ class CodeGenContext {
 
   /**
    * Returns the name used in accessor and setter for a Java primitive type.
+    * 返回Java基元类型的accessor和setter中使用的名称
    */
   def primitiveTypeName(jt: String): String = jt match {
     case JAVA_INT => "Int"
@@ -156,6 +164,7 @@ class CodeGenContext {
 
   /**
    * Returns the Java type for a DataType.
+    * 返回DataType的Java类型
    */
   def javaType(dt: DataType): String = dt match {
     case BooleanType => JAVA_BOOLEAN
@@ -179,6 +188,7 @@ class CodeGenContext {
 
   /**
    * Returns the boxed type in Java.
+    * 返回Java中的盒装类型
    */
   def boxedType(jt: String): String = jt match {
     case JAVA_BOOLEAN => "Boolean"
@@ -195,6 +205,7 @@ class CodeGenContext {
 
   /**
    * Returns the representation of default value for a given Java Type.
+    * 返回给定Java Type的默认值的表示形式
    */
   def defaultValue(jt: String): String = jt match {
     case JAVA_BOOLEAN => "false"
@@ -211,6 +222,7 @@ class CodeGenContext {
 
   /**
    * Generates code for equal expression in Java.
+    * 在Java中生成用于相等表达式的代码
    */
   def genEqual(dataType: DataType, c1: String, c2: String): String = dataType match {
     case BinaryType => s"java.util.Arrays.equals($c1, $c2)"
@@ -222,6 +234,7 @@ class CodeGenContext {
 
   /**
    * Generates code for comparing two expressions.
+    * 生成用于比较两个表达式的代码
    *
    * @param dataType data type of the expressions
    * @param c1 name of the variable of expression 1's output
@@ -256,12 +269,14 @@ class CodeGenContext {
 
   /**
    * List of java data types that have special accessors and setters in [[InternalRow]].
+    * 在[[InternalRow]]中具有特殊访问者和setter的java数据类型的列表
    */
   val primitiveTypes =
     Seq(JAVA_BOOLEAN, JAVA_BYTE, JAVA_SHORT, JAVA_INT, JAVA_LONG, JAVA_FLOAT, JAVA_DOUBLE)
 
   /**
    * Returns true if the Java type has a special accessor and setter in [[InternalRow]].
+    * 如果Java类型在[[InternalRow]]中具有特殊访问器和setter,则返回true
    */
   def isPrimitiveType(jt: String): Boolean = primitiveTypes.contains(jt)
 
@@ -270,6 +285,7 @@ class CodeGenContext {
   /**
    * Splits the generated code of expressions into multiple functions, because function has
    * 64kb code size limit in JVM
+    * 将生成的表达式代码拆分为多个函数,因为函数在JVM中具有64kb的代码大小限制
    *
    * @param row the variable name of row that is used by expressions
    */
@@ -278,6 +294,7 @@ class CodeGenContext {
     val blockBuilder = new StringBuilder()
     for (code <- expressions) {
       // We can't know how many byte code will be generated, so use the number of bytes as limit
+      //我们不知道将生成多少字节代码,因此使用字节数作为限制
       if (blockBuilder.length > 64 * 1000) {
         blocks.append(blockBuilder.toString())
         blockBuilder.clear()
@@ -310,6 +327,7 @@ class CodeGenContext {
 /**
  * A wrapper for generated class, defines a `generate` method so that we can pass extra objects
  * into generated class.
+  * 生成类的包装器定义了一个`generate`方法,以便我们可以将额外的对象传递给生成的类。
  */
 abstract class GeneratedClass {
   def generate(expressions: Array[Expression]): Any
@@ -319,6 +337,7 @@ abstract class GeneratedClass {
  * A base class for generators of byte code to perform expression evaluation.  Includes a set of
  * helpers for referring to Catalyst types and building trees that perform evaluation of individual
  * expressions.
+  * 用于执行表达式求值的字节代码生成器的基类,包含一组帮助程序,用于引用Catalyst类型和构建执行单个表达式求值的树
  */
 abstract class CodeGenerator[InType <: AnyRef, OutType <: AnyRef] extends Logging {
 
@@ -343,20 +362,24 @@ abstract class CodeGenerator[InType <: AnyRef, OutType <: AnyRef] extends Loggin
   /**
    * Generates a class for a given input expression.  Called when there is not cached code
    * already available.
+    * 为给定的输入表达式生成一个类,在没有缓存代码时调用
    */
   protected def create(in: InType): OutType
 
   /**
    * Canonicalizes an input expression. Used to avoid double caching expressions that differ only
    * cosmetically.
+    * 规范化输入表达式,用于避免仅在美观上有所不同的双缓存表达式
    */
   protected def canonicalize(in: InType): InType
 
-  /** Binds an input expression to a given input schema */
+  /** Binds an input expression to a given input schema
+    * 将输入表达式绑定到给定的输入模式*/
   protected def bind(in: InType, inputSchema: Seq[Attribute]): InType
 
   /**
    * Compile the Java source code into a Java class, using Janino.
+    * 使用Janino将Java源代码编译为Java类
    */
   protected def compile(code: String): GeneratedClass = {
     cache.get(code)
@@ -364,6 +387,7 @@ abstract class CodeGenerator[InType <: AnyRef, OutType <: AnyRef] extends Loggin
 
   /**
    * Compile the Java source code into a Java class, using Janino.
+    * 使用Janino将Java源代码编译为Java类
    */
   private[this] def doCompile(code: String): GeneratedClass = {
     val evaluator = new ClassBodyEvaluator()
@@ -417,16 +441,19 @@ abstract class CodeGenerator[InType <: AnyRef, OutType <: AnyRef] extends Loggin
         }
       })
 
-  /** Generates the requested evaluator binding the given expression(s) to the inputSchema. */
+  /** Generates the requested evaluator binding the given expression(s) to the inputSchema.
+    * 生成将给定表达式绑定到inputSchema的请求求值程序 */
   def generate(expressions: InType, inputSchema: Seq[Attribute]): OutType =
     generate(bind(expressions, inputSchema))
 
-  /** Generates the requested evaluator given already bound expression(s). */
+  /** Generates the requested evaluator given already bound expression(s).
+    * 给定已绑定表达式生成请求的求值程序*/
   def generate(expressions: InType): OutType = create(canonicalize(expressions))
 
   /**
    * Create a new codegen context for expression evaluator, used to store those
    * expressions that don't support codegen
+    * 为表达式求值程序创建一个新的codegen上下文,用于存储那些不支持codegen的表达式
    */
   def newCodeGenContext(): CodeGenContext = {
     new CodeGenContext

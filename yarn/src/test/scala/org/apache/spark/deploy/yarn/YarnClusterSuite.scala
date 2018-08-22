@@ -107,9 +107,12 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
     yarnCluster.start()
 
     // There's a race in MiniYARNCluster in which start() may return before the RM has updated
+    //
     // its address in the configuration. You can see this in the logs by noticing that when
     // MiniYARNCluster prints the address, it still has port "0" assigned, although later the
     // test works sometimes:
+    //MiniYARNCluster中存在竞争，其中start()可能在RM更新其配置中的地址之前返回。
+    //您可以在日志中看到这一点,注意到当MiniYARNCluster打印地址时,它仍然分配了端口“0”,尽管稍后测试工作有时：
     //
     //    INFO MiniYARNCluster: MiniYARN ResourceManager address: blah:0
     //
@@ -211,9 +214,10 @@ class YarnClusterSuite extends SparkFunSuite with BeforeAndAfterAll with Matcher
       appArgs = Seq(result.getAbsolutePath()))
     checkResult(result)
   }
-
+  //测试首先使用类路径
   private def testUseClassPathFirst(clientMode: Boolean): Unit = {
     // Create a jar file that contains a different version of "test.resource".
+    //创建一个包含不同版本的“测试资源”的JAR文件
     val originalJar = TestUtils.createJarWithFiles(Map("test.resource" -> "ORIGINAL"), tempDir)
     val userJar = TestUtils.createJarWithFiles(Map("test.resource" -> "OVERRIDDEN"), tempDir)
     val driverResult = File.createTempFile("driver", null, tempDir)

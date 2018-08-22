@@ -186,7 +186,8 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
   }
 
   /**
-   * Finding frequent items for columns, possibly with false positives. Using the
+   * Finding frequent items for columns, possibly with false positives.
+    * 查找列的频繁项目,可能包含误报,Using the
    * frequent element count algorithm described in
    * [[http://dx.doi.org/10.1145/762471.762473, proposed by Karp, Schenker, and Papadimitriou]].
    * Uses a `default` support of 1%.
@@ -247,7 +248,8 @@ final class DataFrameStatFunctions private[sql](df: DataFrame) {
   }
 
   /**
-   * (Scala-specific) Finding frequent items for columns, possibly with false positives. Using the
+   * (Scala-specific) Finding frequent items for columns, possibly with false positives.
+    * 特定于Scala）查找列的频繁项,可能带有误报,Using the
    * frequent element count algorithm described in
    * [[http://dx.doi.org/10.1145/762471.762473, proposed by Karp, Schenker, and Papadimitriou]].
    * Uses a `default` support of 1%.

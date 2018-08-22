@@ -73,7 +73,7 @@ private[sql] class ParquetOutputWriter(path: String, context: TaskAttemptContext
     val outputFormat = {
       new ParquetOutputFormat[InternalRow]() {
         // Here we override `getDefaultWorkFile` for two reasons:
-        //
+        // 这里我们覆盖`getDefaultWorkFile`有两个原因：
         //  1. To allow appending.  We need to generate unique output file names to avoid
         //     overwriting existing files (either exist before the write job, or are just written
         //     by other tasks within the same write job).
@@ -127,6 +127,7 @@ private[sql] class ParquetRelation(
   }
 
   // Should we merge schemas from all Parquet part-files?
+  //我们应该合并所有Parquet零件文件中的模式吗？
   private val shouldMergeSchemas =
     parameters
       .get(ParquetRelation.MERGE_SCHEMA)
@@ -181,7 +182,8 @@ private[sql] class ParquetRelation(
     }
   }
 
-  /** Constraints on schema of dataframe to be stored. */
+  /** Constraints on schema of dataframe to be stored.
+    * 对要存储的dataframe架构的约束。*/
   private def checkConstraints(schema: StructType): Unit = {
     if (schema.fieldNames.length != schema.fieldNames.distinct.length) {
       val duplicateColumns = schema.fieldNames.groupBy(identity).collect {
@@ -196,6 +198,7 @@ private[sql] class ParquetRelation(
     val schema = maybeDataSchema.getOrElse(metadataCache.dataSchema)
     // check if schema satisfies the constraints
     // before moving forward
+    //在前进之前检查模式是否满足约束
     checkConstraints(schema)
     schema
   }
@@ -206,6 +209,7 @@ private[sql] class ParquetRelation(
   }
 
   // Parquet data source always uses Catalyst internal representations.
+  //Parquet数据源始终使用Catalyst内部表示
   override val needConversion: Boolean = false
 
   override def sizeInBytes: Long = metadataCache.dataStatuses.map(_.getLen).sum
@@ -247,6 +251,7 @@ private[sql] class ParquetRelation(
     // TODO There's no need to use two kinds of WriteSupport
     // We should unify them. `SpecificMutableRow` can process both atomic (primitive) types and
     // complex types.
+    //我们应该统一它们,`SpecificMutableRow`可以处理原子(原始)类型和复杂类型。
     val writeSupportClass =
       if (dataSchema.map(_.dataType).forall(ParquetTypesConverter.isPrimitiveType)) {
         classOf[MutableRowWriteSupport]
@@ -257,7 +262,7 @@ private[sql] class ParquetRelation(
     ParquetOutputFormat.setWriteSupportClass(job, writeSupportClass)
     RowWriteSupport.setSchema(dataSchema.toAttributes, conf)
 
-    // Sets compression scheme
+    // Sets compression scheme 设置压缩方案
     conf.set(
       ParquetOutputFormat.COMPRESSION,
       ParquetRelation
@@ -287,14 +292,18 @@ private[sql] class ParquetRelation(
 
     // When merging schemas is enabled and the column of the given filter does not exist,
     // Parquet emits an exception which is an issue of Parquet (PARQUET-389).
+    //当启用合并模式并且不存在给定过滤器的列时,Parquet会发出一个异常,这是Parquet(PARQUET-389)的问题
     val safeParquetFilterPushDown = !shouldMergeSchemas && parquetFilterPushDown
 
     // Parquet row group size. We will use this value as the value for
     // mapreduce.input.fileinputformat.split.minsize and mapred.min.split.size if the value
     // of these flags are smaller than the parquet row group size.
+    //Parquet行组大小,如果这些标志的值小于镶木地板行组大小,
+    // 我们将使用此值作为mapreduce.input.fileinputformat.split.minsize和mapred.min.split.size的值
     val parquetBlockSize = ParquetOutputFormat.getLongBlockSize(broadcastedConf.value.value)
 
     // Create the function to set variable Parquet confs at both driver and executor side.
+    //创建函数以在驱动程序和执行程序端设置变量Parquet confs
     val initLocalJobFuncOpt =
       ParquetRelation.initializeLocalJobFunc(
         requiredColumns,
@@ -308,6 +317,7 @@ private[sql] class ParquetRelation(
         followParquetFormatSpec) _
 
     // Create the function to set input paths at the driver side.
+    //创建函数以在驱动程序端设置输入路径
     val setInputPaths =
       ParquetRelation.initializeDriverSideJobFunc(inputFiles, parquetBlockSize) _
 
@@ -340,6 +350,7 @@ private[sql] class ParquetRelation(
         }
 
         // Overridden so we can inject our own cached files statuses.
+        //重写,以便我们可以注入我们自己的缓存文件状态
         override def getPartitions: Array[SparkPartition] = {
           val inputFormat = new ParquetInputFormat[InternalRow] {
             override def listStatus(jobContext: JobContext): JList[FileStatus] = {
@@ -354,37 +365,45 @@ private[sql] class ParquetRelation(
             new SqlNewHadoopPartition(id, i, rawSplits(i).asInstanceOf[InputSplit with Writable])
           }
         }
+        //类型擦除黑客将RDD [InternalRow]作为RDD [Row]传递
       }.asInstanceOf[RDD[Row]]  // type erasure hack to pass RDD[InternalRow] as RDD[Row]
     }
   }
 
   private class MetadataCache {
     // `FileStatus` objects of all "_metadata" files.
+    //所有“_metadata”文件的`FileStatus`对象
     private var metadataStatuses: Array[FileStatus] = _
 
     // `FileStatus` objects of all "_common_metadata" files.
+    //所有“_common_metadata”文件的`FileStatus`对象
     private var commonMetadataStatuses: Array[FileStatus] = _
 
     // `FileStatus` objects of all data files (Parquet part-files).
+    //`FileStatus`对象的所有数据文件（Parquet部分文件）
     var dataStatuses: Array[FileStatus] = _
 
     // Schema of the actual Parquet files, without partition columns discovered from partition
     // directory paths.
+    //实际Parquet文件的模式,没有从分区目录路径发现的分区列
     var dataSchema: StructType = null
 
     // Schema of the whole table, including partition columns.
+    //整个表的模式,包括分区列
     var schema: StructType = _
 
-    // Cached leaves
+    // Cached leaves 缓存的叶子
     var cachedLeaves: Set[FileStatus] = null
 
     /**
      * Refreshes `FileStatus`es, footers, partition spec, and table schema.
+      * 刷新`FileStatus`es，页脚,分区规范和表模式
      */
     def refresh(): Unit = {
       val currentLeafStatuses = cachedLeafStatuses()
 
       // Check if cachedLeafStatuses is changed or not
+      //检查cachedLeafStatuses是否已更改
       val leafStatusesChanged = (cachedLeaves == null) ||
         !cachedLeaves.equals(currentLeafStatuses)
 
@@ -392,6 +411,7 @@ private[sql] class ParquetRelation(
         cachedLeaves = currentLeafStatuses.toIterator.toSet
 
         // Lists `FileStatus`es of all leaf nodes (files) under all base directories.
+        //列出所有基目录下所有叶节点（文件）的`FileStatus`。
         val leaves = currentLeafStatuses.filter { f =>
           isSummaryFile(f.getPath) ||
             !(f.getPath.getName.startsWith("_") || f.getPath.getName.startsWith("."))
@@ -414,6 +434,7 @@ private[sql] class ParquetRelation(
           // If this Parquet relation is converted from a Hive Metastore table, must reconcile case
           // case insensitivity issue and possible schema mismatch (probably caused by schema
           // evolution).
+          //如果从Hive Metastore表转换此Parquet关系,则必须协调大小写不敏感问题和可能的模式不匹配(可能由模式演变引起)
           maybeMetastoreSchema
             .map(ParquetRelation.mergeMetastoreParquetSchema(_, dataSchema0))
             .getOrElse(dataSchema0)
@@ -428,11 +449,14 @@ private[sql] class ParquetRelation(
 
     private def readSchema(): Option[StructType] = {
       // Sees which file(s) we need to touch in order to figure out the schema.
+      //查看我们需要触摸哪些文件以找出架构
       //
       // Always tries the summary files first if users don't require a merged schema.  In this case,
       // "_common_metadata" is more preferable than "_metadata" because it doesn't contain row
       // groups information, and could be much smaller for large Parquet files with lots of row
       // groups.  If no summary file is available, falls back to some random part-file.
+      //如果用户不需要合并架构,请始终首先尝试摘要文件,在这种情况下,“_ common_metadata”比“_metadata”更优选,
+      //因为它不包含行组信息,对于具有大量行组的大型Parquet文件可能要小得多,如果没有可用的摘要文件,则返回到某个随机零件文件
       //
       // NOTE: Metadata stored in the summary files are merged from all part-files.  However, for
       // user defined key-value metadata (in which we store Spark SQL schema), Parquet doesn't know
@@ -447,16 +471,23 @@ private[sql] class ParquetRelation(
       // Here we tend to be pessimistic and take the second case into account.  Basically this means
       // we can't trust the summary files if users require a merged schema, and must touch all part-
       // files to do the merge.
+      //在这里,我们倾向于悲观,并考虑第二种情况,基本上这意味着如果用户需要合并模式,
+      //我们就不能信任摘要文件,并且必须触摸所有部分文件才能进行合并
       val filesToTouch =
         if (shouldMergeSchemas) {
           // Also includes summary files, 'cause there might be empty partition directories.
+          //还包括摘要文件,因为可能存在空分区目录
 
           // If mergeRespectSummaries config is true, we assume that all part-files are the same for
           // their schema with summary files, so we ignore them when merging schema.
+          //如果mergeRespectSummaries config为true,
+          // 我们假设所有部分文件对于带有摘要文件的模式都是相同的,因此我们在合并模式时忽略它们
           // If the config is disabled, which is the default setting, we merge all part-files.
           // In this mode, we only need to merge schemas contained in all those summary files.
           // You should enable this configuration only if you are very sure that for the parquet
           // part-files to read there are corresponding summary files containing correct schema.
+          //如果配置被禁用,这是默认设置,我们合并所有part-files,在这种模式下,我们只需要合并所有这些摘要文件中包含的模式。
+          //你应该只在你非常确定的时候启用这个配置,要读取的拼花零件文件有相应的包含正确模式的摘要文件
 
           val needMerged: Seq[FileStatus] =
             if (mergeRespectSummaries) {
@@ -468,6 +499,7 @@ private[sql] class ParquetRelation(
         } else {
           // Tries any "_common_metadata" first. Parquet files written by old versions or Parquet
           // don't have this.
+          //首先尝试任何“_common_metadata”,旧版本或Parquet编写的镶木地板文件没有这个
           commonMetadataStatuses.headOption
             // Falls back to "_metadata"
             .orElse(metadataStatuses.headOption)
@@ -475,6 +507,8 @@ private[sql] class ParquetRelation(
             // files contain conflicting user defined metadata (two or more values are associated
             // with a same key in different files).  In either case, we fall back to any of the
             // first part-file, and just assume all schemas are consistent.
+            //未找到摘要文件,Parquet文件已损坏,或者不同的部分文件包含冲突的用户定义元数据(两个或多个值与不同文件中的相同密钥相关联）
+            //在任何一种情况下,我们都会回退到第一个部分文件中的任何一个,并假设所有模式都是一致的
             .orElse(dataStatuses.headOption)
             .toSeq
         }
@@ -491,10 +525,12 @@ private[sql] class ParquetRelation(
 
 private[sql] object ParquetRelation extends Logging {
   // Whether we should merge schemas collected from all Parquet part-files.
+  //我们是否应该合并从所有Parquet部件文件中收集的模式
   private[sql] val MERGE_SCHEMA = "mergeSchema"
 
   // Hive Metastore schema, used when converting Metastore Parquet tables.  This option is only used
   // internally.
+  //转换Metastore Parquet表时使用的Hive Metastore架构,此选项仅在内部使用
   private[sql] val METASTORE_SCHEMA = "metastoreSchema"
 
   /**
@@ -520,7 +556,8 @@ private[sql] object ParquetRelation extends Logging {
     }
   }
 
-  /** This closure sets various Parquet configurations at both driver side and executor side. */
+  /** This closure sets various Parquet configurations at both driver side and executor side.
+    * 该闭合在driver侧和执行者侧设置各种Parquet配置*/
   private[parquet] def initializeLocalJobFunc(
       requiredColumns: Array[String],
       filters: Array[Filter],
@@ -535,11 +572,14 @@ private[sql] object ParquetRelation extends Logging {
     conf.set(ParquetInputFormat.READ_SUPPORT_CLASS, classOf[CatalystReadSupport].getName)
 
     // Try to push down filters when filter push-down is enabled.
+    //启用过滤器下推时,尝试按下过滤器
     if (parquetFilterPushDown) {
       filters
         // Collects all converted Parquet filter predicates. Notice that not all predicates can be
         // converted (`ParquetFilters.createFilter` returns an `Option`). That's why a `flatMap`
         // is used here.
+        //收集所有已转换的Parquet过滤器谓词,请注意,并非所有谓词都可以转换（`ParquetFilters.createFilter`返回`Option`）。
+        //这就是为什么在这里使用`flatMap`的原因。
         .flatMap(ParquetFilters.createFilter(dataSchema, _))
         .reduceOption(FilterApi.and)
         .foreach(ParquetInputFormat.setFilterPredicate(conf, _))
@@ -555,9 +595,11 @@ private[sql] object ParquetRelation extends Logging {
       CatalystSchemaConverter.checkFieldNames(dataSchema).json)
 
     // Tell FilteringParquetRowInputFormat whether it's okay to cache Parquet and FS metadata
+    //告诉FilteringParquetRowInputFormat是否可以缓存Parquet和FS元数据
     conf.setBoolean(SQLConf.PARQUET_CACHE_METADATA.key, useMetadataCache)
 
     // Sets flags for Parquet schema conversion
+    //设置Parquet架构转换的标志
     conf.setBoolean(SQLConf.PARQUET_BINARY_AS_STRING.key, assumeBinaryIsString)
     conf.setBoolean(SQLConf.PARQUET_INT96_AS_TIMESTAMP.key, assumeInt96IsTimestamp)
     conf.setBoolean(SQLConf.PARQUET_FOLLOW_PARQUET_FORMAT_SPEC.key, followParquetFormatSpec)
@@ -565,11 +607,13 @@ private[sql] object ParquetRelation extends Logging {
     overrideMinSplitSize(parquetBlockSize, conf)
   }
 
-  /** This closure sets input paths at the driver side. */
+  /** This closure sets input paths at the driver side.
+    * 该闭包设置driver侧的输入路径。 */
   private[parquet] def initializeDriverSideJobFunc(
       inputFiles: Array[FileStatus],
       parquetBlockSize: Long)(job: Job): Unit = {
     // We side the input paths at the driver side.
+    //我们支持driver侧的输入路径
     logInfo(s"Reading Parquet file(s) from ${inputFiles.map(_.getPath).mkString(", ")}")
     if (inputFiles.nonEmpty) {
       FileInputFormat.setInputPaths(job, inputFiles.map(_.getPath): _*)
@@ -599,12 +643,14 @@ private[sql] object ParquetRelation extends Logging {
         .get(CatalystReadSupport.SPARK_METADATA_KEY)
       if (serializedSchema.isEmpty) {
         // Falls back to Parquet schema if no Spark SQL schema found.
+        //如果未找到Spark SQL架构,则回退到Parquet架构
         Some(parseParquetSchema(metadata.getSchema))
       } else if (!seen.contains(serializedSchema.get)) {
         seen += serializedSchema.get
 
         // Don't throw even if we failed to parse the serialized Spark schema. Just fallback to
         // whatever is available.
+        //即使我们无法解析序列化的Spark模式,也不要抛出,只是回到可用的任何东西。
         Some(Try(DataType.fromJson(serializedSchema.get))
           .recover { case _: Throwable =>
             logInfo(
@@ -622,6 +668,7 @@ private[sql] object ParquetRelation extends Logging {
           .map(_.asInstanceOf[StructType])
           .getOrElse {
             // Falls back to Parquet schema if Spark SQL schema can't be parsed.
+            //如果无法解析Spark SQL架构,则回退到Parquet架构
             parseParquetSchema(metadata.getSchema)
           })
       } else {
@@ -639,11 +686,15 @@ private[sql] object ParquetRelation extends Logging {
   /**
    * Reconciles Hive Metastore case insensitivity issue and data type conflicts between Metastore
    * schema and Parquet schema.
+    * 协调Hive Metastore不区分大小写问题以及Metastore架构和Parquet架构之间的数据类型冲突
    *
    * Hive doesn't retain case information, while Parquet is case sensitive. On the other hand, the
    * schema read from Parquet files may be incomplete (e.g. older versions of Parquet doesn't
    * distinguish binary and string).  This method generates a correct schema by merging Metastore
    * schema data types and Parquet schema field names.
+    *
+    * Hive不保留案例信息,而Parquet区分大小写,另一方面,从Parquet文件读取的模式可能不完整(例如,旧版本的Parquet不区分二进制和字符串)。
+    * 此方法通过合并Metastore架构数据类型和Parquet架构字段名称来生成正确的架构。
    */
   private[parquet] def mergeMetastoreParquetSchema(
       metastoreSchema: StructType,
@@ -669,6 +720,7 @@ private[sql] object ParquetRelation extends Logging {
 
     StructType(metastoreSchema.zip(reorderedParquetSchema).map {
       // Uses Parquet field names but retains Metastore data types.
+      //使用Parquet字段名称但保留Metastore数据类型
       case (mSchema, pSchema) if mSchema.name.toLowerCase == pSchema.name.toLowerCase =>
         mSchema.copy(name = pSchema.name)
       case _ =>
@@ -679,6 +731,7 @@ private[sql] object ParquetRelation extends Logging {
   /**
    * Returns the original schema from the Parquet file with any missing nullable fields from the
    * Hive Metastore schema merged in.
+    * 返回Parquet文件中的原始模式,其中包含Hive Metastore模式中合并的任何缺少的可空字段
    *
    * When constructing a DataFrame from a collection of structured data, the resulting object has
    * a schema corresponding to the union of the fields present in each element of the collection.
@@ -703,9 +756,9 @@ private[sql] object ParquetRelation extends Logging {
 
   /**
    * Figures out a merged Parquet schema with a distributed Spark job.
-   *
+   * 找出合并的Parquet架构与分布式Spark作业
    * Note that locality is not taken into consideration here because:
-   *
+   * 请注意，此处未考虑局部性，因为：
    *  1. For a single Parquet part-file, in most cases the footer only resides in the last block of
    *     that file.  Thus we only need to retrieve the location of the last block.  However, Hadoop
    *     `FileSystem` only provides API to retrieve locations of all blocks, which can be
@@ -736,25 +789,30 @@ private[sql] object ParquetRelation extends Logging {
     val partialFileStatusInfo = filesToTouch.map(f => (f.getPath.toString, f.getLen))
 
     // Issues a Spark job to read Parquet schema in parallel.
+    //发出Spark作业以并行读取Parquet架构
     val partiallyMergedSchemas =
       sqlContext
         .sparkContext
         .parallelize(partialFileStatusInfo)
         .mapPartitions { iterator =>
           // Resembles fake `FileStatus`es with serialized path and length information.
+          //类似于假的`FileStatus`es，带有序列化的路径和长度信息
           val fakeFileStatuses = iterator.map { case (path, length) =>
             new FileStatus(length, false, 0, 0, 0, 0, null, null, null, new Path(path))
           }.toSeq
 
           // Skips row group information since we only need the schema
+          //跳过行组信息,因为我们只需要模式
           val skipRowGroups = true
 
           // Reads footers in multi-threaded manner within each task
+          //在每个任务中以多线程方式读取页脚
           val footers =
             ParquetFileReader.readAllFootersInParallel(
               serializedConf.value, fakeFileStatuses, skipRowGroups)
 
           // Converter used to convert Parquet `MessageType` to Spark SQL `StructType`
+          //用于将Parquet`FessageType`转换为Spark SQL`StructType`的转换器
           val converter =
             new CatalystSchemaConverter(
               assumeBinaryIsString = assumeBinaryIsString,
@@ -773,6 +831,8 @@ private[sql] object ParquetRelation extends Logging {
    * Reads Spark SQL schema from a Parquet footer.  If a valid serialized Spark SQL schema string
    * can be found in the file metadata, returns the deserialized [[StructType]], otherwise, returns
    * a [[StructType]] converted from the [[MessageType]] stored in this footer.
+    * 从Parquet页脚读取Spark SQL架构,如果可以在文件元数据中找到有效的序列化Spark SQL架构字符串,则返回反序列化的[[StructType]],
+    * 否则返回从此页脚中存储的[[MessageType]]转换的[[StructType]]。
    */
   def readSchemaFromFooter(
       footer: Footer, converter: CatalystSchemaConverter): StructType = {
@@ -788,6 +848,7 @@ private[sql] object ParquetRelation extends Logging {
   private def deserializeSchemaString(schemaString: String): Option[StructType] = {
     // Tries to deserialize the schema string as JSON first, then falls back to the case class
     // string parser (data generated by older versions of Spark SQL uses this format).
+    //尝试首先将模式字符串反序列化为JSON,然后返回到案例类字符串解析器(旧版本的Spark SQL生成的数据使用此格式)
     Try(DataType.fromJson(schemaString).asInstanceOf[StructType]).recover {
       case _: Throwable =>
         logInfo(
@@ -804,13 +865,16 @@ private[sql] object ParquetRelation extends Logging {
   }
 
   // JUL loggers must be held by a strong reference, otherwise they may get destroyed by GC.
+  //JUL记录器必须由强引用保留,否则它们可能会被GC破坏
   // However, the root JUL logger used by Parquet isn't properly referenced.  Here we keep
   // references to loggers in both parquet-mr <= 1.6 and >= 1.7
+  //但是,Parquet使用的根JUL记录器未正确引用,这里我们在timber-mr <= 1.6和> = 1.7中保留对记录器的引用
   val apacheParquetLogger: JLogger = JLogger.getLogger(classOf[ApacheParquetLog].getPackage.getName)
   val parquetLogger: JLogger = JLogger.getLogger("parquet")
 
   // Parquet initializes its own JUL logger in a static block which always prints to stdout.  Here
   // we redirect the JUL logger via SLF4J JUL bridge handler.
+  //Parquet在静态块中初始化自己的JUL记录器,该块始终打印到stdout,在这里,我们通过SLF4J JUL桥接处理程序重定向JUL记录器
   val redirectParquetLogsViaSLF4J: Unit = {
     def redirect(logger: JLogger): Unit = {
       logger.getHandlers.foreach(logger.removeHandler)

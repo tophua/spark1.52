@@ -126,6 +126,7 @@ trait BaseGenericInternalRow extends InternalRow {
   }
 
   // Custom hashCode function that matches the efficient code generated version.
+  //自定义hashCode函数,匹配高效的代码生成版本
   override def hashCode: Int = {
     var result: Int = 37
     var i = 0
@@ -158,14 +159,16 @@ trait BaseGenericInternalRow extends InternalRow {
 
 /**
  * An extended interface to [[InternalRow]] that allows the values for each column to be updated.
+  * [[InternalRow]]的扩展接口，允许更新每列的值
  * Setting a value through a primitive function implicitly marks that column as not null.
+  *通过原始函数设置值会隐式地将该列标记为非null
  */
 abstract class MutableRow extends InternalRow {
   def setNullAt(i: Int): Unit
 
   def update(i: Int, value: Any)
 
-  // default implementation (slow)
+  // default implementation (slow) 默认实现（慢）
   def setBoolean(i: Int, value: Boolean): Unit = { update(i, value) }
   def setByte(i: Int, value: Byte): Unit = { update(i, value) }
   def setShort(i: Int, value: Short): Unit = { update(i, value) }
@@ -214,7 +217,9 @@ class GenericRowWithSchema(values: Array[Any], override val schema: StructType)
 
 /**
  * A internal row implementation that uses an array of objects as the underlying storage.
+  * 内部行实现,它使用对象数组作为底层存储
  * Note that, while the array is not copied, and thus could technically be mutated after creation,
+  * 请注意,虽然数组未被复制,因此在技术上可以在创建后进行变异
  * this is not allowed.
  */
 class GenericInternalRow(private[sql] val values: Array[Any]) extends BaseGenericInternalRow {
@@ -234,6 +239,7 @@ class GenericInternalRow(private[sql] val values: Array[Any]) extends BaseGeneri
 
 /**
  * This is used for serialization of Python DataFrame
+  * 这用于Python DataFrame的序列化
  */
 class GenericInternalRowWithSchema(values: Array[Any], val schema: StructType)
   extends GenericInternalRow(values) {

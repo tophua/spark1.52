@@ -54,6 +54,7 @@ private[regression] trait IsotonicRegressionBase extends Params with HasFeatures
   /**
    * Param for the index of the feature if [[featuresCol]] is a vector column (default: `0`), no
    * effect otherwise.
+    * 如果[[featuresCol]]是向量列（默认值：“0”）,则为特征索引的参数,否则无效
    * @group param
    */
   final val featureIndex: IntParam = new IntParam(this, "featureIndex",
@@ -64,13 +65,15 @@ private[regression] trait IsotonicRegressionBase extends Params with HasFeatures
 
   setDefault(isotonic -> true, featureIndex -> 0)
 
-  /** Checks whether the input has weight column. */
+  /** Checks whether the input has weight column.
+    * 检查输入是否有重量列*/
   protected[ml] def hasWeightCol: Boolean = {
     isDefined(weightCol) && $(weightCol) != ""
   }
 
   /**
    * Extracts (label, feature, weight) from input dataset.
+    * 从输入数据集中提取(标签,特征,权重)
    */
   protected[ml] def extractWeightedLabeledPoints(
       dataset: DataFrame): RDD[(Double, Double, Double)] = {
@@ -94,6 +97,7 @@ private[regression] trait IsotonicRegressionBase extends Params with HasFeatures
 
   /**
    * Validates and transforms input schema.
+    * 验证并转换输入架构
    * @param schema input schema
    * @param fitting whether this is in fitting or prediction
    * @return output schema
@@ -121,6 +125,7 @@ private[regression] trait IsotonicRegressionBase extends Params with HasFeatures
  *
  * Currently implemented using parallelized pool adjacent violators algorithm.
  * Only univariate (single feature) algorithm supported.
+  * 目前使用并行池相邻违规算法实现,仅支持单变量(单一特征)算法
  *
  * Uses [[org.apache.spark.mllib.regression.IsotonicRegression]].
  */

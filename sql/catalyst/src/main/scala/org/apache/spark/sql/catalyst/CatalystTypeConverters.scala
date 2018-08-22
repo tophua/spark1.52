@@ -33,6 +33,7 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * Functions to convert Scala types to Catalyst types and vice versa.
+  * 将Scala类型转换为Catalyst类型的函数,反之亦然
  */
 object CatalystTypeConverters {
   // The Predef.Map is scala.collection.immutable.Map.
@@ -76,6 +77,7 @@ object CatalystTypeConverters {
 
   /**
    * Converts a Scala type to its Catalyst equivalent (and vice versa).
+    * 将Scala类型转换为其Catalyst等效项(反之亦然)
    *
    * @tparam ScalaInputType The type of Scala values that can be converted to Catalyst.
    * @tparam ScalaOutputType The type of Scala values returned when converting Catalyst to Scala.
@@ -87,6 +89,7 @@ object CatalystTypeConverters {
     /**
      * Converts a Scala type to its Catalyst equivalent while automatically handling nulls
      * and Options.
+      * 将Scala类型转换为其Catalyst等效类型,同时自动处理空值和选项
      */
     final def toCatalyst(@Nullable maybeScalaValue: Any): CatalystType = {
       if (maybeScalaValue == null) {
@@ -105,6 +108,7 @@ object CatalystTypeConverters {
 
     /**
      * Given a Catalyst row, convert the value at column `column` to its Scala equivalent.
+      * 给定Catalyst行,将列“column”的值转换为其Scala等效值
      */
     final def toScala(row: InternalRow, column: Int): ScalaOutputType = {
       if (row.isNullAt(column)) null.asInstanceOf[ScalaOutputType] else toScalaImpl(row, column)
@@ -112,11 +116,13 @@ object CatalystTypeConverters {
 
     /**
      * Convert a Catalyst value to its Scala equivalent.
+      * 将Catalyst值转换为其Scala等效值
      */
     def toScala(@Nullable catalystValue: CatalystType): ScalaOutputType
 
     /**
      * Converts a Scala value to its Catalyst equivalent.
+      * 将Scala值转换为其Catalyst等效值
      * @param scalaValue the Scala value, guaranteed not to be null.
      * @return the Catalyst value.
      */
@@ -125,6 +131,7 @@ object CatalystTypeConverters {
     /**
      * Given a Catalyst row, convert the value at column `column` to its Scala equivalent.
      * This method will only be called on non-null columns.
+      * 给定Catalyst行,将列“column”的值转换为其Scala等效值,此方法仅在非空列上调用
      */
     protected def toScalaImpl(row: InternalRow, column: Int): ScalaOutputType
   }
@@ -139,6 +146,7 @@ object CatalystTypeConverters {
   private case class UDTConverter(
       udt: UserDefinedType[_]) extends CatalystTypeConverter[Any, Any, Any] {
     // toCatalyst (it calls toCatalystImpl) will do null check.
+    //toCatalyst(它调用toCatalystImpl)将执行null检查
     override def toCatalystImpl(scalaValue: Any): Any = udt.serialize(scalaValue)
 
     override def toScala(catalystValue: Any): Any = {
@@ -149,7 +157,8 @@ object CatalystTypeConverters {
       toScala(row.get(column, udt.sqlType))
   }
 
-  /** Converter for arrays, sequences, and Java iterables. */
+  /** Converter for arrays, sequences, and Java iterables.
+    * 用于数组,序列和Java迭代的转换器 */
   private case class ArrayConverter(
       elementType: DataType) extends CatalystTypeConverter[Any, Seq[Any], ArrayData] {
 
@@ -379,6 +388,8 @@ object CatalystTypeConverters {
    * Creates a converter function that will convert Scala objects to the specified Catalyst type.
    * Typical use case would be converting a collection of rows that have the same schema. You will
    * call this function once to get a converter, and apply it to every row.
+    * 创建一个转换器函数,将Scala对象转换为指定的Catalyst类型,典型的用例是转换具有相同模式的行集合,
+    * 您将调用此函数一次以获取转换器,并将其应用于每一行。
    */
   private[sql] def createToCatalystConverter(dataType: DataType): Any => Any = {
     if (isPrimitive(dataType)) {
@@ -406,6 +417,8 @@ object CatalystTypeConverters {
    * Creates a converter function that will convert Catalyst types to Scala type.
    * Typical use case would be converting a collection of rows that have the same schema. You will
    * call this function once to get a converter, and apply it to every row.
+    * 创建一个将Catalyst类型转换为Scala类型的转换器函数,典型用例是转换具有相同模式的行集合,
+    * 您将调用此函数一次以获取转换器,并将其应用于每一行。
    */
   private[sql] def createToScalaConverter(dataType: DataType): Any => Any = {
     if (isPrimitive(dataType)) {
@@ -417,10 +430,12 @@ object CatalystTypeConverters {
 
   /**
    *  Converts Scala objects to Catalyst rows / types.
+    *  将Scala对象转换为Catalyst行/类型
    *
    *  Note: This should be called before do evaluation on Row
    *        (It does not support UDT)
    *  This is used to create an RDD or test results with correct types for Catalyst.
+    * 这用于为Catalyst创建具有正确类型的RDD或测试结果
    */
   def convertToCatalyst(a: Any): Any = a match {
     case s: String => StringConverter.toCatalyst(s)
@@ -450,6 +465,8 @@ object CatalystTypeConverters {
    * Converts Catalyst types used internally in rows to standard Scala types
    * This method is slow, and for batch conversion you should be using converter
    * produced by createToScalaConverter.
+    * 将行内部使用的Catalyst类型转换为标准Scala类型此方法很慢,
+    * 对于批量转换,您应该使用createToScalaConverter生成的转换器。
    */
   def convertToScala(catalystValue: Any, dataType: DataType): Any = {
     createToScalaConverter(dataType)(catalystValue)

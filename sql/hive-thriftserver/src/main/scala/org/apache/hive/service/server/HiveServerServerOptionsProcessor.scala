@@ -22,6 +22,7 @@ import org.apache.hive.service.server.HiveServer2.{StartOptionExecutor, ServerOp
  * Class to upgrade a package-private class to public, and
  * implement a `process()` operation consistent with
  * the behavior of older Hive versions
+  * 用于将package-private类升级为public的类,并实现与旧Hive版本的行为一致的`process（）`操作
  * @param serverName name of the hive server
  */
 private[apache] class HiveServerServerOptionsProcessor(serverName: String)

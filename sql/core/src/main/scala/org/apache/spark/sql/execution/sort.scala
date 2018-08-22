@@ -28,7 +28,7 @@ import org.apache.spark.util.collection.ExternalSorter
 import org.apache.spark.{SparkEnv, InternalAccumulator, TaskContext}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// This file defines various sort operators.
+// This file defines various sort operators.此文件定义了各种排序运算符
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -58,7 +58,7 @@ case class Sort(
 }
 
 /**
- * Performs a sort, spilling to disk as needed.
+ * Performs a sort, spilling to disk as needed.执行排序,根据需要溢出到磁盘。
  * @param global when true performs a global sort of all partitions by shuffling the data first
  *               if necessary.
  */
@@ -95,6 +95,7 @@ case class ExternalSort(
 /**
  * Optimized version of [[ExternalSort]] that operates on binary data (implemented as part of
  * Project Tungsten).
+  * 优化版[[ExternalSort]],对二进制数据进行操作(作为Project Tungsten的一部分实现)
  *
  * @param global when true performs a global sort of all partitions by shuffling the data first
  *               if necessary.
@@ -125,16 +126,18 @@ case class TungstenSort(
 
     /**
      * Set up the sorter in each partition before computing the parent partition.
+      * 在计算父分区之前,在每个分区中设置分拣机
      * This makes sure our sorter is not starved by other sorters used in the same task.
+      * 这可确保我们的分拣机不会被同一任务中使用的其他分拣机所困扰
      */
     def preparePartition(): UnsafeExternalRowSorter = {
       val ordering = newOrdering(sortOrder, childOutput)
 
-      // The comparator for comparing prefix
+      // The comparator for comparing prefix 用于比较前缀的比较器
       val boundSortExpression = BindReferences.bindReference(sortOrder.head, childOutput)
       val prefixComparator = SortPrefixUtils.getPrefixComparator(boundSortExpression)
 
-      // The generator for prefix
+      // The generator for prefix 前缀的生成器
       val prefixProjection = UnsafeProjection.create(Seq(SortPrefix(boundSortExpression)))
       val prefixComputer = new UnsafeExternalRowSorter.PrefixComputer {
         override def computePrefix(row: InternalRow): Long = {
@@ -151,7 +154,7 @@ case class TungstenSort(
       sorter
     }
 
-    /** Compute a partition using the sorter already set up previously. */
+    /** Compute a partition using the sorter already set up previously.使用先前已设置的分拣机计算分区 */
     def executePartition(
         taskContext: TaskContext,
         partitionIndex: Int,
@@ -174,6 +177,7 @@ case class TungstenSort(
 object TungstenSort {
   /**
    * Return true if UnsafeExternalSort can sort rows with the given schema, false otherwise.
+    * 如果UnsafeExternalSort可以使用给定的模式对行进行排序,则返回true,否则返回false
    */
   def supportsSchema(schema: StructType): Boolean = {
     UnsafeExternalRowSorter.supportsSchema(schema)

@@ -102,7 +102,9 @@ private[sql] object EnsureRowFormats extends Rule[SparkPlan] {
     case operator: SparkPlan if handlesBothSafeAndUnsafeRows(operator) =>
       if (operator.children.map(_.outputsUnsafeRows).toSet.size != 1) {
         // If this operator's children produce both unsafe and safe rows,
+        //如果这个操作员的孩子产生不安全和安全的行
         // convert everything unsafe rows if all the schema of them are support by UnsafeRow
+        //如果它们的所有模式都由UnsafeRow支持,则转换所有不安全的行
         if (operator.children.forall(c => UnsafeProjection.canSupport(c.schema))) {
           operator.withNewChildren {
             operator.children.map {

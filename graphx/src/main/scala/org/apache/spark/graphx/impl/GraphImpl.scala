@@ -30,22 +30,29 @@ import org.apache.spark.graphx.util.BytecodeUtils
 
 /**
  * An implementation of [[org.apache.spark.graphx.Graph]] to support computation on graphs.
+  *
+  * [[org.apache.spark.graphx.Graph]]的实现,以支持图上的计算
  *
  * Graphs are represented using two RDDs: `vertices`, which contains vertex attributes and the
  * routing information for shipping vertex attributes to edge partitions, and
  * `replicatedVertexView`, which contains edges and the vertex attributes mentioned by each edge.
+  *
+  * 图形使用两个RDD表示：`vertices`,其中包含顶点属性和用于将顶点属性发送到边缘分区的路由信息,
+  * 以及`replicatedVertexView`,其中包含边和每个边提到的顶点属性
  */
 class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
     @transient val vertices: VertexRDD[VD],
     @transient val replicatedVertexView: ReplicatedVertexView[VD, ED])
   extends Graph[VD, ED] with Serializable {
 
-  /** Default constructor is provided to support serialization */
+  /** Default constructor is provided to support serialization
+    * 提供默认构造函数以支持序列化*/
   protected def this() = this(null, null)
 
   @transient override val edges: EdgeRDDImpl[ED, VD] = replicatedVertexView.edges
 
-  /** Return a RDD that brings edges together with their source and destination vertices. */
+  /** Return a RDD that brings edges together with their source and destination vertices.
+    * 返回一个RDD,它将边缘与其源和目标顶点结合在一起*/
   @transient override lazy val triplets: RDD[EdgeTriplet[VD, ED]] = {
     replicatedVertexView.upgrade(vertices, true, true)
     replicatedVertexView.edges.partitionsRDD.mapPartitions(_.flatMap {
@@ -126,6 +133,7 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
     (f: (VertexId, VD) => VD2)(implicit eq: VD =:= VD2 = null): Graph[VD2, ED] = {
     // The implicit parameter eq will be populated by the compiler if VD and VD2 are equal, and left
     // null if not
+    //如果VD和VD2相等,则隐式参数eq将由编译器填充,否则保留为null
     if (eq != null) {
       vertices.cache()
       // The map preserves type, so we can use incremental replication
@@ -136,6 +144,7 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
       new GraphImpl(newVerts, newReplicatedVertexView)
     } else {
       // The map does not preserve type, so we must re-replicate all vertices
+      //Map不保留类型，因此我们必须重新复制所有顶点
       GraphImpl(vertices.mapVertexPartitions(_.map(f)), replicatedVertexView.edges)
     }
   }
@@ -163,9 +172,11 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
       vpred: (VertexId, VD) => Boolean = (a, b) => true): Graph[VD, ED] = {
     vertices.cache()
     // Filter the vertices, reusing the partitioner and the index from this graph
+    //过滤顶点,重用分区器和此图中的索引
     val newVerts = vertices.mapVertexPartitions(_.filter(vpred))
     // Filter the triplets. We must always upgrade the triplet view fully because vpred always runs
     // on both src and dst vertices
+    //,我们必须始终完全升级三元组视图,因为vpred始终在src和dst顶点上运行
     replicatedVertexView.upgrade(vertices, true, true)
     val newEdges = replicatedVertexView.edges.filter(epred, vpred)
     new GraphImpl(newVerts, replicatedVertexView.withEdges(newEdges))
@@ -186,6 +197,7 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
 
   // ///////////////////////////////////////////////////////////////////////////////////////////////
   // Lower level transformation methods
+  //较低级别的转换方法
   // ///////////////////////////////////////////////////////////////////////////////////////////////
 
   override def mapReduceTriplets[A: ClassTag](
@@ -222,6 +234,7 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
     vertices.cache()
     // For each vertex, replicate its attribute only to partitions where it is
     // in the relevant position in an edge.
+    //对于每个顶点,仅将其属性复制到位于边缘相关位置的分区
     replicatedVertexView.upgrade(vertices, tripletFields.useSrc, tripletFields.useDst)
     val view = activeSetOpt match {
       case Some((activeSet, _)) =>
@@ -268,6 +281,7 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
     }).setName("GraphImpl.aggregateMessages - preAgg")
 
     // do the final reduction reusing the index map
+    //最后减少重用索引图
     vertices.aggregateUsingIndex(preAgg, mergeMsg)
   }
 
@@ -280,6 +294,7 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
     if (eq != null) {
       vertices.cache()
       // updateF preserves type, so we can use incremental replication
+      //updateF保留类型，因此我们可以使用增量复制
       val newVerts = vertices.leftJoin(other)(updateF).cache()
       val changedVerts = vertices.asInstanceOf[VertexRDD[VD2]].diff(newVerts)
       val newReplicatedVertexView = replicatedVertexView.asInstanceOf[ReplicatedVertexView[VD2, ED]]
@@ -292,7 +307,8 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
     }
   }
 
-  /** Test whether the closure accesses the the attribute with name `attrName`. */
+  /** Test whether the closure accesses the the attribute with name `attrName`.
+    * 测试闭包是否访问名为`attrName`的属性*/
   private def accessesVertexAttr(closure: AnyRef, attrName: String): Boolean = {
     try {
       BytecodeUtils.invokedMethod(closure, classOf[EdgeTriplet[VD, ED]], attrName)
@@ -305,7 +321,8 @@ class GraphImpl[VD: ClassTag, ED: ClassTag] protected (
 
 object GraphImpl {
 
-  /** Create a graph from edges, setting referenced vertices to `defaultVertexAttr`. */
+  /** Create a graph from edges, setting referenced vertices to `defaultVertexAttr`.
+    * 从边创建图形,将引用的顶点设置为`defaultVertexAttr`*/
   def apply[VD: ClassTag, ED: ClassTag](
       edges: RDD[Edge[ED]],
       defaultVertexAttr: VD,
@@ -315,7 +332,8 @@ object GraphImpl {
     fromEdgeRDD(EdgeRDD.fromEdges(edges), defaultVertexAttr, edgeStorageLevel, vertexStorageLevel)
   }
 
-  /** Create a graph from EdgePartitions, setting referenced vertices to `defaultVertexAttr`. */
+  /** Create a graph from EdgePartitions, setting referenced vertices to `defaultVertexAttr`.
+    * 从EdgePartitions创建图形,将引用的顶点设置为“defaultVertexAttr”*/
   def fromEdgePartitions[VD: ClassTag, ED: ClassTag](
       edgePartitions: RDD[(PartitionID, EdgePartition[ED, VD])],
       defaultVertexAttr: VD,
@@ -325,7 +343,8 @@ object GraphImpl {
       vertexStorageLevel)
   }
 
-  /** Create a graph from vertices and edges, setting missing vertices to `defaultVertexAttr`. */
+  /** Create a graph from vertices and edges, setting missing vertices to `defaultVertexAttr`.
+    * 从顶点和边创建图，将缺少的顶点设置为`defaultVertexAttr`*/
   def apply[VD: ClassTag, ED: ClassTag](
       vertices: RDD[(VertexId, VD)],
       edges: RDD[Edge[ED]],
@@ -344,6 +363,9 @@ object GraphImpl {
    * Create a graph from a VertexRDD and an EdgeRDD with arbitrary replicated vertices. The
    * VertexRDD must already be set up for efficient joins with the EdgeRDD by calling
    * `VertexRDD.withEdges` or an appropriate VertexRDD constructor.
+    *
+    * 从具有任意复制顶点的VertexRDD和EdgeRDD创建图形,必须通过调用“VertexRDD.withEdges”或
+    * 适当的VertexRDD构造函数,设置VertexRDD以实现与EdgeRDD的有效连接。
    */
   def apply[VD: ClassTag, ED: ClassTag](
       vertices: VertexRDD[VD],
@@ -352,6 +374,7 @@ object GraphImpl {
     vertices.cache()
 
     // Convert the vertex partitions in edges to the correct type
+    //将边的顶点分区转换为正确的类型
     val newEdges = edges.asInstanceOf[EdgeRDDImpl[ED, _]]
       .mapEdgePartitions((pid, part) => part.withoutVertexAttributes[VD])
       .cache()
@@ -363,6 +386,8 @@ object GraphImpl {
    * Create a graph from a VertexRDD and an EdgeRDD with the same replicated vertex type as the
    * vertices. The VertexRDD must already be set up for efficient joins with the EdgeRDD by calling
    * `VertexRDD.withEdges` or an appropriate VertexRDD constructor.
+    * 从VertexRDD和EdgeRDD创建具有与顶点相同的复制顶点类型的图形,必须通过调用“VertexRDD.withEdges”或
+    * 适当的VertexRDD构造函数，设置VertexRDD以实现与EdgeRDD的有效连接
    */
   def fromExistingRDDs[VD: ClassTag, ED: ClassTag](
       vertices: VertexRDD[VD],
@@ -373,6 +398,8 @@ object GraphImpl {
   /**
    * Create a graph from an EdgeRDD with the correct vertex type, setting missing vertices to
    * `defaultVertexAttr`. The vertices will have the same number of partitions as the EdgeRDD.
+    *
+    * 使用正确的顶点类型从EdgeRDD创建图形,将缺少的顶点设置为“defaultVertexAttr”,顶点将具有与EdgeRDD相同数量的分区
    */
   private def fromEdgeRDD[VD: ClassTag, ED: ClassTag](
       edges: EdgeRDDImpl[ED, VD],

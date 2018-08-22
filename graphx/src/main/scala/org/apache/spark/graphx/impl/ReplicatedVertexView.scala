@@ -40,6 +40,7 @@ class ReplicatedVertexView[VD: ClassTag, ED: ClassTag](
   /**
    * Return a new `ReplicatedVertexView` with the specified `EdgeRDD`, which must have the same
    * shipping level.
+    * 返回一个带有指定`EdgeRDD`的新`ReplicatedVertexView`,它必须具有相同的运输级别
    */
   def withEdges[VD2: ClassTag, ED2: ClassTag](
       edges_ : EdgeRDDImpl[ED2, VD2]): ReplicatedVertexView[VD2, ED2] = {
@@ -49,6 +50,7 @@ class ReplicatedVertexView[VD: ClassTag, ED: ClassTag](
   /**
    * Return a new `ReplicatedVertexView` where edges are reversed and shipping levels are swapped to
    * match.
+    * 返回一个新的`ReplicatedVertexView`,其中边缘被反转并且交换水平被交换以匹配
    */
   def reverse(): ReplicatedVertexView[VD, ED] = {
     val newEdges = edges.mapEdgePartitions((pid, part) => part.reverse)
@@ -59,6 +61,8 @@ class ReplicatedVertexView[VD: ClassTag, ED: ClassTag](
    * Upgrade the shipping level in-place to the specified levels by shipping vertex attributes from
    * `vertices`. This operation modifies the `ReplicatedVertexView`, and callers can access `edges`
    * afterwards to obtain the upgraded view.
+    * 通过从“顶点”运送顶点属性，将装运级别就地升级到指定级别,
+    * 此操作修改`ReplicatedVertexView`,然后调用者可以访问`edges`以获取升级后的视图
    */
   def upgrade(vertices: VertexRDD[VD], includeSrc: Boolean, includeDst: Boolean) {
     val shipSrc = includeSrc && !hasSrcId
@@ -85,6 +89,9 @@ class ReplicatedVertexView[VD: ClassTag, ED: ClassTag](
    * Return a new `ReplicatedVertexView` where the `activeSet` in each edge partition contains only
    * vertex ids present in `actives`. This ships a vertex id to all edge partitions where it is
    * referenced, ignoring the attribute shipping level.
+    *
+    * 返回一个新的`ReplicatedVertexView`,其中每个边分区中的`activeSet`只包含`actives`中的顶点id。
+    * 这会将顶点id发送到引用它的所有边缘分区，忽略属性传送级别。
    */
   def withActiveSet(actives: VertexRDD[_]): ReplicatedVertexView[VD, ED] = {
     val shippedActives = actives.shipVertexIds()
@@ -104,6 +111,9 @@ class ReplicatedVertexView[VD: ClassTag, ED: ClassTag](
    * Return a new `ReplicatedVertexView` where vertex attributes in edge partition are updated using
    * `updates`. This ships a vertex attribute only to the edge partitions where it is in the
    * position(s) specified by the attribute shipping level.
+    *
+    *返回一个新的`ReplicatedVertexView`，其中边缘分区中的顶点属性使用`updates`更新。
+    * 这会将顶点属性仅发送到边缘分区，在该边界分区中，它位于由属性送货级别指定的位置。
    */
   def updateVertices(updates: VertexRDD[VD]): ReplicatedVertexView[VD, ED] = {
     val shippedVerts = updates.shipVertexAttributes(hasSrcId, hasDstId)

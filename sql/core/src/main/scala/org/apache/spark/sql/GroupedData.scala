@@ -61,6 +61,7 @@ private[sql] object GroupedData {
 /**
  * :: Experimental ::
  * A set of methods for aggregations on a [[DataFrame]], created by [[DataFrame.groupBy]].
+  * 由[[DataFrame.groupBy]]创建的[[DataFrame]]聚合方法集
  *
  * @since 1.3.0
  */
@@ -137,6 +138,8 @@ class GroupedData protected[sql](
   /**
    * (Scala-specific) Compute aggregates by specifying a map from column name to
    * aggregate methods. The resulting [[DataFrame]] will also contain the grouping columns.
+    *
+    * （特定于Scala）通过指定从列名称到聚合方法的映射来计算聚合,生成的[[DataFrame]]也将包含分组列
    *
    * The available aggregate methods are `avg`, `max`, `min`, `sum`, `count`.
    * {{{
@@ -156,6 +159,8 @@ class GroupedData protected[sql](
   /**
    * (Scala-specific) Compute aggregates by specifying a map from column name to
    * aggregate methods. The resulting [[DataFrame]] will also contain the grouping columns.
+    *
+    * （特定于Scala）通过指定从列名称到聚合方法的映射来计算聚合,生成的[[DataFrame]]也将包含分组列
    *
    * The available aggregate methods are `avg`, `max`, `min`, `sum`, `count`.
    * {{{
@@ -177,6 +182,7 @@ class GroupedData protected[sql](
   /**
    * (Java-specific) Compute aggregates by specifying a map from column name to
    * aggregate methods. The resulting [[DataFrame]] will also contain the grouping columns.
+    * （特定于Java）通过指定从列名称到聚合方法的映射来计算聚合,生成的[[DataFrame]]也将包含分组列
    *
    * The available aggregate methods are `avg`, `max`, `min`, `sum`, `count`.
    * {{{
@@ -195,6 +201,9 @@ class GroupedData protected[sql](
    * Compute aggregates by specifying a series of aggregate columns. Note that this function by
    * default retains the grouping columns in its output. To not retain grouping columns, set
    * `spark.sql.retainGroupColumns` to false.
+    *
+    * 通过指定一系列聚合列来计算聚合,请注意,默认情况下,
+    * 此函数会在其输出中保留分组列,要不保留分组列,请将`spark.sql.retainGroupColumns`设置为false。
    *
    * The available aggregate methods are defined in [[org.apache.spark.sql.functions]].
    *
@@ -228,8 +237,9 @@ class GroupedData protected[sql](
   }
 
   /**
-   * Count the number of rows for each group.
+   * Count the number of rows for each group.计算每个组的行数
    * The resulting [[DataFrame]] will also contain the grouping columns.
+    * 生成的[[DataFrame]]也将包含分组列
    *
    * @since 1.3.0
    */
@@ -239,6 +249,8 @@ class GroupedData protected[sql](
    * Compute the average value for each numeric columns for each group. This is an alias for `avg`.
    * The resulting [[DataFrame]] will also contain the grouping columns.
    * When specified columns are given, only compute the average values for them.
+    * 计算每个组的每个数字列的平均值,这是`avg`的别名。
+    * 结果[[DataFrame]]也将包含分组列,给定指定的列时,只计算它们的平均值
    *
    * @since 1.3.0
    */
@@ -249,8 +261,11 @@ class GroupedData protected[sql](
 
   /**
    * Compute the max value for each numeric columns for each group.
+    * 计算每个组的每个数字列的最大值
    * The resulting [[DataFrame]] will also contain the grouping columns.
+    * 生成的[[DataFrame]]也将包含分组列
    * When specified columns are given, only compute the max values for them.
+    * 给定指定列时,仅计算它们的最大值
    *
    * @since 1.3.0
    */
@@ -263,6 +278,8 @@ class GroupedData protected[sql](
    * Compute the mean value for each numeric columns for each group.
    * The resulting [[DataFrame]] will also contain the grouping columns.
    * When specified columns are given, only compute the mean values for them.
+    *
+    * 计算每个组的每个数字列的平均值,结果[[DataFrame]]也将包含分组列,当给定指定列时,仅计算它们的平均值
    *
    * @since 1.3.0
    */
@@ -273,8 +290,11 @@ class GroupedData protected[sql](
 
   /**
    * Compute the min value for each numeric column for each group.
+    * 计算每个组的每个数字列的最小值
    * The resulting [[DataFrame]] will also contain the grouping columns.
+    * 生成的[[DataFrame]]也将包含分组列
    * When specified columns are given, only compute the min values for them.
+    * 给定指定列时,仅计算它们的最小值
    *
    * @since 1.3.0
    */
@@ -285,8 +305,11 @@ class GroupedData protected[sql](
 
   /**
    * Compute the sum for each numeric columns for each group.
+    * 计算每个组的每个数字列的总和
    * The resulting [[DataFrame]] will also contain the grouping columns.
+    * 生成的[[DataFrame]]也将包含分组列
    * When specified columns are given, only compute the sum for them.
+    * 给定指定列时,仅计算它们的总和
    *
    * @since 1.3.0
    */

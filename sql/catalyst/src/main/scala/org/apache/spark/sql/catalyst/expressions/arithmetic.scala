@@ -71,6 +71,7 @@ case class UnaryPositive(child: Expression) extends UnaryExpression with Expects
 
 /**
  * A function that get the absolute value of the numeric value.
+  * 获取数值绝对值的函数
  */
 @ExpressionDescription(
   usage = "_FUNC_(expr) - Returns the absolute value of the numeric value",
@@ -99,7 +100,8 @@ abstract class BinaryArithmetic extends BinaryOperator {
 
   override lazy val resolved = childrenResolved && checkInputDataTypes().isSuccess
 
-  /** Name of the function for this expression on a [[Decimal]] type. */
+  /** Name of the function for this expression on a [[Decimal]] type.
+    * [[Decimal]]类型上此表达式的函数名称*/
   def decimalMethod: String =
     sys.error("BinaryArithmetics must override either decimalMethod or genCode")
 
@@ -107,6 +109,7 @@ abstract class BinaryArithmetic extends BinaryOperator {
     case dt: DecimalType =>
       defineCodeGen(ctx, ev, (eval1, eval2) => s"$eval1.$decimalMethod($eval2)")
     // byte and short are casted into int when add, minus, times or divide
+      //add,minus,times或divide时,byte和short被转换为int
     case ByteType | ShortType =>
       defineCodeGen(ctx, ev,
         (eval1, eval2) => s"(${ctx.javaType(dataType)})($eval1 $symbol $eval2)")
@@ -218,6 +221,7 @@ case class Divide(left: Expression, right: Expression) extends BinaryArithmetic 
 
   /**
    * Special case handling due to division by 0 => null.
+    * 由于除以0 => null而导致的特殊情况处理
    */
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
     val eval1 = left.gen(ctx)
@@ -280,6 +284,7 @@ case class Remainder(left: Expression, right: Expression) extends BinaryArithmet
 
   /**
    * Special case handling for x % 0 ==> null.
+    * x％0 ==> null的特殊情况处理
    */
   override def genCode(ctx: CodeGenContext, ev: GeneratedExpressionCode): String = {
     val eval1 = left.gen(ctx)

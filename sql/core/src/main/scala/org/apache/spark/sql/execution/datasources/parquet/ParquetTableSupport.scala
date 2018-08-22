@@ -36,6 +36,7 @@ import org.apache.spark.unsafe.types.UTF8String
 
 /**
  * A `parquet.hadoop.api.WriteSupport` for Row objects.
+  * Row对象的`parquet.hadoop.api.WriteSupport`
  */
 private[parquet] class RowWriteSupport extends WriteSupport[InternalRow] with Logging {
 
@@ -266,6 +267,7 @@ private[parquet] class MutableRowWriteSupport extends RowWriteSupport {
     writer.startMessage()
     while(index < attributesSize) {
       // null values indicate optional fields but we do not check currently
+      //null值表示可选字段,但我们当前不检查
       if (!record.isNullAt(index) && !record.isNullAt(index)) {
         writer.startField(attributes(index).name, index)
         consumeType(attributes(index).dataType, record, index)

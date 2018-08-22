@@ -24,6 +24,7 @@ import org.apache.spark.{Accumulable, AccumulableParam, SparkContext}
  * `Accumulable/AccumulableParam` because it will break Java source compatibility.
  *
  * An implementation of SQLMetric should override `+=` and `add` to avoid boxing.
+  * SQLMetric的实现应该重写`+ =`和`add`以避免装箱
  */
 private[sql] abstract class SQLMetric[R <: SQLMetricValue[T], T](
     name: String, val param: SQLMetricParam[R, T])
@@ -51,6 +52,7 @@ private[sql] trait SQLMetricValue[T] extends Serializable {
 
 /**
  * A wrapper of Long to avoid boxing and unboxing when using Accumulator
+  * 一个Long的包装器,以避免使用Accumulator时装箱和拆箱
  */
 private[sql] class LongSQLMetricValue(private var _value : Long) extends SQLMetricValue[Long] {
 
@@ -60,11 +62,13 @@ private[sql] class LongSQLMetricValue(private var _value : Long) extends SQLMetr
   }
 
   // Although there is a boxing here, it's fine because it's only called in SQLListener
+  //虽然这里有拳击,但它很好,因为它只在SQLListener中调用
   override def value: Long = _value
 }
 
 /**
  * A wrapper of Int to avoid boxing and unboxing when using Accumulator
+  * Int的包装器，以避免使用累加器时装箱和拆箱
  */
 private[sql] class IntSQLMetricValue(private var _value: Int) extends SQLMetricValue[Int] {
 
@@ -116,6 +120,7 @@ private[sql] object SQLMetrics {
   /**
    * A metric that its value will be ignored. Use this one when we need a metric parameter but don't
    * care about the value.
+    * 将忽略其值的度量标准,当我们需要度量参数但不关心该值时,请使用此值
    */
   val nullLongMetric = new LongSQLMetric("null")
 }

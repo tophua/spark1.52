@@ -22,11 +22,13 @@ import org.apache.spark.util.collection.OpenHashSet
 /**
  * <span class="badge" style="float: right;">ALPHA COMPONENT</span>
  * GraphX is a graph processing framework built on top of Spark.
+  * GraphX是一个建立在Spark之上的图形处理框架
  */
 package object graphx {
   /**
    * A 64-bit vertex identifier that uniquely identifies a vertex within a graph. It does not need
    * to follow any ordering or any constraints other than uniqueness.
+    * 64位顶点标识符,用于唯一标识图形中的顶点,除了唯一性之外,它不需要遵循任何排序或任何约束。
    */
   type VertexId = Long
 

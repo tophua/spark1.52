@@ -32,6 +32,7 @@ import org.apache.spark.sql.types.DataType
 
 /**
  * Functions for registering user-defined functions. Use [[SQLContext.udf]] to access this.
+  * 用于注册用户定义函数的函数,使用[[SQLContext.udf]]访问它
  *
  * @since 1.3.0
  */
@@ -56,6 +57,7 @@ class UDFRegistration private[sql] (sqlContext: SQLContext) extends Logging {
 
   /**
    * Register a user-defined aggregate function (UDAF).
+    * 注册用户定义的聚合函数（UDAF）
    *
    * @param name the name of the UDAF.
    * @param udaf the UDAF needs to be registered.
@@ -125,6 +127,7 @@ class UDFRegistration private[sql] (sqlContext: SQLContext) extends Logging {
 
   /**
    * Register a Scala closure of 1 arguments as user-defined function (UDF).
+    * 将1个参数的Scala闭包注册为用户定义的函数（UDF）
    * @tparam RT return type of UDF.
    * @since 1.3.0
    */
@@ -138,6 +141,7 @@ class UDFRegistration private[sql] (sqlContext: SQLContext) extends Logging {
 
   /**
    * Register a Scala closure of 2 arguments as user-defined function (UDF).
+    * 将2个参数的Scala闭包注册为用户定义函数（UDF）
    * @tparam RT return type of UDF.
    * @since 1.3.0
    */
@@ -151,6 +155,7 @@ class UDFRegistration private[sql] (sqlContext: SQLContext) extends Logging {
 
   /**
    * Register a Scala closure of 3 arguments as user-defined function (UDF).
+    * 将3个参数的Scala闭包注册为用户定义函数（UDF）。
    * @tparam RT return type of UDF.
    * @since 1.3.0
    */

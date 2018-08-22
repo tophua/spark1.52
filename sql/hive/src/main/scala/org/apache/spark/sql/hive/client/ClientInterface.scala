@@ -85,18 +85,22 @@ private[hive] case class HiveTable(
  * An externally visible interface to the Hive client.  This interface is shared across both the
  * internal and external classloaders for a given version of Hive and thus must expose only
  * shared classes.
+  * Hive客户端的外部可见界面,对于给定版本的Hive,此接口在内部和外部类加载器之间共享,因此必须仅公开共享类。
  */
 private[hive] trait ClientInterface {
 
-  /** Returns the Hive Version of this client. */
+  /** Returns the Hive Version of this client.
+    *返回此客户端的Hive版本*/
   def version: HiveVersion
 
-  /** Returns the configuration for the given key in the current session. */
+  /** Returns the configuration for the given key in the current session.
+    * 返回当前会话中给定键的配置*/
   def getConf(key: String, defaultValue: String): String
 
   /**
    * Runs a HiveQL command using Hive, returning the results as a list of strings.  Each row will
    * result in one string.
+    * 使用Hive运行HiveQL命令,将结果作为字符串列表返回,每行将产生一个字符串
    */
   def runSqlHive(sql: String): Seq[String]
 
@@ -104,49 +108,55 @@ private[hive] trait ClientInterface {
   def setInfo(stream: PrintStream): Unit
   def setError(stream: PrintStream): Unit
 
-  /** Returns the names of all tables in the given database. */
+  /** Returns the names of all tables in the given database.
+    * 返回给定数据库中所有表的名称*/
   def listTables(dbName: String): Seq[String]
 
-  /** Returns the name of the active database. */
+  /** Returns the name of the active database.
+    * 返回活动数据库的名称*/
   def currentDatabase: String
 
-  /** Returns the metadata for specified database, throwing an exception if it doesn't exist */
+  /** Returns the metadata for specified database, throwing an exception if it doesn't exist
+    * 返回指定数据库的元数据，如果不存在则抛出异常*/
   def getDatabase(name: String): HiveDatabase = {
     getDatabaseOption(name).getOrElse(throw new NoSuchDatabaseException)
   }
 
-  /** Returns the metadata for a given database, or None if it doesn't exist. */
+  /** Returns the metadata for a given database, or None if it doesn't exist.
+    * 返回给定数据库的元数据,如果不存在,则返回None*/
   def getDatabaseOption(name: String): Option[HiveDatabase]
 
-  /** Returns the specified table, or throws [[NoSuchTableException]]. */
+  /** Returns the specified table, or throws [[NoSuchTableException]].
+    * 返回指定的表，或抛出[[NoSuchTableException]]*/
   def getTable(dbName: String, tableName: String): HiveTable = {
     getTableOption(dbName, tableName).getOrElse(throw new NoSuchTableException)
   }
 
-  /** Returns the metadata for the specified table or None if it doens't exist. */
+  /** Returns the metadata for the specified table or None if it doens't exist.
+    * 返回指定表的元数据，如果不存在，则返回None */
   def getTableOption(dbName: String, tableName: String): Option[HiveTable]
 
-  /** Creates a table with the given metadata. */
+  /** Creates a table with the given metadata. 创建具有给定元数据的表*/
   def createTable(table: HiveTable): Unit
 
-  /** Updates the given table with new metadata. */
+  /** Updates the given table with new metadata.使用新元数据更新给定表 */
   def alterTable(table: HiveTable): Unit
 
-  /** Creates a new database with the given name. */
+  /** Creates a new database with the given name. 使用给定名称创建新数据库*/
   def createDatabase(database: HiveDatabase): Unit
 
-  /** Returns the specified paritition or None if it does not exist. */
+  /** Returns the specified paritition or None if it does not exist. 返回指定的分区,如果不存在,则返回None。*/
   def getPartitionOption(
       hTable: HiveTable,
       partitionSpec: JMap[String, String]): Option[HivePartition]
 
-  /** Returns all partitions for the given table. */
+  /** Returns all partitions for the given table. 返回给定表的所有分区*/
   def getAllPartitions(hTable: HiveTable): Seq[HivePartition]
 
-  /** Returns partitions filtered by predicates for the given table. */
+  /** Returns partitions filtered by predicates for the given table. 返回由给定表的谓词过滤的分区*/
   def getPartitionsByFilter(hTable: HiveTable, predicates: Seq[Expression]): Seq[HivePartition]
 
-  /** Loads a static partition into an existing table. */
+  /** Loads a static partition into an existing table. 将静态分区加载到现有表中*/
   def loadPartition(
       loadPath: String,
       tableName: String,
@@ -156,14 +166,14 @@ private[hive] trait ClientInterface {
       inheritTableSpecs: Boolean,
       isSkewedStoreAsSubdir: Boolean): Unit
 
-  /** Loads data into an existing table. */
+  /** Loads data into an existing table.将数据加载到现有表中 */
   def loadTable(
       loadPath: String, // TODO URI
       tableName: String,
       replace: Boolean,
       holdDDLTime: Boolean): Unit
 
-  /** Loads new dynamic partitions into an existing table. */
+  /** Loads new dynamic partitions into an existing table. 将新动态分区加载到现有表中*/
   def loadDynamicPartitions(
       loadPath: String,
       tableName: String,
@@ -173,6 +183,7 @@ private[hive] trait ClientInterface {
       holdDDLTime: Boolean,
       listBucketingEnabled: Boolean): Unit
 
-  /** Used for testing only.  Removes all metadata from this instance of Hive. */
+  /** Used for testing only.  Removes all metadata from this instance of Hive.
+    * 仅用于测试,从此Hive实例中删除所有元数据。*/
   def reset(): Unit
 }

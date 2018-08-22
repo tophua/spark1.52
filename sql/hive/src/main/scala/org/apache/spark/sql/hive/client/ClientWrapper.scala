@@ -43,11 +43,14 @@ import org.apache.spark.util.{CircularBuffer, Utils}
 
 /**
  * A class that wraps the HiveClient and converts its responses to externally visible classes.
+  * 一个包装HiveClient并将其响应转换为外部可见类的类
  * Note that this class is typically loaded with an internal classloader for each instantiation,
+  * 请注意,此类通常为每个实例化加载内部类加载器
  * allowing it to interact directly with a specific isolated version of Hive.  Loading this class
  * with the isolated classloader however will result in it only being visible as a ClientInterface,
  * not a ClientWrapper.
- *
+ *  允许它直接与特定的孤立版Hive进行交互,但是,
+  *  使用隔离的类加载器加载此类将导致它仅作为ClientInterface而不是ClientWrapper可见。
  * This class needs to interact with multiple versions of Hive, but will always be compiled with
  * the 'native', execution version of Hive.  Therefore, any places where hive breaks compatibility
  * must use reflection after matching on `version`.
@@ -71,6 +74,7 @@ private[hive] class ClientWrapper(
   //
   // Internally, Hive `ShimLoader` tries to load different versions of Hadoop shims by checking
   // major version number gathered from Hadoop jar files:
+  //在内部,Hive`ShimLoader`尝试通过检查从Hadoop jar文件收集的主要版本号来加载不同版本的Hadoop填充程序：
   //
   // - For major version number 1, load `Hadoop20SShims`, where "20S" stands for Hadoop 0.20 with
   //   security.
@@ -93,6 +97,7 @@ private[hive] class ClientWrapper(
         logError("Failed to inspect Hadoop version")
 
         // Using "Path.getPathWithoutSchemeAndAuthority" as the probe method.
+        //使用“Path.getPathWithoutSchemeAndAuthority”作为探测方法
         val probeMethod = "getPathWithoutSchemeAndAuthority"
         if (!classOf[Path].getDeclaredMethods.exists(_.getName == probeMethod)) {
           logInfo(
@@ -112,6 +117,7 @@ private[hive] class ClientWrapper(
     }
 
     // Logs the actual loaded Hadoop shims class
+    //记录实际加载的Hadoop填充程序类
     val loadedShimsClassName = ShimLoader.getHadoopShims.getClass.getCanonicalName
     logInfo(s"Loaded $loadedShimsClassName for Hadoop version $hadoopVersion")
   }
@@ -134,6 +140,7 @@ private[hive] class ClientWrapper(
   }
 
   // Circular buffer to hold what hive prints to STDOUT and ERR.  Only printed when failures occur.
+  //循环缓冲区用于将hive打印到STDOUT和ERR, 仅在发生故障时打印
   private val outputBuffer = new CircularBuffer()
 
   private val shim = version match {
@@ -146,6 +153,7 @@ private[hive] class ClientWrapper(
   }
 
   // Create an internal session state for this ClientWrapper.
+  //为此ClientWrapper创建内部会话状态
   val state = {
     //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器
     val original = Thread.currentThread().getContextClassLoader
@@ -179,9 +187,11 @@ private[hive] class ClientWrapper(
         val initialConf = new HiveConf(classOf[SessionState])
         // HiveConf is a Hadoop Configuration, which has a field of classLoader and
         // the initial value will be the current thread's context class loader
+        //HiveConf是一个Hadoop配置,它有一个classLoader字段,初始值将是当前线程的上下文类加载器
         // (i.e. initClassLoader at here).
         // We call initialConf.setClassLoader(initClassLoader) at here to make
         // this action explicit.
+        //我们在这里调用initialConf.setClassLoader（initClassLoader）来使这个动作显式化
         initialConf.setClassLoader(initClassLoader)
         config.foreach { case (k, v) =>
           if (k.toLowerCase.contains("password")) {
@@ -206,7 +216,8 @@ private[hive] class ClientWrapper(
     ret
   }
 
-  /** Returns the configuration for the current session. */
+  /** Returns the configuration for the current session.
+    * 返回当前会话的配置*/
   def conf: HiveConf = SessionState.get().getConf
 
   override def getConf(key: String, defaultValue: String): String = {
@@ -215,18 +226,22 @@ private[hive] class ClientWrapper(
 
   // TODO: should be a def?s
   // When we create this val client, the HiveConf of it (conf) is the one associated with state.
+  //当我们创建这个val客户端时，它的HiveConf(conf)是与state相关联的
   @GuardedBy("this")
   private var client = Hive.get(conf)
 
   // We use hive's conf for compatibility.
+  //我们使用hive的conf来兼容
   private val retryLimit = conf.getIntVar(HiveConf.ConfVars.METASTORETHRIFTFAILURERETRIES)
   private val retryDelayMillis = shim.getMetastoreClientConnectRetryDelayMillis(conf)
 
   /**
    * Runs `f` with multiple retries in case the hive metastore is temporarily unreachable.
+    * 如果hive Metastore暂时无法访问，则运行多次重试`f`。
    */
   private def retryLocked[A](f: => A): A = synchronized {
     // Hive sometimes retries internally, so set a deadline to avoid compounding delays.
+    //Hive有时会在内部重试,因此设置截止日期以避免复合延迟
     val deadline = System.nanoTime + (retryLimit * retryDelayMillis * 1e6).toLong
     var numTries = 0
     var caughtException: Exception = null
@@ -269,6 +284,7 @@ private[hive] class ClientWrapper(
 
   /**
    * Runs `f` with ThreadLocal session state and classloaders configured for this version of hive.
+    * 使用为此版本的配置单元配置的ThreadLocal会话状态和类加载器运行`f`
    */
   def withHiveState[A](f: => A): A = retryLocked {
     //Thread.currentThread().getContextClassLoader,可以获取当前线程的引用,getContextClassLoader用来获取线程的上下文类加载器

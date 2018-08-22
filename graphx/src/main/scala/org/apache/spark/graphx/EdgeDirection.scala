@@ -19,11 +19,13 @@ package org.apache.spark.graphx
 
 /**
  * The direction of a directed edge relative to a vertex.
+  * 有向边相对于顶点的方向
  */
 class EdgeDirection private (private val name: String) extends Serializable {
   /**
    * Reverse the direction of an edge.  An in becomes out,
    * out becomes in and both and either remain the same.
+    * 反转边缘的方向,一个in变成out,out变成in和both都保持不变
    */
   def reverse: EdgeDirection = this match {
     case EdgeDirection.In => EdgeDirection.Out
@@ -47,15 +49,17 @@ class EdgeDirection private (private val name: String) extends Serializable {
  * A set of [[EdgeDirection]]s.
  */
 object EdgeDirection {
-  /** Edges arriving at a vertex. */
+  /** Edges arriving at a vertex. 边缘到达顶点*/
   final val In: EdgeDirection = new EdgeDirection("In")
 
-  /** Edges originating from a vertex. */
+  /** Edges originating from a vertex. 边缘起源于顶点*/
   final val Out: EdgeDirection = new EdgeDirection("Out")
 
-  /** Edges originating from *or* arriving at a vertex of interest. */
+  /** Edges originating from *or* arriving at a vertex of interest.
+    * 源自*或*的边缘到达感兴趣的顶点*/
   final val Either: EdgeDirection = new EdgeDirection("Either")
 
-  /** Edges originating from *and* arriving at a vertex of interest. */
+  /** Edges originating from *and* arriving at a vertex of interest.
+    * 源自*和*的边缘到达感兴趣的顶点*/
   final val Both: EdgeDirection = new EdgeDirection("Both")
 }

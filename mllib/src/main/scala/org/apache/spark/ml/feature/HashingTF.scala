@@ -31,6 +31,7 @@ import org.apache.spark.sql.types.{ArrayType, StructType}
 /**
  * :: Experimental ::
  * Maps a sequence of terms to their term frequencies using the hashing trick.
+  * 使用散列技巧将一系列术语映射到其术语频率
  */
 @Experimental
 class HashingTF(override val uid: String) extends Transformer with HasInputCol with HasOutputCol {

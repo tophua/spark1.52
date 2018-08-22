@@ -86,6 +86,7 @@ case class InsertIntoHiveTable(
     writerContainer.commitJob()
 
     // Note that this function is executed on executor side
+    //请注意，此函数在执行程序端执行
     def writeToFile(context: TaskContext, iterator: Iterator[InternalRow]): Unit = {
       val serializer = newSerializer(fileSinkConf.getTableInfo)
       val standardOI = ObjectInspectorUtils
@@ -119,6 +120,7 @@ case class InsertIntoHiveTable(
 
   /**
    * Inserts all the rows in the table into Hive.  Row objects are properly serialized with the
+    * 将表中的所有行插入Hive,行对象已正确序列化
    * `org.apache.hadoop.hive.serde2.SerDe` and the
    * `org.apache.hadoop.mapred.OutputFormat` provided by the table definition.
    *
@@ -127,6 +129,7 @@ case class InsertIntoHiveTable(
   protected[sql] lazy val sideEffectResult: Seq[Row] = {
     // Have to pass the TableDesc object to RDD.mapPartitions and then instantiate new serializer
     // instances within the closure, since Serializer is not serializable while TableDesc is.
+    //必须将TableDesc对象传递给RDD.mapPartitions,然后在闭包中实例化新的序列化程序实例,因为在TableDesc时序列化程序不可序列化。
     val tableDesc = table.tableDesc
     val tableLocation = table.hiveQlTable.getDataLocation
     val tmpLocation = hiveContext.getExternalTmpPath(tableLocation)
@@ -156,19 +159,23 @@ case class InsertIntoHiveTable(
     val partitionColumnNames = Option(partitionColumns).map(_.split("/")).orNull
 
     // Validate partition spec if there exist any dynamic partitions
+    //如果存在任何动态分区,则验证分区规范
     if (numDynamicPartitions > 0) {
       // Report error if dynamic partitioning is not enabled
+      //如果未启用动态分区,则报告错误
       if (!sc.hiveconf.getBoolVar(HiveConf.ConfVars.DYNAMICPARTITIONING)) {
         throw new SparkException(ErrorMsg.DYNAMIC_PARTITION_DISABLED.getMsg)
       }
 
       // Report error if dynamic partition strict mode is on but no static partition is found
+      //如果启用了动态分区严格模式但未找到静态分区,则报告错误
       if (numStaticPartitions == 0 &&
         sc.hiveconf.getVar(HiveConf.ConfVars.DYNAMICPARTITIONINGMODE).equalsIgnoreCase("strict")) {
         throw new SparkException(ErrorMsg.DYNAMIC_PARTITION_STRICT_MODE.getMsg)
       }
 
       // Report error if any static partition appears after a dynamic partition
+      //如果在动态分区后出现任何静态分区,则报告错误
       val isDynamic = partitionColumnNames.map(partitionSpec(_).isEmpty)
       if (isDynamic.init.zip(isDynamic.tail).contains((true, false))) {
         throw new SparkException(ErrorMsg.PARTITION_DYN_STA_ORDER.getMsg)
@@ -189,6 +196,7 @@ case class InsertIntoHiveTable(
 
     val outputPath = FileOutputFormat.getOutputPath(jobConf)
     // Have to construct the format of dbname.tablename.
+    //必须构造dbname.tablename的格式
     val qualifiedTableName = s"${table.databaseName}.${table.tableName}"
     // TODO: Correctly set holdDDLTime.
     // In most of the time, we should have holdDDLTime = false.
@@ -204,6 +212,7 @@ case class InsertIntoHiveTable(
 
       // inheritTableSpecs is set to true. It should be set to false for a IMPORT query
       // which is currently considered as a Hive native command.
+      //inheritTableSpecs设置为true,对于当前被视为Hive本机命令的IMPORT查询,应将其设置为false
       val inheritTableSpecs = true
       // TODO: Correctly set isSkewedStoreAsSubdir.
       val isSkewedStoreAsSubdir = false
@@ -248,6 +257,7 @@ case class InsertIntoHiveTable(
     }
 
     // Invalidate the cache.
+    //使缓存无效
     sqlContext.cacheManager.invalidateCache(table)
 
     // It would be nice to just return the childRdd unchanged so insert operations could be chained,

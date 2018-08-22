@@ -31,6 +31,9 @@ import org.apache.spark.graphx.util.collection.GraphXPrimitiveKeyOpenHashMap
  * An class containing additional operations for subclasses of VertexPartitionBase that provide
  * implicit evidence of membership in the `VertexPartitionBaseOpsConstructor` typeclass (for
  * example, [[VertexPartition.VertexPartitionOpsConstructor]]).
+  *
+  * 包含VertexPartitionBase子类的附加操作的类,它提供了“VertexPartitionBaseOpsConstructor”类型类中成员资格的隐式证据
+  * （例如，[[VertexPartition.VertexPartitionOpsConstructor]]）。
  */
 private[graphx] abstract class VertexPartitionBaseOps
     [VD: ClassTag, Self[X] <: VertexPartitionBase[X] : VertexPartitionBaseOpsConstructor]
@@ -44,8 +47,10 @@ private[graphx] abstract class VertexPartitionBaseOps
   /**
    * Pass each vertex attribute along with the vertex id through a map
    * function and retain the original RDD's partitioning and index.
+    *
+    * 通过map函数传递每个顶点属性以及顶点id,并保留原始RDD的分区和索引
    *
-   * @tparam VD2 the type returned by the map function
+   * @tparam VD2 the type returned by the map function map函数返回的类型
    *
    * @param f the function applied to each vertex id and vertex
    * attribute in the RDD
@@ -67,6 +72,7 @@ private[graphx] abstract class VertexPartitionBaseOps
 
   /**
    * Restrict the vertex set to the set of vertices satisfying the given predicate.
+    * 将顶点集限制为满足给定谓词的顶点集
    *
    * @param pred the user defined predicate
    *
@@ -88,7 +94,8 @@ private[graphx] abstract class VertexPartitionBaseOps
     this.withMask(newMask)
   }
 
-  /** Hides the VertexId's that are the same between `this` and `other`. */
+  /** Hides the VertexId's that are the same between `this` and `other`.
+    * 隐藏了`this`和`other`之间相同的VertexId*/
   def minus(other: Self[VD]): Self[VD] = {
     if (self.index != other.index) {
       logWarning("Minus operations on two VertexPartitions with different indexes is slow.")
@@ -98,7 +105,8 @@ private[graphx] abstract class VertexPartitionBaseOps
     }
   }
 
-  /** Hides the VertexId's that are the same between `this` and `other`. */
+  /** Hides the VertexId's that are the same between `this` and `other`.
+    * 隐藏了`this`和`other`之间相同的VertexId*/
   def minus(other: Iterator[(VertexId, VD)]): Self[VD] = {
     minus(createUsingIndex(other))
   }
@@ -106,6 +114,8 @@ private[graphx] abstract class VertexPartitionBaseOps
   /**
    * Hides vertices that are the same between this and other. For vertices that are different, keeps
    * the values from `other`. The indices of `this` and `other` must be the same.
+    *
+    * 隐藏此与其他之间相同的顶点,对于不同的顶点,保持“其他”的值,“this”和“other”的索引必须相同
    */
   def diff(other: Self[VD]): Self[VD] = {
     if (self.index != other.index) {
@@ -124,7 +134,8 @@ private[graphx] abstract class VertexPartitionBaseOps
     }
   }
 
-  /** Left outer join another VertexPartition. */
+  /** Left outer join another VertexPartition.
+    * 左外连接另一个VertexPartition*/
   def leftJoin[VD2: ClassTag, VD3: ClassTag]
       (other: Self[VD2])
       (f: (VertexId, VD, Option[VD2]) => VD3): Self[VD3] = {
@@ -144,14 +155,16 @@ private[graphx] abstract class VertexPartitionBaseOps
     }
   }
 
-  /** Left outer join another iterator of messages. */
+  /** Left outer join another iterator of messages.
+    * 左外连接另一个消息迭代器*/
   def leftJoin[VD2: ClassTag, VD3: ClassTag]
       (other: Iterator[(VertexId, VD2)])
       (f: (VertexId, VD, Option[VD2]) => VD3): Self[VD3] = {
     leftJoin(createUsingIndex(other))(f)
   }
 
-  /** Inner join another VertexPartition. */
+  /** Inner join another VertexPartition.
+    * 内部连接另一个VertexPartition*/
   def innerJoin[U: ClassTag, VD2: ClassTag]
       (other: Self[U])
       (f: (VertexId, VD, U) => VD2): Self[VD2] = {
@@ -172,6 +185,7 @@ private[graphx] abstract class VertexPartitionBaseOps
 
   /**
    * Inner join an iterator of messages.
+    * 内部连接消息的迭代器
    */
   def innerJoin[U: ClassTag, VD2: ClassTag]
       (iter: Iterator[Product2[VertexId, U]])
@@ -181,6 +195,7 @@ private[graphx] abstract class VertexPartitionBaseOps
 
   /**
    * Similar effect as aggregateUsingIndex((a, b) => a)
+    * 与aggregateUsingIndex((a,b)=> a)类似的效果
    */
   def createUsingIndex[VD2: ClassTag](iter: Iterator[Product2[VertexId, VD2]])
     : Self[VD2] = {
@@ -199,6 +214,7 @@ private[graphx] abstract class VertexPartitionBaseOps
   /**
    * Similar to innerJoin, but vertices from the left side that don't appear in iter will remain in
    * the partition, hidden by the bitmask.
+    * 与内部连接类似,但左侧未出现在顶部的顶点将保留在分区中,由位掩码隐藏
    */
   def innerJoinKeepLeft(iter: Iterator[Product2[VertexId, VD]]): Self[VD] = {
     val newMask = new BitSet(self.capacity)
@@ -237,6 +253,7 @@ private[graphx] abstract class VertexPartitionBaseOps
 
   /**
    * Construct a new VertexPartition whose index contains only the vertices in the mask.
+    * 构造一个新的VertexPartition,其索引仅包含蒙版中的顶点
    */
   def reindex(): Self[VD] = {
     val hashMap = new GraphXPrimitiveKeyOpenHashMap[VertexId, VD]

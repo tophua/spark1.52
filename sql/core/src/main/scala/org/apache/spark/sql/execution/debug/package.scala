@@ -28,6 +28,7 @@ import org.apache.spark.{Accumulator, AccumulatorParam, Logging}
 
 /**
  * Contains methods for debugging query execution.
+  * 包含调试查询执行的方法
  *
  * Usage:
  * {{{
@@ -84,8 +85,10 @@ package object debug {
 
     /**
      * A collection of metrics for each column of output.
+      * 每列输出的度量标准集合
      * @param elementTypes the actual runtime types for the output.  Useful when there are bugs
      *        causing the wrong data to be projected.
+      *        输出的实际运行时类型,当有错误导致错误的数据被投射时很有用
      */
     case class ColumnMetrics(
         elementTypes: Accumulator[HashSet[String]] = sparkContext.accumulator(HashSet.empty))

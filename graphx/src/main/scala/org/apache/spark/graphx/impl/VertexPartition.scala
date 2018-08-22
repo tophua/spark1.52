@@ -25,7 +25,8 @@ import org.apache.spark.graphx._
 import org.apache.spark.graphx.util.collection.GraphXPrimitiveKeyOpenHashMap
 
 private[graphx] object VertexPartition {
-  /** Construct a `VertexPartition` from the given vertices. */
+  /** Construct a `VertexPartition` from the given vertices.
+    * 从给定顶点构造一个“VertexPartition”*/
   def apply[VD: ClassTag](iter: Iterator[(VertexId, VD)])
     : VertexPartition[VD] = {
     val (index, values, mask) = VertexPartitionBase.initFrom(iter)
@@ -37,6 +38,7 @@ private[graphx] object VertexPartition {
   /**
    * Implicit conversion to allow invoking `VertexPartitionBase` operations directly on a
    * `VertexPartition`.
+    * 隐式转换允许直接在`VertexPartition`上调用`VertexPartitionBase`操作
    */
   implicit def partitionToOps[VD: ClassTag](partition: VertexPartition[VD])
     : VertexPartitionOps[VD] = new VertexPartitionOps(partition)
@@ -45,6 +47,7 @@ private[graphx] object VertexPartition {
    * Implicit evidence that `VertexPartition` is a member of the `VertexPartitionBaseOpsConstructor`
    * typeclass. This enables invoking `VertexPartitionBase` operations on a `VertexPartition` via an
    * evidence parameter, as in [[VertexPartitionBaseOps]].
+    * “VertexPartition”是“VertexPartitionBaseOpsConstructor”类型类的成员的隐含证据。 这样就可以通过证据参数在`VertexPartition`上调用`VertexPartitionBase`操作，如[[VertexPartitionBaseOps]]。
    */
   implicit object VertexPartitionOpsConstructor
     extends VertexPartitionBaseOpsConstructor[VertexPartition] {
@@ -53,7 +56,7 @@ private[graphx] object VertexPartition {
   }
 }
 
-/** A map from vertex id to vertex attribute. */
+/** A map from vertex id to vertex attribute. 从顶点id到顶点属性的映射*/
 private[graphx] class VertexPartition[VD: ClassTag](
     val index: VertexIdToIndexMap,
     val values: Array[VD],

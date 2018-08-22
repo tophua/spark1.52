@@ -42,6 +42,7 @@ import org.apache.spark.util.StatCounter
 
 /**
  * Params for linear regression.
+  * 用于线性回归的参数
  */
 private[regression] trait LinearRegressionParams extends PredictorParams
     with HasRegParam with HasElasticNetParam with HasMaxIter with HasTol
@@ -70,6 +71,7 @@ class LinearRegression(override val uid: String)
 
   /**
    * Set the regularization parameter.
+    * 设置正则化参数
    * Default is 0.0.
    * @group setParam
    */
@@ -78,6 +80,7 @@ class LinearRegression(override val uid: String)
 
   /**
    * Set if we should fit the intercept
+    * 设置我们是否应该适合拦截
    * Default is true.
    * @group setParam
    */
@@ -98,6 +101,7 @@ class LinearRegression(override val uid: String)
 
   /**
    * Set the ElasticNet mixing parameter.
+    * 设置ElasticNet混合参数
    * For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.
    * For 0 < alpha < 1, the penalty is a combination of L1 and L2.
    * Default is 0.0 which is an L2 penalty.
@@ -108,6 +112,7 @@ class LinearRegression(override val uid: String)
 
   /**
    * Set the maximum number of iterations.
+    * 设置最大迭代次数
    * Default is 100.
    * @group setParam
    */
@@ -115,8 +120,9 @@ class LinearRegression(override val uid: String)
   setDefault(maxIter -> 100)
 
   /**
-   * Set the convergence tolerance of iterations.
+   * Set the convergence tolerance of iterations.设置迭代的收敛容差
    * Smaller value will lead to higher accuracy with the cost of more iterations.
+    * 较小的值将导致更高的准确性和更多迭代的成本
    * Default is 1E-6.
    * @group setParam
    */
@@ -224,6 +230,7 @@ class LinearRegression(override val uid: String)
       /*
          The weights are trained in the scaled space; we're converting them back to
          the original space.
+         权重在缩放空间中训练;我们将它们转换回原始空间
        */
       val rawWeights = state.x.toArray.clone()
       var i = 0
@@ -289,7 +296,8 @@ class LinearRegressionModel private[ml] (
     this
   }
 
-  /** Indicates whether a training summary exists for this model instance. */
+  /** Indicates whether a training summary exists for this model instance.
+    * 指示是否存在此模型实例的培训摘要*/
   def hasSummary: Boolean = trainingSummary.isDefined
 
   /**
@@ -318,7 +326,7 @@ class LinearRegressionModel private[ml] (
 
 /**
  * :: Experimental ::
- * Linear regression training results.
+ * Linear regression training results.线性回归训练结果
  * @param predictions predictions outputted by the model's `transform` method.
  * @param objectiveHistory objective function (scaled loss + regularization) at each iteration.
  */
@@ -339,6 +347,7 @@ class LinearRegressionTrainingSummary private[regression] (
 /**
  * :: Experimental ::
  * Linear regression results evaluated on a dataset.
+  * 在数据集上评估线性回归结果
  * @param predictions predictions outputted by the model's `transform` method.
  */
 @Experimental
@@ -376,6 +385,7 @@ class LinearRegressionSummary private[regression] (
   /**
    * Returns the root mean squared error, which is defined as the square root of
    * the mean squared error.
+    * 返回均方根误差,定义为均方误差的平方根
    */
   val rootMeanSquaredError: Double = metrics.rootMeanSquaredError
 

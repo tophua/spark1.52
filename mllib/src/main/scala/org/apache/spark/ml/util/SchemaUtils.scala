@@ -29,6 +29,7 @@ private[spark] object SchemaUtils {
 
   /**
    * Check whether the given schema contains a column of the required data type.
+    * 检查给定的架构是否包含所需数据类型的列
    * @param colName  column name
    * @param dataType  required column data type
    */
@@ -45,6 +46,7 @@ private[spark] object SchemaUtils {
 
   /**
    * Appends a new column to the input schema. This fails if the given output column already exists.
+    * 将新列附加到输入模式,如果给定的输出列已存在,则会失败
    * @param schema input schema
    * @param colName new column name. If this column name is an empty string "", this method returns
    *                the input schema unchanged. This allows users to disable output columns.
@@ -64,6 +66,7 @@ private[spark] object SchemaUtils {
 
   /**
    * Appends a new column to the input schema. This fails if the given output column already exists.
+    * 将新列附加到输入模式,如果给定的输出列已存在,则会失败
    * @param schema input schema
    * @param col New column schema
    * @return new schema with the input column appended

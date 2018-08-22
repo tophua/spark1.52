@@ -54,7 +54,8 @@ private[ui] class ThriftServerPage(parent: ThriftServerTab) extends WebUIPage(""
     UIUtils.headerSparkPage("JDBC/ODBC Server", content, parent, Some(5000))
   }
 
-  /** Generate basic stats of the thrift server program */
+  /** Generate basic stats of the thrift server program
+    * 生成thrift服务器程序的基本统计信息*/
   private def generateBasicStats(): Seq[Node] = {
     val timeSinceStart = System.currentTimeMillis() - startTime.getTime
     <ul class ="unstyled">
@@ -139,7 +140,8 @@ private[ui] class ThriftServerPage(parent: ThriftServerTab) extends WebUIPage(""
     <td>{errorSummary}{details}</td>
   }
 
-  /** Generate stats of batch sessions of the thrift server program */
+  /** Generate stats of batch sessions of the thrift server program
+    * 生成thrift服务器程序的批处理会话的统计信息*/
   private def generateSessionStatsTable(): Seq[Node] = {
     val sessionList = listener.getSessionList
     val numBatches = sessionList.size

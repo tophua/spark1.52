@@ -33,6 +33,7 @@ import org.apache.spark.storage.StorageLevel
 
 /**
  * This is used by the node id cache to find the child id that a data point would belong to.
+  * 节点标识高速缓存使用它来查找数据点所属的子标识
  * @param split Split information.
  * @param nodeIndex The current node index of a data point that this will update.
  */
@@ -40,6 +41,7 @@ private[tree] case class NodeIndexUpdater(split: Split, nodeIndex: Int) {
 
   /**
    * Determine a child node index based on the feature value and the split.
+    * 根据特征值和拆分确定子节点索引
    * @param binnedFeature Binned feature value.
    * @param splits Split information to convert the bin indices to approximate feature values.
    * @return Child node index to update to.
@@ -55,8 +57,10 @@ private[tree] case class NodeIndexUpdater(split: Split, nodeIndex: Int) {
 
 /**
  * Each TreePoint belongs to a particular node per tree.
+  * 每个TreePoint属于每棵树的特定节点
  * Each row in the nodeIdsForInstances RDD is an array over trees of the node index
  * in each tree. Initially, values should all be 1 for root node.
+  * nodeIdsForInstances RDD中的每一行都是每棵树中节点索引的树上的数组,最初,根节点的值应该都是1。
  * The nodeIdsForInstances RDD needs to be updated at each iteration.
  * @param nodeIdsForInstances The initial values in the cache
  *                           (should be an Array of all 1's (meaning the root nodes)).
@@ -73,17 +77,21 @@ private[spark] class NodeIdCache(
   private var prevNodeIdsForInstances: RDD[Array[Int]] = null
 
   // To keep track of the past checkpointed RDDs.
+  //跟踪过去的检查点RDD
   private val checkpointQueue = mutable.Queue[RDD[Array[Int]]]()
   private var rddUpdateCount = 0
 
   // Indicates whether we can checkpoint
+  //表明我们是否可以检查点
   private val canCheckpoint = nodeIdsForInstances.sparkContext.getCheckpointDir.nonEmpty
 
   // FileSystem instance for deleting checkpoints as needed
+  //用于根据需要删除检查点的FileSystem实例
   private val fs = FileSystem.get(nodeIdsForInstances.sparkContext.hadoopConfiguration)
 
   /**
    * Update the node index values in the cache.
+    * 更新缓存中的节点索引值
    * This updates the RDD and its lineage.
    * TODO: Passing bin information to executors seems unnecessary and costly.
    * @param data The RDD of training rows.
@@ -150,6 +158,7 @@ private[spark] class NodeIdCache(
 
   /**
    * Call this after training is finished to delete any remaining checkpoints.
+    * 训练结束后调用此方法以删除任何剩余的检查点
    */
   def deleteAllCheckpoints(): Unit = {
     while (checkpointQueue.nonEmpty) {
@@ -175,6 +184,7 @@ private[spark] class NodeIdCache(
 private[spark] object NodeIdCache {
   /**
    * Initialize the node Id cache with initial node Id values.
+    * 使用初始节点Id值初始化节点Id缓存
    * @param data The RDD of training rows.
    * @param numTrees The number of trees that we want to create cache for.
    * @param checkpointInterval The checkpointing interval

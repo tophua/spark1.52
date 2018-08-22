@@ -50,7 +50,7 @@ class CatalystTypeConvertersSuite extends SparkFunSuite {
       assert(CatalystTypeConverters.createToScalaConverter(dataType)(null) === null)
     }
   }
-
+  //convertToCatalyst中的选项处理
   test("option handling in convertToCatalyst") {
     // convertToCatalyst doesn't handle unboxing from Options. This is inconsistent with
     // createToCatalystConverter but it may not actually matter as this is only called internally

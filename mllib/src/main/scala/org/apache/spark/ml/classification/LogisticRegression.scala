@@ -39,6 +39,7 @@ import org.apache.spark.storage.StorageLevel
 
 /**
  * Params for logistic regression.
+  * 逻辑回归的参数
  */
 private[classification] trait LogisticRegressionParams extends ProbabilisticClassifierParams
   with HasRegParam with HasElasticNetParam with HasMaxIter with HasFitIntercept with HasTol
@@ -46,10 +47,13 @@ private[classification] trait LogisticRegressionParams extends ProbabilisticClas
 
   /**
    * Set threshold in binary classification, in range [0, 1].
-   *
+   * 在二进制分类中设置阈值,范围为[0,1]。
    * If the estimated probability of class label 1 is > threshold, then predict 1, else 0.
+    * 如果类标签1的估计概率>阈值,则预测1,否则为0。
    * A high threshold encourages the model to predict 0 more often;
+    * 高阈值鼓励模型更频繁地预测0;
    * a low threshold encourages the model to predict 1 more often.
+    * 低阈值鼓励模型更频繁地预测1
    *
    * Note: Calling this with threshold p is equivalent to calling `setThresholds(Array(1-p, p))`.
    *       When [[setThreshold()]] is called, any user-set value for [[thresholds]] will be cleared.
@@ -66,8 +70,10 @@ private[classification] trait LogisticRegressionParams extends ProbabilisticClas
 
   /**
    * Get threshold for binary classification.
+    * 获取二进制分类的阈值
    *
    * If [[threshold]] is set, returns that value.
+    * 如果设置了[[threshold]],则返回该值
    * Otherwise, if [[thresholds]] is set with length 2 (i.e., binary classification),
    * this returns the equivalent threshold: {{{1 / (1 + thresholds(0) / thresholds(1))}}}.
    * Otherwise, returns [[threshold]] default value.
@@ -90,6 +96,7 @@ private[classification] trait LogisticRegressionParams extends ProbabilisticClas
   /**
    * Set thresholds in multiclass (or binary) classification to adjust the probability of
    * predicting each class. Array must have length equal to the number of classes, with values >= 0.
+    * 在多类（或二元）分类中设置阈值以调整预测每个类的概率,数组的长度必须等于类的数量,值> = 0
    * The class with largest value p/t is predicted, where p is the original probability of that
    * class and t is the class' threshold.
    *
@@ -106,10 +113,12 @@ private[classification] trait LogisticRegressionParams extends ProbabilisticClas
 
   /**
    * Get thresholds for binary or multiclass classification.
-   *
+   * 获取二进制或多类分类的阈值
    * If [[thresholds]] is set, return its value.
+    * 如果设置了[[thresholds]]，则返回其值。
    * Otherwise, if [[threshold]] is set, return the equivalent thresholds for binary
    * classification: (1-threshold, threshold).
+    * 否则,如果设置了[[threshold]],则返回二进制分类的等效阈值：(1-threshold，threshold)
    * If neither are set, throw an exception.
    *
    * @group getParam
@@ -126,6 +135,7 @@ private[classification] trait LogisticRegressionParams extends ProbabilisticClas
 
   /**
    * If [[threshold]] and [[thresholds]] are both set, ensures they are consistent.
+    * 如果同时设置[[threshold]]和[[thresholds]],则确保它们一致
    * @throws IllegalArgumentException if [[threshold]] and [[thresholds]] are not equivalent
    */
   protected def checkThresholdConsistency(): Unit = {
@@ -148,9 +158,10 @@ private[classification] trait LogisticRegressionParams extends ProbabilisticClas
 
 /**
  * :: Experimental ::
- * Logistic regression.
+ * Logistic regression.逻辑回归
  * Currently, this class only supports binary classification.  It will support multiclass
  * in the future.
+  * 目前,该类仅支持二进制分类,它将在未来支持多类
  */
 @Experimental
 class LogisticRegression(override val uid: String)
@@ -160,7 +171,7 @@ class LogisticRegression(override val uid: String)
   def this() = this(Identifiable.randomUID("logreg"))
 
   /**
-   * Set the regularization parameter.
+   * Set the regularization parameter.设置正则化参数
    * Default is 0.0.
    * @group setParam
    */
@@ -169,7 +180,9 @@ class LogisticRegression(override val uid: String)
 
   /**
    * Set the ElasticNet mixing parameter.
+    * 设置ElasticNet混合参数
    * For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty.
+    * 对于alpha = 0，惩罚是L2惩罚。 对于alpha = 1，它是L1惩罚
    * For 0 < alpha < 1, the penalty is a combination of L1 and L2.
    * Default is 0.0 which is an L2 penalty.
    * @group setParam
@@ -179,6 +192,7 @@ class LogisticRegression(override val uid: String)
 
   /**
    * Set the maximum number of iterations.
+    * 设置最大迭代次数
    * Default is 100.
    * @group setParam
    */
@@ -187,7 +201,9 @@ class LogisticRegression(override val uid: String)
 
   /**
    * Set the convergence tolerance of iterations.
+    * 设置迭代的收敛容差
    * Smaller value will lead to higher accuracy with the cost of more iterations.
+    * 较小的值将导致更高的准确性和更多迭代的成本
    * Default is 1E-6.
    * @group setParam
    */
@@ -196,6 +212,7 @@ class LogisticRegression(override val uid: String)
 
   /**
    * Whether to fit an intercept term.
+    * 是否适合拦截术语
    * Default is true.
    * @group setParam
    */
@@ -204,7 +221,9 @@ class LogisticRegression(override val uid: String)
 
   /**
    * Whether to standardize the training features before fitting the model.
+    * 是否在拟合模型之前标准化训练特征
    * The coefficients of models will be always returned on the original scale,
+    * 模型系数将始终以原始比例返回
    * so it will be transparent for users. Note that with/without standardization,
    * the models should be always converged to the same solution when no regularization
    * is applied. In R's GLMNET package, the default behavior is true as well.
@@ -341,8 +360,10 @@ class LogisticRegression(override val uid: String)
       /*
          The weights are trained in the scaled space; we're converting them back to
          the original space.
+         权重在缩放空间中训练; 我们将它们转换回原始空间
          Note that the intercept in scaled space and original space is the same;
          as a result, no scaling is needed.
+         注意缩放空间和原始空间中的截距是相同的; 因此,不需要缩放。
        */
       val rawWeights = state.x.toArray.clone()
       var i = 0
@@ -504,6 +525,7 @@ class LogisticRegressionModel private[ml] (
 
 /**
  * MultiClassSummarizer computes the number of distinct labels and corresponding counts,
+  * MultiClassSummarizer计算不同标签和相应计数的数量
  * and validates the data to see if the labels used for k class multi-label classification
  * are in the range of {0, 1, ..., k - 1} in a online fashion.
  *
@@ -516,6 +538,7 @@ private[classification] class MultiClassSummarizer extends Serializable {
 
   /**
    * Add a new label into this MultilabelSummarizer, and update the distinct map.
+    * 在此MultilabelSummarizer中添加新标签，并更新不同的Map。
    * @param label The label for this data point.
    * @return This MultilabelSummarizer
    */
@@ -533,6 +556,7 @@ private[classification] class MultiClassSummarizer extends Serializable {
 
   /**
    * Merge another MultilabelSummarizer, and update the distinct map.
+    * 合并另一个MultilabelSummarizer，并更新不同的Map。
    * (Note that it will merge the smaller distinct map into the larger one using in-place
    * merging, so either `this` or `other` object will be modified and returned.)
    *
@@ -718,6 +742,8 @@ class BinaryLogisticRegressionSummary private[classification] (
    * Returns a dataframe with two fields (threshold, recall) curve.
    * Every possible probability obtained in transforming the dataset are used
    * as thresholds used in calculating the recall.
+    * 返回具有两个字段(阈值,调用)曲线的数据框。
+    * 在转换数据集时获得的每个可能概率都用作计算召回时使用的阈值。
    */
   @transient lazy val recallByThreshold: DataFrame = {
     binaryMetrics.recallByThreshold().toDF("threshold", "recall")
@@ -727,6 +753,9 @@ class BinaryLogisticRegressionSummary private[classification] (
 /**
  * LogisticAggregator computes the gradient and loss for binary logistic loss function, as used
  * in binary classification for samples in sparse or dense vector in a online fashion.
+  *
+  * LogisticAggregator计算二元逻辑损失函数的梯度和损失,
+  * 如在线方式中稀疏或密集向量中的样本的二进制分类中所使用的。
  *
  * Note that multinomial logistic loss is not supported yet!
  *
@@ -764,7 +793,7 @@ private class LogisticAggregator(
   /**
    * Add a new training data to this LogisticAggregator, and update the loss and gradient
    * of the objective function.
-   *
+   * 向此LogisticAggregator添加新的训练数据,并更新目标函数的损失和梯度
    * @param label The label for this data point.
    * @param data The features for one data point in dense/sparse vector format to be added
    *             into this aggregator.
@@ -804,6 +833,7 @@ private class LogisticAggregator(
 
         if (label > 0) {
           // The following is equivalent to log(1 + exp(margin)) but more numerically stable.
+          //以下等同于log（1 + exp（margin））但更稳定
           lossSum += MLUtils.log1pExp(margin)
         } else {
           lossSum += MLUtils.log1pExp(margin) - margin
@@ -819,6 +849,7 @@ private class LogisticAggregator(
   /**
    * Merge another LogisticAggregator, and update the loss and gradient
    * of the objective function.
+    * 合并另一个LogisticAggregator,并更新目标函数的损失和梯度
    * (Note that it's in place merging; as a result, `this` object will be modified.)
    *
    * @param other The other LogisticAggregator to be merged.
@@ -857,8 +888,10 @@ private class LogisticAggregator(
 
 /**
  * LogisticCostFun implements Breeze's DiffFunction[T] for a multinomial logistic loss function,
+  * LogisticCostFun为多项逻辑损失函数实现Breeze的DiffFunction [T]
  * as used in multi-class classification (it is also used in binary logistic regression).
  * It returns the loss and gradient with L2 regularization at a particular point (weights).
+  * 它返回特定点(权重)处的L2正则化的损失和梯度
  * It's used in Breeze's convex optimization routines.
  */
 private class LogisticCostFun(
@@ -886,6 +919,7 @@ private class LogisticCostFun(
     val totalGradientArray = logisticAggregator.gradient.toArray
 
     // regVal is the sum of weight squares excluding intercept for L2 regularization.
+    //regVal是除了L2正则化的截距之外的权重平方的总和
     val regVal = if (regParamL2 == 0.0) {
       0.0
     } else {

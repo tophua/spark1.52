@@ -17,7 +17,8 @@
 
 package org.apache.spark.sql.hive
 
-/** Support for interacting with different versions of the HiveMetastoreClient */
+/** Support for interacting with different versions of the HiveMetastoreClient
+  * 支持与不同版本的HiveMetastoreClient进行交互*/
 package object client {
   private[client] abstract class HiveVersion(
       val fullVersion: String,

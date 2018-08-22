@@ -58,6 +58,7 @@ private[hive] trait HiveStrategies {
   /**
    * Retrieves data using a HiveTableScan.  Partition pruning predicates are also detected and
    * applied.
+    * 使用HiveTableScan检索数据,还检测并应用分区修剪谓词
    */
   object HiveTableScans extends Strategy {
     def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {

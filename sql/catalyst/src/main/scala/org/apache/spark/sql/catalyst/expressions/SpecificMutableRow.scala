@@ -24,6 +24,8 @@ import org.apache.spark.unsafe.types.UTF8String
 /**
  * A parent class for mutable container objects that are reused when the values are changed,
  * resulting in less garbage.  These values are held by a [[SpecificMutableRow]].
+  *
+  * 可更改容器对象的父类,在更改值时重用,从而减少垃圾,这些值由[[SpecificMutableRow]]保存
  *
  * The following code was roughly used to generate these objects:
  * {{{
@@ -191,6 +193,9 @@ final class MutableAny extends MutableValue {
  * A row type that holds an array specialized container objects, of type [[MutableValue]], chosen
  * based on the dataTypes of each column.  The intent is to decrease garbage when modifying the
  * values of primitive columns.
+  *
+  * 一种行类型,它包含一个类型为[[MutableValue]]的数组专用容器对象,
+  * 它们是根据每列的dataTypes选择的,目的是在修改原始列的值时减少垃圾
  */
 final class SpecificMutableRow(val values: Array[MutableValue])
   extends MutableRow with BaseGenericInternalRow {

@@ -25,9 +25,11 @@ import org.apache.spark.sql.types.{StructType, MapType, ArrayType}
 
 /**
  * Utility functions used by the query planner to convert our plan to new aggregation code path.
+  * 查询计划程序用于将计划转换为新聚合代码路径的实用程序函数
  */
 object Utils {
   // Right now, we do not support complex types in the grouping key schema.
+  //目前,我们不支持分组键架构中的复杂类型
   private def supportsGroupingKeySchema(aggregate: Aggregate): Boolean = {
     val hasComplexTypes = aggregate.groupingExpressions.map(_.dataType).exists {
       case array: ArrayType => true
@@ -55,6 +57,7 @@ object Utils {
             isDistinct = false)
 
         // We do not support multiple COUNT DISTINCT columns for now.
+          //我们暂时不支持多个COUNT DISTINCT列
         case expressions.CountDistinct(children) if children.length == 1 =>
           aggregate.AggregateExpression2(
             aggregateFunction = aggregate.Count(children.head),
@@ -99,15 +102,17 @@ object Utils {
       }
       // Check if there is any expressions.AggregateExpression1 left.
       // If so, we cannot convert this plan.
+      //检查是否有表达式.AggregateExpression1离开,如果是这样,我们无法转换此计划。
       val hasAggregateExpression1 = converted.aggregateExpressions.exists { expr =>
         // For every expressions, check if it contains AggregateExpression1.
+        //对于每个表达式,检查它是否包含AggregateExpression1
         expr.find {
           case agg: expressions.AggregateExpression1 => true
           case other => false
         }.isDefined
       }
 
-      // Check if there are multiple distinct columns.
+      // Check if there are multiple distinct columns.检查是否有多个不同的列
       val aggregateExpressions = converted.aggregateExpressions.flatMap { expr =>
         expr.collect {
           case agg: AggregateExpression2 => agg
@@ -130,6 +135,8 @@ object Utils {
     // If the plan cannot be converted, we will do a final round check to see if the original
     // logical.Aggregate contains both AggregateExpression1 and AggregateExpression2. If so,
     // we need to throw an exception.
+    //如果无法转换计划,我们将进行最后一轮检查以查看原始logical.Aggregate是否包含AggregateExpression1和AggregateExpression2,
+    // 如果是这样，我们需要抛出异常。
     val aggregateFunction2s = aggregate.aggregateExpressions.flatMap { expr =>
       expr.collect {
         case agg: AggregateExpression2 => agg.aggregateFunction
@@ -137,6 +144,7 @@ object Utils {
     }.distinct
     if (aggregateFunction2s.nonEmpty) {
       // For functions implemented based on the new interface, prepare a list of function names.
+      //对于基于新接口实现的功能,请准备功能名称列表
       val invalidFunctions = {
         if (aggregateFunction2s.length > 1) {
           s"${aggregateFunction2s.tail.map(_.nodeName).mkString(",")} " +

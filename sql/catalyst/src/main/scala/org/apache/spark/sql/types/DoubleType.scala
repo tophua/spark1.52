@@ -45,6 +45,7 @@ class DoubleType private() extends FractionalType {
 
   /**
    * The default size of a value of the DoubleType is 8 bytes.
+    * DoubleType值的默认大小为8个字节
    */
   override def defaultSize: Int = 8
 

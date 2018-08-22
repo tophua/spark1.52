@@ -40,8 +40,10 @@ import org.apache.spark.util.ThreadUtils
 /**
  * YarnAllocator is charged with requesting containers from the YARN ResourceManager and deciding
  * what to do with containers when YARN fulfills these requests.
+  * YarnAllocator负责从YARN ResourceManager请求容器,并决定在YARN满足这些请求时如何处理容器
  *
  * This class makes use of YARN's AMRMClient APIs. We interact with the AMRMClient in three ways:
+  * 该类使用YARN的AMRMClient API。 我们通过三种方式与AMRMClient进行交互：
  * * Making our resource needs known, which updates local bookkeeping about containers requested.
  * * Calling "allocate", which syncs our local container requests with the RM, and returns any
  *   containers that YARN has granted to us.  This also functions as a heartbeat.
@@ -491,7 +493,9 @@ private[yarn] class YarnAllocator(
 
         if (!alreadyReleased) {
           // The executor could have gone away (like no route to host, node failure, etc)
+          //执行者可能已经离开(就像没有主机路由,节点故障等)
           // Notify backend about the failure of the executor
+          //通知后端有关执行程序失败的信息
           numUnexpectedContainerRelease += 1
           driverRef.send(RemoveExecutor(eid,
             s"Yarn deallocated the executor $eid (container $containerId)"))

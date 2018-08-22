@@ -62,19 +62,23 @@ object GenerateUnsafeRowJoiner extends CodeGenerator[(StructType, StructType), U
     val bitset1Remainder = schema1.size % 64
 
     // The number of words we can reduce when we concat two rows together.
+    //当我们将两行连接在一起时,我们可以减少的单词数
     // The only reduction comes from merging the bitset portion of the two rows, saving 1 word.
+    //唯一的减少来自合并两行的bitset部分,节省1个字
     val sizeReduction = bitset1Words + bitset2Words - outputBitsetWords
 
-    // --------------------- copy bitset from row 1 and row 2 --------------------------- //
+    // --------------------- copy bitset from row 1 and row 2 从第1行和第2行复制bitset--------------------------- //
     val copyBitset = Seq.tabulate(outputBitsetWords) { i =>
       val bits = if (bitset1Remainder > 0) {
         if (i < bitset1Words - 1) {
           s"$getLong(obj1, offset1 + ${i * 8})"
         } else if (i == bitset1Words - 1) {
           // combine last work of bitset1 and first word of bitset2
+          //结合bitset1的最后一项工作和bitset2的第一个字
           s"$getLong(obj1, offset1 + ${i * 8}) | ($getLong(obj2, offset2) << $bitset1Remainder)"
         } else if (i - bitset1Words < bitset2Words - 1) {
           // combine next two words of bitset2
+          //结合bitset2的下两个单词
           s"($getLong(obj2, offset2 + ${(i - bitset1Words) * 8}) >>> (64 - $bitset1Remainder))" +
             s" | ($getLong(obj2, offset2 + ${(i - bitset1Words + 1) * 8}) << $bitset1Remainder)"
         } else {
@@ -92,7 +96,7 @@ object GenerateUnsafeRowJoiner extends CodeGenerator[(StructType, StructType), U
       s"$putLong(buf, ${offset + i * 8}, $bits);"
     }.mkString("\n")
 
-    // --------------------- copy fixed length portion from row 1 ----------------------- //
+    // --------------------- copy fixed length portion from row 1  从第1行复制固定长度部分----------------------- //
     var cursor = offset + outputBitsetWords * 8
     val copyFixedLengthRow1 = s"""
        |// Copy fixed length data for row1
@@ -103,7 +107,7 @@ object GenerateUnsafeRowJoiner extends CodeGenerator[(StructType, StructType), U
      """.stripMargin
     cursor += schema1.size * 8
 
-    // --------------------- copy fixed length portion from row 2 ----------------------- //
+    // --------------------- copy fixed length portion from row 2 复制第2行的固定长度部分----------------------- //
     val copyFixedLengthRow2 = s"""
        |// Copy fixed length data for row2
        |Platform.copyMemory(
@@ -113,7 +117,7 @@ object GenerateUnsafeRowJoiner extends CodeGenerator[(StructType, StructType), U
      """.stripMargin
     cursor += schema2.size * 8
 
-    // --------------------- copy variable length portion from row 1 ----------------------- //
+    // --------------------- copy variable length portion from row 1 从第1行复制可变长度部分----------------------- //
     val numBytesBitsetAndFixedRow1 = (bitset1Words + schema1.size) * 8
     val copyVariableLengthRow1 = s"""
        |// Copy variable length data for row1
@@ -124,7 +128,7 @@ object GenerateUnsafeRowJoiner extends CodeGenerator[(StructType, StructType), U
        |  numBytesVariableRow1);
      """.stripMargin
 
-    // --------------------- copy variable length portion from row 2 ----------------------- //
+    // --------------------- copy variable length portion from row 2 从第2行复制可变长度部分----------------------- //
     val numBytesBitsetAndFixedRow2 = (bitset2Words + schema2.size) * 8
     val copyVariableLengthRow2 = s"""
        |// Copy variable length data for row2
@@ -135,15 +139,18 @@ object GenerateUnsafeRowJoiner extends CodeGenerator[(StructType, StructType), U
        |  numBytesVariableRow2);
      """.stripMargin
 
-    // ------------- update fixed length data for variable length data type  --------------- //
+    // ------------- update fixed length data for variable length data type  更新可变长度数据类型的固定长度数据--------------- //
     val updateOffset = (schema1 ++ schema2).zipWithIndex.map { case (field, i) =>
       // Skip fixed length data types, and only generate code for variable length data
+      //跳过固定长度数据类型,仅生成可变长度数据的代码
       if (UnsafeRow.isFixedLength(field.dataType)) {
         ""
       } else {
         // Number of bytes to increase for the offset. Note that since in UnsafeRow we store the
         // offset in the upper 32 bit of the words, we can just shift the offset to the left by
         // 32 and increment that amount in place.
+        //偏移量增加的字节数,请注意,因为在UnsafeRow中我们将偏移存储在单词的高32位中,
+        //我们可以将偏移向左移动32并将该数量增加到位。
         val shift =
           if (i < schema1.size) {
             s"${(outputBitsetWords - bitset1Words + schema2.size) * 8}L"
@@ -157,7 +164,7 @@ object GenerateUnsafeRowJoiner extends CodeGenerator[(StructType, StructType), U
       }
     }.mkString("\n")
 
-    // ------------------------ Finally, put everything together  --------------------------- //
+    // ------------------------ Finally, put everything together  最后,把所有东西放在一起--------------------------- //
     val code = s"""
        |public Object generate($exprType[] exprs) {
        |  return new SpecificUnsafeRowJoiner();

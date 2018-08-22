@@ -27,11 +27,13 @@ import org.apache.spark.mllib.linalg.{Vectors, Vector}
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.sql.DataFrame
 
-/** Params for Multilayer Perceptron. */
+/** Params for Multilayer Perceptron.
+  * 多层感知器的参数*/
 private[ml] trait MultilayerPerceptronParams extends PredictorParams
   with HasSeed with HasMaxIter with HasTol {
   /**
    * Layer sizes including input size and output size.
+    * 图层大小包括输入大小和输出大小
    * Default: Array(1, 1)
    * @group param
    */
@@ -48,8 +50,10 @@ private[ml] trait MultilayerPerceptronParams extends PredictorParams
 
   /**
    * Block size for stacking input data in matrices to speed up the computation.
+    * 用于在矩阵中堆叠输入数据的块大小以加速计算
    * Data is stacked within partitions. If block size is more than remaining data in
    * a partition then it is adjusted to the size of this data.
+    * 数据堆叠在分区中,如果块大小超过分区中的剩余数据,则将其调整为此数据的大小。
    * Recommended size is between 10 and 1000.
    * Default: 128
    * @group expertParam
@@ -66,14 +70,14 @@ private[ml] trait MultilayerPerceptronParams extends PredictorParams
   setDefault(maxIter -> 100, tol -> 1e-4, layers -> Array(1, 1), blockSize -> 128)
 }
 
-/** Label to vector converter. */
+/** Label to vector converter. 标签到矢量转换器*/
 private object LabelConverter {
   // TODO: Use OneHotEncoder instead
   /**
-   * Encodes a label as a vector.
+   * Encodes a label as a vector.将标签编码为矢量
    * Returns a vector of given length with zeroes at all positions
    * and value 1.0 at the position that corresponds to the label.
-   *
+   * 返回给定长度的向量,其中所有位置都为零,而值对应于标签的位置为1.0。
    * @param labeledPoint labeled point
    * @param labelCount total number of labels
    * @return pair of features and vector encoding of a label
@@ -86,7 +90,9 @@ private object LabelConverter {
 
   /**
    * Converts a vector to a label.
+    * 将矢量转换为标签
    * Returns the position of the maximal element of a vector.
+    * 返回向量的最大元素的位置
    *
    * @param output label encoded with a vector
    * @return label
@@ -99,7 +105,9 @@ private object LabelConverter {
 /**
  * :: Experimental ::
  * Classifier trainer based on the Multilayer Perceptron.
+  * 基于多层感知器的分类器训练器
  * Each layer has sigmoid activation function, output layer has softmax.
+  * 每层都有S形激活功能,输出层有softmax
  * Number of inputs has to be equal to the size of feature vectors.
  * Number of outputs has to be equal to the total number of labels.
  *
@@ -119,6 +127,7 @@ class MultilayerPerceptronClassifier(override val uid: String)
 
   /**
    * Set the maximum number of iterations.
+    * 设置最大迭代次数
    * Default is 100.
    * @group setParam
    */
@@ -126,6 +135,7 @@ class MultilayerPerceptronClassifier(override val uid: String)
 
   /**
    * Set the convergence tolerance of iterations.
+    * 设置迭代的收敛容差
    * Smaller value will lead to higher accuracy with the cost of more iterations.
    * Default is 1E-4.
    * @group setParam
@@ -134,6 +144,7 @@ class MultilayerPerceptronClassifier(override val uid: String)
 
   /**
    * Set the seed for weights initialization.
+    * 设置权重初始化的种子
    * @group setParam
    */
   def setSeed(value: Long): this.type = set(seed, value)
@@ -142,6 +153,7 @@ class MultilayerPerceptronClassifier(override val uid: String)
 
   /**
    * Train a model using the given dataset and parameters.
+    * 使用给定的数据集和参数训练模型
    * Developers can implement this instead of [[fit()]] to avoid dealing with schema validation
    * and copying parameters into the model.
    *
@@ -165,7 +177,9 @@ class MultilayerPerceptronClassifier(override val uid: String)
 /**
  * :: Experimental ::
  * Classification model based on the Multilayer Perceptron.
+  * 基于多层感知器的分类模型
  * Each layer has sigmoid activation function, output layer has softmax.
+  * 每层都有S形激活功能,输出层有softmax
  * @param uid uid
  * @param layers array of layer sizes including input and output layers
  * @param weights vector of initial weights for the model that consists of the weights of layers
@@ -182,8 +196,9 @@ class MultilayerPerceptronClassificationModel private[ml] (
   private val mlpModel = FeedForwardTopology.multiLayerPerceptron(layers, true).getInstance(weights)
 
   /**
-   * Predict label for the given features.
+   * Predict label for the given features.预测给定功能的标签
    * This internal method is used to implement [[transform()]] and output [[predictionCol]].
+    * 此内部方法用于实现[[transform()]]和输出[[predictionCol]]
    */
   override protected def predict(features: Vector): Double = {
     LabelConverter.decodeLabel(mlpModel.predict(features))

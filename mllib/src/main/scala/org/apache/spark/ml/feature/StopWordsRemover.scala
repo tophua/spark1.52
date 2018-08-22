@@ -33,6 +33,7 @@ private object StopWords {
 
   /**
    * Use the same default stopwords list as scikit-learn.
+    * 使用与scikit-learn相同的默认停用词列表
    * The original list can be found from "Glasgow Information Retrieval Group"
    * [[http://ir.dcs.gla.ac.uk/resources/linguistic_utils/stop_words]]
    */
@@ -81,6 +82,7 @@ private object StopWords {
 /**
  * :: Experimental ::
  * A feature transformer that filters out stop words from input.
+  * 一个特征变换器,用于过滤掉输入中的停用词
  * Note: null values from input array are preserved unless adding null to stopWords explicitly.
  * @see [[http://en.wikipedia.org/wiki/Stop_words]]
  */
@@ -111,6 +113,7 @@ class StopWordsRemover(override val uid: String)
 
   /**
    * whether to do a case sensitive comparison over the stop words
+    * 是否对停用词进行区分大小写的比较
    * Default: false
    * @group param
    */

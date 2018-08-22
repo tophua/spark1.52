@@ -522,6 +522,7 @@ abstract class RDD[T: ClassTag](
    * Return a sampled subset of this RDD.
    * 根据给定的随机种子seed,随机抽样出数量为frac的数据
    * @param withReplacement can elements be sampled multiple times (replaced when sampled out)
+    *                        可以多次对元素进行采样（在采样时替换）
    * @param fraction expected size of the sample as a fraction of this RDD's size
    *  without replacement: probability that each element is chosen; fraction must be [0, 1]
    *  with replacement: expected number of times each element is chosen; fraction must be >= 0

@@ -27,7 +27,8 @@ import org.apache.spark.graphx._
 /** Implementation of SVD++ algorithm. */
 object SVDPlusPlus {
 
-  /** Configuration parameters for SVDPlusPlus. */
+  /** Configuration parameters for SVDPlusPlus.
+    * SVDPlusPlus的配置参数 */
   class Conf(
       var rank: Int,
       var maxIters: Int,
@@ -42,6 +43,7 @@ object SVDPlusPlus {
   /**
    * This method is now replaced by the updated version of `run()` and returns exactly
    * the same result.
+    * 此方法现在被`run（）`的更新版本替换,并返回完全相同的结果
    */
   @deprecated("Call run()", "1.4.0")
   def runSVDPlusPlus(edges: RDD[Edge[Double]], conf: Conf)
@@ -68,6 +70,7 @@ object SVDPlusPlus {
     : (Graph[(Array[Double], Array[Double], Double, Double), Double], Double) =
   {
     // Generate default vertex attribute
+    //生成默认顶点属性
     def defaultF(rank: Int): (Array[Double], Array[Double], Double, Double) = {
       // TODO: use a fixed random seed
       val v1 = Array.fill(rank)(Random.nextDouble())
@@ -76,6 +79,7 @@ object SVDPlusPlus {
     }
 
     // calculate global rating mean
+    //计算全局评级均值
     edges.cache()
     val (rs, rc) = edges.map(e => (e.attr, 1L)).reduce((a, b) => (a._1 + b._1, a._2 + b._2))
     val u = rs / rc
@@ -87,6 +91,7 @@ object SVDPlusPlus {
     edges.unpersist()
 
     // Calculate initial bias and norm
+    //计算初始偏差和规范
     val t0 = g.aggregateMessages[(Long, Double)](
       ctx => { ctx.sendToSrc((1L, ctx.attr)); ctx.sendToDst((1L, ctx.attr)) },
       (g1, g2) => (g1._1 + g2._1, g1._2 + g2._2))
@@ -182,6 +187,7 @@ object SVDPlusPlus {
     }
 
     // calculate error on training set
+    //计算训练集的误差
     def sendMsgTestF(conf: Conf, u: Double)
         (ctx: EdgeContext[(Array[Double], Array[Double], Double, Double), Double, Double]) {
       val (usr, itm) = (ctx.srcAttr, ctx.dstAttr)
@@ -210,6 +216,7 @@ object SVDPlusPlus {
 
   /**
    * Forces materialization of a Graph by count()ing its RDDs.
+    * 通过count()对其RDD强制实现Graph的实现
    */
   private def materialize(g: Graph[_, _]): Unit = {
     g.vertices.count()

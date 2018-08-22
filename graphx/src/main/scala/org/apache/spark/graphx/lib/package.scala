@@ -19,5 +19,6 @@ package org.apache.spark.graphx
 
 /**
  * Various analytics functions for graphs.
+  * 图表的各种分析功能
  */
 package object lib

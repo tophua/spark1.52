@@ -25,6 +25,7 @@ import org.apache.spark.sql.types.{DoubleType, NumericType, Metadata, MetadataBu
 /**
  * :: DeveloperApi ::
  * Abstract class for ML attributes.
+  * ML属性的抽象类
  */
 @DeveloperApi
 sealed abstract class Attribute extends Serializable {
@@ -36,34 +37,37 @@ sealed abstract class Attribute extends Serializable {
     require(i >= 0, s"Index cannot be negative but got $i")
   }
 
-  /** Attribute type. */
+  /** Attribute type. 属性类型*/
   def attrType: AttributeType
 
-  /** Name of the attribute. None if it is not set. */
+  /** Name of the attribute. None if it is not set.
+    * 属性的名称,没有,如果没有设置*/
   def name: Option[String]
 
-  /** Copy with a new name. */
+  /** Copy with a new name. 使用新名称复制*/
   def withName(name: String): Attribute
 
-  /** Copy without the name. */
+  /** Copy without the name. 没有名字的复制*/
   def withoutName: Attribute
 
-  /** Index of the attribute. None if it is not set. */
+  /** Index of the attribute. None if it is not set. 属性索引,没有,如果没有设置。*/
   def index: Option[Int]
 
-  /** Copy with a new index. */
+  /** Copy with a new index. 使用新索引复制*/
   def withIndex(index: Int): Attribute
 
-  /** Copy without the index. */
+  /** Copy without the index. 没有索引的复制*/
   def withoutIndex: Attribute
 
   /**
    * Tests whether this attribute is numeric, true for [[NumericAttribute]] and [[BinaryAttribute]].
+    * 测试此属性是否为数字,[[NumericAttribute]]和[[BinaryAttribute]]为true
    */
   def isNumeric: Boolean
 
   /**
    * Tests whether this attribute is nominal, true for [[NominalAttribute]] and [[BinaryAttribute]].
+    * 测试此属性是否为名义,[[NominalAttribute]]和[[BinaryAttribute]]为true
    */
   def isNominal: Boolean
 
@@ -77,6 +81,8 @@ sealed abstract class Attribute extends Serializable {
    * Converts this attribute to [[Metadata]]. For numeric attributes, the type info is excluded to
    * save space, because numeric type is the default attribute type. For nominal and binary
    * attributes, the type info is included.
+    * 将此属性转换为[[Metadata]],对于数字属性,排除类型信息以节省空间,
+    * 因为数字类型是默认属性类型,对于名义和二进制属性,包括类型信息
    */
   private[attribute] def toMetadataImpl(): Metadata = {
     if (attrType == AttributeType.Numeric) {
@@ -86,7 +92,8 @@ sealed abstract class Attribute extends Serializable {
     }
   }
 
-  /** Converts to ML metadata with some existing metadata. */
+  /** Converts to ML metadata with some existing metadata.
+    * 使用一些现有元数据转换为ML元数据*/
   def toMetadata(existingMetadata: Metadata): Metadata = {
     new MetadataBuilder()
       .withMetadata(existingMetadata)
@@ -94,11 +101,12 @@ sealed abstract class Attribute extends Serializable {
       .build()
   }
 
-  /** Converts to ML metadata */
+  /** Converts to ML metadata 转换为ML元数据*/
   def toMetadata(): Metadata = toMetadata(Metadata.empty)
 
   /**
    * Converts to a [[StructField]] with some existing metadata.
+    * 使用一些现有元数据转换为[[StructField]]
    * @param existingMetadata existing metadata to carry over
    */
   def toStructField(existingMetadata: Metadata): StructField = {
@@ -109,22 +117,26 @@ sealed abstract class Attribute extends Serializable {
     StructField(name.get, DoubleType, nullable = false, newMetadata)
   }
 
-  /** Converts to a [[StructField]]. */
+  /** Converts to a [[StructField]].
+    * 转换为[[StructField]]*/
   def toStructField(): StructField = toStructField(Metadata.empty)
 
   override def toString: String = toMetadataImpl(withType = true).toString
 }
 
-/** Trait for ML attribute factories. */
+/** Trait for ML attribute factories.
+  * ML属性工厂的特征*/
 private[attribute] trait AttributeFactory {
 
   /**
    * Creates an [[Attribute]] from a [[Metadata]] instance.
+    * 从[[Metadata]]实例创建[[Attribute]]
    */
   private[attribute] def fromMetadata(metadata: Metadata): Attribute
 
   /**
    * Creates an [[Attribute]] from a [[StructField]] instance.
+    * 从[[StructField]]实例创建[[Attribute]]
    */
   def fromStructField(field: StructField): Attribute = {
     require(field.dataType.isInstanceOf[NumericType])
@@ -154,7 +166,8 @@ object Attribute extends AttributeFactory {
     getFactory(attrType).fromMetadata(metadata)
   }
 
-  /** Gets the attribute factory given the attribute type name. */
+  /** Gets the attribute factory given the attribute type name.
+    * 获取给定属性类型名称的属性工厂 */
   private def getFactory(attrType: String): AttributeFactory = {
     if (attrType == AttributeType.Numeric.name) {
       NumericAttribute
@@ -172,6 +185,7 @@ object Attribute extends AttributeFactory {
 /**
  * :: DeveloperApi ::
  * A numeric attribute with optional summary statistics.
+  * 带有可选摘要统计信息的数字属性
  * @param name optional name
  * @param index optional index
  * @param min optional min value
@@ -203,39 +217,39 @@ class NumericAttribute private[ml] (
   override def withIndex(index: Int): NumericAttribute = copy(index = Some(index))
   override def withoutIndex: NumericAttribute = copy(index = None)
 
-  /** Copy with a new min value. */
+  /** Copy with a new min value. 使用新的最小值复制*/
   def withMin(min: Double): NumericAttribute = copy(min = Some(min))
 
-  /** Copy without the min value. */
+  /** Copy without the min value. 复制没有最小值*/
   def withoutMin: NumericAttribute = copy(min = None)
 
 
-  /** Copy with a new max value. */
+  /** Copy with a new max value. 使用新的最大值复制*/
   def withMax(max: Double): NumericAttribute = copy(max = Some(max))
 
-  /** Copy without the max value. */
+  /** Copy without the max value. 复制没有最大值*/
   def withoutMax: NumericAttribute = copy(max = None)
 
-  /** Copy with a new standard deviation. */
+  /** Copy with a new standard deviation. 使用新的标准偏差复制*/
   def withStd(std: Double): NumericAttribute = copy(std = Some(std))
 
-  /** Copy without the standard deviation. */
+  /** Copy without the standard deviation. 没有标准偏差的复制*/
   def withoutStd: NumericAttribute = copy(std = None)
 
-  /** Copy with a new sparsity. */
+  /** Copy with a new sparsity. 复制一个新的稀疏性*/
   def withSparsity(sparsity: Double): NumericAttribute = copy(sparsity = Some(sparsity))
 
-  /** Copy without the sparsity. */
+  /** Copy without the sparsity. 复制没有稀疏性*/
   def withoutSparsity: NumericAttribute = copy(sparsity = None)
 
-  /** Copy without summary statistics. */
+  /** Copy without summary statistics. 复制没有摘要统计*/
   def withoutSummary: NumericAttribute = copy(min = None, max = None, std = None, sparsity = None)
 
   override def isNumeric: Boolean = true
 
   override def isNominal: Boolean = false
 
-  /** Convert this attribute to metadata. */
+  /** Convert this attribute to metadata.将此属性转换为元数据 */
   override private[attribute] def toMetadataImpl(withType: Boolean): Metadata = {
     import org.apache.spark.ml.attribute.AttributeKeys._
     val bldr = new MetadataBuilder()
@@ -249,7 +263,7 @@ class NumericAttribute private[ml] (
     bldr.build()
   }
 
-  /** Creates a copy of this attribute with optional changes. */
+  /** Creates a copy of this attribute with optional changes. 使用可选更改创建此属性的副本*/
   private def copy(
       name: Option[String] = name,
       index: Option[Int] = index,
@@ -289,11 +303,13 @@ class NumericAttribute private[ml] (
 /**
  * :: DeveloperApi ::
  * Factory methods for numeric attributes.
+  * 数字属性的工厂方法
  */
 @DeveloperApi
 object NumericAttribute extends AttributeFactory {
 
-  /** The default numeric attribute. */
+  /** The default numeric attribute.
+    * 默认的数字属性*/
   val defaultAttr: NumericAttribute = new NumericAttribute
 
   private[attribute] override def fromMetadata(metadata: Metadata): NumericAttribute = {
@@ -310,7 +326,7 @@ object NumericAttribute extends AttributeFactory {
 
 /**
  * :: DeveloperApi ::
- * A nominal attribute.
+ * A nominal attribute.名义属性
  * @param name optional name
  * @param index optional index
  * @param isOrdinal whether this attribute is ordinal (optional)
@@ -342,15 +358,15 @@ class NominalAttribute private[ml] (
     values.map(_.zipWithIndex.toMap).getOrElse(Map.empty)
   }
 
-  /** Index of a specific value. */
+  /** Index of a specific value. 特定值的索引*/
   def indexOf(value: String): Int = {
     valueToIndex(value)
   }
 
-  /** Tests whether this attribute contains a specific value. */
+  /** Tests whether this attribute contains a specific value. 测试此属性是否包含特定值*/
   def hasValue(value: String): Boolean = valueToIndex.contains(value)
 
-  /** Gets a value given its index. */
+  /** Gets a value given its index. 获取给定索引的值*/
   def getValue(index: Int): String = values.get(index)
 
   override def withName(name: String): NominalAttribute = copy(name = Some(name))
@@ -359,33 +375,34 @@ class NominalAttribute private[ml] (
   override def withIndex(index: Int): NominalAttribute = copy(index = Some(index))
   override def withoutIndex: NominalAttribute = copy(index = None)
 
-  /** Copy with new values and empty `numValues`. */
+  /** Copy with new values and empty `numValues`. 使用新值复制并清空`numValues`*/
   def withValues(values: Array[String]): NominalAttribute = {
     copy(numValues = None, values = Some(values))
   }
 
-  /** Copy with new values and empty `numValues`. */
+  /** Copy with new values and empty `numValues`. 使用新值复制并清空`numValues`*/
   @varargs
   def withValues(first: String, others: String*): NominalAttribute = {
     copy(numValues = None, values = Some((first +: others).toArray))
   }
 
-  /** Copy without the values. */
+  /** Copy without the values. 复制没有值*/
   def withoutValues: NominalAttribute = {
     copy(values = None)
   }
 
-  /** Copy with a new `numValues` and empty `values`. */
+  /** Copy with a new `numValues` and empty `values`. 使用新的`numValues`复制并清空`values`*/
   def withNumValues(numValues: Int): NominalAttribute = {
     copy(numValues = Some(numValues), values = None)
   }
 
-  /** Copy without the `numValues`. */
+  /** Copy without the `numValues`. 复制没有`numValues`*/
   def withoutNumValues: NominalAttribute = copy(numValues = None)
 
   /**
    * Get the number of values, either from `numValues` or from `values`.
    * Return None if unknown.
+    * 从`numValues`或`values`获取值的数量,如果不知道则返回None
    */
   def getNumValues: Option[Int] = {
     if (numValues.nonEmpty) {
@@ -449,6 +466,7 @@ class NominalAttribute private[ml] (
 /**
  * :: DeveloperApi ::
  * Factory methods for nominal attributes.
+  * 标称属性的工厂方法
  */
 @DeveloperApi
 object NominalAttribute extends AttributeFactory {
@@ -475,6 +493,7 @@ object NominalAttribute extends AttributeFactory {
 /**
  * :: DeveloperApi ::
  * A binary attribute.
+  * 二进制属性
  * @param name optional name
  * @param index optional index
  * @param values optionla values. If set, its size must be 2.
@@ -503,17 +522,18 @@ class BinaryAttribute private[ml] (
   override def withoutIndex: BinaryAttribute = copy(index = None)
 
   /**
-   * Copy with new values.
+   * Copy with new values.使用新值复制
    * @param negative name for negative
    * @param positive name for positive
    */
   def withValues(negative: String, positive: String): BinaryAttribute =
     copy(values = Some(Array(negative, positive)))
 
-  /** Copy without the values. */
+  /** Copy without the values. 复制没有值*/
   def withoutValues: BinaryAttribute = copy(values = None)
 
-  /** Creates a copy of this attribute with optional changes. */
+  /** Creates a copy of this attribute with optional changes.
+    * 使用可选更改创建此属性的副本*/
   private def copy(
       name: Option[String] = name,
       index: Option[Int] = index,
@@ -554,11 +574,13 @@ class BinaryAttribute private[ml] (
 /**
  * :: DeveloperApi ::
  * Factory methods for binary attributes.
+  * 二进制属性的工厂方法
  */
 @DeveloperApi
 object BinaryAttribute extends AttributeFactory {
 
-  /** The default binary attribute. */
+  /** The default binary attribute.
+    * 默认的二进制属性*/
   final val defaultAttr: BinaryAttribute = new BinaryAttribute
 
   private[attribute] override def fromMetadata(metadata: Metadata): BinaryAttribute = {

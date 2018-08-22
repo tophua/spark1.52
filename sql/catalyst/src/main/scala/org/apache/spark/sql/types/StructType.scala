@@ -30,13 +30,17 @@ import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference,
 /**
  * :: DeveloperApi ::
  * A [[StructType]] object can be constructed by
+  * 可以通过构造[[StructType]]对象
  * {{{
  * StructType(fields: Seq[StructField])
  * }}}
  * For a [[StructType]] object, one or multiple [[StructField]]s can be extracted by names.
+  * 对于[[StructType]]对象，可以通过名称提取一个或多个[[StructField]]
  * If multiple [[StructField]]s are extracted, a [[StructType]] object will be returned.
+  *如果提取了多个[[StructField]]，将返回[[StructType]]对象。
  * If a provided name does not have a matching field, it will be ignored. For the case
  * of extracting a single StructField, a `null` will be returned.
+  * 如果提供的名称没有匹配的字段,则将忽略该字段,对于提取单个StructField的情况,将返回“null”
  * Example:
  * {{{
  * import org.apache.spark.sql._
@@ -97,7 +101,8 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
   /** No-arg constructor for kryo. */
   def this() = this(Array.empty[StructField])
 
-  /** Returns all field names in an array. */
+  /** Returns all field names in an array.
+    * 返回数组中的所有字段名称*/
   def fieldNames: Array[String] = fields.map(_.name)
 
   private lazy val fieldNamesSet: Set[String] = fieldNames.toSet
@@ -106,6 +111,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
 
   /**
    * Creates a new [[StructType]] by adding a new field.
+    * 通过添加新字段创建新的[[StructType]]
    * {{{
    * val struct = (new StructType)
    *   .add(StructField("a", IntegerType, true))
@@ -119,6 +125,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
 
   /**
    * Creates a new [[StructType]] by adding a new nullable field with no metadata.
+    * 通过添加没有元数据的新可空字段来创建新的[[StructType]]
    *
    * val struct = (new StructType)
    *   .add("a", IntegerType)
@@ -131,7 +138,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
 
   /**
    * Creates a new [[StructType]] by adding a new field with no metadata.
-   *
+   * 通过添加没有元数据的新字段来创建新的[[StructType]]
    * val struct = (new StructType)
    *   .add("a", IntegerType, true)
    *   .add("b", LongType, false)
@@ -143,6 +150,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
 
   /**
    * Creates a new [[StructType]] by adding a new field and specifying metadata.
+    * 通过添加新字段并指定元数据来创建新的[[StructType]]
    * {{{
    * val struct = (new StructType)
    *   .add("a", IntegerType, true, Metadata.empty)
@@ -161,7 +169,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
   /**
    * Creates a new [[StructType]] by adding a new nullable field with no metadata where the
    * dataType is specified as a String.
-   *
+   * 通过添加一个没有元数据的新的可空字段来创建新的[[StructType]],其中dataType被指定为String
    * {{{
    * val struct = (new StructType)
    *   .add("a", "int")
@@ -176,7 +184,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
   /**
    * Creates a new [[StructType]] by adding a new field with no metadata where the
    * dataType is specified as a String.
-   *
+   * 通过添加没有元数据的新字段来创建新的[[StructType]],其中dataType被指定为String。
    * {{{
    * val struct = (new StructType)
    *   .add("a", "int", true)
@@ -191,6 +199,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
   /**
    * Creates a new [[StructType]] by adding a new field and specifying metadata where the
    * dataType is specified as a String.
+    * 通过添加新字段并指定将dataType指定为String的元数据来创建新的[[StructType]]
    * {{{
    * val struct = (new StructType)
    *   .add("a", "int", true, Metadata.empty)
@@ -209,6 +218,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
   /**
    * Extracts a [[StructField]] of the given name. If the [[StructType]] object does not
    * have a name matching the given name, `null` will be returned.
+    * 提取给定名称的[[StructField]],如果[[StructType]]对象没有与给定名称匹配的名称,则返回“null”
    */
   def apply(name: String): StructField = {
     nameToField.getOrElse(name,
@@ -218,6 +228,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
   /**
    * Returns a [[StructType]] containing [[StructField]]s of the given names, preserving the
    * original order of fields. Those names which do not have matching fields will be ignored.
+    * 返回包含给定名称的[[StructField]]的[[StructType]],保留字段的原始顺序,那些没有匹配字段的名称将被忽略。
    */
   def apply(names: Set[String]): StructType = {
     val nonExistFields = names -- fieldNamesSet
@@ -226,11 +237,13 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
         s"Field ${nonExistFields.mkString(",")} does not exist.")
     }
     // Preserve the original order of fields.
+    //保留字段的原始顺序
     StructType(fields.filter(f => names.contains(f.name)))
   }
 
   /**
    * Returns index of a given field
+    * 返回给定字段的索引
    */
   def fieldIndex(name: String): Int = {
     nameToIndex.getOrElse(name,
@@ -273,6 +286,7 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
 
   /**
    * The default size of a value of the StructType is the total default sizes of all field types.
+    * StructType值的默认大小是所有字段类型的总默认大小
    */
   override def defaultSize: Int = fields.map(_.dataType.defaultSize).sum
 
@@ -284,11 +298,13 @@ case class StructType(fields: Array[StructField]) extends DataType with Seq[Stru
   /**
    * Merges with another schema (`StructType`).  For a struct field A from `this` and a struct field
    * B from `that`,
+    * 与另一个模式（`StructType`）合并,对于来自`this`的结构域A和来自`that`的结构域B
    *
    * 1. If A and B have the same name and data type, they are merged to a field C with the same name
    *    and data type.  C is nullable if and only if either A or B is nullable.
-   * 2. If A doesn't exist in `that`, it's included in the result schema.
-   * 3. If B doesn't exist in `this`, it's also included in the result schema.
+    *    如果A和B具有相同的名称和数据类型,则它们将合并到具有相同名称和数据类型的字段C,当且仅当A或B可为空时,C才可为空
+   * 2. If A doesn't exist in `that`, it's included in the result schema.如果`that`中不存在A，它将包含在结果模式中。
+   * 3. If B doesn't exist in `this`, it's also included in the result schema.如果`this`中不存在B，它也包含在结果模式中。
    * 4. Otherwise, `this` and `that` are considered as conflicting schemas and an exception would be
    *    thrown.
    */

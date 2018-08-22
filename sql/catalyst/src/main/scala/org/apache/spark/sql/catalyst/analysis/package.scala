@@ -30,6 +30,8 @@ package object analysis {
   /**
    * Resolver should return true if the first string refers to the same entity as the second string.
    * For example, by using case insensitive equality.
+    * 如果第一个字符串引用与第二个字符串相同的实体，则解析器应返回true。
+    * 例如,通过使用不区分大小写的相等性。
    */
   type Resolver = (String, String) => Boolean
 
@@ -44,7 +46,8 @@ package object analysis {
     }
   }
 
-  /** Catches any AnalysisExceptions thrown by `f` and attaches `t`'s position if any. */
+  /** Catches any AnalysisExceptions thrown by `f` and attaches `t`'s position if any.
+    * 捕获由`f`抛出的任何AnalysisExceptions并附加`t`的位置(如果有的话)*/
   def withPosition[A](t: TreeNode[_])(f: => A): A = {
     try f catch {
       case a: AnalysisException =>

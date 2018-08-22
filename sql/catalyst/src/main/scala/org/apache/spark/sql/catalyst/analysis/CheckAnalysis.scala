@@ -24,12 +24,14 @@ import org.apache.spark.sql.types._
 
 /**
  * Throws user facing errors when passed invalid queries that fail to analyze.
+  * 传递无法分析的无效查询时,会引发面临用户的错误
  */
 trait CheckAnalysis {
 
   /**
    * Override to provide additional checks for correct analysis.
    * These rules will be evaluated after our built-in check rules.
+    * 覆盖以提供额外的检查以进行正确的分析,我们的内置检查规则将对这些规则进行评估
    */
   val extendedCheckRules: Seq[LogicalPlan => Unit] = Nil
   //Nothing没有对象
@@ -46,6 +48,7 @@ trait CheckAnalysis {
   def checkAnalysis(plan: LogicalPlan): Unit = {
     // We transform up and order the rules so as to catch the first possible failure instead
     // of the result of cascading resolution failures.
+    //我们转换并对规则进行排序,以便捕获第一个可能的故障,而不是级联分辨率故障的结果。
     plan.foreachUp {
       case p if p.analyzed => // Skip already analyzed sub-plans
 

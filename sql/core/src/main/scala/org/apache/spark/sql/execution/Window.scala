@@ -35,6 +35,8 @@ import scala.collection.mutable
  * instructions, frames, are used to calculate these aggregates. Frames are processed in the order
  * specified in the window specification (the ORDER BY ... clause). There are four different frame
  * types:
+  * 此类计算并输出(窗口化)单个(已排序)分区中的行的聚合,将为组中的每一行计算聚合。
+  * 特殊处理指令,帧用于计算这些聚合,按照窗口规范（ORDER BY ...子句)中指定的顺序处理帧,有四种不同的帧类型：
  * - Entire partition: The frame is the entire partition, i.e.
  *   UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING. For this case, window function will take all
  *   rows as inputs and be evaluated once.
@@ -90,6 +92,7 @@ case class Window(
   override def requiredChildDistribution: Seq[Distribution] = {
     if (partitionSpec.isEmpty) {
       // Only show warning when the number of bytes is larger than 100 MB?
+      //仅在字节数大于100 MB时显示警告？
       logWarning("No Partition Defined for Window operation! Moving all data to a single "
         + "partition, this can cause serious performance degradation.")
       AllTuples :: Nil
@@ -106,8 +109,11 @@ case class Window(
   /**
    * Create a bound ordering object for a given frame type and offset. A bound ordering object is
    * used to determine which input row lies within the frame boundaries of an output row.
+    *
+    * 为给定的帧类型和偏移量创建绑定的排序对象,绑定排序对象用于确定哪个输入行位于输出行的帧边界内
    *
    * This method uses Code Generation. It can only be used on the executor side.
+    * 此方法使用代码生成,它只能在执行程序端使用
    *
    * @param frameType to evaluate. This can either be Row or Range based.
    * @param offset with respect to the row.
@@ -118,16 +124,20 @@ case class Window(
       case RangeFrame =>
         val (exprs, current, bound) = if (offset == 0) {
           // Use the entire order expression when the offset is 0.
+          //当偏移量为0时,使用整个订单表达式
           val exprs = orderSpec.map(_.child)
           val projection = newMutableProjection(exprs, child.output)
           (orderSpec, projection(), projection())
         } else if (orderSpec.size == 1) {
           // Use only the first order expression when the offset is non-null.
+          //当偏移量为非null时,仅使用第一个顺序表达式
           val sortExpr = orderSpec.head
           val expr = sortExpr.child
           // Create the projection which returns the current 'value'.
+          //创建返回当前“值”的投影
           val current = newMutableProjection(expr :: Nil, child.output)()
           // Flip the sign of the offset when processing the order is descending
+          //在处理订单下降时翻转偏移量的符号
           val boundOffset =
             if (sortExpr.direction == Descending) {
               -offset
@@ -135,6 +145,7 @@ case class Window(
               offset
             }
           // Create the projection which returns the current 'value' modified by adding the offset.
+          //创建投影,返回通过添加偏移量修改的当前“值”
           val boundExpr = Add(expr, Cast(Literal.create(boundOffset, IntegerType), expr.dataType))
           val bound = newMutableProjection(boundExpr :: Nil, child.output)()
           (sortExpr :: Nil, current, bound)
@@ -145,6 +156,7 @@ case class Window(
         // Construct the ordering. This is used to compare the result of current value projection
         // to the result of bound value projection. This is done manually because we want to use
         // Code Generation (if it is enabled).
+        //构建订单,这用于将当前值投影的结果与绑定值投影的结果进行比较,这是手动完成的,因为我们想要使用代码生成(如果已启用)
         val sortExprs = exprs.zipWithIndex.map { case (e, i) =>
           SortOrder(BoundReference(i, e.dataType, e.nullable), e.direction)
         }
@@ -156,12 +168,14 @@ case class Window(
 
   /**
    * Create a frame processor.
+    * 创建一个帧处理器
    *
    * This method uses Code Generation. It can only be used on the executor side.
+    * 此方法使用代码生成,它只能在执行程序端使用
    *
    * @param frame boundaries.
    * @param functions to process in the frame.
-   * @param ordinal at which the processor starts writing to the output.
+   * @param ordinal at which the processor starts writing to the output.处理器开始写入输出
    * @return a frame processor.
    */
   private[this] def createFrameProcessor(
@@ -185,7 +199,7 @@ case class Window(
       val uBoundOrdering = createBoundOrdering(frameType, high)
       new SlidingWindowFunctionFrame(ordinal, functions, lBoundOrdering, uBoundOrdering)
 
-    // Entire Partition Frame.
+    // Entire Partition Frame. 整个分区框架
     case SpecifiedWindowFrame(_, UnboundedPreceding, UnboundedFollowing) =>
       new UnboundedWindowFunctionFrame(ordinal, functions)
 
@@ -195,9 +209,10 @@ case class Window(
   }
 
   /**
-   * Create the resulting projection.
+   * Create the resulting projection.创建结果投影
    *
    * This method uses Code Generation. It can only be used on the executor side.
+    * 此方法使用代码生成,它只能在执行程序端使用
    *
    * @param expressions unbound ordered function expressions.
    * @return the final resulting projection.
@@ -206,6 +221,7 @@ case class Window(
       expressions: Seq[Expression]): MutableProjection = {
     val references = expressions.zipWithIndex.map{ case (e, i) =>
       // Results of window expressions will be on the right side of child's output
+      //窗口表达式的结果将位于子输出的右侧
       BoundReference(child.output.size + i, e.dataType, e.nullable)
     }
     val unboundToRefMap = expressions.zip(references).toMap
@@ -218,6 +234,7 @@ case class Window(
   protected override def doExecute(): RDD[InternalRow] = {
     // Prepare processing.
     // Group the window expression by their processing frame.
+    //按照处理框架对窗口表达式进行分组
     val windowExprs = windowExpression.flatMap {
       _.collect {
         case e: WindowExpression => e
@@ -227,31 +244,32 @@ case class Window(
     // Create Frame processor factories and order the unbound window expressions by the frame they
     // are processed in; this is the order in which their results will be written to window
     // function result buffer.
+    //创建Frame处理器工厂,并按处理它们的帧对未绑定的窗口表达式进行排序; 这是将结果写入窗口函数结果缓冲区的顺序。
     val framedWindowExprs = windowExprs.groupBy(_.windowSpec.frameSpecification)
     val factories = Array.ofDim[() => WindowFunctionFrame](framedWindowExprs.size)
     val unboundExpressions = mutable.Buffer.empty[Expression]
     framedWindowExprs.zipWithIndex.foreach {
       case ((frame, unboundFrameExpressions), index) =>
-        // Track the ordinal.
+        // Track the ordinal.追踪序数
         val ordinal = unboundExpressions.size
 
-        // Track the unbound expressions
+        // Track the unbound expressions 跟踪未绑定的表达式
         unboundExpressions ++= unboundFrameExpressions
 
-        // Bind the expressions.
+        // Bind the expressions.绑定表达式
         val functions = unboundFrameExpressions.map { e =>
           BindReferences.bindReference(e.windowFunction, child.output)
         }.toArray
 
-        // Create the frame processor factory.
+        // Create the frame processor factory.创建帧处理器工厂
         factories(index) = () => createFrameProcessor(frame, functions, ordinal)
     }
 
-    // Start processing.
+      // Start processing.开始处理
     child.execute().mapPartitions { stream =>
       new Iterator[InternalRow] {
 
-        // Get all relevant projections.
+        // Get all relevant projections.获取所有相关预测
         val result = createResultProjection(unboundExpressions)
         val grouping = if (child.outputsUnsafeRows) {
           UnsafeProjection.create(partitionSpec, child.output)
@@ -260,6 +278,7 @@ case class Window(
         }
 
         // Manage the stream and the grouping.
+        //管理流和分组
         var nextRow: InternalRow = EmptyRow
         var nextGroup: InternalRow = EmptyRow
         var nextRowAvailable: Boolean = false
@@ -276,12 +295,14 @@ case class Window(
         fetchNextRow()
 
         // Manage the current partition.
+        //管理当前分区
         var rows: CompactBuffer[InternalRow] = _
         val frames: Array[WindowFunctionFrame] = factories.map(_())
         val numFrames = frames.length
         private[this] def fetchNextPartition() {
           // Collect all the rows in the current partition.
           // Before we start to fetch new input rows, make a copy of nextGroup.
+          //收集当前分区中的所有行,在我们开始获取新输入行之前,请复制nextGroup
           val currentGroup = nextGroup.copy()
           rows = new CompactBuffer
           while (nextRowAvailable && nextGroup == currentGroup) {
@@ -290,13 +311,14 @@ case class Window(
           }
 
           // Setup the frames.
+          //设置框架
           var i = 0
           while (i < numFrames) {
             frames(i).prepare(rows)
             i += 1
           }
 
-          // Setup iteration
+          // Setup iteration 设置迭代
           rowIndex = 0
           rowsSize = rows.size
         }
@@ -310,12 +332,14 @@ case class Window(
         val windowFunctionResult = new GenericMutableRow(unboundExpressions.size)
         override final def next(): InternalRow = {
           // Load the next partition if we need to.
+          //如果需要,加载下一个分区
           if (rowIndex >= rowsSize && nextRowAvailable) {
             fetchNextPartition()
           }
 
           if (rowIndex < rowsSize) {
             // Get the results for the window frames.
+            //获取窗框的结果
             var i = 0
             while (i < numFrames) {
               frames(i).write(windowFunctionResult)
@@ -323,6 +347,7 @@ case class Window(
             }
 
             // 'Merge' the input row with the window function result
+            //'合并'输入行和窗口函数结果
             join(rows(rowIndex), windowFunctionResult)
             rowIndex += 1
 
@@ -337,6 +362,7 @@ case class Window(
 
 /**
  * Function for comparing boundary values.
+  * 用于比较边界值的函数
  */
 private[execution] abstract class BoundOrdering {
   def compare(input: Seq[InternalRow], inputIndex: Int, outputIndex: Int): Int
@@ -344,6 +370,7 @@ private[execution] abstract class BoundOrdering {
 
 /**
  * Compare the input index to the bound of the output index.
+  * 将输入索引与输出索引的边界进行比较
  */
 private[execution] final case class RowBoundOrdering(offset: Int) extends BoundOrdering {
   override def compare(input: Seq[InternalRow], inputIndex: Int, outputIndex: Int): Int =
@@ -352,6 +379,7 @@ private[execution] final case class RowBoundOrdering(offset: Int) extends BoundO
 
 /**
  * Compare the value of the input index to the value bound of the output index.
+  * 将输入索引的值与输出索引的值边界进行比较
  */
 private[execution] final case class RangeBoundOrdering(
     ordering: Ordering[InternalRow],
@@ -365,6 +393,9 @@ private[execution] final case class RangeBoundOrdering(
  * A window function calculates the results of a number of window functions for a window frame.
  * Before use a frame must be prepared by passing it all the rows in the current partition. After
  * preparation the update method can be called to fill the output rows.
+  *
+  * 窗口函数计算窗口框架的许多窗口函数的结果,在使用之前,必须通过将其传递给当前分区中的所有行来准备帧,
+  * 准备好之后,可以调用update方法来填充输出行。
  *
  * TODO How to improve performance? A few thoughts:
  * - Window functions are expensive due to its distribution and ordering requirements.
@@ -388,13 +419,16 @@ private[execution] abstract class WindowFunctionFrame(
     functions: Array[WindowFunction]) {
 
   // Make sure functions are initialized.
+  //确保初始化功能
   functions.foreach(_.init())
 
-  /** Number of columns the window function frame is managing */
+  /** Number of columns the window function frame is managing
+    * 窗口功能框架管理的列数*/
   val numColumns = functions.length
 
   /**
    * Create a fresh thread safe copy of the frame.
+    * 创建框架的新线程安全副本
    *
    * @return the copied frame.
    */
@@ -402,6 +436,7 @@ private[execution] abstract class WindowFunctionFrame(
 
   /**
    * Create new instances of the functions.
+    * 创建函数的新实例
    *
    * @return an array containing copies of the current window functions.
    */
@@ -409,6 +444,7 @@ private[execution] abstract class WindowFunctionFrame(
 
   /**
    * Prepare the frame for calculating the results for a partition.
+    * 准备框架以计算分区的结果
    *
    * @param rows to calculate the frame results for.
    */
@@ -416,12 +452,14 @@ private[execution] abstract class WindowFunctionFrame(
 
   /**
    * Write the result for the current row to the given target row.
+    * 将当前行的结果写入给定的目标行
    *
    * @param target row to write the result for the current row to.
    */
   def write(target: GenericMutableRow): Unit
 
-  /** Reset the current window functions. */
+  /** Reset the current window functions.
+    * 重置当前窗口功能 */
   protected final def reset(): Unit = {
     var i = 0
     while (i < numColumns) {
@@ -430,7 +468,8 @@ private[execution] abstract class WindowFunctionFrame(
     }
   }
 
-  /** Prepare an input row for processing. */
+  /** Prepare an input row for processing.
+    * 准备输入行以进行处理*/
   protected final def prepare(input: InternalRow): Array[AnyRef] = {
     val prepared = new Array[AnyRef](numColumns)
     var i = 0
@@ -441,7 +480,7 @@ private[execution] abstract class WindowFunctionFrame(
     prepared
   }
 
-  /** Evaluate a prepared buffer (iterator). */
+  /** Evaluate a prepared buffer (iterator).评估准备好的缓冲区(迭代器) */
   protected final def evaluatePrepared(iterator: java.util.Iterator[Array[AnyRef]]): Unit = {
     reset()
     while (iterator.hasNext) {
@@ -455,7 +494,7 @@ private[execution] abstract class WindowFunctionFrame(
     evaluate()
   }
 
-  /** Evaluate a prepared buffer (array). */
+  /** Evaluate a prepared buffer (array). 评估准备好的缓冲区(数组)*/
   protected final def evaluatePrepared(prepared: Array[Array[AnyRef]],
       fromIndex: Int, toIndex: Int): Unit = {
     var i = 0
@@ -472,7 +511,7 @@ private[execution] abstract class WindowFunctionFrame(
     }
   }
 
-  /** Update an array of window functions. */
+  /** Update an array of window functions. 更新窗口函数数组*/
   protected final def update(input: InternalRow): Unit = {
     var i = 0
     while (i < numColumns) {
@@ -483,7 +522,7 @@ private[execution] abstract class WindowFunctionFrame(
     }
   }
 
-  /** Evaluate the window functions. */
+  /** Evaluate the window functions. 评估窗口函数*/
   protected final def evaluate(): Unit = {
     var i = 0
     while (i < numColumns) {
@@ -492,7 +531,7 @@ private[execution] abstract class WindowFunctionFrame(
     }
   }
 
-  /** Fill a target row with the current window function results. */
+  /** Fill a target row with the current window function results. 使用当前窗口函数结果填充目标行*/
   protected final def fill(target: GenericMutableRow, rowIndex: Int): Unit = {
     var i = 0
     while (i < numColumns) {
@@ -504,6 +543,7 @@ private[execution] abstract class WindowFunctionFrame(
 
 /**
  * The sliding window frame calculates frames with the following SQL form:
+  * 滑动窗口框架使用以下SQL格式计算框架：
  * ... BETWEEN 1 PRECEDING AND 1 FOLLOWING
  *
  * @param ordinal of the first column written by this frame.
@@ -517,24 +557,30 @@ private[execution] final class SlidingWindowFunctionFrame(
     lbound: BoundOrdering,
     ubound: BoundOrdering) extends WindowFunctionFrame(ordinal, functions) {
 
-  /** Rows of the partition currently being processed. */
+  /** Rows of the partition currently being processed.
+    * 正在处理的分区的行*/
   private[this] var input: CompactBuffer[InternalRow] = null
 
   /** Index of the first input row with a value greater than the upper bound of the current
-    * output row. */
+    * output row.
+    * 第一个输入行的索引,其值大于当前输出行的上限*/
   private[this] var inputHighIndex = 0
 
   /** Index of the first input row with a value equal to or greater than the lower bound of the
-    * current output row. */
+    * current output row.
+    * 第一个输入行的索引,其值等于或大于当前输出行的下限*/
   private[this] var inputLowIndex = 0
 
-  /** Buffer used for storing prepared input for the window functions. */
+  /** Buffer used for storing prepared input for the window functions.
+    * 缓冲区用于存储窗口函数的准备输入*/
   private[this] val buffer = new util.ArrayDeque[Array[AnyRef]]
 
-  /** Index of the row we are currently writing. */
+  /** Index of the row we are currently writing.
+    * 我们目前正在编写的行的索引*/
   private[this] var outputIndex = 0
 
-  /** Prepare the frame for calculating a new partition. Reset all variables. */
+  /** Prepare the frame for calculating a new partition. Reset all variables.
+    * 准备用于计算新分区的框架,重置所有变量*/
   override def prepare(rows: CompactBuffer[InternalRow]): Unit = {
     input = rows
     inputHighIndex = 0
@@ -543,12 +589,14 @@ private[execution] final class SlidingWindowFunctionFrame(
     buffer.clear()
   }
 
-  /** Write the frame columns for the current row to the given target row. */
+  /** Write the frame columns for the current row to the given target row.
+    * 将当前行的帧列写入给定目标行*/
   override def write(target: GenericMutableRow): Unit = {
     var bufferUpdated = outputIndex == 0
 
     // Add all rows to the buffer for which the input row value is equal to or less than
     // the output row upper bound.
+    //将所有行添加到缓冲区,其输入行值等于或小于输出行上限
     while (inputHighIndex < input.size &&
         ubound.compare(input, inputHighIndex, outputIndex) <= 0) {
       buffer.offer(prepare(input(inputHighIndex)))
@@ -558,6 +606,7 @@ private[execution] final class SlidingWindowFunctionFrame(
 
     // Drop all rows from the buffer for which the input row value is smaller than
     // the output row lower bound.
+    //从缓冲区中删除输入行值小于输出行下限的所有行
     while (inputLowIndex < inputHighIndex &&
         lbound.compare(input, inputLowIndex, outputIndex) < 0) {
       buffer.pop()
@@ -566,6 +615,7 @@ private[execution] final class SlidingWindowFunctionFrame(
     }
 
     // Only recalculate and update when the buffer changes.
+    //仅在缓冲区更改时重新计算和更新
     if (bufferUpdated) {
       evaluatePrepared(buffer.iterator())
       fill(target, outputIndex)
@@ -582,6 +632,7 @@ private[execution] final class SlidingWindowFunctionFrame(
 
 /**
  * The unbounded window frame calculates frames with the following SQL forms:
+  * 无界窗口框架使用以下SQL形式计算框架
  * ... (No Frame Definition)
  * ... BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
  *
@@ -595,10 +646,12 @@ private[execution] final class UnboundedWindowFunctionFrame(
     ordinal: Int,
     functions: Array[WindowFunction]) extends WindowFunctionFrame(ordinal, functions) {
 
-  /** Index of the row we are currently writing. */
+  /** Index of the row we are currently writing.
+    * 我们目前正在编写的行的索引 */
   private[this] var outputIndex = 0
 
-  /** Prepare the frame for calculating a new partition. Process all rows eagerly. */
+  /** Prepare the frame for calculating a new partition. Process all rows eagerly.
+    * 准备用于计算新分区的框架,急切地处理所有行*/
   override def prepare(rows: CompactBuffer[InternalRow]): Unit = {
     reset()
     outputIndex = 0
@@ -609,7 +662,8 @@ private[execution] final class UnboundedWindowFunctionFrame(
     evaluate()
   }
 
-  /** Write the frame columns for the current row to the given target row. */
+  /** Write the frame columns for the current row to the given target row.
+    * 将当前行的帧列写入给定目标行 */
   override def write(target: GenericMutableRow): Unit = {
     fill(target, outputIndex)
     outputIndex += 1
@@ -622,6 +676,7 @@ private[execution] final class UnboundedWindowFunctionFrame(
 
 /**
  * The UnboundPreceding window frame calculates frames with the following SQL form:
+  * UnboundPreceding窗口框架使用以下SQL表单计算框架：
  * ... BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
  *
  * There is only an upper bound. Very common use cases are for instance running sums or counts
@@ -639,17 +694,18 @@ private[execution] final class UnboundedPrecedingWindowFunctionFrame(
     functions: Array[WindowFunction],
     ubound: BoundOrdering) extends WindowFunctionFrame(ordinal, functions) {
 
-  /** Rows of the partition currently being processed. */
+  /** Rows of the partition currently being processed.正在处理的分区的行 */
   private[this] var input: CompactBuffer[InternalRow] = null
 
   /** Index of the first input row with a value greater than the upper bound of the current
-    * output row. */
+    * output row. 第一个输入行的索引,其值大于当前输出行的上限*/
   private[this] var inputIndex = 0
 
-  /** Index of the row we are currently writing. */
+  /** Index of the row we are currently writing.
+    * 我们目前正在编写的行的索引*/
   private[this] var outputIndex = 0
 
-  /** Prepare the frame for calculating a new partition. */
+  /** Prepare the frame for calculating a new partition. 准备用于计算新分区的框架*/
   override def prepare(rows: CompactBuffer[InternalRow]): Unit = {
     reset()
     input = rows
@@ -657,12 +713,14 @@ private[execution] final class UnboundedPrecedingWindowFunctionFrame(
     outputIndex = 0
   }
 
-  /** Write the frame columns for the current row to the given target row. */
+  /** Write the frame columns for the current row to the given target row.
+    * 将当前行的帧列写入给定目标行*/
   override def write(target: GenericMutableRow): Unit = {
     var bufferUpdated = outputIndex == 0
 
     // Add all rows to the aggregates for which the input row value is equal to or less than
     // the output row upper bound.
+    //将所有行添加到输入行值等于或小于输出行上限的聚合
     while (inputIndex < input.size && ubound.compare(input, inputIndex, outputIndex) <= 0) {
       update(input(inputIndex))
       inputIndex += 1
@@ -670,6 +728,7 @@ private[execution] final class UnboundedPrecedingWindowFunctionFrame(
     }
 
     // Only recalculate and update when the buffer changes.
+    //仅在缓冲区更改时重新计算和更新
     if (bufferUpdated) {
       evaluate()
       fill(target, outputIndex)
@@ -686,11 +745,14 @@ private[execution] final class UnboundedPrecedingWindowFunctionFrame(
 
 /**
  * The UnboundFollowing window frame calculates frames with the following SQL form:
+  * UnboundFollowing窗口框架使用以下SQL表单计算框架：
  * ... BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING
  *
  * There is only an upper bound. This is a slightly modified version of the sliding window. The
  * sliding window operator has to check if both upper and the lower bound change when a new row
  * gets processed, where as the unbounded following only has to check the lower bound.
+  * 只有一个上限,这是滑动窗口的略微修改版本,滑动窗口操作符必须检查在处理新行时上限和下限是否都会发生变化,
+  * 而无界后续操作只需要检查下限
  *
  * This is a very expensive operator to use, O(n * (n - 1) /2), because we need to maintain a
  * buffer and must do full recalculation after each row. Reverse iteration would be possible, if
@@ -705,20 +767,25 @@ private[execution] final class UnboundedFollowingWindowFunctionFrame(
     functions: Array[WindowFunction],
     lbound: BoundOrdering) extends WindowFunctionFrame(ordinal, functions) {
 
-  /** Buffer used for storing prepared input for the window functions. */
+  /** Buffer used for storing prepared input for the window functions.
+    * 缓冲区用于存储窗口函数的准备输入*/
   private[this] var buffer: Array[Array[AnyRef]] = _
 
-  /** Rows of the partition currently being processed. */
+  /** Rows of the partition currently being processed.
+    * 正在处理的分区的行*/
   private[this] var input: CompactBuffer[InternalRow] = null
 
   /** Index of the first input row with a value equal to or greater than the lower bound of the
-    * current output row. */
+    * current output row.
+    * 第一个输入行的索引,其值等于或大于当前输出行的下限*/
   private[this] var inputIndex = 0
 
-  /** Index of the row we are currently writing. */
+  /** Index of the row we are currently writing.
+    * 我们目前正在编写的行的索引*/
   private[this] var outputIndex = 0
 
-  /** Prepare the frame for calculating a new partition. */
+  /** Prepare the frame for calculating a new partition.
+    * 准备用于计算新分区的框架*/
   override def prepare(rows: CompactBuffer[InternalRow]): Unit = {
     input = rows
     inputIndex = 0
@@ -733,18 +800,21 @@ private[execution] final class UnboundedFollowingWindowFunctionFrame(
     evaluatePrepared(buffer, 0, buffer.length)
   }
 
-  /** Write the frame columns for the current row to the given target row. */
+  /** Write the frame columns for the current row to the given target row.
+    * 将当前行的帧列写入给定目标行*/
   override def write(target: GenericMutableRow): Unit = {
     var bufferUpdated = outputIndex == 0
 
     // Drop all rows from the buffer for which the input row value is smaller than
     // the output row lower bound.
+    //从缓冲区中删除输入行值小于输出行下限的所有行
     while (inputIndex < input.size && lbound.compare(input, inputIndex, outputIndex) < 0) {
       inputIndex += 1
       bufferUpdated = true
     }
 
     // Only recalculate and update when the buffer changes.
+    //仅在缓冲区更改时重新计算和更新
     if (bufferUpdated) {
       evaluatePrepared(buffer, inputIndex, buffer.length)
       fill(target, outputIndex)

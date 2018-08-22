@@ -48,7 +48,7 @@ import org.apache.spark.util.Utils
 /**
   * The entry point for working with structured data (rows and columns) in Spark.  Allows the
   * creation of [[DataFrame]] objects as well as the execution of SQL queries.
-  *
+  * 在Spark中使用结构化数据(行和列)的入口点,允许创建[[DataFrame]]对象以及执行SQL查询。
   * @groupname basic Basic Operations
   * @groupname ddl_ops Persistent Catalog DDL
   * @groupname cachemgmt Cached Table Management
@@ -74,6 +74,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   protected[sql] def conf = currentSession().conf
 
   // `listener` should be only used in the driver
+  //`listener`应该只在驱动程序中使用
   @transient private[sql] val listener = new SQLListener(this)
   sparkContext.addSparkListener(listener)
   sparkContext.ui.foreach(new SQLTab(this, _))
@@ -82,21 +83,27 @@ class SQLContext(@transient val sparkContext: SparkContext)
   // fork join pools by default. In particular, even after a child thread is spawned, if the
   // parent sets a property the value may be reflected in the child. This leads to undefined
   // consequences such as SPARK-10548, so we should just clone the properties instead to be safe.
+  //执行ID通过SparkContext的本地属性,默认情况下,这些属性不适合与fork join池一起使用。
+  //特别是,即使在生成子线程之后,如果父级设置了属性,则该值可以反映在子级中,这导致了不明确的后果,
+  // 例如SPARK-10548,所以我们应该克隆属性而不是安全。
   sparkContext.conf.set("spark.localProperties.clone", "true")
 
   /**
     * Set Spark SQL configuration properties.
+    * 设置Spark SQL配置属性
     *
     * @group config
     * @since 1.0.0
     */
   def setConf(props: Properties): Unit = conf.setConf(props)
 
-  /** Set the given Spark SQL configuration property. */
+  /** Set the given Spark SQL configuration property.
+    * 设置给定的Spark SQL配置属性*/
   private[sql] def setConf[T](entry: SQLConfEntry[T], value: T): Unit = conf.setConf(entry, value)
 
   /**
     * Set the given Spark SQL configuration property.
+    * 设置给定的Spark SQL配置属性
     *
     * @group config
     * @since 1.0.0
@@ -105,6 +112,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Return the value of Spark SQL configuration property for the given key.
+    * 返回给定键的Spark SQL配置属性的值
     *
     * @group config
     * @since 1.0.0
@@ -114,6 +122,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * Return the value of Spark SQL configuration property for the given key. If the key is not set
     * yet, return `defaultValue` in [[SQLConfEntry]].
+    * 返回给定键的Spark SQL配置属性的值,如果尚未设置密钥,则在[[SQLConfEntry]]中返回“defaultValue”
     */
   private[sql] def getConf[T](entry: SQLConfEntry[T]): T = conf.getConf(entry)
 
@@ -121,6 +130,8 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * Return the value of Spark SQL configuration property for the given key. If the key is not set
     * yet, return `defaultValue`. This is useful when `defaultValue` in SQLConfEntry is not the
     * desired one.
+    * 返回给定键的Spark SQL配置属性的值,如果尚未设置密钥,则返回`defaultValue`。
+    * 当SQLConfEntry中的`defaultValue`不是所需的时,这很有用。
     */
   private[sql] def getConf[T](entry: SQLConfEntry[T], defaultValue: T): T = {
     conf.getConf(entry, defaultValue)
@@ -129,6 +140,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * Return the value of Spark SQL configuration property for the given key. If the key is not set
     * yet, return `defaultValue`.
+    * 返回给定键的Spark SQL配置属性的值,如果尚未设置密钥,则返回`defaultValue`
     *
     * @group config
     * @since 1.0.0
@@ -138,6 +150,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * Return all the configuration properties that have been set (i.e. not the default).
     * This creates a new copy of the config properties in the form of a Map.
+    * 返回已设置的所有配置属性（即不是默认值）,这将以Map的形式创建配置属性的新副本
     *
     * @group config
     * @since 1.0.0
@@ -243,6 +256,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * :: Experimental ::
     * A collection of methods that are considered experimental, but can be used to hook into
     * the query planner for advanced functionality.
+    * 一组被认为是实验性的方法,但可用于挂钩查询规划器以获得高级功能
     *
     * @group basic
     * @since 1.3.0
@@ -254,6 +268,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * :: Experimental ::
     * Returns a [[DataFrame]] with no rows or columns.
+    * 返回没有行或列的[[DataFrame]]
     *
     * @group basic
     * @since 1.3.0
@@ -264,8 +279,9 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * A collection of methods for registering user-defined functions (UDF).
-    *
+    * 用于注册用户定义函数（UDF）的方法集合
     * The following example registers a Scala closure as UDF:
+    * 以下示例将Scala闭包注册为UDF
     * {{{
     *   sqlContext.udf.register("myUDF", (arg1: Int, arg2: String) => arg2 + arg1)
     * }}}
@@ -297,6 +313,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Returns true if the table is currently cached in-memory.
+    * 如果表当前缓存在内存中,则返回true
     * @group cachemgmt
     * @since 1.3.0
     */
@@ -304,6 +321,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Caches the specified table in-memory.
+    * 将指定的表缓存在内存中
     * @group cachemgmt
     * @since 1.3.0
     */
@@ -311,6 +329,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Removes the specified table from the in-memory cache.
+    * 从内存缓存中删除指定的表
     * @group cachemgmt
     * @since 1.3.0
     */
@@ -318,6 +337,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Removes all cached tables from the in-memory cache.
+    * 从内存缓存中删除所有缓存的表
     * @since 1.3.0
     */
   def clearCache(): Unit = cacheManager.clearCache()
@@ -357,6 +377,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * :: Experimental ::
     * Creates a DataFrame from an RDD of Product (e.g. case classes, tuples).
+    * 从Product的RDD创建DataFrame(例如case类,元组)
     *
     * @group dataframes
     * @since 1.3.0
@@ -373,6 +394,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * :: Experimental ::
     * Creates a DataFrame from a local Seq of Product.
+    * 从本地Seq of Product创建DataFrame
     *
     * @group dataframes
     * @since 1.3.0
@@ -387,6 +409,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Convert a [[BaseRelation]] created for external data sources into a [[DataFrame]].
+    * 将为外部数据源创建的[[BaseRelation]]转换为[[DataFrame]]
     *
     * @group dataframes
     * @since 1.3.0
@@ -435,6 +458,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * Creates a DataFrame from an RDD[Row]. User can specify whether the input rows should be
     * converted to Catalyst rows.
+    * 从RDD [Row]创建DataFrame,用户可以指定是否应将输入行转换为Catalyst行
     */
   private[sql]
   def createDataFrame(rowRDD: RDD[Row], schema: StructType, needsConversion: Boolean) = {
@@ -453,6 +477,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * Creates a DataFrame from an RDD[Row]. User can specify whether the input rows should be
     * converted to Catalyst rows.
+    * 从RDD [Row]创建DataFrame,用户可以指定是否应将输入行转换为Catalyst行
     */
   private[sql]
   def internalCreateDataFrame(catalystRows: RDD[InternalRow], schema: StructType) = {
@@ -465,8 +490,10 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * :: DeveloperApi ::
     * Creates a [[DataFrame]] from an [[JavaRDD]] containing [[Row]]s using the given schema.
+    * 使用给定的模式从包含[[Row]]的[[JavaRDD]]创建[[DataFrame]]
     * It is important to make sure that the structure of every [[Row]] of the provided RDD matches
     * the provided schema. Otherwise, there will be runtime exception.
+    * 确保提供的RDD的每个[[Row]]的结构与提供的模式匹配非常重要。 否则,将出现运行时异常
     *
     * @group dataframes
     * @since 1.3.0
@@ -478,6 +505,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Applies a schema to an RDD of Java Beans.
+    * 将架构应用于Java Bean的RDD
     *
     * WARNING: Since there is no guaranteed ordering for fields in a Java Bean,
     *          SELECT * queries will return the columns in an undefined order.
@@ -489,6 +517,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     val className = beanClass.getName
     val rowRdd = rdd.mapPartitions { iter =>
       // BeanInfo is not serializable so we must rediscover it remotely for each partition.
+      //BeanInfo不可序列化，因此我们必须为每个分区远程重新发现它。
       val localBeanInfo = Introspector.getBeanInfo(Utils.classForName(className))
       val extractors =
         localBeanInfo.getPropertyDescriptors.filterNot(_.getName == "class").map(_.getReadMethod)
@@ -506,7 +535,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Applies a schema to an RDD of Java Beans.
-    *
+    * 将架构应用于Java Bean的RDD
     * WARNING: Since there is no guaranteed ordering for fields in a Java Bean,
     *          SELECT * queries will return the columns in an undefined order.
     * @group dataframes
@@ -519,6 +548,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * :: Experimental ::
     * Returns a [[DataFrameReader]] that can be used to read data in as a [[DataFrame]].
+    * 返回[[DataFrameReader]],可用于以[[DataFrame]]的形式读取数据
     * {{{
     *   sqlContext.read.parquet("/path/to/file.parquet")
     *   sqlContext.read.schema(schema).json("/path/to/file.json")
@@ -533,7 +563,9 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * :: Experimental ::
     * Creates an external table from the given path and returns the corresponding DataFrame.
+    * 从给定路径创建外部表并返回相应的DataFrame
     * It will use the default data source configured by spark.sql.sources.default.
+    * 它将使用由spark.sql.sources.default配置的默认数据源
     *
     * @group ddl_ops
     * @since 1.3.0
@@ -548,7 +580,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * :: Experimental ::
     * Creates an external table from the given path based on a data source
     * and returns the corresponding DataFrame.
-    *
+    * 根据数据源从给定路径创建外部表,并返回相应的DataFrame
     * @group ddl_ops
     * @since 1.3.0
     */
@@ -564,6 +596,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * :: Experimental ::
     * Creates an external table from the given path based on a data source and a set of options.
     * Then, returns the corresponding DataFrame.
+    * 根据数据源和一组选项从给定路径创建外部表,然后,返回相应的DataFrame
     *
     * @group ddl_ops
     * @since 1.3.0
@@ -581,6 +614,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * (Scala-specific)
     * Creates an external table from the given path based on a data source and a set of options.
     * Then, returns the corresponding DataFrame.
+    * 根据数据源和一组选项从给定路径创建外部表,然后,返回相应的DataFrame
     *
     * @group ddl_ops
     * @since 1.3.0
@@ -609,6 +643,8 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * Create an external table from the given path based on a data source, a schema and
     * a set of options. Then, returns the corresponding DataFrame.
     *
+    * 根据数据源，架构和一组选项从给定路径创建外部表,然后,返回相应的DataFrame
+    *
     * @group ddl_ops
     * @since 1.3.0
     */
@@ -626,6 +662,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * (Scala-specific)
     * Create an external table from the given path based on a data source, a schema and
     * a set of options. Then, returns the corresponding DataFrame.
+    * 根据数据源.架构和一组选项从给定路径创建外部表.然后.返回相应的DataFrame。
     *
     * @group ddl_ops
     * @since 1.3.0
@@ -653,6 +690,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * Registers the given [[DataFrame]] as a temporary table in the catalog. Temporary tables exist
     * only during the lifetime of this instance of SQLContext.
+    * 将给定的[[DataFrame]]注册为目录中的临时表,临时表仅在此SQLContext实例的生命周期内存在。
     */
   private[sql] def registerDataFrameAsTable(df: DataFrame, tableName: String): Unit = {
     catalog.registerTable(Seq(tableName), df.logicalPlan)
@@ -661,6 +699,8 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * Drops the temporary table with the given table name in the catalog. If the table has been
     * cached/persisted before, it's also unpersisted.
+    *
+    * 删除目录中具有给定表名的临时表,如果表之前已经缓存/持久化,那么它也是无人值守的。
     *
     * @param tableName the name of the table to be unregistered.
     *
@@ -677,6 +717,8 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * Creates a [[DataFrame]] with a single [[LongType]] column named `id`, containing elements
     * in an range from 0 to `end` (exclusive) with step value 1.
     *
+    * 使用名为`id`的单个[[LongType]]列创建[[DataFrame]],其中包含从0到`end`（不包括）的元素，步长值为1。
+    *
     * @since 1.4.1
     * @group dataframe
     */
@@ -687,6 +729,9 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * :: Experimental ::
     * Creates a [[DataFrame]] with a single [[LongType]] column named `id`, containing elements
     * in an range from `start` to `end` (exclusive) with step value 1.
+    *
+    * 使用名为`id`的单个[[LongType]]列创建[[DataFrame]],
+    * 其中包含从“start”到“end”（不包括）的元素，步长值为1。
     *
     * @since 1.4.0
     * @group dataframe
@@ -718,6 +763,9 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * Executes a SQL query using Spark, returning the result as a [[DataFrame]]. The dialect that is
     * used for SQL parsing can be configured with 'spark.sql.dialect'.
     *
+    * 使用Spark执行SQL查询,将结果作为[[DataFrame]]返回,
+    * 用于SQL解析的方言可以使用'spark.sql.dialect'进行配置。
+    *
     * @group basic
     * @since 1.3.0
     */
@@ -727,7 +775,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Returns the specified table as a [[DataFrame]].
-    *
+    *将指定的表作为[[DataFrame]]返回
     * @group ddl_ops
     * @since 1.3.0
     */
@@ -744,6 +792,8 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * The returned DataFrame has two columns, tableName and isTemporary (a Boolean
     * indicating if a table is a temporary one or not).
     *
+    *返回包含当前数据库中现有表名称的[[DataFrame]],返回的DataFrame有两列,
+    * tableName和isTemporary（一个布尔值，指示表是否是临时表）。
     * @group ddl_ops
     * @since 1.3.0
     */
@@ -753,8 +803,10 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Returns a [[DataFrame]] containing names of existing tables in the given database.
+    * 返回包含给定数据库中现有表名称的[[DataFrame]]
     * The returned DataFrame has two columns, tableName and isTemporary (a Boolean
     * indicating if a table is a temporary one or not).
+    * 返回的DataFrame有两列,tableName和isTemporary(一个布尔值,指示表是否是临时表)。
     *
     * @group ddl_ops
     * @since 1.3.0
@@ -765,7 +817,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Returns the names of tables in the current database as an array.
-    *
+    * 以数组形式返回当前数据库中表的名称
     * @group ddl_ops
     * @since 1.3.0
     */
@@ -777,7 +829,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Returns the names of tables in the given database as an array.
-    *
+    * 以数组形式返回给定数据库中表的名称
     * @group ddl_ops
     * @since 1.3.0
     */
@@ -865,6 +917,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
   /**
     * Prepares a planned SparkPlan for execution by inserting shuffle operations and internal
     * row format conversions as needed.
+    * 通过根据需要插入shuffle操作和内部行格式转换来准备计划的SparkPlan以供执行
     */
   @transient
   protected[sql] val prepareForExecution = new RuleExecutor[SparkPlan] {
@@ -908,6 +961,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * :: DeveloperApi ::
     * The primary workflow for executing relational queries using Spark.  Designed to allow easy
     * access to the intermediate phases of query execution for developers.
+    * 使用Spark执行关系查询的主要工作流程,旨在允许开发人员轻松访问查询执行的中间阶段
     */
   @DeveloperApi
   protected[sql] class QueryExecution(val logical: LogicalPlan) {
@@ -927,9 +981,11 @@ class SQLContext(@transient val sparkContext: SparkContext)
     }
     // executedPlan should not be used to initialize any SparkPlan. It should be
     // only used for execution.
+    //executionPlan不应该用于初始化任何SparkPlan,它应该仅用于执行
     lazy val executedPlan: SparkPlan = prepareForExecution.execute(sparkPlan)
 
-    /** Internal version of the RDD. Avoids copies and has no schema */
+    /** Internal version of the RDD. Avoids copies and has no schema
+      * RDD的内部版本,避免复制并且没有架构*/
     lazy val toRdd: RDD[InternalRow] = executedPlan.execute()
 
     protected def stringOrError[A](f: => A): String =
@@ -962,6 +1018,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
     * Parses the data type in our internal string representation. The data type string should
     * have the same format as the one generated by `toString` in scala.
     * It is only used by PySpark.
+    * 在我们的内部字符串表示中解析数据类型,数据类型字符串应与scala中`toString`生成的格式相同,它仅由PySpark使用
     */
   protected[sql] def parseDataType(dataTypeString: String): DataType = {
     DataType.fromJson(dataTypeString)
@@ -969,6 +1026,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Apply a schema defined by the schemaString to an RDD. It is only used by PySpark.
+    * 将schemaString定义的模式应用于RDD。 它仅由PySpark使用
     */
   protected[sql] def applySchemaToPythonRDD(
                                              rdd: RDD[Array[Any]],
@@ -979,6 +1037,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Apply a schema defined by the schema to an RDD. It is only used by PySpark.
+    * 将架构定义的架构应用于RDD。 它仅由PySpark使用。
     */
   protected[sql] def applySchemaToPythonRDD(
                                              rdd: RDD[Array[Any]],
@@ -990,6 +1049,7 @@ class SQLContext(@transient val sparkContext: SparkContext)
 
   /**
     * Returns a Catalyst Schema for the given java bean class.
+    * 返回给定java bean类的Catalyst Schema
     */
   protected def getSchema(beanClass: Class[_]): Seq[AttributeReference] = {
     val (dataType, _) = JavaTypeInference.inferDataType(beanClass)
@@ -1303,13 +1363,16 @@ object SQLContext {
 
   /**
     * Reference to the last created SQLContext.
+    * 引用最后创建的SQLContext
     */
   @transient private val lastInstantiatedContext = new AtomicReference[SQLContext]()
 
   /**
     * Get the singleton SQLContext if it exists or create a new one using the given SparkContext.
+    * 获取单例SQLContext（如果存在）或使用给定的SparkContext创建新的SQLContext
     * This function can be used to create a singleton SQLContext object that can be shared across
     * the JVM.
+    * 此函数可用于创建可在JVM上共享的单例SQLContext对象
     */
   def getOrCreate(sparkContext: SparkContext): SQLContext = {
     INSTANTIATION_LOCK.synchronized {

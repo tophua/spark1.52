@@ -44,7 +44,8 @@ case class BroadcastNestedLoopJoin(
     "numRightRows" -> SQLMetrics.createLongMetric(sparkContext, "number of right rows"),
     "numOutputRows" -> SQLMetrics.createLongMetric(sparkContext, "number of output rows"))
 
-  /** BuildRight means the right relation <=> the broadcast relation. */
+  /** BuildRight means the right relation <=> the broadcast relation.
+    * BuildRight意味着正确的关系<=>广播关系 */
   private val (streamed, broadcast) = buildSide match {
     case BuildRight => (left, right)
     case BuildLeft => (right, left)

@@ -31,11 +31,13 @@ case object Descending extends SortDirection
 /**
  * An expression that can be used to sort a tuple.  This class extends expression primarily so that
  * transformations over expression will descend into its child.
+  * 一个表达式,可用于对元组进行排序,此类主要扩展表达式,以便表达式上的转换将下降到其子级中。
  */
 case class SortOrder(child: Expression, direction: SortDirection)
   extends UnaryExpression with Unevaluable {
 
-  /** Sort order is not foldable because we don't have an eval for it. */
+  /** Sort order is not foldable because we don't have an eval for it.
+    * 排序顺序不可折叠,因为我们没有eval*/
   override def foldable: Boolean = false
 
   override def checkInputDataTypes(): TypeCheckResult = {
@@ -56,6 +58,7 @@ case class SortOrder(child: Expression, direction: SortDirection)
 
 /**
  * An expression to generate a 64-bit long prefix used in sorting.
+  * 用于生成排序中使用的64位长前缀的表达式
  */
 case class SortPrefix(child: SortOrder) extends UnaryExpression {
 

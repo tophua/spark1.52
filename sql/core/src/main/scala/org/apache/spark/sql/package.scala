@@ -22,6 +22,7 @@ import org.apache.spark.sql.execution.SparkPlan
 
 /**
  * Allows the execution of relational queries, including those expressed in SQL using Spark.
+  * 允许执行关系查询,包括使用Spark在SQL中表示的查询
  *
  *  @groupname dataType Data types
  *  @groupdesc Spark SQL data types.
@@ -38,12 +39,15 @@ package object sql {
    * with the query planner and is not designed to be stable across spark releases.  Developers
    * writing libraries should instead consider using the stable APIs provided in
    * [[org.apache.spark.sql.sources]]
+    * 将逻辑计划转换为零个或多个SparkPlans,此API公开用于试验查询计划程序,
+    * 并不是为了在spark版本中保持稳定,编写库的开发人员应考虑使用[[org.apache.spark.sql.sources]]中提供的稳定API。
    */
   @DeveloperApi
   type Strategy = org.apache.spark.sql.catalyst.planning.GenericStrategy[SparkPlan]
 
   /**
    * Type alias for [[DataFrame]]. Kept here for backward source compatibility for Scala.
+    * 输入[[DataFrame]]的别名,保留此处以获得Scala的后向源兼容性
    * @deprecated As of 1.3.0, replaced by `DataFrame`.
    */
   @deprecated("use DataFrame", "1.3.0")

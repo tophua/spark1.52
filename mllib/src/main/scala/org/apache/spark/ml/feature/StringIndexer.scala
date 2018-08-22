@@ -35,7 +35,8 @@ import org.apache.spark.util.collection.OpenHashMap
  */
 private[feature] trait StringIndexerBase extends Params with HasInputCol with HasOutputCol {
 
-  /** Validates and transforms the input schema. */
+  /** Validates and transforms the input schema.
+    * 验证并转换输入架构 */
   protected def validateAndTransformSchema(schema: StructType): StructType = {
     val inputColName = $(inputCol)
     val inputDataType = schema(inputColName).dataType
@@ -55,8 +56,10 @@ private[feature] trait StringIndexerBase extends Params with HasInputCol with Ha
 /**
  * :: Experimental ::
  * A label indexer that maps a string column of labels to an ML column of label indices.
+  * 标签索引器,用于将标签的字符串列映射到标签索引的ML列
  * If the input column is numeric, we cast it to string and index the string values.
  * The indices are in [0, numLabels), ordered by label frequencies.
+  * 如果输入列是数字,我们将其转换为字符串并索引字符串值,索引在[0,numLabels]中,按标签频率排序
  * So the most frequent label gets index 0.
  *
  * @see [[IndexToString]] for the inverse transformation
@@ -166,6 +169,7 @@ class StringIndexerModel (
  * A [[Transformer]] that maps a column of string indices back to a new column of corresponding
  * string values using either the ML attributes of the input column, or if provided using the labels
  * supplied by the user.
+  * 一个[[Transformer]],使用输入列的ML属性或使用用户提供的标签提供,将一列字符串索引映射回相应字符串值的新列
  * All original columns are kept during transformation.
  *
  * @see [[StringIndexer]] for converting strings into indices
@@ -188,14 +192,17 @@ class IndexToString private[ml] (
    * Optional labels to be provided by the user, if not supplied column
    * metadata is read for labels. The default value is an empty array,
    * but the empty array is ignored and column metadata used instead.
+    * 用户提供的可选标签(如果未提供)将读取标签的列元数据,
+    * 默认值为空数组,但忽略空数组,而使用列元数据。
    * @group setParam
    */
   def setLabels(value: Array[String]): this.type = set(labels, value)
 
   /**
-   * Param for array of labels.
-   * Optional labels to be provided by the user.
+   * Param for array of labels.Param的标签数组
+   * Optional labels to be provided by the user.用户提供的可选标签
    * Default: Empty array, in which case column metadata is used for labels.
+    * 默认值：空数组,在这种情况下,列元数据用于标签
    * @group param
    */
   final val labels: StringArrayParam = new StringArrayParam(this, "labels",
@@ -205,11 +212,12 @@ class IndexToString private[ml] (
   /**
    * Optional labels to be provided by the user, if not supplied column
    * metadata is read for labels.
+    * 用户提供的可选标签(如果未提供)将读取标签的列元数据
    * @group getParam
    */
   final def getLabels: Array[String] = $(labels)
 
-  /** Transform the schema for the inverse transformation */
+  /** Transform the schema for the inverse transformation转换模式以进行逆变换 */
   override def transformSchema(schema: StructType): StructType = {
     val inputColName = $(inputCol)
     val inputDataType = schema(inputColName).dataType
@@ -227,6 +235,7 @@ class IndexToString private[ml] (
   override def transform(dataset: DataFrame): DataFrame = {
     val inputColSchema = dataset.schema($(inputCol))
     // If the labels array is empty use column metadata
+    //如果labels数组为空,则使用列元数据
     val values = if ($(labels).isEmpty) {
       Attribute.fromStructField(inputColSchema)
         .asInstanceOf[NominalAttribute].values.get

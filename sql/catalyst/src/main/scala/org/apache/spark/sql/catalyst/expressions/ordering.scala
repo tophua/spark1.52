@@ -23,6 +23,7 @@ import org.apache.spark.sql.types._
 
 /**
  * An interpreted row ordering comparator.
+  * 解释的行排序比较器
  */
 class InterpretedOrdering(ordering: Seq[SortOrder]) extends Ordering[InternalRow] {
 
@@ -69,6 +70,7 @@ object InterpretedOrdering {
 
   /**
    * Creates a [[InterpretedOrdering]] for the given schema, in natural ascending order.
+    * 以自然升序为给定模式创建[[InterpretedOrdering]]
    */
   def forSchema(dataTypes: Seq[DataType]): InterpretedOrdering = {
     new InterpretedOrdering(dataTypes.zipWithIndex.map {
@@ -81,6 +83,7 @@ object RowOrdering {
 
   /**
    * Returns true iff the data type can be ordered (i.e. can be sorted).
+    * 如果可以对数据类型进行排序(即可以对其进行排序),则返回true。
    */
   def isOrderable(dataType: DataType): Boolean = dataType match {
     case NullType => true
@@ -91,6 +94,7 @@ object RowOrdering {
 
   /**
    * Returns true iff outputs from the expressions can be ordered.
+    * 如果可以对表达式的输出进行排序,则返回true
    */
   def isOrderable(exprs: Seq[Expression]): Boolean = exprs.forall(e => isOrderable(e.dataType))
 }

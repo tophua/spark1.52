@@ -34,6 +34,7 @@ import org.apache.spark.sql.types._
 /**
  * :: Experimental ::
  * A feature transformer that merges multiple columns into a vector column.
+  * 将多个列合并到矢量列中的要素转换器
  */
 @Experimental
 class VectorAssembler(override val uid: String)
@@ -58,6 +59,7 @@ class VectorAssembler(override val uid: String)
         case DoubleType =>
           val attr = Attribute.fromStructField(field)
           // If the input column doesn't have ML attribute, assume numeric.
+          //如果输入列没有ML属性，则假定为numeric
           if (attr == UnresolvedAttribute) {
             Some(NumericAttribute.defaultAttr.withName(c))
           } else {
@@ -65,11 +67,13 @@ class VectorAssembler(override val uid: String)
           }
         case _: NumericType | BooleanType =>
           // If the input column type is a compatible scalar type, assume numeric.
+          //如果输入列类型是兼容的标量类型，则假定为数字
           Some(NumericAttribute.defaultAttr.withName(c))
         case _: VectorUDT =>
           val group = AttributeGroup.fromStructField(field)
           if (group.attributes.isDefined) {
             // If attributes are defined, copy them with updated names.
+            //如果定义了属性,请使用更新的名称复制它们
             group.attributes.get.map { attr =>
               if (attr.name.isDefined) {
                 // TODO: Define a rigorous naming scheme.

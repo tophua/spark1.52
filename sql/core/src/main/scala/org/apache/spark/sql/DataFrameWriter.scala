@@ -32,6 +32,8 @@ import org.apache.spark.sql.sources.HadoopFsRelation
  * :: Experimental ::
  * Interface used to write a [[DataFrame]] to external storage systems (e.g. file systems,
  * key-value stores, etc). Use [[DataFrame.write]] to access this.
+  *
+  * 用于将[[DataFrame]]写入外部存储系统(例如文件系统,键值存储等)的接口,使用[[DataFrame.write]]访问它。
  *
  * @since 1.4.0
  */
@@ -40,6 +42,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Specifies the behavior when data or table already exists. Options include:
+    * 指定数据或表已存在时的行为,选项包括:
    *   - `SaveMode.Overwrite`: overwrite the existing data.
    *   - `SaveMode.Append`: append the data.
    *   - `SaveMode.Ignore`: ignore the operation (i.e. no-op).
@@ -54,10 +57,11 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Specifies the behavior when data or table already exists. Options include:
-   *   - `overwrite`: overwrite the existing data.
+    * 指定数据或表已存在时的行为。 选项包括：
+   *   - `overwrite`: overwrite the existing data.覆盖现有数据。
    *   - `append`: append the data.
-   *   - `ignore`: ignore the operation (i.e. no-op).
-   *   - `error`: default option, throw an exception at runtime.
+   *   - `ignore`: ignore the operation (i.e. no-op).忽略操作
+   *   - `error`: default option, throw an exception at runtime. 默认选项，在运行时抛出异常
    *
    * @since 1.4.0
    */
@@ -75,6 +79,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Specifies the underlying output data source. Built-in options include "parquet", "json", etc.
+    * 指定基础输出数据源。 内置选项包括“parquet”，“json”等。
    *
    * @since 1.4.0
    */
@@ -85,6 +90,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Adds an output option for the underlying data source.
+    * 为基础数据源添加输出选项
    *
    * @since 1.4.0
    */
@@ -95,7 +101,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * (Scala-specific) Adds output options for the underlying data source.
-   *
+   *（特定于Scala）添加基础数据源的输出选项
    * @since 1.4.0
    */
   def options(options: scala.collection.Map[String, String]): DataFrameWriter = {
@@ -105,6 +111,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Adds output options for the underlying data source.
+    * 添加基础数据源的输出选项
    *
    * @since 1.4.0
    */
@@ -116,6 +123,8 @@ final class DataFrameWriter private[sql](df: DataFrame) {
   /**
    * Partitions the output by the given columns on the file system. If specified, the output is
    * laid out on the file system similar to Hive's partitioning scheme.
+    *
+    * 通过文件系统上的给定列对输出进行分区,如果指定,则输出布局在文件系统上,类似于Hive的分区方案。
    *
    * This is only applicable for Parquet at the moment.
    *
@@ -129,6 +138,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Saves the content of the [[DataFrame]] at the specified path.
+    * 将[[DataFrame]]的内容保存在指定的路径中
    *
    * @since 1.4.0
    */
@@ -139,6 +149,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Saves the content of the [[DataFrame]] as the specified table.
+    * 将[[DataFrame]]的内容保存为指定的表
    *
    * @since 1.4.0
    */
@@ -155,7 +166,9 @@ final class DataFrameWriter private[sql](df: DataFrame) {
   /**
    * Inserts the content of the [[DataFrame]] to the specified table. It requires that
    * the schema of the [[DataFrame]] is the same as the schema of the table.
-   *
+    *
+   *将[[DataFrame]]的内容插入到指定的表中,它要求[[DataFrame]]的模式与表的模式相同
+    *
    * Because it inserts data to an existing table, format or options will be ignored.
    *
    * @since 1.4.0
@@ -178,9 +191,13 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Saves the content of the [[DataFrame]] as the specified table.
+    * 将[[DataFrame]]的内容保存为指定的表
    *
    * In the case the table already exists, behavior of this function depends on the
    * save mode, specified by the `mode` function (default to throwing an exception).
+
+    * 在表已经存在的情况下，此函数的行为取决于由`mode`函数指定的save模式（默认为抛出异常）
+    *
    * When `mode` is `Overwrite`, the schema of the [[DataFrame]] does not need to be
    * the same as that of the existing table.
    * When `mode` is `Append`, the schema of the [[DataFrame]] need to be
@@ -233,6 +250,9 @@ final class DataFrameWriter private[sql](df: DataFrame) {
    * Saves the content of the [[DataFrame]] to a external database table via JDBC. In the case the
    * table already exists in the external database, behavior of this function depends on the
    * save mode, specified by the `mode` function (default to throwing an exception).
+    *
+    * 通过JDBC将[[DataFrame]]的内容保存到外部数据库表,如果表已存在于外部数据库中,
+    * 则此函数的行为取决于由“mode”函数指定的save模式(默认为抛出异常)
    *
    * Don't create too many partitions in parallel on a large cluster; otherwise Spark might crash
    * your external database systems.
@@ -249,6 +269,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
       props.put(key, value)
     }
     // connectionProperties should override settings in extraOptions
+    //connectionProperties应覆盖extraOptions中的设置
     props.putAll(connectionProperties)
     val conn = JdbcUtils.createConnection(url, props)
 
@@ -283,6 +304,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Saves the content of the [[DataFrame]] in JSON format at the specified path.
+    * 以指定路径保存JSON格式的[[DataFrame]]内容
    * This is equivalent to:
    * {{{
    *   format("json").save(path)
@@ -294,6 +316,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Saves the content of the [[DataFrame]] in Parquet format at the specified path.
+    * 以指定路径保存Parquet格式的[[DataFrame]]内容
    * This is equivalent to:
    * {{{
    *   format("parquet").save(path)
@@ -305,6 +328,7 @@ final class DataFrameWriter private[sql](df: DataFrame) {
 
   /**
    * Saves the content of the [[DataFrame]] in ORC format at the specified path.
+    * 以指定路径的ORC格式保存[[DataFrame]]的内容
    * This is equivalent to:
    * {{{
    *   format("orc").save(path)

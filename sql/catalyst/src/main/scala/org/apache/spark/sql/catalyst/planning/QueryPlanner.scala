@@ -43,13 +43,15 @@ abstract class GenericStrategy[PhysicalPlan <: TreeNode[PhysicalPlan]] extends L
  * @tparam PhysicalPlan The type of physical plan produced by this [[QueryPlanner]]
  */
 abstract class QueryPlanner[PhysicalPlan <: TreeNode[PhysicalPlan]] {
-  /** A list of execution strategies that can be used by the planner */
+  /** A list of execution strategies that can be used by the planner
+    * 计划程序可以使用的执行策略列表*/
   def strategies: Seq[GenericStrategy[PhysicalPlan]]
 
   /**
    * Returns a placeholder for a physical plan that executes `plan`. This placeholder will be
    * filled in automatically by the QueryPlanner using the other execution strategies that are
    * available.
+    * 返回执行`plan`的物理计划的占位符,QueryPlanner将使用其他可用的执行策略自动填充此占位符。
    */
   protected def planLater(plan: LogicalPlan) = this.plan(plan).next()
 

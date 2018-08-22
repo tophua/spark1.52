@@ -31,6 +31,9 @@ import org.apache.spark.annotation.DeveloperApi
  * Metadata is a wrapper over Map[String, Any] that limits the value type to simple ones: Boolean,
  * Long, Double, String, Metadata, Array[Boolean], Array[Long], Array[Double], Array[String], and
  * Array[Metadata]. JSON is used for serialization.
+  *
+  * 元数据是Map [String，Any]的包装器,它将值类型限制为简单类型：Boolean,Long,Double,String,Metadata，
+  * Array [Boolean],Array [Long],Array [Double],Array [String],和数组[元数据],JSON用于序列化
  *
  * The default constructor is private. User should use either [[MetadataBuilder]] or
  * [[Metadata.fromJson()]] to create Metadata instances.
@@ -44,7 +47,8 @@ sealed class Metadata private[types] (private[types] val map: Map[String, Any])
   /** No-arg constructor for kryo. */
   protected def this() = this(null)
 
-  /** Tests whether this Metadata contains a binding for a key. */
+  /** Tests whether this Metadata contains a binding for a key.
+    * 测试此元数据是否包含密钥的绑定*/
   def contains(key: String): Boolean = map.contains(key)
 
   /** Gets a Long. */
@@ -113,15 +117,16 @@ sealed class Metadata private[types] (private[types] val map: Map[String, Any])
 
 object Metadata {
 
-  /** Returns an empty Metadata. */
+  /** Returns an empty Metadata. 返回空元数据*/
   def empty: Metadata = new Metadata(Map.empty)
 
-  /** Creates a Metadata instance from JSON. */
+  /** Creates a Metadata instance from JSON.从JSON创建元数据实例 */
   def fromJson(json: String): Metadata = {
     fromJObject(parse(json).asInstanceOf[JObject])
   }
 
-  /** Creates a Metadata instance from JSON AST. */
+  /** Creates a Metadata instance from JSON AST.
+    * 从JSON AST创建元数据实例*/
   private[sql] def fromJObject(jObj: JObject): Metadata = {
     val builder = new MetadataBuilder
     jObj.obj.foreach {
@@ -138,6 +143,7 @@ object Metadata {
       case (key, JArray(value)) =>
         if (value.isEmpty) {
           // If it is an empty array, we cannot infer its element type. We put an empty Array[Long].
+          //如果它是一个空数组,我们无法推断它的元素类型,我们放了一个空数组[Long]
           builder.putLongArray(key, Array.empty)
         } else {
           value.head match {
@@ -162,7 +168,7 @@ object Metadata {
     builder.build()
   }
 
-  /** Converts to JSON AST. */
+  /** Converts to JSON AST. 转换为JSON AST*/
   private def toJsonValue(obj: Any): JValue = {
     obj match {
       case map: Map[_, _] =>
@@ -186,7 +192,8 @@ object Metadata {
     }
   }
 
-  /** Computes the hash code for the types we support. */
+  /** Computes the hash code for the types we support.
+    * 计算我们支持的类型的哈希码*/
   private def hash(obj: Any): Int = {
     obj match {
       case map: Map[_, _] =>
@@ -214,16 +221,19 @@ object Metadata {
  * :: DeveloperApi ::
  *
  * Builder for [[Metadata]]. If there is a key collision, the latter will overwrite the former.
+  * [元数据]的构建器,如果存在密钥冲突,后者将覆盖前者
  */
 @DeveloperApi
 class MetadataBuilder {
 
   private val map: mutable.Map[String, Any] = mutable.Map.empty
 
-  /** Returns the immutable version of this map.  Used for java interop. */
+  /** Returns the immutable version of this map.  Used for java interop.
+    * 返回此映射的不可变版本,用于java互操作*/
   protected def getMap = map.toMap
 
-  /** Include the content of an existing [[Metadata]] instance. */
+  /** Include the content of an existing [[Metadata]] instance.
+    * 包括现有[[Metadata]]实例的内容*/
   def withMetadata(metadata: Metadata): this.type = {
     map ++= metadata.map
     this

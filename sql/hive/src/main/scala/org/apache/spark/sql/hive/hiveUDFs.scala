@@ -62,6 +62,7 @@ private[hive] class HiveFunctionRegistry(
     Try(underlying.lookupFunction(name, children)).getOrElse {
       // We only look it up to see if it exists, but do not include it in the HiveUDF since it is
       // not always serializable.
+      //我们只查看它是否存在,但不要将其包含在HiveUDF中,因为它并不总是可序列化的
       val functionInfo: FunctionInfo =
         Option(getFunctionInfo(name.toLowerCase)).getOrElse(
           throw new AnalysisException(s"undefined function $name"))
@@ -88,13 +89,13 @@ private[hive] class HiveFunctionRegistry(
   override def registerFunction(name: String, info: ExpressionInfo, builder: FunctionBuilder)
   : Unit = underlying.registerFunction(name, info, builder)
 
-  /* List all of the registered function names. */
+  /* List all of the registered function names. 列出所有已注册的函数名称*/
   override def listFunction(): Seq[String] = {
     val a = FunctionRegistry.getFunctionNames ++ underlying.listFunction()
     a.toList.sorted
   }
 
-  /* Get the class of the registered function by specified name. */
+  /* Get the class of the registered function by specified name. 按指定名称获取已注册函数的类*/
   override def lookupFunction(name: String): Option[ExpressionInfo] = {
     underlying.lookupFunction(name).orElse(
     Try {
@@ -248,12 +249,14 @@ private[spark] object ResolveHiveWindowFunction extends Rule[LogicalPlan] {
 
     // We are resolving WindowExpressions at here. When we get here, we have already
     // replaced those WindowSpecReferences.
+      //我们正在解决WindowExpressions,当我们到达这里时,我们已经替换了那些WindowSpecReferences。
     case p: LogicalPlan =>
       p transformExpressions {
         case WindowExpression(
           UnresolvedWindowFunction(name, children),
           windowSpec: WindowSpecDefinition) =>
           // First, let's find the window function info.
+          //首先,让我们找到窗口功能信息
           val windowFunctionInfo: WindowFunctionInfo =
             Option(FunctionRegistry.getWindowFunctionInfo(name.toLowerCase)).getOrElse(
               throw new AnalysisException(s"Couldn't find window function $name"))
@@ -276,6 +279,7 @@ private[spark] object ResolveHiveWindowFunction extends Rule[LogicalPlan] {
             }
 
           // If the class is UDAF, we need to use UDAFBridge.
+          //如果该类是UDAF，我们需要使用UDAFBridge
           val isUDAFBridgeRequired =
             if (classOf[UDAF].isAssignableFrom(functionClass)) {
               true
@@ -293,6 +297,7 @@ private[spark] object ResolveHiveWindowFunction extends Rule[LogicalPlan] {
               newChildren)
 
           // Second, check if the specified window function can accept window definition.
+          //其次,检查指定的窗口函数是否可以接受窗口定义
           windowSpec.frameSpecification match {
             case frame: SpecifiedWindowFrame if !windowFunctionInfo.isSupportsWindow =>
               // This Hive window function does not support user-speficied window frame.
@@ -301,6 +306,7 @@ private[spark] object ResolveHiveWindowFunction extends Rule[LogicalPlan] {
             case frame: SpecifiedWindowFrame if windowFunctionInfo.isSupportsWindow &&
                                                 windowFunctionInfo.isPivotResult =>
               // These two should not be true at the same time when a window frame is defined.
+              //当定义窗口框架时,这两个不应该同时为真
               // If so, throw an exception.
               throw new AnalysisException(s"Could not handle Hive window function $name because " +
                 s"it supports both a user specified window frame and pivot result.")
@@ -327,10 +333,12 @@ private[spark] object ResolveHiveWindowFunction extends Rule[LogicalPlan] {
 
 /**
  * A [[WindowFunction]] implementation wrapping Hive's window function.
- * @param funcWrapper The wrapper for the Hive Window Function.
+  * 包含Hive窗口函数的[[WindowFunction]]实现
+ * @param funcWrapper The wrapper for the Hive Window Function.Hive窗口函数的包装器
  * @param pivotResult If it is true, the Hive function will return a list of values representing
  *                    the values of the added columns. Otherwise, a single value is returned for
  *                    current row.
+  *                    如果为true,则Hive函数将返回表示添加列的值的值列表,否则,为当前行返回单个值
  * @param isUDAFBridgeRequired If it is true, the function returned by functionWrapper's
  *                             createFunction is UDAF, we need to use GenericUDAFBridge to wrap
  *                             it as a GenericUDAFResolver2.
@@ -344,6 +352,7 @@ private[hive] case class HiveWindowFunction(
   with HiveInspectors with Unevaluable {
 
   // Hive window functions are based on GenericUDAFResolver2.
+  //Hive窗口函数基于GenericUDAFResolver2
   type UDFType = GenericUDAFResolver2
 
   @transient
@@ -358,6 +367,7 @@ private[hive] case class HiveWindowFunction(
   protected lazy val inputInspectors = children.map(toInspector).toArray
 
   // The GenericUDAFEvaluator used to evaluate the window function.
+  //GenericUDAFEvaluator用于评估窗口函数
   @transient
   protected lazy val evaluator: GenericUDAFEvaluator = {
     val parameterInfo = new SimpleGenericUDAFParameterInfo(inputInspectors, false, false)
@@ -365,6 +375,7 @@ private[hive] case class HiveWindowFunction(
   }
 
   // The object inspector of values returned from the Hive window function.
+  //从Hive窗口函数返回的值的对象检查器
   @transient
   protected lazy val returnInspector = {
     evaluator.init(GenericUDAFEvaluator.Mode.COMPLETE, inputInspectors)
@@ -419,6 +430,7 @@ private[hive] case class HiveWindowFunction(
   }
 
   // Add input parameters for a single row.
+  //添加单行的输入参数
   override def update(input: AnyRef): Unit = {
     evaluator.iterate(hiveEvaluatorBuffer, input.asInstanceOf[Array[AnyRef]])
   }
@@ -438,6 +450,7 @@ private[hive] case class HiveWindowFunction(
   override def get(index: Int): Any = {
     if (!pivotResult) {
       // if pivotResult is false, we will get a single value for all rows in the frame.
+      //如果pivotResult为false,我们将为帧中的所有行获取单个值
       outputBuffer
     } else {
       // if pivotResult is true, we will get a ArrayData having the same size with the size
@@ -486,7 +499,8 @@ private[hive] case class HiveGenericUDAF(
   def newInstance(): HiveUDAFFunction = new HiveUDAFFunction(funcWrapper, children, this)
 }
 
-/** It is used as a wrapper for the hive functions which uses UDAF interface */
+/** It is used as a wrapper for the hive functions which uses UDAF interface
+  * 它用作使用UDAF接口的hive函数的包装器*/
 private[hive] case class HiveUDAF(
     funcWrapper: HiveFunctionWrapper,
     children: Seq[Expression]) extends AggregateExpression1

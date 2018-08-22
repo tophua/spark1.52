@@ -31,14 +31,16 @@ import org.apache.spark.util.collection.OpenHashMap
 
 /**
  * Params for [[CountVectorizer]] and [[CountVectorizerModel]].
+  * [[CountVectorizer]]和[[CountVectorizerModel]]的参数
  */
 private[feature] trait CountVectorizerParams extends Params with HasInputCol with HasOutputCol {
 
   /**
    * Max size of the vocabulary.
+    * 词汇量的最大大小
    * CountVectorizer will build a vocabulary that only considers the top
    * vocabSize terms ordered by term frequency across the corpus.
-   *
+   * CountVectorizer将构建一个词汇表,该词汇表仅考虑按语料库中的术语频率排序的顶级vocabSize术语
    * Default: 2^18^
    * @group param
    */
@@ -51,6 +53,7 @@ private[feature] trait CountVectorizerParams extends Params with HasInputCol wit
   /**
    * Specifies the minimum number of different documents a term must appear in to be included
    * in the vocabulary.
+    * 指定术语必须包含在词汇表中的最小不同文档数
    * If this is an integer >= 1, this specifies the number of documents the term must appear in;
    * if this is a double in [0,1), then this specifies the fraction of documents.
    *
@@ -66,7 +69,7 @@ private[feature] trait CountVectorizerParams extends Params with HasInputCol wit
   /** @group getParam */
   def getMinDF: Double = $(minDF)
 
-  /** Validates and transforms the input schema. */
+  /** Validates and transforms the input schema. 验证并转换输入架构*/
   protected def validateAndTransformSchema(schema: StructType): StructType = {
     SchemaUtils.checkColumnType(schema, $(inputCol), new ArrayType(StringType, true))
     SchemaUtils.appendColumn(schema, $(outputCol), new VectorUDT)
@@ -75,11 +78,13 @@ private[feature] trait CountVectorizerParams extends Params with HasInputCol wit
   /**
    * Filter to ignore rare words in a document. For each document, terms with
    * frequency/count less than the given threshold are ignored.
+    * 过滤以忽略文档中的罕见单词。对于每个文档,忽略频率/计数小于给定阈值的术语
    * If this is an integer >= 1, then this specifies a count (of times the term must appear
    * in the document);
+    * 如果这是一个> = 1的整数,则指定一个计数（该术语必须出现在文档中的次数）
    * if this is a double in [0,1), then this specifies a fraction (out of the document's token
    * count).
-   *
+   * 如果这是[0,1]中的双精度数,那么这将指定一个分数(超出文档的令牌数)
    * Note that the parameter is only used in transform of [[CountVectorizerModel]] and does not
    * affect fitting.
    *
@@ -102,6 +107,7 @@ private[feature] trait CountVectorizerParams extends Params with HasInputCol wit
 /**
  * :: Experimental ::
  * Extracts a vocabulary from document collections and generates a [[CountVectorizerModel]].
+  * 从文档集合中提取词汇表并生成[[CountVectorizerModel]]
  */
 @Experimental
 class CountVectorizer(override val uid: String)
@@ -174,6 +180,7 @@ class CountVectorizer(override val uid: String)
 /**
  * :: Experimental ::
  * Converts a text document to a sparse vector of token counts.
+  * 将文本文档转换为令牌计数的稀疏向量
  * @param vocabulary An Array over terms. Only the terms in the vocabulary will be counted.
  */
 @Experimental
@@ -194,7 +201,8 @@ class CountVectorizerModel(override val uid: String, val vocabulary: Array[Strin
   /** @group setParam */
   def setMinTF(value: Double): this.type = set(minTF, value)
 
-  /** Dictionary created from [[vocabulary]] and its indices, broadcast once for [[transform()]] */
+  /** Dictionary created from [[vocabulary]] and its indices, broadcast once for [[transform()]]
+    * 从[词汇]及其索引创建的词典，为[transform（）]广播一次]*/
   private var broadcastDict: Option[Broadcast[Map[String, Int]]] = None
 
   override def transform(dataset: DataFrame): DataFrame = {

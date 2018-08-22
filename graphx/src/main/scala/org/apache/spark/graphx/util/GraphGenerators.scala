@@ -32,7 +32,8 @@ import org.apache.spark.graphx.Graph
 import org.apache.spark.graphx.Edge
 import org.apache.spark.graphx.impl.GraphImpl
 
-/** A collection of graph generating functions. */
+/** A collection of graph generating functions.
+  * 图形生成函数的集合*/
 object GraphGenerators extends Logging {
 
   val RMATa = 0.45
@@ -41,9 +42,10 @@ object GraphGenerators extends Logging {
 
   /**
    * Generate a graph whose vertex out degree distribution is log normal.
+    * 生成顶点出度分布为对数正态的图形
    *
    * The default values for mu and sigma are taken from the Pregel paper:
-   *
+   * mu和sigma的默认值取自Pregel论文：
    * Grzegorz Malewicz, Matthew H. Austern, Aart J.C Bik, James C. Dehnert,
    * Ilan Horn, Naty Leiser, and Grzegorz Czajkowski. 2010.
    * Pregel: a system for large-scale graph processing. SIGMOD '10.
@@ -66,6 +68,7 @@ object GraphGenerators extends Logging {
     val evalNumEParts = if (numEParts == 0) sc.defaultParallelism else numEParts
 
     // Enable deterministic seeding
+    //启用确定性播种
     val seedRand = if (seed == -1) new Random() else new Random(seed)
     val seed1 = seedRand.nextInt()
     val seed2 = seedRand.nextInt()
@@ -83,6 +86,7 @@ object GraphGenerators extends Logging {
 
   // Right now it just generates a bunch of edges where
   // the edge data is the weight (default 1)
+  //现在它只生成一堆边,其中边数据是权重(默认为1)
   val RMATc = 0.15
 
   def generateRandomEdges(
@@ -97,7 +101,9 @@ object GraphGenerators extends Logging {
    * `s` are the mean, standard deviation of the lognormal distribution and
    * `Z ~ N(0, 1)`. In this function,
    * `m = e^(mu+sigma^2/2)` and `s = sqrt[(e^(sigma^2) - 1)(e^(2*mu+sigma^2))]`.
-   *
+    *
+   * 从对数正态分布中随机抽样,其对应的正态分布具有给定的均值和标准差,它使用公式`X = exp（m + s * Z）`其中`m`，
+    *
    * @param mu the mean of the normal distribution
    * @param sigma the standard deviation of the normal distribution
    * @param maxVal exclusive upper bound on the value of the sample
@@ -172,6 +178,8 @@ object GraphGenerators extends Logging {
    * This method recursively subdivides the the adjacency matrix into quadrants
    * until it picks a single cell. The naming conventions in this paper match
    * those of the R-MAT paper. There are a power of 2 number of nodes in the graph.
+    * 该方法递归地将邻接矩阵细分为象限,直到它选择单个单元格,
+    * 本文中的命名约定与R-MAT论文的命名约定相匹配,图中有2个节点的幂
    * The adjacency matrix looks like:
    * <pre>
    *
@@ -235,6 +243,7 @@ object GraphGenerators extends Logging {
    * Create `rows` by `cols` grid graph with each vertex connected to its
    * row+1 and col+1 neighbors.  Vertex ids are assigned in row major
    * order.
+    * 用`cols`网格图创建`rows`,每个顶点连接到它的行+ 1和col + 1个邻居,顶点ID按行主要顺序分配。
    *
    * @param sc the spark context in which to construct the graph
    * @param rows the number of rows
@@ -260,6 +269,7 @@ object GraphGenerators extends Logging {
 
   /**
    * Create a star graph with vertex 0 being the center.
+    * 创建以顶点0为中心的星形图
    *
    * @param sc the spark context in which to construct the graph
    * @param nverts the number of vertices in the star

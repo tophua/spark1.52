@@ -25,6 +25,7 @@ import org.apache.spark.sql.types.StructType
 
 /**
  * A [[RecordMaterializer]] for Catalyst rows.
+  * Catalyst行的[[RecordMaterializer]]
  *
  * @param parquetSchema Parquet schema of the records to be read
  * @param catalystSchema Catalyst schema of the rows to be constructed

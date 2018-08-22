@@ -365,6 +365,7 @@ private[hive] class SparkSQLCLIDriver extends CliDriver with Logging {
           }
           console.printInfo(responseMsg , null)
           // Destroy the driver to release all the locks.
+          //销毁驱动程序以释放所有锁
           driver.destroy()
         } else {
           if (sessionState.getIsVerbose) {

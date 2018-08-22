@@ -196,7 +196,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
     val nns = util.getNameNodesToAccess(sparkConf)
     nns should be(Set())
   }
-  //检查访问权限
+  //检查访问namenodes权限
   test("check access nns") {
     val sparkConf = new SparkConf()
     sparkConf.set("spark.yarn.access.namenodes", "hdfs://nn1:8032")
@@ -250,7 +250,7 @@ class YarnSparkHadoopUtilSuite extends SparkFunSuite with Matchers with Logging 
       System.clearProperty("SPARK_YARN_MODE")
     }
   }
-  //
+  //获取HiveMetastore的令牌
   test("Obtain tokens For HiveMetastore") {
     val hadoopConf = new Configuration()
     hadoopConf.set("hive.metastore.kerberos.principal", "bob")

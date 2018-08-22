@@ -82,6 +82,7 @@ class HistoryServer(
     protected override def doGet(req: HttpServletRequest, res: HttpServletResponse): Unit = {
       // Parse the URI created by getAttemptURI(). It contains an app ID and an optional
       // attempt ID (separated by a slash).
+      //解析getAttemptURI()创建的URI,它包含应用程序ID和可选的尝试ID(以斜杠分隔)
       val parts = Option(req.getPathInfo()).getOrElse("").split("/")
       if (parts.length < 2) {
         res.sendError(HttpServletResponse.SC_BAD_REQUEST,

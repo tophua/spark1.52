@@ -28,6 +28,7 @@ import org.apache.spark.sql.{Row, SQLContext}
 
 /**
  * Implementation for "describe [extended] table".
+  * 描述[扩展]表”的实现
  */
 private[hive]
 case class DescribeHiveTableCommand(
@@ -37,6 +38,7 @@ case class DescribeHiveTableCommand(
 
   override def run(sqlContext: SQLContext): Seq[Row] = {
     // Trying to mimic the format of Hive's output. But not exactly the same.
+    //试图模仿Hive输出的格式,但不完全一样。
     var results: Seq[(String, String, String)] = Nil
 
     val columns: Seq[FieldSchema] = table.hiveQlTable.getCols

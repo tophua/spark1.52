@@ -26,6 +26,7 @@ import org.apache.spark.sql.{DataFrame, Row, SQLContext, SaveMode}
 
 /**
  * Returned for the "DESCRIBE [EXTENDED] [dbName.]tableName" command.
+  * 返回“DESCRIBE [EXTENDED] [dbName。] tableName”命令
  * @param table The table to be described.
  * @param isExtended True if "DESCRIBE EXTENDED" is used. Otherwise, false.
  *                   It is effective only when the table is a Hive table.
@@ -37,7 +38,7 @@ case class DescribeCommand(
   override def children: Seq[LogicalPlan] = Seq.empty
 
   override val output: Seq[Attribute] = Seq(
-    // Column names are based on Hive.
+    // Column names are based on Hive.列名基于Hive
     AttributeReference("col_name", StringType, nullable = false,
       new MetadataBuilder().putString("comment", "name of the column").build())(),
     AttributeReference("data_type", StringType, nullable = false,
@@ -49,8 +50,10 @@ case class DescribeCommand(
 
 /**
   * Used to represent the operation of create table using a data source.
+  * 用于表示使用数据源创建表的操作
   * @param allowExisting If it is true, we will do nothing when the table already exists.
   *                      If it is false, an exception will be thrown
+  *                      如果确实如此,那么当表已经存在时,我们将不执行任何操作,如果该表为false,则将抛出异常
   */
 case class CreateTableUsing(
     tableIdent: TableIdentifier,
@@ -67,6 +70,7 @@ case class CreateTableUsing(
 
 /**
  * A node used to support CTAS statements and saveAsTable for the data source API.
+  * 用于支持CTAS语句的节点和用于数据源API的saveAsTable
  * This node is a [[UnaryNode]] instead of a [[Command]] because we want the analyzer
  * can analyze the logical plan that will be used to populate the table.
  * So, [[PreWriteCheck]] can detect cases that are not allowed.
@@ -124,15 +128,19 @@ case class RefreshTable(tableIdent: TableIdentifier)
 
   override def run(sqlContext: SQLContext): Seq[Row] = {
     // Refresh the given table's metadata first.
+    //首先刷新给定表的元数据
     sqlContext.catalog.refreshTable(tableIdent)
 
     // If this table is cached as a InMemoryColumnarRelation, drop the original
     // cached version and make the new version cached lazily.
+    //如果此表缓存为InMemoryColumnarRelation,请删除原始缓存版本并使新版本缓存缓存
     val logicalPlan = sqlContext.catalog.lookupRelation(tableIdent.toSeq)
     // Use lookupCachedData directly since RefreshTable also takes databaseName.
+    //直接使用lookupCachedData,因为RefreshTable也需要databaseName。
     val isCached = sqlContext.cacheManager.lookupCachedData(logicalPlan).nonEmpty
     if (isCached) {
       // Create a data frame to represent the table.
+      //创建表示表的数据框
       // TODO: Use uncacheTable once it supports database name.
       val df = DataFrame(sqlContext, logicalPlan)
       // Uncache the logicalPlan.
@@ -147,6 +155,7 @@ case class RefreshTable(tableIdent: TableIdentifier)
 
 /**
  * Builds a map in which keys are case insensitive
+  * 构建一个映射,其中键不区分大小写
  */
 class CaseInsensitiveMap(map: Map[String, String]) extends Map[String, String]
   with Serializable {
@@ -165,5 +174,6 @@ class CaseInsensitiveMap(map: Map[String, String]) extends Map[String, String]
 
 /**
  * The exception thrown from the DDL parser.
+  * 从DDL解析器抛出的异常
  */
 class DDLException(message: String) extends RuntimeException(message)

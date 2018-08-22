@@ -24,6 +24,8 @@ import org.apache.spark.sql.catalyst.expressions._
  * the expression library is to hide the details of naming and scoping from developers who want to
  * manipulate trees of relational operators. As such, the library defines a special type of
  * expression, a [[NamedExpression]] in addition to the standard collection of expressions.
+  *
+  * 一组可用于表示关系表达式树的类,表达式库的一个关键目标是隐藏想要操纵关系运算符树的开发人员的命名和作用域的细节。 因此，除了标准的表达式集合之外，库还定义了一种特殊类型的表达式，[[NamedExpression]]。
  *
  * ==Standard Expressions==
  * A library of standard expressions (e.g., [[Add]], [[EqualTo]]), aggregates (e.g., SUM, COUNT),
@@ -48,11 +50,13 @@ import org.apache.spark.sql.catalyst.expressions._
  *
  * ==Evaluation==
  * The result of expressions can be evaluated using the `Expression.apply(Row)` method.
+  * 可以使用`Expression.apply（Row）`方法计算表达式的结果
  */
 package object expressions  {
 
   /**
    * Used as input into expressions whose output does not depend on any input value.
+    * 用作输出到输出不依赖于任何输入值的表达式
    */
   val EmptyRow: InternalRow = null
 
@@ -60,6 +64,8 @@ package object expressions  {
    * Converts a [[InternalRow]] to another Row given a sequence of expression that define each
    * column of the new row. If the schema of the input row is specified, then the given expression
    * will be bound to that schema.
+    * 给定一个表达式序列,将[[InternalRow]]转换为另一行,该表达式定义新行的每一列,
+    * 如果指定了输入行的模式,则给定的表达式将绑定到该模式。
    */
   abstract class Projection extends (InternalRow => InternalRow)
 
@@ -67,6 +73,9 @@ package object expressions  {
    * Converts a [[InternalRow]] to another Row given a sequence of expression that define each
    * column of the new row. If the schema of the input row is specified, then the given expression
    * will be bound to that schema.
+    *
+    * 给定一个表达式序列,将[[InternalRow]]转换为另一行,该表达式定义新行的每一列,
+    * 如果指定了输入行的模式,则给定的表达式将绑定到该模式。
    *
    * In contrast to a normal projection, a MutableProjection reuses the same underlying row object
    * each time an input row is added.  This significantly reduces the cost of calculating the
@@ -77,7 +86,8 @@ package object expressions  {
   abstract class MutableProjection extends Projection {
     def currentValue: InternalRow
 
-    /** Uses the given row to store the output of the projection. */
+    /** Uses the given row to store the output of the projection.
+      * 使用给定的行存储投影的输出*/
     def target(row: MutableRow): MutableProjection
   }
 }

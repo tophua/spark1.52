@@ -47,6 +47,7 @@ private[spark] class YarnClusterSchedulerBackend(
   override def applicationAttemptId(): Option[String] =
     // In YARN Cluster mode, the attempt ID is expected to be set, so log an error if it's
     // not found.
+  //在YARN群集模式下,预计会设置尝试ID,因此如果找不到则会记录错误。
     sc.getConf.getOption("spark.yarn.app.attemptId").orElse {
       logError("Application attempt ID is not set.")
       super.applicationAttemptId

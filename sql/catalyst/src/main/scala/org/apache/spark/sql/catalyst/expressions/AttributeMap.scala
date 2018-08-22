@@ -21,6 +21,8 @@ package org.apache.spark.sql.catalyst.expressions
  * Builds a map that is keyed by an Attribute's expression id. Using the expression id allows values
  * to be looked up even when the attributes used differ cosmetically (i.e., the capitalization
  * of the name, or the expected nullability).
+  * 构建一个由Attribute的表达式id键入的映射,使用表达式id允许查找值,
+  * 即使所使用的属性在美容上不同(即名称的大小写或预期的可为空性)
  */
 object AttributeMap {
   def apply[A](kvs: Seq[(Attribute, A)]): AttributeMap[A] = {

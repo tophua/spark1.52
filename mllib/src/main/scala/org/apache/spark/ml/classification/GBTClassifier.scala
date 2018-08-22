@@ -42,6 +42,7 @@ import org.apache.spark.sql.types.DoubleType
  * [[http://en.wikipedia.org/wiki/Gradient_boosting Gradient-Boosted Trees (GBTs)]]
  * learning algorithm for classification.
  * It supports binary labels, as well as both continuous and categorical features.
+  * 它支持二进制标签,以及连续和分类功能
  * Note: Multiclass labels are not currently supported.
  */
 @Experimental
@@ -52,6 +53,7 @@ final class GBTClassifier(override val uid: String)
   def this() = this(Identifiable.randomUID("gbtc"))
 
   // Override parameter setters from parent trait for Java API compatibility.
+  //从父特征覆盖参数设置器以获得Java API兼容性。
 
   // Parameters from TreeClassifierParams:
 
@@ -80,7 +82,7 @@ final class GBTClassifier(override val uid: String)
   }
 
   // Parameters from TreeEnsembleParams:
-
+  //reeEnsembleParams中的参数：
   override def setSubsamplingRate(value: Double): this.type = super.setSubsamplingRate(value)
 
   override def setSeed(value: Long): this.type = {
@@ -95,9 +97,10 @@ final class GBTClassifier(override val uid: String)
   override def setStepSize(value: Double): this.type = super.setStepSize(value)
 
   // Parameters for GBTClassifier:
-
+  //GBTClassifier的参数：
   /**
    * Loss function which GBT tries to minimize. (case-insensitive)
+    * GBT试图最小化的损失函数。(不区分大小写)
    * Supported: "logistic"
    * (default = logistic)
    * @group param
@@ -115,12 +118,13 @@ final class GBTClassifier(override val uid: String)
   /** @group getParam */
   def getLossType: String = $(lossType).toLowerCase
 
-  /** (private[ml]) Convert new loss to old loss. */
+  /** (private[ml]) Convert new loss to old loss. (私有[ml])将新损失转换为旧损失*/
   override private[ml] def getOldLossType: OldLoss = {
     getLossType match {
       case "logistic" => OldLogLoss
       case _ =>
         // Should never happen because of check in setter method.
+        //绝不应该因为检查setter方法而发生
         throw new RuntimeException(s"GBTClassifier was given bad loss type: $getLossType")
     }
   }
@@ -150,6 +154,7 @@ final class GBTClassifier(override val uid: String)
 @Experimental
 object GBTClassifier {
   // The losses below should be lowercase.
+  //下面的损失应该是小写的
   /** Accessor for supported loss settings: logistic */
   final val supportedLossTypes: Array[String] = Array("logistic").map(_.toLowerCase)
 }
@@ -159,6 +164,7 @@ object GBTClassifier {
  * [[http://en.wikipedia.org/wiki/Gradient_boosting Gradient-Boosted Trees (GBTs)]]
  * model for classification.
  * It supports binary labels, as well as both continuous and categorical features.
+  * 它支持二进制标签,以及连续和分类功能
  * Note: Multiclass labels are not currently supported.
  * @param _trees  Decision trees in the ensemble.
  * @param _treeWeights  Weights for the decision trees in the ensemble.

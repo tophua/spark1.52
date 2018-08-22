@@ -26,16 +26,19 @@ import org.apache.spark.util.Utils
 
 /**
  * A non-concrete data type, reserved for internal uses.
+  * 非具体数据类型,保留供内部使用
  */
 private[sql] abstract class AbstractDataType {
   /**
    * The default concrete type to use if we want to cast a null literal into this type.
+    * 如果我们想将null文字转换为此类型,则使用默认的具体类型
    */
   private[sql] def defaultConcreteType: DataType
 
   /**
    * Returns true if `other` is an acceptable input type for a function that expects this,
    * possibly abstract DataType.
+    * 如果`other`是需要此函数的函数(可能是抽象DataType)的可接受输入类型,则返回true。
    *
    * {{{
    *   // this should return true
@@ -55,12 +58,14 @@ private[sql] abstract class AbstractDataType {
 /**
  * A collection of types that can be used to specify type constraints. The sequence also specifies
  * precedence: an earlier type takes precedence over a latter type.
+  * 可用于指定类型约束的类型集合,序列还指定优先级：较早的类型优先于后一种类型
  *
  * {{{
  *   TypeCollection(StringType, BinaryType)
  * }}}
  *
  * This means that we prefer StringType over BinaryType if it is possible to cast to StringType.
+  * 这意味着如果可以转换为StringType,我们更喜欢StringType而不是BinaryType
  */
 private[sql] class TypeCollection(private val types: Seq[AbstractDataType])
   extends AbstractDataType {
@@ -83,6 +88,7 @@ private[sql] object TypeCollection {
   /**
    * Types that can be ordered/compared. In the long run we should probably make this a trait
    * that can be mixed into each data type, and perhaps create an [[AbstractDataType]].
+    * 可以ordered/比较的类型,从长远来看,我们应该把它变成一个可以混合到每种数据类型中的特征,并且可能创建一个[[AbstractDataType]]。
    */
   val Ordered = TypeCollection(
     BooleanType,
@@ -94,6 +100,7 @@ private[sql] object TypeCollection {
   /**
    * Types that include numeric types and interval type. They are only used in unary_minus,
    * unary_positive, add and subtract operations.
+    * 包含数字类型和间隔类型的类型,它们仅用于unary_minus,unary_positive,add和subtract操作
    */
   val NumericAndInterval = TypeCollection(NumericType, CalendarIntervalType)
 
@@ -113,6 +120,7 @@ protected[sql] object AnyDataType extends AbstractDataType {
 
   // Note that since AnyDataType matches any concrete types, defaultConcreteType should never
   // be invoked.
+  //请注意,由于AnyDataType匹配任何具体类型,因此永远不应调用defaultConcreteType
   override private[sql] def defaultConcreteType: DataType = throw new UnsupportedOperationException
 
   override private[sql] def simpleString: String = "any"
@@ -123,6 +131,7 @@ protected[sql] object AnyDataType extends AbstractDataType {
 
 /**
  * An internal type used to represent everything that is not null, UDTs, arrays, structs, and maps.
+  * 用于表示非null,UDT,数组,结构和映射的所有内部类型的内部类型。
  */
 protected[sql] abstract class AtomicType extends DataType {
   private[sql] type InternalType
@@ -194,6 +203,7 @@ private[sql] abstract class IntegralType extends NumericType {
 private[sql] object FractionalType {
   /**
    * Enables matching against FractionalType for expressions:
+    * 为表达式启用与FractionalType的匹配
    * {{{
    *   case Cast(child @ FractionalType(), StringType) =>
    *     ...

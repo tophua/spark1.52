@@ -32,7 +32,8 @@ class JavaNewHadoopRDD[K, V](rdd: NewHadoopRDD[K, V])
     (implicit override val kClassTag: ClassTag[K], implicit override val vClassTag: ClassTag[V])
   extends JavaPairRDD[K, V](rdd) {
 
-  /** Maps over a partition, providing the InputSplit that was used as the base of the partition. */
+  /** Maps over a partition, providing the InputSplit that was used as the base of the partition.
+    * 映射分区,提供用作分区基础的InputSplit*/
   @DeveloperApi
   def mapPartitionsWithInputSplit[R](
       f: JFunction2[InputSplit, java.util.Iterator[(K, V)], java.util.Iterator[R]],

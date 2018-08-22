@@ -23,6 +23,7 @@ import org.apache.spark.sql.types._
 
 /**
  * Helper functions to check for valid data types.
+  * Helper用于检查有效的数据类型
  */
 object TypeUtils {
   def checkForNumericExpr(dt: DataType, caller: String): TypeCheckResult = {

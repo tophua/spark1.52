@@ -36,6 +36,7 @@ import org.apache.spark.{HashPartitioner, Partitioner, RangePartitioner, SparkEn
 /**
  * :: DeveloperApi ::
  * Performs a shuffle that will result in the desired `newPartitioning`.
+  *执行一个将导致所需`newPartitioning`的shuffle
  */
 @DeveloperApi
 case class Exchange(newPartitioning: Partitioning, child: SparkPlan) extends UnaryNode {
@@ -44,6 +45,7 @@ case class Exchange(newPartitioning: Partitioning, child: SparkPlan) extends Una
 
   /**
    * Returns true iff we can support the data type, and we are not doing range partitioning.
+    * 如果我们可以支持数据类型,则返回true,并且我们不进行范围分区
    */
   private lazy val tungstenMode: Boolean = {
     unsafeEnabled && codegenEnabled && GenerateUnsafeProjection.canSupport(child.schema) &&
@@ -57,27 +59,37 @@ case class Exchange(newPartitioning: Partitioning, child: SparkPlan) extends Una
   // This setting is somewhat counterintuitive:
   // If the schema works with UnsafeRow, then we tell the planner that we don't support safe row,
   // so the planner inserts a converter to convert data into UnsafeRow if needed.
+  //如果架构与UnsafeRow一起使用,那么我们告诉规划器我们不支持安全行,
+  //因此如果需要,规划器会插入转换器以将数据转换为UnsafeRow。
   override def outputsUnsafeRows: Boolean = tungstenMode
   override def canProcessSafeRows: Boolean = !tungstenMode
   override def canProcessUnsafeRows: Boolean = tungstenMode
 
   /**
    * Determines whether records must be defensively copied before being sent to the shuffle.
+    * 确定在发送到shuffle之前是否必须防御性地复制记录
    * Several of Spark's shuffle components will buffer deserialized Java objects in memory. The
    * shuffle code assumes that objects are immutable and hence does not perform its own defensive
    * copying. In Spark SQL, however, operators' iterators return the same mutable `Row` object. In
    * order to properly shuffle the output of these operators, we need to perform our own copying
    * prior to sending records to the shuffle. This copying is expensive, so we try to avoid it
    * whenever possible. This method encapsulates the logic for choosing when to copy.
+    *
+    * Spark的几个shuffle组件将缓冲内存中反序列化的Java对象,随机代码假定对象是不可变的,
+    * 因此不执行自己的防御性复制,但是,在Spark SQL中,运算符的迭代器返回相同的可变`Row`对象。
+    * 为了正确地改变这些运算符的输出,我们需要在将记录发送到shuffle之前执行我们自己的复制,
+    * 这种复制很昂贵,所以尽可能避免使用它,此方法封装了选择何时复制的逻辑。
    *
    * In the long run, we might want to push this logic into core's shuffle APIs so that we don't
    * have to rely on knowledge of core internals here in SQL.
+    * 从长远来看,我们可能希望将此逻辑推入核心的shuffle API中,这样我们就不必依赖SQL中核心内部的知识。
    *
    * See SPARK-2967, SPARK-4479, and SPARK-7375 for more discussion of this issue.
    *
-   * @param partitioner the partitioner for the shuffle
-   * @param serializer the serializer that will be used to write rows
+   * @param partitioner the partitioner for the shuffle shuffle的分区器
+   * @param serializer the serializer that will be used to write rows 将用于写行的序列化程序
    * @return true if rows should be copied before being shuffled, false otherwise
+    *         如果要在洗牌之前复制行,则返回true,否则返回false
    */
   private def needToCopyObjectsBeforeShuffle(
       partitioner: Partitioner,
@@ -146,6 +158,7 @@ case class Exchange(newPartitioning: Partitioning, child: SparkPlan) extends Una
       case RangePartitioning(sortingExpressions, numPartitions) =>
         // Internally, RangePartitioner runs a job on the RDD that samples keys to compute
         // partition bounds. To get accurate samples, we need to copy the mutable keys.
+        //在内部，RangePartitioner在RDD上运行一个作业,该作业对密钥进行采样以计算分区边界,为了获得准确的样本,我们需要复制可变密钥
         val rddForSampling = rdd.mapPartitions { iter =>
           val mutablePair = new MutablePair[InternalRow, Null]()
           iter.map(row => mutablePair.update(row.copy(), null))
@@ -153,6 +166,7 @@ case class Exchange(newPartitioning: Partitioning, child: SparkPlan) extends Una
         // We need to use an interpreted ordering here because generated orderings cannot be
         // serialized and this ordering needs to be created on the driver in order to be passed into
         // Spark core code.
+        //我们需要在这里使用解释的排序,因为生成的排序无法序列化,并且需要在驱动程序上创建此排序以便传递给Spark核心代码
         implicit val ordering = new InterpretedOrdering(sortingExpressions, child.output)
         new RangePartitioner(numPartitions, rddForSampling, ascending = true)
       case SinglePartition =>
@@ -199,6 +213,7 @@ private[sql] case class EnsureRequirements(sqlContext: SQLContext) extends Rule[
 
   /**
    * Given a required distribution, returns a partitioning that satisfies that distribution.
+    * 给定必需的分布,返回满足该分布的分区
    */
   private def canonicalPartitioning(requiredDistribution: Distribution): Partitioning = {
     requiredDistribution match {
@@ -217,6 +232,7 @@ private[sql] case class EnsureRequirements(sqlContext: SQLContext) extends Rule[
     assert(requiredChildOrderings.length == children.length)
 
     // Ensure that the operator's children satisfy their output distribution requirements:
+    //确保操作员的孩子满足他们的输出分配要求
     children = children.zip(requiredChildDistributions).map { case (child, distribution) =>
       if (child.outputPartitioning.satisfies(distribution)) {
         child
@@ -227,6 +243,7 @@ private[sql] case class EnsureRequirements(sqlContext: SQLContext) extends Rule[
 
     // If the operator has multiple children and specifies child output distributions (e.g. join),
     // then the children's output partitionings must be compatible:
+    //如果运算符有多个子节点并指定子输出分布(例如join),则子节点的输出分区必须兼容：
     if (children.length > 1
         && requiredChildDistributions.toSet != Set(UnspecifiedDistribution)
         && !Partitioning.allCompatible(children.map(_.outputPartitioning))) {
@@ -241,6 +258,7 @@ private[sql] case class EnsureRequirements(sqlContext: SQLContext) extends Rule[
     }
 
     // Now that we've performed any necessary shuffles, add sorts to guarantee output orderings:
+    //现在我们已经执行了任何必要的shuffle,添加排序以保证输出顺序
     children = children.zip(requiredChildOrderings).map { case (child, requiredOrdering) =>
       if (requiredOrdering.nonEmpty) {
         // If child.outputOrdering is [a, b] and requiredOrdering is [a], we do not need to sort.

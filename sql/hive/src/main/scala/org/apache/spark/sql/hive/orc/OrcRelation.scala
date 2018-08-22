@@ -85,6 +85,7 @@ private[orc] class OrcOutputWriter(
   }
 
   // Object inspector converted from the schema of the relation to be written.
+  //对象检查器从要写入的关系的模式转换而来
   private val structOI = {
     val typeInfo =
       TypeInfoUtils.getTypeInfoFromTypeString(
@@ -96,9 +97,11 @@ private[orc] class OrcOutputWriter(
   }
 
   // Used to hold temporary `Writable` fields of the next row to be written.
+  //用于保存要写入的下一行的临时`Writable`字段
   private val reusableOutputBuffer = new Array[Any](dataSchema.length)
 
   // Used to convert Catalyst values into Hadoop `Writable`s.
+  //用于将Catalyst值转换为Hadoop`可写的`
   private val wrappers = structOI.getAllStructFieldRefs.zip(dataSchema.fields.map(_.dataType))
     .map { case (ref, dt) =>
       wrapperFor(ref.getFieldObjectInspector, dt)
@@ -244,6 +247,7 @@ private[orc] case class OrcTableScan(
   }
 
   // Transform all given raw `Writable`s into `InternalRow`s.
+  //将所有给定的原始`Writable`s转换为`InternalRow`s
   private def fillObject(
       path: String,
       conf: Configuration,
@@ -263,6 +267,7 @@ private[orc] case class OrcTableScan(
       }.unzip
       val unwrappers = fieldRefs.map(unwrapperFor)
       // Map each tuple to a row object
+      //将每个元组映射到行对象
       iterator.map { value =>
         val raw = deserializer.deserialize(value)
         var i = 0
@@ -287,6 +292,7 @@ private[orc] case class OrcTableScan(
     val conf = job.getConfiguration
 
     // Tries to push down filters if ORC filter push-down is enabled
+    //如果启用ORC过滤器下推,则尝试按下过滤器
     if (sqlContext.conf.orcFilterPushDown) {
       OrcFilters.createFilter(filters).foreach { f =>
         conf.set(OrcTableScan.SARG_PUSHDOWN, f.toKryo)
@@ -295,10 +301,12 @@ private[orc] case class OrcTableScan(
     }
 
     // Sets requested columns
+    //设置请求的列
     addColumnIds(attributes, relation, conf)
 
     if (inputPaths.isEmpty) {
       // the input path probably be pruned, return an empty RDD.
+      //输入路径可能被修剪,返回一个空的RDD。
       return sqlContext.sparkContext.emptyRDD[InternalRow]
     }
     FileInputFormat.setInputPaths(job, inputPaths.map(_.getPath): _*)

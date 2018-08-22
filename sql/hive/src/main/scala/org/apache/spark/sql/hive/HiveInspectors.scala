@@ -217,6 +217,7 @@ private[hive] trait HiveInspectors {
     case c: Class[_] if c.isArray => ArrayType(javaClassToDataType(c.getComponentType))
 
     // Hive seems to return this for struct types?
+      //Hive似乎为结构类型返回了这个？
     case c: Class[_] if c == classOf[java.lang.Object] => NullType
 
     // java list type unsupported
@@ -226,6 +227,7 @@ private[hive] trait HiveInspectors {
         "JVM type erasure makes spark fail to catch a component type in List<>")
 
     // java map type unsupported
+      //java地图类型不支持
     case c: Class[_] if c == classOf[java.util.Map[_, _]] =>
       throw new AnalysisException(
         "Map type in java is unsupported because " +
@@ -236,6 +238,7 @@ private[hive] trait HiveInspectors {
 
   /**
    * Converts hive types to native catalyst types.
+    * 将hive类型转换为本机催化剂类型
    * @param data the data in Hive type
    * @param oi   the ObjectInspector associated with the Hive Type
    * @return     convert the data into catalyst type
@@ -290,17 +293,20 @@ private[hive] trait HiveInspectors {
       DateTimeUtils.fromJavaDate(poi.getWritableConstantValue.get())
     case mi: StandardConstantMapObjectInspector =>
       // take the value from the map inspector object, rather than the input data
+      //从地图检查器对象中获取值，而不是输入数据
       val map = mi.getWritableConstantValue
       val keys = map.keysIterator.map(unwrap(_, mi.getMapKeyObjectInspector)).toArray
       val values = map.valuesIterator.map(unwrap(_, mi.getMapValueObjectInspector)).toArray
       ArrayBasedMapData(keys, values)
     case li: StandardConstantListObjectInspector =>
       // take the value from the list inspector object, rather than the input data
+      //从列表检查器对象中获取值,而不是输入数据
       val values = li.getWritableConstantValue
         .map(unwrap(_, li.getListElementObjectInspector))
         .toArray
       new GenericArrayData(values)
     // if the value is null, we don't care about the object inspector type
+      //如果值为null，我们不关心对象检查器类型
     case _ if data == null => null
     case poi: VoidObjectInspector => null // always be null for void object inspector
     case pi: PrimitiveObjectInspector => pi match {
@@ -484,6 +490,7 @@ private[hive] trait HiveInspectors {
 
   /**
    * Converts native catalyst types to the types expected by Hive
+    * 将原生催化剂类型转换为Hive所期望的类型
    * @param a the value to be wrapped
    * @param oi This ObjectInspector associated with the value returned by this function, and
    *           the ObjectInspector should also be consistent with those returned from
@@ -496,6 +503,11 @@ private[hive] trait HiveInspectors {
    *   If object inspector prefers writable object => return a Writable for the given data `a`
    *   Map the catalyst data to the boxed java primitive
    *
+    * 在包装中严格遵循以下顺序（常量OI具有更高的优先级）：
+    *  常量对象检查器=>返回常量对象检查器的捆绑值
+    *  检查`a`是否为null =>如果为true则返回null
+    *  如果对象检查器更喜欢可写对象=>为给定数据返回一个Writable`a`
+    *  将催化剂数据映射到盒装的java原语
    *  NOTICE: the complex data type requires recursive wrapping.
    */
   def wrap(a: Any, oi: ObjectInspector, dataType: DataType): AnyRef = oi match {
@@ -645,6 +657,8 @@ private[hive] trait HiveInspectors {
    * Map the catalyst expression to ObjectInspector, however,
    * if the expression is [[Literal]] or foldable, a constant writable object inspector returns;
    * Otherwise, we always get the object inspector according to its data type(in catalyst)
+    * 将催化剂表达式映射到ObjectInspector,但是,如果表达式为[[Literal]]或可折叠,
+    * 则返回常量可写对象检查器;否则,我们始终根据其数据类型(在催化剂中)获取对象检查器
    * @param expr Catalyst expression to be mapped
    * @return Hive java objectinspector (recursively).
    */
@@ -702,11 +716,13 @@ private[hive] trait HiveInspectors {
         ObjectInspectorFactory.getStandardConstantMapObjectInspector(keyOI, valueOI, jmap)
       }
     // We will enumerate all of the possible constant expressions, throw exception if we missed
+      //我们将枚举所有可能的常量表达式,如果错过则抛出异常
     case Literal(_, dt) => sys.error(s"Hive doesn't support the constant type [$dt].")
     // ideally, we don't test the foldable here(but in optimizer), however, some of the
     // Hive UDF / UDAF requires its argument to be constant objectinspector, we do it eagerly.
     case _ if expr.foldable => toInspector(Literal.create(expr.eval(), expr.dataType))
     // For those non constant expression, map to object inspector according to its data type
+      //对于那些非常量表达式,根据其数据类型映射到对象检查器
     case _ => toInspector(expr.dataType)
   }
 

@@ -22,6 +22,8 @@ import org.apache.spark.util.collection.SortDataFormat
 /**
  * A single directed edge consisting of a source id, target id,
  * and the data associated with the edge.
+  *
+  * 单个有向边,由源id,目标id和与边相关联的数据组成
  *
  * @tparam ED type of the edge attribute
  *
@@ -37,7 +39,7 @@ case class Edge[@specialized(Char, Int, Boolean, Byte, Long, Float, Double) ED] 
 
   /**
    * Given one vertex in the edge return the other vertex.
-   *
+   * 给定边缘中的一个顶点返回另一个顶点
    * @param vid the id one of the two vertices on the edge.
    * @return the id of the other vertex on the edge.
    */
@@ -47,7 +49,7 @@ case class Edge[@specialized(Char, Int, Boolean, Byte, Long, Float, Double) ED] 
   /**
    * Return the relative direction of the edge to the corresponding
    * vertex.
-   *
+   * 将边的相对方向返回到相应的顶点
    * @param vid the id of one of the two vertices in the edge.
    * @return the relative direction of the edge to the corresponding
    * vertex.
